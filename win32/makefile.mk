@@ -1192,6 +1192,7 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\README.os2 ..\pod\perlos2.pod
 	copy ..\vms\perlvms.pod ..\pod\perlvms.pod
 	cd ..\pod && $(MAKE) -f ..\win32\pod.mak converters
+	cd ..\lib && $(PERLEXE) lib_pm.PL
 	$(PERLEXE) $(PL2BAT) $(UTILS)
 
 distclean: clean

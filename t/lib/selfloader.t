@@ -165,6 +165,7 @@ if ($@ =~ /^Undefined subroutine/) {
 
 # Try to read from the data file handle
 my $foodata = <Foo::DATA>;
+close Foo::DATA;
 if (defined $foodata) {
     print "not ok 17 # $foodata\n";
 } else {
@@ -184,6 +185,7 @@ if ($@ =~ /^Undefined subroutine/) {
 
 # Try to read from the data file handle
 my $bardata = <Bar::DATA>;
+close Bar::DATA;
 if ($bardata ne "sub never { die \"D'oh\" }\n") {
     print "not ok 19 # $bardata\n";
 } else {

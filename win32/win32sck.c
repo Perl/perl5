@@ -105,7 +105,7 @@ set_socktype(void)
 {
 #ifdef USE_SOCKETS_AS_HANDLES
 #if defined(USE_THREADS) || defined(USE_ITHREADS)
-    dTHX;
+    dTHXo;
     if (!w32_init_socktype) {
 #endif
 	int iSockOpt = SO_SYNCHRONOUS_NONALERT;
