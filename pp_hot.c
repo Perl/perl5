@@ -967,7 +967,8 @@ PP(pp_aassign)
     I32 i;
     int magic;
     int duplicates = 0;
-    SV **firsthashrelem;
+    SV **firsthashrelem = 0;	/* "= 0" keeps gcc 2.95 quiet  */
+
 
     PL_delaymagic = DM_DELAY;		/* catch simultaneous items */
     gimme = GIMME_V;
