@@ -91,7 +91,7 @@ BEGIN {
     $::HaveUtil = ($@ eq "");
 };
 
-my $Version = "1.31";
+my $Version = "1.32";
 
 # Changed in 1.06 to skip Mail::Send and Mail::Util if not available.
 # Changed in 1.07 to see more sendmail execs, and added pipe output.
@@ -127,6 +127,7 @@ my $Version = "1.31";
 # Changed in 1.29 Perlbug(tron): auto(-ok), short prompts RFOLEY 05-05-2000
 # Changed in 1.30 Added warnings on failure to open files MSTEVENS 13-07-2000
 # Changed in 1.31 Add checks on close().Fix my $var unless. TJENNESS 26-07-2000
+# Changed in 1.32 Use File::Spec->tmpdir TJENNESS 20-08-2000
 
 # TODO: - Allow the user to re-name the file on mail failure, and
 #       make sure failure (transmission-wise) of Mail::Send is
@@ -905,12 +906,8 @@ EOF
 }
 
 sub filename {
-    my $dir = $Is_VMS ? 'sys$scratch:'
-	: ($Is_MSWin32 && $ENV{'TEMP'}) ? $ENV{'TEMP'}
-        : $Is_MacOS ? $ENV{'TMPDIR'}
-	: '/tmp';
+    my $dir = File::Spec->tmpdir();
     $filename = "bugrep0$$";
-#    $dir .= "\\" if $Is_MSWin32 and $dir !~ m|[\\/]$|;
     $filename++ while -e File::Spec->catfile($dir, $filename);
     $filename = File::Spec->catfile($dir, $filename);
 }
