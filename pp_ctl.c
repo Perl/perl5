@@ -2604,10 +2604,8 @@ PP(pp_require)
     ENTER;
     SAVETMPS;
     lex_start(sv_2mortal(newSVpv("",0)));
-    if (PL_rsfp_filters){
- 	save_aptr(&PL_rsfp_filters);
-	PL_rsfp_filters = NULL;
-    }
+    save_aptr(&PL_rsfp_filters);
+    PL_rsfp_filters = NULL;
 
     PL_rsfp = tryrsfp;
     name = savepv(name);
