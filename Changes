@@ -31,6 +31,200 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 12002] By: jhi                                   on 2001/09/11  11:50:48
+        Log: NetWare update from Ananth Kesari.
+     Branch: perl
+	   ! NetWare/NWUtil.c NetWare/Nwmain.c NetWare/Nwpipe.c
+	   ! NetWare/config.wc NetWare/config_H.wc NetWare/nwutil.h
+____________________________________________________________________________
+[ 12001] By: jhi                                   on 2001/09/11  11:40:51
+        Log: Retract #11984: div() being redefined, and 1397
+             failing on 64-bit platforms.
+     Branch: perl
+	   ! lib/Math/BigInt/Calc.pm
+____________________________________________________________________________
+[ 12000] By: jhi                                   on 2001/09/11  11:19:07
+        Log: Metaconfig unit change for #11999.
+     Branch: metaconfig
+	   ! U/protos/d_lseekproto.U
+____________________________________________________________________________
+[ 11999] By: jhi                                   on 2001/09/11  11:18:36
+        Log: The lseek fix (#11991) was no fix.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 11998] By: sky                                   on 2001/09/11  07:52:06
+        Log: Subject: [PATCH] Encode.pm add UCS-2 little endian support
+             From: Matt Sergeant <MSergeant@star.net.uk>
+             Date: Tue, 11 Sep 2001 09:22:32 +0100
+             Message-ID: <315E8A8BF9D1D411AD3D00508BB1B0C004B9003C@UKS040>
+     Branch: perl
+	   ! ext/Encode/Encode.pm
+____________________________________________________________________________
+[ 11997] By: sky                                   on 2001/09/11  06:35:29
+        Log: Sometimes dTHX is added because it is needed on non 
+             gnuc platforms, but not needed there. This uses GCC
+             to silence GCC specific warnings by marking pTHX as 
+             unused.
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[ 11996] By: nick                                  on 2001/09/11  06:25:27
+        Log: Integrate mainline
+     Branch: perlio
+	   - ext/POSIX/sigaction.t lib/File/Find/taint.t
+	  !> lib/CGI/t/carp.t lib/Test/Simple/t/simple.t t/op/crypt.t
+____________________________________________________________________________
+[ 11995] By: nick                                  on 2001/09/11  06:23:39
+        Log: Part Integrate mainline
+     Branch: perlio
+	  +> (branch 69 files)
+	   - ext/Cwd/Cwd.t ext/Fcntl/Fcntl.t ext/Fcntl/syslfs.t
+	   - ext/POSIX/POSIX.t lib/Attribute/Handlers/test.pl
+	   - lib/Env/array.t lib/Env/env.t lib/File/Find/find.t
+	   - lib/Filter/Simple/test.pl lib/Switch/t/given_when.t
+	   - lib/Switch/t/switch_case.t lib/Test/Harness.t
+	   - lib/Test/More/Changes lib/Test/More/t/More.t
+	   - lib/Test/More/t/fail-like.t lib/Test/More/t/fail.t
+	   - lib/Test/More/t/plan_is_noplan.t lib/Test/More/t/skipall.t
+	   - lib/Text/Balanced.pod lib/Text/Balanced/t/genxt.t
+	   - lib/Text/Balanced/t/xbrak.t lib/Text/Balanced/t/xcode.t
+	   - lib/Text/Balanced/t/xdeli.t lib/Text/Balanced/t/xmult.t
+	   - lib/Text/Balanced/t/xquot.t lib/Text/Balanced/t/xtagg.t
+	   - lib/Text/Balanced/t/xvari.t objXSUB.h t/lib/MyFilter.pm
+	   - t/lib/Test/More/Catch.pm wince/perl.ico
+	  !> (integrate 197 files)
+____________________________________________________________________________
+[ 11994] By: jhi                                   on 2001/09/11  03:12:44
+        Log: Subject: Re: [PATCH] Encode.pm docs fix
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 10 Sep 2001 11:27:02 -0700
+             Message-ID: <lrwv363nrd.fsf@caliper.ActiveState.com>
+     Branch: perl
+	   ! ext/Encode/Encode.pm
+____________________________________________________________________________
+[ 11993] By: jhi                                   on 2001/09/11  02:27:25
+        Log: Fix unpack U to be the reverse of pack U
+             (but implement unpack U0U as a backdoor to get
+             the UTF-8 malformed warnings from un-UTF-8 data)
+     Branch: perl
+	   ! pod/perlunicode.pod pp_pack.c t/op/pack.t t/op/utf8decode.t
+____________________________________________________________________________
+[ 11992] By: jhi                                   on 2001/09/11  00:14:24
+        Log: Metaconfig unit change for #11991;
+             delete an unused unit (d_strtoull.U is the one used)
+     Branch: metaconfig
+	   ! U/protos/d_lseekproto.U
+     Branch: metaconfig/U/perl
+	   - strtoull.U
+____________________________________________________________________________
+[ 11991] By: jhi                                   on 2001/09/11  00:14:01
+        Log: Subject: [PATCH] Configure not recording lseek proto
+             From: Blair Zajac <blair@orcaware.com>
+             Date: Mon, 10 Sep 2001 17:52:37 -0700
+             Message-ID: <3B9D6055.BA334A31@orcaware.com>
+             
+             plus regen Configure.
+     Branch: perl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH uconfig.h
+____________________________________________________________________________
+[ 11990] By: jhi                                   on 2001/09/10  23:59:25
+        Log: Subject: [PATCH] Re: the remaining bugs in \x escapes (was Re: [PATCH] oct and hex in glorious 64 bit (with less bugs) (was Re: hex and oct again (was Re: FreeBSD MD5 crypt? Re: crypt/hex/oct and Unicode?)))                  
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Tue, 11 Sep 2001 00:00:31 +0100
+             Message-ID: <20010911000031.G1512@plum.flirble.org>
+     Branch: perl
+	   + t/op/qq.t
+	   ! MANIFEST numeric.c perl.h regcomp.c t/op/pat.t toke.c
+____________________________________________________________________________
+[ 11989] By: jhi                                   on 2001/09/10  23:31:45
+        Log: Subject: [PATCH] Building on win32 w/o perlio
+             From: "Mattia Barbon" <mbarbon@dsi.unive.it>
+             Date: Mon, 10 Sep 2001 23:38:46 +0200
+             Message-ID: <3B9D4F06.14433.2C37644@localhost>
+     Branch: perl
+	   ! perl.c win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[ 11988] By: jhi                                   on 2001/09/10  23:26:40
+        Log: Subject: [PATCH MANIFEST lib/CGI/t/push.t] New Test for CGI::Push
+             From: "chromatic" <chromatic@rmci.net>
+             Date: Mon, 10 Sep 2001 15:14:01 -0600
+             Message-ID: <20010910211833.30177.qmail@onion.perl.org>
+     Branch: perl
+	   + lib/CGI/t/push.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 11987] By: jhi                                   on 2001/09/10  23:24:11
+        Log: Subject: avoiding hoardes of zombies
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Mon, 10 Sep 2001 22:00:40 +0100
+             Message-ID: <20010910220040.C1512@plum.flirble.org>
+     Branch: perl
+	   ! pod/perlipc.pod
+____________________________________________________________________________
+[ 11986] By: jhi                                   on 2001/09/10  23:22:10
+        Log: Subject: PATCH Resubmission  - was Re: [ID 20010902.001] v strings over 2*31 barf
+             From: John Peacock <jpeacock@rowman.com>
+             Date: Mon, 10 Sep 2001 16:34:30 -0400
+             Message-ID: <3B9D23D6.90BCCC25@rowman.com>
+     Branch: perl
+	   ! sv.c t/op/ver.t utf8.h
+____________________________________________________________________________
+[ 11985] By: ams                                   on 2001/09/10  23:20:13
+        Log: Typo fixed by Blair Zajac in <3B9D284C.23B8D20B@orcaware.com>.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 11984] By: jhi                                   on 2001/09/10  23:09:31
+        Log: (Retracted by #12001)
+             Subject: Calc with USE_MUL/USE_DIV
+             From: Tels <perl_dummy@bloodgate.com>
+             Date: Fri, 07 Sep 2001 18:52:08 +0200 (CEST)
+             Message-Id: <200109071651.TAA11249@tiku.hut.fi>
+     Branch: perl
+	   ! lib/Math/BigInt/Calc.pm
+____________________________________________________________________________
+[ 11983] By: jhi                                   on 2001/09/10  22:37:14
+        Log: Subject: [PATCH op.c] Re: perl@11978
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Mon, 10 Sep 2001 18:58:01 +0100 (BST)
+             Message-Id: <200109101758.SAA07670@tempest.npl.co.uk>
+             
+             Format errors.
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[ 11982] By: jhi                                   on 2001/09/10  22:35:57
+        Log: Switch PADOFFSET back to U32 both because of binary backward
+             compatibility and because Arthur seems to have been fixing the
+             problems with naughty integer-pointer casting.
+     Branch: perl
+	   ! op.h
+____________________________________________________________________________
+[ 11981] By: ams                                   on 2001/09/10  16:31:43
+        Log: Subject: [PATCH MANIFEST, lib/ExtUtils/Command.pm, lib/ExtUtils/Command.t]
+             Fix Pod Typo, Add Test for ExtUtils::Command
+             From: "chromatic" <chromatic@rmci.net>
+             Date: Mon, 10 Sep 2001 11:20:56 -0600
+             Message-Id: <20010910172528.54160.qmail@onion.perl.org>
+     Branch: perl
+	   + lib/ExtUtils/Command.t
+	   ! MANIFEST lib/ExtUtils/Command.pm
+____________________________________________________________________________
+[ 11980] By: jhi                                   on 2001/09/10  13:29:35
+        Log: Subject: [PATCH] Encode.pm docs fix
+             From: Matt Sergeant <MSergeant@star.net.uk>
+             Date: Mon, 10 Sep 2001 15:24:01 +0100
+             Message-ID: <315E8A8BF9D1D411AD3D00508BB1B0C004B90035@UKS040>     
+     Branch: perl
+	   ! ext/Encode/Encode.pm
+____________________________________________________________________________
+[ 11979] By: jhi                                   on 2001/09/10  13:17:48
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 11978] By: jhi                                   on 2001/09/10  12:59:40
         Log: Revert #11973, the dTHX seems to be needed in there
              for threaded builds.
