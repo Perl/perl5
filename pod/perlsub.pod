@@ -58,10 +58,10 @@ indistinguishable list.
 Perl does not have named formal parameters, but in practice all you do is
 assign to a my() list of these.  Any variables you use in the function
 that aren't declared private are global variables.  For the gory details
-on creating private variables, see the sections below on L<"Private
-Variables via my()"> and L</"Temporary Values via local()">.  To create
-protected environments for a set of functions in a separate package (and
-probably a separate file), see L<perlmod/"Packages">.
+on creating private variables, see the sections below on
+L<"Private Variables via my()"> and L<"Temporary Values via local()">.
+To create protected environments for a set of functions in a separate
+package (and probably a separate file), see L<perlmod/"Packages">.
 
 Example:
 
@@ -286,7 +286,7 @@ That will print out 20 and 10.
 
 You may declare "my" variables at the outer most scope of a file to
 totally hide any such identifiers from the outside world.  This is similar
-to a C's static variables at the file level.  To do this with a subroutine
+to C's static variables at the file level.  To do this with a subroutine
 requires the use of a closure (anonymous function).  If a block (such as
 an eval(), function, or C<package>) wants to create a private subroutine
 that cannot be called from outside that block, it can declare a lexical
@@ -342,7 +342,7 @@ See L<perlrun> about the BEGIN function.
 =head2 Temporary Values via local()
 
 B<NOTE>: In general, you should be using "my" instead of "local", because
-it's faster and safer.  Execeptions to this include the global punctuation
+it's faster and safer.  Exceptions to this include the global punctuation
 variables, filehandles and formats, and direct manipulation of the Perl
 symbol table itself.  Format variables often use "local" though, as do
 other variables whose current value must be visible to called
@@ -637,7 +637,7 @@ without the prototype.
 
 The interesting thing about & is that you can generate new syntax with it:
 
-    sub try (&$) {
+    sub try (&@) {
 	my($try,$catch) = @_;
 	eval { &$try };
 	if ($@) {
@@ -764,7 +764,7 @@ should just call system() with those arguments.  All you'd do is this:
 	system($program, @_);
     } 
     date();
-    who('am', i');
+    who('am', 'i');
     ls('-l');
 
 In fact, if you preclare the functions you want to call that way, you don't
@@ -779,9 +779,10 @@ A more complete example of this is the standard Shell module, which
 can treat undefined subroutine calls as calls to Unix programs.
 
 Mechanisms are available for modules writers to help split the modules
-up into autoloadable files.  See the standard AutoLoader module described
-in L<Autoloader>, the standard SelfLoader modules in L<SelfLoader>, and
-the document on adding C functions to perl code in L<perlxs>.
+up into autoloadable files.  See the standard AutoLoader module
+described in L<AutoLoader> and in L<AutoSplit>, the standard
+SelfLoader modules in L<SelfLoader>, and the document on adding C
+functions to perl code in L<perlxs>.
 
 =head1 SEE ALSO
 
