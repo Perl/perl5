@@ -55,10 +55,17 @@ Both B<implicit-read> and B<implicit-write> warn about this:
 
     for (@a) { ... }
 
-=item B<dollar_underscore>
+=item B<dollar-underscore>
 
 This option warns whenever $_ is used either explicitly anywhere or
 as the implicit argument of a B<print> statement.
+
+=item B<private-names>
+
+This option warns on each use of a variable or subroutine name that
+lives in a non-current package but begins with an underscore ("_").
+Warnings aren't issued for the special case of the single character
+name "_" by itself (e.g. $_ and @_).
 
 =item B<all>
 
@@ -103,6 +110,7 @@ sub OPf_STACKED () { 64 }
 
 my $file = "unknown";		# shadows current filename
 my $line = 0;			# shadows current line number
+my $curstash = "main";		# shadows current stash
 
 # Lint checks
 my %check;
@@ -120,7 +128,8 @@ my %valid_check;
 # All valid checks
 BEGIN {
     map($valid_check{$_}++,
-	qw(context implicit_read implicit_write dollar_underscore));
+	qw(context implicit_read implicit_write dollar_underscore
+	   private_names));
 }
 
 # Debugging options
@@ -153,6 +162,7 @@ sub B::COP::lint {
     if ($op->ppaddr eq "pp_nextstate") {
 	$file = $op->filegv->SV->PV;
 	$line = $op->line;
+	$curstash = $op->stash->NAME;
     }
 }
 
@@ -207,8 +217,18 @@ sub B::LOOP::lint {
 sub B::GVOP::lint {
     my $op = shift;
     if ($check{dollar_underscore} && $op->ppaddr eq "pp_gvsv"
-	&& $op->gv->NAME eq "_") {
+	&& $op->gv->NAME eq "_")
+    {
 	warning('Use of $_');
+    }
+    if ($check{private_names}) {
+	my $ppaddr = $op->ppaddr;
+	my $gv = $op->gv;
+	if (($ppaddr eq "pp_gv" || $ppaddr eq "pp_gvsv")
+	    && $gv->NAME =~ /^_./ && $gv->STASH->NAME ne $curstash)
+	{
+	    warning('Illegal reference to private name %s', $gv->NAME);
+	}
     }
 }
 
