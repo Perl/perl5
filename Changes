@@ -28,6 +28,398 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.5		Maintenance release working toward v5.8.5
 --------------
 ____________________________________________________________________________
+[ 22869] By: nicholas                              on 2004/05/30  14:26:17
+        Log: Integrate:
+             [ 22835]
+             Upgrade to Encode 2.00.
+             
+             [ 22842]
+             Subject: Re: utf-8 and taint don't work together
+             From: SADAHIRO Tomoyuki <bqw10602@nifty.com>
+             Date: Sat, 22 May 2004 21:38:33 +0900
+             Message-Id: <20040522212704.C068.BQW10602@nifty.com>
+             
+             Date: Sun, 23 May 2004 09:56:15 +0900
+             Message-Id: <20040523095609.E404.BQW10602@nifty.com>
+             
+             [ 22843]
+             Tests for change #22842, by SADAHIRO Tomoyuki
+             (adapted to the core)
+             
+             [ 22866]
+             Skip in minitest
+             
+             [ 22868]
+             Upgrade to Encode 2.01.
+     Branch: maint-5.8/perl
+	  +> t/op/utftaint.t
+	  !> (integrate 150 files)
+____________________________________________________________________________
+[ 22867] By: nicholas                              on 2004/05/30  13:24:02
+        Log: Integrate:
+             [ 22817]
+             Subject: [perl #29527] Perl 5.8.4 build problems on LynxOS 
+             From: Olli Savia (via RT) <perlbug-followup@perl.org>
+             Date: 12 May 2004 13:02:41 -0000
+             Message-ID: <rt-3.0.9-29527-87290.17.3367022021997@perl.org>
+             
+             [ 22841]
+             Subject: [PATCH] win32_chsize is not exported on Win32
+             From: Steve Hay <steve.hay@uk.radan.com>
+             Date: Mon, 24 May 2004 12:52:48 +0100
+             Message-ID: <40B1E210.4050202@uk.radan.com>
+     Branch: maint-5.8/perl
+	  !> makedef.pl sv.c
+____________________________________________________________________________
+[ 22865] By: nicholas                              on 2004/05/30  13:01:21
+        Log: Integrate:
+             [ 22822]
+             David Manura is the new maintainer of Text::Balanced.
+             
+             [ 22840]
+             Subject: [PATCH] Re: [perl #29765] PERL-5.8.4 INSTALL
+             From: Yitzchak Scott-Thoennes <sthoenna@efn.org>
+             Date: Fri, 21 May 2004 11:35:34 -0700
+             Message-ID: <20040521183533.GA5108@efn.org>
+             (plus whitespace removal)
+             
+             [ 22852]
+             Subject: TEST needs to ignore SCM files
+             From: Alan Burlison <Alan.Burlison@sun.com>
+             Date: Thu, 27 May 2004 23:32:28 +0100
+             Message-ID: <40B66C7C.8030303@sun.com>
+     Branch: maint-5.8/perl
+	  !> INSTALL Porting/Maintainers.pl t/TEST
+____________________________________________________________________________
+[ 22864] By: nicholas                              on 2004/05/30  12:38:30
+        Log: Integrate:
+             [ 22769]
+             Subject: [perl #29073] Reference to incorrect method in documentation of
+             From: "bob@starlabs.net (via RT)" <perlbug-followup@perl.org>
+             Message-ID: <rt-3.0.8-29073-85903.18.1381766820328@perl.org>
+             Date: 22 Apr 2004 10:49:22 -0000
+             
+             [ 22829]
+             perlrun.pod minor fixes :
+             - the parameter to -x is optional
+             - pod nit
+             
+             [ 22837]
+             Subject: Proposed doc patch for getsockopt
+             From: perl5-porters@ton.iguana.be (Ton Hospel)
+             Date: Sun, 16 May 2004 13:35:20 +0000 (UTC)
+             Message-Id: <c87qmo$u9b$1@post.home.lunix>
+             
+             [ 22853]
+             Subject: [PATCH doc] Re: undef loses it magicness when assigned to a variable?
+             From: Stas Bekman <stas@stason.org>
+             Date: Thu, 27 May 2004 11:25:08 -0700
+             Message-ID: <40B63284.5040203@stason.org>
+     Branch: maint-5.8/perl
+	  !> lib/Text/ParseWords.pm pod/perlapi.pod pod/perlfunc.pod
+	  !> pod/perlguts.pod pod/perlrun.pod sv.h
+____________________________________________________________________________
+[ 22863] By: nicholas                              on 2004/05/30  11:38:17
+        Log: Integrate:
+             [ 22756]
+             Subject: [PATCH] Document limitations in PUSHi et al macros and add new mPUSHi et al macros
+             From: Steve Hay <steve.hay@uk.radan.com>
+             Date: Fri, 30 Apr 2004 10:07:21 +0100
+             Message-ID: <40921749.3050600@uk.radan.com>
+             
+             [ 22757]
+             Follow-up to previous patch: the mX?PUSH[inup] macros
+             should handle 'set' magic, just like the X?PUSH[inup]
+             counterparts.
+             
+             [ 22779]
+             Fix mX?PUSH[inup] macros. (Follow-up to #22756 and #22757)
+             
+             Subject: Re: [PATCH] Document limitations in PUSHi et al macros and add new mPUSHi et al macros
+             From: Marcus Holland-Moritz <mhx-perl@gmx.net>
+             Date: Mon, 3 May 2004 20:03:28 +0200
+             Message-Id: <20040503200328.24efcda5@r2d2>
+             
+             [ 22783]
+             Add tests for mX?PUSH[inup] macros.
+             
+             Subject: Re: [PATCH] Document limitations in PUSHi et al macros and add new mPUSHi et al macros
+             From: Steve Hay <steve.hay@uk.radan.com>
+             Date: Wed, 05 May 2004 15:34:45 +0100
+             Message-ID: <4098FB85.1060602@uk.radan.com>
+     Branch: maint-5.8/perl
+	  +> ext/XS/APItest/t/push.t
+	  !> MANIFEST ext/XS/APItest/APItest.pm ext/XS/APItest/APItest.xs
+	  !> ext/XS/APItest/MANIFEST pod/perlapi.pod pod/perlguts.pod pp.h
+____________________________________________________________________________
+[ 22862] By: nicholas                              on 2004/05/30  10:09:57
+        Log: Integrate:
+             [ 22662]
+             C<undef> doesn't look like a number. See also:
+             
+             Subject: Re: [perl #27606] undef "looks like" a number
+             From: Marcus Holland-Moritz <mhx-perl@gmx.net>
+             Date: Mon, 15 Mar 2004 22:16:26 +0100
+             Message-Id: <20040315221626.48061c67@r2d2>
+             
+             [ 22798]
+             [perl #29395] Scalar::Util::refaddr falsely returns false
+             Add mg_get() to refaddr() when SV is magical.
+             Fix the non-xs version of looks_like_number().
+             
+             [ 22838]
+             Update to Scalar-List-Utils-1.14
+     Branch: maint-5.8/perl
+	  +> ext/List/Util/Changes
+	   - ext/List/Util/ChangeLog
+	   ! ext/List/Util/t/lln.t pod/perl585delta.pod
+	  !> MANIFEST ext/List/Util/README ext/List/Util/Util.xs
+	  !> ext/List/Util/lib/List/Util.pm
+	  !> ext/List/Util/lib/Scalar/Util.pm ext/List/Util/t/refaddr.t
+	  !> pp_ctl.c sv.c
+____________________________________________________________________________
+[ 22861] By: nicholas                              on 2004/05/30  09:43:49
+        Log: Integrate:
+             [ 22816]
+             Make XSLoader update @DynaLoader::dl_shared_objects.
+             
+             [ 22823]
+             Subject: [PATCH] Re: [perl #29581] glob() misses a lot of matches
+             From: LAUN Wolfgang <wolfgang.laun@alcatel.at>
+             Date: Mon, 17 May 2004 07:38:19 +0200
+             Message-ID: <DF27CDCBD2581D4B88431901094E4B4D02B0C71E@attmsx1.aut.alcatel.at>
+             
+             [ 22828]
+             Subject: [perl #29623] Patch for h2xs.t in Perl 5.8.4 
+             From: mats@sm5sxl.net (via RT) <perlbug-followup@perl.org>
+             Date: 16 May 2004 13:33:32 -0000
+             Message-ID: <rt-3.0.9-29623-87522.10.1965589695082@perl.org>
+             
+             [ 22836]
+             Subject: [PATCH] h2xs doesn't recognize indented enums
+             From: Tassilo von Parseval <tassilo.parseval@post.rwth-aachen.de>
+             Date: Fri, 21 May 2004 10:51:58 +0200
+             Message-id: <20040521085158.GA10660@ethan>
+             (modified regexp)
+             
+             [ 22848]
+             Subject: [PATCH] correctly handle C<< >> and C<<< >>> in diagnostics
+             From: Yitzchak Scott-Thoennes <sthoenna@efn.org>
+             Date: Tue, 25 May 2004 02:29:37 -0700
+             Message-ID: <20040525092937.GA2332@efn.org>
+             
+             [ 22850]
+             Subject: [PATCH] 'perl -v' fails if local_patches contains code snippets
+             From: Alan Burlison <Alan.Burlison@sun.com>
+             Date: Wed, 26 May 2004 16:24:03 +0100
+             Message-ID: <40B4B693.9090905@sun.com>
+             (using \0 as a separator for q//)
+     Branch: maint-5.8/perl
+	  !> ext/DynaLoader/DynaLoader_pm.PL ext/DynaLoader/XSLoader_pm.PL
+	  !> ext/File/Glob/Glob.xs lib/diagnostics.pm lib/h2xs.t perl.c
+	  !> utils/h2xs.PL
+____________________________________________________________________________
+[ 22860] By: nicholas                              on 2004/05/29  22:13:46
+        Log: Integrate:
+             [ 22830]
+             [perl #29637] Thread creation time is hypersensitive
+             
+             Due to a logic error, the dup ptr table sometimes wans't being
+             grown, leading to extremely slow cloning.
+             
+             [ 22831]
+             improve hashing algorithm for ptr tables in perl_clone:
+             the bottom few bits of a pointer are usually zero
+     Branch: maint-5.8/perl
+	  !> sv.c
+____________________________________________________________________________
+[ 22859] By: nicholas                              on 2004/05/29  21:52:37
+        Log: Integrate:
+             [ 22771]
+             ensure that utf8 Perl code magically called from a regex localizes $.
+             
+             [ 22772]
+             remove spurious intentation in utf8_pva.pl
+     Branch: maint-5.8/perl
+	  !> lib/utf8_pva.pl
+____________________________________________________________________________
+[ 22858] By: nicholas                              on 2004/05/29  21:04:22
+        Log: Integrate 22744, 22760, 22761, 22762, 22763, 22765 redux
+             
+             http://www.google.com/search?btnI=again&q=perforce+fails+bah
+     Branch: maint-5.8/perl
+	   - lib/unicore/lib/gc_sc/Sterm.pl
+	  !> lib/unicore/lib/gc_sc/Dash.pl lib/unicore/lib/gc_sc/Hyphen.pl
+	  !> lib/unicore/lib/gc_sc/Radical.pl
+____________________________________________________________________________
+[ 22857] By: nicholas                              on 2004/05/29  20:48:27
+        Log: Integrate:
+             [ 22744]
+             Subject: [PATCH utf8_heavy.pl, mktables, et. al.] candidate for TR18 compliance
+             From: Jeff 'japhy' Pinyan <japhy@perlmonk.org>
+             Date: Thu, 22 Apr 2004 14:31:30 -0400 (EDT)
+             Message-ID: <Pine.LNX.4.44.0404221429040.10466-101000@perlmonk.org>
+             
+             Date: Mon, 26 Apr 2004 12:37:21 -0400 (EDT)
+             Message-ID: <Pine.LNX.4.44.0404261222320.7154-400000@perlmonk.org>
+             
+             [ 22760]
+             Remove the no-longer autogenerated Unicode files
+             
+             [ 22761]
+             Avoid mktables generating Sterm.pl and Sterm.pl in the same directory
+             by making the %BaseName check global
+             
+             [ 22762]
+             Some fool removed lib/unicore/ArabicShaping.txt	in change 22760
+             
+             [ 22763]
+             And that same fool forgot to add the not-really-needed "fuzzy" versions
+             of some binary property files
+             
+             [ 22765]
+             Make t/uni/class.t pass on case insensitive file systems
+     Branch: maint-5.8/perl
+	  +> (branch 410 files)
+	   - (delete 322 files)
+	  !> MANIFEST lib/unicore/Canonical.pl
+	  !> lib/unicore/CombiningClass.pl lib/unicore/Decomposition.pl
+	  !> lib/unicore/Exact.pl lib/unicore/Name.pl
+	  !> lib/unicore/Properties lib/unicore/To/Digit.pl
+	  !> lib/unicore/To/Fold.pl lib/unicore/To/Lower.pl
+	  !> lib/unicore/To/Title.pl lib/unicore/To/Upper.pl
+	  !> lib/unicore/mktables lib/utf8_heavy.pl pod/perlunicode.pod
+	  !> t/op/pat.t t/uni/class.t
+____________________________________________________________________________
+[ 22856] By: nicholas                              on 2004/05/29  20:04:40
+        Log: Integrate:
+             [ 22693]
+             Subject: [PATCH] lib/utf8_heavy.pl -- cascading classes and '&' support
+             From: Jeff 'japhy' Pinyan <japhy@perlmonk.org>
+             Date: Mon, 12 Apr 2004 20:24:48 -0400 (EDT)
+             Message-ID: <Pine.LNX.4.44.0404122011160.3038-200000@perlmonk.org>
+             
+             [ 22713]
+             Subject: Re: [PATCH] lib/utf8_heavy.pl -- cascading classes and '&' support
+             From: "Jeff 'japhy' Pinyan" <japhy@perlmonk.org>
+             Date: Wed, 14 Apr 2004 17:01:38 -0400 (EDT)
+             Message-ID: <Pine.LNX.4.44.0404141659480.11423-301000@perlmonk.org>
+             
+             [ 22714]
+             New file left out of the last commit.
+     Branch: maint-5.8/perl
+	  +> t/uni/class.t
+	  !> MANIFEST lib/utf8_heavy.pl pod/perlunicode.pod
+____________________________________________________________________________
+[ 22855] By: nicholas                              on 2004/05/29  19:39:53
+        Log: Integrate:
+             [ 22806]
+             Subject: Re: a little extra cmdline help. [PATCH]
+             From: Jim Cromie <jcromie@divsol.com>
+             Date: Mon, 10 May 2004 15:25:07 -0600
+             Message-Id: <409FF333.4020104@divsol.com>
+             
+             [ 22810]
+             Subject: various -V: searches [PATCH]
+             From: Jim Cromie <jcromie@divsol.com>
+             Date: Tue, 11 May 2004 00:15:46 -0600
+             Message-ID: <40A06F92.1070607@divsol.com>
+             
+             [ 22826]
+             Error message too wide.
+     Branch: maint-5.8/perl
+	   ! lib/Config.t
+	  !> configpm perl.c pod/perlrun.pod
+____________________________________________________________________________
+[ 22854] By: nicholas                              on 2004/05/29  18:22:58
+        Log: Revert 22849 and 22851, except for the t/test.pl improvement.
+             [blead patches 22664 and 22669]
+             
+             http://www.perforce.com/perforce/technotes/note014.html
+             "How do you back out a change?"
+             
+             Let me summarise their answer:
+             With difficulty.
+             (We find it easier to write a manual about how to kludge it than
+             to improve our software to make it simple)
+     Branch: maint-5.8/perl
+	   - ext/B/t/OptreeCheck.pm ext/B/t/optree_check.t
+	   - ext/B/t/optree_concise.t ext/B/t/optree_samples.t
+	   - ext/B/t/optree_sort.t ext/B/t/optree_varinit.t
+	   ! MANIFEST ext/B/t/concise.t
+____________________________________________________________________________
+[ 22851] By: nicholas                              on 2004/05/27  10:22:23
+        Log: Integrate:
+             [ 22669]
+             Fix command-line quoting under Windows for the new optree tests
+             Subject: Re: Smoke [5.9.2] 22666 FAIL(F) MSWin32 WinXP/.Net SP1 (x86/1 cpu)
+             From: Steve Hay <steve.hay@uk.radan.com>
+             Date: Wed, 07 Apr 2004 09:46:01 +0100
+             Message-ID: <4073BFC9.10707@uk.radan.com>
+     Branch: maint-5.8/perl
+	  !> ext/B/t/optree_samples.t
+____________________________________________________________________________
+[ 22849] By: nicholas                              on 2004/05/26  10:12:38
+        Log: Integrate:
+             [ 22664]
+             Subject: Re: tests for change #22539
+             From: Jim Cromie <jcromie@divsol.com>
+             Date: Tue, 30 Mar 2004 14:39:31 -0700
+             Message-ID: <4069E913.5040906@divsol.com>
+             (with some spelling tweaks)
+             
+             [I'd do this and the next 2 as one, but perforce is hateful:
+             http://nick.hates-software.com/2003/12/30/9729c0ac.html
+             ]
+     Branch: maint-5.8/perl
+	  +> ext/B/t/OptreeCheck.pm ext/B/t/optree_check.t
+	  +> ext/B/t/optree_concise.t ext/B/t/optree_samples.t
+	  +> ext/B/t/optree_sort.t ext/B/t/optree_varinit.t
+	   ! ext/B/t/concise.t
+	  !> MANIFEST ext/B/B/Concise.pm t/test.pl
+____________________________________________________________________________
+[ 22847] By: nicholas                              on 2004/05/25  21:27:12
+        Log: Integrate:
+             [ 22839]
+             [perl #29790] Optimization busted: '@a = "b", sort @a' drops "b"
+             Fix the sort-in-place optimization of change #22349.
+     Branch: maint-5.8/perl
+	  !> op.c t/op/sort.t
+____________________________________________________________________________
+[ 22846] By: nicholas                              on 2004/05/25  20:56:06
+        Log: Integrate:
+             [ 22808]
+             Subject: [PATCH] debugger (step backwards)
+             From: Richard.Foley@t-online.de (Richard Foley)
+             Date: Tue, 11 May 2004 11:04:11 +0200
+             Message-Id: <200405111104.11484.richard.foley@rfi.net>
+             
+             [ 22809]
+             More pod names in the debugger for the runman command
+     Branch: maint-5.8/perl
+	  !> lib/perl5db.pl
+____________________________________________________________________________
+[ 22845] By: nicholas                              on 2004/05/25  20:54:05
+        Log: Integrate:
+             [ 22788]
+             add -pipe to gcc's default flags
+             it has shown a compile time speed increase of about 40% on
+             Linux and HP-UX, and also works on cygwin-1.5.9. On failing
+             OS/gcc combo's remove it in the hints
+             
+             [ 22815]
+             Subject: [PATCH] Configure shouldn't unconditionally add in -pipe 
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Tue, 11 May 2004 13:14:42 -0400 (EDT)
+             Message-ID: <Pine.SOL.4.58.0405111313210.14279@maxwell.phys.lafayette.edu>
+     Branch: maint-5.8/perl
+	  !> Configure hints/darwin.sh hints/rhapsody.sh
+____________________________________________________________________________
+[ 22844] By: nicholas                              on 2004/05/24  16:42:34
+        Log: Update changes
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 22834] By: nicholas                              on 2004/05/20  13:13:45
         Log: Integrate:
              [ 22827]
