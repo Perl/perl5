@@ -78,6 +78,11 @@ Version 5.005_01        First maintenance release of 5.005
 ----------------
 
 ____________________________________________________________________________
+[  1669] By: gsar                                  on 1998/07/26  23:19:02
+        Log: update Changes; add sv_*_mg() entries in win32/GenCAPI.pl
+     Branch: maint-5.005/perl
+           ! Changes proto.h win32/GenCAPI.pl
+____________________________________________________________________________
 [  1668] By: gsar                                  on 1998/07/26  21:12:11
         Log: s/TMP_CRLF_PATCH/PERL_STRICT_CR/ with sense reversed, so they
              can disable it from config.sh if they want; up patchlevel to 5_01;
