@@ -235,7 +235,7 @@ L<Time::Seconds> - a simple API to convert seconds to other date values
 
 =item *
 
-L<Unicode::UCD> - Unicode Character Database
+L<UnicodeCD> - Unicode Character Database
 
 =back
 

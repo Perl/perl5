@@ -1,4 +1,4 @@
-package Unicode::UCD;
+package UnicodeCD;
 
 use strict;
 use warnings;
@@ -19,17 +19,17 @@ use Carp;
 
 =head1 NAME
 
-Unicode::UCD - Unicode character database
+UnicodeCD - Unicode character database
 
 =head1 SYNOPSIS
 
-    use Unicode::UCD 'charinfo';
+    use UnicodeCD 'charinfo';
     my $charinfo   = charinfo($codepoint);
 
-    use Unicode::UCD 'charblock';
+    use UnicodeCD 'charblock';
     my $charblock  = charblock($codepoint);
 
-    use Unicode::UCD 'charscript';
+    use UnicodeCD 'charscript';
     my $charscript = charblock($codepoint);
 
 =head1 DESCRIPTION
@@ -66,7 +66,7 @@ sub openunicode {
 
 =head2 charinfo
 
-    use Unicode::UCD 'charinfo';
+    use UnicodeCD 'charinfo';
 
     my $charinfo = charinfo(0x41);
 
@@ -180,7 +180,7 @@ sub charinrange {
 
 =head2 charblock
 
-    use Unicode::UCD 'charblock';
+    use UnicodeCD 'charblock';
 
     my $charblock = charblock(0x41);
     my $charblock = charblock(1234);
@@ -242,7 +242,7 @@ sub charblock {
 
 =head2 charscript
 
-    use Unicode::UCD 'charscript';
+    use UnicodeCD 'charscript';
 
     my $charscript = charscript(0x41);
     my $charscript = charscript(1234);
@@ -305,7 +305,7 @@ sub charscript {
 
 =head2 charblocks
 
-    use Unicode::UCD 'charblocks';
+    use UnicodeCD 'charblocks';
 
     my $charblocks = charblocks();
 
@@ -321,7 +321,7 @@ sub charblocks {
 
 =head2 charscripts
 
-    use Unicode::UCD 'charscripts';
+    use UnicodeCD 'charscripts';
 
     my %charscripts = charscripts();
 
@@ -379,7 +379,7 @@ can also test whether a code point is in the I<range> as returned by
 L</charblock> and L</charscript> or as the values of the hash returned
 by L</charblocks> and </charscripts> by using charinrange():
 
-    use Unicode::UCD qw(charscript charinrange);
+    use UnicodeCD qw(charscript charinrange);
 
     $range = charscript('Hiragana');
     print "looks like hiragana\n" if charinrange($range, $code);
@@ -388,7 +388,7 @@ by L</charblocks> and </charscripts> by using charinrange():
 
 =head2 compexcl
 
-    use Unicode::UCD 'compexcl';
+    use UnicodeCD 'compexcl';
 
     my $compexcl = compexcl("09dc");
 
@@ -428,7 +428,7 @@ sub compexcl {
 
 =head2 casefold
 
-    use Unicode::UCD 'casefold';
+    use UnicodeCD 'casefold';
 
     my %casefold = casefold("09dc");
 
@@ -498,7 +498,7 @@ sub casefold {
 
 =head2 casespec
 
-    use Unicode::UCD 'casespec';
+    use UnicodeCD 'casespec';
 
     my %casespec = casespec("09dc");
 
@@ -571,9 +571,9 @@ sub casespec {
     return $CASESPEC{$code};
 }
 
-=head2 Unicode::UCD::UnicodeVersion
+=head2 UnicodeCD::UnicodeVersion
 
-Unicode::UCD::UnicodeVersion() returns the version of the Unicode Character
+UnicodeCD::UnicodeVersion() returns the version of the Unicode Character
 Database, in other words, the version of the Unicode standard the
 database implements.
 

@@ -1487,8 +1487,8 @@ lib/unicode/To/Lower.pl		Unicode character database
 lib/unicode/To/Title.pl		Unicode character database
 lib/unicode/To/Upper.pl		Unicode character database
 lib/unicode/UCD.html		Unicode character database
-lib/Unicode/UCD.pm			Unicode character database
-lib/Unicode/UCD.t			See if Unicode character database works
+lib/UnicodeCD.pm		Unicode character database
+lib/UnicodeCD.t			See if Unicode character database works
 lib/unicode/Unicode.html	Unicode character database
 lib/unicode/Unicode.txt		Unicode character database
 lib/unicode/version		The version of the Unicode

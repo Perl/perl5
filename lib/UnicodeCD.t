@@ -1,11 +1,11 @@
-use Unicode::UCD;
+use UnicodeCD;
 
 use Test;
 use strict;
 
 BEGIN { plan tests => 111 };
 
-use Unicode::UCD 'charinfo';
+use UnicodeCD 'charinfo';
 
 my $charinfo;
 
@@ -93,7 +93,7 @@ ok($charinfo->{title},          '');
 ok($charinfo->{block},          'Hebrew');
 ok($charinfo->{script},         'Hebrew');
 
-use Unicode::UCD qw(charblock charscript);
+use UnicodeCD qw(charblock charscript);
 
 # 0x0590 is in the Hebrew block but unused.
 
@@ -120,7 +120,7 @@ ok($charinfo->{title},          '');
 ok($charinfo->{block},          'Latin-1 Supplement');
 ok($charinfo->{script},         undef);
 
-use Unicode::UCD qw(charblocks charscripts);
+use UnicodeCD qw(charblocks charscripts);
 
 my $charblocks = charblocks();
 
@@ -151,7 +151,7 @@ $ranges = charscript('Ogham');
 ok($ranges->[0]->[0], hex('1681'));
 ok($ranges->[0]->[1], hex('169a'));
 
-use Unicode::UCD qw(charinrange);
+use UnicodeCD qw(charinrange);
 
 $ranges = charscript('Cherokee');
 ok(!charinrange($ranges, "139f"));
@@ -159,14 +159,14 @@ ok( charinrange($ranges, "13a0"));
 ok( charinrange($ranges, "13f4"));
 ok(!charinrange($ranges, "13f5"));
 
-ok(Unicode::UCD::UnicodeVersion, 3.1);
+ok(UnicodeCD::UnicodeVersion, 3.1);
 
-use Unicode::UCD qw(compexcl);
+use UnicodeCD qw(compexcl);
 
 ok(!compexcl(0x0100));
 ok( compexcl(0x0958));
 
-use Unicode::UCD qw(casefold);
+use UnicodeCD qw(casefold);
 
 my $casefold;
 
@@ -184,7 +184,7 @@ ok($casefold->{code} eq '00DF' &&
 
 ok(!casefold(0x20));
 
-use Unicode::UCD qw(casespec);
+use UnicodeCD qw(casespec);
 
 my $casespec;
 

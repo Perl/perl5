@@ -108,7 +108,9 @@ foreach my $module (@Core_Modules) {
 sub compile_module {
     my ($module) = $_[0];
     
-    return scalar `$^X "-Ilib" t/lib/compmod.pl $module` =~ /^ok/;
+    my $out = scalar `$^X "-Ilib" t/lib/compmod.pl $module`;
+    print "# $out";
+    return $out =~ /^ok/;
 }
 
 # Add here modules that have their own test scripts and therefore
@@ -248,7 +250,7 @@ Time::Piece
 Time::gmtime
 Time::localtime
 Time::tm
-Unicode::UCD
+UnicodeUCD
 UNIVERSAL
 User::grent
 User::pwent
