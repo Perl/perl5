@@ -13,13 +13,14 @@ use B qw(class main_root main_start main_cv svref_2object opnumber cstring
 	 OPf_KIDS OPf_REF OPf_STACKED OPf_SPECIAL
 	 OPpLVAL_INTRO OPpENTERSUB_AMPER OPpSLICE OPpCONST_BARE
 	 OPpTRANS_SQUASH OPpTRANS_DELETE OPpTRANS_COMPLEMENT OPpTARGET_MY
-	 OPpCONST_ARYBASE
+	 OPpCONST_ARYBASE OPpEXISTS_SUB
 	 SVf_IOK SVf_NOK SVf_ROK SVf_POK
          CVf_METHOD CVf_LOCKED CVf_LVALUE
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE PMf_SKIPWHITE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
 $VERSION = 0.60;
 use strict;
+use warnings ();
 
 # Changes between 0.50 and 0.51:
 # - fixed nulled leave with live enter in sort { }
@@ -95,7 +96,6 @@ use strict;
 # - finish tr/// changes
 # - add option for even more parens (generalize \&foo change)
 # - left/right context
-# - recognize `use utf8', `use integer', etc
 # - treat top-level block specially for incremental output
 # - copy comments (look at real text with $^P?)
 # - avoid semis in one-statement blocks
@@ -106,12 +106,9 @@ use strict;
 # - more style options: brace style, hex vs. octal, quotes, ...
 # - print big ints as hex/octal instead of decimal (heuristic?)
 # - handle `my $x if 0'?
-# - include values of variables (e.g. set in BEGIN)
 # - coordinate with Data::Dumper (both directions? see previous)
 # - version using op_next instead of op_first/sibling?
 # - avoid string copies (pass arrays, one big join?)
-# - auto-apply `-u'?
-# - -uPackage:: descend recursively?
 # - here-docs?
 # - <DATA>?
 
@@ -131,11 +128,14 @@ use strict;
 # curcv:
 # CV for current sub (or main program) being deparsed
 #
+# curcop:
+# COP for statement being deparsed
+#
 # curstash:
 # name of the current package for deparsed code
 #
 # subs_todo:
-# array of [cop_seq, GV, is_format?] for subs and formats we still
+# array of [cop_seq, CV, is_format?] for subs and formats we still
 # want to deparse
 #
 # protos_todo:
@@ -216,26 +216,120 @@ sub null {
 
 sub todo {
     my $self = shift;
-    my($gv, $cv, $is_form) = @_;
+    my($cv, $is_form) = @_;
     my $seq;
     if (!null($cv->START) and is_state($cv->START)) {
 	$seq = $cv->START->cop_seq;
     } else {
 	$seq = 0;
     }
-    push @{$self->{'subs_todo'}}, [$seq, $gv, $is_form];
+    push @{$self->{'subs_todo'}}, [$seq, $cv, $is_form];
 }
 
 sub next_todo {
     my $self = shift;
     my $ent = shift @{$self->{'subs_todo'}};
-    my $name = $self->gv_name($ent->[1]);
+    my $cv = $ent->[1];
+    my $gv = $cv->GV;
+    my $name = $self->gv_name($gv);
     if ($ent->[2]) {
 	return "format $name =\n"
 	    . $self->deparse_format($ent->[1]->FORM). "\n";
     } else {
 	$self->{'subs_declared'}{$name} = 1;
-	return "sub $name " . $self->deparse_sub($ent->[1]->CV);
+	if ($name eq "BEGIN") {
+	    my $use_dec = $self->begin_is_use($cv);
+	    return $use_dec if defined ($use_dec);
+	}
+        return "sub $name " . $self->deparse_sub($cv);
+    }
+}
+
+# Return a "use" declaration for this BEGIN block, if appropriate
+sub begin_is_use {
+    my ($self, $cv) = @_;
+    my $root = $cv->ROOT;
+#require B::Debug;
+#B::walkoptree($cv->ROOT, "debug");
+    my $lineseq = $root->first;
+    return if $lineseq->name ne "lineseq";
+
+    my $req_op = $lineseq->first->sibling;
+    return if $req_op->name ne "require";
+
+    my $module;
+    if ($req_op->first->private & OPpCONST_BARE) {
+	# Actually it should always be a bareword
+	$module = $self->const_sv($req_op->first)->PV;
+	$module =~ s[/][::]g;
+	$module =~ s/.pm$//;
+    }
+    else {
+	$module = const($self->const_sv($req_op->first));
+    }
+
+    my $version;
+    my $version_op = $req_op->sibling;
+    return if class($version_op) eq "NULL";
+    if ($version_op->name eq "lineseq") {
+	# We have a version parameter; skip nextstate & pushmark
+	my $constop = $version_op->first->next->next;
+
+	return unless $self->const_sv($constop)->PV eq $module;
+	$constop = $constop->sibling;
+
+	$version = $self->const_sv($constop)->int_value;
+	$constop = $constop->sibling;
+	return if $constop->name ne "method_named";
+	return if $self->const_sv($constop)->PV ne "VERSION";
+    }
+
+    $lineseq = $version_op->sibling;
+    return if $lineseq->name ne "lineseq";
+    my $entersub = $lineseq->first->sibling;
+    if ($entersub->name eq "stub") {
+	return "use $module $version ();\n" if defined $version;
+	return "use $module ();\n";
+    }
+    return if $entersub->name ne "entersub";
+
+    # See if there are import arguments
+    my $args = '';
+
+    my $constop = $entersub->first->sibling; # Skip over pushmark
+    return unless $self->const_sv($constop)->PV eq $module;
+
+    # Pull out the arguments
+    for ($constop=$constop->sibling; $constop->name eq "const";
+		$constop = $constop->sibling) {
+	$args .= ", " if length($args);
+	$args .= $self->deparse($constop, 6);
+    }
+
+    my $use = 'use';
+    my $method_named = $constop;
+    return if $method_named->name ne "method_named";
+    my $method_name = $self->const_sv($method_named)->PV;
+
+    if ($method_name eq "unimport") {
+	$use = 'no';
+    }
+
+    # Certain pragmas are dealt with using hint bits,
+    # so we ignore them here
+    if ($module eq 'strict' || $module eq 'integer'
+	|| $module eq 'bytes') {
+	return "";
+    }
+
+    if (defined $version && length $args) {
+	return "$use $module $version ($args);\n";
+    } elsif (defined $version) {
+	return "$use $module $version;\n";
+    } elsif (length $args) {
+	return "$use $module ($args);\n";
+    } else {
+	return "$use $module;\n";
     }
 }
 
@@ -263,14 +357,14 @@ sub walk_sub {
 	    if ($op->next->name eq "entersub") {
 		return if $self->{'subs_done'}{$$gv}++;
 		return if class($gv->CV) eq "SPECIAL";
-		$self->todo($gv, $gv->CV, 0);
+		$self->todo($gv->CV, 0);
 		$self->walk_sub($gv->CV);
 	    } elsif ($op->next->name eq "enterwrite"
 		     or ($op->next->name eq "rv2gv"
 			 and $op->next->next->name eq "enterwrite")) {
 		return if $self->{'forms_done'}{$$gv}++;
 		return if class($gv->FORM) eq "SPECIAL";
-		$self->todo($gv, $gv->FORM, 1);
+		$self->todo($gv->FORM, 1);
 		$self->walk_sub($gv->FORM);
 	    }
 	}
@@ -278,17 +372,21 @@ sub walk_sub {
 }
 
 sub stash_subs {
-    my $self = shift;
-    my $pack = shift;
-    my(%stash, @ret);
-    { no strict 'refs'; %stash = svref_2object(\%{$pack . "::"})->ARRAY }
-    if ($pack eq "main") {
-	$pack = "";
-    } else {
-	$pack = $pack . "::";
+    my ($self, $pack) = @_;
+    my (@ret, $stash);
+    if (!defined $pack) {
+	$pack = '';
+	$stash = \%::;
     }
-    my($key, $val);
-    while (($key, $val) = each %stash) {
+    else {
+	$pack =~ s/(::)?$/::/;
+	no strict 'refs';
+	$stash = \%$pack;
+    }
+    my %stash = svref_2object($stash)->ARRAY;
+    while (my ($key, $val) = each %stash) {
+	next if $key eq 'main::';	# avoid infinite recursion
+	next if $key eq 'B::';		# don't automatically scan B
 	my $class = class($val);
 	if ($class eq "PV") {
 	    # Just a prototype
@@ -297,15 +395,19 @@ sub stash_subs {
 	    # Just a name
 	    push @{$self->{'protos_todo'}}, [$pack . $key, undef];	    
 	} elsif ($class eq "GV") {
-	    if (class($val->CV) ne "SPECIAL") {
+	    if (class(my $cv = $val->CV) ne "SPECIAL") {
+		next unless $cv->FILE eq $0 || $self->{'files'}{$cv->FILE};
 		next if $self->{'subs_done'}{$$val}++;
-		$self->todo($val, $val->CV, 0);
+		$self->todo($val->CV, 0);
 		$self->walk_sub($val->CV);
 	    }
 	    if (class($val->FORM) ne "SPECIAL") {
 		next if $self->{'forms_done'}{$$val}++;
-		$self->todo($val, $val->FORM, 1);
+		$self->todo($val->FORM, 1);
 		$self->walk_sub($val->FORM);
+	    }
+	    if (class($val->HV) ne "SPECIAL" && $key =~ /::$/) {
+		$self->stash_subs($pack . $key);
 	    }
 	}
     }
@@ -348,7 +450,9 @@ sub new {
     my $class = shift;
     my $self = bless {}, $class;
     $self->{'subs_todo'} = [];
+    $self->{'files'} = {};
     $self->{'curstash'} = "main";
+    $self->{'curcop'} = undef;
     $self->{'cuddle'} = "\n";
     $self->{'indent_size'} = 4;
     $self->{'use_tabs'} = 0;
@@ -364,8 +468,8 @@ sub new {
     $self->init();
 
     while (my $arg = shift @_) {
-	if (substr($arg, 0, 2) eq "-u") {
-	    $self->stash_subs(substr($arg, 2));
+	if ($arg =~ /^-f(.*)/) {
+	    $self->{'files'}{$1} = 1;
 	} elsif ($arg eq "-p") {
 	    $self->{'parens'} = 1;
 	} elsif ($arg eq "-l") {
@@ -381,6 +485,11 @@ sub new {
     return $self;
 }
 
+sub WARN_MASK () {
+    # Mask out the bits that C<use vars> uses
+    $warnings::Bits{all} | $warnings::DeadBits{all};
+}
+
 # Initialise the contextual information, either from
 # defaults provided with the ambient_pragmas method,
 # or from perl's own defaults otherwise.
@@ -388,7 +497,7 @@ sub init {
     my $self = shift;
 
     $self->{'arybase'}  = $self->{'ambient_arybase'};
-    $self->{'warnings'} = $self->{'ambient_warnings'};
+    $self->{'warnings'} = $self->{'ambient_warnings'} & WARN_MASK;
     $self->{'hints'}    = $self->{'ambient_hints'} & 0xFF;
 
     # also a convenient place to clear out subs_declared
@@ -399,7 +508,16 @@ sub compile {
     my(@args) = @_;
     return sub { 
 	my $self = B::Deparse->new(@args);
-	$self->stash_subs("main");
+	my @BEGINs  = B::begin_av->isa("B::AV") ? B::begin_av->ARRAY : ();
+	my @INITs   = B::init_av->isa("B::AV") ? B::init_av->ARRAY : ();
+	my @ENDs    = B::end_av->isa("B::AV") ? B::end_av->ARRAY : ();
+	for my $block (@BEGINs, @INITs, @ENDs) {
+	    if ($block->FILE eq $0 || $self->{'files'}{$block->FILE}) {
+		$self->todo($block, 0);
+		$self->walk_sub($block);
+	    }
+	}
+	$self->stash_subs();
 	$self->{'curcv'} = main_cv;
 	$self->walk_sub(main_cv, main_start);
 	print $self->print_protos;
@@ -490,7 +608,6 @@ sub ambient_pragmas {
 	}
 
 	elsif ($name eq 'warnings') {
-	    require warnings;
 	    if ($val eq 'none') {
 		$warning_bits = "\0"x12;
 		next();
@@ -531,11 +648,9 @@ sub ambient_pragmas {
 sub deparse {
     my $self = shift;
     my($op, $cx) = @_;
-#    cluck if class($op) eq "NULL";
-#    cluck unless $op;
-#    return $self->$ {\("pp_" . $op->name)}($op, $cx);
-require Carp;
-Carp::confess() unless defined $op;
+
+    Carp::confess("Null op in deparse") if !defined($op)
+					|| class($op) eq "NULL";
     my $meth = "pp_" . $op->name;
     return $self->$meth($op, $cx);
 }
@@ -572,6 +687,8 @@ sub deparse_sub {
     my $self = shift;
     my $cv = shift;
     my $proto = "";
+Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
+    local $self->{'curcop'} = $self->{'curcop'};
     if ($cv->FLAGS & SVf_POK) {
 	$proto = "(". $cv->PV . ") ";
     }
@@ -594,8 +711,8 @@ sub deparse_sub {
     if ($$sv) {
 	# uh-oh. inlinable sub... format it differently
 	return $proto . "{ " . const($sv) . " }\n";
-    } else { # XSUB?
-	return $proto  . "{}\n";
+    } else { # XSUB? (or just a declaration)
+	return "$proto;\n";
     }
 }
 
@@ -913,6 +1030,7 @@ BEGIN { map($globalnames{$_}++, "SIG", "STDIN", "STDOUT", "STDERR", "INC",
 sub gv_name {
     my $self = shift;
     my $gv = shift;
+Carp::confess() if $gv->isa("B::CV");
     my $stash = $gv->STASH->NAME;
     my $name = $gv->SAFENAME;
     if ($stash eq $self->{'curstash'} or $globalnames{$name}
@@ -928,18 +1046,55 @@ sub gv_name {
     return $stash . $name;
 }
 
+# Recurses down the tree, looking for a COP
+sub find_cop {
+    my ($self, $op) = @_;
+    if ($op->flags & OPf_KIDS) {
+	for (my $o=$op->first; $$o; $o=$o->sibling) {
+	    return $o if is_state($o);
+	    my $r = $self->find_cop($o);
+	    return $r if defined $r;
+	}
+    }
+    return undef;
+}
+
+# Returns a list of subs which should be inserted before the COP
+sub cop_subs {
+    my ($self, $op, $out_seq) = @_;
+    my $seq = $op->cop_seq;
+    # If we have nephews, then our sequence number indicates
+    # the cop_seq of the end of some sort of scope.
+    if (class($op->sibling) ne "NULL" && $op->sibling->flags & OPf_KIDS
+	and my $ncop = $self->find_cop($op->sibling)) {
+	$seq = $ncop->cop_seq;
+    }
+    $seq = $out_seq if defined($out_seq) && $out_seq < $seq;
+    return $self->seq_subs($seq);
+}
+
+sub seq_subs {
+    my ($self, $seq) = @_;
+    my @text;
+#push @text, "# ($seq)\n";
+
+    while (scalar(@{$self->{'subs_todo'}})
+	   and $seq > $self->{'subs_todo'}[0][0]) {
+	push @text, $self->next_todo;
+    }
+    return @text;
+}
+
 # Notice how subs and formats are inserted between statements here;
 # also $[ assignments and pragmas.
 sub pp_nextstate {
     my $self = shift;
     my($op, $cx) = @_;
+    $self->{'curcop'} = $op;
     my @text;
     @text = $op->label . ": " if $op->label;
-    my $seq = $op->cop_seq;
-    while (scalar(@{$self->{'subs_todo'}})
-	   and $seq >= $self->{'subs_todo'}[0][0]) {
-	push @text, $self->next_todo;
-    }
+#push @text, "# ", $op->cop_seq, "\n";
+    push @text, $self->cop_subs($op);
     my $stash = $op->stashpv;
     if ($stash ne $self->{'curstash'}) {
 	push @text, "package $stash;\n";
@@ -964,7 +1119,7 @@ sub pp_nextstate {
         $warning_bits = "\0"x12;
     }
     else {
-	$warning_bits = $warnings->PV;
+	$warning_bits = $warnings->PV & WARN_MASK;
     }
 
     if ($self->{'warnings'} ne $warning_bits) {
@@ -982,7 +1137,6 @@ sub pp_nextstate {
 
 sub declare_warnings {
     my ($from, $to) = @_;
-    require warnings;
     if ($to eq warnings::bits("all")) {
 	return "use warnings;\n";
     }
@@ -1174,6 +1328,17 @@ sub pp_lock { unop(@_, "lock") }
 sub pp_exists {
     my $self = shift;
     my($op, $cx) = @_;
+    my $arg;
+    if ($op->private & OPpEXISTS_SUB) {
+	# Checking for the existence of a subroutine
+	return $self->maybe_parens_func("exists",
+				$self->pp_rv2cv($op->first, 16), $cx, 16);
+    }
+    if ($op->flags & OPf_SPECIAL) {
+	# Array element, not hash element
+	return $self->maybe_parens_func("exists",
+				$self->pp_aelem($op->first, 16), $cx, 16);
+    }
     return $self->maybe_parens_func("exists", $self->pp_helem($op->first, 16),
 				    $cx, 16);
 }
@@ -1183,10 +1348,22 @@ sub pp_delete {
     my($op, $cx) = @_;
     my $arg;
     if ($op->private & OPpSLICE) {
+	if ($op->flags & OPf_SPECIAL) {
+	    # Deleting from an array, not a hash
+	    return $self->maybe_parens_func("delete",
+					$self->pp_aslice($op->first, 16),
+					$cx, 16);
+	}
 	return $self->maybe_parens_func("delete",
 					$self->pp_hslice($op->first, 16),
 					$cx, 16);
     } else {
+	if ($op->flags & OPf_SPECIAL) {
+	    # Deleting from an array, not a hash
+	    return $self->maybe_parens_func("delete",
+					$self->pp_aelem($op->first, 16),
+					$cx, 16);
+	}
 	return $self->maybe_parens_func("delete",
 					$self->pp_helem($op->first, 16),
 					$cx, 16);
@@ -1202,7 +1379,7 @@ sub pp_require {
 	my $name = $self->const_sv($op->first)->PV;
 	$name =~ s[/][::]g;
 	$name =~ s/\.pm//g;
-	return "require($name)";
+	return "require $name";
     } else {	
 	$self->unop($op, $cx, "require");
     }
@@ -1926,6 +2103,7 @@ sub loop_common {
     my $bare = 0;
     my $body;
     my $cond = undef;
+    my $out_seq = $self->{'curcop'}->cop_seq;;
     if ($kid->name eq "lineseq") { # bare or infinite loop 
 	if (is_state $kid->last) { # infinite
 	    $head = "for (;;) "; # shorter than while (1)
@@ -2010,7 +2188,12 @@ sub loop_common {
 	$cont = "\cK";
 	$body = $self->deparse($body, 0);
     }
-    return $head . "{\n\t" . $body . "\n\b}" . $cont;
+    $body .= "\n";
+    # If we have say C<{my $x=2; sub x{$x}}>, the sub must go inside
+    # the loop. So we insert any subs which are due here.
+    $body .= join"", $self->seq_subs($out_seq);
+
+    return $head . "{\n\t" . $body . "\b}" . $cont;
 }
 
 sub pp_leaveloop { loop_common(@_, "") }
@@ -2488,6 +2671,19 @@ sub pp_entersub {
 	    return $prefix . $amper. $kid;
 	}
     } else {
+	# glob() invocations can be translated into calls of
+	# CORE::GLOBAL::glob with an second parameter, a number.
+	# Reverse this.
+	if ($kid eq "CORE::GLOBAL::glob") {
+	    $kid = "glob";
+	    $args =~ s/\s*,[^,]+$//;
+	}
+
+	# It's a syntax error to call CORE::GLOBAL::foo without a prefix,
+	# so it must have been translated from a keyword call. Translate
+	# it back.
+	$kid =~ s/^CORE::GLOBAL:://;
+
         if (!$declared) {
 	    return "$kid(" . $args . ")";
 	} elsif (defined $proto and $proto eq "") {
@@ -3202,19 +3398,14 @@ translation that B::Deparse usually does. On the other hand, note that
 C<$x = "$y"> is not the same as C<$x = $y>: the former makes the value
 of $y into a string before doing the assignment.
 
-=item B<-u>I<PACKAGE>
+=item B<-f>I<FILE>
 
-Normally, B::Deparse deparses the main code of a program, all the subs
-called by the main program (and all the subs called by them,
-recursively), and any other subs in the main:: package. To include
-subs in other packages that aren't called directly, such as AUTOLOAD,
-DESTROY, other subs called automatically by perl, and methods (which
-aren't resolved to subs until runtime), use the B<-u> option. The
-argument to B<-u> is the name of a package, and should follow directly
-after the 'u'. Multiple B<-u> options may be given, separated by
-commas.  Note that unlike some other backends, B::Deparse doesn't
-(yet) try to guess automatically when B<-u> is needed -- you must
-invoke it yourself.
+Normally, B::Deparse deparses the main code of a program, and all the subs
+defined in the same file. To include subs defined in other files, pass the
+B<-f> option with the filename. You can pass the B<-f> option several times, to
+include more than one secondary file.  (Most of the time you don't want to
+use it at all.)  You can also use this option to include subs which are
+defined in the scope of a B<#line> directive with two parameters.
 
 =item B<-s>I<LETTERS>
 
