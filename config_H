@@ -14,9 +14,9 @@
  * $Id: Config_h.U,v 3.0.1.4 1995/09/25 09:10:49 ram Exp $
  */
 
-/* Configuration time: Thu Feb  8 17:15:11 EST 1996
- * Configured by: doughera
- * Target system: sunos fractal 5.4 generic_101946-29 i86pc i386 
+/* Configuration time: Mon Mar 18 23:11:24 EST 1996
+ * Configured by: bailey
+ * Target system: sunos agave.humgen.upenn.edu 5.4 generic_101945-13 sun4m sparc 
  */
 
 #ifndef _config_h_
@@ -1318,6 +1318,12 @@
  */
 #define ARCHLIB_EXP "/usr/local/lib/perl5/i86pc-solaris/5.002"		/**/
 
+/* OSNAME:
+ *	This symbol contains the name of the operating system, as determined
+ *	by Configure.
+ */
+#define OSNAME "solaris"		/**/
+
 /* BYTEORDER:
  *	This symbol hold the hexadecimal constant defined in byteorder,
  *	i.e. 0x1234 or 0x4321, etc...
@@ -1374,6 +1380,28 @@
  *	The last two assume trailing zeros should not be kept.
  */
 #define Gconvert(x,n,t,b) gconvert((x),(n),(t),(b))
+
+/* Sigjmp_buf:
+ * This is the buffer type to be used with Sigsetjmp and Siglongjmp.
+ */
+/* Sigsetjmp:
+ * This macro is used in the same way as sigsetjmp(), but will invoke
+ * traditional setjmp() if sigsetjmp isn't available.
+ */
+/* Siglongjmp:
+ * This macro is used in the same way as siglongjmp(), but will invoke
+ * traditional longjmp() if siglongjmp isn't available.
+ */
+#define HAS_SIGSETJMP	/**/
+#ifdef HAS_SIGSETJMP
+#define Sigjmp_buf sigjmp_buf
+#define Sigsetjmp(buf,save_mask) sigsetjmp(buf,save_mask)
+#define Siglongjmp(buf,retval) siglongjmp(buf,retval)
+#else
+#define Sigjmp_buf jmp_buf
+#define Sigsetjmp(buf,save_mask) setjmp(buf)
+#define Siglongjmp(buf,retval) longjmp(buf,retval)
+#endif
 
 /* USE_DYNAMIC_LOADING:
  *	This symbol, if defined, indicates that dynamic loading of
