@@ -114,11 +114,11 @@ CCTYPE		= MSVC60
 #USE_SETARGV	= define
 
 #
-# if you have the source for des_fcrypt(), uncomment this and make sure the
-# file exists (see README.win32).  File should be located in the same
-# directory as this file.
+# if you want to have the crypt() builtin function implemented, leave this or
+# CRYPT_LIB uncommented.  The fcrypt.c file named here contains a suitable
+# version of des_fcrypt().
 #
-#CRYPT_SRC	= fcrypt.c
+CRYPT_SRC	= fcrypt.c
 
 #
 # if you didn't set CRYPT_SRC and if you have des_fcrypt() available in a
