@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq3 - Programming Tools ($Revision: 1.37 $, $Date: 2003/11/24 19:55:50 $)
+perlfaq3 - Programming Tools ($Revision: 1.40 $, $Date: 2004/10/19 17:02:27 $)
 
 =head1 DESCRIPTION
 
@@ -227,15 +227,9 @@ If you want an IDE, check the following:
 ActiveState's cross-platform (as of April 2001 Windows and Linux),
 multi-language IDE has Perl support, including a regular expression
 debugger and remote debugging
-( http://www.ActiveState.com/Products/Komodo/index.html ).  (Visual
+( http://www.ActiveState.com/Products/Komodo/ ).  (Visual
 Perl, a Visual Studio.NET plug-in is currently (early 2001) in beta
 ( http://www.ActiveState.com/Products/VisualPerl/index.html )).
-
-=item The Object System
-
-( http://www.castlelink.co.uk/object_system/ ) is a Perl web
-applications development IDE, apparently for any platform
-that runs Perl.
 
 =item Open Perl IDE
 
@@ -279,7 +273,7 @@ specifically for programming, such as Textpad
 If you are using MacOS, the same concerns apply.  MacPerl
 (for Classic environments) comes with a simple editor.
 Popular external editors are BBEdit ( http://www.bbedit.com/ )
-or Alpha ( http://www.kelehers.org/alpha/ ). MacOS X users can
+or Alpha ( http://www.his.com/~jguyer/Alpha/Alpha8.html ). MacOS X users can
 use Unix editors as well.
 
 =over 4
@@ -338,7 +332,7 @@ The following are Win32 multilanguage editor/IDESs that support Perl:
 
 =item Codewright
 
-http://www.starbase.com/
+http://www.borland.com/codewright/
 
 =item MultiEdit
 
@@ -399,16 +393,22 @@ no 32k limit).
 
 =over 4
 
-=item BBEdit and BBEdit Lite
+=item Affrus
 
-are text editors for Mac OS that have a Perl sensitivity mode
-( http://web.barebones.com/ ).
+is a full Perl development enivornment with full debugger support (
+http://www.latenightsw.com ).
 
 =item Alpha
 
 is an editor, written and extensible in Tcl, that nonetheless has
 built in support for several popular markup and programming languages
-including Perl and HTML ( http://alpha.olm.net/ ).
+including Perl and HTML ( http://www.his.com/~jguyer/Alpha/Alpha8.html ).
+
+=item BBEdit and BBEdit Lite
+
+are text editors for Mac OS that have a Perl sensitivity mode
+( http://web.barebones.com/ ).
+
 
 =back
 
@@ -454,7 +454,7 @@ to the Athena Widget set.  Both are available from CPAN.  See the
 directory http://www.cpan.org/modules/by-category/08_User_Interfaces/
 
 Invaluable for Perl/Tk programming are the Perl/Tk FAQ at
-http://w4.lns.cornell.edu/%7Epvhp/ptk/ptkTOC.html , the Perl/Tk Reference
+http://phaseit.net/claird/comp.lang.perl.tk/ptkFAQ.html , the Perl/Tk Reference
 Guide available at
 http://www.cpan.org/authors/Stephen_O_Lidie/ , and the
 online manpages at
@@ -780,7 +780,7 @@ Perl install anyway.
 =head2 How can I compile Perl into Java?
 
 You can also integrate Java and Perl with the
-Perl Resource Kit from O'Reilly and Associates.  See
+Perl Resource Kit from O'Reilly Media.  See
 http://www.oreilly.com/catalog/prkunix/ .
 
 Perl 5.6 comes with Java Perl Lingo, or JPL.  JPL, still in

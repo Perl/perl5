@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq4 - Data Manipulation ($Revision: 1.54 $, $Date: 2003/11/30 00:50:08 $)
+perlfaq4 - Data Manipulation ($Revision: 1.55 $, $Date: 2004/10/11 05:06:29 $)
 
 =head1 DESCRIPTION
 
@@ -559,7 +559,7 @@ C<$timestamp = gmtime(1005613200)> sets $timestamp to "Tue Nov 13 01:00:00
 That doesn't mean that Perl can't be used to create non-Y2K compliant
 programs.  It can.  But so can your pencil.  It's the fault of the user,
 not the language.  At the risk of inflaming the NRA: ``Perl doesn't
-break Y2K, people do.''  See http://language.perl.com/news/y2k.html for
+break Y2K, people do.''  See http://www.perl.org/about/y2k.html for
 a longer exposition.
 
 =head1 Data: Strings
