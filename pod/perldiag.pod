@@ -1086,7 +1086,7 @@ on I<Mastering Regular Expressions>.)
 to check the return value of your socket() call?  See
 L<perlfunc/connect>.
 
-=item constant(%s): %s
+=item Constant(%s)%s: %s
 
 (F) The parser found inconsistencies either while attempting to define
 an overloaded constant, or when trying to find the character name

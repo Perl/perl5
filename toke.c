@@ -5749,14 +5749,23 @@ S_new_constant(pTHX_ char *s, STRLEN len, const char *key, SV *sv, SV *pv,
     if (!table || !(PL_hints & HINT_LOCALIZE_HH)) {
 	SV *msg;
 	
-	why1 = "%^H is not consistent";
 	why2 = strEQ(key,"charnames")
-	       ? " (missing \"use charnames ...\"?)"
+	       ? "(possibly a missing \"use charnames ...\")"
 	       : "";
-	why3 = "";
+	msg = Perl_newSVpvf(aTHX_ "Constant(%s) unknown: %s", 
+			    (type ? type: "undef"), why2);
+
+	/* This is convoluted and evil ("goto considered harmful")
+	 * but I do not understand the intricacies of all the different
+	 * failure modes of %^H in here.  The goal here is to make
+	 * the most probable error message user-friendly. --jhi */
+
+	goto msgdone;
+
     report:
-	msg = Perl_newSVpvf(aTHX_ "constant(%s): %s%s%s", 
+	msg = Perl_newSVpvf(aTHX_ "Constant(%s): %s%s%s", 
 			    (type ? type: "undef"), why1, why2, why3);
+    msgdone:
 	yyerror(SvPVX(msg));
  	SvREFCNT_dec(msg);
   	return sv;
