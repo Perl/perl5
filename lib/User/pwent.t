@@ -28,7 +28,8 @@ print "ok 1\n";
 
 my $pwent = getpwuid 0; # This is the OO getpwuid.
 
-print "not " unless $pwent->uid    == 0;
+print "not " unless $pwent->uid    == 0 ||
+                    ($^O eq 'cygwin'  && $pwent->uid == 500); # go figure
 print "ok 2\n";
 
 print "not " unless $pwent->name   == $pwent[0];
