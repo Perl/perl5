@@ -84,7 +84,7 @@ sub runtests {
 	$fh->close or print "can't close $test. $!\n";
 	my $cmd = ($ENV{'HARNESS_COMPILE_TEST'})
 		? "./perl -I../lib ../utils/perlcc $test "
-		  . "-run 2>> ./compilelog |" 
+		  . "-r 2>> ./compilelog |" 
 		: "$^X $s $test|";
 	$cmd = "MCR $cmd" if $^O eq 'VMS';
 	$fh->open($cmd) or print "can't run $test. $!\n";

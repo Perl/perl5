@@ -49,11 +49,12 @@ test(7,h1({-align=>'CENTER'},['fred','agnes']) eq
 test(9,header() eq "Content-Type: text/html; charset=ISO-8859-1${CRLF}${CRLF}","header()");
 test(10,header(-type=>'image/gif') eq "Content-Type: image/gif${CRLF}${CRLF}","header()");
 test(11,header(-type=>'image/gif',-status=>'500 Sucks') eq "Status: 500 Sucks${CRLF}Content-Type: image/gif${CRLF}${CRLF}","header()");
-test(12,header(-nph=>1) eq "HTTP/1.0 200 OK${CRLF}Content-Type: text/html; charset=ISO-8859-1${CRLF}${CRLF}","header()");
+test(12,header(-nph=>1) =~ m!HTTP/1.0 200 OK${CRLF}Server: cmdline${CRLF}Date:.+${CRLF}Content-Type: text/html; charset=ISO-8859-1${CRLF}${CRLF}!,"header()");
 test(13,start_html() ."\n" eq <<END,"start_html()");
+<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html
-	PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-	"DTD/xhtml1-transitional.dtd">
+	PUBLIC "-//W3C//DTD XHTML Basic 1.0//EN"
+	"http://www.w3.org/TR/xhtml-basic/xhtml-basic10.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en-US"><head><title>Untitled Document</title>
 </head><body>
 END
@@ -66,9 +67,10 @@ test(14,start_html(-dtd=>"-//IETF//DTD HTML 3.2//FR") ."\n" eq <<END,"start_html
 END
     ;
 test(15,start_html(-Title=>'The world of foo') ."\n" eq <<END,"start_html()");
+<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html
-	PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-	"DTD/xhtml1-transitional.dtd">
+	PUBLIC "-//W3C//DTD XHTML Basic 1.0//EN"
+	"http://www.w3.org/TR/xhtml-basic/xhtml-basic10.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en-US"><head><title>The world of foo</title>
 </head><body>
 END

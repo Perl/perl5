@@ -8,7 +8,7 @@ BEGIN {
 }
 
 $| = 1;
-print "1..14\n";
+print "1..15\n";
 
 use charnames ':full';
 
@@ -42,6 +42,7 @@ EOE
 $encoded_be = "\320\261";
 $encoded_alpha = "\316\261";
 $encoded_bet = "\327\221";
+$encoded_deseng = "\360\220\221\215";
 
 sub to_bytes {
     pack"a*", shift;
@@ -94,5 +95,14 @@ sub to_bytes {
    use utf8;
    print "not " unless "\x{100}\N{CENT SIGN}" eq "\x{100}"."\N{CENT SIGN}";
    print "ok 14\n";
+}
+
+{
+  use charnames ':full';
+
+  print "not "
+      unless to_bytes("\N{DESERET SMALL LETTER ENG}") eq $encoded_deseng;
+  print "ok 15\n";
+
 }
 

@@ -1096,7 +1096,7 @@ Perl_malloc(register size_t nbytes)
 
 	DEBUG_m(PerlIO_printf(Perl_debug_log,
 			      "0x%"UVxf": (%05lu) malloc %ld bytes\n",
-			      PTR2UV(p+1), (unsigned long)(PL_an++),
+			      PTR2UV(p), (unsigned long)(PL_an++),
 			      (long)size));
 
 	/* remove from linked list */

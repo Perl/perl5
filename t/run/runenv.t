@@ -7,6 +7,11 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
+    require Config; import Config;
+    unless ($Config{'d_fork'}) {
+        print "1..0 # Skip: no fork\n";
+	    exit 0;
+    }
 }
 
 my $STDOUT = './results-0';
@@ -135,3 +140,8 @@ try($T++, {PERL5OPT => '-Mstrict -Mwarnings'},
     "");
 
 print "# ", $T-1, " tests total.\n";
+
+END {
+    1 while unlink $STDOUT;
+    1 while unlink $STDERR;
+}

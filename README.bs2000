@@ -5,7 +5,7 @@ about pod in pod/perlpod.pod or the short summary in the INSTALL file.
 
 =head1 NAME
 
-README.posix-bc - building and installing Perl for BS2000 POSIX.
+README.BS2000 - building and installing Perl for BS2000.
 
 =head1 SYNOPSIS
 
@@ -15,8 +15,8 @@ on BS2000 in the POSIX subsystem.
 =head1 DESCRIPTION
 
 This is a ported perl for the POSIX subsystem in BS2000 VERSION OSD
-V3.1A.  It may work on other versions, but that's the one we've tested
-it on.
+V3.1A or later.  It may work on other versions, but we started porting
+and testing it with 3.1A and are currently using Version V4.0A.
 
 You may need the following GNU programs in order to install perl:
 
@@ -30,7 +30,8 @@ one failure during 'make check'.
 The yacc coming with BS2000 POSIX didn't work for us.  So we had to
 use bison.  We had to make a few changes to perl in order to use the
 pure (reentrant) parser of bison.  We used version 1.25, but we had to
-add a few changes due to EBCDIC.
+add a few changes due to EBCDIC.  See below for more details
+concerning yacc.
 
 =head2 Unpacking
 
@@ -56,9 +57,10 @@ cp -r /usr/local/ascii/perl5.005_02 ./
 
 =head2 Compiling
 
-There is a "hints" file for posix-bc that specifies the correct values
-for most things.  The major problem is (of course) the EBCDIC character
-set.  We have german EBCDIC version.
+There is a "hints" file for BS2000 called hints.posix-bc (because
+posix-bc is the OS name given by `uname`) that specifies the correct
+values for most things.  The major problem is (of course) the EBCDIC
+character set.  We have german EBCDIC version.
 
 Because of our problems with the native yacc we used GNU bison to
 generate a pure (=reentrant) parser for perly.y.  So our yacc is
@@ -124,7 +126,7 @@ We have no nroff on BS2000 POSIX (yet), so we ignored any errors while
 installing the documentation.
 
 
-=head2 Using Perl
+=head2 Using Perl in the Posix-Shell
 
 BS2000 POSIX doesn't support the shebang notation
 (C<#!/usr/local/bin/perl>), so you have to use the following lines
@@ -133,6 +135,28 @@ instead:
 : # use perl
     eval 'exec /usr/local/bin/perl -S $0 ${1+"$@"}'
         if $running_under_some_shell;
+
+=head2 Using Perl in "native" BS2000
+
+We don't have much experience with this yet, but try the following:
+
+Copy your Perl executable to a BS2000 LLM using bs2cp:
+
+C<bs2cp /usr/local/bin/perl 'bs2:perl(perl,l)'>
+
+Now you can start it with the following (SDF) command:
+
+C</START-PROG FROM-FILE=*MODULE(PERL,PERL),PROG-MODE=*ANY,RUN-MODE=*ADV>
+
+First you get the BS2000 commandline prompt ('*').  Here you may enter
+your parameters, e.g. C<-e 'print "Hello World!\\n";'> (note the
+double backslash!) or C<-w> and the name of your Perl script.
+Filenames starting with C</> are searched in in the Posix filesystem,
+others are searched in the BS2000 filesystem.  You may even use
+wildcards if you put a C<%> in front of your filename (e.g. C<-w
+checkfiles.pl %*.c>).  Read your C/C++ manual for additional
+possibilities of the commandline prompt (look for
+PARAMETER-PROMPTING).
 
 =head2 Floating point anomalies
 

@@ -64,6 +64,7 @@ Perl_debop(pTHX_ OP *o)
 {
 #ifdef DEBUGGING
     SV *sv;
+    SV **svp;
     STRLEN n_a;
     Perl_deb(aTHX_ "%s", PL_op_name[o->op_type]);
     switch (o->op_type) {
@@ -80,6 +81,16 @@ Perl_debop(pTHX_ OP *o)
 	}
 	else
 	    PerlIO_printf(Perl_debug_log, "(NULL)");
+	break;
+    case OP_PADSV:
+    case OP_PADAV:
+    case OP_PADHV:
+	/* print the lexical's name */
+	svp = av_fetch(PL_comppad_name, o->op_targ, FALSE);
+	if (svp)
+	    PerlIO_printf(Perl_debug_log, "(%s)", SvPV(*svp,n_a));
+	else
+	    PerlIO_printf(Perl_debug_log, "[%"UVuf"]", o->op_targ);
 	break;
     default:
 	break;

@@ -24,6 +24,15 @@ sub test {
     print($true ? "ok $num\n" : "not ok $num $msg\n");
 }
 
+my $CRLF = "\015\012";
+if ($^O eq 'VMS') { 
+    $CRLF = "\n";  # via web server carriage is inserted automatically
+}
+if (ord("\t") != 9) { # EBCDIC?
+    $CRLF = "\r\n";
+}
+
+
 # Set up a CGI environment
 $ENV{REQUEST_METHOD}='GET';
 $ENV{QUERY_STRING}  ='game=chess&game=checkers&weather=dull';
