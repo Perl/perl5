@@ -100,6 +100,9 @@ PerlIO_init(void)
 
 #undef printf
 void PerlIO_debug(char *fmt,...) __attribute__((format(printf,1,2)));
+#ifndef __GNUC__
+#define __FUNCTION__ "PerlIO_debug"
+#endif
 
 void
 PerlIO_debug(char *fmt,...)
@@ -1827,7 +1830,7 @@ PerlIOMmap_map(PerlIO *f)
        if (b->buf && b->buf != (STDCHAR *) -1)
         {
 #if defined(HAS_MADVISE) && defined(MADV_SEQUENTIAL)
-         madvise(b->buf, len, MADV_SEQUENTIAL);
+         madvise((Mmap_t)b->buf, len, MADV_SEQUENTIAL);
 #endif
          PerlIOBase(f)->flags = flags | PERLIO_F_RDBUF;
          b->end = b->buf+len;
