@@ -321,9 +321,12 @@ S_pad_findlex(pTHX_ char *name, PADOFFSET newoff, U32 seq, CV* startcv,
 			}
 		    }
 		    else if (!CvUNIQUE(PL_compcv)) {
-			if (ckWARN(WARN_CLOSURE) && !SvFAKE(sv) && !CvUNIQUE(cv))
+			if (ckWARN(WARN_CLOSURE) && !SvFAKE(sv) && !CvUNIQUE(cv)
+			    && !(SvFLAGS(sv) & SVpad_OUR))
+			{
 			    Perl_warner(aTHX_ WARN_CLOSURE,
 				"Variable \"%s\" will not stay shared", name);
+			}
 		    }
 		}
 		av_store(PL_comppad, newoff, SvREFCNT_inc(oldsv));
