@@ -385,14 +385,13 @@ sub numbers_with_total {
             $calc_sum = 0;
         }
 
-        if (is( $calc_sum, $sum)) {
-            print "# unpack '%$_$format' gave $sum\n";
+        if ($calc_sum == $sum) { # HAS to be ==, not eq (so no is()).
+            ok ("unpack '%$_$format' gave $sum");
         } else {
             my $delta = 1.000001;
             if ($format =~ tr /dDfF//
                 && ($calc_sum <= $sum * $delta && $calc_sum >= $sum / $delta)) {
-                pass;
-                print "# unpack '%$_$format' gave $sum, expected $calc_sum\n";
+                pass ("unpack '%$_$format' gave $sum, expected $calc_sum");
             } else {
                 my $text = ref $total ? &$total($len) : $total;
                 fail;
