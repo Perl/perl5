@@ -51,6 +51,8 @@ archname='darwin';
 # nm works.
 usenm='true';
 
+case "$optimize" in
+'')
 #    Optimizing for size also mean less resident memory usage on the part
 # of Perl.  Apple asserts that this is a more important optimization than
 # saving on CPU cycles.  Given that memory speed has not increased at
@@ -64,6 +66,8 @@ if [ -z "${optimize}" ]; then
 else
   optimize='-O3'
 fi
+;;
+esac
 
 # -pipe: makes compilation go faster.
 # -fno-common because common symbols are not allowed in MH_DYLIB
