@@ -48,8 +48,8 @@ close($fh);
 
 {
     no utf8;
-    open($fh,">$file") || die "File cannot be re-opened";
-    print $fh "£0.02\n";
+    open($fh,">:bytes",$file) || die "File cannot be re-opened";
+    print $fh "\xA30.02\n";
     close($fh);
 }
 
