@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sun Nov  5 00:37:41 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Tue Nov  7 00:26:20 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >/tmp/c1$$ <<EOF
@@ -11546,13 +11546,24 @@ $cat >try.c <<EOP
 #include <stdio.h>
 /* Can we scream? */
 /* Eat dust sed :-) */
-#define FILE_ptr(fp)	$stdio_ptr
-#define FILE_cnt(fp)	$stdio_cnt
+/* In the buffer space, no one can hear you scream. */
+#define FILE_ptr(fp)	((fp)->_ptr)
+#define FILE_cnt(fp)	((fp)->_cnt)
+#include <sys/types.h>
 int main() {
 	FILE *fp = fopen("try.c", "r");
-	char c = getc(fp);
+	int c;
 	char *ptr;
 	size_t cnt;
+	if (!fp) {
+	    puts("Fail even to read");
+	    exit(1);
+	}
+	c = getc(fp); /* Read away the first # */
+	if (c == EOF) {
+	    puts("Fail even to read");
+	    exit(1);
+	}
 	if (!(
 		18 <= FILE_cnt(fp) &&
 		strncmp(FILE_ptr(fp), "include <stdio.h>\n", 18) == 0
@@ -11560,12 +11571,12 @@ int main() {
 		puts("Fail even to read");
 		exit (1);
 	}
-	ptr = FILE_ptr(fp);
-	cnt = FILE_cnt(fp);
+	ptr = (char*) FILE_ptr(fp);
+	cnt = (size_t)FILE_cnt(fp);
 
-	FILE_ptr(fp)+= 42;
+	FILE_ptr(fp) += 42;
 
-	if (FILE_ptr(fp) != (ptr + 42)) {
+	if ((char*)FILE_ptr(fp) != (ptr + 42)) {
 		printf("Fail ptr check %p != %p", FILE_ptr(fp), (ptr + 42));
 		exit (1);
 	}
