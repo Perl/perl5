@@ -5546,10 +5546,10 @@ else {
 foreach $d (@candidates) {
     if ($d lt $version) {
 	if ($d ge $api_versionstring) {
-	    unshift(@inc_version_list, "$d/$archname", $d);
+	    unshift(@inc_version_list, grep { -d } "$d/$archname", $d);
 	}
 	elsif ($d ge "5.005") {
-	    unshift(@inc_version_list, $d);
+	    unshift(@inc_version_list, grep { -d } $d);
 	}
     }
     else {
