@@ -220,7 +220,7 @@ perl_construct(pTHXx)
 	PL_patchlevel = NEWSV(0,4);
 	SvUPGRADE(PL_patchlevel, SVt_PVNV);
 	if (PERL_REVISION > 127 || PERL_VERSION > 127 || PERL_SUBVERSION > 127)
-	    SvGROW(PL_patchlevel,24);
+	    SvGROW(PL_patchlevel, UTF8_MAXLEN*3+1);
 	s = (U8*)SvPVX(PL_patchlevel);
 	s = uv_to_utf8(s, (UV)PERL_REVISION);
 	s = uv_to_utf8(s, (UV)PERL_VERSION);

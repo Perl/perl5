@@ -3646,7 +3646,7 @@ S_reguni(pTHX_ UV uv, char* s, I32* lenp)
 {
     dTHR;
     if (SIZE_ONLY) {
-	U8 tmpbuf[10];
+	U8 tmpbuf[UTF8_MAXLEN];
 	*lenp = uv_to_utf8(tmpbuf, uv) - tmpbuf;
     }
     else
