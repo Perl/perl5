@@ -388,11 +388,11 @@ sub OUTPUT_handler {
 	    unless defined($args_match{$outarg});
 	blurt("Error: No input definition for OUTPUT argument '$outarg' - ignored"), next
 	    unless defined $var_types{$outarg} ;
+	$var_num = $args_match{$outarg};
 	if ($outcode) {
 	    print "\t$outcode\n";
-	    print "\tSvSETMAGIC(ST(" . $var_num-1 . "));\n" if $DoSetMagic;
+	    print "\tSvSETMAGIC(ST(" , $var_num-1 , "));\n" if $DoSetMagic;
 	} else {
-	    $var_num = $args_match{$outarg};
 	    &generate_output($var_types{$outarg}, $var_num, $outarg, $DoSetMagic);
 	}
     }
