@@ -590,6 +590,44 @@ POSIX : [.lib]POSIX.pm [.lib.auto.POSIX]POSIX$(E)
 [.ext.POSIX]Descrip.MMS : [.ext.POSIX]Makefile.PL $(LIBPREREQ) $(DBG)perlshr$(E)
 	$(MINIPERL) "-I[--.lib]" -e "chdir('[.ext.POSIX]') or die $!; do 'Makefile.PL'; print ${@} if ${@};" "INST_LIB=[--.lib]" "INST_ARCHLIB=[--.lib]"
 
+Dumper : [.lib.data]dumper.pm [.lib.auto.data.dumper]dumper$(E)
+	@ $(NOOP)
+
+[.lib.data]dumper.pm : [.ext.data.dumper]Descrip.MMS
+	@ If F$Search("[.lib]auto.dir").eqs."" Then Create/Directory [.lib.auto]
+	@ Set Default [.ext.data.dumper]
+	$(MMS)
+	@ Set Default [---]
+
+[.lib.auto.data.dumper]dumper$(E) : [.ext.data.dumper]Descrip.MMS
+	@ Set Default [.ext.data.dumper]
+	$(MMS)
+	@ Set Default [---]
+
+# Add "-I[--.lib]" t $(MINIPERL) so we use this copy of lib after C<chdir>
+# ${@} necessary to distract different versions of MM[SK]/make
+[.ext.data.dumper]Descrip.MMS : [.ext.data.dumper]Makefile.PL $(LIBPREREQ) $(DBG)perlshr$(E)
+	$(MINIPERL) "-I[---.lib]" -e "chdir('[.ext.data.dumper]') or die $!; do 'Makefile.PL'; print ${@} if ${@};" "INST_LIB=[---.lib]" "INST_ARCHLIB=[---.lib]"
+
+re : [.lib]re.pm [.lib.auto.re]re$(E)
+	@ $(NOOP)
+
+[.lib]re.pm : [.ext.re]Descrip.MMS
+	@ If F$Search("[.lib]auto.dir").eqs."" Then Create/Directory [.lib.auto]
+	@ Set Default [.ext.re]
+	$(MMS)
+	@ Set Default [--]
+
+[.lib.auto.re]re$(E) : [.ext.re]Descrip.MMS
+	@ Set Default [.ext.re]
+	$(MMS)
+	@ Set Default [--]
+
+# Add "-I[--.lib]" t $(MINIPERL) so we use this copy of lib after C<chdir>
+# ${@} necessary to distract different versions of MM[SK]/make
+[.ext.re]Descrip.MMS : [.ext.re]Makefile.PL $(LIBPREREQ) $(DBG)perlshr$(E)
+	$(MINIPERL) "-I[--.lib]" -e "chdir('[.ext.re]') or die $!; do 'Makefile.PL'; print ${@} if ${@};" "INST_LIB=[--.lib]" "INST_ARCHLIB=[--.lib]"
+
 THREAD : [.lib]THREAD.pm [.lib.auto.THREAD]THREAD$(E)
 	@ $(NOOP)
 
@@ -1471,6 +1509,9 @@ clean : tidy
 	- $(MMS) clean
 	Set Default [--]
 .endif
+    Set Default [.ext.re]
+    - $(MMS) clean
+    Set Default [--]
 	Set Default [.ext.SDBM_File]
 	- $(MMS) clean
 	Set Default [--]
@@ -1531,6 +1572,9 @@ realclean : clean
 	- $(MMS) realclean
 	Set Default [--]
 .endif
+	Set Default [.ext.re]
+	- $(MMS) realclean
+	Set Default [--]
 	Set Default [.ext.SDBM_File]
 	- $(MMS) realclean
 	Set Default [--]
