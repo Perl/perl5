@@ -198,18 +198,18 @@ void
 mpushi()
 	PPCODE:
 	EXTEND(SP, 3);
-	mPUSHn(-1);
-	mPUSHn(2);
-	mPUSHn(-3);
+	mPUSHi(-1);
+	mPUSHi(2);
+	mPUSHi(-3);
 	XSRETURN(3);
 
 void
 mpushu()
 	PPCODE:
 	EXTEND(SP, 3);
-	mPUSHn(1);
-	mPUSHn(2);
-	mPUSHn(3);
+	mPUSHu(1);
+	mPUSHu(2);
+	mPUSHu(3);
 	XSRETURN(3);
 
 void
@@ -231,15 +231,15 @@ mxpushn()
 void
 mxpushi()
 	PPCODE:
-	mXPUSHn(-1);
-	mXPUSHn(2);
-	mXPUSHn(-3);
+	mXPUSHi(-1);
+	mXPUSHi(2);
+	mXPUSHi(-3);
 	XSRETURN(3);
 
 void
 mxpushu()
 	PPCODE:
-	mXPUSHn(1);
-	mXPUSHn(2);
-	mXPUSHn(3);
+	mXPUSHu(1);
+	mXPUSHu(2);
+	mXPUSHu(3);
 	XSRETURN(3);
