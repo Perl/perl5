@@ -187,8 +187,8 @@ ok(! -e $tmpfile_link,  '   -e on unlinked file');
 SKIP: {
     skip "No character, socket or block special files", 3
       if $Is_MSWin32 || $Is_NetWare || $Is_Dos;
-    skip "/dev/ isn't available to test against", 3
-      unless -d '/dev/' && -r '/dev/' && -x '/dev/';
+    skip "/dev isn't available to test against", 3
+      unless -d '/dev' && -r '/dev' && -x '/dev';
 
     my $LS  = $Config{d_readlink} ? "ls -lL" : "ls -l"; 
     my $CMD = "$LS /dev";
@@ -196,29 +196,26 @@ SKIP: {
 
     skip "$CMD failed", 3 if $DEV eq '';
 
-    my $type;
+    my @DEV = do { my $dev; opendir($dev, "/dev") ? readdir($dev) : () };
 
-    my $skip = sub { ok(1, "Skip: no $_[0]s in /dev") };
-    my $ok   = sub { ok(1, "$_[0] /dev/$1") };
-    my $fail = sub { ok(0, "ls -l thinks /dev/$1 is $_[0] but $_[1] says not") };
-    
-    if ($DEV !~ /\nb.* (\S+)\n/) { $skip->("block special") }
-    elsif (-b "/dev/$1")         { $ok->  ("block special") }
-    else { $fail->("block special", "-b") }
-    
-    if ($DEV !~ /\nc.* (\S+)\n/) { $skip->("character special") }
-    elsif (-c "/dev/$1")         { $ok->  ("character special") }
-    else { $fail->("character special", "-c") }
-    
-    if ($DEV !~ /\ns.* (\S+)\n/) { $skip->("socket") }
-    elsif (-S "/dev/$1")         { $ok->  ("socket") }
-    else { $fail->("socket", "-S") }
+    skip "opendir failed: $!", 3 if @DEV == 0;
+
+    my $try = sub {
+	my @c1 = eval qq[\$DEV =~ /^$_[0]/mg];
+	my @c2 = eval qq[grep { $_[1] "/dev/\$_" } \@DEV];
+	my $c1 = scalar @c1;
+	my $c2 = scalar @c2;
+	is($c1, $c2, "ls and $_[1] agree on /dev ($c1 $c2)");
+    };
+
+    $try->('b', '-b');
+    $try->('c', '-c');
+    $try->('s', '-S');
 }
 
+ok(! -b $Curdir,    '!-b cwd');
 ok(! -c $Curdir,    '!-c cwd');
 ok(! -S $Curdir,    '!-S cwd');
-ok(! -b $Curdir,    '!-b cwd');
-
 
 SKIP: {
     skip "No setuid", 3 if $Is_MPE or $Is_Amiga or $Is_Dosish or $Is_Cygwin;
