@@ -5,6 +5,9 @@ Author	:	Matthias Neeracher
 Language	:	MPW C/C++
 
 $Log: MPConsole.cp,v $
+Revision 1.10  2002/01/04 03:34:45  pudge
+Modifications for universal headers 3.4
+
 Revision 1.9  2001/12/19 21:58:12  pudge
 Make -sane, -raw, etc. work in console.
 
@@ -57,6 +60,8 @@ Revision 0.1  1993/08/14  00:00:00  neeri
 Remember rectangles	
 
 *********************************************************************/
+
+#include <stdio.h>
 
 #define GUSI_SOURCE
 #define GUSI_INTERNAL
