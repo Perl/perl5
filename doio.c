@@ -1107,7 +1107,11 @@ Perl_do_binmode(pTHX_ PerlIO *fp, int iotype, int mode)
  /* The old body of this is now in non-LAYER part of perlio.c
   * This is a stub for any XS code which might have been calling it.
   */
- char *name = (O_BINARY != O_TEXT && !(mode & O_BINARY)) ? ":crlf" : ":raw";
+ char *name = ":raw";
+#ifdef PERLIO_CRLF
+ if (!(mode & O_BINARY)))
+     name = ":crlf";
+#endif
  return PerlIO_binmode(aTHX_ fp, iotype, mode, name);
 }
 

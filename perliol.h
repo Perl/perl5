@@ -111,7 +111,7 @@ extern PerlIO *PerlIO_allocate(pTHX);
 extern SV *PerlIO_arg_fetch(PerlIO_list_t *av, IV n);
 #define PerlIOArg PerlIO_arg_fetch(layers,n)
 
-#if O_BINARY != O_TEXT
+#ifdef PERLIO_CRLF
 #define PERLIO_STDTEXT "t"
 #else
 #define PERLIO_STDTEXT ""

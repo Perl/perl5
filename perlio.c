@@ -859,14 +859,12 @@ void
 PerlIO_default_buffer(pTHX_ PerlIO_list_t *av)
 {
     PerlIO_funcs *tab = &PerlIO_perlio;
-    if (O_BINARY != O_TEXT) {
-	tab = &PerlIO_crlf;
-    }
-    else {
-	if (PerlIO_stdio.Set_ptrcnt) {
-	    tab = &PerlIO_stdio;
-	}
-    }
+#ifdef PERLIO_CRLF
+    tab = &PerlIO_crlf;
+#endif
+    if (PerlIO_stdio.Set_ptrcnt)
+        tab = &PerlIO_stdio;
+#else
     PerlIO_debug("Pushing %s\n", tab->name);
     PerlIO_list_push(aTHX_ av, PerlIO_find_layer(aTHX_ tab->name, 0, 0),
 		     &PL_sv_undef);
@@ -1078,7 +1076,8 @@ PerlIO_binmode(pTHX_ PerlIO *f, int iotype, int mode, const char *names)
     /* Can't flush if switching encodings. */
     if (!(names && memEQ(names, ":encoding(", 10))) {
         PerlIO_flush(f);
-	if (!names && (O_TEXT != O_BINARY && (mode & O_BINARY))) {
+#ifdef PERLIO_CRLF
+	if (!names && (mode & O_BINARY)) {
 	    PerlIO *top = f;
 	    while (*top) {
 	        if (PerlIOBase(top)->tab == &PerlIO_crlf) {
@@ -1089,6 +1088,7 @@ PerlIO_binmode(pTHX_ PerlIO *f, int iotype, int mode, const char *names)
 		PerlIO_flush(top);
 	    }
 	}
+#endif
     }
     return PerlIO_apply_layers(aTHX_ f, NULL, names) == 0 ? TRUE : FALSE;
 }
@@ -1781,7 +1781,7 @@ PerlIO_modestr(PerlIO *f, char *buf)
 	    *s++ = '+';
 	}
     }
-#if O_TEXT != O_BINARY
+#ifdef PERLIO_CRLF
     if (!(flags & PERLIO_F_CRLF))
 	*s++ = 'b';
 #endif
@@ -2367,9 +2367,9 @@ PerlIOStdio_mode(const char *mode, char *tmode)
     while (*mode) {
 	*tmode++ = *mode++;
     }
-    if (O_BINARY != O_TEXT) {
-	*tmode++ = 'b';
-    }
+#ifdef PERLIO_CRLF
+    *tmode++ = 'b';
+#endif
     *tmode = '\0';
     return ret;
 }
@@ -2906,7 +2906,7 @@ PerlIOBuf_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 		return NULL;
 	    } else {
 		fd = PerlIO_fileno(f);
-#if (O_BINARY != O_TEXT) && !defined(__BEOS__)
+#ifdef PERLIO_CRLF
 		/*
 		 * do something about failing setmode()? --jhi
 		 */
