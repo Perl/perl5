@@ -438,10 +438,10 @@ be used for installing those add-on modules and scripts.
     $sitescript		$siteprefix/bin
     $sitelib		$siteprefix/lib/perl5/site_perl/$version
     $sitearch		$siteprefix/lib/perl5/site_perl/$version/$archname
-    $siteman1		$siteprefix/man/man1
-    $siteman3		$siteprefix/man/man3
-    $sitehtml1		(none)
-    $sitehtml3		(none)
+    $siteman1dir	$siteprefix/man/man1
+    $siteman3dir	$siteprefix/man/man3
+    $sitehtml1dir	(none)
+    $sitehtml3dir	(none)
 
 By default, ExtUtils::MakeMaker will install architecture-independent
 modules into $sitelib and architecture-dependent modules into $sitearch.
@@ -459,10 +459,10 @@ for you to use to distribute add-on modules.
     $vendorscript	$vendorprefix/bin
     $vendorlib		$vendorprefix/lib/perl5/vendor_perl/$version
     $vendorarch		$vendorprefix/lib/perl5/vendor_perl/$version/$archname
-    $vendorman1		$vendorprefix/man/man1
-    $vendorman3		$vendorprefix/man/man3
-    $vendorhtml1	(none)
-    $vendorhtml3	(none)
+    $vendorman1dir	$vendorprefix/man/man1
+    $vendorman3dir	$vendorprefix/man/man3
+    $vendorhtml1dir	(none)
+    $vendorhtml3dir	(none)
 
 These are normally empty, but may be set as needed.  For example,
 a vendor might choose the following settings:
@@ -484,15 +484,15 @@ This would have the effect of setting the following:
 	$sitescript	/usr/local/bin
 	$sitelib	/usr/local/lib/perl5/site_perl/$version
 	$sitearch	/usr/local/lib/perl5/site_perl/$version/$archname
-	$siteman1	/usr/local/man/man1
-	$siteman3	/usr/local/man/man3
+	$siteman1dir	/usr/local/man/man1
+	$siteman3dir	/usr/local/man/man3
 
 	$vendorbin	/usr/bin
 	$vendorscript	/usr/bin
 	$vendorlib	/usr/lib/perl5/vendor_perl/$version
 	$vendorarch	/usr/lib/perl5/vendor_perl/$version/$archname
-	$vendorman1	/usr/man/man1
-	$vendorman3	/usr/man/man3
+	$vendorman1dir	/usr/man/man1
+	$vendorman3dir	/usr/man/man3
 
 Note how in this example, the vendor-supplied directories are in the
 /usr hierarchy, while the directories reserved for the end-user are in

@@ -1072,21 +1072,21 @@ sitearchexp=''
 installsitebin=''
 sitebin=''
 sitebinexp=''
-installsitehtml1=''
-sitehtml1=''
+installsitehtml1dir=''
+sitehtml1dir=''
 sitehtml1exp=''
-installsitehtml3=''
-sitehtml3=''
+installsitehtml3dir=''
+sitehtml3dir=''
 sitehtml3exp=''
 installsitelib=''
 sitelib=''
 sitelib_stem=''
 sitelibexp=''
-installsiteman1=''
-siteman1=''
+installsiteman1dir=''
+siteman1dir=''
 siteman1exp=''
-installsiteman3=''
-siteman3=''
+installsiteman3dir=''
+siteman3dir=''
 siteman3exp=''
 siteprefix=''
 siteprefixexp=''
@@ -1146,22 +1146,22 @@ d_vendorbin=''
 installvendorbin=''
 vendorbin=''
 vendorbinexp=''
-installvendorhtml1=''
-vendorhtml1=''
+installvendorhtml1dir=''
+vendorhtml1dir=''
 vendorhtml1exp=''
-installvendorhtml3=''
-vendorhtml3=''
+installvendorhtml3dir=''
+vendorhtml3dir=''
 vendorhtml3exp=''
 d_vendorlib=''
 installvendorlib=''
 vendorlib=''
 vendorlib_stem=''
 vendorlibexp=''
-installvendorman1=''
-vendorman1=''
+installvendorman1dir=''
+vendorman1dir=''
 vendorman1exp=''
-installvendorman3=''
-vendorman3=''
+installvendorman3dir=''
+vendorman3dir=''
 vendorman3exp=''
 usevendorprefix=''
 vendorprefix=''
@@ -1217,8 +1217,8 @@ locincpth="$locincpth /opt/gnu/include /usr/GNU/include /opt/GNU/include"
 : no include file wanted by default
 inclwanted=''
 
-siteman1=''
-siteman3=''
+siteman1dir=''
+siteman3dir=''
 sitescript=''
 : Trailing extension.  Override this in a hint file, if needed.
 : Extra object files, if any, needed on this platform.
@@ -8555,9 +8555,9 @@ fi
 : determine where add-on html pages go
 : There is no standard location, so try to copy the previously-selected 
 : directory structure for the core html pages.
-case "$sitehtml1" in
+case "$sitehtml1dir" in
 '')	dflt=`echo "$html1dir" | $sed "s#^$prefix#$siteprefix#"` ;;
-*)	dflt=$sitehtml1 ;;
+*)	dflt=$sitehtml1dir ;;
 esac
 case "$dflt" in
 ''|' ') dflt=none ;;
@@ -8565,23 +8565,23 @@ esac
 fn=dn+~
 rp='Pathname where the site-specific html pages should be installed?'
 . ./getfile
-sitehtml1="$ans"
+sitehtml1dir="$ans"
 sitehtml1exp="$ansexp"
 : Use ' ' for none so value is preserved next time through Configure
-$test X"$sitehtml1" = "X" && sitehtml1=' '
+$test X"$sitehtml1dir" = "X" && sitehtml1dir=' '
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
-	installsitehtml1=`echo "$sitehtml1exp" | $sed "s#^$prefix#$installprefix#"`
+	installsitehtml1dir=`echo "$sitehtml1exp" | $sed "s#^$prefix#$installprefix#"`
 else
-	installsitehtml1="$sitehtml1exp"
+	installsitehtml1dir="$sitehtml1exp"
 fi
 
 : determine where add-on library html pages go
 : There is no standard location, so try to copy the previously-selected
 : directory structure for the core html pages.
-case "$sitehtml3" in
+case "$sitehtml3dir" in
 '')	dflt=`echo "$html3dir" | $sed "s#^$prefix#$siteprefix#"` ;;
-*)	dflt=$sitehtml3 ;;
+*)	dflt=$sitehtml3dir ;;
 esac
 case "$dflt" in
 ''|' ') dflt=none ;;
@@ -8589,21 +8589,21 @@ esac
 fn=dn+~
 rp='Pathname where the site-specific library html pages should be installed?'
 . ./getfile
-sitehtml3="$ans"
+sitehtml3dir="$ans"
 sitehtml3exp="$ansexp"
 : Use ' ' for none so value is preserved next time through Configure
-$test X"$sitehtml3" = "X" && sitehtml3=' '
+$test X"$sitehtml3dir" = "X" && sitehtml3dir=' '
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
-	installsitehtml3=`echo "$sitehtml3exp" | $sed "s#^$prefix#$installprefix#"`
+	installsitehtml3dir=`echo "$sitehtml3exp" | $sed "s#^$prefix#$installprefix#"`
 else
-	installsitehtml3="$sitehtml3exp"
+	installsitehtml3dir="$sitehtml3exp"
 fi
 
 : determine where add-on manual pages go
-case "$siteman1" in
+case "$siteman1dir" in
 '')	dflt=`echo "$man1dir" | $sed "s#^$prefix#$siteprefix#"` ;;
-*)	dflt=$siteman1 ;;
+*)	dflt=$siteman1dir ;;
 esac
 case "$dflt" in
 ''|' ') dflt=none ;;
@@ -8611,21 +8611,21 @@ esac
 fn=dn+~
 rp='Pathname where the site-specific manual pages should be installed?'
 . ./getfile
-siteman1="$ans"
+siteman1dir="$ans"
 siteman1exp="$ansexp"
 : Use ' ' for none so value is preserved next time through Configure
-$test X"$siteman1" = "X" && siteman1=' '
+$test X"$siteman1dir" = "X" && siteman1dir=' '
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
-	installsiteman1=`echo "$siteman1exp" | $sed "s#^$prefix#$installprefix#"`
+	installsiteman1dir=`echo "$siteman1exp" | $sed "s#^$prefix#$installprefix#"`
 else
-	installsiteman1="$siteman1exp"
+	installsiteman1dir="$siteman1exp"
 fi
 
 : determine where add-on library man pages go
-case "$siteman3" in
+case "$siteman3dir" in
 '')	dflt=`echo "$man3dir" | $sed "s#^$prefix#$siteprefix#"` ;;
-*)	dflt=$siteman3 ;;
+*)	dflt=$siteman3dir ;;
 esac
 case "$dflt" in
 ''|' ') dflt=none ;;
@@ -8633,15 +8633,15 @@ esac
 fn=dn+~
 rp='Pathname where the site-specific library manual pages should be installed?'
 . ./getfile
-siteman3="$ans"
+siteman3dir="$ans"
 siteman3exp="$ansexp"
 : Use ' ' for none so value is preserved next time through Configure
-$test X"$siteman3" = "X" && siteman3=' '
+$test X"$siteman3dir" = "X" && siteman3dir=' '
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
-	installsiteman3=`echo "$siteman3exp" | $sed "s#^$prefix#$installprefix#"`
+	installsiteman3dir=`echo "$siteman3exp" | $sed "s#^$prefix#$installprefix#"`
 else
-	installsiteman3="$siteman3exp"
+	installsiteman3dir="$siteman3exp"
 fi
 
 : determine where add-on public executable scripts go
@@ -8958,16 +8958,16 @@ else
 fi
 
 case "$vendorprefix" in
-'')	vendorhtml1=''
+'')	vendorhtml1dir=''
 	vendorhtml1exp=''
 	;;
 *)	: determine where vendor-supplied html pages go.
 	: There is no standard location, so try to copy the previously-selected
 	: directory structure for the core html pages.
 	: XXX Better default suggestions would be welcome.
-	case "$vendorhtml1" in
+	case "$vendorhtml1dir" in
 	'')	dflt=`echo "$html1dir" | $sed "s#^$prefix#$vendorprefix#"` ;;
-	*)	dflt=$vendorhtml1 ;;
+	*)	dflt=$vendorhtml1dir ;;
 	esac
 	case "$dflt" in
 	''|' ') dflt=none ;;
@@ -8975,30 +8975,30 @@ case "$vendorprefix" in
 	fn=dn+~
 	rp='Pathname for the vendor-supplied html pages?'
 	. ./getfile
-	vendorhtml1="$ans"
+	vendorhtml1dir="$ans"
 	vendorhtml1exp="$ansexp"
 	;;
 esac
 : Use ' ' for none so value is preserved next time through Configure
-$test X"$vendorhtml1" = "X" && vendorhtml1=' '
+$test X"$vendorhtml1dir" = "X" && vendorhtml1dir=' '
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
-	installvendorhtml1=`echo $vendorhtml1exp | $sed "s#^$prefix#$installprefix#"`
+	installvendorhtml1dir=`echo $vendorhtml1exp | $sed "s#^$prefix#$installprefix#"`
 else
-	installvendorhtml1="$vendorhtml1exp"
+	installvendorhtml1dir="$vendorhtml1exp"
 fi
 
 case "$vendorprefix" in
-'')	vendorhtml3=''
+'')	vendorhtml3dir=''
 	vendorhtml3exp=''
 	;;
 *)	: determine where vendor-supplied module html pages go.
 	: There is no standard location, so try to copy the previously-selected
 	: directory structure for the core html pages.
 	: XXX Better default suggestions would be welcome.
-	case "$vendorhtml3" in
+	case "$vendorhtml3dir" in
 	'')	dflt=`echo "$html3dir" | $sed "s#^$prefix#$vendorprefix#"` ;;
-	*)	dflt=$vendorhtml3 ;;
+	*)	dflt=$vendorhtml3dir ;;
 	esac
 	case "$dflt" in
 	''|' ') dflt=none ;;
@@ -9006,27 +9006,27 @@ case "$vendorprefix" in
 	fn=dn+~
 	rp='Pathname for the vendor-supplied html pages?'
 	. ./getfile
-	vendorhtml3="$ans"
+	vendorhtml3dir="$ans"
 	vendorhtml3exp="$ansexp"
 	;;
 esac
 : Use ' ' for none so value is preserved next time through Configure
-$test X"$vendorhtml3" = "X" && vendorhtml3=' '
+$test X"$vendorhtml3dir" = "X" && vendorhtml3dir=' '
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
-	installvendorhtml3=`echo $vendorhtml3exp | $sed "s#^$prefix#$installprefix#"`
+	installvendorhtml3dir=`echo $vendorhtml3exp | $sed "s#^$prefix#$installprefix#"`
 else
-	installvendorhtml3="$vendorhtml3exp"
+	installvendorhtml3dir="$vendorhtml3exp"
 fi
 
 case "$vendorprefix" in
-'')	vendorman1=''
+'')	vendorman1dir=''
 	vendorman1exp=''
 	;;
 *)	: determine where vendor-supplied manual pages go.
-	case "$vendorman1" in
+	case "$vendorman1dir" in
 	'') dflt=`echo "$man1dir" | $sed "s#^$prefix#$vendorprefix#"` ;;
-	*)	dflt=$vendorman1 ;;
+	*)	dflt=$vendorman1dir ;;
 	esac
 	case "$dflt" in
 	''|' ') dflt=none ;;
@@ -9034,27 +9034,27 @@ case "$vendorprefix" in
 	fn=nd~+
 	rp='Pathname for the vendor-supplied manual section 1 pages?'
 	. ./getfile
-	vendorman1="$ans"
+	vendorman1dir="$ans"
 	vendorman1exp="$ansexp"
 	;;
 esac
 : Use ' ' for none so value is preserved next time through Configure
-$test X"$vendorman1" = "X" && vendorman1=' '
+$test X"$vendorman1dir" = "X" && vendorman1dir=' '
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
-	installvendorman1=`echo "$vendorman1exp" | $sed "s#^$prefix#$installprefix#"`
+	installvendorman1dir=`echo "$vendorman1exp" | $sed "s#^$prefix#$installprefix#"`
 else
-	installvendorman1="$vendorman1exp"
+	installvendorman1dir="$vendorman1exp"
 fi
 
 case "$vendorprefix" in
-'')	vendorman3=''
+'')	vendorman3dir=''
 	vendorman3exp=''
 	;;
 *)	: determine where vendor-supplied module manual pages go.
-	case "$vendorman3" in
+	case "$vendorman3dir" in
 	'') dflt=`echo "$man3dir" | $sed "s#^$prefix#$vendorprefix#"` ;;
-	*)	dflt=$vendorman3 ;;
+	*)	dflt=$vendorman3dir ;;
 	esac
 	case "$dflt" in
 	''|' ') dflt=none ;;
@@ -9062,17 +9062,17 @@ case "$vendorprefix" in
 	fn=nd~+
 	rp='Pathname for the vendor-supplied manual section 3 pages?'
 	. ./getfile
-	vendorman3="$ans"
+	vendorman3dir="$ans"
 	vendorman3exp="$ansexp"
 	;;
 esac
 : Use ' ' for none so value is preserved next time through Configure
-$test X"$vendorman3" = "X" && vendorman3=' '
+$test X"$vendorman3dir" = "X" && vendorman3dir=' '
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
-	installvendorman3=`echo "$vendorman3exp" | $sed "s#^$prefix#$installprefix#"`
+	installvendorman3dir=`echo "$vendorman3exp" | $sed "s#^$prefix#$installprefix#"`
 else
-	installvendorman3="$vendorman3exp"
+	installvendorman3dir="$vendorman3exp"
 fi
 
 case "$vendorprefix" in
@@ -21083,21 +21083,21 @@ installprivlib='$installprivlib'
 installscript='$installscript'
 installsitearch='$installsitearch'
 installsitebin='$installsitebin'
-installsitehtml1='$installsitehtml1'
-installsitehtml3='$installsitehtml3'
+installsitehtml1dir='$installsitehtml1dir'
+installsitehtml3dir='$installsitehtml3dir'
 installsitelib='$installsitelib'
-installsiteman1='$installsiteman1'
-installsiteman3='$installsiteman3'
+installsiteman1dir='$installsiteman1dir'
+installsiteman3dir='$installsiteman3dir'
 installsitescript='$installsitescript'
 installstyle='$installstyle'
 installusrbinperl='$installusrbinperl'
 installvendorarch='$installvendorarch'
 installvendorbin='$installvendorbin'
-installvendorhtml1='$installvendorhtml1'
-installvendorhtml3='$installvendorhtml3'
+installvendorhtml1dir='$installvendorhtml1dir'
+installvendorhtml3dir='$installvendorhtml3dir'
 installvendorlib='$installvendorlib'
-installvendorman1='$installvendorman1'
-installvendorman3='$installvendorman3'
+installvendorman1dir='$installvendorman1dir'
+installvendorman3dir='$installvendorman3dir'
 installvendorscript='$installvendorscript'
 intsize='$intsize'
 issymlink='$issymlink'
@@ -21278,16 +21278,16 @@ sitearch='$sitearch'
 sitearchexp='$sitearchexp'
 sitebin='$sitebin'
 sitebinexp='$sitebinexp'
-sitehtml1='$sitehtml1'
+sitehtml1dir='$sitehtml1dir'
 sitehtml1exp='$sitehtml1exp'
-sitehtml3='$sitehtml3'
+sitehtml3dir='$sitehtml3dir'
 sitehtml3exp='$sitehtml3exp'
 sitelib='$sitelib'
 sitelib_stem='$sitelib_stem'
 sitelibexp='$sitelibexp'
-siteman1='$siteman1'
+siteman1dir='$siteman1dir'
 siteman1exp='$siteman1exp'
-siteman3='$siteman3'
+siteman3dir='$siteman3dir'
 siteman3exp='$siteman3exp'
 siteprefix='$siteprefix'
 siteprefixexp='$siteprefixexp'
@@ -21388,16 +21388,16 @@ vendorarch='$vendorarch'
 vendorarchexp='$vendorarchexp'
 vendorbin='$vendorbin'
 vendorbinexp='$vendorbinexp'
-vendorhtml1='$vendorhtml1'
+vendorhtml1dir='$vendorhtml1dir'
 vendorhtml1exp='$vendorhtml1exp'
-vendorhtml3='$vendorhtml3'
+vendorhtml3dir='$vendorhtml3dir'
 vendorhtml3exp='$vendorhtml3exp'
 vendorlib='$vendorlib'
 vendorlib_stem='$vendorlib_stem'
 vendorlibexp='$vendorlibexp'
-vendorman1='$vendorman1'
+vendorman1dir='$vendorman1dir'
 vendorman1exp='$vendorman1exp'
-vendorman3='$vendorman3'
+vendorman3dir='$vendorman3dir'
 vendorman3exp='$vendorman3exp'
 vendorprefix='$vendorprefix'
 vendorprefixexp='$vendorprefixexp'

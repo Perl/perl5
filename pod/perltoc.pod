@@ -11146,12 +11146,12 @@ C<ignore_versioned_solibs>, C<inc_version_list>, C<inc_version_list_init>,
 C<incpath>, C<inews>, C<installarchlib>, C<installbin>, C<installhtml1dir>,
 C<installhtml3dir>, C<installman1dir>, C<installman3dir>, C<installprefix>,
 C<installprefixexp>, C<installprivlib>, C<installscript>,
-C<installsitearch>, C<installsitebin>, C<installsitehtml1>,
-C<installsitehtml3>, C<installsitelib>, C<installsiteman1>,
-C<installsiteman3>, C<installsitescript>, C<installstyle>,
+C<installsitearch>, C<installsitebin>, C<installsitehtml1dir>,
+C<installsitehtml3dir>, C<installsitelib>, C<installsiteman1dir>,
+C<installsiteman3dir>, C<installsitescript>, C<installstyle>,
 C<installusrbinperl>, C<installvendorarch>, C<installvendorbin>,
-C<installvendorhtml1>, C<installvendorhtml3>, C<installvendorlib>,
-C<installvendorman1>, C<installvendorman3>, C<installvendorscript>,
+C<installvendorhtml1dir>, C<installvendorhtml3dir>, C<installvendorlib>,
+C<installvendorman1dir>, C<installvendorman3dir>, C<installvendorscript>,
 C<intsize>, C<issymlink>, C<ivdformat>, C<ivsize>, C<ivtype>
 
 =item k
@@ -11223,9 +11223,9 @@ C<setprotoent_r_proto>, C<setpwent_r_proto>, C<setservent_r_proto>, C<sh>,
 C<shar>, C<sharpbang>, C<shmattype>, C<shortsize>, C<shrpenv>, C<shsharp>,
 C<sig_count>, C<sig_name>, C<sig_name_init>, C<sig_num>, C<sig_num_init>,
 C<sig_size>, C<signal_t>, C<sitearch>, C<sitearchexp>, C<sitebin>,
-C<sitebinexp>, C<sitehtml1>, C<sitehtml1exp>, C<sitehtml3>,
-C<sitehtml3exp>, C<sitelib>, C<sitelib_stem>, C<sitelibexp>, C<siteman1>,
-C<siteman1exp>, C<siteman3>, C<siteman3exp>, C<siteprefix>,
+C<sitebinexp>, C<sitehtml1dir>, C<sitehtml1exp>, C<sitehtml3dir>,
+C<sitehtml3exp>, C<sitelib>, C<sitelib_stem>, C<sitelibexp>, C<siteman1dir>,
+C<siteman1exp>, C<siteman3dir>, C<siteman3exp>, C<siteprefix>,
 C<siteprefixexp>, C<sitescript>, C<sitescriptexp>, C<sizesize>,
 C<sizetype>, C<sleep>, C<smail>, C<so>, C<sockethdr>, C<socketlib>,
 C<socksizetype>, C<sort>, C<spackage>, C<spitshell>, C<sPRId64>,
@@ -11259,9 +11259,9 @@ C<uvXUformat>
 =item v
 
 C<vendorarch>, C<vendorarchexp>, C<vendorbin>, C<vendorbinexp>,
-C<vendorhtml1>, C<vendorhtml1exp>, C<vendorhtml3>, C<vendorhtml3exp>,
-C<vendorlib>, C<vendorlib_stem>, C<vendorlibexp>, C<vendorman1>,
-C<vendorman1exp>, C<vendorman3>, C<vendorman3exp>, C<vendorprefix>,
+C<vendorhtml1dir>, C<vendorhtml1exp>, C<vendorhtml3dir>, C<vendorhtml3exp>,
+C<vendorlib>, C<vendorlib_stem>, C<vendorlibexp>, C<vendorman1dir>,
+C<vendorman1exp>, C<vendorman3dir>, C<vendorman3exp>, C<vendorprefix>,
 C<vendorprefixexp>, C<vendorscript>, C<vendorscriptexp>, C<version>,
 C<version_patchlevel_string>, C<versiononly>, C<vi>, C<voidflags>
 
