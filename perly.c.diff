@@ -88,7 +88,7 @@ Index: perly.c
 - short yyss[YYSTACKSIZE];
 - YYSTYPE yyvs[YYSTACKSIZE];
 - #define yystacksize YYSTACKSIZE
-  #line 634 "perly.y"
+  #line 635 "perly.y"
    /* PROGRAM */
 --- 1272,1277 ----
 ***************
@@ -300,14 +300,14 @@ Index: perly.c
                   yystate, yyn, yyrule[yyn]);
   #endif
 ***************
-*** 2272,2277 ****
+*** 2273,2278 ****
   #if YYDEBUG
           if (yydebug)
 !             printf("yydebug: after reduction, shifting from state 0 to\
 !  state %d\n", YYFINAL);
   #endif
           yystate = YYFINAL;
---- 2286,2292 ----
+--- 2287,2293 ----
   #if YYDEBUG
           if (yydebug)
 !             fprintf(stderr,
@@ -316,20 +316,20 @@ Index: perly.c
   #endif
           yystate = YYFINAL;
 ***************
-*** 2287,2291 ****
+*** 2288,2292 ****
                   if (yychar <= YYMAXTOKEN) yys = yyname[yychar];
                   if (!yys) yys = "illegal-symbol";
 !                 printf("yydebug: state %d, reading %d (%s)\n",
                           YYFINAL, yychar, yys);
               }
---- 2302,2306 ----
+--- 2303,2307 ----
                   if (yychar <= YYMAXTOKEN) yys = yyname[yychar];
                   if (!yys) yys = "illegal-symbol";
 !                 fprintf(stderr, "yydebug: state %d, reading %d (%s)\n",
                           YYFINAL, yychar, yys);
               }
 ***************
-*** 2302,2311 ****
+*** 2303,2312 ****
   #if YYDEBUG
       if (yydebug)
 !         printf("yydebug: after reduction, shifting from state %d \
@@ -340,7 +340,7 @@ Index: perly.c
 !         goto yyoverflow;
       }
       *++yyssp = yystate;
---- 2317,2341 ----
+--- 2318,2342 ----
   #if YYDEBUG
       if (yydebug)
 !         fprintf(stderr,
@@ -367,7 +367,7 @@ Index: perly.c
       }
       *++yyssp = yystate;
 ***************
-*** 2313,2320 ****
+*** 2314,2321 ****
       goto yyloop;
   yyoverflow:
 !     yyerror("yacc stack overflow");
@@ -376,7 +376,7 @@ Index: perly.c
   yyaccept:
 !     return (0);
   }
---- 2343,2350 ----
+--- 2344,2351 ----
       goto yyloop;
   yyoverflow:
 !     yyerror("Out of memory for yacc stack");
