@@ -524,10 +524,18 @@ L</"Handling Malformed Data">.
 
 	from_to($string, FROM_ENCODING, TO_ENCODING[, CHECK])
 
-Convert the data between two encodings.  How did the data in $string
-originally get to be in FROM_ENCODING?  Either using encode() or
-through PerlIO: See L</"Encode and PerlIO">.  For CHECK see
-L</"Handling Malformed Data">.
+Convert B<in-place> the data between two encodings.  How did the data
+in $string originally get to be in FROM_ENCODING?  Either using
+encode() or through PerlIO: See L</"Encode and PerlIO">.  For CHECK
+see L</"Handling Malformed Data">.
+
+For example to convert ISO 8859-1 data to UTF-8:
+
+	from_to($data, "iso-8859-1", "utf-8");
+
+and to convert it back:
+
+	from_to($data, "utf-8", "iso-8859-1");
 
 =back
 
@@ -756,7 +764,7 @@ want to bring into memory.  For example to convert between ISO 8859-1
 	open(G, ">:utf8",                 "data.utf") or die $!;
 	while (<F>) { print G }
 
-	# Could do "print G <F>" but that would pull
+	# Could also do "print G <F>" but that would pull
 	# the whole file into memory just to write it out again.
 
 See L<PerlIO> for more information.
