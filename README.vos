@@ -8,19 +8,19 @@ README.vos - Perl for Stratus VOS
 
 =head1 SYNOPSIS
 
-This is a port of Perl version 5, revision 7, to VOS.  Perl is a
-scripting or macro language that is popular on many systems.  See your
-local computer bookstore for a number of good books on Perl.
+This is a port of Perl version 5 to VOS.  Perl is a scripting or
+macro language that is popular on many systems.  See your local
+computer bookstore for a number of good books on Perl.
 
 =head2 Stratus POSIX Support
 
 Note that there are two different implementations of POSIX.1
 support on VOS.  There is an alpha version of POSIX that is
 available from the Stratus anonymous ftp site
-(ftp://ftp.stratus.com/pub/vos/posix/alpha/alpha.html).  There
-is a generally-available version of POSIX that comes with the
-VOS Standard C compiler and C runtime in VOS Release 14.3.0 or
-higher.  This port of POSIX will compile and bind with either
+(ftp://ftp.stratus.com/pub/vos/posix/alpha/alpha.html).  There is
+a generally-available version of POSIX that comes with the VOS
+Standard C Compiler or VOS C runtime in VOS Release 14.3.0 or
+higher.  This port of perl will compile and bind with either
 version of POSIX.
 
 Most of the Perl features should work on VOS regardless of which
@@ -29,11 +29,11 @@ of POSIX is missing a number of key functions, and therefore any
 attempt by perl.pm to call the following unimplemented POSIX
 functions will result in an error message and an immediate and
 fatal call to the VOS debugger.  They are "dup", "fork", and
-"waitpid".  The lack of these functions pretty much prevents you
-from starting VOS commands and grabbing their output in perl.
-The workaround is to run the commands outside of perl, then have
-perl process the output file.  These functions are all available
-in the generally-available version of POSIX.
+"waitpid".  The lack of these functions prevents you from
+starting VOS commands and grabbing their output in perl.  The
+workaround is to run the commands outside of perl, then have perl
+process the output file.  These functions are all available in
+the generally-available version of POSIX.
 
 =head1 INSTALLING PERL IN VOS
 
@@ -91,12 +91,13 @@ execute on VOS Release 12 or earlier.
 
 =item 5
 
-If you are using the generally-available version of VOS
-POSIX support, then you should also acquire the VOS GNU
-C/C++ Compiler and GNU Tools product.  When perl is built
-with this version of POSIX support, it assumes that it can
-find "bash", "sed" and other POSIX-compatible commands in
-the directory /system/gnu_library/bin.
+If you are using the generally-available version of VOS POSIX
+support, then you should also acquire the VOS GNU C/C++ Compiler
+and GNU Tools product because it provides many common Unix or
+POSIX commands.  When perl is built with this version of POSIX
+support, it assumes that it can find "bash", "sed" and other
+POSIX-compatible commands in the directory
+/system/gnu_library/bin.
 
 =back
 
@@ -236,6 +237,6 @@ Paul Green (Paul_Green@stratus.com)
 
 =head1 LAST UPDATE
 
-June 11, 2001
+July 4, 2001
 
 =cut
