@@ -69,6 +69,8 @@ typedef u_int           SOCKET;
 
 EXTERN_C void	Perl_nw5_init(int *argcp, char ***argvp);
 
+#define PTHREAD_ATFORK(prepare,parent,child)	NOOP
+
 /*
  * This provides a layer of functions and macros to ensure extensions will
  * get to use the same RTL functions as the core.
