@@ -566,6 +566,14 @@ PerlIO_apply_layers(pTHX_ PerlIO *f, const char *mode, const char *names)
               }
             }
           }
+         else if ((e - s) == 4 && strncmp(s,"utf8",4) == 0)
+          {
+           PerlIOBase(f)->flags |= PERLIO_F_UTF8;
+          }
+         else if ((e - s) == 5 && strncmp(s,"bytes",5) == 0)
+          {
+           PerlIOBase(f)->flags &= ~PERLIO_F_UTF8;
+          }
          else
           {
            SV *layer = PerlIO_find_layer(s,e-s);
@@ -600,7 +608,7 @@ PerlIO_binmode(pTHX_ PerlIO *f, int iotype, int mode, const char *names)
 {
  PerlIO_debug("PerlIO_binmode f=%p %s %c %x %s\n",
               f,PerlIOBase(f)->tab->name,iotype,mode, (names) ? names : "(Null)");
- if (!names || (O_TEXT != O_BINARY && mode & O_BINARY))
+ if (!names || (O_TEXT != O_BINARY && (mode & O_BINARY)))
   {
    PerlIO *top = f;
    PerlIOl *l;
