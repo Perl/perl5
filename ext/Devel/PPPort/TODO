@@ -1,8 +1,9 @@
+TODO:
 
+* add support for sv_vcatpvf / sv_vsetpvf / ...
 
-  * Don't need to install the harness files - fix Makefile.PL
+* more documentation, more tests
 
-  * more documentation
-
-  * 
+* Resolve dependencies in Makefile.PL and remind of
+  running 'make regen'
 
