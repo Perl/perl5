@@ -51,6 +51,7 @@
 #define ck_anoncode		Perl_ck_anoncode
 #define ck_bitop		Perl_ck_bitop
 #define ck_concat		Perl_ck_concat
+#define ck_defined		Perl_ck_defined
 #define ck_delete		Perl_ck_delete
 #define ck_eof			Perl_ck_eof
 #define ck_eval			Perl_ck_eval
@@ -1021,6 +1022,7 @@
 #define ck_anoncode		CPerlObj::Perl_ck_anoncode
 #define ck_bitop		CPerlObj::Perl_ck_bitop
 #define ck_concat		CPerlObj::Perl_ck_concat
+#define ck_defined		CPerlObj::Perl_ck_defined
 #define ck_delete		CPerlObj::Perl_ck_delete
 #define ck_eof			CPerlObj::Perl_ck_eof
 #define ck_eval			CPerlObj::Perl_ck_eval

@@ -219,6 +219,7 @@ open PPSYM, '>pp.sym' or die "Error creating pp.sym: $!";
 
 for (sort keys %ckname) {
     print PP "PERL_CKDEF($_)\n";
+    print PPSYM "$_\n";
 #OP *\t", &tab(3,$_),"(OP* o);\n";
 }
 

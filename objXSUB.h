@@ -897,6 +897,8 @@
 #define ck_bitop		pPerl->Perl_ck_bitop
 #undef  ck_concat
 #define ck_concat		pPerl->Perl_ck_concat
+#undef  ck_defined
+#define ck_defined		pPerl->Perl_ck_defined
 #undef  ck_delete
 #define ck_delete		pPerl->Perl_ck_delete
 #undef  ck_eof

@@ -271,8 +271,6 @@ my @staticfuncs = qw(
     mul128
     is_an_int
     div128
-    runops_standard
-    runops_debug
     check_uni
     force_next
     force_version
@@ -400,9 +398,7 @@ my @staticfuncs = qw(
     restore_rsfp
     restore_expect
     restore_lex_expect
-    yydestruct
     del_sv
-    fprintf
 );
 
 for $sym (sort(keys(%global),@staticfuncs)) {

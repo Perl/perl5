@@ -104,14 +104,14 @@ VIRTUAL bool	do_exec3 (char* cmd, int fd, int flag);
 #endif
 VIRTUAL void	do_execfree (void);
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
-I32	do_ipcctl (I32 optype, SV** mark, SV** sp);
-I32	do_ipcget (I32 optype, SV** mark, SV** sp);
+VIRTUAL I32	do_ipcctl (I32 optype, SV** mark, SV** sp);
+VIRTUAL I32	do_ipcget (I32 optype, SV** mark, SV** sp);
 #endif
 VIRTUAL void	do_join (SV* sv, SV* del, SV** mark, SV** sp);
 VIRTUAL OP*	do_kv (ARGSproto);
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
-I32	do_msgrcv (SV** mark, SV** sp);
-I32	do_msgsnd (SV** mark, SV** sp);
+VIRTUAL I32	do_msgrcv (SV** mark, SV** sp);
+VIRTUAL I32	do_msgsnd (SV** mark, SV** sp);
 #endif
 VIRTUAL bool	do_open (GV* gv, char* name, I32 len,
 		   int as_raw, int rawmode, int rawperm, PerlIO* supplied_fp);
@@ -121,8 +121,8 @@ VIRTUAL OP*	do_readline (void);
 VIRTUAL I32	do_chomp (SV* sv);
 VIRTUAL bool	do_seek (GV* gv, Off_t pos, int whence);
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
-I32	do_semop (SV** mark, SV** sp);
-I32	do_shmio (I32 optype, SV** mark, SV** sp);
+VIRTUAL I32	do_semop (SV** mark, SV** sp);
+VIRTUAL I32	do_shmio (I32 optype, SV** mark, SV** sp);
 #endif
 VIRTUAL void	do_sprintf (SV* sv, I32 len, SV** sarg);
 VIRTUAL Off_t	do_sysseek (GV* gv, Off_t pos, int whence);
@@ -325,7 +325,7 @@ VIRTUAL OP*	my (OP* o);
 VIRTUAL char*	my_bcopy (const char* from, char* to, I32 len);
 #endif
 #if !defined(HAS_BZERO) && !defined(HAS_MEMSET)
-char*	my_bzero (char* loc, I32 len);
+VIRTUAL char*	my_bzero (char* loc, I32 len);
 #endif
 VIRTUAL void	my_exit (U32 status) __attribute__((noreturn));
 VIRTUAL void	my_failure_exit (void) __attribute__((noreturn));
@@ -774,10 +774,6 @@ I32 amagic_cmp_locale (SV *str1, SV *str2);
 SV *mul128 (SV *sv, U8 m);
 SV *is_an_int (char *s, STRLEN l);
 int div128 (SV *pnum, bool *done);
-
-int runops_standard (void);
-int runops_debug (void);
-
 void check_uni (void);
 void  force_next (I32 type);
 char *force_version (char *start);
@@ -931,8 +927,10 @@ void restore_magic (void *p);
 void restore_rsfp (void *f);
 void restore_expect (void *e);
 void restore_lex_expect (void *e);
-void yydestruct (void *ptr);
+VIRTUAL void yydestruct (void *ptr);
 VIRTUAL int fprintf (PerlIO *pf, const char *pat, ...);
+VIRTUAL int runops_standard (void);
+VIRTUAL int runops_debug (void);
 
 #ifdef WIN32
 VIRTUAL int&	ErrorNo (void);
