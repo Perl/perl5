@@ -1282,7 +1282,7 @@ this:
 
     sub invalid { die "/$_[0]/: invalid escape '\\$_[1]'"}
 
-    my %rules = ( '\\' => '\\', 
+    my %rules = ( '\\' => '\\\\', 
 		  'Y|' => qr/(?=\S)(?<!\S)|(?!\S)(?<=\S)/ );
     sub convert {
       my $re = shift;
