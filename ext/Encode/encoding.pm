@@ -2,6 +2,7 @@ package encoding;
 our $VERSION = do { my @r = (q$Revision: 1.25 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
+use strict;
 
 BEGIN {
     if (ord("A") == 193) {
@@ -28,9 +29,9 @@ sub import {
 	if ($arg{$h}){
 	    unless (defined find_encoding($name)) {
 		require Carp;
-		Carp::croak "Unknown encoding for $fhname, '$arg{$h}'";
+		Carp::croak "Unknown encoding for $h, '$arg{$h}'";
 	    }
-	    eval qq{ binmode($h, ":encoding($arg{h})") };
+	    eval qq{ binmode($h, ":encoding($arg{$h})") };
 	}else{
 	    eval qq{ binmode($h, ":encoding($name)") };
 	}

@@ -197,39 +197,32 @@ ext/DynaLoader/Makefile.PL	Dynamic Loader makefile writer
 ext/DynaLoader/README		Dynamic Loader notes and intro
 ext/DynaLoader/XSLoader_pm.PL	Simple XS Loader perl module
 ext/Encode/AUTHORS		List of authors
-ext/Encode/Byte/Byte.pm	Encode extension
-ext/Encode/Byte/Makefile.PL       Encode extension
-ext/Encode/CN/CN.pm		Encode extension
-ext/Encode/CN/Makefile.PL	Encode extension
-ext/Encode/Changes		Change Log
-ext/Encode/EBCDIC/EBCDIC.pm       Encode extension
-ext/Encode/EBCDIC/Makefile.PL     Encode extension
-ext/Encode/Encode.pm	       Mother of all Encode extensions
-ext/Encode/Encode.xs		Encode extension
-ext/Encode/Encode/Changes.e2x		Skeleton file for enc2xs
-ext/Encode/Encode/Makefile_PL.e2x	Skeleton file for enc2xs
-ext/Encode/Encode/README.e2x		Skeleton file for enc2xs
-ext/Encode/Encode/_PM.e2x		Skeleton file for enc2xs
-ext/Encode/Encode/_T.e2x		Skeleton file for enc2xs
-ext/Encode/Encode/encode.h		Encode extension header file
-ext/Encode/JP/JP.pm		Encode extension
-ext/Encode/JP/Makefile.PL	Encode extension
-ext/Encode/KR/KR.pm		Encode extension
-ext/Encode/KR/Makefile.PL		Encode extension
-ext/Encode/MANIFEST		Encode extension
-ext/Encode/Makefile.PL		Encode extension makefile writer
-ext/Encode/README		Encode extension
-ext/Encode/Symbol/Makefile.PL     Encode extension
-ext/Encode/Symbol/Symbol.pm       Encode extension
-ext/Encode/TW/Makefile.PL	Encode extension
-ext/Encode/TW/TW.pm		Encode extension
 ext/Encode/bin/enc2xs	Encode module generator
 ext/Encode/bin/piconv	iconv by perl
 ext/Encode/bin/ucm2table	Table Generator for testing
 ext/Encode/bin/ucmlint	A UCM Lint utility
 ext/Encode/bin/unidump	Unicode Dump like hexdump(1)
+ext/Encode/Byte/Byte.pm	Encode extension
+ext/Encode/Byte/Makefile.PL       Encode extension
+ext/Encode/Changes		Change Log
+ext/Encode/CN/CN.pm		Encode extension
+ext/Encode/CN/Makefile.PL	Encode extension
+ext/Encode/EBCDIC/EBCDIC.pm       Encode extension
+ext/Encode/EBCDIC/Makefile.PL     Encode extension
 ext/Encode/encengine.c		Encode extension
+ext/Encode/Encode.pm	       Mother of all Encode extensions
+ext/Encode/Encode.xs		Encode extension
+ext/Encode/Encode/Changes.e2x		Skeleton file for enc2xs
+ext/Encode/Encode/encode.h		Encode extension header file
+ext/Encode/Encode/Makefile_PL.e2x	Skeleton file for enc2xs
+ext/Encode/Encode/README.e2x		Skeleton file for enc2xs
+ext/Encode/Encode/_PM.e2x		Skeleton file for enc2xs
+ext/Encode/Encode/_T.e2x		Skeleton file for enc2xs
 ext/Encode/encoding.pm	Perl Pragmactic Module
+ext/Encode/JP/JP.pm		Encode extension
+ext/Encode/JP/Makefile.PL	Encode extension
+ext/Encode/KR/KR.pm		Encode extension
+ext/Encode/KR/Makefile.PL		Encode extension
 ext/Encode/lib/Encode/Alias.pm	        Encode extension
 ext/Encode/lib/Encode/CJKConstants.pm	Encode extension
 ext/Encode/lib/Encode/CN/HZ.pm		Encode extension
@@ -244,15 +237,16 @@ ext/Encode/lib/Encode/KR/2022_KR.pm	 Encode extension
 ext/Encode/lib/Encode/Supported.pod	Documents supported encodings
 ext/Encode/lib/Encode/Unicode.pm	Encode extension
 ext/Encode/lib/Encode/XS.pm		Encode extension
+ext/Encode/Makefile.PL		Encode extension makefile writer
+ext/Encode/MANIFEST		Encode extension
+ext/Encode/README		Encode extension
+ext/Encode/Symbol/Makefile.PL     Encode extension
+ext/Encode/Symbol/Symbol.pm       Encode extension
 ext/Encode/t/Aliases.t	Encode extension test
+ext/Encode/t/bogus.ucm	Sample data for ucmlint
 ext/Encode/t/CN.t		Encode extension test
 ext/Encode/t/Encode.t		Encode extension test
 ext/Encode/t/Encoder.t	Encode::Encoder test
-ext/Encode/t/JP.t		Encode extension test
-ext/Encode/t/KR.t		Encode extension test
-ext/Encode/t/TW.t		Encode extension test
-ext/Encode/t/Unicode.t	Encode extension test
-ext/Encode/t/bogus.ucm	Sample data for ucmlint
 ext/Encode/t/encoding.t	encoding extension test
 ext/Encode/t/gb2312.euc	test data
 ext/Encode/t/gb2312.ref	test data
@@ -261,10 +255,16 @@ ext/Encode/t/jisx0208.euc	test data
 ext/Encode/t/jisx0208.ref	test data
 ext/Encode/t/jisx0212.euc	test data
 ext/Encode/t/jisx0212.ref	test data
+ext/Encode/t/JP.t		Encode extension test
 ext/Encode/t/jperl.t	encoding extension test
+ext/Encode/t/KR.t		Encode extension test
 ext/Encode/t/ksc5601.euc	test data
 ext/Encode/t/ksc5601.ref	test data
+ext/Encode/t/TW.t		Encode extension test
 ext/Encode/t/unibench.pl	Unicode benchmark
+ext/Encode/t/Unicode.t	Encode extension test
+ext/Encode/TW/Makefile.PL	Encode extension
+ext/Encode/TW/TW.pm		Encode extension
 ext/Encode/ucm/8859-1.ucm	Unicode Character Map
 ext/Encode/ucm/8859-10.ucm	Unicode Character Map
 ext/Encode/ucm/8859-11.ucm	Unicode Character Map
@@ -353,9 +353,9 @@ ext/Encode/ucm/macHebrew.ucm	Unicode Character Map
 ext/Encode/ucm/macIceland.ucm	Unicode Character Map
 ext/Encode/ucm/macJapanese.ucm	Unicode Character Map
 ext/Encode/ucm/macKorean.ucm	Unicode Character Map
+ext/Encode/ucm/macRoman.ucm	Unicode Character Map
 ext/Encode/ucm/macROMnn.ucm	Unicode Character Map
 ext/Encode/ucm/macRUMnn.ucm	Unicode Character Map
-ext/Encode/ucm/macRoman.ucm	Unicode Character Map
 ext/Encode/ucm/macSami.ucm	Unicode Character Map
 ext/Encode/ucm/macSymbol.ucm	Unicode Character Map
 ext/Encode/ucm/macThai.ucm	Unicode Character Map
@@ -590,12 +590,14 @@ ext/Storable/t/freeze.t		See if Storable works
 ext/Storable/t/lock.t		See if Storable works
 ext/Storable/t/overload.t	See if Storable works
 ext/Storable/t/recurse.t	See if Storable works
+ext/Storable/t/restrict.t	See if Storable works
 ext/Storable/t/retrieve.t	See if Storable works
 ext/Storable/t/store.t		See if Storable works
 ext/Storable/t/tied.t		See if Storable works
 ext/Storable/t/tied_hook.t	See if Storable works
 ext/Storable/t/tied_items.t	See if Storable works
 ext/Storable/t/utf8.t		See if Storable works
+ext/Storable/t/utf8hash.t	See if Storable works
 ext/Sys/Hostname/Hostname.pm	Sys::Hostname extension Perl module
 ext/Sys/Hostname/Hostname.t	See if Sys::Hostname works
 ext/Sys/Hostname/Hostname.xs	Sys::Hostname extension external subroutines
@@ -1006,16 +1008,16 @@ lib/ExtUtils/MM_Win95.pm        MakeMaker methods for Win95
 lib/ExtUtils/MY.pm              MakeMaker user override class
 lib/ExtUtils/Packlist.pm	Manipulates .packlist files
 lib/ExtUtils/t/basic.t		See if MakeMaker can build a module
-lib/ExtUtils/t/Big-Fat-Dummy/Liar/Makefile.PL         MakeMaker dummy module
 lib/ExtUtils/t/Big-Fat-Dummy/Liar/lib/Big/Fat/Liar.pm MakeMaker dummy module
+lib/ExtUtils/t/Big-Fat-Dummy/Liar/Makefile.PL         MakeMaker dummy module
 lib/ExtUtils/t/Big-Fat-Dummy/lib/Big/Fat/Dummy.pm     MakeMaker dummy module
 lib/ExtUtils/t/Big-Fat-Dummy/Makefile.PL              MakeMaker dummy module
 lib/ExtUtils/t/Command.t	See if ExtUtils::Command works (Win32 only)
 lib/ExtUtils/t/Constant.t	See if ExtUtils::Constant works
 lib/ExtUtils/t/Embed.t		See if ExtUtils::Embed and embedding works
 lib/ExtUtils/t/hints.t          See if hint files are honored.
-lib/ExtUtils/t/Installed.t	See if ExtUtils::Installed works
 lib/ExtUtils/t/INST.t           Check MakeMaker INST_* macros 
+lib/ExtUtils/t/Installed.t	See if ExtUtils::Installed works
 lib/ExtUtils/t/INST_PREFIX.t    See if MakeMaker can apply PREFIXs
 lib/ExtUtils/t/Manifest.t	See if ExtUtils::Manifest works
 lib/ExtUtils/t/Mkbootstrap.t	See if ExtUtils::Mkbootstrap works
@@ -2492,7 +2494,6 @@ t/op/utfhash.t			See if utf8 keys in hashes behave
 t/op/vec.t			See if vectors work
 t/op/ver.t			See if v-strings and the %v format flag work
 t/op/wantarray.t		See if wantarray works
-t/op/winsystem.t		See if system works in Win*
 t/op/write.t			See if write works (formats work)
 t/pod/emptycmd.t		Test empty pod directives
 t/pod/emptycmd.xr		Expected results for emptycmd.t
@@ -2552,6 +2553,8 @@ t/uni/lower.t			See if Unicode casing works
 t/uni/sprintf.t			See if Unicode sprintf works
 t/uni/title.t			See if Unicode casing works
 t/uni/upper.t			See if Unicode casing works
+t/win32/longpath.t		Test if Win32::GetLongPathName() works
+t/win32/system.t		See if system works in Win*
 t/x2p/s2p.t			See if s2p/psed work
 taint.c				Tainting code
 thrdvar.h			Per-thread variables

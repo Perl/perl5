@@ -683,7 +683,7 @@ $(plextract):	miniperl$(EXE_EXT) lib/Config.pm x2p/s2p
 	@-rm -f $@
 	$(LDLIBPTH) ./miniperl -Ilib $@.PL
 
-x2p/s2p: miniperl$(EXE_EXT) x2p/s2p.PL
+x2p/s2p: miniperl$(EXE_EXT) lib/Config.pm x2p/s2p.PL
 	cd x2p; $(LDLIBPTH) $(MAKE) s2p
 
 lib/lib.pm:	miniperl$(EXE_EXT) lib/Config.pm

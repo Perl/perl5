@@ -315,11 +315,13 @@ PERL_CALLCONV char*	Perl_hv_iterkey(pTHX_ HE* entry, I32* retlen);
 PERL_CALLCONV SV*	Perl_hv_iterkeysv(pTHX_ HE* entry);
 PERL_CALLCONV HE*	Perl_hv_iternext(pTHX_ HV* tb);
 PERL_CALLCONV SV*	Perl_hv_iternextsv(pTHX_ HV* hv, char** key, I32* retlen);
+PERL_CALLCONV HE*	Perl_hv_iternext_flags(pTHX_ HV* tb, I32 flags);
 PERL_CALLCONV SV*	Perl_hv_iterval(pTHX_ HV* tb, HE* entry);
 PERL_CALLCONV void	Perl_hv_ksplit(pTHX_ HV* hv, IV newmax);
 PERL_CALLCONV void	Perl_hv_magic(pTHX_ HV* hv, GV* gv, int how);
 PERL_CALLCONV SV**	Perl_hv_store(pTHX_ HV* tb, const char* key, I32 klen, SV* val, U32 hash);
 PERL_CALLCONV HE*	Perl_hv_store_ent(pTHX_ HV* tb, SV* key, SV* val, U32 hash);
+PERL_CALLCONV SV**	Perl_hv_store_flags(pTHX_ HV* tb, const char* key, I32 klen, SV* val, U32 hash, int flags);
 PERL_CALLCONV void	Perl_hv_undef(pTHX_ HV* tb);
 PERL_CALLCONV I32	Perl_ibcmp(pTHX_ const char* a, const char* b, I32 len);
 PERL_CALLCONV I32	Perl_ibcmp_locale(pTHX_ const char* a, const char* b, I32 len);
@@ -660,9 +662,9 @@ PERL_CALLCONV void	Perl_rxres_save(pTHX_ void** rsp, REGEXP* prx);
 #if !defined(HAS_RENAME)
 PERL_CALLCONV I32	Perl_same_dirent(pTHX_ char* a, char* b);
 #endif
-PERL_CALLCONV char*	Perl_savepv(pTHX_ const char* sv);
-PERL_CALLCONV char*	Perl_savesharedpv(pTHX_ const char* sv);
-PERL_CALLCONV char*	Perl_savepvn(pTHX_ const char* sv, I32 len);
+PERL_CALLCONV char*	Perl_savepv(pTHX_ const char* pv);
+PERL_CALLCONV char*	Perl_savesharedpv(pTHX_ const char* pv);
+PERL_CALLCONV char*	Perl_savepvn(pTHX_ const char* pv, I32 len);
 PERL_CALLCONV void	Perl_savestack_grow(pTHX);
 PERL_CALLCONV void	Perl_save_aelem(pTHX_ AV* av, I32 idx, SV **sptr);
 PERL_CALLCONV I32	Perl_save_alloc(pTHX_ I32 size, I32 pad);
@@ -1037,7 +1039,6 @@ STATIC HEK*	S_save_hek_flags(pTHX_ const char *str, I32 len, U32 hash, int flags
 STATIC void	S_hv_magic_check(pTHX_ HV *hv, bool *needs_copy, bool *needs_store);
 STATIC void	S_unshare_hek_or_pvn(pTHX_ HEK* hek, const char* sv, I32 len, U32 hash);
 STATIC HEK*	S_share_hek_flags(pTHX_ const char* sv, I32 len, U32 hash, int flags);
-STATIC SV**	S_hv_store_flags(pTHX_ HV* tb, const char* key, I32 klen, SV* val, U32 hash, int flags);
 STATIC SV**	S_hv_fetch_flags(pTHX_ HV* tb, const char* key, I32 klen, I32 lval, int flags);
 STATIC void	S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen, const char *msg);
 #endif

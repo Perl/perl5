@@ -231,6 +231,8 @@ C<SV*>.
 #define HVhek_UTF8	0x01 /* Key is utf8 encoded. */
 #define HVhek_WASUTF8	0x02 /* Key is bytes here, but was supplied as utf8. */
 #define HVhek_FREEKEY	0x100 /* Internal flag to say key is malloc()ed.  */
+#define HVhek_PLACEHOLD	0x200 /* Internal flag to create placeholder.
+                               * (may change, but Storable is a core module) */
 #define HVhek_MASK	0xFF
 
 #define HEK_UTF8(hek)		(HEK_FLAGS(hek) & HVhek_UTF8)
@@ -250,6 +252,9 @@ C<SV*>.
 			 ? (size) * sizeof(HE*)				\
 			 : (size) * sizeof(HE*) * 2 - MALLOC_OVERHEAD)
 #endif
+
+/* Flags for hv_iternext_flags.  */
+#define HV_ITERNEXT_WANTPLACEHOLDERS	0x01	/* Don't skip placeholders.  */
 
 /* available as a function in hv.c */
 #define Perl_sharepvn(sv, len, hash) HEK_KEY(share_hek(sv, len, hash))

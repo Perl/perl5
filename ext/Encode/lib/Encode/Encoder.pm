@@ -1,10 +1,10 @@
 #
-# $Id: Encoder.pm,v 0.3 2002/04/10 22:28:40 dankogai Exp dankogai $
+# $Id: Encoder.pm,v 0.4 2002/04/12 20:23:05 dankogai Exp dankogai $
 #
 package Encode::Encoder;
 use strict;
 use warnings;
-our $VERSION = do { my @r = (q$Revision: 0.3 $ =~ /\d+/g); sprintf "%d."."%02d"  x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 0.4 $ =~ /\d+/g); sprintf "%d."."%02d"  x $#r, @r };
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -104,7 +104,7 @@ Encode::Encoder -- Object Oriented Encoder
        
   use Encode::Encoder;
   # Encode::encode("ISO-8859-1", $data); 
-  Encoder->new($data)->iso_8859_1; # OOP way
+  Encode::Encoder->new($data)->iso_8859_1; # OOP way
   # shortcut
   use Encode::Encoder qw(encoder);
   encoder($data)->iso_8859_1;

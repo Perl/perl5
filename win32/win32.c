@@ -1284,6 +1284,18 @@ win32_stat(const char *path, struct stat *sbuf)
     return res;
 }
 
+#define isSLASH(c) ((c) == '/' || (c) == '\\')
+#define SKIP_SLASHES(s) \
+    STMT_START {				\
+	while (*(s) && isSLASH(*(s)))		\
+	    ++(s);				\
+    } STMT_END
+#define COPY_NONSLASHES(d,s) \
+    STMT_START {				\
+	while (*(s) && !isSLASH(*(s)))		\
+	    *(d)++ = *(s)++;			\
+    } STMT_END
+
 /* Find the longname of a given path.  path is destructively modified.
  * It should have space for at least MAX_PATH characters. */
 DllExport char *
@@ -1299,61 +1311,74 @@ win32_longpath(char *path)
 	return Nullch;
 
     /* drive prefix */
-    if (isALPHA(path[0]) && path[1] == ':' &&
-	(path[2] == '/' || path[2] == '\\'))
-    {
+    if (isALPHA(path[0]) && path[1] == ':') {
 	start = path + 2;
 	*tmpstart++ = path[0];
 	*tmpstart++ = ':';
     }
     /* UNC prefix */
-    else if ((path[0] == '/' || path[0] == '\\') &&
-	     (path[1] == '/' || path[1] == '\\'))
-    {
+    else if (isSLASH(path[0]) && isSLASH(path[1])) {
 	start = path + 2;
 	*tmpstart++ = path[0];
 	*tmpstart++ = path[1];
-	/* copy machine name */
-	while (*start && *start != '/' && *start != '\\')
-	    *tmpstart++ = *start++;
+	SKIP_SLASHES(start);
+	COPY_NONSLASHES(tmpstart,start);	/* copy machine name */
 	if (*start) {
-	    *tmpstart++ = *start;
-	    start++;
-	    /* copy share name */
-	    while (*start && *start != '/' && *start != '\\')
-		*tmpstart++ = *start++;
+	    *tmpstart++ = *start++;
+	    SKIP_SLASHES(start);
+	    COPY_NONSLASHES(tmpstart,start);	/* copy share name */
 	}
     }
-    sep = *start++;
-    if (sep == '/' || sep == '\\')
-	*tmpstart++ = sep;
     *tmpstart = '\0';
-    while (sep) {
-	/* walk up to slash */
-	while (*start && *start != '/' && *start != '\\')
-	    ++start;
+    while (*start) {
+	/* copy initial slash, if any */
+	if (isSLASH(*start)) {
+	    *tmpstart++ = *start++;
+	    *tmpstart = '\0';
+	    SKIP_SLASHES(start);
+	}
 
-	/* discard doubled slashes */
-	while (*start && (start[1] == '/' || start[1] == '\\'))
+	/* FindFirstFile() expands "." and "..", so we need to pass
+	 * those through unmolested */
+	if (*start == '.'
+	    && (!start[1] || isSLASH(start[1])
+		|| (start[1] == '.' && (!start[2] || isSLASH(start[2])))))
+	{
+	    COPY_NONSLASHES(tmpstart,start);	/* copy "." or ".." */
+	    *tmpstart = '\0';
+	    continue;
+	}
+
+	/* if this is the end, bust outta here */
+	if (!*start)
+	    break;
+
+	/* now we're at a non-slash; walk up to next slash */
+	while (*start && !isSLASH(*start))
 	    ++start;
-	sep = *start;
 
 	/* stop and find full name of component */
+	sep = *start;
 	*start = '\0';
 	fhand = FindFirstFile(path,&fdata);
+	*start = sep;
 	if (fhand != INVALID_HANDLE_VALUE) {
-	    strcpy(tmpstart, fdata.cFileName);
-	    tmpstart += strlen(fdata.cFileName);
-	    if (sep)
-		*tmpstart++ = sep;
-	    *tmpstart = '\0';
-	    *start++ = sep;
-	    FindClose(fhand);
+	    STRLEN len = strlen(fdata.cFileName);
+	    if ((STRLEN)(tmpbuf + sizeof(tmpbuf) - tmpstart) > len) {
+		strcpy(tmpstart, fdata.cFileName);
+		tmpstart += len;
+		FindClose(fhand);
+	    }
+	    else {
+		FindClose(fhand);
+		errno = ERANGE;
+		return Nullch;
+	    }
 	}
 	else {
 	    /* failed a step, just return without side effects */
 	    /*PerlIO_printf(Perl_debug_log, "Failed to find %s\n", path);*/
-	    *start = sep;
+	    errno = EINVAL;
 	    return Nullch;
 	}
     }

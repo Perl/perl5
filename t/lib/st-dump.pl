@@ -11,9 +11,27 @@
 ;#
 
 sub ok {
-	my ($num, $ok) = @_;
-	print "not " unless $ok;
-	print "ok $num\n";
+	my ($num, $ok, $name) = @_;
+        $num .= " - $name" if defined $name and length $name;
+	print $ok ? "ok $num\n" : "not ok $num\n";
+        $ok;
+}
+
+sub num_equal {
+	my ($num, $left, $right, $name) = @_;
+        my $ok = ((defined $left) ? $left == $right : undef);
+        unless (ok ($num, $ok, $name)) {
+          print "# Expected $right\n";
+          if (!defined $left) {
+            print "# Got undef\n";
+          } elsif ($left !~ tr/0-9//c) {
+            print "# Got $left\n";
+          } else {
+            $left =~ s/([^-a-zA-Z0-9_+])/sprintf "\\%03o", ord $1/ge;
+            print "# Got \"$left\"\n";
+          }
+        }
+        $ok;
 }
 
 package dump;
