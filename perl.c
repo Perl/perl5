@@ -3402,8 +3402,8 @@ S_incpush(pTHX_ char *p, int addsubdirs, int addoldvers)
 		    av_push(GvAVn(PL_incgv), newSVsv(subdir));
 	    }
 
-	    if (addoldvers) {
 #ifdef PERL_INC_VERSION_LIST
+	    if (addoldvers) {
 		for (incver = incverlist; *incver; incver++) {
 		    /* .../xxx if -d .../xxx */
 		    Perl_sv_setpvf(aTHX_ subdir, "%"SVf"/%s", libdir, *incver);

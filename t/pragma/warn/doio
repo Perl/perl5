@@ -156,7 +156,7 @@ Can't exec "lskdjfalksdjfdjfkls(:? abc)?": .+
 ########
 # doio.c [Perl_nextargv]
 $^W = 0 ;
-my $filename = "./temp" ;
+my $filename = "./temp.dir" ;
 mkdir $filename, 0777 
   or die "Cannot create directory $filename: $!\n" ;
 {
@@ -178,8 +178,8 @@ mkdir $filename, 0777
 }
 rmdir $filename ;
 EXPECT
-Can't do inplace edit: ./temp is not a regular file at - line 9.
-Can't do inplace edit: ./temp is not a regular file at - line 21.
+Can't do inplace edit: ./temp.dir is not a regular file at - line 9.
+Can't do inplace edit: ./temp.dir is not a regular file at - line 21.
 
 ########
 # doio.c [Perl_do_eof]

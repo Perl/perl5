@@ -197,14 +197,14 @@ scalar and a typeglob.  See L<perlsub/Prototypes>.
 =head2 On 64-bit platforms the semantics of bit operators have changed
 
 If your platform is either natively 64-bit or your Perl has been
-configured to used 64-bit integers (say C<perl -V> and see what is
-your ivsize: if it is 8, you are 64-bit) , be warned that the
-semantics of all the bitwise numeric operators (& | ^ ~ << >>) have
-been changed.  They used to be forced to be 32 bits wide, but now in
-the aforementioned platforms they are 64 bits wide.  Most dramatically
-this affects the unary ~: what used to be 32 bits wide, is now 64 bits
-wide.  If you depend on your integers being 32 bits wide, mask off the
-excess bits with C<& 0xffffffff>.
+configured to used 64-bit integers, i.e., $Config{ivsize} is 8, 
+be warned that the semantics of all the bitwise numeric operators
+(& | ^ ~ << >>) have been changed.  These operators used to strictly
+operate on the lower 32 bits of integers, but now operate over the
+entire width of native integers.  In particular, note that unary C<~>
+will produce different results on platforms that have different
+$Config{ivsize}.  For portability, be sure to mask off the excess bits
+in the result of unary C<~>, e.g., C<~$x & 0xffffffff>.
 
 =back
 
@@ -215,7 +215,7 @@ excess bits with C<& 0xffffffff>.
 =item C<PERL_POLLUTE>
 
 Release 5.005 grandfathered old global symbol names by providing preprocessor
-macros for extension source compatibility.  As of release 5.6, these
+macros for extension source compatibility.  As of release 5.6.0, these
 preprocessor definitions are not available by default.  You need to explicitly
 compile perl with C<-DPERL_POLLUTE> to get these definitions.  For
 extensions still using the old symbols, this option can be
@@ -225,9 +225,9 @@ specified via MakeMaker:
 
 =item C<PERL_IMPLICIT_CONTEXT>
 
-PERL_IMPLICIT_CONTEXT is automatically enabled whenever Perl is built
-with one of -Dusethreads, -Dusemultiplicity, or both.  It is not
-intended to be enabled by users at this time.
+    NOTE: PERL_IMPLICIT_CONTEXT is automatically enabled whenever Perl is built
+    with one of -Dusethreads, -Dusemultiplicity, or both.  It is not
+    intended to be enabled by users at this time.
 
 This new build option provides a set of macros for all API functions
 such that an implicit interpreter/thread context argument is passed to
@@ -246,22 +246,20 @@ Perl, whose interfaces continue to match those of prior versions
 (but subject to the other options described here).
 
 See L<perlguts/"The Perl API"> for detailed information on the
-ramifications of building Perl using this option.
+ramifications of building Perl with this option.
 
 =item C<PERL_POLLUTE_MALLOC>
 
-Enabling Perl's malloc in release 5.005 and earlier caused
-the namespace of system versions of the malloc family of functions to
-be usurped by the Perl versions, since by default they used the
-same names.
+Enabling Perl's malloc in release 5.005 and earlier caused the namespace of
+the system's malloc family of functions to be usurped by the Perl versions,
+since by default they used the same names.  Besides causing problems on
+platforms that do not allow these functions to be cleanly replaced, this
+also meant that the system versions could not be called in programs that
+used Perl's malloc.  Previous versions of Perl have allowed this behaviour
+to be suppressed with the HIDEMYMALLOC and EMBEDMYMALLOC preprocessor
+definitions.
 
-Besides causing problems on platforms that do not allow these functions to
-be cleanly replaced, this also meant that the system versions could not
-be called in programs that used Perl's malloc.  Previous versions of Perl
-have allowed this behaviour to be suppressed with the HIDEMYMALLOC and
-EMBEDMYMALLOC preprocessor definitions.
-
-As of release 5.6, Perl's malloc family of functions have default names
+As of release 5.6.0, Perl's malloc family of functions have default names
 distinct from the system versions.  You need to explicitly compile perl with
 C<-DPERL_POLLUTE_MALLOC> to get the older behaviour.  HIDEMYMALLOC
 and EMBEDMYMALLOC have no effect, since the behaviour they enabled is now
@@ -316,17 +314,17 @@ For the full list of public API functions, see L<perlapi>.
 
 =head2 -Dusethreads means something different
 
-WARNING: Support for threads continues to be an experimental feature.
-Interfaces and implementation are subject to sudden and drastic changes.
+    WARNING: Support for threads continues to be an experimental feature.
+    Interfaces and implementation are subject to sudden and drastic changes.
 
 The -Dusethreads flag now enables the experimental interpreter-based thread
 support by default.  To get the flavor of experimental threads that was in
 5.005 instead, you need to run Configure with "-Dusethreads -Duse5005threads".
 
-As of v5.5.640, interpreter-threads support is still lacking a way to
+As of v5.6.0, interpreter-threads support is still lacking a way to
 create new threads from Perl (i.e., C<use Thread;> will not work with
 interpreter threads).  C<use Thread;> continues to be available when you
-ask for use5005threads, bugs and all.
+specify the -Duse5005threads option to Configure, bugs and all.
 
 =head2 New Configure flags
 
@@ -354,7 +352,7 @@ capabilities.  In other words: if your operating system has the
 necessary APIs and datatypes, you should be able just to go ahead and
 use them, for threads by Configure -Dusethreads, and for 64 bits
 either explicitly by Configure -Duse64bitint or implicitly if your
-system has 64 bit wide datatypes.  See also L<"64-bit support">.
+system has 64-bit wide datatypes.  See also L<"64-bit support">.
 
 =head2 Long Doubles
 
@@ -364,12 +362,15 @@ Perl's scalars, use -Duselongdouble.
 
 =head2 -Dusemorebits
 
-You can enable both -Duse64bitint and -Dlongdouble by -Dusemorebits.
+You can enable both -Duse64bitint and -Duselongdouble with -Dusemorebits.
 See also L<"64-bit support">.
 
 =head2 -Duselargefiles
 
-Some platforms support large files, files larger than two gigabytes.
+Some platforms support system APIs that are capable of handling large files
+(typically, files larger than two gigabytes).  Perl will try to use these
+APIs if you ask for -Duselargefiles.
+
 See L<"Large file support"> for more information. 
 
 =head2 installusrbinperl
@@ -382,13 +383,15 @@ because many scripts assume to find Perl in /usr/bin/perl.
 =head2 SOCKS support
 
 You can use "Configure -Dusesocks" which causes Perl to probe
-for the SOCKS (v5, not v4) proxy protocol library,
-http://www.socks.nec.com/
+for the SOCKS proxy protocol library (v5, not v4).  For more information
+on SOCKS, see:
+
+    http://www.socks.nec.com/
 
 =head2 C<-A> flag
 
 You can "post-edit" the Configure variables using the Configure C<-A>
-flag.  The editing happens immediately after the platform specific
+switch.  The editing happens immediately after the platform specific
 hints files have been processed but before the actual configuration
 process starts.  Run C<Configure -h> to find out the full C<-A> syntax.
 
@@ -413,8 +416,8 @@ See INSTALL for complete details.
 
 =head2 Unicode and UTF-8 support
 
-WARNING: This is an experimental feature.  Implementation details are
-subject to change.
+    WARNING: This is an experimental feature.  Implementation details are
+    subject to change.
 
 Perl now uses UTF-8 as its internal representation for character
 strings.  The C<utf8> and C<bytes> pragmas are used to control this support
@@ -423,8 +426,8 @@ more information.
 
 =head2 Interpreter cloning, threads, and concurrency
 
-WARNING: This is an experimental feature.  Implementation details are
-subject to change.
+    WARNING: This is an experimental feature.  Implementation details are
+    subject to change.
 
 Perl 5.005_63 introduces the beginnings of support for running multiple
 interpreters concurrently in different threads.  In conjunction with
@@ -451,12 +454,12 @@ how to enable it on Windows.)  The resulting perl executable will be
 functionally identical to one that was built with -Dmultiplicity, but
 the perl_clone() API call will only be available in the former.
 
--Dusethreads enables, the cpp macros USE_ITHREADS by default, which enables
-Perl source code changes that provide a clear separation between the op tree
-and the data it operates with.  The former is considered immutable, and can
-therefore be shared between an interpreter and all of its clones, while the
-latter is considered local to each interpreter, and is therefore copied for
-each clone.
+-Dusethreads enables the cpp macro USE_ITHREADS by default, which in turn
+enables Perl source code changes that provide a clear separation between
+the op tree and the data it operates with.  The former is immutable, and
+can therefore be shared between an interpreter and all of its clones,
+while the latter is considered local to each interpreter, and is therefore
+copied for each clone.
 
 Note that building Perl with the -Dusemultiplicity Configure option
 is adequate if you wish to run multiple B<independent> interpreters
@@ -472,7 +475,7 @@ for details.
 
 =head2 Lvalue subroutines
 
-WARNING: This is an experimental feature.  Details are subject to change.
+    WARNING: This is an experimental feature.  Details are subject to change.
 
 Subroutines can now return modifiable lvalues.
 See L<perlsub/"Lvalue subroutines">.
@@ -506,7 +509,7 @@ the perl version as a string), such literals can be used as a readable way
 to check if you're running a particular version of Perl:
 
     # this will parse in older versions of Perl also
-    if ($^V and $^V gt v5.5.640) {
+    if ($^V and $^V gt v5.6.0) {
         # new features supported
     }
 
@@ -532,7 +535,7 @@ See L<perldata/"Scalar value constructors"> for additional information.
 
 =head2 Weak references
 
-WARNING: This is an experimental feature.
+    WARNING: This is an experimental feature.
 
 In previous versions of Perl, you couldn't cache objects so as
 to allow them to be deleted if the last reference from outside 
@@ -556,8 +559,8 @@ contains additional documentation.
 
 =head2 File globbing implemented internally
 
-WARNING: This is currently an experimental feature.  Interfaces and
-implementation are likely to change.
+    WARNING: This is currently an experimental feature.  Interfaces and
+    implementation are likely to change.
 
 Perl now uses the File::Glob implementation of the glob() operator
 automatically.  This avoids using an external csh process and the
@@ -634,15 +637,21 @@ filehandles that must be passed around, as in the following example:
 	# $f implicitly closed here
     }
 
+=head2 open() with more than two arguments
+
+If open() is passed three arguments instead of two, the second arguments
+is used as the mode and the third argument is taken to be the file name.
+This is primarily useful for protecting against unintended magic behavior
+of the traditional two-argument form.  See L<perlfunc/open>.
 
 =head2 64-bit support
 
-	NOTE:	The Configure flags -Duselonglong and -Duse64bits
-		have been deprecated.  Use -Duse64bitint instead.
+    NOTE: The Configure flags -Duselonglong and -Duse64bits have been
+    deprecated.  Use -Duse64bitint instead.
 
 Any platform that has 64-bit integers either (a) natively as longs or
-ints (b) via special compiler flags (c) using long long are able to
-use "quads" (64-integers) as follows:
+ints (b) via special compiler flags, or (c) using long long are able to
+use "quads" (64-bit integers) as follows:
 
 =over 4
 
@@ -674,7 +683,7 @@ of the integer values may produce surprising results)
 =item *
 
 in bit arithmetics: & | ^ ~ << >> (NOTE: these used to be forced 
-to be 32 bits wide.)
+to be 32 bits wide but now operate on the full native width.)
 
 =item *
 
@@ -691,12 +700,12 @@ using Configure -Duse64bitint and the second one using Configure
 the second one maximal.  The first one does only as much as is
 required to get 64-bit integers into Perl (this may mean, for example,
 using "long longs") while your memory may still be limited to 2
-gigabytes (because your pointers most likely are 32-bit); the second
-one goes all the way by attempting to switch also longs (and pointers)
-being 64-bit.  This may create an even more binary incompatible Perl
-than -Duse64bitint: the resulting executable may not run at all in a
-CPU-bit box, or you may have to reboot/reconfigure/rebuild your
-operating system to be 64-bit aware.
+gigabytes (because your pointers are still allowed to be 32-bit); the
+second one goes all the way by attempting to switch also longs (and
+pointers) to being 64-bit.  This may create an even more binary
+incompatible Perl than -Duse64bitint: the resulting executable may not
+run at all in a 32-bit box, or you may have to reboot/reconfigure/rebuild
+your operating system to be 64-bit aware.
 
 Natively 64-bit systems like Alpha and Cray need neither -Duse64bitint
 nor -Duse64bitall.
@@ -706,14 +715,14 @@ floating point numbers the quads are still not true integers.
 When quads overflow their limits (0...18_446_744_073_709_551_615 unsigned,
 -9_223_372_036_854_775_808...9_223_372_036_854_775_807 signed), they
 are silently promoted to floating point numbers, after which they will
-start losing precision (their lower digits).
+start losing precision (in their lower digits).
 
 =head2 Large file support
 
 If you have filesystems that support "large files" (files larger than
 2 gigabytes), you may now also be able to create and access them from
 Perl.  You have to use Configure -Duselargefiles.  Turning on the
-large file support turns on also the 64-bit support on many platforms.
+large file support also turns on 64-bit support on many platforms.
 Beware that unless your filesystem also supports "sparse files" seeking
 to umpteen petabytes may be unadvisable.
 
@@ -749,7 +758,7 @@ and the long double support.
 
 =head2 Enhanced support for sort() subroutines
 
-Perl subroutines with a prototype of C<($$)> and XSUBs in general can
+Perl subroutines with a prototype of C<($$)>, and XSUBs in general, can
 now be used as sort subroutines.  In either case, the two elements to
 be compared are passed as normal parameters in @_.  See L<perlfunc/sort>.
 
@@ -867,13 +876,6 @@ the C<:> is optional.)
 F<AutoSplit.pm> and F<SelfLoader.pm> have been updated to keep the attributes
 with the stubs they provide.  See L<attributes>.
 
-=head2 open() with more than two arguments
-
-If open() is passed three arguments instead of two, the second arguments
-is used as the mode and the third argument is taken to be the file name.
-This is primarily useful for protecting against unintended magic behavior
-of the traditional two-argument form.  See L<perlfunc/open>.
-
 =head2 Support for interpolating named characters
 
 The new C<\N> escape interpolates named characters within strings.
@@ -900,7 +902,7 @@ only during normal running are warranted.  See L<perlvar>.
 =head2 New variable $^V contains Perl version as a string
 
 C<$^V> contains the Perl version number as a string composed of
-characters whose ordinals match the version numbers, e.g., v5.6.0.
+characters whose ordinals match the version numbers, i.e. v5.6.0.
 This may be used in string comparisons.
 
 See C<Support for strings represented as a vector of ordinals> for an
@@ -938,7 +940,7 @@ is unchanged (it continues to leave the file empty).
 =head2 C<eval '...'> improvements
 
 Line numbers (as reflected by caller() and most diagnostics) within
-C<eval '...'> were often incorrect when here documents were involved.
+C<eval '...'> were often incorrect where here documents were involved.
 This has been corrected.
 
 Lexical lookups for variables appearing in C<eval '...'> within
@@ -963,15 +965,14 @@ to queue compile-time errors and report them at the end of the
 compilation as true errors rather than as warnings.  This fixes
 cases where error messages leaked through in the form of warnings
 when code was compiled at run time using C<eval STRING>, and
-also allows such errors to be reliably trapped using __DIE__ hooks.
+also allows such errors to be reliably trapped using C<eval "...">.
 
 =head2 Automatic flushing of output buffers
 
 fork(), exec(), system(), qx//, and pipe open()s now flush buffers
-of all files opened for output when the operation
-was attempted.  This mostly eliminates confusing 
-buffering mishaps suffered by users unaware of how Perl internally
-handles I/O.
+of all files opened for output when the operation was attempted.  This
+mostly eliminates confusing buffering mishaps suffered by users unaware
+of how Perl internally handles I/O.
 
 This is not supported on some platforms like Solaris where a suitably
 correct implementation of fflush(NULL) isn't available.
@@ -1017,7 +1018,7 @@ inadvertently set $? or $!.  This has been corrected.
 
 =head2 C<(\$)> prototype and C<$foo{a}>
 
-An scalar reference prototype now correctly allows a hash or
+A scalar reference prototype now correctly allows a hash or
 array element in that slot.
 
 =head2 Pseudo-hashes work better
@@ -1075,7 +1076,8 @@ back to the default "C" locale.  This has been fixed.
 Numbers formatted according to the local numeric locale
 (such as using a decimal comma instead of a decimal dot) caused
 "isn't numeric" warnings, even while the operations accessing
-those numbers produced correct results.  The warnings are gone.
+those numbers produced correct results.  These warnings have been
+discontinued.
 
 =head2 Memory leaks
 
@@ -1136,7 +1138,7 @@ Embedded null characters in diagnostics now actually show up.  They
 used to truncate the message in prior versions.
 
 $foo::a and $foo::b are now exempt from "possible typo" warnings only
-if sort() is encountered in package foo.
+if sort() is encountered in package C<foo>.
 
 Unrecognized alphabetic escapes encountered when parsing quote
 constructs now generate a warning, since they may take on new
@@ -1207,11 +1209,11 @@ Environment variable names are not converted to uppercase any more.
 
 =item *
 
-Wrong exit code from backticks now fixed.
+Incorrect exit codes from backticks have been fixed.
 
 =item *
 
-This port is still using its own builtin globbing.
+This port continues to use its own builtin globbing (not File::Glob).
 
 =back
 
@@ -1228,41 +1230,43 @@ platform, but the possibility exists.
 =head2 VMS
 
 Numerous revisions and extensions to configuration, build, testing, and
-installation process to accomodate core changes and VMS-specific options
+installation process to accomodate core changes and VMS-specific options.
 
 Expand %ENV-handling code to allow runtime mapping to logical names,
-CLI symbols, and CRTL environ array
+CLI symbols, and CRTL environ array.
 
-Extension of subprocess invocation code to accept filespecs as command "verbs"
+Extension of subprocess invocation code to accept filespecs as command
+"verbs".
 
 Add to Perl command line processing the ability to use default file types and
-to recognize Unix-style C<2E<gt>&1>. 
+to recognize Unix-style C<2E<gt>&1>.
 
-Expansion of File::Spec::VMS routines, and integration into ExtUtils::MM_VMS
+Expansion of File::Spec::VMS routines, and integration into ExtUtils::MM_VMS.
 
-Extension of ExtUtils::MM_VMS to handle complex extensions more flexibly
+Extension of ExtUtils::MM_VMS to handle complex extensions more flexibly.
 
 Barewords at start of Unix-syntax paths may be treated as text rather than
-only as logical names
+only as logical names.
 
-Optional secure translation of several logical names used internally by Perl
+Optional secure translation of several logical names used internally by Perl.
 
-Miscellaneous bugfixing and porting of new core code to VMS
+Miscellaneous bugfixing and porting of new core code to VMS.
 
 Thanks are gladly extended to the many people who have contributed VMS
 patches, testing, and ideas.
 
 =head2 Win32
 
-Perl can now emulate fork() with multiple interpreters.  This support
-must be enabled at build time.  See L<perlfork> for detailed information.
+Perl can now emulate fork() internally, using multiple interpreters running
+in different concurrent threads.  This support must be enabled at build
+time.  See L<perlfork> for detailed information.
 
-When given a pathname that consists only of a drivename, such
-as C<A:>, opendir() and stat() now use the current working
-directory for the drive rather than the drive root.
+When given a pathname that consists only of a drivename, such as C<A:>,
+opendir() and stat() now use the current working directory for the drive
+rather than the drive root.
 
-The builtin XSUB functions in the Win32:: namespace are
-documented.  See L<Win32>.
+The builtin XSUB functions in the Win32:: namespace are documented.  See
+L<Win32>.
 
 $^X now contains the full path name of the running executable.
 
@@ -1280,7 +1284,7 @@ test whether a process exists.
 
 The C<Shell> module is supported.
 
-Rudimentary support for building under command.com in Windows 95
+Better support for building Perl under command.com in Windows 95
 has been added.
 
 Scripts are read in binary mode by default to allow ByteLoader (and
@@ -1294,9 +1298,9 @@ The glob() operator is implemented via the C<File::Glob> extension,
 which supports glob syntax of the C shell.  This increases the flexibility
 of the glob() operator, but there may be compatibility issues for
 programs that relied on the older globbing syntax.  If you want to
-preserve compatibility with the older syntax, you might want to put
-a C<use File::DosGlob;> in your program.  For details and compatibility
-information, see L<File::Glob>.
+preserve compatibility with the older syntax, you might want to run
+perl with C<-MFile::DosGlob>.  For details and compatibility information,
+see L<File::Glob>.
 
 =head1 New tests
 
@@ -1366,9 +1370,9 @@ See L<attributes>.
 
 =item B
 
-WARNING: The Compiler suite is still highly experimental.  The
-generated code may not be correct, even it manages to execute
-without errors.
+    WARNING: The Compiler suite remains highly experimental.  The
+    generated code may not be correct, even it manages to execute
+    without errors.
 
 The Perl Compiler suite has been extensively reworked for this
 release.  More of the standard Perl testsuite passes when run
@@ -1433,7 +1437,7 @@ Overall, Benchmark results exhibit lower average error and better timing
 accuracy.  
 
 You can now run tests for I<n> seconds instead of guessing the right
-number of tests to run: e.g. timethese(-5, ...) will run each 
+number of tests to run: e.g., timethese(-5, ...) will run each 
 code for at least 5 CPU seconds.  Zero as the "number of repetitions"
 means "for at least 3 CPU seconds".  The output format has also
 changed.  For example:
@@ -1701,7 +1705,7 @@ returns found pod files, along with their canonical names (like
 C<File::Spec::Unix>).  L<Pod::ParseUtils|Pod::ParseUtils> contains
 B<Pod::List> (useful for storing pod list information), B<Pod::Hyperlink>
 (for parsing the contents of C<LE<lt>E<gt>> sequences) and B<Pod::Cache>
-(for caching information about pod files, e.g. link nodes).
+(for caching information about pod files, e.g., link nodes).
 
 =item Pod::Select, podselect
 
@@ -2086,7 +2090,7 @@ for other types of variables in future.
 will interfere with proper determination of exit status of child
 processes, Perl has reset the signal to its default value.
 This situation typically indicates that the parent program under
-which Perl may be running (e.g. cron) is being very careless.
+which Perl may be running (e.g., cron) is being very careless.
 
 =item Can't modify non-lvalue subroutine call
 
@@ -2545,7 +2549,7 @@ There may also be information at http://www.perl.com/perl/, the Perl
 Home Page.
 
 If you believe you have an unreported bug, please run the B<perlbug>
-program included with your release.  Make sure to trim your bug down
+program included with your release.  Be sure to trim your bug down
 to a tiny but sufficient test case.  Your bug report, along with the
 output of C<perl -V>, will be sent off to perlbug@perl.com to be
 analysed by the Perl porting team.

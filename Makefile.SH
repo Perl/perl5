@@ -783,6 +783,9 @@ okfile:	utilities
 nok:	utilities
 	$(LDLIBPTH) ./perl -Ilib utils/perlbug -nok -s '(UNINSTALLED)'
 
+nokfile:	utilities
+	$(LDLIBPTH) ./perl -Ilib utils/perlbug -nok -s '(UNINSTALLED)' -F perl.nok
+
 clist:	$(c)
 	echo $(c) | tr ' ' $(TRNL) >.clist
 

@@ -207,7 +207,6 @@ BEGIN {
 [ "VMS->canonpath('')",                                    ''                        ],
 [ "VMS->canonpath('volume:[d1]file')",                     'volume:[d1]file'         ],
 [ "VMS->canonpath('volume:[d1.-.d2.][d3.d4.-]')",              'volume:[d1.-.d2.d3.d4.-]'  ],
-[ "VMS->canonpath('volume:[d1.-.d2.][d3.d4.-]',1)",              'volume:[d2.d3]'          ],
 [ "VMS->canonpath('volume:[000000.d1]d2.dir;1')",                 'volume:[d1]d2.dir;1'   ],
 
 [ "VMS->splitdir('')",            ''          ],
@@ -313,14 +312,17 @@ eval {
    require VMS::Filespec ;
 } ;
 
+my $skip_exception = "Install VMS::Filespec (from vms/ext)" ;
+
 if ( $@ ) {
    # Not pretty, but it allows testing of things not implemented soley
    # on VMS.  It might be better to change File::Spec::VMS to do this,
    # making it more usable when running on (say) Unix but working with
    # VMS paths.
    eval qq-
-      sub File::Spec::VMS::unixify { die "Install VMS::Filespec (from vms/ext)" } ;
-      sub File::Spec::VMS::vmspath { die "Install VMS::Filespec (from vms/ext)" } ;
+      sub File::Spec::VMS::vmsify  { die "$skip_exception" }
+      sub File::Spec::VMS::unixify { die "$skip_exception" }
+      sub File::Spec::VMS::vmspath { die "$skip_exception" }
    - ;
    $INC{"VMS/Filespec.pm"} = 1 ;
 }
@@ -366,8 +368,9 @@ sub tryfunc {
     }
 
     if ( $@ ) {
-	if ( $@ =~ /only provided on VMS/ ) {
-	    print "ok $current_test # skip $function \n" ;
+        if ( substr( $@, 0, length $skip_exception ) eq $skip_exception ) {
+	    chomp $@ ;
+	    print "ok $current_test # skip $function: $@\n" ;
 	}
 	else {
 	    chomp $@ ;

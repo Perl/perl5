@@ -1794,8 +1794,11 @@ Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
 	{
 	    struct semid_ds semds;
 	    union semun semun;
-
+#ifdef EXTRA_F_IN_SEMUN_BUF
+            semun.buff = &semds;
+#else
             semun.buf = &semds;
+#endif
 	    getinfo = (cmd == GETALL);
 	    if (Semctl(id, 0, IPC_STAT, semun) == -1)
 		return -1;
@@ -1850,7 +1853,11 @@ Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
 #ifdef Semctl
             union semun unsemds;
 
+#ifdef EXTRA_F_IN_SEMUN_BUF
+            unsemds.buff = (struct semid_ds *)a;
+#else
             unsemds.buf = (struct semid_ds *)a;
+#endif
 	    ret = Semctl(id, n, cmd, unsemds);
 #else
 	    Perl_croak(aTHX_ "%s not implemented", PL_op_desc[optype]);

@@ -150,8 +150,8 @@
      warn(format, arg)			fprintf(stderr, idem)
 
      # Locking/unlocking for MT operation
-     MALLOC_LOCK			MUTEX_LOCK_NOCONTEXT(&PL_malloc_mutex)
-     MALLOC_UNLOCK			MUTEX_UNLOCK_NOCONTEXT(&PL_malloc_mutex)
+     MALLOC_LOCK			MUTEX_LOCK(&PL_malloc_mutex)
+     MALLOC_UNLOCK			MUTEX_UNLOCK(&PL_malloc_mutex)
 
      # Locking/unlocking mutex for MT operation
      MUTEX_LOCK(l)			void
@@ -319,11 +319,11 @@
 #endif 
 
 #ifndef MALLOC_LOCK
-#  define MALLOC_LOCK		MUTEX_LOCK_NOCONTEXT(&PL_malloc_mutex)
+#  define MALLOC_LOCK		MUTEX_LOCK(&PL_malloc_mutex)
 #endif 
 
 #ifndef MALLOC_UNLOCK
-#  define MALLOC_UNLOCK		MUTEX_UNLOCK_NOCONTEXT(&PL_malloc_mutex)
+#  define MALLOC_UNLOCK		MUTEX_UNLOCK(&PL_malloc_mutex)
 #endif 
 
 #  ifndef fatalcroak				/* make depend */

@@ -358,10 +358,6 @@ best archives.  Just look up "*perl*" as a newsgroup.
 
 You'll probably want to trim that down a bit, though.
 
-ftp.cis.ufl.edu:/pub/perl/comp.lang.perl.*/monthly has an almost
-complete collection dating back to 12/89 (missing 08/91 through
-12/93).  They are kept as one large file for each month.
-
 You'll probably want more a sophisticated query and retrieval mechanism
 than a file listing, preferably one that allows you to retrieve
 articles using a fast-access indices, keyed on at least author, date,

@@ -441,6 +441,7 @@ unless ($define{'PERL_IMPLICIT_CONTEXT'}) {
 		    Perl_die_nocontext
 		    Perl_deb_nocontext
 		    Perl_form_nocontext
+		    Perl_load_module_nocontext
 		    Perl_mess_nocontext
 		    Perl_warn_nocontext
 		    Perl_warner_nocontext
