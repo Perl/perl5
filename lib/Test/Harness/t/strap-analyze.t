@@ -19,7 +19,9 @@ my $IsVMS = $^O eq 'VMS';
 
 # VMS uses native, not POSIX, exit codes.
 my $die_exit = $IsVMS ? 44 : 1;
-my $die_wait = $IsVMS ? 1024 : 256;
+
+# We can only predict that the wait status should be zero or not.
+my $wait_non_zero = 1;
 
 my %samples = (
    combined   => {
@@ -310,7 +312,7 @@ my %samples = (
                         passing     => 0,
 
                         'exit'      => $die_exit,
-                        'wait'      => $die_wait,
+                        'wait'      => $wait_non_zero,
 
                         max         => 0,
                         seen        => 0,
@@ -327,7 +329,7 @@ my %samples = (
                         passing     => 0,
 
                         'exit'      => $die_exit,
-                        'wait'      => $die_wait,
+                        'wait'      => $wait_non_zero,
 
                         max         => 0,
                         seen        => 4,
@@ -345,7 +347,7 @@ my %samples = (
                         passing     => 0,
 
                         'exit'      => $die_exit,
-                        'wait'      => $die_wait,
+                        'wait'      => $wait_non_zero,
 
                         max         => 4,
                         seen        => 4,
@@ -396,7 +398,7 @@ my %samples = (
                        },
 );
 
-plan tests => (keys(%samples) * 2) + 1;
+plan tests => (keys(%samples) * 3) + 1;
 
 use_ok('Test::Harness::Straps');
 
@@ -421,5 +423,11 @@ while( my($test, $expect) = each %samples ) {
 
     delete $expect->{details};
     delete $results{details};
+
+    # We can only check if it's zero or non-zero.
+    is( !!$results{'wait'}, !!$expect->{'wait'}, 'wait status' );
+    delete $results{'wait'};
+    delete $expect->{'wait'};
+
     is_deeply(\%results, $expect, "  the rest $test" );
 }
