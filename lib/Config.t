@@ -123,4 +123,7 @@ ok( exists $Config{d_fork}, "still d_fork");
 # (this is actually a regression test for Configure.)
 
 ok((split / /, $Config{sig_num}) == $Config{sig_size}, "sig_size");
-like($Config{sig_num}, qr/^[ \d]+\z/, "sig_num has only positive numbers");
+SKIP : {
+    if ($^O eq 'hpux') { skip "HP-UX has SIGRTM(IN|AX) == -1" }
+    like($Config{sig_num}, qr/^[ \d]+\z/, "sig_num has only positive numbers");
+}
