@@ -1,3 +1,8 @@
+3.06 - 2005-02-02
+
+    * fix cpan #11327: make fails with syntax error
+    * fix XCPT_* macros
+
 3.05 - 2005-01-31
 
     * fix a test for SvPV_nolen

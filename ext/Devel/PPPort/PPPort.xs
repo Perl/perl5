@@ -69,32 +69,8 @@
 /* ========== BEGIN XSMISC ================================================== */
 
 /* ---- from parts/inc/exception ---- */
-static void throws_exception(int throw_e)
-{
-  if (throw_e)
-    croak("boo\n");
-}
-
-static int exception(int throw_e)
-{
-  dTHR;
-  dXCPT;
-  SV *caught = get_sv("Devel::PPPort::exception_caught", 0);
-
-  XCPT_TRY_START {
-    throws_exception(throw_e);
-  } XCPT_TRY_END
-
-  XCPT_CATCH
-  {
-    sv_setiv(caught, 1);
-    XCPT_RETHROW;
-  }
-
-  sv_setiv(caught, 0);
-
-  return 42;
-}
+/* defined in module3.c */
+int exception(int throw_e);
 
 /* ---- from parts/inc/misc ---- */
 XS(XS_Devel__PPPort_dXSTARG);  /* prototype */

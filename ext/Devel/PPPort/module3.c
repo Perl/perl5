@@ -4,9 +4,9 @@
 *
 ********************************************************************************
 *
-*  $Revision: 5 $
+*  $Revision: 6 $
 *  $Author: mhx $
-*  $Date: 2005/01/31 08:10:50 +0100 $
+*  $Date: 2005/02/02 21:47:34 +0100 $
 *
 ********************************************************************************
 *
@@ -21,11 +21,41 @@
 
 #include "EXTERN.h"
 #include "perl.h"
+
+#define NO_XSLOCKS
 #include "XSUB.h"
 
 #include "ppport.h"
+
+static void throws_exception(int throw_e)
+{
+  if (throw_e)
+    croak("boo\n");
+}
+
+int exception(int throw_e)
+{
+  dTHR;
+  dXCPT;
+  SV *caught = get_sv("Devel::PPPort::exception_caught", 0);
+
+  XCPT_TRY_START {
+    throws_exception(throw_e);
+  } XCPT_TRY_END
+
+  XCPT_CATCH
+  {
+    sv_setiv(caught, 1);
+    XCPT_RETHROW;
+  }
+
+  sv_setiv(caught, 0);
+
+  return 42;
+}
 
 void call_newCONSTSUB_3(void)
 {
   newCONSTSUB(gv_stashpv("Devel::PPPort", FALSE), "test_value_3", newSViv(3));
 }
+

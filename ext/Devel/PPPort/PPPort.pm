@@ -884,7 +884,7 @@ require DynaLoader;
 use strict;
 use vars qw($VERSION @ISA $data);
 
-$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.05 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
+$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.06 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
 
 @ISA = qw(DynaLoader);
 
@@ -5792,24 +5792,20 @@ DPPP_(my_grok_oct)(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result)
 #endif
 #endif
 
-#ifdef dJMPENV
-
-#  ifndef dXCPT
+#ifdef NO_XSLOCKS
+#  ifdef dJMPENV
 #    define dXCPT             dJMPENV; int rEtV = 0
 #    define XCPT_TRY_START    JMPENV_PUSH(rEtV); if (rEtV == 0)
 #    define XCPT_TRY_END      JMPENV_POP;
 #    define XCPT_CATCH        if (rEtV != 0)
 #    define XCPT_RETHROW      JMPENV_JUMP(rEtV)
+#  else
+#    define dXCPT             Sigjmp_buf oldTOP; int rEtV = 0
+#    define XCPT_TRY_START    Copy(top_env, oldTOP, 1, Sigjmp_buf); rEtV = Sigsetjmp(top_env, 1); if (rEtV == 0)
+#    define XCPT_TRY_END      Copy(oldTOP, top_env, 1, Sigjmp_buf);
+#    define XCPT_CATCH        if (rEtV != 0)
+#    define XCPT_RETHROW      Siglongjmp(top_env, rEtV)
 #  endif
-
-#else
-
-#  define dXCPT             Sigjmp_buf oldTOP; int rEtV = 0
-#  define XCPT_TRY_START    Copy(top_env, oldTOP, 1, Sigjmp_buf); rEtV = Sigsetjmp(top_env, 1); if (rEtV == 0)
-#  define XCPT_TRY_END      Copy(oldTOP, top_env, 1, Sigjmp_buf);
-#  define XCPT_CATCH        if (rEtV != 0)
-#  define XCPT_RETHROW      Siglongjmp(top_env, rEtV)
-
 #endif
 
 #endif /* _P_P_PORTABILITY_H_ */
