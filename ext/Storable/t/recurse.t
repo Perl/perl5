@@ -25,7 +25,7 @@ sub ok;
 
 use Storable qw(freeze thaw dclone);
 
-print "1..32\n";
+print "1..33\n";
 
 package OBJ_REAL;
 
@@ -278,9 +278,43 @@ sub make {
 
 sub set_c2 { $_[0]->{c2} = $_[1] }
 
+#
+# Is the reference count of the extra references returned from a
+# STORABLE_freeze hook correct? [ID 20020601.005]
+#
+package Foo2;
+
+sub new {
+	my $self = bless {}, $_[0];
+	$self->{freezed} = "$self";
+	return $self;
+}
+
+sub DESTROY {
+	my $self = shift;
+	$::refcount_ok = 1 unless "$self" eq $self->{freezed};
+}
+
+package Foo3;
+
+sub new {
+	bless {}, $_[0];
+}
+
+sub STORABLE_freeze {
+	my $obj = shift;
+	return ("", $obj, Foo2->new);
+}
+
+sub STORABLE_thaw { } # Not really used
+
 package main;
+use vars qw($refcount_ok);
 
 my $o = CLASS_OTHER->make();
 my $c2 = CLASS_2->make($o);
 my $so = thaw freeze $o;
 
+$refcount_ok = 0;
+thaw freeze(Foo3->new);
+ok 33, $refcount_ok == 1;
