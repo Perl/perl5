@@ -1171,8 +1171,8 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 
     if (sv != left || (optype != OP_BIT_AND && !SvOK(sv) && !SvGMAGICAL(sv)))
 	sv_setpvn(sv, "", 0);	/* avoid undef warning on |= and ^= */
-    lsave = lc = SvPV_const(left, leftlen);
-    rsave = rc = SvPV_const(right, rightlen);
+    lsave = lc = SvPV_nomg_const(left, leftlen);
+    rsave = rc = SvPV_nomg_const(right, rightlen);
     len = leftlen < rightlen ? leftlen : rightlen;
     lensave = len;
     if ((left_utf || right_utf) && (sv == left || sv == right)) {
@@ -1180,9 +1180,7 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 	Newxz(dc, needlen + 1, char);
     }
     else if (SvOK(sv) || SvTYPE(sv) > SVt_PVMG) {
-	/* Fix this to nong when change 22613 is integrated.
-	   (Which in turn awaits merging sv_2iv and sv_2uv)  */
-	dc = SvPV_force_nolen(sv);
+	dc = SvPV_force_nomg_nolen(sv);
 	if (SvLEN(sv) < (STRLEN)(len + 1)) {
 	    dc = SvGROW(sv, (STRLEN)(len + 1));
 	    (void)memzero(dc + SvCUR(sv), len - SvCUR(sv) + 1);

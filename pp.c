@@ -2205,13 +2205,15 @@ PP(pp_bit_and)
     dSP; dATARGET; tryAMAGICbin(band,opASSIGN);
     {
       dPOPTOPssrl;
+      if (SvGMAGICAL(left)) mg_get(left);
+      if (SvGMAGICAL(right)) mg_get(right);
       if (SvNIOKp(left) || SvNIOKp(right)) {
 	if (PL_op->op_private & HINT_INTEGER) {
-	  const IV i = SvIV(left) & SvIV(right);
+	  const IV i = SvIV_nomg(left) & SvIV_nomg(right);
 	  SETi(i);
 	}
 	else {
-	  const UV u = SvUV(left) & SvUV(right);
+	  const UV u = SvUV_nomg(left) & SvUV_nomg(right);
 	  SETu(u);
 	}
       }
@@ -2228,13 +2230,15 @@ PP(pp_bit_xor)
     dSP; dATARGET; tryAMAGICbin(bxor,opASSIGN);
     {
       dPOPTOPssrl;
+      if (SvGMAGICAL(left)) mg_get(left);
+      if (SvGMAGICAL(right)) mg_get(right);
       if (SvNIOKp(left) || SvNIOKp(right)) {
 	if (PL_op->op_private & HINT_INTEGER) {
-	  const IV i = (USE_LEFT(left) ? SvIV(left) : 0) ^ SvIV(right);
+	  const IV i = (USE_LEFT(left) ? SvIV_nomg(left) : 0) ^ SvIV_nomg(right);
 	  SETi(i);
 	}
 	else {
-	  const UV u = (USE_LEFT(left) ? SvUV(left) : 0) ^ SvUV(right);
+	  const UV u = (USE_LEFT(left) ? SvUV_nomg(left) : 0) ^ SvUV_nomg(right);
 	  SETu(u);
 	}
       }
@@ -2251,13 +2255,15 @@ PP(pp_bit_or)
     dSP; dATARGET; tryAMAGICbin(bor,opASSIGN);
     {
       dPOPTOPssrl;
+      if (SvGMAGICAL(left)) mg_get(left);
+      if (SvGMAGICAL(right)) mg_get(right);
       if (SvNIOKp(left) || SvNIOKp(right)) {
 	if (PL_op->op_private & HINT_INTEGER) {
-	  const IV i = (USE_LEFT(left) ? SvIV(left) : 0) | SvIV(right);
+	  const IV i = (USE_LEFT(left) ? SvIV_nomg(left) : 0) | SvIV_nomg(right);
 	  SETi(i);
 	}
 	else {
-	  const UV u = (USE_LEFT(left) ? SvUV(left) : 0) | SvUV(right);
+	  const UV u = (USE_LEFT(left) ? SvUV_nomg(left) : 0) | SvUV_nomg(right);
 	  SETu(u);
 	}
       }
@@ -2352,13 +2358,15 @@ PP(pp_complement)
     dSP; dTARGET; tryAMAGICun(compl);
     {
       dTOPss;
+      if (SvGMAGICAL(sv))
+	  mg_get(sv);
       if (SvNIOKp(sv)) {
 	if (PL_op->op_private & HINT_INTEGER) {
-	  const IV i = ~SvIV(sv);
+	  const IV i = ~SvIV_nomg(sv);
 	  SETi(i);
 	}
 	else {
-	  const UV u = ~SvUV(sv);
+	  const UV u = ~SvUV_nomg(sv);
 	  SETu(u);
 	}
       }
@@ -2368,7 +2376,7 @@ PP(pp_complement)
 	STRLEN len;
 
 	(void)SvPV_nomg_const(sv,len); /* force check for uninit var */
-	SvSetSV(TARG, sv);
+	sv_setsv_nomg(TARG, sv);
 	tmps = (U8*)SvPV_force(TARG, len);
 	anum = len;
 	if (SvUTF8(TARG)) {

@@ -15,7 +15,7 @@ BEGIN {
 # If you find tests are failing, please try adding names to tests to track
 # down where the failure is, and supply your new names as a patch.
 # (Just-in-time test naming)
-plan tests => 49;
+plan tests => 148;
 
 # numerics
 ok ((0xdead & 0xbeef) == 0x9ead);
@@ -197,3 +197,149 @@ SKIP: {
     $b &= "b";
     ok($b =~ /b+$/, 'Unicode "b" is NUL-terminated');
 }
+
+require "./test.pl";
+curr_test(50);
+
+# double magic tests
+
+sub TIESCALAR { bless { value => $_[1], orig => $_[1] } }
+sub STORE { $_[0]{store}++; $_[0]{value} = $_[1] }
+sub FETCH { $_[0]{fetch}++; $_[0]{value} }
+sub stores { tied($_[0])->{value} = tied($_[0])->{orig};
+             delete(tied($_[0])->{store}) || 0 }
+sub fetches { delete(tied($_[0])->{fetch}) || 0 }
+
+# numeric double magic tests
+
+tie $x, "main", 1;
+tie $y, "main", 3;
+
+is(($x | $y), 3);
+is(fetches($x), 1);
+is(fetches($y), 1);
+is(stores($x), 0);
+is(stores($y), 0);
+
+is(($x & $y), 1);
+is(fetches($x), 1);
+is(fetches($y), 1);
+is(stores($x), 0);
+is(stores($y), 0);
+
+is(($x ^ $y), 2);
+is(fetches($x), 1);
+is(fetches($y), 1);
+is(stores($x), 0);
+is(stores($y), 0);
+
+is(($x |= $y), 3);
+is(fetches($x), 2);
+is(fetches($y), 1);
+is(stores($x), 1);
+is(stores($y), 0);
+
+is(($x &= $y), 1);
+is(fetches($x), 2);
+is(fetches($y), 1);
+is(stores($x), 1);
+is(stores($y), 0);
+
+is(($x ^= $y), 2);
+is(fetches($x), 2);
+is(fetches($y), 1);
+is(stores($x), 1);
+is(stores($y), 0);
+
+is(~~$y, 3);
+is(fetches($y), 1);
+is(stores($y), 0);
+
+{ use integer;
+
+is(($x | $y), 3);
+is(fetches($x), 1);
+is(fetches($y), 1);
+is(stores($x), 0);
+is(stores($y), 0);
+
+is(($x & $y), 1);
+is(fetches($x), 1);
+is(fetches($y), 1);
+is(stores($x), 0);
+is(stores($y), 0);
+
+is(($x ^ $y), 2);
+is(fetches($x), 1);
+is(fetches($y), 1);
+is(stores($x), 0);
+is(stores($y), 0);
+
+is(($x |= $y), 3);
+is(fetches($x), 2);
+is(fetches($y), 1);
+is(stores($x), 1);
+is(stores($y), 0);
+
+is(($x &= $y), 1);
+is(fetches($x), 2);
+is(fetches($y), 1);
+is(stores($x), 1);
+is(stores($y), 0);
+
+is(($x ^= $y), 2);
+is(fetches($x), 2);
+is(fetches($y), 1);
+is(stores($x), 1);
+is(stores($y), 0);
+
+is(~$y, -4);
+is(fetches($y), 1);
+is(stores($y), 0);
+
+} # end of use integer;
+
+# stringwise double magic tests
+
+tie $x, "main", "a";
+tie $y, "main", "c";
+
+is(($x | $y), ("a" | "c"));
+is(fetches($x), 1);
+is(fetches($y), 1);
+is(stores($x), 0);
+is(stores($y), 0);
+
+is(($x & $y), ("a" & "c"));
+is(fetches($x), 1);
+is(fetches($y), 1);
+is(stores($x), 0);
+is(stores($y), 0);
+
+is(($x ^ $y), ("a" ^ "c"));
+is(fetches($x), 1);
+is(fetches($y), 1);
+is(stores($x), 0);
+is(stores($y), 0);
+
+is(($x |= $y), ("a" | "c"));
+is(fetches($x), 2);
+is(fetches($y), 1);
+is(stores($x), 1);
+is(stores($y), 0);
+
+is(($x &= $y), ("a" & "c"));
+is(fetches($x), 2);
+is(fetches($y), 1);
+is(stores($x), 1);
+is(stores($y), 0);
+
+is(($x ^= $y), ("a" ^ "c"));
+is(fetches($x), 2);
+is(fetches($y), 1);
+is(stores($x), 1);
+is(stores($y), 0);
+
+is(~~$y, "c");
+is(fetches($y), 1);
+is(stores($y), 0);
