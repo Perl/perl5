@@ -3233,4 +3233,11 @@
 #define PERL_XS_APIVERSION "5.005"
 #define PERL_PM_APIVERSION "5.005"
 
+/* HAS_SIGPROCMASK:
+ *	This symbol, if defined, indicates that the sigprocmask
+ *	system call is available to examine or change the signal mask
+ *	of the calling process.
+ */
+/*#define HAS_SIGPROCMASK		/ **/
+
 #endif
