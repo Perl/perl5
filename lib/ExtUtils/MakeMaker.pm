@@ -3,7 +3,7 @@ package ExtUtils::MakeMaker;
 BEGIN {require 5.005_03;}
 
 $VERSION = '6.11';
-($Revision) = q$Revision: 1.117 $ =~ /Revision:\s+(\S+)/;
+($Revision) = q$Revision: 1.123 $ =~ /Revision:\s+(\S+)/;
 
 require Exporter;
 use Config;
@@ -92,6 +92,7 @@ my %Special_Sigs = (
  dynamic_lib=> 'hash',
  linkext    => 'hash',
  macro      => 'hash',
+ postamble  => 'hash',
  realclean  => 'hash',
  test       => 'hash',
  tool_autosplit => 'hash',
@@ -436,7 +437,12 @@ sub new {
         my $key;
         for $key (@Prepend_parent) {
             next unless defined $self->{PARENT}{$key};
-            $self->{$key} = $self->{PARENT}{$key};
+
+            # Don't stomp on WriteMakefile() args.
+            $self->{$key} = $self->{PARENT}{$key}
+                unless defined $self->{ARGS}{$key} and
+                       $self->{ARGS}{$key} eq $self->{$key};
+
             unless ($Is_VMS && $key =~ /PERL$/) {
                 $self->{$key} = $self->catdir("..",$self->{$key})
                   unless $self->file_name_is_absolute($self->{$key});
@@ -478,6 +484,7 @@ sub new {
     $self->init_dist;
     $self->init_INST;
     $self->init_INSTALL;
+    $self->init_DEST;
     $self->init_dirscan;
     $self->init_xs;
     $self->init_PERL;
@@ -1346,12 +1353,13 @@ Something like C<"-DHAVE_UNISTD_H">
 
 This is the root directory into which the code will be installed.  It
 I<prepends itself to the normal prefix>.  For example, if your code
-would normally go into /usr/local/lib/perl you could set DESTDIR=/tmp
+would normally go into /usr/local/lib/perl you could set DESTDIR=/tmp/
 and installation would go into /tmp/usr/local/lib/perl.
 
 This is primarily of use for people who repackage Perl modules.
 
-From the GNU Makefile conventions.
+NOTE: Due to the nature of make, it is important that you put the trailing
+slash on your DESTDIR.  "/tmp/" not "/tmp".
 
 =item DIR
 
@@ -2029,7 +2037,7 @@ MakeMaker object. The following lines will be parsed o.k.:
 
     $VERSION = '1.00';
     *VERSION = \'1.01';
-    $VERSION = sprintf "%d.%03d", q$Revision: 1.117 $ =~ /(\d+)/g;
+    $VERSION = sprintf "%d.%03d", q$Revision: 1.123 $ =~ /(\d+)/g;
     $FOO::VERSION = '1.10';
     *FOO::VERSION = \'1.11';
     our $VERSION = 1.2.3;       # new for perl5.6.0 
@@ -2089,7 +2097,8 @@ to the value of the VERSION attribute.
 =head2 Additional lowercase attributes
 
 can be used to pass parameters to the methods which implement that
-part of the Makefile.
+part of the Makefile.  Parameters are specified as a hash ref but are
+passed to the method as a hash.
 
 =over 2
 
@@ -2135,6 +2144,10 @@ be linked.
 =item macro
 
   {ANY_MACRO => ANY_VALUE, ...}
+
+=item postamble
+
+Anything put here will be passed to MY::postamble() if you have one.
 
 =item realclean
 
