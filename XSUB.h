@@ -316,6 +316,8 @@ C<xsubpp>.  See L<perlxs/"The VERSIONCHECK: Keyword">.
 #	undef setservent
 #endif	/* NETWARE */
 
+#    undef  socketpair
+
 #    define mkdir		PerlDir_mkdir
 #    define chdir		PerlDir_chdir
 #    define rmdir		PerlDir_rmdir

@@ -897,10 +897,11 @@ regen_config_h:
 	perl config_sh.PL --cfgsh-option-file $(mktmp $(CFG_VARS)) \
 	    $(CFGSH_TMPL) > ..\config.sh
 	-cd .. && del /f perl.exe
+	-cd .. && del /f perl*.dll
 	cd .. && perl configpm
 	-del /f $(CFGH_TMPL)
 	-mkdir $(COREDIR)
-	-perl -I..\lib config_h.PL "INST_VER=$(INST_VER)"
+	-perl config_h.PL "INST_VER=$(INST_VER)"
 	rename config.h $(CFGH_TMPL)
 
 $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl

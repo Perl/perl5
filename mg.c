@@ -1073,7 +1073,9 @@ Perl_raise_signal(pTHX_ int sig)
 Signal_t
 Perl_csighandler(int sig)
 {
-#ifndef PERL_OLD_SIGNALS
+#ifdef PERL_GET_SIG_CONTEXT
+    dTHXa(PERL_GET_SIG_CONTEXT);
+#else
     dTHX;
 #endif
 #ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS
@@ -2310,8 +2312,8 @@ static SV* sig_sv;
 Signal_t
 Perl_sighandler(int sig)
 {
-#if defined(WIN32) && defined(PERL_IMPLICIT_CONTEXT)
-    dTHXa(PL_curinterp);	/* fake TLS, because signals don't do TLS */
+#ifdef PERL_GET_SIG_CONTEXT
+    dTHXa(PERL_GET_SIG_CONTEXT);
 #else
     dTHX;
 #endif
@@ -2323,10 +2325,6 @@ Perl_sighandler(int sig)
     OP *myop = PL_op;
     U32 flags = 0;
     XPV *tXpv = PL_Xpv;
-
-#if defined(WIN32) && defined(PERL_IMPLICIT_CONTEXT)
-    PERL_SET_THX(aTHX);	/* fake TLS, see above */
-#endif
 
     if (PL_savestack_ix + 15 <= PL_savestack_max)
 	flags |= 1;
@@ -2481,3 +2479,6 @@ unwind_handler_stack(pTHX_ void *p)
 	SvREFCNT_dec(sig_sv);
 #endif
 }
+
+
+
