@@ -29,6 +29,10 @@
 #if !defined(HAS_SIGACTION) && defined(VMS)
 #  define  FAKE_PERSISTENT_SIGNAL_HANDLERS
 #endif
+/* if we're doing kill() with sys$sigprc on VMS, FAKE_DEFAULT_SIGNAL_HANDLERS */
+#if defined(KILL_BY_SIGPRC) 
+#  define  FAKE_DEFAULT_SIGNAL_HANDLERS
+#endif
 
 static void restore_magic(pTHX_ void *p);
 static void unwind_handler_stack(pTHX_ void *p);
@@ -992,9 +996,14 @@ Perl_magic_clear_all_env(pTHX_ SV *sv, MAGIC *mg)
     return 0;
 }
 
+#if defined(FAKE_PERSISTENT_SIGNAL_HANDLERS)||defined(FAKE_DEFAULT_SIGNAL_HANDLERS)
+static int sig_handlers_initted = 0;
+#endif
 #ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS   
-static int sig_ignoring_initted = 0;
 static int sig_ignoring[SIG_SIZE];      /* which signals we are ignoring */
+#endif
+#ifdef FAKE_DEFAULT_SIGNAL_HANDLERS
+static int sig_defaulting[SIG_SIZE];
 #endif
 
 #ifndef PERL_MICRO
@@ -1010,13 +1019,13 @@ Perl_magic_getsig(pTHX_ SV *sv, MAGIC *mg)
     	    sv_setsv(sv,PL_psig_ptr[i]);
     	else {
     	    Sighandler_t sigstate;
-#ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS
-    	    if (sig_ignoring_initted && sig_ignoring[i]) 
-    	      sigstate = SIG_IGN;
-    	    else
-#endif
     	    sigstate = rsignal_state(i);
-
+#ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS
+    	    if (sig_handlers_initted && sig_ignoring[i]) sigstate = SIG_IGN;
+#endif
+#ifdef FAKE_DEFAULT_SIGNAL_HANDLERS
+    	    if (sig_handlers_initted && sig_defaulting[i]) sigstate = SIG_DFL;
+#endif
     	    /* cache state so we don't fetch it again */
     	    if(sigstate == SIG_IGN)
     	    	sv_setpv(sv,"IGNORE");
@@ -1067,6 +1076,15 @@ Perl_csighandler(int sig)
     (void) rsignal(sig, &Perl_csighandler);
     if (sig_ignoring[sig]) return;
 #endif
+#ifdef FAKE_DEFAULT_SIGNAL_HANDLERS
+    if (sig_defaulting[sig]) 
+#ifdef KILL_BY_SIGPRC
+            exit((Perl_sig_to_vmscondition(sig)&STS$M_COND_ID)|STS$K_SEVERE|STS$M_INHIB_MSG);
+#else
+            exit(1);
+#endif
+#endif
+
 #ifdef PERL_OLD_SIGNALS
     /* Call the perl level handler now with risk we may be in malloc() etc. */
     (*PL_sighandlerp)(sig);
@@ -1074,6 +1092,26 @@ Perl_csighandler(int sig)
     Perl_raise_signal(aTHX_ sig);
 #endif
 }
+
+#if defined(FAKE_PERSISTENT_SIGNAL_HANDLERS) || defined(FAKE_DEFAULT_SIGNAL_HANDLERS)
+void
+Perl_csighandler_init(void)
+{
+    int sig;
+    if (sig_handlers_initted) return;
+
+    for (sig = 1; sig < SIG_SIZE; sig++) {
+#ifdef FAKE_DEFAULT_SIGNAL_HANDLERS
+        sig_defaulting[sig] = 1;
+        (void) rsignal(sig, &Perl_csighandler);
+#endif
+#ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS
+        sig_ignoring[sig] = 0;
+#endif
+    }
+    sig_handlers_initted = 1;
+}
+#endif
 
 void
 Perl_despatch_signals(pTHX)
@@ -1117,13 +1155,14 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 		Perl_warner(aTHX_ WARN_SIGNAL, "No such signal: SIG%s", s);
 	    return 0;
 	}
+#if defined(FAKE_PERSISTENT_SIGNAL_HANDLERS) || defined(FAKE_DEFAULT_SIGNAL_HANDLERS)
+	if (!sig_handlers_initted) Perl_csighandler_init();
+#endif
 #ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS
-	if (!sig_ignoring_initted) {
-	    int j;
-	    for (j = 0; j < SIG_SIZE; j++) sig_ignoring[j] = 0;
-	    sig_ignoring_initted = 1;
-	}
 	sig_ignoring[i] = 0;
+#endif
+#ifdef FAKE_DEFAULT_SIGNAL_HANDLERS
+	  sig_defaulting[i] = 0;
 #endif
 	SvREFCNT_dec(PL_psig_name[i]);
 	SvREFCNT_dec(PL_psig_ptr[i]);
@@ -1153,7 +1192,14 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
     }
     else if (strEQ(s,"DEFAULT") || !*s) {
 	if (i)
+#ifdef FAKE_DEFAULT_SIGNAL_HANDLERS
+	  {
+	    sig_defaulting[i] = 1;
+	    (void)rsignal(i, &Perl_csighandler);
+	  }
+#else
 	    (void)rsignal(i, SIG_DFL);
+#endif
 	else
 	    *svp = 0;
     }

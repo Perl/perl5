@@ -1125,14 +1125,10 @@ Perl_my_sigaction (pTHX_ int sig, const struct sigaction* act,
 
 #define _MY_SIG_MAX 17
 
-int
-Perl_my_kill(int pid, int sig)
+unsigned int
+Perl_sig_to_vmscondition(int sig)
 {
-    int iss;
-    int sys$sigprc(unsigned int *pidadr,
-                     struct dsc$descriptor_s *prcname,
-                     unsigned int code);
-    static unsigned long sig_code[_MY_SIG_MAX+1] = 
+    static unsigned int sig_code[_MY_SIG_MAX+1] = 
     {
         0,                  /*  0 ZERO     */
         SS$_HANGUP,         /*  1 SIGHUP   */
@@ -1167,11 +1163,28 @@ Perl_my_kill(int pid, int sig)
     }
 #endif
 
-    if (!pid || sig < _SIG_MIN || sig > _SIG_MAX || sig > _MY_SIG_MAX || !sig_code[sig]) {
+    if (sig < _SIG_MIN) return 0;
+    if (sig > _MY_SIG_MAX) return 0;
+    return sig_code[sig];
+}
+
+
+int
+Perl_my_kill(int pid, int sig)
+{
+    int iss;
+    unsigned int code;
+    int sys$sigprc(unsigned int *pidadr,
+                     struct dsc$descriptor_s *prcname,
+                     unsigned int code);
+
+    code = Perl_sig_to_vmscondition(sig);
+
+    if (!pid || !code) {
         return -1;
     }
 
-    iss = sys$sigprc((unsigned int *)&pid,0,sig_code[sig]);
+    iss = sys$sigprc((unsigned int *)&pid,0,code);
     if (iss&1) return 0;
 
     switch (iss) {
@@ -4386,6 +4399,10 @@ vms_image_init(int *argcp, char ***argvp)
                                  {sizeof rlst,  JPI$_RIGHTSLIST, rlst,  &rlen},
                                  { sizeof rsz, JPI$_RIGHTS_SIZE, &rsz, &dummy},
                                  {          0,                0,    0,      0} };
+
+#ifdef KILL_BY_SIGPRC
+    (void) Perl_csighandler_init();
+#endif
 
   _ckvmssts_noperl(sys$getjpiw(0,NULL,NULL,jpilist,iosb,NULL,NULL));
   _ckvmssts_noperl(iosb[0]);

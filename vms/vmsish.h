@@ -773,7 +773,9 @@ FILE *	Perl_my_tmpfile ();
 int	Perl_my_sigaction (pTHX_ int, const struct sigaction*, struct sigaction*);
 #endif
 #ifdef KILL_BY_SIGPRC
+unsigned int	Perl_sig_to_vmscondition (int);
 int	Perl_my_kill (int, int);
+void	Perl_csighandler_init (void);
 #endif
 int	Perl_my_utime (pTHX_ char *, struct utimbuf *);
 void	Perl_vms_image_init (int *, char ***);
