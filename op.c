@@ -4447,6 +4447,9 @@ Perl_newCONSTSUB(pTHX_ HV *stash, char *name, SV *sv)
     CvCONST_on(cv);
     sv_setpv((SV*)cv, "");  /* prototype is "" */
 
+    if (stash)
+	CopSTASH_free(PL_curcop);
+
     LEAVE;
 
     return cv;
