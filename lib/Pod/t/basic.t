@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: basic.t,v 1.1 2001/11/23 10:09:06 eagle Exp $
+# $Id: basic.t,v 1.3 2001/11/26 09:24:37 eagle Exp $
 #
 # basic.t -- Basic tests for podlators.
 #
@@ -11,12 +11,13 @@
 BEGIN {
     chdir 't' if -d 't';
     if ($ENV{PERL_CORE}) {
-	@INC = '../lib';
+        @INC = '../lib';
     } else {
-	unshift (@INC, '../blib/lib');
+        unshift (@INC, '../blib/lib');
     }
+    unshift (@INC, '../blib/lib');
     $| = 1;
-    print "1..9\n";
+    print "1..11\n";
 }
 
 END {
@@ -29,11 +30,27 @@ use Pod::Text::Color;
 use Pod::Text::Overstrike;
 use Pod::Text::Termcap;
 
+# Find the path to the test source files.  This requires some fiddling when
+# these tests are run as part of Perl core.
+sub source_path {
+    my $file = shift;
+    if ($ENV{PERL_CORE}) {
+        require File::Spec;
+        my $updir = File::Spec->updir;
+        my $dir = File::Spec->catdir ($updir, 'lib', 'Pod', 't');
+        return File::Spec->catfile ($dir, $file);
+    } else {
+        return $file;
+    }
+}
+
 $loaded = 1;
 print "ok 1\n";
 
 # Hard-code a few values to try to get reproducible results.
-@ENV{qw(TERMCAP COLUMNS)} = ('co=80:do=^J:md=\E[1m:us=\E[4m:me=\E[m', 80);
+$ENV{COLUMNS} = 80;
+$ENV{TERM} = 'xterm';
+$ENV{TERMCAP} = 'xterm:co=80:do=^J:md=\E[1m:us=\E[4m:me=\E[m';
 
 # Map of translators to file extensions to find the formatted output to
 # compare against.
@@ -41,22 +58,10 @@ my %translators = ('Pod::Man'              => 'man',
                    'Pod::Text'             => 'txt',
                    'Pod::Text::Color'      => 'clr',
                    'Pod::Text::Overstrike' => 'ovr',
-                   # 'Pod::Text::Termcap'    => 'cap' # unportable
-		   );
+                   'Pod::Text::Termcap'    => 'cap');
 
 # Set default options to match those of pod2man and pod2text.
 %options = (sentence => 0);
-
-sub basic {
-    my $basic = shift;
-    if ($ENV{PERL_CORE}) {
-	require File::Spec;
-	return File::Spec->catfile(File::Spec->catdir(File::Spec->updir,
-						      "lib", "Pod", "t"),
-				   $basic);
-    }
-    return $basic;
-}
 
 my $n = 2;
 for (sort keys %translators) {
@@ -68,7 +73,7 @@ for (sort keys %translators) {
     # line.  That means that we don't check those things; oh well.  The header
     # changes with each version change or touch of the input file.
     if ($_ eq 'Pod::Man') {
-        $parser->parse_from_file (basic("basic.pod"), 'out.tmp');
+        $parser->parse_from_file (source_path ('basic.pod'), 'out.tmp');
         open (TMP, 'out.tmp') or die "Cannot open out.tmp: $!\n";
         open (OUTPUT, "> out.$translators{$_}")
             or die "Cannot create out.$translators{$_}: $!\n";
@@ -79,11 +84,12 @@ for (sort keys %translators) {
         close TMP;
         unlink 'out.tmp';
     } else {
-        $parser->parse_from_file (basic("basic.pod"), "out.$translators{$_}");
+        my $basic = source_path ('basic.pod');
+        $parser->parse_from_file ($basic, "out.$translators{$_}");
     }
     {
         local $/;
-        open (MASTER, basic("basic.$translators{$_}"))
+        open (MASTER, source_path ("basic.$translators{$_}"))
             or die "Cannot open basic.$translators{$_}: $!\n";
         open (OUTPUT, "out.$translators{$_}")
             or die "Cannot open out.$translators{$_}: $!\n";

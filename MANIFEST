@@ -1169,6 +1169,7 @@ lib/Pod/Parser.pm		Pod-Parser - define base class for parsing POD
 lib/Pod/ParseUtils.pm		Pod-Parser - pod utility functions
 lib/Pod/Plainer.pm		Pod migration utility module
 lib/Pod/Select.pm		Pod-Parser - select portions of POD docs
+lib/Pod/t/basic.cap		podlators test
 lib/Pod/t/basic.clr		podlators test
 lib/Pod/t/basic.man		podlators test
 lib/Pod/t/basic.ovr		podlators test

@@ -1,5 +1,5 @@
 # Pod::Text::Termcap -- Convert POD data to ASCII text with format escapes.
-# $Id: Termcap.pm,v 1.3 2001/11/15 08:04:18 eagle Exp $
+# $Id: Termcap.pm,v 1.4 2001/11/26 07:54:54 eagle Exp $
 #
 # Copyright 1999, 2001 by Russ Allbery <rra@stanford.edu>
 #
@@ -30,7 +30,7 @@ use vars qw(@ISA $VERSION);
 # Don't use the CVS revision as the version, since this module is also in Perl
 # core and too many things could munge CVS magic revision strings.  This
 # number should ideally be the same as the CVS revision in podlators, however.
-$VERSION = 1.03;
+$VERSION = 1.04;
 
 
 ##############################################################################
@@ -49,10 +49,11 @@ sub initialize {
     my $termios = POSIX::Termios->new;
     $termios->getattr;
     my $ospeed = $termios->getospeed;
-    my $term = Tgetent Term::Cap { TERM => undef, OSPEED => $ospeed };
-    $$self{BOLD} = $$term{_md} or die 'BOLD';
-    $$self{UNDL} = $$term{_us} or die 'UNDL';
-    $$self{NORM} = $$term{_me} or die 'NORM';
+    my $term;
+    eval { $term = Tgetent Term::Cap { TERM => undef, OSPEED => $ospeed } };
+    $$self{BOLD} = $$term{_md} || "\e[1m";
+    $$self{UNDL} = $$term{_us} || "\e[4m";
+    $$self{NORM} = $$term{_me} || "\e[m";
 
     unless (defined $$self{width}) {
         $$self{width} = $ENV{COLUMNS} || $$term{_co} || 78;
@@ -139,9 +140,17 @@ text using the correct termcap escape sequences for the current terminal.
 Apart from the format codes, it in all ways functions like Pod::Text.  See
 L<Pod::Text> for details and available options.
 
+=head NOTES
+
+This module uses Term::Cap to retrieve the formatting escape sequences for
+the current terminal, and falls back on the ECMA-48 (the same in this
+regard as ANSI X3.64 and ISO 6429, the escape codes also used by DEC VT100
+terminals) if the bold, underline, and reset codes aren't set in the
+termcap information.
+
 =head1 SEE ALSO
 
-L<Pod::Text>, L<Pod::Parser>
+L<Pod::Text>, L<Pod::Parser>, L<Term::Cap>
 
 =head1 AUTHOR
 

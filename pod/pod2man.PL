@@ -36,7 +36,7 @@ $Config{startperl}
 print OUT <<'!NO!SUBS!';
 
 # pod2man -- Convert POD data to formatted *roff input.
-# $Id: pod2man.PL,v 1.8 2001/11/05 04:55:47 eagle Exp $
+# $Id: pod2man.PL,v 1.9 2001/11/26 08:44:58 eagle Exp $
 #
 # Copyright 1999, 2000, 2001 by Russ Allbery <rra@stanford.edu>
 #
@@ -78,6 +78,10 @@ if ($options{official} && !defined $options{center}) {
 # Verbose is only our flag, not a Pod::Man flag.
 my $verbose = $options{verbose};
 delete $options{verbose};
+
+# This isn't a valid Pod::Man option and is only accepted for backwards
+# compatibility.
+delete $options{lax};
 
 # Initialize and run the formatter, pulling a pair of input and output off at
 # a time.
@@ -183,8 +187,9 @@ Print out usage information.
 
 =item B<-l>, B<--lax>
 
-Don't complain when required sections are missing.  Not currently used, as
-POD checking functionality is not yet implemented in Pod::Man.
+No longer used.  B<pod2man> used to check its input for validity as a manual
+page, but this should now be done by L<podchecker(1)> instead.  Accepted for
+backwards compatibility; this option no longer does anything.
 
 =item B<-n> I<name>, B<--name>=I<name>
 
@@ -273,8 +278,6 @@ L<Pod::Man> for more details.
 =head1 BUGS
 
 Lots of this documentation is duplicated from L<Pod::Man>.
-
-POD checking and the corresponding B<--lax> option don't work yet.
 
 =head1 NOTES
 
@@ -512,16 +515,16 @@ to later edit the documentation.  Note that many existing translators
 or URLs when wrapped in LE<lt>E<gt>, so don't do that.
 
 For additional information that may be more accurate for your specific
-system, see either man(5) or man(7) depending on your system manual section
-numbering conventions.
+system, see either L<man(5)> or L<man(7)> depending on your system manual
+section numbering conventions.
 
 =head1 SEE ALSO
 
-L<Pod::Man|Pod::Man>, L<Pod::Parser|Pod::Parser>, man(1), nroff(1),
-troff(1), man(7)
+L<Pod::Man>, L<Pod::Parser>, L<man(1)>, L<nroff(1)>, L<podchecker(1)>,
+L<troff(1)>, L<man(7)>
 
-The man page documenting the an macro set may be man(5) instead of man(7) on
-your system.
+The man page documenting the an macro set may be L<man(5)> instead of
+L<man(7)> on your system.
 
 =head1 AUTHOR
 

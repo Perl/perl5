@@ -1,5 +1,5 @@
 # Pod::Man -- Convert POD data to formatted *roff input.
-# $Id: Man.pm,v 1.28 2001/11/23 08:13:16 eagle Exp $
+# $Id: Man.pm,v 1.29 2001/11/26 08:35:15 eagle Exp $
 #
 # Copyright 1999, 2000, 2001 by Russ Allbery <rra@stanford.edu>
 #
@@ -38,7 +38,7 @@ use vars qw(@ISA %ESCAPES $PREAMBLE $VERSION);
 # Don't use the CVS revision as the version, since this module is also in Perl
 # core and too many things could munge CVS magic revision strings.  This
 # number should ideally be the same as the CVS revision in podlators, however.
-$VERSION = 1.28;
+$VERSION = 1.29;
 
 
 ##############################################################################
@@ -1176,7 +1176,7 @@ also be used directly.
 
 As a derived class from Pod::Parser, Pod::Man supports the same methods and
 interfaces.  See L<Pod::Parser> for all the details; briefly, one creates a
-new parser with C<Pod::Man-E<gt>new()> and then calls either
+new parser with C<< Pod::Man->new() >> and then calls either
 parse_from_filehandle() or parse_from_file().
 
 new() can take options, in the form of key/value pairs that control the
@@ -1201,10 +1201,10 @@ func(), func(3), and simple variable references like $foo or @bar so you
 don't have to use code escapes for them; complex expressions like
 C<$fred{'stuff'}> will still need to be escaped, though.  It also translates
 dashes that aren't used as hyphens into en dashes, makes long dashes--like
-this--into proper em dashes, fixes "paired quotes," makes C++ and PI look
-right, puts a little space between double underbars, makes ALLCAPS a teeny
-bit smaller in B<troff>, and escapes stuff that *roff treats as special so
-that you don't have to.
+this--into proper em dashes, fixes "paired quotes," makes C++ look right,
+puts a little space between double underbars, makes ALLCAPS a teeny bit
+smaller in B<troff>, and escapes stuff that *roff treats as special so that
+you don't have to.
 
 The recognized options to new() are as follows.  All options take a single
 argument.
@@ -1345,21 +1345,23 @@ C<=over> command.
 
 =head1 BUGS
 
-The lint-like features and strict POD format checking done by B<pod2man> are
-not yet implemented and should be, along with the corresponding C<lax>
-option.
+Eight-bit input data isn't handled at all well at present.  The correct
+approach would be to map EE<lt>E<gt> escapes to the appropriate UTF-8
+characters and then do a translation pass on the output according to the
+user-specified output character set.  Unfortunately, we can't send eight-bit
+data directly to the output unless the user says this is okay, since some
+vendor *roff implementations can't handle eight-bit data.  If the *roff
+implementation can, however, that's far superior to the current hacked
+characters that only work under troff.
+
+There is currently no way to turn off the guesswork that tries to format
+unmarked text appropriately, and sometimes it isn't wanted (particularly
+when using POD to document something other than Perl).
 
 The NAME section should be recognized specially and index entries emitted
 for everything in that section.  This would have to be deferred until the
 next section, since extraneous things in NAME tends to confuse various man
 page processors.
-
-The handling of hyphens and em dashes is somewhat fragile, and one may get
-the wrong one under some circumstances.  This should only matter for
-B<troff> output.
-
-When and whether to use small caps is somewhat tricky, and Pod::Man doesn't
-necessarily get it right.
 
 Pod::Man doesn't handle font names longer than two characters.  Neither do
 most B<troff> implementations, but GNU troff does as an extension.  It would
@@ -1371,6 +1373,15 @@ characters.  It would ideally be nice if all of those definitions were only
 output if needed, perhaps on the fly as the characters are used.
 
 Pod::Man is excessively slow.
+
+=head1 CAVEATS
+
+The handling of hyphens and em dashes is somewhat fragile, and one may get
+the wrong one under some circumstances.  This should only matter for
+B<troff> output.
+
+When and whether to use small caps is somewhat tricky, and Pod::Man doesn't
+necessarily get it right.
 
 =head1 SEE ALSO
 
