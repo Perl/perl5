@@ -8368,7 +8368,7 @@ Perl_re_dup(pTHX_ REGEXP *r, clone_params *param)
 
     if (r->regstclass) {
 	New(0, ret->regstclass, 1, regnode);
-	ret->regstclass->flags = r->regstclass->flags;
+	Copy(r->regstclass, ret->regstclass, 1, regnode);
     }
     else
 	ret->regstclass = NULL;
