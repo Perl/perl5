@@ -1101,8 +1101,8 @@ portable concept.  Similarly for the qx and system: how well will the
 
 =item *
 
-chmod, chmod, chown, chroot, exec, link, mkdir
-rename, rmdir stat, symlink, truncate, unlink, utime
+chmod, chmod, chown, chroot, exec, link, lstat, mkdir, 
+rename, rmdir, stat, symlink, truncate, unlink, utime, -X
 
 =item *
 
