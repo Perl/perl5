@@ -12,8 +12,10 @@ use B::Asmdata qw(%insn_data @insn_name);
 use Config qw(%Config);
 require ByteLoader;		# we just need its $VERSIOM
 
+no warnings;			# XXX
+
 @ISA = qw(Exporter);
-@EXPORT_OK = qw(assemble_fh newasm endasm assemble);
+@EXPORT_OK = qw(assemble_fh newasm endasm assemble asm);
 $VERSION = 0.04;
 
 use strict;
@@ -128,19 +130,12 @@ sub B::Asmdata::PUT_none {
     return "";
 }
 sub B::Asmdata::PUT_op_tr_array {
-    my $arg = shift;
-    my @ary = split(/\s*,\s*/, $arg);
-    if (@ary != 256) {
-	error "wrong number of arguments to op_tr_array";
-	@ary = (0) x 256;
-    }
-    return pack("S256", @ary);
+    my @ary = split /\s*,\s*/, shift;
+    return pack "S*", @ary;
 }
-# XXX Check this works
-# Note: $arg >> 32 is a no-op on 32-bit systems
+
 sub B::Asmdata::PUT_IV64 {
-    my $arg = shift;
-    return pack("LL", ($arg >> 16) >>16 , $arg & 0xffffffff);
+    return pack "Q", shift;
 }
 
 sub B::Asmdata::PUT_IV {
@@ -283,6 +278,18 @@ sub assemble {
 	    $out->(assemble_insn("nop", undef));
         }
     }
+}
+
+### temporary workaround
+
+sub asm {
+    return if $_[0] =~ /\s*\W/;
+    if (defined $_[1]) {
+	return if $_[1] eq "0" and $_[0] !~ /^(?:newsv|av_pushx?|xav_flags)$/;
+	return if $_[1] eq "1" and $_[0] =~ /^(?:sv_refcnt)$/;
+    }
+    # warn "@_\n";
+    assemble "@_";
 }
 
 1;

@@ -137,7 +137,8 @@ sub GET_none {}
 
 sub GET_op_tr_array {
     my $fh = shift;
-    my @ary = unpack("S256", $fh->readn(256 * 2));
+    my $len = unpack "S", $fh->readn(2);
+    my @ary = unpack "S*", $fh->readn($len*2);
     return join(",", @ary);
 }
 

@@ -225,53 +225,18 @@ sub compile_module {
 }
 
 sub compile_byte {
-    require ByteLoader;
-    my $stash = grab_stash();
-    my $command = "$BinPerl -MO=Bytecode,$stash $Input";
-    # The -a option means we'd have to close the file and lose the
-    # lock, which would create the tiniest of races. Instead, append
-    # the output ourselves. 
-    vprint 1, "Writing on $Output";
-
-    my $openflags = O_WRONLY | O_CREAT;
-    $openflags |= O_BINARY if eval { O_BINARY; 1 };
-    $openflags |= O_EXLOCK if eval { O_EXLOCK; 1 };
-
-    # these dies are not "$0: .... \n" because they "can't happen"
-
-    sysopen(OUT, $Output, $openflags)
-        or die "can't write to $Output: $!";
-
-    # this is blocking; hold on; why are we doing this??
-    # flock OUT, LOCK_EX or die "can't lock $Output: $!"
-    #    unless eval { O_EXLOCK; 1 };
-
-    truncate(OUT, 0)
-        or die "couldn't trunc $Output: $!";
-
-    print OUT <<EOF;
-#!$^X
-use ByteLoader $ByteLoader::VERSION;
-EOF
-
-    # Now the compile:
-    vprint 1, "Compiling...";
-    vprint 3, "Calling $command";
+    my $command = "$BinPerl -MO=Bytecode,-H,-o$Output $Input";
+    $Input =~ s/^-e.*$/-e/;
 
     my ($output_r, $error_r) = spawnit($command);
 
     if (@$error_r && $? != 0) {
-	_die("$0: $Input did not compile, which can't happen:\n@$error_r\n");
+	_die("$0: $Input did not compile:\n@$error_r\n");
     } else {
 	my @error = grep { !/^$Input syntax OK$/o } @$error_r;
 	warn "$0: Unexpected compiler output:\n@error" if @error;
     }
 
-    # Write it and leave.
-    print OUT @$output_r               or _die("can't write $Output: $!");
-    close OUT                          or _die("can't close $Output: $!");
-
-    # wait, how could it be anything but what you see next?
     chmod 0777 & ~umask, $Output    or _die("can't chmod $Output: $!");
     exit 0;
 }

@@ -411,6 +411,44 @@ walkoptree(pTHX_ SV *opsv, char *method)
     }
 }
 
+SV **
+oplist(pTHX_ OP *o, SV **SP)
+{
+    for(; o; o = o->op_next) {
+	SV *opsv;
+	if (o->op_seq == 0) 
+	    break;
+	o->op_seq = 0;
+	opsv = sv_newmortal();
+	sv_setiv(newSVrv(opsv, cc_opclassname(aTHX_ (OP*)o)), PTR2IV(o));
+	XPUSHs(opsv);
+        switch (o->op_type) {
+	case OP_SUBST:
+            SP = oplist(aTHX_ cPMOPo->op_pmreplstart, SP);
+            continue;
+	case OP_SORT:
+	    if (o->op_flags & (OPf_STACKED|OPf_SPECIAL)) {
+		OP *kid = cLISTOPo->op_first->op_sibling;   /* pass pushmark */
+		kid = kUNOP->op_first;                      /* pass rv2gv */
+		kid = kUNOP->op_first;                      /* pass leave */
+		SP = oplist(aTHX_ kid, SP);
+	    }
+	    continue;
+        }
+	switch (PL_opargs[o->op_type] & OA_CLASS_MASK) {
+	case OA_LOGOP:
+	    SP = oplist(aTHX_ cLOGOPo->op_other, SP);
+	    break;
+	case OA_LOOP:
+	    SP = oplist(aTHX_ cLOOPo->op_lastop, SP);
+	    SP = oplist(aTHX_ cLOOPo->op_nextop, SP);
+	    SP = oplist(aTHX_ cLOOPo->op_redoop, SP);
+	    break;
+	}
+    }
+    return SP;
+}
+
 typedef OP	*B__OP;
 typedef UNOP	*B__UNOP;
 typedef BINOP	*B__BINOP;
@@ -431,6 +469,7 @@ typedef SV	*B__PVMG;
 typedef SV	*B__PVLV;
 typedef SV	*B__BM;
 typedef SV	*B__RV;
+typedef SV	*B__FM;
 typedef AV	*B__AV;
 typedef HV	*B__HV;
 typedef CV	*B__CV;
@@ -474,6 +513,7 @@ BOOT:
 #define B_sv_undef()	&PL_sv_undef
 #define B_sv_yes()	&PL_sv_yes
 #define B_sv_no()	&PL_sv_no
+#define B_formfeed()	PL_formfeed
 #ifdef USE_ITHREADS
 #define B_regex_padav()	PL_regex_padav
 #endif
@@ -532,6 +572,9 @@ B_defstash()
 
 U8
 B_dowarn()
+
+B::SV
+B_formfeed()
 
 void
 B_warnhook()
@@ -740,6 +783,12 @@ U8
 OP_private(o)
 	B::OP		o
 
+void
+OP_oplist(o)
+	B::OP		o
+    PPCODE:
+	SP = oplist(aTHX_ o, SP);
+
 #define UNOP_first(o)	o->op_first
 
 MODULE = B	PACKAGE = B::UNOP		PREFIX = UNOP_
@@ -944,6 +993,7 @@ LOOP_lastop(o)
 #define COP_stashpv(o)	CopSTASHPV(o)
 #define COP_stash(o)	CopSTASH(o)
 #define COP_file(o)	CopFILE(o)
+#define COP_filegv(o)	CopFILEGV(o)
 #define COP_cop_seq(o)	o->cop_seq
 #define COP_arybase(o)	o->cop_arybase
 #define COP_line(o)	CopLINE(o)
@@ -967,6 +1017,11 @@ COP_stash(o)
 char *
 COP_file(o)
 	B::COP	o
+
+B::GV
+COP_filegv(o)
+       B::COP  o
+
 
 U32
 COP_cop_seq(o)
@@ -1307,9 +1362,13 @@ B::IO
 GvIO(gv)
 	B::GV	gv
 
-B::CV
+B::FM
 GvFORM(gv)
 	B::GV	gv
+    CODE:
+	RETVAL = (SV*)GvFORM(gv);
+    OUTPUT:
+	RETVAL
 
 B::AV
 GvAV(gv)
@@ -1464,6 +1523,12 @@ MODULE = B	PACKAGE = B::AV
 U8
 AvFLAGS(av)
 	B::AV	av
+
+MODULE = B	PACKAGE = B::FM		PREFIX = Fm
+
+IV
+FmLINES(form)
+	B::FM	form
 
 MODULE = B	PACKAGE = B::CV		PREFIX = Cv
 
