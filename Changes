@@ -31,6 +31,241 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 14868] By: jhi                                   on 2002/02/25  14:53:43
+        Log: Some hosts understand split -l 50, some only split -50
+             (from Paul Eggert).
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 14867] By: jhi                                   on 2002/02/25  14:44:07
+        Log: Subject: Re: [PATCH bleadperl] socketpair.t
+             From: Nikola Knezevic <indy@tesla.rcub.bg.ac.yu>
+             Date: Sun, 24 Feb 2002 10:31:25 +0100
+             Message-ID: <179381153.20020224103125@tesla.rcub.bg.ac.yu>
+             
+             (the pid half only)
+     Branch: perl
+	   ! win32/win32.c
+____________________________________________________________________________
+[ 14866] By: jhi                                   on 2002/02/25  14:35:19
+        Log: Mention the new pack tricks.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 14865] By: jhi                                   on 2002/02/25  14:30:28
+        Log: Subject: [PATCH] consistent commands for perl5db.pl etc.
+             From: Richard.Foley@t-online.de (Richard Foley)
+             Date: Mon, 25 Feb 2002 13:47:03 +0100
+             Message-ID: <16fJgP-1mbVeSC@fwd04.sul.t-online.com>
+     Branch: perl
+	   ! lib/perl5db.pl pod/perldebguts.pod pod/perldebtut.pod
+	   ! pod/perldebug.pod pod/perldelta.pod
+____________________________________________________________________________
+[ 14864] By: jhi                                   on 2002/02/25  13:51:32
+        Log: Typo corrections from John P. Linderman.
+     Branch: perl
+	   ! ext/IPC/SysV/Semaphore.pm
+____________________________________________________________________________
+[ 14863] By: jhi                                   on 2002/02/25  13:49:32
+        Log: Upgrade to Math::BigInt 1.52.
+     Branch: perl
+	   ! lib/Math/BigFloat.pm lib/Math/BigInt.pm
+	   ! lib/Math/BigInt/Calc.pm lib/Math/BigInt/t/bare_mbf.t
+	   ! lib/Math/BigInt/t/bigfltpm.inc lib/Math/BigInt/t/bigfltpm.t
+	   ! lib/Math/BigInt/t/config.t lib/Math/BigInt/t/inf_nan.t
+	   ! lib/Math/BigInt/t/sub_mbf.t t/lib/Math/BigFloat/Subclass.pm
+____________________________________________________________________________
+[ 14862] By: ams                                   on 2002/02/25  10:39:40
+        Log: Subject: [PATCH Cwd.pm] cut-n-paste error?
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Mon, 25 Feb 2002 11:35:06 GMT
+             Message-Id: <200202251135.LAA00573@tempest.npl.co.uk>
+             
+             Subject: [PATCH Net/Cmd.pm]
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Mon, 25 Feb 2002 11:37:06 GMT
+             Message-Id: <200202251137.LAA00579@tempest.npl.co.uk>
+     Branch: perl
+	   ! lib/Cwd.pm lib/Net/Cmd.pm
+____________________________________________________________________________
+[ 14861] By: jhi                                   on 2002/02/25  03:40:45
+        Log: Cut-and-paste errors.
+     Branch: perl
+	   ! t/op/pat.t
+____________________________________________________________________________
+[ 14860] By: jhi                                   on 2002/02/25  03:36:24
+        Log: EBCDIC: the control characters are not that easy to find.
+     Branch: perl
+	   ! t/op/pat.t
+____________________________________________________________________________
+[ 14859] By: jhi                                   on 2002/02/25  03:02:23
+        Log: Subject: Re: [PATCH] Re: Copying PV only with possible UTF-8 characters
+             From: John Peacock <jpeacock@rowman.com>
+             Date: Sun, 24 Feb 2002 22:08:28 -0500
+             Message-ID: <3C79AAAC.6060903@rowman.com>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 14858] By: jhi                                   on 2002/02/25  00:01:13
+        Log: SvSetSV() is not returnable, but that's okay since
+             sv_copypv() returns void.
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 14857] By: jhi                                   on 2002/02/24  23:33:33
+        Log: Subject: [PATCH] Re: Copying PV only with possible UTF-8 characters
+             From: John Peacock <jpeacock@rowman.com>                 
+             Date: Sun, 24 Feb 2002 16:40:07 -0500
+             Message-ID: <3C795DB7.40105@rowman.com>               
+     Branch: perl
+	   ! embed.fnc embed.h global.sym lib/overload.t pod/perlapi.pod
+	   ! pp_hot.c proto.h sv.c
+____________________________________________________________________________
+[ 14856] By: jhi                                   on 2002/02/24  20:15:51
+        Log: Tiny code cleanup.
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[ 14855] By: jhi                                   on 2002/02/24  19:49:01
+        Log: Use to_uni_fold().
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[ 14854] By: jhi                                   on 2002/02/24  19:45:43
+        Log: Document the new taint behaviour of exec LIST and
+             system LIST.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 14853] By: jhi                                   on 2002/02/24  18:28:31
+        Log: Subject: [PATCH] Re: taint news
+             From: Rick Delaney <rick.delaney@rogers.com>             
+             Date: 24 Feb 2002 11:35:00 -0500
+             Message-ID: <m3d6yuvnwr.fsf@cs839290-a.mtth.phub.net.cable.rogers.com>
+     Branch: perl
+	   ! pod/perldiag.pod pod/perlsec.pod pp_sys.c t/op/taint.t
+____________________________________________________________________________
+[ 14852] By: jhi                                   on 2002/02/24  18:20:55
+        Log: EBCDIC tweak (native instead of uni) and comment update.
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[ 14851] By: jhi                                   on 2002/02/24  13:02:53
+        Log: Using uninitialized (and wrong) variables is not good.
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[ 14850] By: jhi                                   on 2002/02/24  05:28:15
+        Log: EBCDIC: this seems to calm the last of the
+             Malformed UTF-8 warnings.
+     Branch: perl
+	   ! regcomp.c utf8.c
+____________________________________________________________________________
+[ 14849] By: jhi                                   on 2002/02/23  23:35:03
+        Log: EBCDIC: document using Encode for character conversions.
+     Branch: perl
+	   ! pod/perlebcdic.pod
+____________________________________________________________________________
+[ 14848] By: jhi                                   on 2002/02/23  23:20:57
+        Log: EBCDIC: disable also Unicode::Collate and
+             Unicode::Normalize for now.  Real users of
+             EBCDIC have to decide what they want.
+     Branch: perl
+	   ! ext/Unicode/Normalize/Normalize.pm
+	   ! ext/Unicode/Normalize/t/func.t ext/Unicode/Normalize/t/norm.t
+	   ! ext/Unicode/Normalize/t/test.t lib/Unicode/Collate.pm
+	   ! lib/Unicode/Collate/t/test.t
+____________________________________________________________________________
+[ 14847] By: jhi                                   on 2002/02/23  20:12:21
+        Log: AUTHORS updates.
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[ 14846] By: jhi                                   on 2002/02/23  20:05:10
+        Log: Retract #14571: there may be a better solution than
+             tweaking the test.
+     Branch: perl
+	   ! ext/Unicode/Normalize/t/func.t ext/Unicode/Normalize/t/norm.t
+____________________________________________________________________________
+[ 14845] By: jhi                                   on 2002/02/23  19:15:32
+        Log: Subject: [PATCH @14833] $Config{prefixexp} for VMS                
+             From: "Craig A. Berry" <craigberry@mac.com> 
+             Date: Sat, 23 Feb 2002 14:14:35 -0600
+             Message-Id: <a05101400b89d8666cc6c@[192.168.56.188]>         
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[ 14844] By: jhi                                   on 2002/02/23  18:37:14
+        Log: metaconfig unit change for #14843.
+     Branch: metaconfig/U/perl
+	   ! Extensions.U
+____________________________________________________________________________
+[ 14843] By: jhi                                   on 2002/02/23  18:36:43
+        Log: Also Encode/JP needs to be listed explicitly.
+             (Any other sub-Encode extensions?)
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 14842] By: jhi                                   on 2002/02/23  18:17:07
+        Log: Document known UNICOS/mk deficiency.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 14841] By: jhi                                   on 2002/02/23  16:29:49
+        Log: Subject: [PATCH] README mention version 5.0
+             From: Autrijus Tang <autrijus@autrijus.org>
+             Date: Sat, 23 Feb 2002 09:35:22 +0800
+             Message-ID: <20020223013522.GA8694@not.autrijus.org>
+     Branch: perl
+	   ! README
+____________________________________________________________________________
+[ 14840] By: jhi                                   on 2002/02/23  03:32:59
+        Log: metaconfig unit change for #14839.
+     Branch: metaconfig
+	   ! U/modified/Signal.U
+____________________________________________________________________________
+[ 14839] By: jhi                                   on 2002/02/23  03:32:32
+        Log: Old hosts like NeXT Classic don't have sort -k,
+             from Paul Eggert.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 14838] By: ams                                   on 2002/02/22  21:14:29
+        Log: Minor clarifications as suggested by Anton Tagunov.
+     Branch: perl
+	   ! pod/perlsyn.pod
+____________________________________________________________________________
+[ 14837] By: ams                                   on 2002/02/22  21:07:02
+        Log: Subject: [PATCH] Re: Prototype checking on assignment of coderef to typeglob
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Fri, 22 Feb 2002 23:01:07 +0100
+             Message-Id: <20020222230107.A15069@rafael>
+     Branch: perl
+	   ! sv.c t/op/gv.t
+____________________________________________________________________________
+[ 14836] By: jhi                                   on 2002/02/22  20:39:11
+        Log: metaconfig unit change for #14835.
+     Branch: metaconfig
+	   ! U/modified/Chk_MANI.U
+____________________________________________________________________________
+[ 14835] By: jhi                                   on 2002/02/22  20:38:32
+        Log: In AIX the split(1) default (1000 lines) chokes the /usr/bin/ls.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 14834] By: jhi                                   on 2002/02/22  18:06:01
+        Log: Subject: [PATCH] Re: Pyrrhic compression in Encode
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Fri, 22 Feb 2002 12:10:28 -0500
+             Message-ID: <20020222171027.GB4181@blackrider>
+     Branch: perl
+	   ! ext/Encode/compile
+____________________________________________________________________________
+[ 14833] By: jhi                                   on 2002/02/22  14:51:17
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 14832] By: jhi                                   on 2002/02/22  14:25:18
         Log: Implement IV/UV/NV/long double pack/unpack with
              template letters j/J/F/D (the latter two have been
