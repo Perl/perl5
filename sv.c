@@ -10516,7 +10516,7 @@ The PV of the sv is returned.
 char *
 Perl_sv_recode_to_utf8(pTHX_ SV *sv, SV *encoding)
 {
-     if (SvPOK(sv) && !DO_UTF8(sv) && SvROK(encoding)) {
+    if (SvPOK(sv) && !DO_UTF8(sv) && SvROK(encoding)) {
 	  SV *uni;
 	  STRLEN len;
 	  char *s;
@@ -10527,7 +10527,16 @@ Perl_sv_recode_to_utf8(pTHX_ SV *sv, SV *encoding)
 	  EXTEND(SP, 3);
 	  XPUSHs(encoding);
 	  XPUSHs(sv);
+/* 
+  NI-S 2002/07/09
+  Passing sv_yes is wrong - it needs to be or'ed set of constants
+  for Encode::XS, while UTf-8 decode (currently) assumes a true value means 
+  remove converted chars from source.
+
+  Both will default the value - let them.
+  
 	  XPUSHs(&PL_sv_yes);
+*/
 	  PUTBACK;
 	  call_method("decode", G_SCALAR);
 	  SPAGAIN;
@@ -10543,8 +10552,9 @@ Perl_sv_recode_to_utf8(pTHX_ SV *sv, SV *encoding)
 	  FREETMPS;
 	  LEAVE;
 	  SvUTF8_on(sv);
-     }
-     return SvPVX(sv);
+    }
+    return SvPVX(sv);
 }
+
 
 
