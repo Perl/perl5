@@ -389,7 +389,7 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 /* HP-UX 10.X CMA (Common Multithreaded Architecure) insists that
    pthread.h must be included before all other header files.
 */
-#if defined(USE_THREADS) && defined(PTHREAD_H_FIRST)
+#if defined(USE_THREADS) && defined(PTHREAD_H_FIRST) && defined(I_PTHREAD)
 #  include <pthread.h>
 #endif
 
@@ -1044,19 +1044,33 @@ Free_t   Perl_mfree (Malloc_t where);
 #  define IVSIZE LONGSIZE
 #endif
 #define IV_DIG (BIT_DIGITS(IVSIZE * 8))
-#define UV_DIG (BIT_DIGITS(UVSIZE * 8))
+#define UV_DIG (BIT_DIGITS(IVSIZE * 8))
 
-#if (IVSIZE > PTRSIZE) || (UVSIZE > PTRSIZE)
-#  if PTRSIZE == LONGSIZE 
-#    define PTRV	unsigned long
-#  else
-#    define PTRV	unsigned
-#  endif
-#  define PTR_CAST	(PTRV)
+/*   
+ *  The macros INT2PTR and NUM2PTR are (despite their names)
+ *  bi-directional: they will convert int/float to or from pointers.
+ *  However the conversion to int/float are named explicitly:
+ *  PTR2IV, PTR2UV, PTR2NV.
+ *
+ *  For int conversions we do not need two casts if pointers are
+ *  the same size as IV and UV.   Otherwise we need an explicit
+ *  cast (PTRV) to avoid compiler warnings.
+ */
+#if (IVSIZE == PTRSIZE) && (UVSIZE == PTRSIZE)
+#  define PTRV			UV
+#  define INT2PTR(any,d)	(any)(d)
 #else
-#  define PTRV      	UV
-#  define PTR_CAST 
+#  if PTRSIZE == LONGSIZE 
+#    define PTRV		unsigned long
+#  else
+#    define PTRV		unsigned
+#  endif
+#  define INT2PTR(any,d)	(any)(PTRV)(d)
 #endif
+#define NUM2PTR(any,d)	(any)(PTRV)(d)
+#define PTR2IV(p)	INT2PTR(IV,p)
+#define PTR2UV(p)	INT2PTR(UV,p)
+#define PTR2NV(p)	NUM2PTR(NV,p)
   
 #ifdef USE_LONG_DOUBLE
 #  if defined(HAS_LONG_DOUBLE) && (LONG_DOUBLESIZE > DOUBLESIZE)
@@ -1602,7 +1616,9 @@ typedef mutex_t		perl_mutex;
 typedef condition_t	perl_cond;
 typedef void *		perl_key;
 #        else /* Posix threads */
-#          include <pthread.h>
+#          ifdef I_PTHREAD
+#            include <pthread.h>
+#          endif
 typedef pthread_t	perl_os_thread;
 typedef pthread_mutex_t	perl_mutex;
 typedef pthread_cond_t	perl_cond;

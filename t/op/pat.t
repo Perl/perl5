@@ -4,7 +4,7 @@
 # the format supported by op/regexp.t.  If you want to add a test
 # that does fit that format, add it to op/re_tests, not here.
 
-print "1..188\n";
+print "1..191\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -862,6 +862,23 @@ print "ok $test\n";
 $test++;
 
 print "not " unless("@a" eq ",f,,o,,o, ,b,,a,,r,");
+print "ok $test\n";
+$test++;
+
+$brackets = qr{
+	         {  (?> [^{}]+ | (?p{ $brackets }) )* }
+	      }x;
+
+"{{}" =~ $brackets;
+print "ok $test\n";		# Did we survive?
+$test++;
+
+"something { long { and } hairy" =~ $brackets;
+print "ok $test\n";		# Did we survive?
+$test++;
+
+"something { long { and } hairy" =~ m/((?p{ $brackets }))/;
+print "not " unless $1 eq "{ and }";
 print "ok $test\n";
 $test++;
 

@@ -272,3 +272,10 @@
    * Added a BOOT check to test for equivalent versions of db.h &
      libdb.a/so.
 
+1.71 7th September 1999
+
+   * Fixed a bug that prevented 1.70 from compiling under win32
+
+   * Updated to support Berkeley DB 3.x
+
+   * Updated dbinfo for Berkeley DB 3.x file formats.

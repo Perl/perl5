@@ -223,12 +223,12 @@ Perl_rxres_save(pTHX_ void **rsp, REGEXP *rx)
 	*rsp = (void*)p;
     }
 
-    *p++ = (UV)PTR_CAST (RX_MATCH_COPIED(rx) ? rx->subbeg : Nullch);
+    *p++ = PTR2UV(RX_MATCH_COPIED(rx) ? rx->subbeg : Nullch);
     RX_MATCH_COPIED_off(rx);
 
     *p++ = rx->nparens;
 
-    *p++ = (UV)PTR_CAST rx->subbeg;
+    *p++ = PTR2UV(rx->subbeg);
     *p++ = (UV)rx->sublen;
     for (i = 0; i <= rx->nparens; ++i) {
 	*p++ = (UV)rx->startp[i];
@@ -249,7 +249,7 @@ Perl_rxres_restore(pTHX_ void **rsp, REGEXP *rx)
 
     rx->nparens = *p++;
 
-    rx->subbeg = (char*)PTR_CAST (*p++);
+    rx->subbeg = INT2PTR(char*,*p++);
     rx->sublen = (I32)(*p++);
     for (i = 0; i <= rx->nparens; ++i) {
 	rx->startp[i] = (I32)(*p++);
@@ -263,7 +263,7 @@ Perl_rxres_free(pTHX_ void **rsp)
     UV *p = (UV*)*rsp;
 
     if (p) {
-	Safefree((char*)PTR_CAST (*p));
+	Safefree(INT2PTR(char*,*p));
 	Safefree(p);
 	*rsp = Null(void*);
     }
@@ -2199,7 +2199,7 @@ PP(pp_goto)
 		    CV *gotocv;
 		    
 		    if (PERLDB_SUB_NN) {
-			SvIVX(sv) = (IV)PTR_CAST cv; /* Already upgraded, saved */
+			SvIVX(sv) = PTR2IV(cv); /* Already upgraded, saved */
 		    } else {
 			save_item(sv);
 			gv_efullname3(sv, CvGV(cv), Nullch);

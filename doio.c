@@ -1696,7 +1696,7 @@ Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
     else
     {
 	IV i = SvIV(astr);
-	a = (char *)PTR_CAST i;		/* ouch */
+	a = INT2PTR(char *,i);		/* ouch */
     }
     SETERRNO(0,0);
     switch (optype)

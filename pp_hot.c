@@ -2125,7 +2125,7 @@ S_get_db_sub(pTHX_ SV **svp, CV *cv)
 	SvUPGRADE(dbsv, SVt_PVIV);
 	SvIOK_on(dbsv);
 	SAVEIV(SvIVX(dbsv));
-	SvIVX(dbsv) = (IV)PTR_CAST cv;	/* Do it the quickest way  */
+	SvIVX(dbsv) = PTR2IV(cv);	/* Do it the quickest way  */
     }
 
     if (CvXSUB(cv))

@@ -642,7 +642,6 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     register I32 tmp;
     I32 minlen;		/* must match at least this many chars */
     I32 dontbother = 0;	/* how many characters not to try at end */
-    CURCUR cc;
     I32 start_shift = 0;		/* Offset of the start to find
 					 constant substr. */		/* CC */
     I32 end_shift = 0;			/* Same for the end. */		/* CC */
@@ -650,9 +649,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     char *scream_olds;
     SV* oreplsv = GvSV(PL_replgv);
 
-    cc.cur = 0;
-    cc.oldcc = 0;
-    PL_regcc = &cc;
+    PL_regcc = 0;
 
     cache_re(prog);
 #ifdef DEBUGGING
@@ -2109,7 +2106,6 @@ S_regmatch(pTHX_ regnode *prog)
 		    regexp *re;
 		    MAGIC *mg = Null(MAGIC*);
 		    re_cc_state state;
-		    CURCUR cctmp;
 		    CHECKPOINT cp, lastcp;
 
 		    if(SvROK(ret) || SvRMAGICAL(ret)) {
@@ -2152,9 +2148,7 @@ S_regmatch(pTHX_ regnode *prog)
 		    state.cc = PL_regcc;
 		    state.re = PL_reg_re;
 
-		    cctmp.cur = 0;
-		    cctmp.oldcc = 0;
-		    PL_regcc = &cctmp;
+		    PL_regcc = 0;
 		    
 		    cp = regcppush(0);	/* Save *all* the positions. */
 		    REGCP_SET;
@@ -2168,6 +2162,20 @@ S_regmatch(pTHX_ regnode *prog)
 		    PL_reg_maxiter = 0;
 
 		    if (regmatch(re->program + 1)) {
+			/* Even though we succeeded, we need to restore
+			   global variables, since we may be wrapped inside
+			   SUSPEND, thus the match may be not finished yet. */
+
+			/* XXXX Do this only if SUSPENDed? */
+			PL_reg_call_cc = state.prev;
+			PL_regcc = state.cc;
+			PL_reg_re = state.re;
+			cache_re(PL_reg_re);
+
+			/* XXXX This is too dramatic a measure... */
+			PL_reg_maxiter = 0;
+
+			/* These are needed even if not SUSPEND. */
 			ReREFCNT_dec(re);
 			regcpblow(cp);
 			sayYES;
@@ -2227,6 +2235,81 @@ S_regmatch(pTHX_ regnode *prog)
 	case LOGICAL:
 	    logical = scan->flags;
 	    break;
+/*******************************************************************
+ PL_regcc contains infoblock about the innermost (...)* loop, and
+ a pointer to the next outer infoblock.
+
+ Here is how Y(A)*Z is processed (if it is compiled into CURLYX/WHILEM):
+
+   1) After matching X, regnode for CURLYX is processed;
+
+   2) This regnode creates infoblock on the stack, and calls 
+      regmatch() recursively with the starting point at WHILEM node;
+
+   3) Each hit of WHILEM node tries to match A and Z (in the order
+      depending on the current iteration, min/max of {min,max} and
+      greediness).  The information about where are nodes for "A"
+      and "Z" is read from the infoblock, as is info on how many times "A"
+      was already matched, and greediness.
+
+   4) After A matches, the same WHILEM node is hit again.
+
+   5) Each time WHILEM is hit, PL_regcc is the infoblock created by CURLYX
+      of the same pair.  Thus when WHILEM tries to match Z, it temporarily
+      resets PL_regcc, since this Y(A)*Z can be a part of some other loop:
+      as in (Y(A)*Z)*.  If Z matches, the automaton will hit the WHILEM node
+      of the external loop.
+
+ Currently present infoblocks form a tree with a stem formed by PL_curcc
+ and whatever it mentions via ->next, and additional attached trees
+ corresponding to temporarily unset infoblocks as in "5" above.
+
+ In the following picture infoblocks for outer loop of 
+ (Y(A)*?Z)*?T are denoted O, for inner I.  NULL starting block
+ is denoted by x.  The matched string is YAAZYAZT.  Temporarily postponed
+ infoblocks are drawn below the "reset" infoblock.
+
+ In fact in the picture below we do not show failed matches for Z and T
+ by WHILEM blocks.  [We illustrate minimal matches, since for them it is
+ more obvious *why* one needs to *temporary* unset infoblocks.]
+
+  Matched	REx position	InfoBlocks	Comment
+  		(Y(A)*?Z)*?T	x
+  		Y(A)*?Z)*?T	x <- O
+  Y		(A)*?Z)*?T	x <- O
+  Y		A)*?Z)*?T	x <- O <- I
+  YA		)*?Z)*?T	x <- O <- I
+  YA		A)*?Z)*?T	x <- O <- I
+  YAA		)*?Z)*?T	x <- O <- I
+  YAA		Z)*?T		x <- O		# Temporary unset I
+				     I
+
+  YAAZ		Y(A)*?Z)*?T	x <- O
+				     I
+
+  YAAZY		(A)*?Z)*?T	x <- O
+				     I
+
+  YAAZY		A)*?Z)*?T	x <- O <- I
+				     I
+
+  YAAZYA	)*?Z)*?T	x <- O <- I	
+				     I
+
+  YAAZYA	Z)*?T		x <- O		# Temporary unset I
+				     I,I
+
+  YAAZYAZ	)*?T		x <- O
+				     I,I
+
+  YAAZYAZ	T		x		# Temporary unset O
+				O
+				I,I
+
+  YAAZYAZT			x
+				O
+				I,I
+ *******************************************************************/
 	case CURLYX: {
 		CURCUR cc;
 		CHECKPOINT cp = PL_savestack_ix;
@@ -2279,7 +2362,8 @@ S_regmatch(pTHX_ regnode *prog)
 
 		if (locinput == cc->lastloc && n >= cc->min) {
 		    PL_regcc = cc->oldcc;
-		    ln = PL_regcc->cur;
+		    if (PL_regcc)
+			ln = PL_regcc->cur;
 		    DEBUG_r(
 			PerlIO_printf(Perl_debug_log,
 			   "%*s  empty match detected, try continuation...\n",
@@ -2292,7 +2376,8 @@ S_regmatch(pTHX_ regnode *prog)
 				      "%*s  failed...\n",
 				      REPORT_CODE_OFF+PL_regindent*2, "")
 			);
-		    PL_regcc->cur = ln;
+		    if (PL_regcc)
+			PL_regcc->cur = ln;
 		    PL_regcc = cc;
 		    sayNO;
 		}
@@ -2363,7 +2448,8 @@ S_regmatch(pTHX_ regnode *prog)
 
 		if (cc->minmod) {
 		    PL_regcc = cc->oldcc;
-		    ln = PL_regcc->cur;
+		    if (PL_regcc)
+			ln = PL_regcc->cur;
 		    cp = regcppush(cc->parenfloor);
 		    REGCP_SET;
 		    if (regmatch(cc->next)) {
@@ -2372,7 +2458,8 @@ S_regmatch(pTHX_ regnode *prog)
 		    }
 		    REGCP_UNWIND;
 		    regcppop();
-		    PL_regcc->cur = ln;
+		    if (PL_regcc)
+			PL_regcc->cur = ln;
 		    PL_regcc = cc;
 
 		    if (n >= cc->max) {	/* Maximum greed exceeded? */
@@ -2443,14 +2530,16 @@ S_regmatch(pTHX_ regnode *prog)
 
 		/* Failed deeper matches of scan, so see if this one works. */
 		PL_regcc = cc->oldcc;
-		ln = PL_regcc->cur;
+		if (PL_regcc)
+		    ln = PL_regcc->cur;
 		if (regmatch(cc->next))
 		    sayYES;
 		DEBUG_r(
 		    PerlIO_printf(Perl_debug_log, "%*s  failed...\n",
 				  REPORT_CODE_OFF+PL_regindent*2, "")
 		    );
-		PL_regcc->cur = ln;
+		if (PL_regcc)
+		    PL_regcc->cur = ln;
 		PL_regcc = cc;
 		cc->cur = n - 1;
 		cc->lastloc = lastloc;

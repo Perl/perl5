@@ -1240,6 +1240,10 @@ just use C<if (%hash) { # not empty }> for example.
 C<FOO> is too long for Perl to handle.  You have to be seriously
 twisted to write code that triggers this error.
 
+=item Did not produce a valid header
+
+See Server error.
+
 =item Did you mean &%s instead?
 
 (W) You probably referred to an imported subroutine &FOO as $FOO or some such.
@@ -1265,6 +1269,10 @@ referencing something that isn't defined yet, you don't actually have
 to define the subroutine or package before the current location.  You
 can use an empty "sub foo;" or "package FOO;" to enter a "forward"
 declaration.
+
+=item Document contains no data
+
+See Server error.
 
 =item Don't know how to handle magic of type '%s'
 
@@ -1741,6 +1749,10 @@ See L<perlsub/"Lvalue subroutines">.
 
 (F) An attempt was made to specify an entry in an overloading table that
 doesn't resolve to a valid subroutine.  See L<overload>.
+
+=item Method %s not permitted
+
+See Server error.
 
 =item Might be a runaway multi-line %s string starting on line %d
 
@@ -2420,6 +2432,10 @@ and list operators.  (The old open was a little of both.)  You must
 put parentheses around the filehandle, or use the new "or" operator
 instead of "||".
 
+=item Premature end of script headers
+
+See Server error.
+
 =item print on closed filehandle %s
 
 (W) The filehandle you're printing on got itself closed sometime before now.
@@ -2613,7 +2629,12 @@ See L<perlre>.
 
 =item Server error
 
-Also known as "500 Server error".
+This is the error message generally seen in a browser window when trying
+to run a CGI program (including SSI) over the web. The actual error
+text varies widely from server to server. The most frequently-seen
+variants are "500 Server error", "Method (something) not permitted",
+"Document contains no data", "Premature end of script headers", and
+"Did not produce a valid header".
 
 B<This is a CGI error, not a Perl error>.
 

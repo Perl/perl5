@@ -150,15 +150,17 @@ use "quads" (64-integers) as follows:
 
 =over 4
 
-=item constants in the code 
+=item constants (decimal, hexadecimal, octal, binary) in the code 
 
 =item arguments to oct() and hex()
 
-=item arguments to print(), printf() and sprintf()
+=item arguments to print(), printf() and sprintf() (flag prefixes ll, L, q)
 
-=item pack() and unpack() "q" format
+=item printed as such
 
-=item in basic arithmetics
+=item pack() and unpack() "q" and "Q" formatS
+
+=item in basic arithmetics: + - * / %
 
 =item vec() (but see the below note about bit arithmetics)
     
@@ -167,7 +169,8 @@ use "quads" (64-integers) as follows:
 Note that unless you have the case (a) you will have to configure
 and compile Perl using the -Duse64bits Configure flag.
 
-Unfortunately bit arithmetics (&, |, ^, ~, <<, >>) are not 64-bit clean.
+Unfortunately bit arithmetics (&, |, ^, ~, <<, >>) are not 64-bit clean,
+they are explictly forced to be 32-bit.
 
 Last but not least: note that due to Perl's habit of always using
 floating point numbers the quads are still not true integers.
@@ -527,7 +530,9 @@ runtime error.
 
 The timelocal() and timegm() functions used to silently return bogus
 results when the date exceeded the machine's integer range.  They
-now consistently croak() if the date falls in an unsupported range.
+now consistently croak() if the date falls in an unsupported range--
+but on the other hand they now accept "out-of-limits" day-of-month
+to make "Julian date" conversions easier.
 
 =item Win32
 
@@ -703,6 +708,11 @@ just use C<if (%hash) { # not empty }> for example.
 elements of a subroutine attribute list.  If the previous attribute
 had a parenthesised parameter list, perhaps that list was terminated
 too soon.
+
+=item Possible Y2K bug: %s
+
+(W) You are concatenating the number 19 with another number, which
+could be a potential Year 2000 problem.
 
 =item Possible Y2K bug: %s
 
