@@ -404,14 +404,18 @@ into account.
 
 In Perls before 5.8.1 one could rather easily generate data that as
 hash keys would cause Perl to consume large amounts of time because
-internal structure of hashes would badly degenerate.  In Perl 5.8.1 it
-is possible to randomly perturb the hash function by a pseudorandom
-seed which makes generating such naughty hash keys harder.  See
-L<perlrun/PERL_HASH_SEED> for more information.
+internal structure of hashes would badly degenerate.  In Perl 5.8.1
+the hash function is randomly perturbed by a pseudorandom seed which
+makes generating such naughty hash keys harder.
+See L<perlrun/PERL_HASH_SEED> for more information.
 
-Perturbing the hash ordering affects for example modules like
-Data::Dumper: if one is dumping hashes, the outputs of two different
-runs are no more identical.
+The random perturbation is done by default but if one wants for some
+reason emulate the old behaviour one can set the environment variable
+PERL_HASH_SEED to zero (or any other integer).  One possible reason
+for wanting to emulate the old behaviour is that in the new behaviour
+consecutive runs of Perl will order hash keys differently, which may
+confuse some applications (like Data::Dumper: the outputs of two
+different runs are no more identical).
 
 B<Perl has never guaranteed any ordering of the hash keys>, and the
 ordering has already changed several times during the lifetime of
