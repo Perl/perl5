@@ -633,9 +633,9 @@ my @layer_syms = qw(
 			 PerlIOBase_eof
 			 PerlIOBase_error
 			 PerlIOBase_fileno
-			 PerlIOBase_setlinebuf
 			 PerlIOBase_pushed
 			 PerlIOBase_read
+			 PerlIOBase_setlinebuf
 		         PerlIOBase_unread
 			 PerlIOBuf_bufsiz
 			 PerlIOBuf_fill
@@ -650,13 +650,16 @@ my @layer_syms = qw(
 			 PerlIOBuf_tell
 			 PerlIOBuf_unread
 			 PerlIOBuf_write
-			 PerlIO_define_layer
-			 PerlIO_arg_fetch
-			 PerlIO_pending
 			 PerlIO_allocate
+			 PerlIO_arg_fetch
+			 PerlIO_define_layer
+			 PerlIO_pending
 			 PerlIO_push
 			 PerlIO_sv_dup
 			 PerlIO_unread
+			 Perl_Idef_layerlist_ptr
+			 Perl_Iknown_layers_ptr
+			 Perl_Iperlio_ptr
 );
 
 if ($define{'USE_PERLIO'}) {
