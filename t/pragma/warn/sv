@@ -285,9 +285,9 @@ $^W =0 ;
 }
 my $a = rindex "a\xff bc ", "bc" ;
 EXPECT
-\xff will produce malformed UTF-8 character; use \x{ff} for that at - line 6.
-Malformed UTF-8 character at - line 6.
-Malformed UTF-8 character at - line 10.
+\xff will produce malformed UTF-8 character; use \x{ff} for that at - line 12.
+Malformed UTF-8 character at - line 12.
+Malformed UTF-8 character at - line 16.
 ########
 # sv.c
 use warnings 'misc';

@@ -474,7 +474,7 @@ $_ = " \xffe " ;
 no warnings 'utf8' ;
 $_ = " \xffe " ;
 EXPECT
-\xff will produce malformed UTF-8 character; use \x{ff} for that at - line 4.
+\xff will produce malformed UTF-8 character; use \x{ff} for that at - line 10.
 ########
 # toke.c
 my $a = rand + 4 ;

@@ -37,9 +37,9 @@ my $a = ord "\x80" ;
     my $a = ord "\x80" ;
 }
 EXPECT
-Malformed UTF-8 character at - line 3.
-\x80 will produce malformed UTF-8 character; use \x{80} for that at - line 6.
-Malformed UTF-8 character at - line 6.
+Malformed UTF-8 character at - line 9.
+\x80 will produce malformed UTF-8 character; use \x{80} for that at - line 12.
+Malformed UTF-8 character at - line 12.
 ########
 # utf8.c [utf8_to_uv]
 use utf8 ;
@@ -63,6 +63,6 @@ my $a = ord "\xf080" ;
     my $a = ord "\xf080" ;
 }
 EXPECT
-Malformed UTF-8 character at - line 3.
-\xf0 will produce malformed UTF-8 character; use \x{f0} for that at - line 6.
-Malformed UTF-8 character at - line 6.
+Malformed UTF-8 character at - line 9.
+\xf0 will produce malformed UTF-8 character; use \x{f0} for that at - line 12.
+Malformed UTF-8 character at - line 12.

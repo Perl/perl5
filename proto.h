@@ -652,6 +652,8 @@ PERL_CALLCONV char*	Perl_sv_peek(pTHX_ SV* sv);
 PERL_CALLCONV void	Perl_sv_pos_u2b(pTHX_ SV* sv, I32* offsetp, I32* lenp);
 PERL_CALLCONV void	Perl_sv_pos_b2u(pTHX_ SV* sv, I32* offsetp);
 PERL_CALLCONV char*	Perl_sv_pvn_force(pTHX_ SV* sv, STRLEN* lp);
+PERL_CALLCONV char*	Perl_sv_pvutf8n_force(pTHX_ SV* sv, STRLEN* lp);
+PERL_CALLCONV char*	Perl_sv_pvbyten_force(pTHX_ SV* sv, STRLEN* lp);
 PERL_CALLCONV char*	Perl_sv_reftype(pTHX_ SV* sv, int ob);
 PERL_CALLCONV void	Perl_sv_replace(pTHX_ SV* sv, SV* nsv);
 PERL_CALLCONV void	Perl_sv_report_used(pTHX);
@@ -685,11 +687,6 @@ PERL_CALLCONV void	Perl_taint_proper(pTHX_ const char* f, const char* s);
 PERL_CALLCONV UV	Perl_to_utf8_lower(pTHX_ U8 *p);
 PERL_CALLCONV UV	Perl_to_utf8_upper(pTHX_ U8 *p);
 PERL_CALLCONV UV	Perl_to_utf8_title(pTHX_ U8 *p);
-PERL_CALLCONV STRLEN	Perl_sv_len_utf8(pTHX_ SV* sv);
-PERL_CALLCONV void	Perl_sv_pos_u2b(pTHX_ SV* sv, I32* offsetp, I32* lenp);
-PERL_CALLCONV void	Perl_sv_pos_b2u(pTHX_ SV* sv, I32* offsetp);
-PERL_CALLCONV char*	Perl_sv_pvutf8n_force(pTHX_ SV* sv, STRLEN* lp);
-PERL_CALLCONV char*	Perl_sv_pvbyten_force(pTHX_ SV* sv, STRLEN* lp);
 #if defined(UNLINK_ALL_VERSIONS)
 PERL_CALLCONV I32	Perl_unlnk(pTHX_ char* f);
 #endif
@@ -772,7 +769,11 @@ PERL_CALLCONV void*	Perl_default_protect(pTHX_ volatile JMPENV *je, int *excpt, 
 PERL_CALLCONV void*	Perl_vdefault_protect(pTHX_ volatile JMPENV *je, int *excpt, protect_body_t body, va_list *args);
 PERL_CALLCONV void	Perl_reginitcolors(pTHX);
 PERL_CALLCONV char*	Perl_sv_2pv_nolen(pTHX_ SV* sv);
+PERL_CALLCONV char*	Perl_sv_2pvutf8_nolen(pTHX_ SV* sv);
+PERL_CALLCONV char*	Perl_sv_2pvbyte_nolen(pTHX_ SV* sv);
 PERL_CALLCONV char*	Perl_sv_pv(pTHX_ SV *sv);
+PERL_CALLCONV char*	Perl_sv_pvutf8(pTHX_ SV *sv);
+PERL_CALLCONV char*	Perl_sv_pvbyte(pTHX_ SV *sv);
 PERL_CALLCONV void	Perl_sv_force_normal(pTHX_ SV *sv);
 PERL_CALLCONV void	Perl_tmps_grow(pTHX_ I32 n);
 PERL_CALLCONV SV*	Perl_sv_rvweaken(pTHX_ SV *sv);
@@ -803,10 +804,6 @@ PERL_CALLCONV void	Perl_ptr_table_store(pTHX_ PTR_TBL_t *tbl, void *oldsv, void 
 PERL_CALLCONV void	Perl_ptr_table_split(pTHX_ PTR_TBL_t *tbl);
 #endif
 
-PERL_CALLCONV char*	Perl_sv_2pvutf8_nolen(pTHX_ SV* sv);
-PERL_CALLCONV char*	Perl_sv_2pvbyte_nolen(pTHX_ SV* sv);
-PERL_CALLCONV char*	Perl_sv_pvutf8(pTHX_ SV *sv);
-PERL_CALLCONV char*	Perl_sv_pvbyte(pTHX_ SV *sv);
 #if defined(PERL_OBJECT)
 protected:
 #else
