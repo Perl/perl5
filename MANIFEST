@@ -188,6 +188,10 @@ ext/DynaLoader/hints/aix.pl	Hint for DynaLoader for named architecture
 ext/DynaLoader/hints/linux.pl	Hint for DynaLoader for named architecture
 ext/DynaLoader/hints/netbsd.pl	Hint for DynaLoader for named architecture
 ext/DynaLoader/hints/openbsd.pl	Hint for DynaLoader for named architecture
+ext/Encode/Encode.pm		Encode extension
+ext/Encode/Encode.xs		Encode extension
+ext/Encode/Makefile.PL		Encode extension
+ext/Encode/Todo			Encode extension
 ext/Errno/ChangeLog		Errno perl module change log
 ext/Errno/Errno_pm.PL		Errno perl module create script
 ext/Errno/Makefile.PL		Errno extension makefile writer

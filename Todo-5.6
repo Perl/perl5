@@ -16,6 +16,17 @@ Unicode support
 	to work similarly to Unicode tech reports and Java
 	notation \uXXXX (and already existing \x{XXXX))?
 	more than four hexdigits? make also \U+XXXX work?
+
+    see ext/Encode/Todo for notes and references about proper detection
+    of malformed UTF-8
+
+    SCSU?          http://www.unicode.org/unicode/reports/tr6/
+    Collation?     http://www.unicode.org/unicode/reports/tr10/
+    Normalization? http://www.unicode.org/unicode/reports/tr15/
+    EBCDIC?        http://www.unicode.org/unicode/reports/tr16/
+    Regexes?       http://www.unicode.org/unicode/reports/tr18/
+    Case Mappings? http://www.unicode.org/unicode/reports/tr21/
+
     See also "Locales", "Regexen", and "Miscellaneous".
 
 Multi-threading
@@ -155,14 +166,6 @@ Miscellaneous
     mmap for speeding up input? (Configure already probes for the mmap family)
     sendmsg, recvmsg? (Configure doesn't probe for these but the units exist)
     setitimer, getitimer? (the metaconfig units exist)
-
-Unicode
-    SCSU?          http://www.unicode.org/unicode/reports/tr6/
-    Collation?     http://www.unicode.org/unicode/reports/tr10/
-    Normalization? http://www.unicode.org/unicode/reports/tr15/
-    EBCDIC?        http://www.unicode.org/unicode/reports/tr16/
-    Regexes?       http://www.unicode.org/unicode/reports/tr18/
-    Case Mappings? http://www.unicode.org/unicode/reports/tr21/
 
 Ongoing
     keep filenames 8.3 friendly, where feasible
