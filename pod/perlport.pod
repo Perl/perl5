@@ -362,6 +362,10 @@ many networking schemes and utilities for separating the nodename and
 the pathname, and so on).  For the same reasons, avoid C<@>, C<;> and
 C<|>.
 
+Don't assume that in pathnames you can collapse two leading slashes
+C<//> into one: some networking and clustering filesystems have special
+semantics for that.  Let the operating system to sort it out.
+
 The I<portable filename characters> as defined by ANSI C are
 
  a b c d e f g h i j k l m n o p q r t u v w x y z
@@ -370,11 +374,11 @@ The I<portable filename characters> as defined by ANSI C are
  . _ -
 
 and the "-" shouldn't be the first character.  If you want to be
-hypercorrect, stay within the 8.3 naming convention (all the files and
-directories have to be unique within one directory if their names are
-lowercased and truncated to eight characters before the C<.>, if any,
-and to three characters after the C<.>, if any).  (And do not use
-C<.>s in directory names.)
+hypercorrect, stay case-insensitive and within the 8.3 naming
+convention (all the files and directories have to be unique within one
+directory if their names are lowercased and truncated to eight
+characters before the C<.>, if any, and to three characters after the
+C<.>, if any).  (And do not use C<.>s in directory names.)
 
 =head2 System Interaction
 
@@ -676,6 +680,7 @@ are a few of the more popular Unix flavors:
     --------------------------------------------
     AIX           aix        aix
     BSD/OS        bsdos      i386-bsdos
+    Darwin        darwin     darwin
     dgux          dgux       AViiON-dgux
     DYNIX/ptx     dynixptx   i386-dynixptx
     FreeBSD       freebsd    freebsd-i386    
