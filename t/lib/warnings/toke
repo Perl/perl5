@@ -101,6 +101,8 @@ toke.c	AOK
         $a =  0037777777776 ;
         $a =  0037777777777 ;
         $a =  0047777777777 ;
+
+    dump() better written as CORE::dump()
      
     Mandatory Warnings
     ------------------
@@ -700,6 +702,23 @@ EXPECT
 Integer overflow in binary number at - line 5.
 Integer overflow in hexadecimal number at - line 8.
 Integer overflow in octal number at - line 11.
+########
+# toke.c
+BEGIN { $^C = 1; }
+use warnings 'misc';
+dump;
+CORE::dump;
+EXPECT
+dump() better written as CORE::dump() at - line 4.
+- syntax OK
+########
+# toke.c
+use warnings 'misc';
+use subs qw/dump/;
+sub dump { print "no warning for overriden dump\n"; }
+dump;
+EXPECT
+no warning for overriden dump
 ########
 # toke.c
 use warnings 'ambiguous';

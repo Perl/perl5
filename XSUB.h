@@ -4,6 +4,8 @@
 /* first, some documentation for xsubpp-generated items */
 
 /*
+=head1 Variables created by C<xsubpp> and C<xsubpp> internal functions
+
 =for apidoc Amn|char*|CLASS
 Variable which is setup by C<xsubpp> to indicate the 
 class name for a C++ XS constructor.  This is always a C<char*>.  See C<THIS>.
@@ -98,6 +100,8 @@ handled automatically by C<xsubpp>.
 /* Typically used to return values from XS functions.       */
 
 /*
+=head1 Stack Manipulation Macros
+
 =for apidoc Am|void|XST_mIV|int pos|IV iv
 Place an integer into the specified position C<pos> on the stack.  The
 value is stored in a new mortal SV.
@@ -146,6 +150,8 @@ Return C<&PL_sv_undef> from an XSUB immediately.  Uses C<XST_mUNDEF>.
 
 =for apidoc Ams||XSRETURN_EMPTY
 Return an empty list from an XSUB immediately.
+
+=head1 Variables created by C<xsubpp> and C<xsubpp> internal functions
 
 =for apidoc AmU||newXSproto
 Used by C<xsubpp> to hook up XSUBs as Perl subs.  Adds Perl prototypes to

@@ -55,6 +55,8 @@
 #define SSPOPDXPTR (PL_savestack[--PL_savestack_ix].any_dxptr)
 
 /*
+=head1 Callback Functions
+
 =for apidoc Ams||SAVETMPS
 Opening bracket for temporaries on a callback.  See C<FREETMPS> and
 L<perlcall>.

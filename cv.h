@@ -37,8 +37,12 @@ struct xpvcv {
 };
 
 /*
+=head1 Handy Values
+
 =for apidoc AmU||Nullcv
 Null CV pointer.
+
+=head1 CV Manipulation Functions
 
 =for apidoc Am|HV*|CvSTASH|CV* cv
 Returns the stash of the CV.

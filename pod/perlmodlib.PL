@@ -165,8 +165,7 @@ CPAN stands for Comprehensive Perl Archive Network; it's a globally
 replicated trove of Perl materials, including documentation, style
 guides, tricks and traps, alternate ports to non-Unix systems and
 occasional binary distributions for these.   Search engines for
-CPAN can be found at http://cpan.perl.com/ and at
-http://theory.uwinnipeg.ca/mod_perl/cpan-search.pl .
+CPAN can be found at http://www.cpan.org/.
 
 Most importantly, CPAN includes around a thousand unbundled modules,
 some of which require a C compiler to build.  Major categories of

@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..834\n";
+print "1..843\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2578,3 +2578,44 @@ print "# some Unicode properties\n";
     print ":$S3:" =~ /:(([$sigma])+):/i && $1 eq $S3 && $2 eq $sigma ?
 	"ok 834\n" : "not ok 834\n";
 }
+
+{
+    print "# LATIN SMALL LETTER SHARP S\n";
+
+    use charnames ':full';
+
+    print "\N{LATIN SMALL LETTER SHARP S}" =~
+	/\N{LATIN SMALL LETTER SHARP S}/    ? "ok 835\n" : "not ok 835\n";
+
+    print "\N{LATIN SMALL LETTER SHARP S}" =~
+	/\N{LATIN SMALL LETTER SHARP S}/i   ? "ok 836\n" : "not ok 836\n";
+
+    print "\N{LATIN SMALL LETTER SHARP S}" =~
+	/[\N{LATIN SMALL LETTER SHARP S}]/  ? "ok 837\n" : "not ok 837\n";
+
+    print "\N{LATIN SMALL LETTER SHARP S}" =~
+	/[\N{LATIN SMALL LETTER SHARP S}]/i ? "ok 838\n" : "not ok 838\n";
+
+    print "ss" =~
+	/\N{LATIN SMALL LETTER SHARP S}/i   ? "ok 839\n" : "not ok 839\n";
+
+    print "SS" =~
+	/\N{LATIN SMALL LETTER SHARP S}/i   ? "ok 840\n" : "not ok 840\n";
+
+# Fix coming up.
+#    print "ss" =~
+#	/[\N{LATIN SMALL LETTER SHARP S}]/i ? "ok 841\n" : "not ok 841\n";
+#
+#    print "SS" =~
+#	/[\N{LATIN SMALL LETTER SHARP S}]/i ? "ok 842\n" : "not ok 842\n";
+}
+
+{
+    print "# more whitespace: U+0085, U+2028, U+2029\n";
+
+    # U+0085 needs to be forced to be Unicode, the \x{100} does that.
+    print "<\x{100}\x{0085}>" =~ /<\x{100}\s>/ ? "ok 841\n" : "not ok 841\n";
+    print "<\x{2028}>" =~ /<\s>/ ? "ok 842\n" : "not ok 842\n";
+    print "<\x{2029}>" =~ /<\s>/ ? "ok 843\n" : "not ok 843\n";
+}
+

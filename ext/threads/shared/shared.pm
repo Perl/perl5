@@ -211,10 +211,10 @@ in a C<cond_wait> on the locked variable, rather than only one.
 
 =head1 NOTES
 
-threads::shared is designed is disable itself silently if threads are
+threads::shared is designed to disable itself silently if threads are
 not available. If you want access to threads, you must C<use threads>
 before you C<use threads::shared>.  threads will emit a warning if you
-use it before threads::shared.
+use it after threads::shared.
 
 =head1 BUGS
 

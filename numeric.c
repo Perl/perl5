@@ -12,6 +12,10 @@
  * wizards count differently to other people."
  */
 
+/*
+=head1 Numeric functions
+*/
+
 #include "EXTERN.h"
 #define PERL_IN_NUMERIC_C
 #include "perl.h"

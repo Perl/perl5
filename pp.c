@@ -3180,12 +3180,12 @@ PP(pp_crypt)
     char *tmps = SvPV(left, len);
     char *t    = 0;
     if (DO_UTF8(left)) {
-         /* If Unicode take the crypt() of the low 8 bits
-	  * of the characters of the string. */
+         /* If Unicode take the crypt() of the low 8 bits of
+	  * the characters of the string.  Yes, we made this up.  */
 	 char *s    = tmps;
 	 char *send = tmps + len;
 	 STRLEN i   = 0;
-	 Newz(688, t, len, char);
+	 Newz(688, t, len + 1, char);
 	 while (s < send) {
 	      t[i++] = utf8_to_uvchr((U8*)s, 0) & 0xFF;
 	      s += UTF8SKIP(s);

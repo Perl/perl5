@@ -3813,6 +3813,10 @@ Perl_yylex(pTHX)
 	    }
 	    else {			/* no override */
 		tmp = -tmp;
+		if (tmp == KEY_dump && ckWARN(WARN_MISC)) {
+		    Perl_warner(aTHX_ WARN_MISC,
+			    "dump() better written as CORE::dump()");
+		}
 		gv = Nullgv;
 		gvp = 0;
 		if (ckWARN(WARN_AMBIGUOUS) && hgv

@@ -11,6 +11,10 @@
  * "I sit beside the fire and think of all that I have seen."  --Bilbo
  */
 
+/* 
+=head1 Hash Manipulation Functions
+*/
+
 #include "EXTERN.h"
 #define PERL_IN_HV_C
 #include "perl.h"
@@ -142,7 +146,7 @@ Perl_hv_notallowed(pTHX_ bool is_utf8, const char *key, I32 klen,
     if (is_utf8) {
 	SvUTF8_on(sv);
     }
-    Perl_croak(aTHX_ "Attempt to access to key '%_' in fixed hash",sv);
+    Perl_croak(aTHX_ "Attempt to access to key '%"SVf"' in fixed hash",sv);
 }
 
 /* (klen == HEf_SVKEY) is special for MAGICAL hv entries, meaning key slot

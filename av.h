@@ -46,8 +46,12 @@ struct xpvav {
 #define AVf_REUSED 4	/* got undeffed--don't turn old memory into SVs now */
 
 /*
+=head1 Handy Values
+
 =for apidoc AmU||Nullav
 Null AV pointer.
+
+=head1 Array Manipulation Functions
 
 =for apidoc Am|int|AvFILL|AV* av
 Same as C<av_len()>.  Deprecated, use C<av_len()> instead.

@@ -18,6 +18,8 @@
 #define PP(s) OP * Perl_##s(pTHX)
 
 /*
+=head1 Stack Manipulation Macros
+
 =for apidoc AmU||SP
 Stack pointer.  This is usually handled by C<xsubpp>.  See C<dSP> and
 C<SPAGAIN>.

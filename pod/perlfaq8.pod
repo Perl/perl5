@@ -634,9 +634,10 @@ STDOUT).
 
 Note that you I<must> use Bourne shell (sh(1)) redirection syntax in
 backticks, not csh(1)!  Details on why Perl's system() and backtick
-and pipe opens all use the Bourne shell are in
-http://www.cpan.org/doc/FMTEYEWTK/versus/csh.whynot .
-To capture a command's STDERR and STDOUT together:
+and pipe opens all use the Bourne shell are in the
+F<versus/csh.whynot> article in the "Far More Than You Ever Wanted To
+Know" collection in http://www.cpan.org/olddoc/FMTEYEWTK.tgz .  To
+capture a command's STDERR and STDOUT together:
 
     $output = `cmd 2>&1`;                       # either with backticks
     $pid = open(PH, "cmd 2>&1 |");              # or with an open pipe

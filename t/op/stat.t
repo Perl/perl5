@@ -210,9 +210,9 @@ SKIP: {
     skip "opendir failed: $!", 3 if @DEV == 0;
 
     # /dev/stdout might be either character special or a named pipe,
-    # depending on which OS and how are you running the test, so let's
-    # censor that one away.
-    $DEV =~ s{^[cp].+?\sstdout$}{}m;
+    # or a symlink, or a socket, depending on which OS and how are
+    # you running the test, so let's censor that one away.
+    $DEV =~ s{^[cpls].+?\sstdout$}{}m;
     @DEV =  grep { $_ ne 'stdout' } @DEV;
 
     # /dev/printer is also naughty: in IRIX it shows up as

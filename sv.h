@@ -12,6 +12,8 @@
 #endif
 
 /*
+=head1 SV Flags
+
 =for apidoc AmU||svtype
 An enum of flags for Perl types.  These are found in the file B<sv.h>
 in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
@@ -98,6 +100,8 @@ struct io {
 };
 
 /*
+=head1 SV Manipulation Functions
+
 =for apidoc Am|U32|SvREFCNT|SV* sv
 Returns the value of the object's reference count.
 
@@ -1139,6 +1143,8 @@ incremented.
 /* the following macros update any magic values this sv is associated with */
 
 /*
+=head1 Magical Functions
+
 =for apidoc Am|void|SvGETMAGIC|SV* sv
 Invokes C<mg_get> on an SV if it has 'get' magic.  This macro evaluates its
 argument more than once.
@@ -1160,6 +1166,8 @@ Like C<SvSetSV>, but does any set magic required afterwards.
 
 =for apidoc Am|void|SvSetMagicSV_nosteal|SV* dsv|SV* ssv
 Like C<SvSetMagicSV>, but does any set magic required afterwards.
+
+=head1 SV Manipulation Functions
 
 =for apidoc Am|char *|SvGROW|SV* sv|STRLEN len
 Expands the character buffer in the SV so that it has room for the

@@ -988,7 +988,6 @@ lib/File/Spec/Cygwin.pm		portable operations on Cygwin file names
 lib/File/Spec/Epoc.pm		portable operations on EPOC file names
 lib/File/Spec/Functions.pm	Function interface to File::Spec object methods
 lib/File/Spec/Mac.pm		portable operations on Mac file names
-lib/File/Spec/NW5.pm		portable operations on NetWare file names
 lib/File/Spec/OS2.pm		portable operations on OS2 file names
 lib/File/Spec/t/Functions.t     See if File::Spec::Functions works
 lib/File/Spec/t/rel2abs2rel.t   See if File::Spec->rel2abs/abs2rel works
@@ -1212,6 +1211,7 @@ lib/Pod/t/basic.pod		podlators test
 lib/Pod/t/basic.t		podlators test
 lib/Pod/t/basic.txt		podlators test
 lib/Pod/t/man.t    		podlators test
+lib/Pod/t/Functions.t		See if Pod::Functions works
 lib/Pod/t/InputObjects.t	See if Pod::InputObjects works
 lib/Pod/t/latex.t		Test for Pod::LaTeX
 lib/Pod/t/parselink.t		podlators test
@@ -2303,7 +2303,6 @@ t/op/subst_amp.t		See if $&-related substitution works
 t/op/subst_wamp.t		See if substitution works with $& present
 t/op/sub_lval.t			See if lvalue subroutines work
 t/op/sysio.t			See if sysread and syswrite work
-t/op/system.t			See if system works
 t/op/system_tests		Test runner for system.t
 t/op/taint.t			See if tainting works
 t/op/tie.t			See if tie/untie functions work
@@ -2318,6 +2317,7 @@ t/op/utf8decode.t		See if UTF-8 decoding works
 t/op/vec.t			See if vectors work
 t/op/ver.t			See if v-strings and the %v format flag work
 t/op/wantarray.t		See if wantarray works
+t/op/winsystem.t		See if system works in Win*
 t/op/write.t			See if write works (formats work)
 t/pod/emptycmd.t		Test empty pod directives
 t/pod/emptycmd.xr		Expected results for emptycmd.t

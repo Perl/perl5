@@ -33,6 +33,8 @@
  */
 
 /*
+=head1 Shared SV Functions
+
 =for apidoc sharedsv_init
 
 Saves a space for keeping SVs wider than an interpreter,

@@ -1304,10 +1304,7 @@ Apd	|STRLEN	|sv_utf8_upgrade_flags|SV *sv|I32 flags
 Apd	|char*	|sv_pvn_force_flags|SV* sv|STRLEN* lp|I32 flags
 Apd	|char*	|sv_2pv_flags	|SV* sv|STRLEN* lp|I32 flags
 Ap	|char*	|my_atof2	|const char *s|NV* value
-#if !defined(HAS_SOCKETPAIR) && defined(HAS_SOCKET)
 Apn	|int	|my_socketpair	|int family|int type|int protocol|int fd[2]
-#endif
-
 
 #if defined(USE_PERLIO) && !defined(USE_SFIO)
 Ap	|int	|PerlIO_close		|PerlIO *

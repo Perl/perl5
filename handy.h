@@ -21,9 +21,10 @@
 #define Null(type) ((type)NULL)
 
 /*
-=for apidoc AmU||Nullch
-Null character pointer.
+=head1 Handy Values
 
+=for apidoc AmU||Nullch 
+Null character pointer.
 =for apidoc AmU||Nullsv
 Null SV pointer.
 
@@ -210,6 +211,8 @@ typedef U64TYPE U64;
 #define Ctl(ch) ((ch) & 037)
 
 /*
+=head1 Miscellaneous Functions
+
 =for apidoc Am|bool|strNE|char* s1|char* s2
 Test two strings to see if they are different.  Returns true or
 false.
@@ -283,6 +286,9 @@ C<strncmp>).
 #endif
 
 /*
+
+=head1 Character classes
+
 =for apidoc Am|bool|isALNUM|char ch
 Returns a boolean indicating whether the C C<char> is an ASCII alphanumeric
 character (including underscore) or digit.
@@ -515,12 +521,16 @@ typedef U16 line_t;
 */
 
 /*
+=head1 SV Manipulation Functions
+
 =for apidoc Am|SV*|NEWSV|int id|STRLEN len
 Creates a new SV.  A non-zero C<len> parameter indicates the number of
 bytes of preallocated string space the SV should have.  An extra byte for a
 tailing NUL is also reserved.  (SvPOK is not set for the SV even if string
 space is allocated.)  The reference count for the new SV is set to 1.
 C<id> is an integer id between 0 and 1299 (used to identify leaks).
+
+=head1 Memory Management
 
 =for apidoc Am|void|New|int id|void* ptr|int nitems|type
 The XSUB-writer's interface to the C C<malloc> function.

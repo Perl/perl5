@@ -15,11 +15,6 @@ $VERSION = '1.1003';
 
 $Too_Big = 1024 * 1024 * 2;
 
-sub VERSION {
-    # Version of File::Compare
-    return $File::Compare::VERSION;
-}
-
 sub compare {
     croak("Usage: compare( file1, file2 [, buffersize]) ")
       unless(@_ == 2 || @_ == 3);

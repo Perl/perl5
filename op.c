@@ -15,6 +15,7 @@
  * either way, as the saying is, if you follow me."  --the Gaffer
  */
 
+
 #include "EXTERN.h"
 #define PERL_IN_OP_C
 #include "perl.h"
@@ -3453,6 +3454,8 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *id, OP *arg)
 }
 
 /*
+=head1 Embedding Functions
+
 =for apidoc load_module
 
 Loads the module whose name is pointed to by the string part of name.
@@ -4632,6 +4635,9 @@ Perl_cv_ckproto(pTHX_ CV *cv, GV *gv, char *p)
 static void const_sv_xsub(pTHX_ CV* cv);
 
 /*
+
+=head1 Optree Manipulation Functions
+
 =for apidoc cv_const_sv
 
 If C<cv> is a constant sub eligible for inlining. returns the constant
@@ -6781,9 +6787,16 @@ Perl_ck_subr(pTHX_ OP *o)
 		     goto again;
 		     break;
 		case ']':
-		     if (contextclass)
-			  contextclass = 0;
-		     else
+		     if (contextclass) {
+			 char *p = proto;
+			 char s = *p;
+			 contextclass = 0;
+			 *p = '\0';
+			 while (*--p != '[');
+			 bad_type(arg, Perl_form("one of %s", p),
+				 gv_ename(namegv), o2);
+			 *proto = s;
+		     } else
 			  goto oops;
 		     break;
 		case '*':

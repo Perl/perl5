@@ -12,6 +12,10 @@
  * meant that things should remain where they had set them)." --Treebeard
  */
 
+/*
+=head1 Array Manipulation Functions
+*/
+
 #include "EXTERN.h"
 #define PERL_IN_AV_C
 #include "perl.h"

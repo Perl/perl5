@@ -93,6 +93,8 @@ S_isa_lookup(pTHX_ HV *stash, const char *name, int len, int level)
 }
 
 /*
+=head1 SV Manipulation Functions
+
 =for apidoc sv_derived_from
 
 Returns a boolean indicating whether the SV is derived from the specified

@@ -543,9 +543,9 @@ quotas or other plumbing problems.
 
 =item Can't declare class for non-scalar %s in "%s"
 
-(F) Currently, only scalar variables can declared with a specific class
-qualifier in a "my" or "our" declaration.  The semantics may be extended
-for other types of variables in future.
+(F) Currently, only scalar variables can be declared with a specific
+class qualifier in a "my" or "our" declaration.  The semantics may be
+extended for other types of variables in future.
 
 =item Can't declare %s in "%s"
 
@@ -1288,6 +1288,11 @@ because of ordering problems in your file, or because of a missing
 something that isn't defined yet, you don't actually have to define the
 subroutine or package before the current location.  You can use an empty
 "sub foo;" or "package FOO;" to enter a "forward" declaration.
+
+=item dump() better written as CORE::dump()
+
+(W misc) You used the obsolescent C<dump()> built-in function, without fully
+qualifying it as C<CORE::dump()>.  Maybe it's a typo.  See L<perlfunc/dump>.
 
 =item Duplicate free() ignored
 
@@ -3171,11 +3176,9 @@ account you tested it under), does not rely on any environment variables
 location where the CGI server can't find it, basically, more or less.
 Please see the following for more information:
 
-	http://www.cpan.org/doc/FAQs/cgi/idiots-guide.html
-	http://www.cpan.org/doc/FAQs/cgi/perl-cgi-faq.html
-	ftp://rtfm.mit.edu/pub/usenet/news.answers/www/cgi-faq
-	http://hoohoo.ncsa.uiuc.edu/cgi/interface.html
-	http://www-genome.wi.mit.edu/WWW/faqs/www-security-faq.html
+	http://www.perl.org/CGI_MetaFAQ.html
+	http://www.htmlhelp.org/faq/cgifaq.html
+	http://www.w3.org/Security/Faq/
 
 You should also look at L<perlfaq9>.
 

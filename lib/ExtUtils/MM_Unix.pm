@@ -2049,20 +2049,22 @@ usually solves this kind of problem.
     # Are we building the core?
     $self->{PERL_CORE} = 0 unless exists $self->{PERL_CORE};
 
+    my $aq = ($^O eq 'VMS' ? '"' : '');  # command-line argument quoter
+
     # How do we run perl?
     $self->{PERLRUN}      = $self->{PERL};
-    $self->{PERLRUN} .= ' -I$(PERL_LIB)' if $self->{UNINSTALLED_PERL};
+    $self->{PERLRUN} .= " -${aq}I\$(PERL_LIB)$aq" if $self->{UNINSTALLED_PERL};
 
     # How do we run perl when installing libraries?
-    $self->{PERLRUNINST} .= $self->{PERLRUN}. ' -I$(INST_ARCHLIB) -I$(INST_LIB)';
+    $self->{PERLRUNINST} .= $self->{PERLRUN}. " -${aq}I\$(INST_ARCHLIB)$aq -${aq}I\$(INST_LIB)$aq";
 
     # What extra library dirs do we need when running the tests?
-    $self->{TEST_LIBS}   .= ' -I$(INST_ARCHLIB) -I$(INST_LIB)';
+    $self->{TEST_LIBS}   .= " -${aq}I\$(INST_ARCHLIB)$aq -${aq}I\$(INST_LIB)$aq";
 
     # When building the core, we need to add some helper libs since
     # perl's @INC won't work (we're not installed yet).
     foreach my $targ (qw(PERLRUN PERLRUNINST TEST_LIBS)) {
-        $self->{$targ} .= ' -I$(PERL_ARCHLIB) -I$(PERL_LIB)'
+        $self->{$targ} .= " -${aq}I\$(PERL_ARCHLIB)$aq -${aq}I\$(PERL_LIB)$aq"
           if $self->{PERL_CORE};
     }
 }

@@ -1368,6 +1368,8 @@ S_qsortsv(pTHX_ gptr *list1, size_t nmemb, SVCOMPARE_t cmp)
 }
 
 /*
+=head1 Array Manipulation Functions
+
 =for apidoc sortsv
 
 Sort an array. Here is an example:

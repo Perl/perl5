@@ -388,7 +388,9 @@ struct context {
 
 #define CXINC (cxstack_ix < cxstack_max ? ++cxstack_ix : (cxstack_ix = cxinc()))
 
-/* "gimme" values */
+/* 
+=head1 "Gimme" Values
+*/
 
 /*
 =for apidoc AmU||G_SCALAR

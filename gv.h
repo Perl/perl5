@@ -35,6 +35,8 @@ struct gp {
 #define GvFLAGS(gv)	(GvXPVGV(gv)->xgv_flags)
 
 /*
+=head1 GV Functions
+
 =for apidoc Am|SV*|GvSV|GV* gv
 
 Return the SV from the GV.

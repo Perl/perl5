@@ -16,6 +16,10 @@
  * laughed Pippin.
  */
 
+/*
+=head1 GV Functions
+*/
+
 #include "EXTERN.h"
 #define PERL_IN_GV_C
 #include "perl.h"
