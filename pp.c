@@ -2808,6 +2808,9 @@ PP(pp_substr)
 	    sv_pos_u2b(sv, &pos, &rem);
 	tmps += pos;
 	sv_setpvn(TARG, tmps, rem);
+#ifdef USE_LOCALE_COLLATE
+	sv_unmagic(TARG, 'o');
+#endif
 	if (utf8_curlen)
 	    SvUTF8_on(TARG);
 	if (repl) {
