@@ -2803,6 +2803,7 @@ new_struct_thread(struct perl_thread *t)
     screamfirst = 0;
     screamnext = 0;
     reg_start_tmp = 0;
+    reg_start_tmpl = 0;
     
     /* Initialise all per-thread SVs that the template thread used */
     svp = AvARRAY(t->threadsv);
