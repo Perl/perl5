@@ -4120,6 +4120,13 @@ If C<use locale> is in effect, the character used for the decimal
 point in formatted real numbers is affected by the LC_NUMERIC locale.
 See L<perllocale>.
 
+To cope with broken systems that allow the standard locales to be
+overridden by malicious users, the return value may be tainted
+if any of the floating point formats are used and the conversion
+yields something that doesn't look like a normal C-locale floating
+point number.  This happens regardless of whether C<use locale> is
+in effect or not.
+
 If Perl understands "quads" (64-bit integers) (this requires
 either that the platform natively supports quads or that Perl
 has been specifically compiled to support quads), the characters

@@ -49,6 +49,8 @@
 #define PL_delaymagic		(vTHX->Tdelaymagic)
 #define PL_dirty		(vTHX->Tdirty)
 #define PL_dumpindent		(vTHX->Tdumpindent)
+#define PL_efloatbuf		(vTHX->Tefloatbuf)
+#define PL_efloatsize		(vTHX->Tefloatsize)
 #define PL_extralen		(vTHX->Textralen)
 #define PL_firstgv		(vTHX->Tfirstgv)
 #define PL_formtarget		(vTHX->Tformtarget)
@@ -229,8 +231,6 @@
 #define PL_doswitches		(PERL_GET_INTERP->Idoswitches)
 #define PL_dowarn		(PERL_GET_INTERP->Idowarn)
 #define PL_e_script		(PERL_GET_INTERP->Ie_script)
-#define PL_efloatbuf		(PERL_GET_INTERP->Iefloatbuf)
-#define PL_efloatsize		(PERL_GET_INTERP->Iefloatsize)
 #define PL_egid			(PERL_GET_INTERP->Iegid)
 #define PL_endav		(PERL_GET_INTERP->Iendav)
 #define PL_envgv		(PERL_GET_INTERP->Ienvgv)
@@ -500,8 +500,6 @@
 #define PL_doswitches		(vTHX->Idoswitches)
 #define PL_dowarn		(vTHX->Idowarn)
 #define PL_e_script		(vTHX->Ie_script)
-#define PL_efloatbuf		(vTHX->Iefloatbuf)
-#define PL_efloatsize		(vTHX->Iefloatsize)
 #define PL_egid			(vTHX->Iegid)
 #define PL_endav		(vTHX->Iendav)
 #define PL_envgv		(vTHX->Ienvgv)
@@ -773,8 +771,6 @@
 #define PL_Idoswitches		PL_doswitches
 #define PL_Idowarn		PL_dowarn
 #define PL_Ie_script		PL_e_script
-#define PL_Iefloatbuf		PL_efloatbuf
-#define PL_Iefloatsize		PL_efloatsize
 #define PL_Iegid		PL_egid
 #define PL_Iendav		PL_endav
 #define PL_Ienvgv		PL_envgv
@@ -1002,6 +998,8 @@
 #define PL_delaymagic		(aTHX->Tdelaymagic)
 #define PL_dirty		(aTHX->Tdirty)
 #define PL_dumpindent		(aTHX->Tdumpindent)
+#define PL_efloatbuf		(aTHX->Tefloatbuf)
+#define PL_efloatsize		(aTHX->Tefloatsize)
 #define PL_extralen		(aTHX->Textralen)
 #define PL_firstgv		(aTHX->Tfirstgv)
 #define PL_formtarget		(aTHX->Tformtarget)
@@ -1136,6 +1134,8 @@
 #define PL_Tdelaymagic		PL_delaymagic
 #define PL_Tdirty		PL_dirty
 #define PL_Tdumpindent		PL_dumpindent
+#define PL_Tefloatbuf		PL_efloatbuf
+#define PL_Tefloatsize		PL_efloatsize
 #define PL_Textralen		PL_extralen
 #define PL_Tfirstgv		PL_firstgv
 #define PL_Tformtarget		PL_formtarget

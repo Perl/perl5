@@ -4645,14 +4645,14 @@ Perl_sv_vcatpvf_mg(pTHX_ SV *sv, const char* pat, va_list* args)
 }
 
 void
-Perl_sv_vsetpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, I32 svmax, bool *used_locale)
+Perl_sv_vsetpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, I32 svmax, bool *maybe_tainted)
 {
     sv_setpvn(sv, "", 0);
-    sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale);
+    sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, maybe_tainted);
 }
 
 void
-Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, I32 svmax, bool *used_locale)
+Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, I32 svmax, bool *maybe_tainted)
 {
     dTHR;
     char *p;
@@ -5086,6 +5086,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		Safefree(PL_efloatbuf);
 		PL_efloatsize = need + 20; /* more fudge */
 		New(906, PL_efloatbuf, PL_efloatsize, char);
+		PL_efloatbuf[0] = '\0';
 	    }
 
 	    eptr = ebuf + sizeof ebuf;
@@ -5125,15 +5126,36 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    eptr = PL_efloatbuf;
 	    elen = strlen(PL_efloatbuf);
 
-#ifdef LC_NUMERIC
+#ifdef USE_LOCALE_NUMERIC
 	    /*
 	     * User-defined locales may include arbitrary characters.
-	     * And, unfortunately, some system may alloc the "C" locale
-	     * to be overridden by a malicious user.
+	     * And, unfortunately, some (broken) systems may allow the
+	     * "C" locale to be overridden by a malicious user.
+	     * XXX This is an extreme way to cope with broken systems.
 	     */
-	    if (used_locale)
-		*used_locale = TRUE;
-#endif /* LC_NUMERIC */
+	    if (maybe_tainted && PL_tainting) {
+		/* safe if it matches /[-+]?\d*(\.\d*)?([eE][-+]?\d*)?/ */
+		if (*eptr == '-' || *eptr == '+')
+		    ++eptr;
+		while (isDIGIT(*eptr))
+		    ++eptr;
+		if (*eptr == '.') {
+		    ++eptr;
+		    while (isDIGIT(*eptr))
+			++eptr;
+		}
+		if (*eptr == 'e' || *eptr == 'E') {
+		    ++eptr;
+		    if (*eptr == '-' || *eptr == '+')
+			++eptr;
+		    while (isDIGIT(*eptr))
+			++eptr;
+		}
+		if (*eptr)
+		    *maybe_tainted = TRUE;	/* results are suspect */
+		eptr = PL_efloatbuf;
+	    }
+#endif /* USE_LOCALE_NUMERIC */
 
 	    break;
 
