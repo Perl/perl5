@@ -2593,6 +2593,7 @@ s	|char*	|stdize_locale	|char* locs
 #endif
 
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
+s	|COP*	|closest_cop	|COP *cop|OP *o
 s	|SV*	|mess_alloc
 #  if defined(LEAKTEST)
 s	|void	|xstat		|int
