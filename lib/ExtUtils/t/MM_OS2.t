@@ -11,7 +11,7 @@ use Test::More;
 if ($^O =~ /os2/i) {
 	plan( tests => 32 );
 } else {
-	plan( skip_all => "This does not appear to be OS/2" );
+	plan( skip_all => "This is not OS/2" );
 }
 
 # for dlsyms, overridden in tests
