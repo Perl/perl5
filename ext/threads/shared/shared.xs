@@ -1,6 +1,6 @@
-/*    sharedsv.c
+/*    shared.xs
  *
- *    Copyright (c) 2001, Larry Wall
+ *    Copyright (c) 2001-2002, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -723,10 +723,19 @@ Perl_sharedsv_lock(pTHX_ shared_sv* ssv)
     recursive_lock_acquire(aTHX_ &ssv->lock, __FILE__, __LINE__);
 }
 
+/* handles calls from lock() builtin via PL_lockhook */
+
 void
 Perl_sharedsv_locksv(pTHX_ SV *sv)
 {
-    Perl_sharedsv_lock(aTHX_ Perl_sharedsv_find(aTHX_ sv));
+    shared_sv* shared;
+
+    if(SvROK(sv))
+	sv = SvRV(sv);
+    shared = Perl_sharedsv_find(aTHX, sv);
+    if(!shared)
+       croak("lock can only be used on shared values");
+    Perl_sharedsv_lock(aTHX_ shared);
 }
 
 =head1 Shared SV Functions
@@ -914,6 +923,7 @@ _id(SV *ref)
 	PROTOTYPE: \[$@%]
 CODE:
 	shared_sv *shared;
+	ref = SvRV(ref);
 	if(SvROK(ref))
 	    ref = SvRV(ref);
 	if( (shared = Perl_sharedsv_find(aTHX_ ref)) ){
@@ -928,6 +938,7 @@ _refcnt(SV *ref)
 	PROTOTYPE: \[$@%]
 CODE:
 	shared_sv *shared;
+	ref = SvRV(ref);
 	if(SvROK(ref))
 	    ref = SvRV(ref);
 	if( (shared = Perl_sharedsv_find(aTHX_ ref)) ){
@@ -948,6 +959,7 @@ void
 share(SV *ref)
 	PROTOTYPE: \[$@%]
 	CODE:
+	ref = SvRV(ref);
 	if(SvROK(ref))
 	    ref = SvRV(ref);
 	Perl_sharedsv_share(aTHX, ref);
@@ -957,6 +969,7 @@ lock_enabled(SV *ref)
 	PROTOTYPE: \[$@%]
 	CODE:
 	shared_sv* shared;
+	ref = SvRV(ref);
 	if(SvROK(ref))
 	    ref = SvRV(ref);
 	shared = Perl_sharedsv_find(aTHX, ref);
@@ -970,6 +983,7 @@ cond_wait_enabled(SV *ref)
 	CODE:
 	shared_sv* shared;
 	int locks;
+	ref = SvRV(ref);
 	if(SvROK(ref))
 	    ref = SvRV(ref);
 	shared = Perl_sharedsv_find(aTHX_ ref);
@@ -999,6 +1013,7 @@ cond_signal_enabled(SV *ref)
 	PROTOTYPE: \[$@%]
 	CODE:
 	shared_sv* shared;
+	ref = SvRV(ref);
 	if(SvROK(ref))
 	    ref = SvRV(ref);
 	shared = Perl_sharedsv_find(aTHX_ ref);
@@ -1011,6 +1026,7 @@ cond_broadcast_enabled(SV *ref)
 	PROTOTYPE: \[$@%]
 	CODE:
 	shared_sv* shared;
+	ref = SvRV(ref);
 	if(SvROK(ref))
 	    ref = SvRV(ref);
 	shared = Perl_sharedsv_find(aTHX_ ref);

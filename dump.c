@@ -731,7 +731,7 @@ Perl_gv_dump(pTHX_ GV *gv)
 }
 
 
-/* map magic types to the symbolic name
+/* map magic types to the symbolic names
  * (with the PERL_MAGIC_ prefixed stripped)
  */
 
@@ -747,6 +747,7 @@ static struct { char type; char *name; } magic_names[] = {
 	{ PERL_MAGIC_env,            "env(E)" },
 	{ PERL_MAGIC_isa,            "isa(I)" },
 	{ PERL_MAGIC_dbfile,         "dbfile(L)" },
+	{ PERL_MAGIC_shared,         "shared(N)" },
 	{ PERL_MAGIC_tied,           "tied(P)" },
 	{ PERL_MAGIC_sig,            "sig(S)" },
 	{ PERL_MAGIC_uvar,           "uvar(U)" },
@@ -760,12 +761,14 @@ static struct { char type; char *name; } magic_names[] = {
 	{ PERL_MAGIC_nkeys,          "nkeys(k)" },
 	{ PERL_MAGIC_dbline,         "dbline(l)" },
 	{ PERL_MAGIC_mutex,          "mutex(m)" },
+	{ PERL_MAGIC_shared_scalar,  "shared_scalar(n)" },
 	{ PERL_MAGIC_collxfrm,       "collxfrm(o)" },
 	{ PERL_MAGIC_tiedelem,       "tiedelem(p)" },
 	{ PERL_MAGIC_tiedscalar,     "tiedscalar(q)" },
 	{ PERL_MAGIC_qr,             "qr(r)" },
 	{ PERL_MAGIC_sigelem,        "sigelem(s)" },
 	{ PERL_MAGIC_taint,          "taint(t)" },
+	{ PERL_MAGIC_uvar_elem,      "uvar_elem(v)" },
 	{ PERL_MAGIC_vec,            "vec(v)" },
 	{ PERL_MAGIC_substr,         "substr(x)" },
 	{ PERL_MAGIC_defelem,        "defelem(y)" },
