@@ -14,9 +14,25 @@ BEGIN {
 
 # so that using > 0xfffffff constants and
 # 32+ bit integers don't cause noise
+use warnings;
 no warnings qw(overflow portable);
 
 print "1..59\n";
+
+# as 6 * 6 = 36, the last digit of 6**n will always be six. Hence the last
+# digit of 16**n will always be six. Hence 16**n - 1 will always end in 5.
+# Assumption is that UVs will always be a multiple of 4 bits long.
+
+my $UV_max = ~0;
+die "UV_max eq '$UV_max', doesn't end in 5; your UV isn't 4n bits long :-(."
+  unless $UV_max =~ /5$/;
+my $UV_max_less3 = $UV_max - 3;
+my $maths_preserves_UVs = $UV_max_less3 =~ /^\d+2$/;   # 5 - 3 is 2.
+if ($maths_preserves_UVs) {
+  print "# This perl's maths preserves all bits of a UV.\n";
+} else {
+  print "# This perl's maths does not preserve all bits of a UV.\n";
+}
 
 my $q = 12345678901;
 my $r = 23456789012;
@@ -327,7 +343,8 @@ print "ok 58\n";
 
 # 0xFFFFFFFFFFFFFFFF ==  1 * 3 * 5 * 17 * 257 * 641 * 65537 * 6700417'
 $q = 0xFFFFFFFFFFFFFFFF / 3;
-if ($q == 0x5555555555555555 and $q != 0x5555555555555556) {
+if ($q == 0x5555555555555555 and ($q != 0x5555555555555556
+                                  or !$maths_preserves_UVs)) {
   print "ok 59\n";
 } else {
   print "not ok 59 # 0xFFFFFFFFFFFFFFFF / 3 = $q\n";

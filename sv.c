@@ -2628,10 +2628,10 @@ Perl_sv_2nv(pTHX_ register SV *sv)
     }
     else if (SvTYPE(sv) < SVt_PVNV)
 	sv_upgrade(sv, SVt_PVNV);
-    if (SvNOKp(sv) && !(SvIOK(sv) || SvPOK(sv))) {
-	SvNOK_on(sv);
+    if (SvNOKp(sv)) {
+        return SvNVX(sv);
     }
-    else if (SvIOKp(sv)) {
+    if (SvIOKp(sv)) {
 	SvNVX(sv) = SvIsUV(sv) ? (NV)SvUVX(sv) : (NV)SvIVX(sv);
 #ifdef NV_PRESERVES_UV
 	SvNOK_on(sv);
@@ -5829,7 +5829,9 @@ Perl_sv_inc(pTHX_ register SV *sv)
     }
     if ((flags & SVf_IOK) || ((flags & (SVp_IOK | SVp_NOK)) == SVp_IOK)) {
 	/* It's publicly an integer, or privately an integer-not-float */
+#ifdef PERL_PRESERVE_IVUV
       oops_its_int:
+#endif
 	if (SvIsUV(sv)) {
 	    if (SvUVX(sv) == UV_MAX)
 		sv_setnv(sv, (NV)UV_MAX + 1.0);
@@ -5977,7 +5979,9 @@ Perl_sv_dec(pTHX_ register SV *sv)
     flags = SvFLAGS(sv);
     if ((flags & SVf_IOK) || ((flags & (SVp_IOK | SVp_NOK)) == SVp_IOK)) {
 	/* It's publicly an integer, or privately an integer-not-float */
+#ifdef PERL_PRESERVE_IVUV
       oops_its_int:
+#endif
 	if (SvIsUV(sv)) {
 	    if (SvUVX(sv) == 0) {
 		(void)SvIOK_only(sv);
