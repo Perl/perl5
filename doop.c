@@ -833,15 +833,15 @@ Perl_do_chop(pTHX_ register SV *astr, register SV *sv)
 	    char *send = s + len;
 	    char *start = s;
 	    s = send - 1;
-	    while ((*s & 0xc0) == 0x80)
-		--s;
-	    if (UTF8SKIP(s) != send - s && ckWARN_d(WARN_UTF8))
-		Perl_warner(aTHX_ WARN_UTF8, "Malformed UTF-8 character");
-	    sv_setpvn(astr, s, send - s);
-	    *s = '\0';
-	    SvCUR_set(sv, s - start);
-	    SvNIOK_off(sv);
-	    SvUTF8_on(astr);
+	    while (s > start && UTF8_IS_CONTINUATION(*s))
+		s--;
+	    if (utf8_to_uv_simple((U8*)s, 0)) {
+		sv_setpvn(astr, s, send - s);
+		*s = '\0';
+		SvCUR_set(sv, s - start);
+		SvNIOK_off(sv);
+		SvUTF8_on(astr);
+	    }
 	}
 	else
 	    sv_setpvn(astr, "", 0);

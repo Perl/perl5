@@ -213,11 +213,24 @@ Perl_utf8_to_uv(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
     bool dowarn = ckWARN_d(WARN_UTF8);
 #endif
     STRLEN expectlen = 0;
-    
-    if (curlen == 0) {
-	if (dowarn)
-	    Perl_warner(aTHX_ WARN_UTF8,
-			"Malformed UTF-8 character (an empty string)");
+    U32 warning = 0;
+
+/* This list is a superset of the UTF8_ALLOW_XXX. */
+
+#define UTF8_WARN_EMPTY				 1
+#define UTF8_WARN_CONTINUATION			 2
+#define UTF8_WARN_NON_CONTINUATION	 	 3
+#define UTF8_WARN_FE_FF				 4
+#define UTF8_WARN_SHORT				 5
+#define UTF8_WARN_OVERFLOW			 6
+#define UTF8_WARN_SURROGATE			 7
+#define UTF8_WARN_BOM				 8
+#define UTF8_WARN_LONG				 9
+#define UTF8_WARN_FFFF				10
+
+    if (curlen == 0 &&
+	!(flags & UTF8_ALLOW_EMPTY)) {
+	warning = UTF8_WARN_EMPTY;
 	goto malformed;
     }
 
@@ -229,28 +242,19 @@ Perl_utf8_to_uv(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
 
     if (UTF8_IS_CONTINUATION(uv) &&
 	!(flags & UTF8_ALLOW_CONTINUATION)) {
-	if (dowarn)
-	    Perl_warner(aTHX_ WARN_UTF8,
-			"Malformed UTF-8 character (unexpected continuation byte 0x%02"UVxf")",
-			uv);
+	warning = UTF8_WARN_CONTINUATION;
 	goto malformed;
     }
 
     if (UTF8_IS_START(uv) && curlen > 1 && !UTF8_IS_CONTINUATION(s[1]) &&
 	!(flags & UTF8_ALLOW_NON_CONTINUATION)) {
-	if (dowarn)
-	    Perl_warner(aTHX_ WARN_UTF8,
-			"Malformed UTF-8 character (unexpected non-continuation byte 0x%02"UVxf" after start byte 0x%02"UVxf")",
-			(UV)s[1], uv);
+	warning = UTF8_WARN_NON_CONTINUATION;
 	goto malformed;
     }
     
     if ((uv == 0xfe || uv == 0xff) &&
 	!(flags & UTF8_ALLOW_FE_FF)) {
-	if (dowarn)
-	    Perl_warner(aTHX_ WARN_UTF8,
-			"Malformed UTF-8 character (byte 0x%02"UVxf")",
-			uv);
+	warning = UTF8_WARN_FE_FF;
 	goto malformed;
     }
 	
@@ -269,10 +273,7 @@ Perl_utf8_to_uv(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
 
     if ((curlen < expectlen) &&
 	!(flags & UTF8_ALLOW_SHORT)) {
-	if (dowarn)
-	    Perl_warner(aTHX_ WARN_UTF8,
-			"Malformed UTF-8 character (%d byte%s, need %d)",
-			curlen, curlen == 1 ? "" : "s", expectlen);
+	warning = UTF8_WARN_SHORT;
 	goto malformed;
     }
 
@@ -283,21 +284,25 @@ Perl_utf8_to_uv(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
     while (len--) {
 	if (!UTF8_IS_CONTINUATION(*s) &&
 	    !(flags & UTF8_ALLOW_NON_CONTINUATION)) {
-	    if (dowarn)
-		Perl_warner(aTHX_ WARN_UTF8,
-			    "Malformed UTF-8 character (unexpected non-continuation byte 0x%02x)",
-			    *s);
+	    s--;
+	    warning = UTF8_WARN_NON_CONTINUATION;
 	    goto malformed;
 	}
 	else
 	    uv = UTF8_ACCUMULATE(uv, *s);
-	if (uv < ouv) {
-	    /* This cannot be allowed. */
-	    if (dowarn)
-		Perl_warner(aTHX_ WARN_UTF8,
-			    "Malformed UTF-8 character (overflow at 0x%"UVxf", byte 0x%02x)",
-			    ouv, *s);
-	    goto malformed;
+	if (!(uv > ouv)) {
+	    /* These cannot be allowed. */
+	    if (uv == ouv) {
+		if (!(flags & UTF8_ALLOW_LONG)) {
+		    warning = UTF8_WARN_LONG;
+		    goto malformed;
+		}
+	    }
+	    else { /* uv < ouv */
+		/* This cannot be allowed. */
+		warning = UTF8_WARN_OVERFLOW;
+		goto malformed;
+	    }
 	}
 	s++;
 	ouv = uv;
@@ -305,31 +310,19 @@ Perl_utf8_to_uv(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
 
     if (UNICODE_IS_SURROGATE(uv) &&
 	!(flags & UTF8_ALLOW_SURROGATE)) {
-	if (dowarn)
-	    Perl_warner(aTHX_ WARN_UTF8,
-			"Malformed UTF-8 character (UTF-16 surrogate 0x%04"UVxf")",
-			uv);
+	warning = UTF8_WARN_SURROGATE;
 	goto malformed;
     } else if (UNICODE_IS_BYTE_ORDER_MARK(uv) &&
 	       !(flags & UTF8_ALLOW_BOM)) {
-	if (dowarn)
-	    Perl_warner(aTHX_ WARN_UTF8,
-			"Malformed UTF-8 character (byte order mark 0x%04"UVxf")",
-			uv);
+	warning = UTF8_WARN_BOM;
 	goto malformed;
     } else if ((expectlen > UNISKIP(uv)) &&
 	       !(flags & UTF8_ALLOW_LONG)) {
-	if (dowarn)
-	    Perl_warner(aTHX_ WARN_UTF8,
-			"Malformed UTF-8 character (%d byte%s, need %d)",
-			expectlen, expectlen == 1 ? "": "s", UNISKIP(uv));
+	warning = UTF8_WARN_LONG;
 	goto malformed;
     } else if (UNICODE_IS_ILLEGAL(uv) &&
 	       !(flags & UTF8_ALLOW_FFFF)) {
-	if (dowarn)
-	    Perl_warner(aTHX_ WARN_UTF8,
-			"Malformed UTF-8 character (character 0x%04"UVxf")",
-			uv);
+	warning = UTF8_WARN_FFFF;
 	goto malformed;
     }
 
@@ -341,6 +334,61 @@ malformed:
 	if (retlen)
 	    *retlen = -1;
 	return 0;
+    }
+
+    if (dowarn) {
+	SV* sv = sv_2mortal(newSVpv("Malformed UTF-8 character ", 0));
+
+	switch (warning) {
+	case 0: /* Intentionally empty. */ break;
+	case UTF8_WARN_EMPTY:
+	    Perl_sv_catpvf(aTHX_ sv, "(empty string)");
+	    break;
+	case UTF8_WARN_CONTINUATION:
+	    Perl_sv_catpvf(aTHX_ sv, "(unexpected continuation byte 0x%02"UVxf")", uv);
+	    break;
+	case UTF8_WARN_NON_CONTINUATION:
+	    Perl_sv_catpvf(aTHX_ sv, "(unexpected non-continuation byte 0x%02"UVxf" after start byte 0x%02"UVxf")",
+                           (UV)s[1], uv);
+	    break;
+	case UTF8_WARN_FE_FF:
+	    Perl_sv_catpvf(aTHX_ sv, "(byte 0x%02"UVxf")", uv);
+	    break;
+	case UTF8_WARN_SHORT:
+	    Perl_sv_catpvf(aTHX_ sv, "(%d byte%s, need %d)",
+                           curlen, curlen == 1 ? "" : "s", expectlen);
+	    break;
+	case UTF8_WARN_OVERFLOW:
+	    Perl_sv_catpvf(aTHX_ sv, "(overflow at 0x%"UVxf", byte 0x%02x)",
+                           ouv, *s);
+	    break;
+	case UTF8_WARN_SURROGATE:
+	    Perl_sv_catpvf(aTHX_ sv, "(UTF-16 surrogate 0x%04"UVxf")", uv);
+	    break;
+	case UTF8_WARN_BOM:
+	    Perl_sv_catpvf(aTHX_ sv, "(byte order mark 0x%04"UVxf")", uv);
+	    break;
+	case UTF8_WARN_LONG:
+	    Perl_sv_catpvf(aTHX_ sv, "(%d byte%s, need %d)",
+			   expectlen, expectlen == 1 ? "": "s", UNISKIP(uv));
+	    break;
+	case UTF8_WARN_FFFF:
+	    Perl_sv_catpvf(aTHX_ sv, "(character 0x%04"UVxf")", uv);
+	    break;
+	default:
+	    Perl_sv_catpvf(aTHX_ sv, "(unknown reason)");
+	    break;
+	}
+	
+	if (warning) {
+	    char *s = SvPVX(sv);
+
+	    if (PL_op)
+		Perl_warner(aTHX_ WARN_UTF8,
+			    "%s in %s", s,  PL_op_desc[PL_op->op_type]);
+	    else
+		Perl_warner(aTHX_ WARN_UTF8, "%s", s);
+	}
     }
 
     if (retlen)

@@ -4606,17 +4606,18 @@ Perl_sv_pos_b2u(pTHX_ register SV *sv, I32* offsetp)
 
     s = (U8*)SvPV(sv, len);
     if (len < *offsetp)
-	Perl_croak(aTHX_ "panic: bad byte offset");
+	Perl_croak(aTHX_ "panic: sv_pos_b2u: bad byte offset");
     send = s + *offsetp;
     len = 0;
     while (s < send) {
-	s += UTF8SKIP(s);
-	++len;
-    }
-    if (s != send) {
-	if (ckWARN_d(WARN_UTF8))
-	    Perl_warner(aTHX_ WARN_UTF8, "Malformed UTF-8 character");
-	--len;
+	STRLEN n;
+
+	if (utf8_to_uv(s, UTF8SKIP(s), &n, 0)) {
+	    s += n;
+	    len++;
+	}
+	else
+	    break;
     }
     *offsetp = len;
     return;

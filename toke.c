@@ -1551,7 +1551,7 @@ S_scan_const(pTHX_ char *start)
            STRLEN len = (STRLEN) -1;
            UV uv;
            if (this_utf8) {
-               uv = utf8_to_uv((U8*)s, send - s, &len, UTF8_CHECK_ONLY);
+               uv = utf8_to_uv((U8*)s, send - s, &len, 0);
            }
            if (len == (STRLEN)-1) {
                /* Illegal UTF8 (a high-bit byte), make it valid. */

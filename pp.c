@@ -3978,20 +3978,17 @@ PP(pp_reverse)
 		U8* s = (U8*)SvPVX(TARG);
 		U8* send = (U8*)(s + len);
 		while (s < send) {
-		    if (*s < 0x80) {
+		    if (UTF8_IS_ASCII(*s)) {
 			s++;
 			continue;
 		    }
 		    else {
+			if (!utf8_to_uv_simple(s, 0))
+			    break;
 			up = (char*)s;
 			s += UTF8SKIP(s);
 			down = (char*)(s - 1);
-			if (s > send || !((*down & 0xc0) == 0x80)) {
-			    if (ckWARN_d(WARN_UTF8))
-				Perl_warner(aTHX_ WARN_UTF8,
-					    "Malformed UTF-8 character");
-			    break;
-			}
+			/* reverse this character */
 			while (down > up) {
 			    tmp = *up;
 			    *up++ = *down;
