@@ -932,8 +932,9 @@ variable are summarised below. For more details see L<PerlIO>.
 
 =item :bytes
 
-Turns I<off> the C<:utf8> flag for the layer below.
-Unlikely to be useful in global PERLIO environment variable.
+A pseudolayer that turns I<off> the C<:utf8> flag for the layer below.
+Unlikely to be useful on its own in the global PERLIO environment variable.
+You perhaps were thinking of C<:crlf:bytes> or C<:perlio:bytes>.
 
 =item :crlf
 
@@ -964,12 +965,17 @@ and in general attempts to minimize data copying.
 
 C<:perlio> will insert a C<:unix> layer below itself to do low level IO.
 
+=item :pop
+
+An experimental pseudolayer that removes the topmost layer.
+Use with the same care as is reserved for nitroglyserin.
+
 =item :raw
 
-Applying the <:raw> layer is equivalent to calling C<binmode($fh)>.
-It makes the stream pass each byte as-is without any translation.
-In particular CRLF translation, and/or :utf8 intuited from locale
-are disabled.
+A pseudolayer that manipulates other layers.  Applying the <:raw>
+layer is equivalent to calling C<binmode($fh)>.  It makes the stream
+pass each byte as-is without any translation.  In particular CRLF
+translation, and/or :utf8 intuited from locale are disabled.
 
 Arranges for all accesses go straight to the lowest buffered layer provided
 by the configration. That is it strips off any layers above that layer.
@@ -998,12 +1004,13 @@ C<open(), read(), write(), lseek(), close()>
 
 =item :utf8
 
-Turns on a flag on the layer below to tell perl that data sent to the
-stream should be converted to perl internal "utf8" form and that data from the
-stream should be considered as so encoded. On ASCII based platforms the
-encoding is UTF-8 and on EBCDIC platforms UTF-EBCDIC.
-May be useful in PERLIO environment variable to make UTF-8 the
-default. (To turn off that behaviour use C<:bytes> layer.)
+A pseudolayer that turns on a flag on the layer below to tell perl
+that data sent to the stream should be converted to perl internal
+"utf8" form and that data from the stream should be considered as so
+encoded. On ASCII based platforms the encoding is UTF-8 and on EBCDIC
+platforms UTF-EBCDIC.  May be useful in PERLIO environment variable to
+make UTF-8 the default. (To turn off that behaviour use C<:bytes>
+layer.)
 
 =item :win32
 
