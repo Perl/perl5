@@ -179,6 +179,7 @@ Exporter::export_tags();
     alarm chdir chown close fork getlogin getppid getpgrp link
 	pipe read rmdir sleep unlink write
     utime
+    nice
 );
 
 # Grandfather old foo_h form to new :foo_h form
