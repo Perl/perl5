@@ -19,13 +19,24 @@ my $glossary = $ARGV[1] || 'Porting/Glossary';
 open CONFIG, ">$config_pm" or die "Can't open $config_pm: $!\n";
 $myver = $];
 
-print CONFIG <<"ENDOFBEG";
+print CONFIG <<'ENDOFBEG_NOQ', <<"ENDOFBEG";
 package Config;
 use Exporter ();
-\@ISA = (Exporter);
-\@EXPORT = qw(%Config);
-\@EXPORT_OK = qw(myconfig config_sh config_vars);
+@EXPORT = qw(%Config);
+@EXPORT_OK = qw(myconfig config_sh config_vars);
 
+# Define our own import method to avoid pulling in the full Exporter:
+sub import {
+  my $pkg = shift;
+  @_ = @EXPORT unless @_;
+  my @func = grep {$_ ne '%Config'} @_;
+  Exporter::import('Config', @func) if @func;
+  return if @func == @_;
+  my $callpkg = caller(0);
+  *{"$callpkg\::Config"} = \%Config;
+}
+
+ENDOFBEG_NOQ
 \$] == $myver
   or die "Perl lib version ($myver) doesn't match executable version (\$])";
 

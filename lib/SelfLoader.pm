@@ -1,5 +1,5 @@
 package SelfLoader;
-use Carp;
+# use Carp;
 require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(AUTOLOAD);
@@ -8,6 +8,8 @@ sub Version {$VERSION}
 $DEBUG = 0;
 
 my %Cache;      # private cache for all SelfLoader's client packages
+
+sub croak { require Carp; goto &Carp::croak }
 
 AUTOLOAD {
     print STDERR "SelfLoader::AUTOLOAD for $AUTOLOAD\n" if $DEBUG;
@@ -92,7 +94,8 @@ sub _load_stubs {
 sub _add_to_cache {
     my($self,$fullname,$pack,$lines, $protoype) = @_;
     return () unless $fullname;
-    carp("Redefining sub $fullname") if exists $Cache{$fullname};
+    (require Carp), Carp::carp("Redefining sub $fullname")
+      if exists $Cache{$fullname};
     $Cache{$fullname} = join('', "package $pack; ",@$lines);
     print STDERR "SelfLoader cached $fullname: $Cache{$fullname}" if $DEBUG;
     # return stub to be eval'd
