@@ -243,6 +243,7 @@ if (! $versiononly || !($installprivlib =~ m/\Q$]/)) {
 		       "${installarchlib}/pod/perldiag.pod");
     if (compare($from, $to) || $nonono) {
 	mkpath("${installarchlib}/pod", 1, 0777);
+	unlink($to);
 	link($from, $to);
     }
 }
