@@ -670,6 +670,52 @@ or by
 Eventually (by perl v5.6.0) this internal confusion ought to disappear,
 and these options may disappear as well.
 
+=head2 64 bit support.
+
+If your platform does not have 64 bits natively, but can simulate them with
+compiler flags and/or C<long long> or C<int64_t>, you can build a perl that
+uses 64 bits.
+
+There are actually two modes of 64-bitness: the first one is achieved
+using Configure -Duse64bitint and the second one using Configure
+-Duse64bitall.  The difference is that the first one is minimal and
+the second one maximal.  The first works in more places than the second.
+
+The C<use64bitint> does only as much as is required to get 64-bit
+integers into Perl (this may mean, for example, using "long longs")
+while your memory may still be limited to 2 gigabytes (because your
+pointers could still be 32-bit).  Note that the name C<64bitint> does
+not imply that your C compiler will be using 64-bit C<int>s (it might,
+but it doesn't have to): the C<use64bitint> means that you will be
+able to have 64 bits wide scalar values.
+
+The C<use64bitall> goes all the way by attempting to switch also
+integers (if it can), longs (and pointers) to being 64-bit.  This may
+create an even more binary incompatible Perl than -Duse64bitint: the
+resulting executable may not run at all in a 32-bit box, or you may
+have to reboot/reconfigure/rebuild your operating system to be 64-bit
+aware.
+
+Natively 64-bit systems like Alpha and Cray need neither -Duse64bitint
+nor -Duse64bitall.
+
+    NOTE: 64-bit support is still experimental on most platforms.
+    Existing support only covers the LP64 data model.  In particular, the
+    LLP64 data model is not yet supported.  64-bit libraries and system
+    APIs on many platforms have not stabilized--your mileage may vary.
+
+=head2 Long doubles
+
+In some systems you may be able to use long doubles to enhance the
+range and precision of your double precision floating point numbers
+(that is, Perl's numbers).  Use Configure -Duselongdouble to enable
+this support (if it is available).
+
+=head2 "more bits"
+
+You can "Configure -Dusemorebits" to turn on both the 64-bit support
+and the long double support.
+
 =head2 Selecting File IO mechanisms
 
 Previous versions of perl used the standard IO mechanisms as defined in
