@@ -1,4 +1,5 @@
 package Devel::SelfStubber;
+use File::Spec;
 require SelfLoader;
 @ISA = qw(SelfLoader);
 @EXPORT = 'AUTOLOAD';
@@ -29,10 +30,11 @@ sub _package_defined {
 sub stub {
     my($self,$module,$lib) = @_;
     my($line,$end_data,$fh,$mod_file,$found_selfloader);
-    $lib ||= '.';
+    $lib ||= File::Spec->curdir();
     ($mod_file = $module) =~ s,::,/,g;
+    $mod_file =~ tr|/|:| if $^O eq 'MacOS';
     
-    $mod_file = "$lib/$mod_file.pm";
+    $mod_file = File::Spec->catfile($lib, "$mod_file.pm");
     $fh = "${module}::DATA";
     my (@BEFORE_DATA, @AFTER_DATA, @AFTER_END);
     @DATA = @STUBS = ();

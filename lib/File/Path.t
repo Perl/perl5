@@ -6,6 +6,7 @@ BEGIN {
 }
 
 use File::Path;
+use File::Spec::Functions;
 use strict;
 
 my $count = 0;
@@ -16,10 +17,11 @@ print "1..4\n";
 # first check for stupid permissions second for full, so we clean up
 # behind ourselves
 for my $perm (0111,0777) {
-    mkpath("foo/bar");
-    chmod $perm, "foo", "foo/bar";
+    my $path = catdir(curdir(), "foo", "bar");
+    mkpath($path);
+    chmod $perm, "foo", $path;
 
-    print "not " unless -d "foo" && -d "foo/bar";
+    print "not " unless -d "foo" && -d $path;
     print "ok ", ++$count, "\n";
 
     rmtree("foo");
