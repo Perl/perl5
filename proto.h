@@ -12,7 +12,6 @@ VIRTUAL bool	Perl_Gv_AMupdate(pTHX_ HV* stash);
 VIRTUAL OP*	Perl_append_elem(pTHX_ I32 optype, OP* head, OP* tail);
 VIRTUAL OP*	Perl_append_list(pTHX_ I32 optype, LISTOP* first, LISTOP* last);
 VIRTUAL I32	Perl_apply(pTHX_ I32 type, SV** mark, SV** sp);
-VIRTUAL void	Perl_assertref(pTHX_ OP* o);
 VIRTUAL bool	Perl_avhv_exists_ent(pTHX_ AV *ar, SV* keysv, U32 hash);
 VIRTUAL SV**	Perl_avhv_fetch_ent(pTHX_ AV *ar, SV* keysv, I32 lval, U32 hash);
 VIRTUAL HE*	Perl_avhv_iternext(pTHX_ AV *ar);
@@ -841,6 +840,7 @@ STATIC void	S_qsortsv(pTHX_ SV ** array, size_t num_elts, SVCOMPARE_t f);
 #endif
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
 STATIC CV*	S_get_db_sub(pTHX_ SV **svp, CV *cv);
+STATIC SV*	S_method_common(pTHX_ SV* meth, U32* hashp);
 #endif
 #if defined(PERL_IN_PP_SYS_C) || defined(PERL_DECL_PROT)
 STATIC OP*	S_doform(pTHX_ CV *cv, GV *gv, OP *retop);

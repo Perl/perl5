@@ -77,13 +77,6 @@ Perl_apply(pTHXo_ I32 type, SV** mark, SV** sp)
     return ((CPerlObj*)pPerl)->Perl_apply(type, mark, sp);
 }
 
-#undef  Perl_assertref
-void
-Perl_assertref(pTHXo_ OP* o)
-{
-    ((CPerlObj*)pPerl)->Perl_assertref(o);
-}
-
 #undef  Perl_avhv_exists_ent
 bool
 Perl_avhv_exists_ent(pTHXo_ AV *ar, SV* keysv, U32 hash)
@@ -4965,6 +4958,13 @@ Perl_ck_match(pTHXo_ OP *o)
     return ((CPerlObj*)pPerl)->Perl_ck_match(o);
 }
 
+#undef  Perl_ck_method
+OP *
+Perl_ck_method(pTHXo_ OP *o)
+{
+    return ((CPerlObj*)pPerl)->Perl_ck_method(o);
+}
+
 #undef  Perl_ck_null
 OP *
 Perl_ck_null(pTHXo_ OP *o)
@@ -6377,6 +6377,13 @@ OP *
 Perl_pp_method(pTHXo)
 {
     return ((CPerlObj*)pPerl)->Perl_pp_method();
+}
+
+#undef  Perl_pp_method_named
+OP *
+Perl_pp_method_named(pTHXo)
+{
+    return ((CPerlObj*)pPerl)->Perl_pp_method_named();
 }
 
 #undef  Perl_pp_mkdir

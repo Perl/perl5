@@ -997,7 +997,6 @@ p	|bool	|Gv_AMupdate	|HV* stash
 p	|OP*	|append_elem	|I32 optype|OP* head|OP* tail
 p	|OP*	|append_list	|I32 optype|LISTOP* first|LISTOP* last
 p	|I32	|apply		|I32 type|SV** mark|SV** sp
-p	|void	|assertref	|OP* o
 p	|bool	|avhv_exists_ent|AV *ar|SV* keysv|U32 hash
 p	|SV**	|avhv_fetch_ent	|AV *ar|SV* keysv|I32 lval|U32 hash
 p	|HE*	|avhv_iternext	|AV *ar
@@ -1873,6 +1872,7 @@ s	|void	|qsortsv	|SV ** array|size_t num_elts|SVCOMPARE_t f
 
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
 s	|CV*	|get_db_sub	|SV **svp|CV *cv
+s	|SV*	|method_common	|SV* meth|U32* hashp
 #endif
 
 #if defined(PERL_IN_PP_SYS_C) || defined(PERL_DECL_PROT)

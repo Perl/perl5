@@ -190,8 +190,9 @@ This program is distributed under the Artistic License.
 
 =cut
 
-my $dircache = "pod2html.d~~";
-my $itemcache = "pod2html.i~~";
+my $cache_ext = $^O eq 'VMS' ? ".tmp" : ".x~~";
+my $dircache = "pod2htmd$cache_ext";
+my $itemcache = "pod2htmi$cache_ext";
 
 my @begin_stack = ();		# begin/end stack
 

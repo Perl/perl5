@@ -9,7 +9,6 @@ Perl_Gv_AMupdate
 Perl_append_elem
 Perl_append_list
 Perl_apply
-Perl_assertref
 Perl_avhv_exists_ent
 Perl_avhv_fetch_ent
 Perl_avhv_iternext

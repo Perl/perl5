@@ -54,7 +54,7 @@ my %ignore_op;		# Hash of ops which do nothing except returning op_next
 my %need_curcop;	# Hash of ops which need PL_curcop
 
 BEGIN {
-    foreach (qw(pp_scalar pp_regcmaybe pp_lineseq pp_scope pp_null)) {
+    foreach (qw(pp_setstate pp_scalar pp_regcmaybe pp_lineseq pp_scope pp_null)) {
 	$ignore_op{$_} = 1;
     }
 }
@@ -95,7 +95,7 @@ sub init_hash { map { $_ => 1 } @_ }
 %need_curcop = init_hash qw(pp_rv2gv  pp_bless pp_repeat pp_sort pp_caller
 			pp_reset pp_rv2cv pp_entereval pp_require pp_dofile
 			pp_entertry pp_enterloop pp_enteriter pp_entersub
-			pp_enter);
+			pp_enter pp_method);
 
 sub debug {
     if ($debug_runtime) {
@@ -1428,7 +1428,7 @@ sub pp_substcont {
 
 sub default_pp {
     my $op = shift;
-    my $ppname = $op->ppaddr;
+    my $ppname = "pp_" . $op->name;
     if ($curcop and $need_curcop{$ppname}){
 	$curcop->write_back;
     }
@@ -1445,7 +1445,7 @@ sub default_pp {
 
 sub compile_op {
     my $op = shift;
-    my $ppname = $op->ppaddr;
+    my $ppname = "pp_" . $op->name;
     if (exists $ignore_op{$ppname}) {
 	return $op->next;
     }

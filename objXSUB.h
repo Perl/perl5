@@ -833,10 +833,6 @@
 #define Perl_apply		pPerl->Perl_apply
 #undef  apply
 #define apply			Perl_apply
-#undef  Perl_assertref
-#define Perl_assertref		pPerl->Perl_assertref
-#undef  assertref
-#define assertref		Perl_assertref
 #undef  Perl_avhv_exists_ent
 #define Perl_avhv_exists_ent	pPerl->Perl_avhv_exists_ent
 #undef  avhv_exists_ent
@@ -3630,6 +3626,10 @@
 #define Perl_ck_match		pPerl->Perl_ck_match
 #undef  ck_match
 #define ck_match		Perl_ck_match
+#undef  Perl_ck_method
+#define Perl_ck_method		pPerl->Perl_ck_method
+#undef  ck_method
+#define ck_method		Perl_ck_method
 #undef  Perl_ck_null
 #define Perl_ck_null		pPerl->Perl_ck_null
 #undef  ck_null
@@ -4438,6 +4438,10 @@
 #define Perl_pp_method		pPerl->Perl_pp_method
 #undef  pp_method
 #define pp_method		Perl_pp_method
+#undef  Perl_pp_method_named
+#define Perl_pp_method_named	pPerl->Perl_pp_method_named
+#undef  pp_method_named
+#define pp_method_named		Perl_pp_method_named
 #undef  Perl_pp_mkdir
 #define Perl_pp_mkdir		pPerl->Perl_pp_mkdir
 #undef  pp_mkdir

@@ -6,7 +6,7 @@ BEGIN {
     require Config; import Config;
 }
 
-print "1..142\n";
+print "1..148\n";
 
 $format = "c2 x5 C C x s d i l a6";
 # Need the expression in here to force ary[5] to be numeric.  This avoids
@@ -353,3 +353,19 @@ print "ok ", $test++, "\n";
 
 print "not " unless pack("V", 0xdeadbeef) eq "\xef\xbe\xad\xde";
 print "ok ", $test++, "\n";
+
+# 143..148: # 
+
+my $z;
+eval { ($x) = unpack '#a*','hello' };
+print 'not ' unless $@; print "ok $test\n"; $test++;
+eval { ($z,$x,$y) = unpack 'a3#A C#a* C#Z', "003ok \003yes\004z\000abc" };
+print $@ eq '' && $z eq 'ok' ? "ok $test\n" : "not ok $test\n"; $test++;
+print $@ eq '' && $x eq 'yes' ? "ok $test\n" : "not ok $test\n"; $test++;
+print $@ eq '' && $y eq 'z' ? "ok $test\n" : "not ok $test\n"; $test++;
+
+eval { ($x) = pack '#a*','hello' };
+print 'not ' unless $@; print "ok $test\n"; $test++;
+$z = pack 'n#a* w#A*','string','etc';
+print 'not ' unless $z eq "\000\006string\003etc"; print "ok $test\n"; $test++;
+

@@ -900,7 +900,7 @@ PP(pp_postinc)
 PP(pp_postdec)
 {
     djSP; dTARGET;
-    if(SvREADONLY(TOPs) || SvTYPE(TOPs) > SVt_PVLV)
+    if (SvREADONLY(TOPs) || SvTYPE(TOPs) > SVt_PVLV)
 	Perl_croak(aTHX_ PL_no_modify);
     sv_setsv(TARG, TOPs);
     if (SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
@@ -3386,6 +3386,18 @@ PP(pp_unpack)
 		DIE(aTHX_ "x outside of string");
 	    s += len;
 	    break;
+	case '#':
+	    if (oldsp >= SP)
+		DIE(aTHX_ "# must follow a numeric type");
+	    if (*pat != 'a' && *pat != 'A' && *pat != 'Z')
+		DIE(aTHX_ "# must be followed by a, A or Z");
+	    datumtype = *pat++;
+	    if (*pat == '*')
+		pat++;		/* ignore '*' for compatibility with pack */
+	    if (isDIGIT(*pat))
+		DIE(aTHX_ "# cannot take a count" );
+	    len = POPi;
+	    /* drop through */
 	case 'A':
 	case 'Z':
 	case 'a':
@@ -4356,7 +4368,8 @@ PP(pp_pack)
     MARK++;
     sv_setpvn(cat, "", 0);
     while (pat < patend) {
-#define NEXTFROM (items-- > 0 ? *MARK++ : &PL_sv_no)
+	SV *lengthcode = Nullsv;
+#define NEXTFROM ( lengthcode ? lengthcode : items-- > 0 ? *MARK++ : &PL_sv_no)
 	datumtype = *pat++ & 0xFF;
 #ifdef PERL_NATINT_PACK
 	natint = 0;
@@ -4386,12 +4399,20 @@ PP(pp_pack)
 	}
 	else
 	    len = 1;
+	if (*pat == '#') {
+	    ++pat;
+	    if (*pat != 'a' && *pat != 'A' && *pat != 'Z' || pat[1] != '*')
+		DIE(aTHX_ "# must be followed by a*, A* or Z*");
+	    lengthcode = sv_2mortal(newSViv(sv_len(items > 0
+						   ? *MARK : &PL_sv_no)));
+	}
 	switch(datumtype) {
 	default:
 	    Perl_croak(aTHX_ "Invalid type in pack: '%c'", (int)datumtype);
 	case ',': /* grandfather in commas but with a warning */
 	    if (commas++ == 0 && ckWARN(WARN_UNSAFE))
-		Perl_warner(aTHX_ WARN_UNSAFE, "Invalid type in pack: '%c'", (int)datumtype);
+		Perl_warner(aTHX_ WARN_UNSAFE,
+			    "Invalid type in pack: '%c'", (int)datumtype);
 	    break;
 	case '%':
 	    DIE(aTHX_ "%% may only be used in unpack");

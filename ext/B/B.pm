@@ -76,7 +76,7 @@ sub parents { \@parents }
 # For debugging
 sub peekop {
     my $op = shift;
-    return sprintf("%s (0x%x) %s", class($op), $$op, $op->ppaddr);
+    return sprintf("%s (0x%x) %s", class($op), $$op, $op->name);
 }
 
 sub walkoptree_slow {
@@ -130,26 +130,26 @@ sub walkoptree_exec {
 	}
 	savesym($op, sprintf("%s (0x%lx)", class($op), $$op));
 	$op->$method($level);
-	$ppname = $op->ppaddr;
+	$ppname = $op->name;
 	if ($ppname =~
-	    /^pp_(or|and|mapwhile|grepwhile|entertry|range|cond_expr)$/)
+	    /^(or|and|mapwhile|grepwhile|entertry|range|cond_expr)$/)
 	{
 	    print $prefix, uc($1), " => {\n";
 	    walkoptree_exec($op->other, $method, $level + 1);
 	    print $prefix, "}\n";
-	} elsif ($ppname eq "pp_match" || $ppname eq "pp_subst") {
+	} elsif ($ppname eq "match" || $ppname eq "subst") {
 	    my $pmreplstart = $op->pmreplstart;
 	    if ($$pmreplstart) {
 		print $prefix, "PMREPLSTART => {\n";
 		walkoptree_exec($pmreplstart, $method, $level + 1);
 		print $prefix, "}\n";
 	    }
-	} elsif ($ppname eq "pp_substcont") {
+	} elsif ($ppname eq "substcont") {
 	    print $prefix, "SUBSTCONT => {\n";
 	    walkoptree_exec($op->other->pmreplstart, $method, $level + 1);
 	    print $prefix, "}\n";
 	    $op = $op->other;
-	} elsif ($ppname eq "pp_enterloop") {
+	} elsif ($ppname eq "enterloop") {
 	    print $prefix, "REDO => {\n";
 	    walkoptree_exec($op->redoop, $method, $level + 1);
 	    print $prefix, "}\n", $prefix, "NEXT => {\n";
@@ -157,7 +157,7 @@ sub walkoptree_exec {
 	    print $prefix, "}\n", $prefix, "LAST => {\n";
 	    walkoptree_exec($op->lastop,  $method, $level + 1);
 	    print $prefix, "}\n";
-	} elsif ($ppname eq "pp_subst") {
+	} elsif ($ppname eq "subst") {
 	    my $replstart = $op->pmreplstart;
 	    if ($$replstart) {
 		print $prefix, "SUBST => {\n";
@@ -559,9 +559,14 @@ leading "class indication" prefix removed (op_).
 
 =item sibling
 
+=item name
+
+This returns the op name as a string (e.g. "add", "rv2av").
+
 =item ppaddr
 
-This returns the function name as a string (e.g. pp_add, pp_rv2av).
+This returns the function name as a string (e.g. Perl_pp_add,
+Perl_pp_rv2av).
 
 =item desc
 
