@@ -61,14 +61,14 @@ See L<perlfunc/pack>.
 
 =item Ambiguous -%c() resolved as a file test
 
-(W ambiguous) A subroutine you used has the same name as a Perl file
-test (C<r w x o R W X O e z s f d l p S u g k b c t T B M A C>), and
-you used a "-" right in front a call to that subroutine, which made it
-really look like a file test.  Use either an extra space after the
-"-", C<- f(...)>, or an extra set of parentheses, C<-(f(...))>, to
-disambiguate it as a subroutine call, or an extra space after the
-operator name C<-f (...)>, or remove the parentheses, C<-f ...>, to
-disambiguate it as a file test.
+(W ambiguous) You used a "-" right in front a call to a subroutine
+that has the same name as a Perl file test (C<r w x o R W X O e z s
+f d l p S u g k b c t T B M A C>).
+
+To disambiguate it as a subroutine call, use either an extra space after
+the "-", C<- f(...)>, or an extra set of parentheses, C<-(f(...))>.
+To disambiguate it as a file test, use an extra space after the operator
+name C<-f (...)>, or add the space and remove the parentheses, C<-f ...>.
 
 =item Ambiguous call resolved as CORE::%s(), qualify as such or use &
 
