@@ -407,7 +407,7 @@ sub pod2html {
     if ($title) {
 	$title =~ s/\s*\(.*\)//;
     } else {
-	warn "$0: no title for $podfile" unless $quiet;
+	warn "$0: no title for $podfile.\n" unless $quiet;
 	$podfile =~ /^(.*)(\.[^.\/]+)?\z/s;
 	$title = ($podfile eq "-" ? 'No Title' : $1);
 	warn "using $title" if $verbose;
@@ -1595,7 +1595,7 @@ sub process_text1($$;$$){
 
             # warning; show some text.
             $linktext = $opar unless defined $linktext;
-            warn "$0: $podfile: cannot resolve L<$opar> in paragraph $paragraph.";
+            warn "$0: $podfile: cannot resolve L<$opar> in paragraph $paragraph.\n";
         }
 
         # now we have a URL or just plain code
@@ -1617,7 +1617,7 @@ sub process_text1($$;$$){
 
     } elsif( $func eq 'Z' ){
 	# Z<> - empty
-	warn "$0: $podfile: invalid X<> in paragraph $paragraph."
+	warn "$0: $podfile: invalid X<> in paragraph $paragraph.\n"
 	    unless $$rstr =~ s/^>//;
 
     } else {
@@ -1636,7 +1636,7 @@ sub process_text1($$;$$){
 	if( $lev == 1 ){
 	    $res .= pure_text( $$rstr );
 	} else {
-	    warn "$0: $podfile: undelimited $func<> in paragraph $paragraph.";
+	    warn "$0: $podfile: undelimited $func<> in paragraph $paragraph.\n";
 	}
     }
     return $res;
@@ -1660,7 +1660,7 @@ sub go_ahead($$$){
 	}
 	$res .= $2;
     }
-    warn "$0: $podfile: undelimited $func<> in paragraph $paragraph.";
+    warn "$0: $podfile: undelimited $func<> in paragraph $paragraph.\n";
     return $res;
 }
 
