@@ -46,3 +46,4 @@ sed -e $SPACKLIST installman >s; mv -f s installman
 sed -e $SPACKLIST lib/ExtUtils/Installed.pm >s; mv -f s lib/ExtUtils/Installed.pm
 sed -e $SPACKLIST lib/ExtUtils/Packlist.pm >s; mv -f s lib/ExtUtils/Packlist.pm
 sed -e $SPACKLIST lib/ExtUtils/inst >s; mv -f s lib/ExtUtils/inst
+sed -e $SABC t/io/iprefix.t >s; mv -f s t/io/iprefix.t
