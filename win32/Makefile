@@ -303,7 +303,7 @@ ARCHNAME	= $(ARCHNAME)-thread
 
 # VC 6.0 can load the socket dll on demand.  Makes the test suite
 # run in about 10% less time.
-DELAYLOAD	= -DELAYLOAD:wsock32.dll -DELAYLOAD:shell32.dll delayimp.lib
+DELAYLOAD	= -DELAYLOAD:ws2_32.dll -DELAYLOAD:shell32.dll delayimp.lib
 !ENDIF
 
 ARCHDIR		= ..\lib\$(ARCHNAME)
@@ -389,7 +389,7 @@ BUILDOPT	= $(BUILDOPT) -DPERL_MSVCRT_READFIX
 LIBBASEFILES	= $(CRYPT_LIB) \
 		oldnames.lib kernel32.lib user32.lib gdi32.lib winspool.lib \
 		comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib \
-		netapi32.lib uuid.lib wsock32.lib mpr.lib winmm.lib \
+		netapi32.lib uuid.lib ws2_32.lib mpr.lib winmm.lib \
 		version.lib
 
 # win64 doesn't have some libs

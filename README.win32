@@ -739,6 +739,12 @@ in the Win32 environment.  See L</"Building Extensions">.
 
 Most C<socket()> related calls are supported, but they may not
 behave as on Unix platforms.  See L<perlport> for the full list.
+Perl requires Winsock2 to be installed on the system. If you're
+running Win95, you can download Winsock upgrade from here:
+
+http://www.microsoft.com/windows95/downloads/contents/WUAdminTools/S_WUNetworkingTools/W95Sockets2/Default.asp
+
+Later OS versions already include Winsock2 support.
 
 Signal handling may not behave as on Unix platforms (where it
 doesn't exactly "behave", either :).  For instance, calling C<die()>

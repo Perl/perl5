@@ -358,9 +358,6 @@ struct thread_intern {
     char		Wstrerror_buffer[512];
     struct servent	Wservent;
     char		Wgetlogin_buffer[128];
-#    ifdef USE_SOCKETS_AS_HANDLES
-    int			Winit_socktype;
-#    endif
 #    ifdef HAVE_DES_FCRYPT
     char		Wcrypt_buffer[30];
 #    endif
@@ -427,7 +424,6 @@ DllExport int win32_async_check(pTHX);
 #define w32_getlogin_buffer	(PL_sys_intern.thr_intern.Wgetlogin_buffer)
 #define w32_crypt_buffer	(PL_sys_intern.thr_intern.Wcrypt_buffer)
 #define w32_servent		(PL_sys_intern.thr_intern.Wservent)
-#define w32_init_socktype	(PL_sys_intern.thr_intern.Winit_socktype)
 #define w32_use_showwindow	(PL_sys_intern.thr_intern.Wuse_showwindow)
 #define w32_showwindow	(PL_sys_intern.thr_intern.Wshowwindow)
 

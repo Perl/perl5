@@ -5113,7 +5113,6 @@ Perl_sys_intern_init(pTHX)
     New(1313, w32_pseudo_children, 1, child_tab);
     w32_num_pseudo_children	= 0;
 #  endif
-    w32_init_socktype		= 0;
     w32_timerid                 = 0;
     w32_poll_count              = 0;
     for (i=0; i < SIG_SIZE; i++) {
@@ -5167,7 +5166,6 @@ Perl_sys_intern_dup(pTHX_ struct interp_intern *src, struct interp_intern *dst)
     Newz(1313, dst->children, 1, child_tab);
     dst->pseudo_id		= 0;
     Newz(1313, dst->pseudo_children, 1, child_tab);
-    dst->thr_intern.Winit_socktype = 0;
     dst->timerid                 = 0;
     dst->poll_count              = 0;
     Copy(src->sigtable,dst->sigtable,SIG_SIZE,Sighandler_t);
