@@ -1,6 +1,6 @@
 #!./perl
 
-# $Id: freeze.t,v 1.0 2000/09/01 19:40:41 ram Exp $
+# $Id: freeze.t,v 1.0.1.1 2001/07/01 11:25:16 ram Exp $
 #
 #  Copyright (c) 1995-2000, Raphael Manfredi
 #  
@@ -8,6 +8,9 @@
 #  in the README file that comes with the distribution.
 #
 # $Log: freeze.t,v $
+# Revision 1.0.1.1  2001/07/01 11:25:16  ram
+# patch12: added test cases for mem corruption during thaw()
+#
 # Revision 1.0  2000/09/01 19:40:41  ram
 # Baseline for first official release.
 #
@@ -22,12 +25,12 @@ sub BEGIN {
         exit 0;
     }
     require 'lib/st-dump.pl';
+    sub ok;
 }
-
 
 use Storable qw(freeze nfreeze thaw);
 
-print "1..15\n";
+print "1..19\n";
 
 $a = 'toto';
 $b = \$a;
@@ -116,4 +119,27 @@ foo($foo->[1]);
 eval { freeze($foo) };
 print "not " if $@;
 print "ok 15\n";
+
+# Test cleanup bug found by Claudio Garcia -- RAM, 08/06/2001
+my $thaw_me = 'asdasdasdasd';
+
+eval {
+	my $thawed = thaw $thaw_me;
+};
+ok 16, $@;
+
+my %to_be_frozen = (foo => 'bar');
+my $frozen;
+eval {
+	$frozen = freeze \%to_be_frozen;
+};
+ok 17, !$@;
+
+freeze {};
+eval { thaw $thaw_me };
+eval { $frozen = freeze { foo => {} } };
+ok 18, !$@;
+
+thaw $frozen;			# used to segfault here
+ok 19, 1;
 

@@ -1,4 +1,4 @@
-;# $Id: Storable.pm,v 1.0.1.10 2001/03/15 00:20:25 ram Exp $
+;# $Id: Storable.pm,v 1.0.1.11 2001/07/01 11:22:14 ram Exp $
 ;#
 ;#  Copyright (c) 1995-2000, Raphael Manfredi
 ;#  
@@ -6,6 +6,10 @@
 ;#  in the README file that comes with the distribution.
 ;#
 ;# $Log: Storable.pm,v $
+;# Revision 1.0.1.11  2001/07/01 11:22:14  ram
+;# patch12: systematically use "=over 4" for POD linters
+;# patch12: updated version number
+;#
 ;# Revision 1.0.1.10  2001/03/15 00:20:25  ram
 ;# patch11: updated version number
 ;#
@@ -59,7 +63,7 @@ package Storable; @ISA = qw(Exporter DynaLoader);
 use AutoLoader;
 use vars qw($forgive_me $VERSION);
 
-$VERSION = '1.011';
+$VERSION = '1.012';
 *AUTOLOAD = \&AutoLoader::AUTOLOAD;		# Grrr...
 
 #

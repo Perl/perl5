@@ -1,3 +1,21 @@
+Sun Jul  1 13:27:32 MEST 2001   Raphael Manfredi <Raphael_Manfredi@pobox.com>
+
+. Description:
+
+	Systematically use "=over 4" for POD linters.
+	Apparently, POD linters are much stricter than would
+	otherwise be needed, but that's OK.
+
+	Fixed memory corruption on croaks during thaw().  Thanks
+	to Claudio Garcia for reproducing this bug and providing the
+	code to exercise it.  Added test cases for this bug, adapted
+	from Claudio's code.
+
+	Made code compile cleanly with -Wall (from Jarkko Hietaniemi).
+
+	Changed tagnum and classnum from I32 to IV in context.  Also
+	from Jarkko.
+
 Thu Mar 15 01:22:32 MET 2001   Raphael Manfredi <Raphael_Manfredi@pobox.com>
 
 . Description:
