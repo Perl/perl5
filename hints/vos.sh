@@ -71,3 +71,6 @@ pager="/system/gnu_library/bin/cat.pm"
 # VOS has a bug that causes _exit() to flush all files.
 # This confuses the tests.  Make 'em happy here.
 fflushNULL=define
+
+# VOS has a link() function but it is a dummy.
+d_link="undef"
