@@ -94,6 +94,7 @@ sub hostname {
     # method 3 - trusty old hostname command
     || eval {
 	local $SIG{__DIE__};
+	local $SIG{CHLD};
 	$host = `(hostname) 2>/dev/null`; # bsdish
     }
 
