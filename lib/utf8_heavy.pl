@@ -41,13 +41,14 @@ sub SWASHNEW {
 	    }
 	}
 
-	# This is separate from 'To' in preparation of Is.pl (a la In.pl).
-	if ((not defined $file) && $type =~ /^Is([A-Z][A-Za-z]*)$/) {
-	    $file = "unicore/Is/$1";
-	}
-
-	if ((not defined $file) && $type =~ /^To([A-Z][A-Za-z]*)$/) {
-	    $file = "unicore/To/$1";
+	unless (defined $file) {
+	    # This is separate from 'To' in preparation of Is.pl (a la In.pl).
+	    if ($type =~ /^Is([A-Z][A-Za-z]*|L&)$/) {
+		my $cat = $1 eq 'L&' ? 'L' : $1;
+		$file = "unicore/Is/$cat";
+	    } elsif ((not defined $file) && $type =~ /^To([A-Z][A-Za-z]*)$/) {
+		$file = "unicore/To/$1";
+	    }
 	}
     }
 
