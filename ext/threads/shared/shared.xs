@@ -413,4 +413,188 @@ SPLICE(self, offset, length, ...)
 	CODE:
 	croak("Splice is not implmented for shared arrays");
 	
+MODULE = threads::shared		PACKAGE = threads::shared::hv
 
+SV* 
+new(class, value)
+	SV* class
+	SV* value
+	CODE:
+	shared_sv* shared = Perl_sharedsv_new(aTHX);
+	SV* obj = newSViv((IV)shared);
+        SHAREDSvEDIT(shared);
+        SHAREDSvGET(shared) = (SV*) newHV();
+        SHAREDSvRELEASE(shared);
+        RETVAL = obj;
+        OUTPUT:
+        RETVAL
+
+void
+STORE(self, key, value)
+        SV* self
+        SV* key
+        SV* value
+        CODE:
+        shared_sv* shared = (shared_sv*) SvIV(SvRV(self));
+        shared_sv* slot;
+        SV* hentry;
+        SV** hentry_;
+	STRLEN len;
+	char* ckey = SvPV(key, len);
+        SHAREDSvLOCK(shared);
+        hentry_ = hv_fetch((HV*) SHAREDSvGET(shared), ckey, len, 0);
+        if(hentry_ && SvIV((*hentry_))) {
+            hentry = (*hentry_);
+            slot = (shared_sv*) SvIV(hentry);
+            if(SvROK(SHAREDSvGET(slot)))
+                Perl_sharedsv_thrcnt_dec(aTHX_ (shared_sv*) SvIV(SvRV(SHAREDSvGET(slot))));
+            SHAREDSvEDIT(slot);
+            sv_setsv(SHAREDSvGET(slot), value);
+            SHAREDSvRELEASE(slot);
+        } else {
+            slot = Perl_sharedsv_new(aTHX);
+            SHAREDSvEDIT(shared);
+            SHAREDSvGET(slot) = newSVsv(value);
+            hentry = newSViv((IV)slot);
+            hv_store((HV*) SHAREDSvGET(shared), ckey,len , hentry, 0);
+            SHAREDSvRELEASE(shared);
+        }
+        SHAREDSvUNLOCK(shared);
+
+
+SV*
+FETCH(self, key)
+        SV* self
+        SV* key
+        CODE:
+        shared_sv* shared = (shared_sv*) SvIV(SvRV(self));
+        shared_sv* slot;
+        SV* hentry;
+        SV** hentry_;
+        SV* retval;
+	STRLEN len;
+	char* ckey = SvPV(key, len);
+        SHAREDSvLOCK(shared);
+        hentry_ = hv_fetch((HV*) SHAREDSvGET(shared), ckey, len,0);
+        if(hentry_) {
+            hentry = (*hentry_);
+            if(SvTYPE(hentry) == SVt_NULL) {
+                retval = &PL_sv_undef;
+            } else {
+                slot = (shared_sv*) SvIV(hentry);
+                retval = newSVsv(SHAREDSvGET(slot));
+            }
+        } else {
+            retval = &PL_sv_undef;
+        }
+        SHAREDSvUNLOCK(shared);
+        RETVAL = retval;
+        OUTPUT:
+        RETVAL
+
+void
+CLEAR(self)
+	SV* self
+	CODE:
+        shared_sv* shared = (shared_sv*) SvIV(SvRV(self));
+        shared_sv* slot;
+	HE* entry;
+	SHAREDSvLOCK(shared);
+	Perl_hv_iterinit(PL_sharedsv_space, (HV*) SHAREDSvGET(shared));
+	entry = Perl_hv_iternext(PL_sharedsv_space, (HV*) SHAREDSvGET(shared));
+	while(entry) {
+		slot = (shared_sv*) SvIV(Perl_hv_iterval(PL_sharedsv_space, (HV*) SHAREDSvGET(shared), entry));
+		Perl_sharedsv_thrcnt_dec(aTHX_ slot);
+		entry = Perl_hv_iternext(PL_sharedsv_space,(HV*) SHAREDSvGET(shared));
+	}
+	SHAREDSvEDIT(shared);
+	hv_clear((HV*) SHAREDSvGET(shared));
+	SHAREDSvRELEASE(shared);
+	SHAREDSvUNLOCK(shared);
+
+SV*
+FIRSTKEY(self)
+	SV* self
+	CODE:
+        shared_sv* shared = (shared_sv*) SvIV(SvRV(self));
+	char* key = NULL;
+	I32 len;
+	HE* entry;
+	SHAREDSvLOCK(shared);
+        Perl_hv_iterinit(PL_sharedsv_space, (HV*) SHAREDSvGET(shared));
+        entry = Perl_hv_iternext(PL_sharedsv_space, (HV*) SHAREDSvGET(shared));
+	if(entry) {
+                key = Perl_hv_iterkey(PL_sharedsv_space, entry,&len);
+		RETVAL = newSVpv(key, len);
+        } else {
+	     RETVAL = &PL_sv_undef;
+	}
+        SHAREDSvUNLOCK(shared);
+	OUTPUT:
+	RETVAL
+
+
+SV*
+NEXTKEY(self, oldkey)
+        SV* self
+	SV* oldkey
+        CODE:
+        shared_sv* shared = (shared_sv*) SvIV(SvRV(self));
+        char* key = NULL;
+        I32 len;
+        HE* entry;
+        SHAREDSvLOCK(shared);
+        entry = Perl_hv_iternext(PL_sharedsv_space, (HV*) SHAREDSvGET(shared));
+        if(entry) {
+                key = Perl_hv_iterkey(PL_sharedsv_space, entry,&len);
+                RETVAL = newSVpv(key, len);
+        } else {
+             RETVAL = &PL_sv_undef;
+        }
+        SHAREDSvUNLOCK(shared);
+        OUTPUT:
+        RETVAL
+
+
+SV*
+EXISTS(self, key)
+	SV* self
+	SV* key
+	CODE:
+	shared_sv* shared = (shared_sv*) SvIV(SvRV(self));
+	STRLEN len;
+	char* ckey = SvPV(key, len);
+	SHAREDSvLOCK(shared);
+	if(hv_exists((HV*)SHAREDSvGET(shared), ckey, len)) {
+		RETVAL = &PL_sv_yes;
+	} else {
+		RETVAL = &PL_sv_no;
+	}
+	SHAREDSvUNLOCK(shared);
+	OUTPUT:
+	RETVAL
+
+SV*
+DELETE(self, key)
+        SV* self
+        SV* key
+        CODE:
+        shared_sv* shared = (shared_sv*) SvIV(SvRV(self));
+	shared_sv* slot;
+        STRLEN len;
+        char* ckey = SvPV(key, len);
+        SV* tmp;
+	SHAREDSvLOCK(shared);
+	SHAREDSvEDIT(shared);
+	tmp = hv_delete((HV*) SHAREDSvGET(shared), ckey, len,0);
+	SHAREDSvRELEASE(shared);
+	if(tmp) {
+		slot = SvIV(tmp);	
+		RETVAL = newSVsv(SHAREDSvGET(slot));
+		Perl_sharedsv_thrcnt_dec(aTHX_ slot);
+	} else {
+		RETVAL = &PL_sv_undef;
+	}
+        SHAREDSvUNLOCK(shared);
+        OUTPUT:
+        RETVAL

@@ -45,6 +45,8 @@ sub share_enabled (\[$@%]) { # \]
 	weaken($shared{$$obj});
     } elsif($ref eq "ARRAY") {
 	tie @$value, 'threads::shared::av', $value;
+    } elsif($ref eq "HASH") {
+	tie %$value, "threads::shared::hv", $value;
     } else {
 	die "You cannot share ref of type $_[0]\n";
     }
@@ -83,7 +85,17 @@ sub TIEARRAY {
 
 package threads::shared::hv;
 use base 'threads::shared';
+use Scalar::Util qw(weaken);
+sub TIEHASH {
+    my $class = shift;
+    my $value = shift;
+    my $self = bless \threads::shared::hv->new($value),'threads::shared::hv';
+    $shared{$self->ptr} = $value;
+    weaken($shared{$self->ptr});
+    return $self;
+}
 
+package threads::shared;
 bootstrap threads::shared $VERSION;
 
 __END__
