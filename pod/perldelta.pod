@@ -2791,6 +2791,13 @@ to be closer to the library/extension they are testing.)
 
 =item *
 
+If using the AIX native make command, instead of just "make" issue
+"make all".  In some setups the former has been known to spuriously
+also try to run "make install".  Alternatively, you may want to use
+GNU make.
+
+=item *
+
 In AIX 4.2, Perl extensions that use C++ functions that use statics
 may have problems in that the statics are not getting initialized.
 In newer AIX releases, this has been solved by linking Perl with
