@@ -1876,9 +1876,10 @@ also use the full suite of core modules in the tests.
 =back
 
 When you say "make test" Perl uses the F<t/TEST> program to run the
-test suite.  All tests are run from the F<t/> directory, B<not> the
-directory which contains the test.  This causes some problems with the
-tests in F<lib/>, so here's some opportunity for some patching.
+test suite (except under Win32 where it uses F<t/harness> instead.)  
+All tests are run from the F<t/> directory, B<not> the directory 
+which contains the test.  This causes some problems with the tests 
+in F<lib/>, so here's some opportunity for some patching.
 
 You must be triply conscious of cross-platform concerns.  This usually
 boils down to using File::Spec and avoiding things like C<fork()> and
@@ -1889,7 +1890,8 @@ C<system()> unless absolutely necessary.
 There are various special make targets that can be used to test Perl
 slightly differently than the standard "test" target.  Not all them
 are expected to give a 100% success rate.  Many of them have several
-aliases.
+aliases, and many of them are not available on certain operating
+systems.
 
 =over 4
 
@@ -1897,14 +1899,20 @@ aliases.
 
 Run F<perl> on all core tests (F<t/*> and F<lib/[a-z]*> pragma tests).
 
+(Not available on Win32)
+
 =item test.deparse
 
 Run all the tests through B::Deparse.  Not all tests will succeed.
+
+(Not available on Win32)
 
 =item test.taintwarn
 
 Run all tests with the B<-t> command-line switch.  Not all tests
 are expected to succeed (until they're specifically fixed, of course).
+
+(Not available on Win32)
 
 =item minitest
 
@@ -1935,6 +1943,8 @@ C<-torture> argument to F<t/harness>.
 
 Run all the tests with -Mutf8.  Not all tests will succeed.
 
+(Not available on Win32)
+
 =item minitest.utf16 test.utf16
 
 Runs the tests with UTF-16 encoded scripts, encoded with different
@@ -1942,6 +1952,8 @@ versions of this encoding.
 
 C<make utest.utf16> runs the test suite with a combination of C<-utf8> and
 C<-utf16> arguments to F<t/TEST>.
+
+(Not available on Win32)
 
 =item test_harness
 
@@ -1951,6 +1963,20 @@ L<Test::Harness> module, thus using this test target supposes that perl
 mostly works. The main advantage for our purposes is that it prints a
 detailed summary of failed tests at the end. Also, unlike F<t/TEST>, it
 doesn't redirect stderr to stdout.
+
+Note that under Win32 F<t/harness> is always used instead of F<t/TEST>, so
+there is no special "test_harness" target.
+
+Under Win32's "test" target you may use the TEST_SWITCHES and TEST_FILES
+environment variables to control the behaviour of F<t/harness>.  This means
+you can say
+
+    nmake test TEST_FILES="op/*.t"
+    nmake test TEST_SWITCHES="-torture" TEST_FILES="op/*.t"
+
+=item test-notty test_notty
+
+Sets PERL_SKIP_TTY_TEST to true before running normal test.
 
 =back
 
@@ -1966,6 +1992,45 @@ or
     ./perl -I../lib harness list-of-.t-files
 
 (if you don't specify test scripts, the whole test suite will be run.)
+
+=head3 Using t/harness for testing
+
+If you use C<harness> for testing you have several command line options
+available to you. The arguments are as follows, and are in the order
+that they must appear if used together.
+
+    harness -v -torture -re=pattern LIST OF FILES TO TEST
+    harness -v -torture -re LIST OF PATTERNS TO MATCH
+
+If C<LIST OF FILES TO TEST> is omitted the file list is obtained from
+the manifest. The file list may include shell wildcards which will be 
+expanded out.
+
+=over 4
+
+=item -v
+
+Run the tests under verbose mode so you can see what tests were run, 
+and debug outbut.
+
+=item -torture
+
+Run the torture tests as well as the normal set.
+
+=item -re=PATTERN
+
+Filter the file list so that all the test files run match PATTERN.
+Note that this form is distinct from the B<-re LIST OF PATTERNS> form below
+in that it allows the file list to be provided as well.
+
+=item -re LIST OF PATTERNS
+
+Filter the file list so that all the test files run match 
+/(LIST|OF|PATTERNS)/. Note that with this form the patterns
+are joined by '|' and you cannot supply a list of files, instead
+the test files are obtained from the MANIFEST.
+
+=back
 
 You can run an individual test by a command similar to
 
