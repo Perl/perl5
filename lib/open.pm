@@ -7,22 +7,25 @@ use vars qw(%layers @layers);
 # Populate hash in non-PerlIO case
 %layers = (crlf => 1, raw => 0) unless (@layers);
 
+# warn join(',',keys %layers);
+
 our $VERSION = '1.00';
 
 sub import {
-    shift;
-    die "`use open' needs explicit list of disciplines" unless @_;
+    my ($class,@args) = @_;
+    croak("`use open' needs explicit list of disciplines") unless @args;
     $^H |= $open::hint_bits;
     my ($in,$out) = split(/\0/,(${^OPEN} || '\0'));
     my @in  = split(/\s+/,$in);
     my @out = split(/\s+/,$out);
-    while (@_) {
-	my $type = shift;
-	my $discp = shift;
+    while (@args) {
+	my $type = shift(@args);
+	my $discp = shift(@args);
 	my @val;
-	foreach my $layer (split(/\s+:?/,$discp)) {
+	foreach my $layer (split(/\s+/,$discp)) {
+            $layer =~ s/^://;
 	    unless(exists $layers{$layer}) {
-		croak "Unknown discipline layer '$layer'";
+		carp("Unknown discipline layer '$layer'");
 	    }
 	    push(@val,":$layer");
 	    if ($layer =~ /^(crlf|raw)$/) {
