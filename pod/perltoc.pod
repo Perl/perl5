@@ -5740,6 +5740,42 @@ DJGPP, Pthreads
 
 =back
 
+=head2 perlepoc, README.epoc - Perl for EPOC
+
+=over
+
+=item SYNOPSIS
+
+=item INTRODUCTION
+
+=item INSTALLING PERL ON EPOC
+
+=item USING PERL ON EPOC
+
+=over
+
+=item IO Redirection
+
+=item PATH Names
+
+=item Editors
+
+=item Features
+
+=item Restrictions
+
+=item Compiling Perl 5 on the EPOC cross compiling environment
+
+=back
+
+=item SUPPORT STATUS
+
+=item AUTHOR
+
+=item LAST UPDATE
+
+=back
+
 =head2 perlhpux, README.hpux - Perl version 5 on Hewlett-Packard Unix
 (HP-UX) systems
 
@@ -6187,6 +6223,46 @@ LIST, waitpid PID,FLAGS
 =item Revision date
 
 =item AUTHOR
+
+=back
+
+=head2 perlvos, README.vos - Perl for Stratus VOS
+
+=over
+
+=item SYNOPSIS
+
+=over
+
+=item Stratus POSIX Support
+
+=back
+
+=item INSTALLING PERL IN VOS
+
+=over
+
+=item Compiling Perl 5 on VOS
+
+=item Installing Perl 5 on VOS
+
+=back
+
+=item USING PERL IN VOS
+
+=over
+
+=item Unimplemented Features
+
+=item Restrictions
+
+=back
+
+=item SUPPORT STATUS
+
+=item AUTHOR
+
+=item LAST UPDATE
 
 =back
 
@@ -8008,12 +8084,13 @@ C<d_setvbuf>, C<d_sfio>, C<d_shm>, C<d_shmat>, C<d_shmatprototype>,
 C<d_shmctl>, C<d_shmdt>, C<d_shmget>, C<d_sigaction>, C<d_sigsetjmp>,
 C<d_socket>, C<d_socklen_t>, C<d_sockpair>, C<d_socks5_init>, C<d_sqrtl>,
 C<d_statblks>, C<d_statfs_f_flags>, C<d_statfs_s>, C<d_statvfs>,
-C<d_stdio_cnt_lval>, C<d_stdio_ptr_lval>, C<d_stdio_stream_array>,
-C<d_stdiobase>, C<d_stdstdio>, C<d_strchr>, C<d_strcoll>, C<d_strctcpy>,
-C<d_strerrm>, C<d_strerror>, C<d_strtod>, C<d_strtol>, C<d_strtold>,
-C<d_strtoll>, C<d_strtoul>, C<d_strtoull>, C<d_strtouq>, C<d_strxfrm>,
-C<d_suidsafe>, C<d_symlink>, C<d_syscall>, C<d_sysconf>, C<d_sysernlst>,
-C<d_syserrlst>, C<d_system>, C<d_tcgetpgrp>, C<d_tcsetpgrp>, C<d_telldir>,
+C<d_stdio_cnt_lval>, C<d_stdio_ptr_lval>, C<d_stdio_ptr_lval_nochange_cnt>,
+C<d_stdio_ptr_lval_sets_cnt>, C<d_stdio_stream_array>, C<d_stdiobase>,
+C<d_stdstdio>, C<d_strchr>, C<d_strcoll>, C<d_strctcpy>, C<d_strerrm>,
+C<d_strerror>, C<d_strtod>, C<d_strtol>, C<d_strtold>, C<d_strtoll>,
+C<d_strtoul>, C<d_strtoull>, C<d_strtouq>, C<d_strxfrm>, C<d_suidsafe>,
+C<d_symlink>, C<d_syscall>, C<d_sysconf>, C<d_sysernlst>, C<d_syserrlst>,
+C<d_system>, C<d_tcgetpgrp>, C<d_tcsetpgrp>, C<d_telldir>,
 C<d_telldirproto>, C<d_time>, C<d_times>, C<d_truncate>, C<d_tzname>,
 C<d_umask>, C<d_uname>, C<d_union_semun>, C<d_ustat>, C<d_vendorarch>,
 C<d_vendorbin>, C<d_vendorlib>, C<d_vfork>, C<d_void_closedir>,

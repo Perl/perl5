@@ -1,14 +1,18 @@
-Perl 5 README file for the Stratus VOS operating system.
-Paul Green (Paul_Green@stratus.com)
-October 24, 2000
+If you read this file _as_is_, just ignore the funny characters you
+see. It is written in the POD format (see pod/perlpod.pod) which is
+specially designed to be readable as is.
 
+=head1 NAME
 
-Introduction
-------------
-This is a port of Perl version 5, revision 7, to VOS.  Perl
-is a scripting or macro language that is popular on many
-systems.  See your local computer bookstore for a number of good
-books on Perl.
+README.vos - Perl for Stratus VOS
+
+=head1 SYNOPSIS
+
+This is a port of Perl version 5, revision 7, to VOS.  Perl is a
+scripting or macro language that is popular on many systems.  See your
+local computer bookstore for a number of good books on Perl.
+
+=head2 Stratus POSIX Support
 
 Note that there are two different implementations of POSIX.1
 support on VOS.  There is an alpha version of POSIX that is
@@ -31,44 +35,57 @@ The workaround is to run the commands outside of perl, then have
 perl process the output file.  These functions are all available
 in the generally-available version of POSIX.
 
+=head1 INSTALLING PERL IN VOS
 
-Compiling Perl 5 on VOS
------------------------
+=head2 Compiling Perl 5 on VOS
+
 Before you can build Perl 5 on VOS, you need to have or acquire the
 following additional items.
 
-1.   The VOS Standard C Compiler and Runtime, or the VOS Standard C
-     Cross-Compiler.  This is a standard Stratus product.
+=over 5
 
-2.   Either the VOS OS TCP/IP or STCP product set.  If you are
-     building with the alpha version of POSIX you need the OS
-     TCP/IP product set.  If you are building with the
-     generally-available version of POSIX you need the STCP
-     product set.  These are standard Stratus products.
+=item 1
 
-3.   Either the alpha or generally-available version of the VOS
-     POSIX.1 environment.
+The VOS Standard C Compiler and Runtime, or the VOS Standard C
+Cross-Compiler.  This is a standard Stratus product.
 
-     The alpha version of POSIX.1 support is available on the
-     Stratus FTP site.  Login anonymously to ftp.stratus.com and
-     get the file /pub/vos/posix/alpha/posix.save.evf.gz in
-     binary file-transfer mode.  Or use the Uniform Resource
-     Locator (URL)
-     ftp://ftp.stratus.com/pub/vos/alpha/posix.save.evf.gz from
-     your web browser.  Instructions for unbundling this file
-     are at ftp://ftp.stratus.com/pub/vos/utility/utility.html.
-     This is not a standard Stratus product.
+=item 2
 
-     The generally-available version of POSIX.1 support is
-     bundled with the VOS Standard C compiler and Runtime (or
-     Cross-Compiler) in VOS Release 14.3.0 or higher.  This is a
-     standard Stratus product.
+Either the VOS OS TCP/IP or STCP product set.  If you are
+building with the alpha version of POSIX you need the OS
+TCP/IP product set.  If you are building with the
+generally-available version of POSIX you need the STCP
+product set.  These are standard Stratus products.
 
-4.   You must compile this version of Perl 5 on VOS Release
-     14.1.0 or higher because some of the perl source files
-     contain more than 32,767 source lines.  Due to VOS
-     release-compatibility rules, this port of perl may not
-     execute on VOS Release 12 or earlier.
+=item 3
+
+Either the alpha or generally-available version of the VOS
+POSIX.1 environment.
+
+The alpha version of POSIX.1 support is available on the
+Stratus FTP site.  Login anonymously to ftp.stratus.com and
+get the file /pub/vos/posix/alpha/posix.save.evf.gz in
+binary file-transfer mode.  Or use the Uniform Resource
+Locator (URL)
+ftp://ftp.stratus.com/pub/vos/alpha/posix.save.evf.gz from
+your web browser.  Instructions for unbundling this file
+are at ftp://ftp.stratus.com/pub/vos/utility/utility.html.
+This is not a standard Stratus product.
+
+The generally-available version of POSIX.1 support is
+bundled with the VOS Standard C compiler and Runtime (or
+Cross-Compiler) in VOS Release 14.3.0 or higher.  This is a
+standard Stratus product.
+
+=item 4
+
+You must compile this version of Perl 5 on VOS Release
+14.1.0 or higher because some of the perl source files
+contain more than 32,767 source lines.  Due to VOS
+release-compatibility rules, this port of perl may not
+execute on VOS Release 12 or earlier.
+
+=back
 
 To build perl 5, change to the "vos" subdirectory and type the
 command "compile_perl -processor X", where X is the processor
@@ -85,61 +102,78 @@ execute on the PA7100, PA8000, PA8500 and PA8600 processors, and
 that code compiled for the pa8000 processor type can execute on
 the PA8000, PA8500 and PA8600 processors.
 
+=head2 Installing Perl 5 on VOS
 
-Installing Perl 5 on VOS
-------------------------
-1.   Create the directory >system>ported>command_library.
+=over 4
 
-2.   Copy the appropriate version of the perl program module to
-     this directory.  For example, with your current directory
-     set to the top-level directory of Perl 5, to install the
-     executable program module for the Motorola 68K
-     architecture, enter:
+=item 1
+
+Create the directory >system>ported>command_library.
+
+=item 2
+
+Copy the appropriate version of the perl program module to
+this directory.  For example, with your current directory
+set to the top-level directory of Perl 5, to install the
+executable program module for the Motorola 68K
+architecture, enter:
 
           !copy_file vos>obj>perl.pm >system>ported>command_library>*
 
-     (If you wish to use both Perl version 4 and Perl version 5,
-     you must give them different names; for example, perl.pm
-     and perl5.pm).
+(If you wish to use both Perl version 4 and Perl version 5,
+you must give them different names; for example, perl.pm
+and perl5.pm).
 
-3.   Create the directory >system>ported>perl>lib.
+=item 3
 
-4.   Copy all of the files and subdirectories from the lib
-     subdirectory into this new directory.  For example, with
-     the current directory set to the top-level directory of the
-     perl distribution, enter:
+Create the directory >system>ported>perl>lib.
+
+=item 4
+
+Copy all of the files and subdirectories from the lib
+subdirectory into this new directory.  For example, with
+the current directory set to the top-level directory of the
+perl distribution, enter:
 
           !copy_dir lib >system>ported>perl>lib>5.7
 
-5.   While there are currently no architecture-specific
-     extensions or modules distributed with perl, the following
-     directories can be used to hold such files:
+=item 5
+
+While there are currently no architecture-specific
+extensions or modules distributed with perl, the following
+directories can be used to hold such files:
 
           >system>ported>perl>lib>5.7.68k
           >system>ported>perl>lib>5.7.860
           >system>ported>perl>lib>5.7.7100
           >system>ported>perl>lib>5.7.8000
 
-6.   Site-specific perl extensions and modules can be installed
-     in one of two places.  Put architecture-independent files
-     into:
+=item 6
+
+Site-specific perl extensions and modules can be installed in one of
+two places.  Put architecture-independent files into:
 
           >system>ported>perl>lib>site>5.7
 
-     Put architecture-dependent files into one of the following
-     directories:
+Put architecture-dependent files into one of the following
+directories:
 
           >system>ported>perl>lib>site>5.7.68k
           >system>ported>perl>lib>site>5.7.860
           >system>ported>perl>lib>site>5.7.7100
           >system>ported>perl>lib>site>5.7.8000
 
-7.   You can examine the @INC variable from within a perl program
-     to see the order in which Perl searches these directories.
+=item 7
 
+You can examine the @INC variable from within a perl program
+to see the order in which Perl searches these directories.
 
-Unimplemented Features
-----------------------
+=back
+
+=head1 USING PERL IN VOS
+
+=head2 Unimplemented Features
+
 If perl is built with the alpha version of VOS POSIX.1 support
 and if it attempts to call an unimplemented VOS POSIX.1
 function, it will print a fatal error message and enter the VOS
@@ -148,9 +182,8 @@ a list of the unimplemented POSIX.1 functions.  To see what
 functions are unimplemented and what the error message looks
 like, compile and execute "test_vos_dummies.c".
 
+=head2 Restrictions
 
-Restrictions
-------------
 This port of Perl version 5 to VOS prefers Unix-style,
 slash-separated pathnames over VOS-style greater-than-separated
 pathnames.  VOS-style pathnames should work in most contexts, but
@@ -167,12 +200,19 @@ supported epoch is January 1, 1980 to January 17, 2038.
 See the file pod/perlport.pod for more information about the VOS
 port of Perl.
 
+=head1 SUPPORT STATUS
 
-Support Status
---------------
 I'm offering this port "as is".  You can ask me questions, but I
 can't guarantee I'll be able to answer them.  There are some
 excellent books available on the Perl language; consult a book
 seller.
 
-(end)
+=head1 AUTHOR
+
+Paul Green (Paul_Green@stratus.com)
+
+=head1 LAST UPDATE
+
+October 24, 2000
+
+=cut

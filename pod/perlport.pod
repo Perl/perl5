@@ -890,9 +890,9 @@ vmsperl on the web, http://www.sidhe.org/vmsperl/index.html
 
 =head2 VOS
 
-Perl on VOS is discussed in F<README.vos> in the perl distribution.
-Perl on VOS can accept either VOS- or Unix-style file
-specifications as in either of the following:
+Perl on VOS is discussed in F<README.vos> in the perl distribution
+(installed as L<perlvos>).  Perl on VOS can accept either VOS- or
+Unix-style file specifications as in either of the following:
 
     $ perl -ne "print if /perl_setup/i" >system>notices
     $ perl -ne "print if /perl_setup/i" /system/notices
@@ -1994,9 +1994,9 @@ http://www.perl.com/CPAN/ports/index.html for binary distributions.
 
 =head1 SEE ALSO
 
-L<perlaix>, L<perlamiga>, L<perlcygwin>, L<perldos>, L<perlebcdic>,
-L<perlhpux>, L<perlos2>, L<perlos390>, L<perlposix-bc>, L<perlwin32>,
-L<perlvms>, and L<Win32>.
+L<perlaix>, L<perlamiga>, L<perlcygwin>, L<perldos>, L<perlepoc>,
+L<perlebcdic>, L<perlhpux>, L<perlos2>, L<perlos390>, L<perlposix-bc>,
+L<perlwin32>, L<perlvms>, L<perlvos>, and L<Win32>.
 
 =head1 AUTHORS / CONTRIBUTORS
 

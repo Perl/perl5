@@ -108,12 +108,14 @@ For ease of access, the Perl manual has been split up into several sections:
     perlamiga		Perl notes for Amiga
     perlcygwin		Perl notes for Cygwin
     perldos		Perl notes for DOS
+    perlepoc		Perl notes for EPOC
     perlhpux		Perl notes for HP-UX
     perlmachten		Perl notes for Power MachTen
     perlos2		Perl notes for OS/2
     perlos390		Perl notes for OS/390
     perlposix-bc	Perl notes for POSIX-BC
     perlvms		Perl notes for VMS
+    perlvos		Perl notes for Stratus VOS
     perlwin32		Perl notes for Windows
 
 (If you're intending to read these straight through for the first time,
