@@ -2981,10 +2981,10 @@ C<STDERR> using various methods:
     print STDOUT "stdout 2\n";
     print STDERR "stderr 2\n";
 
-If you specify C<< '<&=X' >>, where C<X> is a number or a filehandle,
-then Perl will do an equivalent of C's C<fdopen> of that file
-descriptor (and not call L<dup(2)>); this is more parsimonious
-of file descriptors.  For example:
+If you specify C<< '<&=X' >>, where C<X> is a file descriptor number
+or a filehandle, then Perl will do an equivalent of C's C<fdopen> of
+that file descriptor (and not call L<dup(2)>); this is more
+parsimonious of file descriptors.  For example:
 
     # open for input, reusing the fileno of $fd
     open(FILEHANDLE, "<&=$fd")
@@ -3002,18 +3002,19 @@ or
 
     open(FH, ">>&=OLDFH")
 
-Being parsimonious on filehandles is useful (besides being
-parsimonious) also for example when something is dependent
-on the file descriptors, like for example locking using flock().
-If you do just a C<< open(A, '>>&B') >>, the filehandle A will not
-have the file descriptor as B has, and therefore flock(A) will
-not flock(B), and vice versa.  But with C<< open(A, '>>&=B') >>
-the filehandles will share the same file descriptor.
+Being parsimonious on filehandles is also useful (besides being
+parsimonious) for example when something is dependent on file
+descriptors, like for example locking using flock().  If you do just
+C<< open(A, '>>&B') >>, the filehandle A will not have the same file
+descriptor as B, and therefore flock(A) will not flock(B), and vice
+versa.  But with C<< open(A, '>>&=B') >> the filehandles will share
+the same file descriptor.
 
-Note that if Perl is using the standard C libraries' fdopen() then on
-many UNIX systems, fdopen() is known to fail when file descriptors
-exceed a certain value, typically 255. If you need more file
-descriptors than that, consider rebuilding Perl to use the C<PerlIO>.
+Note that if you are using Perls older than 5.8.0, Perl will be using
+the standard C libraries' fdopen() to implement the "=" functionality.
+On many UNIX systems fdopen() fails when file descriptors exceed a
+certain value, typically 255.  For Perls 5.8.0 and later, PerlIO is
+most often the default.
 
 You can see whether Perl has been compiled with PerlIO or not by
 running C<perl -V> and looking for C<useperlio=> line.  If C<useperlio>
