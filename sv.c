@@ -6449,7 +6449,10 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl)
 	    break;
 	case SAVEt_FREEOP:
 	    ptr = POPPTR(ss,ix);
-	    TOPPTR(nss,ix) = ptr;
+	    if (ptr && (((OP*)ptr)->op_private & OPpREFCOUNTED))
+		TOPPTR(nss,ix) = any_dup(ptr, proto_perl);
+	    else
+		TOPPTR(nss,ix) = Nullop;
 	    break;
 	case SAVEt_FREEPV:
 	    c = (char*)POPPTR(ss,ix);
@@ -6594,6 +6597,17 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     SV *sv;
     SV **svp;
     PerlInterpreter *my_perl = (PerlInterpreter*)PerlMem_malloc(sizeof(PerlInterpreter));
+    PERL_SET_INTERP(my_perl);
+
+#    ifdef DEBUGGING
+    memset(my_perl, 0xab, sizeof(PerlInterpreter));
+    PL_markstack = 0;
+    PL_scopestack = 0;
+    PL_savestack = 0;
+    PL_retstack = 0;
+#    else	/* !DEBUGGING */
+    Zero(my_perl, 1, PerlInterpreter);
+#    endif	/* DEBUGGING */
 #endif		/* PERL_IMPLICIT_SYS */
 
     /* arena roots */

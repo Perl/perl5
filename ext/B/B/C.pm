@@ -302,7 +302,7 @@ sub B::COP::save {
 			  $op->arybase, $op->line));
     my $copix = $copsect->index;
     $init->add(sprintf("CopFILE_set(&cop_list[%d], %s);", $copix, cstring($op->file)),
-	       sprintf("CopSTASHPV_set(&cop_list[%d], %s);", $copix, cstring($op->stashpv));
+	       sprintf("CopSTASHPV_set(&cop_list[%d], %s);", $copix, cstring($op->stashpv)));
     savesym($op, "(OP*)&cop_list[$copix]");
 }
 

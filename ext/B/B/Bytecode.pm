@@ -299,7 +299,6 @@ cop_arybase %d
 cop_line $line
 cop_warnings $warningsix
 EOT
-    $stash->bytecode;
 }
 
 sub B::PMOP::bytecode {
