@@ -1521,8 +1521,10 @@ PP(pp_substr)
     pos = POPi - arybase;
     sv = POPs;
     tmps = SvPV(sv, curlen);
-    if (pos < 0)
+    if (pos < 0) {
 	pos += curlen + arybase;
+	if (pos < 0 && MAXARG < 3) pos = 0;
+    }
     if (pos < 0 || pos > curlen) {
 	if (dowarn || lvalue)
 	    warn("substr outside of string");
