@@ -891,6 +891,15 @@ in by Perl and may contain arbitrary commands, for security reasons,
 it must be owned by the superuser or the current user, and writable
 by no one but its owner.
 
+You can mock TTY input to debugger by adding arbitrary commands to
+@DB::typeahead. For example, your F<.perldb> file might contain:
+
+    sub afterinit { push @DB::typeahead, "b 4", "b 6"; }
+
+Which would attempt to set breakpoints on lines 4 and 6 immediately
+after debugger initilization. Note that @DB::typeahead is not a supported
+interface and is subject to change in future releases.
+
 If you want to modify the debugger, copy F<perl5db.pl> from the
 Perl library to another name and hack it to your heart's content.
 You'll then want to set your C<PERL5DB> environment variable to say
