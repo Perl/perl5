@@ -1,16 +1,28 @@
 NOTE: This documentation describes the style of threading that was
-available in 5.005.  Perl v5.6 also has the early beginnings of
-interpreter-based threads support (which is what will be enabled by
-default when you simply ask for -Dusethreads).  However, be advised
-that interpreter threads cannot as yet be created from the Perl level
-yet.  If you're looking to create threads from within Perl, chances
-are you _don't_ want interpreter threads, but want the older support
-for threads described below, enabled with:
+available in Perl 5.005.  Perl 5.6.0 introduced the early beginnings of
+interpreter-based threads support, also known as ithreads, and in Perl
+5.8.0 the interpeter threads became available from perl level through
+the threads and threads::shared modules (in Perl 5.6 ithreads are
+available only internally and to XS extension builders, and used
+by the Win32 port for emulating fork()).
+
+If you really want the older support for threads described below,
+it is enabled with:
 
     sh Configure -Dusethreads -Duse5005threads
 
+Be warned that the old 5.005 implementation of threads is known
+to be quite buggy, and unmaintained, which means that the bugs
+are there to stay.  (We are not mean by not fixing the bugs:
+the bugs are just really, really, really hard to fix.  Honest.)
+
 The rest of this document only applies to the use5005threads style of
-threads.
+threads, and the comments on what works on which platform are highly
+obsolete and preserved here for archaeology buffs only.  The
+architecture specific hints files do all the necessary option
+tweaking automatically during Configure, both for the 5.005 threads
+and for the new interpreter threads.
+
 ---------------------------------------------------------------------------
 
 Support for threading is still in the highly experimental stages.  There
