@@ -31,6 +31,464 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[  9423] By: jhi                                   on 2001/03/28  18:52:09
+        Log: Rmdir lib/XS on cleanup.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  9422] By: jhi                                   on 2001/03/28  18:49:34
+        Log: Integrate perlio.
+     Branch: perl
+	  !> t/op/utf8decode.t
+____________________________________________________________________________
+[  9421] By: nick                                  on 2001/03/28  18:46:44
+        Log: Loose duplicate chunk.
+     Branch: perlio
+	   ! t/op/utf8decode.t
+____________________________________________________________________________
+[  9420] By: nick                                  on 2001/03/28  18:44:11
+        Log: Integrate mainline.
+     Branch: perlio
+	  !> ext/IO/IO.xs lib/ExtUtils/MM_VMS.pm makedef.pl vms/vms.c
+	  !> vms/vmsish.h
+____________________________________________________________________________
+[  9419] By: jhi                                   on 2001/03/28  18:42:05
+        Log: Can't trust external pwds
+             (either shell builtins or external programs)
+     Branch: perl
+	   ! t/lib/cwd.t
+____________________________________________________________________________
+[  9418] By: jhi                                   on 2001/03/28  18:34:05
+        Log: Integrate perlio.
+     Branch: perl
+	   - lib/perlio.pm
+	  !> MANIFEST lib/PerlIO.pm lib/open.pm perlio.c t/lib/b.t
+	  !> t/op/utf8decode.t
+____________________________________________________________________________
+[  9417] By: nick                                  on 2001/03/28  18:24:02
+        Log: PerlIO.pm / perlio.pm conflict.
+             Update some pods.
+             Make t/op/utf8decode.t a text file.
+     Branch: perlio
+	   - lib/perlio.pm
+	   ! MANIFEST lib/PerlIO.pm lib/open.pm perlio.c t/lib/b.t
+	   ! t/op/utf8decode.t
+____________________________________________________________________________
+[  9416] By: jhi                                   on 2001/03/28  18:06:07
+        Log: Integrate change #9409 from mainline to maintperl.
+             
+             Yet another tweak on AIX dynaloading.
+     Branch: maint-5.6/perl
+	  !> ext/DynaLoader/dl_aix.xs ext/DynaLoader/hints/aix.pl
+____________________________________________________________________________
+[  9415] By: gsar                                  on 2001/03/28  17:13:01
+        Log: integrate changes#9377,9385,9401 from mainline
+             
+             Subject: RE: 5.6.0 BUG: Lexical warnings aren't lexical
+             
+             If directory entries compare equal case-insensitively,
+             retry case-sensitively.
+             
+             Subject: [PATCH] B::Terse and warnings
+     Branch: maint-5.6/perl
+	  !> ext/B/B.pm ext/B/B/Terse.pm ext/File/Glob/bsd_glob.c gv.c
+	  !> t/pragma/warn/perl
+____________________________________________________________________________
+[  9414] By: jhi                                   on 2001/03/28  17:11:12
+        Log: Subject: [PATCH perl@9359] VMS fix-ups and status
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Wed, 28 Mar 2001 10:55:20 -0600
+             Message-Id: <5.0.2.1.0.20010327164600.031563e8@exchi01>
+     Branch: perl
+	   ! ext/IO/IO.xs lib/ExtUtils/MM_VMS.pm vms/vms.c vms/vmsish.h
+____________________________________________________________________________
+[  9413] By: jhi                                   on 2001/03/28  17:03:12
+        Log: Dup hunk.
+     Branch: perl
+	   ! t/op/utf8decode.t
+____________________________________________________________________________
+[  9412] By: jhi                                   on 2001/03/28  17:02:36
+        Log: Forced integrate from perlio.
+     Branch: perl
+	  !> t/op/utf8decode.t
+____________________________________________________________________________
+[  9411] By: nick                                  on 2001/03/28  16:50:03
+        Log: Integrate mainline.
+     Branch: perlio
+	  +> t/lib/cwd.t
+	  !> MANIFEST ext/DynaLoader/dl_aix.xs ext/DynaLoader/hints/aix.pl
+	  !> ext/IO/lib/IO/Socket.pm ext/XS/Typemap/Typemap.pm
+	  !> ext/XS/Typemap/Typemap.xs ext/XS/Typemap/typemap gv.c
+	  !> makedef.pl pp.c t/lib/xs-typemap.t t/op/utf8decode.t
+	  !> t/pragma/warn/perl
+____________________________________________________________________________
+[  9410] By: jhi                                   on 2001/03/28  16:44:23
+        Log: Subject: Re: [PATCH] 9403 cannot be tested
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Wed, 28 Mar 2001 18:33:56 +0200
+             Message-Id: <20010328182418.7C17.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! makedef.pl
+____________________________________________________________________________
+[  9409] By: jhi                                   on 2001/03/28  16:12:45
+        Log: Yet another tweak on AIX dynaloading.
+     Branch: perl
+	   ! ext/DynaLoader/dl_aix.xs ext/DynaLoader/hints/aix.pl
+____________________________________________________________________________
+[  9408] By: jhi                                   on 2001/03/28  15:52:55
+        Log: Subject: [PATCH] 9403 cannot be tested
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl> 
+             Date: Wed, 28 Mar 2001 17:23:00 +0200
+             Message-Id: <20010328171835.7C14.H.M.BRAND@hccnet.nl>
+             
+             A missing symbol.
+     Branch: perl
+	   ! makedef.pl
+____________________________________________________________________________
+[  9407] By: jhi                                   on 2001/03/28  15:47:43
+        Log: Integrate perlio. (with tweaks on t/op/utf8decode.t)
+     Branch: perl
+	   ! t/op/utf8decode.t
+	  !> ext/MIME/Base64/QuotedPrint.pm ext/re/re.pm perl.h regcomp.c
+	  !> t/op/each.t t/op/pat.t t/op/regexp.t utf8.c
+____________________________________________________________________________
+[  9406] By: jhi                                   on 2001/03/28  15:37:08
+        Log: Subject: [PATCH] cwd.t (was: Cwd has no tests?)
+             From: Benjamin Sugars <bsugars@canoe.ca> 
+             Date: Tue, 27 Mar 2001 17:37:05 -0500 (EST)
+             Message-ID: <Pine.LNX.4.21.0103271719540.2007-100000@marmot.rim.canoe.ca>
+     Branch: perl
+	   + t/lib/cwd.t
+	   ! MANIFEST
+____________________________________________________________________________
+[  9405] By: jhi                                   on 2001/03/28  15:13:18
+        Log: pp_ne() needs a CORRECT boolean.
+     Branch: perl
+	   ! pp.c
+____________________________________________________________________________
+[  9404] By: jhi                                   on 2001/03/28  15:09:23
+        Log: pp_ne() needs a boolean, not an integer.
+     Branch: perl
+	   ! pp.c
+____________________________________________________________________________
+[  9403] By: jhi                                   on 2001/03/28  14:47:43
+        Log: (Retracted by #9404.)
+     Branch: perl
+	   ! pp.c
+____________________________________________________________________________
+[  9402] By: jhi                                   on 2001/03/28  14:43:59
+        Log: Subject: Re: [PATCH] Typemap testing
+             From: Tim Jenness <t.jenness@jach.hawaii.edu> 
+             Date: Tue, 27 Mar 2001 16:34:03 -1000 (HST)
+             Message-ID: <Pine.LNX.4.30.0103271633030.21198-100000@lapaki.jach.hawaii.edu>
+     Branch: perl
+	   ! ext/XS/Typemap/Typemap.pm ext/XS/Typemap/Typemap.xs
+	   ! ext/XS/Typemap/typemap t/lib/xs-typemap.t
+____________________________________________________________________________
+[  9401] By: jhi                                   on 2001/03/28  14:42:14
+        Log: Subject: RE: 5.6.0 BUG: Lexical warnings aren't lexical
+             From: "Paul Marquess" <Paul_Marquess@Yahoo.co.uk>
+             Date: Sun, 25 Mar 2001 21:59:15 +0100
+             Message-ID: <000701c0b56e$73944220$07bdfea9@bfs.phone.com>
+             
+             A variable will be checked for the "use once" warnings if:
+             
+             1. It is in the scope of a use warnings 'once'
+             2. It isn't in the scope of the warnings pragma at all AND $^W is set.
+             
+             Otherwise it won't be checked at all.
+             
+             Part 1 is what is in perl >= 5.6.0, Part 2 is what I'm fixing.
+             
+             The enclosed patch partially fixes this issue. What I didn't
+             get to work was the case where the "used once" warning is enabled
+             in any file other than the main file.
+     Branch: perl
+	   ! gv.c t/pragma/warn/perl
+____________________________________________________________________________
+[  9400] By: nick                                  on 2001/03/28  14:38:24
+        Log: More EBCDIC tweaks:
+             - one more swash issue &~(0xA0-1) did not do the right thing,
+             for UTF-EBCDIC where &~(0x80-1) does for UTF-8.
+             - add "use re 'asciirange'" to make [!-~] etc. work
+             use it in MIME::QuotedPrint and t/op/regexp.t and t/op/pat.t
+             - Choose a key for t/op/each.t test which gets encoded.
+             - Skip utf8decode if this is UTF-EBCDIC.
+     Branch: perlio
+	   ! ext/MIME/Base64/QuotedPrint.pm ext/re/re.pm perl.h regcomp.c
+	   ! t/op/each.t t/op/pat.t t/op/regexp.t t/op/utf8decode.t utf8.c
+____________________________________________________________________________
+[  9399] By: jhi                                   on 2001/03/28  14:21:00
+        Log: Extend the SvROK() testing also to pp_ne(), pointed out by
+             Andreas Schwab.
+     Branch: perl
+	   ! pp.c
+____________________________________________________________________________
+[  9398] By: jhi                                   on 2001/03/28  00:55:56
+        Log: Subject: [ID 20010327.007] New warning from IO::Socket for sockatmark
+             From: David Dyck <dcd@tc.fluke.com>
+             Date: Tue, 27 Mar 2001 15:16:24 -0800
+             Message-Id: <200103272316.PAA21921@dd.tc.fluke.com>
+     Branch: perl
+	   ! ext/IO/lib/IO/Socket.pm
+____________________________________________________________________________
+[  9397] By: jhi                                   on 2001/03/27  21:52:49
+        Log: Integrate perlio.
+     Branch: perl
+	  +> ext/PerlIO/Via/Makefile.PL ext/PerlIO/Via/Via.pm
+	  +> ext/PerlIO/Via/Via.xs
+	  !> MANIFEST ext/PerlIO/Scalar/Scalar.pm lib/PerlIO.pm
+____________________________________________________________________________
+[  9396] By: nick                                  on 2001/03/27  21:45:13
+        Log: Integrate mainline.
+     Branch: perlio
+	  !> embed.h embed.pl ext/XS/Typemap/Typemap.xs gv.c
+	  !> pod/perlapi.pod proto.h sv.c sv.h t/op/magic.t utils/h2xs.PL
+____________________________________________________________________________
+[  9395] By: nick                                  on 2001/03/27  21:18:58
+        Log: Outline docs for PerlIO and PerlIO::Scalar
+     Branch: perlio
+	   ! ext/PerlIO/Scalar/Scalar.pm lib/PerlIO.pm
+____________________________________________________________________________
+[  9394] By: nick                                  on 2001/03/27  20:50:13
+        Log: PerlIO::Via layer (alpha-ish).
+     Branch: perlio
+	   + ext/PerlIO/Via/Makefile.PL ext/PerlIO/Via/Via.pm
+	   + ext/PerlIO/Via/Via.xs
+	   ! MANIFEST
+____________________________________________________________________________
+[  9393] By: jhi                                   on 2001/03/27  20:49:55
+        Log: Retract #9329 now that 9390 should take care of the matter.
+     Branch: perl
+	   ! utils/h2xs.PL
+____________________________________________________________________________
+[  9390] By: jhi                                   on 2001/03/27  20:47:50
+        Log: Subject: Autoloading Errno.pm when %! is encountered
+             From: Robin Houston <robin@kitsite.com>
+             Date: Tue, 27 Mar 2001 20:57:11 +0100
+             Message-ID: <20010327205710.A24053@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! embed.h embed.pl gv.c proto.h t/op/magic.t
+____________________________________________________________________________
+[  9389] By: jhi                                   on 2001/03/27  20:24:31
+        Log: Integrate perlio.
+     Branch: perl
+	  !> doop.c ext/Encode/Encode.pm ext/MIME/Base64/Base64.xs
+	  !> ext/MIME/Base64/QuotedPrint.pm t/lib/encode.t t/lib/mimeb64.t
+	  !> utf8.c
+____________________________________________________________________________
+[  9388] By: jhi                                   on 2001/03/27  20:21:38
+        Log: Better have a three-element array if one is going to assign
+             to the third element of that array. (from Tim Jenness)
+     Branch: perl
+	   ! ext/XS/Typemap/Typemap.xs
+____________________________________________________________________________
+[  9387] By: nick                                  on 2001/03/27  20:15:43
+        Log: Integrate mainline.
+     Branch: perlio
+	  +> ext/XS/Typemap/Makefile.PL ext/XS/Typemap/README
+	  +> ext/XS/Typemap/Typemap.pm ext/XS/Typemap/Typemap.xs
+	  +> ext/XS/Typemap/stdio.c ext/XS/Typemap/typemap
+	  +> t/lib/xs-typemap.t
+	  !> (integrate 34 files)
+____________________________________________________________________________
+[  9386] By: jhi                                   on 2001/03/27  20:04:18
+        Log: Subject: Re: perl@9359 breaks HTML::Parser
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 27 Mar 2001 11:30:24 -0800
+             Message-ID: <lrr8zjxb5b.fsf@caliper.ActiveState.com>
+             
+             Clarify the UTF-8 issues of the API docs.
+             (Slightly reworded and expanded.)
+     Branch: perl
+	   ! pod/perlapi.pod sv.c sv.h
+____________________________________________________________________________
+[  9385] By: jhi                                   on 2001/03/27  19:44:25
+        Log: If directory entries compare equal case-insensitively,
+             retry case-sensitively.
+     Branch: perl
+	   ! ext/File/Glob/bsd_glob.c
+____________________________________________________________________________
+[  9384] By: nick                                  on 2001/03/27  19:38:50
+        Log: Various EBCDIC fixes:
+             - major revelation that swash code is encoding aware,
+             (or thought it was) - now it is ;-)
+             - With that out of the way fix a slab of tr/// cases.
+             - Fix Encode 'Unicode' to be true Unicode so tests pass.
+             - As anticipated Base64.xs needed tweaks.
+             - Until tr/// works right avoid old_encode64 in MIME tests.
+     Branch: perlio
+	   ! doop.c ext/Encode/Encode.pm ext/MIME/Base64/Base64.xs
+	   ! t/lib/encode.t t/lib/mimeb64.t utf8.c
+____________________________________________________________________________
+[  9383] By: jhi                                   on 2001/03/27  18:34:41
+        Log: Add the std test suite BEGIN block.
+     Branch: perl
+	   ! t/lib/xs-typemap.t
+____________________________________________________________________________
+[  9382] By: jhi                                   on 2001/03/27  15:16:07
+        Log: Add debugging output to the test.
+     Branch: perl
+	   ! t/lib/glob-basic.t
+____________________________________________________________________________
+[  9381] By: jhi                                   on 2001/03/27  15:08:10
+        Log: Add Tim Jenness' XS::Typemap for exercizing the standard typemap.
+     Branch: perl
+	   + ext/XS/Typemap/Makefile.PL ext/XS/Typemap/README
+	   + ext/XS/Typemap/Typemap.pm ext/XS/Typemap/Typemap.xs
+	   + ext/XS/Typemap/stdio.c ext/XS/Typemap/typemap
+	   + t/lib/xs-typemap.t
+	   ! MANIFEST
+____________________________________________________________________________
+[  9380] By: jhi                                   on 2001/03/27  14:48:34
+        Log: Subject: [PATCH] Typemap testing
+             From: Tim Jenness <t.jenness@jach.hawaii.edu> 
+             Date: Sun, 25 Mar 2001 16:46:12 -1000 (HST)
+             Message-ID: <Pine.LNX.4.30.0103251629350.16988-101000@lapaki.jach.hawaii.edu>
+             
+             (The first part of the patch.)
+     Branch: perl
+	   ! lib/ExtUtils/typemap lib/ExtUtils/xsubpp
+____________________________________________________________________________
+[  9379] By: jhi                                   on 2001/03/27  14:44:56
+        Log: Subject: Re: [PATCH] t/lib/glob-basic.t  
+             From: Benjamin Sugars <bsugars@canoe.ca> 
+             Date: Mon, 26 Mar 2001 14:11:47 -0500 (EST)
+             Message-ID: <Pine.LNX.4.21.0103261406170.2729-100000@marmot.rim.canoe.ca>
+     Branch: perl
+	   ! t/lib/glob-basic.t
+____________________________________________________________________________
+[  9378] By: jhi                                   on 2001/03/27  14:42:30
+        Log: Subject: [PATCH] perlvar nit
+             From: Simon Cozens <simon@netthink.co.uk>
+             Date: Tue, 27 Mar 2001 01:12:01 +0100
+             Message-ID: <20010327011201.A19179@netthink.co.uk>
+     Branch: perl
+	   ! pod/perlvar.pod
+____________________________________________________________________________
+[  9377] By: jhi                                   on 2001/03/27  14:36:26
+        Log: Subject: [PATCH] B::Terse and warnings
+             From: Benjamin Sugars <ben.sugars@home.com>
+             Date: Mon, 26 Mar 2001 23:40:33 -0500 (EST)
+             Message-ID: <Pine.LNX.4.21.0103262320170.20040-100000@localhost.localdomain>
+     Branch: perl
+	   ! ext/B/B.pm ext/B/B/Terse.pm
+____________________________________________________________________________
+[  9376] By: jhi                                   on 2001/03/27  14:31:31
+        Log: Document sockatmark() some.
+     Branch: perl
+	   ! pod/perldiag.pod pod/perlfunc.pod pod/perlport.pod
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[  9375] By: jhi                                   on 2001/03/27  14:00:24
+        Log: sv_catpvf(sv, "%c", 128) should not UTF-8-ify the sv,
+             noted by Gisle and fixed by NI-S.
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  9374] By: jhi                                   on 2001/03/27  05:50:01
+        Log: Regen toc.
+     Branch: perl
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[  9373] By: jhi                                   on 2001/03/27  05:43:51
+        Log: Pixie documenting.
+     Branch: perl
+	   ! Makefile.SH pod/perlhack.pod
+____________________________________________________________________________
+[  9372] By: jhi                                   on 2001/03/27  05:29:34
+        Log: Metaconfig unit changes for #9371.
+     Branch: metaconfig
+	   ! U/modified/myhostname.U
+     Branch: metaconfig/U/perl
+	   + d_sockatmark.U
+	   ! gccvers.U
+____________________________________________________________________________
+[  9371] By: jhi                                   on 2001/03/27  05:29:07
+        Log: Add sockatmark() probing.
+     Branch: perl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH configure.com epoc/config.sh uconfig.h uconfig.sh
+	   ! vos/config.alpha.def vos/config.alpha.h vos/config.ga.def
+	   ! vos/config.ga.h win32/config.bc win32/config.gc
+	   ! win32/config.vc
+____________________________________________________________________________
+[  9370] By: jhi                                   on 2001/03/26  22:01:18
+        Log: pp_ncmp() and pp_scmp() should return numeric values, not booleans.
+             Really need to benchmark this.
+     Branch: perl
+	   ! pp.c
+____________________________________________________________________________
+[  9369] By: nick                                  on 2001/03/26  21:59:30
+        Log: Integrate mainline.
+     Branch: perlio
+	   ! ext/MIME/Base64/QuotedPrint.pm
+	  !> Changes Makefile.SH ext/IO/IO.xs ext/IO/lib/IO/Socket.pm
+	  !> patchlevel.h pod/perlhack.pod pp_sys.c
+____________________________________________________________________________
+[  9368] By: jhi                                   on 2001/03/26  21:47:03
+        Log: Treat pp_ncmp() and pp_scmp() as in #9366 (ROK).
+             
+             TODO1: perlbench.
+             TODO2: le, lt, ge, gt?  Yech.
+     Branch: perl
+	   ! pp.c
+____________________________________________________________________________
+[  9367] By: jhi                                   on 2001/03/26  21:34:57
+        Log: Too much cut-and-paste in #9363.
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[  9366] By: jhi                                   on 2001/03/26  21:20:53
+        Log: Subject: $ref1 == $ref2 without NV_PRESERVES_UV
+             From: Andreas Schwab <schwab@suse.de>
+             Date: 26 Mar 2001 17:29:04 +0200
+             Message-ID: <jeitkw5z27.fsf@hawking.suse.de>
+             
+             (The patch for 5.6.0 or so, this is a guess for bleadperl)
+     Branch: perl
+	   ! pp_hot.c
+____________________________________________________________________________
+[  9365] By: jhi                                   on 2001/03/26  21:07:54
+        Log: Integrate perlio.
+     Branch: perl
+	  !> perlio.c
+____________________________________________________________________________
+[  9364] By: nick                                  on 2001/03/26  20:30:48
+        Log: REFCNT botch in layer name cache hash.
+     Branch: perlio
+	   ! perlio.c
+____________________________________________________________________________
+[  9363] By: jhi                                   on 2001/03/26  18:44:32
+        Log: Subject: [PATCH] socket() leaks file descriptors
+             From: Benjamin Sugars <bsugars@canoe.ca>
+             Date: Mon, 26 Mar 2001 13:29:54 -0500 (EST)
+             Message-ID: <Pine.LNX.4.21.0103261315510.2729-100000@marmot.rim.canoe.ca>
+             
+             Also sockpair() fixed similarly.
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[  9362] By: jhi                                   on 2001/03/26  18:37:52
+        Log: Integrate perlio.
+     Branch: perl
+	  !> README.os390 miniperlmain.c perlio.c perliol.h t/op/pat.t
+____________________________________________________________________________
+[  9361] By: nick                                  on 2001/03/26  17:32:06
+        Log: Implement flush of linebuffered streams on read of a tty.
+     Branch: perlio
+	   ! perlio.c perliol.h
+____________________________________________________________________________
+[  9360] By: nick                                  on 2001/03/26  17:12:32
+        Log: Memory tweaks and notes for OEMVS.
+     Branch: perlio
+	   ! README.os390 miniperlmain.c t/op/pat.t
+____________________________________________________________________________
+[  9359] By: jhi                                   on 2001/03/26  02:12:54
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  9358] By: jhi                                   on 2001/03/26  02:05:32
         Log: Document the most common pixie options.
      Branch: perl
@@ -55,12 +513,6 @@ ____________________________________________________________________________
 [  9354] By: jhi                                   on 2001/03/26  00:23:38
         Log: Implement IO::Socket::atmark(), inspired by Lincoln Stein's
              IO::Sockatmark().
-             
-             TODO:
-             - have a IO::Sockatmark wrapper for backward compatibility?
-             (need to check Lincoln's book)
-             - add HAS_SOCKATMARK, I_SYS_SOCKIO, and I_SYS_SOCKIOS probes
-             (now uses only the SIOCATMARK ioctl, if available)
      Branch: perl
 	   ! ext/IO/IO.xs ext/IO/lib/IO/Socket.pm
 ____________________________________________________________________________
@@ -216,7 +668,9 @@ ____________________________________________________________________________
 	   ! doio.c
 ____________________________________________________________________________
 [  9329] By: jhi                                   on 2001/03/24  18:26:57
-        Log: Subject: [PATCH h2xs] $!{EINVAL} requires "use Errno"
+        Log: (Retracted by #9393)
+
+             Subject: [PATCH h2xs] $!{EINVAL} requires "use Errno"
              From: Simon Cozens <simon@netthink.co.uk>
              Date: Sat, 24 Mar 2001 17:13:17 +0000
              Message-ID: <20010324171317.A13406@netthink.co.uk>
