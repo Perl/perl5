@@ -894,21 +894,14 @@ That's where the glue code can be inserted to create the initial contact between
 Perl and linked C/C++ routines.  Let's take a look some pieces of I<perlmain.c>
 to see how Perl does this:
 
+ static void xs_init (pTHX);
 
- #ifdef __cplusplus
- #  define EXTERN_C extern "C"
- #else
- #  define EXTERN_C extern
- #endif
-
- static void xs_init (void);
-
- EXTERN_C void boot_DynaLoader (CV* cv);
- EXTERN_C void boot_Socket (CV* cv);
+ EXTERN_C void boot_DynaLoader (pTHX_ CV* cv);
+ EXTERN_C void boot_Socket (pTHX_ CV* cv);
 
 
  EXTERN_C void
- xs_init()
+ xs_init(pTHX)
  {
         char *file = __FILE__;
         /* DynaLoader is a special case */
@@ -955,21 +948,13 @@ B<ExtUtils::Embed> can also automate writing the I<xs_init> glue code.
 
 Consult L<perlxs>, L<perlguts>, and L<perlapi> for more details.
 
-=head1 Embedding Perl under Win32
+=head1 Embedding Perl under Windows
 
-At the time of this writing (5.004), there are two versions of Perl
-which run under Win32.  (The two versions are merging in 5.005.)
-Interfacing to ActiveState's Perl library is quite different from the
-examples in this documentation, as significant changes were made to
-the internal Perl API.  However, it is possible to embed ActiveState's
-Perl runtime.  For details, see the Perl for Win32 FAQ at
-http://www.perl.com/CPAN/doc/FAQs/win32/perlwin32faq.html.
+In general, all of the source code shown here should work unmodified under
+Windows.
 
-With the "official" Perl version 5.004 or higher, all the examples
-within this documentation will compile and run untouched, although
-the build process is slightly different between Unix and Win32.  
-
-For starters, backticks don't work under the Win32 native command shell.
+However, there are some caveats about the command-line examples shown.
+For starters, backticks won't work under the Win32 native command shell.
 The ExtUtils::Embed kit on CPAN ships with a script called
 B<genmake>, which generates a simple makefile to build a program from
 a single C source file.  It can be used like this:
