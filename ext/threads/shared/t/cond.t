@@ -1,15 +1,15 @@
 BEGIN {
     chdir 't' if -d 't';
-    @INC = qw(../lib .);
+    push @INC ,'../lib';
     require Config; import Config;
     unless ($Config{'useithreads'}) {
         print "1..0 # Skip: no threads\n";
         exit 0;
     }
-    require "test.pl";
 }
-print "1..4\n";
+print "1..5\n";
 use strict;
+
 
 use threads;
 
@@ -18,30 +18,23 @@ use threads::shared;
 my $lock : shared;
 
 sub foo {
-    my $ret = 0;	
     lock($lock);
-    $ret += 1;
+    print "ok 1\n";
+    sleep 2;
+    print "ok 2\n";
     cond_wait($lock);
-    $ret += 2;
-    return $ret;
+    print "ok 5\n";
 }
 
 sub bar {
-    my $ret = 0;	
     lock($lock);
-    $ret += 1;
+    print "ok 3\n";
     cond_signal($lock);
-    $ret += 2;
-    return $ret;
+    print "ok 4\n";
 }
 
-my $tr1  = threads->create(\&foo);
+my $tr  = threads->create(\&foo);
 my $tr2 = threads->create(\&bar);
-my $rt1 = $tr1->join();
-my $rt2 = $tr2->join();
-ok($rt1 & 1);
-ok($rt1 & 2);
-ok($rt2 & 1);
-ok($rt2 & 2);
-
+$tr->join();
+$tr2->join();
 
