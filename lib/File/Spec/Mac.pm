@@ -37,7 +37,7 @@ sub canonpath {
     return $path;
 }
 
-=item catdir
+=item catdir()
 
 Concatenate two or more directory names to form a path separated by colons
 (":") ending with a directory.  Automatically puts a trailing ":" on the
@@ -401,7 +401,7 @@ sub splitdir {
 }
 
 
-=item catpath
+=item catpath()
 
     $path = File::Spec->catpath($volume,$directory,$file);
 

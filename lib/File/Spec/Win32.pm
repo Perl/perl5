@@ -163,7 +163,7 @@ sub splitpath {
 
 =item splitdir
 
-The opposite of L</catdir()>.
+The opposite of L<catdir()|File::Spec/catdir()>.
 
     @dirs = File::Spec->splitdir( $directories );
 
