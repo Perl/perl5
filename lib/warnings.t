@@ -31,7 +31,7 @@ my $files = 0;
 foreach my $file (@w_files) {
 
     next if $file =~ /(~|\.orig|,v)$/;
-    next if $file =~ /perlio$/ && !$Config{useperlio};
+    next if $file =~ /perlio$/ && !(find PerlIO::Layer 'perlio');
 
     open F, "<$file" or die "Cannot open $file: $!\n" ;
     my $line = 0;
@@ -132,7 +132,7 @@ for (@prgs){
 	foreach my $option (split(' ', $1)) {
 	    if ($option eq 'regex') { # allow regular expressions
 		$option_regex = 1;
-	    } 
+	    }
 	    elsif ($option eq 'random') { # all lines match, but in any order
 		$option_random = 1;
 	    }

@@ -73,12 +73,20 @@ ok(5, 1 == $threads::threads,"Check that threads::threads is true");
 
 #test trying to detach thread
 
-sub test4 { ok(6,1,"Detach test") }
+sub test4 { ok(6,1,"Detach test"); rmdir "thrsem" }
+
+# Just a sleep() would not guarantee that we sleep and will not
+# wake up before the just created thread finishes.  Instead, let's
+# use the filesystem as a semaphore.  Creating a directory and removing
+# it should be a reasonably atomic operation even over NFS. 
+# Also, we do not want to depend here on shared variables.
+
+mkdir "thrsem", 0700;
 
 my $thread1 = threads->create('test4');
 
 $thread1->detach();
-sleep 2;
+sleep 1 while -d "thrsem";
 ok(7,1,"Detach test");
 
 
@@ -115,11 +123,8 @@ threads->create('test8')->join;
 ok(14, 0 == threads->self->tid(),"Check so that tid for threads work for main thread");
 ok(15, 0 == threads->tid(),"Check so that tid for threads work for main thread");
 
+END {
+    1 while rmdir "thrsem";
+}
+
 1;
-
-
-
-
-
-
-

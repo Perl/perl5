@@ -76,7 +76,9 @@ PerlIOVia_method(pTHX_ PerlIO *f,char *method,CV **save,int flags,...)
    IV count;
    dSP;
    SV *arg;
+   PUSHSTACKi(PERLSI_MAGIC);
    ENTER;
+   SPAGAIN;
    PUSHMARK(sp);
    XPUSHs(s->obj);
    while ((arg = va_arg(ap,SV *)))
@@ -113,6 +115,7 @@ PerlIOVia_method(pTHX_ PerlIO *f,char *method,CV **save,int flags,...)
      result = &PL_sv_undef;
     }
    LEAVE;
+   POPSTACK;
   }
  va_end(ap);
  return result;

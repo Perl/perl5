@@ -2,7 +2,7 @@ BEGIN {
 	chdir 't' if -d 't';
 	@INC = '../lib';
 	require Config; import Config;
-	unless ($Config{'useperlio'}) {
+	unless (find PerlIO::Layer 'perlio') {
 	    print "1..0 # Skip: PerlIO not used\n";
 	    exit 0;
 	}

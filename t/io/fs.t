@@ -47,7 +47,7 @@ $needs_fh_reopen = 1 if (defined &Win32::IsWin95 && Win32::IsWin95());
 my $skip_mode_checks =
     $^O eq 'cygwin' && $ENV{CYGWIN} !~ /ntsec/;
 
-plan tests => 36;
+plan tests => 32;
 
 
 if (($^O eq 'MSWin32') || ($^O eq 'NetWare')) {
@@ -270,7 +270,7 @@ close(IOFSCOM);
 SKIP: {
 # Check truncating a closed file.
     eval { truncate "Iofs.tmp", 5; };
-    
+
     skip("no truncate - $@", 10) if $@;
 
     is(-s "Iofs.tmp", 5, "truncation to five bytes");
@@ -302,7 +302,7 @@ SKIP: {
     if ($needs_fh_reopen) {
 	close (FH); open (FH, ">>Iofs.tmp") or die "Can't reopen Iofs.tmp";
     }
-       
+
     if ($^O eq 'vos') {
         skip ("# TODO - hit VOS bug posix-973 - cannot resize an open file below the current file pos.", 7);
     }
@@ -316,12 +316,6 @@ SKIP: {
     }
 
     ok(-z "Iofs.tmp", "fh resize to zero working (filename check)");
-
-    ok(truncate(FH, 200), "fh resize to 200");
-    is(-s FH, 200, "fh resize to 200 working (FH check)");
-
-    ok(truncate(FH, 0), "fh resize to 0");
-    ok(-z FH, "fh resize to 0 working (FH check)");
 
     close FH;
 }

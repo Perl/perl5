@@ -3318,7 +3318,7 @@ Perl_sv_2bool(pTHX_ register SV *sv)
 	SV* tmpsv;
         if (SvAMAGIC(sv) && (tmpsv=AMG_CALLun(sv,bool_)) &&
                 (!SvROK(tmpsv) || (SvRV(tmpsv) != SvRV(sv))))
-	    return SvTRUE(tmpsv);
+	    return (bool)SvTRUE(tmpsv);
       return SvRV(sv) != 0;
     }
     if (SvPOKp(sv)) {

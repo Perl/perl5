@@ -1158,7 +1158,7 @@ Perl_hv_exists(pTHX_ HV *hv, const char *key, I32 klen)
 	    sv = sv_newmortal();
 	    mg_copy((SV*)hv, sv, key, klen);
 	    magic_existspack(sv, mg_find(sv, PERL_MAGIC_tiedelem));
-	    return SvTRUE(sv);
+	    return (bool)SvTRUE(sv);
 	}
 #ifdef ENV_IS_CASELESS
 	else if (mg_find((SV*)hv, PERL_MAGIC_env)) {
@@ -1262,7 +1262,7 @@ Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
 	    keysv = sv_2mortal(newSVsv(keysv));
 	    mg_copy((SV*)hv, sv, (char*)keysv, HEf_SVKEY);
 	   magic_existspack(svret, mg_find(sv, PERL_MAGIC_tiedelem));
-	   return SvTRUE(svret);
+	   return (bool)SvTRUE(svret);
 	}
 #ifdef ENV_IS_CASELESS
 	else if (mg_find((SV*)hv, PERL_MAGIC_env)) {
@@ -1935,6 +1935,7 @@ Perl_hv_iterkeysv(pTHX_ register HE *entry)
 
             sv = newSVpvn ((char*)as_utf8, utf8_len);
             SvUTF8_on (sv);
+	    Safefree (as_utf8); /* bytes_to_utf8() allocates a new string */
         } else {
             sv = newSVpvn_share(HEK_KEY(hek),
                                 (HEK_UTF8(hek) ? -HEK_LEN(hek) : HEK_LEN(hek)),

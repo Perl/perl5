@@ -180,7 +180,7 @@ PERLVAR(Tregsawback,	I32)		/* Did we see \1, ...? */
 PERLVAR(Tregprecomp,	char *)		/* uncompiled string. */
 PERLVAR(Tregnpar,	I32)		/* () count. */
 PERLVAR(Tregsize,	I32)		/* Code size. */
-PERLVAR(Tregflags,	U16)		/* are we folding, multilining? */
+PERLVAR(Tregflags,	U32)		/* are we folding, multilining? */
 PERLVAR(Tregseen,	U32)		/* from regcomp.c */
 PERLVAR(Tseen_zerolen,	I32)		/* from regcomp.c */
 PERLVAR(Tseen_evals,	I32)		/* from regcomp.c */

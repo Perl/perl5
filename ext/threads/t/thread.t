@@ -12,7 +12,7 @@ BEGIN {
 
 use ExtUtils::testlib;
 use strict;
-BEGIN { $| = 1; print "1..21\n" };
+BEGIN { $| = 1; print "1..17\n" };
 use threads;
 use threads::shared;
 
@@ -40,23 +40,27 @@ sub content {
 sub dorecurse {
     my $val = shift;
     my $ret;
-    print $val;
     if(@_) {
 	$ret = threads->new(\&dorecurse, @_);
-	$ret->join;
+	$ret &= $ret->join;
     }
+    $val;
 }
 {
-    my $t = threads->new(\&dorecurse, map { "ok $_\n" } 6..10);
-    $t->join();
+    curr_test(6);
+	
+    my $t = threads->new(\&dorecurse, 6..10);
+    ok($t->join());
 }
 
 {
+    curr_test(7);
+
     # test that sleep lets other thread run
-    my $t = threads->new(\&dorecurse, "ok 11\n");
+    my $t = threads->new(\&dorecurse, 1);
     sleep 1;
-    print "ok 12\n";
-    $t->join();
+    ok(1);
+    ok($t->join());
 }
 {
     my $lock : shared;
@@ -70,7 +74,7 @@ sub dorecurse {
 	}
 	return $ret;
     }
-my $t = threads->new(\&islocked, "ok 13\n", "ok 14\n");
+my $t = threads->new(\&islocked, "ok 9\n", "ok 10\n");
 $t->join->join;
 }
 
@@ -95,10 +99,10 @@ sub threaded {
 
 
 { 
-    curr_test(15);
+    curr_test(11);
 
-    my $thr1 = threads->new(\&testsprintf, 15);
-    my $thr2 = threads->new(\&testsprintf, 16);
+    my $thr1 = threads->new(\&testsprintf, 11);
+    my $thr2 = threads->new(\&testsprintf, 12);
     
     my $short = "This is a long string that goes on and on.";
     my $shorte = " a long string that goes on and on.";
@@ -108,8 +112,8 @@ sub threaded {
     my $fooe = " bar bar bar.";
     my $thr3 = new threads \&threaded, $short, $shorte;
     my $thr4 = new threads \&threaded, $long, $longe;
-    my $thr5 = new threads \&testsprintf, 19;
-    my $thr6 = new threads \&testsprintf, 20;
+    my $thr5 = new threads \&testsprintf, 15;
+    my $thr6 = new threads \&testsprintf, 16;
     my $thr7 = new threads \&threaded, $foo, $fooe;
 
     ok($thr1->join());

@@ -227,6 +227,16 @@ typedef long		gid_t;
 
 /* compatibility stuff for other compilers goes here */
 
+#ifndef _INTPTR_T_DEFINED
+typedef int		intptr_t;
+#  define _INTPTR_T_DEFINED
+#endif
+
+#ifndef _UINTPTR_T_DEFINED
+typedef unsigned int	uintptr_t;
+#  define _UINTPTR_T_DEFINED
+#endif
+
 START_EXTERN_C
 
 #undef	 Stat

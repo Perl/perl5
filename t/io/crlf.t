@@ -14,7 +14,7 @@ END {
  unlink($file);
 }
 
-if ($Config{useperlio}) {
+if (find PerlIO::Layer 'perlio') {
  plan(tests => 6);
  ok(open(FOO,">:crlf",$file));
  ok(print FOO 'a'.((('a' x 14).qq{\n}) x 2000) || close(FOO));

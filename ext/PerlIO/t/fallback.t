@@ -1,0 +1,63 @@
+#!./perl
+
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+    require "../t/test.pl";
+    skip_all("No perlio") unless (find PerlIO::Layer 'perlio');
+    plan (8);
+}
+use Encode qw(:fallback_all);
+
+# $PerlIO::encoding = 0; # WARN_ON_ERR|PERLQQ;
+
+my $file = "fallback$$.txt";
+
+$PerlIO::encoding::fallback = Encode::PERLQQ;
+
+ok(open(my $fh,">encoding(iso-8859-1)",$file),"opened iso-8859-1 file");
+my $str = "\x{20AC}";
+print $fh $str,"0.02\n";
+close($fh);
+
+open($fh,$file) || die "File cannot be re-opened";
+my $line = <$fh>;
+is($line,"\\x{20ac}0.02\n","perlqq escapes");
+close($fh);
+
+$PerlIO::encoding::fallback = Encode::HTMLCREF;
+
+ok(open(my $fh,">encoding(iso-8859-1)",$file),"opened iso-8859-1 file");
+my $str = "\x{20AC}";
+print $fh $str,"0.02\n";
+close($fh);
+
+open($fh,$file) || die "File cannot be re-opened";
+my $line = <$fh>;
+is($line,"&#8364;0.02\n","HTML escapes");
+close($fh);
+
+open($fh,">$file") || die "File cannot be re-opened";
+print $fh "£0.02\n";
+close($fh);
+
+ok(open($fh,"<encoding(US-ASCII)",$file),"Opened as ASCII");
+my $line = <$fh>;
+printf "# %x\n",ord($line);
+is($line,"\\xA30.02\n","Escaped non-mapped char");
+close($fh);
+
+$PerlIO::encoding::fallback = Encode::WARN_ON_ERROR;
+
+ok(open($fh,"<encoding(US-ASCII)",$file),"Opened as ASCII");
+my $line = <$fh>;
+printf "# %x\n",ord($line);
+is($line,"\x{FFFD}0.02\n","Unicode replacement char");
+close($fh);
+
+END {
+    1 while unlink($file);
+}
+
+
+

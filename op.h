@@ -252,7 +252,7 @@ struct pmop {
     REGEXP *    op_pmregexp;            /* compiled expression */
 #endif
     U32		op_pmflags;
-    U16		op_pmpermflags;
+    U32		op_pmpermflags;
     U8		op_pmdynflags;
 #ifdef USE_ITHREADS
     char *	op_pmstashpv;
