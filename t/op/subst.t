@@ -6,7 +6,7 @@ BEGIN {
     require Config; import Config;
 }
 
-print "1..82\n";
+print "1..83\n";
 
 $x = 'foo';
 $_ = "x";
@@ -371,5 +371,8 @@ eval q% s/a/"b"}/e %;
 print ($@ =~ /Bad evalled substitution/ ? "ok 81\n" : "not ok 81\n");
 eval q% ($_ = "x") =~ s/(.)/"$1 "/e %;
 print +($_ eq "x " and !length $@) ? "ok 82\n" : "not ok 82\n# \$_ eq $_, $@\n";
+$x = $x = 'interp';
+eval q% ($_ = "x") =~ s/x(($x)*)/"$1"/e %;
+print +($_ eq '' and !length $@) ? "ok 83\n" : "not ok 83\n# \$_ eq $_, $@\n";
 
 
