@@ -84,7 +84,7 @@ that wish to call methods in the class as part of the construction:
     }
 
 If you care about inheritance (and you should; see
-L<perlmod/"Modules: Creation, Use, and Abuse">),
+L<perlmodlib/"Modules: Creation, Use, and Abuse">),
 then you want to use the two-arg form of bless
 so that your constructors may be inherited:
 

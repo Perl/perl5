@@ -85,7 +85,7 @@ begin with C<perl> be referenced with a C<Perl_> prefix.  The bare function
 names without the C<Perl_> prefix are supported with macros, but this
 support may cease in a future release.
 
-See L<perlguts/API LISTING>.
+See L<perlguts/"API LISTING">.
 
 =item Enabling threads has source compatibility issues
 
@@ -100,7 +100,7 @@ directly accessing perl globals as C<GvSV(errgv)>.  The API call is
 backward compatible with existing perls and provides source compatibility
 with threading is enabled.
 
-See L<API Changes for more information>.
+See L<"C Source Compatibility"> for more information.
 
 =back
 

@@ -822,7 +822,7 @@ an effect on what happens with some perl functions (such as C<chr>,
 C<pack>, C<print>, C<printf>, C<ord>, C<sort>, C<sprintf>, C<unpack>), as
 well as bit-fiddling with ASCII constants using operators like C<^>, C<&>
 and C<|>, not to mention dealing with socket interfaces to ASCII computers
-(see L<"NEWLINES">).
+(see L<Newlines>).
 
 Fortunately, most web servers for the mainframe will correctly translate
 the C<\n> in the following statement to its ASCII equivalent (note that

@@ -199,7 +199,7 @@ pre-defined things are C<BEGIN>, C<END>, C<AUTOLOAD>, and C<DESTROY>--plus all t
 functions mentioned in L<perltie>.  The 5.005 release adds C<INIT>
 to this list.
 
-=head2 Private Variables via C<my()>
+=head2 Private Variables via my()
 
 Synopsis:
 
