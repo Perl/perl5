@@ -643,6 +643,7 @@ lib/Pod/Find.pm		used by pod/splitpod
 lib/Pod/Functions.pm	used by pod/splitpod
 lib/Pod/Html.pm		Convert POD data to HTML
 lib/Pod/InputObjects.pm	Pod-Parser - define objects for input streams
+lib/Pod/LaTeX.pm	Convert POD data to LaTeX
 lib/Pod/Man.pm		Convert POD data to *roff
 lib/Pod/ParseUtils.pm	Pod-Parser - pod utility functions
 lib/Pod/Parser.pm	Pod-Parser - define base class for parsing POD
