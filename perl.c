@@ -3759,7 +3759,7 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	  for (; *env; env++) {
 	    if (!(s = strchr(*env,'=')))
 		continue;
-#if defined(MSDOS)
+#if defined(MSDOS) && !defined(DJGPP)
 	    *s = '\0';
 	    (void)strupr(*env);
 	    *s = '=';
