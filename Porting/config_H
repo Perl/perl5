@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : /m/fs/work/work/permanent/perl/pp4/perl
- * Configuration time: Wed Aug 16 02:27:51 EET DST 2000
+ * Configuration time: Thu Aug 17 02:55:55 EET DST 2000
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -3135,13 +3135,6 @@
  */
 #define PERL_XS_APIVERSION "5.7.0"
 #define PERL_PM_APIVERSION "5.005"
-
-/* PRINTF_EXP_DIGITS:
- *	This symbol's value is either 2 or 3, corresponding to the
- *	number of exponent digits produced by the system's sprintf %[FGfg]
- *	formats when the modulus of the exponent is 99 or less.
- */
-#define PRINTF_EXP_DIGITS 2
 
 /* I_LIBUTIL:
  *	This symbol, if defined, indicates that <libutil.h> exists and

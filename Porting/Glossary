@@ -1118,11 +1118,6 @@ d_PRIi64 (quadfio.U):
 	This variable conditionally defines the PERL_PRIi64 symbol, which
 	indiciates that stdio has a symbol to print 64-bit decimal numbers.
 
-d_printf_exp_digits (d_printfed.U):
-	This symbol's value is either 2 or 3, corresponding to the
-	number of exponent digits produced by the system's sprintf %[FGfg]
-	formats when the modulus of the exponent is 99 or less.
-
 d_PRIo64 (quadfio.U):
 	This variable conditionally defines the PERL_PRIo64 symbol, which
 	indiciates that stdio has a symbol to print 64-bit octal numbers.

@@ -6561,38 +6561,9 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		(void)sprintf(PL_efloatbuf, eptr, nv);
 		RESTORE_NUMERIC_STANDARD();
 	    }
+
 	    eptr = PL_efloatbuf;
 	    elen = strlen(PL_efloatbuf);
-
-#if PRINTF_EXP_DIGITS == 3			/* Shorten exponent */
-	    if (((p = index(eptr, 'e')) || (p = index(eptr, 'E'))) &&
-		(*++p == '+' || *p == '-') &&	/* Is there exponent */
-		*++p == '0') {			/* with leading zero? */
-		DEBUG_c(PerlIO_printf(Perl_debug_log,
-				      ">%s<: '0' at %d from start; "
-				      "elen == %d, width == %d\n",
-				      eptr, p-eptr, elen, width));
-	        Move(p+1, p, 3, char);		/* Suppress leading zero */
-		if (elen == width &&		/* Fix up padding if */
-		    *(p+2) == '\0') {		/* necessary */
-		    if (!left) {
-		        if (fill == '0') {
-			    Move(eptr+1, eptr+2, elen-1, char);
-			    *(eptr+1) = '0';
-			}
-			else {
-			    Move(eptr, eptr+1, elen, char);
-			    *eptr = ' ';
-			}
-		    }
-		    else {
-		        *(p+2) == ' '; *(p+3) = '\0';
-		    }
-		}
-		else if (elen > width)
-		    elen--;		    
-	    }
-# endif
 	    break;
 
 	    /* SPECIAL */
@@ -8374,3 +8345,4 @@ do_clean_all(pTHXo_ SV *sv)
     SvFLAGS(sv) |= SVf_BREAK;
     SvREFCNT_dec(sv);
 }
+

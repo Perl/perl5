@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Aug 16 02:10:47 EET DST 2000 [metaconfig 3.0 PL70]
+# Generated on Thu Aug 17 02:52:39 EET DST 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -455,7 +455,6 @@ d_pause=''
 d_pipe=''
 d_poll=''
 d_portable=''
-d_printf_exp_digits=''
 d_old_pthread_create_joinable=''
 old_pthread_create_joinable=''
 d_pthread_yield=''
@@ -10480,34 +10479,6 @@ eval $inlibc
 set poll d_poll
 eval $inlibc
 
-echo " "
-echo "Checking how many exponent digits your sprintf formats use..."
-$cat >try.c <<'EOSC'
-#include <stdio.h> 
-int main() {
-  char b[10];
-  exit(sprintf(b, "%0.1e", 1.2) - 5);
-}
-EOSC
-set try
-if eval $compile; then
-	./try$_exe
-	case "$?" in
-	2|3)	d_printf_exp_digits=$? ;;
-	esac
-fi
-case "$d_printf_exp_digits" in
-2|3)	echo "Your sprintf seems to use $d_printf_exp_digits exponent digits."
-	;;
-*)	cat <<EOM >&4
-I do not understand what your sprintf is saying.
-I'm guessing it uses at least 2 exponent digits.
-EOM
-	d_printf_exp_digits=2
-	;;
-esac
-$rm -f try try.*
-
 
 : see whether the various POSIXish _yields exist
 $cat >try.c <<EOP
@@ -15571,7 +15542,6 @@ d_phostname='$d_phostname'
 d_pipe='$d_pipe'
 d_poll='$d_poll'
 d_portable='$d_portable'
-d_printf_exp_digits='$d_printf_exp_digits'
 d_pthread_yield='$d_pthread_yield'
 d_pwage='$d_pwage'
 d_pwchange='$d_pwchange'

@@ -3156,13 +3156,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define PERL_XS_APIVERSION "$xs_apiversion"
 #define PERL_PM_APIVERSION "$pm_apiversion"
 
-/* PRINTF_EXP_DIGITS:
- *	This symbol's value is either 2 or 3, corresponding to the
- *	number of exponent digits produced by the system's sprintf %[FGfg]
- *	formats when the modulus of the exponent is 99 or less.
- */
-#define PRINTF_EXP_DIGITS $d_printf_exp_digits
-
 /* I_LIBUTIL:
  *	This symbol, if defined, indicates that <libutil.h> exists and
  *	should be included.
