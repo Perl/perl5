@@ -96,6 +96,7 @@ lt_amg
 markstack
 markstack_max
 markstack_ptr
+maxo
 max_intro_pending
 min_intro_pending
 mod_amg
@@ -179,6 +180,7 @@ rsfp
 rsfp_filters
 rshift_amg
 rshift_ass_amg
+save_pptr
 savestack
 savestack_ix
 savestack_max
