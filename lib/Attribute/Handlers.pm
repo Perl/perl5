@@ -145,11 +145,18 @@ sub _gen_handler_AH_() {
 			    _apply_handler_AH_($decl,$gphase)
 				if $global_phases{$gphase} <= $global_phase;
 			}
-			# if _gen_handler_AH_ is being called after CHECK it's
-			# for a lexical, so we don't want to keep a reference 
-			# around
-			push @declarations, $decl
-				if $global_phase == 0;
+			if ($global_phase != 0) {
+				# if _gen_handler_AH_ is being called after 
+				# CHECK it's for a lexical, so make sure
+				# it didn't want to run anything later
+			
+				local $Carp::CarpLevel = 2;
+				carp "Won't be able to apply END handler"
+					if $phase{$handler}{END};
+			}
+			else {
+				push @declarations, $decl
+			}
 		}
 		$_ = undef;
 	    }
@@ -804,6 +811,12 @@ not declarable) that Perl can tie.
 Something is rotten in the state of the program. An attributed
 subroutine ceased to exist between the point it was declared and the point
 at which its attribute handler(s) would have been called.
+
+=item C<Won't be able to apply END handler>
+
+You have defined an END handler for an attribute that is being applied
+to a lexical variable.  Since the variable may not be available during END
+this won't happen.
 
 =back
 
