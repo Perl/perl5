@@ -32,14 +32,14 @@ package syslog;
 $host = 'localhost' unless $host;	# set $syslog'host to change
 
 if ($] >= 5) {
-    warn "You should 'use Sys::Socket' instead; continuing" # if $^W
+    warn "You should 'use Sys::Syslog' instead; continuing" # if $^W
 } 
 
 require 'syslog.ph';
 
- eval 'require Socket' 		|| 
-eval { require "socket.ph" } 	|| 
-       require "sys/socket.ph";
+ eval 'use Socket' 			||
+     eval { require "socket.ph" } 	||
+     require "sys/socket.ph";
 
 $maskpri = &LOG_UPTO(&LOG_DEBUG);
 
