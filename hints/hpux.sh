@@ -392,12 +392,16 @@ case "$uselargefiles" in
 	# but we cheat for now.
 	ccflags="$ccflags -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
 
-        # The strict ANSI mode (-Aa) doesn't like large files.
-        ccflags=`echo " $ccflags "|sed 's@ -Aa @ @g'`
-        case "$ccflags" in
-        *-Ae*) ;;
-        *) ccflags="$ccflags -Ae" ;;
-        esac
+        case "$ccisgcc" in
+        "$define") ;;
+        *) # The strict ANSI mode (-Aa) doesn't like large files.
+           ccflags=`echo " $ccflags "|sed 's@ -Aa @ @g'`
+           case "$ccflags" in
+           *-Ae*) ;;
+           *) ccflags="$ccflags -Ae" ;;
+           esac
+	   ;;
+	esac
 
 	;;
 esac
