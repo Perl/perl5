@@ -52,7 +52,7 @@ d_csh='undef'
 #
 cc='/bin/cc'
 cccdlflags='-Zpic'
-ccdlflags='-Zlink=dynamic -Wl,-Bexport'
+ccdlflags='-Zlink=dynamic -Wl,-usys_nerr -Wl,-Bexport'
 lddlflags='-Zlink=so'
 
 # Configure sometime finds what it believes to be ndbm header files on the
