@@ -534,6 +534,8 @@ unless ($define{'USE_ITHREADS'}) {
 		    PL_op_mutex
 		    PL_regex_pad
 		    PL_regex_padav
+		    PL_sharedsv_space
+		    PL_sharedsv_space_mutex
 		    Perl_dirp_dup
 		    Perl_cx_dup
 		    Perl_si_dup
