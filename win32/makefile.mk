@@ -1126,6 +1126,7 @@ doc: $(PERLEXE)
 	    --libpod=perlfunc:perlguts:perlvar:perlrun:perlop --recurse
 
 utils: $(PERLEXE) $(X2P)
+[
 	cd ..\utils && $(MAKE) PERL=$(MINIPERL)
 	cd ..\pod
 	copy ..\vms\perlvms.pod	..\pod\perlvms.pod
@@ -1168,7 +1169,8 @@ utils: $(PERLEXE) $(X2P)
 	copy perl583delta.pod perldelta.pod
 	$(MAKE) -f ..\win32\pod.mak converters
 	cd ..\lib && $(PERLEXE) lib_pm.PL
-	$(PERLEXE) $(PL2BAT) $(UTILS)
+	cd ..\win32 &&$(PERLEXE) $(PL2BAT) $(UTILS)
+]
 
 distclean: clean
 	-del /f $(MINIPERL) $(PERLEXE) $(PERLDLL) $(GLOBEXE) \
