@@ -31,6 +31,7 @@ BEGIN {
 		local *DIR;
 		opendir(DIR, File::Spec->curdir());
 		while ($file = readdir(DIR)) {
+			$file =~ s/\.\z// if $^O eq 'VMS';
 			last if $file =~ /^\w/;
 		}
 	}
