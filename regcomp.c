@@ -2045,12 +2045,7 @@ nextchar(void)
 - reg_node - emit a node
 */
 static regnode *			/* Location. */
-#ifdef CAN_PROTOTYPE
 reg_node(U8 op)
-#else
-reg_node(op)
-U8 op;
-#endif
 {
     register regnode *ret;
     register regnode *ptr;
@@ -2078,13 +2073,7 @@ U8 op;
 - reganode - emit a node with an argument
 */
 static regnode *			/* Location. */
-#ifdef CAN_PROTOTYPE
 reganode(U8 op, U32 arg)
-#else
-reganode(op, arg)
-U8 op;
-U32 arg;
-#endif
 {
     register regnode *ret;
     register regnode *ptr;
@@ -2111,15 +2100,8 @@ U32 arg;
 /*
 - regc - emit (if appropriate) a byte of code
 */
-#ifdef CAN_PROTOTYPE
 static void
 regc(U8 b, char* s)
-#else
-static void
-regc(b, s)
-U8 b;
-char *s;
-#endif
 {
     if (!SIZE_ONLY)
 	*s = b;
@@ -2130,15 +2112,8 @@ char *s;
 *
 * Means relocating the operand.
 */
-#ifdef CAN_PROTOTYPE
 static void
 reginsert(U8 op, regnode *opnd)
-#else
-static void
-reginsert(op, opnd)
-U8 op;
-regnode *opnd;
-#endif
 {
     register regnode *src;
     register regnode *dst;

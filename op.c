@@ -148,16 +148,7 @@ pad_allocmy(char *name)
 }
 
 static PADOFFSET
-#ifndef CAN_PROTOTYPE
-pad_findlex(name, newoff, seq, startcv, cx_ix)
-char *name;
-PADOFFSET newoff;
-U32 seq;
-CV* startcv;
-I32 cx_ix;
-#else
 pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix)
-#endif
 {
     dTHR;
     CV *cv;
@@ -401,12 +392,7 @@ pad_alloc(I32 optype, U32 tmptype)
 }
 
 SV *
-#ifndef CAN_PROTOTYPE
-pad_sv(po)
-PADOFFSET po;
-#else
 pad_sv(PADOFFSET po)
-#endif /* CAN_PROTOTYPE */
 {
     dTHR;
 #ifdef USE_THREADS
@@ -422,12 +408,7 @@ pad_sv(PADOFFSET po)
 }
 
 void
-#ifndef CAN_PROTOTYPE
-pad_free(po)
-PADOFFSET po;
-#else
 pad_free(PADOFFSET po)
-#endif /* CAN_PROTOTYPE */
 {
     dTHR;
     if (!curpad)
@@ -450,12 +431,7 @@ pad_free(PADOFFSET po)
 }
 
 void
-#ifndef CAN_PROTOTYPE
-pad_swipe(po)
-PADOFFSET po;
-#else
 pad_swipe(PADOFFSET po)
-#endif /* CAN_PROTOTYPE */
 {
     dTHR;
     if (AvARRAY(comppad) != curpad)
@@ -2926,18 +2902,7 @@ newWHILEOP(I32 flags, I32 debuggable, LOOP *loop, I32 whileline, OP *expr, OP *b
 }
 
 OP *
-#ifndef CAN_PROTOTYPE
-newFOROP(flags,label,forline,sv,expr,block,cont)
-I32 flags;
-char *label;
-line_t forline;
-OP* sv;
-OP* expr;
-OP*block;
-OP*cont;
-#else
 newFOROP(I32 flags,char *label,line_t forline,OP *sv,OP *expr,OP *block,OP *cont)
-#endif /* CAN_PROTOTYPE */
 {
     LOOP *loop;
     OP *wop;

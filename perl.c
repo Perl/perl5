@@ -1755,16 +1755,8 @@ init_main_stash(void)
     sv_setpvn(GvSV(gv_fetchpv("/", TRUE, SVt_PV)), "\n", 1);
 }
 
-#ifdef CAN_PROTOTYPE
 static void
 open_script(char *scriptname, bool dosearch, SV *sv)
-#else
-static void
-open_script(scriptname,dosearch,sv)
-char *scriptname;
-bool dosearch;
-SV *sv;
-#endif
 {
     dTHR;
     char *xfound = Nullch;

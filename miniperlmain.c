@@ -14,14 +14,7 @@ static void xs_init _((void));
 static PerlInterpreter *my_perl;
 
 int
-#ifdef CAN_PROTOTYPE
 main(int argc, char **argv, char **env)
-#else
-main(argc, argv, env)
-int argc;
-char **argv;
-char **env;
-#endif
 {
     int exitstatus;
 

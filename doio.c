@@ -564,13 +564,7 @@ badexit:
 
 /* explicit renamed to avoid C++ conflict    -- kja */
 bool
-#ifndef CAN_PROTOTYPE
-do_close(gv,not_implicit)
-GV *gv;
-bool not_implicit;
-#else
 do_close(GV *gv, bool not_implicit)
-#endif /* CAN_PROTOTYPE */
 {
     bool retval;
     IO *io;
