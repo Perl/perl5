@@ -79,6 +79,153 @@ Version 5.005_62        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  4324] By: gsar                                  on 1999/10/09  19:43:10
+        Log: fix Exporter::export_to_level() documentation
+     Branch: perl
+	   ! lib/Exporter.pm
+____________________________________________________________________________
+[  4323] By: gsar                                  on 1999/10/09  18:48:31
+        Log: don't run END blocks when running under -c switch (older,
+             rarely useful, behavior may still be obtained by putting
+             BEGIN { $^C = 0; exit; } at the end of the script)
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[  4322] By: jhi                                   on 1999/10/09  05:31:26
+        Log: While awaiting a good test program to detect the broken gcc.
+             From: Thomas Conté <tom@fr.uu.net>
+             To: <jhi@iki.fi>
+             Cc: <perl5-porters@perl.org>
+             Subject: Re: [ID 19990825.007] test t/lib/ipc_sysv.t failing under irix 6.4
+             Date: Wed, 6 Oct 1999 19:56:29 +0200
+             Message-ID: <000a01bf1024$1d938f20$252ad0d4@eng.iway.fr>
+     Branch: cfgperl
+	   ! hints/irix_6.sh perl.h
+____________________________________________________________________________
+[  4321] By: gsar                                  on 1999/10/09  00:41:02
+        Log: POPSUB() gave up the refcount to the CV before LEAVE had a chance to
+             clear entries in the CV's pad, leading to coredumps when CV had no
+             other references to it; this is a slightly edited version of the
+             patch suggested by Russel O'Connor <roconnor@world.std.com>
+     Branch: perl
+	   ! cop.h pp_ctl.c pp_hot.c
+____________________________________________________________________________
+[  4320] By: gsar                                  on 1999/10/08  22:50:51
+        Log: revert POP{SUB,LOOP}{1,2} logic to the simpler pre-5.003_24
+             situation (assumptions about cx invalidation are not valid
+             anymore)
+     Branch: perl
+	   ! cop.h pp_ctl.c pp_hot.c
+____________________________________________________________________________
+[  4319] By: jhi                                   on 1999/10/08  14:33:31
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> cop.h ext/Thread/Thread.xs op.c opcode.h perl.c perl.h perly.c
+	  !> perly.y pod/perldiag.pod pod/perlfunc.pod pp_ctl.c pp_sys.c
+	  !> t/comp/bproto.t thrdvar.h toke.c util.c
+____________________________________________________________________________
+[  4318] By: jhi                                   on 1999/10/08  13:51:34
+        Log: The second cut at AIX C++ extension troubles.
+     Branch: cfgperl
+	   ! ext/DynaLoader/dl_aix.xs ext/DynaLoader/hints/aix.pl
+	   ! hints/aix.sh
+____________________________________________________________________________
+[  4317] By: jhi                                   on 1999/10/08  10:44:13
+        Log: The first cut at fixing Perl extensions written in C++ in AIX,
+             statics don't get initialized right.  This patch at least
+             doesn't seem to break the build in my AIX, but unfortunately
+             I don't have the IBM C++ to do further testing.
+             
+             Problem reported by Stephanie Beals in
+             From: bealzy@us.ibm.com
+             To: perl5-porters@perl.org
+             Subject: [ID 19991007.005] DynaLoader/dl_aix.xs problem using load and unload on AIX
+             Date: Thu, 7 Oct 1999 15:05:54 -0400
+             Message-Id: <85256803.0068E70D.00@D51MTA03.pok.ibm.com>
+     Branch: cfgperl
+	   + ext/DynaLoader/hints/aix.pl
+	   ! MANIFEST ext/DynaLoader/dl_aix.xs hints/aix.sh
+____________________________________________________________________________
+[  4316] By: gsar                                  on 1999/10/08  10:26:15
+        Log: remove kludgey duplicate background error avoidance (caused
+             "leaks"; %@ wasn't even user-visible under -Dusethreads);
+             only repeats of most recent error are now avoided
+     Branch: perl
+	   ! ext/Thread/Thread.xs perl.c perl.h pp_ctl.c thrdvar.h util.c
+____________________________________________________________________________
+[  4315] By: jhi                                   on 1999/10/08  09:48:59
+        Log: Fix omission.
+     Branch: cfgperl
+	   ! makedef.pl
+____________________________________________________________________________
+[  4314] By: gsar                                  on 1999/10/08  07:17:01
+        Log: extend change#2299 to C<use> (fixes scoping problems in
+             C<if (...) { use foo; ... }>)
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[  4313] By: gsar                                  on 1999/10/08  04:52:19
+        Log: small tweak for change#4309
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[  4312] By: gsar                                  on 1999/10/08  02:31:13
+        Log: add suggested patch =~ s/NOTOP/OP_NOT/ with tests
+             From: Larry Wall <larry@wall.org>
+             Date: Wed, 6 Oct 1999 09:55:57 -0700 (PDT)
+             Message-Id: <199910061655.JAA11333@kiev.wall.org>
+             Subject: Re: [ID 19991001.004] apparent parsing error with not(arg)
+     Branch: perl
+	   ! opcode.h t/comp/bproto.t toke.c
+____________________________________________________________________________
+[  4311] By: gsar                                  on 1999/10/08  00:58:19
+        Log: typo
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[  4310] By: gsar                                  on 1999/10/07  23:51:38
+        Log: fix setpgrp vs getpgrp and POSIX vs BSD confusion (spotted by
+             Brian Mitchell <brian@chele.cais.net>)
+     Branch: perl
+	   ! pod/perldiag.pod pod/perlfunc.pod pp_sys.c
+____________________________________________________________________________
+[  4309] By: gsar                                  on 1999/10/07  22:57:52
+        Log: change#3728 was flawed (loop contexts saw the wrong statement
+             info, causing loop control constructs to not find the label);
+             disable OP_SETSTATE entirely and add a fix that is specifically
+             targetted at disabling the OP_LINESEQ optimization in else BLOCK,
+             which was what the original patch was supposed to fix
+             
+             TODO: remove the remainder of the setstate logic if it can't
+             be used anywhere else (it isn't used anywhere now)
+     Branch: perl
+	   ! cop.h op.c perly.c perly.y
+____________________________________________________________________________
+[  4308] By: jhi                                   on 1999/10/07  19:21:27
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> lib/Pod/Man.pm lib/Pod/Text.pm pod/pod2man.PL
+____________________________________________________________________________
+[  4307] By: gsar                                  on 1999/10/07  15:12:24
+        Log: update to podlators-0.08 from Russ Allbery
+     Branch: perl
+	   ! lib/Pod/Man.pm lib/Pod/Text.pm pod/pod2man.PL
+____________________________________________________________________________
+[  4306] By: jhi                                   on 1999/10/06  17:20:34
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> (integrate 45 files)
+____________________________________________________________________________
+[  4305] By: gsar                                  on 1999/10/06  16:55:45
+        Log: some versions of mingw32 have __int64, define iff it isn't
+     Branch: perl
+	   ! win32/win32.h
+____________________________________________________________________________
+[  4304] By: gsar                                  on 1999/10/06  03:45:44
+        Log: fix typos in change#4288
+     Branch: perl
+	   ! Changes dump.c sv.c
+____________________________________________________________________________
 [  4303] By: gsar                                  on 1999/10/06  03:22:46
         Log: integrate cfgperl contents into mainline
      Branch: perl
@@ -1528,11 +1675,6 @@ ____________________________________________________________________________
 	   + t/lib/gol-basic.t t/lib/gol-compat.t t/lib/gol-linkage.t
 	   ! Changes MANIFEST lib/Getopt/Long.pm
 ____________________________________________________________________________
-[  4117] By: jhi                                   on 1999/09/09  18:24:30
-        Log: Remove ill-designed %B introduced by change #4111.
-     Branch: cfgperl
-	   ! sv.c t/op/sprintf.t
-____________________________________________________________________________
 [  4116] By: jhi                                   on 1999/09/09  15:56:52
         Log: perldeltify change #4115.
      Branch: cfgperl
@@ -1577,11 +1719,6 @@ ____________________________________________________________________________
              Message-Id: <199909090840.EAA26471@monk.mps.ohio-state.edu>
      Branch: cfgperl
 	   ! regexec.c t/op/pat.t
-____________________________________________________________________________
-[  4111] By: jhi                                   on 1999/09/09  07:50:07
-        Log: %#b in particular and %B in general were kaputt.
-     Branch: cfgperl
-	   ! sv.c t/op/sprintf.t
 ____________________________________________________________________________
 [  4110] By: jhi                                   on 1999/09/09  07:29:17
         Log: Tidy up 64-bit situation in perldelta.
@@ -7664,13 +7801,6 @@ ____________________________________________________________________________
              Subject: Re: Win32::GetTickCount
      Branch: perl
            ! win32/win32.c
-____________________________________________________________________________
-[  3315] By: nick                                  on 1999/05/06  21:44:38
-        Log: open(FH,undef) # creates new_tmpfile opened read/write
-             Add t/io/open.t with test for above.
-     Branch: perl
-           + t/io/open.t
-           ! pp_sys.c
 ____________________________________________________________________________
 [  3314] By: gsar                                  on 1999/05/06  08:01:23
         Log: compiler fixes from Vishal Bhatia <vishalb@hotmail.com>

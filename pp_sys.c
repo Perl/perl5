@@ -532,22 +532,6 @@ PP(pp_open)
     if (GvIOp(gv))
 	IoFLAGS(GvIOp(gv)) &= ~IOf_UNTAINT;
 
-#if 0 /* no undef means tmpfile() yet */
-    if (sv == &PL_sv_undef) {
-#ifdef PerlIO
-	PerlIO *fp = PerlIO_tmpfile();
-#else
-	PerlIO *fp = tmpfile();
-#endif                   
-	if (fp != Nullfp && do_open(gv, "+>&", 3, FALSE, 0, 0, fp)) 
-	    PUSHi( (I32)PL_forkprocess );
-	else
-	    RETPUSHUNDEF;
-	RETURN;
-    }   
-#endif /* no undef means tmpfile() yet */
-
-
     if (mg = SvTIED_mg((SV*)gv, 'q')) {
 	PUSHMARK(SP);
 	XPUSHs(SvTIED_obj((SV*)gv, mg));
