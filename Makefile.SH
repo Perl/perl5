@@ -279,8 +279,8 @@ miniperlmain$(OBJ_EXT): miniperlmain.c
 	$(CCCMD) $(PLDLFLAGS) $*.c
 
 perlmain.c: miniperlmain.c config.sh $(FIRSTMAKEFILE)
-	sh writemain $(DYNALOADER) $(static_ext) > tmp
-	sh mv-if-diff tmp perlmain.c
+	sh writemain $(DYNALOADER) $(static_ext) > writemain.tmp
+	sh mv-if-diff writemain.tmp perlmain.c
 
 perlmain$(OBJ_EXT): perlmain.c
 	$(CCCMD) $(PLDLFLAGS) $*.c
@@ -389,12 +389,12 @@ preplibrary: miniperl lib/Config.pm $(plextract)
 # (If trying to create a new port and having problems with the configpm script, 
 # try 'make minitest' and/or commenting out the tests at the end of configpm.)
 lib/Config.pm: config.sh miniperl configpm
-	$(LDLIBPTH) ./miniperl configpm tmp
-	sh mv-if-diff tmp $@
+	$(LDLIBPTH) ./miniperl configpm configpm.tmp
+	sh mv-if-diff configpm.tmp $@
 
 lib/ExtUtils/Miniperl.pm: miniperlmain.c miniperl minimod.pl lib/Config.pm
-	$(LDLIBPTH) ./miniperl minimod.pl > tmp
-	sh mv-if-diff tmp $@
+	$(LDLIBPTH) ./miniperl minimod.pl > minimod.tmp
+	sh mv-if-diff minimod.tmp $@
 
 lib/re.pm: ext/re/re.pm
 	rm -f $@

@@ -655,7 +655,6 @@ PP(pp_gelem)
 PP(pp_study)
 {
     djSP; dPOPss;
-    register UNOP *unop = cUNOP;
     register unsigned char *s;
     register I32 pos;
     register I32 ch;
