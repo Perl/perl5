@@ -34,6 +34,8 @@ use symbolic references (see L<perlref>).
     print $$ref;	# ok
     $ref = "foo";
     print $$ref;	# runtime error; normally ok
+    $file = "STDOUT";
+    print $file "Hi!";	# error; note: no comma after $file
 
 =item C<strict vars>
 
