@@ -1,3 +1,4 @@
+AUTHORS			Contact info for contributors
 Artistic		The "Artistic License"
 Changes			Differences from previous version
 Changes5.000		Differences between 4.x and 5.000
@@ -11,6 +12,7 @@ Copying			The GNU General Public License
 EXTERN.h		Included before foreign .h files
 INSTALL			Detailed installation instructions
 INTERN.h		Included before domestic .h files
+MAINTAIN		Who maintains which files
 MANIFEST		This list of files
 Makefile.SH		A script that generates Makefile
 objXSUB.h		Scoping macros for Perl Object in extensions
@@ -148,6 +150,7 @@ eg/van/vanish		A program to put files in a trashcan
 eg/who			A sample who program
 eg/wrapsuid		A setuid script wrapper generator
 emacs/cperl-mode.el	An alternate perl-mode
+emacs/e2ctags.pl	etags to ctags converter
 emacs/ptags		Creates smart TAGS file
 embed.h			Maps symbols to safer names
 embed.pl		Produces embed.h
@@ -179,6 +182,7 @@ ext/B/README		Compiler backend README
 ext/B/TESTS		Compiler backend test data
 ext/B/Todo		Compiler backend Todo list
 ext/B/byteperl.c	Bytecode runner
+ext/B/defsubs.h.PL	Generator for constant subroutines
 ext/B/ramblings/cc.notes	Compiler ramblings: notes on CC backend
 ext/B/ramblings/curcop.runtime	Compiler ramblings: notes on curcop use
 ext/B/ramblings/flip-flop	Compiler ramblings: notes on flip-flop
@@ -407,6 +411,7 @@ hints/esix4.sh		Hints for named architecture
 hints/fps.sh		Hints for named architecture
 hints/freebsd.sh	Hints for named architecture
 hints/genix.sh		Hints for named architecture
+hints/gnu.sh		Hints for named architecture
 hints/greenhills.sh	Hints for named architecture
 hints/hpux.sh		Hints for named architecture
 hints/i386.sh		Hints for named architecture
@@ -1047,6 +1052,8 @@ t/lib/abbrev.t		See if Text::Abbrev works
 t/lib/anydbm.t		See if AnyDBM_File works
 t/lib/autoloader.t	See if AutoLoader works
 t/lib/basename.t	See if File::Basename works
+t/lib/bigfloat.t	See if bigfloat.pl works
+t/lib/bigfloatpm.t	See if BigFloat.pm works
 t/lib/bigint.t		See if bigint.pl works
 t/lib/bigintpm.t	See if BigInt.pm works
 t/lib/cgi-form.t	See if CGI.pm works
