@@ -15,7 +15,7 @@ require DynaLoader;
 		 d_usleep d_ualarm d_gettimeofday d_getitimer d_setitimer
 		 d_nanosleep);
 	
-$VERSION = '1.61';
+$VERSION = '1.63';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -113,8 +113,8 @@ C<nanosleep()>; just use C<Time::HiRes::sleep()> or
 C<Time::HiRes::usleep()> with small enough values.)
 
 Unless using C<nanosleep> for mixing sleeping with signals, give
-some thought to whether Perl is the tool you should be using for work
-requiring nanosecond accuracies.
+some thought to whether Perl is the tool you should be using for
+work requiring nanosecond accuracies.
 
 The following functions can be imported from this module.
 No functions are exported by default.

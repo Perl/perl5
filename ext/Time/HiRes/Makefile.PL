@@ -439,7 +439,8 @@ sub doConstants {
 					   NAMES => \@names,
 					  );
     } else {
-	foreach my $file ('const-c.inc', 'const-xs.inc') {
+        my $file;
+	foreach $file ('const-c.inc', 'const-xs.inc') {
 	    my $fallback = File::Spec->catfile('fallback', $file);
 	    local $/;
 	    open IN, "<$fallback" or die "Can't open $fallback: $!";
@@ -453,6 +454,9 @@ sub doConstants {
 
 sub main {
     print "Configuring Time::HiRes...\n";
+    if ($] == 5.007002) {
+	die "Cannot Configure Time::HiRes for Perl $], aborting.\n";
+    }
 
     if ($^O =~ /Win32/i) {
       $DEFINE = '-DSELECT_IS_BROKEN';
@@ -463,14 +467,14 @@ sub main {
     doMakefile;
     doConstants;
     my $make = $Config{'make'} || "make";
-    unless ($ENV{PERL_CORE}) {
+    unless (exists $ENV{PERL_CORE} && $ENV{PERL_CORE}) {
 	print  <<EOM;
 Now you may issue '$make'.  Do not forget also '$make test'.
 
 EOM
-       if ($ENV{LC_ALL}   =~ /utf-?8/i ||
-           $ENV{LC_CTYPE} =~ /utf-?8/i ||
-           $ENV{LANG}     =~ /utf-?8/i) {
+       if ((exists $ENV{LC_ALL}   && $ENV{LC_ALL}   =~ /utf-?8/i) ||
+           (exists $ENV{LC_CTYPE} && $ENV{LC_CTYPE} =~ /utf-?8/i) ||
+           (exists $ENV{LANG}     && $ENV{LANG}     =~ /utf-?8/i)) {
             print  <<EOM;
 NOTE: if you get an error like this (the line number may vary):
 Makefile:91: *** missing separator
