@@ -103,6 +103,81 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6995] By: jhi                                   on 2000/09/01  21:14:24
+        Log: Mi splgn s gnin.g
+     Branch: perl
+	   ! pp_ctl.c
+____________________________________________________________________________
+[  6994] By: jhi                                   on 2000/09/01  21:09:54
+        Log: Subject: http:// in L<>
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Fri, 1 Sep 2000 22:03:21 +0100
+             Message-ID: <20000901220321.B72074@plum.flirble.org>
+     Branch: perl
+	   ! README.os2 pod/perl56delta.pod pod/perlxs.pod
+____________________________________________________________________________
+[  6993] By: jhi                                   on 2000/09/01  21:06:54
+        Log: Update to Storable 1.0, from Raphael Manfredi.
+     Branch: perl
+	   ! ext/Storable/ChangeLog ext/Storable/MANIFEST
+	   ! ext/Storable/Makefile.PL ext/Storable/README
+	   ! ext/Storable/Storable.pm ext/Storable/Storable.xs
+	   ! t/lib/st-06compat.t t/lib/st-blessed.t t/lib/st-canonical.t
+	   ! t/lib/st-dclone.t t/lib/st-dump.pl t/lib/st-forgive.t
+	   ! t/lib/st-freeze.t t/lib/st-overload.t t/lib/st-recurse.t
+	   ! t/lib/st-retrieve.t t/lib/st-store.t t/lib/st-tied.t
+	   ! t/lib/st-tiedhook.t t/lib/st-tieditems.t
+____________________________________________________________________________
+[  6992] By: jhi                                   on 2000/09/01  20:43:05
+        Log: Mention known sfio+linux buglet.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  6991] By: jhi                                   on 2000/09/01  20:40:11
+        Log: Subject: Re: [PATCH perl@6962] 2 more vms.c fix-ups and status
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Fri, 1 Sep 2000 12:03:38 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10009011140240.147696-100000@aspara.forte.com>
+     Branch: perl
+	   ! vms/vms.c
+____________________________________________________________________________
+[  6990] By: jhi                                   on 2000/09/01  20:25:26
+        Log: Retract #6986.
+     Branch: perl
+	   ! hints/solaris_2.sh
+____________________________________________________________________________
+[  6989] By: jhi                                   on 2000/09/01  20:23:00
+        Log: Mergesort is back.
+     Branch: perl
+	   ! pod/perldelta.pod pod/perltoc.pod pp_ctl.c
+____________________________________________________________________________
+[  6988] By: jhi                                   on 2000/09/01  19:37:40
+        Log: Subject: [PATCH] Fix vec() / utf8   (was Re: bitvec ops still broken with utf8 -- or not?)
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Fri, 01 Sep 2000 17:43:33 +0100
+             Message-Id: <E13Utuf-0004Bw-00@draco.cus.cam.ac.uk>
+     Branch: perl
+	   ! doop.c embed.pl perlapi.c pod/perlapi.pod pod/perldiag.pod
+	   ! pod/perlfunc.pod proto.h t/op/vec.t utf8.c
+____________________________________________________________________________
+[  6987] By: jhi                                   on 2000/09/01  19:17:10
+        Log: Regen perltoc.
+     Branch: perl
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[  6986] By: jhi                                   on 2000/09/01  18:51:10
+        Log: Subject: Re: Solaris x86 has no SPARC libraries!
+             From: Lupe Christoph <lupe@lupe-christoph.de>
+             Date: Fri, 1 Sep 2000 20:41:20 +0200
+             Message-ID: <20000901204120.P13547@alanya.lupe-christoph.de>
+     Branch: perl
+	   ! hints/solaris_2.sh
+____________________________________________________________________________
+[  6985] By: jhi                                   on 2000/09/01  18:28:10
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  6984] By: jhi                                   on 2000/09/01  18:26:53
         Log: Feature ordering tweak.
      Branch: perl
