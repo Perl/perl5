@@ -415,7 +415,8 @@ sub death_trap {
     if (caller eq $WHOAMI) { print STDERR "INTERNAL EXCEPTION: $exception"; } 
     &$olddie if defined $olddie and $olddie and $olddie ne \&death_trap;
     $SIG{__DIE__} = $SIG{__WARN__} = '';
-    confess "Uncaught exception from user code:\n\t$exception    Bailing out";
+    local($Carp::CarpLevel) = 1;
+    confess "Uncaught exception from user code:\n\t$exception";
 	# up we go; where we stop, nobody knows, but i think we die now
 	# but i'm deeply afraid of the &$olddie guy reraising and us getting
 	# into an indirect recursion loop
