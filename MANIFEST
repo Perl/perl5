@@ -477,6 +477,7 @@ ext/List/Util/README		Util extension
 ext/List/Util/t/blessed.t	Scalar::Util
 ext/List/Util/t/dualvar.t	Scalar::Util
 ext/List/Util/t/first.t		List::Util
+ext/List/Util/t/isvstring.t	Scalar::Util
 ext/List/Util/t/max.t		List::Util
 ext/List/Util/t/maxstr.t	List::Util
 ext/List/Util/t/min.t		List::Util
@@ -484,6 +485,7 @@ ext/List/Util/t/minstr.t	List::Util
 ext/List/Util/t/openhan.t	Scalar::Util
 ext/List/Util/t/readonly.t	Scalar::Util
 ext/List/Util/t/reduce.t	List::Util
+ext/List/Util/t/refaddr.t	Scalar::Util
 ext/List/Util/t/reftype.t	Scalar::Util
 ext/List/Util/t/shuffle.t	List::Util
 ext/List/Util/t/sum.t		List::Util
