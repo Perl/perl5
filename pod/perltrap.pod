@@ -1344,13 +1344,12 @@ within certain expressions, statements, contexts, or whatever.
 
 =item * Interpolation
 
-Double-quoted strings may no longer end with an unescaped $ or @.
+Double-quoted strings may no longer end with an unescaped $.
 
     $foo = "foo$";
-    $bar = "bar@";
-    print "foo is $foo, bar is $bar\n";
+    print "foo is $foo\n";
 
-    # perl4 prints: foo is foo$, bar is bar@
+    # perl4 prints: foo is foo$
     # perl5 errors: Final $ should be \$ or $name
 
 Note: perl5 DOES NOT error on the terminating @ in $bar
