@@ -29,7 +29,6 @@ eq_amg
 exp_amg
 expectterm
 fallback_amg
-find_threadsv
 fold
 fold_locale
 freq
@@ -306,6 +305,7 @@ fetch_io
 filter_add
 filter_del
 filter_read
+find_threadsv
 fold_constants
 force_ident
 force_list
