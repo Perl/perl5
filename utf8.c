@@ -1325,15 +1325,23 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *norma
 			U8 tmpbuf[UTF8_MAXLEN_FOLD+1];
 			U8 *d = tmpbuf;
 			U8 *t, *tend;
-			STRLEN tlen;
 			
-			for (t = ustrp, tend = t + len; t < tend; t += tlen) {
-			     UV c = utf8_to_uvchr(t, &tlen);
-			     
-			     if (tlen > 0)
-				  d = uvchr_to_utf8(d, UNI_TO_NATIVE(c));
-			     else
-				  break;
+			if (SvUTF8(val)) {
+			     STRLEN tlen = 0;
+
+			     for (t = ustrp, tend = t + len;
+				  t < tend; t += tlen) {
+				  UV c = utf8_to_uvchr(t, &tlen);
+				  
+				  if (tlen > 0)
+				       d = uvchr_to_utf8(d, UNI_TO_NATIVE(c));
+				  else
+				       break;
+			     }
+			} else {
+			     for (t = ustrp, tend = t + len;
+				  t < tend; t++)
+				  d = uvchr_to_utf8(d, UNI_TO_NATIVE(*t));
 			}
 			len = d - tmpbuf; 
 			Copy(tmpbuf, ustrp, len, U8);
@@ -1341,15 +1349,10 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *norma
 #endif
 	      }
 	      else {
-		   U8 c = UNI_TO_NATIVE(*s);
+		   UV  c = UNI_TO_NATIVE(*(U8*)s);
+		   U8 *d = uvchr_to_utf8(ustrp, c);
 
-		   if (NATIVE_IS_INVARIANT(c))
-			ustrp[0] = c;
-		   else {
-			ustrp[0] = UTF8_EIGHT_BIT_HI(c);
-			ustrp[1] = UTF8_EIGHT_BIT_LO(c);
-			len = 2;
-		   }
+		   len = d - ustrp;
 	      }
 	      if (lenp)
 		   *lenp = len;
