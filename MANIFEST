@@ -279,6 +279,7 @@ ext/Encode/Encode/jis0201.enc		Encoding tables
 ext/Encode/Encode/jis0208.enc		Encoding tables
 ext/Encode/Encode/jis0212.enc		Encoding tables
 ext/Encode/Encode/koi8-r.enc		Encoding tables
+ext/Encode/Encode/koi8-r.ucm		Encoding tables
 ext/Encode/Encode/ksc5601.enc		Encoding tables
 ext/Encode/Encode/macCentEuro.enc	Encoding tables
 ext/Encode/Encode/macCroatian.enc	Encoding tables
