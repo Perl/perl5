@@ -58,6 +58,8 @@
 # and it is called GEM. Many of the options we are going to use depend
 # on the compiler style.
 
+cc=${cc:-cc}
+
 # do NOT, I repeat, *NOT* take away the leading tabs
 # Configure Black Magic (TM)
 	# reset
