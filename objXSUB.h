@@ -795,6 +795,10 @@
 #define Perl_leave_scope	pPerl->Perl_leave_scope
 #undef  leave_scope
 #define leave_scope		Perl_leave_scope
+#undef  Perl_op_null
+#define Perl_op_null		pPerl->Perl_op_null
+#undef  op_null
+#define op_null			Perl_op_null
 #undef  Perl_load_module
 #define Perl_load_module	pPerl->Perl_load_module
 #undef  load_module
@@ -2359,15 +2363,19 @@
 #  endif
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_DECL_PROT)
+#  ifdef DEBUGGING
+#  endif
 #endif
 #if defined(PERL_IN_REGEXEC_C) || defined(PERL_DECL_PROT)
 #endif
 #if defined(PERL_IN_RUN_C) || defined(PERL_DECL_PROT)
+#   ifdef DEBUGGING
+#   endif
 #endif
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
 #endif
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
-#  if defined(DEBUGGING)
+#  ifdef DEBUGGING
 #  endif
 #  if !defined(NV_PRESERVES_UV)
 #  endif
@@ -2375,6 +2383,8 @@
 #  endif
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
+#  if defined(DEBUGGING)
+#  endif
 #if 0
 #endif
 #  if defined(CRIPPLED_CC)
