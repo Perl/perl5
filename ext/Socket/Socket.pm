@@ -1,7 +1,7 @@
 package Socket;
 
 our($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
-$VERSION = "1.74";
+$VERSION = "1.75";
 
 =head1 NAME
 
@@ -60,30 +60,30 @@ In addition, some structure manipulation functions are available:
 
 =item inet_aton HOSTNAME
 
-Takes a string giving the name of a host, and translates that
-to an opaque string (struct in_adrr). Takes arguments of both
-the 'rtfm.mit.edu' type and '18.181.0.24'. If the host name
-cannot be resolved, returns undef. For multi-homed hosts (hosts
-with more than one address), the first address found is returned.
+Takes a string giving the name of a host, and translates that to an
+opaque string (if programming in C, struct in_addr). Takes arguments
+of both the 'rtfm.mit.edu' type and '18.181.0.24'. If the host name
+cannot be resolved, returns undef.  For multi-homed hosts (hosts with
+more than one address), the first address found is returned.
 
 For portability do not assume that the result of inet_aton() is 32
-bits wide, that it would contain only the IPv4 address in network
-order.
+bits wide, in other words, that it would contain only the IPv4 address
+in network order.
 
 =item inet_ntoa IP_ADDRESS
 
-Takes a string (an opaque string as returned by inet_aton(), or
-a v-string representing the four octets of the IPv4 address in
+Takes a string (an opaque string as returned by inet_aton(),
+or a v-string representing the four octets of the IPv4 address in
 network order) and translates it into a string of the form 'd.d.d.d'
-where the 'd's are numbers less than 256 (the normal readable four
-dotted number notation for internet addresses).
+where the 'd's are numbers less than 256 (the normal human-readable
+four dotted number notation for Internet addresses).
 
 =item INADDR_ANY
 
 Note: does not return a number, but a packed string.
 
 Returns the 4-byte wildcard ip address which specifies any
-of the hosts ip addresses. (A particular machine can have
+of the hosts ip addresses.  (A particular machine can have
 more than one ip address, each address corresponding to
 a particular network interface. This wildcard address
 allows you to bind to all of them simultaneously.)
@@ -102,14 +102,14 @@ Normally equivalent to inet_aton('255.255.255.255').
 
 Note - does not return a number.
 
-Returns the 4-byte loopback address. Normally equivalent
+Returns the 4-byte loopback address.  Normally equivalent
 to inet_aton('localhost').
 
 =item INADDR_NONE
 
 Note - does not return a number.
 
-Returns the 4-byte 'invalid' ip address. Normally equivalent
+Returns the 4-byte 'invalid' ip address.  Normally equivalent
 to inet_aton('255.255.255.255').
 
 =item sockaddr_in PORT, ADDRESS
@@ -123,18 +123,20 @@ use pack_sockaddr_in() and unpack_sockaddr_in() explicitly.
 
 =item pack_sockaddr_in PORT, IP_ADDRESS
 
-Takes two arguments, a port number and a 4 byte IP_ADDRESS (as returned by
-inet_aton()). Returns the sockaddr_in structure with those arguments
-packed in with AF_INET filled in.  For internet domain sockets, this
-structure is normally what you need for the arguments in bind(),
-connect(), and send(), and is also returned by getpeername(),
-getsockname() and recv().
+Takes two arguments, a port number and an opaque string, IP_ADDRESS
+(as returned by inet_aton(), or a v-string).  Returns the sockaddr_in
+structure with those arguments packed in with AF_INET filled in.  For
+Internet domain sockets, this structure is normally what you need for
+the arguments in bind(), connect(), and send(), and is also returned
+by getpeername(), getsockname() and recv().
 
 =item unpack_sockaddr_in SOCKADDR_IN
 
 Takes a sockaddr_in structure (as returned by pack_sockaddr_in()) and
-returns an array of two elements: the port and the 4-byte ip-address.
-Will croak if the structure does not have AF_INET in the right place.
+returns an array of two elements: the port and an opaque string
+representing the IP address (you can use inet_ntoa() to convert the
+address to the four-dotted numeric format).  Will croak if the
+structure does not have AF_INET in the right place.
 
 =item sockaddr_un PATHNAME
 
