@@ -670,7 +670,7 @@ C</o> constitutes a promise that you won't change the variables in the pattern.
 If you change them, Perl won't even notice.
 
 If the PATTERN evaluates to a null string, the last
-successfully executed regular expression is used instead.
+successfully matched regular expression is used instead.
 
 If used in a context that requires a list value, a pattern match returns a
 list consisting of the subexpressions matched by the parentheses in the
