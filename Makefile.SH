@@ -394,7 +394,7 @@ d_dummy $(dynamic_ext):	miniperl preplibrary $(DYNALOADER) FORCE
 s_dummy $(static_ext):	miniperl preplibrary $(DYNALOADER) FORCE
 	@sh ext/util/make_ext static $@ LIBPERL_A=$(LIBPERL)
 
-clean:		_tidy _mopop
+clean:		_tidy _mopup
 
 realclean:	_cleaner _mopup
 	@echo "Note that make realclean does not delete config.sh"
