@@ -204,7 +204,9 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #endif
 
 #if defined(__STRICT_ANSI__) && defined(PERL_GCC_PEDANTIC)
-#   define PERL_GCC_BRACE_GROUPS_FORBIDDEN
+#  if !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+#    define PERL_GCC_BRACE_GROUPS_FORBIDDEN
+#  endif
 #endif
 
 /*
