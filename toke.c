@@ -2857,8 +2857,8 @@ yylex(void)
 		gv = Nullgv;
 		gvp = 0;
 		if (PL_dowarn && hgv)
-		    warn("Ambiguous call resolved as CORE::%s(), "
-			 "qualify as such or use &", GvENAME(hgv));
+		    warn("Ambiguous call resolved as CORE::%s(), %s"
+			 GvENAME(hgv), "qualify as such or use &");
 	    }
 	}
 

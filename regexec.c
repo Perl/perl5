@@ -1188,8 +1188,9 @@ regmatch(regnode *prog)
 			if (PL_dowarn && n >= REG_INFTY 
 			    && !(PL_reg_flags & RF_warned)) {
 			    PL_reg_flags |= RF_warned;
-			    warn("Complex regular subexpression recursion "
-				 "limit (%d) exceeded", REG_INFTY - 1);
+			    warn("%s limit (%d) exceeded",
+				 "Complex regular subexpression recursion",
+				 REG_INFTY - 1);
 			}
 			sayNO;
 		    }
