@@ -267,6 +267,12 @@ syntax.  An optional warning is generated ("Illegal character in
 prototype...")  but this may be upgraded to a fatal error in a future
 release.
 
+=item *
+
+The existing behaviour when localising tied arrays and hashes is wrong,
+and will be changed in a future release, so do not rely on the existing
+behaviour. See L<"Localising Tied Arrays and Hashes Is Broken">.
+
 =back
 
 =head1 Core Enhancements
@@ -2005,8 +2011,8 @@ exist, if that's what they were.
 
     { local $tied_hash{FOO} = 'Bar' }
     
-    # Here the FOO element would have been C<undef>,
-    # but no more so. 
+    # This used to print, but not now.
+    print "exists!\n" if exists $tied_hash{FOO};
 
 As a side effect of this fix, tied hash interfaces B<must> define
 the EXISTS and DELETE methods.
@@ -3025,8 +3031,15 @@ ability to build extensions, and that seems to be working reasonably well.)
 
     local %tied_array;
 
-doesn't work as one would expect: the old value is restored
-incorrectly.
+doesn't work as one would expect: the old value is restored incorrectly.
+This will be fixed in a future release, but note that doing so will break
+existing code that relies on the broken semantics. It is important
+that you check and alter any such code now.  In the future release,
+localising a tied array or hash will convert that variable into a new,
+empty, and B<untied> array or hash. At the end of the block, the variable
+will be repointed at the original tied thinggy. Note that no tied methods
+will be called at any point during this process. (With the existing
+behaviour, the variable remains tied while localised.)
 
 =head2 Self-tying of Arrays and Hashes Is Forbidden
 
