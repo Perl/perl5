@@ -1800,6 +1800,7 @@ s	|OP*	|no_fh_allowed	|OP *o
 s	|OP*	|scalarboolean	|OP *o
 s	|OP*	|too_few_arguments|OP *o|char* name
 s	|OP*	|too_many_arguments|OP *o|char* name
+s	|void	|op_clear	|OP* o
 s	|void	|null		|OP* o
 s	|PADOFFSET|pad_findlex	|char* name|PADOFFSET newoff|U32 seq \
 				|CV* startcv|I32 cx_ix|I32 saweval|U32 flags

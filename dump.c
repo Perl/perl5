@@ -391,7 +391,7 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
     else
 	PerlIO_printf(file, "DONE\n");
     if (o->op_targ) {
-	if (o->op_type == OP_NULL || o->op_type == OP_SETSTATE)
+	if (o->op_type == OP_NULL)
 	    Perl_dump_indent(aTHX_ level, file, "  (was %s)\n", PL_op_name[o->op_targ]);
 	else
 	    Perl_dump_indent(aTHX_ level, file, "TARG = %d\n", o->op_targ);

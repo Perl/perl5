@@ -648,6 +648,7 @@ void
 Perl_op_free(pTHX_ OP *o)
 {
     register OP *kid, *nextkid;
+    OPCODE type;
 
     if (!o || o->op_seq == (U16)-1)
 	return;
@@ -658,22 +659,42 @@ Perl_op_free(pTHX_ OP *o)
 	    op_free(kid);
 	}
     }
+    type = o->op_type;
+    if (type == OP_NULL)
+	type = o->op_targ;
 
+    /* COP* is not cleared by op_clear() so that we may track line
+     * numbers etc even after null() */
+    if (type == OP_NEXTSTATE || type == OP_SETSTATE || type == OP_DBSTATE)
+	cop_free((COP*)o);
+
+    op_clear(o);
+
+#ifdef PL_OP_SLAB_ALLOC
+    if ((char *) o == PL_OpPtr)
+     {
+     }
+#else
+    Safefree(o);
+#endif
+}
+
+STATIC void
+S_op_clear(pTHX_ OP *o)
+{
     switch (o->op_type) {
-    case OP_NULL:
-	o->op_targ = 0;	/* Was holding old type, if any. */
-	break;
-    case OP_ENTEREVAL:
-	o->op_targ = 0;	/* Was holding hints. */
+    case OP_NULL:	/* Was holding old type, if any. */
+    case OP_ENTEREVAL:	/* Was holding hints. */
+#ifdef USE_THREADS
+    case OP_THREADSV:	/* Was holding index into thr->threadsv AV. */
+#endif
+	o->op_targ = 0;
 	break;
 #ifdef USE_THREADS
     case OP_ENTERITER:
 	if (!(o->op_flags & OPf_SPECIAL))
 	    break;
 	/* FALL THROUGH */
-    case OP_THREADSV:
-	o->op_targ = 0;	/* Was holding index into thr->threadsv AV. */
-	break;
 #endif /* USE_THREADS */
     default:
 	if (!(o->op_flags & OPf_REF)
@@ -684,16 +705,11 @@ Perl_op_free(pTHX_ OP *o)
     case OP_GV:
     case OP_AELEMFAST:
 	SvREFCNT_dec(cGVOPo->op_gv);
-	break;
-    case OP_SETSTATE:
-	o->op_targ = 0;	/* Was holding old type. */
-	/* FALL THROUGH */
-    case OP_NEXTSTATE:
-    case OP_DBSTATE:
-	cop_free((COP*)o);
+	cGVOPo->op_gv = Nullgv;
 	break;
     case OP_CONST:
 	SvREFCNT_dec(cSVOPo->op_sv);
+	cSVOPo->op_sv = Nullsv;
 	break;
     case OP_GOTO:
     case OP_NEXT:
@@ -703,31 +719,29 @@ Perl_op_free(pTHX_ OP *o)
 	    break;
 	/* FALL THROUGH */
     case OP_TRANS:
-	if (o->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF))
+	if (o->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF)) {
 	    SvREFCNT_dec(cSVOPo->op_sv);
-	else
+	    cSVOPo->op_sv = Nullsv;
+	}
+	else {
 	    Safefree(cPVOPo->op_pv);
+	    cPVOPo->op_pv = Nullch;
+	}
 	break;
     case OP_SUBST:
 	op_free(cPMOPo->op_pmreplroot);
+	cPMOPo->op_pmreplroot = Nullop;
 	/* FALL THROUGH */
     case OP_PUSHRE:
     case OP_MATCH:
     case OP_QR:
 	ReREFCNT_dec(cPMOPo->op_pmregexp);
+	cPMOPo->op_pmregexp = (REGEXP*)NULL;
 	break;
     }
 
     if (o->op_targ > 0)
 	pad_free(o->op_targ);
-
-#ifdef PL_OP_SLAB_ALLOC
-    if ((char *) o == PL_OpPtr)
-     {
-     }
-#else
-    Safefree(o);
-#endif
 }
 
 STATIC void
@@ -742,10 +756,9 @@ S_cop_free(pTHX_ COP* cop)
 STATIC void
 S_null(pTHX_ OP *o)
 {
-    if (o->op_type == OP_NEXTSTATE || o->op_type == OP_DBSTATE)
-	cop_free((COP*)o);
-    if (o->op_type != OP_NULL && o->op_type != OP_THREADSV && o->op_targ > 0)
-	pad_free(o->op_targ);
+    if (o->op_type == OP_NULL)
+	return;
+    op_clear(o);
     o->op_targ = o->op_type;
     o->op_type = OP_NULL;
     o->op_ppaddr = PL_ppaddr[OP_NULL];
@@ -886,9 +899,12 @@ Perl_scalarvoid(pTHX_ OP *o)
     SV* sv;
     U8 want;
 
-    if (o->op_type == OP_NEXTSTATE || o->op_type == OP_DBSTATE ||
-	(o->op_type == OP_NULL &&
-	 (o->op_targ == OP_NEXTSTATE || o->op_targ == OP_DBSTATE)))
+    if (o->op_type == OP_NEXTSTATE
+	|| o->op_type == OP_SETSTATE
+	|| o->op_type == OP_DBSTATE
+	|| (o->op_type == OP_NULL && (o->op_targ == OP_NEXTSTATE
+				      || o->op_targ == OP_SETSTATE
+				      || o->op_targ == OP_DBSTATE)))
     {
 	dTHR;
 	PL_curcop = (COP*)o;		/* for warning below */
@@ -1018,8 +1034,7 @@ Perl_scalarvoid(pTHX_ OP *o)
 		}
 	    }
 	}
-	null(o);		/* don't execute a constant */
-	SvREFCNT_dec(sv);	/* don't even remember it */
+	null(o);		/* don't execute or even remember it */
 	break;
 
     case OP_POSTINC:
@@ -1690,9 +1705,6 @@ Perl_scope(pTHX_ OP *o)
 		o->op_ppaddr = PL_ppaddr[OP_SCOPE];
 		kid = ((LISTOP*)o)->op_first;
 		if (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE){
-		    if (kid->op_targ > 0)
-			pad_free(kid->op_targ);
-		    kid->op_targ = kid->op_type;
 		    kid->op_type = OP_SETSTATE;
 		    kid->op_ppaddr = PL_ppaddr[OP_SETSTATE];
 		}
@@ -3890,7 +3902,7 @@ Perl_op_const_sv(pTHX_ OP *o, CV *cv)
     for (; o; o = o->op_next) {
 	OPCODE type = o->op_type;
 
-	if(sv && o->op_next == o) 
+	if (sv && o->op_next == o) 
 	    return sv;
 	if (type == OP_NEXTSTATE || type == OP_NULL || type == OP_PUSHMARK)
 	    continue;
@@ -5653,6 +5665,7 @@ Perl_peep(pTHX_ register OP *o)
 	    PL_op_seqmax++;
 	PL_op = o;
 	switch (o->op_type) {
+	case OP_SETSTATE:
 	case OP_NEXTSTATE:
 	case OP_DBSTATE:
 	    PL_curcop = ((COP*)o);		/* for warnings */
@@ -5701,8 +5714,12 @@ Perl_peep(pTHX_ register OP *o)
 	    }
 	    goto nothin;
 	case OP_NULL:
-	    if (o->op_targ == OP_NEXTSTATE || o->op_targ == OP_DBSTATE)
+	    if (o->op_targ == OP_NEXTSTATE
+		|| o->op_targ == OP_DBSTATE
+		|| o->op_targ == OP_SETSTATE)
+	    {
 		PL_curcop = ((COP*)o);
+	    }
 	    goto nothin;
 	case OP_SCALAR:
 	case OP_LINESEQ:
@@ -5737,7 +5754,6 @@ Perl_peep(pTHX_ register OP *o)
 				<= 255 &&
 		    i >= 0)
 		{
-		    SvREFCNT_dec(((SVOP*)pop)->op_sv);
 		    null(o->op_next);
 		    null(pop->op_next);
 		    null(pop);
