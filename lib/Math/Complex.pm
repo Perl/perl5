@@ -5,17 +5,31 @@
 # -- Daniel S. Lewart	Since Sep 1997
 #
 
-require Exporter;
 package Math::Complex;
 
-use 5.005_64;
+$VERSION = "1.30";
+
+our($VERSION, @ISA, @EXPORT, %EXPORT_TAGS, $Inf);
+
+BEGIN {
+    eval { require POSIX; import POSIX 'HUGE_VAL' };
+    if (defined &HUGE_VAL) {
+	$Inf = sprintf "%g", &HUGE_VAL;
+    } else {	
+	my $e = $!;
+	$Inf = CORE::exp(CORE::exp(30));
+	$! = $e; # Clear ERANGE.
+	undef $Inf unless $Inf =~ /^inf$/; # Inf INF inf
+    }
+    $Inf = "Inf" if !defined $Inf || !($Inf > 0);
+}
+
 use strict;
 
-our($VERSION, @ISA, @EXPORT, %EXPORT_TAGS);
+my $i;
+my %LOGN;
 
-my ( $i, %logn );
-
-$VERSION = sprintf("%s", q$Id: Complex.pm,v 1.26 1998/11/01 00:00:00 dsl Exp $ =~ /(\d+\.\d+)/);
+require Exporter;
 
 @ISA = qw(Exporter);
 
@@ -67,16 +81,9 @@ use overload
 # Package "privates"
 #
 
-my $package        = 'Math::Complex';	# Package name
 my %DISPLAY_FORMAT = ('style' => 'cartesian',
 		      'polar_pretty_print' => 1);
 my $eps            = 1e-14;		# Epsilon
-
-my $Inf;
-unless ($^O eq 'unicos') { # Unicos gets a fatal runtime error
-    $Inf = CORE::exp(CORE::exp(30));
-}
-$Inf = "Inf" if !defined $Inf || !$Inf > 0;
 
 #
 # Object attributes (internal):
@@ -762,8 +769,8 @@ sub log10 {
 sub logn {
 	my ($z, $n) = @_;
 	$z = cplx($z, 0) unless ref $z;
-	my $logn = $logn{$n};
-	$logn = $logn{$n} = CORE::log($n) unless defined $logn;	# Cache log(n)
+	my $logn = $LOGN{$n};
+	$logn = $LOGN{$n} = CORE::log($n) unless defined $logn;	# Cache log(n)
 	return &log($z) / $logn;
 }
 
