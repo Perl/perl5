@@ -78,6 +78,26 @@ Version 5.005_04-tobe        Fourth maintenance release of 5.005
 ----------------
 
 ____________________________________________________________________________
+[ 22065] By: acme                                  on 2004/01/05  21:33:04
+        Log: Work around bug where Linux libc's have Berekeley DB 2 in them
+             Patch by Paul Marquess <Paul.Marquess@btinternet.com>,
+             DB_File's maintainer. His description:
+             
+             The patch is to work around a problem where some versions of
+             Linux have a C library with Berkeley DB version 2 embedded in
+             it. This makes life difficult if you want to build with a
+             version of Berkeley DB other than the one embedded in
+             libc. This problem is compounded by the way Perl used to
+             *always* include the Berkeley DB library when it was being
+             built. The DB_File patches solves the latter problem, by
+             retrofitting the fix to Configure et al that was included from
+             perl 5.6 on. I think your best course of action is to just
+             apply the 5.00503 patch to the 5.00504 source. I just tried
+             applying it and it seems ok.
+     Branch: maint-5.005/perl
+           ! Configure Makefile.SH lib/ExtUtils/Embed.pm
+           ! lib/ExtUtils/Liblist.pm lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
 [ 22062] By: acme                                  on 2004/01/05  21:11:24
         Log: Fix locale-dependant test failures
              From: "Marcus Holland-Moritz" <mhx-perl@gmx.net>
