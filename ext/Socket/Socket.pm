@@ -112,6 +112,15 @@ Note - does not return a number.
 Returns the 4-byte 'invalid' ip address.  Normally equivalent
 to inet_aton('255.255.255.255').
 
+=item sockaddr_family SOCKADDR
+
+Takes a sockaddr structure (as returned by pack_sockaddr_in(),
+pack_sockaddr_un() or the perl builtin functions getsockname() and
+getpeername()) and returns the address family tag.  It will match the
+constant AF_INET for a sockaddr_in and AF_UNIX for a sockaddr_un.  It
+can be used to figure out what unpacker to use for a sockaddr of
+unknown type.
+
 =item sockaddr_in PORT, ADDRESS
 
 =item sockaddr_in SOCKADDR_IN
@@ -173,7 +182,9 @@ require Exporter;
 use XSLoader ();
 @ISA = qw(Exporter);
 @EXPORT = qw(
-	inet_aton inet_ntoa pack_sockaddr_in unpack_sockaddr_in
+	inet_aton inet_ntoa
+	sockaddr_family
+	pack_sockaddr_in unpack_sockaddr_in
 	pack_sockaddr_un unpack_sockaddr_un
 	sockaddr_in sockaddr_un
 	INADDR_ANY INADDR_BROADCAST INADDR_LOOPBACK INADDR_NONE

@@ -1472,7 +1472,7 @@ to the end of your file without finding such a line.
 (W redefine) You redefined a format.  To suppress this warning, say
 
     {
-	no warnings;
+	no warnings 'redefine';
 	eval "format NAME =...";
     }
 
@@ -3300,7 +3300,7 @@ C<can> may break this.
 (W redefine) You redefined a subroutine.  To suppress this warning, say
 
     {
-	no warnings;
+	no warnings 'redefine';
 	eval "sub name { ... }";
     }
 

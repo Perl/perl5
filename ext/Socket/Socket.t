@@ -13,7 +13,7 @@ BEGIN {
 	
 use Socket;
 
-print "1..14\n";
+print "1..16\n";
 
 if (socket(T,PF_INET,SOCK_STREAM,6)) {
   print "ok 1\n";
@@ -103,3 +103,12 @@ print ((inet_ntoa(v10.20.30.40) eq "10.20.30.40") ? "ok 11\n" : "not ok 11\n");
 				     
 eval { inet_ntoa(v10.20.30.400) };
 print (($@ =~ /^Wide character in Socket::inet_ntoa at/) ? "ok 14\n" : "not ok 14\n");
+
+if (sockaddr_family(pack_sockaddr_in(100,inet_aton("10.250.230.10"))) == AF_INET) {
+    print "ok 15\n";
+} else {
+    print "not ok 15\n";
+}
+
+eval { sockaddr_family("") };
+print (($@ =~ /^Bad arg length for Socket::sockaddr_family, length is 0, should be at least \d+/) ? "ok 16\n" : "not ok 16\n");

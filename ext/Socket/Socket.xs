@@ -248,7 +248,7 @@ inet_ntoa(ip_address_sv)
 	char * ip_address;
 	if (DO_UTF8(ip_address_sv) && !sv_utf8_downgrade(ip_address_sv, 1))
 	     croak("Wide character in Socket::inet_ntoa");
-	ip_address = SvPV(ip_address_sv, addrlen);
+	ip_address = SvPVbyte(ip_address_sv, addrlen);
 	if (addrlen == sizeof(addr) || addrlen == 4)
 	        addr.s_addr =
 		    (ip_address[0] & 0xFF) << 24 |
@@ -271,6 +271,20 @@ inet_ntoa(ip_address_sv)
 	ST(0) = sv_2mortal(newSVpvn(addr_str, strlen(addr_str)));
 	Safefree(addr_str);
 	}
+
+void
+sockaddr_family(sockaddr)
+	SV *	sockaddr
+	PREINIT:
+	STRLEN sockaddr_len;
+	char *sockaddr_pv = SvPVbyte(sockaddr, sockaddr_len);
+	CODE:
+	if (sockaddr_len < offsetof(struct sockaddr, sa_data)) {
+	    croak("Bad arg length for %s, length is %d, should be at least %d",
+	          "Socket::sockaddr_family", sockaddr_len,
+		  offsetof(struct sockaddr, sa_data));
+	}
+	ST(0) = sv_2mortal(newSViv(((struct sockaddr*)sockaddr_pv)->sa_family));
 
 void
 pack_sockaddr_un(pathname)
@@ -327,7 +341,7 @@ unpack_sockaddr_un(sun_sv)
 #ifdef I_SYS_UN
 	struct sockaddr_un addr;
 	STRLEN sockaddrlen;
-	char * sun_ad = SvPV(sun_sv,sockaddrlen);
+	char * sun_ad = SvPVbyte(sun_sv,sockaddrlen);
 	char * e;
 #   ifndef __linux__
 	/* On Linux sockaddrlen on sockets returned by accept, recvfrom,
@@ -368,7 +382,7 @@ pack_sockaddr_in(port, ip_address_sv)
 	char * ip_address;
 	if (DO_UTF8(ip_address_sv) && !sv_utf8_downgrade(ip_address_sv, 1))
 	     croak("Wide character in Socket::pack_sockaddr_in");
-	ip_address = SvPV(ip_address_sv, addrlen);
+	ip_address = SvPVbyte(ip_address_sv, addrlen);
 	if (addrlen == sizeof(addr) || addrlen == 4)
 	        addr.s_addr =
 		    (ip_address[0] & 0xFF) << 24 |
@@ -395,7 +409,7 @@ unpack_sockaddr_in(sin_sv)
 	struct sockaddr_in addr;
 	unsigned short	port;
 	struct in_addr  ip_address;
-	char *	sin = SvPV(sin_sv,sockaddrlen);
+	char *	sin = SvPVbyte(sin_sv,sockaddrlen);
 	if (sockaddrlen != sizeof(addr)) {
 	    croak("Bad arg length for %s, length is %d, should be %d",
 			"Socket::unpack_sockaddr_in",
