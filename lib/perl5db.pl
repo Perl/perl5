@@ -2,7 +2,8 @@ package DB;
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 
-$header = 'perl5db.pl patch level 0.94';
+$VERSION = 0.95;
+$header = "perl5db.pl patch level $VERSION";
 
 # Enhanced by ilya@math.ohio-state.edu (Ilya Zakharevich)
 # Latest version available: ftp://ftp.math.ohio-state.edu/pub/users/ilya/perl
@@ -63,6 +64,25 @@ $header = 'perl5db.pl patch level 0.94';
 # information into db.out.  (If you interrupt it, you would better
 # reset LineInfo to something "interactive"!)
 #
+# Changes: 0.95: v command shows versions.
+
+##################################################################
+# Changelog:
+
+# A lot of things changed after 0.94. First of all, core now informs
+# debugger about entry into XSUBs, overloaded operators, tied operations,
+# BEGIN and END. Handy with `O f=2'.
+
+# This can make debugger a little bit too verbose, please be patient
+# and report your problems promptly.
+
+# Now the option frame has 3 values: 0,1,2.
+
+# Note that if DESTROY returns a reference to the object (or object),
+# the deletion of data may be postponed until the next function call,
+# due to the need to examine the return value.
+
+####################################################################
 
 # Needed for the statement after exec():
 
@@ -91,6 +111,8 @@ warn (			# Do not ;-)
 
 $trace = $signal = $single = 0;	# Uninitialized warning suppression
                                 # (local $^W cannot help - other packages!).
+$doret = -2;
+$frame = 0;
 @stack = (0);
 
 $option{PrintRet} = 1;
@@ -140,6 +162,9 @@ $option{PrintRet} = 1;
 
 # These guys may be defined in $ENV{PERL5DB} :
 $rl = 1 unless defined $rl;
+$warnLevel = 1 unless defined $warnLevel;
+$dieLevel = 1 unless defined $dieLevel;
+$signalLevel = 1 unless defined $signalLevel;
 warnLevel($warnLevel);
 dieLevel($dieLevel);
 signalLevel($signalLevel);
@@ -201,7 +226,7 @@ if ($notty) {
   }
 
   # Around a bug:
-  if (defined $ENV{OS2_SHELL} and $emacs) { # In OS/2
+  if (defined $ENV{OS2_SHELL} and ($emacs or $ENV{WINDOWID})) { # In OS/2
     $console = undef;
   }
 
@@ -270,14 +295,6 @@ sub DB {
 # EOE
     }
     &save;
-    if ($doret) {
-	$doret = 0;
-	if ($option{PrintRet}) {
-	    print $OUT "$retctx context return from $lastsub:", 
-	      ($retctx eq 'list') ? "\n" : " " ;
-	    dumpit( ($retctx eq 'list') ? \@ret : $ret );
-	}
-    }
     ($package, $filename, $line) = caller;
     $filename_ini = $filename;
     $usercontext = '($@, $!, $,, $/, $\, $^W) = @saved;' .
@@ -373,6 +390,8 @@ sub DB {
 			    }
 			}
 			next CMD; };
+		    $cmd =~ /^v$/ && do {
+			list_versions(); next CMD};
 		    $cmd =~ s/^X\b/V $package/;
 		    $cmd =~ /^V$/ && do {
 			$cmd = "V $package"; };
@@ -383,6 +402,7 @@ sub DB {
 			do 'dumpvar.pl' unless defined &main::dumpvar;
 			if (defined &main::dumpvar) {
 			    local $frame = 0;
+			    local $doret = -2;
 			    &main::dumpvar($packname,@vars);
 			} else {
 			    print $OUT "dumpvar.pl not available.\n";
@@ -614,7 +634,7 @@ sub DB {
 			last CMD; };
 		    $cmd =~ /^r$/ && do {
 			$stack[$#stack] |= 1;
-			$doret = 1;
+			$doret = $option{PrintRet} ? $#stack - 1 : -2;
 			last CMD; };
 		    $cmd =~ /^R$/ && do {
 		        print $OUT "Warning: a lot of settings and command-line options may be lost!\n";
@@ -747,8 +767,8 @@ sub DB {
 			$cmd = $hist[$i] . "\n";
 			print $OUT $cmd;
 			redo CMD; };
-		    $cmd =~ /^$sh$sh\s*/ && do {
-			&system($');
+		    $cmd =~ /^$sh$sh\s*([\x00-\xff]]*)/ && do {
+			&system($1);
 			next CMD; };
 		    $cmd =~ /^$rc([^$rc].*)$/ && do {
 			$pat = "^$1";
@@ -766,8 +786,8 @@ sub DB {
 		    $cmd =~ /^$sh$/ && do {
 			&system($ENV{SHELL}||"/bin/sh");
 			next CMD; };
-		    $cmd =~ /^$sh\s*/ && do {
-			&system($ENV{SHELL}||"/bin/sh","-c",$');
+		    $cmd =~ /^$sh\s*([\x00-\xff]*)/ && do {
+			&system($ENV{SHELL}||"/bin/sh","-c",$1);
 			next CMD; };
 		    $cmd =~ /^H\b\s*(-(\d+))?/ && do {
 			$end = $2?($#hist-$2):0;
@@ -864,23 +884,27 @@ sub DB {
 # BEGIN {warn 4}
 
 sub sub {
-    print $LINEINFO ' ' x $#stack, "entering $sub\n" if $frame;
+    my ($al, $ret, @ret) = "";
+    if ($sub =~ /::AUTOLOAD$/) {
+      $al = " for $ {$` . '::AUTOLOAD'}";
+    }
+    print $LINEINFO ' ' x $#stack, "entering $sub$al\n" if $frame;
     push(@stack, $single);
     $single &= 1;
     $single |= 4 if $#stack == $deep;
     if (wantarray) {
 	@ret = &$sub;
 	$single |= pop(@stack);
-	$retctx = "list";
-	$lastsub = $sub;
-print $LINEINFO ' ' x $#stack, "exited $sub\n" if $frame;
+	print ($OUT "list context return from $sub:\n"), dumpit( \@ret ),
+	  $doret = -2 if $doret eq $#stack;
+	print $LINEINFO ' ' x $#stack, "exited $sub$al\n" if $frame > 1;
 	@ret;
     } else {
 	$ret = &$sub;
 	$single |= pop(@stack);
-	$retctx = "scalar";
-	$lastsub = $sub;
-print $LINEINFO ' ' x $#stack, "exited $sub\n" if $frame;
+	print ($OUT "scalar context return from $sub: "), dumpit( $ret ),
+	  $doret = -2 if $doret eq $#stack;
+	print $LINEINFO ' ' x $#stack, "exited $sub$al\n" if $frame > 1;
 	$ret;
     }
 }
@@ -927,13 +951,21 @@ sub install_breakpoints {
 
 sub dumpit {
     local ($savout) = select($OUT);
-    do 'dumpvar.pl' unless defined &main::dumpValue;
+    my $osingle = $single;
+    my $otrace = $trace;
+    $single = $trace = 0;
+    local $frame = 0;
+    local $doret = -2;
+    unless (defined &main::dumpValue) {
+	do 'dumpvar.pl';
+    }
     if (defined &main::dumpValue) {
-        local $frame = 0;
 	&main::dumpValue(shift);
     } else {
 	print $OUT "dumpvar.pl not available.\n";
     }
+    $single = $osingle;
+    $trace = $otrace;
     select ($savout);    
 }
 
@@ -972,7 +1004,9 @@ sub system {
 
 sub setterm {
     local $frame = 0;
-    eval "require Term::ReadLine;" or die $@;
+    local $doret = -2;
+    local @stack = @stack;		# Prevent growth by failing `use'.
+    eval { require Term::ReadLine } or die $@;
     if ($notty) {
 	if ($tty) {
 	    open(IN,"<$tty") or die "Cannot open TTY `$TTY' for read: $!";
@@ -1017,6 +1051,7 @@ sub readline {
     return $got;
   }
   local $frame = 0;
+  local $doret = -2;
   $term->readline(@_);
 }
 
@@ -1036,7 +1071,7 @@ sub dump_option {
     } else {
 	$val = $option{$opt};
     }
-    $val =~ s/[\\\']/\\$&/g;
+    $val =~ s/([\\\'])/\\$1/g;
     printf $OUT "%20s = '%s'\n", $opt, $val;
 }
 
@@ -1070,7 +1105,8 @@ sub parse_options {
 	print $OUT "Unknown option `$opt'\n" unless $matches;
 	print $OUT "Ambiguous option `$opt'\n" if $matches > 1;
 	$option{$option} = $val if $matches == 1 and defined $val;
-	eval "local \$frame = 0; require '$optionRequire{$option}'"
+	eval "local \$frame = 0; local \$doret = -2; 
+	      require '$optionRequire{$option}'"
 	  if $matches == 1 and defined $optionRequire{$option} and defined $val;
 	$ {$optionVars{$option}} = $val 
 	  if $matches == 1
@@ -1091,7 +1127,7 @@ sub set_list {
   for $i (0 .. $#list) {
     $val = $list[$i];
     $val =~ s/\\/\\\\/g;
-    $val =~ s/[\0-\37\177\200-\377]/"\\0x" . unpack('H2',$&)/eg;
+    $val =~ s/([\0-\37\177\200-\377])/"\\0x" . unpack('H2',$1)/eg;
     $ENV{"$ {stem}_$i"} = $val;
   }
 }
@@ -1200,6 +1236,28 @@ sub LineInfo {
     $lineinfo;
 }
 
+sub list_versions {
+  my %version;
+  my $file;
+  for (keys %INC) {
+    $file = $_;
+    s,\.p[lm]$,,i ;
+    s,/,::,g ;
+    s/^perl5db$/DB/;
+    if (defined $ { $_ . '::VERSION' }) {
+      $version{$file} = "$ { $_ . '::VERSION' } from ";
+    } 
+    $version{$file} .= $INC{$file};
+  }
+  do 'dumpvar.pl' unless defined &main::dumpValue;
+  if (defined &main::dumpValue) {
+    local $frame = 0;
+    &main::dumpValue(\%version);
+  } else {
+    print $OUT "dumpvar.pl not available.\n";
+  }
+}
+
 sub sethelp {
     $help = "
 T		Stack trace.
@@ -1275,6 +1333,7 @@ p expr		Same as \"print DB::OUT expr\" in current package.
 ||dbcmd		Same as |dbcmd but DB::OUT is temporarilly select()ed as well.
 \= [alias value]	Define a command alias, or list current aliases.
 command		Execute as a perl statement in current package.
+v		Show versions of loaded modules.
 R		Pure-man-restart of debugger, debugger state and command-line
 		options are lost.
 h [db_command]	Get help [on a specific debugger command], enter |h to page.
@@ -1288,8 +1347,8 @@ List/search source lines:               Control script execution:
   - or .      List previous/current line  s [expr]    Single step [in expr]
   w [line]    List around line            n [expr]    Next, steps over subs
   f filename  View source in file         <CR>        Repeat last n or s
-  /pattern/   Search forward              r           Return from subroutine
-  ?pattern?   Search backward             c [line]    Continue until line
+  /pattern/ ?patt?   Search forw/backw    r           Return from subroutine
+  v	      Show versions of modules    c [line]    Continue until line
 Debugger controls:                        L           List break pts & actions
   O [...]     Set debugger options        t [expr]    Toggle trace [trace expr]
   < command   Command for before prompt   b [ln] [c]  Set breakpoint
@@ -1312,6 +1371,7 @@ END_SUM
 
 sub diesignal {
     local $frame = 0;
+    local $doret = -2;
     $SIG{'ABRT'} = DEFAULT;
     kill 'ABRT', $$ if $panic++;
     print $DB::OUT "Got $_[0]!\n";	# in the case cannot continue
@@ -1324,6 +1384,7 @@ sub diesignal {
 
 sub dbwarn { 
   local $frame = 0;
+  local $doret = -2;
   local $SIG{__WARN__} = '';
   require Carp; 
   #&warn("Entering dbwarn\n");
@@ -1338,6 +1399,7 @@ sub dbwarn {
 
 sub dbdie {
   local $frame = 0;
+  local $doret = -2;
   local $SIG{__DIE__} = '';
   local $SIG{__WARN__} = '';
   my $i = 0; my $ineval = 0; my $sub;
@@ -1423,16 +1485,11 @@ BEGIN {			# This does not compile, alas.
   $window = 10;
   $preview = 3;
   $sub = '';
-  #$SIG{__WARN__} = "DB::dbwarn";
-  #$SIG{__DIE__} = 'DB::dbdie';
-  #$SIG{SEGV} = "DB::diesignal";
-  #$SIG{BUS} = "DB::diesignal";
   $SIG{INT} = "DB::catch";
-  #$SIG{FPE} = "DB::catch";
-  #warn "SIGFPE installed";
-  $warnLevel = 1 unless defined $warnLevel;
-  $dieLevel = 1 unless defined $dieLevel;
-  $signalLevel = 1 unless defined $signalLevel;
+  # This may be enabled to debug debugger:
+  #$warnLevel = 1 unless defined $warnLevel;
+  #$dieLevel = 1 unless defined $dieLevel;
+  #$signalLevel = 1 unless defined $signalLevel;
 
   $db_stop = 0;			# Compiler warning
   $db_stop = 1 << 30;
