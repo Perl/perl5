@@ -504,6 +504,14 @@ sub DB {
     $usercontext = '($@, $!, $^E, $,, $/, $\, $^W) = @saved;' .
       "package $package;";	# this won't let them modify, alas
     local(*dbline) = $main::{'_<' . $filename};
+
+    # we need to check for pseudofiles on Mac OS (these are files
+    # not attached to a filename, but instead stored in Dev:Pseudo)
+    if ($^O eq 'MacOS' && $#dbline < 0) {
+	$filename_ini = $filename = 'Dev:Pseudo';
+	*dbline = $main::{'_<' . $filename};
+    }
+
     $max = $#dbline;
     if (($stop,$action) = split(/\0/,$dbline{$line})) {
 	if ($stop eq '1') {
