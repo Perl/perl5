@@ -113,7 +113,9 @@ Time::HiRes::sleep() below.
 Issues a ualarm call; interval_useconds is optional and will be 0 if 
 unspecified, resulting in alarm-like behaviour.
 
-=item tv_interval ( $ref_to_gettimeofday [, $ref_to_later_gettimeofday] )
+=item tv_interval 
+
+S<tv_interval ( $ref_to_gettimeofday [, $ref_to_later_gettimeofday] )>
 
 Returns the floating seconds between the two times, which should have been 
 returned by gettimeofday(). If the second argument is omitted, then the
@@ -139,7 +141,9 @@ is optional and will be 0 if unspecified, resulting in alarm-like
 behaviour.  This function can be imported, resulting in a nice drop-in
 replacement for the C<alarm> provided with perl, see the EXAMPLES below.
 
-=item setitimer ( $which, $floating_seconds [, $interval_floating_seconds ] )
+=item setitimer 
+
+S<setitimer ( $which, $floating_seconds [, $interval_floating_seconds ] )>
 
 Start up an interval timer: after a certain time, a signal is arrives,
 and more may keep arriving at certain intervals.  To disable a timer,
