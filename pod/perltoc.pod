@@ -924,6 +924,10 @@ CGI script to do bad things?
 
 =item Internal change: PerlIO abstraction interface
 
+=item New and changed builtin constants
+
+__PACKAGE__
+
 =item New and changed builtin variables
 
 $^E, $^H, $^M
@@ -1364,7 +1368,7 @@ $ARGV, @ARGV, @INC, %INC, $ENV{expr}, $SIG{expr}, $^M
 
 =item SEE ALSO
 
-=head2 perlmod - Perl modules (packages)
+=head2 perlmod - Perl modules (packages and symbol tables)
 
 =item DESCRIPTION
 
@@ -1382,7 +1386,11 @@ $ARGV, @ARGV, @INC, %INC, $ENV{expr}, $SIG{expr}, $^M
 
 =back
 
-=item NOTE
+=item SEE ALSO
+
+=head2 perlmodlib - constructing new Perl modules and finding existing ones
+
+=item DESCRIPTION
 
 =item THE PERL MODULE LIBRARY
 
@@ -1390,8 +1398,8 @@ $ARGV, @ARGV, @INC, %INC, $ENV{expr}, $SIG{expr}, $^M
 
 =item Pragmatic Modules
 
-blib, diagnostics, integer, less, lib, locale, ops, overload, sigtrap,
-strict, subs, vmsish, vars
+use autouse MODULE => qw(sub1 sub2 sub3), blib, diagnostics, integer, less,
+lib, locale, ops, overload, sigtrap, strict, subs, vmsish, vars
 
 =item Standard Modules
 
@@ -1469,6 +1477,8 @@ to reconsider and redesign the interfaces, In some cases the 'application'
 can then be reduced to a small
 
 =back
+
+=item NOTE
 
 =head2 perlform - Perl formats
 
@@ -2850,7 +2860,7 @@ clearcache ( COUNT ), clearallcache ( ), disablecache ( ), enablecache ( )
 
 =item ABSTRACT
 
-=item INSTALLATION:
+=item INSTALLATION
 
 =item DESCRIPTION
 
@@ -2896,7 +2906,7 @@ B<Parameters:>, 4, 5, 6..
 
 =back
 
-=item CREATING FORMS:
+=item CREATING FORMS
 
 =over
 
@@ -2986,7 +2996,7 @@ scripts, B<referer()>, B<auth_type ()>, B<server_name ()>, B<virtual_host
 ()>, B<server_software ()>, B<remote_user ()>, B<user_name ()>,
 B<request_method()>
 
-=item CREATING HTML ELEMENTS:
+=item CREATING HTML ELEMENTS
 
 =over
 

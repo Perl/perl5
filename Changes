@@ -46,6 +46,108 @@ And the Keepers of the Patch Pumpkin:
 
 
 -----------------
+Version 5.003_97j
+-----------------
+
+This patch should be _98, unless it's egregiously broken somehow.
+
+ CORE LANGUAGE CHANGES
+
+   (no changes)
+
+ CORE PORTABILITY
+
+  Title:  "Return to favoring memset(,0,) over bzero()"
+   From:  Chip Salzenberg
+  Files:  perl.h
+
+  Title:  "NetBSD hint update"
+   From:  matthew green <mrg@splode.eterna.com.au>
+ Msg-ID:  <199704251021.EAA22570@jhereg.perl.com>
+   Date:  Fri, 25 Apr 1997 20:18:02 +1000
+  Files:  hints/netbsd.sh
+
+  Title:  "HP-UX hint update"
+   From:  Chuck D. Phillips <cdp@hpescdp.fc.hp.com>
+ Msg-ID:  <199704280535.WAA22441@palrel1.hp.com>
+   Date:  Sun, 27 Apr 1997 23:35:07 -0600
+  Files:  hints/hpux.sh
+
+  Title:  "Win32 update (three patches)"
+   From:  Gurusamy Sarathy and Nick Ing-Simmons
+  Files:  win32/makedef.pl win32/perllib.c win32/win32.c
+
+ OTHER CORE CHANGES
+
+  Title:  "Update sprintf: '%hn'; '%s',NULL; panic on frexp() failure"
+   From:  Chip Salzenberg
+  Files:  perl.h pod/perldiag.pod sv.c
+
+  Title:  "Fix lingering '%S' in XS_VERSION_BOOTCHECK"
+   From:  Chip Salzenberg
+  Files:  XSUB.h
+
+  Title:  "Eliminate Alpha warnings"
+   From:  Hallvard B Furuseth and Chip Salzenberg
+  Files:  perlsdio.h pp_sys.c
+
+  Title:  "Fix typo in NeXT dynaloader"
+   From:  Chip Salzenberg
+  Files:  ext/DynaLoader/dl_next.xs
+
+  Title:  "Fix possible buffer overflow under VMS"
+   From:  Chip Salzenberg
+  Files:  taint.c
+
+ BUILD PROCESS
+
+   (no changes)
+
+ LIBRARY AND EXTENSIONS
+
+  Title:  "Refresh CGI.pm to 2.35"
+   From:  Lincoln Stein <lstein@genome.wi.mit.edu>
+  Files:  lib/CGI.pm
+
+  Title:  "Refresh DB_File to 1.13"
+   From:  Paul Marquess
+ Msg-ID:  <9704271413.AA08876@claudius.bfsec.bt.co.uk>
+   Date:  Sun, 27 Apr 1997 15:12:59 +0100 (BST)
+  Files:  ext/DB_File/DB_File.pm ext/DB_File/DB_File.xs
+
+  Title:  "SelfLoader: fix prototype pattern, rename intrusive lexical"
+   From:  Jesse Glick <jesse@ginger> and Chip Salzenberg
+  Files:  lib/SelfLoader.pm
+
+ TESTS
+
+   (no changes)
+
+ UTILITIES
+
+   (no changes)
+
+ DOCUMENTATION
+
+  Title:  "Split perlmod"
+   From:  Tom Christiansen
+ Msg-ID:  <199704260050.RAA02468@toy.perl.com>
+   Date:  Fri, 25 Apr 1997 20:50:09 -0400
+  Files:  MANIFEST pod/Makefile pod/buildtoc pod/perl.pod
+          pod/perldsc.pod pod/perlfaq3.pod pod/perlipc.pod
+          pod/perlmod.pod pod/perlmodlib.pod pod/perlobj.pod
+          pod/perltie.pod pod/roffitall
+
+  Title:  "Describe __PACKAGE__ in perldelta"
+   From:  Chip Salzenberg
+  Files:  pod/perldelta.pod
+
+  Title:  "Doc fix for close of pipe handle"
+   From:  Chip Salzenberg
+  Files:  pod/perlfunc.pod
+
+
+-----------------
 Version 5.003_97i
 -----------------
 

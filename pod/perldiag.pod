@@ -1249,6 +1249,11 @@ C<./Configure -S> and rebuild Perl.
 (F) The range specified in a character class had a minimum character
 greater than the maximum character.  See L<perlre>.
 
+=item Invalid conversion in %s: "%s"
+
+(F) Perl does not understand the given format conversion.
+See L<perlfunc/sprintf>.
+
 =item Invalid type in pack: '%s'
 
 (F) The given character is not a valid pack type.  See L<perlfunc/pack>.
@@ -1698,6 +1703,10 @@ it wasn't an eval context.
 =item panic: do_trans
 
 (P) The internal do_trans() routine was called with invalid operational data.
+
+=item panic: frexp
+
+(P) The library function frexp() failed, making printf("%f") impossible.
 
 =item panic: goto
 

@@ -1121,7 +1121,7 @@ IV i;
     case SVt_PVFM:
     case SVt_PVIO:
 	croak("Can't coerce %s to integer in %s", sv_reftype(sv,0),
-	    op_name[op->op_type]);
+	    op_desc[op->op_type]);
     }
     (void)SvIOK_only(sv);			/* validate number */
     SvIVX(sv) = i;
@@ -4163,6 +4163,7 @@ sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
     char *patend;
     STRLEN origlen;
     I32 svix = 0;
+    static char nullstr[] = "(null)";
 
     /* no matter what, this is a string now */
     (void)SvPV_force(sv, origlen);
@@ -4173,8 +4174,10 @@ sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
     if (patlen == 2 && pat[0] == '%') {
 	switch (pat[1]) {
 	case 's':
-	    if (args)
-		sv_catpv(sv, va_arg(*args, char*));
+	    if (args) {
+		char *s = va_arg(*args, char*);
+		sv_catpv(sv, s ? s : nullstr);
+	    }
 	    else if (svix < svmax)
 		sv_catsv(sv, *svargs);
 	    return;
@@ -4340,7 +4343,12 @@ sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
 	case 's':
 	    if (args) {
 		eptr = va_arg(*args, char*);
-		elen = strlen(eptr);
+		if (eptr)
+		    elen = strlen(eptr);
+		else {
+		    eptr = nullstr;
+		    elen = sizeof nullstr - 1;
+		}
 	    }
 	    else if (svix < svmax)
 		eptr = SvPVx(svargs[svix++], elen);
@@ -4498,8 +4506,8 @@ sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
 		i = PERL_INT_MIN;
 		(void)frexp(nv, &i);
 		if (i == PERL_INT_MIN)
-		    need = 400;	/* busted -- be safe */
-		else if (i > 0)
+		    die("panic: frexp");
+		if (i > 0)
 		    need = BIT_DIGITS(i);
 	    }
 	    need += has_precis ? precis : 6; /* known default */
@@ -4555,8 +4563,12 @@ sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
 	case 'n':
 	    i = SvCUR(sv) - origlen;
 	    if (args) {
-		int *ip = va_arg(*args, int*);
-		*ip = i;
+		switch (intsize) {
+		case 'h':	*(va_arg(*args, short*)) = i; break;
+		default:	*(va_arg(*args, int*)) = i; break;
+		case 'l':	*(va_arg(*args, long*)) = i; break;
+		case 'V':	*(va_arg(*args, IV*)) = i; break;
+		}
 	    }
 	    else if (svix < svmax)
 		sv_setuv(svargs[svix++], (UV)i);
@@ -4566,7 +4578,19 @@ sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
 
 	default:
       unknown:
-	    /* output mangled stuff without comment */
+	    if (!args && dowarn &&
+		  (op->op_type == OP_PRTF || op->op_type == OP_SPRINTF)) {
+		SV *msg = sv_newmortal();
+		sv_setpvf(msg, "Invalid conversion in %s: ",
+			  (op->op_type == OP_PRTF) ? "printf" : "sprintf");
+		if (c)
+		    sv_catpvf(msg, isPRINT(c) ? "\"%%%c\"" : "\"%%\\%03o\"",
+			      c & 0xFF);
+		else
+		    sv_catpv(msg, "end of string");
+		warn("%_", msg); /* yes, this is reentrant */
+	    }
+	    /* output mangled stuff */
 	    eptr = p;
 	    elen = q - p;
 	    break;

@@ -340,11 +340,11 @@
 #endif /* HAS_MEMCMP && HAS_SANE_MEMCMP */
 
 #ifndef memzero
-#   ifdef HAS_BZERO
-#	define memzero(d,l) bzero(d,l)
+#   ifdef HAS_MEMSET
+#	define memzero(d,l) memset(d,0,l)
 #   else
-#	ifdef HAS_MEMSET
-#	    define memzero(d,l) memset(d,0,l)
+#	ifdef HAS_BZERO
+#	    define memzero(d,l) bzero(d,l)
 #	else
 #	    define memzero(d,l) my_bzero(d,l)
 #	endif
@@ -1210,7 +1210,10 @@ char *strcpy(), *strcat();
 #   endif
 	    double exp _((double));
 	    double log _((double));
+	    double log10 _((double));
 	    double sqrt _((double));
+	    double frexp _((double,int*));
+	    double ldexp _((double,int));
 	    double modf _((double,double*));
 	    double sin _((double));
 	    double cos _((double));
