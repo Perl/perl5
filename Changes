@@ -31,6 +31,143 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 11486] By: jhi                                   on 2001/07/29  20:38:09
+        Log: Use Search::Dict 1.02 interface for charinfo().
+     Branch: perl
+	   ! lib/UnicodeCD.pm
+____________________________________________________________________________
+[ 11485] By: jhi                                   on 2001/07/29  20:37:11
+        Log: Now also allow transforming the read lines before comparing them.
+             (This will help UnicodeCD.) 
+     Branch: perl
+	   ! lib/Search/Dict.pm
+____________________________________________________________________________
+[ 11484] By: jhi                                   on 2001/07/29  20:03:13
+        Log: Remove tiehandle code.
+     Branch: perl
+	   ! lib/UnicodeCD.pm
+____________________________________________________________________________
+[ 11483] By: jhi                                   on 2001/07/29  19:59:02
+        Log: Allow specifying a comparison function for Search::Dict::look().
+     Branch: perl
+	   ! lib/Search/Dict.pm
+____________________________________________________________________________
+[ 11482] By: jhi                                   on 2001/07/29  18:55:04
+        Log: Small UnicodeCD tweaks.
+     Branch: perl
+	   ! lib/UnicodeCD.pm lib/UnicodeCD.t
+____________________________________________________________________________
+[ 11481] By: jhi                                   on 2001/07/29  17:14:19
+        Log: Subject: [PATCH @11446] UnicodeCD::charinfo
+             From: SADAHIRO Tomoyuki <BQW10602@nifty.com>
+             Date: Tue, 24 Jul 2001 01:51:32 +0900
+             Message-Id: <20010724015114.CF4D.BQW10602@nifty.com>
+     Branch: perl
+	   ! lib/UnicodeCD.pm lib/UnicodeCD.t
+____________________________________________________________________________
+[ 11480] By: jhi                                   on 2001/07/29  16:55:58
+        Log: Subject: [PATCH] installperl
+             From: Wilfredo Sánchez <wsanchez@MIT.EDU>
+             Date: Fri, 27 Jul 2001 19:05:04 -0700
+             Message-Id: <F7912758-82FC-11D5-BFC6-003065D59FBA@thor.sbay.org>
+     Branch: perl
+	   ! installperl
+____________________________________________________________________________
+[ 11479] By: jhi                                   on 2001/07/29  16:52:52
+        Log: Subject: [PATCH] Set proper compatibility versions in core
+             From: Wilfredo Sánchez <wsanchez@MIT.EDU>
+             Date: Fri, 27 Jul 2001 20:01:49 -0700
+             Message-Id: <E3A6C66A-8304-11D5-BFC6-003065D59FBA@thor.sbay.org>
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[ 11478] By: jhi                                   on 2001/07/29  16:50:55
+        Log: Metaconfig unit change for #11477.
+     Branch: metaconfig/U/perl
+	   ! dlsrc.U
+____________________________________________________________________________
+[ 11477] By: jhi                                   on 2001/07/29  16:50:35
+        Log: Subject: [PATCH] Darwin: -fpic not so good
+             From: =?iso-8859-1?Q?Wilfredo_S=E1nchez?= <wsanchez@MIT.EDU>
+             Date: Fri, 27 Jul 2001 18:57:38 -0700
+             Message-Id: <EC1496A6-82FB-11D5-BFC6-003065D59FBA@thor.sbay.org>
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 11476] By: jhi                                   on 2001/07/29  16:44:03
+        Log: Subject: [PATCH] Clean up Darwin hints
+             From: =?iso-8859-1?Q?Wilfredo_S=E1nchez?= <wsanchez@MIT.EDU>
+             Date: Fri, 27 Jul 2001 19:13:15 -0700
+             Message-Id: <1A70CA3F-82FE-11D5-BFC6-003065D59FBA@thor.sbay.org>
+     Branch: perl
+	   ! hints/darwin.sh
+____________________________________________________________________________
+[ 11475] By: jhi                                   on 2001/07/29  16:28:45
+        Log: Subject: [PATCH split()] split()'s unused captures should be undef, not ''
+             From: "Jeff 'japhy/Marillion' Pinyan" <jeffp@crusoe.net>
+             Date: Fri, 27 Jul 2001 14:00:37 -0400 (EDT)
+             Message-ID: <Pine.GSO.4.21.0107271358310.28213-100000@crusoe.crusoe.net>
+     Branch: perl
+	   ! pod/perlfunc.pod pp.c t/op/split.t
+____________________________________________________________________________
+[ 11474] By: jhi                                   on 2001/07/29  16:27:54
+        Log: Subject: [PATCH perlvar.pod] $^N foolery as well
+             From: "Jeff 'japhy/Marillion' Pinyan" <jeffp@crusoe.net>
+             Date: Thu, 26 Jul 2001 20:03:12 -0400 (EDT)
+             Message-ID: <Pine.GSO.4.21.0107261958380.28213-100000@crusoe.crusoe.net>
+     Branch: perl
+	   ! pod/perlvar.pod
+____________________________________________________________________________
+[ 11473] By: jhi                                   on 2001/07/29  16:27:00
+        Log: Subject: [PATCH] fixes to constant.pm documentation
+             From: Ilmari Karonen <iltzu@sci.fi>
+             Date: Tue, 24 Jul 2001 16:44:24 +0300 (EET DST)
+             Message-ID: <Pine.SOL.3.96.1010724163055.6822A-100000@simpukka>
+     Branch: perl
+	   ! lib/constant.pm
+____________________________________________________________________________
+[ 11472] By: jhi                                   on 2001/07/28  18:39:03
+        Log: Subject: [DOC PATCH bleadperl] perlport.pod and C<..">>"...>
+             From: "Philip Newton" <Philip.Newton@gmx.net>
+             Date: Fri, 27 Jul 2001 07:51:10 +0200
+             Message-Id: <200107270548.f6R5mJL09063@chaos.wustl.edu>
+     Branch: perl
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[ 11471] By: nick                                  on 2001/07/26  06:23:32
+        Log: Subject:  [PATCH] Doc fix for perlguts / threading
+             From:  Arthur Bergman <arthur@contiller.se>
+             Date:  Wed, 25 Jul 2001 11:28:23 +0200
+             Message-Id:  <B7845DD6.2812%arthur@contiller.se>
+     Branch: perl
+	   ! pod/perlguts.pod
+____________________________________________________________________________
+[ 11470] By: nick                                  on 2001/07/26  06:21:06
+        Log: Subject:  [DOC PATCH bleadperl] INSTALL: README for Unix systems exist
+             From:  Philip Newton <Philip.Newton@gmx.net>
+             Date:  Wed, 25 Jul 2001 08:19:47 +0200
+             Message-Id:  <E15PHy4-0000cR-00@mserv1f.vianw.co.uk>
+     Branch: perl
+	   ! INSTALL
+____________________________________________________________________________
+[ 11469] By: nick                                  on 2001/07/26  06:20:25
+        Log: Subject:  [DOC PATCH bleadperl] typo in INSTALL?
+             From:  Philip Newton <Philip.Newton@gmx.net>
+             Date:  Wed, 25 Jul 2001 08:12:48 +0200
+             Message-Id:  <E15PHrJ-00003f-00@mserv1f.vianw.co.uk>
+     Branch: perl
+	   ! INSTALL
+____________________________________________________________________________
+[ 11468] By: jhi                                   on 2001/07/25  01:39:11
+        Log: More +x.
+     Branch: perl
+	   ! Porting/makerel
+____________________________________________________________________________
+[ 11467] By: jhi                                   on 2001/07/24  16:05:34
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 11466] By: jhi                                   on 2001/07/24  15:40:28
         Log: Subject: [PATCH bleadperl os2/perlrexx.c] my C compiler has no HTML parser
              From: "Philip Newton" <Philip.Newton@gmx.net>
