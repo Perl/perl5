@@ -26,7 +26,7 @@ BEGIN {
   }
   if ($Config{d_shm} || $Config{d_msg}) {
      require IPC::SysV;
-     IPC::SysV->import(qw(IPC_PRIVATE IPC_RMID IPC_CREAT S_IRWXU);
+     IPC::SysV->import(qw(IPC_PRIVATE IPC_RMID IPC_CREAT S_IRWXU));
   }
 }
 
