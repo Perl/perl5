@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Sep  1 02:17:50 EET DST 2000 [metaconfig 3.0 PL70]
+# Generated on Fri Sep  1 17:46:55 EET DST 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >/tmp/c1$$ <<EOF
@@ -4051,8 +4051,8 @@ for thisincl in $inclwanted; do
 	if $test -d $thisincl; then
 		if $test x$thisincl != x$usrinc; then
 			case "$dflt" in
-			*$thisincl*);;
-			*) dflt="$dflt -I$thisincl";;
+                        *" -I$thisincl "*);;
+                        *) dflt="$dflt -I$thisincl ";;
 			esac
 		fi
 	fi
@@ -4088,6 +4088,7 @@ esac
 case "$dflt" in
 ''|' ') dflt=none;;
 esac
+
 $cat <<EOH
 
 Your C compiler may want other flags.  For this question you should include
