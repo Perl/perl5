@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Jun  1 19:20:32 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Sat Jun  2 17:25:04 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -3228,7 +3228,7 @@ case "$gccversion" in
 '') ;;
 *)  case "$ccflags" in
     *-Wall*) ;;
-    *) ccflags="$ccflags -Wall -ansi" ;;
+    *) ccflags="$ccflags -Wall" ;;
     esac
     ;;
 esac
