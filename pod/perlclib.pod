@@ -11,7 +11,7 @@ tends to reimplement or abstract standard library functions, so that we
 know exactly how they're going to operate.
 
 This is a reference card for people who are familiar with the C library
-and who want to do things the Perl way; to tells them which functions
+and who want to do things the Perl way; to tell them which functions
 they ought to use instead of the more normal C functions. 
 
 =head2 Conventions
@@ -44,12 +44,12 @@ C<sv>, C<av>, C<hv>, etc. represent variables of their respective types.
 
 Instead of the F<stdio.h> functions, you should use the Perl abstraction
 layer. Instead of C<FILE*> types, you need to be handling C<PerlIO*>
-types; don't forget that with the new PerlIO layered IO abstraction, 
+types.  Don't forget that with the new PerlIO layered I/O abstraction 
 C<FILE*> types may not even be available. See also the C<perlapio>
 documentation for more information about the following functions:
 
     Instead Of:                 Use:
-    
+
     stdin                       PerlIO_stdin()
     stdout                      PerlIO_stdout()
     stderr                      PerlIO_stderr()
@@ -161,7 +161,7 @@ table, C<c> is a C<char>, and C<u> is a Unicode codepoint.
 
     atof(s)                     Atof(s)
     atol(s)                     Atol(s)
-    strtod(s, *p)               Nothing. Just don't use it.
+    strtod(s, *p)               Nothing.  Just don't use it.
     strtol(s, *p, n)            Strtol(s, *p, n)
     strtoul(s, *p, n)           Strtoul(s, *p, n)
 
@@ -177,7 +177,7 @@ everywhere by now.
     int rand()                  double Drand01()
     srand(n)                    { seedDrand01((Rand_seed_t)n); 
                                   PL_srand_called = TRUE; }
- 
+
     exit(n)                     my_exit(n)
     system(s)                   Don't. Look at pp_system or use my_popen
 
