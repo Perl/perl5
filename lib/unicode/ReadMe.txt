@@ -1,6 +1,6 @@
-March 1, 2001
+March 23, 2001
 
-This directory contains the beta files for the minor release 
+This directory contains the data files for the minor release 
 Unicode 3.1.
 
 This release consists of corrections and additions to the

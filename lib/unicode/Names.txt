@@ -1,14 +1,7 @@
 @@@	The Unicode Standard 3.1
-@@@+	Draft U31M010208.lst
-	Punctuation correction in math alphanumerics notice.
-	Add annotation for FB1E and 05BF.
-	Add tentative English translations for Byzantine musical subheads.
-	Extend annotations for 0598 ZARQA and 05AE ZINOR.
-	Correct placement of Dependent Vowels header in Devanagari.
-	Update subheads for mensural notation in musical symbols.
-	Add bra/ket aliases for 3008, 3009.
-	Add noncharacters for Planes 3..13, 15, 16.
-	Added alias for 25BD.
+@@@+	Draft U31M010319.lst
+	Fixed syntax for xrefs for 0598 and 05AE.
+	Added more aliases for Thai characters.
 @@	0000	C0 Controls and Basic Latin (Basic Latin)	007F
 @		C0 controls
 @+		Alias names are those for ISO 6429.
@@ -3000,7 +2993,7 @@
 0598	HEBREW ACCENT ZARQA *
 	= tsinorit, zinorit; tsinor, zinor
 	* This character is to be used when Zarqa or Tsinor are placed above, and also for Tsinorit.
-	x (05AE - hebrew accent zinor)
+	x (hebrew accent zinor - 05AE)
 0599	HEBREW ACCENT PASHTA
 059A	HEBREW ACCENT YETIV
 059B	HEBREW ACCENT TEVIR
@@ -3027,7 +3020,7 @@
 05AE	HEBREW ACCENT ZINOR
 	= tsinor; zarqa
 	* This character is to be used when Zarqa or Tsinor are placed above left.
-	x (0598 - hebrew accent zarqa)
+	x (hebrew accent zarqa - 0598)
 05AF	HEBREW MARK MASORA CIRCLE
 @		Points and punctuation
 05B0	HEBREW POINT SHEVA
@@ -4772,8 +4765,10 @@
 0E2C	THAI CHARACTER LO CHULA
 0E2D	THAI CHARACTER O ANG
 0E2E	THAI CHARACTER HO NOKHUK
+	= ho nok huk
 @		Sign
 0E2F	THAI CHARACTER PAIYANNOI (paiyan noi)
+	= paiyan noi
 	* ellipsis, abbreviation
 @		Vowels
 0E30	THAI CHARACTER SARA A
@@ -4797,13 +4792,18 @@
 0E41	THAI CHARACTER SARA AE
 0E42	THAI CHARACTER SARA O
 0E43	THAI CHARACTER SARA AI MAIMUAN (sara ai mai muan)
+	= sara ai mai muan
 0E44	THAI CHARACTER SARA AI MAIMALAI (sara ai mai malai)
+	= sara ai mai malai
 @		Signs
 0E45	THAI CHARACTER LAKKHANGYAO (lakkhang yao)
+	= lakkhang yao
 0E46	THAI CHARACTER MAIYAMOK (mai yamok)
+	= mai yamok
 	* repetition
 @		Vowel
 0E47	THAI CHARACTER MAITAIKHU (mai taikhu)
+	= mai taikhu
 @		Tone marks
 0E48	THAI CHARACTER MAI EK
 0E49	THAI CHARACTER MAI THO
