@@ -1044,19 +1044,31 @@ Perl_is_uni_xdigit_lc(pTHX_ UV c)
 U32
 Perl_to_uni_upper_lc(pTHX_ U32 c)
 {
-    return to_uni_upper(c);    /* XXX no locale support yet */
+    /* XXX returns only the first character -- do not use XXX */
+    /* XXX no locale support yet */
+    STRLEN len;
+    U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
+    return (U32)to_uni_upper(c, tmpbuf, &len);
 }
 
 U32
 Perl_to_uni_title_lc(pTHX_ U32 c)
 {
-    return to_uni_title(c);    /* XXX no locale support yet */
+    /* XXX returns only the first character XXX -- do not use XXX */
+    /* XXX no locale support yet */
+    STRLEN len;
+    U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
+    return (U32)to_uni_title(c, tmpbuf, &len);
 }
 
 U32
 Perl_to_uni_lower_lc(pTHX_ U32 c)
 {
-    return to_uni_lower(c);    /* XXX no locale support yet */
+    /* XXX returns only the first character -- do not use XXX */
+    /* XXX no locale support yet */
+    STRLEN len;
+    U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
+    return (U32)to_uni_lower(c, tmpbuf, &len);
 }
 
 bool
