@@ -4145,11 +4145,11 @@ This function binds a variable to a package class that will provide the
 implementation for the variable.  VARIABLE is the name of the variable
 to be enchanted.  CLASSNAME is the name of a class implementing objects
 of correct type.  Any additional arguments are passed to the "C<new()>"
-method of the class (meaning C<TIESCALAR>, C<TIEARRAY>, or C<TIEHASH>).
-Typically these are arguments such as might be passed to the C<dbm_open()>
-function of C.  The object returned by the "C<new()>" method is also
-returned by the C<tie()> function, which would be useful if you want to
-access other methods in CLASSNAME.
+method of the class (meaning C<TIESCALAR>, C<TIEHANDLE>, C<TIEARRAY>,
+or C<TIEHASH>).  Typically these are arguments such as might be passed
+to the C<dbm_open()> function of C.  The object returned by the "C<new()>"
+method is also returned by the C<tie()> function, which would be useful
+if you want to access other methods in CLASSNAME.
 
 Note that functions such as C<keys()> and C<values()> may return huge lists
 when used on large objects, like DBM files.  You may prefer to use the
@@ -4166,28 +4166,52 @@ C<each()> function to iterate over such.  Example:
 A class implementing a hash should have the following methods:
 
     TIEHASH classname, LIST
-    DESTROY this
     FETCH this, key
     STORE this, key, value
     DELETE this, key
+    CLEAR this
     EXISTS this, key
     FIRSTKEY this
     NEXTKEY this, lastkey
+    DESTROY this
 
 A class implementing an ordinary array should have the following methods:
 
     TIEARRAY classname, LIST
-    DESTROY this
     FETCH this, key
     STORE this, key, value
-    [others TBD]
+    FETCHSIZE this
+    STORESIZE this, count
+    CLEAR this
+    PUSH this, LIST
+    POP this
+    SHIFT this
+    UNSHIFT this, LIST
+    SPLICE this, offset, length, LIST
+    EXTEND this, count
+    DESTROY this
+
+A class implementing a file handle should have the following methods:
+
+    TIEHANDLE classname, LIST
+    READ this, scalar, length, offset
+    READLINE this
+    GETC this
+    WRITE this, scalar, length, offset
+    PRINT this, LIST
+    PRINTF this, format, LIST
+    CLOSE this
+    DESTROY this
 
 A class implementing a scalar should have the following methods:
 
     TIESCALAR classname, LIST
-    DESTROY this
     FETCH this,
     STORE this, value
+    DESTROY this
+
+Not all methods indicated above need be implemented.  See L<perltie>,
+L<Tie::Hash>, L<Tie::Array>, L<Tie::Scalar> and L<Tie::Handle>.
 
 Unlike C<dbmopen()>, the C<tie()> function will not use or require a module
 for you--you need to do that explicitly yourself.  See L<DB_File>
