@@ -1225,6 +1225,7 @@ lib/Tie/Hash.pm			Base class for tied hashes
 lib/Tie/RefHash.pm		Base class for tied hashes with references as keys
 lib/Tie/RefHash.t		Test for Tie::RefHash and Tie::RefHash::Nestable
 lib/Tie/Scalar.pm		Base class for tied scalars
+lib/Tie/Scalar.t		See if Tie::Scalar works
 lib/Tie/SubstrHash.pm		Compact hash for known key, value and table size
 lib/Tie/SubstrHash.t		Test for Tie::SubstrHash
 lib/Time/gmtime.pm		By-name interface to Perl's builtin gmtime

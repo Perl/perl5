@@ -92,7 +92,7 @@ sub new {
 
 sub TIESCALAR {
     my $pkg = shift;
-    if (defined &{"{$pkg}::new"}) {
+	if ($pkg->can('new') and $pkg ne __PACKAGE__) {
 	warnings::warnif("WARNING: calling ${pkg}->new since ${pkg}->TIESCALAR is missing");
 	$pkg->new(@_);
     }
