@@ -136,7 +136,28 @@ case `$cc -v 2>&1`"" in
 		esac
 	    ;;
     *)      ccisgcc=''
-	    ccversion=`which cc | xargs what | awk '/Compiler/{print $2}/Itanium/{print $6,$7}'`
+	    # What cannot be use in combination with ccache links :(
+	    cc_found=""
+	    for p in `echo $PATH | tr : ' ''` ; do
+		x="$p/cc"
+		if [ -f $x ] && [ -x $x ]; then
+		    if [ -h $x ]; then
+			l=`ls -l $x | sed 's,.*-> ,,'`
+			case $l in
+			    /*) x=$l		;;
+			    *)  x="$p/$l"	;;
+			    esac
+			fi
+		    x=`echo $x | sed 's,/\./,/,g'`
+		    case $x in
+			*ccache*) ;;
+			*) [ -z "$cc_found" ] && cc_found=$x ;;
+			esac
+		    fi
+		done
+	    [ -z "$cc_found" ] && cc_found=`which cc`
+	    what $cc_found >&4
+	    ccversion=`what $cc_found | awk '/Compiler/{print $2}/Itanium/{print $6,$7}'`
 	    case "$ccflags" in
                "-Ae "*) ;;
 		*)  ccflags="-Ae $cc_cppflags"

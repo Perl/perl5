@@ -39,9 +39,10 @@ d_suidsafe='undef'
 # do the implicit mapping.
 ignore_versioned_solibs='y'
 
-# BSD compatability library no longer needed
-# 'kaffe' has a /usr/lib/libnet.so which is not at all relevent for perl.
-set `echo X "$libswanted "| sed -e 's/ bsd / /' -e 's/ net / /'`
+# BSD compatibility library no longer needed
+# 'kaffe' has a /usr/lib/libnet.so which is not at all relevant for perl.
+# bind causes issues with several reentrant functions
+set `echo X "$libswanted "| sed -e 's/ bsd / /' -e 's/ net / /' -e 's/ bind / /'`
 shift
 libswanted="$*"
 

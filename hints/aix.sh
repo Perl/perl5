@@ -113,7 +113,7 @@ case "$cc" in
 	    fi
 	;;
 
-    *)  ccversion=`lslpp -L | grep 'C for AIX Compiler$' | grep -v '\.msg\.[A-Za-z_]*\.' | head -1 | awk '{print $1,$2}'`
+    *)  ccversion=`lslpp -ql -Ou vac.C | grep -v '^Path' | head -1 | awk '{print $1,$2}'`
 	case "$ccversion" in
 	    '') ccversion=`lslpp -L | grep 'IBM C and C++ Compilers LUM$'` ;;
 
