@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..6\n";
+print "1..10\n";
 
 $SIG{__DIE__} = sub { print ref($_[0]) ? ("ok ",$_[0]->[0]++,"\n") : @_ } ;
 
@@ -24,3 +24,20 @@ eval {
     };
     die if $@;
 };
+
+eval {
+    eval {
+	die bless [ 7 ], "Error";
+    };
+    die if $@;
+};
+
+print "not " unless ref($@) eq "Out";
+print "ok 10\n";
+
+package Error;
+
+sub PROPAGATE {
+    print "ok ",$_[0]->[0]++,"\n";
+    bless [$_[0]->[0]], "Out";
+}
