@@ -16,6 +16,8 @@ sub PRINTF {
     $$self .= sprintf $fmt, @_;
 }
 
+sub FILENO {}
+
 sub read {
     my $self = shift;
     my $data = $$self;

@@ -18,20 +18,23 @@ if( $th_version < 2.03 ) {
     exit;
 }
 
-plan tests => 15;
+plan tests => 16;
 
 
 $Why = 'Just testing the todo interface.';
 
+my $is_todo;
 TODO: {
     local $TODO = $Why;
 
     fail("Expected failure");
     fail("Another expected failure");
+
+    $is_todo = Test::More->builder->todo;
 }
 
-
 pass("This is not todo");
+ok( $is_todo, 'TB->todo' );
 
 
 TODO: {

@@ -1,22 +1,31 @@
 #!/usr/bin/perl
-# $File: //member/autrijus/Module-Signature/t/0-signature.t $ $Author: autrijus $
-# $Revision: #5 $ $Change: 7212 $ $DateTime: 2003/07/28 14:21:21 $
 
 use strict;
-use Test::More tests => 1;
+use Test::More;
 
-SKIP: {
-    if (!eval { require Module::Signature; 1 }) {
-	skip("Next time around, consider install Module::Signature, ".
-	     "so you can verify the integrity of this distribution.", 1);
-    }
-    elsif (!eval { require Socket; Socket::inet_aton('pgp.mit.edu') }) {
-	skip("Cannot connect to the keyserver", 1);
-    }
-    else {
-	ok(Module::Signature::verify() == Module::Signature::SIGNATURE_OK()
-	    => "Valid signature" );
-    }
+if (!eval { require Module::Signature; 1 }) {
+    plan skip_all => 
+      "Next time around, consider installing Module::Signature, ".
+      "so you can verify the integrity of this distribution.";
+}
+elsif ( !-e 'SIGNATURE' ) {
+    plan skip_all => "SIGNATURE not found";
+}
+elsif ( -s 'SIGNATURE' == 0 ) {
+    plan skip_all => "SIGNATURE file empty";
+}
+elsif (!eval { require Socket; Socket::inet_aton('pgp.mit.edu') }) {
+    plan skip_all => "Cannot connect to the keyserver to check module ".
+                     "signature";
+}
+else {
+    plan tests => 1;
 }
 
-__END__
+my $ret = Module::Signature::verify();
+SKIP: {
+    skip "Module::Signature cannot verify", 1 
+      if $ret eq Module::Signature::CANNOT_VERIFY();
+
+    cmp_ok $ret, '==', Module::Signature::SIGNATURE_OK(), "Valid signature";
+}

@@ -52,7 +52,7 @@ END {
 not ok 1
 OUT
 
-    My::Test::ok($$err eq <<"ERR") || print $$err;
+    My::Test::ok($$err eq <<ERR) || print $$err;
 #     Failed test ($0 at line 45)
 # Looks like you failed 1 test of 1.
 ERR

@@ -1,4 +1,4 @@
-#!perl -w
+#!/usr/bin/perl -w
 
 BEGIN {
     if( $ENV{PERL_CORE} ) {
@@ -9,14 +9,8 @@ BEGIN {
         unshift @INC, 't/lib';
     }
 }
-chdir 't';
 
-BEGIN {
-    # There was a bug with overloaded objects and threads.
-    # See rt.cpan.org 4218
-    eval { require threads; 'threads'->import; 1; };
-}
-
+use strict;
 use Test::More;
 
 BEGIN {
@@ -24,7 +18,7 @@ BEGIN {
         plan skip_all => "needs overload.pm";
     }
     else {
-        plan tests => 3;
+        plan tests => 7;
     }
 }
 
@@ -32,22 +26,25 @@ BEGIN {
 package Overloaded;
 
 use overload
-  q{""} => sub { $_[0]->{string} };
+        q{""}    => sub { $_[0]->{string} },
+        q{0}     => sub { $_[0]->{num} },
+        fallback => 1;
 
 sub new {
     my $class = shift;
-    bless { string => shift }, $class;
+    bless { string => shift, num => shift }, $class;
 }
 
 
 package main;
 
-my $warnings = '';
-local $SIG{__WARN__} = sub { $warnings = join '', @_ };
-my $obj = Overloaded->new('foo');
-ok( 1, $obj );
+my $obj = Overloaded->new('foo', 42);
+isa_ok $obj, 'Overloaded';
 
-my $undef = Overloaded->new(undef);
-pass( $undef );
+is $obj, 'foo',            'is() with string overloading';
+cmp_ok $obj, 'eq', 'foo',  'cmp_ok() ...';
+cmp_ok $obj, '==', 'foo',  'cmp_ok() with number overloading';
 
-is( $warnings, '' );
+is_deeply [$obj], ['foo'],                 'is_deeply with string overloading';
+ok eq_array([$obj], ['foo']),              'eq_array ...';
+ok eq_hash({foo => $obj}, {foo => 'foo'}), 'eq_hash ...';
