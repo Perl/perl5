@@ -29,7 +29,7 @@ use Pod::Perldoc::GetOptsOO; # uses the DEBUG.
 
 #..........................................................................
 { my $pager = $Config{'pager'};
-  push @Pagers, $pager if -x (split /\s+/, $pager)[0];
+  push @Pagers, $pager if ((-x (split /\s+/, $pager)[0]) || $^O eq 'VMS');
 }
 $Bindir  = $Config{'scriptdirexp'};
 $Pod2man = "pod2man" . ( $Config{'versiononly'} ? $Config{'version'} : '' );
