@@ -4004,7 +4004,7 @@ $cat >try.msg <<'EOM'
 I've tried to compile and run the following simple program:
 
 EOM
-$cat try.c
+$cat try.c >> try.msg
 
 $cat >> try.msg <<EOM
 
