@@ -27,6 +27,7 @@ my %BaseNames;
 ##
 my $Verbose        = 0;
 my $MakeTestScript = 0;
+my $AlwaysWrite    = 0;
 
 while (@ARGV)
 {
@@ -35,6 +36,8 @@ while (@ARGV)
         $Verbose = 1;
     } elsif ($arg eq '-q') {
         $Verbose = 0;
+    } elsif ($arg eq '-w') {
+        $AlwaysWrite = 1;	# update the files even if they havent changed
     } elsif ($arg eq '-maketest') {
         $MakeTestScript = 1;
     } elsif ($arg eq '-C' && defined (my $dir = shift)) {
@@ -88,7 +91,7 @@ sub WriteIfChanged($\@)
         close IN;
         if ($PreviousText eq $TextToWrite) {
             print "$file unchanged.\n" if $Verbose;
-            return;
+            return unless $AlwaysWrite;
         }
     }
     force_unlink ($file);

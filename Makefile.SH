@@ -759,7 +759,7 @@ lib/lib.pm:	miniperl$(EXE_EXT) lib/Config.pm
 	$(LDLIBPTH) ./miniperl -Ilib lib/lib_pm.PL
 
 $(unidatafiles): miniperl$(EXE_EXT) lib/Config.pm lib/unicore/mktables
-	cd lib/unicore && $(LDLIBPTH) ../../miniperl -I../../lib mktables
+	cd lib/unicore && $(LDLIBPTH) ../../miniperl -I../../lib mktables -w
 
 extra.pods: miniperl$(EXE_EXT)
 	-@test -f extra.pods && rm -f `cat extra.pods`
