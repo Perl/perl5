@@ -174,7 +174,7 @@ sub decode
  my ($obj,$str,$chk) = @_;
  my $rep   = $obj->{'Rep'};
  my $touni = $obj->{'ToUni'};
- my $uni   = '';
+ my $uni;
  while (length($str))
   {
    my $ch = ord(substr($str,0,1,''));
@@ -204,9 +204,9 @@ sub encode
 {
  my ($obj,$uni,$chk) = @_;
  my $fmuni = $obj->{'FmUni'};
- my $str   = '';
  my $def   = $obj->{'Def'};
  my $rep   = $obj->{'Rep'};
+ my $str;
  while (length($uni))
   {
    my $ch = substr($uni,0,1,'');
@@ -229,27 +229,130 @@ use Carp;
 
 sub read
 {
- my ($class,$fh,$name) = @_;
- my %self = (Name => $name, Num => 0);
+ my ($obj,$fh,$name) = @_;
+ my(%tbl, @esc, $enc);
  while (<$fh>)
   {
    my ($key,$val) = /^(\S+)\s+(.*)$/;
    $val =~ s/^\{(.*?)\}/$1/g;
    $val =~ s/\\x([0-9a-f]{2})/chr(hex($1))/ge;
-   $self{$key} = $val;
+   if($enc = Encode->getEncoding($key)){
+     $tbl{$val} = ref($enc) eq 'Encode::Tcl' ? $enc->loadEncoding : $enc;
+     push @esc, $val;
+   }else{
+     $obj->{$key} = $val;
+   }
   }
- return bless \%self,$class;
+ $obj->{'Ctl'} = \@esc;
+ $obj->{'Tbl'} = \%tbl;
+ return $obj;
 }
 
 sub decode
 {
- croak("Not implemented yet");
+ my ($obj,$str,$chk) = @_;
+ my $tbl = $obj->{'Tbl'};
+ my $ctl = $obj->{'Ctl'};
+ my $ini = $obj->{'init'};
+ my $fin = $obj->{'final'};
+ my $std = $ctl->[0];
+ my $cur = $std;
+ my $uni;
+ while (length($str)){
+   my $uch = substr($str,0,1,'');
+   if($uch eq "\e"){
+    $str =~ s/^([\x20-\x2F]*[\x30-\x7E](?:\x1b[\x20-\x2F]*[\x30-\x7E])*)//;
+    my $esc = "\e$1";
+    if($tbl->{$esc}){ $cur = $esc }
+    elsif($esc eq $ini || $esc eq $fin){ $cur = $std }
+    else{carp "unknown escape sequence" }
+    next;
+   }
+   if($uch eq "\x0e" || $uch eq "\x0f"){
+    $cur = $uch and next;
+   }
+   my $x;
+   if(ref($tbl->{$cur}) eq 'Encode::XS'){
+     $uni .= $tbl->{$cur}->decode($uch);
+     next;
+   }
+   my $ch = ord($uch);
+   my $rep   = $tbl->{$cur}->{'Rep'};
+   my $touni = $tbl->{$cur}->{'ToUni'};
+   if (&$rep($ch) eq 'C')
+    {
+     $x = $touni->[0][$ch];
+    }
+   else
+    {
+     $x = $touni->[$ch][ord(substr($str,0,1,''))];
+    }
+   unless (defined $x)
+    {
+     last if $chk;
+     # What do we do here ?
+     $x = '';
+    }
+   $uni .= $x;
+  }
+ $_[1] = $str if $chk;
+ return $uni;
 }
 
 sub encode
 {
- croak("Not implemented yet");
-}
+ my ($obj,$uni,$chk) = @_;
+ my $tbl = $obj->{'Tbl'};
+ my $ctl = $obj->{'Ctl'};
+ my $ini = $obj->{'init'};
+ my $fin = $obj->{'final'};
+ my $std = $ctl->[0];
+ my $str = $ini;
+ my $pre = $std;
+ my $cur = $pre;
 
+ while (length($uni)){
+  my $ch = chr(ord(substr($uni,0,1,'')));
+  my $x  = ref($tbl->{$pre}) eq 'Encode::XS'
+	? $tbl->{$pre}->encode($ch,1)
+	: $tbl->{$pre}->{FmUni}->{$ch};
+
+  unless(defined $x){
+   foreach my $esc (@$ctl){
+    $x = ref($tbl->{$esc}) eq 'Encode::XS'
+	? $tbl->{$esc}->encode($ch,1)
+	: $tbl->{$esc}->{FmUni}->{$ch};
+    $cur = $esc and last if defined $x;
+   }
+  }
+  if($x == 0x0d && !($ini eq '' && $fin eq '') && substr($uni,0,1) eq "\x0a")
+   {
+    $str .= $cur unless $cur eq $pre;
+    $str .= $fin."\x0d\x0a".$ini;
+    substr($uni,0,1,'');
+    $pre = $std;
+    next;
+   }
+  if(ref($tbl->{$cur}) eq 'Encode::XS'){
+   $str .= $cur unless $cur eq $pre;
+   $str .= $x; # "DEF" is lost
+   $pre = $cur;
+   next;
+  }
+  my $def = $tbl->{$cur}->{'Def'};
+  my $rep = $tbl->{$cur}->{'Rep'};
+  unless (defined $x){
+   last if ($chk);
+   $x = $def;
+  }
+  $str .= $cur unless $cur eq $pre;
+  $str .= pack(&$rep($x),$x);
+  $pre = $cur;
+ }
+ $str .= $std unless $cur eq $std;
+ $str .= $fin;
+ $_[1] = $uni if $chk;
+ return $str;
+}
 1;
 __END__

@@ -174,6 +174,9 @@ ext/Encode/encengine.c	Encode extension
 ext/Encode/encode.h	Encode extension
 ext/Encode/Encode.pm		Encode extension
 ext/Encode/Encode.xs		Encode extension
+ext/Encode/Encode/7bit-jis.enc	Encoding tables
+ext/Encode/Encode/7bit-kana.enc	Encoding tables
+ext/Encode/Encode/7bit-kr.enc	Encoding tables
 ext/Encode/Encode/ascii.enc	Encoding tables
 ext/Encode/Encode/ascii.ucm	Encoding tables
 ext/Encode/Encode/big5.enc	Encoding tables
@@ -716,9 +719,8 @@ lib/abbrev.pl			An abbreviation table builder
 lib/AnyDBM_File.pm		Perl module to emulate dbmopen
 lib/AnyDBM_File.t		See if AnyDBM_File works
 lib/assert.pl			assertion and panic with stack trace
-lib/Attribute/Handlers/Changes	Attribute::Handlers
-lib/Attribute/Handlers/README	Attribute::Handlers
 lib/Attribute/Handlers.pm		Attribute::Handlers
+lib/Attribute/Handlers/Changes	Attribute::Handlers
 lib/Attribute/Handlers/demo/demo.pl	Attribute::Handlers demo
 lib/Attribute/Handlers/demo/Demo.pm	Attribute::Handlers demo
 lib/Attribute/Handlers/demo/demo2.pl	Attribute::Handlers demo
@@ -733,6 +735,7 @@ lib/Attribute/Handlers/demo/demo_range.pl	Attribute::Handlers demo
 lib/Attribute/Handlers/demo/demo_rawdata.pl	Attribute::Handlers demo
 lib/Attribute/Handlers/demo/Descriptions.pm	Attribute::Handlers demo
 lib/Attribute/Handlers/demo/MyClass.pm	Attribute::Handlers demo
+lib/Attribute/Handlers/README	Attribute::Handlers
 lib/Attribute/Handlers/test.pl		See if Attribute::Handlers works
 lib/attributes.pm		For "sub foo : attrlist"
 lib/AutoLoader.pm		Autoloader base class
@@ -1095,9 +1098,9 @@ lib/Test/Harness.pm		A test harness
 lib/Test/Harness.t		See if Test::Harness works
 lib/Test/More.pm                More utilities for writing tests
 lib/Test/More/Changes		Test::More changes
-lib/Test/More/t/More.t          Test::More test, basic operation
 lib/Test/More/t/fail-like.t     Test::More test, like() and qr// bug
 lib/Test/More/t/fail.t          Test::More test, failing tests
+lib/Test/More/t/More.t          Test::More test, basic operation
 lib/Test/More/t/plan_is_noplan.t        Test::More test, noplan
 lib/Test/More/t/skipall.t       Test::More test, skipping all tests
 lib/Test/Simple.pm              Basic utility for writing tests
@@ -1519,10 +1522,10 @@ NetWare/Nwpipe.c		Netware port
 NetWare/nwpipe.h		Netware port
 NetWare/nwplglob.c		Netware port
 NetWare/nwplglob.h		Netware port
+NetWare/nwstdio.h		Netware port
 NetWare/NWTInfo.c		Netware port
 NetWare/nwtinfo.h		Netware port
 NetWare/NWUtil.c		Netware port
-NetWare/nwstdio.h		Netware port
 NetWare/nwutil.h		Netware port
 NetWare/perlsdio.h		Netware port
 NetWare/t/NWModify.pl		Netware port
@@ -1546,7 +1549,6 @@ os2/dl_os2.c			Addon for dl_open
 os2/Makefile.SHs		Shared library generation for OS/2
 os2/os2.c			Additional code for OS/2
 os2/os2.sym			Additional symbols to export
-os2/os2_base.t			Additional tests for builtin methods
 os2/OS2/ExtAttr/Changes		EA access module
 os2/OS2/ExtAttr/ExtAttr.pm	EA access module
 os2/OS2/ExtAttr/ExtAttr.xs	EA access module
@@ -1589,6 +1591,7 @@ os2/OS2/REXX/t/rx_vrexx.t	DLL access module
 os2/os2add.sym			Overriding symbols to export
 os2/os2ish.h			Header for OS/2
 os2/os2thread.h			pthread-like typedefs
+os2/os2_base.t			Additional tests for builtin methods
 os2/perl2cmd.pl			Corrects installed binaries under OS/2
 patchlevel.h			The current patch level of perl
 perl.c				main()

@@ -1,0 +1,7 @@
+# Encoding file: 7bit-kr, escape-driven
+E
+name		7bit-kr
+init		\x1b$)C
+final		{}
+ascii		\x0f
+ksc5601		\x0e
