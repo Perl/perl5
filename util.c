@@ -3202,7 +3202,7 @@ Perl_find_script(pTHX_ char *scriptname, bool dosearch, char **search_ext, I32 f
 		continue;
 	    if (S_ISREG(PL_statbuf.st_mode)
 		&& cando(S_IRUSR,TRUE,&PL_statbuf)
-#if !defined(DOSISH) && !defined(MACOS_TRDITIONAL)
+#if !defined(DOSISH) && !defined(MACOS_TRADITIONAL)
 		&& cando(S_IXUSR,TRUE,&PL_statbuf)
 #endif
 		)
