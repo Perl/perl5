@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Jan 19 19:38:29 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Thu Jan 20 00:42:19 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -671,6 +671,7 @@ i_varargs=''
 i_varhdr=''
 i_vfork=''
 inc_version_list=''
+inc_version_list_init=''
 installprefix=''
 installprefixexp=''
 installstyle=''
@@ -5378,9 +5379,7 @@ foreach $d (@candidates) {
 }
 
 if (@inc_version_list) {
-    print '"';
-    print join('", "', @inc_version_list);
-    print '"';
+    print join(' ', @inc_version_list);
 }
 else {
     # Blank space to preserve value for next Configure run.
@@ -5392,9 +5391,10 @@ case "$inc_version_list" in
 '')	if test -x $perl; then
 		dflt=`$perl getverlist`
 	else
-		dflt=''
+		dflt='none'
 	fi
 	;;
+$undef) dflt='none' ;;
 *)  dflt="$inc_version_list" ;;
 esac
 $cat <<'EOM'
@@ -5404,15 +5404,26 @@ can be configured to use modules built and installed with earlier
 versions of perl that were installed under $prefix.  Specify here
 the list of earlier versions that this version of perl should check.
 If Configure detected no earlier versions of perl installed under
-$prefix, then the list will be empty.
+$prefix, then the list will be empty.  Answer 'none' to tell perl
+to not search earlier versions.
 
 The default should almost always be sensible, so if you're not sure,
 just accept the default.
 EOM
 
-rp='list of earlier versions to include in @INC?'
+rp='List of earlier versions to include in @INC?'
 . ./myread
-inc_version_list="$ans"
+case "$ans" in
+[Nn]one) inc_version_list=' ' ;;
+*) inc_version_list="$ans" ;;
+esac
+case "$inc_version_list" in
+''|' ') 
+	inc_version_list_init='""';;
+*)	inc_version_list_init=`echo $inc_version_list |
+		$sed -e 's/^/"/' -e 's/ /","/g' -e 's/$/"/'`
+	;;
+esac
 $rm -f getverlist
 
 : determine whether to install perl also as /usr/bin/perl
@@ -14841,6 +14852,7 @@ i_varhdr='$i_varhdr'
 i_vfork='$i_vfork'
 ignore_versioned_solibs='$ignore_versioned_solibs'
 inc_version_list='$inc_version_list'
+inc_version_list_init='$inc_version_list_init'
 incpath='$incpath'
 inews='$inews'
 installarchlib='$installarchlib'

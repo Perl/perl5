@@ -2125,11 +2125,17 @@ ignore_versioned_solibs (libs.U):
 inc_version_list (inc_version_list.U):
 	This variable specifies the list of subdirectories in over
 	which perl.c:incpush() and lib/lib.pm will automatically
-	search when adding directories to @INC.  This is only useful
+	search when adding directories to @INC.  The elements in
+	the list are separated by spaces.  This is only useful
 	if you have a perl library directory tree structured like the
 	default one.  See INSTALL for how this works.  The versioned
 	site_perl directory was introduced in 5.005, so that is the
 	lowest possible value.
+
+inc_version_list_init (inc_version_list.U):
+	This variable holds the same list as inc_version_list, but
+	each item is enclosed in double quotes and separated by commas, 
+	suitable for use in the PERL_INC_VERSION_LIST initialization.
 
 incpath (usrinc.U):
 	This variable must preceed the normal include path to get hte
