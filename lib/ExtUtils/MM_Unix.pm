@@ -3566,7 +3566,7 @@ sub oneliner {
     $cmd =~ s{\n+$}{};
 
     my @cmds = split /\n/, $cmd;
-    $cmd = join "\n\t-e ", map $self->quote_literal($_), @cmds;
+    $cmd = join " \n\t-e ", map $self->quote_literal($_), @cmds;
     $cmd = $self->escape_newlines($cmd);
 
     $switches = join ' ', @$switches;
