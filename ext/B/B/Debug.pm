@@ -1,6 +1,6 @@
 package B::Debug;
 
-our $VERSION = '1.00';
+our $VERSION = '1.01';
 
 use strict;
 use B qw(peekop class walkoptree walkoptree_exec

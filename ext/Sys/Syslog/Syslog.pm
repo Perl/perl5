@@ -7,7 +7,7 @@ use Carp;
 @ISA = qw(Exporter DynaLoader);
 @EXPORT = qw(openlog closelog setlogmask syslog);
 @EXPORT_OK = qw(setlogsock);
-$VERSION = '0.03';
+$VERSION = '0.04';
 
 # it would be nice to try stream/unix first, since that will be
 # most efficient. However streams are dodgy - see _syslog_send_stream
