@@ -10407,7 +10407,7 @@ Perl_sv_recode_to_utf8(pTHX_ SV *sv, SV *encoding)
 	  SPAGAIN;
 	  uni = POPs;
 	  PUTBACK;
-	  s = SvPVutf8(uni, len);
+	  s = SvPV(uni, len);
 	  if (s != SvPVX(sv)) {
 	       SvGROW(sv, len);
 	       Move(s, SvPVX(sv), len, char);
