@@ -21,6 +21,7 @@
 #include <process.h>
 #include <fcntl.h>
 
+#define PERLIO_NOT_STDIO 0
 #include "EXTERN.h"
 #include "perl.h"
 
@@ -605,8 +606,9 @@ do_spawn_ve(pTHX_ SV *really, U32 flag, U32 execf, char *inicmd, U32 addflag)
 		char *scr = find_script(PL_Argv[0], TRUE, NULL, 0);
 
 		if (scr) {
-		    FILE *file;
-		    char *s = 0, *s1;
+		    PerlIO *file;
+                    SSize_t rd;
+		    char *s = 0, *s1, *s2;
 		    int l;
 
                     l = strlen(scr);
@@ -622,14 +624,18 @@ do_spawn_ve(pTHX_ SV *really, U32 flag, U32 execf, char *inicmd, U32 addflag)
                     Safefree(scr);
                     scr = scrbuf;
 
-		    file = fopen(scr, "r");
+		    file = PerlIO_open(scr, "r");
 		    PL_Argv[0] = scr;
 		    if (!file)
 			goto panic_file;
-		    if (!fgets(buf, sizeof buf, file)) { /* Empty... */
 
+		    rd = PerlIO_read(file, buf, sizeof buf-1);
+		    buf[rd]='\0';
+		    if ((s2 = strchr(buf, '\n')) != NULL) *++s2 = '\0';
+
+		    if (!rd) { /* Empty... */
 			buf[0] = 0;
-			fclose(file);
+			PerlIO_close(file);
 			/* Special case: maybe from -Zexe build, so
 			   there is an executable around (contrary to
 			   documentation, DosQueryAppType sometimes (?)
@@ -648,7 +654,7 @@ do_spawn_ve(pTHX_ SV *really, U32 flag, U32 execf, char *inicmd, U32 addflag)
 			} else
 			    goto longbuf;
 		    }
-		    if (fclose(file) != 0) { /* Failure */
+		    if (PerlIO_close(file) != 0) { /* Failure */
 		      panic_file:
 			Perl_warner(aTHX_ WARN_EXEC, "Error reading \"%s\": %s", 
 			     scr, Strerror(errno));
