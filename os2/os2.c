@@ -1139,12 +1139,15 @@ Xs_OS2_init()
 OS2_Perl_data_t OS2_Perl_data;
 
 void
-Perl_OS2_init()
+Perl_OS2_init(char **env)
 {
     char *shell;
 
     settmppath();
     OS2_Perl_data.xs_init = &Xs_OS2_init;
+    if (environ == NULL) {
+	environ = env;
+    }
     if ( (shell = getenv("PERL_SH_DRIVE")) ) {
 	New(404, sh_path, strlen(SH_PATH) + 1, char);
 	strcpy(sh_path, SH_PATH);

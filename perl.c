@@ -1438,6 +1438,10 @@ GNU General Public License, which may be found in the Perl 5.0 source kit.\n\n")
     case 'P':
 	if (preprocess)
 	    return s+1;
+#ifdef ALTERNATE_SHEBANG
+    case 'S':			/* OS/2 needs -S on "extproc" line. */
+	break;
+#endif
 	/* FALL THROUGH */
     default:
 	croak("Can't emulate -%.1s on #! line",s);

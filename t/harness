@@ -3,8 +3,9 @@
 # We suppose that perl _mostly_ works at this moment, so may use
 # sophisticated testing.
 
-# Note that _before install_ you may need to run it with -I ../lib flag
-
+BEGIN {
+  unshift @INC, '../lib';	# To get lib.pm
+}
 use lib '../lib';
 use Test::Harness;
 

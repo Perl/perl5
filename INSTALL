@@ -913,6 +913,14 @@ bomb, you can run them by hand, e.g.,
 
 	./perl op/groups.t
 
+Another way to get more detailed information about failed tests and
+individual subtests is to B<cd> to the F<t> directory and run
+
+	./perl harness
+
+(this assumes that I<most> tests succeed, since F<harness> uses
+complicated constructs).
+
 You can also read the individual tests to see if there are any helpful
 comments that apply to your system.
 

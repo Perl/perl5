@@ -47,7 +47,7 @@
  *	(IOW, Perl won't hand off to another interpreter via an alternate
  *	shebang sequence that might be legal Perl code.)
  */
-/* #define ALTERNATE_SHEBANG "#!" / **/
+#define ALTERNATE_SHEBANG "extproc "
 
 #ifndef SIGABRT
 #    define SIGABRT SIGILL
@@ -64,12 +64,14 @@
 # undef I_SYS_UN
 #endif 
  
-void Perl_OS2_init();
+void Perl_OS2_init(char **);
+
+/* XXX This code hideously puts env inside: */
 
 #define PERL_SYS_INIT(argcp, argvp) STMT_START {	\
     _response(argcp, argvp);			\
     _wildcard(argcp, argvp);			\
-    Perl_OS2_init();	} STMT_END
+    Perl_OS2_init(env);	} STMT_END
 
 #define PERL_SYS_TERM()
 

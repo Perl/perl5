@@ -331,7 +331,7 @@ possibly for cleaning up.
 
 =back
 
-=item Efficiency Enhancements
+=head2 Efficiency Enhancements
 
 All hash keys with the same string are only allocated once, so
 even if you have 100 copies of the same hash, the immutable keys
@@ -339,6 +339,60 @@ never have to be re-allocated.
 
 Functions that have an empty prototype and that do nothing but return
 a fixed value are now inlined (e.g. C<sub PI () { 3.14159 }>).
+
+=head2 Malloc Enhancements
+
+If perl's malloc() is used, you can require memory statistics at
+runtime by running perl thusly:
+
+  env PERL_DEBUG_MSTATS=2 perl your_script_here
+
+The value of 2 means that the statistics is required after the
+compilation and on exit, if value is 1 the statistics is printed on
+exit only. (If you want the statistics at an arbitrary time, you need
+to install an optional module Devel::Peek.)
+
+Three new flags are recognized by malloc.c. (They have no effect if
+perl is compiled with system malloc().)
+
+=over
+
+=item B<-D>C<EMERGENCY_SBRK>
+
+If defined, running out of memory may be not a fatal error if a memory
+pool is allocated by assigning to variable $^M, see L<"$^M">.
+
+=item B<-D>C<PACK_MALLOC>
+
+Perl memory allocation is by bucket with sizes close to powers of
+two. Because of these malloc overhead may be big, especially for data
+of size exactly a power of two. If C<PACK_MALLOC> is defined, perl
+uses a slightly different algorithm for small allocations (up to 64
+bytes long), which makes it possible to have overhead down to 1 byte
+for allocations which are powers of two (and appear quite often).
+
+Expected memory savings (with 8-byte alignment in C<alignbytes>) are
+circa 20% for typical Perl usage. Expected slowdown due to additional
+malloc overhead is in fractions of percent (hard to measure, because
+of the effect of saved memory on speed).
+
+=item B<-D>C<TWO_POT_OPTIMIZE>
+
+Similarly to C<PACK_MALLOC>, this improves allocations of data with
+size close ot power of two, only it works for big allocations
+(starting with 16K by default). Such allocations are typical for big
+hashes and special-purpose scripts, say, image processing.
+
+On young systems the fact that perl requires 2M from system for 1M
+allocation will not affect the speed, since the tail of such a chunk
+is not going to be touched, however, this may affect the maximal
+number of allocations (unless the system overcommits memory).
+
+Expected saving of memory is 0-100% (100% in applications which
+require most memory in such 2**n chunks), expected slowdown
+negligible.
+
+=back
 
 =head1 Pragmata
 

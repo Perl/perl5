@@ -133,3 +133,13 @@ after 5.003_21:
 	'script.sh'. Form without extension will call shell only if
 	the specified file exists (will not look on path) (to prohibit
 	trying to run shell commands directly). - Needed by magic.t.
+
+after 5.003_27:
+	ALTERNATE_SHEBANG="extproc " supported, thus options on this
+	line are processed (possibly twice). -S is made legal on such
+	a line. This -S -x is not needed any more.
+	perl.dll may be used from non-EMX programs (via PERL_SYS_INIT
+	- the caller should have valid variable "env" with
+	environment). Known problems: $$ does not work - is 0, waitpid
+	returns immediately, thus Perl cannot wait for completion of
+	started programs.
