@@ -1,6 +1,6 @@
 #!./perl -w
 
-print "1..21\n";
+print "1..24\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -42,6 +42,11 @@ END {
 
 my $package = "ExtTest";
 
+# Test the code that generates 1 and 2 letter name comparisons.
+my %compass = (
+N => 0, NE => 45, E => 90, SE => 135, S => 180, SW => 225, W => 270, NW => 315
+);
+
 my @names = ("FIVE", {name=>"OK6", type=>"PV",},
              {name=>"OK7", type=>"PVN",
               value=>['"not ok 7\\n\\0ok 7\\n"', 15]},
@@ -56,6 +61,8 @@ my @names = ("FIVE", {name=>"OK6", type=>"PV",},
              {name => "No", type=>"NO"},
              {name => "Undef", type=>"UNDEF"},
 );
+
+push @names, $_ foreach keys %compass;
 
 my @names_only = map {(ref $_) ? $_->{name} : $_} @names;
 
@@ -78,8 +85,14 @@ print FH <<'EOT';
 #define Yes 0
 #define No 1
 #define Undef 1
+
 #undef NOTDEF
+
 EOT
+
+while (my ($point, $bearing) = each %compass) {
+  print FH "#define $point $bearing\n"
+}
 close FH or die "close $header: $!\n";
 
 ################ XS
@@ -232,6 +245,58 @@ unless (defined $undef) {
   print "not ok 16 # \$undef='$undef'\n";
 }
 
+
+# invalid macro (chosen to look like a mix up between No and SW)
+$notdef = eval { &ExtTest::So };
+if (defined $notdef) {
+  print "not ok 17 # \$notdef='$notdef'\n";
+} elsif ($@ !~ /^So is not a valid ExtTest macro/) {
+  print "not ok 17 # \$@='$@'\n";
+} else {
+  print "ok 17\n";
+}
+
+# invalid defined macro
+$notdef = eval { &ExtTest::EW };
+if (defined $notdef) {
+  print "not ok 18 # \$notdef='$notdef'\n";
+} elsif ($@ !~ /^EW is not a valid ExtTest macro/) {
+  print "not ok 18 # \$@='$@'\n";
+} else {
+  print "ok 18\n";
+}
+
+my %compass = (
+EOT
+
+while (my ($point, $bearing) = each %compass) {
+  print FH "$point => $bearing, "
+}
+
+print FH <<'EOT';
+
+);
+
+my $fail;
+while (my ($point, $bearing) = each %compass) {
+  my $val = eval $point;
+  if ($@) {
+    print "# $point: \$@='$@'\n";
+    $fail = 1;
+  } elsif (!defined $bearing) {
+    print "# $point: \$val=undef\n";
+    $fail = 1;
+  } elsif ($val != $bearing) {
+    print "# $point: \$val=$val, not $bearing\n";
+    $fail = 1;
+  }
+}
+if ($fail) {
+  print "not ok 19\n";
+} else {
+  print "ok 19\n";
+}
+
 EOT
 
 close FH or die "close $testpl: $!\n";
@@ -309,7 +374,7 @@ if ($Config{usedl}) {
   }
 }
 
-my $test = 17;
+my $test = 20;
 my $maketest = "$make test";
 print "# make = '$maketest'\n";
 $makeout = `$maketest`;

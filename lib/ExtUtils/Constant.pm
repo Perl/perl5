@@ -1,4 +1,6 @@
 package ExtUtils::Constant;
+use vars qw (@ISA $VERSION %XS_Constant %XS_TypeSet @EXPORT_OK %EXPORT_TAGS);
+$VERSION = '0.05';
 
 =head1 NAME
 
@@ -81,13 +83,11 @@ use strict;
 use Carp;
 
 use Exporter;
-use vars qw (@ISA $VERSION %XS_Constant %XS_TypeSet @EXPORT_OK %EXPORT_TAGS);
 use Text::Wrap;
 $Text::Wrap::huge = 'overflow';
 $Text::Wrap::columns = 80;
 
 @ISA = 'Exporter';
-$VERSION = '0.04';
 
 %EXPORT_TAGS = ( 'all' => [ qw(
 	XS_constant constant_types return_clause memEQ_clause C_stringify
@@ -295,6 +295,90 @@ sub return_clause ($$$$$) {
   return $clause
 }
 
+=item switch_clause INDENT, NAMELEN, ITEMHASH, ITEM...
+
+An internal function to generate a suitable C<switch> clause, called by
+C<C_constant> I<ITEM>s are in the hash ref format as given in the description
+of C<C_constant>, and must all have the names of the same length, given by
+I<NAMELEN> (This is not checked).  I<ITEMHASH> is a reference to a hash,
+keyed by name, values being the hashrefs in the I<ITEM> list.
+(No parameters are modified, and there can be keys in the I<ITEMHASH> that
+are not in the list of I<ITEM>s without causing problems).
+
+=cut
+
+sub switch_clause {
+  my ($indent, $comment, $namelen, $items, @items) = @_;
+  $indent = ' ' x ($indent || 2);
+  
+  my @names = sort map {$_->{name}} @items;
+  my $leader = $indent . '/* ';
+  my $follower = ' ' x length $leader;
+  my $body = $indent . "/* Names all of length $namelen.  */\n";
+  if ($comment) {
+    $body = wrap ($leader, $follower, $comment) . "\n";
+    $leader = $follower;
+  }
+  $body .= wrap ($leader, $follower, join (" ", @names) . " */") . "\n";
+  # Figure out what to switch on.
+  # (RMS, Spread of jump table, Position, Hashref)
+  my @best = (1e38, ~0);
+  foreach my $i (0 .. ($namelen - 1)) {
+    my ($min, $max) = (~0, 0);
+    my %spread;
+    foreach (@names) {
+      my $char = substr $_, $i, 1;
+      my $ord = ord $char;
+      $max = $ord if $ord > $max; 
+      $min = $ord if $ord < $min;
+      push @{$spread{$char}}, $_;
+      # warn "$_ $char";
+    }
+    # I'm going to pick the character to split on that minimises the root
+    # mean square of the number of names in each case. Normally this should
+    # be the one with the most keys, but it may pick a 7 where the 8 has
+    # one long linear search. I'm not sure if RMS or just sum of squares is
+    # actually better.
+    # $max and $min are for the tie-breaker if the root mean squares match.
+    # Assuming that the compiler may be building a jump table for the
+    # switch() then try to minimise the size of that jump table.
+    # Finally use < not <= so that if it still ties the earliest part of
+    # the string wins. Because if that passes but the memEQ fails, it may
+    # only need the start of the string to bin the choice.
+    # I think. But I'm micro-optimising. :-)
+    my $ss;
+    $ss += @$_ * @$_ foreach values %spread;
+    my $rms = sqrt ($ss / keys %spread);
+    if ($rms < $best[0] || ($rms == $best[0] && ($max - $min) < $best[1])) {
+      @best = ($rms, $max - $min, $i, \%spread);
+    }
+  }
+  die "Internal error. Failed to pick a switch point for @names"
+    unless defined $best[2];
+  # use Data::Dumper; print Dumper (@best);
+  my ($offset, $best) = @best[2,3];
+  $body .= $indent . "/* Offset $offset gives the best switch position.  */\n";
+  $body .= $indent . "switch (name[$offset]) {\n";
+  foreach my $char (sort keys %$best) {
+    $body .= $indent . "case '" . C_stringify ($char) . "':\n";
+    foreach my $name (sort @{$best->{$char}}) {
+      my $thisone = $items->{$name};
+      my ($value, $macro, $default) = @$thisone{qw (value macro default)};
+      $value = $name unless defined $value;
+      $macro = $name unless defined $macro;
+
+      # We have checked this offset.
+      $body .= memEQ_clause ($name, $offset, 2 + length $indent);
+      $body .= return_clause ($value, $thisone->{type},  4 + length $indent,
+                              $macro, $default);
+      $body .= $indent . "  }\n";
+    }
+    $body .= $indent . "  break;\n";
+  }
+  $body .= $indent . "}\n";
+  return $body;
+}
+
 =item params WHAT
 
 An internal function. I<WHAT> should be a hashref of types the constant
@@ -317,16 +401,16 @@ sub params {
 
 =item dump_names  
 
-dump_names  PACKAGE, SUBNAME, DEFAULT_TYPE, TYPES, INDENT, ITEM...
+dump_names  PACKAGE, SUBNAME, DEFAULT_TYPE, TYPES, INDENT, BREAKOUT, ITEM...
 
 An internal function to generate the embedded perl code that will regenerate
-the constant subroutines.  Parameters are the same as for C_constant, except
-that there is no NAMELEN.
+the constant subroutines.  Parameters are the same as for C_constant.
 
 =cut
 
 sub dump_names {
-  my ($package, $subname, $default_type, $what, $indent, @items) = @_;
+  my ($package, $subname, $default_type, $what, $indent, $breakout, @items)
+    = @_;
   my (@simple, @complex);
   foreach (@items) {
     my $type = $_->{type} || $default_type;
@@ -354,8 +438,8 @@ sub dump_names {
 use ExtUtils::Constant qw (constant_types C_constant XS_constant);
 
 EOT
-  $result .= 'my $types = {' . join (", ", map "$_ => 1", sort keys %$what)
- . "};\n";
+  $result .= 'my $types = {map {($_, 1)} qw(' . join (" ", sort keys %$what)
+    . ")};\n";
   $result .= wrap ("my \@names = (qw(",
 		   "               ", join (" ", sort @simple) . ")");
   if (@complex) {
@@ -411,12 +495,13 @@ EOT
   if (defined $indent) {
     require Data::Dumper;
     $Data::Dumper::Terse=1;
+    $Data::Dumper::Terse=1; # Not used once. :-)
     chomp ($indent = Data::Dumper::Dumper ($indent));
     $result .= $indent;
   } else {
     $result .= 'undef';
   }
-  $result .= ', undef, @names) ) {
+  $result .= ", $breakout" . ', @names) ) {
     print $_, "\n"; # C constant subs
 }
 print "#### XS Section:\n";
@@ -431,7 +516,7 @@ __END__
 
 =item C_constant 
 
-C_constant PACKAGE, SUBNAME, DEFAULT_TYPE, TYPES, INDENT, NAMELEN, ITEM...
+C_constant PACKAGE, SUBNAME, DEFAULT_TYPE, TYPES, INDENT, BREAKOUT, ITEM...
 
 A function that returns a B<list> of C subroutine definitions that return
 the value and type of constants when passed the name by the XS wrapper.
@@ -496,16 +581,34 @@ be used to pass in information used to change the C indentation style used.]
 The best way to maintain consistency is to pass in a hash reference and let
 this function update it.
 
-I<NAMELEN> if defined signals that all the I<name>s of the I<ITEM>s are of
-this length, and that the constant name passed in by perl is checked and
-also of this length. It is used during recursion, and should be C<undef>
-unless the caller has checked all the lengths during code generation, and
-the generated subroutine is only to be called with a name of this length.
+I<BREAKOUT> governs when child functions of I<SUBNAME> are generated.  If there
+are I<BREAKOUT> or more I<ITEM>s with the same length of name, then the code
+to switch between them is placed into a function named I<SUBNAME>_I<LEN>, for
+example C<constant_5> for names 5 characters long.  The default I<BREAKOUT> is
+3.  A single C<ITEM> is always inlined.
 
 =cut
 
+# The parameter now BREAKOUT was previously documented as:
+#
+# I<NAMELEN> if defined signals that all the I<name>s of the I<ITEM>s are of
+# this length, and that the constant name passed in by perl is checked and
+# also of this length. It is used during recursion, and should be C<undef>
+# unless the caller has checked all the lengths during code generation, and
+# the generated subroutine is only to be called with a name of this length.
+#
+# As you can see it now performs this function during recursion by being a
+# scalar reference.
+
 sub C_constant {
-  my ($package, $subname, $default_type, $what, $indent, $namelen, @items) = @_;
+  my ($package, $subname, $default_type, $what, $indent, $breakout, @items)
+    = @_;
+  my $namelen;
+  if (ref $breakout) {
+    $namelen = $$breakout;
+  } else {
+    $breakout ||= 3;
+  }
   $package ||= 'Foo';
   $subname ||= 'constant';
   # I'm not using this. But a hashref could be used for full formatting without
@@ -556,74 +659,15 @@ sub C_constant {
 
   if (defined $namelen) {
     # We are a child subroutine. Print the simple description
-    my @names = sort map {$_->{name}} @items;
-    my $names = << 'EOT'
-  /* When generated this function returned values for the list of names given
-     here.  However, subsequent manual editing may have added or removed some.
-EOT
-     . wrap ("     ", "     ", join (" ", @names) . " */") . "\n";
-    # Figure out what to switch on.
-    # (RMS, Spread of jump table, Position, Hashref)
-    my @best = (1e38, ~0);
-    foreach my $i (0 .. ($namelen - 1)) {
-      my ($min, $max) = (~0, 0);
-      my %spread;
-      foreach (@names) {
-        my $char = substr $_, $i, 1;
-        my $ord = ord $char;
-        $max = $ord if $ord > $max; 
-        $min = $ord if $ord < $min;
-        push @{$spread{$char}}, $_;
-        # warn "$_ $char";
-      }
-      # I'm going to pick the character to split on that minimises the root
-      # mean square of the number of names in each case. Normally this should
-      # be the one with the most keys, but it may pick a 7 where the 8 has
-      # one long linear search. I'm not sure if RMS or just sum of squares is
-      # actually better.
-      # $max and $min are for the tie-breaker if the root mean squares match.
-      # Assuming that the compiler may be building a jump table for the
-      # switch() then try to minimise the size of that jump table.
-      # Finally use < not <= so that if it still ties the earliest part of
-      # the string wins. Because if that passes but the memEQ fails, it may
-      # only need the start of the string to bin the choice.
-      # I think. But I'm micro-optimising. :-)
-      my $ss;
-      $ss += @$_ * @$_ foreach values %spread;
-      my $rms = sqrt ($ss / keys %spread);
-      if ($rms < $best[0] || ($rms == $best[0] && ($max - $min) < $best[1])) {
-        @best = ($rms, $max - $min, $i, \%spread);
-      }
-    }
-    die "Internal error. Failed to pick a switch point for @names"
-      unless defined $best[2];
-    # use Data::Dumper; print Dumper (@best);
-    my ($offset, $best) = @best[2,3];
-    $body .= "  /* Names all of length $namelen.  */\n";
-    $body .= $names;
-    $body .= "  /* Offset $offset gives the best switch position.  */\n";
-    $body .= "  switch (name[$offset]) {\n";
-    foreach my $char (sort keys %$best) {
-      $body .= "  case '" . C_stringify ($char) . "':\n";
-      foreach my $name (sort @{$best->{$char}}) {
-        my $thisone = $items{$name};
-        my ($value, $macro, $default) = @$thisone{qw (value macro default)};
-        $value = $name unless defined $value;
-        $macro = $name unless defined $macro;
-
-        $body .= memEQ_clause ($name, $offset); # We have checked this offset.
-        $body .= return_clause ($value, $thisone->{type}, undef, $macro,
-                                $default);
-        $body .= "    }\n";
-      }
-      $body .= "    break;\n";
-    }
-    $body .= "  }\n";
+    my $comment = 'When generated this function returned values for the list'
+      . ' of names given here.  However, subsequent manual editing may have'
+        . ' added or removed some.';
+    $body .= switch_clause (2, $comment, $namelen, \%items, @items);
   } else {
     # We are the top level.
     $body .= "  /* Initially switch on the length of the name.  */\n";
     $body .= dump_names ($package, $subname, $default_type, $what, $indent,
-                         @items);
+                         $breakout, @items);
     $body .= "  switch (len) {\n";
     # Need to group names of the same length
     my @by_length;
@@ -644,9 +688,11 @@ EOT
         $body .= return_clause ($value, $thisone->{type}, undef, $macro,
                                 $default);
         $body .= "    }\n";
+      } elsif (@{$by_length[$i]} < $breakout) {
+        $body .= switch_clause (4, '', $i, \%items, @{$by_length[$i]});
       } else {
         push @subs, C_constant ($package, "${subname}_$i", $default_type,
-                                $what, $indent, $i, @{$by_length[$i]});
+                                $what, $indent, \$i, @{$by_length[$i]});
         $body .= "    return ${subname}_$i (name";
         $body .= ", iv_return" if $use_iv;
         $body .= ", nv_return" if $use_nv;
@@ -755,7 +801,7 @@ EOT
           break;
         case PERL_constant_NOTDEF:
           sv = sv_2mortal(newSVpvf(
-	    "Your vendor has not defined $package macro %s used", s));
+	    "Your vendor has not defined $package macro %s, used", s));
           PUSHs(sv);
           break;
 EOT
@@ -763,13 +809,18 @@ EOT
   foreach $type (sort keys %XS_Constant) {
     $xs .= "\t/* Uncomment this if you need to return ${type}s\n"
       unless $what->{$type};
-    $xs .= << "EOT";
-        case PERL_constant_IS$type:
+    $xs .= "        case PERL_constant_IS$type:\n";
+    if (length $XS_Constant{$type}) {
+      $xs .= << "EOT";
           EXTEND(SP, 1);
           PUSHs(&PL_sv_undef);
           $XS_Constant{$type};
-          break;
 EOT
+    } else {
+      # Do nothing. return (), which will be correctly interpreted as
+      # (undef, undef)
+    }
+    $xs .= "          break;\n";
     unless ($what->{$type}) {
       chop $xs; # Yes, another need for chop not chomp.
       $xs .= " */\n";
@@ -778,7 +829,7 @@ EOT
   $xs .= << "EOT";
         default:
           sv = sv_2mortal(newSVpvf(
-	    "Unexpected return type %d while processing $package macro %s used",
+	    "Unexpected return type %d while processing $package macro %s, used",
                type, s));
           PUSHs(sv);
         }
