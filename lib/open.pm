@@ -10,8 +10,7 @@ sub in_locale { $^H & $locale::hint_bits }
 
 sub _get_locale_encoding {
     unless (defined $locale_encoding) {
-	eval { require I18N::Langinfo;
-	       import I18N::Langinfo qw(langinfo CODESET) };
+	eval { use I18N::Langinfo qw(langinfo CODESET) };
 	unless ($@) {
 	    $locale_encoding = langinfo(CODESET);
 	}
@@ -35,7 +34,7 @@ sub _get_locale_encoding {
 	    defined $country_language) {
 	    if ($country_language =~ /^ja_JP|japan(?:ese)?$/i) {
 		$locale_encoding = 'eucjp';
-	    } elsif ($country_language =~ /^ko_KR|korea(?:n)?$/i) {
+	    } elsif ($country_language =~ /^ko_KR|korean?$/i) {
 		$locale_encoding = 'euckr';
 	    } elsif ($country_language =~ /^zh_TW|taiwan(?:ese)?$/i) {
 		$locale_encoding = 'euctw';
