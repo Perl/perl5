@@ -15,6 +15,7 @@ use VMS::Filespec;
 use File::Basename;
 
 Exporter::import('ExtUtils::MakeMaker', '$Verbose', '&neatvalue');
+unshift @MM::ISA, 'ExtUtils::MM_VMS';
 
 
 sub eliminate_macros {
@@ -98,7 +99,7 @@ sub catdir {
       $rslt = vmspath($self->eliminate_macros($spath)."/$sdir");
     }
     else { $rslt = vmspath($dir); }
-    print "catdir(",join(',',@_[1..$#_]),") = |$rslt|\n" if $Verbose >= 3;
+    print "catdir($path,$dir) = |$rslt|\n" if $Verbose >= 3;
     $rslt;
 }
 
@@ -116,13 +117,10 @@ sub catfile {
       my($spath) = $path;
       $spath =~ s/.dir$//;
       if ( $spath =~ /^[^\)\]\/:>]+\)$/ && basename($file) eq $file) { $rslt = "$spath$file"; }
-      else {
-          $rslt = $self->eliminate_macros($spath);
-          $rslt = vmsify($rslt.($rslt ? '/' : '').unixify($file));
-      }
+      else { $rslt = vmsify($self->eliminate_macros($spath).'/'.unixify($file)); }
     }
     else { $rslt = vmsify($file); }
-    print "catfile(",join(',',@_[1..$#_]),") = |$rslt|\n" if $Verbose >= 3;
+    print "catfile($path,$file) = |$rslt|\n" if $Verbose >= 3;
     $rslt;
 }
 
@@ -277,7 +275,7 @@ sub init_others {
     $self->{MAKEFILE} ||= $self->{FIRST_MAKEFILE};
     $self->{NOECHO} ||= '@ ';
     $self->{RM_F} = '$(PERL) -e "foreach (@ARGV) { 1 while ( -d $_ ? rmdir $_ : unlink $_)}"';
-    $self->{RM_RF} = '$(PERL) "-I$(INST_LIB)" -e "use File::Path; @dirs = map(VMS::Filespec::unixify($_),@ARGV); rmtree(\@dirs,0,0)"';
+    $self->{RM_RF} = '$(PERL) -e "use File::Path; @dirs = map(VMS::Filespec::unixify($_),@ARGV); rmtree(\@dirs,0,0)"';
     $self->{TOUCH} = '$(PERL) -e "$t=time; foreach (@ARGV) { -e $_ ? utime($t,$t,@ARGV) : (open(F,qq(>$_)),close F)}"';
     $self->{CHMOD} = '$(PERL) -e "chmod @ARGV"';  # expect Unix syntax from MakeMaker
     $self->{CP} = 'Copy/NoConfirm';
@@ -698,7 +696,7 @@ sub tools_other {
 	ExtUtils::MakeMaker::TieAtt::warndirectuse((caller(0))[3]);
 	$self = $ExtUtils::MakeMaker::Parent[-1];
     }
-    qq!
+    "
 # Assumes \$(MMS) invokes MMS or MMK
 # (It is assumed in some cases later that the default makefile name
 # (Descrip.MMS for MM[SK]) is used.)
@@ -715,8 +713,7 @@ RM_F  = $self->{RM_F}
 RM_RF = $self->{RM_RF}
 UMASK_NULL = $self->{UMASK_NULL}
 MKPATH = Create/Directory
-EQUALIZE_TIMESTAMP = \$(PERL) -we "open F,"">\$ARGV[1]"";close F;utime((stat(""\$ARGV[0]""))[8,9],\$ARGV[1])"
-!;
+";
 }
 
 
@@ -874,30 +871,17 @@ sub dlsyms {
     return '' unless $self->needs_linking();
 
     my($funcs) = $attribs{DL_FUNCS} || $self->{DL_FUNCS} || {};
-    my($vars)  = $attribs{DL_VARS}  || $self->{DL_VARS}  || [];
-    my($srcdir)= $attribs{PERL_SRC} || $self->{PERL_SRC} || '';
+    my($vars)  = $attribs{DL_VARS} || $self->{DL_VARS} || [];
     my(@m);
 
-    unless ($self->{SKIPHASH}{'dynamic'}) {
-	push(@m,'
+    push(@m,'
 dynamic :: rtls.opt $(INST_ARCHAUTODIR)$(BASEEXT).opt
 	$(NOOP)
-');
-	if ($srcdir) {
-	   my($opt) = $self->catfile($srcdir,'perlshr.opt');
-	   push(@m,"# Depend on $(BASEEXT).opt to insure we copy here *after* autogenerating (wrong) rtls.opt in Mksymlists
-rtls.opt : $opt \$(BASEEXT).opt
-	Copy/Log $opt Sys\$Disk:[]rtls.opt
-");
-	}
-	else {
-	    push(@m,'
+
 # rtls.opt is built in the same step as $(BASEEXT).opt
 rtls.opt : $(BASEEXT).opt
 	$(TOUCH) $(MMS$TARGET)
-');
-	}
-    }
+') unless $self->{SKIPHASH}{'dynamic'};
 
     push(@m,'
 static :: $(INST_ARCHAUTODIR)$(BASEEXT).opt
@@ -1131,8 +1115,8 @@ sub installbin {
     for $from (@{$self->{EXE_FILES}}) {
 	my($path) = '$(INST_EXE)' . basename($from);
 	local($_) = $path;  # backward compatibility
-	$to = $self->exescan($path);
-	print "exescan($from) => '$to'\n" if ($Verbose >=2);
+	$to = $self->libscan($path);
+	print "libscan($from) => '$to'\n" if ($Verbose >=2);
 	$fromto{$from}=$to;
     }
     @to   = values %fromto;
@@ -1181,8 +1165,7 @@ sub pasthru {
     my(@pasthru);
 
     foreach $key (qw(INSTALLPRIVLIB INSTALLARCHLIB INSTALLBIN 
-                     INSTALLMAN1DIR INSTALLMAN3DIR LIBPERL_A
-                     LINKTYPE PREFIX)){
+                     INSTALLMAN1DIR INSTALLMAN3DIR LIBPERL_A LINKTYPE)){
 	push @pasthru, "$key=\"$self->{$key}\"";
     }
 
@@ -1408,17 +1391,14 @@ sub install {
 	$self = $ExtUtils::MakeMaker::Parent[-1];
     }
     my(@m);
-    push @m, q[
+    push @m, q{
 doc_install ::
-	],$self->{NOECHO},q[Write Sys$Output "Appending installation info to $(INST_ARCHLIB)perllocal.pod"
-	],$self->{NOECHO},q[$(PERL) -e "print q{use ExtUtils::MakeMaker; }" >.MM_tmp
-	],$self->{NOECHO},q[$(PERL) -e "print q{MY->new({})->writedoc(}" >>.MM_tmp
-	],$self->{NOECHO},q[$(PERL) -e "print q{'Module','$(NAME)','LINKTYPE=$(LINKTYPE)',}" >>.MM_tmp
-	],$self->{NOECHO},q[$(PERL) -e "print q{'VERSION=$(VERSION)','XS_VERSION=$(XS_VERSION)',}" >>.MM_tmp
-	],$self->{NOECHO},q[$(PERL) -e "print q{'EXE_FILES=$(EXE_FILES)')}" >>.MM_tmp
-	],$self->{NOECHO},q[$(PERL) "-I$(PERL_LIB)" "-I$(PERL_ARCHLIB)"  .MM_tmp >>$(INSTALLARCHLIB)perllocal.pod
-	],$self->{NOECHO},q[If F$Search(".MM_tmp") .nes. "" then Delete/NoLog .MM_tmp;
-];
+	},$self->{NOECHO},q{Write Sys$Output "Appending installation info to $(INST_ARCHLIB)perllocal.pod"
+	},$self->{NOECHO},q{$(PERL) "-I$(PERL_LIB)" "-I$(PERL_ARCHLIB)"  \\
+		-e "use ExtUtils::MakeMaker; MY->new({})->writedoc('Module', '$(NAME)', \\
+		'LINKTYPE=$(LINKTYPE)', 'VERSION=$(VERSION)', 'XS_VERSION=$(XS_VERSION)', 'EXE_FILES=$(EXE_FILES)')" \\
+		>>$(INSTALLARCHLIB)perllocal.pod
+};
 
     push(@m, "
 install :: pure_install doc_install
@@ -1582,14 +1562,13 @@ test : \$(TEST_TYPE)
       push(@m, '	If F$Search("',$vmsdir,'$(MAKEFILE)").nes."" Then $(PERL) -e "chdir ',"'$vmsdir'",
            '; print `$(MMS) $(PASTHRU2) test`'."\n");
     }
-    push(@m, "\t$self->{NOECHO}Write Sys\$Output \"No tests defined for \$(NAME) extension.\"\n")
+    push(@m, "\t$self->{NOECHO}Write Sys\$Output 'No tests defined for \$(NAME) extension.'\n")
         unless $tests or -f "test.pl" or @{$self->{DIR}};
     push(@m, "\n");
 
     push(@m, "test_dynamic :: all\n");
     push(@m, $self->test_via_harness('$(FULLPERL)', $tests)) if $tests;
     push(@m, $self->test_via_script('$(FULLPERL)', 'test.pl')) if -f "test.pl";
-    push(@m, "    \$(NOOP)\n") if (!$tests && ! -f "test.pl");
     push(@m, "\n");
 
     # Occasionally we may face this degenerate target:
@@ -1599,11 +1578,10 @@ test : \$(TEST_TYPE)
 	push(@m, "test_static :: all \$(MAP_TARGET)\n");
 	push(@m, $self->test_via_harness('$(MAP_TARGET)', $tests)) if $tests;
 	push(@m, $self->test_via_script('$(MAP_TARGET)', 'test.pl')) if -f "test.pl";
-	push(@m, "\t$self->{NOECHO}\$(NOOP)\n") if (!$tests && ! -f "test.pl");
 	push(@m, "\n");
     }
     else {
-	push @m, "test_static :: test_dynamic\n\t$self->{NOECHO}\$(NOOP)\n";
+	push @m, "test_static :: test_dynamic\n";
     }
 
     join('',@m);
@@ -1834,7 +1812,7 @@ sub dir_target {
 	push @m, "
 ${vmsdir}.exists :: \$(PERL_INC)perl.h
 	$self->{NOECHO}\$(MKPATH) $vmsdir
-	$self->{NOECHO}\$(EQUALIZE_TIMESTAMP) \$(MMS\$SOURCE) \$(MMS\$TARGET)
+	$self->{NOECHO}\$(TOUCH) ${vmsdir}.exists
 ";
     }
     join "", @m;
@@ -1861,3 +1839,14 @@ sub nicetext {
 1;
 
 __END__
+
+=head1 NAME
+
+ExtUtils::MM_VMS - methods to override UN*X behaviour in ExtUtils::MakeMaker
+
+=head1 DESCRIPTION
+
+See ExtUtils::MM_Unix for a documentation of the methods provided
+there. This package overrides the implementation of these methods, not
+the semantics.
+

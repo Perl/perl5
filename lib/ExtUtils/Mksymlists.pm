@@ -42,13 +42,13 @@ sub Mksymlists {
 
 #    We'll need this if we ever add any OS which uses mod2fname
 #    require DynaLoader;
-#    if (defined &DynaLoader::mod2fname and not $spec{DLBASE}) {
-#        $spec{DLBASE} = DynaLoader::mod2fname([ split(/::/,$spec{NAME}) ]);
-#    }
+    if (defined &DynaLoader::mod2fname and not $spec{DLBASE}) {
+        $spec{DLBASE} = DynaLoader::mod2fname([ split(/::/,$spec{NAME}) ]);
+    }
 
     if    ($osname eq 'aix') { _write_aix(\%spec); }
     elsif ($osname eq 'VMS') { _write_vms(\%spec) }
-    elsif ($osname eq 'OS2') { _write_os2(\%spec) }
+    elsif ($osname =~ m|^os/?2$|i) { _write_os2(\%spec) }
     else { croak("Don't know how to create linker option file for $osname\n"); }
 }
 
@@ -80,9 +80,16 @@ sub _write_os2 {
     print DEF "LIBRARY '$data->{DLBASE}' INITINSTANCE TERMINSTANCE\n";
     print DEF "CODE LOADONCALL\n";
     print DEF "DATA LOADONCALL NONSHARED MULTIPLE\n";
-    print DEF "EXPORTS\n";
-    print DEF join("\n",@{$data->{DL_VARS}}, "\n") if @{$data->{DL_VARS}};
-    print DEF join("\n",@{$data->{FUNCLIST}}, "\n") if @{$data->{FUNCLIST}};
+    print DEF "EXPORTS\n  ";
+    print DEF join("\n  ",@{$data->{DL_VARS}}, "\n") if @{$data->{DL_VARS}};
+    print DEF join("\n  ",@{$data->{FUNCLIST}}, "\n") if @{$data->{FUNCLIST}};
+    if (%{$data->{IMPORTS}}) {
+        print DEF "IMPORTS\n";
+my ($name, $exp);
+while (($name, $exp)= each %{$data->{IMPORTS}}) {
+  print DEF "  $name=$exp\n";
+}
+    }
     close DEF;
 }
 
@@ -162,8 +169,8 @@ from which it is usually taken.  Its value is a reference to an
 associative array, in which each key is the name of a package, and
 each value is an a reference to an array of function names which
 should be exported by the extension.  For instance, one might say
-C<DL_FUNCS =E<gt> { Homer::Iliad =E<gt> [ qw(trojans greeks) ],
-Homer::Odyssey =E<gt> [ qw(travellers family suitors) ] }>.  The
+C<DL_FUNCS => { Homer::Iliad   => [ qw(trojans greeks) ],
+Homer::Odyssey => [ qw(travellers family suitors) ] }>.  The
 function names should be identical to those in the XSUB code;
 C<Mksymlists> will alter the names written to the linker option
 file to match the changes made by F<xsubpp>.  In addition, if
