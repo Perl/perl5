@@ -648,7 +648,7 @@ term	:	termbinop
 			{ $$ = newUNOP(OP_NOT, 0, scalar($2)); }
 	|	UNIOP                                /* Unary op, $_ implied */
 			{ $$ = newOP($1, 0); }
-	|	UNIOP block                          /* eval { foo }, I *think* */
+	|	UNIOP block                          /* eval { foo } */
 			{ $$ = newUNOP($1, 0, $2); }
 	|	UNIOP term                           /* Unary op */
 			{ $$ = newUNOP($1, 0, $2); }
@@ -666,9 +666,9 @@ term	:	termbinop
 			{ $$ = newOP($1, OPf_SPECIAL); }
 	|	FUNC1 '(' expr ')'                   /* not($foo) */
 			{ $$ = newUNOP($1, 0, $3); }
-	|	PMFUNC '(' term ')'                  /* split (/foo/) */
+	|	PMFUNC '(' term ')'                  /* /foo/ */
 			{ $$ = pmruntime($1, $3, Nullop); }
-	|	PMFUNC '(' term ',' term ')'         /* split (/foo/,$bar) */
+	|	PMFUNC '(' term ',' term ')'         /* s/foo/bar/ (or tr) */
 			{ $$ = pmruntime($1, $3, $5); }
 	|	WORD
 	|	listop
