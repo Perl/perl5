@@ -1,6 +1,6 @@
 /*    fakestdio.h
  *
- *    Copyright (c) 2000-2003, Larry Wall
+ *    Copyright (C) 2000, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.

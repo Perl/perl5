@@ -1,7 +1,7 @@
 /*
  *    reentr.c
  *
- *    Copyright (c) 1997-2003, Larry Wall
+ *    Copyright (C) 2002, 2003, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.

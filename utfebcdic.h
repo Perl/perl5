@@ -1,6 +1,6 @@
 /*    utfebcdic.h
  *
- *    Copyright (c) 2001-2002, Larry Wall, Nick Ing-Simmons
+ *    Copyright (C) 2001, 2002, by Larry Wall, Nick Ing-Simmons, and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
