@@ -31,7 +31,7 @@ if (open(CONFIG, "config.sh")) {
 
 push @EXES, "perl$EXE";
 
-find(sub {push @EXES, $File::Find::name if /.$SO$/}, '.' );
+find(sub {push @EXES, $File::Find::name if /\.$SO$/}, '.' );
 
 push @EXES, @ARGV;
 
@@ -45,16 +45,17 @@ my %rfuncs;
 my @syms;
 find(sub {
 	return unless -f $File::Find::name;
-	open my $F, "<$File::Find::name"
+	local *F;
+	open F, "<$File::Find::name"
 	    or die "Can't open $File::Find::name: $!";
 	my $line;
-	while (defined ($line = <$F>)) {
+	while (defined ($line = <F>)) {
 	    if ($line =~ /\b(\w+_r)\b/) {
 		#warn "$1 => $File::Find::name\n";
 		$rfuncs{$1}->{$File::Find::name}++;
 	    }
 	}
-	close $F;
+	close F;
      }, @INCDIRS);
 
 # delete bogus symbols grepped out of comments and such
@@ -68,6 +69,7 @@ for my $exe (@EXES) {
         chomp $sym;
         $sym =~ s/^\s+//;
         $sym =~ s/^([0-9A-Fa-f]+\s+)?[Uu]\s+//;
+        $sym =~ s/\s+[Uu]\s+-$//;
         next if /\s/;
         $sym =~ s/\@.*\z//;	# remove @@GLIBC_2.0 etc
         # warn "#### $sym\n";
