@@ -201,6 +201,30 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 #define CHR_SVLEN(sv) (UTF ? sv_len_utf8(sv) : SvCUR(sv))
 #define CHR_DIST(a,b) (UTF ? utf8_distance(a,b) : a - b)
 
+
+#define	vFAIL(m)                                                             \
+    STMT_START {                                                             \
+	if (!SIZE_ONLY)                                                      \
+	    SAVEDESTRUCTOR_X(clear_re,(void*)PL_regcomp_rx);                 \
+	Perl_croak(aTHX_ "%s at {#} mark in regex m/%.*s{#}%s/", m,          \
+		   strlen(PL_regprecomp)-(PL_regxend - PL_regcomp_parse),    \
+                   PL_regprecomp,                                            \
+                   PL_regprecomp + strlen(PL_regprecomp)-(PL_regxend - PL_regcomp_parse));\
+    } STMT_END
+
+#define	vFAIL2(pat,m)                                                        \
+    STMT_START {                                                             \
+	if (!SIZE_ONLY)                                                      \
+	    SAVEDESTRUCTOR_X(clear_re,(void*)PL_regcomp_rx);                 \
+                                                                             \
+	S_re_croak2(aTHX_ pat, " at {#} mark in regex m/%.*s{#}%s/: ", m,    \
+		   strlen(PL_regprecomp)-(PL_regxend - PL_regcomp_parse),    \
+                   PL_regprecomp,                                            \
+                   PL_regprecomp + strlen(PL_regprecomp)-(PL_regxend - PL_regcomp_parse));\
+    } STMT_END
+
+
+
 /* Allow for side effects in s */
 #define REGC(c,s) STMT_START { if (!SIZE_ONLY) *(s) = (c); else (s);} STMT_END
 
@@ -1193,10 +1217,10 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 	    minnext = study_chunk(&nscan, &deltanext, last, &data_fake, f);
 	    if (scan->flags) {
 		if (deltanext) {
-		    FAIL("variable length lookbehind not implemented");
+		    vFAIL("variable length lookbehind not implemented");
 		}
 		else if (minnext > U8_MAX) {
-		    FAIL2("lookbehind longer than %"UVuf" not implemented", (UV)U8_MAX);
+		    vFAIL2("lookbehind longer than %"UVuf" not implemented", (UV)U8_MAX);
 		}
 		scan->flags = minnext;
 	    }
@@ -1306,6 +1330,7 @@ Perl_reginitcolors(pTHX)
     }
     PL_colorset = 1;
 }
+
 
 /*
  - pregcomp - compile a regular expression into internal code
@@ -1726,7 +1751,7 @@ S_reg(pTHX_ I32 paren, I32 *flagp)
 		break;
 	    case '$':
 	    case '@':
-		FAIL2("Sequence (?%c...) not implemented", (int)paren);
+		vFAIL2("Sequence (?%c...) not implemented", (int)paren);
 		break;
 	    case '#':
 		while (*PL_regcomp_parse && *PL_regcomp_parse != ')')
@@ -1825,7 +1850,7 @@ S_reg(pTHX_ I32 paren, I32 *flagp)
 			PL_regcomp_parse++;
 		    ret = reganode(GROUPP, parno);
 		    if ((c = *nextchar()) != ')')
-			FAIL2("Switch (?(number%c not recognized", c);
+			vFAIL2("Switch (?(number%c not recognized", c);
 		  insert_if:
 		    regtail(ret, reganode(IFTHEN, 0));
 		    br = regbranch(&flags, 1);
@@ -1847,7 +1872,7 @@ S_reg(pTHX_ I32 paren, I32 *flagp)
 		    else
 			lastbr = NULL;
 		    if (c != ')')
-			FAIL("Switch (?(condition)... contains too many branches");
+			vFAIL("Switch (?(condition)... contains too many branches");
 		    ender = reg_node(TAIL);
 		    regtail(br, ender);
 		    if (lastbr) {
@@ -1859,11 +1884,11 @@ S_reg(pTHX_ I32 paren, I32 *flagp)
 		    return ret;
 		}
 		else {
-		    FAIL2("Unknown condition for (?(%.2s", PL_regcomp_parse);
+		    vFAIL2("Unknown condition for (?(%.2s", PL_regcomp_parse);
 		}
 	    }
             case 0:
-                FAIL("Sequence (? incomplete");
+                vFAIL("Sequence (? incomplete");
                 break;
 	    default:
 		--PL_regcomp_parse;
@@ -1887,7 +1912,7 @@ S_reg(pTHX_ I32 paren, I32 *flagp)
 		}		
 	      unknown:
 		if (*PL_regcomp_parse != ')')
-		    FAIL2("Sequence (?%c...) not recognized", *PL_regcomp_parse);
+		    vFAIL2("Sequence (?%c...) not recognized", *PL_regcomp_parse);
 		nextchar();
 		*flagp = TRYAGAIN;
 		return NULL;
@@ -2132,7 +2157,7 @@ S_regpiece(pTHX_ I32 *flagp)
 	    if (!max && *maxpos != '0')
 		max = REG_INFTY;		/* meaning "infinity" */
 	    else if (max >= REG_INFTY)
-		FAIL2("Quantifier in {,} bigger than %d", REG_INFTY - 1);
+		vFAIL2("Quantifier in {,} bigger than %d", REG_INFTY - 1);
 	    PL_regcomp_parse = next;
 	    nextchar();
 
@@ -2166,7 +2191,7 @@ S_regpiece(pTHX_ I32 *flagp)
 	    if (max > 0)
 		*flagp |= HASWIDTH;
 	    if (max && max < min)
-		FAIL("Can't do {n,m} with n > m");
+		vFAIL("Can't do {n,m} with n > m");
 	    if (!SIZE_ONLY) {
 		ARG1_SET(ret, min);
 		ARG2_SET(ret, max);
@@ -2224,7 +2249,7 @@ S_regpiece(pTHX_ I32 *flagp)
 	regtail(ret, ret + NODE_STEP_REGNODE);
     }
     if (ISMULT2(PL_regcomp_parse))
-	FAIL("nested *?+ in regexp");
+	vFAIL("nested quantifiers in regexp");
 
     return(ret);
 }
@@ -2319,7 +2344,7 @@ tryagain:
 	    *flagp |= TRYAGAIN;
 	    return NULL;
 	}
-	FAIL2("internal urp in regexp at /%s/", PL_regcomp_parse);
+	vFAIL("internal urp");
 				/* Supposed to be caught earlier. */
 	break;
     case '{':
@@ -2331,7 +2356,7 @@ tryagain:
     case '?':
     case '+':
     case '*':
-	FAIL("?+*{} follows nothing in regexp");
+	vFAIL("quantifier follows nothing in regexp");
 	break;
     case '\\':
 	switch (*++PL_regcomp_parse) {
@@ -2490,7 +2515,7 @@ tryagain:
 		    goto defchar;
 		else {
 		    if (!SIZE_ONLY && num > PL_regcomp_rx->nparens)
-			FAIL("reference to nonexistent group");
+			vFAIL("reference to nonexistent group");
 		    PL_regsawback = 1;
 		    ret = reganode(FOLD
 				   ? (LOC ? REFFL : REFF)
@@ -2620,7 +2645,7 @@ tryagain:
 				p = e + 1;
 			    }
 			    else
-				FAIL("Can't use \\x{} without 'use utf8' declaration");
+				vFAIL("Can't use \\x{} without 'use utf8' declaration");
 			}
 			else {
 			    numlen = 0;		/* disallow underscores */
@@ -2703,7 +2728,7 @@ tryagain:
 	    PL_regcomp_parse = p - 1;
 	    nextchar();
 	    if (len < 0)
-		FAIL("internal disaster in regexp");
+		vFAIL("internal disaster");
 	    if (len > 0)
 		*flagp |= HASWIDTH;
 	    if (len == 1)
@@ -3239,7 +3264,7 @@ S_regclass(pTHX)
 		    }
 		    break;
 		default:
-		    FAIL("invalid [::] class in regexp");
+		    vFAIL("invalid [::] class");
 		    break;
 		}
 		if (LOC)
