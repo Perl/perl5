@@ -1511,13 +1511,6 @@ magic_freeregexp(SV *sv, MAGIC *mg)
     return 0;
 }
 
-int
-magic_unchain(SV *sv, MAGIC *mg)
-{
-    sv_unmagic(sv, mg->mg_type);
-    return 0;
-}
-
 #ifdef USE_LOCALE_COLLATE
 int
 magic_setcollxfrm(SV *sv, MAGIC *mg)

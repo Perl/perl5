@@ -425,7 +425,6 @@ magic_settaint
 magic_setuvar
 magic_setvec
 magic_sizepack
-magic_unchain
 magic_wipepack
 magicname
 markstack_grow
