@@ -13,10 +13,16 @@
 &then &do
 !copy_file config.&version&.def config.def -delete
 &
-& NOTE: We must invoke Perl 5 not Perl 4. If necessary, edit the
-& next line to say "perl5 config.pl".
+& NOTE: We must invoke Perl 5 not Perl 4. The following
+& commands runs perl5 if it exists, otherwise runs perl,
+& in the hopes it is really perl5.
 &
-!perl config.pl
+!attach_default_output (process_dir)>_where_perl ; &+
+     where_command perl5 ; detach_default_output
+&if (index (contents (process_dir)>_where_perl) 'perl5:') ^= 0
+&then !perl5 config.pl
+&else !perl  config.pl
+&
 !rename config.h.new config.&version&.h -delete
 !delete_file config.def
 &end
