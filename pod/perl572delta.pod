@@ -546,12 +546,13 @@ problems for all the 5.7 releases.
 
 =item *
 
-If Perl is configured to use long doubles the op/int subtests 13 and
-14 and the ext/POSIX subtest 14 may fail.
-
-=item *
-
-If Perl is configured to use threads the op/magic subtest 28 may fail.
+In AIX 4.2 Perl extensions that use C++ functions that use statics
+may have problems in that the statics are not getting initialized.
+In newer AIX releases this has been solved by linking Perl with
+the libC_r library, but unfortunately in AIX 4.2 the said library
+has an obscure bug where the various functions related to time
+(such as time() and gettimeofday()) return broken values, and
+therefore in AIX 4.2 Perl is not linked against the libC_r.
 
 =item *
 
