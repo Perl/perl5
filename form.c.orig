@@ -104,7 +104,6 @@ int sp;
     CMD mycmd;
     STR *str;
     char *chophere;
-    int blank = TRUE;
 
     mycmd.c_type = C_NULL;
     orec->o_lines = 0;
@@ -115,17 +114,10 @@ int sp;
 	if (s = fcmd->f_pre) {
 	    while (*s) {
 		if (*s == '\n') {
-		    t = orec->o_str;
-		    if (blank && (fcmd->f_flags & FC_REPEAT)) {
-			while (d > t && (d[-1] != '\n'))
-			    d--;
-		    }
-		    else {
-			while (d > t && (d[-1] == ' ' || d[-1] == '\t'))
-			    d--;
-		    }
+		    while (d > orec->o_str && (d[-1] == ' ' || d[-1] == '\t'))
+			d--;
 		    if (fcmd->f_flags & FC_NOBLANK) {
-			if (blank || d == orec->o_str || d[-1] == '\n') {
+			if (d == orec->o_str || d[-1] == '\n') {
 			    orec->o_lines--;	/* don't print blank line */
 			    linebeg = fcmd->f_next;
 			    break;
@@ -137,7 +129,6 @@ int sp;
 		    }
 		    else
 			linebeg = fcmd->f_next;
-		    blank = TRUE;
 		}
 		*d++ = *s++;
 	    }
@@ -158,8 +149,6 @@ int sp;
 	    while (size && *s && *s != '\n') {
 		if (*s == '\t')
 		    *s = ' ';
-		else if (*s != ' ')
-		    blank = FALSE;
 		size--;
 		if (*s && index(chopset,(*d++ = *s++)))
 		    chophere = s;
@@ -212,8 +201,6 @@ int sp;
 	    while (size && *s && *s != '\n') {
 		if (*s == '\t')
 		    *s = ' ';
-		else if (*s != ' ')
-		    blank = FALSE;
 		size--;
 		if (*s && index(chopset,*s++))
 		    chophere = s;
@@ -258,8 +245,6 @@ int sp;
 	    while (size && *s && *s != '\n') {
 		if (*s == '\t')
 		    *s = ' ';
-		else if (*s != ' ')
-		    blank = FALSE;
 		size--;
 		if (*s && index(chopset,*s++))
 		    chophere = s;
@@ -333,7 +318,6 @@ int sp;
 		}
 		break;
 	    }
-	    blank = FALSE;
 	    value = str_gnum(str);
 	    if (fcmd->f_flags & FC_DP) {
 		sprintf(d, "%#*.*f", size, fcmd->f_decimals, value);

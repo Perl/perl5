@@ -318,8 +318,9 @@ STR *str;
 	return (STRLEN)ofslen;
     case '\\':
 	return (STRLEN)orslen;
+    default:
+	return str_len(stab_str(str));
     }
-    return str_len(stab_str(str));
 }
 
 void

@@ -68,11 +68,11 @@ while (@ARGV) {
 	die "Malformed -perm argument: $onum\n" unless $onum =~ /^-?[0-7]+$/;
 	if ($onum =~ s/^-//) {
 	    $onum = '0' . sprintf("%o", oct($onum) & 017777);	# s/b 07777 ?
-	    $out .= &tab . "(\$mode & $onum) == $onum";
+	    $out .= &tab . "((\$mode & $onum) == $onum)";
 	}
 	else {
 	    $onum = '0' . $onum unless $onum =~ /^0/;
-	    $out .= &tab . "(\$mode & 0777) == $onum";
+	    $out .= &tab . "((\$mode & 0777) == $onum)";
 	}
     }
     elsif ($_ eq 'type') {

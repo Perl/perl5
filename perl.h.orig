@@ -868,7 +868,7 @@ EXT int lastsize;
 
 EXT char *hexdigit INIT("0123456789abcdef0123456789ABCDEFx");
 EXT char *origfilename;
-EXT FILE * VOLATILE rsfp INIT(Nullfp);
+EXT FILE * VOLATILE rsfp;
 EXT char buf[1024];
 EXT char *bufptr;
 EXT char *oldbufptr;
@@ -952,7 +952,7 @@ void scanconst();
 EXT struct stat statbuf;
 EXT struct stat statcache;
 EXT STAB *statstab INIT(Nullstab);
-EXT STR *statname INIT(Nullstr);
+EXT STR *statname;
 #ifndef MSDOS
 EXT struct tms timesbuf;
 #endif

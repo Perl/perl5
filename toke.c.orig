@@ -162,7 +162,7 @@ check_uni() {
 	return;
     while (isSPACE(*last_uni))
 	last_uni++;
-    for (s = last_uni; isALNUM(*s) || *s == '-'; s++) ;
+    for (s = last_uni; isALNUM(*s); s++) ;
     ch = *s;
     *s = '\0';
     warn("Warning: Use of \"%s\" without parens is ambiguous", last_uni);
@@ -442,7 +442,6 @@ yylex()
     case '-':
 	if (s[1] && isALPHA(s[1]) && !isALPHA(s[2])) {
 	    s++;
-	    last_uni = oldbufptr;
 	    switch (*s++) {
 	    case 'r': FTST(O_FTEREAD);
 	    case 'w': FTST(O_FTEWRITE);
@@ -2301,7 +2300,6 @@ int in_what;
 	    STR *tmpstr;
 	    STR *tmpstr2 = Nullstr;
 	    char *tmps;
-	    char *start;
 	    bool dorange = FALSE;
 
 	    CLINE;
@@ -2399,7 +2397,7 @@ int in_what;
 		}
 		s++;
 	    }
-	    s = d = start = tmpstr->str_ptr;	/* assuming shrinkage only */
+	    s = d = tmpstr->str_ptr;	/* assuming shrinkage only */
 	    while (s < send || dorange) {
 		if (in_what & SCAN_TR) {
 		    if (dorange) {
@@ -2417,11 +2415,10 @@ int in_what;
 			max = d[1] & 0377;
 			for (i = (*d & 0377); i <= max; i++)
 			    *d++ = i;
-			start = s;
 			dorange = FALSE;
 			continue;
 		    }
-		    else if (*s == '-' && s+1 < send  && s != start) {
+		    else if (*s == '-' && s+1 < send  && d != tmpstr->str_ptr) {
 			dorange = TRUE;
 			s++;
 		    }

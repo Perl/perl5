@@ -67,7 +67,7 @@ sub norm { #(mantissa, exponent) return fnum_str
 # negation
 sub main'fneg { #(fnum_str) return fnum_str
     local($_) = &'fnorm($_[0]);
-    vec($_,0,8) =^ ord('+') ^ ord('-') unless $_ eq '+0E+0'; # flip sign
+    vec($_,0,8) ^= ord('+') ^ ord('-') unless $_ eq '+0E+0'; # flip sign
     s/^H/N/;
     $_;
 }

@@ -36,6 +36,7 @@ CONFIG: {
     $MIN = 60 * $SEC;
     $HR = 60 * $MIN;
     $DAYS = 24 * $HR;
+    $YearFix = ((gmtime(946684800))[5] == 100) ? 100 : 0;
 }
 
 sub timegm {
@@ -65,6 +66,7 @@ sub cheat {
     die "Month out of range 0..11 in ctime.pl\n" if $month > 11;
     $guess = $^T;
     @g = gmtime($guess);
+    $year += $YearFix if $year < $epoch[5];
     while ($diff = $year - $g[5]) {
 	$guess += $diff * (363 * $DAYS);
 	@g = gmtime($guess);

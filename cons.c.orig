@@ -85,7 +85,6 @@ CMD *cmd;
 	    Nullarg,mycompblock));
 	saw_return = FALSE;
 	cmd->c_flags |= CF_TERM;
-	cmd->c_head = cmd;
     }
     sub->cmd = cmd;
     if (perldb) {
@@ -1354,8 +1353,7 @@ int willsave;				/* willsave passes down the tree */
 
 		    /* in any event, save the iterator */
 
-		    if (cmd->c_short)  /* Better safe than sorry */
-			(void)apush(tosave,cmd->c_short);
+		    (void)apush(tosave,cmd->c_short);
 		}
 		shouldsave |= tmpsave;
 	    }
@@ -1422,7 +1420,7 @@ int willsave;
 	shouldsave = TRUE;
 	break;
     }
-    if (willsave && arg->arg_ptr.arg_str)
+    if (willsave)
 	(void)apush(tosave,arg->arg_ptr.arg_str);
     return shouldsave;
 }

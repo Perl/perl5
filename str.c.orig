@@ -863,10 +863,11 @@ screamer:
 	bp = buf;
 	while ((i = getc(fp)) != EOF && (*bp++ = i) != newline && bp < bpe) ;
 
+	*bp = '\0';
 	if (append)
-	    str_ncat(str, buf, bp - buf);
+	    str_cat(str, buf);
 	else
-	    str_nset(str, buf, bp - buf);
+	    str_set(str, buf);
 	if (i != EOF			/* joy */
 	    &&
 	    (i != newline

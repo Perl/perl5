@@ -208,7 +208,6 @@ int sp;
 			STABSET(str);
 			str_numset(arg->arg_ptr.arg_str, 1.0);
 			stack->ary_array[++sp] = arg->arg_ptr.arg_str;
-			str->str_nok = 0;
 			return sp;
 		    }
 		    /*SUPPRESS 560*/
@@ -224,7 +223,6 @@ int sp;
 			STABSET(str);
 			str_numset(arg->arg_ptr.arg_str, 1.0);
 			stack->ary_array[++sp] = arg->arg_ptr.arg_str;
-			str->str_nok = 0;
 			return sp;
 		    }
 		    else if (clen) {
@@ -234,7 +232,6 @@ int sp;
 			STABSET(str);
 			str_numset(arg->arg_ptr.arg_str, 1.0);
 			stack->ary_array[++sp] = arg->arg_ptr.arg_str;
-			str->str_nok = 0;
 			return sp;
 		    }
 		    else {
@@ -242,7 +239,6 @@ int sp;
 			STABSET(str);
 			str_numset(arg->arg_ptr.arg_str, 1.0);
 			stack->ary_array[++sp] = arg->arg_ptr.arg_str;
-			str->str_nok = 0;
 			return sp;
 		    }
 		    /* NOTREACHED */
@@ -272,7 +268,6 @@ int sp;
 		STABSET(str);
 		str_numset(arg->arg_ptr.arg_str, (double)iters);
 		stack->ary_array[++sp] = arg->arg_ptr.arg_str;
-		str->str_nok = 0;
 		return sp;
 	    }
 	    str_numset(arg->arg_ptr.arg_str, 0.0);
@@ -327,7 +322,6 @@ int sp;
 	STABSET(str);
 	str_numset(arg->arg_ptr.arg_str, (double)iters);
 	stack->ary_array[++sp] = arg->arg_ptr.arg_str;
-	str->str_nok = 0;
 	return sp;
     }
     str_numset(arg->arg_ptr.arg_str, 0.0);

@@ -13,7 +13,7 @@ chdir './tmp';
 
 umask(022);
 
-if ((umask(0)&0777) == 022) {print "ok 1\n";} else {print "not ok 1\n";}
+if (umask(0) == 022) {print "ok 1\n";} else {print "not ok 1\n";}
 open(fh,'>x') || die "Can't create x";
 close(fh);
 open(fh,'>a') || die "Can't create a";

@@ -128,7 +128,7 @@ setuid perl scripts securely.\n");
 #ifdef TAINT
 #ifndef DOSUID
     if (uid == euid && gid == egid)
-	taintanyway = TRUE;		/* running taintperl explicitly */
+	taintanyway == TRUE;		/* running taintperl explicitly */
 #endif
 #endif
     (void)sprintf(index(rcsid,'#'), "%d\n", PATCHLEVEL);
@@ -1168,8 +1168,6 @@ int *arglast;
 	    eval_root = myroot;
 	else if (in_eval != 1 && myroot != last_root)
 	    cmd_free(myroot);
-	    if (eval_root == myroot)
-		eval_root = Nullcmd;
     }
 
     perldb = oldperldb;

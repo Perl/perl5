@@ -42,9 +42,9 @@ sub getcwd
 		    closedir(getcwd'PARENT);				#');
 		    return '';
 		}
-		unless (@tst = stat("$dotdots/$dir"))
+		unless (@tst = lstat("$dotdots/$dir"))
 		{
-		    warn "stat($dotdots/$dir): $!";
+		    warn "lstat($dotdots/$dir): $!";
 		    closedir(getcwd'PARENT);				#');
 		    return '';
 		}

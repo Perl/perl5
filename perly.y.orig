@@ -544,7 +544,7 @@ term	:	'-' term %prec UMINUS
 	|	DELETE '(' REG '{' expr ';' '}' ')'	%prec '('
 			{ $$ = make_op(O_DELETE, 2,
 				stab2arg(A_STAB,hadd($3)),
-				jmaybe($5),
+				jmaybe($4),
 				Nullarg);
 			    expectterm = FALSE; }
 	|	ARYLEN	%prec '('
