@@ -32,7 +32,7 @@ There may be a slight performance decrease in the filetests
 when C<use filetest> is in effect, because in some systems
 the extended functionality needs to be emulated.
 
-B<NOTE>: using the file tests for security purposes is a lost case
+B<NOTE>: using the file tests for security purposes is a lost cause
 from the start: there is a window open for race conditions (who is to
 say that the permissions will not change between the test and the real
 operation?).  Therefore if you are serious about security, just try
