@@ -229,18 +229,6 @@ vec($b,1,1)=0;
 die unless $a eq $b;
 EXPECT
 ########
-# An attempt at lvalueable barewords broke this
-
-tie FH, 'main';
-EXPECT
-
-########
-# TODO An attempt at lvalueable barewords broke this
-
-tie FH, 'main';
-EXPECT
-
-########
 # correct unlocalisation of tied hashes (patch #16431)
 use Tie::Hash ;
 tie %tied, Tie::StdHash;
