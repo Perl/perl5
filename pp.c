@@ -214,7 +214,7 @@ PP(pp_padany)
 
 PP(pp_rv2gv)
 {
-    djSP; dTOPss;
+    djSP; dTOPss;  
 
     if (SvROK(sv)) {
       wasref:
@@ -242,6 +242,21 @@ PP(pp_rv2gv)
 		    goto wasref;
 	    }
 	    if (!SvOK(sv)) {
+		/* If this is a 'my' scalar and flag is set then vivify 
+		 * NI-S 1999/05/07
+		 */ 
+		if ( (PL_op->op_private & OPpDEREF) && 
+		      cUNOP->op_first->op_type == OP_PADSV ) {
+		    STRLEN len;
+		    SV *padname = *av_fetch(PL_comppad_name, cUNOP->op_first->op_targ, 4);
+		    char *name = SvPV(padname,len); 
+		    GV *gv = (GV *) newSV(0);
+		    gv_init(gv, PL_curcop->cop_stash, name, len, 0);
+		    sv_upgrade(sv, SVt_RV);
+		    SvRV(sv) = (SV *) gv;
+		    SvROK_on(sv);
+		    goto wasref;
+		}  
 		if (PL_op->op_flags & OPf_REF ||
 		    PL_op->op_private & HINT_STRICT_REFS)
 		    DIE(PL_no_usym, "a symbol");
@@ -1016,8 +1031,13 @@ PP(pp_modulo)
 #endif
 
 	    /* Backward-compatibility clause: */
+#if 0
 	    dright = trunc(dright + 0.5);
 	    dleft  = trunc(dleft + 0.5);
+#else
+	    dright = floor(dright + 0.5);
+	    dleft  = floor(dleft + 0.5);
+#endif
 
 	    if (!dright)
 		DIE("Illegal modulus zero");

@@ -4780,11 +4780,20 @@ ck_fun(OP *o)
 		    }
 		    else {
 			I32 flags = OPf_SPECIAL;
+			I32 private = 0;
 			/* is this op a FH constructor? */
-			if (is_handle_constructor(o,numargs))
-			    flags = 0;
+			if (is_handle_constructor(o,numargs)) {
+			    /* Set a flag to tell rv2gv to vivify 
+			     * need to "prove" flag does not mean something
+			     * else already - NI-S 1999/05/07
+			     */ 
+			    flags   = 0;                         
+			    private = OPpDEREF;
+			}
 			kid->op_sibling = 0;
 			kid = newUNOP(OP_RV2GV, flags, scalar(kid));
+			if (private)
+			    kid->op_private |= private;
 		    }
 		    kid->op_sibling = sibl;
 		    *tokid = kid;

@@ -506,6 +506,8 @@ PP(pp_open)
 	DIE(PL_no_usym, "filehandle");
     if (GvIOp(gv))
 	IoFLAGS(GvIOp(gv)) &= ~IOf_UNTAINT;
+
+#if 0 /* no undef means tmpfile() yet */
     if (sv == &PL_sv_undef) {
 #ifdef PerlIO
 	PerlIO *fp = PerlIO_tmpfile();
@@ -518,6 +520,8 @@ PP(pp_open)
 	    RETPUSHUNDEF;
 	RETURN;
     }   
+#endif /* no undef means tmpfile() yet */
+
     tmps = SvPV(sv, len);
     if (do_open(gv, tmps, len, FALSE, O_RDONLY, 0, Nullfp))
 	PUSHi( (I32)PL_forkprocess );
