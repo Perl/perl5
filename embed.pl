@@ -2161,6 +2161,9 @@ Ap	|void*	|ptr_table_fetch|PTR_TBL_t *tbl|void *sv
 Ap	|void	|ptr_table_store|PTR_TBL_t *tbl|void *oldsv|void *newsv
 Ap	|void	|ptr_table_split|PTR_TBL_t *tbl
 #endif
+#if defined(HAVE_INTERP_INTERN)
+Ap	|void	|sys_intern_init
+#endif
 
 #if defined(PERL_OBJECT)
 protected:

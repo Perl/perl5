@@ -3943,6 +3943,15 @@ Perl_ptr_table_split(pTHXo_ PTR_TBL_t *tbl)
     ((CPerlObj*)pPerl)->Perl_ptr_table_split(tbl);
 }
 #endif
+#if defined(HAVE_INTERP_INTERN)
+
+#undef  Perl_sys_intern_init
+void
+Perl_sys_intern_init(pTHXo)
+{
+    ((CPerlObj*)pPerl)->Perl_sys_intern_init();
+}
+#endif
 #if defined(PERL_OBJECT)
 #else
 #endif
