@@ -24,7 +24,7 @@ sub MY::postamble {
   if ($^O =~ /MSWin32/ && Win32::IsWin95()) {
 	if ($Config{'make'} =~ /dmake/i) {
 	    # dmake-specific
-	    return <<EOT;
+	    return <<'EOT';
 $(MYEXTLIB): sdbm/Makefile
 @[
 	cd sdbm
@@ -34,7 +34,7 @@ $(MYEXTLIB): sdbm/Makefile
 EOT
 	} elsif ($Config{'make'} =~ /nmake/i) {
 	    #
-	    return <<EOT;
+	    return <<'EOT';
 $(MYEXTLIB): sdbm/Makefile
 	cd sdbm
 	$(MAKE) all
