@@ -3925,7 +3925,6 @@ Perl_newFOROP(pTHX_ I32 flags,char *label,line_t forline,OP *sv,OP *expr,OP *blo
         expr = mod(force_list(expr), OP_GREPSTART);
     }
 
-
     loop = (LOOP*)list(convert(OP_ENTERITER, iterflags,
 			       append_elem(OP_LIST, expr, scalar(sv))));
     assert(!loop->op_next);
@@ -3936,7 +3935,7 @@ Perl_newFOROP(pTHX_ I32 flags,char *label,line_t forline,OP *sv,OP *expr,OP *blo
     {
 	LOOP *tmp;
 	NewOp(1234,tmp,1,LOOP);
-	Copy(loop,tmp,1,LOOP);
+	Copy(loop,tmp,1,LISTOP);
 	FreeOp(loop);
 	loop = tmp;
     }
