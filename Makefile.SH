@@ -55,7 +55,7 @@ true)
 	sunos*)
 		linklibperl="-lperl"
 		;;
-	netbsd*|freebsd[234]*)
+	netbsd*|freebsd[234]*|openbsd*)
 		linklibperl="-L. -lperl"
 		;;
 	aix*)
