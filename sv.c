@@ -1168,7 +1168,7 @@ register SV *sv;
 	SvIVX(sv) = (IV)atol(SvPVX(sv));
     }
     else  {
-	if (dowarn && !localizing)
+	if (dowarn && !localizing && !(SvFLAGS(sv) & SVs_PADTMP))
 	    warn(warn_uninit);
 	return 0;
     }
@@ -1241,7 +1241,7 @@ register SV *sv;
 	SvNVX(sv) = atof(SvPVX(sv));
     }
     else  {
-	if (dowarn && !localizing)
+	if (dowarn && !localizing && !(SvFLAGS(sv) & SVs_PADTMP))
 	    warn(warn_uninit);
 	return 0.0;
     }
@@ -1372,7 +1372,7 @@ STRLEN *lp;
 	while (*s) s++;
     }
     else {
-	if (dowarn && !localizing)
+	if (dowarn && !localizing && !(SvFLAGS(sv) & SVs_PADTMP))
 	    warn(warn_uninit);
 	*lp = 0;
 	return "";
@@ -1638,6 +1638,13 @@ register SV *sstr;
 			}
 		    }
 		    GvCV(dstr) = (CV*)sref;
+		    break;
+		case SVt_PVIO:
+		    if (intro)
+			SAVESPTR(GvIOp(dstr));
+		    else
+			dref = (SV*)GvIOp(dstr);
+		    GvIOp(dstr) = (IO*)sref;
 		    break;
 		default:
 		    if (intro)
@@ -2070,7 +2077,7 @@ int type;
 {
     MAGIC* mg;
     MAGIC** mgp;
-    if (SvTYPE(sv) < SVt_PVMG)
+    if (SvTYPE(sv) < SVt_PVMG || !SvMAGIC(sv))
 	return 0;
     mgp = &SvMAGIC(sv);
     for (mg = *mgp; mg; mg = *mgp) {
@@ -2088,7 +2095,7 @@ int type;
 	else
 	    mgp = &mg->mg_moremagic;
     }
-    if (!SvMAGICAL(sv) && !SvMAGIC(sv)) {
+    if (!SvMAGIC(sv)) {
 	SvMAGICAL_off(sv);
 	SvFLAGS(sv) |= (SvFLAGS(sv) & (SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
     }
@@ -2256,6 +2263,7 @@ register SV *sv;
 	mg_free(sv);
     switch (SvTYPE(sv)) {
     case SVt_PVIO:
+	io_close((IO*)sv);
 	Safefree(IoTOP_NAME(sv));
 	Safefree(IoFMT_NAME(sv));
 	Safefree(IoBOTTOM_NAME(sv));
@@ -2632,7 +2640,7 @@ screamer:
 	}
 	else {
 	    cnt = fread((char*)buf, 1, sizeof(buf), fp);
-	    i = (cnt == EOF) ? EOF : (U8)buf[cnt - 1];
+	    i = cnt ? (U8)buf[cnt - 1] : EOF;
 	}
 
 	if (append)
