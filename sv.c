@@ -137,6 +137,7 @@ S_more_sv(pTHX)
     if (PL_nice_chunk) {
 	sv_add_arena(PL_nice_chunk, PL_nice_chunk_size, 0);
 	PL_nice_chunk = Nullch;
+        PL_nice_chunk_size = 0;
     }
     else {
 	char *chunk;                /* must use New here to match call to */
