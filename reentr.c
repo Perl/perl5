@@ -148,6 +148,8 @@ Perl_reentrant_init(pTHX) {
 #ifdef HAS_CRYPT_R
 #ifdef __GLIBC__
 	PL_reentrant_buffer->_crypt_struct.initialized = 0;
+	/* work around glibc-2.2.5 bug */
+	PL_reentrant_buffer->_crypt_struct.current_saltbits = 0;
 #endif
 #endif /* HAS_CRYPT_R */
 #ifdef HAS_CTIME_R
