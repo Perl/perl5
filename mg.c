@@ -1724,9 +1724,8 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	            PL_dowarn |= G_WARN_ONCE ;
 	        }	
 		else {
-		    int i ;
+		    STRLEN len, i;
 		    int accumulate = 0 ;
-		    int len ;
 		    char * ptr = (char*)SvPV(sv, len) ;
 		    for (i = 0 ; i < len ; ++i) 
 		        accumulate += ptr[i] ;
