@@ -1,6 +1,7 @@
 package Sys::Hostname;
 
 use Carp;
+use Config;
 require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(hostname);
@@ -33,8 +34,32 @@ Texas Instruments
 
 sub hostname {
 
-    # method 1 - we already know it
-    return $host if defined $host;
+  # method 1 - we already know it
+  return $host if defined $host;
+
+  if ($Config{'osname'} eq 'VMS') {
+
+    # method 2 - no sockets ==> return DECnet node name
+    if (!$Config{'d_has_sockets'}) { return $host = $ENV{'SYS$NODE'}; }
+
+    # method 3 - has someone else done the job already?  It's common for the
+    #    TCP/IP stack to advertise the hostname via a logical name.  (Are
+    #    there any other logicals which TCP/IP stacks use for the host name?)
+    $host = $ENV{'ARPANET_HOST_NAME'}  || $ENV{'INTERNET_HOST_NAME'} ||
+            $ENV{'MULTINET_HOST_NAME'} || $ENV{'UCX$INET_HOST'}      ||
+            $ENV{'TCPWARE_DOMAINNAME'} || $ENV{'NEWS_ADDRESS'};
+    return $host if $host;
+
+    # method 4 - does hostname happen to work?
+    my($rslt) = `hostname`;
+    if ($rslt !~ /IVVERB/) { ($host) = $rslt =~ /^(\S+)/; }
+    return $host if $host;
+
+    # rats!
+    Carp::croak "Cannot get host name of local machine";  
+
+  }
+  else {  # Unix
 
     # method 2 - syscall is preferred since it avoids tainting problems
     eval {
@@ -67,6 +92,7 @@ sub hostname {
     # remove garbage 
     $host =~ tr/\0\r\n//d;
     $host;
+  }
 }
 
 1;

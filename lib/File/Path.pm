@@ -52,8 +52,7 @@ C<rmtree> takes three arguments:
 the root of the subtree to delete, or a reference to
 a list of roots.  All of the files and directories
 below each root, as well as the roots themselves,
-will be deleted.  For the moment, C<rmtree> expects
-Unix file specification syntax.
+will be deleted.
 
 =item *
 
@@ -83,7 +82,7 @@ Charles Bailey <bailey@genetics.upenn.edu>
 
 =head1 REVISION
 
-This document was last revised 08-Mar-1995, for perl 5.001
+This document was last revised 25-Aug-1995, for perl 5.002
 
 =cut
 
@@ -128,7 +127,7 @@ sub rmtree {
        $root =~ s#/$##;
        if (-d $root) { 
            opendir(D,$root);
-           $root =~ s#\.dir$## if $Is_VMS;
+           ($root = VMS::Filespec::unixify($root)) =~ s#\.dir$## if $Is_VMS;
            @files = map("$root/$_", grep $_!~/^\.{1,2}$/, readdir(D));
            closedir(D);
            $count += rmtree(\@files,$verbose,$safe);

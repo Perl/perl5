@@ -225,7 +225,8 @@ command		Execute as a perl statement in current package.
 		    $subname = "main::" . $subname unless $subname =~ /'|::/;
 		    $subname = "main" . $subname if substr($subname,0,1)eq "'";
 		    $subname = "main" . $subname if substr($subname,0,2)eq "::";
-		    ($file,$subrange) = split(/:/,$sub{$subname});
+		    # VMS filespecs may (usually do) contain ':', so don't use split
+		    ($file,$subrange) = $sub{$subname} =~ /(.*):(.*)/;
 		    if ($file ne $filename) {
 			*dbline = "::_<$file";
 			$max = $#dbline;
@@ -305,7 +306,8 @@ command		Execute as a perl statement in current package.
 			unless $subname =~ /'|::/;
 		    $subname = "main" . $subname if substr($subname,0,1) eq "'";
 		    $subname = "main" . $subname if substr($subname,0,2) eq "::";
-		    ($filename,$i) = split(/:/, $sub{$subname});
+		    # VMS filespecs may (usually do) contain ':', so don't use split
+		    ($filename,$i) = $sub{$subname} =~ /(.*):(.*)/;
 		    $i += 0;
 		    if ($i) {
 			*dbline = "::_<$filename";
