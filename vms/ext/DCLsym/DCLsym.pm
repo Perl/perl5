@@ -201,7 +201,7 @@ can also call methods directly to manipulate individual symbols.  In some
 cases, this allows you finer control than using a tied hash aggregate.  The
 following methods are supported:
 
-=over
+=over 4
 
 =item new
 
@@ -253,6 +253,8 @@ disabled, respectively.
 This method is a stopgap until we can incorporate code into this extension to
 traverse the process' symbol table directly, so it may disappear in a future
 version of this package.
+
+=back
 
 =head1 AUTHOR
 

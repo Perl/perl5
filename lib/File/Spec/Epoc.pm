@@ -24,7 +24,7 @@ This package is still work in progress ;-)
 o.flebbe@gmx.de
 
 
-=over
+=over 4
 
 =item devnull
 
@@ -62,6 +62,7 @@ Takes no argument, returns the environment variable PATH as an array. Since
 there is no search path supported, it returns undef, sorry.
 
 =cut
+
 sub path {
     return undef;
 }

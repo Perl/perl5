@@ -138,6 +138,7 @@
 
 double epoc_atof( const char *ptr);
 #define atof(a) epoc_atof(a)
+#define strtoul(a,b,c) epoc_strtoul(a,b,c)
 
 #define init_os_extras Perl_init_os_extras
 

@@ -163,7 +163,7 @@ print "ok 23\n";
 print "#$u{$_}\n" for keys %u; # Used to core dump before change #8056.
 print "ok 24\n";
 
-$d = qu"\xe3\x81\x82";
+$d = pack("U*", 0xe3, 0x81, 0x82);
 %u = ($d => "downgrade");
 for (keys %u) {
     use bytes;
@@ -172,6 +172,6 @@ for (keys %u) {
 }
 {
     use bytes;
-    print "not " if length($d) ne 6 or $d ne qu"\xe3\x81\x82";
+    print "not " if length($d) ne 6;
     print "ok 26\n";
 }

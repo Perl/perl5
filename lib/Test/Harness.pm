@@ -104,7 +104,7 @@ sub _runtests {
 
 	my $cmd = ($ENV{'HARNESS_COMPILE_TEST'})
 		? "./perl -I../lib ../utils/perlcc $test "
-		  . "-run 2>> ./compilelog |" 
+		  . "-r 2>> ./compilelog |" 
 		: "$^X $s $test|";
 	$cmd = "MCR $cmd" if $^O eq 'VMS';
 	open(my $fh, $cmd) or print "can't run $test. $!\n";
@@ -765,6 +765,7 @@ ignore them.
   not ok 2
   # got 'Bush' expected 'Gore'
 
+=back
 
 =head1 EXPORT
 

@@ -163,6 +163,9 @@ perlmodlib.pod:	$(PERL) perlmodlib.PL ../mv-if-diff
 	sh ../mv-if-diff perlmodlib.tmp perlmodlib.pod
 
 compile: all
-	$(REALPERL) -I../lib ../utils/perlcc -regex 's/$$/.exe/' pod2latex pod2man pod2text checkpods -prog -verbose dcf -log ../compilelog;
+	$(REALPERL) -I../lib ../utils/perlcc -o pod2latex.exe pod2latex -log ../compilelog
+	$(REALPERL) -I../lib ../utils/perlcc -o pod2man.exe pod2man -log ../compilelog
+	$(REALPERL) -I../lib ../utils/perlcc -o pod2text.exe pod2text -log ../compilelog
+	$(REALPERL) -I../lib ../utils/perlcc -o checkpods.exe checkpods -log ../compilelog
 
 !NO!SUBS!

@@ -155,6 +155,9 @@ fi
 case "$use64bitall" in
 $define|true|[yY]*) use64bitint="$define" ;;
 esac
+case "$usemorebits" in
+$define|true|[yY]*) use64bitint="$define"; uselongdouble="$define" ;;
+esac
 case "$use64bitint" in
 $define|true|[yY]*)
     if [ "$xxOsRevMajor" -lt 11 ]; then
@@ -434,4 +437,10 @@ EOCBU
 
 # keep that leading tab.
 	ccisgcc=''
+
+# Until we figure out what to be probe for in Configure (ditto for irix_6.sh)
+case "$use64bitint" in
+$define|true|[yY]*) ;;
+*) d_casti32='undef' ;;
+esac
 

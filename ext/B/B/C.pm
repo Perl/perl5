@@ -1020,7 +1020,7 @@ sub output_all {
 static int $init_name()
 {
 	dTARG;
-	djSP;
+	dSP;
 EOT
     $init->output(\*STDOUT, "\t%s\n");
     print "\treturn 0;\n}\n";
@@ -1172,7 +1172,7 @@ xs_init(pTHX)
 {
     char *file = __FILE__;
     dTARG;
-    djSP;
+    dSP;
 EOT
     print "\n#ifdef USE_DYNAMIC_LOADING";
     print qq/\n\tnewXS("DynaLoader::boot_DynaLoader", boot_DynaLoader, file);/;
@@ -1208,7 +1208,7 @@ dl_init(pTHX)
 {
     char *file = __FILE__;
     dTARG;
-    djSP;
+    dSP;
 EOT
     print("/* Dynamicboot strapping code*/\n\tSAVETMPS;\n");
     print("\ttarg=sv_newmortal();\n");

@@ -466,6 +466,8 @@ unless ($define{'USE_ITHREADS'}) {
 		    Perl_sys_intern_dup
 		    Perl_ptr_table_fetch
 		    Perl_ptr_table_new
+		    Perl_ptr_table_clear
+		    Perl_ptr_table_free
 		    Perl_ptr_table_split
 		    Perl_ptr_table_store
 		    perl_clone

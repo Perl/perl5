@@ -30,8 +30,6 @@ $! with much valuable help from Charles Bailey &
 $! the whole VMSPerl crew.
 $! Extended and messed about with by Dan Sugalski
 $!
-$ sav_ver = F$VERIFY(0)
-$!
 $! VMS-isms we will need:
 $ echo = "write sys$output "
 $ cat  = "type"
@@ -135,9 +133,7 @@ $ silent=""
 $ extractsh=""
 $ override=""
 $ knowitall=""
-$ Using_Dec_C = "n"
-$ Using_Gnu_C = "n"
-$ using_cxx = "n"
+$ ccname="VAX"
 $ Dec_C_Version = ""
 $ cxxversion = ""
 $ use_threads = "F"
@@ -362,7 +358,8 @@ $!
 $Shut_up:
 $ IF F$Mode() .eqs. "BATCH"
 $ THEN
-$   STDOUT = F$GetQuI("DISPLAY_JOB","LOG_SPECIFICATION",,"THIS_JOB")
+$   STDOUT = F$PARSE(F$GETQUI("DISPLAY_ENTRY", "JOB_NAME"), -
+                    F$GETQUI("DISPLAY_ENTRY", "LOG_SPECIFICATION"), ".LOG")
 $   WRITE SYS$OUTPUT "Warning: Executing in batch mode.  To avoid file locking conflicts,"
 $   WRITE SYS$OUTPUT "output intended for SYS$OUTPUT will be sent to a new version"
 $   WRITE SYS$OUTPUT STDOUT
@@ -1613,13 +1610,14 @@ $   Mcc = ans
 $   IF (F$LOCATE("dec",ans).NE.F$LENGTH(ans)).or.(F$LOCATE("compaq",ans).NE.F$LENGTH(ans))
 $   THEN
 $     Mcc = "cc/decc"
-$     Using_Dec_C := Y
+$! CPQ ?
+$     ccname := DEC
 $     C_COMPILER_Replace = "CC=cc=''Mcc'"
 $   ENDIF
 $   IF F$LOCATE("cxx",F$EDIT(ans,"COLLAPSE,LOWERCASE")) .NE. F$LENGTH(ans)
 $   THEN
 $     Mcc = "cxx"
-$     using_cxx := Y
+$     ccname := CXX
 $     ld = ld_try
 $     C_COMPILER_Replace = "CC=cc=''Mcc'"
 $   ELSE ! Not_cxx
@@ -1630,12 +1628,12 @@ $       IF F$LOCATE("dec",dflt) .NE. F$LENGTH(dflt) .or. -
 $       THEN 
 $         C_COMPILER_Replace = "CC=cc=''Mcc'"
 $       ELSE
-$         Using_Dec_C := Y
+$         ccname := DEC
 $       ENDIF
 $     ELSE
 $       IF Mcc .EQS. "cc/decc"
 $       THEN
-$         Using_Dec_C := Y
+$         ccname := DEC
 $         C_COMPILER_Replace = "CC=cc=''Mcc'"
 $       ENDIF
 $     ENDIF
@@ -1644,18 +1642,18 @@ $ ELSE
 $   Mcc = dflt
 $   IF Mcc .EQS. "cc/decc"
 $   THEN
-$     Using_Dec_C := Y
+$     ccname := DEC
 $     C_COMPILER_Replace = "CC=cc=''Mcc'"
 $   ENDIF
 $   IF Mcc .EQS. "gcc"
 $   THEN
-$     Using_Gnu_C := Y
+$     ccname := GCC
 $     C_COMPILER_Replace = "CC=cc=''Mcc'"
 $   ENDIF
 $ ENDIF
 $Decc_Version_check:
 $ ccversion=""
-$ IF Using_Dec_C
+$ IF ccname .EQS. "DEC"
 $ THEN
 $   echo ""
 $   echo4 "Checking for the Dec C version number..."
@@ -1708,7 +1706,7 @@ $   DELETE/NOLOG/NOCONFIRM deccvers.*;
 $ ENDIF
 $Gcc_check:
 $ gccversion = ""
-$ IF Using_Gnu_C
+$ IF ccname .EQS. "GCC"
 $ THEN
 $   vaxcrtl_olb = F$SEARCH("SYS$LIBRARY:VAXCRTL.OLB")
 $   vaxcrtl_exe = F$SEARCH("SYS$SHARE:VAXCRTL.EXE")
@@ -1815,14 +1813,14 @@ $       GOTO Host_name
 $     ELSE 
 $       echo "You are using GNU cc ''line'"
 $       gccversion = line
-$       Using_Gnu_C := Y
+$       ccname := "GCC"
 $       C_COMPILER_Replace = "CC=cc=''Mcc'"
 $       GOTO Include_dirs
 $     ENDIF
 $   ENDIF
 $ ENDIF
 $Cxx_Version_check:
-$ IF using_cxx
+$ IF ccname .EQS. "CXX"
 $ THEN
 $   OPEN/WRITE CONFIG cxxvers.c
 $   WRITE CONFIG "#include <stdio.h>"
@@ -1987,12 +1985,15 @@ is most probably close to the reality but may not be valid from outside
 your organization...
 $   EOD
 $ ENDIF
-$ dflt = "''cf_by'@''myhostname'"+"''mydomain'"
-$ rp = "What is your e-mail address? [''dflt'] "
-$ GOSUB myread
-$ IF ans .nes. ""
-$ THEN cf_email = ans
-$ ELSE cf_email = dflt
+$ IF F$TYPE(cf_email) .EQS. "" 
+$ THEN 
+$   dflt = "''cf_by'@''myhostname'"+"''mydomain'"
+$   rp = "What is your e-mail address? [''dflt'] "
+$   GOSUB myread
+$   IF ans .nes. ""
+$   THEN cf_email = ans
+$   ELSE cf_email = dflt
+$   ENDIF
 $ ENDIF
 $!
 $ IF .NOT.silent 
@@ -2047,7 +2048,8 @@ $   echo4 "Hmm... Looks like you have SOCKETSHR Berkeley networking support."
 $ ELSE
 $   Has_socketshr     = "F"
 $ ENDIF
-$ IF (Dec_C_Version .GE. 50200000) .or. using_cxx
+$ IF (ccname .EQS. "DEC" .AND. Dec_C_Version .GE. 50200000) .OR. -
+     (ccname .EQS. "CXX")
 $ THEN
 $   Has_Dec_C_Sockets = "T"
 $   echo ""
@@ -2183,7 +2185,7 @@ $   ENDIF
 $ ENDIF ! AXP && >= 7.1
 $!
 $! Ask about threads, if appropriate
-$ IF Using_Dec_C .OR. using_cxx
+$ IF ccname .EQS. "DEC" .OR. ccname .EQS. "CXX"
 $ THEN
 $   echo ""
 $   echo "This version of Perl can be built with threads. While really nifty,"
@@ -2391,7 +2393,7 @@ $ echo ""
 $ echo "Which modules do you want to build into perl?"
 $! we need to add Byteloader to this list:
 $ dflt = "re Fcntl Encode Errno File::Glob Filter::Util::Call IO Opcode Devel::Peek Devel::DProf Data::Dumper attrs VMS::Stdio VMS::DCLsym B SDBM_File Storable Thread Sys::Hostname"
-$ IF Using_Dec_C .OR. using_cxx
+$ IF ccname .EQS. "DEC" .OR. ccname .EQS. "CXX"
 $ THEN
 $   dflt = dflt + " POSIX"
 $ ENDIF
@@ -2708,11 +2710,11 @@ $ vms_ver = F$EXTRACT(1,3, osvers)
 $ IF F$LENGTH(Mcc) .EQ. 0 THEN Mcc := "cc"
 $ MCC = f$edit(mcc, "UPCASE")
 $ C_Compiler_Replace := "CC=CC=''Mcc'''ccflags'"
-$ IF Using_Dec_C
+$ IF ccname .EQS. "DEC"
 $ THEN
 $   Checkcc := "''Mcc'/prefix=all"
 $ ELSE
-$   IF using_cxx
+$   IF ccname .EQS. "CXX"
 $   THEN
 $     Checkcc := cxx
 $   ELSE
@@ -2739,6 +2741,7 @@ $ THEN
 $   use64bitint = "define"
 $   uselargefiles = "define"
 $   uselongdouble = "define"
+$   alignbytes="16"
 $   usemorebits = "define"
 $ ELSE
 $   use64bitint = "undef"
@@ -2797,7 +2800,7 @@ $   libs="SYS$SHARE:CMA$LIB_SHR.EXE/SHARE SYS$SHARE:CMA$RTL.EXE/SHARE SYS$SHARE:
 $ ELSE
 $   libs=" "
 $ ENDIF
-$ IF Using_Dec_C .OR. using_cxx
+$ IF ccname .EQS. "DEC" .OR. ccname .EQS. "CXX"
 $ THEN
 $   libc="(DECCRTL)"
 $ ELSE
@@ -2916,7 +2919,7 @@ $ CS := "close CONFIG"
 $ DS := "delete/nolog/noconfirm []try.*;*"
 $ Needs_Opt := N
 $ good_compile = %X10B90001
-$ IF Using_Gnu_C
+$ IF ccname .EQS. "GCC"
 $ THEN
 $   open/write OPTCHAN []try.opt
 $   write OPTCHAN "Gnu_CC:[000000]gcclib.olb/library"
@@ -2925,7 +2928,7 @@ $   Close OPTCHAN
 $   Needs_Opt := Y
 $   good_compile = %X10000001
 $ ENDIF
-$ IF using_cxx
+$ IF ccname .EQS. "CXX"
 $ THEN
 $   good_compile = %X15F60001
 $ ENDIF
@@ -4478,7 +4481,7 @@ $ IF F$SEARCH("try.obj").NES."" THEN DELETE/NOLOG/NOCONFIRM try.obj;*
 $ IF F$SEARCH("try.exe").NES."" THEN DELETE/NOLOG/NOCONFIRM try.exe;*
 $ IF F$SEARCH("try.opt").NES."" THEN DELETE/NOLOG/NOCONFIRM try.opt;*
 $ IF F$SEARCH("try.out").NES."" THEN DELETE/NOLOG/NOCONFIRM try.out;*
-$ IF using_cxx
+$ IF ccname .EQS. "CXX"
 $ THEN
 $   CALL Cxx_demangler_cleanup
 $ ENDIF
@@ -4486,7 +4489,7 @@ $!
 $! Some that are compiler or VMS version sensitive
 $!
 $! Gnu C stuff
-$ IF Using_Gnu_C
+$ IF ccname .EQS. "GCC"
 $ THEN
 $   d_attribut="define"
 $   vms_cc_type="gcc"
@@ -4496,7 +4499,8 @@ $   d_attribut="undef"
 $ ENDIF
 $!
 $! Dec C >= 5.2 and VMS ver >= 7.0
-$ IF (Using_Dec_C).AND.(F$INTEGER(Dec_C_Version).GE.50200000).AND.(vms_ver .GES. "7.0")
+$ IF (ccname .EQS. "DEC") .AND. -
+     (F$INTEGER(Dec_C_Version).GE.50200000) .AND. (vms_ver .GES. "7.0")
 $ THEN
 $   d_bcmp="define"
 $   d_gettimeod="define"
@@ -4546,8 +4550,15 @@ $   d_sysconf="undef"
 $   d_sigsetjmp="undef"
 $ ENDIF
 $!
+$ IF d_gethname .EQS. "undef" .AND. d_uname .EQS. "undef"
+$ THEN
+$   d_phostname="define"
+$ ELSE
+$   d_phostname="undef"
+$ ENDIF
+$!
 $! Dec C alone
-$ IF Using_Dec_C
+$ IF ccname .EQS. "DEC"
 $ THEN
 $   d_mbstowcs="define"
 $   d_mbtowc="define"
@@ -4608,7 +4619,7 @@ $   d_gethostprotos="define"
 $   d_getnetprotos="define"
 $   d_getprotoprotos="define"
 $   d_getservprotos="define"
-$   IF Using_Dec_C .OR. using_cxx
+$   IF ccname .EQS. "DEC" .OR. ccname .EQS. "CXX"
 $   THEN
 $     socksizetype="unsigned int"
 $   ELSE
@@ -4795,7 +4806,7 @@ $ ivdformat="""ld"""
 $ uvuformat="""lu"""
 $ uvoformat="""lo"""
 $ uvxformat="""lx"""
-$ uvxuformat="""lX"""
+$ uvXUformat="""lX"""
 $! uselongdouble?
 $ nveformat="""e"""
 $ nvfformat="""f"""
@@ -4805,12 +4816,12 @@ $! Finally the composite ones. All config
 $!
 $ myuname="''osname' ''myname' ''osvers' ''F$EDIT(hwname, "TRIM")'"
 $!
-$ IF Using_Dec_C .AND. (.NOT. using_cxx)
+$ IF ccname .EQS. "DEC"
 $ THEN
 $   ccflags="/Include=[]/Standard=Relaxed_ANSI/Prefix=All/Obj=''obj_ext'/NoList''ccflags'"
 $ ENDIF
 $ i_dirent = "undef"
-$ IF using_cxx
+$ IF ccname .EQS. "CXX"
 $ THEN
 $   i_dirent = "define"
 $   ccflags="/Include=[]/Standard=ANSI/Prefix=All/Obj=''obj_ext'/NoList''ccflags'"
@@ -4847,13 +4858,13 @@ $ WC ""
 $ WC "CONFIG='true'"
 $ WC "Makefile_SH='" + Makefile_SH + "'"
 $ WC "Mcc='" + Mcc + "'"
-$ WC "PERL_REVISION=" + revision
-$ WC "PERL_VERSION=" + patchlevel
-$ WC "PERL_SUBVERSION=" + subversion
-$ WC "PERL_API_VERSION=" + api_version
-$ WC "PERL_API_SUBVERSION=" + api_subversion
+$ WC "PERL_REVISION='" + revision + "'"
+$ WC "PERL_VERSION='" + patchlevel + "'" 
+$ WC "PERL_SUBVERSION='" + subversion + "'" 
+$ WC "PERL_API_VERSION='" + api_version + "'" 
+$ WC "PERL_API_SUBVERSION='" + api_subversion + "'"
 $ WC "alignbytes='" + alignbytes + "'"
-$ WC "aphostname='" + "'"
+$ WC "aphostname='write sys$output f$edit(f$getsyi(\""SCSNODE\""),\""TRIM,LOWERCASE\"")'"
 $ WC "ar='" + "'"
 $ WC "archlib='" + archlib + "'"
 $ WC "archlibexp='" + archlibexp + "'"
@@ -4868,6 +4879,7 @@ $ WC "cc='" + perl_cc + "'"
 $ WC "cccdlflags='" + cccdlflags + "'"
 $ WC "ccdlflags='" + ccdlflags + "'"
 $ WC "ccflags='" + ccflags + "'"
+$ WC "ccname='" + ccname + "'"
 $ WC "ccversion='" + ccversion + "'"
 $ WC "cf_by='" + cf_by + "'"
 $ WC "cf_email='" + cf_email + "'"
@@ -5053,7 +5065,7 @@ $ WC "d_open3='define'"
 $ WC "d_pathconf='" + d_pathconf + "'"
 $ WC "d_pause='define'"
 $ WC "d_perl_otherlibdirs='undef'"
-$ WC "d_phostname='undef'"
+$ WC "d_phostname='" + d_phostname + "'"
 $ WC "d_pipe='define'"
 $ WC "d_poll='undef'"
 $ WC "d_pthread_yield='" + d_pthread_yield + "'"
@@ -5078,7 +5090,7 @@ $ WC "d_rmdir='define'"
 $ WC "d_safebcpy='undef'"
 $ WC "d_safemcpy='define'"
 $ WC "d_sanemcmp='define'"
-$ WC "d_sbrkproto='undef'"
+$ WC "d_sbrkproto='define'"
 $ WC "d_sched_yield='" + d_sched_yield + "'"
 $ WC "d_scm_rights='undef'"
 $ WC "d_seekdir='define'"
@@ -5390,7 +5402,7 @@ $ WC "seedfunc='" + seedfunc + "'"
 $ WC "selectminbits='32'"
 $ WC "selecttype='" + selecttype + "'"
 $ WC "sh='MCR'"
-$ WC "shmattype='" + "'"
+$ WC "shmattype='" + " '"
 $ WC "shortsize='" + shortsize + "'"
 $ WC "shrplib='define'"
 $ WC "sig_name='" + sig_name + "'"
@@ -5457,7 +5469,7 @@ $ WC "uvsize='" + uvsize + "'"
 $ WC "uvtype='" + uvtype + "'"
 $ WC "uvuformat='" + uvuformat + "'"
 $ WC "uvxformat='" + uvxformat + "'"
-$ WC "uvxuformat='" + uvxuformat + "'"
+$ WC "uvXUformat='" + uvXUformat + "'"
 $ WC "vendorarchexp='" + "'"
 $ WC "vendorlib_stem='" + "'"
 $ WC "vendorlibexp='" + "'"
@@ -5480,7 +5492,7 @@ $ 'Perl_CC' munchconfig.c
 $ IF Needs_Opt
 $ THEN
 $   OPEN/WRITE CONFIG []munchconfig.opt
-$   IF Using_Gnu_C
+$   IF ccname .EQS. "GCC"
 $   THEN
 $     WRITE CONFIG "Gnu_CC:[000000]gcclib.olb/library"
 $   ENDIF
@@ -5493,7 +5505,7 @@ $   'ld' munchconfig.obj
 $ ENDIF
 $ IF F$SEARCH("munchconfig.obj") .NES. "" THEN DELETE/NOLOG/NOCONFIRM munchconfig.obj;
 $ IF F$SEARCH("munchconfig.c") .NES. "" THEN DELETE/NOLOG/NOCONFIRM munchconfig.c;
-$ IF using_cxx
+$ IF ccname .EQS. "CXX"
 $ THEN
 $   CALL Cxx_demangler_cleanup
 $ ENDIF
@@ -5543,7 +5555,7 @@ $ IF use_two_pot_malloc THEN WC "#define TWO_POT_OPTIMIZE"
 $ IF mymalloc THEN WC "#define EMBEDMYMALLOC"
 $ IF use_pack_malloc THEN WC "#define PACK_MALLOC"
 $ IF use_debugmalloc THEN WC "#define DEBUGGING_MSTATS"
-$ IF Using_Gnu_C THEN WC "#define GNUC_ATTRIBUTE_CHECK"
+$ IF ccname .EQS. "GCC" THEN WC "#define GNUC_ATTRIBUTE_CHECK"
 $ IF (Has_Dec_C_Sockets)
 $ THEN
 $    WC "#define VMS_DO_SOCKETS"
@@ -5581,19 +5593,19 @@ $ DELETE/NOLOG [-]CONFIG.MAIN;*
 $ DELETE/NOLOG [-]CONFIG.LOCAL;*
 $ DELETE/NOLOG [-]CONFIG.FDL;*
 $!
-$ IF Using_Dec_C
+$ IF ccname .EQS. "DEC"
 $ THEN
 $   DECC_REPLACE = "DECC=decc=1"
 $ ELSE
 $   DECC_REPLACE = "DECC="
 $ ENDIF
-$ IF using_cxx
+$ IF ccname .EQS. "CXX"
 $ THEN
 $   DECCXX_REPLACE = "DECCXX=DECCXX=1"
 $ ELSE
 $   DECCXX_REPLACE = "DECCXX="
 $ ENDIF
-$ IF Using_Gnu_C
+$ IF ccname .EQS. "GCC"
 $ THEN
 $   GNUC_REPLACE = "GNUC=gnuc=1"
 $ ELSE
@@ -5695,6 +5707,49 @@ $    Exit sts
 $!-- make_ext.com
 $EndOfTpl$
 $!
+$! Note that the /key qualifier to search, as in:
+$! search README.* "=head"/key=(position=1)/window=0/output=extra.pods
+$! is not supported on VMS V5.5-2, hence not used in extra_pods.com.
+$!
+$ echo4 "Extracting extra_pods.com (without variable substitutions)"
+$ Create Sys$Disk:[-]extra_pods.com
+$ Deck/Dollar="$EOExtra_Pods$"
+$!++ extra_pods.com
+$!   NOTE: This file is extracted as part of the VMS configuration process.
+$!   Any changes made to it directly will be lost.  If you need to make any
+$!   changes, please edit the template in Configure.Com instead.
+$!   Use FORCE if you've just podified a README.* file on VMS.
+$ if f$search("extra.pods") .eqs. "" .or. P1 .eqs. "FORCE" then -
+    search README.* "=head"/window=0/output=extra.pods
+$ open/read/error=extra_close EXTRA extra.pods
+$extra_loop:
+$ read/error=extra_close/END_OF_FILE=extra_close EXTRA file
+$ file_type = f$parse(file,,,"TYPE",) - "."
+$ if file_type .nes. "VMS" .and. file_type .nes. "vms"
+$ then
+$   pod_file = "[.pod]perl''file_type'.pod"
+$   file = file - "''f$parse(file,,,"VERSION",)'"
+$   if p1 .eqs. "CLEAN"
+$   then if f$search(pod_file) .nes. "" then delete/log 'pod_file';*
+$   else
+$     do_copy := false
+$     if f$search(pod_file) .eqs. ""
+$     then do_copy := true
+$     else
+$       file_rdt = f$cvtime(f$file_attributes(file,"RDT"))
+$       pod_file_rdt = f$cvtime(f$file_attributes(pod_file,"RDT"))
+$       if file_rdt .GTS. pod_file_rdt then do_copy := true
+$     endif
+$     if do_copy then copy/log/noconfirm 'file' 'pod_file'
+$   endif
+$ endif
+$ goto extra_loop
+$extra_close:
+$ close EXTRA
+$ if p1 .eqs. "CLEAN" .and. f$search("extra.pods;-1") .nes. "" then -
+    purge/nolog extra.pods
+$!-- extra_pods.com
+$EOExtra_Pods$
 $!
 $!  Warn of dangerous symbols or logical names
 $!
@@ -5937,8 +5992,8 @@ $ THEN
 $   DEASSIGN SYS$OUTPUT
 $!   DEASSIGN SYS$ERROR
 $ ENDIF
-$ IF F$GETJPI("","FILCNT").NE.vms_filcnt THEN CLOSE CONFIG
-$ IF F$GETJPI("","FILCNT").NE.vms_filcnt 
+$ IF F$GETJPI("","FILCNT").GT.vms_filcnt THEN CLOSE CONFIG
+$ IF F$GETJPI("","FILCNT").GT.vms_filcnt
 $ THEN WRITE SYS$ERROR "%Config-W-VMS, WARNING: There is a file still open"
 $ ENDIF
 $ dflt = F$ENVIRONMENT("DEFAULT")
@@ -5950,6 +6005,5 @@ $   SET PROTECTION=(SYSTEM:RWED,OWNER:RWED) UU.DIR
 $   DELETE/NOLOG/NOCONFIRM UU.DIR;
 $ ENDIF
 $ SET DEFAULT 'vms_default_directory_name' !be kind rewind
-$ STOP
 $ EXIT
 $!: End of Configure

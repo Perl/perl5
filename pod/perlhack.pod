@@ -1146,7 +1146,7 @@ the code which implements the addition operator:
 
    1  PP(pp_add)
    2  {
-   3      djSP; dATARGET; tryAMAGICbin(add,opASSIGN);
+   3      dSP; dATARGET; tryAMAGICbin(add,opASSIGN);
    4      {
    5        dPOPTOPnnrl_ul;
    6        SETn( left + right );
@@ -1308,7 +1308,7 @@ Lots of junk will go past as gdb reads in the relevant source files and
 libraries, and then:
 
     Breakpoint 1, Perl_pp_add () at pp_hot.c:309
-    309         djSP; dATARGET; tryAMAGICbin(add,opASSIGN);
+    309         dSP; dATARGET; tryAMAGICbin(add,opASSIGN);
     (gdb) step
     311           dPOPTOPnnrl_ul;
     (gdb)

@@ -57,7 +57,7 @@ rather than UTF-8).
 
 Enabling the C<utf8> pragma has the following effects:
 
-=over
+=over 4
 
 =item *
 
@@ -78,6 +78,8 @@ of byte semantics.
 	use utf8;			# force char semantics
 	@chars = split //, $data;	# splits characters
     }
+
+=back
 
 =head1 SEE ALSO
 

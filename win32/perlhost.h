@@ -1683,7 +1683,7 @@ win32_start_child(LPVOID arg)
 
     /* push a zero on the stack (we are the child) */
     {
-	djSP;
+	dSP;
 	dTARGET;
 	PUSHi(0);
 	PUTBACK;

@@ -172,8 +172,8 @@ if (@ARGV && $ARGV[0] eq "tree")
     exit ;
 }
 
-#unlink "warnings.h";
-#unlink "lib/warnings.pm";
+unlink "warnings.h";
+unlink "lib/warnings.pm";
 open(WARN, ">warnings.h") || die "Can't create warnings.h: $!\n";
 open(PM, ">lib/warnings.pm") || die "Can't create lib/warnings.pm: $!\n";
 

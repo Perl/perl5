@@ -16,8 +16,7 @@ The following areas need further work.
 
 There is currently no easy way to mark data read from a file or other
 external source as being utf8.  This will be one of the major areas of
-focus in the near future.  Unfortunately it is unlikely that the Perl
-5.6 and earlier will ever gain this capability.
+focus in the near future.
 
 =item Regular Expressions
 
@@ -67,8 +66,7 @@ or from literals and constants in the source text.
 If the C<-C> command line switch is used, (or the ${^WIDE_SYSTEM_CALLS}
 global flag is set to C<1>), all system calls will use the
 corresponding wide character APIs.  This is currently only implemented
-on Windows as other platforms do not have a unified way of handling
-wide character APIs.
+on Windows.
 
 Regardless of the above, the C<bytes> pragma can always be used to force
 byte semantics in a particular lexical scope.  See L<bytes>.
@@ -129,7 +127,8 @@ attempt to canonicalize variable names for you.)
 
 Regular expressions match characters instead of bytes.  For instance,
 "." matches a character instead of a byte.  (However, the C<\C> pattern
-is available to force a match a single byte ("C<char>" in C, hence C<\C>).)
+is provided to force a match a single byte ("C<char>" in C, hence
+C<\C>).)
 
 =item *
 
@@ -217,10 +216,7 @@ And finally, C<scalar reverse()> reverses by character rather than by byte.
 
 =head2 Character encodings for input and output
 
-This feature is in the process of getting implemented.
-
-(For Perl 5.6 and earlier the support is unlikely to get integrated
-to the core language and some external module will be required.)
+[XXX: This feature is not yet implemented.]
 
 =head1 CAVEATS
 

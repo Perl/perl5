@@ -41,17 +41,21 @@ print OUT <<'!NO!SUBS!';
 # Version 2.0, Simon Cozens, Thu Mar 30 17:52:45 JST 2000 
 # Version 2.01, Tom Christiansen, Thu Mar 30 08:25:14 MST 2000
 # Version 2.02, Simon Cozens, Sun Apr 16 01:53:36 JST 2000
+# Version 2.03, Edward Peschko, Mon Feb 26 12:04:17 PST 2001
 
 use strict;
 use warnings;
 use v5.6.0;
 
+use FileHandle;
 use Config;
 use Fcntl qw(:DEFAULT :flock);
 use File::Temp qw(tempfile);
 use Cwd;
-our $VERSION = 2.02;
+our $VERSION = 2.03;
 $| = 1;
+
+$SIG{INT} = sub { exit(); }; # exit gracefully and clean up after ourselves.
 
 use subs qw{
     cc_harness check_read check_write checkopts_byte choose_backend
@@ -62,18 +66,20 @@ sub opt(*); # imal quoting
 
 our ($Options, $BinPerl, $Backend);
 our ($Input => $Output);
+our ($logfh);
+our ($cfile);
 
 # eval { main(); 1 } or die;
 
 main();
 
-sub main { 
+sub main {
     parse_argv();
     check_write($Output);
     choose_backend();
     generate_code();
-    die "XXX: Not reached?";
-    exit(0);
+    run_code();
+    _die("XXX: Not reached?");
 }
 
 #######################################################################
@@ -108,7 +114,13 @@ sub generate_code {
             compile_cstyle();
         }
     }
+    exit(0) if (!opt('r'));
+}
 
+sub run_code {
+    vprint 0, "Running code";
+    run("$Output @ARGV");
+    exit(0);
 }
 
 # usage: vprint [level] msg args
@@ -124,13 +136,18 @@ sub vprint {
     } 
     my $msg = "@_";
     $msg .= "\n" unless substr($msg, -1) eq "\n";
-    print "$0: $msg" if opt(v) > $level;
-} 
+    if (opt(v) > $level)
+    {
+         print        "$0: $msg" if !opt('log');
+	 print $logfh "$0: $msg" if  opt('log');
+    }
+}
 
 sub parse_argv {
 
     use Getopt::Long; 
-    Getopt::Long::Configure("bundling");
+#    Getopt::Long::Configure("bundling"); turned off. this is silly because 
+#                                         it doesn't allow for long switches.
     Getopt::Long::Configure("no_ignore_case");
 
     # no difference in exists and defined for %ENV; also, a "0"
@@ -142,33 +159,38 @@ sub parse_argv {
         'L:s',          # lib directory
         'I:s',          # include directories (FOR C, NOT FOR PERL)
         'o:s',          # Output executable
-        'v+',           # Verbosity level
+        'v:i',           # Verbosity level
         'e:s',          # One-liner
+	'r',            # run resulting executable
         'B',            # Byte compiler backend
         'O',            # Optimised C backend
         'c',            # Compile only
         'h',            # Help me
         'S',            # Dump C files
-        's:s',          # Dirty hack to enable -shared/-static
+	'r',            # run the resulting executable
+        'static',       # Dirty hack to enable -shared/-static
         'shared',       # Create a shared library (--shared for compat.)
+	'log:s'         # where to log compilation process information
     );
         
     # This is an attempt to make perlcc's arg. handling look like cc.
-    if ( opt('s') ) {  # must quote: looks like s)foo)bar)!
-        if (opt('s') eq 'hared') {
-            $Options->{shared}++; 
-        } elsif (opt('s') eq 'tatic') {
-            $Options->{static}++; 
-        } else {
-            warn "$0: Unknown option -s", opt('s');
-        }
-    }
+    # if ( opt('s') ) {  # must quote: looks like s)foo)bar)!
+    #   if (opt('s') eq 'hared') {
+    #        $Options->{shared}++; 
+    #    } elsif (opt('s') eq 'tatic') {
+    #        $Options->{static}++; 
+    #    } else {
+    #        warn "$0: Unknown option -s", opt('s');
+    #    }
+    # }
 
     $Options->{v} += 0;
 
     helpme() if opt(h); # And exit
 
     $Output = opt(o) || 'a.out';
+    $Output = relativize($Output);
+    $logfh  = new FileHandle(">> " . opt('log')) if (opt('log'));
 
     if (opt(e)) {
         warn "$0: using -e 'code' as input file, ignoring @ARGV\n" if @ARGV;
@@ -177,7 +199,7 @@ sub parse_argv {
         $Input = "-e '".opt(e)."'"; # Quotes eaten by shell
     } else {
         $Input = shift @ARGV;  # XXX: more files?
-        die "$0: No input file specified\n" unless $Input;
+        _usage_and_die("$0: No input file specified\n") unless $Input;
         # DWIM modules. This is bad but necessary.
         $Options->{shared}++ if $Input =~ /\.pm\z/;
         warn "$0: using $Input as input file, ignoring @ARGV\n" if @ARGV;
@@ -234,18 +256,18 @@ EOF
     my ($output_r, $error_r) = spawnit($command);
 
     if (@$error_r && $? != 0) {
-	die "$0: $Input did not compile, which can't happen:\n@$error_r\n";
+	_die("$0: $Input did not compile, which can't happen:\n@$error_r\n");
     } else {
 	my @error = grep { !/^$Input syntax OK$/o } @$error_r;
 	warn "$0: Unexpected compiler output:\n@error" if @error;
     }
 	
     # Write it and leave.
-    print OUT @$output_r               or die "can't write $Output: $!";
-    close OUT                          or die "can't close $Output: $!";
+    print OUT @$output_r               or _die("can't write $Output: $!");
+    close OUT                          or _die("can't close $Output: $!");
 
     # wait, how could it be anything but what you see next?
-    chmod 0777 & ~umask, $Output    or die "can't chmod $Output: $!";
+    chmod 0777 & ~umask, $Output    or _die("can't chmod $Output: $!");
     exit 0;
 }
 
@@ -253,8 +275,9 @@ sub compile_cstyle {
     my $stash = grab_stash();
     
     # What are we going to call our output C file?
-    my ($cfile,$cfh);
     my $lose = 0;
+    my ($cfh);
+
     if (opt(S) || opt(c)) {
         # We need to keep it.
         if (opt(e)) {
@@ -292,16 +315,15 @@ sub compile_cstyle {
 	my @error = @$error_r;
 
     if (@error && $? != 0) {
-        die "$0: $Input did not compile, which can't happen:\n@error\n";
+        _die("$0: $Input did not compile, which can't happen:\n@error\n");
     }
 
     cc_harness($cfile,$stash) unless opt(c);
 
     if ($lose) {
         vprint 2, "unlinking $cfile";
-        unlink $cfile or die "can't unlink $cfile: $!" if $lose;
+        unlink $cfile or _die("can't unlink $cfile: $!"); 
     }
-	exit(0);
 }
 
 sub cc_harness {
@@ -312,8 +334,8 @@ sub cc_harness {
 	$command .= " -L".$_ for split /\s+/, opt(L);
 	my @mods = split /-?u /, $stash;
 	$command .= " ".ExtUtils::Embed::ldopts("-std", \@mods);
-	vprint 3, "running cc $command";
-	system("cc $command");
+	vprint 3, "running $Config{cc} $command";
+	system("$Config{cc} $command");
 }
 
 # Where Perl is, and which include path to give it.
@@ -351,7 +373,7 @@ sub yclept {
 		my @error = @$error_r;
 
     	if (@error && $? != 0) {
-            die "$0: $Input did not compile:\n@error\n";
+            _die("$0: $Input did not compile:\n@error\n");
         }
 
         $stash[0] =~ s/,-u\<none\>//;
@@ -366,7 +388,7 @@ sub yclept {
 # To wit, (-B|-O) ==> no -shared, no -S, no -c
 sub checkopts_byte {
 
-    die "$0: Please choose one of either -B and -O.\n" if opt(O);
+    _die("$0: Please choose one of either -B and -O.\n") if opt(O);
 
     if (opt(shared)) {
         warn "$0: Will not create a shared library for bytecode\n";
@@ -387,8 +409,8 @@ sub checkopts_byte {
 sub sanity_check {
     if ($Input eq $Output) {
         if ($Input eq 'a.out') {
-            warn "$0: Compiling a.out is probably not what you want to do.\n";
-            # You fully deserve what you get now.
+            _die("$0: Compiling a.out is probably not what you want to do.\n");
+            # You fully deserve what you get now. No you *don't*. typos happen.
         } else {
             warn "$0: Will not write output on top of input file, ",
                 "compiling to a.out instead\n";
@@ -400,11 +422,11 @@ sub sanity_check {
 sub check_read { 
     my $file = shift;
     unless (-r $file) {
-        die "$0: Input file $file is a directory, not a file\n" if -d _;
+        _die("$0: Input file $file is a directory, not a file\n") if -d _;
         unless (-e _) {
-            die "$0: Input file $file was not found\n";
+            _die("$0: Input file $file was not found\n");
         } else {
-            die "$0: Cannot read input file $file: $!\n";
+            _die("$0: Cannot read input file $file: $!\n");
         }
     }
     unless (-f _) {
@@ -416,13 +438,13 @@ sub check_read {
 sub check_write {
     my $file = shift;
     if (-d $file) {
-        die "$0: Cannot write on $file, is a directory\n";
+        _die("$0: Cannot write on $file, is a directory\n");
     }
     if (-e _) {
-        die "$0: Cannot write on $file: $!\n" unless -w _;
+        _die("$0: Cannot write on $file: $!\n") unless -w _;
     } 
     unless (-w cwd()) { 
-        die "$0: Cannot write in this directory: $!\n" 
+        _die("$0: Cannot write in this directory: $!\n");
     }
 }
 
@@ -432,13 +454,13 @@ sub check_perl {
         warn "$0: Binary `$file' sure doesn't smell like perl source!\n";
         print "Checking file type... ";
         system("file", $file);  
-        die "Please try a perlier file!\n";
+        _die("Please try a perlier file!\n");
     } 
 
-    open(my $handle, "<", $file)    or die "XXX: can't open $file: $!";
+    open(my $handle, "<", $file)    or _die("XXX: can't open $file: $!");
     local $_ = <$handle>;
     if (/^#!/ && !/perl/) {
-        die "$0: $file is a ", /^#!\s*(\S+)/, " script, not perl\n";
+        _die("$0: $file is a ", /^#!\s*(\S+)/, " script, not perl\n");
     } 
 
 } 
@@ -451,14 +473,14 @@ sub spawnit {
 	(undef, $errname) = tempfile("pccXXXXX");
 	{ 
 	open (S_OUT, "$command 2>$errname |")
-		or die "$0: Couldn't spawn the compiler.\n";
+		or _die("$0: Couldn't spawn the compiler.\n");
 	@output = <S_OUT>;
 	}
-	open (S_ERROR, $errname) or die "$0: Couldn't read the error file.\n";
+	open (S_ERROR, $errname) or _die("$0: Couldn't read the error file.\n");
 	@error = <S_ERROR>;
 	close S_ERROR;
 	close S_OUT;
-	unlink $errname or die "$0: Can't unlink error file $errname";
+	unlink $errname or _die("$0: Can't unlink error file $errname");
 	return (\@output, \@error);
 }
 
@@ -471,6 +493,72 @@ sub helpme {
        }
 }
 
+sub relativize {
+	my ($args) = @_;
+
+	return() if ($args =~ m"^[/\\]");
+	return("./$args");
+}
+
+sub _die {
+    $logfh->print(@_) if opt('log');
+    print STDERR @_;
+    exit(); # should die eventually. However, needed so that a 'make compile'
+            # can compile all the way through to the end for standard dist.
+}
+
+sub _usage_and_die {
+    _die(<<EOU);
+$0: Usage:
+$0 [-o executable] [-r] [-O|-B|-c|-S] [-log log] [source[.pl] | -e oneliner]
+EOU
+}
+
+sub run {
+    my (@commands) = @_;
+
+    print interruptrun(@commands) if (!opt('log'));
+    $logfh->print(interruptrun(@commands)) if (opt('log'));
+}
+
+sub interruptrun
+{
+    my (@commands) = @_;
+
+    my $command = join('', @commands);
+    local(*FD);
+    my $pid = open(FD, "$command |");
+    my $text;
+    
+    local($SIG{HUP}) = sub { kill 9, $pid; exit };
+    local($SIG{INT}) = sub { kill 9, $pid; exit };
+
+    my $needalarm = 
+          ($ENV{PERLCC_TIMEOUT} && 
+	  $Config{'osname'} ne 'MSWin32' && 
+	  $command =~ m"(^|\s)perlcc\s");
+
+    eval 
+    {
+         local($SIG{ALRM}) = sub { die "INFINITE LOOP"; };
+         alarm($ENV{PERLCC_TIMEOUT}) if ($needalarm);
+	 $text = join('', <FD>);
+	 alarm(0) if ($needalarm);
+    };
+
+    if ($@)
+    {
+        eval { kill 'HUP', $pid };
+        vprint 0, "SYSTEM TIMEOUT (infinite loop?)\n";
+    }
+
+    close(FD);
+    return($text);
+}
+
+END {
+    unlink $cfile if ($cfile && !opt(S) && !opt(c));
+}
 
 __END__
 
@@ -493,7 +581,15 @@ perlcc - generate executables from Perl programs
 
     $ perlcc -e 'print q//'     # Compiles a one-liner into 'a.out'
     $ perlcc -c -e 'print q//'  # Creates a C file 'a.out.c'
-    
+
+    $ perlcc -r hello           # compiles 'hello' into 'a.out', runs 'a.out'.
+
+    $ perlcc -r hello a b c     # compiles 'hello' into 'a.out', runs 'a.out'.
+                                # with arguments 'a b c' 
+
+    $ perlcc hello -log c       # compiles 'hello' into 'a.out' logs compile
+                                # log into 'c'. 
+
 =head1 DESCRIPTION
 
 F<perlcc> creates standalone executables from Perl programs, using the
@@ -550,6 +646,14 @@ compile in finite time and memory, or indeed, at all.
 =item -v
 
 Increase verbosity of output; can be repeated for more verbose output.
+
+=item -r 
+
+Run the resulting compiled script after compiling it.
+
+=item -log
+
+Log the output of compiling to a file rather than to stdout.
 
 =back
 
