@@ -2371,11 +2371,11 @@ S_usage(pTHX_ char *name)		/* XXX move this out into a module ? */
     static char *usage_msg[] = {
 "-0[octal]       specify record separator (\\0, if no argument)",
 "-a              autosplit mode with -n or -p (splits $_ into @F)",
-"-C              enable native wide character system interfaces",
+"-C[number/list] enables the listed Unicode features",
 "-c              check syntax only (runs BEGIN and CHECK blocks)",
 "-d[:debugger]   run program under debugger",
 "-D[number/list] set debugging flags (argument is a bit mask or alphabets)",
-"-e 'command'    one line of program (several -e's allowed, omit programfile)",
+"-e program      one line of program (several -e's allowed, omit programfile)",
 "-F/pattern/     split() pattern for -a switch (//'s are optional)",
 "-i[extension]   edit <> files in place (makes backup if extension supplied)",
 "-Idirectory     specify @INC/#include directory (several -I's allowed)",
@@ -2386,16 +2386,16 @@ S_usage(pTHX_ char *name)		/* XXX move this out into a module ? */
 "-P              run program through C preprocessor before compilation",
 "-s              enable rudimentary parsing for switches after programfile",
 "-S              look for programfile using PATH environment variable",
-"-T              enable tainting checks",
 "-t              enable tainting warnings",
+"-T              enable tainting checks",
 "-u              dump core after parsing program",
 "-U              allow unsafe operations",
 "-v              print version, subversion (includes VERY IMPORTANT perl info)",
 "-V[:variable]   print configuration summary (or a single Config.pm variable)",
 "-w              enable many useful warnings (RECOMMENDED)",
 "-W              enable all warnings",
-"-X              disable all warnings",
 "-x[directory]   strip off text before #!perl line and perhaps cd to directory",
+"-X              disable all warnings",
 "\n",
 NULL
 };
@@ -3358,7 +3358,7 @@ S_validate_suid(pTHX_ char *validarg, char *scriptname, int fdscript)
 	    PL_euid == PL_statbuf.st_uid)
 	    if (!PL_do_undump)
 		Perl_croak(aTHX_ "YOU HAVEN'T DISABLED SET-ID SCRIPTS IN THE KERNEL YET!\n\
-FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
+FIX YOUR KERNEL, OR PUT A C WRAPPER AROUND THIS SCRIPT!\n");
 #endif /* IAMSUID */
 
 	if (PL_euid) {	/* oops, we're not the setuid root perl */
