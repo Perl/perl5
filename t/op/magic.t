@@ -26,6 +26,7 @@ $Is_VMS     = $^O eq 'VMS';
 $Is_Dos   = $^O eq 'dos';
 $Is_os2   = $^O eq 'os2';
 $Is_Cygwin   = $^O eq 'cygwin';
+$Is_MPE     = $^O eq 'mpeix';		
 $PERL = ($Is_MSWin32 ? '.\perl' : ($Is_NetWare ? 'perl' : './perl'));
 
 print "1..41\n";
@@ -40,7 +41,7 @@ open(FOO,'ajslkdfpqjsjfk');
 ok 2, $!, $!;
 close FOO; # just mention it, squelch used-only-once
 
-if ($Is_MSWin32 || $Is_NetWare || $Is_Dos) {
+if ($Is_MSWin32 || $Is_NetWare || $Is_Dos || $Is_MPE) {
     ok "3 # skipped",1;
     ok "4 # skipped",1;
 }
