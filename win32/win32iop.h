@@ -1,6 +1,18 @@
 #ifndef WIN32IOP_H
 #define WIN32IOP_H
 
+#ifndef START_EXTERN_C
+#ifdef __cplusplus
+#  define START_EXTERN_C extern "C" {
+#  define END_EXTERN_C }
+#  define EXTERN_C extern "C"
+#else
+#  define START_EXTERN_C 
+#  define END_EXTERN_C 
+#  define EXTERN_C
+#endif
+#endif
+
 /*
  * defines for flock emulation
  */

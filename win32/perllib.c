@@ -7,12 +7,6 @@
 #include "perl.h"
 #include "XSUB.h"
 
-#ifdef __cplusplus
-#  define EXTERN_C extern "C"
-#else
-#  define EXTERN_C extern
-#endif
-
 static void xs_init _((void));
 
 __declspec(dllexport) int
