@@ -34,13 +34,14 @@ $Config{'startperl'}
 'ds 00 \"';
 'ig 00 ';
 
-\$perlincl = "$Config{archlibexp}";  # or  {sitearchexp}
-
 !GROK!THIS!
 
 # In the following, perl variables are not expanded during extraction.
 
 print OUT <<'!NO!SUBS!';
+
+use Config;
+$perlincl = @Config{installsitearch};
 
 chdir '/usr/include' || die "Can't cd /usr/include";
 
