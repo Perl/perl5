@@ -22,7 +22,6 @@ use File::Spec;
 ## Base names already used in lib/gc_sc (for avoiding 8.3 conflicts)
 my %BaseNames;
 
-
 ##
 ## Process any args.
 ##
@@ -154,10 +153,15 @@ sub Build_Aliases()
 {
     ##
     ## Most of the work with aliases doesn't occur here,
-    ## but rather in utf8_heavy.pl, which uses utf8_pva.pl,
-    ## which contains just this function.  However, this one
-    ## 
-    ##   -- japhy (2004/04/13)
+    ## but rather in utf8_heavy.pl, which uses PVA.pl,
+
+    # Placate the warnings about used only once. (They are used again, but
+    # via a typeglob lookup)
+    %utf8::PropertyAlias = ();
+    %utf8::PA_reverse = ();
+    %utf8::PropValueAlias = ();
+    %utf8::PVA_reverse = ();
+    %utf8::PVA_abbr_map = ();
 
     open PA, "< PropertyAliases.txt"
 	or confess "Can't open PropertyAliases.txt: $!";
@@ -170,6 +174,12 @@ sub Build_Aliases()
         next if $abbrev eq "n/a";
 	$PropertyAlias{$abbrev} = $name;
         $PA_reverse{$name} = $abbrev;
+
+	# The %utf8::... versions use japhy's code originally from utf8_pva.pl
+	# However, it's moved here so that we build the tables at runtime.
+	tr/ _-//d for $abbrev, $name;
+	$utf8::PropertyAlias{lc $abbrev} = $name;
+	$utf8::PA_reverse{lc $name} = $abbrev;
     }
     close PA;
 
@@ -191,8 +201,23 @@ sub Build_Aliases()
 	    $PropValueAlias{$prop}{$data[0]} = $data[1];
             $PVA_reverse{$prop}{$data[1]} = $data[0];
 	}
+
+	shift @data if $prop eq 'ccc';
+	next if $data[0] eq "n/a";
+
+	$data[1] =~ tr/ _-//d;
+	$utf8::PropValueAlias{$prop}{lc $data[0]} = $data[1];
+	$utf8::PVA_reverse{$prop}{lc $data[1]} = $data[0];
+
+	my $abbr_class = ($prop eq 'gc' or $prop eq 'sc') ? 'gc_sc' : $prop;
+	$utf8::PVA_abbr_map{$abbr_class}{lc $data[0]} = $data[0];
     }
     close PVA;
+
+    # backwards compatibility for L& -> LC
+    $utf8::PropValueAlias{gc}{'l&'} = $utf8::PropValueAlias{gc}{lc};
+    $utf8::PVA_abbr_map{gc_sc}{'l&'} = $utf8::PVA_abbr_map{gc_sc}{lc};
+
 }
 
 
@@ -623,6 +648,33 @@ my $General  = Table->New(); ## all characters, grouped by category
 my %General;
 my %Cat;
 
+## Simple Data::Dumper alike. Good enough for our needs. We can't use the real
+## thing as we have to run under miniperl
+sub simple_dumper {
+    my @lines;
+    my $item;
+    foreach $item (@_) {
+	if (ref $item) {
+	    if (ref $item eq 'ARRAY') {
+		push @lines, "[\n", simple_dumper (@$item), "],\n";
+	    } elsif (ref $item eq 'HASH') {
+		push @lines, "{\n", simple_dumper (%$item), "},\n";
+	    } else {
+		die "Can't cope with $item";
+	    }
+	} else {
+	    if (defined $item) {
+		my $copy = $item;
+		$copy =~ s/([\'\\])/\\$1/gs;
+		push @lines, "'$copy',\n";
+	    } else {
+		push @lines, "undef,\n";
+	    }
+	}
+    }
+    @lines;
+}
+
 ##
 ## Process UnicodeData.txt (Categories, etc.)
 ##
@@ -958,6 +1010,18 @@ sub UnicodeData_Txt()
     ## Now dump the files.
     ##
     $Name->Write("Name.pl");
+
+    {
+	my @PVA = $HEADER;
+	foreach my $name (qw (PropertyAlias PA_reverse PropValueAlias
+			      PVA_reverse PVA_abbr_map)) {
+	    # Should I really jump through typeglob hoops just to avoid a
+	    # symbolic reference? (%{"utf8::$name})
+	    push @PVA, "\n", "\%utf8::$name = (\n",
+		simple_dumper (%{$utf8::{$name}}), ");\n";
+	}
+	WriteIfChanged("PVA.pl", @PVA);
+    }
 
     # $Bidi->Write("Bidirectional.pl");
     for (keys %Bidi) {

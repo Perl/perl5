@@ -77,7 +77,7 @@ sub SWASHNEW {
 	    ##
 	    ## See if it's in some enumeration.
 	    ##
-	    require "utf8_pva.pl";
+	    require "unicore/PVA.pl";
 	    if ($type =~ /^([\w\s]+)[:=]\s*(.*)/) {
 		my ($enum, $val) = (lc $1, lc $2);
 		$enum =~ tr/ _-//d;

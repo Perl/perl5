@@ -1846,7 +1846,6 @@ lib/User/grent.t		See if User::grwent works
 lib/User/pwent.pm		By-name interface to Perl's builtin getpw*
 lib/User/pwent.t		See if User::pwent works
 lib/utf8_heavy.pl		Support routines for utf8 pragma
-lib/utf8_pva.pl			Support routines for utf8 pragma
 lib/utf8.pm			Pragma to control Unicode support
 lib/utf8.t			See if utf8 operations work
 lib/validate.pl			Perl library supporting wholesale file mode validation
