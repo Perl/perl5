@@ -927,16 +927,7 @@ will display the place where they start differing.
 Barrie Slaymaker's Test::Differences module provides more in-depth
 functionality along these lines, and it plays well with Test::More.
 
-B<NOTE> is_deeply cannot tell the difference between $ref and "$ref", it
-also cannot tell the difference between {} and {some_key =E<gt> []}, it
-cannot tell the difference between a scalar string and an object which uses
-overloading to stringify to the same value.
-
-is_deeply will go into an infinite loop if passed a circular data structure.
-
-The above also apply to eq_array and eq_hash.
-
-Display of scalar refs is not quite 100%
+B<NOTE> Display of scalar refs is not quite 100%
 
 =cut
 
