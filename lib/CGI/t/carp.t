@@ -164,7 +164,9 @@ my $fake_out = join '', <STDOUT>;
 untie *STDOUT;
 
 open(STDOUT, ">&REAL_STDOUT");
-is( $fake_out, "<!-- warning: There is a problem at $0 line 95. -->\n",
+my $fname = $0;
+$fname =~ tr/<>-/\253\273\255/; # _warn does this so we have to also
+is( $fake_out, "<!-- warning: There is a problem at $fname line 95. -->\n",
                         'warningsToBrowser() on' );
 
 is($CGI::Carp::EMIT_WARNINGS, 1, "Warnings turned off");
