@@ -8,9 +8,9 @@ IO::Seekable - supply seek based methods for I/O objects
 
 =head1 SYNOPSIS
 
-	use IO::Seekable;
-	package IO::Something;
-	@ISA = qw(IO::Seekable);
+    use IO::Seekable;
+    package IO::Something;
+    @ISA = qw(IO::Seekable);
 
 =head1 DESCRIPTION
 
@@ -35,16 +35,16 @@ corresponding built-in functions:
 
 L<perlfunc>, 
 L<perlop/"I/O Operators">,
-L<"IO::Handle">
-L<"IO::File">
+L<IO::Handle>
+L<IO::File>
 
 =head1 HISTORY
 
-Derived from FileHandle.pm by Graham Barr <bodg@tiuk.ti.com>
+Derived from FileHandle.pm by Graham Barr E<lt>bodg@tiuk.ti.comE<gt>
 
 =head1 REVISION
 
-$Revision: 1.4 $
+$Revision: 1.5 $
 
 =cut
 
@@ -57,7 +57,7 @@ require Exporter;
 @EXPORT = qw(SEEK_SET SEEK_CUR SEEK_END);
 @ISA = qw(Exporter);
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.4 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.5 $ =~ /(\d+)\.(\d+)/);
 
 sub clearerr {
     @_ == 1 or croak 'usage: $fh->clearerr()';

@@ -43,19 +43,34 @@ IO::File - supply object methods for filehandles
 
 =head1 DESCRIPTION
 
-C<IO::File::new> creates a C<IO::File>, which is a reference to a
-newly created symbol (see the C<Symbol> package).  If it receives any
-parameters, they are passed to C<IO::File::open>; if the open fails,
-the C<IO::File> object is destroyed.  Otherwise, it is returned to
-the caller.
+C<IO::File> is inherits from C<IO::Handle> ans C<IO::Seekable>. It extends
+these classes with methods that are specific to file handles.
 
-C<IO::File::open> accepts one parameter or two.  With one parameter,
+=head1 CONSTRUCTOR
+
+=over 4
+
+=item new ([ ARGS ] )
+
+Creates a C<IO::File>.  If it receives any parameters, they are passed to
+the method C<open>; if the open fails, the object is destroyed.  Otherwise,
+it is returned to the caller.
+
+=back
+
+=head1 METHODS
+
+=over 4
+
+=item open( FILENAME [,MODE [,PERMS]] )
+
+C<open> accepts one, two or three parameters.  With one parameter,
 it is just a front end for the built-in C<open> function.  With two
 parameters, the first parameter is a filename that may include
 whitespace or other special characters, and the second parameter is
 the open mode, optionally followed by a file permission value.
 
-If C<IO::File::open> receives a Perl mode string (">", "+<", etc.)
+If C<IO::File::open> receives a Perl mode string ("E<gt>", "+E<lt>", etc.)
 or a POSIX fopen() mode string ("w", "r+", etc.), it uses the basic
 Perl C<open> operator.
 
@@ -65,20 +80,22 @@ For convenience, C<IO::File::import> tries to import the O_XXX
 constants from the Fcntl module.  If dynamic loading is not available,
 this may fail, but the rest of IO::File will still work.
 
+=back
+
 =head1 SEE ALSO
 
 L<perlfunc>, 
 L<perlop/"I/O Operators">,
-L<"IO::Handle">
-L<"IO::Seekable">
+L<IO::Handle>
+L<IO::Seekable>
 
 =head1 HISTORY
 
-Derived from FileHandle.pm by Graham Barr <bodg@tiuk.ti.com>
+Derived from FileHandle.pm by Graham Barr E<lt>F<bodg@tiuk.ti.com>E<gt>.
 
 =head1 REVISION
 
-$Revision: 1.3 $
+$Revision: 1.5 $
 
 =cut
 
@@ -96,7 +113,7 @@ require DynaLoader;
 
 @ISA = qw(IO::Handle IO::Seekable Exporter DynaLoader);
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.3 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.5 $ =~ /(\d+)\.(\d+)/);
 
 @EXPORT = @IO::Seekable::EXPORT;
 
@@ -121,9 +138,10 @@ sub import {
 ##
 
 sub new {
-    @_ >= 1 && @_ <= 4
-	or croak 'usage: new IO::File [FILENAME [,MODE [,PERMS]]]';
-    my $class = shift;
+    my $type = shift;
+    my $class = ref($type) || $type || "IO::File";
+    @_ >= 0 && @_ <= 3
+	or croak "usage: new $class [FILENAME [,MODE [,PERMS]]]";
     my $fh = $class->SUPER::new();
     if (@_) {
 	$fh->open(@_)

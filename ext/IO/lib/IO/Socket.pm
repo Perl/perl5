@@ -4,7 +4,7 @@ package IO::Socket;
 
 =head1 NAME
 
-IO::Socket - supply object methods for sockets
+IO::Socket - Object interface to socket communications
 
 =head1 SYNOPSIS
 
@@ -19,6 +19,23 @@ by L<IO::Handle>.
 C<IO::Socket> only defines methods for those operations which are common to all
 types of socket. Operations which are specified to a socket in a particular 
 domain have methods defined in sub classes of C<IO::Socket>
+
+=head1 CONSTRUCTOR
+
+=over 4
+
+=item new ( [ARGS] )
+
+Creates a C<IO::Pipe>, which is a reference to a
+newly created symbol (see the C<Symbol> package). C<new>
+optionally takes arguments, these arguments are in key-value pairs.
+C<new> only looks for one key C<Domain> which tells new which domain
+the socket it will be. All other arguments will be passed to the
+configuration method of the package for that domain, See below.
+
+=back
+
+=head1 METHODS
 
 See L<perlfunc> for complete descriptions of each of the following
 supported C<IO::Seekable> methods, which are just front ends for the
@@ -36,6 +53,8 @@ corresponding built-in functions:
 
 Some methods take slightly different arguments to those defined in L<perlfunc>
 in attempt to make the interface more flexible. These are
+
+=over 4
 
 =item accept([PKG])
 
@@ -58,7 +77,25 @@ the current setting is changed and the previous value returned.
 =item sockopt(OPT [, VAL])
 
 Unified method to both set and get options in the SOL_SOCKET level. If called
-with one argument then getsockopt is called, otherwise setsockopt is called
+with one argument then getsockopt is called, otherwise setsockopt is called.
+
+=item sockdomain
+
+Returns the numerical number for the socket domain type. For example, fir
+a AF_INET socket the value of &AF_INET will be returned.
+
+=item socktype
+
+Returns the numerical number for the socket type. For example, fir
+a SOCK_STREAM socket the value of &SOCK_STREAM will be returned.
+
+=item protocol
+
+Returns the numerical number for the protocol being used on the socket, if
+known. If the protocol is unknown, as with an AF_UNIX socket, zero
+is returned.
+
+=back
 
 =cut
 
@@ -77,7 +114,7 @@ use Exporter;
 
 # This one will turn 1.2 => 1.02 and 1.2.3 => 1.0203 and so on ...
 
-$VERSION = do{my @r=(q$Revision: 1.9 $=~/(\d+)/g);sprintf "%d."."%02d"x$#r,@r};
+$VERSION = do{my @r=(q$Revision: 1.13 $=~/(\d+)/g);sprintf "%d."."%02d"x$#r,@r};
 
 sub import {
     my $pkg = shift;
@@ -95,18 +132,53 @@ sub new {
 			: $fh;
 }
 
+my @domain2pkg = ();
+
+sub register_domain {
+    my($p,$d) = @_;
+    $domain2pkg[$d] = bless \$d, $p;
+}
+
+sub _domain2pkg {
+    my $domain = shift;
+
+    croak "Unsupported socket domain"
+	unless defined $domain2pkg[$domain];
+
+    $domain2pkg[$domain]
+}
+
 sub configure {
-    croak 'IO::Socket: Cannot configure a generic socket';
+    my($fh,$arg) = @_;
+    my $domain = delete $arg->{Domain};
+
+    croak 'IO::Socket: Cannot configure a generic socket'
+	unless defined $domain;
+
+    my $sub = ref(_domain2pkg($domain)) . "::configure";
+
+    goto &{$sub}
+	if(defined &{$sub});
+
+    croak "IO::Socket: Cannot configure socket in domain '$domain' $sub";
 }
 
 sub socket {
     @_ == 4 or croak 'usage: $fh->socket(DOMAIN, TYPE, PROTOCOL)';
     my($fh,$domain,$type,$protocol) = @_;
 
+    if(!defined ${*$fh}{'io_socket_domain'}
+	|| !ref(${*$fh}{'io_socket_domain'})
+	|| ${${*$fh}{'io_socket_domain'}} != $domain) {
+	my $pkg = 
+	${*$fh}{'io_socket_domain'} = _domain2pkg($domain);
+    }
+
     socket($fh,$domain,$type,$protocol) or
     	return undef;
 
-    ${*$fh}{'io_socket_type'} = $type;
+    ${*$fh}{'io_socket_type'}  = $type;
+    ${*$fh}{'io_socket_proto'} = $protocol;
     $fh;
 }
 
@@ -119,7 +191,8 @@ sub socketpair {
     socketpair($fh1,$fh1,$domain,$type,$protocol) or
     	return ();
 
-    ${*$fh1}{'io_socket_type'} = ${*$fh2}{'io_socket_type'} = $type;
+    ${*$fh1}{'io_socket_type'}  = ${*$fh2}{'io_socket_type'}  = $type;
+    ${*$fh1}{'io_socket_proto'} = ${*$fh2}{'io_socket_proto'} = $protocol;
 
     ($fh1,$fh2);
 }
@@ -220,7 +293,9 @@ sub send {
     croak 'send: Cannot determine peer address'
 	 unless($peer);
 
-    my $r = send($fh, $_[1], $flags, $peer);
+    my $r = defined(getpeername($fh))
+	? send($fh, $_[1], $flags)
+	: send($fh, $_[1], $flags, $peer);
 
     # remember who we send to, if it was sucessful
     ${*$fh}{'io_socket_peername'} = $peer
@@ -273,10 +348,44 @@ sub timeout {
     $r;
 }
 
-sub socktype {
-    @_ == 1 or croak '$fh->socktype()';
-    ${*{$_[0]}}{'io_socket_type'} || undef;
+sub sockdomain {
+    @_ == 1 or croak 'usage: $fh->sockdomain()';
+    my $fh = shift;
+    ${${*$fh}{'io_socket_domain'}}
 }
+
+sub socktype {
+    @_ == 1 or croak 'usage: $fh->socktype()';
+    my $fh = shift;
+    ${*$fh}{'io_socket_type'}
+}
+
+sub protocol {
+    @_ == 1 or croak 'usage: $fh->protocol()';
+    my($fh) = @_;
+    ${*$fh}{'io_socket_protocol'};
+}
+
+sub _addmethod {
+    my $self = shift;
+    my $name;
+
+    foreach $name (@_) {
+	my $n = $name;
+
+	no strict qw(refs);
+
+	*{$n} = sub { 
+		    my $pkg = ref(${*{$_[0]}}{'io_socket_domain'});
+		    my $sub = "${pkg}::${n}";
+		    goto &{$sub} if defined &{$sub};
+		    croak qq{Can't locate object method "$n" via package "$pkg"};
+		}
+		unless defined &{$n};
+    }
+
+}
+
 
 =head1 SUB-CLASSES
 
@@ -296,6 +405,9 @@ use Exporter;
 
 @ISA = qw(IO::Socket);
 
+IO::Socket::INET->_addmethod( qw(sockaddr sockport sockhost peeraddr peerport peerhost));
+IO::Socket::INET->register_domain( AF_INET );
+
 my %socket_type = ( tcp => SOCK_STREAM,
 		    udp => SOCK_DGRAM,
 		  );
@@ -314,32 +426,46 @@ and some related methods. The constructor can take the following options
     Listen	Queue size for listen
     Timeout	Timeout	value for various operations
 
+
 If Listen is defined then a listen socket is created, else if the socket
 type,   which is derived from the protocol, is SOCK_STREAM then a connect
-is called
+is called.
 
 Only one of C<Type> or C<Proto> needs to be specified, one will be assumed
 from the other.
 
 =head2 METHODS
 
-=item sockaddr()
+=over 4
+
+=item sockaddr ()
 
 Return the address part of the sockaddr structure for the socket
 
-=item sockport()
+=item sockport ()
 
 Return the port number that the socket is using on the local host
 
-=item sockhost()
+=item sockhost ()
 
 Return the address part of the sockaddr structure for the socket in a
 text form xx.xx.xx.xx
 
-=item peeraddr(), peerport(), peerhost()
+=item peeraddr ()
 
-Same as for the sock* functions, but returns the data about the peer
-host instead of the local host.
+Return the address part of the sockaddr structure for the socket on
+the peer host
+
+=item peerport ()
+
+Return the port number for the socket on the peer host.
+
+=item peerhost ()
+
+Return the address part of the sockaddr structure for the socket on the
+peer host in a text form xx.xx.xx.xx
+
+=back
 
 =cut
 
@@ -380,6 +506,14 @@ sub _sock_info {
 	);
 }
 
+sub _error {
+    my $fh = shift;
+    carp join("",ref($fh),": ",@_) if @_;
+    close($fh)
+	if(defined fileno($fh));
+    return undef;
+}
+
 sub configure {
     my($fh,$arg) = @_;
     my($lport,$rport,$laddr,$raddr,$proto,$type);
@@ -392,38 +526,50 @@ sub configure {
     $laddr = defined $laddr ? inet_aton($laddr)
 			    : INADDR_ANY;
 
+    return _error($fh,"Bad hostname '",$arg->{LocalAddr},"'")
+	unless(defined $laddr);
+
     unless(exists $arg->{Listen}) {
 	($raddr,$rport,$proto) = _sock_info($arg->{PeerAddr},
 					    $arg->{PeerPort},
 					    $proto);
     }
 
-    croak 'IO::Socket: Cannot determine protocol'
+    if(defined $raddr) {
+	$raddr = inet_aton($raddr);
+	return _error($fh,"Bad hostname '",$arg->{PeerAddr},"'")
+		unless(defined $raddr);
+    }
+
+    return _error($fh,'Cannot determine protocol')
 	unless($proto);
 
     my $pname = (getprotobynumber($proto))[0];
     $type = $arg->{Type} || $socket_type{$pname};
 
+    my $domain = AF_INET;
+    ${*$fh}{'io_socket_domain'} = bless \$domain;
+
     $fh->socket(AF_INET, $type, $proto) or
-	return undef;
+	return _error($fh);
 
     $fh->bind($lport || 0, $laddr) or
-	return undef;
+	return _error($fh);
 
     if(exists $arg->{Listen}) {
 	$fh->listen($arg->{Listen} || 5) or
-	    return undef;
+	    return _error($fh);
     }
     else {
-	croak "IO::Socket: Cannot determine remote port"
+	return _error($fh,'Cannot determine remote port')
 		unless($rport || $type == SOCK_DGRAM);
 
 	if($type == SOCK_STREAM || defined $raddr) {
-	    croak "IO::Socket: Bad peer address"
-		unless defined $raddr;
+	    return _error($fh,'Bad peer address')
+	    	unless(defined $raddr);
 
-	    $fh->connect($rport,inet_aton($raddr)) or
-		return undef;
+	    $fh->connect($rport,$raddr) or
+		return _error($fh);
 	}
     }
 
@@ -480,6 +626,9 @@ use Exporter;
 
 @ISA = qw(IO::Socket);
 
+IO::Socket::UNIX->_addmethod(qw(hostpath peerpath));
+IO::Socket::UNIX->register_domain( AF_UNIX );
+
 =head2 IO::Socket::UNIX
 
 C<IO::Socket::UNIX> provides a constructor to create an AF_UNIX domain socket
@@ -492,13 +641,17 @@ and some related methods. The constructor can take the following options
 
 =head2 METHODS
 
+=over 4
+
 =item hostpath()
 
-Returns the pathname to the fifo at the local end
+Returns the pathname to the fifo at the local end.
 
 =item peerpath()
 
-Returns the pathanme to the fifo at the peer end
+Returns the pathanme to the fifo at the peer end.
+
+=back
 
 =cut
 
@@ -507,6 +660,9 @@ sub configure {
     my($bport,$cport);
 
     my $type = $arg->{Type} || SOCK_STREAM;
+
+    my $domain = AF_UNIX;
+    ${*$fh}{'io_socket_domain'} = bless \$domain;
 
     $fh->socket(AF_UNIX, $type, 0) or
 	return undef;
@@ -531,21 +687,27 @@ sub configure {
 
 sub hostpath {
     @_ == 1 or croak 'usage: $fh->hostpath()';
-    (sockaddr_un($_[0]->hostname))[0];
+    my $n = $_[0]->sockname || return undef;
+warn length($n);
+    (sockaddr_un($n))[0];
 }
 
 sub peerpath {
     @_ == 1 or croak 'usage: $fh->peerpath()';
-    (sockaddr_un($_[0]->peername))[0];
+    my $n = $_[0]->peername || return undef;
+warn length($n);
+my @n = sockaddr_un($n);
+warn join(",",@n);
+    (sockaddr_un($n))[0];
 }
 
 =head1 AUTHOR
 
-Graham Barr <Graham.Barr@tiuk.ti.com>
+Graham Barr E<lt>F<Graham.Barr@tiuk.ti.com>E<gt>
 
 =head1 REVISION
 
-$Revision: 1.9 $
+$Revision: 1.13 $
 
 The VERSION is derived from the revision turning each number after the
 first dot into a 2 digit number so

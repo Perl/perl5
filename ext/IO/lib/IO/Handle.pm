@@ -4,7 +4,7 @@ package IO::Handle;
 
 =head1 NAME
 
-IO::Handle - supply object methods for filehandles
+IO::Handle - supply object methods for I/O handles
 
 =head1 SYNOPSIS
 
@@ -43,39 +43,27 @@ IO::Handle - supply object methods for filehandles
 
 =head1 DESCRIPTION
 
-C<IO::Handle::new> creates a C<IO::Handle>, which is a reference to a
-newly created symbol (see the C<Symbol> package).  If it receives any
-parameters, they are passed to C<IO::Handle::open>; if the open fails,
-the C<IO::Handle> object is destroyed.  Otherwise, it is returned to
-the caller.
+C<IO::Handle> is the base class for all other IO handle classes.
+A C<IO::Handle> object is a reference to a symbol (see the C<Symbol> package)
 
-C<IO::Handle::new_from_fd> creates a C<IO::Handle> like C<new> does.
-It requires two parameters, which are passed to C<IO::Handle::fdopen>;
-if the fdopen fails, the C<IO::Handle> object is destroyed.
-Otherwise, it is returned to the caller.
+=head1 CONSTRUCTOR
 
-C<IO::Handle::open> accepts one parameter or two.  With one parameter,
-it is just a front end for the built-in C<open> function.  With two
-parameters, the first parameter is a filename that may include
-whitespace or other special characters, and the second parameter is
-the open mode in either Perl form (">", "+<", etc.) or POSIX form
-("w", "r+", etc.).
+=over 4
 
-C<IO::Handle::fdopen> is like C<open> except that its first parameter
-is not a filename but rather a file handle name, a IO::Handle object,
-or a file descriptor number.
+=item new ()
 
-C<IO::Handle::write> is like C<write> found in C, that is it is the
-opposite of read. The wrapper for the perl C<write> function is
-called C<format_write>.
+Creates a new C<IO::Handle> object.
 
-C<IO::Handle::opened> returns true if the object is currently a valid
-file descriptor.
+=item new_from_fd ( FD, MODE )
 
-If the C functions fgetpos() and fsetpos() are available, then
-C<IO::Handle::getpos> returns an opaque value that represents the
-current position of the IO::Handle, and C<IO::Handle::setpos> uses
-that value to return to a previously visited position.
+Creates a C<IO::Handle> like C<new> does.
+It requires two parameters, which are passed to the method C<fdopen>;
+if the fdopen fails, the object is destroyed. Otherwise, it is returned
+to the caller.
+
+=back
+
+=head1 METHODS
 
 If the C function setvbuf() is available, then C<IO::Handle::setvbuf>
 sets the buffering policy for the IO::Handle.  The calling sequence
@@ -99,6 +87,10 @@ corresponding built-in functions:
     read
     truncate
     stat
+    print
+    printf
+    sysread
+    syswrite
 
 See L<perlvar> for complete descriptions of each of the following
 supported C<IO::Handle> methods:
@@ -121,14 +113,6 @@ Furthermore, for doing normal I/O you might need these:
 
 =over 
 
-=item $fh->print
-
-See L<perlfunc/print>.
-
-=item $fh->printf
-
-See L<perlfunc/printf>.
-
 =item $fh->getline
 
 This works like <$fh> described in L<perlop/"I/O Operators">
@@ -141,11 +125,27 @@ This works like <$fh> when called in an array context to
 read all the remaining lines in a file, except that it's more readable.
 It will also croak() if accidentally called in a scalar context.
 
+=item $fh->fdopen ( FD, MODE )
+
+C<fdopen> is like an ordinary C<open> except that its first parameter
+is not a filename but rather a file handle name, a IO::Handle object,
+or a file descriptor number.
+
+=item $fh->write ( BUF, LEN [, OFFSET }\] )
+
+C<write> is like C<write> found in C, that is it is the
+opposite of read. The wrapper for the perl C<write> function is
+called C<format_write>.
+
+=item $fh->opened
+
+Returns true if the object is currently a valid file descriptor.
+
 =back
 
-=head1
+=head1 NOTE
 
-The reference returned from new is a GLOB reference. Some modules that
+A C<IO::Handle> object is a GLOB reference. Some modules that
 inherit from C<IO::Handle> may want to keep object related variables
 in the hash table part of the GLOB. In an attempt to prevent modules
 trampling on each other I propose the that any such module should prefix
@@ -167,12 +167,12 @@ class from C<IO::Handle> and inherit those methods.
 
 =head1 HISTORY
 
-Derived from FileHandle.pm by Graham Barr <bodg@tiuk.ti.com>
+Derived from FileHandle.pm by Graham Barr E<lt>F<bodg@tiuk.ti.com>E<gt>
 
 =cut
 
 require 5.000;
-use vars qw($VERSION @EXPORT_OK $AUTOLOAD);
+use vars qw($RCS $VERSION @EXPORT_OK $AUTOLOAD);
 use Carp;
 use Symbol;
 use SelectSaver;
@@ -185,8 +185,8 @@ require Exporter;
 ##
 @FileHandle::ISA = qw(IO::Handle);
 
-
-$VERSION = sprintf("%d.%02d", q$Revision: 1.9 $ =~ /(\d+)\.(\d+)/);
+$VERSION = "1.12";
+$RCS = sprintf("%s", q$Revision: 1.15 $ =~ /([\d\.]+)/);
 
 @EXPORT_OK = qw(
     autoflush
@@ -246,28 +246,39 @@ sub AUTOLOAD {
 ##
 
 sub new {
-    @_ == 1 or croak 'usage: new IO::Handle';
-    my $class = ref($_[0]) || $_[0];
+    my $class = ref($_[0]) || $_[0] || "IO::Handle";
+    @_ == 1 or croak "usage: new $class";
     my $fh = gensym;
     bless $fh, $class;
 }
 
 sub new_from_fd {
-    @_ == 3 or croak 'usage: new_from_fd IO::Handle FD, MODE';
-    my $class = shift;
+    my $class = ref($_[0]) || $_[0] || "IO::Handle";
+    @_ == 3 or croak "usage: new_from_fd $class FD, MODE";
     my $fh = gensym;
     IO::Handle::fdopen($fh, @_)
 	or return undef;
     bless $fh, $class;
 }
 
-# FileHandle::DESTROY use to call close(). This creates a problem
-# if 2 Handle objects have the same fd. sv_clear will call io close
-# when the refcount in the xpvio becomes zero.
-#
-# It is defined as empty to stop AUTOLOAD being called :-)
+sub DESTROY {
+    my ($fh) = @_;
 
-sub DESTROY { }
+    # During global object destruction, this function may be called
+    # on FILEHANDLEs as well as on the GLOBs that contains them.
+    # Thus the following trickery.  If only the CORE file operators
+    # could deal with FILEHANDLEs, it wouldn't be necessary...
+
+    if ($fh =~ /=FILEHANDLE\(/) {
+	local *TMP = $fh;
+	close(TMP)
+	    if defined fileno(TMP);
+    }
+    else {
+	close($fh)
+	    if defined fileno($fh);
+    }
+}
 
 ################################################
 ## Open and close.
@@ -319,12 +330,8 @@ sub close {
 ## Normal I/O functions.
 ##
 
-# fcntl
 # flock
-# ioctl
 # select
-# sysread
-# syswrite
 
 sub opened {
     @_ == 1 or croak 'usage: $fh->opened()';
@@ -372,9 +379,9 @@ sub getline {
 
 sub getlines {
     @_ == 1 or croak 'usage: $fh->getline()';
-    my $this = shift;
     wantarray or
-	croak "Can't call IO::Handle::getlines in a scalar context, use IO::Handle::getline";
+	croak 'Can\'t call $fh->getlines in a scalar context, use $fh->getline';
+    my $this = shift;
     return <$this>;
 }
 
@@ -388,10 +395,20 @@ sub read {
     read($_[0], $_[1], $_[2], $_[3] || 0);
 }
 
+sub sysread {
+    @_ == 3 || @_ == 4 or croak '$fh->sysread(BUF, LEN [, OFFSET])';
+    sysread($_[0], $_[1], $_[2], $_[3] || 0);
+}
+
 sub write {
     @_ == 3 || @_ == 4 or croak '$fh->write(BUF, LEN [, OFFSET])';
     local($\) = "";
     print { $_[0] } substr($_[1], $_[3] || 0, $_[2]);
+}
+
+sub syswrite {
+    @_ == 3 || @_ == 4 or croak '$fh->syswrite(BUF, LEN [, OFFSET])';
+    sysread($_[0], $_[1], $_[2], $_[3] || 0);
 }
 
 sub stat {
@@ -508,5 +525,18 @@ sub format_write {
     }
 }
 
+sub fcntl {
+    @_ == 3 || croak 'usage: $fh->fcntl( OP, VALUE );';
+    my ($fh, $op, $val) = @_;
+    my $r = fcntl($fh, $op, $val);
+    defined $r && $r eq "0 but true" ? 0 : $r;
+}
+
+sub ioctl {
+    @_ == 3 || croak 'usage: $fh->ioctl( OP, VALUE );';
+    my ($fh, $op, $val) = @_;
+    my $r = ioctl($fh, $op, $val);
+    defined $r && $r eq "0 but true" ? 0 : $r;
+}
 
 1;

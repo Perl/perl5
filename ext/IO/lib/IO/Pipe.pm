@@ -38,31 +38,44 @@ IO::pipe - supply object methods for pipes
 
 =head1 DESCRIPTION
 
-C<IO::Pipe::new> creates a C<IO::Pipe>, which is a reference to a
+C<IO::Pipe> provides an interface to createing pipes between
+processes.
+
+=head1 CONSTRCUTOR
+
+=over 4
+
+=item new ( [READER, WRITER] )
+
+Creates a C<IO::Pipe>, which is a reference to a
 newly created symbol (see the C<Symbol> package). C<IO::Pipe::new>
 optionally takes two arguments, which should be objects blessed into
 C<IO::Handle>, or a subclass thereof. These two objects will be used
 for the system call to C<pipe>. If no arguments are given then then
 method C<handles> is called on the new C<IO::Pipe> object.
 
-These two handles are held in the array part of the GLOB untill either
+These two handles are held in the array part of the GLOB until either
 C<reader> or C<writer> is called.
 
-=over 
+=back
 
-=item $fh->reader([ARGS])
+=head1 METHODS
+
+=over 4
+
+=item reader ([ARGS])
 
 The object is re-blessed into a sub-class of C<IO::Handle>, and becomes a
 handle at the reading end of the pipe. If C<ARGS> are given then C<fork>
 is called and C<ARGS> are passed to exec.
 
-=item $fh->writer([ARGS])
+=item writer ([ARGS])
 
 The object is re-blessed into a sub-class of C<IO::Handle>, and becomes a
 handle at the writing end of the pipe. If C<ARGS> are given then C<fork>
 is called and C<ARGS> are passed to exec.
 
-=item $fh->handles
+=item handles ()
 
 This method is called during construction by C<IO::Pipe::new>
 on the newly created C<IO::Pipe> object. It returns an array of two objects
@@ -76,11 +89,11 @@ L<IO::Handle>
 
 =head1 AUTHOR
 
-Graham Barr <bodg@tiuk.ti.com>
+Graham Barr E<lt>F<bodg@tiuk.ti.com>E<gt>
 
 =head1 REVISION
 
-$Revision: 1.4 $
+$Revision: 1.7 $
 
 =head1 COPYRIGHT
 
@@ -96,12 +109,14 @@ use 	Carp;
 use 	Symbol;
 require IO::Handle;
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.4 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.7 $ =~ /(\d+)\.(\d+)/);
 
 sub new {
-    @_ == 1 || @_ == 3 or croak 'usage: new IO::Pipe([$READFH, $WRITEFH])';
+    my $type = shift;
+    my $class = ref($type) || $type || "IO::Pipe";
+    @_ == 0 || @_ == 2 or croak "usage: new $class [READFH, WRITEFH]";
 
-    my $me = bless gensym(), shift;
+    my $me = bless gensym(), $class;
 
     my($readfh,$writefh) = @_ ? @_ : $me->handles;
 
@@ -152,6 +167,7 @@ sub reader {
 
     bless $me, ref($fh);
     *{*$me} = *{*$fh};		# Alias self to handle
+    bless $fh;			# Really wan't un-bless here
     ${*$me}{'io_pipe_pid'} = $pid
 	if defined $pid;
 
@@ -167,6 +183,7 @@ sub writer {
 
     bless $me, ref($fh);
     *{*$me} = *{*$fh};		# Alias self to handle
+    bless $fh;			# Really wan't un-bless here
     ${*$me}{'io_pipe_pid'} = $pid
 	if defined $pid;
 

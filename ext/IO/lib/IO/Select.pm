@@ -4,7 +4,7 @@ package IO::Select;
 
 =head1 NAME
 
-IO::Select - OO interface to the system select call
+IO::Select - OO interface to the select system call
 
 =head1 SYNOPSIS
 
@@ -31,7 +31,7 @@ are ready for reading, writing or have an error condition pending.
 
 =item new ( [ HANDLES ] )
 
-The constructor create a new object and optionally initialises it with a set
+The constructor creates a new object and optionally initialises it with a set
 of handles.
 
 =back
@@ -118,11 +118,11 @@ listening for more connections on a listen socket
 
 =head1 AUTHOR
 
-Graham Barr <Graham.Barr@tiuk.ti.com>
+Graham Barr E<lt>F<Graham.Barr@tiuk.ti.com>E<gt>
 
 =head1 REVISION
 
-$Revision: 1.2 $
+$Revision: 1.9 $
 
 =head1 COPYRIGHT
 
@@ -136,7 +136,7 @@ use     strict;
 use     vars qw($VERSION @ISA);
 require Exporter;
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.2 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.9 $ =~ /(\d+)\.(\d+)/);
 
 @ISA = qw(Exporter); # This is only so we can do version checking
 
@@ -198,10 +198,9 @@ sub can_read
 {
  my $vec = shift;
  my $timeout = shift;
+ my $r = $vec->[VEC_BITS];
 
- my $r = $vec->[VEC_BITS] or return ();
-
- select($r,undef,undef,$timeout) > 0
+ defined($r) && (select($r,undef,undef,$timeout) > 0)
     ? _handles($vec, $r)
     : ();
 }
@@ -210,10 +209,9 @@ sub can_write
 {
  my $vec = shift;
  my $timeout = shift;
+ my $w = $vec->[VEC_BITS];
 
- my $w = $vec->[VEC_BITS] or return ();
-
- select(undef,$w,undef,$timeout) > 0
+ defined($w) && (select(undef,$w,undef,$timeout) > 0)
     ? _handles($vec, $w)
     : ();
 }
@@ -222,10 +220,9 @@ sub has_error
 {
  my $vec = shift;
  my $timeout = shift;
+ my $e = $vec->[VEC_BITS];
 
- my $e = $vec->[VEC_BITS] or return ();
-
- select(undef,undef,$e,$timeout) > 0
+ defined($e) && (select(undef,undef,$e,$timeout) > 0)
     ? _handles($vec, $e)
     : ();
 }
@@ -303,4 +300,3 @@ sub _handles
 }
 
 1;
-
