@@ -88,9 +88,9 @@ $ENV{LANG} = 'ru_RU.KOI8-R';
 # the :locale will probe the locale environment variables like LANG
 use open OUT => ':locale';
 open(O, ">koi8");
-print O chr(0x430); # Unicode CYRILLIC SMALL LETTER A = KOI8-R 0xC1
+print O chr(0x430); # Unicode CYRILLIC SMALL LETTER A = KOI8-R 0xc1
 close O;
 open(I, "<koi8");
-printf "%#X\n", ord(<I>), "\n"; # this should print 0xC1
+printf "%#x\n", ord(<I>), "\n"; # this should print 0xc1
 close I;
 %%%
