@@ -14,14 +14,15 @@ use Fcntl;
 
 print "1..43\n";
 
-$Dfile = "Op.db-hash";
+$Dfile = "dbhash.tmp";
 unlink $Dfile;
 
 umask(0);
 
 # Check the interface to HASHINFO
 
-$dbh = TIEHASH DB_File::HASHINFO ;
+#$dbh = TIEHASH DB_File::HASHINFO ;
+$dbh = new DB_File::HASHINFO ;
 print (($dbh->{bsize} == undef) ? "ok 1\n" : "not ok 1\n") ;
 print (($dbh->{ffactor} == undef) ? "ok 2\n" : "not ok 2\n") ;
 print (($dbh->{nelem} == undef) ? "ok 3\n" : "not ok 3\n") ;
@@ -49,9 +50,9 @@ print ($dbh->{lorder} == 1234 ? "ok 12\n" : "not ok 12\n") ;
 
 # Check that an invalid entry is caught both for store & fetch
 eval '$dbh->{fred} = 1234' ;
-print ($@ eq '' ? "ok 13\n" : "not ok 13\n") ;
+print ($@ =~ /^DB_File::HASHINFO::STORE - Unknown element 'fred' at/ ? "ok 13\n" : "not ok 13\n") ;
 eval '$q = $dbh->{fred}' ;
-print ($@ eq '' ? "ok 14\n" : "not ok 14\n") ;
+print ($@ =~ /^DB_File::HASHINFO::FETCH - Unknown element 'fred' at/ ? "ok 14\n" : "not ok 14\n") ;
 
 # Now check the interface to HASH
 
@@ -69,7 +70,7 @@ print (!$i ? "ok 17\n" : "not ok 17\n");
 $h{'goner1'} = 'snork';
 
 $h{'abc'} = 'ABC';
-print ($h{'abc'} == 'ABC' ? "ok 18\n" : "not ok 18\n") ;
+print ($h{'abc'} eq 'ABC' ? "ok 18\n" : "not ok 18\n") ;
 print (defined $h{'jimmy'} ? "not ok 19\n" : "ok 19\n");
 
 $h{'def'} = 'DEF';
@@ -135,7 +136,7 @@ $X->DELETE('goner3');
 
 if ($#keys == 29 && $#values == 29) {print "ok 21\n";} else {print "not ok 21\n";}
 
-while (($key,$value) = each(h)) {
+while (($key,$value) = each(%h)) {
     if ($key eq $keys[$i] && $value eq $values[$i] && $key gt $value) {
 	$key =~ y/a-z/A-Z/;
 	$i++ if $key eq $value;
@@ -144,7 +145,7 @@ while (($key,$value) = each(h)) {
 
 if ($i == 30) {print "ok 22\n";} else {print "not ok 22\n";}
 
-@keys = ('blurfl', keys(h), 'dyick');
+@keys = ('blurfl', keys(%h), 'dyick');
 if ($#keys == 31) {print "ok 23\n";} else {print "not ok 23\n";}
 
 $h{'foo'} = '';

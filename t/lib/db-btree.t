@@ -12,16 +12,17 @@ BEGIN {
 use DB_File; 
 use Fcntl;
 
-print "1..76\n";
+print "1..86\n";
 
-$Dfile = "Op.db-btree";
+$Dfile = "dbbtree.tmp";
 unlink $Dfile;
 
 umask(0);
 
 # Check the interface to BTREEINFO
 
-$dbh = TIEHASH DB_File::BTREEINFO ;
+#$dbh = TIEHASH DB_File::BTREEINFO ;
+$dbh = new DB_File::BTREEINFO ;
 print (($dbh->{flags} == undef) ? "ok 1\n" : "not ok 1\n") ;
 print (($dbh->{cachesize} == undef) ? "ok 2\n" : "not ok 2\n") ;
 print (($dbh->{psize} == undef) ? "ok 3\n" : "not ok 3\n") ;
@@ -57,9 +58,9 @@ print ($dbh->{prefix} == 1234 ? "ok 16\n" : "not ok 16\n") ;
 
 # Check that an invalid entry is caught both for store & fetch
 eval '$dbh->{fred} = 1234' ;
-print ($@ eq '' ? "ok 17\n" : "not ok 17\n") ;
+print ($@ =~ /^DB_File::BTREEINFO::STORE - Unknown element 'fred' at/ ? "ok 17\n" : "not ok 17\n") ;
 eval '$q = $dbh->{fred}' ;
-print ($@ eq '' ? "ok 18\n" : "not ok 18\n") ;
+print ($@ =~ /^DB_File::BTREEINFO::FETCH - Unknown element 'fred' at/ ? "ok 18\n" : "not ok 18\n") ;
 
 # Now check the interface to BTREE
 
@@ -77,7 +78,7 @@ print (!$i ? "ok 21\n" : "not ok 21\n");
 $h{'goner1'} = 'snork';
 
 $h{'abc'} = 'ABC';
-print ($h{'abc'} == 'ABC' ? "ok 22\n" : "not ok 22\n") ;
+print ($h{'abc'} eq 'ABC' ? "ok 22\n" : "not ok 22\n") ;
 print (defined $h{'jimmy'} ? "not ok 23\n" : "ok 23\n");
 
 $h{'def'} = 'DEF';
@@ -152,7 +153,7 @@ while (($key,$value) = each(%h)) {
 
 if ($i == 30) {print "ok 26\n";} else {print "not ok 26\n";}
 
-@keys = ('blurfl', keys(h), 'dyick');
+@keys = ('blurfl', keys(%h), 'dyick');
 if ($#keys == 31) {print "ok 27\n";} else {print "not ok 27\n";}
 
 #Check that the keys can be retrieved in order
@@ -345,8 +346,52 @@ print (($Y = tie(%h, DB_File,undef, O_RDWR|O_CREAT, 0640, $DB_BTREE )) ? "ok 72\
 $status = $Y->fd ;
 print ($status == -1 ? "ok 73\n" : "not ok 73\n") ;
 
+
 undef $Y ;
 untie %h ;
+
+# Duplicate keys
+my $bt = new DB_File::BTREEINFO ;
+$bt->{flags} = R_DUP ;
+print (($YY = tie(%hh, DB_File, $Dfile, O_RDWR|O_CREAT, 0640, $bt )) ? "ok 74\n" : "not ok 74");
+
+$hh{'Wall'} = 'Larry' ;
+$hh{'Wall'} = 'Stone' ; # Note the duplicate key
+$hh{'Wall'} = 'Brick' ; # Note the duplicate key
+$hh{'Smith'} = 'John' ;
+$hh{'mouse'} = 'mickey' ;
+
+# first work in scalar context
+print(scalar $YY->get_dup('Unknown') == 0 ? "ok 75\n" : "not ok 75\n") ;
+print(scalar $YY->get_dup('Smith') == 1 ? "ok 76\n" : "not ok 76\n") ;
+print(scalar $YY->get_dup('Wall') == 3 ? "ok 77\n" : "not ok 77\n") ;
+
+# now in list context
+my @unknown = $YY->get_dup('Unknown') ;
+print( "@unknown" eq "" ? "ok 78\n" : "not ok 78\n") ;
+
+my @smith = $YY->get_dup('Smith') ;
+print( "@smith" eq "John" ? "ok 79\n" : "not ok 79\n") ;
+
+my @wall = $YY->get_dup('Wall') ;
+my %wall ;
+@wall{@wall} = @wall ;
+print( (@wall == 3 && $wall{'Larry'} && $wall{'Stone'} && $wall{'Brick'}) ? "ok 80\n" : "not ok 80\n") ;
+
+# hash
+my %unknown = $YY->get_dup('Unknown', 1) ;
+print( keys %unknown == 0 ? "ok 81\n" : "not ok 81\n") ;
+
+my %smith = $YY->get_dup('Smith', 1) ;
+print( (keys %smith == 1 && $smith{'John'}) ? "ok 82\n" : "not ok 82\n") ;
+
+my %wall = $YY->get_dup('Wall', 1) ;
+print( (keys %wall == 3 && $wall{'Larry'} && $wall{'Stone'} && $wall{'Brick'}) ? "ok 83\n" : "not ok 83\n") ;
+
+undef $YY ;
+untie %hh ;
+unlink $Dfile;
+
 
 # test multiple callbacks
 $Dfile1 = "btree1" ;
@@ -392,9 +437,9 @@ sub ArrayCompare
     1 ;
 }
  
-print ( ArrayCompare (\@srt_1, [keys %h]) ? "ok 74\n" : "not ok 74\n") ;
-print ( ArrayCompare (\@srt_2, [keys %g]) ? "ok 75\n" : "not ok 75\n") ;
-print ( ArrayCompare (\@srt_3, [keys %k]) ? "ok 76\n" : "not ok 76\n") ;
+print ( ArrayCompare (\@srt_1, [keys %h]) ? "ok 84\n" : "not ok 84\n") ;
+print ( ArrayCompare (\@srt_2, [keys %g]) ? "ok 85\n" : "not ok 85\n") ;
+print ( ArrayCompare (\@srt_3, [keys %k]) ? "ok 86\n" : "not ok 86\n") ;
 
 untie %h ;
 untie %g ;
