@@ -1064,6 +1064,7 @@ t/op/fork.t		See if fork works
 t/op/glob.t		See if <*> works
 t/op/goto.t		See if goto works
 t/op/goto_xs.t		See if "goto &sub" works on XSUBs
+t/op/grent.t		See if getgr*() functions work
 t/op/groups.t		See if $( works
 t/op/gv.t		See if typeglobs work
 t/op/hashwarn.t		See if warnings for bad hash assignments work
@@ -1085,6 +1086,7 @@ t/op/pack.t		See if pack and unpack work
 t/op/pat.t		See if esoteric patterns work
 t/op/pos.t		See if pos works
 t/op/push.t		See if push and pop work
+t/op/pwent.t		See if getpw*() functions work
 t/op/quotemeta.t	See if quotemeta works
 t/op/rand.t		See if rand works
 t/op/range.t		See if .. works
