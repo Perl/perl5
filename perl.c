@@ -1967,9 +1967,11 @@ NULL
 };
     char **p = usage_msg;
 
-    printf("\nUsage: %s [switches] [--] [programfile] [arguments]", name);
+    PerlIO_printf(PerlIO_stdout(),
+		  "\nUsage: %s [switches] [--] [programfile] [arguments]",
+		  name);
     while (*p)
-	printf("\n  %s", *p++);
+	PerlIO_printf(PerlIO_stdout(), "\n  %s", *p++);
 }
 
 /* This routine handles any switches that can be given during run */
@@ -2181,57 +2183,75 @@ Perl_moreswitches(pTHX_ char *s)
 	s++;
 	return s;
     case 'v':
-	printf(Perl_form(aTHX_ "\nThis is perl, v%vd built for %s",
-			 PL_patchlevel, ARCHNAME));
+	PerlIO_printf(PerlIO_stdout(),
+		      Perl_form(aTHX_ "\nThis is perl, v%vd built for %s",
+				PL_patchlevel, ARCHNAME));
 #if defined(LOCAL_PATCH_COUNT)
 	if (LOCAL_PATCH_COUNT > 0)
-	    printf("\n(with %d registered patch%s, see perl -V for more detail)",
-		(int)LOCAL_PATCH_COUNT, (LOCAL_PATCH_COUNT!=1) ? "es" : "");
+	    PerlIO_printf(PerlIO_stdout(),
+			  "\n(with %d registered patch%s, "
+			  "see perl -V for more detail)",
+			  (int)LOCAL_PATCH_COUNT,
+			  (LOCAL_PATCH_COUNT!=1) ? "es" : "");
 #endif
 
-	printf("\n\nCopyright 1987-2000, Larry Wall\n");
+	PerlIO_printf(PerlIO_stdout(),
+		      "\n\nCopyright 1987-2000, Larry Wall\n");
 #ifdef MSDOS
-	printf("\nMS-DOS port Copyright (c) 1989, 1990, Diomidis Spinellis\n");
+	PerlIO_printf(PerlIO_stdout(),
+		      "\nMS-DOS port Copyright (c) 1989, 1990, Diomidis Spinellis\n");
 #endif
 #ifdef DJGPP
-	printf("djgpp v2 port (jpl5003c) by Hirofumi Watanabe, 1996\n");
-	printf("djgpp v2 port (perl5004+) by Laszlo Molnar, 1997-1999\n");
+	PerlIO_printf(PerlIO_stdout(),
+		      "djgpp v2 port (jpl5003c) by Hirofumi Watanabe, 1996\n"
+		      "djgpp v2 port (perl5004+) by Laszlo Molnar, 1997-1999\n");
 #endif
 #ifdef OS2
-	printf("\n\nOS/2 port Copyright (c) 1990, 1991, Raymond Chen, Kai Uwe Rommel\n"
-	    "Version 5 port Copyright (c) 1994-1999, Andreas Kaiser, Ilya Zakharevich\n");
+	PerlIO_printf(PerlIO_stdout(),
+		      "\n\nOS/2 port Copyright (c) 1990, 1991, Raymond Chen, Kai Uwe Rommel\n"
+		      "Version 5 port Copyright (c) 1994-1999, Andreas Kaiser, Ilya Zakharevich\n");
 #endif
 #ifdef atarist
-	printf("atariST series port, ++jrb  bammi@cadence.com\n");
+	PerlIO_printf(PerlIO_stdout(),
+		      "atariST series port, ++jrb  bammi@cadence.com\n");
 #endif
 #ifdef __BEOS__
-	printf("BeOS port Copyright Tom Spindler, 1997-1999\n");
+	PerlIO_printf(PerlIO_stdout(),
+		      "BeOS port Copyright Tom Spindler, 1997-1999\n");
 #endif
 #ifdef MPE
-	printf("MPE/iX port Copyright by Mark Klein and Mark Bixby, 1996-1999\n");
+	PerlIO_printf(PerlIO_stdout(),
+		      "MPE/iX port Copyright by Mark Klein and Mark Bixby, 1996-1999\n");
 #endif
 #ifdef OEMVS
-	printf("MVS (OS390) port by Mortice Kern Systems, 1997-1999\n");
+	PerlIO_printf(PerlIO_stdout(),
+		      "MVS (OS390) port by Mortice Kern Systems, 1997-1999\n");
 #endif
 #ifdef __VOS__
-	printf("Stratus VOS port by Paul_Green@stratus.com, 1997-1999\n");
+	PerlIO_printf(PerlIO_stdout(),
+		      "Stratus VOS port by Paul_Green@stratus.com, 1997-1999\n");
 #endif
 #ifdef __OPEN_VM
-	printf("VM/ESA port by Neale Ferguson, 1998-1999\n");
+	PerlIO_printf(PerlIO_stdout(),
+		      "VM/ESA port by Neale Ferguson, 1998-1999\n");
 #endif
 #ifdef POSIX_BC
-	printf("BS2000 (POSIX) port by Start Amadeus GmbH, 1998-1999\n");
+	PerlIO_printf(PerlIO_stdout(),
+		      "BS2000 (POSIX) port by Start Amadeus GmbH, 1998-1999\n");
 #endif
 #ifdef __MINT__
-	printf("MiNT port by Guido Flohr, 1997-1999\n");
+	PerlIO_printf(PerlIO_stdout(),
+		      "MiNT port by Guido Flohr, 1997-1999\n");
 #endif
 #ifdef EPOC
-	printf("EPOC port by Olaf Flebbe, 1999-2000\n");
+	PerlIO_printf(PerlIO_stdout(),
+		      "EPOC port by Olaf Flebbe, 1999-2000\n");
 #endif
 #ifdef BINARY_BUILD_NOTICE
 	BINARY_BUILD_NOTICE;
 #endif
-	printf("\n\
+	PerlIO_printf(PerlIO_stdout(),
+		      "\n\
 Perl may be copied only under the terms of either the Artistic License or the\n\
 GNU General Public License, which may be found in the Perl 5.0 source kit.\n\n\
 Complete documentation for Perl, including FAQ lists, should be found on\n\
