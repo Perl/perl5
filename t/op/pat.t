@@ -1989,6 +1989,8 @@ print "ok 683\n" if @a == 9 && "@a" eq "f o o \n $a $b b a r";
 }
 
 {
+    # [ID 20010407.006] matching utf8 return values from functions does not work
+
     package ID_20010407_006;
 
     sub x {
@@ -2000,7 +2002,7 @@ print "ok 683\n" if @a == 9 && "@a" eq "f o o \n $a $b b a r";
 
     $x =~ /(..)/; $y = $1;
     print "not " unless length($y) == 2 && $y eq $x;
-    print "ok 685\n" if length($y) == 2;
+    print "ok 685\n";
 
     x  =~ /(..)/; $y = $1;
     print "not " unless length($y) == 2 && $y eq $x;
