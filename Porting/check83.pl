@@ -1,3 +1,8 @@
+#!/usr/local/bin/perl
+
+# Check whether there are naming conflicts when names are truncated
+# to the DOSish case-ignoring 8.3 format
+
 sub eight_dot_three {
     my ($dir, $base, $ext) = ($_[0] =~ m!^(?:(.+)/)?([^/.]+)(?:\.([^/.]+))?$!);
     $base = substr($base, 0, 8);
@@ -20,11 +25,11 @@ if (open(MANIFEST, "MANIFEST")) {
 	    next;
 	}
 	if (tr/././ > 1) {
-	    warn "$_: more than one dot\n";
+	    print "$_: more than one dot\n";
 	    next;
 	}
 	my ($dir, $edt) = eight_dot_three($_);
-	next if $edt eq $_;
+	($dir, $edt) = map { lc } ($dir, $edt);
 	push @{$dir{$dir}->{$edt}}, $_;
     }
 } else {
@@ -35,7 +40,7 @@ for my $dir (sort keys %dir) {
     for my $edt (keys %{$dir{$dir}}) {
 	my @files = @{$dir{$dir}->{$edt}};
 	if (@files > 1) {
-	    print "$dir $edt @files\n";
+	    print "@files: directory $dir conflict $edt\n";
 	}
     }
 }

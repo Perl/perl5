@@ -15,7 +15,6 @@ Changes5.003		Differences between 5.002 and 5.003
 Changes5.004		Differences between 5.003 and 5.004
 Changes5.005		Differences between 5.004 and 5.005
 Changes5.6		Differences between 5.005 and 5.6
-check83.pl		Check whether we are 8.3-friendly
 configpm		Produces lib/Config.pm
 Configure		Portability tool
 configure.com		Configure-equivalent for VMS
@@ -572,10 +571,10 @@ ext/Thread/unsync4.tx		Test thread implicit synchronisation
 ext/threads/Changes		ithreads
 ext/threads/Makefile.PL		ithreads
 ext/threads/README		ithreads
+ext/threads/t/basic.t		ithreads
 ext/threads/threads.h		ithreads
 ext/threads/threads.pm          ithreads
 ext/threads/threads.xs		ithreads
-ext/threads/t/basic.t		ithreads
 ext/Time/HiRes/Changes		Time::HiRes extension
 ext/Time/HiRes/hints/dynixptx.pl	Hint for Time::HiRes for named architecture
 ext/Time/HiRes/hints/sco.pl	Hints for Time::HiRes for named architecture
@@ -1843,6 +1842,7 @@ pod/splitman			Splits perlfunc into multiple man pages
 pod/splitpod			Splits perlfunc into multiple pod pages
 Policy_sh.SH		Hold site-wide preferences between Configure runs.
 Porting/apply		Apply patches sent by mail
+Porting/check83.pl	Check whether we are 8.3-friendly
 Porting/config.sh	Sample config.sh
 Porting/config_H	Sample config.h
 Porting/Contract	Social contract for contributed modules in Perl core
