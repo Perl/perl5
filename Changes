@@ -28,6 +28,358 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.4		Maintenance release working toward v5.8.4
 --------------
 ____________________________________________________________________________
+[ 22639] By: nicholas                              on 2004/04/02  10:39:56
+        Log: Integrate:
+             [ 22636]
+             Subject:  [PATCH] archname salad on VMS
+             From:  "Craig A. Berry" <craigberry@mac.com>
+             Date:  Thu, 01 Apr 2004 14:16:32 -0600
+             Message-Id:  <406C78A0.2070009@mac.com>
+             
+             sort out architecture-specific directory names for OpenVMS
+             Itanium port
+             
+             [ 22637]
+             Subject:  [PATCH] fix utils install problems on VMS
+             From:  "Craig A. Berry" <craigberry@mac.com>
+             Date:  Thu, 01 Apr 2004 20:19:53 -0600
+             Message-Id:  <406CCDC9.7000500@mac.com>
+             
+             We were not running utils/instmodsh.PL or utils/xsubpp.PL during
+             the build, so installperl would not find the generated programs at
+             install time.
+             Also fixed several problems with the command definitions for the
+             utilities
+     Branch: maint-5.8/perl
+	  !> configure.com vms/descrip_mms.template
+____________________________________________________________________________
+[ 22638] By: nicholas                              on 2004/04/02  10:25:17
+        Log: Integrate:
+             [ 22635]
+             Fix change #22376. Only mark a const as short-circuited
+             if it's actually a const!
+     Branch: maint-5.8/perl
+	  !> op.c
+____________________________________________________________________________
+[ 22634] By: nicholas                              on 2004/04/01  16:49:54
+        Log: Integrate:
+             [ 21767]
+             Check that the key is present before a delete, and absent afterwards
+             
+             (this got missed for some reason)
+     Branch: maint-5.8/perl
+	  !> ext/XS/APItest/t/hash.t
+____________________________________________________________________________
+[ 22633] By: nicholas                              on 2004/04/01  16:35:49
+        Log: Unicode 4.0.1!
+             
+             Integrate:
+             [ 22621]
+             Upgrade to Unicode 4.0.1
+             
+             [ 22630]
+             debug the instructions on upgrading Unicode
+     Branch: maint-5.8/perl
+	  +> lib/unicore/lib/Katakan2.pl lib/unicore/lib/Sterm.pl
+	  +> lib/unicore/lib/Variatio.pl
+	  !> (integrate 101 files)
+____________________________________________________________________________
+[ 22632] By: nicholas                              on 2004/04/01  15:55:23
+        Log: Integrate:
+             [ 21450]
+             Add support for Linux abstract unix domain sockets to Socket.pm.
+             Based on a idea by Alex Hudson. (Basically those are unix domain
+             sockets whose name has a '\0' as first character.)
+             
+             [ 22411]
+             Bump Socket's version to a real floating point value
+             
+             And the ext/Socket/... bits from
+             
+             [ 22258]
+             Subject: Re: [perl #15063] /tmp issues
+             From: Solar Designer <solar@openwall.com> 
+             Date: Mon, 26 Jan 2004 01:22:18 +0300
+             Message-ID: <20040125222218.GA13499@openwall.com>
+             
+             Remove insecure usage of /tmp from code and documentation
+             
+             [ 22521]
+             Subject: [PATCH] format/casting/warning RE: perl 5.9.1
+             From: Robin Barker <Robin.Barker@npl.co.uk>
+             Date: Wed, 17 Mar 2004 18:37:10 -0000
+             Message-ID: <533D273D4014D411AB1D00062938C4D90404682E@hotel.npl.co.uk>
+     Branch: maint-5.8/perl
+	  !> ext/Socket/Socket.pm ext/Socket/Socket.xs
+	  !> ext/Socket/t/Socket.t
+____________________________________________________________________________
+[ 22631] By: nicholas                              on 2004/04/01  15:16:56
+        Log: Integrate:
+             [ 20909]
+             Subject: [PATCH] improved 19064 (local $_[0] problems)
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Sun, 24 Aug 2003 15:52:00 +0100
+             Message-ID: <20030824145159.GA12210@fdgroup.com>
+             
+             [ 21432]
+             Suppress the test file t/op/nothr5005.t and integrate its tests into
+             t/op/args.t, now that 5005threads have been removed. Port t/op/args.t
+             to t/test.pl.
+             
+             (just the last "Port" bit)
+             
+             [ 22624]
+             [perl #28032] delete $_[0] + (\$) prototype = bad free
+             av_delete() didn't reify. I also updated its description
+     Branch: maint-5.8/perl
+	   ! t/op/args.t
+	  !> av.c pp_ctl.c pp_hot.c scope.c
+____________________________________________________________________________
+[ 22629] By: nicholas                              on 2004/04/01  13:42:46
+        Log: Integrate:
+             [ 22619]
+             Regenerated Configure after backported #22571
+             Some indent leftovers from earlier patches
+             We don't like double negatives, not even in comment
+     Branch: maint-5.8/perl
+	   ! Configure
+____________________________________________________________________________
+[ 22628] By: nicholas                              on 2004/04/01  13:27:14
+        Log: Integrate:
+             [ 22334]
+             Removed pm_apiversion and xs_apiversion as requested by
+             the pumpkin. Chainsaw was still in perfect working order.
+     Branch: maint-5.8/perl
+	   ! Configure NetWare/config_H.wc Porting/config.sh
+	   ! Porting/config_H config_h.SH perl.h plan9/config.plan9
+	   ! win32/config_H.bc win32/config_H.gc win32/config_H.vc
+	   ! win32/config_H.vc64
+	  !> Cross/config.sh-arm-linux NetWare/config.wc Porting/Glossary
+	  !> configure.com epoc/config.sh plan9/config_h.sample
+	  !> plan9/config_sh.sample uconfig.h uconfig.sh win32/config.bc
+	  !> win32/config.gc win32/config.vc win32/config.vc64
+	  !> wince/config.ce wince/config_H.ce
+____________________________________________________________________________
+[ 22627] By: nicholas                              on 2004/04/01  13:09:08
+        Log: Change 22555 left a perforce conflict in the copyright message.
+             D'oh. Silly maint pumpking.
+     Branch: maint-5.8/perl
+	   ! pad.c
+____________________________________________________________________________
+[ 22626] By: nicholas                              on 2004/04/01  10:55:11
+        Log: Integrate:
+             [ 22617]
+             Subject: Re: [PATCH] MIME::Base64 PERL_NO_GET_CONTEXT
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 30 Mar 2004 04:29:18 -0800
+             Message-ID: <lrk712bjs1.fsf@caliper.activestate.com>
+     Branch: maint-5.8/perl
+	  !> ext/MIME/Base64/Base64.pm ext/MIME/Base64/Base64.xs
+	  !> ext/MIME/Base64/Changes ext/MIME/Base64/QuotedPrint.pm
+____________________________________________________________________________
+[ 22623] By: nicholas                              on 2004/03/31  16:30:33
+        Log: Integrate:
+             [ 22609]
+             Subject: [perl #27986] IPC::Open3 fails in mod_perl (tie bug) 
+             From: "Benjamin J. Tilly" (via RT) <perlbug-followup@perl.org>
+             Date: 26 Mar 2004 21:02:19 -0000
+             Message-ID: <rt-3.0.8-27986-82842.3.55447645581215@perl.org>
+             
+             The forked child should make sure STDIN and STDOUT aren't tied
+             before messing with them
+             
+             [ 22615]
+             Unknowingly for years we've had a test that has assumed the order
+             of results from readdir. Fixed.
+     Branch: maint-5.8/perl
+	  !> lib/File/Find/t/find.t lib/IPC/Open3.pm
+____________________________________________________________________________
+[ 22622] By: nicholas                              on 2004/03/31  15:16:49
+        Log: Integrate:
+             [ 22582]
+             mintest will pass if I skip the correct number of tests. D'oh!
+             
+             [ 22591]
+             [perl #27268] Blessed reference to anonymous glob
+             Stop *$$x=$x giving "Attempt to free unreferenced scalar" warning
+             
+             [ 22594]
+             [perl #27040] - hints hash was being double freed on scope exit
+             
+             [ 22596]
+             fix for change #22594; if using test.pl, must tell perl where to
+             find it!
+             
+             [ 22599]
+             [perl #24200] string corruption with lvalue sub
+             Depending on the context, the same substr OP may want to return
+             a PVLV or an LV on subsequent invcations. If TARG is the wrong
+             type, use a mortal instead.
+             
+             [ 22605]
+             pv_display() had code to display \n etc as escapes but it didn't
+             actually work.
+             
+             [ 22607]
+             update -Dx to cope with lexical version of OP_AELEMFAST
+     Branch: maint-5.8/perl
+	   ! t/op/substr.t
+	  !> dump.c op.c pp.c scope.c scope.h sv.c t/comp/hints.t
+	  !> t/op/magic.t t/op/ref.t
+____________________________________________________________________________
+[ 22620] By: nicholas                              on 2004/03/31  14:37:26
+        Log: Integrate:
+             [ 22514]
+             Move the PERLVAR(Ireentrant_buffer, REENTR*) outside the ITHREADS
+             block. This allows the re-entrant API to be used with ithreads,
+             which in turn permits -Dusethreads -Uuseithreads -Uuse5005threads
+             (Which may seem inane, but makes perl threaded at the C level
+             without enabling ithreads)
+             
+             [ 22545]
+             Subject: Re: [perl #27803] perl crashes when utf8::upgrade($offsetOK_scalar) 
+             From: SADAHIRO Tomoyuki <bqw10602@nifty.com>
+             Date: Sun, 21 Mar 2004 15:19:22 +0900
+             Message-Id: <20040321151828.DAC6.BQW10602@nifty.com>
+             
+             [ 22546]
+             Silence a gcc warning.
+             
+             [ 22547]
+             I must be tired today.
+             
+             [ 22548]
+             Subject: [PATCH sv.h] Nobody has used SvPVbyte_force?
+             From: SADAHIRO Tomoyuki <bqw10602@nifty.com>
+             Date: Sun, 21 Mar 2004 21:49:53 +0900
+             Message-Id: <20040321213628.2461.BQW10602@nifty.com>
+     Branch: maint-5.8/perl
+	  !> intrpvar.h lib/utf8.t sv.c sv.h
+____________________________________________________________________________
+[ 22616] By: nicholas                              on 2004/03/31  10:43:26
+        Log: Integrate:
+             [ 22407]
+             Use File::Temp for tempfiles if it is available.
+             (Based on a patch from Solar Designer <solar@openwall.com> in
+             Message-ID: <20040125222218.GA13499@openwall.com>, the bulk of which
+             was applied as change 22258)
+             
+             [ 22484]
+             Subject: Re: [PATCH] Re: Proposal to remove support for MachTen
+             From: Dominic Dunlop <shouldbedomo@mac.com>
+             Date: Thu, 11 Mar 2004 10:34:01 +0100
+             Message-Id: <3B07B7FC-733F-11D8-AC24-000A27839BD6@mac.com>
+             
+             [ 22604]
+             fix typo in change 22597
+             
+             [ 22614]
+             Subject: Zaurus SL-[78]60 native compile patch
+             Message-Id: <46DCC0BF-8199-11D8-8D5B-000A95DBB50A@dan.co.jp>
+             From: Dan Kogai <dankogai@dan.co.jp>
+             Date: Tue, 30 Mar 2004 00:53:52 +0900
+     Branch: maint-5.8/perl
+	  !> README.machten ext/Errno/Errno_pm.PL hints/machten.sh op.h
+	  !> utils/perlbug.PL
+____________________________________________________________________________
+[ 22611] By: nicholas                              on 2004/03/30  12:28:04
+        Log: Integrate:
+             [ 22610]
+             various win32 build fixes
+             
+             Subject: Re: [PATCH] Re: MinGW/GCC vs MSVC++ on Win32
+             From: Steve Hay <steve.hay@uk.radan.com>
+             Date: Tue, 23 Mar 2004 10:42:12 +0000
+             Message-ID: <40601484.7040905@uk.radan.com>
+             
+             Subject: [PATCH] distclean on Win32 should delete perl.base
+             From: Steve Hay <steve.hay@uk.radan.com>
+             Date: Tue, 23 Mar 2004 11:35:56 +0000
+             Message-ID: <4060211C.8020704@uk.radan.com>
+             
+             Subject: Re: [PATCH] Create debug symbols files on Windows even for release
+             From: Steve Hay <steve.hay@uk.radan.com>
+             Date: Fri, 26 Mar 2004 10:46:07 +0000
+             Message-ID: <406409EF.9020404@uk.radan.com>
+     Branch: maint-5.8/perl
+	   ! win32/makefile.mk
+	  !> win32/Makefile
+____________________________________________________________________________
+[ 22603] By: nicholas                              on 2004/03/27  20:24:25
+        Log: Integrate:
+             [ 22584]
+             Subject: [perl #27790] split docs: say the string is EXPR 
+             From: Dan Jacobson (via RT) <perlbug-followup@perl.org>
+             Date: 20 Mar 2004 05:21:07 -0000
+             Message-ID: <rt-3.0.8-27790-82358.14.5476352902536@perl.org>
+             
+             Minor documentation nit in split
+             
+             [ 22586]
+             Subject: [perl #27748] 'find2perl' bug: -exec causes chdir error 
+             From: "jdhedden@1979.usna.com (via RT)" <perlbug-followup@perl.org>
+             Date: 18 Mar 2004 20:25:50 -0000 
+             Message-ID: <rt-3.0.8-27748-82270.2.99482909739062@perl.org>
+             
+             Cwd code was planted in the output executable after the exit, so
+             was never run.
+             
+             [ 22593]
+             Subject: Re: [perl #27906] stat documentation correction
+             From: Andy Lester <andy@petdance.com>
+             Date: Wed, 24 Mar 2004 21:48:30 -0600
+             Message-Id: <20040325034830.GA5865@petdance.com>
+             (Applied with a correction from Spider Boardman.)
+             
+             [ 22595]
+             [perl #26839] document the return value of an empty sub
+             
+             [ 22597]
+             Clarify op.h comments for which ops the OPpDEREF* private flags
+             are actually used; update Concise.pm to match
+     Branch: maint-5.8/perl
+	   ! pod/perlfunc.pod
+	  !> ext/B/B/Concise.pm op.h pod/perlsub.pod t/op/stat.t
+	  !> x2p/find2perl.PL
+____________________________________________________________________________
+[ 22602] By: nicholas                              on 2004/03/27  16:23:58
+        Log: Integrate:
+             [ 22600]
+             Subject:  [PATCH] don't clean-up perly.* on VMS
+             From:  "Craig A. Berry" <craigberry@mac.com>
+             Date:  Fri, 26 Mar 2004 16:54:44 -0600
+             Message-Id:  <4064B4B4.2030203@mac.com>
+             
+             refrain from getting rid of perly.c and perly.h now that there are
+             no longer VMS-specific overrides for these files
+             
+             [ 22601]
+             Subject:  [PATCH] -Dusemallocwrap for VMS)
+             From:  "Craig A. Berry" <craigberry@mac.com>
+             Date:  Fri, 26 Mar 2004 22:46:50 -0600
+             Message-Id:  <4065073A.30007@mac.com>
+             
+             Mimic in configure.com what Configure does to enable or disable
+             the new feature -Dusemallocwrap
+     Branch: maint-5.8/perl
+	  !> configure.com vms/descrip_mms.template
+____________________________________________________________________________
+[ 22590] By: nicholas                              on 2004/03/25  18:35:10
+        Log: Integrate:
+             [ 22579]
+             Subject: Re: [PATCH] Fix PERL_MALLOC_WRAP change for Win32
+             From: Steve Hay <steve.hay@uk.radan.com>
+             Message-ID: <40618D1C.7000601@uk.radan.com>
+             Date: Wed, 24 Mar 2004 13:29:00 +0000
+     Branch: maint-5.8/perl
+	  !> win32/config_H.bc win32/config_H.gc win32/config_H.vc
+	  !> win32/config_H.vc64
+____________________________________________________________________________
+[ 22589] By: nicholas                              on 2004/03/25  10:41:01
+        Log: Update changes
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 22588] By: nicholas                              on 2004/03/25  10:06:02
         Log: Integrate:
              [ 22563]
