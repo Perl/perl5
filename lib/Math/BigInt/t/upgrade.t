@@ -6,10 +6,26 @@ use strict;
 BEGIN
   {
   $| = 1;
-  unshift @INC, '../lib'; # for running manually
-  my $location = $0; $location =~ s/upgrade.t//;
-  unshift @INC, $location; # to locate the testing files
-  chdir 't' if -d 't';
+  # to locate the testing files
+  my $location = $0; $location =~ s/upgrade.t//i;
+  if ($ENV{PERL_CORE})
+    {
+    # testing with the core distribution
+    @INC = qw(../t/lib);
+    }
+  unshift @INC, qw(../lib);     # to locate the modules
+  if (-d 't')
+    {
+    chdir 't';
+    require File::Spec;
+    unshift @INC, File::Spec->catdir(File::Spec->updir, $location);
+    }
+  else
+    {
+    unshift @INC, $location;
+    }
+  print "# INC = @INC\n";
+
   plan tests => 2068
    + 2;			# our own tests
   }

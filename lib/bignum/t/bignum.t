@@ -10,7 +10,7 @@ BEGIN
   $| = 1;
   chdir 't' if -d 't';
   unshift @INC, '../lib';
-  plan tests => 17;
+  plan tests => 21;
   }
 
 use bignum;
@@ -20,13 +20,15 @@ use bignum;
 
 my $x = 5; ok (ref($x) =~ /^Math::BigInt/);		# :constant
 
-# todo:  ok (2 + 2.5,4.5);				# should still work
-# todo: $x = 2 + 3.5; ok (ref($x),'Math::BigFloat');
+ok (2 + 2.5,4.5);
+$x = 2 + 3.5; ok (ref($x),'Math::BigFloat');
+ok (2 * 2.1,4.2);
+$x = 2 + 2.1; ok (ref($x),'Math::BigFloat');
 
 $x = 2 ** 255; ok (ref($x) =~ /^Math::BigInt/);
 
 # see if Math::BigInt constant and upgrading works
-ok (Math::BigInt::bsqrt(12),'3.464101615137754587054892683011744733886');
+ok (Math::BigInt::bsqrt('12'),'3.464101615137754587054892683011744733886');
 ok (sqrt(12),'3.464101615137754587054892683011744733886');
 
 ok (2/3,"0.6666666666666666666666666666666666666667");

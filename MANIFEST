@@ -837,7 +837,6 @@ lib/bignum/t/br_lite.t		See if bignum works
 lib/bignum/t/option_a.t		See if bignum works
 lib/bignum/t/option_l.t		See if bignum works
 lib/bignum/t/option_p.t		See if bignum works
-lib/bignum/t/trace.t		See if bignum works
 lib/bigrat.pl			An arbitrary precision rational arithmetic package
 lib/bigrat.pm			bignum
 lib/blib.pm			For "use blib"
@@ -1131,6 +1130,7 @@ lib/Math/BigInt/t/use_lib1.t	Test combinations of Math::BigInt and BigFloat
 lib/Math/BigInt/t/use_lib2.t	Test combinations of Math::BigInt and BigFloat
 lib/Math/BigInt/t/use_lib3.t	Test combinations of Math::BigInt and BigFloat
 lib/Math/BigInt/t/use_lib4.t	Test combinations of Math::BigInt and BigFloat
+lib/Math/BigInt/t/with_sub.t	Test use Math::BigFloat with => package
 lib/Math/BigInt/Trace.pm	bignum tracing
 lib/Math/BigRat.pm		Math::BigRat
 lib/Math/BigRat/t/bigfltpm.inc		Math::BigRat test

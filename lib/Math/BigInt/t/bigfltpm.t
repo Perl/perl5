@@ -26,7 +26,8 @@ BEGIN
     }
   print "# INC = @INC\n";
 
-  plan tests => 1601;
+  plan tests => 1601
+	+ 2;		# own tests
   }
 
 use Math::BigInt;
@@ -35,5 +36,8 @@ use Math::BigFloat;
 use vars qw ($class $try $x $y $f @args $ans $ans1 $ans1_str $setup $CL);
 $class = "Math::BigFloat";
 $CL = "Math::BigInt::Calc";
-   
+
+ok ($class->config()->{class},$class);
+ok ($class->config()->{with},'Math::BigInt');
+ 
 require 'bigfltpm.inc';	# all tests here for sharing

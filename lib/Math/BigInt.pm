@@ -18,7 +18,7 @@ package Math::BigInt;
 my $class = "Math::BigInt";
 require 5.005;
 
-$VERSION = '1.55';
+$VERSION = '1.56';
 use Exporter;
 @ISA =       qw( Exporter );
 @EXPORT_OK = qw( objectify _swap bgcd blcm); 
@@ -524,7 +524,6 @@ sub bnan
     # otherwise do our own thing
     $self->{value} = $CALC->_zero();
     }
-  $self->{value} = $CALC->_zero();
   $self->{sign} = $nan;
   delete $self->{_a}; delete $self->{_p};	# rounding NaN is silly
   return $self;
@@ -903,12 +902,8 @@ sub badd
   my ($self,$x,$y,@r) = objectify(2,@_);
 
   return $x if $x->modify('badd');
-#  print "mbi badd ",join(' ',caller()),"\n";
-#  print "upgrade => ",$upgrade||'undef',
-#    " \$x (",ref($x),") \$y (",ref($y),")\n";
   return $upgrade->badd($x,$y,@r) if defined $upgrade &&
-    ((ref($x) eq $upgrade) || (ref($y) eq $upgrade));
-#  print "still badd\n";
+    ((!$x->isa($self)) || (!$y->isa($self)));
 
   $r[3] = $y;				# no push!
   # inf and NaN handling
@@ -969,8 +964,10 @@ sub bsub
   my ($self,$x,$y,@r) = objectify(2,@_);
 
   return $x if $x->modify('bsub');
+
+# upgrade done by badd():
 #  return $upgrade->badd($x,$y,@r) if defined $upgrade &&
-#    ((ref($x) eq $upgrade) || (ref($y) eq $upgrade));
+#   ((!$x->isa($self)) || (!$y->isa($self)));
 
   if ($y->is_zero())
     { 
@@ -1296,7 +1293,7 @@ sub bdiv
    if (($x->{sign} !~ /^[+-]$/) || ($y->{sign} !~ /^[+-]$/) || $y->is_zero());
 
   return $upgrade->bdiv($upgrade->new($x),$y,@r)
-   if defined $upgrade && $y->isa($upgrade);
+   if defined $upgrade && !$y->isa($self);
 
   $r[3] = $y;					# no push!
 
@@ -1436,7 +1433,7 @@ sub bpow
   return $x if $x->modify('bpow');
 
   return $upgrade->bpow($upgrade->new($x),$y,@r)
-   if defined $upgrade && $y->isa($upgrade);
+   if defined $upgrade && !$y->isa($self);
 
   $r[3] = $y;					# no push!
   return $x if $x->{sign} =~ /^[+-]inf$/;	# -inf/+inf ** x
@@ -1539,7 +1536,7 @@ sub brsft
       $bin =~ s/^-0b//;			# strip '-0b' prefix
       $bin =~ tr/10/01/;		# flip bits
       # now shift
-      if (length($bin) <= $y)
+      if (CORE::length($bin) <= $y)
         {
 	$bin = '0'; 			# shifting to far right creates -1
 					# 0, because later increment makes 
@@ -2074,7 +2071,6 @@ sub objectify
   # currently it tries 'Math::BigInt' + 1, which will not work.
 
   # some shortcut for the common cases
-
   # $x->unary_op();
   return (ref($_[1]),$_[1]) if (@_ == 2) && ($_[0]||0 == 1) && ref($_[1]);
 
@@ -2092,6 +2088,7 @@ sub objectify
     $a[0] = $class;
     $a[0] = shift if $_[0] =~ /^[A-Z].*::/;	# classname as first?
     }
+
   no strict 'refs';
   # disable downgrading, because Math::BigFLoat->foo('1.0','2.0') needs floats
   if (defined ${"$a[0]::downgrade"})
@@ -2147,31 +2144,34 @@ sub import
   my $self = shift;
 
   $IMPORT++;
-  my @a = @_; my $l = scalar @_; my $j = 0;
-  for ( my $i = 0; $i < $l ; $i++,$j++ )
+  my @a; my $l = scalar @_;
+  for ( my $i = 0; $i < $l ; $i++ )
     {
+#    print "at $_[$i]\n";
     if ($_[$i] eq ':constant')
       {
       # this causes overlord er load to step in
       overload::constant integer => sub { $self->new(shift) };
       overload::constant binary => sub { $self->new(shift) };
-      splice @a, $j, 1; $j --;
       }
     elsif ($_[$i] eq 'upgrade')
       {
       # this causes upgrading
       $upgrade = $_[$i+1];		# or undef to disable
-      my $s = 2; $s = 1 if @a-$j < 2;	# avoid "can not modify non-existant..."
-      splice @a, $j, $s; $j -= $s;
+      $i++;
       }
     elsif ($_[$i] =~ /^lib$/i)
       {
       # this causes a different low lib to take care...
       $CALC = $_[$i+1] || '';
-      my $s = 2; $s = 1 if @a-$j < 2;	# avoid "can not modify non-existant..."
-      splice @a, $j, $s; $j -= $s;
+      $i++;
+      }
+    else
+      {
+      push @a, $_[$i];
       }
     }
+#  print "a @a\n";
   # any non :constant stuff is handled by our parent, Exporter
   # even if @_ is empty, to give it a chance 
   $self->SUPER::import(@a);			# need it for subclasses
@@ -2557,6 +2557,8 @@ Math::BigInt - Arbitrary size integer math package
   $x->bsstr();			# normalized string in scientific notation
   $x->as_hex();			# as signed hexadecimal string with prefixed 0x
   $x->as_bin();			# as signed binary string with prefixed 0b
+  
+  Math::BigInt->config();	# return hash containing configuration/version
 
 =head1 DESCRIPTION
 
@@ -2611,6 +2613,15 @@ return either undef, <0, 0 or >0 and are suited for sort.
 Each of the methods below accepts three additional parameters. These arguments
 $A, $P and $R are accuracy, precision and round_mode. Please see more in the
 section about ACCURACY and ROUNDIND.
+
+=head2 config
+
+	use Data::Dumper;
+
+	print Dumper ( Math::BigInt->config() );
+
+Returns a hash containing the configuration, e.g. the version number, lib
+loaded etc.
 
 =head2 accuracy
 

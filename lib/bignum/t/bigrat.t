@@ -10,7 +10,7 @@ BEGIN
   $| = 1;
   chdir 't' if -d 't';
   unshift @INC, '../lib';
-  plan tests => 4;
+  plan tests => 16;
   }
 
 use bigrat;
@@ -18,16 +18,34 @@ use bigrat;
 ###############################################################################
 # general tests
 
-my $x = 5; ok (ref($x),'Math::BigInt');		# :constant
+my $x = 5; ok (ref($x) =~ /^Math::BigInt/);		# :constant
 
 # todo:  ok (2 + 2.5,4.5);				# should still work
 # todo: $x = 2 + 3.5; ok (ref($x),'Math::BigFloat');
 
-$x = 2 ** 255; ok (ref($x),'Math::BigInt');
+$x = 2 ** 255; ok (ref($x) =~ /^Math::BigInt/);
 
 # see if Math::BigRat constant works
 ok (1/3, '1/3');
 ok (1/4+1/3,'7/12');
+ok (5/7+3/7,'8/7');
+
+ok (3/7+1,'10/7');
+ok (3/7+1.1,'107/70');
+ok (3/7+3/7,'6/7');
+
+ok (3/7-1,'-4/7');
+ok (3/7-1.1,'-47/70');
+ok (3/7-2/7,'1/7');
+
+# fails ?
+# ok (1+3/7,'10/7');
+
+ok (1.1+3/7,'107/70');
+ok (3/7*5/7,'15/49');
+ok (3/7 / (5/7),'3/5');
+ok (3/7 / 1,'3/7');
+ok (3/7 / 1.5,'2/7');
 
 ###############################################################################
 # accurarcy and precision

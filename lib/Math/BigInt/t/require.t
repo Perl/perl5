@@ -6,18 +6,32 @@ use Test;
 BEGIN
   {
   $| = 1;
-  chdir 't' if -d 't';
-  unshift @INC, '../lib'; # for running manually
+  # to locate the testing files
+  my $location = $0; $location =~ s/require.t//i;
+  if ($ENV{PERL_CORE})
+    {
+    # testing with the core distribution
+    @INC = qw(../t/lib);
+    }
+  unshift @INC, qw(../lib);     # to locate the modules
+  if (-d 't')
+    {
+    chdir 't';
+    require File::Spec;
+    unshift @INC, File::Spec->catdir(File::Spec->updir, $location);
+    }
+  else
+    {
+    unshift @INC, $location;
+    }
+  print "# INC = @INC\n";
+
   plan tests => 1;
   } 
 
-my ($try,$ans,$x);
+my ($x);
 
 require Math::BigInt; $x = Math::BigInt->new(1); ++$x;
-
-#$try = 'require Math::BigInt; $x = Math::BigInt->new(1); ++$x;';
-#$ans = eval $try || 'undef';
-#print "# For '$try'\n" if (!ok "$ans" , '2' ); 
 
 ok ($x||'undef',2);
 

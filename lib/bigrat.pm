@@ -107,7 +107,6 @@ sub import
     {
     require Math::BigInt::Trace; $class = 'Math::BigInt::Trace';
     $upgrade = 'Math::BigFloat::Trace';
-#    print STDERR "Loading $class";
     }
   else
     {

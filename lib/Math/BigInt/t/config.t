@@ -22,7 +22,7 @@ my $cfg = Math::BigInt->config();
 ok (ref($cfg),'HASH');
 
 ok ($cfg->{lib},'Math::BigInt::Calc');
-ok ($cfg->{lib_version},'0.26');
+ok ($cfg->{lib_version}, $Math::BigInt::Calc::VERSION);
 ok ($cfg->{class},'Math::BigInt');
 ok ($cfg->{upgrade}||'','');
 ok ($cfg->{div_scale},40);

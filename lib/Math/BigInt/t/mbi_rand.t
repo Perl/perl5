@@ -39,7 +39,7 @@ for (my $i = 0; $i < $count; $i++)
   while (length($A) < $la) { $A .= int(rand(100)) x int(rand(16)); }
   while (length($B) < $lb) { $B .= int(rand(100)) x int(rand(16)); }
   $A = $c->new($A); $B = $c->new($B);
-  print "# A $A\n# B $B\n";
+  # print "# A $A\n# B $B\n";
   if ($A->is_zero() || $B->is_zero())
     {
     ok (1,1); ok (1,1); next;
@@ -47,10 +47,12 @@ for (my $i = 0; $i < $count; $i++)
   # check that int(A/B)*B + A % B == A holds for all inputs
   # $X = ($A/$B)*$B + 2 * ($A % $B) - ($A % $B);
   ($ADB,$AMB) = $A->copy()->bdiv($B);
-  ok ($A,$ADB*$B+2*$AMB-$AMB);
+  print "# ". join(' ',Math::BigInt::Calc->_base_len()),"\n"
+   unless ok ($ADB*$B+2*$AMB-$AMB,$A);
   # swap 'em and try this, too
   # $X = ($B/$A)*$A + $B % $A;
   ($ADB,$AMB) = $B->copy()->bdiv($A);
-  ok ($B,$ADB*$A+2*$AMB-$AMB);
+  print "# ". join(' ',Math::BigInt::Calc->_base_len()),"\n"
+   unless ok ($ADB*$A+2*$AMB-$AMB,$B);
   }
 

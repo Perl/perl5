@@ -6,12 +6,12 @@ require 5.005_02;
 use strict;
 
 use Exporter;
-use Math::BigInt(1.49);
+use Math::BigInt(1.56);
 use vars qw($VERSION @ISA $PACKAGE @EXPORT_OK
             $accuracy $precision $round_mode $div_scale);
 
 @ISA = qw(Exporter Math::BigInt);
-@EXPORT_OK = qw(bgcd);
+@EXPORT_OK = qw(bgcd objectify);
 
 $VERSION = 0.03;
 
@@ -46,11 +46,36 @@ sub blcm
   Math::BigInt::blcm(@_);
   }
 
+BEGIN
+  {
+  *objectify = \&Math::BigInt::objectify;
+
+  # these are called by AUTOLOAD from BigFloat, so we need at least these.
+  # We cheat, of course..
+  *bneg = \&Math::BigInt::bneg;
+  *babs = \&Math::BigInt::babs;
+  *bnan = \&Math::BigInt::bnan;
+  *binf = \&Math::BigInt::binf;
+  *bzero = \&Math::BigInt::bzero;
+  *bone = \&Math::BigInt::bone;
+  }
+
 sub import
   {
   my $self = shift;
-  $self->SUPER::import(@_);                     # need it for subclasses
-  #$self->export_to_level(1,$self,@_);           # need this ?
+
+  my @a; my $t = 0;
+  foreach (@_)
+    {
+    $t = 0, next if $t == 1;
+    if ($_ eq 'lib')
+      {
+      $t = 1; next;
+      }
+    push @a,$_;
+    }
+  $self->SUPER::import(@a);			# need it for subclasses
+  $self->export_to_level(1,$self,@a);		# need this ?
   }
 
 1;
