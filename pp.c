@@ -4658,13 +4658,13 @@ PP(pp_split)
     }
     else {
 	maxiters += slen * rx->nparens;
-	while (s < strend && --limit
-/*	       && (!rx->check_substr
-		   || ((s = CALLREG_INTUIT_START(aTHX_ rx, sv, s, strend,
-						 0, NULL))))
-*/	       && CALLREGEXEC(aTHX_ rx, s, strend, orig,
-			      1 /* minend */, sv, NULL, 0))
+	while (s < strend && --limit)
 	{
+	    PUTBACK;
+	    i = CALLREGEXEC(aTHX_ rx, s, strend, orig, 1 , sv, NULL, 0);
+	    SPAGAIN;
+	    if (i == 0)
+		break;
 	    TAINT_IF(RX_MATCH_TAINTED(rx));
 	    if (RX_MATCH_COPIED(rx) && rx->subbeg != orig) {
 		m = s;
@@ -4703,7 +4703,6 @@ PP(pp_split)
 		}
 	    }
 	    s = rx->endp[0] + orig;
-	    PUTBACK;
 	}
     }
 

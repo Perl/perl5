@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..1004\n";
+print "1..1006\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3140,7 +3140,15 @@ ok("bbbbac" =~ /$pattern/ && $1 eq 'a', "[perl #3547]");
 {
     my $i;
     ok('-1-3-5-' eq join('', split /((??{$i++}))/, '-1-3-5-'),
-	"[perl #21411] (??{ .. }) corrupts split's stack")
+	"[perl #21411] (??{ .. }) corrupts split's stack");
+    split /(?{'WOW'})/, 'abc';
+    ok('a|b|c' eq join ('|', @_),
+       "[perl #21411] (?{ .. }) version of the above");
+}
+
+{
+    split /(?{ split "" })/, "abc";
+    ok(1,'cache_re & "(?{": it dumps core in 5.6.1 & 5.8.0');
 }
 
 {
