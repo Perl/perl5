@@ -1327,7 +1327,6 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 
     if (PL_in_eval) {
 	I32 cxix;
-	register PERL_CONTEXT *cx;
 	I32 gimme;
 	SV **newsp;
 
@@ -1368,6 +1367,7 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 
 	if (cxix >= 0) {
 	    I32 optype;
+	    register PERL_CONTEXT *cx;
 
 	    if (cxix < cxstack_ix)
 		dounwind(cxix);
@@ -1395,7 +1395,7 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 	    PL_curcop = cx->blk_oldcop;
 
 	    if (optype == OP_REQUIRE) {
-		char* msg = SvPVx(ERRSV, n_a);
+		const char* msg = SvPVx(ERRSV, n_a);
 		DIE(aTHX_ "%sCompilation failed in require",
 		    *msg ? msg : "Unknown error\n");
 	    }

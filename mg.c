@@ -63,8 +63,8 @@ Signal_t Perl_csighandler(int sig);
 #  define  FAKE_DEFAULT_SIGNAL_HANDLERS
 #endif
 
-static void restore_magic(pTHX_ void *p);
-static void unwind_handler_stack(pTHX_ void *p);
+static void restore_magic(pTHX_ const void *p);
+static void unwind_handler_stack(pTHX_ const void *p);
 
 #ifdef __Lynx__
 /* Missing protos on LynxOS */
@@ -116,7 +116,7 @@ Perl_mg_magical(pTHX_ SV *sv)
 {
     MAGIC* mg;
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
-	MGVTBL* vtbl = mg->mg_virtual;
+	const MGVTBL* const vtbl = mg->mg_virtual;
 	if (vtbl) {
 	    if (vtbl->svt_get && !(mg->mg_flags & MGf_GSKIP))
 		SvGMAGICAL_on(sv);
@@ -139,10 +139,10 @@ Do magic after a value is retrieved from the SV.  See C<sv_magic>.
 int
 Perl_mg_get(pTHX_ SV *sv)
 {
+    const I32 mgs_ix = SSNEW(sizeof(MGS));
+    const bool was_temp = SvTEMP(sv);
     int have_new = 0;
     MAGIC *newmg, *head, *cur, *mg;
-    I32 mgs_ix = SSNEW(sizeof(MGS));
-    int was_temp = SvTEMP(sv);
     /* guard against sv having being freed midway by holding a private
        reference. */
 
@@ -163,7 +163,7 @@ Perl_mg_get(pTHX_ SV *sv)
 
     newmg = cur = head = mg = SvMAGIC(sv);
     while (mg) {
-	MGVTBL *vtbl = mg->mg_virtual;
+	const MGVTBL * const vtbl = mg->mg_virtual;
 
 	if (!(mg->mg_flags & MGf_GSKIP) && vtbl && vtbl->svt_get) {
 	    CALL_FPTR(vtbl->svt_get)(aTHX_ sv, mg);
@@ -219,11 +219,10 @@ Do magic after a value is assigned to the SV.  See C<sv_magic>.
 int
 Perl_mg_set(pTHX_ SV *sv)
 {
-    I32 mgs_ix;
+    const I32 mgs_ix = SSNEW(sizeof(MGS));
     MAGIC* mg;
     MAGIC* nextmg;
 
-    mgs_ix = SSNEW(sizeof(MGS));
     save_magic(mgs_ix, sv);
 
     for (mg = SvMAGIC(sv); mg; mg = nextmg) {
@@ -256,11 +255,9 @@ Perl_mg_length(pTHX_ SV *sv)
     STRLEN len;
 
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
-	MGVTBL* vtbl = mg->mg_virtual;
+        const MGVTBL * const vtbl = mg->mg_virtual;
 	if (vtbl && vtbl->svt_len) {
-            I32 mgs_ix;
-
-	    mgs_ix = SSNEW(sizeof(MGS));
+            const I32 mgs_ix = SSNEW(sizeof(MGS));
 	    save_magic(mgs_ix, sv);
 	    /* omit MGf_GSKIP -- not changed here */
 	    len = CALL_FPTR(vtbl->svt_len)(aTHX_ sv, mg);
@@ -269,8 +266,7 @@ Perl_mg_length(pTHX_ SV *sv)
 	}
     }
 
-    if (DO_UTF8(sv))
-    {
+    if (DO_UTF8(sv)) {
         U8 *s = (U8*)SvPV(sv, len);
         len = Perl_utf8_length(aTHX_ s, s + len);
     }
@@ -283,14 +279,12 @@ I32
 Perl_mg_size(pTHX_ SV *sv)
 {
     MAGIC* mg;
-    I32 len;
 
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
-	MGVTBL* vtbl = mg->mg_virtual;
+        const MGVTBL* const vtbl = mg->mg_virtual;
 	if (vtbl && vtbl->svt_len) {
-            I32 mgs_ix;
-
-	    mgs_ix = SSNEW(sizeof(MGS));
+            const I32 mgs_ix = SSNEW(sizeof(MGS));
+            I32 len;
 	    save_magic(mgs_ix, sv);
 	    /* omit MGf_GSKIP -- not changed here */
 	    len = CALL_FPTR(vtbl->svt_len)(aTHX_ sv, mg);
@@ -301,8 +295,7 @@ Perl_mg_size(pTHX_ SV *sv)
 
     switch(SvTYPE(sv)) {
 	case SVt_PVAV:
-	    len = AvFILLp((AV *) sv); /* Fallback to non-tied array */
-	    return len;
+	    return AvFILLp((AV *) sv); /* Fallback to non-tied array */
 	case SVt_PVHV:
 	    /* FIXME */
 	default:
@@ -323,14 +316,13 @@ Clear something magical that the SV represents.  See C<sv_magic>.
 int
 Perl_mg_clear(pTHX_ SV *sv)
 {
-    I32 mgs_ix;
+    const I32 mgs_ix = SSNEW(sizeof(MGS));
     MAGIC* mg;
 
-    mgs_ix = SSNEW(sizeof(MGS));
     save_magic(mgs_ix, sv);
 
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
-	MGVTBL* vtbl = mg->mg_virtual;
+        const MGVTBL* const vtbl = mg->mg_virtual;
 	/* omit GSKIP -- never set here */
 
 	if (vtbl && vtbl->svt_clear)
@@ -352,12 +344,12 @@ Finds the magic pointer for type matching the SV.  See C<sv_magic>.
 MAGIC*
 Perl_mg_find(pTHX_ SV *sv, int type)
 {
-    MAGIC* mg;
-    if (!sv)
-        return 0;
-    for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
-	if (mg->mg_type == type)
-	    return mg;
+    if (sv) {
+        MAGIC *mg;
+        for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
+            if (mg->mg_type == type)
+                return mg;
+        }
     }
     return 0;
 }
@@ -376,7 +368,7 @@ Perl_mg_copy(pTHX_ SV *sv, SV *nsv, const char *key, I32 klen)
     int count = 0;
     MAGIC* mg;
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
-	MGVTBL* vtbl = mg->mg_virtual;
+        const MGVTBL* const vtbl = mg->mg_virtual;
 	if ((mg->mg_flags & MGf_COPY) && vtbl->svt_copy){
 	    count += CALL_FPTR(vtbl->svt_copy)(aTHX_ sv, mg, nsv, key, klen);
 	}
@@ -406,7 +398,7 @@ Perl_mg_free(pTHX_ SV *sv)
     MAGIC* mg;
     MAGIC* moremagic;
     for (mg = SvMAGIC(sv); mg; mg = moremagic) {
-	MGVTBL* vtbl = mg->mg_virtual;
+        const MGVTBL* const vtbl = mg->mg_virtual;
 	moremagic = mg->mg_moremagic;
 	if (vtbl && vtbl->svt_free)
 	    CALL_FPTR(vtbl->svt_free)(aTHX_ sv, mg);
@@ -429,7 +421,7 @@ Perl_mg_free(pTHX_ SV *sv)
 U32
 Perl_magic_regdata_cnt(pTHX_ SV *sv, MAGIC *mg)
 {
-    register REGEXP *rx;
+    register const REGEXP *rx;
 
     if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
 	if (mg->mg_obj)		/* @+ */
@@ -444,20 +436,19 @@ Perl_magic_regdata_cnt(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
 {
-    register I32 paren;
-    register I32 s;
-    register I32 i;
     register REGEXP *rx;
-    I32 t;
 
     if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
-	paren = mg->mg_len;
+        register const I32 paren = mg->mg_len;
+        register I32 s;
+        register I32 t;
 	if (paren < 0)
 	    return 0;
 	if (paren <= (I32)rx->nparens &&
 	    (s = rx->startp[paren]) != -1 &&
 	    (t = rx->endp[paren]) != -1)
 	    {
+                register I32 i;
 		if (mg->mg_obj)		/* @+ */
 		    i = t;
 		else			/* @- */
@@ -1164,10 +1155,9 @@ Perl_magic_clearsig(pTHX_ SV *sv, MAGIC *mg)
     /* XXX Some of this code was copied from Perl_magic_setsig. A little
      * refactoring might be in order.
      */
-    register char *s;
     STRLEN n_a;
     SV* to_dec;
-    s = MgPV(mg,n_a);
+    register char *s = MgPV(mg,n_a);
     if (*s == '_') {
 	SV** svp;
 	if (strEQ(s,"__DIE__"))
@@ -1303,7 +1293,6 @@ Perl_despatch_signals(pTHX)
 int
 Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 {
-    register char *s;
     I32 i;
     SV** svp = 0;
     /* Need to be careful with SvREFCNT_dec(), because that can have side
@@ -1317,7 +1306,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
     SV* save_sv;
 #endif
 
-    s = MgPV(mg,len);
+    register char *s = MgPV(mg,len);
     if (*s == '_') {
 	if (strEQ(s,"__DIE__"))
 	    svp = &PL_diehook;
@@ -1583,7 +1572,7 @@ int
 Perl_magic_nextpack(pTHX_ SV *sv, MAGIC *mg, SV *key)
 {
     dSP;
-    const char *meth = SvOK(key) ? "NEXTKEY" : "FIRSTKEY";
+    const char * const meth = SvOK(key) ? "NEXTKEY" : "FIRSTKEY";
 
     ENTER;
     SAVETMPS;
@@ -1791,8 +1780,8 @@ int
 Perl_magic_getsubstr(pTHX_ SV *sv, MAGIC *mg)
 {
     STRLEN len;
-    SV *lsv = LvTARG(sv);
-    char *tmps = SvPV(lsv,len);
+    SV * const lsv = LvTARG(sv);
+    const char * const tmps = SvPV(lsv,len);
     I32 offs = LvTARGOFF(sv);
     I32 rem = LvTARGLEN(sv);
 
@@ -1862,7 +1851,7 @@ Perl_magic_settaint(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_getvec(pTHX_ SV *sv, MAGIC *mg)
 {
-    SV *lsv = LvTARG(sv);
+    SV * const lsv = LvTARG(sv);
 
     if (!lsv) {
 	SvOK_off(sv);
@@ -2023,7 +2012,7 @@ Perl_magic_setfm(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_setuvar(pTHX_ SV *sv, MAGIC *mg)
 {
-    struct ufuncs *uf = (struct ufuncs *)mg->mg_ptr;
+    const struct ufuncs * const uf = (struct ufuncs *)mg->mg_ptr;
 
     if (uf && uf->uf_set)
 	(*uf->uf_set)(aTHX_ uf->uf_index, sv);
@@ -2190,7 +2179,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 		    STRLEN len, i;
 		    int accumulate = 0 ;
 		    int any_fatals = 0 ;
-		    char * ptr = (char*)SvPV(sv, len) ;
+		    const char * const ptr = (char*)SvPV(sv, len) ;
 		    for (i = 0 ; i < len ; ++i) {
 		        accumulate |= ptr[i] ;
 		        any_fatals |= (ptr[i] & 0xAA) ;
@@ -2411,7 +2400,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
     case ')':
 #ifdef HAS_SETGROUPS
 	{
-	    char *p = SvPV(sv, len);
+	    const char *p = SvPV(sv, len);
 	    Groups_t gary[NGROUPS];
 
 	    while (isSPACE(*p))
@@ -2685,7 +2674,7 @@ cleanup:
 
 
 static void
-restore_magic(pTHX_ void *p)
+restore_magic(pTHX_ const void *p)
 {
     MGS* mgs = SSPTR(PTR2IV(p), MGS*);
     SV* sv = mgs->mgs_sv;
@@ -2726,9 +2715,9 @@ restore_magic(pTHX_ void *p)
 }
 
 static void
-unwind_handler_stack(pTHX_ void *p)
+unwind_handler_stack(pTHX_ const void *p)
 {
-    U32 flags = *(U32*)p;
+    const U32 flags = *(U32*)p;
 
     if (flags & 1)
 	PL_savestack_ix -= 5; /* Unprotect save in progress. */

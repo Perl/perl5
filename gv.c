@@ -1105,7 +1105,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	break;
 	case '\026':	/* $^V */
 	{
-	    SV *sv = GvSV(gv);
+	    SV * const sv = GvSV(gv);
 	    GvSV(gv) = SvREFCNT_inc(PL_patchlevel);
 	    SvREFCNT_dec(sv);
 	}
@@ -1118,8 +1118,8 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 void
 Perl_gv_fullname4(pTHX_ SV *sv, GV *gv, const char *prefix, bool keepmain)
 {
-    char *name;
-    HV *hv = GvSTASH(gv);
+    const char *name;
+    const HV * const hv = GvSTASH(gv);
     if (!hv) {
 	SvOK_off(sv);
 	return;
@@ -1158,14 +1158,14 @@ Perl_gv_efullname3(pTHX_ SV *sv, GV *gv, const char *prefix)
     gv_efullname4(sv, gv, prefix, TRUE);
 }
 
-/* XXX compatibility with versions <= 5.003. */
+/* compatibility with versions <= 5.003. */
 void
 Perl_gv_fullname(pTHX_ SV *sv, GV *gv)
 {
-    gv_fullname3(sv, gv, sv == (SV*)gv ? "*" : "");
+    gv_fullname3(sv, gv, sv == (const SV*)gv ? "*" : "");
 }
 
-/* XXX compatibility with versions <= 5.003. */
+/* compatibility with versions <= 5.003. */
 void
 Perl_gv_efullname(pTHX_ SV *sv, GV *gv)
 {
