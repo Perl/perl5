@@ -5402,6 +5402,14 @@ $ WC "d_tcsetpgrp='undef'"
 $ WC "d_telldir='define'"
 $ WC "d_telldirproto='define'"
 $ WC "d_times='define'"
+$ IF ("''F$EXTRACT(1,3, F$GETSYI(""VERSION""))'".GES."7.0")
+$ THEN
+$   WC "d_tm_tm_gmtoff='define'"
+$   WC "d_tm_tm_zone='define'"
+$ ELSE
+$   WC "d_tm_tm_gmtoff='undef'"
+$   WC "d_tm_tm_zone='undef'"
+$ ENDIF
 $ WC "d_truncate='" + d_truncate + "'"
 $ WC "d_tzname='" + d_tzname + "'"
 $ WC "d_u32align='define'"
