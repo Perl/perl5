@@ -1111,8 +1111,8 @@ d_statblks (d_statblks.U):
 d_statfsflags (d_statfs.U):
 	This variable conditionally defines the HAS_STRUCT_STATFS_FLAGS
 	symbol, which indicates to struct statfs from has f_flags member.
-	This kind of struct statfs is coming from sys/mount.h and not from
-	sys/statfs.h.
+	This kind of struct statfs is coming from sys/mount.h (BSD),
+	not from sys/statfs.h (SYSV).
 
 d_statvfs (d_statvfs.U):
 	This variable conditionally defines the HAS_STATVFS symbol, which
@@ -1539,6 +1539,10 @@ i_limits (i_limits.U):
 i_locale (i_locale.U):
 	This variable conditionally defines the I_LOCALE symbol,
 	and indicates whether a C program should include <locale.h>.
+
+i_machcthr (i_machcthr.U):
+	This variable conditionally defines the I_MACH_CTHREADS symbol,
+	and indicates whether a C program should include <mach/cthreads.h>.
 
 i_malloc (i_malloc.U):
 	This variable conditionally defines the I_MALLOC symbol, and indicates
