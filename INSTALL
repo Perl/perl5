@@ -1,3 +1,7 @@
+If you read this file _as_is_, just ignore the funny characters you see.
+It is written in the POD format (see pod/perlpod.pod) which is specially
+designed to be readable as is.
+
 =head1 NAME
 
 Install - Build and Installation guide for perl5.
@@ -601,7 +605,7 @@ directories to add to @INC.  By default, it will be empty.
 Perl will search these directories (including architecture and
 version-specific subdirectories) for add-on modules and extensions.
 
-For example, if you have a bundle of perl libraries from a previous 
+For example, if you have a bundle of perl libraries from a previous
 installation, perhaps in a strange place:
 
 	Configure -Dotherlibdirs=/usr/lib/perl5/site_perl/5.8.1
@@ -1343,9 +1347,9 @@ additional references (suppose you are installing DB3 with
 
     ln -s libdb-3.so /usr/lib/libdbm.so
     ln -s libdb-3.so /usr/lib/libndbm.so
-    echo '#define DB_DBM_HSEARCH 1' >dbm.h 
+    echo '#define DB_DBM_HSEARCH 1' >dbm.h
     echo '#include <db.h>' >>dbm.h
-    install -m 0644 dbm.h /usr/include/dbm.h 
+    install -m 0644 dbm.h /usr/include/dbm.h
     install -m 0644 dbm.h /usr/include/ndbm.h
 
 Optionally, if you have compiled with --enable-compat185 (not needed
@@ -1750,7 +1754,7 @@ but without prototypes available, check to see if BIND 8.1 (or possibly
 other BIND 8 versions) is (or has been) installed. They install
 header files such as netdb.h into places such as /usr/local/include (or into
 another directory as specified at build/install time), at least optionally.
-Remove them or put them in someplace that isn't in the C preprocessor's 
+Remove them or put them in someplace that isn't in the C preprocessor's
 header file include search path (determined by -I options plus defaults,
 normally /usr/include).
 
