@@ -127,6 +127,12 @@
  */
 #define HAS_DUP2	/**/
 
+/* HAS_FCHDIR:
+ *	This symbol, if defined, indicates that the fchdir routine is
+ *	available to change directory using a file descriptor.
+ */
+/*#define HAS_FCHDIR		/**/
+
 /* HAS_FCHMOD:
  *	This symbol, if defined, indicates that the fchmod routine is available
  *	to change mode of opened files.  If unavailable, use chmod().
