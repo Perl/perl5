@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use ExtUtils::MakeMaker 5.16 ;
+use ExtUtils::MakeMaker ;
 use ExtUtils::Constant qw(WriteConstants);
 use Config ;
 
