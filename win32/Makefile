@@ -609,7 +609,8 @@ SETARGV_OBJ	= setargv$(o)
 DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B re \
 		Data/Dumper Devel/Peek ByteLoader Devel/DProf File/Glob \
 		Sys/Hostname Storable Filter/Util/Call Encode Digest/MD5 \
-		PerlIO/Scalar MIME/Base64 Time/HiRes Time/Piece
+		PerlIO/Scalar MIME/Base64 Time/HiRes Time/Piece \
+		Cwd List/Util PerlIO/Via XS/Typemap
 STATIC_EXT	= DynaLoader
 NONXS_EXT	= Errno
 
@@ -639,6 +640,13 @@ PERLIOSCALAR	= $(EXTDIR)\PerlIO\Scalar\Scalar
 MIMEBASE64	= $(EXTDIR)\MIME\Base64\Base64
 TIMEHIRES	= $(EXTDIR)\Time\HiRes\HiRes
 TIMEPIECE	= $(EXTDIR)\Time\Piece\Piece
+CWD		= $(EXTDIR)\Cwd\Cwd
+LISTUTIL  	= $(EXTDIR)\List\Util\Util
+PERLIOVIA	= $(EXTDIR)\PerlIO\Via\Via
+XSTYPEMAP	= $(EXTDIR)\XS\Typemap\Typemap
+
+# Help out FindExt::scan_ext() with a copy
+LISTUTIL_PM	= $(LISTUTIL).pm
 
 SOCKET_DLL	= $(AUTODIR)\Socket\Socket.dll
 FCNTL_DLL	= $(AUTODIR)\Fcntl\Fcntl.dll
@@ -664,6 +672,10 @@ PERLIOSCALAR_DLL= $(AUTODIR)\PerlIO\Scalar\Scalar.dll
 MIMEBASE64_DLL	= $(AUTODIR)\MIME\Base64\Base64.dll
 TIMEHIRES_DLL	= $(AUTODIR)\Time\HiRes\HiRes.dll
 TIMEPIECE_DLL	= $(AUTODIR)\Time\Piece\Piece.dll
+CWD_DLL		= $(AUTODIR)\Cwd\Cwd.dll
+LISTUTIL_DLL	= $(AUTODIR)\List\Util\Util.dll
+PERLIOVIA_DLL	= $(AUTODIR)\PerlIO\Via\Via.dll
+XSTYPEMAP_DLL	= $(AUTODIR)\XS\Typemap\Typemap.dll
 
 ERRNO_PM	= $(LIBDIR)\Errno.pm
 
@@ -691,7 +703,11 @@ EXTENSION_C	= 		\
 		$(PERLIOSCALAR).c	\
 		$(MIMEBASE64).c	\
 		$(TIMEHIRES).c	\
-		$(TIMEPIECE).c	
+		$(TIMEPIECE).c	\
+		$(CWD).c	\
+		$(LISTUTIL).c	\
+		$(PERLIOVIA).c	\
+		$(XSTYPEMAP).c
 
 EXTENSION_DLL	= 		\
 		$(SOCKET_DLL)	\
@@ -717,7 +733,11 @@ EXTENSION_DLL	= 		\
 		$(PERLIOSCALAR_DLL) \
 		$(MIMEBASE64_DLL) \
 		$(TIMEHIRES_DLL)  \
-		$(TIMEPIECE_DLL)
+		$(TIMEPIECE_DLL)  \
+		$(CWD_DLL)	\
+		$(LISTUTIL_DLL)	\
+		$(PERLIOVIA_DLL)	\
+		$(XSTYPEMAP_DLL)
 
 EXTENSION_PM	=		\
 		$(ERRNO_PM)
@@ -780,7 +800,7 @@ config.w32 : $(CFGSH_TMPL)
 	-del /f config.h
 	copy $(CFGH_TMPL) config.h
 
-..\config.sh : config.w32 $(MINIPERL) config_sh.PL
+..\config.sh : config.w32 $(MINIPERL) $(LISTUTIL_PM) config_sh.PL
 	$(MINIPERL) -I..\lib config_sh.PL $(CFG_VARS) config.w32 > ..\config.sh
 
 # this target is for when changes to the main config.sh happen
@@ -1020,34 +1040,63 @@ $(ENCODE_DLL): $(PERLEXE) $(ENCODE).xs
 	cd ..\..\win32
 
 $(MD5_DLL): $(PERLEXE) $(MD5).xs
-	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	cd $(EXTDIR)\Digest\$(*B)
+	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
 	$(MAKE)
-	cd ..\..\win32
+	cd ..\..\..\win32
 
 $(PERLIOSCALAR_DLL): $(PERLEXE) $(PERLIOSCALAR).xs
-	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	cd $(EXTDIR)\PerlIO\$(*B)
+	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
 	$(MAKE)
-	cd ..\..\win32
+	cd ..\..\..\win32
 
 $(MIMEBASE64_DLL): $(PERLEXE) $(MIMEBASE64).xs
-	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	cd $(EXTDIR)\MIME\$(*B)
+	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
 	$(MAKE)
-	cd ..\..\win32
+	cd ..\..\..\win32
 
 $(TIMEHIRES_DLL): $(PERLEXE) $(TIMEHIRES).xs
+	cd $(EXTDIR)\Time\$(*B)
+	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(MAKE)
+	cd ..\..\..\win32
+
+$(TIMEPIECE_DLL): $(PERLEXE) $(TIMEPIECE).xs
+	cd $(EXTDIR)\Time\$(*B)
+	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(MAKE)
+	cd ..\..\..\win32
+
+$(CWD_DLL): $(PERLEXE) $(CWD).xs
 	cd $(EXTDIR)\$(*B)
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\win32
 
-$(TIMEPIECE_DLL): $(PERLEXE) $(TIMEPIECE).xs
-	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+$(LISTUTIL_PM): $(EXTDIR)\List\Util\lib\List\Util.pm
+	cd $(EXTDIR)
+	copy List\Util\lib\List\Util.pm List\Util\Util.pm
+	cd ..\win32
+
+$(LISTUTIL_DLL): $(LISTUTIL_PM) $(PERLEXE) $(LISTUTIL).xs
+	cd $(EXTDIR)\List\$(*B)
+	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
 	$(MAKE)
-	cd ..\..\win32
+	cd ..\..\..\win32
+
+$(PERLIOVIA_DLL): $(PERLEXE) $(PERLIOVIA).xs
+	cd $(EXTDIR)\PerlIO\$(*B)
+	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(MAKE)
+	cd ..\..\..\win32
+
+$(XSTYPEMAP_DLL): $(PERLEXE) $(XSTYPEMAP).xs
+	cd $(EXTDIR)\XS\$(*B)
+	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(MAKE)
+	cd ..\..\..\win32
 
 $(ERRNO_PM): $(PERLEXE) $(ERRNO)_pm.PL
 	cd $(EXTDIR)\$(*B)
@@ -1107,12 +1156,16 @@ distclean: clean
 	-del /f $(LIBDIR)\Filter\Util\Call.pm
 	-del /f $(LIBDIR)\Digest\MD5.pm
 	-del /f $(LIBDIR)\PerlIO\Scalar.pm
+	-del /f $(LIBDIR)\PerlIO\Via.pm
 	-del /f $(LIBDIR)\MIME\Base64.pm
 	-del /f $(LIBDIR)\MIME\QuotedPrint.pm
 	-del /f $(LIBDIR)\List\Util.pm
+	-del /f $(LISTUTIL_PM)
 	-del /f $(LIBDIR)\Scalar\Util.pm
 	-del /f $(LIBDIR)\Time\HiRes.pm
 	-del /f $(LIBDIR)\Time\Piece.pm
+	-del /f $(LIBDIR)\Cwd.pm
+	-del /f $(LIBDIR)\XS\Typemap.pm
 	-if exist $(LIBDIR)\IO rmdir /s /q $(LIBDIR)\IO
 	-rmdir /s $(LIBDIR)\IO
 	-if exist $(LIBDIR)\Thread rmdir /s /q $(LIBDIR)\Thread
@@ -1130,6 +1183,8 @@ distclean: clean
 	-rmdir /s $(LIBDIR)\List
 	-if exist $(LIBDIR)\Scalar rmdir /s /q $(LIBDIR)\Scalar
 	-rmdir /s $(LIBDIR)\Scalar
+	-if exist $(LIBDIR)\XS rmdir /s /q $(LIBDIR)\XS
+	-rmdir /s $(LIBDIR)\XS
 	cd $(PODDIR)
 	-del /f *.html *.bat checkpods \
 	    perlaix.pod perlamiga.pod perlbs2000.pod perlcygwin.pod \
