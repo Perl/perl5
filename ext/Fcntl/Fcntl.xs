@@ -57,6 +57,12 @@ int arg;
 #else
 	        goto not_there;
 #endif
+	    if (strEQ(name, "F_GETOWN"))
+#ifdef F_GETOWN
+	        return F_GETOWN;
+#else
+	        goto not_there;
+#endif
 	    if (strEQ(name, "F_SETFD"))
 #ifdef F_SETFD
 	        return F_SETFD;
@@ -84,6 +90,12 @@ int arg;
 	    if (strEQ(name, "F_SETLKW"))
 #ifdef F_SETLKW
 	        return F_SETLKW;
+#else
+	        goto not_there;
+#endif
+	    if (strEQ(name, "F_SETOWN"))
+#ifdef F_SETOWN
+	        return F_SETOWN;
 #else
 	        goto not_there;
 #endif
@@ -247,18 +259,6 @@ int arg;
 	    if (strEQ(name, "O_SYNC"))
 #ifdef O_SYNC
 	        return O_SYNC;
-#else
-	        goto not_there;
-#endif
-	    if (strEQ(name, "F_SETOWN"))
-#ifdef F_SETOWN
-	        return F_SETOWN;
-#else
-	        goto not_there;
-#endif
-	    if (strEQ(name, "F_GETOWN"))
-#ifdef F_GETOWN
-	        return F_GETOWN;
 #else
 	        goto not_there;
 #endif
