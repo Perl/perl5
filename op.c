@@ -5451,6 +5451,7 @@ Perl_ck_rvconst(pTHX_ register OP *o)
 #else
 	    kid->op_sv = SvREFCNT_inc(gv);
 #endif
+	    kid->op_private = 0;
 	    kid->op_ppaddr = PL_ppaddr[OP_GV];
 	}
     }
