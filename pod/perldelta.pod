@@ -233,6 +233,15 @@ source code level, this shouldn't be that drastic a change.
 
 =item *
 
+The PerlIO C<:raw> discipline (as described in Camel III) is deprecated
+because its definition (as either the discipline version of C<binmode(FH)>
+or as the opposite of C<:crlf>) didn't really work: most importantly
+because turning off "clrfness" is not enough to make a stream truly
+binary.  Instead of C<:raw> use one of the following: C<open(..., ':bytes')>,
+C<binmode(FH)>, C<sysopen()> + C<sysread()>.
+
+=item *
+
 The current user-visible implementation of pseudo-hashes (the weird
 use of the first array element) is deprecated starting from Perl 5.8.0
 and will be removed in Perl 5.10.0, and the feature will be
