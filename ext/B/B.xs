@@ -163,8 +163,11 @@ cc_opclass(pTHX_ OP *o)
 	 * an SVOP (and op_sv is the GV for the filehandle argument).
 	 */
 	return ((o->op_flags & OPf_KIDS) ? OPc_UNOP :
+#ifdef USE_ITHREADS
+		(o->op_flags & OPf_REF) ? OPc_PADOP : OPc_BASEOP);
+#else
 		(o->op_flags & OPf_REF) ? OPc_SVOP : OPc_BASEOP);
-
+#endif
     case OA_LOOPEXOP:
 	/*
 	 * next, last, redo, dump and goto use OPf_SPECIAL to indicate that a

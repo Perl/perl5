@@ -19,7 +19,6 @@
 *** ERROR: garbled entity E<abcI<bla>> at line 82 in file pod/poderrs.t
 *** WARNING: collapsing newlines to blanks at line 92 in file pod/poderrs.t
 *** ERROR: malformed link L<> : empty link at line 94 in file pod/poderrs.t
-*** WARNING: section in 'passwd(5)' deprecated at line 99 in file pod/poderrs.t
 *** WARNING: ignoring leading whitespace in link at line 100 in file pod/poderrs.t
 *** WARNING: ignoring trailing whitespace in link at line 100 in file pod/poderrs.t
 *** ERROR: Spurious character(s) after =back at line 106 in file pod/poderrs.t
@@ -29,5 +28,6 @@
 *** ERROR: unresolved internal link 'end with begin' at line 87 in file pod/poderrs.t
 *** ERROR: unresolved internal link 'OoPs' at line 88 in file pod/poderrs.t
 *** ERROR: unresolved internal link 'abc def' at line 92 in file pod/poderrs.t
+*** ERROR: unresolved internal link 'passwd(5)' at line 99 in file pod/poderrs.t
 *** WARNING: multiple occurence of link target 'oops' at line - in file pod/poderrs.t
-pod/poderrs.t has 21 pod syntax errors.
+pod/poderrs.t has 22 pod syntax errors.
