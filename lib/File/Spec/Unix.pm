@@ -141,10 +141,8 @@ is tainted, it is not used.
 my $tmpdir;
 sub tmpdir {
     return $tmpdir if defined $tmpdir;
-    my @dirlist = ( "/tmp" );
-    if ( exists $ENV{TMPDIR} )
+    my @dirlist = ($ENV{TMPDIR}, "/tmp");
     {
-      unshift @dirlist, $ENV{TMPDIR};
 	no strict 'refs';
 	if (${"\cTAINT"}) { # Check for taint mode on perl >= 5.8.0
             require Scalar::Util;
