@@ -77,7 +77,7 @@ sub check_contents {
   # now check FETCH:
   my $good = 1;
   for (0.. $#c) {
-    $good = 0 unless $a[$_] eq "$c[$_]\n";
+    $good = 0 unless $a[$_] eq "$c[$_]$/";
   }
   print (($open && $good) ? "ok $N\n" : "not ok $N # fetch @c\n");
   $N++;

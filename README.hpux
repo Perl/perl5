@@ -313,7 +313,7 @@ If you are going to use the HP DCE package, the library used for threading
 is /usr/lib/libcma.sl, but there have been multiple updates of that
 library over time. Perl will build with the first version, but it
 will not pass the test suite. Older Oracle versions might be a compelling
-reason, not to update that library, otherwise please find a newer version
+reason not to update that library, otherwise please find a newer version
 in one of the following patches: PHSS_19739, PHSS_20608, or PHSS_23672
 
 reformatted output:

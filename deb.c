@@ -81,10 +81,13 @@ Perl_debstackptrs(pTHX)
 I32
 Perl_debstack(pTHX)
 {
-#ifdef DEBUGGING
+#ifndef SKIP_DEBUGGING
     I32 top = PL_stack_sp - PL_stack_base;
     register I32 i = top - 30;
     I32 *markscan = PL_markstack + PL_curstackinfo->si_markoff;
+
+    if (CopSTASH_eq(PL_curcop, PL_debstash) && !DEBUG_J_TEST_)
+	return 0;
 
     if (i < 0)
 	i = 0;
@@ -118,6 +121,6 @@ Perl_debstack(pTHX)
     }
     while (1);
     PerlIO_printf(Perl_debug_log, "\n");
-#endif /* DEBUGGING */
+#endif /* SKIP_DEBUGGING */
     return 0;
 }

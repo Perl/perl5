@@ -57,11 +57,9 @@ please email me.
 Tom Spindler
 dogcow@isi.net
 
-=head2 Update 2001-12-26
+=head2 Update 2002-03-02
 
-I managed to compile one of the developer snapshots (13885 plus a few
-tweaks) leading up to (some day) Perl 5.8.0, and the following tests
-fail:
+The following tests fail on pre-5.8.0 Perl in BeOS Personal 5.0:
 
         op/magic                        24-26
         ext/POSIX/t/sigaction           13
@@ -87,8 +85,8 @@ if sigaction returns early.
 =item *
 
 The waitpid failure means that after there are no more child
-processes, waitpid is supposed to start returning -1 (and set errno
-to ECHILD).  In BeOS, it doesn't seem to.
+processes, waitpid is supposed to start returning -1 (and set
+errno to ECHILD).  In BeOS, it doesn't seem to.
 
 =item *
 
@@ -98,6 +96,6 @@ The Installed test has some filesystem portability assumptions.
 
 Disclaimer: I just installed BeOS Personal Edition 5.0 and the
 Developer Tools, that is the whole extent of my BeOS expertise,
-so pelase don't ask for further help in BeOS Perl problems, sorry.
+so please don't ask me for further help in BeOS Perl problems.
 
 jhi@iki.fi

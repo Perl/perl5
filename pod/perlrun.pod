@@ -313,7 +313,7 @@ B<-D14> is equivalent to B<-Dtls>):
         8  t  Trace execution
        16  o  Method and overloading resolution
        32  c  String/numeric conversions
-       64  P  Print preprocessor command for -P, source file input state
+       64  P  Print profiling info, preprocessor command for -P, source file input state
       128  m  Memory allocation
       256  f  Format processing
       512  r  Regular expression parsing and execution
@@ -326,9 +326,11 @@ B<-D14> is equivalent to B<-Dtls>):
     65536  S  Thread synchronization
    131072  T  Tokenising
    262144  R  Include reference counts of dumped variables (eg when using -Ds)
+   524288  J  Do not s,t,P-debug (Jump over) opcodes within package DB
 
 All these flags require B<-DDEBUGGING> when you compile the Perl
-executable.  See the F<INSTALL> file in the Perl source distribution 
+executable (but see L<Devel::Peek>, L<re> which may change this).
+See the F<INSTALL> file in the Perl source distribution 
 for how to do this.  This flag is automatically set if you include B<-g>
 option when C<Configure> asks you about optimizer/debugger flags.
 

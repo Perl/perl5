@@ -3451,11 +3451,13 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *id, OP *arg)
 	    newSTATEOP(0, Nullch, imop) ));
 
     if (packname) {
+#ifdef WIN32
         if (ckWARN(WARN_MISC) && !gv_stashpvn(packname, packlen, FALSE)) {
             Perl_warner(aTHX_ WARN_MISC,
                         "Package `%s' not found "
                         "(did you use the incorrect case?)", packname);
         }
+#endif
         safefree(packname);
     }
 

@@ -2,10 +2,10 @@
 package Tie::File;
 use Carp;
 use POSIX 'SEEK_SET';
-use Fcntl 'O_CREAT', 'O_RDWR';
+use Fcntl 'O_CREAT', 'O_RDWR', 'LOCK_EX';
 require 5.005;
 
-$VERSION = "0.13";
+$VERSION = "0.14";
 
 # Idea: The object will always contain an array of byte offsets
 # this will be filled in as is necessary and convenient.
@@ -102,7 +102,7 @@ sub STORE {
 
   if (not defined $oldrec) {
     # We're storing a record beyond the end of the file
-    $self->_extend_file_to($n);
+    $self->_extend_file_to($n+1);
     $oldrec = $self->{recsep};
   }
   my $len_diff = length($rec) - length($oldrec);
@@ -133,7 +133,7 @@ sub STORESIZE {
 
   # file gets longer
   if ($len > $olen) {
-    $self->_extend_file_to($len-1);  # record numbers from 0 .. $len-1
+    $self->_extend_file_to($len);
     return;
   }
 
@@ -145,11 +145,84 @@ sub STORESIZE {
   delete @{$self->{cache}}{@cached} if @cached;
 }
 
+sub PUSH {
+  my $self = shift;
+  $self->SPLICE($self->FETCHSIZE, scalar(@_), @_);
+  $self->FETCHSIZE;
+}
+
+sub POP {
+  my $self = shift;
+  scalar $self->SPLICE(-1, 1);
+}
+
+sub SHIFT {
+  my $self = shift;
+  scalar $self->SPLICE(0, 1);
+}
+
+sub UNSHIFT {
+  my $self = shift;
+  $self->SPLICE(0, 0, @_);
+  $self->FETCHSIZE;
+}
+
+sub CLEAR {
+  # And enable auto-defer mode, since it's likely that they just
+  # did @a = (...);
+  my $self = shift;
+  $self->_seekb(0);
+  $self->_chop_file;
+  %{$self->{cache}}   = ();
+    $self->{cached}   = 0;
+  @{$self->{lru}}     = ();
+  @{$self->{offsets}} = (0);
+}
+
+sub EXTEND {
+  my ($self, $n) = @_;
+  $self->_fill_offsets_to($n);
+  $self->_extend_file_to($n);
+}
+
+sub DELETE {
+  my ($self, $n) = @_;
+  my $lastrec = $self->FETCHSIZE-1;
+  if ($n == $lastrec) {
+    $self->_seek($n);
+    $self->_chop_file;
+    # perhaps in this case I should also remove trailing null records?
+  } else {
+    $self->STORE($n, "");
+  }
+}
+
+sub EXISTS {
+  my ($self, $n) = @_;
+  $self->_fill_offsets_to($n);
+  0 <= $n && $n < $self->FETCHSIZE;
+}
+
 sub SPLICE {
   my ($self, $pos, $nrecs, @data) = @_;
   my @result;
 
-  $pos += $self->FETCHSIZE if $pos < 0;
+  {
+    my $oldsize = $self->FETCHSIZE;
+    my $oldpos = $pos;
+
+    if ($pos < 0) {
+      $pos += $oldsize;
+      if ($pos < 0) {
+        croak "Modification of non-creatable array value attempted, subscript $oldpos";
+      }
+    }
+
+    if ($pos > $oldsize) {
+      return unless @data;
+      $pos = $oldsize;          # This is what perl does for normal arrays
+    }
+  }
 
   $self->_fixrecs(@data);
   my $data = join '', @data;
@@ -157,6 +230,7 @@ sub SPLICE {
   my $oldlen = 0;
 
   # compute length of data being removed
+  # Incidentally fills offsets table
   for ($pos .. $pos+$nrecs-1) {
     my $rec = $self->FETCH($_);
     last unless defined $rec;
@@ -164,7 +238,7 @@ sub SPLICE {
     $oldlen += length($rec);
   }
 
-  $self->_fill_offsets_to($pos);
+  # Modify the file
   $self->_twrite($data, $self->{offsets}[$pos], $oldlen);
 
   # update the offsets table part 1
@@ -186,6 +260,12 @@ sub SPLICE {
   # If we scrubbed out all known offsets, regenerate the trivial table
   # that knows that the file does indeed start at 0.
   $self->{offsets}[0] = 0 unless @{$self->{offsets}};
+
+  # Perhaps the following cache foolery could be factored out
+  # into a bunch of mor opaque cache functions.  For example,
+  # it's odd to delete a record from the cache and then remove
+  # it from the LRU queue later on; there should be a function to
+  # do both at once.
 
   # update the read cache, part 1
   # modified records
@@ -224,7 +304,8 @@ sub SPLICE {
   }
   @{$self->{lru}} = (@new, @changed);
 
-  @result;
+  # Yes, the return value of 'splice' *is* actually this complicated
+  wantarray ? @result : @result ? $result[-1] : undef;
 }
 
 # write data into the file
@@ -256,24 +337,23 @@ sub _twrite {
   # $bufsize is required to be at least as large as the data we're overwriting
   my $bufsize = _bufsize($len_diff);
   my ($writepos, $readpos) = ($pos, $pos+$len);
+  my $next_block;
 
   # Seems like there ought to be a way to avoid the repeated code
   # and the special case here.  The read(1) is also a little weird.
   # Think about this.
   do {
     $self->_seekb($readpos);
-    my $br = read $self->{fh}, my($next_block), $bufsize;
+    my $br = read $self->{fh}, $next_block, $bufsize;
     my $more_data = read $self->{fh}, my($dummy), 1;
     $self->_seekb($writepos);
     $self->_write_record($data);
     $readpos += $br;
     $writepos += length $data;
     $data = $next_block;
-    unless ($more_data) {
-      $self->_seekb($writepos);
-      $self->_write_record($next_block);
-    }
   } while $more_data;
+  $self->_seekb($writepos);
+  $self->_write_record($next_block);
 
   # There might be leftover data at the end of the file
   $self->_chop_file if $len_diff < 0;
@@ -324,7 +404,7 @@ sub _fill_offsets_to {
     $self->_seek(-1);           # tricky -- see comment at _seek
     $rec = $self->_read_record;
     if (defined $rec) {
-      push @OFF, $o+length($rec);
+      push @OFF, tell $fh;
     } else {
       return;                   # It turns out there is no such record
     }
@@ -391,14 +471,16 @@ sub _cache_flush {
 # entirely populated.  Now we need to write a new record beyond
 # the end of the file.  We prepare for this by writing
 # empty records into the file up to the position we want
-# $n here is the record number of the last record we're going to write
+#
+# assumes that the offsets table already contains the offset of record $n,
+# if it exists, and extends to the end of the file if not.
 sub _extend_file_to {
   my ($self, $n) = @_;
   $self->_seek(-1);             # position after the end of the last record
   my $pos = $self->{offsets}[-1];
 
   # the offsets table has one entry more than the total number of records
-  $extras = $n - ($#{$self->{offsets}} - 1);
+  $extras = $n - $#{$self->{offsets}};
 
   # Todo : just use $self->{recsep} x $extras here?
   while ($extras-- > 0) {
@@ -426,6 +508,17 @@ sub _bufsize {
   $b;
 }
 
+# Lock the file
+sub flock {
+  my ($self, $op) = @_;
+  unless (@_ <= 3) {
+    my $pack = ref $self;
+    croak "Usage: $pack\->flock([OPERATION])";
+  }
+  my $fh = $self->{fh};
+  $op = LOCK_EX unless defined $op;
+  flock $fh, $op;
+}
 
 # Given a file, make sure the cache is consistent with the
 # file contents
@@ -499,7 +592,7 @@ Tie::File - Access the lines of a disk file via a Perl array
 
 =head1 SYNOPSIS
 
-	# This file documents Tie::File version 0.13
+	# This file documents Tie::File version 0.14
 
 	tie @array, 'Tie::File', filename or die ...;
 
@@ -509,7 +602,12 @@ Tie::File - Access the lines of a disk file via a Perl array
 	$n_recs = @array;        # how many records are in the file?
 	$#array = $n_recs - 2;   # chop records off the end
 
-	# As you would expect
+	# As you would expect:
+
+	push @array, new recs...;
+	my $r1 = pop @array;
+	unshift @array, new recs...;
+	my $r1 = shift @array;
 	@old_recs = splice @array, 3, 7, new recs...;
 
 	untie @array;            # all finished
@@ -628,8 +726,35 @@ The C<tie> call returns an object, say C<$o>.  You may call
 	$rec = $o->FETCH($n);
 	$o->STORE($n, $rec);
 
-to fetch or store the record at line C<$n>, respectively.  There are
-no other public methods in this package.
+to fetch or store the record at line C<$n>, respectively.  The only other public method in this package is:
+
+=head2 C<flock>
+
+	$o->flock(MODE)
+
+will lock the tied file.  C<MODE> has the same meaning as the second
+argument to the Perl built-in C<flock> function; for example
+C<LOCK_SH> or C<LOCK_EX | LOCK_NB>.  (These constants are provided by
+the C<use Fcntl ':flock'> declaration.)
+
+C<MODE> is optional; C<< $o->flock >> simply locks the file with
+C<LOCK_EX>.
+
+The best way to unlock a file is to discard the object and untie the
+array.  It is probably unsafe to unlock the file without also untying
+it, because if you do, changes may remain unwritten inside the object.
+That is why there is no shortcut for unlocking.  If you really want to
+unlock the file prematurely, you know what to do; if you don't know
+what to do, then don't do it.
+
+All the usual warnings about file locking apply here.  In particular,
+note that file locking in Perl is B<advisory>, which means that
+holding a lock will not prevent anyone else from reading, writing, or
+erasing the file; it only prevents them from getting another lock at
+the same time.  Locks are analogous to green traffic lights: If you
+have a green light, that does not prevent the idiot coming the other
+way from plowing into you sideways; it merely guarantees to you that
+the idiot does not also have a green light at the same time.
 
 =head1 CAVEATS
 
@@ -675,11 +800,22 @@ suggests, for example, that and LRU read-cache is a good tradeoff,
 even if it requires substantial adjustment following a C<splice>
 operation.
 
-=head2 Missing Methods
+=head1 CAVEATS
 
-The tied array does not yet support C<push>, C<pop>, C<shift>,
-C<unshift>, C<splice>, or size-setting via C<$#array = $n>.  I will
-put these in soon.
+(That's Latin for 'warnings'.)
+
+The behavior of tied arrays is not precisely the same as for regular
+arrays.  For example:
+
+	undef $a[10];  print "How unusual!\n" if $a[10];
+
+C<undef>-ing a C<Tie::File> array element just blanks out the
+corresponding record in the file.  When you read it back again, you'll
+see the record separator (typically, $a[10] will appear to contain
+"\n") so the supposedly-C<undef>'ed value will be true.
+
+There are other minor differences, but in general, the correspondence
+is extremely close.
 
 =head1 AUTHOR
 
@@ -693,7 +829,7 @@ C<mjd-perl-tiefile-subscribe@plover.com>.
 
 =head1 LICENSE
 
-C<Tie::File> version 0.13 is copyright (C) 2002 Mark Jason Dominus.
+C<Tie::File> version 0.14 is copyright (C) 2002 Mark Jason Dominus.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -718,20 +854,19 @@ For licensing inquiries, contact the author at:
 
 =head1 WARRANTY
 
-C<Tie::File> version 0.13 comes with ABSOLUTELY NO WARRANTY.
+C<Tie::File> version 0.14 comes with ABSOLUTELY NO WARRANTY.
 For details, see the license.
 
 =head1 TODO
 
-C<push>, C<pop>, C<shift>, C<unshift>.
+Tests for default arguments to SPLICE.  Tests for CLEAR/EXTEND.
+Tests for DELETE/EXISTS.
 
-More tests.  (Configuration options, cache flushery.  _twrite shoule
-be tested separately, because there are a lot of weird special cases
-lurking in there.)
+More tests.  (Configuration options, cache flushery, locking.  _twrite
+should be tested separately, because there are a lot of weird special
+cases lurking in there.)
 
 More tests.  (Stuff I didn't think of yet.)
-
-File locking.
 
 Deferred writing. (!!!)
 

@@ -3,8 +3,8 @@
  DB_File.xs -- Perl 5 interface to Berkeley DB 
 
  written by Paul Marquess <Paul.Marquess@btinternet.com>
- last modified 6th Jan 2002
- version 1.802
+ last modified 1st March 2002
+ version 1.803
 
  All comments/suggestions/problems are welcome
 
@@ -99,6 +99,8 @@
                 Use the new constants code.
         1.801 - No change to DB_File.xs
         1.802 - No change to DB_File.xs
+        1.803 - FETCH, STORE & DELETE don't map the flags parameter
+                into the equivalent Berkeley DB function anymore.
 
 */
 
@@ -122,8 +124,6 @@
 #ifndef DB_VERSION_MAJOR
 #    undef __attribute__
 #endif
-
-
 
 #ifdef COMPAT185
 #    include <db_185.h>
@@ -327,9 +327,9 @@ typedef union INFO {
 
 
 
-#define db_DELETE(db, key, flags)       ((db->dbp)->del)(db->dbp, TXN &key, flags)
-#define db_STORE(db, key, value, flags) ((db->dbp)->put)(db->dbp, TXN &key, &value, flags)
-#define db_FETCH(db, key, flags)        ((db->dbp)->get)(db->dbp, TXN &key, &value, flags)
+#define db_DELETE(db, key, flags)       ((db->dbp)->del)(db->dbp, TXN &key, 0)
+#define db_STORE(db, key, value, flags) ((db->dbp)->put)(db->dbp, TXN &key, &value, 0)
+#define db_FETCH(db, key, flags)        ((db->dbp)->get)(db->dbp, TXN &key, &value, 0)
 
 #define db_sync(db, flags)              ((db->dbp)->sync)(db->dbp, flags)
 #define db_get(db, key, value, flags)   ((db->dbp)->get)(db->dbp, TXN &key, &value, flags)

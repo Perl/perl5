@@ -17,6 +17,26 @@ use XSLoader ();
 
 XSLoader::load 'Devel::Peek';
 
+sub import {
+  my $c = shift;
+  my $ops_rx = qr/^:opd(=[stP]*)?\b/;
+  my @db = grep m/$ops_rx/, @_;
+  @_ = grep !m/$ops_rx/, @_;
+  if (@db) {
+    die "Too many :opd options" if @db > 1;
+    runops_debug(1);
+    my $flags = ($db[0] =~ m/$ops_rx/ and $1);
+    $flags = 'st' unless defined $flags;
+    my $f = 0;
+    $f |= 2  if $flags =~ /s/;
+    $f |= 8  if $flags =~ /t/;
+    $f |= 64 if $flags =~ /P/;
+    $^D |= $f if $f;
+  }
+  unshift @_, $c;
+  goto &Exporter::import;
+}
+
 sub DumpWithOP ($;$) {
    local($Devel::Peek::dump_ops)=1;
    my $depth = @_ > 1 ? $_[1] : 4 ;
@@ -58,6 +78,8 @@ Devel::Peek - A data debugging tool for the XS programmer
         DumpArray( 5, $a, $b, ... );
 	mstat "Point 5";
 
+        use Devel::Peek ':opd=st';
+
 =head1 DESCRIPTION
 
 Devel::Peek contains functions which allows raw Perl datatypes to be
@@ -87,6 +109,11 @@ need to analyze returns of functions).
 The global variable $Devel::Peek::pv_limit can be set to limit the
 number of character printed in various string values.  Setting it to 0
 means no limit.
+
+If C<use Devel::Peek> directive has a C<:opd=FLAGS> argument,
+this switches on debugging of opcode dispatch.  C<FLAGS> should be a
+combination of C<s>, C<t>, and C<P> (see B<-D> flags in L<perlrun>).
+C<:opd> is a shortcut for C<:opd=st>.
 
 =head2 Runtime debugging
 

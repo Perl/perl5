@@ -7,7 +7,7 @@
 my $file = "tf$$.txt";
 my $data = "rec0$/rec1$/rec2$/";
 
-print "1..45\n";
+print "1..48\n";
 
 my $N = 1;
 use Tie::File;
@@ -129,6 +129,22 @@ check_result();
 # (45) what if we remove too many records?
 @r = splice(@a, 0, 17);
 check_result('rec0', 'rec1');
+
+# (46-48) Now check the scalar context return
+splice(@a, 0, 0, qw(I like pie));
+my $r;
+$r = splice(@a, 0, 0);
+print !defined($r) ? "ok $N\n" : "not ok $N \# return should have been undef\n";
+$N++;
+
+$r = splice(@a, 2, 1);
+print $r eq "pie$/" ? "ok $N\n" : "not ok $N \# return should have been 'pie'\n";
+$N++;
+
+$r = splice(@a, 0, 2);
+print $r eq "like$/" ? "ok $N\n" : "not ok $N \# return should have been 'like'\n";
+$N++;
+
 
 sub init_file {
   my $data = shift;
