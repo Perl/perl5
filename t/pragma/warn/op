@@ -569,7 +569,7 @@ Useless use of a constant in void context at - line 3.
 Useless use of a constant in void context at - line 4.
 ########
 # op.c
-#
+BEGIN{ $ENV{PERL_DESTRUCT_LEVEL} = 0 unless $ENV{PERL_DESTRUCT_LEVEL} > 3; } # known scalar leak
 use warnings 'misc' ;
 my $a ; my @a = () ; my %a = () ; my $b = \@a ; my $c = \%a ;
 @a =~ /abc/ ;

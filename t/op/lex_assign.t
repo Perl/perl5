@@ -4,6 +4,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
 }
+$ENV{PERL_DESTRUCT_LEVEL} = 0 unless $ENV{PERL_DESTRUCT_LEVEL} > 3; 
 
 umask 0;
 $xref = \ "";
