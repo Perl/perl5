@@ -615,7 +615,7 @@ And finally, C<scalar reverse()> reverses by character rather than by byte.
 
 =back
 
-=head2 Defining your own character properties
+=head2 User-defined Character Properties
 
 You can define your own character properties by defining subroutines
 that have names beginning with "In" or "Is".  The subroutines must be
@@ -724,7 +724,8 @@ Level 1 - Basic Unicode Support
         [ 3] . \p{...} \P{...}
         [ 4] now scripts (see UTR#24 Script Names) in addition to blocks
         [ 5] have negation
-        [ 6] can use look-ahead to emulate subtraction (*)
+        [ 6] can use regular expression look-ahead [a]
+             or user-defined character properties [b] to emulate subtraction
         [ 7] include Letters in word characters
         [ 8] note that perl does Full casefolding in matching, not Simple:
              for example U+1F88 is equivalent with U+1F000 U+03B9,
@@ -737,7 +738,7 @@ Level 1 - Basic Unicode Support
              (should also affect <>, $., and script line numbers)
              (the \x{85}, \x{2028} and \x{2029} do match \s)
 
-(*) You can mimic class subtraction using lookahead.
+[a] You can mimic class subtraction using lookahead.
 For example, what TR18 might write as
 
     [{Greek}-[{UNASSIGNED}]]
@@ -752,6 +753,8 @@ But in this particular example, you probably really want
     \p{Greek}
 
 which will match assigned characters known to be part of the Greek script.
+
+[b] See L</User-defined Character Properties>.
 
 =item *
 
