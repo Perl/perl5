@@ -604,13 +604,35 @@ No known fix.
 
 Many floating point inaccuracies:
 
-  op/numconvert            511,657,658,659,665-667,831,991,1151
-  op/pack                  10,22,149,156
-  op/sprintf               8,10,13,102-107,134-135,146-153,159-162
-  lib/Math/BigInt/bigintpm 1145,1183
-  lib/Math/Complex         250,257,514,521,722-724,
-                           934,935,945,949,955,956,975,976
-  ext/POSIX/POSIX          14
+  op/numconvert              511,657,658,659,665-667,831,991,1151
+  op/pack                    10,22,149,156
+  op/sprintf                 8,10,13,102-107,134-135,146-153,159-162
+  lib/Math/BigInt/bigintpm   1145,1183
+  lib/Math/Complex           250,257,514,521,722-724,
+                             934,935,945,949,955,956,975,976
+  ext/POSIX/POSIX            14
+
+=head2 VMS
+
+DEC C V5.3-006 on OpenVMS VAX V6.2
+ 
+  [-.ext.list.util.t]tainted..............FAILED on test 3
+  [-.ext.posix]sigaction..................FAILED on test 7
+  [-.ext.time.hires]hires.................FAILED on test 3
+  [-.lib.file.find]taint..................FAILED on test 17
+  [-.lib.math.bigint.t]bigintpm...........FAILED on test 1183
+  [-.lib.test.simple.t]exit...............FAILED on test 1
+  [.lib]vmsish............................FAILED on test 13
+  [.op]sprintf............................FAILED on test 12
+  Failed 8/399 tests, 91.23% okay.
+
+DEC C V6.0-001 on OpenVMS Alpha V7.2-1 
+
+  [-.ext.list.util.t]tainted..............FAILED on test 3 
+  [-.lib.file.find]taint..................FAILED on test 17
+  [-.lib.test.simple.t]exit...............FAILED on test 1
+  [.lib]vmsish............................FAILED on test 13
+  Failed 4/399 tests, 92.48% okay.
 
 =head2 Localising a Tied Variable Leaks Memory
 
