@@ -37,7 +37,7 @@ static I32 utf16rev_textfilter(pTHXo_ int idx, SV *sv, int maxlen);
 #define XENUMMASK 127
 
 /*#define UTF (SvUTF8(PL_linestr) && !(PL_hints & HINT_BYTE))*/
-#define UTF (PL_hints & HINT_UTF8)
+#define UTF ((PL_linestr && DO_UTF8(PL_linestr)) || PL_hints & HINT_UTF8)
 
 /* In variables name $^X, these are the legal values for X.
  * 1999-02-27 mjd-perl-patch@plover.com */
@@ -917,8 +917,11 @@ S_tokeq(pTHX_ SV *sv)
     if (s == send)
 	goto finish;
     d = s;
-    if ( PL_hints & HINT_NEW_STRING )
+    if ( PL_hints & HINT_NEW_STRING ) {
 	pv = sv_2mortal(newSVpvn(SvPVX(pv), len));
+	if (SvUTF8(sv))
+	    SvUTF8_on(pv);
+    }
     while (s < send) {
 	if (*s == '\\') {
 	    if (s + 1 < send && (s[1] == '\\'))
