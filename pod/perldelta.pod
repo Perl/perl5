@@ -2931,7 +2931,7 @@ Please remember to set your environment variable LC_ALL to "C"
 (setenv LC_ALL C) before running "make test" to avoid a lot of
 warnings about the broken locales of Mac OS X.
 
-The following tests are known to fail in Mac OS X 10.1.4 because of
+The following tests are known to fail in Mac OS X 10.1.5 because of
 buggy (old) implementations of Berkeley DB included in Mac OS X:
 
  Failed Test                 Stat Wstat Total Fail  Failed  List of Failed
