@@ -3502,10 +3502,10 @@ BEGIN block.
 
 =item Too many )'s
 
+=item Too many ('s
+
 (A) You've accidentally run your script through B<csh> instead of Perl.
 Check the #! line, or manually feed your script into Perl yourself.
-
-=item Too many ('s
 
 =item Trailing \ in regex m/%s/
 
