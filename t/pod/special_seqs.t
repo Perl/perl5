@@ -27,4 +27,6 @@ too: C<$self-E<gt>method()> and C<$self-E<gt>{FIELDNAME}> and C<{FOO=E<gt>BAR}>.
 
 Dont forget C<$self-E<gt>method()-E<gt>{FIELDNAME} = {FOO=E<gt>BAR}>.
 
+And make sure that C<0> works too!
+
 =cut

@@ -13,7 +13,7 @@
 package Pod::Select;
 
 use vars qw($VERSION);
-$VERSION = 1.08;   ## Current version of this package
+$VERSION = 1.081;  ## Current version of this package
 require  5.004;    ## requires this Perl version or later
 
 #############################################################################

@@ -13,7 +13,7 @@
 package Pod::Usage;
 
 use vars qw($VERSION);
-$VERSION = 1.08;   ## Current version of this package
+$VERSION = 1.081;  ## Current version of this package
 require  5.004;    ## requires this Perl version or later
 
 =head1 NAME
@@ -389,7 +389,7 @@ sub pod2usage {
         ## User passed a ref to a hash
         %opts = %{$_}  if (ref($_) eq 'HASH');
     }
-    elsif (/^[-+]?\d+$/o) {
+    elsif (/^[-+]?\d+$/) {
         ## User passed in the exit value to use
         $opts{"-exitval"} =  $_;
     }
@@ -488,13 +488,13 @@ sub preprocess_paragraph {
     local $_ = shift;
     my $line = shift;
     ## See if this is a heading and we arent printing the entire manpage.
-    if (($self->{USAGE_OPTIONS}->{-verbose} < 2) && /^=head/o) {
+    if (($self->{USAGE_OPTIONS}->{-verbose} < 2) && /^=head/) {
         ## Change the title of the SYNOPSIS section to USAGE
-        s/^=head1\s+SYNOPSIS\s*$/=head1 USAGE/o;
+        s/^=head1\s+SYNOPSIS\s*$/=head1 USAGE/;
         ## Try to do some lowercasing instead of all-caps in headings
         s{([A-Z])([A-Z]+)}{((length($2) > 2) ? $1 : lc($1)) . lc($2)}ge;
         ## Use a colon to end all headings
-        s/\s*$/:/o  unless (/:\s*$/o);
+        s/\s*$/:/  unless (/:\s*$/);
         $_ .= "\n";
     }
     return  $self->SUPER::preprocess_paragraph($_);
