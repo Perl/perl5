@@ -78,6 +78,7 @@ VIRTUAL void	croak _((const char* pat,...)) __attribute__((noreturn));
 VIRTUAL void	cv_ckproto _((CV* cv, GV* gv, char* p));
 VIRTUAL CV*	cv_clone _((CV* proto));
 VIRTUAL SV*	cv_const_sv _((CV* cv));
+VIRTUAL SV*	op_const_sv _((OP* o, CV* cv));
 VIRTUAL void	cv_undef _((CV* cv));
 VIRTUAL void	cx_dump _((PERL_CONTEXT* cs));
 VIRTUAL SV*	filter_add _((filter_t funcp, SV* datasv));

@@ -1381,6 +1381,8 @@
 #define pad_allocmy         pPerl->Perl_pad_allocmy
 #undef  pad_findmy
 #define pad_findmy          pPerl->Perl_pad_findmy
+#undef  op_const_sv
+#define op_const_sv         pPerl->Perl_op_const_sv
 #undef  op_free
 #define op_free             pPerl->Perl_op_free
 #undef  oopsCV

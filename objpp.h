@@ -871,6 +871,8 @@
 #define pad_allocmy       CPerlObj::Perl_pad_allocmy
 #undef  pad_findmy
 #define pad_findmy        CPerlObj::Perl_pad_findmy
+#undef  op_const_sv
+#define op_const_sv       CPerlObj::Perl_op_const_sv
 #undef  op_free
 #define op_free           CPerlObj::Perl_op_free
 #undef  oopsCV
