@@ -3590,7 +3590,10 @@ OP *block;
 }
 
 void
-newCONSTSUB(HV *stash, char *name, SV *sv)
+newCONSTSUB(stash, name, sv)
+HV *stash;
+char *name;
+SV *sv;
 {
     dTHR;
     U32 oldhints = hints;

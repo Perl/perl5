@@ -2043,7 +2043,7 @@ register SV *sstr;
     if (sflags & SVf_ROK) {
 	if (dtype >= SVt_PV) {
 	    if (dtype == SVt_PVGV) {
-		dTHR;
+		/* dTHR; */ /* unneeded, and breaks SunOS 4.1.3 pre-ANSI cc */
 		SV *sref = SvREFCNT_inc(SvRV(sstr));
 		SV *dref = 0;
 		int intro = GvINTRO(dstr);
@@ -2877,7 +2877,8 @@ register SV *sv;
     stash = NULL;
     switch (SvTYPE(sv)) {
     case SVt_PVIO:
-	if (IoIFP(sv) != PerlIO_stdin() &&
+	if (IoIFP(sv) &&
+	    IoIFP(sv) != PerlIO_stdin() &&
 	    IoIFP(sv) != PerlIO_stdout() &&
 	    IoIFP(sv) != PerlIO_stderr())
 	  io_close((IO*)sv);
