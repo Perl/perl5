@@ -122,6 +122,10 @@ When <follow> or <follow_fast> are in effect there is also a
 C<$File::Find::fullname>.
 The function may set C<$File::Find::prune> to prune the tree
 unless C<bydepth> was specified.
+Unless C<follow> or C<follow_fast> is specified, for compatibility
+reasons (find.pl, find2perl) there are in addition the following globals
+available: C<$File::Find::topdir>, C<$File::Find::topdev>, C<$File::Find::topino>,
+C<$File::Find::topmode> and C<$File::Find::topnlink>.
 
 This library is useful for the C<find2perl> tool, which when fed,
 
@@ -286,6 +290,8 @@ sub _find_opt {
     $untaint_pat      = $wanted->{untaint_pattern};
     $untaint_skip     = $wanted->{untaint_skip};
 
+    # for compatability reasons (find.pl, find2perl)
+    our ($topdir, $topdev, $topino, $topmode, $topnlink);
 
     # a symbolic link to a directory doesn't increase the link count
     $avoid_nlink      = $follow || $File::Find::dont_use_nlink;
@@ -295,7 +301,7 @@ sub _find_opt {
 	die "insecure cwd in find(depth)"  unless defined($cwd_untainted);
     }
     
-    my ($abs_dir, $nlink, $Is_Dir);
+    my ($abs_dir, $Is_Dir);
 
     Proc_Top_Item:
     foreach my $TOP (@_) {
@@ -324,14 +330,15 @@ sub _find_opt {
             }
         }
 	else { # no follow
-            $nlink = (lstat $top_item)[3];
-            unless (defined $nlink) {
+            $topdir = $top_item;
+            ($topdev,$topino,$topmode,$topnlink) = lstat $top_item;
+            unless (defined $topnlink) {
                 warn "Can't stat $top_item: $!\n";
                 next Proc_Top_Item;
             }
             if (-d _) {
 		$top_item =~ s/\.dir$// if $Is_VMS;
-		_find_dir($wanted, $top_item, $nlink);
+		_find_dir($wanted, $top_item, $topnlink);
 		$Is_Dir= 1;
             }
 	    else {
