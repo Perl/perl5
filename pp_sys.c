@@ -2795,8 +2795,8 @@ PP(pp_stat)
 
 PP(pp_ftrread)
 {
-    dSP;
     I32 result;
+    dSP;
 #if defined(HAS_ACCESS) && defined(R_OK)
     STRLEN n_a;
     if ((PL_hints & HINT_FILETEST_ACCESS) && SvPOK(TOPs)) {
@@ -2822,8 +2822,8 @@ PP(pp_ftrread)
 
 PP(pp_ftrwrite)
 {
-    dSP;
     I32 result;
+    dSP;
 #if defined(HAS_ACCESS) && defined(W_OK)
     STRLEN n_a;
     if ((PL_hints & HINT_FILETEST_ACCESS) && SvPOK(TOPs)) {
@@ -2849,8 +2849,8 @@ PP(pp_ftrwrite)
 
 PP(pp_ftrexec)
 {
-    dSP;
     I32 result;
+    dSP;
 #if defined(HAS_ACCESS) && defined(X_OK)
     STRLEN n_a;
     if ((PL_hints & HINT_FILETEST_ACCESS) && SvPOK(TOPs)) {
@@ -2876,8 +2876,8 @@ PP(pp_ftrexec)
 
 PP(pp_fteread)
 {
-    dSP;
     I32 result;
+    dSP;
 #ifdef PERL_EFF_ACCESS_R_OK
     STRLEN n_a;
     if ((PL_hints & HINT_FILETEST_ACCESS) && SvPOK(TOPs)) {
@@ -2903,8 +2903,8 @@ PP(pp_fteread)
 
 PP(pp_ftewrite)
 {
-    dSP;
     I32 result;
+    dSP;
 #ifdef PERL_EFF_ACCESS_W_OK
     STRLEN n_a;
     if ((PL_hints & HINT_FILETEST_ACCESS) && SvPOK(TOPs)) {
@@ -2930,8 +2930,8 @@ PP(pp_ftewrite)
 
 PP(pp_fteexec)
 {
-    dSP;
     I32 result;
+    dSP;
 #ifdef PERL_EFF_ACCESS_X_OK
     STRLEN n_a;
     if ((PL_hints & HINT_FILETEST_ACCESS) && SvPOK(TOPs)) {
@@ -2957,8 +2957,8 @@ PP(pp_fteexec)
 
 PP(pp_ftis)
 {
-    dSP;
     I32 result = my_stat();
+    dSP;
     if (result < 0)
 	RETPUSHUNDEF;
     RETPUSHYES;
@@ -2971,8 +2971,8 @@ PP(pp_fteowned)
 
 PP(pp_ftrowned)
 {
-    dSP;
     I32 result = my_stat();
+    dSP;
     if (result < 0)
 	RETPUSHUNDEF;
     if (PL_statcache.st_uid == (PL_op->op_type == OP_FTEOWNED ?
@@ -2983,8 +2983,8 @@ PP(pp_ftrowned)
 
 PP(pp_ftzero)
 {
-    dSP;
     I32 result = my_stat();
+    dSP;
     if (result < 0)
 	RETPUSHUNDEF;
     if (PL_statcache.st_size == 0)
@@ -2994,8 +2994,8 @@ PP(pp_ftzero)
 
 PP(pp_ftsize)
 {
-    dSP; dTARGET;
     I32 result = my_stat();
+    dSP; dTARGET;
     if (result < 0)
 	RETPUSHUNDEF;
 #if Off_t_size > IVSIZE
@@ -3008,8 +3008,8 @@ PP(pp_ftsize)
 
 PP(pp_ftmtime)
 {
-    dSP; dTARGET;
     I32 result = my_stat();
+    dSP; dTARGET;
     if (result < 0)
 	RETPUSHUNDEF;
     PUSHn( (PL_basetime - PL_statcache.st_mtime) / 86400.0 );
@@ -3018,8 +3018,8 @@ PP(pp_ftmtime)
 
 PP(pp_ftatime)
 {
-    dSP; dTARGET;
     I32 result = my_stat();
+    dSP; dTARGET;
     if (result < 0)
 	RETPUSHUNDEF;
     PUSHn( (PL_basetime - PL_statcache.st_atime) / 86400.0 );
@@ -3028,8 +3028,8 @@ PP(pp_ftatime)
 
 PP(pp_ftctime)
 {
-    dSP; dTARGET;
     I32 result = my_stat();
+    dSP; dTARGET;
     if (result < 0)
 	RETPUSHUNDEF;
     PUSHn( (PL_basetime - PL_statcache.st_ctime) / 86400.0 );
@@ -3038,8 +3038,8 @@ PP(pp_ftctime)
 
 PP(pp_ftsock)
 {
-    dSP;
     I32 result = my_stat();
+    dSP;
     if (result < 0)
 	RETPUSHUNDEF;
     if (S_ISSOCK(PL_statcache.st_mode))
@@ -3049,8 +3049,8 @@ PP(pp_ftsock)
 
 PP(pp_ftchr)
 {
-    dSP;
     I32 result = my_stat();
+    dSP;
     if (result < 0)
 	RETPUSHUNDEF;
     if (S_ISCHR(PL_statcache.st_mode))
@@ -3060,8 +3060,8 @@ PP(pp_ftchr)
 
 PP(pp_ftblk)
 {
-    dSP;
     I32 result = my_stat();
+    dSP;
     if (result < 0)
 	RETPUSHUNDEF;
     if (S_ISBLK(PL_statcache.st_mode))
@@ -3071,8 +3071,8 @@ PP(pp_ftblk)
 
 PP(pp_ftfile)
 {
-    dSP;
     I32 result = my_stat();
+    dSP;
     if (result < 0)
 	RETPUSHUNDEF;
     if (S_ISREG(PL_statcache.st_mode))
@@ -3082,8 +3082,8 @@ PP(pp_ftfile)
 
 PP(pp_ftdir)
 {
-    dSP;
     I32 result = my_stat();
+    dSP;
     if (result < 0)
 	RETPUSHUNDEF;
     if (S_ISDIR(PL_statcache.st_mode))
@@ -3093,8 +3093,8 @@ PP(pp_ftdir)
 
 PP(pp_ftpipe)
 {
-    dSP;
     I32 result = my_stat();
+    dSP;
     if (result < 0)
 	RETPUSHUNDEF;
     if (S_ISFIFO(PL_statcache.st_mode))
@@ -3104,8 +3104,8 @@ PP(pp_ftpipe)
 
 PP(pp_ftlink)
 {
-    dSP;
     I32 result = my_lstat();
+    dSP;
     if (result < 0)
 	RETPUSHUNDEF;
     if (S_ISLNK(PL_statcache.st_mode))
