@@ -18,10 +18,10 @@ filetest - Perl pragma to control the filetest permission operators
 =head1 DESCRIPTION
 
 This pragma tells the compiler to change the behaviour of the filetest
-permissions operators, the C<-r> C<-w> C<-x> C<-R> C<-W> C<-X>
+permission operators, C<-r> C<-w> C<-x> C<-R> C<-W> C<-X>
 (see L<perlfunc>).
 
-The default behaviour to use the mode bits as returned by the stat()
+The default behaviour is to use the mode bits as returned by the stat()
 family of calls.  This, however, may not be the right thing to do if
 for example various ACL (access control lists) schemes are in use.
 For such environments, C<use filetest> may help the permission
