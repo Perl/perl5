@@ -9,11 +9,12 @@ BEGIN {
 	File::Path::rmtree( 'ecmddir' );
 }
 
-use Test::More tests => 22;
+use Test::More tests => 21;
 use File::Spec;
 
 SKIP: {
-	skip( 'ExtUtils::Command is a Win32 module', 22 ) unless $^O =~ /Win32/;
+	skip( 'ExtUtils::Command is a Win32 module', 21 )
+	    unless $^O =~ /Win32/;
 
 	use vars qw( *CORE::GLOBAL::exit );
 
