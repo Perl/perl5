@@ -3194,7 +3194,7 @@ Perl_sv_copypv(pTHX_ SV *dsv, register SV *ssv)
 {
     SV *tmpsv;
 
-    if ( SvTHINKFIRST(ssv) && SvROK(ssv) && SvAMAGIC(ssv) && 
+    if ( SvTHINKFIRST(ssv) && SvROK(ssv) && SvAMAGIC(ssv) &&
 	 (tmpsv = AMG_CALLun(ssv,string))) {
 	if (SvTYPE(tmpsv) != SVt_RV || (SvRV(tmpsv) != SvRV(ssv))) {
 	    SvSetSV(dsv,tmpsv);
@@ -4461,16 +4461,18 @@ Perl_sv_magicext(pTHX_ SV* sv, SV* obj, int how, MGVTBL *vtable,
     /* Some magic sontains a reference loop, where the sv and object refer to
        each other.  To prevent a reference loop that would prevent such
        objects being freed, we look for such loops and if we find one we
-       avoid incrementing the object refcount. */
+       avoid incrementing the object refcount.
+       Note we cannot do this to avoid self-tie loops as intervening RV must
+       have its REFCNT incremented to keep it in existence - instead special
+       case them in sv_free().
+     */
     if (!obj || obj == sv ||
 	how == PERL_MAGIC_arylen ||
 	how == PERL_MAGIC_qr ||
 	(SvTYPE(obj) == SVt_PVGV &&
 	    (GvSV(obj) == sv || GvHV(obj) == (HV*)sv || GvAV(obj) == (AV*)sv ||
 	    GvCV(obj) == (CV*)sv || GvIOp(obj) == (IO*)sv ||
-	    GvFORM(obj) == (CV*)sv)) ||
-	(how == PERL_MAGIC_tiedscalar &&
-	    SvROK(obj) && (SvRV(obj) == sv || GvIO(SvRV(obj)) == (IO*)sv)))
+	    GvFORM(obj) == (CV*)sv)))
     {
 	mg->mg_obj = obj;
     }
@@ -5169,8 +5171,23 @@ Perl_sv_free(pTHX_ SV *sv)
 	return;
     }
     ATOMIC_DEC_AND_TEST(refcount_is_zero, SvREFCNT(sv));
-    if (!refcount_is_zero)
+    if (!refcount_is_zero) {
+	if (SvREFCNT(sv) == 1) {
+	    /* Break self-tie loops */
+	    MAGIC *mg = 0;
+	    SV *obj;
+	    if (SvTYPE(sv) == SVt_PVGV)
+		sv = (SV *)GvIO(sv);
+	    if (!sv || !SvMAGICAL(sv) || SvTYPE(sv) < SVt_PVMG)
+		return;
+            mg = SvTIED_mg(sv, PERL_MAGIC_tiedscalar);
+	    if (mg && (obj = mg->mg_obj) && SvROK(obj) &&
+	        (SvRV(obj) == sv || GvIO(SvRV(obj)) == (IO *) sv)) {
+		sv_unmagic(sv, PERL_MAGIC_tiedscalar);
+	    }
+	}
 	return;
+    }
 #ifdef DEBUGGING
     if (SvTEMP(sv)) {
 	if (ckWARN_d(WARN_DEBUGGING))
@@ -6213,7 +6230,6 @@ SV *
 Perl_sv_mortalcopy(pTHX_ SV *oldstr)
 {
     register SV *sv;
-
     new_SV(sv);
     sv_setsv(sv,oldstr);
     EXTEND_MORTAL(1);
