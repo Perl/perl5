@@ -108,8 +108,14 @@ sub fixpath {
     if (!defined($force_path) and $fixedpath !~ /[:>(.\]]/) {
         $fixedpath = vmspath($fixedpath) if -d $fixedpath;
     }
+
     # Trim off root dirname if it's had other dirs inserted in front of it.
     $fixedpath =~ s/\.000000([\]>])/$1/;
+    # Special case for VMS absolute directory specs: these will have had device
+    # prepended during trip through Unix syntax in eliminate_macros(), since
+    # Unix syntax has no way to express "absolute from the top of this device's
+    # directory tree".
+    if ($path =~ /^[\[>][^.\-]/) { $fixedpath =~ s/^[^\[<]+//; }
     $fixedpath;
 }
 
@@ -119,10 +125,35 @@ sub fixpath {
 
 =over
 
+=item canonpath (override)
+
+Removes redundant portions of file specifications according to VMS syntax
+
+=cut
+
+sub canonpath {
+    my($self,$path,$reduce_ricochet) = @_;
+
+    if ($path =~ m|/|) { # Fake Unix
+      my $pathify = $path =~ m|/$|;
+      $path = $self->SUPER::canonpath($path,$reduce_ricochet);
+      if ($pathify) { return vmspath($path); }
+      else          { return vmsify($path);  }
+    }
+    else {
+      $path =~ s-\]\[--g;  $path =~ s/><//g;    # foo.][bar       ==> foo.bar
+      $path =~ s/([\[<])000000\./$1/;           # [000000.foo     ==> foo
+      $path =~ s/[\[<\.]([^\[<\.]+)\.-\.\1//g;  # bar.foo.-.foo   ==> bar.
+      if ($reduce_ricochet) { $path =~ s/[^\[\-<.]+\.\-//g; }
+      return $path;
+    }
+}
+
 =item catdir
 
 Concatenates a list of file specifications, and returns the result as a
-VMS-syntax directory specification.
+VMS-syntax directory specification.  No check is made for "impossible"
+cases (e.g. elements other than the first being absolute filespecs).
 
 =cut
 
@@ -137,6 +168,12 @@ sub catdir {
 	$spath =~ s/.dir$//; $sdir =~ s/.dir$//; 
 	$sdir = $self->eliminate_macros($sdir) unless $sdir =~ /^[\w\-]+$/;
 	$rslt = $self->fixpath($self->eliminate_macros($spath)."/$sdir",1);
+
+    # Special case for VMS absolute directory specs: these will have had device
+    # prepended during trip through Unix syntax in eliminate_macros(), since
+    # Unix syntax has no way to express "absolute from the top of this device's
+    # directory tree".
+    if ($spath =~ /^[\[<][^.\-]/) { $rslt =~ s/^[^\[<]+//; }
     }
     else {
 	if ($dir =~ /^\$\([^\)]+\)$/) { $rslt = $dir; }
@@ -148,7 +185,7 @@ sub catdir {
 =item catfile
 
 Concatenates a list of file specifications, and returns the result as a
-VMS-syntax directory specification.
+VMS-syntax file specification.
 
 =cut
 
@@ -172,6 +209,7 @@ sub catfile {
     else { $rslt = vmsify($file); }
     return $rslt;
 }
+
 
 =item curdir (override)
 
@@ -235,6 +273,16 @@ sub updir {
     return '[-]';
 }
 
+=item case_tolerant (override)
+
+VMS file specification syntax is case-tolerant.
+
+=cut
+
+sub case_tolerant {
+    return 1;
+}
+
 =item path (override)
 
 Translate logical name DCL$PATH as a searchlist, rather than trying
@@ -261,6 +309,49 @@ sub file_name_is_absolute {
     return scalar($file =~ m!^/!              ||
 		  $file =~ m![<\[][^.\-\]>]!  ||
 		  $file =~ /:[^<\[]/);
+}
+
+=item splitpath (override)
+
+Splits using VMS syntax.
+
+=cut
+
+sub splitpath {
+    my($self,$path) = @_;
+    my($dev,$dir,$file) = ('','','');
+
+    vmsify($path) =~ /(.+:)?([\[<].*[\]>])?(.*)/;
+    return ($1 || '',$2 || '',$3);
+}
+
+=item splitdir (override)
+
+Split dirspec using VMS syntax.
+
+=cut
+
+sub splitdir {
+    my($self,$dirspec) = @_;
+    $dirspec =~ s/\]\[//g;  $dirspec =~ s/\-\-/-.-/g;
+    my(@dirs) = split('\.', vmspath($dirspec));
+    $dirs[0] =~ s/^[\[<]//;  $dirs[-1] =~ s/[\]>]$//;
+    @dirs;
+}
+
+
+=item catpath (override)
+
+Construct a complete filespec using VMS syntax
+
+=cut
+
+sub catpath {
+    my($self,$dev,$dir,$file) = @_;
+    if ($dev =~ m|^/+([^/]+)|) { $dev =~ "$1:"; }
+    else { $dev .= ':' unless $dev eq '' or $dev =~ /:$/; }
+    $dir = vmspath($dir);
+    "$dev$dir$file";
 }
 
 =item splitpath
