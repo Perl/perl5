@@ -60,7 +60,7 @@ README.machten			machten
 README.micro			simon
 README.mpeix			mpeix
 README.os2			os2
-README.os390			mvs
+README.os390			os390
 README.plan9			plan9
 README.posix-bc			posix-bc
 README.qnx			qnx
@@ -345,7 +345,7 @@ hints/next*			step
 hints/openbsd.sh		openbsd
 hints/opus.sh	
 hints/os2.sh			os2
-hints/os390.sh			mvs
+hints/os390.sh			os390
 hints/posix-bc.sh		posix-bc
 hints/powerux.sh		powerux
 hints/qnx.sh			qnx

@@ -102,7 +102,7 @@ dgux		roderick
 doc		tchrist
 dos		laszlo.molnar
 dynix/ptx	mbligh
-ebcdic		vms,vmesa,posix-bc
+ebcdic		os390,vmesa,posix-bc
 filespec	kjahds
 freebsd		roberto
 hpux		okamoto,jhi
@@ -113,11 +113,11 @@ linux		kjahds,kstar
 locale		jhi,domo
 machten		domo
 mm		makemaker
-mvs		pvhp
 netbsd		jhi
 next		gerben,hansmu
 openbsd		millert
 os2		ilya
+os390		pvhp
 plan9		lutherl
 posix-bc	thomas.dorner
 powerux		tom.horsley
