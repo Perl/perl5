@@ -8,7 +8,7 @@ This is a quick reference to Perl's regular expressions.
 For full information see L<perlre> and L<perlop>, as well
 as the L</"SEE ALSO"> section in this document.
 
-=head1 OPERATORS
+=head2 OPERATORS
 
   =~ determines to which variable the regex is applied.
      In its absence, $_ is used.
@@ -52,7 +52,7 @@ as the L</"SEE ALSO"> section in this document.
   ?pattern? is like m/pattern/ but matches only once. No alternate
       delimiters can be used. Must be reset with L<reset|perlfunc/reset>.
 
-=head1 SYNTAX
+=head2 SYNTAX
 
    \       Escapes the character immediately following it
    .       Matches any single character except a newline (unless /s is used)
@@ -185,7 +185,7 @@ There is no quantifier {,n} -- that gets understood as a literal string.
    (?(cond)yes|no)  cond being integer corresponding to capturing parens
    (?(cond)yes)        or a lookaround/eval zero-width assertion
 
-=head1 VARIABLES
+=head2 VARIABLES
 
    $_    Default variable for operators to use
    $*    Enable multiline matching (deprecated; not in 5.9.0 or later)
@@ -208,7 +208,7 @@ See also L<Devel::SawAmpersand>.
 
 Captured groups are numbered according to their I<opening> paren.
 
-=head1 FUNCTIONS
+=head2 FUNCTIONS
 
    lc          Lowercase a string
    lcfirst     Lowercase first char of a string
@@ -225,20 +225,20 @@ Captured groups are numbered according to their I<opening> paren.
 The first four of these are identical to the escape sequences \l, \u,
 \L, and \U.  For Titlecase, see L</Titlecase>.
 
-=head1 Terminology
+=head2 Terminology
 
-=head2 Titlecase
+=head3 Titlecase
 
 Unicode concept which most often is equal to uppercase, but for
 certain characters like the German "sharp s" there is a difference.
 
-=head1 AUTHOR
+=head2 AUTHOR
 
 Iain Truskett.
 
 This document may be distributed under the same terms as Perl itself.
 
-=head1 SEE ALSO
+=head2 SEE ALSO
 
 =over 4
 
@@ -292,7 +292,7 @@ reference on the topic.
 
 =back
 
-=head1 THANKS
+=head2 THANKS
 
 David P.C. Wollmann,
 Richard Soderberg,
