@@ -76,7 +76,7 @@ ugly, but the current implementation slows down normal array and hash
 use quite noticeably. The C<fields> pragma interface will remain
 available.
 
-The syntaxes C<@a->[...]> and  C<@h->{...}> have now been deprecated.
+The syntaxes C<< @a->[...] >> and  C<< %h->{...}>> have now been deprecated.
 
 After years of trying the suidperl is considered to be too complex to
 ever be considered truly secure.  The suidperl functionality is likely
@@ -467,7 +467,7 @@ See L<I18N::Langinfo>.
 =item *
 
 C<I18N::LangTags> has functions for dealing with RFC3066-style
-language tags, by Sean Burke.  See <I18N::LangTags>.
+language tags, by Sean Burke.  See L<I18N::LangTags>.
 
 =item *
 
@@ -525,7 +525,7 @@ Perl installation leaves libnet unconfigured, use F<libnetcfg> to configure.
 =item *
 
 C<List::Util> is a selection of general-utility list subroutines, like
-sum(), min(), first(), and shuffle(), by Graham barr.  See L<List::Util>.
+sum(), min(), first(), and shuffle(), by Graham Barr.  See L<List::Util>.
 
 =item *
 
@@ -1866,7 +1866,7 @@ marked by a C<E<lt>-- HERE> marker.
 
 The various "opened only for", "on closed", "never opened" warnings
 drop the C<main::> prefix for filehandles in the C<main> package,
-for example C<STDIN> instead of <main::STDIN>. 
+for example C<STDIN> instead of C<main::STDIN>. 
 
 =item *
 
