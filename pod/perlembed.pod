@@ -356,7 +356,7 @@ made.
    int matches(SV *string, char *pattern, AV **matches);
 
 Given an C<SV>, a pattern, and a pointer to an empty C<AV>,
-matches() evaluates C<$string =~ $pattern> in an array context, and
+matches() evaluates C<$string =~ $pattern> in a list context, and
 fills in I<matches> with the array elements, returning the number of matches found.
 
 Here's a sample program, I<match.c>, that uses all three (long lines have
@@ -434,7 +434,7 @@ been wrapped here):
 
  /** matches(string, pattern, matches)
  **
- ** Used for matches in an array context.
+ ** Used for matches in a list context.
  **
  ** Returns the number of matches,
  ** and fills in **matches with the matching substrings

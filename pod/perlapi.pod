@@ -478,7 +478,7 @@ Found in file op.h
 =item GIMME_V
 
 The XSUB-writer's equivalent to Perl's C<wantarray>.  Returns C<G_VOID>,
-C<G_SCALAR> or C<G_ARRAY> for void, scalar or array context,
+C<G_SCALAR> or C<G_ARRAY> for void, scalar or list context,
 respectively.
 
 	U32	GIMME_V
@@ -579,7 +579,7 @@ Found in file gv.c
 
 =item G_ARRAY
 
-Used to indicate array context.  See C<GIMME_V>, C<GIMME> and
+Used to indicate list context.  See C<GIMME_V>, C<GIMME> and
 L<perlcall>.
 
 =for hackers
