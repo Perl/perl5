@@ -40,7 +40,7 @@ print $n == 5 ? "ok $N\n" : "not ok $N # size is $n, should be 5\n";
 $N++;
 
 # Trivial push
-$n = push @a;
+$n = push(@a, ());
 check_contents("$ {data}rec3$/rec4$/");
 print $n == 5 ? "ok $N\n" : "not ok $N # size is $n, should be 5\n";
 $N++;
@@ -76,7 +76,7 @@ print $n == 5 ? "ok $N\n" : "not ok $N # size is $n, should be 5\n";
 $N++;
 
 # Trivial unshift
-$n = unshift @a;
+$n = unshift(@a, ());
 check_contents("rec3$/rec4$/$data");
 print $n == 5 ? "ok $N\n" : "not ok $N # size is $n, should be 5\n";
 $N++;
