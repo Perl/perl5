@@ -943,6 +943,11 @@ PerlIOUnix_oflags(const char *mode)
      oflags |= O_WRONLY;
     break;
   }
+ if (*mode == 'b')
+  {
+   oflags |= O_BINARY;
+   mode++; 
+  }   
  if (*mode || oflags == -1)
   {
    errno = EINVAL;
@@ -2399,8 +2404,18 @@ PerlIO_stdoutf(const char *fmt,...)
 PerlIO *
 PerlIO_tmpfile(void)
 {
- dTHX;
  /* I have no idea how portable mkstemp() is ... */
+#if defined(WIN32) || !defined(HAVE_MKSTEMP)
+ PerlIO *f = NULL;
+ FILE *stdio = tmpfile();
+ if (stdio)
+  {
+   PerlIOStdio *s = PerlIOSelf(PerlIO_push(f = PerlIO_allocate(),&PerlIO_stdio,"w+"),PerlIOStdio);
+   s->stdio  = stdio;
+  }
+ return f;
+#else
+ dTHX;
  SV *sv = newSVpv("/tmp/PerlIO_XXXXXX",0);
  int fd = mkstemp(SvPVX(sv));
  PerlIO *f = NULL;
@@ -2415,6 +2430,7 @@ PerlIO_tmpfile(void)
    SvREFCNT_dec(sv);
   }
  return f;
+#endif
 }
 
 #undef HAS_FSETPOS
