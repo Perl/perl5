@@ -28,6 +28,227 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.2		Maintenance release working toward v5.8.2
 --------------
 ____________________________________________________________________________
+[ 21552] By: nicholas                              on 2003/10/27  14:07:08
+        Log: Changes file was in the wrong order (as noticed by Chip)
+     Branch: maint-5.8/perl
+	   ! Changes
+____________________________________________________________________________
+[ 21551] By: nicholas                              on 2003/10/27  14:05:44
+        Log: Integrate:
+             [ 21549]
+             Sync with Unicode::Collate 0.30
+             
+             [ 21550]
+             Sync with Unicode::Normalize 0.25
+     Branch: maint-5.8/perl
+	  +> ext/Unicode/Normalize/t/fcdc.t ext/Unicode/Normalize/t/form.t
+	  +> ext/Unicode/Normalize/t/proto.t
+	  +> ext/Unicode/Normalize/t/split.t
+	  +> lib/Unicode/Collate/t/hangtype.t
+	  +> lib/Unicode/Collate/t/normal.t lib/Unicode/Collate/t/trailwt.t
+	  +> lib/Unicode/Collate/t/variable.t
+	  +> lib/Unicode/Collate/t/version.t
+	  !> MANIFEST ext/Unicode/Normalize/Changes
+	  !> ext/Unicode/Normalize/Makefile.PL
+	  !> ext/Unicode/Normalize/Normalize.pm
+	  !> ext/Unicode/Normalize/Normalize.xs
+	  !> ext/Unicode/Normalize/README lib/Unicode/Collate.pm
+	  !> lib/Unicode/Collate/Changes lib/Unicode/Collate/README
+	  !> lib/Unicode/Collate/t/contract.t
+	  !> lib/Unicode/Collate/t/hangul.t lib/Unicode/Collate/t/index.t
+	  !> lib/Unicode/Collate/t/test.t
+____________________________________________________________________________
+[ 21547] By: nicholas                              on 2003/10/27  10:04:34
+        Log: Integrate:
+             [ 21544]
+             don't complain of podless .pm files that have a separate .pod file
+     Branch: maint-5.8/perl
+	  !> pod/buildtoc
+____________________________________________________________________________
+[ 21541] By: nicholas                              on 2003/10/26  20:51:55
+        Log: Integrate:
+             [ 21535]
+             Return 21533 (with modifications) having found the problem
+             
+             (where 21533 is
+             Plan C rough edge smoothing. Criteria for a hash split is now
+             the earlier of "more keys than buckets" (the old test) or
+             linked list too long. Rehash is triggered after a split if the
+             longest linked list is too long.)
+     Branch: maint-5.8/perl
+	   ! hv.c
+	  !> hv.h
+____________________________________________________________________________
+[ 21537] By: nicholas                              on 2003/10/25  23:05:21
+        Log: Integrate:
+             [ 21536]
+             show the rehash flags in dumps
+     Branch: maint-5.8/perl
+	  !> dump.c
+____________________________________________________________________________
+[ 21531] By: nicholas                              on 2003/10/24  19:15:02
+        Log: Integrate:
+             [ 21530]
+             
+             (The typo corrrection in blead)
+     Branch: maint-5.8/perl
+	  !> ext/threads/shared/shared.xs
+____________________________________________________________________________
+[ 21529] By: nicholas                              on 2003/10/23  19:39:41
+        Log: Integrate:
+             [ 21526]
+             From: Jan Dubois <jand@ActiveState.com>
+             Subject: [PATCH] Update Pod::Perldoc from 3.10 to 3.11
+             Date: Wed, 22 Oct 2003 20:17:07 -0700
+             Message-ID: <mjhepvgtnifdlgrvp20urtuu058e1jrav2@4ax.com>
+             
+             From: Jan Dubois <jand@ActiveState.com>
+             Subject: [PATCH] Update I18N::LangTags from 0.28 to 0.29
+             Date: Wed, 22 Oct 2003 20:26:56 -0700
+             Message-ID: <jgiepv0a8fp8ffq3lpc5ujl7j25hoo1rdt@4ax.com>
+             
+             [ 21528]
+             When it says "add", then, like, you have to p4 add it. D'oh!
+             (missed the new file in "Update I18N::LangTags from 0.28 to 0.29")
+     Branch: maint-5.8/perl
+	  +> lib/I18N/LangTags/t/02decency.t
+	  !> MANIFEST lib/I18N/LangTags.pm lib/I18N/LangTags/ChangeLog
+	  !> lib/I18N/LangTags/List.pm lib/I18N/LangTags/README
+	  !> lib/Pod/Perldoc.pm lib/Pod/Perldoc/ToMan.pm pod/perldoc.pod
+	  !> utils/perldoc.PL
+____________________________________________________________________________
+[ 21525] By: nicholas                              on 2003/10/23  18:51:56
+        Log: Integrate:
+             [ 21523]
+             Subject: [PATCH] utime documentation
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 23 Oct 2003 05:33:43 -0700
+             Message-Id: <lrekx4jfq0.fsf@caliper.activestate.com>
+     Branch: maint-5.8/perl
+	  !> pod/perlfunc.pod
+____________________________________________________________________________
+[ 21524] By: nicholas                              on 2003/10/23  18:38:02
+        Log: Integrate:
+             [ 21522]
+             Subject: [PATCH]  dup2() not going through PerlLIO abstraction layer
+             From: Jan Dubois <jand@ActiveState.com>
+             Date: Wed, 22 Oct 2003 20:33:54 -0700
+             Message-Id: <vniepv0n5mcrbbutm0qgvori6n6vr6arsh@4ax.com>
+     Branch: maint-5.8/perl
+	  !> doio.c
+____________________________________________________________________________
+[ 21521] By: nicholas                              on 2003/10/22  20:30:05
+        Log: Integrate:
+             [ 21520]
+             patch created by Casey West from:
+             
+             Subject: CPAN module problems
+             From: Edward Moy <emoy@apple.com>
+             Date: Fri, 10 Oct 2003 17:42:06 -0700
+             Message-Id: <BD2513C0-FB83-11D7-9065-000A956EFDEE@apple.com>
+             
+             (change ld value in hints file)
+     Branch: maint-5.8/perl
+	  !> hints/darwin.sh
+____________________________________________________________________________
+[ 21519] By: nicholas                              on 2003/10/22  19:11:43
+        Log: Integrate:
+             [ 21514]
+             Subject: [PATCH @20458] embedding perl
+             From: Radu Greab <rgreab@fx.ro>
+             Date: Tue, 05 Aug 2003 20:57:15 +0300 (EEST)
+             Message-Id: <20030805.205715.113441323.radu@yx.primIT.ro>
+     Branch: maint-5.8/perl
+	   ! perl.c
+	  !> hv.c intrpvar.h pod/perlembed.pod pod/perlintern.pod sv.c
+____________________________________________________________________________
+[ 21518] By: nicholas                              on 2003/10/22  18:32:17
+        Log: Integrate:
+             [ 21515]
+             Add a test.taintwarn makefile target,
+             to run the whole test suite with the -t switch.
+     Branch: maint-5.8/perl
+	  !> Makefile.SH pod/perlhack.pod t/TEST
+____________________________________________________________________________
+[ 21517] By: nicholas                              on 2003/10/22  17:53:48
+        Log: Integrate:
+             [ 21513]
+             Fix doc bug #23890, as suggested by Himanshu Garg :
+             in perltoot, $him->fullname should be $him->fullname->as_string
+             when passed to printf.
+             
+             [ 21516]
+             Small email update in AUTHORS.
+     Branch: maint-5.8/perl
+	  !> AUTHORS pod/perltoot.pod
+____________________________________________________________________________
+[ 21512] By: nicholas                              on 2003/10/21  18:58:30
+        Log: Integrate:
+             [ 21372]
+             Sync with libnet 1.17
+     Branch: maint-5.8/perl
+	  !> lib/Net/ChangeLog.libnet lib/Net/Domain.pm lib/Net/FTP.pm
+____________________________________________________________________________
+[ 21511] By: nicholas                              on 2003/10/21  18:31:19
+        Log: 
+             Two OS/2 portability patches from Ilya.
+             
+             Subject: [PATCH 5.8.1 @21211] sockets broken on OS/2
+             From: Ilya Zakharevich <nospam-abuse@ilyaz.org>
+             Date: Thu, 25 Sep 2003 12:09:11 -0700
+             Message-ID: <20030925190911.GA27028@math.berkeley.edu>
+             
+             Subject: Re: [PATCH 5.8.1 @21379] tmpfile() broken on OS/2
+             From: Ilya Zakharevich <nospam-abuse@ilyaz.org>
+             Date: Thu, 25 Sep 2003 19:50:45 -0700
+             Message-ID: <20030926025045.GA27507@math.berkeley.edu>
+     Branch: maint-5.8/perl
+	  !> doio.c os2/os2ish.h perl.h perlio.c pp_sys.c
+____________________________________________________________________________
+[ 21508] By: nicholas                              on 2003/10/20  22:06:05
+        Log: Integrate:
+             [ 21506]
+             Subject: [PATCH] add some missing defines to Devel::PPPort
+             From: "Marcus Holland-Moritz" <mhx-perl@gmx.net>
+             Date: Mon, 20 Oct 2003 20:14:19 +0200
+             Message-ID: <03a301c39735$fb7cb220$0c2f1fac@R2D2>
+     Branch: maint-5.8/perl
+	  !> ext/Devel/PPPort/Changes ext/Devel/PPPort/PPPort.pm
+____________________________________________________________________________
+[ 21507] By: nicholas                              on 2003/10/20  20:14:57
+        Log: Integrate:
+             [ 21505]
+             Subject: Re: [perl #24225] [5.8.1] segfault in binmode STDOUT, ':stdio'; print 1
+             From: Slaven Rezic <slaven@rezic.de>
+             Date: 19 Oct 2003 17:54:59 +0200
+             Message-ID: <871xt9te7g.fsf@vran.herceg.de>
+     Branch: maint-5.8/perl
+	  !> perlio.c
+____________________________________________________________________________
+[ 21504] By: nicholas                              on 2003/10/20  17:31:11
+        Log: Integrate:
+             [ 21503]
+             Skip the chflags tests in filetest.t on Darwin.
+     Branch: maint-5.8/perl
+	  !> lib/filetest.t
+____________________________________________________________________________
+[ 21502] By: nicholas                              on 2003/10/19  19:49:25
+        Log: Forgot to run regen.pl when I merged Plan C (already fixed in
+             the snapshot)
+     Branch: maint-5.8/perl
+	   ! embedvar.h
+____________________________________________________________________________
+[ 21501] By: nicholas                              on 2003/10/19  19:37:27
+        Log: update MAINT level
+     Branch: maint-5.8/perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[ 21500] By: nicholas                              on 2003/10/19  19:35:55
+        Log: Update Changes (submit by hand) - not sure if they're quite in the
+             tidiest order yet
+     Branch: maint-5.8/perl
+	   ! Changes
+____________________________________________________________________________
 [ 21499] By: nicholas                              on 2003/10/19  19:14:43
         Log: If you add files you must add them to the MANIFEST
      Branch: maint-5.8/perl
