@@ -2292,6 +2292,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_pthreads_created_joinable PTHREADS_CREATED_JOINABLE /**/
 
+/* I_MACH_CTHREADS:
+ *     This symbol, if defined, indicates to the C program that it should
+ *     include <mach/cthreads.h>.
+ */
+#$i_machcthr   I_MACH_CTHREADS	/**/
+
 /* MULTIPLICITY:
  *	This symbol, if defined, indicates that Perl should
  *	be built to use multiplicity.

@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Oct 22 10:24:53 EET DST 1998 [metaconfig 3.0 PL70]
+# Generated on Tue Oct 27 09:57:04 EET 1998 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by jhi@iki.fi)
 
 cat >/tmp/c1$$ <<EOF
@@ -558,6 +558,7 @@ d_int64t=''
 i_inttypes=''
 i_limits=''
 i_locale=''
+i_machcthr=''
 i_malloc=''
 i_math=''
 i_memory=''
@@ -7827,8 +7828,21 @@ set inet_aton d_inetaton
 eval $inlibc
 
 : see if inttypes.h is available
-set inttypes.h i_inttypes
-eval $inhdr
+: we want a real compile instead of Inhdr because some systems
+: have an inttypes.h which includes non-existent headers
+$cat >try.c <<EOCP
+#include <inttypes.h>
+extern int foo;
+EOCP
+set try
+if eval $compile; then
+	val="$define"
+else
+	val="$undef"
+fi
+set i_inttypes
+eval $setvar
+
 : check for int64_t
 case "$use64bits" in
 "$define" )
@@ -8239,6 +8253,13 @@ if test "X$usethreads" = "X$define"; then
 	echo $n "Checking whether pthreads are created joinable. $c" >&4 
 	$cat >try.c <<'EOCP'
 #include <pthread.h>
+#ifdef PTHREAD_CREATE_UNDETACHED
+#  define ATTR_JOINABLE PTHREAD_CREATE_UNDETACHED
+#else
+#  ifdef __UNDETACHED
+#    define ATTR_JOINABLE __UNDETACHED
+#  endif
+#endif
 #include <stdio.h>
 int main() {
     pthread_attr_t attr;
@@ -8246,12 +8267,12 @@ int main() {
     printf("%s\n",
 	pthread_attr_init(&attr) == 0 &&
 #if PTHREAD_ATTR_GETDETACHSTATE_INT
-        pthread_attr_getdetachstate(&attr) == 0 &&
+        pthread_attr_getdetachstate(&attr) == ATTR_JOINABLE &&
 #else
         pthread_attr_getdetachstate(&attr, &detachstate) == 0 &&
+        detachstate == PTHREAD_ATTR_JOINABLE
 #endif
-        detachstate == PTHREAD_CREATE_DETACHED ?
-        "detached" : "joinable");
+        ? "detached" : "joinable");
     exit(0);
 }
 EOCP
@@ -8846,9 +8867,9 @@ END
     eval $setvar
     case "$d_semctl_semid_ds" in
     $define)
-        echo "You can $also use struct semid_ds * for semctl IPC_STAT." >&4
+        echo "You can $also use struct semid_ds* for semctl IPC_STAT." >&4
         ;;
-    *)  echo "You cannot use struct semid_ds * for semctl IPC_STAT." >&4
+    *)  echo "You cannot use struct semid_ds* for semctl IPC_STAT." >&4
         ;;
     esac
     $rm -f try.h
@@ -10864,7 +10885,9 @@ EOM
 		: The first arg can be int, unsigned, or size_t
 		: The last arg may or may not be 'const'
 		val=''
-		for xxx in 'fd_set *' 'int *' 'void *'; do
+		: void pointer has been seen but using that
+		: breaks the selectminbits test
+		for xxx in 'fd_set *' 'int *'; do
 			for nfd in 'int' 'size_t' 'unsigned long' 'unsigned' ; do
 				for tmo in 'struct timeval *' 'const struct timeval *'; do
 					case "$val" in
@@ -11408,6 +11431,10 @@ eval $setvar
 
 : see if locale.h is available
 set locale.h i_locale
+eval $inhdr
+
+: see if mach cthreads are available
+set mach/cthreads.h i_machcthr
 eval $inhdr
 
 : see if this is a math.h system
@@ -12486,6 +12513,7 @@ i_grp='$i_grp'
 i_inttypes='$i_inttypes'
 i_limits='$i_limits'
 i_locale='$i_locale'
+i_machcthr='$i_machcthr'
 i_malloc='$i_malloc'
 i_math='$i_math'
 i_memory='$i_memory'
