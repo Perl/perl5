@@ -483,6 +483,7 @@ CODE:
 	    croak("cond_wait for lock that we don't own\n");
 	}
 	MgOWNER(mg) = 0;
+	COND_SIGNAL(MgOWNERCONDP(mg));
 	COND_WAIT(MgCONDP(mg), MgMUTEXP(mg));
 	while (MgOWNER(mg))
 	    COND_WAIT(MgOWNERCONDP(mg), MgMUTEXP(mg));
