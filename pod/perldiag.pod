@@ -4526,6 +4526,12 @@ which means that Perl 5 will try to call the subroutine when the
 assignment is executed, which is probably not what you want.  (If it IS
 what you want, put an & in front.)
 
+=item Your random numbers are not that random
+
+(F) When trying to initialise the random seed for hashes, Perl could
+not get any randomness out of your system.  This usually indicates
+Something Very Wrong.
+
 =back
 
 =cut
