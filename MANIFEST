@@ -1858,3 +1858,13 @@ x2p/util.c		Utility routines
 x2p/util.h		Public declarations for the above
 x2p/walk.c		Parse tree walker
 xsutils.c		Additional bundled package methods not in UNIVERSAL::
+lib/Text/Balanced.pm	Text::Balanced
+lib/Text/Balanced.pod	Text::Balanced
+t/lib/tb-genxt.t	See if Text::Balanced works
+t/lib/tb-xbrak.t	See if Text::Balanced works
+t/lib/tb-xcode.t	See if Text::Balanced works
+t/lib/tb-xdeli.t	See if Text::Balanced works
+t/lib/tb-xmult.t	See if Text::Balanced works
+t/lib/tb-xquot.t	See if Text::Balanced works
+t/lib/tb-xtagg.t	See if Text::Balanced works
+t/lib/tb-xvari.t	See if Text::Balanced works
