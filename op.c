@@ -5058,6 +5058,9 @@ Perl_ck_ftst(pTHX_ OP *o)
 	      OP_IS_FILETEST_ACCESS(o))
 	    o->op_private |= OPpFT_ACCESS;
 	}
+	if (PL_check[kid->op_type] == MEMBER_TO_FPTR(Perl_ck_ftst)
+		&& kid->op_type != OP_STAT && kid->op_type != OP_LSTAT)
+	    o->op_private |= OPpFT_STACKED;
     }
     else {
 	op_free(o);

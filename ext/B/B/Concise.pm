@@ -423,6 +423,12 @@ $priv{"threadsv"}{64} = "SVREFd";
 $priv{"exit"}{128} = "VMS";
 $priv{$_}{2} = "FTACCESS"
   for ("ftrread", "ftrwrite", "ftrexec", "fteread", "ftewrite", "fteexec");
+$priv{$_}{4} = "FTSTACKED"
+  for ("ftrread", "ftrwrite", "ftrexec", "fteread", "ftewrite", "fteexec",
+       "ftis", "fteowned", "ftrowned", "ftzero", "ftsize", "ftmtime",
+       "ftatime", "ftctime", "ftsock", "ftchr", "ftblk", "ftfile", "ftdir",
+       "ftpipe", "ftlink", "ftsuid", "ftsgid", "ftsvtx", "fttty", "fttext",
+       "ftbinary");
 $priv{$_}{2} = "GREPLEX"
   for ("mapwhile", "mapstart", "grepwhile", "grepstart");
 

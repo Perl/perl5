@@ -366,6 +366,12 @@ Example:
     print "Text\n" if -T _;
     print "Binary\n" if -B _;
 
+As of Perl 5.9.1, as a form of purely syntactic sugar, you can stack file
+test operators, in a way that C<-f -w -x $file> is equivalent to
+C<-x $file && -w _ && -f _>. (This is only syntax fancy : if you use
+the return value of C<-f $file> as an argument to another filetest
+operator, no special magic will happen.)
+
 =item abs VALUE
 
 =item abs

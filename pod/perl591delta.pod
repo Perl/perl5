@@ -57,6 +57,12 @@ L<perlform> has been improved, and miscellaneous bugs fixed.
 Now applying C<:unique> to lexical variables and to subroutines will
 result in a compilation error.
 
+=head2 Stacked filetest operators
+
+As a new form of syntactic sugar, it's now possible to stack up filetest
+operators. You can now write C<-f -w -x $file> in a row to mean
+C<-x $file && -w _ && -f _>. See L<perlfunc/-X>.
+
 =head1 Modules and Pragmata
 
 =over 4

@@ -209,6 +209,7 @@ Deprecated.  Use C<GIMME_V> instead.
 
 /* Private of OP_FTXXX */
 #define OPpFT_ACCESS		2	/* use filetest 'access' */
+#define OPpFT_STACKED		4	/* stacked filetest, as in "-f -x $f" */
 #define OP_IS_FILETEST_ACCESS(op) 		\
 	(((op)->op_type) == OP_FTRREAD  ||	\
 	 ((op)->op_type) == OP_FTRWRITE ||	\

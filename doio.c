@@ -1336,6 +1336,9 @@ Perl_my_stat(pTHX)
 	    return (PL_laststatval = -1);
 	}
     }
+    else if (PL_op->op_private & OPpFT_STACKED) {
+	return PL_laststatval;
+    }
     else {
 	SV* sv = POPs;
 	char *s;
@@ -1362,6 +1365,8 @@ Perl_my_stat(pTHX)
     }
 }
 
+static char no_prev_lstat[] = "The stat preceding -l _ wasn't an lstat";
+
 I32
 Perl_my_lstat(pTHX)
 {
@@ -1372,7 +1377,7 @@ Perl_my_lstat(pTHX)
 	EXTEND(SP,1);
 	if (cGVOP_gv == PL_defgv) {
 	    if (PL_laststype != OP_LSTAT)
-		Perl_croak(aTHX_ "The stat preceding -l _ wasn't an lstat");
+		Perl_croak(aTHX_ no_prev_lstat);
 	    return PL_laststatval;
 	}
 	if (ckWARN(WARN_IO)) {
@@ -1381,6 +1386,9 @@ Perl_my_lstat(pTHX)
 	    return (PL_laststatval = -1);
 	}
     }
+    else if (ckWARN(WARN_IO) && PL_laststype != OP_LSTAT
+	    && (PL_op->op_private & OPpFT_STACKED))
+	Perl_croak(aTHX_ no_prev_lstat);
 
     PL_laststype = OP_LSTAT;
     PL_statgv = Nullgv;

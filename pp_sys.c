@@ -2877,13 +2877,23 @@ PP(pp_stat)
     RETURN;
 }
 
+/* This macro is used by the stacked filetest operators :
+ * if the previous filetest failed, short-circuit and pass its value.
+ * Else, discard it from the stack and continue. --rgs
+ */
+#define STACKED_FTEST_CHECK if (PL_op->op_private & OPpFT_STACKED) { \
+	if (TOPs == &PL_sv_no || TOPs == &PL_sv_undef) { RETURN; } \
+	else { (void)POPs; PUTBACK; } \
+    }
+
 PP(pp_ftrread)
 {
     I32 result;
     dSP;
+    STACKED_FTEST_CHECK;
 #if defined(HAS_ACCESS) && defined(R_OK)
-    STRLEN n_a;
     if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
+	STRLEN n_a;
 	result = access(POPpx, R_OK);
 	if (result == 0)
 	    RETPUSHYES;
@@ -2908,9 +2918,10 @@ PP(pp_ftrwrite)
 {
     I32 result;
     dSP;
+    STACKED_FTEST_CHECK;
 #if defined(HAS_ACCESS) && defined(W_OK)
-    STRLEN n_a;
     if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
+	STRLEN n_a;
 	result = access(POPpx, W_OK);
 	if (result == 0)
 	    RETPUSHYES;
@@ -2935,9 +2946,10 @@ PP(pp_ftrexec)
 {
     I32 result;
     dSP;
+    STACKED_FTEST_CHECK;
 #if defined(HAS_ACCESS) && defined(X_OK)
-    STRLEN n_a;
     if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
+	STRLEN n_a;
 	result = access(POPpx, X_OK);
 	if (result == 0)
 	    RETPUSHYES;
@@ -2962,9 +2974,10 @@ PP(pp_fteread)
 {
     I32 result;
     dSP;
+    STACKED_FTEST_CHECK;
 #ifdef PERL_EFF_ACCESS_R_OK
-    STRLEN n_a;
     if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
+	STRLEN n_a;
 	result = PERL_EFF_ACCESS_R_OK(POPpx);
 	if (result == 0)
 	    RETPUSHYES;
@@ -2989,9 +3002,10 @@ PP(pp_ftewrite)
 {
     I32 result;
     dSP;
+    STACKED_FTEST_CHECK;
 #ifdef PERL_EFF_ACCESS_W_OK
-    STRLEN n_a;
     if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
+	STRLEN n_a;
 	result = PERL_EFF_ACCESS_W_OK(POPpx);
 	if (result == 0)
 	    RETPUSHYES;
@@ -3016,9 +3030,10 @@ PP(pp_fteexec)
 {
     I32 result;
     dSP;
+    STACKED_FTEST_CHECK;
 #ifdef PERL_EFF_ACCESS_X_OK
-    STRLEN n_a;
     if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
+	STRLEN n_a;
 	result = PERL_EFF_ACCESS_X_OK(POPpx);
 	if (result == 0)
 	    RETPUSHYES;
@@ -3041,8 +3056,11 @@ PP(pp_fteexec)
 
 PP(pp_ftis)
 {
-    I32 result = my_stat();
+    I32 result;
     dSP;
+    STACKED_FTEST_CHECK;
+    result = my_stat();
+    SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
     RETPUSHYES;
@@ -3055,8 +3073,11 @@ PP(pp_fteowned)
 
 PP(pp_ftrowned)
 {
-    I32 result = my_stat();
+    I32 result;
     dSP;
+    STACKED_FTEST_CHECK;
+    result = my_stat();
+    SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
     if (PL_statcache.st_uid == (PL_op->op_type == OP_FTEOWNED ?
@@ -3067,8 +3088,11 @@ PP(pp_ftrowned)
 
 PP(pp_ftzero)
 {
-    I32 result = my_stat();
+    I32 result;
     dSP;
+    STACKED_FTEST_CHECK;
+    result = my_stat();
+    SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
     if (PL_statcache.st_size == 0)
@@ -3078,8 +3102,11 @@ PP(pp_ftzero)
 
 PP(pp_ftsize)
 {
-    I32 result = my_stat();
+    I32 result;
     dSP; dTARGET;
+    STACKED_FTEST_CHECK;
+    result = my_stat();
+    SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
 #if Off_t_size > IVSIZE
@@ -3092,8 +3119,11 @@ PP(pp_ftsize)
 
 PP(pp_ftmtime)
 {
-    I32 result = my_stat();
+    I32 result;
     dSP; dTARGET;
+    STACKED_FTEST_CHECK;
+    result = my_stat();
+    SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
     PUSHn( (((NV)PL_basetime - PL_statcache.st_mtime)) / 86400.0 );
@@ -3102,8 +3132,11 @@ PP(pp_ftmtime)
 
 PP(pp_ftatime)
 {
-    I32 result = my_stat();
+    I32 result;
     dSP; dTARGET;
+    STACKED_FTEST_CHECK;
+    result = my_stat();
+    SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
     PUSHn( (((NV)PL_basetime - PL_statcache.st_atime)) / 86400.0 );
@@ -3112,8 +3145,11 @@ PP(pp_ftatime)
 
 PP(pp_ftctime)
 {
-    I32 result = my_stat();
+    I32 result;
     dSP; dTARGET;
+    STACKED_FTEST_CHECK;
+    result = my_stat();
+    SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
     PUSHn( (((NV)PL_basetime - PL_statcache.st_ctime)) / 86400.0 );
@@ -3122,8 +3158,11 @@ PP(pp_ftctime)
 
 PP(pp_ftsock)
 {
-    I32 result = my_stat();
+    I32 result;
     dSP;
+    STACKED_FTEST_CHECK;
+    result = my_stat();
+    SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
     if (S_ISSOCK(PL_statcache.st_mode))
@@ -3133,8 +3172,11 @@ PP(pp_ftsock)
 
 PP(pp_ftchr)
 {
-    I32 result = my_stat();
+    I32 result;
     dSP;
+    STACKED_FTEST_CHECK;
+    result = my_stat();
+    SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
     if (S_ISCHR(PL_statcache.st_mode))
@@ -3144,8 +3186,11 @@ PP(pp_ftchr)
 
 PP(pp_ftblk)
 {
-    I32 result = my_stat();
+    I32 result;
     dSP;
+    STACKED_FTEST_CHECK;
+    result = my_stat();
+    SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
     if (S_ISBLK(PL_statcache.st_mode))
@@ -3155,8 +3200,11 @@ PP(pp_ftblk)
 
 PP(pp_ftfile)
 {
-    I32 result = my_stat();
+    I32 result;
     dSP;
+    STACKED_FTEST_CHECK;
+    result = my_stat();
+    SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
     if (S_ISREG(PL_statcache.st_mode))
@@ -3166,8 +3214,11 @@ PP(pp_ftfile)
 
 PP(pp_ftdir)
 {
-    I32 result = my_stat();
+    I32 result;
     dSP;
+    STACKED_FTEST_CHECK;
+    result = my_stat();
+    SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
     if (S_ISDIR(PL_statcache.st_mode))
@@ -3177,8 +3228,11 @@ PP(pp_ftdir)
 
 PP(pp_ftpipe)
 {
-    I32 result = my_stat();
+    I32 result;
     dSP;
+    STACKED_FTEST_CHECK;
+    result = my_stat();
+    SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
     if (S_ISFIFO(PL_statcache.st_mode))
@@ -3201,7 +3255,9 @@ PP(pp_ftsuid)
 {
     dSP;
 #ifdef S_ISUID
-    I32 result = my_stat();
+    I32 result;
+    STACKED_FTEST_CHECK;
+    result = my_stat();
     SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
@@ -3215,7 +3271,9 @@ PP(pp_ftsgid)
 {
     dSP;
 #ifdef S_ISGID
-    I32 result = my_stat();
+    I32 result;
+    STACKED_FTEST_CHECK;
+    result = my_stat();
     SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
@@ -3229,7 +3287,9 @@ PP(pp_ftsvtx)
 {
     dSP;
 #ifdef S_ISVTX
-    I32 result = my_stat();
+    I32 result;
+    STACKED_FTEST_CHECK;
+    result = my_stat();
     SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
@@ -3246,6 +3306,8 @@ PP(pp_fttty)
     GV *gv;
     char *tmps = Nullch;
     STRLEN n_a;
+
+    STACKED_FTEST_CHECK;
 
     if (PL_op->op_flags & OPf_REF)
 	gv = cGVOP_gv;
@@ -3288,6 +3350,8 @@ PP(pp_fttext)
     GV *gv;
     STRLEN n_a;
     PerlIO *fp;
+
+    STACKED_FTEST_CHECK;
 
     if (PL_op->op_flags & OPf_REF)
 	gv = cGVOP_gv;

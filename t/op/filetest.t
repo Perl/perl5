@@ -6,25 +6,17 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
+    require './test.pl';
 }
 
 use Config;
-print "1..10\n";
+plan(tests => 22);
 
-print "not " unless -d 'op';
-print "ok 1\n";
-
-print "not " unless -f 'TEST';
-print "ok 2\n";
-
-print "not " if -f 'op';
-print "ok 3\n";
-
-print "not " if -d 'TEST';
-print "ok 4\n";
-
-print "not " unless -r 'TEST';
-print "ok 5\n";
+ok( -d 'op' );
+ok( -f 'TEST' );
+ok( !-f 'op' );
+ok( !-d 'TEST' );
+ok( -r 'TEST' );
 
 # make sure TEST is r-x
 eval { chmod 0555, 'TEST' };
@@ -35,18 +27,19 @@ eval '$> = 1';		# so switch uid (may not be implemented)
 
 print "# oldeuid = $oldeuid, euid = $>\n";
 
-if (!$Config{d_seteuid}) {
-    print "ok 6 #skipped, no seteuid\n";
-} 
-elsif ($Config{config_args} =~/Dmksymlinks/) {
-    print "ok 6 #skipped, we cannot chmod symlinks\n";
-}
-elsif ($bad_chmod) {
-    print "#[$@]\nok 6 #skipped\n";
-}
-else {
-    print "not " if -w 'TEST';
-    print "ok 6\n";
+SKIP: {
+    if (!$Config{d_seteuid}) {
+	skip('no seteuid');
+    } 
+    elsif ($Config{config_args} =~/Dmksymlinks/) {
+	skip('we cannot chmod symlinks');
+    }
+    elsif ($bad_chmod) {
+	skip( $@ );
+    }
+    else {
+	ok( !-w 'TEST' );
+    }
 }
 
 # Scripts are not -x everywhere so cannot test that.
@@ -55,20 +48,33 @@ eval '$> = $oldeuid';	# switch uid back (may not be implemented)
 
 # this would fail for the euid 1
 # (unless we have unpacked the source code as uid 1...)
-print "not " unless -r 'op';
-print "ok 7\n";
+ok( -r 'op' );
 
 # this would fail for the euid 1
 # (unless we have unpacked the source code as uid 1...)
-if ($Config{d_seteuid}) {
-    print "not " unless -w 'op';
-    print "ok 8\n";
-} else {
-    print "ok 8 #skipped, no seteuid\n";
+SKIP: {
+    if ($Config{d_seteuid}) {
+	ok( -w 'op' );
+    } else {
+	skip('no seteuid');
+    }
 }
 
-print "not " unless -x 'op'; # Hohum.  Are directories -x everywhere?
-print "ok 9\n";
+ok( -x 'op' ); # Hohum.  Are directories -x everywhere?
 
-print "not " unless "@{[grep -r, qw(foo io noo op zoo)]}" eq "io op";
-print "ok 10\n";
+is( "@{[grep -r, qw(foo io noo op zoo)]}", "io op" );
+
+# Test stackability of filetest operators
+
+ok( defined( -f -d 'TEST' ) && ! -f -d _ );
+ok( !defined( -e 'zoo' ) );
+ok( !defined( -e -d 'zoo' ) );
+ok( !defined( -f -e 'zoo' ) );
+ok( -f -e 'TEST' );
+ok( -e -f 'TEST' );
+ok( defined(-d -e 'TEST') );
+ok( defined(-e -d 'TEST') );
+ok( ! -f -d 'op' );
+ok( -x -d -x 'op' );
+ok( (-s -f 'TEST' > 1), "-s returns real size" );
+ok( -f -s 'TEST' == 1 );
