@@ -9746,6 +9746,8 @@ Perl_si_dup(pTHX_ PERL_SI *si, CLONE_PARAMS* param)
 #define TOPLONG(ss,ix)	((ss)[ix].any_long)
 #define POPIV(ss,ix)	((ss)[--(ix)].any_iv)
 #define TOPIV(ss,ix)	((ss)[ix].any_iv)
+#define POPBOOL(ss,ix)	((ss)[--(ix)].any_bool)
+#define TOPBOOL(ss,ix)	((ss)[ix].any_bool)
 #define POPPTR(ss,ix)	((ss)[--(ix)].any_ptr)
 #define TOPPTR(ss,ix)	((ss)[ix].any_ptr)
 #define POPDPTR(ss,ix)	((ss)[--(ix)].any_dptr)
@@ -10034,9 +10036,9 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    TOPPTR(nss,ix) = sv_dup(sv, param);
 	    break;
 	case SAVEt_BOOL:
-	    ptr = POPPTR;
+	    ptr = POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = any_dup(ptr, proto_perl);
-	    longval = (long)POPBOOL;
+	    longval = (long)POPBOOL(ss,ix);
 	    TOPBOOL(nss,ix) = (bool)longval;
 	    break;
 	default:
