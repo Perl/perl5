@@ -38,7 +38,8 @@ Tie::Hash, Tie::StdHash, Tie::ExtraHash - base class definitions for tied hashes
     # the reference to the actual storage 
     sub DELETE { 
       $_[0][1]->('del', $_[0][0], $_[1]); # Call the report writer
-      delete $_[0][0]->{$_[1]};		  #  $_[0]->SUPER::DELETE($_[1]) }
+      delete $_[0][0]->{$_[1]};		  #  $_[0]->SUPER::DELETE($_[1])
+    }
 
 
     package main;
