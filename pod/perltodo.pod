@@ -678,13 +678,13 @@ This emulation should also go near pp_sys.pp_truncate().
 
 =head2 Unicode in Filenames
 
-chdir, chmod, chown, chroot, exec, glob, link, lstat, mkdir, open, qx,
-readdir, readlink, rename, rmdir, stat, symlink, sysopen, system,
-truncate, unlink, utime.  All these could potentially accept Unicode
-filenames either as input or output (and in the case of system and qx
-Unicode in general, as input or output to/from the shell).  Whether a
-filesystem - an operating system pair understands Unicode in filenames
-varies.
+chdir, chmod, chown, chroot, exec, glob, link, lstat, mkdir, open,
+opendir, qx, readdir, readlink, rename, rmdir, stat, symlink, sysopen,
+system, truncate, unlink, utime.  All these could potentially accept
+Unicode filenames either as input or output (and in the case of system
+and qx Unicode in general, as input or output to/from the shell).
+Whether a filesystem - an operating system pair understands Unicode in
+filenames varies.
 
 Known combinations that have some level of understanding include
 Microsoft NTFS, Apple HFS+ (In Mac OS 9 and X) and Apple UFS (in Mac
