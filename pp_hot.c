@@ -2493,6 +2493,9 @@ try_autoload:
 			    SvPADMY_on(sv);
 			}
 		    }
+		    else if (IS_PADGV(oldpad[ix])) {
+			av_store(newpad, ix, sv = SvREFCNT_inc(oldpad[ix]));
+		    }
 		    else {
 			av_store(newpad, ix, sv = NEWSV(0,0));
 			SvPADTMP_on(sv);

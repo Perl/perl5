@@ -311,6 +311,7 @@ struct loop {
 #  define	cGVOP_set(v)	(PL_curpad[cPADOP->op_padix] = (SV*)(v))
 #  define	cGVOPo_set(v)	(PL_curpad[cPADOPo->op_padix] = (SV*)(v))
 #  define	kGVOP_set(v)	(PL_curpad[kPADOP->op_padix] = (SV*)(v))
+#  define	IS_PADGV(v)	(v && SvTYPE(v) == SVt_PVGV && GvIN_PAD(v))
 #else
 #  define	cGVOPx(o)	((GV*)cSVOPx(o)->op_sv)
 #  define	cGVOP		((GV*)cSVOP->op_sv)
@@ -319,6 +320,7 @@ struct loop {
 #  define	cGVOP_set(v)	(cPADOP->op_sv = (SV*)(v))
 #  define	cGVOPo_set(v)	(cPADOPo->op_sv = (SV*)(v))
 #  define	kGVOP_set(v)	(kPADOP->op_sv = (SV*)(v))
+#  define	IS_PADGV(v)	FALSE
 #endif
 
 #define Nullop Null(OP*)

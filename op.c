@@ -448,7 +448,7 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
 		   (sv = names[PL_padix]) && sv != &PL_sv_undef)
 		continue;
 	    sv = *av_fetch(PL_comppad, PL_padix, TRUE);
-	    if (!(SvFLAGS(sv) & (SVs_PADTMP|SVs_PADMY)))
+	    if (!(SvFLAGS(sv) & (SVs_PADTMP|SVs_PADMY)) && !IS_PADGV(sv))
 		break;
 	}
 	retval = PL_padix;
@@ -719,10 +719,12 @@ S_op_clear(pTHX_ OP *o)
     case OP_AELEMFAST:
 #ifdef USE_ITHREADS
 	if (PL_curpad) {
-	    SvREFCNT_dec(cGVOPo);
-	    PL_curpad[cPADOPo->op_padix] = Nullsv;
+	    GV *gv = cGVOPo;
+	    pad_swipe(cPADOPo->op_padix);
+	    /* No GvIN_PAD_off(gv) here, because other references may still
+	     * exist on the pad */
+	    SvREFCNT_dec(gv);
 	}
-	pad_free(cPADOPo->op_padix);
 	cPADOPo->op_padix = 0;
 #else
 	SvREFCNT_dec(cGVOPo);
@@ -762,8 +764,10 @@ S_op_clear(pTHX_ OP *o)
 	break;
     }
 
-    if (o->op_targ > 0)
+    if (o->op_targ > 0) {
 	pad_free(o->op_targ);
+	o->op_targ = 0;
+    }
 }
 
 STATIC void
@@ -2935,6 +2939,7 @@ Perl_newGVOP(pTHX_ I32 type, I32 flags, GV *gv)
 {
     dTHR;
 #ifdef USE_ITHREADS
+    GvIN_PAD_on(gv);
     return newPADOP(type, flags, SvREFCNT_inc(gv));
 #else
     return newSVOP(type, flags, SvREFCNT_inc(gv));
@@ -3229,7 +3234,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 		{
 		    tmpop = ((UNOP*)left)->op_first;
 		    if (tmpop->op_type == OP_GV && !pm->op_pmreplroot) {
-			pm->op_pmreplroot = (OP*)((SVOP*)tmpop)->op_sv; /* XXXXXX */
+			pm->op_pmreplroot = (OP*)cGVOPx(tmpop);
 			pm->op_pmflags |= PMf_ONCE;
 			tmpop = cUNOPo->op_first;	/* to list (nulled) */
 			tmpop = ((UNOP*)tmpop)->op_first; /* to pushmark */
@@ -3739,11 +3744,13 @@ Perl_newFOROP(pTHX_ I32 flags,char *label,line_t forline,OP *sv,OP *expr,OP *blo
 	}
 	else if (sv->op_type == OP_PADSV) { /* private variable */
 	    padoff = sv->op_targ;
+	    sv->op_targ = 0;
 	    op_free(sv);
 	    sv = Nullop;
 	}
 	else if (sv->op_type == OP_THREADSV) { /* per-thread variable */
 	    padoff = sv->op_targ;
+	    sv->op_targ = 0;
 	    iterflags |= OPf_SPECIAL;
 	    op_free(sv);
 	    sv = Nullop;
@@ -3898,9 +3905,9 @@ Perl_cv_undef(pTHX_ CV *cv)
     }
 }
 
-#ifdef DEBUG_CLOSURES
+#ifdef DEBUGGING
 STATIC void
-cv_dump(CV *cv)
+S_cv_dump(pTHX_ CV *cv)
 {
     CV *outside = CvOUTSIDE(cv);
     AV* padlist = CvPADLIST(cv);
@@ -3943,7 +3950,7 @@ cv_dump(CV *cv)
 			  SvIVX(pname[ix]));
     }
 }
-#endif /* DEBUG_CLOSURES */
+#endif /* DEBUGGING */
 
 STATIC CV *
 S_cv_clone2(pTHX_ CV *proto, CV *outside)
@@ -4037,6 +4044,9 @@ S_cv_clone2(pTHX_ CV *proto, CV *outside)
 		    SvPADMY_on(sv);
 		PL_curpad[ix] = sv;
 	    }
+	}
+	else if (IS_PADGV(ppad[ix])) {
+	    PL_curpad[ix] = SvREFCNT_inc(ppad[ix]);
 	}
 	else {
 	    SV* sv = NEWSV(0,0);
@@ -4351,7 +4361,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	for (ix = AvFILLp(PL_comppad); ix > 0; ix--) {
 	    SV *namesv;
 
-	    if (SvIMMORTAL(PL_curpad[ix]))
+	    if (SvIMMORTAL(PL_curpad[ix]) || IS_PADGV(PL_curpad[ix]))
 		continue;
 	    /*
 	     * The only things that a clonable function needs in its
@@ -4375,7 +4385,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	AvFLAGS(av) = AVf_REIFY;
 
 	for (ix = AvFILLp(PL_comppad); ix > 0; ix--) {
-	    if (SvIMMORTAL(PL_curpad[ix]))
+	    if (SvIMMORTAL(PL_curpad[ix]) || IS_PADGV(PL_curpad[ix]))
 		continue;
 	    if (!SvPADMY(PL_curpad[ix]))
 		SvPADTMP_on(PL_curpad[ix]);
@@ -5046,6 +5056,7 @@ Perl_ck_rvconst(pTHX_ register OP *o)
 #ifdef USE_ITHREADS
 	    /* XXXXXX hack: dependence on sizeof(PADOP) <= sizeof(SVOP) */
 	    kPADOP->op_padix = pad_alloc(OP_GV, SVs_PADTMP);
+	    GvIN_PAD_on(gv);
 	    PL_curpad[kPADOP->op_padix] = SvREFCNT_inc(gv);
 #else
 	    kid->op_sv = SvREFCNT_inc(gv);
@@ -5515,6 +5526,7 @@ Perl_ck_sassign(pTHX_ OP *o)
 		    return o;
 	    }
 	    kid->op_targ = kkid->op_targ;
+	    kkid->op_targ = 0;
 	    /* Now we do not need PADSV and SASSIGN. */
 	    kid->op_sibling = o->op_sibling;	/* NULL */
 	    cLISTOPo->op_first = NULL;
@@ -6099,11 +6111,13 @@ Perl_peep(pTHX_ register OP *o)
 			    && (((LISTOP*)o)->op_first->op_sibling->op_type
 				== OP_PADSV)
 			    && (((LISTOP*)o)->op_first->op_sibling->op_targ
-				== o->op_next->op_targ))) {
+				== o->op_next->op_targ)))
+		    {
 			goto ignore_optimization;
 		    }
 		    else {
 			o->op_targ = o->op_next->op_targ;
+			o->op_next->op_targ = 0;
 			o->op_private |= OPpTARGET_MY;
 		    }
 		}
