@@ -320,13 +320,20 @@ Perl_bytes_to_utf8(pTHX_ U8* s, STRLEN *len)
     return dst;
 }
 
-/* XXX NOTHING CALLS THE FOLLOWING TWO ROUTINES YET!!! */
 /*
  * Convert native or reversed UTF-16 to UTF-8.
  *
  * Destination must be pre-extended to 3/2 source.  Do not use in-place.
  * We optimize for native, for obvious reasons. */
 
+/* There are several problems with utf16_to_utf8().
+ * (1) U16 is not necessarily *exactly* two bytes.
+ * (2) Secondly, no check is made for odd length.
+ * (3) Thirdly, the "Malformed UTF-16 surrogate" should probably be
+ *     a hard error (and it should be listed in perldiag).
+ * (4) The tests (in comp/t/require.t) are a joke: the UTF16 BOM
+ *     really ought to be followed by valid UTF16 characters.
+ * --Mike Guy */
 U8*
 Perl_utf16_to_utf8(pTHX_ U16* p, U8* d, I32 bytelen)
 {

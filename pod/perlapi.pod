@@ -38,6 +38,28 @@ array itself.
 =for hackers
 Found in file av.c
 
+=item av_delete
+
+Deletes the element indexed by C<key> from the array.  Returns the
+deleted element. C<flags> is currently ignored.
+
+	SV*	av_delete(AV* ar, I32 key, I32 flags)
+
+=for hackers
+Found in file av.c
+
+=item av_exists
+
+Returns true if the element indexed by C<key> has been initialized.
+
+This relies on the fact that uninitialized array elements are set to
+C<&PL_sv_undef>.
+
+	bool	av_exists(AV* ar, I32 key)
+
+=for hackers
+Found in file av.c
+
 =item av_extend
 
 Pre-extend an array.  The C<key> is the index to which the array should be
@@ -58,6 +80,16 @@ See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for
 more information on how to use this function on tied arrays. 
 
 	SV**	av_fetch(AV* ar, I32 key, I32 lval)
+
+=for hackers
+Found in file av.c
+
+=item av_fill
+
+Ensure than an array has a given number of elements, equivalent to
+Perl's C<$#array = $fill;>.
+
+	void	av_fill(AV* ar, I32 fill)
 
 =for hackers
 Found in file av.c

@@ -661,6 +661,14 @@ Perl_av_len(pTHX_ register AV *av)
     return AvFILL(av);
 }
 
+/*
+=for apidoc av_fill
+
+Ensure than an array has a given number of elements, equivalent to
+Perl's C<$#array = $fill;>.
+
+=cut
+*/
 void
 Perl_av_fill(pTHX_ register AV *av, I32 fill)
 {
@@ -708,6 +716,14 @@ Perl_av_fill(pTHX_ register AV *av, I32 fill)
 	(void)av_store(av,fill,&PL_sv_undef);
 }
 
+/*
+=for apidoc av_delete
+
+Deletes the element indexed by C<key> from the array.  Returns the
+deleted element. C<flags> is currently ignored.
+
+=cut
+*/
 SV *
 Perl_av_delete(pTHX_ AV *av, I32 key, I32 flags)
 {
@@ -758,10 +774,15 @@ Perl_av_delete(pTHX_ AV *av, I32 key, I32 flags)
 }
 
 /*
- * This relies on the fact that uninitialized array elements
- * are set to &PL_sv_undef.
- */
+=for apidoc av_exists
 
+Returns true if the element indexed by C<key> has been initialized.
+
+This relies on the fact that uninitialized array elements are set to
+C<&PL_sv_undef>.
+
+=cut
+*/
 bool
 Perl_av_exists(pTHX_ AV *av, I32 key)
 {

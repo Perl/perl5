@@ -2815,6 +2815,7 @@ S_regpposixcc(pTHX_ I32 value)
 			if (strnEQ(posixcc, "space", 5))
 			    namedclass =
 				complement ? ANYOF_NSPACE : ANYOF_SPACE;
+			break;
 		    case 'u':
 			if (strnEQ(posixcc, "upper", 5))
 			    namedclass =

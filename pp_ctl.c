@@ -725,36 +725,60 @@ PP(pp_mapstart)
 PP(pp_mapwhile)
 {
     djSP;
-    I32 diff = (SP - PL_stack_base) - *PL_markstack_ptr;
+    I32 items = (SP - PL_stack_base) - *PL_markstack_ptr; /* how many new items */
     I32 count;
     I32 shift;
     SV** src;
     SV** dst; 
 
+    /* first, move source pointer to the next item in the source list */
     ++PL_markstack_ptr[-1];
-    if (diff) {
-	if (diff > PL_markstack_ptr[-1] - PL_markstack_ptr[-2]) {
-	    shift = diff - (PL_markstack_ptr[-1] - PL_markstack_ptr[-2]);
-	    count = (SP - PL_stack_base) - PL_markstack_ptr[-1] + 2;
+
+    /* if there are new items, push them into the destination list */
+    if (items) {
+	/* might need to make room back there first */
+	if (items > PL_markstack_ptr[-1] - PL_markstack_ptr[-2]) {
+	    /* XXX this implementation is very pessimal because the stack
+	     * is repeatedly extended for every set of items.  Is possible
+	     * to do this without any stack extension or copying at all
+	     * by maintaining a separate list over which the map iterates
+	     * (like foreach does). --gsar */
+
+	    /* everything in the stack after the destination list moves
+	     * towards the end the stack by the amount of room needed */
+	    shift = items - (PL_markstack_ptr[-1] - PL_markstack_ptr[-2]);
+
+	    /* items to shift up (accounting for the moved source pointer) */
+	    count = (SP - PL_stack_base) - (PL_markstack_ptr[-1] - 1);
+
+	    /* This optimization is by Ben Tilly and it does
+	     * things differently from what Sarathy (gsar)
+	     * is describing.  The downside of this optimization is
+	     * that leaves "holes" (uninitialized and hopefully unused areas)
+	     * to the Perl stack, but on the other hand this
+	     * shouldn't be a problem.  If Sarathy's idea gets
+	     * implemented, this optimization should become
+	     * irrelevant.  --jhi */
+            if (shift < count)
+                shift = count; /* Avoid shifting too often --Ben Tilly */
 	    
 	    EXTEND(SP,shift);
 	    src = SP;
 	    dst = (SP += shift);
 	    PL_markstack_ptr[-1] += shift;
 	    *PL_markstack_ptr += shift;
-	    while (--count)
+	    while (count--)
 		*dst-- = *src--;
 	}
-	dst = PL_stack_base + (PL_markstack_ptr[-2] += diff) - 1; 
-	++diff;
-	while (--diff)
+	/* copy the new items down to the destination list */
+	dst = PL_stack_base + (PL_markstack_ptr[-2] += items) - 1; 
+	while (items--)
 	    *dst-- = SvTEMP(TOPs) ? POPs : sv_mortalcopy(POPs); 
     }
     LEAVE;					/* exit inner scope */
 
     /* All done yet? */
     if (PL_markstack_ptr[-1] > *PL_markstack_ptr) {
-	I32 items;
 	I32 gimme = GIMME_V;
 
 	(void)POPMARK;				/* pop top */
@@ -777,6 +801,7 @@ PP(pp_mapwhile)
 	ENTER;					/* enter inner scope */
 	SAVEVPTR(PL_curpm);
 
+	/* set $_ to the new source item */
 	src = PL_stack_base[PL_markstack_ptr[-1]];
 	SvTEMP_off(src);
 	DEFSV = src;

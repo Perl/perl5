@@ -8,7 +8,7 @@ BEGIN {
 	require Config; import Config;
 	# Don't bother if there are no quad offsets.
 	if ($Config{lseeksize} < 8) {
-		print "1..0\n# no 64-bit file offsets\n";
+		print "1..0 # Skip: no 64-bit file offsets\n";
 		exit(0);
 	}
 	require Fcntl; import Fcntl qw(/^O_/ /^SEEK_/);
@@ -47,14 +47,14 @@ print "# checking whether we have sparse files...\n";
 
 # Known have-nots.
 if ($^O eq 'win32' || $^O eq 'vms') {
-    print "1..0\n# no sparse files (because this is $^O) \n";
+    print "1..0 # Skip: no sparse files (because this is $^O) \n";
     bye();
 }
 
 # Known haves that have problems running this test
 # (for example because they do not support sparse files, like UNICOS)
 if ($^O eq 'unicos') {
-    print "1..0\n# large files known to work but unable to test them here ($^O)\n";
+    print "1..0 # Skip: large files known to work but unable to test them here ($^O)\n";
     bye();
 }
 
@@ -95,7 +95,7 @@ zap();
 
 unless ($s1[7] == 1_000_003 && $s2[7] == 2_000_003 &&
 	$s1[11] == $s2[11] && $s1[12] == $s2[12]) {
-	print "1..0\n#no sparse files?\n";
+	print "1..0 # Skip: no sparse files?\n";
 	bye;
 }
 
@@ -103,15 +103,25 @@ print "# we seem to have sparse files...\n";
 
 # By now we better be sure that we do have sparse files:
 # if we are not, the following will hog 5 gigabytes of disk.  Ooops.
+# This may fail by producing some signal; run in a subprocess first for safety
 
 $ENV{LC_ALL} = "C";
+
+my $r = system '../perl', '-I../lib', '-e', <<'EOF';
+use Fcntl qw(/^O_/ /^SEEK_/);
+sysopen(BIG, "big", O_WRONLY|O_CREAT|O_TRUNC) or die $!;
+my $sysseek = sysseek(BIG, 5_000_000_000, SEEK_SET);
+my $syswrite = syswrite(BIG, "big");
+exit 0;
+EOF
 
 sysopen(BIG, "big", O_WRONLY|O_CREAT|O_TRUNC) or
 	do { warn "sysopen 'big' failed: $!\n"; bye };
 my $sysseek = sysseek(BIG, 5_000_000_000, SEEK_SET);
-unless (defined $sysseek && $sysseek == 5_000_000_000) {
-    print "1..0\n# seeking past 2GB failed: $! (sysseek returned ",
-          defined $sysseek ? $sysseek : 'undef', ")\n";
+unless (! $r && defined $sysseek && $sysseek == 5_000_000_000) {
+    $sysseek = 'undef' unless defined $sysseek;
+    print "1..0 # Skip: seeking past 2GB failed: ",
+           $r ? 'signal '.($r & 0x7f) : "$! (sysseek returned $sysseek)", "\n";
     explain();
     bye();
 }
@@ -125,9 +135,9 @@ my $close     = close BIG;
 print "# close failed: $!\n" unless $close;
 unless($syswrite && $close) {
     if ($! =~/too large/i) {
-	print "1..0\n# writing past 2GB failed: process limits?\n";
+	print "1..0 # Skip: writing past 2GB failed: process limits?\n";
     } elsif ($! =~ /quota/i) {
-	print "1..0\n# filesystem quota limits?\n";
+	print "1..0 # Skip: filesystem quota limits?\n";
     }
     explain();
     bye();
@@ -138,7 +148,7 @@ unless($syswrite && $close) {
 print "# @s\n";
 
 unless ($s[7] == 5_000_000_003) {
-    print "1..0\n# not configured to use large files?\n";
+    print "1..0 # Skip: not configured to use large files?\n";
     explain();
     bye();
 }

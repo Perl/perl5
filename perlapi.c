@@ -169,13 +169,6 @@ Perl_av_extend(pTHXo_ AV* ar, I32 key)
     ((CPerlObj*)pPerl)->Perl_av_extend(ar, key);
 }
 
-#undef  Perl_av_fake
-AV*
-Perl_av_fake(pTHXo_ I32 size, SV** svp)
-{
-    return ((CPerlObj*)pPerl)->Perl_av_fake(size, svp);
-}
-
 #undef  Perl_av_fetch
 SV**
 Perl_av_fetch(pTHXo_ AV* ar, I32 key, I32 lval)
@@ -216,13 +209,6 @@ void
 Perl_av_push(pTHXo_ AV* ar, SV* val)
 {
     ((CPerlObj*)pPerl)->Perl_av_push(ar, val);
-}
-
-#undef  Perl_av_reify
-void
-Perl_av_reify(pTHXo_ AV* ar)
-{
-    ((CPerlObj*)pPerl)->Perl_av_reify(ar);
 }
 
 #undef  Perl_av_shift

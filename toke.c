@@ -2505,7 +2505,13 @@ Perl_yylex(pTHX)
 		}
 	    } 
 	    if (bof)
+	    {
+		PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
+		/* Shouldn't this wsallow_bom() be earlier, e.g.
+		 * immediately after where bof is set?  Currently you can't
+		 * have e.g. a UTF16 sharpbang line. --Mike Guy */
 		s = swallow_bom((U8*)s);
+	    }
 	    incline(s);
 	} while (PL_doextract);
 	PL_oldoldbufptr = PL_oldbufptr = PL_bufptr = PL_linestart = s;

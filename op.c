@@ -1982,9 +1982,10 @@ Perl_bind_match(pTHX_ I32 type, OP *left, OP *right)
              desc, sample, sample);
     }
 
-    if (right->op_type == OP_MATCH ||
+    if (!(right->op_flags & OPf_STACKED) &&
+       (right->op_type == OP_MATCH ||
 	right->op_type == OP_SUBST ||
-	right->op_type == OP_TRANS) {
+	right->op_type == OP_TRANS)) {
 	right->op_flags |= OPf_STACKED;
 	if (right->op_type != OP_MATCH)
 	    left = mod(left, right->op_type);
@@ -6192,7 +6193,7 @@ Perl_ck_split(pTHX_ OP *o)
 	cLISTOPo->op_last = kid; /* There was only one element previously */
     }
 
-    if (kid->op_type != OP_MATCH) {
+    if (kid->op_type != OP_MATCH || kid->op_flags & OPf_STACKED) {
 	OP *sibl = kid->op_sibling;
 	kid->op_sibling = 0;
 	kid = pmruntime( newPMOP(OP_MATCH, OPf_SPECIAL), kid, Nullop);

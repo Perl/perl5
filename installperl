@@ -307,7 +307,7 @@ if (! $versiononly && ! samepath($installbin, '.') && ($^O ne 'dos') && ! $Is_VM
 
 my $mainperl_is_instperl = 0;
 
-if ($Config{installusrbinperl} eq 'define' &&
+if ($Config{installusrbinperl} && $Config{installusrbinperl} eq 'define' &&
     !$versiononly && !$nonono && !$Is_W32 && !$Is_VMS && -t STDIN && -t STDERR
 	&& -w $mainperldir && ! samepath($mainperldir, $installbin)) {
     my($usrbinperl)	= "$mainperldir/$perl$exe_ext";
@@ -465,7 +465,7 @@ sub yn {
     my($prompt) = @_;
     my($answer);
     my($default) = $prompt =~ m/\[([yn])\]\s*$/i;
-    print $prompt;
+    print STDERR $prompt;
     chop($answer = <STDIN>);
     $answer = $default if $answer =~ m/^\s*$/;
     ($answer =~ m/^[yY]/);

@@ -265,7 +265,7 @@ sub rootdir {
 Returns a string representation of the first writable directory
 from the following list or '' if none are writable:
 
-    sys$scratch
+    sys$scratch:
     $ENV{TMPDIR}
 
 =cut
@@ -273,7 +273,7 @@ from the following list or '' if none are writable:
 my $tmpdir;
 sub tmpdir {
     return $tmpdir if defined $tmpdir;
-    foreach ('sys$scratch', $ENV{TMPDIR}) {
+    foreach ('sys$scratch:', $ENV{TMPDIR}) {
 	next unless defined && -d && -w _;
 	$tmpdir = $_;
 	last;

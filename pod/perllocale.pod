@@ -954,37 +954,12 @@ operating system upgrade.
 
 =head1 SEE ALSO
 
-L<POSIX (3)/isalnum>
-
-L<POSIX (3)/isalpha>
-
-L<POSIX (3)/isdigit>
-
-L<POSIX (3)/isgraph>
-
-L<POSIX (3)/islower>
-
-L<POSIX (3)/isprint>,
-
-L<POSIX (3)/ispunct>
-
-L<POSIX (3)/isspace>
-
-L<POSIX (3)/isupper>,
-
-L<POSIX (3)/isxdigit>
-
-L<POSIX (3)/localeconv>
-
-L<POSIX (3)/setlocale>,
-
-L<POSIX (3)/strcoll>
-
-L<POSIX (3)/strftime>
-
-L<POSIX (3)/strtod>,
-
-L<POSIX (3)/strxfrm>
+L<POSIX (3)/isalnum>, L<POSIX (3)/isalpha>, L<POSIX (3)/isdigit>, 
+L<POSIX (3)/isgraph>, L<POSIX (3)/islower>, L<POSIX (3)/isprint>, 
+L<POSIX (3)/ispunct>, L<POSIX (3)/isspace>, L<POSIX (3)/isupper>, 
+L<POSIX (3)/isxdigit>, L<POSIX (3)/localeconv>, L<POSIX (3)/setlocale>, 
+L<POSIX (3)/strcoll>, L<POSIX (3)/strftime>, L<POSIX (3)/strtod>, 
+L<POSIX (3)/strxfrm>.
 
 =head1 HISTORY
 

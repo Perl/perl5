@@ -83,10 +83,6 @@
 #define Perl_av_extend		pPerl->Perl_av_extend
 #undef  av_extend
 #define av_extend		Perl_av_extend
-#undef  Perl_av_fake
-#define Perl_av_fake		pPerl->Perl_av_fake
-#undef  av_fake
-#define av_fake			Perl_av_fake
 #undef  Perl_av_fetch
 #define Perl_av_fetch		pPerl->Perl_av_fetch
 #undef  av_fetch
@@ -111,10 +107,6 @@
 #define Perl_av_push		pPerl->Perl_av_push
 #undef  av_push
 #define av_push			Perl_av_push
-#undef  Perl_av_reify
-#define Perl_av_reify		pPerl->Perl_av_reify
-#undef  av_reify
-#define av_reify		Perl_av_reify
 #undef  Perl_av_shift
 #define Perl_av_shift		pPerl->Perl_av_shift
 #undef  av_shift
