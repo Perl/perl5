@@ -474,6 +474,7 @@ sub internal_lrefs {
 
 BEGIN {
 
+if (ord("\t") == 9) {
 %HTML_Escapes = (
     'amp'	=>	'&',	#   ampersand
     'lt'	=>	'<',	#   left chevron, less-than
@@ -546,6 +547,85 @@ BEGIN {
     "lchevron"	=>	"\xAB",	#   left chevron (double less than)
     "rchevron"	=>	"\xBB",	#   right chevron (double greater than)
 );
+
+}
+else {
+
+# This hash assumes code page IBM-1047:
+%HTML_Escapes = (
+    'amp'	=>	'&',    #   ampersand
+    'lt'	=>	'<',    #   left chevron, less-than
+    'gt'	=>	'>',    #   right chevron, greater-than
+    'quot'	=>	'"',    #   double quote
+
+    "Aacute"	=>	"\x65", #   capital A, acute accent
+    "aacute"	=>	"\x45", #   small a, acute accent
+    "Acirc"	=>	"\x62", #   capital A, circumflex accent
+    "acirc"	=>	"\x42", #   small a, circumflex accent
+    "AElig"	=>	"\x9E", #   capital AE diphthong (ligature)
+    "aelig"	=>	"\x9C", #   small ae diphthong (ligature)
+    "Agrave"	=>	"\x64", #   capital A, grave accent
+    "agrave"	=>	"\x44", #   small a, grave accent
+    "Aring"	=>	"\x67", #   capital A, ring
+    "aring"	=>	"\x47", #   small a, ring
+    "Atilde"	=>	"\x66", #   capital A, tilde
+    "atilde"	=>	"\x46", #   small a, tilde
+    "Auml"	=>	"\x63", #   capital A, dieresis or umlaut mark
+    "auml"	=>	"\x43", #   small a, dieresis or umlaut mark
+    "Ccedil"	=>	"\x68", #   capital C, cedilla
+    "ccedil"	=>	"\x48", #   small c, cedilla
+    "Eacute"	=>	"\x71", #   capital E, acute accent
+    "eacute"	=>	"\x51", #   small e, acute accent
+    "Ecirc"	=>	"\x72", #   capital E, circumflex accent
+    "ecirc"	=>	"\x52", #   small e, circumflex accent
+    "Egrave"	=>	"\x74", #   capital E, grave accent
+    "egrave"	=>	"\x54", #   small e, grave accent
+    "ETH"	=>	"\xAC", #   capital Eth, Icelandic
+    "eth"	=>	"\x8C", #   small eth, Icelandic
+    "Euml"	=>	"\x73", #   capital E, dieresis or umlaut mark
+    "euml"	=>	"\x53", #   small e, dieresis or umlaut mark
+    "Iacute"	=>	"\x75", #   capital I, acute accent
+    "iacute"	=>	"\x55", #   small i, acute accent
+    "Icirc"	=>	"\x76", #   capital I, circumflex accent
+    "icirc"	=>	"\x56", #   small i, circumflex accent
+    "Igrave"	=>	"\x75", #   capital I, grave accent
+    "igrave"	=>	"\x55", #   small i, grave accent
+    "Iuml"	=>	"\x77", #   capital I, dieresis or umlaut mark
+    "iuml"	=>	"\x57", #   small i, dieresis or umlaut mark
+    "Ntilde"	=>	"\x69", #   capital N, tilde
+    "ntilde"	=>	"\x49", #   small n, tilde
+    "Oacute"	=>	"\xEE", #   capital O, acute accent
+    "oacute"	=>	"\xCE", #   small o, acute accent
+    "Ocirc"	=>	"\xEB", #   capital O, circumflex accent
+    "ocirc"	=>	"\xCB", #   small o, circumflex accent
+    "Ograve"	=>	"\xED", #   capital O, grave accent
+    "ograve"	=>	"\xCD", #   small o, grave accent
+    "Oslash"	=>	"\x80", #   capital O, slash
+    "oslash"	=>	"\x70", #   small o, slash
+    "Otilde"	=>	"\xEF", #   capital O, tilde
+    "otilde"	=>	"\xCF", #   small o, tilde
+    "Ouml"	=>	"\xEC", #   capital O, dieresis or umlaut mark
+    "ouml"	=>	"\xCC", #   small o, dieresis or umlaut mark
+    "szlig"	=>	"\x59", #   small sharp s, German (sz ligature)
+    "THORN"	=>	"\xAE", #   capital THORN, Icelandic
+    "thorn"	=>	"\x8E", #   small thorn, Icelandic
+    "Uacute"	=>	"\xFE", #   capital U, acute accent
+    "uacute"	=>	"\xDE", #   small u, acute accent
+    "Ucirc"	=>	"\xFB", #   capital U, circumflex accent
+    "ucirc"	=>	"\xDB", #   small u, circumflex accent
+    "Ugrave"	=>	"\xFD", #   capital U, grave accent
+    "ugrave"	=>	"\xDD", #   small u, grave accent
+    "Uuml"	=>	"\xFC", #   capital U, dieresis or umlaut mark
+    "uuml"	=>	"\xDC", #   small u, dieresis or umlaut mark
+    "Yacute"	=>	"\xBA", #   capital Y, acute accent
+    "yacute"	=>	"\x8D", #   small y, acute accent
+    "yuml"	=>	"\xDF", #   small y, dieresis or umlaut mark
+
+    "lchevron"	=>	"\x8A", #   left chevron (double less than)
+    "rchevron"	=>	"\x8B", #   right chevron (double greater than)
+);
+ 
+}
 }
 
 1;
