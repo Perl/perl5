@@ -1705,8 +1705,8 @@ Perl_hv_clear(pTHX_ HV *hv)
 		    if (HeVAL(entry) && SvREADONLY(HeVAL(entry))) {
 			SV* keysv = hv_iterkeysv(entry);
 			Perl_croak(aTHX_
-		"Attempt to delete readonly key '%_' from a restricted hash",
-				keysv);
+	"Attempt to delete readonly key '%"SVf"' from a restricted hash",
+				   keysv);
 		    }
 		    SvREFCNT_dec(HeVAL(entry));
 		    HeVAL(entry) = &PL_sv_undef;

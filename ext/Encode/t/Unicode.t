@@ -18,7 +18,7 @@ BEGIN {
 
 use strict;
 #use Test::More 'no_plan';
-use Test::More tests => 30;
+use Test::More tests => 37;
 use Encode qw(encode decode);
 
 #
@@ -103,6 +103,24 @@ SKIP: {
     }
 };
 
+#
+# CJKT vs. UTF-7
+#
 
+use File::Spec;
+use File::Basename;
+
+my $dir =  dirname(__FILE__);
+opendir my $dh, $dir or die "$dir:$!";
+my @file = sort grep {/\.utf$/o} readdir $dh;
+closedir $dh;
+for my $file (@file){
+    my $path = File::Spec->catfile($dir, $file);
+    open my $fh, '<:utf8', $path or die "$path:$!";
+    my $content = join('' => <$fh>);
+    close $fh;
+    is(decode("UTF-7", encode("UTF-7", $content)), $content, 
+       "UTF-7 RT:$file");
+}
 1;
 __END__

@@ -98,6 +98,7 @@ our %ExtModule =
      'UTF-32'                 => 'Encode::Unicode',
      'UTF-32BE'               => 'Encode::Unicode',
      'UTF-32LE'               => 'Encode::Unicode',
+     'UTF-7'                  => 'Encode::Unicode::UTF7',
     );
 
 unless (ord("A") == 193){
