@@ -1957,6 +1957,16 @@ typedef union re_unwind_t {
     re_unwind_branch_t branch;
 } re_unwind_t;
 
+#define sayYES goto yes
+#define sayNO goto no
+#define sayYES_FINAL goto yes_final
+#define sayYES_LOUD  goto yes_loud
+#define sayNO_FINAL  goto no_final
+#define sayNO_SILENT goto do_no
+#define saySAME(x) if (x) goto yes; else goto no
+
+#define REPORT_CODE_OFF 24
+
 /*
  - regmatch - main matching routine
  *
@@ -1999,25 +2009,7 @@ S_regmatch(pTHX_ regnode *prog)
     nextchr = UCHARAT(locinput);
     scan = prog;
     while (scan != NULL) {
-#define sayNO_L (logical ? (logical = 0, sw = 0, goto cont) : sayNO)
-#if 1
-#  define sayYES goto yes
-#  define sayNO goto no
-#  define sayYES_FINAL goto yes_final
-#  define sayYES_LOUD  goto yes_loud
-#  define sayNO_FINAL  goto no_final
-#  define sayNO_SILENT goto do_no
-#  define saySAME(x) if (x) goto yes; else goto no
-#  define REPORT_CODE_OFF 24
-#else
-#  define sayYES return 1
-#  define sayNO return 0
-#  define sayYES_FINAL return 1
-#  define sayYES_LOUD  return 1
-#  define sayNO_FINAL  return 0
-#  define sayNO_SILENT return 0
-#  define saySAME(x) return x
-#endif
+
 	DEBUG_r( {
 	    SV *prop = sv_newmortal();
 	    int docolor = *PL_colors[0];
