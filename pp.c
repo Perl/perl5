@@ -2795,7 +2795,7 @@ PP(pp_int)
 		  SETi(I_V(value));
 	      } else {
 		/* This is maint, and we don't have Perl_ceil in perl.h  */
-		  SETn(-Perl_floor(-value));
+		  SETn(Perl_ceil(value));
 	      }
 	  }
       }
