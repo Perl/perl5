@@ -2110,10 +2110,11 @@ PP(pp_lslice)
 
 PP(pp_anonlist)
 {
-    dSP; dMARK;
+    dSP; dMARK; dORIGMARK;
     I32 items = SP - MARK;
-    SP = MARK;
-    XPUSHs((SV*)sv_2mortal((SV*)av_make(items, MARK+1)));
+    SV *av = sv_2mortal((SV*)av_make(items, MARK+1));
+    SP = ORIGMARK;		/* av_make() might realloc stack_sp */
+    XPUSHs(av);
     RETURN;
 }
 
