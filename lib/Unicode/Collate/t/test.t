@@ -188,6 +188,7 @@ ok($ignoreAE->eq("Perl","ePrl"));
 
 my $onlyABC = Unicode::Collate->new(
     table => undef,
+    normalization => undef,
     entry => << 'ENTRIES',
 0061 ; [.0101.0020.0002.0061] # LATIN SMALL LETTER A
 0041 ; [.0101.0020.0008.0041] # LATIN CAPITAL LETTER A

@@ -13,7 +13,7 @@ use Carp;
 
 require Exporter;
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 our $PACKAGE = __PACKAGE__;
 
 our @ISA = qw(Exporter);
@@ -27,21 +27,18 @@ our $KeyFile = "allkeys.txt";
 
 our $UNICODE_VERSION;
 
-{
+eval { require Unicode::UCD };
+
+unless ($@) {
+    $UNICODE_VERSION = Unicode::UCD::UnicodeVersion();
+}
+else { # XXX, Perl 5.6.1
     my($f, $fh);
     foreach my $d (@INC) {
 	use File::Spec;
-	$f = File::Spec->catfile($d, "unicore", "version");
-	if (open($fh, $f)) {
-	    chomp($UNICODE_VERSION = <$fh>);
-	    close $fh;
-	    last;
-	}
-
-	# XXX, Perl 5.6.1
 	$f = File::Spec->catfile($d, "unicode", "Unicode.301");
 	if (open($fh, $f)) {
-	    $UNICODE_VERSION = "3.0.1";
+	    $UNICODE_VERSION = '3.0.1';
 	    close $fh;
 	    last;
 	}
@@ -58,7 +55,7 @@ our $DefaultRearrange = [ 0x0E40..0x0E44, 0x0EC0..0x0EC4 ];
 
 sub UCA_Version { "8.0" }
 
-sub Base_Unicode_Version { $UNICODE_VERSION }
+sub Base_Unicode_Version { $UNICODE_VERSION || 'unknown' }
 
 ##
 ## constructor
