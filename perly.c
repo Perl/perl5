@@ -1405,7 +1405,7 @@ static char *yyrule[] = {
 #endif
 #define yyparse() Perl_yyparse(pTHX)
 
-#line 1481 "perly.c"
+#line 1409 "perly.c"
 #define YYABORT goto yyabort
 #define YYACCEPT goto yyaccept
 #define YYERROR goto yyerrlab
@@ -1437,7 +1437,7 @@ yyparse()
     ysave->oldyylval	= yylval;
   
 #if YYDEBUG
-    if (yys = getenv("YYDEBUG"))
+    if ((yys = getenv("YYDEBUG")))
     {
         yyn = *yys;
         if (yyn >= '0' && yyn <= '9')
@@ -1464,7 +1464,7 @@ yyparse()
     *yyssp = yystate = 0;
 
 yyloop:
-    if (yyn = yydefred[yystate]) goto yyreduce;
+    if ((yyn = yydefred[yystate])) goto yyreduce;
     if (yychar < 0)
     {
         if ((yychar = yylex()) < 0) yychar = 0;
@@ -2455,7 +2455,7 @@ case 197:
 #line 786 "perly.y"
 { yyval.opval = yyvsp[0].opval; }
 break;
-#line 2477 "perly.c"
+#line 2459 "perly.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

@@ -26,7 +26,7 @@ ldlibpth=''
 DPERL_EXTERNAL_GLOB='-DPERL_EXTERNAL_GLOB'
 case "$useshrplib" in
 true)
-	# Prefix all runs of 'miniperl' and 'perl' with 
+	# Prefix all runs of 'miniperl' and 'perl' with
 	# $ldlibpth so that ./perl finds *this* shared libperl.
 	case "$LD_LIBRARY_PATH" in
 	'')
@@ -263,13 +263,13 @@ h = $(h1) $(h2) $(h3) $(h4) $(h5)
 c1 = $(mallocsrc) av.c scope.c op.c doop.c doio.c dump.c hv.c mg.c
 c2 = perl.c perly.c pp.c pp_hot.c pp_ctl.c pp_sys.c regcomp.c regexec.c utf8.c
 c3 = gv.c sv.c taint.c toke.c util.c deb.c run.c universal.c xsutils.c
-c4 = globals.c perlio.c perlapi.c
+c4 = globals.c perlio.c perlapi.c numeric.c locale.c
 
 c = $(c1) $(c2) $(c3) $(c4) miniperlmain.c perlmain.c
 
 obj1 = $(mallocobj) gv$(OBJ_EXT) toke$(OBJ_EXT) perly$(OBJ_EXT) op$(OBJ_EXT) regcomp$(OBJ_EXT) dump$(OBJ_EXT) util$(OBJ_EXT) mg$(OBJ_EXT)
 obj2 = hv$(OBJ_EXT) av$(OBJ_EXT) run$(OBJ_EXT) pp_hot$(OBJ_EXT) sv$(OBJ_EXT) pp$(OBJ_EXT) scope$(OBJ_EXT) pp_ctl$(OBJ_EXT) pp_sys$(OBJ_EXT)
-obj3 = doop$(OBJ_EXT) doio$(OBJ_EXT) regexec$(OBJ_EXT) utf8$(OBJ_EXT) taint$(OBJ_EXT) deb$(OBJ_EXT) universal$(OBJ_EXT) xsutils$(OBJ_EXT) globals$(OBJ_EXT) perlio$(OBJ_EXT) perlapi$(OBJ_EXT)
+obj3 = doop$(OBJ_EXT) doio$(OBJ_EXT) regexec$(OBJ_EXT) utf8$(OBJ_EXT) taint$(OBJ_EXT) deb$(OBJ_EXT) universal$(OBJ_EXT) xsutils$(OBJ_EXT) globals$(OBJ_EXT) perlio$(OBJ_EXT) perlapi$(OBJ_EXT) numeric$(OBJ_EXT) locale$(OBJ_EXT)
 
 obj = $(obj1) $(obj2) $(obj3) $(ARCHOBJS)
 
@@ -295,7 +295,7 @@ all: $(FIRSTMAKEFILE) miniperl extra.pods $(private) $(public) $(dynamic_ext) $(
 compile: all
 	echo "testing compilation" > testcompile;
 	cd utils;  $(MAKE) compile;
-	cd x2p; $(MAKE) compile; 
+	cd x2p; $(MAKE) compile;
 	cd pod; $(MAKE) compile;
 
 translators:	miniperl lib/Config.pm FORCE
@@ -559,7 +559,7 @@ perl.gprof: /usr/bin/gprof perl.gprof.config
 
 # Microperl.  This is just a convenience thing if one happens to
 # build also the full Perl and therefore the real big Makefile:
-# usually one should manually explicitly issue the below command. 
+# usually one should manually explicitly issue the below command.
 
 microperl:
 	$(MAKE) -f Makefile.micro
@@ -594,7 +594,7 @@ preplibrary: miniperl lib/Config.pm lib/lib.pm lib/re.pm
 		autosplit_lib_modules(@ARGV)' lib/*.pm lib/*/*.pm
 
 # Take care to avoid modifying lib/Config.pm without reason
-# (If trying to create a new port and having problems with the configpm script, 
+# (If trying to create a new port and having problems with the configpm script,
 # try 'make minitest' and/or commenting out the tests at the end of configpm.)
 lib/Config.pm: config.sh miniperl configpm lib/re.pm
 	$(LDLIBPTH) ./miniperl configpm configpm.tmp
@@ -686,6 +686,7 @@ run_byacc:	FORCE check_byacc
 	    -e 's/y\.tab/perly/g' perly.c >perly.tmp && mv perly.tmp perly.c
 	sed -e '/^extern YYSTYPE yy/D' y.tab.h >yh.tmp && mv yh.tmp y.tab.h
 	cmp -s y.tab.h perly.h && rm -f y.tab.h || mv y.tab.h perly.h
+	perl -i perlyline.pl perly.c
 	chmod 664 vms/perly_c.vms vms/perly_h.vms
 	perl vms/vms_yfix.pl perly.c perly.h vms/perly_c.vms vms/perly_h.vms
 
@@ -855,11 +856,11 @@ _cleaner2:
 	rm -f testcompile compilelog
 	-rmdir lib/B lib/Data lib/Digest lib/Encode lib/IO/Socket lib/IO lib/Filter/Util lib/List lib/MIME lib/PerlIO lib/Scalar lib/Sys lib/Thread lib/XS
 
-_realcleaner: 
+_realcleaner:
 	@$(LDLIBPTH) $(MAKE) _cleaner1 CLEAN=realclean
 	@$(LDLIBPTH) $(MAKE) _cleaner2
 
-_verycleaner: 
+_verycleaner:
 	@$(LDLIBPTH) $(MAKE) _cleaner1 CLEAN=veryclean
 	@$(LDLIBPTH) $(MAKE) _cleaner2
 	-rm -f *~ *.orig */*~ */*.orig */*/*~ */*/*.orig
