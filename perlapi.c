@@ -2432,6 +2432,13 @@ Perl_rsignal(pTHXo_ int i, Sighandler_t t)
 {
     return ((CPerlObj*)pPerl)->Perl_rsignal(i, t);
 }
+
+#undef  Perl_rsignal_state
+Sighandler_t
+Perl_rsignal_state(pTHXo_ int i)
+{
+    return ((CPerlObj*)pPerl)->Perl_rsignal_state(i);
+}
 #if !defined(HAS_RENAME)
 #endif
 

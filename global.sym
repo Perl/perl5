@@ -333,6 +333,7 @@ Perl_regnext
 Perl_repeatcpy
 Perl_rninstr
 Perl_rsignal
+Perl_rsignal_state
 Perl_savepv
 Perl_savepvn
 Perl_savestack_grow

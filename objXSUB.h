@@ -1331,6 +1331,10 @@
 #define Perl_rsignal		pPerl->Perl_rsignal
 #undef  rsignal
 #define rsignal			Perl_rsignal
+#undef  Perl_rsignal_state
+#define Perl_rsignal_state	pPerl->Perl_rsignal_state
+#undef  rsignal_state
+#define rsignal_state		Perl_rsignal_state
 #if !defined(HAS_RENAME)
 #endif
 #undef  Perl_savepv
