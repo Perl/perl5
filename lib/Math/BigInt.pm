@@ -400,8 +400,8 @@ In particular
 
   perl -MMath::BigInt=:constant -e 'print 2**100'
 
-print the integer value of C<2**100>.  Note that without convertion of 
-constants the expression 2**100 will be calculatted as floating point number.
+print the integer value of C<2**100>.  Note that without conversion of 
+constants the expression 2**100 will be calculated as floating point number.
 
 =head1 BUGS
 
