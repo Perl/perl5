@@ -864,8 +864,10 @@ unbackslashed C<@> or C<%> eats all the rest of the arguments, and forces
 list context.  An argument represented by C<$> forces scalar context.  An
 C<&> requires an anonymous subroutine, which, if passed as the first
 argument, does not require the "C<sub>" keyword or a subsequent comma.  A
-C<*> does whatever it has to do to turn the argument into a reference to a
-symbol table entry.
+C<*> allows the subroutine to accept a bareword, constant, scalar expression,
+typeglob, or a reference to a typeglob in that slot.  The value will be
+available to the subroutine either as a simple scalar, or (in the latter
+two cases) as a reference to the typeglob.
 
 A semicolon separates mandatory arguments from optional arguments.
 (It is redundant before C<@> or C<%>.)
