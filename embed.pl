@@ -1932,9 +1932,10 @@ s	|char*|regwhite	|char *|char *
 s	|char*|nextchar
 s	|regnode*|dumpuntil	|regnode *start|regnode *node \
 				|regnode *last|SV* sv|I32 l
-s	|void	|scan_commit	|scan_data_t *data
+s	|void	|scan_commit	|struct scan_data_t *data
 s	|I32	|study_chunk	|regnode **scanp|I32 *deltap \
-				|regnode *last|scan_data_t *data|U32 flags
+				|regnode *last|struct scan_data_t *data \
+				|U32 flags
 s	|I32	|add_data	|I32 n|char *s
 rs	|void|re_croak2	|const char* pat1|const char* pat2|...
 s	|I32	|regpposixcc	|I32 value

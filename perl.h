@@ -1727,25 +1727,7 @@ struct _sublex_info {
 
 typedef struct magic_state MGS;	/* struct magic_state defined in mg.c */
 
-/* Length of a variant. */
-
-typedef struct {
-    I32 len_min;
-    I32 len_delta;
-    I32 pos_min;
-    I32 pos_delta;
-    SV *last_found;
-    I32 last_end;			/* min value, <0 unless valid. */
-    I32 last_start_min;
-    I32 last_start_max;
-    SV **longest;			/* Either &l_fixed, or &l_float. */
-    SV *longest_fixed;
-    I32 offset_fixed;
-    SV *longest_float;
-    I32 offset_float_min;
-    I32 offset_float_max;
-    I32 flags;
-} scan_data_t;
+struct scan_data_t;		/* Used in S_* functions in regcomp.c */
 
 typedef I32 CHECKPOINT;
 

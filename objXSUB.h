@@ -636,8 +636,12 @@
 #define PL_reg_flags		(*Perl_Treg_flags_ptr(aTHXo))
 #undef  PL_reg_ganch
 #define PL_reg_ganch		(*Perl_Treg_ganch_ptr(aTHXo))
+#undef  PL_reg_leftiter
+#define PL_reg_leftiter		(*Perl_Treg_leftiter_ptr(aTHXo))
 #undef  PL_reg_magic
 #define PL_reg_magic		(*Perl_Treg_magic_ptr(aTHXo))
+#undef  PL_reg_maxiter
+#define PL_reg_maxiter		(*Perl_Treg_maxiter_ptr(aTHXo))
 #undef  PL_reg_oldcurpm
 #define PL_reg_oldcurpm		(*Perl_Treg_oldcurpm_ptr(aTHXo))
 #undef  PL_reg_oldpos
@@ -646,6 +650,10 @@
 #define PL_reg_oldsaved		(*Perl_Treg_oldsaved_ptr(aTHXo))
 #undef  PL_reg_oldsavedlen
 #define PL_reg_oldsavedlen	(*Perl_Treg_oldsavedlen_ptr(aTHXo))
+#undef  PL_reg_poscache
+#define PL_reg_poscache		(*Perl_Treg_poscache_ptr(aTHXo))
+#undef  PL_reg_poscache_size
+#define PL_reg_poscache_size	(*Perl_Treg_poscache_size_ptr(aTHXo))
 #undef  PL_reg_re
 #define PL_reg_re		(*Perl_Treg_re_ptr(aTHXo))
 #undef  PL_reg_start_tmp
@@ -656,6 +664,8 @@
 #define PL_reg_starttry		(*Perl_Treg_starttry_ptr(aTHXo))
 #undef  PL_reg_sv
 #define PL_reg_sv		(*Perl_Treg_sv_ptr(aTHXo))
+#undef  PL_reg_whilem_seen
+#define PL_reg_whilem_seen	(*Perl_Treg_whilem_seen_ptr(aTHXo))
 #undef  PL_regbol
 #define PL_regbol		(*Perl_Tregbol_ptr(aTHXo))
 #undef  PL_regcc

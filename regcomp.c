@@ -132,12 +132,33 @@
 #define	SPSTART		0x4	/* Starts with * or +. */
 #define TRYAGAIN	0x8	/* Weeded out a declaration. */
 
+/* Length of a variant. */
+
+typedef struct scan_data_t {
+    I32 len_min;
+    I32 len_delta;
+    I32 pos_min;
+    I32 pos_delta;
+    SV *last_found;
+    I32 last_end;			/* min value, <0 unless valid. */
+    I32 last_start_min;
+    I32 last_start_max;
+    SV **longest;			/* Either &l_fixed, or &l_float. */
+    SV *longest_fixed;
+    I32 offset_fixed;
+    SV *longest_float;
+    I32 offset_float_min;
+    I32 offset_float_max;
+    I32 flags;
+    I32 whilem_c;
+} scan_data_t;
+
 /*
  * Forward declarations for pregcomp()'s friends.
  */
 
 static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-				      0, 0, 0 };
+				      0, 0, 0, 0 };
 
 #define SF_BEFORE_EOL		(SF_BEFORE_SEOL|SF_BEFORE_MEOL)
 #define SF_BEFORE_SEOL		0x1
@@ -328,6 +349,8 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 
 		    num++;
 		    data_fake.flags = 0;
+		    if (data)
+			data_fake.whilem_c = data->whilem_c;
 		    next = regnext(scan);
 		    scan = NEXTOPER(scan);
 		    if (code != BRANCH)
@@ -346,6 +369,8 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 			pars++;
 		    if (data && (data_fake.flags & SF_HAS_EVAL))
 			data->flags |= SF_HAS_EVAL;
+		    if (data)
+			data->whilem_c = data_fake.whilem_c;
 		    if (code == SUSPEND) 
 			break;
 		}
@@ -562,6 +587,16 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		    else
 			oscan->flags = 0;
 		}
+		else if (OP(oscan) == CURLYX && data && ++data->whilem_c < 16) {
+		    /* This stays as CURLYX, and can put the count/of pair. */
+		    /* Find WHILEM (as in regexec.c) */
+		    regnode *nxt = oscan + NEXT_OFF(oscan);
+
+		    if (OP(PREVOPER(nxt)) == NOTHING) /* LONGJMP */
+			nxt += ARG(nxt);
+		    PREVOPER(nxt)->flags = data->whilem_c
+			| (PL_reg_whilem_seen << 4); /* On WHILEM */
+		}
 		if (data && fl & (SF_HAS_PAR|SF_IN_PAR)) 
 		    pars++;
 		if (flags & SCF_DO_SUBSTR) {
@@ -653,6 +688,8 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 	    regnode *nscan;
 
 	    data_fake.flags = 0;
+	    if (data)
+		data_fake.whilem_c = data->whilem_c;
 	    next = regnext(scan);
 	    nscan = NEXTOPER(NEXTOPER(scan));
 	    minnext = study_chunk(&nscan, &deltanext, last, &data_fake, 0);
@@ -669,6 +706,8 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		pars++;
 	    if (data && (data_fake.flags & SF_HAS_EVAL))
 		data->flags |= SF_HAS_EVAL;
+	    if (data)
+		data->whilem_c = data_fake.whilem_c;
 	}
 	else if (OP(scan) == OPEN) {
 	    pars++;
@@ -787,6 +826,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     I32 minlen = 0;
     I32 sawplus = 0;
     I32 sawopen = 0;
+    scan_data_t data;
 
     if (exp == NULL)
 	FAIL("NULL regexp argument");
@@ -798,7 +838,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 
     PL_regprecomp = savepvn(exp, xend - exp);
     DEBUG_r(if (!PL_colorset) reginitcolors());
-    DEBUG_r(PerlIO_printf(Perl_debug_log, "%sCompiling%s RE `%s%*s%s'\n",
+    DEBUG_r(PerlIO_printf(Perl_debug_log, "%sCompiling REx%s `%s%*s%s'\n",
 		      PL_colors[4],PL_colors[5],PL_colors[0],
 		      xend - exp, PL_regprecomp, PL_colors[1]));
     PL_regflags = pm->op_pmflags;
@@ -816,6 +856,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     PL_regnpar = 1;
     PL_regsize = 0L;
     PL_regcode = &PL_regdummy;
+    PL_reg_whilem_seen = 0;
     regc((U8)REG_MAGIC, (char*)PL_regcode);
     if (reg(0, &flags) == NULL) {
 	Safefree(PL_regprecomp);
@@ -830,6 +871,8 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
         PL_regsize += PL_extralen;
     else
 	PL_extralen = 0;
+    if (PL_reg_whilem_seen > 15)
+	PL_reg_whilem_seen = 15;
 
     /* Allocate space and initialize. */
     Newc(1001, r, sizeof(regexp) + (unsigned)PL_regsize * sizeof(regnode),
@@ -876,12 +919,11 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
        3-units-long substrs field. */
     Newz(1004, r->substrs, 1, struct reg_substr_data);
 
+    StructCopy(&zero_scan_data, &data, scan_data_t);
     if (OP(scan) != BRANCH) {	/* Only one top-level choice. */
-	scan_data_t data;
 	I32 fake;
 	STRLEN longest_float_length, longest_fixed_length;
 
-	StructCopy(&zero_scan_data, &data, scan_data_t);
 	first = scan;
 	/* Skip introductions and multiplicators >= 1. */
 	while ((OP(first) == OPEN && (sawopen = 1)) ||
@@ -1042,7 +1084,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	
 	DEBUG_r(PerlIO_printf(Perl_debug_log, "\n"));
 	scan = r->program + 1;
-	minlen = study_chunk(&scan, &fake, scan + PL_regsize, NULL, 0);
+	minlen = study_chunk(&scan, &fake, scan + PL_regsize, &data, 0);
 	r->check_substr = r->anchored_substr = r->float_substr = Nullsv;
     }
 
@@ -1520,8 +1562,10 @@ S_regpiece(pTHX_ I32 *flagp)
 		reginsert(CURLY, ret);
 	    }
 	    else {
-		PL_regnaughty += 4 + PL_regnaughty;	/* compound interest */
-		regtail(ret, reg_node(WHILEM));
+		regnode *w = reg_node(WHILEM);
+
+		w->flags = 0;
+		regtail(ret, w);
 		if (!SIZE_ONLY && PL_extralen) {
 		    reginsert(LONGJMP,ret);
 		    reginsert(NOTHING,ret);
@@ -1532,7 +1576,8 @@ S_regpiece(pTHX_ I32 *flagp)
 		    NEXT_OFF(ret) = 3;	/* Go over NOTHING to LONGJMP. */
 		regtail(ret, reg_node(NOTHING));
 		if (SIZE_ONLY)
-		    PL_extralen += 3;
+		    PL_reg_whilem_seen++, PL_extralen += 3;
+		PL_regnaughty += 4 + PL_regnaughty;	/* compound interest */
 	    }
 	    ret->flags = 0;
 
@@ -3115,16 +3160,18 @@ Perl_regdump(pTHX_ regexp *r)
 
     /* Header fields of interest. */
     if (r->anchored_substr)
-	PerlIO_printf(Perl_debug_log, "anchored `%s%s%s'%s at %d ", 
+	PerlIO_printf(Perl_debug_log, "anchored `%s%.*s%s'%s at %d ", 
 		      PL_colors[0],
+		      SvCUR(r->anchored_substr) - (SvTAIL(r->anchored_substr)!=0),
 		      SvPVX(r->anchored_substr), 
 		      PL_colors[1],
 		      SvTAIL(r->anchored_substr) ? "$" : "",
 		      r->anchored_offset);
     if (r->float_substr)
-	PerlIO_printf(Perl_debug_log, "floating `%s%s%s'%s at %d..%u ", 
+	PerlIO_printf(Perl_debug_log, "floating `%s%.*s%s'%s at %d..%u ", 
 		      PL_colors[0],
-		      SvPVX(r->float_substr), 
+		      SvCUR(r->float_substr) - (SvTAIL(r->float_substr)!=0), 
+		      SvPVX(r->float_substr),
 		      PL_colors[1],
 		      SvTAIL(r->float_substr) ? "$" : "",
 		      r->float_min_offset, r->float_max_offset);
@@ -3192,6 +3239,8 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 	    Perl_sv_catpvf(aTHX_ sv, "[%d]", o->flags); /* Parenth number */
 	Perl_sv_catpvf(aTHX_ sv, " {%d,%d}", ARG1(o), ARG2(o));
     }
+    else if (k == WHILEM && o->flags)			/* Ordinal/of */
+	Perl_sv_catpvf(aTHX_ sv, "[%d/%d]", o->flags & 0xf, o->flags>>4);
     else if (k == REF || k == OPEN || k == CLOSE || k == GROUPP )
 	Perl_sv_catpvf(aTHX_ sv, "%d", ARG(o));	/* Parenth number */
     else if (k == LOGICAL)

@@ -270,25 +270,33 @@ S_cache_re(pTHX_ regexp *prog)
 
 /* Assumptions: if ANCH_GPOS, then strpos is anchored. XXXX Check GPOS logic */
 
-/* If SCREAM, then sv should be compatible with strpos and strend.
+/* If SCREAM, then SvPVX(sv) should be compatible with strpos and strend.
    Otherwise, only SvCUR(sv) is used to get strbeg. */
 
 /* XXXX We assume that strpos is strbeg unless sv. */
+
+/* A failure to find a constant substring means that there is no need to make
+   an expensive call to REx engine, thus we celebrate a failure.  Similarly,
+   finding a substring too deep into the string means that less calls to
+   regtry() should be needed. */
 
 char *
 Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		     char *strend, U32 flags, re_scream_pos_data *data)
 {
-    I32 start_shift;
+    register I32 start_shift;
     /* Should be nonnegative! */
-    I32 end_shift;
-    char *s;
+    register I32 end_shift;
+    register char *s;
+    register SV *check;
     char *t;
     I32 ml_anch;
+    char *tmp;
+    register char *other_last = Nullch;
 
     DEBUG_r( if (!PL_colorset) reginitcolors() );
     DEBUG_r(PerlIO_printf(Perl_debug_log,
-		      "%sGuessing start of match:%s `%s%.60s%s%s' against `%s%.*s%s%s'\n",
+		      "%sGuessing start of match, REx%s `%s%.60s%s%s' against `%s%.*s%s%s'...\n",
 		      PL_colors[4],PL_colors[5],PL_colors[0],
 		      prog->precomp,
 		      PL_colors[1],
@@ -299,128 +307,296 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		      (strend - strpos > 60 ? "..." : ""))
 	);
 
-    if (prog->minlen > strend - strpos)
+    if (prog->minlen > strend - strpos) {
+	DEBUG_r(PerlIO_printf(Perl_debug_log, "String too short...\n"));
 	goto fail;
-
-    /* XXXX Move further down? */
-    start_shift = prog->check_offset_min;	/* okay to underestimate on CC */
-    /* Should be nonnegative! */
-    end_shift = prog->minlen - start_shift -
-	CHR_SVLEN(prog->check_substr) + (SvTAIL(prog->check_substr) != 0);
-
-    if (prog->reganch & ROPT_ANCH) {
+    }
+    if (prog->reganch & ROPT_ANCH) {	/* Match at beg-of-str or after \n */
 	ml_anch = !( (prog->reganch & ROPT_ANCH_SINGLE)
 		     || ( (prog->reganch & ROPT_ANCH_BOL)
-			  && !PL_multiline ) );
+			  && !PL_multiline ) );	/* Check after \n? */
 
 	if ((prog->check_offset_min == prog->check_offset_max) && !ml_anch) {
-	    /* Anchored... */
+	    /* Substring at constant offset from beg-of-str... */
 	    I32 slen;
 
 	    if ( !(prog->reganch & ROPT_ANCH_GPOS) /* Checked by the caller */
-		 && (sv && (strpos + SvCUR(sv) != strend)) )
+		 && (sv && (strpos + SvCUR(sv) != strend)) ) {
+		DEBUG_r(PerlIO_printf(Perl_debug_log, "Not at start...\n"));
 		goto fail;
-
+	    }
 	    PL_regeol = strend;			/* Used in HOP() */
-	    s = (char*)HOP((U8*)strpos, prog->check_offset_min);
+	    s = HOPc(strpos, prog->check_offset_min);
 	    if (SvTAIL(prog->check_substr)) {
 		slen = SvCUR(prog->check_substr);	/* >= 1 */
 
-		if ( strend - s > slen || strend - s < slen - 1 ) {
-		    s = Nullch;
-		    goto finish;
-		}
-		if ( strend - s == slen && strend[-1] != '\n') {
-		    s = Nullch;
-		    goto finish;
+		if ( strend - s > slen || strend - s < slen - 1 
+		     || (strend - s == slen && strend[-1] != '\n')) {
+		    DEBUG_r(PerlIO_printf(Perl_debug_log, "String too long...\n"));
+		    goto fail_finish;
 		}
 		/* Now should match s[0..slen-2] */
 		slen--;
 		if (slen && (*SvPVX(prog->check_substr) != *s
 			     || (slen > 1
-				 && memNE(SvPVX(prog->check_substr), s, slen))))
-		    s = Nullch;
+				 && memNE(SvPVX(prog->check_substr), s, slen)))) {
+		  report_neq:
+		    DEBUG_r(PerlIO_printf(Perl_debug_log, "String not equal...\n"));
+		    goto fail_finish;
+		}
 	    }
 	    else if (*SvPVX(prog->check_substr) != *s
 		     || ((slen = SvCUR(prog->check_substr)) > 1
 			 && memNE(SvPVX(prog->check_substr), s, slen)))
-		    s = Nullch;
-	    else
-		    s = strpos;
-	    goto finish;
+		goto report_neq;
+	    goto success_at_start;
 	}
+	/* Match is anchored, but substr is not anchored wrt beg-of-str. */
 	s = strpos;
-	if (!ml_anch && (s + prog->check_offset_max < strend - prog->minlen))
-	    end_shift += strend - s - prog->minlen - prog->check_offset_max;
+	start_shift = prog->check_offset_min; /* okay to underestimate on CC */
+	/* Should be nonnegative! */
+	end_shift = prog->minlen - start_shift -
+	    CHR_SVLEN(prog->check_substr) + (SvTAIL(prog->check_substr) != 0);
+	if (!ml_anch) {
+	    I32 end = prog->check_offset_max + CHR_SVLEN(prog->check_substr)
+					 - (SvTAIL(prog->check_substr) != 0);
+	    I32 eshift = strend - s - end;
+
+	    if (end_shift < eshift)
+		end_shift = eshift;
+	}
     }
-    else {
+    else {				/* Can match at random position */
 	ml_anch = 0;
 	s = strpos;
+	start_shift = prog->check_offset_min; /* okay to underestimate on CC */
+	/* Should be nonnegative! */
+	end_shift = prog->minlen - start_shift -
+	    CHR_SVLEN(prog->check_substr) + (SvTAIL(prog->check_substr) != 0);
     }
 
-  restart:
+#ifdef DEBUGGING	/* 7/99: reports of failure (with the older version) */
     if (end_shift < 0)
-	end_shift = 0; /* can happen when strend == strpos */
+	croak("panic: end_shift");
+#endif
+
+    check = prog->check_substr;
+  restart:
+    /* Find a possible match in the region s..strend by looking for
+       the "check" substring in the region corrected by start/end_shift. */
     if (flags & REXEC_SCREAM) {
-	SV *c = prog->check_substr;
 	char *strbeg = SvPVX(sv);	/* XXXX Assume PV_force() on SCREAM! */
 	I32 p = -1;			/* Internal iterator of scream. */
 	I32 *pp = data ? data->scream_pos : &p;
 
-	if (PL_screamfirst[BmRARE(c)] >= 0
-	    || ( BmRARE(c) == '\n'
-		 && (BmPREVIOUS(c) == SvCUR(c) - 1)
-		 && SvTAIL(c) ))
-	    s = screaminstr(sv, prog->check_substr, 
-			    start_shift + (strpos - strbeg), end_shift, pp, 0);
+	if (PL_screamfirst[BmRARE(check)] >= 0
+	    || ( BmRARE(check) == '\n'
+		 && (BmPREVIOUS(check) == SvCUR(check) - 1)
+		 && SvTAIL(check) ))
+	    s = screaminstr(sv, check, 
+			    start_shift + (s - strbeg), end_shift, pp, 0);
 	else
-	    s = Nullch;
+	    goto fail_finish;
 	if (data)
 	    *data->scream_olds = s;
     }
     else
 	s = fbm_instr((unsigned char*)s + start_shift,
 		      (unsigned char*)strend - end_shift,
-		      prog->check_substr, PL_multiline ? FBMrf_MULTILINE : 0);
+		      check, PL_multiline ? FBMrf_MULTILINE : 0);
 
     /* Update the count-of-usability, remove useless subpatterns,
 	unshift s.  */
-  finish:
-    if (!s) {
-	++BmUSEFUL(prog->check_substr);	/* hooray */
-	goto fail;			/* not present */
+
+    DEBUG_r(PerlIO_printf(Perl_debug_log, "%s %s substr `%s%.*s%s'%s%s",
+			  (s ? "Found" : "Did not find"),
+			  ((check == prog->anchored_substr) ? "anchored" : "floating"),
+			  PL_colors[0],
+			  SvCUR(check) - (SvTAIL(check)!=0), SvPVX(check),
+			  PL_colors[1], (SvTAIL(check) ? "$" : ""),
+			  (s ? " at offset " : "...\n") ) );
+
+    if (!s)
+	goto fail_finish;
+
+    /* Finish the diagnostic message */
+    DEBUG_r(PerlIO_printf(Perl_debug_log, "%ld...\n", (long)(s - strpos)) );
+
+    /* Got a candidate.  Check MBOL anchoring, and the *other* substr.
+       Start with the other substr.
+       XXXX no SCREAM optimization yet - and a very coarse implementation
+       XXXX /ttx+/ results in anchored=`ttx', floating=`x'.  floating will
+		*always* match.  Probably should be marked during compile...
+       Probably it is right to do no SCREAM here...
+     */
+
+    if (prog->float_substr && prog->anchored_substr) {
+	/* Take into account the anchored substring. */
+	/* XXXX May be hopelessly wrong for UTF... */
+	if (!other_last)
+	    other_last = strpos - 1;
+	if (check == prog->float_substr) {
+		char *last = s - start_shift, *last1, *last2;
+		char *s1 = s;
+
+		tmp = PL_bostr;
+		t = s - prog->check_offset_max;
+		if (s - strpos > prog->check_offset_max  /* signed-corrected t > strpos */
+		    && (!(prog->reganch & ROPT_UTF8)
+			|| (PL_bostr = strpos, /* Used in regcopmaybe() */
+			    (t = reghopmaybe_c(s, -(prog->check_offset_max)))
+			    && t > strpos)))
+		    ;
+		else
+		    t = strpos;
+		t += prog->anchored_offset;
+		if (t <= other_last)
+		    t = other_last + 1;
+		PL_bostr = tmp;
+		last2 = last1 = strend - prog->minlen;
+		if (last < last1)
+		    last1 = last;
+ /* XXXX It is not documented what units *_offsets are in.  Assume bytes.  */
+		/* On end-of-str: see comment below. */
+		s = fbm_instr((unsigned char*)t,
+			      (unsigned char*)last1 + prog->anchored_offset
+				 + SvCUR(prog->anchored_substr)
+				 - (SvTAIL(prog->anchored_substr)!=0),
+			      prog->anchored_substr, PL_multiline ? FBMrf_MULTILINE : 0);
+		DEBUG_r(PerlIO_printf(Perl_debug_log, "%s anchored substr `%s%.*s%s'%s",
+			(s ? "Found" : "Contradicts"),
+			PL_colors[0],
+			  SvCUR(prog->anchored_substr)
+			  - (SvTAIL(prog->anchored_substr)!=0),
+			  SvPVX(prog->anchored_substr),
+			  PL_colors[1], (SvTAIL(prog->anchored_substr) ? "$" : "")));
+		if (!s) {
+		    if (last1 >= last2) {
+			DEBUG_r(PerlIO_printf(Perl_debug_log,
+						", giving up...\n"));
+			goto fail_finish;
+		    }
+		    DEBUG_r(PerlIO_printf(Perl_debug_log,
+			", trying floating at offset %ld...\n",
+			(long)(s1 + 1 - strpos)));
+		    PL_regeol = strend;			/* Used in HOP() */
+		    other_last = last1 + prog->anchored_offset;
+		    s = HOPc(last, 1);
+		    goto restart;
+		}
+		else {
+		    DEBUG_r(PerlIO_printf(Perl_debug_log, " at offset %ld...\n",
+			  (long)(s - strpos)));
+		    t = s - prog->anchored_offset;
+		    other_last = s - 1;
+		    if (t == strpos)
+			goto try_at_start;
+		    s = s1;
+		    goto try_at_offset;
+		}
+	}
+	else {		/* Take into account the floating substring. */
+		char *last, *last1;
+		char *s1 = s;
+
+		t = s - start_shift;
+		last1 = last = strend - prog->minlen + prog->float_min_offset;
+		if (last - t > prog->float_max_offset)
+		    last = t + prog->float_max_offset;
+		s = t + prog->float_min_offset;
+		if (s <= other_last)
+		    s = other_last + 1;
+ /* XXXX It is not documented what units *_offsets are in.  Assume bytes.  */
+		/* fbm_instr() takes into account exact value of end-of-str
+		   if the check is SvTAIL(ed).  Since false positives are OK,
+		   and end-of-str is not later than strend we are OK. */
+		s = fbm_instr((unsigned char*)s,
+			      (unsigned char*)last + SvCUR(prog->float_substr)
+				  - (SvTAIL(prog->float_substr)!=0),
+			      prog->float_substr, PL_multiline ? FBMrf_MULTILINE : 0);
+		DEBUG_r(PerlIO_printf(Perl_debug_log, "%s floating substr `%s%.*s%s'%s",
+			(s ? "Found" : "Contradicts"),
+			PL_colors[0],
+			  SvCUR(prog->float_substr)
+			  - (SvTAIL(prog->float_substr)!=0),
+			  SvPVX(prog->float_substr),
+			  PL_colors[1], (SvTAIL(prog->float_substr) ? "$" : "")));
+		if (!s) {
+		    if (last1 == last) {
+			DEBUG_r(PerlIO_printf(Perl_debug_log,
+						", giving up...\n"));
+			goto fail_finish;
+		    }
+		    DEBUG_r(PerlIO_printf(Perl_debug_log,
+			", trying anchored starting at offset %ld...\n",
+			(long)(s1 + 1 - strpos)));
+		    other_last = last;
+		    PL_regeol = strend;			/* Used in HOP() */
+		    s = HOPc(t, 1);
+		    goto restart;
+		}
+		else {
+		    DEBUG_r(PerlIO_printf(Perl_debug_log, " at offset %ld...\n",
+			  (long)(s - strpos)));
+		    other_last = s - 1;
+		    if (t == strpos)
+			goto try_at_start;
+		    s = s1;
+		    goto try_at_offset;
+		}
+	}
     }
-    else if (s - strpos > prog->check_offset_max &&
-	     ((prog->reganch & ROPT_UTF8)
-	      ? ((t = reghopmaybe_c(s, -(prog->check_offset_max)))
-		 && t >= strpos)
-	      : (t = s - prog->check_offset_max) != 0) ) {
+
+    t = s - prog->check_offset_max;
+    tmp = PL_bostr;
+    if (s - strpos > prog->check_offset_max  /* signed-corrected t > strpos */
+        && (!(prog->reganch & ROPT_UTF8)
+	    || (PL_bostr = strpos, /* Used in regcopmaybe() */
+		((t = reghopmaybe_c(s, -(prog->check_offset_max)))
+		 && t > strpos)))) {
+	PL_bostr = tmp;
+	/* Fixed substring is found far enough so that the match
+	   cannot start at strpos. */
+      try_at_offset:
 	if (ml_anch && t[-1] != '\n') {
-	  find_anchor:
-	    while (t < strend - end_shift - prog->minlen) {
+	  find_anchor:		/* Eventually fbm_*() should handle this */
+	    while (t < strend - prog->minlen) {
 		if (*t == '\n') {
 		    if (t < s - prog->check_offset_min) {
 			s = t + 1;
+			DEBUG_r(PerlIO_printf(Perl_debug_log, "Found /%s^%s/m at offset %ld...\n",
+			    PL_colors[0],PL_colors[1], (long)(s - strpos)));
 			goto set_useful;
 		    }
+		    DEBUG_r(PerlIO_printf(Perl_debug_log, "Found /%s^%s/m, restarting at offset %ld...\n",
+			PL_colors[0],PL_colors[1], (long)(t + 1 - strpos)));
 		    s = t + 1;
 		    goto restart;
 		}
 		t++;
 	    }
-	    s = Nullch;
-	    goto finish;
+	    DEBUG_r(PerlIO_printf(Perl_debug_log, "Did not find /%s^%s/m...\n",
+			PL_colors[0],PL_colors[1]));
+	    goto fail_finish;
 	}
 	s = t;
       set_useful:
-	++BmUSEFUL(prog->check_substr);	/* hooray/2 */
+	++BmUSEFUL(prog->check_substr);	/* hooray/5 */
     }
     else {
-	if (ml_anch && sv 
+	PL_bostr = tmp;
+	/* The found string does not prohibit matching at beg-of-str
+	   - no optimization of calling REx engine can be performed,
+	   unless it was an MBOL and we are not after MBOL. */
+      try_at_start:
+	/* Even in this situation we may use MBOL flag if strpos is offset
+	   wrt the start of the string. */
+	if (ml_anch && sv
 	    && (strpos + SvCUR(sv) != strend) && strpos[-1] != '\n') {
 	    t = strpos;
 	    goto find_anchor;
 	}
+      success_at_start:
 	if (!(prog->reganch & ROPT_NAUGHTY)
 	    && --BmUSEFUL(prog->check_substr) < 0
 	    && prog->check_substr == prog->float_substr) { /* boo */
@@ -435,11 +611,14 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	    s = strpos;
     }
 
-    DEBUG_r(PerlIO_printf(Perl_debug_log, "%sFound%s at offset %ld\n",
-			  PL_colors[4],PL_colors[5], (long)(s - strpos)) );
+    DEBUG_r(PerlIO_printf(Perl_debug_log, "%sGuessed:%s match at offset %ld\n",
+			  PL_colors[4], PL_colors[5], (long)(s - strpos)) );
     return s;
+
+  fail_finish:				/* Substring not found */
+    BmUSEFUL(prog->check_substr) += 5;	/* hooray */
   fail:
-    DEBUG_r(PerlIO_printf(Perl_debug_log, "%sNot found...%s\n",
+    DEBUG_r(PerlIO_printf(Perl_debug_log, "%sMatch rejected by optimizer%s\n",
 			  PL_colors[4],PL_colors[5]));
     return Nullch;
 }
@@ -504,6 +683,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 
     PL_reg_flags = 0;
     PL_reg_eval_set = 0;
+    PL_reg_maxiter = 0;
 
     if (prog->reganch & ROPT_UTF8)
 	PL_reg_flags |= RF_utf8;
@@ -552,7 +732,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 
     DEBUG_r( if (!PL_colorset) reginitcolors() );
     DEBUG_r(PerlIO_printf(Perl_debug_log,
-		      "%sMatching%s `%s%.60s%s%s' against `%s%.*s%s%s'\n",
+		      "%sMatching REx%s `%s%.60s%s%s' against `%s%.*s%s%s'\n",
 		      PL_colors[4],PL_colors[5],PL_colors[0],
 		      prog->precomp,
 		      PL_colors[1],
@@ -3162,6 +3342,7 @@ S_regmatch(pTHX_ regnode *prog)
 	case REFF:
 	    n = ARG(scan);  /* which paren pair */
 	    ln = PL_regstartp[n];
+	    PL_reg_leftiter = PL_reg_maxiter;		/* Void cache */
 	    if (*PL_reglastparen < n || ln == -1)
 		sayNO;			/* Do not match unless seen CLOSEn. */
 	    if (ln == PL_regendp[n])
@@ -3306,6 +3487,10 @@ S_regmatch(pTHX_ regnode *prog)
 		    *PL_reglastparen = 0;
 		    PL_reg_call_cc = &state;
 		    PL_reginput = locinput;
+
+		    /* XXXX This is too dramatic a measure... */
+		    PL_reg_maxiter = 0;
+
 		    if (regmatch(re->program + 1)) {
 			ReREFCNT_dec(re);
 			regcpblow(cp);
@@ -3323,6 +3508,10 @@ S_regmatch(pTHX_ regnode *prog)
 		    PL_regcc = state.cc;
 		    PL_reg_re = state.re;
 		    cache_re(PL_reg_re);
+
+		    /* XXXX This is too dramatic a measure... */
+		    PL_reg_maxiter = 0;
+
 		    sayNO;
 		}
 		sw = SvTRUE(ret);
@@ -3350,6 +3539,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    sw = (*PL_reglastparen >= n && PL_regendp[n] != -1);
 	    break;
 	case IFTHEN:
+	    PL_reg_leftiter = PL_reg_maxiter;		/* Void cache */
 	    if (sw)
 		next = NEXTOPER(NEXTOPER(scan));
 	    else {
@@ -3388,7 +3578,7 @@ S_regmatch(pTHX_ regnode *prog)
 		/*
 		 * This is really hard to understand, because after we match
 		 * what we're trying to match, we must make sure the rest of
-		 * the RE is going to match for sure, and to do that we have
+		 * the REx is going to match for sure, and to do that we have
 		 * to go back UP the parse tree by recursing ever deeper.  And
 		 * if it fails, we have to reset our parent's current state
 		 * that we can try again after backing off.
@@ -3446,6 +3636,51 @@ S_regmatch(pTHX_ regnode *prog)
 				      REPORT_CODE_OFF+PL_regindent*2, "")
 			);
 		    sayNO;
+		}
+
+		if (scan->flags) {
+		    /* Check whether we already were at this position.
+			Postpone detection until we know the match is not
+			*that* much linear. */
+		if (!PL_reg_maxiter) {
+		    PL_reg_maxiter = (PL_regeol - PL_bostr + 1) * (scan->flags>>4);
+		    PL_reg_leftiter = PL_reg_maxiter;
+		}
+		if (PL_reg_leftiter-- == 0) {
+		    I32 size = (PL_reg_maxiter + 7)/8;
+		    if (PL_reg_poscache) {
+			if (PL_reg_poscache_size < size) {
+			    Renew(PL_reg_poscache, size, char);
+			    PL_reg_poscache_size = size;
+			}
+			Zero(PL_reg_poscache, size, char);
+		    }
+		    else {
+			PL_reg_poscache_size = size;
+			Newz(29, PL_reg_poscache, size, char);
+		    }
+		    DEBUG_r(
+			PerlIO_printf(Perl_debug_log,
+	      "%sDetected a super-linear match, switching on caching%s...\n",
+				      PL_colors[4], PL_colors[5])
+			);
+		}
+		if (PL_reg_leftiter < 0) {
+		    I32 o = locinput - PL_bostr, b;
+
+		    o = (scan->flags & 0xf) - 1 + o * (scan->flags>>4);
+		    b = o % 8;
+		    o /= 8;
+		    if (PL_reg_poscache[o] & (1<<b)) {
+		    DEBUG_r(
+			PerlIO_printf(Perl_debug_log,
+				      "%*s  already tried at this position...\n",
+				      REPORT_CODE_OFF+PL_regindent*2, "")
+			);
+			sayNO;
+		    }
+		    PL_reg_poscache[o] |= (1<<b);
+		}
 		}
 
 		/* Prefer next over scan for minimal matching. */
