@@ -425,12 +425,16 @@ sv_setsv, are again available.
 
 Certain Perl core C APIs like cxinc and regatom are no more available.
 They never should have been, and if you application depends on them,
-you should (be ashamed and) contact perl5-porters to discuss what
-are the proper APIs.
+you should (be ashamed and) contact perl5-porters to discuss what are
+the proper APIs.
 
-Certain APIs like Perl_list are no longer available without their Perl_
-prefix.  For cleaner embedding you can also force this for all APIs by
-defining at compile time the cpp define PERL_NO_SHORT_NAMES.
+Certain APIs like Perl_list are no longer available without their
+Perl_ prefix.  If your XS module stops working because some functions
+cannot be found, in many cases a simple fix is to add the C<Perl_>
+prefix to the function and the thread context C<aTHX_> as the first
+argument of the function call. For cleaner embedding you can also
+force this for all APIs by defining at compile time the cpp define
+PERL_NO_SHORT_NAMES.
 
 Perl_save_bool() has been added.
 
