@@ -2003,12 +2003,6 @@
 /*#define HAS_PTHREAD_YIELD	/**/
 /*#define HAS_SCHED_YIELD	/**/
 
-/* PTHREADS_CREATED_JOINABLE:
- *	This symbol, if defined, indicates that pthreads are created
- *	in the joinable (aka undetached) state.
- */
-/*#define PTHREADS_CREATED_JOINABLE /**/
-
 /* USE_THREADS:
  *	This symbol, if defined, indicates that Perl should
  *	be built to use threads.
