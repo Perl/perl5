@@ -123,6 +123,15 @@ for f in $nonxs_ext; do
     nonxs_list="$nonxs_list ext/$f/pm_to_blib"
 done
 
+# Handle the usage of different yaccs in posix-bc (During Configure we
+# us yacc for perly.y and byacc for a2p.y.  The makefiles must use the
+# same configuration for run_byacc!):
+case "$osname" in
+    posix-bc)
+	byacc=$yacc
+	;;
+esac
+
 echo "Extracting Makefile (with variable substitutions)"
 $spitshell >Makefile <<!GROK!THIS!
 # Makefile.SH
@@ -990,6 +999,7 @@ os390|posix-bc)
             mv -f y.tab.c a2p.c
             chmod u+w a2p.c
             sed -e 's/fprintf *( *stderr *,/PerlIO_printf(Perl_debug_log,/g' \
+		-e 's|^static void __YY_YACC_MAIN.*BS2000.*|/*static main deleted*/|' \
                 -e 's/y\.tab/a2p/g' a2p.c >a2p.tmp && mv a2p.tmp a2p.c
             xxx="$xxx a2p.c"
         fi
