@@ -16,12 +16,16 @@ BEGIN {
 
 use Test;
 
-plan tests => 15;
+plan tests => 17;
 
 my $STDOUT = './results-0';
 my $STDERR = './results-1';
 my $PERL = './perl';
 my $FAILURE_CODE = 119;
+
+delete $ENV{PERLLIB};
+delete $ENV{PERL5LIB};
+delete $ENV{PERL5OPT};
 
 # Run perl with specified environment and arguments returns a list.
 # First element is true if Perl's stdout and stderr match the
@@ -163,6 +167,18 @@ try({PERL5LIB => "foobar:42"},
 try({PERL5LIB => "foobar:42"},
     ['-e', 'print grep { $_ eq "42" } @INC'],
     '42',
+    '');
+
+try({PERL5LIB => "foo",
+     PERLLIB => "bar"},
+    ['-e', 'print grep { $_ eq "foo" } @INC'],
+    'foo',
+    '');
+
+try({PERL5LIB => "foo",
+     PERLLIB => "bar"},
+    ['-e', 'print grep { $_ eq "bar" } @INC'],
+    '',
     '');
 
 # PERL5LIB tests with included arch directories still missing
