@@ -1,22 +1,482 @@
 =head1 NAME
 
-perldelta - what's new for perl v5.8.0
+perldelta - what's new for perl v5.7.0
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.6 release and this one.
+This document describes differences between the 5.6.0 release and
+the 5.7.0 release.
 
 =head1 Core Enhancements
 
+=over 4
+
+=item *
+
+C<perl -d:Module=arg,arg,arg> now works (previously one couldn't pass
+in multiple arguments.)
+
+=item *
+
+Infinity (in numerical context, for example as "Inf", the exact string
+representation is platform-dependent) doesn't cause "not a number"
+warnings.
+
+=item *
+
+my __PACKAGE__ now works.
+
+=item *
+
+no Module; now works even if there is no "sub unimport" in the Module.
+
+=item *
+
+The numerical comparison <=> now returns C<undef> if either operand is a NaN.
+Previously the behaviour was unspecified.
+
+=item *
+
+C<pack('U0a*', ...)> can now be used to force the string to UTF8.
+
+=item *
+
+prototype(\&) is now available.
+
+=item *
+
+sort() is now re-entrant (sort() can call sort(), in other words)
+
+=back
+
 =head1 Modules and Pragmata
+
+=head2 New Modules
+
+The Storable extnesion, version 0.7.2, released the 14th of August
+2000, has been added to the Perl distribution.  Storable gives
+persistence to Perl data structures by allowing to store and retrieve
+Perl data to and from files in fast and compact binary format.
+
+=head2 Updated And Improved Modules and Pragmata
+
+=over 4
+
+=item *
+
+The attributes::reftype() now works on tied arguments.
+
+=item *
+
+AutoLoader can now be `stopped' by
+
+	no AutoLoader; 
+
+=item *
+
+B::Deparse now understands sub attributes.
+
+=item *
+
+Data::Dumper now works on negative number on 32-bit platforms where IV
+(the Perl's integer datatype) is greater than 32 bits.  Also, large
+unsigned numbers are now dumped as such, not as large negative numbers.
+
+=item *
+
+CGI has been updated to version 2.72, released
+the 20th of August 2000.
+
+=item *
+
+CPAN has been updated to version 1.57, released
+the 16th of August 2000.
+
+=item *
+
+DB_File has been updated to version 1.73, released the
+27th of April 2000.
+
+=item *
+
+The English module can now be used without the infamous performance
+hit by saying
+
+	use English '-no_performance_hit';
+
+(Assuming, of course, that one doesn't need the troublesome variables
+C<$`>, C<$&>, or C<$'>.)  Also, introduce C<@LAST_MATCH_START> and
+C<@LAST_MATCH_END> English aliases for C<@-> and C<@+>.
+
+=item *
+
+File::Find now has pre- and postprocessing callbacks.
+It also correctly changes directories when chasing symbolic links.
+Callbacks doing (naughtily) "next;" instead of "return;" now work.
+
+=item *
+
+File::Glob::globI() rename to File::Glob::bsd_glob() to avoid
+prototype mismatch with CORE::glob().
+
+=item *
+
+File::Spec has been updated to version 0.82, released the
+1st of July 2000.
+
+=item *
+
+File::Temp has been updated to version 0.10 (unpublished as the 20th
+of August 2000).
+
+=item *
+
+Getopt::Long has been updated to version 2.23_05, released the 2nd of
+August 2000.
+
+=item *
+
+IO::Poll has been thoroughly fixed.
+
+=item *
+
+IO::Socket::INET now works when given an unknown service name with 
+a port number.
+
+=item *
+
+IPC::Open3 now allows the use of numeric filedescriptors.
+
+=item *
+
+use lib now works identically to @INC.  Removing directories
+with 'no lib' now works.
+
+=item *
+
+Math::BigFloat now more robust (less "uninitialized" warnings).
+
+=item *
+
+Math::Complex now handles extreme values (e.g. 1E20-1E30i more) more
+gracefully.
+
+=item *
+
+The podlators bundle has been updated to version 1.02, released the
+25th of April 2000.  It contains the modules Pod::Man 1.04, Pod::Text
+2.04, and modules Pod::Text::Color and Pod::Text::Termcap (no version
+numbers).
+
+=item *
+
+Pod::LaTeX has been updated to version 0.52, released the 15th
+of May 2000.
+
+=item *
+
+Pod::Parser has been updated to version 1.17, released the 25th of
+July 2000.  It contains the modules Pod::Checker 1.20, Pod::Find 0.21,
+Pod::InputObjects 1.13, Pod::ParseUtils 0.22, Pod::Parser 1.12,
+Pod::Select 1.13, and Pod::Usage 1.13.
+
+=item *
+
+The subpragma 'debug' of the 're' pragma now produces cleaner output.
+
+=item *
+
+C<%INC> now localized in a Safe compartment so that use/require work.
+
+=item *
+
+SelfLoader no more loses C<$@> in AUTOLOAD.
+
+=item *
+
+The Shell module now has an OO interface.
+
+=item *
+
+Sys::Syslog now works on domain sockets.  Also, a forked child
+now exits correctly if it fails to open /dev/console.
+
+=item *
+
+Term::ANSIColor has been updated to version 1.03, released the 6th of
+August 2000.
+
+=item *
+
+The Test module has been updated to version 1.14, released the 21st of June
+1999.  This is for all practical purposes identical to the previous release
+of Test included with the Perl distribution, 1.13, but upgrading the module
+stops the CPAN module from suggesting an upgrade.
+
+=item *
+
+Test::Harness output now prettier on failed test.
+
+=item *
+
+Text::Wrap::wtbrap now handles multiline strings properly.
+
+=item *
+
+UNIVERSAL::isa no more caches methods incorrectly.
+
+=back
 
 =head1 Utility Changes
 
+=head2 cperl-mode version 4.31
+
+The Emacs perl mode (emacs/cperl-mode.el) has been updated to version 4.31.
+
+=head2 perlbug
+
+Perlbug is now much more robust.  It also sends the bug report to perl.org,
+not perl.com.
+
+=head2 perlcc now more cc-like and more robust
+
+The perlcc utility has been rewritten and its user interface (that is,
+command line) is much more like that of the UNIX C compiler, cc.
+
+=head2 xsubpp now understands embedded pod
+
+The xsubpp utility for extension writers now understands POD
+documentation embedded in the *.xs files.
+
 =head1 Improved Documentation
 
-=head1 Performance enhancements
+=over 4
+
+=item *
+
+In many places say "alphanumeric characters" instead of "word
+characters" because that was what was meant.
+
+=item *
+
+Eradicate "array context" from the documentation and diagnostics.
+
+=item *
+
+The return values of a failing backtick (`, qx{}) are now documented
+in perlop.
+
+=item *
+
+caller() return values now better documented.
+
+=item *
+
+SDBM_File, NDBM_File, ODBM_File, now tell about tying instead of
+glossing over.
+
+=item *
+
+Document that the C<$(> special variable does not interpolate
+in regular expressions.
+
+=item *
+
+Add an URL for FSF in README.
+
+=item *
+
+The timeout unit of IO::Select is now documented to be identical
+to the timeout unit of the 4-arg select(), that is, (optionally
+fractional) seconds, or an undef to wait indefinitely.
+
+=item *
+
+Document the C<D> and C<d> magic types.
+
+=item *
+
+The ordering of PODs in perl.pod is now more sensical.
+
+=item *
+
+perlbook now only mentions the Camel III, all other book references
+have been moved to perlfaq2, some good known books added.
+
+=item *
+
+Numerous missing warning/error messages added to perldiag.
+
+=item *
+
+Tell what's perl6 in perlfaq1.
+
+=item *
+
+perlhack much extended.
+
+=item *
+
+perltrap cleaned up.
+
+=item *
+
+Add perlxstut example for passing/returning refs to arrays.
+
+=item *
+
+POSIX module documentation embellished.
+
+=item *
+
+Clarify the status of shadow password support.
+
+=item *
+
+Remind that preprocessors and source filters can alter
+your code before Perl sees it and therefore debugging
+can be somewhat surprising.  ("I didn't write *that*!")
+
+=item *
+
+Remove incorrect documentation about implicit split to @_
+in list context, which never really worked in Perl 5 anyway.
+
+=item *
+
+Tell that split /^/ is split /^/m.
+
+=item *
+
+Many more sprintf() examples in perlfunc.
+
+=item *
+
+Document the handling of negative indices to tied arrays.
+
+=item *
+
+The C<$yday> in localtime()/gmtime() is 0..364, not 1..365.
+
+=item *
+
+Document that tr() is not tr(1): that is, do not expect regular expressions.
+
+=item *
+
+Warn about the vagaries of UDP.
+
+=item *
+
+The uninitialized variable warnings now say "concat or string" or
+"join or string" instead of just "concat" or "join" since many users
+found the "concat" a bit surprising when they were doing "just"
+variable interpolation.
+
+=item *
+
+Document that the values() are copies, not aliases.
+
+=back
+
+=head2 New Documentation
+
+=over 4
+
+=item *
+
+perl56delta details the changes between the 5.005 release and the
+release 5.6.0.
+
+=item *
+
+perl56delta is a Perl debugging tutorial.
+
+=item *
+
+perlebcdic contains considerations for running Perl on EBCDIC platforms.
+Note that unfortunately EBCDIC platforms that used to supported back in
+Perl 5.005 are still unsupported by Perl 5.7; the plan, however, is to
+bring them back to the fold.  
+
+=item *
+
+perlnewmod tells about writing and submitting a new module.
+
+=item *
+
+perlposix-bc explains using Perl on the POSIX-BC platform
+(a mainframe platform).
+
+=item *
+
+perlretut is a regular expression tutorial.
+
+=item *
+
+perlrequick is regular expressions quick-start guide.
+Yes, much quicker than perlretut.
+
+=item *
+
+perlutil explains the command line utilities packaged with the Perl
+distribution.
+
+=back
+
+=head1 Security Vulnerability
+
+A potential security vulnerability in the optional suidperl component
+of Perl has been identified.  The suidperl is neither built nor
+installed by default.  As of August the 20th 2000 the only known
+vulnerable platform is Linux, most likely all Linux distributions.
+The CERT and various vendors have been alerted about the vulnerability.
+
+The problem was caused by Perl trying to report a suspected security
+exploit attempt using an external program, /bin/mail.  In Linux
+platforms the /bin/mail program had an undocumented feature which gave
+access to a root shell, resulting in a serious compromise, instead of
+reporting the exploit attempt.  If you don't have /bin/mail or if you
+have 'safe suid scripts' or if you haven't installed the suidperl, you
+are safe.
+
+The exploit attempt reporting feature has been completely removed from
+the Perl 5.7.0 release, so that particular vulnerability isn't there
+anymore.  However, further security vulnerabilities are,
+unfortunately, always possible.  The suidperl code is being reviewed
+and if deemed too risky to continue being supported, in the extreme
+case it may be completely removed in future releases.  In any case,
+suidperl should only be used by security experts who know exactly what
+they are doing and why are they using suidperl instead of some other solution.
+A good tool for similar needs is sudo: http://www.courtesan.com/sudo/
+
+=head1 Performance Enhancements
+
+map() that changes the size of the list should now work faster.
 
 =head1 Installation and Configuration Improvements
+
+=head2 INSTALL now explains 64-bit configuration.
+
+In some platforms Perl can be configured to use 64-bit integers,
+allowing 4 billion times better...sorry, switched accidentally to
+marketdroid mode for a moment in there.  (In platforms which are
+natively 64-bit this makes no difference.)
+
+=head2 Policy.sh policy change
+
+If you are reusing a Policy.sh file (see INSTALL) and you use 
+Configure -Dprefix=/foo/bar and in the old Policy $prefix eq
+$siteprefix and $prefix eq $vendorprefix, all of them will now
+be changed to the new prefix, /foo/bar.  (Previously only $prefix
+did change.)  If you do not like this new behaviour, specify
+prefix, siteprefix, and vendorprefix explicitly.
+
+=head2 Additional Library Locations
+
+A new optional location for Perl libraries, otherlibdirs, is available.
+It can be used for example for vendor add-ons without disturbing Perl's
+own library directories.
 
 =head2 gcc automatically tried if 'cc' does not seem to be working
 
@@ -25,34 +485,669 @@ build Perl (basically, the 'cc' doesn't do ANSI C).  If this seems
 to be the case and the 'cc' does not seem to be the GNU C compiler
 'gcc', an automatic attempt is made to find and use 'gcc' instead.
 
-=head1 Platform specific changes
+=head2 If gcc seems to be from from a different operating system release ...
 
-=head1 Significant bug fixes
+gcc needs to closely track the operating system release because gcc
+wants to have its own versions of the operating system header files
+fixed to be clean enough for gcc's tastes.  Therefore using a gcc
+compiled for a different release of the operating system is often a
+bad idea.  If Configure can find out the operating system release that
+was used to compile the gcc and that release is different from the one
+being used now, gcc gives a clearly visible warning that trouble may
+lie ahead.
 
-=head1 New or Changed Diagnostics
+=head2 If no binary compatibilty with 5.005 wanted, no 5.005 modules, either
+
+If no binary compatibility with the 5.005 release is wanted, Configure
+does not suggest including the 5.005 modules in the @INC.
+
+=head2 Configuration and Installation fixes
 
 =over 4
 
-=item (perhaps you forgot to load "%s"?)
+=item *
+
+Configure C<-S> can now run non-interactively
+
+=item *
+
+configure.gnu now works with options with whitespace in them
+
+=item *
+
+installperl now outputs everything to STDERR
+
+=item *
+
+$Config{byteorder} is now computed dynamically (this is more robust
+with "fat binaries" where an executable image contains binaries for
+more than one binary platform.)
+
+=back
+
+=head1 Platform Specific Changes and Fixes
+
+=head2 BSDI 4.*
+
+Perl now works on post-4.0 BSD/OSes.
+
+=head2 All BSDs
+
+Setting the C<$0> now works (as much as possible, see perlvar for details).
+
+=head2 Cygwin
+
+=over 4
+
+=item *
+
+Numerous updates; currently synchronized with Cygwin 1.1.4.
+
+=back
+
+=head2 EPOC
+
+EPOC update after Perl 5.6.0.  The EPOC port home page is at
+http://members.linuxstart.com/~oflebbe/perl/perl5.html
+
+=head2 FreeBSD 3.*
+
+Perl now works on post-3.0 FreeBSDs.
+
+=head2 HP-UX
+
+=over 4
+
+=item *
+
+Document that the C<perl -P> causes problems if one uses C<s/foo//>
+(because the HP C compiler does funny things to that // thinking it
+to be C++), document also the workaround.
+
+=item *
+
+C<Configure -Duse64bitall> now almost works (one failing test).
+
+=back
+
+=head2 IRIX
+
+=over 4
+
+=item *
+
+Numerous compilation flag and hint enhancements.
+
+=item *
+
+Accidental mixing of 32-bit and 64-bit libraries (a doomed attempt)
+made much harder.
+
+=back
+
+=head2 Linux
+
+=over 4
+
+=item *
+
+Long doubles should now work (see INSTALL).
+
+=back
+
+=head2 MacOS Classic
+
+=over 4
+
+=item *
+
+Compilation of the standard Perl distribution in MacOS Classic should
+now work--assuming you have the Metrowerks development environment and
+the missing Mac-specific toolkit bits, contact the macperl mailing
+list for details.
+
+=back
+
+=head2 MPE/iX
+
+MPE/iX update after Perl 5.6.0.  The Perl/iX home page is at
+http://www.bixby.org/mark/perlix.html 
+
+=head2 NetBSD/sparc
+
+Perl now works on NetBSD/sparc.
+
+=head2 OS/2
+
+=over 4
+
+=item *
+
+Now works with usethreads (see INSTALL).
+
+=back
+
+=head2 Solaris
+
+=over 4
+
+=item *
+
+64-bitness using the Sun Workshop compiler now works.
+
+=back
+
+=head2 Tru64 (aka Digital UNIX, aka DEC OSF/1)
+
+=over 4
+
+=item *
+
+Allow compiling with gcc (previously explicitly forbidden).  Compiling
+with gcc still not recommended because buggy code results, even with
+gcc 2.95.2.
+
+=item *
+
+The operating system version letter now recorded in $Config{osvers}.
+
+=back
+
+=head2 Unicos
+
+=over 4
+
+=item *
+
+Fixed various alignment problems that lead into core dumps either
+during build or later.
+
+=item *
+
+No more dying on math errors in runtime.
+
+=item *
+
+Now using full quad integers (64 bits), previously was using 
+only 43 bit integers for speed.
+
+=back
+
+=head2 VMS
+
+=over 4
+
+=item *
+
+chdir() now works better despite a CRT bug.
+
+=item *
+
+Now works with MULTIPLICITY (see INSTALL).
+
+=item *
+
+Now works with Perl's malloc.
+
+=back
+
+=head2 Windows
+
+=over 4
+
+=item *
+
+accept() no more leaks memory.
+
+=item *
+
+Better chdir() return value for a non-existent directory.
+
+=item *
+
+New %ENV entries now propagate to subprocesses.
+
+=item *
+
+$ENV{LIB} now used to search for libs under Visual C.
+
+=item *
+
+A failed (pseudo)fork now returns undef and sets errno to EAGAIN.
+
+=item *
+
+Allow REG_EXPAND_SZ keys in the registry.
+
+=item *
+
+Can now send() from all threads, not just the first one.
+
+=item *
+
+Fake signal handling reenabled, bugs and all.
+
+=item *
+
+Less stack reserved per thread so that more threads can run
+concurrently. (still 16M perl thread)
+
+=item *
+
+C<File::Spec->tmpdir()> now prefers C:/temp over /tmp
+(works better when perl running as service).
+
+=item *
+
+Better UNC path handling under ithreads.
+
+=item *
+
+wait() and waitpid() now work much better.
+
+=item *
+
+winsock handle leak fixed.
+
+=back
+
+=head1 Selected Bug Fixes
+
+The following is by no means a comprehensive list of all the
+numerous bug fixes.
+
+=over 4
+
+=item *
+
+Redefining constant subroutines using eval (again) warns.
+
+=item *
+
+Several debugger fixes: exit code now reflects the script exit code,
+condition C<"0"> now treated correctly, the C<d> command now checks
+line number, the C<$.> no more gets corrupted, all debugger output now
+goes correctly to the socket if RemotePort is set.
+
+=item *
+
+C<*foo{FORMAT}> now works.
+
+=item *
+
+Lexical warnings now propagating correctly between scopes.
+
+=item *
+
+Line renumbering with eval and C<#line> now works.
+
+=item *
+
+Module name now mandatory after the C<-M> switch.
+
+=item *
+
+Fixed numerous memory leaks, especially in eval "".
+
+=item *
+
+Moduli of unsigned numbers now works (4063328477 % 65535 used to
+return 27406, instead of 27047).
+
+=item *
+
+msgrcv() no more warns about uninitialized input scalar.
+
+=item *
+
+Some "not a number" warnings introduce in 5.6.0 eliminated to be
+more compatible with 5.005.
+
+=item *
+
+out() variables will not cause "will not stay shared" warnings
+
+=item *
+
+The pack "Z" now correctly terminates the string with an "\0".
+
+=item *
+
+Fix password routines which in some shadow password platforms
+(e.g. HP-UX) caused getpwent() to return every other entry.
+
+=item *
+
+POSIX::STDERR_FILENO (not POSIX::STRERR_FILENO).
+
+=item *
+
+printf() no more resets the numeric locale to "C".
+
+=item *
+
+C<q(a\\b)> now parses as C<'a\\b'>.
+
+=item *
+
+In quad (64-bit) platforms numbers now stay integers longer
+(as opposed to converting automatically to floating point numbers).
+
+=item *
+
+Printing quads (64-bit integers) with printfs/sprintf works now
+without q L ll prefixes (assuming you are on a quad-capable platform).
+
+=item *
+
+Regular expressions on references and overloaded scalars now work.
+
+=item *
+
+Multiline matching of C<"a\nxb\n" =~ /(?!\A)x/m> now works.
+
+=item *
+
+C</(?i)/> now works.
+
+=item *
+
+C</x{ab}/> now works.
+
+=item *
+
+scalar() now doesn't force scalar context when used in void context.
+
+=item *
+
+All the documented examples Shell.pm now work.
+
+=item *
+	
+sort() arguments are now compiled in the right wantarray context
+(were accidentally using the context of the sort() itself).
+
+=item *
+
+Changed the POSIX character class C<[[:space:]]> to include the (very
+rare) vertical tabulator character.  Added a new POSIX-ish character
+class C<[[:blank:]] which stands for horizontal whitespace (currently,
+the space and the tabulator).
+
+=item *
+
+sprintf() format specs like C<%v-*d> now work.
+
+=item *
+
+The (nonsensical) C<%#p> format made illegal.
+
+=item *
+
+C<${$1}> now works (again).
+
+=item *
+
+$AUTOLOAD, sort(), lock(), and spawning subprocesses
+in multiple thread simultaneously are now thread-safe.
+
+=item *
+
+Allow non-variable as left-handside of non-updating tr///.
+
+=item *
+
+Several Unicode fixes (but still not perfect).
+
+BOMs (byte order marks) in the beginning of Perl files
+(scripts, modules) should now be transparently skipped.
+
+The character tables have been updated to new Unicode 3.0 features.
+
+chr() for values greater than 127 now create utf8 when under use
+utf8.
+
+Comparing with utf8 data does not magically upgrade non-utf8 data into
+utf8.
+
+C<IsAlnum>, C<IsAlpha>, and C<IsWord> now match titlecase.
+
+Concatenation with the C<.> operator or via variable interpolation,
+C<eq>, C<substr>, C<reverse>, C<quotemeta>, the C<x> operator,
+substitution with C<s///>, single-quoted UTF8, should now work--in
+theory.
+
+The C<tr///> operator now works I<slightly> better but is still rather
+broken.  Note that the C<tr///CU> functionality has been removed (but
+see pack('U0', ...).
+
+Zero entries were missing from the Unicode classes like C<IsDigit>.
+
+=item *
+
+Unsignedness could disappear from a scalar causing later numeric
+comparisons to fail.
+
+=item *
+
+vec() now drops numericalness.
+
+=back
+
+=head1 New or Changed Diagnostics
+
+All regular expression compilation error messages are now hopefully
+easier to understand both because the error message now comes before
+the failed regex and because the point of failure is now clearly
+marked.
+
+The various "opened only for", "on closed", "never opened" warnings
+drop the C<main::> prefix for filehandles in the C<main> package,
+for example C<STDIN> instead of <main::STDIN>.
+
+=over 4
+
+=item *
+
+(perhaps you forgot to load "%s"?)
 
 (F) This is an educated guess made in conjunction with the message
 "Can't locate object method \"%s\" via package \"%s\"".  It often means
 that a method requires a package that has not been loaded.
 
-=item Ambiguous range in transliteration operator
+=item *
+
+Ambiguous range in transliteration operator
 
 (F) You wrote something like C<tr/a-z-0//> which doesn't mean anything at
 all.  To include a C<-> character in a transliteration, put it either
 first or last.  (In the past, C<tr/a-z-0//> was synonymous with
 C<tr/a-y//>, which was probably not what you would have expected.)
 
+=item *
+
+The "Unrecgonized escape" warning has been extended to include C<\8>,
+C<\9>, and C<\_>.  There is no need to espace any of the C<\w> characters.
+
 =back
 
 =head1 New tests
 
+=over 4
+
+=item *
+
+lib/b tests the various compiler backends (see L<perlcompile>).
+
+=item *
+
+lib/cgi-pretty tests CGI pretty printing.
+
+=item *
+
+lib/ftmp-*.t test File::Temp.
+
+=item *
+
+lib/gol-oo tests Getopt::Long objected-oriented interface.
+
+=item *
+
+lib/peek tests Devel::Peek.
+
+=item *
+
+lib/selfloader tests SelfLoader.
+
+=item *
+
+lib/syslog tests Sys::Syslog.
+
+=item *
+
+op/bless tests bless().
+
+=item *
+
+op/stash tests the "my Package ..." feature.
+
+=item *
+
+op/regmesg exercises all various regex errors.
+
+=item *
+
+pod/find tests Pod::Find.
+
+=back
+
+=head2 Improved Tests
+
+=over 4
+
+=item *
+
+op/sprintf coverage is now of much more comprehensive.
+
+=item *
+
+op/taint now continues on failed shmget().
+
+=item *
+
+lib/*lfs.t now continues even if SIXFSZ happens.
+
+=item *
+
+lib/syslog.t now works without sockets.
+
+=back
+
 =head1 Incompatible Changes
 
+=head2 Arrays Now Always Interpolate Into Double-Quoted Strings
+
+Constructs like "foo@bar" now always assume the C<@bar> to be an array,
+and not dependent on whether it is known whether that is an array or not.
+
+=head2 bless(REF, REF) is now a fatal error
+
+The semantics of bless(REF, REF) were unclear and until someone proves
+it to make some sense, it is forbidden.
+
+=head2 The eg/* Directory Removed
+
+The very dusty examples in the eg/ directory have been removed.
+Suggestions for new shiny examples welcome but the main issue is that
+the examples need to be documented, tested, and most importantly maintained.
+
+=head2 The lib/chat2.pl
+
+The obsolete chat2 library that should never have been allowed
+to escape the laboratory has been decommissioned.
+
+=head2 The Unimplemented (But Recognized) POSIX Regex Features Now Fatal
+
+The unimplemented POSIX regex features [[.cc.]] and [[=c=]] are
+recognized as before but now cause fatal runtime errors.  The previous
+behaviour of ignoring them by default and warning if requested was
+unacceptable since it in a way falsely promised that the features
+can be used.
+
+=head2 lstat(FILEHANDLE) now warns
+
+lstat(FILEHANDLE) now gives a warning because the operation makes no sense.
+In future releases this may become a fatal error.
+
+=head2 Obsolete String Comparison Operators Removed
+
+The long since deprecated uppercase aliases for the string comparison
+operators (EQ, NE, LT, LE, GE, GT) have now been removed.
+
+=head2 The Regular Expression Submatches Are Now Unset When Backtracking 
+
+The regular expression captured submatches ($1, $2, ...) are now
+consistently unset if the match fails, instead of leaving false
+data lying around in them.
+
+=head2 tr///CU Removed, Not To Return
+
+The tr///C and tr///U features have been removed and will not return,
+the interface was a mistake.  Sorry about that.  For similar
+functionality, see pack('U0', ...) and pack('C0', ...).
+
+=head1 Changed Internals
+
+=head2 apidoc
+
+The perlapi.pod now attempts to document the internal API
+(a companion to perlguts).
+
+=head2 microperl
+
+There is now a way to build really minimal perl called microperl.
+Building does not require even running Configure, C<make -f Makefile.micro>
+should be enough.  Beware: microperl makes many assumptions, some of
+which may be too bold, the resulting executable may crash or
+otherwise misbehave in wondrous ways.  For careful hackers only.
+
+=head2 Publicize More Functions
+
+Added rsignal(), whichsig(), do_join() to the publicized API.
+
+=head2 Propagating Exception Objects via Perl_croak() IN XS code
+
+Made possible to propagate customized exceptions via croak()ing.
+
+=head2 UTF8 Interfaces
+
+Added is_utf8_char(), is_utf8_string(), bytes_to_utf8(), and utf8_to_bytes().
+
+=head2 xsub attributes
+
+Now xsubs can have attributes just like subs.
+
 =head1 Known Problems
+
+=head2 Unicode Support Still Far From Perfect
+
+We're working on it.  Stay tuned.
+
+=head2 EBCDIC Still A Lost Platform
+
+The plan is to bring them back.
+
+=head2 Building Extensions Can Fail Because Of Largefiles
+
+Certain extensions like mod_perl and BSD::Resource are known to have
+issues with `largefiles', a change brought by Perl 5.6.0 in where file
+offsets are by default 64 bits wide (assuming the platform supports
+such large files).  Modules may fail to compile at all or compile and
+work incorrectly.  Currently there is no good solution for the problem
+but Configure now stores the flags and libraries that effect the
+largefileness to the %Config hash, the extensions that are having
+problems can try configuring themselves without the largefileness.
+This is admittedly not a clean solution.
 
 =head1 Obsolete Diagnostics
 
@@ -81,8 +1176,8 @@ The F<Artistic> and F<Copying> files for copyright information.
 
 =head1 HISTORY
 
-Written by Gurusamy Sarathy <F<gsar@activestate.com>>, with many
-contributions from The Perl Porters.
+Written by Jarkko Hietaniemi <F<jhi@iki.fi>>, with many contributions
+from The Perl Porters and Perl Users submitting feedback and patches.
 
 Send omissions or corrections to <F<perlbug@perl.com>>.
 
