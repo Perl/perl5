@@ -138,7 +138,22 @@ perform the upgrade if necessary.  See C<svtype>.
 	((PL_Sv=(SV*)(sv)), (PL_Sv && ++(SvREFCNT(PL_Sv))), (SV*)PL_Sv)
 #endif
 
+#if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC)
+#  define SvREFCNT_dec(sv)		\
+    ({					\
+	SV *nsv = (SV*)(sv);		\
+	if (nsv) {			\
+	    if (SvREFCNT(nsv)) {	\
+		if (--(SvREFCNT(nsv)) == 0) \
+		    Perl_sv_free2(aTHX_ nsv);	\
+	    } else {			\
+		sv_free(nsv);		\
+	    }				\
+	}				\
+    })
+#else
 #define SvREFCNT_dec(sv)	sv_free((SV*)(sv))
+#endif
 
 #define SVTYPEMASK	0xff
 #define SvTYPE(sv)	((sv)->sv_flags & SVTYPEMASK)

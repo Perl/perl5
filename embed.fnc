@@ -726,6 +726,7 @@ Ap	|void	|sv_dump	|SV* sv
 Apd	|bool	|sv_derived_from|SV* sv|const char* name
 Apd	|I32	|sv_eq		|SV* sv1|SV* sv2
 Apd	|void	|sv_free	|SV* sv
+po	|void	|sv_free2	|SV* sv
 pd	|void	|sv_free_arenas
 Apd	|char*	|sv_gets	|SV* sv|PerlIO* fp|I32 append
 Apd	|char*	|sv_grow	|SV* sv|STRLEN newlen

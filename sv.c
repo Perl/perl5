@@ -5436,6 +5436,12 @@ Perl_sv_free(pTHX_ SV *sv)
     }
     if (--(SvREFCNT(sv)) > 0)
 	return;
+    Perl_sv_free2(aTHX_ sv);
+}
+
+void
+Perl_sv_free2(pTHX_ SV *sv)
+{
 #ifdef DEBUGGING
     if (SvTEMP(sv)) {
 	if (ckWARN_d(WARN_DEBUGGING))
