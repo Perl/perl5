@@ -44,8 +44,11 @@ currently only stores a pointer to the first interpreter.
 void
 Perl_sharedsv_init(pTHX)
 {
-    PL_sharedsv_space = PERL_GET_CONTEXT;
-    MUTEX_INIT(&PL_sharedsv_space_mutex);
+  PerlInterpreter* old_context = PERL_GET_CONTEXT;
+  PL_sharedsv_space = perl_alloc();
+  perl_construct(PL_sharedsv_space);
+  PERL_SET_CONTEXT(old_context);
+  MUTEX_INIT(&PL_sharedsv_space_mutex);
 }
 
 /*
