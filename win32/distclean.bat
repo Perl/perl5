@@ -13,7 +13,7 @@ my $name = $File::Find::name;
 $name =~ s#^\./##;
  unless (exists $files->{$name})
   {
-   print "new $name\n";
+   # print "new $name\n";
    push(@dead,$name);
   } 
 },'.');
