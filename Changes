@@ -1,3 +1,280 @@
+Please note: This file provides a summary of significant changes
+between versions and sub-versions of Perl, not a complete list
+of each modification.  If you'd like more detailed information,
+please consult the comments in the patches on which the relevant
+release of Perl is based.  (Patches can be found on any CPAN
+site, in the .../src/5.0 directory for full version releases,
+or in the .../src/5/0/unsupported directory for sub-version
+releases.)
+
+
+----------------
+Version 5.003_01
+----------------
+
+Version 5.003_01 contains bugfixes and additions accumulated since
+version 5.002_01, since the patch to version 5.003 was deliberately
+kept simple.  In addition to numerous small bugfixes in the core,
+library files, and documentation, this patch contains several
+significant revisions, summarized below:
+
+o Visible Changes to Core Functionality
+
+  - A port to Plan9 has been started, and changes are integrated into
+    the standard distribution.  As of this release, the Perl core
+    and several common extensions are working.
+
+  - A set of basic methods in the UNIVERSAL class have been added to
+    the Perl core.  Since UNIVERSAL is an implicit member of every
+    class's @ISA, the methods can be called via any object.
+
+  - A mandatory warning has been added for 'declarations' of lexical
+    variables using the "my" operator which mask an existing lexical
+    variable declared in the same scope, making the previous variable
+    inaccessible by its name.
+
+  - The "use" and "require" operators have been extended to allow
+    checking of the required module's version.  The "use" operator
+    can now be used for an immediate version check of Perl itself.
+
+  - A new "strict" pragma, "strict untie", has been added, which
+    produces an error if a tied value is untied when other references
+    exist to the internal object implementing the tie.
+
+  - Barewords used as associative array keys (i.e. when specifying
+    an associative array element like $foo{__BAR} or on the left
+    side of the => operator) may now begin with an underscore as
+    well as an alphabetic character.
+
+  - Some of the configuration information previously produced by the
+    -v switch has been moved to the -V switch, in order to keep -v
+    output concise.
+
+o Changes in Core Internals
+
+  - Symbol table and method lookups have been made faster.
+
+  - Perl subroutines which just return a constant value are now
+    optimized at compile time into inline constants.
+
+  - Management of keys for associative arrays has been improved to
+    conserve space when the same keys are reused frequently, and
+    to pass true Perl values to tie functions, instead of stringified
+    representations.
+
+  - Messages normally output to stderr may be directed to another
+    stream when Perl is built.  This allows some platforms to
+    present diagnostic output in a separate window from normal
+    program results.
+
+  - A bug which caused suiperl to fail silently, albeit securely,
+    in version 5.003 on some systems has been fixed.
+
+  - Management of Unix-style signal handlers via the %SIG associative
+    array has been made safer.
+
+  - Several global C symbols have been renamed to eliminate collisions
+    with system C header files or libraries on some platforms.
+    Unfortunately, this means that dynamic extensions compiled under
+    previous versions of Perl will need to be rebuilt for Perl
+    5.003_01.  We're in the process of cleaning up Perl's C
+    namespace to make it easier to link Perl with other binaries,
+    so this will probably happen again between now and version 5.004.
+    After that, we'll do our best to maintain binary compatibility
+    between versions.
+
+  - An alternate allocation strategy has been added to Perl's
+    optional private memory management routines.  This strategy,
+    which may be selected when Perl is built, is designed to
+    conserve memory in programs which allocate many small
+    chunks of memory with sizes near a power of 2, as is often
+    the case in Perl programs.
+
+  - Several memory leaks in the creation and destruction of
+    multiple interpreters have been fixed.
+
+o Changes in the Standard Library and Utilities
+
+  - The Opcode extension, which allows you to control a program's
+    access to Perl operations, has been added to the standard
+    distribution.  This extends the work begun in the original
+    Safe extension, and subsumes it.  The Safe interface is still
+    available.
+
+  - The IO extension, which provides a set of classes for object-
+    oriented handling of common I/O tasks, has been added to the
+    standard distribution.  The IO classes will form the basis
+    for future development of Perl's I/O interface, and will
+    subsume the FileHandle class in the near future.  The default
+    class to which all Perl I/O handles belong is now IO::Handle,
+    rather than FileHandle.
+
+  - The ExtUtils::Embed library module, which provides a set
+    of utility function to help in embedding Perl in other
+    applications, has been added to the standard distribution.
+
+  - The Fatal library module, which provides a simple interface
+    for creating "do-or-die" equivalents of existing functions,
+    has been added to the standard distribution.
+
+  - The FindBin library module, which determines the full path
+    to the currently executing program, has been added to the
+    standard distribution.
+
+  - The DB_File extension, and the Getopt::Long, Test::Harness,
+    Text::Tabs, Text::Wrap, Time::Local and sigtrap library modules
+    have been updated to the authors' latest versions.
+
+  - The Carp library module now considers the @ISA chain when
+    determining the caller's package for inclusion in error messages.
+
+  - The h2xs, perlbug, and xsubpp utilities have been updated.
+
+  - The standard Perl debugger has been updated, and the information
+    provided to the debugger when an XSUB is called has been improved,
+    making it possible for alternate debuggers (such as Devel::DProf)
+    to do a better job of tracking XSUB calls.
+
+  - The pod documentation formatting tools in the standard distribution
+    can now handle characters in the input stream whose high bit is set.
+
+  - The cperl-mode EMACS editing mode has been updated.
+
+o Changes in Documentation
+
+  - Typographic and formatting errors have been corrected in the pod
+    documentation for the core and standard library files
+
+  - Explanations of several core operators have been improved
+
+  - The perldebug, perlembed, perlipc, perlsec, and perltrap documents
+    extensively revised.
+
+o Changes in OS-specific and Build-time Support
+
+  - Support for the NeXT platform has been extended through
+    NeXTSTEP/OPENSTEP 4.0, and now includes the ability to create MABs.
+
+  - Support for OS/2 has been extended as well, and now includes
+    options for building a.out binaries.
+
+  - Support for VMS has also been extended, incorporating improved
+    processing of file specification strings, optional suppression of
+    carriage control interpretation for record-structured files,
+    improved support for the -S command line switch, a number of
+    VMS-specific bugfixes, and significantly improved performance
+    in line-oriented reading of files.
+
+  - Several hints files have been added or updated: aux.sh (updated),
+    convexos.sh (updated), irix_4.sh (updated), irix_5.sh (updated),
+    irix_6_2.sh (updated), next_3.sh (updated), next_3_2.sh (new),
+    next_3_3.sh (new), next_4.sh (new), os2/sh (updated),
+    sco.sh (updated), and solaris_2.sh (updated).
+
+  - The test driver for the regression tests now reports when a set
+    of tests have been skipped (presumable because the operation
+    they're designed to test isn't supported on the current system).
+
+-------------
+Version 5.003
+-------------
+
+		  ***>  IMPORTANT NOTICE:  <***
+The main reason for this release was to fix a security bug affecting
+suidperl on some systems.  If you build suidperl on your system, it
+is strongly recommended that you replace any existing copies with
+version 5.003 or later immediately.
+
+The changes in 5.003 have been held to a minimum, in the hope that this
+will simplify installation and testing at sites which may be affected
+by the security hole in suidperl.  In brief, 5.003 does the following:
+
+- Plugs security hole in suidperl mechanism on affected systems
+
+- MakeMaker was also updated to version 5.34, and extension Makefile.PLs
+  were modified to match it.
+
+- The following hints files were updated: bsdos.sh, hpux.sh, linux.sh,
+  machten.sh, solaris_2.sh
+
+- A fix was added to installperl to insure that file permissions were
+  set correctly for the installed C header files.
+
+- t/op/stat.t was modified to work around MachTen's belief that /dev/null
+  is a terminal device.
+
+- Incorporation of Perl version information into the VMS' version of
+  config.h was changed to make it compatible with the older VAXC.
+
+- Minor fixes were made to VMS-specific C code, and the routine
+  VMS::Filespec::rmsexpand was added.
+
+----------------
+Version 5.002_01
+----------------
+
+- The EMBED namespace changes are now used by default, in order to better
+  segregate Perl's C global symbols from those belonging to embedding
+  applications or to libraries.  This makes it necessary to rebuild dynamic
+  extensions built under previous versions of Perl without the EMBED option.
+  The default use of EMBED can be overridden by placing -DNO_EMBED on the
+  cc command line.
+
+  The EMBED change is the beginning of a general cleanup of C global
+  symbols used by Perl, so binary compatibility with previously
+  compiled dynamic extensions may be broken again in the next few
+  releases.
+
+- Several bugs in the core were fixed, including the following:
+   - made sure FILE * for -e temp file was closed only once
+   - improved form of single-statement macro definitions to keep
+     as many ccs as possible happy
+   - fixed file tests to insure that signed values were used when
+     computing differences between times.
+   - fixed toke.c so implicit loop isn't doubled when perl is
+     invoked with both the -p and -n switches
+
+- The new SUBVERSION number has been included in the default value for
+  architecture-specific library directories, so development and
+  production architecture-dependent libraries can coexist.
+
+- Two new magic variables, $^E and $^O, have been added.  $^E contains the
+  OS-specific equivalent of $!.  $^O contains the name of the operating
+  system, in order to make it easily available to Perl code whose behavior
+  differs according to its environment.  The standard library files have
+  been converted to use $^O in preference to $Config{'osname'}.
+
+- A mechanism was added to allow listing of locally applied patches
+  in the output of perl -v.
+
+- Miscellaneous minor corrections and updates were made to the documentation.
+
+- Extensive updates were made to the OS/2 and VMS ports
+
+- The following hints file were updated: bsdos.sh, dynixptx.sh,
+  irix_6_2.sh, linux.sh, os2.sh
+
+- Several changes were made to standard library files:
+   - reduced use of English.pm and $`, $', and $& in library modules,
+     since these degrade module loading and evaluation of regular expressions,
+     respectively.
+   - File/Basename.pm: Added path separator to dirname('.')
+   - File/Copy.pm: Added support for VMS and OS/2 system-level copy
+   - MakeMaker updated to v5.26
+   - Symbol.pm now accepts old (') and new (::) package delimiters
+   - Sys/Syslog.pm uses Sys::Hostname only when necessary
+   - chat2.pl picks up necessary constants from socket.ph
+   - syslog.pl: Corrected thinko 'Socket' --> 'Syslog'
+   - xsubpp updated to v1.935
+
+
+- The perlbug utility is now more cautious about sending mail, in order
+  to reduce the chance of accidentally send a bug report by giving the
+  wrong response to a prompt.
+
+- The -m switch has been added to perldoc, causing it to display the 
+  Perl code in target file as well as any documentation.
+
 -------------
 Version 5.002
 -------------
