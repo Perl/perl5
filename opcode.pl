@@ -254,6 +254,9 @@ if (keys %OP_IS_FILETEST) {
 close OC or die "Error closing opcode.h: $!";
 close ON or die "Error closing opnames.h: $!";
 
+chmod 0600, 'opcode.h';  # required by dosish filesystems
+chmod 0600, 'opnames.h'; # required by dosish filesystems
+
 rename 'opcode.h.new', 'opcode.h' or die "renaming opcode.h: $!\n";
 rename 'opnames.h.new', 'opnames.h' or die "renaming opnames.h: $!\n";
 
@@ -294,6 +297,9 @@ for (@ops) {
 
 close PP or die "Error closing pp_proto.h: $!";
 close PPSYM or die "Error closing pp.sym: $!";
+
+chmod 0600, 'pp_proto.h'; # required by dosish filesystems
+chmod 0600, 'pp.sym';     # required by dosish filesystems
 
 rename 'pp_proto.h.new', 'pp_proto.h' or die "rename pp_proto.h: $!\n";
 rename 'pp.sym.new', 'pp.sym' or die "rename pp.sym: $!\n";
