@@ -363,7 +363,17 @@ struct xpvio {
 
     PerlIO *	xio_ifp;	/* ifp and ofp are normally the same */
     PerlIO *	xio_ofp;	/* but sockets need separate streams */
-    DIR *	xio_dirp;	/* for opendir, readdir, etc */
+    /* Cray addresses everything by word boundaries (64 bits) and
+     * code and data pointers cannot be mixed (which is exactly what
+     * Perl_filter_add() tries to do), hence the following
+     * union trick (as suggested by Gurusamy Sarathy).
+     * For further information see Geir Johansen's problem report titled
+       [ID 20000612.002] Perl problem on Cray system
+     */
+    union {
+	DIR *	xiou_dirp;	/* for opendir, readdir, etc */
+	void *	xiou_dummy;	/* for alignment */
+    } xio_dirpu;
     long	xio_lines;	/* $. */
     long	xio_page;	/* $% */
     long	xio_page_len;	/* $= */
@@ -378,6 +388,7 @@ struct xpvio {
     char	xio_type;
     char	xio_flags;
 };
+#define xio_dirp xio_dirpu.xiou_dirp
 
 #define IOf_ARGV	1	/* this fp iterates over ARGV */
 #define IOf_START	2	/* check for null ARGV and substitute '-' */
