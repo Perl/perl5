@@ -2,7 +2,7 @@
 
 # $RCSfile: pack.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:11 $
 
-print "1..30\n";
+print "1..60\n";
 
 $format = "c2 x5 C C x s d i l a6";
 # Need the expression in here to force ary[5] to be numeric.  This avoids
@@ -106,3 +106,92 @@ print((pack("p", undef) =~ /^\0+/ ? "ok " : "not ok "),$test++,"\n");
 # Test 30:
 print( ((unpack("i",pack("i",-1))) == -1 ? "ok " : "not ok "),$test++,"\n");
 
+# 31..36: test the pack lengths of s S i I l L
+print "not " unless length(pack("s", 0)) == 2;
+print "ok ", $test++, "\n";
+ 
+print "not " unless length(pack("S", 0)) == 2;
+print "ok ", $test++, "\n";
+ 
+print "not " unless length(pack("i", 0)) >= 4;
+print "ok ", $test++, "\n";
+
+print "not " unless length(pack("I", 0)) >= 4;
+print "ok ", $test++, "\n";
+
+print "not " unless length(pack("l", 0)) == 4;
+print "ok ", $test++, "\n";
+
+print "not " unless length(pack("L", 0)) == 4;
+print "ok ", $test++, "\n";
+
+# 37..40: test the pack lengths of n N v V
+
+print "not " unless length(pack("n", 0)) == 2;
+print "ok ", $test++, "\n";
+
+print "not " unless length(pack("N", 0)) == 4;
+print "ok ", $test++, "\n";
+
+print "not " unless length(pack("v", 0)) == 2;
+print "ok ", $test++, "\n";
+
+print "not " unless length(pack("V", 0)) == 4;
+print "ok ", $test++, "\n";
+
+# 41..56: test unpack-pack lengths
+
+my @templates = qw(c C i I s S l L n N v V f d);
+
+# quads not supported everywhere: if not, retest floats/doubles
+my $foo = eval { pack("q*", 12, 34) };
+push @templates, $@ !~ /Invalid type in pack/ ? qw(q Q) : qw(f d);
+
+foreach my $t (@templates) {
+    my @t = unpack("$t*", pack("$t*", 12, 34));
+    print "not "
+      unless @t == 2 and (($t[0] == 12 and $t[1] == 34) or ($t =~ /[nv]/i));
+    print "ok ", $test++, "\n";
+}
+
+# 57..60: uuencode/decode
+
+$in = join "", map { chr } 0..255;
+$uu = <<'EOUU';
+M``$"`P0%!@<("0H+#`T.#Q`1$A,4%187&!D:&QP='A\@(2(C)"4F)R@I*BLL
+M+2XO,#$R,S0U-C<X.3H[/#T^/T!!0D-$149'2$E*2TQ-3D]045)35%565UA9
+M6EM<75Y?8&%B8V1E9F=H:6IK;&UN;W!Q<G-T=79W>'EZ>WQ]?G^`@8*#A(6&
+MAXB)BHN,C8Z/D)&2DY25EI>8F9J;G)V>GZ"AHJ.DI::GJ*FJJZRMKJ^PL;*S
+MM+6VM[BYNKN\O;Z_P,'"P\3%QL?(R<K+S,W.S]#1TM/4U=;7V-G:V]S=WM_@
+?X>+CY.7FY^CIZNOL[>[O\/'R\_3U]O?X^?K[_/W^_P``
+EOUU
+
+print "not " unless pack('u', $in) eq $uu;
+print "ok ", $test++, "\n";
+
+print "not " unless unpack('u', $uu) eq $in;
+print "ok ", $test++, "\n";
+
+$in = "\x1f\x8b\x08\x08\x58\xdc\xc4\x35\x02\x03\x4a\x41\x50\x55\x00\xf3\x2a\x2d\x2e\x51\x48\xcc\xcb\x2f\xc9\x48\x2d\x52\x08\x48\x2d\xca\x51\x28\x2d\x4d\xce\x4f\x49\x2d\xe2\x02\x00\x64\x66\x60\x5c\x1a\x00\x00\x00";
+$uu = <<'EOUU';
+M'XL("%C<Q#4"`TI!4%4`\RHM+E%(S,LOR4@M4@A(+<I1*"U-SD])+>("`&1F
+&8%P:````
+EOUU
+
+print "not " unless unpack('u', $uu) eq $in;
+print "ok ", $test++, "\n";
+
+# 60 identical to 59 except that backquotes have been changed to spaces
+
+$uu = <<'EOUU';
+M'XL("%C<Q#4" TI!4%4 \RHM+E%(S,LOR4@M4@A(+<I1*"U-SD])+>(" &1F
+&8%P:    
+EOUU
+
+print "not " unless unpack('u', $uu) eq $in;
+print "ok ", $test++, "\n";
+
+# Note that first uuencoding known 'text' data and then checking the
+# binary values of the uuencoded version would not be portable between
+# character sets.  Uuencoding is meant for encoding binary data, not
+# text data.

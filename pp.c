@@ -3314,6 +3314,9 @@ PP(pp_unpack)
 	    break;
 #ifdef HAS_QUAD
 	case 'q':
+	    along = (strend - s) / sizeof(Quad_t);
+	    if (len > along)
+		len = along;
 	    EXTEND(SP, len);
 	    EXTEND_MORTAL(len);
 	    while (len-- > 0) {
@@ -3332,6 +3335,9 @@ PP(pp_unpack)
 	    }
 	    break;
 	case 'Q':
+	    along = (strend - s) / sizeof(Quad_t);
+	    if (len > along)
+		len = along;
 	    EXTEND(SP, len);
 	    EXTEND_MORTAL(len);
 	    while (len-- > 0) {
@@ -3491,7 +3497,7 @@ register I32 len;
     *hunk = len + ' ';
     sv_catpvn(sv, hunk, 1);
     hunk[4] = '\0';
-    while (len > 0) {
+    while (len > 2) {
 	hunk[0] = ' ' + (077 & (*s >> 2));
 	hunk[1] = ' ' + (077 & (((*s << 4) & 060) | ((s[1] >> 4) & 017)));
 	hunk[2] = ' ' + (077 & (((s[1] << 2) & 074) | ((s[2] >> 6) & 03)));
@@ -3499,6 +3505,14 @@ register I32 len;
 	sv_catpvn(sv, hunk, 4);
 	s += 3;
 	len -= 3;
+    }
+    if (len > 0) {
+	char r = (len > 1 ? s[1] : '\0');
+	hunk[0] = ' ' + (077 & (*s >> 2));
+	hunk[1] = ' ' + (077 & ((*s << 4) & 060 | (r >> 4) & 017));
+	hunk[2] = ' ' + (077 & ((r << 2) & 074));
+	hunk[3] = ' ';
+	sv_catpvn(sv, hunk, 4);
     }
     for (s = SvPVX(sv); *s; s++) {
 	if (*s == ' ')

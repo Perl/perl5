@@ -49,7 +49,7 @@ esac
 # you can not change the real userid of a process under 4.4BSD.
 # netbsd fixed this in 1.2A.
 case "$osvers" in
-0.9*|1.0*|1.1*|1.2_*|1.2|1.2.*)
+0.9*|1.0*|1.1*|1.2_*|1.2|1.2.*|1.3|1.3.1)
 	d_setregid="$undef"
 	d_setreuid="$undef"
 	d_setrgid="$undef"

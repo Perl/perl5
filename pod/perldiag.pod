@@ -33,11 +33,11 @@ The symbols C<"%(-?@> sort before the letters, while C<[> and C<\> sort after.
 to try to declare one with a package qualifier on the front.  Use local()
 if you want to localize a package variable.
 
-=item "my" variable %s masks earlier declaration in same scope
+=item "my" variable %s masks earlier declaration in same %s
 
-(W) A lexical variable has been redeclared in the same scope, effectively
-eliminating all access to the previous instance.  This is almost always
-a typographical error.  Note that the earlier variable will still exist
+(W) A lexical variable has been redeclared in the current scope or statement,
+effectively eliminating all access to the previous instance.  This is almost
+always a typographical error.  Note that the earlier variable will still exist
 until the end of the scope or until all closure referents to it are
 destroyed.
 
@@ -791,6 +791,11 @@ there was no subroutine call to return out of.  See L<perlsub>.
 (P) For some reason you can't fstat() the script even though you have
 it open already.  Bizarre.
 
+=item Can't statfs filesystem of script "%s"
+
+(P) For some reason you can't statfs() the filesystem of the script.
+Bizarre.
+
 =item Can't swap uid and euid
 
 (P) The setreuid() call failed for some reason in the setuid emulator
@@ -1069,7 +1074,7 @@ a return, a goto, or a loop control statement.
 (W) You are blessing a reference to a zero length string.  This has
 the effect of blessing the reference into the package main.  This is
 usually not what you want.  Consider providing a default target
-package, e.g. bless($ref, $p or 'MyPackage');
+package, e.g. bless($ref, $p || 'MyPackage');
 
 =item Fatal VMS error at %s, line %d
 
@@ -2045,18 +2050,6 @@ which is why it's currently left out of your copy.
 
 (F) More than 100 levels of inheritance were used.  Probably indicates
 an unintended loop in your inheritance hierarchy.
-
-=item Reference found where even-sized list expected
-
-(W) You gave a single reference where Perl was expecting a list with
-an even number of elements (for assignment to a hash). This
-usually means that you used the anon hash constructor when you meant 
-to use parens. In any case, a hash requires key/value B<pairs>.
-
-    %hash = { one => 1, two => 2, };	# WRONG
-    %hash = [ qw/ an anon array / ];	# WRONG
-    %hash = ( one => 1, two => 2, );	# right
-    %hash = qw( one 1 two 2 );			# also fine
 
 =item Reference found where even-sized list expected
 

@@ -3393,7 +3393,9 @@ characters at each point it matches that way.  For example:
 
     print join(':', split(/ */, 'hi there'));
 
-produces the output 'h:i:t:h:e:r:e'.
+produces the output 'h:i:t:h:e:r:e'.  It does not match the
+null at the start or end of the string (note that this behavior
+differs from that of the equivalent regular expression).
 
 The LIMIT parameter can be used to split a line partially
 

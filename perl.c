@@ -437,6 +437,17 @@ register PerlInterpreter *sv_interp;
     /* As the absolutely last thing, free the non-arena SV for mess() */
 
     if (mess_sv) {
+	/* it could have accumulated taint magic */
+	if (SvTYPE(mess_sv) >= SVt_PVMG) {
+	    MAGIC* mg;
+	    MAGIC* moremagic;
+	    for (mg = SvMAGIC(mess_sv); mg; mg = moremagic) {
+		moremagic = mg->mg_moremagic;
+		if (mg->mg_ptr && mg->mg_type != 'g' && mg->mg_len >= 0)
+		    Safefree(mg->mg_ptr);
+		Safefree(mg);
+	    }
+	}
 	/* we know that type >= SVt_PV */
 	SvOOK_off(mess_sv);
 	Safefree(SvPVX(mess_sv));
@@ -1575,7 +1586,7 @@ GNU General Public License, which may be found in the Perl 5.0 source kit.\n\n")
 	break;
     case '-':
     case 0:
-#ifdef WIN32
+#if defined(WIN32) || !defined(PERL_STRICT_CR)
     case '\r':
 #endif
     case '\n':
@@ -1878,6 +1889,19 @@ char *scriptname;
 		croak("Can't swap uid and euid");	/* really paranoid */
 	    if (Stat(SvPVX(GvSV(curcop->cop_filegv)),&tmpstatbuf) < 0)
 		croak("Permission denied");	/* testing full pathname here */
+#if defined(IAMSUID) && defined(__NetBSD__)
+	    /* XXX Other BSD 4.4-derived BSDs?
+	       FreeBSD, OpenBSD, BSDI, MachTen? */
+	    {
+            struct statfs stfs;
+
+            if (fstatfs(fileno(rsfp),&stfs) < 0)
+                croak("Can't statfs filesystem of script \"%s\"",origfilename);
+
+	    if (stfs.f_flags & MNT_NOSUID)
+                croak("Permission denied");
+        }
+#endif /* BSD */
 	    if (tmpstatbuf.st_dev != statbuf.st_dev ||
 		tmpstatbuf.st_ino != statbuf.st_ino) {
 		(void)PerlIO_close(rsfp);
