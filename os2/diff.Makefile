@@ -1,19 +1,5 @@
-diff -cr ..\perl5os2.patch\perl5.001m.andy/Makefile.SH ./Makefile.SH
-*** ../perl5os2.patch/perl5.001m.andy/Makefile.SH	Mon Oct 09 21:40:46 1995
---- ./Makefile.SH	Thu Sep 28 00:13:40 1995
-***************
-*** 22,27 ****
---- 22,31 ----
-  *) suidperl='';;
-  esac
-  
-+ # In case Configure is not patched:
-+ : ${obj_ext=.o} ${obj_ext_regexp='\.o'} ${lib_ext=.a} ${ar=ar} ${firstmakefile=makefile}
-+ : ${exe_ext=} ${cldlibs="$libs $cryptlib"}
-+ 
-  shrpenv=""
-  case "$d_shrplib" in
-  *define*)
+*** Makefile.SH.orig	Mon Nov 20 12:56:12 1995
+--- Makefile.SH	Fri Dec 08 00:02:46 1995
 ***************
 *** 31,43 ****
        *[0-9]) plibsuf=.$so.$patchlevel;;
@@ -29,7 +15,7 @@ diff -cr ..\perl5os2.patch\perl5.001m.andy/Makefile.SH ./Makefile.SH
       pldlflags="";;
   esac
   
---- 35,48 ----
+--- 31,44 ----
        *[0-9]) plibsuf=.$so.$patchlevel;;
        *)	    plibsuf=.$so;;
       esac
@@ -53,16 +39,16 @@ diff -cr ..\perl5os2.patch\perl5.001m.andy/Makefile.SH ./Makefile.SH
   	if test -f ext/$f/AutoInit.c; then
   	    static_ai_list="$static_ai_list ext/$f/AutoInit.c"
   	fi
---- 58,64 ----
+--- 54,60 ----
   static_ai_list=' '
   for f in $static_ext; do
   	base=`echo "$f" | sed 's/.*\///'`
-! 	static_list="$static_list lib/auto/$f/$base\$(A)"
+! 	static_list="$static_list lib/auto/$f/$base\$(LIB_EXT)"
   	if test -f ext/$f/AutoInit.c; then
   	    static_ai_list="$static_ai_list ext/$f/AutoInit.c"
   	fi
 ***************
-*** 115,129 ****
+*** 115,122 ****
   static_ext = $static_list
   ext = \$(dynamic_ext) \$(static_ext)
   static_ext_autoinit = $static_ai_list
@@ -71,102 +57,68 @@ diff -cr ..\perl5os2.patch\perl5.001m.andy/Makefile.SH ./Makefile.SH
   
   libs = $libs $cryptlib
   
-  public = perl $suidperl
-  
-  shellflags = $shellflags
-  
-  ## To use an alternate make, set \$altmake in config.sh.
-  MAKE = ${altmake-make}
-  !GROK!THIS!
---- 120,152 ----
+--- 116,122 ----
   static_ext = $static_list
   ext = \$(dynamic_ext) \$(static_ext)
   static_ext_autoinit = $static_ai_list
-! DYNALOADER = lib/auto/DynaLoader/DynaLoader\$(A)
+! DYNALOADER = lib/auto/DynaLoader/DynaLoader\$(LIB_EXT)
   
   libs = $libs $cryptlib
-+ cldlibs = $cldlibs
   
-  public = perl $suidperl
-  
-  shellflags = $shellflags
-  
-+ ## To make it possible a build on a case-unsensitive filesystem
-+ 
-+ firstmakefile = $firstmakefile
-+ 
-+ ## Architecture-specific objects
-+ 
-+ archobjs = $archobjs
-+ 
-+ ## Extention of object files
-+ 
-+ O = $obj_ext
-+ O_REGEXP = $obj_ext_regexp
-+ A = $lib_ext
-+ AR = $ar
-+ exe_ext = $exe_ext
-+ 
-+ .SUFFIXES: .c \$(O)
-+ 
-  ## To use an alternate make, set \$altmake in config.sh.
-  MAKE = ${altmake-make}
-  !GROK!THIS!
 ***************
-*** 153,163 ****
+*** 140,145 ****
+--- 140,147 ----
+  # Any special object files needed by this architecture, e.g. os2/os2.obj
+  ARCHOBJS = $archobjs
+  
++ .SUFFIXES: .c \$(OBJ_EXT)
++ 
+  !GROK!THIS!
+  
+  ## In the following dollars and backticks do not need the extra backslash.
+***************
+*** 180,190 ****
   
   c = $(c1) $(c2) $(c3) miniperlmain.c perlmain.c
   
 ! obj1 = $(mallocobj) gv.o toke.o perly.o op.o regcomp.o dump.o util.o mg.o
 ! obj2 = hv.o av.o run.o pp_hot.o sv.o pp.o scope.o pp_ctl.o pp_sys.o
 ! obj3 = doop.o doio.o regexec.o taint.o deb.o globals.o
-  
-! obj = $(obj1) $(obj2) $(obj3)
+! 
+! 
+  obj = $(obj1) $(obj2) $(obj3) $(ARCHOBJS)
   
   # Once perl has been Configure'd and built ok you build different
-  # perl variants (Debugging, Embedded, Multiplicity etc) by saying:
---- 175,185 ----
+--- 182,191 ----
   
   c = $(c1) $(c2) $(c3) miniperlmain.c perlmain.c
   
-! obj1 = $(mallocobj) gv$(O) toke$(O) perly$(O) op$(O) regcomp$(O) dump$(O) util$(O) mg$(O)
-! obj2 = hv$(O) av$(O) run$(O) pp_hot$(O) sv$(O) pp$(O) scope$(O) pp_ctl$(O) pp_sys$(O)
-! obj3 = doop$(O) doio$(O) regexec$(O) taint$(O) deb$(O) globals$(O)
-  
-! obj = $(obj1) $(obj2) $(obj3) $(archobjs)
+! obj1 = $(mallocobj) gv$(OBJ_EXT) toke$(OBJ_EXT) perly$(OBJ_EXT) op$(OBJ_EXT) regcomp$(OBJ_EXT) dump$(OBJ_EXT) util$(OBJ_EXT) mg$(OBJ_EXT)
+! obj2 = hv$(OBJ_EXT) av$(OBJ_EXT) run$(OBJ_EXT) pp_hot$(OBJ_EXT) sv$(OBJ_EXT) pp$(OBJ_EXT) scope$(OBJ_EXT) pp_ctl$(OBJ_EXT) pp_sys$(OBJ_EXT)
+! obj3 = doop$(OBJ_EXT) doio$(OBJ_EXT) regexec$(OBJ_EXT) taint$(OBJ_EXT) deb$(OBJ_EXT) globals$(OBJ_EXT)
+!   
+  obj = $(obj1) $(obj2) $(obj3) $(ARCHOBJS)
   
   # Once perl has been Configure'd and built ok you build different
-  # perl variants (Debugging, Embedded, Multiplicity etc) by saying:
 ***************
-*** 175,184 ****
+*** 203,209 ****
   # grrr
   SHELL = /bin/sh
   
 ! .c.o:
   	$(CCCMD) $(PLDLFLAGS) $*.c
   
-! all: makefile miniperl $(private) $(public) $(dynamic_ext)
-  	@echo " "; echo "	Making x2p stuff"; cd x2p; $(MAKE) all
-  	
-  # This is now done by installman only if you actually want the man pages.
---- 197,206 ----
+  all: makefile miniperl $(private) $(plextract) $(public) $(dynamic_ext)
+--- 204,210 ----
   # grrr
   SHELL = /bin/sh
   
-! .c$(O):
+! .c$(OBJ_EXT):
   	$(CCCMD) $(PLDLFLAGS) $*.c
   
-! all: $(firstmakefile) miniperl $(private) $(public) $(dynamic_ext)
-  	@echo " "; echo "	Making x2p stuff"; cd x2p; $(MAKE) all
-  	
-  # This is now done by installman only if you actually want the man pages.
+  all: makefile miniperl $(private) $(plextract) $(public) $(dynamic_ext)
 ***************
-*** 187,208 ****
-  # Phony target to force checking subdirectories.
-  # Apparently some makes require an action for the FORCE target.
-  FORCE:
-! 	@true
-  
+*** 220,236 ****
   # The $& notation tells Sequent machines that it can do a parallel make,
   # and is harmless otherwise.
   
@@ -176,7 +128,7 @@ diff -cr ..\perl5os2.patch\perl5.001m.andy/Makefile.SH ./Makefile.SH
 ! miniperlmain.o: miniperlmain.c
   	$(CCCMD) $(PLDLFLAGS) $*.c
   
-! perlmain.c: miniperlmain.c config.sh makefile $(static_ext_autoinit)
+  perlmain.c: miniperlmain.c config.sh makefile $(static_ext_autoinit)
   	sh writemain $(DYNALOADER) $(static_ext) > tmp
   	sh mv-if-diff tmp perlmain.c
   
@@ -184,31 +136,26 @@ diff -cr ..\perl5os2.patch\perl5.001m.andy/Makefile.SH ./Makefile.SH
   	$(CCCMD) $(PLDLFLAGS) $*.c
   
   # The file ext.libs is a list of libraries that must be linked in
---- 209,230 ----
-  # Phony target to force checking subdirectories.
-  # Apparently some makes require an action for the FORCE target.
-  FORCE:
-! 	@sh -c true
-  
+--- 221,237 ----
   # The $& notation tells Sequent machines that it can do a parallel make,
   # and is harmless otherwise.
   
-! miniperl: $& miniperlmain$(O) $(perllib)
-! 	$(CC) $(LARGE) $(CLDFLAGS) -o miniperl miniperlmain$(O) $(perllib) $(cldlibs)
+! miniperl: $& miniperlmain$(OBJ_EXT) $(perllib)
+! 	$(CC) $(LARGE) $(CLDFLAGS) -o miniperl miniperlmain$(OBJ_EXT) $(perllib) $(libs)
   
-! miniperlmain$(O): miniperlmain.c
+! miniperlmain$(OBJ_EXT): miniperlmain.c
   	$(CCCMD) $(PLDLFLAGS) $*.c
   
-! perlmain.c: miniperlmain.c config.sh $(firstmakefile) $(static_ext_autoinit)
+  perlmain.c: miniperlmain.c config.sh makefile $(static_ext_autoinit)
   	sh writemain $(DYNALOADER) $(static_ext) > tmp
   	sh mv-if-diff tmp perlmain.c
   
-! perlmain$(O): perlmain.c
+! perlmain$(OBJ_EXT): perlmain.c
   	$(CCCMD) $(PLDLFLAGS) $*.c
   
   # The file ext.libs is a list of libraries that must be linked in
 ***************
-*** 211,238 ****
+*** 239,266 ****
   ext.libs: $(static_ext)
   	-@test -f ext.libs || touch ext.libs
   
@@ -218,8 +165,8 @@ diff -cr ..\perl5os2.patch\perl5.001m.andy/Makefile.SH ./Makefile.SH
 ! pureperl: $& perlmain.o $(perllib) $(DYNALOADER) $(static_ext) ext.libs
 ! 	purify $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o pureperl perlmain.o $(perllib) $(DYNALOADER) $(static_ext) `cat ext.libs` $(libs)
   
-- quantperl: $& perlmain.o $(perllib) $(DYNALOADER) $(static_ext) ext.libs
-- 	quantify $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o quantperl perlmain.o $(perllib) $(DYNALOADER) $(static_ext) `cat ext.libs` $(libs)
+! quantperl: $& perlmain.o $(perllib) $(DYNALOADER) $(static_ext) ext.libs
+! 	quantify $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o quantperl perlmain.o $(perllib) $(DYNALOADER) $(static_ext) `cat ext.libs` $(libs)
   
 ! $(perllib): $& perl.o $(obj)
   !NO!SUBS!
@@ -233,46 +180,38 @@ diff -cr ..\perl5os2.patch\perl5.001m.andy/Makefile.SH ./Makefile.SH
   *)
   $spitshell >>Makefile <<'!NO!SUBS!'
   	rm -f $(perllib)
-! 	ar rcu $(perllib) perl.o $(obj)
+! 	$(AR) rcu $(perllib) perl.o $(obj)
   	@$(ranlib) $(perllib)
   !NO!SUBS!
   ;;
---- 233,280 ----
+--- 240,279 ----
   ext.libs: $(static_ext)
   	-@test -f ext.libs || touch ext.libs
   
-! perl: $& perlmain$(O) $(perllib) $(DYNALOADER) $(static_ext) ext.libs
-! 	$(SHRPENV) $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o perl perlmain$(O) $(perllib) $(DYNALOADER) $(static_ext) `cat ext.libs` $(libs)
-! 
-! pureperl: $& perlmain$(O) $(perllib) $(DYNALOADER) $(static_ext) ext.libs
-! 	purify $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o pureperl perlmain$(O) $(perllib) $(DYNALOADER) $(static_ext) `cat ext.libs` $(libs)
+! perl: $& perlmain$(OBJ_EXT) $(perllib) $(DYNALOADER) $(static_ext) ext.libs
+! 	$(SHRPENV) $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o perl perlmain$(OBJ_EXT) $(perllib) $(DYNALOADER) $(static_ext) `cat ext.libs` $(libs)
   
-! quantperl: $& perlmain$(O) $(perllib) $(DYNALOADER) $(static_ext) ext.libs
-! 	quantify $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o quantperl perlmain$(O) $(perllib) $(DYNALOADER) $(static_ext) `cat ext.libs` $(libs)
-! 
-! !NO!SUBS!
+! pureperl: $& perlmain$(OBJ_EXT) $(perllib) $(DYNALOADER) $(static_ext) ext.libs
+! 	purify $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o pureperl perlmain$(OBJ_EXT) $(perllib) $(DYNALOADER) $(static_ext) `cat ext.libs` $(libs)
   
+! quantperl: $& perlmain$(OBJ_EXT) $(perllib) $(DYNALOADER) $(static_ext) ext.libs
+! 	quantify $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o quantperl perlmain$(OBJ_EXT) $(perllib) $(DYNALOADER) $(static_ext) `cat ext.libs` $(libs)
   
-! case "$d_shrplib" in
-! custom) ;;
-! *)
-! $spitshell >>Makefile <<'!NO!SUBS!'
-! $(perllib): $& perl$(O) $(obj)
+! $(perllib): $& perl$(OBJ_EXT) $(obj)
   !NO!SUBS!
-+ esac
   
   case "$d_shrplib" in
   *define*)
   $spitshell >>Makefile <<'!NO!SUBS!'
-! 	$(LD) $(LDDLFLAGS) -o $@ perl$(O) $(obj)
+! 	$(LD) $(LDDLFLAGS) -o $@ perl$(OBJ_EXT) $(obj)
   !NO!SUBS!
   ;;
 + custom)
-+ if test -r $osname/Makefile.SH ; then 
-+   . $osname/Makefile.SH
++ if test -r $osname/Makefile.SHs ; then 
++   . $osname/Makefile.SHs
 +   $spitshell >>Makefile <<!GROK!THIS!
 + 
-+ Makefile: $osname/Makefile.SH
++ Makefile: $osname/Makefile.SHs
 + 
 + !GROK!THIS!
 + else
@@ -282,12 +221,12 @@ diff -cr ..\perl5os2.patch\perl5.001m.andy/Makefile.SH ./Makefile.SH
   *)
   $spitshell >>Makefile <<'!NO!SUBS!'
   	rm -f $(perllib)
-! 	$(AR) rcu $(perllib) perl$(O) $(obj)
+! 	$(AR) rcu $(perllib) perl$(OBJ_EXT) $(obj)
   	@$(ranlib) $(perllib)
   !NO!SUBS!
   ;;
 ***************
-*** 245,254 ****
+*** 273,282 ****
   # checks as well as the special code to validate that the script in question
   # has been invoked correctly.
   
@@ -298,36 +237,67 @@ diff -cr ..\perl5os2.patch\perl5.001m.andy/Makefile.SH ./Makefile.SH
   	$(RMS) sperl.c
   	$(LNS) perl.c sperl.c
   	$(CCCMD) -DIAMSUID sperl.c
---- 287,296 ----
+--- 286,295 ----
   # checks as well as the special code to validate that the script in question
   # has been invoked correctly.
   
-! suidperl: $& sperl$(O) perlmain$(O) $(perllib) $(DYNALOADER) $(static_ext) ext.libs
-! 	$(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o suidperl perlmain$(O) sperl$(O) $(perllib) $(DYNALOADER) $(static_ext) `cat ext.libs` $(libs)
+! suidperl: $& sperl$(OBJ_EXT) perlmain$(OBJ_EXT) $(perllib) $(DYNALOADER) $(static_ext) ext.libs
+! 	$(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o suidperl perlmain$(OBJ_EXT) sperl$(OBJ_EXT) $(perllib) $(DYNALOADER) $(static_ext) `cat ext.libs` $(libs)
   
-! sperl$(O): perl.c perly.h patchlevel.h $(h)
+! sperl$(OBJ_EXT): perl.c perly.h patchlevel.h $(h)
   	$(RMS) sperl.c
   	$(LNS) perl.c sperl.c
   	$(CCCMD) -DIAMSUID sperl.c
 ***************
-*** 258,264 ****
+*** 286,292 ****
   #	test -d lib/auto || mkdir lib/auto
   #
-  preplibrary: miniperl lib/Config.pm
+  preplibrary: miniperl lib/Config.pm $(plextract)
 ! 	@./makedir lib/auto
   	@echo "	AutoSplitting perl library"
   	@./miniperl -Ilib -e 'use AutoSplit; \
   		autosplit_lib_modules(@ARGV)' lib/*.pm lib/*/*.pm
---- 300,306 ----
+--- 299,305 ----
   #	test -d lib/auto || mkdir lib/auto
   #
-  preplibrary: miniperl lib/Config.pm
+  preplibrary: miniperl lib/Config.pm $(plextract)
 ! 	@sh ./makedir lib/auto
   	@echo "	AutoSplitting perl library"
   	@./miniperl -Ilib -e 'use AutoSplit; \
   		autosplit_lib_modules(@ARGV)' lib/*.pm lib/*/*.pm
 ***************
-*** 339,346 ****
+*** 304,317 ****
+  
+  install: all install.perl install.man
+  
+! install.perl:	all
+  	./perl installperl
+  
+! install.man:	all
+  	./perl installman
+  
+  # Not implemented yet.
+! #install.html:	all
+  #	./perl installhtml
+  
+  # I now supply perly.c with the kits, so the following section is
+--- 317,330 ----
+  
+  install: all install.perl install.man
+  
+! install.perl:	all installperl
+  	./perl installperl
+  
+! install.man:	all installman
+  	./perl installman
+  
+  # Not implemented yet.
+! #install.html:	all installhtml
+  #	./perl installhtml
+  
+  # I now supply perly.c with the kits, so the following section is
+***************
+*** 371,378 ****
   	@sh ext/util/make_ext static $@ LIBPERL_A=$(perllib)
   
   clean:
@@ -336,18 +306,18 @@ diff -cr ..\perl5os2.patch\perl5.001m.andy/Makefile.SH ./Makefile.SH
   	-cd x2p; $(MAKE) clean
   	-cd pod; $(MAKE) clean
   	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) ; do \
---- 381,389 ----
+--- 384,392 ----
   	@sh ext/util/make_ext static $@ LIBPERL_A=$(perllib)
   
   clean:
-! 	rm -f *$(O) *$(A) all perlmain.c
+! 	rm -f *$(OBJ_EXT) *$(LIB_EXT) all perlmain.c
   	rm -f perl.exp ext.libs
 + 	-rm perl.export perl.dll perl.libexp perl.map perl.def
   	-cd x2p; $(MAKE) clean
   	-cd pod; $(MAKE) clean
   	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) ; do \
 ***************
-*** 356,362 ****
+*** 389,395 ****
   	done
   	rm -f *.orig */*.orig *~ */*~ core t/core t/c t/perl
   	rm -rf $(addedbyconf)
@@ -355,33 +325,24 @@ diff -cr ..\perl5os2.patch\perl5.001m.andy/Makefile.SH ./Makefile.SH
   	rm -f $(private)
   	rm -rf lib/auto
   	rm -f lib/.exists
---- 399,405 ----
+--- 403,409 ----
   	done
   	rm -f *.orig */*.orig *~ */*~ core t/core t/c t/perl
   	rm -rf $(addedbyconf)
-! 	rm -f $(firstmakefile) makefile.old
+! 	rm -f $(FIRSTMAKEFILE) $(FIRSTMAKEFILE).old
   	rm -f $(private)
   	rm -rf lib/auto
   	rm -f lib/.exists
 ***************
-*** 377,383 ****
+*** 410,434 ****
   lint: perly.c $(c)
   	lint $(lintflags) $(defs) perly.c $(c) > perl.fuzz
   
 ! makefile:	Makefile
-  	$(MAKE) depend
+! 	$(MAKE) depend
   
   config.h: config.sh
---- 420,426 ----
-  lint: perly.c $(c)
-  	lint $(lintflags) $(defs) perly.c $(c) > perl.fuzz
-  
-! $(firstmakefile):	Makefile
-  	$(MAKE) depend
-  
-  config.h: config.sh
-***************
-*** 385,401 ****
+  	/bin/sh config_h.SH
   
   # When done, touch perlmain.c so that it doesn't get remade each time.
   depend: makedepend
@@ -399,7 +360,19 @@ diff -cr ..\perl5os2.patch\perl5.001m.andy/Makefile.SH ./Makefile.SH
   		&& ./perl TEST base/*.t comp/*.t cmd/*.t io/*.t op/*.t </dev/tty
   
   clist:	$(c)
---- 428,444 ----
+--- 424,456 ----
+  lint: perly.c $(c)
+  	lint $(lintflags) $(defs) perly.c $(c) > perl.fuzz
+  
+! # Need to unset during recursion to go out of loop
+! 
+! MAKEDEPEND = makedepend
+! 
+! $(FIRSTMAKEFILE):	Makefile $(MAKEDEPEND)
+! 	$(MAKE) depend MAKEDEPEND=
+  
+  config.h: config.sh
+  	/bin/sh config_h.SH
   
   # When done, touch perlmain.c so that it doesn't get remade each time.
   depend: makedepend
@@ -407,18 +380,22 @@ diff -cr ..\perl5os2.patch\perl5.001m.andy/Makefile.SH ./Makefile.SH
   	- test -s perlmain.c && touch perlmain.c
   	cd x2p; $(MAKE) depend
   
++ # Cannot postpone this until $firstmakefile is ready ;-)
++ makedepend: makedepend.SH config.sh
++ 	sh ./makedepend.SH
++ 
   test: miniperl perl preplibrary $(dynamic_ext)
   	- cd t && chmod +x TEST */*.t
-! 	- cd t && (rm -f perl$(exe_ext); $(LNS) ../perl$(exe_ext) perl$(exe_ext)) && ./perl TEST </dev/tty
+! 	- cd t && (rm -f perl$(EXE_EXT); $(LNS) ../perl$(EXE_EXT) perl$(EXE_EXT)) && ./perl TEST </dev/tty
   
   minitest: miniperl
   	- cd t && chmod +x TEST */*.t
-! 	- cd t && (rm -f perl$(exe_ext); $(LNS) ../miniperl$(exe_ext) perl$(exe_ext)) \
+! 	- cd t && (rm -f perl$(EXE_EXT); $(LNS) ../miniperl$(EXE_EXT) perl$(EXE_EXT)) \
   		&& ./perl TEST base/*.t comp/*.t cmd/*.t io/*.t op/*.t </dev/tty
   
   clist:	$(c)
 ***************
-*** 415,421 ****
+*** 451,457 ****
   case `pwd` in
   *SH)
       $rm -f ../Makefile
@@ -426,11 +403,11 @@ diff -cr ..\perl5os2.patch\perl5.001m.andy/Makefile.SH ./Makefile.SH
       ;;
   esac
 ! rm -f makefile
---- 458,464 ----
+--- 473,479 ----
   case `pwd` in
   *SH)
       $rm -f ../Makefile
 !     $ln Makefile ../Makefile
       ;;
   esac
-! rm -f $firstmakefile
+! $rm -f $firstmakefile
