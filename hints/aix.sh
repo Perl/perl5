@@ -3,6 +3,7 @@
 # AIX 4.1 hints thanks to Christopher Chan-Nui <channui@austin.ibm.com>.
 # AIX 4.1 pthreading by Christopher Chan-Nui <channui@austin.ibm.com> and
 #	  Jarkko Hietaniemi <jhi@iki.fi>.
+# AIX 4.3.x LP64 build by Steven Hirsch <hirschs@btv.ibm.com>
 # Merged on Mon Feb  6 10:22:35 EST 1995 by
 #   Andy Dougherty  <doughera@lafcol.lafayette.edu>
 
@@ -66,6 +67,31 @@ so="a"
 # languages (Tcl, Python) and related systems (SWIG).
 # Stephanie Beals <bealzy@us.ibm.com>
 dlext="so"
+
+# Take possible hint from the environment.  If 32-bit is set in the
+# environment, we can override it later.  If set for 64, the
+# 'sizeof' test sees a native 64-bit architecture and never looks back.
+case "$OBJECT_MODE" in
+32)
+    cat >&4 <<EOF
+
+You have OBJECT_MODE=32 set in the environment. 
+I take this as a hint you do not want to
+build for a 64-bit address space. You will be
+given the opportunity to change this later.
+EOF
+    ;;
+64)
+    cat >&4 <<EOF
+
+You have OBJECT_MODE=64 set in the environment. 
+This forces a full 64-bit build.  If that is
+not what you intended, please terminate this
+program, unset it and restart.
+EOF
+    ;;
+*)  ;;
+esac
 
 # Trying to set this breaks the POSIX.c compilation
 
@@ -197,7 +223,7 @@ case "$uselargefiles" in
 	case "$lfcflags$lfldflags$lflibs" in
 	'');;
 	*) ccflags="$ccflags $lfcflags"
-	   ldflags="$ldflags $ldldflags"
+	   ldflags="$ldflags $lfldflags"
 	   libswanted="$libswanted $lflibs"
 	   ;;
 	esac
@@ -217,13 +243,110 @@ $define|true|[yY]*)
 	    3.*|4.[012].*)
 		cat >&4 <<EOM
 AIX `oslevel` does not support 64-bit interfaces.
-You should upgrade to at least AIX 4.2.
+You should upgrade to at least AIX 4.3.
 EOM
 		exit 1
 		;;
 	    esac
-	    # When a 64-bit cc becomes available $archname64
-	    # may need setting so that $archname gets it attached.
+	    ;;
+esac
+EOCBU
+
+# This script UU/use64bitall.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to use full 64-bitness.
+cat > UU/use64bitall.cbu <<'EOCBU'
+case "$use64bitall" in
+$define|true|[yY]*)
+	    case "`oslevel`" in
+	    3.*|4.[012].*)
+		cat >&4 <<EOM
+AIX `oslevel` does not support 64-bit interfaces.
+You should upgrade to at least AIX 4.3.
+EOM
+		exit 1
+		;;
+	    esac
+	    echo " "
+	    echo "Checking the CPU width of your hardware..." >&4
+	    $cat >size.c <<EOCP
+#include <stdio.h>
+#include <sys/systemcfg.h>
+int main (void)
+{
+  printf("%d\n",_system_configuration.width);
+  return(0);
+}
+EOCP
+	    set size
+	    if eval $compile_ok; then
+		lfcpuwidth=`./size`
+		echo "You are running on $lfcpuwidth bit hardware."
+	    else
+		dflt="32"
+		echo " "
+		echo "(I can't seem to compile the test program.  Guessing...)"
+		rp="What is the width of your CPU (in bits)?"
+		. ./myread
+		lfcpuwidth="$ans"
+	    fi
+	    $rm -f size.c size
+	    case "$lfcpuwidth" in
+	    32*)
+		cat >&4 <<EOM
+Bzzzt! At present, you can only perform a
+full 64-bit build on a 64-bit machine.
+EOM
+		exit 1
+		;;
+	    esac
+	    lfcflags="`getconf XBS5_LP64_OFF64_CFLAGS 2>/dev/null`"
+	    lfldflags="`getconf XBS5_LP64_OFF64_LDFLAGS 2>/dev/null`"
+	    # See jhi's comments above regarding this re-eval.  I've
+	    # seen similar weirdness in the form of:
+	    #
+# 1506-173 (W) Option lm is not valid.  Enter xlc for list of valid options.
+	    #
+	    # error messages from 'cc -E' invocation. Again, the offending
+	    # string is simply not detectable by any means.  Since it doesn't
+	    # do any harm, I didn't pursue it. -- sh
+	    lfldflags="`echo $lfldflags`"
+	    lflibs="`getconf XBS5_LP64_OFF64_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g`"
+	    # -q32 and -b32 may have been set by uselfs or user.  Remove them.
+	    ccflags="`echo $ccflags | sed -e 's@-q32@@'`"
+	    ldflags="`echo $ldflags | sed -e 's@-b32@@'`"
+	    # Tell archiver to use large format.  Unless we remove 'ar'
+	    # from 'trylist', the Configure script will just reset it to 'ar'
+	    # immediately prior to writing config.sh.  This took me hours
+	    # to figure out.
+	    trylist="`echo $trylist | sed -e 's@^ar @@' -e 's@ ar @@g' -e 's@ ar$@@'`"
+	    ar="ar -X64"
+	    nm_opt="-X64 $nm_opt"
+	    # Note: Placing the 'lfcflags' variable into the 'ldflags' string
+	    # is NOT a typo.  ldlflags is passed to the C compiler for final
+	    # linking, and it wants -q64 (-b64 is for ld only!).
+	    case "$lfcflags$lfldflags$lflibs" in
+	    '');;
+	    *) ccflags="$ccflags $lfcflags"
+	       ldflags="$ldflags $lfcflags"
+	       lddlflags="$lfldflags $lddlflags"
+	       libswanted="$libswanted $lflibs"
+	       ;;
+	    esac
+	    case "$ccflags" in
+	    *-DUSE_64_BIT_ALL*) ;;
+      	    *) ccflags="$ccflags -DUSE_64_BIT_ALL";;
+	    esac
+	    case "$archname64" in
+	    ''|64*) archname64=64all ;;
+	    esac
+	    longsize="8"
+	    # Don't try backwards compatibility
+	    bincompat="$undef"
+	    d_bincompat5005="$undef"
+	    lfcflags=''
+	    lfldflags=''
+	    lflibs=''
+	    lfcpuwidth=''
 	    ;;
 esac
 EOCBU

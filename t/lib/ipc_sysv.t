@@ -81,9 +81,16 @@ if ($Config{'d_msgget'} eq 'define' &&
     my $test5bad;
     my $test6bad;
 
-    unless (msgsnd($msg,pack("L a*",$msgtype,$msgtext),IPC_NOWAIT)) {
+    if ($Config{'use64bitall'} eq 'define') {
+      unless (msgsnd($msg,pack("L L a*",0,$msgtype,$msgtext),IPC_NOWAIT)) {
 	print "not ";
-         $test2bad = 1;
+	$test2bad = 1;
+      }
+    } else {
+      unless (msgsnd($msg,pack("L a*",$msgtype,$msgtext),IPC_NOWAIT)) {
+	print "not ";
+	$test2bad = 1;
+      }
     }
     print "ok 2\n";
     if ($test2bad) {
@@ -127,8 +134,12 @@ EOM
 EOM
     }
 
-    my($rmsgtype,$rmsgtext) = unpack("L a*",$msgbuf);
-
+    my($rmsgtype,$rmsgtext);
+    if ($Config{'use64bitall'} eq 'define') {
+      (undef,$rmsgtype,$rmsgtext) = unpack("L L a*",$msgbuf)
+    } else {
+      ($rmsgtype,$rmsgtext) = unpack("L a*",$msgbuf)
+    }
     unless($rmsgtype == $msgtype && $rmsgtext eq $msgtext) {
 	print "not ";
 	$test6bad = 1;

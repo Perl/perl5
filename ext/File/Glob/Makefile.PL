@@ -9,3 +9,13 @@ WriteMakefile(
 #   DEFINE		=> '-DGLOB_DEBUG',
 #   OPTIMIZE		=> '-g',
 );
+use Config;
+sub MY::cflags {
+  package MY;
+  my $inherited = shift->SUPER::cflags(@_);
+  if ($Config::Config{archname} =~ /^aix/ and 
+      $Config::Config{use64bitall} eq 'define') {
+    $inherited =~ s/\s-O\d?//m;
+  }
+  $inherited;
+}

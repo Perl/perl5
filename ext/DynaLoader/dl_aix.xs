@@ -20,6 +20,15 @@
 #include "perl.h"
 #include "XSUB.h"
 
+/* When building as a 64-bit binary on AIX, define this to get the
+ * correct structure definitions.  Also determines the field-name
+ * macros and gates some logic in readEntries().  -- Steven N. Hirsch
+ * <hirschs@btv.ibm.com> */
+#ifdef USE_64_BIT_ALL
+#   define __XCOFF64__
+#   define __XCOFF32__
+#endif
+
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
@@ -28,6 +37,18 @@
 #include <sys/ldr.h>
 #include <a.out.h>
 #include <ldfcn.h>
+
+#ifdef USE_64_BIT_ALL
+#   define AIX_SCNHDR SCNHDR_64
+#   define AIX_LDHDR LDHDR_64
+#   define AIX_LDSYM LDSYM_64
+#   define AIX_LDHDRSZ LDHDRSZ_64
+#else
+#   define AIX_SCNHDR SCNHDR
+#   define AIX_LDHDR LDHDR
+#   define AIX_LDSYM LDSYM
+#   define AIX_LDHDRSZ LDHDRSZ
+#endif
 
 /* When using Perl extensions written in C++ the longer versions
  * of load() and unload() from libC and libC_r need to be used,
@@ -394,10 +415,10 @@ static int readExports(ModulePtr mp)
 {
 	dTHX;
 	LDFILE *ldp = NULL;
-	SCNHDR sh;
-	LDHDR *lhp;
+	AIX_SCNHDR sh;
+	AIX_LDHDR *lhp;
 	char *ldbuf;
-	LDSYM *ls;
+	AIX_LDSYM *ls;
 	int i;
 	ExportPtr ep;
 
@@ -463,7 +484,11 @@ static int readExports(ModulePtr mp)
 			return -1;
 		}
 	}
+#ifdef USE_64_BIT_ALL
+	if (TYPE(ldp) != U803XTOCMAGIC) {
+#else
 	if (TYPE(ldp) != U802TOCMAGIC) {
+#endif
 		errvalid++;
 		strcpy(errbuf, "readExports: bad magic");
 		while(ldclose(ldp) == FAILURE)
@@ -511,8 +536,8 @@ static int readExports(ModulePtr mp)
 			;
 		return -1;
 	}
-	lhp = (LDHDR *)ldbuf;
-	ls = (LDSYM *)(ldbuf+LDHDRSZ);
+	lhp = (AIX_LDHDR *)ldbuf;
+	ls = (AIX_LDSYM *)(ldbuf+AIX_LDHDRSZ);
 	/*
 	 * Count the number of exports to include in our export table.
 	 */
@@ -536,15 +561,19 @@ static int readExports(ModulePtr mp)
 	 * the entry point we got from load.
 	 */
 	ep = mp->exports;
-	ls = (LDSYM *)(ldbuf+LDHDRSZ);
+	ls = (AIX_LDSYM *)(ldbuf+AIX_LDHDRSZ);
 	for (i = lhp->l_nsyms; i; i--, ls++) {
 		char *symname;
 		if (!LDR_EXPORT(*ls))
 			continue;
+#ifndef USE_64_BIT_ALL
 		if (ls->l_zeroes == 0)
+#endif
 			symname = ls->l_offset+lhp->l_stoff+ldbuf;
+#ifndef USE_64_BIT_ALL
 		else
 			symname = ls->l_name;
+#endif
 		ep->name = savepv(symname);
 		ep->addr = (void *)((unsigned long)mp->entry + ls->l_value);
 		ep++;
