@@ -507,6 +507,11 @@ $       ENDIF
 $!
 $       dirname = F$EXTRACT(0,F$LOCATE("]",file_2_find),file_2_find) + "]"
 $       file_2_find = file_2_find - dirname
+$!
+$!      may not need double dot check on ODS-5 volumes
+$       found = F$SEARCH(dirname + file_2_find)
+$       IF found .NES. "" THEN GOTO Read_loop_manifest
+$!
 $       dots = 0
 $Dot_loop:
 $       dot_ele = F$ELEMENT(dots,".",file_2_find)
@@ -2375,7 +2380,12 @@ $   echo "the IEEE math option."
 $   bool_dflt = use_ieee_math
 $   if f$type(useieee) .nes. "" 
 $   then
-$       if useieee .or. useieee .eqs. "define" then bool_dflt="y"
+$       if useieee .or. useieee .eqs. "define" 
+$       then 
+$         bool_dflt="y"
+$       else
+$         bool_dflt="n"
+$       endif
 $   endif
 $   rp = "Use IEEE math? [''bool_dflt'] "
 $   GOSUB myread
@@ -6258,12 +6268,13 @@ $   DELETE/NOLOG/NOCONFIRM config.msg;
 $ ENDIF
 $!
 $Clean_up:
+$ SET NOON
 $ IF (silent)
 $ THEN
+$   CLOSE/NOLOG STDOUT
 $   DEASSIGN SYS$OUTPUT
-$!   DEASSIGN SYS$ERROR
 $ ENDIF
-$ IF F$GETJPI("","FILCNT").GT.vms_filcnt THEN CLOSE CONFIG
+$ CLOSE/NOLOG CONFIG
 $ IF F$GETJPI("","FILCNT").GT.vms_filcnt
 $ THEN WRITE SYS$ERROR "%Config-W-VMS, WARNING: There is a file still open"
 $ ENDIF
