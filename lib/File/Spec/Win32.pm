@@ -43,11 +43,14 @@ from the following list:
     $ENV{TMPDIR}
     $ENV{TEMP}
     $ENV{TMP}
+    SYS:/temp
     C:/temp
     /tmp
     /
 
-Since perl 5.8.0, if running under taint mode, and if the environment
+The SYS:/temp is preferred in Novell NetWare.
+
+Since Perl 5.8.0, if running under taint mode, and if the environment
 variables are tainted, they are not used.
 
 =cut
@@ -353,6 +356,10 @@ sub rel2abs {
 }
 
 =back
+
+=head2 Note For File::Spec::Win32 Maintainers
+
+Novell NetWare inherits its File::Spec behaviour from File::Spec::Win32.
 
 =head1 SEE ALSO
 
