@@ -504,7 +504,7 @@ PerlIO_find_layer(pTHX_ const char *name, STRLEN len, int load)
  for (i=0; i < PerlIO_known_layers->cur; i++)
   {
    PerlIO_funcs *f = PerlIO_known_layers->array[i].funcs;
-   if (strEQ(f->name,name))
+   if (strnEQ(f->name,name,len))
     {
      PerlIO_debug("%.*s => %p\n",(int)len,name,f);
      return f;
