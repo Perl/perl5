@@ -222,6 +222,18 @@ Consider using the latest STABLE release.
 EOM
 		 exit 1
 	      fi
+	      # In principle, on FreeBSD 4.X, you can dispense
+	      # with -pthread like this:
+	      # cc -o tt{,.c} -nostdlib -lc_r /usr/lib/crt1.o
+	      # On modern 5.X, however, one has to link with
+	      # BOTH libc and libc_r.
+	      # Using -pthread is just easier.
+	      # If one wants to link against an alternative
+	      # threads implementation (libthr, libpthread, etc),
+	      # one has to jump through a number of hoops anyway,
+	      # so no win there, so leave the -pthread in.
+	      # --Anton Berezin <tobez>
+	      ldflags="-pthread $ldflags"
 	      case "$osvers" in
 	      # Both in 4.x and 5.x gethostbyaddr_r exists but
 	      # it is "Temporary function, not threadsafe"...
