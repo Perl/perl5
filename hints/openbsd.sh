@@ -4,6 +4,9 @@
 # Edited to allow Configure command-line overrides by
 #  Andy Dougherty <doughera@lafcol.lafayette.edu>
 #
+# To build with distribution paths, use:
+#	./Configure -des -Dopenbsd_distribution
+#
 
 # OpenBSD has a better malloc than perl...
 test "$usemymalloc" || usemymalloc='n'
@@ -67,5 +70,22 @@ $define|true|[yY]*)
 	libswanted="$libswanted pthread"
 esac
 EOCBU
+
+# When building in the OpenBSD tree we use different paths
+# This is only part of the story, the rest comes from config.over
+case "$openbsd_distribution" in
+''|$undef|false|[nN]*) ;;
+*)
+	# We put things in /usr, not /usr/local
+	prefix='/usr'
+	prefixexp='/usr'
+	sysman='/usr/share/man/man1'
+	# Never look for things in /usr/local
+	glibpth='/usr/lib'
+	libpth='/usr/lib'
+	locincpth=''
+	loclibpth=''
+	;;
+esac
 
 # end
