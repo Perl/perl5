@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 5826;
+plan tests => 5848;
 
 use strict;
 use warnings;
@@ -263,7 +263,7 @@ foreach my $t (@templates) {
         my @t = eval { unpack("$t*", pack("$t*", 12, 34)) };
 
         # quads not supported everywhere
-        skip "Quads not supported", 4 if $@ =~ /Invalid type in pack/;
+        skip "Quads not supported", 4 if $@ =~ /Invalid type/;
         is( $@, '' );
 
         is(scalar @t, 2);
@@ -378,7 +378,7 @@ sub numbers_with_total {
     SKIP: {
         my $out = eval {unpack($format, pack($format, $_))};
         skip "cannot pack '$format' on this perl", 2 if
-          $@ =~ /Invalid type in pack: '$format'/;
+          $@ =~ /Invalid type '$format'/;
 
         is($@, '');
         is($out, $_);
@@ -398,7 +398,7 @@ sub numbers_with_total {
     SKIP: {
       my $sum = eval {unpack "%$_$format*", pack "$format*", @_};
       skip "cannot pack '$format' on this perl", 3
-        if $@ =~ /Invalid type in pack: '$format'/;
+        if $@ =~ /Invalid type '$format'/;
 
       is($@, '');
       ok(defined $sum);
@@ -519,10 +519,10 @@ is(pack("V", 0xdeadbeef), "\xef\xbe\xad\xde");
 
   my ($x, $y, $z);
   eval { ($x) = unpack '/a*','hello' };
-  like($@, qr!/ must follow a numeric type!);
+  like($@, qr!'/' must follow a numeric type!);
   undef $x;
   eval { $x = unpack '/a*','hello' };
-  like($@, qr!/ must follow a numeric type!);
+  like($@, qr!'/' must follow a numeric type!);
 
   undef $x;
   eval { ($z,$x,$y) = unpack 'a3/A C/a* C/Z', "003ok \003yes\004z\000abc" };
@@ -538,10 +538,10 @@ is(pack("V", 0xdeadbeef), "\xef\xbe\xad\xde");
 
   undef $x;
   eval { ($x) = pack '/a*','hello' };
-  like($@,  qr!Invalid type in pack: '/'!);
+  like($@,  qr!Invalid type '/'!);
   undef $x;
   eval { $x = pack '/a*','hello' };
-  like($@,  qr!Invalid type in pack: '/'!);
+  like($@,  qr!Invalid type '/'!);
 
   $z = pack 'n/a* N/Z* w/A*','string','hi there ','etc';
   my $expect = "\000\006string\0\0\0\012hi there \000\003etc";
@@ -781,7 +781,7 @@ foreach (
     # from Wolfgang Laun: fix in change #13288
 
     eval { my $t=unpack("P*", "abc") };
-    like($@, qr/P must have an explicit size/);
+    like($@, qr/'P' must have an explicit size/);
 }
 
 {   # Grouping constructs
@@ -820,6 +820,105 @@ foreach (
     is("@a", "@b");
     @a = unpack '(SL)3 SL',   pack '(SL)*', 67..74;
     is("@a", "@b");
+}
+
+{  # more on grouping (W.Laun)
+  use warnings;
+  my $warning;
+  local $SIG{__WARN__} = sub {
+      $warning = $_[0];
+  };
+  # @ absolute within ()-group
+  my $badc = pack( '(a)*', unpack( '(@1a @0a @2)*', 'abcd' ) );
+  is( $badc, 'badc' );
+  my @b = ( 1, 2, 3 );
+  my $buf = pack( '(@1c)((@2C)@3c)', @b );
+  is( $buf, "\0\1\0\0\2\3" );
+  my @a = unpack( '(@1c)((@2c)@3c)', $buf );
+  is( "@a", "@b" );
+
+  # various unpack count/code scenarios 
+  my @Env = ( a => 'AAA', b => 'BBB' );
+  my $env = pack( 'S(S/A*S/A*)*', @Env/2, @Env );
+
+  # unpack full length - ok
+  my @pup = unpack( 'S/(S/A* S/A*)', $env );
+  is( "@pup", "@Env" );
+
+  # warn when count/code goes beyond end of string
+  # \0002 \0001 a \0003 AAA \0001 b \0003 BBB
+  #     2     4 5     7  10    1213
+  eval { @pup = unpack( 'S/(S/A* S/A*)', substr( $env, 0, 13 ) ) };
+  like( $@, qr{length/code after end of string} );
+  
+  # postfix repeat count
+  $env = pack( '(S/A* S/A*)' . @Env/2, @Env );
+
+  # warn when count/code goes beyond end of string
+  # \0001 a \0003 AAA \0001  b \0003 BBB
+  #     2 3c    5   8    10 11    13  16
+  eval { @pup = unpack( '(S/A* S/A*)' . @Env/2, substr( $env, 0, 11 ) ) };
+  like( $@, qr{length/code after end of string} );
+
+  # catch stack overflow/segfault
+  eval { $_ = pack( ('(' x 105) . 'A' . (')' x 105) ); };
+  like( $@, qr{Too deeply nested \(\)-groups} );
+}
+
+{ # syntax checks (W.Laun)
+  use warnings;
+  my @warning;
+  local $SIG{__WARN__} = sub {
+      push( @warning, $_[0] );
+  };
+  eval { my $s = pack( 'Ax![4c]A', 1..5 ); };
+  like( $@, qr{Malformed integer in \[\]} );
+
+  eval { my $buf = pack( '(c/*a*)', 'AAA', 'BB' ); };
+  like( $@, qr{'/' does not take a repeat count} );
+
+  eval { my @inf = unpack( 'c/1a', "\x03AAA\x02BB" ); };
+  like( $@, qr{'/' does not take a repeat count} );
+
+  eval { my @inf = unpack( 'c/*a', "\x03AAA\x02BB" ); };
+  like( $@, qr{'/' does not take a repeat count} );
+
+  # white space where possible 
+  my @Env = ( a => 'AAA', b => 'BBB' );
+  my $env = pack( ' S ( S / A*   S / A* )* ', @Env/2, @Env );
+  my @pup = unpack( ' S / ( S / A*   S / A* ) ', $env );
+  is( "@pup", "@Env" );
+
+  # white space in 4 wrong places
+  for my $temp (  'A ![4]', 'A [4]', 'A *', 'A 4' ){
+      eval { my $s = pack( $temp, 'B' ); };
+      like( $@, qr{Invalid type } );
+  }
+
+  # warning for commas
+  @warning = ();
+  my $x = pack( 'I,A', 4, 'X' );
+  like( $warning[0], qr{Invalid type ','} );
+
+  # comma warning only once
+  @warning = ();
+  $x = pack( 'C(C,C)C,C', 65..71  );
+  like( scalar @warning, 1 );
+
+  # forbidden code in []
+  eval { my $x = pack( 'A[@4]', 'XXXX' ); };
+  like( $@, qr{Within \[\]-length '\@' not allowed} );
+
+  # @ repeat default 1
+  my $s = pack( 'AA@A', 'A', 'B', 'C' );
+  my @c = unpack( 'AA@A', $s );
+  is( $s, 'AC' ); 
+  is( "@c", "A C C" ); 
+
+  # no unpack code after /
+  eval { my @a = unpack( "C/", "\3" ); };
+  like( $@, qr{Code missing after '/'} );
+
 }
 
 {  # Repeat count [SUBEXPR]
@@ -939,7 +1038,7 @@ numbers ('F', -(2**34), -1, 0, 1, 2**34);
 SKIP: {
     my $t = eval { unpack("D*", pack("D", 12.34)) };
 
-    skip "Long doubles not in use", 56 if $@ =~ /Invalid type in pack/;
+    skip "Long doubles not in use", 56 if $@ =~ /Invalid type/;
 
     is(length(pack("D", 0)), $Config{longdblsize});
     numbers ('D', -(2**34), -1, 0, 1, 2**34);
@@ -953,7 +1052,7 @@ foreach my $template (qw(A Z c C s S i I l L n N v V q Q j J f d F D u U w)) {
   SKIP: {
     my $packed = eval {pack "${template}4", 1, 4, 9, 16};
     if ($@) {
-      die unless $@ =~ /Invalid type in pack: '$template'/;
+      die unless $@ =~ /Invalid type '$template'/;
       skip ("$template not supported on this perl",
             $cant_checksum{$template} ? 4 : 8);
     }
