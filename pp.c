@@ -2471,12 +2471,12 @@ PP(pp_i_modulo_0)
      }
 }
 
+#ifdef __GLIBC__
 STATIC
 PP(pp_i_modulo_1)
 {
-#ifdef __GLIBC__
      /* This is the i_modulo with the workaround for the _moddi3 bug
-      * in (at least) glibc 2.2.5 (the "right = -right" is the workaround).
+      * in (at least) glibc 2.2.5 (the PERL_ABS() the workaround).
       * See below for pp_i_modulo. */
      dSP; dATARGET; tryAMAGICbin(modulo,opASSIGN);
      {
@@ -2486,8 +2486,8 @@ PP(pp_i_modulo_1)
 	  SETi( left % PERL_ABS(right) );
 	  RETURN;
      }
-#endif
 }
+#endif
 
 PP(pp_i_modulo)
 {
