@@ -297,7 +297,7 @@ BOOT:
 	PL_perl_destruct_level = 2;
 	threads = Perl_sharedsv_new(aTHX);
 	SHAREDSvEDIT(threads);
-	((HV*) SHAREDSvGET(threads)) = newHV();
+	SHAREDSvGET(threads) = (SV *)newHV();
 	SHAREDSvRELEASE(threads);
 	{
 	    
