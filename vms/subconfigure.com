@@ -1035,11 +1035,11 @@ $ DEASSIGN SYS$ERROR
 $ if (teststatus.nes."1")
 $ THEN
 $!  Okay, int64_t failed. Must not exist
-$   perl_d_int64t = "undef"
+$   perl_d_int64_t = "undef"
 $ ELSE
-$   perl_d_int64t="define"
+$   perl_d_int64_t="define"
 $ ENDIF
-$ WRITE_RESULT "d_int64t is ''perl_d_int64t'"
+$ WRITE_RESULT "d_int64_t is ''perl_d_int64_t'"
 $!
 $! Check to see if off64_t exists
 $!
@@ -2975,6 +2975,52 @@ $ perl_d_getsent="undef"
 $ ENDIF
 $ WRITE_RESULT "d_getsent is ''perl_d_getsent'"
 $!
+$! Check for socklen_t
+$!
+$ if ("''Has_Dec_C_Sockets'".eqs."T").or.("''Has_Socketshr'".eqs."T")
+$ THEN
+$   OS
+$   WS "#ifdef __DECC
+$   WS "#include <stdlib.h>
+$   WS "#endif
+$   WS "#include <stdio.h>
+$   IF ("''Has_Socketshr'".eqs."T")
+$   THEN
+$     WS "#include <socketshr.h>"
+$   ELSE
+$     WS "#include <netdb.h>
+$   ENDIF
+$   WS "int main()
+$   WS "{"
+$   WS "socklen_t x = 16;
+$   WS "exit(0);
+$   WS "}"
+$   CS
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   on error then continue
+$   on warning then continue
+$   'Checkcc' temp.c
+$   If (Needs_Opt.eqs."Yes")
+$   THEN
+$     link temp.obj,temp.opt/opt
+$   else
+$     link temp.obj
+$   endif
+$   teststatus = f$extract(9,1,$status)
+$   DEASSIGN SYS$OUTPUT
+$   DEASSIGN SYS$ERROR
+$   if (teststatus.nes."1")
+$   THEN
+$     perl_d_socklen_t="undef"
+$   ELSE
+$     perl_d_socklen_t="define"
+$   ENDIF
+$ ELSE
+$   perl_d_socklen_t="undef"
+$ ENDIF
+$ WRITE_RESULT "d_socklen_t is ''perl_d_socklen_t'"
+$!
 $! Check for pthread_yield
 $!
 $ if ("''use_threads'".eqs."T")
@@ -3572,6 +3618,7 @@ $ WC "d_socket='" + perl_d_socket + "'"
 $ WC "d_sockpair='" + perl_d_sockpair + "'"
 $ WC "d_gethent='" + perl_d_gethent + "'"
 $ WC "d_getsent='" + perl_d_getsent + "'"
+$ WC "d_socklen_t='" + perl_d_socklen_t + "'"
 $ WC "d_select='" + perl_d_select + "'"
 $ WC "i_niin='" + perl_i_niin + "'"
 $ WC "i_netinettcp='" + perl_i_netinettcp + "'"
@@ -3808,6 +3855,7 @@ $ WC "d_dlsymun='" + perl_d_dlsymun + "'"
 $ WC "d_suidsafe='" + perl_d_suidsafe + "'"
 $ WC "d_dosuid='" + perl_d_dosuid + "'"
 $ WC "d_inetaton='" + perl_d_inetaton + "'"
+$ WC "d_int64_t='" + perl_d_int64_t + "'"
 $ WC "d_isascii='" + perl_d_isascii + "'"
 $ WC "d_mkfifo='" + perl_d_mkfifo + "'"
 $ WC "d_pathconf='" + perl_d_pathconf + "'"
@@ -3943,7 +3991,6 @@ $ WC "i_machcthr='" + perl_i_machcthr + "'"
 $ WC "usemultiplicity='" + perl_usemultiplicity + "'"
 $ WC "i_poll='" + perl_i_poll + "'"
 $ WC "i_inttypes='" + perl_i_inttypes + "'"
-$ WC "d_int64t='" + perl_d_int64t + "'"
 $ WC "d_off64_t='" + perl_d_off64_t + "'"
 $ WC "d_fpos64_t='" + perl_d_fpos64_t + "'"
 $ WC "use64bits='" + perl_use64bits + "'"
