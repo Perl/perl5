@@ -1,20 +1,26 @@
 #
-# Makefile to build perl on Windowns NT using DMAKE.
+# Makefile to build perl on Windows NT using DMAKE.
 # Supported compilers:
 #	Visual C++ 2.0 thro 5.0
 #	Borland C++ 5.02
-#	Mingw32-0.1.4 with gcc-2.7.2
+#	Mingw32 with gcc-2.8.1 or egcs-1.0.2
 #
 # This is set up to build a perl.exe that runs off a shared library
 # (perl.dll).  Also makes individual DLLs for the XS extensions.
 #
 
+##
+## Build configuration.  Edit the values below to suit your needs.
+##
+
 #
 # Set these to wherever you want "nmake install" to put your
 # newly built perl.
+#
 INST_DRV	*= c:
 INST_TOP	*= $(INST_DRV)\perl
 
+#
 # Comment this out if you DON'T want your perl installation to be versioned.
 # This means that the new installation will overwrite any files from the
 # old installation at the same INST_TOP location.  Leaving it enabled is
@@ -22,14 +28,17 @@ INST_TOP	*= $(INST_DRV)\perl
 # locations it installs files to.  If you disable it, an alternative
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
+#
 INST_VER	*= \5.00467
 
 #
 # uncomment to enable threads-capabilities
+#
 #USE_THREADS	*= define
 
 #
 # uncomment one
+#
 #CCTYPE		*= MSVC20
 #CCTYPE		*= MSVC
 CCTYPE		*= BORLAND
@@ -38,22 +47,33 @@ CCTYPE		*= BORLAND
 #
 # uncomment next line if you want to use the perl object
 # Currently, this cannot be enabled if you ask for threads above
+#
 #OBJECT		*= -DPERL_OBJECT
 
 #
 # uncomment next line if you want debug version of perl (big,slow)
+#
 #CFG		*= Debug
+
+#
+# uncomment to enable use of PerlCRT.DLL.  Highly recommended.  It has
+# patches that fix known bugs in MSCVRT.DLL.  You will need to download it
+# from: <TBD> and follow the directions in the package to install.
+#
+#USE_PERLCRT	*= define
 
 #
 # if you have the source for des_fcrypt(), uncomment this and make sure the
 # file exists (see README.win32).  File should be located at the perl
 # top level directory.
+#
 #CRYPT_SRC	*= des_fcrypt.c
 
 #
 # if you didn't set CRYPT_SRC and if you have des_fcrypt() available in a
 # library, uncomment this, and make sure the library exists (see README.win32)
 # Specify the full pathname of the library.
+#
 #CRYPT_LIB	*= des_fcrypt.lib
 
 #
@@ -62,6 +82,7 @@ CCTYPE		*= BORLAND
 # you may have compiled with/without it.  Be prepared to recompile all extensions
 # if you change the default.  Currently, this cannot be enabled if you ask for
 # PERL_OBJECT above.
+#
 #PERL_MALLOC	*= define
 
 #
@@ -81,12 +102,18 @@ EXTRALIBDIRS	*=
 #
 # set this to point to cmd.exe (only needed if you use some
 # alternate shell that doesn't grok cmd.exe style commands)
+#
 #SHELL		*= g:\winnt\system32\cmd.exe
 
 #
 # set this to your email address (perl will guess a value from
 # from your loginname and your hostname, which may not be right)
+#
 #EMAIL		*= 
+
+##
+## Build configuration ends.
+##
 
 ##################### CHANGE THESE ONLY IF YOU MUST #####################
 
@@ -221,8 +248,22 @@ LOCDEFS		= -DPERLDLL -DPERL_CORE
 SUBSYS		= console
 CXX_FLAG	= -TP -GX
 
+.IF "$(USE_PERLCRT)" == ""
+.IF  "$(CFG)" == "Debug"
+PERLCRTLIBC	= msvcrtd.lib
+.ELSE
+PERLCRTLIBC	= msvcrt.lib
+.ENDIF
+.ELSE
+.IF  "$(CFG)" == "Debug"
+PERLCRTLIBC	= PerlCRTD.lib
+.ELSE
+PERLCRTLIBC	= PerlCRT.lib
+.ENDIF
+.ENDIF
+
 .IF "$(RUNTIME)" == "-MD"
-LIBC		= msvcrt.lib
+LIBC		= $(PERLCRTLIBC)
 .ELSE
 LIBC		= libcmt.lib
 .ENDIF
@@ -243,15 +284,17 @@ OPTIMIZE	= -Od $(RUNTIME) -DNDEBUG
 LINK_DBG	= -release
 .ENDIF
 
-# we don't add LIBC here, the compiler does it based on -MD/-MT
-LIBFILES	= $(CRYPT_LIB) oldnames.lib kernel32.lib user32.lib gdi32.lib \
+LIBBASEFILES	= $(CRYPT_LIB) oldnames.lib kernel32.lib user32.lib gdi32.lib \
 		winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib \
 		oleaut32.lib netapi32.lib uuid.lib wsock32.lib mpr.lib winmm.lib \
 		version.lib odbc32.lib odbccp32.lib
 
+# we add LIBC here, since we may be using PerlCRT.dll
+LIBFILES	= $(LIBBASEFILES) $(LIBC)
+
 CFLAGS		= -nologo -Gf -W3 $(INCLUDES) $(DEFINES) $(LOCDEFS) \
 		$(PCHFLAGS) $(OPTIMIZE)
-LINK_FLAGS	= -nologo $(LINK_DBG) -machine:$(PROCESSOR_ARCHITECTURE)
+LINK_FLAGS	= -nologo -nodefaultlib $(LINK_DBG) -machine:$(PROCESSOR_ARCHITECTURE)
 OBJOUT_FLAG	= -Fo
 EXEOUT_FLAG	= -Fe
 LIBOUT_FLAG	= /out:
@@ -359,7 +402,9 @@ PERLIMPLIB	*= ..\libperl$(a)
 
 CFGSH_TMPL	= config.vc
 CFGH_TMPL	= config_H.vc
+.IF "$(USE_PERLCRT)" == ""
 PERL95EXE	= ..\perl95.exe
+.ENDIF
 
 .ENDIF
 
@@ -769,6 +814,7 @@ $(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ)
 
 .IF "$(CCTYPE)" != "BORLAND"
 .IF "$(CCTYPE)" != "GCC"
+.IF "$(USE_PERLCRT)" == ""
 
 perl95.c : runperl.c 
 	copy runperl.c perl95.c
@@ -790,8 +836,9 @@ DynaLoadmt$(o) : $(DYNALOADER).c
 
 $(PERL95EXE): $(PERLDLL) $(CONFIGPM) $(PERL95_OBJ)
 	$(LINK32) -subsystem:console -nodefaultlib -out:$@ $(LINK_FLAGS) \
-	    $(LIBFILES) $(PERL95_OBJ) $(PERLIMPLIB) libcmt.lib
+	    $(LIBBASEFILES) $(PERL95_OBJ) $(PERLIMPLIB) libcmt.lib
 
+.ENDIF
 .ENDIF
 .ENDIF
 
