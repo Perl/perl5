@@ -20,10 +20,10 @@
 #define PERL_IN_SHAREDSV_C
 #include "perl.h"
 
+#ifdef USE_ITHREADS
+
 PerlInterpreter* sharedsv_space;
 perl_mutex sharedsv_space_mutex;
-
-#ifdef USE_ITHREADS
 
 /*
   Shared SV
@@ -198,4 +198,4 @@ Perl_sharedsv_thrcnt_dec(pTHX_ shared_sv* ssv)
     SHAREDSvRELEASE(ssv);
 }
 
-#endif
+#endif /* USE_ITHREADS */
