@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Jun  5 04:50:23 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Thu Jun  7 00:46:23 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -10475,6 +10475,52 @@ esac
 : see if modfl exists
 set modfl d_modfl
 eval $inlibc
+
+case "$d_longdbl$d_modfl" in
+$define$define)
+	$cat <<EOM
+Checking to see whether your modfl() is okay for large values...
+EOM
+$cat >try.c <<EOCP
+#include <math.h> 
+#include <stdio.h>
+int main() {
+    long double nv = 4294967303.15;
+    long double v, w;
+    v = modfl(nv, &w);         
+#ifdef __GLIBC__
+    printf("glibc");
+#endif
+    printf(" %"$sPRIfldbl" %"$sPRIfldbl" %"$sPRIfldbl"\n", nv, v, w);
+    return 0;
+}
+EOCP
+	set try
+	if eval $compile; then
+		foo=`./try`
+		case "$foo" in
+		*" 4294967303.150000 1.150000 4294967302.000000")
+			echo >&4 "Your modfl() is broken for large values."
+			d_modfl="$undef"
+			case "$foo" in
+			glibc)	echo >&4 "You should upgrade your glibc to at least 2.2.2 to get a fixed modfl()."
+			;;
+			esac
+			;;
+		*" 4294967303.150000 0.150000 4294967303.000000")
+			echo >&4 "Your modfl() seems okay for large values."
+			;;
+		*)	echo >&4 "I don't understand your modfl() at all."
+			d_modfl="$undef"
+			;;
+		esac
+		$rm -f try.* try core core.try.*
+	else
+		echo "I cannot figure out whether your modfl() is okay, assuming it isn't."
+		d_modfl="$undef"
+	fi
+	;;
+esac
 
 : see if mprotect exists
 set mprotect d_mprotect
