@@ -3567,8 +3567,7 @@ bad switch on your behalf.)
 
 (W newline) A file operation was attempted on a filename, and that
 operation failed, PROBABLY because the filename contained a newline,
-PROBABLY because you forgot to chop() or chomp() it off.  See
-L<perlfunc/chomp>.
+PROBABLY because you forgot to chomp() it off.  See L<perlfunc/chomp>.
 
 =item Unsupported directory function "%s" called
 

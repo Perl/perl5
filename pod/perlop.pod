@@ -1746,7 +1746,7 @@ is roughly equivalent to:
 
     open(FOO, "echo *.c | tr -s ' \t\r\f' '\\012\\012\\012\\012'|");
     while (<FOO>) {
-	chop;
+	chomp;
 	chmod 0644, $_;
     }
 
