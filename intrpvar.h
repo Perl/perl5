@@ -443,3 +443,5 @@ PERLVAR(IProc,		struct IPerlProc*)
 #if defined(USE_ITHREADS)
 PERLVAR(Iptr_table,	PTR_TBL_t*)
 #endif
+
+PERLVAR(Inullstash,	HV *)		/* illegal symbols end up here */
