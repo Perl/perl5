@@ -2676,7 +2676,7 @@ CV* proto;
     comppadlist = newAV();
     AvREAL_off(comppadlist);
     av_store(comppadlist, 0, SvREFCNT_inc((SV*)protopad_name));
-    av_store(comppadlist, 1, SvREFCNT_inc((SV*)comppad));
+    av_store(comppadlist, 1, (SV*)comppad);
     CvPADLIST(cv) = comppadlist;
     av_extend(comppad, AvFILL(protopad));
     curpad = AvARRAY(comppad);
