@@ -271,7 +271,24 @@ struct loop {
 #define OA_DANGEROUS 64
 #define OA_DEFGV 128
 
-#define OASHIFT 8
+/* The next 4 bits encode op class information */
+#define OA_BASEOP (0 << 8)
+#define OA_UNOP (1 << 8)
+#define OA_BINOP (2 << 8)
+#define OA_LOGOP (3 << 8)
+#define OA_CONDOP (4 << 8)
+#define OA_LISTOP (5 << 8)
+#define OA_PMOP (6 << 8)
+#define OA_SVOP (7 << 8)
+#define OA_GVOP (8 << 8)
+#define OA_PVOP (9 << 8)
+#define OA_LOOP (10 << 8)
+#define OA_COP (11 << 8)
+#define OA_BASEOP_OR_UNOP (12 << 8)
+#define OA_FILESTATOP (13 << 8)
+#define OA_LOOPEXOP (14 << 8)
+
+#define OASHIFT 12
 
 /* Remaining nybbles of opargs */
 #define OA_SCALAR 1
