@@ -101,8 +101,8 @@ Parentheses for capturing, Other regexp features
 
 =back
 
-=head2 perlfaq - frequently asked questions about Perl ($Date: 2001/11/19
-17:09:37 $)
+=head2 perlfaq - frequently asked questions about Perl ($Date: 2002/01/11
+02:31:20 $)
 
 =over 4
 
@@ -2714,8 +2714,8 @@ tarball, Announce to the modules list, Announce to clpa, Fix bugs!
 
 =back
 
-=head2 perlfaq1 - General Questions About Perl ($Revision: 1.2 $, $Date:
-2001/11/09 08:06:04 $)
+=head2 perlfaq1 - General Questions About Perl ($Revision: 1.4 $, $Date:
+2002/01/18 21:00:17 $)
 
 =over 4
 
@@ -2761,8 +2761,8 @@ Scheme, or Tcl?
 
 =back
 
-=head2 perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.3 $,
-$Date: 2001/11/09 08:06:04 $)
+=head2 perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.5 $,
+$Date: 2002/01/18 21:00:17 $)
 
 =over 4
 
@@ -2817,8 +2817,8 @@ References, Tutorials, Task-Oriented, Special Topics
 
 =back
 
-=head2 perlfaq3 - Programming Tools ($Revision: 1.10 $, $Date: 2001/11/19
-17:09:37 $)
+=head2 perlfaq3 - Programming Tools ($Revision: 1.11 $, $Date: 2002/01/11
+02:31:20 $)
 
 =over 4
 
@@ -2903,8 +2903,8 @@ mean?
 
 =back
 
-=head2 perlfaq4 - Data Manipulation ($Revision: 1.10 $, $Date: 2002/01/01
-22:26:45 $)
+=head2 perlfaq4 - Data Manipulation ($Revision: 1.11 $, $Date: 2002/01/11
+02:31:20 $)
 
 =over 4
 
@@ -3118,8 +3118,8 @@ array of hashes or arrays?
 
 =back
 
-=head2 perlfaq5 - Files and Formats ($Revision: 1.6 $, $Date: 2001/12/19
-18:17:00 $)
+=head2 perlfaq5 - Files and Formats ($Revision: 1.7 $, $Date: 2002/01/11
+02:31:20 $)
 
 =over 4
 
@@ -3356,8 +3356,8 @@ is in scope?
 
 =back
 
-=head2 perlfaq8 - System Interaction ($Revision: 1.4 $, $Date: 2001/11/09
-08:06:04 $)
+=head2 perlfaq8 - System Interaction ($Revision: 1.5 $, $Date: 2002/01/11
+02:31:20 $)
 
 =over 4
 
@@ -4436,26 +4436,9 @@ croak, warn
 
 =item DESCRIPTION
 
-=item Global Variables
-
-PL_DBsingle, PL_DBsub, PL_DBtrace, PL_dowarn, PL_last_in_gv, PL_ofs_sv,
-PL_rs
-
-=item GV Functions
-
-is_gv_magical
-
-=item IO Functions
-
-start_glob
-
-=item Stack Manipulation Macros
-
-djSP, LVRET
-
-=item SV Manipulation Functions
-
-report_uninit, sv_add_arena, sv_clean_all, sv_clean_objs, sv_free_arenas
+djSP, is_gv_magical, LVRET, PL_DBsingle, PL_DBsub, PL_DBtrace, PL_dowarn,
+PL_last_in_gv, PL_ofs_sv, PL_rs, report_uninit, start_glob, sv_add_arena,
+sv_clean_all, sv_clean_objs, sv_free_arenas
 
 =item AUTHORS
 
@@ -4633,7 +4616,7 @@ PerlIO_apply_layers(f,mode,layers), PerlIO_binmode(f,ptype,imode,layers),
 
 =item Security audit shipped utilities
 
-=item Custom opcodes
+=item Sort out the uid-setting mess
 
 =item DLL Versioning
 
@@ -4777,8 +4760,6 @@ PerlIO_apply_layers(f,mode,layers), PerlIO_binmode(f,ptype,imode,layers),
 
 =item Attach/detach debugger from running program
 
-=item Alternative RE syntax module
-
 =item GUI::Native
 
 =item foreach(reverse ...)
@@ -4804,6 +4785,8 @@ PerlIO_apply_layers(f,mode,layers), PerlIO_binmode(f,ptype,imode,layers),
 =item Recently done things
 
 =over 4
+
+=item Alternative RE syntax module
 
 =item Safe signal handling
 
@@ -5098,7 +5081,7 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item IEEE-format Floating Point Default on OpenVMS Alpha
 
-=item Different Definition of the Unicode Character Classes \p{In...}
+=item New Unicode Properties
 
 =item Perl Parser Stress Tested
 
@@ -5120,7 +5103,7 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item Understanding of Numbers
 
-=item Miscellaneous Enhancements
+=item Miscellaneous Changes
 
 =back
 
@@ -5566,7 +5549,7 @@ d_strtoq, d_u32align, d_ualarm, d_usleep
 
 =back
 
-=head2 perl561delta, perldelta - what's new for perl v5.6.x
+=head2 perl561delta - what's new for perl v5.6.x
 
 =over 4
 
@@ -5986,7 +5969,7 @@ to mean "${$}<digit>" is deprecated
 
 =back
 
-=head2 perl56delta, perldelta - what's new for perl v5.6.0
+=head2 perl56delta - what's new for perl v5.6.0
 
 =over 4
 
@@ -6371,7 +6354,7 @@ to mean "${$}<digit>" is deprecated
 
 =back
 
-=head2 perl5005delta, perldelta - what's new for perl5.005
+=head2 perl5005delta - what's new for perl5.005
 
 =over 4
 
@@ -6547,7 +6530,7 @@ temporary file, regexp too big
 
 =back
 
-=head2 perl5004delta, perldelta - what's new for perl5.004
+=head2 perl5004delta - what's new for perl5.004
 
 =over 4
 
@@ -8858,7 +8841,7 @@ RV
 
 =item B::PV METHODS
 
-PV, PVX
+PV, RV, PVX
 
 =item B::PVMG METHODS
 
@@ -8866,7 +8849,7 @@ MAGIC, SvSTASH
 
 =item B::MAGIC METHODS
 
-MOREMAGIC, PRIVATE, TYPE, FLAGS, OBJ, PTR
+MOREMAGIC, precomp, PRIVATE, TYPE, FLAGS, OBJ, PTR, REGEX
 
 =item B::PVLV METHODS
 
@@ -8884,7 +8867,7 @@ LINE, FILE, FILEGV, GvREFCNT, FLAGS
 =item B::IO METHODS
 
 LINES, PAGE, PAGE_LEN, LINES_LEFT, TOP_NAME, TOP_GV, FMT_NAME, FMT_GV,
-BOTTOM_NAME, BOTTOM_GV, SUBPROCESS, IoTYPE, IoFLAGS
+BOTTOM_NAME, BOTTOM_GV, SUBPROCESS, IoTYPE, IoFLAGS, IsSTD
 
 =item B::AV METHODS
 
@@ -8923,7 +8906,8 @@ children
 
 =item B::PMOP METHODS
 
-pmreplroot, pmreplstart, pmnext, pmregexp, pmflags, pmpermflags, precomp
+pmreplroot, pmreplstart, pmnext, pmregexp, pmflags, pmdynflags,
+pmpermflags, precomp, pmoffet
 
 =item B::SVOP METHOD
 
@@ -8949,11 +8933,11 @@ label, stash, file, cop_seq, arybase, line
 
 =item FUNCTIONS EXPORTED BY C<B>
 
-main_cv, init_av, main_root, main_start, comppadlist, sv_undef, sv_yes,
-sv_no, amagic_generation, walkoptree(OP, METHOD), walkoptree_debug(DEBUG),
-walksymtable(SYMREF, METHOD, RECURSE, PREFIX), svref_2object(SV),
-ppname(OPNUM), hash(STR), cast_I32(I), minus_c, cstring(STR), class(OBJ),
-threadsv_names
+main_cv, init_av, begin_av, end_av, main_root, main_start, comppadlist,
+regex_padav, sv_undef, sv_yes, sv_no, amagic_generation, walkoptree(OP,
+METHOD), walkoptree_debug(DEBUG), walksymtable(SYMREF, METHOD, RECURSE,
+PREFIX), svref_2object(SV), ppname(OPNUM), hash(STR), cast_I32(I), minus_c,
+cstring(STR), class(OBJ), threadsv_names
 
 =item AUTHOR
 
@@ -9040,7 +9024,8 @@ B<-Db>, B<-Da>, B<-DC>, B<-S>, B<-upackage>
 
 B<-ofilename>, B<-v>, B<-->, B<-uPackname>, B<-D>, B<-Do>, B<-Dc>, B<-DA>,
 B<-DC>, B<-DM>, B<-f>, B<-fcog>, B<-fsave-data>, B<-fppaddr>, B<-fwarn-sv>,
-B<-fuse-script-name>, B<-fsave-sig-hash>, B<-On>, B<-llimit>
+B<-fuse-script-name>, B<-fsave-sig-hash>, B<-On>, B<-O0>, B<-O1>, B<-O2>,
+B<-llimit>
 
 =item EXAMPLES
 
@@ -9429,7 +9414,7 @@ B<-Db>, B<-Da>, B<-DC>, B<-S>, B<-upackage>
 
 =item USING THE FUNCTION-ORIENTED INTERFACE
 
-B<:cgi>, B<:form>, B<:html2>, B<:html3>, B<:netscape>, B<:html>,
+B<:cgi>, B<:form>, B<:html2>, B<:html3>, B<:html4>, B<:netscape>, B<:html>,
 B<:standard>, B<:all>
 
 =item PRAGMAS
@@ -9440,9 +9425,9 @@ B<:standard>, B<:all>
 
 =item SPECIAL FORMS FOR IMPORTING HTML-TAG FUNCTIONS
 
-1. start_table() (generates a <TABLE> tag), 2. end_table() (generates a
-</TABLE> tag), 3. start_ul() (generates a <UL> tag), 4. end_ul() (generates
-a </UL> tag)
+1. start_table() (generates a <table> tag), 2. end_table() (generates a
+</table> tag), 3. start_ul() (generates a <ul> tag), 4. end_ul() (generates
+a </ul> tag)
 
 =back
 
@@ -9562,7 +9547,7 @@ B<-name>, B<-value>, B<-path>, B<-domain>, B<-expires>, B<-secure>
 
 1. Create a <Frameset> document, 2. Specify the destination for the
 document in the HTTP header, 3. Specify the destination for the document in
-the <FORM> tag
+the <form> tag
 
 =item LIMITED SUPPORT FOR CASCADING STYLE SHEETS
 
@@ -10980,9 +10965,19 @@ arrays
 
 =item Selecting What To Export
 
+=item How to Import
+
+C<use ModuleName;>, C<use ModuleName ();>, C<use ModuleName qw(...);>
+
+=back
+
+=item Advanced features
+
+=over 4
+
 =item Specialised Import Lists
 
-=item Exporting without using Export's import method
+=item Exporting without using Exporter's import method
 
 =item Module Version Checking
 
@@ -11188,6 +11183,19 @@ For static extensions, For dynamic extensions, For dynamic extensions
 =item SEE ALSO
 
 =back
+
+=head2 ExtUtils::MM_BeOS - methods to override UN*X behaviour in
+ExtUtils::MakeMaker
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
+perl_archive
 
 =head2 ExtUtils::MM_Cygwin - methods to override UN*X behaviour in
 ExtUtils::MakeMaker
@@ -11924,7 +11932,7 @@ rmscopy($from,$to[,$date_flag])
 
 =back
 
-=head2 File::Find, find - traverse a file tree
+=head2 File::Find - Traverse a directory tree.
 
 =over 4
 
@@ -11932,9 +11940,23 @@ rmscopy($from,$to[,$date_flag])
 
 =item DESCRIPTION
 
+B<find>, B<finddepth>
+
+=over 4
+
+=item %options
+
 C<wanted>, C<bydepth>, C<preprocess>, C<postprocess>, C<follow>,
 C<follow_fast>, C<follow_skip>, C<dangling_symlinks>, C<no_chdir>,
 C<untaint>, C<untaint_pattern>, C<untaint_skip>
+
+=item The wanted function
+
+C<$File::Find::dir> is the current directory name,, C<$_> is the current
+filename within that directory, C<$File::Find::name> is the complete
+pathname to the file
+
+=back
 
 =item WARNINGS
 
@@ -13494,6 +13516,8 @@ set ( NAME => VALUE [, NAME => VALUE ...] ), setall ( VALUES ), setval ( N
 first BLOCK LIST, max LIST, maxstr LIST, min LIST, minstr LIST, reduce
 BLOCK LIST, shuffle LIST, sum LIST
 
+=item KNOWN BUGS
+
 =item SUGGESTED ADDITIONS
 
 =item COPYRIGHT
@@ -13512,6 +13536,8 @@ general-utility list subroutines
 first BLOCK LIST, max LIST, maxstr LIST, min LIST, minstr LIST, reduce
 BLOCK LIST, shuffle LIST, sum LIST
 
+=item KNOWN BUGS
+
 =item SUGGESTED ADDITIONS
 
 =item COPYRIGHT
@@ -13529,6 +13555,8 @@ general-utility scalar subroutines
 
 blessed EXPR, dualvar NUM, STRING, isweak EXPR, readonly SCALAR, reftype
 EXPR, tainted EXPR, weaken REF
+
+=item KNOWN BUGS
 
 =item COPYRIGHT
 
@@ -16283,6 +16311,8 @@ Memory, CPU, Snooping, Signals, State Changes
 blessed EXPR, dualvar NUM, STRING, isweak EXPR, readonly SCALAR, reftype
 EXPR, tainted EXPR, weaken REF
 
+=item KNOWN BUGS
+
 =item COPYRIGHT
 
 =item BLATANT PLUG
@@ -16365,10 +16395,10 @@ socket.h defines and structure manipulators
 =item DESCRIPTION
 
 inet_aton HOSTNAME, inet_ntoa IP_ADDRESS, INADDR_ANY, INADDR_BROADCAST,
-INADDR_LOOPBACK, INADDR_NONE, sockaddr_in PORT, ADDRESS, sockaddr_in
-SOCKADDR_IN, pack_sockaddr_in PORT, IP_ADDRESS, unpack_sockaddr_in
-SOCKADDR_IN, sockaddr_un PATHNAME, sockaddr_un SOCKADDR_UN,
-pack_sockaddr_un PATH, unpack_sockaddr_un SOCKADDR_UN
+INADDR_LOOPBACK, INADDR_NONE, sockaddr_family SOCKADDR, sockaddr_in PORT,
+ADDRESS, sockaddr_in SOCKADDR_IN, pack_sockaddr_in PORT, IP_ADDRESS,
+unpack_sockaddr_in SOCKADDR_IN, sockaddr_un PATHNAME, sockaddr_un
+SOCKADDR_UN, pack_sockaddr_un PATH, unpack_sockaddr_un SOCKADDR_UN
 
 =back
 
@@ -16409,6 +16439,8 @@ C<Storable::is_retrieving>
 =item Deep Cloning
 
 =back
+
+=item Storable magic
 
 =item EXAMPLES
 
@@ -16722,9 +16754,17 @@ B<ok>
 
 B<is_eq>, B<is_num>
 
-B<like>
+B<isnt_eq>, B<isnt_num>
+
+B<like>, B<unlike>
+
+B<cmp_ok>
+
+B<BAILOUT>
 
 B<skip>
+
+B<todo_skip>
 
 B<skip_rest>
 
@@ -16796,9 +16836,15 @@ B<_my_exit>
 
 =item The test script output
 
-B<'1..M'>, B<'ok', 'not ok'.  Ok?>, B<test numbers>,
-B<$Test::Harness::verbose>, B<$Test::Harness::switches>, B<Skipping tests>,
-B<Todo tests>, B<Bail out!>, B<Comments>, B<Anything else>
+B<'1..M'>, B<'ok', 'not ok'.  Ok?>, B<test numbers>, B<test names>,
+B<Skipping tests>, B<Todo tests>, B<Bail out!>, B<Comments>, B<Anything
+else>
+
+=item Taint mode
+
+=item Configuration variables.
+
+B<$Test::Harness::verbose>, B<$Test::Harness::switches>
 
 =item Failure
 
@@ -16820,6 +16866,8 @@ B<_globdir>
 B<_run_all_tests>
 
 B<_mk_leader>
+
+B<_leader_width>
 
 =over 4
 
@@ -16847,6 +16895,116 @@ C<HARNESS_ACTIVE>
 =item TODO
 
 =item BUGS
+
+=back
+
+=head2 Test::Harness::Assert - simple assert
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Functions
+
+B<assert>
+
+=back
+
+=back
+
+=over 4
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 Test::Harness::Iterator - Internal Test::Harness Iterator
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
+=head2 Test::Harness::Straps - detailed analysis of test results
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Construction
+
+B<new>
+
+=back
+
+=back
+
+B<_init>
+
+=over 4
+
+=item Analysis
+
+B<analyze>
+
+=back
+
+B<analyze_fh>
+
+B<analyze_file>
+
+B<_switches>
+
+B<_INC2PERL5LIB>
+
+B<_filtered_INC>
+
+B<_restore_PERL5LIB>
+
+=over 4
+
+=item Parsing
+
+B<_is_comment>
+
+=back
+
+B<_is_header>
+
+B<_is_test>
+
+B<_is_bail_out>
+
+B<_reset_file_state>
+
+=over 4
+
+=item Results
+
+B<_detailize>
+
+=back
+
+=over 4
+
+=item EXAMPLES
+
+=item AUTHOR
+
+=item SEE ALSO
 
 =back
 
@@ -16880,11 +17038,23 @@ B<is>, B<isnt>
 
 B<like>
 
+B<unlike>
+
+B<cmp_ok>
+
 B<can_ok>
 
 B<isa_ok>
 
 B<pass>, B<fail>
+
+=over 4
+
+=item Diagnostics
+
+B<diag>
+
+=back
 
 =over 4
 
@@ -16904,7 +17074,7 @@ B<SKIP: BLOCK>
 
 =back
 
-B<TODO: BLOCK>
+B<TODO: BLOCK>, B<todo_skip>
 
 =over 4
 
@@ -16922,11 +17092,19 @@ B<eq_set>
 
 =over 4
 
+=item Extending and Embedding Test::More
+
+B<builder>
+
+=back
+
+=over 4
+
 =item NOTES
 
 =item BUGS and CAVEATS
 
-Making your own ok(), The eq_* family have some caveats, Test::Harness
+Making your own ok(), The eq_* family has some caveats, Test::Harness
 upgrades
 
 =item HISTORY
@@ -17479,11 +17657,20 @@ Unicode Collation Algorithm - Unicode TR #10, L<Unicode::Normalize>
 
 =item DESCRIPTION
 
+=over 4
+
+=item Normalization Forms
+
 C<$string_NFD = NFD($raw_string)>, C<$string_NFC = NFC($raw_string)>,
 C<$string_NFKD = NFKD($raw_string)>, C<$string_NFKC = NFKC($raw_string)>,
 C<$normalized_string = normalize($form_name, $raw_string)>
 
-=over 4
+=item Character Data
+
+C<$canonical_decomposed = getCanon($codepoint)>,
+C<$compatibility_decomposed = getCompat($codepoint)>, C<$uv_composite =
+getComposite($uv_here, $uv_next)>, C<$combining_class =
+getCombinClass($codepoint)>, C<$is_exclusion = isExclusion($codepoint)>
 
 =item EXPORT
 
@@ -17493,7 +17680,7 @@ C<$normalized_string = normalize($form_name, $raw_string)>
 
 =item SEE ALSO
 
-L<Lingua::KO::Hangul::Util>, http://www.unicode.org/unicode/reports/tr15/
+http://www.unicode.org/unicode/reports/tr15/
 
 =back
 
