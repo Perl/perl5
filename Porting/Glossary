@@ -566,7 +566,7 @@ d_fpathconf (d_pathconf.U):
 	to determine file-system related limits and options associated
 	with a given open file descriptor.
 
-d_fpos64_t (io64.U):
+d_fpos64_t (d_fpos64_t.U):
 	This symbol will be defined if the C compiler supports fpos64_t.
 
 d_fs_data_s (d_fs_data_s.U):
@@ -611,6 +611,10 @@ d_getcwd (d_getcwd.U):
 	This variable conditionally defines the HAS_GETCWD symbol, which
 	indicates to the C program that the getcwd() routine is available
 	to get the current working directory.
+
+d_getfsstat (d_getfsstat.U):
+	This variable conditionally defines the HAS_GETFSSTAT symbol, which
+	indicates to the C program that the getfsstat() routine is available.
 
 d_getgrent (d_getgrent.U):
 	This variable conditionally defines the HAS_GETGRENT symbol, which
@@ -838,6 +842,12 @@ d_longlong (d_longlong.U):
 	This variable conditionally defines HAS_LONG_LONG if 
 	the long long type is supported.
 
+d_lseekproto (d_lseekproto.U):
+	This variable conditionally defines the HAS_LSEEK_PROTO symbol,
+	which indicates to the C program that the system provides
+	a prototype for the lseek() function.  Otherwise, it is
+	up to the program to supply one.
+
 d_lstat (d_lstat.U):
 	This variable conditionally defines HAS_LSTAT if lstat() is
 	available to do file stats on symbolic links.
@@ -985,7 +995,7 @@ d_nv_preserves_uv (perlxv.U):
 	This variable indicates whether a variable of type nvtype
 	can preserve all the bits a variable of type uvtype.
 
-d_off64_t (io64.U):
+d_off64_t (d_off64_t.U):
 	This symbol will be defined if the C compiler supports off64_t.
 
 d_old_pthread_create_joinable (d_pthrattrj.U):
@@ -2722,16 +2732,20 @@ patchlevel (patchlevel.U):
 	The patchlevel level of this package.
 	The value of patchlevel comes from the patchlevel.h file.
 	In a version number such as 5.6.1, this is the "6".
-	In patchlevel.h, this is referred to as the "PERL_VERSION".
+	In patchlevel.h, this is referred to as "PERL_VERSION".
 
 path_sep (Unix.U):
 	This is an old synonym for p_ in Head.U, the character
 	used to separate elements in the command shell search PATH.
 
+perl5 (perl5.U):
+	This variable contains the full path (if any) to a previously
+	installed perl5.005 or later suitable for running the script
+	to determine inc_version_list.
+
 perl (Loc.U):
-	This variable is used internally by Configure to determine the
-	full pathname (if any) of the perl program.  After Configure runs,
-	the value is reset to a plain "perl" and is not useful.
+	This variable is defined but not used by Configure.
+	The value is a plain '' and is not useful.
 
 PERL_REVISION (Oldsyms.U):
 	In a Perl version number such as 5.6.2, this is the 5.
@@ -2858,6 +2872,11 @@ rd_nodata (nblock_io.U):
 	present. It should be -1, but some systems return 0 when O_NDELAY is
 	used, which is a shame because you cannot make the difference between
 	no data and an EOF.. Sigh!
+
+revision (patchlevel.U):
+	The value of revision comes from the patchlevel.h file.
+	In a version number such as 5.6.1, this is the "5".
+	In patchlevel.h, this is referred to as "PERL_REVISION".
 
 rm (Loc.U):
 	This variable is used internally by Configure to determine the
@@ -3074,6 +3093,11 @@ sockethdr (d_socket.U):
 socketlib (d_socket.U):
 	This variable has the names of any libraries needed for socket support.
 
+socksizetype (socksizetype.U):
+	This variable holds the type used for the size argument
+	for various socket calls like accept.  Usual values include
+	socklen_t, size_t, and int.
+
 sort (Loc.U):
 	This variable is used internally by Configure to determine the
 	full pathname (if any) of the sort program.  After Configure runs,
@@ -3218,6 +3242,7 @@ subversion (patchlevel.U):
 	The subversion level of this package.
 	The value of subversion comes from the patchlevel.h file.
 	In a version number such as 5.6.1, this is the "1".
+	In patchlevel.h, this is referred to as "PERL_SUBVERSION".
 	This is unique to perl.
 
 sysman (sysman.U):
@@ -3336,11 +3361,24 @@ use5005threads (usethreads.U):
 use64bits (use64bits.U):
 	This variable conditionally defines the USE_64_BITS symbol,
 	and indicates that 64-bit integer types should be used
-	when available.
+	when available.  The minimal possible 64-bitness
+	is employed, just enough to get 64-bit integers into Perl.
+	This may mean using for example "long longs", while your memory
+	may still be limited to 2 gigabytes.
 
 usedl (dlsrc.U):
 	This variable indicates if the system supports dynamic
 	loading of some sort.  See also dlsrc and dlobj.
+
+usefull64bits (use64bits.U):
+	This variable conditionally defines the USE_FULL_64_BITS symbol,
+	and indicates that 64-bit integer types should be used
+	when available.  The maximal possible
+	64-bitness is employed: LP64 or ILP64, meaning that you will
+	be able to use more than 2 gigabytes of memory.  This mode is
+	even more binary incompatible than USE_64_BITS. You may not
+	be able to run the resulting executable in a 32-bit CPU at all or
+	you may need at least to reboot your OS to 64-bit mode.
 
 useithreads (usethreads.U):
 	This variable conditionally defines the USE_ITHREADS symbol,
@@ -3350,7 +3388,7 @@ useithreads (usethreads.U):
 uselargefiles (uselfs.U):
 	This variable conditionally defines the USE_LARGE_FILES symbol,
 	and indicates that large file interfaces should be used when
-	available.  The use64bits symbol will also be turned on if necessary.
+	available.
 
 uselongdouble (uselongdbl.U):
 	This variable conditionally defines the USE_LONG_DOUBLE symbol,
@@ -3486,7 +3524,7 @@ vendorprefixexp (vendorprefix.U):
 
 version (patchlevel.U):
 	The full version number of this package, such as 5.6.1 (or 5_6_1).
-	This combines baserev, patchlevel, and subversion to get the
+	This combines revision, patchlevel, and subversion to get the
 	full version number, including any possible subversions.
 	This is suitable for use as a directory name, and hence is
 	filesystem dependent.

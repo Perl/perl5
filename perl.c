@@ -2539,7 +2539,7 @@ sed %s -e \"/^[^#]/b\" \
 /* Mention
  * I_SYSSTATVFS	HAS_FSTATVFS
  * I_SYSMOUNT
- * I_STATFS	HAS_FSTATFS
+ * I_STATFS	HAS_FSTATFS	HAS_GETFSSTAT
  * I_MNTENT	HAS_GETMNTENT	HAS_HASMNTOPT
  * here so that metaconfig picks them up. */
 

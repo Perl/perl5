@@ -88,6 +88,7 @@ $ perl_d_getspent="undef
 $ perl_d_getspnam="undef
 $ perl_d_setspent="undef
 $ perl_d_fstatfs="undef"
+$ perl_d_getfsstat="undef"
 $ perl_i_machcthreads="undef"
 $ perl_i_pthread="define"
 $ perl_d_fstatvfs="undef"
@@ -140,7 +141,14 @@ $   perl_uselargefiles = "undef"
 $   perl_uselongdouble = "undef"
 $   perl_usemorebits = "undef"
 $ ENDIF
+$ IF use_full64bit .eqs. "Y"
+$ THEN
+$   perl_usefull64bits = "define"
+$ ELSE
+$   perl_usefull64bits = "undef"
+$ ENDIF
 $ perl_d_drand48proto = "define"
+$ perl_d_lseekproto = "define"
 $ perl_libpth="/sys$share /sys$library"
 $ perl_ld="Link"
 $ perl_lddlflags="/Share"
@@ -3341,6 +3349,7 @@ $ perl_d_gethostprotos="define"
 $ perl_d_getnetprotos="define"
 $ perl_d_getprotoprotos="define"
 $ perl_d_getservprotos="define"
+$ perl_sock_size_type="int *"
 $ ELSE
 $ perl_d_vms_do_sockets="undef"
 $ perl_d_htonl="undef"
@@ -3362,6 +3371,7 @@ $ perl_d_gethostprotos="undef"
 $ perl_d_getnetprotos="undef"
 $ perl_d_getprotoprotos="undef"
 $ perl_d_getservprotos="undef"
+$ perl_sock_size_type="undef"
 $ ENDIF
 $! Threads
 $ if ("''use_threads'".eqs."T")
@@ -3909,6 +3919,7 @@ $ WC "netdb_host_type='" + perl_netdb_host_type + "'"
 $ WC "netdb_hlen_type='" + perl_netdb_hlen_type + "'"
 $ WC "netdb_name_type='" + perl_netdb_name_type + "'"
 $ WC "netdb_net_type='" + perl_netdb_net_type + "'"
+$ WC "sock_size_type='" + perl_sock_size_type + "'"
 $ WC "baserev='" + perl_baserev + "'"
 $ WC "doublesize='" + perl_doublesize + "'"
 $ WC "ptrsize='" + perl_ptrsize + "'"
@@ -3999,7 +4010,9 @@ $ WC "i_inttypes='" + perl_i_inttypes + "'"
 $ WC "d_off64_t='" + perl_d_off64_t + "'"
 $ WC "d_fpos64_t='" + perl_d_fpos64_t + "'"
 $ WC "use64bits='" + perl_use64bits + "'"
+$ WC "usefull64bits='" + perl_usefull64bits + "'"
 $ WC "d_drand48proto='" + perl_d_drand48proto + "'"
+$ WC "d_lseekproto='" + perl_d_drand48proto + "'"
 $ WC "d_old_pthread_create_joinable='" + perl_d_old_pthread_create_joinable + "'"
 $ WC "old_pthread_create_joinable='" + perl_old_pthread_create_joinable + "'"
 $ WC "drand01='" + perl_drand01 + "'"
@@ -4008,6 +4021,7 @@ $ WC "seedfunc='" + perl_seedfunc + "'"
 $ WC "sig_num_init='" + perl_sig_num_with_commas + "'"
 $ WC "i_sysmount='" + perl_i_sysmount + "'"
 $ WC "d_fstatfs='" + perl_d_fstatfs + "'"
+$ WC "d_getfsstat='" + perl_d_getfsstat + "'"
 $ WC "d_memchr='" + perl_d_memchr + "'"
 $ WC "d_statfsflags='" + perl_d_statfsflags + "'"
 $ WC "fflushNULL='define'"
@@ -4194,6 +4208,10 @@ $ if use_64bit.eqs."Y"
 $ THEN
 $    WRITE CONFIG "#define USE_64_BITS"
 $    WRITE CONFIG "#define USE_LONG_DOUBLE"
+$ ENDIF
+$ if use_full64bit.eqs."Y"
+$ THEN
+$    WRITE CONFIG "#define USE_FULL_64_BITS"
 $ ENDIF
 $ WRITE CONFIG "#define HAS_ENVGETENV"
 $ WRITE CONFIG "#define PERL_EXTERNAL_GLOB"

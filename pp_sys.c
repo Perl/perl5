@@ -118,20 +118,6 @@ extern int h_errno;
 #   define vfork fork
 #endif
 
-/* Put this after #includes because <unistd.h> defines _XOPEN_*.
- * Sock_size_t is defined identically in doio.c. */
-#ifndef Sock_size_t
-#  ifdef HAS_SOCKLEN_T
-#      define Sock_size_t socklen_t
-#  else
-#      if _XOPEN_VERSION >= 5 || defined(_XOPEN_SOURCE_EXTENDED) || defined(__GLIBC__)
-#          define Sock_size_t Size_t
-#      else
-#          define Sock_size_t int
-#      endif
-#  endif
-#endif
-
 #ifdef HAS_CHSIZE
 # ifdef my_chsize  /* Probably #defined to Perl_my_chsize in embed.h */
 #   undef my_chsize

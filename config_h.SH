@@ -1378,6 +1378,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	available to stat filesystems by file descriptors.
  */
 #$d_fstatfs HAS_FSTATFS		/**/
+
 /* HAS_FTELLO:
  *	This symbol, if defined, indicates that the ftello routine is
  *	available to ftell beyond 32 bits (useful for ILP32 hosts).
@@ -1945,12 +1946,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_msg_peek	HAS_MSG_PEEK	/**/
 #$d_msg_proxy	HAS_MSG_PROXY	/**/
 #$d_scm_rights	HAS_SCM_RIGHTS	/**/
-
-/* HAS_SOCKLEN_T:
- *     This symbol will defined if the C compiler supports socklen_t.
- *     Usually the <sys/socket.h> needs to be included.
- */
-#$d_socklen_t     HAS_SOCKLEN_T               /**/
 
 /* HAS_SQRTL:
  *	This symbol, if defined, indicates that the sqrtl routine is
@@ -2862,7 +2857,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	64-bitness is used, just enough to get 64-bit integers into Perl.
  *	This may mean using for example "long longs", while your memory
  *	may still be limited to 2 gigabytes.
- *	To go all the way, use Configure -Dusefull64bits.
  */
 #ifndef USE_64_BITS
 #$use64bits	USE_64_BITS		/**/
@@ -2874,8 +2868,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 
 /* USE_LARGE_FILES:
  *	This symbol, if defined, indicates that large file support
- *	should be used when available.  The USE_64_BITS symbol will
- *	also be turned on if necessary.
+ *	should be used when available.
  */
 #ifndef USE_LARGE_FILES
 #$uselargefiles	USE_LARGE_FILES		/**/
@@ -3007,6 +3000,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #define PERL_XS_APIVERSION "$xs_apiversion"
 #define PERL_PM_APIVERSION "$pm_apiversion"
 
+/* HAS_GETFSSTAT:
+ *	This symbol, if defined, indicates that the getfsstat routine is
+ *	available to stat filesystems in bulk.
+ */
+#$d_getfsstat HAS_GETFSSTAT		/**/
+
 /* HAS_LSEEK_PROTO:
  *	This symbol, if defined, indicates that the system provides
  *	a prototype for the lseek() function.  Otherwise, it is up
@@ -3014,6 +3013,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *		extern off_t lseek(int, off_t, int);
  */
 #$d_lseekproto	HAS_LSEEK_PROTO	/**/
+
+/* Sock_size_t:
+ *	This symbol holds the type used for the size argument
+ *	of various socket calls.
+ */
+#define Sock_size_t		$socksizetype /**/
 
 #endif
 !GROK!THIS!
