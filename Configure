@@ -3019,7 +3019,7 @@ int main() {
 	exit(0);
 }
 EOM
-if $cc -o gccvers $ldflags gccvers.c; then
+if $cc -o gccvers $ccflags $ldflags gccvers.c; then
 	gccversion=`./gccvers`
 	case "$gccversion" in
 	'') echo "You are not using GNU cc." ;;
