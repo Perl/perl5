@@ -113,7 +113,16 @@ my $status;
 my $display_cmd = "@cmd";
 chomp($display_cmd); # where is the newline coming from? ldopts()?
 print "# $display_cmd\n"; 
-$status = system(join(' ',@cmd));
+
+# On OS/2 the linker will always emit an empty line to STDOUT; filter these
+$status = -1;
+{
+  open my $cmdfh, '-|', join(' ',@cmd) or last;
+  print "#$_" while <$cmdfh>;
+  close $cmdfh;
+  $status = $?;
+}
+
 if ($^O eq 'VMS' && !$status) {
   print "# @cmd2\n";
   $status = system(join(' ',@cmd2)); 

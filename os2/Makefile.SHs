@@ -55,6 +55,7 @@ AOUT_EXTRA_LIBS	= $aout_extra_libs
 !GROK!THIS!
 
 $spitshell >>Makefile <<'!NO!SUBS!'
+PREPLIBRARY_LIBPERL = $(LIBPERL)
 $(LIBPERL): perl.imp $(PERL_DLL) perl5.def libperl_override.lib
 	emximp -o $(LIBPERL) perl.imp
 	cp $(LIBPERL) perl.lib
@@ -126,7 +127,11 @@ perl.linkexp: perl.exports perl.map  os2/os2.sym
 
 # We link miniperl statically, since .DLL depends on $(DYNALOADER) 
 
-miniperl.map miniperl: $(obj) perl$(OBJ_EXT) miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT)
+miniperl.map: miniperl
+
+miniperl.exe: miniperl
+
+miniperl: $(obj) perl$(OBJ_EXT) miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT)
 	$(CC) $(CLDFLAGS) -o miniperl miniperlmain$(OBJ_EXT) perl$(OBJ_EXT) `echo $(obj)|sed -e 's/\bop\./opmini./g'` $(libs) -Zmap -Zlinker /map/PM:VIO
 	@./miniperl -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
 

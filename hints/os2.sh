@@ -108,6 +108,9 @@ exe_ext='.exe'
 # We provide it
 i_dlfcn='define'
 
+# The default one uses exponential notation between 0.0001 and 0.1
+d_Gconvert='gcvt_os2((x),(n),(b))'
+
 # -Zomf build has a problem with _exit() *flushing*, so the test
 # gets confused:
 fflushNULL="define"
@@ -280,6 +283,15 @@ else
 	    gnupatch="`./UU/loc patch.exe undef $pth`"
 	fi
     fi
+fi
+
+for f in less.exe less.sh less.ksh less.cmd more.exe more.sh more.ksh more.cmd ; do
+  if test -z "$pager"; then
+    pager="`./UU/loc $f '' $pth`"
+  fi
+done
+if test -z "$pager"; then
+  pager='cmd /c more'
 fi
 
 # Apply patches if needed

@@ -101,8 +101,8 @@ Parentheses for capturing, Other regexp features
 
 =back
 
-=head2 perlfaq - frequently asked questions about Perl ($Date: 2002/01/11
-02:31:20 $)
+=head2 perlfaq - frequently asked questions about Perl ($Date: 2002/01/31
+04:27:54 $)
 
 =over 4
 
@@ -122,7 +122,7 @@ Parentheses for capturing, Other regexp features
 
 =item L<perlfaq5>: Files and Formats
 
-=item L<perlfaq6>: Regexps
+=item L<perlfaq6>: Regular Expressions
 
 =item L<perlfaq7>: General Perl Language Issues
 
@@ -2714,8 +2714,8 @@ tarball, Announce to the modules list, Announce to clpa, Fix bugs!
 
 =back
 
-=head2 perlfaq1 - General Questions About Perl ($Revision: 1.4 $, $Date:
-2002/01/18 21:00:17 $)
+=head2 perlfaq1 - General Questions About Perl ($Revision: 1.6 $, $Date:
+2002/01/31 01:46:23 $)
 
 =over 4
 
@@ -2753,7 +2753,7 @@ Scheme, or Tcl?
 =item Where can I get a list of Larry Wall witticisms?
 
 =item How can I convince my sysadmin/supervisor/employees to use version
-5/5.005/Perl instead of some other language?
+5/5.6.1/Perl instead of some other language?
 
 =back
 
@@ -2761,8 +2761,8 @@ Scheme, or Tcl?
 
 =back
 
-=head2 perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.5 $,
-$Date: 2002/01/18 21:00:17 $)
+=head2 perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.8 $,
+$Date: 2002/02/08 22:31:57 $)
 
 =over 4
 
@@ -2817,8 +2817,8 @@ References, Tutorials, Task-Oriented, Special Topics
 
 =back
 
-=head2 perlfaq3 - Programming Tools ($Revision: 1.11 $, $Date: 2002/01/11
-02:31:20 $)
+=head2 perlfaq3 - Programming Tools ($Revision: 1.13 $, $Date: 2002/02/08
+22:32:47 $)
 
 =over 4
 
@@ -2892,8 +2892,7 @@ stringification, Pass by reference, Tie large variables to disk
 =item I've read perlembed, perlguts, etc., but I can't embed perl in
 my C program; what am I doing wrong?
 
-=item When I tried to run my script, I got this message. What does it
-mean?
+=item When I tried to run my script, I got this message. What does it mean?
 
 =item What's MakeMaker?
 
@@ -2903,8 +2902,8 @@ mean?
 
 =back
 
-=head2 perlfaq4 - Data Manipulation ($Revision: 1.11 $, $Date: 2002/01/11
-02:31:20 $)
+=head2 perlfaq4 - Data Manipulation ($Revision: 1.14 $, $Date: 2002/02/08
+22:30:23 $)
 
 =over 4
 
@@ -2922,7 +2921,7 @@ numbers I should be getting (eg, 19.95)?
 =item Does Perl have a round() function?  What about ceil() and floor()? 
 Trig functions?
 
-=item How do I convert between numeric representations:
+=item How do I convert between numeric representations?
 
 B<How do I convert Hexadecimal into decimal:>, B<How do I convert from
 decimal to hexadecimal:>, B<How do I convert from octal to decimal:>, B<How
@@ -3118,8 +3117,8 @@ array of hashes or arrays?
 
 =back
 
-=head2 perlfaq5 - Files and Formats ($Revision: 1.7 $, $Date: 2002/01/11
-02:31:20 $)
+=head2 perlfaq5 - Files and Formats ($Revision: 1.8 $, $Date: 2002/01/28
+04:17:26 $)
 
 =over 4
 
@@ -3211,7 +3210,8 @@ protected files?  Isn't this a bug in Perl?
 
 =back
 
-=head2 perlfaq6 - Regexes ($Revision: 1.6 $, $Date: 2002/01/01 22:26:45 $)
+=head2 perlfaq6 - Regular Expressions ($Revision: 1.8 $, $Date: 2002/01/31
+04:27:55 $)
 
 =over 4
 
@@ -3277,8 +3277,8 @@ file?
 
 =back
 
-=head2 perlfaq7 - Perl Language Issues ($Revision: 1.5 $, $Date: 2002/01/01
-22:26:45 $)
+=head2 perlfaq7 - General Perl Language Issues ($Revision: 1.7 $, $Date:
+2002/01/31 04:27:55 $)
 
 =over 4
 
@@ -3356,8 +3356,8 @@ is in scope?
 
 =back
 
-=head2 perlfaq8 - System Interaction ($Revision: 1.5 $, $Date: 2002/01/11
-02:31:20 $)
+=head2 perlfaq8 - System Interaction ($Revision: 1.6 $, $Date: 2002/01/28
+04:17:27 $)
 
 =over 4
 
@@ -3484,7 +3484,7 @@ search path?
 
 =back
 
-=head2 perlfaq9 - Networking ($Revision: 1.5 $, $Date: 2001/11/09 08:06:04
+=head2 perlfaq9 - Networking ($Revision: 1.7 $, $Date: 2002/01/28 04:17:27
 $)
 
 =over 4
@@ -4333,12 +4333,13 @@ hv_store_ent, hv_undef, newHV, Nullhv
 =item Magical Functions
 
 mg_clear, mg_copy, mg_find, mg_free, mg_get, mg_length, mg_magical, mg_set,
-SvGETMAGIC, SvSETMAGIC, SvSetMagicSV, SvSetSV, SvSetSV_nosteal
+SvGETMAGIC, SvLOCK, SvSETMAGIC, SvSetMagicSV, SvSetMagicSV_nosteal,
+SvSetSV, SvSetSV_nosteal, SvSHARE
 
 =item Memory Management
 
 Copy, Move, New, Newc, NEWSV, Newz, Renew, Renewc, Safefree, savepv,
-savepvn, StructCopy, Zero
+savepvn, savesharedpv, StructCopy, Zero
 
 =item Miscellaneous Functions
 
@@ -4353,11 +4354,6 @@ scan_hex, scan_oct
 =item Optree Manipulation Functions
 
 cv_const_sv, newCONSTSUB, newXS
-
-=item Shared SV Functions
-
-sharedsv_find, sharedsv_init, sharedsv_lock, sharedsv_new,
-sharedsv_thrcnt_dec, sharedsv_thrcnt_inc, sharedsv_unlock
 
 =item Stack Manipulation Macros
 
@@ -4381,30 +4377,30 @@ SvIVX, SvLEN, SvNIOK, SvNIOKp, SvNIOK_off, SvNOK, SvNOKp, SvNOK_off,
 SvNOK_on, SvNOK_only, SvNV, SvNVX, SvNVx, SvOK, SvOOK, SvPOK, SvPOKp,
 SvPOK_off, SvPOK_on, SvPOK_only, SvPOK_only_UTF8, SvPV, SvPVbyte,
 SvPVbytex, SvPVbytex_force, SvPVbyte_force, SvPVbyte_nolen, SvPVutf8,
-SvPVutf8x, SvPVutf8x_force, SvPVutf8_force, SvPVutf8_nolen, SvPVX, SvPVx,
+SvPVutf8x, SvPVutf8x_force, SvPVutf8_force, SvPVutf8_nolen, SvPVx, SvPVX,
 SvPV_force, SvPV_force_nomg, SvPV_nolen, SvREFCNT, SvREFCNT_dec,
-SvREFCNT_inc, SvROK, SvROK_off, SvROK_on, SvRV, SvSetMagicSV_nosteal,
-SvSTASH, SvTAINT, SvTAINTED, SvTAINTED_off, SvTAINTED_on, SvTRUE, SvTYPE,
-SvUOK, SvUPGRADE, SvUTF8, SvUTF8_off, SvUTF8_on, SvUV, SvUVx, SvUVX,
-sv_2bool, sv_2cv, sv_2io, sv_2iv, sv_2mortal, sv_2nv, sv_2pvbyte,
-sv_2pvbyte_nolen, sv_2pvutf8, sv_2pvutf8_nolen, sv_2pv_flags, sv_2pv_nolen,
-sv_2uv, sv_backoff, sv_bless, sv_catpv, sv_catpvf, sv_catpvf_mg, sv_catpvn,
+SvREFCNT_inc, SvROK, SvROK_off, SvROK_on, SvRV, SvSTASH, SvTAINT,
+SvTAINTED, SvTAINTED_off, SvTAINTED_on, SvTRUE, SvTYPE, SvUNLOCK, SvUOK,
+SvUPGRADE, SvUTF8, SvUTF8_off, SvUTF8_on, SvUV, SvUVX, SvUVx, sv_2bool,
+sv_2cv, sv_2io, sv_2iv, sv_2mortal, sv_2nv, sv_2pvbyte, sv_2pvbyte_nolen,
+sv_2pvutf8, sv_2pvutf8_nolen, sv_2pv_flags, sv_2pv_nolen, sv_2uv,
+sv_backoff, sv_bless, sv_catpv, sv_catpvf, sv_catpvf_mg, sv_catpvn,
 sv_catpvn_flags, sv_catpvn_mg, sv_catpv_mg, sv_catsv, sv_catsv_flags,
 sv_catsv_mg, sv_chop, sv_clear, sv_cmp, sv_cmp_locale, sv_collxfrm, sv_dec,
 sv_derived_from, sv_eq, sv_force_normal, sv_force_normal_flags, sv_free,
 sv_gets, sv_grow, sv_inc, sv_insert, sv_isa, sv_isobject, sv_iv, sv_len,
-sv_len_utf8, sv_magic, sv_mortalcopy, sv_newmortal, sv_newref, sv_nv,
-sv_pos_b2u, sv_pos_u2b, sv_pv, sv_pvbyte, sv_pvbyten, sv_pvbyten_force,
-sv_pvn, sv_pvn_force, sv_pvn_force_flags, sv_pvutf8, sv_pvutf8n,
-sv_pvutf8n_force, sv_reftype, sv_replace, sv_report_used, sv_reset,
-sv_rvweaken, sv_setiv, sv_setiv_mg, sv_setnv, sv_setnv_mg, sv_setpv,
-sv_setpvf, sv_setpvf_mg, sv_setpviv, sv_setpviv_mg, sv_setpvn,
-sv_setpvn_mg, sv_setpv_mg, sv_setref_iv, sv_setref_nv, sv_setref_pv,
-sv_setref_pvn, sv_setref_uv, sv_setsv, sv_setsv_flags, sv_setsv_mg,
-sv_setuv, sv_setuv_mg, sv_taint, sv_tainted, sv_true, sv_unmagic, sv_unref,
-sv_unref_flags, sv_untaint, sv_upgrade, sv_usepvn, sv_usepvn_mg,
-sv_utf8_decode, sv_utf8_downgrade, sv_utf8_encode, sv_utf8_upgrade,
-sv_utf8_upgrade_flags, sv_uv, sv_vcatpvfn, sv_vsetpvfn
+sv_len_utf8, sv_magic, sv_magicext, sv_mortalcopy, sv_newmortal, sv_newref,
+sv_nolocking, sv_nosharing, sv_nounlocking, sv_nv, sv_pos_b2u, sv_pos_u2b,
+sv_pv, sv_pvbyte, sv_pvbyten, sv_pvbyten_force, sv_pvn, sv_pvn_force,
+sv_pvn_force_flags, sv_pvutf8, sv_pvutf8n, sv_pvutf8n_force, sv_reftype,
+sv_replace, sv_report_used, sv_reset, sv_rvweaken, sv_setiv, sv_setiv_mg,
+sv_setnv, sv_setnv_mg, sv_setpv, sv_setpvf, sv_setpvf_mg, sv_setpviv,
+sv_setpviv_mg, sv_setpvn, sv_setpvn_mg, sv_setpv_mg, sv_setref_iv,
+sv_setref_nv, sv_setref_pv, sv_setref_pvn, sv_setref_uv, sv_setsv,
+sv_setsv_flags, sv_setsv_mg, sv_setuv, sv_setuv_mg, sv_taint, sv_tainted,
+sv_true, sv_unmagic, sv_unref, sv_unref_flags, sv_untaint, sv_upgrade,
+sv_usepvn, sv_usepvn_mg, sv_utf8_decode, sv_utf8_downgrade, sv_utf8_encode,
+sv_utf8_upgrade, sv_utf8_upgrade_flags, sv_uv, sv_vcatpvfn, sv_vsetpvfn
 
 =item Unicode Support
 
@@ -4436,9 +4432,30 @@ croak, warn
 
 =item DESCRIPTION
 
-djSP, is_gv_magical, LVRET, PL_DBsingle, PL_DBsub, PL_DBtrace, PL_dowarn,
-PL_last_in_gv, PL_ofs_sv, PL_rs, report_uninit, start_glob, sv_add_arena,
-sv_clean_all, sv_clean_objs, sv_free_arenas
+=item Global Variables
+
+PL_DBsingle, PL_DBsub, PL_DBtrace, PL_dowarn, PL_last_in_gv, PL_ofs_sv,
+PL_rs
+
+=item GV Functions
+
+is_gv_magical
+
+=item IO Functions
+
+start_glob
+
+=item Pad Data Structures
+
+CvPADLIST
+
+=item Stack Manipulation Macros
+
+djSP, LVRET
+
+=item SV Manipulation Functions
+
+report_uninit, sv_add_arena, sv_clean_all, sv_clean_objs, sv_free_arenas
 
 =item AUTHORS
 
@@ -4652,6 +4669,8 @@ PerlIO_apply_layers(f,mode,layers), PerlIO_binmode(f,ptype,imode,layers),
 
 =item Memory leaks after failed eval
 
+=item pack for IV, UVs, NVs, and long doubles
+
 =item pack "(stuff)*"
 
 =item bitfields in pack
@@ -4713,8 +4732,6 @@ PerlIO_apply_layers(f,mode,layers), PerlIO_binmode(f,ptype,imode,layers),
 =item Garbage collection
 
 =item IO tutorial
-
-=item pack/unpack tutorial
 
 =item Rewrite perldoc
 
@@ -4903,6 +4920,8 @@ PerlIO_apply_layers(f,mode,layers), PerlIO_binmode(f,ptype,imode,layers),
 =item Create debugging macros
 
 =item truncate to the people
+
+=item pack/unpack tutorial
 
 =back
 
@@ -8058,7 +8077,7 @@ from perl
 
 =item DESCRIPTION
 
-$thread = new(function, LIST), $thread->join, $thread->detach,
+$thread = threads->create(function, LIST), $thread->join, $thread->detach,
 threads->self, $thread->tid
 
 =item TODO
@@ -8579,7 +8598,7 @@ from perl
 
 =item DESCRIPTION
 
-$thread = new(function, LIST), $thread->join, $thread->detach,
+$thread = threads->create(function, LIST), $thread->join, $thread->detach,
 threads->self, $thread->tid
 
 =item TODO
@@ -8749,7 +8768,8 @@ warnings::warnif($object, $message)
 C<Bad attribute type: ATTR(%s)>, C<Attribute handler %s doesn't handle %s
 attributes>, C<Declaration of %s attribute in package %s may clash with
 future reserved word>, C<Can't have two ATTR specifiers on one subroutine>,
-C<Can't autotie a %s>, C<Internal error: %s symbol went missing>
+C<Can't autotie a %s>, C<Internal error: %s symbol went missing>, C<Won't
+be able to apply END handler>
 
 =item AUTHOR
 
@@ -9134,8 +9154,8 @@ B<#targ>, B<#targarg>, B<#targarglife>, B<#typenum>
 
 =item OPTIONS
 
-B<-l>, B<-p>, B<-q>, B<-f>I<FILE>, B<-s>I<LETTERS>, B<C>, B<i>I<NUMBER>,
-B<T>, B<v>I<STRING>B<.>, B<-x>I<LEVEL>
+B<-l>, B<-p>, B<-P>, B<-q>, B<-f>I<FILE>, B<-s>I<LETTERS>, B<C>,
+B<i>I<NUMBER>, B<T>, B<v>I<STRING>B<.>, B<-x>I<LEVEL>
 
 =item USING B::Deparse AS A MODULE
 
@@ -10877,8 +10897,12 @@ variants of EBCDIC, symbol and dingbats as used by Tk on X11
 
 =back
 
-=head2 Encode::EncodeFormat, EncodeFormat - the format of encoding tables
-of the Encode extension
+=head2 Encode::Tcl - Tcl encodings
+
+=head2 Encode::lib::Encode::Tcl, Encode::Tcl - Tcl encodings
+
+=head2 Encode::lib::EncodeFormat, EncodeFormat - the format of encoding
+tables of the Encode extension
 
 =over 4
 
@@ -10891,8 +10915,6 @@ of the Encode extension
 =item COPYRIGHT
 
 =back
-
-=head2 Encode::Tcl - Tcl encodings
 
 =head2 EncodeFormat - the format of encoding tables of the Encode extension
 
