@@ -87,6 +87,8 @@ VIRTUAL void	filter_del _((filter_t funcp));
 VIRTUAL I32	filter_read _((int idx, SV* buffer, int maxlen));
 VIRTUAL char **	get_op_descs _((void));
 VIRTUAL char **	get_op_names _((void));
+VIRTUAL char *	get_no_modify _((void));
+VIRTUAL U32 *	get_opargs _((void));
 VIRTUAL I32	cxinc _((void));
 #ifdef DEBUGGING
 VIRTUAL void	deb _((const char* pat,...)) __attribute__((format(printf,1,2)));
@@ -95,6 +97,16 @@ VIRTUAL void	debprofdump _((void));
 VIRTUAL I32	debop _((OP* o));
 VIRTUAL I32	debstack _((void));
 VIRTUAL I32	debstackptrs _((void));
+#else
+#ifdef PERL_OBJECT
+/* create a matching set of virtual entries for the non debugging version */
+VIRTUAL void	deb_place_holder _((const char* pat,...));
+VIRTUAL void	deb_growlevel_place_holder _((void));
+VIRTUAL void	debprofdump_place_holder _((void));
+VIRTUAL I32	debop_place_holder _((OP* o));
+VIRTUAL I32	debstack_place_holder _((void));
+VIRTUAL I32	debstackptrs_place_holder _((void));
+#endif
 #endif
 VIRTUAL char*	delimcpy _((char* to, char* toend, char* from, char* fromend,
 		    int delim, I32* retlen));
@@ -839,16 +851,16 @@ void debprof _((OP *o));
 #endif
 
 void *bset_obj_store _((void *obj, I32 ix));
-#ifdef INDIRECT_BGET_MACROS
-void byterun _((struct bytestream bs));
-#else
-void byterun _((PerlIO *fp));
-#endif /* INDIRECT_BGET_MACROS */
-
 OP *new_logop _((I32 type, I32 flags, OP **firstp, OP **otherp));
 
 #define PPDEF(s) OP* CPerlObj::s _((ARGSproto));
 public:
+#ifdef INDIRECT_BGET_MACROS
+VIRTUAL void byterun _((struct bytestream bs));
+#else
+VIRTUAL void byterun _((PerlIO *fp));
+#endif /* INDIRECT_BGET_MACROS */
+
 PPDEF(pp_aassign)
 PPDEF(pp_abs)
 PPDEF(pp_accept)

@@ -45,6 +45,7 @@ extern void PerlIO_init _((void));
 #define PerlIO_putc(f,c)	piStdIO->Putc((f),(c), ErrorNo())
 #define PerlIO_puts(f,s)	piStdIO->Puts((f),(s), ErrorNo())
 #define PerlIO_flush(f)		piStdIO->Flush((f), ErrorNo())
+#define PerlIO_gets(s, n, fp)   piStdIO->Gets((fp), s, n, ErrorNo())
 #define PerlIO_ungetc(f,c)	piStdIO->Ungetc((f),(c), ErrorNo())
 #define PerlIO_fileno(f)	piStdIO->Fileno((f), ErrorNo())
 #define PerlIO_fdopen(f, s)	piStdIO->Fdopen((f),(s), ErrorNo())

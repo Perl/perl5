@@ -2669,3 +2669,15 @@ get_op_descs(void)
 {
  return op_desc;
 }
+
+char *
+get_no_modify(void)
+{
+ return (char*)no_modify;
+}
+
+U32 *
+get_opargs(void)
+{
+ return opargs;
+}

@@ -50,6 +50,12 @@ debprofdump
 debop
 debstack
 debstackptrs
+deb_place_holder
+deb_growlevel_place_holder
+debprofdump_place_holder
+debop_place_holder
+debstack_place_holder
+debstackptrs_place_holder
 fprintf
 find_threadsv
 magic_mutexfree
@@ -279,6 +285,10 @@ ENDCODE
 		next;
 	    }
 
+	    if($name eq "byterun" and $args eq "struct bytestream bs") {
+		next;
+	    }
+
             # foo(void);
             if ($args eq "void") {
                 print OUTFILE <<ENDCODE;
@@ -501,6 +511,28 @@ print OUTFILE <<EOCODE;
 
 
 extern "C" {
+
+
+char **	_Perl_op_desc(void)
+{
+    return pPerl->Perl_get_op_descs();
+}
+
+char **	_Perl_op_name(void)
+{
+    return pPerl->Perl_get_op_names();
+}
+
+char *	_Perl_no_modify(void)
+{
+    return pPerl->Perl_get_no_modify();
+}
+
+U32 *	_Perl_opargs(void)
+{
+    return pPerl->Perl_get_opargs();
+}
+
 void xs_handler(CV* cv, CPerlObj* p)
 {
     void(*func)(CV*);
@@ -714,6 +746,16 @@ void         _win32_setbuf(FILE *pf, char *buf)
 int          _win32_setvbuf(FILE *pf, char *buf, int type, size_t size)
 {
     return pPerl->piStdIO->SetVBuf((PerlIO*)pf, buf, type, size, ErrorNo());
+}
+
+char*		_win32_fgets(char *s, int n, FILE *pf)
+{
+    return pPerl->piStdIO->Gets((PerlIO*)pf, s, n, ErrorNo());
+}
+
+char*		_win32_gets(char *s)
+{
+    return _win32_fgets(s, 80, (FILE*)pPerl->piStdIO->Stdin());
 }
 
 int          _win32_fgetc(FILE *pf)
@@ -960,7 +1002,7 @@ int _win32_sendto (SOCKET s, const char * buf, int len, int flags,
 
 int _win32_recv (SOCKET s, char * buf, int len, int flags)
 {
-    return 0;
+    return pPerl->piSock->Recv(s, buf, len, flags, ErrorNo());
 }
 
 int _win32_recvfrom (SOCKET s, char * buf, int len, int flags,
@@ -976,12 +1018,12 @@ int _win32_shutdown (SOCKET s, int how)
 
 int _win32_closesocket (SOCKET s)
 {
-    return 0;
+    return pPerl->piSock->Closesocket(s, ErrorNo());
 }
 
 int _win32_ioctlsocket (SOCKET s, long cmd, u_long *argp)
 {
-    return 0;
+    return pPerl->piSock->Ioctlsocket(s, cmd, argp, ErrorNo());
 }
 
 int _win32_setsockopt (SOCKET s, int level, int optname,
@@ -1115,6 +1157,23 @@ EOCODE
 
 
 print HDRFILE <<EOCODE;
+#undef Perl_op_desc
+char ** _Perl_op_desc ();
+#define Perl_op_desc (_Perl_op_desc())
+
+#undef Perl_op_name
+char ** _Perl_op_name ();
+#define Perl_op_name (_Perl_op_name())
+
+#undef Perl_no_modify
+char ** _Perl_no_modify ();
+#define Perl_no_modify (_Perl_no_modify())
+
+#undef Perl_opargs
+char ** _Perl_opargs ();
+#define Perl_opargs (_Perl_opargs())
+
+
 #undef win32_errno
 #undef win32_stdin
 #undef win32_stdout
@@ -1166,6 +1225,8 @@ print HDRFILE <<EOCODE;
 #undef win32_setbuf
 #undef win32_setvbuf
 #undef win32_fgetc
+#undef win32_fgets
+#undef win32_gets
 #undef win32_putc
 #undef win32_puts
 #undef win32_getchar
@@ -1279,6 +1340,8 @@ print HDRFILE <<EOCODE;
 #define win32_setbuf   _win32_setbuf
 #define win32_setvbuf  _win32_setvbuf
 #define win32_fgetc    _win32_fgetc
+#define win32_fgets    _win32_fgets
+#define win32_gets     _win32_gets
 #define win32_putc     _win32_putc
 #define win32_puts     _win32_puts
 #define win32_getchar  _win32_getchar

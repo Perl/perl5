@@ -28,6 +28,7 @@ public:
     virtual int GetBufsiz(PerlIO *, int &err) = 0;
     virtual int GetCnt(PerlIO *, int &err) = 0;
     virtual char* GetPtr(PerlIO *, int &err) = 0;
+    virtual char* Gets(PerlIO*, char*, int, int& err) = 0;
     virtual int Putc(PerlIO*, int, int &err) = 0;
     virtual int Puts(PerlIO*, const char *, int &err) = 0;
     virtual int Flush(PerlIO*, int &err) = 0;

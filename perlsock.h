@@ -35,6 +35,7 @@
 #define PerlSock_inet_addr(c) piSock->InetAddr(c, ErrorNo())
 #define PerlSock_inet_ntoa(i) piSock->InetNtoa(i, ErrorNo())
 #define PerlSock_listen(s, b) piSock->Listen(s, b, ErrorNo())
+#define PerlSock_recv(s, b, l, f) piSock->Recv(s, b, l, f, ErrorNo())
 #define PerlSock_recvfrom(s, b, l, f, from, fromlen) piSock->Recvfrom(s, b, l, f, from, fromlen, ErrorNo())
 #define PerlSock_select(n, r, w, e, t) piSock->Select(n, (char*)r, (char*)w, (char*)e, t, ErrorNo())
 #define PerlSock_send(s, b, l, f) piSock->Send(s, b, l, f, ErrorNo())

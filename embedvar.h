@@ -211,10 +211,10 @@
 #define sawampersand		(curinterp->Isawampersand)
 #define sawstudy		(curinterp->Isawstudy)
 #define sawvec			(curinterp->Isawvec)
-#define seen_zerolen		(curinterp->Iseen_zerolen)
 #define screamfirst		(curinterp->Iscreamfirst)
 #define screamnext		(curinterp->Iscreamnext)
 #define secondgv		(curinterp->Isecondgv)
+#define seen_zerolen		(curinterp->Iseen_zerolen)
 #define siggv			(curinterp->Isiggv)
 #define sortcop			(curinterp->Isortcop)
 #define sortcxix		(curinterp->Isortcxix)
@@ -775,7 +775,7 @@
 #define do_undump		(Perl_Vars.Gdo_undump)
 #define egid			(Perl_Vars.Gegid)
 #define error_count		(Perl_Vars.Gerror_count)
-#define error_no        (Perl_Vars.Gerror_no)
+#define error_no		(Perl_Vars.Gerror_no)
 #define euid			(Perl_Vars.Geuid)
 #define eval_cond		(Perl_Vars.Geval_cond)
 #define eval_mutex		(Perl_Vars.Geval_mutex)
@@ -895,7 +895,7 @@
 #define Gdo_undump		do_undump
 #define Gegid			egid
 #define Gerror_count		error_count
-#define Gerror_no       error_no
+#define Gerror_no		error_no
 #define Geuid			euid
 #define Geval_cond		eval_cond
 #define Geval_mutex		eval_mutex
@@ -1015,7 +1015,7 @@
 #define do_undump		Perl_do_undump
 #define egid			Perl_egid
 #define error_count		Perl_error_count
-#define error_no        Perl_error_no
+#define error_no		Perl_error_no
 #define euid			Perl_euid
 #define eval_cond		Perl_eval_cond
 #define eval_mutex		Perl_eval_mutex

@@ -243,14 +243,14 @@ public:
 	char *r = win32_inet_ntoa(in);
 	PROCESS_AND_RETURN;
     };
-    virtual int IoctlSocket(SOCKET s, long cmd, u_long *argp, int& err)
-    {
-	int r = win32_ioctlsocket(s, cmd, argp);
-	PROCESS_AND_RETURN;
-    };
     virtual int Listen(SOCKET s, int backlog, int &err)
     {
 	int r = win32_listen(s, backlog);
+	PROCESS_AND_RETURN;
+    };
+    virtual int Recv(SOCKET s, char* buffer, int len, int flags, int &err)
+    {
+	int r = win32_recv(s, buffer, len, flags);
 	PROCESS_AND_RETURN;
     };
     virtual int Recvfrom(SOCKET s, char* buffer, int len, int flags, struct sockaddr* from, int* fromlen, int &err)
@@ -308,6 +308,16 @@ public:
     {
         croak("socketpair not implemented!\n");
 	return 0;
+    };
+    virtual int Closesocket(SOCKET s, int& err)
+    {
+	int r = win32_closesocket(s);
+	PROCESS_AND_RETURN;
+    };
+    virtual int Ioctlsocket(SOCKET s, long cmd, u_long *argp, int& err)
+    {
+	int r = win32_ioctlsocket(s, cmd, argp);
+	PROCESS_AND_RETURN;
     };
 };
 
@@ -723,6 +733,13 @@ public:
     {
 	FILE *f = (FILE*)pf;
 	return FILE_ptr(f);
+    };
+    virtual char* Gets(PerlIO* pf, char* s, int n, int& err)
+    {
+	char* ret = win32_fgets(s, n, (FILE*)pf);
+	if(errno)
+	    err = errno;
+	return ret;
     };
     virtual int Putc(PerlIO* pf, int c, int &err)
     {

@@ -375,6 +375,10 @@
 #define get_op_descs      CPerlObj::Perl_get_op_descs
 #undef  get_op_names
 #define get_op_names      CPerlObj::Perl_get_op_names
+#undef  get_no_modify
+#define get_no_modify     CPerlObj::Perl_get_no_modify
+#undef  get_opargs
+#define get_opargs        CPerlObj::Perl_get_opargs
 #undef  getlogin
 #define getlogin          CPerlObj::getlogin
 #undef  gp_free

@@ -41,6 +41,7 @@ public:
     virtual unsigned long InetAddr(const char* cp, int &err) = 0;
     virtual char* InetNtoa(struct in_addr in, int &err) = 0;
     virtual int Listen(SOCKET s, int backlog, int &err) = 0;
+    virtual int Recv(SOCKET s, char* buf, int len, int flags, int &err) = 0;
     virtual int Recvfrom(SOCKET s, char* buf, int len, int flags, struct sockaddr* from, int* fromlen, int &err) = 0;
     virtual int Select(int nfds, char* readfds, char* writefds, char* exceptfds, const struct timeval* timeout, int &err) = 0;
     virtual int Send(SOCKET s, const char* buf, int len, int flags, int &err) = 0; 
@@ -53,6 +54,10 @@ public:
     virtual int Shutdown(SOCKET s, int how, int &err) = 0;
     virtual SOCKET Socket(int af, int type, int protocol, int &err) = 0;
     virtual int Socketpair(int domain, int type, int protocol, int* fds, int &err) = 0;
+#ifdef WIN32
+    virtual int Closesocket(SOCKET s, int& err) = 0;
+    virtual int Ioctlsocket(SOCKET s, long cmd, u_long *argp, int& err) = 0;
+#endif
 };
 
 #endif	/* __Inc__IPerlSock___ */

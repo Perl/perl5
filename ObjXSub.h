@@ -53,6 +53,8 @@
 #define bufend			pPerl->Perl_bufend
 #undef  bufptr
 #define bufptr			pPerl->Perl_bufptr
+#undef  byterun
+#define byterun			pPerl->Perl_byterun
 #undef  cddir
 #define cddir			pPerl->Perl_cddir
 #undef  chopset
@@ -912,6 +914,10 @@
 #define get_op_descs        pPerl->Perl_get_op_descs
 #undef  get_op_names
 #define get_op_names        pPerl->Perl_get_op_names
+#undef  get_no_modify
+#define get_no_modify       pPerl->Perl_get_no_modify
+#undef  get_opargs
+#define get_opargs	    pPerl->Perl_get_opargs
 #undef  gp_free
 #define gp_free             pPerl->Perl_gp_free
 #undef  gp_ref
