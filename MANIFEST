@@ -535,6 +535,7 @@ ext/Socket/Makefile.PL		Socket extension makefile writer
 ext/Socket/Socket.pm		Socket extension Perl module
 ext/Socket/Socket.t		See if Socket works
 ext/Socket/Socket.xs		Socket extension external subroutines
+ext/Socket/socketpair.t		See if socketpair works
 ext/Storable/ChangeLog		Storable extension
 ext/Storable/Makefile.PL	Storable extension
 ext/Storable/MANIFEST		Storable extension

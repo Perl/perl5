@@ -4421,7 +4421,9 @@ to C<pipe(Rdr, Wtr)> is essentially:
     shutdown(Rdr, 1);        # no more writing for reader
     shutdown(Wtr, 0);        # no more reading for writer
 
-See L<perlipc> for an example of socketpair use.
+See L<perlipc> for an example of socketpair use.  Perl 5.8 and later will
+emulate socketpair using IP sockets to localhost if your system implements
+sockets but not socketpair.
 
 =item sort SUBNAME LIST
 

@@ -755,6 +755,12 @@ int sockatmark(int);
 #   endif
 #endif
 
+#ifndef HAS_SOCKETPAIR
+#   ifdef HAS_SOCKET
+#	define socketpair Perl_my_socketpair
+#   endif
+#endif
+
 #if INTSIZE == 2
 #   define htoni htons
 #   define ntohi ntohs
