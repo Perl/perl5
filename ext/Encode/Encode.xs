@@ -64,12 +64,21 @@ PerlIOEncode_pushed(PerlIO *f, const char *mode,const char *arg,STRLEN len)
  XPUSHs(sv_2mortal(newSVpvn(arg,len)));
  PUTBACK;
  if (perl_call_method("getEncoding",G_SCALAR) != 1)
-  return -1;
+  {
+   /* should never happen */
+   Perl_die(aTHX_ "Encode::getEncoding did not return a value");
+   return -1;
+  }
  SPAGAIN;
  e->enc = POPs;
  PUTBACK;
  if (!SvROK(e->enc))
-  return -1;
+  {
+   e->enc = Nullsv;
+   errno  = EINVAL;
+   Perl_warner(aTHX_ WARN_IO, "Cannot find encoding \"%.*s\"", (int) len, arg);
+   return -1;
+  }
  SvREFCNT_inc(e->enc);
  FREETMPS;
  LEAVE;
