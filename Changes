@@ -78,6 +78,25 @@ Version 5.005_02        Second maintenance release of 5.005
 ----------------
 
 ____________________________________________________________________________
+[  1713] By: gsar                                  on 1998/08/02  09:28:32
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Sun, 2 Aug 1998 04:35:11 -0400 (EDT)
+             Message-Id: <199808020835.EAA09367@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.005_*] Better debugging output from malloc.c
+     Branch: maint-5.005/perl
+           ! malloc.c
+____________________________________________________________________________
+[  1712] By: gsar                                  on 1998/08/02  09:16:55
+        Log: fix longstanding bug in pack('u',...) (reads garbage beyond the end
+             of the input string)
+     Branch: maint-5.005/perl
+           ! pp.c
+____________________________________________________________________________
+[  1711] By: gsar                                  on 1998/08/02  08:14:25
+        Log: update Changes, tweak Porting/makerel
+     Branch: maint-5.005/perl
+           ! Changes Porting/makerel
+____________________________________________________________________________
 [  1710] By: gsar                                  on 1998/08/02  07:31:37
         Log: remove CRs from djgpp/configure.bat (Porting/makerel adds them)
      Branch: maint-5.005/perl

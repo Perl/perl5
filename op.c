@@ -92,7 +92,7 @@ void
 assertref(OP *o)
 {
     int type = o->op_type;
-    if (type != OP_AELEM && type != OP_HELEM) {
+    if (type != OP_AELEM && type != OP_HELEM && type != OP_GELEM) {
 	yyerror(form("Can't use subscript on %s", op_desc[type]));
 	if (type == OP_ENTERSUB || type == OP_RV2HV || type == OP_PADHV) {
 	    dTHR;
