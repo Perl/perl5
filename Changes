@@ -31,6 +31,419 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 10267] By: jhi                                   on 2001/05/28  19:03:54
+        Log: Subject: [PATCH] perlnewmod.pod to reflect DLSI(P) change
+             From: Elaine -HFB- Ashton <elaine@chaos.wustl.edu>
+             Date: Mon, 28 May 2001 14:56:35 -0500
+             Message-ID: <20010528145635.L8487@chaos.wustl.edu>
+     Branch: perl
+	   ! pod/perlnewmod.pod
+____________________________________________________________________________
+[ 10266] By: jhi                                   on 2001/05/28  18:35:03
+        Log: Regen toc.
+     Branch: perl
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[ 10265] By: jhi                                   on 2001/05/28  18:33:32
+        Log: Subject: [PATCH] RE: [20000223.001] no test cases for splice(@array) 
+             From: "Richard Soderberg" <rs@crystalflame.net>
+             Date: Mon, 28 May 2001 12:31:23 -0700
+             Message-ID: <NAEKLNAAHLMBPMPNBMLEOEFLDFAA.rs@crystalflame.net>
+     Branch: perl
+	   ! t/op/splice.t
+____________________________________________________________________________
+[ 10264] By: jhi                                   on 2001/05/28  17:59:00
+        Log: The #10260 was too bold: locales and utf8 still do not mix.
+     Branch: perl
+	   ! t/pragma/locale.t
+____________________________________________________________________________
+[ 10263] By: jhi                                   on 2001/05/28  17:52:25
+        Log: Subject: [PATCH] Pod nitpicks
+             From: "Richard Soderberg" <rs@crystalflame.net>
+             Date: Mon, 28 May 2001 10:08:58 -0700
+             Message-ID: <NAEKLNAAHLMBPMPNBMLEOEFGDFAA.rs@crystalflame.net>
+     Branch: perl
+	   ! pod/perl571delta.pod pod/perlapi.pod sv.h
+____________________________________________________________________________
+[ 10262] By: jhi                                   on 2001/05/28  17:50:05
+        Log: Upgrade to I18N::LangTags 0.22.
+     Branch: perl
+	   + lib/I18N/LangTags/List.pod
+	   ! MANIFEST lib/I18N/LangTags.pm
+____________________________________________________________________________
+[ 10261] By: jhi                                   on 2001/05/28  17:23:40
+        Log: A slightly more serious bug found by -Mutf8; op/misc and
+             lib/complex dumped core.
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[ 10260] By: jhi                                   on 2001/05/28  16:58:11
+        Log: Various buglets shaken out by -Mutf8.
+     Branch: perl
+	   ! t/io/utf8.t t/lib/charnames.t t/lib/lc-language.t
+	   ! t/pragma/locale.t
+____________________________________________________________________________
+[ 10259] By: jhi                                   on 2001/05/28  15:48:46
+        Log: STDERR looks much like STDOUT.  (Subtest #2 wasn't really okay.)
+     Branch: perl
+	   ! t/lib/carp.t
+____________________________________________________________________________
+[ 10258] By: jhi                                   on 2001/05/28  15:32:41
+        Log: Subject: [PATCH] todo patch
+             From: Artur Bergman <artur@contiller.se> 
+             Date: Mon, 28 May 2001 17:03:51 +0200
+             Message-ID: <B7383577.F34%artur@contiller.se>
+     Branch: perl
+	   ! pod/perltodo.pod
+____________________________________________________________________________
+[ 10257] By: jhi                                   on 2001/05/28  15:31:25
+        Log: Subject: typo in perlguts.pod
+             From: "John P. Linderman" <jpl@research.att.com>
+             Date: Mon, 28 May 2001 09:35:47 -0400 (EDT)
+             Message-Id: <200105281335.JAA27851@raptor.research.att.com>
+     Branch: perl
+	   ! pod/perlguts.pod
+____________________________________________________________________________
+[ 10256] By: jhi                                   on 2001/05/28  15:30:42
+        Log: Subject: AIX and gcc (moving targets)
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Mon, 28 May 2001 12:54:04 +0200
+             Message-Id: <20010528124531.9FAB.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! hints/aix.sh
+____________________________________________________________________________
+[ 10255] By: jhi                                   on 2001/05/28  15:28:55
+        Log: Subject: Re: perlio + multiple perl_alloc..destruct
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Sun, 27 May 2001 13:47:13 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0105271340370.5938-100000@mako.covalent.net>
+     Branch: perl
+	   ! perlio.c
+____________________________________________________________________________
+[ 10254] By: jhi                                   on 2001/05/28  15:27:49
+        Log: The #10251 wasn't quite up-to-the-code.
+     Branch: perl
+	   ! t/op/misc.t
+____________________________________________________________________________
+[ 10253] By: jhi                                   on 2001/05/28  15:26:39
+        Log: Test case for bug 20010526.004, fixed in #10252.
+     Branch: perl
+	   ! t/op/taint.t
+____________________________________________________________________________
+[ 10252] By: jhi                                   on 2001/05/28  15:26:14
+        Log: Subject: Re: [ID 20010526.004] Taint looses value
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Sun, 27 May 2001 20:39:32 +0100
+             Message-Id: <200105271939.UAA27591@crypt.compulink.co.uk>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 10251] By: jhi                                   on 2001/05/28  15:13:40
+        Log: Test case for 20010422.005, fixed by #10250.
+     Branch: perl
+	   ! t/op/misc.t
+____________________________________________________________________________
+[ 10250] By: jhi                                   on 2001/05/28  15:11:16
+        Log: Subject: [PATCH] Re: [ID 20010422.005] perl -e '{s//${}/; //}' # segfaults on FreeBSD 
+             From: Spider Boardman <spider@Orb.Nashua.NH.US>
+             Date: Mon, 28 May 2001 06:39:12 -0400
+             Message-Id: <200105281039.GAA03962@Orb.Nashua.NH.US>
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[ 10249] By: jhi                                   on 2001/05/28  15:09:24
+        Log: Linerewrapping.
+     Branch: perl
+	   ! lib/open.pm
+____________________________________________________________________________
+[ 10248] By: jhi                                   on 2001/05/28  15:09:07
+        Log: Updates on the modules list.
+     Branch: perl
+	   ! t/lib/1_compile.t
+____________________________________________________________________________
+[ 10247] By: jhi                                   on 2001/05/28  15:03:35
+        Log: Add a test for PerlIO.
+             
+             (I probably got the crlf/raw thing wrong for clrfy platforms...)
+     Branch: perl
+	   + t/lib/perlio.t
+	   ! MANIFEST lib/PerlIO.pm
+____________________________________________________________________________
+[ 10246] By: jhi                                   on 2001/05/28  14:24:08
+        Log: Add a test for carp et alia.
+     Branch: perl
+	   + t/lib/carp.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 10245] By: jhi                                   on 2001/05/28  13:42:55
+        Log: Adding the new test would be swell.
+     Branch: perl
+	   + t/pragma/autouse.t
+____________________________________________________________________________
+[ 10244] By: jhi                                   on 2001/05/28  13:42:34
+        Log: Add a test for the autouse pragma.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 10243] By: jhi                                   on 2001/05/28  13:26:25
+        Log: Subject: [ID 20010528.001] use autouse 'URI::Escape' => qw(URI::Escape::uri_escape) failed
+             From: dLux <dlux@spam.sch.bme.hu>
+             Date: Sun, 27 May 2001 16:14:26 +0200
+             Message-Id: <E1541JK-0000YC-00@dl.sch.bme.hu>
+     Branch: perl
+	   ! lib/autouse.pm
+____________________________________________________________________________
+[ 10242] By: jhi                                   on 2001/05/28  13:21:50
+        Log: Subject: [PATCH #2] RE: [ID 20010528.002] dprofpp: "-R" does not work
+             From: "Richard Soderberg" <rs@crystalflame.net>
+             Date: Mon, 28 May 2001 03:56:36 -0700
+             Message-ID: <NAEKLNAAHLMBPMPNBMLEEEFADFAA.rs@crystalflame.net>
+     Branch: perl
+	   ! utils/dprofpp.PL
+____________________________________________________________________________
+[ 10241] By: jhi                                   on 2001/05/28  13:18:56
+        Log: Subject: Re: [ID 20010522.003] Time::Local module bug
+             From: "Stephen P. Potter" <spp@spotter.yi.org>
+             Date: Tue, 22 May 2001 11:40:25 -0400
+             Message-Id: <20010522154030.584F4729E2@belgarath.spotter.yi.org>
+             
+             Subject: Re: [ID 20010522.003] Time::Local module bug
+             From: Ronald J Kimball <rjk@linguist.Thayer.dartmouth.edu> 
+             Date: Tue, 22 May 2001 11:50:19 -0400
+             Message-ID: <20010522115019.D48634@linguist.thayer.dartmouth.edu>
+     Branch: perl
+	   ! lib/Time/Local.pm
+____________________________________________________________________________
+[ 10240] By: jhi                                   on 2001/05/27  22:44:49
+        Log: The PERL_DL_NONLAZY can have whitespace in front.
+     Branch: perl
+	   ! t/lib/extutils.t
+____________________________________________________________________________
+[ 10239] By: jhi                                   on 2001/05/27  21:23:21
+        Log: Document strftime() and strptime().
+     Branch: perl
+	   ! ext/POSIX/POSIX.pod ext/Time/Piece/Piece.pm t/lib/time-piece.t
+____________________________________________________________________________
+[ 10238] By: jhi                                   on 2001/05/27  20:29:07
+        Log: Make Time::Piece::strptime() to be a function, not a method.
+     Branch: perl
+	   ! ext/Time/Piece/Piece.pm t/lib/time-piece.t
+____________________________________________________________________________
+[ 10237] By: jhi                                   on 2001/05/27  20:22:09
+        Log: Tweak the test to be more portable.
+     Branch: perl
+	   ! t/lib/extutils.t
+____________________________________________________________________________
+[ 10236] By: jhi                                   on 2001/05/27  19:15:54
+        Log: Subject: PATCH: Re: Re: Attributes that tie
+             From: Leon Brocard <acme@astray.com>
+             Date: Sun, 27 May 2001 12:37:29 +0100
+             Message-ID: <20010527123729.A22663@ns0.astray.com>
+             
+             Document that variable attributes are not currently usable
+             for tieing.  (An ugly limitation that should be fixed.)
+     Branch: perl
+	   ! lib/attributes.pm
+____________________________________________________________________________
+[ 10235] By: jhi                                   on 2001/05/27  19:03:31
+        Log: Microperl tweaks.
+     Branch: perl
+	   ! Makefile.micro uconfig.h uconfig.sh
+____________________________________________________________________________
+[ 10234] By: jhi                                   on 2001/05/27  18:22:09
+        Log: Add make target for microperl (kind of silly, but convenient).
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[ 10233] By: jhi                                   on 2001/05/27  18:18:56
+        Log: O_APPEND and O_TRUNC are not portable.  (Not available e.g.
+             for microperl.)
+     Branch: perl
+	   ! doio.c
+____________________________________________________________________________
+[ 10232] By: jhi                                   on 2001/05/27  17:57:18
+        Log: Subject: [PATCH] [ID 19991013.005] utime undef, undef, @files  
+             From: rspier@pobox.com (Robert Spier)
+             Date: Sat, 26 May 2001 20:05:23 -0400
+             Message-ID: <15120.17603.148648.12430@rls.cx>
+             
+             Subject: Re: [PATCH] [ID 19991013.005] utime undef, undef, @files
+             From: rspier@pobox.com (Robert Spier)
+             Date: Sun, 27 May 2001 00:23:12 -0400
+             Message-ID: <15120.33072.511966.767230@rls.cx>
+     Branch: perl
+	   ! doio.c pod/perlfunc.pod
+____________________________________________________________________________
+[ 10231] By: jhi                                   on 2001/05/27  15:45:20
+        Log: Regen toc.  (And add the README.tru64 from #10230 to MANIFEST.)
+     Branch: perl
+	   ! MANIFEST pod/buildtoc.PL pod/perl.pod pod/perltoc.pod
+____________________________________________________________________________
+[ 10230] By: jhi                                   on 2001/05/27  15:41:06
+        Log: Add README.tru64.
+     Branch: perl
+	   + README.tru64
+____________________________________________________________________________
+[ 10229] By: jhi                                   on 2001/05/27  13:50:57
+        Log: Integrate Locale::Maketext 1.01 from Sean Burke.
+     Branch: perl
+	   + lib/Locale/Maketext.pm lib/Locale/Maketext.pod
+	   + lib/Locale/Maketext/TPJ13.pod t/lib/lc-maketext.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 10228] By: jhi                                   on 2001/05/27  13:43:38
+        Log: Integrate I18N::LangTags from Sean Burke.
+             
+             TODO: the language list from RFC 3066 needs to be integrated
+             and made available somehow.  The list is included in the
+             I18N-LangTags 0.21 distribution, but it is undocumented
+             and unconnected to the module.
+     Branch: perl
+	   + lib/I18N/LangTags.pm t/lib/i18n-langtags.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 10227] By: jhi                                   on 2001/05/27  01:41:33
+        Log: Allow 'eval "v200"' to work (part of 20000323.059); fix as
+             envisioned by Sarathy.
+     Branch: perl
+	   ! t/op/ver.t toke.c
+____________________________________________________________________________
+[ 10226] By: jhi                                   on 2001/05/27  00:28:34
+        Log: Subject: [ID 20010525.001] Pod typo nits fixed
+             From: lvirden@cas.org
+             Date: Fri, 25 May 2001 06:57:43 -0400 (EDT)
+             Message-Id: <200105251057.f4PAvhY13003@lwv26awu.cas.org>
+             
+             minus the perlsolaris decimation plus the
+             
+             Subject: Re: [ID 20010525.001] Pod typo nits fixed
+             From: "Philip Newton" <Philip.Newton@gmx.net>
+             Date: Fri, 25 May 2001 18:05:55 +0200
+             Message-Id: <200105251604.f4PG4kt15034@chaos.wustl.edu>
+     Branch: perl
+	   ! README.amiga README.cygwin README.mpeix pod/perl5005delta.pod
+	   ! pod/perldebtut.pod pod/perlebcdic.pod pod/perlfaq3.pod
+	   ! pod/perlhack.pod pod/perltoc.pod pod/perltodo.pod
+	   ! pod/perlutil.pod pod/perlxstut.pod
+____________________________________________________________________________
+[ 10225] By: jhi                                   on 2001/05/26  22:38:16
+        Log: return clauses are nice.
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 10224] By: jhi                                   on 2001/05/26  22:35:31
+        Log: Subject: change 10199 backwards?
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Sat, 26 May 2001 11:26:07 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0105261118510.22038-100000@mako.covalent.net>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 10223] By: jhi                                   on 2001/05/26  22:31:46
+        Log: Subject: Re: 5.6.*, bleadperl: bugs in pp_concat
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Sat, 26 May 2001 17:05:12 +0100
+             Message-Id: <200105261605.RAA12295@crypt.compulink.co.uk>
+     Branch: perl
+	   + t/op/gmagic.t
+	   ! MANIFEST doop.c embed.h embed.pl global.sym
+	   ! lib/File/Basename.pm objXSUB.h perlapi.c pod/perlapi.pod
+	   ! pp_hot.c proto.h sv.c sv.h t/pragma/warn/pp_hot
+____________________________________________________________________________
+[ 10222] By: jhi                                   on 2001/05/26  22:10:38
+        Log: Regen headers for #10221.
+     Branch: perl
+	   ! global.sym objXSUB.h perlapi.c
+____________________________________________________________________________
+[ 10221] By: jhi                                   on 2001/05/26  22:06:06
+        Log: Subject: [ID 20010506.012] Patch for 5.6.1 embed.pl (shared libperl&mod_perl)
+             From: Juha Laiho <juha.laiho@Elma.Net>
+             Date: Thu, 3 May 2001 09:51:30 +0300
+             Message-Id: <200105030651.JAA327254@tokka.elma.fi>
+     Branch: perl
+	   ! embed.pl
+____________________________________________________________________________
+[ 10220] By: jhi                                   on 2001/05/26  22:01:30
+        Log: Subject: Re: [PATCH] Re: stability of sort()?
+             From: "John P. Linderman" <jpl@research.att.com>
+             Date: Sat, 26 May 2001 13:27:19 -0400
+             Message-Id: <200105261727.NAA06654@raptor.research.att.com>
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 10219] By: jhi                                   on 2001/05/26  14:02:34
+        Log: Integrate perlio.
+     Branch: perl
+	  !> pod/perlguts.pod
+____________________________________________________________________________
+[ 10218] By: jhi                                   on 2001/05/26  13:39:52
+        Log: Subject: [PATCH perl@10210] PerlIO for VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Sat, 26 May 2001 09:34:11 -0500
+             Message-Id: <a05100e0ab734816701a5@[172.16.52.1]>
+     Branch: perl
+	   ! configure.com doio.c iperlsys.h perlio.c perlio.h perliol.h
+	   ! perlsdio.h vms/ext/Stdio/Stdio.xs vms/gen_shrfls.pl vms/vms.c
+	   ! vms/vmsish.h
+____________________________________________________________________________
+[ 10217] By: jhi                                   on 2001/05/26  13:19:05
+        Log: Subject: patch to fix: [ID 20010524.004] perl5db.pl version 1.12  doesn't stop on breakpoints
+             From: David Dyck <dcd@tc.fluke.com>
+             Date: Fri, 25 May 2001 00:03:04 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.33.0105242354030.17331-100000@dd.tc.fluke.com>
+     Branch: perl
+	   ! lib/perl5db.pl
+____________________________________________________________________________
+[ 10216] By: jhi                                   on 2001/05/26  13:17:47
+        Log: Subject: utf8 regexp tests
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Fri, 25 May 2001 22:35:01 +0100
+             Message-Id: <200105252135.WAA03197@crypt.compulink.co.uk>
+     Branch: perl
+	   ! t/op/regexp.t
+____________________________________________________________________________
+[ 10215] By: jhi                                   on 2001/05/26  13:15:40
+        Log: Subject: [PATCH] Re: stability of sort()?
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Fri, 25 May 2001 22:40:19 +0100
+             Message-ID: <20010525224019.B86445@plum.flirble.org>
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 10214] By: jhi                                   on 2001/05/26  13:14:30
+        Log: Subject: Re: [ID 20010426.005] Magic not being removed at scope exit [PATCH]
+             From: John Peacock <jpeacock@rowman.com>
+             Date: Thu, 24 May 2001 22:14:01 -0400
+             Message-ID: <3B0DBFE9.A7C49084@rowman.com>
+     Branch: perl
+	   ! mg.c scope.c sv.c
+____________________________________________________________________________
+[ 10213] By: jhi                                   on 2001/05/26  13:08:56
+        Log: Subject: [PATCH] Re: [PATCH] Re: h2xs [was Re: HEAR YE, HEAR YE!]
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sun, 20 May 2001 19:24:13 +0100
+             Message-ID: <20010520192413.G83222@plum.flirble.org>
+     Branch: perl
+	   + lib/ExtUtils/Constant.pm t/lib/extutils.t
+	   ! MANIFEST utils/h2xs.PL
+____________________________________________________________________________
+[ 10212] By: nick                                  on 2001/05/26  09:49:28
+        Log: Change perlguts docs to not suggest PUSHi etc. for multiple results,
+             add a few more notes there on use of mortals on the stack.
+     Branch: perlio
+	   ! pod/perlguts.pod
+____________________________________________________________________________
+[ 10211] By: nick                                  on 2001/05/26  09:05:36
+        Log: Integrate mainline
+     Branch: perlio
+	  +> t/lib/fcntl.t t/pragma/vars.t
+	  !> (integrate 49 files)
+____________________________________________________________________________
+[ 10210] By: jhi                                   on 2001/05/25  12:29:16
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 10209] By: jhi                                   on 2001/05/25  12:24:45
         Log: Based on
              
