@@ -94,6 +94,11 @@ Version 5.004_05        Maintenance release 5 for 5.004
       - Many other bugs fixed.
 
 
+Change 3283 by chip@perlsupport.com on 1999/04/26 23:20:47
+
+	Tweak ordering of Porting/makerel.
+	Update MANIFEST and, yet again, Changes.
+
 Change 3282 by chip@perlsupport.com on 1999/04/26 23:13:39
 
 	Update Changes again for last few patches.

@@ -15,8 +15,10 @@ MANIFEST		This list of files
 Makefile.SH		A script that generates Makefile
 Porting/Contract	Social contract for contributed modules in Perl core
 Porting/Glossary	Glossary of config.sh variables
+Porting/genlog		Generate formatted changelogs by querying p4d
 Porting/makerel		Release making utility
 Porting/p4d2p		Generate standard patches from p4 diffs
+Porting/p4desc		Smarter 'p4 describe', outputs diffs for new files
 Porting/patching.pod	How to report changes made to Perl
 Porting/patchls		Flexible patch file listing utility
 Porting/pumpkin.pod	Guidelines and hints for Perl maintainers
@@ -760,6 +762,8 @@ t/op/hashwarn.t		See if warnings for bad hash assignments work
 t/op/inc.t		See if inc/dec of integers near 32 bit limit work
 t/op/index.t		See if index works
 t/op/int.t		See if int works
+t/op/ipcmsg.t		See if System V message queues work
+t/op/ipcsem.t		See if System V semaphores work
 t/op/join.t		See if join works
 t/op/list.t		See if array lists work
 t/op/local.t		See if local works
