@@ -142,6 +142,10 @@ perl.dll, and perlglob.exe at the perl toplevel, and various other
 extension dll's under the lib\auto directory.  If the build fails for
 any reason, make sure you have done the previous steps correctly.
 
+The build process may produce "harmless" compiler warnings (more or
+less copiously, depending on how picky your compiler gets).  The
+maintainers are aware of these warnings, thankyouverymuch. :)
+
 When building using Visual C++, a perl95.exe will also get built.  This
 executable is only needed on Windows95, and should be used instead of
 perl.exe, and then only if you want sockets to work properly on Windows95.
@@ -347,6 +351,76 @@ It is expected that authors of Win32 specific extensions will begin
 distributing their work in MakeMaker compatible form subsequent to
 the 5.004 release of perl, at which point the need for a dedicated
 bundle such as the above should diminish.
+
+=item Running Perl Scripts
+
+Perl scripts on UNIX use the "#!" (a.k.a "shebang") line to
+indicate to the OS that it should execute the file using perl.
+Win32 has no comparable means to indicate arbitrary files are
+executables.
+
+Instead, all available methods to execute plain text files on
+Win32 rely on the file "extension".  There are three methods
+to use this to execute perl scripts:
+
+=over 8
+
+=item 1
+
+There is a facility called "file extension associations" that will
+work in Windows NT 4.0.  This can be manipulated via the two
+commands "assoc" and "ftype" that come standard with Windows NT
+4.0.  Type "ftype /?" for a complete example of how to set this
+up for perl scripts (Say what?  You thought Windows NT wasn't
+perl-ready? :).
+
+=item 2
+
+Since file associations don't work everywhere, and there are
+reportedly bugs with file associations where it does work, the
+old method of wrapping the perl script to make it look like a
+regular batch file to the OS, may be used.  The install process
+makes available the "pl2bat.bat" script which can be used to wrap
+perl scripts into batch files.  For example:
+
+	pl2bat foo.pl
+
+will create the file "FOO.BAT".  Note "pl2bat" strips any
+.pl suffix and adds a .bat suffix to the generated file.
+
+If you use the 4DOS/NT or similar command shell, note that
+"pl2bat" uses the "%*" variable in the generated batch file to
+refer to all the command line arguments, so you may need to make
+sure that construct works in batch files.  As of this writing,
+4DOS/NT users will need a "ParameterChar = *" statement in their
+4NT.INI file, or will need to execute "setdos /p*" in the 4DOS/NT
+startup file to enable this to work.
+
+=item 3
+
+Using "pl2bat" has a few problems:  the file name gets changed,
+so scripts that rely on C<$0> to find what they must do may not
+run properly; running "pl2bat" replicates the contents of the
+original script, and so this process can be maintenance intensive
+if the originals get updated often.  A different approach that
+avoids both problems is possible.
+
+A script called "runperl.bat" is available that can be copied
+to any filename (along with the .bat suffix).  For example,
+if you call it "foo.bat", it will run the file "foo" when it is
+executed.  Since you can run batch files on Win32 platforms simply
+by typing the name (without the extension), this effectively
+runs the file "foo", when you type either "foo" or "foo.bat".
+With this method, "foo.bat" can even be in a different location
+than the file "foo", as long as "foo" is available somewhere on
+the PATH.  If your scripts are on a filesystem that allows symbolic
+links, you can even avoid copying "runperl.bat".
+
+Here's a diversion:  copy "runperl.bat" to "runperl", and type
+"runperl".  Explain the observed behavior, or lack thereof. :)
+Hint: .gnidnats llits er'uoy fi ,"lrepnur" eteled :tniH
+
+=back
 
 =item Miscellaneous Things
 

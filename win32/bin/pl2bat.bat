@@ -43,9 +43,8 @@ sub process {
         s/\.pl$//;
         $_ .= '.bat' unless /\.bat$/ or /^-$/;
         open( FILE, ">$_" ) or die "Can't open $_: $!";
-	$myhead =~ s/perl -x/perl/ unless $linedone;
 	print FILE $myhead;
-	print FILE "#line $headlines\n" unless $linedone;
+	print FILE "#!perl\n#line " . ($headlines+1) . "\n" unless $linedone;
         print FILE @file, $tail;
         close( FILE );
     }
