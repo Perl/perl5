@@ -190,6 +190,8 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
 
     if (!stash)
 	return 0;
+    if (!HvNAME(stash))
+        Perl_croak(aTHX_ "Can't use anonymous symbol table for method lookup");
     if ((level > 100) || (level < -100))
 	Perl_croak(aTHX_ "Recursive inheritance detected while looking for method '%s' in package '%s'",
 	      name, HvNAME(stash));

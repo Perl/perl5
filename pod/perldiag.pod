@@ -994,6 +994,12 @@ calling sv_upgrade.
 (F) A value used as either a hard reference or a symbolic reference must
 be a defined value.  This helps to delurk some insidious errors.
 
+=item Can't use anonymous symbol table for method lookup
+
+(P) The internal routine that does method lookup was handed a symbol
+table that doesn't have a name.  Symbol tables can become anonymous
+for example by undefining stashes: C<undef %Some::Package::>.
+
 =item Can't use bareword ("%s") as %s ref while "strict refs" in use
 
 (F) Only hard references are allowed by "strict refs".  Symbolic
