@@ -649,6 +649,7 @@ ext/Thread/Makefile.PL		Thread extension makefile writer
 ext/Thread/Notes		Thread notes
 ext/Thread/queue.tx		Test Thread::Queue module
 ext/Thread/README		Thread README
+ext/Thread/README.threads		Notes about multithreading
 ext/Thread/specific.tx		Test thread-specific user data
 ext/Thread/sync.tx		Test thread synchronisation
 ext/Thread/sync2.tx		Test thread synchronisation
@@ -2260,7 +2261,6 @@ README.os390		Notes about OS/390 (nee MVS) port
 README.plan9		Notes about Plan9 port
 README.qnx		Notes about QNX port
 README.solaris		Notes about Solaris port
-README.threads		Notes about multithreading
 README.tru64		Notes about Tru64
 README.tw		About using Perl and Traditional Chinese
 README.uts		Notes about UTS
