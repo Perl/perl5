@@ -28,5 +28,7 @@ if test "$d_shm" = ""; then
     *"undef"*) d_shm="$undef" ;;
     esac
 fi
+# Otherwise the unpack %65c checksums will fail.
+pp_pack_cflags='ccflags="$ccflags -h ieeeconform"'
 
 
