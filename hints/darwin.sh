@@ -33,7 +33,6 @@ case "$prefix" in
 esac
 
 # 4BSD uses ${prefix}/share/man, not ${prefix}/man.
-# Don't put man pages in ${prefix}/lib; that's goofy.
 man1dir="${prefix}/share/man/man1";
 man3dir="${prefix}/share/man/man3";
 
