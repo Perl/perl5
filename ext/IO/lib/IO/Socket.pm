@@ -22,7 +22,7 @@ require IO::Socket::UNIX;
 
 @ISA = qw(IO::Handle);
 
-$VERSION = "1.25";
+$VERSION = "1.251";
 
 sub import {
     my $pkg = shift;
@@ -101,14 +101,12 @@ sub connect {
     my $addr = shift;
     my $timeout = ${*$sock}{'io_socket_timeout'};
 
-    eval {
-	my $blocking = 0;
+    my $blocking;
+    $blocking = $sock->blocking(0) if $timeout;
 
+    eval {
     	croak 'connect: Bad address'
     	    if(@_ == 2 && !defined $_[1]);
-
-	$blocking = $sock->blocking(0)
-	    if($timeout);
 
 	unless(connect($sock, $addr)) {
 	    if($timeout && ($! == &IO::EINPROGRESS)) {
@@ -116,24 +114,21 @@ sub connect {
 
 		my $sel = new IO::Select $sock;
 
-		$sock->blocking(1)
-		    if($blocking);
-
 		unless($sel->can_write($timeout) && defined($sock->peername)) {
-		    undef $sock;
 		    croak "connect: timeout";
 		}
 	    }
 	    else {
-		undef $sock;
 		croak "connect: $!";
 	    }
 	}
-	$sock->blocking(1)
-	    if($sock && $blocking);
     };
 
-    $sock;
+    my $ret = $@ ? undef : $sock;
+
+    $sock->blocking($blocking) if $timeout;
+
+    $ret;
 }
 
 sub bind {
