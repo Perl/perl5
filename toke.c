@@ -5243,8 +5243,6 @@ U32 flags;
     CvOWNER(compcv) = 0;
     New(666, CvMUTEXP(compcv), 1, perl_mutex);
     MUTEX_INIT(CvMUTEXP(compcv));
-    New(666, CvCONDP(compcv), 1, perl_cond);
-    COND_INIT(CvCONDP(compcv));
 #endif /* USE_THREADS */
 
     comppadlist = newAV();
@@ -5258,8 +5256,6 @@ U32 flags;
     CvOWNER(compcv) = 0;
     New(666, CvMUTEXP(compcv), 1, perl_mutex);
     MUTEX_INIT(CvMUTEXP(compcv));
-    New(666, CvCONDP(compcv), 1, perl_cond);
-    COND_INIT(CvCONDP(compcv));
 #endif /* USE_THREADS */
 
     return oldsavestack_ix;

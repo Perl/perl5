@@ -1158,6 +1158,7 @@ taint_proper
 too_few_arguments
 too_many_arguments
 unlnk
+unlock_condpair
 unshare_hek
 unsharepvn
 utilize

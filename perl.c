@@ -83,6 +83,19 @@ static void validate_suid _((char *, char*));
 
 static int fdscript = -1;
 
+#if defined(DEBUGGING) && defined(USE_THREADS) && defined(__linux__)
+#include <asm/sigcontext.h>
+static void
+catch_sigsegv(int signo, struct sigcontext_struct sc)
+{
+    signal(SIGSEGV, SIG_DFL);
+    fprintf(stderr, "Segmentation fault dereferencing 0x%lx\n"
+		    "return_address = 0x%lx, eip = 0x%lx\n",
+	    	    sc.cr2, __builtin_return_address(0), sc.eip);
+    fprintf(stderr, "thread = 0x%lx\n", (unsigned long)THR); 
+}
+#endif
+
 PerlInterpreter *
 perl_alloc()
 {
@@ -416,8 +429,10 @@ register PerlInterpreter *sv_interp;
     /* startup and shutdown function lists */
     SvREFCNT_dec(beginav);
     SvREFCNT_dec(endav);
+    SvREFCNT_dec(initav);
     beginav = Nullav;
     endav = Nullav;
+    initav = Nullav;
 
     /* temp stack during pp_sort() */
     SvREFCNT_dec(sortstack);
@@ -855,8 +870,6 @@ print \"  \\@INC:\\n    @INC\\n\";");
     CvOWNER(compcv) = 0;
     New(666, CvMUTEXP(compcv), 1, perl_mutex);
     MUTEX_INIT(CvMUTEXP(compcv));
-    New(666, CvCONDP(compcv), 1, perl_cond);
-    COND_INIT(CvCONDP(compcv));
 #endif /* USE_THREADS */
 
     comppadlist = newAV();
@@ -870,6 +883,10 @@ print \"  \\@INC:\\n    @INC\\n\";");
 	(*xsinit)();	/* in case linked C routines want magical variables */
 #ifdef VMS
     init_os_extras();
+#endif
+
+#if defined(DEBUGGING) && defined(USE_THREADS) && defined(__linux__)
+    DEBUG_L(signal(SIGSEGV, (void(*)(int))catch_sigsegv););
 #endif
 
     init_predump_symbols();

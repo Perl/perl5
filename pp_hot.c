@@ -33,11 +33,11 @@ void *cvarg;
     DEBUG_L((fprintf(stderr, "0x%lx unsetting CvOWNER of 0x%lx:%s\n",
 		     (unsigned long)thr, (unsigned long)cv, SvPEEK((SV*)cv))));
     MUTEX_LOCK(CvMUTEXP(cv));
-    /* assert(CvDEPTH(cv) == 0); */
+    DEBUG_L(if (CvDEPTH(cv) != 0)
+		PerlIO_printf(PerlIO_stderr(), "depth %ld != 0\n",
+			      CvDEPTH(cv)););
     assert(thr == CvOWNER(cv));
     CvOWNER(cv) = 0;
-    if (CvCONDP(cv))
-	COND_SIGNAL(CvCONDP(cv)); /* next please */
     MUTEX_UNLOCK(CvMUTEXP(cv));
     SvREFCNT_dec(cv);
 }
@@ -1873,26 +1873,35 @@ PP(pp_entersub)
 
 #ifdef USE_THREADS
     MUTEX_LOCK(CvMUTEXP(cv));
-    if (!CvCONDP(cv)) {
-#ifdef DEBUGGING
-	DEBUG_L((fprintf(stderr, "0x%lx entering fast %s\n",
-				 (unsigned long)thr, SvPEEK((SV*)cv))));
-#endif /* DEBUGGING */
-	MUTEX_UNLOCK(CvMUTEXP(cv)); /* fast sub wants neither sync nor clone */
-    }
-    else if (SvFLAGS(cv) & SVp_SYNC) {
-	/*
-	 * It's a synchronised CV. Wait until it's free unless
-	 * we own it already (in which case we're recursing).
-	 */
-	if (CvOWNER(cv) && CvOWNER(cv) != thr) {
-	    do {
-		DEBUG_L((fprintf(stderr, "0x%lx wait for 0x%lx to leave %s\n",
-				 (unsigned long)thr,(unsigned long)CvOWNER(cv),
-				 SvPEEK((SV*)cv))));
-		COND_WAIT(CvCONDP(cv), CvMUTEXP(cv)); /* yawn */
-	    } while (CvOWNER(cv));
+    if (CvFLAGS(cv) & CVf_LOCKED) {
+	MAGIC *mg;	
+	if (CvFLAGS(cv) & CVf_METHOD) {
+	    if (SP > stack_base + TOPMARK)
+		sv = *(stack_base + TOPMARK + 1);
+	    else {
+		MUTEX_UNLOCK(CvMUTEXP(cv));
+		croak("no argument for locked method call");
+	    }
+	    if (SvROK(sv))
+		sv = SvRV(sv);
 	}
+	else {
+	    sv = (SV*)cv;
+	}
+	MUTEX_UNLOCK(CvMUTEXP(cv));
+	mg = condpair_magic(sv);
+	MUTEX_LOCK(MgMUTEXP(mg));
+	if (MgOWNER(mg) == thr)
+	    MUTEX_UNLOCK(MgMUTEXP(mg));
+	else {
+	    while (MgOWNER(mg))
+		COND_WAIT(MgOWNERCONDP(mg), MgMUTEXP(mg));
+	    MgOWNER(mg) = thr;
+	    MUTEX_UNLOCK(MgMUTEXP(mg));
+	    save_destructor(unlock_condpair, sv);
+	}
+	MUTEX_LOCK(CvMUTEXP(cv));
+	assert(CvOWNER(cv) == 0);
 	CvOWNER(cv) = thr;	/* Assert ownership */
 	SvREFCNT_inc(cv);
 	MUTEX_UNLOCK(CvMUTEXP(cv));
@@ -1949,9 +1958,10 @@ PP(pp_entersub)
 		    SvREFCNT_inc(cv);
 		    MUTEX_UNLOCK(CvMUTEXP(cv));
 		    DEBUG_L(fprintf(stderr,
-				    "entersub: 0x%lx grabbing 0x%lx:%s\n",
+				    "entersub: 0x%lx grabbing 0x%lx:%s in stash %s\n",
 				    (unsigned long) thr, (unsigned long) cv,
-				    SvPEEK((SV*)cv)));
+				    SvPEEK((SV*)cv), CvSTASH(cv) ?
+					HvNAME(CvSTASH(cv)) : "(none)"));
 		} else {
 		    /* Make a new clone. */
 		    CV *clonecv;
@@ -1975,7 +1985,9 @@ PP(pp_entersub)
 		    cv = clonecv;
 		    SvREFCNT_inc(cv);
 		}
-		assert(CvDEPTH(cv) == 0);
+		DEBUG_L(if (CvDEPTH(cv) != 0)
+			    PerlIO_printf(PerlIO_stderr(), "depth %ld != 0\n",
+					  CvDEPTH(cv)););
 		SAVEDESTRUCTOR(unset_cvowner, (void*) cv);
 	    }
 	}
@@ -2125,8 +2137,10 @@ PP(pp_entersub)
 	    AV* av;
 	    SV** ary;
 
+#if 0
 	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
 	    			  "%p entersub preparing @_\n", thr));
+#endif
 	    av = (AV*)curpad[0];
 	    if (AvREAL(av)) {
 		av_clear(av);
@@ -2161,8 +2175,10 @@ PP(pp_entersub)
 		MARK++;
 	    }
 	}
+#if 0
 	DEBUG_L(PerlIO_printf(PerlIO_stderr(),
 			      "%p entersub returning %p\n", thr, CvSTART(cv)));
+#endif
 	RETURNOP(CvSTART(cv));
     }
 }

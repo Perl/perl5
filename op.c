@@ -2998,11 +2998,6 @@ CV *cv;
 	Safefree(CvMUTEXP(cv));
 	CvMUTEXP(cv) = 0;
     }
-    if (CvCONDP(cv)) {
-	COND_DESTROY(CvCONDP(cv));
-	Safefree(CvCONDP(cv));
-	CvCONDP(cv) = 0;
-    }
 #endif /* USE_THREADS */
 
     if (!CvXSUB(cv) && CvROOT(cv)) {
@@ -3133,8 +3128,6 @@ CV* outside;
 #ifdef USE_THREADS
     New(666, CvMUTEXP(cv), 1, perl_mutex);
     MUTEX_INIT(CvMUTEXP(cv));
-    New(666, CvCONDP(cv), 1, perl_cond);
-    COND_INIT(CvCONDP(cv));
     CvOWNER(cv)		= 0;
 #endif /* USE_THREADS */
     CvFILEGV(cv)	= CvFILEGV(proto);
@@ -3375,8 +3368,6 @@ OP *block;
     CvOWNER(cv) = 0;
     New(666, CvMUTEXP(cv), 1, perl_mutex);
     MUTEX_INIT(CvMUTEXP(cv));
-    New(666, CvCONDP(cv), 1, perl_cond);
-    COND_INIT(CvCONDP(cv));
 #endif /* USE_THREADS */
 
     if (ps)
@@ -3582,8 +3573,6 @@ char *filename;
 #ifdef USE_THREADS
     New(666, CvMUTEXP(cv), 1, perl_mutex);
     MUTEX_INIT(CvMUTEXP(cv));
-    New(666, CvCONDP(cv), 1, perl_cond);
-    COND_INIT(CvCONDP(cv));
     CvOWNER(cv) = 0;
 #endif /* USE_THREADS */
     CvFILEGV(cv) = gv_fetchfile(filename);

@@ -1091,6 +1091,7 @@
 #define too_many_arguments	Perl_too_many_arguments
 #define uid			Perl_uid
 #define unlnk			Perl_unlnk
+#define unlock_condpair		Perl_unlock_condpair
 #define unshare_hek		Perl_unshare_hek
 #define unsharepvn		Perl_unsharepvn
 #define utilize			Perl_utilize

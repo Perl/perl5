@@ -205,6 +205,9 @@ ext/SDBM_File/typemap		SDBM extension interface types
 ext/Socket/Makefile.PL	Socket extension makefile writer
 ext/Socket/Socket.pm	Socket extension Perl module
 ext/Socket/Socket.xs	Socket extension external subroutines
+ext/attrs/Makefile.PL	attrs extension makefile writer
+ext/attrs/attrs.pm	attrs extension Perl module
+ext/attrs/attrs.xs	attrs extension external subroutines
 ext/util/extliblist	Used by extension Makefile.PL to make lib lists
 ext/util/make_ext	Used by Makefile to execute extension Makefiles
 ext/util/mkbootstrap	Turns ext/*/*_BS into bootstrap info

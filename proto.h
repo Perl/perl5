@@ -534,6 +534,9 @@ void	taint_proper _((const char* f, char* s));
 #ifdef UNLINK_ALL_VERSIONS
 I32	unlnk _((char* f));
 #endif
+#ifdef USE_THREADS
+void	unlock_condpair _((void* svv));
+#endif
 void	unsharepvn _((char* sv, I32 len, U32 hash));
 void	unshare_hek _((HEK* hek));
 void	utilize _((int aver, I32 floor, OP* version, OP* id, OP* arg));

@@ -89,9 +89,6 @@ typedef unsigned UBW;
 static void doencodes _((SV* sv, char* s, I32 len));
 static SV* refto _((SV* sv));
 static U32 seed _((void));
-#ifdef USE_THREADS
-static void unlock_condpair _((void*));
-#endif /* USE_THREADS */
 
 static bool srand_called = FALSE;
 
@@ -4117,7 +4114,7 @@ PP(pp_split)
 }
 
 #ifdef USE_THREADS
-static void
+void
 unlock_condpair(svv)
 void *svv;
 {

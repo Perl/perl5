@@ -4897,9 +4897,10 @@ SV* sv;
 	PerlIO_printf(Perl_debug_log, "  OUTSIDE = 0x%lx\n", (long)CvOUTSIDE(sv));
 #ifdef USE_THREADS
 	PerlIO_printf(Perl_debug_log, "  MUTEXP = 0x%lx\n", (long)CvMUTEXP(sv));
-	PerlIO_printf(Perl_debug_log, "  CONDP = 0x%lx\n", (long)CvCONDP(sv));
 	PerlIO_printf(Perl_debug_log, "  OWNER = 0x%lx\n", (long)CvOWNER(sv));
 #endif /* USE_THREADS */
+	PerlIO_printf(Perl_debug_log, "  FLAGS = 0x%lx\n",
+		      (unsigned long)CvFLAGS(sv));
 	if (type == SVt_PVFM)
 	    PerlIO_printf(Perl_debug_log, "  LINES = %ld\n", (long)FmLINES(sv));
 	break;
