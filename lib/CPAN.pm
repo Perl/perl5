@@ -1,6 +1,6 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 package CPAN;
-$VERSION = '1.59_55';
+$VERSION = '1.59_56';
 # $Id: CPAN.pm,v 1.385 2001/02/09 21:37:57 k Exp $
 
 # only used during development:
@@ -712,10 +712,10 @@ sub has_inst {
 
 }) unless $Have_warned->{"Net::FTP"}++;
 	sleep 3;
-    } elsif ($mod eq "MD5"){
+    } elsif ($mod eq "Digest::MD5"){
 	$CPAN::Frontend->myprint(qq{
-  CPAN: MD5 security checks disabled because MD5 not installed.
-  Please consider installing the MD5 module.
+  CPAN: MD5 security checks disabled because Digest::MD5 not installed.
+  Please consider installing the Digest::MD5 module.
 
 });
 	sleep 2;
@@ -3761,11 +3761,11 @@ sub get {
     #
     # Check integrity
     #
-    if ($CPAN::META->has_inst("MD5")) {
-	$self->debug("MD5 is installed, verifying");
+    if ($CPAN::META->has_inst("Digest::MD5")) {
+	$self->debug("Digest::MD5 is installed, verifying");
 	$self->verifyMD5;
     } else {
-	$self->debug("MD5 is NOT installed");
+	$self->debug("Digest::MD5 is NOT installed");
     }
     return if $CPAN::Signal;
 
@@ -4151,7 +4151,7 @@ sub MD5_check_file {
 	unless ($eq) {
 	  # had to inline it, when I tied it, the tiedness got lost on
 	  # the call to eq_MD5. (Jan 1998)
-	  my $md5 = MD5->new;
+	  my $md5 = Digest::MD5->new;
 	  my($data,$ref);
 	  $ref = \$data;
 	  while ($fh->READ($ref, 4096) > 0){
@@ -4210,7 +4210,7 @@ going awry right now.
 #-> sub CPAN::Distribution::eq_MD5 ;
 sub eq_MD5 {
     my($self,$fh,$expectMD5) = @_;
-    my $md5 = MD5->new;
+    my $md5 = Digest::MD5->new;
     my($data);
     while (read($fh, $data, 4096)){
       $md5->add($data);
@@ -6122,7 +6122,7 @@ functionalities that are available in the shell.
     perl -MCPAN -e 'CPAN::Shell->install(CPAN::Shell->r)'
 
     # install my favorite programs if necessary:
-    for $mod (qw(Net::FTP MD5 Data::Dumper)){
+    for $mod (qw(Net::FTP Digest::MD5 Data::Dumper)){
         my $obj = CPAN::Shell->expand('Module',$mod);
         $obj->install;
     }
