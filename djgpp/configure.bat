@@ -33,5 +33,5 @@ echo Running sed...
 sh djgpp/djgppsed.sh
 
 echo Running Configure...
-sh Configure -DPERL_EXTERNAL_GLOB %1 %2 %3 %4 %5 %6 %7 %8 %9
+sh Configure %1 %2 %3 %4 %5 %6 %7 %8 %9
 :end
