@@ -4768,7 +4768,9 @@ ck_sort(OP *o)
 		kid->op_next = k;
 	    o->op_flags |= OPf_SPECIAL;
 	}
-    }
+	else if (kid->op_type == OP_RV2SV || kid->op_type == OP_PADSV)
+	    null(cLISTOPo->op_first->op_sibling);
+     }
 
     return o;
 }
