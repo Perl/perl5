@@ -64,9 +64,14 @@
 #endif
 #include <fcntl.h>
 
-/* Mac OSX does not include a definition of tzname in a .h file */
-#if defined (HAS_TZNAME) && defined(__APPLE__) && defined(__MACH__)
-extern char *tzname[2];
+#ifdef HAS_TZNAME
+#  if !defined(WIN32) && !defined(__CYGWIN__)
+extern char *tzname[];
+#  endif
+#else
+#if !defined(WIN32) || (defined(__MINGW32__) && !defined(tzname))
+char *tzname[] = { "" , "" };
+#endif
 #endif
 
 #if defined(__VMS) && !defined(__POSIX_SOURCE)
