@@ -226,7 +226,7 @@ This can be used to see the effect of/bugs in the various layers e.g.
 
 For the various value of PERLIO see L<perlrun/PERLIO>.
 
-=head2 Querying the layers of filehandle
+=head2 Querying the layers of filehandles
 
 The following returns the B<names> of the PerlIO layers on a filehandle.
 
