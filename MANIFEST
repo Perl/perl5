@@ -144,6 +144,7 @@ ext/ByteLoader/Makefile.PL	Bytecode loader makefile writer
 ext/Cwd/Changes			Cwd extension Changelog
 ext/Cwd/Cwd.xs			Cwd extension external subroutines
 ext/Cwd/Makefile.PL		Cwd extension makefile maker
+ext/Cwd/ppport.h		portability header for Cwd
 ext/Cwd/t/cwd.t			See if Cwd works
 ext/Cwd/t/taint.t		See if Cwd works with taint
 ext/Cwd/t/win32.t		See if Cwd works on Win32

@@ -764,6 +764,13 @@ sub rel2abs {
 See the authors list in I<File::Spec>. Mac OS support by Paul Schinder
 <schinder@pobox.com> and Thomas Wegner <wegner_thomas@yahoo.com>.
 
+=head1 COPYRIGHT
+
+Copyright (c) 2004 by the Perl 5 Porters.  All rights reserved.
+
+This program is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
 =head1 SEE ALSO
 
 See L<File::Spec> and L<File::Spec::Unix>.  This package overrides the
