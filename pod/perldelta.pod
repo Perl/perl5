@@ -11,7 +11,7 @@ This document describes differences between the 5.6.0 release and the
 
 =head2 64-bit platforms and malloc
 
-If your pointers are 64 bits wide, the Perl malloc is no more being
+If your pointers are 64 bits wide, the Perl malloc is no longer being
 used because it does not work well with 8-byte pointers.  Also,
 usually the system mallocs on such platforms are much better optimized
 for such large memory models than the Perl malloc.  Some memory-hungry
@@ -71,7 +71,7 @@ fixed.
 
 =head2 REF(...) Instead Of SCALAR(...)
 
-A reference to a reference now stringify as "REF(0x81485ec)" instead
+A reference to a reference now stringifies as "REF(0x81485ec)" instead
 of "SCALAR(0x81485ec)" in order to be more consistent with the return
 value of ref().
 
@@ -122,7 +122,7 @@ In future releases this may become a fatal error.
 
 =item *
 
-The C<package;> syntax (C<package> without an argument has been
+The C<package;> syntax (C<package> without an argument) has been
 deprecated.  Its semantics were never that clear and its
 implementation even less so.  If you have used that feature to
 disallow all but fully qualified variables, C<use strict;> instead.
@@ -290,7 +290,7 @@ deficiencies.  This results hopefully in more accurate numbers.
 Perl now tries internally to use integer values in numeric conversions
 and basic arithmetics (+ - * /) if the arguments are integers, and
 tries also to keep the results stored internally as integers.
-This change leads into often slightly faster and always less lossy
+This change leads to often slightly faster and always less lossy
 arithmetics. (Previously Perl always preferred floating point numbers
 in its math.)
 
@@ -591,7 +591,7 @@ MIME::QuotedPrint has been enhanced to provide the basic methods
 necessary to use it with PerlIO::Via as in :
 
     use MIME::QuotedPrint;
-    open($fh,">Via(MIME::QuotedPrint)",$path)
+    open($fh,">Via(MIME::QuotedPrint)",$path);
 
 See L<MIME::QuotedPrint>.
 
@@ -620,7 +620,7 @@ functionality provided by a class (typically implemented in perl
 code), from Nick Ing-Simmons.
 
     use MIME::QuotedPrint;
-    open($fh,">Via(MIME::QuotedPrint)",$path)
+    open($fh,">Via(MIME::QuotedPrint)",$path);
 
 This will automatically convert everything output to C<$fh>
 to Quoted-Printable.  See L<PerlIO::Via>.
@@ -771,7 +771,7 @@ The attributes::reftype() now works on tied arguments.
 
 =item *
 
-AutoLoader can now be disabled with C<no AutoLoader;>,
+AutoLoader can now be disabled with C<no AutoLoader;>.
 
 =item *
 
@@ -1011,9 +1011,9 @@ perldebtut is a Perl debugging tutorial.
 =item *
 
 perlebcdic contains considerations for running Perl on EBCDIC platforms.
-Note that unfortunately EBCDIC platforms that used to supported back in
-Perl 5.005 are still unsupported by Perl 5.7.0; the plan, however, is to
-bring them back to the fold.  
+Note that unfortunately EBCDIC platforms that used to be supported back 
+in Perl 5.005 are still unsupported by Perl 5.8.0; the plan, however, is 
+to bring them back to the fold.  
 
 =item *
 
@@ -1038,7 +1038,7 @@ practices gathered over the years.
 
 =item *
 
-perlpodstyle is a more formal specification of the pod format,
+perlpodspec is a more formal specification of the pod format,
 mainly of interest for writers of pod applications, not to
 people writing in pod.
 
@@ -1662,7 +1662,7 @@ Perl now works on post-4.0 BSD/OSes.
 
 All BSDs
 
-Setting C<$0> now works (as much as possible; see perlvar for details).
+Setting C<$0> now works (as much as possible; see L<perlvar> for details).
 
 =item *
 
@@ -2071,7 +2071,7 @@ vac version 5.0.1.0, that has been known to compile Perl correctly.
 =head2 Amiga Perl Invoking Mystery
 
 One cannot call Perl using the C<volume:> syntax, that is, C<perl -v>
-works, but for example C<bin:perl -v> doesn't.  The exact reason is
+works, but for example C<bin:perl -v> doesn't.  The exact reason isn't
 known but the current suspect is the F<ixemul> library.
 
 =head2 lib/ftmp-security tests warn 'system possibly insecure'
@@ -2182,8 +2182,8 @@ There are a few known test failures, see L<perluts>.
 
 =head2 VMS
 
-Rather many tests are failing in VMS but that actually more tests
-succeed in VMS than they used to, it's just that there are many,
+Rather a lot of tests are failing in VMS, but actually more tests
+succeed in VMS than they used to; it's just that there are many,
 many more tests than there used to be.
 
 Here are the known failures from some compiler/platform combinations.
