@@ -145,7 +145,7 @@ PP(pp_concat)
   {
     dPOPTOPssrl;
     STRLEN len;
-    U8 *s;
+    char *s;
     bool left_utf = DO_UTF8(left);
     bool right_utf = DO_UTF8(right);
 
@@ -156,7 +156,7 @@ PP(pp_concat)
         }
         else {
             /* Set TARG to PV(left), then add right */
-            U8 *l, *c;
+            char *l, *c;
             STRLEN targlen;
             if (TARG == right)
                 /* Need a safe copy elsewhere since we're just about to
@@ -182,7 +182,7 @@ PP(pp_concat)
             /* And now copy, maybe upgrading right to UTF8 on the fly */
             for (c = SvEND(TARG); *s; s++) {
                  if (*s & 0x80 && !right_utf)
-                     c = uv_to_utf8(c, *s);
+                     c = (char*)uv_to_utf8((U8*)c, *s);
                  else
                      *c++ = *s;
             }

@@ -480,6 +480,7 @@ Perl_safexfree
 Perl_GetVars
 Perl_runops_standard
 Perl_runops_debug
+Perl_sv_lock
 Perl_sv_catpvf_mg
 Perl_sv_vcatpvf_mg
 Perl_sv_catpv_mg
@@ -542,4 +543,3 @@ Perl_ptr_table_fetch
 Perl_ptr_table_store
 Perl_ptr_table_split
 Perl_sys_intern_clear
-Perl_sys_intern_init

@@ -6265,8 +6265,8 @@ S_method_2entersub(pTHX_ OP *o, OP *o2, OP *svop)
 
     if (o2->op_type == OP_CONST) {
         STRLEN len;
-        char *package = SvPV(((SVOP*)o2)->op_sv, len);
-        stash = gv_stashpvn(package, len, FALSE);
+        char *pkg = SvPV(((SVOP*)o2)->op_sv, len);
+        stash = gv_stashpvn(pkg, len, FALSE);
     }
     else if (o2->op_type == OP_PADSV) {
         /* my Dog $spot = shift; $spot->bark */

@@ -892,8 +892,8 @@ PP(pp_sort)
 		    PL_sortstash = stash;
 		}
 #ifdef USE_THREADS
-		Perl_lock(aTHX_ (SV *)PL_firstgv);
-		Perl_lock(aTHX_ (SV *)PL_secondgv);
+		sv_lock((SV *)PL_firstgv);
+		sv_lock((SV *)PL_secondgv);
 #endif
 		SAVESPTR(GvSV(PL_firstgv));
 		SAVESPTR(GvSV(PL_secondgv));

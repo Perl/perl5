@@ -421,7 +421,7 @@ unless ($define{'USE_5005THREADS'}) {
 		    Perl_find_threadsv
 		    Perl_unlock_condpair
 		    Perl_magic_mutexfree
-		    Perl_lock
+		    Perl_sv_lock
 		    )];
 }
 

@@ -1954,6 +1954,12 @@
 #define Perl_runops_debug	pPerl->Perl_runops_debug
 #undef  runops_debug
 #define runops_debug		Perl_runops_debug
+#if defined(USE_THREADS)
+#undef  Perl_sv_lock
+#define Perl_sv_lock		pPerl->Perl_sv_lock
+#undef  sv_lock
+#define sv_lock			Perl_sv_lock
+#endif
 #undef  Perl_sv_catpvf_mg
 #define Perl_sv_catpvf_mg	pPerl->Perl_sv_catpvf_mg
 #undef  sv_catpvf_mg
@@ -2277,10 +2283,6 @@
 #  if defined(LEAKTEST)
 #  endif
 #endif
-#undef  Perl_lock
-#define Perl_lock		pPerl->Perl_lock
-#undef  lock
-#define lock			Perl_lock
 #if defined(PERL_OBJECT)
 #endif
 
