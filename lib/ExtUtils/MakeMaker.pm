@@ -439,9 +439,10 @@ sub new {
             next unless defined $self->{PARENT}{$key};
 
             # Don't stomp on WriteMakefile() args.
-            $self->{$key} = $self->{PARENT}{$key}
-                unless defined $self->{ARGS}{$key} and
-                       $self->{ARGS}{$key} eq $self->{$key};
+            next if defined $self->{ARGS}{$key} and
+                    $self->{ARGS}{$key} eq $self->{$key};
+
+            $self->{$key} = $self->{PARENT}{$key};
 
             unless ($Is_VMS && $key =~ /PERL$/) {
                 $self->{$key} = $self->catdir("..",$self->{$key})
