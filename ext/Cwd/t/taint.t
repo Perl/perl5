@@ -1,10 +1,13 @@
 #!./perl -Tw
 # Testing Cwd under taint mode.
 
-use Cwd;
 BEGIN {
     chdir 't' if -d 't';
+    if ($ENV{PERL_CORE}) {
+	@INC = '../lib';
+    }
 }
+use Cwd;
 
 use strict;
 use Test::More tests => 16;

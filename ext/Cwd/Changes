@@ -1,5 +1,30 @@
 Revision history for Perl extension Cwd.
 
+2.18  Thu Jun 24 08:22:57 CDT 2004
+
+ - Fixed a problem in which abs_path($arg) on some platforms could
+   only be called on directories, and died when called on files.  This
+   was a problem in the pure-perl implementation _perl_abs_path().
+
+ - Fixed fast_abs_path($arg) in the same way as abs_path($arg) above.
+
+ - On Win32, a function getdcwd($vol) has been added, which gets the
+   current working directory of the specified drive/volume.
+   [Steve Hay]
+
+ - Fixed a problem on perl 5.6.2 when built with the MULTIPLICITY
+   compile-time flags. [Yitzchak Scott-Thoennes]
+
+ - When looking for a `pwd` system command, we no longer assume the
+   path separator is ':'.
+
+ - On platforms where cwd() is implemented internally (like Win32),
+   don't look for a `pwd` command externally.  This can greatly speed
+   up load time.  [Stefan Scherer]
+
+ - The pure-perl version of abs_path() now has the same prototype as
+   the XS version (;$).
+
 2.17  Wed Mar 10 07:55:36 CST 2004
 
  - The change in 2.16 created a testing failure when tested from
