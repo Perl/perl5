@@ -12,7 +12,7 @@ BEGIN {
 use DB_File; 
 use Fcntl;
 
-print "1..92\n";
+print "1..102\n";
 
 sub ok
 {
@@ -91,7 +91,7 @@ ok(19, $X = tie(%h, 'DB_File',$Dfile, O_RDWR|O_CREAT, 0640, $DB_BTREE )) ;
 
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
    $blksize,$blocks) = stat($Dfile);
-ok(20, ($mode & 0777) == ($^O eq 'os2' ? 0666 : 0640) || $^O eq 'amigaos');
+ok(20, ($mode & 0777) == (($^O eq 'os2' || $^O eq 'MSWin32') ? 0666 : 0640) || $^O eq 'amigaos');
 
 while (($key,$value) = each(%h)) {
     $i++;
@@ -511,6 +511,98 @@ unlink $Dfile1 ;
     eval { tie @x, 'DB_File', $filename, O_RDWR|O_CREAT, 0640, $DB_BTREE ; } ;
     ok(92, $@ =~ /^DB_File can only tie an associative array to a DB_BTREE database/) ;
     unlink $filename ;
+}
+
+
+{
+   # sub-class test
+
+   package Another ;
+
+   use strict ;
+
+   open(FILE, ">SubDB.pm") or die "Cannot open SubDB.pm: $!\n" ;
+   print FILE <<'EOM' ;
+
+   package SubDB ;
+
+   use strict ;
+   use vars qw( @ISA @EXPORT) ;
+
+   require Exporter ;
+   use DB_File;
+   @ISA=qw(DB_File);
+   @EXPORT = @DB_File::EXPORT ;
+
+   sub STORE { 
+	my $self = shift ;
+        my $key = shift ;
+        my $value = shift ;
+        $self->SUPER::STORE($key, $value * 2) ;
+   }
+
+   sub FETCH { 
+	my $self = shift ;
+        my $key = shift ;
+        $self->SUPER::FETCH($key) - 1 ;
+   }
+
+   sub put { 
+	my $self = shift ;
+        my $key = shift ;
+        my $value = shift ;
+        $self->SUPER::put($key, $value * 3) ;
+   }
+
+   sub get { 
+	my $self = shift ;
+        $self->SUPER::get($_[0], $_[1]) ;
+	$_[1] -= 2 ;
+   }
+
+   sub A_new_method
+   {
+	my $self = shift ;
+        my $key = shift ;
+        my $value = $self->FETCH($key) ;
+	return "[[$value]]" ;
+   }
+
+   1 ;
+EOM
+
+    close FILE ;
+
+    BEGIN { push @INC, '.'; }
+    eval 'use SubDB ; ';
+    main::ok(93, $@ eq "") ;
+    my %h ;
+    my $X ;
+    eval '
+	$X = tie(%h, "SubDB","dbbtree.tmp", O_RDWR|O_CREAT, 0640, $DB_BTREE );
+	' ;
+
+    main::ok(94, $@ eq "") ;
+
+    my $ret = eval '$h{"fred"} = 3 ; return $h{"fred"} ' ;
+    main::ok(95, $@ eq "") ;
+    main::ok(96, $ret == 5) ;
+
+    my $value = 0;
+    $ret = eval '$X->put("joe", 4) ; $X->get("joe", $value) ; return $value' ;
+    main::ok(97, $@ eq "") ;
+    main::ok(98, $ret == 10) ;
+
+    $ret = eval ' R_NEXT eq main::R_NEXT ' ;
+    main::ok(99, $@ eq "" ) ;
+    main::ok(100, $ret == 1) ;
+
+    $ret = eval '$X->A_new_method("joe") ' ;
+    main::ok(101, $@ eq "") ;
+    main::ok(102, $ret eq "[[11]]") ;
+
+    unlink "SubDB.pm", "dbbtree.tmp" ;
+
 }
 
 exit ;

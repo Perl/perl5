@@ -1,8 +1,8 @@
 # DB_File.pm -- Perl 5 interface to Berkeley DB 
 #
 # written by Paul Marquess (pmarquess@bfsec.bt.co.uk)
-# last modified 30th Apr 1997
-# version 1.14
+# last modified 29th Jun 1997
+# version 1.15
 #
 #     Copyright (c) 1995, 1996, 1997 Paul Marquess. All rights reserved.
 #     This program is free software; you can redistribute it and/or
@@ -98,7 +98,6 @@ sub NotHere
     croak ref($self) . " does not define the method ${method}" ;
 }
 
-sub DESTROY  { undef %{$_[0]} }
 sub FIRSTKEY { my $self = shift ; $self->NotHere("FIRSTKEY") }
 sub NEXTKEY  { my $self = shift ; $self->NotHere("NEXTKEY") }
 sub CLEAR    { my $self = shift ; $self->NotHere("CLEAR") }
@@ -146,7 +145,7 @@ use vars qw($VERSION @ISA @EXPORT $AUTOLOAD $DB_BTREE $DB_HASH $DB_RECNO) ;
 use Carp;
 
 
-$VERSION = "1.14" ;
+$VERSION = "1.15" ;
 
 #typedef enum { DB_BTREE, DB_HASH, DB_RECNO } DBTYPE;
 $DB_BTREE = new DB_File::BTREEINFO ;
@@ -212,17 +211,13 @@ sub AUTOLOAD {
 }
 
 
-# import borrowed from IO::File
-#   exports Fcntl constants if available.
-sub import {
-    my $pkg = shift;
-    my $callpkg = caller;
-    Exporter::export $pkg, $callpkg, @_;
-    eval {
-        require Fcntl;
-        Exporter::export 'Fcntl', $callpkg, '/^O_/';
-    };
-}
+eval {
+   # Make all Fcntl O_XXX constants available for importing
+   require Fcntl;
+   my @O = grep /^O_/, @Fcntl::EXPORT;
+   Fcntl->import(@O);  # first we import what we want to export
+   push(@EXPORT, @O);
+};
 
 bootstrap DB_File $VERSION;
 
@@ -1665,6 +1660,21 @@ Minor changes to DB_FIle.xs and DB_File.pm
 
 Made it illegal to tie an associative array to a RECNO database and an
 ordinary array to a HASH or BTREE database.
+
+=item 1.15
+
+Patch from Gisle Aas <gisle@aas.no> to suppress "use of undefined
+value" warning with db_get and db_seq.
+
+Patch from Gisle Aas <gisle@aas.no> to make DB_File export only the O_*
+constants from Fcntl.
+
+Removed the DESTROY method from the DB_File::HASHINFO module.
+
+Previously DB_File hard-wired the class name of any object that it
+created to "DB_File". This makes sub-classing difficult. Now DB_File
+creats objects in the namespace of the package it has been inherited
+into.
 
 =back
 
