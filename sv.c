@@ -5313,9 +5313,11 @@ Perl_sv_pos_b2u(pTHX_ register SV *sv, I32* offsetp)
     send = s + *offsetp;
     len = 0;
     while (s < send) {
-	STRLEN n;
-	/* Call utf8n_to_uvchr() to validate the sequence */
-	utf8n_to_uvchr(s, UTF8SKIP(s), &n, 0);
+	STRLEN n = 1;
+	/* Call utf8n_to_uvchr() to validate the sequence
+	 * (unless a simple non-UTF character) */
+	if (!UTF8_IS_INVARIANT(*s))
+	    utf8n_to_uvchr(s, UTF8SKIP(s), &n, 0);
 	if (n > 0) {
 	    s += n;
 	    len++;
