@@ -3740,8 +3740,10 @@ newSVREF(OP *o)
 	o->op_ppaddr = ppaddr[OP_PADSV];
 	return o;
     }
-    else if (o->op_type == OP_THREADSV)
+    else if (o->op_type == OP_THREADSV && !(o->op_flags & OPpDONE_SVREF)) {
+	o->op_flags |= OPpDONE_SVREF;
 	return o;
+    }
     return newUNOP(OP_RV2SV, 0, scalar(o));
 }
 
