@@ -3022,7 +3022,7 @@ PP(pp_require)
     char *tryname;
     SV *namesv = Nullsv;
     SV** svp;
-    I32 gimme = G_SCALAR;
+    I32 gimme = GIMME_V;
     PerlIO *tryrsfp = 0;
     STRLEN n_a;
     int filter_has_file = 0;
@@ -3360,7 +3360,7 @@ trylocal: {
     PL_eval_owner = thr;
     MUTEX_UNLOCK(&PL_eval_mutex);
 #endif /* USE_THREADS */
-    return DOCATCH(doeval(G_SCALAR, NULL));
+    return DOCATCH(doeval(gimme, NULL));
 }
 
 PP(pp_dofile)

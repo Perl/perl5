@@ -1117,7 +1117,7 @@ from a Perl subroutine library.
 
 is just like
 
-    scalar eval `cat stat.pl`;
+    eval `cat stat.pl`;
 
 except that it's more efficient and concise, keeps track of the current
 filename for error messages, searches the @INC libraries, and updates
