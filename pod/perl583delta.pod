@@ -97,7 +97,7 @@ has been improved.
 
 =head1 Installation and Configuration Improvements
 
-Perl now builds on OpenVMS I64
+Perl now builds on OpenVMS IA64
 
 =head1 Selected Bug Fixes
 
