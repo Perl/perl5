@@ -560,6 +560,58 @@ of source code modification to work again.
     http://www.progis.de/
     http://www.lp.se/products/gnu.html
 
+=head2 Multinet issues with Perl on VMS
+
+Prior to the release of Perl 5.8.0 it was noted that the regression
+test for lib/Net/hostent (in file [.lib.Net]hostent.t) will fail owing
+to problems with the hostent structure returned by C calls to either
+gethostbyname() or gethostbyaddr() using DEC or Compaq C with a
+Multinet TCP/IP stack.  The problem was noted in Multinet 4.3A
+using either Compaq C 6.5 or DEC C 6.0, and with Multinet 4.2A
+using DEC C 5.2, but could easily affect other versions of Multinet.
+A representative of Process Software Inc. has acknowledged a
+bug in the Multinet version of UCX$IPC_SHR for which there is
+an ECO forthcoming.  If you see one or more tests in lib/Net/hostent
+fail we recommend that you apply the Multinet ECO when it becomes
+available from:
+
+    http://www.multinet.process.com/eco.html
+
+You may determine the version of Multinet that you are running using
+the command:
+
+    multinet show /version
+
+from the DCL command prompt.
+
+If you cannot wait for the ECO from Process you might try using
+Perl programming constructs such as:
+
+    $address = substr($gethostbyname_addr,0,4);
+
+to temporarily work around the problem, or if you are brave
+and do not mind the possibility of breaking IPv6 addresses,
+you might modify the pp_sys.c file to add an ad-hoc correction
+like so:
+
+
+    --- pp_sys.c;1        Thu May 30 14:42:17 2002
+    +++ pp_sys.c        Thu May 30 12:54:02 2002
+    @@ -4684,6 +4684,10 @@
+             }
+     #endif
+
+    +    if (hent) {
+    +        hent->h_length = 4;
+    +    }
+    +
+         if (GIMME != G_ARRAY) {
+             PUSHs(sv = sv_newmortal());
+             if (hent) {
+
+then re-compile and re-test your perl.  After the installation
+of the Multinet ECO you ought to back out any such changes though.
+
 =head1 Mailing Lists
 
 There are several mailing lists available to the Perl porter.  For VMS
