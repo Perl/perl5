@@ -362,20 +362,21 @@ mkdir FILENAME,MASK, mkdir FILENAME, msgctl ID,CMD,ARG, msgget KEY,FLAGS,
 msgrcv ID,VAR,SIZE,TYPE,FLAGS, msgsnd ID,MSG,FLAGS, my EXPR, my EXPR :
 ATTRIBUTES, next LABEL, next, no Module LIST, oct EXPR, oct, open
 FILEHANDLE,MODE,LIST, open FILEHANDLE,EXPR, open FILEHANDLE, opendir
-DIRHANDLE,EXPR, ord EXPR, ord, our EXPR, pack TEMPLATE,LIST, package
-NAMESPACE, package, pipe READHANDLE,WRITEHANDLE, pop ARRAY, pop, pos
-SCALAR, pos, print FILEHANDLE LIST, print LIST, print, printf FILEHANDLE
-FORMAT, LIST, printf FORMAT, LIST, prototype FUNCTION, push ARRAY,LIST,
-q/STRING/, qq/STRING/, qr/STRING/, qx/STRING/, qw/STRING/, quotemeta EXPR,
-quotemeta, rand EXPR, rand, read FILEHANDLE,SCALAR,LENGTH,OFFSET, read
-FILEHANDLE,SCALAR,LENGTH, readdir DIRHANDLE, readline EXPR, readlink EXPR,
-readlink, readpipe EXPR, recv SOCKET,SCALAR,LENGTH,FLAGS, redo LABEL, redo,
-ref EXPR, ref, rename OLDNAME,NEWNAME, require VERSION, require EXPR,
-require, reset EXPR, reset, return EXPR, return, reverse LIST, rewinddir
-DIRHANDLE, rindex STR,SUBSTR,POSITION, rindex STR,SUBSTR, rmdir FILENAME,
-rmdir, s///, scalar EXPR, seek FILEHANDLE,POSITION,WHENCE, seekdir
-DIRHANDLE,POS, select FILEHANDLE, select, select RBITS,WBITS,EBITS,TIMEOUT,
-semctl ID,SEMNUM,CMD,ARG, semget KEY,NSEMS,FLAGS, semop KEY,OPSTRING, send
+DIRHANDLE,EXPR, ord EXPR, ord, our EXPR, our EXPR : ATTRIBUTES, pack
+TEMPLATE,LIST, package NAMESPACE, package, pipe READHANDLE,WRITEHANDLE, pop
+ARRAY, pop, pos SCALAR, pos, print FILEHANDLE LIST, print LIST, print,
+printf FILEHANDLE FORMAT, LIST, printf FORMAT, LIST, prototype FUNCTION,
+push ARRAY,LIST, q/STRING/, qq/STRING/, qr/STRING/, qx/STRING/, qw/STRING/,
+quotemeta EXPR, quotemeta, rand EXPR, rand, read
+FILEHANDLE,SCALAR,LENGTH,OFFSET, read FILEHANDLE,SCALAR,LENGTH, readdir
+DIRHANDLE, readline EXPR, readlink EXPR, readlink, readpipe EXPR, recv
+SOCKET,SCALAR,LENGTH,FLAGS, redo LABEL, redo, ref EXPR, ref, rename
+OLDNAME,NEWNAME, require VERSION, require EXPR, require, reset EXPR, reset,
+return EXPR, return, reverse LIST, rewinddir DIRHANDLE, rindex
+STR,SUBSTR,POSITION, rindex STR,SUBSTR, rmdir FILENAME, rmdir, s///, scalar
+EXPR, seek FILEHANDLE,POSITION,WHENCE, seekdir DIRHANDLE,POS, select
+FILEHANDLE, select, select RBITS,WBITS,EBITS,TIMEOUT, semctl
+ID,SEMNUM,CMD,ARG, semget KEY,NSEMS,FLAGS, semop KEY,OPSTRING, send
 SOCKET,MSG,FLAGS,TO, send SOCKET,MSG,FLAGS, setpgrp PID,PGRP, setpriority
 WHICH,WHO,PRIORITY, setsockopt SOCKET,LEVEL,OPTNAME,OPTVAL, shift ARRAY,
 shift, shmctl ID,CMD,ARG, shmget KEY,SIZE,FLAGS, shmread ID,VAR,POS,SIZE,
@@ -2459,8 +2460,8 @@ References, Tutorials, Task-Oriented, Special Topics
 
 =item Is there an IDE or Windows Perl Editor?
 
-CodeMagicCD, Komodo, The Object System, PerlBuilder, Perl code magic,
-visiPerl+, GNU Emacs, MicroEMACS, XEmacs, Elvis, Vile, Vim, Codewright,
+Komodo, The Object System, Open Perl IDE, PerlBuilder, visiPerl+,
+CodeMagicCD, GNU Emacs, MicroEMACS, XEmacs, Elvis, Vile, Vim, Codewright,
 MultiEdit, SlickEdit, Bash, Ksh, Tcsh, Zsh, BBEdit and BBEdit Lite, Alpha
 
 =item Where can I get Perl macros for vi?
@@ -4053,199 +4054,139 @@ PerlIO_apply_layers(f,mode,layers), PerlIO_binmode(f,ptype,imode,layers),
 
 =item DESCRIPTION
 
-=item Infrastructure
+=item To do during 5.6.x
 
 =over 4
 
-=item Mailing list archives
+=item Support for I/O disciplines
 
-=item Bug tracking system
+=item Eliminate need for "use utf8";
 
-=item Regression Tests
+=item Autoload byte.pm
 
-Coverage, Regression, __DIE__, suidperl, The 25% slowdown from perl4 to
-perl5
+=item Make "\u{XXXX}" et al work
+
+=item Overloadable regex assertions
+
+=item Unicode collation and normalization
+
+=item Unicode case mappings 
+
+=item Unicode regular expression character classes
+
+=item use Thread for iThreads
+
+=item Work out exit/die semantics for threads
+
+=item Typed lexicals for compiler
+
+=item Compiler workarounds for Win32
+
+=item AUTOLOADing in the compiler
+
+=item Fixing comppadlist when compiling
+
+=item Cleaning up exported namespace
+
+=item Complete signal handling
+
+=item Out-of-source builds
+
+=item POSIX realtime support
+
+=item UNIX98 support
+
+=item IPv6 Support
+
+=item Long double conversion
+
+=item Locales
+
+=item Thread-safe regexes
+
+=item Arithmetic on non-Arabic numerals
+
+=item POSIX Unicode character classes
+
+=item Factoring out common suffices/prefices in regexps (trie optimization)
+
+=item Security audit shipped utilities
+
+=item Custom opcodes
+
+=item spawnvp() on Win32
+
+=item DLL Versioning
+
+=item Introduce @( and @)
+
+=item Floating point handling
+
+=item IV/UV preservation
+
+=item Replace pod2html with something using Pod::Parser
+
+=item Automate module testing on CPAN
+
+=item sendmsg and recvmsg
+
+=item Rewrite perlre documentation
+
+=item Convert example code to IO::Handle filehandles
+
+=item Document Win32 choices
+
+=item Check new modules
+
+=item Make roffitall find pods and libs itself
 
 =back
 
-=item Configure
+=item To do at some point
 
 =over 4
 
-=item Install HTML
+=item Remove regular expression recursion
 
-=back
+=item Memory leaks after failed eval
 
-=item Perl Language
+=item pack "(stuff)*"
 
-=over 4
+=item bitfields in pack
 
-=item 64-bit Perl
+=item Cross compilation
 
-=item Prototypes
+=item Perl preprocessor / macros
 
-Named prototypes, Indirect objects, Method calls, Context, Scoped subs
+=item Perl lexer in Perl
 
-=back
+=item Using POSIX calls internally
 
-=item Perl Internals
+=item -i rename file when changed
 
-=over 4
+=item All ARGV input should act like E<lt>E<gt>
 
-=item magic_setisa
+=item Support for rerunning debugger
 
-=item Garbage Collection
+=item my sub foo { }
 
-=item Reliable signals
+=item One-pass global destruction
 
-Alternate runops() for signal despatch, Figure out how to die() in delayed
-sighandler, Add tests for Thread::Signal, Automatic tests against CPAN
+=item Rewrite regexp parser
 
-=item Interpolated regex performance bugs
+=item Cache recently used regexps
 
-=item Memory leaks from failed eval/regcomp
+=item Re-entrant functions
 
-=item Make XS easier to use
+=item Cross-compilation support
 
-=item Make embedded Perl easier to use
+=item Bit-shifting bitvectors
 
-=item Namespace cleanup
+=item debugger pragma
 
-=item MULTIPLICITY
+=item use less pragma
 
-=item MacPerl
-
-=back
-
-=item Documentation
-
-=over 4
-
-=item A clear division into tutorial and reference
-
-=item Remove the artificial distinction between operators and functions
-
-=item More tutorials
-
-Regular expressions, I/O, pack/unpack, Debugging
-
-=item Include a search tool
-
-=item Include a locate tool
-
-=item Separate function manpages by default
-
-=item Users can't find the manpages
-
-=item Install ALL Documentation
-
-=item Outstanding issues to be documented
-
-=item Adapt www.linuxhq.com for Perl
-
-=item Replace man with a perl program
-
-=item Unicode tutorial
-
-=back
-
-=item Modules
-
-=over 4
-
-=item Update the POSIX extension to conform with the POSIX 1003.1 Edition 2
-
-=item Module versions
-
-=item New modules
-
-=item Profiler
-
-=item Tie Modules
-
-VecArray, SubstrArray, VirtualArray, ShiftSplice
-
-=item Procedural options
-
-=item RPC
-
-=item y2k localtime/gmtime
-
-=item Export File::Find variables
-
-=item Ioctl
-
-=item Debugger attach/detach
-
-=item Regular Expression debugger
-
-=item Alternative RE Syntax
-
-=item Bundled modules
-
-=item Expect
-
-=item GUI::Native
-
-=item Update semibroken auxiliary tools; h2ph, a2p, etc.
-
-=item pod2html
-
-=item Podchecker
-
-=back
-
-=item Tom's Wishes
-
-=over 4
-
-=item Webperl
-
-=item Mobile agents
-
-=item POSIX on non-POSIX
-
-=item Portable installations
-
-=back
-
-=item Win32 Stuff
-
-=over 4
-
-=item Rename new headers to be consistent with the rest
-
-=item Sort out the spawnvp() mess
-
-=item Work out DLL versioning
-
-=item Style-check
-
-=back
-
-=item Would be nice to have
-
-C<pack "(stuff)*">, Contiguous bitfields in pack/unpack, lexperl, Bundled
-perl preprocessor, Use posix calls internally where possible, format
-BOTTOM, -i rename file only when successfully changed, All ARGV input
-should act like <>, report HANDLE [formats], support in perlmain to rerun
-debugger, lvalue functions
-
-=item Possible pragmas
-
-=over 4
-
-=item 'less'
-
-=back
-
-=item Optimizations
-
-=over 4
-
-=item constant function cache
-
-=item foreach(reverse...)
+=item switch structures
 
 =item Cache eval tree
 
@@ -4253,101 +4194,196 @@ debugger, lvalue functions
 
 =item Shrink opcode tables
 
-=item Cache hash value
+=item Optimize away @_
 
-=item Optimize away @_ where possible
+=item Prototypes versus indirect objects
 
-=item Optimize sort by { $a <=> $b }
+=item Install HMTL
 
-=item Rewrite regexp parser for better integrated optimization
+=item Prototype method calls
 
-=back
+=item Return context prototype declarations
 
-=item Vague possibilities
+=item magic_setisa
 
-ref function in list context, make tr/// return histogram in list context?,
-Loop control on do{} et al, Explicit switch statements, compile to real
-threaded code, structured types, Modifiable $1 et al
+=item Garbage collection
 
-=item To Do Or Not To Do
+=item IO tutorial
 
-=over 4
+=item pack/unpack tutorial
 
-=item Making my() work on "package" variables
+=item Rewrite perldoc
 
-=item "or" testing defined not truth
+=item Install .3p man pages
 
-=item "dynamic" lexicals
+=item Unicode tutorial
 
-=item "class"-based, rather than package-based "lexicals"
+=item Update POSIX.pm for 1003.1-2
+=head2 Retargetable installation
 
-=back
+=item POSIX emulation on non-POSIX systems
 
-=item Threading
+=item Rename Win32 headers
 
-=over 4
+=item Finish off lvalue functions
 
-=item Modules
+=item Update sprintf documentation
 
-=item Testing
-
-=item $AUTOLOAD
-
-=item exit/die
-
-=item External threads
-
-=item Thread::Pool
-
-=item thread-safety
-
-=item Per-thread GVs
+=item Use fchown/fchmod internally
 
 =back
 
-=item Compiler
+=item Vague ideas
 
 =over 4
 
-=item Optimization
+=item ref() in list context
 
-=item Byteperl
+=item Make tr/// return histogram
 
-=item Precompiled modules
+=item Compile to real threaded code
+=head2 Structured types
+=head2 Modifiable $1 et al.
 
-=item Executables
+=item Procedural interfaces for IO::*, etc.
 
-=item Typed lexicals
+=item RPC modules
 
-=item Win32
+=item Attach/detach debugger from running program
 
-=item END blocks
+=item Alternative RE syntax module
 
-=item _AUTOLOAD
+=item GUI::Native
 
-=item comppadlist
+=item foreach(reverse ...)
 
-=item Cached compilation
+=item Constant function cache
+
+=item Approximate regular expression matching
 
 =back
 
-=item Recently Finished Tasks
+=item Ongoing
 
 =over 4
 
-=item Figure a way out of $^(capital letter)
+=item Update guts documentation
 
-=item Filenames
+=item Add more tests
 
-=item Foreign lines
+=item Update auxiliary tools
 
-=item Namespace cleanup
+=back
 
-=item ISA.pm
+=item Recently done things
+
+=over 4
+
+=item Safe signal handling
+
+=item Tie Modules
 
 =item gettimeofday
 
-=item autocroak?
+=item setitimer and getimiter
+
+=item Testing __DIE__ hook
+
+=item CPP equivalent in Perl
+
+=item Explicit switch statements
+
+=item autocroak
+
+=item UTF/EBCDIC
+
+=item UTF Regexes
+
+=item perlcc to produce executable
+
+=item END blocks saved in compiled output
+
+=item Secure temporary file module
+
+=item Integrate Time::HiRes
+
+=item Turn Cwd into XS
+
+=item Mmap for input
+
+=item Byte to/from UTF8 and UTF8 to/from local conversion
+
+=item Add sockatmark support
+
+=item Mailing list archives
+
+=item Bug tracking
+
+=item Integrate MacPerl
+
+=item Web "nerve center" for Perl
+
+=item Regular expression tutorial
+
+=item Debugging Tutorial
+
+=item Integrate new modules
+
+=item Integrate profiler
+
+=item Y2K error detection
+
+=item Regular expression debugger
+
+=item POD checker
+
+=item "Dynamic" lexicals
+
+=item Cache precompiled modules
+
+=back
+
+=item Deprecated Wishes
+
+=over 4
+
+=item Loop control on do{}
+
+=item Lexically scoped typeglobs
+
+=item format BOTTOM
+=head2 report HANDLE
+
+=item Generalised want()/caller())
+=head2 Named prototypes
+
+=item Built-in globbing
+
+=item Regression tests for suidperl
+
+=item Cached hash values
+
+=item Add compression modules
+
+=item Reorganise documentation into tutorials/references
+
+=item Remove distinction between functions and operators
+
+=item Make XS easier to use
+
+=item Make embedding easier to use
+
+=item man for perl
+
+=item my $Package::variable
+
+=item "or" tests defined, not truth
+
+=item "class"-based lexicals
+
+=item byteperl
+
+=item Lazy evaluation / tail recursion removal
 
 =back
 
@@ -4432,7 +4468,8 @@ DEFINES, USE_MULTI = define, #PERL_MALLOC = define, CFG = Debug
 
 =item Pixie Profiling
 
--h, -l, -p, -h, -i, -l, -testcoverage, -zero
+-h, -l, -p[rodecures], -h[eavy], -i[nvocations], -l[ines], -testcoverage,
+-z[ero]
 
 =item CONCLUSION
 
@@ -4488,6 +4525,104 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =back
 
+=head2 perl572delta, perl571delta - what's new for perl v5.7.2
+
+=over 4
+
+=item DESCRIPTION
+
+=item Security Vulnerability Closed
+
+=item Incompatible Changes
+
+=item Core Enhancements
+
+=item Modules and Pragmata
+
+=over 4
+
+=item New Modules
+
+=item Updated And Improved Modules and Pragmata
+
+=back
+
+=item Performance Enhancements
+
+=item Utility Changes
+
+=item New Documentation
+
+=item Installation and Configuration Improvements
+
+=over 4
+
+=item New Or Improved Platforms
+
+=item Generic Improvements
+
+=back
+
+=item Selected Bug Fixes
+
+=over 4
+
+=item Platform Specific Changes and Fixes
+
+=back
+
+=item New or Changed Diagnostics
+
+=item Changed Internals
+
+=over 4
+
+=item Regex pre-/post-compilation items matched up
+
+=back
+
+=item New Tests
+
+=item Known Problems
+
+=over 4
+
+=item AIX vac 5.0.0.0 May Produce Buggy Code For Perl
+
+=item lib/ftmp-security tests warn 'system possibly insecure'
+
+=item lib/io_multihomed Fails In LP64-Configured HP-UX
+
+=item Test lib/posix Subtest 9 Fails In LP64-Configured HP-UX
+
+=item lib/b test 19
+
+=item Linux With Sfio Fails op/misc Test 48
+
+=item sigaction test 13 in VMS
+
+=item sprintf tests 129 and 130
+
+=item  Failure of Thread tests
+
+=item Localising a Tied Variable Leaks Memory
+
+=item Self-tying of Arrays and Hashes Is Forbidden
+
+=item Building Extensions Can Fail Because Of Largefiles
+
+=item The Compiler Suite Is Still Experimental
+
+=back
+
+=item Reporting Bugs
+
+=item SEE ALSO
+
+=item HISTORY
+
+=back
+
 =head2 perl571delta - what's new for perl v5.7.1
 
 =over 4
@@ -4499,6 +4634,16 @@ I<The Road goes ever on and on, down from the door where it began.>
 =item Incompatible Changes
 
 =item Core Enhancements
+
+=item AUTOLOAD Is Now Lvaluable
+
+=over 4
+
+=item PerlIO is Now The Default
+
+=item Signals Are Now Safe
+
+=back
 
 =item Modules and Pragmata
 
@@ -5677,6 +5822,38 @@ Source, Compiled Module Source, Perl Modules/Scripts
 =item AUTHORS
 
 =item HISTORY
+
+=back
+
+=head2 perldgux - Perl under DG/UX.
+
+=over 4
+
+=item SYNOPSIS
+
+=back
+
+=over 4
+
+=item DESCRIPTION
+
+=item BUILD
+
+=over 4
+
+=item Non-threaded Case
+
+=item Threaded Case
+
+=item Testing
+
+=item Installing the built perl
+
+=back
+
+=item AUTHOR
+
+=item SEE ALSO
 
 =back
 
@@ -8933,8 +9110,6 @@ reference, e.g.:
 =back
 
 =item Encoding and IO
-
-=item Encode and PerlIO
 
 =item Encoding How to ...
 
@@ -13896,14 +14071,15 @@ TIESCALAR classname, LIST, FETCH this, STORE this, value, DESTROY this
 =item DESCRIPTION
 
 gettimeofday (), usleep ( $useconds ), ualarm ( $useconds [,
-$interval_useconds ] ), tv_interval ( $ref_to_gettimeofday [,
-$ref_to_later_gettimeofday] ), time (), sleep ( $floating_seconds ), alarm
-( $floating_seconds [, $interval_floating_seconds ] ), setitimer ( $which,
-$floating_seconds [, $interval_floating_seconds ] ), getitimer ( $which )
+$interval_useconds ] ), tv_interval, time (), sleep ( $floating_seconds ),
+alarm ( $floating_seconds [, $interval_floating_seconds ] ), setitimer,
+getitimer ( $which )
 
 =item EXAMPLES
 
 =item C API
+
+=item CAVEATS
 
 =item AUTHORS
 

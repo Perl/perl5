@@ -102,6 +102,7 @@ For ease of access, the Perl manual has been split up into several sections:
 
     perlhist		Perl history records
     perldelta		Perl changes since previous version
+    perl572delta	Perl changes in version 5.7.2
     perl571delta	Perl changes in version 5.7.1
     perl570delta	Perl changes in version 5.7.0
     perl56delta		Perl changes in version 5.6
@@ -112,6 +113,7 @@ For ease of access, the Perl manual has been split up into several sections:
     perlamiga		Perl notes for Amiga
     perlbs2000		Perl notes for POSIX-BC BS2000
     perlcygwin		Perl notes for Cygwin
+    perldgux		Perl notes for DG/UX
     perldos		Perl notes for DOS
     perlepoc		Perl notes for EPOC
     perlhpux		Perl notes for HP-UX

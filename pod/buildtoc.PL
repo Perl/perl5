@@ -148,6 +148,7 @@ if (-d "pod") {
 
     perlhist           
     perldelta           
+    perl572delta         
     perl571delta         
     perl570delta         
     perl56delta         
@@ -158,6 +159,7 @@ if (-d "pod") {
     perlamiga          
     perlbs2000
     perlcygwin          
+    perldgux             
     perldos             
     perlepoc             
     perlhpux            
@@ -178,6 +180,7 @@ if (-d "pod") {
     perlamiga          
     perlbs2000
     perlcygwin          
+    perldgux             
     perldos             
     perlepoc             
     perlhpux            
