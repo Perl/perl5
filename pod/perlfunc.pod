@@ -5377,7 +5377,7 @@ to set C<$|> ($AUTOFLUSH in English) or call the C<autoflush()> method
 of C<IO::Handle> on any open handles.
 
 The return value is the exit status of the program as returned by the
-C<wait> call.  To get the actual exit value shift left by eight (see below).
+C<wait> call.  To get the actual exit value shift right by eight (see below).
 See also L</exec>.  This is I<not> what you want to use to capture
 the output from a command, for that you should use merely backticks or
 C<qx//>, as described in L<perlop/"`STRING`">.  Return value of -1
@@ -5401,7 +5401,7 @@ C<$?> like this:
     $signal_num  = $? & 127;
     $dumped_core = $? & 128;
 
-or more portably by using the W*() calls of the POSIX extension,
+or more portably by using the W*() calls of the POSIX extension;
 see L<perlport> for more information.
 
 When the arguments get executed via the system shell, results
