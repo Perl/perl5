@@ -2380,7 +2380,7 @@ static int store_code(stcxt_t *cxt, CV *cv)
 #else
 	dSP;
 	I32 len;
-	int ret, count, reallen;
+	int count, reallen;
 	SV *text, *bdeparse;
 
 	TRACEME(("store_code (0x%"UVxf")", PTR2UV(cv)));
@@ -4961,7 +4961,7 @@ static SV *retrieve_code(stcxt_t *cxt, char *cname)
 	dSP;
 	int type, count;
 	SV *cv;
-	SV *sv, *text, *sub, *errsv;
+	SV *sv, *text, *sub;
 
 	TRACEME(("retrieve_code (#%d)", cxt->tagnum));
 

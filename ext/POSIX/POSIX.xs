@@ -1386,7 +1386,7 @@ lseek(fd, offset, whence)
     OUTPUT:
 	RETVAL
 
-SV *
+void
 nice(incr)
 	int		incr
     PPCODE:

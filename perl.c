@@ -2189,7 +2189,7 @@ Perl_moreswitches(pTHX_ char *s)
 		   s--;
 	      }
 	      PL_rs = newSVpvn("", 0);
-	      SvGROW(PL_rs, UNISKIP(rschar) + 1);
+	      SvGROW(PL_rs, (STRLEN)(UNISKIP(rschar) + 1));
 	      tmps = (U8*)SvPVX(PL_rs);
 	      uvchr_to_utf8(tmps, rschar);
 	      SvCUR_set(PL_rs, UNISKIP(rschar));

@@ -215,7 +215,7 @@ CODE:
     PERL_CONTEXT *cx;
     SV** newsp;
     I32 gimme = G_SCALAR;
-    I32 hasargs = 0;
+    U8 hasargs = 0;
     bool oldcatch = CATCH_GET;
 
     if(items <= 1) {
@@ -270,7 +270,7 @@ CODE:
     PERL_CONTEXT *cx;
     SV** newsp;
     I32 gimme = G_SCALAR;
-    I32 hasargs = 0;
+    U8 hasargs = 0;
     bool oldcatch = CATCH_GET;
 
     if(items <= 1) {
@@ -481,7 +481,7 @@ CODE:
 OUTPUT:
   RETVAL
 
-SV*
+void
 set_prototype(subref, proto)
     SV *subref
     SV *proto
