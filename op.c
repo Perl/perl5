@@ -4216,6 +4216,9 @@ Perl_cv_undef(pTHX_ CV *cv)
 	}
 	CvPADLIST(cv) = Nullav;
     }
+    if (CvXSUB(cv)) {
+        CvXSUB(cv) = 0;
+    }
     CvFLAGS(cv) = 0;
 }
 
