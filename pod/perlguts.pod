@@ -2282,6 +2282,26 @@ source, like this:
 Please try and supply some documentation if you add functions to the
 Perl core.
 
+=head2 Backwards compatibility
+
+The Perl API changes over time. New functions are added or the interfaces
+of existing functions are changed. The C<Devel::PPPort> module tries to
+provide compatibility code for some of these changes, so XS writers don't
+have to code it themselves when supporting multiple versions of Perl.
+
+C<Devel::PPPort> generates a C header file F<ppport.h> that can also
+be run as a Perl script. To generate F<ppport.h>, run:
+
+    perl -MDevel::PPPort -eDevel::PPPort::WriteFile
+
+Besides checking existing XS code, the script can also be used to retrieve
+compatibility information for various API calls using the C<--api-info>
+command line switch. For example:
+
+  % perl ppport.h --api-info=sv_magicext
+
+For details, see C<perldoc ppport.h>.
+
 =head1 Unicode Support
 
 Perl 5.6.0 introduced Unicode support. It's important for porters and XS
