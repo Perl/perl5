@@ -134,6 +134,22 @@ instead:
     eval 'exec /usr/local/bin/perl -S $0 ${1+"$@"}'
         if $running_under_some_shell;
 
+=head2 Floating point anomalies
+
+There appears to be a bug in the floating point implementation on BS2000 POSIX
+systems such that calling int() on the product of a number and a small
+magnitude number is not the same as calling int() on the quotient of
+that number and a large magnitude number.  For example, in the following
+Perl code:
+
+    my $x = 100000.0;
+    my $y = int($x * 1e-5) * 1e5; # '0'
+    my $z = int($x / 1e+5) * 1e5;  # '100000'
+    print "\$y is $y and \$z is $z\n"; # $y is 0 and $z is 100000
+
+Although one would expect the quantities $y and $z to be the same and equal
+to 100000 they will differ and instead will be 0 and 100000 respectively.
+
 =head1 AUTHORS
 
 Thomas Dorner
