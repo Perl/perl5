@@ -374,10 +374,10 @@ XS(XS_UNIVERSAL_VERSION)
 		    vnumify(req),vnormal(req),vnumify(sv),vnormal(sv));
     }
 
-    if (sv == (SV*)&PL_sv_undef) {
-	ST(0) = sv;
-    } else {
+    if ( sv_derived_from(sv, "version") ) {
 	ST(0) = vnumify(sv);
+    } else {
+	ST(0) = sv;
     }
 
     XSRETURN(1);

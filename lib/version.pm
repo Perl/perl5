@@ -12,7 +12,7 @@ use vars qw(@ISA $VERSION $CLASS @EXPORT);
 
 @EXPORT = qw(qv);
 
-$VERSION = 0.37; # stop using CVS and switch to subversion
+$VERSION = 0.39; # stop using CVS and switch to subversion
 
 $CLASS = 'version';
 
@@ -214,7 +214,17 @@ were used:
 
 In other words, the version will be automatically parsed out of the
 string, and it will be quoted to preserve the meaning CVS normally
-carries for versions.
+carries for versions.  The CVS $Revision$ increments differently from
+numeric versions (i.e. 1.10 follows 1.9), so it must be handled as if
+it were a L<Quoted Version>.
+
+New in 0.38, a new version object can be created as a copy of an existing
+version object:
+
+  $v1 = version->new(12.3);
+  $v2 = version->new($v1);
+
+and $v1 and $v2 will be identical.
 
 =back
 
@@ -236,11 +246,11 @@ either will yield the same version number.
 
 =back
 
-For the subsequent examples, the following two objects will be used:
+For the subsequent examples, the following three objects will be used:
 
-  $ver   = version->new("1.2.3"); # see "Quoting" below
-  $alpha = version->new("1.2_3"); # see "Alpha versions" below
-  $nver  = version->new(1.2);     # see "Numeric Versions" above
+  $ver   = version->new("1.2.3.4"); # see "Quoting" below
+  $alpha = version->new("1.2.3_4"); # see "Alpha versions" below
+  $nver  = version->new(1.2);       # see "Numeric Versions" above
 
 =over 4
 
@@ -388,7 +398,7 @@ having three places between subversions.
 The complicating factor is that in bare numbers (i.e. unquoted), the
 underscore is a legal numeric character and is automatically stripped
 by the Perl tokenizer before the version code is called.  However, if
-a number containing a single decimal and an underscore is quoted, i.e.
+a number containing one or more decimals and an underscore is quoted, i.e.
 not bare, that is considered a L<Alpha Version> and the underscore is
 significant.
 
@@ -451,6 +461,20 @@ As a matter of fact, if is also true that
 where the subversion is identical but the alpha release is less than
 the non-alpha release.
 
+Alpha versions with a single decimal place will be treated exactly as if
+they were L<Numeric Versions>, for parsing purposes.  The stringification for
+alpha versions with a single decimal place may seem suprising, since any
+trailing zeros will visible.  For example, the above $alphaver will print as
+
+  12.300_100
+
+Alpha versions with more than a single decimal place will be treated 
+exactly as if they were L<Quoted Versions>, and will display without any
+trailing (or leading) zeros, in the L<Version Normal> form.  For example,
+
+  $newver = version->new("12.3.1_1");
+  print $newver; # 12.3.1_1
+
 =head2 Replacement UNIVERSAL::VERSION
 
 In addition to the version objects, this modules also replaces the core
@@ -480,6 +504,17 @@ For example:
 IMPORTANT NOTE: This may mean that code which searches for a specific
 string (to determine whether a given module is available) may need to be
 changed.
+
+The replacement UNIVERSAL::VERSION, when used as a function, like this:
+
+  print $module->VERSION;
+
+will follow the stringification rules; i.e. Numeric versions will be displayed
+with the numified format, and the rest will be displayed with the Normal
+format.  Technically, the $module->VERSION function returns a string (PV) that
+can be converted to a number following the normal Perl rules, when used in a
+numeric context.
+
 
 =head1 EXPORT
 

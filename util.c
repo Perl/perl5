@@ -3730,8 +3730,8 @@ Perl_scan_version(pTHX_ char *s, SV *rv, bool qv)
 		 * point of a version originally created with a bare
 		 * floating point number, i.e. not quoted in any way
 		 */
- 		if ( !qv && s > start+1 && saw_period == 1 && !saw_under ) {
- 		    mult = 100;
+ 		if ( !qv && s > start+1 && saw_period == 1 ) {
+ 		    mult *= 100;
  		    while ( s < end ) {
  			orev = rev;
  			rev += (*s - '0') * mult;
@@ -3763,7 +3763,7 @@ Perl_scan_version(pTHX_ char *s, SV *rv, bool qv)
 		break;
 	    }
 	    while ( isDIGIT(*pos) ) {
-		if ( !saw_under && saw_period == 1 && pos-s == 3 )
+		if ( saw_period == 1 && pos-s == 3 )
 		    break;
 		pos++;
 	    }
@@ -3883,14 +3883,26 @@ Perl_vnumify(pTHX_ SV *vs)
     }
     digit = SvIVX(*av_fetch((AV *)vs, 0, 0));
     Perl_sv_setpvf(aTHX_ sv,"%d.", (int)PERL_ABS(digit));
-    for ( i = 1 ; i <= len ; i++ )
+    for ( i = 1 ; i < len ; i++ )
     {
 	digit = SvIVX(*av_fetch((AV *)vs, i, 0));
 	Perl_sv_catpvf(aTHX_ sv,"%03d", (int)PERL_ABS(digit));
     }
-    if ( len == 0 )
+
+    if ( len > 0 )
+    {
+	digit = SvIVX(*av_fetch((AV *)vs, len, 0));
+
+	/* Don't display any additional trailing zeros */
+	if ( (int)PERL_ABS(digit) != 0 || len == 1 )
+	{
+	    Perl_sv_catpvf(aTHX_ sv,"%03d", (int)PERL_ABS(digit));
+	}
+    }
+    else /* len == 0 */
+    {
 	 Perl_sv_catpv(aTHX_ sv,"000");
-    sv_setnv(sv, SvNV(sv));
+    }
     return sv;
 }
 
