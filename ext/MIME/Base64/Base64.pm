@@ -1,6 +1,6 @@
 package MIME::Base64;
 
-# $Id: Base64.pm,v 3.0 2004/01/14 11:59:07 gisle Exp $
+# $Id: Base64.pm,v 3.1 2004/03/29 11:55:49 gisle Exp $
 
 use strict;
 use vars qw(@ISA @EXPORT $VERSION);
@@ -10,7 +10,7 @@ require DynaLoader;
 @ISA = qw(Exporter DynaLoader);
 @EXPORT = qw(encode_base64 decode_base64);
 
-$VERSION = '3.00_01';
+$VERSION = '3.01';
 
 MIME::Base64->bootstrap($VERSION);
 
