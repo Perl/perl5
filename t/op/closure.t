@@ -609,7 +609,8 @@ require "./test.pl";
 
 curr_test(182);
 
-SKIP: { skip("tests not in maint because change #19637 not applied", 3) }
+# Because change #19637 was not applied to 5.8.1.
+SKIP: { skip("tests not in 5.8.", 3) }
 
 $test= 185;
 
