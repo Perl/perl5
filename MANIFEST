@@ -1048,11 +1048,12 @@ lib/ExtUtils/MM_BeOS.pm		MakeMaker methods for BeOS
 lib/ExtUtils/MM_Cygwin.pm	MakeMaker methods for Cygwin
 lib/ExtUtils/MM_DOS.pm		MakeMaker methods for DOS
 lib/ExtUtils/MM_MacOS.pm        MakeMaker methods for MacOS
+lib/ExtUtils/MM_NW5.pm		MakeMaker methods for NetWare
 lib/ExtUtils/MM_OS2.pm		MakeMaker methods for OS/2
 lib/ExtUtils/MM_Unix.pm		MakeMaker methods for Unix
 lib/ExtUtils/MM_UWIN.pm		MakeMaker methods for U/WIN
 lib/ExtUtils/MM_VMS.pm		MakeMaker methods for VMS
-lib/ExtUtils/MM_Win32.pm	MakeMaker methods for Win32 and NetWare
+lib/ExtUtils/MM_Win32.pm	MakeMaker methods for Win32
 lib/ExtUtils/MM_Win95.pm	MakeMaker methods for Win95
 lib/ExtUtils/MY.pm		MakeMaker user override class
 lib/ExtUtils/Packlist.pm	Manipulates .packlist files
@@ -1116,7 +1117,7 @@ lib/File/Spec/t/rel2abs2rel.t	See if File::Spec->rel2abs/abs2rel works
 lib/File/Spec/t/Spec.t		See if File::Spec works
 lib/File/Spec/Unix.pm		portable operations on Unix file names
 lib/File/Spec/VMS.pm		portable operations on VMS file names
-lib/File/Spec/Win32.pm		portable operations on Win32 file names
+lib/File/Spec/Win32.pm		portable operations on Win32 and NetWare file names
 lib/File/stat.pm		By-name interface to Perl's builtin stat
 lib/File/stat.t			See if File::stat works
 lib/File/Temp.pm		create safe temporary files and file handles
