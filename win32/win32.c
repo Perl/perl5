@@ -1912,6 +1912,8 @@ win32_async_check(pTHX)
     return ours;
 }
 
+/* This function will not return until the timeout has elapsed, or until
+ * one of the handles is ready. */
 DllExport DWORD
 win32_msgwait(pTHX_ DWORD count, LPHANDLE handles, DWORD timeout, LPDWORD resultp)
 {
@@ -1936,10 +1938,7 @@ win32_msgwait(pTHX_ DWORD count, LPHANDLE handles, DWORD timeout, LPDWORD result
         }
 	if (result == WAIT_OBJECT_0 + count) {
 	    /* Message has arrived - check it */
-	    if (win32_async_check(aTHX)) {
-		/* was one of ours */
-		break;
-	    }
+	    (void)win32_async_check(aTHX);
 	}
 	else {
 	   /* Not timeout or message - one of handles is ready */
