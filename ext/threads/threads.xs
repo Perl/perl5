@@ -71,7 +71,7 @@ I32 active_threads = 0;
 
 void Perl_ithread_set (pTHX_ ithread* thread)
 {
-  SV* thread_sv = newSViv((IV)thread);
+  SV* thread_sv = newSViv(PTR2IV(thread));
   if(!hv_store(PL_modglobal, "threads::self", 12, thread_sv,0)) {
     croak("%s\n","Internal error, couldn't set TLS");
   }
@@ -82,7 +82,7 @@ ithread* Perl_ithread_get (pTHX) {
   if(!thread_sv) {
     croak("%s\n","Internal error, couldn't get TLS");
   }
-  return (ithread*)SvIV(*thread_sv);
+  return INT2PTR(ithread*,SvIV(*thread_sv));
 }
 
 

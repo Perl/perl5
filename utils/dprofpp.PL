@@ -14,9 +14,8 @@ use File::Spec;
 # This forces PL files to create target in same directory as PL file.
 # This is so that make depend always knows where to find PL derivatives.
 chdir(dirname($0));
-($file = basename($0)) =~ s/\.PL$//;
-$file =~ s/\.pl$// if ($Config{'osname'} eq 'OS2');      # "case-forgiving"
-$file =~ s/\.pl$/.com/i if ($Config{'osname'} eq 'VMS');  # "case-forgiving"
+($file = basename($0)) =~ s/\.PL$//i;
+$file .= '.COM' if ($^O eq 'VMS');
 
 my $dprof_pm = File::Spec->catfile(File::Spec->updir, 'ext', 'Devel', 'DProf', 'DProf.pm');
 my $VERSION = 0;

@@ -9,6 +9,7 @@ use Carp;
 use Config         qw(%Config);
 use File::Basename qw(basename dirname fileparse);
 use DirHandle;
+use Text::ParseWords;
 
 use vars qw($VERSION @ISA
             $Is_Mac $Is_OS2 $Is_VMS $Is_Win32 $Is_Win95  $Is_Dos $Is_VOS
@@ -3111,11 +3112,18 @@ sub pasthru {
     $sep .= "\\\n\t";
 
     foreach $key (qw(LIB LIBPERL_A LINKTYPE PREFIX OPTIMIZE INC DEFINE)) {
-	if ($key eq 'INC' && defined(my $inc = $self->{INC})) {
+	next unless defined $self->{$key};
+	if ($key eq 'INC') {
 	    # For INC we need to prepend parent directory but
 	    # only iff the parent directory is not absolute.
 	    my ($o, $i) = $Is_VMS ? ('/Include=', 'i') : ('-I', '');
-	    $inc =~ s!(?$i)$o(.+?)!$o.($self->file_name_is_absolute($1)?$1:$self->catdir($self->updir,$1))!eg;
+	    my $inc = '';
+	    foreach (grep { /\S/ } parse_line(qr/\s*(?$i)$o/, 1, $self->{INC})) {
+		s/^"(.+)"\s*$/$1/o;
+		my $dir = File::Spec->file_name_is_absolute($_) ? $_ : File::Spec->catdir(File::Spec->updir, $_);
+		$dir = qq["$dir"] if $dir =~ / /;
+		$inc .= " $o$dir";
+	    }
 	    push @pasthru, "INC=\"$inc\"";
 	} else {
 	    push @pasthru, "$key=\"\$($key)\"";
