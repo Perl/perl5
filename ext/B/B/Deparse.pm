@@ -2495,7 +2495,7 @@ sub pchr { # ASCII
 
 sub collapse {
     my(@chars) = @_;
-    my($c, $str, $tr);
+    my($str, $c, $tr) = ("");
     for ($c = 0; $c < @chars; $c++) {
 	$tr = $chars[$c];
 	$str .= pchr($tr);
