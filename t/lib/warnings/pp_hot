@@ -105,6 +105,16 @@ print() on closed filehandle STDIN at - line 4.
 print() on closed filehandle STDIN at - line 6.
 	(Are you trying to call print() on dirhandle STDIN?)
 ########
+# pp_hot.c [pp_print]
+# [ID 20020425.012] from Dave Steiner <steiner@bakerst.rutgers.edu>
+# This goes segv on 5.7.3
+use warnings 'closed' ;
+my $fh = *STDOUT{IO};
+close STDOUT or die "Can't close STDOUT";
+print $fh "Shouldn't print anything, but shouldn't SEGV either\n";
+EXPECT
+print() on closed filehandle at - line 7.
+########
 # pp_hot.c [pp_rv2av]
 use warnings 'uninitialized' ;
 my $a = undef ;
