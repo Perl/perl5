@@ -810,7 +810,8 @@ http://lists.perl.org/ , http://archive.develooper.com/
 
 =head2 Bug tracking
 
-Richard Foley has written the bug tracking system at http://bugs.perl.org/
+Since 5.8.0 perl uses the RT bug tracking system from Jesse Vincent,
+implemented by Robert Spier at http://bugs.perl.org/
 
 =head2 Integrate MacPerl
 

@@ -571,7 +571,7 @@ PP(pp_print)
             goto had_magic;
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 	    report_evil_fh(gv, io, PL_op->op_type);
-	SETERRNO(EBADF,RMS$_IFI);
+	SETERRNO(EBADF,RMS_IFI);
 	goto just_say_no;
     }
     else if (!(fp = IoOFP(io))) {
@@ -581,7 +581,7 @@ PP(pp_print)
 	    else if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 		report_evil_fh(gv, io, PL_op->op_type);
 	}
-	SETERRNO(EBADF,IoIFP(io)?RMS$_FAC:RMS$_IFI);
+	SETERRNO(EBADF,IoIFP(io)?RMS_FAC:RMS_IFI);
 	goto just_say_no;
     }
     else {
@@ -744,7 +744,7 @@ PP(pp_rv2av)
 	}
 	SP += maxarg;
     }
-    else {
+    else if (GIMME_V == G_SCALAR) {
 	dTARGET;
 	I32 maxarg = AvFILL(av) + 1;
 	SETi(maxarg);
@@ -1454,8 +1454,11 @@ Perl_do_readline(pTHX)
 	call_method("READLINE", gimme);
 	LEAVE;
 	SPAGAIN;
-	if (gimme == G_SCALAR)
-	    SvSetMagicSV_nosteal(TARG, TOPs);
+	if (gimme == G_SCALAR) {
+	    SV* result = POPs;
+	    SvSetSV_nosteal(TARG, result);
+	    PUSHTARG;
+	}
 	RETURN;
     }
     fp = Nullfp;
@@ -1513,10 +1516,14 @@ Perl_do_readline(pTHX)
 	tmplen = SvLEN(sv);	/* remember if already alloced */
 	if (!tmplen)
 	    Sv_Grow(sv, 80);	/* try short-buffering it */
-	if (type == OP_RCATLINE)
+	offset = 0;
+	if (type == OP_RCATLINE && SvOK(sv)) {
+	    if (!SvPOK(sv)) {
+		STRLEN n_a;
+		(void)SvPV_force(sv, n_a);
+	    }
 	    offset = SvCUR(sv);
-	else
-	    offset = 0;
+	}
     }
     else {
 	sv = sv_2mortal(NEWSV(57, 80));
@@ -2350,8 +2357,9 @@ PP(pp_leavesublv)
 		    PL_curpm = newpm;
 		    LEAVE;
 		    LEAVESUB(sv);
-		    DIE(aTHX_ "Can't return a %s from lvalue subroutine",
-			SvREADONLY(TOPs) ? "readonly value" : "temporary");
+		    DIE(aTHX_ "Can't return %s from lvalue subroutine",
+			SvREADONLY(TOPs) ? (TOPs == &PL_sv_undef) ? "undef"
+			: "a readonly value" : "a temporary");
 		}
 		else {                  /* Can be a localized value
 					 * subject to deletion. */
@@ -3050,6 +3058,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
     char* name;
     STRLEN namelen;
     char* packname = 0;
+    SV *packsv = Nullsv;
     STRLEN packlen;
 
     name = SvPV(meth, namelen);
@@ -3085,6 +3094,8 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	    }
 	    /* assume it's a package name */
 	    stash = gv_stashpvn(packname, packlen, FALSE);
+	    if (!stash)
+		packsv = sv;
 	    goto fetch;
 	}
 	/* it _is_ a filehandle name -- replace with a reference */
@@ -3117,7 +3128,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	}
     }
 
-    gv = gv_fetchmethod(stash, name);
+    gv = gv_fetchmethod(stash ? stash : (HV*)packsv, name);
 
     if (!gv) {
 	/* This code tries to figure out just what went wrong with

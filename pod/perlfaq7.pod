@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq7 - General Perl Language Issues ($Revision: 1.8 $, $Date: 2002/03/26 15:48:32 $)
+perlfaq7 - General Perl Language Issues ($Revision: 1.11 $, $Date: 2002/11/10 17:35:47 $)
 
 =head1 DESCRIPTION
 
@@ -81,6 +81,11 @@ One way is to treat the return values as a list and index into it:
 Another way is to use undef as an element on the left-hand-side:
 
     ($dev, $ino, undef, undef, $uid, $gid) = stat($file);
+    
+You can also use a list slice to select only the elements that
+you need:
+
+	($dev, $ino, $uid, $gid) = ( stat($file) )[0,1,4,5];
 
 =head2 How do I temporarily block warnings?
 
@@ -298,37 +303,21 @@ reference to an existing or anonymous variable or function:
 
 =item Passing Filehandles
 
-To pass filehandles to subroutines, use the C<*FH> or C<\*FH> notations.
+As of Perl 5.6, you can represent filehandles with scalar variables
+which you treat as any other scalar.
+
+	open my $fh, $filename or die "Cannot open $filename! $!";
+	func( $fh );
+	
+	sub func {
+		my $passed_fh = shift;
+		
+		my $line = <$fh>;
+		}
+	
+Before Perl 5.6, you had to use the C<*FH> or C<\*FH> notations.
 These are "typeglobs"--see L<perldata/"Typeglobs and Filehandles">
 and especially L<perlsub/"Pass by Reference"> for more information.
-
-Here's an excerpt:
-
-If you're passing around filehandles, you could usually just use the bare
-typeglob, like *STDOUT, but typeglobs references would be better because
-they'll still work properly under C<use strict 'refs'>.  For example:
-
-    splutter(\*STDOUT);
-    sub splutter {
-        my $fh = shift;
-        print $fh "her um well a hmmm\n";
-    }
-
-    $rec = get_rec(\*STDIN);
-    sub get_rec {
-        my $fh = shift;
-        return scalar <$fh>;
-    }
-
-If you're planning on generating new filehandles, you could do this:
-
-    sub openit {
-        my $path = shift;
-        local *FH;
-        return open (FH, $path) ? *FH : undef;
-    }
-    $fh = openit('< /etc/motd');
-    print <$fh>;
 
 =item Passing Regexes
 
@@ -491,23 +480,33 @@ L<perlsub/"Temporary Values via local()"> for excruciating details.
 
 =head2 How can I access a dynamic variable while a similarly named lexical is in scope?
 
-You can do this via symbolic references, provided you haven't set
-C<use strict "refs">.  So instead of $var, use C<${'var'}>.
-
-    local $var = "global";
-    my    $var = "lexical";
-
-    print "lexical is $var\n";
-
-    no strict 'refs';
-    print "global  is ${'var'}\n";
-
 If you know your package, you can just mention it explicitly, as in
-$Some_Pack::var.  Note that the notation $::var is I<not> the dynamic
-$var in the current package, but rather the one in the C<main>
-package, as though you had written $main::var.  Specifying the package
-directly makes you hard-code its name, but it executes faster and
-avoids running afoul of C<use strict "refs">.
+$Some_Pack::var. Note that the notation $::var is B<not> the dynamic $var
+in the current package, but rather the one in the "main" package, as
+though you had written $main::var.
+
+	use vars '$var';
+	local $var = "global";
+	my    $var = "lexical";
+
+	print "lexical is $var\n";
+	print "global  is $main::var\n";
+
+Alternatively you can use the compiler directive our() to bring a
+dynamic variable into the current lexical scope.
+
+	require 5.006; # our() did not exist before 5.6
+	use vars '$var';
+
+	local $var = "global";
+	my $var    = "lexical";
+
+	print "lexical is $var\n";
+
+	{
+	  our $var;
+	  print "global  is $var\n";
+	}
 
 =head2 What's the difference between deep and shallow binding?
 
@@ -676,31 +675,16 @@ A totally different approach is to create a hash of function references.
         print "No such command: $string\n";
     } 
 
-=head2 How can I catch accesses to undefined variables/functions/methods?
+=head2 How can I catch accesses to undefined variables, functions, or methods?
 
 The AUTOLOAD method, discussed in L<perlsub/"Autoloading"> and
 L<perltoot/"AUTOLOAD: Proxy Methods">, lets you capture calls to
 undefined functions and methods.
 
 When it comes to undefined variables that would trigger a warning
-under C<-w>, you can use a handler to trap the pseudo-signal
-C<__WARN__> like this:
+under C<use warnings>, you can promote the warning to an error.
 
-    $SIG{__WARN__} = sub {
-
-	for ( $_[0] ) {		# voici un switch statement 
-
-	    /Use of uninitialized value/  && do {
-		# promote warning to a fatal
-		die $_;
-	    };
-
-	    # other warning cases to catch could go here;
-
-	    warn $_;
-	}
-
-    };
+	use warnings FATAL => qw(uninitialized);
 
 =head2 Why can't a method included in this same file be found?
 

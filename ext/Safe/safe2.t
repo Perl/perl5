@@ -1,8 +1,10 @@
 #!./perl -w
 $|=1;
 BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
+    if($ENV{PERL_CORE}) {
+	chdir 't' if -d 't';
+	@INC = '../lib';
+    } 
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bOpcode\b/ && $Config{'osname'} ne 'VMS') {
         print "1..0\n";
@@ -38,7 +40,7 @@ $cpt = new Safe or die;
 $cpt = new Safe "Root";
 
 $cpt->reval(q{ system("echo not ok 1"); });
-if ($@ =~ /^system trapped by operation mask/) {
+if ($@ =~ /^'?system'? trapped by operation mask/) {
     print "ok 1\n";
 } else {
     print "#$@" if $@;

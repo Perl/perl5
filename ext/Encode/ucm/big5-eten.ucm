@@ -1,5 +1,5 @@
 #
-# $Id: big5-eten.ucm,v 1.2 2002/04/22 03:41:13 dankogai Exp $
+# $Id: big5-eten.ucm,v 1.3 2002/08/25 15:09:51 dankogai Exp $
 #
 # ./compile -n big5-eten -o Encode/big5-eten.ucm Encode/big5-eten.enc
 <code_set_name> "big5-eten"
@@ -313,8 +313,8 @@ CHARMAP
 <U044E> \xC8\x74 |0
 <U044F> \xC8\x75 |0
 <U0451> \xC8\x5B |0
-<U2008> \xC8\x7C |0
-<U200C> \xC8\x7A |0
+<U2008A> \xC8\x7C |0
+<U200CC> \xC8\x7A |0
 <U2013> \xA1\x56 |0
 <U2014> \xA1\x58 |0
 <U2018> \xA1\xA5 |0
@@ -500,7 +500,7 @@ CHARMAP
 <U2640> \xA1\xF0 |0
 <U2642> \xA1\xF1 |0
 <U273D> \xC6\xE6 |0
-<U2760> \xC8\xA4 |0
+<U27607> \xC8\xA4 |0
 <U2E80> \xC8\xD6 |0
 <U2E84> \xC8\xD7 |0
 <U2E86> \xC8\xD8 |0

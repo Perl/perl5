@@ -18,11 +18,123 @@ extern "C" {
 }
 #endif
 
+#ifndef aTHX_
+#    define aTHX_
+#    define pTHX_
+#endif         
+
+#ifndef NVTYPE
+#   if defined(USE_LONG_DOUBLE) && defined(HAS_LONG_DOUBLE)
+#       define NVTYPE long double
+#   else
+#       define NVTYPE double
+#   endif
+typedef NVTYPE NV;
+#endif
+
+#ifndef IVdf
+#  ifdef IVSIZE
+#      if IVSIZE == LONGSIZE
+#           define	IVdf		"ld"
+#       else
+#           if IVSIZE == INTSIZE
+#               define	IVdf	"d"
+#           endif
+#       endif
+#   else
+#       define	IVdf	"ld"
+#   endif
+#endif
+
+#ifndef NVef
+#   if defined(USE_LONG_DOUBLE) && defined(HAS_LONG_DOUBLE) && \
+	defined(PERL_PRIgldbl) /* Not very likely, but let's try anyway. */ 
+#       define NVgf		PERL_PRIgldbl
+#   else
+#       define NVgf		"g"
+#   endif
+#endif
+
+#ifndef INT2PTR
+
+#if (IVSIZE == PTRSIZE) && (UVSIZE == PTRSIZE)
+#  define PTRV                  UV
+#  define INT2PTR(any,d)        (any)(d)
+#else
+#  if PTRSIZE == LONGSIZE
+#    define PTRV                unsigned long
+#  else
+#    define PTRV                unsigned
+#  endif
+#  define INT2PTR(any,d)        (any)(PTRV)(d)
+#endif
+#define PTR2IV(p)       INT2PTR(IV,p)
+
+#endif /* !INT2PTR */
+
+#ifndef SvPV_nolen
+static char *
+sv_2pv_nolen(pTHX_ register SV *sv)
+{
+    STRLEN n_a;
+    return sv_2pv(sv, &n_a);
+}
+#   define SvPV_nolen(sv) \
+        ((SvFLAGS(sv) & (SVf_POK)) == SVf_POK \
+         ? SvPVX(sv) : sv_2pv_nolen(sv))
+#endif
+
+#ifndef PerlProc_pause
+#   define PerlProc_pause() Pause()
+#endif
+
+/* Though the cpp define ITIMER_VIRTUAL is available the functionality
+ * is not supported in Cygwin as of August 2002, ditto for Win32.
+ * Neither are ITIMER_PROF or ITIMER_REALPROF implemented.  --jhi
+ */
+#if defined(__CYGWIN__) || defined(WIN32)
+#   undef ITIMER_VIRTUAL
+#   undef ITIMER_PROF
+#   undef ITIMER_REALPROF
+#endif
+
 static IV
 constant(char *name, int arg)
 {
     errno = 0;
     switch (*name) {
+    case 'd':
+      if (strEQ(name, "d_getitimer"))
+#ifdef HAS_GETITIMER
+	return 1;
+#else
+	return 0;
+#endif
+      if (strEQ(name, "d_nanosleep"))
+#ifdef HAS_NANOSLEEP
+	return 1;
+#else
+	return 0;
+#endif
+      if (strEQ(name, "d_setitimer"))
+#ifdef HAS_SETITIMER
+	return 1;
+#else
+	return 0;
+#endif
+      if (strEQ(name, "d_ualarm"))
+#ifdef HAS_UALARM
+	return 1;
+#else
+	return 0;
+#endif
+      if (strEQ(name, "d_usleep"))
+#ifdef HAS_USLEEP
+	return 1;
+#else
+	return 0;
+#endif
+      break;
     case 'I':
       if (strEQ(name, "ITIMER_REAL"))
 #ifdef ITIMER_REAL
@@ -287,6 +399,22 @@ gettimeofday (struct timeval *tp, void *tpz)
 }
 #endif
 
+
+#if !defined(HAS_USLEEP) && defined(HAS_NANOSLEEP)
+#define HAS_USLEEP
+#define usleep hrt_nanosleep  /* could conflict with ncurses for static build */
+
+void
+hrt_nanosleep(unsigned long usec)
+{
+    struct timespec res;
+    res.tv_sec = usec/1000/1000;
+    res.tv_nsec = ( usec - res.tv_sec*1000*1000 ) * 1000;
+    nanosleep(&res, NULL);
+}
+#endif
+
+
 #if !defined(HAS_USLEEP) && defined(HAS_SELECT)
 #ifndef SELECT_IS_BROKEN
 #define HAS_USLEEP
@@ -531,8 +659,6 @@ ualarm_AST(Alarm *a)
 
 #endif /* !HAS_UALARM && VMS */
 
-
-
 #ifdef HAS_GETTIMEOFDAY
 
 static int
@@ -562,6 +688,7 @@ MODULE = Time::HiRes            PACKAGE = Time::HiRes
 PROTOTYPES: ENABLE
 
 BOOT:
+#ifdef ATLEASTFIVEOHOHFIVE
 #ifdef HAS_GETTIMEOFDAY
 {
   UV auv[2];
@@ -569,6 +696,7 @@ BOOT:
   if (myU2time(auv) == 0)
     hv_store(PL_modglobal, "Time::U2time", 12, newSViv((IV) auv[0]), 0);
 }
+#endif
 #endif
 
 IV
@@ -779,41 +907,3 @@ getitimer(which)
 
 #endif
 
-# $Id: HiRes.xs,v 1.11 1999/03/16 02:27:38 wegscd Exp wegscd $
-
-# $Log: HiRes.xs,v $
-# Revision 1.11  1999/03/16 02:27:38  wegscd
-# Add U2time, NVtime. Fix symbols for static link.
-#
-# Revision 1.10  1998/09/30 02:36:25  wegscd
-# Add VMS changes.
-#
-# Revision 1.9  1998/07/07 02:42:06  wegscd
-# Win32 usleep()
-#
-# Revision 1.8  1998/07/02 01:47:26  wegscd
-# Add Win32 code for gettimeofday.
-#
-# Revision 1.7  1997/11/13 02:08:12  wegscd
-# Add missing EXTEND in gettimeofday() scalar code.
-#
-# Revision 1.6  1997/11/11 02:32:35  wegscd
-# Do something useful when calling gettimeofday() in a scalar context.
-# The patch is courtesy of Gisle Aas.
-#
-# Revision 1.5  1997/11/06 03:10:47  wegscd
-# Fake ualarm() if we have setitimer.
-#
-# Revision 1.4  1997/11/05 05:41:23  wegscd
-# Turn prototypes ON (suggested by Gisle Aas)
-#
-# Revision 1.3  1997/10/13 20:56:15  wegscd
-# Add PROTOTYPES: DISABLE
-#
-# Revision 1.2  1997/05/23 01:01:38  wegscd
-# Conditional compilation, depending on what the OS gives us.
-#
-# Revision 1.1  1996/09/03 18:26:35  wegscd
-# Initial revision
-#
-#

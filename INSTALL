@@ -712,6 +712,14 @@ If you decide to use ithreads, the 'threads' module allows their use,
 and the 'Thread' module offers an interface to both 5005threads and
 ithreads (whichever has been configured).
 
+When building threaded for certain library calls like the getgr*() and
+the getpw*() there is a dynamically sized result buffer: the buffer
+starts small but Perl will keep growing the buffer until the result fits.
+To get a fixed upper limit you will have to recompile Perl with
+PERL_REENTRANT_MAXSIZE defined to be the number of bytes you want.
+One way to do this is to run Configure with
+C<-Accflags=-DPERL_REENTRANT_MAXSIZE=65536>
+
 =head2 Large file support.
 
 Since Perl 5.6.0, Perl has supported large files (files larger than
@@ -1550,10 +1558,22 @@ referring to __inet_* symbols, check to see whether BIND 8.1 is
 installed.  It installs a /usr/local/include/arpa/inet.h that refers to
 these symbols.  Versions of BIND later than 8.1 do not install inet.h
 in that location and avoid the errors.  You should probably update to a
-newer version of BIND.  If you can't, you can either link with the
-updated resolver library provided with BIND 8.1 or rename
-/usr/local/bin/arpa/inet.h during the Perl build and test process to
-avoid the problem.
+newer version of BIND (and remove the files the old one left behind).
+If you can't, you can either link with the updated resolver library provided
+with BIND 8.1 or rename /usr/local/bin/arpa/inet.h during the Perl build and
+test process to avoid the problem.
+
+=item *_r() prototype NOT found
+
+On a related note, if you see a bunch of complaints like the above about
+reentrant functions - specifically networking-related ones - being present
+but without prototypes available, check to see if BIND 8.1 (or possibly
+other BIND 8 versions) is (or has been) installed. They install
+header files such as netdb.h into places such as /usr/local/include (or into
+another directory as specified at build/install time), at least optionally.
+Remove them or put them in someplace that isn't in the C preprocessor's 
+header file include search path (determined by -I options plus defaults,
+normally /usr/include).
 
 =item #error "No DATAMODEL_NATIVE specified"
 
@@ -1701,6 +1721,13 @@ Patch Bundle" has been reported to break the io/fs test #18 which
 tests whether utime() can change timestamps.  The Y2K patch seems to
 break utime() so that over NFS the timestamps do not get changed
 (on local filesystems utime() still works).
+
+Building Perl on a system that has also BIND (headers and libraries)
+installed may run into troubles because BIND installs its own netdb.h
+and socket.h, which may not agree with the operating system's ideas of
+the same files.  Similarly, including -lbind may conflict with libc's
+view of the world.  You may have to tweak -Dlocincpth and -Dloclibpth
+to avoid the BIND.
 
 =back
 

@@ -843,13 +843,15 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, MAGIC *mg, I32 nest, I32 maxne
 
         if (mg->mg_flags) {
             Perl_dump_indent(aTHX_ level, file, "    MG_FLAGS = 0x%02X\n", mg->mg_flags);
-	    if (mg->mg_flags & MGf_TAINTEDDIR)
+	    if (mg->mg_type == PERL_MAGIC_envelem &&
+		mg->mg_flags & MGf_TAINTEDDIR)
 	        Perl_dump_indent(aTHX_ level, file, "      TAINTEDDIR\n");
 	    if (mg->mg_flags & MGf_REFCOUNTED)
 	        Perl_dump_indent(aTHX_ level, file, "      REFCOUNTED\n");
             if (mg->mg_flags & MGf_GSKIP)
 	        Perl_dump_indent(aTHX_ level, file, "      GSKIP\n");
-	    if (mg->mg_flags & MGf_MINMATCH)
+	    if (mg->mg_type == PERL_MAGIC_regex_global &&
+		mg->mg_flags & MGf_MINMATCH)
 	        Perl_dump_indent(aTHX_ level, file, "      MINMATCH\n");
         }
 	if (mg->mg_obj) {
@@ -1020,7 +1022,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 				sv_catpv(d, "TYPED,");
 	break;
     }
-    if (SvPOK(sv) && SvUTF8(sv))
+    if ((SvPOK(sv) || SvPOKp(sv)) && SvUTF8(sv))
         sv_catpv(d, "UTF8");
 
     if (*(SvEND(d) - 1) == ',')
@@ -1107,8 +1109,6 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	Perl_dump_indent(aTHX_ level, file, "  RV = 0x%"UVxf"\n", PTR2UV(SvRV(sv)));
 	if (nest < maxnest)
 	    do_sv_dump(level+1, file, SvRV(sv), nest+1, maxnest, dumpops, pvlim);
-	SvREFCNT_dec(d);
-	return;
     }
     if (type < SVt_PV) {
 	SvREFCNT_dec(d);

@@ -260,9 +260,11 @@ The following error occurs because of the Cygwin C<#define> of
 C<_LONG_DOUBLE>:
 
   Guessing which symbols your C compiler and preprocessor define...
-  try.c:<line#>: parse error
+  try.c:<line#>: missing binary operator
 
-This failure does not seem to cause any problems.
+This failure does not seem to cause any problems.  With older gcc
+versions, "parse error" is reported instead of "missing binary
+operator".
 
 =back
 
@@ -276,11 +278,18 @@ Simply run I<make> and wait:
 
 Warnings like these are normal:
 
-  warning: overriding commands for target <file>
-  warning: ignoring old commands for target <file>
-
-  dllwrap: no export definition file provided
-  dllwrap: creating one, but that may not be what you want
+  perl.c: In function `S_parse_body':
+  perl.c:1468: warning: implicit declaration of function `init_os_extras'
+  ...
+  pp_sys.c:289: warning: `S_emulate_eaccess' defined but not used
+  ...
+  perlio.c: In function `perlsio_binmode':
+  perlio.c:98: warning: implicit declaration of function `setmode'
+  perlio.c:98: warning: passing arg 1 of `Perl_PerlIO_fileno' from incompatible pointer type
+  ...
+  make: [extra.pods] Error 1 (ignored)
+  ...
+  make: [extras.make] Error 1 (ignored)
 
 =head2 ld2 on Cygwin
 
@@ -337,11 +346,34 @@ these options, these tests will fail (listing not updated yet):
   lib/sdbm.t            2
   op/stat.t             9, 20 (.tmp not an executable extension)
 
-=head2 NDBM_File does not work on FAT filesystems
+=head2 NDBM_File and ODBM_File do not work on FAT filesystems
 
-Do not install NDBM_File on FAT filesystem.  It can be built on a FAT
-filesystem, but many ndbm tests will fail.  With NTFS, there should be
-no problems either way.
+Do not use NDBM_File or ODBM_File on FAT filesystem.  They can be
+built on a FAT filesystem, but many tests will fail:
+
+ ../ext/NDBM_File/ndbm.t       13  3328    71   59  83.10%  1-2 4 16-71
+ ../ext/ODBM_File/odbm.t      255 65280    ??   ??       %  ??
+ ../lib/AnyDBM_File.t           2   512    12    2  16.67%  1 4
+ ../lib/Memoize/t/errors.t      0   139    11    5  45.45%  7-11
+ ../lib/Memoize/t/tie_ndbm.t   13  3328     4    4 100.00%  1-4
+ run/fresh_perl.t                          97    1   1.03%  91
+
+If you intend to run only on FAT (or if using AnyDBM_File on FAT),
+run Configure with the -Ui_ndbm and -Ui_dbm options to prevent
+NDBM_File and ODBM_File being built.
+
+With NTFS (and CYGWIN=ntsec), there should be no problems even if
+perl was built on FAT.
+
+=head2 fork() failures in io_* tests
+
+A fork() failure may result in the following tests failing:
+
+  ext/IO/lib/IO/t/io_multihomed.t
+  ext/IO/lib/IO/t/io_sock.t
+  ext/IO/lib/IO/t/io_unix.t
+
+See comment on fork in L<Miscellaneous> below.
 
 =head2 Script Portability on Cygwin
 
@@ -410,6 +442,18 @@ access by native Win32 programs).
 Inplace editing C<perl -i> of files doesn't work without doing a backup 
 of the file being edited C<perl -i.bak> because of windowish restrictions,
 so Perl adds the C<.bak> automatically if you just use C<perl -i>.
+
+Using fork() after loading multiple dlls may fail with an internal cygwin
+error like the following:
+
+  C:\CYGWIN\BIN\PERL.EXE: *** couldn't allocate memory 0x10000(4128768) for 'C:\CYGWIN\LIB\PERL5\5.6.1\CYGWIN-MULTI\AUTO\SOCKET\SOCKET.DLL' alignment, Win32 error 8
+
+    200 [main] perl 377147 sync_with_child: child -395691(0xB8) died before initialization with status code 0x1
+   1370 [main] perl 377147 sync_with_child: *** child state child loading dlls
+
+Use the rebase utility to resolve the conflicting dll addresses.
+See: http://www.tishler.net/jason/software/rebase/
+and http://sources.redhat.com/ml/cygwin/2002-07/msg00276.html
 
 =back
 
@@ -525,4 +569,4 @@ Gerrit Haase <gh@familiehaase.de>.
 
 =head1 HISTORY
 
-Last updated: 2002-02-27
+Last updated: 2002-10-07

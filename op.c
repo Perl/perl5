@@ -104,7 +104,7 @@ S_Slab_Free(pTHX_ void *op)
 #define CHECKOP(type,o) \
     ((PL_op_mask && PL_op_mask[type])					\
      ? ( op_free((OP*)o),					\
-	 Perl_croak(aTHX_ "%s trapped by operation mask", PL_op_desc[type]),	\
+	 Perl_croak(aTHX_ "'%s' trapped by operation mask", PL_op_desc[type]),	\
 	 Nullop )						\
      : CALL_FPTR(PL_check[type])(aTHX_ (OP*)o))
 
@@ -632,7 +632,8 @@ Perl_pad_swipe(pTHX_ PADOFFSET po)
     DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%"UVxf" swipe %"IVdf"\n",
 			  PTR2UV(PL_curpad), (IV)po));
 #endif /* USE_5005THREADS */
-    SvPADTMP_off(PL_curpad[po]);
+    if (PL_curpad[po])
+	SvPADTMP_off(PL_curpad[po]);
     PL_curpad[po] = NEWSV(1107,0);
     SvPADTMP_on(PL_curpad[po]);
     if ((I32)po < PL_padix)
@@ -1188,6 +1189,7 @@ Perl_scalarvoid(pTHX_ OP *o)
     case OP_GGRNAM:
     case OP_GGRGID:
     case OP_GETLOGIN:
+    case OP_PROTOTYPE:
       func_ops:
 	if (!(o->op_private & (OPpLVAL_INTRO|OPpOUR_INTRO)))
 	    useless = OP_DESC(o);
@@ -1612,7 +1614,6 @@ Perl_mod(pTHX_ OP *o, I32 type)
     case OP_AASSIGN:
     case OP_NEXTSTATE:
     case OP_DBSTATE:
-    case OP_CHOMP:
        PL_modcount = RETURN_UNLIMITED_NUMBER;
 	break;
     case OP_RV2SV:
@@ -2088,19 +2089,19 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
     } else if (type == OP_RV2SV ||	/* "our" declaration */
 	       type == OP_RV2AV ||
 	       type == OP_RV2HV) { /* XXX does this let anything illegal in? */
-      if (cUNOPo->op_first->op_type != OP_GV) { /* MJD 20011224 */
-           yyerror(Perl_form(aTHX_ "Can't declare %s in my", OP_DESC(o)));
-        }
-        if (attrs) {
-            GV *gv = cGVOPx_gv(cUNOPo->op_first);
-            PL_in_my = FALSE;
-            PL_in_my_stash = Nullhv;
-            apply_attrs(GvSTASH(gv),
-                        (type == OP_RV2SV ? GvSV(gv) :
-                         type == OP_RV2AV ? (SV*)GvAV(gv) :
-                         type == OP_RV2HV ? (SV*)GvHV(gv) : (SV*)gv),
-                        attrs, FALSE);
-        }
+	if (cUNOPo->op_first->op_type != OP_GV) { /* MJD 20011224 */
+	    yyerror(Perl_form(aTHX_ "Can't declare %s in %s",
+			OP_DESC(o), PL_in_my == KEY_our ? "our" : "my"));
+	} else if (attrs) {
+	    GV *gv = cGVOPx_gv(cUNOPo->op_first);
+	    PL_in_my = FALSE;
+	    PL_in_my_stash = Nullhv;
+	    apply_attrs(GvSTASH(gv),
+			(type == OP_RV2SV ? GvSV(gv) :
+			 type == OP_RV2AV ? (SV*)GvAV(gv) :
+			 type == OP_RV2HV ? (SV*)GvHV(gv) : (SV*)gv),
+			attrs, FALSE);
+	}
 	o->op_private |= OPpOUR_INTRO;
 	return o;
     }
@@ -2140,10 +2141,16 @@ Perl_my_attrs(pTHX_ OP *o, OP *attrs)
     OP *rops = Nullop;
     int maybe_scalar = 0;
 
+/* [perl #17376]: this appears to be premature, and results in code such as
+   C< our(%x); > executing in list mode rather than void mode */
+#if 0
     if (o->op_flags & OPf_PARENS)
 	list(o);
     else
 	maybe_scalar = 1;
+#else
+    maybe_scalar = 1;
+#endif
     if (attrs)
 	SAVEFREEOP(attrs);
     o = my_kid(o, attrs, &rops);
@@ -2271,6 +2278,8 @@ int
 Perl_block_start(pTHX_ int full)
 {
     int retval = PL_savestack_ix;
+    /* If there were syntax errors, don't try to start a block */
+    if (PL_yynerrs) return retval;
 
     SAVEI32(PL_comppad_name_floor);
     PL_comppad_name_floor = AvFILLp(PL_comppad_name);
@@ -2305,9 +2314,16 @@ Perl_block_end(pTHX_ I32 floor, OP *seq)
 {
     int needblockscope = PL_hints & HINT_BLOCK_SCOPE;
     line_t copline = PL_copline;
-    /* there should be a nextstate in every block */
-    OP* retval = seq ? scalarseq(seq) : newSTATEOP(0, Nullch, seq);
-    PL_copline = copline;  /* XXX newSTATEOP may reset PL_copline */
+    OP* retval = scalarseq(seq);
+    /* If there were syntax errors, don't try to close a block */
+    if (PL_yynerrs) return retval;
+    if (!seq) {
+	/* scalarseq() gave us an OP_STUB */
+	retval->op_flags |= OPf_PARENS;
+	/* there should be a nextstate in every block */
+	retval = newSTATEOP(0, Nullch, retval);
+	PL_copline = copline;  /* XXX newSTATEOP may reset PL_copline */
+    }
     LEAVE_SCOPE(floor);
     PL_pad_reset_pending = FALSE;
     PL_compiling.op_private = (U8)(PL_hints & HINT_PRIVATE_MASK);
@@ -2375,7 +2391,13 @@ OP *
 Perl_localize(pTHX_ OP *o, I32 lex)
 {
     if (o->op_flags & OPf_PARENS)
+/* [perl #17376]: this appears to be premature, and results in code such as
+   C< our(%x); > executing in list mode rather than void mode */
+#if 0
 	list(o);
+#else
+	;
+#endif
     else {
 	if (ckWARN(WARN_PARENTHESIS)
 	    && PL_bufptr > PL_oldbufptr && PL_bufptr[-1] == ',')
@@ -3306,7 +3328,8 @@ Perl_newPADOP(pTHX_ I32 type, I32 flags, SV *sv)
     padop->op_padix = pad_alloc(type, SVs_PADTMP);
     SvREFCNT_dec(PL_curpad[padop->op_padix]);
     PL_curpad[padop->op_padix] = sv;
-    SvPADTMP_on(sv);
+    if (sv)
+	SvPADTMP_on(sv);
     padop->op_next = (OP*)padop;
     padop->op_flags = (U8)flags;
     if (PL_opargs[type] & OA_RETSCALAR)
@@ -3320,7 +3343,8 @@ OP *
 Perl_newGVOP(pTHX_ I32 type, I32 flags, GV *gv)
 {
 #ifdef USE_ITHREADS
-    GvIN_PAD_on(gv);
+    if (gv)
+	GvIN_PAD_on(gv);
     return newPADOP(type, flags, SvREFCNT_inc(gv));
 #else
     return newSVOP(type, flags, SvREFCNT_inc(gv));
@@ -3886,8 +3910,12 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 	}
     }
     if (first->op_type == OP_CONST) {
-	if (ckWARN(WARN_BAREWORD) && (first->op_private & OPpCONST_BARE))
-	    Perl_warner(aTHX_ packWARN(WARN_BAREWORD), "Bareword found in conditional");
+	if (ckWARN(WARN_BAREWORD) && (first->op_private & OPpCONST_BARE)) {
+	    if (first->op_private & OPpCONST_STRICT)
+		no_bareword_allowed(first);
+	    else
+		Perl_warner(aTHX_ packWARN(WARN_BAREWORD), "Bareword found in conditional");
+	}
 	if ((type == OP_AND) == (SvTRUE(((SVOP*)first)->op_sv))) {
 	    op_free(first);
 	    *firstp = Nullop;
@@ -4396,7 +4424,7 @@ Perl_cv_undef(pTHX_ CV *cv)
 	    AV *padlist = CvPADLIST(cv);
 	    I32 ix;
 	    /* pads may be cleared out already during global destruction */
-	    if (is_eval && !PL_dirty) {
+	    if ((is_eval && !PL_dirty) || CvSPECIAL(cv)) {
 		/* inner references to eval's cv must be fixed up */
 		AV *comppad_name = (AV*)AvARRAY(padlist)[0];
 		AV *comppad = (AV*)AvARRAY(padlist)[1];
@@ -5540,7 +5568,29 @@ Perl_ck_anoncode(pTHX_ OP *o)
 OP *
 Perl_ck_bitop(pTHX_ OP *o)
 {
+#define OP_IS_NUMCOMPARE(op) \
+	((op) == OP_LT   || (op) == OP_I_LT || \
+	 (op) == OP_GT   || (op) == OP_I_GT || \
+	 (op) == OP_LE   || (op) == OP_I_LE || \
+	 (op) == OP_GE   || (op) == OP_I_GE || \
+	 (op) == OP_EQ   || (op) == OP_I_EQ || \
+	 (op) == OP_NE   || (op) == OP_I_NE || \
+	 (op) == OP_NCMP || (op) == OP_I_NCMP)
     o->op_private = (U8)(PL_hints & HINT_PRIVATE_MASK);
+    if (o->op_type == OP_BIT_OR
+	    || o->op_type == OP_BIT_AND
+	    || o->op_type == OP_BIT_XOR)
+    {
+	OPCODE typfirst = cBINOPo->op_first->op_type;
+	OPCODE typlast  = cBINOPo->op_first->op_sibling->op_type;
+	if (OP_IS_NUMCOMPARE(typfirst) || OP_IS_NUMCOMPARE(typlast))
+	    if (ckWARN(WARN_PRECEDENCE))
+		Perl_warner(aTHX_ packWARN(WARN_PRECEDENCE),
+			"Possible precedence problem on bitwise %c operator",
+			o->op_type == OP_BIT_OR ? '|'
+			    : o->op_type == OP_BIT_AND ? '&' : '^'
+			);
+    }
     return o;
 }
 

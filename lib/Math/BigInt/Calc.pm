@@ -8,7 +8,7 @@ require Exporter;
 use vars qw/@ISA $VERSION/;
 @ISA = qw(Exporter);
 
-$VERSION = '0.30';
+$VERSION = '0.32';
 
 # Package to store unsigned big integers in decimal and do math with them
 
@@ -368,7 +368,7 @@ sub _inc
   {
   # (ref to int_num_array, ref to int_num_array)
   # routine to add 1 to a base 1eX numbers
-  # This routine clobbers up array x, but not y.
+  # This routine modifies array x
   my ($c,$x) = @_;
 
   for my $i (@$x)
@@ -384,7 +384,7 @@ sub _dec
   {
   # (ref to int_num_array, ref to int_num_array)
   # routine to add 1 to a base 1eX numbers
-  # This routine clobbers up array x, but not y.
+  # This routine modifies array x
   my ($c,$x) = @_;
 
   my $MAX = $BASE-1;				# since MAX_VAL based on MBASE
@@ -430,43 +430,6 @@ sub _sub
   __strip_zeros($sy);
   }                                                                             
 
-sub _square_use_mul
-  {
-  # compute $x ** 2 or $x * $x in-place and return $x
-  my ($c,$x) = @_;
-
-  # From: Handbook of Applied Cryptography by A. Menezes, P. van Oorschot and
-  #       S. Vanstone., Chapter 14
-
-  #14.16 Algorithm Multiple-precision squaring
-  #INPUT: positive integer x = (xt 1 xt 2 ... x1 x0)b.
-  #OUTPUT: x * x = x ** 2 in radix b representation. 
-  #1. For i from 0 to (2t - 1) do: wi <- 0. 
-  #2.  For i from 0 to (t - 1) do the following: 
-  # 2.1 (uv)b w2i + xi * xi, w2i v, c u. 
-  # 2.2 For j from (i + 1)to (t - 1) do the following: 
-  #      (uv)b <- wi+j + 2*xj * xi + c, wi+j <- v, c <- u. 
-  # 2.3 wi+t <- u. 
-  #3. Return((w2t-1 w2t-2 ... w1 w0)b).
-
-#  # Note: That description is crap. Half of the symbols are not explained or
-#  # used with out beeing set.
-#  my $t = scalar @$x;		# count
-#  my ($c,$i,$j);
-#  for ($i = 0; $i < $t; $i++)
-#    {
-#    $x->[$i] = $x->[$i*2] + $x[$i]*$x[$i];
-#    $x->[$i*2] = $x[$i]; $c = $x[$i];
-#    for ($j = $i+1; $j < $t; $j++)
-#      {
-#      $x->[$i] = $x->[$i+$j] + 2 * $x->[$i] * $x->[$j];
-#      $x->[$i+$j] = $x[$j]; $c = $x[$i];
-#      }
-#    $x->[$i+$t] = $x[$i];
-#    }
-  $x;
-  }
-
 sub _mul_use_mul
   {
   # (ref to int_num_array, ref to int_num_array)
@@ -494,10 +457,6 @@ sub _mul_use_mul
 
   # since multiplying $x with $x fails, make copy in this case
   $yv = [@$xv] if $xv == $yv;	# same references?
-#  $yv = [@$xv] if "$xv" eq "$yv";	# same references?
-
-  # since multiplying $x with $x would fail here, use the faster squaring
-#  return _square($c,$xv) if $xv == $yv;	# same reference?
 
   if ($LEN_CONVERT != 0)
     {
@@ -576,9 +535,6 @@ sub _mul_use_div
  
   # since multiplying $x with $x fails, make copy in this case
   $yv = [@$xv] if $xv == $yv;	# same references?
-#  $yv = [@$xv] if "$xv" eq "$yv";	# same references?
-  # since multiplying $x with $x would fail here, use the faster squaring
-#  return _square($c,$xv) if $xv == $yv;	# same reference?
 
   if ($LEN_CONVERT != 0)
     {
@@ -908,48 +864,35 @@ sub _acmp
   my $lxy = scalar @$cx - scalar @$cy;
   return -1 if $lxy < 0;				# already differs, ret
   return 1 if $lxy > 0;					# ditto
-  
+
   # now calculate length based on digits, not parts
-  $lxy = _len($c,$cx) - _len($c,$cy);			# difference
+  # we need only the length of the last element, since both array have the
+  # same number of parts
+  $lxy = length(int($cx->[-1])) - length(int($cy->[-1]));
   return -1 if $lxy < 0;
   return 1 if $lxy > 0;
 
-  # hm, same lengths,  but same contents?
-  my $i = 0; my $a;
-  # first way takes 5.49 sec instead of 4.87, but has the early out advantage
-  # so grep is slightly faster, but more inflexible. hm. $_ instead of $k
-  # yields 5.6 instead of 5.5 sec huh?
+  # hm, same lengths,  but same contents? So we need to check all parts:
+  my $a; my $j = scalar @$cx - 1;
   # manual way (abort if unequal, good for early ne)
-  my $j = scalar @$cx - 1;
   while ($j >= 0)
     {
     last if ($a = $cx->[$j] - $cy->[$j]); $j--;
     }
-#  my $j = scalar @$cx;
-#  while (--$j >= 0)
-#    {
-#    last if ($a = $cx->[$j] - $cy->[$j]);
-#    }
   return 1 if $a > 0;
   return -1 if $a < 0;
-  0;					# equal
-
-  # while it early aborts, it is even slower than the manual variant
-  #grep { return $a if ($a = $_ - $cy->[$i++]); } @$cx;
-  # grep way, go trough all (bad for early ne)
-  #grep { $a = $_ - $cy->[$i++]; } @$cx;
-  #return $a;
+  0;						# numbers are equal
   }
 
 sub _len
   {
-  # compute number of digits in bigint, minus the sign
+  # compute number of digits
 
   # int() because add/sub sometimes leaves strings (like '00005') instead of
   # '5' in this place, thus causing length() to report wrong length
   my $cx = $_[1];
 
-  return (@$cx-1)*$BASE_LEN+length(int($cx->[-1]));
+  (@$cx-1)*$BASE_LEN+length(int($cx->[-1]));
   }
 
 sub _digit
@@ -967,7 +910,7 @@ sub _digit
   my $elem = int($n / $BASE_LEN);	# which array element
   my $digit = $n % $BASE_LEN;		# which digit in this element
   $elem = '0000'.@$x[$elem];		# get element padded with 0's
-  return substr($elem,-$digit-1,1);
+  substr($elem,-$digit-1,1);
   }
 
 sub _zeros
@@ -1166,6 +1109,14 @@ sub _rsft
   # multiples of $BASE_LEN
   my $dst = 0;				# destination
   my $src = _num($c,$y);		# as normal int
+  my $xlen = (@$x-1)*$BASE_LEN+length(int($x->[-1]));  # len of x in digits
+  if ($src > $xlen)
+    {
+    # 12345 67890 shifted right by more than 10 digits => 0
+    splice (@$x,1);                    # leave only one element
+    $x->[0] = 0;                       # set to zero
+    return $x;
+    }
   my $rem = $src % $BASE_LEN;		# remainder to shift
   $src = int($src / $BASE_LEN);		# source
   if ($rem == 0)
@@ -1276,7 +1227,6 @@ sub _fac
   my $n = _copy($c,$cx);
   $cx = [$last];
 
-  #$cx = _one();
   while (!(@$n == 1 && $n->[0] == $step))
     {
     _mul($c,$cx,$n); _dec($c,$n);
@@ -1284,21 +1234,21 @@ sub _fac
   $cx;
   }
 
-use constant DEBUG => 0;
-
-my $steps = 0;
-
-sub steps { $steps };
+# for debugging:
+  use constant DEBUG => 0;
+  my $steps = 0;
+  sub steps { $steps };
 
 sub _sqrt
   {
-  # square-root of $x
-  # ref to array, return ref to array
+  # square-root of $x in place
+  # Compute a guess of the result (rule of thumb), then improve it via
+  # Newton's method.
   my ($c,$x) = @_;
 
   if (scalar @$x == 1)
     {
-    # fit's into one Perl scalar
+    # fit's into one Perl scalar, so result can be computed directly
     $x->[0] = int(sqrt($x->[0]));
     return $x;
     } 
@@ -1307,17 +1257,17 @@ sub _sqrt
   # since our guess will "grow"
   my $l = int((_len($c,$x)-1) / 2);	
 
-  my $lastelem = $x->[-1];	# for guess
+  my $lastelem = $x->[-1];					# for guess
   my $elems = scalar @$x - 1;
   # not enough digits, but could have more?
-  if ((length($lastelem) <= 3) && ($elems > 1))	
+  if ((length($lastelem) <= 3) && ($elems > 1))
     {
     # right-align with zero pad
     my $len = length($lastelem) & 1;
     print "$lastelem => " if DEBUG;
     $lastelem .= substr($x->[-2] . '0' x $BASE_LEN,0,$BASE_LEN);
     # former odd => make odd again, or former even to even again
-    $lastelem = $lastelem / 10 if (length($lastelem) & 1) != $len;	
+    $lastelem = $lastelem / 10 if (length($lastelem) & 1) != $len;
     print "$lastelem\n" if DEBUG;
     }
 
@@ -1325,15 +1275,14 @@ sub _sqrt
   my $r = $l % $BASE_LEN;	# 10000 00000 00000 00000 ($BASE_LEN=5)
   $l = int($l / $BASE_LEN);
   print "l =  $l " if DEBUG;
-  
-  splice @$x,$l; 		# keep ref($x), but modify it
- 
+
+  splice @$x,$l;		# keep ref($x), but modify it
+
   # we make the first part of the guess not '1000...0' but int(sqrt($lastelem))
   # that gives us:
-  # 14400 00000 => sqrt(14400) => 120
-  # 144000 000000 => sqrt(144000) => 379
+  # 14400 00000 => sqrt(14400) => guess first digits to be 120
+  # 144000 000000 => sqrt(144000) => guess 379
 
-  # $x->[$l--] = int('1' . '0' x $r);			# old way of guessing
   print "$lastelem (elems $elems) => " if DEBUG;
   $lastelem = $lastelem / 10 if ($elems & 1 == 1);		# odd or even?
   my $g = sqrt($lastelem); $g =~ s/\.//;			# 2.345 => 2345
@@ -1343,11 +1292,11 @@ sub _sqrt
   $x->[$l--] = int(substr($g . '0' x $r,0,$r+1));
   print "now ",$x->[-1] if DEBUG;
   print " would have been ", int('1' . '0' x $r),"\n" if DEBUG;
-  
+
   # If @$x > 1, we could compute the second elem of the guess, too, to create
-  # an even better guess. Not implemented yet.
+  # an even better guess. Not implemented yet. Does it improve performance?
   $x->[$l--] = 0 while ($l >= 0);	# all other digits of guess are zero
- 
+
   print "start x= ",${_str($c,$x)},"\n" if DEBUG;
   my $two = _two();
   my $last = _zero();
@@ -1360,7 +1309,7 @@ sub _sqrt
     $last = _copy($c,$x);
     _add($c,$x, _div($c,_copy($c,$y),$x));
     _div($c,$x, $two );
-    print "      x= ",${_str($c,$x)},"\n" if DEBUG;
+    print " x= ",${_str($c,$x)},"\n" if DEBUG;
     }
   print "\nsteps in sqrt: $steps, " if DEBUG;
   _dec($c,$x) if _acmp($c,$y,_mul($c,_copy($c,$x),$x)) < 0;	# overshot? 
@@ -1600,38 +1549,35 @@ sub _from_bin
 ##############################################################################
 # special modulus functions
 
-# not ready yet, since it would need to deal with unsigned numbers
-sub _modinv1
+sub _modinv
   {
-  # inverse modulus
-  my ($c,$num,$mod) = @_;
+  # modular inverse
+  my ($c,$x,$y) = @_;
 
-  my $u = _zero(); my $u1 = _one();
-  my $a = _copy($c,$mod); my $b = _copy($c,$num);
+  my $u = _zero($c); my $u1 = _one($c);
+  my $a = _copy($c,$y); my $b = _copy($c,$x);
 
   # Euclid's Algorithm for bgcd(), only that we calc bgcd() ($a) and the
-  # result ($u) at the same time
+  # result ($u) at the same time. See comments in BigInt for why this works.
+  my $q;
+  ($a, $q, $b) = ($b, _div($c,$a,$b));		# step 1
+  my $sign = 1;
   while (!_is_zero($c,$b))
     {
-#    print ${_str($c,$a)}, " ", ${_str($c,$b)}, " ", ${_str($c,$u)}, " ",
-#     ${_str($c,$u1)}, "\n";
-    ($a, my $q, $b) = ($b, _div($c,$a,$b));
-#    print ${_str($c,$a)}, " ", ${_str($c,$q)}, " ", ${_str($c,$b)}, "\n";
-    # original: ($u,$u1) = ($u1, $u - $u1 * $q);
-    my $t = _copy($c,$u);
-    $u = _copy($c,$u1);
-    _mul($c,$u1,$q);
-    $u1 = _sub($t,$u1);
-#    print ${_str($c,$a)}, " ", ${_str($c,$b)}, " ", ${_str($c,$u)}, " ",
-#     ${_str($c,$u1)}, "\n";
+    my $t = _add($c, 				# step 2:
+       _mul($c,_copy($c,$u1), $q) ,		#  t =  u1 * q
+       $u );					#     + u
+    $u = $u1;					#  u = u1, u1 = t
+    $u1 = $t;
+    $sign = -$sign;
+    ($a, $q, $b) = ($b, _div($c,$a,$b));	# step 1
     }
 
   # if the gcd is not 1, then return NaN
-  return undef unless _is_one($c,$a);
-
-  $num = _mod($c,$u,$mod);
-#  print ${_str($c,$num)},"\n";
-  $num;
+  return (undef,undef) unless _is_one($c,$a);
+ 
+  $sign = $sign == 1 ? '+' : '-';
+  ($u1,$sign);
   }
 
 sub _modpow

@@ -10,7 +10,7 @@ BEGIN {
     require "test.pl";
 }
 
-print "1..75\n";
+print "1..78\n";
 
 @A::ISA = 'B';
 @B::ISA = 'C';
@@ -277,3 +277,18 @@ sub Bminor::test {
 Bminor->test('y', 'z');
 is("@X", "Amajor Bminor x y Bminor Bminor y z");
 
+package main;
+for my $meth (['Bar', 'Foo::Bar'],
+	      ['SUPER::Bar', 'main::SUPER::Bar'],
+	      ['Xyz::SUPER::Bar', 'Xyz::SUPER::Bar'])
+{
+    fresh_perl_is(<<EOT,
+package UNIVERSAL; sub AUTOLOAD { my \$c = shift; print "\$c \$AUTOLOAD\\n" }
+package Xyz;
+package main; Foo->$meth->[0]();
+EOT
+	"Foo $meth->[1]",
+	{ switches => [ '-w' ] },
+	"check if UNIVERSAL::AUTOLOAD works",
+    );
+}

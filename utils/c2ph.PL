@@ -184,9 +184,9 @@ declarations at least, but that's quite a bit.
 
 Prior to this point, anyone programming in perl who wanted to interact
 with C programs, like the kernel, was forced to guess the layouts of
-the C strutures, and then hardwire these into his program.  Of course,
+the C structures, and then hardwire these into his program.  Of course,
 when you took your wonderfully crafted program to a system where the
-sgtty structure was laid out differently, you program broke.  Which is
+sgtty structure was laid out differently, your program broke.  Which is
 a shame.
 
 We've had Larry's h2ph translator, which helped, but that only works on

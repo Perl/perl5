@@ -1,8 +1,8 @@
 # DB_File.pm -- Perl 5 interface to Berkeley DB 
 #
 # written by Paul Marquess (Paul.Marquess@btinternet.com)
-# last modified 1st March 2002
-# version 1.804
+# last modified 22nd October 2002
+# version 1.806
 #
 #     Copyright (c) 1995-2002 Paul Marquess. All rights reserved.
 #     This program is free software; you can redistribute it and/or
@@ -32,8 +32,13 @@ sub TIEHASH
 {
     my $pkg = shift ;
 
-    bless { VALID => { map {$_, 1} 
-		       qw( bsize ffactor nelem cachesize hash lorder)
+    bless { VALID => { 
+		       	bsize	  => 1,
+			ffactor	  => 1,
+			nelem	  => 1,
+			cachesize => 1,
+			hash	  => 2,
+			lorder	  => 1,
 		     }, 
 	    GOT   => {}
           }, $pkg ;
@@ -58,8 +63,12 @@ sub STORE
     my $key   = shift ;
     my $value = shift ;
 
-    if ( exists $self->{VALID}{$key} )
+    my $type = $self->{VALID}{$key};
+
+    if ( $type )
     {
+    	croak "Key '$key' not associated with a code reference" 
+	    if $type == 2 && !ref $value && ref $value ne 'CODE';
         $self->{GOT}{$key} = $value ;
         return ;
     }
@@ -132,9 +141,15 @@ sub TIEHASH
 {
     my $pkg = shift ;
 
-    bless { VALID => { map {$_, 1} 
-		       qw( flags cachesize maxkeypage minkeypage psize 
-			   compare prefix lorder )
+    bless { VALID => { 
+		      	flags	   => 1,
+			cachesize  => 1,
+			maxkeypage => 1,
+			minkeypage => 1,
+			psize	   => 1,
+			compare	   => 2,
+			prefix	   => 2,
+			lorder	   => 1,
 	    	     },
 	    GOT   => {},
           }, $pkg ;
@@ -150,7 +165,7 @@ our ($db_version, $use_XSLoader, $splice_end_array);
 use Carp;
 
 
-$VERSION = "1.804" ;
+$VERSION = "1.806" ;
 
 {
     local $SIG{__WARN__} = sub {$splice_end_array = "@_";};
@@ -247,6 +262,9 @@ sub tie_hash_or_array
 
     $arg[4] = tied %{ $arg[4] } 
 	if @arg >= 5 && ref $arg[4] && $arg[4] =~ /=HASH/ && tied %{ $arg[4] } ;
+
+    $arg[2] = O_CREAT()|O_RDWR() if @arg >=3 && ! defined $arg[2];
+    $arg[3] = 0666               if @arg >=4 && ! defined $arg[3];
 
     # make recno in Berkeley DB version 2 work like recno in version 1.
     if ($db_version > 1 and defined $arg[4] and $arg[4] =~ /RECNO/ and 

@@ -28,7 +28,7 @@ sub SWASHNEW {
     ## ranges.
     ##
     ## To make the parsing of $type clear, this code takes the a rather
-    ## unorthadox approach of last'ing out of the block once we have the
+    ## unorthodox approach of last'ing out of the block once we have the
     ## info we need. Were this to be a subroutine, the 'last' would just
     ## be a 'return'.
     ##
@@ -50,7 +50,9 @@ sub SWASHNEW {
             ##
             ## 'Block=' is replaced by 'In'.
             ##
-            $type =~ s/^Is(?:\s+|[-_])?//i
+            my $wasIs;
+
+            ($wasIs = $type =~ s/^Is(?:\s+|[-_])?//i)
               or
             $type =~ s/^Category\s*=\s*//i
               or
@@ -85,20 +87,17 @@ sub SWASHNEW {
 	    ## It could be a user-defined property.
 	    ##
 
-	    if ($type =~ /^I[ns](\w+)$/) {
-                my @caller = caller(1);
+	    my $caller = caller(1);
 
-                if (defined $caller[0]) {
-                    my $prop = $caller[0] . "::" . $type;
-
-                    if (exists &{$prop}) {
-                        no strict 'refs';
-
-                        $list = &{$prop};
-                        last GETFILE;
-                    }
-                }
-            }
+	    if (defined $caller && $type =~ /^(?:\w+)$/) {
+		my $prop = $caller . "::" . ( $wasIs ? "Is" : "" ) . $type;
+		if (exists &{$prop}) {
+		    no strict 'refs';
+		    
+		    $list = &{$prop};
+		    last GETFILE;
+		}
+	    }
 
             ##
             ## Last attempt -- see if it's a "To" name (e.g. "ToLower")
@@ -150,8 +149,10 @@ sub SWASHNEW {
 	no warnings;
 	$extras = join '', grep /^[^0-9a-fA-F]/, @tmp;
 	$list = join '',
-	    sort { hex $a <=> hex $b }
-	    grep {/^([0-9a-fA-F]+)/ and not $seen{$1}++} @tmp; # XXX doesn't do ranges right
+	    map  { $_->[1] }
+	    sort { $a->[0] <=> $b->[0] }
+	    map  { /^([0-9a-fA-F]+)/; [ hex($1), $_ ] }
+	    grep { /^([0-9a-fA-F]+)/ and not $seen{$1}++ } @tmp; # XXX doesn't do ranges right
     }
 
     if ($none) {

@@ -595,7 +595,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 
 		t = s - prog->check_offset_max;
 		if (s - strpos > prog->check_offset_max  /* signed-corrected t > strpos */
-		    && (!(prog->reganch & ROPT_UTF8)
+		    && (!do_utf8
 			|| ((t = reghopmaybe3_c(s, -(prog->check_offset_max), strpos))
 			    && t > strpos)))
 		    /* EMPTY */;
@@ -715,7 +715,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 
     t = s - prog->check_offset_max;
     if (s - strpos > prog->check_offset_max  /* signed-corrected t > strpos */
-        && (!(prog->reganch & ROPT_UTF8)
+        && (!do_utf8
 	    || ((t = reghopmaybe3_c(s, -prog->check_offset_max, strpos))
 		 && t > strpos))) {
 	/* Fixed substring is found far enough so that the match
@@ -2821,6 +2821,7 @@ S_regmatch(pTHX_ regnode *prog)
 		    MAGIC *mg = Null(MAGIC*);
 		    re_cc_state state;
 		    CHECKPOINT cp, lastcp;
+                    int toggleutf;
 
 		    if(SvROK(ret) || SvRMAGICAL(ret)) {
 			SV *sv = SvROK(ret) ? SvRV(ret) : ret;
@@ -2841,6 +2842,7 @@ S_regmatch(pTHX_ regnode *prog)
 			I32 onpar = PL_regnpar;
 
 			Zero(&pm, 1, PMOP);
+                        if (DO_UTF8(ret)) pm.op_pmdynflags |= PMdf_DYN_UTF8;
 			re = CALLREGCOMP(aTHX_ t, t + len, &pm);
 			if (!(SvFLAGS(ret)
 			      & (SVs_TEMP | SVs_PADTMP | SVf_READONLY)))
@@ -2873,6 +2875,9 @@ S_regmatch(pTHX_ regnode *prog)
 		    *PL_reglastcloseparen = 0;
 		    PL_reg_call_cc = &state;
 		    PL_reginput = locinput;
+		    toggleutf = ((PL_reg_flags & RF_utf8) != 0) ^
+				((re->reganch & ROPT_UTF8) != 0);
+		    if (toggleutf) PL_reg_flags ^= RF_utf8;
 
 		    /* XXXX This is too dramatic a measure... */
 		    PL_reg_maxiter = 0;
@@ -2887,6 +2892,7 @@ S_regmatch(pTHX_ regnode *prog)
 			PL_regcc = state.cc;
 			PL_reg_re = state.re;
 			cache_re(PL_reg_re);
+			if (toggleutf) PL_reg_flags ^= RF_utf8;
 
 			/* XXXX This is too dramatic a measure... */
 			PL_reg_maxiter = 0;
@@ -2903,6 +2909,7 @@ S_regmatch(pTHX_ regnode *prog)
 		    PL_regcc = state.cc;
 		    PL_reg_re = state.re;
 		    cache_re(PL_reg_re);
+		    if (toggleutf) PL_reg_flags ^= RF_utf8;
 
 		    /* XXXX This is too dramatic a measure... */
 		    PL_reg_maxiter = 0;
@@ -3682,14 +3689,14 @@ S_regmatch(pTHX_ regnode *prog)
 			/* If it could work, try it. */
 		        if (c == (UV)c1 || c == (UV)c2)
 		        {
-			    TRYPAREN(paren, n, PL_reginput);
+			    TRYPAREN(paren, ln, PL_reginput);
 			    REGCP_UNWIND(lastcp);
 		        }
 		    }
 		    /* If it could work, try it. */
 		    else if (c1 == -1000)
 		    {
-			TRYPAREN(paren, n, PL_reginput);
+			TRYPAREN(paren, ln, PL_reginput);
 			REGCP_UNWIND(lastcp);
 		    }
 		    /* Couldn't or didn't -- move forward. */

@@ -144,3 +144,28 @@ case "$rpathflag" in
 	done
 	;;
 esac
+
+case `uname -m` in
+alpha)
+    echo 'int main() {}' > try.c
+    gcc=`${cc:-cc} -v -c try.c 2>&1|grep 'gcc version egcs-2'`
+    case "$gcc" in
+    '' | "gcc version egcs-2.95."[3-9]*) ;; # 2.95.3 or better okay
+    *)	cat >&4 <<EOF
+***
+*** Your gcc ($gcc) is known to be
+*** too buggy on netbsd/alpha to compile Perl with optimization.
+*** It is suggested you install the lang/gcc package which should
+*** have at least gcc 2.95.3 which should work okay: use for example
+*** Configure -Dcc=/usr/pkg/gcc-2.95.3/bin/cc.  You could also
+*** Configure -Doptimize=-O0 to compile Perl without any optimization
+*** but that is not recommended.
+***
+EOF
+	exit 1
+	;;
+    esac
+    rm -f try.*
+    ;;
+esac
+

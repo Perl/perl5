@@ -214,7 +214,7 @@ PerlIO_fdupopen(pTHX_ PerlIO *f, CLONE_PARAMS *param, int flags)
 	return NULL;
     }
     else {
-	SETERRNO(EBADF, SS$_IVCHAN);
+	SETERRNO(EBADF, SS_IVCHAN);
     }
 #endif
     return NULL;
@@ -481,7 +481,7 @@ PerlIO_fdupopen(pTHX_ PerlIO *f, CLONE_PARAMS *param, int flags)
 	return new;
     }
     else {
-	SETERRNO(EBADF, SS$_IVCHAN);
+	SETERRNO(EBADF, SS_IVCHAN);
 	return NULL;
     }
 }
@@ -660,15 +660,23 @@ PerlIO_find_layer(pTHX_ const char *name, STRLEN len, int load)
     }
     if (load && PL_subname && PL_def_layerlist
 	&& PL_def_layerlist->cur >= 2) {
-	SV *pkgsv = newSVpvn("PerlIO", 6);
-	SV *layer = newSVpvn(name, len);
-	ENTER;
-	/*
-	 * The two SVs are magically freed by load_module
-	 */
-	Perl_load_module(aTHX_ 0, pkgsv, Nullsv, layer, Nullsv);
-	LEAVE;
-	return PerlIO_find_layer(aTHX_ name, len, 0);
+	if (PL_in_load_module) {
+	    Perl_croak(aTHX_ "Recursive call to Perl_load_module in PerlIO_find_layer");
+	    return NULL;
+	} else {
+	    SV *pkgsv = newSVpvn("PerlIO", 6);
+	    SV *layer = newSVpvn(name, len);
+	    ENTER;
+	    SAVEINT(PL_in_load_module);
+	    PL_in_load_module++;
+	    /*
+	     * The two SVs are magically freed by load_module
+	     */
+	    Perl_load_module(aTHX_ 0, pkgsv, Nullsv, layer, Nullsv);
+	    PL_in_load_module--;
+	    LEAVE;
+	    return PerlIO_find_layer(aTHX_ name, len, 0);
+	}
     }
     PerlIO_debug("Cannot find %.*s\n", (int) len, name);
     return NULL;
@@ -812,7 +820,7 @@ PerlIO_parse_layers(pTHX_ PerlIO_list_t *av, const char *names)
 			Perl_warner(aTHX_ packWARN(WARN_LAYER),
 			      "perlio: invalid separator character %c%c%c in layer specification list %s",
 			      q, *s, q, s);
-		    SETERRNO(EINVAL, LIB$_INVARG);
+		    SETERRNO(EINVAL, LIB_INVARG);
 		    return -1;
 		}
 		do {
@@ -1223,7 +1231,7 @@ PerlIO__close(pTHX_ PerlIO *f)
     if (PerlIOValid(f))
 	return (*PerlIOBase(f)->tab->Close) (aTHX_ f);
     else {
-	SETERRNO(EBADF, SS$_IVCHAN);
+	SETERRNO(EBADF, SS_IVCHAN);
 	return -1;
     }
 }
@@ -1247,7 +1255,7 @@ Perl_PerlIO_fileno(pTHX_ PerlIO *f)
     if (PerlIOValid(f))
 	return (*PerlIOBase(f)->tab->Fileno) (aTHX_ f);
     else {
-	SETERRNO(EBADF, SS$_IVCHAN);
+	SETERRNO(EBADF, SS_IVCHAN);
 	return -1;
     }
 }
@@ -1448,7 +1456,7 @@ Perl_PerlIO_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
     if (PerlIOValid(f))
 	return (*PerlIOBase(f)->tab->Read) (aTHX_ f, vbuf, count);
     else {
-	SETERRNO(EBADF, SS$_IVCHAN);
+	SETERRNO(EBADF, SS_IVCHAN);
 	return -1;
     }
 }
@@ -1459,7 +1467,7 @@ Perl_PerlIO_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
     if (PerlIOValid(f))
 	return (*PerlIOBase(f)->tab->Unread) (aTHX_ f, vbuf, count);
     else {
-	SETERRNO(EBADF, SS$_IVCHAN);
+	SETERRNO(EBADF, SS_IVCHAN);
 	return -1;
     }
 }
@@ -1470,7 +1478,7 @@ Perl_PerlIO_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
     if (PerlIOValid(f))
 	return (*PerlIOBase(f)->tab->Write) (aTHX_ f, vbuf, count);
     else {
-	SETERRNO(EBADF, SS$_IVCHAN);
+	SETERRNO(EBADF, SS_IVCHAN);
 	return -1;
     }
 }
@@ -1481,7 +1489,7 @@ Perl_PerlIO_seek(pTHX_ PerlIO *f, Off_t offset, int whence)
     if (PerlIOValid(f))
 	return (*PerlIOBase(f)->tab->Seek) (aTHX_ f, offset, whence);
     else {
-	SETERRNO(EBADF, SS$_IVCHAN);
+	SETERRNO(EBADF, SS_IVCHAN);
 	return -1;
     }
 }
@@ -1492,7 +1500,7 @@ Perl_PerlIO_tell(pTHX_ PerlIO *f)
     if (PerlIOValid(f))
 	return (*PerlIOBase(f)->tab->Tell) (aTHX_ f);
     else {
-	SETERRNO(EBADF, SS$_IVCHAN);
+	SETERRNO(EBADF, SS_IVCHAN);
 	return -1;
     }
 }
@@ -1508,13 +1516,13 @@ Perl_PerlIO_flush(pTHX_ PerlIO *f)
 	    }
 	    else {
 		PerlIO_debug("Cannot flush f=%p :%s\n", (void*)f, tab->name);
-		SETERRNO(EBADF, SS$_IVCHAN);
+		SETERRNO(EBADF, SS_IVCHAN);
 		return -1;
 	    }
 	}
 	else {
 	    PerlIO_debug("Cannot flush f=%p\n", (void*)f);
-	    SETERRNO(EBADF, SS$_IVCHAN);
+	    SETERRNO(EBADF, SS_IVCHAN);
 	    return -1;
 	}
     }
@@ -1566,7 +1574,7 @@ Perl_PerlIO_fill(pTHX_ PerlIO *f)
     if (PerlIOValid(f))
 	return (*PerlIOBase(f)->tab->Fill) (aTHX_ f);
     else {
-	SETERRNO(EBADF, SS$_IVCHAN);
+	SETERRNO(EBADF, SS_IVCHAN);
 	return -1;
     }
 }
@@ -1577,7 +1585,7 @@ PerlIO_isutf8(PerlIO *f)
     if (PerlIOValid(f))
 	return (PerlIOBase(f)->flags & PERLIO_F_UTF8) != 0;
     else {
-	SETERRNO(EBADF, SS$_IVCHAN);
+	SETERRNO(EBADF, SS_IVCHAN);
 	return -1;
     }
 }
@@ -1588,7 +1596,7 @@ Perl_PerlIO_eof(pTHX_ PerlIO *f)
     if (PerlIOValid(f))
 	return (*PerlIOBase(f)->tab->Eof) (aTHX_ f);
     else {
-	SETERRNO(EBADF, SS$_IVCHAN);
+	SETERRNO(EBADF, SS_IVCHAN);
 	return -1;
     }
 }
@@ -1599,7 +1607,7 @@ Perl_PerlIO_error(pTHX_ PerlIO *f)
     if (PerlIOValid(f))
 	return (*PerlIOBase(f)->tab->Error) (aTHX_ f);
     else {
-	SETERRNO(EBADF, SS$_IVCHAN);
+	SETERRNO(EBADF, SS_IVCHAN);
 	return -1;
     }
 }
@@ -1610,7 +1618,7 @@ Perl_PerlIO_clearerr(pTHX_ PerlIO *f)
     if (PerlIOValid(f))
 	(*PerlIOBase(f)->tab->Clearerr) (aTHX_ f);
     else
-	SETERRNO(EBADF, SS$_IVCHAN);
+	SETERRNO(EBADF, SS_IVCHAN);
 }
 
 void
@@ -1619,7 +1627,7 @@ Perl_PerlIO_setlinebuf(pTHX_ PerlIO *f)
     if (PerlIOValid(f))
 	(*PerlIOBase(f)->tab->Setlinebuf) (aTHX_ f);
     else
-	SETERRNO(EBADF, SS$_IVCHAN);
+	SETERRNO(EBADF, SS_IVCHAN);
 }
 
 int
@@ -1907,7 +1915,7 @@ PerlIOBase_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 	    l->flags |= PERLIO_F_TRUNCATE | PERLIO_F_CANWRITE;
 	    break;
 	default:
-	    SETERRNO(EINVAL, LIB$_INVARG);
+	    SETERRNO(EINVAL, LIB_INVARG);
 	    return -1;
 	}
 	while (*mode) {
@@ -1922,7 +1930,7 @@ PerlIOBase_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 		l->flags |= PERLIO_F_CRLF;
 		break;
 	    default:
-		SETERRNO(EINVAL, LIB$_INVARG);
+		SETERRNO(EINVAL, LIB_INVARG);
 		return -1;
 	    }
 	}
@@ -2233,7 +2241,7 @@ PerlIOUnix_oflags(const char *mode)
      */
     oflags |= O_BINARY;
     if (*mode || oflags == -1) {
-	SETERRNO(EINVAL, LIB$_INVARG);
+	SETERRNO(EINVAL, LIB_INVARG);
 	oflags = -1;
     }
     return oflags;
@@ -2401,7 +2409,7 @@ PerlIOUnix_close(pTHX_ PerlIO *f)
 	}
     }
     else {
-	SETERRNO(EBADF,SS$_IVCHAN);
+	SETERRNO(EBADF,SS_IVCHAN);
 	return -1;
     }
     while (PerlLIO_close(fd) != 0) {
@@ -3839,13 +3847,16 @@ PerlIOCrlf_get_cnt(pTHX_ PerlIO *f)
 			b->ptr++;       /* say we have read it as far as
 					 * flush() is concerned */
 			b->buf++;       /* Leave space in front of buffer */
+			/* Note as we have moved buf up flush's
+			   posn += ptr-buf
+			   will naturally make posn point at CR
+			 */
 			b->bufsiz--;    /* Buffer is thus smaller */
 			code = PerlIO_fill(f);  /* Fetch some more */
 			b->bufsiz++;    /* Restore size for next time */
 			b->buf--;       /* Point at space */
 			b->ptr = nl = b->buf;   /* Which is what we hand
 						 * off */
-			b->posn--;      /* Buffer starts here */
 			*nl = 0xd;      /* Fill in the CR */
 			if (code == 0)
 			    goto test;  /* fill() call worked */
@@ -4061,7 +4072,7 @@ PerlIOMmap_map(pTHX_ PerlIO *f)
 		if (!page_size) {
 #if defined(HAS_SYSCONF) && (defined(_SC_PAGESIZE) || defined(_SC_PAGE_SIZE))
 		    {
-			SETERRNO(0, SS$_NORMAL);
+			SETERRNO(0, SS_NORMAL);
 #   ifdef _SC_PAGESIZE
 			page_size = sysconf(_SC_PAGESIZE);
 #   else
@@ -4580,7 +4591,7 @@ PerlIO_setpos(PerlIO *f, SV *pos)
 	if (f && len == sizeof(Off_t))
 	    return PerlIO_seek(f, *posn, SEEK_SET);
     }
-    SETERRNO(EINVAL, SS$_IVCHAN);
+    SETERRNO(EINVAL, SS_IVCHAN);
     return -1;
 }
 #else
@@ -4600,7 +4611,7 @@ PerlIO_setpos(PerlIO *f, SV *pos)
 #endif
 	}
     }
-    SETERRNO(EINVAL, SS$_IVCHAN);
+    SETERRNO(EINVAL, SS_IVCHAN);
     return -1;
 }
 #endif

@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..46\n";
+print "1..47\n";
 
 $FS = ':';
 
@@ -273,4 +273,17 @@ print "ok 32\n";
       (not defined $x[1]) and
       $x[2] eq '2';
     print "ok 46\n";
+}
+
+{
+    # [perl #17064]
+    my $warn;
+    local $SIG{__WARN__} = sub { $warn = join '', @_; chomp $warn };
+    my $char = "\x{10f1ff}";
+    my @a = split /\r?\n/, "$char\n";
+    if (@a == 1 && $a[0] eq $char && !defined($warn)) {
+	print "ok 47\n";
+    } else {
+	print "not ok 47\t# <@a> <$warn>\n";
+    }
 }

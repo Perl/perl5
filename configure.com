@@ -2573,8 +2573,6 @@ $ IF .NOT. Has_socketshr .AND. .NOT. Has_Dec_C_Sockets
 $ THEN
 $   dflt = dflt - "Socket"            ! optional on VMS
 $ ENDIF
-$ IF .NOT. use_ithreads THEN dflt = dflt - "threads/shared"
-$ IF .NOT. use_ithreads THEN dflt = dflt - "threads"
 $ IF .NOT. use_threads  THEN dflt = dflt - "Thread"
 $ dflt = F$EDIT(dflt,"TRIM,COMPRESS")
 $!
@@ -3003,6 +3001,7 @@ $   d_frexpl = "define"
 $   d_isnan = "define"
 $   d_isnanl = "define"
 $   d_modfl = "define"
+$   d_modflproto = "define"
 $ ELSE
 $   d_PRId64 = "undef"
 $   d_PRIXU64 = "undef"
@@ -3023,6 +3022,7 @@ $   d_frexpl = "undef"
 $   d_isnan = "undef"
 $   d_isnanl = "undef"
 $   d_modfl = "undef"
+$   d_modflproto = "undef"
 $ ENDIF
 $!
 $! Now some that we build up
@@ -5326,6 +5326,7 @@ $ WC "d_mkstemps='" + d_mkstemps + "'"
 $ WC "d_mktime='" + d_mktime + "'"
 $ WC "d_mmap='" + d_mmap + "'"
 $ WC "d_modfl='" + d_modfl + "'"
+$ WC "d_modflproto='" + d_modflproto + "'"
 $ WC "d_modfl_pow32_bug='undef'"
 $ WC "d_mprotect='" + d_mprotect + "'"
 $ WC "d_msg='undef'"
@@ -5488,6 +5489,7 @@ $ WC "d_unlink_all_versions='undef'"
 $ WC "d_unordered='undef'"
 $ WC "d_usleep='" + d_usleep + "'"
 $ WC "d_usleepproto='" + d_usleep + "'"
+$ WC "d_nanosleep='undef'"
 $ WC "d_ustat='undef'"
 $ WC "d_vendorarch='undef'"
 $ WC "d_vendorlib='undef'"

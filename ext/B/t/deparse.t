@@ -15,7 +15,7 @@ use warnings;
 use strict;
 use Config;
 
-print "1..17\n";
+print "1..18\n";
 
 use B::Deparse;
 my $deparse = B::Deparse->new() or print "not ";
@@ -193,3 +193,6 @@ $_ .= <ARGV> . <$foo>;
 ####
 # 14
 my $foo = "Ab\x{100}\200\x{200}\377Cd\000Ef\x{1000}\cA\x{2000}\cZ";
+####
+# 15
+s/x/'y';/e;

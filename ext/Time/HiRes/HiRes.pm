@@ -4,15 +4,18 @@ use strict;
 use vars qw($VERSION $XS_VERSION @ISA @EXPORT @EXPORT_OK $AUTOLOAD);
 
 require Exporter;
-use XSLoader;
+require DynaLoader;
 
-@ISA = qw(Exporter);
+@ISA = qw(Exporter DynaLoader);
 
 @EXPORT = qw( );
 @EXPORT_OK = qw (usleep sleep ualarm alarm gettimeofday time tv_interval
-		 getitimer setitimer ITIMER_REAL ITIMER_VIRTUAL ITIMER_PROF);
-
-$VERSION = '1.20_00';
+		 getitimer setitimer
+		 ITIMER_REAL ITIMER_VIRTUAL ITIMER_PROF ITIMER_REALPROF
+		 d_usleep d_ualarm d_gettimeofday d_getitimer d_setitimer
+		 d_nanosleep);
+	
+$VERSION = '1.38';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -31,7 +34,7 @@ sub AUTOLOAD {
     goto &$AUTOLOAD;
 }
 
-XSLoader::load 'Time::HiRes', $XS_VERSION;
+bootstrap Time::HiRes;
 
 # Preloaded methods go here.
 
@@ -75,7 +78,7 @@ Time::HiRes - High resolution alarm, sleep, gettimeofday, interval timers
   alarm ($floating_seconds, $floating_interval);
 
   use Time::HiRes qw( setitimer getitimer
-		      ITIMER_REAL ITIMER_VIRTUAL ITIMER_PROF );
+		      ITIMER_REAL ITIMER_VIRTUAL ITIMER_PROF ITIMER_REALPROF );
 
   setitimer ($which, $floating_seconds, $floating_interval );
   getitimer ($which);
@@ -85,15 +88,28 @@ Time::HiRes - High resolution alarm, sleep, gettimeofday, interval timers
 The C<Time::HiRes> module implements a Perl interface to the usleep,
 ualarm, gettimeofday, and setitimer/getitimer system calls. See the
 EXAMPLES section below and the test scripts for usage; see your system
-documentation for the description of the underlying usleep, ualarm,
-gettimeofday, and setitimer/getitimer calls.
+documentation for the description of the underlying nanosleep or usleep,
+ualarm, gettimeofday, and setitimer/getitimer calls.
 
 If your system lacks gettimeofday(2) or an emulation of it you don't
-get gettimeofday() or the one-arg form of tv_interval().
-If you don't have usleep(3) or select(2) you don't get usleep()
+get gettimeofday() or the one-arg form of tv_interval().  If you don't
+have nanosleep() or usleep(3) or select(2) you don't get Time::HiRes::usleep()
 or sleep().  If your system don't have ualarm(3) or setitimer(2) you
-don't get ualarm() or alarm().  If you try to import an unimplemented
-function in the C<use> statement it will fail at compile time.
+don't get Time::HiRes::ualarm() or alarm().
+
+If you try to import an unimplemented function in the C<use> statement
+it will fail at compile time.
+
+If your subsecond sleeping is implemented with nanosleep() instead of
+usleep(), you can mix subsecond sleeping with signals since
+nanosleep() does not use signals.  This, however, is unportable
+behavior, and you should first check for the truth value of
+C<&Time::HiRes::d_nanosleep> to see whether you have nanosleep,
+and then read carefully your nanosleep() C API documentation for
+any peculiarities.  (There is no separate interface to call nanosleep();
+just use Time::HiRes::sleep() or usleep() with small enough values.  Also,
+think twice whether using nanosecond accuracies in a Perl program is what
+you should be doing.)
 
 The following functions can be imported from this module.
 No functions are exported by default.
@@ -160,11 +176,17 @@ provided with perl, see the EXAMPLES below.
 
 =item alarm ( $floating_seconds [, $interval_floating_seconds ] )
 
-The SIGALRM signal is sent after the specfified number of seconds.
+The SIGALRM signal is sent after the specified number of seconds.
 Implemented using ualarm().  The $interval_floating_seconds argument
 is optional and will be 0 if unspecified, resulting in alarm()-like
 behaviour.  This function can be imported, resulting in a nice drop-in
 replacement for the C<alarm> provided with perl, see the EXAMPLES below.
+
+B<NOTE 1>: With some platform - Perl release combinations select()
+gets restarted by SIGALRM, instead of dropping out of select().
+This means that an alarm() followed by a select() may together take
+the sum of the times specified for the the alarm() and the select(),
+not just the time of the alarm().
 
 =item setitimer 
 
@@ -183,8 +205,12 @@ In scalar context, the remaining time in the timer is returned.
 
 In list context, both the remaining time and the interval are returned.
 
-There are three interval timers: the $which can be ITIMER_REAL,
-ITIMER_VIRTUAL, or ITIMER_PROF.
+There are usually three or four interval timers available: the $which
+can be ITIMER_REAL, ITIMER_VIRTUAL, ITIMER_PROF, or ITIMER_REALPROF.
+Note that which ones are available depends: true UNIX platforms have
+usually all first three, but for example Win32 and Cygwin only have
+ITIMER_REAL, and only Solaris seems to have ITIMER_REALPROF (which is
+used to profile multithreaded programs).
 
 ITIMER_REAL results in alarm()-like behavior.  Time is counted in
 I<real time>, that is, wallclock time.  SIGALRM is delivered when
@@ -300,58 +326,13 @@ R. Schertler <roderick@argon.org>
 J. Hietaniemi <jhi@iki.fi>
 G. Aas <gisle@aas.no>
 
-=head1 REVISION
+=head1 COPYRIGHT AND LICENSE
 
-$Id: HiRes.pm,v 1.20 1999/03/16 02:26:13 wegscd Exp $
+Copyright (c) 1996-2002 Douglas E. Wegscheid.  All rights reserved.
 
-$Log: HiRes.pm,v $
-Revision 1.20  1999/03/16 02:26:13  wegscd
-Add documentation for NVTime and U2Time.
+Copyright (c) 2002 Jarkko Hietaniemi.  All rights reserved.
 
-Revision 1.19  1998/09/30 02:34:42  wegscd
-No changes, bump version.
-
-Revision 1.18  1998/07/07 02:41:35  wegscd
-No changes, bump version.
-
-Revision 1.17  1998/07/02 01:45:13  wegscd
-Bump version to 1.17
-
-Revision 1.16  1997/11/13 02:06:36  wegscd
-version bump to accomodate HiRes.xs fix.
-
-Revision 1.15  1997/11/11 02:17:59  wegscd
-POD editing, courtesy of Gisle Aas.
-
-Revision 1.14  1997/11/06 03:14:35  wegscd
-Update version # for Makefile.PL and HiRes.xs changes.
-
-Revision 1.13  1997/11/05 05:36:25  wegscd
-change version # for Makefile.pl and HiRes.xs changes.
-
-Revision 1.12  1997/10/13 20:55:33  wegscd
-Force a new version for Makefile.PL changes.
-
-Revision 1.11  1997/09/05 19:59:33  wegscd
-New version to bump version for README and Makefile.PL fixes.
-Fix bad RCS log.
-
-Revision 1.10  1997/05/23 01:11:38  wegscd
-Conditional compilation; EXPORT_FAIL fixes.
-
-Revision 1.2  1996/12/30 13:28:40  wegscd
-Update documentation for what to do when missing ualarm() and friends.
-
-Revision 1.1  1996/10/17 20:53:31  wegscd
-Fix =head1 being next to __END__ so pod2man works
-
-Revision 1.0  1996/09/03 18:25:15  wegscd
-Initial revision
-
-=head1 COPYRIGHT
-
-Copyright (c) 1996-1997 Douglas E. Wegscheid.
-All rights reserved. This program is free software; you can
-redistribute it and/or modify it under the same terms as Perl itself.
+This program is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
 
 =cut

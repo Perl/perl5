@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq9 - Networking ($Revision: 1.9 $, $Date: 2002/04/07 18:46:13 $)
+perlfaq9 - Networking ($Revision: 1.13 $, $Date: 2002/11/13 06:07:58 $)
 
 =head1 DESCRIPTION
 
@@ -156,6 +156,8 @@ C<HTML::LinkExtor> or C<HTML::Parser>.  You might even use
 C<HTML::SimpleLinkExtor> as an example for something specifically
 suited to your needs.
 
+You can use URI::Find to extract URLs from an arbitrary text document.
+
 Less complete solutions involving regular expressions can save 
 you a lot of processing time if you know that the input is simple.  One
 solution from Tom Christiansen runs 100 times faster than most
@@ -173,10 +175,17 @@ attribute is HREF and there are no other attributes.
 
 =head2 How do I download a file from the user's machine?  How do I open a file on another machine?
 
-In the context of an HTML form, you can use what's known as
-B<multipart/form-data> encoding.  The CGI.pm module (available from
-CPAN) supports this in the start_multipart_form() method, which isn't
-the same as the startform() method.
+In this case, download means to use the file upload feature of HTML
+forms.  You allow the web surfer to specify a file to send to your web
+server.  To you it looks like a download, and to the user it looks
+like an upload.  No matter what you call it, you do it with what's
+known as B<multipart/form-data> encoding.  The CGI.pm module (which
+comes with Perl as part of the Standard Library) supports this in the
+start_multipart_form() method, which isn't the same as the startform()
+method.
+
+See the section in the CGI.pm documentation on file uploads for code
+examples and details.
 
 =head2 How do I make a pop-up menu in HTML?
 
@@ -298,8 +307,11 @@ an absolute URLpath.
 
 =head2 How do I put a password on my web pages?
 
-That depends.  You'll need to read the documentation for your web
-server, or perhaps check some of the other FAQs referenced above.
+To enable authentication for your web server, you need to configure
+your web server.  The configuration is different for different sorts
+of web servers---apache does it differently from iPlanet which does
+it differently from IIS.  Check your web server documentation for
+the details for your particular server.
 
 =head2 How do I edit my .htpasswd and .htgroup files with Perl?
 
@@ -376,6 +388,14 @@ address is valid.  Even if you apply the mail header standard, you
 can have problems, because there are deliverable addresses that aren't
 RFC-822 (the mail header standard) compliant, and addresses that aren't
 deliverable which are compliant.
+
+You can use the Email::Valid or RFC::RFC822::Address which check
+the format of the address, although they cannot actually tell you
+if it is a deliverable address (i.e. that mail to the address
+will not bounce).  Modules like Mail::CheckUser and Mail::EXPN
+try to interact with the domain name system or particular
+mail servers to learn even more, but their methods do not
+work everywhere---especially for security conscious administrators.
 
 Many are tempted to try to eliminate many frequently-invalid
 mail addresses with a simple regex, such as

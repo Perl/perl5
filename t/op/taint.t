@@ -124,7 +124,7 @@ my $echo = "$Invoke_Perl $ECHO";
 
 my $TEST = catfile(curdir(), 'TEST');
 
-print "1..205\n";
+print "1..206\n";
 
 # First, let's make sure that Perl is checking the dangerous
 # environment variables. Maybe they aren't set yet, so we'll
@@ -894,8 +894,8 @@ else {
     my @untainted;
     while (my ($k, $v) = each %ENV) {
 	if (!tainted($v) &&
-	    # These we have untainted explicitly earlier.
-	    $k !~ /^(BASH_ENV|CDPATH|ENV|IFS|PATH|TEMP|TERM|TMP)$/) {
+	    # These we have explicitly untainted or set earlier.
+	    $k !~ /^(BASH_ENV|CDPATH|ENV|IFS|PATH|PERL_CORE|TEMP|TERM|TMP)$/) {
 	    push @untainted, "# '$k' = '$v'\n";
 	}
     }
@@ -941,9 +941,7 @@ else
 {
     # bug 20020208.005 plus some extras
     # single arg exec/system are tests 80-83
-    use if $] lt '5.009', warnings => FATAL => 'taint';
-    my $err = $] ge '5.009' ? qr/^Insecure dependency/ 
-                            : qr/^Use of tainted arguments/;
+    my $err = qr/^Insecure dependency/ ;
     test 184, eval { exec $TAINT, $TAINT } eq '', 'exec';
     test 185, $@ =~ $err, $@;
     test 186, eval { exec $TAINT $TAINT } eq '', 'exec';
@@ -972,4 +970,11 @@ else
     test 205, $@ eq '';
 
     # If you add tests here update also the above skip block for VMS.
+}
+
+{
+    # [ID 20020704.001] taint propagation failure
+    use re 'taint';
+    $TAINT =~ /(.*)/;
+    test 206, tainted(my $foo = $1);
 }

@@ -446,6 +446,7 @@ BOOT:
 
 #define B_main_cv()	PL_main_cv
 #define B_init_av()	PL_initav
+#define B_check_av()	PL_checkav_save
 #define B_begin_av()	PL_beginav_save
 #define B_end_av()	PL_endav
 #define B_main_root()	PL_main_root
@@ -461,6 +462,9 @@ BOOT:
 
 B::AV
 B_init_av()
+
+B::AV
+B_check_av()
 
 B::AV
 B_begin_av()
@@ -1073,6 +1077,15 @@ MODULE = B	PACKAGE = B::MAGIC	PREFIX = Mg
 B::MAGIC
 MgMOREMAGIC(mg)
 	B::MAGIC	mg
+     CODE:
+	if( MgMOREMAGIC(mg) ) {
+	    RETVAL = MgMOREMAGIC(mg);
+	}
+	else {
+	    XSRETURN_UNDEF;
+	}
+     OUTPUT:
+	RETVAL
 
 U16
 MgPRIVATE(mg)

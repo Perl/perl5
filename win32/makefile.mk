@@ -34,7 +34,7 @@ INST_TOP	*= $(INST_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-INST_VER	*= \5.8.0
+INST_VER	*= \5.9.0
 
 #
 # Comment this out if you DON'T want your perl installation to have
@@ -98,6 +98,9 @@ CCTYPE		*= MSVC60
 #CCTYPE		*= BORLAND
 # mingw32+gcc-2.95.2 or better
 #CCTYPE		*= GCC
+# Uncomment this if you are using the latest MinGW release (2.0.0)
+# with gcc3.2
+#USE_GCC_V3_2	*= define
 
 #
 # uncomment this if your Borland compiler is older than v5.4.
@@ -388,6 +391,9 @@ LINK_FLAGS	+= -L"$(CCLIBDIR)\Release"
 
 CC		= gcc
 LINK32		= gcc
+.IF "$(USE_GCC_V3_2)" == "define"
+LINK32		= g++
+.END
 LIB32		= ar rc
 IMPLIB		= dlltool
 RSC		= rc
@@ -666,6 +672,7 @@ MICROCORE_SRC	=		\
 		..\mg.c		\
 		..\numeric.c	\
 		..\op.c		\
+		..\pad.c	\
 		..\perl.c	\
 		..\perlapi.c	\
 		..\perly.c	\
@@ -1128,6 +1135,7 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\README.netware	..\pod\perlnetware.pod
 	copy ..\README.os2	..\pod\perlos2.pod
 	copy ..\README.os390	..\pod\perlos390.pod
+	copy ..\README.os400	..\pod\perlos400.pod
 	copy ..\README.plan9	..\pod\perlplan9.pod
 	copy ..\README.qnx	..\pod\perlqnx.pod
 	copy ..\README.solaris	..\pod\perlsolaris.pod
@@ -1180,7 +1188,7 @@ distclean: clean
 	    perldos.pod perlepoc.pod perlfreebsd.pod perlhpux.pod perlhurd.pod \
 	    perlirix.pod perlmachten.pod perlmint.pod \
 	    perlmacos.pod perlmpeix.pod perlnetware.pod \
-	    perlos2.pod perlos390.pod \
+	    perlos2.pod perlos390.pod perlos400.pod \
 	    perlplan9.pod perlqnx.pod \
 	    perlsolaris.pod perltru64.pod perluts.pod \
 	    perlvmesa.pod perlvms.pod perlvos.pod \

@@ -38,7 +38,8 @@ B<NOTE>: using the file tests for security purposes is a lost cause
 from the start: there is a window open for race conditions (who is to
 say that the permissions will not change between the test and the real
 operation?).  Therefore if you are serious about security, just try
-the real operation and test for its success.  Think atomicity.
+the real operation and test for its success - think in terms of atomic
+operations.
 
 =head2 subpragma access
 

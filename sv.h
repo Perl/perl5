@@ -152,7 +152,7 @@ perform the upgrade if necessary.  See C<svtype>.
 #  define ATOMIC_DEC_AND_TEST(res, count) (res = (--count == 0))
 #endif /* USE_5005THREADS */
 
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC)
 #  define SvREFCNT_inc(sv)		\
     ({					\
 	SV *nsv = (SV*)(sv);		\
@@ -207,7 +207,7 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SVp_POK		0x04000000	/* has valid non-public pointer value */
 #define SVp_SCREAM	0x08000000	/* has been studied? */
 
-#define SVf_UTF8        0x20000000      /* SvPVX is UTF-8 encoded */
+#define SVf_UTF8        0x20000000      /* SvPV is UTF-8 encoded */
 
 #define SVf_THINKFIRST	(SVf_READONLY|SVf_ROK|SVf_FAKE)
 
@@ -216,7 +216,7 @@ perform the upgrade if necessary.  See C<svtype>.
 
 #define SVf_AMAGIC	0x10000000      /* has magical overloaded methods */
 
-#define PRIVSHIFT 8
+#define PRIVSHIFT 8	/* (SVp_?OK >> PRIVSHIFT) == SVf_?OK */
 
 /* Some private flags. */
 
@@ -995,7 +995,7 @@ otherwise.
 #define SvPVutf8x_force(sv, lp) sv_pvutf8n_force(sv, &lp)
 #define SvPVbytex_force(sv, lp) sv_pvbyten_force(sv, &lp)
 
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC)
 
 #  define SvIVx(sv) ({SV *nsv = (SV*)(sv); SvIV(nsv); })
 #  define SvUVx(sv) ({SV *nsv = (SV*)(sv); SvUV(nsv); })

@@ -256,183 +256,159 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
  * arg. Show regex, up to a maximum length. If it's too long, chop and add
  * "...".
  */
-#define	FAIL(msg)                                                             \
-    STMT_START {                                                             \
-        char *ellipses = "";                                                 \
-        IV len = RExC_end - RExC_precomp;                                \
-                                                                             \
-	if (!SIZE_ONLY)                                                      \
-	    SAVEDESTRUCTOR_X(clear_re,(void*)RExC_rx);                 \
-                                                                             \
-	if (len > RegexLengthToShowInErrorMessages) {                        \
-            /* chop 10 shorter than the max, to ensure meaning of "..." */   \
-	    len = RegexLengthToShowInErrorMessages - 10;                     \
-	    ellipses = "...";                                                \
-	}                                                                    \
-	Perl_croak(aTHX_ "%s in regex m/%.*s%s/",                            \
-		   msg, (int)len, RExC_precomp, ellipses);                  \
-    } STMT_END
+#define	FAIL(msg) STMT_START {						\
+    char *ellipses = "";						\
+    IV len = RExC_end - RExC_precomp;					\
+									\
+    if (!SIZE_ONLY)							\
+	SAVEDESTRUCTOR_X(clear_re,(void*)RExC_rx);			\
+    if (len > RegexLengthToShowInErrorMessages) {			\
+	/* chop 10 shorter than the max, to ensure meaning of "..." */	\
+	len = RegexLengthToShowInErrorMessages - 10;			\
+	ellipses = "...";						\
+    }									\
+    Perl_croak(aTHX_ "%s in regex m/%.*s%s/",				\
+	    msg, (int)len, RExC_precomp, ellipses);			\
+} STMT_END
 
 /*
  * Calls SAVEDESTRUCTOR_X if needed, then calls Perl_croak with the given
  * args. Show regex, up to a maximum length. If it's too long, chop and add
  * "...".
  */
-#define	FAIL2(pat,msg)                                                        \
-    STMT_START {                                                             \
-        char *ellipses = "";                                                 \
-        IV len = RExC_end - RExC_precomp;                                \
-                                                                             \
-	if (!SIZE_ONLY)                                                      \
-	    SAVEDESTRUCTOR_X(clear_re,(void*)RExC_rx);                 \
-                                                                             \
-	if (len > RegexLengthToShowInErrorMessages) {                        \
-            /* chop 10 shorter than the max, to ensure meaning of "..." */   \
-	    len = RegexLengthToShowInErrorMessages - 10;                     \
-	    ellipses = "...";                                                \
-	}                                                                    \
-	S_re_croak2(aTHX_ pat, " in regex m/%.*s%s/",                        \
-		    msg, (int)len, RExC_precomp, ellipses);                \
-    } STMT_END
+#define	FAIL2(pat,msg) STMT_START {					\
+    char *ellipses = "";						\
+    IV len = RExC_end - RExC_precomp;					\
+									\
+    if (!SIZE_ONLY)							\
+	SAVEDESTRUCTOR_X(clear_re,(void*)RExC_rx);			\
+    if (len > RegexLengthToShowInErrorMessages) {			\
+	/* chop 10 shorter than the max, to ensure meaning of "..." */	\
+	len = RegexLengthToShowInErrorMessages - 10;			\
+	ellipses = "...";						\
+    }									\
+    S_re_croak2(aTHX_ pat, " in regex m/%.*s%s/",			\
+	    msg, (int)len, RExC_precomp, ellipses);			\
+} STMT_END
 
 
 /*
  * Simple_vFAIL -- like FAIL, but marks the current location in the scan
  */
-#define	Simple_vFAIL(m)                                                      \
-    STMT_START {                                                             \
-      IV offset = RExC_parse - RExC_precomp; \
-                                                                             \
-      Perl_croak(aTHX_ "%s" REPORT_LOCATION,               \
-		 m, (int)offset, RExC_precomp, RExC_precomp + offset);     \
-    } STMT_END
+#define	Simple_vFAIL(m) STMT_START {					\
+    IV offset = RExC_parse - RExC_precomp;				\
+    Perl_croak(aTHX_ "%s" REPORT_LOCATION,				\
+	    m, (int)offset, RExC_precomp, RExC_precomp + offset);	\
+} STMT_END
 
 /*
  * Calls SAVEDESTRUCTOR_X if needed, then Simple_vFAIL()
  */
-#define	vFAIL(m)                                                             \
-    STMT_START {                                                             \
-      if (!SIZE_ONLY)                                                        \
-	    SAVEDESTRUCTOR_X(clear_re,(void*)RExC_rx);                 \
-      Simple_vFAIL(m);                                                       \
-    } STMT_END
+#define	vFAIL(m) STMT_START {				\
+    if (!SIZE_ONLY)					\
+	SAVEDESTRUCTOR_X(clear_re,(void*)RExC_rx);	\
+    Simple_vFAIL(m);					\
+} STMT_END
 
 /*
  * Like Simple_vFAIL(), but accepts two arguments.
  */
-#define	Simple_vFAIL2(m,a1)                                                  \
-    STMT_START {                                                             \
-      IV offset = RExC_parse - RExC_precomp; \
-                                                                             \
-      S_re_croak2(aTHX_ m, REPORT_LOCATION, a1,       \
-		  (int)offset, RExC_precomp, RExC_precomp + offset);       \
-    } STMT_END
+#define	Simple_vFAIL2(m,a1) STMT_START {			\
+    IV offset = RExC_parse - RExC_precomp;			\
+    S_re_croak2(aTHX_ m, REPORT_LOCATION, a1,			\
+	    (int)offset, RExC_precomp, RExC_precomp + offset);	\
+} STMT_END
 
 /*
  * Calls SAVEDESTRUCTOR_X if needed, then Simple_vFAIL2().
  */
-#define	vFAIL2(m,a1)                                                         \
-    STMT_START {                                                             \
-      if (!SIZE_ONLY)                                                        \
-	    SAVEDESTRUCTOR_X(clear_re,(void*)RExC_rx);                 \
-      Simple_vFAIL2(m, a1);                                                  \
-    } STMT_END
+#define	vFAIL2(m,a1) STMT_START {			\
+    if (!SIZE_ONLY)					\
+	SAVEDESTRUCTOR_X(clear_re,(void*)RExC_rx);	\
+    Simple_vFAIL2(m, a1);				\
+} STMT_END
 
 
 /*
  * Like Simple_vFAIL(), but accepts three arguments.
  */
-#define	Simple_vFAIL3(m, a1, a2)                                             \
-    STMT_START {                                                             \
-      IV offset = RExC_parse - RExC_precomp; \
-                                                                             \
-      S_re_croak2(aTHX_ m, REPORT_LOCATION, a1, a2,   \
-		  (int)offset, RExC_precomp, RExC_precomp + offset);       \
-    } STMT_END
+#define	Simple_vFAIL3(m, a1, a2) STMT_START {			\
+    IV offset = RExC_parse - RExC_precomp;			\
+    S_re_croak2(aTHX_ m, REPORT_LOCATION, a1, a2,		\
+	    (int)offset, RExC_precomp, RExC_precomp + offset);	\
+} STMT_END
 
 /*
  * Calls SAVEDESTRUCTOR_X if needed, then Simple_vFAIL3().
  */
-#define	vFAIL3(m,a1,a2)                                                      \
-    STMT_START {                                                             \
-      if (!SIZE_ONLY)                                                        \
-	    SAVEDESTRUCTOR_X(clear_re,(void*)RExC_rx);                 \
-      Simple_vFAIL3(m, a1, a2);                                              \
-    } STMT_END
+#define	vFAIL3(m,a1,a2) STMT_START {			\
+    if (!SIZE_ONLY)					\
+	SAVEDESTRUCTOR_X(clear_re,(void*)RExC_rx);	\
+    Simple_vFAIL3(m, a1, a2);				\
+} STMT_END
 
 /*
  * Like Simple_vFAIL(), but accepts four arguments.
  */
-#define	Simple_vFAIL4(m, a1, a2, a3)                                         \
-    STMT_START {                                                             \
-      IV offset = RExC_parse - RExC_precomp; \
-                                                                             \
-      S_re_croak2(aTHX_ m, REPORT_LOCATION, a1, a2, a3,\
-		  (int)offset, RExC_precomp, RExC_precomp + offset);       \
-    } STMT_END
+#define	Simple_vFAIL4(m, a1, a2, a3) STMT_START {		\
+    IV offset = RExC_parse - RExC_precomp;			\
+    S_re_croak2(aTHX_ m, REPORT_LOCATION, a1, a2, a3,		\
+	    (int)offset, RExC_precomp, RExC_precomp + offset);	\
+} STMT_END
 
 /*
  * Like Simple_vFAIL(), but accepts five arguments.
  */
-#define	Simple_vFAIL5(m, a1, a2, a3, a4)                                     \
-    STMT_START {                                                             \
-      IV offset = RExC_parse - RExC_precomp; \
-      S_re_croak2(aTHX_ m, REPORT_LOCATION, a1, a2, a3, a4,\
-		  (int)offset, RExC_precomp, RExC_precomp + offset);       \
-    } STMT_END
+#define	Simple_vFAIL5(m, a1, a2, a3, a4) STMT_START {		\
+    IV offset = RExC_parse - RExC_precomp;			\
+    S_re_croak2(aTHX_ m, REPORT_LOCATION, a1, a2, a3, a4,	\
+	    (int)offset, RExC_precomp, RExC_precomp + offset);	\
+} STMT_END
 
 
-#define	vWARN(loc,m)                                                         \
-    STMT_START {                                                             \
-        IV offset = loc - RExC_precomp;          \
-	Perl_warner(aTHX_ packWARN(WARN_REGEXP), "%s" REPORT_LOCATION,\
-		 m, (int)offset, RExC_precomp, RExC_precomp + offset);          \
-    } STMT_END                                                               \
+#define	vWARN(loc,m) STMT_START {					\
+    IV offset = loc - RExC_precomp;					\
+    Perl_warner(aTHX_ packWARN(WARN_REGEXP), "%s" REPORT_LOCATION,	\
+	    m, (int)offset, RExC_precomp, RExC_precomp + offset);	\
+} STMT_END
 
-#define	vWARNdep(loc,m)                                                         \
-    STMT_START {                                                             \
-        IV offset = loc - RExC_precomp;          \
-	Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_REGEXP), "%s" REPORT_LOCATION,\
-		 m, (int)offset, RExC_precomp, RExC_precomp + offset);          \
-    } STMT_END                                                               \
+#define	vWARNdep(loc,m) STMT_START {					\
+    IV offset = loc - RExC_precomp;					\
+    Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_REGEXP),		\
+	    "%s" REPORT_LOCATION,					\
+	    m, (int)offset, RExC_precomp, RExC_precomp + offset);	\
+} STMT_END
 
 
-#define	vWARN2(loc, m, a1)                                                   \
-    STMT_START {                                                             \
-        IV offset = loc - RExC_precomp;          \
-	Perl_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,\
-                 a1,                                                         \
-		 (int)offset, RExC_precomp, RExC_precomp + offset);        \
-    } STMT_END
+#define	vWARN2(loc, m, a1) STMT_START {					\
+    IV offset = loc - RExC_precomp;					\
+    Perl_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,		\
+	    a1, (int)offset, RExC_precomp, RExC_precomp + offset);	\
+} STMT_END
 
-#define	vWARN3(loc, m, a1, a2)                                               \
-    STMT_START {                                                             \
-      IV offset = loc - RExC_precomp;        \
-	Perl_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,                    \
-                 a1, a2,                                                     \
-		 (int)offset, RExC_precomp, RExC_precomp + offset);        \
-    } STMT_END
+#define	vWARN3(loc, m, a1, a2) STMT_START {				\
+    IV offset = loc - RExC_precomp;					\
+    Perl_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,		\
+	    a1, a2, (int)offset, RExC_precomp, RExC_precomp + offset);	\
+} STMT_END
 
-#define	vWARN4(loc, m, a1, a2, a3)                                           \
-    STMT_START {                                                             \
-      IV offset = loc - RExC_precomp;            \
-	Perl_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,\
-                 a1, a2, a3,                                                 \
-		 (int)offset, RExC_precomp, RExC_precomp + offset);        \
-    } STMT_END
+#define	vWARN4(loc, m, a1, a2, a3) STMT_START {				\
+    IV offset = loc - RExC_precomp;					\
+    Perl_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,		\
+	    a1, a2, a3, (int)offset, RExC_precomp, RExC_precomp + offset); \
+} STMT_END
 
-/* used for the parse_flags section for (?c) -- japhy */
-#define	vWARN5(loc, m, a1, a2, a3, a4)                                       \
-  STMT_START {                                                   \
-      IV offset = loc - RExC_precomp;   \
-        Perl_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,      \
-                 a1, a2, a3, a4,                                 \
-                 (int)offset, RExC_precomp, RExC_precomp + offset);  \
-    } STMT_END
+#define	vWARN5(loc, m, a1, a2, a3, a4) STMT_START {			\
+    IV offset = loc - RExC_precomp;					\
+    Perl_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,		\
+	    a1, a2, a3, a4, (int)offset, RExC_precomp, RExC_precomp + offset); \
+} STMT_END
 
 
 /* Allow for side effects in s */
-#define REGC(c,s) STMT_START { if (!SIZE_ONLY) *(s) = (c); else (void)(s);} STMT_END
+#define REGC(c,s) STMT_START {			\
+    if (!SIZE_ONLY) *(s) = (c); else (void)(s);	\
+} STMT_END
 
 /* Macros for recording node offsets.   20001227 mjd@plover.com 
  * Nodes are numbered 1, 2, 3, 4.  Node #n's position is recorded in
@@ -441,38 +417,42 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
  */
 
 #define MJD_OFFSET_DEBUG(x)
-/* #define MJD_OFFSET_DEBUG(x) fprintf x */
+/* #define MJD_OFFSET_DEBUG(x) Perl_warn_nocontext x */
 
 
-#  define Set_Node_Offset_To_R(node,byte)                           \
-   STMT_START {                                        \
-     if (! SIZE_ONLY) {                                  \
-       if((node) < 0) {                   \
-         Perl_croak(aTHX_ "value of node is %d in Offset macro", node); \
-       } else {                                                        \
-         RExC_offsets[2*(node)-1] = (byte);                               \
-       }                                                               \
-     }                                                                 \
-   } STMT_END
+#define Set_Node_Offset_To_R(node,byte) STMT_START {			\
+    if (! SIZE_ONLY) {							\
+	MJD_OFFSET_DEBUG(("** (%d) offset of node %d is %d.\n",		\
+		__LINE__, (node), (byte)));				\
+	if((node) < 0) {						\
+	    Perl_croak(aTHX_ "value of node is %d in Offset macro", node); \
+	} else {							\
+	    RExC_offsets[2*(node)-1] = (byte);				\
+	}								\
+    }									\
+} STMT_END
 
-#  define Set_Node_Offset(node,byte) Set_Node_Offset_To_R((node)-RExC_emit_start, (byte)-RExC_start)
-#  define Set_Cur_Node_Offset Set_Node_Offset(RExC_emit, RExC_parse)
+#define Set_Node_Offset(node,byte) \
+    Set_Node_Offset_To_R((node)-RExC_emit_start, (byte)-RExC_start)
+#define Set_Cur_Node_Offset Set_Node_Offset(RExC_emit, RExC_parse)
 
-#  define Set_Node_Length_To_R(node,len)                            \
-   STMT_START {                                        \
-     if (! SIZE_ONLY) {                                  \
-       MJD_OFFSET_DEBUG((stderr, "** (%d) size of node %d is %d.\n", __LINE__, (node), (len))); \
-       if((node) < 0) {                   \
-         Perl_croak(aTHX_ "value of node is %d in Length macro", node); \
-       } else {                                                        \
-         RExC_offsets[2*(node)] = (len);                               \
-       }                                                               \
-     }                                                                 \
-   } STMT_END
+#define Set_Node_Length_To_R(node,len) STMT_START {			\
+    if (! SIZE_ONLY) {							\
+	MJD_OFFSET_DEBUG(("** (%d) size of node %d is %d.\n",		\
+		__LINE__, (node), (len)));				\
+	if((node) < 0) {						\
+	    Perl_croak(aTHX_ "value of node is %d in Length macro", node); \
+	} else {							\
+	    RExC_offsets[2*(node)] = (len);				\
+	}								\
+    }									\
+} STMT_END
 
-#  define Set_Node_Length(node,len) Set_Node_Length_To_R((node)-RExC_emit_start, len)
-#  define Set_Cur_Node_Length(len)  Set_Node_Length(RExC_emit, len)
-#  define Set_Node_Cur_Length(node)   Set_Node_Length(node, RExC_parse - parse_start)
+#define Set_Node_Length(node,len) \
+    Set_Node_Length_To_R((node)-RExC_emit_start, len)
+#define Set_Cur_Node_Length(len) Set_Node_Length(RExC_emit, len)
+#define Set_Node_Cur_Length(node) \
+    Set_Node_Length(node, RExC_parse - parse_start)
 
 /* Get offsets and lengths */
 #define Node_Offset(n) (RExC_offsets[2*((n)-RExC_emit_start)-1])
@@ -1290,6 +1270,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 			l -= old;
 			/* Get the added string: */
 			last_str = newSVpvn(s  + old, l);
+			if (UTF)
+			    SvUTF8_on(last_str);
 			if (deltanext == 0 && pos_before == b) {
 			    /* What was added is a constant string */
 			    if (mincount > 1) {
@@ -1306,8 +1288,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 			} else {
 			    /* start offset must point into the last copy */
 			    data->last_start_min += minnext * (mincount - 1);
-			    data->last_start_max += is_inf ? 0 : (maxcount - 1)
-				* (minnext + data->pos_delta);
+			    data->last_start_max += is_inf ? I32_MAX
+				: (maxcount - 1) * (minnext + data->pos_delta);
 			}
 		    }
 		    /* It is counted once already... */
@@ -2258,7 +2240,10 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
                     /* deal with the length of this later - MJD */
 		    return ret;
 		}
-		return reganode(pRExC_state, EVAL, n);
+		ret = reganode(pRExC_state, EVAL, n);
+		Set_Node_Length(ret, RExC_parse - parse_start + 1);
+		Set_Node_Offset(ret, parse_start);
+		return ret;
 	    }
 	    case '(':           /* (?(?{...})...) and (?(?=...)...) */
 	    {
@@ -2494,6 +2479,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 	    if (paren == '>')
 		node = SUSPEND, flag = 0;
 	    reginsert(pRExC_state, node,ret);
+	    Set_Node_Offset(ret, oregcomp_parse);
+	    Set_Node_Length(ret,  RExC_parse - oregcomp_parse + 2);
 	    ret->flags = flag;
 	    regtail(pRExC_state, ret, reg_node(pRExC_state, TAIL));
 	}
@@ -2961,7 +2948,7 @@ tryagain:
 	case 'P':
 	    {	
 		char* oldregxend = RExC_end;
-                char* parse_start = RExC_parse;
+		char* parse_start = RExC_parse - 2;
 
 		if (RExC_parse[1] == '{') {
 		  /* a lovely hack--pretend we saw [\pX] instead */
@@ -2985,7 +2972,9 @@ tryagain:
 
 		RExC_end = oldregxend;
 		RExC_parse--;
-                Set_Node_Cur_Length(ret); /* MJD */
+
+		Set_Node_Offset(ret, parse_start + 2);
+		Set_Node_Cur_Length(ret);
 		nextchar(pRExC_state);
 		*flagp |= HASWIDTH|SIMPLE;
 	    }
@@ -3304,25 +3293,27 @@ tryagain:
     /* If the encoding pragma is in effect recode the text of
      * any EXACT-kind nodes. */
     if (PL_encoding && PL_regkind[(U8)OP(ret)] == EXACT) {
-	 STRLEN oldlen = STR_LEN(ret);
-	 SV *sv        = sv_2mortal(newSVpvn(STRING(ret), oldlen));
+	STRLEN oldlen = STR_LEN(ret);
+	SV *sv        = sv_2mortal(newSVpvn(STRING(ret), oldlen));
 
-	 if (RExC_utf8)
-	      SvUTF8_on(sv);
-	 if (sv_utf8_downgrade(sv, TRUE)) {
-	      char *s       = sv_recode_to_utf8(sv, PL_encoding);
-	      STRLEN newlen = SvCUR(sv);
-	 
-	      if (!SIZE_ONLY) {
-		   DEBUG_r(PerlIO_printf(Perl_debug_log, "recode %*s to %*s\n",
-					 (int)oldlen, STRING(ret),
-					 (int)newlen, s));
-		   Copy(s, STRING(ret), newlen, char);
-		   STR_LEN(ret) += newlen - oldlen;
-		   RExC_emit += STR_SZ(newlen) - STR_SZ(oldlen);
-	      } else
-		   RExC_size += STR_SZ(newlen) - STR_SZ(oldlen);
-	 }
+	if (RExC_utf8)
+	    SvUTF8_on(sv);
+	if (sv_utf8_downgrade(sv, TRUE)) {
+	    char *s       = sv_recode_to_utf8(sv, PL_encoding);
+	    STRLEN newlen = SvCUR(sv);
+
+	    if (SvUTF8(sv))
+		RExC_utf8 = 1;
+	    if (!SIZE_ONLY) {
+		DEBUG_r(PerlIO_printf(Perl_debug_log, "recode %*s to %*s\n",
+				      (int)oldlen, STRING(ret),
+				      (int)newlen, s));
+		Copy(s, STRING(ret), newlen, char);
+		STR_LEN(ret) += newlen - oldlen;
+		RExC_emit += STR_SZ(newlen) - STR_SZ(oldlen);
+	    } else
+		RExC_size += STR_SZ(newlen) - STR_SZ(oldlen);
+	}
     }
 
     return(ret);
@@ -4224,11 +4215,11 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	SV *rv;
 
 	/* The 0th element stores the character class description
-	 * in its textual form: used later (regexec.c:Perl_regclass_swatch())
+	 * in its textual form: used later (regexec.c:Perl_regclass_swash())
 	 * to initialize the appropriate swash (which gets stored in
 	 * the 1st element), and also useful for dumping the regnode.
 	 * The 2nd element stores the multicharacter foldings,
-	 * used later (regexec.c:s_reginclasslen()). */
+	 * used later (regexec.c:S_reginclass()). */
 	av_store(av, 0, listsv);
 	av_store(av, 1, NULL);
 	av_store(av, 2, (SV*)unicode_alternate);
@@ -4290,7 +4281,7 @@ S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op)
     ptr = ret;
     FILL_ADVANCE_NODE(ptr, op);
     if (RExC_offsets) {         /* MJD */
-      MJD_OFFSET_DEBUG((stderr, "%s:%u: (op %s) %s %u <- %u (len %u) (max %u).\n", 
+	MJD_OFFSET_DEBUG(("%s:%u: (op %s) %s %u <- %u (len %u) (max %u).\n", 
               "reg_node", __LINE__, 
               reg_name[op],
               RExC_emit - RExC_emit_start > RExC_offsets[0] 
@@ -4298,7 +4289,7 @@ S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op)
               RExC_emit - RExC_emit_start,
               RExC_parse - RExC_start,
               RExC_offsets[0])); 
-      Set_Node_Offset(RExC_emit, RExC_parse + (op == END));
+	Set_Node_Offset(RExC_emit, RExC_parse + (op == END));
     }
             
     RExC_emit = ptr;
@@ -4326,14 +4317,16 @@ S_reganode(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg)
     ptr = ret;
     FILL_ADVANCE_NODE_ARG(ptr, op, arg);
     if (RExC_offsets) {         /* MJD */
-      MJD_OFFSET_DEBUG((stderr, "%s: %s %u <- %u (max %u).\n", 
+	MJD_OFFSET_DEBUG(("%s(%d): (op %s) %s %u <- %u (max %u).\n", 
               "reganode",
+	      __LINE__,
+	      reg_name[op],
               RExC_emit - RExC_emit_start > RExC_offsets[0] ? 
               "Overwriting end of array!\n" : "OK",
               RExC_emit - RExC_emit_start,
               RExC_parse - RExC_start,
               RExC_offsets[0])); 
-      Set_Cur_Node_Offset;
+	Set_Cur_Node_Offset;
     }
             
     RExC_emit = ptr;
@@ -4376,29 +4369,33 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *opnd)
     while (src > opnd) {
 	StructCopy(--src, --dst, regnode);
         if (RExC_offsets) {     /* MJD 20010112 */
-          MJD_OFFSET_DEBUG((stderr, "%s: %s copy %u -> %u (max %u).\n", 
+	    MJD_OFFSET_DEBUG(("%s(%d): (op %s) %s copy %u -> %u (max %u).\n",
                   "reg_insert",
+		  __LINE__,
+		  reg_name[op],
                   dst - RExC_emit_start > RExC_offsets[0] 
                   ? "Overwriting end of array!\n" : "OK",
                   src - RExC_emit_start,
                   dst - RExC_emit_start,
                   RExC_offsets[0])); 
-          Set_Node_Offset_To_R(dst-RExC_emit_start, Node_Offset(src));
-          Set_Node_Length_To_R(dst-RExC_emit_start, Node_Length(src));
+	    Set_Node_Offset_To_R(dst-RExC_emit_start, Node_Offset(src));
+	    Set_Node_Length_To_R(dst-RExC_emit_start, Node_Length(src));
         }
     }
     
 
     place = opnd;		/* Op node, where operand used to be. */
     if (RExC_offsets) {         /* MJD */
-      MJD_OFFSET_DEBUG((stderr, "%s: %s %u <- %u (max %u).\n", 
+	MJD_OFFSET_DEBUG(("%s(%d): (op %s) %s %u <- %u (max %u).\n", 
               "reginsert",
+	      __LINE__,
+	      reg_name[op],
               place - RExC_emit_start > RExC_offsets[0] 
               ? "Overwriting end of array!\n" : "OK",
               place - RExC_emit_start,
               RExC_parse - RExC_start,
               RExC_offsets[0])); 
-      Set_Node_Offset(place, RExC_parse);
+	Set_Node_Offset(place, RExC_parse);
     }
     src = NEXTOPER(place);
     FILL_ADVANCE_NODE(place, op);

@@ -555,7 +555,7 @@ And here's a safe pipe open for writing:
 
     # add error processing as above
     $pid = open(KID_TO_WRITE, "|-");
-    $SIG{ALRM} = sub { die "whoops, $program pipe broke" };
+    $SIG{PIPE} = sub { die "whoops, $program pipe broke" };
 
     if ($pid) {  # parent
 	for (@data) {
@@ -1388,7 +1388,7 @@ Here's the code.  We'll
    $client->autoflush(1);
    print $client "Welcome to $0; type help for command list.\n";
    $hostinfo = gethostbyaddr($client->peeraddr);
-   printf "[Connect from %s]\n", $hostinfo->name || $client->peerhost;
+   printf "[Connect from %s]\n", $hostinfo ? $hostinfo->name : $client->peerhost;
    print $client "Command? ";
    while ( <$client>) {
      next unless /\S/;	     # blank line
@@ -1638,10 +1638,11 @@ version and suggestions from the Perl Porters.
 There's a lot more to networking than this, but this should get you
 started.
 
-For intrepid programmers, the indispensable textbook is I<Unix Network
-Programming> by W. Richard Stevens (published by Addison-Wesley).  Note
-that most books on networking address networking from the perspective of
-a C programmer; translation to Perl is left as an exercise for the reader.
+For intrepid programmers, the indispensable textbook is I<Unix
+Network Programming, 2nd Edition, Volume 1> by W. Richard Stevens
+(published by Prentice-Hall).  Note that most books on networking
+address the subject from the perspective of a C programmer; translation
+to Perl is left as an exercise for the reader.
 
 The IO::Socket(3) manpage describes the object library, and the Socket(3)
 manpage describes the low-level interface to sockets.  Besides the obvious

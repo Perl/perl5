@@ -7,29 +7,35 @@
 # Paths
 ##
 
+# Configure hasn't figured out the version number yet.  Bummer.
+perl_revision=`awk '/define[ 	]+PERL_REVISION/ {print $3}' $src/patchlevel.h`
+perl_version=`awk '/define[ 	]+PERL_VERSION/ {print $3}' $src/patchlevel.h`
+perl_subversion=`awk '/define[ 	]+PERL_SUBVERSION/ {print $3}' $src/patchlevel.h`
+version="${perl_revision}.${perl_version}.${perl_subversion}"
+
 # BSD paths
 case "$prefix" in
-'')
-	# Default install; use non-system directories
-	prefix='/usr/local'; # Built-in perl uses /usr
-	siteprefix='/usr/local';
-	vendorprefix='/usr/local'; usevendorprefix='define';
+  '')
+    # Default install; use non-system directories
+    prefix='/usr/local'; # Built-in perl uses /usr
+    siteprefix='/usr/local';
+    vendorprefix='/usr/local'; usevendorprefix='define';
 
-	# Where to put modules.
-	privlib='/Library/Perl'; # Built-in perl uses /System/Library/Perl
-	sitelib='/Library/Perl';
-	vendorlib='/Network/Library/Perl';
-	;;
-'/usr')
-	# We are building/replacing the built-in perl
-	siteprefix='/usr/local';
-	vendorprefix='/usr/local'; usevendorprefix='define';
+    # Where to put modules.
+    privlib="/Library/Perl/${version}"; # Built-in perl uses /System/Library/Perl
+    sitelib="/Library/Perl/${version}";
+    vendorlib="/Network/Library/Perl/${version}";
+    ;;
+  '/usr')
+    # We are building/replacing the built-in perl
+    siteprefix='/usr/local';
+    vendorprefix='/usr/local'; usevendorprefix='define';
 
-	# Where to put modules.
-	privlib='/System/Library/Perl';
-	sitelib='/Library/Perl';
-	vendorlib='/Network/Library/Perl';
-	;;
+    # Where to put modules.
+    privlib="/System/Library/Perl/${version}";
+    sitelib="/Library/Perl/${version}";
+    vendorlib="/Network/Library/Perl/${version}";
+    ;;
 esac
 
 # 4BSD uses ${prefix}/share/man, not ${prefix}/man.
@@ -47,16 +53,15 @@ archname='darwin';
 usenm='true';
 
 # Optimize.
-if [ "x$optimize" = 'x' ]; then
-    optimize='-O3'
+if [ -z "${optimize}" ]; then
+  case "$osvers" in
+    [12345].*) optimize='-O3' ;;
+    *) optimize='-Os' ;;
+  esac
 fi
 
 # -pipe: makes compilation go faster.
-# -fno-common: we don't like commons.  Common symbols are not allowed
-# in MH_DYLIB binaries, which is what libperl.dylib is.  You will fail
-# to link without that option, unless you otherwise eliminate all commons
-# by, for example, initializing all globals.
-# --Fred Sánchez
+# -fno-common because common symbols are not allowed in MH_DYLIB
 ccflags="${ccflags} -pipe -fno-common"
 
 # At least on Darwin 1.3.x:
@@ -80,19 +85,20 @@ ccflags="${ccflags} -pipe -fno-common"
 # stdint.h defining INT32_MIN as (-INT32_MAX-1)
 # -- Edward Moy
 #
-case "`grep '^#define INT32_MIN' /usr/include/stdint.h`" in
-*-2147483648) ccflags="${ccflags} -DINT32_MIN_BROKEN -DINT64_MIN_BROKEN" ;;
+case "$(grep '^#define INT32_MIN' /usr/include/stdint.h)" in
+  *-2147483648) ccflags="${ccflags} -DINT32_MIN_BROKEN -DINT64_MIN_BROKEN" ;;
 esac
 
 # cppflags='-traditional-cpp';
-# avoid Apple's cpp precompiler, better for extensions
+# Avoid Apple's cpp precompiler, better for extensions
 cppflags="${cppflags} -no-cpp-precomp"
 # and ccflags needs them as well since we don't use cpp directly
+# -- If this is necessary, it's a bug. -wsv
 ccflags="${ccflags} -no-cpp-precomp"
 
 # Known optimizer problems.
 case "`cc -v 2>&1`" in
-*"3.1 20020105"*) toke_cflags='optimize=""' ;;
+  *"3.1 20020105"*) toke_cflags='optimize=""' ;;
 esac
 
 # Shared library extension is .dylib.
@@ -102,12 +108,10 @@ so='dylib';
 dlext='bundle';
 dlsrc='dl_dyld.xs'; usedl='define';
 cccdlflags=' '; # space, not empty, because otherwise we get -fpic
-# ldflag: -flat_namespace is only available since OS X 10.1 (Darwin 1.4.1)
-#    - but not in 10.0.x (Darwin 1.3.x)
-# -- Kay Roepke
+# Perl bundles do not expect two-level namespace, added in Darwin 1.4.
 case "$osvers" in
-1.[0-3].*)	;;
-*)		ldflags="${ldflags} -flat_namespace" ;;
+  1.[0-3].*) ;;
+  *) ldflags="${ldflags} -flat_namespace" ;;
 esac
 lddlflags="${ldflags} -bundle -undefined suppress";
 ldlibpthname='DYLD_LIBRARY_PATH';
@@ -142,13 +146,13 @@ firstmakefile=GNUmakefile;
 # Fix when Apple fixes libc.
 #
 case "$usethreads$useithreads$use5005threads" in
-*define*)
-cat <<EOM >&4
+  *define*)
+    cat <<EOM >&4
 
 *** Warning, there might be problems with your libraries with
 *** regards to threading.  The test ext/threads/t/libc.t is likely
 *** to fail.
 
 EOM
-	;;
+    ;;
 esac

@@ -6,7 +6,7 @@ use warnings;
 
 require Exporter;
 our @ISA = qw(Exporter);
-our @EXPORT = qw(share cond_wait cond_broadcast cond_signal _refcnt _id _thrcnt);
+our @EXPORT = qw(share cond_wait cond_broadcast cond_signal);
 our $VERSION = '0.90';
 
 if ($threads::threads) {
@@ -24,10 +24,10 @@ else {
 }
 
 
-sub cond_wait_disabled { return @_ };
-sub cond_signal_disabled { return @_};
-sub cond_broadcast_disabled { return @_};
-sub share_disabled { return @_}
+sub cond_wait_disabled      (\[$@%]) { undef }
+sub cond_signal_disabled    (\[$@%]) { undef }
+sub cond_broadcast_disabled (\[$@%]) { undef }
+sub share_disabled          (\[$@%]) { return $_[0] }
 
 $threads::shared::threads_shared = 1;
 
@@ -72,7 +72,7 @@ It is used together with the threads module.
 
 =head1 EXPORT
 
-C<share>, C<lock>, C<cond_wait>, C<cond_signal>, C<cond_broadcast>
+C<share>, C<cond_wait>, C<cond_signal>, C<cond_broadcast>
 
 Note that if this module is imported when C<threads> has not yet been
 loaded, then these functions all become no-ops. This makes it possible
@@ -87,7 +87,7 @@ environments.
 
 C<share> takes a value and marks it as shared. You can share a scalar,
 array, hash, scalar ref, array ref or hash ref.  C<share> will return
-the shared rvalue.
+the shared rvalue but always as a reference.
 
 C<share> will traverse up references exactly I<one> level.
 C<share(\$a)> is equivalent to C<share($a)>, while C<share(\\$a)> is not.

@@ -13,7 +13,7 @@ BEGIN {
 
 use Config;
 
-print "1..171\n";
+print "1..173\n";
 
 my $test = 1;
 sub test (&) {
@@ -510,3 +510,15 @@ END
 
 }
 
+# The following dumps core with perl <= 5.8.0
+BEGIN { $vanishing_pad = sub { eval $_[0] } }
+$some_var = 123;
+test { $vanishing_pad->( '$some_var' ) == 123 };
+
+# [perl #17605] found that an empty block called in scalar context
+# can lead to stack corruption
+{
+    my $x = "foooobar";
+    $x =~ s/o//eg;
+    test { $x eq 'fbar' }
+}

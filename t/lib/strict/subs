@@ -345,3 +345,12 @@ print "$abc\n";
 EXPECT
 Bareword "XYZ" not allowed while "strict subs" in use at - line 5.
 Execution of - aborted due to compilation errors.
+########
+
+# [perl #10021]
+use strict;
+use warnings;
+print "" if BAREWORD;
+EXPECT
+Bareword "BAREWORD" not allowed while "strict subs" in use at - line 5.
+Execution of - aborted due to compilation errors.

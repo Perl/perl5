@@ -228,12 +228,12 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
  * Trying to select a version that gives no warnings...
  */
 #if !(defined(STMT_START) && defined(STMT_END))
-# if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(__cplusplus)
+# if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC) && !defined(__cplusplus)
 #   define STMT_START	(void)(	/* gcc supports ``({ STATEMENTS; })'' */
 #   define STMT_END	)
 # else
    /* Now which other defined()s do we need here ??? */
-#  if (VOIDFLAGS) && (defined(sun) || defined(__sun__))
+#  if (VOIDFLAGS) && (defined(sun) || defined(__sun__)) && !defined(__GNUC__)
 #   define STMT_START	if (1)
 #   define STMT_END	else (void)0
 #  else
@@ -730,8 +730,32 @@ int sockatmark(int);
 	    set_errno(errcode);		\
 	    set_vaxc_errno(vmserrcode);	\
 	} STMT_END
+#   define LIB_INVARG 		LIB$_INVARG
+#   define RMS_DIR    		RMS$_DIR
+#   define RMS_FAC    		RMS$_FAC
+#   define RMS_FEX    		RMS$_FEX
+#   define RMS_FNF    		RMS$_FNF
+#   define RMS_IFI    		RMS$_IFI
+#   define RMS_ISI    		RMS$_ISI
+#   define RMS_PRV    		RMS$_PRV
+#   define SS_ACCVIO      	SS$_ACCVIO
+#   define SS_DEVOFFLINE	SS$_DEVOFFLINE
+#   define SS_IVCHAN  		SS$_IVCHAN
+#   define SS_NORMAL  		SS$_NORMAL
 #else
 #   define SETERRNO(errcode,vmserrcode) (errno = (errcode))
+#   define LIB_INVARG 		0
+#   define RMS_DIR    		0
+#   define RMS_FAC    		0
+#   define RMS_FEX    		0
+#   define RMS_FNF    		0
+#   define RMS_IFI    		0
+#   define RMS_ISI    		0
+#   define RMS_PRV    		0
+#   define SS_ACCVIO      	0
+#   define SS_DEVOFFLINE	0
+#   define SS_IVCHAN  		0
+#   define SS_NORMAL  		0
 #endif
 
 #ifdef USE_5005THREADS
@@ -1130,8 +1154,10 @@ typedef UVTYPE UV;
 # define DBL_DIG OVR_DBL_DIG
 #else
 /* The following is all to get DBL_DIG, in order to pick a nice
-   default value for printing floating point numbers in Gconvert.
-   (see config.h)
+   default value for printing floating point numbers in Gconvert
+   (see config.h). (It also has other uses, such as figuring out if
+   a given precision of printing can be done with a double instead of
+   a long double - Allen).
 */
 #ifdef I_LIMITS
 #include <limits.h>
@@ -1186,6 +1212,29 @@ typedef UVTYPE UV;
 # endif
 #endif
 
+/*
+ * This is for making sure we have a good DBL_MAX value, if possible,
+ * either for usage as NV_MAX or for usage in figuring out if we can
+ * fit a given long double into a double, if bug-fixing makes it
+ * necessary to do so. - Allen <allens@cpan.org>
+ */
+
+#ifdef I_LIMITS
+#  include <limits.h>
+#endif
+
+#ifdef I_VALUES
+#  if !(defined(DBL_MIN) && defined(DBL_MAX) && defined(I_LIMITS))
+#    include <values.h>
+#    if defined(MAXDOUBLE) && !defined(DBL_MAX)
+#      define DBL_MAX MAXDOUBLE
+#    endif
+#    if defined(MINDOUBLE) && !defined(DBL_MIN)
+#      define DBL_MIN MINDOUBLE
+#    endif
+#  endif
+#endif /* defined(I_VALUES) */
+
 typedef NVTYPE NV;
 
 #ifdef I_IEEEFP
@@ -1217,7 +1266,7 @@ typedef NVTYPE NV;
 #   endif
 #   ifdef LDBL_MAX
 #       define NV_MAX LDBL_MAX
-#       define NV_MIN LDBL_MIN
+/* Having LDBL_MAX doesn't necessarily mean that we have LDBL_MIN... -Allen */
 #   else
 #       ifdef HUGE_VALL
 #           define NV_MAX HUGE_VALL
@@ -1279,7 +1328,7 @@ typedef NVTYPE NV;
 #   ifdef DBL_EPSILON
 #       define NV_EPSILON DBL_EPSILON
 #   endif
-#   ifdef DBL_MAX
+#   ifdef DBL_MAX               /* XXX Does DBL_MAX imply having DBL_MIN? */
 #       define NV_MAX DBL_MAX
 #       define NV_MIN DBL_MIN
 #   else
@@ -1301,6 +1350,13 @@ typedef NVTYPE NV;
 #endif
 
 /* rumor has it that Win32 has _fpclass() */
+
+/* SGI has fpclassl... but not with the same result values,
+ * and it's via a typedef (not via #define), so will need to redo Configure
+ * to use. Not worth the trouble, IMO, at least until the below is used
+ * more places. Also has fp_class_l, BTW, via fp_class.h. Feel free to check
+ * with me for the SGI manpages, SGI testing, etcetera, if you want to
+ * try getting this to work with IRIX. - Allen <allens@cpan.org> */
 
 #if !defined(Perl_fp_class) && (defined(HAS_FPCLASS)||defined(HAS_FPCLASSL))
 #    ifdef I_IEEFP
@@ -1443,7 +1499,8 @@ int isnan(double d);
  * it is however best to use the native implementation of atof.
  * You can experiment with using your native one by -DUSE_PERL_ATOF=0.
  * Some good tests to try out with either setting are t/base/num.t,
- * t/op/numconvert.t, and t/op/pack.t. */
+ * t/op/numconvert.t, and t/op/pack.t. Note that if using long doubles
+ * you may need to be using a different function than atof! */
 
 #ifndef USE_PERL_ATOF
 #   ifndef _UNICOS
@@ -1476,11 +1533,9 @@ int isnan(double d);
 
 #ifdef I_LIMITS  /* Needed for cast_xxx() functions below. */
 #  include <limits.h>
-#else
-#ifdef I_VALUES
-#  include <values.h>
 #endif
-#endif
+/* Included values.h above if necessary; still including limits.h down here,
+ * despite doing above, because math.h might have overriden... XXX - Allen */
 
 /*
  * Try to figure out max and min values for the integral types.  THE CORRECT
@@ -1912,18 +1967,21 @@ typedef struct clone_params CLONE_PARAMS;
 #  ifdef PATH_MAX
 #    ifdef _POSIX_PATH_MAX
 #       if PATH_MAX > _POSIX_PATH_MAX
-/* MAXPATHLEN is supposed to include the final null character,
- * as opposed to PATH_MAX and _POSIX_PATH_MAX. */
-#         define MAXPATHLEN (PATH_MAX+1)
+/* POSIX 1990 (and pre) was ambiguous about whether PATH_MAX
+ * included the null byte or not.  Later amendments of POSIX,
+ * XPG4, the Austin Group, and the Single UNIX Specification
+ * all explicitly include the null byte in the PATH_MAX.
+ * Ditto for _POSIX_PATH_MAX. */
+#         define MAXPATHLEN PATH_MAX
 #       else
-#         define MAXPATHLEN (_POSIX_PATH_MAX+1)
+#         define MAXPATHLEN _POSIX_PATH_MAX
 #       endif
 #    else
 #      define MAXPATHLEN (PATH_MAX+1)
 #    endif
 #  else
 #    ifdef _POSIX_PATH_MAX
-#       define MAXPATHLEN (_POSIX_PATH_MAX+1)
+#       define MAXPATHLEN _POSIX_PATH_MAX
 #    else
 #       define MAXPATHLEN 1024	/* Err on the large side. */
 #    endif
@@ -2396,6 +2454,7 @@ Gid_t getegid (void);
 
 #ifndef Perl_error_log
 #  define Perl_error_log	(PL_stderrgv			\
+				 && isGV(PL_stderrgv)		\
 				 && GvIOp(PL_stderrgv)          \
 				 && IoOFP(GvIOp(PL_stderrgv))	\
 				 ? IoOFP(GvIOp(PL_stderrgv))	\
@@ -3837,7 +3896,7 @@ typedef struct am_table_short AMTS;
  * Remap printf
  */
 #undef printf
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC)
 #define printf(fmt,args...) PerlIO_stdoutf(fmt,##args)
 #else
 #define printf PerlIO_stdoutf
@@ -4179,6 +4238,10 @@ extern void moncontrol(int);
 #define UNICODE_PARA_SEPA_1	0x80
 #define UNICODE_PARA_SEPA_2	0xA9
 
+#ifndef PIPESOCK_MODE
+#  define PIPESOCK_MODE
+#endif
+
 /* and finally... */
 #define PERL_PATCHLEVEL_H_IMPLICIT
 #include "patchlevel.h"
@@ -4206,8 +4269,9 @@ extern void moncontrol(int);
    NVff
    NVgf
 
-   HAS_USLEEP
    HAS_UALARM
+   HAS_USLEEP
+   HAS_NANOSLEEP
 
    HAS_SETITIMER
    HAS_GETITIMER

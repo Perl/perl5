@@ -1,7 +1,7 @@
 package Encode::MIME::Header;
 use strict;
 # use warnings;
-our $VERSION = do { my @r = (q$Revision: 1.5 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.7 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode qw(find_encoding encode_utf8);
 use MIME::Base64;
@@ -74,7 +74,8 @@ sub decode_b{
     my $enc = shift;
     my $d = find_encoding($enc)	or croak(Unknown encoding "$enc");
     my $db64 = decode_base64(shift);
-    return $d->decode($db64, Encode::FB_PERLQQ);
+    return $d->name eq 'utf8' ?
+	Encode::decode_utf8($db64) : $d->decode($db64, Encode::FB_PERLQQ);
 }
 
 sub decode_q{
@@ -82,7 +83,8 @@ sub decode_q{
     my $d = find_encoding($enc) or croak(Unknown encoding "$enc");
     $q =~ s/_/ /go;
     $q =~ s/=([0-9A-Fa-f]{2})/pack("C", hex($1))/ego;
-    return $d->decode($q, Encode::FB_PERLQQ);
+    return $d->name eq 'utf8' ? 
+	Encode::decode_utf8($q) : $d->decode($q, Encode::FB_PERLQQ);
 }
 
 my $especials = 

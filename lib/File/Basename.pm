@@ -169,7 +169,7 @@ sub fileparse {
   my($fullname,@suffices) = @_;
   unless (defined $fullname) {
       require Carp;
-      Carp::croak "fileparse(): need a valid pathname";
+      Carp::croak("fileparse(): need a valid pathname");
   }
   my($fstype,$igncase) = ($Fileparse_fstype, $Fileparse_igncase);
   my($dirpath,$tail,$suffix,$basename);

@@ -373,7 +373,7 @@ you have to import it with C<use Config>.)
      s!     S!      sizeof(short)      $Config{shortsize}
      i!     I!      sizeof(int)        $Config{intsize}
      l!     L!      sizeof(long)       $Config{longsize}
-     q!     Q!      sizeof(longlong)   $Config{longlongsize}
+     q!     Q!      sizeof(long long)  $Config{longlongsize}
 
 The C<i!> and C<I!> codes aren't different from C<i> and C<I>; they are
 tolerated for completeness' sake.
@@ -836,7 +836,7 @@ program? Here's a C program that does the trick:
    #define Pt(struct,field,tchar) \
      printf( "@%d%s ", offsetof(struct,field), # tchar );
 
-   int main(){
+   int main() {
      Pt( gappy_t, fc1, c  );
      Pt( gappy_t, fs,  s! );
      Pt( gappy_t, fc2, c  );

@@ -1,5 +1,6 @@
 BEGIN {
   push @INC, './lib';
+  require 'regen.pl';
 }
 use strict;
 my %alias_to = (
@@ -36,7 +37,7 @@ EOT
 my $perl_header;
 ($perl_header = $c_header) =~ s{[/ ]?\*/?}{#}g;
 
-unlink "ext/ByteLoader/byterun.c", "ext/ByteLoader/byterun.h", "ext/B/B/Asmdata.pm";
+safer_unlink "ext/ByteLoader/byterun.c", "ext/ByteLoader/byterun.h", "ext/B/B/Asmdata.pm";
 
 #
 # Start with boilerplate for Asmdata.pm
@@ -311,6 +312,11 @@ Malcolm Beattie, C<mbeattie@sable.ox.ac.uk>
 
 =cut
 EOT
+
+
+close ASMDATA_PM or die "Error closing ASMDATA_PM: $!";
+close BYTERUN_H or die "Error closing BYTERUN_H: $!";
+close BYTERUN_C or die "Error closing BYTERUN_C: $!";
 
 __END__
 # First set instruction ord("#") to read comment to end-of-line (sneaky)

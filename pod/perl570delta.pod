@@ -690,7 +690,7 @@ concurrently. (Still 16M per thread.)
 
 =item *
 
-C<File::Spec->tmpdir()> now prefers C:/temp over /tmp
+C<< File::Spec->tmpdir() >> now prefers C:/temp over /tmp
 (works better when perl is running as service).
 
 =item *

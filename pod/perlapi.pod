@@ -871,7 +871,7 @@ is to be expected. (For information only--not to be used).
 =for hackers
 Found in file hv.h
 
-=item Nullch 
+=item Nullch
 
 Null character pointer.
 =for hackers

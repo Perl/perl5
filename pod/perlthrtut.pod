@@ -1016,10 +1016,15 @@ calls, they will be used.  Beyond that, Perl is at the mercy of
 the thread-safety or -unsafety of the calls.  Please consult your
 C library call documentation.
 
-In some platforms the thread-safe interfaces may fail if the result
-buffer is too small (for example getgrent() may return quite large
-group member lists).  Perl will retry growing the result buffer
-a few times, but only up to 64k (for safety reasons).
+On some platforms the thread-safe library interfaces may fail if the
+result buffer is too small (for example the user group databases may
+be rather large, and the reentrant interfaces may have to carry around
+a full snapshot of those databases).  Perl will start with a small
+buffer, but keep retrying and growing the result buffer
+until the result fits.  If this limitless growing sounds bad for
+security or memory consumption reasons you can recompile Perl with
+PERL_REENTRANT_MAXSIZE defined to the maximum number of bytes you will
+allow.
 
 =head1 Conclusion
 

@@ -522,6 +522,7 @@ MICROCORE_SRC	=		\
 		..\mg.c		\
 		..\numeric.c	\
 		..\op.c		\
+		..\pad.c	\
 		..\perl.c	\
 		..\perlapi.c	\
 		..\perly.c	\
@@ -983,6 +984,7 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\README.netware  .\perlnetware.pod
 	copy ..\README.os2      .\perlos2.pod
 	copy ..\README.os390    .\perlos390.pod
+	copy ..\README.os400    .\perlos400.pod
 	copy ..\README.plan9    .\perlplan9.pod
 	copy ..\README.qnx      .\perlqnx.pod
 	copy ..\README.solaris  .\perlsolaris.pod
@@ -1051,8 +1053,8 @@ distclean: clean
 	    perldos.pod perlepoc.pod perlfreebsd.pod perlhurd.pod \
 	    perlhpux.pod perlirix.pod perlmachten.pod \
 	    perlmacos.pod perlmint.pod perlmpeix.pod perlnetware.pod \
-	    perlos2.pod perlos390.pod perlplan9.pod perlqnx.pod \
-	    perlsolaris.pod perltru64.pod perluts.pod \
+	    perlos2.pod perlos390.pod perlos400.pod perlplan9.pod \
+	    perlqnx.pod perlsolaris.pod perltru64.pod perluts.pod \
 	    perlvmesa.pod perlvms.pod perlvos.pod \
 	    perlwin32.pod pod2html pod2latex pod2man pod2text pod2usage \
 	    podchecker podselect

@@ -1,7 +1,7 @@
 =head1 NAME
 
-Term::ReadLine - Perl interface to various C<readline> packages. If
-no real package is found, substitutes stubs instead of basic functions.
+Term::ReadLine - Perl interface to various C<readline> packages.
+If no real package is found, substitutes stubs instead of basic functions.
 
 =head1 SYNOPSIS
 
@@ -10,7 +10,7 @@ no real package is found, substitutes stubs instead of basic functions.
   my $prompt = "Enter your arithmetic expression: ";
   my $OUT = $term->OUT || \*STDOUT;
   while ( defined ($_ = $term->readline($prompt)) ) {
-    my $res = eval($_), "\n";
+    my $res = eval($_);
     warn $@ if $@;
     print $OUT $res, "\n" unless $@;
     $term->addhistory($_) if /\S/;
@@ -33,7 +33,7 @@ or as
 
   $term->addhistory('row');
 
-where $term is a return value of Term::ReadLine-E<gt>Init.
+where $term is a return value of Term::ReadLine-E<gt>new().
 
 =over 12
 
@@ -60,7 +60,7 @@ support. Trailing newline is removed. Returns C<undef> on C<EOF>.
 adds the line to the history of input, from where it can be used if
 the actual C<readline> is present.
 
-=item C<IN>, $C<OUT>
+=item C<IN>, C<OUT>
 
 return the filehandles for input and output or C<undef> if C<readline>
 input and output cannot be used for Perl.

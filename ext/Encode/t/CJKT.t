@@ -20,7 +20,8 @@ BEGIN {
     $| = 1;
 }
 use strict;
-use Test::More tests => 73;
+use Test::More tests => 42;
+#use Test::More tests => 73;
 #use Test::More qw(no_plan);
 use Encode;
 use File::Basename;
@@ -92,10 +93,12 @@ for my $charset (sort keys %Charset){
     }
     close $src;
 
+    my $unisave = $uni;
     eval{ $txt = $transcoder->encode($uni,1) };    
     $@ and print $@;
     ok(defined($txt),   "encode $charset"); $seq++;
     is(length($uni), 0, "encode $charset completely");  $seq++;
+    $uni = $unisave;
 
     open $dst,">$dst_enc" or die "$dst_utf : $!";
     binmode($dst);
@@ -105,10 +108,5 @@ for my $charset (sort keys %Charset){
 	or ($DEBUG and rename $dst_enc, "$dst_enc.$seq");
     $seq++;
     
-    for my $canon (@{$Charset{$charset}}){
-	is($uni, decode($canon, encode($canon, $uni)), 
-	   "RT/$charset/$canon");
-	$seq++;
-     }
     unlink($dst_utf, $dst_enc);
 }

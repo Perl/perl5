@@ -17,7 +17,7 @@ Hash::Util - A selection of general-utility hash subroutines
 
 =head1 SYNOPSIS
 
-  use Hash::Util qw(lock_keys   unlock_keys 
+  use Hash::Util qw(lock_keys   unlock_keys
                     lock_value  unlock_value
                     lock_hash   unlock_hash);
 
@@ -59,10 +59,13 @@ This is intended to largely replace the deprecated pseudo-hashes.
 
 Restricts the given %hash's set of keys to @keys.  If @keys is not
 given it restricts it to its current keyset.  No more keys can be
-added.  delete() and exists() will still work, but it does not effect
-the set of allowed keys.
+added. delete() and exists() will still work, but will not alter
+the set of allowed keys. B<Note>: the current implementation prevents
+the hash from being bless()ed while it is in a locked state. Any attempt
+to do so will raise an exception. Of course you can still bless()
+the hash before you call lock_keys() so this shouldn't be a problem.
 
-  unlock_keys(%hash;)
+  unlock_keys(%hash);
 
 Removes the restriction on the %hash's keyset.
 
@@ -108,8 +111,8 @@ sub unlock_keys (\%) {
 
 =item unlock_value
 
-  lock_key  (%hash, $key);
-  unlock_key(%hash, $key);
+  lock_value  (%hash, $key);
+  unlock_value(%hash, $key);
 
 Locks and unlocks an individual key of a hash.  The value of a locked
 key cannot be changed.

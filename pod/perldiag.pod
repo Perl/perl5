@@ -165,6 +165,11 @@ or a hash or array slice, such as:
 name, and not a subroutine call.  C<exists &sub()> will generate this
 error.
 
+=item '%s' trapped by operation mask
+
+(F) You tried to use an operator from a Safe compartment in which it's
+disallowed. See L<Safe>.
+
 =item Argument "%s" isn't numeric%s
 
 (W numeric) The indicated string was fed as an argument to an operator
@@ -466,6 +471,24 @@ subroutine definition ahead of the call to get proper prototype
 checking.  Alternatively, if you are certain that you're calling the
 function correctly, you may put an ampersand before the name to avoid
 the warning.  See L<perlsub>.
+
+=item Can only compress unsigned integers
+
+(F) An argument to pack("w",...) was not an integer.  The BER compressed
+integer format can only be used with positive integers, and you attempted
+to compress something else.  See L<perlfunc/pack>.
+
+=item Cannot compress integer
+
+(F) An argument to pack("w",...) was too large to compress.  The BER
+compressed integer format can only be used with positive integers, and you
+attempted to compress Infinity or a very large number (> 1e308).
+See L<perlfunc/pack>.
+
+=item Cannot compress negative numbers
+
+(F) An argument to pack("w",...) was negative.  The BER compressed integer
+format can only be used with positive integers.  See L<perlfunc/pack>.
 
 =item / cannot take a count
 
@@ -1494,29 +1517,30 @@ PDP-11 or something?
 
 =item Filehandle %s opened only for input
 
-(W io) You tried to write on a read-only filehandle.  If you intended it
-to be a read-write filehandle, you needed to open it with "+<" or "+>"
-or "+>>" instead of with "<" or nothing.  If you intended only to write
-the file, use ">" or ">>".  See L<perlfunc/open>.
-The warning will also occur if STDOUT (file descriptor 1) or STDERR
-(file descriptor 2) is opened for input, this is a pre-emptive warning in
-case some other part of your program or a child process is expecting STDOUT
-and STDERR to be writable. This can happen accidentally if you
-C<close(STDOUT)> or STDERR and then C<open> an unrelated handle which
-will resuse the lowest numbered available descriptor.
+(W io) You tried to write on a read-only filehandle.  If you intended
+it to be a read-write filehandle, you needed to open it with "+<" or
+"+>" or "+>>" instead of with "<" or nothing.  If you intended only to
+write the file, use ">" or ">>".  See L<perlfunc/open>.
 
 =item Filehandle %s opened only for output
 
-(W io) You tried to read from a filehandle opened only for writing.
-If you intended it to be a read/write filehandle, you needed to open it
+(W io) You tried to read from a filehandle opened only for writing, If
+you intended it to be a read/write filehandle, you needed to open it
 with "+<" or "+>" or "+>>" instead of with "<" or nothing.  If you
 intended only to read from the file, use "<".  See L<perlfunc/open>.
-The warning will also occur if STDIN (file descriptor 0) is opened
-for output - this is a pre-emptive warning in case some other part of your
-program or a child process is expecting STDIN to be readable.
-This can happen accidentally if you C<close(STDIN)> and then C<open> an
-unrelated handle which will resuse the lowest numbered available
-descriptor.
+Another possibility is that you attempted to open filedescriptor 0
+(also known as STDIN) for output (maybe you closed STDIN earlier?).
+
+=item Filehandle %s reopened as %s only for input
+
+(W io) You opened for reading a filehandle that got the same filehandle id
+as STDOUT or STDERR. This occured because you closed STDOUT or STDERR
+previously.
+
+=item Filehandle STDIN reopened as %s only for output
+
+(W io) You opened for writing a filehandle that got the same filehandle id
+as STDIN. This occured because you closed STDIN previously.
 
 =item Final $ should be \$ or $name
 
@@ -1705,6 +1729,11 @@ to your Perl administrator.
 (W syntax) An illegal character was found in a prototype declaration.  Legal
 characters in prototypes are $, @, %, *, ;, [, ], &, and \.
 
+=item Illegal declaration of anonymous subroutine
+
+(F) When using the C<sub> keyword to construct an anonymous subroutine,
+you must always specify a block of code. See L<perlsub>.
+
 =item Illegal division by zero
 
 (F) You tried to divide a number by 0.  Either something was wrong in
@@ -1858,7 +1887,7 @@ C<{}> from your ending C<\x{}> - C<\x> without the curly braces can go only
 up to C<ff>.  The <-- HERE shows in the regular expression about where the
 problem was discovered.  See L<perlre>.
 
-=item Invalid [] range "%s" in transliteration operator
+=item Invalid range "%s" in transliteration operator
 
 (F) The range specified in the tr/// or y/// operator had a minimum
 character greater than the maximum character.  See L<perlop>.
@@ -2955,6 +2984,18 @@ Perl guesses a reasonable buffer size, but puts a sentinel byte at the
 end of the buffer just in case.  This sentinel byte got clobbered, and
 Perl assumes that memory is now corrupted.  See L<perlfunc/ioctl>.
 
+=item Possible precedence problem on bitwise %c operator
+
+(W precedence) Your program uses a bitwise logical operator in conjunction
+with a numeric comparison operator, like this :
+
+    if ($x & $y == 0) { ... }
+
+This expression is actually equivalent to C<$x & ($y == 0)>, due to the
+higher precedence of C<==>. This is probably not what you want. (If you
+really meant to write this, disable the warning, or, better, write
+C<$x & ($y == 0 ? 1 : 0)>).
+
 =item Possible unintended interpolation of %s in string
 
 (W ambiguous) You said something like `@foo' in a double-quoted string
@@ -3032,6 +3073,11 @@ declared or defined with a different function prototype.
 (F) You've omitted the closing parenthesis in a function prototype
 definition.
 
+=item Pseudo-hashes are deprecated
+
+(D deprecated)  Pseudo-hashes were deprecated in Perl 5.8.0 and they
+will be removed in Perl 5.10.0, see L<perl58delta> for more details.
+
 =item Quantifier in {,} bigger than %d in regex;
 
 marked by <-- HERE in m/%s/
@@ -3059,6 +3105,14 @@ discovered.
 are outside the range which can be represented by integers internally.
 One possible workaround is to force Perl to use magical string increment
 by prepending "0" to your numbers.
+
+=item read() on closed filehandle %s
+
+(W closed) You tried to read from a closed filehandle.
+
+=item read() on unopened filehandle %s
+
+(W unopened) You tried to read from a filehandle that was never opened.
 
 =item readline() on closed filehandle %s
 
@@ -3205,6 +3259,11 @@ or setgid bit set.  This doesn't make much sense.
 (F) The lexer couldn't find the final delimiter of a // or m{}
 construct.  Remember that bracketing delimiters count nesting level.
 Missing the leading C<$> from a variable C<$m> may cause this error.
+
+Note that since Perl 5.9.0 a // can also be the I<defined-or>
+construct, not just the empty search pattern.  Therefore code written
+in Perl 5.9.0 or later that uses the // as the I<defined-or> can be
+misparsed by pre-5.9.0 Perls as a non-terminated search pattern.
 
 =item %sseek() on unopened filehandle
 
@@ -3529,6 +3588,14 @@ or "my $var" or "our $var".
 
 (F) The final summary message when a C<perl -c> succeeds.
 
+=item sysread() on closed filehandle %s
+
+(W closed) You tried to read from a closed filehandle.
+
+=item sysread() on unopened filehandle %s
+
+(W unopened) You tried to read from a filehandle that was never opened.
+
 =item System V %s is not implemented on this machine
 
 (F) You tried to do something with a function beginning with "sem",
@@ -3601,6 +3668,12 @@ target of the change to
 =item thread failed to start: %s
 
 (F) The entry point function of threads->create() failed for some reason.
+
+=item 5.005 threads are deprecated
+
+(D deprecated)  The 5.005-style threads (activated by C<use Thread;>)
+are deprecated and one should use the new ithreads instead,
+see L<perl58delta> for more details.
 
 =item times not implemented
 

@@ -6,7 +6,7 @@ rem
 
 set ARG-1=PV=
 set ARG-2=INST_VER=
-set ARG-3=INSTALL_ROOT=\Storage Card\perl-tests\perl@16376
+set ARG-3=INSTALL_ROOT=\Storage Card\perl58
 set ARG-4=WCEROOT=%SDKROOT%
 set ARG-5=CEPATH=%WCEROOT%
 set ARG-6=CELIBDLLDIR=d:\personal\pocketPC\celib-palm-3.0
@@ -20,6 +20,6 @@ set ARG-10=MACHINE=wince-mips-pocket-wce300
 set ARG-11=PERLCEDIR=$(MAKEDIR)
 set ARG-12=MSVCDIR=D:\MSVStudio\VC98
 set ARG-13=CECOPY=$(HPERL) -I$(PERLCEDIR)\lib $(PERLCEDIR)\comp.pl --copy
-set ARG-14=USE_PERLIO=undef
+set ARG-14=
 
 nmake -f Makefile.ce "%ARG-1%" "%ARG-2%" "%ARG-3%" "%ARG-4%" "%ARG-5%" "%ARG-6%" "%ARG-7%" "%ARG-8%" "%ARG-9%" "%ARG-10%" "%ARG-11%" "%ARG-12%" "%ARG-13%" "%ARG-14%" %1 %2 %3 %4 %5 %6 %7 %8 %9

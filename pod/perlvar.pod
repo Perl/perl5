@@ -769,6 +769,12 @@ The process number of the Perl running this script.  You should
 consider this variable read-only, although it will be altered
 across fork() calls.  (Mnemonic: same as shells.)
 
+Note for Linux users: on Linux, the C functions C<getpid()> and
+C<getppid()> return different values from different threads. In order to
+be portable, this behavior is not reflected by C<$$>, whose value remains
+consistent across threads. If you want to call the underlying C<getpid()>,
+you may use the CPAN module C<Linux::Pid>.
+
 =item $REAL_USER_ID
 
 =item $UID
@@ -1467,8 +1473,9 @@ used safely in programs.  C<$^_> itself, however, I<is> reserved.
 
 Perl identifiers that begin with digits, control characters, or
 punctuation characters are exempt from the effects of the C<package>
-declaration and are always forced to be in package C<main>.  A few
-other names are also exempt:
+declaration and are always forced to be in package C<main>; they are
+also exempt from C<strict 'vars'> errors.  A few other names are also
+exempt in these ways:
 
 	ENV		STDIN
 	INC		STDOUT
@@ -1478,7 +1485,7 @@ other names are also exempt:
 
 In particular, the new special C<${^_XYZ}> variables are always taken
 to be in package C<main>, regardless of any C<package> declarations
-presently in scope.
+presently in scope.  
 
 =head1 BUGS
 

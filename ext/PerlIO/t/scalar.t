@@ -10,7 +10,7 @@ BEGIN {
 }
 
 $| = 1;
-print "1..22\n";
+print "1..23\n";
 
 my $fh;
 my $var = "ok 2\n";
@@ -115,3 +115,8 @@ while (<$dup>) {
 close($fh);
 close($dup);
 
+# Check reading from non-string scalars
+
+open $fh, '<', \42;
+print <$fh> eq "42" ? "ok 23\n" : "not ok 23\n";
+close $fh;

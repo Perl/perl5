@@ -133,7 +133,16 @@ sub display {
 
 sub is {
     my ($got, $expected, $name, @mess) = @_;
-    my $pass = $got eq $expected;
+
+    my $pass;
+    if( !defined $got || !defined $expected ) {
+        # undef only matches undef
+        $pass = !defined $got && !defined $expected;
+    }
+    else {
+        $pass = $got eq $expected;
+    }
+
     unless ($pass) {
 	unshift(@mess, "#      got "._q($got)."\n",
 		       "# expected "._q($expected)."\n");
@@ -143,7 +152,16 @@ sub is {
 
 sub isnt {
     my ($got, $isnt, $name, @mess) = @_;
-    my $pass = $got ne $isnt;
+
+    my $pass;
+    if( !defined $got || !defined $isnt ) {
+        # undef only matches undef
+        $pass = defined $got || defined $isnt;
+    }
+    else {
+        $pass = $got ne $isnt;
+    }
+
     unless( $pass ) {
         unshift(@mess, "# it should not be "._q($got)."\n",
                        "# but it is.\n");

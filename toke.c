@@ -1264,7 +1264,7 @@ S_scan_const(pTHX_ char *start)
 
                 if (min > max) {
 		    Perl_croak(aTHX_
-			       "Invalid [] range \"%c-%c\" in transliteration operator",
+			       "Invalid range \"%c-%c\" in transliteration operator",
 			       (char)min, (char)max);
                 }
 
@@ -1665,17 +1665,18 @@ S_scan_const(pTHX_ char *start)
     *d = '\0';
     SvCUR_set(sv, d - SvPVX(sv));
     if (SvCUR(sv) >= SvLEN(sv))
-      Perl_croak(aTHX_ "panic: constant overflowed allocated space");
+	Perl_croak(aTHX_ "panic: constant overflowed allocated space");
 
     SvPOK_on(sv);
     if (PL_encoding && !has_utf8) {
-        sv_recode_to_utf8(sv, PL_encoding);
-        has_utf8 = TRUE;
+	sv_recode_to_utf8(sv, PL_encoding);
+	if (SvUTF8(sv))
+	    has_utf8 = TRUE;
     }
     if (has_utf8) {
 	SvUTF8_on(sv);
 	if (PL_lex_inwhat == OP_TRANS && PL_sublex_info.sub_op) {
-		PL_sublex_info.sub_op->op_private |=
+	    PL_sublex_info.sub_op->op_private |=
 		    (PL_lex_repl ? OPpTRANS_FROM_UTF : OPpTRANS_TO_UTF);
 	}
     }
@@ -1954,7 +1955,7 @@ S_incl_perldb(pTHX)
 
 	if (pdb)
 	    return pdb;
-	SETERRNO(0,SS$_NORMAL);
+	SETERRNO(0,SS_NORMAL);
 	return "BEGIN { require 'perl5db.pl' }";
     }
     return "";
@@ -3046,7 +3047,7 @@ Perl_yylex(pTHX)
 		    break;	/* require real whitespace or :'s */
 	    }
 	    tmp = (PL_expect == XOPERATOR ? '=' : '{'); /*'}(' for vi */
-	    if (*s != ';' && *s != tmp && (tmp != '=' || *s != ')')) {
+	    if (*s != ';' && *s != '}' && *s != tmp && (tmp != '=' || *s != ')')) {
 		char q = ((*s == '\'') ? '"' : '\'');
 		/* If here for an expression, and parsed no attrs, back off. */
 		if (tmp == '=' && !attrs) {
@@ -3769,6 +3770,7 @@ Perl_yylex(pTHX)
     case 'z': case 'Z':
 
       keylookup: {
+	I32 orig_keyword = 0;
 	gv = Nullgv;
 	gvp = 0;
 
@@ -3833,6 +3835,7 @@ Perl_yylex(pTHX)
 		}
 	    }
 	    if (ogv) {
+		orig_keyword = tmp;
 		tmp = 0;		/* overridden by import or by GLOBAL */
 	    }
 	    else if (gv && !gvp
@@ -4008,7 +4011,9 @@ Perl_yylex(pTHX)
 
 		/* If followed by a bareword, see if it looks like indir obj. */
 
-		if ((isIDFIRST_lazy_if(s,UTF) || *s == '$') && (tmp = intuit_method(s,gv)))
+		if (!orig_keyword
+			&& (isIDFIRST_lazy_if(s,UTF) || *s == '$')
+			&& (tmp = intuit_method(s,gv)))
 		    return tmp;
 
 		/* Not a method, so call it a subroutine (if defined) */
@@ -4614,10 +4619,14 @@ Perl_yylex(pTHX)
 		char *t;
 		for (d = s; isALNUM_lazy_if(d,UTF); d++) ;
 		t = skipspace(d);
-		if (strchr("|&*+-=!?:.", *t) && ckWARN_d(WARN_PRECEDENCE))
+		if (strchr("|&*+-=!?:.", *t) && ckWARN_d(WARN_PRECEDENCE)
+		    /* [perl #16184] */
+		    && !(t[0] == '=' && t[1] == '>')
+		) {
 		    Perl_warner(aTHX_ packWARN(WARN_PRECEDENCE),
 			   "Precedence problem: open %.*s should be open(%.*s)",
-			    d-s,s, d-s,s);
+			    d - s, s, d - s, s);
+		}
 	    }
 	    LOP(OP_OPEN,XTERM);
 
@@ -5018,6 +5027,8 @@ Perl_yylex(pTHX)
 
 		if (*s == ':' && s[1] != ':')
 		    PL_expect = attrful;
+		else if (!have_name && *s != '{' && key == KEY_sub)
+		    Perl_croak(aTHX_ "Illegal declaration of anonymous subroutine");
 
 		if (have_proto) {
 		    PL_nextval[PL_nexttoke].opval =
@@ -7005,6 +7016,9 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 	sv_catpvn(sv, s, 1);
     if (has_utf8)
 	SvUTF8_on(sv);
+    else if (PL_encoding)
+	sv_recode_to_utf8(sv, PL_encoding);
+
     PL_multi_end = CopLINE(PL_curcop);
     s++;
 

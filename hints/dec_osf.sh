@@ -148,6 +148,42 @@ case "$optimize" in
 	;;
 esac
 
+## Optimization limits
+case "$isgcc" in
+gcc) #  gcc 3.2.1 wants a lot of memory for -O3'ing toke.c
+cat >try.c <<EOF
+#include <sys/resource.h>
+
+int main ()
+{
+    struct rlimit rl;
+    int i = getrlimit (RLIMIT_DATA, &rl);
+    printf ("%d\n", rl.rlim_cur / (1024 * 1024));
+    } /* main */
+EOF
+$cc -o try $ccflags $ldflags try.c
+	maxdsiz=`./try`
+rm -f try try.c core
+if [ $maxdsiz -lt 256 ]; then
+    # less than 256 MB is probably not enough to optimize toke.c with gcc -O3
+    cat <<EOM >&4
+
+Your process datasize is limited to $maxdsiz MB, which is (sadly) not
+always enough to fully optimize some source code files of Perl,
+at least 256 MB seems to be necessary as of Perl 5.8.0.  I'll try to
+use a lower optimization level for those parts.  You could either try
+using your shell's ulimit/limit/limits command to raise your datasize
+(assuming the system-wide hard resource limits allow you to go higher),
+or if you can't go higher and if you are a sysadmin, and you *do* want
+the full optimization, you can tune the 'max_per_proc_data_size'
+kernel parameter: see man sysconfigtab, and man sys_attrs_proc.
+
+EOM
+toke_cflags='optimize=-O2'
+    fi
+;;
+esac
+
 # we want dynamic fp rounding mode, and we want ieee exception semantics
 case "$isgcc" in
 gcc)	;;
@@ -357,14 +393,10 @@ case "`/usr/sbin/sizer -v`" in
 *[1-4].0*) d_modfl=undef ;; # must wait till 5.0
 esac
 
-# Keep those leading tabs.
-	needusrshlib=''
+# Keep that leading tab.
 	old_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
 for p in $loclibpth
 do
-	if test -n "`ls $p/libdb.so* 2>/dev/null`"; then
-	    needusrshlib=yes
-	fi
 	if test -d $p; then
 	    echo "Appending $p to LD_LIBRARY_PATH." >& 4
 	    case "$LD_LIBRARY_PATH" in
@@ -377,14 +409,6 @@ case "$LD_LIBRARY_PATH" in
 "$old_LD_LIBRARY_PATH") ;;
 *) echo "LD_LIBRARY_PATH is now $LD_LIBRARY_PATH." >& 4 ;;
 esac
-# This is evil but I can't think of a nice workaround:
-# the /usr/shlib/libdb.so needs to be seen first,
-# or running Configure will fail.
-if test -n "$needusrshlib"; then
-    echo "Prepending /usr/shlib to loclibpth." >& 4
-    loclibpth="/usr/shlib $loclibpth"
-    echo "loclibpth is now $loclibpth." >& 4
-fi
 
 #
 # Unset temporary variables no more needed.

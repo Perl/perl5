@@ -12,7 +12,7 @@ use Config;
 $Is_VMS = $^O eq 'VMS';
 $Is_MacOS = $^O eq 'MacOS';
 
-plan tests => 94;
+plan tests => 95;
 
 my $Perl = which_perl();
 
@@ -210,14 +210,14 @@ like( $@, qr/Bad filehandle:\s+afile/,          '       right error' );
 {
     local *F;
     for (1..2) {
-        ok( open(F, qq{$Perl -le "print 'ok'"|}), 'open to pipe' );
+	ok( open(F, qq{$Perl -le "print 'ok'"|}), 'open to pipe' );
 	is(scalar <F>, "ok\n",  '       readline');
-        ok( close F,            '       close' );
+	ok( close F,            '       close' );
     }
 
     for (1..2) {
-        ok( open(F, "-|", qq{$Perl -le "print 'ok'"}), 'open -|');
-        is( scalar <F>, "ok\n", '       readline');
+	ok( open(F, "-|", qq{$Perl -le "print 'ok'"}), 'open -|');
+	is( scalar <F>, "ok\n", '       readline');
 	ok( close F,            '       close' );
     }
 }
@@ -225,8 +225,11 @@ like( $@, qr/Bad filehandle:\s+afile/,          '       right error' );
 
 # other dupping techniques
 {
-    ok( open(my $stdout, ">&", \*STDOUT), 'dup \*STDOUT into lexical fh');
-    ok( open(STDOUT,     ">&", $stdout),  'restore dupped STDOUT from lexical fh');
+    ok( open(my $stdout, ">&", \*STDOUT),       'dup \*STDOUT into lexical fh');
+    ok( open(STDOUT,     ">&", $stdout),        'restore dupped STDOUT from lexical fh');
+
+    # used to try to open a file [perl #17830]
+    ok( open(my $stdin,  "<&", fileno STDIN),   'dup fileno(STDIN) into lexical fh');
 }
 
 SKIP: {

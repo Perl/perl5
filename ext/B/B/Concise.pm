@@ -1,5 +1,5 @@
 package B::Concise;
-# Copyright (C) 2000, 2001 Stephen McCamant. All rights reserved.
+# Copyright (C) 2000-2002 Stephen McCamant. All rights reserved.
 # This program is free software; you can redistribute and/or modify it
 # under the same terms as Perl itself.
 
@@ -234,8 +234,7 @@ sub walk_exec {
 	    last if $opsseen{$$op}++;
 	    push @$targ, $op;
 	    my $name = $op->name;
-	    if ($name
-		=~ /^(or|and|(map|grep)while|entertry|range|cond_expr)$/) {
+	    if (class($op) eq "LOGOP") {
 		my $ar = [];
 		push @$targ, $ar;
 		push @todo, [$op->other, $ar];
@@ -534,7 +533,7 @@ sub tree {
 
 # Why these are different for MacOS?  Does it matter?
 my $cop_seq_mnum = $^O eq 'MacOS' ? 12 : 11;
-my $seq_mnum = $^O eq 'MacOS' ? 100 : 84;
+my $seq_mnum = $^O eq 'MacOS' ? 102 : 86;
 $cop_seq_base = svref_2object(eval 'sub{0;}')->START->cop_seq + $cop_seq_mnum;
 $seq_base = svref_2object(eval 'sub{}')->START->seq + $seq_mnum;
 
