@@ -810,7 +810,7 @@ test-prep: miniperl perl preplibrary utilities $(dynamic_ext) $(nonxs_ext) $(TES
 
 # Second branch is for testing without a tty or controling terminal.
 # See t/op/stat.t
-test check: test-prep
+_test test check: test-prep
 	if (true </dev/tty) >/dev/null 2>&1; then \
 	  cd t && $(LDLIBPTH) ./perl TEST </dev/tty; \
 	else \
