@@ -3176,7 +3176,13 @@ sv_gets(register SV *sv, register PerlIO *fp, I32 append)
     I32 i;
 
     SV_CHECK_THINKFIRST(sv);
-    (void)SvUPGRADE(sv, SVt_PV);
+    if (SvTYPE(sv) >= SVt_PV) {
+	if (SvFAKE(sv) && SvTYPE(sv) == SVt_PVGV)
+	    sv_unglob(sv);
+    }
+    else
+	sv_upgrade(sv, SVt_PV);
+
     SvSCREAM_off(sv);
 
     if (RsSNARF(PL_rs)) {
