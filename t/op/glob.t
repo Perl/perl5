@@ -5,11 +5,12 @@
 print "1..4\n";
 
 @ops = <op/*>;
-$list = join(' ',@ops);
 
-chop($otherway = `echo op/*`);
-
-print $list eq $otherway ? "ok 1\n" : "not ok 1\n$list\n$otherway\n";
+map { $files{$_}++ } <op/*>;
+map { delete $files{$_} } split /[\s\n]/, `echo op/*`;
+if (keys %files) {
+	print "not ok 1\t(",join(' ', sort keys %files),"\n";
+} else { print "ok 1\n"; }
 
 print $/ eq "\n" ? "ok 2\n" : "not ok 2\n";
 
