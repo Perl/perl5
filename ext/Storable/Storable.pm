@@ -1,4 +1,4 @@
-;# $Id: Storable.pm,v 1.0.1.12 2001/08/28 21:51:51 ram Exp $
+;# $Id: Storable.pm,v 1.0.1.13 2001/12/01 13:34:49 ram Exp $
 ;#
 ;#  Copyright (c) 1995-2000, Raphael Manfredi
 ;#  
@@ -6,6 +6,10 @@
 ;#  in the README file that comes with the distribution.
 ;#
 ;# $Log: Storable.pm,v $
+;# Revision 1.0.1.13  2001/12/01 13:34:49  ram
+;# patch14: avoid requiring Fcntl upfront, useful to embedded runtimes
+;# patch14: store_fd() will now correctly autoflush file if needed
+;#
 ;# Revision 1.0.1.12  2001/08/28 21:51:51  ram
 ;# patch13: fixed truncation race with lock_retrieve() in lock_store()
 ;#
@@ -66,7 +70,7 @@ package Storable; @ISA = qw(Exporter DynaLoader);
 use AutoLoader;
 use vars qw($forgive_me $VERSION);
 
-$VERSION = '1.013';
+$VERSION = '1.014';
 *AUTOLOAD = \&AutoLoader::AUTOLOAD;		# Grrr...
 
 #
@@ -93,8 +97,7 @@ unless (defined @Log::Agent::EXPORT) {
 #
 
 BEGIN {
-	require Fcntl;
-	if (exists $Fcntl::EXPORT_TAGS{'flock'}) {
+	if (eval { require Fcntl; 1 } && exists $Fcntl::EXPORT_TAGS{'flock'}) {
 		Fcntl->import(':flock');
 	} else {
 		eval q{
@@ -234,6 +237,7 @@ sub _store_fd {
 	# Call C routine nstore or pstore, depending on network order
 	eval { $ret = &$xsptr($file, $self) };
 	logcroak $@ if $@ =~ s/\.?\n$/,/;
+	local $\; print $file '';	# Autoflush the file if wanted
 	$@ = $da;
 	return $ret ? $ret : undef;
 }
