@@ -692,16 +692,8 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 	  top2:
 	    /*SUPPRESS 560*/
 	    if ((tmp = table[*s])) {
-#ifdef POINTERRIGOR
-		if (bigend - s > tmp) {
-		    s += tmp;
-		    goto top2;
-		}
-		s += tmp;
-#else
 		if ((s += tmp) < bigend)
 		    goto top2;
-#endif
 		goto check_end;
 	    }
 	    else {		/* less expensive than calling strncmp() */
@@ -795,25 +787,6 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
 	if (!(pos += PL_screamnext[pos]))
 	    goto cant_find;
     }
-#ifdef POINTERRIGOR
-    do {
-	if (pos >= stop_pos) break;
-	if (big[pos-previous] != first)
-	    continue;
-	for (x=big+pos+1-previous,s=little; s < littleend; /**/ ) {
-	    if (*s++ != *x++) {
-		s--;
-		break;
-	    }
-	}
-	if (s == littleend) {
-	    *old_posp = pos;
-	    if (!last) return (char *)(big+pos-previous);
-	    found = 1;
-	}
-    } while ( pos += PL_screamnext[pos] );
-    return (last && found) ? (char *)(big+(*old_posp)-previous) : Nullch;
-#else /* !POINTERRIGOR */
     big -= previous;
     do {
 	if (pos >= stop_pos) break;
@@ -833,7 +806,6 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
     } while ( pos += PL_screamnext[pos] );
     if (last && found)
 	return (char *)(big+(*old_posp));
-#endif /* POINTERRIGOR */
   check_tail:
     if (!SvTAIL(littlestr) || (end_shift > 0))
 	return Nullch;
