@@ -317,18 +317,19 @@ IdOS(void)
 static char *
 GetShell(void)
 {
-    static char* szWin95ShellEntry = "Win95Shell";
-    static char* szWin95DefaultShell = "Cmd32.exe";
-    static char* szWinNTDefaultShell = "cmd.exe";
-   
     if (!ProbeEnv) {
+	char* defaultshell = (IsWinNT() ? "cmd.exe" : "command.com");
+	/* we don't use COMSPEC here for two reasons:
+	 *  1. the same reason perl on UNIX doesn't use SHELL--rampant and
+	 *     uncontrolled unportability of the ensuing scripts.
+	 *  2. PERL5SHELL could be set to a shell that may not be fit for
+	 *     interactive use (which is what most programs look in COMSPEC
+	 *     for).
+	 */
+	char *usershell = getenv("PERL5SHELL");  
+
 	ProbeEnv = TRUE;
-	if (IsWin95()) {
-	    strcpy(szShellPath, szWin95DefaultShell);
-	}
-	else {
-	    strcpy(szShellPath, szWinNTDefaultShell);
-	}
+	strcpy(szShellPath, usershell ? usershell : defaultshell);
     }
     return szShellPath;
 }
