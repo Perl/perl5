@@ -1306,7 +1306,7 @@ PERL_CALLCONV void	Perl_pad_tidy(pTHX_ padtidy_type type);
 PERL_CALLCONV void	Perl_do_dump_pad(pTHX_ I32 level, PerlIO *file, PADLIST *padlist, int full);
 PERL_CALLCONV void	Perl_pad_fixup_inner_anons(pTHX_ PADLIST *padlist, CV *old_cv, CV *new_cv);
 
-PERL_CALLCONV void	Perl_pad_push(pTHX_ PADLIST *padlist, int depth, int has_args);
+PERL_CALLCONV void	Perl_pad_push(pTHX_ PADLIST *padlist, int depth);
 
 #if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
 STATIC PADOFFSET	S_pad_findlex(pTHX_ char *name, CV* cv, U32 seq, int warn, SV** out_capture, SV** out_name_sv, int *out_flags);

@@ -2703,7 +2703,7 @@ PP(pp_entersub)
 	 */
 	if (CvDEPTH(cv) >= 2) {
 	    PERL_STACK_OVERFLOW_CHECK();
-	    pad_push(padlist, CvDEPTH(cv), 1);
+	    pad_push(padlist, CvDEPTH(cv));
 	}
 	PAD_SET_CUR(padlist, CvDEPTH(cv));
 	if (hasargs)

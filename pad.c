@@ -1537,17 +1537,14 @@ Perl_pad_fixup_inner_anons(pTHX_ PADLIST *padlist, CV *old_cv, CV *new_cv)
 =for apidoc pad_push
 
 Push a new pad frame onto the padlist, unless there's already a pad at
-this depth, in which case don't bother creating a new one.
-If has_args is true, give the new pad an @_ in slot zero.
+this depth, in which case don't bother creating a new one.  Then give
+the new pad an @_ in slot zero.
 
 =cut
 */
 
-/* XXX pad_push is now always called with has_args == 1. Get rid of
- * this arg at some point */
-
 void
-Perl_pad_push(pTHX_ PADLIST *padlist, int depth, int has_args)
+Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
 {
     if (depth <= AvFILLp(padlist))
 	return;
@@ -1557,41 +1554,44 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth, int has_args)
 	AV *newpad = newAV();
 	SV **oldpad = AvARRAY(svp[depth-1]);
 	I32 ix = AvFILLp((AV*)svp[1]);
-	I32 names_fill = AvFILLp((AV*)svp[0]);
+	const I32 names_fill = AvFILLp((AV*)svp[0]);
 	SV** names = AvARRAY(svp[0]);
-	SV* sv;
+	AV *av;
+
 	for ( ;ix > 0; ix--) {
 	    if (names_fill >= ix && names[ix] != &PL_sv_undef) {
-		char *name = SvPVX(names[ix]);
-		if ((SvFLAGS(names[ix]) & SVf_FAKE) || *name == '&') {
+		const char sigil = SvPVX(names[ix])[0];
+		if ((SvFLAGS(names[ix]) & SVf_FAKE) || sigil == '&') {
 		    /* outer lexical or anon code */
 		    av_store(newpad, ix, SvREFCNT_inc(oldpad[ix]));
 		}
 		else {		/* our own lexical */
-		    if (*name == '@')
-			av_store(newpad, ix, sv = (SV*)newAV());
-		    else if (*name == '%')
-			av_store(newpad, ix, sv = (SV*)newHV());
+		    SV *sv; 
+		    if (sigil == '@')
+			sv = (SV*)newAV();
+		    else if (sigil == '%')
+			sv = (SV*)newHV();
 		    else
-			av_store(newpad, ix, sv = NEWSV(0, 0));
+			sv = NEWSV(0, 0);
+		    av_store(newpad, ix, sv);
 		    SvPADMY_on(sv);
 		}
 	    }
 	    else if (IS_PADGV(oldpad[ix]) || IS_PADCONST(oldpad[ix])) {
-		av_store(newpad, ix, sv = SvREFCNT_inc(oldpad[ix]));
+		av_store(newpad, ix, SvREFCNT_inc(oldpad[ix]));
 	    }
 	    else {
 		/* save temporaries on recursion? */
-		av_store(newpad, ix, sv = NEWSV(0, 0));
+		SV *sv = NEWSV(0, 0);
+		av_store(newpad, ix, sv);
 		SvPADTMP_on(sv);
 	    }
 	}
-	if (has_args) {
-	    AV* av = newAV();
-	    av_extend(av, 0);
-	    av_store(newpad, 0, (SV*)av);
-	    AvFLAGS(av) = AVf_REIFY;
-	}
+	av = newAV();
+	av_extend(av, 0);
+	av_store(newpad, 0, (SV*)av);
+	AvFLAGS(av) = AVf_REIFY;
+
 	av_store(padlist, depth, (SV*)newpad);
 	AvFILLp(padlist) = depth;
     }

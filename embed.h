@@ -4683,7 +4683,7 @@
 #define pad_fixup_inner_anons(a,b,c)	Perl_pad_fixup_inner_anons(aTHX_ a,b,c)
 #endif
 #ifdef PERL_CORE
-#define pad_push(a,b,c)		Perl_pad_push(aTHX_ a,b,c)
+#define pad_push(a,b)		Perl_pad_push(aTHX_ a,b)
 #endif
 #if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE

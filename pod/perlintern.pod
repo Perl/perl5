@@ -697,10 +697,10 @@ Found in file pad.c
 =item pad_push
 
 Push a new pad frame onto the padlist, unless there's already a pad at
-this depth, in which case don't bother creating a new one.
-If has_args is true, give the new pad an @_ in slot zero.
+this depth, in which case don't bother creating a new one.  Then give
+the new pad an @_ in slot zero.
 
-	void	pad_push(PADLIST *padlist, int depth, int has_args)
+	void	pad_push(PADLIST *padlist, int depth)
 
 =for hackers
 Found in file pad.c
