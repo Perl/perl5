@@ -308,11 +308,15 @@ C<E<gt>E<gt>file> appends stdout to C<file>,
 
 =item *
 
-C<2E<gt>file> writes stderr to C<file>, and
+C<2E<gt>file> writes stderr to C<file>,
 
 =item *
 
-C<2E<gt>E<gt>file> appends stderr to C<file>. 
+C<2E<gt>E<gt>file> appends stderr to C<file>, and
+
+=item *
+
+C<< 2>&1 >> redirects stderr to stdout.
 
 =back
 
