@@ -283,17 +283,8 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 			}
 			if (IoIFP(thatio)) {
 			    PerlIO *fp = IoIFP(thatio);
-			    /* Flush stdio buffer before dup. --mjd
-			     * Unfortunately SEEK_CURing 0 seems to
-			     * be optimized away on most platforms;
-			     * only Solaris and Linux seem to flush
-			     * on that. --jhi */
+				/* Flush stdio buffer before dup */
 			    PerlIO_seek(fp, 0, SEEK_CUR);
-			    /* On the other hand, do all platforms
-			     * take gracefully to flushing a read-only
-			     * filehandle?  Perhaps we should do
-			     * fsetpos(src)+fgetpos(dst)?  --nik */
-			    PerlIO_flush(fp);
 			    fd = PerlIO_fileno(fp);
 			    if (IoTYPE(thatio) == 's')
 				IoTYPE(io) = 's';
