@@ -28,6 +28,23 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 21308] By: jhi                                   on 2003/09/22  07:10:32
+        Log: Integrate:
+             [ 21305]
+             Upgrade to Time::HiRes 1.51.
+     Branch: maint-5.8/perl
+	  !> ext/Time/HiRes/Changes ext/Time/HiRes/HiRes.pm
+____________________________________________________________________________
+[ 21307] By: jhi                                   on 2003/09/22  06:44:01
+        Log: It's RC time.
+     Branch: maint-5.8/perl
+	   ! patchlevel.h pod/perlhist.pod
+____________________________________________________________________________
+[ 21306] By: jhi                                   on 2003/09/22  06:41:42
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 21304] By: jhi                                   on 2003/09/22  04:43:10
         Log: Integrate:
              [ 21302]
