@@ -219,6 +219,10 @@ hierarchy is:
           |                  |
           |                  +--- closure
           |                  |
+          |                  +--- overflow
+          |                  |
+          |                  +--- portable
+          |                  |
           |                  +--- untie
           |                  |
           |                  +--- utf8
@@ -241,7 +245,7 @@ hierarchy is:
           |                  |
           |                  +--- reserved
           |                  |
-          |                  +--- octal
+          |                  +--- digit
           |                  |
           |                  +--- parenthesis
           |                  |
@@ -312,10 +316,6 @@ The experimental features need bottomed out.
     patch, but there were design decisions made in diagnostics to work
     around the limitations of C<$^W>. Now that those limitations are gone,
     the module should be revisited.
-
-  octal
-    'octal' controls illegal octal characters warning, but 'unsafe' controls
-    illegal hexadecimal and binary characters warnings.
 
 =head1 SEE ALSO
 

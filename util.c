@@ -2809,8 +2809,8 @@ Perl_scan_bin(pTHX_ char *start, I32 len, I32 *retlen)
 	    }
 	    else {
 		dTHR;
-		if (ckWARN(WARN_UNSAFE))
-		    Perl_warner(aTHX_ WARN_UNSAFE,
+		if (ckWARN(WARN_DIGIT))
+		    Perl_warner(aTHX_ WARN_DIGIT,
 				"Illegal binary digit '%c' ignored", *s);
 		break;
 	    }
@@ -2822,8 +2822,8 @@ Perl_scan_bin(pTHX_ char *start, I32 len, I32 *retlen)
 		dTHR;
 		overflowed = TRUE;
 		rnv = (NV) ruv;
-		if (ckWARN_d(WARN_UNSAFE))
-		    Perl_warner(aTHX_ WARN_UNSAFE,
+		if (ckWARN_d(WARN_OVERFLOW))
+		    Perl_warner(aTHX_ WARN_OVERFLOW,
 				"Integer overflow in binary number");
 	    } else
 		ruv = xuv | (*s - '0');
@@ -2847,8 +2847,8 @@ Perl_scan_bin(pTHX_ char *start, I32 len, I32 *retlen)
 #endif
 	) { 
 	dTHR;
-	if (ckWARN(WARN_UNSAFE))
-	    Perl_warner(aTHX_ WARN_UNSAFE,
+	if (ckWARN(WARN_PORTABLE))
+	    Perl_warner(aTHX_ WARN_PORTABLE,
 			"Binary number > 0b11111111111111111111111111111111 non-portable");
     }
     *retlen = s - start;
@@ -2873,8 +2873,8 @@ Perl_scan_oct(pTHX_ char *start, I32 len, I32 *retlen)
 		 * someone seems to want to use the digits eight and nine). */
 		if (*s == '8' || *s == '9') {
 		    dTHR;
-		    if (ckWARN(WARN_OCTAL))
-			Perl_warner(aTHX_ WARN_OCTAL,
+		    if (ckWARN(WARN_DIGIT))
+			Perl_warner(aTHX_ WARN_DIGIT,
 				    "Illegal octal digit '%c' ignored", *s);
 		}
 		break;
@@ -2887,8 +2887,8 @@ Perl_scan_oct(pTHX_ char *start, I32 len, I32 *retlen)
 		dTHR;
 		overflowed = TRUE;
 		rnv = (NV) ruv;
-		if (ckWARN_d(WARN_UNSAFE))
-		    Perl_warner(aTHX_ WARN_UNSAFE,
+		if (ckWARN_d(WARN_OVERFLOW))
+		    Perl_warner(aTHX_ WARN_OVERFLOW,
 				"Integer overflow in octal number");
 	    } else
 		ruv = xuv | (*s - '0');
@@ -2912,8 +2912,8 @@ Perl_scan_oct(pTHX_ char *start, I32 len, I32 *retlen)
 #endif
 	) {
 	dTHR;
-	if (ckWARN(WARN_UNSAFE))
-	    Perl_warner(aTHX_ WARN_UNSAFE,
+	if (ckWARN(WARN_PORTABLE))
+	    Perl_warner(aTHX_ WARN_PORTABLE,
 			"Octal number > 037777777777 non-portable");
     }
     *retlen = s - start;
@@ -2942,8 +2942,8 @@ Perl_scan_hex(pTHX_ char *start, I32 len, I32 *retlen)
 	    }
 	    else {
 		dTHR;
-		if (ckWARN(WARN_UNSAFE))
-		    Perl_warner(aTHX_ WARN_UNSAFE,
+		if (ckWARN(WARN_DIGIT))
+		    Perl_warner(aTHX_ WARN_DIGIT,
 				"Illegal hexadecimal digit '%c' ignored", *s);
 		break;
 	    }
@@ -2955,8 +2955,8 @@ Perl_scan_hex(pTHX_ char *start, I32 len, I32 *retlen)
 		dTHR;
 		overflowed = TRUE;
 		rnv = (NV) ruv;
-		if (ckWARN_d(WARN_UNSAFE))
-		    Perl_warner(aTHX_ WARN_UNSAFE,
+		if (ckWARN_d(WARN_OVERFLOW))
+		    Perl_warner(aTHX_ WARN_OVERFLOW,
 				"Integer overflow in hexadecimal number");
 	    } else
 		ruv = xuv | ((hexdigit - PL_hexdigit) & 15);
@@ -2980,8 +2980,8 @@ Perl_scan_hex(pTHX_ char *start, I32 len, I32 *retlen)
 #endif
 	) { 
 	dTHR;
-	if (ckWARN(WARN_UNSAFE))
-	    Perl_warner(aTHX_ WARN_UNSAFE,
+	if (ckWARN(WARN_PORTABLE))
+	    Perl_warner(aTHX_ WARN_PORTABLE,
 			"Hexadecimal number > 0xffffffff non-portable");
     }
     *retlen = s - start;
