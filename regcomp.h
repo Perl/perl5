@@ -350,6 +350,15 @@ typedef struct re_scream_pos_data_s
     I32 *scream_pos;		/* Internal iterator of scream. */
 } re_scream_pos_data;
 
+/* .what is a character array with one character for each member of .data
+ * The character describes the function of the corresponding .data item:
+ *   f - start-class data for regstclass optimization  
+ *   n - Root of op tree for (?{EVAL}) item
+ *   o - Start op for (?{EVAL}) item
+ *   p - Pad for (?{EVAL} item
+ *   s - swash for unicode-style character class
+ * 20010712 mjd@plover.com
+ */
 struct reg_data {
     U32 count;
     U8 *what;
