@@ -1293,14 +1293,6 @@ ones (which ones these are depends on your system and applications)
 with "ipcrm -s SEMAPHORE_ID_HERE" or configure more semaphores to your
 system.
 
-=item miniperl coredumps in Digital UNIX 4.0D
-
-In Digital UNIX 4.0D /bin/ld has a bug that may cause the resulting
-executable (here, miniperl) dump core if shared libraries are being
-used (here, libperl.so).  A workaround is to change the -O4 in the
-ld flags to be -O0.  The solution is either to ask for a patch to
-"QAR 56761", or to upgrade to 4.0E or better.
-
 =item Miscellaneous
 
 Some additional things that have been reported for either perl4 or perl5:
