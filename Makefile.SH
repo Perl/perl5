@@ -248,7 +248,7 @@ $(LIBPERL): $& perl$(OBJ_EXT) $(obj)
 	case "$useshrplib" in
 	true)
 		$spitshell >>Makefile <<'!NO!SUBS!'
-	$(LD) $(LDDLFLAGS) -o $@ perl$(OBJ_EXT) $(obj) $(libs)
+	$(LD) $(LDDLFLAGS) -o $@ perl$(OBJ_EXT) $(obj)
 !NO!SUBS!
 		;;
 	*)
