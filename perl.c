@@ -2245,7 +2245,7 @@ validate_suid(char *validarg, char *scriptname, int fdscript)
 		croak("Can't swap uid and euid");	/* really paranoid */
 	    if (PerlLIO_stat(SvPVX(GvSV(PL_curcop->cop_filegv)),&tmpstatbuf) < 0)
 		croak("Permission denied");	/* testing full pathname here */
-#ifdef IAMSUID
+#if defined(IAMSUID) && !defined(NO_NOSUID_CHECK)
 	    if (fd_on_nosuid_fs(PerlIO_fileno(PL_rsfp)))
 		croak("Permission denied");
 #endif
