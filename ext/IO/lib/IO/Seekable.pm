@@ -27,7 +27,6 @@ See L<perlfunc> for complete descriptions of each of the following
 supported C<IO::Seekable> methods, which are just front ends for the
 corresponding built-in functions:
 
-    clearerr
     seek
     tell
 
@@ -55,11 +54,6 @@ require Exporter;
 @ISA = qw(Exporter);
 
 $VERSION = "1.06";
-
-sub clearerr {
-    @_ == 1 or croak 'usage: $fh->clearerr()';
-    seek($_[0], 0, SEEK_CUR);
-}
 
 sub seek {
     @_ == 3 or croak 'usage: $fh->seek(POS, WHENCE)';

@@ -186,7 +186,7 @@ use SelectSaver;
 require Exporter;
 @ISA = qw(Exporter);
 
-$VERSION = "1.1502";
+$VERSION = "1.1503";
 $XS_VERSION = "1.15";
 
 @EXPORT_OK = qw(
