@@ -144,7 +144,7 @@ programmers used to get library constants by reading through the C
 header files. You may still see C<require 'syscall.ph'> or similar
 around - the F<.ph> file should be created by running F<h2ph> on the
 corresponding F<.h> file. See the F<h2ph> documentation for more on how
-to convert a whole bunch of header files at ones.
+to convert a whole bunch of header files at once.
 
 =item L<c2ph|c2ph> and L<pstruct|pstruct>
 
