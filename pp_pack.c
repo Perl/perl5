@@ -2685,8 +2685,8 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 	case 'p':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
-		if (fromstr == &PL_sv_undef)
-		    aptr = NULL;
+		SvGETMAGIC(fromstr);
+		if (!SvOK(fromstr)) aptr = NULL;
 		else {
 		    STRLEN n_a;
 		    /* XXX better yet, could spirit away the string to
@@ -2702,9 +2702,9 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 				"Attempt to pack pointer to temporary value");
 		    }
 		    if (SvPOK(fromstr) || SvNIOK(fromstr))
-			aptr = SvPV(fromstr,n_a);
+			aptr = SvPV_flags(fromstr, n_a, 0);
 		    else
-			aptr = SvPV_force(fromstr,n_a);
+			aptr = SvPV_force_flags(fromstr, n_a, 0);
 		}
 		DO_BO_PACK_P(aptr);
 		sv_catpvn(cat, (char*)&aptr, sizeof(char*));
