@@ -2776,6 +2776,11 @@ sed %s -e \"/^[^#]/b\" \
 		Perl_croak(aTHX_ "Can't do seteuid!\n");
 	}
 #endif /* IAMSUID */
+
+        DEBUG_P(PerlIO_printf(Perl_debug_log, 
+                              "PL_preprocess: cmd=\"%s\"\n", 
+                              SvPVX(cmd)));
+
 	PL_rsfp = PerlProc_popen(SvPVX(cmd), "r");
 	SvREFCNT_dec(cmd);
 	SvREFCNT_dec(cpp);
