@@ -181,17 +181,20 @@ for (@ops) {
     $argsum |= 2 if $flags =~ /f/;		# fold constants
     $argsum |= 4 if $flags =~ /s/;		# always produces scalar
     $argsum |= 8 if $flags =~ /t/;		# needs target scalar
+    $argsum |= (8|256) if $flags =~ /T/;	# ... which may be lexical
     $argsum |= 16 if $flags =~ /i/;		# always produces integer
     $argsum |= 32 if $flags =~ /I/;		# has corresponding int op
     $argsum |= 64 if $flags =~ /d/;		# danger, unknown side effects
     $argsum |= 128 if $flags =~ /u/;		# defaults to $_
 
     $flags =~ /([\W\d_])/ or die qq[Opcode "$_" has no class indicator];
-    $argsum |= $opclass{$1} << 8;
-    $mul = 4096;				# 2 ^ OASHIFT
+    $argsum |= $opclass{$1} << 9;
+    $mul = 0x2000;				# 2 ^ OASHIFT
     for $arg (split(' ',$args{$_})) {
 	$argnum = ($arg =~ s/\?//) ? 8 : 0;
 	$argnum += $argnum{$arg};
+	warn "# Conflicting bit 32 for '$_'.\n"
+	    if $argnum & 8 and $mul == 0x10000000;
 	$argsum += $argnum * $mul;
 	$mul <<= 4;
     }
@@ -237,6 +240,43 @@ sub tab {
     $t;
 }
 ###########################################################################
+
+# Some comments about 'T' opcode classifier:
+
+# Safe to set if the ppcode uses:
+#	tryAMAGICbin, tryAMAGICun, SETn, SETi, SETu, PUSHn, PUSHTARG, SETTARG,
+#	SETs(TARG), XPUSHn, XPUSHu,
+
+# Unsafe to set if the ppcode uses dTARG or [X]RETPUSH[YES|NO|UNDEF]
+
+# lt and friends do SETs (including ncmp, but not scmp)
+
+# pp.c	pos substr each not OK (RETPUSHUNDEF)
+#	substr vec also not OK due to LV to target (are they???)
+#	ref not OK (RETPUSHNO)
+#	trans not OK (dTARG; TARG = sv_newmortal();)
+#	ucfirst etc not OK: TMP arg processed inplace
+#	each repeat not OK too due to array context
+#	pack split - unknown whether they are safe
+
+# pp_hot.c
+#	readline - unknown whether it is safe
+#	match subst not OK (dTARG)
+#	grepwhile not OK (not always setting)
+
+# pp_ctl.c
+#	mapwhile flip caller not OK (not always setting)
+
+# pp_sys.c
+#	backtick glob warn die not OK (not always setting)
+#	warn not OK (RETPUSHYES)
+#	open fileno getc sysread syswrite ioctl accept shutdown
+#	 ftsize(etc) readlink telldir fork alarm getlogin not OK (RETPUSHUNDEF)
+#	umask select not OK (XPUSHs(&PL_sv_undef);)
+#	fileno getc sysread syswrite tell not OK (meth("FILENO" "GETC"))
+#	sselect shm* sem* msg* syscall - unknown whether they are safe
+#	gmtime not OK (list context)
+
 __END__
 
 # Nothing.
@@ -297,13 +337,13 @@ trans		character translation	ck_null		is"	S
 # Lvalue operators.
 # sassign is special-cased for op class
 
-sassign		scalar assignment	ck_null		s0
+sassign		scalar assignment	ck_sassign	s0
 aassign		list assignment		ck_null		t2	L L
 
-chop		chop			ck_spair	mts%	L
-schop		scalar chop		ck_null		stu%	S?
-chomp		safe chop		ck_spair	mts%	L
-schomp		scalar safe chop	ck_null		stu%	S?
+chop		chop			ck_spair	mTs%	L
+schop		scalar chop		ck_null		sTu%	S?
+chomp		safe chop		ck_spair	mTs%	L
+schomp		scalar safe chop	ck_null		sTu%	S?
 defined		defined operator	ck_defined	isu%	S?
 undef		undef operator		ck_lfun		s%	S?
 study		study			ck_fun		su%	S?
@@ -313,32 +353,32 @@ preinc		preincrement		ck_lfun		dIs1	S
 i_preinc	integer preincrement	ck_lfun		dis1	S
 predec		predecrement		ck_lfun		dIs1	S
 i_predec	integer predecrement	ck_lfun		dis1	S
-postinc		postincrement		ck_lfun		dIst1	S
-i_postinc	integer postincrement	ck_lfun		dist1	S
-postdec		postdecrement		ck_lfun		dIst1	S
-i_postdec	integer postdecrement	ck_lfun		dist1	S
+postinc		postincrement		ck_lfun		dIsT1	S
+i_postinc	integer postincrement	ck_lfun		disT1	S
+postdec		postdecrement		ck_lfun		dIsT1	S
+i_postdec	integer postdecrement	ck_lfun		disT1	S
 
 # Ordinary operators.
 
-pow		exponentiation		ck_null		fst2	S S
+pow		exponentiation		ck_null		fsT2	S S
 
-multiply	multiplication		ck_null		Ifst2	S S
-i_multiply	integer multiplication	ck_null		ifst2	S S
-divide		division		ck_null		Ifst2	S S
-i_divide	integer division	ck_null		ifst2	S S
-modulo		modulus			ck_null		Iifst2	S S
-i_modulo	integer modulus		ck_null		ifst2	S S
+multiply	multiplication		ck_null		IfsT2	S S
+i_multiply	integer multiplication	ck_null		ifsT2	S S
+divide		division		ck_null		IfsT2	S S
+i_divide	integer division	ck_null		ifsT2	S S
+modulo		modulus			ck_null		IifsT2	S S
+i_modulo	integer modulus		ck_null		ifsT2	S S
 repeat		repeat			ck_repeat	mt2	L S
 
-add		addition		ck_null		Ifst2	S S
-i_add		integer addition	ck_null		ifst2	S S
-subtract	subtraction		ck_null		Ifst2	S S
-i_subtract	integer subtraction	ck_null		ifst2	S S
-concat		concatenation		ck_concat	fst2	S S
-stringify	string			ck_fun		fst@	S
+add		addition		ck_null		IfsT2	S S
+i_add		integer addition	ck_null		ifsT2	S S
+subtract	subtraction		ck_null		IfsT2	S S
+i_subtract	integer subtraction	ck_null		ifsT2	S S
+concat		concatenation		ck_concat	fsT2	S S
+stringify	string			ck_fun		fsT@	S
 
-left_shift	left bitshift		ck_bitop	fst2	S S
-right_shift	right bitshift		ck_bitop	fst2	S S
+left_shift	left bitshift		ck_bitop	fsT2	S S
+right_shift	right bitshift		ck_bitop	fsT2	S S
 
 lt		numeric lt		ck_null		Iifs2	S S
 i_lt		integer lt		ck_null		ifs2	S S
@@ -363,52 +403,52 @@ seq		string eq		ck_null		ifs2	S S
 sne		string ne		ck_null		ifs2	S S
 scmp		string comparison	ck_scmp		ifst2	S S
 
-bit_and		bitwise and		ck_bitop	fst2	S S
-bit_xor		bitwise xor		ck_bitop	fst2	S S
-bit_or		bitwise or		ck_bitop	fst2	S S
+bit_and		bitwise and		ck_bitop	fsT2	S S
+bit_xor		bitwise xor		ck_bitop	fsT2	S S
+bit_or		bitwise or		ck_bitop	fsT2	S S
 
-negate		negate			ck_null		Ifst1	S
-i_negate	integer negate		ck_null		ifst1	S
+negate		negate			ck_null		IfsT1	S
+i_negate	integer negate		ck_null		ifsT1	S
 not		not			ck_null		ifs1	S
-complement	1's complement		ck_bitop	fst1	S
+complement	1's complement		ck_bitop	fsT1	S
 
 # High falutin' math.
 
-atan2		atan2			ck_fun		fst@	S S
-sin		sin			ck_fun		fstu%	S?
-cos		cos			ck_fun		fstu%	S?
-rand		rand			ck_fun		st%	S?
+atan2		atan2			ck_fun		fsT@	S S
+sin		sin			ck_fun		fsTu%	S?
+cos		cos			ck_fun		fsTu%	S?
+rand		rand			ck_fun		sT%	S?
 srand		srand			ck_fun		s%	S?
-exp		exp			ck_fun		fstu%	S?
-log		log			ck_fun		fstu%	S?
-sqrt		sqrt			ck_fun		fstu%	S?
+exp		exp			ck_fun		fsTu%	S?
+log		log			ck_fun		fsTu%	S?
+sqrt		sqrt			ck_fun		fsTu%	S?
 
 # Lowbrow math.
 
-int		int			ck_fun		fstu%	S?
-hex		hex			ck_fun		fstu%	S?
-oct		oct			ck_fun		fstu%	S?
-abs		abs			ck_fun		fstu%	S?
+int		int			ck_fun		fsTu%	S?
+hex		hex			ck_fun		fsTu%	S?
+oct		oct			ck_fun		fsTu%	S?
+abs		abs			ck_fun		fsTu%	S?
 
 # String stuff.
 
-length		length			ck_lengthconst	istu%	S?
+length		length			ck_lengthconst	isTu%	S?
 substr		substr			ck_fun		st@	S S S? S?
 vec		vec			ck_fun		ist@	S S S
 
-index		index			ck_index	ist@	S S S?
-rindex		rindex			ck_index	ist@	S S S?
+index		index			ck_index	isT@	S S S?
+rindex		rindex			ck_index	isT@	S S S?
 
-sprintf		sprintf			ck_fun_locale	mfst@	S L
+sprintf		sprintf			ck_fun_locale	mfsT@	S L
 formline	formline		ck_fun		ms@	S L
-ord		ord			ck_fun		ifstu%	S?
-chr		chr			ck_fun		fstu%	S?
-crypt		crypt			ck_fun		fst@	S S
+ord		ord			ck_fun		ifsTu%	S?
+chr		chr			ck_fun		fsTu%	S?
+crypt		crypt			ck_fun		fsT@	S S
 ucfirst		upper case first	ck_fun_locale	fstu%	S?
 lcfirst		lower case first	ck_fun_locale	fstu%	S?
 uc		upper case		ck_fun_locale	fstu%	S?
 lc		lower case		ck_fun_locale	fstu%	S?
-quotemeta	quote metachars		ck_fun		fstu%	S?
+quotemeta	quote metachars		ck_fun		fsTu%	S?
 
 # Arrays.
 
@@ -433,7 +473,7 @@ hslice		hash slice		ck_null		m@	H L
 unpack		unpack			ck_fun		@	S S
 pack		pack			ck_fun		mst@	S L
 split		split			ck_split	t@	S S S
-join		join			ck_fun		mst@	S L
+join		join			ck_fun		msT@	S L
 
 # List operators.
 
@@ -443,10 +483,10 @@ anonlist	anonymous list		ck_fun		ms@	L
 anonhash	anonymous hash		ck_fun		ms@	L
 
 splice		splice			ck_fun		m@	A S? S? L
-push		push			ck_fun		imst@	A L
+push		push			ck_fun		imsT@	A L
 pop		pop			ck_shift	s%	A
 shift		shift			ck_shift	s%	A
-unshift		unshift			ck_fun		imst@	A L
+unshift		unshift			ck_fun		imsT@	A L
 sort		sort			ck_sort		m@	C? L
 reverse		reverse			ck_fun		mt@	L
 
@@ -544,7 +584,7 @@ truncate	truncate		ck_trunc	is@	S S
 
 fcntl		fcntl			ck_fun		st@	F S S
 ioctl		ioctl			ck_fun		st@	F S S
-flock		flock			ck_fun		ist@	F S
+flock		flock			ck_fun		isT@	F S
 
 # Sockets.
 
@@ -597,18 +637,18 @@ ftbinary	-B			ck_ftst		isu-	F
 
 # File calls.
 
-chdir		chdir			ck_fun		ist%	S?
-chown		chown			ck_fun		imst@	L
-chroot		chroot			ck_fun		istu%	S?
-unlink		unlink			ck_fun		imstu@	L
-chmod		chmod			ck_fun		imst@	L
-utime		utime			ck_fun		imst@	L
-rename		rename			ck_fun		ist@	S S
-link		link			ck_fun		ist@	S S
-symlink		symlink			ck_fun		ist@	S S
+chdir		chdir			ck_fun		isT%	S?
+chown		chown			ck_fun		imsT@	L
+chroot		chroot			ck_fun		isTu%	S?
+unlink		unlink			ck_fun		imsTu@	L
+chmod		chmod			ck_fun		imsT@	L
+utime		utime			ck_fun		imsT@	L
+rename		rename			ck_fun		isT@	S S
+link		link			ck_fun		isT@	S S
+symlink		symlink			ck_fun		isT@	S S
 readlink	readlink		ck_fun		stu%	S?
-mkdir		mkdir			ck_fun		ist@	S S
-rmdir		rmdir			ck_fun		istu%	S?
+mkdir		mkdir			ck_fun		isT@	S S
+rmdir		rmdir			ck_fun		isTu%	S?
 
 # Directory calls.
 
@@ -622,25 +662,25 @@ closedir	closedir		ck_fun		is%	F
 # Process control.
 
 fork		fork			ck_null		ist0	
-wait		wait			ck_null		ist0	
-waitpid		waitpid			ck_fun		ist@	S S
-system		system			ck_exec		imst@	S? L
-exec		exec			ck_exec		dimst@	S? L
-kill		kill			ck_fun		dimst@	L
-getppid		getppid			ck_null		ist0	
-getpgrp		getpgrp			ck_fun		ist%	S?
-setpgrp		setpgrp			ck_fun		ist@	S? S?
-getpriority	getpriority		ck_fun		ist@	S S
-setpriority	setpriority		ck_fun		ist@	S S S
+wait		wait			ck_null		isT0	
+waitpid		waitpid			ck_fun		isT@	S S
+system		system			ck_exec		imsT@	S? L
+exec		exec			ck_exec		dimsT@	S? L
+kill		kill			ck_fun		dimsT@	L
+getppid		getppid			ck_null		isT0	
+getpgrp		getpgrp			ck_fun		isT%	S?
+setpgrp		setpgrp			ck_fun		isT@	S? S?
+getpriority	getpriority		ck_fun		isT@	S S
+setpriority	setpriority		ck_fun		isT@	S S S
 
 # Time calls.
 
-time		time			ck_null		ist0	
+time		time			ck_null		isT0	
 tms		times			ck_null		0	
 localtime	localtime		ck_fun		t%	S?
 gmtime		gmtime			ck_fun		t%	S?
 alarm		alarm			ck_fun		istu%	S?
-sleep		sleep			ck_fun		ist%	S?
+sleep		sleep			ck_fun		isT%	S?
 
 # Shared memory.
 
