@@ -601,7 +601,7 @@ PPCODE:
 }
 
 void
-yield(thread = 'threads')
+yield(...)
 CODE:
 {
     YIELD;
