@@ -130,8 +130,8 @@ sub postamble
 		$continuator = '';
 	    }
 	}
-	my $plib   = $ENV{PERL_CORE} ? '-I$(PERL_LIB)' : '';
-	my $ucopts = ($^O eq 'VMS')  ? '-"Q"' : '-Q'; # VMS tweaks
+	my $plib   = $self->{PERL_CORE} ? '"-I$(PERL_LIB)"' : '';
+	my $ucopts = '-"Q"';
 	$str .=  
 	    qq{\n\t\$(PERL) $plib $enc2xs $ucopts -o \$\@ -f $table.fnm\n\n};
 	open (FILELIST, ">$table.fnm")

@@ -108,9 +108,9 @@ sub postamble
 		$continuator = '';
 	    }
 	}
-	my $plib   = $ENV{PERL_CORE} ? '-I$(PERL_LIB)' : '';
-	my $ucopts = ($^O eq 'VMS')  ? '-"Q" -"O"' : '-Q -O'; 
-	$str .=  
+	my $plib   = $self->{PERL_CORE} ? '"-I$(PERL_LIB)"' : '';
+	my $ucopts = '-"Q" -"O"';
+	$str .=
 	    qq{\n\t\$(PERL) $plib $enc2xs $ucopts -o \$\@ -f $table.fnm\n\n};
 	open (FILELIST, ">$table.fnm")
 	    || die "Could not open $table.fnm: $!";
