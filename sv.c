@@ -1495,7 +1495,7 @@ S_not_a_number(pTHX_ SV *sv)
 #define IS_NUMBER_INFINITY	      0x10 /* this is big */
 
 static int
-S_grok_number(const char *pv, STRLEN len, UV *valuep)
+S_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
 {
     const char *s = pv;
     const char *send = pv + len;
@@ -2510,7 +2510,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
             } else {
                 SvNOKp_on(sv);
                 SvIOKp_on(sv);
-                
+
                 if (numtype & IS_NUMBER_NEG) {
                     SvIVX(sv) = -(IV)value;
                 } else if (value <= (UV)IV_MAX) {
@@ -2539,7 +2539,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
                     } else {
                         /* between IV_MAX and NV(UV_MAX).
                            Could be slightly > UV_MAX */
-                        
+
                         if (numtype & IS_NUMBER_NOT_INT) {
                             /* UV and NV both imprecise.  */
                         } else {
@@ -2620,7 +2620,7 @@ S_asUV(pTHX_ SV *sv)
     if ((numtype & (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT))
 	== IS_NUMBER_IN_UV) {
 	/* It's defintately an integer */
-	if (!(numtype & IS_NUMBER_NEG)) 
+	if (!(numtype & IS_NUMBER_NEG))
 	    return value;
     }
     if (!numtype) {
@@ -4112,7 +4112,7 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
 	    && how != PERL_MAGIC_regex_global
 	    && how != PERL_MAGIC_bm
 	    && how != PERL_MAGIC_fm
-	    && how != PERL_MAGIC_sv 
+	    && how != PERL_MAGIC_sv
 	   )
 	{
 	    Perl_croak(aTHX_ PL_no_modify);
