@@ -32,6 +32,7 @@
 #define SAVEt_VPTR		31
 #define SAVEt_I8		32
 #define SAVEt_COMPPAD		33
+#define SAVEt_GENERIC_PVREF	34
 
 #define SSCHECK(need) if (PL_savestack_ix + need > PL_savestack_max) savestack_grow()
 #define SSPUSHINT(i) (PL_savestack[PL_savestack_ix++].any_i32 = (I32)(i))
@@ -105,6 +106,7 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
 #define SAVEFREEPV(p)	save_freepv(SOFT_CAST(char*)(p))
 #define SAVECLEARSV(sv)	save_clearsv(SOFT_CAST(SV**)&(sv))
 #define SAVEGENERICSV(s)	save_generic_svref((SV**)&(s))
+#define SAVEGENERICPV(s)	save_generic_pvref((char**)&(s))
 #define SAVEDELETE(h,k,l) \
 	  save_delete(SOFT_CAST(HV*)(h), SOFT_CAST(char*)(k), (I32)(l))
 #define SAVEDESTRUCTOR(f,p) \
@@ -147,14 +149,18 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
     } STMT_END
 
 #ifdef USE_ITHREADS
-#  define SAVECOPSTASH(cop)	SAVEPPTR(CopSTASHPV(cop))
-#  define SAVECOPFILE(cop)	SAVEPPTR(CopFILE(cop))
+#  define SAVECOPSTASH(c)	SAVEPPTR(CopSTASHPV(c))
+#  define SAVECOPSTASH_FREE(c)	SAVEGENERICPV(CopSTASHPV(c))
+#  define SAVECOPFILE(c)	SAVEPPTR(CopFILE(c))
+#  define SAVECOPFILE_FREE(c)	SAVEGENERICPV(CopFILE(c))
 #else
-#  define SAVECOPSTASH(cop)	SAVESPTR(CopSTASH(cop))
-#  define SAVECOPFILE(cop)	SAVESPTR(CopFILEGV(cop))
+#  define SAVECOPSTASH(c)	SAVESPTR(CopSTASH(c))
+#  define SAVECOPSTASH_FREE(c)	SAVECOPSTASH(c)	/* XXX not refcounted */
+#  define SAVECOPFILE(c)	SAVESPTR(CopFILEGV(c))
+#  define SAVECOPFILE_FREE(c)	SAVEGENERICSV(CopFILEGV(c))
 #endif
 
-#define SAVECOPLINE(cop)	SAVEI16(CopLINE(cop))
+#define SAVECOPLINE(c)		SAVEI16(CopLINE(c))
 
 /* SSNEW() temporarily allocates a specified number of bytes of data on the
  * savestack.  It returns an integer index into the savestack, because a

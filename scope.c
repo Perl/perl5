@@ -249,7 +249,7 @@ Perl_save_svref(pTHX_ SV **sptr)
     return save_scalar_at(sptr);
 }
 
-/* Like save_svref(), but doesn't deal with magic.  Can be used to
+/* Like save_sptr(), but also SvREFCNT_dec()s the new value.  Can be used to
  * restore a global SV to its prior contents, freeing new value. */
 void
 Perl_save_generic_svref(pTHX_ SV **sptr)
@@ -259,6 +259,19 @@ Perl_save_generic_svref(pTHX_ SV **sptr)
     SSPUSHPTR(sptr);
     SSPUSHPTR(SvREFCNT_inc(*sptr));
     SSPUSHINT(SAVEt_GENERIC_SVREF);
+}
+
+/* Like save_pptr(), but also Safefree()s the new value if it is different
+ * from the old one.  Can be used to restore a global char* to its prior
+ * contents, freeing new value. */
+void
+Perl_save_generic_pvref(pTHX_ char **str)
+{
+    dTHR;
+    SSCHECK(3);
+    SSPUSHPTR(str);
+    SSPUSHPTR(*str);
+    SSPUSHINT(SAVEt_GENERIC_PVREF);
 }
 
 void
@@ -646,6 +659,7 @@ Perl_leave_scope(pTHX_ I32 base)
     register AV *av;
     register HV *hv;
     register void* ptr;
+    register char* str;
     I32 i;
 
     if (base < -1)
@@ -666,14 +680,20 @@ Perl_leave_scope(pTHX_ I32 base)
 	    ptr = &GvSV(gv);
 	    SvREFCNT_dec(gv);
 	    goto restore_sv;
+        case SAVEt_GENERIC_PVREF:		/* generic pv */
+	    str = (char*)SSPOPPTR;
+	    ptr = SSPOPPTR;
+	    if (*(char**)ptr != str) {
+		Safefree(*(char**)ptr);
+		*(char**)ptr = str;
+	    }
+	    break;
         case SAVEt_GENERIC_SVREF:		/* generic sv */
 	    value = (SV*)SSPOPPTR;
 	    ptr = SSPOPPTR;
-	    if (ptr) {
-		sv = *(SV**)ptr;
-		*(SV**)ptr = value;
-		SvREFCNT_dec(sv);
-	    }
+	    sv = *(SV**)ptr;
+	    *(SV**)ptr = value;
+	    SvREFCNT_dec(sv);
 	    SvREFCNT_dec(value);
 	    break;
         case SAVEt_SVREF:			/* scalar reference */

@@ -2634,11 +2634,9 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, AV** avp)
     /* switch to eval mode */
 
     if (PL_curcop == &PL_compiling) {
-	SAVECOPSTASH(&PL_compiling);
+	SAVECOPSTASH_FREE(&PL_compiling);
 	CopSTASH_set(&PL_compiling, PL_curstash);
     }
-    SAVECOPFILE(&PL_compiling);
-    SAVECOPLINE(&PL_compiling);
     if (PERLDB_NAMEEVAL && CopLINE(PL_curcop)) {
 	SV *sv = sv_newmortal();
 	Perl_sv_setpvf(aTHX_ sv, "_<(%.10seval %lu)[%s:%"IVdf"]",
@@ -2648,7 +2646,9 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, AV** avp)
     }
     else
 	sprintf(tmpbuf, "_<(%.10s_eval %lu)", code, (unsigned long)++PL_evalseq);
+    SAVECOPFILE_FREE(&PL_compiling);
     CopFILE_set(&PL_compiling, tmpbuf+2);
+    SAVECOPLINE(&PL_compiling);
     CopLINE_set(&PL_compiling, 1);
     /* XXX For C<eval "...">s within BEGIN {} blocks, this ends up
        deleting the eval's FILEGV from the stash before gv_check() runs
@@ -3160,7 +3160,7 @@ trylocal: {
 	    }
 	}
     }
-    SAVECOPFILE(&PL_compiling);
+    SAVECOPFILE_FREE(&PL_compiling);
     CopFILE_set(&PL_compiling, tryrsfp ? tryname : name);
     SvREFCNT_dec(namesv);
     if (!tryrsfp) {
@@ -3270,7 +3270,6 @@ PP(pp_entereval)
  
     /* switch to eval mode */
 
-    SAVECOPFILE(&PL_compiling);
     if (PERLDB_NAMEEVAL && CopLINE(PL_curcop)) {
 	SV *sv = sv_newmortal();
 	Perl_sv_setpvf(aTHX_ sv, "_<(eval %lu)[%s:%"IVdf"]",
@@ -3280,7 +3279,9 @@ PP(pp_entereval)
     }
     else
 	sprintf(tmpbuf, "_<(eval %lu)", (unsigned long)++PL_evalseq);
+    SAVECOPFILE_FREE(&PL_compiling);
     CopFILE_set(&PL_compiling, tmpbuf+2);
+    SAVECOPLINE(&PL_compiling);
     CopLINE_set(&PL_compiling, 1);
     /* XXX For C<eval "...">s within BEGIN {} blocks, this ends up
        deleting the eval's FILEGV from the stash before gv_check() runs

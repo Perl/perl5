@@ -1886,6 +1886,7 @@ Ap	|void	|save_freesv	|SV* sv
 p	|void	|save_freeop	|OP* o
 Ap	|void	|save_freepv	|char* pv
 Ap	|void	|save_generic_svref|SV** sptr
+Ap	|void	|save_generic_pvref|char** str
 Ap	|void	|save_gp	|GV* gv|I32 empty
 Ap	|HV*	|save_hash	|GV* gv
 Ap	|void	|save_helem	|HV* hv|SV *key|SV **sptr
