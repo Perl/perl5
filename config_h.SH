@@ -362,11 +362,11 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define Netdb_name_t		$netdb_name_type
 
-/* HAS_GETNETBYADD:
+/* HAS_GETNETBYADDR:
  *	This symbol, if defined, indicates that the getnetbyaddr routine is
  *	available to lookup networks by their IP addresses.
  */
-#$d_getnbyaddr HAS_GETNETBYADD		/**/
+#$d_getnbyaddr HAS_GETNETBYADDR		/**/
 
 /* Netdb_net_t:
  *	This symbol holds the type used for the 1st argument
