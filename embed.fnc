@@ -689,7 +689,7 @@ p	|I32	|setenv_getix	|char* nam
 p	|void	|setdefout	|GV* gv
 p	|HEK*	|share_hek	|const char* sv|I32 len|U32 hash
 np	|Signal_t |sighandler	|int sig
-np	|Signal_t |csighandler	|int sig
+Anp	|Signal_t |csighandler	|int sig
 Ap	|SV**	|stack_grow	|SV** sp|SV**p|int n
 Ap	|I32	|start_subparse	|I32 is_format|U32 flags
 p	|void	|sub_crush_depth|CV* cv

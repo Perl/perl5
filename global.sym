@@ -418,6 +418,7 @@ Perl_scan_hex
 Perl_scan_num
 Perl_scan_oct
 Perl_screaminstr
+Perl_csighandler
 Perl_stack_grow
 Perl_start_subparse
 Perl_sv_2bool
