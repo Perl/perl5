@@ -378,9 +378,8 @@ sub numbers_with_total {
     $max_is_integer = 1 if $max - 1 < ~0;
 
     my $calc_sum;
-    if ($total =~ /^0b[01]*?([01]{1,$len})/) {
-      no warnings qw(overflow portable);
-      $calc_sum = oct "0b$1";
+    if (ref $total) {
+      $calc_sum = &$total($len);
     } else {
       $calc_sum = $total;
       # Shift into range by some multiple of the total
@@ -446,10 +445,17 @@ numbers ('d', -(2**34), -1, 0, 1, 2**34);
 
 numbers_with_total ('q', -1,
                     -9223372036854775808, -1, 0, 1,9223372036854775807);
-# This total is icky, but need a way to express 2**65-1 that is going to
-# work independant of whether NVs can preserve 65 bits.
-# (long double is 128 bits on sparc, so they certianly can)
-numbers_with_total ('Q', "0b" . "1" x 65,
+# This total is icky, but the true total is 2**65-1, and need a way to generate
+# the epxected checksum on any system including those where NVs can preserve
+# 65 bits. (long double is 128 bits on sparc, so they certainly can)
+# or where rounding is down not up on binary conversion (crays)
+numbers_with_total ('Q', sub {
+                      my $len = shift;
+                      $len = 65 if $len > 65; # unmasked total is 2**65-1 here
+                      my $total = 1 + 2 * (int (2**($len - 1)) - 1);
+                      return 0 if $total == $total - 1; # Overflowed integers
+                      return $total; # NVs still accurate to nearest integer
+                    },
                     0, 1,9223372036854775807, 9223372036854775808,
                     18446744073709551615);
 
