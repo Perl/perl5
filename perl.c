@@ -2877,12 +2877,11 @@ S_open_script(pTHX_ char *scriptname, bool dosearch, SV *sv, int *fdscript)
     }
     else if (PL_preprocess) {
 	char *cpp_cfg = CPPSTDIN;
-
-	if (cpp_cfg[0] == 0) /* PERL_MICRO? */
-	     Perl_croak(aTHX_ "Can't run with cpp -P with CPPSTDIN undefined");
 	SV *cpp = newSVpvn("",0);
 	SV *cmd = NEWSV(0,0);
 
+	if (cpp_cfg[0] == 0) /* PERL_MICRO? */
+	     Perl_croak(aTHX_ "Can't run with cpp -P with CPPSTDIN undefined");
 	if (strEQ(cpp_cfg, "cppstdin"))
 	    Perl_sv_catpvf(aTHX_ cpp, "%s/", BIN_EXP);
 	sv_catpv(cpp, cpp_cfg);
