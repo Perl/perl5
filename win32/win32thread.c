@@ -29,7 +29,7 @@ Perl_alloc_thread_key(void)
 }
 
 void
-Perl_set_thread_self(struct thread *thr)
+Perl_set_thread_self(struct perl_thread *thr)
 {
 #ifdef USE_THREADS
     /* Set thr->self.  GetCurrentThread() retrurns a pseudo handle, need
@@ -47,7 +47,7 @@ Perl_set_thread_self(struct thread *thr)
 
 #ifdef USE_THREADS
 int
-Perl_thread_create(struct thread *thr, thread_func_t *fn)
+Perl_thread_create(struct perl_thread *thr, thread_func_t *fn)
 {
     DWORD junk;
 

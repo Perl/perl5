@@ -70,7 +70,7 @@ static void init_debugger _((void));
 static void init_lexer _((void));
 static void init_main_stash _((void));
 #ifdef USE_THREADS
-static struct thread * init_main_thread _((void));
+static struct perl_thread * init_main_thread _((void));
 #endif /* USE_THREADS */
 static void init_perllib _((void));
 static void init_postdump_symbols _((int, char **, char **));
@@ -112,7 +112,7 @@ perl_construct(register PerlInterpreter *sv_interp)
 #ifdef USE_THREADS
     int i;
 #ifndef FAKE_THREADS
-    struct thread *thr;
+    struct perl_thread *thr;
 #endif /* FAKE_THREADS */
 #endif /* USE_THREADS */
     
@@ -134,7 +134,6 @@ perl_construct(register PerlInterpreter *sv_interp)
 	if (pthread_key_create(&thr_key, 0))
 	    croak("panic: pthread_key_create");
 #endif
-	MUTEX_INIT(&malloc_mutex);
 	MUTEX_INIT(&sv_mutex);
 	/*
 	 * Safe to use basic SV functions from now on (though
@@ -529,7 +528,6 @@ perl_destruct(register PerlInterpreter *sv_interp)
     DEBUG_P(debprofdump());
 #ifdef USE_THREADS
     MUTEX_DESTROY(&sv_mutex);
-    MUTEX_DESTROY(&malloc_mutex);
     MUTEX_DESTROY(&eval_mutex);
     COND_DESTROY(&eval_cond);
 
@@ -2780,13 +2778,13 @@ incpush(char *p, int addsubdirs)
 }
 
 #ifdef USE_THREADS
-static struct thread *
+static struct perl_thread *
 init_main_thread()
 {
-    struct thread *thr;
+    struct perl_thread *thr;
     XPV *xpv;
 
-    Newz(53, thr, 1, struct thread);
+    Newz(53, thr, 1, struct perl_thread);
     curcop = &compiling;
     thr->cvcache = newHV();
     thr->threadsv = newAV();

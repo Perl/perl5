@@ -1,6 +1,8 @@
 # hints/aix.sh
 # AIX 3.x.x hints thanks to Wayne Scott <wscott@ichips.intel.com>
 # AIX 4.1 hints thanks to Christopher Chan-Nui <channui@austin.ibm.com>.
+# AIX 4.1 pthreading by Christopher Chan-Nui <channui@austin.ibm.com> and
+#         Jarkko Hietaniemi <jhi@iki.fi>.
 # Merged on Mon Feb  6 10:22:35 EST 1995 by
 #   Andy Dougherty  <doughera@lafcol.lafayette.edu>
 
@@ -74,3 +76,32 @@ lddlflags='-H512 -T512 -bhalt:4 -bM:SRE -bI:$(PERL_INC)/perl.exp -bE:$(BASEEXT).
 
 ;;
 esac
+
+if [ "X$usethreads" != "X" ]; then
+    ccflags="-DUSE_THREADS -DNEED_PTHREAD_INIT $ccflags"
+    cppflags="-DUSE_THREADS -DNEED_PTHREAD_INIT $cppflags"
+    case "$cc" in
+    xlc_r | cc_r)
+	;;
+    cc | '') 
+	cc=xlc_r
+        ;;
+    *)
+	case "$cc" in
+	gcc)
+	    echo >&4 "You cannot use POSIX threads from GNU cc in AIX."
+	    ;;
+	*)
+	    echo >&4 "Unknown C compiler."
+	    ;;
+	esac
+	echo >&4 "You should use the AIX C compilers called xlc_r or cc_r."
+	echo >&4 "Cannot continue, aborting."
+	exit 1
+	;;
+    esac
+
+    # Add the POSIX threads library and use the re-entrant libc.
+
+    lddlflags=`echo $lddlflags | sed 's/ -lc$/ -lpthreads -lc_r/'`
+fi

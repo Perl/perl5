@@ -9,7 +9,7 @@
 
 #ifdef USE_THREADS
 #define ARGS thr
-#define dARGS struct thread *thr;
+#define dARGS struct perl_thread *thr;
 #else
 #define ARGS
 #define dARGS

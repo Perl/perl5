@@ -98,9 +98,9 @@
 #define ABORT() kill(getpid(),SIGABRT);
 
 #define BIT_BUCKET "/dev/null"
-#define PERL_SYS_INIT(c,v)
+#define PERL_SYS_INIT(c,v)	MALLOC_INIT
 #define dXSUB_SYS
-#define PERL_SYS_TERM()
+#define PERL_SYS_TERM()		MALLOC_TERM
 
 /*
  * fwrite1() should be a routine with the same calling sequence as fwrite(),

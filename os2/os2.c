@@ -1147,6 +1147,7 @@ Perl_OS2_init(char **env)
 {
     char *shell;
 
+    MALLOC_INIT;
     settmppath();
     OS2_Perl_data.xs_init = &Xs_OS2_init;
     if (environ == NULL) {

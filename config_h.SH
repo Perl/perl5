@@ -566,6 +566,18 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_poll HAS_POLL		/**/
 
+/* HAS_PTHREAD_YIELD:
+ *	This symbol, if defined, indicates that the pthread_yield routine is
+ *	available to yield the execution of the current thread.
+ */
+#$d_pthread_yield HAS_PTHREAD_YIELD
+
+/* HAS_SCHED_YIELD:
+ *	This symbol, if defined, indicates that the sched_yield routine is
+ *	available to yield the execution of the current thread.
+ */
+#$d_sched_yield HAS_SCHED_YIELD
+
 /* HAS_READDIR:
  *	This symbol, if defined, indicates that the readdir routine is
  *	available to read directory entries. You may have to include
@@ -1623,6 +1635,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	be used.
  */
 #$d_sfio	USE_SFIO		/**/
+
+/* PTHREADS_CREATED_JOINABLE:
+ *	This symbol, if defined, indicates that pthreads are created
+ *	in the joinable (aka undetached) state.
+ */
+#$d_pthreads_created_joinable	PTHREADS_CREATED_JOINABLE		/**/
 
 /* Sigjmp_buf:
  *	This is the buffer type to be used with Sigsetjmp and Siglongjmp.

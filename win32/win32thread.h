@@ -2,7 +2,7 @@
 #define _WIN32THREAD_H
 typedef struct win32_cond { LONG waiters; HANDLE sem; } perl_cond;
 typedef DWORD perl_key;
-typedef HANDLE perl_thread;
+typedef HANDLE perl_os_thread;
 
 #ifndef DONT_USE_CRITICAL_SECTION
 
@@ -97,7 +97,7 @@ typedef HANDLE perl_mutex;
 	}							\
     } STMT_END
 
-
+#define THR ((struct perl_thread *) TlsGetValue(thr_key))
 #define THREAD_CREATE(t, f)	Perl_thread_create(t, f)
 #define THREAD_POST_CREATE(t)	NOOP
 #define THREAD_RET_TYPE		DWORD WINAPI
@@ -118,11 +118,10 @@ extern __declspec(thread) struct thread *Perl_current_thread;
 #endif
 
 void Perl_alloc_thread_key _((void));
-int Perl_thread_create _((struct thread *thr, thread_func_t *fn));
-void Perl_set_thread_self _((struct thread *thr));
-struct thread *Perl_getTHR _((void));
-void Perl_setTHR _((struct thread *t));
-
+int Perl_thread_create _((struct perl_thread *thr, thread_func_t *fn));
+void Perl_set_thread_self _((struct perl_thread *thr));
+struct perl_thread *Perl_getTHR _((void));
+void Perl_setTHR _((struct perl_thread *t));
 END_EXTERN_C
 
 #define INIT_THREADS NOOP
