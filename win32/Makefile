@@ -418,7 +418,6 @@ UTILS		=			\
 		..\utils\c2ph		\
 		..\utils\h2xs		\
 		..\utils\perldoc	\
-		..\utils\pstruct	\
 		..\utils\perlcc		\
 		..\pod\checkpods	\
 		..\pod\pod2html		\
@@ -1006,7 +1005,7 @@ distclean: clean
 	-del /f $(PODDIR)\*.html
 	-del /f $(PODDIR)\*.bat
 	cd ..\utils
-	-del /f h2ph splain perlbug pl2pm c2ph h2xs perldoc pstruct dprofpp
+	-del /f h2ph splain perlbug pl2pm c2ph h2xs perldoc dprofpp
 	-del /f *.bat
 	cd ..\win32
 	cd ..\x2p
