@@ -1061,7 +1061,7 @@ the pod and to add more tests.
 
 Now issue a command all Perl Mongers love:
 
-  $ perl5.7.3 Makefile.PL
+  $ perl Makefile.PL
   Writing Makefile for Encode::My
 
 =item 4.
