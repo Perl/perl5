@@ -5,6 +5,16 @@ BEGIN {
     @INC = '../lib';
 }
 
+# read in a file
+sub cat {
+    my $file = shift;
+    local $/;
+    open my $fh, $file or die "can't open '$file': $!";
+    my $data = <$fh>;
+    close $fh;
+    $data;
+}
+
 #-- testing numeric fields in all variants (WL)
 
 sub swrite {
@@ -16,20 +26,20 @@ sub swrite {
 
 my @NumTests = (
     # [ format, value1, expected1, value2, expected2, .... ]
-    [ '@###',           0,   '   0',         1, '   1',     9999.5, '####',
-		9999.4999,   '9999',    -999.5, '####',     1e+100, '####' ],
+    [ '@###',           0,   '   0',         1, '   1',     9999.6, '####',
+		9999.4999,   '9999',    -999.6, '####',     1e+100, '####' ],
 
-    [ '@0##',           0,   '0000',         1, '0001',     9999.5, '####',
-		-999.4999,   '-999',    -999.5, '####',     1e+100, '####' ],
+    [ '@0##',           0,   '0000',         1, '0001',     9999.6, '####',
+		-999.4999,   '-999',    -999.6, '####',     1e+100, '####' ],
 
     [ '^###',           0,   '   0',     undef, '    ' ],
 
     [ '^0##',           0,   '0000',     undef, '    ' ],
 
-    [ '@###.',          0,  '   0.',         1, '   1.',    9999.5, '#####',
-                9999.4999,  '9999.',    -999.5, '#####' ],
+    [ '@###.',          0,  '   0.',         1, '   1.',    9999.6, '#####',
+                9999.4999,  '9999.',    -999.6, '#####' ],
 
-    [ '@##.##',         0, '  0.00',         1, '  1.00',  999.995, '######',
+    [ '@##.##',         0, '  0.00',         1, '  1.00',  999.996, '######',
                 999.99499, '999.99',      -100, '######' ],
 
     [ '@0#.##',         0, '000.00',         1, '001.00',       10, '010.00',
@@ -51,10 +61,6 @@ my $bas_tests = 20;
 my $hmb_tests = 36;
 
 printf "1..%d\n", $bas_tests + $num_tests + $hmb_tests;
-
-my $CAT = ($^O eq 'MSWin32' || $^O eq 'NetWare' || $^O eq 'VMS') ? 'type'
-	: ($^O eq 'MacOS') ? 'catenate'
-        : 'cat';
 
 ############
 ## Section 1
@@ -99,7 +105,7 @@ the course
 of huma...
 now is the time for all good men to come to\n";
 
-if (`$CAT Op_write.tmp` eq $right)
+if (cat('Op_write.tmp') eq $right)
     { print "ok 1\n"; 1 while unlink 'Op_write.tmp'; }
 else
     { print "not ok 1\n"; }
@@ -141,7 +147,7 @@ becomes
 necessary
 now is the time for all good men to come to\n";
 
-if (`$CAT Op_write.tmp` eq $right)
+if (cat('Op_write.tmp') eq $right)
     { print "ok 2\n"; 1 while unlink 'Op_write.tmp'; }
 else
     { print "not ok 2\n"; }
@@ -185,7 +191,7 @@ becomes
 necessary
 now is the time for all good men to come to\n";
 
-if (`$CAT Op_write.tmp` eq $right)
+if (cat('Op_write.tmp') eq $right)
     { print "ok 3\n"; 1 while unlink 'Op_write.tmp'; }
 else
     { print "not ok 3\n"; }
@@ -240,7 +246,7 @@ close OUT3 or die "Could not close: $!";
 $right =
 "fit\n";
 
-if (`$CAT Op_write.tmp` eq $right)
+if (cat('Op_write.tmp') eq $right)
     { print "ok 6\n"; 1 while unlink 'Op_write.tmp'; }
 else
     { print "not ok 6\n"; }
@@ -268,7 +274,7 @@ format OUT4 =
 open   OUT4, ">Op_write.tmp" or die "Can't create Op_write.tmp";
 write (OUT4);
 close  OUT4 or die "Could not close: $!";
-if (`$CAT Op_write.tmp` eq "1\n") {
+if (cat('Op_write.tmp') eq "1\n") {
     print "ok 9\n";
     1 while unlink "Op_write.tmp";
     }
@@ -290,7 +296,7 @@ write(OUT10);
 close OUT10 or die "Could not close: $!";
 
 $right = "   12.95 00012.95\n";
-if (`$CAT Op_write.tmp` eq $right)
+if (cat('Op_write.tmp') eq $right)
     { print "ok 10\n"; 1 while unlink 'Op_write.tmp'; }
 else
     { print "not ok 10\n"; }
@@ -316,7 +322,7 @@ $right =
 "00012.95
 1 0#
 10 #\n";
-if (`$CAT Op_write.tmp` eq $right)
+if (cat('Op_write.tmp') eq $right)
     { print "ok 11\n"; 1 while unlink 'Op_write.tmp'; }
 else
     { print "not ok 11\n"; }
@@ -334,7 +340,7 @@ $el
 	write(OUT12);
     }
     close OUT12 or die "Could not close: $!";
-    print `$CAT Op_write.tmp`;
+    print cat('Op_write.tmp');
 
 }
 
@@ -351,7 +357,7 @@ $v
     open(OUT13, '>Op_write.tmp') || die "Can't create Op_write.tmp";
     write(OUT13);
     close OUT13 or die "Could not close: $!";
-    print `$CAT Op_write.tmp`;
+    print cat('Op_write.tmp');
 }
 
 {   # test 14
@@ -375,7 +381,7 @@ $txt
     open(OUT15, '>Op_write.tmp') || die "Can't create Op_write.tmp";
     write(OUT15);
     close OUT15 or die "Could not close: $!";
-    my $res = `$CAT Op_write.tmp`;
+    my $res = cat('Op_write.tmp');
     print $res eq "line 1\nline 2\n" ? "ok 15\n" : "not ok 15\n";
 }
 
@@ -390,7 +396,7 @@ $txt,             $txt
     open(OUT16, '>Op_write.tmp') || die "Can't create Op_write.tmp";
     write(OUT16);
     close OUT16 or die "Could not close: $!";
-    my $res = `$CAT Op_write.tmp`;
+    my $res = cat('Op_write.tmp');
     print $res eq <<EOD ? "ok 16\n" : "not ok 16\n";
 this_is_block_1   this_is_block_2
 this_is_block_3   this_is_block_4
@@ -408,7 +414,7 @@ Here we go: @* That's all, folks!
     open(OUT17, '>Op_write.tmp') || die "Can't create Op_write.tmp";
     write(OUT17);
     close OUT17 or die "Could not close: $!";
-    my $res = `$CAT Op_write.tmp`;
+    my $res = cat('Op_write.tmp');
     chomp( $txt );
     my $exp = <<EOD;
 Here we go: $txt That's all, folks!
@@ -438,7 +444,8 @@ EOD
          '$v' . "\n.\n";
     open(OUT19, '>Op_write.tmp') || die "Can't create Op_write.tmp";
     write(OUT19);
-    my $res = `$CAT Op_write.tmp`;
+    close OUT19 or die "Could not close: $!";
+    my $res = cat('Op_write.tmp');
     print $res eq <<EOD ? "ok 19\n" : "not ok 19\n";
 gaga\0
 gaga\0
@@ -466,10 +473,9 @@ $h{xkey}, $h{ykey}
     $exp .= "}\n";
     open(OUT20, '>Op_write.tmp') || die "Can't create Op_write.tmp";
     write(OUT20);
-    my $res = `$CAT Op_write.tmp`;
+    close OUT20 or die "Could not close: $!";
+    my $res = cat('Op_write.tmp');
     print $res eq $exp ? "ok 20\n" : "not ok 20 res=[$res]exp=[$exp]\n";
-
-EOD
 }
 
 

@@ -646,9 +646,9 @@ __EOF__
     # savestack, due to the early freeing of the anon closure
 
     my $got = runperl(stderr => 1, prog => 
-'sub d {die} my $f; $f = sub {my $x=1; $f = 0; d}; eval{$f->()}; print qw(ok)'
+'sub d {die} my $f; $f = sub {my $x=1; $f = 0; d}; eval{$f->()}; print qq(ok\n)'
     );
-    test { $got eq 'ok' };
+    test { $got eq "ok\n" };
 }
 
 # After newsub is redefined outside the BEGIN, it's CvOUTSIDE should point
