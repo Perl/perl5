@@ -7,6 +7,32 @@ our $VERSION = '1.01';
 use bytes ();		# for $bytes::hint_bits
 $charnames::hint_bits = 0x20000;
 
+my %alias1 = (
+		# Icky 3.2 names with parentheses.
+		'LINE FEED'		=> 'LINE FEED (LF)',
+		'FORM FEED'		=> 'FORM FEED (FF)',
+		'CARRIAGE RETURN'	=> 'CARRIAGE RETURN (CR)',
+		'NEXT LINE'		=> 'NEXT LINE (NEL)',
+		# Convenience.
+		'LF'			=> 'LINE FEED (LF)',
+		'FF'			=> 'FORM FEED (FF)',
+		'CR'			=> 'CARRIAGE RETURN (LF)',
+		'NEL'			=> 'NEXT LINE (NEXT LINE)',
+		'BOM'			=> 'BYTE ORDER MARK',
+	    );
+
+my %alias2 = (
+		# Pre-3.2 compatibility (only for the first 256 characters).
+		'HORIZONTAL TABULATION'	=> 'CHARACTER TABULATION',
+		'VERTICAL TABULATION'	=> 'LINE TABULATION',
+		'FILE SEPARATOR'	=> 'INFORMATION SEPARATOR FOUR',
+		'GROUP SEPARATOR'	=> 'INFORMATION SEPARATOR THREE',
+		'RECORD SEPARATOR'	=> 'INFORMATION SEPARATOR TWO',
+		'UNIT SEPARATOR'	=> 'INFORMATION SEPARATOR ONE',
+		'PARTIAL LINE DOWN'	=> 'PARTIAL LINE FORWARD',
+		'PARTIAL LINE UP'	=> 'PARTIAL LINE BACKWARD',
+	    );
+
 my $txt;
 
 # This is not optimized in any way yet
@@ -14,78 +40,99 @@ sub charnames
 {
   my $name = shift;
 
-  ## Suck in the code/name list as a big string.
-  ## Lines look like:
-  ##     "0052\t\tLATIN CAPITAL LETTER R\n"
-  $txt = do "unicore/Name.pl" unless $txt;
+  if (exists $alias1{$name}) {
+      $name = $alias1{$name};
+  }
+  if (exists $alias2{$name}) {
+      require warnings;
+      warnings::warnif('deprecated', qq{Unicode character name "$name" is deprecated, use "$alias2{$name}" instead});
+      $name = $alias2{$name};
+  }
 
-  ## @off will hold the index into the code/name string of the start and
-  ## end of the name as we find it.
+  my $ord;
   my @off;
+  my $fname;
 
-  ## If :full, look for the the name exactly
-  if ($^H{charnames_full} and $txt =~ /\t\t$name$/m) {
-    @off = ($-[0], $+[0]);
-  }
+  if ($name eq "BYTE ORDER MARK") {
+      $fname = $name;
+      $ord = 0xFFFE;
+  } else {
+      ## Suck in the code/name list as a big string.
+      ## Lines look like:
+      ##     "0052\t\tLATIN CAPITAL LETTER R\n"
+      $txt = do "unicore/Name.pl" unless $txt;
 
-  ## If we didn't get above, and :short allowed, look for the short name.
-  ## The short name is like "greek:Sigma"
-  unless (@off) {
-    if ($^H{charnames_short} and $name =~ /^(.+?):(.+)/s) {
-      my ($script, $cname) = ($1,$2);
-      my $case = ( $cname =~ /[[:upper:]]/ ? "CAPITAL" : "SMALL");
-      if ($txt =~ m/\t\t\U$script\E (?:$case )?LETTER \U$cname$/m) {
-	@off = ($-[0], $+[0]);
+      ## @off will hold the index into the code/name string of the start and
+      ## end of the name as we find it.
+      
+      ## If :full, look for the the name exactly
+      if ($^H{charnames_full} and $txt =~ /\t\t\Q$name\E$/m) {
+	  @off = ($-[0], $+[0]);
       }
-    }
-  }
 
-  ## If we still don't have it, check for the name among the loaded
-  ## scripts.
-  if (not @off)
-  {
-      my $case = ( $name =~ /[[:upper:]]/ ? "CAPITAL" : "SMALL");
-      for my $script ( @{$^H{charnames_scripts}} )
+      ## If we didn't get above, and :short allowed, look for the short name.
+      ## The short name is like "greek:Sigma"
+      unless (@off) {
+	  if ($^H{charnames_short} and $name =~ /^(.+?):(.+)/s) {
+	      my ($script, $cname) = ($1,$2);
+	      my $case = ( $cname =~ /[[:upper:]]/ ? "CAPITAL" : "SMALL");
+	      if ($txt =~ m/\t\t\U$script\E (?:$case )?LETTER \U\Q$cname\E$/m) {
+		  @off = ($-[0], $+[0]);
+	      }
+	  }
+      }
+      
+      ## If we still don't have it, check for the name among the loaded
+      ## scripts.
+      if (not @off)
       {
-          if ($txt =~ m/\t\t$script (?:$case )?LETTER \U$name$/m) {
-              @off = ($-[0], $+[0]);
-              last;
-          }
+	  my $case = ( $name =~ /[[:upper:]]/ ? "CAPITAL" : "SMALL");
+	  for my $script ( @{$^H{charnames_scripts}} )
+	  {
+	      if ($txt =~ m/\t\t$script (?:$case )?LETTER \U\Q$name\E$/m) {
+		  @off = ($-[0], $+[0]);
+		  last;
+	      }
+	  }
       }
+      
+      ## If we don't have it by now, give up.
+      unless (@off) {
+	  carp "Unknown charname '$name'";
+	  return "\x{FFFD}";
+      }
+      
+      ##
+      ## Now know where in the string the name starts.
+      ## The code, in hex, is befor that.
+      ##
+      ## The code can be 4-6 characters long, so we've got to sort of
+      ## go look for it, just after the newline that comes before $off[0].
+      ##
+      ## This would be much easier if unicore/Name.pl had info in
+      ## a name/code order, instead of code/name order.
+      ##
+      ## The +1 after the rindex() is to skip past the newline we're finding,
+      ## or, if the rindex() fails, to put us to an offset of zero.
+      ##
+      my $hexstart = rindex($txt, "\n", $off[0]) + 1;
+
+      ## we know where it starts, so turn into number -
+      ## the ordinal for the char.
+      $ord = hex substr($txt, $hexstart, $off[0] - $hexstart);
   }
-
-  ## If we don't have it by now, give up.
-  unless (@off) {
-      carp "Unknown charname '$name'";
-      return "\x{FFFD}";
-  }
-
-  ##
-  ## Now know where in the string the name starts.
-  ## The code, in hex, is befor that.
-  ##
-  ## The code can be 4-6 characters long, so we've got to sort of
-  ## go look for it, just after the newline that comes before $off[0].
-  ##
-  ## This would be much easier if unicore/Name.pl had info in
-  ## a name/code order, instead of code/name order.
-  ##
-  ## The +1 after the rindex() is to skip past the newline we're finding,
-  ## or, if the rindex() fails, to put us to an offset of zero.
-  ##
-  my $hexstart = rindex($txt, "\n", $off[0]) + 1;
-
-  ## we know where it starts, so turn into number - the ordinal for the char.
-  my $ord = hex substr($txt, $hexstart, $off[0] - $hexstart);
 
   if ($^H & $bytes::hint_bits) {	# "use bytes" in effect?
     use bytes;
     return chr $ord if $ord <= 255;
     my $hex = sprintf "%04x", $ord;
-    my $fname = substr $txt, $off[0] + 2, $off[1] - $off[0] - 2;
+    if (not defined $fname) {
+	$fname = substr $txt, $off[0] + 2, $off[1] - $off[0] - 2;
+    }
     croak "Character 0x$hex with name '$fname' is above 0xFF";
   }
 
+  no warnings 'utf8'; # allow even illegal characters
   return pack "U", $ord;
 }
 
@@ -303,10 +350,56 @@ Returns undef if no name is known for the name.
 This works only for the standard names, and does not yet aply 
 to custom translators.
 
+=head1 ALIASES
+
+A few aliases have been defined for convenience: instead of having
+to use the official names
+
+    LINE FEED (LF)
+    FORM FEED (FF)
+    CARRIAGE RETURN (CR)
+    NEXT LINE (NEL)
+
+(yes, with parentheses) one can use
+
+    LINE FEED
+    FORM FEED
+    CARRIAGE RETURN
+    NEXT LINE
+    LF
+    FF
+    CR
+    NEL
+
+One can also use
+
+    BYTE ORDER MARK
+    BOM
+
+though that is of course not a legal character as such.
+
+For backward compatibility one can use the old names for
+certain C0 and C1 controls
+
+    old                         new
+
+    HORIZONTAL TABULATION       CHARACTER TABULATION
+    VERTICAL TABULATION         LINE TABULATION
+    FILE SEPARATOR              INFORMATION SEPARATOR FOUR
+    GROUP SEPARATOR             INFORMATION SEPARATOR THREE
+    RECORD SEPARATOR            INFORMATION SEPARATOR TWO
+    UNIT SEPARATOR              INFORMATION SEPARATOR ONE
+    PARTIAL LINE DOWN           PARTIAL LINE FORWARD
+    PARTIAL LINE UP             PARTIAL LINE BACKWARD
+
+but the old names in addition to giving the character
+will also give a warning about being deprecated.
+
 =head1 ILLEGAL CHARACTERS
 
-If you ask for a character that does not exist, a warning is given
-and the special Unicode I<replacement character> "\x{FFFD}" is returned.
+If you ask for a character that is illegal (like the byte order mark
+U+FFFE, or the U+FFFF) does not exist, a warning is given and the
+special Unicode I<replacement character> "\x{FFFD}" is returned.
 
 =head1 BUGS
 

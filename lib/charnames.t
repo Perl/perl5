@@ -1,15 +1,18 @@
 #!./perl
 
+my @WARN;
+
 BEGIN {
     unless(grep /blib/, @INC) {
 	chdir 't' if -d 't';
 	@INC = '../lib';
     }
+    $SIG{__WARN__} = sub { push @WARN, @_ };
 }
 
 $| = 1;
 
-print "1..25\n";
+print "1..34\n";
 
 use charnames ':full';
 
@@ -169,6 +172,36 @@ print "ok 24\n";
 print "not " unless "\N{NULL}" eq "\c@";
 print "ok 25\n";
 
-# TODO: support 3.1 names, BOM.  Generic aliasing?
+print "not " unless "\N{LINE FEED (LF)}" eq "\n";
+print "ok 26\n";
 
+print "not " unless "\N{LINE FEED}" eq "\n";
+print "ok 27\n";
+
+print "not " unless "\N{LF}" eq "\n";
+print "ok 28\n";
+
+print "not " unless "\N{BYTE ORDER MARK}" eq chr(0xFFFE);
+print "ok 29\n";
+
+print "not " unless "\N{BOM}" eq chr(0xFFFE);
+print "ok 30\n";
+
+{
+    use warnings 'deprecated';
+
+    print "not " unless "\N{HORIZONTAL TABULATION}" eq "\t";
+    print "ok 31\n";
+
+    print "not " unless grep { /"HORIZONTAL TABULATION" is deprecated/ } @WARN;
+    print "ok 32\n";
+
+    no warnings 'deprecated';
+
+    print "not " unless "\N{VERTICAL TABULATION}" eq "\013";
+    print "ok 33\n";
+
+    print "not " if grep { /"VERTICAL TABULATION" is deprecated/ } @WARN;
+    print "ok 34\n";
+}
 
