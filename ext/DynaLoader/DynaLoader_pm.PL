@@ -198,6 +198,7 @@ sub bootstrap {
     croak("Can't locate loadable object for module $module in \@INC (\@INC contains: @INC)")
 	unless $file;	# wording similar to error from 'require'
 
+    $file = uc($file) if $Is_VMS && $Config{d_vms_case_sensitive_symbols};
     my $bootname = "boot_$module";
     $bootname =~ s/\W/_/g;
     @dl_require_symbols = ($bootname);
