@@ -309,8 +309,11 @@ S_tokereport(pTHX_ char* s, I32 rv)
 	    Perl_sv_catpvf(aTHX_ report, "(pval=\"%s\")", yylval.pval);
 	    break;
 	case TOKENTYPE_OPVAL:
-	    Perl_sv_catpvf(aTHX_ report, "(opval=op_%s)",
+	    if (yylval.opval)
+		Perl_sv_catpvf(aTHX_ report, "(opval=op_%s)",
 				    PL_op_name[yylval.opval->op_type]);
+	    else
+		Perl_sv_catpv(aTHX_ report, "(opval=null)");
 	    break;
 	}
         Perl_sv_catpvf(aTHX_ report, " at line %d [", CopLINE(PL_curcop));
