@@ -358,20 +358,24 @@ case "$loclibpth" in
 '')	;;
 *)
 	needusrshlib=''
-	for p in $loclibpth
-	do
-	    if test -n "`ls $p/libdb.so* 2>/dev/null`"; then
-		needusrshlib=yes
-	    fi
-	    if test -d $p; then
-		echo "Appending $p to LD_LIBRARY_PATH." >& 4
-		case "$LD_LIBRARY_PATH" in
-		'') LD_LIBRARY_PATH=$p                  ;;
-		*)  LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$p ;;
-		esac
-	    fi	
+	case "$loclibpth" in
+	'') ;;
+	*)  for p in $loclibpth
+	    do
+		if test -n "`ls $p/libdb.so* 2>/dev/null`"; then
+		    needusrshlib=yes
+		fi
+		if test -d $p; then
+		    echo "Appending $p to LD_LIBRARY_PATH." >& 4
+		    case "$LD_LIBRARY_PATH" in
+		    '') LD_LIBRARY_PATH=$p                  ;;
+		    *)  LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$p ;;
+		    esac
+		fi	
+	    done
+	    echo "LD_LIBRARY_PATH is now $LD_LIBRARY_PATH." >& 4
+	    ;;
 	done
-	echo "LD_LIBRARY_PATH is now $LD_LIBRARY_PATH." >& 4
 	# This is evil but I can't think of a nice workaround:
 	# the /usr/shlib/libdb.so needs to be seen first,
 	# or running Configure will fail.
