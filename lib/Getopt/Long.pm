@@ -2,17 +2,17 @@
 
 package Getopt::Long;
 
-# RCS Status      : $Id: GetoptLong.pm,v 2.13 1997-12-25 16:20:17+01 jv Exp $
+# RCS Status      : $Id: GetoptLong.pm,v 2.16 1998-03-13 11:05:29+01 jv Exp $
 # Author          : Johan Vromans
 # Created On      : Tue Sep 11 15:00:12 1990
 # Last Modified By: Johan Vromans
-# Last Modified On: Thu Dec 25 16:18:08 1997
-# Update Count    : 647
+# Last Modified On: Fri Mar 13 11:05:28 1998
+# Update Count    : 659
 # Status          : Released
 
 ################ Copyright ################
 
-# This program is Copyright 1990,1997 by Johan Vromans.
+# This program is Copyright 1990,1998 by Johan Vromans.
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; either version 2
@@ -32,10 +32,10 @@ package Getopt::Long;
 use strict;
 
 BEGIN {
-    require 5.003;
+    require 5.004;
     use Exporter ();
     use vars   qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
-    $VERSION   = sprintf("%d.%02d", q$Revision: 2.13 $ =~ /(\d+)\.(\d+)/);
+    $VERSION   = sprintf("%d.%02d", q$Revision: 2.16 $ =~ /(\d+)\.(\d+)/);
 
     @ISA       = qw(Exporter);
     @EXPORT    = qw(&GetOptions $REQUIRE_ORDER $PERMUTE $RETURN_IN_ORDER);
@@ -87,7 +87,7 @@ sub GetOptions {
     $genprefix = $gen_prefix;	# so we can call the same module many times
     $error = '';
 
-    print STDERR ('GetOptions $Revision: 2.13 $ ',
+    print STDERR ('GetOptions $Revision: 2.16 $ ',
 		  "[GetOpt::Long $Getopt::Long::VERSION] -- ",
 		  "called from package \"$pkg\".\n",
 		  "  (@ARGV)\n",
@@ -127,7 +127,7 @@ sub GetOptions {
 	my $opt = shift (@optionlist);
 
 	# Strip leading prefix so people can specify "--foo=i" if they like.
-	$opt = $2 if $opt =~ /^$genprefix+(.*)$/;
+	$opt = $+ if $opt =~ /^$genprefix+(.*)$/s;
 
 	if ( $opt eq '<>' ) {
 	    if ( (defined $userlinkage)
@@ -420,9 +420,9 @@ sub config (@) {
     foreach $opt ( @options ) {
 	my $try = lc ($opt);
 	my $action = 1;
-	if ( $try =~ /^no_?(.*)$/ ) {
+	if ( $try =~ /^no_?(.*)$/s ) {
 	    $action = 0;
-	    $try = $1;
+	    $try = $+;
 	}
 	if ( $try eq 'default' or $try eq 'defaults' ) {
 	    &$config_defaults () if $action;
@@ -454,6 +454,21 @@ sub config (@) {
 	elsif ( $try eq 'pass_through' or $try eq 'passthrough' ) {
 	    $passthrough = $action;
 	}
+	elsif ( $try =~ /^prefix=(.+)$/ ) {
+	    $gen_prefix = $1;
+	    # Turn into regexp. Needs to be parenthesized!
+	    $gen_prefix = "(" . quotemeta($gen_prefix) . ")";
+	    eval { '' =~ /$gen_prefix/; };
+	    &$croak ("Getopt::Long: invalid pattern \"$gen_prefix\"") if $@;
+	}
+	elsif ( $try =~ /^prefix_pattern=(.+)$/ ) {
+	    $gen_prefix = $1;
+	    # Parenthesize if needed.
+	    $gen_prefix = "(" . $gen_prefix . ")" 
+	      unless $gen_prefix =~ /^\(.*\)$/;
+	    eval { '' =~ /$gen_prefix/; };
+	    &$croak ("Getopt::Long: invalid pattern \"$gen_prefix\"") if $@;
+	}
 	elsif ( $try eq 'debug' ) {
 	    $debug = $action;
 	}
@@ -476,9 +491,9 @@ $find_option = sub {
 
     print STDERR ("=> find \"$opt\", genprefix=\"$genprefix\"\n") if $debug;
 
-    return 0 unless $opt =~ /^$genprefix(.*)$/;
+    return 0 unless $opt =~ /^$genprefix(.*)$/s;
 
-    $opt = $2;
+    $opt = $+;
     my ($starter) = $1;
 
     print STDERR ("=> split \"$starter\"+\"$opt\"\n") if $debug;
@@ -488,7 +503,7 @@ $find_option = sub {
 
     # If it is a long option, it may include the value.
     if (($starter eq "--" || ($getopt_compat && !$bundling))
-	&& $opt =~ /^([^=]+)=(.*)$/ ) {
+	&& $opt =~ /^([^=]+)=(.*)$/s ) {
 	$opt = $1;
 	$optarg = $2;
 	print STDERR ("=> option \"", $opt, 
@@ -626,7 +641,7 @@ $find_option = sub {
     # Get key if this is a "name=value" pair for a hash option.
     $key = undef;
     if ($hash && defined $arg) {
-	($key, $arg) = ($arg =~ /^(.*)=(.*)$/o) ? ($1, $2) : ($arg, 1);
+	($key, $arg) = ($arg =~ /^(.*)=(.*)$/s) ? ($1, $2) : ($arg, 1);
     }
 
     #### Check if the argument is valid for this option ####
@@ -650,7 +665,7 @@ $find_option = sub {
     }
 
     elsif ( $type eq "n" || $type eq "i" ) { # numeric/integer
-	if ( $bundling && defined $rest && $rest =~ /^(-?[0-9]+)(.*)$/ ) {
+	if ( $bundling && defined $rest && $rest =~ /^(-?[0-9]+)(.*)$/s ) {
 	    $arg = $1;
 	    $rest = $2;
 	    unshift (@ARGV, $starter.$rest) if defined $rest && $rest ne '';
@@ -683,9 +698,9 @@ $find_option = sub {
 	# and at least one digit following the point and 'e'.
 	# [-]NN[.NN][eNN]
 	if ( $bundling && defined $rest &&
-	     $rest =~ /^(-?[0-9]+(\.[0-9]+)?([eE]-?[0-9]+)?)(.*)$/ ) {
+	     $rest =~ /^(-?[0-9]+(\.[0-9]+)?([eE]-?[0-9]+)?)(.*)$/s ) {
 	    $arg = $1;
-	    $rest = $4;
+	    $rest = $+;
 	    unshift (@ARGV, $starter.$rest) if defined $rest && $rest ne '';
 	}
 	elsif ( $arg !~ /^-?[0-9.]+(\.[0-9]+)?([eE]-?[0-9]+)?$/ ) {
@@ -1228,6 +1243,16 @@ remaining options to some other program.
 
 This can be very confusing, especially when B<permute> is also set.
 
+=item prefix
+
+The string that starts options. See also B<prefix_pattern>.
+
+=item prefix_pattern
+
+A Perl pattern that identifies the strings that introduce options.
+Default is C<(--|-|\+)> unless environment variable
+POSIXLY_CORRECT has been set, in which case it is C<(--|-)>.
+
 =item debug (default: reset)
 
 Enable copious debugging output.
@@ -1262,7 +1287,7 @@ Johan Vromans E<lt>jvromans@squirrel.nlE<gt>
 
 =head1 COPYRIGHT AND DISCLAIMER
 
-This program is Copyright 1990,1997 by Johan Vromans.
+This program is Copyright 1990,1998 by Johan Vromans.
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either version 2
