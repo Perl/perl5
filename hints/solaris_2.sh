@@ -474,6 +474,26 @@ EOM
 	    esac
 	    ;;
 esac
+# gcc-2.8.1 on Solaris 8 with -Duse64bitint fails op/pat.t test 822
+# if we compile regexec.c with -O.  Turn off optimization for that one
+# file.  See hints/README.hints , especially 
+# =head2 Propagating variables to config.sh, method 3.
+#  A. Dougherty  May 24, 2002
+case "$use64bitint" in
+"$define")
+    case "${gccversion}-${optimize}" in
+    2.8*-O*)
+	# Honor a command-line override (rather unlikely)
+	case "$regexec_cflags" in
+	'') echo "Disabling optimization on regexec.c for gcc $gccversion" >&4
+	    regexec_cflags='optimize='
+	    echo "regexec_cflags='optimize=\"\"'" >> config.sh 
+	    ;;
+	esac
+	;;
+    esac
+    ;;
+esac
 EOCBU
 
     cat > UU/use64bitall.cbu <<'EOCBU'
