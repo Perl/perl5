@@ -627,7 +627,7 @@ term	:	termbinop
 	|	termunop
 	|	anonymous
 	|	termdo
-	|	term '?' expr ':' term
+	|	term '?' term ':' term
 			{ $$ = newCONDOP(0, $1, $3, $5); }
 	|	REFGEN term                          /* \$x, \@y, \%z */
 			{ $$ = newUNOP(OP_REFGEN, 0, mod($2,OP_REFGEN)); }
