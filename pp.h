@@ -386,4 +386,4 @@ See C<PUSHu>.
 True if this op will be the return value of an lvalue subroutine
 
 =cut */
-#define LVRET ((PL_op->op_private & OPpMAYBE_LVSUB) && Perl_is_lvalue_sub(aTHX))
+#define LVRET ((PL_op->op_private & OPpMAYBE_LVSUB) && is_lvalue_sub())
