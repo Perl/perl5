@@ -75,9 +75,229 @@ indicator:
 
 
 ----------------
-Version v5.5.640        Development release working toward v5.6
+Version v5.5.650        Development release working toward v5.6
 ----------------
 
+____________________________________________________________________________
+[  5002] By: gsar                                  on 2000/02/06  14:45:17
+        Log: revised notes about Pod::Parser & Co.
+     Branch: perl
+	   ! lib/Pod/Usage.pm pod/perldelta.pod
+____________________________________________________________________________
+[  5001] By: gsar                                  on 2000/02/06  14:02:43
+        Log: fix description of obsolete diagnostic
+     Branch: perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[  5000] By: gsar                                  on 2000/02/06  13:59:58
+        Log: allow "\x{12ab}" even without C<use utf8>
+     Branch: perl
+	   ! t/pragma/warn/toke toke.c
+____________________________________________________________________________
+[  4999] By: gsar                                  on 2000/02/06  13:58:31
+        Log: make perlbug use new-style version numbers; improve compatibility
+             (runs with perl 5.005); fix swapped old vs new version reporting
+     Branch: perl
+	   ! utils/perlbug.PL
+____________________________________________________________________________
+[  4998] By: gsar                                  on 2000/02/06  13:56:45
+        Log: support sprintf("v%v", v1.2.3) (works on any string argument, in
+             fact); add tests for version tuples
+     Branch: perl
+	   + t/op/ver.t
+	   ! MANIFEST perl.c pod/perldiag.pod pod/perlfunc.pod
+	   ! pod/perlop.pod sv.c toke.c
+____________________________________________________________________________
+[  4997] By: gsar                                  on 2000/02/04  21:40:08
+        Log: change#4970 fallout for useithreads
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  4996] By: jhi                                   on 2000/02/04  20:09:00
+        Log: Largefilify offsets of tied handles.
+     Branch: cfgperl
+	   ! pp_sys.c
+____________________________________________________________________________
+[  4995] By: jhi                                   on 2000/02/04  19:54:25
+        Log: Sanity check for libraries scan.
+     Branch: cfgperl
+	   ! Configure config_h.SH
+     Branch: metaconfig
+	   ! U/modified/libs.U
+____________________________________________________________________________
+[  4994] By: jhi                                   on 2000/02/04  19:48:42
+        Log: HP-UX largefileness doesn't like lseek being redeclared;
+             no more USE_LONG_LONG.
+     Branch: cfgperl
+	   ! perl.h
+____________________________________________________________________________
+[  4993] By: jhi                                   on 2000/02/04  19:18:59
+        Log: fix the description as much as possible; the whole
+             separation into three different symbols lists is
+             pretty broken now.
+     Branch: metaconfig
+	   ! U/modified/Cppsym.U
+____________________________________________________________________________
+[  4992] By: jhi                                   on 2000/02/04  19:13:10
+        Log: Use <syslog.h>, not <sys/syslog.h>.
+     Branch: cfgperl
+	   ! Configure config_h.SH ext/Sys/Syslog/Syslog.xs
+____________________________________________________________________________
+[  4991] By: gsar                                  on 2000/02/04  19:11:07
+        Log: dmake is on CPAN now
+     Branch: perl
+	   ! README.win32
+____________________________________________________________________________
+[  4990] By: jhi                                   on 2000/02/04  19:04:01
+        Log: Re-introduce #4817 and #4964 wiped out by #4987.
+     Branch: cfgperl
+	   ! Configure config_h.SH
+     Branch: metaconfig
+	   ! U/threads/usethreads.U
+     Branch: metaconfig/U/perl
+	   ! patchlevel.U
+____________________________________________________________________________
+[  4989] By: jhi                                   on 2000/02/04  18:54:00
+        Log: typo fix
+     Branch: cfgperl
+	   ! Configure config_h.SH
+     Branch: metaconfig
+	   ! U/modified/libs.U
+____________________________________________________________________________
+[  4988] By: jhi                                   on 2000/02/04  18:34:06
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  +> ext/Sys/Syslog/Makefile.PL ext/Sys/Syslog/Syslog.pm
+	  +> ext/Sys/Syslog/Syslog.xs
+	   - lib/Sys/Syslog.pm
+	  !> (integrate 37 files)
+____________________________________________________________________________
+[  4987] By: jhi                                   on 2000/02/04  18:31:05
+        Log: Configure megamaintenance.  Cppsym (hopefully) final spasms;
+             default is to use long long if available; various nits
+             here and there; fixed to hpux 64-bitnes and largefileness.
+     Branch: cfgperl
+	   ! Configure config_h.SH hints/hpux.sh perl.h
+     Branch: metaconfig
+	   ! U/a_dvisory/quadtype.U U/modified/Cppsym.U
+	   ! U/modified/d_gethname.U U/modified/libpth.U U/modified/libs.U
+     Branch: metaconfig/U/perl
+	   ! d_fseeko.U d_ftello.U dlsrc.U uselongdbl.U uselonglong.U
+	   ! usemultiplicity.U xs_apiversion.U
+____________________________________________________________________________
+[  4986] By: gsar                                  on 2000/02/04  17:26:37
+        Log: avoid bad cast warnings (from Robin Barker <rmb1@cise.npl.co.uk>)
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  4985] By: gsar                                  on 2000/02/04  16:43:49
+        Log: avoid 'na' (spotted by Yitzchak Scott-Thoennes <sthoenna@efn.org>)
+     Branch: perl
+	   ! ext/Devel/DProf/DProf.xs
+____________________________________________________________________________
+[  4984] By: gsar                                  on 2000/02/04  08:20:05
+        Log: CPAN.pm updated to v1.52 (from Andreas Koenig)
+     Branch: perl
+	   ! lib/CPAN.pm lib/CPAN/FirstTime.pm lib/CPAN/Nox.pm
+____________________________________________________________________________
+[  4983] By: gsar                                  on 2000/02/04  08:00:38
+        Log: updated OpenBSD hints (From Todd C. Miller <Todd.Miller@courtesan.com>)
+     Branch: perl
+	   ! hints/openbsd.sh
+____________________________________________________________________________
+[  4982] By: gsar                                  on 2000/02/04  07:54:04
+        Log: pod typos (from Gregor N. Purdy <gregor@focusresearch.com>)
+     Branch: perl
+	   ! lib/Pod/Parser.pm
+____________________________________________________________________________
+[  4981] By: gsar                                  on 2000/02/04  07:34:38
+        Log: avoid assuming cc accepts -o switch (from Tom Hughes)
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  4980] By: gsar                                  on 2000/02/04  07:29:59
+        Log: Sys::Syslog goes the XS way (from Tom Hughes <tom@compton.nu>)
+     Branch: perl
+	   + ext/Sys/Syslog/Makefile.PL ext/Sys/Syslog/Syslog.pm
+	   + ext/Sys/Syslog/Syslog.xs
+	   - lib/Sys/Syslog.pm
+	   ! MANIFEST pod/perldelta.pod
+____________________________________________________________________________
+[  4979] By: gsar                                  on 2000/02/04  07:13:19
+        Log: pod updates (from David Adler, M J T Guy)
+     Branch: perl
+	   ! pod/perlfaq2.pod pod/perlop.pod pod/perlsyn.pod
+____________________________________________________________________________
+[  4978] By: gsar                                  on 2000/02/04  07:08:14
+        Log: typos in config_h.SH (from Paul_Green@vos.stratus.com)
+     Branch: perl
+	   ! config_h.SH
+____________________________________________________________________________
+[  4977] By: gsar                                  on 2000/02/04  07:06:10
+        Log: avoid adding null components to LD_LIBRARY_PATH, OpenBSD has trouble
+             with them (from Todd C. Miller <Todd.Miller@courtesan.com>)
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  4976] By: gsar                                  on 2000/02/04  06:33:43
+        Log: VMS update (from Dan Sugalski and Peter Prymmer)
+     Branch: perl
+	   ! configure.com vms/descrip_mms.template vms/subconfigure.com
+____________________________________________________________________________
+[  4975] By: gsar                                  on 2000/02/04  05:51:14
+        Log: patch to provide more informative names for evals and anonymous
+             subroutines (from Ilya Zakharevich)
+     Branch: perl
+	   ! ext/Devel/Peek/Peek.pm ext/Devel/Peek/Peek.xs lib/Dumpvalue.pm
+	   ! lib/dumpvar.pl lib/perl5db.pl op.c perl.h pod/perldebug.pod
+	   ! pod/perlvar.pod pp_ctl.c
+____________________________________________________________________________
+[  4974] By: gsar                                  on 2000/02/04  05:05:57
+        Log: off-by-one in malloc.c (from Ilya Zakharevich)
+     Branch: perl
+	   ! malloc.c
+____________________________________________________________________________
+[  4973] By: gsar                                  on 2000/02/04  05:03:00
+        Log: OS/2 build fixups from Ilya Zakharevich
+     Branch: perl
+	   ! ext/Devel/DProf/DProf.xs os2/Makefile.SHs t/op/fork.t
+____________________________________________________________________________
+[  4972] By: gsar                                  on 2000/02/04  04:58:57
+        Log: avoid /* within comment
+     Branch: perl
+	   ! xsutils.c
+____________________________________________________________________________
+[  4971] By: gsar                                  on 2000/02/04  04:56:09
+        Log: another HINT_BYTE victim
+     Branch: perl
+	   ! lib/charnames.pm
+____________________________________________________________________________
+[  4970] By: gsar                                  on 2000/02/04  04:45:13
+        Log: fix pad_alloc panic from C<my $w; sub { my($i) = @_; sub { $w } }>
+     Branch: perl
+	   ! op.c scope.c scope.h t/op/closure.t toke.c
+____________________________________________________________________________
+[  4969] By: gsar                                  on 2000/02/04  01:09:37
+        Log: byte.pm and HINT_BYTE don't match (0x8, not 0x10!)
+     Branch: perl
+	   ! lib/byte.pm
+____________________________________________________________________________
+[  4968] By: jhi                                   on 2000/02/02  13:17:25
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  +> lib/Pod/Find.pm lib/Pod/ParseUtils.pm
+	   ! Configure
+	  !> (integrate 29 files)
+
+----------------
+Version v5.5.640
+----------------
+
+____________________________________________________________________________
+[  4967] By: gsar                                  on 2000/02/02  12:22:29
+        Log: update makerel for new version format
+     Branch: perl
+	   ! Changes Porting/makerel
 ____________________________________________________________________________
 [  4966] By: gsar                                  on 2000/02/02  11:42:03
         Log: workaround for undefined symbol
