@@ -6298,7 +6298,7 @@ Perl_scan_num(pTHX_ char *start)
 	    static char *maxima[5] = { "",
 				       "0b11111111111111111111111111111111",
 				       "",
-				       "0b37777777777",
+				       "037777777777",
 				       "0xffffffff" };
 	    char *base, *Base, *max;
 
@@ -6324,7 +6324,7 @@ Perl_scan_num(pTHX_ char *start)
 	    /* read the rest of the number */
 	    for (;;) {
 		/* x is used in the overflow test,
-		   b is the digit we're adding on */
+		   b is the digit we're adding on. */
 		UV x, b;
 
 		switch (*s) {
@@ -6410,7 +6410,7 @@ Perl_scan_num(pTHX_ char *start)
 	    sv = NEWSV(92,0);
 	    if (overflowed) {
 		dTHR;
-		if (ckWARN(WARN_UNSAFE) && (NV) n > 4294967295.0)
+		if (ckWARN(WARN_UNSAFE) && n > 4294967295.0)
 		    Perl_warner(aTHX_ WARN_UNSAFE,
 				"%s number > %s non-portable",
 				Base, max);

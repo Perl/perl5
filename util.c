@@ -2828,7 +2828,11 @@ Perl_scan_bin(pTHX_ char *start, I32 len, I32 *retlen)
     }
     if (!overflowed)
 	rnv = (NV) ruv;
-    if (rnv > 4294967295.0) {
+    if (   ( overflowed && rnv > 4294967295.0)
+#if UV_SIZEOF > 4
+	|| (!overflowed && ruv > 0xffffffff  )
+#endif
+	) { 
 	dTHR;
 	if (ckWARN(WARN_UNSAFE))
 	    Perl_warner(aTHX_ WARN_UNSAFE,
@@ -2864,7 +2868,7 @@ Perl_scan_oct(pTHX_ char *start, I32 len, I32 *retlen)
 	    }
 	}
 	if (!overflowed) {
-	    register xuv = ruv << 3;
+	    register UV xuv = ruv << 3;
 
 	    if ((xuv >> 3) != ruv) {
 		dTHR;
@@ -2889,7 +2893,11 @@ Perl_scan_oct(pTHX_ char *start, I32 len, I32 *retlen)
     }
     if (!overflowed)
 	rnv = (NV) ruv;
-    if (rnv > 4294967295.0) { 
+    if (   ( overflowed && rnv > 4294967295.0)
+#if UV_SIZEOF > 4
+	|| (!overflowed && ruv > 0xffffffff  )
+#endif
+	) {
 	dTHR;
 	if (ckWARN(WARN_UNSAFE))
 	    Perl_warner(aTHX_ WARN_UNSAFE,
@@ -2953,7 +2961,11 @@ Perl_scan_hex(pTHX_ char *start, I32 len, I32 *retlen)
     }
     if (!overflowed)
 	rnv = (NV) ruv;
-    if (rnv > 4294967295.0) {
+    if (   ( overflowed && rnv > 4294967295.0)
+#if UV_SIZEOF > 4
+	|| (!overflowed && ruv > 0xffffffff  )
+#endif
+	) { 
 	dTHR;
 	if (ckWARN(WARN_UNSAFE))
 	    Perl_warner(aTHX_ WARN_UNSAFE,
