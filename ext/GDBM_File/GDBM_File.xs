@@ -256,7 +256,6 @@ gdbm_STORE(db, key, value, flags = GDBM_REPLACE)
 		croak("No write permission to gdbm file");
 	    croak("gdbm store returned %d, errno %d, key \"%.*s\"",
 			RETVAL,errno,key.dsize,key.dptr);
-	    gdbm_clearerr(db);
 	}
 
 #define gdbm_DELETE(db,key)			gdbm_delete(db->dbp,key)

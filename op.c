@@ -1833,8 +1833,14 @@ Perl_fold_constants(pTHX_ register OP *o)
     if (PL_opargs[type] & OA_TARGET)
 	o->op_targ = pad_alloc(type, SVs_PADTMP);
 
-    if ((PL_opargs[type] & OA_OTHERINT) && (PL_hints & HINT_INTEGER))
+    /* integerize op, unless it happens to be C<-foo>.
+     * XXX should pp_i_negate() do magic string negation instead? */
+    if ((PL_opargs[type] & OA_OTHERINT) && (PL_hints & HINT_INTEGER)
+	&& !(type == OP_NEGATE && cUNOPo->op_first->op_type == OP_CONST
+	     && (cUNOPo->op_first->op_private & OPpCONST_BARE)))
+    {
 	o->op_ppaddr = PL_ppaddr[type = ++(o->op_type)];
+    }
 
     if (!(PL_opargs[type] & OA_FOLDCONST))
 	goto nope;

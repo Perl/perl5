@@ -106,6 +106,18 @@ vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
                                  {LNM$C_NAMLENGTH, LNM$_STRING, eqv, &eqvlen},
                                  {0, 0, 0, 0}};
     $DESCRIPTOR(crtlenv,"CRTL_ENV");  $DESCRIPTOR(clisym,"CLISYM");
+#if defined(USE_THREADS)
+    /* We jump through these hoops because we can be called at */
+    /* platform-specific initialization time, which is before anything is */
+    /* set up--we can't even do a plain dTHR since that relies on the */
+    /* interpreter structure to be initialized */
+    struct perl_thread *thr;
+    if (PL_curinterp) {
+      thr = PL_threadnum? THR : (struct perl_thread*)SvPVX(PL_thrsv);
+    } else {
+      thr = NULL;
+    }
+#endif
 
     if (!lnm || !eqv || idx > LNM$_MAX_INDEX) {
       set_errno(EINVAL); set_vaxc_errno(SS$_BADPARAM); return 0;
@@ -159,8 +171,22 @@ vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
             if (eqvlen > 1024) {
               set_errno(EVMSERR); set_vaxc_errno(LIB$_STRTRU);
               eqvlen = 1024;
-              if (ckWARN(WARN_MISC))
-                warner(WARN_MISC,"Value of CLI symbol \"%s\" too long",lnm);
+	      /* Special hack--we might be called before the interpreter's */
+	      /* fully initialized, in which case either thr or PL_curcop */
+	      /* might be bogus. We have to check, since ckWARN needs them */
+	      /* both to be valid if running threaded */
+#if defined(USE_THREADS)
+	      if (thr && PL_curcop) {
+#endif
+		if (ckWARN(WARN_MISC)) {
+		  warner(WARN_MISC,"Value of CLI symbol \"%s\" too long",lnm);
+		}
+#if defined(USE_THREADS)
+	      } else {
+		  warner(WARN_MISC,"Value of CLI symbol \"%s\" too long",lnm);
+	      }
+#endif
+	      
             }
             strncpy(eqv,eqvdsc.dsc$a_pointer,eqvlen);
           }
@@ -187,7 +213,6 @@ vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
     return 0;
 }  /* end of vmstrnenv */
 /*}}}*/
-
 
 /*{{{ int my_trnlnm(const char *lnm, char *eqv, unsigned long int idx)*/
 /* Define as a function so we can access statics. */
@@ -260,9 +285,19 @@ my_getenv(const char *lnm, bool sys)
 char *
 my_getenv_len(const char *lnm, unsigned long *len, bool sys)
 {
-    char buf[LNM$C_NAMLENGTH+1], *cp1, *cp2;
+    char *buf, *cp1, *cp2;
     unsigned long idx = 0;
-
+    static char __my_getenv_len_eqv[LNM$C_NAMLENGTH+1];
+    SV *tmpsv;
+    
+    if (PL_curinterp) {  /* Perl interpreter running -- may be threaded */
+      /* Set up a temporary buffer for the return value; Perl will
+       * clean it up at the next statement transition */
+      tmpsv = sv_2mortal(newSVpv("",LNM$C_NAMLENGTH+1));
+      if (!tmpsv) return NULL;
+      buf = SvPVX(tmpsv);
+    }
+    else buf = __my_getenv_len_eqv;  /* Assume no interpreter ==> single thread */
     for (cp1 = (char *)lnm, cp2 = buf; *cp1; cp1++,cp2++) *cp2 = _toupper(*cp1);
     if (cp1 - lnm == 7 && !strncmp(buf,"DEFAULT",7)) {
       getcwd(buf,LNM$C_NAMLENGTH);
@@ -285,7 +320,8 @@ my_getenv_len(const char *lnm, unsigned long *len, bool sys)
 #endif
                                                          )))
 	  return buf;
-      else return Nullch;
+      else
+	  return Nullch;
     }
 
 }  /* end of my_getenv_len() */
@@ -1083,6 +1119,7 @@ Pid_t
 my_waitpid(Pid_t pid, int *statusp, int flags)
 {
     struct pipe_details *info;
+    dTHR;
     
     for (info = open_pipes; info != NULL; info = info->next)
         if (info->pid == pid) break;
@@ -3381,6 +3418,7 @@ bool
 vms_do_exec(char *cmd)
 {
 
+  dTHR;
   if (vfork_called) {             /* this follows a vfork - act Unixish */
     vfork_called--;
     if (vfork_called < 0) {
@@ -3445,6 +3483,7 @@ unsigned long int
 do_spawn(char *cmd)
 {
   unsigned long int sts, substs, hadcmd = 1;
+  dTHR;
 
   TAINT_ENV();
   TAINT_PROPER("spawn");
@@ -4499,17 +4538,19 @@ flex_fstat(int fd, Stat_t *statbufp)
 }  /* end of flex_fstat() */
 /*}}}*/
 
-/*{{{ int flex_stat(char *fspec, Stat_t *statbufp)*/
+/*{{{ int flex_stat(const char *fspec, Stat_t *statbufp)*/
 int
-flex_stat(char *fspec, Stat_t *statbufp)
+flex_stat(const char *fspec, Stat_t *statbufp)
 {
     dTHR;
     char fileified[NAM$C_MAXRSS+1];
+    char temp_fspec[NAM$C_MAXRSS+300];
     int retval = -1;
 
+    strcpy(temp_fspec, fspec);
     if (statbufp == (Stat_t *) &PL_statcache)
-      do_tovmsspec(fspec,namecache,0);
-    if (is_null_device(fspec)) { /* Fake a stat() for the null device */
+      do_tovmsspec(temp_fspec,namecache,0);
+    if (is_null_device(temp_fspec)) { /* Fake a stat() for the null device */
       memset(statbufp,0,sizeof *statbufp);
       statbufp->st_dev = encode_dev("_NLA0:");
       statbufp->st_mode = S_IFBLK | S_IREAD | S_IWRITE | S_IEXEC;
@@ -4528,12 +4569,12 @@ flex_stat(char *fspec, Stat_t *statbufp)
      * the file with null type, specify this by calling flex_stat() with
      * a '.' at the end of fspec.
      */
-    if (do_fileify_dirspec(fspec,fileified,0) != NULL) {
+    if (do_fileify_dirspec(temp_fspec,fileified,0) != NULL) {
       retval = stat(fileified,(stat_t *) statbufp);
       if (!retval && statbufp == (Stat_t *) &PL_statcache)
         strcpy(namecache,fileified);
     }
-    if (retval) retval = stat(fspec,(stat_t *) statbufp);
+    if (retval) retval = stat(temp_fspec,(stat_t *) statbufp);
     if (!retval) {
       statbufp->st_dev = encode_dev(statbufp->st_devnam);
 #     ifdef RTL_USES_UTC

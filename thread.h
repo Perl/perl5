@@ -35,10 +35,8 @@ struct perl_thread *getTHR (void);
 #      define YIELD pthread_yield(NULL)
 #    endif
 #  endif
-#  ifndef VMS
 #    define pthread_mutexattr_default NULL
 #    define pthread_condattr_default  NULL
-#  endif
 #endif
 
 #ifndef PTHREAD_CREATE

@@ -66,6 +66,7 @@
 
 /* Note that we do, in fact, have this */
 #define HAS_GETENV_SV
+#define HAS_GETENV_LEN
 
 #ifndef DONT_MASK_RTL_CALLS
 #  ifdef getenv
@@ -624,7 +625,7 @@ int     my_sigprocmask (int, sigset_t *, sigset_t *);
 #endif
 I32	cando_by_name (I32, I32, char *);
 int	flex_fstat (int, Stat_t *);
-int	flex_stat (char *, Stat_t *);
+int	flex_stat (const char *, Stat_t *);
 int	trim_unixpath (char *, char*, int);
 int	my_vfork ();
 bool	vms_do_aexec (SV *, SV **, SV **);

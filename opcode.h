@@ -740,7 +740,7 @@ EXT char *PL_op_desc[] = {
 	"anonymous subroutine",
 	"subroutine prototype",
 	"reference constructor",
-	"scalar ref constructor",
+	"single ref constructor",
 	"reference-type operator",
 	"bless",
 	"backticks",

@@ -271,7 +271,7 @@ rv2cv		subroutine deref	ck_rvconst	d1
 anoncode	anonymous subroutine	ck_anoncode	$	
 prototype	subroutine prototype	ck_null		s%	S
 refgen		reference constructor	ck_spair	m1	L
-srefgen		scalar ref constructor	ck_null		fs1	S
+srefgen		single ref constructor	ck_null		fs1	S
 ref		reference-type operator	ck_fun		stu%	S?
 bless		bless			ck_fun		s@	S S?
 
