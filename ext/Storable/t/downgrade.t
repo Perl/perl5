@@ -38,7 +38,7 @@ use vars qw(@RESTRICT_TESTS %R_HASH %U_HASH $UTF8_CROAK $RESTRICTED_CROAK);
                   );
 %R_HASH = (perl => 'rules');
 
-if ($] >= 5.007003) {
+if ($] > 5.007002) {
   # This is cheating. "\xdf" in Latin 1 is beta S, so will match \w if it
   # is stored in utf8, not bytes.
   # "\xdf" is y diaresis in EBCDIC (except for cp875, but so far no-one seems
@@ -206,7 +206,7 @@ if ($] >= 5.006) {
   thaw_scalar ('Long 24 bit utf8 data', $$bytes x 256);
 }
 
-if ($] >= 5.007003) {
+if ($] > 5.007002) {
   print "# We have utf8 hashes, so test that the utf8 hashes in <DATA> are valid\n";
   my $hash = thaw_hash ('Hash with utf8 keys', \%U_HASH);
   for (keys %$hash) {
