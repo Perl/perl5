@@ -32,7 +32,7 @@ Generally one only needs to call the C<WriteConstants> function, and then
 
 in the C section of C<Foo.xs>
 
-    INCLUDE const-xs.inc
+    INCLUDE: const-xs.inc
 
 in the XS section of C<Foo.xs>.
 
