@@ -1517,7 +1517,9 @@ sub unlink0 {
     print "Link count = $fh[3] \n" if $DEBUG;
 
     # Make sure that the link count is zero
-    return ( $fh[3] == 0 ? 1 : 0);
+    # - Cygwin provides deferred unlinking, however,
+    #   on Win9x the link count remains 1
+    return ( $fh[3] == 0 or $^O eq 'cygwin' ? 1 : 0);
 
   } else {
     _deferred_unlink($fh, $path, 0);
