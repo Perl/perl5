@@ -35,6 +35,7 @@ typedef struct
  CV *mERROR;
  CV *mEOF;
  CV *BINMODE;
+ CV *UTF8;
 } PerlIOVia;
 
 #define MYMethod(x) #x,&s->x
@@ -163,6 +164,15 @@ PerlIOVia_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg,
 		}
 		else {
 		    goto push_failed;
+		}
+		modesv = (*PerlIONext(f) && (PerlIOBase(PerlIONext(f))->flags & PERLIO_F_UTF8))
+                           ? &PL_sv_yes : &PL_sv_no;
+		result = PerlIOVia_method(aTHX_ f, MYMethod(UTF8), G_SCALAR, modesv, Nullsv);
+		if (result && SvTRUE(result)) {
+		    PerlIOBase(f)->flags |= ~PERLIO_F_UTF8;
+		}
+		else {
+		    PerlIOBase(f)->flags &= ~PERLIO_F_UTF8;
 		}
 		if (PerlIOVia_fetchmethod(aTHX_ s, MYMethod(FILL)) ==
 		    (CV *) - 1)

@@ -549,7 +549,7 @@ which must be done in one.  That's why computer hardware provides an
 atomic test-and-set instruction.   In theory, this "ought" to work:
 
     sysopen(FH, "file.lock", O_WRONLY|O_EXCL|O_CREAT)
-		or die "can't open  file.lock: $!":
+		or die "can't open  file.lock: $!";
 
 except that lamentably, file creation (and deletion) is not atomic
 over NFS, so this won't work (at least, not every time) over the net.

@@ -1043,7 +1043,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	    c1 = *(U8*)m;
 	    c2 = PL_fold_locale[c1];
 	  do_exactf:
-	    e = HOP3c(strend, -lnc, s);
+	    e = HOP3c(strend, -((I32)lnc), s);
 
 	    if (norun && e < s)
 		e = s;			/* Due to minlen logic of intuit() */
