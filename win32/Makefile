@@ -19,7 +19,7 @@ INST_TOP	= $(INST_DRV)\perl
 # locations it installs files to.  If you disable it, an alternative
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
-INST_VER	= \5.00466
+INST_VER	= \5.00467
 
 #
 # uncomment to enable threads-capabilities

@@ -139,7 +139,7 @@ don't work.
 =item I grabbed the sources and tried to compile but gdbm/dynamic
 loading/malloc/linking/... failed.  How do I make it work?
 
-=item What modules and extensions are available for Perl?  What is CPAN? 
+=item What modules and extensions are available for Perl?  What is CPAN?
 What does CPAN/src/... mean?
 
 =item Is there an ISO or ANSI certified version of Perl?
@@ -151,6 +151,10 @@ What does CPAN/src/... mean?
 =item Where should I post source code?
 
 =item Perl Books
+
+References, Tutorials           
+*Learning Perl [2nd edition]
+by Randal L. Schwartz and Tom Christiansen, Task-Oriented, Special Topics
 
 =item Perl in Magazines
 
@@ -208,8 +212,6 @@ MacPerl, Perl5-Porters, NTPerl, Perl-Packrats
 =item How can I use X or Tk with Perl?
 
 =item How can I generate simple menus without using CGI or Tk?
-
-=item Can I dynamically load C routines into Perl?
 
 =item What is undump?
 
@@ -292,7 +294,7 @@ Trig functions?
 
 =item How can I find the Julian Day?
 
-=item Does Perl have a year 2000 problem?
+=item Does Perl have a year 2000 problem?  Is Perl Y2K compliant?
 
 =back
 
@@ -354,12 +356,13 @@ the tag
 
 =item How can I extract just the unique elements of an array?
 
-a) If @in is sorted, and you want @out to be sorted:, b) If you don't know
-whether @in is sorted:, c) Like (b), but @in contains only small integers:,
-d) A way to do (b) without any loops or greps:, e) Like (d), but @in
-contains only small positive integers:
+a) If @in is sorted, and you want @out to be sorted:(this assumes all true
+values in the array), b) If you don't know whether @in is sorted:, c) Like
+(b), but @in contains only small integers:, d) A way to do (b) without any
+loops or greps:, e) Like (d), but @in contains only small positive
+integers:
 
-=item How can I tell whether an array contains a certain element?
+=item How can I tell whether a list or array contains a certain element?
 
 =item How do I compute the difference of two arrays?  How do I compute the
 intersection of two arrays?
@@ -452,7 +455,7 @@ array of hashes or arrays?
 
 =over
 
-=item How do I flush/unbuffer a filehandle?  Why must I do this?
+=item How do I flush/unbuffer an output filehandle?  Why must I do this?
 
 =item How do I change one line in a file/delete a line in a file/insert a
 line in the middle of a file/append to the beginning of a file?
@@ -466,6 +469,8 @@ line in the middle of a file/append to the beginning of a file?
 =item How can I make a filehandle local to a subroutine?  How do I pass
 filehandles between subroutines?  How do I make an array of filehandles?
 
+=item How can I use a filehandle indirectly?
+
 =item How can I set up a footer format to be used with write()?
 
 =item How can I write() into a string?
@@ -474,7 +479,7 @@ filehandles between subroutines?  How do I make an array of filehandles?
 
 =item How can I translate tildes (~) in a filename?
 
-=item How come when I open the file read-write it wipes it out?
+=item How come when I open a file read-write it wipes it out?
 
 =item Why do I sometimes get an "Argument list too long" when I use <*>?
 
@@ -504,10 +509,6 @@ the file.  How can I do this?
 =item How can I read a single character from a file?  From the keyboard?
 
 =item How can I tell if there's a character waiting on a filehandle?
-
-=item How do I open a file without blocking?
-
-=item How do I create a file only if it doesn't exist?
 
 =item How do I do a C<tail -f> in perl?
 
@@ -551,7 +552,7 @@ different lines?
 =item How do I substitute case insensitively on the LHS, but preserving
 case on the RHS?
 
-=item How can I make C<\w> match accented characters?
+=item How can I make C<\w> match national character sets?
 
 =item How can I match a locale-smart version of C</[a-zA-Z]/>?
 
@@ -633,7 +634,7 @@ Passing Methods
 
 =item How do I create a static variable?
 
-=item What's the difference between dynamic and lexical (static) scoping? 
+=item What's the difference between dynamic and lexical (static) scoping?
 Between local() and my()?
 
 =item How can I access a dynamic variable while a similarly named lexical
@@ -807,15 +808,15 @@ file on another machine?
 =item How do I make sure users can't enter values into a form that cause my
 CGI script to do bad things?
 
-=item How do I parse an email header?
+=item How do I parse a mail header?
 
 =item How do I decode a CGI form?
 
-=item How do I check a valid email address?
+=item How do I check a valid mail address?
 
 =item How do I decode a MIME/BASE64 string?
 
-=item How do I return the user's email address?
+=item How do I return the user's mail address?
 
 =item How do I send/read mail?
 
@@ -831,114 +832,13 @@ CGI script to do bad things?
 
 =item AUTHOR AND COPYRIGHT
 
-=head2 perldelta - what's new for perl5.004
+=head2 perldelta - what's new for perl5.005
 
 =item DESCRIPTION
 
-=item Supported Environments
+=item Incompatible Changes
 
 =item Core Changes
-
-=over
-
-=item List assignment to %ENV works
-
-=item "Can't locate Foo.pm in @INC" error now lists @INC
-
-=item Compilation option: Binary compatibility with 5.003
-
-=item $PERL5OPT environment variable
-
-=item Limitations on B<-M>, B<-m>, and B<-T> options
-
-=item More precise warnings
-
-=item Deprecated: Inherited C<AUTOLOAD> for non-methods
-
-=item Previously deprecated %OVERLOAD is no longer usable
-
-=item Subroutine arguments created only when they're modified
-
-=item Group vector changeable with C<$)>
-
-=item Fixed parsing of $$<digit>, &$<digit>, etc.
-
-=item Fixed localization of $<digit>, $&, etc.
-
-=item No resetting of $. on implicit close
-
-=item C<wantarray> may return undef
-
-=item C<eval EXPR> determines value of EXPR in scalar context
-
-=item Changes to tainting checks
-
-No glob() or <*>, No spawning if tainted $CDPATH, $ENV, $BASH_ENV, No
-spawning if tainted $TERM doesn't look like a terminal name
-
-=item New Opcode module and revised Safe module
-
-=item Embedding improvements
-
-=item Internal change: FileHandle class based on IO::* classes
-
-=item Internal change: PerlIO abstraction interface
-
-=item New and changed syntax
-
-$coderef->(PARAMS)
-
-=item New and changed builtin constants
-
-__PACKAGE__
-
-=item New and changed builtin variables
-
-$^E, $^H, $^M
-
-=item New and changed builtin functions
-
-delete on slices, flock, printf and sprintf, keys as an lvalue, my() in
-Control Structures, pack() and unpack(), sysseek(), use VERSION, use Module
-VERSION LIST, prototype(FUNCTION), srand, $_ as Default, C<m//gc> does not
-reset search position on failure, C<m//x> ignores whitespace before ?*+{},
-nested C<sub{}> closures work now, formats work right on changing lexicals
-
-=item New builtin methods
-
-isa(CLASS), can(METHOD), VERSION( [NEED] )
-
-=item TIEHANDLE now supported
-
-TIEHANDLE classname, LIST, PRINT this, LIST, PRINTF this, LIST, READ this
-LIST, READLINE this, GETC this, DESTROY this
-
-=item Malloc enhancements
-
--DPERL_EMERGENCY_SBRK, -DPACK_MALLOC, -DTWO_POT_OPTIMIZE
-
-=item Miscellaneous efficiency enhancements
-
-=back
-
-=item Support for More Operating Systems
-
-=over
-
-=item Win32
-
-=item Plan 9
-
-=item QNX
-
-=item AmigaOS
-
-=back
-
-=item Pragmata
-
-use autouse MODULE => qw(sub1 sub2 sub3), use blib, use blib 'dir', use
-constant NAME => VALUE, use locale, use ops, use vmsish
 
 =item Modules
 
@@ -946,77 +846,13 @@ constant NAME => VALUE, use locale, use ops, use vmsish
 
 =item Required Updates
 
-=item Installation directories
-
-=item Module information summary
-
-=item Fcntl
-
-=item IO
-
-=item Math::Complex
-
-=item Math::Trig
-
-=item DB_File
-
-=item Net::Ping
-
-=item Object-oriented overrides for builtin operators
-
 =back
 
 =item Utility Changes
 
-=over
-
-=item pod2html
-
-Sends converted HTML to standard output
-
-=item xsubpp
-
-C<void> XSUBs now default to returning nothing
-
-=back
-
 =item C Language API Changes
 
-C<gv_fetchmethod> and C<perl_call_sv>, C<perl_eval_pv>, Extended API for
-manipulating hashes
-
 =item Documentation Changes
-
-L<perldelta>, L<perlfaq>, L<perllocale>, L<perltoot>, L<perlapio>,
-L<perlmodlib>, L<perldebug>, L<perlsec>
-
-=item New Diagnostics
-
-"my" variable %s masks earlier declaration in same scope, %s argument is
-not a HASH element or slice, Allocation too large: %lx, Allocation too
-large, Applying %s to %s will act on scalar(%s), Attempt to free
-nonexistent shared string, Attempt to use reference as lvalue in substr,
-Can't redefine active sort subroutine %s, Can't use bareword ("%s") as %s
-ref while "strict refs" in use, Cannot resolve method `%s' overloading `%s'
-in package `%s', Constant subroutine %s redefined, Constant subroutine %s
-undefined, Copy method did not return a reference, Died, Exiting
-pseudo-block via %s, Identifier too long, Illegal character %s (carriage
-return), Illegal switch in PERL5OPT: %s, Integer overflow in hex number,
-Integer overflow in octal number, internal error: glob failed, Invalid
-conversion in %s: "%s", Invalid type in pack: '%s', Invalid type in unpack:
-'%s', Name "%s::%s" used only once: possible typo, Null picture in
-formline, Offset outside string, Out of memory!, Out of memory during
-request for %s, panic: frexp, Possible attempt to put comments in qw()
-list, Possible attempt to separate words with commas, Scalar value @%s{%s}
-better written as $%s{%s}, Stub found while resolving method `%s'
-overloading `%s' in package `%s', Too late for "B<-T>" option, untie
-attempted while %d inner references still exist, Unrecognized character %s,
-Unsupported function fork, Use of "$$<digit>" to mean "${$}<digit>" is
-deprecated, Value of %s can be "0"; test with defined(), Variable "%s" may
-be unavailable, Variable "%s" will not stay shared, Warning: something's
-wrong, Ill-formed logical name |%s| in prime_env_iter, Got an error from
-DosAllocMem, Malformed PERLLIB_PREFIX, PERL_SH_DIR too long, Process
-terminated by SIG%s
 
 =item BUGS
 
@@ -1112,7 +948,7 @@ terminated by SIG%s
 
 =item C-style Logical Or
 
-=item Range Operator
+=item Range Operators
 
 =item Conditional Operator
 
@@ -1145,9 +981,13 @@ y/SEARCHLIST/REPLACEMENTLIST/cds
 
 =item Constant Folding
 
+=item Bitwise String Operators
+
 =item Integer Arithmetic
 
 =item Floating-point Arithmetic
+
+=item Bigger Numbers
 
 =back
 
@@ -1161,9 +1001,9 @@ i, m, s, x
 
 =item Regular Expressions
 
-C<(?#text)>, C<(?:regexp)>, C<(?=regexp)>, C<(?!regexp)>, C<(?<=regexp)>,
-C<(?<!regexp)>, C<(?{ code })>, C<(?E<gt>regexp)>,
-C<(?(condition)yes-regexp|no-regexp)>, C<(?(condition)yes-regexp)>,
+C<(?#text)>, C<(?:pattern)>, C<(?=pattern)>, C<(?!pattern)>,
+C<(?E<lt>=pattern)>, C<(?<!pattern)>, C<(?{ code })>, C<(?E<gt>pattern)>,
+C<(?(condition)yes-pattern|no-pattern)>, C<(?(condition)yes-pattern)>,
 C<(?imsx)>
 
 =item Backtracking
@@ -1188,6 +1028,8 @@ C<(?imsx)>
 
 OS/2, MS-DOS, Win95/NT, Macintosh
 
+=item Location of Perl
+
 =item Switches
 
 B<-0>[I<digits>], B<-a>, B<-c>, B<-d>, B<-d:>I<foo>, B<-D>I<letters>,
@@ -1207,8 +1049,6 @@ HOME, LOGDIR, PATH, PERL5LIB, PERL5OPT, PERLLIB, PERL5DB, PERL5SHELL
 =head2 perlfunc - Perl builtin functions
 
 =item DESCRIPTION
-
- I<THERE IS NO GENERAL RULE FOR CONVERTING A LIST INTO A SCALAR!>
 
 =over
 
@@ -1237,36 +1077,36 @@ close FILEHANDLE, closedir DIRHANDLE, connect SOCKET,NAME, continue BLOCK,
 cos EXPR, crypt PLAINTEXT,SALT, dbmclose HASH, dbmopen HASH,DBNAME,MODE,
 defined EXPR, defined, delete EXPR, die LIST, do BLOCK, do
 SUBROUTINE(LIST), do EXPR, dump LABEL, each HASH, eof FILEHANDLE, eof (),
-eof, eval EXPR, eval BLOCK, exec LIST, exists EXPR, exit EXPR, exp EXPR,
-exp, fcntl FILEHANDLE,FUNCTION,SCALAR, fileno FILEHANDLE, flock
-FILEHANDLE,OPERATION, fork, format, formline PICTURE,LIST, getc FILEHANDLE,
-getc, getlogin, getpeername SOCKET, getpgrp PID, getppid, getpriority
-WHICH,WHO, getpwnam NAME, getgrnam NAME, gethostbyname NAME, getnetbyname
-NAME, getprotobyname NAME, getpwuid UID, getgrgid GID, getservbyname
-NAME,PROTO, gethostbyaddr ADDR,ADDRTYPE, getnetbyaddr ADDR,ADDRTYPE,
-getprotobynumber NUMBER, getservbyport PORT,PROTO, getpwent, getgrent,
-gethostent, getnetent, getprotoent, getservent, setpwent, setgrent,
-sethostent STAYOPEN, setnetent STAYOPEN, setprotoent STAYOPEN, setservent
-STAYOPEN, endpwent, endgrent, endhostent, endnetent, endprotoent,
-endservent, getsockname SOCKET, getsockopt SOCKET,LEVEL,OPTNAME, glob EXPR,
-glob, gmtime EXPR, goto LABEL, goto EXPR, goto &NAME, grep BLOCK LIST, grep
-EXPR,LIST, hex EXPR, hex, import, index STR,SUBSTR,POSITION, index
-STR,SUBSTR, int EXPR, int, ioctl FILEHANDLE,FUNCTION,SCALAR, join
-EXPR,LIST, keys HASH, kill LIST, last LABEL, last, lc EXPR, lc, lcfirst
-EXPR, lcfirst, length EXPR, length, link OLDFILE,NEWFILE, listen
-SOCKET,QUEUESIZE, local EXPR, localtime EXPR, log EXPR, log, lstat
-FILEHANDLE, lstat EXPR, lstat, m//, map BLOCK LIST, map EXPR,LIST, mkdir
-FILENAME,MODE, msgctl ID,CMD,ARG, msgget KEY,FLAGS, msgsnd ID,MSG,FLAGS,
-msgrcv ID,VAR,SIZE,TYPE,FLAGS, my EXPR, next LABEL, next, no Module LIST,
-oct EXPR, oct, open FILEHANDLE,EXPR, open FILEHANDLE, opendir
-DIRHANDLE,EXPR, ord EXPR, ord, pack TEMPLATE,LIST, package NAMESPACE, pipe
-READHANDLE,WRITEHANDLE, pop ARRAY, pop, pos SCALAR, pos, print FILEHANDLE
-LIST, print LIST, print, printf FILEHANDLE FORMAT, LIST, printf FORMAT,
-LIST, prototype FUNCTION, push ARRAY,LIST, q/STRING/, qq/STRING/,
-qx/STRING/, qw/STRING/, quotemeta EXPR, quotemeta, rand EXPR, rand, read
-FILEHANDLE,SCALAR,LENGTH,OFFSET, read FILEHANDLE,SCALAR,LENGTH, readdir
-DIRHANDLE, readline EXPR, readlink EXPR, readlink, readpipe EXPR, recv
-SOCKET,SCALAR,LEN,FLAGS, redo LABEL, redo, ref EXPR, ref, rename
+eof, eval EXPR, eval BLOCK, exec LIST, exec PROGRAM LIST, exists EXPR, exit
+EXPR, exp EXPR, exp, fcntl FILEHANDLE,FUNCTION,SCALAR, fileno FILEHANDLE,
+flock FILEHANDLE,OPERATION, fork, format, formline PICTURE,LIST, getc
+FILEHANDLE, getc, getlogin, getpeername SOCKET, getpgrp PID, getppid,
+getpriority WHICH,WHO, getpwnam NAME, getgrnam NAME, gethostbyname NAME,
+getnetbyname NAME, getprotobyname NAME, getpwuid UID, getgrgid GID,
+getservbyname NAME,PROTO, gethostbyaddr ADDR,ADDRTYPE, getnetbyaddr
+ADDR,ADDRTYPE, getprotobynumber NUMBER, getservbyport PORT,PROTO, getpwent,
+getgrent, gethostent, getnetent, getprotoent, getservent, setpwent,
+setgrent, sethostent STAYOPEN, setnetent STAYOPEN, setprotoent STAYOPEN,
+setservent STAYOPEN, endpwent, endgrent, endhostent, endnetent,
+endprotoent, endservent, getsockname SOCKET, getsockopt
+SOCKET,LEVEL,OPTNAME, glob EXPR, glob, gmtime EXPR, goto LABEL, goto EXPR,
+goto &NAME, grep BLOCK LIST, grep EXPR,LIST, hex EXPR, hex, import, index
+STR,SUBSTR,POSITION, index STR,SUBSTR, int EXPR, int, ioctl
+FILEHANDLE,FUNCTION,SCALAR, join EXPR,LIST, keys HASH, kill LIST, last
+LABEL, last, lc EXPR, lc, lcfirst EXPR, lcfirst, length EXPR, length, link
+OLDFILE,NEWFILE, listen SOCKET,QUEUESIZE, local EXPR, localtime EXPR, log
+EXPR, log, lstat FILEHANDLE, lstat EXPR, lstat, m//, map BLOCK LIST, map
+EXPR,LIST, mkdir FILENAME,MODE, msgctl ID,CMD,ARG, msgget KEY,FLAGS, msgsnd
+ID,MSG,FLAGS, msgrcv ID,VAR,SIZE,TYPE,FLAGS, my EXPR, next LABEL, next, no
+Module LIST, oct EXPR, oct, open FILEHANDLE,EXPR, open FILEHANDLE, opendir
+DIRHANDLE,EXPR, ord EXPR, ord, pack TEMPLATE,LIST, package, package
+NAMESPACE, pipe READHANDLE,WRITEHANDLE, pop ARRAY, pop, pos SCALAR, pos,
+print FILEHANDLE LIST, print LIST, print, printf FILEHANDLE FORMAT, LIST,
+printf FORMAT, LIST, prototype FUNCTION, push ARRAY,LIST, q/STRING/,
+qq/STRING/, qx/STRING/, qw/STRING/, quotemeta EXPR, quotemeta, rand EXPR,
+rand, read FILEHANDLE,SCALAR,LENGTH,OFFSET, read FILEHANDLE,SCALAR,LENGTH,
+readdir DIRHANDLE, readline EXPR, readlink EXPR, readlink, readpipe EXPR,
+recv SOCKET,SCALAR,LEN,FLAGS, redo LABEL, redo, ref EXPR, ref, rename
 OLDNAME,NEWNAME, require EXPR, require, reset EXPR, reset, return EXPR,
 return, reverse LIST, rewinddir DIRHANDLE, rindex STR,SUBSTR,POSITION,
 rindex STR,SUBSTR, rmdir FILENAME, rmdir, s///, scalar EXPR, seek
@@ -1283,19 +1123,20 @@ sort LIST, splice ARRAY,OFFSET,LENGTH,LIST, splice ARRAY,OFFSET,LENGTH,
 splice ARRAY,OFFSET, split /PATTERN/,EXPR,LIMIT, split /PATTERN/,EXPR,
 split /PATTERN/, split, sprintf FORMAT, LIST, sqrt EXPR, sqrt, srand EXPR,
 srand, stat FILEHANDLE, stat EXPR, stat, study SCALAR, study, sub BLOCK,
-sub NAME, sub NAME BLOCK, substr EXPR,OFFSET,LEN, substr EXPR,OFFSET,
-symlink OLDFILE,NEWFILE, syscall LIST, sysopen FILEHANDLE,FILENAME,MODE,
-sysopen FILEHANDLE,FILENAME,MODE,PERMS, sysread
-FILEHANDLE,SCALAR,LENGTH,OFFSET, sysread FILEHANDLE,SCALAR,LENGTH, sysseek
-FILEHANDLE,POSITION,WHENCE, system LIST, syswrite
-FILEHANDLE,SCALAR,LENGTH,OFFSET, syswrite FILEHANDLE,SCALAR,LENGTH, tell
-FILEHANDLE, tell, telldir DIRHANDLE, tie VARIABLE,CLASSNAME,LIST, tied
-VARIABLE, time, times, tr///, truncate FILEHANDLE,LENGTH, truncate
-EXPR,LENGTH, uc EXPR, uc, ucfirst EXPR, ucfirst, umask EXPR, umask, undef
-EXPR, undef, unlink LIST, unlink, unpack TEMPLATE,EXPR, untie VARIABLE,
-unshift ARRAY,LIST, use Module LIST, use Module, use Module VERSION LIST,
-use VERSION, utime LIST, values HASH, vec EXPR,OFFSET,BITS, wait, waitpid
-PID,FLAGS, wantarray, warn LIST, write FILEHANDLE, write EXPR, write, y///
+sub NAME, sub NAME BLOCK, substr EXPR,OFFSET,LEN,REPLACEMENT, substr
+EXPR,OFFSET,LEN, substr EXPR,OFFSET, symlink OLDFILE,NEWFILE, syscall LIST,
+sysopen FILEHANDLE,FILENAME,MODE, sysopen FILEHANDLE,FILENAME,MODE,PERMS,
+sysread FILEHANDLE,SCALAR,LENGTH,OFFSET, sysread FILEHANDLE,SCALAR,LENGTH,
+sysseek FILEHANDLE,POSITION,WHENCE, system LIST, system PROGRAM LIST,
+syswrite FILEHANDLE,SCALAR,LENGTH,OFFSET, syswrite
+FILEHANDLE,SCALAR,LENGTH, tell FILEHANDLE, tell, telldir DIRHANDLE, tie
+VARIABLE,CLASSNAME,LIST, tied VARIABLE, time, times, tr///, truncate
+FILEHANDLE,LENGTH, truncate EXPR,LENGTH, uc EXPR, uc, ucfirst EXPR,
+ucfirst, umask EXPR, umask, undef EXPR, undef, unlink LIST, unlink, unpack
+TEMPLATE,EXPR, untie VARIABLE, unshift ARRAY,LIST, use Module LIST, use
+Module, use Module VERSION LIST, use VERSION, utime LIST, values HASH, vec
+EXPR,OFFSET,BITS, wait, waitpid PID,FLAGS, wantarray, warn LIST, write
+FILEHANDLE, write EXPR, write, y///
 
 =back
 
@@ -1307,7 +1148,7 @@ PID,FLAGS, wantarray, warn LIST, write FILEHANDLE, write EXPR, write, y///
 
 =item Predefined Names
 
-$ARG, $_, $E<lt>I<digit>E<gt>, $MATCH, $&, $PREMATCH, $`, $POSTMATCH, $',
+$ARG, $_, $E<lt>I<digits>E<gt>, $MATCH, $&, $PREMATCH, $`, $POSTMATCH, $',
 $LAST_PAREN_MATCH, $+, $MULTILINE_MATCHING, $*, input_line_number HANDLE
 EXPR, $INPUT_LINE_NUMBER, $NR, $, input_record_separator HANDLE EXPR,
 $INPUT_RECORD_SEPARATOR, $RS, $/, autoflush HANDLE EXPR, $OUTPUT_AUTOFLUSH,
@@ -1327,7 +1168,7 @@ $EFFECTIVE_GROUP_ID, $EGID, $), $PROGRAM_NAME, $0, $[, $PERL_VERSION, $],
 $DEBUGGING, $^D, $SYSTEM_FD_MAX, $^F, $^H, $INPLACE_EDIT, $^I, $^M,
 $OSNAME, $^O, $PERLDB, $^P, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, $^S,
 $BASETIME, $^T, $WARNING, $^W, $EXECUTABLE_NAME, $^X, $ARGV, @ARGV, @INC,
-@_, %INC, %ENV	$ENV{expr}, %SIG  $SIG{expr}
+@_, %INC, %ENV  $ENV{expr}, %SIG  $SIG{expr}
 
 =back
 
@@ -1341,9 +1182,17 @@ $BASETIME, $^T, $WARNING, $^W, $EXECUTABLE_NAME, $^X, $ARGV, @ARGV, @INC,
 
 =item Private Variables via my()
 
+=item Peristent Private Variables
+
 =item Temporary Values via local()
 
 =item Passing Symbol Table Entries (typeglobs)
+
+=item When to Still Use local()
+
+1. You need to give a global variable a temporary value, especially $_, 2.
+You need to create a local file or directory handle or a local function, 3.
+You want to temporarily change just one element of an array or hash
 
 =item Pass by Reference
 
@@ -1462,7 +1311,7 @@ to ::, Converts die(...) to croak(...), Several other minor changes
 =item Guidelines for Reusing Application Code
 
 Complete applications rarely belong in the Perl Module Library, Many
-applications contain some perl code which could be reused, Break-out the
+applications contain some Perl code that could be reused, Break-out the
 reusable code into one or more separate module files, Take the opportunity
 to reconsider and redesign the interfaces, In some cases the 'application'
 can then be reduced to a small
@@ -1508,6 +1357,18 @@ localization)
 
 =item The setlocale function
 
+=item Finding locales
+
+=item LOCALE PROBLEMS
+
+=item Temporarily fixing locale problems
+
+=item Permanently fixing locale problems
+
+=item Permanently fixing your locale configuration
+
+=item Permanently fixing system locale configuration
+
 =item The localeconv function
 
 =back
@@ -1533,7 +1394,7 @@ localization)
 =item SECURITY
 
 B<Comparison operators> (C<lt>, C<le>, C<ge>, C<gt> and C<cmp>):,
-B<Case-mapping interpolation> (with C<\l>, C<\L>, C<\u> or <\U>),
+B<Case-mapping interpolation> (with C<\l>, C<\L>, C<\u> or C<\U>),
 B<Matching operator> (C<m//>):, B<Substitution operator> (C<s///>):,
 B<In-memory formatting function> (sprintf()):, B<Output formatting
 functions> (printf() and write()):, B<Case-mapping functions> (lc(),
@@ -1586,9 +1447,15 @@ LC_TIME, LANG
 
 =over
 
+=item Making References
+
+=item Using References
+
 =item Symbolic references
 
 =item Not-so-symbolic references
+
+=item Function Templates
 
 =back
 
@@ -1783,6 +1650,8 @@ more elaborate constructs
 
 =item SEE ALSO
 
+=item AUTHOR AND COPYRIGHT
+
 =item COPYRIGHT
 
 =over
@@ -1846,8 +1715,8 @@ this, NEXTKEY this, lastkey, DESTROY this
 
 =item Tying FileHandles
 
-TIEHANDLE classname, LIST, PRINT this, LIST, PRINTF this, LIST, READ this
-LIST, READLINE this, GETC this, DESTROY this
+TIEHANDLE classname, LIST, WRITE this, LIST, PRINT this, LIST, PRINTF this,
+LIST, READ this, LIST, READLINE this, GETC this, CLOSE this, DESTROY this
 
 =item The C<untie> Gotcha
 
@@ -1894,6 +1763,12 @@ safe subprocesses, sockets, and semaphores)
 
 =item Named Pipes
 
+=over
+
+=item WARNING
+
+=back
+
 =item Using open() for IPC
 
 =over
@@ -1908,11 +1783,15 @@ safe subprocesses, sockets, and semaphores)
 
 =item Bidirectional Communication with Another Process
 
+=item Bidirectional Communication with Yourself
+
 =back
 
 =item Sockets: Client/Server Communication
 
 =over
+
+=item Internet Line Terminators
 
 =item Internet TCP Clients and Servers
 
@@ -1965,16 +1844,16 @@ h [command], p expr, x expr, V [pkg [vars]], X [vars], T, s [expr], n
 subname, -, w [line], f filename, /pattern/, ?pattern?, L, S [[!]pattern],
 t, t expr, b [line] [condition], b subname [condition], b postpone subname
 [condition], b load filename, b compile subname, d [line], D, a [line]
-command, A, O [opt[=val]] [opt"val"] [opt?].., C<recallCommand>,
-C<ShellBang>, C<pager>, C<tkRunning>, C<signalLevel>, C<warnLevel>,
-C<dieLevel>, C<AutoTrace>, C<LineInfo>, C<inhibit_exit>, C<PrintRet>,
-C<ornaments>, C<frame>, C<maxTraceLen>, C<arrayDepth>, C<hashDepth>,
-C<compactDump>, C<veryCompact>, C<globPrint>, C<DumpDBFiles>,
-C<DumpPackages>, C<quote>, C<HighBit>, C<undefPrint>, C<UsageOnly>, C<TTY>,
-C<noTTY>, C<ReadLine>, C<NonStop>, E<lt> [ command ], E<lt>E<lt> command,
-E<gt> command, E<gt>E<gt> command, { [ command ], {{ command, ! number, !
--number, ! pattern, !! cmd, H -number, q or ^D, R, |dbcmd, ||dbcmd,
-command, m expr, m package
+command, A, W [expr], W, O [opt[=val]] [opt"val"] [opt?]..,
+C<recallCommand>, C<ShellBang>, C<pager>, C<tkRunning>, C<signalLevel>,
+C<warnLevel>, C<dieLevel>, C<AutoTrace>, C<LineInfo>, C<inhibit_exit>,
+C<PrintRet>, C<ornaments>, C<frame>, C<maxTraceLen>, C<arrayDepth>,
+C<hashDepth>, C<compactDump>, C<veryCompact>, C<globPrint>, C<DumpDBFiles>,
+C<DumpPackages>, C<DumpReused>, C<quote>, C<HighBit>, C<undefPrint>,
+C<UsageOnly>, C<TTY>, C<noTTY>, C<ReadLine>, C<NonStop>, E<lt> [ command ],
+E<lt>E<lt> command, E<gt> command, E<gt>E<gt> command, { [ command ], {{
+command, ! number, ! -number, ! pattern, !! cmd, H -number, q or ^D, R,
+|dbcmd, ||dbcmd, command, m expr, m package
 
 =item Debugger input/output
 
@@ -1996,9 +1875,31 @@ Prompt, Multiline commands, Stack backtrace, Listing, Frame listing
 
 =item Other resources
 
+=item BUGS
+
 =back
 
-=item BUGS
+=item Debugging Perl memory usage
+
+=over
+
+=item Using C<$ENV{PERL_DEBUG_MSTATS}>
+
+C<buckets SMALLEST(APPROX)..GREATEST(APPROX)>, Free/Used, C<Total sbrk():
+SBRKed/SBRKs:CONTINUOUS>, C<pad: 0>, C<heads: 2192>, C<chain: 0>, C<tail:
+6144>
+
+=item Example of using B<-DL> switch
+
+C<717>, C<002>, C<054>, C<602>, C<702>, C<704>
+
+=item B<-DL> details
+
+C<!!!>, C<!!>, C<!>
+
+=item Limitations of B<-DL> statistic
+
+=back
 
 =head2 perldiag - various Perl diagnostics
 
@@ -2021,6 +1922,8 @@ Prompt, Multiline commands, Stack backtrace, Listing, Frame listing
 =item Protecting Your Programs
 
 =back
+
+=item SEE ALSO
 
 =head2 perltrap - Perl traps for the unwary
 
@@ -2061,8 +1964,8 @@ Numerical, Numerical, Numerical
 
 =item General data type traps
 
-(Arrays), (Arrays), (Hashes), (Globs), (Scalar String), (Constants),
-(Scalars), (Variable Suicide)
+(Arrays), (Arrays), (Hashes), (Globs), (Globs), (Scalar String),
+(Constants), (Scalars), (Variable Suicide)
 
 =item Context Traps - scalar, list contexts
 
@@ -2248,6 +2151,8 @@ B<PerlIO_get_base(f)>, B<PerlIO_get_bufsiz(f)>
 
 =item Variable-length Parameter Lists
 
+=item The C_ARGS: Keyword
+
 =item The PPCODE: Keyword
 
 =item Returning Undef And Empty Lists
@@ -2265,6 +2170,10 @@ B<PerlIO_get_base(f)>, B<PerlIO_get_bufsiz(f)>
 =item The PROTOTYPE: Keyword
 
 =item The ALIAS: Keyword
+
+=item The INTERFACE: Keyword
+
+=item The INTERFACE_MACRO: Keyword
 
 =item The INCLUDE: Keyword
 
@@ -2439,52 +2348,54 @@ save_hptr(HV **hptr)>
 
 =item API LISTING
 
-AvFILL, av_clear, av_extend, av_fetch, av_len, av_make, av_pop, av_push,
+av_clear, av_extend, av_fetch, AvFILL, av_len, av_make, av_pop, av_push,
 av_shift, av_store, av_undef, av_unshift, CLASS, Copy, croak, CvSTASH,
 DBsingle, DBsub, DBtrace, dMARK, dORIGMARK, dowarn, dSP, dXSARGS, dXSI32,
-ENTER, EXTEND, FREETMPS, G_ARRAY, G_DISCARD, G_EVAL, GIMME, GIMME_V,
-G_NOARGS, G_SCALAR, G_VOID, gv_fetchmeth, gv_fetchmethod,
-gv_fetchmethod_autoload, gv_stashpv, gv_stashsv, GvSV, HEf_SVKEY, HeHASH,
-HeKEY, HeKLEN, HePV, HeSVKEY, HeSVKEY_force, HeSVKEY_set, HeVAL, hv_clear,
-hv_delayfree_ent, hv_delete, hv_delete_ent, hv_exists, hv_exists_ent,
-hv_fetch, hv_fetch_ent, hv_free_ent, hv_iterinit, hv_iterkey, hv_iterkeysv,
-hv_iternext, hv_iternextsv, hv_iterval, hv_magic, HvNAME, hv_store,
-hv_store_ent, hv_undef, isALNUM, isALPHA, isDIGIT, isLOWER, isSPACE,
-isUPPER, items, ix, LEAVE, MARK, mg_clear, mg_copy, mg_find, mg_free,
-mg_get, mg_len, mg_magical, mg_set, Move, na, New, Newc, Newz, newAV,
-newHV, newRV_inc, newRV_noinc, NEWSV, newSViv, newSVnv, newSVpv, newSVpvn,
-newSVrv, newSVsv, newXS, newXSproto, Nullav, Nullch, Nullcv, Nullhv,
-Nullsv, ORIGMARK, perl_alloc, perl_call_argv, perl_call_method,
-perl_call_pv, perl_call_sv, perl_construct, perl_destruct, perl_eval_sv,
-perl_eval_pv, perl_free, perl_get_av, perl_get_cv, perl_get_hv,
-perl_get_sv, perl_parse, perl_require_pv, perl_run, POPi, POPl, POPp, POPn,
-POPs, PUSHMARK, PUSHi, PUSHn, PUSHp, PUSHs, PUTBACK, Renew, Renewc, RETVAL,
-safefree, safemalloc, saferealloc, savepv, savepvn, SAVETMPS, SP, SPAGAIN,
-ST, strEQ, strGE, strGT, strLE, strLT, strNE, strnEQ, strnNE, sv_2mortal,
-sv_bless, sv_catpv, sv_catpv_mg, sv_catpvn, sv_catpvn_mg, sv_catpvf,
-sv_catpvf_mg, sv_catsv, sv_catsv_mg, sv_cmp, SvCUR, SvCUR_set, sv_dec,
-SvEND, sv_eq, SvGETMAGIC, SvGROW, sv_grow, sv_inc, SvIOK, SvIOK_off,
-SvIOK_on, SvIOK_only, SvIOKp, sv_isa, SvIV, sv_isobject, SvIVX, SvLEN,
-sv_len, sv_magic, sv_mortalcopy, SvOK, sv_newmortal, sv_no, SvNIOK,
-SvNIOK_off, SvNIOKp, SvNOK, SvNOK_off, SvNOK_on, SvNOK_only, SvNOKp, SvNV,
-SvNVX, SvPOK, SvPOK_off, SvPOK_on, SvPOK_only, SvPOKp, SvPV, SvPVX,
-SvREFCNT, SvREFCNT_dec, SvREFCNT_inc, SvROK, SvROK_off, SvROK_on, SvRV,
-SvSETMAGIC, SvTAINT, SvTAINTED, SvTAINTED_off, SvTAINTED_on, sv_setiv,
-sv_setiv_mg, sv_setnv, sv_setnv_mg, sv_setpv, sv_setpv_mg, sv_setpviv,
-sv_setpviv_mg, sv_setpvn, sv_setpvn_mg, sv_setpvf, sv_setpvf_mg,
-sv_setref_iv, sv_setref_nv, sv_setref_pv, sv_setref_pvn, SvSetSV,
-SvSetSV_nosteal, sv_setsv, sv_setsv_mg, sv_setuv, sv_setuv_mg, SvSTASH,
-SVt_IV, SVt_PV, SVt_PVAV, SVt_PVCV, SVt_PVHV, SVt_PVMG, SVt_NV, SvTRUE,
-SvTYPE, svtype, SvUPGRADE, sv_upgrade, sv_undef, sv_unref, sv_usepvn,
-sv_usepvn_mg, sv_yes, THIS, toLOWER, toUPPER, warn, XPUSHi, XPUSHn, XPUSHp,
-XPUSHs, XS, XSRETURN, XSRETURN_EMPTY, XSRETURN_IV, XSRETURN_NO,
+do_binmode, ENTER, EXTEND, fbm_compile, fbm_instr, FREETMPS, G_ARRAY,
+G_DISCARD, G_EVAL, GIMME, GIMME_V, G_NOARGS, G_SCALAR, gv_fetchmeth,
+gv_fetchmethod, gv_fetchmethod_autoload, G_VOID, gv_stashpv, gv_stashsv,
+GvSV, HEf_SVKEY, HeHASH, HeKEY, HeKLEN, HePV, HeSVKEY, HeSVKEY_force,
+HeSVKEY_set, HeVAL, hv_clear, hv_delayfree_ent, hv_delete, hv_delete_ent,
+hv_exists, hv_exists_ent, hv_fetch, hv_fetch_ent, hv_free_ent, hv_iterinit,
+hv_iterkey, hv_iterkeysv, hv_iternext, hv_iternextsv, hv_iterval, hv_magic,
+HvNAME, hv_store, hv_store_ent, hv_undef, isALNUM, isALPHA, isDIGIT,
+isLOWER, isSPACE, isUPPER, items, ix, LEAVE, looks_like_number, MARK,
+mg_clear, mg_copy, mg_find, mg_free, mg_get, mg_len, mg_magical, mg_set,
+Move, na, New, newAV, Newc, newCONSTSUB, newHV, newRV_inc, newRV_noinc,
+NEWSV, newSViv, newSVnv, newSVpv, newSVpvf, newSVpvn, newSVrv, newSVsv,
+newXS, newXSproto, Newz, Nullav, Nullch, Nullcv, Nullhv, Nullsv, ORIGMARK,
+perl_alloc, perl_call_argv, perl_call_method, perl_call_pv, perl_call_sv,
+perl_construct, perl_destruct, perl_eval_sv, perl_eval_pv, perl_free,
+perl_get_av, perl_get_cv, perl_get_hv, perl_get_sv, perl_parse,
+perl_require_pv, perl_run, POPi, POPl, POPp, POPn, POPs, PUSHMARK, PUSHi,
+PUSHn, PUSHp, PUSHs, PUSHu, PUTBACK, Renew, Renewc, RETVAL, safefree,
+safemalloc, saferealloc, savepv, savepvn, SAVETMPS, SP, SPAGAIN, ST, strEQ,
+strGE, strGT, strLE, strLT, strNE, strnEQ, strnNE, sv_2mortal, sv_bless,
+sv_catpv, sv_catpv_mg, sv_catpvn, sv_catpvn_mg, sv_catpvf, sv_catpvf_mg,
+sv_catsv, sv_catsv_mg, sv_chop, sv_cmp, SvCUR, SvCUR_set, sv_dec,
+sv_derived_from, sv_derived_from, SvEND, sv_eq, SvGETMAGIC, SvGROW,
+sv_grow, sv_inc, sv_insert, SvIOK, SvIOK_off, SvIOK_on, SvIOK_only, SvIOKp,
+sv_isa, sv_isobject, SvIV, SvIVX, SvLEN, sv_len, sv_magic, sv_mortalcopy,
+sv_newmortal, SvNIOK, SvNIOK_off, SvNIOKp, sv_no, SvNOK, SvNOK_off,
+SvNOK_on, SvNOK_only, SvNOKp, SvNV, SvNVX, SvOK, SvOOK, SvPOK, SvPOK_off,
+SvPOK_on, SvPOK_only, SvPOKp, SvPV, SvPV_force, SvPVX, SvREFCNT,
+SvREFCNT_dec, SvREFCNT_inc, SvROK, SvROK_off, SvROK_on, SvRV, SvSETMAGIC,
+sv_setiv, sv_setiv_mg, sv_setnv, sv_setnv_mg, sv_setpv, sv_setpv_mg,
+sv_setpviv, sv_setpviv_mg, sv_setpvn, sv_setpvn_mg, sv_setpvf,
+sv_setpvf_mg, sv_setref_iv, sv_setref_nv, sv_setref_pv, sv_setref_pvn,
+SvSetSV, SvSetSV_nosteal, sv_setsv, sv_setsv_mg, sv_setuv, sv_setuv_mg,
+SvSTASH, SvTAINT, SvTAINTED, SvTAINTED_off, SvTAINTED_on, SVt_IV, SVt_PV,
+SVt_PVAV, SVt_PVCV, SVt_PVHV, SVt_PVMG, SVt_NV, SvTRUE, SvTYPE, svtype,
+sv_undef, sv_unref, SvUPGRADE, sv_upgrade, sv_usepvn, sv_usepvn_mg,
+sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale),
+sv_vsetpvfn(sv, pat, patlen, args, svargs, svmax, used_locale), SvUV,
+SvUVX, sv_yes, THIS, toLOWER, toUPPER, warn, XPUSHi, XPUSHn, XPUSHp,
+XPUSHs, XPUSHu, XS, XSRETURN, XSRETURN_EMPTY, XSRETURN_IV, XSRETURN_NO,
 XSRETURN_NV, XSRETURN_PV, XSRETURN_UNDEF, XSRETURN_YES, XST_mIV, XST_mNV,
 XST_mNO, XST_mPV, XST_mUNDEF, XST_mYES, XS_VERSION, XS_VERSION_BOOTCHECK,
 Zero
 
-=item EDITOR
-
-=item DATE
+=item AUTHORS
 
 =head2 perlcall - Perl calling conventions from C
 
@@ -2611,8 +2522,6 @@ method, locked
 =item DESCRIPTION
 
 =item WARNING
-
-=item BUGS
 
 =item AUTHOR
 
@@ -2884,9 +2793,48 @@ C<strict refs>, C<strict vars>, C<strict subs>
 
 =item DESCRIPTION
 
-=item CAVEATS
+$keep, $check, $modtime
+
+=over
+
+=item Multiple packages
+
+=back
 
 =item DIAGNOSTICS
+
+=head2 B::Lint - Perl lint
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item OPTIONS AND LINT CHECKS
+
+B<context>, B<implicit-read> and B<implicit-write>, B<dollar-underscore>,
+B<private-names>, B<undefined-subs>, B<regexp-variables>, B<all>, B<none>
+
+=item NON LINT-CHECK OPTIONS
+
+B<-u Package>
+
+=item BUGS
+
+=item AUTHOR
+
+=head2 B::Xref - Generates cross reference reports for Perl programs
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item OPTIONS
+
+C<-oFILENAME>, C<-r>, C<-D[tO]>
+
+=item BUGS
+
+=item AUTHOR
 
 =head2 Benchmark - benchmark running times of code
 
@@ -2904,7 +2852,7 @@ new, debug
 
 timeit(COUNT, CODE), timethis ( COUNT, CODE, [ TITLE, [ STYLE ]] ),
 timethese ( COUNT, CODEHASHREF, [ STYLE ] ), timediff ( T1, T2 ), timestr (
-TIMEDIFF, [ STYLE, [ FORMAT ]] )
+TIMEDIFF, [ STYLE, [ FORMAT ] ] )
 
 =item Optional Exports
 
@@ -3440,20 +3388,6 @@ $value, $flags) ;>, B<$status = $X-E<gt>sync([$flags]) ;>
 
 =item DESCRIPTION
 
-=head2 DynaLoader - Dynamically load C libraries into Perl code
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-@dl_library_path, @dl_resolve_using, @dl_require_symbols, @dl_librefs,
-@dl_modules, dl_error(), $dl_debug, dl_findfile(), dl_expandspec(),
-dl_load_file(), dl_loadflags(), dl_find_symbol(),
-dl_find_symbol_anywhere(), dl_undef_symbols(), dl_install_xsub(),
-bootstrap()
-
-=item AUTHOR
-
 =head2 English - use nice English (or awk) names for ugly punctuation
 variables
 
@@ -3532,6 +3466,21 @@ ccopts(), xsi_header(), xsi_protos(@modules), xsi_body(@modules)
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=head2 ExtUtils::Installed - Inventory management of installed modules
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item USAGE
+
+=item FUNCTIONS
+
+new(), modules(), files(), directories(), directory_tree(), validate(),
+packlist(), version()
+
+=item AUTHOR
 
 =head2 ExtUtils::Liblist - determine libraries to use and how to use them
 
@@ -3708,8 +3657,8 @@ tool_autosplit
 
 =item Distribution Support
 
-   make distcheck,    make skipcheck,	 make distclean,    make manifest, 
-  make distdir,    make tardist,    make dist,	  make uutardist,    make
+make distcheck,    make skipcheck,    make distclean,	 make manifest,
+make distdir,	 make tardist,	  make dist,	make uutardist,    make
 shdist,    make zipdist,    make ci
 
 =item Disabling an extension
@@ -3759,6 +3708,20 @@ NAME, DL_FUNCS, DL_VARS, FILE, FUNCLIST, DLBASE
 =item AUTHOR
 
 =item REVISION
+
+=head2 ExtUtils::Packlist - manage .packlist files
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item USAGE
+
+=item FUNCTIONS
+
+new(), read(), write(), validate(), packlist_file()
+
+=item AUTHOR
 
 =head2 ExtUtils::testlib - add blib/* directories to @INC
 
@@ -3927,7 +3890,7 @@ options
 
 =item DESCRIPTION
 
-!, :s, :i, :f
+!, +, :s, :i, :f
 
 =over
 
@@ -3950,9 +3913,9 @@ options
 =item CONFIGURATION OPTIONS
 
 default, auto_abbrev, getopt_compat, require_order, permute, bundling
-(default: reset), bundling_override (default: reset), ignore_case 
+(default: reset), bundling_override (default: reset), ignore_case
 (default: set), ignore_case_always (default: reset), pass_through (default:
-reset), debug (default: reset)
+reset), prefix, prefix_pattern, debug (default: reset)
 
 =item OTHER USEFUL VARIABLES
 
@@ -4361,7 +4324,7 @@ Memory, CPU, Snooping, Signals, State Changes
 =head2 Opcode::ops, ops - Perl pragma to restrict unsafe operations when
 compiling
 
-=item SYNOPSIS	
+=item SYNOPSIS  
 
 =item DESCRIPTION
 
@@ -4494,7 +4457,7 @@ Constants, Macros
 
 =item CREATION
 
-=head2 Pod::Html, Pod::HTML - module to convert pod files to HTML
+=head2 Pod::Html - module to convert pod files to HTML
 
 =item SYNOPSIS
 
@@ -4670,6 +4633,22 @@ C<tkRunning>, C<ornaments>, C<newTTY>
 
 =item ENVIRONMENT
 
+=head2   Test - provides a simple framework for writing test scripts
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item TEST TYPES
+
+NORMAL TESTS, SKIPPED TESTS, TODO TESTS
+
+=item ONFAIL
+
+=item SEE ALSO
+
+=item AUTHOR
+
 =head2 Test::Harness - run perl standard test scripts with statistics
 
 =item SYNOPSIS
@@ -4705,11 +4684,20 @@ C<All tests successful.\nFiles=%d,  Tests=%d, %s>, C<FAILED tests
 
 =item EXAMPLE
 
-=head2 Text::ParseWords - parse text into an array of tokens
+=head2 Text::ParseWords - parse text into an array of tokens or array of
+arrays
 
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=item EXAMPLES
+
+0a simple word, 1multiple spaces are skipped because of our $delim, 2use of
+quotes to include a space in a word, 3use of a backslash to include a space
+in a word, 4use of a backslash to remove the special meaning of a
+double-quote, 5another simple word (note the lack of effect of the
+backslashed double-quote)
 
 =item AUTHORS
 
@@ -4755,15 +4743,49 @@ unexpand(1)
 
 =item DESCRIPTION
 
+=item FUNCTIONS
+
+new \&start_sub, new \&start_sub, LIST, lock VARIABLE, async BLOCK;,
+Thread->self, Thread->list, cond_wait VARIABLE, cond_signal VARIABLE,
+cond_broadcast VARIABLE
+
+=item METHODS
+
+join, eval, tid
+
+=item LIMITATIONS
+
 =item SEE ALSO
 
 =head2 Thread::Queue - thread-safe queues
 
 =item SYNOPSIS
 
+=item DESCRIPTION
+
+=item FUNCTIONS AND METHODS
+
+new, enqueue LIST, dequeue, dequeue_nb, pending
+
+=item SEE ALSO
+
 =head2 Thread::Semaphore - thread-safe semaphores
 
 =item SYNOPSIS
+
+=item DESCRIPTION
+
+=item FUNCTIONS AND METHODS
+
+new, new NUMBER, down, down NUMBER, up, up NUMBER
+
+=head2 Thread::Signal - Start a thread which runs signal handlers reliably
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item BUGS
 
 =head2 Thread::Specific - thread-specific keys
 
@@ -4771,9 +4793,9 @@ unexpand(1)
 
 =head2 Tie::Array - base class for tied arrays
 
-=item SYNOPSIS	
+=item SYNOPSIS  
 
-=item DESCRIPTION	
+=item DESCRIPTION       
 
 TIEARRAY classname, LIST, STORE this, index, value, FETCH this, index,
 FETCHSIZE this, STORESIZE this, count, EXTEND this, count, CLEAR this,
@@ -4783,6 +4805,18 @@ SPLICE this, offset, length, LIST
 =item CAVEATS
 
 =item AUTHOR 
+
+=head2 Tie::Handle - base class definitions for tied handles
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+TIEHANDLE classname, LIST, WRITE this, scalar, length, offset, PRINT this,
+LIST, PRINTF this, format, LIST, READ this, scalar, length, offset,
+READLINE this, GETC this, DESTROY this
+
+=item MORE INFORMATION
 
 =head2 Tie::Hash, Tie::StdHash - base class definitions for tied hashes
 
