@@ -72,6 +72,8 @@ add_by_name('File::Spec::Functions');	# put this back
 
 delete_by_prefix('Attribute::Handlers');# we test this, and we have demos
 
+delete_by_prefix('Net::') unless has_extension('Socket');
+
 sub using_feature {
     my $use = "use$_[0]";
     exists $Config{$use} &&
