@@ -108,8 +108,8 @@ Makes files exist, with current timestamp
 
 sub touch
 {
- expand_wildcards();
  my $t    = time;
+ expand_wildcards();
  while (@ARGV)
   {
    my $file = shift(@ARGV);               

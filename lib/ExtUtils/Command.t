@@ -9,7 +9,7 @@ BEGIN {
 	File::Path::rmtree( 'ecmddir' );
 }
 
-use Test::More tests => 22;
+use Test::More tests => 21;
 use File::Spec;
 
 SKIP: {
@@ -63,6 +63,7 @@ SKIP: {
 
 	# these are destructive, have to keep setting @ARGV
 	@ARGV = ( 'ecmdfile' );
+        my $now = time;
 	touch();
 
 	@ARGV = ( 'ecmdfile' );
@@ -71,11 +72,8 @@ SKIP: {
 	@ARGV = ( 'ecmdfile' );
 	ok( -e $ARGV[0], 'created!' );
 
-	# use utime to set the timestamps
-	$ARGV[1] = (my $now = time);
-	utime();
-
-	is( (stat($ARGV[0]))[8], $now, 'checking access time stamp' );
+	# Just checking modify time stamp, access time stamp is set
+	# to the beginning of the day in Win95
 	is( (stat($ARGV[0]))[9], $now, 'checking modify time stamp' );
 
 	# change a file to read-only
