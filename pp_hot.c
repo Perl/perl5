@@ -142,107 +142,52 @@ PP(pp_concat)
   djSP; dATARGET; tryAMAGICbin(concat,opASSIGN);
   {
     dPOPTOPssrl;
-    STRLEN len, llen, rlen;
-    U8 *s, *l, *r;
-    bool left_utf8;
-    bool right_utf8;
+    SV* rcopy = Nullsv;
 
-    r = (U8*)SvPV(right,rlen);
+    if (SvGMAGICAL(left))
+        mg_get(left);
+    if (TARG == right && SvGMAGICAL(right))
+        mg_get(right);
+
+    if (TARG == right && left != right)
+	/* Clone since otherwise we cannot prepend. */
+	rcopy = sv_2mortal(newSVsv(right));
 
     if (TARG != left)
-        l = (U8*)SvPV(left,llen);
-    else if (SvGMAGICAL(left))
-        mg_get(left);
+	sv_setsv(TARG, left);
 
-    left_utf8  = DO_UTF8(left);
-    right_utf8 = DO_UTF8(right);
+    if (TARG == right) {
+	if (left == right) {
+	    /*  $right = $right . $right; */
+	    STRLEN rlen;
+	    char *rpv = SvPV(right, rlen);
 
-    if (!left_utf8 && !right_utf8 && SvUTF8(TARG)) {
-	SvUTF8_off(TARG);
-    }
-
-    if (left_utf8 != right_utf8 && !IN_BYTE) {
-        if (TARG == right && !right_utf8) {
-            sv_utf8_upgrade(TARG); /* Now straight binary copy */
-            SvUTF8_on(TARG);
-        }
-        else {
-            /* Set TARG to PV(left), then add right */
-            U8 *c, *olds = NULL;
-            STRLEN targlen;
-	    s = r; len = rlen;
-            if (TARG == right) {
-		/* Take a copy since we're about to overwrite TARG */
-		olds = s = (U8*)savepvn((char*)s, len);
-	    }
-	    if (!SvOK(left) && SvTYPE(left) <= SVt_PVMG) {
-	        if (SvREADONLY(left))
-		    left = sv_2mortal(newSVsv(left));
-		else
-		    sv_setpv(left, "");	/* Suppress warning. */
-	    }
-            if (TARG != left)
-                sv_setpvn(TARG, (char*)l, llen);
-            if (!left_utf8) {
-		SvUTF8_off(TARG);
-		sv_utf8_upgrade(TARG);
-	    }
-            /* Extend TARG to length of right (s) */
-            targlen = SvCUR(TARG) + len;
-            if (!right_utf8) {
-                /* plus one for each hi-byte char if we have to upgrade */
-                for (c = s; c < s + len; c++)  {
-                    if (UTF8_IS_CONTINUED(*c))
-                        targlen++;
-                }
-            }
-            SvGROW(TARG, targlen+1);
-            /* And now copy, maybe upgrading right to UTF8 on the fly */
-	    if (right_utf8)
-		Copy(s, SvEND(TARG), len, U8);
-	    else {
-		for (c = (U8*)SvEND(TARG); len--; s++)
-		    c = uv_to_utf8(c, *s);
-	    }
-            SvCUR_set(TARG, targlen);
-            *SvEND(TARG) = '\0';
-            SvUTF8_on(TARG);
-            SETs(TARG);
-	    Safefree(olds);
-            RETURN;
-        }
-    }
-
-    if (TARG != left) {
-	if (TARG == right) {
-	    sv_insert(TARG, 0, 0, (char*)l, llen);
-	    SETs(TARG);
-	    RETURN;
+	    sv_catpvn(TARG, rpv, rlen);
 	}
-	sv_setpvn(TARG, (char *)l, llen);
+	else /* $right = $left  . $right; */
+	    sv_catsv(TARG, rcopy);
     }
-    else if (!SvOK(TARG) && SvTYPE(TARG) <= SVt_PVMG)
-	sv_setpv(TARG, "");	/* Suppress warning. */
-    s = r; len = rlen;
-    if (SvOK(TARG)) {
+    else {
+	if (!SvOK(TARG)) /* Avoid warning when concatenating to undef. */
+	    sv_setpv(TARG, "");
+	/* $other = $left . $right; */
+	/* $left  = $left . $right; */
+	sv_catsv(TARG, right);
+    }
+
 #if defined(PERL_Y2KWARN)
-	if ((SvIOK(right) || SvNOK(right)) && ckWARN(WARN_Y2K)) {
-	    STRLEN n;
-	    char *s = SvPV(TARG,n);
-	    if (n >= 2 && s[n-2] == '1' && s[n-1] == '9'
-		&& (n == 2 || !isDIGIT(s[n-3])))
-	    {
-		Perl_warner(aTHX_ WARN_Y2K, "Possible Y2K bug: %s",
-			    "about to append an integer to '19'");
-	    }
+    if ((SvIOK(right) || SvNOK(right)) && ckWARN(WARN_Y2K)) {
+	STRLEN n;
+	char *s = SvPV(TARG,n);
+	if (n >= 2 && s[n-2] == '1' && s[n-1] == '9'
+	    && (n == 2 || !isDIGIT(s[n-3])))
+	{
+	    Perl_warner(aTHX_ WARN_Y2K, "Possible Y2K bug: %s",
+			"about to append an integer to '19'");
 	}
-#endif
-	sv_catpvn(TARG, (char *)s, len);
     }
-    else
-	sv_setpvn(TARG, (char *)s, len);	/* suppress warning */
-    if (left_utf8 && !IN_BYTE)
-	SvUTF8_on(TARG);
+#endif
+
     SETTARG;
     RETURN;
   }
