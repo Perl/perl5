@@ -1692,6 +1692,13 @@ typedef struct ptr_tbl PTR_TBL_t;
 #  define USE_ENVIRON_ARRAY
 #endif
 
+#ifdef JPL
+    /* E.g. JPL needs to operate on a copy of the real environment.
+     * JDK 1.2 and 1.3 seem to get upset if the original environment
+     * is diddled with. */
+#   define NEED_ENVIRON_DUP_FOR_MODIFY
+#endif
+
 #ifndef PERL_SYS_INIT3
 #  define PERL_SYS_INIT3(argvp,argcp,envp) PERL_SYS_INIT(argvp,argcp)
 #endif

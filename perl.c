@@ -3257,6 +3257,8 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
     char *s;
     SV *sv;
     GV* tmpgv;
+    char **dup_env_base = 0;
+    int dup_env_count = 0;
 
     argc--,argv++;	/* skip name of script */
     if (PL_doswitches) {
@@ -3325,6 +3327,23 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	    env = environ;
 	if (env != environ)
 	    environ[0] = Nullch;
+#ifdef NEED_ENVIRON_DUP_FOR_MODIFY
+	{
+	    char **env_base;
+	    for (env_base = env; *env; env++) 
+		dup_env_count++;
+	    if ((dup_env_base = (char **)
+		 safemalloc( sizeof(char *) * (dup_env_count+1) ))) {
+		char **dup_env;
+		for (env = env_base, dup_env = dup_env_base;
+		     *env;
+		     env++, dup_env++)
+		    *dup_env = savepv(*env);
+		*dup_env = Nullch;
+		env = dup_env_base;
+	    } /* else what? */
+	}
+#endif /* NEED_ENVIRON_DUP_FOR_MODIFY */
 	for (; *env; env++) {
 	    if (!(s = strchr(*env,'=')))
 		continue;
@@ -3340,7 +3359,13 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	    (void)PerlEnv_putenv(savepv(*env));
 #endif
 	}
-#endif
+	if (dup_env_base) {
+	    char **dup_env;
+	    for (dup_env = dup_env_base; *dup_env; dup_env++)
+		Safefree(*dup_env);
+	    Safefree(dup_env_base);
+	}
+#endif /* USE_ENVIRON_ARRAY */
 #ifdef DYNAMIC_ENV_FETCH
 	HvNAME(hv) = savepv(ENV_HV_NAME);
 #endif
