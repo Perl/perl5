@@ -1,7 +1,6 @@
 package Sys::Hostname;
 
 use Carp;
-use Config;
 require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(hostname);
@@ -37,10 +36,11 @@ sub hostname {
   # method 1 - we already know it
   return $host if defined $host;
 
-  if ($Config{'osname'} eq 'VMS') {
+  if ($^O eq 'VMS') {
 
     # method 2 - no sockets ==> return DECnet node name
-    if (!$Config{'d_has_sockets'}) { return $host = $ENV{'SYS$NODE'}; }
+    eval {gethostbyname('me')};
+    if ($@) { return $host = $ENV{'SYS$NODE'}; }
 
     # method 3 - has someone else done the job already?  It's common for the
     #    TCP/IP stack to advertise the hostname via a logical name.  (Are
@@ -56,6 +56,7 @@ sub hostname {
     return $host if $host;
 
     # rats!
+    $host = '';
     Carp::croak "Cannot get host name of local machine";  
 
   }
