@@ -2488,7 +2488,7 @@ get_childenv(void)
 }
 
 void
-free_childenv(void*)
+free_childenv(void* d)
 {
 }
 
@@ -2499,7 +2499,7 @@ get_childdir(void)
 }
 
 void
-free_childdir(char*)
+free_childdir(char* d)
 {
 }
 
