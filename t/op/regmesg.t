@@ -13,8 +13,8 @@ my $debug = 1;
 ## arrays below. The {#} is a meta-marker -- it marks where the marker should
 ## go.
 
-my $marker1 = "<HERE<";
-my $marker2 = " <<<HERE<<< ";
+my $marker1 = "=HERE=";
+my $marker2 = " ===HERE=== ";
 
 ##
 ## Key-value pairs of code/error of code that should have fatal errors.
