@@ -1,3 +1,4 @@
+
 apollo/netinet/in.h	Apollo DomainOS port: C header file frontend
 Artistic		The "Artistic License"
 AUTHORS			Contact info for contributors
@@ -225,6 +226,7 @@ ext/Encode/Encode/dingbats.enc	Encoding tables
 ext/Encode/Encode/dingbats.ucm	Encoding tables
 ext/Encode/Encode/EncodeFormat.pod	Encoding table format
 ext/Encode/Encode/euc-cn.enc	Encoding tables
+ext/Encode/Encode/euc-jp-0212.enc	Encoding tables
 ext/Encode/Encode/euc-jp.enc	Encoding tables
 ext/Encode/Encode/euc-kr.enc	Encoding tables
 ext/Encode/Encode/gb12345.enc	Encoding tables
@@ -1514,6 +1516,8 @@ lib/warnings.t			See if warning controls work
 lib/warnings/register.pm	For "use warnings::register"
 lib/Win32.pod			Documentation for Win32 extras
 locale.c			locale-specific utility functions
+macos/MacPerlTests.cmd	MacOS ports
+macos/xsubpp.patch	MacOS ports
 makeaperl.SH			perl script that produces a new perl binary
 makedef.pl			Create symbol export lists for linking
 makedepend.SH			Precursor to makedepend
