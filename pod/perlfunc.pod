@@ -5352,7 +5352,7 @@ as follows:
            = stat($filename);
 
 Not all fields are supported on all filesystem types.  Here are the
-meaning of the fields:
+meanings of the fields:
 
   0 dev      device number of filesystem
   1 ino      inode number
@@ -5370,13 +5370,13 @@ meaning of the fields:
 
 (The epoch was at 00:00 January 1, 1970 GMT.)
 
-(*) The ctime field is non-portable, in particular you cannot expect
+(*) The ctime field is non-portable.  In particular, you cannot expect
 it to be a "creation time", see L<perlport/"Files and Filesystems">
 for details.
 
-If stat is passed the special filehandle consisting of an underline, no
+If C<stat> is passed the special filehandle consisting of an underline, no
 stat is done, but the current contents of the stat structure from the
-last stat or filetest are returned.  Example:
+last C<stat>, C<lstat>, or filetest are returned.  Example:
 
     if (-x $file && (($d) = stat(_)) && $d < 0) {
 	print "$file is executable NFS file\n";
@@ -5421,7 +5421,7 @@ You can import symbolic mode constants (C<S_IF*>) and functions
     $is_setgid     =  S_ISDIR($mode);
 
 You could write the last two using the C<-u> and C<-d> operators.
-The commonly available S_IF* constants are
+The commonly available C<S_IF*> constants are
 
     # Permissions: read, write, execute, for user, group, others.
 
@@ -5442,7 +5442,7 @@ The commonly available S_IF* constants are
 
     S_IREAD S_IWRITE S_IEXEC
 
-and the S_IF* functions are
+and the C<S_IF*> functions are
 
     S_IMODE($mode)	the part of $mode containing the permission bits
 			and the setuid/setgid/sticky bits
@@ -5451,7 +5451,7 @@ and the S_IF* functions are
 			which can be bit-anded with e.g. S_IFREG
                         or with the following functions
 
-    # The operators -f, -d, -l, -b, -c, -p, and -s.
+    # The operators -f, -d, -l, -b, -c, -p, and -S.
 
     S_ISREG($mode) S_ISDIR($mode) S_ISLNK($mode)
     S_ISBLK($mode) S_ISCHR($mode) S_ISFIFO($mode) S_ISSOCK($mode)
@@ -5463,7 +5463,7 @@ and the S_IF* functions are
     S_ISENFMT($mode) S_ISWHT($mode)
 
 See your native chmod(2) and stat(2) documentation for more details
-about the S_* constants.  To get status info for a symbolic link
+about the C<S_*> constants.  To get status info for a symbolic link
 instead of the target file behind the link, use the C<lstat> function.
 
 =item study SCALAR
