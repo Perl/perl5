@@ -611,10 +611,10 @@ Also see L<Error Indicators>.
 
 =item $@
 
-The Perl syntax error message from the last eval() operator.  If null, the
-last eval() parsed and executed correctly (although the operations you
-invoked may have failed in the normal fashion).  (Mnemonic: Where was
-the syntax error "at"?)
+The Perl syntax error message from the last eval() operator.
+If $@ is the null string, the last eval() parsed and executed
+correctly (although the operations you invoked may have failed in the
+normal fashion).  (Mnemonic: Where was the syntax error "at"?)
 
 Warning messages are not collected in this variable.  You can,
 however, set up a routine to process warnings by setting C<$SIG{__WARN__}>
