@@ -32,6 +32,151 @@ Version v5.7.1		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  8956] By: jhi                                   on 2001/02/27  06:12:11
+        Log: Subject: [perl-current] EPOC 
+             From: Olaf Flebbe <O.Flebbe@science-computing.de>
+             Date: Mon, 26 Feb 2001 23:34:36 +0100 (CET)
+             Message-ID: <Pine.LNX.4.02.10102262333490.3781-100000@milkyway.science-computing.de>
+     Branch: perl
+	   ! AUTHORS README.epoc epoc/createpkg.pl epoc/epoc.c
+	   ! epoc/epocish.c epoc/epocish.h pp_sys.c
+____________________________________________________________________________
+[  8955] By: jhi                                   on 2001/02/27  05:59:50
+        Log: Subject: Re: Compile with perlcc..
+             From: Edward Peschko <edwardp@excitehome.net>
+             Date: Mon, 26 Feb 2001 18:51:58 -0800
+             Message-ID: <20010226185158.A9871@excitehome.net>
+             
+             plus add a simple usage message if no arguments given.
+     Branch: perl
+	   ! lib/Test/Harness.pm pod/Makefile.SH t/TEST t/harness
+	   ! utils/Makefile utils/perlcc.PL win32/pod.mak
+____________________________________________________________________________
+[  8954] By: nick                                  on 2001/02/26  21:02:59
+        Log: Integrate mainline
+     Branch: perlio
+	  !> README.bs2000 ext/Encode/compile lib/Test.pm op.c perlio.c
+	  !> pod/perlguts.pod pod/perlop.pod pp_ctl.c run.c t/op/bop.t
+	  !> t/op/sprintf.t
+____________________________________________________________________________
+[  8953] By: jhi                                   on 2001/02/26  14:43:54
+        Log: Subject: Documenting coderef @INC (Re: CPAN "make this script work" feature)
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Mon, 26 Feb 2001 00:42:07 +0000
+             Message-ID: <20010226004207.F23333@plum.flirble.org>
+     Branch: perl
+	   ! pp_ctl.c
+____________________________________________________________________________
+[  8952] By: jhi                                   on 2001/02/26  14:42:13
+        Log: Subject: [PATCH] XPUSH[insp] was Re: progress
+             From: Simon Cozens <simon@netthink.co.uk>
+             Date: Mon, 26 Feb 2001 12:23:48 +0000
+             Message-ID: <20010226122348.A25536@pembro26.pmb.ox.ac.uk>
+     Branch: perl
+	   ! pod/perlguts.pod
+____________________________________________________________________________
+[  8951] By: jhi                                   on 2001/02/26  14:39:15
+        Log: Subject: [PATCH] perlio - unknown layer
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Mon, 26 Feb 2001 00:27:19 +0000
+             Message-ID: <20010226002719.E23333@plum.flirble.org>
+     Branch: perl
+	   ! perlio.c
+____________________________________________________________________________
+[  8950] By: jhi                                   on 2001/02/26  14:38:04
+        Log: Subject: PATCH: extra tests to check on negative float to unsigned cast
+             From: Jeff Okamoto <okamoto@xfiles.corp.hp.com>
+             Message-Id: <200102232128.NAA28938@xfiles.corp.hp.com>
+             Date: Fri, 23 Feb 2001 13:28:33 -0800 (PST)
+     Branch: perl
+	   ! t/op/bop.t
+____________________________________________________________________________
+[  8949] By: jhi                                   on 2001/02/26  14:37:07
+        Log: Subject: Re: [PATCH: perl 5.005_03] Record I/O fix for Test.pm in older perl
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Fri, 23 Feb 2001 10:51:37 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10102231042010.79050-100000@aspara.forte.com>
+     Branch: perl
+	   ! lib/Test.pm
+____________________________________________________________________________
+[  8948] By: jhi                                   on 2001/02/26  14:35:53
+        Log: Subject: [PATCH: perl@8890] small fix in pod/perlop.pod
+             From: Radu Greab <radu@netsoft.ro>
+             Date: Fri, 23 Feb 2001 18:50:48 +0200 (EET)
+             Message-ID: <14998.38120.623015.916165@ix.netsoft.ro>
+     Branch: perl
+	   ! pod/perlop.pod
+____________________________________________________________________________
+[  8947] By: jhi                                   on 2001/02/26  14:34:46
+        Log: Subject: [PATCH: perl@8935] -Dt padsv($var)
+             From: David Mitchell <davem@fdgroup.co.uk>
+             Date: Mon, 26 Feb 2001 11:01:24 +0000 (GMT)
+             Message-Id: <200102261101.LAA12915@tiree.fdgroup.co.uk>
+     Branch: perl
+	   ! run.c
+____________________________________________________________________________
+[  8946] By: jhi                                   on 2001/02/26  14:32:37
+        Log: Subject: Modified README.bs2000 
+             From: Dorner Thomas <Thomas.Dorner@start.de>
+             Date: Mon, 26 Feb 2001 09:22:17 +0100
+             Message-ID: <6727B1DACFCDD311A757009027CA8D69010A889D@Ex02.inhouse.start.de>
+     Branch: perl
+	   ! README.bs2000
+____________________________________________________________________________
+[  8945] By: jhi                                   on 2001/02/26  14:19:53
+        Log: Integrate the t/op/sprintf.t parts of #7909 and #8944 from mainline
+             to maintperl, listing the known failures on the tests 129 and 130.
+     Branch: maint-5.6/perl
+	  !> t/op/sprintf.t
+____________________________________________________________________________
+[  8944] By: jhi                                   on 2001/02/26  14:14:15
+        Log: Add more known sprintf failures.
+     Branch: perl
+	   ! t/op/sprintf.t
+____________________________________________________________________________
+[  8943] By: jhi                                   on 2001/02/26  13:56:22
+        Log: perlglob.exe needs to be found in Win32, patch from
+             Vadim Konovalov.  Nick I-S comments: "Perhaps a lingering glob()
+             which needs external glob at mini-perl time."
+     Branch: perl
+	   ! ext/Encode/compile
+____________________________________________________________________________
+[  8942] By: jhi                                   on 2001/02/26  13:52:19
+        Log: A missing dTHX from Vadim Konovalov.
+     Branch: perl
+	   ! perlio.c
+____________________________________________________________________________
+[  8941] By: jhi                                   on 2001/02/26  13:37:05
+        Log: Miscommunication at #8914: #8902 was okay, #8881 was to be retracted.
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[  8940] By: jhi                                   on 2001/02/26  13:35:40
+        Log: Integrate perlio.
+     Branch: perl
+	  !> ext/Encode/Encode.pm
+____________________________________________________________________________
+[  8939] By: nick                                  on 2001/02/25  23:47:09
+        Log: Integrate mainline.
+     Branch: perlio
+	  !> Changes lib/Pod/Find.pm patchlevel.h perl.h regcomp.c
+	  !> t/op/pat.t t/op/tr.t t/pod/find.t toke.c utf8.c
+____________________________________________________________________________
+[  8938] By: nick                                  on 2001/02/25  19:36:28
+        Log: Encode implementations docs.
+     Branch: perlio
+	   ! ext/Encode/Encode.pm
+____________________________________________________________________________
+[  8937] By: jhi                                   on 2001/02/25  19:26:16
+        Log: Script wasn't aligned with reality.
+     Branch: perl
+	   ! t/pod/find.t
+____________________________________________________________________________
+[  8936] By: jhi                                   on 2001/02/25  18:54:55
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  8935] By: jhi                                   on 2001/02/25  18:46:36
         Log: Retract #8929,8930,8932,8933 for now.
      Branch: perl
