@@ -2496,6 +2496,9 @@ only 46 bit integers for speed.
 
 VMS
 
+See L</"Socket Extension Dynamic in VMS"> and L</"IEEE-format Floating Point
+Default on OpenVMS Alpha"> for important changes not otherwise listed here.
+
 chdir() now works better despite a CRT bug; now works with MULTIPLICITY
 (see INSTALL); now works with Perl's malloc.
 
