@@ -28,11 +28,11 @@ EXT I32 obj_list_fill INIT(-1);
 #endif /* INDIRECT_BGET_MACROS */
 
 #define BGET_U32(arg)	\
-	BGET_FREAD(&arg, sizeof(U32), 1); arg = ntohl((U32)arg)
+	BGET_FREAD(&arg, sizeof(U32), 1); arg = PerlSock_ntohl((U32)arg)
 #define BGET_I32(arg)	\
-	BGET_FREAD(&arg, sizeof(I32), 1); arg = (I32)ntohl((U32)arg)
+	BGET_FREAD(&arg, sizeof(I32), 1); arg = (I32)PerlSock_ntohl((U32)arg)
 #define BGET_U16(arg)	\
-	BGET_FREAD(&arg, sizeof(U16), 1); arg = ntohs((U16)arg)
+	BGET_FREAD(&arg, sizeof(U16), 1); arg = PerlSock_ntohs((U16)arg)
 #define BGET_U8(arg)	arg = BGET_FGETC()
 
 #if INDIRECT_BGET_MACROS
@@ -92,7 +92,7 @@ EXT I32 obj_list_fill INIT(-1);
 	New(666, ary, 256, unsigned short); \
 	BGET_FREAD(ary, 256, 2);	\
 	for (i = 0; i < 256; i++)	\
-	    ary[i] = ntohs(ary[i]);	\
+	    ary[i] = PerlSock_ntohs(ary[i]);	\
 	arg = (char *) ary;		\
     } while (0)
 

@@ -4127,7 +4127,7 @@ PP(pp_split)
     register char *s = SvPV(sv, len);
     char *strend = s + len;
     register PMOP *pm;
-    register REGEXP *prx;
+    register REGEXP *rx;
     register SV *dstr;
     register char *m;
     I32 iters = 0;
@@ -4150,7 +4150,7 @@ PP(pp_split)
 #endif
     if (!pm || !s)
 	DIE("panic: do_split");
-    prx = pm->op_pmregexp;
+    rx = pm->op_pmregexp;
 
     TAINT_IF((pm->op_pmflags & PMf_LOCALE) &&
 	     (pm->op_pmflags & (PMf_WHITE | PMf_SKIPWHITE)));
@@ -4228,7 +4228,7 @@ PP(pp_split)
 		++s;
 	}
     }
-    else if (strEQ("^", prx->precomp)) {
+    else if (strEQ("^", rx->precomp)) {
 	while (--limit) {
 	    /*SUPPRESS 530*/
 	    for (m = s; m < strend && *m != '\n'; m++) ;
@@ -4243,12 +4243,12 @@ PP(pp_split)
 	    s = m;
 	}
     }
-    else if (prx->check_substr && !prx->nparens
-	     && (prx->reganch & ROPT_CHECK_ALL)
-	     && !(prx->reganch & ROPT_ANCH)) {
-	i = SvCUR(prx->check_substr);
-	if (i == 1 && !SvTAIL(prx->check_substr)) {
-	    i = *SvPVX(prx->check_substr);
+    else if (rx->check_substr && !rx->nparens
+	     && (rx->reganch & ROPT_CHECK_ALL)
+	     && !(rx->reganch & ROPT_ANCH)) {
+	i = SvCUR(rx->check_substr);
+	if (i == 1 && !SvTAIL(rx->check_substr)) {
+	    i = *SvPVX(rx->check_substr);
 	    while (--limit) {
 		/*SUPPRESS 530*/
 		for (m = s; m < strend && *m != i; m++) ;
@@ -4266,7 +4266,7 @@ PP(pp_split)
 #ifndef lint
 	    while (s < strend && --limit &&
 	      (m=fbm_instr((unsigned char*)s, (unsigned char*)strend,
-		    prx->check_substr)) )
+		    rx->check_substr)) )
 #endif
 	    {
 		dstr = NEWSV(31, m-s);
@@ -4279,29 +4279,29 @@ PP(pp_split)
 	}
     }
     else {
-	maxiters += (strend - s) * prx->nparens;
+	maxiters += (strend - s) * rx->nparens;
 	while (s < strend && --limit &&
-	       regexec_flags(prx, s, strend, orig, 1, Nullsv, NULL, 0))
+	       regexec_flags(rx, s, strend, orig, 1, Nullsv, NULL, 0))
 	{
-	    TAINT_IF(RX_MATCH_TAINTED(prx));
-	    if (prx->subbase
-	      && prx->subbase != orig) {
+	    TAINT_IF(RX_MATCH_TAINTED(rx));
+	    if (rx->subbase
+	      && rx->subbase != orig) {
 		m = s;
 		s = orig;
-		orig = prx->subbase;
+		orig = rx->subbase;
 		s = orig + (m - s);
 		strend = s + (strend - m);
 	    }
-	    m = prx->startp[0];
+	    m = rx->startp[0];
 	    dstr = NEWSV(32, m-s);
 	    sv_setpvn(dstr, s, m-s);
 	    if (make_mortal)
 		sv_2mortal(dstr);
 	    XPUSHs(dstr);
-	    if (prx->nparens) {
-		for (i = 1; i <= prx->nparens; i++) {
-		    s = prx->startp[i];
-		    m = prx->endp[i];
+	    if (rx->nparens) {
+		for (i = 1; i <= rx->nparens; i++) {
+		    s = rx->startp[i];
+		    m = rx->endp[i];
 		    if (m && s) {
 			dstr = NEWSV(33, m-s);
 			sv_setpvn(dstr, s, m-s);
@@ -4313,7 +4313,7 @@ PP(pp_split)
 		    XPUSHs(dstr);
 		}
 	    }
-	    s = prx->endp[0];
+	    s = rx->endp[0];
 	}
     }
 
