@@ -3483,7 +3483,10 @@ S_checkposixcc(pTHX_ RExC_state_t *pRExC_state)
 	while(*s && isALNUM(*s))
 	    s++;
 	if (*s && c == *s && s[1] == ']') {
-	    vWARN3(s+2, "POSIX syntax [%c %c] belongs inside character classes", c, c);
+	    if (ckWARN(WARN_REGEXP))
+		vWARN3(s+2,
+			"POSIX syntax [%c %c] belongs inside character classes",
+			c, c);
 
 	    /* [[=foo=]] and [[.foo.]] are still future. */
 	    if (POSIXCC_NOTYET(c)) {
