@@ -2621,7 +2621,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	SV* transv = 0;
 	U8* tend = t + tlen;
 	U8* rend = r + rlen;
-	I32 ulen;
+	STRLEN ulen;
 	U32 tfirst = 1;
 	U32 tlast = 0;
 	I32 tdiff;
@@ -2641,6 +2641,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	if (complement) {
 	    U8 tmpbuf[UTF8_MAXLEN];
 	    U8** cp;
+	    I32* cl;
 	    UV nextmin = 0;
 	    New(1109, cp, tlen, U8*);
 	    i = 0;
@@ -2656,7 +2657,8 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    qsort(cp, i, sizeof(U8*), utf8compare);
 	    for (j = 0; j < i; j++) {
 		U8 *s = cp[j];
-		UV val = utf8_to_uv_chk(s, &ulen, 0);
+		I32 cur = j < i ? cp[j+1] - s : tend - s;
+		UV  val = utf8_to_uv(s, cur, &ulen, 0);
 		s += ulen;
 		diff = val - nextmin;
 		if (diff > 0) {
@@ -2669,7 +2671,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 		    }
 	        }
 		if (*s == 0xff)
-		    val = utf8_to_uv_chk(s+1, &ulen, 0);
+		    val = utf8_to_uv(s+1, cur - 1, &ulen, 0);
 		if (val >= nextmin)
 		    nextmin = val + 1;
 	    }
@@ -2696,10 +2698,11 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	while (t < tend || tfirst <= tlast) {
 	    /* see if we need more "t" chars */
 	    if (tfirst > tlast) {
-		tfirst = (I32)utf8_to_uv_chk(t, &ulen, 0);
+		tfirst = (I32)utf8_to_uv(t, tend - t, &ulen, 0);
 		t += ulen;
 		if (t < tend && *t == 0xff) {	/* illegal utf8 val indicates range */
-		    tlast = (I32)utf8_to_uv_chk(++t, &ulen, 0);
+		    t++;
+		    tlast = (I32)utf8_to_uv(t, tend - t, &ulen, 0);
 		    t += ulen;
 		}
 		else
@@ -2709,10 +2712,11 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    /* now see if we need more "r" chars */
 	    if (rfirst > rlast) {
 		if (r < rend) {
-		    rfirst = (I32)utf8_to_uv_chk(r, &ulen, 0);
+		    rfirst = (I32)utf8_to_uv(r, rend - r, &ulen, 0);
 		    r += ulen;
 		    if (r < rend && *r == 0xff) {	/* illegal utf8 val indicates range */
-			rlast = (I32)utf8_to_uv_chk(++r, &ulen, 0);
+			r++;
+			rlast = (I32)utf8_to_uv(r, rend - r, &ulen, 0);
 			r += ulen;
 		    }
 		    else
@@ -4112,6 +4116,10 @@ Perl_cv_undef(pTHX_ CV *cv)
     CvGV(cv) = Nullgv;
     SvREFCNT_dec(CvOUTSIDE(cv));
     CvOUTSIDE(cv) = Nullcv;
+    if (CvCONST(cv)) {
+	SvREFCNT_dec((SV*)CvXSUBANY(cv).any_ptr);
+	CvCONST_off(cv);
+    }
     if (CvPADLIST(cv)) {
 	/* may be during global destruction */
 	if (SvREFCNT(CvPADLIST(cv))) {
@@ -4312,6 +4320,15 @@ S_cv_clone2(pTHX_ CV *proto, CV *outside)
 #endif
 
     LEAVE;
+
+    if (CvCONST(cv)) {
+	SV* const_sv = op_const_sv(CvSTART(cv), cv);
+	assert(const_sv);
+	/* constant sub () { $x } closing over $x - see lib/constant.pm */
+	SvREFCNT_dec(cv);
+	cv = newCONSTSUB(CvSTASH(proto), 0, const_sv);
+    }
+
     return cv;
 }
 
@@ -4350,12 +4367,25 @@ Perl_cv_ckproto(pTHX_ CV *cv, GV *gv, char *p)
     }
 }
 
+static void const_sv_xsub(pTHXo_ CV* cv);
+
+/*
+=for apidoc cv_const_sv
+
+If C<cv> is a constant sub eligible for inlining. returns the constant
+value returned by the sub.  Otherwise, returns NULL.
+
+Constant subs can be created with C<newCONSTSUB> or as described in
+L<perlsub/"Constant Functions">.
+
+=cut
+*/
 SV *
 Perl_cv_const_sv(pTHX_ CV *cv)
 {
-    if (!cv || !SvPOK(cv) || SvCUR(cv))
+    if (!cv || !CvCONST(cv))
 	return Nullsv;
-    return op_const_sv(CvSTART(cv), cv);
+    return (SV*)CvXSUBANY(cv).any_ptr;
 }
 
 SV *
@@ -4376,6 +4406,8 @@ Perl_op_const_sv(pTHX_ OP *o, CV *cv)
 	    return sv;
 	if (type == OP_NEXTSTATE || type == OP_NULL || type == OP_PUSHMARK)
 	    continue;
+	if (type == OP_DBSTATE)
+	    continue;
 	if (type == OP_LEAVESUB || type == OP_RETURN)
 	    break;
 	if (sv)
@@ -4385,7 +4417,17 @@ Perl_op_const_sv(pTHX_ OP *o, CV *cv)
 	else if ((type == OP_PADSV || type == OP_CONST) && cv) {
 	    AV* padav = (AV*)(AvARRAY(CvPADLIST(cv))[1]);
 	    sv = padav ? AvARRAY(padav)[o->op_targ] : Nullsv;
-	    if (!sv || (!SvREADONLY(sv) && SvREFCNT(sv) > 1))
+	    if (!sv)
+		return Nullsv;
+	    if (CvCONST(cv)) {
+		/* We get here only from cv_clone2() while creating a closure.
+		   Copy the const value here instead of in cv_clone2 so that
+		   SvREADONLY_on doesn't lead to problems when leaving
+		   scope.
+		*/
+		sv = newSVsv(sv);
+	    }
+	    if (!SvREADONLY(sv) && SvREFCNT(sv) > 1)
 		return Nullsv;
 	}
 	else
@@ -4427,6 +4469,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     char *ps = proto ? SvPVx(((SVOP*)proto)->op_sv, n_a) : Nullch;
     register CV *cv=0;
     I32 ix;
+    SV *const_sv;
 
     name = o ? SvPVx(cSVOPo->op_sv, n_a) : Nullch;
     if (!name && PERLDB_NAMEANON && CopLINE(PL_curcop)) {
@@ -4465,12 +4508,17 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	SvREFCNT_dec(PL_compcv);
 	cv = PL_compcv = NULL;
 	PL_sub_generation++;
-	goto noblock;
+	goto done;
     }
 
-    if (!name || GvCVGEN(gv))
-	cv = Nullcv;
-    else if ((cv = GvCV(gv))) {
+    cv = (!name || GvCVGEN(gv)) ? Nullcv : GvCV(gv);
+
+    if (!block || !ps || *ps || attrs)
+	const_sv = Nullsv;
+    else
+	const_sv = op_const_sv(block, Nullcv);
+
+    if (cv) {
         bool exists = CvROOT(cv) || CvXSUB(cv);
         /* if the subroutine doesn't exist and wasn't pre-declared
          * with a prototype, assume it will be AUTOLOADed,
@@ -4480,8 +4528,6 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    cv_ckproto(cv, gv, ps);
 	/* already defined (or promised)? */
 	if (exists || GvASSUMECV(gv)) {
-	    SV* const_sv;
-	    bool const_changed = TRUE;
 	    if (!block && !attrs) {
 		/* just a "sub foo;" when &foo is already defined */
 		SAVEFREESV(PL_compcv);
@@ -4490,24 +4536,48 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    /* ahem, death to those who redefine active sort subs */
 	    if (PL_curstackinfo->si_type == PERLSI_SORT && PL_sortcop == CvSTART(cv))
 		Perl_croak(aTHX_ "Can't redefine active sort subroutine %s", name);
-	    if (!block)
-		goto withattrs;
-	    if ((const_sv = cv_const_sv(cv)))
-		const_changed = sv_cmp(const_sv, op_const_sv(block, Nullcv));
-            if ((const_sv && const_changed) || ckWARN(WARN_REDEFINE))
-	    {
-		line_t oldline = CopLINE(PL_curcop);
-		CopLINE_set(PL_curcop, PL_copline);
-		Perl_warner(aTHX_ WARN_REDEFINE,
-			const_sv ? "Constant subroutine %s redefined"
-				 : "Subroutine %s redefined", name);
-		CopLINE_set(PL_curcop, oldline);
+	    if (block) {
+		if (ckWARN(WARN_REDEFINE)
+		    || (CvCONST(cv)
+			&& (!const_sv || sv_cmp(cv_const_sv(cv), const_sv))))
+		{
+		    line_t oldline = CopLINE(PL_curcop);
+		    CopLINE_set(PL_curcop, PL_copline);
+		    Perl_warner(aTHX_ WARN_REDEFINE,
+			CvCONST(cv) ? "Constant subroutine %s redefined"
+				    : "Subroutine %s redefined", name);
+		    CopLINE_set(PL_curcop, oldline);
+		}
+		SvREFCNT_dec(cv);
+		cv = Nullcv;
 	    }
-	    SvREFCNT_dec(cv);
-	    cv = Nullcv;
 	}
     }
-  withattrs:
+    if (const_sv) {
+	SvREFCNT_inc(const_sv);
+	if (cv) {
+	    cv_undef(cv);
+#ifdef USE_THREADS
+	    New(666, CvMUTEXP(cv), 1, perl_mutex);
+	    MUTEX_INIT(CvMUTEXP(cv));
+	    CvOWNER(cv) = 0;
+#endif /* USE_THREADS */
+	    sv_setpv((SV*)cv, "");  /* prototype is "" */
+	    CvXSUBANY(cv).any_ptr = const_sv;
+	    CvXSUB(cv) = const_sv_xsub;
+	    CvCONST_on(cv);
+	    /* XXX Does anybody care that CvFILE(cv) is blank? */
+	}
+	else {
+	    GvCV(gv) = Nullcv;
+	    cv = newCONSTSUB(NULL, name, const_sv);
+	}
+	op_free(block);
+	SvREFCNT_dec(PL_compcv);
+	PL_compcv = NULL;
+	PL_sub_generation++;
+	goto done;
+    }
     if (attrs) {
 	HV *stash;
 	SV *rcv;
@@ -4591,12 +4661,8 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    }
 	}
     }
-    if (!block) {
-      noblock:
-	PL_copline = NOLINE;
-	LEAVE_SCOPE(floor);
-	return cv;
-    }
+    if (!block)
+	goto done;
 
     if (AvFILLp(PL_comppad_name) < AvFILLp(PL_comppad))
 	av_store(PL_comppad_name, AvFILLp(PL_comppad), Nullsv);
@@ -4635,6 +4701,9 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 		PL_curpad[ix] = Nullsv;
 	    }
 	}
+	assert(!CvCONST(cv));
+	if (ps && !*ps && op_const_sv(block, cv))
+	    CvCONST_on(cv);
     }
     else {
 	AV *av = newAV();			/* Will be @_ */
@@ -4750,10 +4819,11 @@ eligible for inlining at compile-time.
 =cut
 */
 
-void
+CV *
 Perl_newCONSTSUB(pTHX_ HV *stash, char *name, SV *sv)
 {
     dTHR;
+    CV* cv;
 
     ENTER;
 
@@ -4774,15 +4844,14 @@ Perl_newCONSTSUB(pTHX_ HV *stash, char *name, SV *sv)
 #endif
     }
 
-    newATTRSUB(
-	start_subparse(FALSE, 0),
-	newSVOP(OP_CONST, 0, newSVpv(name,0)),
-	newSVOP(OP_CONST, 0, &PL_sv_no),	/* SvPV(&PL_sv_no) == "" -- GMB */
-	Nullop,
-	newSTATEOP(0, Nullch, newSVOP(OP_CONST, 0, sv))
-    );
+    cv = newXS(name, const_sv_xsub, __FILE__);
+    CvXSUBANY(cv).any_ptr = sv;
+    CvCONST_on(cv);
+    sv_setpv((SV*)cv, "");  /* prototype is "" */
 
     LEAVE;
+
+    return cv;
 }
 
 /*
@@ -4814,7 +4883,10 @@ Perl_newXS(pTHX_ char *name, XSUBADDR_t subaddr, char *filename)
 		line_t oldline = CopLINE(PL_curcop);
 		if (PL_copline != NOLINE)
 		    CopLINE_set(PL_curcop, PL_copline);
-		Perl_warner(aTHX_ WARN_REDEFINE, "Subroutine %s redefined",name);
+		Perl_warner(aTHX_ WARN_REDEFINE,
+			    CvCONST(cv) ? "Constant subroutine %s redefined"
+					: "Subroutine %s redefined"
+			    ,name);
 		CopLINE_set(PL_curcop, oldline);
 	    }
 	    SvREFCNT_dec(cv);
@@ -6520,7 +6592,7 @@ Perl_peep(pTHX_ register OP *o)
 		PADOFFSET ix = pad_alloc(OP_CONST, SVs_PADTMP);
 		if (SvPADTMP(cSVOPo->op_sv)) {
 		    /* If op_sv is already a PADTMP then it is being used by
-		     * another pad, so make a copy. */
+		     * some pad, so make a copy. */
 		    sv_setsv(PL_curpad[ix],cSVOPo->op_sv);
 		    SvREADONLY_on(PL_curpad[ix]);
 		    SvREFCNT_dec(cSVOPo->op_sv);
@@ -6529,6 +6601,8 @@ Perl_peep(pTHX_ register OP *o)
 		    SvREFCNT_dec(PL_curpad[ix]);
 		    SvPADTMP_on(cSVOPo->op_sv);
 		    PL_curpad[ix] = cSVOPo->op_sv;
+		    /* XXX I don't know how this isn't readonly already. */
+		    SvREADONLY_on(PL_curpad[ix]);
 		}
 		cSVOPo->op_sv = Nullsv;
 		o->op_targ = ix;
@@ -6842,4 +6916,16 @@ Perl_peep(pTHX_ register OP *o)
 	oldop = o;
     }
     LEAVE;
+}
+
+#include "XSUB.h"
+
+/* Efficient sub that returns a constant scalar value. */
+static void
+const_sv_xsub(pTHXo_ CV* cv)
+{
+    dXSARGS;
+    EXTEND(sp, 1);
+    ST(0) = sv_2mortal(SvREFCNT_inc((SV*)XSANY.any_ptr));
+    XSRETURN(1);
 }

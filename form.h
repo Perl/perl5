@@ -23,4 +23,5 @@
 #define FF_NEWLINE	13
 #define FF_BLANK	14
 #define FF_MORE		15
+#define FF_0DECIMAL   16
 

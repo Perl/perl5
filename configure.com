@@ -4402,6 +4402,8 @@ $   i_locale="undef"
 $   d_locconv="undef"
 $   d_setlocale="undef"
 $ ENDIF
+$ d_stdio_ptr_lval_sets_cnt="undef"
+$ d_stdio_ptr_lval_nochange_cnt="undef"
 $!
 $! Sockets?
 $ if Has_Socketshr .OR. Has_Dec_C_Sockets
@@ -4935,6 +4937,8 @@ $ WC "d_statfs_s='undef'"
 $ WC "d_statfsflags='undef'"
 $ WC "d_stdio_cnt_lval='" + d_stdio_cnt_lval + "'"
 $ WC "d_stdio_ptr_lval='" + d_stdio_ptr_lval + "'"
+$ WC "d_stdio_ptr_lval_sets_cnt='" + d_stdio_ptr_lval_sets_cnt + "'"
+$ WC "d_stdio_ptr_lval_nochange_cnt='" + d_stdio_ptr_lval_nochange_cnt + "'"
 $ WC "d_stdio_stream_array='undef'"
 $ WC "d_stdiobase='" + d_stdiobase + "'"
 $ WC "d_stdstdio='" + d_stdstdio + "'"

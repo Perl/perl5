@@ -185,7 +185,7 @@ sub walksymtable {
 	*glob = "*main::".$prefix.$sym;
 	if ($sym =~ /::$/) {
 	    $sym = $prefix . $sym;
-	    if ($sym ne "main::" && &$recurse($sym)) {
+	    if ($sym ne "main::" && $sym ne "<none>::" && &$recurse($sym)) {
 		walksymtable(\%glob, $method, $recurse, $sym);
 	    }
 	} else {
@@ -530,6 +530,8 @@ This method returns TRUE if the GP field of the GV is NULL.
 =item XSUBANY
 
 =item CvFLAGS
+
+=item const_sv
 
 =back
 

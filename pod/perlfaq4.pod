@@ -952,12 +952,12 @@ ordered and whether you wish to preserve the ordering.
 (this assumes all true values in the array)
 
     $prev = 'nonesuch';
-    @out = grep($_ ne $prev && ($prev = $_), @in);
+    @out = grep($_ ne $prev && ($prev = $_, 1), @in);
 
 This is nice in that it doesn't use much extra memory, simulating
-uniq(1)'s behavior of removing only adjacent duplicates.  It's less
-nice in that it won't work with false values like undef, 0, or "";
-"0 but true" is OK, though.
+uniq(1)'s behavior of removing only adjacent duplicates.  The ", 1"
+guarantees that the expression is true (so that grep picks it up)
+even if the $_ is 0, "", or undef.
 
 =item b) If you don't know whether @in is sorted:
 

@@ -52,10 +52,10 @@ extern int	_stdprintf _ARG_((const char*, ...));
 #define PerlIO_has_cntptr(f)		1       
 #define PerlIO_get_ptr(f)		((f)->next)
 #define PerlIO_get_cnt(f)		((f)->endr - (f)->next)
-#define PerlIO_canset_cnt(f)		1      
-#define PerlIO_fast_gets(f)		1        
-#define PerlIO_set_ptrcnt(f,p,c)	((f)->next = (unsigned char *)(p))          
-#define PerlIO_set_cnt(f,c)		1
+#define PerlIO_canset_cnt(f)		0
+#define PerlIO_fast_gets(f)		1
+#define PerlIO_set_ptrcnt(f,p,c)	STMT_START {(f)->next = (unsigned char *)(p); assert(FILE_cnt(f) == (c))} STMT_END
+#define PerlIO_set_cnt(f,c)		Perl_croak(aTHX_ "Cannot set 'cnt' of FILE * on this system");
 
 #define PerlIO_has_base(f)		1         
 #define PerlIO_get_base(f)		((f)->data)

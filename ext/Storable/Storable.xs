@@ -3,12 +3,19 @@
  */
 
 /*
- * $Id: Storable.xs,v 1.0 2000/09/01 19:40:41 ram Exp $
+ * $Id: Storable.xs,v 1.0.1.4 2000/10/26 17:11:04 ram Exp ram $
  *
  *  Copyright (c) 1995-2000, Raphael Manfredi
  *  
  *  You may redistribute only under the same terms as Perl 5, as specified
  *  in the README file that comes with the distribution.
+ *
+ * $Log: Storable.xs,v $
+ * Revision 1.0.1.4  2000/10/26 17:11:04  ram
+ * patch5: auto requires module of blessed ref when STORABLE_thaw misses
+ *
+ * Revision 1.0.1.3  2000/09/29 19:49:57  ram
+ * patch3: avoid using "tainted" and "dirty" since Perl remaps them via cpp
  *
  * $Log: Storable.xs,v $
  * Revision 1.0  2000/09/01 19:40:41  ram
@@ -1220,6 +1227,19 @@ static void pkg_hide(
 {
 	(void) hv_store(cache,
 		HvNAME(pkg), strlen(HvNAME(pkg)), newSVsv(&PL_sv_undef), 0);
+}
+
+/*
+ * pkg_uncache
+ *
+ * Discard cached value: a whole fetch loop will be retried at next lookup.
+ */
+static void pkg_uncache(
+	HV *cache,
+	HV *pkg,
+	char *method)
+{
+	(void) hv_delete(cache, HvNAME(pkg), strlen(HvNAME(pkg)), G_DISCARD);
 }
 
 /*
@@ -3131,8 +3151,37 @@ static SV *retrieve_hook(stcxt_t *cxt)
 
 	BLESS(sv, class);
 	hook = pkg_can(cxt->hook, SvSTASH(sv), "STORABLE_thaw");
-	if (!hook)
-		CROAK(("No STORABLE_thaw defined for objects of class %s", class));
+	if (!hook) {
+		/*
+		 * Hook not found.  Maybe they did not require the module where this
+		 * hook is defined yet?
+		 *
+		 * If the require below succeeds, we'll be able to find the hook.
+		 * Still, it only works reliably when each class is defined in a
+		 * file of its own.
+		 */
+
+		SV *psv = newSVpvn("require ", 8);
+		sv_catpv(psv, class);
+
+		TRACEME(("No STORABLE_thaw defined for objects of class %s", class));
+		TRACEME(("Going to require module '%s' with '%s'", class, SvPVX(psv)));
+
+		perl_eval_sv(psv, G_DISCARD);
+		sv_free(psv);
+
+		/*
+		 * We cache results of pkg_can, so we need to uncache before attempting
+		 * the lookup again.
+		 */
+
+		pkg_uncache(cxt->hook, SvSTASH(sv), "STORABLE_thaw");
+		hook = pkg_can(cxt->hook, SvSTASH(sv), "STORABLE_thaw");
+
+		if (!hook)
+			CROAK(("No STORABLE_thaw defined for objects of class %s "
+					"(even after a \"require %s;\")", class, class));
+	}
 
 	/*
 	 * If we don't have an `av' yet, prepare one.

@@ -729,8 +729,8 @@
 #define utf8_hop		Perl_utf8_hop
 #define utf8_to_bytes		Perl_utf8_to_bytes
 #define bytes_to_utf8		Perl_bytes_to_utf8
+#define utf8_to_uv_simple	Perl_utf8_to_uv_simple
 #define utf8_to_uv		Perl_utf8_to_uv
-#define utf8_to_uv_chk		Perl_utf8_to_uv_chk
 #define uv_to_utf8		Perl_uv_to_utf8
 #define vivify_defelem		Perl_vivify_defelem
 #define vivify_ref		Perl_vivify_ref
@@ -744,12 +744,12 @@
 #define watch			Perl_watch
 #define whichsig		Perl_whichsig
 #define yyerror			Perl_yyerror
-#if defined(USE_PURE_BISON)
+#ifdef USE_PURE_BISON
+#define yylex_r			Perl_yylex_r
 #define yylex			Perl_yylex
 #else
 #define yylex			Perl_yylex
 #endif
-#define syylex			S_syylex
 #define yyparse			Perl_yyparse
 #define yywarn			Perl_yywarn
 #if defined(MYMALLOC)
@@ -2189,8 +2189,8 @@
 #define utf8_hop(a,b)		Perl_utf8_hop(aTHX_ a,b)
 #define utf8_to_bytes(a,b)	Perl_utf8_to_bytes(aTHX_ a,b)
 #define bytes_to_utf8(a,b)	Perl_bytes_to_utf8(aTHX_ a,b)
-#define utf8_to_uv(a,b)		Perl_utf8_to_uv(aTHX_ a,b)
-#define utf8_to_uv_chk(a,b,c)	Perl_utf8_to_uv_chk(aTHX_ a,b,c)
+#define utf8_to_uv_simple(a,b)	Perl_utf8_to_uv_simple(aTHX_ a,b)
+#define utf8_to_uv(a,b,c,d)	Perl_utf8_to_uv(aTHX_ a,b,c,d)
 #define uv_to_utf8(a,b)		Perl_uv_to_utf8(aTHX_ a,b)
 #define vivify_defelem(a)	Perl_vivify_defelem(aTHX_ a)
 #define vivify_ref(a,b)		Perl_vivify_ref(aTHX_ a,b)
@@ -2202,12 +2202,12 @@
 #define watch(a)		Perl_watch(aTHX_ a)
 #define whichsig(a)		Perl_whichsig(aTHX_ a)
 #define yyerror(a)		Perl_yyerror(aTHX_ a)
-#if defined(USE_PURE_BISON)
+#ifdef USE_PURE_BISON
+#define yylex_r(a,b)		Perl_yylex_r(aTHX_ a,b)
 #define yylex(a,b)		Perl_yylex(aTHX_ a,b)
 #else
 #define yylex()			Perl_yylex(aTHX)
 #endif
-#define syylex()		S_syylex(aTHX)
 #define yyparse()		Perl_yyparse(aTHX)
 #define yywarn(a)		Perl_yywarn(aTHX_ a)
 #if defined(MYMALLOC)
@@ -4290,10 +4290,10 @@
 #define utf8_to_bytes		Perl_utf8_to_bytes
 #define Perl_bytes_to_utf8	CPerlObj::Perl_bytes_to_utf8
 #define bytes_to_utf8		Perl_bytes_to_utf8
+#define Perl_utf8_to_uv_simple	CPerlObj::Perl_utf8_to_uv_simple
+#define utf8_to_uv_simple	Perl_utf8_to_uv_simple
 #define Perl_utf8_to_uv		CPerlObj::Perl_utf8_to_uv
 #define utf8_to_uv		Perl_utf8_to_uv
-#define Perl_utf8_to_uv_chk	CPerlObj::Perl_utf8_to_uv_chk
-#define utf8_to_uv_chk		Perl_utf8_to_uv_chk
 #define Perl_uv_to_utf8		CPerlObj::Perl_uv_to_utf8
 #define uv_to_utf8		Perl_uv_to_utf8
 #define Perl_vivify_defelem	CPerlObj::Perl_vivify_defelem
@@ -4320,15 +4320,15 @@
 #define whichsig		Perl_whichsig
 #define Perl_yyerror		CPerlObj::Perl_yyerror
 #define yyerror			Perl_yyerror
-#if defined(USE_PURE_BISON)
+#ifdef USE_PURE_BISON
+#define Perl_yylex_r		CPerlObj::Perl_yylex_r
+#define yylex_r			Perl_yylex_r
 #define Perl_yylex		CPerlObj::Perl_yylex
 #define yylex			Perl_yylex
 #else
 #define Perl_yylex		CPerlObj::Perl_yylex
 #define yylex			Perl_yylex
 #endif
-#define S_syylex		CPerlObj::S_syylex
-#define syylex			S_syylex
 #define Perl_yyparse		CPerlObj::Perl_yyparse
 #define yyparse			Perl_yyparse
 #define Perl_yywarn		CPerlObj::Perl_yywarn

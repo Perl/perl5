@@ -75,6 +75,7 @@ Returns the stash of the CV.
 #define CVf_METHOD	0x0040	/* CV is explicitly marked as a method */
 #define CVf_LOCKED	0x0080	/* CV locks itself or first arg on entry */
 #define CVf_LVALUE	0x0100  /* CV return value can be used as lvalue */
+#define CVf_CONST	0x0200  /* inlinable sub */
 
 #define CvCLONE(cv)		(CvFLAGS(cv) & CVf_CLONE)
 #define CvCLONE_on(cv)		(CvFLAGS(cv) |= CVf_CLONE)
@@ -122,3 +123,7 @@ Returns the stash of the CV.
 #define CvSPECIAL(cv)		(CvUNIQUE(cv) && SvFAKE(cv))
 #define CvSPECIAL_on(cv)	(CvUNIQUE_on(cv),SvFAKE_on(cv))
 #define CvSPECIAL_off(cv)	(CvUNIQUE_off(cv),SvFAKE_off(cv))
+
+#define CvCONST(cv)		(CvFLAGS(cv) & CVf_CONST)
+#define CvCONST_on(cv)		(CvFLAGS(cv) |= CVf_CONST)
+#define CvCONST_off(cv)		(CvFLAGS(cv) &= ~CVf_CONST)

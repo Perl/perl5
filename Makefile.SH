@@ -324,14 +324,6 @@ ext.libs: $(static_ext)
 
 !NO!SUBS!
 
-# if test -f .patch ; then $spitshell >>Makefile <<'!NO!SUBS!' 
-# patchlevel.h: .patch
-# 	perl fix_pl || (make -f Makefile.micro && ./microperl fix_pl)
-#	$(SHELL) Makefile.SH
-# fi
-# 
-# !NO!SUBS!
-
 # How to build libperl.  This is still rather convoluted.
 # Load up custom Makefile.SH fragment for shared loading and executables:
 case "$osname" in
@@ -618,6 +610,11 @@ perly.c: perly.y
 perly.h: perly.y
 	-@sh -c true
 
+PERLYVMS = vms/perly_c.vms vms/perly_h.vms
+
+$(PERLYVMS):	perly.c perly.h vms/vms_yfix.pl
+	perl vms/vms_yfix.pl perly.c perly.h vms/perly_c.vms vms/perly_h.vms
+
 # No compat3.sym here since and including the 5.004_50.
 # No interp.sym since 5.005_03.
 SYM  = global.sym globvar.sym perlio.sym pp.sym
@@ -642,6 +639,31 @@ CHMOD_W = chmod +w
 # To force them to be regenerated, type
 #	make regen_headers
 
+keywords.h:	keywords.pl
+	-perl keywords.pl
+
+OPCODE_PL_OUTPUT = opcode.h opnames.h pp_proto.h pp.sym
+
+$(OPCODE_PL_OUTPUT): opcode.pl
+	-perl opcode.pl
+
+# Really the prerequisites for the next rule  should only be "embed.pl pp.sym"
+# Writing it this way gives make a big hint to always run opcode.pl before
+# embed.pl. The alternative - running embed.pl then opcode.pl causes embed.pl
+# to be re-run next make invocation, and then all object files get recompiled.
+
+proto.h embed.h embedvar.h global.sym objXSUB.h perlapi.h perlapi.c pod/perlintern.pod pod/perlapi.pod: embed.pl $(OPCODE_PL_OUTPUT)
+	-perl embed.pl
+
+ext/ByteLoader/byterun.h ext/ByteLoader/byterun.c ext/B/B/Asmdata.pm: bytecode.pl
+	-perl bytecode.pl
+
+regnodes.h:	regcomp.pl
+	-perl regcomp.pl
+
+warnings.h lib/warnings.pm: warnings.pl
+	-perl warnings.pl
+
 AUTOGEN_FILES = keywords.h opcode.h opnames.h pp_proto.h pp.sym proto.h \
 		embed.h embedvar.h global.sym \
 		pod/perlintern.pod pod/perlapi.pod \
@@ -660,6 +682,8 @@ regen_headers:	FORCE
 
 regen_pods:	FORCE
 	-cd pod; $(LDLIBPTH) make regen_pods
+
+regen_all: $(PERLYVMS) regen_headers regen_pods
 
 # Extensions:
 # Names added to $(dynamic_ext) or $(static_ext) or $(nonxs_ext) will

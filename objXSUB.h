@@ -1869,14 +1869,14 @@
 #define Perl_bytes_to_utf8	pPerl->Perl_bytes_to_utf8
 #undef  bytes_to_utf8
 #define bytes_to_utf8		Perl_bytes_to_utf8
+#undef  Perl_utf8_to_uv_simple
+#define Perl_utf8_to_uv_simple	pPerl->Perl_utf8_to_uv_simple
+#undef  utf8_to_uv_simple
+#define utf8_to_uv_simple	Perl_utf8_to_uv_simple
 #undef  Perl_utf8_to_uv
 #define Perl_utf8_to_uv		pPerl->Perl_utf8_to_uv
 #undef  utf8_to_uv
 #define utf8_to_uv		Perl_utf8_to_uv
-#undef  Perl_utf8_to_uv_chk
-#define Perl_utf8_to_uv_chk	pPerl->Perl_utf8_to_uv_chk
-#undef  utf8_to_uv_chk
-#define utf8_to_uv_chk		Perl_utf8_to_uv_chk
 #undef  Perl_uv_to_utf8
 #define Perl_uv_to_utf8		pPerl->Perl_uv_to_utf8
 #undef  uv_to_utf8

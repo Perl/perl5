@@ -1441,7 +1441,7 @@ Afnp	|int	|fprintf_nocontext|PerlIO* stream|const char* fmt|...
 #endif
 p	|void	|cv_ckproto	|CV* cv|GV* gv|char* p
 p	|CV*	|cv_clone	|CV* proto
-Ap	|SV*	|cv_const_sv	|CV* cv
+Apd	|SV*	|cv_const_sv	|CV* cv
 p	|SV*	|op_const_sv	|OP* o|CV* cv
 Ap	|void	|cv_undef	|CV* cv
 Ap	|void	|cx_dump	|PERL_CONTEXT* cs
@@ -1626,7 +1626,7 @@ Ap	|bool	|is_uni_xdigit_lc|U32 c
 Ap	|U32	|to_uni_upper_lc|U32 c
 Ap	|U32	|to_uni_title_lc|U32 c
 Ap	|U32	|to_uni_lower_lc|U32 c
-Ap	|int	|is_utf8_char	|U8 *p
+Ap	|STRLEN	|is_utf8_char	|U8 *p
 Ap	|bool	|is_utf8_string	|U8 *s|STRLEN len
 Ap	|bool	|is_utf8_alnum	|U8 *p
 Ap	|bool	|is_utf8_alnumc	|U8 *p
@@ -1761,7 +1761,7 @@ Ap	|OP*	|newANONHASH	|OP* o
 Ap	|OP*	|newANONSUB	|I32 floor|OP* proto|OP* block
 Ap	|OP*	|newASSIGNOP	|I32 flags|OP* left|I32 optype|OP* right
 Ap	|OP*	|newCONDOP	|I32 flags|OP* expr|OP* trueop|OP* falseop
-Apd	|void	|newCONSTSUB	|HV* stash|char* name|SV* sv
+Apd	|CV*	|newCONSTSUB	|HV* stash|char* name|SV* sv
 Ap	|void	|newFORM	|I32 floor|OP* o|OP* block
 Ap	|OP*	|newFOROP	|I32 flags|char* label|line_t forline \
 				|OP* sclr|OP* expr|OP*block|OP*cont
@@ -1941,10 +1941,10 @@ p	|OP*	|scalar		|OP* o
 p	|OP*	|scalarkids	|OP* o
 p	|OP*	|scalarseq	|OP* o
 p	|OP*	|scalarvoid	|OP* o
-Ap	|NV	|scan_bin	|char* start|I32 len|I32* retlen
-Ap	|NV	|scan_hex	|char* start|I32 len|I32* retlen
+Ap	|NV	|scan_bin	|char* start|STRLEN len|STRLEN* retlen
+Ap	|NV	|scan_hex	|char* start|STRLEN len|STRLEN* retlen
 Ap	|char*	|scan_num	|char* s|YYSTYPE *lvalp
-Ap	|NV	|scan_oct	|char* start|I32 len|I32* retlen
+Ap	|NV	|scan_oct	|char* start|STRLEN len|STRLEN* retlen
 p	|OP*	|scope		|OP* o
 Ap	|char*	|screaminstr	|SV* bigsv|SV* littlesv|I32 start_shift \
 				|I32 end_shift|I32 *state|I32 last
@@ -2074,9 +2074,9 @@ Ap	|I32	|utf8_distance	|U8 *a|U8 *b
 Ap	|U8*	|utf8_hop	|U8 *s|I32 off
 ApM	|U8*	|utf8_to_bytes	|U8 *s|STRLEN *len
 ApM	|U8*	|bytes_to_utf8	|U8 *s|STRLEN *len
-Ap	|UV	|utf8_to_uv	|U8 *s|I32* retlen
-Ap	|UV	|utf8_to_uv_chk	|U8 *s|I32* retlen|bool checking
-Ap	|U8*	|uv_to_utf8	|U8 *d|UV uv
+Ap	|UV	|utf8_to_uv_simple|U8 *s|STRLEN* retlen
+Ap	|UV	|utf8_to_uv	|U8 *s|STRLEN curlen|STRLEN* retlen|U32 flags
+Ap	|U8*	|uv_to_utf8|U8 *d|UV uv
 p	|void	|vivify_defelem	|SV* sv
 p	|void	|vivify_ref	|SV* sv|U32 to_what
 p	|I32	|wait4pid	|Pid_t pid|int* statusp|int flags
@@ -2089,12 +2089,12 @@ Ap	|void	|vwarner	|U32 err|const char* pat|va_list* args
 p	|void	|watch		|char** addr
 Ap	|I32	|whichsig	|char* sig
 p	|int	|yyerror	|char* s
-#if defined(USE_PURE_BISON)
+#ifdef USE_PURE_BISON
+p	|int	|yylex_r	|YYSTYPE *lvalp|int *lcharp
 p	|int	|yylex		|YYSTYPE *lvalp|int *lcharp
 #else
 p	|int	|yylex
 #endif
-sp	|int	|syylex
 p	|int	|yyparse
 p	|int	|yywarn		|char* s
 #if defined(MYMALLOC)
@@ -2358,7 +2358,7 @@ s	|regnode*|reg		|I32|I32 *
 s	|regnode*|reganode	|U8|U32
 s	|regnode*|regatom	|I32 *
 s	|regnode*|regbranch	|I32 *|I32
-s	|void	|reguni		|UV|char *|I32*
+s	|void	|reguni		|UV|char *|STRLEN*
 s	|regnode*|regclass
 s	|regnode*|regclassutf8
 s	|I32	|regcurly	|char *

@@ -1,10 +1,16 @@
 #!./perl
 
-# $Id: lock.t,v 1.0.1.1 2000/09/28 21:44:06 ram Exp $
+# $Id: lock.t,v 1.0.1.3 2000/10/26 17:11:27 ram Exp ram $
 #
 #  @COPYRIGHT@
 #
 # $Log: lock.t,v $
+# Revision 1.0.1.3  2000/10/26 17:11:27  ram
+# patch5: just check $^O, there's no need for the whole Config
+#
+# Revision 1.0.1.2  2000/10/23 18:03:07  ram
+# patch4: protected calls to flock() for dos platform
+#
 # Revision 1.0.1.1  2000/09/28 21:44:06  ram
 # patch2: created.
 #
@@ -22,6 +28,10 @@ sub BEGIN {
     if (!$Config{'d_flock'} && !$Config{'d_fcntl'} && !$Config{'d_lockf'}) {
         print "1..0 # Skip: no flock or flock emulation on this platform\n";
         exit 0;
+    }
+    if ($^O eq 'dos') {
+	print "1..0 # Skip: fcntl/flock emulation broken on this platform\n";
+	exit 0;
     }
     require 'lib/st-dump.pl';
 }

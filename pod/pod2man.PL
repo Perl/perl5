@@ -72,9 +72,14 @@ if ($options{official} && !defined $options{center}) {
     $options{center} = 'Perl Programmers Reference Guide';
 }
 
-# Initialize and run the formatter.
+# Initialize and run the formatter, pulling a pair of input and output off
+# at a time.
 my $parser = Pod::Man->new (%options);
-$parser->parse_from_file (@ARGV);
+my @files;
+do {
+    @files = splice (@ARGV, 0, 2);
+    $parser->parse_from_file (@files);
+} while (@ARGV);
 
 __END__
 
@@ -88,7 +93,7 @@ pod2man [B<--section>=I<manext>] [B<--release>=I<version>]
 [B<--center>=I<string>] [B<--date>=I<string>] [B<--fixed>=I<font>]
 [B<--fixedbold>=I<font>] [B<--fixeditalic>=I<font>]
 [B<--fixedbolditalic>=I<font>] [B<--official>] [B<--lax>]
-[B<--quotes>=I<quotes>] [I<input> [I<output>]]
+[B<--quotes>=I<quotes>] [I<input> [I<output>] ...]
 
 pod2man B<--help>
 
@@ -101,7 +106,10 @@ terminal using nroff(1), normally via man(1), or printing using troff(1).
 I<input> is the file to read for POD source (the POD can be embedded in
 code).  If I<input> isn't given, it defaults to STDIN.  I<output>, if given,
 is the file to which to write the formatted output.  If I<output> isn't
-given, the formatted output is written to STDOUT.
+given, the formatted output is written to STDOUT.  Several POD files can be
+processed in the same B<pod2man> invocation (saving module load and compile
+times) by providing multiple pairs of I<input> and I<output> files on the
+command line.
 
 B<--section>, B<--release>, B<--center>, B<--date>, and B<--official> can be
 used to set the headers and footers to use; if not given, Pod::Man will

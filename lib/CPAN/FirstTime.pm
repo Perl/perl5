@@ -16,7 +16,7 @@ use FileHandle ();
 use File::Basename ();
 use File::Path ();
 use vars qw($VERSION);
-$VERSION = substr q$Revision: 1.46 $, 10;
+$VERSION = substr q$Revision: 1.48 $, 10;
 
 =head1 NAME
 
@@ -174,6 +174,9 @@ disable the cache scanning with 'never'.
     } while ($ans ne 'atstart' && $ans ne 'never');
     $CPAN::Config->{scan_cache} = $ans;
 
+    #
+    # cache_metadata
+    #
     print qq{
 
 To considerably speed up the initial CPAN shell startup, it is
@@ -187,6 +190,30 @@ is not available, the normal index mechanism will be used.
         $ans = prompt("Cache metadata (yes/no)?", ($default ? 'yes' : 'no'));
     } while ($ans !~ /^\s*[yn]/i);
     $CPAN::Config->{cache_metadata} = ($ans =~ /^\s*y/i ? 1 : 0);
+
+    #
+    # term_is_latin
+    #
+    print qq{
+
+The next option deals with the charset your terminal supports. In
+general CPAN is English speaking territory, thus the charset does not
+matter much, but some of the aliens out there who upload their
+software to CPAN bear names that are outside the ASCII range. If your
+terminal supports UTF-8, you say no to the next question, if it
+supports ISO-8859-1 (also known as LATIN1) then you say yes, and if it
+supports neither nor, your answer does not matter, you will not be
+able to read the names of some authors anyway. If you answer no, nmes
+will be output in UTF-8.
+
+};
+
+    defined($default = $CPAN::Config->{term_is_latin}) or $default = 1;
+    do {
+        $ans = prompt("Your terminal expects ISO-8859-1 (yes/no)?",
+                      ($default ? 'yes' : 'no'));
+    } while ($ans !~ /^\s*[yn]/i);
+    $CPAN::Config->{term_is_latin} = ($ans =~ /^\s*y/i ? 1 : 0);
 
     #
     # prerequisites_policy
@@ -216,10 +243,11 @@ policy to one of the three values.
 
     print qq{
 
-The CPAN module will need a few external programs to work
-properly. Please correct me, if I guess the wrong path for a program.
-Don\'t panic if you do not have some of them, just press ENTER for
-those.
+The CPAN module will need a few external programs to work properly.
+Please correct me, if I guess the wrong path for a program. Don\'t
+panic if you do not have some of them, just press ENTER for those. To
+disable the use of a download program, you can type a space followed
+by ENTER.
 
 };
 
@@ -228,7 +256,7 @@ those.
     my(@path) = split /$Config{'path_sep'}/, $ENV{'PATH'};
     local $^W = $old_warn;
     my $progname;
-    for $progname (qw/gzip tar unzip make lynx ncftpget ncftp ftp/){
+    for $progname (qw/gzip tar unzip make lynx wget ncftpget ncftp ftp/){
       if ($^O eq 'MacOS') {
           $CPAN::Config->{$progname} = 'not_here';
           next;

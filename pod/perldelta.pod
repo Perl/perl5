@@ -109,6 +109,10 @@ functionality, see pack('U0', ...) and pack('C0', ...).
 
 =item *
 
+Formats now support zero-padded decimal fields.
+
+=item *
+
 C<perl -d:Module=arg,arg,arg> now works (previously one couldn't pass
 in multiple arguments.)
 
@@ -128,6 +132,11 @@ is a NaN.  Previously the behaviour was unspecified.
 =item *
 
 C<pack('U0a*', ...)> can now be used to force a string to UTF8.
+
+=item *
+
+The printf and sprintf now support parameter reordering using the
+C<%\d+\$> and C<*\d+\$> syntaxes.
 
 =item *
 
