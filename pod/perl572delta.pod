@@ -618,7 +618,7 @@ DEC C V5.3-006 on OpenVMS VAX V6.2
  
   [-.ext.list.util.t]tainted..............FAILED on test 3
   [-.ext.posix]sigaction..................FAILED on test 7
-  [-.ext.time.hires]hires.................FAILED on test 3
+  [-.ext.time.hires]hires.................FAILED on test 14
   [-.lib.file.find]taint..................FAILED on test 17
   [-.lib.math.bigint.t]bigintpm...........FAILED on test 1183
   [-.lib.test.simple.t]exit...............FAILED on test 1
