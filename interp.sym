@@ -85,6 +85,7 @@ minus_l
 minus_n
 minus_p
 multiline
+mustcatch
 mystack_base
 mystack_mark
 mystack_max

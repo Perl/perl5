@@ -162,6 +162,8 @@ my_getenv(char *lnm)
 }  /* end of my_getenv() */
 /*}}}*/
 
+static FILE *safe_popen(char *, char *);
+
 /*{{{ void prime_env_iter() */
 void
 prime_env_iter(void)
@@ -188,9 +190,9 @@ prime_env_iter(void)
   (void) hv_fetch(envhv,"USER",4,TRUE);
 
   /* Now, go get the logical names */
-  if ((sholog = my_popen("$ Show Logical *","r")) == Nullfp)
+  if ((sholog = safe_popen("$ Show Logical *","r")) == Nullfp)
     _ckvmssts(vaxc$errno);
-  /* We use Perl's sv_gets to read from the pipe, since my_popen is
+  /* We use Perl's sv_gets to read from the pipe, since safe_popen is
    * tied to Perl's I/O layer, so it may not return a simple FILE * */
   oldrs = rs;
   rs = newSVpv("\n",1);
@@ -502,7 +504,8 @@ static int waitpid_asleep = 0;
 static unsigned long int
 pipe_exit_routine()
 {
-    unsigned long int retsts = SS$_NORMAL, abort = SS$_TIMEOUT, sts;
+    unsigned long int retsts = SS$_NORMAL, abort = SS$_TIMEOUT;
+    int sts;
 
     while (open_pipes != NULL) {
       if (!open_pipes->done) { /* Tap them gently on the shoulder . . .*/
@@ -511,7 +514,8 @@ pipe_exit_routine()
       }
       if (!open_pipes->done)  /* We tried to be nice . . . */
         _ckvmssts(sys$delprc(&open_pipes->pid,0));
-      if (!((sts = my_pclose(open_pipes->fp))&1)) retsts = sts;
+      if ((sts = my_pclose(open_pipes->fp)) == -1) retsts = vaxc$errno;
+      else if (!(sts & 1)) retsts = sts;
     }
     return retsts;
 }
@@ -531,9 +535,8 @@ popen_completion_ast(struct pipe_details *thispipe)
   }
 }
 
-/*{{{  FILE *my_popen(char *cmd, char *mode)*/
-FILE *
-my_popen(char *cmd, char *mode)
+static FILE *
+safe_popen(char *cmd, char *mode)
 {
     static int handler_set_up = FALSE;
     char mbxname[64];
@@ -591,7 +594,18 @@ my_popen(char *cmd, char *mode)
         
     forkprocess = info->pid;
     return info->fp;
+}  /* end of safe_popen */
+
+
+/*{{{  FILE *my_popen(char *cmd, char *mode)*/
+FILE *
+my_popen(char *cmd, char *mode)
+{
+    TAINT_ENV();
+    TAINT_PROPER("popen");
+    return safe_popen(cmd,mode);
 }
+
 /*}}}*/
 
 /*{{{  I32 my_pclose(FILE *fp)*/
@@ -603,9 +617,11 @@ I32 my_pclose(FILE *fp)
     for (info = open_pipes; info != NULL; last = info, info = info->next)
         if (info->fp == fp) break;
 
-    if (info == NULL)
-      /* get here => no such pipe open */
-      croak("No such pipe open");
+    if (info == NULL) {  /* no such pipe open */
+      set_errno(ECHILD); /* quoth POSIX */
+      set_vaxc_errno(SS$_NONEXPR);
+      return -1;
+    }
 
     /* If we were writing to a subprocess, insure that someone reading from
      * the mailbox gets an EOF.  It looks like a simple fclose() doesn't
@@ -2741,6 +2757,8 @@ vms_do_exec(char *cmd)
   {                               /* no vfork - act VMSish */
     unsigned long int retsts;
 
+    TAINT_ENV();
+    TAINT_PROPER("exec");
     if ((retsts = setup_cmddsc(cmd,1)) & 1)
       retsts = lib$do_command(&VMScmd);
 
@@ -2774,6 +2792,8 @@ do_spawn(char *cmd)
 {
   unsigned long int substs, hadcmd = 1;
 
+  TAINT_ENV();
+  TAINT_PROPER("spawn");
   if (!cmd || !*cmd) {
     hadcmd = 0;
     _ckvmssts(lib$spawn(0,0,0,0,0,0,&substs,0,0,0,0,0,0));

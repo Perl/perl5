@@ -322,6 +322,48 @@ The hash algorithm is defined in the C<PERL_HASH(hash, key, klen)> macro:
     while (i--)
 	hash = hash * 33 + *s++;
 
+=head2 Hash API Extensions
+
+Beginning with version 5.004, the following functions are also supported:
+
+    HE*     hv_fetch_ent  (HV* tb, SV* key, I32 lval, U32 hash);
+    HE*     hv_store_ent  (HV* tb, SV* key, SV* val, U32 hash);
+    
+    bool    hv_exists_ent (HV* tb, SV* key, U32 hash);
+    SV*     hv_delete_ent (HV* tb, SV* key, I32 flags, U32 hash);
+    
+    SV*     hv_iterkeysv  (HE* entry);
+
+Note that these functions take C<SV*> keys, which simplifies writing
+of extension code that deals with hash structures.  These functions
+also allow passing of C<SV*> keys to C<tie> functions without forcing
+you to stringify the keys (unlike the previous set of functions).
+
+They also return and accept whole hash entries (C<HE*>), making their
+use more efficient (since the hash number for a particular string
+doesn't have to be recomputed every time).  See L<API LISTING> later in
+this document for detailed descriptions.
+
+The following macros must always be used to access the contents of hash
+entries.  Note that the arguments to these macros must be simple
+variables, since they may get evaluated more than once.  See
+L<API LISTING> later in this document for detailed descriptions of these
+macros.
+
+    HePV(HE* he, STRLEN len)
+    HeVAL(HE* he)
+    HeHASH(HE* he)
+    HeSVKEY(HE* he)
+    HeSVKEY_force(HE* he)
+    HeSVKEY_set(HE* he, SV* sv)
+
+These two lower level macros are defined, but must only be used when
+dealing with keys that are not C<SV*>s:
+
+    HeKEY(HE* he)
+    HeKLEN(HE* he)
+
+
 =head2 References
 
 References are a special type of scalar that point to other data types
@@ -1392,12 +1434,83 @@ statement (or thereabouts) with C<sv_2mortal>.  See C<hv_iternext>.
 
 	void    he_delayfree _((HV* hv, HE* hent));
 
+=item HEf_SVKEY
+
+This flag, used in the length slot of hash entries and magic
+structures, specifies the structure contains a C<SV*> pointer where a
+C<char*> pointer is to be expected. (For information only--not to be used).
+
 =item he_free
 
 Releases a hash entry, such as while iterating though the hash.  See
 C<hv_iternext>.
 
 	void    he_free _((HV* hv, HE* hent));
+
+=item HeHASH
+
+Returns the computed hash (type C<U32>) stored in the hash entry.
+
+	HeHASH(HE* he)
+
+=item HeKEY
+
+Returns the actual pointer stored in the key slot of the hash entry.
+The pointer may be either C<char*> or C<SV*>, depending on the value of
+C<HeKLEN()>.  Can be assigned to.  The C<HePV()> or C<HeSVKEY()> macros
+are usually preferable for finding the value of a key.
+
+	HeKEY(HE* he)
+
+=item HeKLEN
+
+If this is negative, and amounts to C<HEf_SVKEY>, it indicates the entry
+holds an C<SV*> key.  Otherwise, holds the actual length of the key.
+Can be assigned to. The C<HePV()> macro is usually preferable for finding
+key lengths.
+
+	HeKLEN(HE* he)
+
+=item HePV
+
+Returns the key slot of the hash entry as a C<char*> value, doing any
+necessary dereferencing of possibly C<SV*> keys.  The length of
+the string is placed in C<len> (this is a macro, so do I<not> use
+C<&len>).  If you do not care about what the length of the key is,
+you may use the global variable C<na>.  Remember though, that hash
+keys in perl are free to contain embedded nulls, so using C<strlen()>
+or similar is not a good way to find the length of hash keys.
+This is very similar to the C<SvPV()> macro described elsewhere in
+this document.
+
+	HePV(HE* he, STRLEN len)
+
+=item HeSVKEY
+
+Returns the key as an C<SV*>, or C<Nullsv> if the hash entry
+does not contain an C<SV*> key.
+
+	HeSVKEY(HE* he)
+
+=item HeSVKEY_force
+
+Returns the key as an C<SV*>.  Will create and return a temporary
+mortal C<SV*> if the hash entry contains only a C<char*> key.
+
+	HeSVKEY_force(HE* he)
+
+=item HeSVKEY_set
+
+Sets the key to a given C<SV*>, taking care to set the appropriate flags
+to indicate the presence of an C<SV*> key, and returns the same C<SV*>.
+
+	HeSVKEY_set(HE* he, SV* sv)
+
+=item HeVAL
+
+Returns the value slot (type C<SV*>) stored in the hash entry.
+
+	HeVAL(HE* he)
 
 =item hv_clear
 
@@ -1414,12 +1527,28 @@ returned.
 
 	SV*	hv_delete _((HV* tb, char* key, U32 klen, I32 flags));
 
+=item hv_delete_ent
+
+Deletes a key/value pair in the hash.  The value SV is removed from the hash
+and returned to the caller.  The C<flags> value will normally be zero; if set
+to G_DISCARD then null will be returned.  C<hash> can be a valid pre-computed
+hash value, or 0 to ask for it to be computed.
+
+	SV*     hv_delete_ent _((HV* tb, SV* key, I32 flags, U32 hash));
+
 =item hv_exists
 
 Returns a boolean indicating whether the specified hash key exists.  The
 C<klen> is the length of the key.
 
 	bool	hv_exists _((HV* tb, char* key, U32 klen));
+
+=item hv_exists_ent
+
+Returns a boolean indicating whether the specified hash key exists. C<hash>
+can be a valid pre-computed hash value, or 0 to ask for it to be computed.
+
+	bool    hv_exists_ent _((HV* tb, SV* key, U32 hash));
 
 =item hv_fetch
 
@@ -1429,6 +1558,18 @@ part of a store.  Check that the return value is non-null before
 dereferencing it to a C<SV*>.
 
 	SV**	hv_fetch _((HV* tb, char* key, U32 klen, I32 lval));
+
+=item hv_fetch_ent
+
+Returns the hash entry which corresponds to the specified key in the hash.
+C<hash> must be a valid pre-computed hash number for the given C<key>, or
+0 if you want the function to compute it.  IF C<lval> is set then the
+fetch will be part of a store.  Make sure the return value is non-null
+before accessing it.  The return value when C<tb> is a tied hash
+is a pointer to a static location, so be sure to make a copy of the
+structure if you need to store it somewhere.
+
+	HE*     hv_fetch_ent  _((HV* tb, SV* key, I32 lval, U32 hash));
 
 =item hv_iterinit
 
@@ -1442,6 +1583,14 @@ Returns the key from the current position of the hash iterator.  See
 C<hv_iterinit>.
 
 	char*	hv_iterkey _((HE* entry, I32* retlen));
+
+=item hv_iterkeysv
+	
+Returns the key as an C<SV*> from the current position of the hash
+iterator.  The return value will always be a mortal copy of the
+key.  Also see C<hv_iterinit>.
+
+	SV*     hv_iterkeysv  _((HE* entry));
 
 =item hv_iternext
 
@@ -1484,6 +1633,17 @@ null if the operation failed, otherwise it can be dereferenced to get the
 original C<SV*>.
 
 	SV**	hv_store _((HV* tb, char* key, U32 klen, SV* val, U32 hash));
+
+=item hv_store_ent
+
+Stores C<val> in a hash.  The hash key is specified as C<key>.  The C<hash>
+parameter is the pre-computed hash value; if it is zero then Perl will
+compute it.  The return value is the new hash entry so created.  It will be
+null if the operation failed or if the entry was stored in a tied hash.
+Otherwise the contents of the return value can be accessed using the
+C<He???> macros described here.
+
+	HE*     hv_store_ent  _((HV* tb, SV* key, SV* val, U32 hash));
 
 =item hv_undef
 
@@ -2748,4 +2908,4 @@ API Listing by Dean Roehrich <roehrich@cray.com>.
 
 =head1 DATE
 
-Version 31: 1997/1/27
+Version 31.1: 1997/2/25

@@ -4877,7 +4877,7 @@ char *start;
 {
     register char *s = start;
     register char *d;
-    I32 tryi32;
+    I32 tryiv;
     double value;
     SV *sv;
     I32 floatit;
@@ -4978,11 +4978,11 @@ char *start;
 	sv = NEWSV(92,0);
 	SET_NUMERIC_STANDARD();
 	value = atof(tokenbuf);
-	tryi32 = I_32(value);
-	if (!floatit && (double)tryi32 == value)
-	    sv_setiv(sv,tryi32);
+	tryiv = I_V(value);
+	if (!floatit && (double)tryiv == value)
+	    sv_setiv(sv, tryiv);
 	else
-	    sv_setnv(sv,value);
+	    sv_setnv(sv, value);
 	break;
     }
 

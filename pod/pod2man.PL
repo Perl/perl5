@@ -46,6 +46,7 @@ B<pod2man>
 [ B<--date=>I<string> ]
 [ B<--fixed=>I<font> ]
 [ B<--official> ]
+[ B<--lax> ]
 I<inputfile>
 
 =head1 DESCRIPTION
@@ -104,6 +105,10 @@ miscellaneous information, and 8 for administrator commands.  This works
 best if you put your Perl man pages in a separate tree, like
 F</usr/local/perl/man/>.  By default, section 1 will be used
 unless the file ends in F<.pm> in which case section 3 will be selected.
+
+=item lax
+
+Don't complain when required sections aren't present.
 
 =back
 
@@ -329,6 +334,7 @@ $DEF_SECTION = 1;
 $DEF_CENTER = "User Contributed Perl Documentation";
 $STD_CENTER = "Perl Programmers Reference Guide";
 $DEF_FIXED = 'CW';
+$DEF_LAX = 0;
 
 sub usage {
     warn "$0: @_\n" if @_;
@@ -341,6 +347,7 @@ Options are:
 	--date=string         (default "$DEF_DATE")
 	--fixed=font	      (default "$DEF_FIXED")
 	--official	      (default NOT)
+	--lax                 (default NOT)
 EOF
 }
 
@@ -351,6 +358,7 @@ $uok = GetOptions( qw(
 	date=s
 	fixed=s
 	official
+	lax
 	help));
 
 $DEF_DATE = makedate((stat($ARGV[0]))[9] || time());
@@ -362,6 +370,7 @@ usage("Need one and only one podpage argument") unless @ARGV == 1;
 $section = $opt_section || ($ARGV[0] =~ /\.pm$/ ? 3 : $DEF_SECTION);
 $RP = $opt_release || $DEF_RELEASE;
 $center = $opt_center || ($opt_official ? $STD_CENTER : $DEF_CENTER);
+$lax = $opt_lax || $DEF_LAX;
 
 $CFont = $opt_fixed || $DEF_FIXED;
 
@@ -410,9 +419,9 @@ if ($name ne 'something') {
 		last FCHECK;
 	    }
 	    next if /^=cut\b/;	# DB_File and Net::Ping have =cut before NAME
-	    die "$0: Invalid man page - 1st pod line is not NAME in $ARGV[0]\n";
+	    die "$0: Invalid man page - 1st pod line is not NAME in $ARGV[0]\n" unless $lax;
 	}
-	die "$0: Invalid man page - no documentation in $ARGV[0]\n";
+	die "$0: Invalid man page - no documentation in $ARGV[0]\n" unless $lax;
     }
     close F;
 }
@@ -861,7 +870,7 @@ print <<"END";
 .rn }` ''
 END
 
-if (%wanna_see) {
+if (%wanna_see && !$lax) {
     @missing = keys %wanna_see;
     warn "$0: $Filename is missing required section"
 	.  (@missing > 1 && "s")
@@ -945,13 +954,7 @@ sub escapes {
 # make troff just be normal, but make small nroff get quoted
 # decided to just put the quotes in the text; sigh;
 sub ccvt {
-     local($_,$prev) = @_;
-     if ( /^\W+$/ && !/^\$./ ) {
- 	($prev && "\n") . noremap(qq{.CQ $_ \n\\&});
- 	# what about $" ?
-     } else {
- 	noremap(qq{${CFont_embed}$_\\fR});
-     }
+    local($_,$prev) = @_;
     noremap(qq{.CQ "$_" \n\\&});
 }
 

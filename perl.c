@@ -496,6 +496,7 @@ setuid perl scripts securely.\n");
     main_cv = Nullcv;
 
     time(&basetime);
+    mustcatch = FALSE;
 
     switch (Sigsetjmp(top_env,1)) {
     case 1:
@@ -508,6 +509,7 @@ setuid perl scripts securely.\n");
 	    calllist(endav);
 	return STATUS_NATIVE_EXPORT;
     case 3:
+	mustcatch = FALSE;
 	PerlIO_printf(PerlIO_stderr(), "panic: top_env\n");
 	return 1;
     }
@@ -799,6 +801,7 @@ PerlInterpreter *sv_interp;
 #endif
 	return STATUS_NATIVE_EXPORT;
     case 3:
+	mustcatch = FALSE;
 	if (!restartop) {
 	    PerlIO_printf(PerlIO_stderr(), "panic: restartop\n");
 	    FREETMPS;
@@ -953,7 +956,8 @@ I32 flags;		/* See G_* flags in cop.h */
     Sigjmp_buf oldtop;
     I32 oldscope;
     static CV *DBcv;
-    
+    bool oldmustcatch = mustcatch;
+
     if (flags & G_DISCARD) {
 	ENTER;
 	SAVETMPS;
@@ -1028,6 +1032,7 @@ I32 flags;		/* See G_* flags in cop.h */
 	    my_exit_jump();
 	    /* NOTREACHED */
 	case 3:
+	    mustcatch = FALSE;
 	    if (restartop) {
 		op = restartop;
 		restartop = 0;
@@ -1043,6 +1048,8 @@ I32 flags;		/* See G_* flags in cop.h */
 	    goto cleanup;
 	}
     }
+    else
+	mustcatch = TRUE;
 
     if (op == (OP*)&myop)
 	op = pp_entersub();
@@ -1069,6 +1076,9 @@ I32 flags;		/* See G_* flags in cop.h */
 	}
 	Copy(oldtop, top_env, 1, Sigjmp_buf);
     }
+    else
+	mustcatch = oldmustcatch;
+
     if (flags & G_DISCARD) {
 	stack_sp = stack_base + oldmark;
 	retval = 0;
@@ -1133,6 +1143,7 @@ restart:
 	my_exit_jump();
 	/* NOTREACHED */
     case 3:
+	mustcatch = FALSE;
 	if (restartop) {
 	    op = restartop;
 	    restartop = 0;
@@ -2252,7 +2263,7 @@ register char **env;
     }
     TAINT_NOT;
     if (tmpgv = gv_fetchpv("$",TRUE, SVt_PV))
-	sv_setiv(GvSV(tmpgv),(I32)getpid());
+	sv_setiv(GvSV(tmpgv), (IV)getpid());
 }
 
 static void

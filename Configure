@@ -3771,8 +3771,8 @@ rmlist="$rmlist pdp11"
 
 : coherency check
 echo " "
-echo "Checking your choice of C compiler and flags for coherency..." >&4
-set X $cc $optimize $ccflags $ldflags try.c -o try
+echo "Checking your choice of C compiler, libs, and flags for coherency..." >&4
+set X $cc $optimize $ccflags $ldflags -o try try.c $libs
 shift
 $cat >try.msg <<EOM
 I've tried to compile and run a simple program with:
@@ -3788,7 +3788,7 @@ $cat > try.c <<'EOF'
 main() { exit(0); }
 EOF
 dflt=y
-if sh -c "$cc $optimize $ccflags try.c -o try $ldflags" >>try.msg 2>&1; then
+if sh -c "$cc $optimize $ccflags -o try try.c $ldflags $libs" >>try.msg 2>&1; then
 	if sh -c './try' >>try.msg 2>&1; then
 		dflt=n
 	else
@@ -3894,11 +3894,13 @@ esac
 : nm options which may be necessary
 case "$nm_opt" in
 '') if $test -f /mach_boot; then
-		nm_opt=''
+		nm_opt=''	# Mach
 	elif $test -d /usr/ccs/lib; then
-		nm_opt='-p'
+		nm_opt='-p'	# Solaris (and SunOS?)
 	elif $test -f /dgux; then
-		nm_opt='-p'
+		nm_opt='-p'	# DG-UX
+	elif $test -x /lib64/rld; then
+		nm_opt='-p'	# 64-bit Irix
 	else
 		nm_opt=''
 	fi;;
@@ -4115,6 +4117,10 @@ elif com="$sed -n -e 's/^.*|FUNC |GLOB .*|//p' -e 's/^.*|FUNC |WEAK .*|//p'";\
 	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
 		eval $xrun
 elif com="$sed -n -e 's/^__//' -e '/|Undef/d' -e '/|Proc/s/ .*//p'";\
+	eval $xscan;\
+	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
+		eval $xrun
+elif com="$sed -n -e 's/^.*|Proc .*|Text *| *//p'";\
 	eval $xscan;\
 	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
 		eval $xrun
@@ -8573,6 +8579,7 @@ main()
 	for (i = 0; max; i++)
 		max /= 2;
 	printf("%d\n",i);
+	fflush(stdout);
 }
 EOCP
 	if $cc $ccflags $ldflags -o try try.c $libs >/dev/null 2>&1 ; then

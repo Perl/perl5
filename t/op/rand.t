@@ -74,13 +74,13 @@ sub bits ($) {
     # reason that the diagnostic message might get the
     # wrong value is that Config.pm is incorrect.)
     #
-    if ($max <= 0) {	# Just in case...
+    if ($max <= 0 or $max >= (1 << $randbits)) {	# Just in case...
 	print "not ok 1\n";
 	print "# This perl was compiled with randbits=$randbits\n";
 	print "# which is _way_ off. Or maybe your system rand is broken,\n";
 	print "# or your C compiler can't multiply, or maybe Martians\n";
 	print "# have taken over your computer. For starters, see about\n";
-	print "# trying a better value for randbits.\n";
+	print "# trying a better value for randbits, probably smaller.\n";
 	# If that isn't the problem, we'll have
 	# to put d_martians into Config.pm 
 	print "# Skipping remaining tests until randbits is fixed.\n";
@@ -329,7 +329,12 @@ AUTOSRAND:
 
     my($pid, $first);
     for (1..5) {
-	$pid = open PERL, "./perl -e 'print rand'|";
+	if ($^O eq 'VMS') {
+	    $pid = open PERL, qq[MCR $^X -e "print rand"|];
+	}
+	else {
+	    $pid = open PERL, "./perl -e 'print rand'|";
+	}
 	die "Couldn't pipe from perl: $!" unless defined $pid;
 	if (defined $first) {
 	    if ($first ne <PERL>) {

@@ -135,9 +135,9 @@ I32 lval;
     if (HvNAME(hv) && strEQ(HvNAME(hv),ENV_HV_NAME)) {
       char *gotenv;
 
-      gotenv = ENV_getenv(key);
-      if (gotenv != NULL) {
+      if ((gotenv = ENV_getenv(key)) != Nullch) {
         sv = newSVpv(gotenv,strlen(gotenv));
+        SvTAINTED_on(sv);
         return hv_store(hv,key,klen,sv,hash);
       }
     }
@@ -177,7 +177,6 @@ register U32 hash;
 	    char *k;
 	    New(54, k, HEK_BASESIZE + sizeof(SV*), char);
 	    HeKEY_hek(&mh) = (HEK*)k;
-	    HeKLEN(&mh) = HEf_SVKEY;	/* key will always hold an SV* */
 	}
 	HeSVKEY_set(&mh, keysv);
 	HeVAL(&mh) = sv;
@@ -215,9 +214,9 @@ register U32 hash;
     if (HvNAME(hv) && strEQ(HvNAME(hv),ENV_HV_NAME)) {
       char *gotenv;
 
-      gotenv = ENV_getenv(key);
-      if (gotenv != NULL) {
+      if ((gotenv = ENV_getenv(key)) != Nullch) {
         sv = newSVpv(gotenv,strlen(gotenv));
+        SvTAINTED_on(sv);
         return hv_store_ent(hv,keysv,sv,hash);
       }
     }
@@ -316,8 +315,12 @@ register U32 hash;
 
     xhv = (XPVHV*)SvANY(hv);
     if (SvMAGICAL(hv)) {
+	bool save_taint = tainted;
+	if (tainting)
+	    tainted = SvTAINTED(keysv);
 	keysv = sv_2mortal(newSVsv(keysv));
 	mg_copy((SV*)hv, val, (char*)keysv, HEf_SVKEY);
+	TAINT_IF(save_taint);
 	if (!xhv->xhv_array
 	    && (SvMAGIC(hv)->mg_moremagic
 		|| (SvMAGIC(hv)->mg_type != 'E'

@@ -23,6 +23,9 @@
 #define WORD_ALIGN sizeof(U16)
 #endif
 
+#define DOCATCH(o) (mustcatch ? docatch(o) : (o))
+
+static OP *docatch _((OP *o));
 static OP *doeval _((int gimme));
 static OP *dofindlabel _((OP *op, char *label, OP **opstack));
 static void doparseform _((SV *sv));
@@ -625,6 +628,7 @@ PP(pp_sort)
 	    AV *oldstack;
 	    CONTEXT *cx;
 	    SV** newsp;
+	    bool oldmustcatch = mustcatch;
 
 	    SAVETMPS;
 	    SAVESPTR(op);
@@ -635,6 +639,7 @@ PP(pp_sort)
 		AvREAL_off(sortstack);
 		av_extend(sortstack, 32);
 	    }
+	    mustcatch = TRUE;
 	    SWITCHSTACK(curstack, sortstack);
 	    if (sortstash != stash) {
 		firstgv = gv_fetchpv("a", TRUE, SVt_PV);
@@ -651,6 +656,7 @@ PP(pp_sort)
 
 	    POPBLOCK(cx,curpm);
 	    SWITCHSTACK(sortstack, oldstack);
+	    mustcatch = oldmustcatch;
 	}
 	LEAVE;
     }
@@ -1935,6 +1941,49 @@ SV *sv;
 }
 
 static OP *
+docatch(o)
+OP *o;
+{
+    int ret;
+    int oldrunlevel = runlevel;
+    OP *oldop = op;
+    Sigjmp_buf oldtop;
+
+    op = o;
+    Copy(top_env, oldtop, 1, Sigjmp_buf);
+#ifdef DEBUGGING
+    assert(mustcatch == TRUE);
+#endif
+    mustcatch = FALSE;
+    switch ((ret = Sigsetjmp(top_env,1))) {
+    default:				/* topmost level handles it */
+	Copy(oldtop, top_env, 1, Sigjmp_buf);
+	runlevel = oldrunlevel;
+	mustcatch = TRUE;
+	op = oldop;
+	Siglongjmp(top_env, ret);
+	/* NOTREACHED */
+    case 3:
+	if (!restartop) {
+	    PerlIO_printf(PerlIO_stderr(), "panic: restartop\n");
+	    break;
+	}
+	mustcatch = FALSE;
+	op = restartop;
+	restartop = 0;
+	/* FALL THROUGH */
+    case 0:
+        runops();
+	break;
+    }
+    Copy(oldtop, top_env, 1, Sigjmp_buf);
+    runlevel = oldrunlevel;
+    mustcatch = TRUE;
+    op = oldop;
+    return Nullop;
+}
+
+static OP *
 doeval(gimme)
 int gimme;
 {
@@ -2177,7 +2226,7 @@ PP(pp_require)
     compiling.cop_line = 0;
 
     PUTBACK;
-    return doeval(G_SCALAR);
+    return DOCATCH(doeval(G_SCALAR));
 }
 
 PP(pp_dofile)
@@ -2232,7 +2281,7 @@ PP(pp_entereval)
     if (perldb && was != sub_generation) { /* Some subs defined here. */
 	strcpy(safestr, "_<(eval )");	/* Anything fake and short. */
     }
-    return ret;
+    return DOCATCH(ret);
 }
 
 PP(pp_leaveeval)
@@ -2316,7 +2365,8 @@ PP(pp_entertry)
 
     in_eval = 1;
     sv_setpv(GvSV(errgv),"");
-    RETURN;
+    PUTBACK;
+    return DOCATCH(op->op_next);
 }
 
 PP(pp_leavetry)

@@ -65,7 +65,7 @@ OBJVAL = $(MMS$TARGET_NAME)$(O)
 .endif
 
 # Updated by fndvers.com -- do not edit by hand
-PERL_VERSION = 5_00390#
+PERL_VERSION = 5_00391#
 
 
 ARCHDIR =  [.lib.$(ARCH).$(PERL_VERSION)]
@@ -795,6 +795,19 @@ perly$(O) : perly.c, perly.h, $(h)
 
 test : all [.t.lib]vmsfspec.t
 	- @[.VMS]Test.Com "$(E)"
+
+archify : all
+	@ Write Sys$Output "Moving files to architecture-specific locations for $(ARCH)"
+	archroot = "$(ARCHAUTO)" - "]" + "...]"
+	Backup/Log/Verify [.lib.auto...]*.*;/Exclude=(*.al,*.ix) 'archroot'
+	Delete/Log/NoConfirm [.lib.auto...]*.*;*/exclude=(*.al,*.ix)
+	Delete/Log/NoConfirm [.lib]Config.pm;*
+	Copy/Log/NoConfirm *$(E);,[.x2p]a2p$(E); $(ARCHDIR)
+	Delete/Log/NoConfirm Perl*$(E);*,[.x2p]a2p$(E);*
+	@ Write Sys$Output "Architecture-specific setup completed."
+	@ Write Sys$Output "Before building for another architecture, be sure to"
+	@ Write Sys$Output "    1. $(MMS)$(MMSQUALIFIERS) clean"
+	@ Write Sys$Output "    2. Delete Miniperl$(E)"
 
 # CORE subset for MakeMaker, so we can build Perl without sources
 # Should move to VMS installperl when we get one

@@ -585,37 +585,76 @@ MAGIC* mg;
     char *ptr;
     STRLEN len;
     I32 i;
+
     s = SvPV(sv,len);
     ptr = MgPV(mg);
     my_setenv(ptr, s);
+
 #ifdef DYNAMIC_ENV_FETCH
      /* We just undefd an environment var.  Is a replacement */
      /* waiting in the wings? */
     if (!len) {
 	HE *envhe;
 	SV *keysv;
-	if (mg->mg_len == HEf_SVKEY) keysv = (SV *)mg->mg_ptr;
-	else keysv = newSVpv(mg->mg_ptr,mg->mg_len);
-	if (envhe = hv_fetch_ent(GvHVn(envgv),keysv,FALSE,0))
-	    s = SvPV(HeVAL(envhe),len);
-	if (mg->mg_len != HEf_SVKEY) SvREFCNT_dec(keysv);
+	if (mg->mg_len == HEf_SVKEY)
+	    keysv = (SV *)mg->mg_ptr;
+	else
+	    keysv = newSVpv(mg->mg_ptr, mg->mg_len);
+	if ((envhe = hv_fetch_ent(GvHVn(envgv), keysv, FALSE, 0)))
+	    s = SvPV(HeVAL(envhe), len);
+	if (mg->mg_len != HEf_SVKEY)
+	    SvREFCNT_dec(keysv);
     }
 #endif
+
+#if !defined(OS2) && !defined(AMIGAOS)
 			    /* And you'll never guess what the dog had */
 			    /*   in its mouth... */
     if (tainting) {
+	MgTAINTEDDIR_off(mg);
+#ifdef VMS
+	if (s && strnEQ(ptr, "DCL$PATH", 8)) {
+	    char pathbuf[256], eltbuf[256], *cp, *elt = s;
+	    struct stat sbuf;
+	    int i = 0, j = 0;
+
+	    do {          /* DCL$PATH may be a search list */
+		while (1) {   /* as may dev portion of any element */
+		    if ( ((cp = strchr(elt,'[')) || (cp = strchr(elt,'<'))) ) {
+			if ( *(cp+1) == '.' || *(cp+1) == '-' ||
+			     cando_by_name(S_IWUSR,0,elt) ) {
+			    MgTAINTEDDIR_on(mg);
+			    return 0;
+			}
+		    }
+		    if ((cp = strchr(elt, ':')) != Nullch)
+			*cp = '\0';
+		    if (my_trnlnm(elt, eltbuf, j++))
+			elt = eltbuf;
+		    else
+			break;
+		}
+		j = 0;
+	    } while (my_trnlnm(s, pathbuf, i++) && (elt = pathbuf));
+	}
+#endif /* VMS */
 	if (s && strEQ(ptr,"PATH")) {
 	    char *strend = s + len;
 
 	    while (s < strend) {
-		s = cpytill(tokenbuf,s,strend,':',&i);
+		struct stat st;
+		s = cpytill(tokenbuf, s, strend, ':', &i);
 		s++;
 		if (*tokenbuf != '/'
-		  || (Stat(tokenbuf,&statbuf) && (statbuf.st_mode & 2)) )
+		      || (Stat(tokenbuf, &st) == 0 && (st.st_mode & 2)) ) {
 		    MgTAINTEDDIR_on(mg);
+		    return 0;
+		}
 	    }
 	}
     }
+#endif /* neither OS2 nor AMIGAOS */
+
     return 0;
 }
 

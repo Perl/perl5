@@ -32,8 +32,9 @@ struct magic {
 
 #define MGf_MINMATCH   1
 
-#define MgTAINTEDDIR(mg) (mg->mg_flags & MGf_TAINTEDDIR)
-#define MgTAINTEDDIR_on(mg) (mg->mg_flags |= MGf_TAINTEDDIR)
+#define MgTAINTEDDIR(mg)	(mg->mg_flags & MGf_TAINTEDDIR)
+#define MgTAINTEDDIR_on(mg)	(mg->mg_flags |= MGf_TAINTEDDIR)
+#define MgTAINTEDDIR_off(mg)	(mg->mg_flags &= ~MGf_TAINTEDDIR)
 
 #define MgPV(mg)                ((mg)->mg_len == HEf_SVKEY) ?   \
                                 SvPV((SV*)((mg)->mg_ptr),na) :   \

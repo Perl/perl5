@@ -684,6 +684,7 @@ t/op/recurse.t		See if deep recursion works
 t/op/ref.t		See if refs and objects work
 t/op/regexp.t		See if regular expressions work
 t/op/repeat.t		See if x operator works
+t/op/runlevel.t		See if die() works from perl_call_*()
 t/op/sleep.t		See if sleep works
 t/op/sort.t		See if sort works
 t/op/split.t		See if split works
@@ -693,6 +694,7 @@ t/op/study.t		See if study works
 t/op/subst.t		See if substitution works
 t/op/substr.t		See if substr works
 t/op/sysio.t		See if sysread and syswrite work
+t/op/taint.t		See if tainting works
 t/op/tie.t		See if tie/untie functions work
 t/op/time.t		See if time functions work
 t/op/undef.t		See if undef works

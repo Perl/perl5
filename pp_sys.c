@@ -459,6 +459,7 @@ PP(pp_tie)
     SV **mark = stack_base + ++*markstack_ptr;	/* reuse in entersub */
     I32 markoff = mark - stack_base - 1;
     char *methname;
+    bool oldmustcatch = mustcatch;
 
     varsv = mark[0];
     if (SvTYPE(varsv) == SVt_PVHV)
@@ -479,6 +480,7 @@ PP(pp_tie)
     myop.op_last = (OP *) &myop;
     myop.op_next = Nullop;
     myop.op_flags = OPf_KNOW|OPf_STACKED;
+    mustcatch = TRUE;
 
     ENTER;
     SAVESPTR(op);
@@ -493,6 +495,7 @@ PP(pp_tie)
         runops();
     SPAGAIN;
 
+    mustcatch = oldmustcatch;
     sv = TOPs;
     if (sv_isobject(sv)) {
 	if (SvTYPE(varsv) == SVt_PVHV || SvTYPE(varsv) == SVt_PVAV) {
@@ -569,6 +572,7 @@ PP(pp_dbmopen)
     GV *gv;
     BINOP myop;
     SV *sv;
+    bool oldmustcatch = mustcatch;
 
     hv = (HV*)POPs;
 
@@ -587,6 +591,7 @@ PP(pp_dbmopen)
     myop.op_last = (OP *) &myop;
     myop.op_next = Nullop;
     myop.op_flags = OPf_KNOW|OPf_STACKED;
+    mustcatch = TRUE;
 
     ENTER;
     SAVESPTR(op);
@@ -629,6 +634,7 @@ PP(pp_dbmopen)
 	SPAGAIN;
     }
 
+    mustcatch = oldmustcatch;
     if (sv_isobject(TOPs))
 	sv_magic((SV*)hv, TOPs, 'P', Nullch, 0);
     LEAVE;
@@ -1117,7 +1123,7 @@ PP(pp_sysread)
     IO *io;
     char *buffer;
     int length;
-    int bufsize;
+    Sock_size_t bufsize;
     SV *bufsv;
     STRLEN blen;
 
@@ -1333,8 +1339,9 @@ PP(pp_truncate)
     SETERRNO(0,0);
 #if defined(HAS_TRUNCATE) || defined(HAS_CHSIZE) || defined(F_FREESP)
     if (op->op_flags & OPf_SPECIAL) {
-	tmpgv = gv_fetchpv(POPp,FALSE, SVt_PVIO);
+	tmpgv = gv_fetchpv(POPp, FALSE, SVt_PVIO);
     do_ftruncate:
+	TAINT_PROPER("truncate");
 	if (!GvIO(tmpgv) || !IoIFP(GvIOp(tmpgv)) ||
 #ifdef HAS_TRUNCATE
 	  ftruncate(PerlIO_fileno(IoIFP(GvIOn(tmpgv))), len) < 0)
@@ -1345,6 +1352,8 @@ PP(pp_truncate)
     }
     else {
 	SV *sv = POPs;
+	char *name;
+
 	if (SvTYPE(sv) == SVt_PVGV) {
 	    tmpgv = (GV*)sv;		/* *main::FRED for example */
 	    goto do_ftruncate;
@@ -1353,14 +1362,16 @@ PP(pp_truncate)
 	    tmpgv = (GV*) SvRV(sv);	/* \*main::FRED for example */
 	    goto do_ftruncate;
 	}
+
+	name = SvPV(sv, na);
+	TAINT_PROPER("truncate");
 #ifdef HAS_TRUNCATE
-	if (truncate (SvPV (sv, na), len) < 0)
+	if (truncate(name, len) < 0)
 	    result = 0;
 #else
 	{
 	    int tmpfd;
-
-	    if ((tmpfd = open(SvPV (sv, na), O_RDWR)) < 0)
+	    if ((tmpfd = open(name, O_RDWR)) < 0)
 		result = 0;
 	    else {
 		if (my_chsize(tmpfd, len) < 0)
@@ -1679,7 +1690,7 @@ PP(pp_accept)
     register IO *nstio;
     register IO *gstio;
     struct sockaddr saddr;	/* use a struct to avoid alignment problems */
-    int len = sizeof saddr;
+    Sock_size_t len = sizeof saddr;
     int fd;
 
     ggv = (GV*)POPs;
@@ -1771,7 +1782,7 @@ PP(pp_ssockopt)
     unsigned int lvl;
     GV *gv;
     register IO *io;
-    int aint;
+    Sock_size_t len;
 
     if (optype == OP_GSOCKOPT)
 	sv = sv_2mortal(NEWSV(22, 257));
@@ -1792,24 +1803,26 @@ PP(pp_ssockopt)
 	(void)SvPOK_only(sv);
 	SvCUR_set(sv,256);
 	*SvEND(sv) ='\0';
-	aint = SvCUR(sv);
-	if (getsockopt(fd, lvl, optname, SvPVX(sv), &aint) < 0)
+	len = SvCUR(sv);
+	if (getsockopt(fd, lvl, optname, SvPVX(sv), &len) < 0)
 	    goto nuts2;
-	SvCUR_set(sv,aint);
+	SvCUR_set(sv, len);
 	*SvEND(sv) ='\0';
 	PUSHs(sv);
 	break;
     case OP_SSOCKOPT: {
-	    STRLEN len = 0;
-	    char *buf = 0;
-	    if (SvPOKp(sv))
-		buf = SvPV(sv, len);
+	    char *buf;
+	    int aint;
+	    if (SvPOKp(sv)) {
+		buf = SvPV(sv, na);
+		len = na;
+	    }
 	    else if (SvOK(sv)) {
 		aint = (int)SvIV(sv);
 		buf = (char*)&aint;
 		len = sizeof(int);
 	    }
-	    if (setsockopt(fd, lvl, optname, buf, (int)len) < 0)
+	    if (setsockopt(fd, lvl, optname, buf, len) < 0)
 		goto nuts2;
 	    PUSHs(&sv_yes);
 	}
@@ -1847,34 +1860,34 @@ PP(pp_getpeername)
     int fd;
     GV *gv = (GV*)POPs;
     register IO *io = GvIOn(gv);
-    int aint;
+    Sock_size_t len;
 
     if (!io || !IoIFP(io))
 	goto nuts;
 
     sv = sv_2mortal(NEWSV(22, 257));
     (void)SvPOK_only(sv);
-    SvCUR_set(sv,256);
+    len = 256;
+    SvCUR_set(sv, len);
     *SvEND(sv) ='\0';
-    aint = SvCUR(sv);
     fd = PerlIO_fileno(IoIFP(io));
     switch (optype) {
     case OP_GETSOCKNAME:
-	if (getsockname(fd, (struct sockaddr *)SvPVX(sv), &aint) < 0)
+	if (getsockname(fd, (struct sockaddr *)SvPVX(sv), &len) < 0)
 	    goto nuts2;
 	break;
     case OP_GETPEERNAME:
-	if (getpeername(fd, (struct sockaddr *)SvPVX(sv), &aint) < 0)
+	if (getpeername(fd, (struct sockaddr *)SvPVX(sv), &len) < 0)
 	    goto nuts2;
 	break;
     }
 #ifdef BOGUS_GETNAME_RETURN
     /* Interactive Unix, getpeername() and getsockname()
       does not return valid namelen */
-    if (aint == BOGUS_GETNAME_RETURN)
-	aint = sizeof(struct sockaddr);
+    if (len == BOGUS_GETNAME_RETURN)
+	len = sizeof(struct sockaddr);
 #endif
-    SvCUR_set(sv,aint);
+    SvCUR_set(sv, len);
     *SvEND(sv) ='\0';
     PUSHs(sv);
     RETURN;
@@ -2572,55 +2585,68 @@ dooneliner(cmd, filename)
 char *cmd;
 char *filename;
 {
-    char mybuf[8192];
-    char *s,
-	 *save_filename = filename;
-    int anum = 1;
+    char *save_filename = filename;
+    char *cmdline;
+    char *s;
     PerlIO *myfp;
+    int anum = 1;
 
-    strcpy(mybuf, cmd);
-    strcat(mybuf, " ");
-    for (s = mybuf+strlen(mybuf); *filename; ) {
+    New(666, cmdline, strlen(cmd) + (strlen(filename) * 2) + 10, char);
+    strcpy(cmdline, cmd);
+    strcat(cmdline, " ");
+    for (s = cmdline + strlen(cmdline); *filename; ) {
 	*s++ = '\\';
 	*s++ = *filename++;
     }
     strcpy(s, " 2>&1");
-    myfp = my_popen(mybuf, "r");
+    myfp = my_popen(cmdline, "r");
+    Safefree(cmdline);
+
     if (myfp) {
-	*mybuf = '\0';
+	SV *tmpsv = sv_newmortal();
 	/* Need to save/restore 'rs' ?? */
 	s = sv_gets(tmpsv, myfp, 0);
 	(void)my_pclose(myfp);
 	if (s != Nullch) {
-	    for (errno = 1; errno < sys_nerr; errno++) {
+	    int e;
+	    for (e = 1;
 #ifdef HAS_SYS_ERRLIST
-		if (instr(mybuf, sys_errlist[errno]))	/* you don't see this */
-		    return 0;
-#else
-		char *errmsg;				/* especially if it isn't there */
-
-		if (instr(mybuf,
-		          (errmsg = strerror(errno)) ? errmsg : "NoErRoR"))
-		    return 0;
+		 e <= sys_nerr
 #endif
+		 ; e++)
+	    {
+		/* you don't see this */
+		char *errmsg =
+#ifdef HAS_SYS_ERRLIST
+		    sys_errlist[e]
+#else
+		    strerror(e)
+#endif
+		    ;
+		if (!errmsg)
+		    break;
+		if (instr(s, errmsg)) {
+		    SETERRNO(e,0);
+		    return 0;
+		}
 	    }
 	    SETERRNO(0,0);
 #ifndef EACCES
 #define EACCES EPERM
 #endif
-	    if (instr(mybuf, "cannot make"))
+	    if (instr(s, "cannot make"))
 		SETERRNO(EEXIST,RMS$_FEX);
-	    else if (instr(mybuf, "existing file"))
+	    else if (instr(s, "existing file"))
 		SETERRNO(EEXIST,RMS$_FEX);
-	    else if (instr(mybuf, "ile exists"))
+	    else if (instr(s, "ile exists"))
 		SETERRNO(EEXIST,RMS$_FEX);
-	    else if (instr(mybuf, "non-exist"))
+	    else if (instr(s, "non-exist"))
 		SETERRNO(ENOENT,RMS$_FNF);
-	    else if (instr(mybuf, "does not exist"))
+	    else if (instr(s, "does not exist"))
 		SETERRNO(ENOENT,RMS$_FNF);
-	    else if (instr(mybuf, "not empty"))
+	    else if (instr(s, "not empty"))
 		SETERRNO(EBUSY,SS$_DEVOFFLINE);
-	    else if (instr(mybuf, "cannot access"))
+	    else if (instr(s, "cannot access"))
 		SETERRNO(EACCES,RMS$_PRV);
 	    else
 		SETERRNO(EPERM,RMS$_PRV);
@@ -2867,7 +2893,7 @@ PP(pp_fork)
     if (!childpid) {
 	/*SUPPRESS 560*/
 	if (tmpgv = gv_fetchpv("$", TRUE, SVt_PV))
-	    sv_setiv(GvSV(tmpgv), (I32)getpid());
+	    sv_setiv(GvSV(tmpgv), (IV)getpid());
 	hv_clear(pidstatus);	/* no kids, so don't wait for 'em */
     }
     PUSHi(childpid);
@@ -2921,7 +2947,6 @@ PP(pp_system)
     int status;
     Sigsave_t ihand,qhand;     /* place to save signals during system() */
 
-#if (defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(OS2)
     if (SP - MARK == 1) {
 	if (tainting) {
 	    char *junk = SvPV(TOPs, na);
@@ -2929,6 +2954,7 @@ PP(pp_system)
 	    TAINT_PROPER("system");
 	}
     }
+#if (defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(OS2)
     while ((childpid = vfork()) == -1) {
 	if (errno != EAGAIN) {
 	    value = -1;
@@ -3475,10 +3501,10 @@ PP(pp_ghostent)
 		sv_catpvn(sv, " ", 1);
 	}
 	PUSHs(sv = sv_mortalcopy(&sv_no));
-	sv_setiv(sv, (I32)hent->h_addrtype);
+	sv_setiv(sv, (IV)hent->h_addrtype);
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	len = hent->h_length;
-	sv_setiv(sv, (I32)len);
+	sv_setiv(sv, (IV)len);
 #ifdef h_addr
 	for (elem = hent->h_addr_list; elem && *elem; elem++) {
 	    XPUSHs(sv = sv_mortalcopy(&sv_no));
@@ -3541,7 +3567,7 @@ PP(pp_gnetent)
 	PUSHs(sv = sv_newmortal());
 	if (nent) {
 	    if (which == OP_GNBYNAME)
-		sv_setiv(sv, (I32)nent->n_net);
+		sv_setiv(sv, (IV)nent->n_net);
 	    else
 		sv_setpv(sv, nent->n_name);
 	}
@@ -3558,9 +3584,9 @@ PP(pp_gnetent)
 		sv_catpvn(sv, " ", 1);
 	}
 	PUSHs(sv = sv_mortalcopy(&sv_no));
-	sv_setiv(sv, (I32)nent->n_addrtype);
+	sv_setiv(sv, (IV)nent->n_addrtype);
 	PUSHs(sv = sv_mortalcopy(&sv_no));
-	sv_setiv(sv, (I32)nent->n_net);
+	sv_setiv(sv, (IV)nent->n_net);
     }
 
     RETURN;
@@ -3611,7 +3637,7 @@ PP(pp_gprotoent)
 	PUSHs(sv = sv_newmortal());
 	if (pent) {
 	    if (which == OP_GPBYNAME)
-		sv_setiv(sv, (I32)pent->p_proto);
+		sv_setiv(sv, (IV)pent->p_proto);
 	    else
 		sv_setpv(sv, pent->p_name);
 	}
@@ -3628,7 +3654,7 @@ PP(pp_gprotoent)
 		sv_catpvn(sv, " ", 1);
 	}
 	PUSHs(sv = sv_mortalcopy(&sv_no));
-	sv_setiv(sv, (I32)pent->p_proto);
+	sv_setiv(sv, (IV)pent->p_proto);
     }
 
     RETURN;
@@ -3694,9 +3720,9 @@ PP(pp_gservent)
 	if (sent) {
 	    if (which == OP_GSBYNAME) {
 #ifdef HAS_NTOHS
-		sv_setiv(sv, (I32)ntohs(sent->s_port));
+		sv_setiv(sv, (IV)ntohs(sent->s_port));
 #else
-		sv_setiv(sv, (I32)(sent->s_port));
+		sv_setiv(sv, (IV)(sent->s_port));
 #endif
 	    }
 	    else
@@ -3716,9 +3742,9 @@ PP(pp_gservent)
 	}
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 #ifdef HAS_NTOHS
-	sv_setiv(sv, (I32)ntohs(sent->s_port));
+	sv_setiv(sv, (IV)ntohs(sent->s_port));
 #else
-	sv_setiv(sv, (I32)(sent->s_port));
+	sv_setiv(sv, (IV)(sent->s_port));
 #endif
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	sv_setpv(sv, sent->s_proto);
@@ -3860,7 +3886,7 @@ PP(pp_gpwent)
 	PUSHs(sv = sv_newmortal());
 	if (pwent) {
 	    if (which == OP_GPWNAM)
-		sv_setiv(sv, (I32)pwent->pw_uid);
+		sv_setiv(sv, (IV)pwent->pw_uid);
 	    else
 		sv_setpv(sv, pwent->pw_name);
 	}
@@ -3873,15 +3899,15 @@ PP(pp_gpwent)
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	sv_setpv(sv, pwent->pw_passwd);
 	PUSHs(sv = sv_mortalcopy(&sv_no));
-	sv_setiv(sv, (I32)pwent->pw_uid);
+	sv_setiv(sv, (IV)pwent->pw_uid);
 	PUSHs(sv = sv_mortalcopy(&sv_no));
-	sv_setiv(sv, (I32)pwent->pw_gid);
+	sv_setiv(sv, (IV)pwent->pw_gid);
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 #ifdef PWCHANGE
-	sv_setiv(sv, (I32)pwent->pw_change);
+	sv_setiv(sv, (IV)pwent->pw_change);
 #else
 #ifdef PWQUOTA
-	sv_setiv(sv, (I32)pwent->pw_quota);
+	sv_setiv(sv, (IV)pwent->pw_quota);
 #else
 #ifdef PWAGE
 	sv_setpv(sv, pwent->pw_age);
@@ -3904,7 +3930,7 @@ PP(pp_gpwent)
 	sv_setpv(sv, pwent->pw_shell);
 #ifdef PWEXPIRE
 	PUSHs(sv = sv_mortalcopy(&sv_no));
-	sv_setiv(sv, (I32)pwent->pw_expire);
+	sv_setiv(sv, (IV)pwent->pw_expire);
 #endif
     }
     RETURN;
@@ -3974,7 +4000,7 @@ PP(pp_ggrent)
 	PUSHs(sv = sv_newmortal());
 	if (grent) {
 	    if (which == OP_GGRNAM)
-		sv_setiv(sv, (I32)grent->gr_gid);
+		sv_setiv(sv, (IV)grent->gr_gid);
 	    else
 		sv_setpv(sv, grent->gr_name);
 	}
@@ -3987,7 +4013,7 @@ PP(pp_ggrent)
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	sv_setpv(sv, grent->gr_passwd);
 	PUSHs(sv = sv_mortalcopy(&sv_no));
-	sv_setiv(sv, (I32)grent->gr_gid);
+	sv_setiv(sv, (IV)grent->gr_gid);
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	for (elem = grent->gr_mem; *elem; elem++) {
 	    sv_catpv(sv, *elem);

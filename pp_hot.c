@@ -951,7 +951,6 @@ nope:
 	++BmUSEFUL(pm->op_pmshort);
 
 ret_no:
-    TAINT_IF(rx->exec_tainted);		/* /\W/ */
     LEAVE_SCOPE(oldsave);
     if (gimme == G_ARRAY)
 	RETURN;
@@ -1082,6 +1081,7 @@ do_readline()
 		           PerlIO_rewind(tmpfp);
 		           IoTYPE(io) = '<';
 		           IoIFP(io) = fp = tmpfp;
+		           IoFLAGS(io) &= ~IOf_UNTAINT;  /* maybe redundant */
 		        }
 		    }
 		}
@@ -1460,7 +1460,6 @@ PP(pp_subst)
     if (c && clen <= rx->minlen) {
 	if (! pregexec(rx, s, strend, orig, 0,
 		       SvSCREAM(TARG) ? TARG : Nullsv, safebase)) {
-	    TAINT_IF(rx->exec_tainted);
 	    PUSHs(&sv_no);
 	    LEAVE_SCOPE(oldsave);
 	    RETURN;
@@ -1606,7 +1605,6 @@ PP(pp_subst)
 	RETURN;
     }
 
-    TAINT_IF(rx->exec_tainted);
     PUSHs(&sv_no);
     LEAVE_SCOPE(oldsave);
     RETURN;

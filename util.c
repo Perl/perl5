@@ -1700,7 +1700,7 @@ char	*mode;
 	}
 	/*SUPPRESS 560*/
 	if (tmpgv = gv_fetchpv("$",TRUE, SVt_PV))
-	    sv_setiv(GvSV(tmpgv),(I32)getpid());
+	    sv_setiv(GvSV(tmpgv), (IV)getpid());
 	forkprocess = 0;
 	hv_clear(pidstatus);	/* we have no children */
 	return Nullfp;

@@ -1256,6 +1256,7 @@
 #define minus_n			(curinterp->Iminus_n)
 #define minus_p			(curinterp->Iminus_p)
 #define multiline		(curinterp->Imultiline)
+#define mustcatch		(curinterp->Imustcatch)
 #define mystack_base		(curinterp->Imystack_base)
 #define mystack_mark		(curinterp->Imystack_mark)
 #define mystack_max		(curinterp->Imystack_max)
@@ -1408,6 +1409,7 @@
 #define Iminus_n		minus_n
 #define Iminus_p		minus_p
 #define Imultiline		multiline
+#define Imustcatch		mustcatch
 #define Imystack_base		mystack_base
 #define Imystack_mark		mystack_mark
 #define Imystack_max		mystack_max
@@ -1569,6 +1571,7 @@
 #define minus_n			Perl_minus_n
 #define minus_p			Perl_minus_p
 #define multiline		Perl_multiline
+#define mustcatch		Perl_mustcatch
 #define mystack_base		Perl_mystack_base
 #define mystack_mark		Perl_mystack_mark
 #define mystack_max		Perl_mystack_max

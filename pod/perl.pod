@@ -42,7 +42,6 @@ of sections:
     perlbot	Perl OO tricks and examples
     perlipc	Perl interprocess communication
 
-    perlbug	Perl bug reports howto
     perldebug	Perl debugging
     perldiag	Perl diagnostic messages
     perlsec	Perl security
@@ -224,64 +223,7 @@ Ok, that's I<definitely> enough hype.
 
 =head1 ENVIRONMENT
 
-=over 12
-
-=item HOME
-
-Used if chdir has no argument.
-
-=item LOGDIR
-
-Used if chdir has no argument and HOME is not set.
-
-=item PATH
-
-Used in executing subprocesses, and in finding the script if B<-S> is
-used.
-
-=item PERL5LIB
-
-A colon-separated list of directories in which to look for Perl library
-files before looking in the standard library and the current
-directory.  If PERL5LIB is not defined, PERLLIB is used.  When running
-taint checks (because the script was running setuid or setgid, or the
-B<-T> switch was used), neither variable is used.  The script should
-instead say
-
-    use lib "/my/directory";
-
-=item PERL5DB
-
-The command used to get the debugger code.  If unset, uses
-
-	BEGIN { require 'perl5db.pl' }
-
-=item PERL_DESTRUCT_LEVEL
-
-Relevant only if your perl executable was built with B<-DDEBUGGING>,
-this controls the behavior of global destruction of objects and other
-references.
-
-=item PERLLIB
-
-A colon-separated list of directories in which to look for Perl library
-files before looking in the standard library and the current
-directory.  If PERL5LIB is defined, PERLLIB is not used.
-
-=back
-
-Perl also has environment variables that control how Perl handles data
-specific to particular natural languages.  See L<perllocale>.
-
-Apart from these, Perl uses no other environment variables, except
-to make them available to the script being executed, and to child
-processes.  However, scripts running setuid would do well to execute
-the following lines before doing anything else, just to keep people
-honest:
-
-    $ENV{'PATH'} = '/bin:/usr/bin';    # or whatever you need
-    $ENV{'SHELL'} = '/bin/sh' if defined $ENV{'SHELL'};
-    $ENV{'IFS'} = ''          if defined $ENV{'IFS'};
+See L<perlrun>.
 
 =head1 AUTHOR
 

@@ -377,13 +377,12 @@ PP(pp_study)
     register I32 ch;
     register I32 *sfirst;
     register I32 *snext;
-    I32 retval;
     STRLEN len;
 
-    s = (unsigned char*)(SvPV(sv, len));
-    pos = len;
-    if (sv == lastscream)
-	SvSCREAM_off(sv);
+    if (sv == lastscream) {
+	if (SvSCREAM(sv))
+	    RETPUSHYES;
+    }
     else {
 	if (lastscream) {
 	    SvSCREAM_off(lastscream);
@@ -391,10 +390,11 @@ PP(pp_study)
 	}
 	lastscream = SvREFCNT_inc(sv);
     }
-    if (pos <= 0) {
-	retval = 0;
-	goto ret;
-    }
+
+    s = (unsigned char*)(SvPV(sv, len));
+    pos = len;
+    if (pos <= 0)
+	RETPUSHNO;
     if (pos > maxscream) {
 	if (maxscream < 0) {
 	    maxscream = pos + 80;
@@ -428,10 +428,7 @@ PP(pp_study)
 
     SvSCREAM_on(sv);
     sv_magic(sv, Nullsv, 'g', Nullch, 0);	/* piggyback on m//g magic */
-    retval = 1;
-  ret:
-    XPUSHs(sv_2mortal(newSViv((I32)retval)));
-    RETURN;
+    RETPUSHYES;
 }
 
 PP(pp_trans)
@@ -555,7 +552,7 @@ PP(pp_undef)
 	    sv_setsv(sv, &sv_undef);
 	break;
     default:
-	if (SvPOK(sv) && SvLEN(sv)) {
+	if (SvTYPE(sv) >= SVt_PV && SvPVX(sv) && SvLEN(sv)) {
 	    (void)SvOOK_off(sv);
 	    Safefree(SvPVX(sv));
 	    SvPV_set(sv, Nullch);
@@ -1631,7 +1628,7 @@ PP(pp_vec)
 	}
     }
 
-    sv_setiv(TARG, (I32)retnum);
+    sv_setiv(TARG, (IV)retnum);
     PUSHs(TARG);
     RETURN;
 }
@@ -2741,7 +2738,7 @@ PP(pp_unpack)
 		    if (aint >= 128)	/* fake up signed chars */
 			aint -= 256;
 		    sv = NEWSV(36, 0);
-		    sv_setiv(sv, (I32)aint);
+		    sv_setiv(sv, (IV)aint);
 		    PUSHs(sv_2mortal(sv));
 		}
 	    }
@@ -2762,7 +2759,7 @@ PP(pp_unpack)
 		while (len-- > 0) {
 		    auint = *s++ & 255;
 		    sv = NEWSV(37, 0);
-		    sv_setiv(sv, (I32)auint);
+		    sv_setiv(sv, (IV)auint);
 		    PUSHs(sv_2mortal(sv));
 		}
 	    }
@@ -2785,7 +2782,7 @@ PP(pp_unpack)
 		    Copy(s, &ashort, 1, I16);
 		    s += sizeof(I16);
 		    sv = NEWSV(38, 0);
-		    sv_setiv(sv, (I32)ashort);
+		    sv_setiv(sv, (IV)ashort);
 		    PUSHs(sv_2mortal(sv));
 		}
 	    }
@@ -2826,7 +2823,7 @@ PP(pp_unpack)
 		    if (datumtype == 'v')
 			aushort = vtohs(aushort);
 #endif
-		    sv_setiv(sv, (I32)aushort);
+		    sv_setiv(sv, (IV)aushort);
 		    PUSHs(sv_2mortal(sv));
 		}
 	    }
@@ -2852,7 +2849,7 @@ PP(pp_unpack)
 		    Copy(s, &aint, 1, int);
 		    s += sizeof(int);
 		    sv = NEWSV(40, 0);
-		    sv_setiv(sv, (I32)aint);
+		    sv_setiv(sv, (IV)aint);
 		    PUSHs(sv_2mortal(sv));
 		}
 	    }
@@ -2878,10 +2875,7 @@ PP(pp_unpack)
 		    Copy(s, &auint, 1, unsigned int);
 		    s += sizeof(unsigned int);
 		    sv = NEWSV(41, 0);
-		    if (auint <= I32_MAX)
-		    	sv_setiv(sv, (I32)auint);
-		    else
-		    	sv_setnv(sv, (double)auint);
+		    sv_setuv(sv, (UV)auint);
 		    PUSHs(sv_2mortal(sv));
 		}
 	    }
@@ -2907,7 +2901,7 @@ PP(pp_unpack)
 		    Copy(s, &along, 1, I32);
 		    s += sizeof(I32);
 		    sv = NEWSV(42, 0);
-		    sv_setiv(sv, (I32)along);
+		    sv_setiv(sv, (IV)along);
 		    PUSHs(sv_2mortal(sv));
 		}
 	    }
@@ -2942,7 +2936,6 @@ PP(pp_unpack)
 		while (len-- > 0) {
 		    Copy(s, &aulong, 1, U32);
 		    s += sizeof(U32);
-		    sv = NEWSV(43, 0);
 #ifdef HAS_NTOHL
 		    if (datumtype == 'N')
 			aulong = ntohl(aulong);
@@ -2951,7 +2944,8 @@ PP(pp_unpack)
 		    if (datumtype == 'V')
 			aulong = vtohl(aulong);
 #endif
-		    sv_setnv(sv, (double)aulong);
+		    sv = NEWSV(43, 0);
+		    sv_setuv(sv, (UV)aulong);
 		    PUSHs(sv_2mortal(sv));
 		}
 	    }
@@ -3058,7 +3052,7 @@ PP(pp_unpack)
 		    s += sizeof(unsigned Quad_t);
 		}
 		sv = NEWSV(43, 0);
-		sv_setiv(sv, (IV)auquad);
+		sv_setuv(sv, (UV)auquad);
 		PUSHs(sv_2mortal(sv));
 	    }
 	    break;

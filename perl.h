@@ -256,6 +256,12 @@
 
 #define MEM_SIZE Size_t
 
+#if _XOPEN_VERSION >= 4
+#   define Sock_size_t Size_t
+#else
+#   define Sock_size_t int
+#endif
+
 #if defined(STANDARD_C) && defined(I_STDDEF)
 #   include <stddef.h>
 #   define STRUCT_OFFSET(s,m)  offsetof(s,m)
@@ -1211,7 +1217,9 @@ char *crypt ();       /* Maybe more hosts will need the unprototyped version */
 #else
 char *crypt _((const char*, const char*));
 #endif
+#ifndef getenv
 char *getenv _((const char*));
+#endif
 Off_t lseek _((int,Off_t,int));
 char *getlogin _((void));
 #endif
@@ -1827,6 +1835,7 @@ IEXT I32	Icxstack_ix IINIT(-1);
 IEXT I32	Icxstack_max IINIT(128);
 IEXT Sigjmp_buf	Itop_env;
 IEXT I32	Irunlevel;
+IEXT bool	Imustcatch;	/* doeval() must be caught locally */
 
 /* stack stuff */
 IEXT AV *	Icurstack;		/* THE STACK */

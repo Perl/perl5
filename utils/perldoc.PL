@@ -252,11 +252,11 @@ unless($Is_VMS) {
 unshift @pagers, $ENV{PERLDOC_PAGER} if $ENV{PERLDOC_PAGER};
 
 if ($opt_m) {
-    foreach $pager (@pagers) {
-	my($sts) = system("$pager @found");
-	exit 0 if ($Is_VMS ? ($sts & 1) : !$sts);
-    }
-    exit $Is_VMS ? $sts : 1;
+	foreach $pager (@pagers) {
+		system("$pager @found") or exit;
+	}
+	if ($Is_VMS) { eval 'use vmsish qw(status exit); exit $?' }
+	exit 1;
 } 
 
 if ($opt_f) {
@@ -301,16 +301,14 @@ foreach (@found) {
 		Pod::Text::pod2text($_,*TMP);
 		close(TMP);
 	} elsif(not $opt_u) {
-		open(TMP,">>$tmp");
-		if($^O =~ /hpux/) {
-			$rslt = `pod2man $_ | nroff -man | col -x`;
-		} else {
-			$rslt = `pod2man $_ | nroff -man`;
+		my $cmd = "pod2man --lax $_ | nroff -man";
+		$cmd .= " | col -x" if $^O =~ /hpux/;
+		$rslt = `$cmd`;
+		unless(($err = $?)) {
+			open(TMP,">>$tmp");
+			print TMP $rslt;
+			close TMP;
 		}
-		if ($Is_VMS) { $err = !($? % 2) || $rslt =~ /IVVERB/; }
-		else      { $err = $?; }
-		print TMP $rslt unless $err;
-		close TMP;
 	}
 	                                                
 	if( $opt_u or $err or -z $tmp) {
@@ -333,9 +331,7 @@ if( $no_tty ) {
 	close(TMP);
 } else {
 	foreach $pager (@pagers) {
-		$sts = system("$pager $tmp");
-		last if $Is_VMS && ($sts & 1);
-		last unless $sts;
+		system("$pager $tmp") or last;
 	}
 }
 

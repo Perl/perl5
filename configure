@@ -27,7 +27,7 @@ case "$0" in
     if cmp $0 `echo $0 | sed -e s/configure/Configure/` >/dev/null; then
 	echo "Your configure and Configure scripts seem to be identical."
 	echo "This can happen on filesystems that aren't fully case sensitive."
-	echo "You'll have to explicitely extract Configure and run that."
+	echo "You'll have to explicitly extract Configure and run that."
 	exit 1
     fi
     ;;

@@ -1284,12 +1284,14 @@ int flags;
     dSP;
     BINOP myop;
     SV* res;
+    bool oldmustcatch = mustcatch;
 
     Zero(&myop, 1, BINOP);
     myop.op_last = (OP *) &myop;
     myop.op_next = Nullop;
     myop.op_flags = OPf_KNOW|OPf_STACKED;
 
+    mustcatch = TRUE;
     ENTER;
     SAVESPTR(op);
     op = (OP *) &myop;
@@ -1315,6 +1317,7 @@ int flags;
 
     res=POPs;
     PUTBACK;
+    mustcatch = oldmustcatch;
 
     if (postpr) {
       int ans;

@@ -14,9 +14,10 @@ char *s;
 {
     char *ug;
 
+    DEBUG_u(PerlIO_printf(PerlIO_stderr(),
+            "%s %d %d %d\n", s, tainted, uid, euid));
+
     if (tainted) {
-	DEBUG_u(PerlIO_printf(PerlIO_stderr(),
-			      "%s %d %d %d\n", s, tainted, uid, euid));
 	if (euid != uid)
 	    ug = " while running setuid";
 	else if (egid != gid)
@@ -34,23 +35,44 @@ void
 taint_env()
 {
     SV** svp;
-    MAGIC *mg = 0;
+    MAGIC *mg;
+
+#ifdef VMS
+    int i = 0;
+    char name[14] = "DCL$PATH";
+
+    while (1) {
+	if (i)
+	    (void)sprintf(name,"DCL$PATH;%d", i);
+	svp = hv_fetch(GvHVn(envgv), name, strlen(name), FALSE);
+	if (!svp || *svp == &sv_undef)
+	    break;
+	if (SvTAINTED(*svp)) {
+	    TAINT;
+	    taint_proper("Insecure %s%s", "$ENV{DCL$PATH}");
+	}
+	if ((mg = mg_find(*svp, 'e')) && MgTAINTEDDIR(mg)) {
+	    TAINT;
+	    taint_proper("Insecure directory in %s%s", "$ENV{DCL$PATH}");
+	}
+	i++;
+    }
+#endif /* VMS */
 
     svp = hv_fetch(GvHVn(envgv),"PATH",4,FALSE);
-    if (!svp || *svp == &sv_undef ||
-	((mg = mg_find(*svp, 't')) && mg->mg_len & 1))
-    {
-	TAINT;
-	if (mg && MgTAINTEDDIR(mg))
-	    taint_proper("Insecure directory in %s%s", "$ENV{PATH}");
-	else
+    if (svp && *svp) {
+	if (SvTAINTED(*svp)) {
+	    TAINT;
 	    taint_proper("Insecure %s%s", "$ENV{PATH}");
+	}
+	if ((mg = mg_find(*svp, 'e')) && MgTAINTEDDIR(mg)) {
+	    TAINT;
+	    taint_proper("Insecure directory in %s%s", "$ENV{PATH}");
+	}
     }
 
     svp = hv_fetch(GvHVn(envgv),"IFS",3,FALSE);
-    if (svp && *svp != &sv_undef &&
-	(mg = mg_find(*svp, 't')) && mg->mg_len & 1)
-    {
+    if (svp && *svp != &sv_undef && SvTAINTED(*svp)) {
 	TAINT;
 	taint_proper("Insecure %s%s", "$ENV{IFS}");
     }

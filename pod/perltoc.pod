@@ -26,8 +26,6 @@ expression enhancements, Innumerable Unbundled Modules, Compilability
 
 =item ENVIRONMENT
 
-HOME, LOGDIR, PATH, PERL5LIB, PERL5DB, PERL_DESTRUCT_LEVEL, PERLLIB
-
 =item AUTHOR
 
 =item FILES
@@ -126,12 +124,12 @@ C<void> XSUBs now default to returning nothing
 
 =item C Language API Changes
 
-C<gv_fetchmethod> and C<perl_call_sv>
+C<gv_fetchmethod> and C<perl_call_sv>, Extended API for manipulating hashes
 
 =item Documentation Changes
 
-L<perlbug>, L<perldelta>, L<perllocale>, L<perltoot>, L<perlapio>,
-L<perldebug>, L<perlsec>
+L<perldelta>, L<perllocale>, L<perltoot>, L<perlapio>, L<perldebug>,
+L<perlsec>
 
 =item New Diagnostics
 
@@ -322,6 +320,11 @@ B<-[mM]>[B<->]I<module=arg[,arg]...>, B<-n>, B<-p>, B<-P>, B<-s>, B<-S>,
 B<-T>, B<-u>, B<-U>, B<-v>, B<-V>, B<-V:>I<name>, B<-w>, B<-x> I<directory>
 
 =back
+
+=item ENVIRONMENT
+
+HOME, LOGDIR, PATH, PERL5LIB, PERLLIB, PERL5DB, PERL_DEBUG_MSTATS,
+PERL_DESTRUCT_LEVEL
 
 =head2 perlfunc - Perl builtin functions
 
@@ -1434,6 +1437,8 @@ B<PerlIO_get_base(f)>, B<PerlIO_get_bufsiz(f)>
 
 =item Working with HV's
 
+=item Hash API Extensions
+
 =item References
 
 =item Blessed References and Class Objects
@@ -1501,35 +1506,41 @@ av_shift, av_store, av_undef, av_unshift, CLASS, Copy, croak, CvSTASH,
 DBsingle, DBsub, DBtrace, dMARK, dORIGMARK, dowarn, dSP, dXSARGS, dXSI32,
 dXSI32, ENTER, EXTEND, FREETMPS, G_ARRAY, G_DISCARD, G_EVAL, GIMME,
 G_NOARGS, G_SCALAR, gv_fetchmeth, gv_fetchmethod, gv_stashpv, gv_stashsv,
-GvSV, he_delayfree, he_free, hv_clear, hv_delete, hv_exists, hv_fetch,
-hv_iterinit, hv_iterkey, hv_iternext, hv_iternextsv, hv_iterval, hv_magic,
-HvNAME, hv_store, hv_undef, isALNUM, isALPHA, isDIGIT, isLOWER, isSPACE,
-isUPPER, items, ix, LEAVE, MARK, mg_clear, mg_copy, mg_find, mg_free,
-mg_get, mg_len, mg_magical, mg_set, Move, na, New, Newc, Newz, newAV,
-newHV, newRV_inc, newRV_noinc, newSV, newSViv, newSVnv, newSVpv, newSVrv,
-newSVsv, newXS, newXSproto, Nullav, Nullch, Nullcv, Nullhv, Nullsv,
-ORIGMARK, perl_alloc, perl_call_argv, perl_call_method, perl_call_pv,
-perl_call_sv, perl_construct, perl_destruct, perl_eval_sv, perl_free,
-perl_get_av, perl_get_cv, perl_get_hv, perl_get_sv, perl_parse,
-perl_require_pv, perl_run, POPi, POPl, POPp, POPn, POPs, PUSHMARK, PUSHi,
-PUSHn, PUSHp, PUSHs, PUTBACK, Renew, Renewc, RETVAL, safefree, safemalloc,
-saferealloc, savepv, savepvn, SAVETMPS, SP, SPAGAIN, ST, strEQ, strGE,
-strGT, strLE, strLT, strNE, strnEQ, strnNE, sv_2mortal, sv_bless, sv_catpv,
-sv_catpvn, sv_catsv, sv_cmp, sv_cmp, SvCUR, SvCUR_set, sv_dec, sv_dec,
-SvEND, sv_eq, SvGROW, sv_grow, sv_inc, SvIOK, SvIOK_off, SvIOK_on,
-SvIOK_only, SvIOK_only, SvIOKp, sv_isa, SvIV, sv_isobject, SvIVX, SvLEN,
-sv_len, sv_len, sv_magic, sv_mortalcopy, SvOK, sv_newmortal, sv_no, SvNIOK,
-SvNIOK_off, SvNIOKp, SvNOK, SvNOK_off, SvNOK_on, SvNOK_only, SvNOK_only,
-SvNOKp, SvNV, SvNVX, SvPOK, SvPOK_off, SvPOK_on, SvPOK_only, SvPOK_only,
-SvPOKp, SvPV, SvPVX, SvREFCNT, SvREFCNT_dec, SvREFCNT_inc, SvROK,
-SvROK_off, SvROK_on, SvRV, sv_setiv, sv_setnv, sv_setpv, sv_setpvn,
-sv_setref_iv, sv_setref_nv, sv_setref_pv, sv_setref_pvn, sv_setsv, SvSTASH,
-SVt_IV, SVt_PV, SVt_PVAV, SVt_PVCV, SVt_PVHV, SVt_PVMG, SVt_NV, SvTRUE,
-SvTYPE, svtype, SvUPGRADE, sv_upgrade, sv_undef, sv_unref, sv_usepvn,
-sv_yes, THIS, toLOWER, toUPPER, warn, XPUSHi, XPUSHn, XPUSHp, XPUSHs, XS,
-XSRETURN, XSRETURN_EMPTY, XSRETURN_IV, XSRETURN_NO, XSRETURN_NV,
-XSRETURN_PV, XSRETURN_UNDEF, XSRETURN_YES, XST_mIV, XST_mNV, XST_mNO,
-XST_mPV, XST_mUNDEF, XST_mYES, XS_VERSION, XS_VERSION_BOOTCHECK, Zero
+GvSV, he_delayfree, HEf_SVKEY, he_free, HeHASH, HeKEY, HeKLEN, HePV,
+HeSVKEY, HeSVKEY_force, HeSVKEY_set, HeVAL, hv_clear, hv_delete,
+hv_delete_ent, hv_exists, hv_exists_ent, hv_fetch, hv_fetch_ent,
+hv_iterinit, hv_iterkey, hv_iterkeysv	 
+Returns the key as an C<SV*> from the current position of the hash
+iterator.  The return value will always be a mortal copy of the
+key.  Also see C<hv_iterinit>, hv_iternext, hv_iternextsv, hv_iterval,
+hv_magic, HvNAME, hv_store, hv_store_ent, hv_undef, isALNUM, isALPHA,
+isDIGIT, isLOWER, isSPACE, isUPPER, items, ix, LEAVE, MARK, mg_clear,
+mg_copy, mg_find, mg_free, mg_get, mg_len, mg_magical, mg_set, Move, na,
+New, Newc, Newz, newAV, newHV, newRV_inc, newRV_noinc, newSV, newSViv,
+newSVnv, newSVpv, newSVrv, newSVsv, newXS, newXSproto, Nullav, Nullch,
+Nullcv, Nullhv, Nullsv, ORIGMARK, perl_alloc, perl_call_argv,
+perl_call_method, perl_call_pv, perl_call_sv, perl_construct,
+perl_destruct, perl_eval_sv, perl_free, perl_get_av, perl_get_cv,
+perl_get_hv, perl_get_sv, perl_parse, perl_require_pv, perl_run, POPi,
+POPl, POPp, POPn, POPs, PUSHMARK, PUSHi, PUSHn, PUSHp, PUSHs, PUTBACK,
+Renew, Renewc, RETVAL, safefree, safemalloc, saferealloc, savepv, savepvn,
+SAVETMPS, SP, SPAGAIN, ST, strEQ, strGE, strGT, strLE, strLT, strNE,
+strnEQ, strnNE, sv_2mortal, sv_bless, sv_catpv, sv_catpvn, sv_catsv,
+sv_cmp, sv_cmp, SvCUR, SvCUR_set, sv_dec, sv_dec, SvEND, sv_eq, SvGROW,
+sv_grow, sv_inc, SvIOK, SvIOK_off, SvIOK_on, SvIOK_only, SvIOK_only,
+SvIOKp, sv_isa, SvIV, sv_isobject, SvIVX, SvLEN, sv_len, sv_len, sv_magic,
+sv_mortalcopy, SvOK, sv_newmortal, sv_no, SvNIOK, SvNIOK_off, SvNIOKp,
+SvNOK, SvNOK_off, SvNOK_on, SvNOK_only, SvNOK_only, SvNOKp, SvNV, SvNVX,
+SvPOK, SvPOK_off, SvPOK_on, SvPOK_only, SvPOK_only, SvPOKp, SvPV, SvPVX,
+SvREFCNT, SvREFCNT_dec, SvREFCNT_inc, SvROK, SvROK_off, SvROK_on, SvRV,
+sv_setiv, sv_setnv, sv_setpv, sv_setpvn, sv_setref_iv, sv_setref_nv,
+sv_setref_pv, sv_setref_pvn, sv_setsv, SvSTASH, SVt_IV, SVt_PV, SVt_PVAV,
+SVt_PVCV, SVt_PVHV, SVt_PVMG, SVt_NV, SvTRUE, SvTYPE, svtype, SvUPGRADE,
+sv_upgrade, sv_undef, sv_unref, sv_usepvn, sv_yes, THIS, toLOWER, toUPPER,
+warn, XPUSHi, XPUSHn, XPUSHp, XPUSHs, XS, XSRETURN, XSRETURN_EMPTY,
+XSRETURN_IV, XSRETURN_NO, XSRETURN_NV, XSRETURN_PV, XSRETURN_UNDEF,
+XSRETURN_YES, XST_mIV, XST_mNV, XST_mNO, XST_mPV, XST_mUNDEF, XST_mYES,
+XS_VERSION, XS_VERSION_BOOTCHECK, Zero
 
 =item EDITOR
 

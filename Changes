@@ -9,6 +9,198 @@ releases.)
 
 
 ----------------
+Version 5.003_91
+----------------
+
+This is (should be?  must be!) the public beta of 5.004.
+
+ CORE LANGUAGE CHANGES
+
+  Title:  "Fix perl_call_*() when !G_EVAL"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199702250725.CAA09192@aatma.engin.umich.edu>,
+          <199702251925.OAA15498@aatma.engin.umich.edu>,
+          <199702252200.RAA16853@aatma.engin.umich.edu>
+   Date:  Tue, 25 Feb 1997 02:25:56 -0500
+  Files:  MANIFEST gv.c interp.sym perl.c perl.h pp_ctl.c pp_sys.c
+          t/op/runlevel.t
+
+  Title:  "Fix taint tests for writeable dirs in $ENV{PATH}"
+   From:  Chip Salzenberg
+  Files:  mg.c mg.h pod/perlsec.pod taint.c
+
+  Title:  "Forbid tainted parameters for truncate()"
+   From:  Chip Salzenberg
+  Files:  pp_sys.c
+
+  Title:  "Don't taint magic hash keys unnecessarily"
+   From:  Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>
+ Msg-ID:  <01IFXL9TY74Y00661G@hmivax.humgen.upenn.edu>
+   Date:  Fri, 28 Feb 1997 02:11:26 -0500 (EST)
+  Files:  hv.c
+
+ CORE PORTABILITY
+
+  Title:  "VMS patches post _90"
+   From:  Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>
+ Msg-ID:  <01IFYDE5ZT7O005A53@hmivax.humgen.upenn.edu>
+   Date:  Fri, 28 Feb 1997 15:26:33 -0500 (EST)
+  Files:  doio.c mg.c perl.h pp_hot.c t/op/rand.t t/op/taint.t taint.c
+          vms/descrip.mms vms/vms.c
+
+  Title:  "Fix taint check in system() and exec() under VMS and OS/2"
+   From:  Chip Salzenberg
+  Files:  pp_sys.c
+
+  Title:  "If _XOPEN_VERSION >= 4, socket length parameters are size_t"
+   From:  Michael H. Moran <mhm@austin.ibm.com>
+  Files:  perl.h pp_sys.c
+
+  Title:  "Make dooneliner() compile again"
+   From:  Chip Salzenberg
+  Files:  pp_sys.c
+
+ OTHER CORE CHANGES
+
+  Title:  "Short-circuit duplicate study() calls"
+   From:  Chip Salzenberg
+  Files:  pp.c
+
+  Title:  "Call sv_set[iu]v() with [IU]V parameter, not [IU]32"
+   From:  Chip Salzenberg
+  Files:  perl.c pp.c pp_sys.c toke.c util.c
+
+  Title:  "Clean up and document API for hashes"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199702251824.NAA14859@aatma.engin.umich.edu>
+   Date:  Tue, 25 Feb 1997 13:24:02 -0500
+  Files:  hv.c hv.h pod/perldelta.pod pod/perlguts.pod
+
+  Title:  "pp_undef was not always freeing memory"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199702270653.BAA13949@monk.mps.ohio-state.edu>
+   Date:  Thu, 27 Feb 1997 01:53:51 -0500 (EST)
+  Files:  pp.c
+
+  Title:  "Fix SEGV when debugging with foreach() lvalue patch"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199702271924.OAA14557@monk.mps.ohio-state.edu>
+   Date:  Thu, 27 Feb 1997 14:24:36 -0500 (EST)
+  Files:  sv.c
+
+  Title:  "Don't examine rx->exec_tainted if pregexec() fails"
+   From:  Chip Salzenberg
+  Files:  pp_hot.c
+
+  Title:  "Silence bogus typo warning on $DB::postponed"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199702271802.NAA12505@aatma.engin.umich.edu>
+   Date:  Thu, 27 Feb 1997 13:02:30 -0500
+  Files:  op.c
+
+ BUILD PROCESS
+
+  Title:  "Sanity check linking with $libs"
+   From:  Andy Dougherty <doughera@fractal.phys.lafayette.edu>
+ Msg-ID:  <Pine.SOL.3.95q.970225221634.2486A-100000@fractal.lafayette.edu>
+   Date:  Tue, 25 Feb 1997 14:13:45 -0500 (EST)
+  Files:  Configure
+
+  Title:  "Flush stdout when printing $randbits guess"
+   From:  Chip Salzenberg
+  Files:  Configure
+
+  Title:  "Configure changes for Irix nm"
+   From:  Helmut Jarausch and Fabien Tassin
+  Files:  Configure
+
+  Title:  "Update OS/2 Configure diff"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199702251906.OAA10608@monk.mps.ohio-state.edu>
+   Date:  Tue, 25 Feb 1997 14:06:23 -0500 (EST)
+  Files:  os2/diff.configure
+
+ LIBRARY AND EXTENSIONS
+
+  Title:  "Don't require() in a signal handler"
+   From:  Chip Salzenberg
+  Files:  lib/perl5db.pl
+
+  Title:  "Make IPC::Open3 work without fork()"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199702251937.OAA10718@monk.mps.ohio-state.edu>
+   Date:  Tue, 25 Feb 1997 14:37:07 -0500 (EST)
+  Files:  lib/IPC/Open3.pm
+
+  Title:  "Follow up on elimination of $` $& $' in libraries"
+   From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+ Msg-ID:  <E0w0Sqc-00046E-00@ursa.cus.cam.ac.uk>
+   Date:  Fri, 28 Feb 1997 13:59:42 +0000
+  Files:  lib/Getopt/Long.pm lib/diagnostics.pm
+
+  Title:  "Don't warn on use of CCFLAGS"
+   From:  Andreas Koenig <k@anna.in-berlin.de>
+ Msg-ID:  <199702251038.LAA13123@anna.in-berlin.de>
+   Date:  Tue, 25 Feb 1997 11:38:43 +0100
+  Files:  lib/ExtUtils/MakeMaker.pm
+
+  Title:  "Allow explicit '-lperl' in link arguments"
+   From:  Doug MacEachern <dougm@opengroup.org>
+ Msg-ID:  <199702271625.LAA25402@postman.osf.org>
+   Date:  Thu, 27 Feb 1997 11:25:04 -0500
+  Files:  lib/ExtUtils/Embed.pm
+
+ TESTS
+
+  Title:  "New test op/taint.t"
+   From:  Tom Phoenix <rootbeer@teleport.com>
+ Msg-ID:  <Pine.GSO.3.95q.970225101328.18288M-100000@kelly.teleport.com
+   Date:  Tue, 25 Feb 1997 11:36:53 -0800 (PST)
+  Files:  MANIFEST t/op/taint.t
+
+  Title:  "Patch to t/op/rand.t"
+   From:  Tom Phoenix <rootbeer@teleport.com>
+ Msg-ID:  <Pine.GSO.3.95q.970225181321.13796Q-100000@kelly.teleport.com
+   Date:  Tue, 25 Feb 1997 18:19:34 -0800 (PST)
+  Files:  t/op/rand.t
+
+ UTILITIES
+
+  Title:  "Add --lax option to pod2man; use it in perldoc"
+   From:  Nat <gnat@frii.com>, Chip Salzenberg
+  Files:  pod/pod2man.PL utils/perldoc.PL
+
+  Title:  "Eliminate dead code in pod2man"
+   From:  Chip Salzenberg
+  Files:  pod/pod2man.PL
+
+ DOCUMENTATION
+
+  Title:  "Warn about intrusive sfio behavior"
+   From:  Andy Dougherty <doughera@fractal.phys.lafayette.edu>
+ Msg-ID:  <Pine.SOL.3.95q.970228112136.24038G-100000@fractal.lafayette.
+   Date:  Fri, 28 Feb 1997 11:35:49 -0500 (EST)
+  Files:  INSTALL
+
+  Title:  "Updates to perlfunc.pod"
+   From:  Tom Phoenix (with help from M.J.T. Guy and Tom C.)
+  Files:  pod/perlfunc.pod
+
+  Title:  "Move ENVIRONMENT from perl.pod to perlrun.pod"
+   From:  Chip Salzenberg
+  Files:  pod/perl.pod pod/perlrun.pod
+
+  Title:  "Describe PERL_DEBUG_MSTATS in perlrun.pod"
+   From:  Nat <gnat@frii.com>
+  Files:  pod/perlrun.pod
+
+  Title:  "Fix references to perlbug"
+   From:  Chip Salzenberg
+  Files:  pod/perl.pod pod/perldelta.pod pod/perllocale.pod
+          pod/perltoc.pod
+
+
+----------------
 Version 5.003_90
 ----------------
 

@@ -95,9 +95,11 @@ struct xpvhv {
 #define HeKLEN(he)		HEK_LEN(HeKEY_hek(he))
 #define HeVAL(he)		(he)->hent_val
 #define HeHASH(he)		HEK_HASH(HeKEY_hek(he))
-#define HePV(he)		((HeKLEN(he) == HEf_SVKEY) ?		\
-				 SvPV(HeKEY_sv(he),na) :		\
-				 HeKEY(he))
+#define HePV(he,lp)		((HeKLEN(he) == HEf_SVKEY) ?		\
+				 SvPV(HeKEY_sv(he),lp) :		\
+				 (((lp = HeKLEN(he)) >= 0) ?		\
+				  HeKEY(he) : Nullch))
+
 #define HeSVKEY(he)		((HeKEY(he) && 				\
 				  HeKLEN(he) == HEf_SVKEY) ?		\
 				 HeKEY_sv(he) : Nullsv)
@@ -108,7 +110,7 @@ struct xpvhv {
 				  sv_2mortal(newSVpv(HeKEY(he),		\
 						     HeKLEN(he)))) :	\
 				 &sv_undef)
-#define HeSVKEY_set(he,sv)	(HeKEY_sv(he) = sv)
+#define HeSVKEY_set(he,sv)	((HeKLEN(he) = HEf_SVKEY), (HeKEY_sv(he) = sv))
 
 #define Nullhek Null(HEK*)
 #define HEK_BASESIZE		STRUCT_OFFSET(HEK, hek_key[0])
