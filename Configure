@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Nov 15 03:54:52 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Thu Nov 16 03:18:20 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >/tmp/c1$$ <<EOF
@@ -308,6 +308,7 @@ cppminus=''
 cpprun=''
 cppstdin=''
 crosscompile=''
+d__fwalk=''
 d_access=''
 d_accessx=''
 d_alarm=''
@@ -7753,6 +7754,10 @@ qgcvt) d_Gconvert='qgcvt((x),(n),(b))' ;;
    esac
    ;;  
 esac
+
+: see if _fwalk exists
+set fwalk d__fwalk
+eval $inlibc
 
 : Initialize h_fcntl
 h_fcntl=false
@@ -15527,6 +15532,7 @@ d_PRIo64='$d_PRIo64'
 d_PRIu64='$d_PRIu64'
 d_PRIx64='$d_PRIx64'
 d_SCNfldbl='$d_SCNfldbl'
+d__fwalk='$d__fwalk'
 d_access='$d_access'
 d_accessx='$d_accessx'
 d_alarm='$d_alarm'

@@ -3211,6 +3211,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_setpgrp HAS_SETPGRP		/**/
 #$d_bsdsetpgrp USE_BSD_SETPGRP	/**/
 
+/* HAS__FWALK:
+ *	This symbol, if defined, indicates that the _fwalk system call is
+ *	available to apply a function to all the file handles.
+ */
+#$d__fwalk HAS__FWALK		/**/
+
 /* FCNTL_CAN_LOCK:
  *	This symbol, if defined, indicates that fcntl() can be used
  *	for file locking.  Normally on Unix systems this is defined.
