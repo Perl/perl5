@@ -31,6 +31,160 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 14289] By: jhi                                   on 2002/01/15  18:38:03
+        Log: Jeffrey is trying very hard to avoid working on his
+             book, it would seem :-) (better naming, better comments
+             in the files)
+     Branch: perl
+	   + lib/unicore/Is/AsciiHex.pl lib/unicore/Is/IdContin.pl
+	   + lib/unicore/Is/IdStart.pl lib/unicore/Is/L_.pl
+	   + lib/unicore/Is/_CanonDC.pl lib/unicore/Is/_CaseIgn.pl
+	   + lib/unicore/Is/_CombAbo.pl lib/unicore/Properties
+	   - lib/unicore/Is/2.pl lib/unicore/Is/ASCIIHex.pl
+	   - lib/unicore/Is/CanonDCI.pl lib/unicore/Is/CaseIgno.pl
+	   - lib/unicore/Is/CombAbov.pl lib/unicore/Is/IDContin.pl
+	   - lib/unicore/Is/IDStart.pl
+	   ! (edit 200 files)
+____________________________________________________________________________
+[ 14287] By: jhi                                   on 2002/01/15  17:55:54
+        Log: Some protection against spaces in directory names.
+             (Tru64 still has some makedepend problems in such
+             cases but that looks like Tru64's problem.)
+     Branch: perl
+	   ! Configure Makefile.SH
+____________________________________________________________________________
+[ 14286] By: jhi                                   on 2002/01/15  17:13:28
+        Log: Should have been in #14285 but I have sausages for fingers.
+     Branch: perl
+	   + lib/ExtUtils/MM_BeOS.pm
+____________________________________________________________________________
+[ 14285] By: jhi                                   on 2002/01/15  17:12:59
+        Log: MM_BeOS from Tels.
+     Branch: perl
+	   + lib/ExtUtils/t/MM_BeOS.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 14284] By: jhi                                   on 2002/01/15  15:55:53
+        Log: Integrate perlio;
+             
+             (reintroduce #14251) Slab allocator for ops
+             - moved the statics to intrpvar.h
+             - implemented Slab_Free()
+             - uses PerlMemShared (for now) if distinction exists.
+             
+             Slab allocator submit after resolve -ay to keep it!
+             
+             Hand merge of non slab allocator stuff
+             
+             const-ness fix in savepv's passing of NULL
+             
+             Typo in #else branch of PL_SLAB_ALLOC
+             
+             Integrate rest of mainline
+             
+             Regen embed enable slab for PERL_IMPLICIT_SYS
+             
+             Correct name of PL_OP_SLAB_ALLOC
+             
+             Correct slab allocator for case where sizeof(IV) > sizeof(IV *)
+             e.g. -Duse64bitint on a 32-bit platform.
+             Now uses I32 for use-count and is more careful with its casts.
+     Branch: perl
+	  !> (integrate 28 files)
+____________________________________________________________________________
+[ 14279] By: jhi                                   on 2002/01/15  14:43:04
+        Log: Subject: [PATCH] Socket::sockaddr_family
+             From: Gisle Aas <gisle@ActiveState.com> 
+             Date: 15 Jan 2002 06:35:28 -0800
+             Message-ID: <lr1ygrk7gv.fsf@caliper.activestate.com>
+     Branch: perl
+	   ! ext/Socket/Socket.pm ext/Socket/Socket.t ext/Socket/Socket.xs
+____________________________________________________________________________
+[ 14278] By: jhi                                   on 2002/01/15  14:37:34
+        Log: Subject: [PATCH perldiag] Style issue
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Tue, 15 Jan 2002 15:36:30 +0100                
+             Message-ID: <20020115153630.A11568@rafael>
+     Branch: perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[ 14276] By: jhi                                   on 2002/01/15  14:22:38
+        Log: NetWare tweak from Ananth Kesari.
+     Branch: perl
+	   ! lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[ 14275] By: jhi                                   on 2002/01/15  14:19:43
+        Log: Throwback.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 14274] By: jhi                                   on 2002/01/15  14:16:28
+        Log: A couple of additional character classes from Jeffrey,
+             hopefully useful in future for internal use for implementing
+             some special cases of casing.
+             
+             Also regenerate once more all the character classes,
+             now without the timestamp.  A timestamp would be kind of
+             nice but it's not: having a timestamp in a file means that
+             even if the effective contents of file really didn't
+             change, the file looks as if it changed.
+     Branch: perl
+	   + lib/unicore/Is/CanonDCI.pl lib/unicore/Is/CaseIgno.pl
+	   + lib/unicore/Is/CombAbov.pl
+	   ! (edit 304 files)
+____________________________________________________________________________
+[ 14273] By: jhi                                   on 2002/01/15  13:53:01
+        Log: Make the test harder.
+     Branch: perl
+	   ! t/op/pat.t
+____________________________________________________________________________
+[ 14272] By: jhi                                   on 2002/01/15  13:51:11
+        Log: Additional utf8_heavy.pl tweak from Jeffrey.
+     Branch: perl
+	   ! lib/utf8_heavy.pl
+____________________________________________________________________________
+[ 14264] By: jhi                                   on 2002/01/15  04:19:11
+        Log: Pod nits.
+     Branch: perl
+	   ! lib/Unicode/UCD.pm pod/perlunicode.pod
+____________________________________________________________________________
+[ 14263] By: jhi                                   on 2002/01/15  02:14:29
+        Log: The Unicode categories doc patch to go with #14254,
+             from Jeffrey.
+     Branch: perl
+	   ! lib/Unicode/UCD.pm pod/perldelta.pod pod/perlunicode.pod
+____________________________________________________________________________
+[ 14262] By: jhi                                   on 2002/01/15  01:30:09
+        Log: There isn't going to be perl.third.exe.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[ 14261] By: jhi                                   on 2002/01/15  01:25:11
+        Log: Subject: [PATCH] small coredump correction
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Tue, 15 Jan 2002 00:22:52 +0100
+             Message-ID: <20020115002252.I691@rafael>
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[ 14260] By: jhi                                   on 2002/01/15  01:23:53
+        Log: Subject: [PATCH] Overriding readline() should also override <FH>     
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Mon, 14 Jan 2002 23:03:04 +0100
+             Message-ID: <20020114230304.A691@rafael>   
+             
+             Subject: Re: [PATCH] Overriding readline() should also override <FH> 
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Mon, 14 Jan 2002 23:18:43 +0100
+             Message-ID: <20020114231843.E691@rafael>   
+     Branch: perl
+	   ! pod/perlsub.pod t/op/override.t toke.c
+____________________________________________________________________________
+[ 14256] By: jhi                                   on 2002/01/14  14:42:12
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 14255] By: jhi                                   on 2002/01/14  14:04:24
         Log: Retract #14251 (the op slab allocator from perlio)
              until we figure out why 2.2.19 x86 debian gets
