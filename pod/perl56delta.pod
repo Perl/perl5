@@ -2631,7 +2631,9 @@ but still allowed it.
 
 In Perl 5.6.0 and later, C<"$$1"> always means C<"${$1}">.
 
-=item delete(), values() and C<\(%h)> operate on aliases to values, not copies
+=item
+
+delete(), values() and C<\(%h)> operate on aliases to values, not copies
 
 delete(), each(), values() and hashes in a list context return the actual
 values in the hash, instead of copies (as they used to in earlier

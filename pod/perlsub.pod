@@ -699,7 +699,9 @@ I<must> use C<local> instead of C<my>.
 
 =over 4
 
-=item 1. You need to give a global variable a temporary value, especially $_.
+=item 1.
+
+You need to give a global variable a temporary value, especially $_.
 
 The global variables, like C<@ARGV> or the punctuation variables, must be 
 C<local>ized with C<local()>.  This block reads in F</etc/motd>, and splits
@@ -716,7 +718,9 @@ in C<@Fields>.
 It particular, it's important to C<local>ize $_ in any routine that assigns
 to it.  Look out for implicit assignments in C<while> conditionals.
 
-=item 2. You need to create a local file or directory handle or a local function.
+=item 2.
+
+You need to create a local file or directory handle or a local function.
 
 A function that needs a filehandle of its own must use
 C<local()> on a complete typeglob.   This can be used to create new symbol
@@ -746,7 +750,9 @@ a local alias.
 See L<perlref/"Function Templates"> for more about manipulating
 functions by name in this way.
 
-=item 3. You want to temporarily change just one element of an array or hash.
+=item 3.
+
+You want to temporarily change just one element of an array or hash.
 
 You can C<local>ize just one element of an aggregate.  Usually this
 is done on dynamics:

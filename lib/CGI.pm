@@ -3530,12 +3530,18 @@ have several choices:
 
 =over 4
 
-=item 1. Use another name for the argument, if one is available.  For
-example, -value is an alias for -values.
+=item 1.
 
-=item 2. Change the capitalization, e.g. -Values
+Use another name for the argument, if one is available. 
+For example, -value is an alias for -values.
 
-=item 3. Put quotes around the argument name, e.g. '-values'
+=item 2.
+
+Change the capitalization, e.g. -Values
+
+=item 3.
+
+Put quotes around the argument name, e.g. '-values'
 
 =back
 
@@ -5669,6 +5675,7 @@ field.
 The second argument (-src) is also required and specifies the URL
 
 =item 3.
+
 The third option (-align, optional) is an alignment type, and may be
 TOP, BOTTOM or MIDDLE
 
@@ -6102,6 +6109,7 @@ Returns either the remote host name or IP address.
 if the former is unavailable.
 
 =item B<script_name()>
+
 Return the script name as a partial URL, for self-refering
 scripts.
 
@@ -6220,7 +6228,9 @@ Call B<nph()> with a non-zero parameter at any point after using CGI.pm in your 
 
       CGI->nph(1)
 
-=item By using B<-nph> parameters in the B<header()> and B<redirect()>  statements:
+=item By using B<-nph> parameters
+
+in the B<header()> and B<redirect()>  statements:
 
       print $q->header(-nph=>1);
 

@@ -802,66 +802,87 @@ modules are:
 =over
 
 =item *
+
 Language Extensions and Documentation Tools
 
 =item *
+
 Development Support
 
 =item *
+
 Operating System Interfaces
 
 =item *
+
 Networking, Device Control (modems) and InterProcess Communication
 
 =item *
+
 Data Types and Data Type Utilities
 
 =item *
+
 Database Interfaces
 
 =item *
+
 User Interfaces
 
 =item *
+
 Interfaces to / Emulations of Other Programming Languages
 
 =item *
+
 File Names, File Systems and File Locking (see also File Handles)
 
 =item *
+
 String Processing, Language Text Processing, Parsing, and Searching
 
 =item *
+
 Option, Argument, Parameter, and Configuration File Processing
 
 =item *
+
 Internationalization and Locale
 
 =item *
+
 Authentication, Security, and Encryption
 
 =item *
+
 World Wide Web, HTML, HTTP, CGI, MIME
 
 =item *
+
 Server and Daemon Utilities
 
 =item *
+
 Archiving and Compression
 
 =item *
+
 Images, Pixmap and Bitmap Manipulation, Drawing, and Graphing
 
 =item *
+
 Mail and Usenet News
 
 =item *
+
 Control Flow Utilities (callbacks and exceptions etc)
 
 =item *
+
 File Handle and Input/Output Stream Utilities
 
 =item *
+
 Miscellaneous Modules
 
 =back
@@ -1430,18 +1451,28 @@ Don't delete the original .pl file till the new .pm one works!
 
 =over 4
 
-=item Complete applications rarely belong in the Perl Module Library.
+=item *
 
-=item Many applications contain some Perl code that could be reused.
+Complete applications rarely belong in the Perl Module Library.
+
+=item *
+
+Many applications contain some Perl code that could be reused.
 
 Help save the world! Share your code in a form that makes it easy
 to reuse.
 
-=item Break-out the reusable code into one or more separate module files.
+=item *
 
-=item Take the opportunity to reconsider and redesign the interfaces.
+Break-out the reusable code into one or more separate module files.
 
-=item In some cases the 'application' can then be reduced to a small
+=item *
+
+Take the opportunity to reconsider and redesign the interfaces.
+
+=item *
+
+In some cases the 'application' can then be reduced to a small
 
 fragment of code built on top of the reusable modules. In these cases
 the application could invoked as:

@@ -678,16 +678,22 @@ the locale:
 
 =over 4
 
-=item B<Comparison operators> (C<lt>, C<le>, C<ge>, C<gt> and C<cmp>):
+=item  *
+
+B<Comparison operators> (C<lt>, C<le>, C<ge>, C<gt> and C<cmp>):
 
 Scalar true/false (or less/equal/greater) result is never tainted.
 
-=item B<Case-mapping interpolation> (with C<\l>, C<\L>, C<\u> or C<\U>)
+=item  *
+
+B<Case-mapping interpolation> (with C<\l>, C<\L>, C<\u> or C<\U>)
 
 Result string containing interpolated material is tainted if
 C<use locale> is in effect.
 
-=item B<Matching operator> (C<m//>):
+=item  *
+
+B<Matching operator> (C<m//>):
 
 Scalar true/false result never tainted.
 
@@ -700,7 +706,9 @@ expression contains C<\w> (to match an alphanumeric character), C<\W>
 C<use locale> is in effect and the regular expression contains C<\w>,
 C<\W>, C<\s>, or C<\S>.
 
-=item B<Substitution operator> (C<s///>):
+=item  *
+
+B<Substitution operator> (C<s///>):
 
 Has the same behavior as the match operator.  Also, the left
 operand of C<=~> becomes tainted when C<use locale> in effect
@@ -708,22 +716,30 @@ if modified as a result of a substitution based on a regular
 expression match involving C<\w>, C<\W>, C<\s>, or C<\S>; or of
 case-mapping with C<\l>, C<\L>,C<\u> or C<\U>.
 
-=item B<Output formatting functions> (printf() and write()):
+=item *
+
+B<Output formatting functions> (printf() and write()):
 
 Results are never tainted because otherwise even output from print,
 for example C<print(1/7)>, should be tainted if C<use locale> is in
 effect.
 
-=item B<Case-mapping functions> (lc(), lcfirst(), uc(), ucfirst()):
+=item *
+
+B<Case-mapping functions> (lc(), lcfirst(), uc(), ucfirst()):
 
 Results are tainted if C<use locale> is in effect.
 
-=item B<POSIX locale-dependent functions> (localeconv(), strcoll(),
+=item *
+
+B<POSIX locale-dependent functions> (localeconv(), strcoll(),
 strftime(), strxfrm()):
 
 Results are never tainted.
 
-=item B<POSIX character class tests> (isalnum(), isalpha(), isdigit(),
+=item *
+
+B<POSIX character class tests> (isalnum(), isalpha(), isdigit(),
 isgraph(), islower(), isprint(), ispunct(), isspace(), isupper(),
 isxdigit()):
 

@@ -1432,7 +1432,7 @@ assigning to it and when evaluating its argument, while C<@foo{&bar}> behaves
 like a list when you assign to it, and provides a list context to its
 subscript, which can do weird things if you're expecting only one subscript.
 
-=item Stub found while resolving method `%s' overloading `%s' in package `%s'
+=item Stub found while resolving method `%s' overloading `%s' in %s
 
 (P) Overloading resolution over @ISA tree may be broken by importing stubs.
 Stubs should never be implicitly created, but explicit calls to C<can>

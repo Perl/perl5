@@ -166,24 +166,31 @@ Perl has several abbreviations for common character classes:
 =over 4
 
 =item *
+
 \d is a digit and represents [0-9]
 
 =item *
+
 \s is a whitespace character and represents [\ \t\r\n\f]
 
 =item *
+
 \w is a word character (alphanumeric or _) and represents [0-9a-zA-Z_]
 
 =item *
+
 \D is a negated \d; it represents any character but a digit [^0-9]
 
 =item *
+
 \S is a negated \s; it represents any non-whitespace character [^\s]
 
 =item *
+
 \W is a negated \w; it represents any non-word character [^\w]
 
 =item *
+
 The period '.' matches any character but "\n"
 
 =back

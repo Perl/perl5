@@ -192,56 +192,83 @@ rewrite that provides the following additional benefits:
 
 =over 4
 
-=item * modularity and reusability using innumerable modules 
+=item *
+
+modularity and reusability using innumerable modules 
 
 Described in L<perlmod>, L<perlmodlib>, and L<perlmodinstall>.
 
-=item * embeddable and extensible 
+=item *
+
+embeddable and extensible 
 
 Described in L<perlembed>, L<perlxstut>, L<perlxs>, L<perlcall>,
 L<perlguts>, and L<xsubpp>.
 
-=item * roll-your-own magic variables (including multiple simultaneous DBM implementations)
+=item *
+
+roll-your-own magic variables (including multiple simultaneous DBM implementations)
 
 Described in L<perltie> and L<AnyDBM_File>.
 
-=item * subroutines can now be overridden, autoloaded, and prototyped
+=item *
+
+subroutines can now be overridden, autoloaded, and prototyped
 
 Described in L<perlsub>.
 
-=item * arbitrarily nested data structures and anonymous functions
+=item *
+
+arbitrarily nested data structures and anonymous functions
 
 Described in L<perlreftut>, L<perlref>, L<perldsc>, and L<perllol>.
 
-=item * object-oriented programming
+=item *
+
+object-oriented programming
 
 Described in L<perlobj>, L<perltoot>, and L<perlbot>.
 
-=item * compilability into C code or Perl bytecode
+=item *
+
+compilability into C code or Perl bytecode
 
 Described in L<B> and L<B::Bytecode>.
 
-=item * support for light-weight processes (threads)
+=item *
+
+support for light-weight processes (threads)
 
 Described in L<perlthrtut> and L<Thread>.
 
-=item * support for internationalization, localization, and Unicode 
+=item *
+
+support for internationalization, localization, and Unicode 
 
 Described in L<perllocale> and L<utf8>.
 
-=item * lexical scoping
+=item *
+
+lexical scoping
 
 Described in L<perlsub>.
 
-=item * regular expression enhancements
+=item *
+
+regular expression enhancements
 
 Described in L<perlre>, with additional examples in L<perlop>.
 
-=item * enhanced debugger and interactive Perl environment, with integrated editor support
+=item *
+
+enhanced debugger and interactive Perl environment,
+with integrated editor support
 
 Described in L<perldebug>.
 
-=item * POSIX 1003.1 compliant library
+=item *
+
+POSIX 1003.1 compliant library
 
 Described in L<POSIX>.
 
