@@ -648,13 +648,19 @@ B::OP
 LOGOP_other(o)
 	B::LOGOP	o
 
-#define LISTOP_children(o)	o->op_children
-
 MODULE = B	PACKAGE = B::LISTOP		PREFIX = LISTOP_
 
 U32
 LISTOP_children(o)
 	B::LISTOP	o
+	OP *		kid = NO_INIT
+	int		i = NO_INIT
+    CODE:
+	ST(0) = sv_newmortal();
+	i = 0;
+	for (kid = o->op_first; kid; kid = kid->op_sibling)
+	    i++;
+	sv_setiv(ST(0), i);
 
 #define PMOP_pmreplroot(o)	o->op_pmreplroot
 #define PMOP_pmreplstart(o)	o->op_pmreplstart

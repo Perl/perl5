@@ -114,11 +114,6 @@
 #define	ISMULT1(c)	((c) == '*' || (c) == '+' || (c) == '?')
 #define	ISMULT2(s)	((*s) == '*' || (*s) == '+' || (*s) == '?' || \
 	((*s) == '{' && regcurly(s)))
-#ifdef atarist
-#define	PERL_META	"^$.[()|?+*\\"
-#else
-#define	META	"^$.[()|?+*\\"
-#endif
 
 #ifdef SPSTART
 #undef SPSTART		/* dratted cpp namespace... */

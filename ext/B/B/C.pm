@@ -225,11 +225,10 @@ sub B::LISTOP::save {
     my ($op, $level) = @_;
     my $sym = objsym($op);
     return $sym if defined $sym;
-    $listopsect->add(sprintf("s\\_%x, s\\_%x, NULL, %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x, %u",
+    $listopsect->add(sprintf("s\\_%x, s\\_%x, NULL, %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x",
 			     ${$op->next}, ${$op->sibling},
 			     $op->targ, $op->type, $op_seq, $op->flags,
-			     $op->private, ${$op->first}, ${$op->last},
-			     $op->children));
+			     $op->private, ${$op->first}, ${$op->last}));
     my $ix = $listopsect->index;
     $init->add(sprintf("listop_list[$ix].op_ppaddr = %s;", $op->ppaddr));
     savesym($op, "(OP*)&listop_list[$ix]");
@@ -255,11 +254,11 @@ sub B::LOOP::save {
     #warn sprintf("LOOP: redoop %s, nextop %s, lastop %s\n",
     #		 peekop($op->redoop), peekop($op->nextop),
     #		 peekop($op->lastop)); # debug
-    $loopsect->add(sprintf("s\\_%x, s\\_%x, NULL, %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x, %u, s\\_%x, s\\_%x, s\\_%x",
+    $loopsect->add(sprintf("s\\_%x, s\\_%x, NULL, %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x, s\\_%x, s\\_%x, s\\_%x",
 			   ${$op->next}, ${$op->sibling},
 			   $op->targ, $op->type, $op_seq, $op->flags,
 			   $op->private, ${$op->first}, ${$op->last},
-			   $op->children, ${$op->redoop}, ${$op->nextop},
+			   ${$op->redoop}, ${$op->nextop},
 			   ${$op->lastop}));
     my $ix = $loopsect->index;
     $init->add(sprintf("loop_list[$ix].op_ppaddr = %s;", $op->ppaddr));
@@ -351,10 +350,10 @@ sub B::PMOP::save {
     # pmnext handling is broken in perl itself, I think. Bad op_pmnext
     # fields aren't noticed in perl's runtime (unless you try reset) but we
     # segfault when trying to dereference it to find op->op_pmnext->op_type
-    $pmopsect->add(sprintf("s\\_%x, s\\_%x, NULL, %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x, %u, %s, %s, 0, 0, 0x%x, 0x%x",
+    $pmopsect->add(sprintf("s\\_%x, s\\_%x, NULL, %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x, %s, %s, 0, 0, 0x%x, 0x%x",
 			   ${$op->next}, ${$op->sibling}, $op->targ,
 			   $op->type, $op_seq, $op->flags, $op->private,
-			   ${$op->first}, ${$op->last}, $op->children,
+			   ${$op->first}, ${$op->last}, 
 			   $replrootfield, $replstartfield,
 			   $op->pmflags, $op->pmpermflags,));
     my $pm = sprintf("pmop_list[%d]", $pmopsect->index);

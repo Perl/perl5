@@ -1,7 +1,7 @@
 # Pod::Man -- Convert POD data to formatted *roff input.
-# $Id: Man.pm,v 1.10 2000/11/19 05:46:19 eagle Exp $
+# $Id: Man.pm,v 1.14 2001/01/16 13:39:45 eagle Exp $
 #
-# Copyright 1999, 2000 by Russ Allbery <rra@stanford.edu>
+# Copyright 1999, 2000, 2001 by Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -38,7 +38,7 @@ use vars qw(@ISA %ESCAPES $PREAMBLE $VERSION);
 # Perl core and too many things could munge CVS magic revision strings.
 # This number should ideally be the same as the CVS revision in podlators,
 # however.
-$VERSION = 1.10;
+$VERSION = 1.14;
 
 
 ############################################################################
@@ -410,6 +410,10 @@ sub begin_pod {
         }
     }
 
+    # If $name contains spaces, quote it; this mostly comes up in the case
+    # of input from stdin.
+    $name = '"' . $name . '"' if ($name =~ /\s/);
+
     # Modification date header.  Try to use the modification time of our
     # input.
     if (!defined $$self{date}) {
@@ -630,6 +634,7 @@ sub cmd_head1 {
     local $_ = $self->parse (@_);
     s/\s+$//;
     s/\\s-?\d//g;
+    s/\s*\n\s*/ /g;
     if ($$self{ITEMS} > 1) {
         $$self{ITEMS} = 0;
         $self->output (".PD\n");
@@ -644,6 +649,7 @@ sub cmd_head2 {
     my $self = shift;
     local $_ = $self->parse (@_);
     s/\s+$//;
+    s/\s*\n\s*/ /g;
     if ($$self{ITEMS} > 1) {
         $$self{ITEMS} = 0;
         $self->output (".PD\n");
@@ -658,6 +664,7 @@ sub cmd_head3 {
     my $self = shift;
     local $_ = $self->parse (@_);
     s/\s+$//;
+    s/\s*\n\s*/ /g;
     if ($$self{ITEMS} > 1) {
         $$self{ITEMS} = 0;
         $self->output (".PD\n");
@@ -673,6 +680,7 @@ sub cmd_head4 {
     my $self = shift;
     local $_ = $self->parse (@_);
     s/\s+$//;
+    s/\s*\n\s*/ /g;
     if ($$self{ITEMS} > 1) {
         $$self{ITEMS} = 0;
         $self->output (".PD\n");
@@ -1063,7 +1071,7 @@ sub output { print { $_[0]->output_handle } $_[1] }
 # If there are double quotes, use an if statement to test for nroff, and for
 # nroff output the command followed by the argument in double quotes with
 # embedded double quotes doubled.  For other formatters, remap paired double
-# quotes to `` and ''.
+# quotes to LQUOTE and RQUOTE.
 sub switchquotes {
     my $self = shift;
     my $command = shift;
@@ -1073,17 +1081,19 @@ sub switchquotes {
 
     # We also have to deal with \*C` and \*C', which are used to add the
     # quotes around C<> text, since they may expand to " and if they do this
-    # confuses the .SH macros and the like no end.
+    # confuses the .SH macros and the like no end.  Expand them ourselves.
+    # If $extra is set, we're dealing with =item, which in most nroff macro
+    # sets requires an extra level of quoting of double quotes.
     my $c_is_quote = ($$self{LQUOTE} =~ /\"/) || ($$self{RQUOTE} =~ /\"/);
     if (/\"/ || ($c_is_quote && /\\\*\(C[\'\`]/)) {
         s/\"/\"\"/g;
         my $troff = $_;
         $troff =~ s/\"\"([^\"]*)\"\"/\`\`$1\'\'/g;
-        s/\"/\"\"/g if $extra;
-        $troff =~ s/\"/\"\"/g if $extra;
         s/\\\*\(C\`/$$self{LQUOTE}/g;
         s/\\\*\(C\'/$$self{RQUOTE}/g;
         $troff =~ s/\\\*\(C[\'\`]//g;
+        s/\"/\"\"/g if $extra;
+        $troff =~ s/\"/\"\"/g if $extra;
         $_ = qq("$_") . ($extra ? " $extra" : '');
         $troff = qq("$troff") . ($extra ? " $extra" : '');
         return ".if n $command $_\n.el $command $troff\n";
