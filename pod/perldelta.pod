@@ -228,8 +228,8 @@ since it, in a way, falsely promised that the features could be used.
 =item *
 
 In future releases, non-PerlIO aware XS modules may become completely
-unsupported.  Since PerlIO is a drop-in replacement for stdio, this
-shouldn't be that drastic a change.
+unsupported.  Since PerlIO is a drop-in replacement for stdio at the
+source code level, this shouldn't be that drastic a change.
 
 =item *
 
@@ -505,7 +505,7 @@ in multiple arguments.)
 =item *
 
 C<do> followed by a bareword now ensures that this bareword isn't
-a keyword (to avoid a bug where C<do q(foo.pl)> tried to call
+a keyword (to avoid a bug where C<do q(foo.pl)> tried to call a
 subroutine called C<q>).  This means that for example instead of
 C<do format()> you must write C<do &format()>.
 
