@@ -2,7 +2,7 @@
 
 # $RCSfile: lex.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:04 $
 
-print "1..28\n";
+print "1..30\n";
 
 $x = 'x';
 
@@ -104,9 +104,15 @@ print "FOO:" =~ /$foo[:]/ ? "ok 24\n" : "not ok 24\n";
 print "ABC" =~ /^$ary[$A]$/ ? "ok 25\n" : "not ok 25\n";
 print "FOOZ" =~ /^$foo[$A-Z]$/ ? "ok 26\n" : "not ok 26\n";
 
-print (((q{{\{\(}} . q{{\)\}}}) eq '{{\(}{\)}}') ? "ok 27\n" : "not ok 27\n");
+# MJD 19980425
+($X, @X) = qw(a b c d); 
+print "d" =~ /^$X[-1]$/ ? "ok 27\n" : "not ok 27\n";
+print "a1" !~ /^$X[-1]$/ ? "ok 28\n" : "not ok 28\n";
 
-$foo = "not ok 28\n";
+print (((q{{\{\(}} . q{{\)\}}}) eq '{{\(}{\)}}') ? "ok 29\n" : "not ok 29\n");
+
+
+$foo = "not ok 30\n";
 $foo =~ s/^not /substr(<<EOF, 0, 0)/e;
   Ignored
 EOF
