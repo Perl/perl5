@@ -369,6 +369,8 @@ $priv{"threadsv"}{64} = "SVREFd";
 @{$priv{$_}}{16,32,64,128} = ("INBIN","INCR","OUTBIN","OUTCR")
   for ("open", "backtick");
 $priv{"exit"}{128} = "VMS";
+$priv{$_}{2} = "FTACCESS"
+  for ("ftrread", "ftrwrite", "ftrexec", "fteread", "ftewrite", "fteexec");
 
 sub private_flags {
     my($name, $x) = @_;

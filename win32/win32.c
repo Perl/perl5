@@ -3971,7 +3971,7 @@ win32_execvp(const char *cmdname, const char *const *argv)
     /* if this is a pseudo-forked child, we just want to spawn
      * the new program, and return */
     if (w32_pseudo_id) {
-	int status = win32_spawnvp(P_WAIT, cmdname, (char *const *)argv);
+	int status = win32_spawnvp(P_WAIT, cmdname, (const char *const *)argv);
 	if (status != -1) {
 	    my_exit(status);
 	    return 0;
@@ -4429,11 +4429,11 @@ XS(w32_DomainName)
 	/* NERR_Success *is* 0*/
 	if (0 == pfnNetWkstaGetInfo(NULL, 100, &pwi)) {
 	    if (pwi->wki100_langroup && *(pwi->wki100_langroup)) {
-		WideCharToMultiByte(CP_ACP, NULL, pwi->wki100_langroup,
+		WideCharToMultiByte(CP_ACP, 0, pwi->wki100_langroup,
 				    -1, (LPSTR)dname, dnamelen, NULL, NULL);
 	    }
 	    else {
-		WideCharToMultiByte(CP_ACP, NULL, pwi->wki100_computername,
+		WideCharToMultiByte(CP_ACP, 0, pwi->wki100_computername,
 				    -1, (LPSTR)dname, dnamelen, NULL, NULL);
 	    }
 	    pfnNetApiBufferFree(pwi);

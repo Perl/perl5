@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat Apr 26 00:34:39 EET DST 2003 [metaconfig 3.0 PL70]
+# Generated on Sun May  4 12:24:37 EET DST 2003 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -3195,7 +3195,8 @@ EOM
 			mips)	osname=mips_osf1 ;;
 			esac
 			;;
-		unixware) osname=svr5
+		# UnixWare 7.1.2 is known as Open UNIX 8
+		openunix|unixware) osname=svr5
 			osvers="$4"
 			;;
 		uts)	osname=uts

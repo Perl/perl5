@@ -617,6 +617,10 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
 	    if (o->op_private & OPpHUSH_VMSISH)
 		sv_catpv(tmpsv, ",HUSH_VMSISH");
 	}
+	else if (OP_IS_FILETEST_ACCESS(o)) {
+	     if (o->op_private & OPpFT_ACCESS)
+		  sv_catpv(tmpsv, ",FT_ACCESS");
+	}
 	if (o->op_flags & OPf_MOD && o->op_private & OPpLVAL_INTRO)
 	    sv_catpv(tmpsv, ",INTRO");
 	if (SvCUR(tmpsv))

@@ -6069,7 +6069,7 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
 	Stat_t st;
 	if (!PerlLIO_fstat(PerlIO_fileno(fp), &st) && S_ISREG(st.st_mode))  {
 	    Off_t offset = PerlIO_tell(fp);
-	    if (offset != (Off_t) -1) {
+	    if (offset != (Off_t) -1 && st.st_size + append > offset) {
 	     	(void) SvGROW(sv, (STRLEN)((st.st_size - offset) + append + 1));
 	    }
 	}
