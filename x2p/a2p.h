@@ -1,4 +1,4 @@
-/* $RCSfile: a2p.h,v $$Revision: 4.1 $$Date: 1996/07/05 23:49:58 $
+/* $RCSfile: a2p.h,v $$Revision: 4.1 $$Date: 92/08/07 18:29:09 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,9 +6,6 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	a2p.h,v $
- * Revision 1.2  1996/07/05 23:49:58  gerti
- * OPENSTEP 4.0 patches
- *
  */
 
 #include "../embed.h"
