@@ -31,6 +31,161 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 14416] By: jhi                                   on 2002/01/25  15:04:25
+        Log: Integrate perlio; extensive threads and threads::shared work
+             
+             Nearly-working threads re-structuring. Do not integrate,
+             submit-ing to get to Win32, and as "off site" backup.
+             
+             threads work again on Win32. (Not threads::shared yet)
+             Submit to see if they do on Linux.
+             
+             Add new threads/typemap to MANIFEST
+             
+             XS side of new threads::shared designed, coded and compiles,
+             and mostly commented but is totaly untested.
+             submit in case anyone wants a preview.
+             
+             Miss mg_len == 0 meaning don't Safefree
+             
+             Shared scalars working, some shared array ops working.
+             
+             Implement recursive lock and use of scope for PL_sharedsv_space,
+             so now croak() from asserts does not leave locks.
+             Make hv_simple compile (new prototype for debugging probe).
+             
+             thread::shared nearly working again - remaining issue
+             is references withing shared space.
+             Added bulk test with no threads involved (for debugging)
+             Tuned tests to skip those needing _thrcnt
+             
+             SvTEMP_off to stop private PV's being stolen and stored in shared space
+             
+             Except Win32 from echo tests. (Alarm does not break into connect)
+             
+             Expand command line test globs on Win32.
+             
+             threads::shared tidy up:
+             - Add _id() function to shared.xs so we can test refs point at same thing.
+             - Use that rather that comparing stringified ref in shared/t/hv_refs.t
+             - Allow no_share to pass if sharing to works despite mis-ordering.
+             - Change docs of threads to document ->create() (as used in tests),
+             and not mention "new".
+             
+             Linux/NFS hackery was not faking right number of passes.
+     Branch: perl
+	  +> ext/threads/shared/t/0nothread.t ext/threads/shared/typemap
+	  +> ext/threads/typemap
+	   - ext/threads/threads.h sharedsv.c sharedsv.h
+	   ! NetWare/config_H.wc
+	  !> (integrate 38 files)
+____________________________________________________________________________
+[ 14415] By: jhi                                   on 2002/01/25  14:33:43
+        Log: Subject: Re: perldebguts minor tweaks
+             From: Joe McMahon <mcmahon@metalab.unc.edu>
+             Date: Fri, 25 Jan 2002 10:32:45 -0500 (EST)
+             Message-ID: <Pine.LNX.4.33.0201251031530.9326-100000@tribal.metalab.unc.edu>
+     Branch: perl
+	   ! pod/perldebguts.pod
+____________________________________________________________________________
+[ 14413] By: jhi                                   on 2002/01/25  14:05:49
+        Log: Okay, you can come home now, _().
+     Branch: perl
+	   ! config_h.SH
+____________________________________________________________________________
+[ 14409] By: jhi                                   on 2002/01/24  21:08:35
+        Log: Subject: perldebguts minor tweaks
+             From: Joe McMahon <mcmahon@metalab.unc.edu>
+             Date: Thu, 24 Jan 2002 16:48:43 -0500 (EST)
+             Message-ID: <Pine.LNX.4.33.0201241646580.14744-100000@tribal.metalab.unc.edu>
+     Branch: perl
+	   ! pod/perldebguts.pod
+____________________________________________________________________________
+[ 14408] By: jhi                                   on 2002/01/24  20:58:15
+        Log: Subject: [PATCH] perldebguts.pod [bleadperl]
+             From: Peter Scott <Peter@PSDT.com>
+             Date: Thu, 24 Jan 2002 08:51:34 -0800
+             Message-Id: <4.3.2.7.2.20020123073917.00bac740@mail.webquarry.com>
+     Branch: perl
+	   ! pod/perldebguts.pod
+____________________________________________________________________________
+[ 14407] By: jhi                                   on 2002/01/24  20:55:34
+        Log: Few more paranoia checks for Unicode hash keys.
+     Branch: perl
+	   ! t/op/each.t
+____________________________________________________________________________
+[ 14406] By: jhi                                   on 2002/01/24  18:03:02
+        Log: Subject: [PATCH] Suppress /bin/ls errors in t/op/stat.t
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Thu, 24 Jan 2002 13:02:20 -0500 (EST)
+             Message-ID: <Pine.SOL.4.10.10201241238510.23176-100000@maxwell.phys.lafayette.edu>
+     Branch: perl
+	   ! t/op/stat.t
+____________________________________________________________________________
+[ 14405] By: jhi                                   on 2002/01/24  15:44:31
+        Log: The
+             
+             Subject: Very old debugger UTF-8 bug
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 24 Jan 2002 12:45:44 +0100
+             Message-ID: <m3y9iot1jr.fsf@anima.de>
+             
+             still broken, but this should work as a stopgap
+             measure to stop pp_match accessing naughty data.
+     Branch: perl
+	   ! pod/perldiag.pod pp_hot.c
+____________________________________________________________________________
+[ 14403] By: jhi                                   on 2002/01/24  13:13:29
+        Log: Pacify picky compilers (this time Sun Workshop).
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 14402] By: jhi                                   on 2002/01/24  12:45:02
+        Log: Subject: Very old debugger UTF-8 bug
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 24 Jan 2002 12:45:44 +0100
+             Message-ID: <m3y9iot1jr.fsf@anima.de>
+     Branch: perl
+	   ! lib/dumpvar.pl
+____________________________________________________________________________
+[ 14400] By: jhi                                   on 2002/01/24  02:49:05
+        Log: Sprinkle some copyrights (use the oldest timestamp to
+             be found in the repository, which is most often not right,
+             but at least consistent)
+     Branch: perl
+	   ! XSUB.h cc_runtime.h dosish.h embed.h embed.pl embedvar.h
+	   ! fakesdio.h fakethr.h global.sym globals.c keywords.h
+	   ! keywords.pl miniperlmain.c nostdio.h opcode.h opcode.pl
+	   ! opnames.h patchlevel.h perl.h perlapi.c perlapi.h perlio.h
+	   ! perlsdio.h perlsfio.h perlvars.h proto.h regcomp.h regexp.h
+	   ! scope.h sharedsv.h taint.c thrdvar.h thread.h universal.c
+	   ! unixish.h xsutils.c
+____________________________________________________________________________
+[ 14391] By: jhi                                   on 2002/01/23  18:48:45
+        Log: Copyright++.  (Not all the toplevel *.h have one, it seems.)
+     Branch: perl
+	   ! EXTERN.h INTERN.h README av.c av.h cop.h cv.h deb.c doio.c
+	   ! doop.c dump.c form.h gv.c gv.h handy.h hv.c hv.h locale.c mg.c
+	   ! mg.h numeric.c op.c op.h perl.c perl.h perlio.c perly.y
+	   ! pod/perlfaq1.pod pod/perlfaq2.pod pod/perlmodinstall.pod
+	   ! pod/perluniintro.pod pp.c pp.h pp_ctl.c pp_hot.c pp_pack.c
+	   ! pp_sort.c pp_sys.c regcomp.c regexec.c run.c scope.c
+	   ! sharedsv.c sv.c sv.h toke.c utf8.c utf8.h utfebcdic.h util.c
+	   ! util.h x2p/EXTERN.h x2p/INTERN.h x2p/a2p.c x2p/a2p.h x2p/a2p.y
+	   ! x2p/hash.c x2p/hash.h x2p/proto.h x2p/str.c x2p/str.h
+	   ! x2p/util.c x2p/util.h x2p/walk.c
+____________________________________________________________________________
+[ 14390] By: jhi                                   on 2002/01/23  18:30:18
+        Log: Unused (the only occurrence of USE_BYTES_DOWNGRADES) and
+             therefore quite probably also obsolete code.
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 14389] By: jhi                                   on 2002/01/23  15:09:38
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 14388] By: jhi                                   on 2002/01/23  15:04:06
         Log: Small update on todo.  Could use a lot more.
      Branch: perl
