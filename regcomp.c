@@ -443,7 +443,7 @@ S_cl_is_anything(pTHX_ struct regnode_charclass_class *cl)
 {
     int value;
 
-    for (value = 0; value < ANYOF_MAX; value += 2)
+    for (value = 0; value <= ANYOF_MAX; value += 2)
 	if (ANYOF_CLASS_TEST(cl, value) && ANYOF_CLASS_TEST(cl, value + 1))
 	    return 1;
     for (value = 0; value < 256; ++value)
@@ -3004,6 +3004,11 @@ S_regpposixcc(pTHX_ I32 value)
 			    namedclass =
 				complement ? ANYOF_NASCII : ANYOF_ASCII;
 			break;
+		    case 'b':
+			if (strnEQ(posixcc, "blank", 5))
+			    namedclass =
+				complement ? ANYOF_NBLANK : ANYOF_BLANK;
+			break;
 		    case 'c':
 			if (strnEQ(posixcc, "cntrl", 5))
 			    namedclass =
@@ -3035,7 +3040,7 @@ S_regpposixcc(pTHX_ I32 value)
 		    case 's':
 			if (strnEQ(posixcc, "space", 5))
 			    namedclass =
-				complement ? ANYOF_NSPACE : ANYOF_SPACE;
+				complement ? ANYOF_NPSXSPC : ANYOF_PSXSPC;
 			break;
 		    case 'u':
 			if (strnEQ(posixcc, "upper", 5))
@@ -3160,7 +3165,7 @@ S_regclass(pTHX)
 	else if (value == '\\') {
 	    value = UCHARAT(PL_regcomp_parse++);
 	    /* Some compilers cannot handle switching on 64-bit integer
-	     * values, therefore value cannot be an UV. --jhi */
+	     * values, therefore the 'value' cannot be an UV. --jhi */
 	    switch (value) {
 	    case 'w':	namedclass = ANYOF_ALNUM;	break;
 	    case 'W':	namedclass = ANYOF_NALNUM;	break;
@@ -3339,6 +3344,24 @@ S_regclass(pTHX)
 #endif /* EBCDIC */
 		    }
 		    break;
+		case ANYOF_BLANK:
+		    if (LOC)
+			ANYOF_CLASS_SET(ret, ANYOF_BLANK);
+		    else {
+			for (value = 0; value < 256; value++)
+			    if (isBLANK(value))
+				ANYOF_BITMAP_SET(ret, value);
+		    }
+		    break;
+		case ANYOF_NBLANK:
+		    if (LOC)
+			ANYOF_CLASS_SET(ret, ANYOF_NBLANK);
+		    else {
+			for (value = 0; value < 256; value++)
+			    if (!isBLANK(value))
+				ANYOF_BITMAP_SET(ret, value);
+		    }
+		    break;
 		case ANYOF_CNTRL:
 		    if (LOC)
 			ANYOF_CLASS_SET(ret, ANYOF_CNTRL);
@@ -3409,6 +3432,24 @@ S_regclass(pTHX)
 		    else {
 			for (value = 0; value < 256; value++)
 			    if (!isPRINT(value))
+				ANYOF_BITMAP_SET(ret, value);
+		    }
+		    break;
+		case ANYOF_PSXSPC:
+		    if (LOC)
+			ANYOF_CLASS_SET(ret, ANYOF_PSXSPC);
+		    else {
+			for (value = 0; value < 256; value++)
+			    if (isPSXSPC(value))
+				ANYOF_BITMAP_SET(ret, value);
+		    }
+		    break;
+		case ANYOF_NPSXSPC:
+		    if (LOC)
+			ANYOF_CLASS_SET(ret, ANYOF_NPSXSPC);
+		    else {
+			for (value = 0; value < 256; value++)
+			    if (!isPSXSPC(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
 		    break;
@@ -3739,8 +3780,12 @@ S_regclassutf8(pTHX)
 		case ANYOF_NPUNCT:
 		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsPunct\n");	break;
 		case ANYOF_SPACE:
+		case ANYOF_PSXSPC:
+		case ANYOF_BLANK:
 		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsSpace\n");	break;
 		case ANYOF_NSPACE:
+		case ANYOF_NPSXSPC:
+		case ANYOF_NBLANK:
 		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsSpace\n");	break;
 		case ANYOF_UPPER:
 		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsUpper\n");	break;
@@ -4193,7 +4238,7 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
     else if (k == ANYOF) {
 	int i, rangestart = -1;
 	const char * const out[] = {	/* Should be syncronized with
-					   a table in regcomp.h */
+					   ANYOF_ #xdefines in regcomp.h */
 	    "\\w",
 	    "\\W",
 	    "\\s",
@@ -4217,9 +4262,13 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 	    "[:punct:]",
 	    "[:^punct:]",
 	    "[:upper:]",
-	    "[:!upper:]",
+	    "[:^upper:]",
 	    "[:xdigit:]",
-	    "[:^xdigit:]"
+	    "[:^xdigit:]",
+	    "[:space:]",
+	    "[:^space:]",
+	    "[:blank:]",
+	    "[:^blank:]"
 	};
 
 	if (o->flags & ANYOF_LOCALE)

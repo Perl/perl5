@@ -4,7 +4,7 @@
 # the format supported by op/regexp.t.  If you want to add a test
 # that does fit that format, add it to op/re_tests, not here.
 
-print "1..220\n";
+print "1..223\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -1058,3 +1058,29 @@ $w = 0;
 }
 print $w ? "not " : "", "ok $test\n";
 $test++;
+
+my %space = ( spc   => " ",
+	      tab   => "\t",
+	      cr    => "\r",
+	      lf    => "\n",
+	      ff    => "\f",
+# The vertical tabulator seems miraculously be 12 both in ASCII and EBCDIC.
+	      vt    => chr(11),
+	      false => "space" );
+
+my @space0 = sort grep { $space{$_} =~ /\s/ }          keys %space;
+my @space1 = sort grep { $space{$_} =~ /[[:space:]]/ } keys %space;
+my @space2 = sort grep { $space{$_} =~ /[[:blank:]]/ } keys %space;
+
+print "not " unless "@space0" eq "cr ff lf spc tab";
+print "ok $test\n";
+$test++;
+
+print "not " unless "@space1" eq "cr ff lf spc tab vt";
+print "ok $test\n";
+$test++;
+
+print "not " unless "@space2" eq "spc tab";
+print "ok $test\n";
+$test++;
+ 

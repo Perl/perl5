@@ -3625,7 +3625,11 @@ S_reginclass(pTHX_ register regnode *p, register I32 c)
 	    (ANYOF_CLASS_TEST(p, ANYOF_UPPER)   &&  isUPPER_LC(c))  ||
 	    (ANYOF_CLASS_TEST(p, ANYOF_NUPPER)  && !isUPPER_LC(c))  ||
 	    (ANYOF_CLASS_TEST(p, ANYOF_XDIGIT)  &&  isXDIGIT(c))    ||
-	    (ANYOF_CLASS_TEST(p, ANYOF_NXDIGIT) && !isXDIGIT(c))
+	    (ANYOF_CLASS_TEST(p, ANYOF_NXDIGIT) && !isXDIGIT(c))    ||
+	    (ANYOF_CLASS_TEST(p, ANYOF_PSXSPC)  &&  isPSXSPC(c))    ||
+	    (ANYOF_CLASS_TEST(p, ANYOF_NPSXSPC) && !isPSXSPC(c))    ||
+	    (ANYOF_CLASS_TEST(p, ANYOF_BLANK)   &&  isBLANK(c))    ||
+	    (ANYOF_CLASS_TEST(p, ANYOF_NBLANK)  && !isBLANK(c))
 	    ) /* How's that for a conditional? */
 	{
 	    match = TRUE;

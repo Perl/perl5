@@ -296,6 +296,8 @@ Converts the specified character to lowercase.
 #define isALPHA(c)	(isUPPER(c) || isLOWER(c))
 #define isSPACE(c) \
 	((c) == ' ' || (c) == '\t' || (c) == '\n' || (c) =='\r' || (c) == '\f')
+#define isPSXSPC(c)	(isSPACE(c) || (c) == '\v')
+#define isBLANK(c)	((c) == ' ' || (c) == '\t')
 #define isDIGIT(c)	((c) >= '0' && (c) <= '9')
 #ifdef EBCDIC
     /* In EBCDIC we do not do locales: therefore() isupper() is fine. */
@@ -382,6 +384,9 @@ Converts the specified character to lowercase.
 #  endif
 #endif /* USE_NEXT_CTYPE */
 
+#define isPSXSPC_LC(c)		(isSPACE_LC(c) || (c) == '\v')
+#define isBLANK_LC(c)		isBLANK(c) /* could be wrong */
+
 #define isALNUM_uni(c)		is_uni_alnum(c)
 #define isIDFIRST_uni(c)	is_uni_idfirst(c)
 #define isALPHA_uni(c)		is_uni_alpha(c)
@@ -400,6 +405,9 @@ Converts the specified character to lowercase.
 #define toTITLE_uni(c)		to_uni_title(c)
 #define toLOWER_uni(c)		to_uni_lower(c)
 
+#define isPSXSPC_uni(c)		(isSPACE_uni(c) ||(c) == '\f')
+#define isBLANK_uni(c)		isBLANK(c) /* could be wrong */
+
 #define isALNUM_LC_uni(c)	(c < 256 ? isALNUM_LC(c) : is_uni_alnum_lc(c))
 #define isIDFIRST_LC_uni(c)	(c < 256 ? isIDFIRST_LC(c) : is_uni_idfirst_lc(c))
 #define isALPHA_LC_uni(c)	(c < 256 ? isALPHA_LC(c) : is_uni_alpha_lc(c))
@@ -415,6 +423,9 @@ Converts the specified character to lowercase.
 #define toUPPER_LC_uni(c)	(c < 256 ? toUPPER_LC(c) : to_uni_upper_lc(c))
 #define toTITLE_LC_uni(c)	(c < 256 ? toUPPER_LC(c) : to_uni_title_lc(c))
 #define toLOWER_LC_uni(c)	(c < 256 ? toLOWER_LC(c) : to_uni_lower_lc(c))
+
+#define isPSXSPC_LC_uni(c)	(isSPACE_LC_uni(c) ||(c) == '\f')
+#define isBLANK_LC_uni(c)	isBLANK(c) /* could be wrong */
 
 #define isALNUM_utf8(p)		is_utf8_alnum(p)
 #define isIDFIRST_utf8(p)	is_utf8_idfirst(p)
@@ -434,6 +445,9 @@ Converts the specified character to lowercase.
 #define toTITLE_utf8(p)		to_utf8_title(p)
 #define toLOWER_utf8(p)		to_utf8_lower(p)
 
+#define isPSXSPC_utf8(c)	(isSPACE_utf8(c) ||(c) == '\f')
+#define isBLANK_utf8(c)		isBLANK(c) /* could be wrong */
+
 #define isALNUM_LC_utf8(p)	isALNUM_LC_uni(utf8_to_uv(p, 0))
 #define isIDFIRST_LC_utf8(p)	isIDFIRST_LC_uni(utf8_to_uv(p, 0))
 #define isALPHA_LC_utf8(p)	isALPHA_LC_uni(utf8_to_uv(p, 0))
@@ -449,6 +463,9 @@ Converts the specified character to lowercase.
 #define toUPPER_LC_utf8(p)	toUPPER_LC_uni(utf8_to_uv(p, 0))
 #define toTITLE_LC_utf8(p)	toTITLE_LC_uni(utf8_to_uv(p, 0))
 #define toLOWER_LC_utf8(p)	toLOWER_LC_uni(utf8_to_uv(p, 0))
+
+#define isPSXSPC_LC_utf8(c)	(isSPACE_LC_utf8(c) ||(c) == '\f')
+#define isBLANK_LC_utf8(c)	isBLANK(c) /* could be wrong */
 
 #ifdef EBCDIC
 EXT int ebcdic_control (int);
