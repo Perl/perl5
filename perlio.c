@@ -553,7 +553,8 @@ PerlIO_push(PerlIO *f,PerlIO_funcs *tab,const char *mode,const char *arg,STRLEN 
    l->next = *f;
    l->tab  = tab;
    *f      = l;
-   PerlIO_debug("PerlIO_push f=%p %s %s\n",f,tab->name,(mode) ? mode : "(Null)");
+   PerlIO_debug("PerlIO_push f=%p %s %s '%.*s'\n",
+                 f,tab->name,(mode) ? mode : "(Null)",(int) len,arg);
    if ((*l->tab->Pushed)(f,mode,arg,len) != 0)
     {
      PerlIO_pop(f);
@@ -620,56 +621,71 @@ PerlIO_apply_layers(pTHX_ PerlIO *f, const char *mode, const char *names)
       s++;
      if (*s)
       {
+       STRLEN llen = 0;
        const char *e = s;
        const char *as = Nullch;
-       const char *ae = Nullch;
-       int count = 0;
-       while (*e && *e != ':' && !isSPACE(*e))
+       STRLEN alen = 0;
+       if (!isIDFIRST(*s))
         {
-         if (*e == '(')
-          {
-           if (!as)
-            as = e;
-           count++;
-          }
-         else if (*e == ')')
-          {
-           if (as && --count == 0)
-            ae = e;
-          }
+         /* Message is consistent with how attribute lists are passed.
+            Even though this means "foo : : bar" is seen as an invalid separator
+            character.  */
+         char q = ((*s == '\'') ? '"' : '\'');
+         Perl_warn(aTHX_ "perlio: invalid separator character %c%c%c in layer specification list", q, *s, q);
+         return -1;
+        }
+       do
+        {
          e++;
+        } while (isALNUM(*e));
+       llen = e-s;
+       if (*e == '(')
+        {
+         int nesting = 1;
+         as = ++e;
+         while (nesting)
+          {
+           switch (*e++)
+            {
+             case ')':
+              if (--nesting == 0)
+               alen = (e-1)-as;
+              break;
+             case '(':
+              ++nesting;
+              break;
+             case '\\':
+              /* It's a nul terminated string, not allowed to \ the terminating null.
+                 Anything other character is passed over.  */
+              if (*e++)
+               {
+                break;
+               }
+              /* Drop through */
+             case '\0':
+              e--;
+              Perl_warn(aTHX_ "perlio: argument list not closed for layer \"%.*s\"",(int)(e - s),s);
+              return -1;
+             default:
+              /* boring.  */
+              break;
+            }
+          }
         }
        if (e > s)
         {
-         if ((e - s) == 4 && strncmp(s,"utf8",4) == 0)
+         SV *layer = PerlIO_find_layer(s,llen);
+         if (layer)
           {
-           PerlIOBase(f)->flags |= PERLIO_F_UTF8;
-          }
-         else if ((e - s) == 5 && strncmp(s,"bytes",5) == 0)
-          {
-           PerlIOBase(f)->flags &= ~PERLIO_F_UTF8;
+           PerlIO_funcs *tab = INT2PTR(PerlIO_funcs *, SvIV(SvRV(layer)));
+           if (tab)
+            {
+             if (!PerlIO_push(f,tab,mode,as,alen))
+              return -1;
+            }
           }
          else
-          {
-           STRLEN len = ((as) ? as : e)-s;
-           SV *layer = PerlIO_find_layer(s,len);
-           if (layer)
-            {
-             PerlIO_funcs *tab = INT2PTR(PerlIO_funcs *, SvIV(SvRV(layer)));
-             if (tab)
-              {
-	       if (as && (ae == Nullch)) {
-		ae = e;
-		Perl_warn(aTHX_ "perlio: argument list not closed for layer \"%.*s\"",(int)(e - s),s);
-	       }
-               len = (as) ? (ae-(as++)-1) : 0;
-               if (!PerlIO_push(f,tab,mode,as,len))
-                return -1;
-              }
-            }
-           else
-            Perl_warn(aTHX_ "perlio: unknown layer \"%.*s\"",(int)len,s);
-          }
+          Perl_warn(aTHX_ "perlio: unknown layer \"%.*s\"",(int)llen,s);
         }
        s = e;
       }
