@@ -1052,7 +1052,7 @@ sub __strip_zeros
   }                                                                             
 
 ###############################################################################
-# check routine to test internal state of corruptions
+# check routine to test internal state for corruptions
 
 sub _check
   {
@@ -1081,7 +1081,7 @@ sub _check
     $i++;
     }
   return "Illegal part '$e' at pos $i (tested: $try)" if $i < $j;
-  return 0;
+  0;
   }
 
 
@@ -1120,7 +1120,7 @@ sub _mod
     }
   elsif ($b == 1)
     {
-    # else need to go trough all elements: O(N), but loop is a bit simplified
+    # else need to go through all elements: O(N), but loop is a bit simplified
     my $r = 0;
     foreach (@$x)
       {
@@ -1132,7 +1132,7 @@ sub _mod
     }
   else
     {
-    # else need to go trough all elements: O(N)
+    # else need to go through all elements: O(N)
     my $r = 0; my $bm = 1;
     foreach (@$x)
       {
@@ -1396,7 +1396,7 @@ sub _log_int
     $trial = _pow ($c, _copy($c, $base), $x);
     my $a = _acmp($x,$trial,$x_org);
     return ($x,1) if $a == 0;
-    # we now that $res is too small
+    # we now know that $res is too small
     if ($res < 0)
       {
       _mul($c,$trial,$base); _add($c, $x, [1]);
@@ -1551,11 +1551,12 @@ sub _root
     return $x;
     } 
 
-  # X is more than one element
+  # we know now that X is more than one element long
+
   # if $n is a power of two, we can repeatedly take sqrt($X) and find the
   # proper result, because sqrt(sqrt($x)) == root($x,4)
   my $b = _as_bin($c,$n);
-  if ($$b =~ /0b1(0+)/)
+  if ($$b =~ /0b1(0+)$/)
     {
     my $count = CORE::length($1);	# 0b100 => len('00') => 2
     my $cnt = $count;			# counter for loop
@@ -1577,42 +1578,54 @@ sub _root
   else
     {
     # trial computation by starting with 2,4,8,16 etc until we overstep
-
-    my $step = _two();
+    my $step;
     my $trial = _two();
 
-    _mul($c, $trial, $step) 
-      while (_acmp($c, _pow($c, _copy($c, $trial), $n), $x) < 0);
-
-    # hit exactly?
-    if (_acmp($c, _pow($c, _copy($c, $trial), $n), $x) == 0)
+    # while still to do more than X steps
+    do
       {
-      @$x = @$trial;			# make copy while preserving ref to $x
-      return $x;
-      }
-    # overstepped, so go back on step
-    _div($c, $trial, $step);
+      $step = _two();
+      while (_acmp($c, _pow($c, _copy($c, $trial), $n), $x) < 0)
+        {
+        _mul ($c, $step, [2]);
+        _add ($c, $trial, $step);
+        }
 
+      # hit exactly?
+      if (_acmp($c, _pow($c, _copy($c, $trial), $n), $x) == 0)
+        {
+        @$x = @$trial;			# make copy while preserving ref to $x
+        return $x;
+        }
+      # overstepped, so go back on step
+      _sub($c, $trial, $step);
+      } while (scalar @$step > 1 || $step->[0] > 128);
+
+    # reset step to 2
+    $step = _two();
     # add two, because $trial cannot be exactly the result (otherwise we would
     # alrady have found it)
     _add($c, $trial, $step);
  
-    # and now add more and more (2,4,6,8, etc)
-    _add($c, $trial, $step) 
-      while (_acmp($c, _pow($c, _copy($c, $trial), $n), $x) < 0);
+    # and now add more and more (2,4,6,8,10 etc)
+    while (_acmp($c, _pow($c, _copy($c, $trial), $n), $x) < 0)
+      {
+      _add ($c, $trial, $step);
+      }
+
+    # hit not exactly? (overstepped)
+    if (_acmp($c, _pow($c, _copy($c, $trial), $n), $x) > 0)
+      {
+      _dec($c,$trial);
+      }
 
     # hit not exactly? (overstepped)
     # 80 too small, 81 slightly too big, 82 too big
     if (_acmp($c, _pow($c, _copy($c, $trial), $n), $x) > 0)
       {
-      _dec($c,$trial);
+      _dec ($c, $trial); 
       }
-    # 80 too small, 81 slightly too big
-    if (_acmp($c, _pow($c, _copy($c, $trial), $n), $x) > 0)
-      {
-      _dec($c,$trial);
-      }
-    
+
     @$x = @$trial;			# make copy while preserving ref to $x
     return $x;
     }

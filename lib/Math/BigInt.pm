@@ -120,8 +120,8 @@ use overload
 'bool'  =>	sub {
   # this kludge is needed for perl prior 5.6.0 since returning 0 here fails :-/
   # v5.6.1 dumps on this: return !$_[0]->is_zero() || undef;		    :-(
-  my $t = !$_[0]->is_zero();
-  undef $t if $t == 0;
+  my $t = undef;
+  $t = 1 if !$_[0]->is_zero();
   $t;
   },
 
@@ -2051,7 +2051,7 @@ sub broot
   # objectify is costly, so avoid it
   if ((!ref($x)) || (ref($x) ne ref($y)))
     {
-    ($self,$x,$y,@r) = $self->objectify(2,@_);
+    ($self,$x,$y,@r) = objectify(2,$self || $class,@_);
     }
 
   return $x if $x->modify('broot');

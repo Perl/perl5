@@ -6,7 +6,7 @@ use strict;
 
 use vars qw/$VERSION/;
 
-$VERSION = '0.01';
+$VERSION = '0.02';
 
 # See SYNOPSIS below.
 
@@ -474,7 +474,7 @@ sub __emu_broot
   # proper result, because sqrt(sqrt($x)) == root($x,4)
   # See Calc.pm for more details
   my $b = $y->as_bin();
-  if ($b =~ /0b1(0+)/)
+  if ($b =~ /0b1(0+)$/)
     {
     my $count = CORE::length($1);		# 0b100 => len('00') => 2
     my $cnt = $count;				# counter for loop
@@ -493,10 +493,48 @@ sub __emu_broot
     }
   else
     {
-    # Should compute a guess of the result (by rule of thumb), then improve it
-    # via Newton's method or something similiar.
-    # XXX TODO
-    warn ('broot() not fully implemented in BigInt.');
+    # trial computation by starting with 2,4,6,8,10 etc until we overstep
+    my $step;
+    my $trial = $self->new(2);
+    my $two = $self->new(2);
+    my $s_128 = $self->new(128);
+
+    local undef $Math::BigInt::accuracy;
+    local undef $Math::BigInt::precision;
+
+    # while still to do more than X steps
+    do
+      {
+      $step = $self->new(2);
+      while ( $trial->copy->bpow($y)->bacmp($x) < 0)
+        {
+        $step->bmul($two);
+        $trial->badd($step);
+        }
+
+      # hit exactly?
+      if ( $trial->copy->bpow($y)->bacmp($x) == 0)
+        {
+        $x->{value} = $trial->{value};	# make copy while preserving ref to $x
+        return $x->round(@r);
+        }
+      # overstepped, so go back on step
+      $trial->bsub($step);
+      } while ($step > $s_128);
+
+    $step = $two->copy();
+    while ( $trial->copy->bpow($y)->bacmp($x) < 0)
+      {
+      $trial->badd($step);
+      }
+
+    # not hit exactly?
+    if ( $x->bacmp( $trial->copy()->bpow($y) ) < 0)
+      {
+      $trial->bdec();
+      }
+    # copy result into $x (preserve ref)
+    $x->{value} = $trial->{value};
     }
   $x->round(@r);
   }
