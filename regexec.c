@@ -2536,11 +2536,18 @@ S_regmatch(pTHX_ regnode *prog)
 	    PL_curpad = AvARRAY((AV*)PL_regdata->data[n + 2]);
 	    PL_regendp[0] = PL_reg_magic->mg_len = locinput - PL_bostr;
 
-	    CALLRUNOPS(aTHX);			/* Scalar context. */
-	    SPAGAIN;
-	    ret = POPs;
-	    PUTBACK;
-	
+	    {
+		SV **before = SP;
+		CALLRUNOPS(aTHX);			/* Scalar context. */
+		SPAGAIN;
+		if (SP == before)
+		    ret = Nullsv;   /* protect against empty (?{}) blocks. */
+		else {
+		    ret = POPs;
+		    PUTBACK;
+		}
+	    }
+
 	    PL_op = oop;
 	    PL_curpad = ocurpad;
 	    PL_curcop = ocurcop;

@@ -7,7 +7,7 @@ BEGIN {
 }
 
 require './test.pl';
-plan( tests => 86 );
+plan( tests => 87 );
 
 $x = 'foo';
 $_ = "x";
@@ -298,7 +298,11 @@ s{  \d+          \b [,.;]? (?{ 'digits' })
     [^A-Za-z0-9\s]+          (?{ '$@%#' })
 }{$^R}xg;
 ok( $_ eq $foo );
-ok( $snum == 31, "# TODO \$snum == $snum, should be 31" );
+ok( $snum == 31 );
+
+$_ = 'a' x 6;
+$snum = s/a(?{})//g;
+ok( $_ eq '' && $snum == 6 );
 
 $_ = 'x' x 20; 
 $snum = s/(\d*|x)/<$1>/g; 
