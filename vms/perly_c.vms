@@ -1,6 +1,6 @@
 /* Postprocessed by vms_yfix.pl 1.11 to add VMS declarations of globals */
 #ifndef lint
-static char yysccsid[] = "@(#)yaccpar 1.8 (Berkeley) 01/20/91";
+/* static char yysccsid[] = "@(#)yaccpar 1.8 (Berkeley) 01/20/91"; */
 #endif
 #define YYBYACC 1
 #line 16 "perly.y"
@@ -1521,12 +1521,12 @@ yyloop:
 #ifdef lint
     goto yynewerror;
 #endif
-yynewerror:
+
     yyerror("syntax error");
 #ifdef lint
     goto yyerrlab;
 #endif
-yyerrlab:
+
     ++yynerrs;
 yyinrecovery:
     if (yyerrflag < 3)

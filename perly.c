@@ -1,5 +1,5 @@
 #ifndef lint
-static char yysccsid[] = "@(#)yaccpar 1.8 (Berkeley) 01/20/91";
+/* static char yysccsid[] = "@(#)yaccpar 1.8 (Berkeley) 01/20/91"; */
 #endif
 #define YYBYACC 1
 #line 16 "perly.y"
@@ -1509,7 +1509,9 @@ yyloop:
         if (yyerrflag > 0)  --yyerrflag;
         goto yyloop;
     }
-    if ((yyn = yyrindex[yystate]) && (yyn += yychar) >= 0 &&
+    if (
+((yyn = yyrindex[yystate])) && 
+(yyn += yychar) >= 0 &&
             yyn <= YYTABLESIZE && yycheck[yyn] == yychar)
     {
         yyn = yytable[yyn];
@@ -1519,12 +1521,12 @@ yyloop:
 #ifdef lint
     goto yynewerror;
 #endif
-yynewerror:
+
     yyerror("syntax error");
 #ifdef lint
     goto yyerrlab;
 #endif
-yyerrlab:
+
     ++yynerrs;
 yyinrecovery:
     if (yyerrflag < 3)
