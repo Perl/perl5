@@ -38,7 +38,7 @@ producing better software for free than you could hope to purchase for
 money.  You may snoop on pending developments via the archives at
 http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/ 
 and http://archive.develooper.com/perl5-porters@perl.org/ 
-or the news gateway news://news.perl.com/perl.porters-gw/ ,
+or the news gateway http://nntp.perl.org/group/perl.perl5.porters ,
 or read the faq at http://perlhacker.org/p5p-faq,
 or you can subscribe to the mailing list by sending
 perl5-porters-request@perl.org a subscription request
