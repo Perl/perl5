@@ -217,7 +217,7 @@ BEGIN {
                                                 },
                                       all_ok => 0,
                                      },
-                header_at_end     => {
+                head_end          => {
                                       total => {
                                                 bonus      => 0,
                                                 max        => 4,
@@ -233,7 +233,7 @@ BEGIN {
                                       failed => { },
                                       all_ok => 1,
                                      },
-                header_at_end_fail=> {
+                head_fail         => {
                                       total => {
                                                 bonus      => 0,
                                                 max        => 4,

@@ -168,7 +168,7 @@ Tom Christiansen <F<tchrist@mox.perl.com>>, 25 June 1995.
 =cut
 
 use strict;
-use 5.6.0;
+use 5.006;
 use Carp;
 
 our $VERSION = 1.1;

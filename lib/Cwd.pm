@@ -1,5 +1,5 @@
 package Cwd;
-require 5.6.0;
+use 5.006;
 
 =head1 NAME
 
@@ -499,6 +499,7 @@ sub _epoc_cwd {
         *fastcwd	= \&_NT_cwd;
         *fastgetcwd	= \&_NT_cwd;
         *abs_path	= \&fast_abs_path;
+        *realpath   = \&fast_abs_path;
     }
     elsif ($^O eq 'os2') {
         # sys_cwd may keep the builtin command

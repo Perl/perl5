@@ -8,6 +8,20 @@ our $VERSION = '1.00';
 
 warnings::register - warnings import function
 
+=head1 SYNOPSIS
+
+    use warnings::register ;
+
+=head1 DESCRIPTION
+
+Create a warnings category with the same name as the current package.
+
+See L<perlmodlib/Pragmatic Modules> and L<perllexwarn>.
+
+=head1 SEE ALSO
+
+L<perllexwarn>
+
 =cut
 
 require warnings ;

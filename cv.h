@@ -60,7 +60,7 @@ Returns the stash of the CV.
 #else
 #  define CvFILE_set_from_cop(sv, cop)	(CvFILE(sv) = CopFILE(cop))
 #endif
-#define CvFILEGV(sv)	(gv_fetchfile(CvFILE(sv))
+#define CvFILEGV(sv)	(gv_fetchfile(CvFILE(sv)))
 #define CvDEPTH(sv)	((XPVCV*)SvANY(sv))->xcv_depth
 #define CvPADLIST(sv)	((XPVCV*)SvANY(sv))->xcv_padlist
 #define CvOUTSIDE(sv)	((XPVCV*)SvANY(sv))->xcv_outside

@@ -49,7 +49,7 @@ For ease of access, the Perl manual has been split up into several sections:
 
     perlboot		Perl OO tutorial for beginners
     perltoot		Perl OO tutorial, part 1
-    perltootc		Perl OO tutorial, part 2
+    perltooc		Perl OO tutorial, part 2
     perlobj		Perl objects
     perlbot		Perl OO tricks and examples
     perltie		Perl objects hidden behind simple variables

@@ -3,18 +3,21 @@
 BEGIN {
 	chdir 't' if -d 't';
 	@INC = '../lib';
+}
+
+BEGIN {
 	1 while unlink 'ecmdfile';
 	# forcibly remove ecmddir/temp2, but don't import mkpath
 	use File::Path ();
 	File::Path::rmtree( 'ecmddir' );
 }
 
-use Test::More tests => 22;
-use File::Spec;
+BEGIN {
+	use Test::More tests => 21;
+	use File::Spec;
+}
 
-SKIP: {
-	skip( 'ExtUtils::Command is a Win32 module', 22 ) unless $^O =~ /Win32/;
-
+{
 	use vars qw( *CORE::GLOBAL::exit );
 
 	# bad neighbor, but test_f() uses exit()
@@ -48,7 +51,15 @@ SKIP: {
 	# concatenate this file with itself
 	# be extra careful the regex doesn't match itself
 	my $out = tie *STDOUT, 'TieOut';
-	@ARGV = ($0, $0);
+	my $self = $0;
+	unless (-f $self) {
+	    my ($vol, $dirs, $file) = File::Spec->splitpath($self);
+	    my @dirs = File::Spec->splitdir($dirs);
+	    unshift(@dirs, File::Spec->updir);
+	    $dirs = File::Spec->catdir(@dirs);
+	    $self = File::Spec->catpath($vol, $dirs, $file);
+	}
+	@ARGV = ($self, $self);
 
 	cat();
 	is( scalar( $$out =~ s/use_ok\( 'ExtUtils::Command'//g), 2, 
@@ -71,11 +82,11 @@ SKIP: {
 	@ARGV = ( 'ecmdfile' );
 	ok( -e $ARGV[0], 'created!' );
 
-	# use utime to set the timestamps
-	$ARGV[1] = (my $now = time);
-	utime();
+	my ($now) = time;
+	utime ($now, $now, $ARGV[0]);
 
-	is( (stat($ARGV[0]))[8], $now, 'checking access time stamp' );
+	# Just checking modify time stamp, access time stamp is set
+	# to the beginning of the day in Win95
 	is( (stat($ARGV[0]))[9], $now, 'checking modify time stamp' );
 
 	# change a file to read-only

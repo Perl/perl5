@@ -1191,8 +1191,8 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	       to the expected number needed for a random hash.
 
 	       The total number of comparisons is equal to the sum of
-	       the squares of the number of entries in each backet.
-	       For a random hash of n keys into k backets, the expected
+	       the squares of the number of entries in each bucket.
+	       For a random hash of n keys into k buckets, the expected
 	       value is
 				n + n(n-1)/2k
 	    */

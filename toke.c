@@ -4209,7 +4209,7 @@ Perl_yylex(pTHX)
 	    if (*s == '{')
 		PRETERMBLOCK(DO);
 	    if (*s != '\'')
-		s = force_word(s,WORD,FALSE,TRUE,FALSE);
+		s = force_word(s,WORD,TRUE,TRUE,FALSE);
 	    OPERATOR(DO);
 
 	case KEY_die:

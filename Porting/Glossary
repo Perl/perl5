@@ -879,10 +879,6 @@ d_htonl (d_htonl.U):
 	This variable conditionally defines HAS_HTONL if htonl() and its
 	friends are available to do network order byte swapping.
 
-d_iconv (d_iconv.U):
-	This variable conditionally defines the HAS_ICONV symbol, which
-	indicates to the C program that the iconv() routine is available.
-
 d_index (d_strchr.U):
 	This variable conditionally defines HAS_INDEX if index() and
 	rindex() are available for string searching.
@@ -2212,10 +2208,6 @@ i_gdbm (i_gdbm.U):
 i_grp (i_grp.U):
 	This variable conditionally defines the I_GRP symbol, and indicates
 	whether a C program should include <grp.h>.
-
-i_iconv (i_iconv.U):
-	This variable conditionally defines the I_ICONV symbol, and indicates
-	whether a C program should include <iconv.h>.
 
 i_ieeefp (i_ieeefp.U):
 	This variable conditionally defines the I_IEEEFP symbol, and indicates

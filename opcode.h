@@ -1488,7 +1488,7 @@ EXT U32 PL_opargs[] = {
 	0x00001608,	/* backtick */
 	0x00012808,	/* glob */
 	0x0001d608,	/* readline */
-	0x00001608,	/* rcatline */
+	0x00000c08,	/* rcatline */
 	0x00002204,	/* regcmaybe */
 	0x00002204,	/* regcreset */
 	0x00002604,	/* regcomp */

@@ -1,6 +1,6 @@
 package vars;
 
-require 5.6.0;
+use 5.006;
 
 our $VERSION = '1.01';
 

@@ -129,7 +129,7 @@ while (<>) {
     if ( open(PM, ">$newname") ) {
         print PM <<"END";
 package $newpack;
-require 5.6.0;
+use 5.006;
 require Exporter;
 $carp
 \@ISA = qw(Exporter);

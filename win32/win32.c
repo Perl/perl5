@@ -3009,6 +3009,10 @@ DllExport int
 win32_chdir(const char *dir)
 {
     dTHX;
+    if (!dir) {
+	errno = ENOENT;
+	return -1;
+    }
     if (USING_WIDE()) {
 	WCHAR wBuffer[MAX_PATH+1];
 	A2WHELPER(dir, wBuffer, sizeof(wBuffer));
@@ -3611,6 +3615,10 @@ XS(w32_GetCwd)
 	SV *sv = sv_newmortal();
 	sv_setpv(sv, ptr);
 	PerlEnv_free_childdir(ptr);
+
+#ifndef INCOMPLETE_TAINTS
+	SvTAINTED_on(sv);
+#endif
 
 	EXTEND(SP,1);
 	SvPOK_on(sv);

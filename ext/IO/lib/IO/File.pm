@@ -103,7 +103,7 @@ Derived from FileHandle.pm by Graham Barr E<lt>F<gbarr@pobox.com>E<gt>.
 
 =cut
 
-require 5.6.1;
+use 5.006_001;
 use strict;
 our($VERSION, @EXPORT, @EXPORT_OK, @ISA);
 use Carp;
@@ -116,7 +116,7 @@ require Exporter;
 
 @ISA = qw(IO::Handle IO::Seekable Exporter);
 
-$VERSION = "1.08";
+$VERSION = "1.09";
 
 @EXPORT = @IO::Seekable::EXPORT;
 

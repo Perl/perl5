@@ -2368,6 +2368,10 @@ CPerlHost::Chdir(const char *dirname)
 {
     dTHX;
     int ret;
+    if (!dirname) {
+	errno = ENOENT;
+	return -1;
+    }
     if (USING_WIDE()) {
 	WCHAR wBuffer[MAX_PATH];
 	A2WHELPER(dirname, wBuffer, sizeof(wBuffer));

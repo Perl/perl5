@@ -1,6 +1,6 @@
 package ExtUtils::Install;
 
-use 5.6.1;
+use 5.006_001;
 our(@ISA, @EXPORT, $VERSION);
 $VERSION = substr q$Revision: 1.29 $, 10;
 # $Date: 1998/01/25 07:08:24 $

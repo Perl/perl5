@@ -1,6 +1,6 @@
 package AutoSplit;
 
-use 5.6.1;
+use 5.006_001;
 use Exporter ();
 use Config qw(%Config);
 use Carp qw(carp);

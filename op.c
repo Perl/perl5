@@ -6940,10 +6940,12 @@ Perl_peep(pTHX_ register OP *o)
 		    && o->op_next->op_next->op_type == OP_CONCAT
 		    && (o->op_next->op_next->op_flags & OPf_STACKED))
 	    {
-		/* Turn "$a .= <FH>" into an OP_RCATLINE. AMS 20010811 */
-		o->op_next->op_type   = OP_RCATLINE;
-		o->op_next->op_flags |= OPf_STACKED;
+		/* Turn "$a .= <FH>" into an OP_RCATLINE. AMS 20010917 */
+		o->op_type   = OP_RCATLINE;
+		o->op_flags |= OPf_STACKED;
+		o->op_ppaddr = PL_ppaddr[OP_RCATLINE];
 		op_null(o->op_next->op_next);
+		op_null(o->op_next);
 	    }
 
 	    o->op_seq = PL_op_seqmax++;

@@ -1757,7 +1757,7 @@ L<overload>.
 L<perlboot> is a kinder, gentler introduction to object-oriented
 programming.
 
-L<perltootc> provides more detail on class data.
+L<perltooc> provides more detail on class data.
 
 Some modules which might prove interesting are Class::Accessor,
 Class::Class, Class::Contract, Class::Data::Inheritable,

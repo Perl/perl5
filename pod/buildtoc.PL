@@ -129,7 +129,7 @@ if (-d "pod") {
 
     perlboot
     perltoot
-    perltootc
+    perltooc
     perlobj
     perlbot
     perltie

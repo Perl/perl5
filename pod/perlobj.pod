@@ -7,7 +7,7 @@ perlobj - Perl objects
 First you need to understand what references are in Perl.
 See L<perlref> for that.  Second, if you still find the following
 reference work too complicated, a tutorial on object-oriented programming
-in Perl can be found in L<perltoot> and L<perltootc>.
+in Perl can be found in L<perltoot> and L<perltooc>.
 
 If you're still with us, then
 here are three very simple definitions that you should find reassuring.
@@ -200,7 +200,7 @@ methods and instance methods.
 A class method expects a class name as the first argument.  It
 provides functionality for the class as a whole, not for any
 individual object belonging to the class.  Constructors are often
-class methods, but see L<perltoot> and L<perltootc> for alternatives.
+class methods, but see L<perltoot> and L<perltooc> for alternatives.
 Many class methods simply ignore their first argument, because they
 already know what package they're in and don't care what package
 they were invoked via.  (These aren't necessarily the same, because
@@ -559,7 +559,7 @@ breaks the circularities in the self-referential structure.
 =head1 SEE ALSO
 
 A kinder, gentler tutorial on object-oriented programming in Perl can
-be found in L<perltoot>, L<perlboot> and L<perltootc>.  You should
+be found in L<perltoot>, L<perlboot> and L<perltooc>.  You should
 also check out L<perlbot> for other object tricks, traps, and tips, as
 well as L<perlmodlib> for some style guides on constructing both
 modules and classes.

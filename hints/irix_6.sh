@@ -181,6 +181,12 @@ case "$cc" in
 	nm_opt='-p'
 	nm_so_opt='-p'
 
+	# Warnings to turn off because the source code hasn't
+	# been cleaned up enough yet to satisfy the IRIX cc.
+	# 1184: "=" is used where where "==" may have been intended.
+	# 1552: The variable "foobar" is set but never used.
+	woff=1184,1552
+
 	# Perl 5.004_57 introduced new qsort code into pp_ctl.c that
 	# makes IRIX  cc prior to 7.2.1 to emit bad code.
 	# so some serious hackery follows to set pp_ctl flags correctly.
@@ -188,11 +194,11 @@ case "$cc" in
 	# Check for which version of the compiler we're running
 	case "`$cc -version 2>&1`" in
 	*7.0*)                        # Mongoose 7.0
-	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1042,1048,1110,1116,1174,1184,1552 -OPT:Olimit=0"
+	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff $woff -OPT:Olimit=0"
 	     optimize='none'
 	     ;;
 	*7.1*|*7.2|*7.20)             # Mongoose 7.1+
-	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1110,1174,1184,1552 -OPT:Olimit=0"
+	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff $woff -OPT:Olimit=0"
 	     optimize='-O3'
 # This is a temporary fix for 5.005.
 # Leave pp_ctl_cflags  line at left margin for Configure.  See 
@@ -201,15 +207,15 @@ case "$cc" in
 pp_ctl_cflags='optimize=-O'
 	     ;;
 	*7.*)                         # Mongoose 7.2.1+
-	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1110,1174,1184,1552 -OPT:Olimit=0:space=ON"
+	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff $woff -OPT:Olimit=0:space=ON"
 	     optimize='-O3'
 	     ;;
 	*6.2*)                        # Ragnarok 6.2
-	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1110,1174,1184,1552"
+	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff $woff"
 	     optimize='none'
 	     ;;
 	*)                            # Be safe and not optimize
-	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1110,1174,1184,1552 -OPT:Olimit=0"
+	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff $woff -OPT:Olimit=0"
 	     optimize='none'
 	     ;;
 	esac

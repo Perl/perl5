@@ -705,7 +705,7 @@ and leaves the UTF8 status as it was.
 
 #ifdef USE_ITHREADS
 /* The following uses the FAKE flag to show that a regex pointer is infact
-   it's own offset in the regexpad for ithreads */
+   its own offset in the regexpad for ithreads */
 #define SvREPADTMP(sv)		(SvFLAGS(sv) & SVf_FAKE)
 #define SvREPADTMP_on(sv)	(SvFLAGS(sv) |= SVf_FAKE)
 #define SvREPADTMP_off(sv)	(SvFLAGS(sv) &= ~SVf_FAKE)

@@ -1,6 +1,6 @@
 package ExtUtils::Command;
 
-use 5.6.1;
+use 5.006_001;
 use strict;
 # use AutoLoader;
 use Carp;
@@ -108,8 +108,8 @@ Makes files exist, with current timestamp
 
 sub touch
 {
- expand_wildcards();
  my $t    = time;
+ expand_wildcards();
  while (@ARGV)
   {
    my $file = shift(@ARGV);               

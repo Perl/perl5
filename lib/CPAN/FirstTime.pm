@@ -17,7 +17,7 @@ use FileHandle ();
 use File::Basename ();
 use File::Path ();
 use vars qw($VERSION);
-$VERSION = substr q$Revision: 1.53 $, 10;
+$VERSION = substr q$Revision: 1.54 $, 10;
 
 =head1 NAME
 

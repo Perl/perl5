@@ -12,7 +12,7 @@ package Net::Ping;
 # Copyright (c) 2001, Colin McMillen.  All rights reserved.  This
 # program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
-use 5.6.1;
+use 5.006_001;
 require Exporter;
 
 use strict;

@@ -927,6 +927,10 @@ END_EXTERN_C
 #define PL_op_mutex		(*Perl_Gop_mutex_ptr(NULL))
 #undef  PL_patleave
 #define PL_patleave		(*Perl_Gpatleave_ptr(NULL))
+#undef  PL_sharedsv_space
+#define PL_sharedsv_space	(*Perl_Gsharedsv_space_ptr(NULL))
+#undef  PL_sharedsv_space_mutex
+#define PL_sharedsv_space_mutex	(*Perl_Gsharedsv_space_mutex_ptr(NULL))
 #undef  PL_thr_key
 #define PL_thr_key		(*Perl_Gthr_key_ptr(NULL))
 

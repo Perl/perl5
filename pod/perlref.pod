@@ -243,7 +243,9 @@ All of these are self-explanatory except for C<*foo{IO}>.  It returns
 the IO handle, used for file handles (L<perlfunc/open>), sockets
 (L<perlfunc/socket> and L<perlfunc/socketpair>), and directory
 handles (L<perlfunc/opendir>).  For compatibility with previous
-versions of Perl, C<*foo{FILEHANDLE}> is a synonym for C<*foo{IO}>.
+versions of Perl, C<*foo{FILEHANDLE}> is a synonym for C<*foo{IO}>, though it
+is deprecated as of 5.8.0.  If deprecation warnings are in effect, it will warn
+of its use.
 
 C<*foo{THING}> returns undef if that particular THING hasn't been used yet,
 except in the case of scalars.  C<*foo{SCALAR}> returns a reference to an

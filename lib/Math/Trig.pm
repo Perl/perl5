@@ -7,7 +7,7 @@
 require Exporter;
 package Math::Trig;
 
-use 5.6.1;
+use 5.006;
 use strict;
 
 use Math::Complex qw(:trig);

@@ -550,8 +550,11 @@ PP(pp_gelem)
 	    tmpRef = (SV*)GvCVu(gv);
 	break;
     case 'F':
-	if (strEQ(elem, "FILEHANDLE")) /* XXX deprecate in 5.005 */
+	if (strEQ(elem, "FILEHANDLE")) {
+	    /* finally deprecated in 5.8.0 */
+	    deprecate("*glob{FILEHANDLE}");
 	    tmpRef = (SV*)GvIOp(gv);
+	}
 	else
 	if (strEQ(elem, "FORMAT"))
 	    tmpRef = (SV*)GvFORM(gv);

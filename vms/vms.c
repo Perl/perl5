@@ -9,6 +9,7 @@
  * 20-Aug-1999 revisions by Charles Bailey  bailey@newman.upenn.edu
  */
 
+#include <accdef.h>
 #include <acedef.h>
 #include <acldef.h>
 #include <armdef.h>
@@ -29,6 +30,7 @@
 #include <libdef.h>
 #include <lib$routines.h>
 #include <lnmdef.h>
+#include <msgdef.h>
 #include <prvdef.h>
 #include <psldef.h>
 #include <rms.h>
@@ -2330,13 +2332,26 @@ I32 Perl_my_pclose(pTHX_ PerlIO *fp)
 
 }  /* end of my_pclose() */
 
-/* sort-of waitpid; use only with popen() */
+#if defined(__CRTL_VER) && __CRTL_VER >= 70100322
+  /* Roll our own prototype because we want this regardless of whether
+   * _VMS_WAIT is defined.
+   */
+  __pid_t __vms_waitpid( __pid_t __pid, int *__stat_loc, int __options );
+#endif
+/* sort-of waitpid; special handling of pipe clean-up for subprocesses 
+   created with popen(); otherwise partially emulate waitpid() unless 
+   we have a suitable one from the CRTL that came with VMS 7.2 and later.
+   Also check processes not considered by the CRTL waitpid().
+ */
 /*{{{Pid_t my_waitpid(Pid_t pid, int *statusp, int flags)*/
 Pid_t
 Perl_my_waitpid(pTHX_ Pid_t pid, int *statusp, int flags)
 {
     pInfo info;
     int done;
+    int sts;
+    
+    if (statusp) *statusp = 0;
     
     for (info = open_pipes; info != NULL; info = info->next)
         if (info->pid == pid) break;
@@ -2350,37 +2365,140 @@ Perl_my_waitpid(pTHX_ Pid_t pid, int *statusp, int flags)
           if (!done) _ckvmssts(sys$waitfr(pipe_ef));
       }
 
-      *statusp = info->completion;
+      if (statusp) *statusp = info->completion;
       return pid;
+
     }
-    else {  /* we haven't heard of this child */
+    else {  /* this child is not one of our own pipe children */
+
+#if defined(__CRTL_VER) && __CRTL_VER >= 70100322
+
+      /* waitpid() became available in the CRTL as of VMS 7.0, but only
+       * in 7.2 did we get a version that fills in the VMS completion
+       * status as Perl has always tried to do.
+       */
+
+      sts = __vms_waitpid( pid, statusp, flags );
+
+      if ( sts == 0 || !(sts == -1 && errno == ECHILD) ) 
+         return sts;
+
+      /* If the real waitpid tells us the child does not exist, we 
+       * fall through here to implement waiting for a child that 
+       * was created by some means other than exec() (say, spawned
+       * from DCL) or to wait for a process that is not a subprocess 
+       * of the current process.
+       */
+
+#endif /* defined(__CRTL_VER) && __CRTL_VER >= 70100322 */
+
       $DESCRIPTOR(intdsc,"0 00:00:01");
-      unsigned long int ownercode = JPI$_OWNER, ownerpid, mypid;
-      unsigned long int interval[2],sts;
+      unsigned long int ownercode = JPI$_OWNER, ownerpid;
+      unsigned long int pidcode = JPI$_PID, mypid;
+      unsigned long int interval[2];
+      int termination_mbu = 0;
+      unsigned short qio_iosb[4];
+      unsigned int jpi_iosb[2];
+      struct itmlst_3 jpilist[3] = { 
+          {sizeof(ownerpid),        JPI$_OWNER, &ownerpid,        0},
+          {sizeof(termination_mbu), JPI$_TMBU,  &termination_mbu, 0},
+          {                      0,         0,                 0, 0} 
+      };
+      char trmmbx[NAM$C_DVI+1];
+      $DESCRIPTOR(trmmbxdsc,trmmbx);
+      struct accdef trmmsg;
+      unsigned short int mbxchan;
+
+      if (pid <= 0) {
+        /* Sorry folks, we don't presently implement rooting around for 
+           the first child we can find, and we definitely don't want to
+           pass a pid of -1 to $getjpi, where it is a wildcard operation.
+         */
+        set_errno(ENOTSUP); 
+        return -1;
+      }
+
+      /* Get the owner of the child so I can warn if it's not mine, plus
+       * get the termination mailbox.  If the process doesn't exist or I
+       * don't have the privs to look at it, I can go home early.
+       */
+      sts = sys$getjpiw(0,&pid,NULL,&jpilist,&jpi_iosb,NULL,NULL);
+      if (sts & 1) sts = jpi_iosb[0];
+      if (!(sts & 1)) {
+        switch (sts) {
+            case SS$_NONEXPR:
+                set_errno(ECHILD);
+                break;
+            case SS$_NOPRIV:
+                set_errno(EACCES);
+                break;
+            default:
+                _ckvmssts(sts);
+        }
+        set_vaxc_errno(sts);
+        return -1;
+      }
 
       if (ckWARN(WARN_EXEC)) {
-        _ckvmssts(lib$getjpi(&ownercode,&pid,0,&ownerpid,0,0));
-        _ckvmssts(lib$getjpi(&ownercode,0,0,&mypid,0,0));
+        /* remind folks they are asking for non-standard waitpid behavior */
+        _ckvmssts(lib$getjpi(&pidcode,0,0,&mypid,0,0));
         if (ownerpid != mypid)
-          Perl_warner(aTHX_ WARN_EXEC,"pid %x not a child",pid);
+          Perl_warner(aTHX_ WARN_EXEC,
+                      "waitpid: process %x is not a child of process %x",
+                      pid,mypid);
       }
 
-      _ckvmssts(sys$bintim(&intdsc,interval));
-      while ((sts=lib$getjpi(&ownercode,&pid,0,&ownerpid,0,0)) & 1) {
-        _ckvmssts(sys$schdwk(0,0,interval,0));
-        _ckvmssts(sys$hiber());
-      }
-      if (sts == SS$_NONEXPR) sts = SS$_NORMAL;
-      _ckvmssts(sts);
-
-      /* There's no easy way to find the termination status a child we're
-       * not aware of beforehand.  If we're really interested in the future,
-       * we can go looking for a termination mailbox, or chase after the
-       * accounting record for the process.
+      /* It's possible to have a mailbox unit number but no actual mailbox; we 
+       * check for this by assigning a channel to it, which we need anyway.
        */
-      *statusp = 0;
+      if (termination_mbu != 0) {
+          sprintf(trmmbx, "MBA%d:", termination_mbu);
+          trmmbxdsc.dsc$w_length = strlen(trmmbx);
+          sts = sys$assign(&trmmbxdsc, &mbxchan, 0, 0);
+          if (sts == SS$_NOSUCHDEV) {
+              termination_mbu = 0; /* set up to take "no mailbox" case */
+              sts = SS$_NORMAL;
+          }
+          _ckvmssts(sts);
+      }
+      /* If the process doesn't have a termination mailbox, then simply check
+       * on it once a second until it's not there anymore.
+       */
+      if (termination_mbu == 0) {
+          _ckvmssts(sys$bintim(&intdsc,interval));
+          while ((sts=lib$getjpi(&ownercode,&pid,0,&ownerpid,0,0)) & 1) {
+            _ckvmssts(sys$schdwk(0,0,interval,0));
+            _ckvmssts(sys$hiber());
+          }
+          if (sts == SS$_NONEXPR) sts = SS$_NORMAL;
+      } 
+      else {
+        /* If we do have a termination mailbox, post reads to it until we get a
+         * termination message, discarding messages of the wrong type or for other
+         * processes.  If there is a place to put the final status, then do so.
+         */
+          sts = SS$_NORMAL;
+          while (sts & 1) {
+              memset((void *) &trmmsg, 0, sizeof(trmmsg));
+              sts = sys$qiow(0,mbxchan,IO$_READVBLK,&qio_iosb,0,0,
+                             &trmmsg,ACC$K_TERMLEN,0,0,0,0);
+              if (sts & 1) sts = qio_iosb[0];
+
+              if ( sts & 1 
+                   && trmmsg.acc$w_msgtyp == MSG$_DELPROC 
+                   && trmmsg.acc$l_pid == pid ) {
+
+                  if (statusp) *statusp = trmmsg.acc$l_finalsts;
+                  sts = sys$dassgn(mbxchan);
+                  break;
+              }
+          }
+      } /* termination_mbu ? */
+
+      _ckvmssts(sts);
       return pid;
-    }
+
+    } /* else one of our own pipe children */
                     
 }  /* end of waitpid() */
 /*}}}*/

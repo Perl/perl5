@@ -6,7 +6,7 @@
 
 package IO::Dir;
 
-use 5.6.0;
+use 5.006;
 
 use strict;
 use Carp;

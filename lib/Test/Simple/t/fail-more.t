@@ -95,11 +95,9 @@ ERR
 #     Failed test \\($filename at line 43\\)
 #     Tried to use 'Hooble::mooble::yooble'.
 #     Error:  Can't locate Hooble.* in \\\@INC .*
-
 #     Failed test \\($filename at line 44\\)
 #     Tried to require 'ALL::YOUR::BASE::ARE::BELONG::TO::US::wibble'.
 #     Error:  Can't locate ALL.* in \\\@INC .*
-
 # Looks like you failed 10 tests of 10.
 ERR
 

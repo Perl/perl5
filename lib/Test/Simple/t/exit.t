@@ -1,11 +1,12 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
-    use File::Spec;
 }
 
 # Can't use Test.pm, that's a 5.005 thing.
 package My::Test;
+
+use File::Spec;
 
 my $test_num = 1;
 # Utility testing functions.
@@ -43,13 +44,11 @@ my %Tests = (
 
 print "1..".keys(%Tests)."\n";
 
-my $lib = File::Spec->catdir('lib', 'Test', 'Simple', 'sample_tests');
-
+my $lib = File::Spec->catdir(qw(lib Test Simple sample_tests));
 while( my($test_name, $exit_codes) = each %Tests ) {
     my($exit_code) = $exit_codes->[$IsVMS ? 1 : 0];
 
     my $file = File::Spec->catfile($lib, $test_name);
-
     my $wait_stat = system(qq{$^X -"I../lib" -"I../t/lib" $file});
     my $actual_exit = $wait_stat >> 8;
 

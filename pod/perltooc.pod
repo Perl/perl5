@@ -1,6 +1,6 @@
 =head1 NAME
 
-perltootc - Tom's OO Tutorial for Class Data in Perl
+perltooc - Tom's OO Tutorial for Class Data in Perl
 
 =head1 DESCRIPTION
 

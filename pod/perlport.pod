@@ -690,17 +690,22 @@ often assume nothing about their data.
 The C<$^O> variable and the C<$Config{archname}> values for various
 DOSish perls are as follows:
 
-    OS            $^O        $Config{'archname'}
-    --------------------------------------------
-    MS-DOS        dos
-    PC-DOS        dos
-    OS/2          os2
-    Windows 95    MSWin32    MSWin32-x86
-    Windows 98    MSWin32    MSWin32-x86
-    Windows NT    MSWin32    MSWin32-x86
-    Windows NT    MSWin32    MSWin32-ALPHA
-    Windows NT    MSWin32    MSWin32-ppc
-    Cygwin        cygwin
+     OS            $^O      $Config{archname}   ID    Version
+     --------------------------------------------------------
+     MS-DOS        dos        ?                 
+     PC-DOS        dos        ?                 
+     OS/2          os2        ?
+     Windows 3.1   ?          ?                 0      3 01
+     Windows 95    MSWin32    MSWin32-x86       1      4 00
+     Windows 98    MSWin32    MSWin32-x86       1      4 10
+     Windows ME    MSWin32    MSWin32-x86       1      ?
+     Windows NT    MSWin32    MSWin32-x86       2      4 xx
+     Windows NT    MSWin32    MSWin32-ALPHA     2      4 xx
+     Windows NT    MSWin32    MSWin32-ppc       2      4 xx
+     Windows 2000  MSWin32    MSWin32-x86       2      5 xx
+     Windows XP    MSWin32    MSWin32-x86       2      ?
+     Windows CE    MSWin32    ?                 3           
+     Cygwin        cygwin     ?                 
 
 The various MSWin32 Perl's can distinguish the OS they are running on
 via the value of the fifth element of the list returned from 

@@ -6,10 +6,10 @@
   Attempt to use reference as lvalue in substr 
     $a = "ab" ; $b = \$a ;  substr($b, 1,1) = $b
 
-  uninitialized	in pp_rv2gv()
-	my *b = *{ undef()}
+  Use of uninitialized value in ref-to-glob cast	[pp_rv2gv()]
+	*b = *{ undef()}
 
-  uninitialized	in pp_rv2sv()
+  Use of uninitialized value in scalar dereference	[pp_rv2sv()]
 	my $a = undef ; my $b = $$a
 
   Odd number of elements in hash list
@@ -18,8 +18,11 @@
   Explicit blessing to '' (assuming package main)
 	bless \[], "";
 
-  Constant subroutine %s undefined			<<<TODO
-  Constant subroutine (anonymous) undefined		<<<TODO
+  Constant subroutine %s undefined
+	sub foo () { 1 }; undef &foo;
+
+  Constant subroutine (anonymous) undefined
+	$foo = sub () { 3 }; undef &$foo;
 
 __END__
 # pp.c
@@ -44,9 +47,19 @@ Attempt to use reference as lvalue in substr at - line 5.
 ########
 # pp.c
 use warnings 'uninitialized' ;
-# TODO
+*x = *{ undef() };
+no warnings 'uninitialized' ;
+*y = *{ undef() };
 EXPECT
-
+Use of uninitialized value in ref-to-glob cast at - line 3.
+########
+# pp.c
+use warnings 'uninitialized';
+$x = undef; $y = $$x;
+no warnings 'uninitialized' ;
+$u = undef; $v = $$u;
+EXPECT
+Use of uninitialized value in scalar dereference at - line 3.
 ########
 # pp.c
 use warnings 'misc' ;
@@ -63,6 +76,26 @@ no warnings 'misc' ;
 bless \[], "" ;
 EXPECT
 Explicit blessing to '' (assuming package main) at - line 3.
+########
+# pp.c
+use warnings 'misc';
+sub foo () { 1 }
+undef &foo;
+no warnings 'misc';
+sub bar () { 2 }
+undef &bar;
+EXPECT
+Constant subroutine foo undefined at - line 4.
+########
+# pp.c
+use warnings 'misc';
+$foo = sub () { 3 };
+undef &$foo;
+no warnings 'misc';
+$bar = sub () { 4 };
+undef &$bar;
+EXPECT
+Constant subroutine (anonymous) undefined at - line 4.
 ########
 # pp.c
 use utf8 ;

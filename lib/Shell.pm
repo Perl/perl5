@@ -1,5 +1,5 @@
 package Shell;
-use 5.6.1;
+use 5.006_001;
 use strict;
 use warnings;
 our($capture_stderr, $VERSION, $AUTOLOAD);

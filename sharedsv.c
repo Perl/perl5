@@ -22,8 +22,7 @@
 
 #ifdef USE_ITHREADS
 
-PerlInterpreter* sharedsv_space;
-perl_mutex sharedsv_space_mutex;
+
 
 /*
   Shared SV
@@ -45,8 +44,8 @@ currently only stores a pointer to the first interpreter.
 void
 Perl_sharedsv_init(pTHX)
 {
-    sharedsv_space = PERL_GET_CONTEXT;
-    MUTEX_INIT(&sharedsv_space_mutex);
+    PL_sharedsv_space = PERL_GET_CONTEXT;
+    MUTEX_INIT(&PL_sharedsv_space_mutex);
 }
 
 /*
@@ -63,6 +62,8 @@ Perl_sharedsv_new(pTHX)
     New(2555,ssv,1,shared_sv);
     MUTEX_INIT(&ssv->mutex);
     COND_INIT(&ssv->cond);
+    COND_INIT(&ssv->user_cond);
+    ssv->owner = 0;
     ssv->locks = 0;
     return ssv;
 }
@@ -97,15 +98,19 @@ Perl_sharedsv_lock(pTHX_ shared_sv* ssv)
 {
     if(!ssv)
         return;
+    MUTEX_LOCK(&ssv->mutex);
     if(ssv->owner && ssv->owner == my_perl) {
         ssv->locks++;
+	MUTEX_UNLOCK(&ssv->mutex);
         return;
     }
-    MUTEX_LOCK(&ssv->mutex);
+    while(ssv->owner) 
+      COND_WAIT(&ssv->cond,&ssv->mutex);
     ssv->locks++;
     ssv->owner = my_perl;
     if(ssv->locks == 1)
         SAVEDESTRUCTOR_X(Perl_sharedsv_unlock_scope,ssv);
+    MUTEX_UNLOCK(&ssv->mutex);
 }
 
 /*
@@ -119,22 +124,31 @@ Recursively unlocks a shared sv.
 void
 Perl_sharedsv_unlock(pTHX_ shared_sv* ssv)
 {
-    if(ssv->owner != my_perl)
+    MUTEX_LOCK(&ssv->mutex);
+    if(ssv->owner != my_perl) {
+        Perl_croak(aTHX_ "panic: Perl_sharedsv_unlock unlocking mutex that we don't own");
+        MUTEX_UNLOCK(&ssv->mutex); 
         return;
+    } 
 
     if(--ssv->locks == 0) {
         ssv->owner = NULL;
-        MUTEX_UNLOCK(&ssv->mutex);
+	COND_SIGNAL(&ssv->cond);
     }
+    MUTEX_UNLOCK(&ssv->mutex);
  }
 
 void
 Perl_sharedsv_unlock_scope(pTHX_ shared_sv* ssv)
 {
-    if(ssv->owner != my_perl)
+    MUTEX_LOCK(&ssv->mutex);
+    if(ssv->owner != my_perl) {
+        MUTEX_UNLOCK(&ssv->mutex);
         return;
+    }
     ssv->locks = 0;
     ssv->owner = NULL;
+    COND_SIGNAL(&ssv->cond);
     MUTEX_UNLOCK(&ssv->mutex);
 }
 
@@ -199,3 +213,4 @@ Perl_sharedsv_thrcnt_dec(pTHX_ shared_sv* ssv)
 }
 
 #endif /* USE_ITHREADS */
+

@@ -99,7 +99,7 @@ foreach my $mod (sort keys %Test) {
 }
 foreach my $mod (<DATA>) {
     chomp $mod;
-    print "### $mod has a test but is in DATA\n" if exists $Test{$mod};
+    print "### $mod has a test but is in DATA of $0\n" if exists $Test{$mod};
     delete_by_name($mod);
 }
 
@@ -136,6 +136,7 @@ CGI::Carp
 CGI::Cookie
 CGI::Form
 CGI::Pretty
+CGI::Push
 CGI::Switch
 CGI::Util
 Carp::Heavy
@@ -196,4 +197,3 @@ attributes
 base
 bytes
 ops
-warnings::register

@@ -33,6 +33,7 @@ my($out, $err) = Test::Simple::Catch::caught();
 
 Test::Simple->import(tests => 5);
 
+#line 30
 ok(1, 'Foo');
 ok(0, 'Bar');
 

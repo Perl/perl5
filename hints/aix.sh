@@ -160,14 +160,14 @@ EOF
      5.0.0.0)
 	cat >&4 <<EOF
 ***
-*** This C compiler ($ccversion) is known to have optimizer problems
-*** when compiling perl.c.
+*** This C compiler ($ccversion) is known to have too many optimizer
+*** bugs to compile a working Perl.
 ***
-*** Disabling optimization for that file but consider upgrading
-*** your C compiler.
+*** Consider upgrading your C compiler, or getting the GNU cc (gcc).
 ***
+*** Cannot continue, aborting.
 EOF
-perl_cflags='optimize='
+	exit 1
 	;;
      5.0.1.0)
 	cat >&4 <<EOF

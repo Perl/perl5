@@ -104,7 +104,16 @@ print ref *x{FORMAT} eq "FORMAT" ? "ok 21\n" : "not ok 21\n";
 *x = *STDOUT;
 print *{*x{GLOB}} eq "*main::STDOUT" ? "ok 22\n" : "not ok 22\n";
 print {*x{IO}} "ok 23\n";
-print {*x{FILEHANDLE}} "ok 24\n";
+
+{
+	my $warn;
+	local $SIG{__WARN__} = sub {
+		$warn .= $_[0];
+	};
+	my $val = *x{FILEHANDLE};
+	print {*x{IO}} ($warn =~ /is deprecated/ ? "ok 24\n" : "not ok 24\n");
+	
+}
 
 # test if defined() doesn't create any new symbols
 
