@@ -6665,15 +6665,23 @@ S_scan_trans(pTHX_ char *start)
     }
 
     complement = del = squash = 0;
-    while (strchr("cds", *s)) {
-	if (*s == 'c')
+    while (1) {
+	switch (*s) {
+	case 'c':
 	    complement = OPpTRANS_COMPLEMENT;
-	else if (*s == 'd')
+	    break;
+	case 'd':
 	    del = OPpTRANS_DELETE;
-	else if (*s == 's')
+	    break;
+	case 's':
 	    squash = OPpTRANS_SQUASH;
+	    break;
+	default:
+	    goto no_more;
+	}
 	s++;
     }
+  no_more:
 
     New(803, tbl, complement&&!del?258:256, short);
     o = newPVOP(OP_TRANS, 0, (char*)tbl);
