@@ -834,3 +834,36 @@ print "after: $$s\n";
 EXPECT
 before: c
 after: c
+######## [ID 20020104.007] "coredump on dbmclose"
+package Foo;
+eval { dbmclose %h }; # not all places have dbm* functions
+if ($@) {
+    print "ok\n";
+    exit 0;
+}
+package Foo;
+sub new {
+        my $proto = shift;
+        my $class = ref($proto) || $proto;
+        my $self  = {};
+        bless($self,$class);
+        my %LT;
+        dbmopen(%LT, "dbmtest", 0666) ||
+	    die "Can't open dbmtest because of $!\n";
+        $self->{'LT'} = \%LT;
+        return $self;
+}
+sub DESTROY {
+        my $self = shift;
+        dbmclose(%{$self->{'LT'}});
+        return 1;
+}
+package main;
+$test = Foo->new(); # must be package var
+END
+{
+	1 while unlink <dbmtest.*>;
+	print "ok\n";
+}
+EXPECT
+ok
