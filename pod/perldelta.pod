@@ -657,7 +657,7 @@ exact compilation phase (BEGIN, CHECK, INIT, or END).
 
 =item *
 
-B<B::Concise> is a new compiler backend for walking the Perl syntax
+C<B::Concise> is a new compiler backend for walking the Perl syntax
 tree, printing concise info about ops, from Stephen McCamant.  The
 output is highly customisable.  See L<B::Concise>.
 
@@ -2896,7 +2896,8 @@ Please remember to set your environment variable LC_ALL to "C"
 (setenv LC_ALL C) before running "make test" to avoid a lot of
 warnings about the broken locales of Mac OS X.
 
-The following tests are known to fail:
+The following tests are known to fail in Mac OS X 10.1.4 because of
+buggy (old) implementations of Berkeley DB included in Mac OS X:
 
  Failed Test                 Stat Wstat Total Fail  Failed  List of Failed
  -------------------------------------------------------------------------
@@ -2958,13 +2959,28 @@ the 5.005 threading implementation. These are not new failures--Perl
  ../ext/List/Util/t/first.t         255 65280     7    4  57.14%  2 5-7
  ../lib/English.t                     2   512    54    2   3.70%  2-3
  ../lib/Filter/Simple/t/data.t                    6    3  50.00%  1-3
- ../lib/Filter/Simple/t/filter_onl                9    3  33.33%  1-2 5
+ ../lib/Filter/Simple/t/filter_only               9    3  33.33%  1-2 5
  ../lib/autouse.t                                10    1  10.00%  4
  op/flip.t                                       15    1   6.67%  15
 
 These failures are unlikely to get fixed as the 5.005-style threads
 are considered fundamentally broken.  (Basically what happens is that
 competing threads can corrupt shared global state.)
+
+=head2 Timing problems
+
+The following tests may fail intermittently because of timing
+problems, for example if the system is heavily loaded.
+
+    t/op/alarm.t
+    ext/Time/HiRes/HiRes.t
+    lib/Benchmark.t
+    lib/Memoize/t/expmod_t.t
+    lib/Memoize/t/speed.t
+
+In case of failure please try running them manually, for example
+
+    ./perl -Ilib ext/Time/HiRes/HiRes.t
 
 =head2 UNICOS
 
