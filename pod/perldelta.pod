@@ -135,7 +135,12 @@ features make them less often a problem.  See L<New Diagnostics>.
 Perl has a new Social Contract for contributors.  See F<Porting/Contract>.
 
 The license included in much of the Perl documentation has changed.
-See L<perl> and the individual perl man pages listed therein.
+Most of the Perl documentation was previously under the implicit GNU
+General Public License or the Artistic License (at the user's choice).
+Now much of the documentation unambigously states the terms under which
+it may be distributed.  Those terms are in general much less restrictive
+than the GNU GPL.  See L<perl> and the individual perl man pages listed
+therein.
 
 =head1 Core Changes
 
@@ -301,13 +306,15 @@ and in XSUBs.
 
 =head2 More generous treatment of carriage returns
 
-Perl used to complain if it encountered carriage returns in scripts.  Now
-they are treated like whitespace.  Literal carriage returns inside
-string literals and here documents are ignored if they are paired with
-newlines, or treated like newlines if they stand alone.  This behavior
-means that literal carriage returns in files should be avoided.  You
-can get the older, more compatible (but less generous) behavior by
-defining the preprocessor symbol C<TMP_CRLF_PATCH> when building perl.
+Perl used to complain if it encountered literal carriage returns in
+scripts.  Now they are mostly treated like whitespace within program text.
+Inside string literals and here documents, literal carriage returns are
+ignored if they occur paired with newlines, or get interpreted as newlines
+if they stand alone.  This behavior means that literal carriage returns
+in files should be avoided.  You can get the older, more compatible (but
+less generous) behavior by defining the preprocessor symbol
+C<PERL_STRICT_CR> when building perl.  Of course, all this has nothing
+whatever to do with how escapes like C<\r> are handled within strings.
 
 Note that this doesn't somehow magically allow you to keep all text files
 in DOS format.  The generous treatment only applies to files that perl

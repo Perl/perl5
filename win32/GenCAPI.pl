@@ -202,6 +202,29 @@ extern "C" $type $funcName ($args)
 ENDCODE
                     print OUTFILE "#endif\n" unless ($separateObj == 0);
                 }
+                elsif($name eq "sv_catpvf_mg") {
+                    print OUTFILE "\n#ifdef $name" . "_defined" unless ($separateObj == 0);
+                    $args[0] =~ /(\w+)\W*$/; 
+                    $arg0 = $1;
+                    $args[1] =~ /(\w+)\W*$/; 
+                    $arg1 = $1;
+                    print OUTFILE <<ENDCODE;
+
+#undef $name
+#ifndef mg_set
+#define mg_set pPerl->Perl_mg_set
+#endif
+extern "C" $type $funcName ($args)
+{
+    va_list args;
+    va_start(args, $arg1);
+    pPerl->Perl_sv_vcatpvfn($arg0, $arg1, strlen($arg1), &args, NULL, 0, NULL);
+    va_end(args);
+    SvSETMAGIC(sv);
+}
+ENDCODE
+                    print OUTFILE "#endif\n" unless ($separateObj == 0);
+                }
                 elsif($name eq "sv_setpvf") {
                     print OUTFILE "\n#ifdef $name" . "_defined" unless ($separateObj == 0);
                     $args[0] =~ /(\w+)\W*$/; 
@@ -217,6 +240,29 @@ extern "C" $type $funcName ($args)
     va_start(args, $arg1);
     pPerl->Perl_sv_vsetpvfn($arg0, $arg1, strlen($arg1), &args, NULL, 0, NULL);
     va_end(args);
+}
+ENDCODE
+                    print OUTFILE "#endif\n" unless ($separateObj == 0);
+                }
+                elsif($name eq "sv_setpvf_mg") {
+                    print OUTFILE "\n#ifdef $name" . "_defined" unless ($separateObj == 0);
+                    $args[0] =~ /(\w+)\W*$/; 
+                    $arg0 = $1;
+                    $args[1] =~ /(\w+)\W*$/; 
+                    $arg1 = $1;
+                    print OUTFILE <<ENDCODE;
+
+#undef $name
+#ifndef mg_set
+#define mg_set pPerl->Perl_mg_set
+#endif
+extern "C" $type $funcName ($args)
+{
+    va_list args;
+    va_start(args, $arg1);
+    pPerl->Perl_sv_vsetpvfn($arg0, $arg1, strlen($arg1), &args, NULL, 0, NULL);
+    va_end(args);
+    SvSETMAGIC(sv);
 }
 ENDCODE
                     print OUTFILE "#endif\n" unless ($separateObj == 0);

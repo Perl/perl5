@@ -78,6 +78,11 @@ Version 5.005_50        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  1665] By: gsar                                  on 1998/07/26  05:38:48
+        Log: add trailing newline to file
+     Branch: perl
+           ! Changes lib/unicode/blocks.txt
+____________________________________________________________________________
 [  1664] By: gsar                                  on 1998/07/26  05:08:48
         Log: integrate proto.h additions from maint-5.005
      Branch: perl

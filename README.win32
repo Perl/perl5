@@ -70,7 +70,7 @@ If the build fails under that shell, try building again with the cmd
 shell.  The Makefile also has known incompatibilites with the "command.com"
 shell that comes with Windows95, so building under Windows95 should
 be considered "unsupported".  However, there have been reports of successful
-build attempts using 4DOS/NT version 3.00 under Windows95, using dmake, but
+build attempts using 4DOS/NT version 6.01 under Windows95, using dmake, but
 your mileage may vary.
 
 The surest way to build it is on WindowsNT, using the cmd shell.
