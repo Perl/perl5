@@ -180,6 +180,9 @@ sub autosplit_lib_modules{
 	s|\\|/|g;		# bug in ksh OS/2
 	s#^lib/##s; # incase specified as lib/*.pm
 	my($lib) = catfile(curdir(), "lib");
+	if ($Is_VMS) { # may need to convert VMS-style filespecs
+	    $lib =~ s#^\[\]#.\/#;
+	}
 	s#^$lib\W+##s; # incase specified as ./lib/*.pm
 	if ($Is_VMS && /[:>\]]/) { # may need to convert VMS-style filespecs
 	    my ($dir,$name) = (/(.*])(.*)/s);
@@ -250,6 +253,9 @@ sub autosplit_file {
     $def_package or die "Can't find 'package Name;' in $filename\n";
 
     my($modpname) = _modpname($def_package); 
+    if ($Is_VMS) {
+	$modpname = VMS::Filespec::unixify($modpname); # may have dirs
+    }
 
     # this _has_ to match so we have a reasonable timestamp file
     die "Package $def_package ($modpname.pm) does not ".

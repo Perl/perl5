@@ -4015,7 +4015,7 @@ C<@ARGV> array at file scopes or within the lexical scopes established by
 the C<eval ''>, C<BEGIN {}>, C<INIT {}>, C<CHECK {}>, and C<END {}>
 constructs.
 
-See also C<unshift>, C<push>, and C<pop>.  C<shift()> and C<unshift> do the
+See also C<unshift>, C<push>, and C<pop>.  C<shift> and C<unshift> do the
 same thing to the left end of an array that C<pop> and C<push> do to the
 right end.
 

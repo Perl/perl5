@@ -758,3 +758,5 @@ tt+$	xxxtt	y	-	-
 ^([^,]*,){2}c	a,b,c	y	$1	b,
 (?i)		y	-	-
 '(?!\A)x'm	a\nxb\n	y	-	-
+^(a(b)?)+$	aba	y	-$1-$2-	-a--
+^(aa(bb)?)+$	aabbaa	y	-$1-$2-	-aa--
