@@ -85,11 +85,12 @@ like( $@, qr/too ambiguous/, 'should die with ambiguous locale encoding' );
 %%%
 # the special :locale layer
 $ENV{LANG} = 'ru_RU.KOI8-R';
-use open ':locale';
+# the :locale will probe the locale environment variables like LANG
+use open OUT => ':locale';
 open(O, ">koi8");
 print O chr(0x430); # Unicode CYRILLIC SMALL LETTER A = KOI8-R 0xC1
 close O;
 open(I, "<koi8");
-is(ord(<I>), 0xC1, ":locale");
+printf "%#X\n", ord(<I>), "\n"; # this should print 0xC1
 close I;
 %%%

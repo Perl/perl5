@@ -153,12 +153,13 @@ locale environment variables, you can use the C<:locale> tag.
 For example:
 
     $ENV{LANG} = 'ru_RU.KOI8-R';
-    use open ':locale';
+    # the :locale will probe the locale environment variables like LANG
+    use open OUT => ':locale';
     open(O, ">koi8");
     print O chr(0x430); # Unicode CYRILLIC SMALL LETTER A = KOI8-R 0xC1
     close O;
     open(I, "<koi8");
-    printf "%#x\n", ord(<I>), "\n"; # this should print 0xC1
+    printf "%#X\n", ord(<I>), "\n"; # this should print 0xC1
     close I;
 
 These are equivalent
