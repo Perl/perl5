@@ -177,7 +177,7 @@ EOM
 	    6.2)
  	        cat >&4 <<EOM
 IRIX 6.2 can have the POSIX threads.
-However,the following IRIX patches (or their replacements) MUST be installed:
+However, the following IRIX patches (or their replacements) MUST be installed:
         1404 Irix 6.2 Posix 1003.1b man pages
         1645 IRIX 6.2 & 6.3 POSIX header file updates
         2000 Irix 6.2 Posix 1003.1b support modules

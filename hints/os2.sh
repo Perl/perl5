@@ -261,6 +261,21 @@ d_setprior='define'
 
 cp ./README.os2 ./pod/perlos2.pod
 
+# This script UU/usethreads.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to use threads.
+cat > UU/usethreads.cbu <<'EOCBU'
+case "$usethreads" in
+$define|true|[yY]*)
+	ccflags="-Zmt $ccflags"
+        cppflags="-Zmt $cppflags"  # Do we really need to set this?
+        aout_ccflags="-DUSE_THREADS $aout_ccflags"
+        aout_cppflags="-DUSE_THREADS $aout_cppflags"
+        aout_lddlflags="-Zmt $aout_lddlflags"
+        aout_ldflags="-Zmt $aout_ldflags"
+	;;
+esac
+EOCBU
+
 # Now install the external modules. We are in the ./hints directory.
 
 cd ./os2/OS2
@@ -288,21 +303,6 @@ for xxx in * ; do
 		fi
 	fi
 done
-
-# This script UU/usethreads.cbu will get 'called-back' by Configure 
-# after it has prompted the user for whether to use threads.
-cat > UU/usethreads.cbu <<'EOCBU'
-case "$usethreads" in
-$define|true|[yY]*)
-	ccflags="-Zmt $ccflags"
-        cppflags="-Zmt $cppflags"  # Do we really need to set this?
-        aout_ccflags="-DUSE_THREADS $aout_ccflags"
-        aout_cppflags="-DUSE_THREADS $aout_cppflags"
-        aout_lddlflags="-Zmt $aout_lddlflags"
-        aout_ldflags="-Zmt $aout_ldflags"
-	;;
-esac
-EOCBU
 
 # Now go back
 cd ../..
