@@ -152,7 +152,6 @@ sub share_from {
     my $pkg = shift;
     my $vars = shift;
     my $no_record = shift || 0;
-    my $root = $obj->root();
     croak("vars not an array ref") unless ref $vars eq 'ARRAY';
 	no strict 'refs';
     # Check that 'from' package actually exists
@@ -167,13 +166,16 @@ sub share_from {
 	my ($var, $type);
 	$type = $1 if ($var = $arg) =~ s/^(\W)//;
 	# warn "share_from $pkg $type $var";
-	*{$root."::$var"} = (!$type)       ? \&{$pkg."::$var"}
+	my $obj_to_share =  (!$type)       ? \&{$pkg."::$var"}
 			  : ($type eq '&') ? \&{$pkg."::$var"}
 			  : ($type eq '$') ? \${$pkg."::$var"}
 			  : ($type eq '@') ? \@{$pkg."::$var"}
 			  : ($type eq '%') ? \%{$pkg."::$var"}
 			  : ($type eq '*') ?  *{$pkg."::$var"}
 			  : croak(qq(Can't share "$type$var" of unknown type));
+	package main;
+	Opcode::_safe_call_sv($obj->{Root}, $obj->{Mask},
+			      sub { *$var = $obj_to_share });
     }
     $obj->share_record($pkg, $vars) unless $no_record or !$vars;
 }
@@ -208,27 +210,25 @@ sub varglob {
 
 sub reval {
     my ($obj, $expr, $strict) = @_;
-    my $root = $obj->{Root};
 
-    # Create anon sub ref in root of compartment.
-    # Uses a closure (on $expr) to pass in the code to be executed.
-    # (eval on one line to keep line numbers as expected by caller)
-	my $evalcode = sprintf('package %s; sub { eval $expr; }', $root);
-    my $evalsub;
-
-	if ($strict) { use strict; $evalsub = eval $evalcode; }
-	else         {  no strict; $evalsub = eval $evalcode; }
-
-    return Opcode::_safe_call_sv($root, $obj->{Mask}, $evalsub);
+    package main;
+    if ($strict) {
+	use strict;
+	return Opcode::_safe_call_sv($obj->{Root}, $obj->{Mask},
+				     sub { eval $expr });
+    }
+    else {
+	no strict;
+	return Opcode::_safe_call_sv($obj->{Root}, $obj->{Mask},
+				     sub { eval $expr });
+    }
 }
 
 sub rdo {
     my ($obj, $file) = @_;
-    my $root = $obj->{Root};
-
-    my $evalsub = eval
-	    sprintf('package %s; sub { do $file }', $root);
-    return Opcode::_safe_call_sv($root, $obj->{Mask}, $evalsub);
+    package main;
+    return Opcode::_safe_call_sv($obj->{Root}, $obj->{Mask},
+				 sub { do $file });
 }
 
 
