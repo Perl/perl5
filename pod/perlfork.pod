@@ -1,8 +1,13 @@
 =head1 NAME
 
-perlfork - Perl's fork() emulation
+perlfork - Perl's fork() emulation (EXPERIMENTAL, subject to change)
 
 =head1 SYNOPSIS
+
+    WARNING:  As of the 5.6.1 release, the fork() emulation continues
+    to be an experimental feature.  Use in production applications is
+    not recommended.  See the "BUGS" and "CAVEATS AND LIMITATIONS"
+    sections below.
 
 Perl provides a fork() keyword that corresponds to the Unix system call
 of the same name.  On most Unix-like platforms where the fork() system
@@ -271,6 +276,17 @@ are expected to be fixed for thread-safety.
 =head1 BUGS
 
 =over 8
+
+=item *
+
+Perl's regular expression engine currently does not play very nicely
+with the fork() emulation.  There are known race conditions arising
+from the regular expression engine modifying state carried in the opcode
+tree at run time (the fork() emulation relies on the opcode tree being
+immutable).  This typically happens when the regex contains paren groups
+or variables interpolated within it that force a run time recompilation
+of the regex.  Due to this major bug, the fork() emulation is not
+recommended for use in production applications at this time.
 
 =item *
 
