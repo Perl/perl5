@@ -140,6 +140,9 @@ else
 fi
 
 # Do this right now instead of the delayed callback unit approach.
+case "$use64bitall" in
+$define|true|[yY]*) use64bitint="$define" ;;
+esac
 case "$use64bitint" in
 $define|true|[yY]*)
     if [ "$xxOsRevMajor" -lt 11 ]; then
@@ -154,12 +157,13 @@ EOM
     fi
 
     # Without the 64-bit libc we cannot do much.
-    if [ ! -f /lib/pa20_64/libc.sl ]; then
+    libc='/lib/pa20_64/libc.sl'
+    if [ ! -f "$libc" ]; then
 		cat <<EOM >&4
 
-You do not seem to have the 64-bit libraries in /lib/pa20_64.
-Most importantly, I cannot find /lib/pa20_64/libc.sl.
-Cannot continue, aborting.
+*** You do not seem to have the 64-bit libraries in /lib/pa20_64.
+*** Most importantly, I cannot find the $libc.
+*** Cannot continue, aborting.
 
 EOM
 		exit 1
