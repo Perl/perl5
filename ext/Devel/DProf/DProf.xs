@@ -84,7 +84,7 @@ typedef struct {
     U32		dprof_ticks;
     char*	out_file_name;	/* output file (defaults to tmon.out) */
     PerlIO*	fp;		/* pointer to tmon.out file */
-    long	TIMES_LOCATION;	/* Where in the file to store the time totals */
+    Off_t	TIMES_LOCATION;	/* Where in the file to store the time totals */
     int		SAVE_STACK;	/* How much data to buffer until end of run */
     int		prof_pid;	/* pid of profiled process */
     struct tms	prof_start;

@@ -2838,7 +2838,7 @@ PP(pp_stat)
 	PUSHs(sv_2mortal(newSVpvn("", 0)));
 #endif
 #if Off_t_size > IVSIZE
-	PUSHs(sv_2mortal(newSVnv(PL_statcache.st_size)));
+	PUSHs(sv_2mortal(newSVnv((NV)PL_statcache.st_size)));
 #else
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_size)));
 #endif

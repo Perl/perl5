@@ -73,7 +73,13 @@ USE_IMP_SYS	*= define
 # then get a number of fails from make test i.e. bugs - complain to them not us ;-). 
 # You will also be unable to take full advantage of perl5.8's support for multiple 
 # encodings and may see lower IO performance. You have been warned.
-USE_PERLIO	= define
+USE_PERLIO	*= define
+
+#
+# Comment this out if you don't want to enable large file support for
+# some reason.  Should normally only be changed to maintain compatibility
+# with an older release of perl.
+USE_LARGE_FILES *= define
 
 #
 # uncomment exactly one of the following
@@ -233,6 +239,7 @@ USE_MULTI	*= undef
 USE_ITHREADS	*= undef
 USE_IMP_SYS	*= undef
 USE_PERLIO	*= undef
+USE_LARGE_FILES	*= undef
 USE_PERLCRT	*= undef
 
 .IF "$(USE_IMP_SYS)$(USE_MULTI)" == "defineundef"
@@ -813,7 +820,8 @@ CFG_VARS	=					\
 		useithreads=$(USE_ITHREADS)	~	\
 		usemultiplicity=$(USE_MULTI)	~	\
 		useperlio=$(USE_PERLIO)		~	\
-		LINK_FLAGS=$(LINK_FLAGS:s/\/\\/)		~	\
+		uselargefiles=$(USE_LARGE_FILES) ~	\
+		LINK_FLAGS=$(LINK_FLAGS:s/\/\\/) ~	\
 		optimize=$(OPTIMIZE)
 
 #

@@ -74,11 +74,17 @@ USE_IMP_SYS = define
 USE_PERLIO	= define
 
 #
+# Comment this out if you don't want to enable large file support for
+# some reason.  Should normally only be changed to maintain compatibility
+# with an older release of perl.
+USE_LARGE_FILES = define
+
+#
 # uncomment one of the following lines if you are using either
 # Visual C++ 2.x or Visual C++ 6.x (aka Visual Studio 98)
 #
 #CCTYPE		= MSVC20
-#CCTYPE		= MSVC60
+CCTYPE		= MSVC60
 
 #
 # uncomment next line if you want debug version of perl (big,slow)
@@ -214,6 +220,10 @@ USE_IMP_SYS	= undef
 
 !IF "$(USE_PERLIO)" == ""
 USE_PERLIO	= undef
+!ENDIF
+
+!IF "$(USE_LARGE_FILES)" == ""
+USE_LARGE_FILES	= undef
 !ENDIF
 
 !IF "$(USE_PERLCRT)" == ""
@@ -767,6 +777,7 @@ CFG_VARS	=					\
 		"useithreads=$(USE_ITHREADS)"		\
 		"usemultiplicity=$(USE_MULTI)"		\
 		"useperlio=$(USE_PERLIO)"		\
+		"uselargefiles=$(USE_LARGE_FILES)"	\
 		"LINK_FLAGS=$(LINK_FLAGS:"=\")"		\
 		"optimize=$(OPTIMIZE:"=\")"
 
