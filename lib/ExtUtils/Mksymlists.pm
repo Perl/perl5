@@ -48,7 +48,7 @@ sub Mksymlists {
 
     if    ($osname eq 'aix') { _write_aix(\%spec); }
     elsif ($osname eq 'VMS') { _write_vms(\%spec) }
-    elsif ($osname =~ m|^os/?2$|i) { _write_os2(\%spec) }
+    elsif ($osname eq 'os2') { _write_os2(\%spec) }
     else { croak("Don't know how to create linker option file for $osname\n"); }
 }
 

@@ -2,10 +2,10 @@ BEGIN {require 5.002;} # MakeMaker 5.17 was the last MakeMaker that was compatib
 
 package ExtUtils::MakeMaker;
 
-$Version = $VERSION = "5.38";
+$Version = $VERSION = "5.39";
 $Version_OK = "5.17";	# Makefiles older than $Version_OK will die
 			# (Will be checked from MakeMaker version 4.13 onwards)
-($Revision = substr(q$Revision: 1.207 $, 10)) =~ s/\s+$//;
+($Revision = substr(q$Revision: 1.208 $, 10)) =~ s/\s+$//;
 
 
 
@@ -69,7 +69,7 @@ package ExtUtils::MakeMaker;
 # Now we can can pull in the friends
 #
 $Is_VMS = $^O eq 'VMS';
-$Is_OS2 = $^O =~ m|^os/?2$|i;
+$Is_OS2 = $^O eq 'os2';
 $Is_Mac = $^O eq 'MacOS';
 
 require ExtUtils::MM_Unix;
@@ -236,7 +236,7 @@ sub full_setup {
     INSTALLARCHLIB INSTALLBIN INSTALLDIRS INSTALLMAN1DIR
     INSTALLMAN3DIR INSTALLPRIVLIB INSTALLSCRIPT INSTALLSITEARCH
     INSTALLSITELIB INST_ARCHLIB INST_BIN INST_EXE INST_LIB
-    INST_MAN1DIR INST_MAN3DIR INST_SCRIPT LDFROM LIBPERL_A LIBS
+    INST_MAN1DIR INST_MAN3DIR INST_SCRIPT LDFROM LIBPERL_A LIB LIBS
     LINKTYPE MAKEAPERL MAKEFILE MAN1PODS MAN3PODS MAP_TARGET MYEXTLIB
     NAME NEEDS_LINKING NOECHO NORECURS OBJECT OPTIMIZE PERL PERLMAINCC
     PERL_ARCHLIB PERL_LIB PERL_SRC PL_FILES PM PMLIBDIRS PREFIX
@@ -408,10 +408,7 @@ sub ExtUtils::MakeMaker::new {
 
     # This is for old Makefiles written pre 5.00, will go away
     if ( Carp::longmess("") =~ /runsubdirpl/s ){
-	#$self->{Correct_relativ_directories}++;
 	Carp::carp("WARNING: Please rerun 'perl Makefile.PL' to regenerate your Makefiles\n");
-    } else {
-	$self->{Correct_relativ_directories}=0;
     }
 
     my $newclass = ++$PACKNAME;
@@ -557,15 +554,8 @@ sub parse_args{
 		 (getpwuid($>))[7]
 		 ]ex;
 	}
-	# This may go away, in mid 1996
-#	if ($self->{Correct_relativ_directories}){
-#	    $value = $self->catdir("..",$value)
-#		if $Prepend_dot_dot{$name} && ! $self->file_name_is_absolute($value);
-#	}
 	$self->{uc($name)} = $value;
     }
-    # This may go away, in mid 1996
-    delete $self->{Correct_relativ_directories};
 
     # catch old-style 'potential_libs' and inform user how to 'upgrade'
     if (defined $self->{potential_libs}){
@@ -862,18 +852,26 @@ Makefiles with a single invocation of WriteMakefile().
 
 =head2 How To Write A Makefile.PL
 
-The short answer is: Don't. Run h2xs(1) before you start thinking
-about writing a module. For so called pm-only modules that consist of
-C<*.pm> files only, h2xs has the very useful C<-X> switch. This will
-generate dummy files of all kinds that are useful for the module
-developer.
+The short answer is: Don't.
+
+        Always begin with h2xs.
+        Always begin with h2xs!
+        ALWAYS BEGIN WITH H2XS!
+
+even if you're not building around a header file, and even if you
+don't have an XS component.
+
+Run h2xs(1) before you start thinking about writing a module. For so
+called pm-only modules that consist of C<*.pm> files only, h2xs has
+the C<-X> switch. This will generate dummy files of all kinds that are
+useful for the module developer.
 
 The medium answer is:
 
     use ExtUtils::MakeMaker;
     WriteMakefile( NAME => "Foo::Bar" );
 
-The long answer is below.
+The long answer is the rest of the manpage :-)
 
 =head2 Default Makefile Behaviour
 
@@ -899,7 +897,7 @@ Other interesting targets in the generated Makefile are
 
 =head2 make test
 
-MakeMaker checks for the existence of a file named "test.pl" in the
+MakeMaker checks for the existence of a file named F<test.pl> in the
 current directory and if it exists it adds commands to the test target
 of the generated Makefile that will execute the script with the proper
 set of perl C<-I> options.
@@ -908,6 +906,22 @@ MakeMaker also checks for any files matching glob("t/*.t"). It will
 add commands to the test target of the generated Makefile that execute
 all matching files via the L<Test::Harness> module with the C<-I>
 switches set correctly.
+
+=head2 make testdb
+
+A useful variation of the above is the target C<testdb>. It runs the
+test under the Perl debugger (see L<perldebug>). If the file
+F<test.pl> exists in the current directory, it is used for the test.
+
+If you want to debug some other testfile, set C<TEST_FILE> variable
+thusly:
+
+  make testdb TEST_FILE=t/mytest.t
+
+By default the debugger is called using C<-d> option to perl. If you
+want to specify some other option, set C<TESTDB_SW> variable:
+
+  make testdb TESTDB_SW=-Dx
 
 =head2 make install
 
@@ -938,9 +952,7 @@ The INSTALL... macros in turn default to their %Config
 
 You can check the values of these variables on your system with
 
-    perl -MConfig -le 'print join $/, map 
-        sprintf("%20s: %s", $_, $Config{$_}),
-        grep /^install/, keys %Config'
+    perl '-V:install.*'
 
 And to check the sequence in which the library directories are
 searched by perl, run
@@ -948,18 +960,29 @@ searched by perl, run
     perl -le 'print join $/, @INC'
 
 
-=head2 PREFIX attribute
+=head2 PREFIX and LIB attribute
 
-The PREFIX attribute can be used to set the INSTALL* attributes in one
-go. The quickest way to install a module in a non-standard place
+PREFIX and LIB can be used to set several INSTALL* attributes in one
+go. The quickest way to install a module in a non-standard place might
+be
+
+    perl Makefile.PL LIB=~/lib
+
+This will install the module's architecture-independent files into
+~/lib, the architecture-dependent files into ~/lib/$archname/auto.
+
+Another way to specify many INSTALL directories with a single
+parameter is PREFIX.
 
     perl Makefile.PL PREFIX=~
 
 This will replace the string specified by $Config{prefix} in all
 $Config{install*} values.
 
-Note, that the tilde expansion is done by MakeMaker, not by perl by
-default, nor by make.
+Note, that in both cases the tilde expansion is done by MakeMaker, not
+by perl by default, nor by make. Conflicts between parmeters LIB,
+PREFIX and the various INSTALL* arguments are resolved so that 
+XXX
 
 If the user has superuser privileges, and is not working on AFS
 (Andrew File System) or relatives, then the defaults for
@@ -1330,6 +1353,11 @@ specify ld flags)
 The filename of the perllibrary that will be used together with this
 extension. Defaults to libperl.a.
 
+=item LIB
+
+LIB can only be set at C<perl Makefile.PL> time. It has the effect of
+setting both INSTALLPRIVLIB and INSTALLSITELIB to that value regardless any
+
 =item LIBS
 
 An anonymous array of alternative library
@@ -1529,7 +1557,7 @@ B<after> the eval() will be assigned to the VERSION attribute of the
 MakeMaker object. The following lines will be parsed o.k.:
 
     $VERSION = '1.00';
-    ( $VERSION ) = '$Revision: 1.207 $ ' =~ /\$Revision:\s+([^\s]+)/;
+    ( $VERSION ) = '$Revision: 1.208 $ ' =~ /\$Revision:\s+([^\s]+)/;
     $FOO::VERSION = '1.10';
 
 but these will fail:
