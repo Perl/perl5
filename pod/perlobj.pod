@@ -227,117 +227,104 @@ and then uses that as an ordinary reference.
 
 =head2 Method Invocation
 
-There are two ways to invoke a method, one of which you're already
-familiar with, and the other of which will look familiar.  Perl 4
-already had an "indirect object" syntax that you use when you say
+For various historical and other reasons, Perl offers two equivalent
+ways to write a method call.  The simpler and more common way is to use
+the arrow notation:
 
-    print STDERR "help!!!\n";
+    my $fred = Critter->find("Fred");
+    $fred->display("Height", "Weight");
 
-This same syntax can be used to call either class or instance methods.
-We'll use the two methods defined above, the class method to lookup
-an object reference and the instance method to print out its attributes.
+You should already be familiar with the C<< -> >> operator from using
+references.  In fact, since C<$fred> above is a reference to an object,
+you could think of the method call as just another form of
+dereferencing.
 
-    $fred = find Critter "Fred";
-    display $fred 'Height', 'Weight';
+Whatever is on the left side of the arrow, whether a reference or a
+class name, is passed to the method subroutine as its first argument.
+So the above code is mostly equivalent to:
 
-These could be combined into one statement by using a BLOCK in the
-indirect object slot:
+    my $fred = Critter::find("Critter", "Fred");
+    Critter::display($fred, "Height", "Weight");
 
-    display {find Critter "Fred"} 'Height', 'Weight';
+How does Perl know which package the subroutine is in?  By looking at
+the left side of the arrow, which must be either a package name or a
+reference to an object, i.e. something that has been blessed to a
+package.  Either way, that's the package Perl starts looking in.  If
+that package has no subroutine with that name, Perl starts looking for
+it in any base classes of that package, and so on.
 
-For C++ fans, there's also a syntax using -> notation that does exactly
-the same thing.  The parentheses are required if there are any arguments.
+If you want, you I<can> force Perl to start looking in some other
+package:
 
-    $fred = Critter->find("Fred");
-    $fred->display('Height', 'Weight');
+    my $barney = MyCritter->Critter::find("Barney");
+    $barney->Critter::display("Height", "Weight");
 
-or in one statement,
+Here C<MyCritter> is presumably a subclass of C<Critter> that defines
+its own versions of find() and display().  We haven't specified what
+those methods do, but that doesn't matter above since we've forced Perl
+to start looking for the subroutines in C<Critter>.
 
-    Critter->find("Fred")->display('Height', 'Weight');
+As a special case of the above, you may use the C<SUPER> pseudo-class to
+tell Perl to start looking for the method in the current class's C<@ISA>
+list.  
 
-There are times when one syntax is more readable, and times when the
-other syntax is more readable.  The indirect object syntax is less
-cluttered, but it has the same ambiguity as ordinary list operators.
-Indirect object method calls are usually parsed using the same rule as list
-operators: "If it looks like a function, it is a function".  (Presuming
-for the moment that you think two words in a row can look like a
-function name.  C++ programmers seem to think so with some regularity,
-especially when the first word is "new".)  Thus, the parentheses of
+    package MyCritter;
+    use base 'Critter';    # sets @MyCritter::ISA = ('Critter');
 
-    new Critter ('Barney', 1.5, 70)
-
-are assumed to surround ALL the arguments of the method call, regardless
-of what comes after.  Saying
-
-    new Critter ('Bam' x 2), 1.4, 45
-
-would be equivalent to
-
-    Critter->new('Bam' x 2), 1.4, 45
-
-which is unlikely to do what you want.  Confusingly, however, this
-rule applies only when the indirect object is a bareword package name,
-not when it's a scalar, a BLOCK, or a C<Package::> qualified package name.
-In those cases, the arguments are parsed in the same way as an
-indirect object list operator like print, so
-
-    new Critter:: ('Bam' x 2), 1.4, 45
-
-is the same as
-
-   Critter::->new(('Bam' x 2), 1.4, 45)
-
-For more reasons why the indirect object syntax is ambiguous, see
-L<"WARNING"> below.
-
-There are times when you wish to specify which class's method to use.
-Here you can call your method as an ordinary subroutine
-call, being sure to pass the requisite first argument explicitly:
-
-    $fred =  MyCritter::find("Critter", "Fred");
-    MyCritter::display($fred, 'Height', 'Weight');
-
-Unlike method calls, function calls don't consider inheritance.  If you wish
-merely to specify that Perl should I<START> looking for a method in a
-particular package, use an ordinary method call, but qualify the method
-name with the package like this:
-
-    $fred = Critter->MyCritter::find("Fred");
-    $fred->MyCritter::display('Height', 'Weight');
-
-If you're trying to control where the method search begins I<and> you're
-executing in the class itself, then you may use the SUPER pseudo class,
-which says to start looking in your base class's @ISA list without having
-to name it explicitly:
-
-    $self->SUPER::display('Height', 'Weight');
-
-Please note that the C<SUPER::> construct is meaningful I<only> within the
-class.
-
-Sometimes you want to call a method when you don't know the method name
-ahead of time.  You can use the arrow form, replacing the method name
-with a simple scalar variable containing the method name or a
-reference to the function.
-
-    $method = $fast ? "findfirst" : "findbest";
-    $fred->$method(@args);  	    # call by name
-
-    if ($coderef = $fred->can($parent . "::findbest")) {
-	$self->$coderef(@args);	    # call by coderef
+    sub display { 
+        my ($self, @args) = @_;
+        $self->SUPER::display("Name", @args);
     }
 
-=head2 WARNING
+Instead of a class name or an object reference, you can also use any
+expression that returns either of those on the left side of the arrow.
+So the following statement is valid:
 
-While indirect object syntax may well be appealing to English speakers and
-to C++ programmers, be not seduced!  It suffers from two grave problems.
+    Critter->find("Fred")->display("Height", "Weight");
 
-The first problem is that an indirect object is limited to a name,
-a scalar variable, or a block, because it would have to do too much
-lookahead otherwise, just like any other postfix dereference in the
-language.  (These are the same quirky rules as are used for the filehandle
-slot in functions like C<print> and C<printf>.)  This can lead to horribly
-confusing precedence problems, as in these next two lines:
+and so is even the following:
+
+    my $fred = (reverse "rettirC")->find(reverse "derF");
+
+=head2 Indirect Object Syntax
+
+The other way to invoke a method is by using the so-called indirect
+object notation.  Already in Perl 4, long before objects were
+introduced, this syntax was used with filehandles like this:
+
+   print STDERR "help!!!\n";
+
+The same syntax can be used to call either object or class methods.
+
+   my $fred = find Critter "Fred";
+   display $fred "Height", "Weight";
+
+Notice that there is no comma between the object or class name and the
+parameters.  This is how Perl can tell you want an indirect method call
+instead of an ordinary subroutine call.
+
+But what if there are no arguments?  In that case, Perl must guess what
+you want.  Even worse, it must make the guess I<at compile time>.
+Usually Perl gets it right, but when it doesn't it, you get a function
+call compiled as a method, or vice versa. This can introduce subtle bugs
+that are hard to unravel.
+
+For example, calling a method C<new> in indirect notation -- as C++
+programmers are so wont to do -- can be miscompiled into a subroutine
+call if there's already a C<new> function in scope.  You'd end up
+calling the current package's C<new> as a subroutine, rather than the
+desired class's method.  The compiler tries to cheat by remembering
+bareword C<require>s, but the grief if it messes up just isn't worth the
+years of debugging it would likely take you to track such subtle bugs
+down.
+
+There is another problem with this syntax: the indirect object is
+limited to a name, a scalar variable, or a block, because it would have
+to do too much lookahead otherwise, just like any other postfix
+dereference in the language.  (These are the same quirky rules as are
+used for the filehandle slot in functions like C<print> and C<printf>.)
+This can lead to horribly confusing precedence problems, as in these
+next two lines:
 
     move $obj->{FIELD};                 # probably wrong!
     move $ary[$i];                      # probably wrong!
@@ -352,24 +339,18 @@ Rather than what you might have expected:
     $obj->{FIELD}->move();              # You should be so lucky.
     $ary[$i]->move;                     # Yeah, sure.
 
-The left side of ``->'' is not so limited, because it's an infix operator,
-not a postfix operator.  
+To get the correct behavior with indirect object syntax, you would have
+to use a block around the indirect object:
 
-As if that weren't bad enough, think about this: Perl must guess I<at
-compile time> whether C<name> and C<move> above are functions or methods.
-Usually Perl gets it right, but when it doesn't it, you get a function
-call compiled as a method, or vice versa.  This can introduce subtle
-bugs that are hard to unravel.  For example, calling a method C<new>
-in indirect notation--as C++ programmers are so wont to do--can
-be miscompiled into a subroutine call if there's already a C<new>
-function in scope.  You'd end up calling the current package's C<new>
-as a subroutine, rather than the desired class's method.  The compiler
-tries to cheat by remembering bareword C<require>s, but the grief if it
-messes up just isn't worth the years of debugging it would likely take
-you to track such subtle bugs down.
+    move {$obj->{FIELD}};
+    move {$ary[$i]};
 
-The infix arrow notation using ``C<< -> >>'' doesn't suffer from either
-of these disturbing ambiguities, so we recommend you use it exclusively.
+Even then, you still have the same potential problem if there happens to
+be a function named C<move> in the current package.  B<The C<< -> >>
+notation suffers from neither of these disturbing ambiguities, so we
+recommend you use it exclusively.>  However, you may still end up having
+to read code using the indirect object notation, so it's important to be
+familiar with it.
 
 =head2 Default UNIVERSAL methods
 
