@@ -1,11 +1,19 @@
-/* $Header: dolist.c,v 4.0 91/03/20 01:08:03 lwall Locked $
+/* $RCSfile: dolist.c,v $$Revision: 4.0.1.1 $$Date: 91/06/07 10:58:28 $
  *
- *    Copyright (c) 1989, Larry Wall
+ *    Copyright (c) 1991, Larry Wall
  *
- *    You may distribute under the terms of the GNU General Public License
- *    as specified in the README file that comes with the perl 3.0 kit.
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	dolist.c,v $
+ * Revision 4.0.1.1  91/06/07  10:58:28  lwall
+ * patch4: new copyright notice
+ * patch4: added global modifier for pattern matches
+ * patch4: // wouldn't use previous pattern if it started with a null character
+ * patch4: //o and s///o now optimize themselves fully at runtime
+ * patch4: $` was busted inside s///
+ * patch4: caller($arg) didn't work except under debugger
+ * 
  * Revision 4.0  91/03/20  01:08:03  lwall
  * 4.0 baseline.
  * 
@@ -35,6 +43,8 @@ int *arglast;
     char *strend = s + st[sp]->str_cur;
     STR *tmpstr;
     char *myhint = hint;
+    int global;
+    int safebase;
 
     hint = Nullch;
     if (!spat) {
@@ -45,6 +55,8 @@ int *arglast;
 	st[sp] = str;
 	return sp;
     }
+    global = spat->spat_flags & SPAT_GLOBAL;
+    safebase = (gimme == G_ARRAY) || global;
     if (!s)
 	fatal("panic: do_match");
     if (spat->spat_flags & SPAT_USED) {
@@ -76,19 +88,30 @@ int *arglast;
 	}
 	spat->spat_regexp = regcomp(t,t+tmpstr->str_cur,
 	    spat->spat_flags & SPAT_FOLD);
-	if (!*spat->spat_regexp->precomp && lastspat)
+	if (!spat->spat_regexp->prelen && lastspat)
 	    spat = lastspat;
 	if (spat->spat_flags & SPAT_KEEP) {
 	    if (spat->spat_runtime)
 		arg_free(spat->spat_runtime);	/* it won't change, so */
 	    spat->spat_runtime = Nullarg;	/* no point compiling again */
+	    scanconst(spat, t, tmpstr->str_cur);
+	    hoistmust(spat);
+	    if (curcmd->c_expr && (curcmd->c_flags & CF_OPTIMIZE) == CFT_EVAL) {
+		curcmd->c_flags &= ~CF_OPTIMIZE;
+		opt_arg(curcmd, 1, curcmd->c_type == C_EXPR);
+	    }
 	}
-	if (!spat->spat_regexp->nparens)
+	if (global) {
+	    if (spat->spat_regexp->startp[0]) {
+		s = spat->spat_regexp->endp[0];
+	    }
+	}
+	else if (!spat->spat_regexp->nparens)
 	    gimme = G_SCALAR;			/* accidental array context? */
 	if (regexec(spat->spat_regexp, s, strend, s, 0,
 	  srchstr->str_pok & SP_STUDIED ? srchstr : Nullstr,
-	  gimme == G_ARRAY)) {
-	    if (spat->spat_regexp->subbase)
+	  safebase)) {
+	    if (spat->spat_regexp->subbase || global)
 		curspat = spat;
 	    lastspat = spat;
 	    goto gotcha;
@@ -114,9 +137,12 @@ int *arglast;
 	    deb("2.SPAT %c%s%c\n",ch,spat->spat_regexp->precomp,ch);
 	}
 #endif
-	if (!*spat->spat_regexp->precomp && lastspat)
+	if (!spat->spat_regexp->prelen && lastspat)
 	    spat = lastspat;
 	t = s;
+    play_it_again:
+	if (global && spat->spat_regexp->startp[0])
+	    s = spat->spat_regexp->endp[0];
 	if (myhint) {
 	    if (myhint < s || myhint > strend)
 		fatal("panic: hint in do_match");
@@ -163,12 +189,12 @@ int *arglast;
 		spat->spat_short = Nullstr;	/* opt is being useless */
 	    }
 	}
-	if (!spat->spat_regexp->nparens)
+	if (!spat->spat_regexp->nparens && !global)
 	    gimme = G_SCALAR;			/* accidental array context? */
 	if (regexec(spat->spat_regexp, s, strend, t, 0,
 	  srchstr->str_pok & SP_STUDIED ? srchstr : Nullstr,
-	  gimme == G_ARRAY)) {
-	    if (spat->spat_regexp->subbase)
+	  safebase)) {
+	    if (spat->spat_regexp->subbase || global)
 		curspat = spat;
 	    lastspat = spat;
 	    if (spat->spat_flags & SPAT_ONCE)
@@ -191,12 +217,16 @@ int *arglast;
 	int iters, i, len;
 
 	iters = spat->spat_regexp->nparens;
-	if (sp + iters >= stack->ary_max) {
-	    astore(stack,sp + iters, Nullstr);
+	if (global && !iters)
+	    i = 1;
+	else
+	    i = 0;
+	if (sp + iters + i >= stack->ary_max) {
+	    astore(stack,sp + iters + i, Nullstr);
 	    st = stack->ary_array;		/* possibly realloced */
 	}
 
-	for (i = 1; i <= iters; i++) {
+	for (i = !i; i <= iters; i++) {
 	    st[++sp] = str_mortal(&str_no);
 	    if (s = spat->spat_regexp->startp[i]) {
 		len = spat->spat_regexp->endp[i] - s;
@@ -204,6 +234,8 @@ int *arglast;
 		    str_nset(st[sp],s,len);
 	    }
 	}
+	if (global)
+	    goto play_it_again;
 	return sp;
     }
     else {
@@ -218,12 +250,19 @@ yup:
     lastspat = spat;
     if (spat->spat_flags & SPAT_ONCE)
 	spat->spat_flags |= SPAT_USED;
+    if (global) {
+	spat->spat_regexp->startp[0] = s;
+	spat->spat_regexp->endp[0] = s + spat->spat_short->str_cur;
+	curspat = spat;
+	goto gotcha;
+    }
     if (sawampersand) {
 	char *tmps;
 
 	if (spat->spat_regexp->subbase)
 	    Safefree(spat->spat_regexp->subbase);
 	tmps = spat->spat_regexp->subbase = nsavestr(t,strend-t);
+	spat->spat_regexp->subbeg = tmps;
 	spat->spat_regexp->subend = tmps + (strend-t);
 	tmps = spat->spat_regexp->startp[0] = tmps + (s - t);
 	spat->spat_regexp->endp[0] = tmps + spat->spat_short->str_cur;
@@ -235,6 +274,7 @@ yup:
     return sp;
 
 nope:
+    spat->spat_regexp->startp[0] = Nullch;
     ++spat->spat_short->str_u.str_useful;
     if (gimme == G_ARRAY)
 	return sp;
@@ -1592,7 +1632,10 @@ int *arglast;
       str_2mortal(str_nmake((double)csv->wantarray)) );
     if (csv->hasargs) {
 	ARRAY *ary = csv->argarray;
+	STAB *tmpstab;
 
+	if (!dbargs)
+	    dbargs = stab_xarray(aadd(stabent("DB'args", TRUE)));
 	if (dbargs->ary_max < ary->ary_fill)
 	    astore(dbargs,ary->ary_fill,Nullstr);
 	Copy(ary->ary_array, dbargs->ary_array, ary->ary_fill+1, STR*);

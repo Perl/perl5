@@ -1,11 +1,21 @@
-/* $RCSfile: doarg.c,v $$Revision: 4.0.1.1 $$Date: 91/04/11 17:40:14 $
+/* $RCSfile: doarg.c,v $$Revision: 4.0.1.2 $$Date: 91/06/07 10:42:17 $
  *
- *    Copyright (c) 1989, Larry Wall
+ *    Copyright (c) 1991, Larry Wall
  *
- *    You may distribute under the terms of the GNU General Public License
- *    as specified in the README file that comes with the perl 3.0 kit.
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	doarg.c,v $
+ * Revision 4.0.1.2  91/06/07  10:42:17  lwall
+ * patch4: new copyright notice
+ * patch4: // wouldn't use previous pattern if it started with a null character
+ * patch4: //o and s///o now optimize themselves fully at runtime
+ * patch4: added global modifier for pattern matches
+ * patch4: undef @array disabled "@array" interpolation
+ * patch4: chop("") was returning "\0" rather than ""
+ * patch4: vector logical operations &, | and ^ sometimes returned null string
+ * patch4: syscall couldn't pass numbers with most significant bit set on sparcs
+ * 
  * Revision 4.0.1.1  91/04/11  17:40:14  lwall
  * patch1: fixed undefined environ problem
  * patch1: fixed debugger coredump on subroutines
@@ -67,6 +77,12 @@ int sp;
 	if (spat->spat_flags & SPAT_KEEP) {
 	    arg_free(spat->spat_runtime);	/* it won't change, so */
 	    spat->spat_runtime = Nullarg;	/* no point compiling again */
+	    scanconst(spat, m, dstr->str_cur);
+	    hoistmust(spat);
+            if (curcmd->c_expr && (curcmd->c_flags & CF_OPTIMIZE) == CFT_EVAL) {
+                curcmd->c_flags &= ~CF_OPTIMIZE;
+                opt_arg(curcmd, 1, curcmd->c_type == C_EXPR);
+            }
 	}
     }
 #ifdef DEBUGGING
@@ -76,7 +92,7 @@ int sp;
 #endif
     safebase = ((!spat->spat_regexp || !spat->spat_regexp->nparens) &&
       !sawampersand);
-    if (!*spat->spat_regexp->precomp && lastspat)
+    if (!spat->spat_regexp->prelen && lastspat)
 	spat = lastspat;
     orig = m = s;
     if (hint) {
@@ -122,7 +138,7 @@ int sp;
 	    spat->spat_short = Nullstr;	/* opt is being useless */
 	}
     }
-    once = ((rspat->spat_flags & SPAT_ONCE) != 0);
+    once = !(rspat->spat_flags & SPAT_GLOBAL);
     if (rspat->spat_flags & SPAT_CONST) {	/* known replacement string? */
 	if ((rspat->spat_repl[1].arg_type & A_MASK) == A_SINGLE)
 	    dstr = rspat->spat_repl[1].arg_ptr.arg_str;
@@ -1287,7 +1303,7 @@ int *arglast;
     if (type == O_ARRAY || type == O_LARRAY) {
 	stab = arg[1].arg_ptr.arg_stab;
 	afree(stab_xarray(stab));
-	stab_xarray(stab) = Null(ARRAY*);
+	stab_xarray(stab) = anew(stab);		/* so "@array" still works */
     }
     else if (type == O_HASH || type == O_LHASH) {
 	stab = arg[1].arg_ptr.arg_stab;
@@ -1442,14 +1458,16 @@ register STR *str;
 	return;
     }
     tmps = str_get(str);
-    if (!tmps)
-	return;
-    tmps += str->str_cur - (str->str_cur != 0);
-    str_nset(astr,tmps,1);	/* remember last char */
-    *tmps = '\0';				/* wipe it out */
-    str->str_cur = tmps - str->str_ptr;
-    str->str_nok = 0;
-    STABSET(str);
+    if (tmps && str->str_cur) {
+	tmps += str->str_cur - 1;
+	str_nset(astr,tmps,1);	/* remember last char */
+	*tmps = '\0';				/* wipe it out */
+	str->str_cur = tmps - str->str_ptr;
+	str->str_nok = 0;
+	STABSET(str);
+    }
+    else
+	str_nset(astr,"",0);
 }
 
 do_vop(optype,str,left,right)
@@ -1472,6 +1490,8 @@ STR *right;
 	(void)bzero(str->str_ptr + str->str_cur, len - str->str_cur);
 	str->str_cur = len;
     }
+    str->str_pok = 1;
+    str->str_nok = 0;
     s = str->str_ptr;
     if (!s) {
 	str_nset(str,"",0);
@@ -1506,7 +1526,7 @@ int *arglast;
     register STR **st = stack->ary_array;
     register int sp = arglast[1];
     register int items = arglast[2] - sp;
-    long arg[8];
+    unsigned long arg[8];
     register int i = 0;
     int retval = -1;
 
@@ -1527,10 +1547,10 @@ int *arglast;
      */
     while (items--) {
 	if (st[++sp]->str_nok || !i)
-	    arg[i++] = (long)str_gnum(st[sp]);
+	    arg[i++] = (unsigned long)str_gnum(st[sp]);
 #ifndef lint
 	else
-	    arg[i++] = (long)st[sp]->str_ptr;
+	    arg[i++] = (unsigned long)st[sp]->str_ptr;
 #endif /* lint */
     }
     sp = arglast[1];

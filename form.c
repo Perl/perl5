@@ -1,11 +1,15 @@
-/* $Header: form.c,v 4.0 91/03/20 01:19:23 lwall Locked $
+/* $RCSfile: form.c,v $$Revision: 4.0.1.1 $$Date: 91/06/07 11:07:59 $
  *
- *    Copyright (c) 1989, Larry Wall
+ *    Copyright (c) 1991, Larry Wall
  *
- *    You may distribute under the terms of the GNU General Public License
- *    as specified in the README file that comes with the perl 3.0 kit.
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	form.c,v $
+ * Revision 4.0.1.1  91/06/07  11:07:59  lwall
+ * patch4: new copyright notice
+ * patch4: default top-of-form format is now FILEHANDLE_TOP
+ * 
  * Revision 4.0  91/03/20  01:19:23  lwall
  * 4.0 baseline.
  * 
@@ -325,11 +329,12 @@ register int size;
     return count;
 }
 
-do_write(orec,stio,sp)
+do_write(orec,stab,sp)
 struct outrec *orec;
-register STIO *stio;
+STAB *stab;
 int sp;
 {
+    register STIO *stio = stab_io(stab);
     FILE *ofp = stio->ofp;
 
 #ifdef DEBUGGING
@@ -340,9 +345,18 @@ int sp;
     if (stio->lines_left < orec->o_lines) {
 	if (!stio->top_stab) {
 	    STAB *topstab;
+	    char tmpbuf[256];
 
-	    if (!stio->top_name)
-		stio->top_name = savestr("top");
+	    if (!stio->top_name) {
+		if (!stio->fmt_name)
+		    stio->fmt_name = savestr(stab_name(stab));
+		sprintf(tmpbuf, "%s_TOP", stio->fmt_name);
+		topstab = stabent(tmpbuf,FALSE);
+		if (topstab && stab_form(topstab))
+		    stio->top_name = savestr(tmpbuf);
+		else
+		    stio->top_name = savestr("top");
+	    }
 	    topstab = stabent(stio->top_name,FALSE);
 	    if (!topstab || !stab_form(topstab)) {
 		stio->lines_left = 100000000;

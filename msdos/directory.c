@@ -1,11 +1,14 @@
-/* $Header: directory.c,v 4.0 91/03/20 01:34:24 lwall Locked $
+/* $RCSfile: directory.c,v $$Revision: 4.0.1.1 $$Date: 91/06/07 11:22:24 $
  *
  *    (C) Copyright 1987, 1988, 1990 Diomidis Spinellis.
  *
- *    You may distribute under the terms of the GNU General Public License
- *    as specified in the README file that comes with the perl 3.0 kit.
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	directory.c,v $
+ * Revision 4.0.1.1  91/06/07  11:22:24  lwall
+ * patch4: new copyright notice
+ * 
  * Revision 4.0  91/03/20  01:34:24  lwall
  * 4.0 baseline.
  * 
@@ -44,7 +47,7 @@
 #define PATHLEN 65
 
 #ifndef lint
-static char rcsid[] = "$Header: directory.c,v 4.0 91/03/20 01:34:24 lwall Locked $";
+static char rcsid[] = "$RCSfile: directory.c,v $$Revision: 4.0.1.1 $$Date: 91/06/07 11:22:24 $";
 #endif
 
 DIR *

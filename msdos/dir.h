@@ -1,11 +1,14 @@
-/* $Header: dir.h,v 4.0 91/03/20 01:34:20 lwall Locked $
+/* $RCSfile: dir.h,v $$Revision: 4.0.1.1 $$Date: 91/06/07 11:22:10 $
  *
  *    (C) Copyright 1987, 1990 Diomidis Spinellis.
  *
- *    You may distribute under the terms of the GNU General Public License
- *    as specified in the README file that comes with the perl 3.0 kit.
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	dir.h,v $
+ * Revision 4.0.1.1  91/06/07  11:22:10  lwall
+ * patch4: new copyright notice
+ * 
  * Revision 4.0  91/03/20  01:34:20  lwall
  * 4.0 baseline.
  * 

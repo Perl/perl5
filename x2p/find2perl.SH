@@ -128,11 +128,25 @@ while (@ARGV) {
     elsif ($_ eq 'exec') {
 	for (@cmd = (); @ARGV && $ARGV[0] ne ';'; push(@cmd,shift)) { }
 	shift;
-	for (@cmd) { s/'/\\'/g; }
-	$" = "','";
-	$out .= &tab . "&exec(0, '@cmd')";
-	$" = ' ';
-	$initexec++;
+	$_ = "@cmd";
+	if (m#^(/bin/)?rm -f {}$#) {
+	    if (!@ARGV) {
+		$out .= &tab . 'unlink($_)';
+	    }
+	    else {
+		$out .= &tab . '(unlink($_) || 1)';
+	    }
+	}
+	elsif (m#^(/bin/)?rm {}$#) {
+	    $out .= &tab . '(unlink($_) || warn "$name: $!\n")';
+	}
+	else {
+	    for (@cmd) { s/'/\\'/g; }
+	    $" = "','";
+	    $out .= &tab . "&exec(0, '@cmd')";
+	    $" = ' ';
+	    $initexec++;
+	}
     }
     elsif ($_ eq 'ok') {
 	for (@cmd = (); @ARGV && $ARGV[0] ne ';'; push(@cmd,shift)) { }
@@ -202,9 +216,9 @@ while (@ARGV) {
     }
     if (@ARGV) {
 	if ($ARGV[0] eq '-o') {
+	    { local($statdone) = 1; $out .= "\n" . &tab . "||\n"; }
 	    $statdone = 0 if $indent == 1 && $delayedstat;
 	    $saw_or++;
-	    $out .= "\n" . &tab . "||\n";
 	    shift;
 	}
 	else {
@@ -246,118 +260,18 @@ print $initnewer, "\n" if $initnewer;
 
 print $initfile, "\n" if $initfile;
 
+$find = $depth ? "finddepth" : "find";
 print <<"END";
+require "$find.pl";
+
 # Traverse desired filesystems
 
-&dodirs($roots);
+&$find($roots);
 $flushall
 exit;
 
 sub wanted {
 $out;
-}
-
-END
-
-print <<'END';
-sub dodirs {
-    chop($cwd = `pwd`);
-    foreach $topdir (@_) {
-	(($topdev,$topino,$topmode,$topnlink) = stat($topdir))
-	  || (warn("Can't stat $topdir: $!\n"), next);
-	if (-d _) {
-	    if (chdir($topdir)) {
-END
-if ($depth) {
-    print <<'END';
-		$topdir = '' if $topdir eq '/';
-		&dodir($topdir,$topnlink);
-		($dir,$_) = ($topdir,'.');
-		$name = $topdir;
-		&wanted;
-END
-}
-else {
-    print <<'END';
-		($dir,$_) = ($topdir,'.');
-		$name = $topdir;
-		&wanted;
-		$topdir = '' if $topdir eq '/';
-		&dodir($topdir,$topnlink);
-END
-}
-print <<'END';
-	    }
-	    else {
-		warn "Can't cd to $topdir: $!\n";
-	    }
-	}
-	else {
-	    unless (($dir,$_) = $topdir =~ m#^(.*/)(.*)$#) {
-		($dir,$_) = ('.', $topdir);
-	    }
-	    chdir $dir && &wanted;
-	}
-	chdir $cwd;
-    }
-}
-
-sub dodir {
-    local($dir,$nlink) = @_;
-    local($dev,$ino,$mode,$subcount);
-    local($name);
-
-    # Get the list of files in the current directory.
-
-    opendir(DIR,'.') || warn "Can't open $dir: $!\n";
-    local(@filenames) = readdir(DIR);
-    closedir(DIR);
-
-    if ($nlink == 2) {        # This dir has no subdirectories.
-	for (@filenames) {
-	    next if $_ eq '.';
-	    next if $_ eq '..';
-	    $name = "$dir/$_";
-	    $nlink = 0;
-	    &wanted;
-	}
-    }
-    else {                    # This dir has subdirectories.
-	$subcount = $nlink - 2;
-	for (@filenames) {
-	    next if $_ eq '.';
-	    next if $_ eq '..';
-	    $nlink = $prune = 0;
-	    $name = "$dir/$_";
-END
-print <<'END' unless $depth;
-	    &wanted;
-END
-print <<'END';
-	    if ($subcount > 0) {    # Seen all the subdirs?
-
-		# Get link count and check for directoriness.
-
-		($dev,$ino,$mode,$nlink) = lstat($_) unless $nlink;
-		
-		if (-d _) {
-
-		    # It really is a directory, so do it recursively.
-
-		    if (!$prune && chdir $_) {
-			&dodir($name,$nlink);
-			chdir '..';
-		    }
-		    --$subcount;
-		}
-	    }
-END
-print <<'END' if $depth;
-	    &wanted;
-END
-print <<'END';
-	}
-    }
 }
 
 END

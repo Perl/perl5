@@ -1,11 +1,20 @@
-/* $RCSfile: eval.c,v $$Revision: 4.0.1.1 $$Date: 91/04/11 17:43:48 $
+/* $RCSfile: eval.c,v $$Revision: 4.0.1.2 $$Date: 91/06/07 11:07:23 $
  *
- *    Copyright (c) 1989, Larry Wall
+ *    Copyright (c) 1991, Larry Wall
  *
- *    You may distribute under the terms of the GNU General Public License
- *    as specified in the README file that comes with the perl 3.0 kit.
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	eval.c,v $
+ * Revision 4.0.1.2  91/06/07  11:07:23  lwall
+ * patch4: new copyright notice
+ * patch4: length($`), length($&), length($') now optimized to avoid string copy
+ * patch4: assignment wasn't correctly de-tainting the assigned variable.
+ * patch4: default top-of-form format is now FILEHANDLE_TOP
+ * patch4: added $^P variable to control calling of perldb routines
+ * patch4: taintchecks could improperly modify parent in vfork()
+ * patch4: many, many itty-bitty portability fixes
+ * 
  * Revision 4.0.1.1  91/04/11  17:43:48  lwall
  * patch1: fixed failed fork to return undef as documented
  * patch1: reduced maximum branch distance in eval.c
@@ -204,6 +213,16 @@ register int sp;
 #ifdef DEBUGGING
 	    if (debug & 8) {
 		(void)sprintf(buf,"STAB $%s",stab_name(argptr.arg_stab));
+		tmps = buf;
+	    }
+#endif
+	    break;
+	case A_LENSTAB:
+	    str_numset(str, (double)STAB_LEN(argptr.arg_stab));
+	    st[++sp] = str;
+#ifdef DEBUGGING
+	    if (debug & 8) {
+		(void)sprintf(buf,"LENSTAB $%s",stab_name(argptr.arg_stab));
 		tmps = buf;
 	    }
 #endif
@@ -619,6 +638,10 @@ register int sp;
 	goto array_return;
     case O_SASSIGN:
       sassign:
+#ifdef TAINT
+	if (tainted && !st[2]->str_tainted)
+	    tainted = 0;
+#endif
 	STR_SSET(str, st[2]);
 	STABSET(str);
 	break;
@@ -927,7 +950,7 @@ register int sp;
 	    break;
 	}
 	format(&outrec,form,sp);
-	do_write(&outrec,stab_io(stab),sp);
+	do_write(&outrec,stab,sp);
 	if (stab_io(stab)->flags & IOF_FLUSH)
 	    (void)fflush(fp);
 	str_set(str, Yes);
@@ -1087,7 +1110,7 @@ register int sp;
 	else if (stab_hash(tmpstab)->tbl_dbm)
 	    str_magic(str, tmpstab, 'D', tmps, anum);
 #endif
-	else if (perldb && tmpstab == DBline)
+	else if (tmpstab == DBline)
 	    str_magic(str, tmpstab, 'L', tmps, anum);
 	break;
     case O_LSLICE:
@@ -1961,6 +1984,11 @@ register int sp;
 	else if (arglast[2] - arglast[1] != 1)
 	    value = (double)do_aexec(Nullstr,arglast);
 	else {
+#ifdef TAINT
+	    taintenv();
+	    tainted |= st[2]->str_tainted;
+	    taintproper("Insecure dependency in exec");
+#endif
 	    value = (double)do_exec(str_get(str_mortal(st[2])));
 	}
 	goto donumset;
@@ -2260,7 +2288,13 @@ donumset:
 	    anum = 0;
 	else
 	    anum = (int)str_gnum(st[1]);
+#ifdef _POSIX_SOURCE
+	if (anum != 0)
+	    fatal("POSIX getpgrp can't take an argument");
+	value = (double)getpgrp();
+#else
 	value = (double)getpgrp(anum);
+#endif
 	goto donumset;
 #else
 	fatal("The getpgrp() function is unimplemented on this machine");
@@ -2852,7 +2886,7 @@ donumset:
 	fatal("Unsupported function getlogin");
 #endif
 	break;
-    case O_OPENDIR:
+    case O_OPEN_DIR:
     case O_READDIR:
     case O_TELLDIR:
     case O_SEEKDIR:

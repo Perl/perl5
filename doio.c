@@ -1,11 +1,19 @@
-/* $RCSfile: doio.c,v $$Revision: 4.0.1.1 $$Date: 91/04/11 17:41:06 $
+/* $RCSfile: doio.c,v $$Revision: 4.0.1.2 $$Date: 91/06/07 10:53:39 $
  *
- *    Copyright (c) 1989, Larry Wall
+ *    Copyright (c) 1991, Larry Wall
  *
- *    You may distribute under the terms of the GNU General Public License
- *    as specified in the README file that comes with the perl 3.0 kit.
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	doio.c,v $
+ * Revision 4.0.1.2  91/06/07  10:53:39  lwall
+ * patch4: new copyright notice
+ * patch4: system fd's are now treated specially
+ * patch4: added $^F variable to specify maximum system fd, default 2
+ * patch4: character special files now opened with bidirectional stdio buffers
+ * patch4: taintchecks could improperly modify parent in vfork()
+ * patch4: many, many itty-bitty portability fixes
+ * 
  * Revision 4.0.1.1  91/04/11  17:41:06  lwall
  * patch1: hopefully straightened out some of the Xenix mess
  * 
@@ -75,6 +83,9 @@ int len;
     int fd;
     int writing = 0;
     char mode[3];		/* stdio file mode ("r\0" or "r+\0") */
+    FILE *saveifp = Nullfp;
+    FILE *saveofp = Nullfp;
+    char savetype = ' ';
 
     name = myname;
     forkprocess = 1;		/* assume true if no fork */
@@ -84,10 +95,16 @@ int len;
 	stio = stab_io(stab) = stio_new();
     else if (stio->ifp) {
 	fd = fileno(stio->ifp);
-	if (stio->type == '|')
-	    result = mypclose(stio->ifp);
-	else if (stio->type == '-')
+	if (stio->type == '-')
 	    result = 0;
+	else if (fd <= maxsysfd) {
+	    saveifp = stio->ifp;
+	    saveofp = stio->ofp;
+	    savetype = stio->type;
+	    result = 0;
+	}
+	else if (stio->type == '|')
+	    result = mypclose(stio->ifp);
 	else if (stio->ifp != stio->ofp) {
 	    if (stio->ofp) {
 		result = fclose(stio->ofp);
@@ -98,7 +115,7 @@ int len;
 	}
 	else
 	    result = fclose(stio->ifp);
-	if (result == EOF && fd > 2)
+	if (result == EOF && fd > maxsysfd)
 	    fprintf(stderr,"Warning: unable to close filehandle %s properly.\n",
 	      stab_name(stab));
 	stio->ofp = stio->ifp = Nullfp;
@@ -143,8 +160,12 @@ int len;
 		fd = atoi(name);
 	    else {
 		stab = stabent(name,FALSE);
-		if (!stab || !stab_io(stab))
-		    return FALSE;
+		if (!stab || !stab_io(stab)) {
+#ifdef EINVAL
+		    errno = EINVAL;
+#endif
+		    goto say_false;
+		}
 		if (stab_io(stab) && stab_io(stab)->ifp) {
 		    fd = fileno(stab_io(stab)->ifp);
 		    if (stab_io(stab)->type == 's')
@@ -209,14 +230,14 @@ int len;
     }
     Safefree(myname);
     if (!fp)
-	return FALSE;
+	goto say_false;
     if (stio->type &&
       stio->type != '|' && stio->type != '-') {
 	if (fstat(fileno(fp),&statbuf) < 0) {
 	    (void)fclose(fp);
-	    return FALSE;
+	    goto say_false;
 	}
-	if (S_ISSOCK(statbuf.st_mode))
+	if (S_ISSOCK(statbuf.st_mode) || (S_ISCHR(statbuf.st_mode) && writing))
 	    stio->type = 's';	/* in case a socket was passed in to us */
 #ifdef S_IFMT
 	else if (!(statbuf.st_mode & S_IFMT))
@@ -225,8 +246,23 @@ int len;
     }
 #if defined(HAS_FCNTL) && defined(F_SETFD)
     fd = fileno(fp);
-    fcntl(fd,F_SETFD,fd >= 3);
+    fcntl(fd,F_SETFD,fd > maxsysfd);
 #endif
+    if (saveifp) {		/* must use old fp? */
+	fd = fileno(saveifp);
+	if (saveofp) {
+	    fflush(saveofp);		/* emulate fclose() */
+	    if (saveofp != saveifp) {	/* was a socket? */
+		fclose(saveofp);
+		Safefree(saveofp);
+	    }
+	}
+	if (fd != fileno(fp)) {
+	    dup2(fileno(fp), fd);
+	    fclose(fp);
+	}
+	fp = saveifp;
+    }
     stio->ifp = fp;
     if (writing) {
 	if (stio->type != 's')
@@ -235,9 +271,16 @@ int len;
 	    if (!(stio->ofp = fdopen(fileno(fp),"w"))) {
 		fclose(fp);
 		stio->ifp = Nullfp;
+		goto say_false;
 	    }
     }
     return TRUE;
+
+say_false:
+    stio->ifp = saveifp;
+    stio->ofp = saveofp;
+    stio->type = savetype;
+    return FALSE;
 }
 
 FILE *
@@ -1173,11 +1216,6 @@ char *cmd;
     register char *s;
     char flags[10];
 
-#ifdef TAINT
-    taintenv();
-    taintproper("Insecure dependency in exec");
-#endif
-
     /* save an extra exec if possible */
 
 #ifdef CSH
@@ -1400,7 +1438,7 @@ STAB *gstab;
     else if (nstio->ifp)
 	do_close(nstab,FALSE);
 
-    fd = accept(fileno(gstio->ifp),buf,&len);
+    fd = accept(fileno(gstio->ifp),(struct sockaddr *)buf,&len);
     if (fd < 0)
 	goto badexit;
     nstio->ifp = fdopen(fd, "r");
@@ -2142,18 +2180,20 @@ int *arglast;
 #ifndef telldir
     long telldir();
 #endif
+#ifndef apollo
     struct DIRENT *readdir();
+#endif
     register struct DIRENT *dp;
 
     if (!stab)
 	goto nope;
     if (!(stio = stab_io(stab)))
 	stio = stab_io(stab) = stio_new();
-    if (!stio->dirp && optype != O_OPENDIR)
+    if (!stio->dirp && optype != O_OPEN_DIR)
 	goto nope;
     st[sp] = &str_yes;
     switch (optype) {
-    case O_OPENDIR:
+    case O_OPEN_DIR:
 	if (stio->dirp)
 	    closedir(stio->dirp);
 	if (!(stio->dirp = opendir(str_get(st[sp+1]))))
@@ -2522,11 +2562,9 @@ int *arglast;
 	    if (semctl(id, 0, IPC_STAT, &semds) == -1)
 		return -1;
 	    getinfo = (cmd == GETALL);
-#ifdef _POSIX_SOURCE
-	    infosize = semds.sem_nsems * sizeof(ushort_t);
-#else
-	    infosize = semds.sem_nsems * sizeof(ushort);
-#endif
+	    infosize = semds.sem_nsems * sizeof(short);
+		/* "short" is technically wrong but much more portable
+		   than guessing about u_?short(_t)? */
 	}
 	break;
 #endif
@@ -2665,7 +2703,7 @@ int *arglast;
 	return -1;
     }
     errno = 0;
-    return semop(id, opbuf, opsize/sizeof(struct sembuf));
+    return semop(id, (struct sembuf *)opbuf, opsize/sizeof(struct sembuf));
 #else
     fatal("semop not implemented");
 #endif
@@ -2683,7 +2721,9 @@ int *arglast;
     char *mbuf, *shm;
     int id, mpos, msize;
     struct shmid_ds shmds;
+#ifndef VOIDSHMAT
     extern char *shmat();
+#endif
 
     id = (int)str_gnum(st[++sp]);
     mstr = st[++sp];
@@ -2696,7 +2736,7 @@ int *arglast;
 	errno = EFAULT;		/* can't do as caller requested */
 	return -1;
     }
-    shm = shmat(id, (char *)NULL, (optype == O_SHMREAD) ? SHM_RDONLY : 0);
+    shm = (char*)shmat(id, (char*)NULL, (optype == O_SHMREAD) ? SHM_RDONLY : 0);
     if (shm == (char *)-1)	/* I hate System V IPC, I really do */
 	return -1;
     mbuf = str_get(mstr);
