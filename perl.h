@@ -1293,7 +1293,6 @@ typedef struct padop PADOP;
 typedef struct pvop PVOP;
 typedef struct loop LOOP;
 
-typedef struct Outrec Outrec;
 typedef struct interpreter PerlInterpreter;
 typedef struct sv SV;
 typedef struct av AV;
@@ -1849,12 +1848,6 @@ typedef I32 CHECKPOINT;
 					/* XXXX: need to speed it up */
 #define CLUMP_2UV(iv)	((iv) < 0 ? 0 : (UV)(iv))
 #define CLUMP_2IV(uv)	((uv) > (UV)IV_MAX ? IV_MAX : (IV)(uv))
-
-struct Outrec {
-    I32		o_lines;
-    char	*o_str;
-    U32		o_len;
-};
 
 #ifndef MAXSYSFD
 #   define MAXSYSFD 2
