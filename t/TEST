@@ -321,11 +321,10 @@ EOT
 	}
 	if ($ENV{PERL_3LOG}) {
 	    my $tpp = $test;
-	    $tpp =~ s:^../::;
-	    if ($tpp =~ m:/:) { $tpp =~ s:/:_:g } else { $tpp = "op_$tpp" }
+	    $tpp =~ s:/:_:g;
 	    $tpp =~ s:\.t$::;
-	    rename("perl.3log", "perl.3log.$tpp") ||
-		die "rename: perl3.log to perl.3log.$tpp: $!\n";
+	    rename("perl.3log", "$tpp.3log") ||
+		die "rename: perl3.log to $tpp.3log: $!\n";
 	}
 	$next = $next - 1;
         # test if the compiler compiled something
