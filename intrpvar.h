@@ -506,6 +506,8 @@ PERLVAR(Isignals, U32)	/* Using which pre-5.8 signals */
 
 PERLVAR(IDBassertion,   SV *)
 
+PERLVAR(Istashcache,	HV *)		/* Cache to speed up S_method_common */
+
 /* Don't forget to add your variable also to perl_clone()! */
 
 /* New variables must be added to the very end, before this comment,

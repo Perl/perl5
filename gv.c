@@ -1121,6 +1121,9 @@ Perl_newIO(pTHX)
     sv_upgrade((SV *)io,SVt_PVIO);
     SvREFCNT(io) = 1;
     SvOBJECT_on(io);
+    /* Clear the stashcache because a new IO could overrule a 
+       package name */
+    hv_clear(PL_stashcache);
     iogv = gv_fetchpv("FileHandle::", FALSE, SVt_PVHV);
     /* unless exists($main::{FileHandle}) and defined(%main::FileHandle::) */
     if (!(iogv && GvHV(iogv) && HvARRAY(GvHV(iogv))))

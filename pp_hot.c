@@ -2926,6 +2926,15 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 
 	/* this isn't a reference */
 	packname = Nullch;
+
+        if(SvOK(sv) && (packname = SvPV(sv, packlen))) {
+          HE* he = hv_fetch_ent(PL_stashcache, sv, 0, 0);
+          if (he) { 
+            stash = HeVAL(he);
+            goto fetch;
+          }
+        }
+
 	if (!SvOK(sv) ||
 	    !(packname = SvPV(sv, packlen)) ||
 	    !(iogv = gv_fetchpv(packname, FALSE, SVt_PVIO)) ||
@@ -2946,6 +2955,11 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	    stash = gv_stashpvn(packname, packlen, FALSE);
 	    if (!stash)
 		packsv = sv;
+            else {
+              SvREFCNT_inc((SV*)stash);
+              if(!hv_store(PL_stashcache, packname, packlen, stash, 0))
+                SvREFCNT_dec((SV*)stash);
+            }
 	    goto fetch;
 	}
 	/* it _is_ a filehandle name -- replace with a reference */

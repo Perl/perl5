@@ -373,6 +373,7 @@
 #define PL_sort_RealCmp		(vTHX->Isort_RealCmp)
 #define PL_splitstr		(vTHX->Isplitstr)
 #define PL_srand_called		(vTHX->Isrand_called)
+#define PL_stashcache		(vTHX->Istashcache)
 #define PL_statusvalue		(vTHX->Istatusvalue)
 #define PL_statusvalue_vms	(vTHX->Istatusvalue_vms)
 #define PL_stderrgv		(vTHX->Istderrgv)
@@ -665,6 +666,7 @@
 #define PL_Isort_RealCmp	PL_sort_RealCmp
 #define PL_Isplitstr		PL_splitstr
 #define PL_Isrand_called	PL_srand_called
+#define PL_Istashcache		PL_stashcache
 #define PL_Istatusvalue		PL_statusvalue
 #define PL_Istatusvalue_vms	PL_statusvalue_vms
 #define PL_Istderrgv		PL_stderrgv
