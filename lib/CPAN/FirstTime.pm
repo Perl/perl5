@@ -66,7 +66,10 @@ First of all, I\'d like to create this directory. Where?
     }
 
     $default = $cpan_home;
-    $ans = prompt("CPAN build and cache directory?",$default);
+    until (-d ($ans = prompt("CPAN build and cache directory?",$default)) && -w _) {
+	print "Couldn't find directory $ans
+  or directory is not writable. Please retry.\n";
+    }
     File::Path::mkpath($ans); # dies if it can't
     $CPAN::Config->{cpan_home} = $ans;
     
@@ -105,7 +108,7 @@ properly. Please correct me, if I guess the wrong path for a program.
 
     my(@path) = split($Config{path_sep},$ENV{PATH});
     my $prog;
-    for $prog (qw/gzip tar unzip make/){
+    for $prog (qw/gzip tar unzip make lynx ftp/){
 	my $path = $CPAN::Config->{$prog} || find_exe($prog,[@path]) || $prog;
 	$ans = prompt("Where is your $prog program?",$path) || $path;
 	$CPAN::Config->{$prog} = $ans;
@@ -134,6 +137,23 @@ the calls, please specify them here.
     $CPAN::Config->{make_install_arg} =
 	prompt("Parameters for the 'make install' command?",$default);
 
+    print qq{
+
+Sometimes you may wish to leave the processes run by CPAN alone
+without caring about them. As sometimes the Makefile.PL contains
+question you\'re expected to answer, you can set a timer that will
+kill a 'perl Makefile.PL' process after the specified time in seconds.
+
+If you set this value to 0, these processes will wait forever.
+
+};
+
+    $default = $CPAN::Config->{inactivity_timeout} || 0;
+    $CPAN::Config->{inactivity_timeout} =
+	prompt("Timout for inacivity during Makefile.PL?",$default);
+
+    $default = $CPAN::Config->{makepl_arg} || "";
+
     $local = 'MIRRORED.BY';
     if (@{$CPAN::Config->{urllist}||[]}) {
 	print qq{
@@ -141,8 +161,8 @@ I found a list of URLs in CPAN::Config and will use this.
 You can change it later with the 'o conf' command.
 
 }
-    } elsif (-f $local) { # if they really have a MIRRORED.BY in the
-                     # current directory, we can't help
+    } elsif (-f $local) { # if they really have a wrong MIRRORED.BY in
+                          # the current directory, we can't help
 	read_mirrored_by($local);
     } else {
 	$CPAN::Config->{urllist} ||= [];
