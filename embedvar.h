@@ -246,6 +246,7 @@
 #define PL_exitlistlen		(PERL_GET_INTERP->Iexitlistlen)
 #define PL_expect		(PERL_GET_INTERP->Iexpect)
 #define PL_fdpid		(PERL_GET_INTERP->Ifdpid)
+#define PL_fdpid_mutex		(PERL_GET_INTERP->Ifdpid_mutex)
 #define PL_filemode		(PERL_GET_INTERP->Ifilemode)
 #define PL_forkprocess		(PERL_GET_INTERP->Iforkprocess)
 #define PL_formfeed		(PERL_GET_INTERP->Iformfeed)
@@ -378,6 +379,7 @@
 #define PL_subname		(PERL_GET_INTERP->Isubname)
 #define PL_sv_arenaroot		(PERL_GET_INTERP->Isv_arenaroot)
 #define PL_sv_count		(PERL_GET_INTERP->Isv_count)
+#define PL_sv_lock_mutex	(PERL_GET_INTERP->Isv_lock_mutex)
 #define PL_sv_mutex		(PERL_GET_INTERP->Isv_mutex)
 #define PL_sv_no		(PERL_GET_INTERP->Isv_no)
 #define PL_sv_objcount		(PERL_GET_INTERP->Isv_objcount)
@@ -523,6 +525,7 @@
 #define PL_exitlistlen		(vTHX->Iexitlistlen)
 #define PL_expect		(vTHX->Iexpect)
 #define PL_fdpid		(vTHX->Ifdpid)
+#define PL_fdpid_mutex		(vTHX->Ifdpid_mutex)
 #define PL_filemode		(vTHX->Ifilemode)
 #define PL_forkprocess		(vTHX->Iforkprocess)
 #define PL_formfeed		(vTHX->Iformfeed)
@@ -655,6 +658,7 @@
 #define PL_subname		(vTHX->Isubname)
 #define PL_sv_arenaroot		(vTHX->Isv_arenaroot)
 #define PL_sv_count		(vTHX->Isv_count)
+#define PL_sv_lock_mutex	(vTHX->Isv_lock_mutex)
 #define PL_sv_mutex		(vTHX->Isv_mutex)
 #define PL_sv_no		(vTHX->Isv_no)
 #define PL_sv_objcount		(vTHX->Isv_objcount)
@@ -937,6 +941,7 @@
 #define PL_exitlistlen		(aTHXo->interp.Iexitlistlen)
 #define PL_expect		(aTHXo->interp.Iexpect)
 #define PL_fdpid		(aTHXo->interp.Ifdpid)
+#define PL_fdpid_mutex		(aTHXo->interp.Ifdpid_mutex)
 #define PL_filemode		(aTHXo->interp.Ifilemode)
 #define PL_forkprocess		(aTHXo->interp.Iforkprocess)
 #define PL_formfeed		(aTHXo->interp.Iformfeed)
@@ -1069,6 +1074,7 @@
 #define PL_subname		(aTHXo->interp.Isubname)
 #define PL_sv_arenaroot		(aTHXo->interp.Isv_arenaroot)
 #define PL_sv_count		(aTHXo->interp.Isv_count)
+#define PL_sv_lock_mutex	(aTHXo->interp.Isv_lock_mutex)
 #define PL_sv_mutex		(aTHXo->interp.Isv_mutex)
 #define PL_sv_no		(aTHXo->interp.Isv_no)
 #define PL_sv_objcount		(aTHXo->interp.Isv_objcount)
@@ -1215,6 +1221,7 @@
 #define PL_Iexitlistlen		PL_exitlistlen
 #define PL_Iexpect		PL_expect
 #define PL_Ifdpid		PL_fdpid
+#define PL_Ifdpid_mutex		PL_fdpid_mutex
 #define PL_Ifilemode		PL_filemode
 #define PL_Iforkprocess		PL_forkprocess
 #define PL_Iformfeed		PL_formfeed
@@ -1347,6 +1354,7 @@
 #define PL_Isubname		PL_subname
 #define PL_Isv_arenaroot	PL_sv_arenaroot
 #define PL_Isv_count		PL_sv_count
+#define PL_Isv_lock_mutex	PL_sv_lock_mutex
 #define PL_Isv_mutex		PL_sv_mutex
 #define PL_Isv_no		PL_sv_no
 #define PL_Isv_objcount		PL_sv_objcount

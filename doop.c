@@ -24,10 +24,10 @@
 #define HALF_UPGRADE(start,end) \
     STMT_START {				\
 	U8* NeWsTr;				\
-	STRLEN LeN = LeN = (end) - (start);	\
+	STRLEN LeN = (end) - (start);		\
 	NeWsTr = bytes_to_utf8(start, &LeN);	\
 	Copy(NeWsTr,start,LeN,U8*);		\
-	end = (start) + len;			\
+	end = (start) + LeN;			\
     } STMT_END
 
 

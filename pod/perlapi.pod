@@ -1916,16 +1916,6 @@ Returns the size of the string buffer in the SV.  See C<SvCUR>.
 =for hackers
 Found in file sv.h
 
-=item SvLOCK
-
-Aquires an internal mutex for a SV. Used to make sure multiple threads
-don't stomp on the guts of an SV at the same time
-
-	void	SvLOCK(SV* sv)
-
-=for hackers
-Found in file sv.h
-
 =item SvNIOK
 
 Returns a boolean indicating whether the SV contains a number, integer or
@@ -2344,15 +2334,6 @@ Found in file sv.h
 =item SVt_PVMG
 
 Type flag for blessed scalars.  See C<svtype>.
-
-=for hackers
-Found in file sv.h
-
-=item SvUNLOCK
-
-Release the internal mutex for an SV.
-
-	void	SvUNLOCK(SV* sv)
 
 =for hackers
 Found in file sv.h
