@@ -520,9 +520,16 @@ XS(XS_Internals_hv_clear_placehold)
         I32 riter = HvRITER(hv);
         HE *eiter = HvEITER(hv);
         hv_iterinit(hv);
-        while (items
-               && (entry
-                   = hv_iternext_flags(hv, HV_ITERNEXT_WANTPLACEHOLDERS))) {
+        /* This may look suboptimal with the items *after* the iternext, but
+           it's quite deliberate. We only get here with items==0 if we've
+           just deleted the last placeholder in the hash. If we've just done
+           that then it means that the hash is in lazy delete mode, and the
+           HE is now only referenced in our iterator. If we just quit the loop
+           and discarded our iterator then the HE leaks. So we do the && the
+           other way to ensure iternext is called just one more time, which
+           has the side effect of triggering the lazy delete.  */
+        while ((entry = hv_iternext_flags(hv, HV_ITERNEXT_WANTPLACEHOLDERS))
+            && items) {
             SV *val = hv_iterval(hv, entry);
 
             if (val == &PL_sv_undef) {
