@@ -30,7 +30,8 @@ if ($^O eq 'VMS') {
 print "### searching $lib_dir\n";
 my %pods = pod_find("$lib_dir");
 my $result = join(",", sort values %pods);
-print "### found $result\n";
+my $printresult = join("\n### ", sort values %pods);
+print "### found $printresult\n";
 my $compare = join(',', qw(
     Checker
     Find
@@ -93,7 +94,7 @@ $result = pod_where({ -dirs => ['../pod'], -verbose => $VERBOSE }, 'perlfunc')
 print "### found $result\n";
 
 if ($^O eq 'VMS') { # privlib is perl_root:[lib] unfortunately
-    $compare = "/lib/pod/perlfunc.pod";
+    $compare = "/pod/perlfunc.pod";
     $result = VMS::Filespec::unixify($result);
     $result =~ s/perl_root\///i;
     $result =~ s/^\.\.//;  # needed under `mms test`
