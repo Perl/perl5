@@ -724,3 +724,6 @@ sub DESTROY {
 }
 EXPECT
 Bar=ARRAY(0x...)
+########
+eval "a.b.c.d.e.f;sub"
+EXPECT
