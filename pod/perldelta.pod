@@ -1994,6 +1994,11 @@ Allow read-only string on left hand side of non-modifying tr///.
 
 =item *
 
+If C<STDERR> is tied, warnings caused by C<warn> and C<die> now
+correctly pass to it.
+
+=item *
+
 Several Unicode fixes.
 
 =over 8
