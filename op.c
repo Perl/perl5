@@ -1400,7 +1400,7 @@ my(OP *o)
 	for (kid = cLISTOPo->op_first; kid; kid = kid->op_sibling)
 	    my(kid);
     } else if (type == OP_UNDEF) {
-	return op;
+	return o;
     } else if (type != OP_PADSV &&
 	     type != OP_PADAV &&
 	     type != OP_PADHV &&
@@ -4743,7 +4743,7 @@ peep(register OP *o)
 	    goto nothin;
 	case OP_NULL:
 	    if (o->op_targ == OP_NEXTSTATE || o->op_targ == OP_DBSTATE)
-		curcop = ((COP*)op);
+		curcop = ((COP*)o);
 	    goto nothin;
 	case OP_SCALAR:
 	case OP_LINESEQ:
