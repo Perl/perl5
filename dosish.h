@@ -37,7 +37,7 @@
 #  else
 #	 ifdef NETWARE
 #      define PERL_SYS_INIT(c,v)	Perl_nw5_init(c,v)
-#      define BIT_BUCKET "nul"
+#      define BIT_BUCKET "nwnul"
 #    else
 #      define PERL_SYS_INIT(c,v)
 #      define BIT_BUCKET "\\dev\\nul" /* "wanna be like, umm, Newlined, or somethin?" */

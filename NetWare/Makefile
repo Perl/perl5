@@ -942,7 +942,7 @@ $(EXTDIR)\DynaLoader\dl_netware.xs: dl_netware.xs
 
 HEADERS :
 	@echo . . . . making stdio.h and string.h
-	@copy << stdio.h >\nul
+	@copy << stdio.h >\nwnul
 
 /*
  * (C) Copyright 2001-2002 Novell Inc. All rights reserved.
@@ -979,7 +979,7 @@ HEADERS :
 <<
 	@copy stdio.h $(COREDIR)
 	 
-	@copy << string.h >\nul
+	@copy << string.h >\nwnul
 
 /*
  * (C) Copyright 2001-2002 Novell Inc. All rights reserved.
@@ -1017,7 +1017,7 @@ HEADERS :
 	@copy string.h $(COREDIR)
 
 
-$(NLM_NAME): MESSAGE HEADERS $(BLDDIR)\nul $(NLM_OBJ) $(NEWTARE_OBJ_DEP) $(PERL_IO_OBJ_DEP) $(PERL_LIB_OBJ_DEP) $(DLL_OBJ) .XDC $(PERLIMPLIB) $(EXT_MAIN_OBJ)
+$(NLM_NAME): MESSAGE HEADERS $(BLDDIR)\nwnul $(NLM_OBJ) $(NEWTARE_OBJ_DEP) $(PERL_IO_OBJ_DEP) $(PERL_LIB_OBJ_DEP) $(DLL_OBJ) .XDC $(PERLIMPLIB) $(EXT_MAIN_OBJ)
 	@echo======= Linking $@ at $(MAKEDIR)\$(BLDDIR) =======
 !ifdef WATCOM
 	@$(NLM_LINK) @<<$(BLDDIR)\$*.link
@@ -1078,7 +1078,7 @@ Import @perl.imp
 	@echo======= Finished building $(BUILT).
  
 # Create the debug\release directory if not existing
-$(BLDDIR)\nul:
+$(BLDDIR)\nwnul:
 	@echo . . . . mkdir $(BLDDIR)
 	@mkdir $(BLDDIR)
 
