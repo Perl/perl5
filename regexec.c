@@ -953,6 +953,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	I32 doevery = (prog->reganch & ROPT_SKIP) == 0;
 	char *m;
 	STRLEN ln;
+	STRLEN lnc;
 	unsigned int c1;
 	unsigned int c2;
 	char *e;
@@ -1008,10 +1009,12 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	    }
 	    break;
 	case EXACTF:
-	    m = STRING(c);
-	    ln = STR_LEN(c);
+	    m   = STRING(c);
+	    ln  = STR_LEN(c);	/* length to match in octets/bytes */
+	    lnc = (I32) ln;	/* length to match in characters */
 	    if (UTF) {
 	        STRLEN ulen1, ulen2;
+		U8 *sm = (U8 *) m;
 		U8 tmpbuf1[UTF8_MAXLEN_UCLC+1];
 		U8 tmpbuf2[UTF8_MAXLEN_UCLC+1];
 
@@ -1022,6 +1025,11 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 				    0, ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
 		c2 = utf8n_to_uvchr(tmpbuf2, UTF8_MAXLEN_UCLC,
 				    0, ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
+		lnc = 0;
+		while (sm < ((U8 *) m + ln)) {
+		    lnc++;
+		    sm += UTF8SKIP(sm);
+		}
 	    }
 	    else {
 		c1 = *(U8*)m;
@@ -1029,14 +1037,13 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	    }
 	    goto do_exactf;
 	case EXACTFL:
-	    m = STRING(c);
-	    ln = STR_LEN(c);
+	    m   = STRING(c);
+	    ln  = STR_LEN(c);
+	    lnc = (I32) ln;
 	    c1 = *(U8*)m;
 	    c2 = PL_fold_locale[c1];
 	  do_exactf:
-	    /* The last byte to try is ln-1 characters before strend
-	     * since the strend points one byte past the string. */
-	    e = HOP3c(strend, (I32)1 - (I32)ln, s);
+	    e = HOP3c(strend, -lnc, s);
 
 	    if (norun && e < s)
 		e = s;			/* Due to minlen logic of intuit() */
@@ -1059,6 +1066,8 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 		STRLEN len, foldlen;
 		
 		if (c1 == c2) {
+		    /* Upper and lower of 1st char are equal -
+		     * probably not a "letter". */
 		    while (s <= e) {
 		        c = utf8n_to_uvchr((U8*)s, UTF8_MAXLEN, &len,
 					   ckWARN(WARN_UTF8) ?

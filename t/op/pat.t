@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..1009\n";
+print "1..1010\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3192,5 +3192,7 @@ ok("123\x{100}" =~ /^.*1.*23\x{100}$/, 'uft8 + multiple floating substr');
 ok("  \x{101}" =~ qr/\x{100}/i,
    "<20030808193656.5109.1@llama.ni-s.u-net.com>");
 
-# last test 1008
+ok("  \x{1E01}" =~ qr/\x{1E00}/i,
+   "<20030808193656.5109.1@llama.ni-s.u-net.com>");
 
+# last test 1010
