@@ -117,7 +117,7 @@ Specifies a name to be used for the extension, e.g., S<-n RPC::DCE>
 
 Specify a prefix which should be removed from the Perl function names, e.g., S<-p sec_rgy_> 
 This sets up the XS B<PREFIX> keyword and removes the prefix from functions that are
-autoloaded via the C<constant()> mechansim.
+autoloaded via the C<constant()> mechanism.
 
 =item B<-s> I<sub1,sub2>
 
@@ -419,6 +419,7 @@ else{
 	# will want Carp.
 	print PM <<'END';
 use Carp;
+use Errno;
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK $AUTOLOAD);
 END
 }
@@ -471,7 +472,7 @@ sub AUTOLOAD {
     croak "&$module::constant not defined" if \$constname eq 'constant';
     my \$val = constant(\$constname, \@_ ? \$_[0] : 0);
     if (\$! != 0) {
-	if (\$! =~ /Invalid/) {
+	if (\$!{EINVAL} || \$! =~ /Invalid/) {
 	    \$AutoLoader::AUTOLOAD = \$AUTOLOAD;
 	    goto &AutoLoader::AUTOLOAD;
 	}

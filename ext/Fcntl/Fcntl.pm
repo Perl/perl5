@@ -44,6 +44,7 @@ what constants are implemented in your system.
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $AUTOLOAD);
 
+use Errno;
 require Exporter;
 require DynaLoader;
 @ISA = qw(Exporter DynaLoader);
@@ -122,7 +123,7 @@ sub AUTOLOAD {
     (my $constname = $AUTOLOAD) =~ s/.*:://;
     my $val = constant($constname, 0);
     if ($! != 0) {
-	if ($! =~ /Invalid/) {
+	if ($!{EINVAL} || $! =~ /Invalid/) {
 	    $AutoLoader::AUTOLOAD = $AUTOLOAD;
 	    goto &AutoLoader::AUTOLOAD;
 	}

@@ -15,6 +15,7 @@ require 5.003 ;
 
 use strict;
 use Carp;
+use Errno;
 require Tie::Hash;
 @DB_File::HASHINFO::ISA = qw(Tie::Hash);
 
@@ -196,7 +197,7 @@ sub AUTOLOAD {
     ($constname = $AUTOLOAD) =~ s/.*:://;
     my $val = constant($constname, @_ ? $_[0] : 0);
     if ($! != 0) {
-	if ($! =~ /Invalid/) {
+	if ($!{EINVAL} || $! =~ /Invalid/) {
 	    $AutoLoader::AUTOLOAD = $AUTOLOAD;
 	    goto &AutoLoader::AUTOLOAD;
 	}

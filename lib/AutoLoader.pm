@@ -219,13 +219,14 @@ lines:
 
     use AutoLoader;
     use Carp;
+    use Errno;
 
     sub AUTOLOAD {
         my $sub = $AUTOLOAD;
         (my $constname = $sub) =~ s/.*:://;
         my $val = constant($constname, @_ ? $_[0] : 0);
         if ($! != 0) {
-            if ($! =~ /Invalid/) {
+            if ($!{EINVAL} || $! =~ /Invalid/) {
                 $AutoLoader::AUTOLOAD = $sub;
                 goto &AutoLoader::AUTOLOAD;
             }
