@@ -543,7 +543,7 @@ PerlIO_clone(pTHX_ PerlInterpreter *proto, CLONE_PARAMS *param)
 	    table = (PerlIO **) (f++);
 	    for (i = 1; i < PERLIO_TABLE_SIZE; i++) {
 		if (*f) {
-		    PerlIO_fdupopen(aTHX_ f, param);
+		    (void) fp_dup(f, 0, param);
 		}
 		f++;
 	    }
@@ -1947,6 +1947,65 @@ PerlIOBase_setlinebuf(PerlIO *f)
     }
 }
 
+SV *
+PerlIO_sv_dup(pTHX_ SV *arg, CLONE_PARAMS *param)
+{
+    if (!arg)
+	return Nullsv;
+#ifdef sv_dup
+    if (param) {
+	return sv_dup(arg, param);
+    }
+    else {
+	return newSVsv(arg);
+    }
+#else
+    return newSVsv(arg);
+#endif
+}
+
+PerlIO *
+PerlIOBase_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param)
+{
+    PerlIO *nexto = PerlIONext(o);
+    if (*nexto) {
+	PerlIO_funcs *tab = PerlIOBase(nexto)->tab;
+	f = (*tab->Dup)(aTHX_ f, nexto, param);
+    }
+    if (f) {
+	PerlIO_funcs *self = PerlIOBase(o)->tab;
+	SV *arg = Nullsv;
+	char buf[8];
+	PerlIO_debug("PerlIOBase_dup %s f=%p o=%p param=%p\n",self->name,f,o,param);
+	if (self->Getarg) {
+	    arg = (*self->Getarg)(o);
+	    if (arg) {
+		arg = PerlIO_sv_dup(aTHX_ arg, param);
+	    }
+	}
+	f = PerlIO_push(aTHX_ f, self, PerlIO_modestr(o,buf), arg);
+	if (!f && arg) {
+	    SvREFCNT_dec(arg);
+	}
+    }
+    return f;
+}
+
+#define PERLIO_MAX_REFCOUNTABLE_FD 2048
+#ifdef USE_ITHREADS
+perl_mutex PerlIO_mutex;
+int PerlIO_fd_refcnt[PERLIO_MAX_REFCOUNTABLE_FD] = {1,1,1};
+#endif
+
+void
+PerlIO_init(pTHX)
+{
+ /* Place holder for stdstreams call ??? */
+#ifdef USE_ITHREADS
+ MUTEX_INIT(&PerlIO_mutex);
+#endif
+}
+
 /*--------------------------------------------------------------------------------------*/
 /*
  * Bottom-most level for UNIX-like case
@@ -2020,12 +2079,26 @@ PerlIOUnix_fileno(PerlIO *f)
     return PerlIOSelf(f, PerlIOUnix)->fd;
 }
 
+void
+PerlIOUnix_refcnt_inc(int fd)
+{
+#ifdef USE_ITHREADS
+    if (fd >= 0 && fd < PERLIO_MAX_REFCOUNTABLE_FD) {
+	MUTEX_LOCK(&PerlIO_mutex);
+	PerlIO_fd_refcnt[fd]++;
+	PerlIO_debug("fd %d refcnt=%d\n",fd,PerlIO_fd_refcnt[fd]);
+	MUTEX_UNLOCK(&PerlIO_mutex);
+    }
+#endif
+}
+
+
 IV
 PerlIOUnix_pushed(PerlIO *f, const char *mode, SV *arg)
 {
     IV code = PerlIOBase_pushed(f, mode, arg);
+    PerlIOUnix *s = PerlIOSelf(f, PerlIOUnix);
     if (*PerlIONext(f)) {
-	PerlIOUnix *s = PerlIOSelf(f, PerlIOUnix);
 	s->fd = PerlIO_fileno(PerlIONext(f));
 	/*
 	 * XXX could (or should) we retrieve the oflags from the open file
@@ -2073,6 +2146,7 @@ PerlIOUnix_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 	s->fd = fd;
 	s->oflags = imode;
 	PerlIOBase(f)->flags |= PERLIO_F_OPEN;
+        PerlIOUnix_refcnt_inc(fd);
 	return f;
     }
     else {
@@ -2085,65 +2159,19 @@ PerlIOUnix_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
     }
 }
 
-SV *
-PerlIO_sv_dup(pTHX_ SV *arg, CLONE_PARAMS *param)
-{
-    if (!arg)
-	return Nullsv;
-#ifdef sv_dup
-    if (param) {
-	return sv_dup(arg, param);
-    }
-    else {
-	return newSVsv(arg);
-    }
-#else
-    return newSVsv(arg);
-#endif
-}
-
-PerlIO *
-PerlIOBase_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param)
-{
-    PerlIO *nexto = PerlIONext(o);
-    if (*nexto) {
-	PerlIO_funcs *tab = PerlIOBase(nexto)->tab;
-	f = (*tab->Dup)(aTHX_ f, nexto, param);
-    }
-    if (f) {
-	PerlIO_funcs *self = PerlIOBase(o)->tab;
-	SV *arg = Nullsv;
-	char buf[8];
-	PerlIO_debug("PerlIOBase_dup %s f=%p o=%p param=%p\n",self->name,f,o,param);
-	if (self->Getarg) {
-	    arg = (*self->Getarg)(o);
-	    if (arg) {
-		arg = PerlIO_sv_dup(aTHX_ arg, param);
-	    }
-	}
-	f = PerlIO_push(aTHX_ f, self, PerlIO_modestr(o,buf), arg);
-	if (!f && arg) {
-	    SvREFCNT_dec(arg);
-	}
-    }
-    return f;
-}
-
 PerlIO *
 PerlIOUnix_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param)
 {
     PerlIOUnix *os = PerlIOSelf(o, PerlIOUnix);
-    int fd = PerlLIO_dup(os->fd);
-    if (fd >= 0) {
+    int fd = os->fd;
+    if (fd >= 0 && fd < PERLIO_MAX_REFCOUNTABLE_FD) {
 	f = PerlIOBase_dup(aTHX_ f, o, param);
 	if (f) {
 	    /* If all went well overwrite fd in dup'ed lay with the dup()'ed fd */
 	    PerlIOUnix *s = PerlIOSelf(f, PerlIOUnix);
 	    s->fd = fd;
+	    PerlIOUnix_refcnt_inc(fd);
 	    return f;
-	}
-	else {
-	    PerlLIO_close(fd);
 	}
     }
     return NULL;
@@ -2210,6 +2238,23 @@ PerlIOUnix_close(PerlIO *f)
     dTHX;
     int fd = PerlIOSelf(f, PerlIOUnix)->fd;
     int code = 0;
+#ifdef USE_ITHREADS
+    if ((PerlIOBase(f)->flags & PERLIO_F_OPEN) && fd >= 0 && fd < PERLIO_MAX_REFCOUNTABLE_FD) {
+	MUTEX_LOCK(&PerlIO_mutex); 
+	if (--PerlIO_fd_refcnt[fd] > 0) {
+	    PerlIO_debug("fd %d refcnt=%d\n",fd,PerlIO_fd_refcnt[fd]);
+	    MUTEX_UNLOCK(&PerlIO_mutex); 
+	    PerlIOBase(f)->flags &= ~PERLIO_F_OPEN;
+	    return 0;
+        }
+	PerlIO_debug("fd %d refcnt=%d\n",fd,PerlIO_fd_refcnt[fd]);
+	MUTEX_UNLOCK(&PerlIO_mutex); 
+    }
+    else {
+	SETERRNO(EBADF,SS$_IVCHAN);
+	return -1;
+    }
+#endif
     while (PerlLIO_close(fd) != 0) {
 	if (errno != EINTR) {
 	    code = -1;
@@ -3920,12 +3965,6 @@ PerlIO_funcs PerlIO_mmap = {
 
 #endif				/* HAS_MMAP */
 
-void
-PerlIO_init(pTHX)
-{
- /* Place holder for stdstreams call ??? */
-}
-
 #undef PerlIO_stdin
 PerlIO *
 PerlIO_stdin(void)
@@ -4240,4 +4279,8 @@ PerlIO_sprintf(char *s, int n, const char *fmt, ...)
     return result;
 }
 #endif
+
+
+
+
 
