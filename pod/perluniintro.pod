@@ -451,7 +451,7 @@ displayed as C<\x..>, and the rest of the characters as themselves:
                sprintf("\\x{%04X}", $_) :  # \x{...}
                chr($_) =~ /[[:cntrl:]]/ ?  # else if control character ...
                sprintf("\\x%02X", $_) :    # \x..
-               chr($_)                     # else as themselves
+               quotemeta(chr($_))          # else quoted or as themselves
          } unpack("U*", $_[0]));           # unpack Unicode characters
    }
 
@@ -459,9 +459,11 @@ For example,
 
    nice_string("foo\x{100}bar\n")
 
-returns:
+returns the string
 
-   "foo\x{0100}bar\x0A"
+   'foo\x{0100}bar\x0A'
+
+which is ready to be printed.
 
 =head2 Special Cases
 
