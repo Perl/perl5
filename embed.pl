@@ -1998,7 +1998,7 @@ Apd	|void	|sv_catpv	|SV* sv|const char* ptr
 Apd	|void	|sv_catpvn	|SV* sv|const char* ptr|STRLEN len
 Apd	|void	|sv_catsv	|SV* dsv|SV* ssv
 Apd	|void	|sv_chop	|SV* sv|char* ptr
-p	|void	|sv_clean_all
+p	|I32	|sv_clean_all
 p	|void	|sv_clean_objs
 Apd	|void	|sv_clear	|SV* sv
 Apd	|I32	|sv_cmp		|SV* sv1|SV* sv2
@@ -2474,7 +2474,7 @@ s	|void	|del_xpvbm	|XPVBM* p
 s	|void	|del_xrv	|XRV* p
 s	|void	|sv_unglob	|SV* sv
 s	|void	|not_a_number	|SV *sv
-s	|void	|visit		|SVFUNC_t f
+s	|I32	|visit		|SVFUNC_t f
 #  if defined(DEBUGGING)
 s	|void	|del_sv	|SV *p
 #  endif

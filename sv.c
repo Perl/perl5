@@ -147,20 +147,24 @@ S_more_sv(pTHX)
     return sv;
 }
 
-STATIC void
+STATIC I32
 S_visit(pTHX_ SVFUNC_t f)
 {
     SV* sva;
     SV* sv;
     register SV* svend;
+    I32 visited = 0;
 
     for (sva = PL_sv_arenaroot; sva; sva = (SV*)SvANY(sva)) {
 	svend = &sva[SvREFCNT(sva)];
 	for (sv = sva + 1; sv < svend; ++sv) {
-	    if (SvTYPE(sv) != SVTYPEMASK)
+	    if (SvTYPE(sv) != SVTYPEMASK) {
 		(FCALL)(aTHXo_ sv);
+		++visited;
+	    }
 	}
     }
+    return visited;
 }
 
 void
@@ -181,12 +185,14 @@ Perl_sv_clean_objs(pTHX)
     PL_in_clean_objs = FALSE;
 }
 
-void
+I32
 Perl_sv_clean_all(pTHX)
 {
+    I32 cleaned;
     PL_in_clean_all = TRUE;
-    visit(do_clean_all);
+    cleaned = visit(do_clean_all);
     PL_in_clean_all = FALSE;
+    return cleaned;
 }
 
 void
