@@ -103,6 +103,7 @@
 #define ck_split		Perl_ck_split
 #define ck_subr			Perl_ck_subr
 #define ck_svconst		Perl_ck_svconst
+#define ck_sysread		Perl_ck_sysread
 #define ck_trunc		Perl_ck_trunc
 #define compl_amg		Perl_compl_amg
 #define concat_amg		Perl_concat_amg

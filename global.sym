@@ -232,6 +232,7 @@ ck_spair
 ck_split
 ck_subr
 ck_svconst
+ck_sysread
 ck_trunc
 condpair_magic
 convert
