@@ -125,7 +125,7 @@ test 33, E2BIG == 7;
 # This is something like "Arg list too long", but the actual message
 # text may vary, so we can't test much better than this.
 test 34, length(E2BIG) > 6;
-test 35, index(E2BIG, " ") > 0;
+test 35, 1; # Skipped: used to assume " ", false in ja_JP.eucJP on Linux
 
 test 36, @warnings == 0, join "\n", "unexpected warning", @warnings;
 @warnings = ();		# just in case
