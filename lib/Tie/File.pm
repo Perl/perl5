@@ -94,7 +94,11 @@ sub TIEARRAY {
   } elsif (ref $file) {
     croak "usage: tie \@array, $pack, filename, [option => value]...";
   } else {
-    $fh = \do { local *FH };   # only works in 5.005 and later
+    if ($] < 5.006) {
+	# perl 5.005 and earlier don't autovivify filehandles
+	require Symbol;
+	$fh = Symbol::gensym();
+    }
     sysopen $fh, $file, $opts{mode}, 0666 or return;
     binmode $fh;
     ++$opts{ourfh};
@@ -411,14 +415,6 @@ sub DESTROY {
   if ($self->{fh} and $self->{ourfh}) {
       delete $self->{ourfh};
       close delete $self->{fh};
-      # The above close() causes a problem which would tickle a bug in
-      # 09_gen_rs.t subtest #51 and onwards but only with threaded builds:
-      # Couldn't seek filehandle: Bad file number at lib/Tie/File.pm line 826
-      # Tie::File::_seek('Tie::File=HASH(0x14015e2f0)',-1) called at lib/Tie/File.pm line 870
-      # Tie::File::_fill_offsets('Tie::File=HASH(0x14015e2f0)') called at lib/Tie/File.pm line 256
-      # Tie::File::FETCHSIZE('Tie::File=HASH(0x14015e2f0)') called at lib/Tie/File.pm line 428
-      # Tie::File::_splice('Tie::File=HASH(0x14015e2f0)',1,0,'x','y') called at lib/Tie/File.pm line 403
-      # Tie::File::SPLICE('Tie::File=HASH(0x14015e2f0)',1,0,'x','y') called at lib/Tie/File/t/09_gen_rs.t line 120
   }
 }
 

@@ -105,13 +105,6 @@ if (setup_badly_terminated_file(3)) {
   push @a, "next";
   check_contents($badrec, "next");
 }
-use Config;
-if ($Config{usethreads}) {
-    for (51..58) {
-	print "not ok $_ # TODO - premature close() -> _seek() failure\n";
-    }
-    exit 0;
-}
 # (51-52)
 if (setup_badly_terminated_file(2)) {
   $o = tie @a, 'Tie::File', $file,
