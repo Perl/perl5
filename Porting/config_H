@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Thu Apr 19 03:59:37 EET DST 2001
+ * Configuration time: Wed May 16 17:42:51 EET DST 2001
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -1042,7 +1042,13 @@
  *	by Configure.  You shouldn't rely on it too much; the specific
  *	feature tests from Configure are generally more reliable.
  */
+/* OSVERS:
+ *	This symbol contains the version of the operating system, as determined
+ *	by Configure.  You shouldn't rely on it too much; the specific
+ *	feature tests from Configure are generally more reliable.
+ */
 #define OSNAME "dec_osf"		/**/
+#define OSVERS "4.0d"		/**/
 
 /* MEM_ALIGNBYTES:
  *	This symbol contains the number of bytes required to align a

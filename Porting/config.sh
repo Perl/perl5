@@ -8,7 +8,7 @@
 
 # Package name      : perl5
 # Source directory  : .
-# Configuration time: Thu Apr 19 03:59:37 EET DST 2001
+# Configuration time: Wed May 16 17:42:51 EET DST 2001
 # Configured by     : jhi
 # Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
 
@@ -62,7 +62,7 @@ ccsymbols='__alpha=1 __LANGUAGE_C__=1 __osf__=1 __unix__=1 _LONGLONG=1 _SYSTYPE_
 ccversion='V5.6-082'
 cf_by='jhi'
 cf_email='yourname@yourhost.yourplace.com'
-cf_time='Thu Apr 19 03:59:37 EET DST 2001'
+cf_time='Wed May 16 17:42:51 EET DST 2001'
 charsize='1'
 chgrp=''
 chmod=''
@@ -416,7 +416,7 @@ dlext='so'
 dlsrc='dl_dlopen.xs'
 doublesize='8'
 drand01='drand48()'
-dynamic_ext='B ByteLoader Cwd DB_File Data/Dumper Devel/DProf Devel/Peek Digest/MD5 Encode Fcntl File/Glob Filter/Util/Call IO IPC/SysV List/Util MIME/Base64 NDBM_File ODBM_File Opcode POSIX PerlIO/Scalar PerlIO/Via SDBM_File Socket Storable Sys/Hostname Sys/Syslog Thread Time/HiRes XS/Typemap attrs re'
+dynamic_ext='B ByteLoader Cwd DB_File Data/Dumper Devel/DProf Devel/Peek Digest/MD5 Encode Fcntl File/Glob Filter/Util/Call IO IPC/SysV List/Util MIME/Base64 NDBM_File ODBM_File Opcode POSIX PerlIO/Scalar PerlIO/Via SDBM_File Socket Storable Sys/Hostname Sys/Syslog Thread Time/HiRes Time/Piece XS/Typemap attrs re'
 eagain='EAGAIN'
 ebcdic='undef'
 echo='echo'
@@ -425,7 +425,7 @@ emacs=''
 eunicefix=':'
 exe_ext=''
 expr='expr'
-extensions='B ByteLoader Cwd DB_File Data/Dumper Devel/DProf Devel/Peek Digest/MD5 Encode Fcntl File/Glob Filter/Util/Call IO IPC/SysV List/Util MIME/Base64 NDBM_File ODBM_File Opcode POSIX PerlIO/Scalar PerlIO/Via SDBM_File Socket Storable Sys/Hostname Sys/Syslog Thread Time/HiRes XS/Typemap attrs re Errno'
+extensions='B ByteLoader Cwd DB_File Data/Dumper Devel/DProf Devel/Peek Digest/MD5 Encode Fcntl File/Glob Filter/Util/Call IO IPC/SysV List/Util MIME/Base64 NDBM_File ODBM_File Opcode POSIX PerlIO/Scalar PerlIO/Via SDBM_File Socket Storable Sys/Hostname Sys/Syslog Thread Time/HiRes Time/Piece XS/Typemap attrs re Errno'
 fflushNULL='define'
 fflushall='undef'
 find=''
@@ -565,7 +565,7 @@ issymlink='test -h'
 ivdformat='"ld"'
 ivsize='8'
 ivtype='long'
-known_extensions='B ByteLoader Cwd DB_File Data/Dumper Devel/DProf Devel/Peek Digest/MD5 Encode Fcntl File/Glob Filter/Util/Call GDBM_File IO IPC/SysV List/Util MIME/Base64 NDBM_File ODBM_File Opcode POSIX PerlIO/Scalar PerlIO/Via SDBM_File Socket Storable Sys/Hostname Sys/Syslog Thread Time/HiRes XS/Typemap attrs re'
+known_extensions='B ByteLoader Cwd DB_File Data/Dumper Devel/DProf Devel/Peek Digest/MD5 Encode Fcntl File/Glob Filter/Util/Call GDBM_File IO IPC/SysV List/Util MIME/Base64 NDBM_File ODBM_File Opcode POSIX PerlIO/Scalar PerlIO/Via SDBM_File Socket Storable Sys/Hostname Sys/Syslog Thread Time/HiRes Time/Piece XS/Typemap attrs re'
 ksh=''
 ld='ld'
 lddlflags='-shared -expect_unresolved "*" -msym -std -s'
@@ -851,6 +851,6 @@ PERL_SUBVERSION=1
 PERL_API_REVISION=5
 PERL_API_VERSION=5
 PERL_API_SUBVERSION=0
-CONFIGDOTSH=true
+PERL_CONFIG_SH=true
 # Variables propagated from previous config.sh file.
 pp_sys_cflags='ccflags="$ccflags -DNO_EFF_ONLY_OK"'

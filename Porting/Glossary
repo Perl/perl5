@@ -258,10 +258,6 @@ compress (Loc.U):
 	This variable is defined but not used by Configure.
 	The value is a plain '' and is not useful.
 
-CONFIGDOTSH (Oldsyms.U):
-	This is set to 'true' in config.sh so that a shell script
-	sourcing config.sh can tell if it has been sourced already.
-
 contains (contains.U):
 	This variable holds the command to do a grep with a proper return
 	status.  On most sane systems it is simply "grep".  On insane systems
