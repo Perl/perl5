@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat Feb  3 18:24:21 EET 2001 [metaconfig 3.0 PL70]
+# Generated on Wed Feb 21 16:35:15 EET 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -961,6 +961,8 @@ defvoidused=''
 voidflags=''
 pm_apiversion=''
 xs_apiversion=''
+yacc=''
+yaccflags=''
 CONFIG=''
 
 define='define'
@@ -1976,6 +1978,7 @@ uniq
 trylist="
 Mcc
 ar
+bison
 byacc
 cpp
 csh
@@ -11408,11 +11411,6 @@ $define)
 		;;
 	*)	echo "Ok, avoiding sfio this time.  I'll use stdio instead."
 		val="$undef"
-		: Remove sfio from list of libraries to use
-		set `echo X $libs | $sed -e 's/-lsfio / /' -e 's/-lsfio$//'`
-		shift
-		libs="$*"
-		echo "libs = $libs" >&4
 		;;
 	esac
 	;;
@@ -11431,6 +11429,16 @@ case "$d_sfio" in
 $define) usesfio='true';;
 *) usesfio='false';;
 esac
+case "$d_sfio" in
+$define) ;;
+*)	: Remove sfio from list of libraries to use
+	set `echo X $libs | $sed -e 's/-lsfio / /' -e 's/-lsfio$//'`
+	shift
+	libs="$*"
+	echo "libs = $libs" >&4
+;;
+esac
+
 
 : see if shmctl exists
 set shmctl d_shmctl
@@ -14916,6 +14924,37 @@ case "$uidsign" in
 	;;
 esac
 
+: determine compiler compiler
+case "$yacc" in
+'')
+	dflt=yacc;;
+*)
+	dflt="$yacc";;
+esac
+echo " "
+comp='yacc'
+if $test -f "$byacc"; then
+	dflt="$byacc"
+	comp="byacc or $comp"
+fi
+if $test -f "$bison"; then
+	comp="$comp or bison -y"
+fi
+rp="Which compiler compiler ($comp) shall I use?"
+. ./myread
+yacc="$ans"
+case "$yacc" in
+*bis*)
+	case "$yacc" in
+	*-y*) ;;
+	*)
+		yacc="$yacc -y"
+		echo "(Adding -y option to bison to get yacc-compatible behaviour.)"
+		;;
+	esac
+	;;
+esac
+
 : see if dbm.h is available
 : see if dbmclose exists
 set dbmclose d_dbmclose
@@ -16602,6 +16641,8 @@ vi='$vi'
 voidflags='$voidflags'
 xlibpth='$xlibpth'
 xs_apiversion='$xs_apiversion'
+yacc='$yacc'
+yaccflags='$yaccflags'
 zcat='$zcat'
 zip='$zip'
 EOT
