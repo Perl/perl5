@@ -10,7 +10,7 @@ BEGIN {
     }
 }
 
-print "1..75\n";
+print "1..80\n";
 
 my $test = 1;
 
@@ -373,4 +373,28 @@ sub nok_bytes {
 	print "ok $test\n";
 	$test++;
     }
+}
+
+{
+    use utf8;
+
+    print "not " unless "\x{41}" eq +v65;
+    print "ok $test\n";
+    $test++;
+
+    print "not " unless "\x41" eq +v65;
+    print "ok $test\n";
+    $test++;
+
+    print "not " unless "\x{c8}" eq +v200;
+    print "ok $test\n";
+    $test++;
+
+    print "not " unless "\xc8" eq +v200;
+    print "ok $test\n";
+    $test++;
+
+    print "not " unless "\x{221b}" eq v8731;
+    print "ok $test\n";
+    $test++;
 }
