@@ -588,7 +588,7 @@ EOD
 	    $found = 1;
 	    push @pod, "=head1 Found in $ARGV\n\n" unless $found_in{$ARGV}++;
 	}
-	elsif (/^=head2/) {
+	elsif (/^=head[12]/) {
 	    $found = 0;
 	}
 	next unless $found;

@@ -3926,8 +3926,11 @@ PP(pp_splice)
 	offset = 0;
 	length = AvMAX(ary) + 1;
     }
-    if (offset > AvFILLp(ary) + 1)
+    if (offset > AvFILLp(ary) + 1) {
+	if (ckWARN(WARN_MISC))
+	    Perl_warner(aTHX_ WARN_MISC, "splice() offset past end of array" );
 	offset = AvFILLp(ary) + 1;
+    }
     after = AvFILLp(ary) + 1 - (offset + length);
     if (after < 0) {				/* not that much array */
 	length += after;			/* offset+length now in array */

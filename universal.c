@@ -290,10 +290,18 @@ XS(XS_UNIVERSAL_VERSION)
 	STRLEN len;
 	SV *req = ST(1);
 
-	if (undef)
-	    Perl_croak(aTHX_ "%s does not define $%s::VERSION--version check failed",
-		       HvNAME(pkg), HvNAME(pkg));
+	if (undef) {
+	     if (pkg)
+		  Perl_croak(aTHX_
+			     "%s does not define $%s::VERSION--version check failed",
+			     HvNAME(pkg), HvNAME(pkg));
+	     else {
+		  char *str = SvPVx(ST(0), len);
 
+		  Perl_croak(aTHX_
+			     "%s defines neither package nor VERSION--version check failed", str);
+	     }
+	}
 	if (!SvNIOK(sv) && SvPOK(sv)) {
 	    char *str = SvPVx(sv,len);
 	    while (len) {

@@ -78,87 +78,8 @@ See L<perlfaq9> for other examples of fetching URLs over the web.
 
 =head2 How do I change one line in a file/delete a line in a file/insert a line in the middle of a file/append to the beginning of a file?
 
-The short answer is to use the Tie::File module, which is included
-in the standard distribution since Perl 5.8.0.
-
-The long answer is that those are operations of a text editor.  Perl
-is not a text editor.  Perl is a programming language.  You have to
-decompose the problem into low-level calls to read, write, open,
-close, and seek.
-
-Although humans have an easy time thinking of a text file as being a
-sequence of lines that operates much like a stack of playing cards--or
-punch cards--computers usually see the text file as a sequence of bytes.
-In general, there's no direct way for Perl to seek to a particular line
-of a file, insert text into a file, or remove text from a file.
-
-(There are exceptions in special circumstances.  You can add or remove
-data at the very end of the file.  A sequence of bytes can be replaced
-with another sequence of the same length.  The C<$DB_RECNO> array
-bindings as documented in L<DB_File> also provide a direct way of
-modifying a file.  Files where all lines are the same length are also
-easy to alter.)
-
-The general solution is to create a temporary copy of the text file with
-the changes you want, then copy that over the original.  This assumes
-no locking.
-
-    $old = $file;
-    $new = "$file.tmp.$$";
-    $bak = "$file.orig";
-
-    open(OLD, "< $old") 	or die "can't open $old: $!";
-    open(NEW, "> $new") 	or die "can't open $new: $!";
-
-    # Correct typos, preserving case
-    while (<OLD>) {
-	s/\b(p)earl\b/${1}erl/i;
-	(print NEW $_)		or die "can't write to $new: $!";
-    }
-
-    close(OLD)			or die "can't close $old: $!";
-    close(NEW) 			or die "can't close $new: $!";
-
-    rename($old, $bak)		or die "can't rename $old to $bak: $!";
-    rename($new, $old)		or die "can't rename $new to $old: $!";
-
-Perl can do this sort of thing for you automatically with the C<-i>
-command-line switch or the closely-related C<$^I> variable (see
-L<perlrun> for more details).  Note that
-C<-i> may require a suffix on some non-Unix systems; see the
-platform-specific documentation that came with your port.
-
-    # Renumber a series of tests from the command line
-    perl -pi -e 's/(^\s+test\s+)\d+/ $1 . ++$count /e' t/op/taint.t
-
-    # form a script
-    local($^I, @ARGV) = ('.orig', glob("*.c"));
-    while (<>) {
-	if ($. == 1) {
-	    print "This line should appear at the top of each file\n";
-	}
-	s/\b(p)earl\b/${1}erl/i;        # Correct typos, preserving case
-	print;
-	close ARGV if eof;              # Reset $.
-    }
-
-If you need to seek to an arbitrary line of a file that changes
-infrequently, you could build up an index of byte positions of where
-the line ends are in the file.  If the file is large, an index of
-every tenth or hundredth line end would allow you to seek and read
-fairly efficiently.  If the file is sorted, try the look.pl library
-(part of the standard perl distribution).
-
-In the unique case of deleting lines at the end of a file, you
-can use tell() and truncate().  The following code snippet deletes
-the last line of a file without making a copy or reading the
-whole file into memory:
-
-	open (FH, "+< $file");
-        while ( <FH> ) { $addr = tell(FH) unless eof(FH) }
-        truncate(FH, $addr);
-
-Error checking is left as an exercise for the reader.
+Use the Tie::File module, which is included in the standard
+distribution since Perl 5.8.0.
 
 =head2 How do I count the number of lines in a file?
 

@@ -6,5 +6,3 @@ XSLoader::load('Encode::TW',$VERSION);
 
 1;
 __END__
-
-todo: HZ (Escape-based)
