@@ -272,7 +272,7 @@ S_mul128(pTHX_ SV *sv, U8 m)
 #endif
 
 #define PACK_SIZE_CANNOT_CSUM		0x80
-#define PACK_SIZE_CANNOT_ONLY_ONE	0x40
+#define PACK_SIZE_SPARE			0x40
 #define PACK_SIZE_MASK			0x3F
 
 
@@ -329,7 +329,7 @@ unsigned char size_normal[53] = {
   0,
   /* n */ SIZE16,
   0,
-  /* p */ sizeof(char *) | PACK_SIZE_CANNOT_ONLY_ONE | PACK_SIZE_CANNOT_CSUM,
+  /* p */ sizeof(char *) | PACK_SIZE_CANNOT_CSUM,
 #if defined(HAS_QUAD)
   /* q */ sizeof(Quad_t),
 #else
@@ -398,7 +398,7 @@ unsigned char size_normal[99] = {
   0,
   /* n */ SIZE16,
   0,
-  /* p */ sizeof(char *) | PACK_SIZE_CANNOT_ONLY_ONE | PACK_SIZE_CANNOT_CSUM,
+  /* p */ sizeof(char *) | PACK_SIZE_CANNOT_CSUM,
 #if defined(HAS_QUAD)
   /* q */ sizeof(Quad_t),
 #else
@@ -935,7 +935,8 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	{
 	    int which = (symptr->code & TYPE_IS_SHRIEKING)
 		? PACK_SIZE_SHRIEKING : PACK_SIZE_NORMAL;
-	    int offset = TYPE_NO_MODIFIERS(datumtype) - packsize[which].first;
+	    const int rawtype = TYPE_NO_MODIFIERS(datumtype);
+	    int offset = rawtype - packsize[which].first;
 
 	    if (offset >= 0 && offset < packsize[which].size) {
 		/* Data about this template letter  */
@@ -948,9 +949,17 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		    if (len > howmany)
 			len = howmany;
 
+		    /* In the old code, 'p' was the only type without shortcut
+		       code to curtail unpacking to only one.  As far as I can
+		       see the only point of retaining this anomaly is to make
+		       code such as $_ = unpack "p2", pack "pI", "Hi", 2
+		       continue to segfault. ie, it probably should be
+		       construed as a bug.
+		    */
+
 		    if (!checksum || (data & PACK_SIZE_CANNOT_CSUM)) {
 			if (len && unpack_only_one &&
-			    !(data & PACK_SIZE_CANNOT_ONLY_ONE))
+			    rawtype != 'p')
 			    len = 1;
 			EXTEND(SP, len);
 			EXTEND_MORTAL(len);
