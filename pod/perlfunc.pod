@@ -136,8 +136,8 @@ C<pack>, C<read>, C<syscall>, C<sysread>, C<syswrite>, C<unpack>, C<vec>
 
 C<-I<X>>, C<chdir>, C<chmod>, C<chown>, C<chroot>, C<fcntl>, C<glob>,
 C<ioctl>, C<link>, C<lstat>, C<mkdir>, C<open>, C<opendir>,
-C<readlink>, C<rename>, C<rmdir>, C<stat>, C<symlink>, C<umask>,
-C<unlink>, C<utime>
+C<readlink>, C<rename>, C<rmdir>, C<stat>, C<symlink>, C<sysopen>,
+C<umask>, C<unlink>, C<utime>
 
 =item Keywords related to the control flow of your perl program
 
