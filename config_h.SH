@@ -2062,6 +2062,18 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_ftello HAS_FTELLO		/**/
 
+/* HAS_GETMNTENT:
+ *	This symbol, if defined, indicates that the getmntent routine is
+ *	available to iterate through mounted file systems.
+ */
+#$d_getmntent HAS_GETMNTENT		/**/
+
+/* HAS_HASMNTOPT:
+ *	This symbol, if defined, indicates that the hasmntopt routine is
+ *	available to query the mount options of file systems.
+ */
+#$d_hasmntopt HAS_HASMNTOPT		/**/
+
 /* HAS_MADVISE:
  *	This symbol, if defined, indicates that the madvise system call is
  *	available to map a file into memory.
@@ -2089,21 +2101,21 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 
 /* HAS_FSTATFS:
  *	This symbol, if defined, indicates that the fstatfs routine is
- *	available to do stat filesystems of file descriptors.
+ *	available to stat filesystems of file descriptors.
  */
 /* HAS_STRUCT_STATFS_FLAGS:
  *	This symbol, if defined, indicates that the struct statfs
  *	does have the f_flags member containing the mount flags of
  *	the filesystem holding the file.
- *	This kind of struct statfs is coming from sys/mount.h (BSD)
- *	and not from sys/statfs.h (SYSV).
+ *	This kind of struct statfs is coming from sys/mount.h (BSD),
+ *	not from sys/statfs.h (SYSV).
  */
 #$d_fstatfs HAS_FSTATFS		/**/
 #$d_statfsflags HAS_STRUCT_STATFS_FLAGS		/**/
 
 /* HAS_FSTATVFS:
  *	This symbol, if defined, indicates that the fstatvfs routine is
- *	available to do stat filesystems of file descriptors.
+ *	available to stat filesystems of file descriptors.
  */
 #$d_fstatvfs HAS_FSTATVFS		/**/
 

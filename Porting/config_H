@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Fri Feb 19 22:09:06 EET 1999
+ * Configuration time: Sat Feb 20 15:45:59 EET 1999
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -2087,21 +2087,21 @@
 
 /* HAS_FSTATFS:
  *	This symbol, if defined, indicates that the fstatfs routine is
- *	available to do stat filesystems of file descriptors.
+ *	available to stat filesystems of file descriptors.
  */
 /* HAS_STRUCT_STATFS_FLAGS:
  *	This symbol, if defined, indicates that the struct statfs
  *	does have the f_flags member containing the mount flags of
  *	the filesystem holding the file.
- *	This kind of struct statfs is coming from sys/mount.h (BSD)
- *	and not from sys/statfs.h (SYSV).
+ *	This kind of struct statfs is coming from sys/mount.h (BSD),
+ *	not from sys/statfs.h (SYSV).
  */
 #define HAS_FSTATFS		/**/
 #define HAS_STRUCT_STATFS_FLAGS		/**/
 
 /* HAS_FSTATVFS:
  *	This symbol, if defined, indicates that the fstatvfs routine is
- *	available to do stat filesystems of file descriptors.
+ *	available to stat filesystems of file descriptors.
  */
 #define HAS_FSTATVFS		/**/
 
