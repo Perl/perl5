@@ -72,7 +72,10 @@ my %DISPLAY_FORMAT = ('style' => 'cartesian',
 		      'polar_pretty_print' => 1);
 my $eps            = 1e-14;		# Epsilon
 
-my $Inf		   = CORE::exp(CORE::exp(30));
+my $Inf;
+unless ($^O eq 'unicos') { # Unicos gets a fatal runtime error
+    $Inf = CORE::exp(CORE::exp(30));
+}
 $Inf = "Inf" if !defined $Inf || !$Inf > 0;
 
 #
