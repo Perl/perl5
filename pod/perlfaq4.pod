@@ -1870,7 +1870,7 @@ it on top of either DB_File or GDBM_File.
 Use the Tie::IxHash from CPAN.
 
     use Tie::IxHash;
-    tie my %myhash, Tie::IxHash;
+    tie my %myhash, 'Tie::IxHash';
     for (my $i=0; $i<20; $i++) {
         $myhash{$i} = 2*$i;
     }
