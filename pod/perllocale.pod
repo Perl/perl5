@@ -204,15 +204,16 @@ command lines:
 
 and see whether they list something resembling these
 
+        en_US.ISO8859-1     de_DE.ISO8859-1     ru_RU.ISO8859-5
+        en_US               de_DE               ru_RU
         en                  de                  ru
-        english             de_DE               russian
-        english.iso88591    de_DE.ISO8859-1     russian.iso88595
-        en_US               german              ru_RU
-        en_US.ISO8859-1     german.iso88591     ru_RU.ISO8859-5
+        english             german              russian
+        english.iso88591    german.iso88591     russian.iso88595
 
 Sadly, even though the calling interface for setlocale() has been
-standardized, the names of the locales have not.  The form of the name
-is usually I<language_country>B</>I<territory>B<.>I<codeset>, but the
+standardized, the names of the locales and the directories where
+the configuration is, have not.  The basic form of the name is
+I<language_country/territory>B<.>I<codeset>, but the
 latter parts are not always present.
 
 Two special locales are worth particular mention: "C" and "POSIX".
@@ -748,14 +749,14 @@ standard we've got.  This may be construed as a bug.
 
 =head2 Broken systems
 
-In certain system environments the operating system's locale support is
-broken and cannot be fixed or used by Perl.  Such deficiencies can and
-will result in mysterious hangs and/or Perl core dumps.  One example is
-IRIX before release 6.2, in which the C<LC_COLLATE> support simply does
-not work.  When confronted with such a system, please report in
-excruciating detail to C<perlbug@perl.com>, and complain to your vendor:
-maybe some bug fixes exist for these problems in your operating system.
-Sometimes such bug fixes are called an operating system upgrade.
+In certain system environments the operating system's locale support
+is broken and cannot be fixed or used by Perl.  Such deficiencies can
+and will result in mysterious hangs and/or Perl core dumps when the
+C<use locale> is in effect.  When confronted with such a system,
+please report in excruciating detail to C<perlbug@perl.com>, and
+complain to your vendor: maybe some bug fixes exist for these problems
+in your operating system.  Sometimes such bug fixes are called an
+operating system upgrade.
 
 =head1 SEE ALSO
 
