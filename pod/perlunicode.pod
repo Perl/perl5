@@ -780,6 +780,8 @@ is not extensible beyond 0xFFFF, because it does not use surrogates.
 A seven-bit safe (non-eight-bit) encoding, useful if the
 transport/storage is not eight-bit safe.  Defined by RFC 2152.
 
+=back
+
 =head2 Security Implications of Malformed UTF-8
 
 Unfortunately, the specification of UTF-8 leaves some room for
@@ -803,7 +805,81 @@ are specifically discussed. There is no C<utfebcdic> pragma or
 the platform's "natural" 8-bit encoding of Unicode. See L<perlebcdic>
 for more discussion of the issues.
 
+=head2 Using Unicode in XS
+
+If you want to handle Perl Unicode in XS extensions, you may find
+the following C APIs useful:
+
+=over 4
+
+=item *
+
+DO_UTF8(sv) returns true if the UTF8 flag is on and the bytes
+pragma is not in effect.  SvUTF8(sv) returns true is the UTF8
+flag is on, the bytes pragma is ignored.  Remember that UTF8
+flag being on does not mean that there would be any characters
+of code points greater than 255 or 127 in the scalar, or that
+there even are any characters in the scalar.  The UTF8 flag
+means that any characters added to the string will be encoded
+in UTF8 if the code points of the characters are greater than
+255.  Not "if greater than 127", since Perl's Unicode model
+is not to use UTF-8 until it's really necessary.
+
+=item *
+
+uvuni_to_utf8(buf, chr) writes a Unicode character code point into a
+buffer encoding the code poinqt as UTF-8, and returns a pointer
+pointing after the UTF-8 bytes.
+
+=item *
+
+utf8_to_uvuni(buf, lenp) reads UTF-8 encoded bytes from a buffer and
+returns the Unicode character code point (and optionally the length of
+the UTF-8 byte sequence).
+
+=item *
+
+utf8_length(s, len) returns the length of the UTF-8 encoded buffer in
+characters.  sv_len_utf8(sv) returns the length of the UTF-8 encoded
+scalar.
+
+=item *
+
+sv_utf8_upgrade(sv) converts the string of the scalar to its UTF-8
+encoded form.  sv_utf8_downgrade(sv) does the opposite (if possible).
+sv_utf8_encode(sv) is like sv_utf8_upgrade but the UTF8 flag does not
+get turned on.  sv_utf8_decode() does the opposite of sv_utf8_encode().
+
+=item *
+
+is_utf8_char(buf) returns true if the buffer points to valid UTF-8.
+
+=item *
+
+is_utf8_string(buf, len) returns true if the len bytes of the buffer
+are valid UTF-8.
+
+=item *
+
+UTF8SKIP(buf) will return the number of bytes in the UTF-8 encoded
+character in the buffer.  UNISKIP(chr) will return the number of bytes
+required to UTF-8-encode the Unicode character code point.
+
+=item *
+
+utf8_distance(a, b) will tell the distance in characters between the
+two pointers pointing to the same UTF-8 encoded buffer.
+
+=item *
+
+utf8_hop(s, off) will return a pointer to an UTF-8 encoded buffer that
+is C<off> (positive or negative) Unicode characters displaced from the
+UTF-8 buffer C<s>.
+
 =back
+
+For more information, see L<perlapi>, and F<utf8.c> and F<utf8.h>
+in the Perl source code distribution.
 
 =head1 SEE ALSO
 
