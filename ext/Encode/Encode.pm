@@ -485,8 +485,11 @@ The CJKV: Chinese, Japanese, Korean, Vietnamese:
   ISO 2022     ISO 2022 JP-1  JIS 0201  GB 1988   Big5       EUC-CN
   ISO 2022 CN  ISO 2022 JP-2  JIS 0208  GB 2312   HZ         EUC-JP
   ISO 2022 JP  ISO 2022 KR    JIS 0210  GB 12345  CNS 11643  EUC-JP-0212
-  Shift-JIS                                                  EUC-KR
-  VISCII
+  Shift-JIS				GBK	  Big5-HKSCS EUC-KR
+  VISCII				ISO-IR-165
+
+(Due to size concerns, GB 18030 and EUC-TW are available separately on CPAN,
+under the name L<Encode::HanExtra>.)
 
 The PC codepages:
 

@@ -153,14 +153,14 @@ splice(@a, 89, 0, "pie pie pie");
 check_contents("Iblahlikeblahpieblahpie pie pieblah");
 
 # (97) Splicing with too large a negative number should be fatal
-# This test ignored because it causes 5.6.1 and 5.7.2 to dump core
+# This test ignored because it causes 5.6.1 and 5.7.3 to dump core
 # NOT MY FAULT
-if ($] < 5.006 || $] > 5.007002) {
+if ($] < 5.006 || $] > 5.007003) {
   eval { splice(@a, -7, 0) };
   print $@ =~ /^Modification of non-creatable array value attempted, subscript -7/
       ? "ok $N\n" : "not ok $N \# \$\@ was '$@'\n";
 } else { 
-  print "ok $N \# skipped (5.6.0 through 5.7.2 dump core here.)\n";
+  print "ok $N \# skipped (5.6.0 through 5.7.3 dump core here.)\n";
 }
 $N++;
        

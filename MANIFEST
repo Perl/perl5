@@ -1433,6 +1433,8 @@ lib/Tie/File/t/12_longfetch_rs.t  Test for Tie::File.
 lib/Tie/File/t/13_size_rs.t     Test for Tie::File.
 lib/Tie/File/t/14_lock.t        Test for Tie::File.
 lib/Tie/File/t/15_pushpop.t     Test for Tie::File.
+lib/Tie/File/t/16_handle.t      Test for Tie::File.
+lib/Tie/File/t/17_misc_meth.t   Test for Tie::File.
 lib/Tie/Handle.pm		Base class for tied handles
 lib/Tie/Handle/stdhandle.t	Test for Tie::StdHandle
 lib/Tie/Hash.pm			Base class for tied hashes
