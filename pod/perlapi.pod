@@ -2043,7 +2043,7 @@ Found in file sharedsv.c
 
 Sort an array. Here is an example:
 
-    sortsv(AvARRAY(av), av_len(av)+1, Perl_sv_cmp_locale); 
+    sortsv(AvARRAY(av), av_len(av)+1, Perl_sv_cmp_locale);
 
 	void	sortsv(SV ** array, size_t num_elts, SVCOMPARE_t cmp)
 
