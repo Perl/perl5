@@ -290,7 +290,7 @@ I32 safebase;	/* no need to remember string in subbase */
 		s++;
 	    }
 	}
-	else if (SvPOK(prog->regstart) == 3) {
+	else if (SvTYPE(prog->regstart) == SVt_PVBM) {
 	    /* We know what string it must start with. */
 	    while ((s = fbm_instr((unsigned char*)s,
 	      (unsigned char*)strend, prog->regstart)) != NULL)
@@ -300,7 +300,7 @@ I32 safebase;	/* no need to remember string in subbase */
 		s++;
 	    }
 	}
-	else {
+	else {				/* Optimized fbm_instr: */
 	    c = SvPVX(prog->regstart);
 	    while ((s = ninstr(s, strend, c, c + SvCUR(prog->regstart))) != NULL)
 	    {

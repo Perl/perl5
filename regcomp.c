@@ -145,6 +145,13 @@ PMOP* pm;
     I32 minlen = 0;
     I32 sawplus = 0;
     I32 sawopen = 0;
+#define MAX_REPEAT_DEPTH 12
+    struct {
+	char *opcode;
+	I32 count;
+    } repeat_stack[MAX_REPEAT_DEPTH];
+    I32 repeat_depth = 0;
+    I32 repeat_count = 1;	/* We start unmultiplied. */
 
     if (exp == NULL)
 	croak("NULL regexp argument");
@@ -289,9 +296,9 @@ PMOP* pm;
 		char *t;
 
 		first = scan;
-		while (OP(t = regnext(scan)) == CLOSE)
+		while ((t = regnext(scan)) && OP(t) == CLOSE)
 		    scan = t;
-		minlen += *OPERAND(first);
+		minlen += *OPERAND(first) * repeat_count;
 		if (curback - backish == len) {
 		    sv_catpvn(longish, OPERAND(first)+1,
 			*OPERAND(first));
@@ -310,22 +317,42 @@ PMOP* pm;
 		    curback += *OPERAND(first);
 	    }
 	    else if (strchr(varies,OP(scan))) {
-		curback = -30000;
-		len = 0;
-		if (SvCUR(longish) > SvCUR(longest)) {
-		    sv_setsv(longest,longish);
-		    backest = backish;
+		int tcount;
+		char *next;
+
+		if (repeat_depth < MAX_REPEAT_DEPTH
+		    && ((OP(scan) == PLUS
+			 && (tcount = 1)
+			 && (next = NEXTOPER(scan)))
+			|| (regkind[(U8)OP(scan)] == CURLY
+			    && (tcount = ARG1(scan))
+			    && (next = NEXTOPER(scan)+4))))
+		{
+		    /* We treat (abc)+ as (abc)(abc)*. */
+
+		    /* Mark the place to return back. */
+		    repeat_stack[repeat_depth].opcode = regnext(scan);
+		    repeat_stack[repeat_depth].count = repeat_count;
+		    repeat_depth++;
+		    repeat_count *= tcount;
+
+		    /* Go deeper: */
+		    scan = next;
+		    continue;
 		}
-		sv_setpvn(longish,"",0);
-		if (OP(scan) == PLUS && strchr(simple,OP(NEXTOPER(scan))))
-		    minlen++;
-		else if (regkind[(U8)OP(scan)] == CURLY &&
-		  strchr(simple,OP(NEXTOPER(scan)+4)))
-		    minlen += ARG1(scan);
+		else {
+		    curback = -30000;
+		    len = 0;
+		    if (SvCUR(longish) > SvCUR(longest)) {
+			sv_setsv(longest,longish);
+			backest = backish;
+		    }
+		    sv_setpvn(longish,"",0);
+		}
 	    }
 	    else if (strchr(simple,OP(scan))) {
 		curback++;
-		minlen++;
+		minlen += repeat_count;
 		len = 0;
 		if (SvCUR(longish) > SvCUR(longest)) {
 		    sv_setsv(longest,longish);
@@ -334,11 +361,25 @@ PMOP* pm;
 		sv_setpvn(longish,"",0);
 	    }
 	    scan = regnext(scan);
+	    if (!scan) {		/* Go up PLUS or CURLY. */
+		if (!repeat_depth--)
+		    croak("panic: re scan");
+		scan = repeat_stack[repeat_depth].opcode;
+		repeat_count = repeat_stack[repeat_depth].count;
+		/* Need to submit the longest string found: */
+		curback = -30000;
+		len = 0;
+		if (SvCUR(longish) > SvCUR(longest)) {
+		    sv_setsv(longest,longish);
+		    backest = backish;
+		}
+		sv_setpvn(longish,"",0);
+	    }
 	}
 
 	/* Prefer earlier on tie, unless we can tail match latter */
 
-	if (SvCUR(longish) + (regkind[(U8)OP(first)] == EOL)
+	if (SvCUR(longish) + (first && regkind[(U8)OP(first)] == EOL)
 		> SvCUR(longest))
 	{
 	    sv_setsv(longest,longish);
@@ -357,11 +398,12 @@ PMOP* pm;
 	    if (backest < 0)
 		backest = -1;
 	    r->regback = backest;
-	    if (SvCUR(longest) > !(sawstudy || regkind[(U8)OP(first)] == EOL))
+	    if (SvCUR(longest) > !(sawstudy || 
+				   (first && regkind[(U8)OP(first)] == EOL)))
 		fbm_compile(r->regmust);
 	    (void)SvUPGRADE(r->regmust, SVt_PVBM);
 	    BmUSEFUL(r->regmust) = 100;
-	    if (regkind[(U8)OP(first)] == EOL && SvCUR(longish))
+	    if (first && regkind[(U8)OP(first)] == EOL && SvCUR(longish))
 		SvTAIL_on(r->regmust);
 	}
 	else {
