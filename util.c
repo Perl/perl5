@@ -3962,8 +3962,16 @@ Perl_scan_version(pTHX_ char *s, SV *rv, bool qv)
     }
     if ( qv ) { /* quoted versions always become full version objects */
 	I32 len = av_len((AV *)sv);
-	for ( len = 2 - len; len > 0; len-- )
-	    av_push((AV *)sv, newSViv(0));
+	/* This for loop appears to trigger a compiler bug on OS X, as it
+	   loops infinitely. Yes, len is negative. No, it makes no sense.
+	   Compiler in question is:
+	   gcc version 3.3 20030304 (Apple Computer, Inc. build 1640)
+	   for ( len = 2 - len; len > 0; len-- )
+	   av_push((AV *)sv, newSViv(0));
+	*/
+	len = 2 - len;
+	while (len-- > 0)
+	  av_push((AV *)sv, newSViv(0));
     }
     return s;
 }
