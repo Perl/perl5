@@ -1665,6 +1665,11 @@ Not implemented. (S<Mac OS>, Plan9)
 
 Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>, VOS)
 
+=item sockatmark SOCKET
+
+A relatively recent addition to socket functions, may not
+be implemented even in UNIX platforms.
+
 =item socketpair SOCKET1,SOCKET2,DOMAIN,TYPE,PROTOCOL
 
 Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>, VOS, VM/ESA)

@@ -10,6 +10,7 @@ char			T_CHAR
 unsigned char		T_U_CHAR
 char *			T_PV
 unsigned char *		T_PV
+const char *		T_PV
 caddr_t			T_PV
 wchar_t *		T_PV
 wchar_t			T_IV
@@ -29,6 +30,7 @@ CV *			T_CVREF
 
 IV			T_IV
 UV			T_UV
+NV                      T_NV
 I32			T_IV
 I16			T_IV
 I8			T_IV
@@ -37,7 +39,8 @@ U32			T_U_LONG
 U16			T_U_SHORT
 U8			T_UV
 Result			T_U_CHAR
-Boolean			T_IV
+Boolean			T_BOOL
+float                   T_FLOAT
 double			T_DOUBLE
 SysRet			T_SYSRET
 SysRetLong		T_SYSRET
@@ -54,25 +57,25 @@ INPUT
 T_SV
 	$var = $arg
 T_SVREF
-	if (sv_isa($arg, \"${ntype}\"))
+	if (SvROK($arg))
 	    $var = (SV*)SvRV($arg);
 	else
-	    Perl_croak(aTHX_ \"$var is not of type ${ntype}\")
+	    Perl_croak(aTHX_ \"$var is not a reference\")
 T_AVREF
-	if (sv_isa($arg, \"${ntype}\"))
+	if (SvROK($arg) && SvTYPE(SvRV($arg))==SVt_PVAV)
 	    $var = (AV*)SvRV($arg);
 	else
-	    Perl_croak(aTHX_ \"$var is not of type ${ntype}\")
+	    Perl_croak(aTHX_ \"$var is not an array reference\")
 T_HVREF
-	if (sv_isa($arg, \"${ntype}\"))
+	if (SvROK($arg) && SvTYPE(SvRV($arg))==SVt_PVHV)
 	    $var = (HV*)SvRV($arg);
 	else
-	    Perl_croak(aTHX_ \"$var is not of type ${ntype}\")
+	    Perl_croak(aTHX_ \"$var is not a hash reference\")
 T_CVREF
-	if (sv_isa($arg, \"${ntype}\"))
+	if (SvROK($arg) && SvTYPE(SvRV($arg))==SVt_PVCV)
 	    $var = (CV*)SvRV($arg);
 	else
-	    Perl_croak(aTHX_ \"$var is not of type ${ntype}\")
+	    Perl_croak(aTHX_ \"$var is not a code reference\")
 T_SYSRET
 	$var NOT IMPLEMENTED
 T_UV
@@ -84,7 +87,7 @@ T_INT
 T_ENUM
 	$var = ($type)SvIV($arg)
 T_BOOL
-	$var = (int)SvIV($arg)
+	$var = (bool)SvTRUE($arg)
 T_U_INT
 	$var = (unsigned int)SvUV($arg)
 T_SHORT
@@ -124,7 +127,7 @@ T_REF_IV_REF
 	else
 	    Perl_croak(aTHX_ \"$var is not of type ${ntype}\")
 T_REF_IV_PTR
-	if (sv_isa($arg, \"${type}\")) {
+	if (sv_isa($arg, \"${ntype}\")) {
 	    IV tmp = SvIV((SV*)SvRV($arg));
 	    $var = ($type) tmp;
 	}
@@ -170,11 +173,14 @@ T_PACKEDARRAY
 T_CALLBACK
 	$var = make_perl_cb_$type($arg)
 T_ARRAY
-	$var = $ntype(items -= $argoff);
 	U32 ix_$var = $argoff;
+	$var = $ntype(items -= $argoff);
 	while (items--) {
 	    DO_ARRAY_ELEM;
+	    ix_$var++;
 	}
+        /* this is the number of elements in the array */
+        ix_$var -= $argoff
 T_STDIO
 	$var = PerlIO_findFILE(IoIFP(sv_2io($arg)))
 T_IN
@@ -247,8 +253,7 @@ T_PTROBJ
 T_PTRDESC
 	sv_setref_pv($arg, \"${ntype}\", (void*)new\U${type}_DESC\E($var));
 T_REFREF
-	sv_setrefref($arg, \"${ntype}\", XS_service_$ntype,
-		    ($var ? (void*)new $ntype($var) : 0));
+	NOT_IMPLEMENTED
 T_REFOBJ
 	NOT IMPLEMENTED
 T_OPAQUE
@@ -265,12 +270,14 @@ T_CALLBACK
 	sv_setpvn($arg, $var.context.value().chp(),
 		$var.context.value().size());
 T_ARRAY
-	ST_EXTEND($var.size);
-	for (U32 ix_$var = 0; ix_$var < $var.size; ix_$var++) {
+        {
+	    U32 ix_$var;
+	    EXTEND(SP,size_$var);
+	    for (ix_$var = 0; ix_$var < size_$var; ix_$var++) {
 		ST(ix_$var) = sv_newmortal();
 	DO_ARRAY_ELEM
-	}
-	SP += $var.size - 1;
+	    }
+        }
 T_STDIO
 	{
 	    GV *gv = newGVgen("$Package");

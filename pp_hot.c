@@ -230,12 +230,18 @@ PP(pp_readline)
 PP(pp_eq)
 {
     dSP; tryAMAGICbinSET(eq,0);
+#ifndef NV_PRESERVES_UV
+    if (SvROK(TOPs) && SvROK(TOPm1s)) {
+	SETs(boolSV(SvRV(TOPs) == SvRV(TOPm1s)));
+	RETURN;
+    }
+#endif
 #ifdef PERL_PRESERVE_IVUV
     SvIV_please(TOPs);
     if (SvIOK(TOPs)) {
-	/* Unless the left argument is integer in range we are going to have to
-	   use NV maths. Hence only attempt to coerce the right argument if
-	   we know the left is integer.  */
+	/* Unless the left argument is integer in range we are going
+	   to have to use NV maths. Hence only attempt to coerce the
+	   right argument if we know the left is integer.  */
       SvIV_please(TOPm1s);
 	if (SvIOK(TOPm1s)) {
 	    bool auvok = SvUOK(TOPm1s);

@@ -3256,4 +3256,10 @@
  */
 /*#define	NEED_VA_COPY		/ **/
 
+/* HAS_SOCKATMARK:
+ *	This symbol, if defined, indicates that the sockatmark routine is
+ *	available to test whether a socket is at the out-of-band mark.
+ */
+/*#define HAS_SOCKATMARK		/ **/
+
 #endif

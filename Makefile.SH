@@ -513,7 +513,7 @@ perl.config.dashg:
 
 perl.third.config: config.sh
 	@echo "To build perl.third you must Configure -Doptimize=-g -Uusemymalloc, checking..."
-	$(MAKE) perl.config.dashg
+	@$(MAKE) perl.config.dashg
 	@echo "Checking usemymalloc='n'..."
 	@grep "^usemymalloc=" config.sh
 	@grep -q "^usemymalloc='n'" config.sh || exit 1
@@ -525,7 +525,7 @@ perl.third: /usr/bin/atom perl.third.config perl
 
 perl.pixie.config: config.sh
 	@echo "To build perl.pixie you must Configure -Doptimize=-g, checking..."
-	$(MAKE) perl.config.dashg
+	@$(MAKE) perl.config.dashg
 
 perl.pixie.atom: /usr/bin/atom perl
 	atom -tool pixie -L. -all -toolargs="-quiet" perl

@@ -172,7 +172,7 @@ C<untie>, C<use>
 
 C<accept>, C<bind>, C<connect>, C<getpeername>, C<getsockname>,
 C<getsockopt>, C<listen>, C<recv>, C<send>, C<setsockopt>, C<shutdown>,
-C<socket>, C<socketpair>
+C<sockatmark>, C<socket>, C<socketpair>
 
 =item System V interprocess communication functions
 
@@ -234,8 +234,9 @@ C<msgsnd>, C<open>, C<pipe>, C<readlink>, C<rename>, C<select>, C<semctl>,
 C<semget>, C<semop>, C<setgrent>, C<sethostent>, C<setnetent>,
 C<setpgrp>, C<setpriority>, C<setprotoent>, C<setpwent>,
 C<setservent>, C<setsockopt>, C<shmctl>, C<shmget>, C<shmread>,
-C<shmwrite>, C<socket>, C<socketpair>, C<stat>, C<symlink>, C<syscall>,
-C<sysopen>, C<system>, C<times>, C<truncate>, C<umask>, C<unlink>,
+C<shmwrite>, C<sockatmark>, C<socket>, C<socketpair>,
+C<stat>, C<symlink>, C<syscall>, C<sysopen>, C<system>,
+C<times>, C<truncate>, C<umask>, C<unlink>,
 C<utime>, C<wait>, C<waitpid>
 
 For more information about the portability of these functions, see
@@ -4154,6 +4155,26 @@ it, or else see L</select> above.  The Time::HiRes module from CPAN
 may also help.
 
 See also the POSIX module's C<pause> function.
+
+=item sockatmark SOCKET
+
+Returns true if the socket is positioned at the out-of-band mark
+(also known as the urgent data mark), false otherwise.  Use right
+after reading from the socket.
+
+Not available directly, one has to import the function from
+the IO::Socket extension
+
+    use IO::Socket 'sockatmark';
+
+Even this doesn't guarantee that sockatmark() really is available,
+though, because sockatmark() is a relatively recent addition to
+the family of socket functions.  If it is unavailable, attempt to
+use it will fail
+
+	IO::Socket::atmark not implemented on this architecture ...
+
+See also L<IO::Socket>.
 
 =item socket SOCKET,DOMAIN,TYPE,PROTOCOL
 

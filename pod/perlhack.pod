@@ -1739,8 +1739,8 @@ You can build a profiled version of perl called "perl.pixie" by
 invoking the make target "perl.pixie" (in Tru64 a file called
 "perl.Addrs" will also be silently created, this file contains the
 addresses of the basic blocks).  Running the profiled version of Perl
-will create a new file called "Perl.Counts" which contains the basic
-block counts for that particular program execution.
+will create a new file called "perl.Counts" which contains the counts
+for the basic block for that particular program execution.
 
 To display the results you must use the "prof" utility.  The exact
 incantation depends on your operating system, "prof perl.Counts" in
@@ -1753,11 +1753,13 @@ In IRIX the following prof options are available:
 =item -h
 
 Reports the most heavily used lines in descending order of use.
+Useful for finding the hotspot lines.
 
 =item -l
 
 Groups lines by procedure, with procedures sorted in descending order of use.
 Within a procedure, lines are listed in source order.
+Useful for finding the hotspots of procedures.
 
 =back
 
@@ -1767,20 +1769,24 @@ In Tru64 the following options are available:
 
 =item -p
 
-Sorted in descending order by the number of cycles executed in each procedure.
+Procecures sorted in descending order by the number of cycles executed
+in each procedure.  Useful for finding the hotspot procedures.
 (This is the default option.)
 
 =item -h
 
-Sorted in descending order by the number of cycles executed in each line.
+Lines sorted in descending order by the number of cycles executed in
+each line.  Useful for finding the hotspot lines.
 
 =item -i
 
-The called procedures are sorted in descending order by number of calls.
+The called procedures are sorted in descending order by number of calls
+made to the procedures.  Useful for finding the most used procedures.
 
 =item -l
 
 Grouped by procedure, sorted by cycles executed per procedure.
+Useful for finding the hotspots of procedures.
 
 =item -testcoverage
 

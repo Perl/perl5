@@ -1621,6 +1621,7 @@ sub generate_init {
         blurt("Error: No INPUT definition for type '$subtype', typekind '$type_kind{$subtype}' found"), return
             unless defined $input_expr{$type_kind{$subtype}} ;
 	$subexpr = $input_expr{$type_kind{$subtype}};
+        $subexpr =~ s/\$type/\$subtype/g;
 	$subexpr =~ s/ntype/subtype/g;
 	$subexpr =~ s/\$arg/ST(ix_$var)/g;
 	$subexpr =~ s/\n\t/\n\t\t/g;
@@ -1671,6 +1672,7 @@ sub generate_output {
 
     $type = TidyType($type) ;
     if ($type =~ /^array\(([^,]*),(.*)\)/) {
+            print "\t$arg = sv_newmortal();\n";
 	    print "\tsv_setpvn($arg, (char *)$var, $2 * sizeof($1));\n";
 	    print "\tSvSETMAGIC($arg);\n" if $do_setmagic;
     } else {

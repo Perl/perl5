@@ -835,7 +835,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol, if defined, indicates that <sys/ioctl.h> exists and should
  *	be included. Otherwise, include <sgtty.h> or <termio.h>.
  */
+/* I_SYS_SOCKIO:
+ *	This symbol, if defined, indicates the <sys/sockio.h> should be included
+ *	to get socket ioctl options, like SIOCATMARK.
+ */
 #$i_sysioctl	I_SYS_IOCTL		/**/
+#$i_syssockio I_SYS_SOCKIO	/**/
 
 /* I_SYS_NDIR:
  *	This symbol, if defined, indicates to the C program that it should
@@ -3273,6 +3278,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	of the calling process.
  */
 #$d_sigprocmask HAS_SIGPROCMASK		/**/
+
+/* HAS_SOCKATMARK:
+ *	This symbol, if defined, indicates that the sockatmark routine is
+ *	available to test whether a socket is at the out-of-band mark.
+ */
+#$d_sockatmark HAS_SOCKATMARK		/**/
 
 #endif
 !GROK!THIS!
