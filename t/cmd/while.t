@@ -2,7 +2,7 @@
 
 # $RCSfile: while.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:15 $
 
-print "1..15\n";
+print "1..17\n";
 
 open (tmp,'>Cmd_while.tmp') || die "Can't create Cmd_while.tmp.";
 print tmp "tvi925\n";
@@ -128,3 +128,16 @@ while (1) {
 $i++;
 print "not " unless $` . $& . $' eq "abc";
 print "ok $i\n";
+
+# check that scope cleanup happens right when there's a continue block
+{
+    my $var = 16;
+    while (my $i = ++$var) {
+	next if $i == 17;
+	last if $i > 17;
+	my $i = 0;
+    }
+    continue {
+        print "ok ", $var-1, "\nok $i\n";
+    }
+}

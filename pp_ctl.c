@@ -1960,9 +1960,15 @@ PP(pp_next)
 	dounwind(cxix);
 
     TOPBLOCK(cx);
-    oldsave = PL_scopestack[PL_scopestack_ix - 1];
-    LEAVE_SCOPE(oldsave);
-    return cx->blk_loop.next_op;
+    {
+	OP *nextop = cx->blk_loop.next_op;
+	/* clean scope, but only if there's no continue block */
+	if (nextop == cUNOPx(cx->blk_loop.last_op)->op_first->op_next) {
+	    oldsave = PL_scopestack[PL_scopestack_ix - 1];
+	    LEAVE_SCOPE(oldsave);
+	}
+	return nextop;
+    }
 }
 
 PP(pp_redo)
