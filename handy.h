@@ -1,4 +1,4 @@
-/* $Header: handy.h,v 3.0.1.1 89/11/17 15:25:55 lwall Locked $
+/* $Header: handy.h,v 3.0.1.2 90/08/09 03:48:28 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	handy.h,v $
+ * Revision 3.0.1.2  90/08/09  03:48:28  lwall
+ * patch19: various MSDOS and OS/2 patches folded in
+ * 
  * Revision 3.0.1.1  89/11/17  15:25:55  lwall
  * patch5: some machines already define TRUE and FALSE
  * 
@@ -67,12 +70,21 @@ typedef unsigned short line_t;
 char *safemalloc();
 char *saferealloc();
 void safefree();
+#ifndef MSDOS
 #define New(x,v,n,t)  (v = (t*)safemalloc((MEM_SIZE)((n) * sizeof(t))))
 #define Newc(x,v,n,t,c)  (v = (c*)safemalloc((MEM_SIZE)((n) * sizeof(t))))
 #define Newz(x,v,n,t) (v = (t*)safemalloc((MEM_SIZE)((n) * sizeof(t)))), \
     bzero((char*)(v), (n) * sizeof(t))
 #define Renew(v,n,t) (v = (t*)saferealloc((char*)(v),(MEM_SIZE)((n)*sizeof(t))))
 #define Renewc(v,n,t,c) (v = (c*)saferealloc((char*)(v),(MEM_SIZE)((n)*sizeof(t))))
+#else
+#define New(x,v,n,t)  (v = (t*)safemalloc(((unsigned long)(n) * sizeof(t))))
+#define Newc(x,v,n,t,c)  (v = (c*)safemalloc(((unsigned long)(n) * sizeof(t))))
+#define Newz(x,v,n,t) (v = (t*)safemalloc(((unsigned long)(n) * sizeof(t)))), \
+    bzero((char*)(v), (n) * sizeof(t))
+#define Renew(v,n,t) (v = (t*)saferealloc((char*)(v),((unsigned long)(n)*sizeof(t))))
+#define Renewc(v,n,t,c) (v = (c*)saferealloc((char*)(v),((unsigned long)(n)*sizeof(t))))
+#endif /* MSDOS */
 #define Safefree(d) safefree((char*)d)
 #define Str_new(x,len) str_new(len)
 #else /* LEAKTEST */

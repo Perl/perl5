@@ -2,9 +2,14 @@
  * kit sizes from getting too big.
  */
 
-/* $Header: evalargs.xc,v 3.0.1.5 90/03/27 15:54:42 lwall Locked $
+/* $Header: evalargs.xc,v 3.0.1.6 90/08/09 03:37:15 lwall Locked $
  *
  * $Log:	evalargs.xc,v $
+ * Revision 3.0.1.6  90/08/09  03:37:15  lwall
+ * patch19: passing *name to subroutine now forces filehandle and array creation
+ * patch19: `command` in array context now returns array of lines
+ * patch19: <handle> input is a little more efficient
+ * 
  * Revision 3.0.1.5  90/03/27  15:54:42  lwall
  * patch16: MSDOS support
  * 
@@ -98,7 +103,14 @@
 #endif
 	    break;
 	case A_STAR:
-	    st[++sp] = (STR*)argptr.arg_stab;
+	    stab = argptr.arg_stab;
+	    st[++sp] = (STR*)stab;
+	    if (!stab_xarray(stab))
+		aadd(stab);
+	    if (!stab_xhash(stab))
+		hadd(stab);
+	    if (!stab_io(stab))
+		stab_io(stab) = stio_new();
 #ifdef DEBUGGING
 	    if (debug & 8) {
 		(void)sprintf(buf,"STAR *%s",stab_name(argptr.arg_stab));
@@ -221,14 +233,30 @@
 	    fp = mypopen(tmps,"r");
 	    str_set(str,"");
 	    if (fp) {
-		while (str_gets(str,fp,str->str_cur) != Nullch)
-		    ;
+		if (gimme == G_SCALAR) {
+		    while (str_gets(str,fp,str->str_cur) != Nullch)
+			;
+		}
+		else {
+		    for (;;) {
+			if (++sp > stack->ary_max) {
+			    astore(stack, sp, Nullstr);
+			    st = stack->ary_array;
+			}
+			st[sp] = str_static(&str_undef);
+			if (str_gets(st[sp],fp,0) == Nullch) {
+			    sp--;
+			    break;
+			}
+		    }
+		}
 		statusvalue = mypclose(fp);
 	    }
 	    else
 		statusvalue = -1;
 
-	    st[++sp] = str;
+	    if (gimme == G_SCALAR)
+		st[++sp] = str;
 #ifdef DEBUGGING
 	    tmps = "BACK";
 #endif
@@ -268,6 +296,8 @@
 	  do_read:
 	    if (anum > 1)		/* assign to scalar */
 		gimme = G_SCALAR;	/* force context to scalar */
+	    if (gimme == G_ARRAY)
+		str = str_static(&str_undef);
 	    ++sp;
 	    fp = Nullfp;
 	    if (stab_io(last_in_stab)) {
@@ -362,11 +392,11 @@
 			goto keepgoing;		/* unmatched wildcard? */
 		}
 		if (gimme == G_ARRAY) {
-		    st[sp] = str_static(st[sp]);
 		    if (++sp > stack->ary_max) {
 			astore(stack, sp, Nullstr);
 			st = stack->ary_array;
 		    }
+		    str = str_static(&str_undef);
 		    goto keepgoing;
 		}
 	    }

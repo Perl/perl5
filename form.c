@@ -1,4 +1,4 @@
-/* $Header: form.c,v 3.0.1.1 90/02/28 17:39:34 lwall Locked $
+/* $Header: form.c,v 3.0.1.2 90/08/09 03:38:40 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	form.c,v $
+ * Revision 3.0.1.2  90/08/09  03:38:40  lwall
+ * patch19: did preliminary work toward debugging packages and evals
+ * 
  * Revision 3.0.1.1  90/02/28  17:39:34  lwall
  * patch9: ... in format threw off subsequent field
  * 
@@ -28,11 +31,11 @@ register FCMD *fcmd;
     register int items;
     STR *str;
     ARG *parselist();
-    line_t oldline = line;
+    line_t oldline = curcmd->c_line;
     int oldsave = savestack->ary_fill;
 
     str = fcmd->f_unparsed;
-    line = fcmd->f_line;
+    curcmd->c_line = fcmd->f_line;
     fcmd->f_unparsed = Nullstr;
     (void)savehptr(&curstash);
     curstash = str->str_u.str_hash;
@@ -58,7 +61,7 @@ register FCMD *fcmd;
     }
     if (fcmd && fcmd->f_type)
 	fatal("Not enough field values");
-    line = oldline;
+    curcmd->c_line = oldline;
     Safefree(arg);
     str_free(str);
 }
@@ -280,6 +283,7 @@ int sp;
 	    break;
 	}
     }
+    CHKLEN(1);
     *d++ = '\0';
 }
 

@@ -1,4 +1,4 @@
-/* $Header: eval.c,v 3.0.1.6 90/03/27 15:53:51 lwall Locked $
+/* $Header: eval.c,v 3.0.1.7 90/08/09 03:33:44 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,16 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	eval.c,v $
+ * Revision 3.0.1.7  90/08/09  03:33:44  lwall
+ * patch19: made ~ do vector operation on strings like &, | and ^
+ * patch19: dbmopen(%name...) didn't work right
+ * patch19: dbmopen(name, 'filename', undef) now refrains from creating
+ * patch19: empty %array now returns 0 in scalar context
+ * patch19: die with no arguments no longer exits unconditionally
+ * patch19: return outside a subroutine now returns a reasonable message
+ * patch19: rename done with unlink()/link()/unlink() now checks for clobbering
+ * patch19: -s now returns size of file
+ * 
  * Revision 3.0.1.6  90/03/27  15:53:51  lwall
  * patch16: MSDOS support
  * patch16: support for machines that can't cast negative floats to unsigned ints
@@ -50,7 +60,9 @@
 #include "EXTERN.h"
 #include "perl.h"
 
+#ifndef NSIG
 #include <signal.h>
+#endif
 
 #ifdef I_FCNTL
 #include <fcntl.h>
@@ -282,7 +294,7 @@ register int sp;
 	if (when >= 0)
 	    value = (double)(when % tmplong);
 	else
-	    value = (double)(tmplong - (-when % tmplong));
+	    value = (double)(tmplong - ((-when - 1) % tmplong)) - 1;
 #endif
 	goto donumset;
     case O_ADD:
@@ -440,10 +452,19 @@ register int sp;
 	value = (double) !str_true(st[1]);
 	goto donumset;
     case O_COMPLEMENT:
+	if (!sawvec || st[1]->str_nok) {
 #ifndef lint
-	value = (double) ~U_L(str_gnum(st[1]));
+	    value = (double) ~U_L(str_gnum(st[1]));
 #endif
-	goto donumset;
+	    goto donumset;
+	}
+	else {
+	    STR_SSET(str,st[1]);
+	    tmps = str_get(str);
+	    for (anum = str->str_cur; anum; anum--)
+		*tmps = ~*tmps;
+	}
+	break;
     case O_SELECT:
 	tmps = stab_name(defoutstab);
 	if (maxarg > 0) {
@@ -503,11 +524,11 @@ register int sp;
 	break;
     case O_DBMOPEN:
 #ifdef SOME_DBM
-	if ((arg[1].arg_type & A_MASK) == A_WORD)
-	    stab = arg[1].arg_ptr.arg_stab;
+	stab = arg[1].arg_ptr.arg_stab;
+	if (st[3]->str_nok || st[3]->str_pok)
+	    anum = (int)str_gnum(st[3]);
 	else
-	    stab = stabent(str_get(st[1]),TRUE);
-	anum = (int)str_gnum(st[3]);
+	    anum = -1;
 	value = (double)hdbmopen(stab_hash(stab),str_get(st[2]),anum);
 	goto donumset;
 #else
@@ -515,10 +536,7 @@ register int sp;
 #endif
     case O_DBMCLOSE:
 #ifdef SOME_DBM
-	if ((arg[1].arg_type & A_MASK) == A_WORD)
-	    stab = arg[1].arg_ptr.arg_stab;
-	else
-	    stab = stabent(str_get(st[1]),TRUE);
+	stab = arg[1].arg_ptr.arg_stab;
 	hdbmclose(stab_hash(stab));
 	goto say_yes;
 #else
@@ -539,7 +557,7 @@ register int sp;
 	    goto say_zero;
 	else
 	    goto say_undef;
-	break;
+	/* break; */
     case O_TRANS:
 	value = (double) do_trans(str,arg);
 	str = arg->arg_ptr.arg_str;
@@ -582,7 +600,8 @@ register int sp;
 		astore(stack,sp + maxarg, Nullstr);
 		st = stack->ary_array;
 	    }
-	    Copy(ary->ary_array, &st[sp+1], maxarg, STR*);
+	    st += sp;
+	    Copy(ary->ary_array, &st[1], maxarg, STR*);
 	    sp += maxarg;
 	    goto array_return;
 	}
@@ -618,6 +637,8 @@ register int sp;
 	}
 	else {
 	    tmpstab = arg[1].arg_ptr.arg_stab;
+	    if (!stab_hash(tmpstab)->tbl_fill)
+		goto say_zero;
 	    sprintf(buf,"%d/%d",stab_hash(tmpstab)->tbl_fill,
 		stab_hash(tmpstab)->tbl_max+1);
 	    str_set(str,buf);
@@ -677,7 +698,7 @@ register int sp;
 	    gimme,arglast);
 	goto array_return;
     case O_SPLICE:
-	sp = do_splice(stab_array(arg[1].arg_ptr.arg_stab),str,gimme,arglast);
+	sp = do_splice(stab_array(arg[1].arg_ptr.arg_stab),gimme,arglast);
 	goto array_return;
     case O_PUSH:
 	if (arglast[2] - arglast[1] != 1)
@@ -821,7 +842,7 @@ register int sp;
 	    tmps = str_get(st[2]);
 	}
 	if (!tmps || !*tmps)
-	    exit(1);
+	    tmps = "Died";
 	fatal("%s",tmps);
 	goto say_zero;
     case O_PRTF:
@@ -1064,8 +1085,11 @@ register int sp;
 	    }
 #endif
 	}
-	if (loop_ptr < 0)
+	if (loop_ptr < 0) {
+	    if (tmps && strEQ(tmps, "_SUB_"))
+		fatal("Can't return outside a subroutine");
 	    fatal("Bad label: %s", maxarg > 0 ? tmps : "<null>");
+	}
 	if (!lastretstr && optype == O_LAST && lastsize) {
 	    st -= arglast[0];
 	    st += lastspbase + 1;
@@ -1134,6 +1158,10 @@ register int sp;
 	else
 	    when = (long)str_gnum(st[1]);
 	sp = do_time(str,gmtime(&when),
+	  gimme,arglast);
+	goto array_return;
+    case O_TRUNCATE:
+	sp = do_truncate(str,arg,
 	  gimme,arglast);
 	goto array_return;
     case O_LSTAT:
@@ -1317,7 +1345,7 @@ register int sp;
 	    argtype = arg[2].arg_type & A_MASK;
 	    argptr = arg[2].arg_ptr;
 	    sp = arglast[0];
-	    st -= sp;
+	    st -= sp++;
 	    goto re_eval;
 	}
 	str_set(str,"");
@@ -1392,6 +1420,7 @@ register int sp;
 	    else {
 		value = (double)((unsigned int)argflags & 0xffff);
 	    }
+	    do_execfree();	/* free any memory child malloced on vfork */
 	    goto donumset;
 	}
 	if ((arg[1].arg_type & A_MASK) == A_STAB)
@@ -1510,11 +1539,15 @@ register int sp;
 #ifdef RENAME
 	value = (double)(rename(tmps,tmps2) >= 0);
 #else
-	if (euid || stat(tmps2,&statbuf) < 0 ||
-	  (statbuf.st_mode & S_IFMT) != S_IFDIR )
-	    (void)UNLINK(tmps2);	/* avoid unlinking a directory */
-	if (!(anum = link(tmps,tmps2)))
-	    anum = UNLINK(tmps);
+	if (same_dirent(tmps2, tmps)	/* can always rename to same name */
+	    anum = 1;
+	else {
+	    if (euid || stat(tmps2,&statbuf) < 0 ||
+	      (statbuf.st_mode & S_IFMT) != S_IFDIR )
+		(void)UNLINK(tmps2);
+	    if (!(anum = link(tmps,tmps2)))
+		anum = UNLINK(tmps);
+	}
 	value = (double)(anum >= 0);
 #endif
 	goto donumset;
@@ -1738,6 +1771,8 @@ register int sp;
 	}
 	value = (double)(ary->ary_fill + 1);
 	break;
+
+    case O_REQUIRE:
     case O_DOFILE:
     case O_EVAL:
 	if (maxarg < 1)
@@ -1803,9 +1838,8 @@ register int sp;
     case O_FTSIZE:
 	if (mystat(arg,st[1]) < 0)
 	    goto say_undef;
-	if (statcache.st_size)
-	    goto say_yes;
-	goto say_no;
+	value = (double)statcache.st_size;
+	goto donumset;
 
     case O_FTSOCK:
 #ifdef S_IFSOCK
@@ -2037,10 +2071,7 @@ register int sp;
     case O_ESERVENT:
 	value = (double) endservent();
 	goto donumset;
-    case O_SSELECT:
-	sp = do_select(gimme,arglast);
-	goto array_return;
-    case O_SOCKETPAIR:
+    case O_SOCKPAIR:
 	if ((arg[1].arg_type & A_MASK) == A_WORD)
 	    stab = arg[1].arg_ptr.arg_stab;
 	else
@@ -2089,8 +2120,7 @@ register int sp;
     case O_CONNECT:
     case O_LISTEN:
     case O_ACCEPT:
-    case O_SSELECT:
-    case O_SOCKETPAIR:
+    case O_SOCKPAIR:
     case O_GHBYNAME:
     case O_GHBYADDR:
     case O_GHOSTENT:
@@ -2119,6 +2149,13 @@ register int sp;
       badsock:
 	fatal("Unsupported socket function");
 #endif /* SOCKET */
+    case O_SSELECT:
+#ifdef SELECT
+	sp = do_select(gimme,arglast);
+	goto array_return;
+#else
+	fatal("select not implemented");
+#endif
     case O_FILENO:
 	if (maxarg < 1)
 	    goto say_undef;
@@ -2256,8 +2293,9 @@ array_return:
 		deb("%s RETURNS (\"%s\")\n",opname[optype],str_get(st[1]));
 		break;
 	    default:
-		deb("%s RETURNS %d ARGS (\"%s\",%s\"%s\"\n",opname[optype],anum,
-		  str_get(st[1]),anum==2?"":"...,",str_get(st[anum]));
+		tmps = str_get(st[1]);
+		deb("%s RETURNS %d ARGS (\"%s\",%s\"%s\")\n",opname[optype],
+		  anum,tmps,anum==2?"":"...,",str_get(st[anum]));
 		break;
 	    }
 	}

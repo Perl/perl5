@@ -1,8 +1,8 @@
-;# $Header: importenv.pl,v 3.0 89/10/18 15:19:39 lwall Locked $
+;# $Header: importenv.pl,v 3.0.1.1 90/08/09 03:56:38 lwall Locked $
 
 ;# This file, when interpreted, pulls the environment into normal variables.
 ;# Usage:
-;#	do 'importenv.pl';
+;#	require 'importenv.pl';
 ;# or
 ;#	#include <importenv.pl>
 

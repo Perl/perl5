@@ -1,4 +1,4 @@
-/* $Header: hash.c,v 3.0.1.3 90/03/27 15:59:09 lwall Locked $
+/* $Header: hash.c,v 3.0.1.4 90/08/09 03:50:22 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	hash.c,v $
+ * Revision 3.0.1.4  90/08/09  03:50:22  lwall
+ * patch19: dbmopen(name, 'filename', undef) now refrains from creating
+ * 
  * Revision 3.0.1.3  90/03/27  15:59:09  lwall
  * patch16: @dbmvalues{'foo','bar'} could use the same cache entry for both values
  * 
@@ -22,6 +25,16 @@
 
 #include "EXTERN.h"
 #include "perl.h"
+
+static char coeff[] = {
+		61,59,53,47,43,41,37,31,29,23,17,13,11,7,3,1,
+		61,59,53,47,43,41,37,31,29,23,17,13,11,7,3,1,
+		61,59,53,47,43,41,37,31,29,23,17,13,11,7,3,1,
+		61,59,53,47,43,41,37,31,29,23,17,13,11,7,3,1,
+		61,59,53,47,43,41,37,31,29,23,17,13,11,7,3,1,
+		61,59,53,47,43,41,37,31,29,23,17,13,11,7,3,1,
+		61,59,53,47,43,41,37,31,29,23,17,13,11,7,3,1,
+		61,59,53,47,43,41,37,31,29,23,17,13,11,7,3,1};
 
 STR *
 hfetch(tb,key,klen,lval)
@@ -502,19 +515,22 @@ int mode;
     if (tb->tbl_dbm)	/* never really closed it */
 	return TRUE;
 #endif
-    if (tb->tbl_dbm)
+    if (tb->tbl_dbm) {
 	hdbmclose(tb);
+	tb->tbl_dbm = 0;
+    }
     hclear(tb);
 #ifdef NDBM
-    tb->tbl_dbm = dbm_open(fname, O_RDWR|O_CREAT, mode);
-    if (!tb->tbl_dbm)		/* oops, just try reading it */
-	tb->tbl_dbm = dbm_open(fname, O_RDONLY, mode);
+    if (mode >= 0)
+	tb->tbl_dbm = dbm_open(fname, O_RDWR|O_CREAT, mode);
+    if (!tb->tbl_dbm)
+	tb->tbl_dbm = dbm_open(fname, O_RDWR, mode);
 #else
     if (dbmrefcnt++)
 	fatal("Old dbm can only open one database");
     sprintf(buf,"%s.dir",fname);
     if (stat(buf, &statbuf) < 0) {
-	if (close(creat(buf,mode)) < 0)
+	if (mode < 0 || close(creat(buf,mode)) < 0)
 	    return FALSE;
 	sprintf(buf,"%s.pag",fname);
 	if (close(creat(buf,mode)) < 0)
