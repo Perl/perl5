@@ -402,23 +402,22 @@ sub enter
 {
  my ($a,$s,$d,$t,$fb) = @_;
  $t = $a if @_ < 4;
- my $b = substr($s,0,1);
- my $e = $a->{$b};
- unless ($e)
-  {     # 0  1  2  3         4  5
-   $e = [$b,$b,'',{},length($s),0,$fb];
-   $a->{$b} = $e;
-  }
- if (length($s) > 1)
-  {
-   enter($e->[3],substr($s,1),$d,$t,$fb);
-  }
- else
-  {
+
+ while (1) {
+  $s =~ s/(.)//s;
+  my $b = $1;
+  my $e = $a->{$b};
+  #                 0  1  2  3           4  5
+  $a->{$b} = $e = [$b,$b,'',{},1+length($s),0,$fb] unless $e;
+  unless (length($s)) {
    $e->[2] = $d;
    $e->[3] = $t;
    $e->[5] = length($d);
+   return;
   }
+  # Tail recursion.
+  $a = $e->[3];
+ }
 }
 
 
@@ -449,16 +448,12 @@ sub outstring
    }
    $strings{$s} = $sym = $name;
    $strings += length($s);
-   printf $fh "\nstatic const U8 %s[%d] =\n",$name,length($s);
-   # Do in chunks of 16 chars to constrain line length
-   # Assumes ANSI C adjacent string litteral concatenation
-   while (length($s))
-    {
-     my $c = substr($s,0,16,'');
-     print  $fh '"',join('',map(sprintf('\x%02x',ord($_)),split(//,$c))),'"';
-     print  $fh "\n" if length($s);
-    }
-   printf $fh ";\n";
+   my $definition = sprintf "static const U8 %s[%d] = { ",$name,length($s);
+   # Maybe we should assert that these are all <256.
+   $definition .= join(',',unpack "C*",$s);
+   # We have a single long line. Split it at convenient commas.
+   $definition =~ s/(.{74,77},)/$1\n/g;
+   print $fh "$definition };\n\n";
   }
  return $sym;
 }
