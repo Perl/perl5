@@ -616,7 +616,7 @@ pascal Boolean RunScript(ArgExtractor extractor, void * data)
 	PerlArgs[ArgC] =  nil;
 	gRunningPerl 	=  true;
 	gMacPerl_Quit	=	0;
-	/* gFirstErrorLine= -1; */
+	gMacPerl_OSErr	=	0;
 	
 	ShowWindowStatus();
 	
