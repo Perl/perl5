@@ -59,6 +59,13 @@ A new variable, ${^RE_DEBUG_FLAGS}, controls what debug flags are in
 effect for the regular expression engine when running under C<use re
 "debug">. See L<re> for details.
 
+=head2 Byte-order modifiers for pack() and unpack()
+
+There are two new byte-order modifiers, C<E<gt>> (big-endian) and C<E<lt>>
+(little-endian), that can be appended to most pack() and unpack() template
+characters and groups to force a certain byte-order for that type or group.
+See L<perlfunc/pack> and L<perlpacktut> for details.
+
 =head1 Modules and Pragmata
 
 =head2 New modules
