@@ -497,6 +497,8 @@
 #define init_debugger     CPerlObj::init_debugger
 #undef  init_ids
 #define init_ids          CPerlObj::init_ids
+#undef  init_interp
+#define init_interp       CPerlObj::init_interp
 #undef  init_main_thread
 #define init_main_thread  CPerlObj::init_main_thread
 #undef  init_main_stash

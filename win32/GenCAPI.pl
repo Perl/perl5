@@ -71,6 +71,7 @@ safexcalloc
 safexrealloc
 safexfree
 Perl_GetVars
+malloced_size
 )];
 
 

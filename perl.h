@@ -1944,11 +1944,11 @@ typedef void *Thread;
 
 #ifndef MULTIPLICITY
 
-#ifndef USE_THREADS
-#include "thrdvar.h"
-#endif
+#  include "intrpvar.h"
+#  ifndef USE_THREADS
+#    include "thrdvar.h"
+#  endif
 
-#include "intrpvar.h"
 #endif
 
 #ifdef PERL_OBJECT

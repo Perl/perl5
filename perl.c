@@ -1780,7 +1780,7 @@ STATIC void
 init_interp(void)
 {
 
-#if 0
+#ifdef PERL_OBJECT		/* XXX kludge */
 #define I_REINIT \
   STMT_START {			\
     chopset	= " \n-";	\
@@ -1812,18 +1812,31 @@ init_interp(void)
     rsfp	= Nullfp;	\
     rsfp_filters= Nullav;	\
   } STMT_END
+#else
+#  ifdef MULTIPLICITY
+#    define PERLVAR(var,type)
+#    define PERLVARI(var,type,init)	curinterp->var = init;
+#    define PERLVARIC(var,type,init)	curinterp->var = init;
+#    include "intrpvar.h"
+#    ifndef USE_THREADS
+#      include "thrdvar.h"
+#    endif
+#    undef PERLVAR
+#    undef PERLVARI
+#    undef PERLVARIC
+#    else
+#    define PERLVAR(var,type)
+#    define PERLVARI(var,type,init)	var = init;
+#    define PERLVARIC(var,type,init)	var = init;
+#    include "intrpvar.h"
+#    ifndef USE_THREADS
+#      include "thrdvar.h"
+#    endif
+#    undef PERLVAR
+#    undef PERLVARI
+#    undef PERLVARIC
+#  endif
 #endif
-
-#define PERLVAR(var,type)
-#define PERLVARI(var,type,init)		curinterp->var = init;
-#define PERLVARIC(var,type,init)	curinterp->var = init;
-#include "intrpvar.h"
-#ifndef USE_THREADS
-#  include "thrdvar.h"
-#endif
-#undef PERLVAR
-#undef PERLVARI
-#undef PERLVARIC
 
 }
 

@@ -264,7 +264,9 @@ VIRTUAL U32	magic_sizepack	_((SV* sv, MAGIC* mg));
 VIRTUAL int	magic_wipepack	_((SV* sv, MAGIC* mg));
 VIRTUAL void	magicname _((char* sym, char* name, I32 namlen));
 int	main _((int argc, char** argv, char** env));
+#ifdef MYMALLOC
 VIRTUAL MEM_SIZE	malloced_size _((void *p));
+#endif
 VIRTUAL void	markstack_grow _((void));
 #ifdef USE_LOCALE_COLLATE
 VIRTUAL char*	mem_collxfrm _((const char* s, STRLEN len, STRLEN* xlen));
