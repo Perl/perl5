@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 47;
+plan tests => 49;
 
 $FS = ':';
 
@@ -261,4 +261,18 @@ ok(@ary == 3 &&
     my $char = "\x{10f1ff}";
     my @a = split /\r?\n/, "$char\n";
     ok(@a == 1 && $a[0] eq $char && !defined($warn));
+}
+
+{
+    # [perl #18195]
+    for my $a (0,1) {
+	$_ = 'readin,database,readout';
+	if ($ARGV[0])  {
+	    $_ .= chr 256;
+	    chop;
+	}
+	/(.+)/;
+	my @d = split /[,]/,$1;
+	is(join (':',@d), 'readin:database:readout', "[perl #18195]")
+    }
 }
