@@ -276,7 +276,7 @@ char* name;
     if (!gv) {
 	CV* cv;
 
-	if (strEQ(name,"import") || strEQ(name,"unimport"))
+	if (strEQ(name,"import"))
 	    gv = (GV*)&sv_yes;
 	else if (strNE(name, "AUTOLOAD")) {
 	    gv = gv_fetchmeth(stash, "AUTOLOAD", 8, 0);
