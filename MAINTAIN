@@ -94,7 +94,7 @@ dump.c
 ebcdic.c		
 eg/ADB	
 eg/README	
-eg/cgi/*		cgi
+eg/cgi/*			cgi
 eg/changes	
 eg/client	
 eg/down	
@@ -142,48 +142,9 @@ embed.h
 embed.pl	
 embedvar.h	
 ext/*/hints*			cfg
-ext/B/B.pm	
-ext/B/B.xs	
-ext/B/B/Asmdata.pm	
-ext/B/B/Assembler.pm	
-ext/B/B/Bblock.pm	
-ext/B/B/Bytecode.pm	
-ext/B/B/C.pm	
-ext/B/B/CC.pm	
-ext/B/B/Debug.pm	
-ext/B/B/Deparse.pm	
-ext/B/B/Disassembler.pm	
-ext/B/B/Lint.pm	
-ext/B/B/Showlex.pm	
-ext/B/B/Stackobj.pm	
-ext/B/B/Terse.pm	
-ext/B/B/Xref.pm	
-ext/B/B/assemble	
-ext/B/B/cc_harness	
-ext/B/B/disassemble	
-ext/B/B/makeliblinks	
-ext/B/Makefile.PL	
-ext/B/NOTES	
-ext/B/O.pm	
-ext/B/README	
-ext/B/TESTS	
-ext/B/Todo	
-ext/B/byteperl.c	
-ext/B/ramblings/cc.notes	
-ext/B/ramblings/curcop.runtime	
-ext/B/ramblings/flip-flop	
-ext/B/ramblings/magic	
-ext/B/ramblings/reg.alloc	
-ext/B/ramblings/runtime.porting	
-ext/B/typemap	
+ext/B/*				nik
 ext/DB_File*			pmarquess
-ext/DB_File/DB_File.pm	
-ext/DB_File/DB_File.xs	
-ext/DB_File/DB_File_BS	
-ext/DB_File/Makefile.PL	
-ext/DB_File/dbinfo	
 ext/DB_File/hints/dynixptx.pl	dynix/ptx
-ext/DB_File/typemap	
 ext/Data/Dumper/*		gsar
 ext/Devel/Peek/*		ilya
 ext/DynaLoader/DynaLoader_pm.PL	
@@ -191,8 +152,8 @@ ext/DynaLoader/Makefile.PL
 ext/DynaLoader/README	
 ext/DynaLoader/dl_aix.xs	aix
 ext/DynaLoader/dl_cygwin32.xs	cygwin32
-ext/DynaLoader/dl_dld.xs	
-ext/DynaLoader/dl_dlopen.xs	
+ext/DynaLoader/dl_dld.xs	rsanders
+ext/DynaLoader/dl_dlopen.xs	timb
 ext/DynaLoader/dl_hpux.xs	hpux
 ext/DynaLoader/dl_mpeix.xs	mpeix
 ext/DynaLoader/dl_next.xs	next
@@ -207,8 +168,8 @@ ext/GDBM_File/GDBM_File.pm
 ext/GDBM_File/GDBM_File.xs	
 ext/GDBM_File/Makefile.PL	
 ext/GDBM_File/typemap	
-ext/IO/*		gbarr
-ext/IPC/SysV/*		gbarr
+ext/IO/*			gbarr
+ext/IPC/SysV/*			gbarr
 ext/NDBM_File/Makefile.PL	
 ext/NDBM_File/NDBM_File.pm	
 ext/NDBM_File/NDBM_File.xs	
@@ -307,9 +268,9 @@ ext/attrs/Makefile.PL
 ext/attrs/attrs.pm	
 ext/attrs/attrs.xs	
 ext/re/Makefile.PL	
-ext/re/hints/mpeix.pl	mpeix
-ext/re/re.pm	
-ext/re/re.xs	
+ext/re/hints/mpeix.pl		mpeix
+ext/re/re.pm			regex
+ext/re/re.xs			regex
 ext/util/make_ext	
 ext/util/mkbootstrap	
 fakethr.h	
@@ -332,76 +293,76 @@ h2pl/mkvars
 h2pl/tcbreak	
 h2pl/tcbreak2	
 handy.h	
-hints/*			cfg
+hints/*				cfg
 hints/3b1.sh	
 hints/3b1cc	
 hints/README.hints	
-hints/aix.sh		aix
+hints/aix.sh			aix
 hints/altos486.sh	
-hints/amigaos.sh	amiga
+hints/amigaos.sh		amiga
 hints/apollo.sh	
 hints/aux_3.sh	
-hints/beos.sh		beos
+hints/beos.sh			beos
 hints/broken-db.msg	
-hints/bsdos.sh		bsdos
+hints/bsdos.sh			bsdos
 hints/convexos.sh	
-hints/cxux.sh		cxux
-hints/cygwin32.sh	cygwin32x
+hints/cxux.sh			cxux
+hints/cygwin32.sh		cygwin32x
 hints/dcosx.sh	
-hints/dec_osf.sh	dec_osf
-hints/dgux.sh		dgux
-hints/dos_djgpp.sh	dos
-hints/dynix.sh		dynix/ptx
-hints/dynixptx.sh	dynix/ptx
+hints/dec_osf.sh		dec_osf
+hints/dgux.sh			dgux
+hints/dos_djgpp.sh		dos
+hints/dynix.sh			dynix/ptx
+hints/dynixptx.sh		dynix/ptx
 hints/epix.sh	
 hints/esix4.sh	
 hints/fps.sh	
-hints/freebsd.sh	freebsd
+hints/freebsd.sh		freebsd
 hints/genix.sh	
 hints/greenhills.sh	
-hints/hpux.sh		hpux
+hints/hpux.sh			hpux
 hints/i386.sh	
-hints/irix*		irix
+hints/irix*			irix
 hints/isc.sh	
 hints/isc_2.sh	
-hints/linux.sh		linux
-hints/lynxos.sh		lynxos
-hints/machten.sh	machten
+hints/linux.sh			linux
+hints/lynxos.sh			lynxos
+hints/machten.sh		machten
 hints/machten_2.sh	
 hints/mips.sh	
 hints/mpc.sh	
-hints/mpeix.sh		mpeix
+hints/mpeix.sh			mpeix
 hints/ncr_tower.sh	
-hints/netbsd.sh		netbsd
+hints/netbsd.sh			netbsd
 hints/newsos4.sh	
-hints/next*		step
-hints/openbsd.sh	openbsd
+hints/next*			step
+hints/openbsd.sh		openbsd
 hints/opus.sh	
-hints/os2.sh		os2
-hints/os390.sh		mvs
-hints/posix-bc.sh	posix-bc
-hints/powerux.sh	powerux
-hints/qnx.sh		qnx
+hints/os2.sh			os2
+hints/os390.sh			mvs
+hints/posix-bc.sh		posix-bc
+hints/powerux.sh		powerux
+hints/qnx.sh			qnx
 hints/sco.sh	
 hints/sco_2_3_0.sh	
 hints/sco_2_3_1.sh	
 hints/sco_2_3_2.sh	
 hints/sco_2_3_3.sh	
 hints/sco_2_3_4.sh	
-hints/solaris_2.sh	solaris
+hints/solaris_2.sh		solaris
 hints/stellar.sh	
-hints/sunos_4*		sunos4
-hints/svr4.sh		svr4
+hints/sunos_4*			sunos4
+hints/svr4.sh			svr4
 hints/ti1500.sh	
 hints/titanos.sh	
-hints/ultrix_4.sh	ultrix
+hints/ultrix_4.sh		ultrix
 hints/umips.sh	
-hints/unicos*		unicos
+hints/unicos*			unicos
 hints/unisysdynix.sh	
 hints/utekv.sh	
 hints/uts.sh	
-hints/uwin.sh		uwin
-hints/vmesa.sh		vmesa
+hints/uwin.sh			uwin
+hints/vmesa.sh			vmesa
 hv.c	
 hv.h	
 installhtml	
@@ -409,17 +370,17 @@ installman
 installperl	
 intrpvar.h	
 iperlsys.h	
-jpl/*			jpl
+jpl/*				jpl
 keywords.h	
 keywords.pl	
 lib/AnyDBM_File.pm	
 lib/AutoLoader.pm	
 lib/AutoSplit.pm	
-lib/Benchmark.pm	jhi,timb
-lib/CGI*		cgi
-lib/CPAN*		cpan
+lib/Benchmark.pm		jhi,timb
+lib/CGI*			cgi
+lib/CPAN*			cpan
 lib/Carp.pm	
-lib/Class/Struct.pm	tchrist
+lib/Class/Struct.pm		tchrist
 lib/Cwd.pm	
 lib/Devel/SelfStubber.pm	
 lib/DirHandle.pm	
@@ -865,8 +826,8 @@ toke.c
 universal.c	
 unixish.h	
 utf*				lwall
-utils/Makefile	
-utils/c2ph.PL	
+utils/Makefile
+utils/c2ph.PL			tchrist
 utils/h2ph.PL			kstar
 utils/h2xs.PL	
 utils/perlbug.PL	
