@@ -639,9 +639,9 @@ union any {
 #define U_L(what) ((U32)(what))
 #else
 U32 cast_ulong _((double));
-#define U_S(what) ((U16)cast_ulong(what))
-#define U_I(what) ((unsigned int)cast_ulong(what))
-#define U_L(what) (cast_ulong(what))
+#define U_S(what) ((U16)cast_ulong((double)(what)))
+#define U_I(what) ((unsigned int)cast_ulong((double)(what)))
+#define U_L(what) (cast_ulong((double)(what)))
 #endif
 
 #ifdef CASTI32
@@ -649,9 +649,9 @@ U32 cast_ulong _((double));
 #define I_V(what) ((IV)(what))
 #else
 I32 cast_i32 _((double));
-#define I_32(what) (cast_i32(what))
+#define I_32(what) (cast_i32((double)(what)))
 IV cast_iv _((double));
-#define I_V(what) (cast_iv(what))
+#define I_V(what) (cast_iv((double)(what)))
 #endif
 
 struct Outrec {
@@ -758,7 +758,6 @@ char *strcpy(), *strcat();
 	extern "C" {
 #   endif
 	    double exp _((double));
-	    double fmod _((double,double));
 	    double log _((double));
 	    double sqrt _((double));
 	    double modf _((double,double*));
@@ -768,15 +767,6 @@ char *strcpy(), *strcat();
 	    double pow _((double,double));
 #   ifdef __cplusplus
 	};
-#   endif
-#endif
-
-#ifndef HAS_FMOD
-#   ifdef HAS_DREM
-#	define fmod(x,y) drem((x),(y))
-#   else
-#	define USE_MY_FMOD
-#	define fmod(x,y) my_fmod(x,y)
 #   endif
 #endif
 

@@ -12,7 +12,8 @@ while (@ARGV) {
 
 umask 022;
 
-@scripts = ('cppstdin', 'c2ph', 'h2xs', 'pstruct', 'x2p/s2p', 'x2p/find2perl');
+@scripts = ('cppstdin', 'c2ph', 'h2xs', 'pstruct', 'x2p/s2p', 'x2p/find2perl',
+	    'pod/pod2man', 'pod/pod2html', 'pod/pod2latex' );
 @manpages = (<pod/*.man>, 'x2p/a2p.man', 'x2p/s2p.man');
 
 # Read in the config file.

@@ -1311,19 +1311,6 @@
 #undef SETUID_SCRIPTS_ARE_SECURE_NOW	/**/
 #undef DOSUID		/**/
 
-/* HAS_DREM:
- *	This symbol, if defined, indicates that the drem routine is
- *	available.  This is a Pyramid routine that is the same as
- *	fmod.
- */
-#undef HAS_DREM		/**/
-
-/* HAS_FMOD:
- *	This symbol, if defined, indicates that the fmod routine is
- *	available.
- */
-#define HAS_FMOD		/**/
-
 /* Gconvert:
  *	This preprocessor macro is defined to convert a floating point
  *	number to a string without a trailing decimal point.  This

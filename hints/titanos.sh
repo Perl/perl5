@@ -2,6 +2,7 @@
 # Created by: JT McDuffie (jt@kpc.com)  26 DEC 1991
 # p5ed by: Jarkko Hietaniemi <jhi@hut.fi> Aug 27 1994
 #  NOTE:   You should run Configure with tcsh (yes, tcsh).
+# Comments by Andy Dougherty <doughera@lafcol.lafayette.edu> 28 Mar 1995
 alignbytes="8"
 byteorder="4321"
 castflags='0'
@@ -14,9 +15,24 @@ malloctype='void *'
 models='none'
 ccflags="$ccflags -I/usr/include/net -DDEBUGGING -DSTANDARD_C"
 cppflags="$cppflags -I/usr/include/net -DDEBUGGING -DSTANDARD_C"
-libs='-lnsl -ldbm -lPW -lmalloc -lm'
 stdchar='unsigned char'
-static_ext='DynaLoader NDBM_File Socket'
+#
+# Apparently there are some harmful libs in Configure's $libswanted.
+# Perl5.000 had: libs='-lnsl -ldbm -lPW -lmalloc -lm'
+# Unfortunately, this line prevents users from including things like
+# -lgdbm and -ldb, which they may or may not have or want.
+# We should probably fiddle with libswanted instead of libs.
+# And even there, we should only bother to delete harmful libraries.
+# However, I don't know what they are or why they should be deleted,
+# so this will have to do for now.  --AD  28 Mar 1995
+libswanted='nsl dbm gdbm db PW malloc m'
+#
+# Extensions:  This system can not compile POSIX. We'll let Configure 
+# figure out the others.  Certainly Fcntl, Socket, and at least one *DB*
+# extension should be included.
+# perl5.000 had:  static_ext='DynaLoader NDBM_File Socket'
+useposix='n'
+#
 uidtype='ushort'
 voidflags='7'
 inclwanted='/usr/include /usr/include/net'

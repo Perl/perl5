@@ -833,10 +833,12 @@ I32 namlen;
 
 #if defined(DOSISH)
 #    define PERLLIB_SEP ';'
-#elif defined(VMS)
-#    define PERLLIB_SEP '|'
 #else
+#  if defined(VMS)
+#    define PERLLIB_SEP '|'
+#  else
 #    define PERLLIB_SEP ':'
+#  endif
 #endif
 
 static void

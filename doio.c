@@ -43,6 +43,16 @@
 #include <sys/file.h>
 #endif
 
+#if defined(HAS_SOCKET) && !defined(VMS) /* VMS handles sockets via vmsish.h */
+# include <sys/socket.h>
+# include <netdb.h>
+# ifndef ENOTSOCK
+#  ifdef I_NET_ERRNO
+#   include <net/errno.h>
+#  endif
+# endif
+#endif
+
 bool
 do_open(gv,name,len,supplied_fp)
 GV *gv;

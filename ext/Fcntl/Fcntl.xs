@@ -51,9 +51,9 @@ int arg;
 #else
 	        goto not_there;
 #endif
-	    if (strEQ(name, "SETFL"))
-#ifdef SETFL
-	        return SETFL;
+	    if (strEQ(name, "F_SETFL"))
+#ifdef F_SETFL
+	        return F_SETFL;
 #else
 	        goto not_there;
 #endif

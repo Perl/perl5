@@ -2,20 +2,38 @@
 # Original version by rsanders
 # Additional support by Kenneth Albanowski <kjahds@kjahds.com>
 #
-# First pass at ELF support by Andy Dougherty <doughera@lafcol.lafayette.edu>
-# Fri Feb  3 14:05:00 EST 1995
-# Use   sh Configure -Dcc=gcc-elf     to try using gcc-elf.  It might work.
+# ELF support by H.J. Lu <hjl@nynexst.com>
+# Additional info from Nigel Head <nhead@ESOC.bitnet>
+# and Kenneth Albanowski <kjahds@kjahds.com>
 #
-# Last updated Mon Mar  6 10:18:10 EST 1995
+# Consolidated by Andy Dougherty <doughera@lafcol.lafayette.edu>
+#
+# Last updated Thu Apr  6 12:22:03 EDT 1995
 #
 
-# Why is this needed?
-bin='/usr/bin'
+# perl goes into the /usr tree.  See the Filesystem Standard
+# available via anonymous FTP at tsx-11.mit.edu in
+# /pub/linux/docs/linux-standards/fsstnd.
+# This used to be
+# bin='/usr/bin'
+# but it doesn't seem sensible to put the binary in /usr and all the
+# rest of the support stuff (lib, man pages) into /usr/local.
+# However, allow a command line override, e.g. Configure -Dprefix=/foo/bar
+case "$prefix" in
+'') prefix='/usr' ;;
+esac
 
-# Apparently some versions of gcc 2.6.2 are picking up _G_HAVE_BOOL
-# from somewhere (_G_config.h maybe?) but not actually defining bool.
-# Anyone really know what's going on?
-ccflags='-Dbool=char -DHAS_BOOL'
+# Perl expects BSD style signal handling.
+ccflags="-D__USE_BSD_SIGNAL $ccflags"
+
+# The following functions are gcc built-ins, but the Configure test
+# may fail because it doesn't supply a proper prototype.
+d_memcmp=define
+d_memcpy=define
+
+# Configure may fail to find lstat() since it's a static/inline
+# function in <sys/stat.h>.
+d_lstat=define
 
 d_dosuid='define'
 
@@ -26,26 +44,60 @@ case "$optimize" in
 '') optimize='-O2' ;;
 esac
 
-case "$cc" in
-*cc-elf*)
+# Are we using ELF?  Thanks to Kenneth Albanowski <kjahds@kjahds.com>
+# for this test.
+cat >try.c <<'EOM'
+/* Test for whether ELF binaries are produced */
+#include <fcntl.h>
+#include <stdlib.h>
+main() {
+	char buffer[4];
+	int i=open("a.out",O_RDONLY);
+	if(i==-1)
+		exit(1); /* fail */
+	if(read(i,&buffer[0],4)<4)
+		exit(1); /* fail */
+	if(buffer[0] != 127 || buffer[1] != 'E' ||
+           buffer[2] != 'L' || buffer[3] != 'F')
+		exit(1); /* fail */
+	exit(0); /* succeed (yes, it's ELF) */
+}
+EOM
+if gcc try.c >/dev/null 2>&1 && ./a.out; then
+    cat <<'EOM'
+
+You appear to have ELF support.  I'll try to use it for dynamic loading.
+EOM
+    # Be careful not to overwrite lddlflags, since the user might
+    # have specified some -L/path options on the Configure command line.
+    lddlflags="-shared $lddlflags"
+    ccdlflags='-rdynamic'
     so='so'
     dlext='so'
-    # Configure might not understand nm output for ELF.
-    usenm=false
-    ;;
-*)
-    lddlflags='-r'
+    ld=gcc
+else
+    echo "You don't have an ELF gcc, using dld if available."
+    # We might possibly have a version of DLD around.
+    lddlflags="-r $lddlflags"
     so='sa'
     dlext='o'
     ## If you are using DLD 3.2.4 which does not support shared libs,
     ## uncomment the next two lines:
     #ldflags="-static"
     #so='none'
-    ;;
-esac
+fi
+rm -rf try.c a.out
 
-cat <<EOM
+cat <<'EOM'
 
 You should take a look at hints/linux.sh. There are a some lines you
-may wish to change near the bottom.
+may wish to change.
 EOM
+
+# And -- reported by one user:
+# We need to get -lc away from the link lines.
+# If we leave it there we get SEGV from miniperl during the build.
+# This may have to do with bugs in the pre-release version of libc for ELF.
+# Uncomment the next two lines to remove -lc from the link line.
+# set `echo " $libswanted " | sed -e 's@ c @ @'`
+# libswanted="$*"

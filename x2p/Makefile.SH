@@ -76,7 +76,7 @@ a2p: $(obj) a2p.o
 # used only if you force byacc to run by saying
 # make  run_byacc
 
-run_byacc:
+run_byacc:	FORCE
 	@ echo Expect many shift/reduce and reduce/reduce conflicts
 	$(BYACC) a2p.y
 	mv y.tab.c a2p.c
@@ -84,7 +84,7 @@ run_byacc:
 # We don't want to regenerate a2p.c, but it might appear out-of-date
 # after a patch is applied or a new distribution is made.
 a2p.c: a2p.y
-	- touch a2p.c
+	-@touch a2p.c
 
 a2p.o: a2p.c a2py.c a2p.h EXTERN.h util.h INTERN.h handy.h ../config.h str.h hash.h
 	$(CCCMD) $(LARGE) a2p.c

@@ -154,6 +154,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  *		0 = ok
  *		1 = couldn't cast < 0
  *		2 = couldn't cast >= 0x80000000
+ *		4 = couldn't cast in argument expression list
  */
 #$d_castneg	CASTNEGFLOAT		/**/
 #define CASTFLAGS $castflags		/**/
@@ -246,14 +247,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
 #$d_suidsafe SETUID_SCRIPTS_ARE_SECURE_NOW	/**/
 #$d_dosuid DOSUID		/**/
 
-/* HAS_DREM:
- *	This symbol, if defined, indicates that the drem routine is
- *	available.  This routine is roughly the same as fmod, i.e. it
- *	computes the remainder r=x-n*y, where n=rint(x/y), whereas fmod
- *	uses n=trunc(x/y).
- */
-#$d_drem HAS_DREM		/**/
-
 /* HAS_DUP2:
  *	This symbol, if defined, indicates that the dup2 routine is
  *	available to duplicate file descriptors.
@@ -295,12 +288,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  *	available to do file locking.
  */
 #$d_flock HAS_FLOCK		/**/
-
-/* HAS_FMOD:
- *	This symbol, if defined, indicates that the fmod routine is
- *	available to compute the remainder r=x-n*y where n=trunc(x/y).
- */
-#$d_fmod HAS_FMOD		/**/
 
 /* HAS_FORK:
  *	This symbol, if defined, indicates that the fork routine is
@@ -973,6 +960,19 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
 #define Groups_t $groupstype	/* Type for 2nd arg to getgroups() */
 #endif
 
+/* DB_Prefix_t:
+ *	This symbol contains the type of the prefix structure element
+ *	in the <db.h> header file.  In older versions of DB, it was
+ *	int, while in newer ones it is u_int32_t.
+ */
+/* DB_Hash_t:
+ *	This symbol contains the type of the prefix structure element
+ *	in the <db.h> header file.  In older versions of DB, it was
+ *	int, while in newer ones it is size_t.
+ */
+#define DB_Hash_t	$db_hashtype		/**/
+#define DB_Prefix_t	$db_prefixtype  	/**/
+
 /* I_DIRENT:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <dirent.h>. Using this symbol also triggers the definition
@@ -1035,6 +1035,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  *	include <memory.h>.
  */
 #$i_memory I_MEMORY		/**/
+
+/* I_NDBM:
+ *	This symbol, if defined, indicates that ndbm.h exists and should
+ *	be included.
+ */
+#$i_ndbm I_NDBM	/**/
 
 /* I_NET_ERRNO:
  *	This symbol, if defined, indicates that <net/errno.h> exists and 
@@ -1386,25 +1392,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  *	some sort is available.
  */
 #$usedl USE_DYNAMIC_LOADING		/**/
-
-/* DB_Prefix_t:
- *	This symbol contains the type of the prefix structure element
- *	in the <db.h> header file.  In older versions of DB, it was
- *	int, while in newer ones it is u_int32_t.
- */
-/* DB_Hash_t:
- *	This symbol contains the type of the prefix structure element
- *	in the <db.h> header file.  In older versions of DB, it was
- *	int, while in newer ones it is size_t.
- */
-#define DB_Hash_t	$db_hashtype		/**/
-#define DB_Prefix_t	$db_prefixtype  	/**/
-
-/* I_NDBM:
- *	This symbol, if defined, indicates that ndbm.h exists and should
- *	be included.
- */
-#$i_ndbm I_NDBM	/**/
 
 /* I_SYS_STAT:
  *	This symbol, if defined, indicates to the C program that it should

@@ -1579,12 +1579,12 @@ I32
 cast_i32(f)
 double f;
 {
-#   define BIGDOUBLE 2147483648.0        /* Assume 32 bit int's ! */
+#   define BIGDOUBLE 2147483647.0        /* Assume 32 bit int's ! */
 #   define BIGNEGDOUBLE (-2147483648.0)
     if (f >= BIGDOUBLE)
-	return (I32)fmod(f, BIGDOUBLE);
+	return (I32) BIGDOUBLE;
     if (f <= BIGNEGDOUBLE)
-	return (I32)fmod(f, BIGNEGDOUBLE);
+	return (I32) BIGNEGDOUBLE;
     return (I32) f;
 }
 # undef BIGDOUBLE
@@ -1595,12 +1595,12 @@ cast_iv(f)
 double f;
 {
     /* XXX  This should be fixed.  It assumes 32 bit IV's. */
-#   define BIGDOUBLE 2147483648.0        /* Assume 32 bit IV's ! */
+#   define BIGDOUBLE 2147483647.0        /* Assume 32 bit IV's ! */
 #   define BIGNEGDOUBLE (-2147483648.0)
     if (f >= BIGDOUBLE)
-	return (IV)fmod(f, BIGDOUBLE);
+	return (IV) BIGDOUBLE;
     if (f <= BIGNEGDOUBLE)
-	return (IV)fmod(f, BIGNEGDOUBLE);
+	return (IV) BIGNEGDOUBLE;
     return (IV) f;
 }
 # undef BIGDOUBLE
@@ -1687,28 +1687,3 @@ I32 *retlen;
     *retlen = s - start;
     return retval;
 }
-
-/* Amazingly enough, some systems (e.g. Dynix 3) don't have fmod.
-   This is a slow, stupid, but working emulation.  (AD)
-*/
-#ifdef USE_MY_FMOD
-double
-my_fmod(x, y)
-double x, y;
-{
-    double i = 0.0;   /* Can't use int because it can overflow */
-    if ((x == 0) || (y == 0))
-       return 0;
-    /* The sign of fmod is the same as the sign of x.  */
-    if ( (x < 0 && y > 0) || (x > 0 && y < 0) )
-	y = -y;
-    if (x > 0) {
-	while (x - i*y > y)
-	    i++;
-    } else {
-	while (x - i*y < y)
-	    i++;
-    }
-    return x - i * y;
-}
-#endif

@@ -211,9 +211,6 @@ char*	my_bcopy _((char* from, char* to, I32 len));
 char*	my_bzero _((char* loc, I32 len));
 #endif
 void	my_exit _((U32 status)) __attribute__((noreturn));
-#ifdef	USE_MY_FMOD
-double	my_fmod _((double x, double y));
-#endif
 I32	my_lstat _((void));
 #ifndef HAS_MEMCMP
 I32	my_memcmp _((unsigned char* s1, unsigned char* s2, I32 len));

@@ -73,9 +73,13 @@ Installation
 
     Configure supports a number of useful options.  Run Configure -h 
     to get a listing.  To compile with gcc, for example, you can run 
-    Configure -Dcc=gcc, or answer 'gcc' at the cc prompt.  If you
-    change compilers or make other significant changes, you should
-    probably _not_ re-use your old config.sh.
+    Configure -Dcc=gcc, or answer 'gcc' at the cc prompt.  This is the
+    preferred way to invoke an alternate compiler, since the hints
+    files can then set appropriate defaults.
+    
+    If you change compilers or make other significant changes, you should
+    probably _not_ re-use your old config.sh.  Simply remove it or
+    rename it, e.g. mv config.sh config.sh.old.
     
     By default, perl will be installed in /usr/local/{bin, lib, man}.
     You can specify a different prefix for the default installation
@@ -152,6 +156,10 @@ Installation
     If you get varags problems with gcc, be sure that gcc is installed
     correctly.  When using gcc, you should probably have i_stdarg='define'
     and i_varags='undef' in config.sh.
+    If you wish to use dynamic loading on SunOS or Solaris, and you
+    have GNU as and GNU ld installed, you may need to add -B/bin/ to
+    your $ccflags and $ldflags so that the system's versions of as 
+    and ld are used.
 
 5)  make test
 
@@ -184,6 +192,9 @@ Installation
 	s2p		sed-to-perl translator
 	find2perl	find-to-perl translator
 	h2xs		Converts C .h header files to Perl extensions.
+	pod2html,	Converters from perl's pod documentation format
+	pod2latex, and 	to other useful formats.
+	pod2man
 
 	library files	in $privlib and $archlib specified to
 			Configure, usually under /usr/local/lib/perl5/.

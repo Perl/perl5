@@ -14,8 +14,8 @@ case "$cc" in
     ;;
 esac
 libswanted='m dld'
-# ldflags="-Wl,-E -Wl,-a,shared"  # Force all shared?
-ldflags="-Wl,-E"
+# ccdlflags="-Wl,-E -Wl,-a,shared $ccdlflags"  # Force all shared?
+ccdlflags="-Wl,-E $ccdlflags"
 usemymalloc='y'
 alignbytes=8
 selecttype='int *' 

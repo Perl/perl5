@@ -45,7 +45,7 @@ struct gv {
 };
 
 struct cv {
-    XPVGV*	sv_any;		/* pointer to something */
+    XPVCV*	sv_any;		/* pointer to something */
     U32		sv_refcnt;	/* how many references to us */
     U32		sv_flags;	/* what we are */
 };

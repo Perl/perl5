@@ -22,7 +22,7 @@ Summary of my $package (patchlevel $PATCHLEVEL) configuration:
     uname='$myuname'
     hint=$hint
   Compiler:
-    cc='$cc', optimize='$optimize'
+    cc='$cc', optimize='$optimize', ld='$ld'
     cppflags='$cppflags'
     ccflags ='$ccflags'
     ldflags ='$ldflags'

@@ -77,6 +77,7 @@ $spitshell >>Makefile <<!GROK!THIS!
 # I now supply perly.c with the kits, so don't remake perly.c without byacc
 BYACC = $byacc
 CC = $cc
+LD = $ld
 bin = $installbin
 scriptdir = $scriptdir
 privlib = $installprivlib
@@ -221,7 +222,7 @@ $(perllib): $& perl.o $(obj)
 case "$d_shrplib" in
 *define*)
 $spitshell >>Makefile <<'!NO!SUBS!'
-	ld $(LDDLFLAGS) -o $@ perl.o $(obj)
+	$(LD) $(LDDLFLAGS) -o $@ perl.o $(obj)
 !NO!SUBS!
 ;;
 *)
@@ -281,7 +282,7 @@ install: all
 # to run with precisely the same version of byacc as I use.  You
 # normally shouldn't remake perly.[ch].
 
-run_byacc:
+run_byacc:	FORCE
 	@ echo 'Expect' 109 shift/reduce and 1 reduce/reduce conflict
 	$(BYACC) -d perly.y
 	sh $(shellflags) ./perly.fixer y.tab.c perly.c
@@ -292,10 +293,10 @@ run_byacc:
 # appear out-of-date after a patch is applied or a new distribution is
 # made.
 perly.c: perly.y
-	- touch perly.c
+	-@touch perly.c
 
 perly.h: perly.y
-	- touch perly.h
+	-@touch perly.h
 
 # Extensions:
 # Names added to $(dynamic_ext) or $(static_ext) will automatically
@@ -337,6 +338,7 @@ realclean: clean
 	rm -f config.h makefile makefile.old
 	rm -f $(private)
 	rm -rf lib/auto
+	rm -f lib/.exists
 	rm -f h2ph h2ph.man c2ph pstruct h2xs makeaperl
 	rm -rf .config
 	@echo "Note that make realclean does not delete config.sh"

@@ -14,7 +14,7 @@
  * $Id: Config_h.U,v 3.0.1.3 1995/01/30 14:25:39 ram Exp $
  */
 
-/* Configuration time: Mon Feb 27 17:21:15 EST 1995
+/* Configuration time: Wed Apr  5 14:50:33 EDT 1995
  * Configured by: andy
  * Target system: crystal crystal 3.2 2 i386 
  */
@@ -140,9 +140,10 @@
  *		0 = ok
  *		1 = couldn't cast < 0
  *		2 = couldn't cast >= 0x80000000
+ *		4 = couldn't cast in argument expression list
  */
 /*#define	CASTNEGFLOAT		/**/
-#define CASTFLAGS 3		/**/
+#define CASTFLAGS 7		/**/
 
 /* HAS_CHOWN:
  *	This symbol, if defined, indicates that the chown routine is
@@ -232,14 +233,6 @@
 /*#define SETUID_SCRIPTS_ARE_SECURE_NOW	/**/
 /*#define DOSUID		/**/
 
-/* HAS_DREM:
- *	This symbol, if defined, indicates that the drem routine is
- *	available.  This routine is roughly the same as fmod, i.e. it
- *	computes the remainder r=x-n*y, where n=rint(x/y), whereas fmod
- *	uses n=trunc(x/y).
- */
-/*#define HAS_DREM		/**/
-
 /* HAS_DUP2:
  *	This symbol, if defined, indicates that the dup2 routine is
  *	available to duplicate file descriptors.
@@ -281,12 +274,6 @@
  *	available to do file locking.
  */
 /*#define HAS_FLOCK		/**/
-
-/* HAS_FMOD:
- *	This symbol, if defined, indicates that the fmod routine is
- *	available to compute the remainder r=x-n*y where n=trunc(x/y).
- */
-#define HAS_FMOD		/**/
 
 /* HAS_FORK:
  *	This symbol, if defined, indicates that the fork routine is
@@ -597,7 +584,7 @@
  *	probably use memmove() or memcpy(). If neither is defined, roll your
  *	own version.
  */
-#define HAS_SAFE_MEMCPY	/**/
+/*#define HAS_SAFE_MEMCPY	/**/
 
 /* HAS_SELECT:
  *	This symbol, if defined, indicates that the select routine is
@@ -959,6 +946,19 @@
 #define Groups_t gid_t	/* Type for 2nd arg to getgroups() */
 #endif
 
+/* DB_Prefix_t:
+ *	This symbol contains the type of the prefix structure element
+ *	in the <db.h> header file.  In older versions of DB, it was
+ *	int, while in newer ones it is u_int32_t.
+ */
+/* DB_Hash_t:
+ *	This symbol contains the type of the prefix structure element
+ *	in the <db.h> header file.  In older versions of DB, it was
+ *	int, while in newer ones it is size_t.
+ */
+#define DB_Hash_t	int		/**/
+#define DB_Prefix_t	int  	/**/
+
 /* I_DIRENT:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <dirent.h>. Using this symbol also triggers the definition
@@ -1021,6 +1021,12 @@
  *	include <memory.h>.
  */
 /*#define I_MEMORY		/**/
+
+/* I_NDBM:
+ *	This symbol, if defined, indicates that ndbm.h exists and should
+ *	be included.
+ */
+#define I_NDBM	/**/
 
 /* I_NET_ERRNO:
  *	This symbol, if defined, indicates that <net/errno.h> exists and 
@@ -1372,25 +1378,6 @@
  *	some sort is available.
  */
 /*#define USE_DYNAMIC_LOADING		/**/
-
-/* DB_Prefix_t:
- *	This symbol contains the type of the prefix structure element
- *	in the <db.h> header file.  In older versions of DB, it was
- *	int, while in newer ones it is u_int32_t.
- */
-/* DB_Hash_t:
- *	This symbol contains the type of the prefix structure element
- *	in the <db.h> header file.  In older versions of DB, it was
- *	int, while in newer ones it is size_t.
- */
-#define DB_Hash_t	int		/**/
-#define DB_Prefix_t	int  	/**/
-
-/* I_NDBM:
- *	This symbol, if defined, indicates that ndbm.h exists and should
- *	be included.
- */
-#define I_NDBM	/**/
 
 /* I_SYS_STAT:
  *	This symbol, if defined, indicates to the C program that it should
