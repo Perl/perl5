@@ -531,15 +531,19 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    }
 	    else
 		(void)hv_iterinit((HV*)ival);
-	    i = 0;
-	    while (sortkeys ? (void*)(keys && (i <= av_len(keys))) : 
-			      (void*)((entry = hv_iternext((HV*)ival))) )		    {
+
+            /* foreach (keys %hash) */
+            for (i = 0; 1; i++) {
 		char *nkey = NULL;
 		I32 nticks = 0;
 		SV* keysv;
 		STRLEN keylen;
 		bool do_utf8 = FALSE;
-		
+
+                if ((sortkeys && !(keys && i <= av_len(keys))) ||
+                    !(entry = hv_iternext((HV *)ival)))
+                    break;
+
 		if (i)
 		    sv_catpvn(retval, ",", 1);
 
@@ -555,8 +559,6 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		    keysv = hv_iterkeysv(entry);
 		    hval = hv_iterval((HV*)ival, entry);
 		}
-
-		i++;
 
 		do_utf8 = DO_UTF8(keysv);
 		key = SvPV(keysv, keylen);
