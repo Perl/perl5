@@ -3024,8 +3024,8 @@ baserev=5.0
 echo " "
 echo "Getting the current patchlevel..." >&4
 if $test -r $rsrc/patchlevel.h;then
-	patchlevel=`awk '/define[ 	]+PATCHLEVEL/ {print $3}' $rsrc/patchlevel.h`
-	subversion=`awk '/define[ 	]+SUBVERSION/ {print $3}' $rsrc/patchlevel.h`
+	patchlevel=`awk '/define[ 	]+PERL_VERSION/ {print $3}' $rsrc/patchlevel.h`
+	subversion=`awk '/define[ 	]+PERL_SUBVERSION/ {print $3}' $rsrc/patchlevel.h`
 else
 	patchlevel=0
 	subversion=0
