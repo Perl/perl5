@@ -7664,8 +7664,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	char c;
 	int i;
 	unsigned base = 0;
-	IV iv;
-	UV uv;
+	IV iv = 0;
+	UV uv = 0;
 	NV nv;
 	STRLEN have;
 	STRLEN need;
