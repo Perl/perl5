@@ -2691,8 +2691,13 @@ sed %s -e \"/^[^#]/b\" \
 	}
 #endif
 #endif
+#ifdef IAMSUID
+	errno = EPERM;
+	Perl_croak(aTHX_ "Permission denied\n");
+#else
 	Perl_croak(aTHX_ "Can't open perl script \"%s\": %s\n",
 		   CopFILE(PL_curcop), Strerror(errno));
+#endif
     }
 }
 
@@ -3006,7 +3011,7 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
     else if (fdscript >= 0)
 	Perl_croak(aTHX_ "fd script not allowed in suidperl\n");
     else
-	Perl_croak(aTHX_ "Script is not setuid/setgid in suidperl\n");
+	Perl_croak(aTHX_ "Permission denied\n");
 
     /* We absolutely must clear out any saved ids here, so we */
     /* exec the real perl, substituting fd script for scriptname. */
