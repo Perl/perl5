@@ -47,6 +47,10 @@ For consistency, C<A> in unpack() format now trims all Unicode whitespace
 from the end of the string. Before perl 5.9.2, it used to strip only the
 classical ASCII space characters.
 
+=head2 The -C option can no longer be used on the #! line
+
+It wasn't working anyway.
+
 =head1 Core Enhancements
 
 =head2 Regexp debug flags
@@ -57,7 +61,35 @@ effect for the regular expression engine when running under C<use re
 
 =head1 Modules and Pragmata
 
+=head2 New modules
+
+=over 4
+
+=item *
+
+C<Module::CoreList>, by Richard Clamp, is a small handy module that tells
+you what versions of core modules ship with any versions of Perl 5. It
+comes with a command-line frontend, C<corelist>.
+
+=back
+
+=head2 Updated And Improved Modules and Pragmata
+
 =head1 Utility Changes
+
+=over 4
+
+=item *
+
+The C<corelist> utility is now installed with perl (see L</"New Modules">
+above).
+
+=item *
+
+C<h2ph> and C<h2xs> have been made a bit more robust with regard to
+"modern" C code.
+
+=back
 
 =head1 Documentation
 
@@ -74,6 +106,13 @@ added to fine tune this optimization.
 =head1 Selected Bug Fixes
 
 =head1 New or Changed Diagnostics
+
+The warning I<Newline in left-justified string> has been removed.
+
+The error I<Too late for "-T" option> has been reformulated to be more
+descriptive.
+
+There is a new compilation error, I<Illegal declaration of subroutine>.
 
 =head1 Changed Internals
 
