@@ -43,9 +43,7 @@ $installsitelib = $Config{installsitelib};
 $installsitearch = $Config{installsitearch};
 $installman1dir = $Config{installman1dir};
 $man1ext = $Config{man1ext};
-# Did we build libperl as a shared library?
-$d_shrplib = $Config{d_shrplib};
-$shrpdir = $Config{shrpdir};
+$libperl = $Config{libperl};
 # Shared library and dynamic loading suffixes.
 $so = $Config{so};
 $dlext = $Config{dlext};
@@ -68,17 +66,6 @@ if ($d_dosuid && $>) { die "You must run as root to install suidperl\n"; }
 
 -x 't/TEST'		|| warn "WARNING: You've never run 'make test'!!!",
 	"  (Installing anyway.)\n";
-
-if ($d_shrplib) {
-    if (!<libperl*.$so*>) {
-	warn "WARNING: Can't find libperl*.$so* to install into $shrpdir.",
-	    "  (Installing other things anyway.)\n";
-    } else {
-	mkpath($shrpdir, 1, 0777);
-	-w $shrpdir	|| $nonono || die "$shrpdir is not writable by you\n";
-	&cmd("cp libperl*.$so* $shrpdir");
-    }
-}
 
 # First we install the version-numbered executables.
 
@@ -215,9 +202,9 @@ if (-w $mainperldir && ! &samepath($mainperldir, $installbin) && !$nonono) {
 	     "$binexp/perl? [y] ")))
     {	
 	unlink("$mainperldir/perl$exe_ext");
-	eval 'link("$installbin/perl$exe_ext", "$mainperldir/perl$exe_ext")' ||
-	eval 'symlink("$binexp/perl$exe_ext", "$mainperldir/perl$exe_ext")' ||
-	&cmd("cp $installbin/perl$exe_ext $mainperldir$exe_ext");
+	CORE::link("$installbin/perl$exe_ext", "$mainperldir/perl$exe_ext") ||
+	    symlink("$binexp/perl$exe_ext", "$mainperldir/perl$exe_ext") ||
+		cmd("cp $installbin/perl$exe_ext $mainperldir$exe_ext");
 	$mainperl_is_instperl = 1;
     }
 }
@@ -321,16 +308,18 @@ sub rename {
 }
 
 sub link {
-    local($from,$to) = @_;
+    my($from,$to) = @_;
+    my($success) = 0;
 
     print STDERR "  ln $from $to\n";
     eval {
-      CORE::link($from,$to) || warn "Couldn't link $from to $to: $!\n" unless $nonono;
+      CORE::link($from,$to) ? $success++ : warn "Couldn't link $from to $to: $!\n" unless $nonono;
     };
     if ($@) {
-      system( $cp, $from, $to )
-	&& warn "Couldn't copy $from to $to: $!\n" unless $nonono;
+      system( $cp, $from, $to )==0 ? $success++ :
+	warn "Couldn't copy $from to $to: $!\n" unless $nonono;
     }
+    $success;
 }
 
 sub chmod {
