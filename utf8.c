@@ -1356,12 +1356,8 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *norma
 		   }
 #endif
 	      }
-	      else {
-		   UV  c = UNI_TO_NATIVE(*(U8*)s);
-		   U8 *d = uvchr_to_utf8(ustrp, c);
-
-		   len = d - ustrp;
-	      }
+	      else 
+		   len = uvchr_to_utf8(ustrp, UNI_TO_NATIVE(*(U8*)s)) - ustrp;
 	      if (lenp)
 		   *lenp = len;
 
