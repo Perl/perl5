@@ -4827,6 +4827,18 @@ Perl_trim_unixpath(pTHX_ char *fspec, char *wildspec, int opts)
  *  Minor modifications to original routines.
  */
 
+/* readdir may have been redefined by reentr.h, so make sure we get
+ * the local version for what we do here.
+ */
+#ifdef readdir
+# undef readdir
+#endif
+#if !defined(PERL_IMPLICIT_CONTEXT)
+# define readdir Perl_readdir
+#else
+# define readdir(a) Perl_readdir(aTHX_ a)
+#endif
+
     /* Number of elements in vms_versions array */
 #define VERSIZE(e)	(sizeof e->vms_versions / sizeof e->vms_versions[0])
 
@@ -4869,6 +4881,12 @@ Perl_opendir(pTHX_ char *name)
     dd->pat.dsc$w_length = strlen(dd->pattern);
     dd->pat.dsc$b_dtype = DSC$K_DTYPE_T;
     dd->pat.dsc$b_class = DSC$K_CLASS_S;
+#if defined(USE_5005THREADS) || defined(USE_ITHREADS)
+    New(1308,dd->mutex,1,perl_mutex);
+    MUTEX_INIT( (perl_mutex *) dd->mutex );
+#else
+    dd->mutex = NULL;
+#endif
 
     return dd;
 }  /* end of opendir() */
@@ -4894,6 +4912,10 @@ closedir(DIR *dd)
 {
     (void)lib$find_file_end(&dd->context);
     Safefree(dd->pattern);
+#if defined(USE_5005THREADS) || defined(USE_ITHREADS)
+    MUTEX_DESTROY( (perl_mutex *) dd->mutex );
+    Safefree(dd->mutex);
+#endif
     Safefree((char *)dd);
 }
 /*}}}*/
@@ -5005,6 +5027,28 @@ Perl_readdir(pTHX_ DIR *dd)
     return &dd->entry;
 
 }  /* end of readdir() */
+/*}}}*/
+
+/*
+ *  Read the next entry from the directory -- thread-safe version.
+ */
+/*{{{ int readdir_r(DIR *dd, struct dirent *entry, struct dirent **result)*/
+int
+Perl_readdir_r(pTHX_ DIR *dd, struct dirent *entry, struct dirent **result)
+{
+    int retval;
+
+    MUTEX_LOCK( (perl_mutex *) dd->mutex );
+
+    entry = readdir(dd);
+    *result = entry;
+    retval = ( *result == NULL ? errno : 0 );
+
+    MUTEX_UNLOCK( (perl_mutex *) dd->mutex );
+
+    return retval;
+
+}  /* end of readdir_r() */
 /*}}}*/
 
 /*
