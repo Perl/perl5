@@ -39,9 +39,23 @@ directory.
  $RealBin     - $Bin with all links resolved
  $RealScript  - $Script with all links resolved
 
+=head1 KNOWN ISSUES
+
+If there are two modules using C<FindBin> from different directories
+under the same interpreter, this won't work. Since C<FindBin> uses
+C<BEGIN> block, it'll be executed only once, and only the first caller
+will get it right. This is a problem under mod_perl and other persistent
+Perl environments, where you shouldn't use this module. Which also means
+that you should avoid using C<FindBin> in modules that you plan to put
+on CPAN. The only way to make sure that C<FindBin> will work is to force
+the C<BEGIN> block to be executed again:
+
+  delete $INC{'FindBin.pm'};
+  require FindBin;
+
 =head1 KNOWN BUGS
 
-if perl is invoked as
+If perl is invoked as
 
    perl filename
 
