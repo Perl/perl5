@@ -9477,7 +9477,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     IV i;
     clone_params* param = (clone_params*) malloc(sizeof(clone_params));
-    param->flags = flags;
 
 
 
@@ -9515,7 +9514,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     IV i;
     clone_params* param = (clone_params*) malloc(sizeof(clone_params));
     PerlInterpreter *my_perl = (PerlInterpreter*)PerlMem_malloc(sizeof(PerlInterpreter));
-    param->flags = flags;
     PERL_SET_THX(my_perl);
 
 
@@ -9531,6 +9529,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     Zero(my_perl, 1, PerlInterpreter);
 #    endif	/* DEBUGGING */
 #endif		/* PERL_IMPLICIT_SYS */
+    param->flags = flags;
 
     /* arena roots */
     PL_xiv_arenaroot	= NULL;
