@@ -324,6 +324,7 @@ Perl_new_struct_thread
 Perl_reentrant_size
 Perl_reentrant_init
 Perl_reentrant_free
+Perl_reentrant_retry
 Perl_call_atexit
 Perl_call_argv
 Perl_call_method

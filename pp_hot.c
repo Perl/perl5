@@ -1888,6 +1888,7 @@ PP(pp_subst)
     int force_on_match = 0;
     I32 oldsave = PL_savestack_ix;
     STRLEN slen;
+    bool doutf8 = FALSE;
 
     /* known replacement string? */
     dstr = (pm->op_pmflags & PMf_CONST) ? POPs : Nullsv;
@@ -1960,8 +1961,15 @@ PP(pp_subst)
     once = !(rpm->op_pmflags & PMf_GLOBAL);
 
     /* known replacement string? */
-    c = dstr ? SvPV(dstr, clen) : Nullch;
-
+    if (dstr) {
+        c = SvPV(dstr, clen);
+	doutf8 = DO_UTF8(dstr);
+    }
+    else {
+        c = Nullch;
+	doutf8 = FALSE;
+    }
+    
     /* can do inplace substitution? */
     if (c && clen <= rx->minlen && (once || !(r_flags & REXEC_COPY_STR))
 	&& !(rx->reganch & ROPT_LOOKBEHIND_SEEN)) {
@@ -2067,8 +2075,6 @@ PP(pp_subst)
     if (CALLREGEXEC(aTHX_ rx, s, strend, orig, 0, TARG, NULL,
 		    r_flags | REXEC_CHECKED))
     {
-	bool isutf8;
-
 	if (force_on_match) {
 	    force_on_match = 0;
 	    s = SvPV_force(TARG, len);
@@ -2114,7 +2120,7 @@ PP(pp_subst)
 	SvPVX(TARG) = SvPVX(dstr);
 	SvCUR_set(TARG, SvCUR(dstr));
 	SvLEN_set(TARG, SvLEN(dstr));
-	isutf8 = DO_UTF8(dstr);
+	doutf8 |= DO_UTF8(dstr);
 	SvPVX(dstr) = 0;
 	sv_free(dstr);
 
@@ -2123,7 +2129,7 @@ PP(pp_subst)
 	PUSHs(sv_2mortal(newSViv((I32)iters)));
 
 	(void)SvPOK_only(TARG);
-	if (isutf8)
+	if (doutf8)
 	    SvUTF8_on(TARG);
 	TAINT_IF(rxtainted);
 	SvSETMAGIC(TARG);

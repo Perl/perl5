@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..861\n";
+print "1..864\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2713,3 +2713,20 @@ print "# some Unicode properties\n";
     $s =~ s/[^\w]/ /g;
     print $s eq "s \x{100}" x 4 ? "ok 861\n" : "not ok 861\n";
 }
+
+{
+    print "# UTF-8 bug (maybe alreayd known?)\n";
+    my $u;
+
+    $u = "foo";
+    $u =~ s/./\x{100}/g;
+    print $u eq "\x{100}\x{100}\x{100}" ? "ok 862\n" : "not ok 862\n";
+
+    $u = "foobar";
+    $u =~ s/[ao]/\x{100}/g;
+    print $u eq "f\x{100}\x{100}b\x{100}r" ? "ok 863\n" : "not ok 863\n";
+
+    $u =~ s/\x{100}/e/g;
+    print $u eq "feeber" ? "ok 864\n" : "not ok 864\n";
+}
+

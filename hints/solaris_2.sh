@@ -391,6 +391,20 @@ for more information.
 
 EOM
         fi
+
+	# These prototypes should be visible since we using
+	# -D_REENTRANT, but that does not seem to work.
+	# It does seem to work for getnetbyaddr_r, weirdly enough.
+
+	d_ctermid_r_proto="$define"
+	d_gethostbyaddr_r_proto="$define"
+	d_gethostbyname_r_proto="$define"
+	d_getnetbyname_r_proto="$define"
+	d_getprotobyname_r_proto="$define"
+	d_getprotobynumber_r_proto="$define"
+	d_getservbyname_r_proto="$define"
+	d_getservbyport_r_proto="$define"
+
 	;;
 esac
 EOCBU

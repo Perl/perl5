@@ -4631,12 +4631,14 @@ PP(pp_ghostent)
     STRLEN n_a;
 
     EXTEND(SP, 10);
-    if (which == OP_GHBYNAME)
+    if (which == OP_GHBYNAME) {
 #ifdef HAS_GETHOSTBYNAME
-	hent = PerlSock_gethostbyname(POPpbytex);
+        char* name = POPpbytex;
+	hent = PerlSock_gethostbyname(name);
 #else
 	DIE(aTHX_ PL_no_sock_func, "gethostbyname");
 #endif
+    }
     else if (which == OP_GHBYADDR) {
 #ifdef HAS_GETHOSTBYADDR
 	int addrtype = POPi;
@@ -4744,12 +4746,14 @@ PP(pp_gnetent)
     struct netent *nent;
     STRLEN n_a;
 
-    if (which == OP_GNBYNAME)
+    if (which == OP_GNBYNAME){
 #ifdef HAS_GETNETBYNAME
-	nent = PerlSock_getnetbyname(POPpbytex);
+        char *name = POPpbytex;
+	nent = PerlSock_getnetbyname(name);
 #else
         DIE(aTHX_ PL_no_sock_func, "getnetbyname");
 #endif
+    }
     else if (which == OP_GNBYADDR) {
 #ifdef HAS_GETNETBYADDR
 	int addrtype = POPi;
@@ -4843,18 +4847,22 @@ PP(pp_gprotoent)
     struct protoent *pent;
     STRLEN n_a;
 
-    if (which == OP_GPBYNAME)
+    if (which == OP_GPBYNAME) {
 #ifdef HAS_GETPROTOBYNAME
-	pent = PerlSock_getprotobyname(POPpbytex);
+        char* name = POPpbytex;
+	pent = PerlSock_getprotobyname(name);
 #else
 	DIE(aTHX_ PL_no_sock_func, "getprotobyname");
 #endif
-    else if (which == OP_GPBYNUMBER)
+    }
+    else if (which == OP_GPBYNUMBER) {
 #ifdef HAS_GETPROTOBYNUMBER
-	pent = PerlSock_getprotobynumber(POPi);
+        int number = POPi;
+	pent = PerlSock_getprotobynumber(number);
 #else
-    DIE(aTHX_ PL_no_sock_func, "getprotobynumber");
+	DIE(aTHX_ PL_no_sock_func, "getprotobynumber");
 #endif
+    }
     else
 #ifdef HAS_GETPROTOENT
 	pent = PerlSock_getprotoent();
@@ -5175,10 +5183,16 @@ PP(pp_gpwent)
 
     switch (which) {
     case OP_GPWNAM:
-	pwent  = getpwnam(POPpbytex);
-	break;
+      {
+	char* name = POPpbytex;
+	pwent  = getpwnam(name);
+      }
+      break;
     case OP_GPWUID:
-	pwent = getpwuid((Uid_t)POPi);
+      {
+	Uid_t uid = POPi;
+	pwent = getpwuid(uid);
+      }
 	break;
     case OP_GPWENT:
 #   ifdef HAS_GETPWENT
@@ -5375,10 +5389,14 @@ PP(pp_ggrent)
     struct group *grent;
     STRLEN n_a;
 
-    if (which == OP_GGRNAM)
-	grent = (struct group *)getgrnam(POPpbytex);
-    else if (which == OP_GGRGID)
-	grent = (struct group *)getgrgid(POPi);
+    if (which == OP_GGRNAM) {
+        char* name = POPpbytex;
+	grent = (struct group *)getgrnam(name);
+    }
+    else if (which == OP_GGRGID) {
+        Gid_t gid = POPi;
+	grent = (struct group *)getgrgid(gid);
+    }
     else
 #ifdef HAS_GETGRENT
 	grent = (struct group *)getgrent();

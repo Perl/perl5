@@ -28,7 +28,6 @@ $N++;
 my ($n, @r);
 
 
-
 # (3-11) PUSH tests
 $n = push @a, "rec0", "rec1", "rec2";
 check_contents($data);

@@ -96,6 +96,8 @@
 #define	STATIC	static
 #endif
 
+#define REGINCLASS(p,c)  (ANYOF_FLAGS(p) ? reginclasslen(p,c,0,0) : ANYOF_BITMAP_TEST(p,*(c)))
+
 /*
  * Forwards.
  */
@@ -921,9 +923,11 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	switch (OP(c)) {
 	case ANYOF:
 	    while (s < strend) {
-	        STRLEN skip = do_utf8 ? UTF8SKIP(s) : 1;
-
-		if (reginclass(c, (U8*)s, do_utf8) ||
+		STRLEN skip = do_utf8 ? UTF8SKIP(s) : 1;
+		  
+		if (do_utf8 ?
+		    reginclasslen(c, (U8*)s, 0, do_utf8) :
+		    REGINCLASS(c, (U8*)s) ||
 		    (ANYOF_FOLD_SHARP_S(c, s, strend) &&
 		     /* The assignment of 2 is intentional:
 		      * for the sharp s, the skip is 2. */
@@ -935,7 +939,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 			tmp = doevery;
 		}
 		else 
-		     tmp = 1;
+		    tmp = 1;
 		s += skip;
 	    }
 	    break;
@@ -2432,7 +2436,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    else {
 		if (nextchr < 0)
 		    nextchr = UCHARAT(locinput);
-		if (!reginclass(scan, (U8*)locinput, do_utf8))
+		if (!REGINCLASS(scan, (U8*)locinput))
 		    sayNO_ANYOF;
 		if (!nextchr && locinput >= PL_regeol)
 		    sayNO;
@@ -3950,12 +3954,12 @@ S_regrepeat(pTHX_ regnode *p, I32 max)
 	if (do_utf8) {
 	    loceol = PL_regeol;
 	    while (hardcount < max && scan < loceol &&
-		   reginclass(p, (U8*)scan, do_utf8)) {
+		   reginclasslen(p, (U8*)scan, 0, do_utf8)) {
 		scan += UTF8SKIP(scan);
 		hardcount++;
 	    }
 	} else {
-	    while (scan < loceol && reginclass(p, (U8*)scan, do_utf8))
+	    while (scan < loceol && REGINCLASS(p, (U8*)scan))
 		scan++;
 	}
 	break;

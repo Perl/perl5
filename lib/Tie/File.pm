@@ -5,20 +5,7 @@ use POSIX 'SEEK_SET';
 use Fcntl 'O_CREAT', 'O_RDWR', 'LOCK_EX';
 require 5.005;
 
-$VERSION = "0.20";
-
-# Idea: The object will always contain an array of byte offsets
-# this will be filled in as is necessary and convenient.
-# fetch will do seek-read.
-# There will be a cache parameter that controls the amount of cached *data*
-# Also an LRU queue of cached records
-# store will read the relevant record into the cache
-# If it's the same length as what is being written, it will overwrite it in 
-#   place; if not, it will do a from-to copying write.
-# The record separator string is also a parameter
-
-# Record numbers start at ZERO.
-
+$VERSION = "0.21";
 my $DEFAULT_MEMORY_SIZE = 1<<21;    # 2 megabytes
 
 my %good_opt = map {$_ => 1, "-$_" => 1} 
@@ -47,12 +34,15 @@ sub TIEARRAY {
     $opts{memory} = $DEFAULT_MEMORY_SIZE;
     $opts{memory} = $opts{dw_size} 
       if defined $opts{dw_size} && $opts{dw_size} > $DEFAULT_MEMORY_SIZE;
+    # Dora Winifred Read
   }
   $opts{dw_size} = $opts{memory} unless defined $opts{dw_size};
   if ($opts{dw_size} > $opts{memory}) {
       croak("$pack: dw_size may not be larger than total memory allocation\n");
   }
-  $opts{deferred} = {};         # no records presently deferred
+  # are we in deferred-write mode?
+  $opts{defer} = 0 unless defined $opts{defer};
+  $opts{deferred} = {};         # no records are presently deferred
   $opts{deferred_s} = 0;        # count of total bytes in ->{deferred}
 
   # the cache is a hash instead of an array because it is likely to be
@@ -77,10 +67,15 @@ sub TIEARRAY {
   my $fh;
 
   if (UNIVERSAL::isa($file, 'GLOB')) {
-    unless (seek $file, 0, SEEK_SET) {
+    # We use 1 here on the theory that some systems 
+    # may not indicate failure if we use 0.
+    # MSWin32 does not indicate failure with 0, but I don't know if
+    # it will indicate failure with 1 or not.
+    unless (seek $file, 1, SEEK_SET) {
       croak "$pack: your filehandle does not appear to be seekable";
     }
-    $fh = $file;
+    seek $file, 0, SEEK_SET     # put it back
+    $fh = $file;                # setting binmode is the user's problem
   } elsif (ref $file) {
     croak "usage: tie \@array, $pack, filename, [option => value]...";
   } else {
@@ -102,7 +97,9 @@ sub TIEARRAY {
 
 sub FETCH {
   my ($self, $n) = @_;
-  $self->_chomp1($self->_fetch($n));
+  my $rec = exists $self->{deferred}{$n}
+                 ? $self->{deferred}{$n} : $self->_fetch($n);
+  $self->_chomp1($rec);
 }
 
 # Chomp many records in-place; return nothing useful
@@ -172,14 +169,11 @@ sub STORE {
   # Note we have to do this before we alter the cache
   my $oldrec = $self->_fetch($n);
 
-  # _check_cache promotes record $n to MRU.  Is this correct behavior?
   if (my $cached = $self->_check_cache($n)) {
     my $len_diff = length($rec) - length($cached);
     $self->{cache}{$n} = $rec;
     $self->{cached} += $len_diff;
-    $self->_cache_flush 
-      if $len_diff > 0
-        && $self->{deferred_s} + $self->{cached} > $self->{memory};
+    $self->_cache_flush if $len_diff > 0 && $self->_cache_too_full;
   }
 
   if (not defined $oldrec) {
@@ -208,18 +202,30 @@ sub _store_deferred {
   $self->{deferred_s} += length($rec);
   $self->{deferred_s} -= length($old_deferred) if defined $old_deferred;
   if ($self->{deferred_s} > $self->{dw_size}) {
-    $self->flush;
-    $self->defer;               # flush clears the 'defer' flag
-  } elsif ($self->{deferred_s} + $self->{cached} > $self->{memory}) {
+    $self->_flush;
+  } elsif ($self->_cache_too_full) {
     $self->_cache_flush;
   }
+}
+
+# Remove a single record from the deferred-write buffer without writing it
+# The record need not be present
+sub _delete_deferred {
+  my ($self, $n) = @_;
+  my $rec = delete $self->{deferred}{$n};
+  return unless defined $rec;
+  $self->{deferred_s} -= length $rec;
 }
 
 sub FETCHSIZE {
   my $self = shift;
   my $n = $#{$self->{offsets}};
+  # 20020317 Change this to binary search
   while (defined ($self->_fill_offsets_to($n+1))) {
     ++$n;
+  }
+  for my $k (keys %{$self->{deferred}}) {
+    $n = $k+1 if $n < $k+1;
   }
   $n;
 }
@@ -231,11 +237,23 @@ sub STORESIZE {
 
   # file gets longer
   if ($len > $olen) {
-    $self->_extend_file_to($len);
+    if ($self->{defer}) {
+      for ($olen .. $len-1) {
+        $self->_store_deferred($_, $self->{recsep});
+      }
+    } else {
+      $self->_extend_file_to($len);
+    }
     return;
   }
 
   # file gets shorter
+  if ($self->{defer}) {
+    for (grep $_ >= $len, keys %{$self->{deferred}}) {
+      $self->_delete_deferred($_);
+    }
+  }
+
   $self->_seek($len);
   $self->_chop_file;
   $#{$self->{offsets}} = $len;
@@ -247,7 +265,7 @@ sub STORESIZE {
 sub PUSH {
   my $self = shift;
   $self->SPLICE($self->FETCHSIZE, scalar(@_), @_);
-  $self->FETCHSIZE;
+#  $self->FETCHSIZE;  # av.c takes care of this for me
 }
 
 sub POP {
@@ -266,12 +284,17 @@ sub SHIFT {
 sub UNSHIFT {
   my $self = shift;
   $self->SPLICE(0, 0, @_);
-  $self->FETCHSIZE;
+  # $self->FETCHSIZE; # av.c takes care of this for me
 }
 
 sub CLEAR {
   # And enable auto-defer mode, since it's likely that they just
-  # did @a = (...);
+  # did @a = (...); 
+  #
+  # 20020316
+  # Maybe that's too much dwimmery.  But stuffing a fake '-1' into the
+  # autodefer history might not be too much.  If you did that, you
+  # could also special-case [ -1, 0 ], which might not be too much.
   my $self = shift;
   $self->_seekb(0);
   $self->_chop_file;
@@ -279,32 +302,46 @@ sub CLEAR {
     $self->{cached}   = 0;
   @{$self->{lru}}     = ();
   @{$self->{offsets}} = (0);
+  %{$self->{deferred}}= ();
+    $self->{deferred_s} = 0;
 }
 
 sub EXTEND {
   my ($self, $n) = @_;
+
+  # No need to pre-extend anything in this case
+  return if $self->{defer};
+
   $self->_fill_offsets_to($n);
   $self->_extend_file_to($n);
 }
 
 sub DELETE {
   my ($self, $n) = @_;
+  $self->_delete_deferred($n) if $self->{defer};
   my $lastrec = $self->FETCHSIZE-1;
+  my $rec = $self->FETCH($n);
   if ($n == $lastrec) {
     $self->_seek($n);
     $self->_chop_file;
     $#{$self->{offsets}}--;
     $self->_uncache($n);
     # perhaps in this case I should also remove trailing null records?
-  } else {
+    # 20020316
+    # Note that delete @a[-3..-1] deletes the records in the wrong order,
+    # so we only chop the very last one out of the file.  We could repair this
+    # by tracking deleted records inside the object.
+  } elsif ($n < $lastrec) {
     $self->STORE($n, "");
   }
+  $rec;
 }
 
 sub EXISTS {
   my ($self, $n) = @_;
-  $self->_fill_offsets_to($n);
-  0 <= $n && $n < $self->FETCHSIZE;
+  return 1 if exists $self->{deferred}{$n};
+  $self->_fill_offsets_to($n);  # I think this is unnecessary
+  $n < $self->FETCHSIZE;
 }
 
 sub SPLICE {
@@ -319,6 +356,7 @@ sub SPLICE {
 }
 
 sub DESTROY {
+  my $self = shift;
   $self->flush if $self->{defer};
 }
 
@@ -505,6 +543,12 @@ sub _fixrecs {
   }
 }
 
+
+################################################################
+#
+# Basic read, write, and seek
+#
+
 # seek to the beginning of record #$n
 # Assumes that the offsets table is already correctly populated
 #
@@ -570,6 +614,12 @@ sub _read_record {
   $rec;
 }
 
+################################################################
+#
+# Read cache management
+
+# Insert a record into the cache at position $n
+# Only appropriate when no data is cached for $n already
 sub _cache_insert {
   my ($self, $n, $rec) = @_;
 
@@ -580,9 +630,11 @@ sub _cache_insert {
   $self->{cached} += length $rec;
   push @{$self->{lru}}, $n;     # most-recently-used is at the END
 
-  $self->_cache_flush if $self->{cached} > $self->{memory};
+  $self->_cache_flush if $self->_cache_too_full;
 }
 
+# Remove cached data for record $n, if there is any
+# (It is OK if $n is not in the cache at all)
 sub _uncache {
   my $self = shift;
   for my $n (@_) {
@@ -593,6 +645,7 @@ sub _uncache {
   }
 }
 
+# _check_cache promotes record $n to MRU.  Is this correct behavior?
 sub _check_cache {
   my ($self, $n) = @_;
   my $rec;
@@ -600,18 +653,30 @@ sub _check_cache {
 
   # cache hit; update LRU queue and return $rec
   # replace this with a heap in a later version
+  # 20020317 This should be a separate method
   @{$self->{lru}} = ((grep $_ ne $n, @{$self->{lru}}), $n);
   $rec;
 }
 
+sub _cache_too_full {
+  my $self = shift;
+  $self->{cached} + $self->{deferred_s} > $self->{memory};
+}
+
 sub _cache_flush {
   my ($self) = @_;
-  while ($self->{cached} + $self->{deferred_s} > $self->{memory}) {
+  while ($self->_cache_too_full) {
     my $lru = shift @{$self->{lru}};
     my $rec = delete $self->{cache}{$lru};
     $self->{cached} -= length $rec;
   }
 }
+
+################################################################
+#
+# File custodial services
+#
+
 
 # We have read to the end of the file and have the offsets table
 # entirely populated.  Now we need to write a new record beyond
@@ -641,6 +706,7 @@ sub _chop_file {
   truncate $self->{fh}, tell($self->{fh});
 }
 
+
 # compute the size of a buffer suitable for moving
 # all the data in a file forward $n bytes
 # ($n may be negative)
@@ -652,6 +718,11 @@ sub _bufsize {
   $b += 8192 if $n & 8191;
   $b;
 }
+
+################################################################
+#
+# Miscellaneous public methods
+#
 
 # Lock the file
 sub flock {
@@ -665,12 +736,6 @@ sub flock {
   flock $fh, $op;
 }
 
-# Defer writes
-sub defer {
-  my $self = shift;
-  $self->{defer} = 1;
-}
-
 # Get/set autochomp option
 sub autochomp {
   my $self = shift;
@@ -681,6 +746,17 @@ sub autochomp {
   } else {
     $self->{autochomp};
   }
+}
+
+################################################################
+#
+# Matters related to deferred writing
+#
+
+# Defer writes
+sub defer {
+  my $self = shift;
+  $self->{defer} = 1;
 }
 
 # Flush deferred writes
@@ -711,23 +787,33 @@ sub _flush {
                    @{$self->{deferred}}{$first_rec .. $last_rec});
   }
 
-  $self->discard;               # clear out defered-write-cache
+  $self->_discard;               # clear out defered-write-cache
 }
 
-# Discard deferred writes
+# Discard deferred writes and disable future deferred writes
 sub discard {
   my $self = shift;
-  undef $self->{deferred};
-  $self->{deferred_s} = 0;
+  $self->_discard;
   $self->{defer} = 0;
+}
+
+# Discard deferred writes, but retain old deferred writing mode
+sub _discard {
+  my $self = shift;
+  $self->{deferred} = {};
+  $self->{deferred_s} = 0;
 }
 
 # Not yet implemented
 sub autodefer { }
 
+# This is NOT a method.  It is here for two reasons:
+#  1. To factor a fairly complicated block out of the constructor
+#  2. To provide access for the test suite, which need to be sure
+#     files are being written properly.
 sub _default_recsep {
   my $recsep = $/;
-  if ($^O eq 'MSWin32') {
+  if ($^O eq 'MSWin32') {       # Dos too?
     # Windows users expect files to be terminated with \r\n
     # But $/ is set to \n instead
     # Note that this also transforms \n\n into \r\n\r\n.
@@ -737,23 +823,36 @@ sub _default_recsep {
   $recsep;
 }
 
+# Utility function for _check_integrity
+sub _ci_warn {
+  my $msg = shift;
+  $msg =~ s/\n/\\n/g;
+  $msg =~ s/\r/\\r/g;
+  print "# $msg\n";
+}
+
 # Given a file, make sure the cache is consistent with the
-# file contents
+# file contents and the internal data structures are consistent with
+# each other.  Returns true if everything checks out, false if not
+#
+# The $file argument is no longer used.  It is retained for compatibility
+# with the existing test suite.
 sub _check_integrity {
   my ($self, $file, $warn) = @_;
   my $good = 1; 
 
   if (not defined $self->{offsets}[0]) {
-    $warn && print STDERR "# offset 0 is missing!\n";
+    _ci_warn("offset 0 is missing!");
     $good = 0;
   } elsif ($self->{offsets}[0] != 0) {
-    $warn && print STDERR "# rec 0: offset <$self->{offsets}[0]> s/b 0!\n";
+    _ci_warn("rec 0: offset <$self->{offsets}[0]> s/b 0!");
     $good = 0;
   }
 
   local *F = $self->{fh};
   seek F, 0, SEEK_SET;
   local $/ = $self->{recsep};
+  my $rsl = $self->{recseplen};
   $. = 0;
 
   while (<F>) {
@@ -762,26 +861,29 @@ sub _check_integrity {
     my $offset = $self->{offsets}[$.];
     my $ao = tell F;
     if (defined $offset && $offset != $ao) {
-      $warn && print STDERR "# rec $n: offset <$offset> actual <$ao>\n";
+      _ci_warn("rec $n: offset <$offset> actual <$ao>");
       $good = 0;
     }
     if (defined $cached && $_ ne $cached) {
       $good = 0;
       chomp $cached;
       chomp;
-      $warn && print STDERR "# rec $n: cached <$cached> actual <$_>\n";
+      _ci_warn("rec $n: cached <$cached> actual <$_>");
+    }
+    if (defined $cached && substr($cached, -$rsl) ne $/) {
+      _ci_warn("rec $n in the cache is missing the record separator");
     }
   }
 
-  my $memory = 0;
+  my $cached = 0;
   while (my ($n, $r) = each %{$self->{cache}}) {
-    $memory += length($r);
+    $cached += length($r);
     next if $n+1 <= $.;         # checked this already
-    $warn && print STDERR "# spurious caching of record $n\n";
+    _ci_warn("spurious caching of record $n");
     $good = 0;
   }
-  if ($memory != $self->{cached}) {
-    $warn && print STDERR "# cache size is $self->{cached}, should be $memory\n";
+  if ($cached != $self->{cached}) {
+    _ci_warn("cache size is $self->{cached}, should be $cached");
     $good = 0;
   }
 
@@ -789,7 +891,7 @@ sub _check_integrity {
   for (@{$self->{lru}}) {
     $seen{$_}++;
     if (not exists $self->{cache}{$_}) {
-      $warn && print "# $_ is mentioned in the LRU queue, but not in the cache\n";
+      _ci_warn("$_ is mentioned in the LRU queue, but not in the cache");
       $good = 0;
     }
   }
@@ -797,14 +899,54 @@ sub _check_integrity {
   if (@duplicate) {
     my $records = @duplicate == 1 ? 'Record' : 'Records';
     my $appear  = @duplicate == 1 ? 'appears' : 'appear';
-    $warn && print "# $records @duplicate $appear multiple times in LRU queue: @{$self->{lru}}\n";
+    _ci_warn("$records @duplicate $appear multiple times in LRU queue: @{$self->{lru}}");
     $good = 0;
   }
   for (keys %{$self->{cache}}) {
     unless (exists $seen{$_}) {
-      print "# record $_ is in the cache but not the LRU queue\n";
+      _ci_warn("record $_ is in the cache but not the LRU queue");
       $good = 0;
     }
+  }
+
+  # Now let's check the deferbuffer
+  # Unless deferred writing is enabled, it should be empty
+  if (! $self->{defer} && %{$self->{deferred}}) {
+    _ci_warn("deferred writing disabled, but deferbuffer nonempty");
+    $good = 0;
+  }
+
+  # Any record in the deferbuffer should *not* be present in the readcache
+  my $deferred_s = 0;
+  while (my ($n, $r) = each %{$self->{deferred}}) {
+    $deferred_s += length($r);
+    if (exists $self->{cache}{$n}) {
+      _ci_warn("record $n is in the deferbuffer *and* the readcache");
+      $good = 0;
+    }
+    if (substr($r, -$rsl) ne $/) {
+      _ci_warn("rec $n in the deferbuffer is missing the record separator");
+      $good = 0;
+    }
+  }
+
+  # Total size of deferbuffer should match internal total
+  if ($deferred_s != $self->{deferred_s}) {
+    _ci_warn("buffer size is $self->{deferred_s}, should be $deferred_s");
+    $good = 0;
+  }
+
+  # Total size of deferbuffer should not exceed the specified limit
+  if ($deferred_s > $self->{dw_size}) {
+    _ci_warn("buffer size is $self->{deferred_s} which exceeds the limit of $self->{dw_size}");
+    $good = 0;
+  }
+
+  # Total size of cached data should not exceed the specified limit
+  if ($deferred_s + $cached > $self->{memory}) {
+    my $total = $deferred_s + $cached;
+    _ci_warn("total stored data size is $total which exceeds the limit of $self->{memory}");
+    $good = 0;
   }
 
   $good;
@@ -818,7 +960,7 @@ Tie::File - Access the lines of a disk file via a Perl array
 
 =head1 SYNOPSIS
 
-	# This file documents Tie::File version 0.20
+	# This file documents Tie::File version 0.21
 
 	tie @array, 'Tie::File', filename or die ...;
 
@@ -826,9 +968,15 @@ Tie::File - Access the lines of a disk file via a Perl array
 	print $array[42];        # display line 42 of the file
 
 	$n_recs = @array;        # how many records are in the file?
-	$#array = $n_recs - 2;   # chop records off the end
+	$#array -= 2;            # chop two records off the end
 
-	# As you would expect:
+
+	for (@array) {
+	  s/PERL/Perl/g;         # Replace PERL with Perl everywhere in the file
+	}
+
+	# These are just like regular push, pop, unshift, shift, and splice
+	# Except that they modify the file in the way you would expect
 
 	push @array, new recs...;
 	my $r1 = pop @array;
@@ -837,6 +985,7 @@ Tie::File - Access the lines of a disk file via a Perl array
 	@old_recs = splice @array, 3, 7, new recs...;
 
 	untie @array;            # all finished
+
 
 =head1 DESCRIPTION
 
@@ -850,7 +999,7 @@ gigantic files.
 
 Changes to the array are reflected in the file immediately.
 
-Lazy people may now stop reading the manual.
+Lazy people and beginners may now stop reading the manual.
 
 =head2 C<recsep>
 
@@ -918,8 +1067,9 @@ the file contains the text
 	Frankincense
 	Myrrh
 
-the tied array will appear to contain C<("Gold", "Frankincense", "Myrrh")>.
-If you set C<autochomp> to a false value, the record separator will not be removed.  If the file above was tied with
+the tied array will appear to contain C<("Gold", "Frankincense",
+"Myrrh")>.  If you set C<autochomp> to a false value, the record
+separator will not be removed.  If the file above was tied with
 
 	tie @gifts, "Tie::File", $gifts, autochomp => 0;
 
@@ -952,9 +1102,10 @@ Opening the data file in write-only or append mode is not supported.
 
 =head2 C<memory>
 
-This is an (inexact) upper limit on the amount of memory that
-C<Tie::File> will consume at any time while managing the file.  
-At present, this is used as a bound on the size of the read cache.
+This is an upper limit on the amount of memory that C<Tie::File> will
+consume at any time while managing the file.  This is used for two
+things: managing the I<read cache> and managing the I<deferred write
+buffer>.
 
 Records read in from the file are cached, to avoid having to re-read
 them repeatedly.  If you read the same record twice, the first time it
@@ -973,6 +1124,28 @@ desired cache size, in bytes.
 
 Setting the memory limit to 0 will inhibit caching; records will be
 fetched from disk every time you examine them.
+
+=head2 C<dw_size>
+
+(This is an advanced feature.  Skip this section on first reading.)
+ 
+If you use deferred writing (See L<"Deferred Writing">, below) then
+data you write into the array will not be written directly to the
+file; instead, it will be saved in the I<deferred write buffer> to be
+written out later.  Data in the deferred write buffer is also charged
+against the memory limit you set with the C<memory> option.
+
+You may set the C<dw_size> option to limit the amount of data that can
+be saved in the deferred write buffer.  This limit may not exceed the
+total memory limit.  For example, if you set C<dw_size> to 1000 and
+C<memory> to 2500, that means that no more than 1000 bytes of deferred
+writes will be saved up.  The space available for the read cache will
+vary, but it will always be at least 1500 bytes (if the deferred write
+buffer is full) and it could grow as large as 2500 bytes (if the
+deferred write buffer is empty.)
+
+If you don't specify a C<dw_size>, it defaults to the entire memory
+limit.
 
 =head2 Option Format
 
@@ -1000,8 +1173,19 @@ argument to the Perl built-in C<flock> function; for example
 C<LOCK_SH> or C<LOCK_EX | LOCK_NB>.  (These constants are provided by
 the C<use Fcntl ':flock'> declaration.)
 
-C<MODE> is optional; C<$o-E<gt>flock> simply locks the file with
-C<LOCK_EX>.
+C<MODE> is optional; the default is C<LOCK_EX>.
+
+C<Tie::File> promises that the following sequence of operations will
+be safe:
+
+	my $o = tie @array, "Tie::File", $filename;
+	$o->flock;
+
+In particular, C<Tie::File> will I<not> read or write the file during
+the C<tie> call.  (Exception: Using C<mode =E<gt> O_TRUNC> will, of
+course, erase the file during the C<tie> call.  If you want to do this
+safely, then open the file without C<O_TRUNC>, lock the file, and use
+C<@array = ()>.)
 
 The best way to unlock a file is to discard the object and untie the
 array.  It is probably unsafe to unlock the file without also untying
@@ -1028,6 +1212,10 @@ the idiot does not also have a green light at the same time.
 
 See L<"autochomp">, above.
 
+=head2 C<defer>, C<flush>, and C<discard>
+
+See L<"Deferred Writing">, below.
+
 =head1 Tying to an already-opened filehandle
 
 If C<$fh> is a filehandle, such as is returned by C<IO::File> or one
@@ -1041,10 +1229,81 @@ C<sysopen>, you may use:
 	tie @array, 'Tie::File', \*FH, ...;
 
 Handles that were opened write-only won't work.  Handles that were
-opened read-only will work as long as you don't try to write to them.
-Handles must be attached to seekable sources of data---that means no
-pipes or sockets.  If you supply a non-seekable handle, the C<tie>
-call will try to abort your program.
+opened read-only will work as long as you don't try to modify the
+array.  Handles must be attached to seekable sources of data---that
+means no pipes or sockets.  If you supply a non-seekable handle, the
+C<tie> call will try to throw an exception.  (On Unix systems, it
+B<will> throw an exception.)
+
+=head1 Deferred Writing
+
+(This is an advanced feature.  Skip this section on first reading.)
+
+Normally, modifying a C<Tie::File> array writes to the underlying file
+immediately.  Every assignment like C<$a[3] = ...> rewrites as much of
+the file as is necessary; typically, everything from line 3 through
+the end will need to be rewritten.  This is the simplest and most
+transparent behavior.  Performance even for large files is reasonably
+good.
+
+However, under some circumstances, this behavior may be excessively
+slow.  For example, suppose you have a million-record file, and you
+want to do:
+
+	for (@FILE) {
+	  $_ = "> $_";
+	}
+
+The first time through the loop, you will rewrite the entire file,
+from line 0 through the end.  The second time through the loop, you
+will rewrite the entire file from line 1 through the end.  The third
+time through the loop, you will rewrite the entire file from line 2 to
+the end.  And so on.
+
+If the performance in such cases is unacceptable, you may defer the
+actual writing, and then have it done all at once.  The following loop
+will perform much better for large files:
+
+	(tied @a)->defer;
+	for (@a) {
+	  $_ = "> $_";
+	}
+	(tied @a)->flush;
+
+If C<Tie::File>'s memory limit is large enough, all the writing will
+done in memory.  Then, when you call C<-E<gt>flush>, the entire file
+will be rewritten in a single pass.
+
+Calling C<-E<gt>flush> returns the array to immediate-write mode.  If
+you wish to discard the deferred writes, you may call C<-E<gt>discard>
+instead of C<-E<gt>flush>.  Note that in some cases, some of the data
+will have been written already, and it will be too late for
+C<-E<gt>discard> to discard all the changes.
+
+Deferred writes are cached in memory up to the limit specified by the
+C<dw_size> option (see above).  If the deferred-write buffer is full
+and you try to write still more deferred data, the buffer will be
+flushed.  All buffered data will be written immediately, the buffer
+will be emptied, and the now-empty space will be used for future
+deferred writes.
+
+If the deferred-write buffer isn't yet full, but the total size of the
+buffer and the read cache would exceed the C<memory> limit, the oldest
+records will be flushed out of the read cache until total usage is
+under the limit.
+
+C<push>, C<pop>, C<shift>, C<unshift>, and C<splice> cannot be
+deferred.  When you perform one of these operations, any deferred data
+is written to the file and the operation is performed immediately.
+This may change in a future version.
+
+A soon-to-be-released version of this module may enabled deferred
+write mode automagically if it guesses that you are about to write
+many consecutive records.  To disable this feature, use
+
+	(tied @o)->autodefer(0);
+
+(At present, this call does nothing.)
 
 =head1 CAVEATS
 
@@ -1064,39 +1323,25 @@ changing the size of a record in the middle of a large file will
 always be fairly slow, because everything after the new record must be
 moved.
 
-In particular, note that the following innocent-looking loop has very
-bad behavior:
-
-        # million-line file
-        for (@file_array) {
-          $_ .= 'x';
-        }
-
-This is likely to be very slow, because the first iteration must
-relocate lines 1 through 999,999; the second iteration must relocate
-lines 2 through 999,999, and so on.  The relocation is done using
-block writes, however, so it's not as slow as it might be.
-
-A soon-to-be-released version of this module will provide a mechanism
-for getting better performance in such cases, by deferring the writing
-until it can be done all at once.  This deferred writing feature might
-be enabled automagically if C<Tie::File> guesses that you are about to write many consecutive records.  To disable this feature, use 
-
-	(tied @o)->autodefer(0);
-
-(At present, this call does nothing.)
-
 =item *
 
 The behavior of tied arrays is not precisely the same as for regular
 arrays.  For example:
 
-	undef $a[10];  print "How unusual!\n" if $a[10];
+	# This DOES print "How unusual!"
+	undef $a[10];  print "How unusual!\n" if defined $a[10];
 
 C<undef>-ing a C<Tie::File> array element just blanks out the
 corresponding record in the file.  When you read it back again, you'll
-see the record separator (typically, $a[10] will appear to contain
-"\n") so the supposedly-C<undef>'ed value will be true.
+get the empty string, so the supposedly-C<undef>'ed value will be
+defined.  Similarly, if you have C<autochomp> disabled, then
+
+	# This DOES print "How unusual!" if 'autochomp' is disabled
+	undef $a[10];  
+        print "How unusual!\n" if $a[10];
+
+Because when C<autochomp> is disabled, C<$a[10]> will read back as
+C<"\n"> (or whatever the record separator string is.)  
 
 There are other minor differences, but in general, the correspondence
 is extremely close.
@@ -1106,8 +1351,15 @@ is extremely close.
 Not quite every effort was made to make this module as efficient as
 possible.  C<FETCHSIZE> should use binary search instead of linear
 search.  The cache's LRU queue should be a heap instead of a list.
+
+The performance of the C<flush> method could be improved.  At present,
+it still rewrites the tail of the file once for each block of
+contiguous lines to be changed.  In the typical case, this will result
+in only one rewrite, but in peculiar cases it might be bad.  It should
+be possible to perform I<all> deferred writing with a single rewrite.
+
 These defects are probably minor; in any event, they will be fixed in
-a later version of the module.
+a future version of the module.
 
 =item *
 
@@ -1119,7 +1371,18 @@ suggests, for example, that an LRU read-cache is a good tradeoff,
 even if it requires substantial adjustment following a C<splice>
 operation.
 
+=item *
+You might be tempted to think that deferred writing is like
+transactions, with C<flush> as C<commit> and C<discard> as
+C<rollback>, but it isn't, so don't.  
+
 =back
+
+=head1 SUBCLASSING
+
+This version promises absolutely nothing about the internals, which
+may change without notice.  A future version of the module will have a
+well-defined and stable subclassing API.
 
 =head1 WHAT ABOUT C<DB_File>?
 
@@ -1172,8 +1435,8 @@ can be inconvenient to arrange for concurrent access to the same file
 by two or more processes.  Each process needs to call C<$db-E<gt>sync>
 after every write.  When you change a C<Tie::File> array, the changes
 are reflected in the file immediately; no explicit C<-E<gt>sync> call
-is required.  (The forthcoming "deferred writing" mode will allow you
-to request that writes be held in memory until explicitly C<sync>'ed.)
+is required.  (Or you can enable deferred writing mode to require that
+changes be explicitly sync'ed.)
 
 =item *
 
@@ -1215,15 +1478,21 @@ To receive an announcement whenever a new version of this module is
 released, send a blank email message to
 C<mjd-perl-tiefile-subscribe@plover.com>.
 
+The most recent version of this module, including documentation and
+any news of importance, will be available at
+
+	http://perl.plover.com/TieFile/
+
+
 =head1 LICENSE
 
-C<Tie::File> version 0.20 is copyright (C) 2002 Mark Jason Dominus.
+C<Tie::File> version 0.21 is copyright (C) 2002 Mark Jason Dominus.
 
 This library is free software; you may redistribute it and/or modify
 it under the same terms as Perl itself.
 
-These terms include your choice of (1) the Perl Artistic Licence, or
-(2) version 2 of the GNU General Public License as published by the
+These terms are your choice of any of (1) the Perl Artistic Licence,
+or (2) version 2 of the GNU General Public License as published by the
 Free Software Foundation, or (3) any later version of the GNU General
 Public License.
 
@@ -1245,7 +1514,7 @@ For licensing inquiries, contact the author at:
 
 =head1 WARRANTY
 
-C<Tie::File> version 0.20 comes with ABSOLUTELY NO WARRANTY.
+C<Tie::File> version 0.21 comes with ABSOLUTELY NO WARRANTY.
 For details, see the license.
 
 =head1 THANKS
@@ -1255,12 +1524,13 @@ core when I hadn't written it yet, and for generally being helpful,
 supportive, and competent.  (Usually the rule is "choose any one.")
 Also big thanks to Abhijit Menon-Sen for all of the same things.
 
-Special thanks to Craig Berry (for VMS portability help), Randy Kobes
-(for Win32 portability help), Clinton Pierce and Autrijus Tang (for
-heroic eleventh-hour Win32 testing above and beyond the call of duty),
-and the rest of the CPAN testers (for testing generally).
+Special thanks to Craig Berry and Peter Prymmer (for VMS portability
+help), Randy Kobes (for Win32 portability help), Clinton Pierce and
+Autrijus Tang (for heroic eleventh-hour Win32 testing above and beyond
+the call of duty), and the rest of the CPAN testers (for testing
+generally).
 
-More thanks to:
+Additional thanks to:
 Edward Avis /
 Gerrit Haase /
 Nikola Knezevic /
@@ -1269,6 +1539,7 @@ Tassilo von Parseval /
 H. Dieter Pearcey /
 Slaven Rezic /
 Peter Somu /
+Autrijus Tang (again) /
 Tels
 
 =head1 TODO
@@ -1288,12 +1559,11 @@ Fixed-length mode.
 
 Maybe an autolocking mode?
 
-Finish deferred writing.
-
 Autodeferment.
 
 Record locking with fcntl()?  Then you might support an undo log and
-get real transactions.  What a coup that would be.
+get real transactions.  What a coup that would be.  All would bow
+before my might.
 
 Leave-blanks mode
 

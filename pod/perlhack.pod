@@ -2197,7 +2197,7 @@ For further information, see your system's manual pages for pixie and prof.
 
 =item *
 
-hose debugging perl with the DDD frontend over gdb may find the
+Those debugging perl with the DDD frontend over gdb may find the
 following useful:
 
 You can extend the data conversion shortcuts menu, so for example you
