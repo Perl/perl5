@@ -4138,8 +4138,6 @@ PP(pp_system)
 	    PerlLIO_close(pp[0]);
 #if defined(HAS_FCNTL) && defined(F_SETFD)
 	    fcntl(pp[1], F_SETFD, FD_CLOEXEC);
-#else
-	    PerlLIO_close(pp[1]); /* Do as best as we can: pretend success. */
 #endif
 	}
 	if (PL_op->op_flags & OPf_STACKED) {
