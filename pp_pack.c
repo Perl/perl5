@@ -119,7 +119,7 @@ STMT_START {						\
 } STMT_END
 
 #define PUSH_VAR(utf8, aptr, var)	\
-	PUSH_BYTES(utf8, aptr, (char *) &(var), sizeof(var))
+	PUSH_BYTES(utf8, aptr, &(var), sizeof(var))
 
 /* Avoid stack overflow due to pathological templates. 100 should be plenty. */
 #define MAX_SUB_TEMPLATE_LEVEL 100
@@ -678,13 +678,13 @@ bytes_to_uni(pTHX_ U8 *start, STRLEN len, char **dest) {
     *dest = d;
 }
 
-#define PUSH_BYTES(utf8, cur, buf, len)			\
-STMT_START {						\
-    if (utf8) bytes_to_uni(aTHX_ buf, len, &(cur));	\
-    else {						\
-	Copy(buf, cur, len, char);			\
-	(cur) += (len);					\
-    }							\
+#define PUSH_BYTES(utf8, cur, buf, len)				\
+STMT_START {							\
+    if (utf8) bytes_to_uni(aTHX_ (U8 *) buf, len, &(cur));	\
+    else {							\
+	Copy(buf, cur, len, char);				\
+	(cur) += (len);						\
+    }								\
 } STMT_END
 
 #define GROWING(utf8, cat, start, cur, in_len)	\
@@ -1113,7 +1113,7 @@ Perl_unpack_str(pTHX_ char *pat, char *patend, char *s, char *strbeg, char *stre
 	/* We probably should try to avoid this in case a scalar context call
 	   wouldn't get to the "U0" */
 	STRLEN len = strend - s;
-	s = (char *) bytes_to_utf8(s, &len);
+	s = (char *) bytes_to_utf8((U8 *) s, &len);
 	SAVEFREEPV(s);
 	strend = s + len;
 	flags |= FLAG_DO_UTF8;
@@ -1148,7 +1148,7 @@ Perl_unpackstring(pTHX_ char *pat, char *patend, char *s, char *strend, U32 flag
 	/* We probably should try to avoid this in case a scalar context call
 	   wouldn't get to the "U0" */
 	STRLEN len = strend - s;
-	s = (char *) bytes_to_utf8(s, &len);
+	s = (char *) bytes_to_utf8((U8 *) s, &len);
 	SAVEFREEPV(s);
 	strend = s + len;
 	flags |= FLAG_DO_UTF8;
@@ -1316,8 +1316,8 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, char *s, char *strbeg, char *strend, char 
  	case 'x' | TYPE_IS_SHRIEKING:
  	    if (!len)			/* Avoid division by 0 */
  		len = 1;
-	    if (utf8) ai32 = utf8_length(strbeg, s) % len;
-	    else      ai32 = (s - strbeg)           % len;
+	    if (utf8) ai32 = utf8_length((U8 *) strbeg, (U8 *) s) % len;
+	    else      ai32 = (s - strbeg)                         % len;
 	    if (ai32 == 0) break;
 	    len -= ai32;
  	    /* FALL THROUGH */
@@ -1376,7 +1376,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, char *s, char *strbeg, char *strend, char 
 		if (utf8 && (symptr->flags & FLAG_WAS_UTF8)) {
 		    for (ptr = s+len-1; ptr >= s; ptr--)
 			if (*ptr != 0 && !UTF8_IS_CONTINUATION(*ptr) &&
-			    !is_utf8_space(ptr)) break;
+			    !is_utf8_space((U8 *) ptr)) break;
 		    if (ptr >= s) ptr += UTF8SKIP(ptr);
 		    else ptr++;
 		    if (ptr > s+len) 
@@ -1590,11 +1590,12 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, char *s, char *strbeg, char *strend, char 
 		    ptr = s;
 		    /* Bug: warns about bad utf8 even if we are short on bytes
 		       and will break out of the loop */
-		    if (!uni_to_bytes(aTHX_ &ptr, strend, result, 1, 'U'))
+		    if (!uni_to_bytes(aTHX_ &ptr, strend, (char *) result, 1,
+				      'U'))
 			break;
 		    len = UTF8SKIP(result);
 		    if (!uni_to_bytes(aTHX_ &ptr, strend,
-				      &result[1], len-1, 'U')) break;
+				      (char *) &result[1], len-1, 'U')) break;
 		    auv = utf8n_to_uvuni(result, len, &retlen, ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANYUV);
 		    s = ptr;
 		} else {
@@ -2385,7 +2386,7 @@ marked_upgrade(pTHX_ SV *sv, tempsym_t *sym_ptr) {
 
     for (;from_ptr < from_end; from_ptr++) {
 	while (*m == from_ptr) *m++ = to_ptr;
-	to_ptr = uvchr_to_utf8(to_ptr, *(U8 *) from_ptr);
+	to_ptr = (char *) uvchr_to_utf8((U8 *) to_ptr, *(U8 *) from_ptr);
     }
     *to_ptr = 0;
 
@@ -2613,7 +2614,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	    I32 ai32;
 	    if (!len)			/* Avoid division by 0 */
 		len = 1;
-	    if (utf8) ai32 = utf8_length(start, cur) % len;
+	    if (utf8) ai32 = utf8_length((U8 *) start, (U8 *) cur) % len;
 	    else      ai32 = (cur - start) % len;
 	    if (ai32 == 0) goto no_change;
 	    len -= ai32;
@@ -2687,7 +2688,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		GROWING(0, cat, start, cur, fromlen*(UTF8_EXPAND-1)+len);
 		len -= fromlen;
 		while (fromlen > 0) {
-		    cur = uvchr_to_utf8(cur, * (U8 *) aptr);
+		    cur = (char *) uvchr_to_utf8((U8 *) cur, * (U8 *) aptr);
 		    aptr++;
 		    fromlen--;
 		}
@@ -2903,9 +2904,10 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 			GROWING(0, cat, start, cur, len+UTF8_MAXLEN);
 			end = start+SvLEN(cat)-UTF8_MAXLEN;
 		    }
-		    cur = uvuni_to_utf8_flags(cur, NATIVE_TO_UNI(auv),
-					      ckWARN(WARN_UTF8) ?
-					      0 : UNICODE_ALLOW_ANY);
+		    cur = (char *) uvuni_to_utf8_flags((U8 *) cur,
+						       NATIVE_TO_UNI(auv),
+						       ckWARN(WARN_UTF8) ?
+						       0 : UNICODE_ALLOW_ANY);
 		} else {
 		    if (auv >= 0x100) {
 			if (!SvUTF8(cat)) {
@@ -2956,7 +2958,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		fromstr = NEXTFROM;
 		auv = SvUV(fromstr);
 		if (utf8) {
-		    char buffer[UTF8_MAXLEN], *endb;
+		    U8 buffer[UTF8_MAXLEN], *endb;
 		    endb = uvuni_to_utf8_flags(buffer, auv,
 					       ckWARN(WARN_UTF8) ?
 					       0 : UNICODE_ALLOW_ANY);
@@ -2975,9 +2977,9 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 			GROWING(0, cat, start, cur, len+UTF8_MAXLEN);
 			end = start+SvLEN(cat)-UTF8_MAXLEN;
 		    }
-		    cur = uvuni_to_utf8_flags(cur, auv,
-					      ckWARN(WARN_UTF8) ?
-					      0 : UNICODE_ALLOW_ANY);
+		    cur = (char *) uvuni_to_utf8_flags((U8 *) cur, auv,
+						       ckWARN(WARN_UTF8) ?
+						       0 : UNICODE_ALLOW_ANY);
 		}
 	    }
 	    break;
