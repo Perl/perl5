@@ -13,8 +13,8 @@ while (@ARGV && $ARGV[0] =~ /^([\w_]+)=(.*)$/)
  }
 my $patchlevel = $opt{INST_VER};
 $patchlevel =~ s|^[\\/]||;
-$patchlevel =~ s|~VERSION~|$]|g;
-$patchlevel ||= $];
+$patchlevel =~ s|~VERSION~|$Config{version}|g;
+$patchlevel ||= $Config{version};
 $patchlevel = qq["$patchlevel"];
 
 open(SH,"<$name") || die "Cannot open $name:$!";

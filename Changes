@@ -79,6 +79,59 @@ Version v5.5.640        Development release working toward 5.6
 ----------------
 
 ____________________________________________________________________________
+[  4772] By: gsar                                  on 2000/01/09  19:05:33
+        Log: s/usethreads/use5005threads/g
+     Branch: perl
+	   ! myconfig.SH t/lib/english.t t/lib/thread.t t/op/nothread.t
+____________________________________________________________________________
+[  4771] By: gsar                                  on 2000/01/09  18:51:50
+        Log: Configure changes for new-style version numbers (from Andy Dougherty,
+             slightly altered)
+     Branch: perl
+	   ! Configure INSTALL Porting/Glossary Porting/config.sh
+	   ! Porting/config_H config_h.SH perl.h win32/Makefile
+	   ! win32/config.bc win32/config.gc win32/config.vc
+	   ! win32/makefile.mk
+____________________________________________________________________________
+[  4770] By: gsar                                  on 2000/01/07  22:18:54
+        Log: fix for 'make utest' failures (from Ilya Zakharevich)
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[  4769] By: gsar                                  on 2000/01/07  18:23:16
+        Log: cygwin update (from Eric Fifer <EFifer@sanwaint.com>)
+     Branch: perl
+	   + ext/IPC/SysV/hints/cygwin.pl ext/NDBM_File/hints/cygwin.pl
+	   + ext/ODBM_File/hints/cygwin.pl
+	   ! Configure INSTALL MANIFEST ext/POSIX/Makefile.PL
+	   ! hints/cygwin.sh installman installperl lib/Cwd.pm
+	   ! lib/ExtUtils/MakeMaker.pm lib/File/Spec/Unix.pm lib/perl5db.pl
+	   ! perlsdio.h t/op/magic.t t/op/stat.t utils/perlcc.PL
+____________________________________________________________________________
+[  4768] By: gsar                                  on 2000/01/07  18:12:15
+        Log: typo on h2xs.PL (from Helmut Jarausch)
+     Branch: perl
+	   ! utils/h2xs.PL
+____________________________________________________________________________
+[  4767] By: gsar                                  on 2000/01/07  17:58:45
+        Log: VMS update (from Peter Prymmer <pvhp@forte.com>)
+     Branch: perl
+	   ! README.vms configure.com vms/subconfigure.com
+____________________________________________________________________________
+[  4766] By: gsar                                  on 2000/01/07  17:54:05
+        Log: os2/POSIX.mkfifo not needed (from Yitzchak Scott-Thoennes
+             <sthoenna@efn.org>)
+     Branch: perl
+	   - os2/POSIX.mkfifo
+	   ! MANIFEST README.os2
+____________________________________________________________________________
+[  4765] By: gsar                                  on 2000/01/06  20:11:46
+        Log: add workaround for dlopen() bug on OpenBSD (relative paths that
+             match /^lib/ won't load properly)
+     Branch: perl
+	   + ext/DynaLoader/hints/openbsd.pl
+	   ! Changes MANIFEST ext/DynaLoader/dl_dlopen.xs
+____________________________________________________________________________
 [  4764] By: gsar                                  on 2000/01/06  19:51:08
         Log: add undocumented globals for compatibility--find.pl, and find2perl
              generated code need them (from Helmut Jarausch <jarausch@igpm.rwth-aachen.de>)

@@ -2263,8 +2263,8 @@ sed %s -e \"/^[^#]/b\" \
 	{
 	    /* try again */
 	    PerlProc_execv(Perl_form(aTHX_ "%s/sperl"PERL_FS_VER_FMT, BIN_EXP,
-				     (UV)PERL_REVISION, (UV)PERL_VERSION,
-				     (UV)PERL_SUBVERSION), PL_origargv);
+				     (int)PERL_REVISION, (int)PERL_VERSION,
+				     (int)PERL_SUBVERSION), PL_origargv);
 	    Perl_croak(aTHX_ "Can't do setuid\n");
 	}
 #endif
@@ -2512,8 +2512,8 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 #ifndef IAMSUID
 	    /* try again */
 	    PerlProc_execv(Perl_form(aTHX_ "%s/sperl"PERL_FS_VER_FMT, BIN_EXP,
-				     (UV)PERL_REVISION, (UV)PERL_VERSION,
-				     (UV)PERL_SUBVERSION), PL_origargv);
+				     (int)PERL_REVISION, (int)PERL_VERSION,
+				     (int)PERL_SUBVERSION), PL_origargv);
 #endif
 	    Perl_croak(aTHX_ "Can't do setuid\n");
 	}
@@ -2596,8 +2596,8 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
     fcntl(PerlIO_fileno(PL_rsfp),F_SETFD,0);	/* ensure no close-on-exec */
 #endif
     PerlProc_execv(Perl_form(aTHX_ "%s/perl"PERL_FS_VER_FMT, BIN_EXP,
-			     (UV)PERL_REVISION, (UV)PERL_VERSION,
-			     (UV)PERL_SUBVERSION), PL_origargv);/* try again */
+			     (int)PERL_REVISION, (int)PERL_VERSION,
+			     (int)PERL_SUBVERSION), PL_origargv);/* try again */
     Perl_croak(aTHX_ "Can't do setuid\n");
 #endif /* IAMSUID */
 #else /* !DOSUID */
@@ -3040,8 +3040,8 @@ S_incpush(pTHX_ char *p, int addsubdirs)
 #endif
 	    /* .../archname/version if -d .../archname/version/auto */
 	    Perl_sv_setpvf(aTHX_ subdir, "%_/%s/"PERL_FS_VER_FMT"/auto", libdir,
-			   ARCHNAME, (UV)PERL_REVISION,
-			   (UV)PERL_VERSION, (UV)PERL_SUBVERSION);
+			   ARCHNAME, (int)PERL_REVISION,
+			   (int)PERL_VERSION, (int)PERL_SUBVERSION);
 	    if (PerlLIO_stat(SvPVX(subdir), &tmpstatbuf) >= 0 &&
 		  S_ISDIR(tmpstatbuf.st_mode))
 		av_push(GvAVn(PL_incgv),

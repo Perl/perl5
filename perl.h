@@ -1609,8 +1609,9 @@ typedef pthread_key_t	perl_key;
 #endif
 
 /* format to use for version numbers in file/directory names */
+/* XXX move to Configure? */
 #ifndef PERL_FS_VER_FMT
-#  define PERL_FS_VER_FMT	"%"UVuf".%"UVuf".%"UVuf
+#  define PERL_FS_VER_FMT	"%d.%d.%d"
 #endif
 
 /* This defines a way to flush all output buffers.  This may be a

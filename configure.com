@@ -984,7 +984,7 @@ $!
 $ ENDIF !%Config-I-VMS, skip "where install" questions
 $!
 $!: set the base revision
-$ baserev="5.0"
+$ baserev="5"
 $!: get the patchlevel
 $ echo ""
 $ echo4 "Getting the current patchlevel..." !>&4
@@ -1032,7 +1032,7 @@ $   ENDIF
 $ ELSE subversion = ""
 $ ENDIF
 $!
-$ version = F$EXTRACT(0,1,baserev) + "_" + patchlevel + subversion
+$ version = baserev + "_" + patchlevel + "_" + subversion
 $!
 $ IF (.NOT.vms_skip_install)
 $ THEN

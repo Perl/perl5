@@ -746,6 +746,8 @@ ranlib=''
 package=''
 spackage=''
 pager=''
+apirevision=''
+apisubversion=''
 apiversion=''
 patchlevel=''
 subversion=''
@@ -881,8 +883,6 @@ vendorprefix=''
 vendorprefixexp=''
 defvoidused=''
 voidflags=''
-pm_apiversion=''
-xs_apiversion=''
 CONFIG=''
 
 define='define'
@@ -4647,20 +4647,23 @@ prefixit='case "$3" in
 	esac;;
 esac'
 
-: set the base revision
-baserev=5.0
-
-: get the patchlevel
+: get the revision, patchlevel, subversion
 echo " "
 echo "Getting the current patchlevel..." >&4
 if $test -r $rsrc/patchlevel.h;then
+	baserev=`awk '/define[ 	]+PERL_REVISION/ {print $3}' $rsrc/patchlevel.h`
 	patchlevel=`awk '/define[ 	]+PERL_VERSION/ {print $3}' $rsrc/patchlevel.h`
 	subversion=`awk '/define[ 	]+PERL_SUBVERSION/ {print $3}' $rsrc/patchlevel.h`
-	apiversion=`awk '/define[ 	]+PERL_APIVERSION/ {print $3}' $rsrc/patchlevel.h`
+	apirevision=`awk '/define[ 	]+PERL_API_REVISION/ {print $3}' $rsrc/patchlevel.h`
+	apiversion=`awk '/define[ 	]+PERL_API_VERSION/ {print $3}' $rsrc/patchlevel.h`
+	apisubversion=`awk '/define[ 	]+PERL_API_SUBVERSION/ {print $3}' $rsrc/patchlevel.h`
 else
+	baserev=0
 	patchlevel=0
 	subversion=0
+	apirevision=0
 	apiversion=0
+	apisubversion=0
 fi
 $echo $n "(You have $package" $c
 case "$package" in
@@ -4671,10 +4674,15 @@ $echo $n " patchlevel $patchlevel" $c
 test 0 -eq "$subversion" || $echo $n " subversion $subversion" $c
 echo ".)"
 
-version=`LC_ALL=C; export LC_ALL; \
-	 echo $baserev $patchlevel $subversion | \
-	 $awk '{ printf "%.6f\n", $1 + $2/1000.0 + $3/1000000.0 }' | \
-	 sed -e 's/0*$//'`
+if $test -n $osname -a "$osname" = "dos"; then
+	version=`LC_ALL=C; export LC_ALL; \
+		 echo $baserev $patchlevel $subversion | \
+		 $awk '{ printf "%d_%d_%d\n", $1, $2, $3 }'`
+else
+	version=`LC_ALL=C; export LC_ALL; \
+		 echo $baserev $patchlevel $subversion | \
+		 $awk '{ printf "%d.%d.%d\n", $1, $2, $3 }'`
+fi
 
 : determine installation style
 : For now, try to deduce it from prefix unless it is already set.
@@ -6824,13 +6832,13 @@ siteprefix="$ans"
 siteprefixexp="$ansexp"
 
 : determine where site specific libraries go.
-: Usual default is /usr/local/lib/perl5/site_perl
+: Usual default is /usr/local/lib/perl5/site_perl/$version
 : The default "style" setting is made in installstyle.U
 : XXX No longer works with Prefixit stuff.
 prog=`echo $package | $sed 's/-*[0-9.]*$//'`
 case "$installstyle" in
-*lib/perl5*) dflt=$siteprefix/lib/$package/site_$prog ;;
-*)	 dflt=$siteprefix/lib/site_$prog ;;
+*lib/perl5*) dflt=$siteprefix/lib/$package/site_$prog/$version ;;
+*)	 dflt=$siteprefix/lib/site_$prog/$version ;;
 esac
 $cat <<EOM
 
@@ -6853,11 +6861,11 @@ else
 fi
 
 : determine where site specific architecture-dependent libraries go.
-: sitelib  default is /usr/local/lib/perl5/site_perl/
-: sitearch default is /usr/local/lib/perl5/site_perl/$apiversion/$archname
+: sitelib  default is /usr/local/lib/perl5/site_perl/$version
+: sitearch default is /usr/local/lib/perl5/site_perl/$version/$archname
 : sitelib may have an optional trailing /share.
 tdflt=`echo $sitelib | $sed 's,/share$,,'`
-tdflt="$tdflt/$apiversion/$archname"
+tdflt="$tdflt/$archname"
 set sitearch sitearch none
 eval $prefixit
 case "$sitearch" in
@@ -12670,15 +12678,6 @@ rp="What is the type of process ids on this system?"
 set pid_t pidtype int stdio.h sys/types.h
 eval $typedef_ask
 
-: Find earliest binary compatible site_perl subdirectory perl can use.
-case "$bincompat5005" in
-"$define") xs_apiversion='5.005' ;;
-*) xs_apiversion=$apiversion ;;   # The current site_perl version.
-esac
-: Find earliest pure perl site_perl subdirectory perl can use.
-: The versioned directories started at 5.005.
-pm_apiversion='5.005'
-
 : check for length of pointer
 echo " "
 case "$ptrsize" in
@@ -14225,6 +14224,8 @@ afs='$afs'
 alignbytes='$alignbytes'
 ansi2knr='$ansi2knr'
 aphostname='$aphostname'
+apirevision='$apirevision'
+apisubversion='$apisubversion'
 apiversion='$apiversion'
 ar='$ar'
 archlib='$archlib'
@@ -14777,7 +14778,6 @@ pg='$pg'
 phostname='$phostname'
 pidtype='$pidtype'
 plibpth='$plibpth'
-pm_apiversion='$pm_apiversion'
 pmake='$pmake'
 pr='$pr'
 prefix='$prefix'
@@ -14927,7 +14927,6 @@ version='$version'
 vi='$vi'
 voidflags='$voidflags'
 xlibpth='$xlibpth'
-xs_apiversion='$xs_apiversion'
 zcat='$zcat'
 zip='$zip'
 EOT

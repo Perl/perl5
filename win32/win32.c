@@ -176,12 +176,13 @@ get_emd_part(SV **prev_pathp, char *trailing_path, ...)
     char *optr;
     char *strip;
     int oldsize, newsize;
+    STRLEN baselen;
 
     va_start(ap, trailing_path);
     strip = va_arg(ap, char *);
 
-    sprintf(base, "%5.3f",
-	    (double)PERL_REVISION + ((double)PERL_VERSION / (double)1000));
+    sprintf(base, "%d.%d", (int)PERL_REVISION, (int)PERL_VERSION);
+    baselen = strlen(base);
 
     if (!*w32_module_name) {
 	GetModuleFileName((HMODULE)((w32_perldll_handle == INVALID_HANDLE_VALUE)
@@ -213,10 +214,10 @@ get_emd_part(SV **prev_pathp, char *trailing_path, ...)
 	/* avoid stripping component if there is no slash,
 	 * or it doesn't match ... */
 	if (!ptr || stricmp(ptr+1, strip) != 0) {
-	    /* ... but not if component matches 5.00X* */
+	    /* ... but not if component matches m|5\.$patchlevel.*| */
 	    if (!ptr || !(*strip == '5' && *(ptr+1) == '5'
-			  && strncmp(strip, base, 5) == 0
-			  && strncmp(ptr+1, base, 5) == 0))
+			  && strncmp(strip, base, baselen) == 0
+			  && strncmp(ptr+1, base, baselen) == 0))
 	    {
 		*optr = '/';
 		ptr = optr;
@@ -283,12 +284,6 @@ win32_get_sitelib(char *pl)
      * ";$EMD/" . ((-d $EMD/../../../$]) ? "../../.." : "../.."). "/site/$]/lib";  */
     sprintf(pathstr, "site/%s/lib", pl);
     (void)get_emd_part(&sv1, pathstr, ARCHNAME, "bin", pl, Nullch);
-    if (!sv1 && strlen(pl) == 7) {
-	/* pl may have been SUBVERSION-specific; try again without
-	 * SUBVERSION */
-	sprintf(pathstr, "site/%.5s/lib", pl);
-	(void)get_emd_part(&sv1, pathstr, ARCHNAME, "bin", pl, Nullch);
-    }
 
     /* $HKCU{'sitelib'} || $HKLM{'sitelib'} . ---; */
     (void)get_regstr(sitelib, &sv2);

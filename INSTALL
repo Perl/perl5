@@ -360,23 +360,22 @@ the common style is shown here.
 
 After perl is installed, you may later wish to add modules (e.g. from
 CPAN) or scripts.  Configure will set up the following directories to
-be used for installing those add-on modules and scripts.  $apiversion
-is the perl version number (without subversion), e.g. 5.6.
+be used for installing those add-on modules and scripts.  $version
+is the perl version number, e.g. 5.6.0.
 
     Configure variable	Default value
     $siteprefix		$prefix
     $sitebin		$siteprefix/bin
     $sitescriptdir	$siteprefix/bin
-    $sitelib		$siteprefix/lib/perl5/site_perl/
-    $sitearch		$siteprefix/lib/perl5/site_perl/$apiversion/$archname
+    $sitelib		$siteprefix/lib/perl5/site_perl/$version
+    $sitearch		$siteprefix/lib/perl5/site_perl/$version/$archname
     $siteman1dir	$siteprefix/man/man1
     $siteman3dir	$siteprefix/man/man3
     $sitehtml1dir	(none)
     $sitehtml3dir	(none)
 
 By default, ExtUtils::MakeMaker will install architecture-independent
-modules into $sitelib/$apiversion and architecture-dependent modules
-into $sitearch.
+modules into $sitelib and architecture-dependent modules into $sitearch.
 
 =item Directories for vendor-supplied add-on files
 
@@ -389,8 +388,8 @@ for you to use to distribute add-on modules.
     (The next ones are set only if vendorprefix is set.)
     $vendorbin		$vendorprefix/bin
     $vendorscriptdir	$vendorprefix/bin
-    $vendorlib		$vendorprefix/lib/perl5/vendor_perl/
-    $vendorarch	    $vendorprefix/lib/perl5/vendor_perl/$apiversion/$archname
+    $vendorlib		$vendorprefix/lib/perl5/vendor_perl/$version
+    $vendorarch		$vendorprefix/lib/perl5/vendor_perl/$version/$archname
     $vendorman1dir	$vendorprefix/man/man1
     $vendorman3dir	$vendorprefix/man/man3
     $vendorhtml1dir	(none)
@@ -414,24 +413,28 @@ This would have the effect of setting the following:
 
 	$sitebin	/usr/local/bin
 	$sitescriptdir	/usr/local/bin
-	$sitelib	/usr/local/lib/perl5/site_perl/
-	$sitearch	/usr/local/lib/perl5/site_perl/$apiversion/$archname
+	$sitelib	/usr/local/lib/perl5/site_perl/$version
+	$sitearch	/usr/local/lib/perl5/site_perl/$version/$archname
 	$siteman1dir	/usr/local/man/man1
 	$siteman3dir	/usr/local/man/man3
 
 	$vendorbin		/usr/bin
 	$vendorscriptdir	/usr/bin
-	$vendorlib	/usr/lib/perl5/vendor_perl/
-	$vendorarch	/usr/lib/perl5/vendor_perl/$apiversion/$archname
+	$vendorlib	/usr/lib/perl5/vendor_perl/$version
+	$vendorarch	/usr/lib/perl5/vendor_perl/$version/$archname
 	$vendorman1dir	/usr/man/man1
 	$vendorman3dir	/usr/man/man3
 
 Note how in this example, the vendor-supplied directories are in the
 /usr hierarchy, while the directories reserved for the end-user are in
-the /usr/local hierarchy.  Note too how the vendor-supplied
-directories track $apiversion, rather than $version, to ease upgrading
-between maintenance subversions.  See L<"Coexistence with earlier
-versions of perl5"> below for more details.
+the /usr/local hierarchy.
+
+The entire installed library hierarchy is installed in locations with
+version numbers, keeping the installations of different versions distinct.
+However, later installations of Perl can still be configured to search the
+installed libraries corresponding to compatible earlier versions.
+See L<"Coexistence with earlier versions of perl5"> below for more details
+on how Perl can be made to search older version directories.
 
 Of course you may use these directories however you see fit.  For
 example, you may wish to use $siteprefix for site-specific files that
