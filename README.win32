@@ -524,10 +524,9 @@ functionality of ioctlsocket() in the Winsock API).
 
 =item *
 
-C<$?> ends up with the exitstatus of the subprocess (this is different
-from Unix, where the exitstatus is actually given by "$? >> 8").
-Failure to spawn() the subprocess is indicated by setting $? to 
-"255<<8".  This is subject to change.
+C<$?> is set in a way compatible with Unix, so the exitstatus of the
+subprocess is actually obtained by "$? >> 8".  Failure to spawn() the
+subprocess is indicated by setting $? to "255 << 8".
 
 =item *
 

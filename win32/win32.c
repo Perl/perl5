@@ -259,9 +259,9 @@ do_aspawn(void* really, void ** mark, void ** arglast)
     if (status < 0) {
 	if (dowarn)
 	    warn("Can't spawn \"%s\": %s", cmd, strerror(errno));
-	status = 255 << 8;
+	status = 255;
     }
-    return (status);
+    return (statusvalue = status*256);
 }
 
 int
@@ -341,9 +341,9 @@ do_spawn2(char *cmd, int exectype)
 		 (exectype == EXECF_EXEC ? "exec" : "spawn"),
 		 needToTry ? shell : argv[0],
 		 strerror(errno));
-	status = 255 << 8;
+	status = 255;
     }
-    return (status);
+    return (statusvalue = status*256);
 }
 
 int
