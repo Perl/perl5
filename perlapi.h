@@ -188,6 +188,8 @@ END_EXTERN_C
 #define PL_cshlen		(*Perl_Icshlen_ptr(aTHX))
 #undef  PL_cshname
 #define PL_cshname		(*Perl_Icshname_ptr(aTHX))
+#undef  PL_csighandlerp
+#define PL_csighandlerp		(*Perl_Icsighandlerp_ptr(aTHX))
 #undef  PL_curcopdb
 #define PL_curcopdb		(*Perl_Icurcopdb_ptr(aTHX))
 #undef  PL_curstname
