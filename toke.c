@@ -2520,8 +2520,26 @@ Perl_yylex(pTHX)
 	    goto retry;
 	}
 	do {
-	    bool bof;
-	    bof = PL_rsfp && (PerlIO_tell(PL_rsfp) == 0); /* *Before* read! */
+	    bool bof = PL_rsfp ? TRUE : FALSE;
+	    if (bof) {
+#ifdef PERLIO_IS_STDIO
+#  ifdef __GLIBC__
+#    if __GLIBC__ == 1 /* Linux glibc5 */
+#      define FTELL_FOR_PIPE_IS_BROKEN
+#    endif
+#  endif
+#endif
+#ifdef FTELL_FOR_PIPE_IS_BROKEN
+		/* This loses the possibility to detect the bof
+		 * situation on perl -P when the libc5 is being used.
+		 * Workaround?  Maybe attach some extra state to PL_rsfp?
+		 */
+		if (!PL_preprocess)
+		    bof = PerlIO_tell(PL_rsfp) == 0;
+#else
+		bof = PerlIO_tell(PL_rsfp) == 0;
+#endif
+	    }
 	    s = filter_gets(PL_linestr, PL_rsfp, 0);
 	    if (s == Nullch) {
 	      fake_eof:
