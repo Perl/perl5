@@ -33,4 +33,4 @@ if ($y eq "1a line\n2a line\n3a line\n")
 else
     {print "not ok 5\n";}
 
-`/bin/rm -f Io.argv.tmp`;
+`/bin/rm -f Io.argv.tmp` if -x '/bin/rm';

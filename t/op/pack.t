@@ -33,7 +33,8 @@ print +($x = unpack("%32B69", "\001\002\004\010\020\040\100\200\017")) == 9
 print +($x = unpack("%32B*", "Now is the time for all good blurfl")) == 129
 	? "ok 7\n" : "not ok 7 $x\n";
 
-open(BIN, "./perl") || die "Can't open ../perl: $!\n";
+open(BIN, "./perl") || open(BIN, "./perl.exe") 
+    || die "Can't open ../perl or ../perl.exe: $!\n";
 sysread BIN, $foo, 8192;
 close BIN;
 

@@ -9,7 +9,7 @@ chop($wd);
 
 `rm -f tmp 2>/dev/null; mkdir tmp 2>/dev/null`;
 chdir './tmp';
-`/bin/rm -rf a b c x`;
+`/bin/rm -rf a b c x` if -x '/bin/rm';
 
 umask(022);
 
@@ -19,9 +19,9 @@ close(fh);
 open(fh,'>a') || die "Can't create a";
 close(fh);
 
-if (link('a','b')) {print "ok 2\n";} else {print "not ok 2\n";}
+if (eval {link('a','b')}) {print "ok 2\n";} else {print "not ok 2\n";}
 
-if (link('b','c')) {print "ok 3\n";} else {print "not ok 3\n";}
+if (eval {link('b','c')}) {print "ok 3\n";} else {print "not ok 3\n";}
 
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat('c');
