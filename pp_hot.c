@@ -781,6 +781,7 @@ PP(pp_match)
     strend = s + len;
     if (!s)
 	DIE("panic: do_match");
+    TAINT_NOT;
 
     if (pm->op_pmflags & PMf_USED) {
 	if (gimme == G_ARRAY)
@@ -868,10 +869,10 @@ play_it_again:
     /*NOTREACHED*/
 
   gotcha:
+    TAINT_IF(rx->exec_tainted);
     if (gimme == G_ARRAY) {
 	I32 iters, i, len;
 
-	TAINT_IF(rx->exec_tainted);
 	iters = rx->nparens;
 	if (global && !iters)
 	    i = 1;
@@ -919,6 +920,7 @@ play_it_again:
     }
 
 yup:
+    TAINT_IF(rx->exec_tainted);
     ++BmUSEFUL(pm->op_pmshort);
     curpm = pm;
     if (pm->op_pmflags & PMf_ONCE)
@@ -949,6 +951,7 @@ nope:
 	++BmUSEFUL(pm->op_pmshort);
 
 ret_no:
+    TAINT_IF(rx->exec_tainted);		/* /\W/ */
     LEAVE_SCOPE(oldsave);
     if (gimme == G_ARRAY)
 	RETURN;
@@ -1396,6 +1399,7 @@ PP(pp_subst)
     s = SvPV(TARG, len);
     if (!SvPOKp(TARG) || SvREADONLY(TARG) || (SvTYPE(TARG) == SVt_PVGV))
 	force_on_match = 1;
+    TAINT_NOT;
 
   force_it:
     if (!pm || !s)
@@ -1456,6 +1460,7 @@ PP(pp_subst)
     if (c && clen <= rx->minlen) {
 	if (! pregexec(rx, s, strend, orig, 0,
 		       SvSCREAM(TARG) ? TARG : Nullsv, safebase)) {
+	    TAINT_IF(rx->exec_tainted);
 	    PUSHs(&sv_no);
 	    LEAVE_SCOPE(oldsave);
 	    RETURN;
@@ -1507,6 +1512,7 @@ PP(pp_subst)
 	    else {
 		sv_chop(TARG, d);
 	    }
+	    TAINT_IF(rxtainted);
 	    PUSHs(&sv_yes);
 	}
 	else {
@@ -1534,12 +1540,12 @@ PP(pp_subst)
 		SvCUR_set(TARG, d - SvPVX(TARG) + i);
 		Move(s, d, i+1, char);		/* include the NUL */
 	    }
+	    TAINT_IF(rxtainted);
 	    PUSHs(sv_2mortal(newSViv((I32)iters)));
 	}
 	(void)SvPOK_only(TARG);
 	SvSETMAGIC(TARG);
-	if (rxtainted)
-	    SvTAINTED_on(TARG);
+	SvTAINT(TARG);
 	LEAVE_SCOPE(oldsave);
 	RETURN;
     }
@@ -1582,6 +1588,8 @@ PP(pp_subst)
 	} while (pregexec(rx, s, strend, orig, s == m, Nullsv, safebase));
 	sv_catpvn(dstr, s, strend - s);
 
+	TAINT_IF(rxtainted);
+
 	(void)SvOOK_off(TARG);
 	Safefree(SvPVX(TARG));
 	SvPVX(TARG) = SvPVX(dstr);
@@ -1592,12 +1600,13 @@ PP(pp_subst)
 
 	(void)SvPOK_only(TARG);
 	SvSETMAGIC(TARG);
-	if (rxtainted)
-	    SvTAINTED_on(TARG);
+	SvTAINT(TARG);
 	PUSHs(sv_2mortal(newSViv((I32)iters)));
 	LEAVE_SCOPE(oldsave);
 	RETURN;
     }
+
+    TAINT_IF(rx->exec_tainted);
     PUSHs(&sv_no);
     LEAVE_SCOPE(oldsave);
     RETURN;

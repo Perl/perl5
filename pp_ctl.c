@@ -123,6 +123,8 @@ PP(pp_substcont)
 	    SV *targ = cx->sb_targ;
 	    sv_catpvn(dstr, s, cx->sb_strend - s);
 
+	    TAINT_IF(cx->sb_rxtainted || rx->exec_tainted);
+
 	    (void)SvOOK_off(targ);
 	    Safefree(SvPVX(targ));
 	    SvPVX(targ) = SvPVX(dstr);
@@ -133,8 +135,7 @@ PP(pp_substcont)
 
 	    (void)SvPOK_only(targ);
 	    SvSETMAGIC(targ);
-	    if (cx->sb_rxtainted)
-		SvTAINTED_on(targ);
+	    SvTAINT(targ);
 	    PUSHs(sv_2mortal(newSViv((I32)cx->sb_iters - 1)));
 	    LEAVE_SCOPE(cx->sb_oldsave);
 	    POPSUBST(cx);
