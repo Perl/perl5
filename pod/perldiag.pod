@@ -444,12 +444,6 @@ L<perlfunc/pack>.
 (F) Only hard references may be blessed.  This is how Perl "enforces"
 encapsulation of objects.  See L<perlobj>.
 
-=item Can't break at that line
-
-(S internal) A warning intended to only be printed while running within
-the debugger, indicating the line number specified wasn't the location
-of a statement that could be stopped at.
-
 =item Can't call method "%s" in empty package "%s"
 
 (F) You called a method correctly, and it correctly indicated a package

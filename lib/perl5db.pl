@@ -941,8 +941,12 @@ EOP
 			next CMD; };
 		    $cmd =~ /^d\b\s*(\d*)/ && do {
 			$i = $1 || $line;
-			$dbline{$i} =~ s/^[^\0]*//;
-			delete $dbline{$i} if $dbline{$i} eq '';
+                        if ($dbline[$i] == 0) {
+                            print $OUT "Line $i not breakable.\n";
+                        } else {
+			    $dbline{$i} =~ s/^[^\0]*//;
+			    delete $dbline{$i} if $dbline{$i} eq '';
+                        }
 			next CMD; };
 		    $cmd =~ /^A$/ && do {
 		      print $OUT "Deleting all actions...\n";
