@@ -31,6 +31,122 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 13884] By: jhi                                   on 2001/12/25  16:20:19
+        Log: Make -t equal -tw.
+     Branch: perl
+	   ! perl.c pod/perlrun.pod
+____________________________________________________________________________
+[ 13883] By: jhi                                   on 2001/12/25  15:56:49
+        Log: Subject: Re: Not OK 13881
+             From: John Peacock <jpeacock@rowman.com>
+             Date: Tue, 25 Dec 2001 06:02:12 -0500
+             Message-ID: <3C285CB4.8040006@rowman.com>
+     Branch: perl
+	   ! embed.h embed.pl global.sym pod/perlapi.pod util.c
+____________________________________________________________________________
+[ 13882] By: jhi                                   on 2001/12/25  15:45:52
+        Log: Subject: Re: Not OK 13881
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 25 Dec 2001 07:33:23 +0100
+             Message-ID: <m3bsgnajws.fsf@anima.de>
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[ 13881] By: jhi                                   on 2001/12/24  23:47:53
+        Log: Subject: PATCH: Restore "Can't declare scalar dereference in my" error
+             From: Mark-Jason Dominus <mjd@plover.com>    
+             Date: Mon, 24 Dec 2001 18:14:48 -0500
+             Message-ID: <20011224231448.25826.qmail@plover.com>
+     Branch: perl
+	   ! op.c t/op/eval.t
+____________________________________________________________________________
+[ 13880] By: jhi                                   on 2001/12/24  22:58:18
+        Log: Subject: [PATCH]: ExtUtils::MM_* and File::Spec 
+             From: Dave Rolsky <autarch@urth.org>
+             Date: Mon, 24 Dec 2001 13:27:23 -0600 (CST) 
+             Message-ID: <Pine.LNX.4.43.0112241305020.21723-100000@urth.org>
+     Branch: perl
+	   + lib/File/Spec/Cygwin.pm lib/File/Spec/NW5.pm
+	   ! MANIFEST lib/ExtUtils/MM_Cygwin.pm lib/ExtUtils/MM_NW5.pm
+	   ! lib/ExtUtils/MM_OS2.pm lib/ExtUtils/MM_Unix.pm
+	   ! lib/ExtUtils/MM_VMS.pm lib/ExtUtils/MM_Win32.pm
+	   ! lib/File/Spec.pm lib/File/Spec/Win32.pm
+____________________________________________________________________________
+[ 13879] By: jhi                                   on 2001/12/24  18:52:10
+        Log: Subject: [PATCH] and [BUG]   \X and \C fixed, \X still dorked 
+             From: Jeffrey Friedl <jfriedl@yahoo.com>
+             Date: Fri, 21 Dec 2001 23:18:17 -0800 (PST)           
+             Message-Id: <200112220718.fBM7IHG25075@ventrue.corp.yahoo.com>
+             
+             The rest of the tests for plus few extras.
+     Branch: perl
+	   ! t/op/pat.t
+____________________________________________________________________________
+[ 13877] By: jhi                                   on 2001/12/24  17:13:53
+        Log: No-op.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 13876] By: jhi                                   on 2001/12/24  17:13:16
+        Log: More constant casting.
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[ 13875] By: jhi                                   on 2001/12/24  16:47:30
+        Log: Subject: perlhack.pod 
+             From: "John P. Linderman" <jpl@research.att.com>
+             Date: Sun, 23 Dec 2001 16:16:10 -0500 (EST) 
+             Message-Id: <200112232116.QAA18463@raptor.research.att.com>
+     Branch: perl
+	   ! pod/perlhack.pod
+____________________________________________________________________________
+[ 13874] By: jhi                                   on 2001/12/24  16:41:03
+        Log: File::Find patch patches from Thomas Wegner.
+     Branch: perl
+	   ! lib/File/Find.pm
+____________________________________________________________________________
+[ 13873] By: jhi                                   on 2001/12/24  16:38:10
+        Log: Subject: Re: socketpair emulation 
+             From: Nicholas Clark <nick@unfortu.net>                 
+             Date: Mon, 24 Dec 2001 16:11:30 +0000                 
+             Message-ID: <20011224161129.A1520@Bagpuss.unfortu.net>          
+     Branch: perl
+	   ! ext/Socket/socketpair.t
+____________________________________________________________________________
+[ 13872] By: jhi                                   on 2001/12/24  02:53:02
+        Log: Must cast constants if they can be quads.
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[ 13871] By: jhi                                   on 2001/12/24  01:40:12
+        Log: Promote the e/uid to wide enough un/signed integers
+             and printf them as such.
+     Branch: perl
+	   ! taint.c
+____________________________________________________________________________
+[ 13869] By: jhi                                   on 2001/12/24  01:14:06
+        Log: The U32 alignment test wasn't really working, noticed
+             by Paul Green.  Now the test works, but this means that
+             we may see coredumps from the test.   I sure hope MMUless
+             places don't crash on the test.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 13867] By: jhi                                   on 2001/12/23  23:46:18
+        Log: More VOS tweaks.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 13866] By: jhi                                   on 2001/12/23  16:43:29
+        Log: The funky final sigma casefolding.
+     Branch: perl
+	   ! regcomp.c regexec.c t/op/pat.t utf8.h
+____________________________________________________________________________
+[ 13865] By: jhi                                   on 2001/12/23  13:55:23
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 13864] By: jhi                                   on 2001/12/23  13:50:25
         Log: Move the \C and \X to pat.t.
      Branch: perl
