@@ -205,12 +205,10 @@ BEGIN {
 [ "VMS->catpath('node\"access_spec\"::volume:','[d1.d2.d3]','file')", 'node"access_spec"::volume:[d1.d2.d3]file' ],
 
 [ "VMS->canonpath('')",                                    ''                        ],
-# There's no VMS specific canonpath
-#[ "VMS->canonpath('volume:[d1]file')",                     'volume:[d1]file'         ],
-#[ "VMS->canonpath('LOGICAL:[LOGICAL]LOGICAL')",            'LOGICAL:[VULCAN]LOGICAL' ],
-#[ "VMS->canonpath('volume:[d1]d2.dir')",                   'volume:[d1.d2]'          ],
-#[ "VMS->canonpath('volume:[d1]d2.dir;1')",                 'volume:[d1.d2]'          ],
-#[ "VMS->canonpath('volume:[d1.d2.--]file')",               'volume:[d1.d2.-.-]file'  ],
+[ "VMS->canonpath('volume:[d1]file')",                     'volume:[d1]file'         ],
+[ "VMS->canonpath('volume:[d1.-.d2.][d3.d4.-]')",              'volume:[d1.-.d2.d3.d4.-]'  ],
+[ "VMS->canonpath('volume:[d1.-.d2.][d3.d4.-]',1)",              'volume:[d2.d3]'          ],
+[ "VMS->canonpath('volume:[000000.d1]d2.dir;1')",                 'volume:[d1]d2.dir;1'   ],
 [ "VMS->canonpath('///../../..//./././a//b/.././c/././')", '/a/b/../c'               ],
 
 [ "VMS->splitdir('')",            ''          ],
@@ -222,20 +220,17 @@ BEGIN {
 [ "VMS->splitdir('.-.d2.d3')",    ',-,d2,d3'  ],
 [ "VMS->splitdir('[.-.d2.d3]')",  ',-,d2,d3'  ],
 
-[ "VMS->catdir('')",                                                      '[]'                 ],
-[ "VMS->catdir('d1','d2','d3')",                                          '[d1.d2.d3]'         ],
-[ "VMS->catdir('d1','d2/','d3')",                                         '[d1.d2.d3]'         ],
+#[ "VMS->catdir('')",                                                      '[]'                 ],
+[ "VMS->catdir('d1','d2','d3')",                                          '[.d1.d2.d3]'         ],
+[ "VMS->catdir('d1','d2/','d3')",                                         '[.d1.d2.d3]'         ],
 [ "VMS->catdir('','d1','d2','d3')",                                       '[.d1.d2.d3]'        ],
-[ "VMS->catdir('','-','d2','d3')",                                        '[.-.d2.d3]'         ],
-[ "VMS->catdir('','-','d2','d3')",                                        '[.-.d2.d3]'         ],
-[ "VMS->catdir('','-','','d3')",                                          '[.-.d3]'            ],
-[ "VMS->catdir('[]','<->','[]','[d3]')",                                  '[.-.d3]'            ],
-[ "VMS->catdir('dir.dir','d2.dir','d3.dir')",                             '[dir.d2.d3]'        ],
+[ "VMS->catdir('','-','d2','d3')",                                        '[-.d2.d3]'         ],
+[ "VMS->catdir('','-','','d3')",                                          '[-.d3]'            ],
+#[ "VMS->catdir('[]','<->','[]','[d3]')",                                  '[-.d3]'            ],
+[ "VMS->catdir('dir.dir','d2.dir','d3.dir')",                             '[.dir.d2.d3]'        ],
 [ "VMS->catdir('[.name]')",                                               '[.name]'            ],
 [ "VMS->catdir('[.name]','[.name]')",                                     '[.name.name]'],    
-[ "VMS->catdir('a:[.name]','b:[.name]')",                                 '[.name.name]'],    
-[ "VMS->catdir('LOGICAL:[.LOGICAL]LOGICAL','LOGICAL:[.LOGICAL]LOGICAL')", '[.LOGICAL.LOGICAL]'],
-[ "VMS->catdir('LOGICAL','LOGICAL')",                                     '[VULCAN.VULCAN]'], 
+#[ "VMS->catdir('a:[.name]','b:[.name]')",                                 '[.name.name]'],    
 
 [  "VMS->abs2rel('node::volume:[t1.t2.t3]','[t1.t2.t3]')", ''                 ],
 [  "VMS->abs2rel('node::volume:[t1.t2.t4]','[t1.t2.t3]')", '[-.t4]'           ],
@@ -321,10 +316,10 @@ if ( $@ ) {
    # on VMS.  It might be better to change File::Spec::VMS to do this,
    # making it more usable when running on (say) Unix but working with
    # VMS paths.
-   eval {
-      sub File::Spec::VMS::unixify { die "unixify() only provided on VMS" } ;
-      sub File::Spec::VMS::vmspath { die "vmspath() only provided on VMS" } ;
-   } ;
+   eval qq-
+      sub File::Spec::VMS::unixify { die "Install VMS::Filespec (from vms/ext)" } ;
+      sub File::Spec::VMS::vmspath { die "Install VMS::Filespec (from vms/ext)" } ;
+   - ;
    $INC{"VMS/Filespec.pm"} = 1 ;
 }
 require File::Spec::VMS ;
@@ -335,9 +330,6 @@ require File::Spec::Mac ;
 print "1..", scalar( @tests ), "\n" ;
 
 my $current_test= 1 ;
-
-# Set up for logical interpolation in ::VMS->canonpath() and ::VMS->catdir()
-%ENV = ( 'LOGICAL' => 'VULCAN' ) ;
 
 # Test out the class methods
 for ( @tests ) {
