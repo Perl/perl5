@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sun Jun 10 05:21:37 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Tue Jun 12 02:31:11 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -12892,8 +12892,8 @@ int main() {
 EOCP
 set try
 if eval $compile_ok; then
-	echo "(This test may dump core.)" >&4
-	./try >&2 >/dev/null
+	echo "(Testign for character data alignment may dump core.)" >&4
+	./try 2>&1 >/dev/null
 	case "$?" in
 	0)	cat >&4 <<EOM
 You can access character data pretty unalignedly.
