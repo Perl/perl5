@@ -116,7 +116,7 @@ Perl_is_utf8_char(pTHX_ U8 *s)
     if (!(u & 0x40))
 	return 0;
 
-    len = UTF8SKIP(u);
+    len = UTF8SKIP(s);
 
     slen = len - 1;
     s++;
