@@ -664,10 +664,6 @@ These tests fail because of yet unresolved floating point inaccuracies.
 
 =back
 
-=head2 UNICOS/mk ext/IPC/SysV/t/sem test 8
-
-No known fix.
-
 =head2 UTS
 
 Many floating point inaccuracies:
