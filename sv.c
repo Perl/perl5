@@ -2182,7 +2182,10 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
 		case SVt_PV:
 		case SVt_PVIV:
 		case SVt_PVNV:
-		case SVt_PVBM:	s = "SCALAR";			break;
+		case SVt_PVBM:	if (SvROK(sv))
+				    s = "REF";
+				else
+				    s = "SCALAR";		break;
 		case SVt_PVLV:	s = "LVALUE";			break;
 		case SVt_PVAV:	s = "ARRAY";			break;
 		case SVt_PVHV:	s = "HASH";			break;
