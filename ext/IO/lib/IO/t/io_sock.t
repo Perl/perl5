@@ -205,9 +205,15 @@ if ($^O eq 'mpeix') {
 print "not " unless $server->blocking;
 print "ok 13\n";
 
-$server->blocking(0);
-print "not " if $server->blocking;
-print "ok 14\n";
+if ( $^O eq 'qnx' ) {
+  # QNX library bug: Can set non-blocking on socket, but
+  # cannot return that status.
+  print "ok 14 # skipped\n";
+} else {
+  $server->blocking(0);
+  print "not " if $server->blocking;
+  print "ok 14\n";
+}
 
 ### TEST 15
 ### Set up some data to be transfered between the server and
