@@ -67,14 +67,14 @@ test(13,start_html() ."\n" eq <<END,"start_html()");
 <!DOCTYPE html
 	PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 	 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US"><head><title>Untitled Document</title>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US"><head><title>Untitled Document</title>
 </head><body>
 END
     ;
 test(14,start_html(-dtd=>"-//IETF//DTD HTML 3.2//FR",-lang=>'fr') ."\n" eq <<END,"start_html()");
 <!DOCTYPE html
 	PUBLIC "-//IETF//DTD HTML 3.2//FR">
-<html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><title>Untitled Document</title>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr" xml:lang="fr"><head><title>Untitled Document</title>
 </head><body>
 END
     ;
@@ -83,7 +83,7 @@ test(15,start_html(-Title=>'The world of foo') ."\n" eq <<END,"start_html()");
 <!DOCTYPE html
 	PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 	 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US"><head><title>The world of foo</title>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US"><head><title>The world of foo</title>
 </head><body>
 END
     ;
@@ -94,7 +94,7 @@ test(17,$h =~ m!^Set-Cookie: fred=chocolate&chip\; path=/${CRLF}Date:.*${CRLF}Co
 test(18,start_h3 eq '<h3>');
 test(19,end_h3 eq '</h3>');
 test(20,start_table({-border=>undef}) eq '<table border>');
-test(21,h1(escapeHTML("this is <not> \x8bright\x9b")) eq '<h1>this is &lt;not&gt; &#139;right&#155;</h1>');
+test(21,h1(escapeHTML("this is <not> \x8bright\x9b")) eq '<h1>this is &lt;not&gt; &#8249;right&#8250;</h1>');
 charset('utf-8');
 if (ord("\t") == 9) {
 test(22,h1(escapeHTML("this is <not> \x8bright\x9b")) eq '<h1>this is &lt;not&gt; ‹right›</h1>');

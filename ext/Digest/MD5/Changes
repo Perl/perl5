@@ -1,3 +1,26 @@
+2002-03-04   Gisle Aas <gisle@ActiveState.com>
+
+   Release 2.22.
+
+   Added clone method.
+   Contributed by Holger Smolinski <holger@kunterbunt.bb.bawue.de>
+
+
+
+2002-12-27   Gisle Aas <gisle@ActiveState.com>
+
+   Release 2.21
+
+   Minor tweaks sync up with bleadperl:
+     - VMS optimizer tweaks to the Makefile.PL
+     - MacOS support
+     - Added alignment test
+
+   Added example to the MD5 POD that shows how to calculate the
+   digest of Unicode strings.
+
+
+
 2002-05-05   Gisle Aas <gisle@ActiveState.com>
 
    Release 2.20

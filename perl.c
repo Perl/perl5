@@ -1355,10 +1355,11 @@ print \"  \\@INC:\\n    @INC\\n\";");
     if (!PL_do_undump)
 	init_postdump_symbols(argc,argv,env);
 
-    /* PL_wantutf8 is conditionally turned on by
+    /* PL_utf8locale is conditionally turned on by
      * locale.c:Perl_init_i18nl10n() if the environment
-     * look like the user wants to use UTF-8. */
-    if (PL_wantutf8) { /* Requires init_predump_symbols(). */
+     * look like the user wants to use UTF-8.
+     * PL_wantutf8 is turned on by -C or by $ENV{PERL_UTF8_LOCALE}. */
+    if (PL_utf8locale && PL_wantutf8) { /* Requires init_predump_symbols(). */
 	 IO* io;
 	 PerlIO* fp;
 	 SV* sv;
@@ -2156,7 +2157,7 @@ Perl_moreswitches(pTHX_ char *s)
 	return s + numlen;
     }
     case 'C':
-	PL_widesyscalls = TRUE;
+        PL_wantutf8 = TRUE; /* Can be set earlier by $ENV{PERL_UTF8_LOCALE}. */
 	s++;
 	return s;
     case 'F':
@@ -3397,7 +3398,7 @@ Perl_init_argv_symbols(pTHX_ register int argc, register char **argv)
 	for (; argc > 0; argc--,argv++) {
 	    SV *sv = newSVpv(argv[0],0);
 	    av_push(GvAVn(PL_argvgv),sv);
-	    if (PL_widesyscalls)
+	    if (PL_wantutf8)
 		(void)sv_utf8_decode(sv);
 	}
     }

@@ -67,13 +67,6 @@ character data.  Such data may come from filehandles, from calls to
 external programs, from information provided by the system (such as %ENV),
 or from literals and constants in the source text.
 
-On Windows platforms, if the C<-C> command line switch is used or the
-${^WIDE_SYSTEM_CALLS} global flag is set to C<1>, all system calls
-will use the corresponding wide-character APIs.  This feature is
-available only on Windows to conform to the API standard already
-established for that platform--and there are very few non-Windows
-platforms that have Unicode-aware APIs.
-
 The C<bytes> pragma will always, regardless of platform, force byte
 semantics in a particular lexical scope.  See L<bytes>.
 
@@ -1050,10 +1043,14 @@ there are a couple of exceptions:
 
 =item *
 
-If your locale environment variables (LANGUAGE, LC_ALL, LC_CTYPE, LANG)
-contain the strings 'UTF-8' or 'UTF8' (case-insensitive matching),
-the default encodings of your STDIN, STDOUT, and STDERR, and of
-B<any subsequent file open>, are considered to be UTF-8.
+If your locale environment variables (LC_ALL, LC_CTYPE, LANG)
+contain the strings 'UTF-8' or 'UTF8' (matched case-insensitively)
+B<and> you enable using UTF-8 either by using the C<-C> command line
+switch or setting the PERL_UTF8_LOCALE environment variable to a true
+value, then the default encodings of your STDIN, STDOUT, and STDERR,
+and of B<any subsequent file open>, are considered to be UTF-8.
+See L<perluniintro>, L<perlfunc/open>, and L<open> for more
+information.  The magic variable C<${^UTF8_LOCALE}> will also be set.
 
 =item *
 
@@ -1410,6 +1407,6 @@ the UTF-8 flag:
 =head1 SEE ALSO
 
 L<perluniintro>, L<encoding>, L<Encode>, L<open>, L<utf8>, L<bytes>,
-L<perlretut>, L<perlvar/"${^WIDE_SYSTEM_CALLS}">
+L<perlretut>, L<perlvar/"${^UTF8_LOCALE}">
 
 =cut

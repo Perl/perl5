@@ -259,6 +259,8 @@ ext/Encode/t/big5-hkscs.utf	test data
 ext/Encode/t/CJKT.t		test script
 ext/Encode/t/Encode.t		test script
 ext/Encode/t/Encoder.t		test script
+ext/Encode/t/enc_eucjp.t	test script
+ext/Encode/t/enc_utf8.t		test script
 ext/Encode/t/encoding.t		test script
 ext/Encode/t/fallback.t		test script
 ext/Encode/t/gb2312.enc		test data
@@ -709,6 +711,8 @@ ext/threads/threads.pm		ithreads
 ext/threads/threads.xs		ithreads
 ext/threads/typemap		ithreads
 ext/Time/HiRes/Changes		Time::HiRes extension
+ext/Time/HiRes/fallback/const-c.inc	Time::HiRes extension
+ext/Time/HiRes/fallback/const-xs.inc	Time::HiRes extension
 ext/Time/HiRes/hints/dynixptx.pl	Hint for Time::HiRes for named architecture
 ext/Time/HiRes/hints/sco.pl	Hints for Time::HiRes for named architecture
 ext/Time/HiRes/HiRes.pm		Time::HiRes extension
@@ -2598,6 +2602,7 @@ t/op/quotemeta.t		See if quotemeta works
 t/op/rand.t			See if rand works
 t/op/range.t			See if .. works
 t/op/read.t			See if read() works
+t/op/readline.t			See if <> / readline work
 t/op/readdir.t			See if readdir() works
 t/op/recurse.t			See if deep recursion works
 t/op/ref.t			See if refs and objects work

@@ -61,6 +61,7 @@ t/big5-eten.enc	test data
 t/big5-eten.utf	test data
 t/big5-hkscs.enc	test data
 t/big5-hkscs.utf	test data
+t/enc_utf8.t	test script
 t/encoding.t	test script
 t/fallback.t	test script
 t/gb2312.enc	test data

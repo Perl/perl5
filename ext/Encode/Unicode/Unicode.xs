@@ -1,5 +1,5 @@
 /*
- $Id: Unicode.xs,v 1.5 2002/05/20 15:25:44 dankogai Exp $
+ $Id: Unicode.xs,v 1.6 2003/01/10 12:00:16 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -113,8 +113,8 @@ CODE:
 		endian = 'V';
 	    }
 	    else {
-		croak("%s:Unregognised BOM %"UVxf,
-                      SvPV_nolen(*hv_fetch((HV *)SvRV(obj),"Name",4,0)),
+		croak("%"SVf": Unrecognised BOM %"UVxf,
+                      *hv_fetch((HV *)SvRV(obj),"Name",4,0),
 		      bom);
 	    }
 	}
@@ -129,8 +129,8 @@ CODE:
 	if (size != 4 && invalid_ucs2(ord)) {
 	    if (ucs2) {
 		if (check) {
-		    croak("%s:no surrogates allowed %"UVxf,
-			  SvPV_nolen(*hv_fetch((HV *)SvRV(obj),"Name",4,0)),
+		    croak("%"SVf":no surrogates allowed %"UVxf,
+			  *hv_fetch((HV *)SvRV(obj),"Name",4,0),
 			  ord);
 		}
 		if (s+size <= e) {
@@ -142,8 +142,8 @@ CODE:
 	    else {
 		UV lo;
 		if (!isHiSurrogate(ord)) {
-		    croak("%s:Malformed HI surrogate %"UVxf,
-			  SvPV_nolen(*hv_fetch((HV *)SvRV(obj),"Name",4,0)),
+		    croak("%"SVf":Malformed HI surrogate %"UVxf,
+			  *hv_fetch((HV *)SvRV(obj),"Name",4,0),
 			  ord);
 		}
 		if (s+size > e) {
@@ -153,8 +153,8 @@ CODE:
 		}
 		lo = enc_unpack(aTHX_ &s,e,size,endian);
 		if (!isLoSurrogate(lo)){
-		    croak("%s:Malformed LO surrogate %"UVxf,
-			  SvPV_nolen(*hv_fetch((HV *)SvRV(obj),"Name",4,0)),
+		    croak("%"SVf":Malformed LO surrogate %"UVxf,
+			  *hv_fetch((HV *)SvRV(obj),"Name",4,0),
 			  ord);
 		}
 		ord = 0x10000 + ((ord - 0xD800) << 10) + (lo - 0xDC00);
@@ -165,8 +165,8 @@ CODE:
 	SvCUR_set(result,d - (U8 *)SvPVX(result));
     }
     if (s < e) {
-	    Perl_warner(aTHX_ packWARN(WARN_UTF8),"%s:Partial character",
-			SvPV_nolen(*hv_fetch((HV *)SvRV(obj),"Name",4,0)));
+	    Perl_warner(aTHX_ packWARN(WARN_UTF8),"%"SVf":Partial character",
+			*hv_fetch((HV *)SvRV(obj),"Name",4,0));
     }
     if (check && !(check & ENCODE_LEAVE_SRC)){
 	if (s < e) {
@@ -212,10 +212,8 @@ CODE:
 	    if (!issurrogate(ord)){
 		if (ucs2) {
 		    if (check) {
-			croak("%s:code point \"\\x{%"UVxf"}\" too high",
-			      SvPV_nolen(
-				  *hv_fetch((HV *)SvRV(obj),"Name",4,0))
-			      ,ord);
+			croak("%"SVf":code point \"\\x{%"UVxf"}\" too high",
+				  *hv_fetch((HV *)SvRV(obj),"Name",4,0),ord);
 		    }
 		    enc_pack(aTHX_ result,size,endian,FBCHAR);
 		}else{
@@ -235,8 +233,8 @@ CODE:
 	}
     }
     if (s < e) {
-	Perl_warner(aTHX_ packWARN(WARN_UTF8),"%s:Partial character",
-		    SvPV_nolen(*hv_fetch((HV *)SvRV(obj),"Name",4,0)));
+	Perl_warner(aTHX_ packWARN(WARN_UTF8),"%"SVf":Partial character",
+		    *hv_fetch((HV *)SvRV(obj),"Name",4,0));
     }
     if (check && !(check & ENCODE_LEAVE_SRC)){
 	if (s < e) {

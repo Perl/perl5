@@ -3,7 +3,7 @@ package Digest;
 use strict;
 use vars qw($VERSION %MMAP $AUTOLOAD);
 
-$VERSION = "1.00";
+$VERSION = "1.01";
 
 %MMAP = (
   "SHA-1"      => "Digest::SHA1",
@@ -124,10 +124,15 @@ load the right module on first use.  The second form allow you to use
 algorithm names which contains letters which are not legal perl
 identifiers, e.g. "SHA-1".
 
-If new() is called as an instance method (i.e. $ctx->new) it will just
+If new() is called as a instance method (i.e. $ctx->new) it will just
 reset the state the object to the state of a newly created object.  No
 new object is created in this case, and the return value is the
 reference to the object (i.e. $ctx).
+
+=item $other_ctx = $ctx->clone
+
+The clone method creates a copy of the digest state object and returns
+a reference to the copy.
 
 =item $ctx->reset
 
@@ -151,7 +156,8 @@ Return the binary digest for the message.
 Note that the C<digest> operation is effectively a destructive,
 read-once operation. Once it has been performed, the $ctx object is
 automatically C<reset> and can be used to calculate another digest
-value.
+value.  Call $ctx->clone->digest if you want to calculate the digest
+without reseting the digest state.
 
 =item $ctx->hexdigest
 

@@ -136,7 +136,9 @@ if (tell($tst) == 5) { print "ok 30\n"; } else { print "not ok 30\n"; }
 
 print $tst "xxxx\n";
 
-if (tell($tst) == 15) { print "ok 27\n"; } else { print "not ok 27\n"; }
+if (tell($tst) == 15 ||
+    tell($tst) == 5) # unset PERLIO or PERLIO=stdio (e.g. HP-UX, Solaris)
+{ print "ok 27\n"; } else { print "not ok 27\n"; }
 
 close($tst);
 
