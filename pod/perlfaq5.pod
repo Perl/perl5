@@ -174,32 +174,25 @@ This assumes no funny games with newline translations.
 
 =head2 How do I make a temporary file name?
 
-Use the C<new_tmpfile> class method from the IO::File module to get a
-filehandle opened for reading and writing.  Use it if you don't
-need to know the file's name:
+Use the File::Temp module, see L<File::Temp> for more information.
+
+  use File::Temp qw/ tempfile tempdir /; 
+
+  $dir = tempdir( CLEANUP => 1 );
+  ($fh, $filename) = tempfile( DIR => $dir );
+
+  # or if you don't need to know the filename
+
+  $fh = tempfile( DIR => $dir );
+
+The File::Temp has been a standard module since Perl 5.6.1.  If you
+don't have a modern enough Perl installed, use the C<new_tmpfile>
+class method from the IO::File module to get a filehandle opened for
+reading and writing.  Use it if you don't need to know the file's name:
 
     use IO::File;
     $fh = IO::File->new_tmpfile()
 	or die "Unable to make new temporary file: $!";
-
-If you do need to know the file's name, you can use the C<tmpnam>
-function from the POSIX module to get a filename that you then open
-yourself:
-
-
-    use Fcntl;
-    use POSIX qw(tmpnam);
-
-    # try new temporary filenames until we get one that didn't already
-    # exist;  the check should be unnecessary, but you can't be too careful
-    do { $name = tmpnam() }
-        until sysopen(FH, $name, O_RDWR|O_CREAT|O_EXCL);
-
-    # install atexit-style handler so that when we exit or die,
-    # we automatically delete this temporary file
-    END { unlink($name) or die "Couldn't unlink $name : $!" }
-
-    # now go on to use the file ...
 
 If you're committed to creating a temporary file by hand, use the
 process ID and/or the current time-value.  If you need to have many
@@ -207,7 +200,7 @@ temporary files in one process, use a counter:
 
     BEGIN {
 	use Fcntl;
-	my $temp_dir = -d '/tmp' ? '/tmp' : $ENV{TMP} || $ENV{TEMP};
+	my $temp_dir = -d '/tmp' ? '/tmp' : $ENV{TMPDIR} || $ENV{TEMP};
 	my $base_name = sprintf("%s/%d-%d-0000", $temp_dir, $$, time());
 	sub temp_file {
 	    local *FH;
