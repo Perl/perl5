@@ -6521,22 +6521,28 @@ Perl_my_tmpfp(pTHX)
       *  e.g. miniperl, use mkstemp() or stdio tmpfile() instead. */
 #   if defined(WIN32) || !defined(HAS_MKSTEMP)
      FILE *stdio = PerlSIO_tmpfile();
+
      if (stdio) {
-	  if ((f = PerlIO_push(aTHX_(PerlIO_allocate(aTHX)),
-			       &PerlIO_stdio, "w+", Nullsv))) {
-	       PerlIOStdio *s = PerlIOSelf(f, PerlIOStdio);
-	       s->stdio = stdio;
-	  }
+          if ((f = PerlIO_push(aTHX_(PerlIO_allocate(aTHX)),
+                               &PerlIO_stdio, "w+", Nullsv))) {
+               PerlIOStdio *s = PerlIOSelf(f, PerlIOStdio);
+
+               if (s)
+                    s->stdio = stdio;
+          }
      }
 #   else /* !WIN32 && HAS_MKSTEMP */
      SV *sv = newSVpv("/tmp/PerlIO_XXXXXX", 0);
-     fd = mkstemp(SvPVX(sv));
-     if (fd >= 0) {
-	  f = PerlIO_fdopen(fd, "w+");
-	  if (f) {
-	       PerlLIO_unlink(SvPVX(sv));
-	       SvREFCNT_dec(sv);
-	  }
+
+     if (sv) {
+          fd = mkstemp(SvPVX(sv));
+          if (fd >= 0) {
+               f = PerlIO_fdopen(fd, "w+");
+               if (f) {
+                    PerlLIO_unlink(SvPVX(sv));
+                    SvREFCNT_dec(sv);
+               }
+          }
      }
 #   endif /* WIN32 || !HAS_MKSTEMP */
 #else
@@ -6545,31 +6551,37 @@ Perl_my_tmpfp(pTHX)
      GV *gv = gv_fetchpv("File::Temp::tempfile", FALSE, SVt_PVCV);
 
      if (!gv) {
-	  ENTER;
-	  Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT,
-			   newSVpvn("File::Temp", 10), Nullsv, Nullsv, Nullsv);
-	  gv = gv_fetchpv("File::Temp::tempfile", FALSE, SVt_PVCV);
-	  GvIMPORTED_CV_on(gv);
-	  LEAVE;
+          ENTER;
+          Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT,
+                           newSVpvn("File::Temp", 10), Nullsv, Nullsv, Nullsv);
+          gv = gv_fetchpv("File::Temp::tempfile", FALSE, SVt_PVCV);
+          GvIMPORTED_CV_on(gv);
+          LEAVE;
      }
      if (gv && GvCV(gv)) {
-	  dSP;
-	  ENTER;
-	  SAVETMPS;
-	  PUSHMARK(SP);
-	  PUTBACK;
-	  if (call_sv((SV*)GvCV(gv), G_SCALAR)) {
-	       GV *gv = (GV*)SvRV(newSVsv(*PL_stack_sp--));
-	       IO *io = gv ? GvIO(gv) : 0;
-	       fd = io ? PerlIO_fileno(IoIFP(io)) : -1;
-	  }
-	  SPAGAIN;
-	  PUTBACK;
-	  FREETMPS;
-	  LEAVE;
+          dSP;
+          ENTER;
+          SAVETMPS;
+          PUSHMARK(SP);
+          PUTBACK;
+          if (call_sv((SV*)GvCV(gv), G_SCALAR)) {
+               GV *gv = (GV*)SvRV(newSVsv(*PL_stack_sp--));
+
+               if (gv) {
+                    IO *io = GvIO(gv);
+
+                    if (io) {
+                         fd = PerlIO_fileno(IoIFP(io));
+                         if (fd >= 0)
+                              f = PerlIO_fdopen(fd, "w+");
+                    }
+               }
+          }
+          SPAGAIN;
+          PUTBACK;
+          FREETMPS;
+          LEAVE;
      }
-     if (fd >= 0)
-	  f = PerlIO_fdopen(fd, "w+");
 #endif
 
      return f;
