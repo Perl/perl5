@@ -30,6 +30,7 @@ OP *arg;
     register I32 ch;
     register I32 matches = 0;
     register I32 squash = op->op_private & OPpTRANS_SQUASH;
+    register U8 *p;
     STRLEN len;
 
     if (SvREADONLY(sv))
@@ -56,14 +57,16 @@ OP *arg;
     }
     else {
 	d = s;
+	p = send;
 	while (s < send) {
 	    if ((ch = tbl[*s]) >= 0) {
 		*d = ch;
-		if (matches++ && squash) {
-		    if (d[-1] == *d)
+		matches++;
+		if (squash) {
+		    if (p == d - 1 && *p == *d)
 			matches--;
 		    else
-			d++;
+		        p = d++;
 		}
 		else
 		    d++;
