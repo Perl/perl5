@@ -3286,8 +3286,8 @@ S_regmatch(pTHX_ regnode *prog)
 				    locinput++;
 			    } else {
 				while (locinput <= e
-				       && *locinput != c1
-				       && *locinput != c2)
+				       && (U8) *locinput != (U8) c1
+				       && (U8) *locinput != (U8) c2)
 				    locinput++;
 			    }
 			    count = locinput - old;
