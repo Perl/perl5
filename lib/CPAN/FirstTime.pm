@@ -16,7 +16,7 @@ use FileHandle ();
 use File::Basename ();
 use File::Path ();
 use vars qw($VERSION);
-$VERSION = substr q$Revision: 1.33 $, 10;
+$VERSION = substr q$Revision: 1.35 $, 10;
 
 =head1 NAME
 
@@ -183,7 +183,9 @@ policy to one of the three values.
 
     $default = $CPAN::Config->{prerequisites_policy} || 'follow';
     do {
-        $ans = prompt("Perform cache scanning (follow, ask or ignore)?", $default);
+      $ans =
+	  prompt("Policy on building prerequisites (follow, ask or ignore)?",
+		 $default);
     } while ($ans ne 'follow' && $ans ne 'ask' && $ans ne 'ignore');
     $CPAN::Config->{prerequisites_policy} = $ans;
 
@@ -200,9 +202,16 @@ those.
 
 };
 
+    my $old_warn = $^W;
+    local $^W if $^O eq 'MacOS';
     my(@path) = split /$Config{'path_sep'}/, $ENV{'PATH'};
+    local $^W = $old_warn;
     my $progname;
     for $progname (qw/gzip tar unzip make lynx ncftpget ncftp ftp/){
+      if ($^O eq 'MacOS') {
+          $CPAN::Config->{$progname} = 'not_here';
+          next;
+      }
       my $progcall = $progname;
       # we don't need ncftp if we have ncftpget
       next if $progname eq "ncftp" && $CPAN::Config->{ncftpget} gt " ";
@@ -231,7 +240,8 @@ those.
     }
     my $path = $CPAN::Config->{'pager'} || 
 	$ENV{PAGER} || find_exe("less",[@path]) || 
-	    find_exe("more",[@path]) || "more";
+	    find_exe("more",[@path]) || ($^O eq 'MacOS' ? $ENV{EDITOR} : 0 )
+	    || "more";
     $ans = prompt("What is your favorite pager program?",$path);
     $CPAN::Config->{'pager'} = $ans;
     $path = $CPAN::Config->{'shell'};
@@ -240,9 +250,13 @@ those.
 	$path = "";
     }
     $path ||= $ENV{SHELL};
-    $path =~ s,\\,/,g if $^O eq 'os2';	# Cosmetic only
-    $ans = prompt("What is your favorite shell?",$path);
-    $CPAN::Config->{'shell'} = $ans;
+    if ($^O eq 'MacOS') {
+        $CPAN::Config->{'shell'} = 'not_here';
+    } else {
+        $path =~ s,\\,/,g if $^O eq 'os2';	# Cosmetic only
+        $ans = prompt("What is your favorite shell?",$path);
+        $CPAN::Config->{'shell'} = $ans;
+    }
 
     #
     # Arguments to make etc.
@@ -396,6 +410,7 @@ sub read_mirrored_by {
     my(%all,$url,$expected_size,$default,$ans,$host,$dst,$country,$continent,@location);
     my $fh = FileHandle->new;
     $fh->open($local) or die "Couldn't open $local: $!";
+    local $/ = "\012";
     while (<$fh>) {
 	($host) = /^([\w\.\-]+)/ unless defined $host;
 	next unless defined $host;
