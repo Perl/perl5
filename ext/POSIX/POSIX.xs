@@ -38,6 +38,10 @@
 #include <stddef.h>
 #endif
 
+#ifdef I_UNISTD
+#include <unistd.h>
+#endif
+
 /* XXX This comment is just to make I_TERMIO and I_SGTTY visible to 
    metaconfig for future extension writers.  We don't use them in POSIX.
    (This is really sneaky :-)  --AD
@@ -4014,3 +4018,45 @@ char *
 ttyname(fd)
 	int		fd
 
+char *
+getcwd()
+	PPCODE:
+#ifdef HAS_GETCWD
+	char *		buf;
+	int		buflen = 128;
+	int		i;
+
+	New(0, buf, buflen, char);
+	/* Many getcwd()s know how to automatically allocate memory
+	 * for the directory if the buffer argument is NULL but...
+	 * (1) we cannot assume all getcwd()s do that
+  	 * (2) this may interfere with Perl's malloc
+         * So let's not.  --jhi */
+	while ((getcwd(buf, buflen) == NULL) && errno == ERANGE) {
+	    buflen += 128;
+	    if (buflen > MAXPATHLEN) {
+		Safefree(buf);
+		buf = NULL;
+		break;
+	    }
+	    Renew(buf, buflen, char);
+	}
+	if (buf) {
+	    PUSHs(sv_2mortal(newSVpv(buf, 0)));
+	    Safefree(buf);
+	}
+	else
+	    PUSHs(&PL_sv_undef);
+#else
+	dSP;
+	require_pv("Cwd.pm");
+
+	ENTER;
+	SAVETMPS;
+	PUSHMARK(sp);
+	PUTBACK;
+	call_pv("Cwd::cwd", GIMME_V);
+	FREETMPS;
+	LEAVE;
+	XSRETURN(1);
+#endif
