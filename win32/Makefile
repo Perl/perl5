@@ -842,7 +842,6 @@ CFG_VARS	=					\
 		"usethreads=$(USE_ITHREADS)"		\
 		"use5005threads=$(USE_5005THREADS)"	\
 		"useithreads=$(USE_ITHREADS)"		\
-		"usethreads=$(USE_5005THREADS)"		\
 		"usemultiplicity=$(USE_MULTI)"		\
 		"useperlio=$(USE_PERLIO)"		\
 		"uselargefiles=$(USE_LARGE_FILES)"	\
