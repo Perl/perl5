@@ -1292,6 +1292,10 @@ typedef I32 (*filter_t) _((int, SV *, int));
 #define FILTER_DATA(idx)	   (AvARRAY(PL_rsfp_filters)[idx])
 #define FILTER_ISREADER(idx)	   (idx >= AvFILLp(PL_rsfp_filters))
 
+#if defined(__OPEN_VM)
+# include "vmesa/vmesaish.h"
+#endif
+
 #ifdef DOSISH
 # if defined(OS2)
 #   include "os2ish.h"
@@ -1311,11 +1315,7 @@ typedef I32 (*filter_t) _((int, SV *, int));
 #       if defined(__VOS__)
 #         include "vosish.h"
 #       else
-#         if defined(__OPEN_VM)
-#           include "vmesa/vmesaish.h"
-#         else   
-#           include "unixish.h"
-#         endif
+#         include "unixish.h"
 #       endif
 #     endif
 #   endif
