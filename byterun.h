@@ -15,18 +15,12 @@ struct bytestream {
     int (*fread)(char *, size_t, size_t, void*);
     void (*freadpv)(U32, void*);
 };
-void freadpv _((U32, void *));
 void byterun _((struct bytestream));
 #else
 void byterun _((FILE *));
 #endif /* INDIRECT_BGET_MACROS */
 
-#ifndef PATCHLEVEL
-#include "patchlevel.h"
-#endif
-#if PATCHLEVEL < 4 || (PATCHLEVEL == 4 && SUBVERSION < 50)
-#define dTHR extern int errno
-#endif
+void *bset_obj_store _((void *, I32));
 
 enum {
     INSN_RET,			/* 0 */

@@ -8,8 +8,6 @@ typedef OP *opindex;
 typedef IV IV64;
 
 EXT int iv_overflows INIT(0);
-void *bset_obj_store _((void *, I32));
-void freadpv _((U32, void *));
 
 EXT SV *sv;
 #ifndef USE_THREADS

@@ -1100,6 +1100,8 @@ union any {
 #include "hv.h"
 #include "mg.h"
 #include "scope.h"
+#include "bytecode.h"
+#include "byterun.h"
 
 /* work around some libPW problems */
 #ifdef DOINIT
