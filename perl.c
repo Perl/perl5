@@ -2690,7 +2690,7 @@ Perl_init_stacks(pTHX)
     PL_markstack_ptr = PL_markstack;
     PL_markstack_max = PL_markstack + REASONABLE(32);
 
-    SET_MARKBASE;
+    SET_MARK_OFFSET;
 
     New(54,PL_scopestack,REASONABLE(32),I32);
     PL_scopestack_ix = 0;
