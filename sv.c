@@ -10718,7 +10718,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 
 Create and return a new interpreter by cloning the current one.
 
-perl_clone takes these flags as paramters:
+perl_clone takes these flags as parameters:
 
 CLONEf_COPY_STACKS - is used to, well, copy the stacks also, 
 without it we only clone the data and zero the stacks, 
