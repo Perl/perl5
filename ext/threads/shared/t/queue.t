@@ -12,7 +12,7 @@ BEGIN {
 
 
 use threads;
-use threads::queue;
+use threads::shared::queue;
 
 $q = new threads::shared::queue;
 $|++;

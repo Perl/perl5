@@ -657,6 +657,7 @@ ext/threads/Makefile.PL		ithreads
 ext/threads/README		ithreads
 ext/threads/shared/Makefile.PL	thread shared variables
 ext/threads/shared/queue.pm	Threadsafe queue.
+ext/threads/shared/semaphore.pm	Threadsafe semaphore
 ext/threads/shared/README	thread shared variables
 ext/threads/shared/shared.pm	thread shared variables
 ext/threads/shared/shared.xs	thread shared variables
@@ -668,6 +669,7 @@ ext/threads/shared/t/hv_refs.t	Test shared hashes containing references
 ext/threads/shared/t/hv_simple.t	Tests for basic shared hash functionality.
 ext/threads/shared/t/no_share.t Tests for disabled share on variables.
 ext/threads/shared/t/queue.t	thread shared variables
+ext/threads/shared/t/semaphore.t	test semaphore
 ext/threads/shared/t/shared_attr.t	Test :shared attribute
 ext/threads/shared/t/sv_refs.t	thread shared variables
 ext/threads/shared/t/sv_simple.t	thread shared variables
