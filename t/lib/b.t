@@ -2,7 +2,12 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
+    if ($^O eq 'MacOS') { 
+	@INC = qw(: ::lib ::macos:lib); 
+    } else { 
+	@INC = '.'; 
+	push @INC, '../lib'; 
+    }
 }
 
 $|  = 1;
@@ -69,7 +74,12 @@ ok;
 
 my $a;
 my $Is_VMS = $^O eq 'VMS';
-$a = `$^X "-I../lib" "-MO=Deparse" -anle 1 2>&1`;
+my $Is_MacOS = $^O eq 'MacOS';
+
+my $path = join " ", map { qq["-I$_"] } @INC;
+my $redir = $Is_MacOS ? "" : "2>&1";
+
+$a = `$^X $path "-MO=Deparse" -anle 1 $redir`;
 $a =~ s/-e syntax OK\n//g;
 $a =~ s{\\340\\242}{\\s} if (ord("\\") == 224); # EBCDIC, cp 1047 or 037
 $a =~ s{\\274\\242}{\\s} if (ord("\\") == 188); # $^O eq 'posix-bc'
@@ -85,17 +95,17 @@ EOF
 print "# [$a]\n\# vs\n# [$b]\nnot " if $a ne $b;
 ok;
 
-$a = `$^X "-I../lib" "-MO=Debug" -e 1 2>&1`;
+$a = `$^X $path "-MO=Debug" -e 1 $redir`;
 print "not " unless $a =~
 /\bLISTOP\b.*\bOP\b.*\bCOP\b.*\bOP\b/s;
 ok;
 
-$a = `$^X "-I../lib" "-MO=Terse" -e 1 2>&1`;
+$a = `$^X $path "-MO=Terse" -e 1 $redir`;
 print "not " unless $a =~
 /\bLISTOP\b.*leave.*\n    OP\b.*enter.*\n    COP\b.*nextstate.*\n    OP\b.*null/s;
 ok;
 
-$a = `$^X "-I../lib" "-MO=Terse" -ane "s/foo/bar/" 2>&1`;
+$a = `$^X $path "-MO=Terse" -ane "s/foo/bar/" $redir`;
 $a =~ s/\(0x[^)]+\)//g;
 $a =~ s/\[[^\]]+\]//g;
 $a =~ s/-e syntax OK//;
@@ -123,7 +133,7 @@ $b =~ s/\s+$//;
 print "# [$a]\n# vs\n# [$b]\nnot " if $a ne $b;
 ok;
 
-chomp($a = `$^X "-I../lib" "-MB::Stash" "-Mwarnings" -e1`);
+chomp($a = `$^X $path "-MB::Stash" "-Mwarnings" -e1`);
 $a = join ',', sort split /,/, $a;
 $a =~ s/-u(perlio|open)(?:::\w+)?,//g if defined $Config{'useperlio'} and $Config{'useperlio'} eq 'define';
 $a =~ s/-uWin32,// if $^O eq 'MSWin32';
@@ -144,7 +154,7 @@ if ($Config{static_ext} eq ' ') {
 if ($is_thread) {
     print "# use5005threads: test $test skipped\n";
 } else {
-    $a = `$^X "-I../lib" "-MO=Showlex" -e "my %one" 2>&1`;
+    $a = `$^X $path "-MO=Showlex" -e "my %one" $redir`;
     if (ord('A') != 193) { # ASCIIish
         print "# [$a]\nnot " unless $a =~ /sv_undef.*PVNV.*%one.*sv_undef.*HV/s;
     } 

@@ -41,11 +41,19 @@ sub process_file {
             return;
 	}
     }
-    while(<FH>) {
-	$err{$1} = 1
-	    if /^\s*#\s*define\s+(E\w+)\s+/;
-   }
-   close(FH);
+
+    if ($^O eq 'MacOS') {
+	while(<FH>) {
+	    $err{$1} = $2
+		if /^\s*#\s*define\s+(E\w+)\s+(\d+)/;
+	}
+    } else {
+	while(<FH>) {
+	    $err{$1} = 1
+		if /^\s*#\s*define\s+(E\w+)\s+/;
+	}
+    }
+    close(FH);
 }
 
 my $cppstdin;
@@ -90,6 +98,11 @@ sub get_files {
 	# Some Linuxes have weird errno.hs which generate
 	# no #file or #line directives
 	$file{'/usr/include/errno.h'} = 1;
+    } elsif ($^O eq 'MacOS') {
+	# note that we are only getting the GUSI errno's here ...
+	# we might miss out on compiler-specific ones
+	$file{"$ENV{GUSI}include:sys:errno.h"} = 1;
+
     } else {
 	open(CPPI,"> errno.c") or
 	    die "Cannot open errno.c";
@@ -152,31 +165,33 @@ sub write_errno_pm {
 
     close(CPPI);
 
+    unless ($^O eq 'MacOS') {	# trust what we have
     # invoke CPP and read the output
 
-    if ($^O eq 'VMS') {
-	my $cpp = "$Config{cppstdin} $Config{cppflags} $Config{cppminus}";
-	$cpp =~ s/sys\$input//i;
-	open(CPPO,"$cpp  errno.c |") or
-          die "Cannot exec $Config{cppstdin}";
-    } elsif ($^O eq 'MSWin32') {
-	open(CPPO,"$Config{cpprun} $Config{cppflags} errno.c |") or
-	    die "Cannot run '$Config{cpprun} $Config{cppflags} errno.c'";
-    } else {
-	my $cpp = default_cpp();
-	open(CPPO,"$cpp < errno.c |")
-	    or die "Cannot exec $cpp";
-    }
+	if ($^O eq 'VMS') {
+	    my $cpp = "$Config{cppstdin} $Config{cppflags} $Config{cppminus}";
+	    $cpp =~ s/sys\$input//i;
+	    open(CPPO,"$cpp  errno.c |") or
+		die "Cannot exec $Config{cppstdin}";
+	} elsif ($^O eq 'MSWin32') {
+	    open(CPPO,"$Config{cpprun} $Config{cppflags} errno.c |") or
+		die "Cannot run '$Config{cpprun} $Config{cppflags} errno.c'";
+	} else {
+	    my $cpp = default_cpp();
+	    open(CPPO,"$cpp < errno.c |")
+		or die "Cannot exec $cpp";
+	}
 
-    %err = ();
+	%err = ();
 
-    while(<CPPO>) {
-	my($name,$expr);
-	next unless ($name, $expr) = /"(.*?)"\s*\[\s*\[\s*(.*?)\s*\]\s*\]/;
-	next if $name eq $expr;
-	$err{$name} = eval $expr;
+	while(<CPPO>) {
+	    my($name,$expr);
+	    next unless ($name, $expr) = /"(.*?)"\s*\[\s*\[\s*(.*?)\s*\]\s*\]/;
+	    next if $name eq $expr;
+	    $err{$name} = eval $expr;
+	}
+	close(CPPO);
     }
-    close(CPPO);
 
     # Write Errno.pm
 

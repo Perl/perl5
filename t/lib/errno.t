@@ -3,7 +3,11 @@
 BEGIN {
     unless(grep /blib/, @INC) {
 	chdir 't' if -d 't';
-	@INC = '../lib';
+	if ($^O eq 'MacOS') { 
+	    @INC = qw(: ::lib ::macos:lib); 
+	} else { 
+	    @INC = '../lib'; 
+	}
     }
 }
 

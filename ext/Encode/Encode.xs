@@ -640,7 +640,7 @@ _utf8_off(sv)
 
 BOOT:
 {
-#ifdef USE_PERLIO
+#if defined(USE_PERLIO) && !defined(USE_SFIO)
  PerlIO_define_layer(&PerlIO_encode);
 #endif
 #include "iso8859.def"
