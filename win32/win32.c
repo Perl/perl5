@@ -3207,7 +3207,7 @@ DllExport Off_t
 win32_tell(int fd)
 {
 #if defined(WIN64) || defined(USE_LARGE_FILES)
-#if defined(__BORLANDC__) /* buk *//
+#if defined(__BORLANDC__) /* buk */
     LARGE_INTEGER pos;
     pos.QuadPart = 0;
     pos.LowPart = SetFilePointer(
