@@ -3747,7 +3747,8 @@ The transliteration operator.  Same as y///. See L<perlop>.
 
 Truncates the file opened on FILEHANDLE, or named by EXPR, to the
 specified length.  Produces a fatal error if truncate isn't implemented
-on your system.
+on your system.  Returns TRUE if successful, the undefined value
+otherwise.
 
 =item uc EXPR
 
