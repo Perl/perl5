@@ -897,6 +897,9 @@ my_mkdir(char *dir, Mode_t mode)
   STRLEN dirlen = strlen(dir);
   dTHX;
 
+  /* zero length string sometimes gives ACCVIO */
+  if (dirlen == 0) return -1;
+
   /* CRTL mkdir() doesn't tolerate trailing /, since that implies
    * null file name/type.  However, it's commonplace under Unix,
    * so we'll allow it for a gain in portability.
@@ -1484,7 +1487,7 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
       set_errno(EINVAL); set_vaxc_errno(SS$_BADPARAM); return NULL;
     }
     dirlen = strlen(dir);
-    while (dir[dirlen-1] == '/') --dirlen;
+    while (dirlen && dir[dirlen-1] == '/') --dirlen;
     if (!dirlen) { /* We had Unixish '/' -- substitute top of current tree */
       strcpy(trndir,"/sys$disk/000000");
       dir = trndir;
@@ -1510,7 +1513,7 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
      *    ... do_fileify_dirspec("myroot",buf,1) ...
      * does something useful.
      */
-    if (!strcmp(dir+dirlen-2,".]")) {
+    if (dirlen >= 2 && !strcmp(dir+dirlen-2,".]")) {
       dir[--dirlen] = '\0';
       dir[dirlen-1] = ']';
     }
@@ -1540,7 +1543,7 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
                  (dir[2] == '\0' || (dir[2] == '/' && dir[3] == '\0')))
           return do_fileify_dirspec("[-]",buf,ts);
       }
-      if (dir[dirlen-1] == '/') {    /* path ends with '/'; just add .dir;1 */
+      if (dirlen && dir[dirlen-1] == '/') {    /* path ends with '/'; just add .dir;1 */
         dirlen -= 1;                 /* to last element */
         lastdir = strrchr(dir,'/');
       }
@@ -1567,7 +1570,7 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
         } while ((cp1 = strstr(cp1,"/.")) != NULL);
         lastdir = strrchr(dir,'/');
       }
-      else if (!strcmp(&dir[dirlen-7],"/000000")) {
+      else if (dirlen >= 7 && !strcmp(&dir[dirlen-7],"/000000")) {
         /* Ditto for specs that end in an MFD -- let the VMS code
          * figure out whether it's a real device or a rooted logical. */
         dir[dirlen] = '/'; dir[dirlen+1] = '\0';
