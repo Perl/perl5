@@ -13,17 +13,25 @@ BEGIN {
 use strict;
 
 $|=1;
-undef $/;
-my @prgs = split "########\n", <DATA>;
-close DATA;
-print "1..", scalar @prgs, "\n";
+
+my @prgs;
+
+{
+    local $/;
+    @prgs = split "########\n", <DATA>;
+    close DATA;
+}
+
+use Test::More;
+
+plan tests => scalar @prgs;
+
 require "dumpvar.pl";
 
 our $tmpfile = "perl5db0";
 1 while -f ++$tmpfile;
 END { if ($tmpfile) { 1 while unlink $tmpfile; } }
 
-my $i = 0;
 $ENV{PERLDB_OPTS} = "TTY=0";
 my($ornament1,$ornament2);
 for (@prgs){
@@ -39,14 +47,7 @@ for (@prgs){
     }
     $got =~ s/^\Q$ornament1\E//;
     $got =~ s/\Q$ornament2\E\z//;
-    my $not = "";
-    my $why = "";
-    if ($got !~ /$expected/) {
-        $not = "not ";
-        $got = dumpvar::unctrl($got);
-        $why = " # prog[$prog]got[$got]expected[$expected]";
-    }
-    print $not, "ok ", ++$i, $why, "\n";
+    like($got, qr:$expected:i, $prog);
 }
 
 __END__
@@ -58,6 +59,14 @@ x "foo"
 EXPECT
 0  'foo'
 ########
+x "\x{100}"
+EXPECT
+0  '\\x\{0100\}'
+########
+x *a
+EXPECT
+0  \*main::a
+########
 x 1..3
 EXPECT
 0  1
@@ -66,7 +75,7 @@ EXPECT
 ########
 x +{1..4}
 EXPECT
-0\s+HASH\(0x[\da-f]+\)
+0\s+HASH\(0x[0-9a-f]+\)
 \s+1 => 2
 \s+3 => 4
 ########
