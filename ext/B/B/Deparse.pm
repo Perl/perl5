@@ -1097,6 +1097,10 @@ sub populate_curcvlex {
 
 	for (my $i=0; $i<@ns; ++$i) {
 	    next if class($ns[$i]) eq "SPECIAL";
+	    if (class($ns[$i]) eq "PV") {
+		# Probably that pesky lexical @_
+		next;
+	    }
             my $name = $ns[$i]->PVX;
 	    my $seq_st = $ns[$i]->NVX;
 	    my $seq_en = int($ns[$i]->IVX);
