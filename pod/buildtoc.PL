@@ -137,7 +137,9 @@ if (-d "pod") {
     perlipc
     perlfork
     perlnumber
+
     perlthrtut
+    perlothrtut
 
     perlport
     perllocale

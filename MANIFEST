@@ -1774,6 +1774,7 @@ pod/perlnumber.pod		Semantics of numbers and numeric operations
 pod/perlobj.pod			Object info
 pod/perlop.pod			Operator info
 pod/perlopentut.pod		open() tutorial
+pod/perlothrtut.pod		Threads old tutorial
 pod/perlpod.pod			Pod info
 pod/perlport.pod		Portability guide
 pod/perlre.pod			Regular expression info
