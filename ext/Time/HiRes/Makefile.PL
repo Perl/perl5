@@ -98,7 +98,7 @@ sub try_compile_and_link {
 
 	if ($^O eq 'VMS') {
 	    if ($ENV{PERL_CORE}) {
-		# Fragile if the extensions change hierachy within
+		# Fragile if the extensions change hierarchy within
 		# the Perl core but this should do for now.
                 $cccmd = "$Config{'cc'} /include=([---]) $tmp.c";
 	    } else {

@@ -342,7 +342,7 @@ get an initial "handle" on an internal object.
 
 =head2 Functions Returning C<B::SV>, C<B::AV>, C<B::HV>, and C<B::CV> objects
 
-For descriptions of the class hierachy of these objects and the
+For descriptions of the class hierarchy of these objects and the
 methods that can be called on them, see below, L<"OVERVIEW OF
 CLASSES"> and L<"SV-RELATED CLASSES">.
 
@@ -430,7 +430,7 @@ Methods">, below.
 
 =head2 Functions Returning C<B::OP> objects or for walking op trees
 
-For descriptions of the class hierachy of these objects and the
+For descriptions of the class hierarchy of these objects and the
 methods that can be called on them, see below, L<"OVERVIEW OF
 CLASSES"> and L<"OP-RELATED CLASSES">.
 
