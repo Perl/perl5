@@ -84,13 +84,13 @@ foreach (<MASTER>) {
   next if /^\#/;
 
   # At least one upper case letter somewhere in the first group
-  if (/^(\S+)\s(.*)/ && $1 =~ tr/A-Z//) {
+  if (/^(\S+)\s(.*)/ && $1 =~ tr/h//) {
     # it's a heading
     my $flags = $1;
+    $flags =~ tr/h//d;
     my %flags = (header => 1);
-    $flags{toc_omit} = 1 if $flags =~ tr/O//d;
-    $flags{include} = 1 if $flags =~ tr/I//d;
-    $flags{aux} = 1 if $flags =~ tr/A//d;
+    $flags{toc_omit} = 1 if $flags =~ tr/o//d;
+    $flags{aux} = 1 if $flags =~ tr/a//d;
     die "$0: Unknown flag found in heading line: $_" if length $flags;
     push @Master, [\%flags, $2];
 
@@ -259,7 +259,7 @@ sub output ($);
 sub output_perltoc {
   open(OUT, ">perltoc.pod") || die "$0: creating perltoc.pod failed: $!";
 
-  $/ = '';
+  local $/ = '';
 
   ($_= <<"EOPOD2B") =~ s/^\t//gm && output($_);
 
@@ -642,7 +642,9 @@ while (my ($target, $name) = each %Targets) {
   next unless $Build{$target};
   $built++;
   if ($target eq "toc") {
+    print "Now processing $name\n" if $Verbose;
     &output_perltoc;
+    print "Finished\n" if $Verbose;
     next;
   }
   print "Now processing $name\n" if $Verbose;
