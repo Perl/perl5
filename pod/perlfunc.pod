@@ -539,9 +539,10 @@ Here $subroutine may be C<(eval)> if the frame is not a subroutine
 call, but an C<eval>.  In such a case additional elements $evaltext and
 C<$is_require> are set: C<$is_require> is true if the frame is created by a
 C<require> or C<use> statement, $evaltext contains the text of the
-C<eval EXPR> statement.  In particular, for a C<eval BLOCK> statement,
+C<eval EXPR> statement.  In particular, for an C<eval BLOCK> statement,
 $filename is C<(eval)>, but $evaltext is undefined.  (Note also that
 each C<use> statement creates a C<require> frame inside an C<eval EXPR>)
+frame.  C<$hasargs> is true if a new instance of C<@_> was set up for the
 frame.  C<$hints> and C<$bitmask> contain pragmatic hints that the caller
 was compiled with.  The C<$hints> and C<$bitmask> values are subject to
 change between versions of Perl, and are not meant for external use.

@@ -15,12 +15,15 @@ use Devel::Peek;
 print "1..17\n";
 
 our $DEBUG = 0;
+open(SAVERR, ">&STDERR") or die "Can't dup STDERR: $!";
 
 sub do_test {
     my $pattern = pop;
-    if (open(STDERR,">peek$$")) {
+    if (open(OUT,">peek$$")) {
+	open(STDERR, ">&OUT") or die "Can't dup OUT: $!";
 	Dump($_[1]);
-	close(STDERR);
+	open(STDERR, ">&SAVERR") or die "Can't restore STDERR: $!";
+	close(OUT);
 	if (open(IN, "peek$$")) {
 	    local $/;
 	    $pattern =~ s/\$ADDR/0x[[:xdigit:]]+/g;
