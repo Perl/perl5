@@ -52,7 +52,7 @@ sub SWASHNEW {
 		}
 	    }
 
-	    unless (defined $file) {
+	    unless ($list or defined $file) {
 		defined %utf8::In || do "unicore/In.pl";
 		$type = 'Lampersand' if $type =~ /^(?:Is)?L&$/;
 		$type = 'Assigned'   if $type =~ /^(?:Is)?Assigned$/i;
@@ -88,7 +88,7 @@ sub SWASHNEW {
 		}
 	    }
 
-	    unless (defined $file) {
+	    unless ($list or defined $file) {
 		if ($type =~ /^To([A-Z][A-Za-z]+)$/) {
 		    $file = "unicore/To/$1";
 		}
