@@ -5096,356 +5096,153 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item DESCRIPTION
 
-=item To do during 5.6.x
+=item assertions
+
+=item iCOW
+
+=item (?{...}) closures in regexps
+
+=item A re-entrant regexp engine
+
+=item pragmata
 
 =over 4
 
-=item Support for I/O disciplines
+=item lexical pragmas
 
-=item Autoload bytes.pm
-
-=item Make "\u{XXXX}" et al work
-
-=item Create a char *sv_pvprintify(sv, STRLEN *lenp, UV flags)
-
-=item Overloadable regex assertions
-
-=item Unicode
-
-=item Work out exit/die semantics for threads
-
-=item Better support for nonpreemptive threading systems like GNU pth
-
-=item Typed lexicals for compiler
-
-=item Compiler workarounds for Win32
-
-=item AUTOLOADing in the compiler
-
-=item Fixing comppadlist when compiling
-
-=item Cleaning up exported namespace
-
-=item Complete signal handling
-
-=item Out-of-source builds
-
-=item POSIX realtime support
-
-=item UNIX98 support
-
-=item IPv6 Support
-
-=item Long double conversion
-
-=item Locales
-
-=item Arithmetic on non-Arabic numerals
-
-=item POSIX Unicode character classes
-
-=item Factoring out common suffices/prefices in regexps (trie optimization)
-
-=item Security audit shipped utilities
-
-=item Sort out the uid-setting mess
-
-=item Custom opcodes
-
-=item DLL Versioning
-
-=item Introduce @( and @)
-
-=item Floating point handling
-
-=item IV/UV preservation
-
-=item Replace pod2html with something using Pod::Parser
-
-=item Automate module testing on CPAN
-
-=item sendmsg and recvmsg
-
-=item Rewrite perlre documentation
-
-=item Convert example code to IO::Handle filehandles
-
-=item Document Win32 choices
-
-=item Check new modules
-
-=item Make roffitall find pods and libs itself
+=item use less 'memory'
 
 =back
 
-=item To do at some point
+=item prototypes and functions
 
 =over 4
 
-=item Remove regular expression recursion
+=item _ prototype character
 
-=item Memory leaks after failed eval
-
-=item bitfields in pack
-
-=item Cross compilation
-
-=item Perl preprocessor / macros
-
-=item Perl lexer in Perl
-
-=item Using POSIX calls internally
-
-=item -i rename file when changed
-
-=item All ARGV input should act like E<lt>E<gt>
-
-=item Support for rerunning debugger
-
-=item Test Suite for the Debugger
-
-=item my sub foo { }
-
-=item One-pass global destruction
-
-=item Rewrite regexp parser
-
-=item Cache recently used regexps
-
-=item Cross-compilation support
-
-=item Bit-shifting bitvectors
-
-=item debugger pragma
-
-=item use less pragma
-
-=item switch structures
-
-=item Cache eval tree
-
-=item rcatmaybe
-
-=item Shrink opcode tables
-
-=item Optimize away @_
-
-=item Prototypes versus indirect objects
-
-=item Install HTML
-
-=item Prototype method calls
-
-=item Return context prototype declarations
-
-=item magic_setisa
-
-=item Garbage collection
-
-=item IO tutorial
-
-=item Rewrite perldoc
-
-=item Install .3p manpages
-
-=item Unicode tutorial
-
-=item Update POSIX.pm for 1003.1-2
-
-=item Retargetable installation
-
-=item POSIX emulation on non-POSIX systems
-
-=item Rename Win32 headers
+=item inlining autoloaded constants
 
 =item Finish off lvalue functions
 
-=item Update sprintf documentation
-
-=item Use fchown/fchmod internally
-
-=item Make v-strings overloaded objects
-
-=item Allow restricted hash assignment
-
-=item Should overload be inheritable?
-
-=item Taint rethink
-
-=item Perform correctly when XSUBs call subroutines that exit via
-goto(LABEL) and friends
-
 =back
 
-=item Vague ideas
+=item Unicode and UTF8
 
 =over 4
 
-=item ref() in list context
+=item Implicit Latin 1 => Unicode translation
 
-=item Make tr/// return histogram of characters in list context
-
-=item Compile to real threaded code
-
-=item Structured types
-
-=item Modifiable $1 et al.
-
-=item Procedural interfaces for IO::*, etc.
-
-=item RPC modules
-
-=item Attach/detach debugger from running program
-
-=item GUI::Native
-
-=item foreach(reverse ...)
-
-=item Constant function cache
-
-=item Approximate regular expression matching
-
-=back
-
-=item Ongoing
-
-=over 4
-
-=item Update guts documentation
-
-=item Add more tests
-
-=item Update auxiliary tools
-
-=item Create debugging macros
-
-=item truncate to the people
+=item UTF8 caching code
 
 =item Unicode in Filenames
 
-=back
-
 =item Unicode in %ENV
 
-=item Recently done things
+=back
+
+=item Regexps
 
 =over 4
 
-=item Alternative RE syntax module
+=item regexp optimiser optional
 
-=item Safe signal handling
-
-=item Tie Modules
-
-=item gettimeofday
-
-=item setitimer and getimiter
-
-=item Testing __DIE__ hook
-
-=item CPP equivalent in Perl
-
-=item Explicit switch statements
-
-=item autocroak
-
-=item UTF/EBCDIC
-
-=item UTF Regexes
-
-=item perlcc to produce executable
-
-=item END blocks saved in compiled output
-
-=item Secure temporary file module
-
-=item Integrate Time::HiRes
-
-=item Turn Cwd into XS
-
-=item Mmap for input
-
-=item Byte to/from UTF-8 and UTF-8 to/from local conversion
-
-=item Add sockatmark support
-
-=item Mailing list archives
-
-=item Bug tracking
-
-=item Integrate MacPerl
-
-=item Web "nerve center" for Perl
-
-=item Regular expression tutorial
-
-=item Debugging Tutorial
-
-=item Integrate new modules
-
-=item Integrate profiler
-
-=item Y2K error detection
-
-=item Regular expression debugger
-
-=item POD checker
-
-=item "Dynamic" lexicals
-
-=item Cache precompiled modules
+=item common suffices/prefices in regexps (trie optimization)
 
 =back
 
-=item Deprecated Wishes
+=item POD
 
 =over 4
 
-=item Loop control on do{}
+=item POD -> HTML conversion still sucks
 
-=item Lexically scoped typeglobs
+=back
 
-=item format BOTTOM
+=item Misc medium sized projects
 
-=item report HANDLE
+=over 4
 
-=item Generalised want()/caller())
+=item UNITCHECK
 
-=item Named prototypes
+=item optional optimizer
 
-=item Built-in globbing
+=item You WANT *how* many
 
-=item Regression tests for suidperl
+=item lexical aliases
 
-=item Cached hash values
+=item no 6
 
-=item Add compression modules
+=item IPv6
 
-=item Reorganise documentation into tutorials/references
+=item entersub XS vs Perl
 
-=item Remove distinction between functions and operators
+=item @INC source filter to Filter::Simple
 
-=item Make XS easier to use
+=item bincompat functions
 
-=item Make embedding easier to use
+=item Use fchown/fchmod internally
 
-=item man for perl
+=back
 
-=item my $Package::variable
+=item Tests
 
-=item "or" tests defined, not truth
+=over 4
 
-=item "class"-based lexicals
+=item Make Schwern poorer
 
-=item byteperl
+=item test B
 
-=item Lazy evaluation / tail recursion removal
+=item Improve tests for Config.pm
 
-=item Make "use utf8" the default
+=item common test code for timed bailout
 
-=item Unicode collation and normalization
+=back
 
-=item pack/unpack tutorial
+=item Installation
+
+=over 4
+
+=item compressed man pages
+
+=item Make Config.pm cope with differences between build and installed perl
+
+=item Relocatable perl
+
+=item make HTML install work
+
+=item put patchlevel in -v
+
+=back
+
+=item Incremental things
+
+=over 4
+
+=item autovivification
+
+=item fix tainting bugs
+
+=item Make tainting consistent
+
+=item Dual life everything
+
+=back
+
+=item Vague things
+
+=over 4
+
+=item threads
+
+=item POSIX memory footprint
+
+=item Optimize away @_
+
+=item switch ops
+
+=item Attach/detach debugger from running program
+
+=item A decent benchmark
 
 =back
 
@@ -5506,7 +5303,7 @@ B<-V>
 
 =back
 
-=head2 perldelta, perl584delta - what is new for perl v5.8.4
+=head2 perldelta - what is new for perl v5.8.5
 
 =over 4
 
@@ -5516,35 +5313,13 @@ B<-V>
 
 =item Core Enhancements
 
-=over 4
-
-=item Malloc wrapping
-
-=item Unicode Character Database 4.0.1
-
-=item suidperl less insecure
-
-=item format
-
-=back
-
 =item Modules and Pragmata
 
-=over 4
+=item Utility Changes
 
-=item Updated modules
-
-Attribute::Handlers, B, Benchmark, CGI, Carp, Cwd, Exporter, File::Find,
-IO, IPC::Open3, Local::Maketext, Math::BigFloat, Math::BigInt,
-Math::BigRat, MIME::Base64, ODBM_File, POSIX, Shell, Socket, Storable,
-Switch, Sys::Syslog, Term::ANSIColor, Time::HiRes, Unicode::UCD, Win32,
-base, open, threads, utf8
-
-=back
+=item New Documentation
 
 =item Performance Enhancements
-
-=item Utility Changes
 
 =item Installation and Configuration Improvements
 
@@ -5554,7 +5329,9 @@ base, open, threads, utf8
 
 =item Changed Internals
 
-=item Future Directions
+=item New Tests
+
+=item Known Problems
 
 =item Platform Specific Problems
 
@@ -5564,7 +5341,45 @@ base, open, threads, utf8
 
 =back
 
-=head2 perl585delta, perldelta - what is new for perl v5.8.5
+=head2 perl586delta, perldelta - what is new for perl v5.8.5
+
+=over 4
+
+=item DESCRIPTION
+
+=item Incompatible Changes
+
+=item Core Enhancements
+
+=item Modules and Pragmata
+
+=item Utility Changes
+
+=item New Documentation
+
+=item Performance Enhancements
+
+=item Installation and Configuration Improvements
+
+=item Selected Bug Fixes
+
+=item New or Changed Diagnostics
+
+=item Changed Internals
+
+=item New Tests
+
+=item Known Problems
+
+=item Platform Specific Problems
+
+=item Reporting Bugs
+
+=item SEE ALSO
+
+=back
+
+=head2 perl585delta - what is new for perl v5.8.5
 
 =over 4
 
@@ -5586,10 +5401,6 @@ base, open, threads, utf8
 
 =back
 
-=item New Documentation
-
-=item Performance Enhancements
-
 =item Installation and Configuration Improvements
 
 =item Selected Bug Fixes
@@ -5597,8 +5408,6 @@ base, open, threads, utf8
 =item New or Changed Diagnostics
 
 =item Changed Internals
-
-=item New Tests
 
 =item Known Problems
 
@@ -9898,33 +9707,6 @@ C<strict refs>, C<strict vars>, C<strict subs>
 
 =back
 
-=head2 threadshared, threads::shared - Perl extension for sharing data
-structures between threads
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item EXPORT
-
-=item FUNCTIONS
-
-share VARIABLE, lock VARIABLE, cond_wait VARIABLE, cond_wait CONDVAR,
-LOCKVAR, cond_timedwait VARIABLE, ABS_TIMEOUT, cond_timedwait CONDVAR,
-ABS_TIMEOUT, LOCKVAR, cond_signal VARIABLE, cond_broadcast VARIABLE
-
-=item NOTES
-
-=item BUGS
-
-=item AUTHOR
-
-=item SEE ALSO
-
-=back
-
 =head2 utf8 - Perl pragma to enable/disable UTF-8 (or UTF-EBCDIC) in source
 code
 
@@ -13116,22 +12898,6 @@ arrays
 =item LIMITATIONS
 
 =item AUTHOR
-
-=back
-
-=head2 Errno - System errno constants
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item CAVEATS
-
-=item AUTHOR
-
-=item COPYRIGHT
 
 =back
 
@@ -19687,27 +19453,6 @@ C<Storable::is_retrieving>
 =item SYNOPSIS
 
 =item DESCRIPTION
-
-=item AUTHOR
-
-=back
-
-=head2 Syslog, Sys::Syslog, openlog, closelog, setlogmask, syslog - Perl
-interface to the UNIX syslog(3) calls
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-openlog $ident, $logopt, $facility, syslog $priority, $format, @args,
-setlogmask $mask_priority, setlogsock $sock_type [$stream_location] (added
-in 5.004_02), closelog
-
-=item EXAMPLES
-
-=item SEE ALSO
 
 =item AUTHOR
 
