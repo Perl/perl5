@@ -1526,8 +1526,6 @@ sub unlink0 {
     @okstat = (1,2,3,4,5,7,8,9,10);
   } elsif ($^O eq 'os2') {
     @okstat = (0, 2..$#fh);
-  } elsif ($^O eq 'dos') {
-    @okstat = (2,3,4,5,7,8,9,10);
   } elsif ($^O eq 'VMS') { # device and file ID are sufficient
     @okstat = (0, 1);
   } elsif ($^O eq 'dos') {
