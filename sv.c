@@ -2730,6 +2730,14 @@ sv_clear(register SV *sv)
 	    } while (SvOBJECT(sv) && SvSTASH(sv) != stash);
 
 	    del_XRV(SvANY(&tmpref));
+
+	    if (SvREFCNT(sv)) {
+		if (PL_in_clean_objs)
+		    croak("DESTROY created new reference to dead object '%s'",
+			  HvNAME(stash));
+		/* DESTROY gave object new lease on life */
+		return;
+	    }
 	}
 
 	if (SvOBJECT(sv)) {
@@ -2737,12 +2745,6 @@ sv_clear(register SV *sv)
 	    SvOBJECT_off(sv);	/* Curse the object. */
 	    if (SvTYPE(sv) != SVt_PVIO)
 		--PL_sv_objcount;	/* XXX Might want something more general */
-	}
-	if (SvREFCNT(sv)) {
-		if (PL_in_clean_objs)
-		    croak("DESTROY created new reference to dead object");
-		/* DESTROY gave object new lease on life */
-		return;
 	}
     }
     if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv))
