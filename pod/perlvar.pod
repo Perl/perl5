@@ -717,8 +717,54 @@ C<$^F> when the open() or pipe() was called, not the time of the exec().
 
 =item $^H
 
-The current set of syntax checks enabled by C<use strict> and other block
-scoped compiler hints.  See the documentation of C<strict> for more details.
+WARNING: This variable is strictly for internal use only.  Its availability,
+behavior, and contents are subject to change without notice.
+
+This variable contains compile-time hints for the Perl interpreter.  At the
+end of compilation of a BLOCK the value of this variable is restored to the
+value when the interpreter started to compile the BLOCK.
+
+When perl begins to parse any block construct that provides a lexical scope
+(e.g., eval body, required file, subroutine body, loop body, or conditional
+block), the existing value of $^H is saved, but its value is left unchanged.
+When the compilation of the block is completed, it regains the saved value.
+Between the points where its value is saved and restored, code that
+executes within BEGIN blocks is free to change the value of $^H.
+
+This behavior provides the semantic of lexical scoping, and is used in,
+for instance, the C<use strict> pragma.
+
+The contents should be an integer; different bits of it are used for
+different pragmatic flags.  Here's an example:
+
+    sub add_100 { $^H |= 0x100 }
+
+    sub foo {
+	BEGIN { add_100() }
+	bar->baz($boon);
+    }
+
+Consider what happens during execution of the BEGIN block.  At this point
+the BEGIN block has already been compiled, but the body of foo() is still
+being compiled.  The new value of $^H will therefore be visible only while
+the body of foo() is being compiled.
+
+Substitution of the above BEGIN block with:
+
+    BEGIN { require strict; strict->import('vars') }
+
+demonstrates how C<use strict 'vars'> is implemented.  Here's a conditional
+version of the same lexical pragma:
+
+    BEGIN { require strict; strict->import('vars') if $condition }
+
+=item %^H
+
+WARNING: This variable is strictly for internal use only.  Its availability,
+behavior, and contents are subject to change without notice.
+
+The %^H hash provides the same scoping semantic as $^H.  This makes it
+useful for implementation of lexically scoped pragmas.
 
 =item $INPLACE_EDIT
 
