@@ -55,6 +55,14 @@ Creates a C<IO::File>.  If it receives any parameters, they are passed to
 the method C<open>; if the open fails, the object is destroyed.  Otherwise,
 it is returned to the caller.
 
+=item new_tmpfile
+
+Creates an C<IO::File> opened for read/write on a newly created temporary
+file.  On systems where this is possible, the temporary file is anonymous
+(i.e. it is unlinked after creation, but held open).  If the temporary
+file cannot be created or opened, the C<IO::File> object is destroyed.
+Otherwise, it is returned to the caller.
+
 =back
 
 =head1 METHODS
