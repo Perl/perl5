@@ -2,7 +2,7 @@ package DB;
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 
-$VERSION = 0.9902;
+$VERSION = 0.9904;
 $header = "perl5db.pl patch level $VERSION";
 
 # Enhanced by ilya@math.ohio-state.edu (Ilya Zakharevich)
@@ -654,7 +654,7 @@ sub DB {
 			  next unless keys %db;
 			  print $OUT " $file:\n";
 			  for $line (sort {$a <=> $b} keys %db) {
-				print $OUT "  $i:\n";
+				print $OUT "  $line:\n";
 				my ($stop,$action) = split(/\0/, $db{$line});
 				print $OUT "    break if (", $stop, ")\n"
 				  if $stop;
@@ -1912,32 +1912,40 @@ BEGIN {$^W = $ini_warn;}	# Switch warnings back
 #use Carp;			# This did break, left for debuggin
 
 sub db_complete {
-  # Specific code for b l V m f O, &blah, $blah, @blah, %blah
+  # Specific code for b c l V m f O, &blah, $blah, @blah, %blah
   my($text, $line, $start) = @_;
   my ($itext, $search, $prefix, $pack) =
-    ($text, "^\Q$ {package}::\E([^:]+)\$");
+    ($text, "^\Q$ {'package'}::\E([^:]+)\$");
   
-  return grep /^\Q$text/, (keys %sub), qw(postpone load compile), # subroutines
-                          (map { /$search/ ? ($1) : () } keys %sub)
-    if (substr $line, 0, $start) =~ /^\|*[bl]\s+((postpone|compile)\s+)?$/;
-  return grep /^\Q$text/, values %INC # files
+  return sort grep /^\Q$text/, (keys %sub), qw(postpone load compile), # subroutines
+                               (map { /$search/ ? ($1) : () } keys %sub)
+    if (substr $line, 0, $start) =~ /^\|*[blc]\s+((postpone|compile)\s+)?$/;
+  return sort grep /^\Q$text/, values %INC # files
     if (substr $line, 0, $start) =~ /^\|*b\s+load\s+$/;
-  return grep /^\Q$text/, map { /^(.*)::$/ ? ($1) : ()} keys %:: # packages
-    if (substr $line, 0, $start) =~ /^\|*[Vm]\s+$/ and $text =~ /^($|\w)/;
+  return sort map {($_, db_complete($_ . "::", "V ", 2))}
+    grep /^\Q$text/, map { /^(.*)::$/ ? ($1) : ()} keys %:: # top-packages
+      if (substr $line, 0, $start) =~ /^\|*[Vm]\s+$/ and $text =~ /^\w*$/;
+  return sort map {($_, db_complete($_ . "::", "V ", 2))}
+    grep !/^main::/,
+      grep /^\Q$text/, map { /^(.*)::$/ ? ($prefix . "::$1") : ()} keys %{$prefix . '::'}
+				 # packages
+	if (substr $line, 0, $start) =~ /^\|*[Vm]\s+$/ 
+	  and $text =~ /^(.*[^:])::?(\w*)$/  and $prefix = $1;
   if ( $line =~ /^\|*f\s+(.*)/ ) { # Loaded files
     # We may want to complete to (eval 9), so $text may be wrong
     $prefix = length($1) - length($text);
     $text = $1;
-    return map {substr $_, 2 + $prefix} grep /^_<\Q$text/, (keys %main::), $0
+    return sort 
+	map {substr $_, 2 + $prefix} grep /^_<\Q$text/, (keys %main::), $0
   }
   if ((substr $text, 0, 1) eq '&') { # subroutines
     $text = substr $text, 1;
     $prefix = "&";
-    return map "$prefix$_", 
-             grep /^\Q$text/, 
-               (keys %sub),
-               (map { /$search/ ? ($1) : () } 
-		  keys %sub);
+    return sort map "$prefix$_", 
+               grep /^\Q$text/, 
+                 (keys %sub),
+                 (map { /$search/ ? ($1) : () } 
+		    keys %sub);
   }
   if ($text =~ /^[\$@%](.*)::(.*)/) { # symbols in a package
     $pack = ($1 eq 'main' ? '' : $1) . '::';
@@ -1948,7 +1956,7 @@ sub db_complete {
     if (@out == 1 and $out[0] =~ /::$/ and $out[0] ne $itext) {
       return db_complete($out[0], $line, $start);
     }
-    return @out;
+    return sort @out;
   }
   if ($text =~ /^[\$@%]/) { # symbols (in $package + packages in main)
     $pack = ($package eq 'main' ? '' : $package) . '::';
@@ -1960,7 +1968,7 @@ sub db_complete {
     if (@out == 1 and $out[0] =~ /::$/ and $out[0] ne $itext) {
       return db_complete($out[0], $line, $start);
     }
-    return @out;
+    return sort @out;
   }
   if ((substr $line, 0, $start) =~ /^\|*O\b.*\s$/) { # Options after a space
     my @out = grep /^\Q$text/, @options;
@@ -1980,7 +1988,7 @@ sub db_complete {
     $readline::rl_completer_terminator_character 
       = $readline::rl_completer_terminator_character
 	= (@out == 1 ? $out : '? ');
-    return @out;
+    return sort @out;
   }
   return &readline::rl_filename_list($text); # filenames
 }
