@@ -43,17 +43,38 @@ if ($_ eq 'abcdef') {print "ok 3\n";} else {print "not ok 3\n";}
     my $t1 = $a; $t1 .= $ab;
     print $t1 =~ /\142/ ? "ok 6\n" : "not ok 6\t# $t1\n";
     my $t2 = $a; $t2 .= $ub;
-    print $t2 =~ /\142/ ? "ok 7\n" : "not ok 7\t# $t2\n";
+    if (ord('A') == 193) {
+        # print $t2 eq "\141\141\000" ? "ok 7\n" : "not ok 7\t# $t2\n";
+        print $t2 =~ /\141/ ? "ok 7\n" : "not ok 7\t# $t2\n";
+    }
+    else {
+        print $t2 =~ /\142/ ? "ok 7\n" : "not ok 7\t# $t2\n";
+    }
     my $t3 = $u; $t3 .= $ab;
     print $t3 =~ /\142/ ? "ok 8\n" : "not ok 8\t# $t3\n";
     my $t4 = $u; $t4 .= $ub;
-    print $t4 =~ /\142/ ? "ok 9\n" : "not ok 9\t# $t4\n";
+    if (ord('A') == 193) {
+        print $t4 =~ /\141/ ? "ok 9\n" : "not ok 9\t# $t4\n";
+    }
+    else {
+        print $t4 =~ /\142/ ? "ok 9\n" : "not ok 9\t# $t4\n";
+    }
     my $t5 = $a; $t5 = $ab . $t5;
     print $t5 =~ /\142/ ? "ok 10\n" : "not ok 10\t# $t5\n";
     my $t6 = $a; $t6 = $ub . $t6;
-    print $t6 =~ /\142/ ? "ok 11\n" : "not ok 11\t# $t6\n";
+    if (ord('A') == 193) {
+        print $t6 =~ /\141/ ? "ok 11\n" : "not ok 11\t# $t6\n";
+    }
+    else {
+        print $t6 =~ /\142/ ? "ok 11\n" : "not ok 11\t# $t6\n";
+    }
     my $t7 = $u; $t7 = $ab . $t7;
     print $t7 =~ /\142/ ? "ok 12\n" : "not ok 12\t# $t7\n";
     my $t8 = $u; $t8 = $ub . $t8;
-    print $t8 =~ /\142/ ? "ok 13\n" : "not ok 13\t# $t8\n";
+    if (ord('A') == 193) {
+        print $t8 =~ /\141/ ? "ok 13\n" : "not ok 13\t# $t8\n";
+    }
+    else {
+        print $t8 =~ /\142/ ? "ok 13\n" : "not ok 13\t# $t8\n";
+    }
 }
