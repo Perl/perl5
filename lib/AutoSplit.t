@@ -79,7 +79,7 @@ foreach (@tests) {
                | \#(?!\#)	# or a # character not followed by #
                | (?<!\n)\#	# or a # character not preceded by \n
               )*)/sgmx;
-  foreach ($args{Name}, $args{Require}) {
+  foreach ($args{Name}, $args{Require}, $args{Extra}) {
     chomp $_ if defined $_;
   }
   my @extra_args = !defined $args{Extra} ? () : split /,/, $args{Extra};
