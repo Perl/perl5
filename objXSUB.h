@@ -2706,6 +2706,10 @@
 #define Perl_save_destructor	pPerl->Perl_save_destructor
 #undef  save_destructor
 #define save_destructor		Perl_save_destructor
+#undef  Perl_save_destructor_x
+#define Perl_save_destructor_x	pPerl->Perl_save_destructor_x
+#undef  save_destructor_x
+#define save_destructor_x	Perl_save_destructor_x
 #undef  Perl_save_freesv
 #define Perl_save_freesv	pPerl->Perl_save_freesv
 #undef  save_freesv

@@ -134,7 +134,7 @@
   yyaccept:
 !     return (0);
   }
---- 2524,2570 ----
+--- 2524,2550 ----
   #endif
       if (yyssp >= yyss + yystacksize - 1)
       {
@@ -161,24 +161,4 @@
 !     retval = 1;
   yyaccept:
 !     return retval;
-! }
-! 
-! #ifdef PERL_OBJECT
-! #define NO_XSLOCKS
-! #include "XSUB.h"
-! #endif
-! 
-! static void
-! yydestruct(pTHXo_ void *ptr)
-! {
-!     struct ysv* ysave = (struct ysv*)ptr;
-!     if (ysave->yyss) Safefree(ysave->yyss);
-!     if (ysave->yyvs) Safefree(ysave->yyvs);
-!     yydebug	= ysave->oldyydebug;
-!     yynerrs	= ysave->oldyynerrs;
-!     yyerrflag	= ysave->oldyyerrflag;
-!     yychar	= ysave->oldyychar;
-!     yyval	= ysave->oldyyval;
-!     yylval	= ysave->oldyylval;
-!     Safefree(ysave);
   }

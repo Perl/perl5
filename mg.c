@@ -48,7 +48,7 @@ S_save_magic(pTHX_ I32 mgs_ix, SV *sv)
     MGS* mgs;
     assert(SvMAGICAL(sv));
 
-    SAVEDESTRUCTOR(restore_magic, (void*)mgs_ix);
+    SAVEDESTRUCTOR_X(restore_magic, (void*)mgs_ix);
 
     mgs = SSPTR(mgs_ix, MGS*);
     mgs->mgs_sv = sv;
@@ -2004,7 +2004,7 @@ Perl_sighandler(int sig)
     if (flags & 1) {
 	PL_savestack_ix += 5;		/* Protect save in progress. */
 	o_save_i = PL_savestack_ix;
-	SAVEDESTRUCTOR(unwind_handler_stack, (void*)&flags);
+	SAVEDESTRUCTOR_X(unwind_handler_stack, (void*)&flags);
     }
     if (flags & 4) 
 	PL_markstack_ptr++;		/* Protect mark. */
@@ -2102,7 +2102,7 @@ restore_magic(pTHXo_ void *p)
     if (PL_savestack_ix == mgs->mgs_ss_ix)
     {
 	I32 popval = SSPOPINT;
-        assert(popval == SAVEt_DESTRUCTOR);
+        assert(popval == SAVEt_DESTRUCTOR_X);
         PL_savestack_ix -= 2;
 	popval = SSPOPINT;
         assert(popval == SAVEt_ALLOC);

@@ -561,7 +561,7 @@ XS(XS_DB_sub)
         sv_setiv( DBsingle, 0 ); /* disable DB single-stepping */
 #endif 
 
-	SAVEDESTRUCTOR(check_depth, (void*)depth);
+	SAVEDESTRUCTOR_X(check_depth, (void*)depth);
 	depth++;
 
         prof_mark( OP_ENTERSUB );

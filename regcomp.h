@@ -247,14 +247,14 @@ struct regnode_2 {
 #define	FAIL(m) \
     STMT_START {							\
 	if (!SIZE_ONLY)							\
-	    SAVEDESTRUCTOR(clear_re,(void*)PL_regcomp_rx);		\
+	    SAVEDESTRUCTOR_X(clear_re,(void*)PL_regcomp_rx);		\
 	Perl_croak(aTHX_ "/%.127s/: %s",  PL_regprecomp,m);		\
     } STMT_END
 
 #define	FAIL2(pat,m) \
     STMT_START {							\
 	if (!SIZE_ONLY)							\
-	    SAVEDESTRUCTOR(clear_re,(void*)PL_regcomp_rx);		\
+	    SAVEDESTRUCTOR_X(clear_re,(void*)PL_regcomp_rx);		\
 	S_re_croak2(aTHX_ "/%.127s/: ",pat,PL_regprecomp,m);		\
     } STMT_END
 
