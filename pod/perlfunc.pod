@@ -5807,9 +5807,10 @@ and 00:00:00 UTC, January 1, 1970 for most other systems).
 Suitable for feeding to C<gmtime> and C<localtime>.
 
 For measuring time in better granularity than one second,
-you may use either the Time::HiRes module from CPAN, or
-if you have gettimeofday(2), you may be able to use the
-C<syscall> interface of Perl, see L<perlfaq8> for details.
+you may use either the Time::HiRes module (from CPAN, and starting from
+Perl 5.8 part of the standard distribution), or if you have
+gettimeofday(2), you may be able to use the C<syscall> interface of Perl.
+See L<perlfaq8> for details.
 
 =item times
 
