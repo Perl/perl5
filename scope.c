@@ -217,8 +217,8 @@ S_save_scalar_at(pTHX_ SV **sptr)
 	/* if it's a special scalar or if it has no 'set' magic,
 	 * propagate the SvREADONLY flag. --rgs 20030922 */
 	for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
-	    if (SvMAGIC(sv)->mg_type == '\0'
-		    || !SvMAGIC(sv)->mg_virtual->svt_set)
+	    if (mg->mg_type == '\0'
+		    || !(mg->mg_virtual && mg->mg_virtual->svt_set))
 	    {
 		SvFLAGS(sv) |= SvREADONLY(osv);
 		break;
