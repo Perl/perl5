@@ -1,10 +1,19 @@
 Building
 
 If you want to build with multi-threading support and you are
-running Linux 2.x (with the LinuxThreads library installed:
-that's the linuxthreads and linuxthreads-devel RPMs for RedHat)
-or Digital UNIX 4.x or Solaris 2.x for recentish x (2.5 is OK)
-or IRIX 6.2 or newer (6.2 will require a few os patches),
+running one of the following:
+  * Linux 2.x (with the LinuxThreads library installed: that's
+    the linuxthreads and linuxthreads-devel RPMs for RedHat)
+
+  * Digital UNIX 4.x
+
+  * Solaris 2.x for recentish x (2.5 is OK)
+
+  * IRIX 6.2 or newer. 6.2 will require a few os patches.
+    IMPORTANT: Without patch 2401, a kernel bug in IRIX 6.2 will
+    cause your machine to panic and crash when running threaded perl.
+    IRIX 6.3 and up should be OK. See lower down for patch details.
+
 then you should be able to use
     ./Configure -Dusethreads -Doptimize=-g -ders
     make
@@ -53,6 +62,11 @@ For IRIX:
 	1645 IRIX 6.2 & 6.3 POSIX header file updates
 	2000 Irix 6.2 Posix 1003.1b support modules
 	2254 Pthread library fixes
+	2401 6.2 all platform kernel rollup
+    IMPORTANT: Without patch 2401, a kernel bug in IRIX 6.2 will
+    cause your machine to panic and crash when running threaded perl.
+    IRIX 6.3 and up should be OK.
+
     For IRIX 6.3 and 6.4 the pthreads should work out of the box.
     Thanks to Hannu Napari <Hannu.Napari@hut.fi> for the IRIX
     pthreads patches information.
@@ -68,9 +82,8 @@ while doing a sort() then the resulting longjmp() leaves the mutex
 locked so you get a deadlock the next time you try to sort().
 
 LinuxThreads 0.5 has a bug which can cause file descriptor 0 to be
-closed after a fork() leading to many strange symptoms. The
-development version of LinuxThreads has this fixed but the following
-patch can be applied to 0.5 for now:
+closed after a fork() leading to many strange symptoms. Version 0.6
+has this fixed but the following patch can be applied to 0.5 for now:
 
 ----------------------------- cut here -----------------------------
 --- linuxthreads-0.5/pthread.c.ORI	Mon Oct  6 13:55:50 1997
@@ -99,27 +112,20 @@ the list of extensions automatically.
 
 You can try some of the tests with
     cd ext/Thread
-    perl -Mblib create.t
-    perl -Mblib join.t
-    perl -Mblib lock.t
-    perl -Mblib unsync.t
-    perl -Mblib unsync2.t
-    perl -Mblib unsync3.t
-    perl -Mblib io.t
-    perl -Mblib queue.t
+    perl create.t
+    perl join.t
+    perl lock.t
+    perl io.t
+etc.
 The io one leaves a thread reading from the keyboard on stdin so
 as the ping messages appear you can type lines and see them echoed.
 
 Try running the main perl test suite too. There are known
-failures for op/misc test 45 (tries to do local(@_) but @_ is
-now lexical) and for some of the DBM/DB extensions (if there
-underlying libraries were not compiled to be thread-aware).
-may or may not work.
+failures for some of the DBM/DB extensions (if their underlying
+libraries were not compiled to be thread-aware).
 
 
 Bugs
-
-* cond.t hasn't been redone since condition variable changed.
 
 * FAKE_THREADS should produce a working perl but the Thread
 extension won't build with it yet.
@@ -131,8 +137,6 @@ haven't tracked down yet) and there are very probably others too.
 * There may still be races where bugs show up under contention.
 
 * Need to document "lock", Thread.pm, Queue.pm, ...
-
-* Plenty of others
 
 
 Debugging
@@ -248,4 +252,4 @@ ZOMBIE ----------------------------> DEAD
 
 Malcolm Beattie
 mbeattie@sable.ox.ac.uk
-6 November 1997
+Last updated: 27 November 1997
