@@ -98,9 +98,9 @@ for (sort keys %translators) {
         close MASTER;
         close OUTPUT;
 
-        # OS/390 is EBCDIC, which uses a different character for ESC
+        # EBCDIC platforms use a different character for ESC
         # apparently.  Try to convert so that the test still works.
-        if ($^O eq 'os390' && $_ eq 'Pod::Text::Termcap') {
+        if (ord('A') eq 193 && $_ eq 'Pod::Text::Termcap') {
             $output =~ tr/\033/\047/;
         }
 
