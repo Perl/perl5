@@ -51,7 +51,7 @@
     	  fred() if $a++ < 200
 	}
 	 
-	fred()
+	fred();
 
       (in cleanup) foo bar
 	package Foo;
@@ -182,7 +182,7 @@ sub fred
     fred() if $a++ < 200
 }
  
-fred()
+fred();
 EXPECT
 Deep recursion on subroutine "main::fred" at - line 6.
 ########
@@ -194,7 +194,7 @@ sub fred
     fred() if $a++ < 200
 }
  
-fred()
+fred();
 EXPECT
 ########
 # pp_ctl.c
