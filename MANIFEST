@@ -925,10 +925,10 @@ lib/getopt.pl			Perl library supporting option parsing
 lib/Getopt/Long.pm		Fetch command options (GetOptions)
 lib/Getopt/Long/CHANGES		Getopt::Long changes
 lib/Getopt/Long/README		Getopt::Long README
-lib/Getopt/Long/t/basic.t	See if Getopt::Long works
-lib/Getopt/Long/t/compat.t	See if Getopt::Long works
-lib/Getopt/Long/t/linkage.t	See if Getopt::Long works
-lib/Getopt/Long/t/oo.t		See if Getopt::Long works
+lib/Getopt/Long/t/gol-basic.t	See if Getopt::Long works
+lib/Getopt/Long/t/gol-compat.t	See if Getopt::Long works
+lib/Getopt/Long/t/gol-linkage.t	See if Getopt::Long works
+lib/Getopt/Long/t/gol-oo.t	See if Getopt::Long works
 lib/Getopt/Std.pm		Fetch command options (getopt, getopts)
 lib/Getopt/Std.t		See if Getopt::Std and Getopt::Long work
 lib/getopts.pl			Perl library supporting option parsing
