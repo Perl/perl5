@@ -58,13 +58,24 @@ SKIP: {
 	$stat[2] = 077;
 	ok( !defined(Net::Netrc::_readrc()),
 		'_readrc() should not read world-writable file' );
-	ok( $warn =~ /^Bad permissions/, '... and should warn about it' );
+	ok( $warn =~ /^Bad permissions:/, '... and should warn about it' );
 
 	# the owner field should still not match
 	$stat[2] = 0;
-	ok( !defined(Net::Netrc::_readrc()),
-		'_readrc() should not read file owned by someone else' );
-	ok( $warn =~ /^Not owner/, '... and should warn about it' );
+
+	my $olduid = $>;
+	eval { $> = 1 }; # switch uid away from root (may not be impelemented)
+
+      SKIP: {
+	  skip("don't you know what absolutely power does to you?", 2)
+	      if $> == 0;
+	  
+	  ok( !defined(Net::Netrc::_readrc()),
+	      '_readrc() should not read file owned by someone else' );
+	  ok( $warn =~ /^Not owner:/, '... and should warn about it' );
+      }
+
+	eval { $> = $olduid }; # switch uid back (may not be implemented)
 }
 
 # this field must now match, to avoid the last-tested warning
