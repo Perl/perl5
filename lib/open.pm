@@ -7,13 +7,10 @@ our $VERSION = '1.04';
 
 require 5.008001; # for PerlIO::get_layers()
 
-use Encode qw(resolve_alias);
-
-use encoding ':_get_locale_encoding';
-my $locale_encoding = _get_locale_encoding();
+my $locale_encoding;
 
 sub _get_encname {
-    return ($1, resolve_alias($1)) if $_[0] =~ /^:?encoding\((.+)\)$/;
+    return ($1, Encode::resolve_alias($1)) if $_[0] =~ /^:?encoding\((.+)\)$/;
     return;
 }
 
@@ -39,6 +36,7 @@ sub _drop_oldenc {
     return unless @old >= 3 &&
 	          $old[-1] eq 'utf8' &&
                   $old[-2] =~ /^encoding\(.+\)$/;
+    require Encode;
     my ($loname, $lcname) = _get_encname($old[-2]);
     unless (defined $lcname) { # Should we trust get_layers()?
 	require Carp;
@@ -77,7 +75,8 @@ sub import {
             $layer =~ s/^://;
 	    if ($layer eq 'locale') {
 		require Encode;
-		$locale_encoding = _get_locale_encoding()
+		require encoding;
+		$locale_encoding = encoding::_get_locale_encoding()
 		    unless defined $locale_encoding;
 		(warnings::warnif("layer", "Cannot figure out an encoding to use"), last)
 		    unless defined $locale_encoding;
