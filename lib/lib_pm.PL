@@ -30,7 +30,7 @@ if ($ENV{PERL_BUILD_EXPAND_CONFIG_VARS}) {
     $Config_archname = q($Config{archname});
     $Config_version  = q($Config{version});
     $Config_inc_version_list =
-	      q(reverse split / /, qw($Config{inc_version_list}));
+	      q(reverse split / /, $Config{inc_version_list});
 }
  
 open OUT,">$file" or die "Can't create $file: $!";
