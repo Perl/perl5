@@ -4743,10 +4743,14 @@ PP(pp_pack)
 		    DIE(aTHX_ "Cannot compress negative numbers");
 
 		if (
-#ifdef CXUX_BROKEN_CONSTANT_CONVERT
-		    adouble <= UV_MAX_cxux
+#if UVSIZE > 4 && UVSIZE >= NVSIZE
+		    adouble <= 0xffffffff
 #else
+#   ifdef CXUX_BROKEN_CONSTANT_CONVERT
+		    adouble <= UV_MAX_cxux
+#   else
 		    adouble <= UV_MAX
+#   endif
 #endif
 		    )
 		{
