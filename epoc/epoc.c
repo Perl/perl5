@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <sys/unistd.h>
 #include <process.h>
+#include <emx.h>
 
 
 #include "EXTERN.h"
@@ -56,7 +57,7 @@ do_aspawn ( void *vreally, void **vmark, void **vsp) {
 
     cmd = strdup((const char*)(really ? SvPV_nolen(really) : argv[0]));
 
-    spawnvp( P_WAIT, cmd, argv);
+    rc = spawnvp( P_WAIT, cmd, argv);
     free( argv);
     free( cmd);
 
@@ -125,5 +126,6 @@ Perl_init_os_extras(void)
 
 void
 Perl_my_setenv(pTHX_ char *nam,char *val) {
+
   setenv( nam, val, 1);
 }

@@ -66,7 +66,7 @@ chdir './tmp';
 umask(022);
 
 SKIP: {
-    skip "bogus umask", 1 if ($^O eq 'MSWin32') || ($^O eq 'NetWare');
+    skip "bogus umask", 1 if ($^O eq 'MSWin32') || ($^O eq 'NetWare') ||  ($^O eq 'epoc'); 
 
     is((umask(0)&0777), 022, 'umask'),
 }

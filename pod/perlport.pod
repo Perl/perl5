@@ -2030,7 +2030,7 @@ distribution available at http://www.cpan.org/src/index.html
 	DG/UX
 	DOS DJGPP 	1)
 	DYNIX/ptx
-	EPOC
+	EPOC R5
 	FreeBSD
 	HP-UX
 	IRIX

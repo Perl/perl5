@@ -752,7 +752,7 @@ Perl_nextargv(pTHX_ register GV *gv)
 		    }
 #endif
 #ifdef HAS_RENAME
-#if !defined(DOSISH) && !defined(__CYGWIN__)
+#if !defined(DOSISH) && !defined(__CYGWIN__) && !defined(EPOC)
 		    if (PerlLIO_rename(PL_oldname,SvPVX(sv)) < 0) {
 		        if (ckWARN_d(WARN_INPLACE))	
 			    Perl_warner(aTHX_ packWARN(WARN_INPLACE),
