@@ -62,6 +62,7 @@ For ease of access, the Perl manual has been split up into several sections.
     perlsub		Perl subroutines
     perlfunc		Perl built-in functions
       perlopentut	Perl open() tutorial
+      perlpacktut       Perl open() tutorial
     perlpod		Perl plain old documentation
     perlpodspec         Perl plain old documentation format specification
     perlrun		Perl execution and options
@@ -81,7 +82,7 @@ For ease of access, the Perl manual has been split up into several sections.
     perlnumber		Perl number semantics
 
     perlthrtut		Perl threads tutorial
-      perlothrtut		Old Perl threads tutorial
+      perlothrtut	  Old Perl threads tutorial
 
     perlport		Perl portability guide
     perllocale		Perl locale support

@@ -122,6 +122,7 @@ if (-d "pod") {
     perlvar
     perllol
     perlopentut
+    perlpacktut
     perlretut
 
     perlre
@@ -291,8 +292,7 @@ sub getpods {
         return if $file =~ m!lib/Attribute/Handlers/demo/!;
 	return if $file =~ m!lib/Net/FTP/.+\.pm!; # Hi, Graham! :-)
         return if $file =~ m!lib/Math/BigInt/t/!;
-	return if $file =~ m!lib/Devel/Harness.pm|Devel/PPPort/harness/!;
-
+	return if $file =~ m!/Devel/PPPort/[Hh]arness|lib/Devel/Harness!i;
 	die "tut $name" if $file =~ /TUT/;
 	unless (open (F, "< $_\0")) {
 	    warn "bogus <$file>: $!";

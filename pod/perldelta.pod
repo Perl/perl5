@@ -1030,6 +1030,10 @@ perlnewmod tells about writing and submitting a new module.
 
 =item *
 
+perlpacktut is a pack() tutorial.
+
+=item *
+
 perlpod has been rewritten to be clearer and to record the best
 practices gathered over the years.
 

@@ -1907,6 +1907,7 @@ pod/perlobj.pod			Object info
 pod/perlop.pod			Operator info
 pod/perlopentut.pod		open() tutorial
 pod/perlothrtut.pod		Threads old tutorial
+pod/perlpacktut.pod		pack() tutorial
 pod/perlpod.pod			Pod info
 pod/perlpodspec.pod		Pod specification
 pod/perlport.pod		Portability guide

@@ -1132,6 +1132,74 @@ $ARGV, @ARGV, @F, @INC, @_, %INC, %ENV, $ENV{expr}, %SIG, $SIG{expr}
 
 =back
 
+=head2 perlpacktut - tutorial on C<pack> and C<unpack>
+
+=over 4
+
+=item DESCRIPTION
+
+=item The Basic Principle
+
+=item Packing Text
+
+=item Packing Numbers
+
+=over 4
+
+=item Integers
+
+=item Unpacking a Stack Frame
+
+=item How to Eat an Egg on a Net
+
+=item Floating point Numbers
+
+=back
+
+=item Exotic Templates
+
+=over 4
+
+=item Bit Strings
+
+=item Uuencoding
+
+=item Doing Sums
+
+=item  Unicode
+
+=back
+
+=item Lengths and Widths
+
+=over 4
+
+=item String Lengths
+
+=item Dynamic Templates
+
+=item Another Portable Binary Encoding
+
+=back
+
+=item Packing and Unpacking C Structures
+
+=over 4
+
+=item The Alignment Pit
+
+=item Alignment, Take 2
+
+=item Pointers for How to Use Them
+
+=back
+
+=item Pack Recipes
+
+=item Authors
+
+=back
+
 =head2 perlretut - Perl regular expressions tutorial
 
 =over 4
@@ -2153,6 +2221,8 @@ Locales?
 
 =back
 
+=item UNICODE IN OLDER PERLS
+
 =item SEE ALSO
 
 =item ACKNOWLEDGEMENTS
@@ -2417,9 +2487,9 @@ module (sometimes unnecessary), B<INSTALL> the module
 =item Pragmatic Modules
 
 attributes, attrs, autouse, base, blib, bytes, charnames, constant,
-diagnostics, fields, filetest, integer, less, locale, open, ops, overload,
-re, sigtrap, strict, subs, threads, utf8, vars, warnings,
-warnings::register
+diagnostics, encoding, fields, filetest, integer, less, locale, open, ops,
+overload, re, sigtrap, sort, strict, subs, threads, utf8, vars, vmsish,
+warnings, warnings::register
 
 =item Standard Modules
 
@@ -2443,26 +2513,26 @@ File::Spec::Mac, File::Spec::OS2, File::Spec::Unix, File::Spec::VMS,
 File::Spec::Win32, File::Temp, File::stat, FileCache, FileHandle,
 Filter::Simple, FindBin, Getopt::Long, Getopt::Std, I18N::Collate,
 I18N::LangTags, I18N::LangTags::List, IO, IPC::Open2, IPC::Open3,
-Lingua::KO::Hangul::Util, Locale::Constants, Locale::Country,
-Locale::Currency, Locale::Language, Locale::Maketext,
-Locale::Maketext::TPJ13, Math::BigFloat, Math::BigInt, Math::BigInt::Calc,
-Math::Complex, Math::Trig, Memoize, Memoize::AnyDBM_File, Memoize::Expire,
-Memoize::ExpireFile, Memoize::ExpireTest, Memoize::NDBM_File,
-Memoize::SDBM_File, Memoize::Saves, Memoize::Storable, NDBM_File, NEXT,
-Net::Cmd, Net::Config, Net::Domain, Net::FTP, Net::NNTP, Net::Netrc,
-Net::POP3, Net::Ping, Net::SMTP, Net::Time, Net::hostent, Net::libnetFAQ,
-Net::netent, Net::protoent, Net::servent, O, ODBM_File, Opcode, POSIX,
-PerlIO, Pod::Checker, Pod::Find, Pod::Html, Pod::InputObjects, Pod::LaTeX,
-Pod::Man, Pod::ParseUtils, Pod::Parser, Pod::Plainer, Pod::Select,
-Pod::Text, Pod::Text::Color, Pod::Text::Overstrike, Pod::Text::Termcap,
-Pod::Usage, SDBM_File, Safe, Search::Dict, SelectSaver, SelfLoader, Shell,
-Socket, Storable, Switch, Symbol, Term::ANSIColor, Term::Cap,
-Term::Complete, Term::ReadLine, Test, Test::Harness, Test::More,
-Test::Simple, Test::Tutorial, Text::Abbrev, Text::Balanced,
-Text::ParseWords, Text::Soundex, Text::Tabs, Text::Wrap, Tie::Array,
-Tie::Handle, Tie::Hash, Tie::RefHash, Tie::Scalar, Tie::SubstrHash,
-Time::Local, Time::gmtime, Time::localtime, Time::tm, UNIVERSAL,
-Unicode::Collate, Unicode::Normalize, Unicode::UCD, User::grent,
+Locale::Constants, Locale::Country, Locale::Currency, Locale::Language,
+Locale::Maketext, Locale::Maketext::TPJ13, Math::BigFloat, Math::BigInt,
+Math::BigInt::Calc, Math::Complex, Math::Trig, Memoize,
+Memoize::AnyDBM_File, Memoize::Expire, Memoize::ExpireFile,
+Memoize::ExpireTest, Memoize::NDBM_File, Memoize::SDBM_File,
+Memoize::Saves, Memoize::Storable, NDBM_File, NEXT, Net::Cmd, Net::Config,
+Net::Domain, Net::FTP, Net::NNTP, Net::Netrc, Net::POP3, Net::Ping,
+Net::SMTP, Net::Time, Net::hostent, Net::libnetFAQ, Net::netent,
+Net::protoent, Net::servent, O, ODBM_File, Opcode, POSIX, PerlIO,
+Pod::Checker, Pod::Find, Pod::Html, Pod::InputObjects, Pod::LaTeX,
+Pod::Man, Pod::ParseLink, Pod::ParseUtils, Pod::Parser, Pod::Plainer,
+Pod::Select, Pod::Text, Pod::Text::Color, Pod::Text::Overstrike,
+Pod::Text::Termcap, Pod::Usage, Pod::t::basic, SDBM_File, Safe,
+Search::Dict, SelectSaver, SelfLoader, Shell, Socket, Storable, Switch,
+Symbol, Term::ANSIColor, Term::Cap, Term::Complete, Term::ReadLine, Test,
+Test::Builder, Test::Harness, Test::More, Test::Simple, Test::Tutorial,
+Text::Abbrev, Text::Balanced, Text::ParseWords, Text::Soundex, Text::Tabs,
+Text::Wrap, Thread, Tie::Array, Tie::Handle, Tie::Hash, Tie::RefHash,
+Tie::Scalar, Tie::SubstrHash, Time::Local, Time::gmtime, Time::localtime,
+Time::tm, UNIVERSAL, Unicode::Collate, Unicode::UCD, User::grent,
 User::pwent, Win32
 
 =item Extension Modules
@@ -4921,6 +4991,8 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item Perl Parser Stress Tested
 
+=item REF(...) Instead Of SCALAR(...)
+
 =item Deprecations
 
 =back
@@ -4929,13 +5001,15 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =over 4
 
-=item AUTOLOAD Is Now Lvaluable
-
 =item PerlIO is Now The Default
 
 =item Signals Are Now Safe
 
+=item Unicode Overhaul
+
 =item Understanding of Numbers
+
+=item Miscellaneous Enhancements
 
 =back
 
@@ -4943,7 +5017,7 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =over 4
 
-=item New Modules
+=item New Modules and Pragmata
 
 =item Updated And Improved Modules and Pragmata
 
@@ -5011,15 +5085,17 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item VMS
 
-=item Win32
-
 =item Localising a Tied Variable Leaks Memory
+
+=item Localising Tied Arrays and Hashes Is Broken
 
 =item Self-tying of Arrays and Hashes Is Forbidden
 
 =item Variable Attributes are not Currently Usable for Tieing
 
 =item Building Extensions Can Fail Because Of Largefiles
+
+=item Unicode Support on EBCDIC Still Spotty
 
 =item The Compiler Suite Is Still Experimental
 
@@ -7608,6 +7684,8 @@ escapes.
 
 =item charnames::viacode(code)
 
+=item charnames::vianame(code)
+
 =item BUGS
 
 =back
@@ -9447,11 +9525,11 @@ C<d_bincompat5005>, C<d_bsd>, C<d_bsdgetpgrp>, C<d_bsdsetpgrp>, C<d_bzero>,
 C<d_casti32>, C<d_castneg>, C<d_charvspr>, C<d_chown>, C<d_chroot>,
 C<d_chsize>, C<d_class>, C<d_closedir>, C<d_cmsghdr_s>, C<d_const>,
 C<d_crypt>, C<d_csh>, C<d_cuserid>, C<d_dbl_dig>, C<d_dbminitproto>,
-C<d_difftime>, C<d_dirnamlen>, C<d_dlerror>, C<d_dlopen>, C<d_dlsymun>,
-C<d_dosuid>, C<d_drand48proto>, C<d_dup2>, C<d_eaccess>, C<d_endgrent>,
-C<d_endhent>, C<d_endnent>, C<d_endpent>, C<d_endpwent>, C<d_endsent>,
-C<d_eofnblk>, C<d_eunice>, C<d_fchdir>, C<d_fchmod>, C<d_fchown>,
-C<d_fcntl>, C<d_fcntl_can_lock>, C<d_fd_macros>, C<d_fd_set>,
+C<d_difftime>, C<d_dirfd>, C<d_dirnamlen>, C<d_dlerror>, C<d_dlopen>,
+C<d_dlsymun>, C<d_dosuid>, C<d_drand48proto>, C<d_dup2>, C<d_eaccess>,
+C<d_endgrent>, C<d_endhent>, C<d_endnent>, C<d_endpent>, C<d_endpwent>,
+C<d_endsent>, C<d_eofnblk>, C<d_eunice>, C<d_fchdir>, C<d_fchmod>,
+C<d_fchown>, C<d_fcntl>, C<d_fcntl_can_lock>, C<d_fd_macros>, C<d_fd_set>,
 C<d_fds_bits>, C<d_fgetpos>, C<d_finite>, C<d_finitel>, C<d_flexfnam>,
 C<d_flock>, C<d_flockproto>, C<d_fork>, C<d_fp_class>, C<d_fpathconf>,
 C<d_fpclass>, C<d_fpclassify>, C<d_fpclassl>, C<d_fpos64_t>, C<d_frexpl>,
@@ -9483,32 +9561,32 @@ C<d_open3>, C<d_pathconf>, C<d_pause>, C<d_perl_otherlibdirs>,
 C<d_phostname>, C<d_pipe>, C<d_poll>, C<d_portable>, C<d_PRId64>,
 C<d_PRIeldbl>, C<d_PRIEUldbl>, C<d_PRIfldbl>, C<d_PRIFUldbl>,
 C<d_PRIgldbl>, C<d_PRIGUldbl>, C<d_PRIi64>, C<d_PRIo64>, C<d_PRIu64>,
-C<d_PRIx64>, C<d_PRIXU64>, C<d_pthread_atfork>, C<d_pthread_yield>,
-C<d_pwage>, C<d_pwchange>, C<d_pwclass>, C<d_pwcomment>, C<d_pwexpire>,
-C<d_pwgecos>, C<d_pwpasswd>, C<d_pwquota>, C<d_qgcvt>, C<d_quad>,
-C<d_readdir>, C<d_readlink>, C<d_readv>, C<d_recvmsg>, C<d_rename>,
-C<d_rewinddir>, C<d_rmdir>, C<d_safebcpy>, C<d_safemcpy>, C<d_sanemcmp>,
-C<d_sbrkproto>, C<d_sched_yield>, C<d_scm_rights>, C<d_SCNfldbl>,
-C<d_seekdir>, C<d_select>, C<d_sem>, C<d_semctl>, C<d_semctl_semid_ds>,
-C<d_semctl_semun>, C<d_semget>, C<d_semop>, C<d_sendmsg>, C<d_setegid>,
-C<d_seteuid>, C<d_setgrent>, C<d_setgrps>, C<d_sethent>, C<d_setitimer>,
-C<d_setlinebuf>, C<d_setlocale>, C<d_setnent>, C<d_setpent>, C<d_setpgid>,
-C<d_setpgrp2>, C<d_setpgrp>, C<d_setprior>, C<d_setproctitle>,
-C<d_setpwent>, C<d_setregid>, C<d_setresgid>, C<d_setresuid>,
-C<d_setreuid>, C<d_setrgid>, C<d_setruid>, C<d_setsent>, C<d_setsid>,
-C<d_setvbuf>, C<d_sfio>, C<d_shm>, C<d_shmat>, C<d_shmatprototype>,
-C<d_shmctl>, C<d_shmdt>, C<d_shmget>, C<d_sigaction>, C<d_sigprocmask>,
-C<d_sigsetjmp>, C<d_sockatmark>, C<d_sockatmarkproto>, C<d_socket>,
-C<d_socklen_t>, C<d_sockpair>, C<d_socks5_init>, C<d_sqrtl>,
-C<d_sresgproto>, C<d_sresuproto>, C<d_statblks>, C<d_statfs_f_flags>,
-C<d_statfs_s>, C<d_statvfs>, C<d_stdio_cnt_lval>, C<d_stdio_ptr_lval>,
-C<d_stdio_ptr_lval_nochange_cnt>, C<d_stdio_ptr_lval_sets_cnt>,
-C<d_stdio_stream_array>, C<d_stdiobase>, C<d_stdstdio>, C<d_strchr>,
-C<d_strcoll>, C<d_strctcpy>, C<d_strerrm>, C<d_strerror>, C<d_strftime>,
-C<d_strtod>, C<d_strtol>, C<d_strtold>, C<d_strtoll>, C<d_strtoq>,
-C<d_strtoul>, C<d_strtoull>, C<d_strtouq>, C<d_strxfrm>, C<d_suidsafe>,
-C<d_symlink>, C<d_syscall>, C<d_syscallproto>, C<d_sysconf>,
-C<d_sysernlst>, C<d_syserrlst>, C<d_system>, C<d_tcgetpgrp>,
+C<d_PRIx64>, C<d_PRIXU64>, C<d_procselfexe>, C<d_pthread_atfork>,
+C<d_pthread_yield>, C<d_pwage>, C<d_pwchange>, C<d_pwclass>,
+C<d_pwcomment>, C<d_pwexpire>, C<d_pwgecos>, C<d_pwpasswd>, C<d_pwquota>,
+C<d_qgcvt>, C<d_quad>, C<d_readdir>, C<d_readlink>, C<d_readv>,
+C<d_recvmsg>, C<d_rename>, C<d_rewinddir>, C<d_rmdir>, C<d_safebcpy>,
+C<d_safemcpy>, C<d_sanemcmp>, C<d_sbrkproto>, C<d_sched_yield>,
+C<d_scm_rights>, C<d_SCNfldbl>, C<d_seekdir>, C<d_select>, C<d_sem>,
+C<d_semctl>, C<d_semctl_semid_ds>, C<d_semctl_semun>, C<d_semget>,
+C<d_semop>, C<d_sendmsg>, C<d_setegid>, C<d_seteuid>, C<d_setgrent>,
+C<d_setgrps>, C<d_sethent>, C<d_setitimer>, C<d_setlinebuf>,
+C<d_setlocale>, C<d_setnent>, C<d_setpent>, C<d_setpgid>, C<d_setpgrp2>,
+C<d_setpgrp>, C<d_setprior>, C<d_setproctitle>, C<d_setpwent>,
+C<d_setregid>, C<d_setresgid>, C<d_setresuid>, C<d_setreuid>, C<d_setrgid>,
+C<d_setruid>, C<d_setsent>, C<d_setsid>, C<d_setvbuf>, C<d_sfio>, C<d_shm>,
+C<d_shmat>, C<d_shmatprototype>, C<d_shmctl>, C<d_shmdt>, C<d_shmget>,
+C<d_sigaction>, C<d_sigprocmask>, C<d_sigsetjmp>, C<d_sockatmark>,
+C<d_sockatmarkproto>, C<d_socket>, C<d_socklen_t>, C<d_sockpair>,
+C<d_socks5_init>, C<d_sqrtl>, C<d_sresgproto>, C<d_sresuproto>,
+C<d_statblks>, C<d_statfs_f_flags>, C<d_statfs_s>, C<d_statvfs>,
+C<d_stdio_cnt_lval>, C<d_stdio_ptr_lval>, C<d_stdio_ptr_lval_nochange_cnt>,
+C<d_stdio_ptr_lval_sets_cnt>, C<d_stdio_stream_array>, C<d_stdiobase>,
+C<d_stdstdio>, C<d_strchr>, C<d_strcoll>, C<d_strctcpy>, C<d_strerrm>,
+C<d_strerror>, C<d_strftime>, C<d_strtod>, C<d_strtol>, C<d_strtold>,
+C<d_strtoll>, C<d_strtoq>, C<d_strtoul>, C<d_strtoull>, C<d_strtouq>,
+C<d_strxfrm>, C<d_suidsafe>, C<d_symlink>, C<d_syscall>, C<d_syscallproto>,
+C<d_sysconf>, C<d_sysernlst>, C<d_syserrlst>, C<d_system>, C<d_tcgetpgrp>,
 C<d_tcsetpgrp>, C<d_telldir>, C<d_telldirproto>, C<d_time>, C<d_times>,
 C<d_truncate>, C<d_tzname>, C<d_u32align>, C<d_ualarm>, C<d_umask>,
 C<d_uname>, C<d_union_semun>, C<d_unordered>, C<d_usleep>,
@@ -9613,7 +9691,7 @@ C<perl>, C<perl_patchlevel>
 C<PERL_REVISION>, C<PERL_SUBVERSION>, C<PERL_VERSION>, C<perladmin>,
 C<perllibs>, C<perlpath>, C<pg>, C<phostname>, C<pidtype>, C<plibpth>,
 C<pm_apiversion>, C<pmake>, C<pr>, C<prefix>, C<prefixexp>, C<privlib>,
-C<privlibexp>, C<prototype>, C<ptrsize>
+C<privlibexp>, C<procselfexe>, C<prototype>, C<ptrsize>
 
 =item q
 
@@ -11772,6 +11850,8 @@ into the pieces between string literals and regexes. So the C<'code'>
 component filter behaves slightly differently from the other partial
 filters
 described in the previous section.
+
+=item Using Filter::Simple with an explicit C<import> subroutine
 
 =item Using Filter::Simple and Exporter together
 
@@ -14373,7 +14453,7 @@ unix, stdio, perlio, crlf, utf8, raw
 
 =item DESCRIPTION
 
-$class->PUSHED([$mode][,$fh]), $obj->POPPED([$fh]),
+$class->PUSHED([$mode[,$fh]]), $obj->POPPED([$fh]),
 $class->OPEN($path,$mode[,$fh]), $class->FDOPEN($fd),
 $class->SYSOPEN($path,$imode,$perm,$fh), $obj->FILENO($fh),
 $obj->READ($buffer,$len,$fh), $obj->WRITE($buffer,$fh), $obj->FILL($fh),
@@ -14909,9 +14989,12 @@ release, section
 
 roff font should be 1 or 2 chars, not "%s", Invalid link %s, Invalid quote
 specification "%s", %s:%d: Unknown command paragraph "%s", %s:%d: Unknown
-escape EE<lt>%sE<gt>, %s:%d: Unknown sequence %s, %s:%d: Unmatched =back
+escape EE<lt>%sE<gt>, %s:%d: Unknown formatting code %s, %s:%d: Unmatched
+=back
 
 =item BUGS
+
+=item CAVEATS
 
 =item SEE ALSO
 
@@ -15419,7 +15502,7 @@ alt, code, indent, loose, quotes, sentence, width
 
 Bizarre space in item, Item called without tag, Can't open %s for reading:
 %s, Invalid quote specification "%s", %s:%d: Unknown command paragraph
-"%s", %s:%d: Unknown escape: %s, %s:%d: Unknown sequence: %s, %s:%d:
+"%s", %s:%d: Unknown escape: %s, %s:%d: Unknown formatting code: %s, %s:%d:
 Unmatched =back
 
 =item RESTRICTIONS
@@ -15479,6 +15562,8 @@ text with format escapes
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=item NOTES
 
 =item SEE ALSO
 
