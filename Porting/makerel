@@ -104,6 +104,8 @@ my @exe = qw(
 system("chmod +x @exe");
 
 my @writables = qw(
+    NetWare/config_H.wc
+    NetWare/Makefile
     keywords.h
     opcode.h
     opnames.h
@@ -129,19 +131,22 @@ my @writables = qw(
     win32/Makefile
     win32/makefile.mk
     win32/config_H.bc
-    win32/config_H.bc
     win32/config_H.gc
     win32/config_H.vc
+    wince/config_H.ce
+    wince/Makefile.ce
 );
 system("chmod +w @writables");
 
 print "Adding CRs to DOSish files...\n";
 my @crlf = qw(
     djgpp/configure.bat
+    README.ce
     README.dos
     README.win32
     win32/Makefile
     win32/makefile.mk
+    wince/Makefile.ce
 );
 system("perl -pi -e 's/\015*\012/\015\012/' @crlf");
 print "\n";
