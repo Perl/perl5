@@ -1,6 +1,6 @@
 package FileCache;
 
-our $VERSION = '1.02';
+our $VERSION = '1.021';
 
 =head1 NAME
 
@@ -45,6 +45,11 @@ If you use cacheout with C<'|-'> or C<'-|'> you should catch SIGPIPE
 and explicitly close the filehandle., when it is closed from the
 other end some cleanup needs to be done.
 
+While it is permissible to C<close> a FileCache managed file,
+do not do so if you are calling C<FileCache::cacheout> from a package other
+than which it was imported, or with another module which overrides C<close>.
+If you must, use C<FileCache::cacheout_close>.
+
 =head1 BUGS
 
 F<sys/param.h> lies with its C<NOFILE> define on some systems,
@@ -52,7 +57,7 @@ so you may have to set maxopen (I<$FileCache::cacheout_maxopen>) yourself.
 
 =cut
 
-require 5.000;
+require 5.006;
 use Carp;
 use strict;
 no strict 'refs';
