@@ -685,6 +685,14 @@ the C<Unicode::UCD> module.
 
 =back
 
+=head1 UNICODE IN OLDER PERLS
+
+If you cannot upgrade your Perl to 5.8.0 or later, you can still
+do some Unicode processing by using the modules C<Unicode::String>,
+C<Unicode::Map8>, and C<Unicode::Map>, available from CPAN.
+If you have the GNU recode installed, you can also use the
+Perl frontend C<Convert::Recode> for character conversions.
+
 =head1 SEE ALSO
 
 L<perlunicode>, L<Encode>, L<encoding>, L<open>, L<utf8>, L<bytes>,
