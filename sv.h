@@ -318,12 +318,13 @@ struct xpvio {
     char	xio_flags;
 };
 
-#define IOf_ARGV 1	/* this fp iterates over ARGV */
-#define IOf_START 2	/* check for null ARGV and substitute '-' */
-#define IOf_FLUSH 4	/* this fp wants a flush after write op */
-#define IOf_DIDTOP 8	/* just did top of form */
-#define IOf_UNTAINT 16  /* consider this fp (and its data) "safe" */
-#define IOf_NOLINE  32	/* slurped a pseudo-line from empty file */
+#define IOf_ARGV	1	/* this fp iterates over ARGV */
+#define IOf_START	2	/* check for null ARGV and substitute '-' */
+#define IOf_FLUSH	4	/* this fp wants a flush after write op */
+#define IOf_DIDTOP	8	/* just did top of form */
+#define IOf_UNTAINT	16	/* consider this fp (and its data) "safe" */
+#define IOf_NOLINE	32	/* slurped a pseudo-line from empty file */
+#define IOf_FAKE_DIRP	64	/* xio_dirp is fake (source filters kludge) */
 
 /* The following macros define implementation-independent predicates on SVs. */
 

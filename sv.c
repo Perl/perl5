@@ -3318,10 +3318,9 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	{
 	    io_close((IO*)sv, FALSE);
 	}
-	if (IoDIRP(sv)) {
+	if (IoDIRP(sv) && !(IoFLAGS(sv) & IOf_FAKE_DIRP))
 	    PerlDir_close(IoDIRP(sv));
-	    IoDIRP(sv) = 0;
-	}
+	IoDIRP(sv) = (DIR*)NULL;
 	Safefree(IoTOP_NAME(sv));
 	Safefree(IoFMT_NAME(sv));
 	Safefree(IoBOTTOM_NAME(sv));
@@ -5940,8 +5939,11 @@ Perl_sv_dup(pTHX_ SV *sstr)
 	    IoOFP(dstr) = IoIFP(dstr);
 	else
 	    IoOFP(dstr)		= fp_dup(IoOFP(sstr), IoTYPE(sstr));
-	/* XXX PL_rsfp_filters entries have fake IoDIRP() */
-	IoDIRP(dstr)		= dirp_dup(IoDIRP(sstr));
+	/* PL_rsfp_filters entries have fake IoDIRP() */
+	if (IoDIRP(sstr) && !(IoFLAGS(sstr) & IOf_FAKE_DIRP))
+	    IoDIRP(dstr)	= dirp_dup(IoDIRP(sstr));
+	else
+	    IoDIRP(dstr)	= IoDIRP(sstr);
 	IoLINES(dstr)		= IoLINES(sstr);
 	IoPAGE(dstr)		= IoPAGE(sstr);
 	IoPAGE_LEN(dstr)	= IoPAGE_LEN(sstr);
@@ -6516,7 +6518,7 @@ perl_clone_using(PerlInterpreter *proto_perl, IV flags,
     PL_ofslen		= proto_perl->Tofslen;
     PL_ofs		= SAVEPVN(proto_perl->Tofs, PL_ofslen);
     PL_defoutgv		= gv_dup_inc(proto_perl->Tdefoutgv);
-    PL_chopset		= proto_perl->Tchopset;
+    PL_chopset		= proto_perl->Tchopset;	/* XXX */
     PL_toptarget	= sv_dup_inc(proto_perl->Ttoptarget);
     PL_bodytarget	= sv_dup_inc(proto_perl->Tbodytarget);
     PL_formtarget	= sv_dup(proto_perl->Tformtarget);

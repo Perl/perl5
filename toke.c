@@ -1764,7 +1764,8 @@ S_incl_perldb(pTHX)
  * store private buffers and state information.
  *
  * The supplied datasv parameter is upgraded to a PVIO type
- * and the IoDIRP field is used to store the function pointer.
+ * and the IoDIRP field is used to store the function pointer,
+ * and IOf_FAKE_DIRP is enabled on datasv to mark this as such.
  * Note that IoTOP_NAME, IoFMT_NAME, IoBOTTOM_NAME, if set for
  * private use must be set using malloc'd pointers.
  */
@@ -1782,6 +1783,7 @@ Perl_filter_add(pTHX_ filter_t funcp, SV *datasv)
     if (!SvUPGRADE(datasv, SVt_PVIO))
         Perl_die(aTHX_ "Can't upgrade filter_add data to SVt_PVIO");
     IoDIRP(datasv) = (DIR*)funcp; /* stash funcp into spare field */
+    IoFLAGS(datasv) |= IOf_FAKE_DIRP;
     DEBUG_P(PerlIO_printf(Perl_debug_log, "filter_add func %p (%s)\n",
 			  funcp, SvPV_nolen(datasv)));
     av_unshift(PL_rsfp_filters, 1);
@@ -1794,12 +1796,15 @@ Perl_filter_add(pTHX_ filter_t funcp, SV *datasv)
 void
 Perl_filter_del(pTHX_ filter_t funcp)
 {
+    SV *datasv;
     DEBUG_P(PerlIO_printf(Perl_debug_log, "filter_del func %p", funcp));
     if (!PL_rsfp_filters || AvFILLp(PL_rsfp_filters)<0)
 	return;
     /* if filter is on top of stack (usual case) just pop it off */
-    if (IoDIRP(FILTER_DATA(AvFILLp(PL_rsfp_filters))) == (DIR*)funcp){
-	IoDIRP(FILTER_DATA(AvFILLp(PL_rsfp_filters))) = NULL;
+    datasv = FILTER_DATA(AvFILLp(PL_rsfp_filters));
+    if (IoDIRP(datasv) == (DIR*)funcp) {
+	IoFLAGS(datasv) &= ~IOf_FAKE_DIRP;
+	IoDIRP(datasv) = (DIR*)NULL;
 	sv_free(av_pop(PL_rsfp_filters));
 
         return;
