@@ -621,7 +621,7 @@ the syntax
 
 forks the ps(1) command (without spawning a shell, as there are more than
 three arguments to open()), and reads its standard output via the
-C<KID_PS> filehandle.  The corresponding syntax to read from command
+C<KID_PS> filehandle.  The corresponding syntax to write to command
 pipes (with C<"|-"> in place of C<"-|">) is also implemented.
 
 Note that these operations are full Unix forks, which means they may not be
