@@ -208,9 +208,17 @@ private = :lib:Config.pm preplibrary :lib:ExtUtils:Miniperl.pm
 # Files to be built with variable substitution after miniperl is
 # available.  Dependencies handled manually below (for now).
 
-pl = "::pod:pod2html.PL" "::pod:pod2latex.PL" "::pod:pod2man.PL" "::pod:pod2text.PL" "::lib:lib_pm.PL"
+pl = "::pod:pod2html.PL" "::pod:pod2latex.PL" "::pod:pod2man.PL" "::pod:pod2text.PL" \
+	"::lib:lib_pm.PL" "::utils:c2ph.PL" "::utils:h2ph.PL" "::utils:h2xs.PL" \
+	"::utils:perlbug.PL" "::utils:perldoc.PL" "::utils:perlivp.PL" "::utils:pl2pm.PL" \
+	"::utils:splain.PL" "::utils:perlcc.PL" "::utils:dprofpp.PL" "::utils:libnetcfg.PL" \
+	"::utils:piconv.PL" "::utils:enc2xs.PL" 
 
-plextract = "::pod:pod2html" "::pod:pod2latex" "::pod:pod2man" "::pod:pod2text" "::lib:lib_pm"
+plextract = "::pod:pod2html" "::pod:pod2latex" "::pod:pod2man" "::pod:pod2text" \
+	"::lib:lib_pm" "::utils:c2ph" "::utils:h2ph" "::utils:h2xs" \
+	"::utils:perlbug" "::utils:perldoc" "::utils:perlivp" "::utils:pl2pm" \
+	"::utils:splain" "::utils:perlcc" "::utils:dprofpp" "::utils:libnetcfg" \
+	"::utils:piconv" "::utils:enc2xs" 
 
 addedbyconf = UU $(plextract) pstruct
 

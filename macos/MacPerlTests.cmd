@@ -14,7 +14,7 @@ set -e PERL5LIB ""
 set -e PERL_CORE 1
 
 # create/open file for dumping tests to
-perl -e 'open F, ">>::macos:MacPerlTests.out"'
+perl -e 'open F, ">::macos:MacPerlTests.out"'
 open ::macos:MacPerlTests.out
 
 echo ":perl -I::lib    :base:cond.t" >> ::macos:MacPerlTests.out
@@ -1021,6 +1021,9 @@ save ::macos:MacPerlTests.out
 echo ":perl -I::lib    ::ext:Storable:t:integer.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::ext:Storable:t:integer.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::ext:Storable:t:interwork56.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::ext:Storable:t:interwork56.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
 echo ":perl -I::lib    ::ext:Storable:t:lock.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::ext:Storable:t:lock.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
@@ -1234,11 +1237,9 @@ save ::macos:MacPerlTests.out
 echo ":perl -I::lib    ::lib:CGI:t:util.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::lib:CGI:t:util.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
-
-#echo ":perl -I::lib    ::lib:charnames.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:charnames.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-
+echo ":perl -I::lib    ::lib:charnames.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:charnames.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
 echo ":perl -I::lib    ::lib:Class:ISA:test.pl" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::lib:Class:ISA:test.pl >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
@@ -1248,31 +1249,27 @@ save ::macos:MacPerlTests.out
 echo ":perl -I::lib    ::lib:constant.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::lib:constant.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
-
-#echo ":perl -I::lib    ::lib:CPAN:t:loadme.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:CPAN:t:loadme.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:CPAN:t:mirroredby.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:CPAN:t:mirroredby.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:CPAN:t:Nox.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:CPAN:t:Nox.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib -t ::lib:CPAN:t:vcmp.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib -t ::lib:CPAN:t:vcmp.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-
+echo ":perl -I::lib    ::lib:CPAN:t:loadme.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:CPAN:t:loadme.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:CPAN:t:mirroredby.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:CPAN:t:mirroredby.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:CPAN:t:Nox.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:CPAN:t:Nox.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib -t ::lib:CPAN:t:vcmp.t" >> ::macos:MacPerlTests.out
+:perl -I::lib -t ::lib:CPAN:t:vcmp.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
 echo ":perl -I::lib -T ::lib:DB.t" >> ::macos:MacPerlTests.out
 :perl -I::lib -T ::lib:DB.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
-
-#echo ":perl -I::lib    ::lib:Devel:SelfStubber.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:Devel:SelfStubber.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:diagnostics.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:diagnostics.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-
+echo ":perl -I::lib    ::lib:Devel:SelfStubber.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:Devel:SelfStubber.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:diagnostics.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:diagnostics.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
 echo ":perl -I::lib -t ::lib:Digest.t" >> ::macos:MacPerlTests.out
 :perl -I::lib -t ::lib:Digest.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
@@ -1282,31 +1279,34 @@ save ::macos:MacPerlTests.out
 echo ":perl -I::lib    ::lib:Dumpvalue.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::lib:Dumpvalue.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:English.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:English.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:Env:t:array.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:Env:t:array.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:Env:t:env.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:Env:t:env.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:Exporter.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:Exporter.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
 
-#echo ":perl -I::lib    ::lib:English.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:English.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:Env:t:array.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:Env:t:array.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:Env:t:env.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:Env:t:env.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:Exporter.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:Exporter.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:ExtUtils:t:00setup_dummy.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:ExtUtils:t:00setup_dummy.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:ExtUtils:t:backwards.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:ExtUtils:t:backwards.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:ExtUtils:t:00setup_dummy.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:ExtUtils:t:00setup_dummy.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:ExtUtils:t:backwards.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:ExtUtils:t:backwards.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+
 #echo ":perl -I::lib    ::lib:ExtUtils:t:basic.t" >> ::macos:MacPerlTests.out
 #:perl -I::lib    ::lib:ExtUtils:t:basic.t >> ::macos:MacPerlTests.out
 #save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:ExtUtils:t:Command.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:ExtUtils:t:Command.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
+
+echo ":perl -I::lib    ::lib:ExtUtils:t:Command.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:ExtUtils:t:Command.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+
 #echo ":perl -I::lib    ::lib:ExtUtils:t:Constant.t" >> ::macos:MacPerlTests.out
 #:perl -I::lib    ::lib:ExtUtils:t:Constant.t >> ::macos:MacPerlTests.out
 #save ::macos:MacPerlTests.out
@@ -1328,33 +1328,38 @@ save ::macos:MacPerlTests.out
 #echo ":perl -I::lib    ::lib:ExtUtils:t:Manifest.t" >> ::macos:MacPerlTests.out
 #:perl -I::lib    ::lib:ExtUtils:t:Manifest.t >> ::macos:MacPerlTests.out
 #save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:ExtUtils:t:Mkbootstrap.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:ExtUtils:t:Mkbootstrap.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:ExtUtils:t:MM_BeOS.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:ExtUtils:t:MM_BeOS.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:ExtUtils:t:MM_Cygwin.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:ExtUtils:t:MM_Cygwin.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:ExtUtils:t:MM_OS2.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:ExtUtils:t:MM_OS2.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:ExtUtils:t:MM_Unix.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:ExtUtils:t:MM_Unix.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:ExtUtils:t:MM_VMS.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:ExtUtils:t:MM_VMS.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:ExtUtils:t:MM_Win32.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:ExtUtils:t:MM_Win32.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:ExtUtils:t:Packlist.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:ExtUtils:t:Packlist.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:ExtUtils:t:prefixify.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:ExtUtils:t:prefixify.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
+
+echo ":perl -I::lib    ::lib:ExtUtils:t:Mkbootstrap.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:ExtUtils:t:Mkbootstrap.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:ExtUtils:t:MM_BeOS.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:ExtUtils:t:MM_BeOS.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:ExtUtils:t:MM_Cygwin.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:ExtUtils:t:MM_Cygwin.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:ExtUtils:t:MM_NW5.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:ExtUtils:t:MM_NW5.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:ExtUtils:t:MM_OS2.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:ExtUtils:t:MM_OS2.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:ExtUtils:t:MM_Unix.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:ExtUtils:t:MM_Unix.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:ExtUtils:t:MM_VMS.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:ExtUtils:t:MM_VMS.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:ExtUtils:t:MM_Win32.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:ExtUtils:t:MM_Win32.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:ExtUtils:t:Packlist.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:ExtUtils:t:Packlist.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:ExtUtils:t:prefixify.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:ExtUtils:t:prefixify.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+
 #echo ":perl -I::lib -T ::lib:ExtUtils:t:problems.t" >> ::macos:MacPerlTests.out
 #:perl -I::lib -T ::lib:ExtUtils:t:problems.t >> ::macos:MacPerlTests.out
 #save ::macos:MacPerlTests.out
@@ -1364,175 +1369,188 @@ save ::macos:MacPerlTests.out
 #echo ":perl -I::lib    ::lib:ExtUtils:t:VERSION_FROM.t" >> ::macos:MacPerlTests.out
 #:perl -I::lib    ::lib:ExtUtils:t:VERSION_FROM.t >> ::macos:MacPerlTests.out
 #save ::macos:MacPerlTests.out
+#echo ":perl -I::lib    ::lib:ExtUtils:t:writemakefile_args.t" >> ::macos:MacPerlTests.out
+#:perl -I::lib    ::lib:ExtUtils:t:writemakefile_args.t >> ::macos:MacPerlTests.out
+#save ::macos:MacPerlTests.out
 #echo ":perl -I::lib    ::lib:ExtUtils:t:zz_cleanup_dummy.t" >> ::macos:MacPerlTests.out
 #:perl -I::lib    ::lib:ExtUtils:t:zz_cleanup_dummy.t >> ::macos:MacPerlTests.out
 #save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:Fatal.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:Fatal.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:fields.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:fields.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib -T ::lib:File:Basename.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib -T ::lib:File:Basename.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:File:CheckTree.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:File:CheckTree.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:File:Compare.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:File:Compare.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:File:Copy.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:File:Copy.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:File:DosGlob.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:File:DosGlob.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:File:Find:t:find.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:File:Find:t:find.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib -T ::lib:File:Find:t:taint.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib -T ::lib:File:Find:t:taint.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib -T ::lib:File:Path.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib -T ::lib:File:Path.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:File:Spec:t:Functions.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:File:Spec:t:Functions.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:File:Spec:t:rel2abs2rel.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:File:Spec:t:rel2abs2rel.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:File:Spec:t:Spec.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:File:Spec:t:Spec.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:File:stat.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:File:stat.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:File:Temp:t:mktemp.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:File:Temp:t:mktemp.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:File:Temp:t:posix.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:File:Temp:t:posix.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:File:Temp:t:security.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:File:Temp:t:security.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:File:Temp:t:tempfile.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:File:Temp:t:tempfile.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:FileCache.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:FileCache.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:FileHandle.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:FileHandle.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:filetest.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:filetest.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:Filter:Simple:t:data.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:Filter:Simple:t:data.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:Filter:Simple:t:export.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:Filter:Simple:t:export.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:Filter:Simple:t:filter.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:Filter:Simple:t:filter.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:Filter:Simple:t:filter_only.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:Filter:Simple:t:filter_only.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:Filter:Simple:t:import.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:Filter:Simple:t:import.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:FindBin.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:FindBin.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:Getopt:Long:t:gol-basic.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:Getopt:Long:t:gol-basic.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:Getopt:Long:t:gol-compat.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:Getopt:Long:t:gol-compat.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:Getopt:Long:t:gol-linkage.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:Getopt:Long:t:gol-linkage.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:Getopt:Long:t:gol-oo.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:Getopt:Long:t:gol-oo.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib -T ::lib:Getopt:Std.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib -T ::lib:Getopt:Std.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
+
+echo ":perl -I::lib    ::lib:Fatal.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:Fatal.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:fields.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:fields.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib -T ::lib:File:Basename.t" >> ::macos:MacPerlTests.out
+:perl -I::lib -T ::lib:File:Basename.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:File:CheckTree.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:File:CheckTree.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+
+perl -e 'chmod 0666, "TEST-OLD"; `rename TEST-OLD TEST`'
+echo ":perl -I::lib    ::lib:File:Compare.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:File:Compare.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+perl -e 'chmod 0666, "TEST"; `rename TEST TEST-OLD`'
+
+echo ":perl -I::lib    ::lib:File:Copy.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:File:Copy.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:File:DosGlob.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:File:DosGlob.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:File:Find:t:find.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:File:Find:t:find.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib -T ::lib:File:Find:t:taint.t" >> ::macos:MacPerlTests.out
+:perl -I::lib -T ::lib:File:Find:t:taint.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib -T ::lib:File:Path.t" >> ::macos:MacPerlTests.out
+:perl -I::lib -T ::lib:File:Path.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:File:Spec:t:Functions.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:File:Spec:t:Functions.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:File:Spec:t:rel2abs2rel.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:File:Spec:t:rel2abs2rel.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:File:Spec:t:Spec.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:File:Spec:t:Spec.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:File:stat.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:File:stat.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:File:Temp:t:mktemp.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:File:Temp:t:mktemp.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:File:Temp:t:posix.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:File:Temp:t:posix.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:File:Temp:t:security.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:File:Temp:t:security.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:File:Temp:t:tempfile.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:File:Temp:t:tempfile.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:FileCache.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:FileCache.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+
+perl -e 'chmod 0666, "TEST-OLD"; `rename TEST-OLD TEST`'
+echo ":perl -I::lib    ::lib:FileHandle.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:FileHandle.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+perl -e 'chmod 0666, "TEST"; `rename TEST TEST-OLD`'
+
+echo ":perl -I::lib    ::lib:filetest.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:filetest.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:Filter:Simple:t:data.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:Filter:Simple:t:data.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:Filter:Simple:t:export.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:Filter:Simple:t:export.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:Filter:Simple:t:filter.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:Filter:Simple:t:filter.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:Filter:Simple:t:filter_only.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:Filter:Simple:t:filter_only.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:Filter:Simple:t:import.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:Filter:Simple:t:import.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:FindBin.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:FindBin.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:Getopt:Long:t:gol-basic.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:Getopt:Long:t:gol-basic.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:Getopt:Long:t:gol-compat.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:Getopt:Long:t:gol-compat.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:Getopt:Long:t:gol-linkage.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:Getopt:Long:t:gol-linkage.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:Getopt:Long:t:gol-oo.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:Getopt:Long:t:gol-oo.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib -T ::lib:Getopt:Std.t" >> ::macos:MacPerlTests.out
+:perl -I::lib -T ::lib:Getopt:Std.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+
 #echo ":perl -I::lib    ::lib:h2ph.t" >> ::macos:MacPerlTests.out
 #:perl -I::lib    ::lib:h2ph.t >> ::macos:MacPerlTests.out
 #save ::macos:MacPerlTests.out
 #echo ":perl -I::lib    ::lib:h2xs.t" >> ::macos:MacPerlTests.out
 #:perl -I::lib    ::lib:h2xs.t >> ::macos:MacPerlTests.out
 #save ::macos:MacPerlTests.out
-#echo ":perl -I::lib -T ::lib:Hash:Util.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib -T ::lib:Hash:Util.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:I18N:Collate.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:I18N:Collate.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib -t ::lib:I18N:LangTags:test.pl" >> ::macos:MacPerlTests.out
-#:perl -I::lib -t ::lib:I18N:LangTags:test.pl >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:if.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:if.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:integer.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:integer.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib -T ::lib:Internals.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib -T ::lib:Internals.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:IPC:Open2.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:IPC:Open2.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:IPC:Open3.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:IPC:Open3.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:IPC:SysV.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:IPC:SysV.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:less.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:less.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:lib.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:lib.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib -T ::lib:locale.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib -T ::lib:locale.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:Locale:Codes:t:all.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:Locale:Codes:t:all.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:Locale:Codes:t:constants.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:Locale:Codes:t:constants.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:Locale:Codes:t:country.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:Locale:Codes:t:country.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:Locale:Codes:t:currency.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:Locale:Codes:t:currency.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:Locale:Codes:t:languages.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:Locale:Codes:t:languages.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:Locale:Codes:t:rename.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:Locale:Codes:t:rename.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:Locale:Codes:t:script.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:Locale:Codes:t:script.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:Locale:Codes:t:uk.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:Locale:Codes:t:uk.t >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
-#echo ":perl -I::lib -t ::lib:Locale:Maketext:test.pl" >> ::macos:MacPerlTests.out
-#:perl -I::lib -t ::lib:Locale:Maketext:test.pl >> ::macos:MacPerlTests.out
-#save ::macos:MacPerlTests.out
 
+echo ":perl -I::lib -T ::lib:Hash:Util.t" >> ::macos:MacPerlTests.out
+:perl -I::lib -T ::lib:Hash:Util.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:I18N:Collate.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:I18N:Collate.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib -t ::lib:I18N:LangTags:test.pl" >> ::macos:MacPerlTests.out
+:perl -I::lib -t ::lib:I18N:LangTags:test.pl >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:if.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:if.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:integer.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:integer.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib -T ::lib:Internals.t" >> ::macos:MacPerlTests.out
+:perl -I::lib -T ::lib:Internals.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:IPC:Open2.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:IPC:Open2.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:IPC:Open3.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:IPC:Open3.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:IPC:SysV.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:IPC:SysV.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:less.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:less.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:lib.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:lib.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib -T ::lib:locale.t" >> ::macos:MacPerlTests.out
+:perl -I::lib -T ::lib:locale.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:Locale:Codes:t:all.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:Locale:Codes:t:all.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:Locale:Codes:t:constants.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:Locale:Codes:t:constants.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:Locale:Codes:t:country.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:Locale:Codes:t:country.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:Locale:Codes:t:currency.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:Locale:Codes:t:currency.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:Locale:Codes:t:languages.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:Locale:Codes:t:languages.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:Locale:Codes:t:rename.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:Locale:Codes:t:rename.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:Locale:Codes:t:script.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:Locale:Codes:t:script.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:Locale:Codes:t:uk.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:Locale:Codes:t:uk.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib -t ::lib:Locale:Maketext:test.pl" >> ::macos:MacPerlTests.out
+:perl -I::lib -t ::lib:Locale:Maketext:test.pl >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
 echo ":perl -I::lib    ::lib:Math:BigInt:t:bare_mbf.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::lib:Math:BigInt:t:bare_mbf.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
@@ -2067,8 +2085,8 @@ save ::macos:MacPerlTests.out
 echo ":perl -I::lib    ::lib:Tie:File:t:08_ro.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::lib:Tie:File:t:08_ro.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
-#echo ":perl -I::lib    ::lib:Tie:File:t:09_gen_rs.t" >> ::macos:MacPerlTests.out
-#:perl -I::lib    ::lib:Tie:File:t:09_gen_rs.t >> ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:Tie:File:t:09_gen_rs.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:Tie:File:t:09_gen_rs.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
 echo ":perl -I::lib    ::lib:Tie:File:t:10_splice_rs.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::lib:Tie:File:t:10_splice_rs.t >> ::macos:MacPerlTests.out

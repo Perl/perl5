@@ -53,14 +53,23 @@ for my $script (sort keys %tests) {
 	} else {
 		push @ok, $script;
 	}
+	$total{not} += @not;
+	$total{missed} += @missed;
+	$total{extra} += @extra;
+	$total{total} += $tests{$script}{num};
 
 	push @none, $script if $tests{$script}{num} == 0;
 }
 
 print "\n\nTest results begin\n";
 print join("\n  ", "OK:", @ok), "\n\n";
-print join("\n  ", "Not OK:", @notok), "\n\n";
 print join("\n  ", "None executed:", @none), "\n\n";
-printf "Test results: %s OK, %s not OK, %s none executed\n\n",
+print join("\n  ", "Not OK:", @notok), "\n\n";
+printf "Test files: %s OK, %s not OK, %s none executed\n\n",
 	scalar @ok, scalar @notok, scalar @none;
+$total{ok} = ($total{total} + $total{extra}) - ($total{not} + $total{missed});
+printf "Individual tests: %s total, %s OK, %s not OK, %s missed, %s extra\n\n",
+	@total{qw(total ok not missed extra)};
+
+
 __END__
