@@ -53,8 +53,6 @@ INST_ARCH	*= \$(ARCHNAME)
 #USE_MULTI	*= define
 
 #
-# XXX WARNING! This option is still very experimental.  May be broken.
-#
 # Beginnings of interpreter cloning/threads; still very incomplete.
 # This should be enabled to get the fork() emulation.  This needs
 # USE_MULTI as well.
@@ -195,11 +193,6 @@ CCLIBDIR	*= $(CCHOME)\lib
 # This should normally be disabled.  Enabling it causes perl to read scripts
 # in text mode (which is the 5.005 behavior) and will break ByteLoader.
 #BUILDOPT	+= -DPERL_TEXTMODE_SCRIPTS
-
-#
-# This should normally be disabled.  Enabling it runs a cloned toplevel
-# interpreter (*EXPERIMENTAL*, fails tests)
-#BUILDOPT	+= -DTOP_CLONE
 
 #
 # specify semicolon-separated list of extra directories that modules will
