@@ -380,7 +380,7 @@ sub doMakefile {
 	    'SUFFIX'   => 'gz',
 	},
         clean => { FILES => "xdefine" },
-        realclean => {FILES=> 'const-c.inc const-xs.inc'},
+        realclean => { FILES=> 'const-c.inc const-xs.inc' },
     );
 
     if ($ENV{PERL_CORE}) {
@@ -445,7 +445,8 @@ EOM
             print  <<EOM;
 NOTE: if you get an error like this (the line number may vary):
 Makefile:91: *** missing separator
-then set the environment variable LC_ALL to "C" and retry.
+then set the environment variable LC_ALL to "C" and retry
+from scratch (re-run perl "Makefile.PL").
 
 EOM
         }
