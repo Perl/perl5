@@ -2020,11 +2020,12 @@ The following pairs are more or less equivalent:
 
 See L<perlipc/"Safe Pipe Opens"> for more examples of this.
 
-Explicitly closing any piped filehandle causes the parent process to
-wait for the child to finish, and returns the status value in C<$?>.
-Note: on any operation which may do a fork, unflushed buffers remain
+NOTE: On any operation which may do a fork, unflushed buffers remain
 unflushed in both processes, which means you may need to set C<$|> to
 avoid duplicate output.
+
+Closing any piped filehandle causes the parent process to wait for the
+child to finish, and returns the status value in C<$?>.
 
 Using the constructor from the IO::Handle package (or one of its
 subclasses, such as IO::File or IO::Socket),
