@@ -360,6 +360,11 @@ running Perl interpreter's version in this form.  See L<perlvar/$^V>.
 Note that using the v-strings for IPv4 addresses is not portable unless
 you also use the inet_aton()/inet_ntoa() routines of the Socket package.
 
+Note that since Perl 5.8.1 the single-number v-strings (like C<v65>)
+are not v-strings before the C<< => >> operator.  (They were v-strings
+from Perl 5.6.0 to Perl 5.8.0, but that caused more confusion and
+breakage than good.)
+
 =head3 Special Literals
 
 The special literals __FILE__, __LINE__, and __PACKAGE__
