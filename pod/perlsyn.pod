@@ -497,7 +497,7 @@ Or
                                   "read-only";
         };
 
-Or if you are certainly that all the C<&&> clauses are true, you can use
+Or if you are certain that all the C<&&> clauses are true, you can use
 something like this, which "switches" on the value of the
 C<HTTP_USER_AGENT> environment variable.
 
