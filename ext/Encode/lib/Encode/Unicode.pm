@@ -3,7 +3,7 @@ package Encode::Unicode;
 use strict;
 use warnings;
 
-our $VERSION = do { my @r = (q$Revision: 1.30 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.31 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 #
 # Aux. subs & constants
@@ -69,17 +69,28 @@ for my $name (qw(UTF-16 UTF-16BE UTF-16LE
 }
 
 sub name { shift->{'Name'} }
-sub new_sequence { $_[0] };
+sub new_sequence
+{
+    my $self = shift;
+    # Return the original if endian known
+    return $self if ($self->{endian});
+    # Return a clone
+    return bless {%$self},ref($self);
+}
+
 
 #
-# two implementation of (en|de)code exist.  *_modern use
-# an array and *_classic stick with substr.  *_classic is much
-# slower but more memory conservative.  *_modern is default.
+# three implementation of (en|de)code exist.  XS version is the fastest.
+# *_modern use # an array and *_classic stick with substr.  *_classic is
+#  much slower but more memory conservative.  *_xs is default.
 
 sub set_transcoder{
     no warnings qw(redefine);
     my $type = shift;
-    if     ($type eq "modern"){
+    if    ($type eq "xs"){
+	*decode = \&decode_xs;
+	*encode = \&encode_xs;
+    }elsif($type eq "modern"){
 	*decode = \&decode_modern;
 	*encode = \&encode_modern;
     }elsif($type eq "classic"){
@@ -87,17 +98,17 @@ sub set_transcoder{
 	*encode = \&encode_classic;
     }else{
 	require Carp; 
-	Carp::croak __PACKAGE__, "::set_transcoder(modern|classic)";
+	Carp::croak __PACKAGE__, "::set_transcoder(modern|classic|xs)";
     }
 }
 
-set_transcoder("modern");
+set_transcoder("xs");
 
 #
 # *_modern are much faster but guzzle more memory
 #
 
-sub decode_modern
+sub decode_modern($$;$)
 {
     my ($obj, $str, $chk ) = @_;
     my ($size, $endian, $ucs2) = @$obj{qw(size endian ucs2)};
@@ -134,7 +145,7 @@ sub decode_modern
     return $utf8;
 }
 
-sub encode_modern
+sub encode_modern($$;$)
 {
     my ($obj, $utf8, $chk) = @_;
     my ($size, $endian, $ucs2) = @$obj{qw(size endian ucs2)};
@@ -171,7 +182,7 @@ sub encode_modern
 # *_classic are slower but more memory conservative
 #
 
-sub decode_classic
+sub decode_classic($$;$)
 {
     my ($obj, $str, $chk ) = @_;
     my ($size, $endian, $ucs2) = @$obj{qw(size endian ucs2)};
@@ -207,7 +218,7 @@ sub decode_classic
     return $utf8;
 }
 
-sub encode_classic
+sub encode_classic($$;$)
 {
     my ($obj, $utf8, $chk) = @_;
     my ($size, $endian, $ucs2) = @$obj{qw(size endian ucs2)};

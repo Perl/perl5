@@ -1,6 +1,6 @@
 package Encode;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 1.34 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.40 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 
 require DynaLoader;
@@ -44,7 +44,9 @@ use Encode::Alias;
 
 # Make a %Encoding package variable to allow a certain amount of cheating
 our %Encoding;
-use Encode::Config;
+our %ExtModule;
+require Encode::Config;
+eval { require Encode::ConfigLocal };
 
 sub encodings
 {
@@ -243,15 +245,6 @@ sub predefine_encodings{
 	};
 	$Encode::Encoding{utf8} = 
 	    bless {Name => "utf8"} => "Encode::utf8";
-    }
-    # do externals if necessary 
-    require File::Basename;
-    require File::Spec;
-    for my $ext (qw()){
-	my $pm =
-	    File::Spec->catfile(File::Basename::dirname($INC{'Encode.pm'}),
-				"Encode", "$ext.pm");
-	do $pm;
     }
 }
 
@@ -598,5 +591,12 @@ L<perlfunc/open>,
 L<perlunicode>, 
 L<utf8>, 
 the Perl Unicode Mailing List E<lt>perl-unicode@perl.orgE<gt>
+
+head2 MAINTAINER
+
+This project was originated by Nick Ing-Simmons and later maintained
+by Dan Kogai E<lt>dankogai@dan.co.jpE<gt>.  See AUTHORS for full list
+of people involved.  For any questions, use
+E<lt>perl-unicode@perl.orgE<gt> so others can share.
 
 =cut

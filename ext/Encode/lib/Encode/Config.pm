@@ -2,10 +2,9 @@
 # Demand-load module list
 #
 package Encode::Config;
-our $VERSION = do { my @r = (q$Revision: 1.1 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.2 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use strict;
-require Exporter;
 
 our %ExtModule = 
     (
@@ -108,6 +107,7 @@ unless (ord("A") == 193){
 	 'euc-cn'             => 'Encode::CN',
 	 'gb12345-raw'        => 'Encode::CN',
 	 'gb2312-raw'         => 'Encode::CN',
+	 'hz'                 => 'Encode::CN',
 	 'iso-ir-165'         => 'Encode::CN',
 	 'cp936'              => 'Encode::CN',
 	 'MacChineseSimp'     => 'Encode::CN',
@@ -136,12 +136,17 @@ unless (ord("A") == 193){
 	 'cp950'              => 'Encode::TW',
 	 'MacChineseTrad'     => 'Encode::TW',
 
-	 'big5plus'           => 'Encode::HanExtra',
-	 'euc-tw'             => 'Encode::HanExtra',
-	 'gb18030'            => 'Encode::HanExtra',
+	 #'big5plus'           => 'Encode::HanExtra',
+	 #'euc-tw'             => 'Encode::HanExtra',
+	 #'gb18030'            => 'Encode::HanExtra',
 	);
 }
 
-*Encode::ExtModule = \%ExtModule;
+#
+# Why not export ? to keep ConfigLocal Happy!
+#
+while (my ($enc,$mod) = each %ExtModule){
+    $Encode::ExtModule{$enc} = $mod;
+}
 
 1;
