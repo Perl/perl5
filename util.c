@@ -4359,3 +4359,35 @@ Perl_seed(pTHX)
     return u;
 }
 
+UV
+Perl_get_seed(void)
+{
+     char *s = PerlEnv_getenv("PERL_HASH_SEED");
+     UV myseed = 0;
+
+     if (s)
+	  while (isSPACE(*s)) s++;
+     if (s && isDIGIT(*s))
+	  myseed = (UV)Atoul(s);
+     else
+#ifdef USE_HASH_SEED_EXPLICIT
+     if (s)
+#endif
+     {
+	  /* Compute a random seed */
+	  (void)seedDrand01((Rand_seed_t)seed());
+	  PL_srand_called = TRUE;
+	  myseed = (UV)(Drand01() * (NV)UV_MAX);
+#if RANDBITS < (UVSIZE * 8)
+	  /* Since there are not enough randbits to to reach all
+	   * the bits of a UV, the low bits might need extra
+	   * help.  Sum in another random number that will
+	   * fill in the low bits. */
+	  myseed +=
+	       (UV)(Drand01() * (NV)((1 << ((UVSIZE * 8 - RANDBITS))) - 1));
+#endif /* RANDBITS < (UVSIZE * 8) */
+     }
+     PL_hash_seed_set = TRUE;
+
+     return myseed;
+}

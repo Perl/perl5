@@ -1101,12 +1101,11 @@ PERL_ENCODING environment variable is consulted for an encoding name.
 
 =item PERL_HASH_SEED
 
-(Since Perl 5.8.1.)
-
-Used to randomise Perl's internal hash function.  To emulate the
-pre-5.8.1 behaviour, set to an integer (zero means exactly the same
-order as 5.8.0).  "Pre-5.8.1" means, among other things, that hash
-keys will be ordered the same between different runs of Perl.
+(Since Perl 5.8.1.)  Used to randomise Perl's internal hash function.
+To emulate the pre-5.8.1 behaviour, set to an integer (zero means
+exactly the same order as 5.8.0).  "Pre-5.8.1" means, among other
+things, that hash keys will be ordered the same between different runs
+of Perl.
 
 The default behaviour is to randomise unless the PERL_HASH_SEED is set.
 If Perl has been compiled with C<-DUSE_HASH_SEED_EXPLICIT>, the default
@@ -1114,14 +1113,15 @@ behaviour is B<not> to randomise unless the PERL_HASH_SEED is set.
 
 If PERL_HASH_SEED is unset or set to a non-numeric string, Perl uses
 the pseudorandom seed supplied by the operating system and libraries.
-If unset, each different run of Perl will have different ordering of
-the outputs of keys(), values(), and each().
+This means that each different run of Perl will have a different
+ordering of the results of keys(), values(), and each().
 
 See L<perlsec/"Algorithmic Complexity Attacks"> for more information.
 
 =item PERL_HASH_SEED_DEBUG
 
-Set to (anything) to display the value of the hash seed.
+(Since Perl 5.8.1.)  Set to "1" to display (to STDERR) the value of
+the hash seed at the beginning of execution.
 
 =item PERL_ROOT (specific to the VMS port)
 

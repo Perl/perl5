@@ -1135,6 +1135,9 @@
 #define seed			Perl_seed
 #endif
 #ifdef PERL_CORE
+#define get_seed		Perl_get_seed
+#endif
+#ifdef PERL_CORE
 #define report_evil_fh		Perl_report_evil_fh
 #endif
 #ifdef PERL_CORE
@@ -3644,6 +3647,9 @@
 #endif
 #ifdef PERL_CORE
 #define seed()			Perl_seed(aTHX)
+#endif
+#ifdef PERL_CORE
+#define get_seed()		Perl_get_seed(aTHX)
 #endif
 #ifdef PERL_CORE
 #define report_evil_fh(a,b,c)	Perl_report_evil_fh(aTHX_ a,b,c)
