@@ -1081,10 +1081,6 @@ d_pwquota (i_pwd.U):
 	This variable conditionally defines PWQUOTA, which indicates
 	that struct passwd contains pw_quota.
 
-d_qgcvt (d_qgcvt.U):
-	This variable conditionally defines the HAS_QGCVT symbol, which
-	indicates to the C program that the qgcvt() routine is available.
-
 d_quad (quadtype.U):
 	This variable, if defined, tells that there's a 64-bit integer type,
 	quadtype.

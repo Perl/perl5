@@ -719,7 +719,7 @@ Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
 		if (offset >= srclen)
 		    retnum = 0;
 		else
-		    retnum = (UV) s[offset] << 8;
+		    retnum = (UV) s[offset] <<  8;
 	    }
 	    else if (size == 32) {
 		if (offset >= srclen)
@@ -786,7 +786,7 @@ Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
 			((UV) s[offset + 3] << 32) +
 			((UV) s[offset + 4] << 24) +
 			((UV) s[offset + 5] << 16) +
-			(     s[offset + 6] << 8);
+			(     s[offset + 6] <<  8);
 	    }
 #endif
 	}
@@ -799,7 +799,7 @@ Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
 	    retnum = s[offset];
 	else if (size == 16)
 	    retnum =
-		((UV) s[offset] <<  8) +
+		((UV) s[offset] <<      8) +
 		      s[offset + 1];
 	else if (size == 32)
 	    retnum =
@@ -820,7 +820,7 @@ Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
 		((UV) s[offset + 3] << 32) +
 		((UV) s[offset + 4] << 24) +
 		((UV) s[offset + 5] << 16) +
-		(     s[offset + 6] << 8) +
+		(     s[offset + 6] <<  8) +
 		      s[offset + 7];
 	}
 #endif
