@@ -2865,6 +2865,10 @@ This is a known bug in the glibc 2.2.5 with long long integers.
 
 No known fix.
 
+=head2 libwww-perl (LWP) fails base/date #51
+
+Use libwww-perl 5.65 or later.
+
 =head2 Mac OS X
 
 Please remember to set your environment variable LC_ALL to "C"
@@ -3055,9 +3059,12 @@ hard-to-fix ways.  As a stop-gap measure to avoid people from getting
 frustrated at the mysterious results (core dumps, most often) it is
 for now forbidden (you will get a fatal error even from an attempt).
 
-Self-tying of globs is broken, but not disabled.
+A change to self-tying of globs has caused them to be recursively
+referenced (see: L<perlobj/"Two-Phased Garbage Collection">).  You
+will now need an explicit untie to destroy a self-tied glob.  This
+behaviour may be fixed at a later date.
 
-Self-tying of scalars and IO works.
+Self-tying of scalars and IO thingies works.
 
 =head2 Building Extensions Can Fail Because Of Largefiles
 

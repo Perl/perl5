@@ -1,6 +1,4 @@
 #!./perl
-
-# $Id: lock.t,v 1.0.1.4 2001/01/03 09:41:00 ram Exp $
 #
 #  Copyright (c) 1995-2000, Raphael Manfredi
 #  

@@ -48,6 +48,8 @@ package lib;
 
 $useConfig
 
+use strict;
+
 my \$archname         = $Config_archname;
 my \$version          = $Config_version;
 my \@inc_version_list = $Config_inc_version_list;
@@ -57,6 +59,12 @@ print OUT <<'!NO!SUBS!';
 
 our @ORIG_INC = @INC;	# take a handy copy of 'original' value
 our $VERSION = '0.5564';
+my $Is_MacOS = $^O eq 'MacOS';
+my $Mac_FS;
+if ($Is_MacOS) {
+	require File::Spec;
+	$Mac_FS = eval { require Mac::FileSpec::Unixish };
+}
 
 sub import {
     shift;
@@ -67,21 +75,29 @@ sub import {
 	    require Carp;
 	    Carp::carp("Empty compile time value given to use lib");
 	}
+
+	local $_ = _nativize($_);
+
 	if (-e && ! -d _) {
 	    require Carp;
 	    Carp::carp("Parameter to use lib must be directory, not file");
 	}
 	unshift(@INC, $_);
-        # Add any previous version directories we found at configure time
-        foreach my $incver (@inc_version_list)
-        {
-            unshift(@INC, "$_/$incver") if -d "$_/$incver";
-        }
-	# Put a corresponding archlib directory infront of $_ if it
+	# Add any previous version directories we found at configure time
+	foreach my $incver (@inc_version_list)
+	{
+	    my $dir = $Is_MacOS
+		? File::Spec->catdir( $_, $incver )
+		: "$_/$incver";
+	    unshift(@INC, $dir) if -d $dir;
+	}
+	# Put a corresponding archlib directory in front of $_ if it
 	# looks like $_ has an archlib directory below it.
-	unshift(@INC, "$_/$archname")          if -d "$_/$archname/auto";
-	unshift(@INC, "$_/$version")           if -d "$_/$version";
-	unshift(@INC, "$_/$version/$archname") if -d "$_/$version/$archname";
+	my($arch_auto_dir, $arch_dir, $version_dir, $version_arch_dir)
+	    = _get_dirs($_);
+	unshift(@INC, $arch_dir)         if -d $arch_auto_dir;
+	unshift(@INC, $version_dir)      if -d $version_dir;
+	unshift(@INC, $version_arch_dir) if -d $version_arch_dir;
     }
 
     # remove trailing duplicates
@@ -95,15 +111,50 @@ sub unimport {
 
     my %names;
     foreach (@_) {
+	local $_ = _nativize($_);
+
+	my($arch_auto_dir, $arch_dir, $version_dir, $version_arch_dir)
+	    = _get_dirs($_);
 	++$names{$_};
-	++$names{"$_/$archname"}          if -d "$_/$archname/auto";
-	++$names{"$_/$version"}           if -d "$_/$version";
-	++$names{"$_/$version/$archname"} if -d "$_/$version/$archname";
+	++$names{$arch_dir}         if -d $arch_auto_dir;
+	++$names{$version_dir}      if -d $version_dir;
+	++$names{$version_arch_dir} if -d $version_arch_dir;
     }
 
     # Remove ALL instances of each named directory.
     @INC = grep { !exists $names{$_} } @INC;
     return;
+}
+
+sub _get_dirs {
+    my($dir) = @_;
+    my($arch_auto_dir, $arch_dir, $version_dir, $version_arch_dir);
+
+    # we could use this for all platforms in the future, but leave it
+    # Mac-only for now, until there is more time for testing it.
+    if ($Is_MacOS) {
+	$arch_auto_dir    = File::Spec->catdir( $_, $archname, 'auto' );
+	$arch_dir         = File::Spec->catdir( $_, $archname, );
+	$version_dir      = File::Spec->catdir( $_, $version );
+	$version_arch_dir = File::Spec->catdir( $_, $version, $archname );
+    } else {
+	$arch_auto_dir    = "$_/$archname/auto";
+	$arch_dir         = "$_/$archname";
+	$version_dir      = "$_/$version";
+	$version_arch_dir = "$_/$version/$archname";
+    }
+    return($arch_auto_dir, $arch_dir, $version_dir, $version_arch_dir);
+}
+
+sub _nativize {
+    my($dir) = @_;
+
+    if ($Is_MacOS && $Mac_FS) {
+	$dir = Mac::FileSpec::Unixish::nativize($dir);
+	$dir .= ":" unless $dir =~ /:$/;
+    }
+
+    return $dir;
 }
 
 1;
@@ -180,6 +231,13 @@ users must first translate their file paths to Unix conventions.
     # VMS users wanting to put [.stuff.moo] into 
     # their @INC would write
     use lib 'stuff/moo';
+
+=head1 NOTES
+
+In the future, this module will likely use File::Spec for determining
+paths, as it does now for Mac OS (where Unix-style or Mac-style paths
+work, and Unix-style paths are converted properly to Mac-style paths
+before being added to @INC).
 
 =head1 SEE ALSO
 

@@ -1,9 +1,5 @@
 /*
- * Store and retrieve mechanism.
- */
-
-/*
- * $Id: Storable.xs,v 1.0.1.10 2001/08/28 21:52:14 ram Exp $
+ *  Store and retrieve mechanism.
  *
  *  Copyright (c) 1995-2000, Raphael Manfredi
  *  

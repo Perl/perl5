@@ -11,5 +11,9 @@ use FindBin qw($Bin);
 
 print "# $Bin\n";
 
-print "not " unless $Bin =~ m,[/.]lib\]?$,;
+if ($^O eq 'MacOS') {
+    print "not " unless $Bin =~ m,:lib:$,;
+} else {
+    print "not " unless $Bin =~ m,[/.]lib\]?$,;
+}
 print "ok 1\n";

@@ -7,8 +7,10 @@ BEGIN {
 
 use strict;
 use Devel::SelfStubber;
+use File::Spec::Functions;
 
 my $runperl = "$^X \"-I../lib\"";
+$runperl =~ s|../lib|::lib:| if $^O eq 'MacOS';
 
 # ensure correct output ordering for system() calls
 
@@ -31,7 +33,8 @@ push @cleanup, $inlib;
 
 while (<DATA>) {
   if (/^\#{16,}\s+(.*)/) {
-    my $file = "$inlib/$1";
+    my $f = $1;
+    my $file = catfile(curdir(),$inlib,$f);
     push @cleanup, $file;
     open FH, ">$file" or die $!;
   } else {
@@ -169,8 +172,9 @@ $Devel::SelfStubber::JUST_STUBS=0;
 
 undef $/;
 foreach my $module (@module, 'Data', 'End') {
-  my $file = "$lib/$module.pm";
-  open FH, "$inlib/$module.pm" or die $!;
+  my $file = catfile(curdir(),$lib,"$module.pm");
+  my $fileo = catfile(curdir(),$inlib,"$module.pm");
+  open FH, $fileo or die "Can't open $fileo: $!";
   my $contents = <FH>;
   close FH or die $!;
   push @cleanup, $file;
@@ -210,7 +214,7 @@ system "$runperl -w \"-I$lib\" \"-MData\" -e \"Data::ok\"";
 system "$runperl -w \"-I$lib\" \"-MEnd\" -e \"End::lime\"";
 
 # But check that the documentation after the __END__ survived.
-open FH, "$lib/End.pm" or die $!;
+open FH, catfile(curdir(),$lib,"End.pm") or die $!;
 $_ = <FH>;
 close FH or die $!;
 

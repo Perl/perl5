@@ -16,6 +16,7 @@ $VERSION = 0.02;
             );
 
 my $Is_VMS = $^O eq 'VMS';
+my $Is_MacOS = $^O eq 'MacOS';
 
 
 =head1 NAME
@@ -68,7 +69,7 @@ sub which_perl {
     $perl .= $Config{exe_ext} unless $perl =~ m/$Config{exe_ext}$/i;
 
     my $perlpath = File::Spec->rel2abs( $perl );
-    unless( -x $perlpath ) {
+    unless( $Is_MacOS || -x $perlpath ) {
         # $^X was probably 'perl'
 
         # When building in the core, *don't* go off and find

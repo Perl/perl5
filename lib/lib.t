@@ -51,13 +51,25 @@ use lib $Lib_Dir;
 BEGIN { use_ok('Yup') }
 
 BEGIN {
+    if ($^O eq 'MacOS') {
+	for ($Lib_Dir, $Arch_Dir) {
+	    tr|/|:|;
+	    $_ .= ":" unless /:$/;
+	    $_ = ":$_" unless /^:/; # we know this path is relative
+	}
+    }
     is( $INC[1], $Lib_Dir,          'lib adding at end of @INC' );
     print "# \@INC == @INC\n";
     is( $INC[0], $Arch_Dir,        '    auto/ dir in front of that' );
     is( grep(/^\Q$Lib_Dir\E$/, @INC), 1,   '    no duplicates' );
 
     # Yes, %INC uses Unixy filepaths.
-    is( $INC{'Yup.pm'}, join("/",$Lib_Dir, 'Yup.pm'),    '%INC set properly' );
+    # Not on Mac OS, it doesn't ... it never has, at least.
+    my $path = join("/",$Lib_Dir, 'Yup.pm');
+    if ($^O eq 'MacOS') {
+	$path = $Lib_Dir . 'Yup.pm';
+    }
+    is( $INC{'Yup.pm'}, $path,    '%INC set properly' );
 
     is( eval { do 'Yup.pm'  }, 42,  'do() works' );
     ok( eval { require Yup; },      '   require()' );

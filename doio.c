@@ -790,7 +790,7 @@ Perl_nextargv(pTHX_ register GV *gv)
 #endif
 		}
 		else {
-#if !defined(DOSISH) && !defined(AMIGAOS) && !defined(__CYGWIN__)
+#if !defined(DOSISH) && !defined(AMIGAOS)
 #  ifndef VMS  /* Don't delete; use automatic file versioning */
 		    if (UNLINK(PL_oldname) < 0) {
 		        if (ckWARN_d(WARN_INPLACE))	

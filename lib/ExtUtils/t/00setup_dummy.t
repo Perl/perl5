@@ -12,11 +12,12 @@ chdir 't';
 
 use strict;
 use Test::More tests => 9;
+use File::Spec::Functions;
 use File::Path;
 use File::Basename;
 
 my %Files = (
-             'Big-Dummy/lib/Big/Dummy.pm'     => <<'END',
+             catfile(curdir(),'Big-Dummy','lib','Big','Dummy.pm')     => <<'END',
 package Big::Dummy;
 
 $VERSION = 0.01;
@@ -24,7 +25,7 @@ $VERSION = 0.01;
 1;
 END
 
-             'Big-Dummy/Makefile.PL'          => <<'END',
+             catfile(curdir(),'Big-Dummy','Makefile.PL')          => <<'END',
 use ExtUtils::MakeMaker;
 
 printf "Current package is: %s\n", __PACKAGE__;
@@ -36,14 +37,14 @@ WriteMakefile(
 );
 END
 
-             'Big-Dummy/t/compile.t'          => <<'END',
+             catfile(curdir(),'Big-Dummy','t','compile.t')          => <<'END',
 print "1..2\n";
 
 print eval "use Big::Dummy; 1;" ? "ok 1\n" : "not ok 1\n";
 print "ok 2 - TEST_VERBOSE\n";
 END
 
-             'Big-Dummy/Liar/t/sanity.t'      => <<'END',
+             catfile(curdir(),'Big-Dummy','Liar','t','sanity.t')      => <<'END',
 print "1..3\n";
 
 print eval "use Big::Dummy; 1;" ? "ok 1\n" : "not ok 1\n";
@@ -51,7 +52,7 @@ print eval "use Big::Liar; 1;" ? "ok 2\n" : "not ok 2\n";
 print "ok 3 - TEST_VERBOSE\n";
 END
 
-             'Big-Dummy/Liar/lib/Big/Liar.pm' => <<'END',
+             catfile(curdir(),'Big-Dummy','Liar','lib','Big','Liar.pm') => <<'END',
 package Big::Liar;
 
 $VERSION = 0.01;
@@ -59,7 +60,7 @@ $VERSION = 0.01;
 1;
 END
 
-             'Big-Dummy/Liar/Makefile.PL'     => <<'END',
+             catfile(curdir(),'Big-Dummy','Liar','Makefile.PL')     => <<'END',
 use ExtUtils::MakeMaker;
 
 my $mm = WriteMakefile(
@@ -74,7 +75,7 @@ foreach my $key (qw(INST_LIB INST_ARCHLIB)) {
 }
 END
 
-             'Problem-Module/Makefile.PL'   => <<'END',
+             catfile(curdir(),'Problem-Module','Makefile.PL')   => <<'END',
 use ExtUtils::MakeMaker;
 
 WriteMakefile(
@@ -82,7 +83,7 @@ WriteMakefile(
 );
 END
 
-             'Problem-Module/subdir/Makefile.PL'    => <<'END',
+             catfile(curdir(),'Problem-Module','subdir','Makefile.PL')    => <<'END',
 printf "\@INC %s .\n", (grep { $_ eq '.' } @INC) ? "has" : "doesn't have";
 
 warn "I think I'm going to be sick\n";

@@ -106,7 +106,8 @@ BEGIN {
 
     SKIP: {
         if ($^O eq 'amigaos' || $^O eq 'os2' || $^O eq 'MSWin32' ||
-            $^O eq 'NetWare' || $^O eq 'dos' || $^O eq 'cygwin') {
+            $^O eq 'NetWare' || $^O eq 'dos' || $^O eq 'cygwin'  ||
+            $^O eq 'MacOS') {
             skip( "different file permission semantics on $^O", 3);
         }
 

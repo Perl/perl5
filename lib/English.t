@@ -128,7 +128,7 @@ is( $keys[1], 'd|e|f', '$SUBSCRIPT_SEPARATOR' );
 eval { is( $EXCEPTIONS_BEING_CAUGHT, 1, '$EXCEPTIONS_BEING_CAUGHT' ) };
 ok( !$EXCEPTIONS_BEING_CAUGHT, '$EXCEPTIONS_BEING_CAUGHT should be false' );
 
-eval { open('') };
+eval { local *F; my $f = 'asdasdasd'; ++$f while -e $f; open(F, $f); };
 is( $OS_ERROR, $ERRNO, '$OS_ERROR' );
 ok( $OS_ERROR{ENOENT}, '%OS_ERROR (ENOENT should be set)' );
 

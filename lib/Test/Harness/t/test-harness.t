@@ -10,7 +10,11 @@ BEGIN {
     }
 }
 
-my $SAMPLE_TESTS = $ENV{PERL_CORE} ? "lib/sample-tests" : "t/sample-tests";
+use File::Spec::Functions;
+
+my $SAMPLE_TESTS = $ENV{PERL_CORE}
+    ? catdir(curdir(), 'lib', 'sample-tests')
+    : catdir(curdir(), 't', 'sample-tests');
 
 use strict;
 
@@ -36,9 +40,10 @@ package main;
 use Test::More;
 
 my $IsVMS = $^O eq 'VMS';
+my $IsMacOS = $^O eq 'MacOS';
 
 # VMS uses native, not POSIX, exit codes.
-my $die_estat = $IsVMS ? 44 : 1;
+my $die_estat = $IsVMS ? 44 : $IsMacOS ? 0 : 1;
 
 my %samples = (
             simple            => {
@@ -426,7 +431,9 @@ while (my($test, $expect) = each %samples) {
         select NULL;    # _run_all_tests() isn't as quiet as it should be.
         local $SIG{__WARN__} = sub { $warning .= join '', @_; };
         ($totals, $failed) = 
-          Test::Harness::_run_all_tests("$SAMPLE_TESTS/$test");
+          Test::Harness::_run_all_tests($^O eq 'macos' ?
+					catfile($SAMPLE_TESTS, $test) :
+					"$SAMPLE_TESTS/$test");
     };
     select STDOUT;
 
@@ -444,7 +451,7 @@ while (my($test, $expect) = each %samples) {
         is_deeply( {map { $_=>$totals->{$_} } keys %{$expect->{total}}},
                    $expect->{total},
                                                   "$test - totals" );
-        is_deeply( {map { $_=>$failed->{"$SAMPLE_TESTS/$test"}{$_} }
+        is_deeply( {map { $_=>$failed->{catfile($SAMPLE_TESTS, $test)}{$_} }
                     keys %{$expect->{failed}}},
                    $expect->{failed},
                                                   "$test - failed" );

@@ -82,7 +82,7 @@ if ($@) {
 }
 print "ok ",$i++,"\n";
 
-print "not " unless $INC[0] eq "fred";
+print "not " unless ($INC[0] eq "fred" || ($^O eq 'MacOS' && $INC[0] eq ":fred:"));
 print "ok ",$i++,"\n";
 
 eval "use lib 1.0 qw(joe)";
@@ -92,7 +92,7 @@ if ($@) {
 }
 print "ok ",$i++,"\n";
 
-print "not " unless $INC[0] eq "joe";
+print "not " unless ($INC[0] eq "joe" || ($^O eq 'MacOS' && $INC[0] eq ":joe:"));
 print "ok ",$i++,"\n";
 
 eval "use lib 1.01 qw(freda)";
@@ -101,7 +101,7 @@ unless ($@) {
 }
 print "ok ",$i++,"\n";
 
-print "not " if $INC[0] eq "freda";
+print "not " if ($INC[0] eq "freda" || ($^O eq 'MacOS' && $INC[0] eq ":freda:"));
 print "ok ",$i++,"\n";
 
 {

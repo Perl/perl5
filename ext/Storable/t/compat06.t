@@ -1,6 +1,4 @@
 #!./perl
-
-# $Id: compat-0.6.t,v 1.0.1.1 2001/02/17 12:26:21 ram Exp $
 #
 #  Copyright (c) 1995-2000, Raphael Manfredi
 #  
