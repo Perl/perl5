@@ -2374,7 +2374,7 @@ Found in file pp.h
 Opening bracket for arguments on a callback.  See C<PUTBACK> and
 L<perlcall>.
 
-		PUSHMARK;
+	void	PUSHMARK(SP)
 
 =for hackers
 Found in file pp.h
