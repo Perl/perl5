@@ -3137,7 +3137,7 @@ tryagain:
 		if (ISMULT2(p)) { /* Back off on ?+*. */
 		    if (len)
 			p = oldp;
-		    else if (!UNI_IS_INVARIANT(NATIVE_TO_UNI(ender)) && UTF) {
+		    else if (UTF) {
 			 if (FOLD) {
 			      /* Emit all the Unicode characters. */
 			      for (foldbuf = tmpbuf;
@@ -3162,7 +3162,7 @@ tryagain:
 		    }
 		    break;
 		}
-		if (!UNI_IS_INVARIANT(NATIVE_TO_UNI(ender)) && UTF) {
+		if (UTF) {
 		     if (FOLD) {
 		          /* Emit all the Unicode characters. */
 			  for (foldbuf = tmpbuf;
