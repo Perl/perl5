@@ -483,10 +483,12 @@ PERLVAR(Iregex_padav,   AV*)		/* All regex objects */
 PERLVAR(Ireentrant_buffer, REBUF*)	/* here we store the _r buffers */
 #endif
 
+PERLVAR(sharedsv_space,		PerlInterpreter*)
+PERLVAR(sharesv_space_mutex,	perl_mutex)
+
 #endif
 
 PERLVAR(Isavebegin,     bool)	/* save BEGINs for compiler	*/
-
 
 PERLVAR(Icustom_op_names, HV*)  /* Names of user defined ops */
 PERLVAR(Icustom_op_descs, HV*)  /* Descriptions of user defined ops */
