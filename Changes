@@ -95,6 +95,44 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6600] By: jhi                                   on 2000/08/11  04:06:10
+        Log: Add a few missing files, update MANIFEST.
+     Branch: perl
+	   + lib/CGI/eg/make_links.pl lib/CGI/eg/wilogo.gif
+	   + lib/Pod/PlainText.pm t/pod/find.t
+	   ! MANIFEST t/op/regmesg.t
+____________________________________________________________________________
+[  6599] By: jhi                                   on 2000/08/11  03:31:10
+        Log: Add Perl debugging tutorial, regen toc. 
+             
+             Subject: perldebtut.pod
+             From: Richard Foley <Richard.Foley@m.dasa.de>
+             Date: Wed, 09 Aug 2000 10:17:15 +0200
+             Message-id: <3991138B.262247B8@m.dasa.de>
+     Branch: perl
+	   + pod/perldebtut.pod
+	   ! MANIFEST pod/buildtoc.PL pod/perl.pod pod/perltoc.pod
+____________________________________________________________________________
+[  6598] By: jhi                                   on 2000/08/11  02:48:56
+        Log: tiny Changes edit
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
+[  6597] By: jhi                                   on 2000/08/11  02:39:04
+        Log: Tests for #6589.
+             
+             Subject: Re: B::Deparse was Re: [ID 20000808.005] refs to returned lvalues are lvalues??
+             From: simon@brecon.co.uk (Simon Cozens)
+             Date: 11 Aug 2000 02:24:52 GMT
+             Message-ID: <slrn8p6ovk.5sh.simon@justanother.perlhacker.org>
+     Branch: perl
+	   ! t/lib/b.t
+____________________________________________________________________________
+[  6596] By: jhi                                   on 2000/08/11  01:50:07
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
 [  6595] By: jhi                                   on 2000/08/11  01:47:16
         Log: nitfix
      Branch: perl
