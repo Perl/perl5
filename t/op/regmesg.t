@@ -30,7 +30,7 @@ my @death =
 
  '/(?<= .*)/' =>  'Variable length lookbehind not implemented at {#} mark in regex m/(?<= .*){#}/',
 
- '/(?<= x{10000})/' => 'Lookbehind longer than 255 not implemented at {#} mark in regex m/(?<= x{10000}){#}/',
+ '/(?<= x{1000})/' => 'Lookbehind longer than 255 not implemented at {#} mark in regex m/(?<= x{1000}){#}/',
 
  '/(?@)/' => 'Sequence (?@...) not implemented at {#} mark in regex m/(?@{#})/',
 
