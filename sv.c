@@ -2520,7 +2520,7 @@ register SV *str2;
     if (cur1 != cur2)
 	return 0;
 
-    return !bcmp(pv1, pv2, cur1);
+    return !memcmp(pv1, pv2, cur1);
 }
 
 I32
@@ -2707,7 +2707,7 @@ I32 append;
 
 thats_all_folks:
     if ((rslen > 1 && (bp - (STDCHAR*)SvPVX(sv) < rslen)) ||
-	  bcmp((char*)bp - rslen, rsptr, rslen))
+	  memcmp((char*)bp - rslen, rsptr, rslen))
 	goto screamer;				/* go back to the fray */
 thats_really_all_folks:
     if (shortbuffered)
@@ -2742,7 +2742,7 @@ screamer2:
 	if (i != EOF &&			/* joy */
 	    (!rslen ||
 	     SvCUR(sv) < rslen ||
-	     bcmp(SvPVX(sv) + SvCUR(sv) - rslen, rsptr, rslen)))
+	     memcmp(SvPVX(sv) + SvCUR(sv) - rslen, rsptr, rslen)))
 	{
 	    append = -1;
 	    goto screamer2;
