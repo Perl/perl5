@@ -23,6 +23,11 @@
 #endif
 #define ABORT() kill(getpid(),SIGABRT);
 
+#define PERL_SYS_INIT(argcp, argvp) do {	\
+    _response(argcp, argvp);			\
+    _wildcard(argcp, argvp); } while (0)
+
+
 /*
  * fwrite1() should be a routine with the same calling sequence as fwrite(),
  * but which outputs all of the bytes requested as a single stream (unlike

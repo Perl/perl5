@@ -1,25 +1,24 @@
-*** Configure.orig	Thu Oct 19 07:48:18 1995
---- Configure	Wed Nov 01 20:14:32 1995
+*** Configure.orig	Thu Dec 07 14:38:08 1995
+--- Configure	Mon Dec 18 19:16:22 1995
 ***************
-*** 561,566 ****
---- 561,575 ----
-  defvoidused=''
-  voidflags=''
-  CONFIG=''
-+ archobjs=''
-+ firstmakefile='makefile'
-+ obj_ext='.o'
-+ obj_ext_regexp='\.o'
-+ lib_ext='.a'
-+ exe_ext=
-+ ar='ar'
-+ plibext=
-+ path_sep=$p_
-  
-  define='define'
-  undef='undef'
+*** 1377,1383 ****
+  	*)
+  		echo "I don't know where '$file' is, and my life depends on it." >&4
+  		echo "Go find a public domain implementation or fix your PATH setting!" >&4
+! 		exit 1
+  		;;
+  	esac
+  done
+--- 1377,1383 ----
+  	*)
+  		echo "I don't know where '$file' is, and my life depends on it." >&4
+  		echo "Go find a public domain implementation or fix your PATH setting!" >&4
+! 		#exit 1
+  		;;
+  	esac
+  done
 ***************
-*** 1363,1369 ****
+*** 1386,1392 ****
   say=offhand
   for file in $trylist; do
   	xxx=`./loc $file $file $pth`
@@ -27,7 +26,7 @@
   	eval _$file=$xxx
   	case "$xxx" in
   	/*)
---- 1370,1378 ----
+--- 1386,1394 ----
   say=offhand
   for file in $trylist; do
   	xxx=`./loc $file $file $pth`
@@ -38,7 +37,7 @@
   	case "$xxx" in
   	/*)
 ***************
-*** 2156,2162 ****
+*** 3173,3179 ****
   	exit(0);
   }
   EOM
@@ -46,7 +45,7 @@
   	gccversion=`./gccvers`
   	case "$gccversion" in
   	'') echo "You are not using GNU cc." ;;
---- 2165,2171 ----
+--- 3175,3181 ----
   	exit(0);
   }
   EOM
@@ -55,8 +54,8 @@
   	case "$gccversion" in
   	'') echo "You are not using GNU cc." ;;
 ***************
-*** 3851,3856 ****
---- 3860,3871 ----
+*** 3765,3770 ****
+--- 3767,3778 ----
   		*"-l$thislib "*);;
   		*) dflt="$dflt -l$thislib";;
   		esac
@@ -70,7 +69,24 @@
   		echo "No -l$thislib."
   	fi
 ***************
-*** 3964,3975 ****
+*** 3864,3870 ****
+  	esac
+  	;;
+  esac
+! libnames='';
+  case "$libs" in
+  '') ;;
+  *)  for thislib in $libs; do
+--- 3872,3878 ----
+  	esac
+  	;;
+  esac
+! #libnames='';
+  case "$libs" in
+  '') ;;
+  *)  for thislib in $libs; do
+***************
+*** 3878,3889 ****
   			:
   		elif try=`./loc lib$thislib.$so X $libpth`; $test -f "$try"; then
   			:
@@ -83,7 +99,7 @@
   		elif try=`./loc Slib$thislib.a X $xlibpth`; $test -f "$try"; then
   			:
   		else
---- 3979,3992 ----
+--- 3886,3899 ----
   			:
   		elif try=`./loc lib$thislib.$so X $libpth`; $test -f "$try"; then
   			:
@@ -99,7 +115,7 @@
   			:
   		else
 ***************
-*** 4018,4028 ****
+*** 3932,3942 ****
   	fi
   elif $test -r "$libc" || (test -h "$libc") >/dev/null 2>&1; then
   	echo "Your C library seems to be in $libc, as you said before."
@@ -111,7 +127,7 @@
   	echo "Your C library seems to be in $libc.  You're normal."
   else
   	if tans=`./loc libc.a blurfl/dyick $libpth`; $test -r "$tans"; then
---- 4035,4045 ----
+--- 3942,3952 ----
   	fi
   elif $test -r "$libc" || (test -h "$libc") >/dev/null 2>&1; then
   	echo "Your C library seems to be in $libc, as you said before."
@@ -124,8 +140,8 @@
   else
   	if tans=`./loc libc.a blurfl/dyick $libpth`; $test -r "$tans"; then
 ***************
-*** 4135,4140 ****
---- 4152,4161 ----
+*** 4049,4054 ****
+--- 4059,4068 ----
   	eval $xscan;\
   	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
   		eval $xrun
@@ -137,7 +153,7 @@
   	nm -p $* 2>/dev/null >libc.tmp
   	$grep fprintf libc.tmp > libc.ptf
 ***************
-*** 4145,4167 ****
+*** 4059,4081 ****
   		eval $xrun
   	else
   		echo " "
@@ -161,7 +177,7 @@
   				done
   				echo "Ok." >&4
   			else
---- 4166,4189 ----
+--- 4073,4096 ----
   		eval $xrun
   	else
   		echo " "
@@ -187,7 +203,7 @@
   				echo "Ok." >&4
   			else
 ***************
-*** 4507,4513 ****
+*** 4421,4427 ****
   	exit(0);
   }
   EOCP
@@ -195,7 +211,7 @@
   		intsize=`./try`
   		echo "Your integers are $intsize bytes long."
   	else
---- 4529,4535 ----
+--- 4436,4442 ----
   	exit(0);
   }
   EOCP
@@ -204,7 +220,7 @@
   		echo "Your integers are $intsize bytes long."
   	else
 ***************
-*** 4587,4593 ****
+*** 4501,4507 ****
   	exit(result);
   }
   EOCP
@@ -212,7 +228,7 @@
   	./try
   	yyy=$?
   else
---- 4609,4615 ----
+--- 4516,4522 ----
   	exit(result);
   }
   EOCP
@@ -221,7 +237,7 @@
   	yyy=$?
   else
 ***************
-*** 4668,4674 ****
+*** 4582,4588 ****
   
   }
   EOCP
@@ -229,7 +245,7 @@
   	./try
   	castflags=$?
   else
---- 4690,4696 ----
+--- 4597,4603 ----
   
   }
   EOCP
@@ -238,7 +254,7 @@
   	castflags=$?
   else
 ***************
-*** 4707,4713 ****
+*** 4621,4627 ****
   	exit((unsigned long)vsprintf(buf,"%s",args) > 10L);
   }
   EOF
@@ -246,7 +262,7 @@
   		echo "Your vsprintf() returns (int)." >&4
   		val2="$undef"
   	else
---- 4729,4735 ----
+--- 4636,4642 ----
   	exit((unsigned long)vsprintf(buf,"%s",args) > 10L);
   }
   EOF
@@ -255,7 +271,7 @@
   		val2="$undef"
   	else
 ***************
-*** 4777,4783 ****
+*** 4691,4697 ****
   		cryptlib=-lcrypt
   	fi
   	if $test -z "$cryptlib"; then
@@ -263,7 +279,7 @@
   	else
   		cryptlib=-lcrypt
   	fi
---- 4799,4805 ----
+--- 4706,4712 ----
   		cryptlib=-lcrypt
   	fi
   	if $test -z "$cryptlib"; then
@@ -272,7 +288,7 @@
   		cryptlib=-lcrypt
   	fi
 ***************
-*** 5284,5290 ****
+*** 5198,5204 ****
   }
   EOM
   	if $cc $ccflags $cccdlflags -c dyna.c > /dev/null 2>&1 && 
@@ -280,7 +296,7 @@
   		$cc $ccflags $ldflags $cccdlflags $ccdlflags fred.c -o fred $libs > /dev/null 2>&1; then
   		xxx=`./fred`
   		case $xxx in
---- 5306,5312 ----
+--- 5213,5219 ----
   }
   EOM
   	if $cc $ccflags $cccdlflags -c dyna.c > /dev/null 2>&1 && 
@@ -289,7 +305,7 @@
   		xxx=`./fred`
   		case $xxx in
 ***************
-*** 5441,5447 ****
+*** 5355,5361 ****
   EOCP
   : check sys/file.h first to get FREAD on Sun
   if $test `./findhdr sys/file.h` && \
@@ -297,7 +313,7 @@
   	h_sysfile=true;
   	echo "<sys/file.h> defines the O_* constants..." >&4
   	if ./open3; then
---- 5463,5469 ----
+--- 5370,5376 ----
   EOCP
   : check sys/file.h first to get FREAD on Sun
   if $test `./findhdr sys/file.h` && \
@@ -306,7 +322,7 @@
   	echo "<sys/file.h> defines the O_* constants..." >&4
   	if ./open3; then
 ***************
-*** 5452,5458 ****
+*** 5366,5372 ****
   		val="$undef"
   	fi
   elif $test `./findhdr fcntl.h` && \
@@ -314,7 +330,7 @@
   	h_fcntl=true;
   	echo "<fcntl.h> defines the O_* constants..." >&4
   	if ./open3; then
---- 5474,5480 ----
+--- 5381,5387 ----
   		val="$undef"
   	fi
   elif $test `./findhdr fcntl.h` && \
@@ -323,7 +339,7 @@
   	echo "<fcntl.h> defines the O_* constants..." >&4
   	if ./open3; then
 ***************
-*** 5931,5937 ****
+*** 5848,5854 ****
   y*|true)
   	usemymalloc='y'
   	mallocsrc='malloc.c'
@@ -331,7 +347,7 @@
   	d_mymalloc="$define"
   	case "$libs" in
   	*-lmalloc*)
---- 5953,5959 ----
+--- 5863,5869 ----
   y*|true)
   	usemymalloc='y'
   	mallocsrc='malloc.c'
@@ -340,7 +356,7 @@
   	case "$libs" in
   	*-lmalloc*)
 ***************
-*** 6366,6375 ****
+*** 6283,6292 ****
   		: we will have to assume that it supports the 4.2 BSD interface
   		d_oldsock="$undef"
   	else
@@ -351,7 +367,7 @@
   			if $contains socket libc.list >/dev/null 2>&1; then
   			echo "...but the Wollongong group seems to have hacked it in." >&4
   				socketlib="-lnet"
---- 6388,6397 ----
+--- 6298,6307 ----
   		: we will have to assume that it supports the 4.2 BSD interface
   		d_oldsock="$undef"
   	else
@@ -363,7 +379,7 @@
   			echo "...but the Wollongong group seems to have hacked it in." >&4
   				socketlib="-lnet"
 ***************
-*** 6382,6388 ****
+*** 6299,6305 ****
   					d_oldsock="$define"
   				fi
   			else
@@ -371,7 +387,7 @@
   				d_socket="$undef"
   				d_oldsock="$undef"
   			fi
---- 6404,6410 ----
+--- 6314,6320 ----
   					d_oldsock="$define"
   				fi
   			else
@@ -380,7 +396,7 @@
   				d_oldsock="$undef"
   			fi
 ***************
-*** 6905,6911 ****
+*** 7055,7061 ****
   	printf("%d\n", (char *)&try.bar - (char *)&try.foo);
   }
   EOCP
@@ -388,7 +404,7 @@
   		dflt=`./try`
   	else
   		dflt='8'
---- 6927,6933 ----
+--- 7070,7076 ----
   	printf("%d\n", (char *)&try.bar - (char *)&try.foo);
   }
   EOCP
@@ -397,7 +413,24 @@
   	else
   		dflt='8'
 ***************
-*** 6953,6959 ****
+*** 7080,7086 ****
+  '') obj_ext='.o';;
+  esac
+  case "$path_sep" in
+! '') path_sep=':';;
+  esac
+  : Which makefile gets called first.  This is used by make depend.
+  case "$firstmakefile" in
+--- 7095,7101 ----
+  '') obj_ext='.o';;
+  esac
+  case "$path_sep" in
+! '') path_sep="$p_";;
+  esac
+  : Which makefile gets called first.  This is used by make depend.
+  case "$firstmakefile" in
+***************
+*** 7120,7126 ****
   }
   EOCP
   	xxx_prompt=y
@@ -405,7 +438,7 @@
   		dflt=`./try`
   		case "$dflt" in
   		[1-4][1-4][1-4][1-4]|12345678|87654321)
---- 6975,6981 ----
+--- 7135,7141 ----
   }
   EOCP
   	xxx_prompt=y
@@ -414,7 +447,7 @@
   		case "$dflt" in
   		[1-4][1-4][1-4][1-4]|12345678|87654321)
 ***************
-*** 7531,7537 ****
+*** 7470,7476 ****
   	printf("%d\n",i);
   }
   EOCP
@@ -422,7 +455,7 @@
   		dflt=`try`
   	else
   		dflt='?'
---- 7553,7559 ----
+--- 7485,7491 ----
   	printf("%d\n",i);
   }
   EOCP
@@ -431,7 +464,7 @@
   	else
   		dflt='?'
 ***************
-*** 7558,7575 ****
+*** 7497,7514 ****
   $cc $ccflags -c bar1.c >/dev/null 2>&1
   $cc $ccflags -c bar2.c >/dev/null 2>&1
   $cc $ccflags -c foo.c >/dev/null 2>&1
@@ -450,7 +483,7 @@
   else
   	case "$ranlib" in
   	:) ranlib='';;
---- 7580,7597 ----
+--- 7512,7529 ----
   $cc $ccflags -c bar1.c >/dev/null 2>&1
   $cc $ccflags -c bar2.c >/dev/null 2>&1
   $cc $ccflags -c foo.c >/dev/null 2>&1
@@ -470,7 +503,7 @@
   	case "$ranlib" in
   	:) ranlib='';;
 ***************
-*** 7641,7647 ****
+*** 7580,7586 ****
   	'') $echo $n ".$c"
   		if $cc $ccflags \
   		$i_time $i_systime $i_systimek $sysselect $s_timeval $s_timezone \
@@ -478,7 +511,7 @@
   			set X $i_time $i_systime $i_systimek $sysselect $s_timeval
   			shift
   			flags="$*"
---- 7663,7669 ----
+--- 7595,7601 ----
   	'') $echo $n ".$c"
   		if $cc $ccflags \
   		$i_time $i_systime $i_systimek $sysselect $s_timeval $s_timezone \
@@ -487,7 +520,7 @@
   			shift
   			flags="$*"
 ***************
-*** 7710,7716 ****
+*** 7649,7655 ****
   #endif
   }
   EOCP
@@ -495,7 +528,7 @@
   	d_fds_bits="$define"
   	d_fd_set="$define"
   	echo "Well, your system knows about the normal fd_set typedef..." >&4
---- 7732,7738 ----
+--- 7664,7670 ----
   #endif
   }
   EOCP
@@ -504,7 +537,7 @@
   	d_fd_set="$define"
   	echo "Well, your system knows about the normal fd_set typedef..." >&4
 ***************
-*** 7727,7733 ****
+*** 7666,7672 ****
   	$cat <<'EOM'
   Hmm, your compiler has some difficulty with fd_set.  Checking further...
   EOM
@@ -512,7 +545,7 @@
   		d_fds_bits="$undef"
   		d_fd_set="$define"
   		echo "Well, your system has some sort of fd_set available..." >&4
---- 7749,7755 ----
+--- 7681,7687 ----
   	$cat <<'EOM'
   Hmm, your compiler has some difficulty with fd_set.  Checking further...
   EOM
@@ -521,7 +554,7 @@
   		d_fd_set="$define"
   		echo "Well, your system has some sort of fd_set available..." >&4
 ***************
-*** 8353,8359 ****
+*** 8380,8386 ****
   else
   	echo "false"
   fi
@@ -529,7 +562,7 @@
   EOP
   chmod +x varargs
   
---- 8375,8381 ----
+--- 8395,8401 ----
   else
   	echo "false"
   fi
@@ -538,7 +571,7 @@
   chmod +x varargs
   
 ***************
-*** 8496,8506 ****
+*** 8744,8750 ****
   	echo " "
   	echo "Stripping down executable paths..." >&4
   	for file in $loclist $trylist; do
@@ -546,11 +579,7 @@
   	done
   	;;
   esac
-  
-  : create config.sh file
-  echo " "
-  echo "Creating config.sh..." >&4
---- 8518,8531 ----
+--- 8759,8765 ----
   	echo " "
   	echo "Stripping down executable paths..." >&4
   	for file in $loclist $trylist; do
@@ -558,47 +587,3 @@
   	done
   	;;
   esac
-  
-+ # Setup libraries for linking miniperl (if not set already)
-+ : ${cldlibs="$libs $cryptlib"}
-+ 
-  : create config.sh file
-  echo " "
-  echo "Creating config.sh..." >&4
-***************
-*** 8556,8561 ****
---- 8581,8587 ----
-  chmod='$chmod'
-  chown='$chown'
-  clocktype='$clocktype'
-+ cldlibs='$cldlibs'
-  comm='$comm'
-  compress='$compress'
-  contains='$contains'
-***************
-*** 8752,8757 ****
---- 8778,8784 ----
-  expr='$expr'
-  extensions='$extensions'
-  find='$find'
-+ firstmakefile='$firstmakefile'
-  flex='$flex'
-  fpostype='$fpostype'
-  freetype='$freetype'
-***************
-*** 8962,8967 ****
---- 8989,9002 ----
-  voidflags='$voidflags'
-  xlibpth='$xlibpth'
-  zcat='$zcat'
-+ archobjs='$archobjs'
-+ obj_ext='$obj_ext'
-+ obj_ext_regexp='$obj_ext_regexp'
-+ lib_ext='$lib_ext'
-+ exe_ext='$exe_ext'
-+ ar='$ar'
-+ plibext='$plibext'
-+ path_sep='$path_sep'
-  EOT
-  
-  : add special variables

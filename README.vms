@@ -1,4 +1,4 @@
-Last revised: 12-Jun-1995 by Charles Bailey  bailey@genetics.upenn.edu
+Last revised: 14-Dec-1995 by Charles Bailey  bailey@genetics.upenn.edu
 
 The VMS port of Perl is still under development.  At this time, the Perl
 binaries built under VMS handle internal operations properly, for the most
@@ -34,10 +34,10 @@ which affect Perl performance:
 
 At the moment, in addition to basic VMS, you'll need two things:
    - a C compiler: VAXC, DECC, or gcc for the VAX; DECC for the AXP
-   - a make tool: DEC's MMS or the free analog MMK (available from ftp.spc.edu)
-     or a standard make utility (e.g. GNU make, also available from
-     ftp.spc.edu).
-In addition, you may include socket support if you have a IP stack running
+   - a make tool: DEC's MMS (version 2.6 or later) or the free analog MMK
+     (available from ftp.spc.edu), or a standard make utility (e.g. GNU make,
+     also available from ftp.spc.edu).
+In addition, you may include socket support if you have an IP stack running
 on your system.  See the topic "Socket support" for more information.
 
 * Socket support
@@ -45,8 +45,8 @@ on your system.  See the topic "Socket support" for more information.
 Perl includes a number of IP socket routines among its builtin functions,
 which are available if you choose to compile Perl with socket support.  Since
 IP networking is an optional addition to VMS, there are several different IP
-stacks available, it's difficult to automate the process of building Perl with
-socket support in a way which will work on all systems.  
+stacks available, so it's difficult to automate the process of building Perl
+with socket support in a way which will work on all systems.  
 
 By default, Perl is built without IP socket support.  If you define the macro
 SOCKET when invoking MMS, however, socket support will be included.  As
@@ -55,6 +55,9 @@ which is layered on MadGoat software's vendor-independent NETLIB interface.
 This provides support for all socket calls used by Perl except the
 [g|s]etnet*() routines, which are replaced for the moment by stubs which
 generate a fatal error if a Perl script attempts to call one of these routines. 
+Both SOCKETSHR and NETLIB are available from MadGoat ftp sites, such as
+ftp.spc.edu or ftp.wku.edu.
+
 You can link Perl directly to your TCP/IP stack's library, *as long as* it
 supplies shims for stdio routines which will properly handle both sockets and
 normal file descriptors.  This is necessary because Perl does not distinguish
@@ -65,7 +68,7 @@ your IP stack, then make the following changes:
     change the SOCKLIB macro so that it translates to  the filespec of your
     IP stack's socket library.  This will be added to the RTL options file.
   - Edit the file SockAdapt.H in the [.VMS] subdirectory so that it
-    includes the Socket.h, In.H, Inet.H, NetDb.H, and, if necessary,
+    includes the Socket.H, In.H, Inet.H, NetDb.H, and, if necessary,
     Errno.H header files for your IP stack, or so that it declares the
     standard TCP/IP constants and data structures appropriately.  (See
     the distributed copy of SockAdapt.H for a collection of the structures
@@ -89,7 +92,7 @@ need to unpack the distribution properly, or manually edit Descrip.MMS or
 the VMS Makefile to alter directory paths as necessary.  (I'd advise using the 
 `normal' directory tree, at least for the first time through.)  This
 subdirectory contains several files, among which are the following:
-  Config.VMS     - A template C header file set up for VMS.
+  Config.VMS     - A template Config.H set up for VMS.
   Descrip.MMS    - The MMS/MMK dependency file for building Perl
   GenConfig.Pl   - A Perl script to generate Config.SH retrospectively
                    from Config.VMS, since the Configure shell script which
@@ -98,13 +101,20 @@ subdirectory contains several files, among which are the following:
                    files, since not all make utilities can do this easily.
   Gen_ShrFls.Pl  - A Perl script which generates linker options files and
                    MACRO declarations for PerlShr.Exe.
-  Makefile      - The make dependency file for building Perl  
+  Makefile       - The make dependency file for building Perl  
   MMS2Make.Pl    - A Perl script used to generate Makefile from Descrip.MMS
+  PerlVMS.pod    - Documentation for VMS-specific behavior of Perl
+  Perly_[CH].VMS - Versions of the byacc output from Perl's grammar,
+                   modified to include VMS-specific C compiler options
+  SockAdapt.[CH] - C source code used to integrate VMS TCP/IP support
+  Test.Com       - DCL driver for Perl regression tests
   VMSish.H       - C header file containing VMS-specific definitions
   VMS.C          - C source code for VMS-specific routines
-  WriteMain.Pl   - A Perl script used to generate perlmain.c during the build.
-There may also be other files pertaining to features under development; for the
-most part, you can ignore them.
+  VMS_Yfix.Pl    - Perl script to convert Perly.[CH] to Perly_[CH].VMS
+  WriteMain.Pl   - Perl script to generate Perlmain.C
+The [.Ext...] directories contain VMS-specific extensions distributed with
+Perl.  There may also be other files in [.VMS...] pertaining to features under
+development; for the most part, you can ignore them.
 
 Config.VMS and Decrip.MMS/Makefile are set up to build a version of Perl which
 includes all features known to work when this release was assembled.  If you
@@ -115,11 +125,18 @@ it is superseded by the current Config.VMS during the build.)  You may also
 wish to make site-specific changes to Descrip.MMS or Makefile to reflect local
 conventions for naming of files, etc.
 
-At the moment, system-specific information which becomes part of the Perl
-Config extension is hard-coded into the file genconfig.pl in the vms
-subdirectory.  Before you build Perl, you should make any changes to the list
-at the end of this file necessary to reflect your system (e.g your hostname and
-VMS version).
+There are several pieces of system-specific information which become part of
+the Perl Config extension.  Under VMS, the data for Config are generated by the
+script GenConfig.Pl in the [.VMS] subdirectory.  It tries to ascertain the
+necessary information from various files, or from the system itself, and
+generally does the right thing.  There is a list of hard-coded values at the
+end of this script which specifies items that are correct for most VMS systems,
+but may be incorrect for you, if your site is set up in an unusual fashion.  If
+you're familiar with Perl's Config extension, feel free to edit these values as
+necessary.  If this doesn't mean much to you, don't worry -- the information is
+probably correct, and even if it's not, none of these parameters affect your
+ability to build or run Perl.  You'll only get the wrong answer if you ask for
+it specifically from Config.
 
 Examine the information at the beginning of Descrip.MMS for information about
 specifying alternate C compilers or building a version of Perl with debugging
@@ -134,7 +151,9 @@ of command-line macros, you may want to be certain that you haven't defined DCL
 symbols which would interfere with the build.  Then, if you are using MMS or
 MMK, say
 $ MMS/Descrip=[.VMS] ! or MMK
-If you are using make, say
+(N.B. If you are using MMS, you must use version 2.6 or later; a bug in
+earlier versions produces malformed cc command lines.)  If you are using a
+version of make, say
 $ Make -f [.VMS]Makefile
 Note that the Makefile doesn't support conditional compilation, is
 set up to use VAXC on a VAX, and does not include socket support.  You can
@@ -143,11 +162,15 @@ Makefile to build Miniperl.Exe, and then run the Perl script MMS2Make.pl,
 found in the [.VMS] subdirectory, to generate a new Makefile with the options
 appropriate to your site.
 
-Note for sites using early versions of DECC:  A bug in some versions of the
-DECC RTL causes newlines to be lost when writing to a pipe.  This causes
+Note for sites using DECC:  A bug in some early versions of the DECC RTL on the
+AXP causes newlines to be lost when writing to a pipe.  This causes
 Gen_ShrFls.pl to fail, since it can't read the preprocessor output to identify
-global variables and routines.  You can work around this problem by defining
-the macro DECC_PIPES_BROKEN when you invoke MMS or MMK.
+global variables and routines.  A different bug in the DECC preprocessor itself
+for some patched versions of DECC 4.0 on the VAX also makes it impossible for
+Gen_ShrFls.pl to parse the preprocessor output.  In either case, the problem is
+generally manifested as missing global symbols when linking PerlShr.Exe or
+Perl.Exe.  You can work around this problem by defining the macro
+DECC_PIPES_BROKEN when you invoke MMS or MMK.
 
 This will build the following files:
   Miniperl.Exe        - a stand-alone version of without any extensions.
@@ -170,8 +193,10 @@ This will build the following files:
                         Descrip.MMS files for static extensions.
   [.Lib]Config.pm     - the Perl extension which saves configuration information
                         about Perl and your system.
-  [.lib]DynaLoader.pm - The Perl extension which performs dynamic linking of
+  [.Lib]DynaLoader.pm - The Perl extension which performs dynamic linking of
                         shareable images for extensions.
+  Several subdirectories under [.Lib] containing preprocessed files or
+                        site-specific files.
 There are, of course, a number of other files created for use during the build. 
 Once you've got the binaries built, you may wish to `build' the `tidy' or
 `clean' targets to remove extra files.
@@ -183,7 +208,7 @@ Once the build is complete, you'll need to do the following:
   - Put PerlShr.Exe in a common directory, and make it world-readable.
     If you place it in a location other than Sys$Share, you'll need to
     define the logical name PerlShr to point to the image.
-  - Put Perl.Exe in a common directory, and make it world executable
+  - Put Perl.Exe in a common directory, and make it world-executable.
   - Define a foreign command to invoke Perl, using a statement like
     $ Perl == "$dev:[dir]Perl.Exe"
   - Create a world-readable directory tree for Perl library modules,
@@ -195,9 +220,6 @@ Once the build is complete, you'll need to do the following:
     remember that a rooted logical name cannot have as its device portion
     another rooted logical name - you've got to supply the actual device name
     and directory path to the root directory.)
-  - Define the logical name PERLSHR as the full file specification of
-    PERLSHR.EXE, so executable images linked to it can find it.  Alternatively,
-    you can justput PERLSHR.EXE int SYS$SHARE.
   - Place the files from the [.lib...] directory tree in the distribution
     package into a [.lib...] directory tree off the root directory described
     above.
@@ -207,15 +229,17 @@ Once the build is complete, you'll need to do the following:
     docs for common display engines; a pod2hlp translator is under development.
     Information on Perl can also be gleaned from the files in the [.doc]
     subdirectory (internals documents and summaries of changes), and from
-    the test scripts in the [.t...] subdirectories.
-For now, that's it.
+    the test scripts in the [.t...] subdirectories.  For this reason,
+    you may wish to copy these subtrees into directories under Perl_Root.
+That's it.
 
 
 * For more information
 
 If you're interested in more information on Perl in general, consult the Usenet
-newsgroup comp.lang.perl.  The FAQ for that group provides pointers to other
-online sources of information, as well as books describing Perl in depth.
+newsgroups comp.lang.perl.announce and comp.lang.perl.misc.  The FAQ for these
+groups provides pointers to other online sources of information, as well as
+books describing Perl in depth.
 
 If you're interested in up-to-date information on Perl development and
 internals, you might want to subscribe to the perl5-porters mailing list.  You
@@ -235,12 +259,13 @@ Finally, if you'd like to try out the latest changes to VMS Perl, you can
 retrieve a test distribution kit by anonymous ftp from genetics.upenn.edu, in
 the file [.perl5]perl5_ppp_yymmddx.zip, where "ppp" is the current Perl
 patchlevel, and "yymmddx" is a sequence number indicating the date that
-particular kit was assembled.  These test kits contain "unofficial" patches
-from the perl5-porters group, test patches for important bugs, and VMS-specific
-fixes and improvements which have occurred since the last Perl release.  Most
-of these changes will be incorporated in the next release of Perl, but until
-Larry Wall's looked at them and said they're OK, none of them should be
-considered official.
+particular kit was assembled.  In order to make retrieval convenient, this
+kit is also available by the name Perl5_VMSTest.Zip.  These test kits contain
+"unofficial" patches from the perl5-porters group, test patches for important
+bugs, and VMS-specific fixes and improvements which have occurred since the
+last Perl release.  Most of these changes will be incorporated in the next
+release of Perl, but until Larry Wall's looked at them and said they're OK,
+none of them should be considered official.
 
 Good luck using Perl.  Please let us know how it works for you - we can't
 guarantee that we'll be able to fix bugs quickly, but we'll try, and we'd

@@ -173,7 +173,10 @@ fork(void)
 /* not implemented in EMX 0.9a */
 
 void *	ctermid(x)	{ return 0; }
+
+#ifdef MYTTYNAME /* was not in emx0.9a */
 void *	ttyname(x)	{ return 0; }
+#endif
 
 void *	gethostent()	{ return 0; }
 void *	getnetent()	{ return 0; }

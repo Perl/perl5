@@ -1,13 +1,4 @@
-# This message contains the description of the patch.
-# The actual patch will be posted to p5-p later, the parts that
-# are relevant to other lists will be posted there separately
-#
-# This is needed _before_ application of the patch:
-
-mkdir os2
-touch os2/Makefile.SH hints/os2.sh os2/os2.c os2/os2ish.h
-touch ext/DynaLoader/dl_os2.xs
-exit 0
+Current state of the patches here is with respect to perl5.002b1d ;-).
 
 ========================================================
 
@@ -24,16 +15,14 @@ metaconfig package that generates Configure.
 
 Notes on the patch:
 ~~~~~~~~~~~~~~~~~~~
-1) run the above commands
-2)  patches should be applied as
+patches should be applied as
 	patch -p0 <.....
+All the diff.* files and POSIX.mkfifo should be applied.
 
-Patches are relative to perl5.001n.
-It is tested under Solaris and OS/2.
-The complete distribution of this patch is available on
+Additional files are available on
 	ftp://ftp.math.ohio-state.edu/pub/users/ilya/os2
-The file diff.for.o.Configure should be applied last. It will repatch
-Configure.
+including patched pdksh and gnumake, needed for build.
+
 
 Target:
 ~~~~~~~
@@ -42,8 +31,8 @@ This is not supposed to make a perfect Perl on OS/2. This patch is
 concerned only with perfect _build_ of Perl on OS/2. A lot of good
 features from Andreas Kaiser port missed this patch.
 
-Annotations of changes:
-~~~~~~~~~~~~~~~~~~~~~~~
+Annotations of changes: (part of what is below is already included by Andy,
+~~~~~~~~~~~~~~~~~~~~~~~ thus there are skips below)
 1) C files
 2) Configure
 3) MakeMaker
@@ -59,10 +48,6 @@ Annotations of changes:
 	f) some diagnostics added to tests
 
 2) Configure 
-	0) Differences are provided with plain 5.001m + andys.
-	a) New vars exe_ext obj_ext lib_ext ar plibext 
-		firstmakefile archobjs cldlibs path_sep
-		I think they should be set by the hints files only
 	b) Support for extraction from NE style libraries.
 	c) a lot of 
 			cc -o whatever
@@ -71,10 +56,6 @@ Annotations of changes:
 
 3) Build tools and libraries
 
-	Since Configure can go out of sync with the other tools,
-		all the added configuration variables are checked for
-		existence, if not, set to reasonable values. Thus the
-		changes are independent of Configure patch.
 	
 	a) ln changed to $ln in some places
 	b) Makefiles and related scripts made to use $(O), $(A), $(AR)
@@ -84,21 +65,14 @@ Annotations of changes:
 	d) $plibext is the extension for the perl library
 	e) $archobjs is the list of additional object files needed for
 		local build.
-	   $cldlibs are libs to use when linking miniperl.
-	f) Sanity checks look for perl$Config{exe_ext}.
-	g) installperl was looping through config.sh in a wrong way
-	h) installperl needs to change permission to 0777 before
-		unlink on OS/2.
-	i) Cwd.pm updated for OS/2.                                   
-	j) Find.pm updated for OS/2.                                  
-	k) Shell.pm updated for OS/2.                                 
 	l) Makefile.SH : added sh in front of some commands           
 	   if $d_shrplib is 'custom', looks into                      
 	        $osname/Makefile.$osname.SH to construct the section  
-	        on shared Perl library.                               
+	        on shared Perl library.            
+		!!!!!!	Also: installperl installman makedepend
+		!!!!!!		added as dependencies to the corresponding 
+		!!!!!!		targets.
 	m) clean target extended to delete some intermediate files    
-	n) Test::Harness works.
-
 
 Notes on build on OS/2:
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -106,8 +80,10 @@ The change of C code in this patch is based on the ak port of 5.001+.
 
 a) Make sure your sort is not the broken OS/2 one.
 
-b) when extraction perl5.001m.tar.gz you need to extract perl5.001m/Configure
+b) when extraction perl5.*.tar.gz you need to extract perl5.*/Configure
 separately, since by default perl5.001m/configure overwrites it;
+	like this:
+		tar vzxf perl5.004.tar.gz perl5.004/Configure
 
 c) Necessary manual intervention when compiling on OS/2:
 
@@ -119,24 +95,29 @@ d) Compile summary:
 # I have rather spartan configuration.
 
 	# Prefix means where to install:
-sh Configure -des -D prefix=f:/perl5m
+sh Configure -des -D prefix=f:/perl5.005
 make
 	# Will probably die after build of miniperl (unless you have DLL
 	# from previous compile). Need to move DLL where it belongs
 make
 	# some warnings in POSIX.c
 make test
-	# some tests fail, 10 on my system
+	# some tests fail, 9 on my system
 	#
 	# before this you should create subdirs bin and lib in the 
-	# prefix directory (f:/perl5m above):
+	# prefix directory (f:/perl5.005 above):
 make install
 	# man pages are not installed
 
 e) At the end of August GNU make and pdksh were too buggy for compile.
 Both maintainers have patches that make it possible to compile perl.
-They are included into distribution of this patch on 
+The binaries are included in
 	ftp://ftp.math.ohio-state.edu/pub/users/ilya/os2
+patches are available too.
+Note that the beta of pdksh5.2.4 can run Configure, but not build, since
+	sh file
+may actually call file.SH ! The maintainer is notified, I hope this will be
+fixed before actual release.
 
 !!!!!!!!!!!!!!!!!
 If you see that some '/' became '\' in pdksh 5.2.3, you did not apply
@@ -153,3 +134,24 @@ c) Get rid of invalid perl.dll on your LIBPATH.
 
 
 Send comments to ilya@math.ohio-state.edu.
+
+======================================================
+Requires 0.9b (well, provision are made to make it build under 0.9a6,
+but they are not tested, please inform me on success).
+(earlier than 0.9b ttyname was not present, it is hard to maintain this
+difference automatically, though I try).
+======================================================
+
+You may try building with a.out style by using `-D emxaout' on the Configure
+line (dynamic extensions should not use CRT (and/or any perl API) in this
+case, which prohibits most buildin extensions). Probably no extension is
+possible, since boot code should return the amount on stack.
+
+The reason why compiling with a.out style executables leads to problems
+with dynamic extensions is:
+	a) OS/2 does not export symbols from executables;
+	b) Thus if extension needs to import symbols from an application
+		the symbols for the application should reside in a .dll.
+	c) You cannot export data from a .dll compiled with a.out style.
+On the other hand, aout-style compiled extension enjoys all the 
+(dis)advantages of fork().

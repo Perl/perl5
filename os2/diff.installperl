@@ -1,37 +1,17 @@
-diff -cr ..\perl5os2.patch\perl5.001m.andy/installperl ./installperl
-*** ../perl5os2.patch/perl5.001m.andy/installperl	Wed Jun 21 12:09:26 1995
---- ./installperl	Thu Sep 28 00:00:20 1995
+*** installperl.orig	Mon Nov 20 09:55:08 1995
+--- installperl	Wed Nov 22 02:29:34 1995
 ***************
-*** 24,35 ****
-  # Read in the config file.
+*** 4,9 ****
+--- 4,10 ----
+  use Config;
   
-  open(CONFIG, "config.sh") || die "You haven't run Configure yet!\n";
-! while (<CONFIG>) {
-!     if (s/^(\w+=)/\$$1/) {
-  	$accum =~ s/'undef'/undef/g;
-  	eval $accum;
-  	$accum = '';
-      }
-      $accum .= $_;
-  }
-  close CONFIG;
---- 24,37 ----
-  # Read in the config file.
+  $mainperldir = "/usr/bin";
++ $exe_ext = $Config{exe_ext};
   
-  open(CONFIG, "config.sh") || die "You haven't run Configure yet!\n";
-! while (1) {
-!     $_ = <CONFIG>;
-!     if (s/^(\w+=)/\$$1/ or not defined $_) {
-  	$accum =~ s/'undef'/undef/g;
-  	eval $accum;
-  	$accum = '';
-      }
-+     last unless defined $_;	# To get the last two lines too
-      $accum .= $_;
-  }
-  close CONFIG;
+  while (@ARGV) {
+      $nonono = 1 if $ARGV[0] eq '-n';
 ***************
-*** 50,57 ****
+*** 61,68 ****
   -w $installbin		|| die "$installbin is not writable by you\n"
   	unless $installbin =~ m#^/afs/# || $nonono;
   
@@ -40,7 +20,7 @@ diff -cr ..\perl5os2.patch\perl5.001m.andy/installperl ./installperl
   
   -x 't/TEST'		|| warn "WARNING: You've never run 'make test'!!!",
   	"  (Installing anyway.)\n";
---- 52,59 ----
+--- 62,69 ----
   -w $installbin		|| die "$installbin is not writable by you\n"
   	unless $installbin =~ m#^/afs/# || $nonono;
   
@@ -50,7 +30,7 @@ diff -cr ..\perl5os2.patch\perl5.001m.andy/installperl ./installperl
   -x 't/TEST'		|| warn "WARNING: You've never run 'make test'!!!",
   	"  (Installing anyway.)\n";
 ***************
-*** 69,81 ****
+*** 80,92 ****
   
   # First we install the version-numbered executables.
   
@@ -64,7 +44,7 @@ diff -cr ..\perl5os2.patch\perl5.001m.andy/installperl ./installperl
   }
   
   exit 0 if $versiononly;
---- 71,83 ----
+--- 81,93 ----
   
   # First we install the version-numbered executables.
   
@@ -79,7 +59,7 @@ diff -cr ..\perl5os2.patch\perl5.001m.andy/installperl ./installperl
   
   exit 0 if $versiononly;
 ***************
-*** 83,97 ****
+*** 94,108 ****
   # Make links to ordinary names if installbin directory isn't current directory.
   
   if (! &samepath($installbin, '.')) {
@@ -95,7 +75,7 @@ diff -cr ..\perl5os2.patch\perl5.001m.andy/installperl ./installperl
   }
   
   # Install scripts.
---- 85,100 ----
+--- 95,110 ----
   # Make links to ordinary names if installbin directory isn't current directory.
   
   if (! &samepath($installbin, '.')) {
@@ -113,7 +93,7 @@ diff -cr ..\perl5os2.patch\perl5.001m.andy/installperl ./installperl
   
   # Install scripts.
 ***************
-*** 174,187 ****
+*** 188,201 ****
   if (-w $mainperldir && ! &samepath($mainperldir, $installbin) && !$nonono) {
       # First make sure $mainperldir/perl is not already the same as
       # the perl we just installed
@@ -128,7 +108,7 @@ diff -cr ..\perl5os2.patch\perl5.001m.andy/installperl ./installperl
       }
       if ((! $mainperl_is_instperl) &&
   	(&yn("Many scripts expect perl to be installed as " .
---- 177,190 ----
+--- 190,203 ----
   if (-w $mainperldir && ! &samepath($mainperldir, $installbin) && !$nonono) {
       # First make sure $mainperldir/perl is not already the same as
       # the perl we just installed
@@ -144,7 +124,7 @@ diff -cr ..\perl5os2.patch\perl5.001m.andy/installperl ./installperl
       if ((! $mainperl_is_instperl) &&
   	(&yn("Many scripts expect perl to be installed as " .
 ***************
-*** 189,198 ****
+*** 203,212 ****
   	     "Do you wish to have $mainperldir/perl be the same as\n" .
   	     "$binexp/perl? [y] ")))
       {	
@@ -155,7 +135,7 @@ diff -cr ..\perl5os2.patch\perl5.001m.andy/installperl ./installperl
   	$mainperl_is_instperl = 1;
       }
   }
---- 192,201 ----
+--- 205,214 ----
   	     "Do you wish to have $mainperldir/perl be the same as\n" .
   	     "$binexp/perl? [y] ")))
       {	
@@ -167,7 +147,7 @@ diff -cr ..\perl5os2.patch\perl5.001m.andy/installperl ./installperl
       }
   }
 ***************
-*** 203,209 ****
+*** 217,223 ****
   # Also skip $mainperl if the user opted to have it be a link to the
   # installed perl.
   
@@ -175,7 +155,7 @@ diff -cr ..\perl5os2.patch\perl5.001m.andy/installperl ./installperl
   @otherperls = ();
   for (@path) {
       next unless m,^/,;
---- 206,214 ----
+--- 219,227 ----
   # Also skip $mainperl if the user opted to have it be a link to the
   # installed perl.
   
@@ -186,7 +166,7 @@ diff -cr ..\perl5os2.patch\perl5.001m.andy/installperl ./installperl
   for (@path) {
       next unless m,^/,;
 ***************
-*** 211,217 ****
+*** 225,231 ****
       # Use &samepath here because some systems have other dirs linked
       # to $mainperldir (like SunOS)
       next if ($mainperl_is_instperl && &samepath($_, $mainperldir));
@@ -194,7 +174,7 @@ diff -cr ..\perl5os2.patch\perl5.001m.andy/installperl ./installperl
   }
   if (@otherperls) {
       print STDERR "\nWarning: perl appears in your path in the following " .
---- 216,223 ----
+--- 229,236 ----
       # Use &samepath here because some systems have other dirs linked
       # to $mainperldir (like SunOS)
       next if ($mainperl_is_instperl && &samepath($_, $mainperldir));
@@ -204,8 +184,8 @@ diff -cr ..\perl5os2.patch\perl5.001m.andy/installperl ./installperl
   if (@otherperls) {
       print STDERR "\nWarning: perl appears in your path in the following " .
 ***************
-*** 244,249 ****
---- 250,256 ----
+*** 258,263 ****
+--- 263,269 ----
       foreach $name (@names) {
   	next unless -e $name;
   	print STDERR "  unlink $name\n";
@@ -214,8 +194,8 @@ diff -cr ..\perl5os2.patch\perl5.001m.andy/installperl ./installperl
       }
   }
 ***************
-*** 255,260 ****
---- 262,268 ----
+*** 269,274 ****
+--- 275,281 ----
   	next unless -e $name;
   	print STDERR "  unlink $name\n";
   	next if $nonono;
@@ -224,7 +204,7 @@ diff -cr ..\perl5os2.patch\perl5.001m.andy/installperl ./installperl
   	warn "Couldn't unlink $name: $!\n";
   	if ($! =~ /busy/i) {
 ***************
-*** 290,296 ****
+*** 304,310 ****
       local($from,$to) = @_;
   
       print STDERR "  ln $from $to\n";
@@ -232,7 +212,7 @@ diff -cr ..\perl5os2.patch\perl5.001m.andy/installperl ./installperl
   }
   
   sub chmod {
---- 298,310 ----
+--- 311,323 ----
       local($from,$to) = @_;
   
       print STDERR "  ln $from $to\n";
