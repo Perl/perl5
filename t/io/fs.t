@@ -239,7 +239,7 @@ close(IOFSCOM);
 SKIP: {
     eval { truncate "Iofs.tmp", 5; };
 
-    skip("no truncate - $@", 4) if $@;
+    skip("no truncate - $@", 6) if $@;
 
     is(-s "Iofs.tmp", 5, "truncation to five bytes");
 
