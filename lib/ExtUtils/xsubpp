@@ -821,7 +821,8 @@ while (fetch_para()) {
 
     @args = split(/\s*,\s*/, $orig_args);
     if (defined($class)) {
-	my $arg0 = ((defined($static) or $func_name =~ /^new/) ? "CLASS" : "THIS");
+	my $arg0 = ((defined($static) or $func_name eq 'new')
+		    ? "CLASS" : "THIS");
 	unshift(@args, $arg0);
 	($orig_args = "$arg0, $orig_args") =~ s/^$arg0, $/$arg0/;
     }
@@ -928,7 +929,7 @@ EOF
 EOF
 	
 	if (!$thisdone && defined($class)) {
-	    if (defined($static) or $func_name =~ /^new/) {
+	    if (defined($static) or $func_name eq 'new') {
 		print "\tchar *";
 		$var_types{"CLASS"} = "char *";
 		&generate_init("char *", 1, "CLASS");
@@ -973,13 +974,13 @@ EOF
 				$wantRETVAL = 1;
 			}
 			if (defined($static)) {
-			    if ($func_name =~ /^new/) {
+			    if ($func_name eq 'new') {
 				$func_name = "$class";
 			    } else {
 				print "${class}::";
 			    }
 			} elsif (defined($class)) {
-			    if ($func_name =~ /^new/) {
+			    if ($func_name eq 'new') {
 				$func_name .= " $class";
 			    } else {
 				print "THIS->";
