@@ -338,6 +338,11 @@ if ($define{'MYMALLOC'}) {
 		    Perl_realloc
 		    Perl_calloc
 		    )];
+    if ($define{'USE_THREADS'} || $define{'USE_ITHREADS'}) {
+	emit_symbols [qw(
+			PL_malloc_mutex
+			)];
+    }
 }
 else {
     skip_symbols [qw(
@@ -357,7 +362,6 @@ unless ($define{'USE_THREADS'}) {
 		    PL_sv_mutex
 		    PL_strtab_mutex
 		    PL_svref_mutex
-		    PL_malloc_mutex
 		    PL_cred_mutex
 		    PL_eval_mutex
 		    PL_eval_cond

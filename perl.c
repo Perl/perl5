@@ -119,9 +119,8 @@ perl_construct(pTHXx)
 
    /* Init the real globals (and main thread)? */
     if (!PL_linestr) {
-#ifdef USE_THREADS
-
     	INIT_THREADS;
+#ifdef USE_THREADS
 #ifdef ALLOC_THREAD_KEY
         ALLOC_THREAD_KEY;
 #else
