@@ -654,15 +654,14 @@ For example, to define a property that covers both the Japanese
 syllabaries (hiragana and katakana), you can define
 
     sub InKana {
-	return <<'END';
-    3040    309F
-    30A0    30FF
+	return <<END;
+    3040\t309F
+    30A0\t30FF
     END
     }
 
-Imagine that the here-doc end marker is at the beginning of the line,
-and that the hexadecimal numbers are separated by a tabulator.
-Now you can use C<\p{InKana}> and C<\P{IsKana}>.
+Imagine that the here-doc end marker is at the beginning of the line.
+Now you can use C<\p{InKana}> and C<\P{InKana}>.
 
 You could also have used the existing block property names:
 
@@ -674,7 +673,7 @@ You could also have used the existing block property names:
     }
 
 Suppose you wanted to match only the allocated characters,
-not the by raw block ranges: in other words, you want to remove
+not the raw block ranges: in other words, you want to remove
 the non-characters:
 
     sub InKana {
