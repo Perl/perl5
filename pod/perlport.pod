@@ -1658,7 +1658,7 @@ Not implemented. (Win32, VMS, S<RISC OS>)
 
 =item select RBITS,WBITS,EBITS,TIMEOUT
 
-Only implemented on sockets. (Win32)
+Only implemented on sockets. (Win32, VMS)
 
 Only reliable on sockets. (S<RISC OS>)
 
