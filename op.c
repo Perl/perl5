@@ -5123,7 +5123,9 @@ Perl_ck_sassign(pTHX_ OP *o)
 	OP *kkid = kid->op_sibling;
 
 	/* Can just relocate the target. */
-	if (kkid && kkid->op_type == OP_PADSV) {
+	if (kkid && kkid->op_type == OP_PADSV
+	    && !(kkid->op_private & OPpLVAL_INTRO))
+	{
 	    /* Concat has problems if target is equal to right arg. */
 	    if (kid->op_type == OP_CONCAT
 		&& kLISTOP->op_first->op_sibling->op_type == OP_PADSV
@@ -5695,6 +5697,7 @@ Perl_peep(pTHX_ register OP *o)
 			goto ignore_optimization;
 		    } else {
 			o->op_targ = o->op_next->op_targ;
+			o->op_private |= OPpTARGET_MY;
 		    }
 		}
 		null(o->op_next);
