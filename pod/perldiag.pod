@@ -978,6 +978,18 @@ to 01411.  Octal constants are introduced with a leading 0 in Perl, as in C.
 Perl uses this generic message when none of the errors that it encountered
 were severe enough to halt compilation immediately.
 
+=item Complex regular subexpression recursion limit (%d) exceeded
+
+(W) The regular expression engine uses recursion in complex situations
+where back-tracking is required.  Recursion depth is limited to 32766,
+or perhaps less in architectures where the stack cannot grow
+arbitrarily.  ("Simple" and "medium" situations are handled without
+recursion and are not subject to a limit.)  Try shortening the string
+under examination; looping in Perl code (e.g. with C<while>) rather
+than in the regular expression engine; or rewriting the regular
+expression so that it is simpler or backtracks less.  (See L<perlbook>
+for information on I<Mastering Regular Expressions>.)
+
 =item connect() on closed fd
 
 (W) You tried to do a connect on a closed socket.  Did you forget to check

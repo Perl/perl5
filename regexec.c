@@ -117,8 +117,14 @@ regcppush(I32 parenfloor)
 }
 
 /* These are needed since we do not localize EVAL nodes: */
-#  define REGCP_SET  DEBUG_r(PerlIO_printf(Perl_debug_log, "  Setting an EVAL scope, savestack=%i\n", savestack_ix)); lastcp = savestack_ix
-#  define REGCP_UNWIND  DEBUG_r(lastcp != savestack_ix ? PerlIO_printf(Perl_debug_log,"  Clearing an EVAL scope, savestack=%i..%i\n", lastcp, savestack_ix) : 0); regcpblow(lastcp)
+#  define REGCP_SET  DEBUG_r(PerlIO_printf(Perl_debug_log,		\
+			     "  Setting an EVAL scope, savestack=%i\n",	\
+			     savestack_ix)); lastcp = savestack_ix
+
+#  define REGCP_UNWIND  DEBUG_r(lastcp != savestack_ix ?		\
+				PerlIO_printf(Perl_debug_log,		\
+				"  Clearing an EVAL scope, savestack=%i..%i\n", \
+				lastcp, savestack_ix) : 0); regcpblow(lastcp)
 
 STATIC char *
 regcppop(void)
@@ -141,7 +147,8 @@ regcppop(void)
 	if (paren <= *reglastparen)
 	    regendp[paren] = tmps;
 	DEBUG_r(
-	    PerlIO_printf(Perl_debug_log, "     restoring \\%d to %d(%d)..%d%s\n",
+	    PerlIO_printf(Perl_debug_log,
+			  "     restoring \\%d to %d(%d)..%d%s\n",
 			  paren, regstartp[paren] - regbol, 
 			  reg_start_tmp[paren] - regbol,
 			  regendp[paren] - regbol, 
@@ -150,7 +157,8 @@ regcppop(void)
     }
     DEBUG_r(
 	if (*reglastparen + 1 <= regnpar) {
-	    PerlIO_printf(Perl_debug_log, "     restoring \\%d..\\%d to undef\n",
+	    PerlIO_printf(Perl_debug_log,
+			  "     restoring \\%d..\\%d to undef\n",
 			  *reglastparen + 1, regnpar);
 	}
     );
@@ -172,7 +180,8 @@ regcppop(void)
  - pregexec - match a regexp against a string
  */
 I32
-pregexec(register regexp *prog, char *stringarg, register char *strend, char *strbeg, I32 minend, SV *screamer, U32 nosave)
+pregexec(register regexp *prog, char *stringarg, register char *strend,
+	 char *strbeg, I32 minend, SV *screamer, U32 nosave)
 /* strend: pointer to null at end of string */
 /* strbeg: real beginning of string */
 /* minend: end of match must be >=minend after stringarg. */
@@ -187,7 +196,8 @@ pregexec(register regexp *prog, char *stringarg, register char *strend, char *st
  - regexec_flags - match a regexp against a string
  */
 I32
-regexec_flags(register regexp *prog, char *stringarg, register char *strend, char *strbeg, I32 minend, SV *screamer, void *data, U32 flags)
+regexec_flags(register regexp *prog, char *stringarg, register char *strend,
+	      char *strbeg, I32 minend, SV *screamer, void *data, U32 flags)
 /* strend: pointer to null at end of string */
 /* strbeg: real beginning of string */
 /* minend: end of match must be >=minend after stringarg. */
@@ -672,7 +682,8 @@ regtry(regexp *prog, char *startpos)
     if ((prog->reganch & ROPT_EVAL_SEEN) && !reg_eval_set) {
 	reg_eval_set = RS_init;
 	DEBUG_r(DEBUG_s(
-	    PerlIO_printf(Perl_debug_log, "  setting stack tmpbase at %i\n", stack_sp - stack_base);
+	    PerlIO_printf(Perl_debug_log, "  setting stack tmpbase at %i\n",
+			  stack_sp - stack_base);
 	    ));
 	SAVEINT(cxstack[cxstack_ix].blk_oldsp);
 	cxstack[cxstack_ix].blk_oldsp = stack_sp - stack_base;
@@ -736,7 +747,8 @@ regmatch(regnode *prog)
     register regnode *scan;	/* Current node. */
     regnode *next;		/* Next node. */
     regnode *inner;		/* Next node in internal branch. */
-    register I32 nextchr; /* renamed nextchr - nextchar colides with function of same name */
+    register I32 nextchr;	/* renamed nextchr - nextchar colides with
+				   function of same name */
     register I32 n;		/* no or next */
     register I32 ln;		/* len or last */
     register char *s;		/* operand or save */
@@ -1111,12 +1123,16 @@ regmatch(regnode *prog)
 		    regcc = cc->oldcc;
 		    ln = regcc->cur;
 		    DEBUG_r(
-			PerlIO_printf(Perl_debug_log, "%*s  empty match detected, try continuation...\n", REPORT_CODE_OFF+regindent*2, "")
+			PerlIO_printf(Perl_debug_log,
+			   "%*s  empty match detected, try continuation...\n",
+			   REPORT_CODE_OFF+regindent*2, "")
 			);
 		    if (regmatch(cc->next))
 			sayYES;
 		    DEBUG_r(
-			PerlIO_printf(Perl_debug_log, "%*s  failed...\n", REPORT_CODE_OFF+regindent*2, "")
+			PerlIO_printf(Perl_debug_log,
+				      "%*s  failed...\n",
+				      REPORT_CODE_OFF+regindent*2, "")
 			);
 		    regcc->cur = ln;
 		    regcc = cc;
@@ -1133,7 +1149,9 @@ regmatch(regnode *prog)
 		    cc->cur = n - 1;
 		    cc->lastloc = lastloc;
 		    DEBUG_r(
-			PerlIO_printf(Perl_debug_log, "%*s  failed...\n", REPORT_CODE_OFF+regindent*2, "")
+			PerlIO_printf(Perl_debug_log,
+				      "%*s  failed...\n",
+				      REPORT_CODE_OFF+regindent*2, "")
 			);
 		    sayNO;
 		}
@@ -1158,13 +1176,16 @@ regmatch(regnode *prog)
 			if (dowarn && n >= REG_INFTY 
 			    && !(reg_flags & RF_warned)) {
 			    reg_flags |= RF_warned;
-			    warn("count exceeded %d", REG_INFTY - 1);
+			    warn("Complex regular subexpression recursion "
+				 "limit (%d) exceeded", REG_INFTY - 1);
 			}
 			sayNO;
 		    }
 
 		    DEBUG_r(
-			PerlIO_printf(Perl_debug_log, "%*s  trying longer...\n", REPORT_CODE_OFF+regindent*2, "")
+			PerlIO_printf(Perl_debug_log,
+				      "%*s  trying longer...\n",
+				      REPORT_CODE_OFF+regindent*2, "")
 			);
 		    /* Try scanning more and see if it helps. */
 		    reginput = locinput;
@@ -1177,7 +1198,9 @@ regmatch(regnode *prog)
 			sayYES;
 		    }
 		    DEBUG_r(
-			PerlIO_printf(Perl_debug_log, "%*s  failed...\n", REPORT_CODE_OFF+regindent*2, "")
+			PerlIO_printf(Perl_debug_log,
+				      "%*s  failed...\n",
+				      REPORT_CODE_OFF+regindent*2, "")
 			);
 		    REGCP_UNWIND;
 		    regcppop();
@@ -1201,7 +1224,9 @@ regmatch(regnode *prog)
 		    regcppop();		/* Restore some previous $<digit>s? */
 		    reginput = locinput;
 		    DEBUG_r(
-			PerlIO_printf(Perl_debug_log, "%*s  failed, try continuation...\n", REPORT_CODE_OFF+regindent*2, "")
+			PerlIO_printf(Perl_debug_log,
+				      "%*s  failed, try continuation...\n",
+				      REPORT_CODE_OFF+regindent*2, "")
 			);
 		}
 		if (dowarn && n >= REG_INFTY && !(reg_flags & RF_warned)) {
@@ -1215,7 +1240,8 @@ regmatch(regnode *prog)
 		if (regmatch(cc->next))
 		    sayYES;
 		DEBUG_r(
-		    PerlIO_printf(Perl_debug_log, "%*s  failed...\n", REPORT_CODE_OFF+regindent*2, "")
+		    PerlIO_printf(Perl_debug_log, "%*s  failed...\n",
+				  REPORT_CODE_OFF+regindent*2, "")
 		    );
 		regcc->cur = ln;
 		regcc = cc;
@@ -1349,7 +1375,9 @@ regmatch(regnode *prog)
 		    ln = n;
 		locinput = reginput;
 		DEBUG_r(
-		    PerlIO_printf(Perl_debug_log, "%*s  matched %ld times, len=%ld...\n", REPORT_CODE_OFF+regindent*2, "", n, l)
+		    PerlIO_printf(Perl_debug_log, "%*s  matched %ld times,
+				  len=%ld...\n",
+				  REPORT_CODE_OFF+regindent*2, "", n, l)
 		    );
 		if (n >= ln) {
 		    if (regkind[(U8)OP(next)] == EXACT) {
@@ -1371,7 +1399,9 @@ regmatch(regnode *prog)
 			UCHARAT(reginput) == c2)
 			{
 			    DEBUG_r(
-				PerlIO_printf(Perl_debug_log, "%*s  trying tail with n=%ld...\n", REPORT_CODE_OFF+regindent*2, "", n)
+				PerlIO_printf(Perl_debug_log,
+					      "%*s  trying tail with n=%ld...\n",
+					      REPORT_CODE_OFF+regindent*2, "", n)
 				);
 			    if (paren) {
 				if (n) {
