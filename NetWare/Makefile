@@ -360,8 +360,8 @@ EXTENSION_NLM	= 		\
 
 # Begin - Following is required to build NetWare specific extensions CGI2Perl, Perl2UCS and UCSExt
 CGI2PERL		= CGI2Perl\CGI2Perl
-PERL2UCS		= $(EXTDIR)\Perl2UCS\Perl2UCS
-UCSExt			= $(EXTDIR)\Perl2UCS\UCSExt
+PERL2UCS		= Perl2UCS\Perl2UCS
+UCSExt			= Perl2UCS\UCSExt
 
 CGI2PERL_NLM = \CGI2Perl\CGI2Perl.NLM
 PERL2UCS_NLM = $(AUTODIR)\Perl2UCS\Perl2UCS.NLM
@@ -1375,7 +1375,7 @@ $(CGI2PERL_NLM):
 
 $(PERL2UCS_NLM):
 !if "$(NW_EXTNS)"=="yes"
-	cd $(EXTDIR)\$(*B)
+	cd $(*B)
 	..\..\miniperl -I..\..\lib Makefile.PL "CCCDLFLAGS=-bool on -lang c++" PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\netware
@@ -1383,7 +1383,7 @@ $(PERL2UCS_NLM):
 
 $(UCSExt_NLM):
 !if "$(NW_EXTNS)"=="yes"
-	cd $(EXTDIR)\$(*B)
+	cd $(*B)
 	..\..\miniperl -I..\..\lib Makefile.PL "CCCDLFLAGS=-bool on -lang c++" PERL_CORE=1 INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\netware
@@ -1464,10 +1464,10 @@ distclean: clean nwclean
 	cd cgi2perl
 	-del /f /q *.obj *.bs Makefile *$(o) *.c pm_to_blib *.xdc *.err *.sym *.map *.def *.lib *.pdb
 	cd ..
-	cd $(EXTDIR)\Perl2UCS
+	cd Perl2UCS
 	-del /f /q *.obj *.bs Makefile *$(o) *.c pm_to_blib *.xdc *.err *.sym *.map *.def *.lib *.pdb
 	cd ..\..\netware
-	cd $(EXTDIR)\UCSExt
+	cd UCSExt
 	-del /f /q *.obj *.bs Makefile *$(o) *.c pm_to_blib *.xdc *.err *.sym *.map *.c
 	cd ..\..\netware
 !endif
