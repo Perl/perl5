@@ -524,6 +524,8 @@ EOD
 my @path_h_ini = @path_h;
 my ($name, %fullpath, %prefix, %seen_define, %prefixless, %const_names);
 
+my $module = $opt_n;
+
 if( @path_h ){
     use Config;
     use File::Spec;
@@ -542,6 +544,15 @@ if( @path_h ){
     }
     foreach my $path_h (@path_h) {
         $name ||= $path_h;
+    $module ||= do {
+      $name =~ s/\.h$//;
+      if ( $name !~ /::/ ) {
+	$name =~ s#^.*/##;
+	$name = "\u$name";
+      }
+      $name;
+    };
+
     if( $path_h =~ s#::#/#g && $opt_n ){
 	warn "Nesting of headerfile ignored with -n\n";
     }
@@ -550,19 +561,36 @@ if( @path_h ){
     $path_h =~ s/,.*$// if $opt_x;
     $fullpath{$path_h} = $fullpath;
 
+    # Minor trickery: we can't chdir() before we processed the headers
+    # (so know the name of the extension), but the header may be in the
+    # extension directory...
+    my $tmp_path_h = $path_h;
+    my $rel_path_h = $path_h;
+    my @dirs = @paths;
     if (not -f $path_h) {
-      my $tmp_path_h = $path_h;
+      my $found;
       for my $dir (@paths) {
-	last if -f ($path_h = File::Spec->catfile($dir, $tmp_path_h));
+	$found++, last
+	  if -f ($path_h = File::Spec->catfile($dir, $tmp_path_h));
+      }
+      if ($found) {
+	$rel_path_h = $path_h;
+      } else {
+	(my $epath = $module) =~ s,::,/,g;
+	$epath = File::Spec->catdir('ext', $epath) if -d 'ext';
+	$rel_path_h = File::Spec->catfile($epath, $tmp_path_h);
+	$path_h = $tmp_path_h;	# Used during -x
+	push @dirs, $epath;
       }
     }
 
     if (!$opt_c) {
-      die "Can't find $path_h\n" if ( ! $opt_f && ! -f $path_h );
+      die "Can't find $tmp_path_h in @dirs\n" 
+	if ( ! $opt_f && ! -f "$rel_path_h" );
       # Scan the header file (we should deal with nested header files)
       # Record the names of simple #define constants into const_names
             # Function prototypes are processed below.
-      open(CH, "<$path_h") || die "Can't open $path_h: $!\n";
+      open(CH, "<$rel_path_h") || die "Can't open $rel_path_h: $!\n";
     defines:
       while (<CH>) {
 	if (/^[ \t]*#[ \t]*define\s+([\$\w]+)\b(?!\()\s*(?=[^" \t])(.*)/) {
@@ -603,14 +631,6 @@ if( @path_h ){
 }
 
 
-my $module = $opt_n || do {
-	$name =~ s/\.h$//;
-	if( $name !~ /::/ ){
-		$name =~ s#^.*/##;
-		$name = "\u$name";
-	}
-	$name;
-};
 
 my ($ext, $nested, @modparts, $modfname, $modpname);
 (chdir 'ext', $ext = 'ext/') if -d 'ext';
