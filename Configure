@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Feb 18 01:09:27 EET 1999 [metaconfig 3.0 PL70]
+# Generated on Fri Feb 19 21:44:45 EET 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -236,6 +236,7 @@ uuname=''
 vi=''
 zcat=''
 zip=''
+full_ar=''
 full_sed=''
 libswanted=''
 hint=''
@@ -356,6 +357,7 @@ d_phostname=''
 d_uname=''
 d_gethostprotos=''
 d_getlogin=''
+d_getmntent=''
 d_getnbyaddr=''
 d_getnbyname=''
 d_getnent=''
@@ -376,6 +378,7 @@ d_getservprotos=''
 d_getsbyname=''
 d_getsbyport=''
 d_gnulibc=''
+d_hasmntopt=''
 d_htonl=''
 d_inetaton=''
 d_isascii=''
@@ -4076,11 +4079,7 @@ if $xxx; then
 	esac;
 fi'
 
-if ./osf1; then
-	set signal.h __LANGUAGE_C__; eval $inctest
-else
-	set signal.h LANGUAGE_C; eval $inctest
-fi
+set signal.h LANGUAGE_C; eval $inctest
 
 case "$hint" in
 none|recommended) dflt="$ccflags $dflt" ;;
@@ -4220,7 +4219,7 @@ echo " "
 echo "Checking your choice of C compiler and flags for coherency..." >&4
 $cat > try.c <<'EOF'
 #include <stdio.h>
-int main() { printf("Ok\n"); exit(0); }
+main() { printf("Ok\n"); exit(0); }
 EOF
 set X $cc $optimize $ccflags -o try $ldflags try.c $libs
 shift
@@ -8150,6 +8149,10 @@ eval $hasproto
 set getlogin d_getlogin
 eval $inlibc
 
+: see if getmntent exists
+set getmntent d_getmntent
+eval $inlibc
+
 : see if getnetbyaddr exists
 set getnetbyaddr d_getnbyaddr
 eval $inlibc
@@ -8266,6 +8269,10 @@ $define)
 	set d_grpasswd; eval $setvar
 	;;
 esac
+
+: see if hasmntopt exists
+set hasmntopt d_hasmntopt
+eval $inlibc
 
 : see if this is a netinet/in.h or sys/in.h system
 set netinet/in.h i_niin sys/in.h i_sysin
@@ -10822,6 +10829,12 @@ rp="What is the type for file position used by fsetpos()?"
 set fpos_t fpostype long stdio.h sys/types.h
 eval $typedef_ask
 
+: Store the full pathname to the ar program for use in the C program
+: Respect a hint or command line value for full_ar.
+case "$full_ar" in
+'') full_ar=$ar ;;
+esac
+
 : Store the full pathname to the sed program for use in the C program
 full_sed=$sed
 
@@ -12660,6 +12673,7 @@ d_gethent='$d_gethent'
 d_gethname='$d_gethname'
 d_gethostprotos='$d_gethostprotos'
 d_getlogin='$d_getlogin'
+d_getmntent='$d_getmntent'
 d_getnbyaddr='$d_getnbyaddr'
 d_getnbyname='$d_getnbyname'
 d_getnent='$d_getnent'
@@ -12681,6 +12695,7 @@ d_getservprotos='$d_getservprotos'
 d_gettimeod='$d_gettimeod'
 d_gnulibc='$d_gnulibc'
 d_grpasswd='$d_grpasswd'
+d_hasmntopt='$d_hasmntopt'
 d_htonl='$d_htonl'
 d_index='$d_index'
 d_inetaton='$d_inetaton'
@@ -12883,6 +12898,7 @@ firstmakefile='$firstmakefile'
 flex='$flex'
 fpostype='$fpostype'
 freetype='$freetype'
+full_ar='$full_ar'
 full_csh='$full_csh'
 full_sed='$full_sed'
 gccversion='$gccversion'

@@ -116,15 +116,15 @@ byteorder (byteorder.U):
 c (n.U):
 	This variable contains the \c string if that is what causes the echo
 	command to suppress newline.  Otherwise it is null.  Correct usage is
-	    $echo $n "prompt for a question: $c".
+	$echo $n "prompt for a question: $c".
 
 castflags (d_castneg.U):
 	This variable contains a flag that precise difficulties the
 	compiler has casting odd floating values to unsigned long:
-		0 = ok
-		1 = couldn't cast < 0
-		2 = couldn't cast >= 0x80000000
-		4 = couldn't cast in argument expression list
+	0 = ok
+	1 = couldn't cast < 0
+	2 = couldn't cast >= 0x80000000
+	4 = couldn't cast in argument expression list
 
 cat (Loc.U):
 	This variable is be used internally by Configure to determine the
@@ -572,9 +572,9 @@ d_Gconvert (d_gconvert.U):
 	floating point numbers into strings. It could be 'gconvert'
 	or a more complex macro emulating gconvert with gcvt() or sprintf.
 	Possible values are:
-		d_Gconvert='gconvert((x),(n),(t),(b))'
-		d_Gconvert='gcvt((x),(n),(b))'
-		d_Gconvert='sprintf((b),"%.*g",(n),(x))'
+	d_Gconvert='gconvert((x),(n),(t),(b))'
+	d_Gconvert='gcvt((x),(n),(b))'
+	d_Gconvert='sprintf((b),"%.*g",(n),(x))'
 
 d_getgrent (d_getgrent.U):
 	This variable conditionally defines the HAS_GETGRENT symbol, which
@@ -737,7 +737,7 @@ d_ino64t (io64.U):
 	This symbol will be defined if the C compiler supports ino64_t.
 
 d_int64t (i_inttypes.U):
-	    This symbol will be defined if the C compiler supports int64_t.
+	This symbol will be defined if the C compiler supports int64_t.
 
 d_iovec_s (i_sysuio.U):
 	This variable conditionally defines the HAS_STRUCT_IOVEC symbol,
@@ -1696,8 +1696,8 @@ i_grp (i_grp.U):
 	whether a C program should include <grp.h>.
 
 i_inttypes (i_inttypes.U):
-	    This variable conditionally defines the I_INTTYPES symbol,
-	    and indicates whether a C program should include <inttypes.h>.
+	This variable conditionally defines the I_INTTYPES symbol,
+	and indicates whether a C program should include <inttypes.h>.
 
 i_limits (i_limits.U):
 	This variable conditionally defines the I_LIMITS symbol, and indicates
@@ -1709,8 +1709,8 @@ i_locale (i_locale.U):
 	and indicates whether a C program should include <locale.h>.
 
 i_machcthr (i_machcthr.U):
-	    This variable conditionally defines the I_MACH_CTHREADS symbol,
-	    and indicates whether a C program should include <mach/cthreads.h>.
+	This variable conditionally defines the I_MACH_CTHREADS symbol,
+	and indicates whether a C program should include <mach/cthreads.h>.
 
 i_malloc (i_malloc.U):
 	This variable conditionally defines the I_MALLOC symbol, and indicates
@@ -1785,8 +1785,8 @@ i_string (i_string.U):
 	indicates that <string.h> should be included rather than <strings.h>.
 
 i_sysaccess (i_sysaccess.U):
-	    This variable conditionally defines the I_SYS_ACCESS symbol,
-	    and indicates whether a C program should include <sys/access.h>.
+	This variable conditionally defines the I_SYS_ACCESS symbol,
+	and indicates whether a C program should include <sys/access.h>.
 
 i_sysdir (i_sysdir.U):
 	This variable conditionally defines the I_SYS_DIR symbol, and indicates
@@ -1824,8 +1824,8 @@ i_sysresrc (i_sysresrc.U):
 	and indicates whether a C program should include <sys/resource.h>.
 
 i_syssecrt (i_syssecrt.U):
-	    This variable conditionally defines the I_SYS_SECURITY symbol,
-	    and indicates whether a C program should include <sys/security.h>.
+	This variable conditionally defines the I_SYS_SECURITY symbol,
+	and indicates whether a C program should include <sys/security.h>.
 
 i_sysselct (i_sysselct.U):
 	This variable conditionally defines I_SYS_SELECT, which indicates
@@ -2235,7 +2235,7 @@ myuname (Oldconfig.U):
 n (n.U):
 	This variable contains the '-n' flag if that is what causes the echo
 	command to suppress newline.  Otherwise it is null.  Correct usage is
-	    $echo $n "prompt for a question: $c".
+	$echo $n "prompt for a question: $c".
 
 netdb_hlen_type (netdbtype.U):
 	This variable holds the type used for the 2nd argument to
@@ -2257,11 +2257,6 @@ netdb_net_type (netdbtype.U):
 	This variable holds the type used for the 1st argument to
 	getnetbyaddr().  Usually, this is int or long.
 	This is only useful if you have getnetbyaddr(), naturally.
-
-nm (Loc.U):
-	This variable is be used internally by Configure to determine the
-	full pathname (if any) of the nm program.  After Configure runs,
-	the value is reset to a plain "nm" and is not useful.
 
 nm_opt (usenm.U):
 	This variable holds the options that may be necessary for nm.
@@ -2524,11 +2519,11 @@ shrpenv (libperl.U):
 	One way to do this on some systems is to set the environment variable
 	LD_RUN_PATH to the directory that will be the final location of the
 	shared libperl.so.  The makefile can use this with something like
-		$shrpenv $(CC) -o perl perlmain.o $libperl $libs
+	$shrpenv $(CC) -o perl perlmain.o $libperl $libs
 	Typical values are
-		shrpenv="env LD_RUN_PATH=$archlibexp/CORE"
+	shrpenv="env LD_RUN_PATH=$archlibexp/CORE"
 	or
-		shrpenv=''
+	shrpenv=''
 	See the main perl Makefile.SH for actual working usage.
 	Alternatively, we might be able to use a command line option such
 	as -R $archlibexp/CORE (Solaris, NetBSD) or -Wl,-rpath
@@ -2650,8 +2645,8 @@ startperl (startperl.U):
 	script to make sure (hopefully) that it runs with perl and not some
 	shell. Of course, that leading line must be followed by the classical
 	perl idiom:
-		eval 'exec perl -S $0 ${1+"$@"}'
-			if $running_under_some_shell;
+	eval 'exec perl -S $0 ${1+"$@"}'
+	if $running_under_some_shell;
 	to guarantee perl startup should the shell execute the script. Note
 	that this magic incatation is not understood by csh.
 
@@ -2724,11 +2719,6 @@ tar (Loc.U):
 tbl (Loc.U):
 	This variable is defined but not used by Configure.
 	The value is a plain '' and is not useful.
-
-tee (Loc.U):
-	This variable is be used internally by Configure to determine the
-	full pathname (if any) of the tee program.  After Configure runs,
-	the value is reset to a plain "tee" and is not useful.
 
 test (Loc.U):
 	This variable is be used internally by Configure to determine the
