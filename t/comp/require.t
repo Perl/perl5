@@ -134,7 +134,8 @@ print $x;
 
 write_file('bleah.pm', <<'**BLEAH**'
 print "not " if !defined wantarray || wantarray ne '';
-print "ok $i - require() context\n";
+my $TODO = $i == 23 ? " # TODO bug #21742" : "";
+print "ok $i - require() context$TODO\n";
 1;
 **BLEAH**
 );
