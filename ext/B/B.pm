@@ -7,7 +7,7 @@
 #
 package B;
 
-our $VERSION = '1.06';
+our $VERSION = '1.07';
 
 use XSLoader ();
 require Exporter;
@@ -36,7 +36,8 @@ use strict;
 @B::PVIV::ISA = qw(B::PV B::IV);
 @B::PVNV::ISA = qw(B::PV B::NV);
 @B::PVMG::ISA = 'B::PVNV';
-@B::PVLV::ISA = 'B::GV';
+# Change in the inheritance hierarchy post 5.8
+@B::PVLV::ISA = $] > 5.009 ? 'B::GV' : 'B::PVMG';
 @B::BM::ISA = 'B::PVMG';
 @B::AV::ISA = 'B::PVMG';
 @B::GV::ISA = 'B::PVMG';
@@ -529,7 +530,8 @@ using this module.
 B::IV, B::NV, B::RV, B::PV, B::PVIV, B::PVNV, B::PVMG, B::BM, B::PVLV,
 B::AV, B::HV, B::CV, B::GV, B::FM, B::IO. These classes correspond in
 the obvious way to the underlying C structures of similar names. The
-inheritance hierarchy mimics the underlying C "inheritance":
+inheritance hierarchy mimics the underlying C "inheritance". For 5.9 and
+later this is:
 
                              B::SV
                                |
@@ -552,6 +554,20 @@ inheritance hierarchy mimics the underlying C "inheritance":
               B::BM B::AV B::GV B::HV B::CV B::IO
                            |            |
                         B::PVLV         |
+                                      B::FM
+
+
+For 5.8 and earlier, PVLV is a direct subclass of PVMG, so the base of this
+diagram is
+
+                           |
+                        B::PVMG
+                           |
+         +------+-----+----+------+-----+-----+
+         |      |     |    |      |     |     |
+      B::PVLV B::BM B::AV B::GV B::HV B::CV B::IO
+                                        |
+                                        |
                                       B::FM
 
 

@@ -505,7 +505,7 @@ BOOT:
     specialsv_list[4] = pWARN_ALL;
     specialsv_list[5] = pWARN_NONE;
     specialsv_list[6] = pWARN_STD;
-#if PERL_VERSION <= 9
+#if PERL_VERSION <= 8
 #  define CVf_ASSERTION	0
 #endif
 #include "defsubs.h"
@@ -721,7 +721,16 @@ cchar(sv)
 void
 threadsv_names()
     PPCODE:
+#if PERL_VERSION <= 8
+# ifdef USE_5005THREADS
+	int i;
+	STRLEN len = strlen(PL_threadsv_names);
 
+	EXTEND(sp, len);
+	for (i = 0; i < len; i++)
+	    PUSHs(sv_2mortal(newSVpvn(&PL_threadsv_names[i], 1)));
+# endif
+#endif
 
 #define OP_next(o)	o->op_next
 #define OP_sibling(o)	o->op_sibling

@@ -5,9 +5,12 @@
 #      You may distribute under the terms of either the GNU General Public
 #      License or the Artistic License, as specified in the README file.
 #
-package B::C::Section;
+
+package B::C;
 
 our $VERSION = '1.04';
+
+package B::C::Section;
 
 use B ();
 use base B::Section;
@@ -1433,6 +1436,14 @@ typedef struct {
     long	xcv_depth;	/* >= 2 indicates recursive call */
     AV *	xcv_padlist;
     CV *	xcv_outside;
+EOT
+    print <<'EOT' if $] < 5.009;
+#ifdef USE_5005THREADS
+    perl_mutex *xcv_mutexp;
+    struct perl_thread *xcv_owner;	/* current owner thread */
+#endif /* USE_5005THREADS */
+EOT
+    print <<'EOT';
     cv_flags_t	xcv_flags;
     U32		xcv_outside_seq; /* the COP sequence (at the point of our
 				  * compilation) in the lexically enclosing
