@@ -1808,20 +1808,20 @@
 #define my(a)			Perl_my(aTHX_ a)
 #define my_atof(a)		Perl_my_atof(aTHX_ a)
 #if !defined(HAS_BCOPY) || !defined(HAS_SAFE_BCOPY)
-#define my_bcopy(a,b,c)		Perl_my_bcopy(aTHX_ a,b,c)
+#define my_bcopy		Perl_my_bcopy
 #endif
 #if !defined(HAS_BZERO) && !defined(HAS_MEMSET)
-#define my_bzero(a,b)		Perl_my_bzero(aTHX_ a,b)
+#define my_bzero		Perl_my_bzero
 #endif
 #define my_exit(a)		Perl_my_exit(aTHX_ a)
 #define my_failure_exit()	Perl_my_failure_exit(aTHX)
 #define my_fflush_all()		Perl_my_fflush_all(aTHX)
 #define my_lstat()		Perl_my_lstat(aTHX)
 #if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
-#define my_memcmp(a,b,c)	Perl_my_memcmp(aTHX_ a,b,c)
+#define my_memcmp		Perl_my_memcmp
 #endif
 #if !defined(HAS_MEMSET)
-#define my_memset(a,b,c)	Perl_my_memset(aTHX_ a,b,c)
+#define my_memset		Perl_my_memset
 #endif
 #if !defined(PERL_OBJECT)
 #define my_pclose(a)		Perl_my_pclose(aTHX_ a)

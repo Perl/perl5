@@ -67,7 +67,7 @@ dl_find_symbol(libhandle, symbolname)
     status_t retcode;
     void *adr = 0;
 #ifdef DLSYM_NEEDS_UNDERSCORE
-    symbolname = form("_%s", symbolname);
+    symbolname = Perl_form_nocontext("_%s", symbolname);
 #endif
     RETVAL = NULL;
     DLDEBUG(2, PerlIO_printf(Perl_debug_log,

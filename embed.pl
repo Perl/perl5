@@ -1419,20 +1419,20 @@ p	|char*	|moreswitches	|char* s
 p	|OP*	|my		|OP* o
 p	|NV	|my_atof	|const char *s
 #if !defined(HAS_BCOPY) || !defined(HAS_SAFE_BCOPY)
-p	|char*	|my_bcopy	|const char* from|char* to|I32 len
+np	|char*	|my_bcopy	|const char* from|char* to|I32 len
 #endif
 #if !defined(HAS_BZERO) && !defined(HAS_MEMSET)
-p	|char*	|my_bzero	|char* loc|I32 len
+np	|char*	|my_bzero	|char* loc|I32 len
 #endif
 pr	|void	|my_exit	|U32 status
 pr	|void	|my_failure_exit
 p	|I32	|my_fflush_all
 p	|I32	|my_lstat
 #if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
-p	|I32	|my_memcmp	|const char* s1|const char* s2|I32 len
+np	|I32	|my_memcmp	|const char* s1|const char* s2|I32 len
 #endif
 #if !defined(HAS_MEMSET)
-p	|void*	|my_memset	|char* loc|I32 ch|I32 len
+np	|void*	|my_memset	|char* loc|I32 ch|I32 len
 #endif
 #if !defined(PERL_OBJECT)
 p	|I32	|my_pclose	|PerlIO* ptr

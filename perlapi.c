@@ -2302,8 +2302,9 @@ Perl_my_atof(pTHXo_ const char *s)
 
 #undef  Perl_my_bcopy
 char*
-Perl_my_bcopy(pTHXo_ const char* from, char* to, I32 len)
+Perl_my_bcopy(const char* from, char* to, I32 len)
 {
+    dTHXo;
     return ((CPerlObj*)pPerl)->Perl_my_bcopy(from, to, len);
 }
 #endif
@@ -2311,8 +2312,9 @@ Perl_my_bcopy(pTHXo_ const char* from, char* to, I32 len)
 
 #undef  Perl_my_bzero
 char*
-Perl_my_bzero(pTHXo_ char* loc, I32 len)
+Perl_my_bzero(char* loc, I32 len)
 {
+    dTHXo;
     return ((CPerlObj*)pPerl)->Perl_my_bzero(loc, len);
 }
 #endif
@@ -2348,8 +2350,9 @@ Perl_my_lstat(pTHXo)
 
 #undef  Perl_my_memcmp
 I32
-Perl_my_memcmp(pTHXo_ const char* s1, const char* s2, I32 len)
+Perl_my_memcmp(const char* s1, const char* s2, I32 len)
 {
+    dTHXo;
     return ((CPerlObj*)pPerl)->Perl_my_memcmp(s1, s2, len);
 }
 #endif
@@ -2357,8 +2360,9 @@ Perl_my_memcmp(pTHXo_ const char* s1, const char* s2, I32 len)
 
 #undef  Perl_my_memset
 void*
-Perl_my_memset(pTHXo_ char* loc, I32 ch, I32 len)
+Perl_my_memset(char* loc, I32 ch, I32 len)
 {
+    dTHXo;
     return ((CPerlObj*)pPerl)->Perl_my_memset(loc, ch, len);
 }
 #endif

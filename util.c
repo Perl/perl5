@@ -2003,9 +2003,10 @@ Perl_unlnk(pTHX_ char *f)	/* unlink all versions of a file */
 }
 #endif
 
+/* this is a drop-in replacement for bcopy() */
 #if !defined(HAS_BCOPY) || !defined(HAS_SAFE_BCOPY)
 char *
-Perl_my_bcopy(pTHX_ register const char *from,register char *to,register I32 len)
+Perl_my_bcopy(register const char *from,register char *to,register I32 len)
 {
     char *retval = to;
 
@@ -2023,9 +2024,10 @@ Perl_my_bcopy(pTHX_ register const char *from,register char *to,register I32 len
 }
 #endif
 
+/* this is a drop-in replacement for memset() */
 #ifndef HAS_MEMSET
 void *
-Perl_my_memset(pTHX_ register char *loc, register I32 ch, register I32 len)
+Perl_my_memset(register char *loc, register I32 ch, register I32 len)
 {
     char *retval = loc;
 
@@ -2035,9 +2037,10 @@ Perl_my_memset(pTHX_ register char *loc, register I32 ch, register I32 len)
 }
 #endif
 
+/* this is a drop-in replacement for bzero() */
 #if !defined(HAS_BZERO) && !defined(HAS_MEMSET)
 char *
-Perl_my_bzero(pTHX_ register char *loc, register I32 len)
+Perl_my_bzero(register char *loc, register I32 len)
 {
     char *retval = loc;
 
@@ -2047,9 +2050,10 @@ Perl_my_bzero(pTHX_ register char *loc, register I32 len)
 }
 #endif
 
+/* this is a drop-in replacement for memcmp() */
 #if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
 I32
-Perl_my_memcmp(pTHX_ const char *s1, const char *s2, register I32 len)
+Perl_my_memcmp(const char *s1, const char *s2, register I32 len)
 {
     register U8 *a = (U8 *)s1;
     register U8 *b = (U8 *)s2;

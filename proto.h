@@ -383,20 +383,20 @@ PERL_CALLCONV char*	Perl_moreswitches(pTHX_ char* s);
 PERL_CALLCONV OP*	Perl_my(pTHX_ OP* o);
 PERL_CALLCONV NV	Perl_my_atof(pTHX_ const char *s);
 #if !defined(HAS_BCOPY) || !defined(HAS_SAFE_BCOPY)
-PERL_CALLCONV char*	Perl_my_bcopy(pTHX_ const char* from, char* to, I32 len);
+PERL_CALLCONV char*	Perl_my_bcopy(const char* from, char* to, I32 len);
 #endif
 #if !defined(HAS_BZERO) && !defined(HAS_MEMSET)
-PERL_CALLCONV char*	Perl_my_bzero(pTHX_ char* loc, I32 len);
+PERL_CALLCONV char*	Perl_my_bzero(char* loc, I32 len);
 #endif
 PERL_CALLCONV void	Perl_my_exit(pTHX_ U32 status) __attribute__((noreturn));
 PERL_CALLCONV void	Perl_my_failure_exit(pTHX) __attribute__((noreturn));
 PERL_CALLCONV I32	Perl_my_fflush_all(pTHX);
 PERL_CALLCONV I32	Perl_my_lstat(pTHX);
 #if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
-PERL_CALLCONV I32	Perl_my_memcmp(pTHX_ const char* s1, const char* s2, I32 len);
+PERL_CALLCONV I32	Perl_my_memcmp(const char* s1, const char* s2, I32 len);
 #endif
 #if !defined(HAS_MEMSET)
-PERL_CALLCONV void*	Perl_my_memset(pTHX_ char* loc, I32 ch, I32 len);
+PERL_CALLCONV void*	Perl_my_memset(char* loc, I32 ch, I32 len);
 #endif
 #if !defined(PERL_OBJECT)
 PERL_CALLCONV I32	Perl_my_pclose(pTHX_ PerlIO* ptr);

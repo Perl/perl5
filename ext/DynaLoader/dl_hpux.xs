@@ -104,7 +104,7 @@ dl_find_symbol(libhandle, symbolname)
     void *symaddr = NULL;
     int status;
 #ifdef __hp9000s300
-    symbolname = form("_%s", symbolname);
+    symbolname = Perl_form_nocontext("_%s", symbolname);
 #endif
     DLDEBUG(2, PerlIO_printf(Perl_debug_log,
 			     "dl_find_symbol(handle=%lx, symbol=%s)\n",

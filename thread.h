@@ -73,7 +73,9 @@ struct perl_thread *getTHR (void);
 	} STMT_END
 
 #define MUTEX_LOCK(m)		mutex_lock(*m)
+#define MUTEX_LOCK_NOCONTEXT(m)	mutex_lock(*m)
 #define MUTEX_UNLOCK(m)		mutex_unlock(*m)
+#define MUTEX_UNLOCK_NOCONTEXT(m) mutex_unlock(*m)
 #define MUTEX_DESTROY(m)				\
 	STMT_START {					\
 		mutex_free(*m);				\
@@ -109,7 +111,7 @@ struct perl_thread *getTHR (void);
 #define JOIN(t, avp)		(*(avp) = (AV *)cthread_join(t->self))
 
 #define SET_THR(thr)		cthread_set_data(cthread_self(), thr)
-#define THR			cthread_data(cthread_self())
+#define THR			((struct perl_thread *)cthread_data(cthread_self()))
 
 #define INIT_THREADS		cthread_init()
 #define YIELD			cthread_yield()
