@@ -29,6 +29,12 @@
 #include <a.out.h>
 #include <ldfcn.h>
 
+/* If using PerlIO, redefine these macros from <ldfcn.h> */
+#ifdef USE_PERLIO
+#define FSEEK(ldptr,o,p)        PerlIO_seek(IOPTR(ldptr),(p==BEGINNING)?(OFFSET(ldptr)+o):o,p)
+#define FREAD(p,s,n,ldptr)      PerlIO_read(IOPTR(ldptr),p,s*n)
+#endif
+
 /*
  * We simulate dlopen() et al. through a call to load. Because AIX has
  * no call to find an exported symbol we read the loader section of the
@@ -389,7 +395,13 @@ static int readExports(ModulePtr mp)
 			;
 		return -1;
 	}
+/* This first case is a hack, since it assumes that the 3rd parameter to
+   FREAD is 1. See the redefinition of FREAD above to see how this works. */
+#ifdef USE_PERLIO
+	if (FREAD(ldbuf, sh.s_size, 1, ldp) != sh.s_size) {
+#else
 	if (FREAD(ldbuf, sh.s_size, 1, ldp) != 1) {
+#endif
 		errvalid++;
 		strcpy(errbuf, "readExports: cannot read loader section");
 		safefree(ldbuf);
