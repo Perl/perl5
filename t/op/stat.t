@@ -1,7 +1,8 @@
 #!./perl
 
 # $RCSfile: stat.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:28 $
-
+# 950521 DFD    This version hacked to make test 39 succeed on MachTen
+#               though the O.S. wrongly thinks /dev/null is a terminal
 print "1..56\n";
 
 chop($cwd = `pwd`);
@@ -140,7 +141,8 @@ if (-c tty) {print "ok 37\n";} else {print "not ok 37\n";}
 close(tty);
 if (! -t tty) {print "ok 38\n";} else {print "not ok 38\n";}
 open(null,"/dev/null");
-if (! -t null || -e '/xenix') {print "ok 39\n";} else {print "not ok 39\n";}
+if (! -t null || -e '/xenix' || -e '/MachTen')
+	{print "ok 39\n";} else {print "not ok 39\n";}
 close(null);
 if (-t) {print "ok 40\n";} else {print "not ok 40\n";}
 
