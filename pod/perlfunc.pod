@@ -1141,10 +1141,12 @@ Returns the packed sockaddr address of other end of the SOCKET connection.
 
 =item getpgrp PID
 
-Returns the current process group for the specified PID, 0 for the
+Returns the current process group for the specified PID.  Use
+a PID of 0 to get the current process group for the
 current process.  Will raise an exception if used on a machine that
 doesn't implement getpgrp(2).  If PID is omitted, returns process
-group of current process.
+group of current process.  Note that the POSIX version of getpgrp()
+does not accept a PID argument, so only PID==0 is truly portable.
 
 =item getppid
 
@@ -2442,7 +2444,9 @@ See L<perlipc/"UDP: Message Passing"> for examples.
 
 Sets the current process group for the specified PID, 0 for the current
 process.  Will produce a fatal error if used on a machine that doesn't
-implement setpgrp(2).
+implement setpgrp(2).  If the arguments are ommitted, it defaults to
+0,0.  Note that the POSIX version of setpgrp() does not accept any
+arguments, so only setpgrp 0,0 is portable.
 
 =item setpriority WHICH,WHO,PRIORITY
 
@@ -3315,7 +3319,7 @@ Waits for a particular child process to terminate and returns the pid
 of the deceased process, or -1 if there is no such child process.  The
 status is returned in $?.  If you say
 
-    use POSIX "wait_h";
+    use POSIX ":wait_h";
     ...
     waitpid(-1,&WNOHANG);
 
