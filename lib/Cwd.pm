@@ -131,10 +131,22 @@ eval {
     XSLoader::load('Cwd');
 };
 
-# The 'natural and safe form' for UNIX (pwd may be setuid root)
 
+# Find the pwd command in the expected locations.  We assume these
+# are safe.  This prevents _backtick_pwd() consulting $ENV{PATH}
+# so everything works under taint mode.
+my $pwd_cmd;
+foreach my $try (qw(/bin/pwd /usr/bin/pwd)) {
+    if( -x $try ) {
+        $pwd_cmd = $try;
+        last;
+    }
+}
+$pwd_cmd ||= 'pwd';
+
+# The 'natural and safe form' for UNIX (pwd may be setuid root)
 sub _backtick_pwd {
-    my $cwd = `pwd`;
+    my $cwd = `$pwd_cmd`;
     # `pwd` may fail e.g. if the disk is full
     chomp($cwd) if defined $cwd;
     $cwd;
