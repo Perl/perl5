@@ -324,6 +324,15 @@ change#3385, also need perlguts documentation
 
 [TODO - Tuomas Lukka <lukka@fas.harvard.edu>]
 
+=head2 File globbing implemented internally
+
+WARNING: This is currently an experimental feature.  Interfaces and
+implementation are likely to change.
+
+Perl can be compiled with -DPERL_INTERNAL_GLOB to use the File::Glob
+implementation of the glob() operator.  This avoids using an external
+csh process and the problems associated with it.
+
 =head2 Binary numbers supported
 
 Binary numbers are now supported as literals, in s?printf formats, and
@@ -1081,6 +1090,12 @@ autoloaded or is a symbolic reference.
 
 A bug that caused File::Find to lose track of the working directory
 when pruning top-level directories has been fixed.
+
+=item File::Glob
+
+This extension implements BSD-style file globbing.  It will also be
+used for the internal implementation of the glob() operator if
+Perl was compiled with -DPERL_INTERNAL_GLOB.  See L<File::Glob>.
 
 =item File::Spec
 

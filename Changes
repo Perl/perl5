@@ -79,6 +79,46 @@ Version 5.005_62        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  4356] By: gsar                                  on 1999/10/12  16:53:31
+        Log: add File::BSDGlob as File::Glob and load it at compile-time
+             if perl was built with -DPERL_INTERNAL_GLOB
+             
+             TODO: we currently get a compile-time failure if File/Glob.pm
+             can't be found; such failure needs to be made to emit a warning
+             and use the csh implementation instead
+     Branch: perl
+	   + ext/File/Glob/Changes ext/File/Glob/Glob.pm
+	   + ext/File/Glob/Glob.xs ext/File/Glob/Makefile.PL
+	   + ext/File/Glob/TODO ext/File/Glob/bsd_glob.c
+	   + ext/File/Glob/bsd_glob.h t/lib/glob-basic.t
+	   + t/lib/glob-global.t t/lib/glob-taint.t
+	   ! MANIFEST op.c t/op/glob.t t/op/readdir.t t/op/taint.t
+	   ! t/pragma/overload.t
+____________________________________________________________________________
+[  4355] By: jhi                                   on 1999/10/12  15:30:05
+        Log: Revert the parts of #3926 that outlawed character ranges
+             that have character classes such as \w as either endpoint.
+             This change re-establishes the old behavior which meant that
+             such ranges weren't really ranges, the "-" was literal.
+             Moreover, this change also fixes the old behavior to be
+             more consistent: [\w-.] and [\s-\w] worked, but [.-\w] didn't.
+             Now they all do work as described above.  The #3926 outlawed
+             all of those.
+     Branch: cfgperl
+	   ! pod/perldiag.pod pod/perlre.pod regcomp.c t/op/re_tests
+____________________________________________________________________________
+[  4354] By: jhi                                   on 1999/10/12  09:58:59
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> (integrate 33 files)
+____________________________________________________________________________
+[  4353] By: gsar                                  on 1999/10/12  05:53:40
+        Log: apply parts of LynxOS patches from Alan Johnson
+             <johnson@alonn.gemse.fr>
+     Branch: perl
+	   ! Changes hints/lynxos.sh pod/perldelta.pod t/lib/safe2.t
+	   ! t/op/groups.t
+____________________________________________________________________________
 [  4352] By: gsar                                  on 1999/10/12  05:24:39
         Log: allow any unpack specifier to take a count via '/'
              (from Ilya Zakharevich)
