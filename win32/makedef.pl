@@ -219,6 +219,7 @@ Perl_nthreads
 Perl_nthreads_cond
 Perl_per_thread_magicals
 Perl_thread_create
+Perl_threadnum
 Perl_find_threadsv
 Perl_threadsv_names
 Perl_thrsv
