@@ -980,7 +980,28 @@ EOP
 			} 
 			$pretype = [$1];
 			next CMD; };
-	    $cmd =~ /^n$/ && do {
+                   $cmd =~ /^y\s*(\d*)\s*(.*)/ && do {
+                       eval { require PadWalker; PadWalker->VERSION(0.08) }
+                         or &warn($@ =~ /locate/
+                            ? "PadWalker module not found - please install\n"
+                            : $@)
+                          and next CMD;
+                       do 'dumpvar.pl' unless defined &main::dumpvar;
+                       defined &main::dumpvar
+                          or print $OUT "dumpvar.pl not available.\n"
+                          and next CMD;
+                       my @vars = split(' ', $2);
+                       my $h = eval { PadWalker::peek_my(($1 || 0) + 1) };
+                       $@ and $@ =~ s/ at .*//, &warn($@), next CMD;
+                       my $savout = select($OUT);
+                       dumpvar::dumplex($_, $h->{$_}, 
+                                       defined $option{dumpDepth}
+                                       ? $option{dumpDepth} : -1,
+                                       @vars)
+                           for sort keys %$h;
+                       select($savout);
+                       next CMD; };
+                   $cmd =~ /^n$/ && do {
 		        end_report(), next CMD if $finished and $level <= 1;
 			$single = 2;
 			$laststep = $cmd;
