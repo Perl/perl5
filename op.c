@@ -3466,7 +3466,6 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
     return cv;
 }
 
-
 CV *
 newXS(char *name, void (*subaddr) (CV *), char *filename)
 {

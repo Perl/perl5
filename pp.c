@@ -4297,8 +4297,8 @@ PP(pp_lock)
 
 PP(pp_specific)
 {
-#ifdef USE_THREADS
     djSP;
+#ifdef USE_THREADS
     SV **svp = av_fetch(thr->magicals, op->op_targ, FALSE);
     if (!svp)
 	croak("panic: pp_specific");

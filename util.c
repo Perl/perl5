@@ -1126,9 +1126,11 @@ die(pat, va_alist)
     GV *gv;
     CV *cv;
 
+#ifdef USE_THREADS
     DEBUG_L(PerlIO_printf(PerlIO_stderr(),
 			  "%p: die: curstack = %p, mainstack = %p\n",
 			  thr, curstack, mainstack));
+#endif /* USE_THREADS */
     /* We have to switch back to mainstack or die_where may try to pop
      * the eval block from the wrong stack if die is being called from a
      * signal handler.  - dkindred@cs.cmu.edu */
@@ -1145,9 +1147,11 @@ die(pat, va_alist)
     message = mess(pat, &args);
     va_end(args);
 
+#ifdef USE_THREADS
     DEBUG_L(PerlIO_printf(PerlIO_stderr(),
 			  "%p: die: message = %s\ndiehook = %p\n",
 			  thr, message, diehook));
+#endif /* USE_THREADS */
     if (diehook) {
 	/* sv_2cv might call croak() */
 	SV *olddiehook = diehook;
@@ -1175,9 +1179,11 @@ die(pat, va_alist)
     }
 
     restartop = die_where(message);
+#ifdef USE_THREADS
     DEBUG_L(PerlIO_printf(PerlIO_stderr(),
 	  "%p: die: restartop = %p, was_in_eval = %d, oldrunlevel = %d\n",
 	  thr, restartop, was_in_eval, oldrunlevel));
+#endif /* USE_THREADS */
     if ((!restartop && was_in_eval) || oldrunlevel > 1)
 	JMPENV_JUMP(3);
     return restartop;
