@@ -1081,6 +1081,15 @@ use system() instead of exec() if you want it to return. It fails and
 returns FALSE only if the command does not exist I<and> it is executed
 directly instead of via your system's command shell (see below).
 
+Since it's a common mistake to use system() instead of exec(), Perl
+warns you if there is a following statement which isn't die(), warn()
+or exit() (if C<-w> is set  -  but you always do that).   If you
+I<really> want to follow an exec() with some other statement, you
+can use one of these styles to avoid the warning:
+
+    exec ('foo') or print STDERR "couldn't exec foo";
+    { exec ('foo') }; print STDERR "couldn't exec foo";
+
 If there is more than one argument in LIST, or if LIST is an array with
 more than one value, calls execvp(3) with the arguments in LIST.  If
 there is only one scalar argument, the argument is checked for shell
