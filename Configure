@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.8 1995/07/25 13:40:02 ram Exp $
 #
-# Generated on Fri Aug 23 15:01:14 EDT 1996 [metaconfig 3.0 PL60]
+# Generated on Fri Aug 30 11:30:25 EDT 1996 [metaconfig 3.0 PL60]
 
 cat >/tmp/c1$$ <<EOF
 ARGGGHHHH!!!!!
@@ -1598,10 +1598,16 @@ if test -f config.sh; then
 	*)  echo "Fetching default answers from your old config.sh file..." >&4
 		tmp_n="$n"
 		tmp_c="$c"
+		tmp_sh="$sh"
 		. ./config.sh
 		cp config.sh UU
 		n="$tmp_n"
 		c="$tmp_c"
+		: Older versions did not always set $sh.  Catch re-use of such
+		: an old config.sh.
+		case "$sh" in
+		'') sh="$tmp_sh" ;;
+		esac
 		hint=previous
 		;;
 	esac
@@ -7983,12 +7989,12 @@ true)
 		# a version-specific architecture-dependent library, the version
 		# number isn't really that important, except for making cc/ld happy.
 		#
-		# A name such as libperl5.so.3.1
-		majmin="libperl5.$so.$patchlevel.$subversion"
-		# A name such as libperl5.so.301
+		# A name such as libperl.so.3.1
+		majmin="libperl.$so.$patchlevel.$subversion"
+		# A name such as libperl.so.301
 		majonly=`echo $patchlevel $subversion |
 			$awk '{printf "%d%02d", $1, $2}'`
-		majonly=libperl5.$so.$majonly
+		majonly=libperl.$so.$majonly
 		# I'd prefer to keep the os-specific stuff here to a minimum, and
 		# rely on figuring it out from the naming of libc.
 		case "${osname}${osvers}" in
@@ -8000,7 +8006,7 @@ true)
 			case "$libc" in
 			*libc.$so.[0-9]*.[0-9]*) dflt=$majmin ;;
 			*libc.$so.[0-9]*) dflt=$majonly ;;
-			*)	dflt=libperl5.$so ;;
+			*)	dflt=libperl.$so ;;
 			esac
 			;;
 		esac
@@ -8014,7 +8020,7 @@ I need to select a good name for the shared libperl.  If your system uses
 library names with major and minor numbers, then you might want something
 like $majmin.  Alternatively, if your system uses a single version
 number for shared libraries, then you might want to use $majonly.
-Or, your system might be quite happy with a simple libperl5.$so.
+Or, your system might be quite happy with a simple libperl.$so.
 
 Since the shared libperl will get installed into a version-specific
 architecture-dependent directory, the version number of the shared perl
@@ -8035,10 +8041,10 @@ esac
 case "$shrpdir" in
 '') ;;
 *)	$cat >&4 <<EOM
-WARNING:  Use of the shrpdir variable for the installation locaion of
-the shared libperl5.$so is not supported.  It was never documented and
-will not work in this version.  Let me (doughera@lafcol.lafayette.edu) know of any
-problems this may cause.
+WARNING:  Use of the shrpdir variable for the installation location of
+the shared $libperl is not supported.  It was never documented and
+will not work in this version.  Let me (doughera@lafcol.lafayette.edu)
+know of any problems this may cause.
 
 EOM
 	case "$shrpdir" in
@@ -8050,9 +8056,9 @@ EOM
 		;;
 	*)
 		$cat >&4 <<EOM
-And your current attempted setting of $shrpdir
-conflicts with the value of $archlibexp/CORE that
-installperl will use.
+Further, your current attempted setting of $shrpdir
+conflicts with the value of $archlibexp/CORE
+that installperl will use.
 EOM
 		;;
 	esac
