@@ -27,13 +27,29 @@
  */
 PerlInterpreter *PL_sharedsv_space;             /* The shared sv space */
 /* To access shared space we fake aTHX in this scope and thread's context */
-#define SHARED_CONTEXT 	    PERL_SET_CONTEXT((aTHX = PL_sharedsv_space))
+
+/* bug #24255: we include ENTER+SAVETMPS/FREETMPS+LEAVE with
+ * SHARED_CONTEXT/CALLER_CONTEXT macros, so that any mortals etc created
+ * while in the shared inpterpreter context don't languish */
+
+#define SHARED_CONTEXT \
+    STMT_START {					\
+	PERL_SET_CONTEXT((aTHX = PL_sharedsv_space));	\
+	ENTER;						\
+	SAVETMPS;					\
+    } STMT_END
 
 /* So we need a way to switch back to the caller's context... */
 /* So we declare _another_ copy of the aTHX variable ... */
 #define dTHXc PerlInterpreter *caller_perl = aTHX
+
 /* and use it to switch back */
-#define CALLER_CONTEXT      PERL_SET_CONTEXT((aTHX = caller_perl))
+#define CALLER_CONTEXT					\
+    STMT_START {					\
+    	FREETMPS;					\
+	LEAVE;						\
+	PERL_SET_CONTEXT((aTHX = caller_perl));		\
+    } STMT_END
 
 /*
  * Only one thread at a time is allowed to mess with shared space.
@@ -438,12 +454,6 @@ sharedsv_scalar_store(pTHX_ SV *sv, shared_sv *shared)
 	if (target) {
 	    SV *tmp;
 	    SHARED_CONTEXT;
-	    /* #24255: sv_setsv() (via sv_unref_flags()) may cause a
-	     * deferred free with sv_2mortal(). Ensure that the free_tmps
-	     * is done within this interpreter. DAPM.
-	     */
-	    ENTER;
-	    SAVETMPS;
 	    tmp = newRV(SHAREDSvPTR(target));
 	    sv_setsv_nomg(SHAREDSvPTR(shared), tmp);
 	    SvREFCNT_dec(tmp);
@@ -452,8 +462,6 @@ sharedsv_scalar_store(pTHX_ SV *sv, shared_sv *shared)
 	      SvOBJECT_on(SHAREDSvPTR(target));
 	      SvSTASH(SHAREDSvPTR(target)) = (HV*)fake_stash;
 	    }
-	    FREETMPS;
-	    LEAVE;
 	    CALLER_CONTEXT;
 	}
 	else {
@@ -463,16 +471,12 @@ sharedsv_scalar_store(pTHX_ SV *sv, shared_sv *shared)
     else {
         SvTEMP_off(sv);
 	SHARED_CONTEXT;
-	ENTER;
-	SAVETMPS;
 	sv_setsv_nomg(SHAREDSvPTR(shared), sv);
 	if(SvOBJECT(sv)) {
 	  SV* fake_stash = newSVpv(HvNAME(SvSTASH(sv)),0);
 	  SvOBJECT_on(SHAREDSvPTR(shared));
 	  SvSTASH(SHAREDSvPTR(shared)) = (HV*)fake_stash;
 	}
-	FREETMPS;
-	LEAVE;
 	CALLER_CONTEXT;
     }
     if (!allowed) {
@@ -614,9 +618,12 @@ int
 sharedsv_elem_mg_DELETE(pTHX_ SV *sv, MAGIC *mg)
 {
     dTHXc;
+    MAGIC *shmg;
     shared_sv *shared = SV_to_sharedsv(aTHX_ mg->mg_obj);
     ENTER_LOCK;
     sharedsv_elem_mg_FETCH(aTHX_ sv, mg);
+    if ((shmg = mg_find(sv, PERL_MAGIC_shared_scalar)))
+	sharedsv_scalar_mg_get(aTHX_ sv, shmg);
     if (SvTYPE(SHAREDSvPTR(shared)) == SVt_PVAV) {
 	SHARED_CONTEXT;
 	av_delete((AV*) SHAREDSvPTR(shared), mg->mg_len, G_DISCARD);
