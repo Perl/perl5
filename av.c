@@ -134,10 +134,11 @@ I32 lval;
 
     if (SvRMAGICAL(av)) {
 	if (mg_find((SV*)av,'P')) {
+	    static SV *mysv;
 	    sv = sv_newmortal();
 	    mg_copy((SV*)av, sv, 0, key);
-	    Sv = sv;
-	    return &Sv;
+	    mysv = sv;
+	    return &mysv;
 	}
     }
 

@@ -100,10 +100,11 @@ I32 lval;
 
     if (SvRMAGICAL(hv)) {
 	if (mg_find((SV*)hv,'P')) {
+	    static SV *mysv;
 	    sv = sv_newmortal();
 	    mg_copy((SV*)hv, sv, key, klen);
-	    Sv = sv;
-	    return &Sv;
+	    mysv = sv;
+	    return &mysv;
 	}
 #ifdef ENV_IS_CASELESS
 	else if (mg_find((SV*)hv,'E')) {
