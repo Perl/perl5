@@ -18,10 +18,6 @@ Net::NNTP	RFC977		Network News Transfer Protocol
 Net::POP3	RFC1939		Post Office Protocol 3
 Net::SNPP	RFC1861		Simple Network Pager Protocol
 
-The distribution also contains a module (Net::PH) which facilitates
-comunicate with with servers using the CCSO Nameserver Server-Client
-Protocol
-
 FUTURE WORK
 
 AVAILABILITY
@@ -57,11 +53,20 @@ together with libnet.  These packages should be available on CPAN
 
 CONFIGURE
 
-Normally when perl Makefile.PL is run it will run Configure which will ask some
-questions about your system. The results of these questions will be stored in
-the Net::Config package. If you are on a system when this script cannot be run
-for some reason then the file Config.eg can be edited manually and installed
-as Net::Config (Net/Comfig.pm)
+Normally when perl Makefile.PL is run it will run Configure which will
+ask some questions about your system. The results of these questions
+will be stored in in a file called libnet.cfg which will be installed
+alongside the other perl modules in this distribution. The Makefile.PL
+will run Configure in an interactive mode unless these exists a file
+called libnet.cfg in the build directory.
+
+If you are on a system which cannot run this script you can create an
+empty file to make Makefile.PL skip running Configure. If you want to
+keep your existing settings and not run interactivly the simple run
+
+  Configure -d
+
+before running the Makefile.PL.
 
 DOCUMENTATION
 
@@ -84,7 +89,7 @@ SUPPORT
 
 Questions about how to use this library should be directed to the
 comp.lang.perl.modules USENET Newsgroup.  Bug reports and suggestions
-for improvements can be sendt to me at <gbarr@pobox.com>. 
+for improvements can be sent to me at <gbarr@pobox.com>. 
 
 Most of the modules in this library have an option to output a debug
 transcript to STDERR. When reporting bugs/problems please, if possible,
@@ -92,7 +97,7 @@ include a transcript of a run.
 
 COPYRIGHT
 
-  © 1996-98 Graham Barr. All rights reserved.
+  © 1996-2000 Graham Barr. All rights reserved.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

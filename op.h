@@ -464,7 +464,21 @@ struct loop {
 typedef struct {
   struct tm* tmbuff;
 } REBUF;
-#define localtime(a)       localtime_r(a,PL_reentrant_buffer->tmbuff)
-#define gmtime(a)          gmtime_r(a,PL_reentrant_buffer->tmbuff)
+
+#define localtime(a)       (localtime_r((a),PL_reentrant_buffer->tmbuff) ? PL_reentrant_buffer->tmbuff : NULL)
+#define gmtime(a)          (gmtime_r((a),PL_reentrant_buffer->tmbuff) ?  PL_reentrant_buffer->tmbuff : NULL)
+
+#if defined(__hpux) && defined(__ux_version) && __ux_version <= 1020
+
+/* HP-UX 10.20 returns 0 on success, what it returns on failure is hidden
+   in the fog somewhere, possibly -1 which means the following should do 
+   the right thing - 20010816 sky */
+
+#undef localtime
+#undef gmtime
+#define localtime(a)       ((localtime_r((a),PL_reentrant_buffer->tmbuff) == 0) ? PL_reentrant_buffer->tmbuff : NULL)
+#define gmtime(a)          ((gmtime_r((a),PL_reentrant_buffer->tmbuff) == 0) ? PL_reentrant_buffer->tmbuff : NULL)
+#endif /* HP-UX 10.20 */
+
 #endif
 

@@ -1,0 +1,57 @@
+Unicode/Normalize version 0.04
+===================================
+
+Unicode::Normalize - normalized forms of Unicode text
+
+SYNOPSIS
+
+  use Unicode::Normalize;
+
+  $string_NFD  = NFD($string);  # Normalization Form D
+  $string_NFC  = NFC($string);  # Normalization Form C
+  $string_NFKD = NFKD($string); # Normalization Form KD
+  $string_NFKC = NFKC($string); # Normalization Form KC
+
+   or
+
+  use Unicode::Normalize 'normalize';
+
+  $string_NFD  = normalize('D',  $string);  # Normalization Form D
+  $string_NFC  = normalize('C',  $string);  # Normalization Form C
+  $string_NFKD = normalize('KD', $string);  # Normalization Form KD
+  $string_NFKC = normalize('KC', $string);  # Normalization Form KC
+
+INSTALLATION
+
+To install this module type the following:
+
+   perl Makefile.PL
+   make
+   make test
+   make install
+
+DEPENDENCIES
+
+This module requires these other modules and libraries:
+
+Carp
+Exporter
+File::Spec
+Lingua::KO::Hangul::Util
+$unidir/CombiningClass.pl
+$unidir/Decomposition.pl
+$unidir/CompExcl.txt
+
+# $unidir is $LIB/unicore or $LIB/unicode
+
+COPYRIGHT AND LICENCE
+
+SADAHIRO Tomoyuki, E<lt>SADAHIRO@cpan.orgE<gt>
+
+  http://homepage1.nifty.com/nomenclator/perl/
+
+  Copyright(C) 2001, SADAHIRO Tomoyuki. Japan. All rights reserved.
+
+  This program is free software; you can redistribute it and/or 
+  modify it under the same terms as Perl itself.
+

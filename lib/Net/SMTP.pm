@@ -16,7 +16,7 @@ use IO::Socket;
 use Net::Cmd;
 use Net::Config;
 
-$VERSION = "2.15"; # $Id$
+$VERSION = "2.16"; # $Id: //depot/libnet/Net/SMTP.pm#16 $
 
 @ISA = qw(Net::Cmd IO::Socket::INET);
 
@@ -109,7 +109,7 @@ sub hello
    my $h = ${*$me}{'net_smtp_esmtp'} = {};
    my $ln;
    foreach $ln (@msg) {
-     $h->{$1} = $2
+     $h->{uc $1} = $2
 	if $ln =~ /(\S+)\b[ \t]*([^\n]*)/;
     }
   }
@@ -308,7 +308,11 @@ sub recipient
  return $skip_bad ? @ok : 1;
 }
 
-sub to { shift->recipient(@_) }
+BEGIN {
+  *to  = \&recipient;
+  *cc  = \&recipient;
+  *bcc = \&recipient;
+}
 
 sub data
 {
@@ -384,7 +388,7 @@ Net::SMTP - Simple Mail Transfer Protocol Client
 =head1 SYNOPSIS
 
     use Net::SMTP;
-    
+
     # Constructors
     $smtp = Net::SMTP->new('mailhost');
     $smtp = Net::SMTP->new('mailhost', Timeout => 60);
@@ -406,9 +410,9 @@ The Net::SMTP class is a subclass of Net::Cmd and IO::Socket::INET.
 This example prints the mail domain name of the SMTP server known as mailhost:
 
     #!/usr/local/bin/perl -w
-    
+
     use Net::SMTP;
-    
+
     $smtp = Net::SMTP->new('mailhost');
     print $smtp->domain,"\n";
     $smtp->quit;
@@ -417,20 +421,20 @@ This example sends a small message to the postmaster at the SMTP server
 known as mailhost:
 
     #!/usr/local/bin/perl -w
-    
+
     use Net::SMTP;
-    
+
     $smtp = Net::SMTP->new('mailhost');
-    
+
     $smtp->mail($ENV{USER});
     $smtp->to('postmaster');
-    
+
     $smtp->data();
     $smtp->datasend("To: postmaster\n");
     $smtp->datasend("\n");
     $smtp->datasend("A simple test message\n");
     $smtp->dataend();
-    
+
     $smtp->quit;
 
 =head1 CONSTRUCTOR
@@ -466,6 +470,8 @@ Example:
 			   Timeout => 30,
                            Debug   => 1,
 			  );
+
+=back
 
 =head1 METHODS
 
@@ -544,9 +550,17 @@ If C<SkipBad> is true the C<recipient> will not return an error when a
 bad address is encountered and it will return an array of addresses
 that did succeed.
 
+  $smtp->recipient($recipient1,$recipient2);  # Good
+  $smtp->recipient($recipient1,$recipient2, { SkipBad => 1 });  # Good
+  $smtp->recipient("$recipient,$recipient2"); # BAD   
+
 =item to ( ADDRESS [, ADDRESS [...]] )
 
-A synonym for C<recipient>.
+=item cc ( ADDRESS [, ADDRESS [...]] )
+
+=item bcc ( ADDRESS [, ADDRESS [...]] )
+
+Synonyms for C<recipient>.
 
 =item data ( [ DATA ] )
 
@@ -592,5 +606,9 @@ Graham Barr <gbarr@pobox.com>
 Copyright (c) 1995-1997 Graham Barr. All rights reserved.
 This program is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
+
+=for html <hr>
+
+I<$Id: //depot/libnet/Net/SMTP.pm#16 $>
 
 =cut

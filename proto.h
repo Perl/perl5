@@ -13,7 +13,7 @@ PERL_CALLCONV PerlInterpreter*	perl_alloc_using(struct IPerlMem* m, struct IPerl
 #endif
 PERL_CALLCONV PerlInterpreter*	perl_alloc(void);
 PERL_CALLCONV void	perl_construct(PerlInterpreter* interp);
-PERL_CALLCONV void	perl_destruct(PerlInterpreter* interp);
+PERL_CALLCONV int	perl_destruct(PerlInterpreter* interp);
 PERL_CALLCONV void	perl_free(PerlInterpreter* interp);
 PERL_CALLCONV int	perl_run(PerlInterpreter* interp);
 PERL_CALLCONV int	perl_parse(PerlInterpreter* interp, XSINIT_t xsinit, int argc, char** argv, char** env);

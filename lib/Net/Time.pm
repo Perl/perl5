@@ -17,7 +17,7 @@ use IO::Select;
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(inet_time inet_daytime);
 
-$VERSION = "2.08";
+$VERSION = "2.09"; # $Id: //depot/libnet/Net/Time.pm#9 $
 
 $TIMEOUT = 120;
 
@@ -102,11 +102,11 @@ Net::Time - time and daytime network client interface
 =head1 SYNOPSIS
 
     use Net::Time qw(inet_time inet_daytime);
-    
+
     print inet_time();		# use default host from Net::Config
     print inet_time('localhost');
     print inet_time('localhost', 'tcp');
-    
+
     print inet_daytime();	# use default host from Net::Config
     print inet_daytime('localhost');
     print inet_daytime('localhost', 'tcp');
@@ -143,5 +143,9 @@ Graham Barr <gbarr@pobox.com>
 Copyright (c) 1995-1998 Graham Barr. All rights reserved.
 This program is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
+
+=for html <hr>
+
+I<$Id: //depot/libnet/Net/Time.pm#9 $>
 
 =cut

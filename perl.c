@@ -301,7 +301,7 @@ Shuts down a Perl interpreter.  See L<perlembed>.
 =cut
 */
 
-void
+int
 perl_destruct(pTHXx)
 {
     int destruct_level;  /* 0=none, 1=full, 2=full with checks */
@@ -397,7 +397,8 @@ perl_destruct(pTHXx)
     }
 #endif
 
-    {
+
+    if(PL_exit_flags & PERL_EXIT_DESTRUCT_END) {
         dJMPENV;
         int x = 0;
 
@@ -456,7 +457,7 @@ perl_destruct(pTHXx)
 	DEBUG_P(debprofdump());
 
 	/* The exit() function will do everything that needs doing. */
-	return;
+        return STATUS_NATIVE_EXPORT;;
     }
 
     /* jettison our possibly duplicated environment */
@@ -854,6 +855,7 @@ perl_destruct(pTHXx)
 	Safefree(PL_mess_sv);
 	PL_mess_sv = Nullsv;
     }
+    return STATUS_NATIVE_EXPORT;
 }
 
 /*
@@ -1041,7 +1043,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     AV* comppadlist;
     register SV *sv;
     register char *s;
-    char *popts, *cddir = Nullch;
+    char *cddir = Nullch;
 
     sv_setpvn(PL_linestr,"",0);
     sv = newSVpvn("",0);		/* first used for -I flags */
@@ -1271,14 +1273,15 @@ print \"  \\@INC:\\n    @INC\\n\";");
 #ifndef SECURE_INTERNAL_GETENV
         !PL_tainting &&
 #endif
-	(popts = PerlEnv_getenv("PERL5OPT")))
+	(s = PerlEnv_getenv("PERL5OPT")))
     {
-    	s = savepv(popts);
+    	char *popt = s;
 	while (isSPACE(*s))
 	    s++;
 	if (*s == '-' && *(s+1) == 'T')
 	    PL_tainting = TRUE;
 	else {
+	    char *popt_copy = Nullch;
 	    while (s && *s) {
 	        char *d;
 		while (isSPACE(*s))
@@ -1295,6 +1298,11 @@ print \"  \\@INC:\\n    @INC\\n\";");
 		    Perl_croak(aTHX_ "Illegal switch in PERL5OPT: -%c", *s);
 		while (++s && *s) {
 		    if (isSPACE(*s)) {
+			if (!popt_copy) {
+			    popt_copy = SvPVX(sv_2mortal(newSVpv(popt,0)));
+			    s = popt_copy + (s - popt);
+			    d = popt_copy + (d - popt);
+			}
 		        *s++ = '\0';
 			break;
 		    }
@@ -1507,6 +1515,9 @@ perl_run(pTHXx)
 	    LEAVE;
 	FREETMPS;
 	PL_curstash = PL_defstash;
+	if (!(PL_exit_flags & PERL_EXIT_DESTRUCT_END) && 
+	    PL_endav && !PL_minus_c)
+	    call_list(oldscope, PL_endav);
 #ifdef MYMALLOC
 	if (PerlEnv_getenv("PERL_DEBUG_MSTATS"))
 	    dump_mstats("after execution:  ");

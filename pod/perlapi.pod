@@ -1566,7 +1566,7 @@ Found in file perl.c
 
 Shuts down a Perl interpreter.  See L<perlembed>.
 
-	void	perl_destruct(PerlInterpreter* interp)
+	int	perl_destruct(PerlInterpreter* interp)
 
 =for hackers
 Found in file perl.c

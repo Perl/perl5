@@ -1,4 +1,4 @@
-# Net::Cmd.pm
+# Net::Cmd.pm $Id: //depot/libnet/Net/Cmd.pm#25 $
 #
 # Copyright (c) 1995-1997 Graham Barr <gbarr@pobox.com>. All rights reserved.
 # This program is free software; you can redistribute it and/or
@@ -13,7 +13,14 @@ use strict;
 use vars qw(@ISA @EXPORT $VERSION);
 use Carp;
 
-$VERSION = "2.18";
+BEGIN {
+  if ($^O eq 'os390') {
+    require Convert::EBCDIC;
+#    Convert::EBCDIC->import;
+  }
+}
+
+$VERSION = "2.19";
 @ISA     = qw(Exporter);
 @EXPORT  = qw(CMD_INFO CMD_OK CMD_MORE CMD_REJECT CMD_ERROR CMD_PENDING);
 
@@ -25,6 +32,32 @@ sub CMD_ERROR	{ 5 }
 sub CMD_PENDING { 0 }
 
 my %debug = ();
+
+my $tr = $^O eq 'os390' ? Convert::EBCDIC->new() : undef;
+
+sub toebcdic
+{
+ my $cmd = shift;
+
+ unless (exists ${*$cmd}{'net_cmd_asciipeer'})
+  {
+   my $string = $_[0];
+   my $ebcdicstr = $tr->toebcdic($string);
+   ${*$cmd}{'net_cmd_asciipeer'} = $string !~ /^\d+/ && $ebcdicstr =~ /^\d+/;
+  }
+
+  ${*$cmd}{'net_cmd_asciipeer'}
+    ? $tr->toebcdic($_[0])
+    : $_[0];
+}
+
+sub toascii
+{
+  my $cmd = shift;
+  ${*$cmd}{'net_cmd_asciipeer'}
+    ? $tr->toascii($_[0])
+    : $_[0];
+}
 
 sub _print_isa
 {
@@ -159,19 +192,27 @@ sub command
 {
  my $cmd = shift;
 
- return $cmd unless defined fileno($cmd);
- 
+ unless (defined fileno($cmd))
+  {
+    $cmd->set_status("599", "Connection closed");
+    return $cmd;
+  }
+
+
  $cmd->dataend()
     if(exists ${*$cmd}{'net_cmd_lastch'});
 
  if (scalar(@_))
   {
-   local $SIG{PIPE} = 'IGNORE';
+   local $SIG{PIPE} = 'IGNORE' unless $^O eq 'MacOS';
 
-   my $str =  join(" ", map { /\n/ ? do { my $n = $_; $n =~ tr/\n/ /; $n } : $_; } @_) . "\015\012";
+   my $str =  join(" ", map { /\n/ ? do { my $n = $_; $n =~ tr/\n/ /; $n } : $_; } @_);
+   $str = $cmd->toascii($str) if $tr;
+   $str .= "\015\012";
+
    my $len = length $str;
    my $swlen;
-   
+
    $cmd->close
 	unless (defined($swlen = syswrite($cmd,$str,$len)) && $swlen == $len);
 
@@ -214,7 +255,7 @@ sub getline
  my $partial = defined(${*$cmd}{'net_cmd_partial'})
 		? ${*$cmd}{'net_cmd_partial'} : "";
  my $fd = fileno($cmd);
- 
+
  return undef
 	unless defined $fd;
 
@@ -254,6 +295,14 @@ sub getline
   }
 
  ${*$cmd}{'net_cmd_partial'} = $partial;
+
+ if ($tr) 
+  {
+   foreach my $ln (@{${*$cmd}{'net_cmd_lines'}}) 
+    {
+     $ln = $cmd->toebcdic($ln);
+    }
+  }
 
  shift @{${*$cmd}{'net_cmd_lines'}};
 }
@@ -437,7 +486,7 @@ Net::Cmd - Network Command class (as used by FTP, SMTP etc)
 =head1 SYNOPSIS
 
     use Net::Cmd;
-    
+
     @ISA = qw(Net::Cmd);
 
 =head1 DESCRIPTION
@@ -587,5 +636,9 @@ Graham Barr <gbarr@pobox.com>
 Copyright (c) 1995-1997 Graham Barr. All rights reserved.
 This program is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
+
+=for html <hr>
+
+I<$Id: //depot/libnet/Net/Cmd.pm#25 $>
 
 =cut

@@ -49,7 +49,8 @@ need not normally be used.
 However, as a compatibility measure, this pragma must be explicitly
 used to enable recognition of UTF-8 in the Perl scripts themselves on
 ASCII based machines or recognize UTF-EBCDIC on EBCDIC based machines.
-B<This should be the only place where an explicit C<use utf8> is needed>.
+B<NOTE: this should be the only place where an explicit C<use utf8> is
+needed>.
 
 =back
 
@@ -88,10 +89,9 @@ force byte semantics in a particular lexical scope.  See L<bytes>.
 
 The C<utf8> pragma is primarily a compatibility device that enables
 recognition of UTF-(8|EBCDIC) in literals encountered by the parser.
-It may also be used for enabling some of the more experimental Unicode
-support features.  Note that this pragma is only required until a
-future version of Perl in which character semantics will become the
-default.  This pragma may then become a no-op.  See L<utf8>.
+Note that this pragma is only required until a future version of Perl
+in which character semantics will become the default.  This pragma may
+then become a no-op.  See L<utf8>.
 
 Unless mentioned otherwise, Perl operators will use character semantics
 when they are dealing with Unicode data, and byte semantics otherwise.
@@ -101,6 +101,11 @@ character encoding discipline to the filehandle whence it came, or a
 literal UTF-8 string constant in the program), character semantics
 apply; otherwise, byte semantics are in effect.  To force byte semantics
 on Unicode data, the C<bytes> pragma should be used.
+
+Notice that if you have a string with byte semantics and you then
+add character data into it, the bytes will be upgraded I<as if they
+were ISO 8859-1 (Latin-1)> (or if in EBCDIC, after a translation
+to ISO 8859-1).
 
 Under character semantics, many operations that formerly operated on
 bytes change to operating on characters.  For ASCII data this makes no

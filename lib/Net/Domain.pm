@@ -16,7 +16,7 @@ use Net::Config;
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(hostname hostdomain hostfqdn domainname);
 
-$VERSION = "2.13"; # $Id: //depot/libnet/Net/Domain.pm#10 $
+$VERSION = "2.14"; # $Id: //depot/libnet/Net/Domain.pm#15 $
 
 my($host,$domain,$fqdn) = (undef,undef,undef);
 
@@ -28,7 +28,7 @@ sub _hostname {
     return $host
     	if(defined $host);
 
-    if ($^O eq 'MSWin32' || $^O eq 'cygwin') {
+    if ($^O eq 'MSWin32') {
         require Socket;
         my ($name,$alias,$type,$len,@addr) =  gethostbyname($ENV{'COMPUTERNAME'}||'localhost');
         while (@addr)
@@ -101,7 +101,7 @@ sub _hostname {
     	    $host = "";
 	};
     }
- 
+
     # remove garbage 
     $host =~ s/[\0\r\n]+//go;
     $host =~ s/(\A\.+|\.+\Z)//go;
@@ -165,7 +165,7 @@ sub _hostdomain {
         };
 
 	chop($dom = `domainname 2>/dev/null`)
-		unless(defined $dom);
+		unless(defined $dom || $^O eq 'MSWin32');
 
 	if(defined $dom) {
 	    my @h = ();
@@ -199,7 +199,7 @@ sub _hostdomain {
 
     # Look for environment variable
 
-    $domain ||= $ENV{LOCALDOMAIN} ||= $ENV{DOMAIN} || undef;
+    $domain ||= $ENV{LOCALDOMAIN} || $ENV{DOMAIN};
 
     if(defined $domain) {
     	$domain =~ s/[\r\n\0]+//g;
@@ -236,7 +236,7 @@ sub domainname {
     # Determine from @host & @domain the FQDN
 
     my @d = @domain;
- 
+
 LOOP:
     while(1) {
     	my @h = @host;
@@ -327,5 +327,9 @@ Adapted from Sys::Hostname by David Sundstrom <sunds@asictest.sc.ti.com>
 Copyright (c) 1995-1998 Graham Barr. All rights reserved.
 This program is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
+
+=for html <hr>
+
+I<$Id: //depot/libnet/Net/Domain.pm#15 $>
 
 =cut

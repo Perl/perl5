@@ -1222,7 +1222,7 @@ PP(pp_match)
 	TARG = DEFSV;
 	EXTEND(SP,1);
     }
-    PL_reg_sv = TARG;
+
     PUTBACK;				/* EVAL blocks need stack_sp. */
     s = SvPV(TARG, len);
     strend = s + len;
@@ -1231,6 +1231,8 @@ PP(pp_match)
     rxtainted = ((pm->op_pmdynflags & PMdf_TAINTED) ||
 		 (PL_tainted && (pm->op_pmflags & PMf_RETAINT)));
     TAINT_NOT;
+
+    PL_reg_sv_utf8 = DO_UTF8(TARG);
 
     if (pm->op_pmdynflags & PMdf_USED) {
       failure:
@@ -1336,6 +1338,22 @@ play_it_again:
 	    }
 	}
 	if (global) {
+	    if (pm->op_pmflags & PMf_CONTINUE) {
+		MAGIC* mg = 0;
+		if (SvTYPE(TARG) >= SVt_PVMG && SvMAGIC(TARG))
+		    mg = mg_find(TARG, PERL_MAGIC_regex_global);
+		if (!mg) {
+		    sv_magic(TARG, (SV*)0, PERL_MAGIC_regex_global, Nullch, 0);
+		    mg = mg_find(TARG, PERL_MAGIC_regex_global);
+		}
+		if (rx->startp[0] != -1) {
+		    mg->mg_len = rx->endp[0];
+		    if (rx->startp[0] == rx->endp[0])
+			mg->mg_flags |= MGf_MINMATCH;
+		    else
+			mg->mg_flags &= ~MGf_MINMATCH;
+		}
+	    }
 	    had_zerolen = (rx->startp[0] != -1
 			   && rx->startp[0] == rx->endp[0]);
 	    PUTBACK;			/* EVAL blocks may use stack */
@@ -1382,7 +1400,7 @@ yup:					/* Confirmed by INTUIT */
     if (global) {
 	rx->subbeg = truebase;
 	rx->startp[0] = s - truebase;
-	if (DO_UTF8(PL_reg_sv)) {
+	if (PL_reg_sv_utf8) {
 	    char *t = (char*)utf8_hop((U8*)s, rx->minlen);
 	    rx->endp[0] = t - truebase;
 	}
@@ -1882,7 +1900,6 @@ PP(pp_subst)
     STRLEN len;
     int force_on_match = 0;
     I32 oldsave = PL_savestack_ix;
-    bool do_utf8;
     STRLEN slen;
 
     /* known replacement string? */
@@ -1893,8 +1910,7 @@ PP(pp_subst)
 	TARG = DEFSV;
 	EXTEND(SP,1);
     }
-    PL_reg_sv = TARG;
-    do_utf8 = DO_UTF8(PL_reg_sv);
+
     if (SvFAKE(TARG) && SvREADONLY(TARG))
 	sv_force_normal(TARG);
     if (SvREADONLY(TARG)
@@ -1912,12 +1928,14 @@ PP(pp_subst)
 	rxtainted |= 2;
     TAINT_NOT;
 
+    PL_reg_sv_utf8 = DO_UTF8(TARG);
+
   force_it:
     if (!pm || !s)
 	DIE(aTHX_ "panic: pp_subst");
 
     strend = s + len;
-    slen = do_utf8 ? utf8_length((U8*)s, (U8*)strend) : len;
+    slen = PL_reg_sv_utf8 ? utf8_length((U8*)s, (U8*)strend) : len;
     maxiters = 2 * slen + 10;	/* We can match twice at each
 				   position, once with zero-length,
 				   second time with non-zero. */

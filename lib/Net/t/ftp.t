@@ -11,7 +11,7 @@ unless(defined($NetConfig{ftp_testhost}) && $NetConfig{test_hosts}) {
 my $t = 1;
 print "1..7\n";
 
-$ftp = Net::FTP->new($NetConfig{ftp_testhost}, Debug => 0)
+$ftp = Net::FTP->new($NetConfig{ftp_testhost})
 	or (print("not ok 1\n"), exit);
 
 printf "ok %d\n",$t++;
@@ -46,10 +46,10 @@ if ($data = $ftp->stor('libnet.tst')) {
   
 }
 else {
-  print STDERR $ftp->message,"\n";
-  printf "not ok %d\n",$t++;
-  printf "not ok %d\n",$t++;
-  printf "not ok %d\n",$t++;
+  print "# ",$ftp->message,"\n";
+  printf "ok %d\n",$t++;
+  printf "ok %d\n",$t++;
+  printf "ok %d\n",$t++;
 }
 
 $ftp->quit  or do {

@@ -439,14 +439,14 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #endif
 
 /* Use the reentrant APIs like localtime_r and getpwent_r */
-#if defined(USE_THREADS) && defined(USE_ITHREADS) && !defined(USE_REENTRANT_API)
+#if defined(USE_ITHREADS) && !defined(USE_REENTRANT_API)
 #   define USE_REENTRANT_API
 #endif
 
-/* Tru64/Digital UNIX/DEC OSF/1 and Win32 have naturally
- * threadsafe libraries, no need to use any _r variants. */
+/* Win32 has naturally threadsafe libraries,
+ * no need to use any _r variants. */
 #ifdef USE_REENTRANT_API
-#   if (defined(__osf__) && defined(__alpha)) || defined(WIN32)
+#   ifdef WIN32
 #       undef USE_REEENTRANT_API
 #   endif
 #endif
@@ -2070,6 +2070,7 @@ typedef pthread_key_t	perl_key;
 
 /* flags in PL_exit_flags for nature of exit() */
 #define PERL_EXIT_EXPECTED	0x01
+#define PERL_EXIT_DESTRUCT_END  0x02  /* Run END in perl_destruct */
 
 #ifndef MEMBER_TO_FPTR
 #  define MEMBER_TO_FPTR(name)		name

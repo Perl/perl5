@@ -9784,6 +9784,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_e_script		= sv_dup_inc(proto_perl->Ie_script, param);
     PL_perldb		= proto_perl->Iperldb;
     PL_perl_destruct_level = proto_perl->Iperl_destruct_level;
+    PL_exit_flags       = proto_perl->Iexit_flags;
 
     /* magical thingies */
     /* XXX time(&PL_basetime) when asked for? */
@@ -10258,6 +10259,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_reg_re		= (regexp*)NULL;
     PL_reg_ganch	= Nullch;
     PL_reg_sv		= Nullsv;
+    PL_reg_sv_utf8	= FALSE;
     PL_reg_magic	= (MAGIC*)NULL;
     PL_reg_oldpos	= 0;
     PL_reg_oldcurpm	= (PMOP*)NULL;

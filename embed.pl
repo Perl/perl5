@@ -1339,7 +1339,7 @@ Ajno	|PerlInterpreter*	|perl_alloc_using \
 #endif
 Ajnod	|PerlInterpreter*	|perl_alloc
 Ajnod	|void	|perl_construct	|PerlInterpreter* interp
-Ajnod	|void	|perl_destruct	|PerlInterpreter* interp
+Ajnod	|int	|perl_destruct	|PerlInterpreter* interp
 Ajnod	|void	|perl_free	|PerlInterpreter* interp
 Ajnod	|int	|perl_run	|PerlInterpreter* interp
 Ajnod	|int	|perl_parse	|PerlInterpreter* interp|XSINIT_t xsinit \

@@ -10,6 +10,7 @@ typedef struct {
 } shared_sv;
 
 extern PerlInterpreter* sharedsv_space;
+extern perl_mutex  sharedsv_space_mutex;
 
 void Perl_sharedsv_unlock_scope(pTHX_ shared_sv* ssv);
 void Perl_sharedsv_unlock(pTHX_ shared_sv* ssv);
@@ -22,8 +23,14 @@ void Perl_sharedsv_thrcnt_dec(pTHX_ shared_sv* ssv);
 
 
 #define SHAREDSvGET(a)     (a->sv)
-#define SHAREDSvEDIT(a)    PERL_SET_CONTEXT(sharedsv_space)
-#define SHAREDSvRELEASE(a) PERL_SET_CONTEXT(my_perl)
+#define SHAREDSvEDIT(a)    { MUTEX_LOCK(&sharedsv_space_mutex);\
+SHAREDSvLOCK((a));\
+PERL_SET_CONTEXT(sharedsv_space);\
+}
+#define SHAREDSvRELEASE(a) { PERL_SET_CONTEXT((a)->owner);\
+SHAREDSvUNLOCK((a));\
+MUTEX_UNLOCK(&sharedsv_space_mutex);\
+}
 #define SHAREDSvLOCK(a)    Perl_sharedsv_lock(aTHX_ a)
 #define SHAREDSvUNLOCK(a)  Perl_sharedsv_unlock(aTHX_ a)
 

@@ -256,4 +256,8 @@ PERLVAR(i,		struct thread_intern)
 
 PERLVAR(trailing_nul,	char)		/* For the sake of thrsv and oursv */
 PERLVAR(thr_done,	bool)		/* True when the thread has finished */
+
 #endif /* USE_THREADS */
+
+PERLVAR(Treg_sv_utf8,	bool)		/* was what we matched against utf8 */
+

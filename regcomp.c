@@ -4735,6 +4735,7 @@ Perl_save_re_context(pTHX)
     SAVEVPTR(PL_reg_re);		/* from regexec.c */
     SAVEPPTR(PL_reg_ganch);		/* from regexec.c */
     SAVESPTR(PL_reg_sv);		/* from regexec.c */
+    SAVEI32(PL_reg_sv_utf8);		/* from regexec.c */
     SAVEVPTR(PL_reg_magic);		/* from regexec.c */
     SAVEI32(PL_reg_oldpos);			/* from regexec.c */
     SAVEVPTR(PL_reg_oldcurpm);		/* from regexec.c */

@@ -1,6 +1,10 @@
+# Net::Config.pm
+#
+# Copyright (c) 2000 Graham Barr <gbarr@pobox.com>. All rights reserved.
+# This program is free software; you can redistribute it and/or
+# modify it under the same terms as Perl itself.
 
 package Net::Config;
-# $Id: //depot/libnet/Net/Config.pm#6 $
 
 require Exporter;
 use vars qw(@ISA @EXPORT %NetConfig $VERSION $CONFIGURE $LIBNET_CFG);
@@ -9,7 +13,7 @@ use strict;
 
 @EXPORT  = qw(%NetConfig);
 @ISA     = qw(Net::LocalCfg Exporter);
-$VERSION = "1.04";
+$VERSION = "1.05"; # $Id: //depot/libnet/Net/Config.pm#9 $
 
 eval { local $SIG{__DIE__}; require Net::LocalCfg };
 
@@ -40,12 +44,13 @@ if ( -f $file ) {
     }
 }
 if ($< == $> and !$CONFIGURE)  {
-    use File::Spec;
-    my $home = eval { (getpwuid($>))[7] } || $ENV{HOME} || $ENV{HOMEDRIVE} || $ENV{HOMEPATH} || File::Spec->curdir;
-    $file = File::Spec->catfile($home, ".libnetrc");
-    $ref = eval { do $file } if -f $file;
-    %NetConfig = (%NetConfig, %{ $ref })
-	if ref($ref) eq 'HASH';	
+    my $home = eval { (getpwuid($>))[7] } || $ENV{HOME};
+    if (defined $home) {
+	$file = $home . "/.libnetrc";
+	$ref = eval { do $file } if -f $file;
+	%NetConfig = (%NetConfig, %{ $ref })
+	    if ref($ref) eq 'HASH';	
+    }
 }
 my ($k,$v);
 while(($k,$v) = each %NetConfig) {
@@ -168,6 +173,73 @@ then this value should be set to the firewall hostname. If your firewall
 does not listen to port 21, then this value should be set to
 C<"hostname:port"> (eg C<"hostname:99">)
 
+=item ftp_firewall_type
+
+There are many different ftp firewall products avaliable. But unfortunately there
+is not standard for how to traverse a firewall.  The list below shows the
+sequence of commands that Net::FTP will use
+
+  user        Username for remote host
+  pass        Password for remote host
+  fwuser      Username for firewall
+  fwpass      Password for firewall
+  remote.host The hostname of the remote ftp server
+
+=over 4
+
+=item 0
+
+There is no firewall
+
+=item 1
+
+     USER user@remote.host
+     PASS pass
+
+=item 2
+
+     USER fwuser
+     PASS fwpass
+     USER user@remote.host
+     PASS pass
+
+=item 3
+
+     USER fwuser
+     PASS fwpass
+     SITE remote.site
+     USER user
+     PASS pass
+
+=item 4
+
+     USER fwuser
+     PASS fwpass
+     OPEN remote.site
+     USER user
+     PASS pass
+
+=item 5
+
+     USER user@fwuser@remote.site
+     PASS pass@fwpass
+
+=item 6
+
+     USER fwuser@remote.site
+     PASS fwpass
+     USER user
+     PASS pass
+
+=item 7
+
+     USER user@remote.host
+     PASS pass
+     AUTH fwuser
+     RESP fwpass
+
+=back
+
 =item ftp_ext_passive
 
 =item ftp_int_pasive
@@ -209,5 +281,9 @@ configuration.
 If true the C<Configure> will check each hostname given that it exists
 
 =back
+
+=for html <hr>
+
+I<$Id: //depot/libnet/Net/Config.pm#9 $>
 
 =cut

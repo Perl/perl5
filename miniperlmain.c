@@ -70,14 +70,13 @@ main(int argc, char **argv, char **env)
 	perl_construct(my_perl);
 	PL_perl_destruct_level = 0;
     }
-
+    PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
     exitstatus = perl_parse(my_perl, xs_init, argc, argv, (char **)NULL);
     if (!exitstatus) {
-	exitstatus = perl_run(my_perl);
-       perl_destruct(my_perl);
-       exitstatus = STATUS_NATIVE_EXPORT;
+        perl_run(my_perl);
+        exitstatus = perl_destruct(my_perl);
     } else {
-      perl_destruct(my_perl);
+        perl_destruct(my_perl);
     }
 
     perl_free(my_perl);
