@@ -55,6 +55,8 @@ sub new {
 package Test::Harness::Iterator::FH;
 sub next {
     my $fh = $_[0]->{fh};
+
+    # readline() doesn't work so good on 5.5.4.
     return scalar <$fh>;
 }
 

@@ -54,6 +54,16 @@ sub _populate_hash {
     return map {$_, 1} split /\s+/, $_[0];
 }
 
+if ($ARGV[0]=~/^-re/) {
+    if ($ARGV[0]!~/=/) {
+        shift;
+        $re=join "|",@ARGV;
+        @ARGV=();
+    } else {
+        (undef,$re)=split/=/,shift;
+    }
+}
+
 if (@ARGV) {
     if ($^O eq 'MSWin32') {
 	@tests = map(glob($_),@ARGV);
@@ -108,6 +118,8 @@ if (@ARGV) {
 if ($^O eq 'MSWin32') {
     s,\\,/,g for @tests;
 }
+@tests=grep /$re/, @tests 
+    if $re;
 Test::Harness::runtests @tests;
 exit(0) unless -e "../testcompile";
 
