@@ -3447,6 +3447,8 @@ Perl_sv_utf8_upgrade_flags(pTHX_ register SV *sv, I32 flags)
     U8 *s, *t, *e;
     int  hibit = 0;
 
+    if (sv == &PL_sv_undef)
+	return 0;
     if (!SvPOK(sv)) {
 	STRLEN len = 0;
 	(void) SvPV_force(sv,len);
