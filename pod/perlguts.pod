@@ -2862,13 +2862,13 @@ will return false.
 
 =item SvIV
 
-Returns the integer which is in the SV.
+Coerces the given SV to an integer and returns it.
 
 	int SvIV (SV* sv)
 
 =item SvIVX
 
-Returns the integer which is stored in the SV.
+Returns the integer which is stored in the SV, assuming SvIOK is true.
 
 	int	SvIVX (SV* sv)
 
@@ -2960,13 +2960,13 @@ B<private> setting.  Use C<SvNOK>.
 
 =item SvNV
 
-Returns the double which is stored in the SV.
+Coerce the given SV to a double and return it.
 
 	double	SvNV (SV* sv)
 
 =item SvNVX
 
-Returns the double which is stored in the SV.
+Returns the double which is stored in the SV, assuming SvNOK is true.
 
 	double	SvNVX (SV* sv)
 
@@ -3397,13 +3397,13 @@ appending it.
 
 =item SvUV
 
-Returns the unsigned integer which is in the SV.
+Coerces the given SV to an unsigned integer and returns it.
 
 	UV      SvUV(SV* sv)
 
 =item SvUVX
 
-Returns the unsigned integer which is stored in the SV.
+Returns the unsigned integer which is stored in the SV, assuming SvIOK is true.
 
 	UV      SvUVX(SV* sv)
 
