@@ -2156,12 +2156,36 @@ PerlIOCrlf_set_ptrcnt(PerlIO *f, STDCHAR *ptr, SSize_t cnt)
   PerlIO_get_base(f);
  if (!ptr)
   {
-   ptr = ((c->nl) ? (c->nl+1) : b->end) - cnt;
+   if (c->nl)
+    ptr = c->nl+1;
+   else
+    {
+     ptr = b->end;
+     if (ptr > b->buf && ptr[-1] == 0xd)
+      ptr--;
+    }
+   ptr -= cnt;
   }
  else
   {
-   if (ptr != (((c->nl) ? (c->nl+1) : b->end) - cnt))
-    abort();
+   /* Test code - delete when it works ... */
+   STDCHAR *chk;
+   if (c->nl)
+    chk = c->nl+1;
+   else
+    {
+     chk = b->end;
+     if (chk > b->buf && chk[-1] == 0xd)
+      chk--;
+    }
+   chk -= cnt;
+   
+   if (ptr != chk)
+    {
+     dTHX;
+     Perl_croak(aTHX_ "ptr wrong %p != %p nl=%p e=%p for %d",
+                ptr, chk, c->nl, b->end, cnt);    
+    }
   }
  if (c->nl)
   {

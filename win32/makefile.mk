@@ -371,7 +371,7 @@ a = .a
 # Options
 #
 
-INCLUDES	= -I$(COREDIR) -I.\include -I. -I..
+INCLUDES	= -I.\include -I. -I.. -I$(COREDIR) 
 DEFINES		= -DWIN32 $(CRYPT_FLAG)
 LOCDEFS		= -DPERLDLL -DPERL_CORE
 SUBSYS		= console

@@ -528,7 +528,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		}
 	    }
 	}
-	else if (O_BINARY != O_TEXT) {
+	else if (O_BINARY != O_TEXT && IoTYPE(io) != IoTYPE_STD) {
 	    type = ":crlf";
 	}
     }
