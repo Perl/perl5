@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat Jan 12 23:16:55 EET 2002 [metaconfig 3.0 PL70]
+# Generated on Tue Jan 15 20:37:25 EET 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1581,13 +1581,13 @@ if test -f MANIFEST; then
 	set x `awk '{print $1}' < MANIFEST | grep '\.SH$'`
 else
 	echo "(Looking for .SH files under the source directory.)"
-	set x `(cd $src; find . -name "*.SH" -print)`
+	set x `(cd "$src"; find . -name "*.SH" -print)`
 fi
 shift
 case $# in
-0) set x `(cd $src; echo *.SH)`; shift;;
+0) set x `(cd "$src"; echo *.SH)`; shift;;
 esac
-if test ! -f $src/$1; then
+if test ! -f "$src/$1"; then
 	shift
 fi
 mkdir_p='
@@ -1613,7 +1613,7 @@ for file in $*; do
 		*/*)
 			dir=`expr X$file : 'X\(.*\)/'`
 			file=`expr X$file : 'X.*/\(.*\)'`
-			(cd $dir && . ./$file)
+			(cd "$dir" && . ./$file)
 			;;
 		*)
 			. ./$file
@@ -1626,19 +1626,19 @@ for file in $*; do
 			dir=`expr X$file : 'X\(.*\)/'`
 			file=`expr X$file : 'X.*/\(.*\)'`
 			(set x $dir; shift; eval $mkdir_p)
-			sh <$src/$dir/$file
+			sh <"$src/$dir/$file"
 			;;
 		*)
-			sh <$src/$file
+			sh <"$src/$file"
 			;;
 		esac
 		;;
 	esac
 done
-if test -f $src/config_h.SH; then
+if test -f "$src/config_h.SH"; then
 	if test ! -f config.h; then
 	: oops, they left it out of MANIFEST, probably, so do it anyway.
-	. $src/config_h.SH
+	. "$src/config_h.SH"
 	fi
 fi
 EOS
@@ -1694,13 +1694,13 @@ rm -f .echotmp
 
 : Now test for existence of everything in MANIFEST
 echo " "
-if test -f $rsrc/MANIFEST; then
+if test -f "$rsrc/MANIFEST"; then
 	echo "First let's make sure your kit is complete.  Checking..." >&4
-	awk '$1 !~ /PACK[A-Z]+/ {print $1}' $rsrc/MANIFEST | split -50
+	awk '$1 !~ /PACK[A-Z]+/ {print $1}' "$rsrc/MANIFEST" | split -50
 	rm -f missing
 	tmppwd=`pwd`
 	for filelist in x??; do
-		(cd $rsrc; ls `cat $tmppwd/$filelist` >/dev/null 2>>$tmppwd/missing)
+		(cd "$rsrc"; ls `cat "$tmppwd/$filelist"` >/dev/null 2>>"$tmppwd/missing")
 	done
 	if test -s missing; then
 		cat missing >&4
@@ -7115,7 +7115,7 @@ y*) usedl="$define"
 	esac
     echo "The following dynamic loading files are available:"
 	: Can not go over to $dldir because getfile has path hard-coded in.
-	tdir=`pwd`; cd $rsrc; $ls -C $dldir/dl*.xs; cd $tdir
+	tdir=`pwd`; cd "$rsrc"; $ls -C $dldir/dl*.xs; cd "$tdir"
 	rp="Source file to use for dynamic loading"
 	fn="fne"
 	gfpth="$src"
@@ -16535,7 +16535,7 @@ find_extensions='
            else
                if $test -d $xxx -a $# -lt 10; then
                    set $1$xxx/ $*;
-                   cd $xxx;
+                   cd "$xxx";
                    eval $find_extensions;
                    cd ..;
                    shift;
@@ -16545,7 +16545,7 @@ find_extensions='
        esac;
     done'
 tdir=`pwd`
-cd $rsrc/ext
+cd "$rsrc/ext"
 set X
 shift
 eval $find_extensions
@@ -16559,7 +16559,7 @@ nonxs_extensions="$*"
 set X $known_extensions
 shift
 known_extensions="$*"
-cd $tdir
+cd "$tdir"
 
 : Now see which are supported on this system.
 avail_ext=''
@@ -17808,7 +17808,7 @@ echo " "
 exec 1>&4
 pwd=`pwd`
 . ./UU/extract
-cd $pwd
+cd "$pwd"
 
 if $contains '^depend:' [Mm]akefile >/dev/null 2>&1; then
 	dflt=y

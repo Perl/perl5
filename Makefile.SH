@@ -100,6 +100,11 @@ true)
 	;;
 esac
 
+case "`pwd`" in
+# Protect any spaces
+*" "*) ldlibpth=`echo $ldlibpth|sed 's/ /\\\\ /g'` ;;
+esac
+
 : Prepare dependency lists for Makefile.
 dynamic_list=' '
 for f in $dynamic_ext; do
