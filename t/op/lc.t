@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 55;
+plan tests => 57;
 
 $a = "HELLO.* world";
 $b = "hello.* WORLD";
@@ -138,3 +138,14 @@ ok($c eq "\x{3c3}FOO.bAR", "Using s///e to change case.");
 
 ($c = $a) =~ s/(\w+)/ucfirst($1)/ge;
 ok($c eq "\x{3a3}foo.Bar", "Using s///e to change case.");
+
+# #18931: perl5.8.0 bug in \U..\E processing
+# Test case from Nick Clark.
+for my $a (0,1) {
+    $_ = 'abcdefgh';
+    $_ .= chr 256;
+    chop;
+    /(.*)/;
+    is(uc($1), "ABCDEFGH", "[perl #18931]");
+}
+
