@@ -463,6 +463,18 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    Perl_warner(aTHX_ WARN_NEWLINE, PL_warn_nl, "open");
 	goto say_false;
     }
+
+    if (ckWARN(WARN_IO)) {
+	if ((IoTYPE(io) == IoTYPE_RDONLY) &&
+	    (fp == PerlIO_stdout() || fp == PerlIO_stderr())) {
+		Perl_warner(aTHX_ WARN_IO, "'std%s' opened only for input",
+				(fp == PerlIO_stdout()) ? "out" : "err");
+	}
+	else if ((IoTYPE(io) == IoTYPE_WRONLY) && fp == PerlIO_stdout()) {
+		Perl_warner(aTHX_ WARN_IO, "'stdin' opened only for output");
+	}
+    }
+
     if (IoTYPE(io) && IoTYPE(io) != IoTYPE_PIPE && IoTYPE(io) != IoTYPE_STD) {
 	if (PerlLIO_fstat(PerlIO_fileno(fp),&PL_statbuf) < 0) {
 	    (void)PerlIO_close(fp);
@@ -938,9 +950,7 @@ Perl_do_eof(pTHX_ GV *gv)
 
     if (!io)
 	return TRUE;
-    else if (ckWARN(WARN_IO)
-	     && (IoTYPE(io) == IoTYPE_WRONLY || IoIFP(io) == PerlIO_stdout()
-		 || IoIFP(io) == PerlIO_stderr()))
+    else if (ckWARN(WARN_IO) && (IoTYPE(io) == IoTYPE_WRONLY))
     {
 	/* integrate to report_evil_fh()? */
         char *name = NULL;
