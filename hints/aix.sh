@@ -30,13 +30,13 @@ esac
 
 case "$osvers" in
 3*) d_fchmod=undef
-    ccflags='-D_ALL_SOURCE'
+    ccflags="$ccflags -D_ALL_SOURCE"
     ;;
 *)  # These hints at least work for 4.x, possibly other systems too.
-    ccflags='-D_ALL_SOURCE -D_ANSI_C_SOURCE -D_POSIX_SOURCE'
+    ccflags="$ccflags -D_ALL_SOURCE -D_ANSI_C_SOURCE -D_POSIX_SOURCE"
     case "$cc" in
      *gcc*) ;;
-     *) ccflags="-qmaxmem=8192  $ccflags" ;;
+     *) ccflags="$ccflags -qmaxmem=8192" ;;
     esac
     nm_opt='-B'
     ;;
