@@ -340,58 +340,69 @@ sub from_to
  return length($_[0] = $string);
 }
 
-sub encodings
-{
- my ($class) = @_;
- my ($dir) = __FILE__ =~ /^(.*)\.pm$/;
- my @names = ('Unicode');
- if (opendir(my $dh,$dir))
-  {
-   while (defined(my $name = readdir($dh)))
-    {
-     push(@names,$1) if ($name =~ /^(.*)\.enc$/);
-    }
-   closedir($dh);
-  }
- else
-  {
-   die "Cannot open $dir:$!";
-  }
- return @names;
-}
-
 my %encoding = ( Unicode      => bless({},'Encode::Unicode'),
                  'iso10646-1' => bless({},'Encode::iso10646_1'),
                );
 
+sub encodings
+{
+ my ($class) = @_;
+ foreach my $dir (@INC)
+  {
+   if (opendir(my $dh,"$dir/Encode"))
+    {
+     while (defined(my $name = readdir($dh)))
+      {
+       if ($name =~ /^(.*)\.enc$/)
+        {
+         next if exists $encoding{$1};
+         $encoding{$1} = "$dir/$name";
+        }
+      }
+     closedir($dh);
+    }
+  }
+ return keys %encoding;
+}
+
+sub loadEncoding
+{
+ my ($class,$name,$file) = @_;
+ if (open(my $fh,$file))
+  {
+   my $type;
+   while (1)
+    {
+     my $line = <$fh>;
+     $type = substr($line,0,1);
+     last unless $type eq '#';
+    }
+   $class .= ('::'.(($type eq 'E') ? 'Escape' : 'Table'));
+   return $class->read($fh,$name,$type);
+  }
+ else
+  {
+   return undef;
+  }
+}
+
 sub getEncoding
 {
  my ($class,$name) = @_;
- unless (exists $encoding{$name})
+ my $enc;
+ unless (ref($enc = $encoding{$name}))
   {
-   my $file;
-   foreach my $dir (@INC)
+   $enc = $class->loadEncoding($name,$enc) if defined $enc;
+   unless (ref($enc))
     {
-     last if -f ($file = "$dir/Encode/$name.enc");
-    }
-   if (open(my $fh,$file))
-    {
-     my $type;
-     while (1)
+     foreach my $dir (@INC)
       {
-       my $line = <$fh>;
-       $type = substr($line,0,1);
-       last unless $type eq '#';
+       last if ($enc = $class->loadEncoding($name,"$dir/Encode/$name.enc"));
       }
-     $class .= ('::'.(($type eq 'E') ? 'Escape' : 'Table'));
-     $encoding{$name} = $class->read($fh,$name,$type);
     }
-   else
-    {
-     $encoding{$name} = undef;
-    }
+   $encoding{$name} = $enc;
   }
- return $encoding{$name};
+ return $enc;
 }
 
 package Encode::Unicode;
