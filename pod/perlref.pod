@@ -511,6 +511,38 @@ The B<-w> switch will warn you if it interprets a reserved word as a string.
 But it will no longer warn you about using lowercase words, because the
 string is effectively quoted.
 
+=head2 Pseudo-hashes: Using an array as a hash
+
+WARNING:  This section describes an experimental feature.  Details may
+change without notice in future versions.
+
+Beginning with release 5.005 of Perl you can use an array reference
+in some contexts that would normally require a hash reference.  This
+allows you to access array elements using symbolic names, as if they
+were fields in a structure.
+
+For this to work, the array must contain extra information.  The first
+element of the array has to be a hash reference that maps field names
+to array indices.  Here is an example:
+
+   $struct = [{foo => 1, bar => 2}, "FOO", "BAR"];
+
+   $struct->{foo};  # same as $struct->[1], i.e. "FOO"
+   $struct->{bar};  # same as $struct->[2], i.e. "BAR"
+
+   keys %$struct;   # will return ("foo", "bar") in some order
+   values %$struct; # will return ("FOO", "BAR") in same some order
+
+   while (my($k,$v) = each %$struct) {
+       print "$k => $v\n";
+   }
+
+Perl will raise an exception if you try to delete keys from a pseudo-hash
+or try to access nonexistent fields.  For better performance, Perl can also
+do the translation from field names to array indices at compile time for
+typed object references.  See L<fields>.
+
+
 =head2 Function Templates
 
 As explained above, a closure is an anonymous function with access to the
