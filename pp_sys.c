@@ -3477,8 +3477,9 @@ PP(pp_rename)
 
 PP(pp_link)
 {
+    dSP;
 #ifdef HAS_LINK
-    dSP; dTARGET;
+    dTARGET;
     STRLEN n_a;
     char *tmps2 = POPpx;
     char *tmps = SvPV(TOPs, n_a);
