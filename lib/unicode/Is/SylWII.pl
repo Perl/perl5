@@ -2,12 +2,14 @@
 # This file is built by mktables.PL from e.g. Unicode.300.
 # Any changes made here will be lost!
 return <<'END';
-124d	
-125d	
-128d	
-12b5	
-12c5	
-1315	
-1484	
-1507	
+1410	1411
+143e	143f
+145b	145c
+1478	1479
+1496	1497
+14b0	14b1
+14e0	14e1
+14fa	14fb
+151b	151c
+1533	1534
 END
