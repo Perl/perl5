@@ -159,21 +159,18 @@ the trick.  And if not, it's easy to hack into what you want.
 
 Perl programs are just plain text, so any editor will do.
 
-If you're transferring Windows text files to Unix using FTP be sure
-to transfer them in ASCII mode so the ends of lines are appropriately
-converted.
-
 If you're on Unix, you already have an IDE--Unix itself.  The UNIX
 philosophy is the philosophy of several small tools that each do one
 thing and do it well.  It's like a carpenter's toolbox.
 
-For Windows: PerlBuilder (http://www.solutionsoft.com/perl.htm) is
-an integrated development environment for Windows that supports Perl
-development.  Komodo, ActiveState's cross-platform, multi-language IDE
-has Perl support, including a regular expression debugger and remote
-debugging (http://www.ActiveState.com/Products/Komodo/index.html).
-(Visual Perl, a Visual Studio.NET plug-in is currently in beta
-(late 2000) (http://www.ActiveState.com/Products/VisualPerl/index.html)).
+If you want a Windows IDE, check the following: PerlBuilder
+(http://www.solutionsoft.com/perl.htm) is an integrated development
+environment for Windows that supports Perl development.  Komodo,
+ActiveState's cross-platform, multi-language IDE has Perl support,
+including a regular expression debugger and remote debugging
+(http://www.ActiveState.com/Products/Komodo/index.html).
+(Visual Perl, a Visual Studio.NET plug-in is currently (late 2000)
+in beta (http://www.ActiveState.com/Products/VisualPerl/index.html)).
 The visiPerl+ IDE is available from Help Consulting
 (http://helpconsulting.net/visiperl/).  Perl code magic is another IDE
 (http://www.petes-place.com/codemagic.html).  CodeMagicCD
@@ -181,21 +178,22 @@ The visiPerl+ IDE is available from Help Consulting
 (http://www.castlelink.co.uk/object_system/) is a Perl web
 applications development IDE.
 
-Editors: if you're on Unix you probably have vi or a vi clone already,
+For editors: if you're on Unix you probably have vi or a vi clone already,
 and possibly an emacs too, so you may not need to download anything.
-In anyemacs the cperl-mode (M-x cperl-mode) gives you perhaps the
+In any emacs the cperl-mode (M-x cperl-mode) gives you perhaps the
 best available Perl editing mode in any editor.
 
-In Windows: you can download GNU Emacs
+For Windows editors: you can download GNU Emacs
 (http://www.gnu.org/software/emacs/windows/ntemacs.html) or XEmacs
 (http://www.xemacs.org/Download/index.html), or a vi clone such as
 Elvis (ftp://ftp.cs.pdx.edu/pub/elvis/, http://www.fh-wedel.de/elvis/),
 Vile (http://www.clark.net/pub/dickey/vile/vile.html), or
 Vim (http://www.vim.org/) (win32: http://www.cs.vu.nl/%7Etmgil/vi.html).
-For vi lovers in general: http://www.thomer.com/thomer/vi/vi.html
+For vi lovers in general, Windows or elsewhere:
+http://www.thomer.com/thomer/vi/vi.html.
 
 nvi (http://www.bostic.com/vi/, available from CPAN in src/misc/) is
-yet another vi clone, not unfortunately available for Windows, but in
+yet another vi clone, unfortunately not available for Windows, but in
 UNIX platforms you might be interested in trying it out, firstly because
 strictly speaking it is not a vi clone, it is the real vi, or the new
 incarnation of it, and secondly because you can embed Perl inside it
@@ -226,6 +224,10 @@ research purposes), Cygwin is covered by the GNU Public License (but
 that shouldn't matter for Perl use).  The Cygwin, MKS, and U/WIN all
 contain (in addition to the shells) a comprehensive set of standard
 UNIX toolkit utilities.
+
+If you're transferring text files between Unix and Windows using FTP
+be sure to transfer them in ASCII mode so the ends of lines are
+appropriately converted.
 
 On Mac OS the MacPerl Application comes with a simple 32k text editor
 that behaves like a rudimentary IDE.  In contrast to the MacPerl Application
