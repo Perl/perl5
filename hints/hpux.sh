@@ -98,6 +98,7 @@ EOM
     #optimize='+O3'
     #cccdlflags='+z +O2'
     optimize='-O'
+    cc=cc
     ;;
 esac
 
@@ -176,7 +177,11 @@ esac'
 	    echo "(Changing from strict ANSI compilation to extended because of 64-bitness)"
 	    ccflags=`echo $ccflags|sed 's@ -Aa @ -Ae @'`
 	    ;;
-    *)	ccflags="$ccflags -Ae" ;;
+    *)	case `$cc -v 2>&1`"" in
+	*gcc*) ;;
+	*) ccflags="$ccflags -Ae" ;;
+	esac
+	;;
     esac    
 
     set `echo " $libswanted " | sed -e 's@ dl @ @'`
@@ -363,7 +368,11 @@ case "$uselargefiles" in
 	    echo "(Changing from strict ANSI compilation to extended because of large files)"
 	    ccflags=`echo $ccflags|sed 's@ -Aa @ -Ae @'`
 	    ;;
-	*)  ccflags="$ccflags -Ae" ;;
+	*)  case `$cc -v 2>&1`"" in
+	    *gcc*) ;;
+	    *) ccflags="$ccflags -Ae" ;;
+	    esac
+	    ;; 
 	esac    
 	;;
 esac
