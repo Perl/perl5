@@ -3717,7 +3717,7 @@ typedef struct am_table_short AMTS;
 #define STORE_NUMERIC_STANDARD_SET_LOCAL()	/**/
 #define RESTORE_NUMERIC_LOCAL()		/**/
 #define RESTORE_NUMERIC_STANDARD()	/**/
-#define Atof				Perl_atof
+#define Atof				my_atof
 #define IN_LOCALE_RUNTIME		0
 
 #endif /* !USE_LOCALE_NUMERIC */
