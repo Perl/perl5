@@ -1,7 +1,11 @@
+#ifndef PERL_CALLCONV
+#  define PERL_CALLCONV
+#endif 
+
 #ifdef PERL_OBJECT
-#define VIRTUAL virtual
+#define VIRTUAL virtual PERL_CALLCONV
 #else
-#define VIRTUAL
+#define VIRTUAL PERL_CALLCONV
 START_EXTERN_C
 #endif
 
