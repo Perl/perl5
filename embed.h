@@ -326,6 +326,7 @@
 #define magic_sizepack		Perl_magic_sizepack
 #define magic_wipepack		Perl_magic_wipepack
 #define magicname		Perl_magicname
+#define malloced_size		Perl_malloced_size
 #define markstack_grow		Perl_markstack_grow
 #define mem_collxfrm		Perl_mem_collxfrm
 #define mess			Perl_mess

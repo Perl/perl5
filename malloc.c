@@ -1430,8 +1430,18 @@ calloc(register size_t elements, register size_t size)
 MEM_SIZE
 malloced_size(void *p)
 {
-    int bucket = OV_INDEX((union overhead *)p);
-
+    union overhead *ovp = (union overhead *)
+	((caddr_t)p - sizeof (union overhead) * CHUNK_SHIFT);
+    int bucket = OV_INDEX(ovp);
+#ifdef RCHECK
+    /* The caller wants to have a complete control over the chunk,
+       disable the memory checking inside the chunk.  */
+    if (bucket <= MAX_SHORT_BUCKET) {
+	MEM_SIZE size = BUCKET_SIZE_REAL(bucket);
+	ovp->ov_size = size + M_OVERHEAD - 1;
+	*((u_int *)((caddr_t)ovp + size + M_OVERHEAD - RSLOP)) = RMAGIC;
+    }
+#endif
     return BUCKET_SIZE_REAL(bucket);
 }
 

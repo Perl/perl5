@@ -92,9 +92,15 @@ av_extend(AV *av, I32 key)
 		U32 bytes;
 #endif
 
+#ifdef MYMALLOC
+		newmax = malloced_size((void*)AvALLOC(av))/sizeof(SV*) - 1;
+
+		if (key <= newmax) 
+		    goto resized;
+#endif 
 		newmax = key + AvMAX(av) / 5;
 	      resize:
-#ifdef STRANGE_MALLOC
+#if defined(STRANGE_MALLOC) || defined(MYMALLOC)
 		Renew(AvALLOC(av),newmax+1, SV*);
 #else
 		bytes = (newmax + 1) * sizeof(SV*);
@@ -114,6 +120,7 @@ av_extend(AV *av, I32 key)
 		    Safefree(AvALLOC(av));
 		AvALLOC(av) = ary;
 #endif
+	      resized:
 		ary = AvALLOC(av) + AvMAX(av) + 1;
 		tmp = newmax - AvMAX(av);
 		if (av == curstack) {	/* Oops, grew stack (via av_store()?) */
@@ -123,7 +130,7 @@ av_extend(AV *av, I32 key)
 		}
 	    }
 	    else {
-		newmax = key < 4 ? 4 : key;
+		newmax = key < 3 ? 3 : key;
 		New(2,AvALLOC(av), newmax+1, SV*);
 		ary = AvALLOC(av) + 1;
 		tmp = newmax;

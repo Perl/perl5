@@ -1197,6 +1197,8 @@
 #define magic_wipepack      pPerl->Perl_magic_wipepack
 #undef  magicname
 #define magicname           pPerl->Perl_magicname
+#undef  malloced_size
+#define malloced_size       pPerl->Perl_malloced_size
 #undef  markstack_grow
 #define markstack_grow      pPerl->Perl_markstack_grow
 #undef  mem_collxfrm

@@ -649,6 +649,8 @@
 #define magic_wipepack    CPerlObj::Perl_magic_wipepack
 #undef  magicname
 #define magicname         CPerlObj::Perl_magicname
+#undef  malloced_size
+#define malloced_size     CPerlObj::Perl_malloced_size
 #undef  markstack_grow
 #define markstack_grow    CPerlObj::Perl_markstack_grow
 #undef  markstack_ptr

@@ -665,7 +665,7 @@ hsplit(HV *hv)
     I32 oldsize = (I32) xhv->xhv_max + 1; /* sic(k) */
     register I32 newsize = oldsize * 2;
     register I32 i;
-    register HE **a;
+    register HE **a = (HE**)xhv->xhv_array;
     register HE **b;
     register HE *entry;
     register HE **oentry;
@@ -673,9 +673,8 @@ hsplit(HV *hv)
     I32 tmp;
 #endif
 
-    a = (HE**)xhv->xhv_array;
     nomemok = TRUE;
-#ifdef STRANGE_MALLOC
+#if defined(STRANGE_MALLOC) || defined(MYMALLOC)
     Renew(a, newsize, HE*);
     if (!a) {
       nomemok = FALSE;
@@ -756,7 +755,7 @@ hv_ksplit(HV *hv, IV newmax)
     a = (HE**)xhv->xhv_array;
     if (a) {
 	nomemok = TRUE;
-#ifdef STRANGE_MALLOC
+#if defined(STRANGE_MALLOC) || defined(MYMALLOC)
 	Renew(a, newsize, HE*);
         if (!a) {
 	  nomemok = FALSE;

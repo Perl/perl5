@@ -426,6 +426,7 @@ magic_setvec
 magic_sizepack
 magic_wipepack
 magicname
+malloced_size
 markstack_grow
 mem_collxfrm
 mess

@@ -170,7 +170,7 @@ perl_construct(register PerlInterpreter *sv_interp)
 	thr = init_main_thread();
 #endif /* USE_THREADS */
 
-	linestr = NEWSV(65,80);
+	linestr = NEWSV(65,79);
 	sv_upgrade(linestr,SVt_PVIV);
 
 	if (!SvREADONLY(&sv_undef)) {

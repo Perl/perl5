@@ -1118,8 +1118,16 @@ sv_grow(SV* sv, unsigned long newlen)
     else
 	s = SvPVX(sv);
     if (newlen > SvLEN(sv)) {		/* need more room? */
-        if (SvLEN(sv) && s)
+	if (SvLEN(sv) && s) {
+#ifdef MYMALLOC
+	    STRLEN l = malloced_size((void*)SvPVX(sv));
+	    if (newlen <= l) {
+		SvLEN_set(sv, l);
+		return s;
+	    } else
+#endif 
 	    Renew(s,newlen,char);
+	}
         else
 	    New(703,s,newlen,char);
 	SvPV_set(sv, s);

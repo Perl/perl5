@@ -5049,7 +5049,7 @@ scan_heredoc(register char *s)
 	s--, herewas = newSVpv(s,d-s);
     s += SvCUR(herewas);
 
-    tmpstr = NEWSV(87,80);
+    tmpstr = NEWSV(87,79);
     sv_upgrade(tmpstr, SVt_PVIV);
     if (term == '\'') {
 	op_type = OP_CONST;
@@ -5307,8 +5307,8 @@ scan_str(char *start)
     multi_close = term;
 
     /* create a new SV to hold the contents.  87 is leak category, I'm
-       assuming.  80 is the SV's initial length.  What a random number. */
-    sv = NEWSV(87,80);
+       assuming.  79 is the SV's initial length.  What a random number. */
+    sv = NEWSV(87,79);
     sv_upgrade(sv, SVt_PVIV);
     SvIVX(sv) = term;
     (void)SvPOK_only(sv);		/* validate pointer */
