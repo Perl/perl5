@@ -145,4 +145,14 @@ typedef  char *		caddr_t;	/* In malloc.c (core address). */
 #include <sys/socket.h>
 #include <netdb.h>
 
+#ifdef MYMALLOC
+#define EMBEDMYMALLOC	/**/
+/* #define USE_PERL_SBRK	/**/
+/* #define PERL_SBRK_VIA_MALLOC	/**/
+#endif
+
+#ifdef PERLDLL
+#define PERL_CORE
+#endif
+
 #endif /* _INC_WIN32_PERL5 */

@@ -1654,7 +1654,7 @@
 /* MYMALLOC:
  *	This symbol, if defined, indicates that we're using our own malloc.
  */
-/*#define MYMALLOC			/**/
+#define MYMALLOC			/**/
 
 /* OLDARCHLIB:
  *	This variable, if defined, holds the name of the directory in

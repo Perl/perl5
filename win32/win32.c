@@ -1303,6 +1303,85 @@ win32_putchar(int c)
     return putchar(c);
 }
 
+#ifdef MYMALLOC
+
+#ifndef USE_PERL_SBRK
+
+static char *committed = NULL;
+static char *base      = NULL;
+static char *reserved  = NULL;
+static char *brk       = NULL;
+static DWORD pagesize  = 0;
+static DWORD allocsize = 0;
+
+void *
+sbrk(int need)
+{
+ void *result;
+ if (!pagesize)
+  {SYSTEM_INFO info;
+   GetSystemInfo(&info);
+   /* Pretend page size is larger so we don't perpetually
+    * call the OS to commit just one page ...
+    */
+   pagesize = info.dwPageSize << 3;
+   allocsize = info.dwAllocationGranularity;
+  }
+ /* This scheme fails eventually if request for contiguous
+  * block is denied so reserve big blocks - this is only 
+  * address space not memory ...
+  */
+ if (brk+need >= reserved)
+  {
+   DWORD size = 64*1024*1024;
+   char *addr;
+   if (committed && reserved && committed < reserved)
+    {
+     /* Commit last of previous chunk cannot span allocations */
+     addr = VirtualAlloc(committed,reserved-committed,MEM_COMMIT,PAGE_READWRITE);
+     if (addr)
+      committed = reserved;
+    }
+   /* Reserve some (more) space 
+    * Note this is a little sneaky, 1st call passes NULL as reserved
+    * so lets system choose where we start, subsequent calls pass
+    * the old end address so ask for a contiguous block
+    */
+   addr  = VirtualAlloc(reserved,size,MEM_RESERVE,PAGE_NOACCESS);
+   if (addr)
+    {
+     reserved = addr+size;
+     if (!base)
+      base = addr;
+     if (!committed)
+      committed = base;
+     if (!brk)
+      brk = committed;
+    }
+   else
+    {
+     return (void *) -1;
+    }
+  }
+ result = brk;
+ brk += need;
+ if (brk > committed)
+  {
+   DWORD size = ((brk-committed + pagesize -1)/pagesize) * pagesize;
+   char *addr = VirtualAlloc(committed,size,MEM_COMMIT,PAGE_READWRITE);
+   if (addr)
+    {
+     committed += size;
+    }
+   else
+    return (void *) -1;
+  }
+ return result;
+}
+
+#endif
+#endif
+
 DllExport void*
 win32_malloc(size_t size)
 {
@@ -1326,6 +1405,7 @@ win32_free(void *block)
 {
     free(block);
 }
+
 
 int
 win32_open_osfhandle(long handle, int flags)
