@@ -1,0 +1,46 @@
+Revision history for Perl extension Attribute::Handlers
+
+0.50  Sat Apr 21 16:09:31 2001
+	- original version; 
+
+0.51	Tue May  1 06:33:15 2001
+
+	- Fixed fatal file path error in MANIFEST (thanks Marcel and Jost)
+
+
+0.60	Thu May 10 15:46:02 2001
+
+	- Added RAWDATA specifier
+
+	- Cleaned up documentation (thanks Garrett)
+
+	- Added warning for all-lowercase handlers (thanks Garrett)
+
+	- Added autotie functionality
+
+	- Tweaked handling of anon arrays as attribute args
+
+
+0.61	Thu May 10 16:28:06 2001
+
+	- Critical doc patch
+
+
+0.65	Sun Jun  3 07:40:03 2001
+
+	- Added __CALLER__ pseudo class for 'autotie'
+
+	- Added multi-phasic attribute handlers (thanks Garrett)
+
+	- Fixed nasty $SIG{__WARN__}-induced bug
+
+	- Cached ref/symbol mapping for better performance and more
+	  reliable symbol identification under evil typeglob manipulations
+
+	- Added option to pass arguments when autotied classes are imported
+	  (thanks Marcel)
+
+	- Fixed bug in handling of lexical SCALAR refs
+
+	- Cleaned up interactions with other class hierarchies
+	  (due to being base class of UNIVERSAL)

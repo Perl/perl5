@@ -713,6 +713,8 @@ lib/abbrev.pl			An abbreviation table builder
 lib/AnyDBM_File.pm		Perl module to emulate dbmopen
 lib/AnyDBM_File.t		See if AnyDBM_File works
 lib/assert.pl			assertion and panic with stack trace
+lib/Attribute/Handlers/Changes	Attribute::Handlers
+lib/Attribute/Handlers/README	Attribute::Handlers
 lib/Attribute/Handlers.pm		Attribute::Handlers
 lib/Attribute/Handlers/demo/demo.pl	Attribute::Handlers demo
 lib/Attribute/Handlers/demo/Demo.pm	Attribute::Handlers demo
