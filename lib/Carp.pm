@@ -67,6 +67,7 @@ sub longmess {
 		$a[$#a] = "...";
 	      }
 	      for (@a) {
+		$_ = "undef", next unless defined $_;
 		s/'/\\'/g;
 		substr($_,$MaxArgLen) = '...' if $MaxArgLen and $MaxArgLen < length;
 		s/([^\0]*)/'$1'/ unless /^-?[\d.]+$/;
