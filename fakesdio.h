@@ -71,9 +71,7 @@
 #define fread(b,s,c,f)		_CANNOT fread
 #define fwrite(b,s,c,f)		_CANNOT fwrite
 #endif
-#define fgetpos(f,p)		PerlIO_getpos(f,p)
 #define fseek(f,o,w)		PerlIO_seek(f,o,w)
-#define fsetpos(f,p)		PerlIO_setpos(f,p)
 #define ftell(f)		PerlIO_tell(f)
 #define rewind(f)		PerlIO_rewind(f)
 #define clearerr(f)		PerlIO_clearerr(f)
@@ -83,6 +81,9 @@
 #define fileno(f)		PerlIO_fileno(f)
 #define popen(c,m)		my_popen(c,m)
 #define pclose(f)		my_pclose(f)
+
+#define fsetpos(f,p)		_CANNOT _fsetpos_
+#define fgetpos(f,p)		_CANNOT _fgetpos_
 
 #define __filbuf(f)		_CANNOT __filbuf_
 #define _filbuf(f)		_CANNOT _filbuf_

@@ -59,9 +59,9 @@ io_blocking(InputStream f, int block)
     if (RETVAL >= 0) {
 	int mode = RETVAL;
 #ifdef O_NONBLOCK
-	/* POSIX style */ 
+	/* POSIX style */
 #if defined(O_NDELAY) && O_NDELAY != O_NONBLOCK
-	/* Ooops has O_NDELAY too - make sure we don't 
+	/* Ooops has O_NDELAY too - make sure we don't
 	 * get SysV behaviour by mistake. */
 
 	/* E.g. In UNICOS and UNICOS/mk a F_GETFL returns an O_NDELAY
@@ -86,7 +86,7 @@ io_blocking(InputStream f, int block)
               }
 	}
 #else
-	/* Standard POSIX */ 
+	/* Standard POSIX */
 	RETVAL = RETVAL & O_NONBLOCK ? 0 : 1;
 
 	if ((block == 0) && !(mode & O_NONBLOCK)) {
@@ -103,11 +103,11 @@ io_blocking(InputStream f, int block)
 	    if(ret < 0)
 		RETVAL = ret;
 	 }
-#endif 
+#endif
 #else
 	/* Not POSIX - better have O_NDELAY or we can't cope.
 	 * for BSD-ish machines this is an acceptable alternative
-	 * for SysV we can't tell "would block" from EOF but that is 
+	 * for SysV we can't tell "would block" from EOF but that is
 	 * the way SysV is...
 	 */
 	RETVAL = RETVAL & O_NDELAY ? 0 : 1;
@@ -141,18 +141,18 @@ fgetpos(handle)
 	InputStream	handle
     CODE:
 	if (handle) {
-	    Fpos_t pos;
-	    if (
 #ifdef PerlIO
-		PerlIO_getpos(handle, &pos)
+	    ST(0) = sv_2mortal(newSV(0));
+	    if (PerlIO_getpos(handle, ST(0)) != 0) {
+		ST(0) = &PL_sv_undef;
+	    }
 #else
-		fgetpos(handle, &pos)
-#endif
-		) {
+	    if (fgetpos(handle, &pos)) {
 		ST(0) = &PL_sv_undef;
 	    } else {
 		ST(0) = sv_2mortal(newSVpv((char*)&pos, sizeof(Fpos_t)));
 	    }
+#endif
 	}
 	else {
 	    ST(0) = &PL_sv_undef;
@@ -164,14 +164,21 @@ fsetpos(handle, pos)
 	InputStream	handle
 	SV *		pos
     CODE:
-        char *p;
-	STRLEN len;
-	if (handle && (p = SvPV(pos,len)) && len == sizeof(Fpos_t))
+	if (handle) {
 #ifdef PerlIO
-	    RETVAL = PerlIO_setpos(handle, (Fpos_t*)p);
+	    RETVAL = PerlIO_setpos(handle, pos);
 #else
-	    RETVAL = fsetpos(handle, (Fpos_t*)p);
+	    char *p;
+	    STRLEN len;
+	    if ((p = SvPV(pos,len)) && len == sizeof(Fpos_t)) {
+		RETVAL = fsetpos(handle, (Fpos_t*)p);
+	    }
+	    else {
+		RETVAL = -1;
+		errno = EINVAL;
+	    }
 #endif
+	}
 	else {
 	    RETVAL = -1;
 	    errno = EINVAL;
@@ -207,7 +214,7 @@ new_tmpfile(packname = "IO::File")
 
 MODULE = IO	PACKAGE = IO::Poll
 
-void   
+void
 _poll(timeout,...)
 	int timeout;
 PPCODE:

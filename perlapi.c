@@ -3227,6 +3227,13 @@ Perl_sv_unref(pTHXo_ SV* sv)
     ((CPerlObj*)pPerl)->Perl_sv_unref(sv);
 }
 
+#undef  Perl_sv_unref_flags
+void
+Perl_sv_unref_flags(pTHXo_ SV* sv, U32 flags)
+{
+    ((CPerlObj*)pPerl)->Perl_sv_unref_flags(sv, flags);
+}
+
 #undef  Perl_sv_untaint
 void
 Perl_sv_untaint(pTHXo_ SV* sv)
@@ -3866,6 +3873,13 @@ void
 Perl_sv_force_normal(pTHXo_ SV *sv)
 {
     ((CPerlObj*)pPerl)->Perl_sv_force_normal(sv);
+}
+
+#undef  Perl_sv_force_normal_flags
+void
+Perl_sv_force_normal_flags(pTHXo_ SV *sv, U32 flags)
+{
+    ((CPerlObj*)pPerl)->Perl_sv_force_normal_flags(sv, flags);
 }
 
 #undef  Perl_tmps_grow
