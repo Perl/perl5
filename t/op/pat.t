@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..786\n";
+print "1..792\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2388,4 +2388,19 @@ print "# some Unicode properties\n";
 
     # Before #13843 this was failing by matching falsely.
     print "_:$char:_" =~ m/_:$SIGMA:_/i ? "not ok 786\n" : "ok 786\n";
+}
+
+{
+    print "# \\X\n";
+
+    use charnames ':full';
+
+    print "a!"              =~ /\X!/ ? "ok 787\n" : "not ok 787\n";
+    print "\xDF!"           =~ /\X!/ ? "ok 788\n" : "not ok 788\n";
+    print "\x{100}!"        =~ /\X!/ ? "ok 789\n" : "not ok 789\n";
+    print "\x{100}\x{300}!" =~ /\X!/ ? "ok 790\n" : "not ok 790\n";
+    print "\N{LATIN CAPITAL LETTER E}!" =~ /\X!/ ?
+	"ok 791\n" : "not ok 791\n";
+    print "\N{LATIN CAPITAL LETTER E}\N{COMBINING GRAVE ACCENT}!" =~ /\X!/ ?
+	"ok 792\n" : "not ok 792\n";
 }

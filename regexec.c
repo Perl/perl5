@@ -2591,16 +2591,19 @@ S_regmatch(pTHX_ regnode *prog)
 	    nextchr = UCHARAT(++locinput);
 	    break;
 	case CLUMP:
-	    LOAD_UTF8_CHARCLASS(mark,"~");
-	    if (locinput >= PL_regeol ||
-		swash_fetch(PL_utf8_mark,(U8*)locinput, do_utf8))
+	    if (locinput >= PL_regeol)
 		sayNO;
-	    locinput += PL_utf8skip[nextchr];
-	    while (locinput < PL_regeol &&
-		   swash_fetch(PL_utf8_mark,(U8*)locinput, do_utf8))
-		locinput += UTF8SKIP(locinput);
-	    if (locinput > PL_regeol)
-		sayNO;
+	    if  (do_utf8) {
+		LOAD_UTF8_CHARCLASS(mark,"~");
+		if (swash_fetch(PL_utf8_mark,(U8*)locinput, do_utf8))
+		    sayNO;
+		locinput += PL_utf8skip[nextchr];
+		while (locinput < PL_regeol &&
+		       swash_fetch(PL_utf8_mark,(U8*)locinput, do_utf8))
+		    locinput += UTF8SKIP(locinput);
+		if (locinput > PL_regeol)
+		    sayNO;
+	    }
 	    nextchr = UCHARAT(locinput);
 	    break;
 	case REFFL:
