@@ -48,7 +48,7 @@ The cwd() is the most natural form for the current architecture. For
 most systems it is identical to `pwd` (but without the trailing line
 terminator).
 
-Unfortunately, cwd() is B<not> taint-safe.
+Taint-safe.
 
 =item fastcwd
 
@@ -105,7 +105,8 @@ Taint-safe.
 
 A more dangerous, but potentially faster version of abs_path.
 
-B<Not> taint-safe.
+This function is B<Not> taint-safe : you can't use it in programs
+that work under taint mode.
 
 =back
 
@@ -270,9 +271,9 @@ sub fastcwd {
     $path = '/' . join('/', @path);
     if ($^O eq 'apollo') { $path = "/".$path; }
     # At this point $path may be tainted (if tainting) and chdir would fail.
-    # To be more useful we untaint it then check that we landed where we started.
-    $path = $1 if $path =~ /^(.*)\z/s;	# untaint
-    CORE::chdir($path) || return undef;
+    # Untaint it then check that we landed where we started.
+    $path =~ /^(.*)\z/s		# untaint
+	&& CORE::chdir($1) or return undef;
     ($cdev, $cino) = stat('.');
     die "Unstable directory path, current directory changed unexpectedly"
 	if $cdev != $orig_cdev || $cino != $orig_cino;

@@ -222,6 +222,9 @@ PPCODE:
     dXSTARG;
     getcwd_sv(TARG);
     XSprePUSH; PUSHTARG;
+#ifndef INCOMPLETE_TAINTS
+    SvTAINTED_on(TARG);
+#endif
 }
 
 void
