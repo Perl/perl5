@@ -157,9 +157,9 @@ SV* Perl_thread_create(char* class, SV* init_function, SV* params) {
 
 #else
 #ifdef OLD_PTHREADS_API
-	pthread_create( &thread->thr, (pthread_attr_t)NULL, Perl_thread_run, thread);
+	pthread_create( &thread->thr, (pthread_attr_t)NULL, Perl_thread_run, (void *)thread);
 #else
-	pthread_create( &thread->thr, (pthread_attr_t*)NULL, Perl_thread_run, thread);
+	pthread_create( &thread->thr, (pthread_attr_t*)NULL, Perl_thread_run, (void *)thread);
 #endif
 #endif
 	MUTEX_UNLOCK(&create_mutex);	
