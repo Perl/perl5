@@ -357,6 +357,16 @@ perl.exp: $(MINIPERLEXP) makedef.pl config.sh $(SYM) $(SYMH)
 
 !NO!SUBS!
 	;;
+os2)
+	$spitshell >>Makefile <<'!NO!SUBS!'
+MINIPERLEXP		= miniperl
+
+perl5.def: $(MINIPERLEXP) makedef.pl config.sh $(SYM) $(SYMH) miniperl.map
+	./$(MINIPERLEXP) makedef.pl PLATFORM=os2 -DPERL_DLL=$(PERL_DLL) > perl.exp.tmp
+	sh mv-if-diff perl.exp.tmp perl5.def
+
+!NO!SUBS!
+	;;
 esac
 
 if test -r $Makefile_s ; then

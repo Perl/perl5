@@ -1445,6 +1445,10 @@ typedef union any ANY;
 #   endif
 #endif
 
+#if defined(OS2)
+#  include "iperlsys.h"
+#endif
+
 #if defined(__OPEN_VM)
 # include "vmesa/vmesaish.h"
 #endif
@@ -1680,7 +1684,9 @@ typedef I32 (*filter_t) (pTHXo_ int, SV *, int);
 #define FILTER_DATA(idx)	   (AvARRAY(PL_rsfp_filters)[idx])
 #define FILTER_ISREADER(idx)	   (idx >= AvFILLp(PL_rsfp_filters))
 
-#include "iperlsys.h"
+#if !defined(OS2)
+#  include "iperlsys.h"
+#endif
 #include "regexp.h"
 #include "sv.h"
 #include "util.h"

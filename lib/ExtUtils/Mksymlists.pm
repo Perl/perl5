@@ -76,12 +76,19 @@ sub _write_os2 {
         ($data->{DLBASE} = $data->{NAME}) =~ s/.*:://;
         $data->{DLBASE} = substr($data->{DLBASE},0,7) . '_';
     }
+    my $distname = $data->{DISTNAME} || $data->{NAME};
+    $distname = "Distribution $distname";
+    my $comment = "Perl (v$]$threaded) module $data->{NAME}";
+    if ($data->{INSTALLDIRS} and $data->{INSTALLDIRS} eq 'perl') {
+	$distname = 'perl5-porters@perl.org';
+	$comment = "Core $comment";
+    }
     rename "$data->{FILE}.def", "$data->{FILE}_def.old";
 
     open(DEF,">$data->{FILE}.def")
         or croak("Can't create $data->{FILE}.def: $!\n");
     print DEF "LIBRARY '$data->{DLBASE}' INITINSTANCE TERMINSTANCE\n";
-    print DEF "DESCRIPTION 'Perl (v$]$threaded) module $data->{NAME} v$data->{VERSION}'\n";
+    print DEF "DESCRIPTION '\@#$distname:$data->{VERSION}#\@ $comment'\n";
     print DEF "CODE LOADONCALL\n";
     print DEF "DATA LOADONCALL NONSHARED MULTIPLE\n";
     print DEF "EXPORTS\n  ";
