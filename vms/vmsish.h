@@ -60,6 +60,57 @@
 #include <unixio.h>
 #include <unixlib.h>
 #include <file.h>  /* it's not <sys/file.h>, so don't use I_SYS_FILE */
+
+/* Our own contribution to PerlShr's global symbols . . . */
+#ifdef EMBED
+#  define my_trnlnm		Perl_my_trnlnm
+#  define my_getenv		Perl_my_getenv
+#  define my_crypt		Perl_my_crypt
+#  define waitpid		Perl_waitpid
+#  define my_gconvert		Perl_my_gconvert
+#  define do_rmdir		Perl_do_rmdir
+#  define kill_file		Perl_kill_file
+#  define my_utime		Perl_my_utime
+#  define fileify_dirspec	Perl_fileify_dirspec
+#  define fileify_dirspec_ts	Perl_fileify_dirspec_ts
+#  define pathify_dirspec	Perl_pathify_dirspec
+#  define pathify_dirspec_ts	Perl_pathify_dirspec_ts
+#  define tounixspec		Perl_tounixspec
+#  define tounixspec_ts		Perl_tounixspec_ts
+#  define tovmsspec		Perl_tovmsspec
+#  define tovmsspec_ts		Perl_tovmsspec_ts
+#  define tounixpath		Perl_tounixpath
+#  define tounixpath_ts		Perl_tounixpath_ts
+#  define tovmspath		Perl_tovmspath
+#  define tovmspath_ts		Perl_tovmspath_ts
+#  define getredirection	Perl_getredirection
+#  define opendir		Perl_opendir
+#  define readdir		Perl_readdir
+#  define telldir		Perl_telldir
+#  define seekdir		Perl_seekdir
+#  define closedir		Perl_closedir
+#  define vmsreaddirversions	Perl_vmsreaddirversions
+#  define getredirection	Perl_getredirection
+#  define my_gmtime		Perl_my_gmtime
+#  define cando_by_name		Perl_cando_by_name
+#  define flex_fstat		Perl_flex_fstat
+#  define flex_stat		Perl_flex_stat
+#  define trim_unixpath		Perl_trim_unixpath
+#  define vms_do_aexec		Perl_vms_do_aexec
+#  define vms_do_exec		Perl_vms_do_exec
+#  define do_aspawn		Perl_do_aspawn
+#  define do_spawn		Perl_do_spawn
+#  define my_fwrite		Perl_my_fwrite
+#  define my_getpwnam		Perl_my_getpwnam
+#  define my_getpwuid		Perl_my_getpwuid
+#  define my_getpwent		Perl_my_getpwent
+#  define my_endpwent		Perl_my_endpwent
+#  define my_getlogin		Perl_my_getlogin
+#  define rmscopy		Perl_rmscopy
+#  define init_os_extras	Perl_init_os_extras
+#endif
+
+/* Delete if at all possible, changing protections if necessary. */
 #define unlink kill_file
 
 /*  The VMS C RTL has vfork() but not fork().  Both actually work in a way
@@ -79,11 +130,11 @@
 #endif
 
 /* Handy way to vet calls to VMS system services and RTL routines. */
-#define _ckvmssts(call) do { register unsigned long int __ckvms_sts; \
+#define _ckvmssts(call) STMT_START { register unsigned long int __ckvms_sts; \
   if (!((__ckvms_sts=(call))&1)) { \
   set_errno(EVMSERR); set_vaxc_errno(__ckvms_sts); \
   croak("Fatal VMS error (status=%d) at %s, line %d", \
-  __ckvms_sts,__FILE__,__LINE__); } } while (0);
+  __ckvms_sts,__FILE__,__LINE__); } } STMT_END
 
 #ifdef VMS_DO_SOCKETS
 #include "sockadapt.h"
@@ -91,6 +142,8 @@
 
 #define BIT_BUCKET "_NLA0:"
 #define PERL_SYS_INIT(c,v)  getredirection((c),(v))
+#define PERL_SYS_TERM()
+#define dXSUB_SYS int dummy
 #define HAS_KILL
 #define HAS_WAIT
 
@@ -351,7 +404,7 @@ struct passwd *	my_getpwuid _((Uid_t uid));
 struct passwd *	my_getpwent _(());
 void	my_endpwent _(());
 char *	my_getlogin _(());
-int	rmscopy _((char *, char *));
+int	rmscopy _((char *, char *, int));
 void	init_os_extras _(());
 typedef char __VMS_SEPYTOTORP__;
 /* prototype section end marker; `typedef' passes through cpp */
