@@ -2131,7 +2131,6 @@ PP(pp_goto)
     char *label;
     int do_dump = (PL_op->op_type == OP_DUMP);
     static char must_have_label[] = "goto must have label";
-    AV *oldav = Nullav;
 
     label = 0;
     if (PL_op->op_flags & OPf_STACKED) {
@@ -2146,6 +2145,7 @@ PP(pp_goto)
 	    SV** mark;
 	    I32 items = 0;
 	    I32 oldsave;
+	    bool reified = 0;
 
 	retry:
 	    if (!CvROOT(cv) && !CvXSUB(cv)) {
@@ -2189,16 +2189,16 @@ PP(pp_goto)
 		SvREFCNT_dec(GvAV(PL_defgv));
 		GvAV(PL_defgv) = cx->blk_sub.savearray;
 #endif /* USE_5005THREADS */
+		CLEAR_ARGARRAY(av);
 		/* abandon @_ if it got reified */
 		if (AvREAL(av)) {
-		    oldav = av;	/* delay until return */
+		    reified = 1;
+		    SvREFCNT_dec(av);
 		    av = newAV();
 		    av_extend(av, items-1);
 		    AvFLAGS(av) = AVf_REIFY;
 		    PAD_SVl(0) = (SV*)(cx->blk_sub.argarray = av);
 		}
-		else
-		    CLEAR_ARGARRAY(av);
 	    }
 	    else if (CvXSUB(cv)) {	/* put GvAV(defgv) back onto stack */
 		AV* av;
@@ -2221,11 +2221,13 @@ PP(pp_goto)
 
 	    /* Now do some callish stuff. */
 	    SAVETMPS;
-	    /* For reified @_, delay freeing till return from new sub */
-	    if (oldav)
-		SAVEFREESV((SV*)oldav);
 	    SAVEFREESV(cv); /* later, undo the 'avoid premature free' hack */
 	    if (CvXSUB(cv)) {
+		if (reified) {
+		    I32 index;
+		    for (index=0; index<items; index++)
+			sv_2mortal(SP[-index]);
+		}
 #ifdef PERL_XSUB_OLDSTYLE
 		if (CvOLDSTYLE(cv)) {
 		    I32 (*fp3)(int,int,int);
@@ -2321,6 +2323,11 @@ PP(pp_goto)
 		    Copy(mark,AvARRAY(av),items,SV*);
 		    AvFILLp(av) = items - 1;
 		    assert(!AvREAL(av));
+		    if (reified) {
+			/* transfer 'ownership' of refcnts to new @_ */
+			AvREAL_on(av);
+			AvREIFY_off(av);
+		    }
 		    while (items--) {
 			if (*mark)
 			    SvTEMP_off(*mark);

@@ -7,7 +7,7 @@ BEGIN {
     @INC = qw(. ../lib);
 }
 
-print "1..46\n";
+print "1..47\n";
 
 require "test.pl";
 
@@ -406,5 +406,13 @@ sub recurse2 {
 }
 print "not " unless recurse1(500) == 500;
 print "ok 46 - recursive goto &foo\n";
+
+# [perl #32039] Chained goto &sub drops data too early. 
+
+sub a32039 { @_=("foo"); goto &b32039; }
+sub b32039 { goto &c32039; }
+sub c32039 { print $_[0] eq 'foo' ? "" : "not ", "ok 47 - chained &goto\n" }
+a32039();
+
 
 
