@@ -307,6 +307,11 @@ Benchmark: running a, b, each for at least 5 CPU seconds...
 New features: "each for at least N CPU seconds...", "wallclock secs",
 and the "@ operations/CPU second (n=operations)".
 
+=item Devel::Peek
+
+The Devel::Peek module provides access to the internal representation
+of Perl variables. It is a data debugging tool for the XS programmer.
+
 =item Fcntl
 
 More Fcntl constants added: F_SETLK64, F_SETLKW64, O_LARGEFILE for
@@ -314,6 +319,27 @@ large (more than 4G) file access (the 64-bit support is not yet
 working, though, so no need to get overly excited), Free/Net/OpenBSD
 locking behaviour flags F_FLOCK, F_POSIX, Linux F_SHLCK, and
 O_ACCMODE: the mask of O_RDONLY, O_WRONLY, and O_RDWR.
+
+=item File::Spec
+
+New methods have been added to the File::Spec module: devnull() returns
+the name of the null device (/dev/null on UNIX) and tmpdir() the name of
+the temp directory (normally /tmp on UNIX). There are now also methods
+to convert between absolute and relative filenames: abs2rel() and
+rel2abs(). For compatibility with operating systems that specify volume
+names in file paths, the splitpath(), splitdir() and catdir() methods
+have been added.
+
+=item File::Spec::Functions
+
+The new File::Spec::Functions modules provides a function interface
+to the File::Spec module. Allows shorthand
+
+	$fullname = catfile($dir1, $dir2, $file);
+
+instead of
+
+	$fullname = File::Spec->catfile($dir1, $dir2, $file);
 
 =item Math::Complex
 
