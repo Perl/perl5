@@ -250,6 +250,7 @@ CODE:
     }
     ST(0) = ret;
     POPBLOCK(cx,PL_curpm);
+    LEAVESUB(cv);
     CATCH_SET(oldcatch);
     XSRETURN(1);
 }
@@ -290,8 +291,6 @@ CODE:
     CATCH_SET(TRUE);
     PUSHBLOCK(cx, CXt_SUB, SP);
     PUSHSUB(cx);
-    if (!CvDEPTH(cv))
-        (void)SvREFCNT_inc(cv);
 
     for(index = 1 ; index < items ; index++) {
 	GvSV(PL_defgv) = ST(index);
@@ -300,11 +299,13 @@ CODE:
 	if (SvTRUE(*PL_stack_sp)) {
 	  ST(0) = ST(index);
 	  POPBLOCK(cx,PL_curpm);
+	  LEAVESUB(cv);
 	  CATCH_SET(oldcatch);
 	  XSRETURN(1);
 	}
     }
     POPBLOCK(cx,PL_curpm);
+    LEAVESUB(cv);
     CATCH_SET(oldcatch);
     XSRETURN_UNDEF;
 }
