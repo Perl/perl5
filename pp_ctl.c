@@ -2769,7 +2769,7 @@ PP(pp_entereval)
     SAVEDELETE(PL_defstash, safestr, strlen(safestr));
     SAVEHINTS();
     PL_hints = PL_op->op_targ;
-    SAVEPPTR(compiling.cop_warnings);
+    SAVEPPTR(PL_compiling.cop_warnings);
     if (PL_compiling.cop_warnings != WARN_ALL 
 	&& PL_compiling.cop_warnings != WARN_NONE){
         PL_compiling.cop_warnings = newSVsv(PL_compiling.cop_warnings) ;

@@ -792,7 +792,7 @@ pregcomp(char *exp, char *xend, PMOP *pm)
     if (exp == NULL)
 	FAIL("NULL regexp argument");
 
-    if (PL_curcop == &compiling ? (PL_hints & HINT_UTF8) : IN_UTF8)
+    if (PL_curcop == &PL_compiling ? (PL_hints & HINT_UTF8) : IN_UTF8)
 	PL_reg_flags |= RF_utf8;
     else
 	PL_reg_flags = 0;
@@ -1160,8 +1160,9 @@ reg(I32 paren, I32 *flagp)
 		    PL_regcomp_rx->data->data[n+2] = (void*)sop;
 		    SvREFCNT_dec(sv);
 		}
-		else {		/* First pass */
-		    if (PL_reginterp_cnt < ++PL_seen_evals && PL_curcop != &compiling)
+		else {						/* First pass */
+		    if (PL_reginterp_cnt < ++PL_seen_evals
+			&& PL_curcop != &PL_compiling)
 			/* No compiled RE interpolated, has runtime
 			   components ===> unsafe.  */
 			FAIL("Eval-group not allowed at runtime, use re 'eval'");

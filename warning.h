@@ -19,47 +19,47 @@
 /* Part of the logic below assumes that WARN_NONE is NULL */
 
 #define ckDEAD(x)							\
-	   (curcop->cop_warnings != WARN_ALL &&				\
-	    curcop->cop_warnings != WARN_NONE &&			\
-	    IsSet(SvPVX(curcop->cop_warnings), 2*x+1))
+	   (PL_curcop->cop_warnings != WARN_ALL &&			\
+	    PL_curcop->cop_warnings != WARN_NONE &&			\
+	    IsSet(SvPVX(PL_curcop->cop_warnings), 2*x+1))
 
 #define ckWARN(x)							\
-	( (curcop->cop_warnings &&					\
-	      (curcop->cop_warnings == WARN_ALL ||			\
-	       IsSet(SvPVX(curcop->cop_warnings), 2*x) ) )		\
+	( (PL_curcop->cop_warnings &&					\
+	      (PL_curcop->cop_warnings == WARN_ALL ||			\
+	       IsSet(SvPVX(PL_curcop->cop_warnings), 2*x) ) )		\
 	  || (PL_dowarn & G_WARN_ON) )
 
 #define ckWARN2(x,y)							\
-	  ( (curcop->cop_warnings &&					\
-	      (curcop->cop_warnings == WARN_ALL ||			\
-	        IsSet(SvPVX(curcop->cop_warnings), 2*x)  ||		\
-	        IsSet(SvPVX(curcop->cop_warnings), 2*y) ) ) 		\
+	  ( (PL_curcop->cop_warnings &&					\
+	      (PL_curcop->cop_warnings == WARN_ALL ||			\
+	        IsSet(SvPVX(PL_curcop->cop_warnings), 2*x)  ||		\
+	        IsSet(SvPVX(PL_curcop->cop_warnings), 2*y) ) ) 		\
 	    ||	(PL_dowarn & G_WARN_ON) )
 
 #else
 
-#define ckDEAD(x)						\
-	   (curcop->cop_warnings != WARN_ALL &&			\
-	    curcop->cop_warnings != WARN_NONE &&		\
-	    SvPVX(curcop->cop_warnings)[Off(2*x+1)] & Bit(2*x+1) )
+#define ckDEAD(x)							\
+	   (PL_curcop->cop_warnings != WARN_ALL &&			\
+	    PL_curcop->cop_warnings != WARN_NONE &&			\
+	    SvPVX(PL_curcop->cop_warnings)[Off(2*x+1)] & Bit(2*x+1) )
 
-#define ckWARN(x)						\
+#define ckWARN(x)							\
 	( (PL_dowarn & G_WARN_ON) || ( (PL_dowarn & G_WARN_DISABLE) && 	\
-	  curcop->cop_warnings &&				\
-	  ( curcop->cop_warnings == WARN_ALL ||			\
-	    SvPVX(curcop->cop_warnings)[Off(2*x)] & Bit(2*x)  ) ) )
+	  PL_curcop->cop_warnings &&					\
+	  ( PL_curcop->cop_warnings == WARN_ALL ||			\
+	    SvPVX(PL_curcop->cop_warnings)[Off(2*x)] & Bit(2*x)  ) ) )
 
-#define ckWARN2(x,y)						\
+#define ckWARN2(x,y)							\
 	( (PL_dowarn & G_WARN_ON) || ( (PL_dowarn & G_WARN_DISABLE) && 	\
-	  curcop->cop_warnings &&				\
-	  ( curcop->cop_warnings == WARN_ALL ||			\
-	    SvPVX(curcop->cop_warnings)[Off(2*x)] & Bit(2*x) || 	\
-	    SvPVX(curcop->cop_warnings)[Off(2*y)] & Bit(2*y) ) ) ) 
+	  PL_curcop->cop_warnings &&					\
+	  ( PL_curcop->cop_warnings == WARN_ALL ||			\
+	    SvPVX(PL_curcop->cop_warnings)[Off(2*x)] & Bit(2*x) || 	\
+	    SvPVX(PL_curcop->cop_warnings)[Off(2*y)] & Bit(2*y) ) ) ) 
 
 #endif
 
 #define WARN_NONE		NULL
-#define WARN_ALL		(&sv_yes)
+#define WARN_ALL		(&PL_sv_yes)
 
 #define WARN_REDEFINE		0
 #define WARN_VOID		1

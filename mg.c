@@ -464,15 +464,15 @@ magic_get(SV *sv, MAGIC *mg)
 	break;
     case '\002':		/* ^B */
 	/* printf("magic_get $^B: ") ; */
-	if (curcop->cop_warnings == WARN_NONE)
+	if (PL_curcop->cop_warnings == WARN_NONE)
 	    /* printf("WARN_NONE\n"), */
 	    sv_setpvn(sv, WARN_NONEstring, WARNsize) ;
-        else if (curcop->cop_warnings == WARN_ALL)
+        else if (PL_curcop->cop_warnings == WARN_ALL)
 	    /* printf("WARN_ALL\n"), */
 	    sv_setpvn(sv, WARN_ALLstring, WARNsize) ;
         else 
-	    /* printf("some %s\n", printW(curcop->cop_warnings)), */
-	    sv_setsv(sv, curcop->cop_warnings);
+	    /* printf("some %s\n", printW(PL_curcop->cop_warnings)), */
+	    sv_setsv(sv, PL_curcop->cop_warnings);
 	break;
     case '\004':		/* ^D */
 	sv_setiv(sv, (IV)(PL_debug & 32767));
@@ -1639,15 +1639,15 @@ magic_set(SV *sv, MAGIC *mg)
     case '\002':	/* ^B */
 	if ( ! (PL_dowarn & G_WARN_ALL_MASK)) {
             if (memEQ(SvPVX(sv), WARN_ALLstring, WARNsize))
-	        compiling.cop_warnings = WARN_ALL;
+	        PL_compiling.cop_warnings = WARN_ALL;
 	    else if (memEQ(SvPVX(sv), WARN_NONEstring, WARNsize))
-	        compiling.cop_warnings = WARN_NONE;
+	        PL_compiling.cop_warnings = WARN_NONE;
             else {
-	        if (compiling.cop_warnings != WARN_NONE && 
-		    compiling.cop_warnings != WARN_ALL)
-	            sv_setsv(compiling.cop_warnings, sv);
+	        if (PL_compiling.cop_warnings != WARN_NONE && 
+		    PL_compiling.cop_warnings != WARN_ALL)
+	            sv_setsv(PL_compiling.cop_warnings, sv);
 	        else
-		    compiling.cop_warnings = newSVsv(sv) ;
+		    PL_compiling.cop_warnings = newSVsv(sv) ;
 	    }
 	}
 	break;

@@ -78,6 +78,115 @@ Version 5.005_53        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  1935] By: gsar                                  on 1998/10/06  06:50:35
+        Log: add test for previous fix
+     Branch: perl
+           ! ext/Thread/create.t
+____________________________________________________________________________
+[  1934] By: gsar                                  on 1998/10/06  06:37:36
+        Log: fix USE_THREADS coredump due to uninitialized PL_hv_fetch_ent_mh
+     Branch: perl
+           ! util.c
+____________________________________________________________________________
+[  1933] By: gsar                                  on 1998/10/06  05:04:20
+        Log: undo bogus part of change#1903 (as pointed out by Larry)
+     Branch: perl
+           ! pp_ctl.c
+____________________________________________________________________________
+[  1932] By: gsar                                  on 1998/10/06  04:21:31
+        Log: added tweaked version of suggested patch
+             From: jan.dubois@ibm.net (Jan Dubois)
+             Date: Sat, 03 Oct 1998 19:04:48 +0200
+             Message-ID: <361d54b2.36841294@smtp1.ibm.net>
+             Subject: [PATCH 5.005_52] More MakeMaker  patches
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm lib/ExtUtils/MakeMaker.pm
+           ! lib/ExtUtils/Mkbootstrap.pm lib/ExtUtils/Mksymlists.pm
+____________________________________________________________________________
+[  1931] By: gsar                                  on 1998/10/06  04:04:33
+        Log: use cpp symbols instead of hardwired constants
+             From: Hugo van der Sanden <hv@crypt.compulink.co.uk>
+             Date: Mon, 05 Oct 1998 09:23:33 +0100
+             Message-Id: <199810050823.JAA00891@crypt.compulink.co.uk>
+             Subject: [PATCH 5.005_52] By the numbers (resend)
+     Branch: perl
+           ! op.c
+____________________________________________________________________________
+[  1930] By: gsar                                  on 1998/10/06  04:01:55
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Message-Id: <199810050637.CAA07781@monk.mps.ohio-state.edu>
+             Date: Mon, 5 Oct 1998 02:37:43 -0400 (EDT)
+             Subject: [PATCH 5.005_52] Cumulative OS/2-related patch
+     Branch: perl
+	   ! Makefile.SH hints/os2.sh lib/ExtUtils/MM_OS2.pm mg.c
+           ! os2/Changes os2/Makefile.SHs os2/os2.c perl_exp.SH util.c
+____________________________________________________________________________
+[  1929] By: gsar                                  on 1998/10/06  03:50:36
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 5 Oct 1998 02:39:00 -0400 (EDT)
+             Message-Id: <199810050639.CAA07803@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.00552] Minor test improvement
+     Branch: perl
+           ! t/op/magic.t
+____________________________________________________________________________
+[  1928] By: gsar                                  on 1998/10/06  03:49:03
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 5 Oct 1998 02:38:23 -0400 (EDT)
+             Message-Id: <199810050638.CAA07792@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.00552] emacs/ptags inprovements
+     Branch: perl
+           ! emacs/ptags
+____________________________________________________________________________
+[  1927] By: gsar                                  on 1998/10/06  03:47:44
+        Log: disable C<#define dirty PL_dirty> et al.
+     Branch: perl
+           ! embed.pl embedvar.h
+____________________________________________________________________________
+[  1926] By: gsar                                  on 1998/10/06  03:43:32
+        Log: From: Mark-Jason Dominus <mjd@plover.com>
+             Date: Sun, 04 Oct 1998 14:48:11 -0400
+             Message-ID: <19981004184811.16048.qmail@plover.com>
+             Subject: PATCH: perldoc -f does not locate -e, -r, -x, etc.
+     Branch: perl
+           ! utils/perldoc.PL
+____________________________________________________________________________
+[  1925] By: gsar                                  on 1998/10/06  03:27:35
+        Log: disable USE_THREADS when PERL_OBJECT is enabled
+     Branch: perl
+           ! win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  1924] By: gsar                                  on 1998/10/06  03:26:54
+        Log: remove spurious unused conflicting globals (PL_yy{v,s}sp)
+     Branch: perl
+	   ! Makefile.SH Todo-5.005 embedvar.h perlvars.h perly.c toke.c
+           ! vms/perly_c.vms
+____________________________________________________________________________
+[  1923] By: gsar                                  on 1998/10/03  05:19:56
+        Log: make C<use> recognize C<require> overrides; allow C<do EXPR> to be
+             overridden
+     Branch: perl
+	   ! embed.h global.sym objXSUB.h objpp.h op.c perly.c perly.y
+           ! proto.h vms/perly_c.vms
+____________________________________________________________________________
+[  1922] By: gsar                                  on 1998/10/03  03:59:50
+        Log: suppress manifypods leak in extensions
+     Branch: perl
+           ! ext/Errno/Makefile.PL ext/IPC/SysV/Makefile.PL pod/pod2man.PL
+____________________________________________________________________________
+[  1921] By: gsar                                  on 1998/10/02  22:30:15
+        Log: os390 fixes (suggested by Peter Prymmer)
+     Branch: perl
+           ! Makefile.SH regcomp.c
+____________________________________________________________________________
+[  1920] By: gsar                                  on 1998/10/02  21:41:19
+        Log: squelch undef warnings
+             From: Hugo van der Sanden <hv@crypt.compulink.co.uk>
+             Date: Fri, 02 Oct 1998 11:01:14 +0100
+             Message-Id: <199810021001.LAA19214@crypt.compulink.co.uk>
+             Subject: [PATCH] Re: Apparent bug in Math::BigInt 
+     Branch: perl
+           ! Changes lib/Math/BigInt.pm
+____________________________________________________________________________
 [  1919] By: gsar                                  on 1998/10/02  04:59:13
         Log: add note to INSTALL about ANSI C
      Branch: perl

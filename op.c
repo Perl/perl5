@@ -1582,7 +1582,7 @@ block_start(int full)
     PL_pad_reset_pending = FALSE;
     SAVEHINTS();
     PL_hints &= ~HINT_BLOCK_SCOPE;
-    SAVEPPTR(compiling.cop_warnings); 
+    SAVEPPTR(PL_compiling.cop_warnings); 
     if (PL_compiling.cop_warnings != WARN_ALL && 
        PL_compiling.cop_warnings != WARN_NONE) {
         PL_compiling.cop_warnings = newSVsv(PL_compiling.cop_warnings) ;
@@ -1601,7 +1601,7 @@ block_end(I32 floor, OP *seq)
     OP* retval = scalarseq(seq);
     LEAVE_SCOPE(floor);
     PL_pad_reset_pending = FALSE;
-    compiling.op_private = PL_hints;
+    PL_compiling.op_private = PL_hints;
     if (needblockscope)
 	PL_hints |= HINT_BLOCK_SCOPE; /* propagate out */
     pad_leavemy(PL_comppad_name_fill);
@@ -2887,7 +2887,7 @@ newSTATEOP(I32 flags, char *label, OP *o)
 #ifdef NATIVE_HINTS
     cop->op_private |= NATIVE_HINTS;
 #endif
-    compiling.op_private = cop->op_private;
+    PL_compiling.op_private = cop->op_private;
     cop->op_next = (OP*)cop;
 
     if (label) {

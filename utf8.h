@@ -22,6 +22,6 @@ EXTCONST unsigned char utf8skip[] = {
 EXTCONST unsigned char utf8skip[];
 #endif
 
-#define IN_UTF8 (curcop->op_private & HINT_UTF8)
+#define IN_UTF8 (PL_curcop->op_private & HINT_UTF8)
 
 #define UTF8SKIP(s) utf8skip[*(U8*)s]

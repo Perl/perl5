@@ -406,7 +406,7 @@ bool
 is_utf8_alnum(U8 *p)
 {
     if (!PL_utf8_alnum)
-	PL_utf8_alnum = swash_init("utf8", "IsAlnum", &sv_undef, 0, 0);
+	PL_utf8_alnum = swash_init("utf8", "IsAlnum", &PL_sv_undef, 0, 0);
     return swash_fetch(PL_utf8_alnum, p);
 /*    return *p == '_' || is_utf8_alpha(p) || is_utf8_digit(p); */
 #ifdef SURPRISINGLY_SLOWER  /* probably because alpha is usually true */
@@ -427,7 +427,7 @@ bool
 is_utf8_alpha(U8 *p)
 {
     if (!PL_utf8_alpha)
-	PL_utf8_alpha = swash_init("utf8", "IsAlpha", &sv_undef, 0, 0);
+	PL_utf8_alpha = swash_init("utf8", "IsAlpha", &PL_sv_undef, 0, 0);
     return swash_fetch(PL_utf8_alpha, p);
 }
 
@@ -435,7 +435,7 @@ bool
 is_utf8_space(U8 *p)
 {
     if (!PL_utf8_space)
-	PL_utf8_space = swash_init("utf8", "IsSpace", &sv_undef, 0, 0);
+	PL_utf8_space = swash_init("utf8", "IsSpace", &PL_sv_undef, 0, 0);
     return swash_fetch(PL_utf8_space, p);
 }
 
@@ -443,7 +443,7 @@ bool
 is_utf8_digit(U8 *p)
 {
     if (!PL_utf8_digit)
-	PL_utf8_digit = swash_init("utf8", "IsDigit", &sv_undef, 0, 0);
+	PL_utf8_digit = swash_init("utf8", "IsDigit", &PL_sv_undef, 0, 0);
     return swash_fetch(PL_utf8_digit, p);
 }
 
@@ -451,7 +451,7 @@ bool
 is_utf8_upper(U8 *p)
 {
     if (!PL_utf8_upper)
-	PL_utf8_upper = swash_init("utf8", "IsUpper", &sv_undef, 0, 0);
+	PL_utf8_upper = swash_init("utf8", "IsUpper", &PL_sv_undef, 0, 0);
     return swash_fetch(PL_utf8_upper, p);
 }
 
@@ -459,7 +459,7 @@ bool
 is_utf8_lower(U8 *p)
 {
     if (!PL_utf8_lower)
-	PL_utf8_lower = swash_init("utf8", "IsLower", &sv_undef, 0, 0);
+	PL_utf8_lower = swash_init("utf8", "IsLower", &PL_sv_undef, 0, 0);
     return swash_fetch(PL_utf8_lower, p);
 }
 
@@ -467,7 +467,7 @@ bool
 is_utf8_print(U8 *p)
 {
     if (!PL_utf8_print)
-	PL_utf8_print = swash_init("utf8", "IsPrint", &sv_undef, 0, 0);
+	PL_utf8_print = swash_init("utf8", "IsPrint", &PL_sv_undef, 0, 0);
     return swash_fetch(PL_utf8_print, p);
 }
 
@@ -475,7 +475,7 @@ bool
 is_utf8_mark(U8 *p)
 {
     if (!PL_utf8_mark)
-	PL_utf8_mark = swash_init("utf8", "IsM", &sv_undef, 0, 0);
+	PL_utf8_mark = swash_init("utf8", "IsM", &PL_sv_undef, 0, 0);
     return swash_fetch(PL_utf8_mark, p);
 }
 
@@ -485,7 +485,7 @@ to_utf8_upper(U8 *p)
     UV uv;
 
     if (!PL_utf8_toupper)
-	PL_utf8_toupper = swash_init("utf8", "ToUpper", &sv_undef, 4, 0);
+	PL_utf8_toupper = swash_init("utf8", "ToUpper", &PL_sv_undef, 4, 0);
     uv = swash_fetch(PL_utf8_toupper, p);
     return uv ? uv : utf8_to_uv(p,0);
 }
@@ -496,7 +496,7 @@ to_utf8_title(U8 *p)
     UV uv;
 
     if (!PL_utf8_totitle)
-	PL_utf8_totitle = swash_init("utf8", "ToTitle", &sv_undef, 4, 0);
+	PL_utf8_totitle = swash_init("utf8", "ToTitle", &PL_sv_undef, 4, 0);
     uv = swash_fetch(PL_utf8_totitle, p);
     return uv ? uv : utf8_to_uv(p,0);
 }
@@ -507,7 +507,7 @@ to_utf8_lower(U8 *p)
     UV uv;
 
     if (!PL_utf8_tolower)
-	PL_utf8_tolower = swash_init("utf8", "ToLower", &sv_undef, 4, 0);
+	PL_utf8_tolower = swash_init("utf8", "ToLower", &PL_sv_undef, 4, 0);
     uv = swash_fetch(PL_utf8_tolower, p);
     return uv ? uv : utf8_to_uv(p,0);
 }
@@ -533,17 +533,17 @@ swash_init(char* pkg, char* name, SV *listsv, I32 minbits, I32 none)
     SAVEI32(PL_hints);
     PL_hints = 0;
     save_re_context();
-    if (curcop == &compiling)	/* XXX ought to be handled by lex_start */
+    if (PL_curcop == &PL_compiling)	/* XXX ought to be handled by lex_start */
 	strncpy(tmpbuf, PL_tokenbuf, sizeof tmpbuf);
     if (perl_call_method("SWASHNEW", G_SCALAR))
-	retval = newSVsv(*stack_sp--);    
+	retval = newSVsv(*PL_stack_sp--);    
     else
-	retval = &sv_undef;
+	retval = &PL_sv_undef;
     LEAVE;
     POPSTACK;
-    if (curcop == &compiling) {
+    if (PL_curcop == &PL_compiling) {
 	strncpy(PL_tokenbuf, tmpbuf, sizeof tmpbuf);
-	curcop->op_private = PL_hints;
+	PL_curcop->op_private = PL_hints;
     }
     if (!SvROK(retval) || SvTYPE(SvRV(retval)) != SVt_PVHV)
 	croak("SWASHNEW didn't return an HV ref");
@@ -596,14 +596,14 @@ swash_fetch(SV *sv, U8 *ptr)
 	    PUSHs(sv_2mortal(newSViv(needents)));
 	    PUTBACK;
 	    if (perl_call_method("SWASHGET", G_SCALAR))
-		retval = newSVsv(*stack_sp--);    
+		retval = newSVsv(*PL_stack_sp--);    
 	    else
-		retval = &sv_undef;
+		retval = &PL_sv_undef;
 	    POPSTACK;
 	    FREETMPS;
 	    LEAVE;
-	    if (curcop == &compiling)
-		curcop->op_private = PL_hints;
+	    if (PL_curcop == &PL_compiling)
+		PL_curcop->op_private = PL_hints;
 
 	    svp = hv_store(hv, (char*)ptr, klen, retval, 0);
 

@@ -1766,12 +1766,12 @@ Internet, point your browser at http://www.perl.com/, the Perl Home Page.\n\n");
 	return s;
     case 'W':
 	PL_dowarn = G_WARN_ALL_ON|G_WARN_ON; 
-	compiling.cop_warnings = WARN_ALL ;
+	PL_compiling.cop_warnings = WARN_ALL ;
 	s++;
 	return s;
     case 'X':
 	PL_dowarn = G_WARN_ALL_OFF; 
-	compiling.cop_warnings = WARN_NONE ;
+	PL_compiling.cop_warnings = WARN_NONE ;
 	s++;
 	return s;
     case '*':
