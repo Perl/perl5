@@ -28,9 +28,10 @@ print "Extracting $file (with variable substitutions)\n";
 print OUT <<"!GROK!THIS!";
 $Config{startperl}
     eval 'exec $Config{perlpath} -S \$0 \${1+"\$@"}'
-	if \$running_under_some_shell;
+	if 0;
 
-\@pagers = ();
+use strict;
+my \@pagers = ();
 push \@pagers, "$Config{'pager'}" if -x "$Config{'pager'}";
 !GROK!THIS!
 
@@ -47,7 +48,7 @@ print OUT <<'!NO!SUBS!';
 # the perl manuals, though it too is written in perl.
 
 if(@ARGV<1) {
-	$me = $0;		# Editing $0 is unportable
+	my $me = $0;		# Editing $0 is unportable
 	$me =~ s,.*/,,;
 	die <<EOF;
 Usage: $me [-h] [-r] [-i] [-v] [-t] [-u] [-m] [-l] [-F] [-X] PageName|ModuleName|ProgramName
@@ -62,12 +63,12 @@ EOF
 use Getopt::Std;
 use Config '%Config';
 
-@global_found = ();
-$global_target = "";
+my @global_found = ();
+my $global_target = "";
 
-$Is_VMS = $^O eq 'VMS';
-$Is_MSWin32 = $^O eq 'MSWin32';
-$Is_Dos = $^O eq 'dos';
+my $Is_VMS = $^O eq 'VMS';
+my $Is_MSWin32 = $^O eq 'MSWin32';
+my $Is_Dos = $^O eq 'dos';
 
 sub usage{
     warn "@_\n" if @_;
@@ -114,28 +115,39 @@ filenames, one per line.
 EOF
 }
 
-use Text::ParseWords;
+if( defined $ENV{"PERLDOC"} ) {
+    require Text::ParseWords;
+    unshift(@ARGV, Text::ParseWords::shellwords($ENV{"PERLDOC"}));
+}
+!NO!SUBS!
 
+my $getopts = "mhtluvriFf:Xq:";
+print OUT <<"!GET!OPTS!";
 
-unshift(@ARGV,shellwords($ENV{"PERLDOC"}));
+use vars qw( @{[map "\$opt_$_", ($getopts =~ /\w/g)]} );
 
-getopts("mhtluvriFf:Xq:") || usage;
+getopts("$getopts") || usage;
+!GET!OPTS!
 
-usage if $opt_h || $opt_h; # avoid -w warning
+print OUT <<'!NO!SUBS!';
 
+usage if $opt_h;
+
+my $podidx;
 if( $opt_X ) {
     $podidx = "$Config{'archlib'}/pod.idx";
     $podidx = "" unless -f $podidx && -r _ && -M _ <= 7;
 }
 
-if ($opt_t + $opt_u + $opt_m + $opt_l > 1) {
+if( (my $opts = do{ local $^W; $opt_t + $opt_u + $opt_m + $opt_l }) > 1) {
     usage("only one of -t, -u, -m or -l")
 } elsif ($Is_MSWin32 || $Is_Dos) {
-    $opt_t = 1 unless $opt_t + $opt_u + $opt_m + $opt_l;
+    $opt_t = 1 unless $opts
 }
 
 if ($opt_t) { require Pod::Text; import Pod::Text; }
 
+my @pages;
 if ($opt_f) {
    @pages = ("perlfunc");
 } elsif ($opt_q) {
@@ -189,7 +201,7 @@ sub minus_f_nocase {
  	if (-d _){
  	    push @p, $p;
 	    if ( $p eq $global_target) {
-		$tmp_path = join ('/', @p);
+		my $tmp_path = join ('/', @p);
 		my $path_f = 0;
 		for (@global_found) {
 		    $path_f = 1 if $_ eq $tmp_path;
@@ -279,7 +291,7 @@ sub searchfor {
     return ();
 }
 
-
+my @found;
 foreach (@pages) {
         if ($podidx && open(PODIDX, $podidx)) {
 	    my $searchfor = $_;
@@ -296,7 +308,7 @@ foreach (@pages) {
 	print STDERR "Searching for $_\n" if $opt_v;
 	# We must look both in @INC for library modules and in PATH
 	# for executables, like h2xs or perldoc itself.
-	@searchdirs = @INC;
+	my @searchdirs = @INC;
 	if ($opt_F) {
 	  next unless -r;
 	  push @found, $_ if $opt_m or containspod($_);
@@ -314,7 +326,7 @@ foreach (@pages) {
 						 $ENV{'PATH'})));
 	    }
 	}
-	@files = searchfor(0,$_,@searchdirs);
+	my @files = searchfor(0,$_,@searchdirs);
 	if( @files ) {
 		print STDERR "Found as @files\n" if $opt_v;
 	} else {
@@ -329,10 +341,9 @@ foreach (@pages) {
 			print STDERR "No documentation found for \"$_\".\n";
 			if (@global_found) {
 			    print STDERR "However, try\n";
-			    my $dir = $file = "";
-			    for $dir (@global_found) {
+			    for my $dir (@global_found) {
 				opendir(DIR, $dir) or die "$!";
-				while ($file = readdir(DIR)) {
+				while (my $file = readdir(DIR)) {
 				    next if ($file =~ /^\./);
 				    $file =~ s/\.(pm|pod)$//;
 				    print STDERR "\tperldoc $_\::$file\n";
@@ -356,8 +367,10 @@ if ($opt_l) {
 
 my $lines = $ENV{LINES} || 24;
 
+my $no_tty;
 if( ! -t STDOUT ) { $no_tty = 1 }
 
+my $tmp;
 if ($Is_MSWin32) {
 	$tmp = "$ENV{TEMP}\\perldoc1.$$";
 	push @pagers, qw( more< less notepad );
@@ -384,7 +397,7 @@ if ($Is_MSWin32) {
 unshift @pagers, $ENV{PERLDOC_PAGER} if $ENV{PERLDOC_PAGER};
 
 if ($opt_m) {
-	foreach $pager (@pagers) {
+	foreach my $pager (@pagers) {
 		system("$pager @found") or exit;
 	}
 	if ($Is_VMS) { eval 'use vmsish qw(status exit); exit $?' }
@@ -423,7 +436,7 @@ if ($opt_f) {
        } elsif (@pod < $lines-2) {
 	   print @pod;
        } else {
-	   foreach $pager (@pagers) {
+	   foreach my $pager (@pagers) {
 		open (PAGER, "| $pager") or next;
 		print PAGER @pod ;
 		close(PAGER) or next;
@@ -463,7 +476,7 @@ if ($opt_q) {
       } elsif (@pod < $lines-2) {
 	 print @pod;
       } else {
-	 foreach $pager (@pagers) {
+	 foreach my $pager (@pagers) {
 	    open (PAGER, "| $pager") or next;
 	    print PAGER @pod ;
 	    close(PAGER) or next;
@@ -478,6 +491,7 @@ if ($opt_q) {
 
 foreach (@found) {
 
+	my $err;
 	if($opt_t) {
 		open(TMP,">>$tmp");
 		Pod::Text::pod2text($_,*TMP);
@@ -485,7 +499,7 @@ foreach (@found) {
 	} elsif(not $opt_u) {
 		my $cmd = "pod2man --lax $_ | nroff -man";
 		$cmd .= " | col -x" if $^O =~ /hpux/;
-		$rslt = `$cmd`;
+		my $rslt = `$cmd`;
 		unless(($err = $?)) {
 			open(TMP,">>$tmp");
 			print TMP $rslt;
@@ -496,7 +510,7 @@ foreach (@found) {
 	if( $opt_u or $err or -z $tmp) {
 		open(OUT,">>$tmp");
 		open(IN,"<$_");
-		$cut = 1;
+		my $cut = 1;
 		while (<IN>) {
 			$cut = $1 eq 'cut' if /^=(\w+)/;
 			next if $cut;
@@ -512,7 +526,7 @@ if( $no_tty ) {
 	print while <TMP>;
 	close(TMP);
 } else {
-	foreach $pager (@pagers) {
+	foreach my $pager (@pagers) {
 		system("$pager $tmp") or last;
 	}
 }
@@ -631,6 +645,9 @@ Minor updates by Andy Dougherty <doughera@lafcol.lafayette.edu>
 =cut
 
 #
+# Version 1.14: Wed Jul 15 01:50:20 EST 1998
+#       Robin Barker <rmb1@cise.npl.co.uk>
+#	-strict, -w cleanups
 # Version 1.13: Fri Feb 27 16:20:50 EST 1997
 #       Gurusamy Sarathy <gsar@umich.edu>
 #	-doc tweaks for -F and -X options
