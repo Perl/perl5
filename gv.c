@@ -903,9 +903,16 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	if (len == 1) {
 	    SV *sv = GvSV(gv);
 	    (void)SvUPGRADE(sv, SVt_PVNV);
+	    Perl_sv_setpvf(aTHX_ sv,
+#if defined(PERL_SUBVERSION) && (PERL_SUBVERSION > 0)
+			    "%8.6"
+#else
+			    "%5.3"
+#endif
+			    NVff,
+			    SvNVX(PL_patchlevel));
 	    SvNVX(sv) = SvNVX(PL_patchlevel);
 	    SvNOK_on(sv);
-	    (void)SvPV_nolen(sv);
 	    SvREADONLY_on(sv);
 	}
 	break;
