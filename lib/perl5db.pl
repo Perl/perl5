@@ -1254,11 +1254,11 @@ sub save {
 # The following takes its argument via $evalarg to preserve current @_
 
 sub eval {
-    my @res;
+    local @res;			# 'my' would make it visible from user code
     {
-	my $otrace = $trace;
-	my $osingle = $single;
-	my $od = $^D;
+	local $otrace = $trace;
+	local $osingle = $single;
+	local $od = $^D;
 	@res = eval "$usercontext $evalarg;\n"; # '\n' for nice recursive debug
 	$trace = $otrace;
 	$single = $osingle;
