@@ -11,7 +11,7 @@ AutoLoader - load functions only on demand
     package FOOBAR;
     use Exporter;
     use AutoLoader;
-    @ISA = (Exporter, AutoLoader);
+    @ISA = qw(Exporter AutoLoader);
 
 =head1 DESCRIPTION
 
@@ -34,6 +34,31 @@ file itself. As an example, assume F<POSIX.pm> is located in
 F</usr/local/lib/perl5/POSIX.pm>. The autoloader will look for perl
 subroutines for this package in F</usr/local/lib/perl5/auto/POSIX/*.al>.
 The C<.al> file is named using the subroutine name, sans package.
+
+=head2 Loading Stubs
+
+The B<AutoLoader> module provide a special import() method that will
+load the stubs (from F<autosplit.ix> file) of the calling module.
+These stubs are needed to make inheritance work correctly for class
+modules.
+
+Modules that inherit from B<AutoLoader> should always ensure that they
+override the AutoLoader->import() method.  If the module inherit from
+B<Exporter> like shown in the I<synopis> section this is already taken
+care of.  For class methods an empty import() would do nicely:
+
+  package MyClass;
+  use AutoLoader;        # load stubs
+  @ISA=qw(AutoLoader);
+  sub import {}          # hide AutoLoader::import
+
+You can also set up autoloading by importing the AUTOLOAD function
+instead of inheriting from B<AutoLoader>:
+
+  package MyClass;
+  use AutoLoader;        # load stubs
+  *AUTOLOAD = \&AutoLoader::AUTOLOAD;
+
 
 =head2 Package Lexicals
 
@@ -60,7 +85,8 @@ can also handle multiple packages in a file.
 
 B<AutoLoader> only reads code as it is requested, and in many cases should be
 faster, but requires a machanism like B<AutoSplit> be used to create the
-individual files.
+individual files.  The B<ExtUtils::MakeMaker> will invoke B<AutoSplit>
+automatically if the B<AutoLoader> is used in a module source file.
 
 =head1 CAVEAT
 
@@ -69,30 +95,37 @@ subroutine may have a shorter name that the routine itself. This can lead to
 conflicting file names. The I<AutoSplit> package warns of these potential
 conflicts when used to split a module.
 
+Calling foo($1) for the autoloaded function foo() might not work as
+expected, because the AUTOLOAD function of B<AutoLoader> clobbers the
+regexp variables.  Invoking it as foo("$1") avoids this problem.
+
 =cut
 
 AUTOLOAD {
     my $name = "auto/$AUTOLOAD.al";
-    $name =~ s#::#/#g;
+    # Braces used on the s/// below to preserve $1 et al.
+    {$name =~ s#::#/#g}
+    my $save = $@;
     eval {require $name};
     if ($@) {
-	# The load might just have failed because the filename was too
-	# long for some old SVR3 systems which treat long names as errors.
-	# If we can succesfully truncate a long name then it's worth a go.
-	# There is a slight risk that we could pick up the wrong file here
-	# but autosplit should have warned about that when splitting.
-	if ($name =~ s/(\w{12,})\.al$/substr($1,0,11).".al"/e){
-	    eval {require $name};
-	}
-	elsif ($AUTOLOAD =~ /::DESTROY$/) {
-	    # eval "sub $AUTOLOAD {}";
+	if (substr($AUTOLOAD,-9) eq '::DESTROY') {
 	    *$AUTOLOAD = sub {};
-	}
-	if ($@){
-	    $@ =~ s/ at .*\n//;
-	    croak $@;
+	} else {
+	    # The load might just have failed because the filename was too
+	    # long for some old SVR3 systems which treat long names as errors.
+	    # If we can succesfully truncate a long name then it's worth a go.
+	    # There is a slight risk that we could pick up the wrong file here
+	    # but autosplit should have warned about that when splitting.
+	    if ($name =~ s/(\w{12,})\.al$/substr($1,0,11).".al"/e){
+		eval {require $name};
+	    }
+	    if ($@){
+		$@ =~ s/ at .*\n//;
+		croak $@;
+	    }
 	}
     }
+    $@ = $save;
     $DB::sub = $AUTOLOAD;	# Now debugger know where we are.
     goto &$AUTOLOAD;
 }
