@@ -3741,8 +3741,10 @@ If EXPR is omitted, uses C<$_>.
 
 Returns a random fractional number greater than or equal to C<0> and less
 than the value of EXPR.  (EXPR should be positive.)  If EXPR is
-omitted, or a C<0>, the value C<1> is used.  Automatically calls C<srand>
-unless C<srand> has already been called.  See also C<srand>.
+omitted, the value C<1> is used.  Currently EXPR with the value C<0> is
+also special-cased as C<1> - this has not been documented before perl 5.8.0
+and is subject to change in future versions of perl.  Automatically calls
+C<srand> unless C<srand> has already been called.  See also C<srand>.
 
 Apply C<int()> to the value returned by C<rand()> if you want random
 integers instead of random fractional numbers.  For example,
