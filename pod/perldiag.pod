@@ -3853,6 +3853,16 @@ if you wish to use an empty line as the terminator of the here-document.
 (D deprecated) You are now encouraged to use the shorter *glob{IO} form
 to access the filehandle slot within a typeglob.
 
+=item Use of chdir('') or chdir(undef) as chdir() deprecated
+
+(D deprecated) chdir() with no arguments is documented to change to
+$ENV{HOME} or $ENV{LOGDIR}.  chdir(undef) and chdir('') share this
+behavior, but that has been deprecated.  In future versions they
+will simply fail.
+
+Be careful to check that what you pass to chdir() is defined and not
+blank, else you might find yourself in your home directory.
+
 =item Use of implicit split to @_ is deprecated
 
 (D deprecated) It makes a lot of work for the compiler when you clobber

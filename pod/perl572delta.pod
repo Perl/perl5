@@ -100,6 +100,10 @@ deprecated.  Its semantics were never that clear and its
 implementation even less so.  If you have used that feature to
 disallow all but fully qualified variables, C<use strict;> instead.
 
+The chdir(undef) and chdir('') behaviors to match chdir() has been
+deprecated.  In future versions, chdir(undef) and chdir('') will
+simply fail.
+
 =head1 Core Enhancements
 
 In general a lot of fixing has happened in the area of Perl's

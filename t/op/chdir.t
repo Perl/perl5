@@ -1,3 +1,5 @@
+#!./perl -w
+
 BEGIN {
     # We're not going to chdir() into 't' because we don't know if
     # chdir() works!  Instead, we'll hedge our bets and put both
@@ -7,6 +9,8 @@ BEGIN {
 
 require "test.pl";
 plan(tests => 25);
+
+my $IsVMS = $^O eq 'VMS';
 
 # Might be a little early in the testing process to start using these,
 # but I can't think of a way to write this test without them.
@@ -18,57 +22,77 @@ sub abs_path {
     rel2abs(curdir);
 }
 
-my $cwd = abs_path;
+my $Cwd = abs_path;
 
 # Let's get to a known position
 SKIP: {
     skip("Already in t/", 2) if (splitdir(abs_path))[-1] eq 't';
 
     ok( chdir('t'),     'chdir("t")');
-    is( abs_path, catdir($cwd, 't'),       '  abs_path() agrees' );
+    is( abs_path, catdir($Cwd, 't'),       '  abs_path() agrees' );
 }
 
-$cwd = abs_path;
+$Cwd = abs_path;
 
 # The environment variables chdir() pays attention to.
 my @magic_envs = qw(HOME LOGDIR SYS$LOGIN);
+
+sub check_env {
+    my($key) = @_;
+
+    # Make sure $ENV{'SYS$LOGIN'} is only honored on VMS.
+    if( $key eq 'SYS$LOGIN' && !$IsVMS ) {
+        ok( !chdir(),         "chdir() on $^O ignores only \$ENV{$key} set" );
+        is( abs_path, $Cwd,   '  abs_path() did not change' );
+        pass( "  no need to chdir back on $^O" );
+    }
+    else {
+        ok( chdir(),              "chdir() w/ only \$ENV{$key} set" );
+        is( abs_path, $ENV{$key}, '  abs_path() agrees' );
+        chdir($Cwd);
+        is( abs_path, $Cwd,       '  and back again' );
+
+        my $warning = '';
+        local $SIG{__WARN__} = sub { $warning .= join '', @_ };
+
+
+        # Check the deprecated chdir(undef) feature.
+#line 60
+        ok( chdir(undef),           "chdir(undef) w/ only \$ENV{$key} set" );
+        is( abs_path, $ENV{$key},   '  abs_path() agrees' );
+        is( $warning,  <<WARNING,   '  got uninit & deprecation warning' );
+Use of uninitialized value in chdir at $0 line 60.
+Use of chdir('') or chdir(undef) as chdir() is deprecated at $0 line 60.
+WARNING
+
+        chdir($Cwd);
+
+        # Ditto chdir('').
+        $warning = '';
+#line 72
+        ok( chdir(''),              "chdir('') w/ only \$ENV{$key} set" );
+        is( abs_path, $ENV{$key},   '  abs_path() agrees' );
+        is( $warning,  <<WARNING,   '  got deprecation warning' );
+Use of chdir('') or chdir(undef) as chdir() is deprecated at $0 line 72.
+WARNING
+
+        chdir($Cwd);
+    }
+}
 
 foreach my $key (@magic_envs) {
     # We're going to be using undefs a lot here.
     no warnings 'uninitialized';
 
-    delete @ENV{@magic_envs};
-    local $ENV{$key} = catdir $cwd, 'op';
+    local %ENV = ();
+    $ENV{$key} = catdir $Cwd, 'op';
     
-    # Make sure $ENV{'SYS$LOGIN'} is only honored on VMS.
-    if( $key eq 'SYS$LOGIN' && $^O ne 'VMS' ) {
-        ok( !chdir(),             "chdir() on $^O ignores only \$ENV{$key} set" );
-        is( abs_path, $cwd,       '  abs_path() did not change' );
-        ok( 1,                    "  no need to chdir back on $^O" );
-    }
-    else {
-        ok( chdir(),              "chdir() w/ only \$ENV{$key} set" );
-        is( abs_path, $ENV{$key}, '  abs_path() agrees' );
-        chdir($cwd);
-        is( abs_path, $cwd,       '  and back again' );
-    }
-
-    # Bug had chdir(undef) being the same as chdir()
-    ok( !chdir(undef),              "chdir(undef) w/ only \$ENV{$key} set" );
-    is( abs_path, $cwd,             '  abs_path() agrees' );
-
-    # Ditto chdir('').
-    ok( !chdir(''),                 "chdir('') w/ only \$ENV{$key} set" );
-    is( abs_path, $cwd,             '  abs_path() agrees' );
+    check_env($key);
 }
 
 {
-    # We're going to be using undefs a lot here.
-    no warnings 'uninitialized';
-
-    # Unset all the environment variables chdir() pay attention to.
-    local @ENV{@magic_envs} = (undef) x @magic_envs;
+    local %ENV = ();
 
     ok( !chdir(),                   'chdir() w/o any ENV set' );
-    is( abs_path, $cwd,             '  abs_path() agrees' );
+    is( abs_path, $Cwd,             '  abs_path() agrees' );
 }
