@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq4 - Data Manipulation ($Revision: 1.8 $, $Date: 2001/11/09 08:06:04 $)
+perlfaq4 - Data Manipulation ($Revision: 1.9 $, $Date: 2001/12/07 21:17:58 $)
 
 =head1 DESCRIPTION
 
@@ -1635,13 +1635,13 @@ worry you, you can always reverse the hash into a hash of arrays instead:
 =head2 How can I know how many entries are in a hash?
 
 If you mean how many keys, then all you have to do is
-take the scalar sense of the keys() function:
+use the keys() function in a scalar context:
 
-    $num_keys = scalar keys %hash;
+    $num_keys = keys %hash;
 
-The keys() function also resets the iterator, which in void context is
-faster for tied hashes than would be iterating through the whole 
-hash, one key-value pair at a time.
+The keys() function also resets the iterator, which means that you may 
+see strange results if you use this between uses of other hash operators 
+such as each().
 
 =head2 How do I sort a hash (optionally by value instead of key)?
 
