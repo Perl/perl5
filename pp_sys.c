@@ -2739,7 +2739,7 @@ PP(pp_rename)
 	if (same_dirent(tmps2, tmps))	/* can always rename to same name */
 	    anum = 1;
 	else {
-	    if (euid || PerlLIO_stat(tmps2, &PL_statbuf) < 0 || !S_ISDIR(PL_statbuf.st_mode))
+	    if (PL_euid || PerlLIO_stat(tmps2, &PL_statbuf) < 0 || !S_ISDIR(PL_statbuf.st_mode))
 		(void)UNLINK(tmps2);
 	    if (!(anum = link(tmps, tmps2)))
 		anum = UNLINK(tmps);
