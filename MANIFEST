@@ -1029,6 +1029,7 @@ pod/perlfaq9.pod	Frequently Asked Questions, Part 9
 pod/perlform.pod	Format info
 pod/perlfunc.pod	Function info
 pod/perlguts.pod	Internals info
+pod/perlhack.pod	Perl hackers guide
 pod/perlhist.pod	Perl history info
 pod/perlipc.pod		IPC info
 pod/perllexwarn.pod	Lexical Warnings info

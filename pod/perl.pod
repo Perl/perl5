@@ -69,6 +69,7 @@ sections:
     perlcall		Perl calling conventions from C
 
     perltodo		Perl things to do
+    perlhack		Perl hackers guide
     perlhist		Perl history records
 
 (If you're intending to read these straight through for the first time,
