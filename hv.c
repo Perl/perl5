@@ -25,7 +25,10 @@ static void more_he _((void));
 #  define ARRAY_ALLOC_BYTES(size) ( (size)*sizeof(HE*) )
 #else
 #  define MALLOC_OVERHEAD 16
-#  define ARRAY_ALLOC_BYTES(size) ( (size)*sizeof(HE*)*2 - MALLOC_OVERHEAD )
+#  define ARRAY_ALLOC_BYTES(size) \
+			(((size) < 64)					\
+			 ? (size) * sizeof(HE*)				\
+			 : (size) * sizeof(HE*) * 2 - MALLOC_OVERHEAD)
 #endif
 
 STATIC HE*
