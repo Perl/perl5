@@ -133,10 +133,19 @@ d_bcopy (d_bcopy.U):
 	This variable conditionally defines the HAS_BCOPY symbol if
 	the bcopy() routine is available to copy strings.
 
+d_bsdgetpgrp (d_getpgrp.U):
+	This variable conditionally defines USE_BSD_GETPGRP if
+	getpgrp needs one arguments whereas USG one needs none.
+
 d_bsdpgrp (d_setpgrp.U):
 	This variable conditionally defines USE_BSDPGRP if the notion of
 	process group is the BSD one. This means setpgrp needs two arguments
 	whereas USG one needs none.
+
+d_bsdsetpgrp (d_setpgrp.U):
+	This variable conditionally defines USE_BSD_SETPGRP if
+	setpgrp needs two arguments whereas USG one needs none.
+	See also d_setpgid for a POSIX interface.
 
 d_bzero (d_bzero.U):
 	This variable conditionally defines the HAS_BZERO symbol if
@@ -271,6 +280,11 @@ d_getlogin (d_getlogin.U):
 	This variable conditionally defines the HAS_GETLOGIN symbol, which
 	indicates to the C program that the getlogin() routine is available
 	to get the login name.
+
+d_getpgid (d_getpgid.U):
+	This variable conditionally defines the HAS_GETPGID symbol, which
+	indicates to the C program that the getpgid(pid) function
+	is available to get the process group id.
 
 d_getpgrp (d_getpgrp.U):
 	This variable conditionally defines HAS_GETPGRP if getpgrp() is
@@ -503,8 +517,9 @@ d_setlocale (d_setlocale.U):
 	available to handle locale-specific ctype implementations.
 
 d_setpgid (d_setpgid.U):
-	This variable conditionally defines HAS_SETPGID if setpgid() is
-	available to set process group ID.
+	This variable conditionally defines the HAS_SETPGID symbol, which
+	indicates to the C program that the setpgid(pid, gpid) function
+	is available to set the process group id.
 
 d_setpgrp (d_setpgrp.U):
 	This variable conditionally defines HAS_SETPGRP if setpgrp() is
@@ -1223,6 +1238,22 @@ sh (sh.U):
 shmattype (d_shmat.U):
 	This symbol contains the type of pointer returned by shmat().
 	It can be 'void *' or 'char *'.
+
+shrpenv (libperl.U):
+	If the user builds a shared libperl.so, then we need to tell the
+	'perl' executable where it will be able to find the installed libperl.so. 
+	One way to do this on some systems is to set the environment variable
+	LD_RUN_PATH to the directory that will be the final location of the
+	shared libperl.so.  The makefile can use this with something like
+		$shrpenv $(CC) -o perl perlmain.o $libperl $libs
+	Typical values are
+		shrpenv="env LD_RUN_PATH=$archlibexp/CORE"
+	or
+		shrpenv=''
+	See the main perl Makefile.SH for actual working usage.
+	Alternatively, we might be able to use a command line option such
+	as -R $archlibexp/CORE (Solaris, NetBSD) or -Wl,-rpath
+	$archlibexp/CORE (Linux).
 
 sig_name (sig_name.U):
 	This variable holds the signal names, space separated. The leading
