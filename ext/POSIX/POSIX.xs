@@ -10,8 +10,6 @@
 #  undef open
 #  undef setmode
 #  define open PerlLIO_open3
-#  undef TAINT_PROPER
-#  define TAINT_PROPER(a)
 #endif
 #include <ctype.h>
 #ifdef I_DIRENT    /* XXX maybe better to just rely on perl.h? */
@@ -3604,7 +3602,7 @@ mktime(sec, min, hour, mday, mon, year, wday = 0, yday = 0, isdst = 0)
 	RETVAL
 
 char *
-strftime(fmt, sec, min, hour, mday, mon, year, wday = 0, yday = 0, isdst = 0)
+strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
 	char *		fmt
 	int		sec
 	int		min
@@ -3630,6 +3628,7 @@ strftime(fmt, sec, min, hour, mday, mon, year, wday = 0, yday = 0, isdst = 0)
 	    mytm.tm_wday = wday;
 	    mytm.tm_yday = yday;
 	    mytm.tm_isdst = isdst;
+	    (void) mktime(&mytm);
 	    len = strftime(tmpbuf, sizeof tmpbuf, fmt, &mytm);
 	    ST(0) = sv_2mortal(newSVpv(tmpbuf, len));
 	}

@@ -122,9 +122,10 @@ gv_init(GV *gv, HV *stash, char *name, STRLEN len, int multi)
 	CvSTASH(GvCV(gv)) = PL_curstash;
 #ifdef USE_THREADS
 	CvOWNER(GvCV(gv)) = 0;
-	if (!CvMUTEXP(GvCV(gv)))
+	if (!CvMUTEXP(GvCV(gv))) {
 	    New(666, CvMUTEXP(GvCV(gv)), 1, perl_mutex);
-	MUTEX_INIT(CvMUTEXP(GvCV(gv)));
+	    MUTEX_INIT(CvMUTEXP(GvCV(gv)));
+	}
 #endif /* USE_THREADS */
 	if (proto) {
 	    sv_setpv((SV*)GvCV(gv), proto);

@@ -10,6 +10,10 @@
 #
 
 ##
+## Make sure you read README.win32 *before* you mess with anything here!
+##
+
+##
 ## Build configuration.  Edit the values below to suit your needs.
 ##
 
@@ -35,6 +39,11 @@ INST_VER	*= \5.00502
 # uncomment to enable threads-capabilities
 #
 #USE_THREADS	*= define
+
+#
+# uncomment to enable multiple interpreters
+#
+#USE_MULTI	*= define
 
 #
 # uncomment one
@@ -111,6 +120,7 @@ CCTYPE		*= BORLAND
 
 #
 # set the install locations of the compiler include/libraries
+# Running VCVARS32.BAT is *required* when using Visual C.
 # Some versions of Visual C don't define MSVCDIR in the environment,
 # so you may have to set CCHOME explicitly.
 #
@@ -152,14 +162,16 @@ CRYPT_FLAG	= -DHAVE_DES_FCRYPT
 
 .IF "$(OBJECT)" != ""
 PERL_MALLOC	!= undef
+USE_THREADS	!= undef
+USE_MULTI	!= undef
 .ENDIF
 
 PERL_MALLOC	*= undef
 
 USE_THREADS	*= undef
+USE_MULTI	*= undef
 
-#BUILDOPT	*= -DMULTIPLICITY 
-#BUILDOPT	*= -DPERL_GLOBAL_STRUCT -DMULTIPLICITY 
+#BUILDOPT	*= -DPERL_GLOBAL_STRUCT
 # -DUSE_PERLIO -D__STDC__=1 -DUSE_SFIO -DI_SFIO -I\sfio97\include
 
 .IMPORT .IGNORE : PROCESSOR_ARCHITECTURE
@@ -213,7 +225,7 @@ OPTIMIZE	= -O2 $(RUNTIME)
 LINK_DBG	= 
 .ENDIF
 
-CFLAGS		= -w -d -tWM -tWD $(INCLUDES) $(DEFINES) $(LOCDEFS) \
+CFLAGS		= -w -g0 -tWM -tWD $(INCLUDES) $(DEFINES) $(LOCDEFS) \
 		$(PCHFLAGS) $(OPTIMIZE)
 LINK_FLAGS	= $(LINK_DBG) -L$(CCLIBDIR) $(EXTRALIBDIRS:^"-L")
 OBJOUT_FLAG	= -o
@@ -690,6 +702,7 @@ CFG_VARS	=					\
 		"dynamic_ext=$(DYNAMIC_EXT)"		\
 		"nonxs_ext=$(NONXS_EXT)"		\
 		"usethreads=$(USE_THREADS)"		\
+		"usemultiplicity=$(USE_MULTI)"		\
 		"LINK_FLAGS=$(LINK_FLAGS)"		\
 		"optimize=$(OPTIMIZE)"
 
@@ -1022,7 +1035,8 @@ distclean: clean
 	-rmdir /s /q $(LIBDIR)\Data || rmdir /s $(LIBDIR)\Data
 	-del /f $(PODDIR)\*.html
 	-del /f $(PODDIR)\*.bat
-	-cd ..\utils && del /f h2ph splain perlbug pl2pm c2ph h2xs perldoc pstruct *.bat
+	-cd ..\utils && del /f h2ph splain perlbug pl2pm c2ph h2xs perldoc \
+	    pstruct *.bat
 	-cd ..\x2p && del /f find2perl s2p *.bat
 	-del /f ..\config.sh ..\splittree.pl perlmain.c dlutils.c config.h.new
 	-del /f $(CONFIGPM)
@@ -1030,7 +1044,8 @@ distclean: clean
 	-del /f perl95.c
 .ENDIF
 	-del /f bin\*.bat
-	-cd $(EXTDIR) && del /s *$(a) *.def *.map *.bs Makefile *$(o) pm_to_blib
+	-cd $(EXTDIR) && del /s *$(a) *.def *.map *.pdb *.bs Makefile *$(o) \
+	    pm_to_blib
 	-rmdir /s /q $(AUTODIR) || rmdir /s $(AUTODIR)
 	-rmdir /s /q $(COREDIR) || rmdir /s $(COREDIR)
 

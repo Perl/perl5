@@ -6,6 +6,10 @@
 #
 
 ##
+## Make sure you read README.win32 *before* you mess with anything here!
+##
+
+##
 ## Build configuration.  Edit the values below to suit your needs.
 ##
 
@@ -31,6 +35,11 @@ INST_VER	= \5.00502
 # uncomment to enable threads-capabilities
 #
 #USE_THREADS	= define
+
+#
+# uncomment to enable multiple interpreters
+#
+#USE_MULTI	= define
 
 #
 # uncomment next line if you are using Visual C++ 2.x
@@ -100,6 +109,7 @@ INST_VER	= \5.00502
 
 #
 # set the install locations of the compiler include/libraries
+# Running VCVARS32.BAT is *required* when using Visual C.
 # Some versions of Visual C don't define MSVCDIR in the environment,
 # so you may have to set CCHOME explicitly.
 #
@@ -134,6 +144,8 @@ CRYPT_FLAG	= -DHAVE_DES_FCRYPT
 
 !IF "$(OBJECT)" != ""
 PERL_MALLOC	= undef
+USE_THREADS	= undef
+USE_MULTI	= undef
 !ENDIF
 
 !IF "$(PERL_MALLOC)" == ""
@@ -144,8 +156,11 @@ PERL_MALLOC	= undef
 USE_THREADS	= undef
 !ENDIF
 
-#BUILDOPT	= -DMULTIPLICITY 
-#BUILDOPT	= -DPERL_GLOBAL_STRUCT -DMULTIPLICITY
+!IF "$(USE_MULTI)" == ""
+USE_MULTI	= undef
+!ENDIF
+
+#BUILDOPT	= -DPERL_GLOBAL_STRUCT
 # -DUSE_PERLIO -D__STDC__=1 -DUSE_SFIO -DI_SFIO -I\sfio97\include
 
 !IF "$(PROCESSOR_ARCHITECTURE)" == ""
@@ -570,6 +585,7 @@ CFG_VARS	=					\
 		"dynamic_ext=$(DYNAMIC_EXT)"		\
 		"nonxs_ext=$(NONXS_EXT)"		\
 		"usethreads=$(USE_THREADS)"		\
+		"usemultiplicity=$(USE_MULTI)"		\
 		"LINK_FLAGS=$(LINK_FLAGS)"		\
 		"optimize=$(OPTIMIZE)"
 
@@ -868,7 +884,7 @@ distclean: clean
 	-del /f perl95.c
 	-del /f bin\*.bat
 	cd $(EXTDIR)
-	-del /s *.lib *.def *.map *.bs Makefile *$(o) pm_to_blib
+	-del /s *.lib *.def *.map *.pdb *.bs Makefile *$(o) pm_to_blib
 	cd ..\win32
 	-rmdir /s /q $(AUTODIR) || rmdir /s $(AUTODIR)
 	-rmdir /s /q $(COREDIR) || rmdir /s $(COREDIR)
