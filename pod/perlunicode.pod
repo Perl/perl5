@@ -631,22 +631,28 @@ newline-separated lines.  Each line must be one of the following:
 =item *
 
 Two hexadecimal numbers separated by a tabulator denoting a range
-of Unicode codepoints.
+of Unicode codepoints to include.
 
 =item *
 
-An existing character property prefixed by "+utf8::" to include
-all the characters in that property.
+Something to include, prefixed by "+": either an built-in character
+property (prefixed by "utf8::"), for all the characters in that
+property; or two hexadecimal codepoints for a range; or a single
+hexadecimal codepoint.
 
 =item *
 
-An existing character property prefixed by "-utf8::" to exclude
-all the characters in that property.
+Something to exclude, prefixed by "-": either an existing character
+property (prefixed by "utf8::"), for all the characters in that
+property; or two hexadecimal codepoints for a range; or a single
+hexadecimal codepoint.
 
 =item *
 
-An existing character property prefixed by "!utf8::" to include
-all except the characters in that property.
+Something to negate, prefixed "!": either an existing character
+property (prefixed by "utf8::") for all the characters except the
+characters in the property; or two hexadecimal codepoints for a range;
+or a single hexadecimal codepoint.
 
 =back
 
