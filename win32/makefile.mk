@@ -60,7 +60,8 @@ IMPLIB = implib
 RUNTIME  = -D_RTLDLL
 INCLUDES = -I.\include -I. -I.. -I$(CCINCDIR)
 #PCHFLAGS = -H -H$(INTDIR)\bcmoduls.pch 
-DEFINES  = -DWIN32 -DPERLDLL
+DEFINES  = -DWIN32 -DUSE_THREADS -D_WIN32_WINNT=0x400
+LOCDEFS  = -DPERLDLL
 SUBSYS   = console
 LIBC = cw32mti.lib
 LIBFILES = import32.lib $(LIBC) odbc32.lib odbccp32.lib
@@ -75,7 +76,7 @@ OPTIMIZE = -O $(RUNTIME)
 LINK_DBG = 
 .ENDIF
 
-CFLAGS   = -w -tWM -tWD $(INCLUDES) $(DEFINES) $(PCHFLAGS) $(OPTIMIZE)
+CFLAGS   = -w -tWM -tWD $(INCLUDES) $(DEFINES) $(LOCDEFS) $(PCHFLAGS) $(OPTIMIZE)
 LINK_FLAGS  = $(LINK_DBG) -L$(CCLIBDIR)
 OBJOUT_FLAG = -o
 
@@ -92,7 +93,8 @@ RUNTIME  = -MD
 .ENDIF
 INCLUDES = -I.\include -I. -I..
 #PCHFLAGS = -Fp$(INTDIR)\vcmoduls.pch -YX 
-DEFINES  = -DWIN32 -D_CONSOLE -DPERLDLL
+DEFINES  = -DWIN32 -D_CONSOLE -DUSE_THREADS -D_WIN32_WINNT=0x400
+LOCDEFS  = -DPERLDLL
 SUBSYS   = console
 
 .IF "$(RUNTIME)" == "-MD"
@@ -125,7 +127,7 @@ LIBFILES = oldnames.lib kernel32.lib user32.lib gdi32.lib \
 	oleaut32.lib netapi32.lib uuid.lib wsock32.lib mpr.lib winmm.lib \
 	version.lib odbc32.lib odbccp32.lib
 
-CFLAGS   = -nologo -W3 $(INCLUDES) $(DEFINES) $(PCHFLAGS) $(OPTIMIZE)
+CFLAGS   = -nologo -W3 $(INCLUDES) $(DEFINES) $(LOCDEFS) $(PCHFLAGS) $(OPTIMIZE)
 LINK_FLAGS  = -nologo $(LIBFILES) $(LINK_DBG) -machine:I386
 OBJOUT_FLAG = -Fo
 
@@ -292,6 +294,7 @@ CORE_H = ..\av.h	\
 	..\regexp.h	\
 	..\scope.h	\
 	..\sv.h		\
+	..\thread.h	\
 	..\unixish.h	\
 	..\util.h	\
 	..\XSUB.h	\
@@ -303,7 +306,7 @@ CORE_H = ..\av.h	\
 	.\win32.h
 
 
-EXTENSIONS=DynaLoader Socket IO Fcntl Opcode SDBM_File
+EXTENSIONS=DynaLoader Socket IO Fcntl Opcode SDBM_File attrs
 
 DYNALOADER=$(EXTDIR)\DynaLoader\DynaLoader
 SOCKET=$(EXTDIR)\Socket\Socket
@@ -311,12 +314,14 @@ FCNTL=$(EXTDIR)\Fcntl\Fcntl
 OPCODE=$(EXTDIR)\Opcode\Opcode
 SDBM_FILE=$(EXTDIR)\SDBM_File\SDBM_File
 IO=$(EXTDIR)\IO\IO
+ATTRS=$(EXTDIR)\attrs\attrs
 
 SOCKET_DLL=..\lib\auto\Socket\Socket.dll
 FCNTL_DLL=..\lib\auto\Fcntl\Fcntl.dll
 OPCODE_DLL=..\lib\auto\Opcode\Opcode.dll
 SDBM_FILE_DLL=..\lib\auto\SDBM_File\SDBM_File.dll
 IO_DLL=..\lib\auto\IO\IO.dll
+ATTRS_DLL=..\lib\auto\attrs\attrs.dll
 
 STATICLINKMODULES=DynaLoader
 DYNALOADMODULES=	\
@@ -324,7 +329,8 @@ DYNALOADMODULES=	\
 	$(FCNTL_DLL)	\
 	$(OPCODE_DLL)	\
 	$(SDBM_FILE_DLL)\
-	$(IO_DLL)
+	$(IO_DLL)	\
+	$(ATTRS_DLL)
 
 POD2HTML=$(PODDIR)\pod2html
 POD2MAN=$(PODDIR)\pod2man
@@ -366,7 +372,7 @@ config.w32 : $(CFGSH_TMPL)
 
 ..\config.sh : config.w32 $(MINIPERL) config_sh.PL
 	$(MINIPERL) -I..\lib config_sh.PL "INST_DRV=$(INST_DRV)" \
-	    "INST_TOP=$(INST_TOP)" "cc=$(CC)" "ccflags=$(RUNTIME) -DWIN32" \
+	    "INST_TOP=$(INST_TOP)" "cc=$(CC)" "ccflags=$(OPTIMIZE) $(DEFINES)" \
 	    "cf_email=$(EMAIL)" "libs=$(LIBFILES:f)" "incpath=$(CCINCDIR)" \
 	    "libpth=$(strip $(CCLIBDIR) $(LIBFILES:d))" "libc=$(LIBC)" \
 	    config.w32 > ..\config.sh
@@ -472,7 +478,12 @@ $(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
 $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 	copy dl_win32.xs $(EXTDIR)\DynaLoader\dl_win32.xs
 
-$(IO_DLL): $(PERLEXE) $(CONFIGPM) $(IO).xs
+$(ATTRS_DLL): $(PERLEXE) $(ATTRS).xs
+	cd $(EXTDIR)\$(*B) && \
+	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	cd $(EXTDIR)\$(*B) && $(MAKE)
+
+$(IO_DLL): $(PERLEXE) $(IO).xs
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
@@ -492,7 +503,7 @@ $(OPCODE_DLL): $(PERLEXE) $(OPCODE).xs
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
 
-$(SOCKET_DLL): $(SOCKET).xs $(PERLEXE)
+$(SOCKET_DLL): $(PERLEXE) $(SOCKET).xs
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
@@ -519,9 +530,9 @@ distclean: clean
 		$(PERLIMPLIB) ..\miniperl.lib $(MINIMOD)
 	-del /f *.def *.map
 	-del /f $(SOCKET_DLL) $(IO_DLL) $(SDBM_FILE_DLL) $(FCNTL_DLL) \
-		$(OPCODE_DLL)
+		$(OPCODE_DLL) $(ATTRS_DLL)
 	-del /f $(SOCKET).c $(IO).c $(SDBM_FILE).c $(FCNTL).c $(OPCODE).c \
-		$(DYNALOADER).c
+		$(DYNALOADER).c $(ATTRS).c
 	-del /f $(PODDIR)\*.html
 	-del /f $(PODDIR)\*.bat
 	-del /f ..\config.sh ..\splittree.pl perlmain.c dlutils.c config.h.new
