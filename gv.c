@@ -688,8 +688,6 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	}
     }
     len = namend - name;
-    if (!len)
-	len = 1;
 
     /* No stash in name, so see how we can default */
 
