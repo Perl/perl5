@@ -3168,8 +3168,10 @@ Perl_sv_copypv(pTHX_ SV *dsv, register SV *ssv)
 
     if ( SvTHINKFIRST(ssv) && SvROK(ssv) && SvAMAGIC(ssv) ) {
 	tmpsv = AMG_CALLun(ssv,string);
-	if (SvTYPE(tmpsv) != SVt_RV || (SvRV(tmpsv) != SvRV(ssv)))
+	if (SvTYPE(tmpsv) != SVt_RV || (SvRV(tmpsv) != SvRV(ssv))) {
 	    SvSetSV(dsv,tmpsv);
+	    return;
+	}
     }
     {
 	STRLEN len;
