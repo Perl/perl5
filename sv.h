@@ -442,6 +442,15 @@ Unsets the IV status of an SV.
 =for apidoc Am|void|SvIOK_only|SV* sv
 Tells an SV that it is an integer and disables all other OK bits.
 
+=for apidoc Am|void|SvIOK_only_UV|SV* sv
+Tells and SV that it is an unsigned integer and disables all other OK bits.
+
+=for apidoc Am|void|SvIOK_UV|SV* sv
+Returns a boolean indicating whether the SV contains an unsigned integer.
+
+=for apidoc Am|void|SvIOK_notUV|SV* sv
+Returns a boolean indicating whether the SV contains an signed integer.
+
 =for apidoc Am|bool|SvNOK|SV* sv
 Returns a boolean indicating whether the SV contains a double.
 

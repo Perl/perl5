@@ -1906,6 +1906,15 @@ the B<private> setting.  Use C<SvIOK>.
 =for hackers
 Found in file sv.h
 
+=item SvIOK_notUV
+
+Returns a boolean indicating whether the SV contains an signed integer.
+
+	void	SvIOK_notUV(SV* sv)
+
+=for hackers
+Found in file sv.h
+
 =item SvIOK_off
 
 Unsets the IV status of an SV.
@@ -1929,6 +1938,24 @@ Found in file sv.h
 Tells an SV that it is an integer and disables all other OK bits.
 
 	void	SvIOK_only(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvIOK_only_UV
+
+Tells and SV that it is an unsigned integer and disables all other OK bits.
+
+	void	SvIOK_only_UV(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvIOK_UV
+
+Returns a boolean indicating whether the SV contains an unsigned integer.
+
+	void	SvIOK_UV(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -2318,19 +2345,19 @@ false, defined or undefined.  Does not handle 'get' magic.
 =for hackers
 Found in file sv.h
 
-=item svtype
-
-An enum of flags for Perl types.  These are found in the file B<sv.h> 
-in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
-
-=for hackers
-Found in file sv.h
-
 =item SvTYPE
 
 Returns the type of the SV.  See C<svtype>.
 
 	svtype	SvTYPE(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item svtype
+
+An enum of flags for Perl types.  These are found in the file B<sv.h> 
+in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
 
 =for hackers
 Found in file sv.h
