@@ -342,6 +342,8 @@ elsif ($PLATFORM eq 'os2') {
 		    init_PMWIN_entries
 		    PMWIN_entries
 		    Perl_hab_GET
+		    loadByOrdinal
+		    pExtFCN
 		    )]);
 }
 elsif ($PLATFORM eq 'MacOS') {

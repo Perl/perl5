@@ -186,83 +186,199 @@ os2_cond_wait(perl_cond *c, perl_mutex *m)
 
 /*****************************************************************************/
 /* 2.1 would not resolve symbols on demand, and has no ExtLIBPATH. */
-static PFN ExtFCN[2];			/* Labeled by ord below. */
-static USHORT loadOrd[2] = { 874, 873 }; /* Query=874, Set=873. */
-#define ORD_QUERY_ELP	0
-#define ORD_SET_ELP	1
+#define C_ARR_LEN(sym)	(sizeof(sym)/sizeof(*sym))
+
+struct dll_handle {
+    const char *modname;
+    HMODULE handle;
+};
+static struct dll_handle doscalls_handle = {"doscalls", 0};
+static struct dll_handle tcp_handle = {"tcp32dll", 0};
+static struct dll_handle pmwin_handle = {"pmwin", 0};
+static struct dll_handle rexx_handle = {"rexx", 0};
+static struct dll_handle rexxapi_handle = {"rexxapi", 0};
+static struct dll_handle sesmgr_handle = {"sesmgr", 0};
+static struct dll_handle pmshapi_handle = {"pmshapi", 0};
+
+/* This should match enum entries_ordinals defined in os2ish.h. */
+static const struct {
+    struct dll_handle *dll;
+    const char *entryname;
+    int entrypoint;
+} loadOrdinals[ORD_NENTRIES] = { 
+  {&doscalls_handle, NULL, 874},	/* DosQueryExtLibpath */
+  {&doscalls_handle, NULL, 873},	/* DosSetExtLibpath */
+  {&doscalls_handle, NULL, 460},	/* DosVerifyPidTid */
+  {&tcp_handle, "SETHOSTENT", 0},
+  {&tcp_handle, "SETNETENT" , 0},
+  {&tcp_handle, "SETPROTOENT", 0},
+  {&tcp_handle, "SETSERVENT", 0},
+  {&tcp_handle, "GETHOSTENT", 0},
+  {&tcp_handle, "GETNETENT" , 0},
+  {&tcp_handle, "GETPROTOENT", 0},
+  {&tcp_handle, "GETSERVENT", 0},
+  {&tcp_handle, "ENDHOSTENT", 0},
+  {&tcp_handle, "ENDNETENT", 0},
+  {&tcp_handle, "ENDPROTOENT", 0},
+  {&tcp_handle, "ENDSERVENT", 0},
+  {&pmwin_handle, NULL, 763},		/* WinInitialize */
+  {&pmwin_handle, NULL, 716},		/* WinCreateMsgQueue */
+  {&pmwin_handle, NULL, 726},		/* WinDestroyMsgQueue */
+  {&pmwin_handle, NULL, 918},		/* WinPeekMsg */
+  {&pmwin_handle, NULL, 915},		/* WinGetMsg */
+  {&pmwin_handle, NULL, 912},		/* WinDispatchMsg */
+  {&pmwin_handle, NULL, 753},		/* WinGetLastError */
+  {&pmwin_handle, NULL, 705},		/* WinCancelShutdown */
+	/* These are needed in extensions.
+	   How to protect PMSHAPI: it comes through EMX functions? */
+  {&rexx_handle,    "RexxStart", 0},
+  {&rexx_handle,    "RexxVariablePool", 0},
+  {&rexxapi_handle, "RexxRegisterFunctionExe", 0},
+  {&rexxapi_handle, "RexxDeregisterFunction", 0},
+  {&sesmgr_handle,  "DOSSMSETTITLE", 0}, /* Would not work runtime-loaded */
+  {&pmshapi_handle, "PRF32QUERYPROFILESIZE", 0},
+  {&pmshapi_handle, "PRF32OPENPROFILE", 0},
+  {&pmshapi_handle, "PRF32CLOSEPROFILE", 0},
+  {&pmshapi_handle, "PRF32QUERYPROFILE", 0},
+  {&pmshapi_handle, "PRF32RESET", 0},
+  {&pmshapi_handle, "PRF32QUERYPROFILEDATA", 0},
+  {&pmshapi_handle, "PRF32WRITEPROFILEDATA", 0},
+
+  /* At least some of these do not work by name, since they need
+	WIN32 instead of WIN... */
+#if 0
+  These were generated with
+    nm I:\emx\lib\os2.a  | fgrep -f API-list | grep = > API-list-entries
+    perl -wnle "next unless /^0+\s+E\s+_(\w+)=(\w+).(\d+)/; print qq(    ORD_$1,)" API-list-entries > API-list-ORD_
+    perl -wnle "next unless /^0+\s+E\s+_(\w+)=(\w+).(\d+)/; print qq(  {${2}_handle, NULL, $3},\t\t/* $1 */)" WinSwitch-API-list-entries  >API-list-entry
+#endif
+  {&pmshapi_handle, NULL, 123},		/* WinChangeSwitchEntry */
+  {&pmshapi_handle, NULL, 124},		/* WinQuerySwitchEntry */
+  {&pmshapi_handle, NULL, 125},		/* WinQuerySwitchHandle */
+  {&pmshapi_handle, NULL, 126},		/* WinQuerySwitchList */
+  {&pmshapi_handle, NULL, 131},		/* WinSwitchToProgram */
+  {&pmwin_handle, NULL, 702},		/* WinBeginEnumWindows */
+  {&pmwin_handle, NULL, 737},		/* WinEndEnumWindows */
+  {&pmwin_handle, NULL, 740},		/* WinEnumDlgItem */
+  {&pmwin_handle, NULL, 756},		/* WinGetNextWindow */
+  {&pmwin_handle, NULL, 768},		/* WinIsChild */
+  {&pmwin_handle, NULL, 799},		/* WinQueryActiveWindow */
+  {&pmwin_handle, NULL, 805},		/* WinQueryClassName */
+  {&pmwin_handle, NULL, 817},		/* WinQueryFocus */
+  {&pmwin_handle, NULL, 834},		/* WinQueryWindow */
+  {&pmwin_handle, NULL, 837},		/* WinQueryWindowPos */
+  {&pmwin_handle, NULL, 838},		/* WinQueryWindowProcess */
+  {&pmwin_handle, NULL, 841},		/* WinQueryWindowText */
+  {&pmwin_handle, NULL, 842},		/* WinQueryWindowTextLength */
+  {&pmwin_handle, NULL, 860},		/* WinSetFocus */
+  {&pmwin_handle, NULL, 875},		/* WinSetWindowPos */
+  {&pmwin_handle, NULL, 877},		/* WinSetWindowText */
+  {&pmwin_handle, NULL, 883},		/* WinShowWindow */
+  {&pmwin_handle, NULL, 872},		/* WinIsWindow */
+  {&pmwin_handle, NULL, 899},		/* WinWindowFromId */
+  {&pmwin_handle, NULL, 900},		/* WinWindowFromPoint */
+  {&pmwin_handle, NULL, 919},		/* WinPostMsg */
+};
+
+static PFN ExtFCN[C_ARR_LEN(loadOrdinals)];	/* Labeled by ord ORD_*. */
+const Perl_PFN * const pExtFCN = ExtFCN;
 struct PMWIN_entries_t PMWIN_entries;
 
 HMODULE
-loadModule(char *modname)
+loadModule(const char *modname, int fail)
 {
     HMODULE h = (HMODULE)dlopen(modname, 0);
-    if (!h)
+
+    if (!h && fail)
 	Perl_croak_nocontext("Error loading module '%s': %s", 
 			     modname, dlerror());
     return h;
 }
 
-void
-loadByOrd(char *modname, ULONG ord)
+PFN
+loadByOrdinal(enum entries_ordinals ord, int fail)
 {
     if (ExtFCN[ord] == NULL) {
-	static HMODULE hdosc = 0;
 	PFN fcn = (PFN)-1;
 	APIRET rc;
 
-	if (!hdosc)
-	    hdosc = loadModule(modname);
-	if (CheckOSError(DosQueryProcAddr(hdosc, loadOrd[ord], NULL, &fcn)))
+	if (!loadOrdinals[ord].dll->handle)
+	    loadOrdinals[ord].dll->handle
+		= loadModule(loadOrdinals[ord].dll->modname, fail);
+	if (!loadOrdinals[ord].dll->handle)
+	    return 0;			/* Possible with FAIL==0 only */
+	if (CheckOSError(DosQueryProcAddr(loadOrdinals[ord].dll->handle,
+					  loadOrdinals[ord].entrypoint,
+					  loadOrdinals[ord].entryname,&fcn))) {
+	    char buf[20], *s = (char*)loadOrdinals[ord].entryname;
+
+	    if (!fail)
+		return 0;
+	    if (!s)
+		sprintf(s = buf, "%d", loadOrdinals[ord].entrypoint);
 	    Perl_croak_nocontext(
-			"This version of OS/2 does not support %s.%i", 
-			modname, loadOrd[ord]);	    
+		 "This version of OS/2 does not support %s.%s", 
+		 loadOrdinals[ord].dll->modname, s);
+	}
 	ExtFCN[ord] = fcn;
     } 
-    if ((long)ExtFCN[ord] == -1) 
+    if ((long)ExtFCN[ord] == -1)
 	Perl_croak_nocontext("panic queryaddr");
+    return ExtFCN[ord];
 }
 
 void 
 init_PMWIN_entries(void)
 {
-    static HMODULE hpmwin = 0;
-    static const int ords[] = {
-	763,				/* Initialize */
-	716,				/* CreateMsgQueue */
-	726,				/* DestroyMsgQueue */
-	918,				/* PeekMsg */
-	915,				/* GetMsg */
-	912,				/* DispatchMsg */
-	753,				/* GetLastError */
-	705,				/* CancelShutdown */
-    };
-    int i = 0;
-    unsigned long rc;
+    int i;
 
-    if (hpmwin)
-	return;
-
-    hpmwin = loadModule("pmwin");
-    while (i < sizeof(ords)/sizeof(int)) {
-	if (CheckOSError(DosQueryProcAddr(hpmwin, ords[i], NULL, 
-					  ((PFN*)&PMWIN_entries)+i)))
-	    Perl_croak_nocontext("This version of OS/2 does not support pmwin.%d", ords[i]);
-	i++;
-    }
+    for (i = ORD_WinInitialize; i <= ORD_WinCancelShutdown; i++)
+	((PFN*)&PMWIN_entries)[i - ORD_WinInitialize] = loadByOrdinal(i, 1);
 }
 
+/*****************************************************/
+/* socket forwarders without linking with tcpip DLLs */
+
+DeclFuncByORD(struct hostent *,  gethostent,  ORD_GETHOSTENT,  (void), ())
+DeclFuncByORD(struct netent  *,  getnetent,   ORD_GETNETENT,   (void), ())
+DeclFuncByORD(struct protoent *, getprotoent, ORD_GETPROTOENT, (void), ())
+DeclFuncByORD(struct servent *,  getservent,  ORD_GETSERVENT,  (void), ())
+
+DeclVoidFuncByORD(sethostent,  ORD_SETHOSTENT,  (int x), (x))
+DeclVoidFuncByORD(setnetent,   ORD_SETNETENT,   (int x), (x))
+DeclVoidFuncByORD(setprotoent, ORD_SETPROTOENT, (int x), (x))
+DeclVoidFuncByORD(setservent,  ORD_SETSERVENT,  (int x), (x))
+
+DeclVoidFuncByORD(endhostent,  ORD_ENDHOSTENT,  (void), ())
+DeclVoidFuncByORD(endnetent,   ORD_ENDNETENT,   (void), ())
+DeclVoidFuncByORD(endprotoent, ORD_ENDPROTOENT, (void), ())
+DeclVoidFuncByORD(endservent,  ORD_ENDSERVENT,  (void), ())
 
 /* priorities */
 static signed char priors[] = {0, 1, 3, 2}; /* Last two interchanged,
 					       self inverse. */
 #define QSS_INI_BUFFER 1024
 
+ULONG (*pDosVerifyPidTid) (PID pid, TID tid);
+static int pidtid_lookup;
+
 PQTOPLEVEL
 get_sysinfo(ULONG pid, ULONG flags)
 {
     char *pbuffer;
     ULONG rc, buf_len = QSS_INI_BUFFER;
+    PQTOPLEVEL psi;
 
+    if (!pidtid_lookup) {
+	pidtid_lookup = 1;
+	*(PFN*)&pDosVerifyPidTid = loadByOrdinal(ORD_DosVerifyPidTid, 0);
+    }
+    if (pDosVerifyPidTid) {	/* Warp3 or later */
+	/* Up to some fixpak QuerySysState() kills the system if a non-existent
+	   pid is used. */
+	if (!pDosVerifyPidTid(pid, 1))
+	    return 0;
+    }
     New(1322, pbuffer, buf_len, char);
     /* QSS_PROCESS | QSS_MODULE | QSS_SEMAPHORES | QSS_SHARED */
     rc = QuerySysState(flags, pid, pbuffer, buf_len);
@@ -275,7 +391,12 @@ get_sysinfo(ULONG pid, ULONG flags)
 	Safefree(pbuffer);
 	return 0;
     }
-    return (PQTOPLEVEL)pbuffer;
+    psi = (PQTOPLEVEL)pbuffer;
+    if (psi && pid && pid != psi->procdata->pid) {
+      Safefree(psi);
+      Perl_croak_nocontext("panic: wrong pid in sysinfo");
+    }
+    return psi;
 }
 
 #define PRIO_ERR 0x1111
@@ -286,14 +407,11 @@ sys_prio(pid)
   ULONG prio;
   PQTOPLEVEL psi;
 
-  psi = get_sysinfo(pid, QSS_PROCESS);
-  if (!psi) {
+  if (!pid)
       return PRIO_ERR;
-  }
-  if (pid != psi->procdata->pid) {
-      Safefree(psi);
-      Perl_croak_nocontext("panic: wrong pid in sysinfo");
-  }
+  psi = get_sysinfo(pid, QSS_PROCESS);
+  if (!psi)
+      return PRIO_ERR;
   prio = psi->procdata->threads->priority;
   Safefree(psi);
   return prio;
@@ -331,12 +449,6 @@ setpriority(int which, int pid, int val)
 					 abs(pid)))
 	  ? -1 : 0;
   } 
-/*   else return CheckOSError(DosSetPriority((pid < 0)  */
-/* 					  ? PRTYS_PROCESSTREE : PRTYS_PROCESS, */
-/* 					  priors[(32 - val) >> 5] + 1,  */
-/* 					  (32 - val) % 32 - (prio & 0xFF),  */
-/* 					  abs(pid))) */
-/*       ? -1 : 0; */
 }
 
 int 
@@ -1121,51 +1233,6 @@ char *	ctermid(char *s)	{ return 0; }
 #ifdef MYTTYNAME /* was not in emx0.9a */
 void *	ttyname(x)	{ return 0; }
 #endif
-
-/******************************************************************/
-/* my socket forwarders - EMX lib only provides static forwarders */
-
-static HMODULE htcp = 0;
-
-static void *
-tcp0(char *name)
-{
-    PFN fcn;
-
-    if (!(_emx_env & 0x200)) Perl_croak_nocontext("%s requires OS/2", name); /* Die if not OS/2. */
-    if (!htcp)
-	htcp = loadModule("tcp32dll");
-    if (htcp && DosQueryProcAddr(htcp, 0, name, &fcn) == 0)
-	return (void *) ((void * (*)(void)) fcn) ();
-    return 0;
-}
-
-static void
-tcp1(char *name, int arg)
-{
-    static BYTE buf[20];
-    PFN fcn;
-
-    if (!(_emx_env & 0x200)) Perl_croak_nocontext("%s requires OS/2", name); /* Die if not OS/2. */
-    if (!htcp)
-	DosLoadModule(buf, sizeof buf, "tcp32dll", &htcp);
-    if (htcp && DosQueryProcAddr(htcp, 0, name, &fcn) == 0)
-	((void (*)(int)) fcn) (arg);
-}
-
-struct hostent *	gethostent()	{ return tcp0("GETHOSTENT");  }
-struct netent *		getnetent()	{ return tcp0("GETNETENT");   }
-struct protoent *	getprotoent()	{ return tcp0("GETPROTOENT"); }
-struct servent *	getservent()	{ return tcp0("GETSERVENT");  }
-
-void	sethostent(x)	{ tcp1("SETHOSTENT",  x); }
-void	setnetent(x)	{ tcp1("SETNETENT",   x); }
-void	setprotoent(x)	{ tcp1("SETPROTOENT", x); }
-void	setservent(x)	{ tcp1("SETSERVENT",  x); }
-void	endhostent()	{ tcp0("ENDHOSTENT");  }
-void	endnetent()	{ tcp0("ENDNETENT");   }
-void	endprotoent()	{ tcp0("ENDPROTOENT"); }
-void	endservent()	{ tcp0("ENDSERVENT");  }
 
 /*****************************************************************************/
 /* not implemented in C Set++ */
@@ -2012,22 +2079,22 @@ APIRET
 ExtLIBPATH(ULONG ord, PSZ path, IV type)
 {
     ULONG what;
+    PFN f = loadByOrdinal(ord, 1);	/* Guarantied to load or die! */
 
-    loadByOrd("doscalls",ord);		/* Guarantied to load or die! */
     if (type > 0)
 	what = END_LIBPATH;
     else if (type == 0)
 	what = BEGIN_LIBPATH;
     else
 	what = LIBPATHSTRICT;
-    return (*(PELP)ExtFCN[ord])(path, what);
+    return (*(PELP)f)(path, what);
 }
 
 #define extLibpath(to,type) 						\
-    (CheckOSError(ExtLIBPATH(ORD_QUERY_ELP, (to), (type))) ? NULL : (to) )
+    (CheckOSError(ExtLIBPATH(ORD_DosQueryExtLibpath, (to), (type))) ? NULL : (to) )
 
 #define extLibpath_set(p,type) 					\
-    (!CheckOSError(ExtLIBPATH(ORD_SET_ELP, (p), (type))))
+    (!CheckOSError(ExtLIBPATH(ORD_DosSetExtLibpath, (p), (type))))
 
 XS(XS_Cwd_extLibpath)
 {

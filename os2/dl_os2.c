@@ -11,17 +11,20 @@ static char fail[300];
 char *os2error(int rc);
 
 void *
-dlopen(char *path, int mode)
+dlopen(const char *path, int mode)
 {
 	HMODULE handle;
 	char tmp[260], *beg, *dot;
 	ULONG rc;
 
 	fail[0] = 0;
-	if ((rc = DosLoadModule(fail, sizeof fail, path, &handle)) == 0)
+	if ((rc = DosLoadModule(fail, sizeof fail, (char*)path, &handle)) == 0)
 		return (void *)handle;
 
 	retcode = rc;
+
+	if (strlen(path) >= sizeof(tmp))
+	    return NULL;
 
 	/* Not found. Check for non-FAT name and try truncated name. */
 	/* Don't know if this helps though... */
@@ -32,6 +35,7 @@ dlopen(char *path, int mode)
 			dot = beg;
 	if (dot - beg > 8) {
 		int n = beg+8-path;
+
 		memmove(tmp, path, n);
 		memmove(tmp+n, dot, strlen(dot)+1);
 		if (DosLoadModule(fail, sizeof fail, tmp, &handle) == 0)
@@ -42,7 +46,7 @@ dlopen(char *path, int mode)
 }
 
 void *
-dlsym(void *handle, char *symbol)
+dlsym(void *handle, const char *symbol)
 {
 	ULONG rc, type;
 	PFN addr;

@@ -437,6 +437,7 @@ cp -rfu * ../../ext/OS2/
 
 # Install tests:
 
+cp -uf ../*.t ../../t/lib
 for xxx in * ; do
 	if $test -d $xxx/t; then
 		cp -uf $xxx/t/*.t ../../t/lib

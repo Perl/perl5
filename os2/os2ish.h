@@ -469,9 +469,94 @@ void init_PMWIN_entries(void);
 
 #define STATIC_FILE_LENGTH 127
 
+    /* This should match loadOrdinals[] array in os2.c */
+enum entries_ordinals {
+    ORD_DosQueryExtLibpath,
+    ORD_DosSetExtLibpath,
+    ORD_DosVerifyPidTid,
+    ORD_SETHOSTENT,
+    ORD_SETNETENT, 
+    ORD_SETPROTOENT,
+    ORD_SETSERVENT,
+    ORD_GETHOSTENT,
+    ORD_GETNETENT, 
+    ORD_GETPROTOENT,
+    ORD_GETSERVENT,
+    ORD_ENDHOSTENT,
+    ORD_ENDNETENT,
+    ORD_ENDPROTOENT,
+    ORD_ENDSERVENT,
+    ORD_WinInitialize,
+    ORD_WinCreateMsgQueue,
+    ORD_WinDestroyMsgQueue,
+    ORD_WinPeekMsg,
+    ORD_WinGetMsg,
+    ORD_WinDispatchMsg,
+    ORD_WinGetLastError,
+    ORD_WinCancelShutdown,
+    ORD_RexxStart,
+    ORD_RexxVariablePool,
+    ORD_RexxRegisterFunctionExe,
+    ORD_RexxDeregisterFunction,
+    ORD_DOSSMSETTITLE,
+    ORD_PRF32QUERYPROFILESIZE,
+    ORD_PRF32OPENPROFILE,
+    ORD_PRF32CLOSEPROFILE,
+    ORD_PRF32QUERYPROFILE,
+    ORD_PRF32RESET,
+    ORD_PRF32QUERYPROFILEDATA,
+    ORD_PRF32WRITEPROFILEDATA,
+
+    ORD_WinChangeSwitchEntry,
+    ORD_WinQuerySwitchEntry,
+    ORD_WinQuerySwitchHandle,
+    ORD_WinQuerySwitchList,
+    ORD_WinSwitchToProgram,
+    ORD_WinBeginEnumWindows,
+    ORD_WinEndEnumWindows,
+    ORD_WinEnumDlgItem,
+    ORD_WinGetNextWindow,
+    ORD_WinIsChild,
+    ORD_WinQueryActiveWindow,
+    ORD_WinQueryClassName,
+    ORD_WinQueryFocus,
+    ORD_WinQueryWindow,
+    ORD_WinQueryWindowPos,
+    ORD_WinQueryWindowProcess,
+    ORD_WinQueryWindowText,
+    ORD_WinQueryWindowTextLength,
+    ORD_WinSetFocus,
+    ORD_WinSetWindowPos,
+    ORD_WinSetWindowText,
+    ORD_WinShowWindow,
+    ORD_WinIsWindow,
+    ORD_WinWindowFromId,
+    ORD_WinWindowFromPoint,
+    ORD_WinPostMsg,
+    ORD_NENTRIES
+};
+
+/* RET: return type, AT: argument signature in (), ARGS: should be in () */
+#define CallORD(ret,o,at,args)	(((ret (*)at) loadByOrdinal(o, 1))args)
+#define DeclFuncByORD(ret,name,o,at,args)	\
+  ret name at { return CallORD(ret,o,at,args); }
+#define DeclVoidFuncByORD(name,o,at,args)	\
+  void name at { CallORD(void,o,at,args); }
+
+/* These functions return false on error, and save the error info in $^E */
+#define DeclOSFuncByORD(ret,name,o,at,args)	\
+  ret name at { unsigned long rc; return !CheckOSError(CallORD(ret,o,at,args)); }
+#define DeclWinFuncByORD(ret,name,o,at,args)	\
+  ret name at { return SaveWinError(CallORD(ret,o,at,args)); }
+
+#define AssignFuncPByORD(p,o)	(*(Perl_PFN*)&(p) = (loadByOrdinal(o, 1)))
+
 #define PERLLIB_MANGLE(s, n) perllib_mangle((s), (n))
 char *perllib_mangle(char *, unsigned int);
 
+typedef int (*Perl_PFN)();
+Perl_PFN loadByOrdinal(enum entries_ordinals ord, int fail);
+extern const Perl_PFN * const pExtFCN;
 char *os2error(int rc);
 int os2_stat(const char *name, struct stat *st);
 int setpriority(int which, int pid, int val);

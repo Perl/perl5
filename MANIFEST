@@ -1544,6 +1544,7 @@ os2/dl_os2.c			Addon for dl_open
 os2/Makefile.SHs		Shared library generation for OS/2
 os2/os2.c			Additional code for OS/2
 os2/os2.sym			Additional symbols to export
+os2/os2_base.t			Additional tests for builtin methods
 os2/OS2/ExtAttr/Changes		EA access module
 os2/OS2/ExtAttr/ExtAttr.pm	EA access module
 os2/OS2/ExtAttr/ExtAttr.xs	EA access module
