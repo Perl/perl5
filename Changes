@@ -28,6 +28,139 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 21020] By: jhi                                   on 2003/09/03  16:07:02
+        Log: Integrate:
+             [ 21016]
+             Add, document, and test bytes::substr, index, rindex, chr,
+             document bytes::ord.
+             
+             [ 21017]
+             Bump up the VERSION.
+             
+             [ 21019]
+             Also indicate the Unicode level here.
+             (The last date is non-committal :-)
+     Branch: maint-5.8/perl
+	  !> lib/bytes.pm lib/bytes.t lib/bytes_heavy.pl
+	  !> pod/perlunicode.pod
+____________________________________________________________________________
+[ 21015] By: jhi                                   on 2003/09/03  07:06:08
+        Log: Integrate:
+             [ 21008]
+             VMS does not have quite UNIX glob semantics.
+             
+             [ 21009]
+             Subject: Re: maint@20974 or before broke mp2 ithreads test
+             From: "Marcus Holland-Moritz" <mhx-perl@gmx.net>
+             Date: Wed, 3 Sep 2003 06:07:54 +0200
+             Message-ID: <044101c371d0$f39b3fc0$0c2f1fac@R2D2>
+             
+             [ 21010]
+             Subject: {PATCH 5.8.1] Re: [perl #23651] Debugger dump failed for blessed REF object 
+             From: Joe McMahon <mcmahon@ibiblio.org>
+             Date: Tue, 2 Sep 2003 18:02:14 -0400
+             Message-Id: <1C49133C-DD91-11D7-8450-000393BCA0FC@ibiblio.org>
+             
+             [ 21011]
+             Changing the test count is a good idea.
+             
+             [ 21012]
+             Upgrade to base 2.01 from CPAN.
+             
+             [ 21013]
+             use IO; is deprecated.
+             
+             [ 21014]
+             Subject: [PATCH] Re: maint@20974 or before broke mp2 ithreads test
+             From: Marcus Holland-Moritz <mhx-perl@gmx.net>
+             Date: Wed, 3 Sep 2003 08:57:25 +0200 (MEST)
+             Message-ID: <29644.1062572245@www50.gmx.net>
+             
+             The other half of #20930 should be still good.
+             
+             (The fields.pm from the base 2.01 not integrated, though,
+             because otherwise fields.t and t/lib/warnings/doio will
+             start emitting "Pseudo-hashes are deprecated" warnings)
+     Branch: maint-5.8/perl
+	  !> ext/threads/t/join.t lib/base.pm lib/dumpvar.pl op.c
+	  !> t/run/fresh_perl.t
+____________________________________________________________________________
+[ 21004] By: jhi                                   on 2003/09/02  19:10:18
+        Log: Integrate:
+             [ 20995]
+             Subject: [perl #23679] perl-5.8.1-RC4 perldelta typo
+             From: "mcharity@vendian.org (via RT)" <perlbug-followup@perl.org>
+             Date: 1 Sep 2003 22:11:00 -0000
+             Message-ID: <rt-23679-64048.6.59087677001438@rt.perl.org>
+             
+             [ 20996]
+             Subject: [PATCH] grok_(number|numeric_radix) added to Devel::PPPort
+             From: Tassilo von Parseval <tassilo.parseval@post.rwth-aachen.de>
+             Date: Tue, 02 Sep 2003 11:27:19 +0200
+             Message-id: <20030902092719.GA18075@ethan>
+             
+             [ 20997]
+             Subject: [PATCH perlfaq6.pod] Explain \Q better
+             From: Mark Jason Dominus <mjd@plover.com>
+             Date: Mon, 01 Sep 2003 16:19:20 -0400
+             Message-ID: <20030901201920.3929.qmail@plover.com>
+             
+             [ 20998]
+             Subject: [perl #23672] Math::BigInit POD 
+             From: "abigail@abigail.nl (via RT)" <perlbug-followup@perl.org>
+             Date: 1 Sep 2003 08:47:39 -0000
+             Message-ID: <rt-23672-64035.19.2973991993763@rt.perl.org>
+             
+             [ 20999]
+             Subject: [DOCPATCH] Re: [perl #23630] problem with "used only once" warning
+             From: Fergal Daly <fergal@esatclear.ie>
+             Date: Tue, 2 Sep 2003 17:36:52 +0100
+             Message-Id: <200309021736.52725.fergal@esatclear.ie>
+             
+             [ 21000]
+             Retract #20930 because of
+             Subject: maint@20974 or before broke mp2 ithreads test
+             From: Stas Bekman <stas@stason.org>
+             Date: Mon, 01 Sep 2003 23:31:11 -0700
+             Message-ID: <3F54392F.7080009@stason.org>
+             
+             [ 21003]
+             An untie test from perlmonks-- worked in 5.6.1,
+             broken in 5.8.0, seems to be working again in maint,
+             better nail it down now.
+     Branch: maint-5.8/perl
+	  !> ext/Devel/PPPort/Changes ext/Devel/PPPort/PPPort.pm
+	  !> ext/Devel/PPPort/t/test.t lib/Math/BigInt.pm op.c
+	  !> pod/perldiag.pod pod/perlfaq6.pod t/op/tie.t
+____________________________________________________________________________
+[ 21002] By: jhi                                   on 2003/09/02  18:23:44
+        Log: Better wording for Rafael.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 21001] By: jhi                                   on 2003/09/02  15:43:23
+        Log: More future.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20995] By: jhi                                   on 2003/09/02  14:43:45
+        Log: Subject: [perl #23679] perl-5.8.1-RC4 perldelta typo
+             From: "mcharity@vendian.org (via RT)" <perlbug-followup@perl.org>
+             Date: 1 Sep 2003 22:11:00 -0000
+             Message-ID: <rt-23679-64048.6.59087677001438@rt.perl.org>
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20994] By: jhi                                   on 2003/09/02  14:42:10
+        Log: Add some pressure for Enache :-)
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20992] By: jhi                                   on 2003/09/02  06:33:48
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 20991] By: jhi                                   on 2003/09/02  04:39:23
         Log: Integrate:
              [ 20978]
