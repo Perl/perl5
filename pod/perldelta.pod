@@ -238,9 +238,32 @@ emulating, and always flushes before (un)locking.
 
 =item printf and sprintf
 
-now support "%i" as a synonym for "%d", and the "h" modifier.
-So "%hi" means "short integer in decimal", and "%ho" means
-"unsigned short integer as octal".
+Perl now implements these functions itself; it doesn't use the C
+library function sprintf() any more, except for floating-point
+numbers, and even then only known flags are allowed.  As a result, it
+is now possible to know which conversions and flags will work, and
+what they will do.
+
+The new conversions in Perl's sprintf() are:
+
+   %i	a synonym for %d
+   %p	a pointer (the address of the Perl value, in hexadecimal)
+   %n	special: B<stores> into the next variable in the parameter
+        list the number of characters printed so far
+
+The new flags that go between the C<%> and the conversion are:
+
+   #	prefix octal with "0", hex with "0x"
+   h	interpret integer as C type "short" or "unsigned short"
+   V	interpret integer as Perl's standard integer type
+
+Also, where a number would appear in the flags, an asterisk ("*") may
+be used instead, in which case Perl uses the next item in the
+parameter list as the given number (that is, as the field width or
+precision).  If a field width obtained through "*" is negative, it has
+the same effect as the '-' flag: left-justification.
+
+See L<perlfunc/sprintf> for a complete list of conversion and flags.
 
 =item keys as an lvalue
 

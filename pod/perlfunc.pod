@@ -3090,15 +3090,77 @@ L</chomp>, and L</join>.)
 
 =item sprintf FORMAT, LIST
 
-Returns a string formatted by the usual printf conventions of the C
-language.  See L<sprintf(3)> or L<printf(3)> on your system for details.
-(The * character for an indirectly specified length is not
-supported, but you can get the same effect by interpolating a variable
-into the pattern.)  If C<use locale> is
-in effect, the character used for the decimal point in formatted real numbers
-is affected by the LC_NUMERIC locale.  See L<perllocale>.
-Some C libraries' implementations of sprintf() can
-dump core when fed ludicrous arguments.
+Returns a string formatted by the usual printf conventions of the
+C library function sprintf().  See L<sprintf(3)> or L<printf(3)>
+on your system for an explanation of the general principles.
+
+Perl does all of its own sprintf() formatting -- it emulates the C
+function sprintf(), but it doesn't use it (except for floating-point
+numbers, and even then only the standard modifiers are allowed).  As a
+result, any non-standard extensions in your local sprintf() are not
+available from Perl.
+
+Perl's sprintf() permits the following universally-known conversions:
+
+   %%	a percent sign
+   %c	a character with the given number
+   %s	a string
+   %d	a signed integer, in decimal
+   %u	an unsigned integer, in decimal
+   %o	an unsigned integer, in octal
+   %x	an unsigned integer, in hexadecimal
+   %e	a floating-point number, in scientific notation
+   %f	a floating-point number, in fixed decimal notation
+   %g	a floating-point number, in %e or %f notation
+
+In addition, Perl permits the following ANSI-invented conversions:
+
+   %i	a synonym for %d
+   %X	like %x, but using upper-case letters
+   %E	like %e, but using an upper-case "E"
+   %G	like %g, but with an upper-case "E" (if applicable)
+   %p	a pointer (outputs the Perl value's address in hexadecimal)
+   %n	special: B<stores> into the next variable in the parameter
+        list the number of characters printed so far
+
+Finally, for backward (and we do mean "backward") compatibility,
+Perl permits these nonstandard but unaccountably popular conversions:
+
+   %D	a synonym for %ld
+   %U	a synonym for %lu
+   %O	a synonym for %lo
+   %F	a synonym for %f
+
+Perl permits the following universally-known flags between the C<%>
+and the conversion letter:
+
+   space   prefix positive number with a space
+   +       prefix positive number with a plus sign
+   -       left-justify within the field
+   0       use zeros, not spaces, to right-justify
+   number  minimum field width
+   .number "precision": digits after decimal point for floating-point,
+           max length for string, minimum length for integer
+   l       interpret integer as C type "long" or "unsigned long"
+
+In addition, Perl permits the following ANSI-invented flags:
+
+   #       prefix octal with "0", hex with "0x"
+   h       interpret integer as C type "short" or "unsigned short"
+
+Finally, there is one Perl-specific flag:
+
+   V       interpret integer as Perl's standard integer type
+
+Where a number would appear in the flags, an asterisk ("*") may be
+used instead, in which case Perl uses the next item in the parameter
+list as the given number (that is, as the field width or precision).
+If a field width obtained through "*" is negative, it has the same
+effect as the '-' flag: left-justification.
+
+If C<use locale> is in effect, the character used for the decimal
+point in formatted real numbers is affected by the LC_NUMERIC locale.
+See L<perllocale>.
 
 =item sqrt EXPR
 
