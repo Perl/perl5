@@ -342,7 +342,7 @@ sub pod2html {
     } 
     $htmlfile = "-" unless $htmlfile;	# stdout
     $htmlroot = "" if $htmlroot eq "/";	# so we don't get a //
-    $htmldir =~ s#/$## ;                # so we don't get a //
+    $htmldir =~ s#/\z## ;               # so we don't get a //
     if (  $htmlroot eq ''
        && defined( $htmldir ) 
        && $htmldir ne ''
@@ -388,7 +388,7 @@ sub pod2html {
 	    } 
 	}
     }
-    if (!$title and $podfile =~ /\.pod$/) {
+    if (!$title and $podfile =~ /\.pod\z/) {
 	# probably a split pod so take first =head[12] as title
 	for (my $i = 0; $i < @poddata; $i++) { 
 	    last if ($title) = $poddata[$i] =~ /^=head[12]\s*(.*)/;
@@ -400,7 +400,7 @@ sub pod2html {
 	$title =~ s/\s*\(.*\)//;
     } else {
 	warn "$0: no title for $podfile" unless $quiet;
-	$podfile =~ /^(.*)(\.[^.\/]+)?$/;
+	$podfile =~ /^(.*)(\.[^.\/]+)?\z/s;
 	$title = ($podfile eq "-" ? 'No Title' : $1);
 	warn "using $title" if $verbose;
     }
@@ -802,7 +802,7 @@ sub scan_podpath {
 	    $dirname = $1;
 	    opendir(DIR, $dirname) ||
 		die "$0: error opening directory $dirname: $!\n";
-	    @files = grep(/(\.pod|\.pm)$/ && ! -d $_, readdir(DIR));
+	    @files = grep(/(\.pod|\.pm)\z/ && ! -d $_, readdir(DIR));
 	    closedir(DIR);
 
 	    # scan each .pod and .pm file for =item directives
@@ -888,13 +888,13 @@ sub scan_dir {
 	    $pages{$_}  = "" unless defined $pages{$_};
 	    $pages{$_} .= "$dir/$_:";
 	    push(@subdirs, $_);
-	} elsif (/\.pod$/) {	    	    	    	    # .pod
-	    s/\.pod$//;
+	} elsif (/\.pod\z/) {	    	    	    	    # .pod
+	    s/\.pod\z//;
 	    $pages{$_}  = "" unless defined $pages{$_};
 	    $pages{$_} .= "$dir/$_.pod:";
 	    push(@pods, "$dir/$_.pod");
-	} elsif (/\.pm$/) { 	    	    	    	    # .pm
-	    s/\.pm$//;
+	} elsif (/\.pm\z/) { 	    	    	    	    # .pm
+	    s/\.pm\z//;
 	    $pages{$_}  = "" unless defined $pages{$_};
 	    $pages{$_} .= "$dir/$_.pm:";
 	    push(@pods, "$dir/$_.pm");
@@ -974,7 +974,7 @@ sub scan_items {
     my($i, $item);
     local $_;
 
-    $pod =~ s/\.pod$//;
+    $pod =~ s/\.pod\z//;
     $pod .= ".html" if $pod;
 
     foreach $i (0..$#poddata) {
@@ -1693,7 +1693,7 @@ sub page_sect($$) {
 	# this will only find one page. A better solution might be to produce
 	# an intermediate page that is an index to all such pages.
 	my $page_name = $page ;
-	$page_name =~ s,^.*/,, ;
+	$page_name =~ s,^.*/,,s ;
 	if ( defined( $pages{ $page_name } ) && 
 	     $pages{ $page_name } =~ /([^:]*$page)\.(?:pod|pm):/ 
 	   ) {
@@ -1752,7 +1752,7 @@ sub page_sect($$) {
 	# for other kinds of links, like file:, ftp:, etc.
         my $url ;
         if (  $htmlfileurl ne '' ) {
-            $link = "$htmldir$link" if $link =~ m{^/};
+            $link = "$htmldir$link" if $link =~ m{^/}s;
             $url = relativize_url( $link, $htmlfileurl );
 # print( "  b: [$link,$htmlfileurl,$url]\n" );
 	}

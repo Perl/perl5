@@ -1796,22 +1796,6 @@ operation you intend by using C<""> or C<0+>, as in the examples below.
 See L<perlfunc/vec> for information on how to manipulate individual bits
 in a bit vector.
 
-=head2 Strings of Character
-
-A literal of the form C<v1.20.300.4000> is parsed as a string composed
-of characters with the specified ordinals.  This provides an alternative,
-more readable way to construct strings, rather than use the somewhat less
-readable interpolation form C<"\x{1}\x{14}\x{12c}\x{fa0}">.  This is useful
-for representing Unicode strings, and for comparing version "numbers"
-using the string comparison operators, C<cmp>, C<gt>, C<lt> etc.
-
-If there are two or more dots in the literal, the leading C<v> may be
-omitted.
-
-Such literals are accepted by both C<require> and C<use> for doing a version
-check.  The C<$^V> special variable also contains the running Perl
-interpreter's version in this form.  See L<perlvar/$^V>.
-
 =head2 Integer Arithmetic
 
 By default, Perl assumes that it must do most of its arithmetic in

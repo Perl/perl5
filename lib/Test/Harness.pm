@@ -84,7 +84,7 @@ sub runtests {
     while ($test = shift(@tests)) {
 	$te = $test;
 	chop($te);
-	if ($^O eq 'VMS') { $te =~ s/^.*\.t\./[.t./; }
+	if ($^O eq 'VMS') { $te =~ s/^.*\.t\./[.t./s; }
 	my $blank = (' ' x 77);
 	my $leader = "$te" . '.' x (20 - length($te));
 	my $ml = "";
