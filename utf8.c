@@ -1632,6 +1632,6 @@ Perl_ibcmp_utf8(pTHX_ const char *s1, bool u1, const char *s2, bool u2, register
 	  return 0;
      }
      else
-         return ibcmp(s1, s2);
+         return ibcmp(s1, s2, len);
 }
 
