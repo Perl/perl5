@@ -1197,7 +1197,6 @@
 #define ck_exit			Perl_ck_exit
 #define ck_ftst			Perl_ck_ftst
 #define ck_fun			Perl_ck_fun
-#define ck_fun_locale		Perl_ck_fun_locale
 #define ck_glob			Perl_ck_glob
 #define ck_grep			Perl_ck_grep
 #define ck_index		Perl_ck_index
@@ -1215,7 +1214,6 @@
 #define ck_rfun			Perl_ck_rfun
 #define ck_rvconst		Perl_ck_rvconst
 #define ck_sassign		Perl_ck_sassign
-#define ck_scmp			Perl_ck_scmp
 #define ck_select		Perl_ck_select
 #define ck_shift		Perl_ck_shift
 #define ck_sort			Perl_ck_sort
@@ -2693,7 +2691,6 @@
 #define ck_exit(a)		Perl_ck_exit(aTHX_ a)
 #define ck_ftst(a)		Perl_ck_ftst(aTHX_ a)
 #define ck_fun(a)		Perl_ck_fun(aTHX_ a)
-#define ck_fun_locale(a)	Perl_ck_fun_locale(aTHX_ a)
 #define ck_glob(a)		Perl_ck_glob(aTHX_ a)
 #define ck_grep(a)		Perl_ck_grep(aTHX_ a)
 #define ck_index(a)		Perl_ck_index(aTHX_ a)
@@ -2711,7 +2708,6 @@
 #define ck_rfun(a)		Perl_ck_rfun(aTHX_ a)
 #define ck_rvconst(a)		Perl_ck_rvconst(aTHX_ a)
 #define ck_sassign(a)		Perl_ck_sassign(aTHX_ a)
-#define ck_scmp(a)		Perl_ck_scmp(aTHX_ a)
 #define ck_select(a)		Perl_ck_select(aTHX_ a)
 #define ck_shift(a)		Perl_ck_shift(aTHX_ a)
 #define ck_sort(a)		Perl_ck_sort(aTHX_ a)
@@ -5232,8 +5228,6 @@
 #define ck_ftst			Perl_ck_ftst
 #define Perl_ck_fun		CPerlObj::Perl_ck_fun
 #define ck_fun			Perl_ck_fun
-#define Perl_ck_fun_locale	CPerlObj::Perl_ck_fun_locale
-#define ck_fun_locale		Perl_ck_fun_locale
 #define Perl_ck_glob		CPerlObj::Perl_ck_glob
 #define ck_glob			Perl_ck_glob
 #define Perl_ck_grep		CPerlObj::Perl_ck_grep
@@ -5268,8 +5262,6 @@
 #define ck_rvconst		Perl_ck_rvconst
 #define Perl_ck_sassign		CPerlObj::Perl_ck_sassign
 #define ck_sassign		Perl_ck_sassign
-#define Perl_ck_scmp		CPerlObj::Perl_ck_scmp
-#define ck_scmp			Perl_ck_scmp
 #define Perl_ck_select		CPerlObj::Perl_ck_select
 #define ck_select		Perl_ck_select
 #define Perl_ck_shift		CPerlObj::Perl_ck_shift

@@ -1031,7 +1031,7 @@ PP(pp_sort)
 			? ( (PL_op->op_private & OPpSORT_INTEGER)
 			    ? ( overloading ? amagic_i_ncmp : sv_i_ncmp)
 			    : ( overloading ? amagic_ncmp : sv_ncmp))
-			: ( (PL_op->op_private & OPpLOCALE)
+			: ( IN_LOCALE_RUNTIME
 			    ? ( overloading
 				? amagic_cmp_locale
 				: sv_cmp_locale_static)

@@ -4015,7 +4015,7 @@ Perl_my_atof(pTHX_ const char* s)
 {
     NV x = 0.0;
 #ifdef USE_LOCALE_NUMERIC
-    if ((PL_hints & HINT_LOCALE) && PL_numeric_local) {
+    if (PL_numeric_local && IN_LOCALE) {
 	NV y;
 
 	Perl_atof2(aTHX_ s, &x);

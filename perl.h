@@ -2886,7 +2886,8 @@ enum {		/* pass one of these to get_vtbl */
 #define HINT_PRIVATE_MASK	0x000000ff
 #define HINT_INTEGER		0x00000001
 #define HINT_STRICT_REFS	0x00000002
-/* #define HINT_notused4	0x00000004 */
+#define HINT_LOCALE		0x00000004
+#define HINT_BYTES		0x00000008
 #define HINT_BYTES		0x00000008
 /* #define HINT_notused10	0x00000010 */
 				/* Note: 20,40,80 used for NATIVE_HINTS */
@@ -2894,7 +2895,6 @@ enum {		/* pass one of these to get_vtbl */
 #define HINT_BLOCK_SCOPE	0x00000100
 #define HINT_STRICT_SUBS	0x00000200
 #define HINT_STRICT_VARS	0x00000400
-#define HINT_LOCALE		0x00000800
 
 #define HINT_NEW_INTEGER	0x00001000
 #define HINT_NEW_FLOAT		0x00002000
@@ -3428,16 +3428,23 @@ typedef struct am_table_short AMTS;
 #define SET_NUMERIC_LOCAL() \
 	set_numeric_local();
 
+#define IN_LOCALE_RUNTIME	(PL_curcop->op_private & HINT_LOCALE)
+#define IN_LOCALE_COMPILETIME	(PL_hints & HINT_LOCALE)
+
+#define IN_LOCALE \
+	(PL_curcop == &PL_compiling ? IN_LOCALE_COMPILETIME : IN_LOCALE_RUNTIME)
+
 #define IS_NUMERIC_RADIX(s)	\
-	((PL_hints & HINT_LOCALE) && \
-	  PL_numeric_radix_sv && memEQ(s, SvPVX(PL_numeric_radix_sv), SvCUR(PL_numeric_radix_sv)))
+	(PL_numeric_radix_sv \
+	 && IN_LOCALE \
+	 && memEQ(s, SvPVX(PL_numeric_radix_sv), SvCUR(PL_numeric_radix_sv)))
 
 #define STORE_NUMERIC_LOCAL_SET_STANDARD() \
-	bool was_local = (PL_hints & HINT_LOCALE) && PL_numeric_local; \
+	bool was_local = PL_numeric_local && IN_LOCALE; \
 	if (was_local) SET_NUMERIC_STANDARD();
 
 #define STORE_NUMERIC_STANDARD_SET_LOCAL() \
-	bool was_standard = (PL_hints & HINT_LOCALE) && PL_numeric_standard; \
+	bool was_standard = PL_numeric_standard && IN_LOCALE; \
 	if (was_standard) SET_NUMERIC_LOCAL();
 
 #define RESTORE_NUMERIC_LOCAL() \

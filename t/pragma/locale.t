@@ -9,6 +9,7 @@ BEGIN {
 	print "1..0\n";
 	exit;
     }
+    $| = 1;
 }
 
 use strict;
@@ -651,7 +652,7 @@ foreach $Locale (@Locale) {
 	tryneoalpha($Locale, 107, $c == $d);
 
 	{
-	    no locale;
+#	    no locale; # XXX did this ever work correctly?
 	
 	    my $e = "$x";
 
@@ -816,16 +817,17 @@ if ($didwarn) {
         warn "# None of your locales were broken.\n";
     }
 
-    if (@utf8locale) {
-        my $S = join(" ", @utf8locale);
-        $S =~ s/(.{50,60}) /$1\n#\t/g;
+}
 
-        warn "# The following locales\n#\n",
-    	     "#\t", $S, "\n#\n",
-             "# were skipped for the tests ",
-                 join(" ", sort {$a<=>$b} keys %utf8skip), "\n",
-             "# because UTF-8 and locales do not work together in Perl.\n#\n";
-    }
+if (@utf8locale) {
+    my $S = join(" ", @utf8locale);
+    $S =~ s/(.{50,60}) /$1\n#\t/g;
+
+    warn "#\n# The following locales\n#\n",
+         "#\t", $S, "\n#\n",
+         "# were skipped for the tests ",
+         join(" ", sort {$a<=>$b} keys %utf8skip), "\n",
+        "# because UTF-8 and locales do not work together in Perl.\n#\n";
 }
 
 # eof

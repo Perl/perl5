@@ -27,7 +27,7 @@ locales.
 
 =cut
 
-$locale::hint_bits = 0x800;
+$locale::hint_bits = 0x4;
 
 sub import {
     $^H |= $locale::hint_bits;

@@ -511,13 +511,13 @@ i_ne		integer ne (!=)		ck_null		ifs2	S S
 ncmp		numeric comparison (<=>)	ck_null		Iifst2	S S
 i_ncmp		integer comparison (<=>)	ck_null		ifst2	S S
 
-slt		string lt		ck_scmp		ifs2	S S
-sgt		string gt		ck_scmp		ifs2	S S
-sle		string le		ck_scmp		ifs2	S S
-sge		string ge		ck_scmp		ifs2	S S
+slt		string lt		ck_null		ifs2	S S
+sgt		string gt		ck_null		ifs2	S S
+sle		string le		ck_null		ifs2	S S
+sge		string ge		ck_null		ifs2	S S
 seq		string eq		ck_null		ifs2	S S
 sne		string ne		ck_null		ifs2	S S
-scmp		string comparison (cmp)	ck_scmp		ifst2	S S
+scmp		string comparison (cmp)	ck_null		ifst2	S S
 
 bit_and		bitwise and (&)		ck_bitop	fst2	S S
 bit_xor		bitwise xor (^)		ck_bitop	fst2	S S
@@ -555,15 +555,15 @@ vec		vec			ck_fun		ist@	S S S
 index		index			ck_index	isT@	S S S?
 rindex		rindex			ck_index	isT@	S S S?
 
-sprintf		sprintf			ck_fun_locale	mfst@	S L
+sprintf		sprintf			ck_fun		mfst@	S L
 formline	formline		ck_fun		ms@	S L
 ord		ord			ck_fun		ifsTu%	S?
 chr		chr			ck_fun		fsTu%	S?
 crypt		crypt			ck_fun		fsT@	S S
-ucfirst		ucfirst			ck_fun_locale	fstu%	S?
-lcfirst		lcfirst			ck_fun_locale	fstu%	S?
-uc		uc			ck_fun_locale	fstu%	S?
-lc		lc			ck_fun_locale	fstu%	S?
+ucfirst		ucfirst			ck_fun		fstu%	S?
+lcfirst		lcfirst			ck_fun		fstu%	S?
+uc		uc			ck_fun		fstu%	S?
+lc		lc			ck_fun		fstu%	S?
 quotemeta	quotemeta		ck_fun		fstu%	S?
 
 # Arrays.
