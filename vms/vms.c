@@ -33,7 +33,11 @@
 #include <uaidef.h>
 #include <uicdef.h>
 
-#ifndef SS$_NOSUCHOBJECT  /* Older versions of ssdef.h don't have this */
+/* Older versions of ssdef.h don't have these */
+#ifndef SS$_INVFILFOROP
+#  define SS$_INVFILFOROP 3930
+#endif
+#ifndef SS$_NOSUCHOBJECT
 #  define SS$_NOSUCHOBJECT 2696
 #endif
 
@@ -95,7 +99,7 @@ my_trnlnm(char *lnm, char *eqv, unsigned long int idx)
     }
     else if (retsts & 1) {
       eqv[eqvlen] = '\0';
-      return 1;
+      return eqvlen;
     }
     _ckvmssts(retsts);  /* Must be an error */
     return 0;      /* Not reached, assuming _ckvmssts() bails out */
@@ -147,13 +151,68 @@ my_getenv(char *lnm)
           _ckvmssts(retsts);
         }
         /* Try for CRTL emulation of a Unix/POSIX name */
-        else return getenv(lnm);
+        else return getenv(uplnm);
       }
     }
     return Nullch;
 
 }  /* end of my_getenv() */
 /*}}}*/
+
+/*{{{ void prime_env_iter() */
+void
+prime_env_iter(void)
+/* Fill the %ENV associative array with all logical names we can
+ * find, in preparation for iterating over it.
+ */
+{
+  static int primed = 0;  /* XXX Not thread-safe!!! */
+  HV *envhv = GvHVn(envgv);
+  FILE *sholog;
+  char eqv[LNM$C_NAMLENGTH+1],*start,*end;
+  STRLEN eqvlen;
+  SV *oldrs, *linesv, *eqvsv;
+
+  if (primed) return;
+  /* Perform a dummy fetch as an lval to insure that the hash table is
+   * set up.  Otherwise, the hv_store() will turn into a nullop */
+  (void) hv_fetch(envhv,"DEFAULT",7,TRUE);
+  /* Also, set up the four "special" keys that the CRTL defines,
+   * whether or not underlying logical names exist. */
+  (void) hv_fetch(envhv,"HOME",4,TRUE);
+  (void) hv_fetch(envhv,"TERM",4,TRUE);
+  (void) hv_fetch(envhv,"PATH",4,TRUE);
+  (void) hv_fetch(envhv,"USER",4,TRUE);
+
+  /* Now, go get the logical names */
+  if ((sholog = my_popen("$ Show Logical *","r")) == Nullfp)
+    _ckvmssts(vaxc$errno);
+  /* We use Perl's sv_gets to read from the pipe, since my_popen is
+   * tied to Perl's I/O layer, so it may not return a simple FILE * */
+  oldrs = rs;
+  rs = newSVpv("\n",1);
+  linesv = newSVpv("",0);
+  while (1) {
+    if ((start = sv_gets(linesv,sholog,0)) == Nullch) {
+      my_pclose(sholog);
+      SvREFCNT_dec(linesv); SvREFCNT_dec(rs); rs = oldrs;
+      primed = 1;
+      return;
+    }
+    while (*start != '"' && *start != '=' && *start) start++;
+    if (*start != '"') continue;
+    for (end = ++start; *end && *end != '"'; end++) ;
+    if (*end) *end = '\0';
+    else end = Nullch;
+    if ((eqvlen = my_trnlnm(start,eqv,0)) == 0) _ckvmssts(vaxc$errno);
+    else {
+      eqvsv = newSVpv(eqv,eqvlen);
+      hv_store(envhv,start,(end ? end - start : strlen(start)),eqvsv,0);
+    }
+  }
+}  /* end of prime_env_iter */
+/*}}}*/
+  
 
 /*{{{ void  my_setenv(char *lnm, char *eqv)*/
 void
@@ -306,7 +365,9 @@ kill_file(char *name)
        lcklst[2] = {{sizeof newace, ACL$C_WLOCK_ACL, &newace, 0},{0,0,0,0}},
        ulklst[2] = {{sizeof newace, ACL$C_UNLOCK_ACL, &newace, 0},{0,0,0,0}};
       
-    if (!remove(name)) return 0;  /* Can we just get rid of it? */
+    if (!remove(name)) return 0;   /* Can we just get rid of it? */
+    /* If not, can changing protections help? */
+    if (vaxc$errno != RMS$_PRV) return -1;
 
     /* No, so we get our own UIC to use as a rights identifier,
      * and the insert an ACE at the head of the ACL which allows us
@@ -319,7 +380,22 @@ kill_file(char *name)
     cxt = 0;
     newace.myace$l_ident = oldace.myace$l_ident;
     if (!((aclsts = sys$change_acl(0,&type,&fildsc,lcklst,0,0,0)) & 1)) {
-      set_errno(EVMSERR);
+      switch (aclsts) {
+        case RMS$_FNF:
+        case RMS$_DNF:
+        case RMS$_DIR:
+        case SS$_NOSUCHOBJECT:
+          set_errno(ENOENT); break;
+        case RMS$_DEV:
+          set_errno(ENODEV); break;
+        case RMS$_SYN:
+        case SS$_INVFILFOROP:
+          set_errno(EINVAL); break;
+        case RMS$_PRV:
+          set_errno(EACCES); break;
+        default:
+          _ckvmssts(aclsts);
+      }
       set_vaxc_errno(aclsts);
       return -1;
     }
@@ -545,7 +621,7 @@ create_mbx(unsigned short int *chan, struct dsc$descriptor_s *namdsc)
 struct pipe_details
 {
     struct pipe_details *next;
-    FILE *fp;  /* stdio file pointer to pipe mailbox */
+    PerlIO *fp;  /* stdio file pointer to pipe mailbox */
     int pid;   /* PID of subprocess */
     int mode;  /* == 'r' if pipe open for reading */
     int done;  /* subprocess has completed */
@@ -625,7 +701,7 @@ my_popen(char *cmd, char *mode)
     create_mbx(&chan,&namdsc);
 
     /* open a FILE* onto it */
-    info->fp=fopen(mbxname, mode);
+    info->fp = PerlIO_open(mbxname, mode);
 
     /* give up other channel onto it */
     _ckvmssts(sys$dassgn(chan));
@@ -673,7 +749,7 @@ I32 my_pclose(FILE *fp)
       /* get here => no such pipe open */
       croak("No such pipe open");
 
-    fclose(info->fp);
+    PerlIO_close(info->fp);
 
     if (info->done) retsts = info->completion;
     else waitpid(info->pid,(int *) &retsts,0);
@@ -1659,7 +1735,7 @@ getredirection(int *ac, char ***av)
 	    {
 	    if (j+1 >= argc)
 		{
-		fprintf(Perl_debug_log,"No input file after < on command line");
+		PerlIO_printf(Perl_debug_log,"No input file after < on command line");
 		exit(LIB$_WRONUMARG);
 		}
 	    in = argv[++j];
@@ -1674,7 +1750,7 @@ getredirection(int *ac, char ***av)
 	    {
 	    if (j+1 >= argc)
 		{
-		fprintf(Perl_debug_log,"No output file after > on command line");
+		PerlIO_printf(Perl_debug_log,"No output file after > on command line");
 		exit(LIB$_WRONUMARG);
 		}
 	    out = argv[++j];
@@ -1694,7 +1770,7 @@ getredirection(int *ac, char ***av)
 		out = 1 + ap;
 	    if (j >= argc)
 		{
-		fprintf(Perl_debug_log,"No output file after > or >> on command line");
+		PerlIO_printf(Perl_debug_log,"No output file after > or >> on command line");
 		exit(LIB$_WRONUMARG);
 		}
 	    continue;
@@ -1716,7 +1792,7 @@ getredirection(int *ac, char ***av)
 		    err = 2 + ap;
 	    if (j >= argc)
 		{
-		fprintf(Perl_debug_log,"No output file after 2> or 2>> on command line");
+		PerlIO_printf(Perl_debug_log,"No output file after 2> or 2>> on command line");
 		exit(LIB$_WRONUMARG);
 		}
 	    continue;
@@ -1725,7 +1801,7 @@ getredirection(int *ac, char ***av)
 	    {
 	    if (j+1 >= argc)
 		{
-		fprintf(Perl_debug_log,"No command into which to pipe on command line");
+		PerlIO_printf(Perl_debug_log,"No command into which to pipe on command line");
 		exit(LIB$_WRONUMARG);
 		}
 	    cmargc = argc-(j+1);
@@ -1756,7 +1832,7 @@ getredirection(int *ac, char ***av)
 	{
 	if (out != NULL)
 	    {
-	    fprintf(Perl_debug_log,"'|' and '>' may not both be specified on command line");
+	    PerlIO_printf(Perl_debug_log,"'|' and '>' may not both be specified on command line");
 	    exit(LIB$_INVARGORD);
 	    }
 	pipe_and_fork(cmargv);
@@ -1775,7 +1851,7 @@ getredirection(int *ac, char ***av)
 	/* Input from a pipe, reopen it in binary mode to disable	*/
 	/* carriage control processing.	 				*/
 
-	fgetname(stdin, mbxname,1);
+	PerlIO_getname(stdin, mbxname);
 	mbxnam.dsc$a_pointer = mbxname;
 	mbxnam.dsc$w_length = strlen(mbxnam.dsc$a_pointer);	
 	lib$getdvi(&dvi_item, 0, &mbxnam, &bufsize, 0, 0);
@@ -1789,25 +1865,25 @@ getredirection(int *ac, char ***av)
 	freopen(mbxname, "rb", stdin);
 	if (errno != 0)
 	    {
-	    fprintf(Perl_debug_log,"Can't reopen input pipe (name: %s) in binary mode",mbxname);
+	    PerlIO_printf(Perl_debug_log,"Can't reopen input pipe (name: %s) in binary mode",mbxname);
 	    exit(vaxc$errno);
 	    }
 	}
     if ((in != NULL) && (NULL == freopen(in, "r", stdin, "mbc=32", "mbf=2")))
 	{
-	fprintf(Perl_debug_log,"Can't open input file %s as stdin",in);
+	PerlIO_printf(Perl_debug_log,"Can't open input file %s as stdin",in);
 	exit(vaxc$errno);
 	}
     if ((out != NULL) && (NULL == freopen(out, outmode, stdout, "mbc=32", "mbf=2")))
 	{	
-	fprintf(Perl_debug_log,"Can't open output file %s as stdout",out);
+	PerlIO_printf(Perl_debug_log,"Can't open output file %s as stdout",out);
 	exit(vaxc$errno);
 	}
     if (err != NULL) {
 	FILE *tmperr;
 	if (NULL == (tmperr = fopen(err, errmode, "mbc=32", "mbf=2")))
 	    {
-	    fprintf(Perl_debug_log,"Can't open error file %s as stderr",err);
+	    PerlIO_printf(Perl_debug_log,"Can't open error file %s as stderr",err);
 	    exit(vaxc$errno);
 	    }
 	    fclose(tmperr);
@@ -1817,9 +1893,9 @@ getredirection(int *ac, char ***av)
 		}
 	}
 #ifdef ARGPROC_DEBUG
-    fprintf(Perl_debug_log, "Arglist:\n");
+    PerlIO_printf(Perl_debug_log, "Arglist:\n");
     for (j = 0; j < *ac;  ++j)
-	fprintf(Perl_debug_log, "argv[%d] = '%s'\n", j, argv[j]);
+	PerlIO_printf(Perl_debug_log, "argv[%d] = '%s'\n", j, argv[j]);
 #endif
    /* Clear errors we may have hit expanding wildcards, so they don't
       show up in Perl's $! later */
@@ -1950,7 +2026,7 @@ short iosb[4];
     if (0 == child_st[0])
 	{
 #ifdef ARGPROC_DEBUG
-	fprintf(Perl_debug_log, "Waiting for Child Process to Finish . . .\n");
+	PerlIO_printf(Perl_debug_log, "Waiting for Child Process to Finish . . .\n");
 #endif
 	fflush(stdout);	    /* Have to flush pipe for binary data to	*/
 			    /* terminate properly -- <tp@mccall.com>	*/
@@ -1965,7 +2041,7 @@ short iosb[4];
 static void sig_child(int chan)
 {
 #ifdef ARGPROC_DEBUG
-    fprintf(Perl_debug_log, "Child Completion AST\n");
+    PerlIO_printf(Perl_debug_log, "Child Completion AST\n");
 #endif
     if (child_st[0] == 0)
 	child_st[0] = 1;
@@ -2001,19 +2077,19 @@ static void pipe_and_fork(char **cmargv)
 
 	create_mbx(&child_chan,&mbxdsc);
 #ifdef ARGPROC_DEBUG
-    fprintf(Perl_debug_log, "Pipe Mailbox Name = '%s'\n", mbxdsc.dsc$a_pointer);
-    fprintf(Perl_debug_log, "Sub Process Command = '%s'\n", cmddsc.dsc$a_pointer);
+    PerlIO_printf(Perl_debug_log, "Pipe Mailbox Name = '%s'\n", mbxdsc.dsc$a_pointer);
+    PerlIO_printf(Perl_debug_log, "Sub Process Command = '%s'\n", cmddsc.dsc$a_pointer);
 #endif
     _ckvmssts_noperl(lib$spawn(&cmddsc, &mbxdsc, 0, &one,
                                0, &pid, child_st, &zero, sig_child,
                                &child_chan));
 #ifdef ARGPROC_DEBUG
-    fprintf(Perl_debug_log, "Subprocess's Pid = %08X\n", pid);
+    PerlIO_printf(Perl_debug_log, "Subprocess's Pid = %08X\n", pid);
 #endif
     sys$dclexh(&exit_block);
     if (NULL == freopen(mbxname, "wb", stdout))
 	{
-	fprintf(Perl_debug_log,"Can't open output pipe (name %s)",mbxname);
+	PerlIO_printf(Perl_debug_log,"Can't open output pipe (name %s)",mbxname);
 	}
 }
 
@@ -2047,10 +2123,10 @@ unsigned long int flags = 17, one = 1, retsts;
 	_ckvmssts_noperl(retsts);
     }
 #ifdef ARGPROC_DEBUG
-    fprintf(Perl_debug_log, "%s\n", command);
+    PerlIO_printf(Perl_debug_log, "%s\n", command);
 #endif
     sprintf(pidstring, "%08X", pid);
-    fprintf(Perl_debug_log, "%s\n", pidstring);
+    PerlIO_printf(Perl_debug_log, "%s\n", pidstring);
     pidstr.dsc$a_pointer = pidstring;
     pidstr.dsc$w_length = strlen(pidstr.dsc$a_pointer);
     lib$set_symbol(&pidsymbol, &pidstr);
@@ -3522,7 +3598,8 @@ rmsexpand_fromperl(CV *cv)
 
   retsts = sys$parse(&myfab,0,0);
   if (!(retsts & 1)) {
-    if (retsts == RMS$_DNF) {
+    if (retsts == RMS$_DNF || retsts == RMS$_DIR ||
+        retsts == RMS$_DEV || retsts == RMS$_DEV) {
       mynam.nam$b_nop |= NAM$M_SYNCHK;
       retsts = sys$parse(&myfab,0,0);
       if (retsts & 1) goto expanded;
@@ -3549,12 +3626,20 @@ rmsexpand_fromperl(CV *cv)
     if (islower(*out)) { haslower = 1; break; }
   if (mynam.nam$b_rsl) { out = rsa; speclen = mynam.nam$b_rsl; }
   else                 { out = esa; speclen = mynam.nam$b_esl; }
-  if (!(mynam.nam$l_fnb & NAM$M_EXP_VER))
-    speclen = mynam.nam$l_type - out;
+  if (!(mynam.nam$l_fnb & NAM$M_EXP_VER) &&
+      (items == 1 || !strchr(myfab.fab$l_dna,';')))
+    speclen = mynam.nam$l_ver - out;
+  /* If we just had a directory spec on input, $PARSE "helpfully"
+   * adds an empty name and type for us */
+  if (mynam.nam$l_name == mynam.nam$l_type &&
+      mynam.nam$l_ver  == mynam.nam$l_type + 1 &&
+      !(mynam.nam$l_fnb & NAM$M_EXP_NAME))
+    speclen = mynam.nam$l_name - out;
   out[speclen] = '\0';
   if (haslower) __mystrtolower(out);
 
   ST(0) = sv_2mortal(newSVpv(out, speclen));
+  XSRETURN(1);
 }
 
 void
@@ -3724,7 +3809,7 @@ init_os_extras()
 {
   char* file = __FILE__;
 
-  newXSproto("VMS::Filespec::rmsexpand",rmsexpand_fromperl,file,"$");
+  newXSproto("VMS::Filespec::rmsexpand",rmsexpand_fromperl,file,"$;$");
   newXSproto("VMS::Filespec::vmsify",vmsify_fromperl,file,"$");
   newXSproto("VMS::Filespec::unixify",unixify_fromperl,file,"$");
   newXSproto("VMS::Filespec::pathify",pathify_fromperl,file,"$");

@@ -13,7 +13,7 @@ use DynaLoader ();
 use Exporter ();
  
 $VERSION = '2.0';
-@ISA = qw( Exporter DynaLoader FileHandle );
+@ISA = qw( Exporter DynaLoader IO::File );
 @EXPORT = qw( &O_APPEND &O_CREAT &O_EXCL  &O_NDELAY &O_NOWAIT
               &O_RDONLY &O_RDWR  &O_TRUNC &O_WRONLY );
 @EXPORT_OK = qw( &flush &getname &remove &rewind &sync &tmpnam
@@ -34,10 +34,10 @@ sub AUTOLOAD {
       defined $val or croak("Unknown VMS::Stdio constant $constname");
       *$AUTOLOAD = sub { $val };
     }
-    else { # We don't know about it; hand off to FileHandle
-      require FileHandle;
+    else { # We don't know about it; hand off to IO::File
+      require IO::File;
       my($obj) = shift(@_);
-      $obj->FileHandle::$constname(@_);
+      $obj->IO::File::$constname(@_);
     }
     goto &$AUTOLOAD;
 }
@@ -124,12 +124,12 @@ easily choose what you'd like to import:
 Of course, you can also choose to import specific functions by
 name, as usual.
 
-This package C<ISA> FileHandle, so that you can call FileHandle
+This package C<ISA> IO::File, so that you can call IO::File
 methods on the handles returned by C<vmsopen> and C<vmssysopen>.
-The FileHandle package is not initialized, however, until you
+The IO::File package is not initialized, however, until you
 actually call a method that VMS::Stdio doesn't provide.  This
 is doen to save startup time for users who don't wish to use
-the FileHandle methods.
+the IO::File methods.
 
 B<Note:>  In order to conform to naming conventions for Perl
 extensions and functions, the name of this package has been
@@ -152,7 +152,7 @@ returns a true value if successful, and C<undef> if not.
 =item getname
 
 The C<getname> function returns the file specification associated
-with a Perl FileHandle.  If an error occurs, it returns C<undef>.
+with a Perl I/O handle.  If an error occurs, it returns C<undef>.
 
 =item remove
 
@@ -190,7 +190,7 @@ The C<vmsopen> function enables you to specify optional RMS arguments
 to the VMS CRTL when opening a file.  It is similar to the built-in
 Perl C<open> function (see L<perlfunc> for a complete description),
 but will only open normal files; it cannot open pipes or duplicate
-existing FileHandles.  Up to 8 optional arguments may follow the
+existing I/O handles.  Up to 8 optional arguments may follow the
 file name.  These arguments should be strings which specify
 optional file characteristics as allowed by the CRTL. (See the
 CRTL reference manual description of creat() and fopen() for details.)
@@ -199,11 +199,11 @@ error occurs, it returns C<undef>.
 
 You can use the file handle returned by C<vmsfopen> just as you
 would any other Perl file handle.  The class VMS::Stdio ISA
-FileHandle, so you can call FileHandle methods using the handle
+IO::File, so you can call IO::File methods using the handle
 returned by C<vmsopen>.  However, C<use>ing VMS::Stdio does not
-automatically C<use> FileHandle; you must do so explicitly in
-your program if you want to call FileHandle methods.  This is
-done to avoid the overhead of initializing the FileHandle package
+automatically C<use> IO::File; you must do so explicitly in
+your program if you want to call IO::File methods.  This is
+done to avoid the overhead of initializing the IO::File package
 in programs which intend to use the handle returned by C<vmsopen>
 as a normal Perl file handle only.  When the scalar containing
 a VMS::Stdio file handle is overwritten, C<undef>d, or goes

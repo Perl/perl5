@@ -222,10 +222,10 @@ close CPP;
 
 
 # Kluge to determine whether we need to add EMBED prefix to
-# symbols read from local list.  init_os_extras() is a VMS-
+# symbols read from local list.  vmsreaddirversions() is a VMS-
 # specific function whose Perl_ prefix is added in vmsish.h
 # if EMBED is #defined.
-$embed = exists($fcns{'Perl_init_os_extras'}) ? 'Perl_' : '';
+$embed = exists($fcns{'Perl_vmsreaddirversions'}) ? 'Perl_' : '';
 while (<DATA>) {
   next if /^#/;
   s/\s+#.*\n//;

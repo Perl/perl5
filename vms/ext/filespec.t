@@ -8,7 +8,7 @@ foreach (<DATA>) {
   next if /^\s*$/;
   push(@tests,$_);
 }
-print '1..',scalar(@tests)+1,"\n";
+print '1..',scalar(@tests)+3,"\n";
 
 foreach $test (@tests) {
   ($arg,$func,$expect) = split(/\t+/,$test);
@@ -24,6 +24,10 @@ foreach $test (@tests) {
 }
 
 print +(rmsexpand('[]') eq "\U$ENV{DEFAULT}" ? 'ok ' : 'not ok '),++$idx,"\n";
+print +(rmsexpand('from.here') eq "\L$ENV{DEFAULT}from.here" ? 
+      'ok ' : 'not ok '),++$idx,"\n";
+print +(rmsexpand('from.here','cant:[get.there];2') eq 
+      'cant:[get.there]from.here;2' ? 'ok ' : 'not ok '),++$idx,"\n";
 
 __DATA__
 
@@ -81,6 +85,7 @@ down/the/garden/path	vmspath	[.down.the.garden.path]
 path	vmspath	[.path]
 
 # Redundant characters in Unix paths
+//some/where//over/../the.rainbow	vmsify	some:[where]the.rainbow
 /some/where//over/./the.rainbow	vmsify	some:[where.over]the.rainbow
 ..//../	vmspath	[--]
 ./././	vmspath	[]

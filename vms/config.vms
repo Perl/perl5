@@ -58,21 +58,26 @@
  */
 #define OSNAME "VMS"		/**/
 
-/* ARCHLIB_EXP:
+/* ARCHLIB:
  *	This variable, if defined, holds the name of the directory in
  *	which the user wants to put architecture-dependent public
  *	library files for $package.  It is most often a local directory
  *	such as /usr/local/lib.  Programs using this variable must be
- *	prepared to deal with filename expansion.  If ARCHLIB_EXP is the
- *	same as PRIVLIB_EXP, it is not defined, since presumably the
- *	program already searches PRIVLIB_EXP.
+ *	prepared to deal with filename expansion.  If ARCHLIB is the
+ *	same as PRIVLIB, it is not defined, since presumably the
+ *	program already searches PRIVLIB.
+ */
+/* ARCHLIB_EXP:
+ *	This symbol contains the ~name expanded version of ARCHLIB, to be used
+ *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
 /*     ==> NOTE <==
  * This value is automatically updated by FndVers.Com
  * when Perl is built.  Please do not change it by hand; make
  * any changes to FndVers.Com instead.
  */
-#define ARCHLIB_EXP "/perl_root/lib/VMS_VAX/5_00301"  /**/
+#define ARCHLIB_EXP "/perl_root/lib/VMS_VAX/5_00304"  /**/
+#define ARCHLIB ARCHLIB_EXP	/*config-skip*/
 
 /* CPPSTDIN:
  *	This symbol contains the first part of the string which will invoke
@@ -499,8 +504,8 @@
  * I/O uses a summy FILE *, and Perl doesn't distinguish between socket
  * and non-socket filehandles.
  */
-#undef USE_STDIO_PTR 	/**/
-#undef USE_STDIO_BASE 	/**/
+#define USE_STDIO_PTR 	/**/
+#define USE_STDIO_BASE 	/**/
 
 /* FILE_ptr:
  *	This macro is used to access the _ptr field (or equivalent) of the
@@ -520,10 +525,20 @@
  *	This symbol is defined if the FILE_cnt macro can be used as an
  *	lvalue.
  */
-#undef FILE_ptr
-#undef STDIO_PTR_LVALUE
-#undef FILE_cnt
-#undef STDIO_CNT_LVALUE
+#define FILE_ptr(fp)	((*fp)->_ptr)
+#define STDIO_PTR_LVALUE
+#define FILE_cnt(fp)	((*fp)->_cnt)
+#define STDIO_CNT_LVALUE
+
+/* FILE_filbuf:
+ *	This macro is used to access the internal stdio _filbuf function
+ *	(or equivalent), if STDIO_CNT_LVALUE and STDIO_PTR_LVALUE
+ *	are defined.  It is typically either _filbuf or __filbuf.
+ *	This macro will only be defined if both STDIO_CNT_LVALUE and
+ *	STDIO_PTR_LVALUE are defined.
+ */
+#define FILE_filbuf(fp) do { register int c; if ((c = fgetc(fp)) != EOF) \
+                             ungetc(c,(fp)); } while (0);
 
 /* FILE_base:
  *	This macro is used to access the _base field (or equivalent) of the
@@ -536,8 +551,8 @@
  *	structure pointed to its argument. This macro will always be defined
  *	if USE_STDIO_BASE is defined.
  */
-#undef FILE_base
-#undef FILE_bufsiz
+#define FILE_base(fp)	((*fp)->_base)
+#define FILE_bufsiz(fp)	((*fp)->_cnt + (*fp)->_ptr - (*fp)->_base)
 
 /* USE_STRUCT_COPY:
  *	This symbol, if defined, indicates that this C compiler knows how
@@ -681,7 +696,7 @@
  *	include <limits.h> to get definition of symbols like WORD_BIT or
  *	LONG_MAX, i.e. machine dependant limitations.
  */
-#undef I_LIMITS		/**/
+#define I_LIMITS		/**/
 
 /* I_MEMORY:
  *	This symbol, if defined, indicates to the C program that it should
@@ -779,6 +794,12 @@
  */
 #undef I_SYS_NDIR	/**/
 
+/* I_SYS_RESOURCE:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <sys/resource.h>.
+ */
+#undef I_SYS_RESOURCE		/**/
+
 /* I_SYS_SELECT:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <sys/select.h> in order to get definition of struct timeval.
@@ -795,6 +816,12 @@
  */
 #undef I_DBM	/**/
 #undef I_RPCSVC_DBM	/**/
+
+/* I_SFIO:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <sfio.h>.
+ */
+#undef	I_SFIO		/**/
 
 /* I_SYS_STAT:
  *	This symbol, if defined, indicates to the C program that it should
@@ -819,6 +846,12 @@
  *	include <sys/un.h> to get UNIX domain socket definitions.
  */
 #undef I_SYS_UN		/**/
+
+/* I_SYS_WAIT:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <sys/wait.h>.
+ */
+#undef I_SYS_WAIT	/**/
 
 /* I_TERMIO:
  *	This symbol, if defined, indicates that the program should include
@@ -1203,6 +1236,14 @@
  */
 #define Off_t int		/* <offset> type */
 
+/* I_VALUES:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <values.h> to get definition of symbols like MINFLOAT or
+ *	MAXLONG, i.e. machine dependant limitations.  Probably, you
+ *	should use <limits.h> instead, if it is available.
+ */
+#undef I_VALUES		/**/
+
 /* Free_t:
  *	This variable contains the return type of free().  It is usually
  * void, but occasionally int.
@@ -1217,6 +1258,14 @@
  *	This symbol, if defined, indicates that we're using our own malloc.
  */
 #undef MYMALLOC			/**/
+
+/* SH_PATH:
+ *	This symbol contains the full pathname to the shell used on this
+ *	on this system to execute Bourne shell scripts.  Usually, this will be
+ *	/bin/sh, though it's possible that some systems will have /bin/ksh,
+ *	/bin/pdksh, /bin/ash, /bin/bash, or even something such as D:/bin/sh.
+ */
+#define SH_PATH "MCR"  /**/
 
 /* SIG_NAME:
  *	This symbol contains a list of signal names in order. This is intended
@@ -1294,6 +1343,13 @@
 #undef RD_NODATA
 #undef EOF_NONBLOCK
 
+/* OLDARCHLIB:
+ *	This variable, if defined, holds the name of the directory in
+ *	which the user has perl5.000 or perl5.001 architecture-dependent
+ *	public library files for $package.  For the most part, these
+ *	files will work with 5.002 (and later), but that is not
+ *	guaranteed.
+ */
 /* OLDARCHLIB_EXP:
  *	This symbol contains the ~name expanded version of OLDARCHLIB, to be
  *	used in programs that are not prepared to deal with ~ expansion at 
@@ -1305,21 +1361,46 @@
  * any changes to FndVers.Com instead.
  */
 #define OLDARCHLIB_EXP "/perl_root/lib/VMS_VAX"  /**/
+#define OLDARCHLIB OLDARCHLIB_EXP  /*config-skip*/
 
-/* PRIVLIB_EXP:
+/* PRIVLIB:
  *	This symbol contains the name of the private library for this package.
  *	The library is private in the sense that it needn't be in anyone's
  *	execution path, but it should be accessible by the world.  The program
  *	should be prepared to do ~ expansion.
  */
+/* PRIVLIB_EXP:
+ *	This symbol contains the ~name expanded version of PRIVLIB, to be used
+ *	in programs that are not prepared to deal with ~ expansion at run-time.
+ */
 #define PRIVLIB_EXP "/perl_root/lib"		/**/
+#define PRIVLIB PRIVLIB_EXP  /*config-skip*/
 
+/* SITELIB:
+ *	This symbol contains the name of the private library for this package.
+ *	The library is private in the sense that it needn't be in anyone's
+ *	execution path, but it should be accessible by the world.  The program
+ *	should be prepared to do ~ expansion.
+ *	The standard distribution will put nothing in this directory.
+ *	Individual sites may place their own extensions and modules in
+ *	this directory.
+ */
 /* SITELIB_EXP:
  *	This symbol contains the ~name expanded version of SITELIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
 #define SITELIB_EXP	"/perl_root/lib/site_perl"	/**/
+#define SITELIB SITELIB_EXP  /*config-skip*/
 
+/* SITEARCH:
+ *	This symbol contains the name of the private library for this package.
+ *	The library is private in the sense that it needn't be in anyone's
+ *	execution path, but it should be accessible by the world.  The program
+ *	should be prepared to do ~ expansion.
+ *	The standard distribution will put nothing in this directory.
+ *	Individual sites may place their own extensions and modules in
+ *	this directory.
+ */
 /* SITEARCH_EXP:
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
@@ -1330,6 +1411,7 @@
  * any changes to FndVers.Com instead.
  */
 #define SITEARCH_EXP "/perl_root/lib/site_perl/VMS_VAX"  /**/
+#define SITEARCH SITEARCH_EXP  /*config-skip*/
 
 /* SCRIPTDIR:
  *	This symbol holds the name of the directory in which the user wants
@@ -1485,6 +1567,12 @@
  */
 #define Gconvert(x,n,t,b) my_gconvert(x,n,t,b)
 
+/* USE_SFIO:
+ *	This symbol, if defined, indicates that sfio should
+ *	be used.
+ */
+#undef	USE_SFIO		/**/
+
 /* Sigjmp_buf:
  * This is the buffer type to be used with Sigsetjmp and Siglongjmp.
  */
@@ -1545,10 +1633,12 @@
 #undef DB_Hash_t	/**/
 #undef DB_Prefix_t	/**/
 
-/* BIN_SH:
- *	This variable contains the path to the shell.
+/* USE_PERLIO:
+ *	This symbol, if defined, indicates that the PerlIO abstraction should
+ *	be used throughout.  If not defined, stdio should be
+ *	used in a fully backward compatible manner.
  */
-#define BIN_SH "MCR"		/**/
+#undef	USE_PERLIO		/**/
 
 /* VOIDFLAGS:
  *	This symbol indicates how much support of the void type is given by this

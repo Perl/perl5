@@ -32,7 +32,7 @@ ARCH = VMS_VAX
 OBJVAL = $@
 
 # Updated by fndvers.com -- do not edit by hand
-PERL_VERSION = 5_00301#
+PERL_VERSION = 5_00304#
 
 
 ARCHDIR =  [.lib.$(ARCH).$(PERL_VERSION)]
@@ -114,16 +114,16 @@ extobj = $(myextobj)
 h1 = EXTERN.h, INTERN.h, XSUB.h, av.h, config.h, cop.h, cv.h
 h2 = embed.h, form.h, gv.h, handy.h, hv.h, keywords.h, mg.h, op.h
 h3 = opcode.h, patchlevel.h, perl.h, perly.h, pp.h, proto.h, regcomp.h
-h4 = regexp.h, scope.h, sv.h, vmsish.h, util.h
+h4 = regexp.h, scope.h, sv.h, vmsish.h, util.h, perlio.h, perlsdio.h
 h = $(h1), $(h2), $(h3), $(h4) $(SOCKHLIS)
 
-c1 = av.c, scope.c, op.c, doop.c, doio.c, dump.c, hv.c, mg.c, universal.c
+c1 = av.c, scope.c, op.c, doop.c, doio.c, dump.c, hv.c, mg.c, universal.c, perlio.c
 c2 = perl.c, perly.c, pp.c, pp_hot.c, pp_ctl.c, pp_sys.c, regcomp.c, regexec.c
 c3 = gv.c, sv.c, taint.c, toke.c, util.c, deb.c, run.c, globals.c, vms.c $(SOCKCLIS)
 
 c = $(c1), $(c2), $(c3), miniperlmain.c, perlmain.c
 
-obj1 = perl$(O), gv$(O), toke$(O), perly$(O), op$(O), regcomp$(O), dump$(O), util$(O), mg$(O)
+obj1 = perl$(O), gv$(O), toke$(O), perly$(O), op$(O), regcomp$(O), dump$(O), util$(O), mg$(O), perlio$(O)
 obj2 = hv$(O), av$(O), run$(O), pp_hot$(O), sv$(O), pp$(O), scope$(O), pp_ctl$(O), pp_sys$(O)
 obj3 = doop$(O), doio$(O), regexec$(O), taint$(O), deb$(O), universal$(O), globals$(O), vms$(O) $(SOCKOBJ)
 
@@ -134,7 +134,7 @@ ac2 = $(ARCHCORE)config.h $(ARCHCORE)cop.h $(ARCHCORE)cv.h $(ARCHCORE)embed.h
 ac3 = $(ARCHCORE)form.h $(ARCHCORE)gv.h $(ARCHCORE)handy.h $(ARCHCORE)hv.h
 ac4 = $(ARCHCORE)keywords.h $(ARCHCORE)mg.h $(ARCHCORE)op.h $(ARCHCORE)opcode.h
 ac5 = $(ARCHCORE)patchlevel.h $(ARCHCORE)perl.h $(ARCHCORE)perly.h
-ac6 = $(ARCHCORE)pp.h $(ARCHCORE)proto.h $(ARCHCORE)regcomp.h
+ac6 = $(ARCHCORE)pp.h $(ARCHCORE)proto.h $(ARCHCORE)regcomp.h $(ARCHCORE)perlio.h $(ARCHCORE)perlsdio.h
 ac7 = $(ARCHCORE)regexp.h $(ARCHCORE)scope.h $(ARCHCORE)sv.h $(ARCHCORE)util.h
 ac8 = $(ARCHCORE)vmsish.h $(ARCHCORE)$(DBG)libperl$(OLB) $(ARCHCORE)perlshr_attr.opt
 ac9 = $(ARCHCORE)$(DBG)perlshr_bld.opt
@@ -651,6 +651,12 @@ $(ARCHCORE)patchlevel.h : patchlevel.h
 $(ARCHCORE)perl.h : perl.h
 	@ If f$$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log perl.h $@
+$(ARCHCORE)perlio.h : perlio.h
+	@ If f$$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
+	Copy/Log perlio.h $@
+$(ARCHCORE)perlsdio.h : perlsdio.h
+	@ If f$$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
+	Copy/Log perlsdio.h $@
 $(ARCHCORE)perly.h : perly.h
 	@ If f$$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log perly.h $@
@@ -1271,6 +1277,29 @@ vms$(O) : scope.h
 vms$(O) : sv.h
 vms$(O) : vmsish.h
 vms$(O) : util.h
+perlio$(O) : EXTERN.h
+perlio$(O) : av.h
+perlio$(O) : config.h
+perlio$(O) : cop.h
+perlio$(O) : cv.h
+perlio$(O) : embed.h
+perlio$(O) : form.h
+perlio$(O) : gv.h
+perlio$(O) : handy.h
+perlio$(O) : hv.h
+perlio$(O) : mg.h
+perlio$(O) : op.h
+perlio$(O) : opcode.h
+perlio$(O) : perl.h
+perlio$(O) : perly.h
+perlio$(O) : pp.h
+perlio$(O) : proto.h
+perlio$(O) : regexp.h
+perlio$(O) : perlio.c
+perlio$(O) : scope.h
+perlio$(O) : sv.h
+perlio$(O) : vmsish.h
+perlio$(O) : util.h
 miniperlmain$(O) : EXTERN.h
 miniperlmain$(O) : av.h
 miniperlmain$(O) : config.h

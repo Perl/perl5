@@ -611,7 +611,7 @@ list logical names.  For instance, if you say
 
    $  Define STORY  once,upon,a,time,there,was
    $  perl -e "for ($i = 0; $i <= 6; $i++) " -
-   _$ -e "{ print $ENV{'foo'.$i},' '}"
+   _$ -e "{ print $ENV{'story;'.$i},' '}"
 
 Perl will print C<ONCE UPON A TIME THERE WAS>.
 
@@ -632,6 +632,14 @@ logical name translation after the deletion, so an inner-mode
 logical name or a name in another logical name table will 
 replace the logical name just deleted.  It is not possible
 at present to define a search list logical name via %ENV.
+
+At present, the first time you iterate over %ENV using
+C<keys>, C<values>, or C<each>, you will incur a time
+penalty as all logical names are read, in order to fully
+populate %ENV.  Subsequent iterations will not reread
+logical names, so they won't be as slow, but they also
+won't reflect any changes to logical name tables caused
+by other programs.
 
 In all operations on %ENV, the key string is treated as if it 
 were entirely uppercase, regardless of the case actually 
