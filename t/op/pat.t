@@ -6,7 +6,7 @@
 
 # $RCSfile: pat.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:12 $
 
-print "1..120\n";
+print "1..123\n";
 
 chdir 't' if -d 't';
 @INC = "../lib";
@@ -449,6 +449,22 @@ foreach $ans ('', 'a', '') {
   print "ok $test\n";
   $test++;
 }
+
+sub prefixify {
+  my($v,$a,$b,$res) = @_; 
+  $v =~ s/\Q$a\E/$b/; 
+  print "not " unless $res eq $v; 
+  print "ok $test\n";
+  $test++;
+}
+prefixify('/a/b/lib/arch', "/a/b/lib", 'X/lib', 'X/lib/arch');
+prefixify('/a/b/man/arch', "/a/b/man", 'X/man', 'X/man/arch');
+
+$_ = 'var="foo"';
+/(\")/;
+print "not " unless $1 and /$1/;
+print "ok $test\n";
+$test++;
 
 sub must_warn_pat {
     my $warn_pat = shift;
