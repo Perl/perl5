@@ -14,8 +14,27 @@ Max  Memory: @{[MaxMem]}
 END
 
 $h  = new Handle("xyzzy");
-$fh = $h->open("<");
+$r = $h->open("r");
 
-$_ = <$fh>;
+# should be "xyzzy"
+print <$r>, "\n";
 
-print;
+$w = $h->open("w");
+print $w "wysiwyg";
+
+# should be "wysiwyg"
+print $h->get, "\n";
+
+truncate $w, 0;
+# should be " (0)"
+printf "%s (%d)\n", $h->get, $h->size;
+# should be blank
+print <$r>, "\n";
+# should be " (0)"
+undef $w;
+printf "%s (%d)\n", $h->get, $h->size;
+
+truncate $r, 0;
+# should be " (0)"
+printf "%s (%d)\n", $h->get, $h->size;
+__END__

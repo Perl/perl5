@@ -6,6 +6,12 @@
  *    as specified in the README file.
  *
  * $Log: Memory.xs,v $
+ * Revision 1.4  2002/01/04 03:38:19  pudge
+ * Disable Mac::Memory::_open (HandleSocket::OpenHandle) for now
+ *
+ * Revision 1.3  2001/12/19 22:57:11  pudge
+ * Start to make Mac::Memory::_open work.  HandleSocket.cp still needs some lovin ' ... the entire thing is a bit unstable.
+ *
  * Revision 1.2  2000/09/09 22:18:27  neeri
  * Dynamic libraries compile under 5.6
  *
@@ -245,6 +251,10 @@ Open a stream to a handle and return it.
 
 NOT DEFINED AT THE MOMENT
 
+=cut
+
+#ifdef NOT_YET
+
 SysRet
 _open(hand, mode)
 	Handle	hand
@@ -254,6 +264,8 @@ _open(hand, mode)
 	OUTPUT:
 	RETVAL
 	
+#endif
+
 =item dispose
 
 Disposes of the handle.
