@@ -255,3 +255,10 @@
      2 databases.
 
    * Added some of the examples in the POD into the test harness.
+
+1.69 3rd August 1999
+
+   * fixed a bug in push -- DB_APPEND wasn't working properly.
+   * Fixed the R_SETCURSOR bug introduced in 1.68
+   * Added a new Perl variable $DB_File::db_ver
+   

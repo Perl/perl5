@@ -3,8 +3,8 @@
  DB_File.xs -- Perl 5 interface to Berkeley DB 
 
  written by Paul Marquess <Paul.Marquess@btinternet.com>
- last modified 22nd July 1999
- version 1.68
+ last modified 3rd August 1999
+ version 1.69
 
  All comments/suggestions/problems are welcome
 
@@ -71,6 +71,10 @@
 		Fixed a small memory leak in the filter code.
         1.68 -  fixed backward compatability bug with R_IAFTER & R_IBEFORE
 		merged in the 5.005_58 changes
+        1.69 -  fixed a bug in push -- DB_APPEND wasn't working properly.
+		Fixed the R_SETCURSOR bug introduced in 1.68
+		Added a new Perl variable $DB_File::db_ver 
+
 
 
 
@@ -161,7 +165,11 @@ typedef db_recno_t	recno_t;
 #define R_NEXT          DB_NEXT
 #define R_NOOVERWRITE   DB_NOOVERWRITE
 #define R_PREV          DB_PREV
-#define R_SETCURSOR     (-1 )
+#if DB_VERSION_MAJOR == 2 && DB_VERSION_MINOR < 5
+#define R_SETCURSOR     0x800000
+#else
+#define R_SETCURSOR     (-100)
+#endif
 #define R_RECNOSYNC     0
 #define R_FIXEDLEN	DB_FIXEDLEN
 #define R_DUP		DB_DUP
@@ -271,7 +279,8 @@ typedef union INFO {
 #define db_get(db, key, value, flags)   ((db->dbp)->get)(db->dbp, TXN &key, &value, flags)
 
 #ifdef DB_VERSION_MAJOR
-#define db_DESTROY(db)                  ((db->dbp)->close)(db->dbp, 0)
+#define db_DESTROY(db)                  ( db->cursor->c_close(db->cursor),\
+					  db->dbp->close(db->dbp, 0) )
 #define db_close(db)			((db->dbp)->close)(db->dbp, 0)
 #define db_del(db, key, flags)          (flagSet(flags, R_CURSOR) 					\
 						? ((db->cursor)->c_del)(db->cursor, 0)		\
@@ -432,7 +441,8 @@ u_int		flags ;
 static void
 GetVersionInfo(pTHX)
 {
-    SV * ver_sv = perl_get_sv("DB_File::db_version", TRUE) ;
+    SV * version_sv = perl_get_sv("DB_File::db_version", TRUE) ;
+    SV * ver_sv = perl_get_sv("DB_File::db_ver", TRUE) ;
 #ifdef DB_VERSION_MAJOR
     int Major, Minor, Patch ;
 
@@ -444,16 +454,20 @@ GetVersionInfo(pTHX)
 		 Major, Minor, Patch) ;
  
 #if PERL_VERSION > 3
-    sv_setpvf(ver_sv, "%d.%d", Major, Minor) ;
+    sv_setpvf(version_sv, "%d.%d", Major, Minor) ;
+    sv_setpvf(ver_sv, "%d.%03d%03d", Major, Minor, Patch) ;
 #else
     {
         char buffer[40] ;
         sprintf(buffer, "%d.%d", Major, Minor) ;
+        sv_setpv(version_sv, buffer) ; 
+        sprintf(buffer, "%d.%03d%03d", Major, Minor, Patch) ;
         sv_setpv(ver_sv, buffer) ; 
     }
 #endif
  
 #else
+    sv_setiv(version_sv, 1) ;
     sv_setiv(ver_sv, 1) ;
 #endif
 
@@ -1522,6 +1536,7 @@ push(db, ...)
 	    DBT_flags(value) ; 
 	    CurrentDB = db ;
 #ifdef DB_VERSION_MAJOR
+	    	RETVAL = do_SEQ(db, key, value, DB_LAST) ;
 	   	RETVAL = 0 ;
 		key = empty ;
 	        for (i = 1 ; i < items  ; ++i)

@@ -197,6 +197,8 @@ ok(25, $#keys == 31) ;
 $h{'foo'} = '';
 ok(26, $h{'foo'} eq '' );
 
+# Berkeley DB 2 from version 2.4.10 onwards does not allow null keys.
+# This feature will be reenabled in a future version of Berkeley DB.
 #$h{''} = 'bar';
 #ok(27, $h{''} eq 'bar' );
 ok(27,1) ;
