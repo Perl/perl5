@@ -1082,6 +1082,19 @@ build process.  Type B<man perl> to get started.  Alternatively, you
 can type B<perldoc perl> to use the supplied B<perldoc> script.  This
 is sometimes useful for finding things in the library modules.
 
+Under UNIX, you can produce a documentation book in postscript form
+along with its I<Table of Contents> by going to the pod/ subdirectory
+and running (either):
+
+	./roffitall -groff		# If you have GNU groff installed
+	./roffitall -psroff		# Otherwise
+
+This will leave you with two postscript files ready to be printed.
+
+Note that you must have performed the installation already before
+running the above, since the script collects the installed files to
+generate the documentation.
+
 =head1 AUTHOR
 
 Andy Dougherty <doughera@lafcol.lafayette.edu>, borrowing I<very> heavily
@@ -1089,4 +1102,4 @@ from the original README by Larry Wall.
 
 =head1 LAST MODIFIED
 
-24 December 1996
+16 January 1997
