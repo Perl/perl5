@@ -95,6 +95,15 @@ print "# @list\n";
 my $max_uv_pp = "$max_uv"; $max_uv_pp++;
 my $max_uv_p1 = "$max_uv"; $max_uv_p1+=0; $max_uv_p1++;
 
+# Also need to cope with %g notation for max_uv_p1 that actually gives an
+# integer less than max_uv because of correct rounding for the limited
+# precisision. This bites for 12 byte long doubles and 8 byte UVs
+
+my $temp = $max_uv_p1;
+my $max_uv_p1_as_iv;
+{use integer; $max_uv_p1_as_iv = 0 + sprintf "%s", $temp}
+my $max_uv_p1_as_uv = 0 | sprintf "%s", $temp;
+
 my @opnames = split //, "-+UINPuinp";
 
 # @list = map { 2->($_), 3->($_), 4->($_), 5->($_),  } @list; # Prepare input
@@ -193,6 +202,15 @@ for my $num_chain (1..$max_chain) {
 	      # string ++ versus numeric ++. Tolerate this little
 	      # bit of insanity
 	      print "# ok, as string ++ of max_uv is \"$max_uv_pp\", numeric is $max_uv_p1\n"
+	    } elsif ($opnames[$last] eq 'I' and $ans[1] eq "-1"
+		     and $ans[0] eq $max_uv_p1_as_iv) {
+	      print "# ok, \"$max_uv_p1\" correctly converts to IV \"$max_uv_p1_as_iv\"\n";
+	    } elsif ($opnames[$last] eq 'U' and $ans[1] eq ~0
+		     and $ans[0] eq $max_uv_p1_as_uv) {
+	      print "# ok, \"$max_uv_p1\" correctly converts to UV \"$max_uv_p1_as_uv\"\n";
+	    } elsif (grep {/^N$/} @opnames[@{$curops[0]}]
+		     and $ans[0] == $ans[1] and $ans[0] <= ~0) {
+	      print "# ok, numerically equal - notation changed due to adding zero\n";
 	    } else {
 	      $nok++,
 	    }
