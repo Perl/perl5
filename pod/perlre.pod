@@ -175,7 +175,11 @@ just like "^" and "$" except that they won't match multiple times when the
 C</m> modifier is used, while "^" and "$" will match at every internal line
 boundary.  To match the actual end of the string, not ignoring newline,
 you can use C<\Z(?!\n)>.  The C<\G> assertion can be used to mix global
-matches (using C<m//g>) and non-global ones, as described in L<perlop>.
+matches (using C<m//g>) and non-global ones, as described in 
+L<perlop/"Regexp Quote-Like Operators">.
+It is also useful when writing C<lex>-like scanners, when you have several
+regexps which you want to match against consequent substrings of your
+string, see the previous reference.
 The actual location where C<\G> will match can also be influenced
 by using C<pos()> as an lvalue.  See L<perlfunc/pos>.
 

@@ -912,8 +912,8 @@ HV* stash;
   AMT *amtp=mg ? (AMT*)mg->mg_ptr: NULL;
   AMT amt;
 
-  if (mg && (amtp=((AMT*)(mg->mg_ptr)))->was_ok_am == amagic_generation &&
-             amtp->was_ok_sub == sub_generation)
+  if (mg && amtp->was_ok_am == amagic_generation
+      && amtp->was_ok_sub == sub_generation)
       return AMT_AMAGIC(amtp);
   if (amtp && AMT_AMAGIC(amtp)) {	/* Have table. */
     int i;
@@ -997,10 +997,10 @@ HV* stash;
 
     if ( cp = (char *)AMG_names[0] ) {
 	/* Try to find via inheritance. */
-	gv = gv_fetchmeth(stash, "()", 2, 0); /* A cooky: "()". */
+	gv = gv_fetchmeth(stash, "()", 2, -1); /* A cooky: "()". */
 	if (gv) sv = GvSV(gv);
 
-	if (!sv) /* Empty */;
+	if (!gv) goto notable;
 	else if (SvTRUE(sv)) amt.fallback=AMGfallYES;
 	else if (SvOK(sv)) amt.fallback=AMGfallNEVER;
     }
@@ -1057,6 +1057,7 @@ HV* stash;
     }
   }
   /* Here we have no table: */
+ notable:
   AMT_AMAGIC_off(&amt);
   sv_magic((SV*)stash, 0, 'c', (char*)&amt, sizeof(AMTS));
   return FALSE;
@@ -1222,8 +1223,9 @@ int flags;
 	notfound = 1; lr = 1;
       } else {
         if (off==-1) off=method;
-	sprintf(buf, "Operation `%s': no method found,\n\tleft argument %s%.256s,\n\tright argument %s%.256s",
+	sprintf(buf, "Operation `%s': no method found,%sargument %s%.256s%s%.256s",
 		      AMG_names[method + assignshift],
+		      (flags & AMGf_unary ? " " : "\n\tleft "),
 		      SvAMAGIC(left)? 
 		        "in overloaded package ":
 		        "has no overloaded magic",
@@ -1231,8 +1233,10 @@ int flags;
 		        HvNAME(SvSTASH(SvRV(left))):
 		        "",
 		      SvAMAGIC(right)? 
-		        "in overloaded package ":
-		        "has no overloaded magic",
+		        ",\n\tright argument in overloaded package ":
+		        (flags & AMGf_unary 
+			 ? ""
+			 : ",\n\tright argument has no overloaded magic"),
 		      SvAMAGIC(right)? 
 		        HvNAME(SvSTASH(SvRV(right))):
 		        "");
