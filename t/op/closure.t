@@ -465,6 +465,7 @@ END
 	    open CMD, ">$cmdfile"; print CMD $code; close CMD;
 	    my $cmd = (($^O eq 'VMS') ? "MCR $^X"
 		       : ($^O eq 'MSWin32') ? '.\perl'
+		       : ($^O eq 'MacOS') ? $^X
 		       : './perl');
 	    $cmd .= " -w $cmdfile 2>$errfile";
 	    if ($^O eq 'VMS' or $^O eq 'MSWin32') {

@@ -95,16 +95,20 @@ static char sscsid[]=  "$OpenBSD: glob.c,v 1.8.10.1 2001/04/10 jason Exp $";
 #endif
 
 #ifndef ARG_MAX
-#  ifdef _SC_ARG_MAX
-#    define	ARG_MAX		(sysconf(_SC_ARG_MAX))
+#  ifdef MACOS_TRADITIONAL
+#    define		ARG_MAX		65536	/* Mac OS is actually unlimited */
 #  else
-#    ifdef _POSIX_ARG_MAX
-#      define	ARG_MAX		_POSIX_ARG_MAX
+#    ifdef _SC_ARG_MAX
+#      define		ARG_MAX		(sysconf(_SC_ARG_MAX))
 #    else
-#      ifdef WIN32
-#        define	ARG_MAX		14500	/* from VC's limits.h */
+#      ifdef _POSIX_ARG_MAX
+#        define		ARG_MAX		_POSIX_ARG_MAX
 #      else
-#        define	ARG_MAX		4096	/* from POSIX, be conservative */
+#        ifdef WIN32
+#          define	ARG_MAX		14500	/* from VC's limits.h */
+#        else
+#          define	ARG_MAX		4096	/* from POSIX, be conservative */
+#        endif
 #      endif
 #    endif
 #  endif
@@ -492,7 +496,7 @@ glob0(const Char *pattern, glob_t *pglob)
 
 #ifdef MACOS_TRADITIONAL
 	if ( (*pattern == BG_TILDE) && (pglob->gl_flags & GLOB_TILDE) ) {
-		return(globextend(pattern, pglob));
+		return(globextend(pattern, pglob, &limit));
 	}
 #endif
 
