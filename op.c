@@ -4750,6 +4750,8 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	}
 	/* ... before we throw it away */
 	SvREFCNT_dec(PL_compcv);
+	if (PERLDB_INTER)/* Advice debugger on the new sub. */
+	  ++PL_sub_generation;
     }
     else {
 	cv = PL_compcv;
