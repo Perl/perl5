@@ -6546,7 +6546,7 @@ Perl_ck_subr(pTHX_ OP *o)
     int optional = 0;
     I32 arg = 0;
     I32 contextclass = 0;
-    char *e;
+    char *e = 0;
     STRLEN n_a;
 
     o->op_private |= OPpENTERSUB_HASTARG;
