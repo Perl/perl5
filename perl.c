@@ -925,7 +925,7 @@ setuid perl scripts securely.\n");
 	     (UV)(Drand01() * (NV)((1 << ((UVSIZE * 8 - RANDBITS))) - 1));
 #endif /* RANDBITS < (UVSIZE * 8) */
        }
-#endif /* USE_HASH_SEED_EXPLICIT */
+#endif /* #ifndef USE_HASH_SEED_EXPLICIT */
        if ((s = PerlEnv_getenv("PERL_HASH_SEED_DEBUG")))
 	   PerlIO_printf(Perl_debug_log, "HASH_SEED = %"UVuf"\n",
 			 PL_hash_seed);
