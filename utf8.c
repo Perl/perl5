@@ -1319,7 +1319,6 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *norma
 	     (he    = hv_fetch_ent(hv, keysv, FALSE, 0)) &&
 	     (val   = HeVAL(he))) {
 	     char *s;
-	     U8 *d;
 
 	      s = SvPV(val, len);
 	      if (len == 1)
@@ -1329,7 +1328,7 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *norma
 		   /* If we have EBCDIC we need to remap the characters
 		    * since any characters in the low 256 are Unicode
 		    * code points, not EBCDIC. */
-		   U8 *t = (U8*)s, *tend = t + len;
+		   U8 *t = (U8*)s, *tend = t + len, *d;
 		
 		   d = tmpbuf;
 		   if (SvUTF8(val)) {
