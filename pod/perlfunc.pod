@@ -3255,7 +3255,7 @@ and the conversion letter:
    +       prefix positive number with a plus sign
    -       left-justify within the field
    0       use zeros, not spaces, to right-justify
-   #       prefix octal with "0", hex with "0x"
+   #       prefix non-zero octal with "0", non-zero hex with "0x"
    number  minimum field width
    .number "precision": digits after decimal point for floating-point,
            max length for string, minimum length for integer
