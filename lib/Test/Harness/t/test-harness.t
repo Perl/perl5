@@ -452,13 +452,29 @@ my %samples = (
                                            },
                                  all_ok => 0,
                                 },
+            switches         => {
+                                  total => {
+                                            bonus      => 0,
+                                            max        => 1,
+                                            'ok'       => 1,
+                                            files      => 1,
+                                            bad        => 0,
+                                            good       => 1,
+                                            tests      => 1,
+                                            sub_skipped=> 0,
+                                            'todo'     => 0,
+                                            skipped    => 0,
+                                           },
+                                  failed => { },
+                                  all_ok => 1,
+                                 },
            );
 
 plan tests => (keys(%samples) * 8) + 1;
 
 use Test::Harness;
 use_ok('Test::Harness');
-
+$Test::Harness::Switches = '"-Mstrict"';
 
 tie *NULL, 'My::Dev::Null' or die $!;
 

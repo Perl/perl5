@@ -1,5 +1,5 @@
 # -*- Mode: cperl; cperl-indent-level: 4 -*-
-# $Id: Straps.pm,v 1.16 2003/02/02 05:27:44 schwern Exp $
+# $Id: Straps.pm,v 1.17 2003/04/03 17:47:25 andy Exp $
 
 package Test::Harness::Straps;
 
@@ -324,7 +324,7 @@ sub _switches {
     local *TEST;
     open(TEST, $file) or print "can't open $file. $!\n";
     my $first = <TEST>;
-    my $s = '';
+    my $s = $Test::Harness::Switches || '';
     $s .= " $ENV{'HARNESS_PERL_SWITCHES'}"
       if exists $ENV{'HARNESS_PERL_SWITCHES'};
 
