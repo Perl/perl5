@@ -1492,6 +1492,8 @@ PP(pp_sort)
     bool hasargs = FALSE;
     I32 is_xsub = 0;
     I32 sorting_av = 0;
+    U8 private = PL_op->op_private;
+    U8 flags = PL_op->op_flags;
     void (*sortsvp)(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp)
       = Perl_sortsv;
 
@@ -1502,8 +1504,8 @@ PP(pp_sort)
 
     ENTER;
     SAVEVPTR(PL_sortcop);
-    if (PL_op->op_flags & OPf_STACKED) {
-	if (PL_op->op_flags & OPf_SPECIAL) {
+    if (flags & OPf_STACKED) {
+	if (flags & OPf_SPECIAL) {
 	    OP *kid = cLISTOP->op_first->op_sibling;	/* pass pushmark */
 	    kid = kUNOP->op_first;			/* pass rv2gv */
 	    kid = kUNOP->op_first;			/* pass leave */
@@ -1553,7 +1555,7 @@ PP(pp_sort)
     /* optimiser converts "@a = sort @a" to "sort \@a";
      * in case of tied @a, pessimise: push (@a) onto stack, then assign
      * result back to @a at the end of this function */
-    if (PL_op->op_private & OPpSORT_INPLACE) {
+    if (private & OPpSORT_INPLACE) {
 	assert( MARK+1 == SP && *SP && SvTYPE(*SP) == SVt_PVAV);
 	(void)POPMARK; /* remove mark associated with ex-OP_AASSIGN */
 	av = (AV*)(*SP);
@@ -1576,7 +1578,7 @@ PP(pp_sort)
 	max = SP - MARK;
    }
 
-    if (PL_op->op_private & OPpSORT_DESCEND) {
+    if (private & OPpSORT_DESCEND) {
 	sortsvp = S_sortsv_desc;
     }
 
@@ -1601,6 +1603,7 @@ PP(pp_sort)
 	AvFILLp(av) = max-1;
 
     if (max > 1) {
+	SV **start;
 	if (PL_sortcop) {
 	    PERL_CONTEXT *cx;
 	    SV** newsp;
@@ -1624,7 +1627,7 @@ PP(pp_sort)
 	    }
 
 	    PUSHBLOCK(cx, CXt_NULL, PL_stack_base);
-	    if (!(PL_op->op_flags & OPf_SPECIAL)) {
+	    if (!(flags & OPf_SPECIAL)) {
 		cx->cx_type = CXt_SUB;
 		cx->blk_gimme = G_SCALAR;
 		PUSHSUB(cx);
@@ -1640,8 +1643,10 @@ PP(pp_sort)
 		CX_CURPAD_SAVE(cx->blk_sub);
 		cx->blk_sub.argarray = av;
 	    }
-           sortsvp(aTHX_ p1-max, max,
-		   is_xsub ? sortcv_xsub : hasargs ? sortcv_stacked : sortcv);
+	    
+	    start = p1 - max;
+	    sortsvp(aTHX_ start, max,
+		    is_xsub ? sortcv_xsub : hasargs ? sortcv_stacked : sortcv);
 
 	    POPBLOCK(cx,PL_curpm);
 	    PL_stack_sp = newsp;
@@ -1650,9 +1655,10 @@ PP(pp_sort)
 	}
 	else {
 	    MEXTEND(SP, 20);	/* Can't afford stack realloc on signal. */
-	    sortsvp(aTHX_ sorting_av ? AvARRAY(av) : ORIGMARK+1, max,
-		    (PL_op->op_private & OPpSORT_NUMERIC)
-			? ( (PL_op->op_private & OPpSORT_INTEGER)
+	    start = sorting_av ? AvARRAY(av) : ORIGMARK+1;
+	    sortsvp(aTHX_ start, max,
+		    (private & OPpSORT_NUMERIC)
+			? ( (private & OPpSORT_INTEGER)
 			    ? ( overloading ? amagic_i_ncmp : sv_i_ncmp)
 			    : ( overloading ? amagic_ncmp : sv_ncmp))
 			: ( IN_LOCALE_RUNTIME
@@ -1660,14 +1666,13 @@ PP(pp_sort)
 				? amagic_cmp_locale
 				: sv_cmp_locale_static)
 			    : ( overloading ? amagic_cmp : sv_cmp_static)));
-	    if (PL_op->op_private & OPpSORT_REVERSE) {
-		SV **p = sorting_av ? AvARRAY(av) : ORIGMARK+1;
-		SV **q = p+max-1;
-		while (p < q) {
-		    SV *tmp = *p;
-		    *p++ = *q;
-		    *q-- = tmp;
-		}
+	}
+	if (private & OPpSORT_REVERSE) {
+	    SV **q = start+max-1;
+	    while (start < q) {
+		SV *tmp = *start;
+		*start++ = *q;
+		*q-- = tmp;
 	    }
 	}
     }

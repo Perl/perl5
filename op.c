@@ -6600,18 +6600,38 @@ Perl_peep(pTHX_ register OP *o)
         }
 
 	case OP_SORT: {
-	    /* make @a = sort @a act in-place */
-
 	    /* will point to RV2AV or PADAV op on LHS/RHS of assign */
 	    OP *oleft, *oright;
 	    OP *o2;
-
-	    o->op_opt = 1;
 
 	    /* check that RHS of sort is a single plain array */
 	    oright = cUNOPo->op_first;
 	    if (!oright || oright->op_type != OP_PUSHMARK)
 		break;
+
+	    /* reverse sort ... can be optimised.  */
+	    if (!cUNOPo->op_sibling) {
+		/* Nothing follows us on the list. */
+		OP *reverse = o->op_next;
+
+		if (reverse->op_type == OP_REVERSE &&
+		    (reverse->op_flags & OPf_WANT) == OPf_WANT_LIST) {
+		    OP *pushmark = cUNOPx(reverse)->op_first;
+		    if (pushmark && (pushmark->op_type == OP_PUSHMARK)
+			&& (cUNOPx(pushmark)->op_sibling == o)) {
+			/* reverse -> pushmark -> sort */
+			o->op_private |= OPpSORT_REVERSE;
+			op_null(reverse);
+			pushmark->op_next = oright->op_next;
+			op_null(oright);
+		    }
+		}
+	    }
+
+	    /* make @a = sort @a act in-place */
+
+	    o->op_opt = 1;
+
 	    oright = cUNOPx(oright)->op_sibling;
 	    if (!oright)
 		break;
@@ -6698,8 +6718,6 @@ Perl_peep(pTHX_ register OP *o)
 	    break;
 	}
 	
-
-
 	default:
 	    o->op_opt = 1;
 	    break;
