@@ -231,6 +231,7 @@ cc=''
 gccversion=''
 ccflags=''
 cppflags=''
+mab=''
 ldflags=''
 lkflags=''
 locincpth=''
@@ -1638,7 +1639,7 @@ EOM
 			*)	osvers="$3" ;;
 			esac
 			;;
-		irix) osname=irix
+		irix*) osname=irix
 			case "$3" in
 			4*) osvers=4 ;;
 			5*) osvers=5 ;;
@@ -1857,6 +1858,7 @@ cd UU
 	tmp_c="$c"
 	cd ..
 	cp $config_sh config.sh 2>/dev/null
+	chmod +w config.sh
 	. ./config.sh
 	cd UU
 	cp ../config.sh .
@@ -2331,7 +2333,8 @@ case "$archlib" in
 		set dflt
 		eval $prefixup
 		;;
-	*)	version=`echo $baserev $patchlevel $subversion | \
+	*)	version=`LC_ALL=C;export LC_ALL;\
+		    echo $baserev $patchlevel $subversion | \
 		    $awk '{print $1 + $2/1000.0 + $3/100000.0}'`
 		dflt="$privlib/$archname/$version"
 		;;
@@ -4621,6 +4624,10 @@ $cat >try.c <<'EOP'
 #endif
 main() { 
 	char buf[64]; 
+	/* This test must come first. <AlanBurlison@unn.unisys.com> */
+	Gconvert(0.1, 8, 0, buf);
+	if (buf[0] != '.' || buf[1] != '1' || buf[2] != '\0')
+		exit(1);
 	Gconvert(1.0, 8, 0, buf); 
 	if (buf[0] != '1' || buf[1] != '\0')
 		exit(1);
@@ -5388,6 +5395,7 @@ EOM
 			hpux)	dflt='+z' ;;
 			next)	dflt='none' ;;
 			solaris|svr4*|esix*) dflt='-Kpic' ;;
+			irix*)  dflt='-KPIC' ;;
 			sunos)	dflt='-pic' ;;
 			*)	dflt='none' ;;
 		    esac ;;
@@ -5455,7 +5463,7 @@ EOM
     case "$lddlflags" in
     '') case "$osname" in
 			hpux)  dflt='-b' ;;
-			linux)	dflt='-shared' ;;
+			linux|irix*)	dflt='-shared' ;;
 			next)  dflt='none' ;;
 			solaris) dflt='-G' ;;
 			sunos) dflt='-assert nodefinitions' ;;
@@ -5646,7 +5654,8 @@ main()
 }
 EOM
 	if $cc $ccflags $cccdlflags -c dyna.c > /dev/null 2>&1 && 
-		$ld $lddlflags -o dyna.$dlext dyna.o > /dev/null 2>&1 && 
+		mv dyna.o tmp-dyna.o > /dev/null 2>&1 &&
+		$ld $lddlflags -o dyna.$dlext tmp-dyna.o > /dev/null 2>&1 && 
 		$cc $ccflags $ldflags $cccdlflags $ccdlflags fred.c -o fred $libs > /dev/null 2>&1; then
 		xxx=`./fred`
 		case $xxx in
@@ -5664,7 +5673,7 @@ EOM
 	;;
 esac
 		
-$rm -f fred fred.? dyna.$dlext dyna.?
+$rm -f fred fred.? dyna.$dlext dyna.? tmp-dyna.?
 
 set d_dlsymun
 eval $setvar
@@ -9262,6 +9271,7 @@ lp='$lp'
 lpr='$lpr'
 ls='$ls'
 lseektype='$lseektype'
+mab='$mab'
 mail='$mail'
 mailx='$mailx'
 make='$make'
