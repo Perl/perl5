@@ -143,16 +143,7 @@ if ($PLATFORM eq 'win32') {
 elsif ($PLATFORM eq 'os2') {
     ($v = $]) =~ s/(\d\.\d\d\d)(\d\d)$/$1_$2/;
     $v .= '-thread' if $ARCHNAME =~ /-thread/;
-    #$sum = 0;
-    #for (split //, $v) {
-    #	$sum = ($sum * 33) + ord;
-    #	$sum &= 0xffffff;
-    #}
-    #$sum += $sum >> 5;
-    #$sum &= 0xffff;
-    #$sum = printf '%X', $sum;
     ($dll = $define{PERL_DLL}) =~ s/\.dll$//i;
-    # print STDERR "'$dll' <= '$define{PERL_DLL}'\n";
     print <<"---EOP---";
 LIBRARY '$dll' INITINSTANCE TERMINSTANCE
 DESCRIPTION '\@#perl5-porters\@perl.org:$v#\@ Perl interpreter'
@@ -823,3 +814,12 @@ PerlIO_define_layer
 PerlIO_pending
 PerlIO_unread
 PerlIO_push
+PerlIO_apply_layers
+perlsio_binmode
+PerlIO_binmode
+PerlIO_init
+PerlIO_tmpfile
+PerlIO_setpos
+PerlIO_getpos
+PerlIO_vsprintf
+PerlIO_sprintf
