@@ -970,7 +970,6 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen, I32 flags)
 	bool needs_store;
 	hv_magic_check (hv, &needs_copy, &needs_store);
 
-// XXX PerlIO_printf(PerlIO_stderr(), "%d %d\n", is_utf8, klen);
 	if (needs_copy
 	    && (svp = hv_fetch(hv, key, is_utf8 ? -klen : klen, TRUE))) {
 	    sv = *svp;
