@@ -2200,7 +2200,7 @@ Perl_rsignal(pTHX_ int signo, Sighandler_t handler)
     if (PL_signals & PERL_SIGNALS_UNSAFE_FLAG)
         act.sa_flags |= SA_RESTART;	/* SVR4, 4.3+BSD */
 #endif
-#ifdef SA_NOCLDWAIT
+#ifdef SA_NOCLDWAIT && !defined(BSDish) /* See [perl #18849] */
     if (signo == SIGCHLD && handler == (Sighandler_t)SIG_IGN)
 	act.sa_flags |= SA_NOCLDWAIT;
 #endif
@@ -2239,7 +2239,7 @@ Perl_rsignal_save(pTHX_ int signo, Sighandler_t handler, Sigsave_t *save)
     if (PL_signals & PERL_SIGNALS_UNSAFE_FLAG)
         act.sa_flags |= SA_RESTART;	/* SVR4, 4.3+BSD */
 #endif
-#ifdef SA_NOCLDWAIT
+#if defined(SA_NOCLDWAIT) && !defined(BSDish) /* See [perl #18849] */
     if (signo == SIGCHLD && handler == (Sighandler_t)SIG_IGN)
 	act.sa_flags |= SA_NOCLDWAIT;
 #endif
