@@ -1,7 +1,7 @@
 /*    toke.c
  *
  *    Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
- *    2000, 2001, 2002, 2003, 2004, by Larry Wall and others
+ *    2000, 2001, 2002, 2003, 2004, 2005, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -588,15 +588,17 @@ S_skipspace(pTHX_ register char *s)
 			     (prevlen = SvCUR(PL_linestr)))) == Nullch)
 	{
 	    /* end of file.  Add on the -p or -n magic */
-	    if (PL_minus_n || PL_minus_p) {
-		sv_setpv(PL_linestr,PL_minus_p ?
-			 ";}continue{print or die qq(-p destination: $!\\n)" :
-			 "");
-		sv_catpv(PL_linestr,";}");
+	    if (PL_minus_p) {
+		sv_setpv(PL_linestr,
+			 ";}continue{print or die qq(-p destination: $!\\n);}");
 		PL_minus_n = PL_minus_p = 0;
 	    }
+	    else if (PL_minus_n) {
+		sv_setpvn(PL_linestr, ";}", 2);
+		PL_minus_n = 0;
+	    }
 	    else
-		sv_setpv(PL_linestr,";");
+		sv_setpvn(PL_linestr,";", 1);
 
 	    /* reset variables for next time we lex */
 	    PL_oldoldbufptr = PL_oldbufptr = PL_bufptr = s = PL_linestart
@@ -2448,12 +2450,12 @@ Perl_yylex(pTHX)
 	    PL_preambled = TRUE;
 	    sv_setpv(PL_linestr,incl_perldb());
 	    if (SvCUR(PL_linestr))
-		sv_catpv(PL_linestr,";");
+		sv_catpvn(PL_linestr,";", 1);
 	    if (PL_preambleav){
 		while(AvFILLp(PL_preambleav) >= 0) {
 		    SV *tmpsv = av_shift(PL_preambleav);
 		    sv_catsv(PL_linestr, tmpsv);
-		    sv_catpv(PL_linestr, ";");
+		    sv_catpvn(PL_linestr, ";", 1);
 		    sv_free(tmpsv);
 		}
 		sv_free((SV*)PL_preambleav);
@@ -2488,7 +2490,7 @@ Perl_yylex(pTHX)
 		        sv_catpv(PL_linestr,"our @F=split(' ');");
 		}
 	    }
-	    sv_catpv(PL_linestr, "\n");
+	    sv_catpvn(PL_linestr, "\n", 1);
 	    PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = SvPVX(PL_linestr);
 	    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
 	    PL_last_lop = PL_last_uni = Nullch;
@@ -2518,8 +2520,8 @@ Perl_yylex(pTHX)
 		    PL_doextract = FALSE;
 		}
 		if (!PL_in_eval && (PL_minus_n || PL_minus_p)) {
-		    sv_setpv(PL_linestr,PL_minus_p ? ";}continue{print" : "");
-		    sv_catpv(PL_linestr,";}");
+		    sv_setpv(PL_linestr,PL_minus_p
+			     ? ";}continue{print;}" : ";}");
 		    PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = SvPVX(PL_linestr);
 		    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
 		    PL_last_lop = PL_last_uni = Nullch;
@@ -4081,7 +4083,7 @@ Perl_yylex(pTHX)
 			char *proto = SvPV((SV*)cv, len);
 			if (!len)
 			    TERM(FUNC0SUB);
-			if (strEQ(proto, "$"))
+			if (*proto == '$' && proto[1] == '\0')
 			    OPERATOR(UNIOPSUB);
 			while (*proto == ';')
 			    proto++;
@@ -5623,7 +5625,7 @@ Perl_keyword(pTHX_ register char *d, I32 len)
 	    else if (*d == 'l') {
 		if (strEQ(d,"login"))		return -KEY_getlogin;
 	    }
-	    else if (strEQ(d,"c"))		return -KEY_getc;
+	    else if (*d == 'c' && d[1] == '\0')	return -KEY_getc;
 	    break;
 	}
 	switch (len) {
@@ -5770,12 +5772,16 @@ Perl_keyword(pTHX_ register char *d, I32 len)
 	}
 	break;
     case 'q':
-	if (len <= 2) {
-	    if (strEQ(d,"q"))			return KEY_q;
-	    if (strEQ(d,"qr"))			return KEY_qr;
-	    if (strEQ(d,"qq"))			return KEY_qq;
-	    if (strEQ(d,"qw"))			return KEY_qw;
-	    if (strEQ(d,"qx"))			return KEY_qx;
+	if (len == 1) {
+						return KEY_q;
+	}
+	else if (len == 2) {
+	    switch (d[1]) {
+	    case 'r':				return KEY_qr;
+	    case 'q':				return KEY_qq;
+	    case 'w':				return KEY_qw;
+	    case 'x':				return KEY_qx;
+	    };
 	}
 	else if (strEQ(d,"quotemeta"))		return -KEY_quotemeta;
 	break;

@@ -1,7 +1,7 @@
 /*    doio.c
  *
  *    Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
- *    2000, 2001, 2002, 2003, 2004, by Larry Wall and others
+ *    2000, 2001, 2002, 2003, 2004, 2005, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -265,7 +265,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		errno = EPIPE;
 		goto say_false;
 	    }
-	    if (strNE(name,"-") || num_svs)
+	    if ((*name == '-' && name[1] == '\0') || num_svs)
 		TAINT_ENV();
 	    TAINT_PROPER("piped open");
 	    if (!num_svs && name[len-1] == '|') {
@@ -483,7 +483,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		errno = EPIPE;
 		goto say_false;
 	    }
-	    if (strNE(name,"-") || num_svs)
+	    if (!(*name == '-' && name[1] == '\0') || num_svs)
 		TAINT_ENV();
 	    TAINT_PROPER("piped open");
 	    mode[0] = 'r';
@@ -519,7 +519,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		strcat(mode, "b");
 	    else if (in_crlf)
 		strcat(mode, "t");
-	    if (strEQ(name,"-")) {
+	    if (*name == '-' && name[1] == '\0') {
 		fp = PerlIO_stdin();
 		IoTYPE(io) = IoTYPE_STD;
 	    }
@@ -1141,7 +1141,7 @@ Perl_mode_from_discipline(pTHX_ SV *discp)
 	    if (*s == ':') {
 		switch (s[1]) {
 		case 'r':
-		    if (len > 3 && strnEQ(s+1, "raw", 3)
+		    if (s[2] == 'a' && s[3] == 'w'
 			&& (!s[4] || s[4] == ':' || isSPACE(s[4])))
 		    {
 			mode = O_BINARY;
@@ -1151,7 +1151,7 @@ Perl_mode_from_discipline(pTHX_ SV *discp)
 		    }
 		    /* FALL THROUGH */
 		case 'c':
-		    if (len > 4 && strnEQ(s+1, "crlf", 4)
+		    if (s[2] == 'r' && s[3] == 'l' && s[4] == 'f'
 			&& (!s[5] || s[5] == ':' || isSPACE(s[5])))
 		    {
 			mode = O_TEXT;
