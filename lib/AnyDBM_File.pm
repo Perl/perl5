@@ -1,12 +1,15 @@
 package AnyDBM_File;
+use vars qw(@ISA);
 
 @ISA = qw(NDBM_File DB_File GDBM_File SDBM_File ODBM_File) unless @ISA;
 
-eval { require NDBM_File } ||
-eval { require DB_File } ||
-eval { require GDBM_File } ||
-eval { require SDBM_File } ||
-eval { require ODBM_File };
+my $mod;
+for $mod (@ISA) {
+    return 1 if eval "require $mod"
+}
+
+die "No DBM package was successfully found or installed";
+#return 0;
 
 =head1 NAME
 
