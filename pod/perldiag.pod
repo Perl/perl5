@@ -2652,10 +2652,6 @@ See L<perlfunc/sort>.
 (F) A sort comparison subroutine may not return a list value with more
 or less than one element.  See L<perlfunc/sort>.
 
-=item split /^/ better written as split /^/m
-
-(W) Implicit translation of /^/ to mean /^/m in split is deprecated.
-
 =item Split loop
 
 (P) The split was looping infinitely.  (Obviously, a split shouldn't iterate
