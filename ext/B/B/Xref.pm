@@ -324,7 +324,7 @@ sub xref_definitions {
     my ($pack, %exclude);
     return if $nodefs;
     $subname = "(definitions)";
-    foreach $pack (qw(B O AutoLoader DynaLoader Config DB VMS
+    foreach $pack (qw(B O AutoLoader DynaLoader XSLoader Config DB VMS
 		      strict vars FileHandle Exporter Carp)) {
         $exclude{$pack."::"} = 1;
     }

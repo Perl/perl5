@@ -653,7 +653,7 @@ sub bytecompile_main {
     walkoptree(main_root, "bytecode");
     warn "done main program, now walking symbol table\n" if $debug_bc;
     my ($pack, %exclude);
-    foreach $pack (qw(B O AutoLoader DynaLoader Config DB VMS strict vars
+    foreach $pack (qw(B O AutoLoader DynaLoader XSLoader Config DB VMS strict vars
 		      FileHandle Exporter Carp UNIVERSAL IO Fcntl Symbol
 		      SelectSaver blib Cwd))
     {

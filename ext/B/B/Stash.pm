@@ -29,7 +29,7 @@ sub scan{
 }
 sub omit{
 	my $module = shift;
-	my %omit=("DynaLoader::" => 1 , "CORE::" => 1 ,
+	my %omit=("DynaLoader::" => 1 , "XSLoader::" => 1, "CORE::" => 1 ,
 		"CORE::GLOBAL::" => 1, "UNIVERSAL::" => 1 );
 	return 1 if $omit{$module};
 	if ($module eq "IO::" or $module eq "IO::Handle::"){
