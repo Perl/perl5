@@ -55,6 +55,7 @@ S_Slab_Alloc(pTHX_ int m, size_t sz)
      : CALL_FPTR(PL_check[type])(aTHX_ (OP*)o))
 
 #define PAD_MAX 999999999
+#define RETVAL_MAX ( PERL_INT_MAX / 2 )
 
 STATIC char*
 S_gv_ename(pTHX_ GV *gv)
@@ -1549,7 +1550,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	if (!type && cUNOPo->op_first->op_type != OP_GV)
 	    Perl_croak(aTHX_ "Can't localize through a reference");
 	if (type == OP_REFGEN && o->op_flags & OPf_PARENS) {
-	    PL_modcount = 10000;
+           PL_modcount = RETVAL_MAX;
 	    return o;		/* Treat \(@foo) like ordinary list. */
 	}
 	/* FALL THROUGH */
@@ -1565,7 +1566,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
     case OP_DBSTATE:
     case OP_REFGEN:
     case OP_CHOMP:
-	PL_modcount = 10000;
+       PL_modcount = RETVAL_MAX;
 	break;
     case OP_RV2SV:
 	if (!type && cUNOPo->op_first->op_type != OP_GV)
@@ -1584,7 +1585,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
 
     case OP_PADAV:
     case OP_PADHV:
-	PL_modcount = 10000;
+       PL_modcount = RETVAL_MAX;
 	if (type == OP_REFGEN && o->op_flags & OPf_PARENS)
 	    return o;		/* Treat \(@foo) like ordinary list. */
 	if (scalar_mod_type(o, type))
@@ -3502,7 +3503,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 		    }
 		}
 		else {
-		    if (PL_modcount < 10000 &&
+                   if (PL_modcount < RETVAL_MAX &&
 		      ((LISTOP*)right)->op_last->op_type == OP_CONST)
 		    {
 			SV *sv = ((SVOP*)((LISTOP*)right)->op_last)->op_sv;
