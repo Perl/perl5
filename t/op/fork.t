@@ -6,7 +6,7 @@ BEGIN {
     chdir 't' if -d 't';
     unshift @INC, '../lib';
     require Config; import Config;
-    unless ($Config{'d_fork'} || $Config{ccflags} =~ /-DUSE_ITHREADS\b/) {
+    unless ($Config{'d_fork'} || $^O eq 'MSWin32') {
 	print "1..0 # Skip: no fork\n";
 	exit 0;
     }
