@@ -4,6 +4,8 @@ ok ($class->config()->{lib},$CL);
 
 use strict;
 
+my $z;
+
 while (<DATA>)
   {
   chomp;
@@ -87,7 +89,27 @@ while (<DATA>)
     else
       {
       $try .= "\$y = $class->new(\"$args[1]\");";
-      if ($f eq "fcmp") {
+      
+      if ($f eq "bgcd")
+        {
+        if (defined $args[2])
+          {
+          $try .= " \$z = $class->new(\"$args[2]\"); ";
+          }
+        $try .= "$class\::bgcd(\$x, \$y";
+        $try .= ", \$z" if (defined $args[2]);
+        $try .= " );";
+        }
+      elsif ($f eq "blcm")
+        {
+        if (defined $args[2])
+          {
+          $try .= " \$z = $class->new(\"$args[2]\"); ";
+          }
+        $try .= "$class\::blcm(\$x, \$y";
+        $try .= ", \$z" if (defined $args[2]);
+        $try .= " );";
+      } elsif ($f eq "fcmp") {
         $try .= '$x <=> $y;';
       } elsif ($f eq "facmp") {
         $try .= '$x->facmp($y);';
@@ -115,6 +137,7 @@ while (<DATA>)
     }
     # print "# Trying: '$try'\n";
     $ans1 = eval $try;
+    print "# Error: $@\n" if $@;
     if ($ans =~ m|^/(.*)$|)
       {
       my $pat = $1;
@@ -337,6 +360,42 @@ sub ok_undef
   }
 
 __DATA__
+&bgcd
+inf:12:NaN
+-inf:12:NaN
+12:inf:NaN
+12:-inf:NaN
+inf:inf:NaN
+inf:-inf:NaN
+-inf:-inf:NaN
+abc:abc:NaN
+abc:+0:NaN
++0:abc:NaN
++0:+0:0
++0:+1:1
++1:+0:1
++1:+1:1
++2:+3:1
++3:+2:1
+-3:+2:1
+-3:-2:1
+-144:-60:12
+144:-60:12
+144:60:12
+100:625:25
+4096:81:1
+1034:804:2
+27:90:56:1
+27:90:54:9
+&blcm
+abc:abc:NaN
+abc:+0:NaN
++0:abc:NaN
++0:+0:NaN
++1:+0:0
++0:+1:0
++27:+90:270
++1034:+804:415668
 $div_scale = 40;
 &flog
 0::NaN
@@ -1479,7 +1538,7 @@ abc:0
 1200:1
 -1200:1
 &is_positive
-0:1
+0:0
 1:1
 -1:0
 -123:0

@@ -12,7 +12,7 @@ package Math::BigFloat;
 #   _a	: accuracy
 #   _p	: precision
 
-$VERSION = '1.47';
+$VERSION = '1.49';
 require 5.005;
 
 require Exporter;
@@ -89,13 +89,13 @@ BEGIN
   # valid method aliases for AUTOLOAD
   my %methods = map { $_ => 1 }  
    qw / fadd fsub fmul fdiv fround ffround fsqrt fmod fstr fsstr fpow fnorm
-        fint facmp fcmp fzero fnan finf finc fdec flog ffac
+        fint facmp fcmp fzero fnan finf finc fdec flog ffac fneg
 	fceil ffloor frsft flsft fone flog froot
       /;
   # valid method's that can be hand-ed up (for AUTOLOAD)
   my %hand_ups = map { $_ => 1 }  
    qw / is_nan is_inf is_negative is_positive is_pos is_neg
-        accuracy precision div_scale round_mode fneg fabs fnot
+        accuracy precision div_scale round_mode fabs fnot
         objectify upgrade downgrade
 	bone binf bnan bzero
       /;
@@ -337,7 +337,7 @@ sub bstr
   # (ref to BFLOAT or num_str ) return num_str
   # Convert number from internal format to (non-scientific) string format.
   # internal format is always normalized (no leading zeros, "-0" => "+0")
-  my ($self,$x) = ref($_[0]) ? (ref($_[0]),$_[0]) : objectify(1,@_);
+  my ($self,$x) = ref($_[0]) ? (undef,$_[0]) : objectify(1,@_);
 
   if ($x->{sign} !~ /^[+-]$/)
     {
@@ -400,7 +400,7 @@ sub bsstr
   # (ref to BFLOAT or num_str ) return num_str
   # Convert number from internal format to scientific string format.
   # internal format is always normalized (no leading zeros, "-0E0" => "+0E0")
-  my ($self,$x) = ref($_[0]) ? (ref($_[0]),$_[0]) : objectify(1,@_);
+  my ($self,$x) = ref($_[0]) ? (undef,$_[0]) : objectify(1,@_);
 
   if ($x->{sign} !~ /^[+-]$/)
     {
@@ -422,6 +422,19 @@ sub numify
 
 ##############################################################################
 # public stuff (usually prefixed with "b")
+
+sub bneg
+  {
+  # (BINT or num_str) return BINT
+  # negate number or make a negated number from string
+  my ($self,$x) = ref($_[0]) ? (undef,$_[0]) : objectify(1,@_);
+
+  return $x if $x->modify('bneg');
+
+  # for +0 dont negate (to have always normalized +0). Does nothing for 'NaN'
+  $x->{sign} =~ tr/+-/-+/ unless ($x->{sign} eq '+' && $MBI->_is_zero($x->{_m}));
+  $x;
+  }
 
 # tels 2001-08-04 
 # XXX TODO this must be overwritten and return NaN for non-integer values
@@ -1094,19 +1107,39 @@ sub blcm
 
   my ($self,@arg) = objectify(0,@_);
   my $x = $self->new(shift @arg);
-  while (@arg) { $x = _lcm($x,shift @arg); } 
+  while (@arg) { $x = Math::BigInt::__lcm($x,shift @arg); } 
   $x;
   }
 
-sub bgcd 
-  { 
-  # (BFLOAT or num_str, BFLOAT or num_str) return BINT
+sub bgcd
+  {
+  # (BINT or num_str, BINT or num_str) return BINT
   # does not modify arguments, but returns new object
-  # GCD -- Euclids algorithm Knuth Vol 2 pg 296
-   
-  my ($self,@arg) = objectify(0,@_);
-  my $x = $self->new(shift @arg);
-  while (@arg) { $x = _gcd($x,shift @arg); } 
+
+  my $y = shift;
+  $y = __PACKAGE__->new($y) if !ref($y);
+  my $self = ref($y);
+  my $x = $y->copy()->babs();			# keep arguments
+
+  return $x->bnan() if $x->{sign} !~ /^[+-]$/	# x NaN?
+	|| !$x->is_int();			# only for integers now
+
+  while (@_)
+    {
+    my $t = shift; $t = $self->new($t) if !ref($t);
+    $y = $t->copy()->babs();
+    
+    return $x->bnan() if $y->{sign} !~ /^[+-]$/	# y NaN?
+     	|| !$y->is_int();			# only for integers now
+
+    # greatest common divisor
+    while (! $y->is_zero())
+      {
+      ($x,$y) = ($y->copy(), $x->copy()->bmod($y));
+      }
+
+    last if $x->is_one();
+    }
   $x;
   }
 
@@ -1307,19 +1340,25 @@ sub bdiv
   $scale = $ly if $ly > $scale;
   my $diff = $ly - $lx;
   $scale += $diff if $diff > 0;		# if lx << ly, but not if ly << lx!
-  
-  # cases like $x /= $x (but not $x /= $y!) were wrong due to modifying $x
-  # twice below)
-  require Scalar::Util;
-  if (Scalar::Util::refaddr($x) == Scalar::Util::refaddr($y)) 
+
+  # already handled inf/NaN/-inf above:
+
+  my $xsign = $x->{sign};
+  $y->{sign} =~ tr/+-/-+/;
+  my $y_not_one = !$y->is_one();	# cache this result
+  if ($xsign ne $x->{sign})
     {
-    $x->bone();				# x/x => 1, rem 0
+    # special case of $x /= $x results in 1
+    $x->bone();
     }
   else
     {
- 
+    # correct $y's sign again
+    $y->{sign} =~ tr/+-/-+/;
+    # continue with normal div code:
+
     # make copy of $x in case of list context for later reminder calculation
-    if (wantarray && !$y->is_one())
+    if (wantarray && $y_not_one)
       {
       $rem = $x->copy();
       }
@@ -1327,7 +1366,7 @@ sub bdiv
     $x->{sign} = $x->{sign} ne $y->sign() ? '-' : '+'; 
 
     # check for / +-1 ( +/- 1E0)
-    if (!$y->is_one())
+    if ($y_not_one)
       {
       # promote BigInts and it's subclasses (except when already a BigFloat)
       $y = $self->new($y) unless $y->isa('Math::BigFloat'); 
@@ -1364,7 +1403,7 @@ sub bdiv
 
   if (wantarray)
     {
-    if (!$y->is_one())
+    if ($y_not_one)
       {
       $rem->bmod($y,@params);			# copy already done
       }
@@ -1963,10 +2002,8 @@ sub bfround
   # expects and returns normalized numbers!
   my $x = shift; my $self = ref($x) || $x; $x = $self->new(shift) if !ref($x);
 
-  return $x if $x->modify('bfround');
- 
-  my ($scale,$mode) = $x->_scale_p($self->precision(),$self->round_mode(),@_);
-  return $x if !defined $scale;			# no-op
+  my ($scale,$mode) = $x->_scale_p(@_);
+  return $x if !defined $scale || $x->modify('bfround'); # no-op
 
   # never round a 0, +-inf, NaN
   if ($x->is_zero())
@@ -2076,25 +2113,23 @@ sub bround
     require Carp; Carp::croak ('bround() needs positive accuracy');
     }
 
-  my ($scale,$mode) = $x->_scale_a($self->accuracy(),$self->round_mode(),@_);
-  return $x if !defined $scale;				# no-op
-
-  return $x if $x->modify('bround');
+  my ($scale,$mode) = $x->_scale_a(@_);
+  return $x if !defined $scale || $x->modify('bround');	# no-op
 
   # scale is now either $x->{_a}, $accuracy, or the user parameter
   # test whether $x already has lower accuracy, do nothing in this case 
   # but do round if the accuracy is the same, since a math operation might
   # want to round a number with A=5 to 5 digits afterwards again
-  return $x if defined $_[0] && defined $x->{_a} && $x->{_a} < $_[0];
+  return $x if defined $x->{_a} && $x->{_a} < $scale;
 
   # scale < 0 makes no sense
+  # scale == 0 => keep all digits
   # never round a +-inf, NaN
-  return $x if ($scale < 0) ||	$x->{sign} !~ /^[+-]$/;
+  return $x if ($scale <= 0) || $x->{sign} !~ /^[+-]$/;
 
-  # 1: $scale == 0 => keep all digits
-  # 2: never round a 0
-  # 3: if we should keep more digits than the mantissa has, do nothing
-  if ($scale == 0 || $x->is_zero() || $MBI->_len($x->{_m}) <= $scale)
+  # 1: never round a 0
+  # 2: if we should keep more digits than the mantissa has, do nothing
+  if ($x->is_zero() || $MBI->_len($x->{_m}) <= $scale)
     {
     $x->{_a} = $scale if !defined $x->{_a} || $x->{_a} > $scale;
     return $x; 
@@ -2321,6 +2356,7 @@ sub import
       }
     }
 
+  $lib =~ tr/a-zA-Z0-9,://cd;		# restrict to sane characters
   # let use Math::BigInt lib => 'GMP'; use Math::BigFloat; still work
   my $mbilib = eval { Math::BigInt->config()->{lib} };
   if ((defined $mbilib) && ($MBI eq 'Math::BigInt::Calc'))
@@ -2345,8 +2381,12 @@ sub import
     {
     require Carp; Carp::croak ("Couldn't load $lib: $! $@");
     }
+  # find out which one was actually loaded
   $MBI = Math::BigInt->config()->{lib};
 
+  # register us with MBI to get notified of future lib changes
+  Math::BigInt::_register_callback( $self, sub { $MBI = $_[0]; } );
+   
   # any non :constant stuff is handled by our parent, Exporter
   # even if @_ is empty, to give it a chance
   $self->SUPER::import(@a);      	# for subclasses
@@ -2702,12 +2742,33 @@ it is rounded. The rounding mode taken is either the default mode, or the one
 supplied to the operation after the I<scale>:
 
 	$x = Math::BigFloat->new(2);
-	Math::BigFloat->precision(5);		# 5 digits max
-	$y = $x->copy()->bdiv(3);		# will give 0.66666
-	$y = $x->copy()->bdiv(3,6);		# will give 0.666666
-	$y = $x->copy()->bdiv(3,6,'odd');	# will give 0.666667
+	Math::BigFloat->accuracy(5);		# 5 digits max
+	$y = $x->copy()->bdiv(3);		# will give 0.66667
+	$y = $x->copy()->bdiv(3,6);		# will give 0.666667
+	$y = $x->copy()->bdiv(3,6,undef,'odd');	# will give 0.666667
 	Math::BigFloat->round_mode('zero');
-	$y = $x->copy()->bdiv(3,6);		# will give 0.666666
+	$y = $x->copy()->bdiv(3,6);		# will also give 0.666667
+
+Note that C<< Math::BigFloat->accuracy() >> and C<< Math::BigFloat->precision() >>
+set the global variables, and thus B<any> newly created number will be subject
+to the global rounding. This means that in the examples above, the C<3>
+as argument to C<bdiv()> will also get an accuracy of B<5>.
+
+It is less confusing to either calculate the result fully, and afterwards
+round it explicitely, or use the additional parameters to the math
+functions like so:
+
+	use Math::BigFloat;	
+	$x = Math::BigFloat->new(2);
+	$y = $x->copy()->bdiv(3);
+	print $y->bround(5),"\n";		# will give 0.66667
+
+	or
+
+	use Math::BigFloat;	
+	$x = Math::BigFloat->new(2);
+	$y = $x->copy()->bdiv(3,5);		# will give 0.66667
+	print "$y\n";
 
 =head2 Rounding
 
@@ -2993,7 +3054,7 @@ the same terms as Perl itself.
 =head1 AUTHORS
 
 Mark Biggar, overloaded interface by Ilya Zakharevich.
-Completely rewritten by Tels http://bloodgate.com in 2001, 2002, and still
-at it in 2003.
+Completely rewritten by Tels L<http://bloodgate.com> in 2001 - 2004, and still
+at it in 2005.
 
 =cut
