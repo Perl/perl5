@@ -9,8 +9,6 @@ use Getopt::Long;	# for command-line parsing
 use Cwd;
 use Pod::Html;
 
-umask 022;
-
 =head1 NAME
 
 installhtml - converts a collection of POD pages to HTML format.

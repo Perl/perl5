@@ -10,7 +10,6 @@ use subs qw(unlink chmod rename link);
 use vars qw($packlist);
 require Cwd;
 
-umask 022;
 $ENV{SHELL} = 'sh' if $^O eq 'os2';
 
 $ver = $];
