@@ -855,7 +855,7 @@ PP(pp_match)
     register char *s;
     char *strend;
     I32 global;
-    I32 r_flags;
+    I32 r_flags = 0;
     char *truebase;
     register REGEXP *rx = pm->op_pmregexp;
     bool rxtainted;
@@ -904,14 +904,18 @@ PP(pp_match)
 	    if (mg && mg->mg_len >= 0) {
 		if (!(rx->reganch & ROPT_GPOS_SEEN))
 		    rx->endp[0] = rx->startp[0] = s + mg->mg_len; 
+		else if (rx->reganch & ROPT_ANCH_GPOS) {
+		    r_flags |= REXEC_IGNOREPOS;
+		    rx->endp[0] = rx->startp[0] = s + mg->mg_len; 
+		}
 		minmatch = (mg->mg_flags & MGf_MINMATCH);
 		update_minmatch = 0;
 	    }
 	}
     }
-    r_flags = ((gimme != G_ARRAY && !global && rx->nparens)
-		|| SvTEMP(TARG) || PL_sawampersand)
-		? REXEC_COPY_STR : 0;
+    if ((gimme != G_ARRAY && !global && rx->nparens)
+	    || SvTEMP(TARG) || PL_sawampersand)
+	r_flags |= REXEC_COPY_STR;
     if (SvSCREAM(TARG) && rx->check_substr
 	&& SvTYPE(rx->check_substr) == SVt_PVBM
 	&& SvVALID(rx->check_substr)) 
