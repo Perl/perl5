@@ -5629,7 +5629,7 @@ Perl_keyword(pTHX_ register char *d, I32 len)
 	    if (strEQ(d,"rindex"))		return -KEY_rindex;
 	    break;
 	case 7:
-	    if (strEQ(d,"require"))		return -KEY_require;
+	    if (strEQ(d,"require"))		return KEY_require;
 	    if (strEQ(d,"reverse"))		return -KEY_reverse;
 	    if (strEQ(d,"readdir"))		return -KEY_readdir;
 	    break;
