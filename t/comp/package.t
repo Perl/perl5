@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..12\n";
+print "1..14\n";
 
 $blurfl = 123;
 $foo = 3;
@@ -67,4 +67,7 @@ print "$Q" =~ /^__ANON__=/ ? "ok 11\n" : "not ok 11\n";
 
 print ref $Q eq "__ANON__" ? "ok 12\n" : "not ok 12\n";
 
+package bug32562;
 
+print       __PACKAGE__  eq 'bug32562' ? "ok 13\n" : "not ok 13\n";
+print eval '__PACKAGE__' eq 'bug32562' ? "ok 14\n" : "not ok 14\n";
