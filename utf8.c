@@ -432,7 +432,7 @@ Perl_utf8n_to_uvuni(pTHX_ U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 	if (!(uv > ouv)) {
 	    /* These cannot be allowed. */
 	    if (uv == ouv) {
-		if (!(flags & UTF8_ALLOW_LONG)) {
+		if (expectlen != 13 && !(flags & UTF8_ALLOW_LONG)) {
 		    warning = UTF8_WARN_LONG;
 		    goto malformed;
 		}
