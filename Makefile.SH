@@ -1012,8 +1012,8 @@ _cleaner2:
 	rm -rf .config
 	rm -f preload
 	rm -f testcompile compilelog
-	-rmdir lib/B lib/Data lib/Digest
 	rm -rf lib/Encode
+	-rmdir lib/B lib/Data
 	-rmdir lib/Filter/Util lib/IO/Socket lib/IO
 	-rmdir lib/List lib/MIME lib/Scalar lib/Sys 
 	-rmdir lib/threads lib/XS
