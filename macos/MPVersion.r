@@ -44,9 +44,9 @@
  *
  */
 
-#define MPVersionStr	"5.7.3a1 patch 16788"
+#define MPVersionStr	"5.8.0a1"
 #define MPRevision	0x05
-#define MPVersion	0x73
+#define MPVersion	0x80
 #define MPBuild		0x01
 #define MPState		alpha
 #define MPCopyright	"ported by Matthias Neeracher, maintained by Chris Nandor"

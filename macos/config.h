@@ -3650,7 +3650,7 @@ First build released to public
  *	(presumably) be similar.
  *	See the INSTALL file for how this works.
  */
-#define PERL_XS_APIVERSION "5.7.3"
+#define PERL_XS_APIVERSION "5.8.0"
 #define PERL_PM_APIVERSION "5.6.0"
 
 /* HAS_CRYPT:
