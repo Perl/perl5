@@ -410,6 +410,14 @@ sub INPUT_handler {
 	# remove trailing semicolon if no initialisation
 	s/\s*;$//g unless /[=;+].*\S/ ;
 
+	# Process the length(foo) declarations
+	if (s/^([^=]*)\blength\(\s*(\w+)\s*\)\s*$/$1 XSauto_length_of_$2=NO_INIT/x) {
+	  print "\tSTRLEN\tSTRLEN_length_of_$2;\n";
+	  $lengthof{$2} = $name;
+	  # $islengthof{$name} = $1;
+	  $deferred .= "\n\tXSauto_length_of_$2 = STRLEN_length_of_$2;";
+	}
+
 	# check for optional initialisation code
 	my $var_init = '' ;
 	$var_init = $1 if s/\s*([=;+].*)$//s ;
@@ -422,7 +430,7 @@ sub INPUT_handler {
 	# Check for duplicate definitions
 	blurt ("Error: duplicate definition of argument '$var_name' ignored"), next
 	    if $arg_list{$var_name}++ 
-	      or defined $arg_types{$var_name} and not $processing_arg_with_types;
+	      or defined $argtype_seen{$var_name} and not $processing_arg_with_types;
 
 	$thisdone |= $var_name eq "THIS";
 	$retvaldone |= $var_name eq "RETVAL";
@@ -1005,11 +1013,14 @@ while (fetch_para()) {
     undef($RETVAL_no_return) ;
     undef(%arg_list) ;
     undef(@proto_arg) ;
-    undef(@arg_with_types) ;
+    undef(@fake_INPUT_pre) ;	# For length(s) generated variables
+    undef(@fake_INPUT) ;
     undef($processing_arg_with_types) ;
-    undef(%arg_types) ;
+    undef(%argtype_seen) ;
     undef(@outlist) ;
     undef(%in_out) ;
+    undef(%lengthof) ;
+    # undef(%islengthof) ;
     undef($proto_in_this_xsub) ;
     undef($scope_in_this_xsub) ;
     undef($interface);
@@ -1074,7 +1085,7 @@ while (fetch_para()) {
 
     $orig_args =~ s/\\\s*/ /g;		# process line continuations
 
-    my %only_outlist;
+    my %only_C_inlist;	# Not in the signature of Perl function
     if ($process_argtypes and $orig_args =~ /\S/) {
 	my $args = "$orig_args ,";
 	if ($args =~ /^( (??{ $C_arg }) , )* $ /x) {
@@ -1082,10 +1093,10 @@ while (fetch_para()) {
 	    for ( @args ) {
 		s/^\s+//;
 		s/\s+$//;
-		my $arg = $_;
-		my $default;
-		($arg, $default) = / ( [^=]* ) ( (?: = .* )? ) /x;
-		my ($pre, $name) = ($arg =~ /(.*?) \s* \b(\w+) \s* $ /x);
+		my ($arg, $default) = / ( [^=]* ) ( (?: = .* )? ) /x;
+		my ($pre, $name) = ($arg =~ /(.*?) \s*
+					     \b ( \w+ | length\( \s*\w+\s* \) )
+					     \s* $ /x);
 		next unless length $pre;
 		my $out_type;
 		my $inout_var;
@@ -1093,14 +1104,26 @@ while (fetch_para()) {
 		    my $type = $1;
 		    $out_type = $type if $type ne 'IN';
 		    $arg =~ s/^(IN|IN_OUTLIST|OUTLIST|OUT|IN_OUT)\s+//;
+		    $pre =~ s/^(IN|IN_OUTLIST|OUTLIST|OUT|IN_OUT)\s+//;
 		}
-		if (/\W/) {	# Has a type
-		    push @arg_with_types, $arg;
+		my $islength;
+		if ($name =~ /^length\( \s* (\w+) \s* \)\z/x) {
+		  $name = "XSauto_length_of_$1";
+		  $islength = 1;
+		  die "Default value on length() argument: `$_'"
+		    if length $default;
+		}
+		if (length $pre or $islength) {	# Has a type
+		    if ($islength) {
+		      push @fake_INPUT_pre, $arg;
+		    } else {
+		      push @fake_INPUT, $arg;
+		    }
 		    # warn "pushing '$arg'\n";
-		    $arg_types{$name} = $arg;
-		    $_ = "$name$default";
+		    $argtype_seen{$name}++;
+		    $_ = "$name$default"; # Assigns to @args
 		}
-		$only_outlist{$_} = 1 if $out_type eq "OUTLIST";
+		$only_C_inlist{$_} = 1 if $out_type eq "OUTLIST" or $islength;
 		push @outlist, $name if $out_type =~ /OUTLIST$/;
 		$in_out{$name} = $out_type if $out_type;
 	    }
@@ -1114,7 +1137,7 @@ while (fetch_para()) {
 	    if ($process_inout and s/^(IN|IN_OUTLIST|OUTLIST|IN_OUT|OUT)\s+//) {
 		my $out_type = $1;
 		next if $out_type eq 'IN';
-		$only_outlist{$_} = 1 if $out_type eq "OUTLIST";
+		$only_C_inlist{$_} = 1 if $out_type eq "OUTLIST";
 		push @outlist, $name if $out_type =~ /OUTLIST$/;
 		$in_out{$_} = $out_type;
 	    }
@@ -1139,7 +1162,7 @@ while (fetch_para()) {
 			last;
 		    }
 	    }
-	    if ($only_outlist{$args[$i]}) {
+	    if ($only_C_inlist{$args[$i]}) {
 		push @args_num, undef;
 	    } else {
 		push @args_num, ++$num_args;
@@ -1284,8 +1307,8 @@ EOF
 				if $WantOptimize and $targetable{$type_kind{$ret_type}};
 		}
 
-		if (@arg_with_types) {
-		    unshift @line, @arg_with_types, $_;
+		if (@fake_INPUT or @fake_INPUT_pre) {
+		    unshift @line, @fake_INPUT_pre, @fake_INPUT, $_;
 		    $_ = "";
 		    $processing_arg_with_types = 1;
 		    INPUT_handler() ;
@@ -1621,6 +1644,13 @@ sub generate_init {
     ($subtype = $ntype) =~ s/(?:Array)?(?:Ptr)?$//;
     $tk = $type_kind{$type};
     $tk =~ s/OBJ$/REF/ if $func_name =~ /DESTROY$/;
+    if ($tk eq 'T_PV' and exists $lengthof{$var}) {
+      print "\t$var" unless $name_printed;
+      print " = ($type)SvPV($arg, STRLEN_length_of_$var);\n";
+      die "default value not supported with length(NAME) supplied"
+	if defined $defaults{$var};
+      return;
+    }
     $type =~ tr/:/_/;
     blurt("Error: No INPUT definition for type '$type', typekind '$type_kind{$type}' found"), return
         unless defined $input_expr{$tk} ;
@@ -1657,7 +1687,7 @@ sub generate_init {
 		$deferred .= eval qq/"\\n\\tif (items < $num)\\n\\t    $var = $defaults{$var};\\n\\telse {\\n$expr;\\n\\t}\\n"/;
 	    }
 	    warn $@   if  $@;
-    } elsif ($ScopeThisXSUB or $expr !~ /^\t\$var =/) {
+    } elsif ($ScopeThisXSUB or $expr !~ /^\s*\$var =/) {
 	    if ($name_printed) {
 	      print ";\n";
 	    } else {
