@@ -763,7 +763,6 @@ PP(pp_rv2hv)
 {
     dSP; dTOPss;
     HV *hv;
-    I32 gimme = GIMME_V;
 
     if (SvROK(sv)) {
       wasref:
