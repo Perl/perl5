@@ -1491,7 +1491,7 @@ lib/unicore/In/YiRadica.pl	Unicode character database
 lib/unicore/In/YiSyllab.pl	Unicode character database
 lib/unicore/Index.txt		Unicode character database
 lib/unicore/Is.pl		Unicode character database
-lib/unicode/Is/2.pl		Unicode character database
+lib/unicore/Is/2.pl		Unicode character database
 lib/unicore/Is/Alnum.pl		Unicode character database
 lib/unicore/Is/Alpha.pl		Unicode character database
 lib/unicore/Is/Alphabet.pl	Unicode character database
