@@ -825,22 +825,36 @@ PerlIO_binmode(pTHX_ PerlIO *f, int iotype, int mode, const char *names)
 int
 PerlIO__close(PerlIO *f)
 {
- return (*PerlIOBase(f)->tab->Close)(f);
+ if (f && *f)
+   return (*PerlIOBase(f)->tab->Close)(f);
+ else
+  {
+   SETERRNO(EBADF,SS$_IVCHAN);
+   return -1;
+  }
 }
 
 #undef PerlIO_fdupopen
 PerlIO *
 PerlIO_fdupopen(pTHX_ PerlIO *f)
 {
- char buf[8];
- int fd = PerlLIO_dup(PerlIO_fileno(f));
- PerlIO *new = PerlIO_fdopen(fd,PerlIO_modestr(f,buf));
- if (new)
+ if (f && *f)
   {
-   Off_t posn = PerlIO_tell(f);
-   PerlIO_seek(new,posn,SEEK_SET);
+   char buf[8];
+   int fd = PerlLIO_dup(PerlIO_fileno(f));
+   PerlIO *new = PerlIO_fdopen(fd,PerlIO_modestr(f,buf));
+   if (new)
+    {
+     Off_t posn = PerlIO_tell(f);
+     PerlIO_seek(new,posn,SEEK_SET);
+    }
+   return new;
   }
- return new;
+ else
+  {
+   SETERRNO(EBADF,SS$_IVCHAN);
+   return -1;
+  }
 }
 
 #undef PerlIO_close
@@ -864,7 +878,13 @@ PerlIO_close(PerlIO *f)
 int
 PerlIO_fileno(PerlIO *f)
 {
- return (*PerlIOBase(f)->tab->Fileno)(f);
+ if (f && *f)
+  return (*PerlIOBase(f)->tab->Fileno)(f);
+ else
+  {
+   SETERRNO(EBADF,SS$_IVCHAN);
+   return -1;
+  }
 }
 
 static const char *
@@ -1072,7 +1092,7 @@ SSize_t
 PerlIO_read(PerlIO *f, void *vbuf, Size_t count)
 {
  if (f && *f)
-   return (*PerlIOBase(f)->tab->Read)(f,vbuf,count);
+  return (*PerlIOBase(f)->tab->Read)(f,vbuf,count);
  else
   {
    SETERRNO(EBADF,SS$_IVCHAN);
@@ -1098,7 +1118,7 @@ SSize_t
 PerlIO_write(PerlIO *f, const void *vbuf, Size_t count)
 {
  if (f && *f)
-   return (*PerlIOBase(f)->tab->Write)(f,vbuf,count);
+  return (*PerlIOBase(f)->tab->Write)(f,vbuf,count);
  else
   {
    SETERRNO(EBADF,SS$_IVCHAN);
