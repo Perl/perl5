@@ -5337,6 +5337,8 @@ seconds, for this process and the children of this process.
 
     ($user,$system,$cuser,$csystem) = times;
 
+In scalar context, C<times> returns C<$user>.
+
 =item tr///
 
 The transliteration operator.  Same as C<y///>.  See L<perlop>.
