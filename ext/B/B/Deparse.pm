@@ -777,7 +777,7 @@ sub pp_nextstate {
     }
     if ($self->{'linenums'}) {
 	push @text, "\f#line " . $op->line . 
-	  ' "' . substr($op->filegv->NAME, 2), qq'"\n';
+	  ' "' . $op->file, qq'"\n';
     }
     return join("", @text);
 }

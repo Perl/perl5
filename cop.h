@@ -11,7 +11,11 @@ struct cop {
     BASEOP
     char *	cop_label;	/* label for this construct */
     HV *	cop_stash;	/* package line was compiled in */
+#ifdef USE_ITHREADS
+    char *	cop_file;	/* file name the following line # is from */
+#else
     GV *	cop_filegv;	/* file the following line # is from */
+#endif
     U32		cop_seq;	/* parse sequence number */
     I32		cop_arybase;	/* array base this line was compiled with */
     line_t      cop_line;       /* line # of this command */
@@ -20,13 +24,36 @@ struct cop {
 
 #define Nullcop Null(COP*)
 
-#define CopFILEGV(c)		(c)->cop_filegv
-#define CopFILEGV_set(c,gv)	((c)->cop_filegv = gv)
-#define CopFILESV(c)		(CopFILEGV(c) ? GvSV(CopFILEGV(c)) : Nullsv)
-#define CopFILEAV(c)		(CopFILEGV(c) ? GvAV(CopFILEGV(c)) : Nullav)
-#define CopFILE(c)		(CopFILESV(c) ? SvPVX(CopFILESV(c)) : Nullch)
+#ifdef USE_ITHREADS
+#  define CopFILE(c)		((c)->cop_file)
+#  define CopFILEGV(c)		(CopFILE(c) \
+				 ? gv_fetchfile(CopFILE(c)) : Nullgv)
+#  define CopFILE_set(c,pv)	((c)->cop_file = savepv(pv))	/* XXX */
+#  define CopFILESV(c)		(CopFILE(c) \
+				 ? GvSV(gv_fetchfile(CopFILE(c))) : Nullsv)
+#  define CopFILEAV(c)		(CopFILE(c) \
+				 ? GvAV(gv_fetchfile(CopFILE(c))) : Nullav)
+#  define CopSTASH(c)		(CopSTASHPV(c) \
+				 ? gv_fetchstash(CopSTASHPV(c)) : Nullhv)
+#  define CopSTASH_set(c,hv)	((c)->cop_stashpv = HvNAME(hv))	/* XXX */
+#  define CopSTASHPV_set(c,pv)	((c)->cop_stashpv = pv)
+#  define CopSTASHPV(c)		((c)->cop_stashpv)
+#else
+#  define CopFILEGV(c)		((c)->cop_filegv)
+#  define CopFILEGV_set(c,gv)	((c)->cop_filegv = gv)
+#  define CopFILE_set(c,pv)	((c)->cop_filegv = gv_fetchfile(pv))
+#  define CopFILESV(c)		(CopFILEGV(c) ? GvSV(CopFILEGV(c)) : Nullsv)
+#  define CopFILEAV(c)		(CopFILEGV(c) ? GvAV(CopFILEGV(c)) : Nullav)
+#  define CopFILE(c)		(CopFILESV(c) ? SvPVX(CopFILESV(c)) : Nullch)
+#  define CopSTASH(c)		((c)->cop_stash)
+#  define CopSTASH_set(c,hv)	((c)->cop_stash = hv)
+#  define CopSTASHPV(c)		(CopSTASH(c) ? HvNAME(CopSTASH(c)) : Nullch)
+#endif /* USE_ITHREADS */
+
 #define CopLINE(c)		((c)->cop_line)
-#define CopLINE_set(c,l)	((c)->cop_line = (l))
+#define CopLINE_inc(c)		(++CopLINE(c))
+#define CopLINE_dec(c)		(--CopLINE(c))
+#define CopLINE_set(c,l)	(CopLINE(c) = (l))
 
 /*
  * Here we have some enormously heavy (or at least ponderous) wizardry.

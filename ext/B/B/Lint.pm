@@ -172,7 +172,7 @@ sub B::OP::lint {}
 sub B::COP::lint {
     my $op = shift;
     if ($op->name eq "nextstate") {
-	$file = $op->filegv->SV->PV;
+	$file = $op->file;
 	$line = $op->line;
 	$curstash = $op->stash->NAME;
     }

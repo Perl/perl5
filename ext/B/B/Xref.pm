@@ -201,7 +201,7 @@ sub xref_main {
 
 sub pp_nextstate {
     my $op = shift;
-    $file = $op->filegv->SV->PV;
+    $file = $op->file;
     $line = $op->line;
     $top = UNKNOWN;
 }

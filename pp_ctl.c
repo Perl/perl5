@@ -1446,7 +1446,7 @@ PP(pp_caller)
     else
 	PUSHs(sv_2mortal(newSVpv(HvNAME(hv), 0)));
     PUSHs(sv_2mortal(newSVsv(CopFILESV(cx->blk_oldcop))));
-    PUSHs(sv_2mortal(newSViv((I32)cx->blk_oldcop->cop_line)));
+    PUSHs(sv_2mortal(newSViv((I32)CopLINE(cx->blk_oldcop))));
     if (!MAXARG)
 	RETURN;
     if (CxTYPE(cx) == CXt_SUB) { /* So is ccstack[dbcxix]. */
@@ -2491,11 +2491,11 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, AV** avp)
 	SAVESPTR(PL_compiling.cop_stash);
 	PL_compiling.cop_stash = PL_curstash;
     }
-    SAVESPTR(CopFILEGV(&PL_compiling));
-    SAVEI16(PL_compiling.cop_line);
+    SAVECOPFILE(&PL_compiling);
+    SAVECOPLINE(&PL_compiling);
     sprintf(tmpbuf, "_<(%.10s_eval %lu)", code, (unsigned long)++PL_evalseq);
-    CopFILEGV_set(&PL_compiling, gv_fetchfile(tmpbuf+2));
-    PL_compiling.cop_line = 1;
+    CopFILE_set(&PL_compiling, tmpbuf+2);
+    CopLINE_set(&PL_compiling, 1);
     /* XXX For C<eval "...">s within BEGIN {} blocks, this ends up
        deleting the eval's FILEGV from the stash before gv_check() runs
        (i.e. before run-time proper). To work around the coredump that
@@ -2671,7 +2671,7 @@ S_doeval(pTHX_ int gimme, OP** startop)
     }
     SvREFCNT_dec(PL_rs);
     PL_rs = SvREFCNT_inc(PL_nrs);
-    PL_compiling.cop_line = 0;
+    CopLINE_set(&PL_compiling, 0);
     if (startop) {
 	*startop = PL_eval_root;
 	SvREFCNT_dec(CvOUTSIDE(PL_compcv));
@@ -2782,21 +2782,9 @@ PP(pp_require)
 
     /* prepare to compile file */
 
-    if (*name == '/' ||
-	(*name == '.' && 
-	    (name[1] == '/' ||
-	     (name[1] == '.' && name[2] == '/')))
-#ifdef DOSISH
-      || (name[0] && name[1] == ':')
-#endif
-#ifdef WIN32
-      || (name[0] == '\\' && name[1] == '\\')	/* UNC path */
-#endif
-#ifdef VMS
-	|| (strchr(name,':')  || ((*name == '[' || *name == '<') &&
-	    (isALNUM(name[1]) || strchr("$-_]>",name[1]))))
-#endif
-    )
+    if (PERL_FILE_IS_ABSOLUTE(name)
+	|| (*name == '.' && (name[1] == '/' ||
+			     (name[1] == '.' && name[2] == '/'))))
     {
 	tryname = name;
 	tryrsfp = doopen_pmc(name,PERL_SCRIPT_MODE);
@@ -2940,8 +2928,8 @@ PP(pp_require)
 	    }
 	}
     }
-    SAVESPTR(CopFILEGV(&PL_compiling));
-    CopFILEGV_set(&PL_compiling, gv_fetchfile(tryrsfp ? tryname : name));
+    SAVECOPFILE(&PL_compiling);
+    CopFILE_set(&PL_compiling, tryrsfp ? tryname : name);
     SvREFCNT_dec(namesv);
     if (!tryrsfp) {
 	if (PL_op->op_type == OP_REQUIRE) {
@@ -3010,8 +2998,8 @@ PP(pp_require)
     PUSHBLOCK(cx, CXt_EVAL, SP);
     PUSHEVAL(cx, name, Nullgv);
 
-    SAVEI16(PL_compiling.cop_line);
-    PL_compiling.cop_line = 0;
+    SAVECOPLINE(&PL_compiling);
+    CopLINE_set(&PL_compiling, 0);
 
     PUTBACK;
 #ifdef USE_THREADS
@@ -3051,10 +3039,10 @@ PP(pp_entereval)
  
     /* switch to eval mode */
 
-    SAVESPTR(CopFILEGV(&PL_compiling));
+    SAVECOPFILE(&PL_compiling);
     sprintf(tmpbuf, "_<(eval %lu)", (unsigned long)++PL_evalseq);
-    CopFILEGV_set(&PL_compiling, gv_fetchfile(tmpbuf+2));
-    PL_compiling.cop_line = 1;
+    CopFILE_set(&PL_compiling, tmpbuf+2);
+    CopLINE_set(&PL_compiling, 1);
     /* XXX For C<eval "...">s within BEGIN {} blocks, this ends up
        deleting the eval's FILEGV from the stash before gv_check() runs
        (i.e. before run-time proper). To work around the coredump that

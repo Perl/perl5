@@ -257,7 +257,7 @@ struct xpvbm {
     U8		xbm_rare;	/* rarest character in string */
 };
 
-/* This structure much match XPVCV */
+/* This structure much match XPVCV in cv.h */
 
 typedef U16 cv_flags_t;
 
@@ -276,9 +276,7 @@ struct xpvfm {
     void      (*xcv_xsub)(pTHXo_ CV*);
     ANY		xcv_xsubany;
     GV *	xcv_gv;
-#if defined(PERL_BINCOMPAT_5005)
-    GV *	xcv_filegv;	/* XXX unused (and deprecated) */
-#endif
+    char *	xcv_file;
     long	xcv_depth;	/* >= 2 indicates recursive call */
     AV *	xcv_padlist;
     CV *	xcv_outside;

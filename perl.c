@@ -1082,7 +1082,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
 		       PL_origfilename);
 	}
     }
-    PL_curcop->cop_line = 0;
+    CopLINE_set(PL_curcop, 0);
     PL_curstash = PL_defstash;
     PL_preprocess = FALSE;
     if (PL_e_script) {
@@ -1097,8 +1097,11 @@ print \"  \\@INC:\\n    @INC\\n\";");
     if (PL_do_undump)
 	my_unexec();
 
-    if (isWARN_ONCE)
+    if (isWARN_ONCE) {
+	SAVECOPFILE(PL_curcop);
+	SAVECOPLINE(PL_curcop);
 	gv_check(PL_defstash);
+    }
 
     LEAVE;
     FREETMPS;
@@ -2115,7 +2118,7 @@ S_open_script(pTHX_ char *scriptname, bool dosearch, SV *sv, int *fdscript)
 	}
     }
 
-    CopFILEGV_set(PL_curcop, gv_fetchfile(PL_origfilename));
+    CopFILE_set(PL_curcop, PL_origfilename);
     if (strEQ(PL_origfilename,"-"))
 	scriptname = "";
     if (*fdscript >= 0) {
@@ -2446,7 +2449,7 @@ S_validate_suid(pTHX_ char *validarg, char *scriptname, int fdscript)
 	if (PL_statbuf.st_mode & S_IWOTH)
 	    Perl_croak(aTHX_ "Setuid/gid script is writable by world");
 	PL_doswitches = FALSE;		/* -s is insecure in suid */
-	PL_curcop->cop_line++;
+	CopLINE_inc(PL_curcop);
 	if (sv_gets(PL_linestr, PL_rsfp, 0) == Nullch ||
 	  strnNE(SvPV(PL_linestr,n_a),"#!",2) )	/* required even on Sys V */
 	    Perl_croak(aTHX_ "No #! line");
@@ -3119,7 +3122,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 {
     dTHR;
     SV *atsv = ERRSV;
-    line_t oldline = PL_curcop->cop_line;
+    line_t oldline = CopLINE(PL_curcop);
     CV *cv;
     STRLEN len;
     int ret;
@@ -3134,7 +3137,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 	    (void)SvPV(atsv, len);
 	    if (len) {
 		PL_curcop = &PL_compiling;
-		PL_curcop->cop_line = oldline;
+		CopLINE_set(PL_curcop, oldline);
 		if (paramList == PL_beginav)
 		    sv_catpv(atsv, "BEGIN failed--compilation aborted");
 		else
@@ -3158,7 +3161,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 	    FREETMPS;
 	    PL_curstash = PL_defstash;
 	    PL_curcop = &PL_compiling;
-	    PL_curcop->cop_line = oldline;
+	    CopLINE_set(PL_curcop, oldline);
 	    if (PL_statusvalue) {
 		if (paramList == PL_beginav)
 		    Perl_croak(aTHX_ "BEGIN failed--compilation aborted");
@@ -3173,7 +3176,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 	case 3:
 	    if (PL_restartop) {
 		PL_curcop = &PL_compiling;
-		PL_curcop->cop_line = oldline;
+		CopLINE_set(PL_curcop, oldline);
 		JMPENV_JUMP(3);
 	    }
 	    PerlIO_printf(Perl_error_log, "panic: restartop\n");

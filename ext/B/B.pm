@@ -512,6 +512,8 @@ C<REFCNT> (corresponding to the C function C<SvREFCNT>).
 
 =item GV
 
+=item FILE
+
 =item DEPTH
 
 =item PADLIST
@@ -688,7 +690,7 @@ This returns the op description from the global C PL_op_desc array
 
 =item stash
 
-=item filegv
+=item file
 
 =item cop_seq
 

@@ -71,7 +71,7 @@ HV *GvHVn();
 
 #define GvLINE(gv)	(GvGP(gv)->gp_line)
 #define GvFILE(gv)	(GvGP(gv)->gp_file)
-#define GvFILEGV(gv)	(gv_fetchfile(GvGP(gv)->gp_file))
+#define GvFILEGV(gv)	(gv_fetchfile(GvFILE(gv)))
 
 #define GvEGV(gv)	(GvGP(gv)->gp_egv)
 #define GvENAME(gv)	GvNAME(GvEGV(gv) ? GvEGV(gv) : gv)

@@ -747,10 +747,10 @@ LOOP_lastop(o)
 
 #define COP_label(o)	o->cop_label
 #define COP_stash(o)	o->cop_stash
-#define COP_filegv(o)	o->cop_filegv
+#define COP_file(o)	CopFILE(o)
 #define COP_cop_seq(o)	o->cop_seq
 #define COP_arybase(o)	o->cop_arybase
-#define COP_line(o)	o->cop_line
+#define COP_line(o)	CopLINE(o)
 #define COP_warnings(o)	o->cop_warnings
 
 MODULE = B	PACKAGE = B::COP		PREFIX = COP_
@@ -763,8 +763,8 @@ B::HV
 COP_stash(o)
 	B::COP	o
 
-B::GV
-COP_filegv(o)
+char *
+COP_file(o)
 	B::COP	o
 
 U32
@@ -1151,6 +1151,10 @@ CvROOT(cv)
 
 B::GV
 CvGV(cv)
+	B::CV	cv
+
+char *
+CvFILE(cv)
 	B::CV	cv
 
 long

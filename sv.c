@@ -2462,7 +2462,7 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 		    Newz(602,gp, 1, GP);
 		    GvGP(dstr) = gp_ref(gp);
 		    GvSV(dstr) = NEWSV(72,0);
-		    GvLINE(dstr) = PL_curcop->cop_line;
+		    GvLINE(dstr) = CopLINE(PL_curcop);
 		    GvEGV(dstr) = (GV*)dstr;
 		}
 		GvMULTI_on(dstr);
@@ -6176,7 +6176,7 @@ perl_clone_using(PerlInterpreter *proto_perl, IV flags,
 
     PL_compiling		= proto_perl->Icompiling;
     PL_compiling.cop_stash	= hv_dup(PL_compiling.cop_stash);
-    PL_compiling.cop_filegv	= gv_dup(PL_compiling.cop_filegv);
+    PL_compiling.cop_file	= SAVEPV(PL_compiling.cop_file);
     PL_compiling.cop_warnings	= sv_dup_inc(PL_compiling.cop_warnings);
     if (proto_perl->Tcurcop == &proto_perl->Icompiling)
 	PL_curcop	= &PL_compiling;
