@@ -121,7 +121,7 @@ recursive_lock_acquire(pTHX_ recursive_lock_t *lock,char *file,int line)
 		                CALLER_CONTEXT;	\
 				LEAVE_LOCK;	\
 			    } STMT_END
-			
+
 
 /*
 
@@ -370,7 +370,7 @@ Perl_sharedsv_share(pTHX_ SV *sv)
     case SVt_PVCV:
 	Perl_croak(aTHX_ "Cannot share subs yet");
 	break;
-	
+
     default:
 	ENTER_LOCK;
 	Perl_sharedsv_associate(aTHX_ &sv, 0, 0);
@@ -425,6 +425,7 @@ sharedsv_scalar_store(pTHX_ SV *sv, shared_sv *shared)
 	}
     }
     else {
+		SvTEMP_off(sv);
 	SHARED_CONTEXT;
 	sv_setsv_nomg(SHAREDSvPTR(shared), sv);
 	CALLER_CONTEXT;
