@@ -31,6 +31,300 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 14832] By: jhi                                   on 2002/02/22  14:25:18
+        Log: Implement IV/UV/NV/long double pack/unpack with
+             template letters j/J/F/D (the latter two have been
+             undocumented aliases of f/d).
+     Branch: perl
+	   ! pod/perlfunc.pod pod/perltodo.pod pp_pack.c t/op/pack.t
+____________________________________________________________________________
+[ 14831] By: jhi                                   on 2002/02/22  13:47:08
+        Log: Subject: Re: [PATCH++] Re: [PATCH] go faster for Encode's compile
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Fri, 22 Feb 2002 14:01:25 +0000
+             Message-ID: <20020222140123.GD358@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! ext/Encode/compile
+____________________________________________________________________________
+[ 14830] By: jhi                                   on 2002/02/22  13:44:27
+        Log: NetWare change from Ananth Kesari.
+     Branch: perl
+	   - NetWare/t/NWModify-Exist.pl NetWare/t/NWScripts-Exist.pl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 14829] By: jhi                                   on 2002/02/22  13:42:42
+        Log: Subject: [PATCH @14577] pack with a human face: part ]|[
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Fri, 22 Feb 2002 03:55:13 -0500
+             Message-ID: <20020222035513.A894@math.ohio-state.edu>
+     Branch: perl
+	   ! pod/perlfunc.pod pp_pack.c t/op/pack.t
+____________________________________________________________________________
+[ 14828] By: jhi                                   on 2002/02/22  13:19:19
+        Log: EBCDIC: Disable Encode::JP and Encode::Tcl for now.
+     Branch: perl
+	   ! ext/Encode/JP/JP.pm ext/Encode/lib/Encode/Tcl.pm
+____________________________________________________________________________
+[ 14827] By: jhi                                   on 2002/02/22  13:11:00
+        Log: Make measure_struct a file static.
+     Branch: perl
+	   ! pp_pack.c
+____________________________________________________________________________
+[ 14826] By: jhi                                   on 2002/02/22  04:30:27
+        Log: EBCDIC: someone who knows what they are doing
+             and whether it is possible at all in the first
+             place needs to figure these tests out on EBCDIC.
+             The CJK encodings heavily abuse their knowledge
+             of ASCII and that may require a translation layer
+             or four to survive UTF-EBCDIC.
+     Branch: perl
+	   ! ext/Encode/t/JP.t ext/Encode/t/Tcl.t
+____________________________________________________________________________
+[ 14825] By: jhi                                   on 2002/02/22  02:43:03
+        Log: croak() needs context.
+     Branch: perl
+	   ! pp_pack.c
+____________________________________________________________________________
+[ 14824] By: jhi                                   on 2002/02/22  01:56:06
+        Log: Subject: [PATCH @14577] pack with a human face: the sequel
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Thu, 21 Feb 2002 21:33:37 -0500
+             Message-ID: <20020221213337.A23848@math.ohio-state.edu>
+     Branch: perl
+	   ! embed.fnc embed.h pod/perldiag.pod pod/perlfunc.pod pp_pack.c
+	   ! proto.h t/op/pack.t
+____________________________________________________________________________
+[ 14823] By: jhi                                   on 2002/02/22  00:38:19
+        Log: Subject: [PATCH+=2] Re: [PATCH++] Re: [PATCH] go faster for Encode's compile
+             From: Nicholas Clark <nick@unfortu.net> 
+             Date: Fri, 22 Feb 2002 00:49:44 +0000
+             Message-ID: <20020222004943.GK394@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! ext/Encode/compile
+____________________________________________________________________________
+[ 14822] By: jhi                                   on 2002/02/21  22:42:17
+        Log: Test for #14795.
+     Branch: perl
+	   ! t/op/pat.t
+____________________________________________________________________________
+[ 14821] By: jhi                                   on 2002/02/21  22:05:20
+        Log: Testing for ASCII in EBCDIC makes one's brain hurt.
+     Branch: perl
+	   ! t/op/pat.t
+____________________________________________________________________________
+[ 14820] By: jhi                                   on 2002/02/21  21:53:00
+        Log: Subject: [PATCH] next batch of bugfixes
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Thu, 21 Feb 2002 23:54:41 +0100
+             Message-ID: <20020221235441.A17260@rafael>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 14819] By: jhi                                   on 2002/02/21  21:06:54
+        Log: Subject: [PATCH lib/File/stat.t, lib/File/stat.pm] Find Filehandles Fully (was Re: [ID 20020221.004] [PATCH] File/stat.pm , Perl 5.6.1)
+             From: chromatic <chromatic@rmci.net>
+             Date: Thu, 21 Feb 2002 14:17:35 -0700
+             Message-ID: <20020221211823.80922.qmail@onion.perl.org>
+     Branch: perl
+	   ! lib/File/stat.pm lib/File/stat.t
+____________________________________________________________________________
+[ 14818] By: jhi                                   on 2002/02/21  21:01:36
+        Log: Externalization from Jatan Shah <jshah@broadcom.com>.
+     Branch: perl
+	   ! ext/re/re.xs
+____________________________________________________________________________
+[ 14817] By: jhi                                   on 2002/02/21  20:02:27
+        Log: Upgrade to Math::BigInt 1.51.
+     Branch: perl
+	   + lib/Math/BigInt/t/bare_mbf.t lib/Math/BigInt/t/config.t
+	   + lib/Math/BigInt/t/constant.t lib/Math/BigInt/t/inf_nan.t
+	   + lib/Math/BigInt/t/upgrade.inc lib/Math/BigInt/t/upgrade.t
+	   ! MANIFEST lib/Math/BigFloat.pm lib/Math/BigInt.pm
+	   ! lib/Math/BigInt/Calc.pm lib/Math/BigInt/t/bare_mbi.t
+	   ! lib/Math/BigInt/t/bigfltpm.inc lib/Math/BigInt/t/bigfltpm.t
+	   ! lib/Math/BigInt/t/bigintc.t lib/Math/BigInt/t/bigintpm.inc
+	   ! lib/Math/BigInt/t/bigintpm.t lib/Math/BigInt/t/calling.t
+	   ! lib/Math/BigInt/t/mbimbf.inc lib/Math/BigInt/t/mbimbf.t
+	   ! lib/Math/BigInt/t/require.t lib/Math/BigInt/t/sub_mbf.t
+	   ! lib/Math/BigInt/t/sub_mbi.t lib/Math/BigInt/t/sub_mif.t
+	   ! t/lib/Math/BigFloat/Subclass.pm t/lib/Math/BigInt/Subclass.pm
+____________________________________________________________________________
+[ 14816] By: jhi                                   on 2002/02/21  19:33:01
+        Log: Subject: Re: [PATCH] 'make clobber' on Cygwin broken
+             From: "Gerrit P. Haase" <gp@familiehaase.de>
+             Date: Thu, 21 Feb 2002 21:20:25 +0100
+             Message-ID: <69510538936.20020221212025@familiehaase.de>
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[ 14815] By: jhi                                   on 2002/02/21  17:28:23
+        Log: Subject: [PATCH @14577] grouping in pack/unpack
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Thu, 21 Feb 2002 06:06:14 -0500
+             Message-ID: <20020221060614.A29836@math.ohio-state.edu>
+     Branch: perl
+	   ! embed.fnc embed.h global.sym pod/perldiag.pod pod/perlfunc.pod
+	   ! pod/perltodo.pod pp_pack.c proto.h t/op/pack.t
+____________________________________________________________________________
+[ 14814] By: jhi                                   on 2002/02/21  15:41:10
+        Log: Subject: [PATCH propose] question about fs.t
+             From: Nikola Knezevic <indy@tesla.rcub.bg.ac.yu>
+             Date: Thu, 21 Feb 2002 15:10:21 +0100
+             Message-ID: <725805519.20020221151021@tesla.rcub.bg.ac.yu>
+     Branch: perl
+	   ! t/io/fs.t
+____________________________________________________________________________
+[ 14813] By: jhi                                   on 2002/02/21  15:37:44
+        Log: Subject: [PATCH] 'make clobber' on Cygwin broken    
+             From: "Gerrit P. Haase" <gerrit@familiehaase.de>         
+             Date: Thu, 21 Feb 2002 09:54:28 +0100
+             Message-ID: <13576559576.20020221095428@familiehaase.de>     
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[ 14812] By: ams                                   on 2002/02/21  14:59:09
+        Log: Subject: typo correction
+             From: mjd@plover.com
+             Date: 21 Feb 2002 15:43:49 -0000
+             Message-Id: <20020221154349.22772.qmail@plover.com>
+     Branch: perl
+	   ! pod/perldebug.pod
+____________________________________________________________________________
+[ 14811] By: ams                                   on 2002/02/21  14:02:12
+        Log: Subject: [PATCH] No OPf_SPECIAL on OP_ENTERSUB when readline() is overriden
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Thu, 21 Feb 2002 15:22:22 +0100
+             Message-Id: <20020221152222.A15095@rafael>
+     Branch: perl
+	   ! op.h toke.c
+____________________________________________________________________________
+[ 14810] By: ams                                   on 2002/02/21  12:45:28
+        Log: Subject: [PATCH @14577] cosmetic OS/2 patches
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Thu, 21 Feb 2002 06:02:48 -0500
+             Message-Id: <20020221060248.A29705@math.ohio-state.edu>
+     Branch: perl
+	   ! lib/ExtUtils/Mksymlists.pm makedef.pl
+____________________________________________________________________________
+[ 14809] By: nick                                  on 2002/02/21  09:31:08
+        Log: Integrate mainline
+     Branch: perlio
+	  +> lib/Pod/t/Select.t
+	  !> (integrate 37 files)
+____________________________________________________________________________
+[ 14808] By: jhi                                   on 2002/02/21  05:33:27
+        Log: metaconfig unit change for #14807.
+     Branch: metaconfig
+	   ! U/modified/Signal.U
+____________________________________________________________________________
+[ 14807] By: jhi                                   on 2002/02/21  05:33:07
+        Log: Revert #14805, didn't quite work.
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[ 14806] By: jhi                                   on 2002/02/21  05:21:52
+        Log: metaconfig changes for #14805.
+     Branch: metaconfig
+	   ! U/modified/Signal.U dist-3.0at70b/kit/makeSH
+____________________________________________________________________________
+[ 14805] By: jhi                                   on 2002/02/21  05:21:21
+        Log: Subject: Re: [ID 20020220.002] Perl 5.7.2 porting patches for POSIX 1003.1-2001 hosts 
+             From: Paul Eggert <eggert@twinsun.com>
+             Date: Wed, 20 Feb 2002 11:23:04 -0800 (PST)
+             Message-Id: <200202201923.g1KJN4d06394@shade.twinsun.com>
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[ 14804] By: jhi                                   on 2002/02/21  04:56:05
+        Log: More advice.
+     Branch: perl
+	   ! README.os390
+____________________________________________________________________________
+[ 14803] By: jhi                                   on 2002/02/21  04:40:37
+        Log: Missing MANIFESTation.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 14802] By: ams                                   on 2002/02/20  22:55:25
+        Log: Subject: [PATCH] Add missing Tolkien quotes to *.c
+             From: Autrijus Tang <autrijus@autrijus.org>
+             Date: Thu, 21 Feb 2002 07:13:12 +0800
+             Message-Id: <20020220231312.GA775@not.autrijus.org>
+     Branch: perl
+	   ! globals.c malloc.c perlio.c pp_pack.c universal.c xsutils.c
+____________________________________________________________________________
+[ 14801] By: ams                                   on 2002/02/20  22:27:20
+        Log: Subject: Re: Make Schwern poor in just 20 easy steps!
+             From: Abe Timmerman <abe@ztreet.demon.nl>
+             Date: Thu, 21 Feb 2002 00:20:40 +0100
+             Message-Id: <dgb87ukjfanphg45i4skobhe40s1g4sujj@4ax.com>
+     Branch: perl
+	   + lib/Pod/t/Select.t
+____________________________________________________________________________
+[ 14800] By: jhi                                   on 2002/02/20  22:15:23
+        Log: In EBCDIC the UNI_TO_NATIVE() macro evaluates its argument
+             twice, causing the loop to skip every other character.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 14799] By: jhi                                   on 2002/02/20  21:43:21
+        Log: Better debugging info.
+     Branch: perl
+	   ! t/uni/case.pl
+____________________________________________________________________________
+[ 14798] By: jhi                                   on 2002/02/20  21:13:50
+        Log: Subject: [PATCH++] Re: [PATCH] go faster for Encode's compile
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Wed, 20 Feb 2002 22:13:05 +0000
+             Message-ID: <20020220221304.GE371@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! ext/Encode/compile
+____________________________________________________________________________
+[ 14797] By: jhi                                   on 2002/02/20  18:31:14
+        Log: Subject: Re: [ID 20020220.002] Perl 5.7.2 porting patches for POSIX 1003.1-2001 hosts
+             From: Paul Eggert <eggert@twinsun.com>
+             Date: Wed, 20 Feb 2002 11:29:30 -0800 (PST)
+             Message-Id: <200202201929.g1KJTUb06403@shade.twinsun.com>
+     Branch: perl
+	   ! pod/perlhack.pod
+____________________________________________________________________________
+[ 14796] By: nick                                  on 2002/02/20  18:15:00
+        Log: Integrate mainline
+     Branch: perlio
+	  +> lib/Locale/Codes/ChangeLog lib/Locale/Codes/README
+	  +> lib/Locale/Codes/t/script.t lib/Locale/Constants.pod
+	  +> lib/Locale/Country.pod lib/Locale/Currency.pod
+	  +> lib/Locale/Language.pod lib/Locale/Script.pm
+	  +> lib/Locale/Script.pod t/uni/case.pl t/uni/lower.t
+	  +> t/uni/title.t t/uni/upper.t
+	  !> (integrate 41 files)
+____________________________________________________________________________
+[ 14795] By: ams                                   on 2002/02/20  17:08:38
+        Log: Subject: Re: Re-posts of some unresolved bleadperl bugreports
+             From: Hugo van der Sanden <hv@crypt.compulink.co.uk>
+             Date: Wed, 20 Feb 2002 18:06:59 +0000
+             Message-Id: <200202201807.g1KI6xj08220@crypt.compulink.co.uk>
+     Branch: perl
+	   ! pp_ctl.c
+____________________________________________________________________________
+[ 14794] By: ams                                   on 2002/02/20  16:41:56
+        Log: Subject: [PATCH] perl/Makefile.SH -- care with question mark
+             From: Paul_GreenVOS@vos.stratus.com
+             Date: Wed, 20 Feb 02 12:21 est
+             Message-Id: <200202201723.MAA24639@mailhub1.stratus.com>
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[ 14793] By: jhi                                   on 2002/02/20  16:26:56
+        Log: Forgot from #14790.
+     Branch: perl
+	   ! pp_pack.c
+____________________________________________________________________________
+[ 14792] By: jhi                                   on 2002/02/20  16:23:00
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 14791] By: jhi                                   on 2002/02/20  15:24:19
         Log: Integrate change #14778 from maintperl.
      Branch: perl
