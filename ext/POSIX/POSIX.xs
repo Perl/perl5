@@ -178,6 +178,35 @@ extern char *tzname[];
 char *tzname[] = { "" , "" };
 #endif
 
+/* XXX struct tm on some systems (SunOS4/BSD) contains extra (non POSIX)
+ * fields for which we don't have Configure support yet:
+ *   char *tm_zone;   -- abbreviation of timezone name
+ *   long tm_gmtoff;  -- offset from GMT in seconds
+ * To workaround core dumps from the uninitialised tm_zone we get the
+ * system to give us a reasonable struct to copy.  This fix means that
+ * strftime uses the tm_zone and tm_gmtoff values returned by
+ * localtime(time()). That should give the desired result most of the
+ * time. But probably not always!
+ *
+ * This is a temporary workaround to be removed once Configure
+ * support is added and NETaa14816 is considered in full.
+ * It does not address tzname aspects of NETaa14816.
+ */
+#ifdef STRUCT_TM_HASZONE
+static void
+init_tm(ptm)		/* see mktime, strftime and asctime	*/
+    struct tm *ptm;
+{
+    Time_t now;
+    (void)time(&now);
+    Copy(localtime(&now), ptm, 1, struct tm);
+}
+
+#else
+# define init_tm(ptm)
+#endif
+
+
 #ifndef HAS_LONG_DOUBLE /* XXX What to do about long doubles? */
 #ifdef LDBL_MAX
 #undef LDBL_MAX
@@ -2797,17 +2826,20 @@ pipe()
 
 SysRet
 read(fd, buffer, nbytes)
-	int		fd
-	char *		buffer = sv_grow(ST(1),SvIV(ST(2))+1);
-	size_t		nbytes
+    PREINIT:
+        SV *sv_buffer = SvROK(ST(1)) ? SvRV(ST(1)) : ST(1);
+    INPUT:
+        int             fd
+        size_t          nbytes
+        char *          buffer = sv_grow( sv_buffer, nbytes+1 );
     CLEANUP:
-	if (RETVAL >= 0) {
-	    SvCUR(ST(1)) = RETVAL;
-	    SvPOK_only(ST(1));
-	    *SvEND(ST(1)) = '\0';
-	    if (tainting)
-		sv_magic(ST(1), 0, 't', 0, 0);
-	}
+        if (RETVAL >= 0) {
+            SvCUR(sv_buffer) = RETVAL;
+            SvPOK_only(sv_buffer);
+            *SvEND(sv_buffer) = '\0';
+            if (tainting)
+                sv_magic(sv_buffer, 0, 't', 0, 0);
+        }
 
 SysRet
 setpgid(pid, pgid)
@@ -2955,6 +2987,7 @@ asctime(sec, min, hour, mday, mon, year, wday = 0, yday = 0, isdst = 0)
     CODE:
 	{
 	    struct tm mytm;
+	    init_tm(&mytm);	/* XXX workaround - see init_tm() above */
 	    mytm.tm_sec = sec;
 	    mytm.tm_min = min;
 	    mytm.tm_hour = hour;
@@ -3008,6 +3041,7 @@ mktime(sec, min, hour, mday, mon, year, wday = 0, yday = 0, isdst = 0)
     CODE:
 	{
 	    struct tm mytm;
+	    init_tm(&mytm);	/* XXX workaround - see init_tm() above */
 	    mytm.tm_sec = sec;
 	    mytm.tm_min = min;
 	    mytm.tm_hour = hour;
@@ -3039,6 +3073,7 @@ strftime(fmt, sec, min, hour, mday, mon, year, wday = 0, yday = 0, isdst = 0)
 	    char tmpbuf[128];
 	    struct tm mytm;
 	    int len;
+	    init_tm(&mytm);	/* XXX workaround - see init_tm() above */
 	    mytm.tm_sec = sec;
 	    mytm.tm_min = min;
 	    mytm.tm_hour = hour;
