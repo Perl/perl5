@@ -1,6 +1,6 @@
-# $Id: encoding.pm,v 2.01 2004/05/16 20:55:16 dankogai Exp $
+# $Id: encoding.pm,v 2.1 2004/10/19 04:55:01 dankogai Exp dankogai $
 package encoding;
-our $VERSION = do { my @r = (q$Revision: 2.01 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 2.1 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
 use strict;
@@ -127,7 +127,7 @@ sub import {
 			   $status ;
 		       });
 	};
-        $@ == '' and DEBUG and warn "Filter installed";
+        $@ eq '' and DEBUG and warn "Filter installed";
     }
     defined ${^UNICODE} and ${^UNICODE} != 0 and return 1;
     for my $h (qw(STDIN STDOUT)){

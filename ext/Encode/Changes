@@ -1,9 +1,16 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.4 2004/10/16 21:22:44 dankogai Exp dankogai $
+# $Id: Changes,v 2.5 2004/10/19 04:55:01 dankogai Exp dankogai $
 #
 
-$Revision: 2.4 $ $Date: 2004/10/16 21:22:44 $
+$Revision: 2.5 $ $Date: 2004/10/19 04:55:01 $
+! encoding.pm
+  "unnuke" jhi's patch in bleedperl, with minor correction by dankogai.
+  Message-ID: <41210A84.6060506@iki.fi>
+  Message-ID: <20041018233442.7418113f@r2d2>
+  Message-Id: <2BA3DAC4-218A-11D9-906D-000A95DBB50A@dan.co.jp>
+
+2.04 2004/10/16 21:22:44
 ! Makefle.PL 
   From:   craigberry@mac.com
   Subject: [PATCH ext/Encode/Makefile.PL] make Encode.c dependency explicit
