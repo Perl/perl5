@@ -46,7 +46,6 @@ int shared_sv_store_mg (pTHX_ SV* sv, MAGIC *mg) {
     if(SvROK(sv)) {
         shared_sv* target = Perl_sharedsv_find(aTHX_ SvRV(sv));
         if(!target) {
-            SHAREDSvRELEASE(shared);
             sv_setsv(sv,SHAREDSvGET(shared));
             SHAREDSvUNLOCK(shared);            
             Perl_croak(aTHX_ "You cannot assign a non shared reference to a shared scalar");
