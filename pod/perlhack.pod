@@ -1931,6 +1931,11 @@ or in UNIXy environments you can also use the C<env> command:
 
     env PERL_DESTRUCT_LEVEL=2 valgrind ./perl -Ilib ...
 
+B<NOTE 3>: There are known memory leaks when there are compile-time
+errors within eval or require, seeing C<S_doeval> in the call stack
+is a good sign of these.  Fixing these leaks is non-trivial,
+unfortunately, but they must be fixed eventually.
+
 =head2 Rational Software's Purify
 
 Purify is a commercial tool that is helpful in identifying
@@ -1938,11 +1943,6 @@ memory overruns, wild pointers, memory leaks and other such
 badness.  Perl must be compiled in a specific way for
 optimal testing with Purify.  Purify is available under
 Windows NT, Solaris, HP-UX, SGI, and Siemens Unix.
-
-The only currently known leaks happen when there are
-compile-time errors within eval or require.  (Fixing these
-is non-trivial, unfortunately, but they must be fixed
-eventually.)
 
 =head2 Purify on Unix
 
