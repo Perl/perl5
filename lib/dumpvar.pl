@@ -30,7 +30,8 @@ sub main::dumpValue {
   local $^W=0;
   (print "undef\n"), return unless defined $_[0];
   (print &stringify($_[0]), "\n"), return unless ref $_[0];
-  dumpvar::unwrap($_[0],0, $_[1]);
+  push @_, -1 if @_ == 1;
+  dumpvar::unwrap($_[0], 0, $_[1]);
 }
 
 # This one is good for variable names:
