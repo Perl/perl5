@@ -1,3 +1,14 @@
+BEGIN {
+    if ($ENV{PERL_CORE}) {
+	unless ($ENV{PERL_TEST_Net_Ping}) {
+	    print "1..0 # Skip: network dependent test\n";
+	    exit;
+	}
+	chdir 't' if -d 't';
+	@INC = qw(../lib);
+    }
+}
+
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl test.t'
 

@@ -1,3 +1,14 @@
+BEGIN {
+    if ($ENV{PERL_CORE}) {
+	unless ($ENV{PERL_TEST_Net_Ping}) {
+	    print "1..0 # Skip: network dependent test\n";
+	    exit;
+	}
+	chdir 't' if -d 't';
+	@INC = qw(../lib);
+    }
+}
+
 # Remote network test using tcp protocol.
 #
 # NOTE:
