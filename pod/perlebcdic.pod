@@ -104,7 +104,7 @@ representation of the Unicode standard that looks very much like ASCII.
 UTF-EBCDIC is an attempt to represent Unicode characters in an EBCDIC
 transparent manner.
 
-=head Using Encode
+=head2 Using Encode
 
 Starting from Perl 5.8 you can use the standard new module Encode
 to translate from EBCDIC to Latin-1 code points
