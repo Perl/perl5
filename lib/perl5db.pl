@@ -3,7 +3,7 @@ package DB;
 use IO::Handle;
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
-$VERSION = 1.20;
+$VERSION = 1.21;
 $header  = "perl5db.pl version $VERSION";
 
 # It is crucial that there is no lexicals in scope of `eval ""' down below
@@ -324,6 +324,8 @@ sub eval {
 # Changes: 1.20: Feb 17, 2003 Richard Foley <richard.foley@rfi.net>
 #   + pre'n'post commands no longer trashed with no args
 #   + watch val joined out of eval()
+# Changes: 1.21: Dec 21, 2003 Dominique Quatravaux
+#   + Fix a side-effect of bug #24674 in the perl debugger ("odd taint bug")
 # 
 ####################################################################
 
