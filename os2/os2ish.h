@@ -68,6 +68,13 @@
 
 #define BIT_BUCKET "/dev/nul"  /* Will this work? */
 
+/* Apparently TCPIPV4 defines may be included even with only IAK present */
+
+#if !defined(NO_TCPIPV4) && !defined(TCPIPV4)
+#  define TCPIPV4
+#  define TCPIPV4_FORCED		/* Just in case */
+#endif
+
 #if defined(I_SYS_UN) && !defined(TCPIPV4)
 /* It is not working without TCPIPV4 defined. */
 # undef I_SYS_UN
