@@ -532,7 +532,10 @@ Perl_ithread_self (pTHX_ SV *obj, char* Class)
 #else
     PERL_THREAD_GETSPECIFIC(self_key,thread);
 #endif
-    return ithread_to_SV(aTHX_ obj, thread, Class, TRUE);
+   if (thread)
+	return ithread_to_SV(aTHX_ obj, thread, Class, TRUE);
+   else
+	Perl_croak(aTHX_ "panic: cannot find thread data");
 }
 
 /*
