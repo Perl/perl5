@@ -641,65 +641,53 @@ perl_init_i18nl10n(int printwarn)
 	else
 	    setlocale_failure = TRUE;
     }
-    if (!setlocale_failure)
-#endif /* LC_ALL */
-    {
+    if (!setlocale_failure) {
 #ifdef USE_LOCALE_CTYPE
-	if (! (curctype = setlocale(LC_CTYPE,
-				    (!done && (lang || PerlEnv_getenv("LC_CTYPE")))
+	if (! (curctype =
+	       setlocale(LC_CTYPE,
+			 (!done && (lang || PerlEnv_getenv("LC_CTYPE")))
 				    ? "" : Nullch)))
 	    setlocale_failure = TRUE;
 #endif /* USE_LOCALE_CTYPE */
 #ifdef USE_LOCALE_COLLATE
-	if (! (curcoll = setlocale(LC_COLLATE,
-				   (!done && (lang || PerlEnv_getenv("LC_COLLATE")))
+	if (! (curcoll =
+	       setlocale(LC_COLLATE,
+			 (!done && (lang || PerlEnv_getenv("LC_COLLATE")))
 				   ? "" : Nullch)))
 	    setlocale_failure = TRUE;
 #endif /* USE_LOCALE_COLLATE */
 #ifdef USE_LOCALE_NUMERIC
-	if (! (curnum = setlocale(LC_NUMERIC,
-				  (!done && (lang || PerlEnv_getenv("LC_NUMERIC")))
+	if (! (curnum =
+	       setlocale(LC_NUMERIC,
+			 (!done && (lang || PerlEnv_getenv("LC_NUMERIC")))
 				  ? "" : Nullch)))
 	    setlocale_failure = TRUE;
 #endif /* USE_LOCALE_NUMERIC */
     }
 
-#else /* !LOCALE_ENVIRON_REQUIRED */
-
-#ifdef LC_ALL
-
-    if (! setlocale(LC_ALL, ""))
-	setlocale_failure = TRUE;
-    else {
-#ifdef USE_LOCALE_CTYPE
-	curctype = setlocale(LC_CTYPE, Nullch);
-#endif /* USE_LOCALE_CTYPE */
-#ifdef USE_LOCALE_COLLATE
-	curcoll = setlocale(LC_COLLATE, Nullch);
-#endif /* USE_LOCALE_COLLATE */
-#ifdef USE_LOCALE_NUMERIC
-	curnum = setlocale(LC_NUMERIC, Nullch);
-#endif /* USE_LOCALE_NUMERIC */
-    }
-
-#else /* !LC_ALL */
-
-#ifdef USE_LOCALE_CTYPE
-    if (! (curctype = setlocale(LC_CTYPE, "")))
-	setlocale_failure = TRUE;
-#endif /* USE_LOCALE_CTYPE */
-#ifdef USE_LOCALE_COLLATE
-    if (! (curcoll = setlocale(LC_COLLATE, "")))
-	setlocale_failure = TRUE;
-#endif /* USE_LOCALE_COLLATE */
-#ifdef USE_LOCALE_NUMERIC
-    if (! (curnum = setlocale(LC_NUMERIC, "")))
-	setlocale_failure = TRUE;
-#endif /* USE_LOCALE_NUMERIC */
-
 #endif /* LC_ALL */
 
 #endif /* !LOCALE_ENVIRON_REQUIRED */
+
+#ifdef LC_ALL
+    if (! setlocale(LC_ALL, ""))
+	setlocale_failure = TRUE;
+#endif /* LC_ALL */
+
+    if (!setlocale_failure) {
+#ifdef USE_LOCALE_CTYPE
+	if (! (curctype = setlocale(LC_CTYPE, "")))
+	    setlocale_failure = TRUE;
+#endif /* USE_LOCALE_CTYPE */
+#ifdef USE_LOCALE_COLLATE
+	if (! (curcoll = setlocale(LC_COLLATE, "")))
+	    setlocale_failure = TRUE;
+#endif /* USE_LOCALE_COLLATE */
+#ifdef USE_LOCALE_NUMERIC
+	if (! (curnum = setlocale(LC_NUMERIC, "")))
+	    setlocale_failure = TRUE;
+#endif /* USE_LOCALE_NUMERIC */
+    }
 
     if (setlocale_failure) {
 	char *p;
