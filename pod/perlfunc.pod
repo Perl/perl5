@@ -3153,8 +3153,8 @@ because they obey the native byteorder and endianness.  For example a
 4-byte integer 0x12345678 (305419896 decimal) be ordered natively
 (arranged in and handled by the CPU registers) into bytes as
 
- 	0x12 0x34 0x56 0x78	# little-endian
- 	0x78 0x56 0x34 0x12	# big-endian
+ 	0x12 0x34 0x56 0x78	# big-endian
+ 	0x78 0x56 0x34 0x12	# little-endian
 
 Basically, the Intel, Alpha, and VAX CPUs are little-endian, while
 everybody else, for example Motorola m68k/88k, PPC, Sparc, HP PA,
