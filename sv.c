@@ -2097,32 +2097,11 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
 	    return "";
 	}
     }
-    if (SvIOKp(sv)) {
-	I32 isIOK = SvIOK(sv);
-	I32 isUIOK = SvIsUV(sv);
-	char buf[TYPE_CHARS(UV)];
-	char *ebuf, *ptr;
-
-	if (SvTYPE(sv) < SVt_PVIV)
-	    sv_upgrade(sv, SVt_PVIV);
-	if (isUIOK)
-	    ptr = uiv_2buf(buf, 0, SvUVX(sv), 1, &ebuf);
-	else
-	    ptr = uiv_2buf(buf, SvIVX(sv), 0, 0, &ebuf);
-	SvGROW(sv, ebuf - ptr + 1);	/* inlined from sv_setpvn */
-	Move(ptr,SvPVX(sv),ebuf - ptr,char);
-	SvCUR_set(sv, ebuf - ptr);
-	s = SvEND(sv);
-	*s = '\0';
-	if (isIOK)
-	    SvIOK_on(sv);
-	else
-	    SvIOKp_on(sv);
-	if (isUIOK)
-	    SvIsUV_on(sv);
-	SvPOK_on(sv);
-    }
-    else if (SvNOKp(sv)) {			/* See note in sv_2uv() */
+    if (SvNOKp(sv)) {			/* See note in sv_2uv() */
+	/* XXXX 64-bit?  IV may have better precision... */
+	/* I tried changing this for to be 64-bit-aware and
+	 * the t/op/numconvert.t became very, very, angry.
+	 * --jhi Sep 1999 */
 	if (SvTYPE(sv) < SVt_PVNV)
 	    sv_upgrade(sv, SVt_PVNV);
 	SvGROW(sv, 28);
@@ -2146,6 +2125,31 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
 	if (s[-1] == '.')
 	    *--s = '\0';
 #endif
+    }
+    else if (SvIOKp(sv)) {
+	U32 isIOK = SvIOK(sv);
+	U32 isUIOK = SvIsUV(sv);
+	char buf[TYPE_CHARS(UV)];
+	char *ebuf, *ptr;
+
+	if (SvTYPE(sv) < SVt_PVIV)
+	    sv_upgrade(sv, SVt_PVIV);
+	if (isUIOK)
+	    ptr = uiv_2buf(buf, 0, SvUVX(sv), 1, &ebuf);
+	else
+	    ptr = uiv_2buf(buf, SvIVX(sv), 0, 0, &ebuf);
+	SvGROW(sv, ebuf - ptr + 1);	/* inlined from sv_setpvn */
+	Move(ptr,SvPVX(sv),ebuf - ptr,char);
+	SvCUR_set(sv, ebuf - ptr);
+	s = SvEND(sv);
+	*s = '\0';
+	if (isIOK)
+	    SvIOK_on(sv);
+	else
+	    SvIOKp_on(sv);
+	if (isUIOK)
+	    SvIsUV_on(sv);
+	SvPOK_on(sv);
     }
     else {
 	dTHR;
@@ -6074,7 +6078,6 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    goto uns_integer;
 
 	case 'X':
-	    /* FALL THROUGH */
 	case 'x':
 	    base = 16;
 
