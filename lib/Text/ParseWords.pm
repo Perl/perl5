@@ -1,7 +1,7 @@
 package Text::ParseWords;
 
 use vars qw($VERSION @ISA @EXPORT $PERL_SINGLE_QUOTE);
-$VERSION = "3.1";
+$VERSION = "3.1001";
 
 require 5.000;
 
@@ -51,7 +51,11 @@ sub parse_line {
 	# We will be testing undef strings
 	local($^W) = 0;
 
-    my($delimiter, $keep, $line) = @_;
+    # This is a bit of a hack, but it's the best way to work
+    # correctly most of the time.  -- Chip
+    (my $delimiter = shift) =~ s/([\s#])/\\$1/g;
+
+    my($keep, $line) = @_;
     my($quote, $quoted, $unquoted, $delim, $word, @pieces);
 
     while (length($line)) {
