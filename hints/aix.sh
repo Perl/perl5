@@ -17,6 +17,10 @@ alignbytes=8
 
 usemymalloc='n'
 
+# Intuiting the existence of system calls under AIX is difficult, at
+# best; the safest technique is to find them empirically.
+usenm='undef'
+
 so="a"
 dlext="so"
 
