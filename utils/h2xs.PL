@@ -1255,13 +1255,6 @@ my $pod = <<"END" unless $opt_P;
 #  use $module;
 #  blah blah blah
 #
-#=head1 ABSTRACT
-#
-#  This should be the abstract for $module.
-#  The abstract is used when making PPD (Perl Package Description) files.
-#  If you don't want an ABSTRACT you should also edit Makefile.PL to
-#  remove the ABSTRACT_FROM option.
-#
 #=head1 DESCRIPTION
 #
 #Stub documentation for $module, created by h2xs. It looks like the
