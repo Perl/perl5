@@ -1942,6 +1942,23 @@ typedef struct clone_params CLONE_PARAMS;
 #  endif
 #endif
 
+/* The PL_earlytaint is to be used instead PL_tainting before
+ * perl_parse() has had the chance to set up PL_tainting. */
+
+#ifndef EARLY_INIT3
+#  define EARLY_INIT3(argvp,argcp,envp) \
+	STMT_START {		\
+		PL_earlytaint = doing_taint(argcp, argvp, envp); \
+	} STMT_END;
+#endif
+
+#ifndef EARLY_INIT2
+#  define EARLY_INIT2(argvp,argcp) \
+	STMT_START {		\
+		PL_earlytaint = doing_taint(argcp, argvp, 0); \
+	} STMT_END;
+#endif
+
 #ifndef PERL_SYS_INIT3
 #  define PERL_SYS_INIT3(argvp,argcp,envp) PERL_SYS_INIT(argvp,argcp)
 #endif

@@ -56,9 +56,6 @@ main(int argc, char **argv, char **env)
     /* noop unless Configure is given -Accflags=-DPERL_GPROF_CONTROL */
     PERL_GPROF_MONCONTROL(0);
 
-    /* To be used instead PL_taining before perl_parse() */
-    PL_earlytaint = doing_taint(argc, argv, env);
-
     PERL_SYS_INIT3(&argc,&argv,&env);
 
 #if defined(USE_ITHREADS)
