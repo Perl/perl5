@@ -411,7 +411,7 @@ sub import {
     shift;
     $^W = 1; # yup, clobbered the global variable; 
 	     # tough, if you want diags, you want diags.
-    return if $SIG{__WARN__} eq \&warn_trap;
+    return if defined $SIG{__WARN__} && ($SIG{__WARN__} eq \&warn_trap);
 
     for (@_) {
 
