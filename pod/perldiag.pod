@@ -2926,7 +2926,7 @@ bad side effects.
 
 (W) An undefined value was used as if it were already defined.  It was
 interpreted as a "" or a 0, but maybe it was a mistake.  To suppress this
-warning assign an initial value to your variables.
+warning assign a defined value to your variables.
 
 =item Useless use of "re" pragma
 

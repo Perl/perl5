@@ -384,6 +384,7 @@ if ($Is_MSWin32) {
 	$tmp = "$ENV{TEMP}\\perldoc1.$$";
 	push @pagers, qw( more< less notepad );
 	unshift @pagers, $ENV{PAGER}  if $ENV{PAGER};
+	for (@found) { s,/,\\,g }
 } elsif ($Is_VMS) {
 	$tmp = 'Sys$Scratch:perldoc.tmp1_'.$$;
 	push @pagers, qw( most more less type/page );
