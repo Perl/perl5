@@ -143,40 +143,40 @@ typedef U16 line_t;
 #ifndef lint
 #ifndef LEAKTEST
 #ifndef safemalloc
-char *safemalloc _((MEM_SIZE));
-char *saferealloc _((char *, MEM_SIZE));
-void safefree _((char *));
-char *safecalloc _((MEM_SIZE, MEM_SIZE));
+Malloc_t safemalloc _((MEM_SIZE));
+Malloc_t saferealloc _((Malloc_t, MEM_SIZE));
+Free_t safefree _((Malloc_t));
+Malloc_t safecalloc _((MEM_SIZE, MEM_SIZE));
 #endif
 #ifndef MSDOS
 #define New(x,v,n,t)  (v = (t*)safemalloc((MEM_SIZE)((n) * sizeof(t))))
 #define Newc(x,v,n,t,c)  (v = (c*)safemalloc((MEM_SIZE)((n) * sizeof(t))))
 #define Newz(x,v,n,t) (v = (t*)safemalloc((MEM_SIZE)((n) * sizeof(t)))), \
     memzero((char*)(v), (n) * sizeof(t))
-#define Renew(v,n,t) (v = (t*)saferealloc((char*)(v),(MEM_SIZE)((n)*sizeof(t))))
-#define Renewc(v,n,t,c) (v = (c*)saferealloc((char*)(v),(MEM_SIZE)((n)*sizeof(t))))
+#define Renew(v,n,t) (v = (t*)saferealloc((Malloc_t)(v),(MEM_SIZE)((n)*sizeof(t))))
+#define Renewc(v,n,t,c) (v = (c*)saferealloc((Malloc_t)(v),(MEM_SIZE)((n)*sizeof(t))))
 #else
 #define New(x,v,n,t)  (v = (t*)safemalloc(((unsigned long)(n) * sizeof(t))))
 #define Newc(x,v,n,t,c)  (v = (c*)safemalloc(((unsigned long)(n) * sizeof(t))))
 #define Newz(x,v,n,t) (v = (t*)safemalloc(((unsigned long)(n) * sizeof(t)))), \
     memzero((char*)(v), (n) * sizeof(t))
-#define Renew(v,n,t) (v = (t*)saferealloc((char*)(v),((unsigned long)(n)*sizeof(t))))
-#define Renewc(v,n,t,c) (v = (c*)saferealloc((char*)(v),((unsigned long)(n)*sizeof(t))))
+#define Renew(v,n,t) (v = (t*)saferealloc((Malloc_t)(v),((unsigned long)(n)*sizeof(t))))
+#define Renewc(v,n,t,c) (v = (c*)saferealloc((Malloc_t)(v),((unsigned long)(n)*sizeof(t))))
 #endif /* MSDOS */
-#define Safefree(d) safefree((char*)d)
+#define Safefree(d) safefree((Malloc_t)(d))
 #define NEWSV(x,len) newSV(len)
 #else /* LEAKTEST */
-char *safexmalloc();
-char *safexrealloc();
-void safexfree();
-char *safexcalloc();
+Malloc_t safexmalloc();
+Malloc_t safexrealloc();
+Free_t safexfree();
+Malloc_t safexcalloc();
 #define New(x,v,n,t)  (v = (t*)safexmalloc(x,(MEM_SIZE)((n) * sizeof(t))))
 #define Newc(x,v,n,t,c)  (v = (c*)safexmalloc(x,(MEM_SIZE)((n) * sizeof(t))))
 #define Newz(x,v,n,t) (v = (t*)safexmalloc(x,(MEM_SIZE)((n) * sizeof(t)))), \
     memzero((char*)(v), (n) * sizeof(t))
-#define Renew(v,n,t) (v = (t*)safexrealloc((char*)(v),(MEM_SIZE)((n)*sizeof(t))))
-#define Renewc(v,n,t,c) (v = (c*)safexrealloc((char*)(v),(MEM_SIZE)((n)*sizeof(t))))
-#define Safefree(d) safexfree((char*)d)
+#define Renew(v,n,t) (v = (t*)safexrealloc((Malloc_t)(v),(MEM_SIZE)((n)*sizeof(t))))
+#define Renewc(v,n,t,c) (v = (c*)safexrealloc((Malloc_t)(v),(MEM_SIZE)((n)*sizeof(t))))
+#define Safefree(d) safexfree((Malloc_t)d)
 #define NEWSV(x,len) newSV(x,len)
 #define MAXXCOUNT 1200
 long xcount[MAXXCOUNT];
