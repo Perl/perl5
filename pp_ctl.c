@@ -29,7 +29,7 @@
 #define CALLOP this->*PL_op
 #else
 #define CALLOP *PL_op
-static void *docatch_body _((valist args));
+static void *docatch_body _((va_list args));
 static OP *docatch _((OP *o));
 static OP *dofindlabel _((OP *o, char *label, OP **opstack, OP **oplimit));
 static void doparseform _((SV *sv));
