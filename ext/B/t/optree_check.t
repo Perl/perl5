@@ -64,9 +64,8 @@ checkOptree ( name	=> 'test skip itself',
 # no good way to expect a successful todo, and inducing a failure
 # causes the harness to print verbose errors, which is NOT helpful.
 
-checkOptree ( name	=> 'test todo itself. suppressed, remove skip to test',
-	      todo	=> "suppress todo test for now",
-	      skip	=> 1,
+checkOptree ( name	=> 'test todo itself',
+	      todo	=> "your excuse here ;-)",
 	      bcopts	=> '-exec',
 	      code	=> sub {print 1},
 	      noanchors	=> 1, # unanchored match
