@@ -192,7 +192,7 @@ use SelectSaver;
 require Exporter;
 @ISA = qw(Exporter);
 
-$VERSION = "1.14";
+$VERSION = "1.1401";
 
 @EXPORT_OK = qw(
     autoflush
