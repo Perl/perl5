@@ -103,9 +103,8 @@ as the last item in a statement.
 
 =head2 Truth and Falsehood
 
-The number 0, the strings C<'0'> and C<''>, the empty list C<()>, and an
-explicit C<undef> are all false in a boolean context. Every other value
-is true.
+The number 0, the strings C<'0'> and C<''>, the empty list C<()>, and
+C<undef> are all false in a boolean context. All other values are true.
 
 Note that while 0, 0.0 and C<'0'> are false, C<'0.0'> and C<'0e0'> are
 true, but evaluate to 0 in a numeric context.
