@@ -54,7 +54,7 @@ is the recommended Unicode-aware way of saying
 U8 *
 Perl_uvuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 {
-    if (ckWARN_d(WARN_UTF8)) {
+    if (ckWARN(WARN_UTF8)) {
 	 if (UNICODE_IS_SURROGATE(uv) &&
 	     !(flags & UNICODE_ALLOW_SURROGATE))
 	      Perl_warner(aTHX_ WARN_UTF8, "UTF-16 surrogate 0x%04"UVxf, uv);

@@ -4184,7 +4184,10 @@ So put in parentheses to say what you really mean.
 
 =item Wide character in %s
 
-(W utf8) Perl met a wide character (>255) when it wasn't expecting one.
+(W utf8) Perl met a wide character (>255) when it wasn't expecting
+one.  This warning is by default on for I/O (like print) but can be
+turned off by C<no warnings 'utf8';>.  You are supposed to explicitly
+mark the filehandle with an encoding, see L<open> and L<perlfunc/binmode>.
 
 =item write() on closed filehandle %s
 
