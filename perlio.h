@@ -78,8 +78,10 @@ typedef struct _PerlIO PerlIOl;
 typedef struct _PerlIO_funcs PerlIO_funcs;
 typedef PerlIOl *PerlIO;
 #define PerlIO PerlIO
+#define PERLIO_LAYERS 1
 
 extern void	PerlIO_define_layer	(PerlIO_funcs *tab);
+extern SV *	PerlIO_find_layer(char *name, STRLEN len);
 extern PerlIO *	PerlIO_push		(PerlIO *f,PerlIO_funcs *tab,const char *mode);
 extern void	PerlIO_pop		(PerlIO *f);
 
