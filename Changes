@@ -28,6 +28,509 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 18234] By: jhi                                   on 2002/12/02  22:30:41
+        Log: Integrate
+             
+             [ 17815]
+             formatting cleanup and:
+             Subject: Re: perl-5.8.0 on HP porting center
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Thu, 29 Aug 2002 12:23:31 +0200
+             Message-Id: <20020829122221.0CA3.H.M.BRAND@hccnet.nl>
+             
+             [ 18170]
+             Move some tests from t/run/fresh_perl.t
+             to the new t/comp/parser.t. The goal being to
+             get rid of fresh_perl.t at some point.
+             
+             [ 18228]
+             integrate Pod-Perldoc-3.07. This replaces the original inline perldoc
+             with a module-driven version, and separates out its docs.
+             
+             [ 18229]
+             $0 mofifying part I
+             
+             Date: Sat, 30 Nov 2002 20:16:51 +0200
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Subject: [PATCH] $0 modifying
+             Message-ID: <20021130181651.GA5876@kosh.hut.fi>
+             
+             [ 18230]
+             $0 modifying part II (HP-UX only)
+             
+             Date: Sat, 30 Nov 2002 20:16:51 +0200
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Subject: [PATCH] $0 modifying
+             Message-ID: <20021130181651.GA5876@kosh.hut.fi>
+             
+             [ 18231]
+             Subject: Re: [perl #15129] building a dynamically linked Perl 5.6.1 on HPUX 11.0
+             Date: Mon, 2 Dec 2002 12:04:40 -0500 (EST)
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Message-ID: <Pine.SOL.4.10.10212021200050.24023-100000@maxwell.phys.lafayette.edu>
+             
+             [ 18232]
+             Skip test #17 of lib/open.t when useperlio is not defined.
+             
+             [ 18233]
+             Fix bug #18573 : in a double-quoted string, a \c not followed
+             by any character may corrupt memory due to reading past the
+             end of the input buffer. Add a new error message corresponding
+             to this case.
+     Branch: maint-5.8/perl
+	  +> lib/Pod/Perldoc.pm lib/Pod/Perldoc/BaseTo.pm
+	  +> lib/Pod/Perldoc/GetOptsOO.pm lib/Pod/Perldoc/ToChecker.pm
+	  +> lib/Pod/Perldoc/ToMan.pm lib/Pod/Perldoc/ToNroff.pm
+	  +> lib/Pod/Perldoc/ToPod.pm lib/Pod/Perldoc/ToRtf.pm
+	  +> lib/Pod/Perldoc/ToText.pm lib/Pod/Perldoc/ToTk.pm
+	  +> lib/Pod/Perldoc/ToXml.pm lib/Pod/Perldoc/t/checkerbasic.t
+	  +> lib/Pod/Perldoc/t/perldocbasic.t lib/Pod/Perldoc/t/textbasic.t
+	  +> pod/perldoc.pod
+	  !> MANIFEST README.hpux ext/threads/t/join.t installperl
+	  !> lib/open.t makedef.pl mg.c perl.c pod/perldiag.pod
+	  !> pod/perlvar.pod sv.c t/comp/parser.t t/op/magic.t thread.h
+	  !> toke.c utils/perldoc.PL
+____________________________________________________________________________
+[ 18227] By: jhi                                   on 2002/12/02  13:23:48
+        Log: Integrate
+             
+             [ 18216]
+             64bit Peek failure on HP-UX 11.00
+             
+             Subject: Re: Smoke 18188
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: 28 Nov 2002 19:25:25 +0100
+             Message-ID: <877kexsga2.fsf@vran.herceg.de>
+             
+             [ 18217]
+             Document the hint constants and where they're used.
+             
+             [ 18224]
+             Integrate PodParser-1.20, with matching tweaks to lib/Pod/t/latex.t
+             and lib/Pod/t/utils.t to cater for simpler output text.
+             
+             [ 18226]
+             missed the new file from #18224
+     Branch: maint-5.8/perl
+	  +> lib/Pod/PlainText.pm
+	  !> (integrate 37 files)
+____________________________________________________________________________
+[ 18218] By: jhi                                   on 2002/11/29  18:23:39
+        Log: Add test from [perl #8026]
+     Branch: maint-5.8/perl
+	   ! t/op/pack.t
+____________________________________________________________________________
+[ 18215] By: jhi                                   on 2002/11/29  00:32:10
+        Log: perl #7887: Bad URL in README.os2
+     Branch: maint-5.8/perl
+	   ! README.os2
+____________________________________________________________________________
+[ 18214] By: jhi                                   on 2002/11/28  23:41:54
+        Log: Two tests from perl #7806.
+     Branch: maint-5.8/perl
+	   ! t/op/subst.t
+____________________________________________________________________________
+[ 18213] By: jhi                                   on 2002/11/28  22:26:23
+        Log: Unintended integratee from #18210.
+     Branch: maint-5.8/perl
+	   - macos/config.h
+____________________________________________________________________________
+[ 18211] By: jhi                                   on 2002/11/28  21:50:05
+        Log: More pseudohashery.
+     Branch: maint-5.8/perl
+	   ! lib/fields.t
+____________________________________________________________________________
+[ 18210] By: jhi                                   on 2002/11/28  21:24:10
+        Log: Integrate from maint-5.8/macperl
+             
+             [ 18200]
+             Yet another approach to signal handling (Matthias)
+     Branch: maint-5.8/perl
+	  +> macos/config.h
+	  !> util.c
+____________________________________________________________________________
+[ 18209] By: jhi                                   on 2002/11/28  19:07:20
+        Log: Add the test case from perl #9728.
+     Branch: maint-5.8/perl
+	   ! t/op/eval.t
+____________________________________________________________________________
+[ 18208] By: jhi                                   on 2002/11/28  16:57:01
+        Log: Retry the #17920.
+     Branch: maint-5.8/perl
+	   ! av.c embed.fnc embed.h ext/GDBM_File/GDBM_File.xs global.sym
+	   ! handy.h perl.c perl.h pod/perlrun.pod proto.h sv.c util.c
+____________________________________________________________________________
+[ 18207] By: jhi                                   on 2002/11/28  16:49:00
+        Log: Urque.  Retract #18206 since it got two patches interleaved
+             (the #17920, and an unfinished experimental patch).
+     Branch: maint-5.8/perl
+	   ! av.c embed.fnc embed.h ext/GDBM_File/GDBM_File.xs
+	   ! ext/threads/t/join.t global.sym handy.h intrpvar.h makedef.pl
+	   ! mg.c perl.c perl.h pod/perlrun.pod pod/perlvar.pod sv.c
+	   ! t/op/magic.t thread.h util.c
+____________________________________________________________________________
+[ 18206] By: jhi                                   on 2002/11/28  16:45:11
+        Log: Integrate
+             
+             [ 17920]
+             LEAKTEST is dead, RIP
+             Subject: Re: [perl #17197] SIGSEGV in perl 5.8.0 multithread build with -DLEAKTEST
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Mon, 23 Sep 2002 18:33:12 +0200
+             Message-Id: <20020923182824.C7B6.H.M.BRAND@hccnet.nl>
+             
+             (since LEAKTEST seems to be fundamentally obsolete,
+             even maint-5.8 shouldn't keep flogging a dead feature)
+     Branch: maint-5.8/perl
+	   ! ext/threads/t/join.t intrpvar.h makedef.pl mg.c perl.c
+	   ! pod/perlvar.pod sv.c t/op/magic.t thread.h
+	  !> av.c embed.fnc embed.h ext/GDBM_File/GDBM_File.xs global.sym
+	  !> handy.h perl.h pod/perlrun.pod util.c
+____________________________________________________________________________
+[ 18205] By: jhi                                   on 2002/11/28  15:25:35
+        Log: Another pseudohash usage.
+     Branch: maint-5.8/perl
+	   ! lib/constant.t
+____________________________________________________________________________
+[ 18204] By: jhi                                   on 2002/11/28  14:55:34
+        Log: Integrate
+             
+             [ 18203]
+             Slight beauty tweak. 
+     Branch: maint-5.8/perl
+	  !> intrpvar.h
+____________________________________________________________________________
+[ 18203] By: jhi                                   on 2002/11/28  14:54:34
+        Log: Slight beauty tweak. 
+     Branch: perl
+	   ! intrpvar.h
+____________________________________________________________________________
+[ 18202] By: jhi                                   on 2002/11/28  14:49:11
+        Log: Add test for bug #18153.
+     Branch: maint-5.8/perl
+	   ! t/op/grep.t
+____________________________________________________________________________
+[ 18197] By: jhi                                   on 2002/11/28  04:14:27
+        Log: Integrate:
+             
+             [ 18175]
+             Subject: [Encode] 1.83 + bleedperl patch released
+             From: Dan Kogai <dankogai@dan.co.jp>
+             Date: Tue, 19 Nov 2002 03:18:44 +0900
+             Message-Id: <2C132F6D-FB22-11D6-87FC-0003939A104C@dan.co.jp>
+             
+             [ 18176]
+             Subject: Re: [perl #18479] Error when no strict refs in effect
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: 18 Nov 2002 22:50:04 +0100
+             Message-ID: <87smxya6pf.fsf@vran.herceg.de>
+             
+             [ 18177]
+             add support for STASH and MAGIC information for REFs to sv_dump().
+             Subject: [PATCH]
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: Mon, 18 Nov 2002 11:09:51 +0100 (CET)
+             Message-Id: <200211181009.gAIA9pFG034877@vran.herceg.de>
+             
+             [ 18178]
+             Subject: Re: Storable bug #1698
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: 18 Nov 2002 10:41:36 +0100
+             Message-ID: <87ptt343lb.fsf@vran.herceg.de>
+             
+             [ 18179]
+             Subject: [PATCH] UTF8 regexp {n} bug
+             From: Inaba Hiroto <inaba@st.rim.or.jp>
+             Date: Sat, 16 Nov 2002 19:23:00 +0900
+             Message-ID: <3DD61C83.62FF9887@st.rim.or.jp>
+             
+             [ 18182]
+             Subject: #17171: ld flag for shrplib on OpenBSD
+             Date: Wed, 11 Sep 2002 13:44:12 -0600 (MDT)
+             From: "Todd C. Miller" <Todd.Miller  at  courtesan.com>
+             
+             [ 18183]
+             Subject: Re: [perl #18626] bug in perlipc man page
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: 23 Nov 2002 21:23:20 +0100
+             Message-ID: <87bs4gdohz.fsf@vran.herceg.de>
+             
+             [ 18184]
+             Subject: [PATCH] 2 Pod errors in perlop.pod
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: Mon, 25 Nov 2002 10:21:08 +0100
+             Message-ID: <m31y5admyj.fsf@k242.linux.bogus>
+             
+             Plus a few similar POD fixes
+             
+             [ 18185]
+             PerlFAQ sync.
+             
+             [ 18186]
+             Subject: DESTROY called in scalar context ?
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Tue, 29 Oct 2002 22:04:23 +0100
+             Message-Id: <20021029220423.6f8e6600.rgarciasuarez@free.fr>
+             
+             [ 18188]
+             Subject: Re: [perl #18203] Recursive call in PerlIO_find_layer
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: 03 Nov 2002 10:59:43 +0100
+             Message-ID: <877kfvnfcg.fsf@vran.herceg.de>
+     Branch: maint-5.8/perl
+	   ! Configure config_h.SH
+	  !> (integrate 41 files)
+____________________________________________________________________________
+[ 18192] By: jhi                                   on 2002/11/27  03:14:22
+        Log: Doc tweak for perl #9731.
+     Branch: maint-5.8/perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[ 18191] By: jhi                                   on 2002/11/27  02:56:52
+        Log: A bit of additional information regarding BIND's harmful
+             effects (perl #9465).
+     Branch: maint-5.8/perl
+	   ! INSTALL
+____________________________________________________________________________
+[ 18190] By: jhi                                   on 2002/11/27  02:28:34
+        Log: Fix perl #18519: GDBM_SYNC and GDBM_SYNCMODE were unsupported.
+     Branch: maint-5.8/perl
+	   ! ext/GDBM_File/GDBM_File.pm ext/GDBM_File/Makefile.PL
+____________________________________________________________________________
+[ 18189] By: jhi                                   on 2002/11/27  01:51:45
+        Log: Add the new POSIX isxxx() test by Ed Santiago <esm@pobox.com>
+             (perl #16799).
+     Branch: maint-5.8/perl
+	   + ext/POSIX/t/is.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 18187] By: jhi                                   on 2002/11/27  01:26:02
+        Log: Follow-up on change #18122 (perl #18065) as noted by Philip Newton.
+     Branch: maint-5.8/perl
+	   ! ext/Fcntl/t/syslfs.t t/op/lfs.t
+____________________________________________________________________________
+[ 18174] By: jhi                                   on 2002/11/24  22:35:23
+        Log: Fix perl #7305: UnicodeCD::compexcl is weird
+     Branch: maint-5.8/perl
+	   ! lib/Unicode/UCD.pm lib/Unicode/UCD.t
+____________________________________________________________________________
+[ 18173] By: jhi                                   on 2002/11/23  02:02:33
+        Log: Integrate
+             
+             [ 18135]
+             Subject: [PATCH] perlopentut and PerlIO documentation
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: 08 Nov 2002 22:22:19 +0100
+             Message-ID: <8765v7kb90.fsf@vran.herceg.de>
+             
+             [ 18136]
+             Subject: t/run/runenv.t bug
+             From: Salvador "Fandiño" <sfandino@yahoo.com>
+             Date: Fri, 8 Nov 2002 08:07:13 -0800 (PST)
+             Message-ID: <20021108160713.78109.qmail@web13409.mail.yahoo.com>
+             
+             [ 18137]
+             Subject: [PATCH] warning fix in SYNOPSIS example of Term::ReadLine pod
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: Sat, 9 Nov 2002 22:31:31 +0100 (CET)
+             Message-Id: <200211092131.gA9LVVAV007663@vran.herceg.de>
+             
+             [ 18139]
+             Date: Tue, 12 Nov 2002 16:49:22 +0200
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Subject: [PATCH] Tru64 osvers
+             Message-ID: <20021112144922.GI511825@lyta.hut.fi>
+             
+             [ 18141]
+             repair 18139 (missing awk command)
+             
+             [ 18147]
+             Subject: [PATCH] Typo in perl58delta
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: Sat, 16 Nov 2002 16:29:14 +0100
+             Message-ID: <m3u1ihjzxx.fsf@k242.linux.bogus>
+             
+             [ 18148]
+             New B::Lint option, bare-subs, that checks for implicitely
+             quoted barewords that are also subroutines, from
+             Ian Phillipps <ip@tarragon-et.co.uk>.
+             Message-ID: <20021107122909.A11199@bob.tarragon-et.co.uk>
+             With a few tweaks to the implementation and tests.
+             
+             [ 18149]
+             New B::Lint option, bare-subs, that checks for implicitely
+             quoted barewords that are also subroutines, from
+             Ian Phillipps <ip@tarragon-et.co.uk>.
+             Message-ID: <20021107122909.A11199@bob.tarragon-et.co.uk>
+             With a few tweaks to the implementation and tests.
+             (previous change was empty)
+             
+             [ 18150]
+             Subject: [PATCH] optional code for debugging leaking scalars
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Thu, 14 Nov 2002 23:03:00 +0000
+             Message-ID: <20021114230300.B18614@fdgroup.com>
+             
+             [ 18151]
+             Document PRIVSHIFT.
+             Subject: [PATCH] two small doc patches
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Thu, 14 Nov 2002 15:07:35 -0800
+             Message-ID: <3yC19gzkguTO092yn@efn.org>
+             
+             [ 18152]
+             Subject: Re: [PATCH] optional code for debugging leaking scalars
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Sat, 16 Nov 2002 22:18:23 +0000
+             Message-ID: <20021116221823.A23614@fdgroup.com>
+             Documentation for change #18150.
+             
+             [ 18154]
+             Correction to change #18152, by Dave Mitchell.
+             
+             [ 18158]
+             Remove duplicate my() declaration giving warnings from change #18105.
+             
+             [ 18159]
+             Subject: Re: [perl #18113] UNIVERSAL::AUTOLOAD doesn't work if the stash doesn't exist yet
+             From: Gurusamy Sarathy <gsar@ActiveState.com>
+             Date: Wed, 30 Oct 2002 20:58:15 -0800
+             Message-Id: <200210310458.g9V4wFK00513@smtp3.ActiveState.com>
+             Date: Wed, 30 Oct 2002 21:56:22 -0800
+             Message-Id: <200210310556.g9V5uMK05748@smtp3.ActiveState.com>
+             Date: Wed, 30 Oct 2002 22:55:30 -0800
+             Message-Id: <200210310655.g9V6tUK10959@smtp3.ActiveState.com>
+             
+             [ 18160]
+             Subject: [PATCH] regen_headers outside Makefile (was Re: [PATCH] embed.pl doc)
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Tue, 29 Oct 2002 23:00:05 +0000
+             Message-ID: <20021029230003.GF287@Bagpuss.unfortu.net>
+             
+             [ 18161]
+             Subject: [PATCH Win32] Document wperl.exe
+             From: "Brent Dax" <brentdax@cpan.org>
+             Date: Fri, 15 Nov 2002 23:02:01 -0800
+             Message-ID: <034e01c28d3e$0fed1680$6501a8c0@deepblue>
+             
+             [ 18162]
+             Subject: [PATCH ext/threads/threads.xs] trivial typo
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Thu, 14 Nov 2002 22:55:39 +0000
+             Message-ID: <20021114225539.A18614@fdgroup.com>
+             
+             [ 18163]
+             Subject: Re: [PATCH] AutoLoader gives wrong message
+             From: Peter Scott <Peter@PSDT.com>
+             Date: Thu, 07 Nov 2002 19:04:27 -0800
+             Message-id: <4.3.2.7.2.20021107185902.00b93ec0@shell2.webquarry.com>
+             
+             With a tweak to the END cleanup block to fully remove the
+             temporary test directory
+             
+             [ 18164]
+             t/io/crlf.t failed with miniperl.
+             
+             [ 18165]
+             Subject: Re: [PATCH] UTF-8 enabling via locale (was: Re: Redhat 8 issue?)
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Sun, 3 Nov 2002 17:50:08 +0200
+             Message-ID: <20021103155008.GA382682@lyta.hut.fi>
+             
+             [ 18166]
+             Fix perl bug #17920 : a case of parser coredump.
+             The fix is to disable Perl_block_start and Perl_block_end
+             when the yacc parser has encountered errors. This prevents
+             corruption of the internal stack, at the expense of correctness,
+             but this doesn't matter as the code is unparseable anyway.
+             
+             [ 18168]
+             Subject: [PATCH] hires sleeping wants libs
+             Date: Wed, 20 Nov 2002 17:18:31 +0200
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Message-ID: <20021120151830.GC127060@lyta.hut.fi>
+             
+             [ 18169]
+             Add a test for bug #17920, and a new test file for it.
+             
+             [ 18170]
+             Move some tests from t/run/fresh_perl.t
+             to the new t/comp/parser.t. The goal being to
+             get rid of fresh_perl.t at some point.
+             
+             [ 18171]
+             A new test for $^S, based on a patch by Iain 'Spoon' Truskett.
+             Fix the existing tests that didn't checked the difference
+             between 0 and undef.
+             
+             [ 18172]
+             Subject: [PATCH] Historic version labels
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: Fri, 22 Nov 2002 14:39:41 +0100
+             Message-ID: <m3lm3loh9e.fsf@k242.linux.bogus>
+             
+             (and regen Configure, regen_headers)
+     Branch: maint-5.8/perl
+	  +> regen.pl regen_headers.pl t/comp/parser.t
+	   ! Configure README.ce config_h.SH ext/B/B.pm ext/B/t/concise.t
+	  !> (integrate 35 files)
+____________________________________________________________________________
+[ 18156] By: jhi                                   on 2002/11/18  23:06:22
+        Log: Unicode 3.2 Errata from
+             http://www.unicode.org/unicode/uni2errata/UnicodeErrata.html
+             (errata 2002 October 31 and 2002 October 30)
+             (If/when 3.2.1 or 4.0 happens, just replace SpecialCasing
+             and UnicodeData, don't bother with diffs, and rerun
+             perl ./mktables)
+     Branch: maint-5.8/perl
+	   ! lib/Unicode/UCD.t lib/unicore/Category.pl
+	   ! lib/unicore/SpecialCasing.txt lib/unicore/UnicodeData.txt
+	   ! lib/unicore/lib/C.pl lib/unicore/lib/Cf.pl
+	   ! lib/unicore/lib/Cntrl.pl lib/unicore/lib/Graph.pl
+	   ! lib/unicore/lib/P.pl lib/unicore/lib/Pd.pl
+	   ! lib/unicore/lib/Print.pl lib/unicore/lib/Punct.pl
+____________________________________________________________________________
+[ 18155] By: jhi                                   on 2002/11/16  22:34:07
+        Log: make regen_headers
+     Branch: maint-5.8/perl
+	   ! pod/perlapi.pod proto.h
+____________________________________________________________________________
+[ 18153] By: jhi                                   on 2002/11/16  21:24:13
+        Log: Tripped by the pseudo-hash warning.
+     Branch: maint-5.8/perl
+	   ! t/op/hashwarn.t
+____________________________________________________________________________
+[ 18146] By: jhi                                   on 2002/11/16  15:09:26
+        Log: Typo noticed by Philip Newton.
+     Branch: maint-5.8/perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[ 18145] By: jhi                                   on 2002/11/16  02:53:59
+        Log: Add 5.005-style thread deprecation warning (at each
+             thread create).
+     Branch: maint-5.8/perl
+	   ! ext/Thread/Thread.xs pod/perldelta.pod pod/perldiag.pod
+____________________________________________________________________________
+[ 18144] By: jhi                                   on 2002/11/15  22:30:36
+        Log: perlport tweaks:
+             - timezone
+             - $!, Errno
+             - metainformation changing
+             - perlunicode
+     Branch: maint-5.8/perl
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[ 18143] By: jhi                                   on 2002/11/15  04:37:24
+        Log: Add pseudo-hashes deprecation warning (at each pseudo-hash access).
+     Branch: maint-5.8/perl
+	   ! av.c pod/perldelta.pod pod/perldiag.pod t/lib/warnings/av
+____________________________________________________________________________
+[ 18134] By: jhi                                   on 2002/11/09  22:10:52
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 18133] By: jhi                                   on 2002/11/09  21:56:38
         Log: Integrate
              

@@ -79,7 +79,7 @@
 #if !defined(PERL_PATCHLEVEL_H_IMPLICIT) && !defined(LOCAL_PATCH_COUNT)
 static	char	*local_patches[] = {
         NULL
-	,"MAINT18133"
+	,"MAINT18234"
 	,NULL
 };
 
