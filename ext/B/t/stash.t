@@ -61,7 +61,7 @@ print "# got = @got\n";
 @got = grep { ! /^Win32$/                     } @got  if $^O eq 'MSWin32';
 @got = grep { ! /^NetWare$/                   } @got  if $^O eq 'NetWare';
 @got = grep { ! /^(Cwd|File|File::Copy|OS2)$/ } @got  if $^O eq 'os2';
-@got = grep { ! /^Cwd$/                       } @got  if $^O eq 'cygwin';
+@got = grep { ! /^(Cwd|Cygwin)$/              } @got  if $^O eq 'cygwin';
 
 if ($Is_VMS) {
     @got = grep { ! /^File(?:::Copy)?$/    } @got;
