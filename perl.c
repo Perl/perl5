@@ -272,6 +272,18 @@ perl_construct(pTHXx)
     New(31337, PL_reentrant_buffer,1, REBUF);
     New(31337, PL_reentrant_buffer->tmbuff,1, struct tm);
 #endif
+
+    /* Note that strtab is a rather special HV.  Assumptions are made
+       about not iterating on it, and not adding tie magic to it.
+       It is properly deallocated in perl_destruct() */
+    PL_strtab = newHV();
+
+#ifdef USE_5005THREADS
+    MUTEX_INIT(&PL_strtab_mutex);
+#endif
+    HvSHAREKEYS_off(PL_strtab);			/* mandatory */
+    hv_ksplit(PL_strtab, 512);
+
     ENTER;
 }
 
@@ -2586,15 +2598,7 @@ S_init_main_stash(pTHX)
 {
     GV *gv;
 
-    /* Note that strtab is a rather special HV.  Assumptions are made
-       about not iterating on it, and not adding tie magic to it.
-       It is properly deallocated in perl_destruct() */
-    PL_strtab = newHV();
-#ifdef USE_5005THREADS
-    MUTEX_INIT(&PL_strtab_mutex);
-#endif
-    HvSHAREKEYS_off(PL_strtab);			/* mandatory */
-    hv_ksplit(PL_strtab, 512);
+
 
     PL_curstash = PL_defstash = newHV();
     PL_curstname = newSVpvn("main",4);
