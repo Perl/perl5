@@ -1412,7 +1412,7 @@ as C<"\\\t"> (since TAB is not alphanumeric).  Note also that:
 may be closer to the conjectural I<intention> of the writer of C<"\Q\t\E">.
 
 Interpolated scalars and arrays are converted internally to the C<join> and
-C<.> catentation operations.  Thus, C<"$foo XXX '@arr'"> becomes:
+C<.> catenation operations.  Thus, C<"$foo XXX '@arr'"> becomes:
 
   $foo . " XXX '" . (join $", @arr) . "'";
 

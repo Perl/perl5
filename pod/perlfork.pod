@@ -51,7 +51,7 @@ pseudo-processes are launched after others have been wait()-ed on.
 
 =item %ENV
 
-Each pseudo-process maintains its own virtual enviroment.  Modifications
+Each pseudo-process maintains its own virtual environment.  Modifications
 to %ENV affect the virtual environment, and are only visible within that
 pseudo-process, and in any processes (or pseudo-processes) launched from
 it.

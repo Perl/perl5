@@ -49,7 +49,7 @@ failure: it just raises an exception matching C</^open3:/>.  However,
 C<exec> failures in the child are not detected.  You'll have to 
 trap SIGPIPE yourself.
 
-open2() does not wait for and reap the child process after it exits.  
+open3() does not wait for and reap the child process after it exits.  
 Except for short programs where it's acceptable to let the operating system
 take care of this, you need to do this yourself.  This is normally as 
 simple as calling C<waitpid $pid, 0> when you're done with the process.

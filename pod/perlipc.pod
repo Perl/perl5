@@ -1022,7 +1022,7 @@ something to the server before fetching the server's response.
     }
 
 The web server handing the "http" service, which is assumed to be at
-its standard port, number 80.  If your the web server you're trying to
+its standard port, number 80.  If the web server you're trying to
 connect to is at a different port (like 1080 or 8080), you should specify
 as the named-parameter pair, C<< PeerPort => 8080 >>.  The C<autoflush>
 method is used on the socket because otherwise the system would buffer

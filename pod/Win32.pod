@@ -132,7 +132,7 @@ same value.
 
 =item Win32::GetLongPathName(PATHNAME)
 
-[CORE] Returns a representaion of PATHNAME composed of longname
+[CORE] Returns a representation of PATHNAME composed of longname
 components (if any).  The result may not necessarily be longer
 than PATHNAME.  No attempt is made to convert PATHNAME to the
 absolute path.  Compare with Win32::GetShortPathName and

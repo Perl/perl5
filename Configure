@@ -5521,13 +5521,12 @@ $cat > getverlist <<EOPL
 use File::Basename;
 \$api_versionstring = "$api_versionstring";
 \$version = "$version";
-\$sitelib = "$sitelib";
+\$stem = "$sitelib_stem";
 \$archname = "$archname";
 EOPL
 	$cat >> getverlist <<'EOPL'
 # Can't have leading @ because metaconfig interprets it as a command!
 ;@inc_version_list=();
-$stem=dirname($sitelib);
 # XXX Redo to do opendir/readdir? 
 if (-d $stem) {
     chdir($stem);

@@ -188,7 +188,7 @@ A. DECOMPRESS
 In general, all Macintosh decompression utilities mentioned here
 can be found in the Info-Mac Hyperarchive
 ( http://hyperarchive.lcs.mit.edu/HyperArchive.html ).
-Specificly the "Commpress & Translate" listing
+Specifically the "Compress & Translate" listing
 ( http://hyperarchive.lcs.mit.edu/HyperArchive/Abstracts/cmp/HyperArchive.html ).
 
 

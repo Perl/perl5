@@ -673,7 +673,7 @@ The "grab all you can, and do not give anything back" semantic is desirable
 in many situations where on the first sight a simple C<()*> looks like
 the correct solution.  Suppose we parse text with comments being delimited
 by C<#> followed by some optional (horizontal) whitespace.  Contrary to
-its appearence, C<#[ \t]*> I<is not> the correct subexpression to match
+its appearance, C<#[ \t]*> I<is not> the correct subexpression to match
 the comment delimiter, because it may "give up" some whitespace if
 the remainder of the pattern can be made to match that way.  The correct
 answer is either one of these:

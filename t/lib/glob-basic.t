@@ -27,7 +27,7 @@ $ENV{PATH} = "/bin";
 delete @ENV{BASH_ENV, CDPATH, ENV, IFS};
 @correct = ();
 if (opendir(D, ".")) {
-   @correct = grep { !/^\.\.?$/ } sort readdir(D);
+   @correct = grep { !/^\./ } sort readdir(D);
    closedir D;
 }
 @a = File::Glob::glob("*", 0);
@@ -39,7 +39,7 @@ print "ok 2\n";
 
 # look up the user's home directory
 # should return a list with one item, and not set ERROR
-if ($^O ne 'MSWin32' || $^O ne 'VMS') {
+if ($^O ne 'MSWin32' && $^O ne 'VMS') {
   eval {
     ($name, $home) = (getpwuid($>))[0,7];
     1;
@@ -99,7 +99,7 @@ print "ok 7\n";
 
 @a = File::Glob::glob(
     '{TES*,doesntexist*,a,b}',
-    GLOB_BRACE | GLOB_NOMAGIC
+    GLOB_BRACE | GLOB_NOMAGIC | ($^O eq 'VMS' ? GLOB_NOCASE : 0)
 );
 unless (@a == 3
         and $a[0] eq ($^O eq 'VMS'? 'test.' : 'TEST')
