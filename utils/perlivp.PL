@@ -313,6 +313,7 @@ while (($var, $val) = each %Config) {
 	$h_file = 'sys/resource' if $h_file eq 'sysresrc';
 	$h_file = 'sys/select'   if $h_file eq 'sysselct';
 	$h_file = 'sys/security' if $h_file eq 'syssecrt';
+        $h_file = 'rpcsvc/dbm'   if $h_file eq 'rpcsvcdbm';
         # This ought to distinguish syslog from sys/syslog.
         # (NB syslog.ph is heavily used for the DBI pre-requisites).
         $h_file =~ s{^sys(\w.+)}{sys/$1} unless $h_file eq 'syslog';
