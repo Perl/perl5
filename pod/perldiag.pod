@@ -3603,6 +3603,10 @@ Check the #! line, or manually feed your script into Perl yourself.
 (F) The unexec() routine failed for some reason.  See your local FSF
 representative, who probably put it there in the first place.
 
+=item Unicode character %s is illegal
+
+Certain Unicode characters have been designated off-limits by the
+Unicode standard and should not be generated.
 
 =item Unknown BYTEORDER
 
@@ -3997,6 +4001,14 @@ be removed in a future version.
 C<< @foo->[23] >> or C<< @$ref->[99] >>.  Versions of perl <= 5.6.1 used to
 allow this syntax, but shouldn't have. It is now deprecated, and will be
 removed in a future version.
+
+=item UTF-16 surrogate %s
+
+(F) You tried to generate half of an UTF-16 surrogate by requesting
+a Unicode character between the code points 0xD800 and 0xDFFF (inclusive).
+That range is reserved exclusively for the use of UTF-16 encoding
+(by having two 16-bit UCS-2 characters); but Perl encodes its characters
+in UTF-8, so what you got is a very illegal character.
 
 =item Value of %s can be "0"; test with defined()
 

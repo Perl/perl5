@@ -1,34 +1,42 @@
 #!./perl
 
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '.';
+    require "test.pl";
+}
+
 print "1..8\n";
 
 # compile time evaluation
 
 # 'A' 65	ASCII
 # 'A' 193	EBCDIC
-if (ord('A') == 65 || ord('A') == 193) {print "ok 1\n";} else {print "not ok 1\n";}
 
-print "not " unless ord(chr(500)) == 500;
-print "ok 2\n";
+ok(ord('A') == 65 || ord('A') == 193, "ord('A') is ".ord('A'));
+
+is(ord(chr(500)), 500, "compile time chr 500");
 
 # run time evaluation
 
 $x = 'ABC';
-if (ord($x) == 65 || ord($x) == 193) {print "ok 3\n";} else {print "not ok 3\n";}
 
-if (chr 65 eq 'A' || chr 193 eq 'A') {print "ok 4\n";} else {print "not ok 4\n";}
+ok(ord($x) == 65 || ord($x) == 193, "ord('$x') is ".ord($x));
 
-print "not " unless ord(chr(500)) == 500;
-print "ok 5\n";
+ok(chr 65 eq 'A' || chr 193 eq 'A', "chr can produce 'A'");
 
 $x = 500;
-print "not " unless ord(chr($x)) == $x;
-print "ok 6\n";
+is(ord(chr($x)), $x, "runtime chr $x");
 
-print "not " unless ord("\x{1234}") == 0x1234;
-print "ok 7\n";
+is(ord("\x{1234}"), 0x1234, 'compile time ord \x{....}');
 
 $x = "\x{1234}";
-print "not " unless ord($x) == 0x1234;
-print "ok 8\n";
+is(ord($x), 0x1234, 'runtime ord \x{....}');
+
+{
+    eval 'my $surrogate = chr(0xD800)';
+
+    like($@, qr/^UTF-16 surrogate 0xd800 /, "surrogates bad");
+}
+
 

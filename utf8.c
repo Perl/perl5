@@ -46,6 +46,11 @@ is the recommended Unicode-aware way of saying
 U8 *
 Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 {
+    if (UNICODE_IS_SURROGATE(uv))
+        Perl_croak(aTHX_ "UTF-16 surrogate 0x%04"UVxf, uv);
+    else if ((uv >= 0xFDD0 && uv <= 0xFDEF) ||
+	     (uv == 0xFFFE || uv == 0xFFFF))
+        Perl_croak(aTHX_ "Unicode character 0x%04"UVxf" is illegal", uv);
     if (UNI_IS_INVARIANT(uv)) {
 	*d++ = UTF_TO_NATIVE(uv);
 	return d;

@@ -942,7 +942,6 @@ sub maybe_my {
 # The following OPs don't have functions:
 
 # pp_padany -- does not exist after parsing
-# pp_rcatline -- does not exist
 
 sub pp_enter { # see also leave
     cluck "unexpected OP_ENTER";
@@ -1666,6 +1665,12 @@ sub pp_readline {
     $kid = $kid->first if $kid->name eq "rv2gv"; # <$fh>
     return "<" . $self->deparse($kid, 1) . ">" if is_scalar($kid);
     return $self->unop($op, $cx, "readline");
+}
+
+sub pp_rcatline {
+    my $self = shift;
+    my($op) = @_;
+    return "<" . $self->gv_name($op->gv) . ">";
 }
 
 # Unary operators that can occur as pseudo-listops inside double quotes
@@ -2491,6 +2496,14 @@ sub pp_null {
 				   $cx, 20);
     } elsif ($op->flags & OPf_SPECIAL && $cx == 0 && !$op->targ) {
 	return "do {\n\t". $self->deparse($op->first, $cx) ."\n\b};";
+    } elsif (!null($op->first->sibling) and
+	     $op->first->sibling->name eq "null" and
+	     class($op->first->sibling) eq "UNOP" and
+	     $op->first->sibling->first->flags & OPf_STACKED and
+	     $op->first->sibling->first->name eq "rcatline") {
+	return $self->maybe_parens($self->deparse($op->first, 18) . " .= "
+				   . $self->deparse($op->first->sibling, 18),
+				   $cx, 18);
     } else {
 	return $self->deparse($op->first, $cx);
     }
@@ -4201,6 +4214,7 @@ There are probably many more bugs on non-ASCII platforms (EBCDIC).
 Stephen McCamant <smcc@CSUA.Berkeley.EDU>, based on an earlier
 version by Malcolm Beattie <mbeattie@sable.ox.ac.uk>, with
 contributions from Gisle Aas, James Duncan, Albert Dvornik, Robin
-Houston, Hugo van der Sanden, Gurusamy Sarathy, and Nick Ing-Simmons.
+Houston, Hugo van der Sanden, Gurusamy Sarathy, Nick Ing-Simmons,
+and Rafael Garcia-Suarez.
 
 =cut

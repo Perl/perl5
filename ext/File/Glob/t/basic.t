@@ -49,9 +49,11 @@ if ($^O ne 'MSWin32' && $^O ne 'NetWare' && $^O ne 'VMS' && $^O ne 'os2') {
     ($name, $home) = (getpwuid($>))[0,7];
     1;
   } and do {
-    @a = bsd_glob("~$name", GLOB_TILDE);
-    if (defined $home && (scalar(@a) != 1 || $a[0] ne $home || GLOB_ERROR)) {
-	print "not ";
+    if (defined $home && defined $name && -d $home) {
+	@a = bsd_glob("~$name", GLOB_TILDE);
+	if ((scalar(@a) != 1 || $a[0] ne $home || GLOB_ERROR)) {
+	    print "not ";
+	}
     }
   };
 }

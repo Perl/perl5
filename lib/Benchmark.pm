@@ -389,6 +389,12 @@ September, 1999; by Barrie Slaymaker: math fixes and accuracy and
 efficiency tweaks.  Added cmpthese().  A result is now returned from 
 timethese().  Exposed countit() (was runfor()).
 
+December, 2001; by Nicholas Clark: make timestr() recognise the style 'none'
+and return an empty string. If cmpthese is calling timethese, make it pass the
+style in. (so that 'none' will suppress output). Make sub new dump its
+debugging output to STDERR, to be consistent with everything else.
+All bugs found while writing a regression test.
+
 =cut
 
 # evaluate something in a clean lexical environment
@@ -406,7 +412,7 @@ use Exporter;
 	      clearcache clearallcache disablecache enablecache);
 %EXPORT_TAGS=( all => [ @EXPORT, @EXPORT_OK ] ) ;
 
-$VERSION = 1.03;
+$VERSION = 1.04;
 
 &init;
 
@@ -435,7 +441,7 @@ sub disablecache  { $cache = 0; }
 # --- Functions to process the 'time' data type
 
 sub new { my @t = (time, times, @_ == 2 ? $_[1] : 0);
-	  print "new=@t\n" if $debug;
+	  print STDERR "new=@t\n" if $debug;
 	  bless \@t; }
 
 sub cpu_p { my($r,$pu,$ps,$cu,$cs) = @{$_[0]}; $pu+$ps         ; }
@@ -471,6 +477,7 @@ sub timestr {
     $f = $defaultfmt unless defined $f;
     # format a time in the required style, other formats may be added here
     $style ||= $defaultstyle;
+    return '' if $style eq 'none';
     $style = ($ct>0) ? 'all' : 'noc' if $style eq 'auto';
     my $s = "@t $style"; # default for unknown style
     $s=sprintf("%2d wallclock secs (%$f usr %$f sys + %$f cusr %$f csys = %$f CPU)",
@@ -706,7 +713,7 @@ sub timethese{
 }
 
 sub cmpthese{
-    my ($results, $style) = ref $_[0] ? @_ : ( timethese( @_[0,1] ), $_[2] ) ;
+    my ($results, $style) = ref $_[0] ? @_ : ( timethese( @_[0,1,2] ), $_[2] ) ;
 
     $style = "" unless defined $style;
 

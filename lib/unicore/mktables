@@ -512,6 +512,13 @@ $In{Assigned} = $InId++;
 my $Assigned = inverse($Cat{Cn});
 $InIn{Assigned} = $Assigned;
 
+# Unassigned is everything not Assigned
+
+$In{Unassigned} = $InId++;
+my $Unassigned = $Cat{Cn};
+$InIn{Unassigned} = $Unassigned;
+
+# Unassigned is everything not Assigned
 sub merge_general_and_extended {
     my ($name, $general, $extended) = @_;
     my $merged;
@@ -578,6 +585,13 @@ my $ID_Continue =
 $In{Any} = $InId++;
 my $Any = [ [ 0, sprintf("%04X", $LastUnicodeCodepoint) ] ];
 $InIn{Any} = $Any;
+
+#
+# All is any, too.
+#
+
+$In{All} = $InId++;
+$InIn{All} = $Any;
 
 #
 # mapping() will be used to write out the In and Is virtual mappings.

@@ -156,7 +156,7 @@ ideograph, for instance.
 
 =item *
 
-Named Unicode properties and block ranges make be used as character
+Named Unicode properties and block ranges may be used as character
 classes via the new C<\p{}> (matches property) and C<\P{}> (doesn't
 match property) constructs.  For instance, C<\p{Lu}> matches any
 character with the Unicode uppercase property, while C<\p{M}> matches
@@ -167,7 +167,7 @@ are available, such as C<\p{IsMirrored}> and C<\p{InTibetan}>.
 The C<\p{Is...}> test for "general properties" such as "letter",
 "digit", while the C<\p{In...}> test for Unicode scripts and blocks.
 
-The official Unicode script and block names have spaces and dashes and
+The official Unicode script and block names have spaces and dashes as
 separators, but for convenience you can have dashes, spaces, and
 underbars at every word division, and you need not care about correct
 casing.  It is recommended, however, that for consistency you use the
@@ -249,7 +249,8 @@ The following reserved ranges have C<In> tests:
 
 For example C<"\x{AC00}" =~ \p{HangulSyllable}> will test true.
 (Handling of surrogates is not implemented yet, because Perl
-uses UTF-8 and not UTF-16 internally to represent Unicode.)
+uses UTF-8 and not UTF-16 internally to represent Unicode.
+So you really can't use the "Cs" category.)
 
 Additionally, because scripts differ in their directionality
 (for example Hebrew is written right to left), all characters
@@ -280,7 +281,7 @@ have their directionality defined:
 =head2 Scripts
 
 The scripts available for C<\p{In...}> and C<\P{In...}>, for example
-\p{InCyrillic>, are as follows, for example C<\p{InLatin}> or C<\P{InHan}>:
+C<\p{InLatin}> or \p{InCyrillic>, are as follows:
 
     Arabic
     Armenian
@@ -366,15 +367,18 @@ scripts concept is closer to natural languages, while the blocks
 concept is more an artificial grouping based on groups of 256 Unicode
 characters.  For example, the C<Latin> script contains letters from
 many blocks.  On the other hand, the C<Latin> script does not contain
-all the characters from those blocks, it does not for example contain
+all the characters from those blocks. It does not, for example, contain
 digits because digits are shared across many scripts.  Digits and
 other similar groups, like punctuation, are in a category called
 C<Common>.
 
-For more about scripts see the UTR #24:
-http://www.unicode.org/unicode/reports/tr24/
-For more about blocks see
-http://www.unicode.org/Public/UNIDATA/Blocks.txt
+For more about scripts, see the UTR #24:
+
+   http://www.unicode.org/unicode/reports/tr24/
+
+For more about blocks, see:
+
+   http://www.unicode.org/Public/UNIDATA/Blocks.txt
 
 Because there are overlaps in naming (there are, for example, both
 a script called C<Katakana> and a block called C<Katakana>, the block
@@ -641,11 +645,21 @@ Level 1 - Basic Unicode Support
         [10] should do ^ and $ also on \x{85}, \x{2028} and \x{2029})
              (should also affect <>, $., and script line numbers)
   
-(*) Instead of [\u0370-\u03FF-[{UNASSIGNED}]] as suggested by the TR
-18 you can use negated lookahead: to match currently assigned modern
-Greek characters use for example
+(*) You can mimic class subtraction using lookahead.
+For example, what TR18 might write as
 
-		/(?!\p{Cn})[\x{0370}-\x{03ff}]/
+    [{Greek}-[{UNASSIGNED}]]
+
+in Perl can be written as:
+
+    (?!\p{UNASSIGNED})\p{GreekBlock}
+    (?=\p{ASSIGNED})\p{GreekBlock}
+
+But in this particular example, you probably really want
+
+    \p{Greek}
+
+which will match assigned characters known to be part of the Greek script.
 
 In other words: the matched character must not be a non-assigned
 character, but it must be in the block of modern Greek characters.
@@ -720,11 +734,18 @@ As you can see, the continuation bytes all begin with C<10>, and the
 leading bits of the start byte tells how many bytes the are in the
 encoded character.
 
+=item UTF-EBDIC
+
+Like UTF-8, but EBDCIC-safe, as UTF-8 is ASCII-safe.
+
 =item UTF-16, UTF-16BE, UTF16-LE, Surrogates, and BOMs (Byte Order Marks)
+
+(The followings items are mostly for reference, Perl doesn't
+use them internally.)
 
 UTF-16 is a 2 or 4 byte encoding.  The Unicode code points
 0x0000..0xFFFF are stored in two 16-bit units, and the code points
-0x010000..0x10FFFF in four 16-bit units.  The latter case is
+0x010000..0x10FFFF in two 16-bit units.  The latter case is
 using I<surrogates>, the first 16-bit unit being the I<high
 surrogate>, and the second being the I<low surrogate>.
 
@@ -739,6 +760,11 @@ are the range 0xDC00..0xDFFFF.  The surrogate encoding is
 and the decoding is
 
 	$uni = 0x10000 + ($hi - 0xD8000) * 0x400 + ($lo - 0xDC00);
+
+If you try to generate surrogates (for example by using chr()), you
+will get an error because firstly a surrogate on its own is meaningless,
+and secondly because Perl encodes its Unicode characters in UTF-8
+(not 16-bit numbers), which makes the encoded character doubly illegal.
 
 Because of the 16-bitness, UTF-16 is byteorder dependent.  UTF-16
 itself can be used for in-memory computations, but if storage or
@@ -829,7 +855,7 @@ is not to use UTF-8 until it's really necessary.
 =item *
 
 uvuni_to_utf8(buf, chr) writes a Unicode character code point into a
-buffer encoding the code poinqt as UTF-8, and returns a pointer
+buffer encoding the code point as UTF-8, and returns a pointer
 pointing after the UTF-8 bytes.
 
 =item *

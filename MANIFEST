@@ -91,7 +91,9 @@ ext/B/ramblings/magic		Compiler ramblings: notes on magic
 ext/B/ramblings/reg.alloc	Compiler ramblings: register allocation
 ext/B/ramblings/runtime.porting	Compiler ramblings: porting PP enging
 ext/B/README		Compiler backend README
+ext/B/t/asmdata.t       See if B::Asmdata works
 ext/B/t/b.t		See if B works
+ext/B/t/bblock.t        See if B::Bblock works
 ext/B/t/debug.t		See if B::Debug works
 ext/B/t/deparse.t	See if B::Deparse works
 ext/B/t/showlex.t	See if B::ShowLex works
@@ -735,6 +737,7 @@ hints/unisysdynix.sh		Hints for named architecture
 hints/utekv.sh			Hints for named architecture
 hints/uts.sh			Hints for named architecture
 hints/uwin.sh			Hints for named architecture
+hints/vos.sh			Hints for named architecture
 hints/vmesa.sh			Hints for named architecture
 hv.c				Hash value code
 hv.h				Hash value header
@@ -791,6 +794,24 @@ lib/abbrev.pl			An abbreviation table builder
 lib/AnyDBM_File.pm		Perl module to emulate dbmopen
 lib/AnyDBM_File.t		See if AnyDBM_File works
 lib/assert.pl			assertion and panic with stack trace
+lib/Attribute/Handlers.pm		Attribute::Handlers
+lib/Attribute/Handlers/Changes	Attribute::Handlers
+lib/Attribute/Handlers/demo/demo.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/Demo.pm	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo2.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo3.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo4.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo_call.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo_chain.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo_cycle.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo_hashdir.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo_phases.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo_range.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/demo_rawdata.pl	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/Descriptions.pm	Attribute::Handlers demo
+lib/Attribute/Handlers/demo/MyClass.pm	Attribute::Handlers demo
+lib/Attribute/Handlers/README		Attribute::Handlers
+lib/Attribute/Handlers/t/multi.t	See if Attribute::Handlers works
 lib/attributes.pm		For "sub foo : attrlist"
 lib/AutoLoader.pm		Autoloader base class
 lib/AutoLoader.t		See if AutoLoader works
@@ -800,6 +821,7 @@ lib/autouse.pm			Load and call a function only when it's used
 lib/autouse.t			See if autouse works
 lib/base.pm			Establish IS-A relationship at compile time
 lib/Benchmark.pm		Measure execution time
+lib/Benchmark.t			See if Benchmark works
 lib/bigfloat.pl			An arbitrary precision floating point package
 lib/bigfloat.t			See if bigfloat.pl works
 lib/bigint.pl			An arbitrary precision integer arithmetic package
@@ -908,6 +930,7 @@ lib/ExtUtils/Embed.t		See if ExtUtils::Embed and embedding works
 lib/ExtUtils/inst		Give information about installed extensions
 lib/ExtUtils/Install.pm		Handles 'make install' on extensions
 lib/ExtUtils/Installed.pm	Information on installed extensions
+lib/ExtUtils/Installed.t	See if ExtUtils::Installed works
 lib/ExtUtils/Liblist.pm		Locates libraries
 lib/ExtUtils/MakeMaker.pm	Write Makefiles for extensions
 lib/ExtUtils/Manifest.pm	Utilities to write MANIFEST files
@@ -917,6 +940,7 @@ lib/ExtUtils/Mkbootstrap.pm	Writes a bootstrap file (see MakeMaker)
 lib/ExtUtils/Mkbootstrap.t	See if ExtUtils::Mkbootstrap works
 lib/ExtUtils/Mksymlists.pm	Writes a linker options file for extensions
 lib/ExtUtils/MM_Cygwin.pm	MakeMaker methods for Cygwin
+lib/ExtUtils/MM_Cygwin.t	See if ExtUtils::MM_Cygwin works
 lib/ExtUtils/MM_NW5.pm		MakeMaker methods for NetWare
 lib/ExtUtils/MM_OS2.pm		MakeMaker methods for OS/2
 lib/ExtUtils/MM_Unix.pm		MakeMaker base class for Unix
@@ -1408,6 +1432,8 @@ lib/unicore/In/169.pl		Unicode character database
 lib/unicore/In/17.pl		Unicode character database
 lib/unicore/In/170.pl		Unicode character database
 lib/unicore/In/171.pl		Unicode character database
+lib/unicore/In/172.pl		Unicode character database
+lib/unicore/In/173.pl		Unicode character database
 lib/unicore/In/18.pl		Unicode character database
 lib/unicore/In/19.pl		Unicode character database
 lib/unicore/In/2.pl		Unicode character database

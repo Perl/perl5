@@ -4,7 +4,7 @@
 #########################
 
 use Test;
-BEGIN { plan tests => 50 };
+BEGIN { plan tests => 54 };
 use Unicode::Collate;
 ok(1); # If we made it this far, we're ok.
 
@@ -42,10 +42,31 @@ eval "use Unicode::Normalize";
 if(!$@){
   my $NFD = Unicode::Collate->new(
     table => 'keys.txt',
+    entry => <<'ENTRIES',
+0430 ; [.0B01.0020.0002.0430] # CYRILLIC SMALL LETTER A
+0410 ; [.0B01.0020.0008.0410] # CYRILLIC CAPITAL LETTER A
+04D3 ; [.0B09.0020.0002.04D3] # CYRILLIC SMALL LETTER A WITH DIAERESIS
+0430 0308 ; [.0B09.0020.0002.04D3] # CYRILLIC SMALL LETTER A WITH DIAERESIS
+04D3 ; [.0B09.0020.0002.04D3] # CYRILLIC SMALL LETTER A WITH DIAERESIS
+0430 0308 ; [.0B09.0020.0002.04D3] # CYRILLIC SMALL LETTER A WITH DIAERESIS
+04D2 ; [.0B09.0020.0008.04D2] # CYRILLIC CAPITAL LETTER A WITH DIAERESIS
+0410 0308 ; [.0B09.0020.0008.04D2] # CYRILLIC CAPITAL LETTER A WITH DIAERESIS
+0430 3099 ; [.0B10.0020.0002.04D3] # A WITH KATAKANA VOICED
+0430 3099 0308 ; [.0B11.0020.0002.04D3] # A WITH KATAKANA VOICED, DIAERESIS
+ENTRIES
   );
-  ok($NFD->cmp("A$acute", $A_acute), 0);
+  ok($NFD->eq("A$acute", $A_acute));
+  ok($NFD->eq("\x{4D3}\x{325}", "\x{430}\x{308}\x{325}"));
+  ok($NFD->lt("\x{430}\x{308}A", "\x{430}\x{308}B"));
+  ok($NFD->lt("\x{430}\x{3099}B", "\x{430}\x{308}\x{3099}A"));
+  ok($NFD->eq("\x{0430}\x{3099}\x{309A}\x{0308}",
+              "\x{0430}\x{309A}\x{3099}\x{0308}") );
 }
 else{
+  ok(1);
+  ok(1);
+  ok(1);
+  ok(1);
   ok(1);
 }
 

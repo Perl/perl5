@@ -14,7 +14,7 @@ BEGIN {
     # is unlikely to be installed on non VMS machines
     # (although not impossible: no xs, no sys$parse(), pure perl).
     else {
-        plan( skip_all => "Only for VMS.  You go home now." );
+        plan( skip_all => "This is not VMS" );
     }
 }
 

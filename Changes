@@ -31,6 +31,1094 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 13686] By: jhi                                   on 2001/12/14  16:07:02
+        Log: Reintroduce Attribute::Handlers with Spider's fixes.
+     Branch: perl
+	   + lib/Attribute/Handlers.pm lib/Attribute/Handlers/Changes
+	   + lib/Attribute/Handlers/README
+	   + lib/Attribute/Handlers/demo/Demo.pm
+	   + lib/Attribute/Handlers/demo/Descriptions.pm
+	   + lib/Attribute/Handlers/demo/MyClass.pm
+	   + lib/Attribute/Handlers/demo/demo.pl
+	   + lib/Attribute/Handlers/demo/demo_call.pl
+	   + lib/Attribute/Handlers/demo/demo_chain.pl
+	   + lib/Attribute/Handlers/demo/demo_cycle.pl
+	   + lib/Attribute/Handlers/demo/demo_hashdir.pl
+	   + lib/Attribute/Handlers/demo/demo_phases.pl
+	   + lib/Attribute/Handlers/demo/demo_range.pl
+	   + lib/Attribute/Handlers/demo/demo_rawdata.pl
+	   + lib/Attribute/Handlers/t/multi.t
+	   ! MANIFEST pod/perldelta.pod pod/perlmodlib.pod pod/perltoc.pod
+____________________________________________________________________________
+[ 13684] By: jhi                                   on 2001/12/14  14:43:40
+        Log: Subject: [PATCH taint.c intrpvar.h perl.c ...] -t taint warnings
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Thu, 13 Dec 2001 19:27:08 -0500
+             Message-ID: <20011214002707.GA10532@blackrider>
+             
+             (reword the perlrun -t description a bit,
+             and move the Itaint_warn to the bottom of
+             the intrpvar.h for binary compatibility)
+     Branch: perl
+	   + t/run/switcht.t
+	   ! MANIFEST embedvar.h intrpvar.h lib/Test/Harness.pm perl.c
+	   ! perlapi.h pod/perlrun.pod t/TEST taint.c
+____________________________________________________________________________
+[ 13682] By: jhi                                   on 2001/12/14  04:10:37
+        Log: Detypo.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 13681] By: jhi                                   on 2001/12/14  04:07:08
+        Log: Buffer overflow checks.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 13680] By: jhi                                   on 2001/12/13  21:30:14
+        Log: Subject: [ID 20011213.009] Not OK: perl v5.7.2 +DEVEL13660 on alpha-dec_osf-perlio-ld 5.1 (UNINSTALLED)
+             From: Spider Boardman <spider@leggy.zk3.dec.com>
+             Date: Thu, 13 Dec 2001 15:32:51 -0500
+             Message-Id: <200112132032.PAA203491@leggy.zk3.dec.com>
+     Branch: perl
+	   ! lib/ExtUtils/Embed.t
+____________________________________________________________________________
+[ 13679] By: jhi                                   on 2001/12/13  21:27:31
+        Log: More on the Unicode "line" definition.
+     Branch: perl
+	   ! pod/perlunicode.pod
+____________________________________________________________________________
+[ 13678] By: jhi                                   on 2001/12/13  21:18:47
+        Log: Open-ended VERSION?
+     Branch: perl
+	   ! lib/ExtUtils/Install.pm
+____________________________________________________________________________
+[ 13677] By: jhi                                   on 2001/12/13  19:13:13
+        Log: Subject: [PATCH] Better make distclean
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Thu, 13 Dec 2001 21:10:18 +0100
+             Message-Id: <20011213204542.0321.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[ 13676] By: jhi                                   on 2001/12/13  17:11:42
+        Log: Remove Memoize::Saves as requested by mjd.
+     Branch: perl
+	   - lib/Memoize/Saves.pm
+	   ! MANIFEST pod/perlmodlib.pod pod/perltoc.pod
+____________________________________________________________________________
+[ 13675] By: jhi                                   on 2001/12/13  16:16:12
+        Log: Subject: [PATCH ExtUtils::Install] Old RCS $Date$ tag
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Tue, 11 Dec 2001 23:17:32 -0500
+             Message-ID: <20011212041732.GS17250@blackrider>
+     Branch: perl
+	   ! lib/ExtUtils/Install.pm
+____________________________________________________________________________
+[ 13674] By: jhi                                   on 2001/12/13  16:12:19
+        Log: Subject: [PATCH] Re: use utf8; with bad utf8
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Thu, 13 Dec 2001 17:09:39 +0000
+             Message-ID: <20011213170939.L21702@plum.flirble.org>
+     Branch: perl
+	   ! t/lib/1_compile.t
+____________________________________________________________________________
+[ 13673] By: jhi                                   on 2001/12/13  16:09:18
+        Log: Subject: (LONG!) Sort benchmarks and patch
+             From: "John P. Linderman" <jpl@research.att.com>
+             Date: Thu, 13 Dec 2001 09:50:58 -0500 (EST)
+             Message-Id: <200112131450.JAA84836@raptor.research.att.com>
+     Branch: perl
+	   ! pp_sort.c
+____________________________________________________________________________
+[ 13672] By: jhi                                   on 2001/12/13  14:19:28
+        Log: Unadorned numbers evil.
+     Branch: perl
+	   ! pp.c regcomp.c regexec.c utf8.c utf8.h
+____________________________________________________________________________
+[ 13671] By: jhi                                   on 2001/12/13  13:35:47
+        Log: "preprocessing directive not recognized within macro arg"
+     Branch: perl
+	   ! ext/Data/Dumper/Dumper.xs
+____________________________________________________________________________
+[ 13670] By: jhi                                   on 2001/12/13  13:32:37
+        Log: Subject: Clarifying the documentation of goto            
+             From: "Benjamin J. Tilly" <ben_tilly@operamail.com>      
+             Date: Thu, 13 Dec 2001 08:57:38 -0500
+             Message-ID: <3C18BD8B@operamail.com>
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 13669] By: jhi                                   on 2001/12/13  04:38:19
+        Log: It could be possible for the case-insensitive
+             Unicode-aware string comparison to wander off
+             to the la-la land.
+     Branch: perl
+	   ! embed.h embed.pl pod/perlapi.pod pod/perlunicode.pod proto.h
+	   ! regexec.c utf8.c
+____________________________________________________________________________
+[ 13668] By: jhi                                   on 2001/12/13  02:48:14
+        Log: Subject: [PATCH] Re: [PATCH t/test.pl t/op/stat.t lib/Net/hostent.t] Unbail out
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Wed, 12 Dec 2001 21:53:46 -0500
+             Message-ID: <20011213025346.GH25129@blackrider>
+     Branch: perl
+	   ! lib/Net/hostent.t t/op/stat.t t/test.pl
+____________________________________________________________________________
+[ 13667] By: jhi                                   on 2001/12/13  02:47:27
+        Log: Subject: [PATCH t/io/fs.t] Proper skip tests and VMS unlink
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Wed, 12 Dec 2001 20:33:42 -0500
+             Message-ID: <20011213013342.GX25129@blackrider>
+     Branch: perl
+	   ! t/io/fs.t
+____________________________________________________________________________
+[ 13666] By: jhi                                   on 2001/12/12  23:22:27
+        Log: Subject: Re: [PATCH] use utf8; tests
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Thu, 13 Dec 2001 00:16:58 +0000
+             Message-ID: <20011213001658.I21702@plum.flirble.org>
+     Branch: perl
+	   ! lib/utf8.t
+____________________________________________________________________________
+[ 13665] By: jhi                                   on 2001/12/12  21:45:49
+        Log: EPOC fixes from Olaf Flebbe.
+     Branch: perl
+	   ! README.epoc epoc/config.sh epoc/createpkg.pl
+	   ! ext/Data/Dumper/Dumper.xs ext/Errno/Errno_pm.PL
+____________________________________________________________________________
+[ 13664] By: jhi                                   on 2001/12/12  21:33:50
+        Log: Subject: [PATCH perl@13661] VMS test fix-ups
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Wed, 12 Dec 2001 16:27:48 -0600
+             Message-Id: <5.1.0.14.2.20011212154350.01be3618@exchi01>
+     Branch: perl
+	   ! lib/Net/hostent.t t/io/fs.t
+____________________________________________________________________________
+[ 13663] By: jhi                                   on 2001/12/12  19:59:56
+        Log: Subject: Re: Next cygwin round.
+             From: "Gerrit P. Haase" <gp@familiehaase.de>
+             Date: Wed, 12 Dec 2001 21:59:00 +0100
+             Message-ID: <122343874595.20011212215900@familiehaase.de>
+     Branch: perl
+	   ! t/io/fs.t
+____________________________________________________________________________
+[ 13662] By: jhi                                   on 2001/12/12  19:12:36
+        Log: Subject: [PATCH] use utf8; tests
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Wed, 12 Dec 2001 20:07:04 +0000
+             Message-ID: <20011212200704.E21702@plum.flirble.org>
+     Branch: perl
+	   ! lib/utf8.t t/test.pl
+____________________________________________________________________________
+[ 13661] By: jhi                                   on 2001/12/12  15:24:42
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
+[ 13660] By: jhi                                   on 2001/12/12  15:04:03
+        Log: Subject: [PATCH] Passing in env to perl_parse did not work
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 11 Dec 2001 20:52:57 -0800
+             Message-ID: <lrheqxniom.fsf@caliper.activestate.com>
+     Branch: perl
+	   ! perl.c perl.h
+____________________________________________________________________________
+[ 13659] By: jhi                                   on 2001/12/12  14:33:30
+        Log: Fixes for casting problems detected on a SuSE 7.2 Itanium,
+             mostly gcc -Wall complaining about the argument of %p not
+             being a void *.
+     Branch: perl
+	   ! perlio.c regcomp.c taint.c toke.c
+____________________________________________________________________________
+[ 13657] By: jhi                                   on 2001/12/12  14:08:49
+        Log: Try YP/NIS also from /usr/lib/yp.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 13656] By: jhi                                   on 2001/12/12  14:05:28
+        Log: Subject: [PATCH Configure t/op/grent.t] ypcat working, but NIS not used
+             From: Michael G Schwern <schwern@pobox.com>                
+             Date: Wed, 12 Dec 2001 05:27:02 -0500      
+             Message-ID: <20011212102702.GW17250@blackrider>
+             
+             (the op/grent part)
+     Branch: perl
+	   ! t/op/grent.t
+____________________________________________________________________________
+[ 13655] By: jhi                                   on 2001/12/12  14:01:55
+        Log: Weed out .files from ls and readdir() results.
+     Branch: perl
+	   ! t/op/stat.t
+____________________________________________________________________________
+[ 13654] By: jhi                                   on 2001/12/12  13:45:21
+        Log: Subject: Re: [PATCH] ID 20011206.007 File::Find:name set to empty string for "/"  
+             From: "Wolfgang Laun" <wolfgang.laun@chello.at>
+             Date: Wed, 12 Dec 2001 10:52:21 +0100
+             Message-ID: <200112121052210220.001ACE6B@smtp.chello.at>
+     Branch: perl
+	   ! lib/File/Find.pm
+____________________________________________________________________________
+[ 13653] By: jhi                                   on 2001/12/12  13:34:06
+        Log: Subject: [PATCH] doio fatal on cygwin for 13651
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>               
+             Date: Wed, 12 Dec 2001 11:28:13 +0100      
+             Message-Id: <20011212112548.4611.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! doio.c
+____________________________________________________________________________
+[ 13652] By: jhi                                   on 2001/12/12  13:32:51
+        Log: Get the whole line of ls, makes debugging easier
+             (from Schwern)
+     Branch: perl
+	   ! t/op/stat.t
+____________________________________________________________________________
+[ 13651] By: jhi                                   on 2001/12/12  05:42:05
+        Log: rename() must be tested even without link()
+             or the utime() and rename-directory tests fail.
+             (Also got the BeOS utime atime/time the wrong way round.)
+     Branch: perl
+	   ! t/io/fs.t
+____________________________________________________________________________
+[ 13650] By: jhi                                   on 2001/12/12  05:36:31
+        Log: Now that the beos.c is compiled at the main level
+             the header is in the beos/
+     Branch: perl
+	   ! beos/beos.c
+____________________________________________________________________________
+[ 13649] By: jhi                                   on 2001/12/12  04:25:21
+        Log: Must remember to require Socket.
+     Branch: perl
+	   ! ext/Sys/Syslog/syslog.t
+____________________________________________________________________________
+[ 13648] By: jhi                                   on 2001/12/12  04:12:05
+        Log: In BeOS Errno must resort to actual compilation
+             and execution for some of the error constants.
+     Branch: perl
+	   ! ext/Errno/Errno_pm.PL
+____________________________________________________________________________
+[ 13647] By: jhi                                   on 2001/12/12  03:23:26
+        Log: BeOS still has no good sockets.
+     Branch: perl
+	   ! ext/IO/lib/IO/t/io_sel.t
+____________________________________________________________________________
+[ 13646] By: jhi                                   on 2001/12/12  03:19:56
+        Log: BeOS sockets are not true sockets.
+     Branch: perl
+	   ! ext/IO/lib/IO/t/io_poll.t
+____________________________________________________________________________
+[ 13645] By: jhi                                   on 2001/12/12  03:14:32
+        Log: No Socket, no Syslog.
+     Branch: perl
+	   ! ext/Sys/Syslog/syslog.t
+____________________________________________________________________________
+[ 13644] By: jhi                                   on 2001/12/12  03:12:46
+        Log: (On some platforms) missing truncate FH.
+     Branch: perl
+	   ! pod/perltodo.pod
+____________________________________________________________________________
+[ 13643] By: jhi                                   on 2001/12/12  03:09:37
+        Log: io/fs cleanup: testing on win32/cygwin/netware/djgpp/...
+             and vms would be muchly appreciated.
+     Branch: perl
+	   ! t/io/fs.t
+____________________________________________________________________________
+[ 13642] By: jhi                                   on 2001/12/12  02:32:05
+        Log: utime() updates only the mtime in BeOS. 
+     Branch: perl
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[ 13641] By: jhi                                   on 2001/12/12  01:50:13
+        Log: No link(), no need to dSP.
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[ 13640] By: jhi                                   on 2001/12/12  01:49:40
+        Log: Missing argument.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 13639] By: jhi                                   on 2001/12/12  01:44:39
+        Log: (1) To assume any setuid programs is silly.
+             (2) Chaining tests with booleans means that some
+             of them may not get run which means getting out
+             of test count sync.
+     Branch: perl
+	   ! t/op/stat.t
+____________________________________________________________________________
+[ 13638] By: jhi                                   on 2001/12/12  01:12:49
+        Log: The beos.c needs to be in the main directory.
+     Branch: perl
+	   ! hints/beos.sh
+____________________________________________________________________________
+[ 13637] By: jhi                                   on 2001/12/12  00:37:20
+        Log: Detypo and rename.
+     Branch: perl
+	   ! doio.c perl.h perlio.c perliol.h
+____________________________________________________________________________
+[ 13636] By: jhi                                   on 2001/12/12  00:22:16
+        Log: This time I test compiled.  Honest.
+     Branch: perl
+	   ! beos/beos.c
+____________________________________________________________________________
+[ 13635] By: jhi                                   on 2001/12/11  22:57:07
+        Log: Subject: [PATCH] slightly more pack tests
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Tue, 11 Dec 2001 23:41:23 +0000
+             Message-ID: <20011211234123.Y21702@plum.flirble.org>
+     Branch: perl
+	   ! t/op/pack.t
+____________________________________________________________________________
+[ 13634] By: jhi                                   on 2001/12/11  21:49:58
+        Log: Subject: [PATCH perl@13600] Gconvert for VMS again
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Tue, 11 Dec 2001 16:39:13 -0600
+             Message-Id: <5.1.0.14.2.20011211162600.02a4b008@exchi01>
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[ 13632] By: jhi                                   on 2001/12/11  21:48:26
+        Log: Subject: $Config{perlpath} and -Dversiononly
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Tue, 11 Dec 2001 23:32:33 +0100
+             Message-ID: <20011211233233.A11587@rafael>
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 13631] By: jhi                                   on 2001/12/11  21:01:00
+        Log: Subject: [PATCH] _qq pack.t Re: [PATCH] tests for hash assignment
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Tue, 11 Dec 2001 21:59:36 +0000
+             Message-ID: <20011211215935.W21702@plum.flirble.org>
+     Branch: perl
+	   ! t/op/pack.t
+____________________________________________________________________________
+[ 13630] By: jhi                                   on 2001/12/11  20:16:29
+        Log: More UTF-8 API docs.
+     Branch: perl
+	   ! embed.pl pod/perlapi.pod pod/perlunicode.pod utf8.c
+____________________________________________________________________________
+[ 13629] By: jhi                                   on 2001/12/11  19:17:16
+        Log: Subject: [PATCH] Re: [PATCH] Re: [PATCH t/op/pack.t] Cleanup
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Tue, 11 Dec 2001 20:08:59 +0000
+             Message-ID: <20011211200859.S21702@plum.flirble.org>
+     Branch: perl
+	   ! t/op/pack.t
+____________________________________________________________________________
+[ 13628] By: jhi                                   on 2001/12/11  19:13:57
+        Log: Subject: Re: use utf8; with bad utf8
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Tue, 11 Dec 2001 19:49:21 +0000
+             Message-ID: <20011211194921.R21702@plum.flirble.org>
+     Branch: perl
+	   ! lib/utf8.t
+____________________________________________________________________________
+[ 13627] By: jhi                                   on 2001/12/11  17:29:01
+        Log: Can't spell worth a dam.  (Try Three Gorges.)
+     Branch: perl
+	   ! beos/beos.c
+____________________________________________________________________________
+[ 13626] By: jhi                                   on 2001/12/11  15:55:51
+        Log: We need DWIM cpps.
+     Branch: perl
+	   ! perlio.c
+____________________________________________________________________________
+[ 13625] By: jhi                                   on 2001/12/11  15:53:41
+        Log: The unixish.h needs to be found and the waitpid wrapper
+             could use a proto.
+     Branch: perl
+	   ! beos/beosish.h
+____________________________________________________________________________
+[ 13624] By: jhi                                   on 2001/12/11  15:27:06
+        Log: The BeOS waitpid() seems to be broken,
+             have a wrapper for it.
+     Branch: perl
+	   + beos/beos.c beos/beosish.h
+	   ! MANIFEST hints/beos.sh perl.h
+____________________________________________________________________________
+[ 13623] By: jhi                                   on 2001/12/11  15:12:18
+        Log: Unlean the leaning tower of Babel.
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[ 13622] By: jhi                                   on 2001/12/11  14:34:53
+        Log: Retract #13607 until we figure out what to do with autouse.
+     Branch: perl
+	   ! lib/Carp.pm
+____________________________________________________________________________
+[ 13621] By: jhi                                   on 2001/12/11  14:33:14
+        Log: Try to handle platforms that have O_TEXT != O_BINARY but
+             which are not DOSish, BeOS being one of such platforms.
+             Ideally this should be a Configure test, not a hardwired
+             cpp symbol test... 
+     Branch: perl
+	   ! doio.c perl.h perlio.c perliol.h
+____________________________________________________________________________
+[ 13620] By: jhi                                   on 2001/12/11  13:56:17
+        Log: Subject: [PATCH lib/Term/Cap.pm lib/Term/Cap.t] Sync changes in CPAN version
+             From: Jonathan Stowe <gellyfish@gellyfish.com>
+             Date: Tue, 11 Dec 2001 07:28:45 +0000 (GMT) 
+             Message-ID: <Pine.LNX.4.33.0112110720470.31242-100000@orpheus.gellyfish.com>
+     Branch: perl
+	   ! lib/Term/Cap.pm lib/Term/Cap.t
+____________________________________________________________________________
+[ 13619] By: jhi                                   on 2001/12/11  13:51:21
+        Log: Subject: [patch perlio.c] test for NULL before derefencing
+             From: Stas Bekman <stas@stason.org>
+             Date: Tue, 11 Dec 2001 16:17:55 +0800
+             Message-ID: <3C15C133.8@stason.org>
+     Branch: perl
+	   ! perlio.c
+____________________________________________________________________________
+[ 13617] By: jhi                                   on 2001/12/11  05:22:08
+        Log: BeOS has socket() but not enough to build a working Socket.
+             Go figure.  ("BONE" (BeOS NEtworking?) is some sort of rumored
+             new networking implementation, which is rumored to fix the
+             non-standardness of sockets, but it's apparently not publicly
+             available, and anything to do with BeOS has become quite
+             complicated with the sale of the Be assets to Palm.)
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 13611] By: jhi                                   on 2001/12/11  04:29:32
+        Log: Subject: Exporter's documentation shouldn't lie               
+             From: "Benjamin J. Tilly" <ben_tilly@operamail.com>
+             Date: Mon, 10 Dec 2001 21:30:20 -0500
+             Message-ID: <3C4AA201@operamail.com>
+     Branch: perl
+	   ! lib/Exporter.pm
+____________________________________________________________________________
+[ 13610] By: jhi                                   on 2001/12/11  04:28:31
+        Log: Make Errno better in BeOS (the second hunk is
+             good on any platform).  Still not working in BeOS
+             are the E constants that refer BeOS native error
+             constants (B_...) which are enums (*groan*).
+     Branch: perl
+	   ! ext/Errno/Errno_pm.PL
+____________________________________________________________________________
+[ 13609] By: jhi                                   on 2001/12/11  00:59:31
+        Log: The BeOS linker seems to link the last seen symbol,
+             not the first (so the symbols of op.o from libperl.so
+             would get linked to miniperl instead of the symbols of
+             opmini.o)-- use the same trick as for NeXT4 for linking
+             miniperl.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[ 13608] By: jhi                                   on 2001/12/11  00:49:15
+        Log: Subject: Re: [PATCH] tests for hash assignment
+             From: Hugo van der Sanden <hv@crypt.compulink.co.uk>
+             Date: Tue, 11 Dec 2001 01:48:55 +0000
+             Message-Id: <200112110148.fBB1mtl19148@crypt.compulink.co.uk>
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 13607] By: jhi                                   on 2001/12/11  00:40:47
+        Log: (retracted by #13622)
+             
+             Subject: RE: More verbose POD for Carp
+             From: "Benjamin J. Tilly" <ben_tilly@operamail.com>
+             Date: Mon, 10 Dec 2001 20:23:20 -0500
+             Message-ID: <3C4A3566@operamail.com>
+     Branch: perl
+	   ! lib/Carp.pm
+____________________________________________________________________________
+[ 13606] By: jhi                                   on 2001/12/11  00:39:20
+        Log: Subject: [PATCH follow-up] (was Re: [PATCH perl@13600] cat2type in tests for VMS)
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Mon, 10 Dec 2001 18:25:37 -0600
+             Message-Id: <5.1.0.14.2.20011210174517.029c7ec0@mail.mac.com>
+     Branch: perl
+	   ! t/op/write.t t/test.pl
+____________________________________________________________________________
+[ 13605] By: jhi                                   on 2001/12/11  00:37:54
+        Log: Subject: [PATCH t/io/multiline.t] Cleanup and $. check
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 10 Dec 2001 08:00:01 -0500
+             Message-ID: <20011210130000.GK1770@blackrider>
+     Branch: perl
+	   ! t/comp/multiline.t
+____________________________________________________________________________
+[ 13604] By: jhi                                   on 2001/12/10  22:51:44
+        Log: Subject: Re: [PATCH] tests for hash assignment
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Mon, 10 Dec 2001 23:22:28 +0000
+             Message-ID: <20011210232228.M21702@plum.flirble.org>
+     Branch: perl
+	   + t/op/hashassign.t
+	   ! MANIFEST t/op/each.t t/test.pl
+____________________________________________________________________________
+[ 13603] By: jhi                                   on 2001/12/10  21:34:46
+        Log: Subject: [PATCH perl@13600] cat2type in tests for VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Mon, 10 Dec 2001 16:38:14 -0600
+             Message-Id: <5.1.0.14.2.20011210154846.01aef188@exchi01>
+     Branch: perl
+	   ! ext/IO/lib/IO/t/io_dup.t t/comp/multiline.t t/io/dup.t
+____________________________________________________________________________
+[ 13602] By: jhi                                   on 2001/12/10  19:52:01
+        Log: Subject: [PATCH perl@13600] configure.com fixes
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Mon, 10 Dec 2001 14:40:20 -0600
+             Message-Id: <5.1.0.14.2.20011210142528.01aff2e8@exchi01>
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[ 13601] By: jhi                                   on 2001/12/10  18:25:30
+        Log: Silence BeOS compilation moaning.
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[ 13600] By: jhi                                   on 2001/12/10  15:11:40
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
+[ 13599] By: jhi                                   on 2001/12/10  13:35:57
+        Log: Subject: [PATCH lib/ExtUtils/Command.t] Bad touch
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 10 Dec 2001 01:21:03 -0500
+             Message-ID: <20011210062103.GC1770@blackrider>
+     Branch: perl
+	   ! lib/ExtUtils/Command.t
+____________________________________________________________________________
+[ 13598] By: jhi                                   on 2001/12/10  13:35:20
+        Log: Subject: [PATCH t/op/groups.t] Need @INC = '../lib' mantra
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 10 Dec 2001 01:10:57 -0500
+             Message-ID: <20011210061057.GB1770@blackrider>
+     Branch: perl
+	   ! t/op/groups.t
+____________________________________________________________________________
+[ 13597] By: jhi                                   on 2001/12/10  13:33:51
+        Log: Retract #13596, #13593 should do the trick.
+     Branch: perl
+	   ! t/op/stat.t
+____________________________________________________________________________
+[ 13596] By: jhi                                   on 2001/12/10  13:31:38
+        Log: (retracted by #13597, #13593 does the job better)
+             
+             Subject: [PATCH t/op/stat.t] -B/-T Cygwin fix
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 10 Dec 2001 00:53:16 -0500
+             Message-ID: <20011210055316.GA1770@blackrider>
+     Branch: perl
+	   ! t/op/stat.t
+____________________________________________________________________________
+[ 13595] By: jhi                                   on 2001/12/10  13:28:30
+        Log: Subject: [PATCH lib/AutoSplit.t] Too fast for FAT filesystems
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Mon, 10 Dec 2001 02:19:14 -0500
+             Message-ID: <20011210071914.GF1770@blackrider>
+     Branch: perl
+	   ! lib/AutoSplit.t
+____________________________________________________________________________
+[ 13594] By: jhi                                   on 2001/12/10  13:26:24
+        Log: Subject: [PATCH] Re: [PATCH t/op/pack.t] Cleanup
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 10 Dec 2001 02:47:40 -0500
+             Message-ID: <20011210074739.GH1770@blackrider>
+     Branch: perl
+	   ! t/op/pack.t
+____________________________________________________________________________
+[ 13593] By: jhi                                   on 2001/12/10  13:22:49
+        Log: Subject: [PATCH t/test.pl] Moving Cygwin .exe logic into which_perl
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 10 Dec 2001 02:54:22 -0500
+             Message-ID: <20011210075422.GI1770@blackrider>
+     Branch: perl
+	   ! t/test.pl
+____________________________________________________________________________
+[ 13592] By: jhi                                   on 2001/12/10  13:21:06
+        Log: Subject: Re: [ID 20011209.005] perl "u2" eats RAM
+             From: Wolfgang Laun <Wolfgang.Laun@alcatel.at>
+             Date: Mon, 10 Dec 2001 08:45:20 +0100
+             Message-ID: <3C146810.60B5B7C0@alcatel.at>
+     Branch: perl
+	   ! pp_pack.c
+____________________________________________________________________________
+[ 13591] By: jhi                                   on 2001/12/10  13:18:17
+        Log: Subject: [PATCH] Re: [PATCH t/io/openpid.t] Cleanup
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 10 Dec 2001 03:27:02 -0500
+             Message-ID: <20011210082702.GN1770@blackrider>
+     Branch: perl
+	   ! t/io/openpid.t
+____________________________________________________________________________
+[ 13590] By: jhi                                   on 2001/12/10  13:17:08
+        Log: More chmod +w.
+     Branch: perl
+	   ! Porting/makerel
+____________________________________________________________________________
+[ 13589] By: jhi                                   on 2001/12/10  04:21:59
+        Log: Just skip the readability test if running as root.
+     Branch: perl
+	   ! lib/Net/t/netrc.t
+____________________________________________________________________________
+[ 13588] By: jhi                                   on 2001/12/10  04:03:10
+        Log: Tell about the downside of safe signals.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 13587] By: jhi                                   on 2001/12/10  03:38:20
+        Log: Make the whole -lperl thing NetBSD only until we
+             find some other platform that needs the same.
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 13586] By: jhi                                   on 2001/12/10  03:13:59
+        Log: Subject: [PATCH t/op/pack.t] Cleanup
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Sun, 9 Dec 2001 23:08:26 -0500
+             Message-ID: <20011210040826.GD660@blackrider>
+     Branch: perl
+	   ! t/op/pack.t
+____________________________________________________________________________
+[ 13585] By: jhi                                   on 2001/12/10  02:47:01
+        Log: Add threads support for NetBSD.
+             
+             This is also the first (I think) Perl threads build with
+             the GNU pth ( http://www.gnu.org/software/pth/pth.html ).
+             NetBSD does not as of yet have true kernel POSIX threads,
+             but the user-level pth seems to be doing pretty well--
+             the only failure is that threads/t/basic okays 6 and 7
+             consistently seem be arriving in the reverse order.
+             Well, gdbm.t is also failing: 'Undefined PLT symbol
+             "gdbm_open" (reloc type = 7, symnum = 28)', but I'm
+             guessing that GDBM would need a threaded rebuild.
+     Branch: perl
+	   ! hints/netbsd.sh
+____________________________________________________________________________
+[ 13582] By: jhi                                   on 2001/12/10  02:01:26
+        Log: Update the ithreads selection info in Configure,
+             as suggested by Michael Schwern.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 13581] By: jhi                                   on 2001/12/10  01:56:14
+        Log: Clearing locale environment simply doesn't seem to
+             guarantee that (nl_)langinfo(CODESET) would return nil.
+             (I for example get "ISO8859-1", so <guess>maybe there can
+             be per-system default settings at work</guess>.)
+     Branch: perl
+	   ! lib/open.t
+____________________________________________________________________________
+[ 13580] By: jhi                                   on 2001/12/10  01:53:11
+        Log: Subject: RE: Exporter fixes reversed in 13540?
+             From: "Benjamin J. Tilly" <ben_tilly@operamail.com>                
+             Date: Sun, 9 Dec 2001 12:55:15 -0500
+             Message-ID: <3C13F455@operamail.com>
+     Branch: perl
+	   ! lib/open.pm
+____________________________________________________________________________
+[ 13579] By: jhi                                   on 2001/12/10  01:26:53
+        Log: Root is the lizard king.
+     Branch: perl
+	   ! lib/Net/t/netrc.t
+____________________________________________________________________________
+[ 13578] By: jhi                                   on 2001/12/10  01:01:24
+        Log: Telling how many tests we are expecting helps.
+     Branch: perl
+	   ! ext/POSIX/t/waitpid.t
+____________________________________________________________________________
+[ 13577] By: jhi                                   on 2001/12/10  00:38:09
+        Log: Add a test case for waitpid(): from Rocco Caputo.
+     Branch: perl
+	   + ext/POSIX/t/waitpid.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 13576] By: jhi                                   on 2001/12/10  00:15:19
+        Log: Subject: [PATCH] Term::ReadLine tweaks and test
+             From: Richard Clamp <richardc@unixbeard.net>
+             Date: Mon, 10 Dec 2001 00:51:47 +0000
+             Message-ID: <20011210005147.GA1073@mirth.demon.co.uk>
+     Branch: perl
+	   + lib/Term/ReadLine.t
+	   ! MANIFEST lib/Term/ReadLine.pm
+____________________________________________________________________________
+[ 13575] By: jhi                                   on 2001/12/10  00:04:56
+        Log: Subject: [patch] non-blocking waitpid(-1,WNOHANG) for MSWin32
+             From: Rocco Caputo <troc@netrus.net>
+             Date: Sun, 9 Dec 2001 18:12:38 -0500
+             Message-ID: <20011209181238.A803@eyrie.homenet>
+     Branch: perl
+	   ! win32/win32.c
+____________________________________________________________________________
+[ 13574] By: jhi                                   on 2001/12/09  23:49:19
+        Log: make sure that va_start() has matching va_end();
+             from OpenBSD 3.0.
+     Branch: perl
+	   ! x2p/util.c
+____________________________________________________________________________
+[ 13573] By: jhi                                   on 2001/12/09  23:45:57
+        Log: h2ph updates from OpenBSD 3.0.
+     Branch: perl
+	   ! utils/h2ph.PL
+____________________________________________________________________________
+[ 13572] By: jhi                                   on 2001/12/09  23:44:25
+        Log: OpenBSD hints update from OpenBSD 3.0.
+     Branch: perl
+	   ! hints/openbsd.sh
+____________________________________________________________________________
+[ 13571] By: jhi                                   on 2001/12/09  23:32:08
+        Log: DJGPP tweaks from Laszlo Molnar.
+     Branch: perl
+	   ! djgpp/config.over lib/File/Find/t/find.t
+	   ! lib/File/Find/t/taint.t t/pod/find.t
+____________________________________________________________________________
+[ 13570] By: jhi                                   on 2001/12/09  23:28:55
+        Log: Subject: [PATCH README.cygwin] 64bit ints & Cygwin98 ok
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Sun, 9 Dec 2001 19:28:12 -0500
+             Message-ID: <20011210002812.GF13586@blackrider>
+     Branch: perl
+	   ! README.cygwin
+____________________________________________________________________________
+[ 13569] By: jhi                                   on 2001/12/09  21:51:37
+        Log: README.cygwin update from Gerrit P. Haase.
+     Branch: perl
+	   ! README.cygwin
+____________________________________________________________________________
+[ 13568] By: jhi                                   on 2001/12/09  21:49:06
+        Log: Apply NetBSD patch-ag: shared/static linking,
+             but make the change less intrusive on non-NetBSD.
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 13567] By: jhi                                   on 2001/12/09  21:09:10
+        Log: Apply NetBSD patch-af: handle both -[LR] and -Wl,-R linker paths.
+     Branch: perl
+	   ! lib/ExtUtils/Liblist.pm
+____________________________________________________________________________
+[ 13566] By: jhi                                   on 2001/12/09  20:55:32
+        Log: Apply NetBSD patch-ae: another gcc sparc64 bug.
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[ 13565] By: jhi                                   on 2001/12/09  20:50:57
+        Log: Apply NetBSD patch-ad: a gcc sparc64 code generation bug.
+     Branch: perl
+	   ! pp.c
+____________________________________________________________________________
+[ 13564] By: jhi                                   on 2001/12/09  20:38:48
+        Log: Apply NetBSD patch-ac.
+             (the fix has already been done: change #9706, fully qualified
+             pathnames in packlists)
+     Branch: perl
+	   ! lib/ExtUtils/Install.pm
+____________________________________________________________________________
+[ 13563] By: jhi                                   on 2001/12/09  20:32:52
+        Log: Apply NetBSD patch-ab: NetBSD hints update.
+     Branch: perl
+	   ! hints/netbsd.sh
+____________________________________________________________________________
+[ 13561] By: jhi                                   on 2001/12/09  20:31:14
+        Log: NetBSD has <ieeefp.h> but hidden.
+     Branch: perl
+	   ! hints/netbsd.sh
+____________________________________________________________________________
+[ 13560] By: jhi                                   on 2001/12/09  20:29:35
+        Log: Implement NetBSD patch-aa.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 13559] By: jhi                                   on 2001/12/09  19:21:45
+        Log: Subject: Re: [ID 20011206.006] File::Find calls lstat on wrong object before wanted()
+             From: "Wolfgang Laun" <wolfgang.laun@chello.at>             
+             Date: Sun, 09 Dec 2001 13:40:58 +0100
+             Message-ID: <200112091340580550.008ED513@smtp.chello.at>
+             
+             (The lstat()s were there in 5.6.1: what happened to them?)
+     Branch: perl
+	   ! lib/File/Find.pm
+____________________________________________________________________________
+[ 13558] By: jhi                                   on 2001/12/09  19:04:23
+        Log: Quickie documentation of the C UTF-8 API.
+     Branch: perl
+	   ! pod/perlunicode.pod
+____________________________________________________________________________
+[ 13557] By: jhi                                   on 2001/12/09  18:36:20
+        Log: Subject: bleadperl on cygwin weirdness...
+             From: "Gerrit P. Haase" <gp@familiehaase.de>
+             Date: Sun, 9 Dec 2001 20:31:28 +0100
+             Message-ID: <13779422183.20011209203128@familiehaase.de>          
+             
+             (plus libperl*.dll version portability tweaks)
+     Branch: perl
+	   ! lib/ExtUtils/Embed.t
+____________________________________________________________________________
+[ 13556] By: jhi                                   on 2001/12/09  18:21:46
+        Log: Instead of muting symbol export error if under eval,
+             delay the errors until the croak().
+             
+             (replaces #13408)
+     Branch: perl
+	   ! lib/Exporter/Heavy.pm
+____________________________________________________________________________
+[ 13555] By: jhi                                   on 2001/12/09  18:09:12
+        Log: Basegroup 0 is a cygwin_nt thing.
+     Branch: perl
+	   ! t/op/groups.t
+____________________________________________________________________________
+[ 13554] By: jhi                                   on 2001/12/09  17:57:44
+        Log: Also WinME is LoseLink.
+     Branch: perl
+	   ! t/op/stat.t
+____________________________________________________________________________
+[ 13553] By: jhi                                   on 2001/12/09  16:25:52
+        Log: Forgotten checkin.
+     Branch: perl
+	   ! lib/User/grent.t
+____________________________________________________________________________
+[ 13552] By: jhi                                   on 2001/12/09  16:23:14
+        Log: Subject: [PATCH] ID 20011206.007 File::Find:name set to empty string for "/"
+             From: "Wolfgang Laun" <wolfgang.laun@chello.at>
+             Date: Sun, 09 Dec 2001 13:45:06 +0100
+             Message-ID: <200112091345060760.00929EA9@smtp.chello.at>
+     Branch: perl
+	   ! lib/File/Find.pm
+____________________________________________________________________________
+[ 13551] By: jhi                                   on 2001/12/09  16:18:20
+        Log: Tweakback.
+     Branch: perl
+	   ! lib/Net/hostent.t
+____________________________________________________________________________
+[ 13550] By: jhi                                   on 2001/12/09  16:01:55
+        Log: Subject: [PATCH lib/User/grent.t] More Cygwin98 group oddities
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sat, 8 Dec 2001 14:48:38 -0500
+             Message-ID: <20011208194838.GA8650@blackrider>
+     Branch: perl
+	   ! t/op/grent.t
+____________________________________________________________________________
+[ 13549] By: jhi                                   on 2001/12/09  15:40:28
+        Log: Subject: [README.cygwin] Removing old expected test failures
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sat, 8 Dec 2001 15:38:28 -0500
+             Message-ID: <20011208203828.GB9017@blackrider>
+     Branch: perl
+	   ! README.cygwin
+____________________________________________________________________________
+[ 13548] By: jhi                                   on 2001/12/09  15:37:48
+        Log: Subject: [PATCH lib/Net/hostent.t] Cleanup and Cygwin98 oddity
+             From: Michael G Schwern <schwern@pobox.com>                
+             Date: Sat, 8 Dec 2001 15:26:59 -0500
+             Message-ID: <20011208202659.GA9017@blackrider> 
+     Branch: perl
+	   ! lib/Net/hostent.t
+____________________________________________________________________________
+[ 13547] By: jhi                                   on 2001/12/09  15:33:43
+        Log: Subject: [PATCH t/op/stat.t] Cygwin98 fakes hard links
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Sat, 8 Dec 2001 15:06:16 -0500
+             Message-ID: <20011208200616.GA8915@blackrider>
+     Branch: perl
+	   ! t/op/stat.t
+____________________________________________________________________________
+[ 13546] By: jhi                                   on 2001/12/09  15:31:19
+        Log: Developer deprecations and an incompatibility.
+     Branch: perl
+	   ! pod/perldelta.pod pod/perlmodlib.pod pod/perltoc.pod
+____________________________________________________________________________
+[ 13545] By: jhi                                   on 2001/12/09  15:27:14
+        Log: Shoo.
+     Branch: perl
+	   - lib/Attribute/Handlers.pm
+____________________________________________________________________________
+[ 13544] By: jhi                                   on 2001/12/09  15:20:08
+        Log: Remove Attribute::Handlers, as per Damian's request.
+             (Because of fixing the my variables to be now handled
+             in run-time, the whole internals of the A::H needs to
+             be rewritten and Damian will not have time for that
+             for months.)
+     Branch: perl
+	   - lib/Attribute/Handlers/Changes lib/Attribute/Handlers/README
+	   - lib/Attribute/Handlers/demo/Demo.pm
+	   - lib/Attribute/Handlers/demo/Descriptions.pm
+	   - lib/Attribute/Handlers/demo/MyClass.pm
+	   - lib/Attribute/Handlers/demo/demo.pl
+	   - lib/Attribute/Handlers/demo/demo2.pl
+	   - lib/Attribute/Handlers/demo/demo3.pl
+	   - lib/Attribute/Handlers/demo/demo4.pl
+	   - lib/Attribute/Handlers/demo/demo_call.pl
+	   - lib/Attribute/Handlers/demo/demo_chain.pl
+	   - lib/Attribute/Handlers/demo/demo_cycle.pl
+	   - lib/Attribute/Handlers/demo/demo_hashdir.pl
+	   - lib/Attribute/Handlers/demo/demo_phases.pl
+	   - lib/Attribute/Handlers/demo/demo_range.pl
+	   - lib/Attribute/Handlers/demo/demo_rawdata.pl
+	   - lib/Attribute/Handlers/t/multi.t
+	   ! MANIFEST lib/Attribute/Handlers.pm pod/perldelta.pod
+	   ! pod/perlmodlib.pod pod/perltoc.pod
+____________________________________________________________________________
+[ 13543] By: jhi                                   on 2001/12/09  15:00:50
+        Log: Subject: Re: attributes are broken
+             From: Spider Boardman <spider@Orb.Nashua.NH.US>
+             Date: Sun, 09 Dec 2001 00:09:23 -0500
+             Message-Id: <200112090509.AAA02053@Orb.Nashua.NH.US>              
+     Branch: perl
+	   ! dump.c embed.h embed.pl lib/attributes.pm op.c op.h
+	   ! pod/perldelta.pod pod/perltoc.pod proto.h t/op/attrs.t
+	   ! xsutils.c
+____________________________________________________________________________
+[ 13542] By: jhi                                   on 2001/12/09  14:49:46
+        Log: Forgotten checkin.
+     Branch: perl
+	   ! lib/Pod/Text.pm
+____________________________________________________________________________
+[ 13541] By: jhi                                   on 2001/12/09  14:48:15
+        Log: uconfig.h update.
+     Branch: perl
+	   ! uconfig.h
+____________________________________________________________________________
+[ 13540] By: jhi                                   on 2001/12/08  18:39:51
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
+[ 13539] By: jhi                                   on 2001/12/08  18:28:02
+        Log: Note that some of the Unicode features are
+             dependent on perlio.
+     Branch: perl
+	   ! pod/perluniintro.pod
+____________________________________________________________________________
+[ 13538] By: jhi                                   on 2001/12/08  17:53:00
+        Log: Regen perlapi, regen toc.
+     Branch: perl
+	   ! pod/perlapi.pod pod/perltoc.pod
+____________________________________________________________________________
+[ 13537] By: jhi                                   on 2001/12/08  17:44:48
+        Log: FAQ sync.
+     Branch: perl
+	   ! pod/perlfaq4.pod pod/perlfaq6.pod
+____________________________________________________________________________
+[ 13536] By: jhi                                   on 2001/12/08  17:37:53
+        Log: Subject: [PATCH] Fix odd language in an sv.c comment
+             From: coral@eekeek.org
+             Date: Sat, 8 Dec 2001 12:19:39 -0500
+             Message-Id: <200112081719.fB8HJdZ14747@eekeek.org>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 13535] By: jhi                                   on 2001/12/08  15:29:18
+        Log: Subject: [PATCH lib/vmsish.t] Small test name abuse.
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Fri, 7 Dec 2001 20:03:45 -0500
+             Message-ID: <20011208010345.GD642@blackrider>
+             
+             Subject: [PATCH vms/test.com] Goodbye frightening echo kludge!
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Fri, 7 Dec 2001 20:13:54 -0500
+             Message-ID: <20011208011354.GE642@blackrider>
+             
+             Subject: [PATCH t/io/pipe.t t/test.pl] Cleanup & $NO_ENDING
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Fri, 7 Dec 2001 21:47:36 -0500
+             Message-ID: <20011208024736.GH642@blackrider>
+             
+             Subject: [PATCH t/op/exec.t] Piping and newline on pipe tests
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Fri, 7 Dec 2001 23:09:43 -0500
+             Message-ID: <20011208040943.GK642@blackrider>
+             
+             Subject: [PATCH] vms/test.com -- skip tty tests when not interactive
+             Message-Id: <a05101004b83754903506@[172.16.52.1]>
+             Date: Fri, 7 Dec 2001 23:28:15 -0600
+             From: "Craig A. Berry" <craigberry@mac.com>
+     Branch: perl
+	   ! lib/vmsish.t t/io/pipe.t t/op/exec.t t/test.pl vms/test.com
+____________________________________________________________________________
+[ 13534] By: jhi                                   on 2001/12/08  15:16:14
+        Log: Integrate perlio.
+     Branch: perl
+	  !> doio.c lib/Exporter/Heavy.pm lib/open.t op.c perlio.c
+	  !> perliol.h pod/perlfunc.pod pod/perltoc.pod pp.c
+____________________________________________________________________________
+[ 13533] By: jhi                                   on 2001/12/08  15:13:39
+        Log: Retract #11156 since Sarathy has found that it breaks code:
+             http://bugs.ActiveState.com/show_bug.cgi?id=18457
+             http://bugs.ActiveState.com/show_bug.cgi?id=18858
+     Branch: perl
+	   ! op.c sv.c t/op/pos.t
+____________________________________________________________________________
+[ 13532] By: nick                                  on 2001/12/08  14:11:12
+        Log: Integrate mainline
+     Branch: perlio
+	  !> Changes doop.c patchlevel.h pod/perluniintro.pod t/op/chop.t
+	  !> t/op/magic.t t/op/stat.t t/run/switches.t t/test.pl
+____________________________________________________________________________
+[ 13531] By: nick                                  on 2001/12/08  13:48:21
+        Log: Tweak multi-arg open error messages
+     Branch: perlio
+	   ! perlio.c
+____________________________________________________________________________
+[ 13530] By: nick                                  on 2001/12/08  10:20:06
+        Log: Allow multi-arg open() if opening layer declares this legal.
+     Branch: perlio
+	   ! doio.c perlio.c perliol.h
+____________________________________________________________________________
+[ 13529] By: jhi                                   on 2001/12/07  23:48:58
+        Log: Subject: [PATCH t/run/switches.t] Declaring mostly TODO
+             From: Michael G Schwern <schwern@pobox.com>       
+             Date: Fri, 7 Dec 2001 19:41:31 -0500
+             Message-ID: <20011208004131.GC642@blackrider>
+     Branch: perl
+	   ! t/run/switches.t t/test.pl
+____________________________________________________________________________
+[ 13528] By: jhi                                   on 2001/12/07  23:47:26
+        Log: Subject: [PATCH t/op/stat.t] Declaring -t STDIN w/pipe TODO
+             From: Michael G Schwern <schwern@pobox.com>       
+             Date: Fri, 7 Dec 2001 19:12:44 -0500
+             Message-ID: <20011208001244.GB642@blackrider>
+     Branch: perl
+	   ! t/op/stat.t
+____________________________________________________________________________
+[ 13527] By: jhi                                   on 2001/12/07  22:31:22
+        Log: Subject: [PATCH t/op/magic.t] Puut... The TODO... Beck!
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Fri, 7 Dec 2001 17:28:57 -0500
+             Message-ID: <20011207222857.GI23210@blackrider>
+     Branch: perl
+	   ! t/op/magic.t
+____________________________________________________________________________
+[ 13526] By: jhi                                   on 2001/12/07  22:27:46
+        Log: which_perl: if File::Spec fails, assume "./" and hope for the best.
+     Branch: perl
+	   ! t/test.pl
+____________________________________________________________________________
+[ 13525] By: jhi                                   on 2001/12/07  22:21:25
+        Log: which_perl: delay as much a possible till runtime.
+     Branch: perl
+	   ! t/test.pl
+____________________________________________________________________________
+[ 13524] By: jhi                                   on 2001/12/07  21:58:15
+        Log: Further tweakage to which_perl().
+     Branch: perl
+	   ! t/test.pl
+____________________________________________________________________________
+[ 13523] By: jhi                                   on 2001/12/07  21:57:30
+        Log: perluniintro tweaks.
+     Branch: perl
+	   ! pod/perluniintro.pod
+____________________________________________________________________________
+[ 13522] By: jhi                                   on 2001/12/07  21:01:02
+        Log: Tweak the $Perl computation.
+     Branch: perl
+	   ! t/test.pl
+____________________________________________________________________________
+[ 13521] By: jhi                                   on 2001/12/07  17:27:02
+        Log: Subject: Re: [PATCH] chom?p needs to remove read only fakery
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Fri, 7 Dec 2001 17:06:56 +0000
+             Message-ID: <20011207170656.G21702@plum.flirble.org>
+     Branch: perl
+	   ! doop.c t/op/chop.t
+____________________________________________________________________________
+[ 13520] By: jhi                                   on 2001/12/07  15:55:34
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 13519] By: jhi                                   on 2001/12/07  15:32:58
         Log: Missing ).
      Branch: perl
@@ -46,6 +1134,35 @@ ____________________________________________________________________________
              or a named pipe, so let's pretend it doesn't exist.
      Branch: perl
 	   ! t/op/stat.t
+____________________________________________________________________________
+[ 13516] By: nick                                  on 2001/12/07  15:09:23
+        Log: Integrate again - can I catch up ?
+     Branch: perlio
+	  !> t/test.pl
+____________________________________________________________________________
+[ 13515] By: nick                                  on 2001/12/07  15:08:17
+        Log: Integrate mainline some more
+     Branch: perlio
+	  !> README.hpux hints/linux.sh pod/perlfunc.pod
+____________________________________________________________________________
+[ 13514] By: nick                                  on 2001/12/07  15:07:15
+        Log: Integrate mainline
+     Branch: perlio
+	  +> djgpp/djgpp.h ext/Devel/PPPort/Changes
+	  +> ext/Devel/PPPort/PPPort.xs ext/Devel/PPPort/module2.c
+	  +> ext/Devel/PPPort/module3.c ext/Devel/PPPort/t/test.t
+	  +> hints/super-ux.sh lib/File/Spec/t/Functions.t
+	  +> lib/File/Spec/t/Spec.t lib/File/Spec/t/rel2abs2rel.t
+	  +> lib/Math/BigInt/t/bare_mbi.t pod/perl561delta.pod
+	  +> t/lib/Math/BigInt/BareCalc.pm
+	   - ext/Devel/PPPort/harness/Harness.pm
+	   - ext/Devel/PPPort/harness/Harness.xs
+	   - ext/Devel/PPPort/harness/Makefile.PL
+	   - ext/Devel/PPPort/harness/module2.c
+	   - ext/Devel/PPPort/harness/module3.c
+	   - ext/Devel/PPPort/harness/t/test.t lib/File/Spec.t
+	   - lib/File/Spec/Functions.t
+	  !> (integrate 103 files)
 ____________________________________________________________________________
 [ 13513] By: jhi                                   on 2001/12/07  14:58:06
         Log: Add display() for displaying icky scalars.
@@ -309,6 +1426,12 @@ ____________________________________________________________________________
      Branch: perl
 	   ! pod/perlport.pod
 ____________________________________________________________________________
+[ 13478] By: gsar                                  on 2001/12/05  18:22:38
+        Log: tweak change#13474 (pad entries can apparently be null in some
+             situations)
+     Branch: maint-5.6/perl
+	   ! op.c
+____________________________________________________________________________
 [ 13477] By: jhi                                   on 2001/12/05  17:53:13
         Log: Restore the /dev -b -c -S part of the test.
      Branch: perl
@@ -329,6 +1452,21 @@ ____________________________________________________________________________
              (threads/shared/sv_refs.t is coredump-unhappy about this change)
      Branch: perl
 	   ! op.c t/run/kill_perl.t
+____________________________________________________________________________
+[ 13474] By: gsar                                  on 2001/12/05  15:14:24
+        Log: replacement for change#10451
+             
+             fixes stale reference to dead CvOUTSIDE(); this can happen when
+             anonymous subroutines that aren't closures are returned from an
+             eval""
+     Branch: maint-5.6/perl
+	   ! op.c t/op/misc.t
+____________________________________________________________________________
+[ 13473] By: gsar                                  on 2001/12/05  15:08:18
+        Log: revert change#10451,10472; it was a naive fix that simply
+             reintroduced the memory leak!
+     Branch: maint-5.6/perl
+	   ! op.c t/op/misc.t
 ____________________________________________________________________________
 [ 13472] By: jhi                                   on 2001/12/05  13:30:47
         Log: Subject: Re: [PATCH] File::Basename pod and .t (was: perlpacktut.pod v0.0 (split))
@@ -410,7 +1548,7 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [ 13461] By: jhi                                   on 2001/12/04  14:49:45
         Log: Must wipe out the memory of real Socket before starting
-             to use the old one.
+             to use the new fake one.
      Branch: perl
 	   ! lib/Net/t/config.t
 ____________________________________________________________________________
@@ -459,6 +1597,14 @@ ____________________________________________________________________________
              Not adding the test suite because of its many assumptions.
      Branch: perl
 	   ! lib/Net/Ping.pm
+____________________________________________________________________________
+[ 13453] By: gsar                                  on 2001/12/04  07:54:58
+        Log: tweak change#11399 to use an explicit flag rather than
+             ass_u_ming w32_pseudo_id will only be zero for the real
+             toplevel interpreter; avoids multiple hosts from diddling
+             the environment at the same time
+     Branch: maint-5.6/perl
+	   ! win32/perlhost.h
 ____________________________________________________________________________
 [ 13452] By: jhi                                   on 2001/12/04  04:28:29
         Log: Add hints file for SUPER-UX: the UNIX of NEC SX series,
@@ -752,11 +1898,22 @@ ____________________________________________________________________________
      Branch: perl
 	   ! ext/I18N/Langinfo/Langinfo.xs
 ____________________________________________________________________________
+[ 13409] By: nick                                  on 2001/12/01  18:19:59
+        Log: Skip socket-ness tests on handles (e.g. PerlIO::Scalar) which do not
+             have file descriptors. Noticed a possibly worse problem in the process ...
+     Branch: perlio
+	   ! doio.c
+____________________________________________________________________________
 [ 13408] By: jhi                                   on 2001/12/01  18:18:34
         Log: If we are inside an eval, let's be silent about
              separate symbols and just croak() in the end.
      Branch: perl
 	   ! lib/Exporter/Heavy.pm
+____________________________________________________________________________
+[ 13407] By: nick                                  on 2001/12/01  17:14:05
+        Log: Integrate mainline
+     Branch: perlio
+	  !> (integrate 26 files)
 ____________________________________________________________________________
 [ 13406] By: jhi                                   on 2001/12/01  16:31:02
         Log: Subject: Fix for Exporter error reporting behaviour
@@ -813,6 +1970,15 @@ ____________________________________________________________________________
         Log: Add simple caches for ::viacode() and ::vianame().
      Branch: perl
 	   ! lib/charnames.pm lib/charnames.t
+____________________________________________________________________________
+[ 13398] By: nick                                  on 2001/12/01  10:36:24
+        Log: Integrate mainline.
+     Branch: perlio
+	  +> (branch 44 files)
+	   - lib/Math/BigInt/t/Math/BigFloat/Subclass.pm
+	   - lib/Math/BigInt/t/Math/BigInt/Subclass.pm
+	   - t/lib/FilterOnlyTest.pm t/lib/FilterTest.pm
+	  !> (integrate 250 files)
 ____________________________________________________________________________
 [ 13397] By: jhi                                   on 2001/12/01  04:35:39
         Log: Regen toc and modlib.
@@ -930,7 +2096,9 @@ ____________________________________________________________________________
 	   ! ext/Unicode/Normalize/t/test.t
 ____________________________________________________________________________
 [ 13381] By: jhi                                   on 2001/11/30  13:23:06
-        Log: Subject: [ID 20011130.164] Not OK: perl v5.7.2 +DEVEL13363 on i686-linux 2.4.8-26mdk
+        Log: (replaced by #13391)
+             
+             Subject: [ID 20011130.164] Not OK: perl v5.7.2 +DEVEL13363 on i686-linux 2.4.8-26mdk
              From: jpeacock@dsl092-147-156.wdc1.dsl.speakeasy.net
              Date: 30 Nov 2001 11:41:53 -0000             
              Message-Id: <20011130114153.24600.qmail@dsl092-147-156.wdc1.dsl.speakeasy.net>
@@ -1496,7 +2664,8 @@ ____________________________________________________________________________
 	   ! t/op/split.t
 ____________________________________________________________________________
 [ 13303] By: jhi                                   on 2001/11/27  02:03:49
-        Log: Try to make Unicode casemapping to work for EBCDIC, too.
+        Log: (retracted by #13449)
+             Try to make Unicode casemapping to work for EBCDIC, too.
      Branch: perl
 	   ! utf8.c
 ____________________________________________________________________________
@@ -1775,11 +2944,26 @@ ____________________________________________________________________________
      Branch: perl
 	   ! installman
 ____________________________________________________________________________
+[ 13261] By: gsar                                  on 2001/11/25  16:48:38
+        Log: integrate changes#8340,13260 from mainline
+             
+             Subject: [PATCH] Re: [ID 20010105.002] close() on process filehandle leaves defunct process
+             
+             change#3373 introduced a handle leak in backticks and piped open()s
+             that fail
+     Branch: maint-5.6/perl
+	   ! t/io/pipe.t util.c
+____________________________________________________________________________
 [ 13260] By: gsar                                  on 2001/11/25  16:37:29
         Log: change#3373 introduced a handle leak in backticks and piped open()s
              that fail
      Branch: perl
 	   ! util.c
+____________________________________________________________________________
+[ 13259] By: jhi                                   on 2001/11/25  05:58:47
+        Log: metaconfig unit change for #13258.
+     Branch: metaconfig/U/perl
+	   ! d_procselfexe.U
 ____________________________________________________________________________
 [ 13258] By: jhi                                   on 2001/11/25  05:58:30
         Log: Extraenous breaks noticed by David Dyck.
@@ -2038,6 +3222,11 @@ ____________________________________________________________________________
      Branch: perl
 	   ! pod/perldelta.pod
 ____________________________________________________________________________
+[ 13220] By: jhi                                   on 2001/11/23  18:55:20
+        Log: metaconfig unit change for #13219.
+     Branch: metaconfig/U/perl
+	   ! d_procselfexe.U
+____________________________________________________________________________
 [ 13219] By: jhi                                   on 2001/11/23  18:55:06
         Log: Regen Porting stuff; regen toc; cleanup nit in Configure.
      Branch: perl
@@ -2053,6 +3242,11 @@ ____________________________________________________________________________
 	   ! win32/config.gc win32/config.vc win32/config.win64
 	   ! wince/config.ce
 ____________________________________________________________________________
+[ 13217] By: jhi                                   on 2001/11/23  18:47:41
+        Log: metaconfig unit change for #13216.
+     Branch: metaconfig/U/perl
+	   ! d_procselfexe.U
+____________________________________________________________________________
 [ 13216] By: jhi                                   on 2001/11/23  18:47:17
         Log: Better to "quote" the pathname.
      Branch: perl
@@ -2063,10 +3257,20 @@ ____________________________________________________________________________
      Branch: perl
 	   ! perl.c
 ____________________________________________________________________________
+[ 13214] By: jhi                                   on 2001/11/23  18:31:27
+        Log: metaconfig unit change for #13213.
+     Branch: metaconfig/U/perl
+	   ! d_procselfexe.U
+____________________________________________________________________________
 [ 13213] By: jhi                                   on 2001/11/23  18:31:13
         Log: Add probing for BSD-like /proc/curpoc/file.
      Branch: perl
 	   ! Configure config_h.SH
+____________________________________________________________________________
+[ 13212] By: jhi                                   on 2001/11/23  18:10:05
+        Log: metaconfig unit change for 13211.
+     Branch: metaconfig/U/perl
+	   + d_dirfd.U
 ____________________________________________________________________________
 [ 13211] By: jhi                                   on 2001/11/23  18:09:37
         Log: Add probing for dirfd() so that it can be added it IO::Dir.
@@ -2193,6 +3397,11 @@ ____________________________________________________________________________
      Branch: perl
 	   ! utils/perldoc.PL
 ____________________________________________________________________________
+[ 13192] By: jhi                                   on 2001/11/22  05:06:35
+        Log: metaconfig unit change for #13191.
+     Branch: metaconfig/U/perl
+	   ! d_procselfexe.U
+____________________________________________________________________________
 [ 13191] By: jhi                                   on 2001/11/22  05:06:09
         Log: procselfexe tweak: for some reason I had a ls in
              /proc/self/exe, not the ls Configure thought it
@@ -2207,6 +3416,13 @@ ____________________________________________________________________________
 	   ! lib/Net/Ping/t/100_load.t lib/Net/Ping/t/110_icmp_inst.t
 	   ! lib/Net/Ping/t/120_udp_inst.t lib/Net/Ping/t/130_tcp_inst.t
 	   ! lib/Net/Ping/t/200_ping_tcp.t
+____________________________________________________________________________
+[ 13189] By: jhi                                   on 2001/11/22  04:44:03
+        Log: metaconfig units changes for #13188.
+     Branch: metaconfig
+	   ! U/modified/Head.U
+     Branch: metaconfig/U/perl
+	   ! issymlink.U
 ____________________________________________________________________________
 [ 13188] By: jhi                                   on 2001/11/22  04:43:29
         Log: The #13182 didn't really help.  The real problem
@@ -2248,6 +3464,11 @@ ____________________________________________________________________________
      Branch: perl
 	   ! os2/Makefile.SHs os2/OS2/REXX/REXX.pm os2/OS2/REXX/REXX.xs
 	   ! os2/OS2/REXX/t/rx_cmprt.t os2/os2.c os2/perlrexx.c
+____________________________________________________________________________
+[ 13182] By: jhi                                   on 2001/11/21  22:31:10
+        Log: metaconfig unit change for #13181.
+     Branch: metaconfig/U/perl
+	   ! issymlink.U
 ____________________________________________________________________________
 [ 13181] By: jhi                                   on 2001/11/21  22:30:37
         Log: AIX has broken builtin 'test'.
@@ -2298,6 +3519,12 @@ ____________________________________________________________________________
         Log: debug_pad only visible when debugging.
      Branch: perl
 	   ! makedef.pl
+____________________________________________________________________________
+[ 13175] By: jhi                                   on 2001/11/21  16:02:14
+        Log: metaconfig units changes for #13174.
+     Branch: metaconfig/U/perl
+	   + d_procselfexe.U
+	   - procselfexe.U
 ____________________________________________________________________________
 [ 13174] By: jhi                                   on 2001/11/21  16:01:39
         Log: procselfexe tweaks.
@@ -4495,6 +5722,9 @@ ____________________________________________________________________________
              From: lane@DUPHY4.Physics.Drexel.Edu (Charles Lane)
              Date: Wed, 7 Nov 2001 09:23:28 EST
              Message-Id: <011107092325.11726@DUPHY4.Physics.Drexel.Edu>
+             
+             (Also i seems that an unrelated experimental patch
+             to lib/ExtUtils/MM_Unix.pm was accidentally included.)
      Branch: perl
 	   ! lib/ExtUtils/MM_Unix.pm vms/gen_shrfls.pl
 ____________________________________________________________________________
@@ -4916,7 +6146,9 @@ ____________________________________________________________________________
 	   ! perl.h
 ____________________________________________________________________________
 [ 12824] By: jhi                                   on 2001/11/02  23:08:05
-        Log: There is no csh of any kind in default BeOS.
+        Log: (retracted by #12871)
+             
+             There is no csh of any kind in default BeOS.
              For the purposes of miniperl globbing, bash
              will do.
      Branch: perl
@@ -5347,7 +6579,7 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [ 12766] By: jhi                                   on 2001/10/29  14:08:21
         Log: The test (and the module) would require some
-             quality hacking time to work on EBCDIC.  Based n
+             quality hacking time to work on EBCDIC.  Based on
              the test results nothing seems to be majorly broken,
              the module just seems to have strange assumptions:
              got: ''\226\225\205'
@@ -6394,9 +7626,9 @@ ____________________________________________________________________________
 	  !> utils/h2xs.PL utils/perldoc.PL
 ____________________________________________________________________________
 [ 12610] By: sky                                   on 2001/10/23  19:39:24
-        Log: Change #12607 introduced a bug, seems like some MAGICAL svs don't call themselves
-             READONLY but still dies with modification attempt. We only call bless for ext and
-             umagic.
+        Log: Change #12607 introduced a bug, seems like some MAGICAL SVs
+             don't call themselves READONLY but still die with modification
+             attempt. We only call bless for ext and umagic.
      Branch: perl
 	   ! sv.c
 ____________________________________________________________________________
@@ -6412,7 +7644,7 @@ ____________________________________________________________________________
 	   ! pod/perlfaq4.pod pod/perlfaq7.pod
 ____________________________________________________________________________
 [ 12607] By: sky                                   on 2001/10/23  18:27:27
-        Log: Call setmagic on the referant we blessing!
+        Log: Call setmagic on the referent we are blessing.
      Branch: perl
 	   ! sv.c
 ____________________________________________________________________________
@@ -13638,7 +14870,8 @@ ____________________________________________________________________________
 	   ! hints/dec_osf.sh
 ____________________________________________________________________________
 [ 11635] By: jhi                                   on 2001/08/11  15:14:48
-        Log: Subject: [PATCH] Re: [ID 20010809.028] x operator not copying elements in 'for' list?
+        Log: (retracted by 13077)
+             Subject: [PATCH] Re: [ID 20010809.028] x operator not copying elements in 'for' list?
              From: Robin Houston <robin@kitsite.com>
              Date: Fri, 10 Aug 2001 14:42:02 +0100
              Message-ID: <20010810144202.A32754@puffinry.freeserve.co.uk>
@@ -17029,7 +18262,9 @@ ____________________________________________________________________________
 	   ! pod/perldiag.pod
 ____________________________________________________________________________
 [ 11156] By: jhi                                   on 2001/07/05  03:43:28
-        Log: Subject: [PATCH perl@11099]Re: [ID 20010704.003] Taint mode breaks global match
+        Log: (retracted by #13533)
+             
+             Subject: [PATCH perl@11099]Re: [ID 20010704.003] Taint mode breaks global match
              From: Radu Greab <radu@netsoft.ro>
              Date: Wed, 4 Jul 2001 22:13:31 +0300
              Message-ID: <15171.27355.895094.128142@ix.netsoft.ro>
@@ -19052,7 +20287,9 @@ ____________________________________________________________________________
 	   ! perl.c
 ____________________________________________________________________________
 [ 10874] By: jhi                                   on 2001/06/23  23:57:28
-        Log: Hack to get rid of the UNEXPECTEDLY succeeded message for now.
+        Log: (Retracted by #11586)
+             
+             Hack to get rid of the UNEXPECTEDLY succeeded message for now.
      Branch: perl
 	   ! lib/Test/Harness.pm
 ____________________________________________________________________________
@@ -30386,7 +31623,7 @@ ____________________________________________________________________________
 	   + t/lib/mimeqp.t
 ____________________________________________________________________________
 [  9339] By: gsar                                  on 2001/03/25  15:48:50
-        Log: delete mimeqp.t for later with text mode set
+        Log: delete mimeqp.t for later add with text mode set
      Branch: perl
 	   - t/lib/mimeqp.t
 ____________________________________________________________________________
@@ -30451,7 +31688,7 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [  9329] By: jhi                                   on 2001/03/24  18:26:57
         Log: (Retracted by #9393)
-
+             
              Subject: [PATCH h2xs] $!{EINVAL} requires "use Errno"
              From: Simon Cozens <simon@netthink.co.uk>
              Date: Sat, 24 Mar 2001 17:13:17 +0000
@@ -31008,7 +32245,7 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [  9255] By: jhi                                   on 2001/03/19  23:17:17
         Log: substr($bytestr, i, n, $charstr)
-
+             
              TODO: we are still broken if $bytestr needs UTF-8 upgrading.
      Branch: perl
 	   ! Todo-5.6 pp.c t/op/substr.t
@@ -32433,10 +33670,7 @@ ____________________________________________________________________________
 	   ! pod/perlsyn.pod
 ____________________________________________________________________________
 [  9069] By: jhi                                   on 2001/03/07  14:55:30
-        Log: Subject: 'no *POSIX' Patch speeding up make on BS2000 
-             From: Dorner Thomas <Thomas.Dorner@start.de>
-             Date: Wed, 7 Mar 2001 14:13:31 +0100
-             Message-ID: <6727B1DACFCDD311A757009027CA8D69010A88CB@Ex02.inhouse.start.de>
+        Log: (Retracted by #9078.)
      Branch: perl
 	   ! Makefile.SH
 ____________________________________________________________________________
@@ -33805,8 +35039,8 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [  8902] By: jhi                                   on 2001/02/23  01:37:41
         Log: (Retracted by #8914)
-             (Wrongly, reinstated by #8941)             
-
+             (Wrongly, reinstated by #8941)
+             
              Subject:  [PATCH 5.7.0] don't zero CvFLAGS before checking for CvCONST!
              From: lane@DUPHY4.Physics.Drexel.Edu (Charles Lane)
              Date:     Thu, 22 Feb 2001 09:43:57 EST
@@ -34000,7 +35234,7 @@ ____________________________________________________________________________
 	   ! Configure config_h.SH
 ____________________________________________________________________________
 [  8875] By: jhi                                   on 2001/02/21  14:54:00
-        Log: Make unpack C and unpack C truly equivalent.
+        Log: Make unpack C and unpack U truly equivalent.
      Branch: perl
 	   ! pp.c t/op/pack.t
 ____________________________________________________________________________
@@ -34505,7 +35739,7 @@ ____________________________________________________________________________
              Message-ID: <ylzofpf7w2.fsf@windlord.stanford.edu>
              
              (8809 empty)
-
+             
              Upgrade to podlators 1.08, from Russ Allbery.
      Branch: perl
 	  !> lib/Pod/Man.pm lib/Pod/Text.pm lib/Test/Harness.pm
@@ -35314,7 +36548,7 @@ ____________________________________________________________________________
 	   ! lib/Pod/Find.pm
 ____________________________________________________________________________
 [  8711] By: nick                                  on 2001/02/07  21:06:11
-        Log: Manually appliued version for dev branch of Alan/Sarathy 5.6 patch.
+        Log: Manually applied version for dev branch of Alan/Sarathy 5.6 patch.
              Subject: Re: Incorrect scoping of PL_reg_start_tmp causes leak
              From: Alan Burlison <Alan.Burlison@uk.sun.com>
              Date: Tue, 06 Feb 2001 23:37:01 +0000
@@ -36784,7 +38018,9 @@ ____________________________________________________________________________
 	  !> scope.h
 ____________________________________________________________________________
 [  8552] By: jhi                                   on 2001/01/26  15:03:23
-        Log: Subject: [PATCH Text::Wrap 2000.06292219] Spurious leading whitespace
+        Log: (Retracted by #8573)
+             
+             Subject: [PATCH Text::Wrap 2000.06292219] Spurious leading whitespace
              From: Michael G Schwern <schwern@pobox.com>
              Date: Fri, 26 Jan 2001 09:28:31 -0500
              Message-ID: <20010126092831.A15328@blackrider.aocn.com>
@@ -36925,7 +38161,7 @@ ____________________________________________________________________________
 	   ! pod/perlfaq3.pod
 ____________________________________________________________________________
 [  8539] By: jhi                                   on 2001/01/25  03:21:55
-        Log: (Retracted by #5940.)
+        Log: (Retracted by #8540.)
      Branch: maint-5.6/perl
 	   ! pod/perlfaq3.pod
 ____________________________________________________________________________
@@ -37169,7 +38405,7 @@ ____________________________________________________________________________
 	   ! lib/open.pm perlio.c perliol.h
 ____________________________________________________________________________
 [  8510] By: jhi                                   on 2001/01/21  22:56:53
-        Log: Document the regex context pushing/popping a bit better.
+        Log: Document the regex content pushing/popping a bit better.
      Branch: perl
 	   ! regexec.c
 ____________________________________________________________________________
@@ -37663,8 +38899,9 @@ ____________________________________________________________________________
 [  8449] By: jhi                                   on 2001/01/16  03:42:55
         Log: Under 5.005 threads and debugging crashed in Debian 2.2 Linux/x86
              at the setting of the ofs_sv in new_struct_thread() as the
-             thr->Tofs_sv (PL_ofs_sv) was still 0xabab...., SvREFCNT_inc()ing
-             that invited a core dump.
+             thr->Tofs_sv (PL_ofs_sv) was still 0xabab.... (this is what
+             uninitialized fields are, uh, initialized with),
+             SvREFCNT_inc()ing that invited a core dump.
      Branch: perl
 	   ! util.c
 ____________________________________________________________________________
@@ -37761,12 +38998,16 @@ ____________________________________________________________________________
 	   ! toke.c
 ____________________________________________________________________________
 [  8438] By: jhi                                   on 2001/01/14  05:10:23
-        Log: Metaconfig unit changes for #8437.
+        Log: (Reverted by #8440)
+             
+             Metaconfig unit changes for #8437.
      Branch: metaconfig/U/perl
 	   ! d_fpos64_t.U d_off64_t.U
 ____________________________________________________________________________
 [  8437] By: jhi                                   on 2001/01/14  04:55:34
-        Log: Add <features.h> probing, seems to be needed for (some?)
+        Log: (Reverted by #8440)
+             
+             Add <features.h> probing, seems to be needed for (some?)
              Linux largefileness.
      Branch: perl
 	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
@@ -38033,7 +39274,7 @@ ____________________________________________________________________________
 	   ! util.c
 ____________________________________________________________________________
 [  8398] By: jhi                                   on 2001/01/10  20:55:31
-        Log: Add ReuseAddr as a (preferred) alias for Reuse as we now
+        Log: Add ReuseAddr as a (preferred) alias for Reuse as we know
              also have ReusePort.
      Branch: perl
 	   ! ext/IO/lib/IO/Socket/INET.pm
@@ -38375,7 +39616,7 @@ ____________________________________________________________________________
 	   ! pod/perlrequick.pod pod/perlretut.pod pod/perlsub.pod
 ____________________________________________________________________________
 [  8353] By: jhi                                   on 2001/01/06  20:21:10
-        Log: integrate changes #7980, 7990, 8056, 8057 from mainline
+        Log: integrate changes #7980, 8056, 8057 from mainline
              
              UTF-8 hash keys.
      Branch: maint-5.6/perl
@@ -39681,6 +40922,20 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [  8180] By: gsar                                  on 2000/12/18  09:20:27
         Log: integrate changes#7924..7926,7946,7952 from mainline
+             
+             A test works better if it has the right 1..$n output.
+             
+             All the core library users of Class::Struct seem to be
+             using "use Class::Struct 'struct';" instead of the bare
+             "use Class::Struct;", which isn't documented in Class::Struct.
+             This can't be right.
+             
+             Make the Class::Struct import() wiser.
+             
+             Upgrade to CPAN 1.59_51, from Andreas König.
+             
+             Subject: Re: long shell lines
+             Split overly long shell command lines.
      Branch: maint-5.6/perl
 	  !> lib/CPAN.pm lib/CPAN/FirstTime.pm lib/ExtUtils/MM_Unix.pm
 	  !> lib/File/stat.pm t/lib/class-struct.t
@@ -39688,6 +40943,34 @@ ____________________________________________________________________________
 [  8179] By: gsar                                  on 2000/12/18  08:55:54
         Log: integrate changes#7889,7890,7900,7903,7904,7907,7910,7917,
              7918,7919,7988,8907 from mainline (various)
+             
+             Subject: [ID 20001127.004] White space problem in perlamiga.pod
+             
+             Subject: [PATCH perl@7825] Re: [ID 20001122.006] weird behaviour of $|
+             
+             Subject: [PATCH] perlcc.PL cleanups
+             
+             Subject: [PATCH] Updating perltie.pod for arrays
+             
+             Subject: [ID 20001128.002] what's the point of example code if it is buggy?
+             Subject: Re: [PATCH] Updating perltie.pod for arrays
+             Subject: Re: [PATCH] Updating perltie.pod for arrays
+             
+             One more perltie.pod nit from Casey R. Tweten.
+             
+             Subject: [PATCH] $^O  win32 -> MSWin32
+             plus similar nits for vms, err, VMS, and UNICOS.
+             
+             Subject: Re: Minor suggestion for Sys::Syslog  [PATCH]
+             More checking in case someone has broken their services or
+             protocol databases.
+             
+             Make "use Class::Struct 'struct';" work again (broken by #7617);
+             add a test for Class::Struct.
+             
+             Integrate the "skip" messages to explain().
+             
+             Subject: [PATCH: perl@8892] treat unicoding and null bytes in op/append.t
      Branch: maint-5.6/perl
 	  +> t/lib/class-struct.t
 	  !> MANIFEST README.amiga ext/Sys/Syslog/Syslog.pm gv.c
@@ -39720,6 +41003,196 @@ ____________________________________________________________________________
              7725,7726,7729..7732,7737,7748,7749,7758,7759,7761,7773,
              7775,7776,7782,7785..7787,7804,7807,7808,7810,7811,7816,
              7823,7825,7838
+             
+             Subject: Re: [PATCH] README.solaris
+             
+             Add getpagesize() probing, on non-UNIX guess 'undef'.
+             
+             Simplify the getpagesize() unit by dropping the
+             pagesize probe since it's nowadays slightly more
+             complicated because of sysconf(). (Note: if some
+             platform really needs the -lPW for getpagesize,
+             I just broke it.)
+             TODO: a new pagesize unit.
+             
+             Subject: [PATCH] fwd: Re: [ID 20001105.011] Perl 5.6.0 documentation glitch
+             
+             MachTen doesn't really do mmap() and munmap().
+             Subject: [PATCHES Bleadperl] Re: PerlIO - what all of you can all do.   
+             
+             More README.solaris updates from Andy Dougherty.
+             
+             Copy the s// information of README.hpux also to the perlrun.
+             
+             Add HAS_FSYNC, lack noticed by Nicholas Clark.
+             
+             Add a metaconfig unit for fsync.
+             
+             Subject: [ID 20001112.004] man perlfunc omits tell()'s error return
+             
+             Many subdocumented return values of the IO extension now documented.
+             ungetc and write still left subdocumented.
+             Subject: [PATCH] (was Re: IO::Handle::ungetc)
+             
+             Document tell() on special streams.
+             
+             Subject: [ID 20001112.006] IO::Seekable::getpos doesn't check for fgetpos() failure
+             
+             Subject: [ID 20001112.007] sfio's sftell isn't ftell
+             
+             Couple of tests from #7660 salvaged.
+             
+             Tweak the definition of the bit complement on UTF-8 data:
+             if none of the characters in the string are > 0xff,
+             the result is a complemented byte string, not a (UTF-8)
+             char string.  Based on the summary in
+             Subject: Re: [ID 20000918.005] ~ on wide chars
+             This should give us the maximum backward (pre-char string)
+             compatibility and utf8 compatibility.  The other alternative
+             would be to limit the bit complement to be always byte only,
+             taking the least significant byte of the chars.
+             
+             Cleanup messy #ifdef.
+             
+             Typos in #7667.
+             
+             Declare reg_data like reg_substr_data.
+             
+             Placate nervous compilers that see longer than ints switch()ing.
+             
+             Remove the new two tests of lib/io_xs for now, they seem to
+             fail under perlio on some platforms.
+             
+             Subject: Re: [ID 20001112.008] perlio.c's PerlIO_getpos ingores error return
+             
+             Subject: [ID 20001113.003] utf8_to_uv on malformed utf returns wrong values
+             
+             Subject: tiny typo in perl5db.pl
+             
+             Subject: some additions for makefiles for win32 (for perl@7674)
+             
+             Hoist the duplicated socket/netdb include logic to perl.h;
+             undef SETERRNO in case SOCKS has defined it.  Based on:
+             Subject: [ID 20001114.002] Code-Cleanups concerning SOCKS5 and Solaris   
+             
+             Regen Configure.
+             
+             Defined INT64_C() and UINT64_C() unless defined by <inttypes.h>
+             (a macro to define signed and unsigned integer constants).
+             
+             Use UINT64_C().
+             Subject: [ID 20001114.006] 5.7.0-7680 Solaris 8, 64 bit, utf8 patch
+             
+             Use u_int32_t for the size of hash_cb(), not size_t.
+             Subject: [ID 20001114.003] Solaris 8, 64 Bit DB_file patch
+             
+             Quit utf8_to_uv() instantly if curlen == 0.
+             
+             Subject: [PATCH: perl@7674] updates to README.os390
+             
+             Subject: [PATCH: perl@7674 + Scott-Thoennes] hush warnings about malformed EBCDIC text
+             
+             EBCDIC tweaks.
+             Subject: [PATCH: perl@7674 ++] fixes for warnings and regmesg (reprise)
+             
+             Linenumber fix.
+             
+             SOCKS has its own USE_THREADS, based on
+             Subject: [ID 20001114.002] et. al. bugfix followup
+             
+             UINT64_C() work continues.
+             
+             Detypo.
+             
+             The type of the hash_cb() size argument is tricky.
+             
+             Add fwalk() probe to the configuration files and regen perltoc.
+             
+             Subject: perllocale.pod changes
+             
+             Avoid an infinite loop in VMS when utils scripts are run
+             with no arguments, from Charles Lane.
+             
+             Subject: Re: Bug in Carp::Heavy/5.6.0?
+             
+             For Solaris use64bitall the stdchar needs a little bit of help.
+             
+             The long double hints can be here or there.
+             
+             Test tweak for the open pragma.
+             
+             Also the 64bitall hints can be either here or there.
+             
+             As surmised the #7719 wasn't a good move.
+             
+             Subject: Fix for 20000409.001
+             
+             Subject: Fix for 20000815.006
+             It's really 20000518.006.
+             
+             Subject: [PATCH 5.6.0 README.win32] very minor typos
+             
+             Subject: Fix for README.amiga (20000323.033)
+             
+             Explain in more detail the {} syntax ambiguousity.
+             Subject: [PATCH] Re: [ID 20001117.003] map { "$_", 1} @array is syntax error
+             
+             Sparc 64-bit pack() fix from Jens Hamisch.
+             
+             Upgrade to CPAN.pm 1.58_93 (the RC1 for 1.59), from Andreas König.
+             
+             Subject: podlators 1.05 available        
+             
+             Subject: [ID 20001118.006] [PATCH] perl@7707 djgpp/config.over, hints/dos_djgpp.sh and Storable.pm
+             
+             Subject: [perl 7711: EPOC] updates
+             
+             Make certain MacOS Classic has NO_ENVIRON_ARRAY.
+             
+             Miraculous typo.
+             
+             sysseek() instead of seek().
+             
+             Solaris hints tweaks.
+             
+             Assume SOCKS is broken in all 64bitall platforms, not just Solaris.
+             This may be overly harsh but until proven otherwise, we think this
+             way, or until we have a simple test for Configure (having to start
+             up servers is does not count as simple) to check for the problems.
+             
+             Remove the shared object before attempting to create
+             (by linking) a new one.  E.g. in AIX not removing
+             becomes quite painful if one tries to do more than one
+             build in the same tree (an interrupted build, for example),
+             since the AIX' shared dynaloader seemingly keeps the shared
+             objects open and therefore 'busy' for quite a while, even when
+             nobody is using the objects, leading into link failures.
+             
+             Subject: [ID 20001120.010] typo in lib/Cwd.pm broke Cwd::chdir
+             
+             Subject: DOC PATCH 5.6.0 perlreftut
+             
+             Subject: [PATCH: perl@7777] add system locale testing for VMS
+             
+             Subject: [PATCH] Test.pm POD peculiarity
+             
+             Subject: [ID 20001120.002] [PATCH] io_sock.t fails without 'localhost'
+             
+             Subject: [ID 20001120.003] [PATCH] io_udp.t fails without 'localhost'
+             
+             Subject: Re: perl@7777 
+             Detypoing.
+             
+             Subject: [PATCH: perl@7777] make VMS' test.com tail compatible w/ unix
+             
+             Go ahead and #include <unistd.h> in perl.h.
+             
+             Subject: [PATCH perl@7795] small cleanup task for test suite
+             
+             Subject: Re: av.c patch (having slight problems)
+             unshift() speedup.
+             
+             Reach back one higher up when searching for PERL_SRC.
      Branch: maint-5.6/perl
 	  +> lib/File/Spec/Epoc.pm
 	  !> (integrate 88 files)
@@ -39727,15 +41200,319 @@ ____________________________________________________________________________
 [  8174] By: gsar                                  on 2000/12/18  03:53:09
         Log: integrate changes#7602,7604..7611,7614,7616..7619,7621..7623,
              7625..7629,7631..7634,7637,7639,7642 from mainline
+             
+             Fix for the tie-refhash string table leaks.
+             
+             Subject: [patch perl@7595] VMS configure.com tweak
+             
+             More careful detection of how well NVs and UVs mix.
+             Subject: [PATCH] Re: NV preserving UV (wasRe: [ID 20001007.002] Not OK: perl v5.7.0 +DEVEL7158 on armv4l-linux-64int 2.2.17-rmk1 (UNINSTALLED))
+             Added some SIGFPE paranoia.
+             
+             Forgot to bump the line numbers in #7601.
+             
+             Subject: PATCH std stdio for (Free)BSD
+             
+             Deleting $ENV{PATH} in VMS is not recommendable.
+             
+             Locale buglets.
+             Subject: RE: Locales support (setlocale) fixes
+             
+             Do not test UTF-8 locales since that the tests would require
+             polymorphic regexen.
+             
+             Subject: [PATCH bleadperl] Re: Patch 7533 prevents malloc.c from compiling on MachTen
+             
+             A missing aTHX_.
+             
+             Subject: [ID 20001108.013] spelling
+             
+             Subject: [PATCH] Class::Struct at compile time
+             
+             Make deleting for %ENV work for (newer versions of) VMS,
+             from Craig A. Berry.
+             
+             Forgot from #7618.
+             
+             More VMS moves on environment handling, from Charles Lane.
+             
+             Remove unused extra arguments.
+             
+             Typo in an ifndef.
+             Subject: Re: [PATCH 5.7.0] better messages from malloc()
+             
+             Subject: [PATCH: perl@7613] updates to Porting/pumpkin.pod
+             All except the "cow orker" change.
+             
+             The generated boot_* headers are wrong.  Pickier compiler,
+             such as KAI C++ will refuse to compile the resulting perlmain.
+             Subject: [ID 20001109.005] Bug in minimod.pl, perl 5.6.0
+             
+             There's no =head3.
+             
+             Disable only the tests 99 and 166 for UTF-8 locales.
+             
+             Missing dTHXs.
+             Subject: RE: perl@7595 builds not on cygwin
+             
+             Subject: Re: bash -c exit and linux hints 
+             
+             Various doc oddball characters.
+             Subject: [ID 20001106.004] Perl 5.6.0 bugs  
+             
+             Subject: [PATCH] IO::Seekable pod
+             
+             Amdahl UTS hints updates.
+             Subject: [ID 20001109.016] Trouble going from 5.4 to 5.6
+             
+             Explain better why certain regex tests are skipped.
+             Subject: Re: tests skipped: unknown reason
+             
+             Subject: [PATCH] README.solaris
+             
+             Subject: [PATCH perl@7638] cygwin port
      Branch: maint-5.6/perl
 	  +> README.solaris
 	  !> (integrate 26 files)
 ____________________________________________________________________________
 [  8173] By: gsar                                  on 2000/12/18  03:37:02
-        Log: integrate changes#7472,7474..7479,7481,7485,7489,7493,7494,7496,
+        Log: integrate changes#7472,7474..7478,7481,7485,7489,7493,7494,7496,
              7497,7499..7503,7505..7507,7509..7513,7515..7523,7526..7534,
              7536,7540,7542,7544..7546,7549,7553,7556,7557,7559,7561..7563,
              7565,7568..7572,7576,7578..7589,9592..7594,7596..7601 from mainline
+             
+             Better create a true mailing list for the repository keepers.
+             
+             Subject: [ID 20001027.007] uniq array in perlfaq
+             
+             De-quoted-unreadable to ISO Latin 1.
+             (There's one ISO-2022-JP name in Changes5.004.)
+             
+             Have only one master list of AUTHORS, drop unmaintained MAINTAIN.
+             
+             The #7476 needs a MANIFEST change, too.
+             
+             Add also emailless people.
+             
+             UTF-8 decoder tweak.
+             
+             Make \x{...} consistently produce UTF-8.
+             Subject: Re: \x{...} is confused 
+             
+             Subject: [Chris Winters <cwinters@intes.net>] patch to ExtUtils::Manifest
+             
+             Add a perlbug flag, -A, to avoid acknowledgement messages.
+             Subject: PATCH (Re: [ID 20001030.008] OK: perl v5.7.0 +DEVEL7445 on i586-linux 2.2.16 (UNINSTALLED))
+             
+             Use Errno magic.
+             Subject: [ID 20001030.009] [PATCH] ftmp-mktemp failing
+             
+             Subject: [PATCH: perl@7483] CRLF fix for cgi-function.t tests
+             
+             Subject: [PATCH: perl@7483] fix coded control chars in cgi-html.t
+             
+             Subject: [ID 20001030.001] 5.7.0-7489: Null-Pointer reference in mg.c
+             
+             Be more lenient on bad UTF-8 when doing bit arithmetics.
+             Subject: Re: [ID 20000918.005] ~ on wide chars
+             (The ord() part of the patch skipped.)
+             
+             Subject: perlfaq style changes
+             
+             AUTHORS tweaks.
+             
+             Whitespace style tweak.  Was originally going to see to
+             Subject: PATCH (Re: PerlIO - Configure tweak for Linux/glibc?)
+             but that had already been taken care of.
+             
+             The compiler is either gcc or cc, from Tom Bates.
+             
+             The osname has been lowercased by now, from Tom Bates.
+             
+             The NonStop-UX libraries have a novel way to say NaN.
+             
+             printf UVs the correct way, noticed by Robin Barker.
+             
+             Subject: [PATCH] startperl to respect versiononly
+             
+             AUTHORS updates.
+             
+             Subject: [ID 20001031.004] Uninitialized auto variable in regcomp.c
+             
+             Subject: [ID 20001101.001] Net::Ping icmp odd $bytes
+             
+             Subject: [ID 20001005.004] doc bug: perlsec misleading re file output
+             
+             Generalize the Camel wording.
+             Subject: Re: perlfaq style changes
+             
+             Subject: [ID 20001005.006] Documentation -- description of qr//
+             
+             C.pm part of
+             Subject: [ID 20001010.001] [Daniel.Stutz@astaro.de: perlcc and C.pm in perl-5.7.0]
+             
+             Locale warning explanation tweak.
+             
+             Subject: [ID 20000904.004] perlsec Manual Page Incorrect Doing "Safe Backticks"
+             
+             Make the POSIX::setuid and POSIX::setgid to really call setuid()
+             and setgid() because they were just changing $< and $( which means
+             only changing the real uid/gid, as opposed to changing both
+             real and effective ids.  (The alternative way could have been
+             in POSIX.pm to change $> and $), too, but making a direct call
+             to the C API feels cleaner.)  Fixes the bug
+             Subject: [ID 20000904.005] POSIX::setuid() Doesn't Call setuid()
+             
+             Expand %Config variables and %ENV variables only if
+             so requested during build time using the
+             PERL_BUILD_EXPAND_CONFIG_VARS and PERL_BUILD_EXPAND_ENV_VARS.
+             Not expanding makes relocating distributions easier.
+             
+             More tweaking on the #7522 theme.
+             
+             Test::Harness revealed buglets in the new DynaLoader.
+             Subject: [ID 20001102.001] Not OK: perl v5.7.0 +DEVEL7523 on i686-linux 2.2.16a (UNINSTALLED)
+             
+             Add Tie::RefHash::Nestable (lives in Tie/RefHash.pm),
+             fix a autovivification bug in Tie::RefHash, add tests for both.
+             Subject: Re: Tie::RefHash: use hash refs as keys in nested hashes
+             
+             Detpyo.
+             
+             recv() can fail and return undef.
+             Subject: [ID 20001102.003] Net::Ping patch: "Bad arg lenght" error appears if host is unreachable    
+             
+             Fix the problem discussed in
+             Subject: [ID 20001015.004] Fwd: Tie::SubstrHash -- bug & fix (all Perl versions)
+             originally from Linc Madison.  Also Andreas König's comments
+             taken into account.  Some other problems with Tie::SubstrHash
+             fixed: didn't croak when the table exceeded the requested number
+             of entries (as documented) but instead when the number of entries
+             exceeded the size of the table, a croak() had an unnecessary \n,
+             didn't have a CLEAR method, documented that there is no exists().
+             Didn't fix to be strict-proof because the module uses &foo; and
+             dynamic scope.  Added a test script exercizing both first tamely 
+             the basic functionality, and then the failure cases reported by
+             Linc Madison.
+             
+             Subject:  [PATCH] Perl@7504, vms/gen_shrfls.pl
+             
+             The #7521 touched things it shouldn't have.
+             
+             Subject: [PATCH 5.7.0] better messages from malloc()
+             
+             Subject: Re: README.aix
+             
+             Add FCNTL_CAN_LOCK.
+             Subject: Re: [ID 20001030.011] Not OK: perl v5.7.0 +DEVEL7481 on VMS_AXP V7.1 (UNINSTALLED)
+             Subject: Re: [ID 20001030.011] Not OK: perl v5.7.0 +DEVEL7481 on VMS_AXP V7.1 (UNINSTALLED)
+             
+             Locale tweakery.  Add test case for bug id 20000809.003 to op/misc,
+             create a "fast path" for locale name probing using "locale -a"
+             if available, squash finally hopefully the s?printf resetting
+             the numeric locale (since, IIUC perllocale, it never shouldn't). 
+             
+             More Changes tweakery.
+             
+             Dying is too strict here, better just skip.
+             
+             Subject: Locales support (setlocale) fixes
+             Modified quite a bit to be more portable.
+             
+             Configure would use a bad $myuname from an old config.sh.
+             Subject: [PATCH 5.6.1-to-be and 5.7.x] Very old Configure myuname bug
+             
+             Fix for
+             Subject: [ID 20001004.006] undef is never tainted
+             An undef read from a slurped file was not tainted.
+             
+             Fix for
+             Subject: [ID 20001004.007] taint propogation is inconsistent
+             The culprit was sv_setsv() which was rather blindly
+             propagating taint, which lead to behaviour where if
+             a tainted anon hash value was seen all the hash values
+             from then on at that level became tainted, or at any
+             upper levels in the case of nested anon hashes.
+             
+             Test tweak: show also the failed locales.
+             Subject: [ID 20001105.001] Not OK: perl v5.7.0 +DEVEL7523 on i86pc-solaris 2.8  
+             
+             A fix of sorts for 20000329.026, a better error message
+             for a missing "use charnames" when using the \N{...}. 
+             
+             Subject: [Corrected/tested PATCH] Re: [ID 20001102.008] Not OK: perl v5.7.0 +DEVEL7503 on i686-linux 2.2.16
+             
+             Add =pod to be tidy.
+             
+             Fix for bug id 19990615.008, pos() unset during s///ge.
+             
+             Add a note for future generations about bug id 20000229.006.
+             
+             Use -dM for gcc (the suggested patch did it only for Linux,
+             but I think it can be generalized).
+             Subject: Re: connect and $!{EINPROGRESS} pb (was [ID 20001030.010] [PATCH] io_multihomed.t failing)
+             
+             opmini.o can linger from Configures past.
+             
+             Document that the evaled syntax errors cause scalar leaks.
+             
+             Fix for
+             Subject: [ID 20000728.005] perl -P broken
+             (hopefully).  The fix is also not complete, it seems to break
+             BOM swallowing for libc5 systems, but until someone figures
+             out a way to do this without ftell(), this will do.
+             
+             AUTHORS updates.
+             
+             Subject: Re: rsync'ed patches vs. rsync'ed source
+             
+             Admit that the test leaks scalars.
+             
+             Sanitize the environment further.
+             
+             VOS updates from Paul Green.
+             
+             Document %ENV = () portability issues.
+             
+             Make the stdio test program of 7427 less noisy while being	
+             compiled so that Digital UNIX wouldn't get both
+             d_stdio_ptr_lval_nochange_cnt and d_stdio_ptr_lval_sets_cnt
+             undefined.  This makes perlio happy.
+             
+             glibc5 detection by __GNU_LIBRARY__.
+             
+             %ENV note tweaks from Dan Sugalski.
+             
+             Varargs don't always work too well if one puts an unsigned
+             char on the stack and pop an unsigned quad off the stack.
+             Subject: Re: [ID 20001103.002] Not OK: perl v5.7.0 +DEVEL7523 on os2-64int-ld-2.30 (UNINSTALLED)
+             
+             Subject: Pod updates
+             
+             Fake support of holey files in win/dosish platforms.
+             Subject: SDBM_File under MS-Windows95/98 does not work correctly. (APR#1302)
+             
+             A doc addition for bug id 20001105.019, beware \p.
+             
+             Tweak #7587.
+             
+             Subject: [PATCH perl@7573] configure.com and st-lock.t changes for   
+             
+             perlhack updates from H.Merijn Brand.
+             
+             Subject: [PATCH perl@7573] cygwin port
+             Synchronize with Cygwin 1.1.5.
+             
+             Bad thinko in #7581 (I used the test program with the expanded
+             values as-is).
+             
+             Make perlbug not insist on dumping to a file when stdout isn't a tty.
+             Subject: [PATCH] perlbug.PL
+             
+             Overrideable keys, each, pop, push, shift, splice, unshift.
+             Subject: [PATCH] prototyped functions that should be overrideable
+             
+             Try to avoid flockless and emulationless places.
      Branch: maint-5.6/perl
 	  +> t/lib/tie-refhash.t t/lib/tie-substrhash.t
 	   - MAINTAIN
@@ -39901,6 +41678,30 @@ ____________________________________________________________________________
         Log: integrate changes#7626,7632,7717,7738,7814,7817,7902,7912,7915
              from mainline (xsubpp and ExtUtils::LibList fixups, various
              other small items)
+             
+             The generated boot_* headers are wrong.  Pickier compiler,
+             such as KAI C++ will refuse to compile the resulting perlmain.
+             Subject: [ID 20001109.005] Bug in minimod.pl, perl 5.6.0
+             
+             Various doc oddball characters.
+             Subject: [ID 20001106.004] Perl 5.6.0 bugs  
+             
+             Subject: [PATCH] Re: 20001101.003 PDL
+             
+             Subject: [PATCH 5.7.0] etags broken again
+             
+             Subject: [PATCH 5.7.0] Liblist finally works
+             
+             Subject: [PATCH 5.7.0] Liblist returns found libraries
+             
+             Subject: [PATCH] Re: 5.6 bug: split /^/ implies /m modifier (from CLPM)
+             
+             Subject: [PATCH 5.7.0] OUT keyword for xsubpp
+             
+             Subject: Re: [PATCH 5.7.0] OUT keyword for xsubpp
+             OUT keyword nits.
+             Subject: Re: [PATCH 5.7.0] OUT keyword for xsubpp
+             OUT and IN_OUT documentation.
      Branch: maint-5.6/perl
 	  !> emacs/cperl-mode.el emacs/ptags lib/ExtUtils/Liblist.pm
 	  !> lib/ExtUtils/MM_VMS.pm lib/ExtUtils/MakeMaker.pm
@@ -39952,8 +41753,216 @@ ____________________________________________________________________________
 [  8159] By: gsar                                  on 2000/12/18  00:03:38
         Log: integrate changes#7205..7210,7212,7214..7219,7222,7223,7225,7226,
              7228,7230..7241,7243,7346,7347,7350..7354,7356,7358..7360,7362,
-             7363,7365..7368,7370..7374,7376..7386,7391,7393..7399,7304..7408,
+             7363,7365..7368,7370..7374,7376..7386,7391,7393..7399,7404..7408,
              7410..7413 from mainline
+             
+             Introduce the man[24-8] variables, from Andy Dougherty.
+             
+             Upgrade to CPAN 1.58, from Andreas König.
+             
+             An updated EBCDIC tr patch.
+             Subject: Re: [PATCH: perl@7181] op/tr tests on OS/390
+             
+             Subject:  [PATCH] 5.6.0 & 5.7.1,  VMS fixes
+             
+             Two thirds of
+             Subject: Proposed patches, Install.pm getopts.pl termcap.pl
+             The Install.pm changes will be submitted separately because
+             they need some work and discussion still.
+             
+             The Install.pm third of
+             Subject: Proposed patches, Install.pm getopts.pl termcap.pl
+             
+             Subject: [PATCH: perl@7181] was: Re: off to a bad start on fixing regression tests
+             
+             Subject: [PATCH 5.7.0] IVs in mtats
+             
+             Subject: [PATCH 5.7.0] Perl API for mstats
+             
+             Ilya implemented the memory profiling API.
+             
+             In Amdahl UTS "struct sv" is defined by a system header,
+             <ksync.h>.
+             
+             Slight tweak of the code to appease Amdahl UTS cc.
+             
+             Amdahl UTS doesn't seem to do dynaloading.
+             
+             Use UTF8SKIP(), from Simon Cozens.
+             
+             Thinko in #7222.
+             
+             op/sprintf.t patch for OS/390 (and any other host with limited
+             floating-point exponent length)
+             Subject: Re: [ID 20001006.014] Not OK: perl v5.7.0 +DEVEL7158 on os390 05.00  (UNINSTALLED) [PATCH bleadperl]
+             
+             Tweak #7225.
+             Subject: Re: [ID 20001006.014] Not OK: perl v5.7.0 +DEVEL7158 on os390 05.00 (UNINSTALLED) [PATCH bleadperl]
+             
+             Subject: RFC: a (temporary?) way around utf8.pm for EBCDIC
+             
+             Needs to be conditional on SunOS 4.
+             Subject: [Pach 5.7.0@7229] Removing -ldb from the core build
+             
+             Test cases for bug id 20000323.056 (the bug seems to be fixed).
+             
+             Add test for bug id 20000427.003 (which seems to have
+             been fixed) (also duplicate as 20000427.004, though
+             with a higher severity).  Move one utf8 from op/append
+             to pragma/utf8, tag the tests with bug ids.
+             
+             Document FNCASE=y as discussed in the bug 20000902.009.
+             
+             split() utf8 fixes.  Should fix both 20001014.001 and 20000426.003.
+             The problem was that rx->minlen was in chars while pp_split()
+             thought it would be in bytes. 
+             
+             Make ~(chr(a).chr(b)) eq chr(~a).chr(~b) on utf8.
+             Subject: [PATCH] Re: [ID 20000918.005] ~ on wide chars
+             
+             Fix few quad issues, which for example broke chr(~chr(~0)) for UTF8.
+             
+             Fix a couple of compiler-noted nits in #7235.
+             
+             Tweak the test of #7235.
+             
+             One more ~utf8 tweak.
+             
+             -w cleanup.
+             Subject: Re: Problems with bleadperl 
+             
+             Subject: small pod patch
+             
+             Subject: [PATCH perlguts.pod] Document offset hack
+             
+             Add Charles Lane.
+             
+             Add the capability to include/exclude branches.
+             
+             Subject: [ID 20001016.012] [PATCHes Included]OK: perl v5.7.0 on dos-djgpp djgpp
+             
+             Detect early whether the std streams have gone bad.
+             Subject: PATCH (was Re: [ID 20001016.007] Not OK: perl v5.7.0 +DEVEL7228 on i586-linux 2.2.16 (UNINSTALLED))
+             
+             More IoTYPE sprinkling.
+             
+             Workaround for a sfio bug where the stream error indicator
+             is not cleared as documented.
+             Subject: PATCH (was Re: [ID 20001016.007] Not OK: perl v5.7.0 +DEVEL7228 on i586-linux 2.2.16 (UNINSTALLED))
+             
+             Clarify documentation on 'use bytes'.
+             Subject: Re: What does 'use bytes' "mean" ?
+             
+             Show the failed remote port, instead of the failing line number.
+             Subject: [PATCH 5.6.1 Debugger] More diagnostics
+             
+             Make Cwd more bulletproof in chrooted environments.
+             Subject: [ID 20001018.001] Fix for Cwd.pm (chroot)
+             
+             Subject: Pod patch for Devel::Peek
+             
+             Subject: Re: [ID 20001013.008] perl 5.6.0 on AIX 4.3.2 w/GCC 2.95.2
+             
+             Borland C fstat() never saw the fd as writable.
+             Subject: fix for Borland's weak "stat" (perl@7211)
+             
+             Missing change from #7362.
+             
+             Subject: [PATCH 5.7.0] Re: [ID 20001018.008] flip-flop bug when there's no <FH> 
+             
+             Add the test case for the bug id 20000730.004 which seems
+             to have been fixed by now.
+             
+             Fix of sorts for bug id 20000901.092.  There seems to be no trace
+             of a 'pmshort' anywhere in the B, so the offending line was simply
+             removed.
+             
+             Subject: Re: [ID 20001013.008] perl 5.6.0 on AIX w/GCC
+             
+             Subject: PATCH do_print has 2 PerlIO_error()s
+             
+             NonStop-UX patches from Tom Bates <tom.bates@compaq.com>
+             
+             Typo noted by Mark Lutz.
+             
+             Subject: PATCH CR+LF should be "\cM\cJ" in perlop
+             
+             In the latest compiler builds cccdlflags must not become -fpic,
+             from Wilfredo Sánchez.
+             
+             Subject:  [PATCH] Perl 5.6.0/5.7.0, vms/gen_shrfls.pl update
+             
+             Subject:  [PATCH] Perl 5.6.0/5.7.0 enable DProf test for VMS
+             
+             SOCKS function redefinitions need prototypes, too, otherwise
+             for example 32 bit versus 64 bit differences cause a lot of
+             problems.  Part of
+             Subject: [ID 20001016.017] [jens: 5.7.0 Solaris 8, 64 Bit, Workshop 6.0 Compiler]
+             
+             Portability tweak on #7377.
+             Subject:  Re: [nick@cow.org.uk: [ID 20001020.004] Not OK: perl v5.7.0 +DEVEL7368 on i386-freebsd-64all 4.1-stable (UNINSTALLED)]
+             
+             Don't write double values through long double pointers,
+             based on a part of
+             Subject: [ID 20001016.017] [jens: 5.7.0 Solaris 8, 64 Bit, Workshop 6.0 Compiler]
+             
+             Reëntrancy fix.
+             Subject: [PATCH perl@7229] Rentrant parser and yylex()
+             
+             Make scan_num() reëntrant, as suggested in
+             Subject: [PATCH perl@7229] Rentrant parser and yylex()
+             
+             Fix for ID 20001020.006, concatenating an unset submatch
+             with utf8 resulted in "Modification of a read-only value".
+             
+             Fix for ID 20000915.011, IO::Select warning for an undefined fd.
+             
+             The #7383 was right only in the context of the original bug report,
+             not in more general case.
+             
+             Update Changes.
+             
+             Testcases for a #7383,#7385 related bug.
+             Subject: PATCH Re: [ID 20001020.006] "$2$utf8" == modification of read-only-variable
+             
+             Subject: [PATCH@blead Tie/Array.pm] Re: [ID 20001020.002] Tie::Array SPLICE method is buggy
+             
+             Tweak the Is* definitions of Unicode character classes
+             to better match the official categorizations; embrace
+             the official categorizations; add the combining marks
+             as alpha (and -numeric); fix DCinital (a typo and edito)
+             to be DCmedial.
+             
+             Hints tweak from Anton Berezin.
+             
+             Subject: installman go-faster stripes
+             Subject: Re: installman go-faster stripes
+             
+             Subject: [ID 20001021.003] updated hints/openbsd.sh
+             
+             Subject: [PATCH bleadperl] -MO=C falls over on package <none>
+             
+             Subject: PATCH $Config::Config{ldlibpthname} in ext/DynaLoader/DynaLoader_pm.PL
+             
+             Subject: [PATCH] Re: [ID 20000121.007] XXX documentation in man ExtUtils::MakeMaker
+             
+             Doc patch.
+             Subject: [ID 19991128.002] \&{'foo'} not caught by strict refs
+             
+             Retract #7404 with a patch from Robin Barker, via Andy Dougherty.
+             
+             Subject: Re: [ID 20001021.005] SEGV with regex match 
+             
+             Subject: Re: [20000731.007] potential syntax error not detected [PATCH]
+             
+             The change #7187 was not so good on VMS.
+             Subject: [PATCH perl@7369] VMS perldoc.PL fix for double quoted temp filename
+             
+             Subject: [PATCH: perl@7386] miscellaneous typos in 3 pods
+             
+             Miscellaneous MacOS Classic library updates from Matthias Neeracher.
+             
+             Document PERL_INSTALL_ROOT of #7210.
      Branch: maint-5.6/perl
 	  +> README.aix hints/nonstopux.sh lib/unicode/Is/DCmedial.pl
 	  +> t/lib/tie-splice.t
@@ -39983,6 +41992,262 @@ ____________________________________________________________________________
              7136..7139,7141..7146,7148,7149,7151,7153..7155,7157,7158,
              7160,7161,7164,7165,7169..7178,7180..7191,7193..7197,7199,
              7201,7204 from mainline
+             
+             Remove vestiges of tr//CU.
+             Subject: [ID 20000912.009] perlunicode.pod still mentions tr///CU
+             Subject: Re: [ID 20000912.009] perlunicode.pod still mentions tr///CU
+             
+             The return value of setlocale must be copied away.
+             Subject: [ID 20000913.001] Heap corruption in Perl_init_i18nl10n
+             
+             Allow chop() and chomp() to be overridden.
+             Subject: [PATCH] Re: [ID 20000911.006] I can override glob but not chop?
+             
+             Hints optimization.
+             Subject: Minor nit
+             
+             Subject: [PATCH] de-wall t/README
+             
+             Subject: Re: Two advertising clauses need to be removed
+             
+             Batch of UTF-8 patches from Simon Cozens.
+             
+             Fix for a parsing bug, not for the original bug.
+             Subject: Re: [ID 20000910.005] Another segfault with regexes. 
+             
+             Compilation warnings and an error.
+             
+             Subject: File::Find 5.7.0 POD nits
+             
+             Subject: [PATCH perl-5.7.0] continued -Wformat support
+             
+             The one that got away.
+             
+             Subject: Re: perl@7078
+             
+             UTF8-encoded version of 256 is 0xc4 0x80; test that a char is
+             convertable to bytes by checking it doesn't go above 0xc3
+             Subject: Re: perl@7078
+             
+             Replace #7084 with
+             Subject: Re: perl@7078 
+             
+             We don't need to count the high bit bytes, a boolean is enough. 
+             
+             Subject: [PATCH] utf8.c apidoc
+             
+             Subject: Re: perl@7078 
+             
+             Botched the #7090 check-in.
+             
+             Fix for the charnames.t failures from Spider Boardman.
+             
+             Re-instate Perl_utf8_to_uv without checking parameter - added in change 7075.
+             i.e. rename Simon's function to Perl_utf8_to_uv_chk, change all calls to it
+             to use new name and add Perl_utf8_to_uv() as a wrapper which calls it passing
+             0 to checking to get the warning.
+             
+             Subject: [PATCH] Nits in perlmod.pod
+             
+             Subject: Re: Trapping by opmask sets strange parser state [PATCH]
+             
+             Subject: Re: unicode support and perl [ID 20000901.097]
+             
+             Subject: Re: unicode support and perl [ID 20000901.097]
+             
+             Subject: [PATCH perl@7065] another VMS my_fwrite() fix for Storable
+             
+             Subject: [PATCH] Re: [ID 20000915.010] Infinite loop with -MO=Deparse
+             
+             Subject: [ID 20000917.002] 5.7.0 and blead@7095 make html makes man
+             
+             Subject: [PATCH@blead] Fix some recursion in overload.pm
+             
+             s/Robin Parker/Robin Barker/
+             
+             Subject: [PATCH] Fix aliasing of tied filehandles
+             
+             Subject: Re: [ID 20000912.008] substr replacement of tainted data (bug) 
+             
+             Subject: Re: [PATCH 5.005_64 missed]
+             
+             SOCK_DGRAM and listen() do not mix as reported in
+             Subject: [ID 20000930.001] Bug in perl 5.00503 IO::Socket
+             The patch for 5.7.0+ had to be reengineered, though.
+             
+             Subject: DOC PATCH 5.6.0
+             
+             Subject: [PATCH 5.7.0] Minor optimization in re_intuit_start
+             
+             Document the issue (is not a syntax error, kind of)
+             Subject: Re: [ID 20000901.011] the list (1,,3) ought to be a syntax error
+             
+             Subject: [ID 20000928.002] perlcc & ByteCode.pm option mismatch
+             Did not apply cleanly, manual intervention was needed.
+             
+             Subject: [PATCH] DLL not restartabke with threaded perl
+             
+             Inside require() $^S was always left undefined.
+             Subject: Re: Tiny 2-byte change to fix debugger's eval bug
+             
+             Subject: [PATCH pod/perlop.pod]  Documentation glitch in magic autoincrement.
+             
+             OpenBSD flags tweak from Todd C. Miller, tweaked some more by Abigail.
+             
+             Regen headers.
+             
+             Subject: [PATCH 5.7.0] Epoc update
+             
+             Introduce NO_ENVIRON_ARRAY (and USE_ENVIRON_ARRAY) defines
+             as suggested by Olaf Flebbe and Nick Clark.
+             
+             Subject: [ID 20000915.007] Not OK: perl v5.7.0 +DEVEL7092 on os2-64int-ld 2.30 '(UNINSTALLED)'
+             
+             Misplaced else.
+             
+             Scale down the VMS message boxes, by Charles Lane.
+             Fix for ID 20000903.009, workaround at
+             http://www.xray.mpe.mpg.de/mailing-lists/vmsperl/2000-09/msg00039.html
+             
+             Subject: [ID 20001003.006] B::Debug not -w clean
+             
+             Test harness update to sync with the new perlcc,
+             from Simon Cozens.
+             
+             One remaining nit less at the VMS mailbox sizing.
+             
+             Subject: [PATCH: 7131] PWPASSWD problem for passwd less pwd's
+             
+             It is possible to have no hosts database at all.  Pointed out in
+             Subject: [PATCH: 7131] PWPASSWD problem for passwd less pwd's
+             
+             Subject: [PATCH 5.7.0] h2xs not working
+             Subject: [PATCH 5.7.0] h2xs not documenting the created module
+             
+             Subject:  [PATCH] 5.6.0 & 5.7.0  VMS TZ fix for VMS6.2 and earlier
+             
+             Subject: perlhack.pod Patch for Externals Tools
+             
+             Subject: [PATCH perlrun.pod] Re: [ID 20000930.002] perlrun nor perldelta mention -s modification
+             
+             Subject: Re: [PATCH 5.7.0] h2xs not documenting the created module
+             
+             Enable disabling scripts installation by Configure -Uinstallscripts,
+             suggested by H. Merijn Brand.
+             
+             Code around the stat-on-a-pipe-returns-a-mode-of-zero bug
+             reported several times by Dominic Dunlop, for example in
+             ID 20000315.008.  Patch from Dominic.  Patch affects at
+             least MachTen, and possibly other oldish BSDs. Should not
+             break non-broken platforms (tested on LinuxPPC). 
+             
+             Regen toc.
+             
+             Subject: Re: Questions about Tie::Array and perl modules
+             Bug reported and fix suggested by Philip D Crow <pcrow@hertz.com>.
+             
+             Patch from Simon Cozens to avoid using utf8 routines in EBCDIC.
+             
+             Tweak #7153.
+             
+             IO::Handle->syswrite() did not handle length omission
+             like CORE::syswrite() does.
+             Subject: [Fwd] IO::Handle, syswrite and arguments
+             The original patch from andrew@ugh.net.au.
+             
+             Also the $ccflags is needed for the C compiler check.
+             Subject: Configure (check for C-compiler)
+             
+             Eliminate $Is_VMS code from the test.
+             Subject:  Re: [ID 20001004.005] Not OK: perl v5.7.0 +DEVEL7129 on VMS_AXP V7.1
+             
+             Fix bug in #7157 (s/cflags/ccflags); moved the -o foo
+             as the first option of cc/ld because of ultrapicky compilers
+             (e.g. OS/390 R2.5)
+             
+             Change the version number of Tie::Handle in the core to 4.0,
+             the (unrelated) Tie::Handle in CPAN will remain at 3.0.
+             Subject: Note on Tie::Handle
+             
+             UTF8ize split() so that the cloned substrings get the UTF8
+             flag of the original scalar.  Problem reported by Simon Cozens.
+             
+             save_re_context() could reset PL_curcop to freed memory, causing core
+             dumps in code such as C<use CGI::Carp; use something_that_calls_die;>
+             
+             Subject: PATCH 5.6 perldebguts grammar cleanup
+             
+             Add a todo note about overloadable assertions.
+             
+             on Windows, LoadLibrary() could load an extension DLL multiple
+             times if forward slashes are used in the path
+             
+             on Windows, cwd strings in the environment should be of the
+             form =X:=X:\foo instead of =X=X:\foo\
+             
+             on Windows, avoid potential exception (could happen if MSVCRT isn't
+             being used) when closing a socket handle
+             
+             avoid nonportable example code
+             
+             Windows9x doesn't support link(), despite what Config.pm
+             might think
+             
+             pod nit
+             
+             Change #7160 had a nasty typo.
+             
+             Warn about unknown scripts.
+             Subject: Re: ideas? patches? [PATCH bleadperl]
+             
+             on Windows, clean targets might not work under some flavors of the shell
+             
+             tweak for change#7173
+             
+             Make eq work again with utf8 (disabling the upgrading
+             should no more be necessary since the copies of the
+             scalars are upgraded, not the scalars themselves).
+             Takes care of ID 20001009.001.  (The claimed length()
+             bug in 20001009.001 seems bogus to me.)
+             
+             Subject: [PATCH: perl@7159] various VMS cleanup issues + CXX configure
+             
+             Upgrade to CGI.pm 2.74, from Lincoln Stein.
+             
+             Upgrade to podlators 1.04, from Russ Allbery.
+             
+             Subject: [PATCH 5.6.0] Re: [ID 20001009.004] SEGV from sprintf in a thread 
+             
+             Quote the temp file name, needed in Win32 because the
+             default name unfortunately contains spaces, shouldn't
+             hurt elsewhere.
+             Subject: FW: perldoc fails if $TEMP contains spaces
+             
+             Subject: RE: [ID 19990803.001] README.win32 suggestions 
+             
+             Subject: [ID 20000720.004] ExtUtils::MakeMaker finds wrong version of perl
+             
+             Subject: Re: utf8 concat, mg_get
+             
+             Subject: [PATCH: perl@7181] perlebcdic.pod updates and corrections
+             
+             Subject: [PATCH: perl@7181] op/tr tests on OS/390
+             
+             Subject: [PATCH: perl@7181] ver.t v string tests for os/390
+             
+             Use the versiononly instead of the installscripts,
+             retract the changes 7146 and 7147.
+             
+             Reapply Andy's patch and regen Configure.
+             
+             Add the test case for #7190, from the original bug report
+             by Andreas König.
+             
+             Remove duplicated code.
+             
+             SvPV() (via mg_get() of sv_2pv()) can update the UTF8ness of the SVs.
+             
+             restore change#7202
      Branch: maint-5.6/perl
 	  !> (integrate 121 files)
 ____________________________________________________________________________
@@ -40965,6 +43230,9 @@ ____________________________________________________________________________
              Message-ID: <20001210001333.A16221@deep-dark-truthful-mirror.perlhacker.org>
              
              Make CORE::substr to be '$$;$$' instead of '$$;$;$'.
+             In other words, make the returned prototypes for any function
+             stop prepending the ';' optionality marker after the first one.
+             If they start getting optional, all the rest are optional.
      Branch: perl
 	   ! pp.c
 ____________________________________________________________________________
@@ -52988,7 +55256,9 @@ ____________________________________________________________________________
 	   ! lib/CGI.pm
 ____________________________________________________________________________
 [  6721] By: jhi                                   on 2000/08/20  19:43:54
-        Log: Subject: Re: [ID 20000819.002] Not OK: perl v5.7.0 +SUIDMAIL +DEVEL6707 on i686-linux 2.2.5-16 (UNINSTALLED)
+        Log: (Replaced by #8364.)
+             
+             Subject: Re: [ID 20000819.002] Not OK: perl v5.7.0 +SUIDMAIL +DEVEL6707 on i686-linux 2.2.5-16 (UNINSTALLED)
              From: Radu Greab <radu@netsoft.ro>
              Date: Sun, 20 Aug 2000 18:03:26 +0300 (EEST)
              Message-ID: <Pine.LNX.4.10.10008201753260.1292-100000@busy.netsoft.ro>
