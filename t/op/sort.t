@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 use warnings;
-print "1..65\n";
+print "1..75\n";
 
 # these shouldn't hang
 {
@@ -354,13 +354,41 @@ sub ok {
     ok "$r1-@a", "$r2-c b a", "inplace sort with function of lexical";
 
     use Tie::Array;
-    tie @a, 'Tie::StdArray';
+    my @t;
+    tie @t, 'Tie::StdArray';
 
-    @a = qw(b c a); @a = sort @a;
-    ok "@a", "a b c", "inplace sort of tied array";
+    @t = qw(b c a); @t = sort @t;
+    ok "@t", "a b c", "inplace sort of tied array";
 
-    @a = qw(b c a); @a = sort mysort @a;
-    ok "@a", "c b a", "inplace sort of tied array with function";
+    @t = qw(b c a); @t = sort mysort @t;
+    ok "@t", "c b a", "inplace sort of tied array with function";
+
+    #  [perl #29790] don't optimise @a = ('a', sort @a) !
+
+    @g = (3,2,1); @g = ('0', sort @g);
+    ok "@g", "0 1 2 3", "un-inplace sort of global";
+    @g = (3,2,1); @g = (sort(@g),'4');
+    ok "@g", "1 2 3 4", "un-inplace sort of global 2";
+
+    @a = qw(b a c); @a = ('x', sort @a);
+    ok "@a", "x a b c", "un-inplace sort of lexical";
+    @a = qw(b a c); @a = ((sort @a), 'x');
+    ok "@a", "a b c x", "un-inplace sort of lexical 2";
+
+    @g = (2,3,1); @g = ('0', sort { $b <=> $a } @g);
+    ok "@g", "0 3 2 1", "un-inplace reversed sort of global";
+    @g = (2,3,1); @g = ((sort { $b <=> $a } @g),'4');
+    ok "@g", "3 2 1 4", "un-inplace reversed sort of global 2";
+
+    @g = (2,3,1); @g = ('0', sort { $a<$b?1:$a>$b?-1:0 } @g);
+    ok "@g", "0 3 2 1", "un-inplace custom sort of global";
+    @g = (2,3,1); @g = ((sort { $a<$b?1:$a>$b?-1:0 } @g),'4');
+    ok "@g", "3 2 1 4", "un-inplace custom sort of global 2";
+
+    @a = qw(b c a); @a = ('x', sort mysort @a);
+    ok "@a", "x c b a", "un-inplace sort with function of lexical";
+    @a = qw(b c a); @a = ((sort mysort @a),'x');
+    ok "@a", "c b a x", "un-inplace sort with function of lexical 2";
 }
 
 
