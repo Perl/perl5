@@ -3899,11 +3899,7 @@ if $xxx; then
 	esac;
 fi'
 
-if ./osf1; then
-	set signal.h __LANGUAGE_C__; eval $inctest
-else
-	set signal.h LANGUAGE_C; eval $inctest
-fi
+set signal.h LANGUAGE_C; eval $inctest
 
 case "$hint" in
 none|recommended) dflt="$ccflags $dflt" ;;
