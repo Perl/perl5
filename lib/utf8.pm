@@ -64,6 +64,9 @@ pragma will effectively become a no-op.  For convenience in what
 follows the term I<UTF-X> is used to refer to UTF-8 on ASCII and ISO
 Latin based platforms and UTF-EBCDIC on EBCDIC based platforms.
 
+See also the effects of the C<-C> switch and its cousin, the
+C<$ENV{PERL_UNICODE}>, in L<perlrun>.
+
 Enabling the C<utf8> pragma has the following effect:
 
 =over 4
@@ -184,6 +187,6 @@ portable answers.
 
 =head1 SEE ALSO
 
-L<perluniintro>, L<encoding>, L<perlunicode>, L<bytes>
+L<perluniintro>, L<encoding>, L<perlrun>, L<bytes>, L<perlunicode>
 
 =cut
