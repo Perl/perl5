@@ -894,13 +894,16 @@ C<main_root> and C<curpad> are omitted.
 
 =head1 EXAMPLES
 
-        perl -MO=Bytecode,-O6,-o,foo.plc foo.pl
+    perl -MO=Bytecode,-O6,-o,foo.plc foo.pl
 
-        perl -MO=Bytecode,-S foo.pl > foo.S
-        assemble foo.S > foo.plc
-        byteperl foo.plc
+    perl -MO=Bytecode,-S foo.pl > foo.S
+    assemble foo.S > foo.plc
 
-        perl -MO=Bytecode,-m,-oFoo.pmc Foo.pm
+Note that C<assemble> lives in the C<B> subdirectory of your perl
+library directory. The utility called perlcc may also be used to 
+help make use of this compiler.
+
+    perl -MO=Bytecode,-m,-oFoo.pmc Foo.pm
 
 =head1 BUGS
 

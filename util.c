@@ -3205,12 +3205,6 @@ get_opargs(void)
  return PL_opargs;
 }
 
-SV **
-get_specialsv_list(void)
-{
- return PL_specialsv_list;
-}
-
 #ifndef HAS_GETENV_LEN
 char *
 getenv_len(char *env_elem, unsigned long *len)

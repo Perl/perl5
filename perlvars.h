@@ -186,8 +186,6 @@ PERLVARIC(GNo,		char *, "")
 PERLVARIC(Ghexdigit,	char *, "0123456789abcdef0123456789ABCDEF")
 PERLVARIC(Gpatleave,	char *, "\\.^$@dDwWsSbB+*?|()-nrtfeaxc0123456789[{]}")
 
-PERLVAR(Gspecialsv_list[4],SV *)	/* from byterun.h */
-
 /* perly.c globals */
 PERLVAR(Gyydebug,	int)
 PERLVAR(Gyynerrs,	int)
@@ -204,6 +202,4 @@ PERLVAR(Guudmap[256],	char)
 PERLVAR(Gbitcount,	char *)
 PERLVAR(Gfilter_debug,	int)
 
-/* byterun globals */
-PERLVAR(Goptype_size[], int)
 

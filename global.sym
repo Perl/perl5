@@ -33,7 +33,6 @@ block_gimme
 block_start
 boot_core_UNIVERSAL
 bset_obj_store
-byterun
 call_list
 cando
 cast_ulong
@@ -154,7 +153,6 @@ get_op_descs
 get_op_names
 get_no_modify
 get_opargs
-get_specialsv_list
 get_vtbl
 gp_free
 gp_ref

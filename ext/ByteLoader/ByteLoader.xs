@@ -1,17 +1,16 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+#include "byterun.h"
 
-#ifndef WIN32
-/* this is probably not needed manywhere */
-#  include "byterun.c"
-#endif
-
-/* defgv must be accessed differently under threaded perl */
-/* DEFSV et al are in 5.004_56 */
-#ifndef DEFSV
-#define DEFSV		GvSV(defgv)
-#endif
+static void
+freadpv(U32 len, void *data, XPV *pv)
+{
+    New(666, pv->xpv_pv, len, char);
+    fread(pv->xpv_pv, 1, len, (FILE*)data);
+    pv->xpv_len = len;
+    pv->xpv_cur = len - 1;
+}
 
 static I32
 #ifdef PERL_OBJECT
@@ -23,17 +22,14 @@ byteloader_filter(int idx, SV *buf_sv, int maxlen)
     dTHR;
     OP *saveroot = PL_main_root;
     OP *savestart = PL_main_start;
-
-#ifdef INDIRECT_BGET_MACROS
-    struct bytesream bs;
+    struct bytestream bs;
 
     bs.data = PL_rsfp;
     bs.fgetc = (int(*) _((void*)))fgetc;
     bs.fread = (int(*) _((char*,size_t,size_t,void*)))fread;
     bs.freadpv = freadpv;
-#else
-    byterun(PL_rsfp);
-#endif
+
+    byterun(bs);
 
     if (PL_in_eval) {
         OP *o;

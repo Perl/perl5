@@ -200,12 +200,6 @@ PERLVARI(Ithreadnum,	U32,	0)	/* incremented each thread creation */
 PERLVAR(Istrtab_mutex,	perl_mutex)	/* Mutex for string table access */
 #endif /* USE_THREADS */
 
-PERLVARI(Ibytecode_iv_overflows,int,	0)	/* from bytecode.h */
-PERLVAR(Ibytecode_sv,	SV *)
-PERLVAR(Ibytecode_pv,	XPV)
-PERLVAR(Ibytecode_obj_list,	void **)
-PERLVARI(Ibytecode_obj_list_fill, I32,	-1)
-
 #ifdef PERL_OBJECT
 PERLVARI(piMem,		IPerlMem*,  NULL)
 PERLVARI(piENV,		IPerlEnv*,  NULL)
