@@ -2054,7 +2054,7 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 		) {
 		SvIOK_on(sv);  /* Can this go wrong with rounding? NWC */
 		DEBUG_c(PerlIO_printf(Perl_debug_log,
-				      "0x%"UVxf" iv(%g => %"IVdf") (precise)\n",
+				      "0x%"UVxf" iv(%"NVgf" => %"IVdf") (precise)\n",
 				      PTR2UV(sv),
 				      SvNVX(sv),
 				      SvIVX(sv)));
@@ -2065,7 +2065,7 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 		   that PV->IV would be better than PV->NV->IV
 		   flags already correct - don't set public IOK.  */
 		DEBUG_c(PerlIO_printf(Perl_debug_log,
-				      "0x%"UVxf" iv(%g => %"IVdf") (imprecise)\n",
+				      "0x%"UVxf" iv(%"NVgf" => %"IVdf") (imprecise)\n",
 				      PTR2UV(sv),
 				      SvNVX(sv),
 				      SvIVX(sv)));
@@ -2348,7 +2348,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 		) {
 		SvIOK_on(sv);  /* Can this go wrong with rounding? NWC */
 		DEBUG_c(PerlIO_printf(Perl_debug_log,
-				      "0x%"UVxf" uv(%g => %"IVdf") (precise)\n",
+				      "0x%"UVxf" uv(%"NVgf" => %"IVdf") (precise)\n",
 				      PTR2UV(sv),
 				      SvNVX(sv),
 				      SvIVX(sv)));
@@ -2359,7 +2359,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 		   that PV->IV would be better than PV->NV->IV
 		   flags already correct - don't set public IOK.  */
 		DEBUG_c(PerlIO_printf(Perl_debug_log,
-				      "0x%"UVxf" uv(%g => %"IVdf") (imprecise)\n",
+				      "0x%"UVxf" uv(%"NVgf" => %"IVdf") (imprecise)\n",
 				      PTR2UV(sv),
 				      SvNVX(sv),
 				      SvIVX(sv)));
