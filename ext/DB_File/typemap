@@ -29,8 +29,10 @@ T_dbtkeydatum
 T_dbtdatum
 	ckFilter($arg, filter_store_value, \"filter_store_value\");
 	DBT_clear($var) ;
-	$var.data = SvPV($arg, PL_na);
-	$var.size = (int)PL_na;
+	if (SvOK($arg)) {
+	    $var.data = SvPV($arg, PL_na);
+	    $var.size = (int)PL_na;
+	}
 
 
 OUTPUT

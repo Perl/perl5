@@ -15,7 +15,7 @@ require SDBM_File;
 #If Fcntl is not available, try 0x202 or 0x102 for O_RDWR|O_CREAT
 use Fcntl;
 
-print "1..66\n";
+print "1..68\n";
 
 unlink <Op_dbmx.*>;
 
@@ -396,3 +396,24 @@ unlink <Op_dbmx*>, $Dfile;
    unlink <Op_dbmx*>;
 }
 
+{
+    # Bug ID 20001013.009
+    #
+    # test that $hash{KEY} = undef doesn't produce the warning
+    #     Use of uninitialized value in null operation 
+    use warnings ;
+    use strict ;
+    use SDBM_File ;
+
+    unlink <Op_dbmx*>;
+    my %h ;
+    my $a = "";
+    local $SIG{__WARN__} = sub {$a = $_[0]} ;
+    
+    ok(67, tie(%h, 'SDBM_File','Op_dbmx', O_RDWR|O_CREAT, 0640)) ;
+    $h{ABC} = undef;
+    ok(68, $a eq "") ;
+
+    untie %h;
+    unlink <Op_dbmx*>;
+}

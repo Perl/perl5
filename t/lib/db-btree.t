@@ -12,7 +12,7 @@ BEGIN {
 use DB_File; 
 use Fcntl;
 
-print "1..155\n";
+print "1..156\n";
 
 sub ok
 {
@@ -1216,5 +1216,27 @@ EOM
 #   untie %h;
 #   unlink $Dfile;
 #}
+
+{
+    # Bug ID 20001013.009
+    #
+    # test that $hash{KEY} = undef doesn't produce the warning
+    #     Use of uninitialized value in null operation 
+    use warnings ;
+    use strict ;
+    use DB_File ;
+
+    unlink $Dfile;
+    my %h ;
+    my $a = "";
+    local $SIG{__WARN__} = sub {$a = $_[0]} ;
+    
+    tie %h, 'DB_File', $Dfile, O_RDWR|O_CREAT, 0664, $DB_BTREE 
+	or die "Can't open file: $!\n" ;
+    $h{ABC} = undef;
+    ok(156, $a eq "") ;
+    untie %h ;
+    unlink $Dfile;
+}
 
 exit ;
