@@ -179,6 +179,9 @@ BEGIN failed--compilation aborted at - line 1.
     sub TIEHANDLE {
         bless {}, shift;
     }
+    sub READLINE {
+	"Out of inspiration";
+    }
     sub DESTROY {
 	print "and destroyed as well\n";
     }
@@ -187,7 +190,9 @@ BEGIN failed--compilation aborted at - line 1.
     local(*FOO);
     tie(*FOO,'foo');
     print FOO "sentence.", "reversed", "a", "is", "This";
+    print "-- ", <FOO>, " --\n";
 }
 EXPECT
 This is a reversed sentence.
+-- Out of inspiration --
 and destroyed as well

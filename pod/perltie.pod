@@ -611,10 +611,8 @@ use the each() function to iterate over such.  Example:
 
 This is partially implemeted now.
 
-A class implementing a tied scalar should define the folowing methods:
-TIEHANDLE, PRINT, and possibly DESTROY.
-
-In future READLINE, EOF and possibly others will be added.
+A class implementing a tied filehandle should define the folowing methods:
+TIEHANDLE, PRINT and/or READLINE, and possibly DESTROY.
 
 It is especially useful when perl is embedded in some other program,
 where output to STDOUT and STDERR may have to be redirected in some
@@ -632,7 +630,7 @@ This is the constructor for the class.  That means it is expected to
 return a blessed reference of some sort. The refence can be used to
 hold some internal information. We won't use it in out example.
 
-    sub TIEHANDLE { print "<shout>\n"; bless [], shift }
+    sub TIEHANDLE { print "<shout>\n"; my $i; bless \$i, shift }
 
 =item PRINT this, LIST
 
@@ -640,7 +638,14 @@ This method will be triggered every time the tied handle is printed to.
 Beyond its self refence it also expects the list that was passed to
 the print function.
 
-    sub PRINT { shift; for (@_) { print uc($_) } }
+    sub PRINT { $r = shift; $$r++; print join($,,map(uc($_),@_)),$\ }
+
+=item READLINE this
+
+This method will be called when the handle is read from. The method
+should return undef when there is no more data.
+
+    sub READLINE { $r = shift; "PRINT called $$r times\n"; }
 
 =item DESTROY this
 
@@ -658,6 +663,7 @@ Here's how to use our little example:
     print FOO "hello\n";
     $a = 4; $b = 6;
     print FOO $a, " plus ", $b, " equals ", $a + $b, "\n";
+    print <FOO>;
 
 =head1 SEE ALSO
 
