@@ -384,7 +384,7 @@ LINK32		= g++
 .END
 LIB32		= ar rc
 IMPLIB		= dlltool
-RSC		= rc
+RSC		= windres
 
 i = .i
 o = .o
@@ -554,7 +554,7 @@ $(o).dll:
 .ENDIF
 
 .rc.res:
-	$(RSC) -i.. $<
+	$(RSC) -i $< -o $@
 
 #
 # various targets
@@ -1021,10 +1021,10 @@ $(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES)
 .ENDIF
 	$(XCOPY) $(PERLIMPLIB) $(COREDIR)
 
-$(PERLEXE_ICO): $(MINIPERL) makeico.pl
+.\$(PERLEXE_ICO): $(MINIPERL) makeico.pl
 	$(MINIPERL) makeico.pl > $@
 
-$(PERLEXE_RES): perlexe.rc $(PERLEXE_ICO)
+.\$(PERLEXE_RES): perlexe.rc $(PERLEXE_ICO)
 
 $(MINIMOD) : $(MINIPERL) ..\minimod.pl
 	cd .. && miniperl minimod.pl > lib\ExtUtils\Miniperl.pm
