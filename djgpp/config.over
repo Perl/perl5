@@ -1,5 +1,5 @@
 ln='cp'
-pager='less'
+pager='${DJDIR}/bin/less.exe'
 
 # fix extension names under DOS 
 repair()
