@@ -14,7 +14,7 @@ use VMS::Filespec;
 use File::Basename;
 
 use vars qw($Revision);
-$Revision = '5.3901 (6-Mar-1997)';
+$Revision = '5.3902 (27-Apr-1999)';
 
 unshift @MM::ISA, 'ExtUtils::MM_VMS';
 
@@ -835,6 +835,12 @@ sub cflags {
 	}
     }
     $quals .= "$incstr)";
+
+    # Strip out double commas
+    $quals =~ s/,,/,/g;
+
+    # Strip any (, constructs that might have slipped in
+    $quals =~ s/\(,/(/g;
 
     $optimize = '/Debug/NoOptimize'
 	if ($self->{OPTIMIZE} =~ /-g/ or $self->{OPTIMIZE} =~ m!/Debug!i);
