@@ -158,7 +158,7 @@ a program named I<splain>, you should expect a bit of whimsy.
 
 =head1 AUTHOR
 
-Tom Christiansen F<E<lt>tchrist@mox.perl.comE<gt>>, 25 June 1995.
+Tom Christiansen <F<tchrist@mox.perl.com>>, 25 June 1995.
 
 =cut
 

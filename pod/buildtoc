@@ -130,7 +130,7 @@ podset( @modules[ sort { $modname[$a] cmp $modname[$b] } 0 .. $#modules ] );
 
 	=head1 AUTHOR
 
-	Larry Wall E<lt>F<larry\@wall.org>E<gt>, with the help of oodles
+	Larry Wall <F<larry\@wall.org>>, with the help of oodles
 	of other folks.
 
 

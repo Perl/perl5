@@ -1835,11 +1835,10 @@ ExtUtils::Install, ExtUtils::embed
 
 =head1 AUTHORS
 
-Andy Dougherty F<E<lt>doughera@lafcol.lafayette.eduE<gt>>, Andreas
-KE<ouml>nig F<E<lt>A.Koenig@franz.ww.TU-Berlin.DEE<gt>>, Tim Bunce
-F<E<lt>Tim.Bunce@ig.co.ukE<gt>>.  VMS support by Charles Bailey
-F<E<lt>bailey@genetics.upenn.eduE<gt>>. OS/2 support by Ilya
-Zakharevich F<E<lt>ilya@math.ohio-state.eduE<gt>>. Contact the
+Andy Dougherty <F<doughera@lafcol.lafayette.edu>>, Andreas KE<ouml>nig
+<F<A.Koenig@franz.ww.TU-Berlin.DE>>, Tim Bunce <F<Tim.Bunce@ig.co.uk>>.
+VMS support by Charles Bailey <F<bailey@genetics.upenn.edu>>.  OS/2
+support by Ilya Zakharevich <F<ilya@math.ohio-state.edu>>.  Contact the
 makemaker mailing list C<mailto:makemaker@franz.ww.tu-berlin.de>, if
 you have any questions.
 

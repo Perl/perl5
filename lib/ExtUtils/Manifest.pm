@@ -385,6 +385,6 @@ L<ExtUtils::MakeMaker> which has handy targets for most of the functionality.
 
 =head1 AUTHOR
 
-Andreas Koenig F<E<lt>koenig@franz.ww.TU-Berlin.DEE<gt>>
+Andreas Koenig <F<koenig@franz.ww.TU-Berlin.DE>>
 
 =cut
