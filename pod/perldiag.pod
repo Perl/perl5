@@ -3605,8 +3605,9 @@ representative, who probably put it there in the first place.
 
 =item Unicode character %s is illegal
 
-Certain Unicode characters have been designated off-limits by the
-Unicode standard and should not be generated.
+(W utf8) Certain Unicode characters have been designated off-limits by
+the Unicode standard and should not be generated.  If you really know
+what you are doing you can turn off this warning by C<no warnings 'utf8';>.
 
 =item Unknown BYTEORDER
 
@@ -4004,11 +4005,13 @@ removed in a future version.
 
 =item UTF-16 surrogate %s
 
-(F) You tried to generate half of an UTF-16 surrogate by requesting
-a Unicode character between the code points 0xD800 and 0xDFFF (inclusive).
-That range is reserved exclusively for the use of UTF-16 encoding
-(by having two 16-bit UCS-2 characters); but Perl encodes its characters
-in UTF-8, so what you got is a very illegal character.
+(W utf8) You tried to generate half of an UTF-16 surrogate by
+requesting a Unicode character between the code points 0xD800 and
+0xDFFF (inclusive).  That range is reserved exclusively for the use of
+UTF-16 encoding (by having two 16-bit UCS-2 characters); but Perl
+encodes its characters in UTF-8, so what you got is a very illegal
+character.  If you really know what you are doing you can turn off
+this warning by C<no warnings 'utf8';>.
 
 =item Value of %s can be "0"; test with defined()
 
