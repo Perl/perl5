@@ -2,6 +2,10 @@
 
 require 5.003;
 
+# XXX others that may need adding
+#       warnhook
+#       hints
+#       copline
 my @extvars = qw(sv_undef sv_yes sv_no na dowarn
                  curcop compiling 
                  tainting tainted stack_base stack_sp sv_arenaroot
@@ -12,6 +16,9 @@ my @extvars = qw(sv_undef sv_yes sv_no na dowarn
 		 errgv
 		 rsfp_filters
 		 perldb
+		 diehook
+		 dirty
+		 perl_destruct_level
                 );
 
 sub readsyms (\%$) {
