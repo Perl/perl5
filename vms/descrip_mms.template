@@ -373,7 +373,7 @@ pod15 = [.lib.pod]perlport.pod [.lib.pod]perlre.pod [.lib.pod]perlref.pod
 pod16 = [.lib.pod]perlreftut.pod [.lib.pod]perlrun.pod [.lib.pod]perlsec.pod
 pod17 = [.lib.pod]perlstyle.pod [.lib.pod]perlsub.pod [.lib.pod]perlsyn.pod
 pod18 = [.lib.pod]perlthrtut.pod [.lib.pod]perltie.pod [.lib.pod]perltoc.pod
-pod19 = [.lib.pod]perltodo.pod [.lib.pod]perltoot.pod [.lib.pod]perltootc.pod
+pod19 = [.lib.pod]perltodo.pod [.lib.pod]perltoot.pod [.lib.pod]perltooc.pod
 pod20 = [.lib.pod]perltrap.pod [.lib.pod]perlunicode.pod [.lib.pod]perlvar.pod
 pod21 = [.lib.pod]perlxs.pod [.lib.pod]perlxstut.pod [.lib.pod]win32.pod [.lib.pod]perlvms.pod
 pod22 = [.lib.pod]perldebguts.pod [.lib.pod]perldebtut.pod [.lib.pod]perlebcdic.pod [.lib.pod]perliol.pod
@@ -817,7 +817,7 @@ preplibrary : $(MINIPERL_EXE) $(LIBPREREQ)
 [.lib.pod]perltoot.pod : [.pod]perltoot.pod
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
-[.lib.pod]perltootc.pod : [.pod]perltootc.pod
+[.lib.pod]perltooc.pod : [.pod]perltooc.pod
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 [.lib.pod]perltrap.pod : [.pod]perltrap.pod
