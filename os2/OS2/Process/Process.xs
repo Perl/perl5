@@ -889,7 +889,286 @@ bufsize(void)
     return i[0]*i[1]*2;
 #endif	/* 0 */
 }
-    
+
+SV*
+_kbdChar(unsigned int nowait, int handle)
+{
+    KBDKEYINFO viob[2], *vio;
+    ULONG rc;
+
+    VIO_FROM_VIOB;
+
+    if (nowait > 2)
+	croak("unexpected nowait");
+    if (CheckOSError(nowait == 2
+		     ? KbdPeek( vio, handle )
+		     : KbdCharIn( vio, nowait == 1, handle )))
+	croak_with_os2error("Can't _kbdChar");
+    return newSVpvn((char*)vio, sizeof(*vio));
+}
+
+SV*
+_kbdStatus(int handle)
+{
+    KBDINFO viob[2], *vio;
+    ULONG rc;
+
+    VIO_FROM_VIOB;
+
+    vio->cb = sizeof(*vio);
+    if (CheckOSError(KbdGetStatus( vio, handle )))
+	croak_with_os2error("Can't _kbdStatus");
+    return newSVpvn((char*)vio, sizeof(*vio));
+}
+
+void
+_kbdStatus_set(SV* sv, int handle)
+{
+    KBDINFO viob[2], *vio;
+    ULONG rc;
+    STRLEN l;
+    char *s = SvPV(sv, l);
+
+    VIO_FROM_VIOB;
+
+    if (l != sizeof(*vio))
+	croak("unexpected datasize");
+    Copy((KBDINFO*)s, vio, 1, KBDINFO);
+    if (vio->cb != sizeof(*vio))
+	croak("unexpected datasize");
+    if (CheckOSError(KbdSetStatus( vio, handle )))
+	croak_with_os2error("Can't kbdStatus_set()");
+}
+
+SV*
+_vioConfig(int which, int handle)
+{
+    struct {VIOCONFIGINFO i; short a[20];} viob[2], *vio;
+    ULONG rc;
+
+    VIO_FROM_VIOB;
+
+    vio->i.cb = 2;
+    if (CheckOSError(VioGetConfig( which, &vio->i, handle )))
+	croak_with_os2error("Can't get VIO config size");
+    if (vio->i.cb > sizeof(*vio))
+	vio->i.cb = sizeof(*vio);
+    if (CheckOSError(VioGetConfig( which, &vio->i, handle )))
+	croak_with_os2error("Can't get VIO config");
+    return newSVpvn((char*)vio, vio->i.cb);
+}
+
+SV*
+_vioMode(void)
+{
+    VIOMODEINFO viob[2], *vio;
+    ULONG rc;
+
+    VIO_FROM_VIOB;
+
+    vio->cb = sizeof(*vio);
+    if (CheckOSError(VioGetMode( vio, 0 )))
+	croak_with_os2error("Can't get VIO mode");
+    return newSVpvn((char*)vio, sizeof(*vio));
+}
+
+void
+_vioMode_set(SV* sv)
+{
+    VIOMODEINFO viob[2], *vio;
+    ULONG rc;
+    STRLEN l;
+    char *s = SvPV(sv, l);
+
+    VIO_FROM_VIOB;
+
+    Copy((VIOMODEINFO*)s, vio, 1, VIOMODEINFO);
+    if (vio->cb != sizeof(*vio) || l != vio->cb)
+	croak("unexpected datasize");
+    if (CheckOSError(VioSetMode( vio, 0 )))
+	croak_with_os2error("Can't set VIO mode");
+}
+
+SV*
+vioFont(int type, int *w, int *h) /* 0 for actual RAM font, 1 for ROM font */
+{
+    VIOFONTINFO viob[2], *vio;
+    ULONG rc;
+    UCHAR b[1<<17];
+    UCHAR *buf = b;
+    SV *sv;
+
+    VIO_FROM_VIOB;
+
+    /* Should not cross 64K boundaries too: */
+    if (((ULONG)buf) & 0xFFFF)
+	buf += 0x10000 - (((ULONG)buf) & 0xFFFF);
+
+    vio->cb = sizeof(*vio);
+    vio->type = type;			/* BIOS or the loaded font. */
+    vio->cbData = 0xFFFF;		/* How large is my buffer? */
+    vio->pbData = _emx_32to16(buf);	/* Wants an 16:16 pointer */
+    if (CheckOSError(VioGetFont( vio, 0 )))
+	croak_with_os2error("Can't get VIO font");
+    *w = vio->cxCell;
+    *h = vio->cyCell;
+    return newSVpvn(buf,vio->cbData);
+}
+
+void
+vioFont_set(SV *sv, int cellwidth, int cellheight, int type)
+{
+    VIOFONTINFO viob[2], *vio;
+    ULONG rc;
+    UCHAR b[1<<17];
+    UCHAR *buf = b;
+    STRLEN l;
+    char *s = SvPV(sv, l);
+
+    VIO_FROM_VIOB;
+
+    /* Should not cross 64K boundaries too: */
+    if (((ULONG)buf) & 0xFFFF)
+	buf += 0x10000 - (((ULONG)buf) & 0xFFFF);
+
+    if (l > 0xFFFF)
+	croak("length overflow of VIO font");
+    if (l != (cellwidth + 7)/8 * cellheight * 256)
+	warn("unexpected length of VIO font");
+    vio->cb = sizeof(*vio);
+    vio->type = type;			/* BIOS or the loaded font. */
+    vio->cbData = l;			/* How large is my buffer? */
+    vio->pbData = _emx_32to16(buf);	/* Wants an 16:16 pointer */
+    vio->cxCell = cellwidth;
+    vio->cyCell = cellheight;
+    Copy(s, buf, l, char);
+
+    if (CheckOSError(VioSetFont( vio, 0 )))
+	croak_with_os2error("Can't set VIO font");
+}
+
+/*
+  uses use32,os2def,os2base,crt,defs;
+  var   Plt :Plt256;
+  const Pal :VioPalState=(Cb:sizeof(VioPalState);rType:0;iFirst:0;
+    Acolor:($FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF));
+        CReg:VioColorReg=(Cb:sizeof(VioColorReg);rType:3;FirstColorReg:0;
+    NumColorRegs:256; ColorRegAddr:@Plt);
+  var   ii:Pointer;
+  begin
+   VioGetState(Pal,0);
+   Pal.Acolor[09]:=$0F;
+   Pal.Acolor[10]:=$A;
+   Pal.Acolor[13]:=$2F;
+   VioSetState(Pal,0); // ce smena EGA registrov
+   asm
+  lea   eax,Plt
+     call  DosFlatToSel
+     mov   ii,eax
+   end;
+   CReg.ColorRegAddr:=ii;
+   VioGetState(CReg,0);
+   Plt[10,0]:=$00;
+   Plt[10,1]:=$32;
+   Plt[10,2]:=$2A;
+   VioSetState(CReg,0); // a ce - VGA registrov
+  end.
+*/
+
+typedef union {
+  VIOPALSTATE pal;
+  struct { VIOPALSTATE pal; USHORT a[15]; } pal_padded;
+  VIOOVERSCAN overscan;
+  VIOINTENSITY intensity;
+  VIOCOLORREG colorreg;
+  struct { VIOCOLORREG reg; char rgb[3*256]; } colorreg_padded;
+  VIOSETULINELOC lineloc;
+  VIOSETTARGET target;
+} my_VIOSTATE;
+
+int
+vio_state_size(int what)
+{
+    static const char sizes[] = {
+	sizeof(VIOPALSTATE),
+	sizeof(VIOOVERSCAN),
+	sizeof(VIOINTENSITY),
+	sizeof(VIOCOLORREG),
+	6,				/* Random number: Reserved entry */
+	sizeof(VIOSETULINELOC),
+	sizeof(VIOSETTARGET)
+    };
+    if (what < 0 || what >= sizeof(sizes))
+	croak("Unexpected VIO state type");
+    return sizes[what];
+}
+
+SV*
+_vioState(int what, int first, int count)
+{
+    my_VIOSTATE viob[2], *vio;
+    ULONG rc, size = vio_state_size(what);
+
+    VIO_FROM_VIOB;
+
+    vio->pal.cb = size;
+    vio->pal.type = what;
+    if (what == 0) {
+	vio->pal.iFirst = first;
+	if (first < 0 || first >= 16)
+	    croak("unexpected palette start value");
+	if (count < 0 || count > 16)
+	    croak("unexpected palette count");
+	vio->pal.cb = (size += (count - 1) * sizeof(short));
+    } else if (what == 3) {
+	/* Wants an 16:16 pointer */
+	if (count < 0 || count > 256)
+	    croak("unexpected palette count");
+	vio->colorreg.colorregaddr = (PCH)_emx_32to16(vio->colorreg_padded.rgb);
+	vio->colorreg.numcolorregs = count;		/* 256 is max */
+	vio->colorreg.firstcolorreg = first;
+	size += 3 * count;
+    }
+    if (CheckOSError(VioGetState( (void*)vio, 0 )))
+	croak_with_os2error("Can't get VIO state");
+    return newSVpvn((char*)vio, size);
+}
+
+void
+_vioState_set(SV *sv)
+{
+    my_VIOSTATE viob[2], *ovio = (my_VIOSTATE*)SvPV_nolen(sv), *vio = ovio;
+    int what = ovio->pal.type, cb = ovio->pal.cb;
+    ULONG rc, size = vio_state_size(what);
+    STRLEN l;
+    char *s = SvPV(sv, l);
+
+    VIO_FROM_VIOB;
+
+    switch (what) {
+    case 0:
+	if ( cb < size || cb > size + 15*sizeof(SHORT) || l != cb)
+	    croak("unexpected datasize");
+	size = l;
+	break;
+    case 3:
+	if (l != cb + 3 * ovio->colorreg.numcolorregs || cb != size)
+	    croak("unexpected datasize");
+	size = l;
+	break;
+    default:
+	if (l != cb || l != size )
+	    croak("unexpected datasize");
+	break;
+    }
+    Copy(s, (char*)vio, size, char);
+    if (what == 3)	/* We expect colors put after VIOCOLORREG */
+	vio->colorreg.colorregaddr = (PCH)_emx_32to16(vio->colorreg_padded.rgb);
+
+    if (CheckOSError(VioSetState( (void*)vio, 0 )))
+	croak_with_os2error("Can't set VIO state");
+}
+
 SV *
 screen(void)
 {
@@ -1215,6 +1494,36 @@ cursor(OUTLIST int stp, OUTLIST int ep, OUTLIST int wp, OUTLIST int ap)
 
 bool
 cursor_set(int s, int e, int w = cursor__(0), int a = cursor__(1))
+
+SV*
+_kbdChar(int nowait = 0, int handle = 0)
+
+SV*
+_kbdStatus(int handle = 0)
+
+void
+_kbdStatus_set(SV *sv, int handle = 0)
+
+SV*
+_vioConfig(int which = 0, int handle = 0)
+
+SV*
+_vioMode()
+
+void
+_vioMode_set(SV *buffer)
+
+SV*
+_vioState(int what, int first = -1, int count = -1)
+
+void
+_vioState_set(SV *buffer)
+
+SV*
+vioFont( int type = 0, OUTLIST int w, OUTLIST int h)
+
+void
+vioFont_set(SV *buffer, int cellwidth, int cellheight, int type = 0)
 
 NO_OUTPUT bool
 _ClipbrdData_set(unsigned long ulData, unsigned long fmt = CF_TEXT, unsigned long rgfFmtInfo = ((fmt == CF_TEXT || fmt == CF_DSPTEXT) ? CFI_POINTER : CFI_HANDLE), HAB hab = perl_hab_GET())
