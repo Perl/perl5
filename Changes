@@ -28,6 +28,116 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 21336] By: jhi                                   on 2003/09/23  10:07:41
+        Log: perldelta.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 21335] By: jhi                                   on 2003/09/23  10:04:22
+        Log: Enache Adrian says the FreeBSD malloc example
+             is no more true.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 21334] By: jhi                                   on 2003/09/23  10:02:42
+        Log: Integrate:
+             [ 21331]
+             [perl #23979] GSM 03.38 mapping in Encoding::Byte is incorrect
+             
+             Fix as much as possible - the specification is still
+             a bit unclear.
+             
+             [ 21332]
+             ucmlintage.
+     Branch: maint-5.8/perl
+	  +> ext/Encode/t/gsm0338.t
+	  !> MANIFEST ext/Encode/MANIFEST
+	  !> ext/Encode/lib/Encode/Supported.pod ext/Encode/ucm/gsm0338.ucm
+____________________________________________________________________________
+[ 21333] By: jhi                                   on 2003/09/23  09:21:04
+        Log: Mention the GSM 03.38 fix.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 21330] By: jhi                                   on 2003/09/23  06:30:06
+        Log: Integrate:
+             [ 21324]
+             The RCs have been missing CRs from certain files because
+             not all shells can handle multiline arguments right.
+             
+             [ 21325]
+             Stray CRs noticed by Jan Dubois.
+             
+             [ 21326]
+             Subject: [PATCH] RC5 and Intel's ICC
+             From: "Marcus Holland-Moritz" <mhx-perl@gmx.net>
+             Date: Mon, 22 Sep 2003 22:52:40 +0200
+             Message-ID: <00a101c3814b$76a8cc50$0c2f1fac@R2D2>
+             
+             (the attribute part)
+             
+             [ 21327]
+             Subject: [PATCH] RC5 and Intel's ICC
+             From: "Marcus Holland-Moritz" <mhx-perl@gmx.net>
+             Date: Mon, 22 Sep 2003 22:52:40 +0200
+             Message-ID: <00a101c3814b$76a8cc50$0c2f1fac@R2D2>
+             
+             (the missing void return type)
+             
+             [ 21329]
+             Subject: [PATCH] Re: B::Deparse fails in pure_string()
+             From: Stephen McCamant <smcc@MIT.EDU>
+             Date: Mon, 22 Sep 2003 20:53:57 -0700
+             Message-ID: <16239.50133.367465.947398@famine.OCF.Berkeley.EDU>
+     Branch: maint-5.8/perl
+	  !> Porting/makerel ext/B/B/Deparse.pm ext/Devel/PPPort/PPPort.pm
+	  !> ext/threads/shared/shared.xs lib/ExtUtils/MM_Win95.pm
+	  !> lib/ExtUtils/t/MM_Win32.t perl.h
+____________________________________________________________________________
+[ 21328] By: jhi                                   on 2003/09/23  06:08:15
+        Log: perldelta.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 21322] By: jhi                                   on 2003/09/22  19:39:27
+        Log: perldelta tweaks.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 21321] By: jhi                                   on 2003/09/22  19:07:15
+        Log: Integrate:
+             
+             [ 21318]
+             Upgrade to Math::BigInt 1.66.
+             
+             [ 21319]
+             An error message need not be a novel.
+             
+             (the M::BI is somewhat risky, but smokes will be running,
+             and I will ask known tricky platforms to test separately)
+     Branch: maint-5.8/perl
+	  !> lib/Math/BigFloat.pm lib/Math/BigInt.pm
+	  !> lib/Math/BigInt/Calc.pm lib/Math/BigInt/t/bare_mbi.t
+	  !> lib/Math/BigInt/t/bigintpm.inc lib/Math/BigInt/t/bigintpm.t
+	  !> lib/Math/BigInt/t/mbi_rand.t lib/Math/BigInt/t/sub_mbi.t
+	  !> lib/Math/BigInt/t/upgrade.inc lib/Math/BigInt/t/upgrade.t
+	  !> pod/perldiag.pod pp_hot.c
+____________________________________________________________________________
+[ 21320] By: jhi                                   on 2003/09/22  18:22:27
+        Log: perldelta updates.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 21317] By: jhi                                   on 2003/09/22  10:59:53
+        Log: perldelta tweakage.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 21316] By: jhi                                   on 2003/09/22  10:10:29
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 21315] By: jhi                                   on 2003/09/22  09:57:26
         Log: Integrate:
              [ 21311]
