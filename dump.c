@@ -22,11 +22,13 @@ dump_all(void)
 }
 #else  /* Rest of file is for DEBUGGING */
 
+#ifndef PERL_OBJECT
 #ifdef I_STDARG
 static void dump(char *pat, ...);
 #else
 static void dump();
 #endif
+#endif /* PERL_OBJECT */
 
 void
 dump_all(void)
@@ -408,7 +410,7 @@ long arg2, arg3, arg4, arg5;
 #else
 
 #ifdef I_STDARG
-static void
+STATIC void
 dump(char *pat,...)
 #else
 /*VARARGS0*/

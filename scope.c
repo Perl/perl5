@@ -112,7 +112,7 @@ free_tmps(void)
     }
 }
 
-static SV *
+STATIC SV *
 save_scalar_at(SV **sptr)
 {
     dTHR;
@@ -440,7 +440,11 @@ save_list(register SV **sarg, I32 maxsarg)
 }
 
 void
+#ifdef PERL_OBJECT
+save_destructor(void (*f) (void*, void*), void* p)
+#else
 save_destructor(void (*f) (void *), void *p)
+#endif
 {
     dTHR;
     SSCHECK(3);
@@ -676,7 +680,7 @@ leave_scope(I32 base)
 	    break;
 	case SAVEt_DESTRUCTOR:
 	    ptr = SSPOPPTR;
-	    (*SSPOPDPTR)(ptr);
+	    (*SSPOPDPTR)(THIS_ ptr);
 	    break;
 	case SAVEt_REGCONTEXT:
 	    {

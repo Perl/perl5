@@ -116,6 +116,8 @@ static U16		regflags;	/* are we folding, multilining? */
  * Forward declarations for pregcomp()'s friends.
  */
 
+static char* regwhite _((char *, char *));
+#ifndef PERL_OBJECT
 static regnode *reg _((I32, I32 *));
 static regnode *reganode _((U8, U32));
 static regnode *regatom _((I32 *));
@@ -129,8 +131,8 @@ static void reginsert _((U8, regnode *));
 static void regoptail _((regnode *, regnode *));
 static void regset _((char *, I32));
 static void regtail _((regnode *, regnode *));
-static char* regwhite _((char *, char *));
 static char* nextchar _((void));
+#endif
 
 static U32 regseen;
 static I32 seen_zerolen;
@@ -144,6 +146,7 @@ char *colors[4];
 
 /* Length of a variant. */
 
+#ifndef PERL_OBJECT
 typedef struct {
     I32 len_min;
     I32 len_delta;
@@ -161,6 +164,7 @@ typedef struct {
     I32 offset_float_max;
     I32 flags;
 } scan_data_t;
+#endif
 
 static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
@@ -183,7 +187,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 #define SF_IN_PAR		0x100
 #define SF_HAS_EVAL		0x200
 
-static void
+STATIC void
 scan_commit(scan_data_t *data)
 {
     STRLEN l = SvCUR(data->last_found);
@@ -220,7 +224,7 @@ scan_commit(scan_data_t *data)
 /* Stops at toplevel WHILEM as well as at `last'. At end *scanp is set
    to the position after last scanned or to NULL. */
 
-static I32
+STATIC I32
 study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 flags)
 			/* scanp: Start here (read-write). */
 			/* deltap: Write maxlen-minlen here. */
@@ -671,7 +675,7 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
     return min;
 }
 
-static I32
+STATIC I32
 add_data(I32 n, char *s)
 {
     if (rx->data) {
@@ -750,7 +754,7 @@ pregcomp(char *exp, char *xend, PMOP *pm)
     DEBUG_r(
 	if (!colorset) {
 	    int i = 0;
-	    char *s = PerlENV_getenv("TERMCAP_COLORS");
+	    char *s = PerlEnv_getenv("TERMCAP_COLORS");
 	    
 	    colorset = 1;
 	    if (s) {
@@ -980,7 +984,7 @@ pregcomp(char *exp, char *xend, PMOP *pm)
  * is a trifle forced, but the need to tie the tails of the branches to what
  * follows makes it hard to avoid.
  */
-static regnode *
+STATIC regnode *
 reg(I32 paren, I32 *flagp)
     /* paren: Parenthesized? 0=top, 1=(, inside: changed to letter. */
 {
@@ -1257,7 +1261,7 @@ reg(I32 paren, I32 *flagp)
  *
  * Implements the concatenation operator.
  */
-static regnode *
+STATIC regnode *
 regbranch(I32 *flagp, I32 first)
 {
     register regnode *ret;
@@ -1321,7 +1325,7 @@ regbranch(I32 *flagp, I32 first)
  * It might seem that this node could be dispensed with entirely, but the
  * endmarker role is not redundant.
  */
-static regnode *
+STATIC regnode *
 regpiece(I32 *flagp)
 {
     register regnode *ret;
@@ -1477,7 +1481,7 @@ regpiece(I32 *flagp)
  *
  * [Yes, it is worth fixing, some scripts can run twice the speed.]
  */
-static regnode *
+STATIC regnode *
 regatom(I32 *flagp)
 {
     register regnode *ret = 0;
@@ -1821,7 +1825,7 @@ regwhite(char *p, char *e)
     return p;
 }
 
-static void
+STATIC void
 regset(char *opnd, register I32 c)
 {
     if (SIZE_ONLY)
@@ -1830,7 +1834,7 @@ regset(char *opnd, register I32 c)
     opnd[1 + (c >> 3)] |= (1 << (c & 7));
 }
 
-static regnode *
+STATIC regnode *
 regclass(void)
 {
     register char *opnd, *s;
@@ -1988,7 +1992,7 @@ regclass(void)
     return ret;
 }
 
-static char*
+STATIC char*
 nextchar(void)
 {
     char* retval = regparse++;
@@ -2020,7 +2024,7 @@ nextchar(void)
 /*
 - reg_node - emit a node
 */
-static regnode *			/* Location. */
+STATIC regnode *			/* Location. */
 #ifdef CAN_PROTOTYPE
 reg_node(U8 op)
 #else
@@ -2053,7 +2057,7 @@ U8 op;
 /*
 - reganode - emit a node with an argument
 */
-static regnode *			/* Location. */
+STATIC regnode *			/* Location. */
 #ifdef CAN_PROTOTYPE
 reganode(U8 op, U32 arg)
 #else
@@ -2088,7 +2092,7 @@ U32 arg;
 - regc - emit (if appropriate) a byte of code
 */
 #ifdef CAN_PROTOTYPE
-static void
+STATIC void
 regc(U8 b, char* s)
 #else
 static void
@@ -2107,7 +2111,7 @@ char *s;
 * Means relocating the operand.
 */
 #ifdef CAN_PROTOTYPE
-static void
+STATIC void
 reginsert(U8 op, regnode *opnd)
 #else
 static void
@@ -2146,7 +2150,7 @@ regnode *opnd;
 /*
 - regtail - set the next-pointer at the end of a node chain of p to val.
 */
-static void
+STATIC void
 regtail(regnode *p, regnode *val)
 {
     register regnode *scan;
@@ -2191,7 +2195,7 @@ regtail(regnode *p, regnode *val)
 /*
 - regoptail - regtail on operand of first argument; nop if operandless
 */
-static void
+STATIC void
 regoptail(regnode *p, regnode *val)
 {
     /* "Operandless" and "op != BRANCH" are synonymous in practice. */
@@ -2228,7 +2232,7 @@ regcurly(register char *s)
 
 #ifdef DEBUGGING
 
-static regnode *
+STATIC regnode *
 dumpuntil(regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
 {
     register char op = EXACT;	/* Arbitrary non-END op. */

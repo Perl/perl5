@@ -1,0 +1,4 @@
+LIBRARY Perl500
+DESCRIPTION 'Perl interpreter'
+EXPORTS
+	perl_alloc

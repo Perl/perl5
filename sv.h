@@ -604,7 +604,7 @@ struct xpvio {
 #  undef newRV_noinc
 #  define newRV_noinc(sv) ({SV *nsv=newRV((sv)); --SvREFCNT(SvRV(nsv)); nsv;})
 #else
-#  if defined(CRIPPLED_CC) || defined(USE_THREADS)
+#  if defined(CRIPPLED_CC) || defined(USE_THREADS) || defined(PERL_OBJECT)
 #  else
 #    undef newRV_noinc
 #    define newRV_noinc(sv)	((Sv = newRV(sv)), --SvREFCNT(SvRV(Sv)), Sv)

@@ -636,6 +636,7 @@
 #define do_undump		(Perl_Vars.Gdo_undump)
 #define egid			(Perl_Vars.Gegid)
 #define error_count		(Perl_Vars.Gerror_count)
+#define error_no        (Perl_Vars.Gerror_no)
 #define euid			(Perl_Vars.Geuid)
 #define eval_cond		(Perl_Vars.Geval_cond)
 #define eval_mutex		(Perl_Vars.Geval_mutex)
@@ -706,6 +707,7 @@
 #define scrgv			(Perl_Vars.Gscrgv)
 #define sh_path			(Perl_Vars.Gsh_path)
 #define sighandlerp		(Perl_Vars.Gsighandlerp)
+#define sort_mutex		(Perl_Vars.Gsort_mutex)
 #define sub_generation		(Perl_Vars.Gsub_generation)
 #define subline			(Perl_Vars.Gsubline)
 #define subname			(Perl_Vars.Gsubname)
@@ -754,6 +756,7 @@
 #define Gdo_undump		do_undump
 #define Gegid			egid
 #define Gerror_count		error_count
+#define Gerror_no       error_no
 #define Geuid			euid
 #define Geval_cond		eval_cond
 #define Geval_mutex		eval_mutex
@@ -824,6 +827,7 @@
 #define Gscrgv			scrgv
 #define Gsh_path		sh_path
 #define Gsighandlerp		sighandlerp
+#define Gsort_mutex		sort_mutex
 #define Gsub_generation		sub_generation
 #define Gsubline		subline
 #define Gsubname		subname
@@ -872,6 +876,7 @@
 #define do_undump		Perl_do_undump
 #define egid			Perl_egid
 #define error_count		Perl_error_count
+#define error_no        Perl_error_no
 #define euid			Perl_euid
 #define eval_cond		Perl_eval_cond
 #define eval_mutex		Perl_eval_mutex
@@ -942,6 +947,7 @@
 #define scrgv			Perl_scrgv
 #define sh_path			Perl_sh_path
 #define sighandlerp		Perl_sighandlerp
+#define sort_mutex		Perl_sort_mutex
 #define sub_generation		Perl_sub_generation
 #define subline			Perl_subline
 #define subname			Perl_subname

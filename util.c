@@ -536,8 +536,8 @@ perl_init_i18nl10n(int printwarn)
 #ifdef USE_LOCALE_NUMERIC
     char *curnum     = NULL;
 #endif /* USE_LOCALE_NUMERIC */
-    char *lc_all     = PerlENV_getenv("LC_ALL");
-    char *lang       = PerlENV_getenv("LANG");
+    char *lc_all     = PerlEnv_getenv("LC_ALL");
+    char *lang       = PerlEnv_getenv("LANG");
     bool setlocale_failure = FALSE;
 
 #ifdef LOCALE_ENVIRON_REQUIRED
@@ -561,19 +561,19 @@ perl_init_i18nl10n(int printwarn)
     {
 #ifdef USE_LOCALE_CTYPE
 	if (! (curctype = setlocale(LC_CTYPE,
-				    (!done && (lang || PerlENV_getenv("LC_CTYPE")))
+				    (!done && (lang || PerlEnv_getenv("LC_CTYPE")))
 				    ? "" : Nullch)))
 	    setlocale_failure = TRUE;
 #endif /* USE_LOCALE_CTYPE */
 #ifdef USE_LOCALE_COLLATE
 	if (! (curcoll = setlocale(LC_COLLATE,
-				   (!done && (lang || PerlENV_getenv("LC_COLLATE")))
+				   (!done && (lang || PerlEnv_getenv("LC_COLLATE")))
 				   ? "" : Nullch)))
 	    setlocale_failure = TRUE;
 #endif /* USE_LOCALE_COLLATE */
 #ifdef USE_LOCALE_NUMERIC
 	if (! (curnum = setlocale(LC_NUMERIC,
-				  (!done && (lang || PerlENV_getenv("LC_NUMERIC")))
+				  (!done && (lang || PerlEnv_getenv("LC_NUMERIC")))
 				  ? "" : Nullch)))
 	    setlocale_failure = TRUE;
 #endif /* USE_LOCALE_NUMERIC */
@@ -620,7 +620,7 @@ perl_init_i18nl10n(int printwarn)
 	char *p;
 	bool locwarn = (printwarn > 1 || 
 			printwarn &&
-			(!(p = PerlENV_getenv("PERL_BADLANG")) || atoi(p)));
+			(!(p = PerlEnv_getenv("PERL_BADLANG")) || atoi(p)));
 
 	if (locwarn) {
 #ifdef LC_ALL
@@ -763,13 +763,13 @@ char *
 mem_collxfrm(const char *s, STRLEN len, STRLEN *xlen)
 {
     char *xbuf;
-    STRLEN xalloc, xin, xout;
+    STRLEN xAlloc, xin, xout; /* xalloc is a reserved word in VC */
 
     /* the first sizeof(collationix) bytes are used by sv_collxfrm(). */
     /* the +1 is for the terminating NUL. */
 
-    xalloc = sizeof(collation_ix) + collxfrm_base + (collxfrm_mult * len) + 1;
-    New(171, xbuf, xalloc, char);
+    xAlloc = sizeof(collation_ix) + collxfrm_base + (collxfrm_mult * len) + 1;
+    New(171, xbuf, xAlloc, char);
     if (! xbuf)
 	goto bad;
 
@@ -779,13 +779,13 @@ mem_collxfrm(const char *s, STRLEN len, STRLEN *xlen)
 	SSize_t xused;
 
 	for (;;) {
-	    xused = strxfrm(xbuf + xout, s + xin, xalloc - xout);
+	    xused = strxfrm(xbuf + xout, s + xin, xAlloc - xout);
 	    if (xused == -1)
 		goto bad;
-	    if (xused < xalloc - xout)
+	    if (xused < xAlloc - xout)
 		break;
-	    xalloc = (2 * xalloc) + 1;
-	    Renew(xbuf, xalloc, char);
+	    xAlloc = (2 * xAlloc) + 1;
+	    Renew(xbuf, xAlloc, char);
 	    if (! xbuf)
 		goto bad;
 	}
@@ -1097,7 +1097,7 @@ savepvn(char *sv, register I32 len)
 
 /* the SV for form() and mess() is not kept in an arena */
 
-static SV *
+STATIC SV *
 mess_alloc(void)
 {
     SV *sv;
@@ -1455,7 +1455,7 @@ my_setenv(char *nam,char *val)
 	vallen = strlen(val);
     New(904, envstr, namlen + vallen + 3, char);
     (void)sprintf(envstr,"%s=%s",nam,val);
-    (void)PerlENV_putenv(envstr);
+    (void)PerlEnv_putenv(envstr);
     if (oldstr)
 	Safefree(oldstr);
 #ifdef _MSC_VER
@@ -2115,7 +2115,7 @@ wait4pid(int pid, int *statusp, int flags)
 	if (flags)
 	    croak("Can't do waitpid with flags");
 	else {
-	    while ((result = wait(statusp)) != pid && pid > 0 && result >= 0)
+	    while ((result = PerlProc_wait(statusp)) != pid && pid > 0 && result >= 0)
 		pidgone(result,*statusp);
 	    if (result < 0)
 		*statusp = -1;
@@ -2457,7 +2457,7 @@ condpair_magic(SV *sv)
 	    sv_magic(sv, Nullsv, 'm', 0, 0);
 	    mg = SvMAGIC(sv);
 	    mg->mg_ptr = (char *)cp;
-	    mg->mg_len = sizeof(cp);
+	    mg->mg_length = sizeof(cp);
 	    MUTEX_UNLOCK(&sv_mutex);
 	    DEBUG_L(WITH_THR(PerlIO_printf(PerlIO_stderr(),
 					   "%p: condpair_magic %p\n", thr, sv));)

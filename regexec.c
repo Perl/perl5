@@ -104,6 +104,7 @@ struct curcur {
 
 static CURCUR* regcc;
 
+#ifndef PERL_OBJECT
 typedef I32 CHECKPOINT;
 
 /*
@@ -117,8 +118,9 @@ static I32 regtry _((regexp *prog, char *startpos));
 static bool reginclass _((char *p, I32 c));
 static CHECKPOINT regcppush _((I32 parenfloor));
 static char * regcppop _((void));
+#endif
 
-static CHECKPOINT
+STATIC CHECKPOINT
 regcppush(I32 parenfloor)
 {
     dTHR;
@@ -145,7 +147,7 @@ regcppush(I32 parenfloor)
 #  define REGCP_SET  DEBUG_r(PerlIO_printf(Perl_debug_log, "  Setting an EVAL scope, savestack=%i\n", savestack_ix)); lastcp = savestack_ix
 #  define REGCP_UNWIND  DEBUG_r(lastcp != savestack_ix ? PerlIO_printf(Perl_debug_log,"  Clearing an EVAL scope, savestack=%i..%i\n", lastcp, savestack_ix) : 0); regcpblow(lastcp)
 
-static char *
+STATIC char *
 regcppop(void)
 {
     dTHR;
@@ -678,7 +680,7 @@ phooey:
 /*
  - regtry - try match at specific point
  */
-static I32			/* 0 failure, 1 success */
+STATIC I32			/* 0 failure, 1 success */
 regtry(regexp *prog, char *startpos)
 {
     dTHR;
@@ -734,14 +736,14 @@ regtry(regexp *prog, char *startpos)
  * maybe save a little bit of pushing and popping on the stack.  It also takes
  * advantage of machines that use a register save mask on subroutine entry.
  */
-static I32			/* 0 failure, 1 success */
+STATIC I32			/* 0 failure, 1 success */
 regmatch(regnode *prog)
 {
     dTHR;
     register regnode *scan;	/* Current node. */
     regnode *next;		/* Next node. */
     regnode *inner;		/* Next node in internal branch. */
-    register I32 nextchar;
+    register I32 nextchr; /* renamed nextchr - nextchar colides with function of same name */
     register I32 n;		/* no or next */
     register I32 ln;		/* len or last */
     register char *s;		/* operand or save */
@@ -753,7 +755,7 @@ regmatch(regnode *prog)
     regindent++;
 #endif
 
-    nextchar = UCHARAT(locinput);
+    nextchr = UCHARAT(locinput);
     scan = prog;
     while (scan != NULL) {
 #define sayNO_L (logical ? (logical = 0, sw = 0, goto cont) : sayNO)
@@ -804,7 +806,7 @@ regmatch(regnode *prog)
 	    if (locinput == regbol
 		? regprev == '\n'
 		: (multiline && 
-		   (nextchar || locinput < regeol) && locinput[-1] == '\n') )
+		   (nextchr || locinput < regeol) && locinput[-1] == '\n') )
 	    {
 		/* regtill = regbol; */
 		break;
@@ -813,7 +815,7 @@ regmatch(regnode *prog)
 	case MBOL:
 	    if (locinput == regbol
 		? regprev == '\n'
-		: ((nextchar || locinput < regeol) && locinput[-1] == '\n') )
+		: ((nextchr || locinput < regeol) && locinput[-1] == '\n') )
 	    {
 		break;
 	    }
@@ -833,38 +835,38 @@ regmatch(regnode *prog)
 		goto seol;
 	case MEOL:
 	  meol:
-	    if ((nextchar || locinput < regeol) && nextchar != '\n')
+	    if ((nextchr || locinput < regeol) && nextchr != '\n')
 		sayNO;
 	    break;
 	case SEOL:
 	  seol:
-	    if ((nextchar || locinput < regeol) && nextchar != '\n')
+	    if ((nextchr || locinput < regeol) && nextchr != '\n')
 		sayNO;
 	    if (regeol - locinput > 1)
 		sayNO;
 	    break;
 	case SANY:
-	    if (!nextchar && locinput >= regeol)
+	    if (!nextchr && locinput >= regeol)
 		sayNO;
-	    nextchar = UCHARAT(++locinput);
+	    nextchr = UCHARAT(++locinput);
 	    break;
 	case ANY:
-	    if (!nextchar && locinput >= regeol || nextchar == '\n')
+	    if (!nextchr && locinput >= regeol || nextchr == '\n')
 		sayNO;
-	    nextchar = UCHARAT(++locinput);
+	    nextchr = UCHARAT(++locinput);
 	    break;
 	case EXACT:
 	    s = (char *) OPERAND(scan);
 	    ln = UCHARAT(s++);
 	    /* Inline the first character, for speed. */
-	    if (UCHARAT(s) != nextchar)
+	    if (UCHARAT(s) != nextchr)
 		sayNO;
 	    if (regeol - locinput < ln)
 		sayNO;
 	    if (ln > 1 && memNE(s, locinput, ln))
 		sayNO;
 	    locinput += ln;
-	    nextchar = UCHARAT(locinput);
+	    nextchr = UCHARAT(locinput);
 	    break;
 	case EXACTFL:
 	    reg_flags |= RF_tainted;
@@ -873,9 +875,9 @@ regmatch(regnode *prog)
 	    s = (char *) OPERAND(scan);
 	    ln = UCHARAT(s++);
 	    /* Inline the first character, for speed. */
-	    if (UCHARAT(s) != nextchar &&
+	    if (UCHARAT(s) != nextchr &&
 		UCHARAT(s) != ((OP(scan) == EXACTF)
-			       ? fold : fold_locale)[nextchar])
+			       ? fold : fold_locale)[nextchr])
 		sayNO;
 	    if (regeol - locinput < ln)
 		sayNO;
@@ -884,39 +886,39 @@ regmatch(regnode *prog)
 			   : ibcmp_locale(s, locinput, ln)))
 		sayNO;
 	    locinput += ln;
-	    nextchar = UCHARAT(locinput);
+	    nextchr = UCHARAT(locinput);
 	    break;
 	case ANYOF:
 	    s = (char *) OPERAND(scan);
-	    if (nextchar < 0)
-		nextchar = UCHARAT(locinput);
-	    if (!reginclass(s, nextchar))
+	    if (nextchr < 0)
+		nextchr = UCHARAT(locinput);
+	    if (!reginclass(s, nextchr))
 		sayNO;
-	    if (!nextchar && locinput >= regeol)
+	    if (!nextchr && locinput >= regeol)
 		sayNO;
-	    nextchar = UCHARAT(++locinput);
+	    nextchr = UCHARAT(++locinput);
 	    break;
 	case ALNUML:
 	    reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case ALNUM:
-	    if (!nextchar)
+	    if (!nextchr)
 		sayNO;
 	    if (!(OP(scan) == ALNUM
-		  ? isALNUM(nextchar) : isALNUM_LC(nextchar)))
+		  ? isALNUM(nextchr) : isALNUM_LC(nextchr)))
 		sayNO;
-	    nextchar = UCHARAT(++locinput);
+	    nextchr = UCHARAT(++locinput);
 	    break;
 	case NALNUML:
 	    reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case NALNUM:
-	    if (!nextchar && locinput >= regeol)
+	    if (!nextchr && locinput >= regeol)
 		sayNO;
 	    if (OP(scan) == NALNUM
-		? isALNUM(nextchar) : isALNUM_LC(nextchar))
+		? isALNUM(nextchr) : isALNUM_LC(nextchr))
 		sayNO;
-	    nextchar = UCHARAT(++locinput);
+	    nextchr = UCHARAT(++locinput);
 	    break;
 	case BOUNDL:
 	case NBOUNDL:
@@ -928,11 +930,11 @@ regmatch(regnode *prog)
 	    ln = (locinput != regbol) ? UCHARAT(locinput - 1) : regprev;
 	    if (OP(scan) == BOUND || OP(scan) == NBOUND) {
 		ln = isALNUM(ln);
-		n = isALNUM(nextchar);
+		n = isALNUM(nextchr);
 	    }
 	    else {
 		ln = isALNUM_LC(ln);
-		n = isALNUM_LC(nextchar);
+		n = isALNUM_LC(nextchr);
 	    }
 	    if (((!ln) == (!n)) == (OP(scan) == BOUND || OP(scan) == BOUNDL))
 		sayNO;
@@ -941,35 +943,35 @@ regmatch(regnode *prog)
 	    reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case SPACE:
-	    if (!nextchar && locinput >= regeol)
+	    if (!nextchr && locinput >= regeol)
 		sayNO;
 	    if (!(OP(scan) == SPACE
-		  ? isSPACE(nextchar) : isSPACE_LC(nextchar)))
+		  ? isSPACE(nextchr) : isSPACE_LC(nextchr)))
 		sayNO;
-	    nextchar = UCHARAT(++locinput);
+	    nextchr = UCHARAT(++locinput);
 	    break;
 	case NSPACEL:
 	    reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case NSPACE:
-	    if (!nextchar)
+	    if (!nextchr)
 		sayNO;
 	    if (OP(scan) == SPACE
-		? isSPACE(nextchar) : isSPACE_LC(nextchar))
+		? isSPACE(nextchr) : isSPACE_LC(nextchr))
 		sayNO;
-	    nextchar = UCHARAT(++locinput);
+	    nextchr = UCHARAT(++locinput);
 	    break;
 	case DIGIT:
-	    if (!isDIGIT(nextchar))
+	    if (!isDIGIT(nextchr))
 		sayNO;
-	    nextchar = UCHARAT(++locinput);
+	    nextchr = UCHARAT(++locinput);
 	    break;
 	case NDIGIT:
-	    if (!nextchar && locinput >= regeol)
+	    if (!nextchr && locinput >= regeol)
 		sayNO;
-	    if (isDIGIT(nextchar))
+	    if (isDIGIT(nextchr))
 		sayNO;
-	    nextchar = UCHARAT(++locinput);
+	    nextchr = UCHARAT(++locinput);
 	    break;
 	case REFFL:
 	    reg_flags |= RF_tainted;
@@ -983,10 +985,10 @@ regmatch(regnode *prog)
 	    if (s == regendp[n])
 		break;
 	    /* Inline the first character, for speed. */
-	    if (UCHARAT(s) != nextchar &&
+	    if (UCHARAT(s) != nextchr &&
 		(OP(scan) == REF ||
 		 (UCHARAT(s) != ((OP(scan) == REFF
-				  ? fold : fold_locale)[nextchar]))))
+				  ? fold : fold_locale)[nextchr]))))
 		sayNO;
 	    ln = regendp[n] - s;
 	    if (locinput + ln > regeol)
@@ -998,7 +1000,7 @@ regmatch(regnode *prog)
 			      : ibcmp_locale(s, locinput, ln))))
 		sayNO;
 	    locinput += ln;
-	    nextchar = UCHARAT(locinput);
+	    nextchr = UCHARAT(locinput);
 	    break;
 
 	case NOTHING:
@@ -1035,7 +1037,7 @@ regmatch(regnode *prog)
 		   cxstack[cxstack_ix].blk_gimme = G_SCALAR; */
 	    }
 
-	    runops();			/* Scalar context. */
+	    CALLRUNOPS();			/* Scalar context. */
 	    SPAGAIN;
 	    ret = POPs;
 	    PUTBACK;
@@ -1622,7 +1624,7 @@ no:
  * That was true before, but now we assume scan - reginput is the count,
  * rather than incrementing count on every character.]
  */
-static I32
+STATIC I32
 regrepeat(regnode *p, I32 max)
 {
     register char *scan;
@@ -1734,7 +1736,7 @@ regrepeat(regnode *p, I32 max)
  * The repeater is supposed to have constant length.
  */
 
-static I32
+STATIC I32
 regrepeat_hard(regnode *p, I32 max, I32 *lp)
 {
     register char *scan;
@@ -1765,7 +1767,7 @@ regrepeat_hard(regnode *p, I32 max, I32 *lp)
  - regclass - determine if a character falls into a character class
  */
 
-static bool
+STATIC bool
 reginclass(register char *p, register I32 c)
 {
     char flags = *p;

@@ -25,6 +25,10 @@
 
 #define DOCATCH(o) ((CATCH_GET == TRUE) ? docatch(o) : (o))
 
+#ifdef PERL_OBJECT
+#define CALLOP this->*op
+#else
+#define CALLOP *op
 static OP *docatch _((OP *o));
 static OP *dofindlabel _((OP *o, char *label, OP **opstack, OP **oplimit));
 static void doparseform _((SV *sv));
@@ -37,6 +41,7 @@ static int sortcv _((const void *, const void *));
 static int sortcmp _((const void *, const void *));
 static int sortcmp_locale _((const void *, const void *));
 static OP *doeval _((int gimme, OP** startop));
+#endif
 
 static I32 sortcxix;
 
@@ -239,7 +244,7 @@ rxres_free(void **rsp)
 PP(pp_formline)
 {
     djSP; dMARK; dORIGMARK;
-    register SV *form = *++MARK;
+    register SV *tmpForm = *++MARK;
     register U16 *fpc;
     register char *t;
     register char *f;
@@ -258,17 +263,17 @@ PP(pp_formline)
     bool gotsome;
     STRLEN len;
 
-    if (!SvMAGICAL(form) || !SvCOMPILED(form)) {
-	SvREADONLY_off(form);
-	doparseform(form);
+    if (!SvMAGICAL(tmpForm) || !SvCOMPILED(tmpForm)) {
+	SvREADONLY_off(tmpForm);
+	doparseform(tmpForm);
     }
 
     SvPV_force(formtarget, len);
-    t = SvGROW(formtarget, len + SvCUR(form) + 1);  /* XXX SvCUR bad */
+    t = SvGROW(formtarget, len + SvCUR(tmpForm) + 1);  /* XXX SvCUR bad */
     t += len;
-    f = SvPV(form, len);
+    f = SvPV(tmpForm, len);
     /* need to jump to the next word */
-    s = f + len + WORD_ALIGN - SvCUR(form) % WORD_ALIGN;
+    s = f + len + WORD_ALIGN - SvCUR(tmpForm) % WORD_ALIGN;
 
     fpc = (U16*)s;
 
@@ -443,7 +448,7 @@ PP(pp_formline)
 		}
 		SvCUR_set(formtarget, t - SvPVX(formtarget));
 		sv_catpvn(formtarget, item, itemsize);
-		SvGROW(formtarget, SvCUR(formtarget) + SvCUR(form) + 1);
+		SvGROW(formtarget, SvCUR(formtarget) + SvCUR(tmpForm) + 1);
 		t = SvPVX(formtarget) + SvCUR(formtarget);
 	    }
 	    break;
@@ -634,6 +639,22 @@ PP(pp_mapwhile)
 }
 
 
+#ifdef PERL_OBJECT
+static CPerlObj *pSortPerl;
+static int SortCv(const void *a, const void *b)
+{
+    return pSortPerl->sortcv(a, b);
+}
+static int SortCmp(const void *a, const void *b)
+{
+    return pSortPerl->sortcmp(a, b);
+}
+static int SortCmpLocale(const void *a, const void *b)
+{
+    return pSortPerl->sortcmp_locale(a, b);
+}
+#endif
+
 PP(pp_sort)
 {
     djSP; dMARK; dORIGMARK;
@@ -740,7 +761,14 @@ PP(pp_sort)
 	    }
 	    sortcxix = cxstack_ix;
 
+#ifdef PERL_OBJECT
+	    MUTEX_LOCK(&sort_mutex);
+	    pSortPerl = this;
+	    qsort((char*)(myorigmark+1), max, sizeof(SV*), SortCv);
+	    MUTEX_UNLOCK(&sort_mutex);
+#else
 	    qsort((char*)(myorigmark+1), max, sizeof(SV*), sortcv);
+#endif
 
 	    POPBLOCK(cx,curpm);
 	    SWITCHSTACK(sortstack, oldstack);
@@ -751,8 +779,16 @@ PP(pp_sort)
     else {
 	if (max > 1) {
 	    MEXTEND(SP, 20);	/* Can't afford stack realloc on signal. */
+#ifdef PERL_OBJECT
+	    MUTEX_LOCK(&sort_mutex);
+	    pSortPerl = this;
+	    qsort((char*)(ORIGMARK+1), max, sizeof(SV*),
+		  (op->op_private & OPpLOCALE) ? SortCmpLocale : SortCmp);
+	    MUTEX_UNLOCK(&sort_mutex);
+#else
 	    qsort((char*)(ORIGMARK+1), max, sizeof(SV*),
 		  (op->op_private & OPpLOCALE) ? sortcmp_locale : sortcmp);
+#endif
 	}
     }
     stack_sp = ORIGMARK + max;
@@ -858,7 +894,7 @@ PP(pp_flop)
 
 /* Control. */
 
-static I32
+STATIC I32
 dopoptolabel(char *label)
 {
     dTHR;
@@ -927,7 +963,7 @@ block_gimme(void)
     }
 }
 
-static I32
+STATIC I32
 dopoptosub(I32 startingblock)
 {
     dTHR;
@@ -947,7 +983,7 @@ dopoptosub(I32 startingblock)
     return i;
 }
 
-static I32
+STATIC I32
 dopoptoeval(I32 startingblock)
 {
     dTHR;
@@ -966,7 +1002,7 @@ dopoptoeval(I32 startingblock)
     return i;
 }
 
-static I32
+STATIC I32
 dopoptoloop(I32 startingblock)
 {
     dTHR;
@@ -1223,7 +1259,7 @@ PP(pp_caller)
     RETURN;
 }
 
-static int
+STATIC int
 sortcv(const void *a, const void *b)
 {
     dTHR;
@@ -1236,7 +1272,7 @@ sortcv(const void *a, const void *b)
     GvSV(secondgv) = *str2;
     stack_sp = stack_base;
     op = sortcop;
-    runops();
+    CALLRUNOPS();
     if (stack_sp != stack_base + 1)
 	croak("Sort subroutine didn't return single value");
     if (!SvNIOKp(*stack_sp))
@@ -1249,13 +1285,13 @@ sortcv(const void *a, const void *b)
     return result;
 }
 
-static int
+STATIC int
 sortcmp(const void *a, const void *b)
 {
     return sv_cmp(*(SV * const *)a, *(SV * const *)b);
 }
 
-static int
+STATIC int
 sortcmp_locale(const void *a, const void *b)
 {
     return sv_cmp_locale(*(SV * const *)a, *(SV * const *)b);
@@ -1637,7 +1673,7 @@ PP(pp_redo)
 
 static OP* lastgotoprobe;
 
-static OP *
+STATIC OP *
 dofindlabel(OP *o, char *label, OP **opstack, OP **oplimit)
 {
     OP *kid;
@@ -1763,7 +1799,7 @@ PP(pp_goto)
 		}
 		else {
 		    stack_sp--;		/* There is no cv arg. */
-		    (void)(*CvXSUB(cv))(cv);
+		    (void)(*CvXSUB(cv))(THIS_ cv);
 		}
 		LEAVE;
 		return pop_return();
@@ -1965,7 +2001,7 @@ PP(pp_goto)
 		if (op->op_type == OP_ENTERITER)
 		    DIE("Can't \"goto\" into the middle of a foreach loop",
 			label);
-		(*op->op_ppaddr)(ARGS);
+		(CALLOP->op_ppaddr)(ARGS);
 	    }
 	    op = oldop;
 	}
@@ -2053,7 +2089,7 @@ PP(pp_cswitch)
 
 /* Eval. */
 
-static void
+STATIC void
 save_lines(AV *array, SV *sv)
 {
     register char *s = SvPVX(sv);
@@ -2077,7 +2113,7 @@ save_lines(AV *array, SV *sv)
     }
 }
 
-static OP *
+STATIC OP *
 docatch(OP *o)
 {
     dTHR;
@@ -2106,7 +2142,7 @@ docatch(OP *o)
 	restartop = 0;
 	/* FALL THROUGH */
     case 0:
-        runops();
+        CALLRUNOPS();
 	break;
     }
     JMPENV_POP;
@@ -2169,7 +2205,7 @@ sv_compile_2op(SV *sv, OP** startop, char *code, AV** avp)
 }
 
 /* With USE_THREADS, eval_owner must be held on entry to doeval */
-static OP *
+STATIC OP *
 doeval(int gimme, OP** startop)
 {
     dSP;
@@ -2707,7 +2743,7 @@ PP(pp_leavetry)
     RETURN;
 }
 
-static void
+STATIC void
 doparseform(SV *sv)
 {
     STRLEN len;

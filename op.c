@@ -18,6 +18,12 @@
 #include "EXTERN.h"
 #include "perl.h"
 
+#ifdef PERL_OBJECT
+#define CHECKCALL this->*check
+#else
+#define CHECKCALL *check
+#endif
+
 /*
  * In the following definition, the ", Nullop" is just to make the compiler
  * think the expression is of the right type: croak actually does a Siglongjmp.
@@ -27,13 +33,14 @@
      ? ( op_free((OP*)o),					\
 	 croak("%s trapped by operation mask", op_desc[type]),	\
 	 Nullop )						\
-     : (*check[type])((OP*)o))
+     : (CHECKCALL[type])((OP*)o))
 
+static bool scalar_mod_type _((OP *o, I32 type));
+#ifndef PERL_OBJECT
 static I32 list_assignment _((OP *o));
 static void bad_type _((I32 n, char *t, char *name, OP *kid));
 static OP *modkids _((OP *o, I32 type));
 static OP *no_fh_allowed _((OP *o));
-static bool scalar_mod_type _((OP *o, I32 type));
 static OP *scalarboolean _((OP *o));
 static OP *too_few_arguments _((OP *o, char* name));
 static OP *too_many_arguments _((OP *o, char* name));
@@ -41,8 +48,9 @@ static void null _((OP* o));
 static PADOFFSET pad_findlex _((char* name, PADOFFSET newoff, U32 seq,
 	CV* startcv, I32 cx_ix));
 static OP *newDEFSVOP _((void));
+#endif
 
-static char*
+STATIC char*
 gv_ename(GV *gv)
 {
     SV* tmpsv = sv_newmortal();
@@ -50,7 +58,7 @@ gv_ename(GV *gv)
     return SvPV(tmpsv,na);
 }
 
-static OP *
+STATIC OP *
 no_fh_allowed(OP *o)
 {
     yyerror(form("Missing comma after first argument to %s function",
@@ -58,21 +66,21 @@ no_fh_allowed(OP *o)
     return o;
 }
 
-static OP *
+STATIC OP *
 too_few_arguments(OP *o, char *name)
 {
     yyerror(form("Not enough arguments for %s", name));
     return o;
 }
 
-static OP *
+STATIC OP *
 too_many_arguments(OP *o, char *name)
 {
     yyerror(form("Too many arguments for %s", name));
     return o;
 }
 
-static void
+STATIC void
 bad_type(I32 n, char *t, char *name, OP *kid)
 {
     yyerror(form("Type of arg %d to %s must be %s (not %s)",
@@ -147,7 +155,7 @@ pad_allocmy(char *name)
     return off;
 }
 
-static PADOFFSET
+STATIC PADOFFSET
 #ifndef CAN_PROTOTYPE
 pad_findlex(name, newoff, seq, startcv, cx_ix)
 char *name;
@@ -615,7 +623,7 @@ op_free(OP *o)
     Safefree(o);
 }
 
-static void
+STATIC void
 null(OP *o)
 {
     if (o->op_type != OP_NULL && o->op_type != OP_THREADSV && o->op_targ > 0)
@@ -664,7 +672,7 @@ scalarkids(OP *o)
     return o;
 }
 
-static OP *
+STATIC OP *
 scalarboolean(OP *o)
 {
     if (dowarn &&
@@ -1034,7 +1042,7 @@ scalarseq(OP *o)
     return o;
 }
 
-static OP *
+STATIC OP *
 modkids(OP *o, I32 type)
 {
     OP *kid;
@@ -1534,7 +1542,7 @@ block_end(I32 floor, OP *seq)
     return retval;
 }
 
-static OP *
+STATIC OP *
 newDEFSVOP(void)
 {
 #ifdef USE_THREADS
@@ -1663,7 +1671,7 @@ fold_constants(register OP *o)
     curop = LINKLIST(o);
     o->op_next = 0;
     op = curop;
-    runops();
+    CALLRUNOPS();
     sv = *(stack_sp--);
     if (o->op_targ && sv == PAD_SV(o->op_targ))	/* grab pad temp? */
 	pad_swipe(o->op_targ);
@@ -1725,7 +1733,7 @@ gen_constant_list(register OP *o)
     op = curop = LINKLIST(o);
     o->op_next = 0;
     pp_pushmark(ARGS);
-    runops();
+    CALLRUNOPS();
     op = curop;
     pp_anonlist(ARGS);
     tmps_floor = oldtmps_floor;
@@ -2362,7 +2370,7 @@ newSLICEOP(I32 flags, OP *subscript, OP *listval)
 	    list(force_list(listval)) );
 }
 
-static I32
+STATIC I32
 list_assignment(register OP *o)
 {
     if (!o)
@@ -3047,7 +3055,7 @@ cv_undef(CV *cv)
 }
 
 #ifdef DEBUG_CLOSURES
-static void
+STATIC void
 cv_dump(cv)
 CV* cv;
 {
@@ -3092,7 +3100,7 @@ CV* cv;
 }
 #endif /* DEBUG_CLOSURES */
 
-static CV *
+STATIC CV *
 cv_clone2(CV *proto, CV *outside)
 {
     dTHR;
@@ -3500,7 +3508,7 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
 }
 
 CV *
-newXS(char *name, void (*subaddr) (CV *), char *filename)
+newXS(char *name, void (*subaddr) (CPERLproto_ CV *), char *filename)
 {
     dTHR;
     GV *gv = gv_fetchpv(name ? name : "__ANON__", GV_ADDMULTI, SVt_PVCV);

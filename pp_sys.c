@@ -553,7 +553,7 @@ PP(pp_tie)
     PUTBACK;
 
     if (op = pp_entersub(ARGS))
-        runops();
+        CALLRUNOPS();
     SPAGAIN;
 
     CATCH_SET(oldcatch);
@@ -686,7 +686,7 @@ PP(pp_dbmopen)
     PUTBACK;
 
     if (op = pp_entersub(ARGS))
-        runops();
+        CALLRUNOPS();
 #else
     PUTBACK;
     perl_call_sv((SV*)GvCV(gv), G_SCALAR);
@@ -714,7 +714,7 @@ PP(pp_dbmopen)
 
 #ifdef ORIGINAL_TIE
 	if (op = pp_entersub(ARGS))
-	    runops();
+	    CALLRUNOPS();
 #else
 	perl_call_sv((SV*)GvCV(gv), G_SCALAR);
 #endif	
@@ -954,7 +954,7 @@ PP(pp_read)
     return pp_sysread(ARGS);
 }
 
-static OP *
+STATIC OP *
 doform(CV *cv, GV *gv, OP *retop)
 {
     dTHR;
@@ -1600,7 +1600,7 @@ PP(pp_ioctl)
 
     if (optype == OP_IOCTL)
 #ifdef HAS_IOCTL
-	retval = ioctl(PerlIO_fileno(IoIFP(io)), func, s);
+	retval = PerlLIO_ioctl(PerlIO_fileno(IoIFP(io)), func, s);
 #else
 	DIE("ioctl is not implemented");
 #endif
@@ -1654,7 +1654,7 @@ PP(pp_flock)
 	fp = Nullfp;
     if (fp) {
 	(void)PerlIO_flush(fp);
-	value = (I32)(FLOCK(PerlIO_fileno(fp), argtype) >= 0);
+	value = (I32)(PerlLIO_flock(PerlIO_fileno(fp), argtype) >= 0);
     }
     else
 	value = 0;
@@ -2124,7 +2124,7 @@ PP(pp_stat)
 	    laststatval = PerlLIO_lstat(SvPV(statname, na), &statcache);
 	else
 #endif
-	    laststatval = Stat(SvPV(statname, na), &statcache);
+	    laststatval = PerlLIO_stat(SvPV(statname, na), &statcache);
 	if (laststatval < 0) {
 	    if (dowarn && strchr(SvPV(statname, na), '\n'))
 		warn(warn_nl, "stat");
@@ -3381,11 +3381,11 @@ PP(pp_tms)
     EXTEND(SP, 4);
 
 #ifndef VMS
-    (void)times(&timesbuf);
+    (void)PerlProc_times(&timesbuf);
 #else
-    (void)times((tbuffer_t *)&timesbuf);  /* time.h uses different name for */
-                                          /* struct tms, though same data   */
-                                          /* is returned.                   */
+    (void)PerlProc_times((tbuffer_t *)&timesbuf);  /* time.h uses different name for */
+                                                   /* struct tms, though same data   */
+                                                   /* is returned.                   */
 #endif
 
     PUSHs(sv_2mortal(newSVnv(((double)timesbuf.tms_utime)/HZ)));
@@ -3483,10 +3483,10 @@ PP(pp_sleep)
 
     (void)time(&lasttime);
     if (MAXARG < 1)
-	Pause();
+	PerlProc_pause();
     else {
 	duration = POPi;
-	sleep((unsigned int)duration);
+	PerlProc_sleep((unsigned int)duration);
     }
     (void)time(&when);
     XPUSHi(when - lasttime);
@@ -3751,14 +3751,14 @@ PP(pp_gnetent)
     struct netent *nent;
 
     if (which == OP_GNBYNAME)
-	nent = getnetbyname(POPp);
+	nent = PerlSock_getnetbyname(POPp);
     else if (which == OP_GNBYADDR) {
 	int addrtype = POPi;
 	Getnbadd_net_t addr = (Getnbadd_net_t) U_L(POPn);
-	nent = getnetbyaddr(addr, addrtype);
+	nent = PerlSock_getnetbyaddr(addr, addrtype);
     }
     else
-	nent = getnetent();
+	nent = PerlSock_getnetent();
 
     EXTEND(SP, 4);
     if (GIMME != G_ARRAY) {
@@ -3944,7 +3944,7 @@ PP(pp_gservent)
 	}
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 #ifdef HAS_NTOHS
-	sv_setiv(sv, (IV)ntohs(sent->s_port));
+	sv_setiv(sv, (IV)PerlSock_ntohs(sent->s_port));
 #else
 	sv_setiv(sv, (IV)(sent->s_port));
 #endif
@@ -3962,7 +3962,7 @@ PP(pp_shostent)
 {
     djSP;
 #ifdef HAS_SOCKET
-    sethostent(TOPi);
+    PerlSock_sethostent(TOPi);
     RETSETYES;
 #else
     DIE(no_sock_func, "sethostent");
@@ -3973,7 +3973,7 @@ PP(pp_snetent)
 {
     djSP;
 #ifdef HAS_SOCKET
-    setnetent(TOPi);
+    PerlSock_setnetent(TOPi);
     RETSETYES;
 #else
     DIE(no_sock_func, "setnetent");
@@ -3984,7 +3984,7 @@ PP(pp_sprotoent)
 {
     djSP;
 #ifdef HAS_SOCKET
-    setprotoent(TOPi);
+    PerlSock_setprotoent(TOPi);
     RETSETYES;
 #else
     DIE(no_sock_func, "setprotoent");
@@ -3995,7 +3995,7 @@ PP(pp_sservent)
 {
     djSP;
 #ifdef HAS_SOCKET
-    setservent(TOPi);
+    PerlSock_setservent(TOPi);
     RETSETYES;
 #else
     DIE(no_sock_func, "setservent");
@@ -4006,7 +4006,7 @@ PP(pp_ehostent)
 {
     djSP;
 #ifdef HAS_SOCKET
-    endhostent();
+    PerlSock_endhostent();
     EXTEND(sp,1);
     RETPUSHYES;
 #else
@@ -4018,7 +4018,7 @@ PP(pp_enetent)
 {
     djSP;
 #ifdef HAS_SOCKET
-    endnetent();
+    PerlSock_endnetent();
     EXTEND(sp,1);
     RETPUSHYES;
 #else
@@ -4030,7 +4030,7 @@ PP(pp_eprotoent)
 {
     djSP;
 #ifdef HAS_SOCKET
-    endprotoent();
+    PerlSock_endprotoent();
     EXTEND(sp,1);
     RETPUSHYES;
 #else
@@ -4042,7 +4042,7 @@ PP(pp_eservent)
 {
     djSP;
 #ifdef HAS_SOCKET
-    endservent();
+    PerlSock_endservent();
     EXTEND(sp,1);
     RETPUSHYES;
 #else
@@ -4261,7 +4261,7 @@ PP(pp_getlogin)
 #ifdef HAS_GETLOGIN
     char *tmps;
     EXTEND(SP, 1);
-    if (!(tmps = getlogin()))
+    if (!(tmps = PerlProc_getlogin()))
 	RETPUSHUNDEF;
     PUSHp(tmps, strlen(tmps));
     RETURN;

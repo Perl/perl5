@@ -151,6 +151,7 @@ END_EXTERN_C
 #undef fileno
 #endif
 
+#ifndef PERL_OBJECT
 #define stderr				win32_stderr()
 #define stdout				win32_stdout()
 #define	stdin				win32_stdin()
@@ -163,6 +164,7 @@ END_EXTERN_C
 /*
  * redirect to our own version
  */
+#undef fprintf
 #define	fprintf			win32_fprintf
 #define	vfprintf		win32_vfprintf
 #define	printf			win32_printf
@@ -177,6 +179,7 @@ END_EXTERN_C
 #define fputs(s,f)		win32_fputs(s,f)
 #define fputc(c,f)		win32_fputc(c,f)
 #define ungetc(c,f)		win32_ungetc(c,f)
+#undef getc
 #define getc(f)			win32_getc(f)
 #define fileno(f)		win32_fileno(f)
 #define clearerr(f)		win32_clearerr(f)
@@ -218,9 +221,12 @@ END_EXTERN_C
 #define fgets			win32_fgets
 #define gets			win32_gets
 #define fgetc			win32_fgetc
+#undef putc
 #define putc			win32_putc
 #define puts			win32_puts
+#undef getchar
 #define getchar			win32_getchar
+#undef putchar
 #define putchar			win32_putchar
 
 #if !defined(MYMALLOC) || !defined(PERL_CORE)
@@ -241,6 +247,7 @@ END_EXTERN_C
 #define alarm			win32_alarm
 #define ioctl			win32_ioctl
 #define wait			win32_wait
+#endif  /* PERL_OBJECT */
 
 #ifdef HAVE_DES_FCRYPT
 #undef crypt
@@ -248,8 +255,10 @@ END_EXTERN_C
 #endif
 
 #ifndef USE_WIN32_RTL_ENV
+#ifndef PERL_OBJECT
 #undef getenv
 #define getenv win32_getenv
+#endif  /* PERL_OBJECT */
 #endif
 
 #endif /* WIN32IO_IS_STDIO */

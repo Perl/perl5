@@ -40,6 +40,12 @@
 #  define FAST_SV_GETS
 #endif
 
+#ifdef PERL_OBJECT
+#define FCALL this->*f
+#define VTBL this->*vtbl
+
+#else /* !PERL_OBJECT */
+
 static IV asIV _((SV* sv));
 static UV asUV _((SV* sv));
 static SV *more_sv _((void));
@@ -60,6 +66,10 @@ static void sv_unglob _((SV* sv));
 static void sv_check_thinkfirst _((SV *sv));
 
 typedef void (*SVFUNC) _((SV*));
+#define VTBL *vtbl
+#define FCALL *f
+
+#endif /* PERL_OBJECT */
 
 #ifdef PURIFY
 
@@ -203,7 +213,7 @@ U32 flags;
 	MUTEX_UNLOCK(&sv_mutex);	\
     } while (0)
 
-static void
+STATIC void
 del_sv(SV *p)
 {
     if (debug & 32768) {
@@ -259,7 +269,7 @@ sv_add_arena(char *ptr, U32 size, U32 flags)
 }
 
 /* sv_mutex must be held while calling more_sv() */
-static SV*
+STATIC SV*
 more_sv(void)
 {
     register SV* sv;
@@ -277,7 +287,7 @@ more_sv(void)
     return sv;
 }
 
-static void
+STATIC void
 visit(SVFUNC f)
 {
     SV* sva;
@@ -288,14 +298,14 @@ visit(SVFUNC f)
 	svend = &sva[SvREFCNT(sva)];
 	for (sv = sva + 1; sv < svend; ++sv) {
 	    if (SvTYPE(sv) != SVTYPEMASK)
-		(*f)(sv);
+		(FCALL)(sv);
 	}
     }
 }
 
 #endif /* PURIFY */
 
-static void
+STATIC void
 do_report_used(SV *sv)
 {
     if (SvTYPE(sv) != SVTYPEMASK) {
@@ -311,7 +321,7 @@ sv_report_used(void)
     visit(do_report_used);
 }
 
-static void
+STATIC void
 do_clean_objs(SV *sv)
 {
     SV* rv;
@@ -327,7 +337,7 @@ do_clean_objs(SV *sv)
 }
 
 #ifndef DISABLE_DESTRUCTOR_KLUDGE
-static void
+STATIC void
 do_clean_named_objs(SV *sv)
 {
     if (SvTYPE(sv) == SVt_PVGV && GvSV(sv))
@@ -348,7 +358,7 @@ sv_clean_objs(void)
     in_clean_objs = FALSE;
 }
 
-static void
+STATIC void
 do_clean_all(SV *sv)
 {
     DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning loops:\n "), sv_dump(sv));)
@@ -388,7 +398,7 @@ sv_free_arenas(void)
     sv_root = 0;
 }
 
-static XPVIV*
+STATIC XPVIV*
 new_xiv(void)
 {
     IV** xiv;
@@ -403,7 +413,7 @@ new_xiv(void)
     return more_xiv();
 }
 
-static void
+STATIC void
 del_xiv(XPVIV *p)
 {
     IV** xiv = (IV**)((char*)(p) + sizeof(XPV));
@@ -411,7 +421,7 @@ del_xiv(XPVIV *p)
     xiv_root = xiv;
 }
 
-static XPVIV*
+STATIC XPVIV*
 more_xiv(void)
 {
     register IV** xiv;
@@ -432,7 +442,7 @@ more_xiv(void)
     return new_xiv();
 }
 
-static XPVNV*
+STATIC XPVNV*
 new_xnv(void)
 {
     double* xnv;
@@ -444,7 +454,7 @@ new_xnv(void)
     return more_xnv();
 }
 
-static void
+STATIC void
 del_xnv(XPVNV *p)
 {
     double* xnv = (double*)((char*)(p) + sizeof(XPVIV));
@@ -452,7 +462,7 @@ del_xnv(XPVNV *p)
     xnv_root = xnv;
 }
 
-static XPVNV*
+STATIC XPVNV*
 more_xnv(void)
 {
     register double* xnv;
@@ -469,7 +479,7 @@ more_xnv(void)
     return new_xnv();
 }
 
-static XRV*
+STATIC XRV*
 new_xrv(void)
 {
     XRV* xrv;
@@ -481,14 +491,14 @@ new_xrv(void)
     return more_xrv();
 }
 
-static void
+STATIC void
 del_xrv(XRV *p)
 {
     p->xrv_rv = (SV*)xrv_root;
     xrv_root = p;
 }
 
-static XRV*
+STATIC XRV*
 more_xrv(void)
 {
     register XRV* xrv;
@@ -504,7 +514,7 @@ more_xrv(void)
     return new_xrv();
 }
 
-static XPV*
+STATIC XPV*
 new_xpv(void)
 {
     XPV* xpv;
@@ -516,14 +526,14 @@ new_xpv(void)
     return more_xpv();
 }
 
-static void
+STATIC void
 del_xpv(XPV *p)
 {
     p->xpv_pv = (char*)xpv_root;
     xpv_root = p;
 }
 
-static XPV*
+STATIC XPV*
 more_xpv(void)
 {
     register XPV* xpv;
@@ -1172,7 +1182,7 @@ sv_setnv(register SV *sv, double num)
     SvTAINT(sv);
 }
 
-static void
+STATIC void
 not_a_number(SV *sv)
 {
     dTHR;
@@ -1467,7 +1477,7 @@ sv_2nv(register SV *sv)
     return SvNVX(sv);
 }
 
-static IV
+STATIC IV
 asIV(SV *sv)
 {
     I32 numtype = looks_like_number(sv);
@@ -1485,7 +1495,7 @@ asIV(SV *sv)
 	return (IV) U_V(d);
 }
 
-static UV
+STATIC UV
 asUV(SV *sv)
 {
     I32 numtype = looks_like_number(sv);
@@ -2219,7 +2229,7 @@ sv_usepvn(register SV *sv, register char *ptr, register STRLEN len)
     SvTAINT(sv);
 }
 
-static void
+STATIC void
 sv_check_thinkfirst(register SV *sv)
 {
     if (SvTHINKFIRST(sv)) {
@@ -2343,7 +2353,7 @@ sv_magic(register SV *sv, SV *obj, int how, char *name, I32 namlen)
     if (SvMAGICAL(sv) || (how == 't' && SvTYPE(sv) >= SVt_PVMG)) {
 	if (SvMAGIC(sv) && (mg = mg_find(sv, how))) {
 	    if (how == 't')
-		mg->mg_len |= 1;
+		mg->mg_length |= 1;
 	    return;
 	}
     }
@@ -2363,7 +2373,7 @@ sv_magic(register SV *sv, SV *obj, int how, char *name, I32 namlen)
 	mg->mg_flags |= MGf_REFCOUNTED;
     }
     mg->mg_type = how;
-    mg->mg_len = namlen;
+    mg->mg_length = namlen;
     if (name)
 	if (namlen >= 0)
 	    mg->mg_ptr = savepvn(name, namlen);
@@ -2444,7 +2454,7 @@ sv_magic(register SV *sv, SV *obj, int how, char *name, I32 namlen)
 	break;
     case 't':
 	mg->mg_virtual = &vtbl_taint;
-	mg->mg_len = 1;
+	mg->mg_length = 1;
 	break;
     case 'U':
 	mg->mg_virtual = &vtbl_uvar;
@@ -2493,12 +2503,12 @@ sv_unmagic(SV *sv, int type)
 	if (mg->mg_type == type) {
 	    MGVTBL* vtbl = mg->mg_virtual;
 	    *mgp = mg->mg_moremagic;
-	    if (vtbl && vtbl->svt_free)
-		(*vtbl->svt_free)(sv, mg);
+	    if (vtbl && (vtbl->svt_free != NULL))
+		(VTBL->svt_free)(sv, mg);
 	    if (mg->mg_ptr && mg->mg_type != 'g')
-		if (mg->mg_len >= 0)
+		if (mg->mg_length >= 0)
 		    Safefree(mg->mg_ptr);
-		else if (mg->mg_len == HEf_SVKEY)
+		else if (mg->mg_length == HEf_SVKEY)
 		    SvREFCNT_dec((SV*)mg->mg_ptr);
 	    if (mg->mg_flags & MGf_REFCOUNTED)
 		SvREFCNT_dec(mg->mg_obj);
@@ -2636,23 +2646,23 @@ sv_clear(register SV *sv)
 
 	    destructor = gv_fetchmethod(SvSTASH(sv), "DESTROY");
 	    if (destructor) {
-		SV ref;
+		SV tmpRef;
 
-		Zero(&ref, 1, SV);
-		sv_upgrade(&ref, SVt_RV);
-		SvRV(&ref) = SvREFCNT_inc(sv);
-		SvROK_on(&ref);
-		SvREFCNT(&ref) = 1;	/* Fake, but otherwise
+		Zero(&tmpRef, 1, SV);
+		sv_upgrade(&tmpRef, SVt_RV);
+		SvRV(&tmpRef) = SvREFCNT_inc(sv);
+		SvROK_on(&tmpRef);
+		SvREFCNT(&tmpRef) = 1;	/* Fake, but otherwise
 					   creating+destructing a ref
 					   leads to disaster. */
 
 		EXTEND(SP, 2);
 		PUSHMARK(SP);
-		PUSHs(&ref);
+		PUSHs(&tmpRef);
 		PUTBACK;
 		perl_call_sv((SV*)GvCV(destructor),
 			     G_DISCARD|G_EVAL|G_KEEPERR);
-		del_XRV(SvANY(&ref));
+		del_XRV(SvANY(&tmpRef));
 		SvREFCNT(sv)--;
 	    }
 
@@ -2961,17 +2971,17 @@ sv_collxfrm(SV *sv, STRLEN *nxp)
 		assert(mg);
 	    }
 	    mg->mg_ptr = xf;
-	    mg->mg_len = xlen;
+	    mg->mg_length = xlen;
 	}
 	else {
 	    if (mg) {
 		mg->mg_ptr = NULL;
-		mg->mg_len = -1;
+		mg->mg_length = -1;
 	    }
 	}
     }
     if (mg && mg->mg_ptr) {
-	*nxp = mg->mg_len;
+	*nxp = mg->mg_length;
 	return mg->mg_ptr + sizeof(collation_ix);
     }
     else {
@@ -2983,7 +2993,7 @@ sv_collxfrm(SV *sv, STRLEN *nxp)
 #endif /* USE_LOCALE_COLLATE */
 
 char *
-sv_gets(register SV *sv, register FILE *fp, I32 append)
+sv_gets(register SV *sv, register PerlIO *fp, I32 append)
 {
     dTHR;
     char *rsptr;
@@ -3356,7 +3366,7 @@ sv_dec(register SV *sv)
  * hopefully we won't free it until it has been assigned to a
  * permanent location. */
 
-static void
+STATIC void
 sv_mortalgrow(void)
 {
     dTHR;
@@ -3486,7 +3496,7 @@ newSViv(IV i)
 }
 
 SV *
-newRV(SV *ref)
+newRV(SV *tmpRef)
 {
     dTHR;
     register SV *sv;
@@ -3496,8 +3506,8 @@ newRV(SV *ref)
     SvREFCNT(sv) = 1;
     SvFLAGS(sv) = 0;
     sv_upgrade(sv, SVt_RV);
-    SvTEMP_off(ref);
-    SvRV(sv) = SvREFCNT_inc(ref);
+    SvTEMP_off(tmpRef);
+    SvRV(sv) = SvREFCNT_inc(tmpRef);
     SvROK_on(sv);
     return sv;
 }
@@ -3505,12 +3515,12 @@ newRV(SV *ref)
 
 
 SV *
-Perl_newRV_noinc(SV *ref)
+Perl_newRV_noinc(SV *tmpRef)
 {
     register SV *sv;
 
-    sv = newRV(ref);
-    SvREFCNT_dec(ref);
+    sv = newRV(tmpRef);
+    SvREFCNT_dec(tmpRef);
     return sv;
 }
 
@@ -3938,24 +3948,24 @@ SV*
 sv_bless(SV *sv, HV *stash)
 {
     dTHR;
-    SV *ref;
+    SV *tmpRef;
     if (!SvROK(sv))
         croak("Can't bless non-reference value");
-    ref = SvRV(sv);
-    if (SvFLAGS(ref) & (SVs_OBJECT|SVf_READONLY)) {
-	if (SvREADONLY(ref))
+    tmpRef = SvRV(sv);
+    if (SvFLAGS(tmpRef) & (SVs_OBJECT|SVf_READONLY)) {
+	if (SvREADONLY(tmpRef))
 	    croak(no_modify);
-	if (SvOBJECT(ref)) {
-	    if (SvTYPE(ref) != SVt_PVIO)
+	if (SvOBJECT(tmpRef)) {
+	    if (SvTYPE(tmpRef) != SVt_PVIO)
 		--sv_objcount;
-	    SvREFCNT_dec(SvSTASH(ref));
+	    SvREFCNT_dec(SvSTASH(tmpRef));
 	}
     }
-    SvOBJECT_on(ref);
-    if (SvTYPE(ref) != SVt_PVIO)
+    SvOBJECT_on(tmpRef);
+    if (SvTYPE(tmpRef) != SVt_PVIO)
 	++sv_objcount;
-    (void)SvUPGRADE(ref, SVt_PVMG);
-    SvSTASH(ref) = (HV*)SvREFCNT_inc(stash);
+    (void)SvUPGRADE(tmpRef, SVt_PVMG);
+    SvSTASH(tmpRef) = (HV*)SvREFCNT_inc(stash);
 
 #ifdef OVERLOAD
     if (Gv_AMG(stash))
@@ -3967,7 +3977,7 @@ sv_bless(SV *sv, HV *stash)
     return sv;
 }
 
-static void
+STATIC void
 sv_unglob(SV *sv)
 {
     assert(SvTYPE(sv) == SVt_PVGV);
@@ -4006,7 +4016,7 @@ sv_untaint(SV *sv)
     if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
 	MAGIC *mg = mg_find(sv, 't');
 	if (mg)
-	    mg->mg_len &= ~1;
+	    mg->mg_length &= ~1;
     }
 }
 
@@ -4015,7 +4025,7 @@ sv_tainted(SV *sv)
 {
     if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
 	MAGIC *mg = mg_find(sv, 't');
-	if (mg && ((mg->mg_len & 1) || (mg->mg_len & 2) && mg->mg_obj == sv))
+	if (mg && ((mg->mg_length & 1) || (mg->mg_length & 2) && mg->mg_obj == sv))
 	    return TRUE;
     }
     return FALSE;

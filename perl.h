@@ -24,6 +24,33 @@
 #define USE_STDIO
 #endif /* PERL_FOR_X2P */
 
+#ifdef PERL_OBJECT
+class CPerlObj;
+
+#define STATIC
+#define CPERLscope(x) CPerlObj::x
+#define CPERLproto CPerlObj *
+#define CPERLproto_ CPERLproto,
+#define CPERLarg CPerlObj *pPerl
+#define CPERLarg_ CPERLarg,
+#define THIS this
+#define THIS_ this,
+#define CALLRUNOPS (this->*runops)
+
+#else /* !PERL_OBJECT */
+
+#define STATIC static
+#define CPERLscope(x) x
+#define CPERLproto
+#define CPERLproto_ 
+#define CPERLarg
+#define CPERLarg_
+#define THIS
+#define THIS_
+#define CALLRUNOPS runops
+
+#endif /* PERL_OBJECT */
+
 #define VOIDUSED 1
 #include "config.h"
 
@@ -204,6 +231,7 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 #endif
 
 #include "perlio.h"
+#include "perlmem.h"
 #include "perllio.h"
 #include "perlsock.h"
 #include "perlproc.h"
@@ -1072,7 +1100,11 @@ union any {
     I32		any_i32;
     IV		any_iv;
     long	any_long;
+#ifdef PERL_OBJECT
+    void	(*any_dptr) _((void*, void*));
+#else
     void	(*any_dptr) _((void*));
+#endif
 };
 
 #ifdef USE_THREADS
@@ -1099,6 +1131,34 @@ union any {
 #include "hv.h"
 #include "mg.h"
 #include "scope.h"
+
+#ifdef PERL_OBJECT
+struct magic_state {
+    SV* mgs_sv;
+    U32 mgs_flags;
+};
+typedef struct magic_state MGS;
+
+typedef struct {
+    I32 len_min;
+    I32 len_delta;
+    I32 pos_min;
+    I32 pos_delta;
+    SV *last_found;
+    I32 last_end;			/* min value, <0 unless valid. */
+    I32 last_start_min;
+    I32 last_start_max;
+    SV **longest;			/* Either &l_fixed, or &l_float. */
+    SV *longest_fixed;
+    I32 offset_fixed;
+    SV *longest_float;
+    I32 offset_float_min;
+    I32 offset_float_max;
+    I32 flags;
+} scan_data_t;
+
+typedef I32 CHECKPOINT;
+#endif /* PERL_OBJECT */
 
 /* work around some libPW problems */
 #ifdef DOINIT
@@ -1377,11 +1437,13 @@ typedef Sighandler_t Sigsave_t;
  * included until after runops is initialised.
  */
 
+#ifndef PERL_OBJECT
 typedef int runops_proc_t _((void));
 int runops_standard _((void));
 #ifdef DEBUGGING
 int runops_debug _((void));
 #endif
+#endif  /* PERL_OBJECT */
 
 #define THREADSV_NAMES "_123456789&`'+/.,\\\";^-%=|~:\001\005!@"
 
@@ -1624,6 +1686,24 @@ typedef enum {
 #define PERLVARI(var,type,init) type var;
 #define PERLVARIC(var,type,init) type var;
 
+#ifdef PERL_OBJECT
+extern "C" CPerlObj* perl_alloc _((IPerlMem*, IPerlEnv*, IPerlStdIO*, IPerlLIO*, IPerlDir*, IPerlSock*, IPerlProc*));
+
+typedef int (CPerlObj::*runops_proc_t) _((void));
+#undef EXT
+#define EXT
+#undef EXTCONST
+#define EXTCONST
+#undef INIT
+#define INIT(x)
+
+class CPerlObj {
+public:
+	CPerlObj(IPerlMem*, IPerlEnv*, IPerlStdIO*, IPerlLIO*, IPerlDir*, IPerlSock*, IPerlProc*);
+	void Init(void);
+	void* operator new(size_t nSize, IPerlMem *pvtbl);
+#endif /* PERL_OBJECT */
+
 #ifdef PERL_GLOBAL_STRUCT
 struct perl_vars {
 #include "perlvars.h"
@@ -1720,6 +1800,20 @@ typedef void *Thread;
 #include "intrpvar.h"
 #endif
 
+#ifdef PERL_OBJECT
+#if defined(WIN32)
+char** environ;
+#endif
+};
+
+#include "objpp.h"
+#ifdef DOINIT
+#include "INTERN.h"
+#else
+#include "EXTERN.h"
+#endif
+#endif  /* PERL_OBJECT */
+
 
 #undef PERLVAR
 #undef PERLVARI
@@ -1732,7 +1826,9 @@ typedef void *Thread;
  * It has to go here or #define of printf messes up __attribute__
  * stuff in proto.h  
  */
+#ifndef PERL_OBJECT
 #  include <win32iop.h>
+#endif  /* PERL_OBJECT */
 #endif	/* WIN32 */
 
 #ifdef DOINIT
@@ -1925,7 +2021,7 @@ enum {
   subtr_amg,	subtr_ass_amg,
   mult_amg,	mult_ass_amg,
   div_amg,	div_ass_amg,
-  mod_amg,	mod_ass_amg,
+  modulo_amg,	modulo_ass_amg,
   pow_amg,	pow_ass_amg,
   lshift_amg,	lshift_ass_amg,
   rshift_amg,	rshift_ass_amg,

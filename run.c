@@ -16,12 +16,17 @@
  * know.  Run now!  Hope is in speed!"  --Gandalf
  */
 
+#ifdef PERL_OBJECT
+#define CALLOP this->*op
+#else
+#define CALLOP *op
+#endif
 
 int
 runops_standard(void) {
     dTHR;
 
-    while ( op = (*op->op_ppaddr)(ARGS) ) ;
+    while ( op = (CALLOP->op_ppaddr)(ARGS) ) ;
 
     TAINT_NOT;
     return 0;
@@ -32,7 +37,9 @@ runops_standard(void) {
 dEXT char **watchaddr = 0;
 dEXT char *watchok;
 
+#ifndef PERL_OBJECT
 static void debprof _((OP*o));
+#endif
 
 int
 runops_debug(void) {
@@ -51,7 +58,7 @@ runops_debug(void) {
 	    DEBUG_t(debop(op));
 	    DEBUG_P(debprof(op));
 	}
-    } while ( op = (*op->op_ppaddr)(ARGS) );
+    } while ( op = (CALLOP->op_ppaddr)(ARGS) );
 
     TAINT_NOT;
     return 0;
@@ -93,7 +100,7 @@ watch(char **addr)
 	(long)watchaddr, (long)watchok);
 }
 
-static void
+STATIC void
 debprof(OP *o)
 {
     if (!profiledata)

@@ -448,4 +448,6 @@ const static char reg_off_by_arg[] = {
 extern char *colors[4];
 #endif 
 
+#ifndef PERL_OBJECT
 void	re_croak2 _((const char* pat1,const char* pat2,...)) __attribute__((noreturn));
+#endif

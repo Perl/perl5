@@ -157,3 +157,13 @@ PERLVAR(Iofmt,		char *)		/* $# */
 #ifdef USE_THREADS
 PERLVAR(Ithrsv,		SV *)		/* holds struct perl_thread for main thread */
 #endif /* USE_THREADS */
+
+#ifdef PERL_OBJECT
+PERLVARI(piMem, IPerlMem*, NULL)
+PERLVARI(piENV, IPerlEnv*, NULL)
+PERLVARI(piStdIO, IPerlStdIO*, NULL)
+PERLVARI(piLIO, IPerlLIO*, NULL)
+PERLVARI(piDir, IPerlDir*, NULL)
+PERLVARI(piSock, IPerlSock*, NULL)
+PERLVARI(piProc, IPerlProc*, NULL)
+#endif

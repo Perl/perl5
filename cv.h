@@ -21,7 +21,7 @@ struct xpvcv {
     HV *	xcv_stash;
     OP *	xcv_start;
     OP *	xcv_root;
-    void      (*xcv_xsub) _((CV*));
+    void      (*xcv_xsub) _((CPERLproto_ CV*));
     ANY		xcv_xsubany;
     GV *	xcv_gv;
     GV *	xcv_filegv;

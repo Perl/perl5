@@ -18,6 +18,14 @@
 #ifndef _config_h_
 #define _config_h_
 
+#ifdef PERL_OBJECT
+#ifdef PERL_GLOBAL_STRUCT
+#error PERL_GLOBAL_STRUCT cannot be defined with PERL_OBJECT
+#endif
+#define win32_perllib_path PerlEnv_lib_path
+#endif
+
+
 /* MEM_ALIGNBYTES:
  *	This symbol contains the number of bytes required to align a
  *	double. Usual values are 2, 4 and 8.
@@ -57,8 +65,8 @@
  *	This symbol is the filename expanded version of the BIN symbol, for
  *	programs that do not want to deal with that at run-time.
  */
-#define BIN "c:\\perl\\bin"	/**/
-#define BIN_EXP "c:\\perl\\bin"	/**/
+#define BIN "c:\\perl5004.5x\\bin"	/**/
+#define BIN_EXP "c:\\perl5004.5x\\bin"	/**/
 
 /* CAT2:
  *	This macro catenates 2 tokens together.
@@ -548,12 +556,24 @@
  */
 /*#define HAS_POLL		/**/
 
+/* HAS_PTHREAD_YIELD:
+ *	This symbol, if defined, indicates that the pthread_yield routine is
+ *	available to yield the execution of the current thread.
+ */
+#undef HAS_PTHREAD_YIELD
+
 /* HAS_READDIR:
  *	This symbol, if defined, indicates that the readdir routine is
  *	available to read directory entries. You may have to include
  *	<dirent.h>. See I_DIRENT.
  */
 #define HAS_READDIR		/**/
+
+/* HAS_SCHED_YIELD:
+ *	This symbol, if defined, indicates that the sched_yield
+ *	routine is available to yield the execution of the current thread.
+ */
+#undef HAS_SCHED_YIELD
 
 /* HAS_SEEKDIR:
  *	This symbol, if defined, indicates that the seekdir routine is
@@ -1466,7 +1486,7 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define ARCHLIB "c:\\perl\\lib\\MSWin32-x86-thread"		/**/
+#define ARCHLIB "c:\\perl5004.5x\\lib"		/**/
 #define ARCHLIB_EXP (win32_perllib_path(ARCHNAME,NULL))	/**/
 
 /* BINCOMPAT3:
@@ -1606,6 +1626,12 @@
  */
 /*#define	USE_SFIO		/**/
 
+/* PTHREADS_CREATED_JOINABLE:
+ *	This symbol, if defined, indicates that pthreads are created
+ *	in the joinable (aka undetached) state.
+ */
+/*#define	PTHREADS_CREATED_JOINABLE		/**/
+
 /* Sigjmp_buf:
  *	This is the buffer type to be used with Sigsetjmp and Siglongjmp.
  */
@@ -1686,7 +1712,9 @@
 /* MYMALLOC:
  *	This symbol, if defined, indicates that we're using our own malloc.
  */
+#ifndef PERL_OBJECT
 #define MYMALLOC			/**/
+#endif
 
 /* OLDARCHLIB:
  *	This variable, if defined, holds the name of the directory in
@@ -1713,7 +1741,7 @@
  *	This symbol contains the ~name expanded version of PRIVLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define PRIVLIB "c:\\perl\\lib"		/**/
+#define PRIVLIB "c:\\perl5004.5x\\lib"		/**/
 #define PRIVLIB_EXP (win32_perllib_path(NULL))	/**/
 
 /* SH_PATH:
@@ -1769,7 +1797,7 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITEARCH "c:\\perl\\lib\\site"		/**/
+#define SITEARCH "c:\\perl5004.5x\\lib\\site"		/**/
 #define SITEARCH_EXP (win32_perllib_path("site",ARCHNAME,NULL))	/**/
 
 /* SITELIB:
@@ -1785,7 +1813,7 @@
  *	This symbol contains the ~name expanded version of SITELIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITELIB "c:\\perl\\lib\\site"		/**/
+#define SITELIB "c:\\perl5004.5x\\lib\\site"		/**/
 #define SITELIB_EXP (win32_perllib_path("site",NULL))	/**/
 
 /* STARTPERL:

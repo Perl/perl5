@@ -678,12 +678,12 @@ PP(pp_aassign)
 	    if (delaymagic & DM_UID) {
 		if (uid != euid)
 		    DIE("No setreuid available");
-		(void)setuid(uid);
+		(void)PerlProc_setuid(uid);
 	    }
 #  endif /* HAS_SETREUID */
 #endif /* HAS_SETRESUID */
-	    uid = (int)getuid();
-	    euid = (int)geteuid();
+	    uid = (int)PerlProc_getuid();
+	    euid = (int)PerlProc_geteuid();
 	}
 	if (delaymagic & DM_GID) {
 #ifdef HAS_SETRESGID
@@ -707,12 +707,12 @@ PP(pp_aassign)
 	    if (delaymagic & DM_GID) {
 		if (gid != egid)
 		    DIE("No setregid available");
-		(void)setgid(gid);
+		(void)PerlProc_setgid(gid);
 	    }
 #  endif /* HAS_SETREGID */
 #endif /* HAS_SETRESGID */
-	    gid = (int)getgid();
-	    egid = (int)getegid();
+	    gid = (int)PerlProc_getgid();
+	    egid = (int)PerlProc_getegid();
 	}
 	tainting |= (uid && (euid != uid || egid != gid));
     }
@@ -791,8 +791,8 @@ PP(pp_match)
 	rx->startp[0] = 0;
 	if (SvTYPE(TARG) >= SVt_PVMG && SvMAGIC(TARG)) {
 	    MAGIC* mg = mg_find(TARG, 'g');
-	    if (mg && mg->mg_len >= 0) {
-		rx->endp[0] = rx->startp[0] = s + mg->mg_len; 
+	    if (mg && mg->mg_length >= 0) {
+		rx->endp[0] = rx->startp[0] = s + mg->mg_length; 
 		minmatch = (mg->mg_flags & MGf_MINMATCH);
 		update_minmatch = 0;
 	    }
@@ -914,7 +914,7 @@ play_it_again:
 		mg = mg_find(TARG, 'g');
 	    }
 	    if (rx->startp[0]) {
-		mg->mg_len = rx->endp[0] - rx->subbeg;
+		mg->mg_length = rx->endp[0] - rx->subbeg;
 		if (rx->startp[0] == rx->endp[0])
 		    mg->mg_flags |= MGf_MINMATCH;
 		else
@@ -961,7 +961,7 @@ ret_no:
 	if (SvTYPE(TARG) >= SVt_PVMG && SvMAGIC(TARG)) {
 	    MAGIC* mg = mg_find(TARG, 'g');
 	    if (mg)
-		mg->mg_len = -1;
+		mg->mg_length = -1;
 	}
     }
     LEAVE_SCOPE(oldsave);
@@ -1209,7 +1209,7 @@ do_readline(void)
 		if (!isALPHA(*tmps) && !isDIGIT(*tmps) &&
 		    strchr("$&*(){}[]'\";\\|?<>~`", *tmps))
 			break;
-	    if (*tmps && Stat(SvPVX(sv), &statbuf) < 0) {
+	    if (*tmps && PerlLIO_stat(SvPVX(sv), &statbuf) < 0) {
 		(void)POPs;		/* Unmatched wildcard?  Chuck it... */
 		continue;
 	    }
@@ -1757,7 +1757,7 @@ PP(pp_leavesub)
     return pop_return();
 }
 
-static CV *
+STATIC CV *
 get_db_sub(SV **svp, CV *cv)
 {
     dTHR;
@@ -2056,7 +2056,7 @@ PP(pp_entersub)
 		curcopdb = NULL;
 	    }
 	    /* Do we need to open block here? XXXX */
-	    (void)(*CvXSUB(cv))(cv);
+	    (void)(*CvXSUB(cv))(THIS_ cv);
 
 	    /* Enforce some sanity in scalar context. */
 	    if (gimme == G_SCALAR && ++markix != stack_sp - stack_base ) {

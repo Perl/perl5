@@ -104,6 +104,7 @@ Perl_dump_packsubs
 Perl_dump_pm
 Perl_dump_sub
 Perl_expectterm
+Perl_error_no
 Perl_fetch_gv
 Perl_fetch_io
 Perl_force_ident
@@ -156,6 +157,7 @@ Perl_scan_trans
 Perl_scan_word
 Perl_setenv_getix
 Perl_skipspace
+Perl_sort_mutex
 Perl_sublex_done
 Perl_sublex_start
 Perl_sv_ref

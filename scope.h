@@ -60,8 +60,13 @@
 #define SAVECLEARSV(sv)	save_clearsv(SOFT_CAST(SV**)&(sv))
 #define SAVEDELETE(h,k,l) \
 	  save_delete(SOFT_CAST(HV*)(h), SOFT_CAST(char*)(k), (I32)(l))
+#ifdef PERL_OBJECT
+#define SAVEDESTRUCTOR(f,p) \
+	  save_destructor(SOFT_CAST(void(*)_((void*, void*)))(f),SOFT_CAST(void*)(p))
+#else
 #define SAVEDESTRUCTOR(f,p) \
 	  save_destructor(SOFT_CAST(void(*)_((void*)))(f),SOFT_CAST(void*)(p))
+#endif
 #define SAVESTACK_POS() STMT_START {	\
     SSCHECK(2);				\
     SSPUSHINT(stack_sp - stack_base);	\

@@ -15,7 +15,11 @@
 #define dARGS
 #endif /* USE_THREADS */
 #ifdef CAN_PROTOTYPE
+#ifdef PERL_OBJECT
+#define PP(s) OP* CPerlObj::s _((ARGSproto))
+#else
 #define PP(s) OP * s(ARGSproto)
+#endif
 #else /* CAN_PROTOTYPE */
 #define PP(s) OP* s(ARGS) dARGS
 #endif /* CAN_PROTOTYPE */
@@ -217,10 +221,11 @@
 /* newSVsv does not behave as advertised, so we copy missing
  * information by hand */
 
-
-#define RvDEEPCP(rv) STMT_START { SV* ref=SvRV(rv);      \
-  if (SvREFCNT(ref)>1) {                 \
-    SvREFCNT_dec(ref);                   \
+/* SV* ref causes confusion with the member variable
+   changed SV* ref to SV* tmpRef */
+#define RvDEEPCP(rv) STMT_START { SV* tmpRef=SvRV(rv);      \
+  if (SvREFCNT(tmpRef)>1) {                 \
+    SvREFCNT_dec(tmpRef);                   \
     SvRV(rv)=AMG_CALLun(rv,copy);        \
   } } STMT_END
 #else

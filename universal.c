@@ -1,13 +1,12 @@
 #include "EXTERN.h"
 #include "perl.h"
-#include "XSUB.h"
 
 /*
  * Contributed by Graham Barr  <Graham.Barr@tiuk.ti.com>
  * The main guts of traverse_isa was actually copied from gv_fetchmeth
  */
 
-static SV *
+STATIC SV *
 isa_lookup(HV *stash, char *name, int len, int level)
 {
     AV* av;
@@ -100,6 +99,7 @@ sv_derived_from(SV *sv, char *name)
  
 }
 
+#include "XSUB.h"
 
 static
 XS(XS_UNIVERSAL_isa)
@@ -195,6 +195,12 @@ XS(XS_UNIVERSAL_VERSION)
 
     XSRETURN(1);
 }
+
+#ifdef PERL_OBJECT
+#undef  boot_core_UNIVERSAL
+#define boot_core_UNIVERSAL CPerlObj::Perl_boot_core_UNIVERSAL
+#define pPerl this
+#endif
 
 void
 boot_core_UNIVERSAL(void)

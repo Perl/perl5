@@ -6,11 +6,20 @@ static char yysccsid[] = "@(#)yaccpar 1.8 (Berkeley) 01/20/91";
 #include "EXTERN.h"
 #include "perl.h"
 
+#ifdef PERL_OBJECT
+static void
+Dep(CPerlObj *pPerl)
+{
+    pPerl->deprecate("\"do\" to call subroutines");
+}
+#define dep() Dep(this)
+#else
 static void
 dep(void)
 {
     deprecate("\"do\" to call subroutines");
 }
+#endif
 
 #line 16 "perly.c"
 #define YYERRCODE 256
@@ -1317,6 +1326,16 @@ yydestruct(void *ptr)
     Safefree(ysave);
 }
 
+#ifdef PERL_OBJECT
+static void YYDestructor(void *pPerl, void *ptr)
+{
+    ((CPerlObj*)pPerl)->yydestruct(ptr);
+}
+#define YYDESTRUCT YYDestructor
+#else
+#define YYDESTRUCT yydestruct
+#endif
+
 int
 yyparse(void)
 {
@@ -1335,7 +1354,7 @@ yyparse(void)
 #endif
 
     struct ysv *ysave = (struct ysv*)safemalloc(sizeof(struct ysv));
-    SAVEDESTRUCTOR(yydestruct, ysave);
+    SAVEDESTRUCTOR(YYDESTRUCT, ysave);
     ysave->oldyydebug	= yydebug;
     ysave->oldyynerrs	= yynerrs;
     ysave->oldyyerrflag	= yyerrflag;

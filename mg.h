@@ -8,11 +8,11 @@
  */
 
 struct mgvtbl {
-    int		(*svt_get)	_((SV *sv, MAGIC* mg));
-    int		(*svt_set)	_((SV *sv, MAGIC* mg));
-    U32		(*svt_len)	_((SV *sv, MAGIC* mg));
-    int		(*svt_clear)	_((SV *sv, MAGIC* mg));
-    int		(*svt_free)	_((SV *sv, MAGIC* mg));
+    int		(CPERLscope(*svt_get))	_((SV *sv, MAGIC* mg));
+    int		(CPERLscope(*svt_set))	_((SV *sv, MAGIC* mg));
+    U32		(CPERLscope(*svt_len))	_((SV *sv, MAGIC* mg));
+    int		(CPERLscope(*svt_clear))	_((SV *sv, MAGIC* mg));
+    int		(CPERLscope(*svt_free))	_((SV *sv, MAGIC* mg));
 };
 
 struct magic {
@@ -23,7 +23,7 @@ struct magic {
     U8		mg_flags;
     SV*		mg_obj;
     char*	mg_ptr;
-    I32		mg_len;
+    I32		mg_length;
 };
 
 #define MGf_TAINTEDDIR 1
@@ -36,6 +36,6 @@ struct magic {
 #define MgTAINTEDDIR_on(mg)	(mg->mg_flags |= MGf_TAINTEDDIR)
 #define MgTAINTEDDIR_off(mg)	(mg->mg_flags &= ~MGf_TAINTEDDIR)
 
-#define MgPV(mg,lp)		(((lp = (mg)->mg_len) == HEf_SVKEY) ?   \
+#define MgPV(mg,lp)		(((lp = (mg)->mg_length) == HEf_SVKEY) ?   \
 				 SvPV((SV*)((mg)->mg_ptr),lp) :		\
 				 (mg)->mg_ptr)

@@ -21,6 +21,10 @@ BUILDOPT=-DUSE_THREADS
 #CCTYPE=MSVC20
 
 #
+# uncomment next line if you want to use the perl object
+#OBJECT=-DPERL_OBJECT
+
+#
 # uncomment next line if you want debug version of perl (big,slow)
 #CFG=Debug
 
@@ -70,7 +74,7 @@ RUNTIME  = -MD
 !ENDIF
 INCLUDES = -I.\include -I. -I..
 #PCHFLAGS = -Fp"$(INTDIR)/modules.pch" -YX 
-DEFINES  = -DWIN32 -D_CONSOLE $(BUILDOPT) $(CRYPT_FLAG)
+DEFINES  = -DWIN32 -D_CONSOLE $(BUILDOPT) $(CRYPT_FLAG) $(OBJECT)
 LOCDEFS  = -DPERLDLL -DPERL_CORE
 SUBSYS   = console
 
@@ -104,7 +108,11 @@ LIBFILES = $(CRYPT_LIB) oldnames.lib kernel32.lib user32.lib gdi32.lib \
 	oleaut32.lib netapi32.lib uuid.lib wsock32.lib mpr.lib winmm.lib \
 	version.lib odbc32.lib odbccp32.lib
 
+!IF  "$(OBJECT)" == "-DPERL_OBJECT"
+CFLAGS   = -nologo -Gf -W3 -TP $(INCLUDES) $(DEFINES) $(LOCDEFS) $(PCHFLAGS) $(OPTIMIZE)
+!ELSE
 CFLAGS   = -nologo -Gf -W3 $(INCLUDES) $(DEFINES) $(LOCDEFS) $(PCHFLAGS) $(OPTIMIZE)
+!ENDIF
 LINK_FLAGS  = -nologo $(LINK_DBG) -machine:$(PROCESSOR_ARCHITECTURE)
 OBJOUT_FLAG = -Fo
 EXEOUT_FLAG = -Fe
