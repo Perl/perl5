@@ -392,6 +392,8 @@
 #define PL_stderrgv		(*Perl_Istderrgv_ptr(aTHXo))
 #undef  PL_stdingv
 #define PL_stdingv		(*Perl_Istdingv_ptr(aTHXo))
+#undef  PL_stopav
+#define PL_stopav		(*Perl_Istopav_ptr(aTHXo))
 #undef  PL_strtab
 #define PL_strtab		(*Perl_Istrtab_ptr(aTHXo))
 #undef  PL_strtab_mutex

@@ -241,7 +241,7 @@ sub B::SVOP::lint {
     }
     if ($check{private_names}) {
 	my $opname = $op->name;
-	if (($opname eq "gv" || $opname eq "gvsv") {
+	if ($opname eq "gv" || $opname eq "gvsv") {
 	    my $gv = $op->gv;
 	    if ($gv->NAME =~ /^_./ && $gv->STASH->NAME ne $curstash) {
 		warning('Illegal reference to private name %s', $gv->NAME);

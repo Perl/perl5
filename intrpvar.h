@@ -92,6 +92,7 @@ PERLVAR(Iglobalstash,	HV *)		/* global keyword overrides imported here */
 PERLVAR(Icurstname,	SV *)		/* name of current package */
 PERLVAR(Ibeginav,	AV *)		/* names of BEGIN subroutines */
 PERLVAR(Iendav,		AV *)		/* names of END subroutines */
+PERLVAR(Istopav,	AV *)		/* names of STOP subroutines */
 PERLVAR(Iinitav,	AV *)		/* names of INIT subroutines */
 PERLVAR(Istrtab,	HV *)		/* shared string table */
 PERLVARI(Isub_generation,U32,1)		/* incr to invalidate method cache */

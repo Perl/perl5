@@ -42,6 +42,7 @@ INIT
 LE
 LT
 NE
+STOP
 abs
 accept
 alarm
