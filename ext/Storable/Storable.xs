@@ -5613,6 +5613,7 @@ PROTOTYPES: ENABLE
 
 BOOT:
     init_perinterp();
+    gv_fetchpv("Storable::drop_utf8",   GV_ADDMULTI, SVt_PV);
 #ifdef DEBUGME
     /* Only disable the used only once warning if we are in debugging mode.  */
     gv_fetchpv("Storable::DEBUGME",   GV_ADDMULTI, SVt_PV);
