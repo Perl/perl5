@@ -201,9 +201,22 @@ you can call:
     SvOK(SV*)
 
 The scalar C<undef> value is stored in an SV instance called C<PL_sv_undef>.
-Its address can be used whenever an C<SV*> is needed.
-However, you have to be careful when using C<&PL_sv_undef> as a value in AVs
-or HVs (see L<AVs, HVs and undefined values>).
+
+Its address can be used whenever an C<SV*> is needed. Make sure that
+you don't try to compare a random sv with C<&PL_sv_undef>. For example
+when interfacing Perl code, it'll work correctly for:
+
+  foo(undef);
+
+But won't work when called as:
+
+  $x = undef;
+  foo($x);
+
+So to repeat always use SvOK() to check whether an sv is defined.
+
+Also you have to be careful when using C<&PL_sv_undef> as a value in
+AVs or HVs (see L<AVs, HVs and undefined values>).
 
 There are also the two values C<PL_sv_yes> and C<PL_sv_no>, which contain
 boolean TRUE and FALSE values, respectively.  Like C<PL_sv_undef>, their
