@@ -383,9 +383,14 @@ else {
 		    )];
 }
 
-unless ($define{'USE_5005THREADS'}) {
+unless ($define{'USE_5005THREADS'} || $define{'USE_ITHREADS'}) {
     skip_symbols [qw(
 		    PL_thr_key
+		    )];
+}
+
+unless ($define{'USE_5005THREADS'}) {
+    skip_symbols [qw(
 		    PL_sv_mutex
 		    PL_strtab_mutex
 		    PL_svref_mutex
