@@ -13,7 +13,7 @@ use Exporter ();
 
 use B qw(minus_c sv_undef walkoptree walksymtable main_root main_start peekop
 	 class cstring cchar svref_2object compile_stats comppadlist hash
-	 threadsv_names main_cv );
+	 threadsv_names main_cv init_av);
 use B::Asmdata qw(@specialsv_name);
 
 use FileHandle;
@@ -44,7 +44,7 @@ my ($init, $decl, $symsect, $binopsect, $condopsect, $copsect, $cvopsect,
     $gvopsect, $listopsect, $logopsect, $loopsect, $opsect, $pmopsect,
     $pvopsect, $svopsect, $unopsect, $svsect, $xpvsect, $xpvavsect,
     $xpvhvsect, $xpvcvsect, $xpvivsect, $xpvnvsect, $xpvmgsect, $xpvlvsect,
-    $xrvsect, $xpvbmsect, $xpviosect);
+    $xrvsect, $xpvbmsect, $xpviosect, $bootstrap);
 
 sub walk_and_save_optree;
 my $saveoptree_callback = \&walk_and_save_optree;
@@ -852,6 +852,7 @@ sub output_all {
 		    $cvopsect, $loopsect, $copsect, $svsect, $xpvsect,
 		    $xpvavsect, $xpvhvsect, $xpvcvsect, $xpvivsect, $xpvnvsect,
 		    $xpvmgsect, $xpvlvsect, $xrvsect, $xpvbmsect, $xpviosect);
+    $bootstrap->output(\*STDOUT, "/* bootstrap %s */\n");
     $symsect->output(\*STDOUT, "#define %s\n");
     print "\n";
     output_declarations();
@@ -1051,19 +1052,26 @@ sub save_object {
     foreach $sv (@_) {
 	svref_2object($sv)->save;
     }
-}
+}                    
 
 sub B::GV::savecv {
     my $gv = shift;
     my $cv = $gv->CV;
     my $name = $gv->NAME;
-    if ($$cv && !objsym($cv) && !($name eq "bootstrap" && $cv->XSUB)) {
+    if ($$cv && !objsym($cv)) {
+	if ($name eq "bootstrap" && $cv->XSUB) {
+	    my $file = $cv->FILEGV->SV->PV;
+	    $bootstrap->add($file);
+	    return;
+	}
 	if ($debug_cv) {
 	    warn sprintf("saving extra CV &%s::%s (0x%x) from GV 0x%x\n",
 			 $gv->STASH->NAME, $name, $$cv, $$gv);
 	}
       my $package=$gv->STASH->NAME;
-      if ( ! grep(/^$package$/,@unused_sub_packages)){
+      # This seems to undo all the ->isa and prefix stuff we do below
+      # so disable again for now
+      if (0 && ! grep(/^$package$/,@unused_sub_packages)){
           warn sprintf("omitting cv in superclass %s", $gv->STASH->NAME) 
               if $debug_cv;
           return ;
@@ -1126,6 +1134,7 @@ sub save_unused_subs {
 sub save_main {
     my $curpad_nam = (comppadlist->ARRAY)[0]->save;
     my $curpad_sym = (comppadlist->ARRAY)[1]->save;
+    my $init_av    = init_av->save;
     walkoptree(main_root, "save");
     warn "done main optree, walking symtable for extras\n" if $debug_cv;
     save_unused_subs(@unused_sub_packages);
@@ -1133,9 +1142,9 @@ sub save_main {
     $init->add(sprintf("PL_main_root = s\\_%x;", ${main_root()}),
 	       sprintf("PL_main_start = s\\_%x;", ${main_start()}),
 	       "PL_curpad = AvARRAY($curpad_sym);",
+	       "PL_initav = $init_av;",
                "av_store(CvPADLIST(PL_main_cv),0,SvREFCNT_inc($curpad_nam));",
                "av_store(CvPADLIST(PL_main_cv),1,SvREFCNT_inc($curpad_sym));");
-
     warn "Writing output\n";
     output_boilerplate();
     print "\n";
@@ -1156,7 +1165,7 @@ sub init_sections {
 		    xpviv => \$xpvivsect, xpvnv => \$xpvnvsect,
 		    xpvmg => \$xpvmgsect, xpvlv => \$xpvlvsect,
 		    xrv => \$xrvsect, xpvbm => \$xpvbmsect,
-		    xpvio => \$xpviosect);
+		    xpvio => \$xpviosect, bootstrap => \$bootstrap);
     my ($name, $sectref);
     while (($name, $sectref) = splice(@sections, 0, 2)) {
 	$$sectref = new B::Section $name, \%symtable, 0;
