@@ -262,10 +262,10 @@ bye(); # does the necessary cleanup
 
 END {
     # unlink may fail if applied directly to a large file
-    open(BIG, ">big");
-    print BIG "x";
+    # be paranoid about leaving 5 gig files lying around
+    open(BIG, ">big"); # truncate
     close(BIG);
-    unlink "big"; # be paranoid about leaving 5 gig files lying around
+    1 while unlink "big"; # standard portable idiom
 }
 
 # eof
