@@ -278,6 +278,9 @@ S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
 #endif
 
 #if !defined(PERL_EFF_ACCESS_R_OK)
+/* With it or without it: anyway you get a warning: either that
+   it is unused, or it is declared static and never defined.
+ */
 STATIC int
 S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
 {
@@ -2242,8 +2245,8 @@ PP(pp_socket)
 
 PP(pp_sockpair)
 {
-    dSP;
 #ifdef HAS_SOCKETPAIR
+    dSP;
     GV *gv1;
     GV *gv2;
     register IO *io1;
@@ -3389,10 +3392,10 @@ PP(pp_chdir)
 
 PP(pp_chown)
 {
-    dSP; dMARK; dTARGET;
-    I32 value;
 #ifdef HAS_CHOWN
-    value = (I32)apply(PL_op->op_type, MARK, SP);
+    dSP; dMARK; dTARGET;
+    I32 value = (I32)apply(PL_op->op_type, MARK, SP);
+
     SP = MARK;
     PUSHi(value);
     RETURN;
@@ -3403,8 +3406,8 @@ PP(pp_chown)
 
 PP(pp_chroot)
 {
-    dSP; dTARGET;
 #ifdef HAS_CHROOT
+    dSP; dTARGET;
     STRLEN n_a;
     char *tmps = POPpx;
     TAINT_PROPER("chroot");
@@ -3474,8 +3477,9 @@ PP(pp_rename)
 
 PP(pp_link)
 {
-    dSP; dTARGET;
+    dSP;
 #ifdef HAS_LINK
+    dTARGET;
     STRLEN n_a;
     char *tmps2 = POPpx;
     char *tmps = SvPV(TOPs, n_a);
@@ -3489,8 +3493,9 @@ PP(pp_link)
 
 PP(pp_symlink)
 {
-    dSP; dTARGET;
 #ifdef HAS_SYMLINK
+    dSP;
+    dTARGET;
     STRLEN n_a;
     char *tmps2 = POPpx;
     char *tmps = SvPV(TOPs, n_a);
@@ -3504,8 +3509,9 @@ PP(pp_symlink)
 
 PP(pp_readlink)
 {
-    dSP; dTARGET;
+    dSP;
 #ifdef HAS_SYMLINK
+    dTARGET;
     char *tmps;
     char buf[MAXPATHLEN];
     int len;
@@ -3967,13 +3973,8 @@ PP(pp_system)
 {
     dSP; dMARK; dORIGMARK; dTARGET;
     I32 value;
-    Pid_t childpid;
-    int result;
-    int status;
-    Sigsave_t ihand,qhand;     /* place to save signals during system() */
     STRLEN n_a;
-    I32 did_pipes = 0;
-    int pp[2];
+    int result;
 
     if (SP - MARK == 1) {
 	if (PL_tainting) {
@@ -3984,6 +3985,13 @@ PP(pp_system)
     }
     PERL_FLUSHALL_FOR_CHILD;
 #if (defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(OS2) && !defined(__CYGWIN__) || defined(PERL_MICRO)
+  {
+    Pid_t childpid;
+    int status;
+    Sigsave_t ihand,qhand;     /* place to save signals during system() */
+    I32 did_pipes = 0;
+    int pp[2];
+
     if (PerlProc_pipe(pp) >= 0)
 	did_pipes = 1;
     while ((childpid = vfork()) == -1) {
@@ -4043,6 +4051,7 @@ PP(pp_system)
 	PerlLIO_close(pp[0]);
 #if defined(HAS_FCNTL) && defined(F_SETFD)
 	fcntl(pp[1], F_SETFD, FD_CLOEXEC);
+  }
 #endif
     }
     if (PL_op->op_flags & OPf_STACKED) {
