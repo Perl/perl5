@@ -339,7 +339,7 @@ from Andreas König to have better control over the patching process.
 
 =back
 
-=head3 Why rsync the source tree
+=head2 Why rsync the source tree
 
 =over 4
 
@@ -367,7 +367,7 @@ more ... (see Sarathy's remark).
 
 =back
 
-=head3 Why rsync the patches
+=head2 Why rsync the patches
 
 =over 4
 
