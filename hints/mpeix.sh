@@ -12,6 +12,7 @@
 # Revised again for 5.004_69 by Mark Bixby, markb@cccd.edu.
 # Revised for 5.6.0 by Mark Bixby, mbixby@power.net.
 # Revised for 5.7.3 by Mark Bixby, mark@bixby.org.
+# Revised for 5.8.0 by Mark Bixby, mark@bixby.org.
 #
 osname='mpeix'
 osvers=`uname -r | sed -e 's/.[A-Z]\.\([0-9]\)\([0-9]\)\.[0-9][0-9]/\1.\2/'`
@@ -93,6 +94,12 @@ d_difftime='define'
 d_dlerror='undef'
 d_dlopen='undef'
 d_Gconvert='gcvt((x),(n),(b))'
+d_getnbyaddr='define'
+d_getnbyname='define'
+d_getpbyname='define'
+d_getpbynumber='define'
+d_getsbyname='define'
+d_getsbyport='define'
 d_gettimeod='undef'
 d_inetaton='undef'
 d_link='undef'
