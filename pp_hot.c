@@ -1163,11 +1163,8 @@ do_readline()
 		IoFLAGS(io) |= IOf_START;
 	    }
 	    else if (type == OP_GLOB) {
-		if (!do_close(last_in_gv, FALSE) && dowarn)
-		    warn("glob failed (child exited with status %d%s)",
-			STATUS_CURRENT >> 8,
-			(STATUS_CURRENT & 0x80) ? ", core dumped" : ""
-		    );
+		if (do_close(last_in_gv, FALSE) & ~0xFF)
+		    warn("internal error: glob failed");
 	    }
 	    if (gimme == G_SCALAR) {
 		(void)SvOK_off(TARG);
