@@ -958,7 +958,7 @@ _test_prep:
 
 test_prep_pre: preplibrary utilities $(nonxs_ext)
 
-test_prep: test_prep_pre miniperl ./perl$(EXE_EXT) $(dynamic_ext) $(TEST_PERL_DLL)
+test_prep: test_prep_pre miniperl perl$(EXE_EXT) $(dynamic_ext) $(TEST_PERL_DLL)
 	PERL=./perl $(MAKE) _test_prep
 
 _test_tty:
