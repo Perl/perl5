@@ -237,9 +237,17 @@ Perl_is_utf8_string(pTHX_ U8 *s, STRLEN len)
     send = s + len;
 
     while (x < send) {
-        c = is_utf8_char(x);
-	if (!c)
-	    return FALSE;
+	 /* Inline the easy bits of is_utf8_char() here for speed... */
+	 if (UTF8_IS_INVARIANT(*x))
+	      c = 1;
+	 else if (!UTF8_IS_START(*x))
+	      return FALSE;
+	 else {
+	      /* ... and call is_utf8_char() only if really needed. */
+	      c = is_utf8_char(x);
+	      if (!c)
+		   return FALSE;
+	 }
         x += c;
     }
     if (x != send)
