@@ -2335,7 +2335,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_stat64      HAS_STAT64		/**/
 #$d_telldir64   HAS_TELLDIR64	/**/
 #$d_truncate64  HAS_TRUNCATE64	/**/
-#$d_off64t      HAS_OFF64_T    	/**/
+#$d_off64_t      HAS_OFF64_T    	/**/
 #$d_dirent64_s   HAS_STRUCT_DIRENT64 	/**/
 
 /* PRIVLIB:

@@ -1,5 +1,5 @@
 #! /bin/sh
-case $CONFIG in
+case $CONFIGDOTSH in
 '')
 	if test -f config.sh; then TOP=.;
 	elif test -f ../config.sh; then TOP=..;

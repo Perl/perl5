@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Mar 25 00:17:22 EET 1999 [metaconfig 3.0 PL70]
+# Generated on Fri Apr  2 15:40:35 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -661,11 +661,13 @@ d_dirent64_s=''
 d_flock64_s=''
 d_fstat64=''
 d_ftruncate64=''
-d_ino64t=''
+d_ino64_t=''
+d_llseek=''
 d_lockf64=''
 d_lseek64=''
 d_lstat64=''
-d_off64t=''
+d_off64_t=''
+d_offset_t=''
 d_open64=''
 d_opendir64=''
 d_readdir64=''
@@ -1311,7 +1313,7 @@ esac
 
 : script used to extract .SH files with variable substitutions
 cat >extract <<'EOS'
-CONFIG=true
+CONFIGDOTSH=true
 echo "Doing variable substitutions on .SH files..."
 if test -f $src/MANIFEST; then
 	set x `awk '{print $1}' <$src/MANIFEST | grep '\.SH$'`
@@ -2095,7 +2097,7 @@ EOM
 					osvers=2
 				fi
 			fi
-			unset tmp
+			tmp=''
 			;;
 		pc*)
 			if test -n "$DJGPP"; then
@@ -6862,7 +6864,7 @@ while $test $# -ge 2; do
     shift 2;
 done > try.c;
 echo "int main () { struct $struct foo; foo.$field = 0; }" >> try.c;
-if eval $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
+if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
 	val="$define";
 else
 	val="$undef";
@@ -7228,6 +7230,10 @@ if $test X"$use64bits" = X"$define"; then
 	set lockf64 d_lockf64
 	eval $inlibc
 
+	: see if llseek exists
+	set llseek d_llseek
+	eval $inlibc
+
 	: see if lseek64 exists
 	set lseek64 d_lseek64
 	eval $inlibc
@@ -7269,6 +7275,7 @@ if $test X"$use64bits" = X"$define"; then
 	echo $n "Checking to see if your system supports off64_t...$c" >&4
 	$cat >try.c <<EOCP
 #include <sys/types.h>
+#include <stdio.h>
 off64_t foo() { off64_t x; x = 7; return x; }'
 EOCP
 	if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
@@ -7279,7 +7286,26 @@ EOCP
 		echo " Nope, it doesn't." >&4
 	fi
 	$rm -f try.*
-	set d_off64t
+	set d_off64_t
+	eval $setvar
+
+	: check for offset_t
+	echo " "
+	echo $n "Checking to see if your system supports offset_t...$c" >&4
+	$cat >try.c <<EOCP
+#include <sys/types.h>
+#include <stdio.h>
+offset_t foo() { offset_t x; x = 7; return x; }'
+EOCP
+	if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
+		val="$define"
+		echo " Yup, it does." >&4
+	else
+		val="$undef"
+		echo " Nope, it doesn't." >&4
+	fi
+	$rm -f try.*
+	set d_offset_t
 	eval $setvar
 
 	: check for ino64_t
@@ -7304,7 +7330,7 @@ EOCP
 	else
 		echo " Nope, it doesn't." >&4
 	fi
-	set d_ino64t
+	set d_ino64_t
 	eval $setvar
 
 	: check for struct flock64
@@ -7339,7 +7365,7 @@ EOCP
 
 else
 	val="$undef"
-	for xxx in d_fstat64 d_ftruncate64 d_lockf64 d_lseek64 d_lstat64 d_open64 d_opendir64 d_readdir64 d_seekdir64 d_stat64 d_telldir64 d_truncate64 d_off64t d_ino64t d_flock64_s d_dirent64_s
+	for xxx in d_fstat64 d_ftruncate64 d_lockf64 d_lseek64 d_lstat64 d_open64 d_opendir64 d_readdir64 d_seekdir64 d_stat64 d_telldir64 d_truncate64 d_off64_t d_offset_t d_ino64_t d_flock64_s d_dirent64_s
 	do
 		set $xxx
 		eval $setvar
@@ -11986,7 +12012,7 @@ do
 done
 $rm -f try.c
 EOS
-unset postprocess_cc_v
+postprocess_cc_v=''
 chmod +x ccsym
 $eunicefix ccsym
 ./ccsym > ccsym1.raw
@@ -12756,13 +12782,14 @@ d_hasmntopt='$d_hasmntopt'
 d_htonl='$d_htonl'
 d_index='$d_index'
 d_inetaton='$d_inetaton'
-d_ino64t='$d_ino64t'
+d_ino64_t='$d_ino64_t'
 d_int64t='$d_int64t'
 d_iovec_s='$d_iovec_s'
 d_isascii='$d_isascii'
 d_killpg='$d_killpg'
 d_lchown='$d_lchown'
 d_link='$d_link'
+d_llseek='$d_llseek'
 d_locconv='$d_locconv'
 d_lockf64='$d_lockf64'
 d_lockf='$d_lockf'
@@ -12800,7 +12827,8 @@ d_munmap='$d_munmap'
 d_mymalloc='$d_mymalloc'
 d_nextkey64='$d_nextkey64'
 d_nice='$d_nice'
-d_off64t='$d_off64t'
+d_off64_t='$d_off64_t'
+d_offset_t='$d_offset_t'
 d_old_pthread_create_joinable='$d_old_pthread_create_joinable'
 d_oldpthreads='$d_oldpthreads'
 d_oldsock='$d_oldsock'
@@ -13240,7 +13268,7 @@ $test -f UU/cmdline.opt && $cat UU/cmdline.opt >> config.sh
 : add special variables
 $test -f $src/patchlevel.h && \
 awk '/^#define[ 	]+PERL_/ {printf "%s=%s\n",$2,$3}' $src/patchlevel.h >>config.sh
-echo "CONFIG=true" >>config.sh
+echo "CONFIGDOTSH=true" >>config.sh
 
 : propagate old symbols
 if $test -f UU/config.sh; then
