@@ -2155,7 +2155,10 @@ OP*
 Perl_block_end(pTHX_ I32 floor, OP *seq)
 {
     int needblockscope = PL_hints & HINT_BLOCK_SCOPE;
-    OP* retval = scalarseq(seq);
+    line_t copline = PL_copline;
+    /* there should be a nextstate in every block */
+    OP* retval = seq ? scalarseq(seq) : newSTATEOP(0, Nullch, seq);
+    PL_copline = copline;  /* XXX newSTATEOP may reset PL_copline */
     LEAVE_SCOPE(floor);
     PL_pad_reset_pending = FALSE;
     PL_compiling.op_private = PL_hints;
@@ -4704,7 +4707,8 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 			&& (!const_sv || sv_cmp(cv_const_sv(cv), const_sv))))
 		{
 		    line_t oldline = CopLINE(PL_curcop);
-		    CopLINE_set(PL_curcop, PL_copline);
+		    if (PL_copline != NOLINE)
+			CopLINE_set(PL_curcop, PL_copline);
 		    Perl_warner(aTHX_ WARN_REDEFINE,
 			CvCONST(cv) ? "Constant subroutine %s redefined"
 				    : "Subroutine %s redefined", name);
@@ -5177,8 +5181,8 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
     if ((cv = GvFORM(gv))) {
 	if (ckWARN(WARN_REDEFINE)) {
 	    line_t oldline = CopLINE(PL_curcop);
-
-	    CopLINE_set(PL_curcop, PL_copline);
+	    if (PL_copline != NOLINE)
+		CopLINE_set(PL_curcop, PL_copline);
 	    Perl_warner(aTHX_ WARN_REDEFINE, "Format %s redefined",name);
 	    CopLINE_set(PL_curcop, oldline);
 	}
