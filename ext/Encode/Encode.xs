@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 1.42 2002/04/29 06:54:06 dankogai Exp $
+ $Id: Encode.xs,v 1.43 2002/05/01 05:41:06 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -130,72 +130,73 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 				   &clen, UTF8_ALLOW_ANY|UTF8_CHECK_ONLY);
 		if (check & ENCODE_DIE_ON_ERR) {
 		    Perl_croak(
-			aTHX_ "\"\\N{U+%" UVxf "}\" does not map to %s, %d",
-			ch, enc->name[0], __LINE__);
-		}else{
-		    if (check & ENCODE_RETURN_ON_ERR){
-			if (check & ENCODE_WARN_ON_ERR){
-			    Perl_warner(
-				aTHX_ packWARN(WARN_UTF8),
-				"\"\\N{U+%" UVxf "}\" does not map to %s",
-				ch,enc->name[0]);
-			}
-       			goto ENCODE_SET_SRC;
-		    }else if (check & ENCODE_PERLQQ){
-			SV* perlqq =
-			    sv_2mortal(newSVpvf("\\x{%04"UVxf"}", ch));
-			sdone += slen + clen;
-			ddone += dlen + SvCUR(perlqq);
-			sv_catsv(dst, perlqq);
-		    }else if (check & ENCODE_HTMLCREF){
-			SV* htmlcref =
-			    sv_2mortal(newSVpvf("&#%" UVuf ";", ch));
-			sdone += slen + clen;
-			ddone += dlen + SvCUR(htmlcref);
-			sv_catsv(dst, htmlcref);
-		    }else if (check & ENCODE_XMLCREF){
-			SV* xmlcref =
-			    sv_2mortal(newSVpvf("&#x%" UVxf ";", ch));
-			sdone += slen + clen;
-			ddone += dlen + SvCUR(xmlcref);
-			sv_catsv(dst, xmlcref);
-		    } else {
-			/* fallback char */
-			sdone += slen + clen;
-			ddone += dlen + enc->replen;
-			sv_catpvn(dst, (char*)enc->rep, enc->replen);
-		    }			
+                       aTHX_ "\"\\x{%04" UVxf "}\" does not map to %s",
+			(UV)ch, enc->name[0]);
+		    return &PL_sv_undef; /* never reaches but be safe */
+		}
+		if (check & ENCODE_WARN_ON_ERR){
+		    Perl_warner(aTHX_ packWARN(WARN_UTF8),
+                               "\"\\x{%" UVxf "}\" does not map to %s",
+				(UV)ch, enc->name[0]);
+		}
+		if (check & ENCODE_RETURN_ON_ERR){
+		    goto ENCODE_SET_SRC;
+		}
+		if (check & ENCODE_PERLQQ){
+		    SV* perlqq = 
+			sv_2mortal(newSVpvf("\\x{%04"UVxf"}", (UV)ch));
+		    sdone += slen + clen;
+		    ddone += dlen + SvCUR(perlqq);
+		    sv_catsv(dst, perlqq);
+		}else if (check & ENCODE_HTMLCREF){
+		    SV* htmlcref = 
+			sv_2mortal(newSVpvf("&#%" UVuf ";", (UV)ch));
+		    sdone += slen + clen;
+		    ddone += dlen + SvCUR(htmlcref);
+		    sv_catsv(dst, htmlcref);
+		}else if (check & ENCODE_XMLCREF){
+		    SV* xmlcref = 
+			sv_2mortal(newSVpvf("&#x%" UVxf ";", (UV)ch));
+		    sdone += slen + clen;
+		    ddone += dlen + SvCUR(xmlcref);
+		    sv_catsv(dst, xmlcref);
+		} else {
+		    /* fallback char */
+		    sdone += slen + clen;
+		    ddone += dlen + enc->replen;
+		    sv_catpvn(dst, (char*)enc->rep, enc->replen);
 		}
 	    }
 	    /* decoding */
 	    else {
 		if (check & ENCODE_DIE_ON_ERR){
 		    Perl_croak(
-			aTHX_ "%s \"\\x%02" UVXf
+			aTHX_ "%s \"\\x%02" UVXf 
 			"\" does not map to Unicode (%d)",
-			enc->name[0], (U8) s[slen], code);
-		}else{
-		    if (check & ENCODE_RETURN_ON_ERR){
-			if (check & ENCODE_WARN_ON_ERR){
-			    Perl_warner(
-				aTHX_ packWARN(WARN_UTF8),
-				"%s \"\\x%02" UVXf
-				"\" does not map to Unicode (%d)",
-				enc->name[0], (U8) s[slen], code);
-			}
-			goto ENCODE_SET_SRC;
-		    }else if (check &
-			      (ENCODE_PERLQQ|ENCODE_HTMLCREF|ENCODE_XMLCREF)){
-			SV* perlqq =
-			    sv_2mortal(newSVpvf("\\x%02" UVXf, s[slen]));
-			sdone += slen + 1;
-			ddone += dlen + SvCUR(perlqq);
-			sv_catsv(dst, perlqq);
-		    } else {
-			sdone += slen + 1;
-			ddone += dlen + strlen(FBCHAR_UTF8);
-			sv_catpv(dst, FBCHAR_UTF8);
-		    }
+			(UV)enc->name[0], (U8)s[slen], code);
+		    return &PL_sv_undef; /* never reaches but be safe */
+		}
+		if (check & ENCODE_WARN_ON_ERR){
+		    Perl_warner(
+			aTHX_ packWARN(WARN_UTF8),
+			"%s \"\\x%02" UVXf
+			"\" does not map to Unicode (%d)",
+			(UV)enc->name[0], (U8)s[slen], code);
+		}
+		if (check & ENCODE_RETURN_ON_ERR){
+		    goto ENCODE_SET_SRC;
+		}
+		if (check &
+		    (ENCODE_PERLQQ|ENCODE_HTMLCREF|ENCODE_XMLCREF)){
+		    SV* perlqq = 
+			sv_2mortal(newSVpvf("\\x%02" UVXf, (UV)s[slen]));
+		    sdone += slen + 1;
+		    ddone += dlen + SvCUR(perlqq);
+		    sv_catsv(dst, perlqq);
+		} else {
+		    sdone += slen + 1;
+		    ddone += dlen + strlen(FBCHAR_UTF8);
+		    sv_catpv(dst, FBCHAR_UTF8);
 		}
 	    }
 	    /* settle variables when fallback */

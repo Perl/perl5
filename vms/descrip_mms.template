@@ -489,7 +489,7 @@ $(ARCHDIR)vmspipe.com : vmspipe.com
 	@ Rename/Log xsloader.pm [.ext.dynaloader]
 
 dynext : $(LIBPREREQ) $(DBG)perlshr$(E) preplibrary
-       @make_ext "$(MINIPERL_EXE)" "$(MMS)" all
+       @make_ext "$(MINIPERL_EXE)" "$(MMS)"
 
 [.lib]lib.pm : [.lib]lib_pm.PL
 	$(MINIPERL) $(MMS$SOURCE)

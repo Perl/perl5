@@ -1,9 +1,9 @@
 #
-# $Id: Encode.pm,v 1.65 2002/04/30 16:13:37 dankogai Exp dankogai $
+# $Id: Encode.pm,v 1.66 2002/05/01 05:41:06 dankogai Exp dankogai $
 #
 package Encode;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 1.65 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.66 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 use XSLoader ();
 XSLoader::load(__PACKAGE__, $VERSION);
@@ -131,7 +131,6 @@ sub resolve_alias {
 sub encode($$;$)
 {
     my ($name, $string, $check) = @_;
-    defined $string or return;
     $check ||=0;
     my $enc = find_encoding($name);
     unless(defined $enc){
@@ -146,7 +145,6 @@ sub encode($$;$)
 sub decode($$;$)
 {
     my ($name,$octets,$check) = @_;
-    defined $octets or return;
     $check ||=0;
     my $enc = find_encoding($name);
     unless(defined $enc){
@@ -161,7 +159,6 @@ sub decode($$;$)
 sub from_to($$$;$)
 {
     my ($string,$from,$to,$check) = @_;
-    defined $string or return;
     $check ||=0;
     my $f = find_encoding($from);
     unless (defined $f){
@@ -183,7 +180,6 @@ sub from_to($$$;$)
 sub encode_utf8($)
 {
     my ($str) = @_;
-    defined $str or return;
     utf8::encode($str);
     return $str;
 }
@@ -191,7 +187,6 @@ sub encode_utf8($)
 sub decode_utf8($)
 {
     my ($str) = @_;
-    defined $str or return;
     return undef unless utf8::decode($str);
     return $str;
 }
@@ -366,6 +361,10 @@ for $octets is B<always> off.  When you encode anything, utf8 flag of
 the result is always off, even when it contains completely valid utf8
 string. See L</"The UTF-8 flag"> below.
 
+encode($valid_encoding, undef) is harmless but warns you for 
+C<Use of uninitialized value in subroutine entry>. 
+encode($valid_encoding, '') is harmless and warnless.
+
 =item $string = decode(ENCODING, $octets [, CHECK])
 
 Decodes a sequence of octets assumed to be in I<ENCODING> into Perl's
@@ -383,6 +382,10 @@ B<may not be equal to> $octets.  Though they both contain the same data,
 the utf8 flag for $string is on unless $octets entirely consists of
 ASCII data (or EBCDIC on EBCDIC machines).  See L</"The UTF-8 flag">
 below.
+
+decode($valid_encoding, undef) is harmless but warns you for 
+C<Use of uninitialized value in subroutine entry>. 
+decode($valid_encoding, '') is harmless and warnless.
 
 =item [$length =] from_to($octets, FROM_ENC, TO_ENC [, CHECK])
 
@@ -586,7 +589,7 @@ constants via C<use Encode qw(:fallback_all)>.
 
                      FB_DEFAULT FB_CROAK FB_QUIET FB_WARN  FB_PERLQQ
  DIE_ON_ERR    0x0001             X
- WARN_ON_ER    0x0002                               X
+ WARN_ON_ERR   0x0002                               X
  RETURN_ON_ERR 0x0004                      X        X
  LEAVE_SRC     0x0008
  PERLQQ        0x0100                                        X
