@@ -25,9 +25,12 @@ esac
 
 echo "Extracting Makefile (with variable substitutions)"
 cat >Makefile <<!GROK!THIS!
-# $Header: Makefile.SH,v 3.0.1.8 90/08/13 21:50:49 lwall Locked $
+# $Header: Makefile.SH,v 3.0.1.9 90/10/15 14:41:34 lwall Locked $
 #
 # $Log:	Makefile.SH,v $
+# Revision 3.0.1.9  90/10/15  14:41:34  lwall
+# patch29: various portability fixes
+# 
 # Revision 3.0.1.8  90/08/13  21:50:49  lwall
 # patch28: not all yaccs are the same
 # 
@@ -69,13 +72,14 @@ mansrc = $mansrc
 manext = $manext
 CFLAGS = $ccflags $optimize
 LDFLAGS = $ldflags
+CLDFLAGS = $ldflags
 SMALL = $small
 LARGE = $large $split
 mallocsrc = $mallocsrc
 mallocobj = $mallocobj
 SLN = $sln
 
-libs = $libs -lm
+libs = $libs
 
 public = perl taintperl $suidperl
 
@@ -101,7 +105,7 @@ h = $(h1) $(h2)
 
 c1 = array.c cmd.c cons.c consarg.c doarg.c doio.c dolist.c dump.c
 c2 = eval.c form.c hash.c $(mallocsrc) perly.c regcomp.c regexec.c
-c3 = stab.c str.c toke.c util.c
+c3 = stab.c str.c toke.c util.c usersub.c
 
 c = $(c1) $(c2) $(c3)
 
@@ -135,10 +139,10 @@ all: $(public) $(private) $(util) perl.man uperl.o $(scripts)
 # used for all scripts that aren't set-id or running under something set-id.
 
 perl: perl.o $(obj) usersub.o
-	$(CC) $(LARGE) $(LDFLAGS) $(obj) perl.o usersub.o $(libs) -o perl
+	$(CC) $(LARGE) $(CLDFLAGS) $(obj) perl.o usersub.o $(libs) -o perl
 
 uperl.o: perl.o $(obj)
-	ld $(LARGE) $(LDFLAGS) -r $(obj) perl.o $(libs) -o uperl.o
+	-ld $(LARGE) $(LDFLAGS) -r $(obj) perl.o $(libs) -o uperl.o
 
 saber: perl.c
 	# load $(c) perl.c
@@ -149,7 +153,7 @@ saber: perl.c
 # has been invoked correctly.
 
 suidperl: tperl.o sperly.o $(tobj) usersub.o
-	$(CC) $(LARGE) $(LDFLAGS) sperly.o $(tobj) tperl.o usersub.o $(libs) \
+	$(CC) $(LARGE) $(CLDFLAGS) sperly.o $(tobj) tperl.o usersub.o $(libs) \
 	    -o suidperl
 
 # This version interprets scripts that are already set-id either via a wrapper
@@ -158,7 +162,7 @@ suidperl: tperl.o sperly.o $(tobj) usersub.o
 # and normal perl is the presence of the "taint" checks.
 
 taintperl: tperl.o tperly.o $(tobj) usersub.o
-	$(CC) $(LARGE) $(LDFLAGS) tperly.o $(tobj) tperl.o usersub.o $(libs) \
+	$(CC) $(LARGE) $(CLDFLAGS) tperly.o $(tobj) tperl.o usersub.o $(libs) \
 	    -o taintperl
 
 # Replicating all this junk is yucky, but I don't see a portable way to fix it.
@@ -349,9 +353,9 @@ clean:
 	rm -f *.o all perl taintperl suidperl perl.man
 	cd x2p; $(MAKE) clean
 
-realclean:
+realclean: clean
 	cd x2p; $(MAKE) realclean
-	rm -f perl *.orig */*.orig *~ */*~ *.o core $(addedbyconf) perl.man
+	rm -f *.orig */*.orig *~ */*~ core $(addedbyconf) h2ph h2ph.man
 	rm -f perl.c perly.h t/perl Makefile config.h makedepend makedir
 	rm -f x2p/Makefile
 

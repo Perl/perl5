@@ -1,8 +1,10 @@
-
 		   Notes on the OS/2 Perl port
 
 			Raymond Chen
-			 (rjc@math.princeton.edu)
+		 (rjc@math.princeton.edu)
+
+                        Kai Uwe Rommel
+          (rommel@lan.informatik.tu-muenchen.dbp.de)
 
 -1.  Background.
 
@@ -16,28 +18,28 @@ directory.
 
 1.  Compiling.
 
-Perl has been compiled under MS-DOS using the Microsoft C compiler 
-version 6.0.  Before compiling install dir.h as <sys/dir.h>.  You will 
-need a Unix-like make program and something like yacc (e.g. bison).  I 
-just ran yacc on my UNIX box and downloaded the resulting y.tab.[ch] 
+Perl has been compiled under MS-DOS using the Microsoft C compiler
+version 6.0.  Before compiling install dir.h as <sys/dir.h>.  You will
+need a Unix-like make program and something like yacc (e.g. bison).  I
+just ran yacc on my UNIX box and downloaded the resulting y.tab.[ch]
 files.  Compilation takes 45 minutes on a 16MHz 386 machine running
-no jobs other than the compiler, so you will probably need something to 
+no jobs other than the compiler, so you will probably need something to
 do in the meantime.  Like, say, lunch.  (Compilation time does not
-include formatting the manual.)  If you compile with optimization 
+include formatting the manual.)  If you compile with optimization
 turned off, it takes about half as long.
 
 The executable is 270k (perlsym.exe is 473k; if you compile
-without optimization, the sizes are 329K/531K), and the top level 
-directory needs 800K for sources, 550K for object code, and 800K for the 
+without optimization, the sizes are 329K/531K), and the top level
+directory needs 800K for sources, 550K for object code, and 800K for the
 executables, assuming you want to build both perl.exe and perlsym.exe
 with full optimization.
 
-The makefile will compile glob for you which you will need to place 
-somewhere in your path so that perl globbing will work correctly.  All 
-the tests were run, although some modifications were necessary because 
-OS/2 isn't UNIX. The tests that failed failed because of limitations of 
-the operating system and aren't the fault of the compiler.  a2p and s2p 
-were not tested.  
+The makefile will compile glob for you which you will need to place
+somewhere in your path so that perl globbing will work correctly.  All
+the tests were run, although some modifications were necessary because
+OS/2 isn't UNIX. The tests that failed failed because of limitations of
+the operating system and aren't the fault of the compiler.  a2p and s2p
+were not tested.
 
 In the eg directory you will find the syscalls.pl header file,
 and a sample program that demonstrates some of the improvements
@@ -46,20 +48,20 @@ system calls.
 
 2.  Using OS/2 Perl
 
-The OS/2 version of perl has much of the functionality of the Unix 
-version.  Here are some things that don't work:  sockets, password 
-functions, [gs]et[eug]id, dbm functions, fork.  
+The OS/2 version of perl has much of the functionality of the Unix
+version.  Here are some things that don't work:  sockets, password
+functions, [gs]et[eug]id, dbm functions, fork.
 
 One thing that doesn't work is "split" with no arguments.  Somehow,
 yylval.arg is empty ...  [[ Wait, sorry, I fixed that. --rjc ]]
 
 Care has been taken to implement the rest, although the implementation
-might not be the best possible.  Here are short notes on the tricky 
-bits:  
+might not be the best possible.  Here are short notes on the tricky
+bits:
 
 2.1.  In-place editing.
 
-Files currently can be edited in-place provided you are creating a 
+Files currently can be edited in-place provided you are creating a
 backup.  Considerable effort is made to ensure that a reasonable
 name for the backup is selected, while still remaining within
 the 8.3 contraints of the FAT filesystem.  (HPFS users have nothing
@@ -76,14 +78,14 @@ Style 0:  Append the suffix exactly as UNIX perl would do it.
           swallow it.  FAT will rarely accept it.)
 
 Style 1:  If the suffix begins with a '.', change the file extension
-	  to whatever you supplied.  If the name matches the original 
+	  to whatever you supplied.  If the name matches the original
 	  name, use the fallback method.
 
-Style 2:  If the suffix is a single character, not a '.', try to add the 
+Style 2:  If the suffix is a single character, not a '.', try to add the
           suffix to the following places, using the first one that works.
-              [1] Append to extension.  
-              [2] Append to filename, 
-              [3] Replace end of extension, 
+              [1] Append to extension.
+              [2] Append to filename,
+              [3] Replace end of extension,
               [4] Replace end of filename.
           If the name matches the original name, use the fallback method.
 
@@ -116,7 +118,7 @@ suffix = "~" (style 2)
                longname.fil => longname.fi~
                longname.fi~ => longnam~.fi~
                longnam~.fi~ => longnam~.$$$
-               
+
 2.2.  Directory access.
 
 Are implemented, but in order to support telldir() and seekdir(),
@@ -125,7 +127,7 @@ then handing out pieces of it each time you do a readdir().
 
 2.3.  Pipes and redirection.
 
-Pipes and redirection are supported.  Although OS/2 does not 
+Pipes and redirection are supported.  Although OS/2 does not
 terminate programs which try to write to closed pipes, perl will
 kill them for you if you do it like this:
 
@@ -174,24 +176,24 @@ the syscalls I've written so far:
 
 The arguments you pass are handed off to OS/2 without interpretation,
 and the return value is returned straight to you.  However, you don't
-have to supply arguments for the ones whose descriptions are "must be 
+have to supply arguments for the ones whose descriptions are "must be
 zero"; perl will supply the mandatory zeros for you.
 
 2.5.  Binary file access
 
-Files are opened in text mode by default.  This means that CR LF pairs 
-are translated to LF. If binary access is needed the `binarymode' 
-function should be used.  There is currently no way to reverse the 
-effect of the binary function.  If that is needed close and reopen the 
-file.  
+Files are opened in text mode by default.  This means that CR LF pairs
+are translated to LF. If binary access is needed the `binarymode'
+function should be used.  There is currently no way to reverse the
+effect of the binary function.  If that is needed close and reopen the
+file.
 
 2.6.  Priority
 
-The getpriority and setpriority functions are implemented, but since 
-OS/2 priorities are different from UNIX priorities, the arguments aren't 
-the same.  Basically, the arguments you pass are handed directly to 
-OS/2. The only exception is the last argument to setpriority.  To make 
-it easier to make delta priorities, if the priority class is 0xff, it 
+The getpriority and setpriority functions are implemented, but since
+OS/2 priorities are different from UNIX priorities, the arguments aren't
+the same.  Basically, the arguments you pass are handed directly to
+OS/2. The only exception is the last argument to setpriority.  To make
+it easier to make delta priorities, if the priority class is 0xff, it
 is changed to 0.  That way, you can write
 
 	setpriority(0,0,-2)
@@ -204,8 +206,8 @@ to decrease the delta by 2.
 
 2.7.  Interpreter startup.
 
-The effect of the Unix #!/bin/perl interpreter startup can be obtained 
-under OS/2 by giving the script a .cmd extension and beginning the script 
+The effect of the Unix #!/bin/perl interpreter startup can be obtained
+under OS/2 by giving the script a .cmd extension and beginning the script
 with the line
 
 	extproc C:\binp\perl.exe -S
@@ -264,7 +266,7 @@ to make popen() do much of the same sort of preprocessing
 as do_spawn does (which means, of course, that we probably
 should yank out code to be dished off into a subroutine).
 
-In do_spawn(), use DosExecPgm instead of spawnl in order to get more 
+In do_spawn(), use DosExecPgm instead of spawnl in order to get more
 precise reasons why the child terminated (RESULTCODES).
 
 
@@ -273,3 +275,82 @@ precise reasons why the child terminated (RESULTCODES).
 				Raymond Chen <rjc@math.princeton.edu>
 				1817 Oxford St. Apt 6
 				Berkeley, CA 94709-1828 USA
+
+-----------------------
+I picked up the OS/2 port with patches 19-28. When compiling, I found
+out that os2.c and director.c were missing. I had to rewrite them because
+even the original author of the port (Raymond Chen) did no longer have them.
+
+I had directory routines laying around, this was no big deal.
+I rewrote os2.c, but did not implement the syscall() as described above.
+I had not the time and did not really need it. Feel free ...
+
+Changes to above described port:
+
+- the small program GLOB is now named PERLGLOB for better ordering in
+  my /bin directory
+
+- added help page (well, a graphical user interface would be overkill
+  but a simple help page should be in every program :-)
+
+- several cosmetic changes in standard distribution files because of
+  naming conventions etc., #ifdef'd OS2
+
+- syscall() not supported as noted above
+
+- chdir now recognizes also drive letters and changes also the drive
+
+- new mypopen(), mypclose() functions and simulation routines for DOS mode,
+  they are selected automatically in real mode
+- the new pclose() does not kill the child, my experience is that this is
+  not needed.
+
+- setpriority is now:   setpriority(class, pid, val)
+  see description of DosSetPrty() for class and val meanings
+- getpriority is now:   getpriority(dummy, pid)
+  see description of DosGetPrty()
+
+- kill is now:          kill(pid, sig)
+  where sig can be 0 (kill process)
+                   1-3 (send process flags A-C, see DosFlagProcess())
+  if pid is less than zero, the signal is sent to the whole
+  process tree originating at -pid.
+
+The following files are now new with patch >=29:
+
+readme.os2        this file
+
+dir.h             sys/dir.h
+director.c        directory routines
+os2.c             kernel of OS/2 port (see below)
+popen.c           new popen.c
+mktemp.c          enhanced mktemp(), uses TMP env. variable, used by popen.c
+
+perl.cs           Compiler Shell script for perl itself
+perl.def          linker definition file for perl
+perl.bad          names of protect-only API calls for BIND
+perlglob.cs       Compiler Shell script for perl globbing program
+perlglob.def      linker definition file for perlglob
+a2p.cs            Compiler Shell script for a2p (see below)
+a2p.def           linker definition file for a2p
+makefile          Makefile, not tested
+
+perlsh.cmd        the converted perlsh
+selfrun.cmd       sample selfrunning perl script for OS/2
+selfrun.bat       sample selfrunning perl script for DOS mode
+
+Note: I don't use make but my own utility, the Compiler Shell CS.
+It was posted in comp.binaries.os2 or you can ask me for the newest
+version. The .CS files are the "makefiles" for it.
+
+Note: MS C 6.00 is required. C 5.1 is not capable of compiling perl,
+especially not with -DDEBUGGING
+
+
+                                August 1990
+
+                                Kai Uwe Rommel
+                                rommel@lan.informatik.tu-muenchen.dbp.de
+                                Breslauer Str. 25
+                                D-8756 Kahl/Main
+                                West (yes, still!) Germany

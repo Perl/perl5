@@ -18,9 +18,12 @@ case "$mallocsrc" in
 esac
 echo "Extracting x2p/Makefile (with variable substitutions)"
 cat >Makefile <<!GROK!THIS!
-# $Header: Makefile.SH,v 3.0.1.5 90/08/13 22:41:05 lwall Locked $
+# $Header: Makefile.SH,v 3.0.1.6 90/10/16 11:28:18 lwall Locked $
 #
 # $Log:	Makefile.SH,v $
+# Revision 3.0.1.6  90/10/16  11:28:18  lwall
+# patch29: various portability fixes
+# 
 # Revision 3.0.1.5  90/08/13  22:41:05  lwall
 # patch28: shift/reduce count was off for a2p's Makefile
 # 
@@ -63,7 +66,7 @@ LARGE = $large $split
 mallocsrc = $mallocsrc
 mallocobj = $mallocobj
 
-libs = $libs -lm
+libs = $libs
 !GROK!THIS!
 
 cat >>Makefile <<'!NO!SUBS!'
@@ -105,7 +108,7 @@ a2p.c: a2p.y
 	$(YACC) a2p.y
 	mv y.tab.c a2p.c
 
-a2p.o: a2p.c a2py.c a2p.h EXTERN.h util.h INTERN.h handy.h ../config.h
+a2p.o: a2p.c a2py.c a2p.h EXTERN.h util.h INTERN.h handy.h ../config.h str.h hash.h
 	$(CC) -c $(CFLAGS) $(LARGE) a2p.c
 
 install: a2p s2p
@@ -137,8 +140,8 @@ fi
 clean:
 	rm -f *.o
 
-realclean:
-	rm -f a2p *.orig */*.orig *.o core $(addedbyconf)
+realclean: clean
+	rm -f a2p *.orig */*.orig core $(addedbyconf) a2p.c s2p all
 
 # The following lint has practically everything turned on.  Unfortunately,
 # you have to wade through a lot of mumbo jumbo that can't be suppressed.

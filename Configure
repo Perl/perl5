@@ -8,14 +8,14 @@
 # and edit it to reflect your system.  Some packages may include samples
 # of config.h for certain machines, so you might look for one of those.)
 #
-# $Header: Configure,v 3.0.1.9 90/08/13 21:48:46 lwall Locked $
+# $Header: Configure,v 3.0.1.10 90/10/15 14:37:52 lwall Locked $
 #
 # Yes, you may rip this off to use in other distribution packages.
 # (Note: this Configure script was generated automatically.  Rather than
 # working with this copy of Configure, you may wish to get metaconfig.)
 
 : sanity checks
-PATH=".:/bin:/usr/bin:/usr/local/bin:/usr/ucb:/usr/local:/usr/lbin:/etc:/usr/new:/usr/new/bin:/usr/nbin:$PATH"
+PATH="$PATH:.:/bin:/usr/bin:/usr/local/bin:/usr/ucb:/usr/local:/usr/lbin:/etc:/usr/new:/usr/new/bin:/usr/nbin"
 export PATH || (echo "OOPS, this isn't sh.  Desperation time.  I will feed myself to sh."; sh $0; kill $$)
 
 if test ! -t 0; then
@@ -154,6 +154,7 @@ d_strctcpy=''
 d_strerror=''
 d_symlink=''
 d_syscall=''
+d_sysvipc=''
 d_truncate=''
 d_varargs=''
 d_vfork=''
@@ -162,6 +163,7 @@ d_volatile=''
 d_vprintf=''
 d_charvspr=''
 d_wait4=''
+d_waitpid=''
 gidtype=''
 i_dirent=''
 d_dirnamlen=''
@@ -169,6 +171,7 @@ i_fcntl=''
 i_grp=''
 i_niin=''
 i_pwd=''
+d_pwcomment=''
 d_pwquota=''
 d_pwage=''
 d_pwchange=''
@@ -232,7 +235,7 @@ define='define'
 undef='undef'
 : change the next line if compiling for Xenix/286 on Xenix/386
 xlibpth='/usr/lib/386 /lib/386'
-libpth='/usr/lib /usr/local/lib /usr/lib/large /lib '$xlibpth' /lib/large /usr/lib/small /lib/small'
+libpth='/usr/ccs/lib /usr/lib /usr/local/lib /usr/lib/large /lib '$xlibpth' /lib/large /usr/lib/small /lib/small'
 smallmach='pdp11 i8086 z8000 i80286 iAPX286'
 rmlist='kit[1-9]isdone kit[1-9][0-9]isdone'
 trap 'echo " "; rm -f $rmlist; exit 1' 1 2 3
@@ -259,11 +262,12 @@ attrlist="$attrlist ns32000 ns16000 iAPX286 mc300 mc500 mc700 sparc"
 attrlist="$attrlist nsc32000 sinix xenix venix posix ansi M_XENIX"
 attrlist="$attrlist $mc68k __STDC__ UTS M_I8086 M_I186 M_I286 M_I386"
 attrlist="$attrlist i186 __m88k__ m88k DGUX __DGUX__"
-pth="/usr/ucb /bin /usr/bin /usr/local /usr/local/bin /usr/lbin /usr/plx /usr/5bin /vol/local/bin /etc /usr/lib /lib /usr/local/lib /sys5.3/bin /sys5.3/usr/bin /bsd4.3/bin /bsd4.3/usr/bin /bsd4.3/usr/ucb"
+pth="/usr/ccs/bin /bin /usr/bin /usr/ucb /usr/local /usr/local/bin /usr/lbin /usr/plx /usr/5bin /vol/local/bin /etc /usr/lib /lib /usr/local/lib /sys5.3/bin /sys5.3/usr/bin /bsd4.3/bin /bsd4.3/usr/bin /bsd4.3/usr/ucb"
 d_newshome="/usr/NeWS"
 defvoidused=7
 libswanted="net_s net nsl_s nsl socket nm ndir ndbm dbm sun m bsd BSD x c_s"
 inclwanted='/usr/netinclude /usr/include/sun /usr/include/bsd /usr/include/lan'
+
 : some greps do not return status, grrr.
 echo "grimblepritz" >grimble
 if grep blurfldyick grimble >/dev/null 2>&1 ; then
@@ -1126,7 +1130,7 @@ for thislib in $libswanted; do
     *) thatlib="${thislib}_s";;
     *) thatlib=NONE;;
     esac
-    xxx=`loc lib$thislib.a X /usr/lib /usr/local/lib /lib`
+    xxx=`loc lib$thislib.a X /usr/ccs/lib /usr/lib /usr/local/lib /lib`
     if test -f $xxx; then
 	echo "Found -l$thislib."
 	case "$dflt" in
@@ -1274,25 +1278,25 @@ if $contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
     cppstdin="$cc -E"
     cppminus='';
 else
-    echo 'Nope, maybe "'$cpp'" will work...'
-    $cpp <testcpp.c >testcpp.out 2>&1
+    echo 'Nope...maybe "'"$cc"' -E -" will work...'
+    $cc -E - <testcpp.c >testcpp.out 2>&1
     if $contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
 	echo "Yup, it does."
-	cppstdin="$cpp"
-	cppminus='';
+	cppstdin="$cc -E"
+	cppminus='-';
     else
-	echo 'No such luck...maybe "'$cpp' -" will work...'
-	$cpp - <testcpp.c >testcpp.out 2>&1
+	echo 'No such luck, maybe "'$cpp'" will work...'
+	$cpp <testcpp.c >testcpp.out 2>&1
 	if $contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
 	    echo "It works!"
 	    cppstdin="$cpp"
-	    cppminus='-';
+	    cppminus='';
 	else
-	    echo 'Nixed again...maybe "'"$cc"' -E -" will work...'
-	    $cc -E - <testcpp.c >testcpp.out 2>&1
+	    echo 'Nixed again...maybe "'$cpp' -" will work...'
+	    $cpp - <testcpp.c >testcpp.out 2>&1
 	    if $contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
 		echo "Hooray, it works!  I was beginning to wonder."
-		cppstdin="$cc -E"
+		cppstdin="$cpp"
 		cppminus='-';
 	    else
 		echo 'Nope...maybe "'"$cc"' -P" will work...'
@@ -1357,7 +1361,7 @@ case "$libc" in
 '') libc=unknown;;
 esac
 case "$libpth" in
-'') libpth='/lib /usr/lib /usr/local/lib';;
+'') libpth='/usr/ccs/lib /lib /usr/lib /usr/local/lib';;
 esac
 case "$libs" in
 *-lc_s*) libc=`loc libc_s.a $libc $libpth`
@@ -1388,7 +1392,9 @@ case "$libs" in
     done
     ;;
 esac
-set /usr/lib/libc.so.[0-9]*
+set /usr/ccs/lib/libc.so
+test -f $1 || set /usr/lib/libc.so
+test -f $1 || set /usr/lib/libc.so.[0-9]*
 eval set \$$#
 if test -f "$1"; then
     echo "Your shared C library is in $1."
@@ -1440,7 +1446,7 @@ echo " "
 set `echo $libc $libnames | tr ' ' '\012' | sort | uniq`
 $echo $n "Extracting names from $* for later perusal...$c"
 nm $* 2>/dev/null >libc.tmp
-$sed -n -e 's/^.* [AT]  *_[_.]*//p' -e 's/^.* [AT] //p' <libc.tmp >libc.list
+$sed -n -e 's/^.* [ATD]  *_[_.]*//p' -e 's/^.* [ATD] //p' <libc.tmp >libc.list
 if $contains '^printf$' libc.list >/dev/null 2>&1; then
     echo "done"
 else
@@ -1453,7 +1459,8 @@ else
        $sed -n -e 's/^_//' \
 	      -e 's/^\([a-zA-Z_0-9]*\).*xtern.*text.*/\1/p' <libc.tmp >libc.list
     $contains '^printf$' libc.list >/dev/null 2>&1 || \
-	$sed -n -e 's/^.*|FUNC |GLOB .*|//p' <libc.tmp >libc.list
+	$sed -n -e 's/^.*|FUNC |GLOB .*|//p' -e 's/^.*|FUNC |WEAK .*|//p' \
+	   <libc.tmp >libc.list
     if $contains '^printf$' libc.list >/dev/null 2>&1; then
 	echo "done"
     else
@@ -1860,7 +1867,12 @@ echo " "
 if $test -r /usr/include/pwd.h ; then
     i_pwd="$define"
     echo "pwd.h found."
-    $cppstdin $cppflags </usr/include/pwd.h >$$.h
+    $cppstdin $cppflags $cppminus </usr/include/pwd.h >$$.h
+    if $contains 'pw_comment' $$.h >/dev/null 2>&1; then
+	d_pwcomment="$define"
+    else
+	d_pwcomment="$undef"
+    fi
     if $contains 'pw_quota' $$.h >/dev/null 2>&1; then
 	d_pwquota="$define"
     else
@@ -1889,6 +1901,7 @@ if $test -r /usr/include/pwd.h ; then
     rm -f $$.h
 else
     i_pwd="$undef"
+    d_pwcomment="$undef"
     d_pwquota="$undef"
     d_pwage="$undef"
     d_pwchange="$undef"
@@ -2083,6 +2096,10 @@ case "$flags" in
 esac
 $rm -f try.c try
 
+: see if there is System V IPC
+set msgget d_sysvipc
+eval $inlibc
+
 : see if truncate exists
 set truncate d_truncate
 eval $inlibc
@@ -2103,7 +2120,7 @@ eval $inlibc
 
 : see if signal is declared as pointer to function returning int or void
 echo " "
-$cppstdin $cppflags < /usr/include/signal.h >$$.tmp
+$cppstdin $cppflags $cppminus < /usr/include/signal.h >$$.tmp
 if $contains 'void.*signal' $$.tmp >/dev/null 2>&1 ; then
     echo "You have void (*signal())() instead of int."
     d_voidsig="$define"
@@ -2137,6 +2154,10 @@ $rm -f try.*
 
 : see if there is a wait4
 set wait4 d_wait4
+eval $inlibc
+
+: see if there is a waitpid
+set waitpid d_waitpid
 eval $inlibc
 
 : check for void type
@@ -2494,7 +2515,6 @@ uidtype="$ans"
 Log='$Log'
 Header='$Header'
 
-
 : determine which malloc to compile in
 echo " "
 case "$usemymalloc" in
@@ -2709,6 +2729,7 @@ d_strctcpy='$d_strctcpy'
 d_strerror='$d_strerror'
 d_symlink='$d_symlink'
 d_syscall='$d_syscall'
+d_sysvipc='$d_sysvipc'
 d_truncate='$d_truncate'
 d_varargs='$d_varargs'
 d_vfork='$d_vfork'
@@ -2717,6 +2738,7 @@ d_volatile='$d_volatile'
 d_vprintf='$d_vprintf'
 d_charvspr='$d_charvspr'
 d_wait4='$d_wait4'
+d_waitpid='$d_waitpid'
 gidtype='$gidtype'
 i_dirent='$i_dirent'
 d_dirnamlen='$d_dirnamlen'
@@ -2724,6 +2746,7 @@ i_fcntl='$i_fcntl'
 i_grp='$i_grp'
 i_niin='$i_niin'
 i_pwd='$i_pwd'
+d_pwcomment='$d_pwcomment'
 d_pwquota='$d_pwquota'
 d_pwage='$d_pwage'
 d_pwchange='$d_pwchange'

@@ -91,7 +91,7 @@ Installation
     Some compilers will not compile or optimize the larger files without
     some extra switches to use larger jump offsets or allocate larger
     internal tables.  It's okay to insert rules for specific files into
-    Makefile.SH, since a default rule only take effect in the
+    Makefile.SH, since a default rule only takes effect in the
     absence of a specific rule.
 
     The 3b2 needs to turn off -O.
