@@ -597,6 +597,7 @@ ext/Storable/t/dclone.t		See if Storable works
 ext/Storable/t/forgive.t	See if Storable works
 ext/Storable/t/freeze.t		See if Storable works
 ext/Storable/t/lock.t		See if Storable works
+ext/Storable/t/malice.t		See if Storable copes with corrupt files
 ext/Storable/t/overload.t	See if Storable works
 ext/Storable/t/recurse.t	See if Storable works
 ext/Storable/t/restrict.t	See if Storable works
