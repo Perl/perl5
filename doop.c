@@ -23,6 +23,7 @@ do_trans(sv,arg)
 SV *sv;
 OP *arg;
 {
+    dTHR;
     register short *tbl;
     register U8 *s;
     register U8 *send;
@@ -33,7 +34,7 @@ OP *arg;
     register U8 *p;
     STRLEN len;
 
-    if (SvREADONLY(sv))
+    if (SvREADONLY(sv) && !(op->op_private & OPpTRANS_COUNTONLY))
 	croak(no_modify);
     tbl = (short*)cPVOP->op_pv;
     s = (U8*)SvPV(sv, len);
@@ -52,6 +53,14 @@ OP *arg;
 		matches++;
 		*s = ch;
 	    }
+	    s++;
+	}
+	SvSETMAGIC(sv);
+    }
+    else if (op->op_private & OPpTRANS_COUNTONLY) {
+	while (s < send) {
+	    if (tbl[*s] >= 0)
+		matches++;
 	    s++;
 	}
     }
@@ -78,8 +87,8 @@ OP *arg;
 	matches += send - d;	/* account for disappeared chars */
 	*d = '\0';
 	SvCUR_set(sv, d - (U8*)SvPVX(sv));
+	SvSETMAGIC(sv);
     }
-    SvSETMAGIC(sv);
     return matches;
 }
 
@@ -259,6 +268,7 @@ I32
 do_chomp(sv)
 register SV *sv;
 {
+    dTHR;
     register I32 count;
     STRLEN len;
     char *s;
@@ -336,6 +346,7 @@ SV *sv;
 SV *left;
 SV *right;
 {
+    dTHR;	/* just for taint */
 #ifdef LIBERAL
     register long *dl;
     register long *ll;
@@ -450,7 +461,7 @@ OP *
 do_kv(ARGS)
 dARGS
 {
-    dSP;
+    djSP;
     HV *hv = (HV*)POPs;
     register HE *entry;
     SV *tmpstr;
@@ -477,7 +488,7 @@ dARGS
 	RETURN;
 
     if (gimme == G_SCALAR) {
-	I32 i;
+	IV i;
 	dTARGET;
 
 	if (op->op_flags & OPf_MOD) {	/* lvalue */

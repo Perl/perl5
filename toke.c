@@ -230,6 +230,7 @@ void
 lex_start(line)
 SV *line;
 {
+    dTHR;
     char *s;
     STRLEN len;
 
@@ -330,6 +331,7 @@ static void
 incline(s)
 char *s;
 {
+    dTHR;
     char *t;
     char *n;
     char ch;
@@ -371,6 +373,7 @@ static char *
 skipspace(s)
 register char *s;
 {
+    dTHR;
     if (lex_formbrack && lex_brackets <= lex_formbrack) {
 	while (s < bufend && (*s == ' ' || *s == '\t'))
 	    s++;
@@ -481,6 +484,7 @@ expectation x;
 char *s;
 #endif /* CAN_PROTOTYPE */
 {
+    dTHR;
     yylval.ival = f;
     CLINE;
     expect = x;
@@ -558,6 +562,7 @@ int kind;
 	nextval[nexttoke].opval = o;
 	force_next(WORD);
 	if (kind) {
+	    dTHR;		/* just for in_eval */
 	    o->op_private = OPpCONST_ENTERED;
 	    /* XXX see note in pp_entereval() for why we forgo typo
 	       warnings if the symbol must be introduced in an eval.
@@ -672,6 +677,7 @@ sublex_start()
 static I32
 sublex_push()
 {
+    dTHR;
     ENTER;
 
     lex_state = sublex_info.super_state;
@@ -765,7 +771,6 @@ sublex_done()
 	return ')';
     }
 }
-
 
 /*
   scan_const
@@ -1264,7 +1269,7 @@ filter_add(funcp, datasv)
     if (!rsfp_filters)
 	rsfp_filters = newAV();
     if (!datasv)
-	datasv = newSV(0);
+	datasv = NEWSV(255,0);
     if (!SvUPGRADE(datasv, SVt_PVIO))
         die("Can't upgrade filter_add data to SVt_PVIO");
     IoDIRP(datasv) = (DIR*)funcp; /* stash funcp into spare field */
@@ -1283,12 +1288,13 @@ filter_del(funcp)
 {
     if (filter_debug)
 	warn("filter_del func %p", funcp);
-    if (!rsfp_filters || AvFILL(rsfp_filters)<0)
+    if (!rsfp_filters || AvFILLp(rsfp_filters)<0)
 	return;
     /* if filter is on top of stack (usual case) just pop it off */
-    if (IoDIRP(FILTER_DATA(AvFILL(rsfp_filters))) == (void*)funcp){
+    if (IoDIRP(FILTER_DATA(AvFILLp(rsfp_filters))) == (void*)funcp){
 	sv_free(av_pop(rsfp_filters));
-	return;
+
+        return;
     }
     /* we need to search for the correct entry and clear it	*/
     die("filter_del can only delete in reverse order (currently)");
@@ -1307,7 +1313,7 @@ filter_read(idx, buf_sv, maxlen)
 
     if (!rsfp_filters)
 	return -1;
-    if (idx > AvFILL(rsfp_filters)){       /* Any more filters?	*/
+    if (idx > AvFILLp(rsfp_filters)){       /* Any more filters?	*/
 	/* Provide a default input filter to make life easy.	*/
 	/* Note that we append to the line. This is handy.	*/
 	if (filter_debug)
@@ -1371,7 +1377,6 @@ STRLEN append;
     }
     else 
         return (sv_gets(sv, fp, append));
-    
 }
 
 
@@ -1410,6 +1415,7 @@ EXT int yychar;		/* last token */
 int
 yylex()
 {
+    dTHR;
     register char *s;
     register char *d;
     register I32 tmp;
@@ -1702,7 +1708,7 @@ yylex()
 	    if (SvCUR(linestr))
 		sv_catpv(linestr,";");
 	    if (preambleav){
-		while(AvFILL(preambleav) >= 0) {
+		while(AvFILLp(preambleav) >= 0) {
 		    SV *tmpsv = av_shift(preambleav);
 		    sv_catsv(linestr, tmpsv);
 		    sv_catpv(linestr, ";");
@@ -4942,7 +4948,7 @@ char *start;
     OP *o;
     short *tbl;
     I32 squash;
-    I32 delete;
+    I32 Delete;
     I32 complement;
 
     yylval.ival = OP_NULL;
@@ -4971,17 +4977,17 @@ char *start;
     New(803,tbl,256,short);
     o = newPVOP(OP_TRANS, 0, (char*)tbl);
 
-    complement = delete = squash = 0;
+    complement = Delete = squash = 0;
     while (*s == 'c' || *s == 'd' || *s == 's') {
 	if (*s == 'c')
 	    complement = OPpTRANS_COMPLEMENT;
 	else if (*s == 'd')
-	    delete = OPpTRANS_DELETE;
+	    Delete = OPpTRANS_DELETE;
 	else
 	    squash = OPpTRANS_SQUASH;
 	s++;
     }
-    o->op_private = delete|squash|complement;
+    o->op_private = Delete|squash|complement;
 
     lex_op = o;
     yylval.ival = OP_TRANS;
@@ -4992,6 +4998,7 @@ static char *
 scan_heredoc(s)
 register char *s;
 {
+    dTHR;
     SV *herewas;
     I32 op_type = OP_SCALAR;
     I32 len;
@@ -5069,6 +5076,7 @@ register char *s;
 	sv_setpvn(tmpstr,d+1,s-d);
 	s += len - 1;
 	curcop->cop_line++;	/* the preceding stmt passes a newline */
+
 	sv_catpvn(herewas,s,bufend-s);
 	sv_setsv(linestr,herewas);
 	oldoldbufptr = oldbufptr = bufptr = s = linestart = SvPVX(linestr);
@@ -5272,6 +5280,7 @@ static char *
 scan_str(start)
 char *start;
 {
+    dTHR;
     SV *sv;				/* scalar value: string */
     char *tmps;				/* temp string, used for delimiter matching */
     register char *s = start;		/* current position in the buffer */
@@ -5282,10 +5291,10 @@ char *start;
     /* skip space before the delimiter */
     if (isSPACE(*s))
 	s = skipspace(s);
-	
+
     /* mark where we are, in case we need to report errors */
     CLINE;
-    
+
     /* after skipping whitespace, the next character is the terminator */
     term = *s;
     /* mark where we are */
@@ -5662,6 +5671,7 @@ static char *
 scan_formline(s)
 register char *s;
 {
+    dTHR;
     register char *eol;
     register char *t;
     SV *stuff = newSVpv("",0);
@@ -5742,6 +5752,7 @@ start_subparse(is_format, flags)
 I32 is_format;
 U32 flags;
 {
+    dTHR;
     I32 oldsavestack_ix = savestack_ix;
     CV* outsidecv = compcv;
     AV* comppadlist;
@@ -5766,11 +5777,11 @@ U32 flags;
     CvFLAGS(compcv) |= flags;
 
     comppad = newAV();
+    av_push(comppad, Nullsv);
+    curpad = AvARRAY(comppad);
     comppad_name = newAV();
     comppad_name_fill = 0;
     min_intro_pending = 0;
-    av_push(comppad, Nullsv);
-    curpad = AvARRAY(comppad);
     padix = 0;
     subline = curcop->cop_line;
 
@@ -5789,6 +5800,7 @@ int
 yywarn(s)
 char *s;
 {
+    dTHR;
     --error_count;
     in_eval |= 2;
     yyerror(s);
@@ -5800,6 +5812,7 @@ int
 yyerror(s)
 char *s;
 {
+    dTHR;
     char *where = NULL;
     char *context = NULL;
     int contlen = -1;
@@ -5858,7 +5871,7 @@ char *s;
     if (in_eval & 2)
 	warn("%_", msg);
     else if (in_eval)
-	sv_catsv(GvSV(errgv), msg);
+	sv_catsv(ERRSV, msg);
     else
 	PerlIO_write(PerlIO_stderr(), SvPVX(msg), SvCUR(msg));
     if (++error_count >= 10)

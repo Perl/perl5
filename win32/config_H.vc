@@ -342,6 +342,12 @@
  */
 /*#define HAS_GETPRIORITY		/**/
 
+/* HAS_GNULIBC:
+ *	This symbol, if defined, indicates to the C program that 
+ *	the GNU C library is being used.
+ */
+/*#define HAS_GNULIBC  	/**/
+
 /* HAS_HTONL:
  *	This symbol, if defined, indicates that the htonl() routine (and
  *	friends htons() ntohl() ntohs()) are available to do network
@@ -1123,13 +1129,13 @@
  *	This symbol, if defined, indicates to the C program that struct passwd
  *	contains pw_expire.
  */
-/* PWGECOS:
- *	This symbol, if defined, indicates to the C program that struct passwd
- *	contains pw_gecos.
- */
 /* PWCOMMENT:
  *	This symbol, if defined, indicates to the C program that struct passwd
  *	contains pw_comment.
+ */
+/* PWGECOS:
+ *	This symbol, if defined, indicates to the C program that struct passwd
+ *	contains pw_gecos.
  */
 /*#define I_PWD		/**/
 /*#define PWQUOTA	/**/
@@ -1137,8 +1143,8 @@
 /*#define PWCHANGE	/**/
 /*#define PWCLASS	/**/
 /*#define PWEXPIRE	/**/
-/*#define PWGECOS	/**/
 /*#define PWCOMMENT	/**/
+/*#define PWGECOS	/**/
 
 /* I_STDDEF:
  *	This symbol, if defined, indicates that <stddef.h> exists and should

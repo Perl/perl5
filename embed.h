@@ -1349,6 +1349,7 @@
 #define sv_count		(curinterp->Isv_count)
 #define sv_objcount		(curinterp->Isv_objcount)
 #define sv_root			(curinterp->Isv_root)
+#define sys_intern		(curinterp->Isys_intern)
 #define tainted			(curinterp->Itainted)
 #define tainting		(curinterp->Itainting)
 #define tmps_floor		(curinterp->Itmps_floor)
@@ -1503,6 +1504,7 @@
 #define Isv_count		sv_count
 #define Isv_objcount		sv_objcount
 #define Isv_root		sv_root
+#define Isys_intern		sys_intern
 #define Itainted		tainted
 #define Itainting		tainting
 #define Itmps_floor		tmps_floor
@@ -1665,6 +1667,7 @@
 #define sv_count		Perl_sv_count
 #define sv_objcount		Perl_sv_objcount
 #define sv_root			Perl_sv_root
+#define sys_intern		Perl_sys_intern
 #define tainted			Perl_tainted
 #define tmps_floor		Perl_tmps_floor
 #define tmps_ix			Perl_tmps_ix

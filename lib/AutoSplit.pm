@@ -11,7 +11,7 @@ use vars qw(
 	    $Verbose $Keep $Maxlen $CheckForAutoloader $CheckModTime
 	   );
 
-$VERSION = "1.0301";
+$VERSION = "1.0302";
 @ISA = qw(Exporter);
 @EXPORT = qw(&autosplit &autosplit_lib_modules);
 @EXPORT_OK = qw($Verbose $Keep $Maxlen $CheckForAutoloader $CheckModTime);
@@ -142,6 +142,9 @@ $CheckModTime = 1;
 my $IndexFile = "autosplit.ix";	# file also serves as timestamp
 my $maxflen = 255;
 $maxflen = 14 if $Config{'d_flexfnam'} ne 'define';
+if (defined (&Dos::UseLFN)) {
+     $maxflen = Dos::UseLFN() ? 255 : 11;
+}
 my $Is_VMS = ($^O eq 'VMS');
 
 
@@ -241,7 +244,7 @@ sub autosplit_file {
     die "Package $def_package ($modpname.pm) does not ".
 	"match filename $filename"
 	    unless ($filename =~ m/\Q$modpname.pm\E$/ or
-		    ($^O eq "msdos") or ($^O eq 'MSWin32') or
+		    ($^O eq 'dos') or ($^O eq 'MSWin32') or
 	            $Is_VMS && $filename =~ m/$modpname.pm/i);
 
     my($al_idx_file) = "$autodir/$modpname/$IndexFile";
@@ -268,6 +271,8 @@ sub autosplit_file {
     # create filenames which exactly match the names used by AutoLoader.pm.
     # This is a problem because some systems silently truncate the file
     # names while others treat long file names as an error.
+
+    my $Is83 = $maxflen==11;  # plain, case INSENSITIVE dos filenames
 
     my(@subnames, $subname, %proto, %package);
     my @cache = ();
@@ -304,7 +309,7 @@ sub autosplit_file {
 	    my($lpath) = "$autodir/$modpname/$lname.al";
 	    my($spath) = "$autodir/$modpname/$sname.al";
 	    my $path;
-	    if (open(OUT, ">$lpath")){
+	    if (!$Is83 and open(OUT, ">$lpath")){
 	        $path=$lpath;
 		print "  writing $lpath\n" if ($Verbose>=2);
 	    } else {
@@ -353,7 +358,7 @@ EOT
 	# letters in them will get their .al files deleted right after they're
 	# created. (The mixed case sub name wonn't match the all-lowercase
 	# filename, and so be cleaned up as a scrap file)
-	if ($Is_VMS) {
+	if ($Is_VMS or $Is83) {
 	    %outfiles = map {lc($_) => lc($_) } @outfiles;
 	} else {
 	    @outfiles{@outfiles} = @outfiles;
@@ -367,6 +372,7 @@ EOT
 	    foreach (sort readdir(OUTDIR)){
 		next unless /\.al$/;
 		my($file) = "$dir/$_";
+		$file = lc $file if $Is83;
 		next if $outfiles{$file};
 		print "  deleting $file\n" if ($Verbose>=2);
 		my($deleted,$thistime);  # catch all versions on VMS

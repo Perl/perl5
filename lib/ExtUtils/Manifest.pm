@@ -87,10 +87,16 @@ sub _manicheck {
     my $read = maniread();
     my $found = manifind();
     my $file;
+    my $dosnames=(defined(&Dos::UseLFN) && Dos::UseLFN()==0);
     my(@missfile,@missentry);
     if ($arg & 1){
 	foreach $file (sort keys %$read){
 	    warn "Debug: manicheck checking from $MANIFEST $file\n" if $Debug;
+            if ($dosnames){
+                $file = lc $file;
+                $file =~ s=(\.(\w|-)+)=substr ($1,0,4)=ge;
+                $file =~ s=((\w|-)+)=substr ($1,0,8)=ge;
+            }
 	    unless ( exists $found->{$file} ) {
 		warn "No such file: $file\n" unless $Quiet;
 		push @missfile, $file;

@@ -51,7 +51,7 @@ SV*	cv_const_sv _((CV* cv));
 SV*	op_const_sv _((OP* o, CV* cv));
 void	cv_undef _((CV* cv));
 #ifdef DEBUGGING
-void	cx_dump _((CONTEXT* cs));
+void	cx_dump _((PERL_CONTEXT* cs));
 #endif
 SV*	filter_add _((filter_t funcp, SV* datasv));
 void	filter_del _((filter_t funcp));

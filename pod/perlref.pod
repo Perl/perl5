@@ -120,6 +120,15 @@ reference to it, you have these options:
     sub hashem {       +{ @_ } }   # ok
     sub hashem { return { @_ } }   # ok
 
+On the other hand, if you want the other meaning, you can do this:
+
+    sub showem {        { @_ } }   # ambiguous (currently ok, but may change)
+    sub showem {       {; @_ } }   # ok
+    sub showem { { return @_ } }   # ok
+
+Note how the leading C<+{> and C<{;> always serve to disambiguate
+the expression to mean either the HASH reference, or the BLOCK.
+
 =item 4.
 
 A reference to an anonymous subroutine can be constructed by using

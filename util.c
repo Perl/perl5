@@ -94,6 +94,7 @@ MEM_SIZE size;
     else {
 	PerlIO_puts(PerlIO_stderr(),no_mem) FLUSH;
 	my_exit(1);
+        return Nullch;
     }
     /*NOTREACHED*/
 }
@@ -144,6 +145,7 @@ MEM_SIZE size;
     else {
 	PerlIO_puts(PerlIO_stderr(),no_mem) FLUSH;
 	my_exit(1);
+	return Nullch;
     }
     /*NOTREACHED*/
 }
@@ -201,6 +203,7 @@ MEM_SIZE size;
     else {
 	PerlIO_puts(PerlIO_stderr(),no_mem) FLUSH;
 	my_exit(1);
+	return Nullch;
     }
     /*NOTREACHED*/
 }
@@ -1131,6 +1134,7 @@ mess(pat, args)
     sv = mess_sv;
     sv_vsetpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
     if (!SvCUR(sv) || *(SvEND(sv) - 1) != '\n') {
+	dTHR;
 	if (dirty)
 	    sv_catpv(sv, dgd);
 	else {
@@ -1162,6 +1166,7 @@ die(pat, va_alist)
     va_dcl
 #endif
 {
+    dTHR;
     va_list args;
     char *message;
     I32 oldrunlevel = runlevel;
@@ -1233,6 +1238,7 @@ croak(pat, va_alist)
     va_dcl
 #endif
 {
+    dTHR;
     va_list args;
     char *message;
     HV *stash;
@@ -1306,6 +1312,7 @@ warn(pat,va_alist)
 
     if (warnhook) {
 	/* sv_2cv might call warn() */
+	dTHR;
 	SV *oldwarnhook = warnhook;
 	ENTER;
 	SAVESPTR(warnhook);
@@ -2060,7 +2067,7 @@ PerlIO *ptr;
 }
 #endif /* !DOSISH */
 
-#if  !defined(DOSISH) || defined(OS2)
+#if  !defined(DOSISH) || defined(OS2) || defined(WIN32)
 I32
 wait4pid(pid,statusp,flags)
 int pid;
@@ -2121,7 +2128,7 @@ int flags;
     }
 #endif
 }
-#endif /* !DOSISH */
+#endif /* !DOSISH || OS2 || WIN32 */
 
 void
 /*SUPPRESS 590*/
@@ -2333,13 +2340,13 @@ I32 *retlen;
     bool overflowed = FALSE;
     char *tmp = s;
 
-    while (len-- && *s && (tmp = strchr(hexdigit, *s))) {
+    while (len-- && *s && (tmp = strchr((char *) hexdigit, *s))) {
 	register UV n = retval << 4;
 	if (!overflowed && (n >> 4) != retval) {
 	    warn("Integer overflow in hex number");
 	    overflowed = TRUE;
 	}
-	retval = n | (tmp - hexdigit) & 15;
+	retval = n | ((tmp - hexdigit) & 15);
 	s++;
     }
     if (dowarn && !tmp) {

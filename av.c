@@ -25,13 +25,15 @@ AV* av;
     if (AvREAL(av))
 	return;
     key = AvMAX(av) + 1;
-    while (key > AvFILL(av) + 1)
+    while (key > AvFILLp(av) + 1)
 	AvARRAY(av)[--key] = &sv_undef;
     while (key) {
 	sv = AvARRAY(av)[--key];
 	assert(sv);
-	if (sv != &sv_undef)
+	if (sv != &sv_undef) {
+	    dTHR;
 	    (void)SvREFCNT_inc(sv);
+	}
     }
     key = AvARRAY(av) - AvALLOC(av);
     while (key)
@@ -44,15 +46,16 @@ av_extend(av,key)
 AV *av;
 I32 key;
 {
+    dTHR;			/* only necessary if we have to extend stack */
     if (key > AvMAX(av)) {
 	SV** ary;
 	I32 tmp;
 	I32 newmax;
 
 	if (AvALLOC(av) != AvARRAY(av)) {
-	    ary = AvALLOC(av) + AvFILL(av) + 1;
+	    ary = AvALLOC(av) + AvFILLp(av) + 1;
 	    tmp = AvARRAY(av) - AvALLOC(av);
-	    Move(AvARRAY(av), AvALLOC(av), AvFILL(av)+1, SV*);
+	    Move(AvARRAY(av), AvALLOC(av), AvFILLp(av)+1, SV*);
 	    AvMAX(av) += tmp;
 	    SvPVX(av) = (char*)AvALLOC(av);
 	    if (AvREAL(av)) {
@@ -147,7 +150,7 @@ I32 lval;
 	if (key < 0)
 	    return 0;
     }
-    else if (key > AvFILL(av)) {
+    else if (key > AvFILLp(av)) {
 	if (!lval)
 	    return 0;
 	if (AvREALISH(av))
@@ -199,6 +202,7 @@ SV *val;
 	if (key < 0)
 	    return 0;
     }
+
     if (SvREADONLY(av) && key >= AvFILL(av))
 	croak(no_modify);
     if (!AvREAL(av) && AvREIFY(av))
@@ -206,15 +210,16 @@ SV *val;
     if (key > AvMAX(av))
 	av_extend(av,key);
     ary = AvARRAY(av);
-    if (AvFILL(av) < key) {
+    if (AvFILLp(av) < key) {
 	if (!AvREAL(av)) {
+	    dTHR;
 	    if (av == curstack && key > stack_sp - stack_base)
 		stack_sp = stack_base + key;	/* XPUSH in disguise */
 	    do
-		ary[++AvFILL(av)] = &sv_undef;
-	    while (AvFILL(av) < key);
+		ary[++AvFILLp(av)] = &sv_undef;
+	    while (AvFILLp(av) < key);
 	}
-	AvFILL(av) = key;
+	AvFILLp(av) = key;
     }
     else if (AvREAL(av))
 	SvREFCNT_dec(ary[key]);
@@ -239,7 +244,7 @@ newAV()
     AvREAL_on(av);
     AvALLOC(av) = 0;
     SvPVX(av) = 0;
-    AvMAX(av) = AvFILL(av) = -1;
+    AvMAX(av) = AvFILLp(av) = -1;
     return av;
 }
 
@@ -259,7 +264,7 @@ register SV **strp;
 	New(4,ary,size,SV*);
 	AvALLOC(av) = ary;
 	SvPVX(av) = (char*)ary;
-	AvFILL(av) = size - 1;
+	AvFILLp(av) = size - 1;
 	AvMAX(av) = size - 1;
 	for (i = 0; i < size; i++) {
 	    assert (*strp);
@@ -286,7 +291,7 @@ register SV **strp;
     Copy(strp,ary,size,SV*);
     AvFLAGS(av) = AVf_REIFY;
     SvPVX(av) = (char*)ary;
-    AvFILL(av) = size - 1;
+    AvFILLp(av) = size - 1;
     AvMAX(av) = size - 1;
     while (size--) {
 	assert (*strp);
@@ -314,7 +319,7 @@ register AV *av;
 
     if (AvREAL(av)) {
 	ary = AvARRAY(av);
-	key = AvFILL(av) + 1;
+	key = AvFILLp(av) + 1;
 	while (key) {
 	    SvREFCNT_dec(ary[--key]);
 	    ary[key] = &sv_undef;
@@ -324,7 +329,7 @@ register AV *av;
 	AvMAX(av) += key;
 	SvPVX(av) = (char*)AvALLOC(av);
     }
-    AvFILL(av) = -1;
+    AvFILLp(av) = -1;
 
     if (SvRMAGICAL(av))
 	mg_clear((SV*)av); 
@@ -340,14 +345,14 @@ register AV *av;
 	return;
     /*SUPPRESS 560*/
     if (AvREAL(av)) {
-	key = AvFILL(av) + 1;
+	key = AvFILLp(av) + 1;
 	while (key)
 	    SvREFCNT_dec(AvARRAY(av)[--key]);
     }
     Safefree(AvALLOC(av));
     AvALLOC(av) = 0;
     SvPVX(av) = 0;
-    AvMAX(av) = AvFILL(av) = -1;
+    AvMAX(av) = AvFILLp(av) = -1;
     if (AvARYLEN(av)) {
 	SvREFCNT_dec(AvARYLEN(av));
 	AvARYLEN(av) = 0;
@@ -402,13 +407,13 @@ register I32 num;
 	num -= i;
     
 	AvMAX(av) += i;
-	AvFILL(av) += i;
+	AvFILLp(av) += i;
 	SvPVX(av) = (char*)(AvARRAY(av) - i);
     }
     if (num) {
-	i = AvFILL(av);
+	i = AvFILLp(av);
 	av_extend(av, i + num);
-	AvFILL(av) += num;
+	AvFILLp(av) += num;
 	ary = AvARRAY(av);
 	Move(ary, ary + num, i + 1, SV*);
 	do {
@@ -432,7 +437,7 @@ register AV *av;
 	*AvARRAY(av) = &sv_undef;
     SvPVX(av) = (char*)(AvARRAY(av) + 1);
     AvMAX(av)--;
-    AvFILL(av)--;
+    AvFILLp(av)--;
     if (SvSMAGICAL(av))
 	mg_set((SV*)av);
     return retval;
@@ -455,7 +460,7 @@ I32 fill;
     if (fill < 0)
 	fill = -1;
     if (fill <= AvMAX(av)) {
-	I32 key = AvFILL(av);
+	I32 key = AvFILLp(av);
 	SV** ary = AvARRAY(av);
 
 	if (AvREAL(av)) {
@@ -469,7 +474,7 @@ I32 fill;
 		ary[++key] = &sv_undef;
 	}
 	    
-	AvFILL(av) = fill;
+	AvFILLp(av) = fill;
 	if (SvSMAGICAL(av))
 	    mg_set((SV*)av);
     }

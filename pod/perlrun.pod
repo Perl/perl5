@@ -266,10 +266,14 @@ equivalent to B<-Dtls>):
       512  r  Regular expression parsing and execution
      1024  x  Syntax tree dump
      2048  u  Tainting checks
-     4096  L  Memory leaks (not supported anymore)
+     4096  L  Memory leaks (needs C<-DLEAKTEST> when compiling Perl)
      8192  H  Hash dump -- usurps values()
     16384  X  Scratchpad allocation
     32768  D  Cleaning up
+
+All these flags require C<-DDEBUGGING> when you compile the Perl
+executable.  This flag is automatically set if you include C<-g>
+option when C<Configure> asks you about optimizer/debugger flags.
 
 =item B<-e> I<commandline>
 
@@ -632,8 +636,8 @@ look in COMSPEC to find a shell fit for interactive use).
 =item PERL_DEBUG_MSTATS
 
 Relevant only if perl is compiled with the malloc included with the perl
-distribution (that is, if C<perl -V:d_mymalloc> is 'define'),
-if set, this causes memory statistics to be dumped after execution.  If set
+distribution (that is, if C<perl -V:d_mymalloc> is 'define').
+If set, this causes memory statistics to be dumped after execution.  If set
 to an integer greater than one, also causes memory statistics to be dumped
 after compilation.
 

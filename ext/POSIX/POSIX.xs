@@ -1,3 +1,6 @@
+#ifdef WIN32
+#define _POSIX_
+#endif
 #include "EXTERN.h"
 #define PERLIO_NOT_STDIO 1
 #include "perl.h"
@@ -40,7 +43,9 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <time.h>
+#ifdef I_UNISTD
 #include <unistd.h>	/* see hints/sunos_4_1.sh */
+#endif
 #include <fcntl.h>
 
 #if defined(__VMS) && !defined(__POSIX_SOURCE)
@@ -161,6 +166,28 @@
    }
 #  define times(t) vms_times(t)
 #else
+#if defined (WIN32)
+#  undef mkfifo  /* #defined in perl.h */
+#  define mkfifo(a,b) not_here("mkfifo")
+#  define ttyname(a) not_here("ttyname")
+#  define sigset_t long
+#  define pid_t long
+#  ifdef __BORLANDC__
+#    define tzname _tzname
+#  endif
+#  ifdef _MSC_VER
+#    define mode_t short
+#  endif
+#  define sigaction(a,b,c)	not_here("sigaction")
+#  define sigpending(a)		not_here("sigpending")
+#  define sigprocmask(a,b,c)	not_here("sigprocmask")
+#  define sigsuspend(a)		not_here("sigsuspend")
+#  define sigemptyset(a)	not_here("sigemptyset")
+#  define sigaddset(a,b)	not_here("sigaddset")
+#  define sigdelset(a,b)	not_here("sigdelset")
+#  define sigfillset(a)		not_here("sigfillset")
+#  define sigismember(a,b)	not_here("sigismember")
+#else
 #  include <grp.h>
 #  include <sys/times.h>
 #  ifdef HAS_UNAME
@@ -170,7 +197,8 @@
 #  ifdef I_UTIME
 #    include <utime.h>
 #  endif
-#endif
+#endif /* WIN32 */
+#endif /* __VMS */
 
 typedef int SysRet;
 typedef long SysRetLong;
@@ -297,10 +325,12 @@ unsigned long strtoul _((const char *, char **, int));
 #define localeconv() not_here("localeconv")
 #endif
 
+#ifndef WIN32
 #ifdef HAS_TZNAME
 extern char *tzname[];
 #else
 char *tzname[] = { "" , "" };
+#endif
 #endif
 
 /* XXX struct tm on some systems (SunOS4/BSD) contains extra (non POSIX)
@@ -3161,7 +3191,9 @@ sigaction(sig, action, oldaction = 0)
 	POSIX::SigAction	action
 	POSIX::SigAction	oldaction
     CODE:
-
+#ifdef WIN32
+	RETVAL = not_here("sigaction");
+#else
 # This code is really grody because we're trying to make the signal
 # interface look beautiful, which is hard.
 
@@ -3240,6 +3272,7 @@ sigaction(sig, action, oldaction = 0)
 		sv_setiv(*svp, oact.sa_flags);
 	    }
 	}
+#endif
     OUTPUT:
 	RETVAL
 

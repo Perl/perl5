@@ -181,7 +181,6 @@ Perl_safexcalloc
 Perl_safexmalloc
 Perl_safexfree
 Perl_safexrealloc
-Perl_wait4pid
 Perl_my_memcmp
 Perl_my_memset
 Perl_cshlen
@@ -366,6 +365,11 @@ perl_call_sv
 perl_require_pv
 perl_eval_pv
 perl_eval_sv
+perl_new_ctype
+perl_new_collate
+perl_new_numeric
+perl_set_numeric_standard
+perl_set_numeric_local
 boot_DynaLoader
 Perl_thread_create
 win32_errno

@@ -19,6 +19,9 @@ eval {
     $have_setlocale++;
 };
 
+# Visual C's CRT goes silly on strings of the form "en_US.ISO8859-1"
+$have_setlocale = 0 if $^O eq 'MSWin32' && $Config{cc} =~ /^cl/i;
+
 print "1..", ($have_setlocale ? 102 : 98), "\n";
 
 use vars qw($a

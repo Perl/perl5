@@ -873,7 +873,7 @@ typedef struct regexp REGEXP;
 typedef struct gp GP;
 typedef struct gv GV;
 typedef struct io IO;
-typedef struct context CONTEXT;
+typedef struct context PERL_CONTEXT;
 typedef struct block BLOCK;
 
 typedef struct magic MAGIC;
@@ -1859,7 +1859,7 @@ IEXT OP *	Ieval_start;
 IEXT COP * VOL	Icurcop IINIT(&compiling);
 IEXT COP *	Icurcopdb IINIT(NULL);
 IEXT line_t	Icopline IINIT(NOLINE);
-IEXT CONTEXT *	Icxstack;
+IEXT PERL_CONTEXT *	Icxstack;
 IEXT I32	Icxstack_ix IINIT(-1);
 IEXT I32	Icxstack_max IINIT(128);
 IEXT JMPENV 	Istart_env;	/* empty startup sigjmp() environment */
@@ -1900,6 +1900,11 @@ IEXT AV *	Ipreambleav;
 IEXT int	Ilaststatval IINIT(-1);
 IEXT I32	Ilaststype IINIT(OP_STAT);
 IEXT SV *	Imess_sv;
+
+/* system specific per-interpreter internals */
+#ifdef HAVE_INTERP_INTERN
+IEXT struct interp_intern	Isys_intern;
+#endif
 
 #undef IEXT
 #undef IINIT
@@ -2235,7 +2240,13 @@ EXT bool	numeric_local INIT(TRUE);    /* Assume local numerics */
 #define printf PerlIO_stdoutf
 #endif
 
+#ifndef PERL_SCRIPT_MODE
+#define PERL_SCRIPT_MODE "r"
+#endif
+
 /* provide some backwards compatibility for XS source from 5.005 */
+#define djSP dSP
+#define AvFILLp(a) AvFILL(a)
 #define dTHR typedef int _thr_dummy
 #define ERRSV GvSV(errgv)
 #define ERRHV GvHV(errgv)

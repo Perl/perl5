@@ -93,6 +93,7 @@ typedef U32 PADOFFSET;
 #define OPpRUNTIME		64	/* Pattern coming in on the stack */
 
 /* Private for OP_TRANS */
+#define OPpTRANS_COUNTONLY	8
 #define OPpTRANS_SQUASH		16
 #define OPpTRANS_DELETE		32
 #define OPpTRANS_COMPLEMENT	64

@@ -179,6 +179,7 @@ void
 perl_destruct(sv_interp)
 register PerlInterpreter *sv_interp;
 {
+    dTHR;
     int destruct_level;  /* 0=none, 1=full, 2=full with checks */
     I32 last_sv_count;
     HV *hv;
@@ -461,6 +462,7 @@ int argc;
 char **argv;
 char **env;
 {
+    dTHR;
     register SV *sv;
     register char *s;
     char *scriptname = NULL;
@@ -812,8 +814,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
     /* now that script is parsed, we can modify record separator */
     SvREFCNT_dec(rs);
     rs = SvREFCNT_inc(nrs);
-    sv_setsv(GvSV(gv_fetchpv("/", TRUE, SVt_PV)), rs);
-
+    sv_setsv(perl_get_sv("/", TRUE), rs);
     if (do_undump)
 	my_unexec();
 
@@ -838,6 +839,7 @@ int
 perl_run(sv_interp)
 PerlInterpreter *sv_interp;
 {
+    dSP;
     I32 oldscope;
     dJMPENV;
     int ret;
@@ -977,7 +979,7 @@ register char **argv;	/* null terminated arg list */
 {
     dSP;
 
-    PUSHMARK(sp);
+    PUSHMARK(SP);
     if (argv) {
 	while (*argv) {
 	    XPUSHs(sv_2mortal(newSVpv(*argv,0)));
@@ -1019,8 +1021,8 @@ perl_call_sv(sv, flags)
 SV* sv;
 I32 flags;		/* See G_* flags in cop.h */
 {
+    dSP;
     LOGOP myop;		/* fake syntax tree node */
-    SV** sp = stack_sp;
     I32 oldmark;
     I32 retval;
     I32 oldscope;
@@ -1064,7 +1066,7 @@ I32 flags;		/* See G_* flags in cop.h */
 	markstack_ptr--;
 	/* we're trying to emulate pp_entertry() here */
 	{
-	    register CONTEXT *cx;
+	    register PERL_CONTEXT *cx;
 	    I32 gimme = GIMME_V;
 	    
 	    ENTER;
@@ -1079,7 +1081,7 @@ I32 flags;		/* See G_* flags in cop.h */
 	    if (flags & G_KEEPERR)
 		in_eval |= 4;
 	    else
-		sv_setpv(GvSV(errgv),"");
+		sv_setpv(ERRSV,"");
 	}
 	markstack_ptr++;
 
@@ -1124,7 +1126,7 @@ I32 flags;		/* See G_* flags in cop.h */
 	runops();
     retval = stack_sp - (stack_base + oldmark);
     if ((flags & G_EVAL) && !(flags & G_KEEPERR))
-	sv_setpv(GvSV(errgv),"");
+	sv_setpv(ERRSV,"");
 
   cleanup:
     if (flags & G_EVAL) {
@@ -1132,7 +1134,7 @@ I32 flags;		/* See G_* flags in cop.h */
 	    SV **newsp;
 	    PMOP *newpm;
 	    I32 gimme;
-	    register CONTEXT *cx;
+	    register PERL_CONTEXT *cx;
 	    I32 optype;
 
 	    POPBLOCK(cx,newpm);
@@ -1163,9 +1165,9 @@ perl_eval_sv(sv, flags)
 SV* sv;
 I32 flags;		/* See G_* flags in cop.h */
 {
+    dSP;
     UNOP myop;		/* fake syntax tree node */
-    SV** sp = stack_sp;
-    I32 oldmark = sp - stack_base;
+    I32 oldmark = SP - stack_base;
     I32 retval;
     I32 oldscope;
     dJMPENV;
@@ -1232,7 +1234,7 @@ I32 flags;		/* See G_* flags in cop.h */
 	runops();
     retval = stack_sp - (stack_base + oldmark);
     if (!(flags & G_KEEPERR))
-	sv_setpv(GvSV(errgv),"");
+	sv_setpv(ERRSV,"");
 
   cleanup:
     JMPENV_POP;
@@ -1254,7 +1256,7 @@ I32 croak_on_error;
     dSP;
     SV* sv = newSVpv(p, 0);
 
-    PUSHMARK(sp);
+    PUSHMARK(SP);
     perl_eval_sv(sv, G_SCALAR);
     SvREFCNT_dec(sv);
 
@@ -1262,8 +1264,8 @@ I32 croak_on_error;
     sv = POPs;
     PUTBACK;
 
-    if (croak_on_error && SvTRUE(GvSV(errgv)))
-	croak(SvPVx(GvSV(errgv), na));
+    if (croak_on_error && SvTRUE(ERRSV))
+	croak(SvPVx(ERRSV, na));
 
     return sv;
 }
@@ -1345,6 +1347,8 @@ char *s;
 
     switch (*s) {
     case '0':
+    {
+	dTHR;
 	rschar = scan_oct(s, 4, &numlen);
 	SvREFCNT_dec(nrs);
 	if (rschar & ~((U8)~0))
@@ -1356,6 +1360,7 @@ char *s;
 	    nrs = newSVpv(&ch, 1);
 	}
 	return s + numlen;
+    }
     case 'F':
 	minus_F = TRUE;
 	splitstr = savepv(s + 1);
@@ -1445,6 +1450,7 @@ char *s;
 	    s += numlen;
 	}
 	else {
+	    dTHR;
 	    if (RsPARA(nrs)) {
 		ors = "\n\n";
 		orslen = 2;
@@ -1461,30 +1467,31 @@ char *s;
 	forbid_setid("-m");	/* XXX ? */
 	if (*++s) {
 	    char *start;
+	    SV *sv;
 	    char *use = "use ";
 	    /* -M-foo == 'no foo'	*/
 	    if (*s == '-') { use = "no "; ++s; }
-	    Sv = newSVpv(use,0);
+	    sv = newSVpv(use,0);
 	    start = s;
 	    /* We allow -M'Module qw(Foo Bar)'	*/
 	    while(isALNUM(*s) || *s==':') ++s;
 	    if (*s != '=') {
-		sv_catpv(Sv, start);
+		sv_catpv(sv, start);
 		if (*(start-1) == 'm') {
 		    if (*s != '\0')
 			croak("Can't use '%c' after -mname", *s);
-		    sv_catpv( Sv, " ()");
+		    sv_catpv( sv, " ()");
 		}
 	    } else {
-		sv_catpvn(Sv, start, s-start);
-		sv_catpv(Sv, " split(/,/,q{");
-		sv_catpv(Sv, ++s);
-		sv_catpv(Sv,    "})");
+		sv_catpvn(sv, start, s-start);
+		sv_catpv(sv, " split(/,/,q{");
+		sv_catpv(sv, ++s);
+		sv_catpv(sv,    "})");
 	    }
 	    s += strlen(s);
 	    if (preambleav == NULL)
 		preambleav = newAV();
-	    av_push(preambleav, Sv);
+	    av_push(preambleav, sv);
 	}
 	else
 	    croak("No space allowed after -%c", *(s-1));
@@ -1538,7 +1545,7 @@ char *s;
 #endif
 #ifdef OS2
 	printf("\n\nOS/2 port Copyright (c) 1990, 1991, Raymond Chen, Kai Uwe Rommel\n"
-	    "Version 5 port Copyright (c) 1994-1997, Andreas Kaiser, Ilya Zakharevich\n");
+	    "Version 5 port Copyright (c) 1994-1998, Andreas Kaiser, Ilya Zakharevich\n");
 #endif
 #ifdef atarist
 	printf("atariST series port, ++jrb  bammi@cadence.com\n");
@@ -1561,6 +1568,9 @@ Internet, point your browser at http://www.perl.com/, the Perl Home Page.\n\n");
 	break;
     case '-':
     case 0:
+#ifdef WIN32
+    case '\r':
+#endif
     case '\n':
     case '\t':
 	break;
@@ -1613,6 +1623,7 @@ my_unexec()
 static void
 init_main_stash()
 {
+    dTHR;
     GV *gv;
 
     /* Note that strtab is a rather special HV.  Assumptions are made
@@ -1636,8 +1647,8 @@ init_main_stash()
     errgv = gv_HVadd(gv_fetchpv("@", TRUE, SVt_PV));
     GvMULTI_on(errgv);
     (void)form("%240s","");	/* Preallocate temp - for immediate signals. */
-    sv_grow(GvSV(errgv), 240);	/* Preallocate - for immediate signals. */
-    sv_setpvn(GvSV(errgv), "", 0);
+    sv_grow(ERRSV, 240);	/* Preallocate - for immediate signals. */
+    sv_setpvn(ERRSV, "", 0);
     curstash = defstash;
     compiling.cop_stash = defstash;
     debstash = GvHV(gv_fetchpv("DB::", GV_ADDMULTI, SVt_PVHV));
@@ -1656,6 +1667,7 @@ bool dosearch;
 SV *sv;
 #endif
 {
+    dTHR;
     register char *s;
 
     scriptname = find_script(scriptname, dosearch, NULL, 0);
@@ -1675,7 +1687,7 @@ SV *sv;
     if (strEQ(origfilename,"-"))
 	scriptname = "";
     if (fdscript >= 0) {
-	rsfp = PerlIO_fdopen(fdscript,"r");
+	rsfp = PerlIO_fdopen(fdscript,PERL_SCRIPT_MODE);
 #if defined(HAS_FCNTL) && defined(F_SETFD)
 	if (rsfp)
 	    fcntl(PerlIO_fileno(rsfp),F_SETFD,1);  /* ensure close-on-exec */
@@ -1759,7 +1771,7 @@ sed %s -e \"/^[^#]/b\" \
 	rsfp = PerlIO_stdin();
     }
     else {
-	rsfp = PerlIO_open(scriptname,"r");
+	rsfp = PerlIO_open(scriptname,PERL_SCRIPT_MODE);
 #if defined(HAS_FCNTL) && defined(F_SETFD)
 	if (rsfp)
 	    fcntl(PerlIO_fileno(rsfp),F_SETFD,1);  /* ensure close-on-exec */
@@ -1809,6 +1821,7 @@ char *scriptname;
      */
 
 #ifdef DOSUID
+    dTHR;
     char *s, *s2;
 
     if (Fstat(PerlIO_fileno(rsfp),&statbuf) < 0)	/* normal stat is insecure */
@@ -2096,6 +2109,7 @@ char *s;
 static void
 init_debugger()
 {
+    dTHR;
     curstash = debstash;
     dbargs = GvAV(gv_AVadd((gv_fetchpv("args", GV_ADDMULTI, SVt_PVAV))));
     AvREAL_off(dbargs);
@@ -2123,8 +2137,8 @@ init_stacks()
     stack_sp = stack_base;
     stack_max = stack_base + 127;
 
-    cxstack_max = 8192 / sizeof(CONTEXT) - 2;	/* Use most of 8K. */
-    New(50,cxstack,cxstack_max + 1,CONTEXT);
+    cxstack_max = 8192 / sizeof(PERL_CONTEXT) - 2;	/* Use most of 8K. */
+    New(50,cxstack,cxstack_max + 1,PERL_CONTEXT);
     cxstack_ix	= -1;
 
     New(50,tmps_stack,128,SV*);
@@ -2200,11 +2214,11 @@ init_lexer()
 static void
 init_predump_symbols()
 {
+    dTHR;
     GV *tmpgv;
     GV *othergv;
 
-    sv_setpvn(GvSV(gv_fetchpv("\"", TRUE, SVt_PV)), " ", 1);
-
+    sv_setpvn(perl_get_sv("\"", TRUE), " ", 1);
     stdingv = gv_fetchpv("STDIN",TRUE, SVt_PVIO);
     GvMULTI_on(stdingv);
     IoIFP(GvIOp(stdingv)) = PerlIO_stdin();
@@ -2239,6 +2253,7 @@ register int argc;
 register char **argv;
 register char **env;
 {
+    dTHR;
     char *s;
     SV *sv;
     GV* tmpgv;
@@ -2402,7 +2417,7 @@ int addsubdirs;
 	return;
 
     if (addsubdirs) {
-	subdir = newSV(0);
+	subdir = NEWSV(55,0);
 	if (!archpat_auto) {
 	    STRLEN len = (sizeof(ARCHNAME) + strlen(patchlevel)
 			  + sizeof("//auto"));
@@ -2418,7 +2433,7 @@ int addsubdirs;
 
     /* Break at all separators */
     while (p && *p) {
-	SV *libdir = newSV(0);
+	SV *libdir = NEWSV(55,0);
 	char *s;
 
 	/* skip any consecutive separators */
@@ -2487,6 +2502,7 @@ call_list(oldscope, list)
 I32 oldscope;
 AV* list;
 {
+    dTHR;
     line_t oldline = curcop->cop_line;
     STRLEN len;
     dJMPENV;
@@ -2500,7 +2516,7 @@ AV* list;
 	JMPENV_PUSH(ret);
 	switch (ret) {
 	case 0: {
-		SV* atsv = GvSV(errgv);
+		SV* atsv = ERRSV;
 		PUSHMARK(stack_sp);
 		perl_call_sv((SV*)cv, G_EVAL|G_DISCARD);
 		(void)SvPV(atsv, len);
@@ -2559,6 +2575,8 @@ void
 my_exit(status)
 U32 status;
 {
+    dTHR;
+
     switch (status) {
     case 0:
 	STATUS_ALL_SUCCESS;
@@ -2605,7 +2623,7 @@ my_failure_exit()
 static void
 my_exit_jump()
 {
-    register CONTEXT *cx;
+    register PERL_CONTEXT *cx;
     I32 gimme;
     SV **newsp;
 
