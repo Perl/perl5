@@ -385,11 +385,12 @@ defaults to radians.
 
 If you think geographically the I<theta> are longitudes: zero at the
 Greenwhich meridian, eastward positive, westward negative--and the
-I<phi> are latitudes: zero at North Pole, northward positive,
+I<phi> are latitudes: zero at the North Pole, northward positive,
 southward negative.  B<NOTE>: this formula thinks in mathematics, not
-geographically: the I<phi> zero is at the Nort Pole, not on the
-west coast of Africa (Bay of Guinea).  You need to subtract your
-geographical coordinates from I<pi/2> (also known as 90 degrees).
+geographically: the I<phi> zero is at the North Pole, not at the
+Equator on the west coast of Africa (Bay of Guinea).  You need to
+subtract your geographical coordinates from I<pi/2> (also known as 90
+degrees).
 
   $distance = great_circle_distance($lon0, pi/2 - $lat0,
                                     $lon1, pi/2 - $lat1, $rho);
