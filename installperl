@@ -26,6 +26,9 @@ sub mkpath {
 $mainperldir = "/usr/bin";
 $exe_ext = $Config{exe_ext};
 
+# Allow ``make install PERLNAME=something_besides_perl'':
+$perl = defined($ENV{PERLNAME}) ? $ENV{PERLNAME} : 'perl';
+
 while (@ARGV) {
     $nonono = 1 if $ARGV[0] eq '-n';
     $versiononly = 1 if $ARGV[0] eq '-v';
@@ -112,9 +115,9 @@ if ($^O eq 'MSWin32') {
 
 # Install the DLL
 
-safe_unlink("$installbin/perl.$dlext");
-copy("perl.$dlext", "$installbin/perl.$dlext");
-chmod(0755, "$installbin/perl.$dlext");
+safe_unlink("$installbin/$perl.$dlext");
+copy("perl.$dlext", "$installbin/$perl.$dlext");
+chmod(0755, "$installbin/$perl.$dlext");
 }
 
 # This will be used to store the packlist
@@ -123,26 +126,26 @@ $packlist = ExtUtils::Packlist->new("$installarchlib/.packlist");
 # First we install the version-numbered executables.
 
 if ($Is_VMS) {
-    safe_unlink("$installbin/perl$exe_ext");
-    copy("perl$exe_ext", "$installbin/perl$exe_ext");
-    chmod(0755, "$installbin/perl$exe_ext");
-    safe_unlink("$installbin/perlshr$exe_ext");
-    copy("perlshr$exe_ext", "$installbin/perlshr$exe_ext");
-    chmod(0755, "$installbin/perlshr$exe_ext");
+    safe_unlink("$installbin/$perl$exe_ext");
+    copy("perl$exe_ext", "$installbin/$perl$exe_ext");
+    chmod(0755, "$installbin/$perl$exe_ext");
+    safe_unlink("$installbin/${perl}shr$exe_ext");
+    copy("perlshr$exe_ext", "$installbin/${perl}shr$exe_ext");
+    chmod(0755, "$installbin/${perl}shr$exe_ext");
 }
 elsif ($^O ne 'dos') {
-    safe_unlink("$installbin/perl$ver$exe_ext");
-    copy("perl$exe_ext", "$installbin/perl$ver$exe_ext");
-    chmod(0755, "$installbin/perl$ver$exe_ext");
+    safe_unlink("$installbin/$perl$ver$exe_ext");
+    copy("perl$exe_ext", "$installbin/$perl$ver$exe_ext");
+    chmod(0755, "$installbin/$perl$ver$exe_ext");
 } else {
-    safe_unlink("$installbin/perl.exe");
-    copy("perl.exe", "$installbin/perl.exe");
+    safe_unlink("$installbin/$perl.exe");
+    copy("perl.exe", "$installbin/$perl.exe");
 }
 
-safe_unlink("$installbin/sperl$ver$exe_ext");
+safe_unlink("$installbin/s$perl$ver$exe_ext");
 if ($d_dosuid) {
-    copy("suidperl$exe_ext", "$installbin/sperl$ver$exe_ext");
-    chmod(04711, "$installbin/sperl$ver$exe_ext");
+    copy("suidperl$exe_ext", "$installbin/s$perl$ver$exe_ext");
+    chmod(04711, "$installbin/s$perl$ver$exe_ext");
 }
 
 # Install library files.
@@ -194,9 +197,9 @@ foreach $file (@corefiles) {
 # Make links to ordinary names if installbin directory isn't current directory.
 
 if (! $versiononly && ! samepath($installbin, '.') && ($^O ne 'dos') && ! $Is_VMS) {
-    safe_unlink("$installbin/perl$exe_ext", "$installbin/suidperl$exe_ext");
-    link("$installbin/perl$ver$exe_ext", "$installbin/perl$exe_ext");
-    link("$installbin/sperl$ver$exe_ext", "$installbin/suidperl$exe_ext") 
+    safe_unlink("$installbin/$perl$exe_ext", "$installbin/suid$perl$exe_ext");
+    link("$installbin/$perl$ver$exe_ext", "$installbin/$perl$exe_ext");
+    link("$installbin/s$perl$ver$exe_ext", "$installbin/suid$perl$exe_ext") 
       if $d_dosuid;
 }
 
@@ -206,9 +209,9 @@ $mainperl_is_instperl = 0;
 
 if (!$versiononly && !$nonono && $^O ne 'MSWin32' && !$Is_VMS && -t STDIN && -t STDERR
 	&& -w $mainperldir && ! samepath($mainperldir, $installbin)) {
-    local($usrbinperl)	= "$mainperldir/perl$exe_ext";
-    local($instperl)	= "$installbin/perl$exe_ext";
-    local($expinstperl)	= "$binexp/perl$exe_ext";
+    local($usrbinperl)	= "$mainperldir/$perl$exe_ext";
+    local($instperl)	= "$installbin/$perl$exe_ext";
+    local($expinstperl)	= "$binexp/$perl$exe_ext";
 
     # First make sure $usrbinperl is not already the same as the perl we
     # just installed.
@@ -338,11 +341,11 @@ if (!$versiononly) {
 	# to $mainperldir (like SunOS)
 	next if samepath($_, $binexp);
 	next if ($mainperl_is_instperl && samepath($_, $mainperldir));
-	push(@otherperls, "$_/perl$exe_ext")
-	    if (-x "$_/perl$exe_ext" && ! -d "$_/perl$exe_ext");
+	push(@otherperls, "$_/$perl$exe_ext")
+	    if (-x "$_/$perl$exe_ext" && ! -d "$_/$perl$exe_ext");
     }
     if (@otherperls) {
-	print STDERR "\nWarning: perl appears in your path in the following " .
+	print STDERR "\nWarning: $perl appears in your path in the following " .
 	    "locations beyond where\nwe just installed it:\n";
 	for (@otherperls) {
 	    print STDERR "    ", $_, "\n";

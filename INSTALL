@@ -499,6 +499,14 @@ system.  For most users, the defaults are sensible and will work.
 Some users, however, may wish to further customize perl.  Here are
 some of the main things you can change.
 
+=head2 Installing perl under different names
+
+If you want to install perl under a name other than "perl" (for example,
+when installing perl with special features enabled, such as debugging),
+indicate the alternate name on the "make install" line, such as:
+
+    make install PERLNAME=myperl
+
 =head2 Threads
 
 On some platforms, perl5.005 can be compiled to use threads.  To
