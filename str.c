@@ -1,4 +1,4 @@
-/* $Header: str.c,v 3.0.1.4 89/12/21 20:21:35 lwall Locked $
+/* $Header: str.c,v 3.0.1.5 90/02/28 18:30:38 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,15 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	str.c,v $
+ * Revision 3.0.1.5  90/02/28  18:30:38  lwall
+ * patch9: you may now undef $/ to have no input record separator
+ * patch9: nested evals clobbered their longjmp environment
+ * patch9: sometimes perl thought ordinary data was a symbol table entry
+ * patch9: insufficient space allocated for numeric string on sun4
+ * patch9: underscore in an array name in a double-quoted string not recognized
+ * patch9: "@foo{}" not recognized unless %foo defined
+ * patch9: "$foo[$[]" gives error
+ * 
  * Revision 3.0.1.4  89/12/21  20:21:35  lwall
  * patch7: errno may now be a macro with an lvalue
  * patch7: made nested or recursive foreach work right
@@ -129,7 +138,15 @@ register STR *str;
     if (!str)
 	return "";
     if (str->str_nok) {
+/* this is a problem on the sun 4... 24 bytes is not always enough and the
+	exponent blows away the malloc stack
+	PEJ Wed Jan 31 18:41:34 CST 1990
+*/
+#ifdef sun4
+	STR_GROW(str, 30);
+#else
 	STR_GROW(str, 24);
+#endif /* sun 4 */
 	s = str->str_ptr;
 	olderrno = errno;	/* some Xenix systems wipe out errno here */
 #if defined(scs) && defined(ns32000)
@@ -144,13 +161,21 @@ register STR *str;
 #endif /*scs*/
 	errno = olderrno;
 	while (*s) s++;
+#ifdef hcx
+	if (s[-1] == '.')
+	    s--;
+#endif
     }
     else {
 	if (str == &str_undef)
 	    return No;
 	if (dowarn)
 	    warn("Use of uninitialized variable");
+#ifdef sun4
+	STR_GROW(str, 30);
+#else
 	STR_GROW(str, 24);
+#endif
 	s = str->str_ptr;
     }
     *s = '\0';
@@ -194,6 +219,8 @@ register STR *sstr;
 #ifdef TAINT
     tainted |= sstr->str_tainted;
 #endif
+    if (sstr == dstr)
+	return;
     if (!sstr)
 	dstr->str_pok = dstr->str_nok = 0;
     else if (sstr->str_pok) {
@@ -206,7 +233,7 @@ register STR *sstr;
 	else if (sstr->str_cur == sizeof(STBP)) {
 	    char *tmps = sstr->str_ptr;
 
-	    if (*tmps == 'S' && bcmp(tmps,"Stab",4) == 0) {
+	    if (*tmps == 'S' && bcmp(tmps,"StB",4) == 0) {
 		dstr->str_magic = str_smake(sstr->str_magic);
 		dstr->str_magic->str_rare = 'X';
 	    }
@@ -642,7 +669,7 @@ int append;
     register char *bp;		/* we're going to steal some values */
     register int cnt;		/*  from the stdio struct and put EVERYTHING */
     register STDCHAR *ptr;	/*   in the innermost loop into registers */
-    register char newline = record_separator;/* (assuming >= 6 registers) */
+    register int newline = record_separator;/* (assuming >= 6 registers) */
     int i;
     int bpx;
     int obpx;
@@ -742,15 +769,36 @@ STR *str;
     register ARG *arg;
     line_t oldline = line;
     int retval;
+    char *tmps;
 
     str_sset(linestr,str);
     in_eval++;
     oldoldbufptr = oldbufptr = bufptr = str_get(linestr);
     bufend = bufptr + linestr->str_cur;
-    if (setjmp(eval_env)) {
-	in_eval = 0;
+    if (++loop_ptr >= loop_max) {
+        loop_max += 128;
+        Renew(loop_stack, loop_max, struct loop);
+    }
+    loop_stack[loop_ptr].loop_label = "_EVAL_";
+    loop_stack[loop_ptr].loop_sp = 0;
+#ifdef DEBUGGING
+    if (debug & 4) {
+        deb("(Pushing label #%d _EVAL_)\n", loop_ptr);
+    }
+#endif
+    if (setjmp(loop_stack[loop_ptr].loop_env)) {
+	in_eval--;
+	loop_ptr--;
 	fatal("%s\n",stab_val(stabent("@",TRUE))->str_ptr);
     }
+#ifdef DEBUGGING
+    if (debug & 4) {
+	tmps = loop_stack[loop_ptr].loop_label;
+	deb("(Popping label #%d %s)\n",loop_ptr,
+	    tmps ? tmps : "" );
+    }
+#endif
+    loop_ptr--;
     error_count = 0;
     retval = yyparse();
     in_eval--;
@@ -803,11 +851,12 @@ STR *src;
 	  s+1 < send) {
 	    str_ncat(str,t,s-t);
 	    t = s;
-	    if (*s == '$' && s[1] == '#' && isalpha(s[2]) || s[2] == '_')
+	    if (*s == '$' && s[1] == '#' && (isalpha(s[2]) || s[2] == '_'))
 		s++;
 	    s = scanreg(s,send,tokenbuf);
 	    if (*t == '@' &&
-	      (!(stab = stabent(tokenbuf,FALSE)) || !stab_xarray(stab)) ) {
+	      (!(stab = stabent(tokenbuf,FALSE)) || 
+		 (*s == '{' ? !stab_xhash(stab) : !stab_xarray(stab)) )) {
 		str_ncat(str,"@",1);
 		s = ++t;
 		continue;	/* grandfather @ from old scripts */
@@ -821,10 +870,18 @@ STR *src;
 		checkpoint = s;
 		do {
 		    switch (*s) {
-		    case '[': case '{':
+		    case '[':
+			if (s[-1] != '$')
+			    brackets++;
+			break;
+		    case '{':
 			brackets++;
 			break;
-		    case ']': case '}':
+		    case ']':
+			if (s[-1] != '$')
+			    brackets--;
+			break;
+		    case '}':
 			brackets--;
 			break;
 		    case '\'':

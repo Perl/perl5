@@ -1,9 +1,14 @@
 #!/usr/bin/perl
 
 ($op = shift) || die "Usage: rename perlexpr [filenames]\n";
-if ($#ARGV < 0) {
-    @ARGV = <stdin>;
-    chop(@ARGV);
+if (!@ARGV) {
+    if (-t) {
+	@ARGV = <*>;
+    }
+    else {
+	@ARGV = <STDIN>;
+	chop(@ARGV);
+    }
 }
 for (@ARGV) {
     $was = $_;

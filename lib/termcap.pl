@@ -1,13 +1,13 @@
-;# $Header: termcap.pl,v 3.0 89/10/18 15:19:58 lwall Locked $
+;# $Header: termcap.pl,v 3.0.1.1 90/02/28 17:46:44 lwall Locked $
 ;#
 ;# Usage:
 ;#	do 'ioctl.pl';
 ;#	ioctl(TTY,$TIOCGETP,$foo);
 ;#	($ispeed,$ospeed) = unpack('cc',$foo);
-;#	do 'termcap.pl';
-;#	do Tgetent('vt100');	# sets $TC{'cm'}, etc.
-;#	do Tgoto($TC{'cm'},$row,$col);
-;#	do Tputs($TC{'dl'},$affcnt,'FILEHANDLE');
+;#	do 'termcap.pl' || die "Can't get termcap.pl";
+;#	&Tgetent('vt100');	# sets $TC{'cm'}, etc.
+;#	&Tputs(&Tgoto($TC{'cm'},$col,$row), 0, 'FILEHANDLE');
+;#	&Tputs($TC{'dl'},$affcnt,'FILEHANDLE');
 ;#
 sub Tgetent {
     local($TERM) = @_;
@@ -47,7 +47,7 @@ sub Tgetent {
 	    \$entry .= \$_;
 	    ";
 	    eval $loop;
-	} while s/:tc=([^:]+):/:/, $TERM = $1;
+	} while s/:tc=([^:]+):/:/ && ($TERM = $1);
 	$TERMCAP = $entry;
     }
 
@@ -70,7 +70,7 @@ sub Tgetent {
 	    s/\\f/\f/g;
 	    s/\\\^/\377/g;
 	    s/\^\?/\177/g;
-	    s/\^(.)/pack('c',$1 & 031)/eg;
+	    s/\^(.)/pack('c',$1 & 31)/eg;
 	    s/\\(.)/$1/g;
 	    s/\377/^/g;
 	    $TC{$entry} = $_ if $TC{$entry} eq '';
@@ -104,17 +104,18 @@ sub Tgoto {
     local($result) = '';
     local($after) = '';
     local($code,$tmp) = @_;
-    @_ = ($tmp,$code);
+    local(@tmp);
+    @tmp = ($tmp,$code);
     local($online) = 0;
     while ($string =~ /^([^%]*)%(.)(.*)/) {
 	$result .= $1;
 	$code = $2;
 	$string = $3;
 	if ($code eq 'd') {
-	    $result .= sprintf("%d",shift(@_));
+	    $result .= sprintf("%d",shift(@tmp));
 	}
 	elsif ($code eq '.') {
-	    $tmp = shift(@_);
+	    $tmp = shift(@tmp);
 	    if ($tmp == 0 || $tmp == 4 || $tmp == 10) {
 		if ($online) {
 		    ++$tmp, $after .= $TC{'up'} if $TC{'up'};
@@ -127,32 +128,32 @@ sub Tgoto {
 	    $online = !$online;
 	}
 	elsif ($code eq '+') {
-	    $result .= sprintf("%c",shift(@_)+ord($string));
+	    $result .= sprintf("%c",shift(@tmp)+ord($string));
 	    $string = substr($string,1,99);
 	    $online = !$online;
 	}
 	elsif ($code eq 'r') {
-	    ($code,$tmp) = @_;
-	    @_ = ($tmp,$code);
+	    ($code,$tmp) = @tmp;
+	    @tmp = ($tmp,$code);
 	    $online = !$online;
 	}
 	elsif ($code eq '>') {
 	    ($code,$tmp,$string) = unpack("CCa99",$string);
-	    if ($_[$[] > $code) {
-		$_[$[] += $tmp;
+	    if ($tmp[$[] > $code) {
+		$tmp[$[] += $tmp;
 	    }
 	}
 	elsif ($code eq '2') {
-	    $result .= sprintf("%02d",shift(@_));
+	    $result .= sprintf("%02d",shift(@tmp));
 	    $online = !$online;
 	}
 	elsif ($code eq '3') {
-	    $result .= sprintf("%03d",shift(@_));
+	    $result .= sprintf("%03d",shift(@tmp));
 	    $online = !$online;
 	}
 	elsif ($code eq 'i') {
-	    ($code,$tmp) = @_;
-	    @_ = ($code+1,$tmp+1);
+	    ($code,$tmp) = @tmp;
+	    @tmp = ($code+1,$tmp+1);
 	}
 	else {
 	    return "OOPS";

@@ -1,4 +1,4 @@
-/* $Header: toke.c,v 3.0.1.4 89/12/21 20:26:56 lwall Locked $
+/* $Header: toke.c,v 3.0.1.5 90/02/28 18:47:06 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,13 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	toke.c,v $
+ * Revision 3.0.1.5  90/02/28  18:47:06  lwall
+ * patch9: return grandfathered to never be function call
+ * patch9: non-existent perldb.pl now gives reasonable error message
+ * patch9: perl can now start up other interpreters scripts
+ * patch9: line numbers were bogus during certain portions of foreach evaluation
+ * patch9: null hereis core dumped
+ * 
  * Revision 3.0.1.4  89/12/21  20:26:56  lwall
  * patch7: -d switch incompatible with -p or -n
  * patch7: " ''$foo'' " didn't parse right
@@ -78,6 +85,8 @@ char *reparse;		/* if non-null, scanreg found ${foo[$bar]} */
 #define LOP(f) return(*s == '(' || (s = skipspace(s), *s == '(') ? \
 	(*s = META('('), bufptr = oldbufptr, '(') : \
 	(yylval.ival=f,expectterm = TRUE,bufptr = s,(int)LISTOP))
+/* grandfather return to old style */
+#define OLDLOP(f) return(yylval.ival=f,expectterm = TRUE,bufptr = s,(int)LISTOP)
 
 char *
 skipspace(s)
@@ -171,7 +180,8 @@ yylex()
 	    if (minus_n || minus_p || perldb) {
 		str_set(linestr,"");
 		if (perldb)
-		    str_cat(linestr,"do 'perldb.pl'; print $@;");
+		    str_cat(linestr,
+"do 'perldb.pl' || die \"Can't find perldb.pl in @INC\"; print $@;");
 		if (minus_n || minus_p) {
 		    str_cat(linestr,"line: while (<>) {");
 		    if (minus_a)
@@ -222,12 +232,42 @@ yylex()
 	}
 #endif
 	bufend = linestr->str_ptr + linestr->str_cur;
-	if (firstline) {
-	    while (s < bufend && isspace(*s))
-		s++;
-	    if (*s == ':')	/* for csh's that have to exec sh scripts */
-		s++;
-	    firstline = FALSE;
+	if (line == 1) {
+	    if (*s == '#' && s[1] == '!') {
+		if (!in_eval && !instr(s,"perl") && instr(origargv[0],"perl")) {
+		    char **newargv;
+		    char *cmd;
+
+		    s += 2;
+		    if (*s == ' ')
+			s++;
+		    cmd = s;
+		    while (s < bufend && !isspace(*s))
+			s++;
+		    *s++ = '\0';
+		    while (s < bufend && isspace(*s))
+			s++;
+		    if (s < bufend) {
+			Newz(899,newargv,origargc+3,char*);
+			newargv[1] = s;
+			while (s < bufend && !isspace(*s))
+			    s++;
+			*s = '\0';
+			Copy(origargv+1, newargv+2, origargc+1, char*);
+		    }
+		    else
+			newargv = origargv;
+		    newargv[0] = cmd;
+		    execv(cmd,newargv);
+		    fatal("Can't exec %s", cmd);
+		}
+	    }
+	    else {
+		while (s < bufend && isspace(*s))
+		    s++;
+		if (*s == ':')	/* for csh's that have to exec sh scripts */
+		    s++;
+	    }
 	}
 	goto retry;
     case ' ': case '\t': case '\f':
@@ -519,8 +559,10 @@ yylex()
 	    LFUN(O_CHOP);
 	if (strEQ(d,"continue"))
 	    OPERATOR(CONTINUE);
-	if (strEQ(d,"chdir"))
+	if (strEQ(d,"chdir")) {
+	    (void)stabent("ENV",TRUE);	/* may use HOME */
 	    UNI(O_CHDIR);
+	}
 	if (strEQ(d,"close"))
 	    FOP(O_CLOSE);
 	if (strEQ(d,"closedir"))
@@ -606,10 +648,10 @@ yylex()
 	break;
     case 'f': case 'F':
 	SNARFWORD;
-	if (strEQ(d,"for"))
+	if (strEQ(d,"for") || strEQ(d,"foreach")) {
+	    yylval.ival = line;
 	    OPERATOR(FOR);
-	if (strEQ(d,"foreach"))
-	    OPERATOR(FOR);
+	}
 	if (strEQ(d,"format")) {
 	    d = bufend;
 	    while (s < d && isspace(*s))
@@ -819,6 +861,8 @@ yylex()
 	    FL2(O_PACK);
 	if (strEQ(d,"package"))
 	    OPERATOR(PACKAGE);
+	if (strEQ(d,"pipe"))
+	    FOP22(O_PIPE);
 	break;
     case 'q': case 'Q':
 	SNARFWORD;
@@ -834,7 +878,7 @@ yylex()
     case 'r': case 'R':
 	SNARFWORD;
 	if (strEQ(d,"return"))
-	    LOP(O_RETURN);
+	    OLDLOP(O_RETURN);
 	if (strEQ(d,"reset"))
 	    UNI(O_RESET);
 	if (strEQ(d,"redo"))
@@ -1483,7 +1527,8 @@ get_repl:
 	tmpstr = spat->spat_repl[1].arg_ptr.arg_str;
 	e = tmpstr->str_ptr + tmpstr->str_cur;
 	for (t = tmpstr->str_ptr; t < e; t++) {
-	    if (*t == '$' && t[1] && index("`'&+0123456789",t[1]))
+	    if (*t == '$' && t[1] && (index("`'&+0123456789",t[1]) ||
+	      (t[1] == '{' /*}*/ && isdigit(t[2])) ))
 		spat->spat_flags &= ~SPAT_CONST;
 	}
     }
@@ -1861,7 +1906,7 @@ register char *s;
 		    term = tmps[5];
 		multi_close = term;
 	    }
-	    tmpstr = Str_new(87,0);
+	    tmpstr = Str_new(87,80);
 	    if (hereis) {
 		term = *tokenbuf;
 		if (!rsfp) {
@@ -1946,7 +1991,7 @@ register char *s;
 		if ((*s == '$' && s+1 < send &&
 		    (alwaysdollar || /*(*/ (s[1] != ')' && s[1] != '|')) ) ||
 		    (*s == '@' && s+1 < send) ) {
-		    len = scanreg(s,bufend,tokenbuf) - s;
+		    len = scanreg(s,send,tokenbuf) - s;
 		    if (*s == '$' || strEQ(tokenbuf,"ARGV")
 		      || strEQ(tokenbuf,"ENV")
 		      || strEQ(tokenbuf,"SIG")

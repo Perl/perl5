@@ -28,9 +28,12 @@ $spitshell >s2p <<!GROK!THIS!
 : In the following dollars and backticks do not need the extra backslash.
 $spitshell >>s2p <<'!NO!SUBS!'
 
-# $Header: s2p.SH,v 3.0.1.2 89/11/17 15:51:27 lwall Locked $
+# $Header: s2p.SH,v 3.0.1.3 90/03/01 10:31:21 lwall Locked $
 #
 # $Log:	s2p.SH,v $
+# Revision 3.0.1.3  90/03/01  10:31:21  lwall
+# patch9: s2p didn't handle \< and \>
+# 
 # Revision 3.0.1.2  89/11/17  15:51:27  lwall
 # patch5: in s2p, line labels without a subsequent statement were done wrong
 # patch5: s2p left residue in /tmp
@@ -426,6 +429,9 @@ ${space}next line;";
 			$len--;
 			$_ = substr($_,0,$i) . substr($_,$i+1,10000);
 		    }
+		    elsif (!$repl && substr($_,$i,1) =~ /^[<>]$/) {
+			substr($_,$i,1) = 'b';
+		    }
 		}
 		elsif ($c eq '[' && !$repl) {
 		    $i++ if substr($_,$i,1) eq '^';
@@ -607,7 +613,8 @@ sub fetchpat {
 	    s/(.)//;
 	    $ch = $1;
 	    $delim = '' if $ch =~ /^[(){}\w]$/;
-	    $delim .= $1;
+	    $ch = 'b' if $ch =~ /^[<>]$/;
+	    $delim .= $ch;
 	}
 	elsif ($delim eq '[') {
 	    $inbracket = 1;

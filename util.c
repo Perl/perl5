@@ -1,4 +1,4 @@
-/* $Header: util.c,v 3.0.1.3 89/12/21 20:27:41 lwall Locked $
+/* $Header: util.c,v 3.0.1.4 90/03/01 10:26:48 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,12 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	util.c,v $
+ * Revision 3.0.1.4  90/03/01  10:26:48  lwall
+ * patch9: fbminstr() called instr() rather than ninstr()
+ * patch9: nested evals clobbered their longjmp environment
+ * patch9: piped opens returned undefined rather than 0 in child
+ * patch9: the x operator is now up to 10 times faster
+ * 
  * Revision 3.0.1.3  89/12/21  20:27:41  lwall
  * patch7: errno may now be a macro with an lvalue
  * 
@@ -479,7 +485,8 @@ STR *littlestr;
 
 #ifndef lint
     if (!(littlestr->str_pok & SP_FBM))
-	return instr((char*)big,littlestr->str_ptr);
+	return ninstr((char*)big,(char*)bigend,
+		littlestr->str_ptr, littlestr->str_ptr + littlestr->str_cur);
 #endif
 
     littlelen = littlestr->str_cur;
@@ -733,11 +740,33 @@ long a1, a2, a3, a4;
 {
     extern FILE *e_fp;
     extern char *e_tmpname;
+    char *tmps;
 
     mess(pat,a1,a2,a3,a4);
     if (in_eval) {
 	str_set(stab_val(stabent("@",TRUE)),buf);
-	longjmp(eval_env,1);
+	tmps = "_EVAL_";
+	while (loop_ptr >= 0 && (!loop_stack[loop_ptr].loop_label ||
+	  strNE(tmps,loop_stack[loop_ptr].loop_label) )) {
+#ifdef DEBUGGING
+	    if (debug & 4) {
+		deb("(Skipping label #%d %s)\n",loop_ptr,
+		    loop_stack[loop_ptr].loop_label);
+	    }
+#endif
+	    loop_ptr--;
+	}
+#ifdef DEBUGGING
+	if (debug & 4) {
+	    deb("(Found label #%d %s)\n",loop_ptr,
+		loop_stack[loop_ptr].loop_label);
+	}
+#endif
+	if (loop_ptr < 0) {
+	    in_eval = 0;
+	    fatal("Bad label: %s", tmps);
+	}
+	longjmp(loop_stack[loop_ptr].loop_env, 1);
     }
     fputs(buf,stderr);
     (void)fflush(stderr);
@@ -809,6 +838,7 @@ va_dcl
     va_list args;
     extern FILE *e_fp;
     extern char *e_tmpname;
+    char *tmps;
 
 #ifndef lint
     va_start(args);
@@ -819,7 +849,28 @@ va_dcl
     va_end(args);
     if (in_eval) {
 	str_set(stab_val(stabent("@",TRUE)),buf);
-	longjmp(eval_env,1);
+	tmps = "_EVAL_";
+	while (loop_ptr >= 0 && (!loop_stack[loop_ptr].loop_label ||
+	  strNE(tmps,loop_stack[loop_ptr].loop_label) )) {
+#ifdef DEBUGGING
+	    if (debug & 4) {
+		deb("(Skipping label #%d %s)\n",loop_ptr,
+		    loop_stack[loop_ptr].loop_label);
+	    }
+#endif
+	    loop_ptr--;
+	}
+#ifdef DEBUGGING
+	if (debug & 4) {
+	    deb("(Found label #%d %s)\n",loop_ptr,
+		loop_stack[loop_ptr].loop_label);
+	}
+#endif
+	if (loop_ptr < 0) {
+	    in_eval = 0;
+	    fatal("Bad label: %s", tmps);
+	}
+	longjmp(loop_stack[loop_ptr].loop_env, 1);
     }
     fputs(buf,stderr);
     (void)fflush(stderr);
@@ -1112,6 +1163,7 @@ char	*mode;
 	}
 	if (tmpstab = stabent("$",allstabs))
 	    str_numset(STAB_STR(tmpstab),(double)getpid());
+	forkprocess = 0;
 	return Nullfp;
 #undef THIS
 #undef THAT
@@ -1235,3 +1287,27 @@ register int len;
     return 0;
 }
 #endif /* MEMCMP */
+
+void
+repeatcpy(to,from,len,count)
+register char *to;
+register char *from;
+int len;
+register int count;
+{
+    register int todo;
+    register char *frombase = from;
+
+    if (len == 1) {
+	todo = *from;
+	while (count-- > 0)
+	    *to++ = todo;
+	return;
+    }
+    while (count-- > 0) {
+	for (todo = len; todo > 0; todo--) {
+	    *to++ = *from++;
+	}
+	from = frombase;
+    }
+}

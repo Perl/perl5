@@ -1,4 +1,4 @@
-/* $Header: walk.c,v 3.0.1.3 89/12/21 20:32:35 lwall Locked $
+/* $Header: walk.c,v 3.0.1.4 90/03/01 10:32:45 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	walk.c,v $
+ * Revision 3.0.1.4  90/03/01  10:32:45  lwall
+ * patch9: a2p didn't put a $ on ExitValue
+ * 
  * Revision 3.0.1.3  89/12/21  20:32:35  lwall
  * patch7: in a2p, user-defined functions didn't work on some machines
  * 
@@ -158,7 +161,7 @@ int minprec;			/* minimum precedence without parens */
 	    str_cat(str,"\n");
 	}
 	if (exitval)
-	    str_cat(str,"exit ExitValue;\n");
+	    str_cat(str,"exit $ExitValue;\n");
 	if (subs->str_ptr) {
 	    str_cat(str,"\n");
 	    str_scat(str,subs);
@@ -1327,7 +1330,7 @@ sub Pick {\n\
 	}
 	else {
 	    if (len == 1) {
-		str_set(str,"ExitValue = ");
+		str_set(str,"$ExitValue = ");
 		exitval = TRUE;
 		str_scat(str,
 		  fstr=walk(1,level,ops[node+1].ival,&numarg,P_ASSIGN));

@@ -1,4 +1,4 @@
-/* $Header: stab.c,v 3.0.1.3 89/12/21 20:18:40 lwall Locked $
+/* $Header: stab.c,v 3.0.1.4 90/02/28 18:19:14 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,13 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	stab.c,v $
+ * Revision 3.0.1.4  90/02/28  18:19:14  lwall
+ * patch9: $0 is now always the command name
+ * patch9: you may now undef $/ to have no input record separator
+ * patch9: local($.) didn't work
+ * patch9: sometimes perl thought ordinary data was a symbol table entry
+ * patch9: stab_array() and stab_hash() weren't defined on MICROPORT
+ * 
  * Revision 3.0.1.3  89/12/21  20:18:40  lwall
  * patch7: ANSI strerror() is now supported
  * patch7: errno may now be a macro with an lvalue
@@ -50,7 +57,7 @@ STR *str;
 	return stab_val(stab);
 
     switch (*stab->str_magic->str_ptr) {
-    case '0': case '1': case '2': case '3': case '4':
+    case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9': case '&':
 	if (curspat) {
 	    paren = atoi(stab_name(stab));
@@ -128,9 +135,11 @@ STR *str;
 	break;
 #endif
     case '/':
-	*tokenbuf = record_separator;
-	tokenbuf[1] = '\0';
-	str_nset(stab_val(stab),tokenbuf,rslen);
+	if (record_separator != 12345) {
+	    *tokenbuf = record_separator;
+	    tokenbuf[1] = '\0';
+	    str_nset(stab_val(stab),tokenbuf,rslen);
+	}
 	break;
     case '[':
 	str_numset(stab_val(stab),(double)arybase);
@@ -228,7 +237,7 @@ STR *str;
 	break;
     case '*':
 	s = str_get(str);
-	if (strnNE(s,"Stab",4) || str->str_cur != sizeof(STBP)) {
+	if (strNE(s,"StB") || str->str_cur != sizeof(STBP)) {
 	    if (!*s) {
 		STBP *stbp;
 
@@ -239,7 +248,7 @@ STR *str;
 		stab->str_ptr = stbp;
 		stab->str_len = stab->str_cur = sizeof(STBP);
 		stab->str_pok = 1;
-		strncpy(stab_magic(stab),"Stab",4);
+		strcpy(stab_magic(stab),"StB");
 		stab_val(stab) = Str_new(70,0);
 		stab_line(stab) = line;
 	    }
@@ -264,6 +273,10 @@ STR *str;
 
     case 0:
 	switch (*stab->str_magic->str_ptr) {
+	case '.':
+	    if (localizing)
+		savesptr((STR**)&last_in_stab);
+	    break;
 	case '^':
 	    Safefree(stab_io(curoutstab)->top_name);
 	    stab_io(curoutstab)->top_name = s = savestr(str_get(str));
@@ -296,8 +309,14 @@ STR *str;
 	    multiline = (i != 0);
 	    break;
 	case '/':
-	    record_separator = *str_get(str);
-	    rslen = str->str_cur;
+	    if (str->str_ptr) {
+		record_separator = *str_get(str);
+		rslen = str->str_cur;
+	    }
+	    else {
+		record_separator = 12345;	/* fake a non-existent char */
+		rslen = 1;
+	    }
 	    break;
 	case '\\':
 	    if (ors)
@@ -588,7 +607,7 @@ int add;
 	stab->str_ptr = stbp;
 	stab->str_len = stab->str_cur = sizeof(STBP);
 	stab->str_pok = 1;
-	strncpy(stab_magic(stab),"Stab",4);
+	strcpy(stab_magic(stab),"StB");
 	stab_val(stab) = Str_new(72,0);
 	stab_line(stab) = line;
 	str_magic(stab,stab,'*',name,len);
@@ -661,3 +680,26 @@ register STAB *stab;
     stab->str_cur = 0;
 }
 
+#if defined(CRIPPLED_CC) && (defined(iAPX286) || defined(M_I286) || defined(I80286))
+#define MICROPORT
+#endif
+
+#ifdef	MICROPORT	/* Microport 2.4 hack */
+ARRAY *stab_array(stab)
+register STAB *stab;
+{
+    if (((STBP*)(stab->str_ptr))->stbp_array) 
+	return ((STBP*)(stab->str_ptr))->stbp_array;
+    else
+	return ((STBP*)(aadd(stab)->str_ptr))->stbp_array;
+}
+
+HASH *stab_hash(stab)
+register STAB *stab;
+{
+    if (((STBP*)(stab->str_ptr))->stbp_hash)
+	return ((STBP*)(stab->str_ptr))->stbp_hash;
+    else
+	return ((STBP*)(hadd(stab)->str_ptr))->stbp_hash;
+}
+#endif			/* Microport 2.4 hack */

@@ -1,0 +1,24 @@
+#!/usr/bin/perl
+
+($op = shift) || die "Usage: relink perlexpr [filenames]\n";
+if (!@ARGV) {
+    if (-t) {
+	@ARGV = <*>;
+    }
+    else {
+	@ARGV = <STDIN>;
+	chop(@ARGV);
+    }
+}
+for (@ARGV) {
+    next unless -l;		# symbolic link?
+    $name = $_;
+    $_ = readlink($_);
+    $was = $_;
+    eval $op;
+    die $@ if $@;
+    if ($was ne $_) {
+	unlink($name);
+	symlink($_, $name);
+    }
+}
