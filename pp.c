@@ -1199,7 +1199,21 @@ PP(pp_ncmp)
     {
       dPOPTOPnnrl;
       I32 value;
+#ifdef __osf__ /* XXX fix in 5.6.1 --jhi */
+#if defined(USE_LONG_DOUBLE) && defined(HAS_LONG_DOUBLE)
+#define Perl_isnan isnanl
+#else
+#define Perl_isnan isnan
+#endif
+#endif
 
+#ifdef __osf__ /* XXX fix in 5.6.1 --jhi */
+      if (Perl_isnan(left) || Perl_isnan(right)) {
+	  SETs(&PL_sv_undef);
+	  RETURN;
+       }
+      value = (left > right) - (left < right);
+#else
       if (left == right)
 	value = 0;
       else if (left < right)
@@ -1210,6 +1224,7 @@ PP(pp_ncmp)
 	SETs(&PL_sv_undef);
 	RETURN;
       }
+#endif
       SETi(value);
       RETURN;
     }
