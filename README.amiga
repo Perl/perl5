@@ -224,20 +224,32 @@ basic UNIX utilities like test, cat, sed, and so on)
 
 =item *
 
+fix makedepend
+
+	In the file 'makedepend' there are three spots like this `$cat ...`:
+	a for loop near line 75, an egrep near line 161, and a for loop near
+	line 175.  In all those spots using an editor change the $cat to
+	/bin/cat.
+
+=item *
+
 now type make depend
 
-	when the make depend has ended load the gnumakefile into a editor and
-	go to the end of the file
-	move upwards in the file until you reach av.o: EXTERN.h
+	When the make depend has ended load the gnumakefile into
+	an editor and go to the end of the file.
+
+	Move upwards in the file until you reach av.o: EXTERN.h
 	and delete all lines down to # WARNING: Put....
 
 =item *
 
 now go to the x2p directory
 
-	load the gnumakefile
-	go to the end moveup until you reach hash.o: EXTERN.h
-	and delete all lines dowonwards until you reach
+	Load the gnumakefile into an editor.
+
+	Go to the end moveup until you reach hash.o: EXTERN.h
+	and delete all lines dowonwards until you reach a line saying
+
 	# WARNING: Put nothing....
 
 =item *
