@@ -118,6 +118,11 @@ sub _store {
 	open(FILE, ">$file") || logcroak "can't create $file: $!";
 	binmode FILE;				# Archaic systems...
 	if ($use_locking) {
+		if ($^O eq 'dos') {
+		    require Carp;
+		    Carp::carp "Storable::lock_store: fcntl/flock emulation broken on $^O\n";
+		    return undef;
+		}
 		flock(FILE, LOCK_EX) ||
 			logcroak "can't get exclusive lock on $file: $!";
 		truncate FILE, 0;
@@ -234,7 +239,13 @@ sub _retrieve {
 	my $self;
 	my $da = $@;							# Could be from exception handler
 	if ($use_locking) {
-		flock(FILE, LOCK_SH) || logcroak "can't get shared lock on $file: $!";
+ 		if ($^O eq 'dos') {
+ 			require Carp;
+ 			Carp::carp "Storable::lock_retrieve: fcntl/flock emulation broken on $^O\n";
+ 			return undef;
+ 		}
+		flock(FILE, LOCK_SH) ||
+		    logcroak "can't get shared lock on $file: $!";
 		# Unlocking will happen when FILE is closed
 	}
 	eval { $self = pretrieve(*FILE) };		# Call C routine
