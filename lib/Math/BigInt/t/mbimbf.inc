@@ -91,8 +91,10 @@ foreach my $class ($mbi,$mbf)
   ok (${"$mbf\::round_mode"},'zero');
   ok (${"$mbi\::round_mode"},'-inf');	# from above
 
+  # reset for further tests
   ${"$mbi\::accuracy"} = undef;
   ${"$mbi\::precision"} = undef;
+  ${"$mbf\::div_scale"} = 40;
 }
 
 # local copies
@@ -317,6 +319,25 @@ $x = $mbi->new(-123401); $x->{_a} = 4; ok ($x->bneg(),123401);
 # test fdiv rounding to A and R (bug in v1.48 and maybe earlier versions)
 $mbf->round_mode('even');
 $x = $mbf->new('740.7')->fdiv('6',4,undef,'zero'); ok ($x,'123.4');
+
+###############################################################################
+# test that bop(0) does the same than bop(undef)
+
+$x = $mbf->new('1234567890');
+ok ($x->copy()->bsqrt(0),$x->copy()->bsqrt(undef));
+ok ($x->copy->bsqrt(0),'35136.41828644462161665823116758077037159');
+
+ok_undef ($x->{_a});
+
+# test that bsqrt() modifies $x and does not just return something else
+# (especially under BareCalc)
+$z = $x->bsqrt();
+ok ($z,$x); ok ($x,'35136.41828644462161665823116758077037159');
+
+$x = $mbf->new('1.234567890123456789');
+ok ($x->copy()->bpow('0.5',0),$x->copy()->bpow('0.5',undef));
+ok ($x->copy()->bpow('0.5',0),$x->copy()->bsqrt(undef));
+ok ($x->copy()->bpow('2',0),'1.524157875323883675019051998750190521');
 
 ###############################################################################
 # test (also under Bare) that bfac() rounds at last step

@@ -16,13 +16,12 @@ BEGIN
     }
   } 
 
-no warnings 'portable';	# this must wait until after the version check
 use Math::BigInt ':constant';
 
 ok (2 ** 255,'57896044618658097711785492504343953926634992332820282019728792003956564819968');
 
 {
-  local $^W = 0;	# protect against "non-portable" warnings
+  no warnings 'portable';	# protect against "non-portable" warnings
 # hexadecimal constants
 ok (0x123456789012345678901234567890,
     Math::BigInt->new('0x123456789012345678901234567890'));
