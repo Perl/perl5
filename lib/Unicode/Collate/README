@@ -1,4 +1,4 @@
-Unicode/Collate version 0.31
+Unicode/Collate version 0.33
 ===============================
 
 NAME
@@ -47,6 +47,7 @@ To install this module type the following:
    make test
    make install
 
+(!! XSUB for Unicode::Collate is an EXPERIMENTAL support !!)
 If you have a C compiler and want to use XSUB edition,
 type the following (!! "enableXS" must run before "Makefile.PL" !!):
 
