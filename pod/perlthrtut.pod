@@ -331,7 +331,7 @@ Perl's threading package provides the yield() function that does
 this. yield() is pretty straightforward, and works like this:
 
     use threads; 
-	
+
     sub loop {
 	    my $thread = shift;
 	    my $foo = 50;
@@ -344,7 +344,7 @@ this. yield() is pretty straightforward, and works like this:
     my $thread1 = threads->new(\&loop, 'first');
     my $thread2 = threads->new(\&loop, 'second');
     my $thread3 = threads->new(\&loop, 'third');
-	
+
 It is important to remember that yield() is only a hint to give up the CPU,
 it depends on your hardware, OS and threading libraries what actually happens.
 Therefore it is important to note that one should not build the scheduling of 
@@ -433,7 +433,7 @@ L<threads::shared> module and the C< : shared> attribute:
     my $foo : shared = 1;
     my $bar = 1;
     threads->new(sub { $foo++; $bar++ })->join;
-    
+
     print "$foo\n";  #prints 2 since $foo is shared
     print "$bar\n";  #prints 1 since $bar is not shared
 

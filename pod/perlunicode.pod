@@ -765,7 +765,7 @@ But in this particular example, you probably really want
 
 which will match assigned characters known to be part of the Greek script.
 
-[b] See L</User-defined Character Properties>.
+[b] See L</"User-Defined Character Properties">.
 
 =item *
 

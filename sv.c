@@ -3194,7 +3194,7 @@ Perl_sv_copypv(pTHX_ SV *dsv, register SV *ssv)
 {
     SV *tmpsv;
 
-    if ( SvTHINKFIRST(ssv) && SvROK(ssv) && SvAMAGIC(ssv) &&
+    if ( SvTHINKFIRST(ssv) && SvROK(ssv) && SvAMAGIC(ssv) && 
 	 (tmpsv = AMG_CALLun(ssv,string))) {
 	if (SvTYPE(tmpsv) != SVt_RV || (SvRV(tmpsv) != SvRV(ssv))) {
 	    SvSetSV(dsv,tmpsv);
@@ -4461,11 +4461,7 @@ Perl_sv_magicext(pTHX_ SV* sv, SV* obj, int how, MGVTBL *vtable,
     /* Some magic sontains a reference loop, where the sv and object refer to
        each other.  To prevent a reference loop that would prevent such
        objects being freed, we look for such loops and if we find one we
-       avoid incrementing the object refcount.
-       Note we cannot do this to avoid self-tie loops as intervening RV must
-       have its REFCNT incremented to keep it in existence - instead special
-       case them in mg_free().
-     */
+       avoid incrementing the object refcount. */
     if (!obj || obj == sv ||
 	how == PERL_MAGIC_arylen ||
 	how == PERL_MAGIC_qr ||
@@ -4479,15 +4475,6 @@ Perl_sv_magicext(pTHX_ SV* sv, SV* obj, int how, MGVTBL *vtable,
     else {
 	mg->mg_obj = SvREFCNT_inc(obj);
 	mg->mg_flags |= MGf_REFCOUNTED;
-
-	/* Break self-tie loops */
-	if (how == PERL_MAGIC_tiedscalar && SvROK(obj) &&
-	   (SvRV(obj) == sv || GvIO(SvRV(obj)) == (IO *) sv)) {
-	    /* We have to have a REFCNT to obj, so drop REFCNT
-	       of what if references instead
-	     */
-	    SvREFCNT_dec(SvRV(obj));
-	}
     }
     mg->mg_type = how;
     mg->mg_len = namlen;
@@ -5180,12 +5167,8 @@ Perl_sv_free(pTHX_ SV *sv)
 	return;
     }
     ATOMIC_DEC_AND_TEST(refcount_is_zero, SvREFCNT(sv));
-    if (!refcount_is_zero) {
-	/* Do not be tempted to test SvMAGIC here till scope.c
-	   stops sharing MAGIC * between SVs
-	 */
+    if (!refcount_is_zero)
 	return;
-    }
 #ifdef DEBUGGING
     if (SvTEMP(sv)) {
 	if (ckWARN_d(WARN_DEBUGGING))
@@ -6228,6 +6211,7 @@ SV *
 Perl_sv_mortalcopy(pTHX_ SV *oldstr)
 {
     register SV *sv;
+
     new_SV(sv);
     sv_setsv(sv,oldstr);
     EXTEND_MORTAL(1);

@@ -56,6 +56,8 @@ sub post_initialize
     $self->{'O_FILES'} = [sort keys %o];
     my @files = ("$name.xs");
     $self->{'C'} = ["$name.c"];
+    $self->{SOURCE} .= " $name.c"
+        if $^O eq 'MacOS' && $self->{SOURCE} !~ /\b$name\.c\b/;
     $self->{'H'} = [$self->catfile($self->updir,'Encode', 'encode.h')];
     my %xs;
     foreach my $table (keys %tables) {
@@ -65,6 +67,8 @@ sub post_initialize
 	foreach my $ext (qw($(OBJ_EXT) .c .h .exh .fnm)) {
 	    push (@files,$table.$ext);
 	}
+	$self->{SOURCE} .= " $table.c"
+	    if $^O eq 'MacOS' && $self->{SOURCE} !~ /\b$table\.c\b/;
     }
     $self->{'XS'} = { "$name.xs" => "$name.c" };
     $self->{'clean'}{'FILES'} .= join(' ',@files);

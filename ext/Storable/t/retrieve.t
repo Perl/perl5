@@ -7,10 +7,6 @@
 #  You may redistribute only under the same terms as Perl 5, as specified
 #  in the README file that comes with the distribution.
 #
-# $Log: retrieve.t,v $
-# Revision 1.0  2000/09/01 19:40:42  ram
-# Baseline for first official release.
-#
 
 sub BEGIN {
     if ($ENV{PERL_CORE}){
@@ -78,4 +74,3 @@ print "not " if length $root->[1];
 print "ok 14\n";
 
 END { 1 while unlink('store', 'nstore') }
-

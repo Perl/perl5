@@ -7,13 +7,6 @@
 #  You may redistribute only under the same terms as Perl 5, as specified
 #  in the README file that comes with the distribution.
 #  
-# $Log: overload.t,v $
-# Revision 1.0.1.1  2001/02/17 12:27:22  ram
-# patch8: added test for structures with indirect ref to overloaded
-#
-# Revision 1.0  2000/09/01 19:40:42  ram
-# Baseline for first official release.
-#
 
 sub BEGIN {
     if ($ENV{PERL_CORE}){

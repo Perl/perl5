@@ -1,6 +1,7 @@
 use 5.7.2;
 use strict;
 use ExtUtils::MakeMaker;
+use File::Spec::Functions;
 
 my $name = 'Byte';
 my %tables = (
@@ -43,7 +44,7 @@ my %not_here =
  qw(cp932.ucm cp936.ucm cp949.ucm cp950.ucm),  # CJK
  );
 
-opendir(ENC,'../ucm');
+opendir(ENC,catdir(updir(),'ucm')) or die $!;
 while (defined(my $file = readdir(ENC)))
 {
     $file =~ /^(8859|cp).*\.ucm$/io or next;
@@ -83,6 +84,8 @@ sub post_initialize
     $self->{'O_FILES'} = [sort keys %o];
     my @files = ("$name.xs");
     $self->{'C'} = ["$name.c"];
+    $self->{SOURCE} .= " $name.c"
+        if $^O eq 'MacOS' && $self->{SOURCE} !~ /\b$name\.c\b/;
     $self->{'H'} = [$self->catfile($self->updir,'Encode', 'encode.h')];
     my %xs;
     foreach my $table (keys %tables) {
@@ -92,6 +95,8 @@ sub post_initialize
 	foreach my $ext (qw($(OBJ_EXT) .c .h .exh .fnm)) {
 	    push (@files,$table.$ext);
 	}
+	$self->{SOURCE} .= " $table.c"
+	    if $^O eq 'MacOS' && $self->{SOURCE} !~ /\b$table\.c\b/;
     }
     $self->{'XS'} = { "$name.xs" => "$name.c" };
     $self->{'clean'}{'FILES'} .= join(' ',@files);

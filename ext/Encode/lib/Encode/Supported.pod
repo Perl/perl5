@@ -61,9 +61,17 @@ The following encodings are always available.
   Canonical     Aliases                      Comments & References
   ----------------------------------------------------------------
   ascii         US-ascii                                    [ECMA]
+  ascii-ctrl			                  Special Encoding
   iso-8859-1    latin1                                       [ISO]
+  null				                  Special Encoding
   utf8          UTF-8                                    [RFC2279]
   ----------------------------------------------------------------
+
+I<null> and I<ascii-ctrl> are special.  "null" fails for all character
+so when you set fallback mode to PERLQQ, HTMLCREF or XMLCREF, ALL
+CHARACTERS will fall back to character references.  Ditto for
+"ascii-ctrl" except for control characters.  For fallback modes, see
+L<Encode>.
 
 =head2 Encode::Unicode -- other Unicode encodings
 

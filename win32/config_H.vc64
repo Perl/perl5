@@ -3201,7 +3201,7 @@
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
 #define PRIVLIB "c:\\perl\\lib"		/**/
-#define PRIVLIB_EXP (win32_get_privlib("5.7.3"))	/**/
+#define PRIVLIB_EXP (win32_get_privlib("5.8.0"))	/**/
 
 /* PTRSIZE:
  *	This symbol contains the size of a pointer, so that the C preprocessor
@@ -3328,7 +3328,7 @@
  *	be tacked onto this variable to generate a list of directories to search.
  */
 #define SITELIB "c:\\perl\\site\\lib"		/**/
-#define SITELIB_EXP (win32_get_sitelib("5.7.3"))	/**/
+#define SITELIB_EXP (win32_get_sitelib("5.8.0"))	/**/
 #define SITELIB_STEM ""		/**/
 
 /* Size_t_size:
@@ -3594,7 +3594,7 @@
  *	(presumably) be similar.
  *	See the INSTALL file for how this works.
  */
-#define PERL_XS_APIVERSION "5.6.0"
+#define PERL_XS_APIVERSION "5.8.0"
 #define PERL_PM_APIVERSION "5.005"
 
 /* HAS_CRYPT:

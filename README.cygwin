@@ -403,7 +403,7 @@ access by native Win32 programs).
 
 Inplace editing ( perl -i ) of files doesn't work without doing a backup 
 of the file being edited ( perl -i.bak ).
-  
+
 =back
 
 =head1 INSTALL PERL ON CYGWIN

@@ -359,17 +359,8 @@ Perl_mg_free(pTHX_ SV *sv)
 	    else if (mg->mg_len == HEf_SVKEY)
 		SvREFCNT_dec((SV*)mg->mg_ptr);
 	}
-	if (mg->mg_flags & MGf_REFCOUNTED) {
-	    SV *obj = mg->mg_obj;
-	    if (mg->mg_type == PERL_MAGIC_tiedscalar && SvROK(obj) &&
-		(SvRV(obj) == sv || GvIO(SvRV(obj)) == (IO *) sv)) {
-		/* We are already free'ing the self-tied thing
-		   so must not SvREFCNT_dec.
-		 */
-		SvROK_off(obj);
-	    } else
-		SvREFCNT_dec(obj);
-	}
+	if (mg->mg_flags & MGf_REFCOUNTED)
+	    SvREFCNT_dec(mg->mg_obj);
 	Safefree(mg);
     }
     SvMAGIC(sv) = 0;

@@ -97,4 +97,3 @@ for $Storable::canonical (0, 1) {
   my $object = \%hash;
   # bless {}, "Restrict_Test";
 }
-

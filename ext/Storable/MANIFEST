@@ -12,6 +12,7 @@ t/dclone.t		    See if Storable works
 t/downgrade.t		    See if Storable works
 t/forgive.t		    See if Storable works
 t/freeze.t		    See if Storable works
+t/integer.t		    For "use integer" testing
 t/lock.t		    See if Storable works
 t/make_downgrade.pl	    See if Storable works
 t/malice.t		    See if Storable copes with corrupt files
