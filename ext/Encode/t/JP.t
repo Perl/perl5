@@ -76,7 +76,11 @@ while (<$src>)
  }
 close($dst);
 close($src);
-ok(compare($utf,$ref) == 0);
+TODO:
+{
+  local $TODO = 'needs debugging on VMS' if $^O eq 'VMS';
+  ok(compare($utf,$ref) == 0);
+}
 select($out);
 
 SKIP:

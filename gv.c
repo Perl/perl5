@@ -482,9 +482,9 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
     /*
      * Inheriting AUTOLOAD for non-methods works ... for now.
      */
-    if (ckWARN(WARN_DEPRECATED) && !method &&
+    if (ckWARN2(WARN_DEPRECATED, WARN_SYNTAX) && !method &&
 	(GvCVGEN(gv) || GvSTASH(gv) != stash))
-	Perl_warner(aTHX_ WARN_DEPRECATED,
+	Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
 	  "Use of inherited AUTOLOAD for non-method %s::%.*s() is deprecated",
 	     HvNAME(stash), (int)len, name);
 
@@ -918,8 +918,8 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	goto magicalize;
     case '#':
     case '*':
-	if (ckWARN(WARN_DEPRECATED) && len == 1 && sv_type == SVt_PV)
-	    Perl_warner(aTHX_ WARN_DEPRECATED, "Use of $%s is deprecated", name);
+	if (ckWARN2(WARN_DEPRECATED, WARN_SYNTAX) && len == 1 && sv_type == SVt_PV)
+	    Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX), "Use of $%s is deprecated", name);
 	/* FALL THROUGH */
     case '[':
     case '^':

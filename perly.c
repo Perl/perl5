@@ -9,7 +9,7 @@
 #ifdef EBCDIC
 #undef YYDEBUG
 #endif
-#define dep() deprecate("\"do\" to call subroutines")
+#define dep() deprecate_old("\"do\" to call subroutines")
 
 /* stuff included here to make perly_c.diff apply better */
 

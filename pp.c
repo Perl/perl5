@@ -555,7 +555,7 @@ PP(pp_gelem)
     case 'F':
 	if (strEQ(elem, "FILEHANDLE")) {
 	    /* finally deprecated in 5.8.0 */
-	    deprecate("*glob{FILEHANDLE}");
+	    deprecate_old("*glob{FILEHANDLE}");
 	    tmpRef = (SV*)GvIOp(gv);
 	}
 	else

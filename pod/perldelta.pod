@@ -2170,6 +2170,10 @@ to 7.0.
 The C<system> function and backticks operator have improved
 functionality and better error handling.
 
+File access tests now use current process privileges rather than the
+user's default privileges, which could sometimes result in a mismatch
+between reported access and actual access.
+
 =item *
 
 Windows
@@ -2277,6 +2281,12 @@ winsock handle leak fixed.
 =head1 New or Changed Diagnostics
 
 =over 4
+
+=item *
+
+The lexical warnings category "deprecated" is no longer a sub-category
+of the "syntax" category. It is now a top-level category in its own
+right.
 
 =item *
 
@@ -2632,9 +2642,9 @@ There are a few known test failures, see L<perluts>.
 
 =head2 VMS
 
-There is one known test failure with a default configuration:
-
-  [.run]switches..........................FAILED on test 1
+There should be no reported test failures with a default configuration,
+though there are a number of tests marked TODO that point to areas
+needing further debugging and/or porting work.
 
 =head2 Win32
 
