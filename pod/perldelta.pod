@@ -82,7 +82,7 @@ Documentation improved
 
 =head1 Selected Bug Fixes
 
-C<require> should now cache results as expected when repeated attempts are
+C<require> now caches results as expected when repeated attempts are
 made to load a file which fails.
 
 Some syntax errors involving unrecognized filetest operators are now handled
@@ -90,9 +90,9 @@ correctly by the parser.
 
 =head1 Changed Internals
 
-Fixes have been made to the embedding implementation to initialise more
-interpreter variables when several interpreters are run without
--DMULTIPLICITY
+Interpreter initialization is more complete when -DMULTIPLICITY is off.
+This should resolve problems with initializing and destroying the Perl
+interpreter more than once in a single process.                      
 
 dup2() now uses the PerlLIO abstraction layer
 
