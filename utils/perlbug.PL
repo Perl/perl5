@@ -91,7 +91,7 @@ BEGIN {
     $::HaveUtil = ($@ eq "");
 };
 
-my $Version = "1.32";
+my $Version = "1.33";
 
 # Changed in 1.06 to skip Mail::Send and Mail::Util if not available.
 # Changed in 1.07 to see more sendmail execs, and added pipe output.
@@ -128,6 +128,7 @@ my $Version = "1.32";
 # Changed in 1.30 Added warnings on failure to open files MSTEVENS 13-07-2000
 # Changed in 1.31 Add checks on close().Fix my $var unless. TJENNESS 26-07-2000
 # Changed in 1.32 Use File::Spec->tmpdir TJENNESS 20-08-2000
+# Changed in 1.33 Don't require -t STDOUT for -ok.
 
 # TODO: - Allow the user to re-name the file on mail failure, and
 #       make sure failure (transmission-wise) of Mail::Send is
@@ -153,7 +154,6 @@ include a file, you can use the -f switch.
 EOF
     die "\n";
 }
-if (!-t STDOUT && !$outfile) { Dump(*STDOUT); exit; }
 
 Query();
 Edit() unless $usefile || ($ok and not $::opt_n);
@@ -896,8 +896,7 @@ Options:
         this if you don't give it here.
   -e    Editor to use.
   -t    Test mode. The target address defaults to `$testaddress'.
-  -d    Data mode (the default if you redirect or pipe output.)
-        This prints out your configuration data, without mailing
+  -d    Data mode.  This prints out your configuration data, without mailing
         anything. You can use this with -v to get more complete data.
   -A    Don't send a bug received acknowledgement to the return address.
   -ok   Report successful build on this system to perl porters
