@@ -33,7 +33,7 @@ case 0x0041 and 0x03B1, respectively.  These unique numbers are called
 I<code points>.
 
 The Unicode standard prefers using hexadecimal notation for the code
-points.  If numbers like "C<0x0041" are unfamiliar to
+points.  If numbers like C<0x0041> are unfamiliar to
 you, take a peek at a later section, L</"Hexadecimal Notation">.
 The Unicode standard uses the notation C<U+0041 LATIN CAPITAL LETTER A>,
 to give the hexadecimal code point and the normative name of
@@ -61,9 +61,9 @@ looks like in the context of the user's language.
 With this "whole sequence" view of characters, the total number of
 characters is open-ended. But in the programmer's "one unit is one
 character" point of view, the concept of "characters" is more
-deterministic.  In this document, we take that second  point of view: one
-"character" is one Unicode code point, be it a base character or a
-combining character.
+deterministic.  In this document, we take that second  point of view:
+one "character" is one Unicode code point, be it a base character or
+a combining character.
 
 For some combinations, there are I<precomposed> characters.
 C<LATIN CAPITAL LETTER A WITH ACUTE>, for example, is defined as
@@ -93,14 +93,15 @@ C<0x10000> characters are called the I<Plane 0>, or the I<Basic
 Multilingual Plane> (BMP).  With Unicode 3.1, 17 planes in all are
 defined--but nowhere near full of defined characters, yet.
 
-Another myth is that the 256-character blocks have something to do
-with languages--that each languages is specified inside a block.
-B<This is also untrue.> The division into blocks exists, but it is
-almost completely accidental--an artifact of how the characters have
-been historically allocated.  Instead, there is a concept called
-I<scripts>, which is more useful: there is C<Latin> script,
-C<Greek> script, and so on.  Scripts usually span varied parts of
-several blocks.  For further information see L<Unicode::UCD>.
+Another myth is that the 256-character blocks have something to
+do with languages--that each block would define the characters used
+by a language or a set of languages.  B<This is also untrue.>
+The division into blocks exists, but it is almost completely
+accidental--an artifact of how the characters have been and
+still are allocated.  Instead, there is a concept called I<scripts>,
+which is more useful: there is C<Latin> script, C<Greek> script, and
+so on.  Scripts usually span varied parts of several blocks.
+For further information see L<Unicode::UCD>.
 
 The Unicode code points are just abstract numbers.  To input and
 output these abstract numbers, the numbers must be I<encoded> somehow.
@@ -108,7 +109,7 @@ Unicode defines several I<character encoding forms>, of which I<UTF-8>
 is perhaps the most popular.  UTF-8 is a variable length encoding that
 encodes Unicode characters as 1 to 6 bytes (only 4 with the currently
 defined characters).  Other encodings include UTF-16 and UTF-32 and their
-big- and little-endian variants (UTF-8 is byte-order independent).
+big- and little-endian variants (UTF-8 is byte-order independent)
 The ISO/IEC 10646 defines the UCS-2 and UCS-4 encoding forms.
 
 For more information about encodings--for instance, to learn what
@@ -120,13 +121,13 @@ Starting from Perl 5.6.0, Perl has had the capacity to handle Unicode
 natively.  Perl 5.8.0, however, is the first recommended release for
 serious Unicode work.  The maintenance release 5.6.1 fixed many of the
 problems of the initial Unicode implementation, but for example
-regular expressions did not really work with Unicode.
+regular expressions still do not work with Unicode in 5.6.1.
 
 B<Starting from Perl 5.8.0, the use of C<use utf8> is no longer
 necessary.> In earlier releases the C<utf8> pragma was used to declare
 that operations in the current block or file would be Unicode-aware.
 This model was found to be wrong, or at least clumsy: the "Unicodeness"
-is now carried with the data instead of being attached to the
+is now carried with the data, instead of being attached to the
 operations.  Only one case remains where an explicit C<use utf8> is
 needed: if your Perl script itself is encoded in UTF-8, you can use
 UTF-8 in your identifier names, and in string and regular expression
@@ -160,21 +161,24 @@ For example,
       perl -e 'print "\x{DF}\n", "\x{0100}\x{DF}\n"'              
 
 produces a fairly useless mixture of native bytes and UTF-8, as well
-as a warning.
+as a warning:
 
-To output UTF-8 always, use the "C<:utf8>" output discipline.  Prepending
+     Wide character in print at ...
+
+To output UTF-8, use the C<:utf8> output discipline.  Prepending
 
       binmode(STDOUT, ":utf8");
 
 to this sample program ensures that the output is completely UTF-8,
-and helpfully removes the program's warning.
+and removes the program's warning.
 
 If your locale environment variables (C<LANGUAGE>, C<LC_ALL>,
 C<LC_CTYPE>, C<LANG>) contain the strings 'UTF-8' or 'UTF8',
 regardless of case, then the default encoding of your STDIN, STDOUT,
 and STDERR and of B<any subsequent file open>, is UTF-8.  Note that
-this means that Perl expects other software to work, too: if STDIN
-coming in from another command is not UTF-8, Perl will complain about
+this means that Perl expects other software to work, too: if Perl has
+been led to believe that STDIN should be UTF-8, but then STDIN coming
+in from another command is not UTF-8, Perl will complain about the
 malformed UTF-8.
 
 =head2 Unicode and EBCDIC
@@ -211,10 +215,10 @@ See L</"Further Resources"> for how to find all these numeric codes.
 Naturally, C<ord()> will do the reverse: it turns a character into
 a code point.
 
-Note that C<\x..> (no C<{}> and only two hexadecimal digits),
-C<\x{...}>, and C<chr(...)> for arguments less than C<0x100> (decimal
-256) generate an eight-bit character for backward compatibility with
-older Perls.  For arguments of C<0x100> or more, Unicode characters are
+Note that C<\x..> (no C<{}> and only two hexadecimal digits), C<\x{...}>,
+and C<chr(...)> for arguments less than C<0x100> (decimal 256)
+generate an eight-bit character for backward compatibility with older
+Perls.  For arguments of C<0x100> or more, Unicode characters are
 always produced. If you want to force the production of Unicode
 characters regardless of the numeric value, use C<pack("U", ...)>
 instead of C<\x..>, C<\x{...}>, or C<chr()>.
@@ -252,8 +256,8 @@ strings as usual.  Functions like C<index()>, C<length()>, and
 C<substr()> will work on the Unicode characters; regular expressions
 will work on the Unicode characters (see L<perlunicode> and L<perlretut>).
 
-Note that Perl considers combining character sequences
-to be characters, so for example
+Note that Perl considers combining character sequences to be
+characters, so for example
 
     use charnames ':full';
     print length("\N{LATIN CAPITAL LETTER A}\N{COMBINING ACUTE ACCENT}"), "\n";
@@ -273,8 +277,8 @@ using the C<encoding> pragma, for example
 
     use encoding 'latin2'; # ISO 8859-2
 
-in which case literals (string or regular expressions), C<chr()>, and
-C<ord()> in your whole script are assumed to produce Unicode
+in which case literals (string or regular expressions), C<chr()>,
+and C<ord()> in your whole script are assumed to produce Unicode
 characters from ISO 8859-2 code points.  Note that the matching for
 encoding names is forgiving: instead of C<latin2> you could have
 said C<Latin 2>, or C<iso8859-2>, or other variations.  With just
@@ -320,8 +324,8 @@ and on already open streams, use C<binmode()>:
 
 The matching of encoding names is loose: case does not matter, and
 many encodings have several aliases.  Note that C<:utf8> discipline
-must always be specified exactly like that; it is I<not> subject to the
-loose matching of encoding names.
+must always be specified exactly like that; it is I<not> subject to
+the loose matching of encoding names.
 
 See L<PerlIO> for the C<:utf8> layer, L<PerlIO::encoding> and
 L<Encode::PerlIO> for the C<:encoding()> layer, and
@@ -329,9 +333,9 @@ L<Encode::Supported> for many encodings supported by the C<Encode>
 module.
 
 Reading in a file that you know happens to be encoded in one of the
-Unicode encodings does not magically turn the data into Unicode in
-Perl's eyes.  To do that, specify the appropriate discipline when
-opening files
+Unicode or legacy encodings does not magically turn the data into
+Unicode in Perl's eyes.  To do that, specify the appropriate
+discipline when opening files
 
     open(my $fh,'<:utf8', 'anything');
     my $line_of_unicode = <$fh>;
@@ -399,7 +403,7 @@ flexible names: C<koi8-r> and C<KOI8R> will both be understood.
 
 Common encodings recognized by ISO, MIME, IANA, and various other
 standardisation organisations are recognised; for a more detailed
-list see L<Encode>.
+list see L<Encode::Supported>.
 
 C<read()> reads characters and returns the number of characters.
 C<seek()> and C<tell()> operate on byte counts, as do C<sysread()>
@@ -408,7 +412,7 @@ and C<sysseek()>.
 Notice that because of the default behaviour of not doing any
 conversion upon input if there is no default discipline,
 it is easy to mistakenly write code that keeps on expanding a file
-by repeatedly encoding:
+by repeatedly encoding the data:
 
     # BAD CODE WARNING
     open F, "file";
@@ -433,8 +437,8 @@ yours is by running "perl -V" and looking for C<useperlio=define>.
 Sometimes you might want to display Perl scalars containing Unicode as
 simple ASCII (or EBCDIC) text.  The following subroutine converts
 its argument so that Unicode characters with code points greater than
-255 are displayed as "C<\x{...}>", control characters (like "C<\n>") are
-displayed as "C<\x..>", and the rest of the characters as themselves:
+255 are displayed as C<\x{...}>, control characters (like C<\n>) are
+displayed as C<\x..>, and the rest of the characters as themselves:
 
    sub nice_string {
        join("",
@@ -462,13 +466,13 @@ returns:
 
 Bit Complement Operator ~ And vec()
 
-The bit complement operator C<~> may produce surprising results if used on
-strings containing characters with ordinal values above 255. In such a
-case, the results are consistent with the internal encoding of the
-characters, but not with much else. So don't do that. Similarly for C<vec()>:
-you will be operating on the internally-encoded bit patterns of the Unicode
-characters, not on the code point values, which is very probably not what
-you want.
+The bit complement operator C<~> may produce surprising results if
+used on strings containing characters with ordinal values above
+255. In such a case, the results are consistent with the internal
+encoding of the characters, but not with much else. So don't do
+that. Similarly for C<vec()>: you will be operating on the
+internally-encoded bit patterns of the Unicode characters, not on
+the code point values, which is very probably not what you want.
 
 =item *
 
@@ -522,9 +526,8 @@ Reports #15 and #21, I<Unicode Normalization Forms> and I<Case
 Mappings>, http://www.unicode.org/unicode/reports/tr15/ and 
 http://www.unicode.org/unicode/reports/tr21/ 
 
-As of Perl 5.8.0, regular expression case-ignoring matching
-implements only 1:1 semantics: one character matches one character.
-In I<Case Mappings> both 1:N and N:1 matches are defined.
+As of Perl 5.8.0, the "Full" case-folding of I<Case
+Mappings/SpecialCasing> is implemented.
 
 =item *
 
@@ -538,8 +541,8 @@ C<LATIN CAPITAL LETTER A WITH GRAVE>?)
 
 The short answer is that by default, Perl compares strings (C<lt>,
 C<le>, C<cmp>, C<ge>, C<gt>) based only on the code points of the
-characters.  In the above case, the answer is "after", since C<0x00C1>
-> C<0x00C0>.
+characters.  In the above case, the answer is "after", since
+C<0x00C1> > C<0x00C0>.
 
 The long answer is that "it depends", and a good answer cannot be
 given without knowing (at the very least) the language context.
@@ -562,12 +565,13 @@ Unicode-aware.  What this means that C<[A-Za-z]> will not magically start
 to mean "all alphabetic letters"; not that it does mean that even for
 8-bit characters, you should be using C</[[:alpha:]]/> in that case.
 
-For specifying character classes like that in regular expressions, you can use
-the various Unicode properties--C<\pL>, or perhaps C<\p{Alphabetic}>,
-in this particular case.  You can use Unicode code points as the end
-points of character ranges, but there is no magic associated with
-specifying a certain range.  For further information--there are dozens
-of Unicode character classes--see L<perlunicode>.
+For specifying character classes like that in regular expressions,
+you can use the various Unicode properties--C<\pL>, or perhaps
+C<\p{Alphabetic}>, in this particular case.  You can use Unicode
+code points as the end points of character ranges, but there is no
+magic associated with specifying a certain range.  For further
+information--there are dozens of Unicode character classes--see
+L<perlunicode>.
 
 =item *
 
@@ -589,26 +593,27 @@ than ASCII 0 to 9 (and ASCII a to f for hexadecimal).
 Will My Old Scripts Break?
 
 Very probably not.  Unless you are generating Unicode characters
-somehow, old behaviour should be preserved.  About the only
-behaviour that has changed and which could start generating Unicode
-is the old behaviour of C<chr()> where supplying an argument more
-than 255 produced a character modulo 255.  C<chr(300)>, for example,
-was equal to C<chr(45)>.
+somehow, old behaviour should be preserved.  About the only behaviour
+that has changed and which could start generating Unicode is the old
+behaviour of C<chr()> where supplying an argument more than 255
+produced a character modulo 255.  C<chr(300)>, for example, was equal
+to C<chr(45)> or "-" (in ASCII), now it is LATIN CAPITAL LETTER I WITH
+BREVE.
 
 =item 
 
 How Do I Make My Scripts Work With Unicode?
 
 Very little work should be needed since nothing changes until you
-generate Unicode data.  The trick is getting input as Unicode; for
-that, see the earlier I/O discussion.
+generate Unicode data.  The most important thing is getting input as
+Unicode; for that, see the earlier I/O discussion.
 
 =item 
 
 How Do I Know Whether My String Is In Unicode?
 
-You shouldn't care.  No, you really shouldn't.  No, really.  If you have
-to care--beyond the cases described above--it means that we
+You shouldn't care.  No, you really shouldn't.  No, really.  If you
+have to care--beyond the cases described above--it means that we
 didn't get the transparency of Unicode quite right.
 
 Okay, if you insist:
@@ -634,7 +639,7 @@ as if copies of the byte strings were upgraded to UTF-8: for example,
     $b = "\x{100}";
     print "$a = $b\n";
 
-the output string will be UTF-8-encoded "C<ab\x80c\x{100}\n>", but note
+the output string will be UTF-8-encoded C<ab\x80c\x{100}\n>, but note
 that C<$a> will stay byte-encoded.
 
 Sometimes you might really need to know the byte length of a string
@@ -647,7 +652,8 @@ defined function C<length()>:
     require Encode;
     print length(Encode::encode_utf8($unicode)), "\n"; # will print 2
     use bytes;
-    print length($unicode), "\n"; # will also print 2 (the 0xC4 0x80 of the UTF-8)
+    print length($unicode), "\n"; # will also print 2
+                                  # (the 0xC4 0x80 of the UTF-8)
 
 =item 
 
@@ -668,11 +674,10 @@ For UTF-8 only, you can use:
     use warnings;
     @chars = unpack("U0U*", $string_of_bytes_that_I_think_is_utf8);
 
-If invalid, a C<Malformed UTF-8 character (byte 0x##) in
-unpack> warning is produced. The "U0" means "expect strictly UTF-8
-encoded Unicode".  Without that the C<unpack("U*", ...)>
-would accept also data like C<chr(0xFF>), similarly to the
-C<pack> as we saw earlier.
+If invalid, a C<Malformed UTF-8 character (byte 0x##) in unpack>
+warning is produced. The "U0" means "expect strictly UTF-8 encoded
+Unicode".  Without that the C<unpack("U*", ...)> would accept also
+data like C<chr(0xFF>), similarly to the C<pack> as we saw earlier.
 
 =item 
 
@@ -681,23 +686,23 @@ How Do I Convert Binary Data Into a Particular Encoding, Or Vice Versa?
 This probably isn't as useful as you might think.
 Normally, you shouldn't need to.
 
-In one sense, what you are asking doesn't make much sense: Encodings
+In one sense, what you are asking doesn't make much sense: encodings
 are for characters, and binary data are not "characters", so converting
 "data" into some encoding isn't meaningful unless you know in what
 character set and encoding the binary data is in, in which case it's
 not just binary data, now is it?
 
-If you have a raw sequence of bytes that you know should be interpreted via
-a particular encoding, you can use C<Encode>:
+If you have a raw sequence of bytes that you know should be
+interpreted via a particular encoding, you can use C<Encode>:
 
     use Encode 'from_to';
     from_to($data, "iso-8859-1", "utf-8"); # from latin-1 to utf-8
 
-The call to C<from_to()> changes the bytes in C<$data>, but nothing material
-about the nature of the string has changed as far as Perl is concerned.
-Both before and after the call, the string C<$data> contains just a bunch of
-8-bit bytes. As far as Perl is concerned, the encoding of the string
-remains as "system-native 8-bit bytes".
+The call to C<from_to()> changes the bytes in C<$data>, but nothing
+material about the nature of the string has changed as far as Perl is
+concerned.  Both before and after the call, the string C<$data>
+contains just a bunch of 8-bit bytes. As far as Perl is concerned,
+the encoding of the string remains as "system-native 8-bit bytes".
 
 You might relate this to a fictional 'Translate' module:
 
@@ -707,8 +712,8 @@ You might relate this to a fictional 'Translate' module:
    ## phrase now contains "Ja"
 
 The contents of the string changes, but not the nature of the string.
-Perl doesn't know any more after the call than before that the contents
-of the string indicates the affirmative.
+Perl doesn't know any more after the call than before that the
+contents of the string indicates the affirmative.
 
 Back to converting data.  If you have (or want) data in your system's
 native 8-bit encoding (e.g. Latin-1, EBCDIC, etc.), you can use
@@ -725,7 +730,7 @@ but Perl doesn't know it yet, you can make Perl a believer, too:
 
 You can convert well-formed UTF-8 to a sequence of bytes, but if
 you just want to convert random binary data into UTF-8, you can't.
-Any random collection of bytes isn't well-formed UTF-8.  You can
+B<Any random collection of bytes isn't well-formed UTF-8>.  You can
 use C<unpack("C*", $string)> for the former, and you can create
 well-formed Unicode data by C<pack("U*", 0xff, ...)>.
 
@@ -751,7 +756,7 @@ The Unicode standard prefers using hexadecimal notation because
 that more clearly shows the division of Unicode into blocks of 256 characters.
 Hexadecimal is also simply shorter than decimal.  You can use decimal
 notation, too, but learning to use hexadecimal just makes life easier
-with the Unicode standard.  The "C<U+HHHH>" notation uses hexadecimal,
+with the Unicode standard.  The C<U+HHHH> notation uses hexadecimal,
 for example.
 
 The C<0x> prefix means a hexadecimal number, the digits are 0-9 I<and>
