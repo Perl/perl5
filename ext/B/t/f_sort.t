@@ -342,7 +342,6 @@ print sort @george, 'to', @harry;
 
 checkOptree(name   => q{sort USERSUB LIST },
 	    bcopts => q{-exec},
-	    todo   => 'sort why BARE flag happens',	
 	    code   => q{sub backwards { $b cmp $a }
 			@harry = qw(dog cat x Cain Abel);
 			@george = qw(gone chased yz Punished Axed);
