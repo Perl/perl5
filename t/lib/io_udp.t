@@ -27,6 +27,10 @@ print "1..3\n";
 use Socket;
 use IO::Socket qw(AF_INET SOCK_DGRAM INADDR_ANY);
 
+    # This can fail if localhost is undefined or the
+    # special 'loopback' address 127.0.0.1 is not configured
+    # on your system. (/etc/rc.config.d/netconfig on HP-UX.)
+
 $udpa = IO::Socket::INET->new(Proto => 'udp', LocalAddr => 'localhost');
 $udpb = IO::Socket::INET->new(Proto => 'udp', LocalAddr => 'localhost');
 

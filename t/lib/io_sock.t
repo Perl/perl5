@@ -52,6 +52,10 @@ if($pid = fork()) {
 
 } elsif(defined $pid) {
 
+    # This can fail if localhost is undefined or the
+    # special 'loopback' address 127.0.0.1 is not configured
+    # on your system. (/etc/rc.config.d/netconfig on HP-UX.)
+
     $sock = IO::Socket::INET->new(PeerPort => $port,
 				  Proto => 'tcp',
 				  PeerAddr => 'localhost'
