@@ -44,13 +44,15 @@
 	    Sv = ST(1);							\
 	else {								\
 	    /* XXX GV_ADDWARN */					\
-	    Sv = perl_get_sv(vn = form("%s::XS_VERSION", module), FALSE); \
+	    Sv = perl_get_sv(form("%s::%s", module,			\
+				  vn = "XS_VERSION"), FALSE);		\
 	    if (!Sv || !SvOK(Sv))					\
-		Sv = perl_get_sv(vn = form("%s::VERSION", module), FALSE); \
+		Sv = perl_get_sv(form("%s::%s", module,			\
+				      vn = "VERSION"), FALSE);		\
 	}								\
 	if (Sv && (!SvOK(Sv) || strNE(XS_VERSION, SvPV(Sv, na))))	\
-	    croak("%s object version %s does not match $%s %_",		\
-		  module, XS_VERSION, vn, Sv);				\
+	    croak("%s object version %s does not match $%s::%s %_",	\
+		  module, XS_VERSION, module, vn, Sv);			\
     } STMT_END
 #else
 # define XS_VERSION_BOOTCHECK
