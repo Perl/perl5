@@ -494,7 +494,7 @@ register SV *sv;
 		++count;
 	    }
 	    else {
-		if (len < rslen)
+		if (len < rslen - 1)
 		    goto nope;
 		len -= rslen - 1;
 		s -= rslen - 1;
@@ -622,9 +622,7 @@ dARGS
 {
     dSP;
     HV *hv = (HV*)POPs;
-    I32 i;
     register HE *entry;
-    char *tmps;
     SV *tmpstr;
     I32 dokeys =   (op->op_type == OP_KEYS);
     I32 dovalues = (op->op_type == OP_VALUES);
@@ -638,6 +636,7 @@ dARGS
     (void)hv_iterinit(hv);	/* always reset iterator regardless */
 
     if (GIMME != G_ARRAY) {
+	I32 i;
 	dTARGET;
 
 	if (!SvRMAGICAL(hv) || !mg_find((SV*)hv,'P'))
@@ -659,21 +658,17 @@ dARGS
     PUTBACK;	/* hv_iternext and hv_iterval might clobber stack_sp */
     while (entry = hv_iternext(hv)) {
 	SPAGAIN;
-	if (dokeys) {
-	    tmps = hv_iterkey(entry,&i);	/* won't clobber stack_sp */
-	    if (!i)
-		tmps = "";
-	    XPUSHs(sv_2mortal(newSVpv(tmps,i)));
-	}
+	if (dokeys)
+	    XPUSHs(hv_iterkeysv(entry));	/* won't clobber stack_sp */
 	if (dovalues) {
 	    tmpstr = NEWSV(45,0);
 	    PUTBACK;
 	    sv_setsv(tmpstr,hv_iterval(hv,entry));
 	    SPAGAIN;
 	    DEBUG_H( {
-		sprintf(buf,"%d%%%d=%d\n",entry->hent_hash,
-		    HvMAX(hv)+1,entry->hent_hash & HvMAX(hv));
-		sv_setpv(tmpstr,buf);
+			sprintf(buf,"%d%%%d=%d\n", HeHASH(entry),
+				HvMAX(hv)+1, HeHASH(entry) & HvMAX(hv));
+			sv_setpv(tmpstr,buf);
 	    } )
 	    XPUSHs(sv_2mortal(tmpstr));
 	}
