@@ -24,8 +24,25 @@ For ease of access, the Perl manual has been split up into several sections.
     perlintro		Perl introduction for beginners
     perltoc		Perl documentation table of contents
 
-
 =head2 Tutorials
+
+    perlreftut		Perl references short introduction
+    perldsc		Perl data structures intro
+    perllol		Perl data structures: arrays of arrays
+    perlopentut		Perl open() tutorial
+
+    perlrequick		Perl regular expressions quick start
+    perlretut		Perl regular expressions tutorial
+
+    perlboot		Perl OO tutorial for beginners
+    perltoot		Perl OO tutorial, part 1
+    perltooc		Perl OO tutorial, part 2
+    perlbot		Perl OO tricks and examples
+
+    perlstyle		Perl style guide
+
+    perltrap		Perl traps for the unwary
+    perldebtut		Perl debugging tutorial
 
     perlfaq		Perl frequently asked questions
       perlfaq1		General Questions About Perl
@@ -38,22 +55,6 @@ For ease of access, the Perl manual has been split up into several sections.
       perlfaq8		System Interaction
       perlfaq9		Networking
   
-    perlrequick		Perl regular expressions quick start
-    perlretut		Perl regular expressions tutorial
-
-    perlreftut		Perl references short introduction
-    perldsc		Perl data structures intro
-    perllol		Perl data structures: arrays of arrays
-
-    perldebtut		Perl debugging tutorial
-
-    perlopentut		Perl open() tutorial
-
-    perlboot		Perl OO tutorial for beginners
-    perltoot		Perl OO tutorial, part 1
-    perltootc		Perl OO tutorial, part 2
-    perlbot		Perl OO tricks and examples
-
 =head2 Reference Manual
     perlsyn		Perl syntax
     perldata		Perl data structures
@@ -119,8 +120,6 @@ For ease of access, the Perl manual has been split up into several sections.
 =head2 Miscellaneous
 
     perlbook		Perl book information
-    perlstyle		Perl style guide
-    perltrap		Perl traps for the unwary
     perltodo		Perl things to do
 
     perlhist		Perl history records
