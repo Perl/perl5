@@ -10,7 +10,7 @@ $|  = 1;
 use warnings;
 $Is_VMS = $^O eq 'VMS';
 
-plan tests => 107;
+plan tests => 106;
 
 my $Perl = which_perl();
 
@@ -260,8 +260,6 @@ like( $@, qr/Bad filehandle:\s+afile/,          '       right error' );
 
     SKIP: {
 	local $TODO = "in-memory stdhandles not implemented yet";
-
-	skip($TODO, 3);
 
 	# test in-memory open over STDOUT
 	open OLDOUT, ">&STDOUT" or die "cannot dup STDOUT: $!";
