@@ -3703,8 +3703,6 @@ sv_true(register SV *sv)
     dTHR;
     if (!sv)
 	return 0;
-    if (SvGMAGICAL(sv))
-	mg_get(sv);
     if (SvPOK(sv)) {
 	register XPV* tXpv;
 	if ((tXpv = (XPV*)SvANY(sv)) &&
