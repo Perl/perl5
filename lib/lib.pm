@@ -11,9 +11,11 @@ my $archname = $Config{'archname'};
 sub import {
     shift;
     foreach (reverse @_) {
-	unless (defined $_ and $_ ne '') {
+	## Ignore this if not defined.
+	next unless defined($_);
+	if ($_ eq '') {
 	    require Carp;
-	    Carp::carp("Empty or undefined compile time value given"); # at foo.pl line ...
+	    Carp::carp("Empty compile time value given to use lib"); # at foo.pl line ...
 	}
 	unshift(@INC, $_);
 	# Put a corresponding archlib directory infront of $_ if it
