@@ -1990,19 +1990,73 @@ yylex()
 		s = skipspace(s);
 		if (*s == '}')
 		    OPERATOR(HASHBRACK);
-		if (isALPHA(*s)) {
-		    for (t = s; t < bufend && isALNUM(*t); t++) ;
+		/* This hack serves to disambiguate a pair of curlies
+		 * as being a block or an anon hash.  Normally, expectation
+		 * determines that, but in cases where we're not in a
+		 * position to expect anything in particular (like inside
+		 * eval"") we have to resolve the ambiguity.  This code
+		 * covers the case where the first term in the curlies is a
+		 * quoted string.  Most other cases need to be explicitly
+		 * disambiguated by prepending a `+' before the opening
+		 * curly in order to force resolution as an anon hash.
+		 *
+		 * XXX should probably propagate the outer expectation
+		 * into eval"" to rely less on this hack, but that could
+		 * potentially break current behavior of eval"".
+		 * GSAR 97-07-21
+		 */
+		t = s;
+		if (*s == '\'' || *s == '"' || *s == '`') {
+		    /* common case: get past first string, handling escapes */
+		    for (t++; t < bufend && *t != *s;)
+			if (*t++ == '\\' && (*t == '\\' || *t == *s))
+			    t++;
+		    t++;
 		}
-		else if (*s == '\'' || *s == '"') {
-		    t = strchr(s+1,*s);
-		    if (!t++)
-			t = s;
+		else if (*s == 'q') {
+		    if (++t < bufend
+			&& (!isALNUM(*t)
+			    || ((*t == 'q' || *t == 'x') && ++t < bufend
+				&& !isALNUM(*t)))) {
+			char *tmps;
+			char open, close, term;
+			I32 brackets = 1;
+
+			while (t < bufend && isSPACE(*t))
+			    t++;
+			term = *t;
+			open = term;
+			if (term && (tmps = strchr("([{< )]}> )]}>",term)))
+			    term = tmps[5];
+			close = term;
+			if (open == close)
+			    for (t++; t < bufend; t++) {
+				if (*t == '\\' && t+1 < bufend && term != '\\')
+				    t++;
+				else if (*t == term)
+				    break;
+			    }
+			else
+			    for (t++; t < bufend; t++) {
+				if (*t == '\\' && t+1 < bufend && term != '\\')
+				    t++;
+				else if (*t == term && --brackets <= 0)
+				    break;
+				else if (*t == open)
+				    brackets++;
+			    }
+		    }
+		    t++;
 		}
-		else
-		    t = s;
+		else if (isALPHA(*s)) {
+		    for (t++; t < bufend && isALNUM(*t); t++) ;
+		}
 		while (t < bufend && isSPACE(*t))
 		    t++;
-		if ((*t == ',' && !isLOWER(*s)) || (*t == '=' && t[1] == '>'))
+		/* if comma follows first term, call it an anon hash */
+		/* XXX it could be a comma expression with loop modifiers */
+		if (t < bufend && ((*t == ',' && (*s == 'q' || !isLOWER(*s)))
+				   || (*t == '=' && t[1] == '>')))
 		    OPERATOR(HASHBRACK);
 		if (expect == XREF)
 		    expect = XTERM;
