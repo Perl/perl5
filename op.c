@@ -37,29 +37,38 @@
 STATIC void *
 S_Slab_Alloc(pTHX_ int m, size_t sz)
 {
-    /* Add an overhead for pointer to slab and round up as a number of IVs */
-    sz = (sz + 2*sizeof(IV) -1)/sizeof(IV);
+    /*
+     * To make incrementing use count easy PL_OpSlab is an I32 *
+     * To make inserting the link to slab PL_OpPtr is I32 **
+     * So compute size in units of sizeof(I32 *) as that is how Pl_OpPtr increments
+     * Add an overhead for pointer to slab and round up as a number of pointers
+     */
+    sz = (sz + 2*sizeof(I32 *) -1)/sizeof(I32 *);
     if ((PL_OpSpace -= sz) < 0) {
-	PL_OpSlab = (IV *) PerlMemShared_malloc(PERL_SLAB_SIZE*sizeof(IV));
-	if (!PL_OpSlab) {
+	PL_OpPtr = (I32 **) PerlMemShared_malloc(PERL_SLAB_SIZE*sizeof(I32*));
+	if (!PL_OpPtr) {
 	    return NULL;
 	}
-	Zero(PL_OpSlab,PERL_SLAB_SIZE,IV);
-	/* We reserve the 0'th word as a use count */
-	PL_OpSpace = PERL_SLAB_SIZE - 1 - sz;
+	Zero(PL_OpPtr,PERL_SLAB_SIZE,I32 **);
+	/* We reserve the 0'th I32 sized chunk as a use count */
+	PL_OpSlab = (I32 *) PL_OpPtr;
+	/* Reduce size by the use count word, and by the size we need.
+	 * Latter is to mimic the '-=' in the if() above
+	 */
+	PL_OpSpace = PERL_SLAB_SIZE - (sizeof(I32)+sizeof(I32 **)-1)/sizeof(I32 **) - sz;
 	/* Allocation pointer starts at the top.
 	   Theory: because we build leaves before trunk allocating at end
 	   means that at run time access is cache friendly upward
 	 */
-	PL_OpPtr   = (IV **) &PL_OpSlab[PERL_SLAB_SIZE];
+	PL_OpPtr += PERL_SLAB_SIZE;
     }
     assert( PL_OpSpace >= 0 );
     /* Move the allocation pointer down */
     PL_OpPtr   -= sz;
-    assert( PL_OpPtr > (IV **) PL_OpSlab );
+    assert( PL_OpPtr > (I32 **) PL_OpSlab );
     *PL_OpPtr   = PL_OpSlab;	/* Note which slab it belongs to */
     (*PL_OpSlab)++;		/* Increment use count of slab */
-    assert( (IV *) (PL_OpPtr+sz) <= (PL_OpSlab + PERL_SLAB_SIZE) );
+    assert( PL_OpPtr+sz <= ((I32 **) PL_OpSlab + PERL_SLAB_SIZE) );
     assert( *PL_OpSlab > 0 );
     return (void *)(PL_OpPtr + 1);
 }
@@ -67,10 +76,10 @@ S_Slab_Alloc(pTHX_ int m, size_t sz)
 STATIC void
 S_Slab_Free(pTHX_ void *op)
 {
-    IV **ptr = (IV **) op;
-    IV *slab = ptr[-1];
-    assert( ptr-1 > (IV **) slab );
-    assert( (IV *) ptr < (slab + PERL_SLAB_SIZE) );
+    I32 **ptr = (I32 **) op;
+    I32 *slab = ptr[-1];
+    assert( ptr-1 > (I32 **) slab );
+    assert( ptr < ( (I32 **) slab + PERL_SLAB_SIZE) );
     assert( *slab > 0 );
     if (--(*slab) == 0) {
 	PerlMemShared_free(slab);
