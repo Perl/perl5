@@ -125,8 +125,10 @@ perl_construct(register PerlInterpreter *sv_interp)
 #ifdef USE_THREADS
 
     	INIT_THREADS;
+#ifndef WIN32
 	if (pthread_key_create(&thr_key, 0))
 	    croak("panic: pthread_key_create");
+#endif
 	MUTEX_INIT(&malloc_mutex);
 	MUTEX_INIT(&sv_mutex);
 	/*
