@@ -261,7 +261,7 @@ if ($doC)
     #my @info = ($e2u->{Cname},$u2e->{Cname},$rsym,length($rep),$min_el,$max_el);
     my $replen = 0; 
     $replen++ while($rep =~ /\G\\x[0-9A-Fa-f]/g);
-    my @info = ($e2u->{Cname},$u2e->{Cname},qq("$rep"),$replen,$min_el,$max_el);
+    my @info = ($e2u->{Cname},$u2e->{Cname},qq((U8*)"$rep"),$replen,$min_el,$max_el);
     my $sym = "${enc}_encoding";
     $sym =~ s/\W+/_/g;
     print C "encode_t $sym = \n";
