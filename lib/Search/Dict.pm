@@ -4,7 +4,7 @@ require Exporter;
 
 use strict;
 
-our $VERSION = '1.01';
+our $VERSION = '1.02';
 our @ISA = qw(Exporter);
 our @EXPORT = qw(look);
 
@@ -15,7 +15,10 @@ Search::Dict, look - search for key in dictionary file
 =head1 SYNOPSIS
 
     use Search::Dict;
-    look *FILEHANDLE, $key, $dict, $fold, $comp;
+    look *FILEHANDLE, $key, $dict, $fold;
+
+    use Search::Dict;
+    look *FILEHANDLE, $params;
 
 =head1 DESCRIPTION
 
@@ -30,24 +33,30 @@ characters and whitespace).  The default is honour all characters.
 
 If I<$fold> is true, ignore case.  The default is to honour case.
 
-If I<$comp> is defined, use that as a reference to the comparison subroutine,
-which must return less than zero, zero, or greater than zero, if the
-first comparand is less than, equal, or greater than the second comparand.
-
 If there are only three arguments and the third argument is a hash
 reference, the keys of that hash can have values C<dict>, C<fold>, and
-C<comp>, and their correponding values will be used as the parameters.
+C<comp> or C<xfrm> (see below), and their correponding values will be
+used as the parameters.
+
+If a comparison subroutine (comp) is defined, it must return less than zero,
+zero, or greater than zero, if the first comparand is less than,
+equal, or greater than the second comparand.
+
+If a transformation subroutine (xfrm) is defined, its value is used to
+transform the lines read from the filehandle before their comparison.
 
 =cut
 
 sub look {
-    my($fh,$key,$dict,$fold,$comp) = @_;
+    my($fh,$key,$dict,$fold) = @_;
+    my ($comp, $xfrm);
     if (@_ == 3 && ref $dict eq 'HASH') {
-	my $opt = $dict;
+	my $params = $dict;
 	$dict = 0;
-	$dict = $opt->{dict} if exists $opt->{dict};
-	$fold = $opt->{fold} if exists $opt->{fold};
-	$comp = $opt->{comp} if exists $opt->{comp};
+	$dict = $params->{dict} if exists $params->{dict};
+	$fold = $params->{fold} if exists $params->{fold};
+	$comp = $params->{comp} if exists $params->{comp};
+	$xfrm = $params->{xfrm} if exists $params->{xfrm};
     }
     $comp = sub { $_[0] cmp $_[1] } unless defined $comp;
     local($_);
@@ -66,6 +75,7 @@ sub look {
 	    or return -1;
 	<$fh> if $mid;			# probably a partial line
 	$_ = <$fh>;
+	$_ = $xfrm->($_) if defined $xfrm;
 	chomp;
 	s/[^\w\s]//g if $dict;
 	$_ = lc $_   if $fold;
@@ -85,6 +95,7 @@ sub look {
 	$min = tell($fh);
 	defined($_ = <$fh>)
 	    or last;
+	$_ = $xfrm->($_) if defined $xfrm;
 	chomp;
 	s/[^\w\s]//g if $dict;
 	$_ = lc $_   if $fold;
