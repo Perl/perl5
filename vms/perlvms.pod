@@ -575,7 +575,7 @@ B<SPAWN> at the DCL prompt.
 Perl waits for the subprocess to complete before continuing
 execution in the current process.  As described in L<perlfunc>,
 the return value of C<system> is a fake "status" which follows
-POSIX semantics unless the pragma C<use vmsish status> is in 
+POSIX semantics unless the pragma C<use vmsish 'status'> is in
 effect; see the description of C<$?> in this document for more 
 detail.  
 
