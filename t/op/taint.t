@@ -587,7 +587,7 @@ else {
 	unlink($symlink);
 	my $sl = "/something/naughty";
 	# it has to be a real path on Mac OS
-	$sl = MacPerl::MakePath((MacPerl::Volumes)[0]) if $Is_MacOS;
+	$sl = MacPerl::MakePath((MacPerl::Volumes())[0]) if $Is_MacOS;
 	symlink($sl, $symlink) or die "symlink: $!\n";
 	my $readlink = readlink($symlink);
 	test 144, tainted $readlink;

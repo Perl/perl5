@@ -8,11 +8,11 @@ my $symlink_exists = eval { symlink("",""); 1 };
 my $cwd;
 my $cwd_untainted;
 
-use Config;
-
 BEGIN {
     chdir 't' if -d 't';
     unshift @INC => '../lib';
+
+    require Config;
 
     for (keys %ENV) { # untaint ENV
 	($ENV{$_}) = $ENV{$_} =~ /(.*)/;
@@ -48,10 +48,10 @@ my $NonTaintedCwd = $^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'os2';
 
 cleanup();
 
-find({wanted => sub { print "ok 1\n" if $_ eq 'commonsense.t'; },
+find({wanted => sub { print "ok 1\n" if $_ eq 'if.t'; },
       untaint => 1, untaint_pattern => qr|^(.+)$|}, File::Spec->curdir);
 
-finddepth({wanted => sub { print "ok 2\n" if $_ eq 'commonsense.t'; },
+finddepth({wanted => sub { print "ok 2\n" if $_ eq 'if.t'; },
            untaint => 1, untaint_pattern => qr|^(.+)$|},
            File::Spec->curdir);
 

@@ -754,7 +754,7 @@ BEGIN {
 exec "$^X -e 1" ; 
 my $a
 EXPECT
-Statement unlikely to be reached at - line 4.
+Statement unlikely to be reached at - line 10.
 	(Maybe you meant system() when you said exec()?)
 ########
 # op.c
