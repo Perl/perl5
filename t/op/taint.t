@@ -995,9 +995,14 @@ else
 }
 
 {
-    # Remove this when changes 21542 and 21563 are integrated
-    test 207, 1;
-    test 208, 1;
+    # [perl #24291] this used to dump core
+    our %nonmagicalenv = ( PATH => "util" );
+    local *ENV = \%nonmagicalenv;
+    eval { system("lskdfj"); };
+    test 207, $@ =~ /^%ENV is aliased to another variable while running with -T switch/;
+    local *ENV = *nonmagicalenv;
+    eval { system("lskdfj"); };
+    test 208, $@ =~ /^%ENV is aliased to %nonmagicalenv while running with -T switch/;
 }
 
 {

@@ -83,8 +83,25 @@ Perl_taint_env(pTHX)
 	NULL
     };
 
+    /* Don't bother if there's no *ENV glob */
     if (!PL_envgv)
 	return;
+    /* If there's no %ENV hash of if it's not magical, croak, because
+     * it probably doesn't reflect the actual environment */
+    if (!GvHV(PL_envgv) || !(SvRMAGICAL(GvHV(PL_envgv))
+	    && mg_find((SV*)GvHV(PL_envgv), PERL_MAGIC_env))) {
+	bool was_tainted = PL_tainted;
+	char *name = GvENAME(PL_envgv);
+	PL_tainted = TRUE;
+	if (strEQ(name,"ENV"))
+	    /* hash alias */
+	    taint_proper("%%ENV is aliased to %s%s", "another variable");
+	else
+	    /* glob alias: report it in the error message */
+	    taint_proper("%%ENV is aliased to %%%s%s", name);
+	/* this statement is reached under -t or -U */
+	PL_tainted = was_tainted;
+    }
 
 #ifdef VMS
     {
