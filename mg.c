@@ -698,19 +698,20 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 			SvUTF8_on(sv);
 		    else
 			SvUTF8_off(sv);
-		    if (PL_tainting)
-			PL_tainted = PL_tainted || !!RX_MATCH_TAINTED(rx);
-		    if (RX_MATCH_TAINTED(rx)) {
-			MAGIC* mg = SvMAGIC(sv);
-			MAGIC* mgt;
-			SvMAGIC(sv) = mg->mg_moremagic;
-			SvTAINT(sv);
-			if ((mgt = SvMAGIC(sv))) {
-			    mg->mg_moremagic = mgt;
-			    SvMAGIC(sv) = mg;
-			}
-		    } else
-			SvTAINTED_off(sv);
+		    if (PL_tainting) {
+			if (RX_MATCH_TAINTED(rx)) {
+			    MAGIC* mg = SvMAGIC(sv);
+			    MAGIC* mgt;
+			    PL_tainted = 1;
+			    SvMAGIC(sv) = mg->mg_moremagic;
+			    SvTAINT(sv);
+			    if ((mgt = SvMAGIC(sv))) {
+				mg->mg_moremagic = mgt;
+				SvMAGIC(sv) = mg;
+			    }
+			} else
+			    SvTAINTED_off(sv);
+		    }
 		    break;
 		}
 	    }
