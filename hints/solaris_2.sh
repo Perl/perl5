@@ -479,6 +479,29 @@ case "$uselongdouble" in
 	;;
 esac
 
+case "$fflushNULL" in
+"$define"|true|[yY]*)
+	# allow them to force it the other way
+	;;
+*)
+	# All versions of Solaris appear to have a stdio bug that improperly
+	# flushes the input end of pipes.  So we avoid the autoflush on
+	# fork/system/exec support for now. :-(  See the test case in:
+	#   http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2000-03/msg00373.html
+	# XXX this needs a Configure test so that more such platforms can be
+	# caught automatically.
+	fflushNULL=undef
+	fflushall=undef
+	cat >&4 <<EOM
+
+*** Solaris has a bug that affects input pipes, and so I have disabled
+*** support for automatic flushing on fork/system/exec.  If you want
+*** automatic flushing anyway, rerun Configure again with -DfflushNULL.
+
+EOM
+	;;
+esac
+
 rm -f try.c try.o try
 # keep that leading tab
 	ccisworkshop=''

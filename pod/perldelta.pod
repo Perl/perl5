@@ -4,12 +4,6 @@ perldelta - what's new for perl v5.6.0
 
 =head1 DESCRIPTION
 
-This is an unsupported alpha release, meant for intrepid Perl
-developers only.  The included sources may not even build correctly on
-some platforms.  Subscribing to perl5-porters is the best way to
-monitor and contribute to the progress of development releases (see
-http://www.hut.fi/~jhi/perl5-porters.html for info).
-
 This document describes differences between the 5.005 release and this one.
 
 =head1 Incompatible Changes
@@ -985,6 +979,9 @@ of all files opened for output when the operation
 was attempted.  This mostly eliminates confusing 
 buffering mishaps suffered by users unaware of how Perl internally
 handles I/O.
+
+This is not supported on some platforms like Solaris where a suitably
+correct implementation of fflush(NULL) isn't available.
 
 =head2 Better diagnostics on meaningless filehandle operations
 
