@@ -5,7 +5,7 @@
 static SV	*freezer;
 static SV	*toaster;
 
-static I32 num_q _((char *s));
+static I32 num_q _((char *s, STRLEN slen));
 static I32 esc_q _((char *dest, char *src, STRLEN slen));
 static SV *sv_x _((SV *sv, char *str, STRLEN len, I32 n));
 static I32 DD_dump _((SV *val, char *name, STRLEN namelen, SV *retval,
@@ -42,14 +42,15 @@ TOP:
 
 /* count the number of "'"s and "\"s in string */
 static I32
-num_q(register char *s)
+num_q(register char *s, register STRLEN slen)
 {
     register I32 ret = 0;
-    
-    while (*s) {
+
+    while (slen > 0) {
 	if (*s == '\'' || *s == '\\')
 	    ++ret;
 	++s;
+	--slen;
     }
     return ret;
 }
@@ -380,7 +381,7 @@ DD_dump(SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		hval = hv_iterval((HV*)ival, entry);
 
 		if (quotekeys || needs_quote(key)) {
-		    nticks = num_q(key);
+		    nticks = num_q(key, klen);
 		    New(0, nkey, klen+nticks+3, char);
 		    nkey[0] = '\'';
 		    if (nticks)
