@@ -52,9 +52,12 @@ archlib=$privlib
 sitelib=$privlib/site
 sitearch=$sitelib
 
+eagain='EAGAIN'
+rd_nodata='-1'
+
 : set up the translation script tr
 
-cat >../UU/tr <<EOSC
+cat > UU/tr <<EOSC
 $startsh
 case "\$1\$2" in
 '[A-Z][a-z]') exec tr.exe '[:upper:]' '[:lower:]';;
@@ -64,8 +67,6 @@ exec tr.exe "\$@"
 EOSC
 
 if [ "X$usethreads" != "X" ]; then
-    ccflags="-DUSE_THREADS $ccflags"
-    cppflags="-DUSE_THREADS $cppflags"
     set `echo X "$libswanted "| sed -e 's/ c / gthreads c /'`
     shift
     libswanted="$*"
