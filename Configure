@@ -1780,6 +1780,10 @@ EOM
 		bsd386) osname=bsd386
 			osvers=`$uname -r`
 			;;
+		powerux | power_ux | powermax_os | powermaxos | \
+		powerunix | power_unix) osname=powerux
+			osvers="$3"
+			;;
 		next*) osname=next ;;
 		solaris) osname=solaris
 			case "$3" in
