@@ -1191,7 +1191,9 @@ Perl_newHVhv(pTHX_ HV *ohv)
 	/* It's an ordinary hash, so copy it fast. AMS 20010804 */
 	int i, shared = !!HvSHAREKEYS(ohv);
 	HE **ents, **oents = (HE **)HvARRAY(ohv);
-	New(0, (char *)ents, PERL_HV_ARRAY_ALLOC_BYTES(hv_max+1), char);
+	char *a;
+	New(0, a, PERL_HV_ARRAY_ALLOC_BYTES(hv_max+1), char);
+	ents = (HE**)a;
 
 	/* In each bucket... */
 	for (i = 0; i <= hv_max; i++) {
