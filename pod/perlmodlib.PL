@@ -4,9 +4,12 @@ $ENV{LC_ALL} = 'C';
 
 open (OUT, ">perlmodlib.tmp") or die $!;
 my (@pragma, @mod, @MANIFEST);
-open (MANIFEST, "../MANIFEST") or die $!;
 
-while (<MANIFEST>) {
+open (MANIFEST, "../MANIFEST") or die $!;
+@MANIFEST = grep !m</(?:t|demo)/>, <MANIFEST>;
+push @MANIFEST, 'lib/Config.pm', 'lib/Errno.pm';
+
+for (@MANIFEST) {
      my $filename;
      next unless s|^lib/|| or m|^ext/|;
      ($filename) = m|^(\S+)|;
