@@ -2,12 +2,12 @@
 
 package Getopt::Long;
 
-# RCS Status      : $Id: GetoptLong.pm,v 2.63 2003-04-04 18:44:03+02 jv Exp jv $
+# RCS Status      : $Id: GetoptLong.pm,v 2.65 2003-05-19 17:44:13+02 jv Exp $
 # Author          : Johan Vromans
 # Created On      : Tue Sep 11 15:00:12 1990
 # Last Modified By: Johan Vromans
-# Last Modified On: Thu May 15 14:48:48 2003
-# Update Count    : 1321
+# Last Modified On: Mon May 19 17:43:33 2003
+# Update Count    : 1330
 # Status          : Released
 
 ################ Copyright ################
@@ -35,10 +35,10 @@ use 5.004;
 use strict;
 
 use vars qw($VERSION);
-$VERSION        =  2.3205;
+$VERSION        =  2.33;
 # For testing versions only.
-use vars qw($VERSION_STRING);
-$VERSION_STRING = "2.32_05";
+#use vars qw($VERSION_STRING);
+#$VERSION_STRING = "2.32_06";
 
 use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK);
@@ -105,10 +105,6 @@ sub ConfigDefaults() {
     $ignorecase = 1;		# ignore case when matching options
     $passthrough = 0;		# leave unrecognized options alone
     $gnu_compat = 0;		# require --opt=val if value is optional
-
-    # Version-dependent defaults. Leave undefined.
-    # $auto_help    = $requested_version >= 2.3203;	# supply --help handler
-    # $auto_version = $requested_version >= 2.3203;	# supply --version handler
 }
 
 # Override import.
@@ -264,7 +260,7 @@ sub GetOptions(@) {
     $error = '';
 
     print STDERR ("Getopt::Long $Getopt::Long::VERSION (",
-		  '$Revision: 2.63 $', ") ",
+		  '$Revision: 2.65 $', ") ",
 		  "called from package \"$pkg\".",
 		  "\n  ",
 		  "ARGV: (@ARGV)",
@@ -1182,7 +1178,8 @@ sub VersionMessage(@) {
 	       "\n",
 	       "(", __PACKAGE__, "::", "GetOptions",
 	       " version ",
-	       defined($VERSION_STRING) ? $VERSION_STRING : $VERSION, ";",
+	       defined($Getopt::Long::VERSION_STRING)
+	         ? $Getopt::Long::VERSION_STRING : $VERSION, ";",
 	       " Perl version ",
 	       $] >= 5.006 ? sprintf("%vd", $^V) : $],
 	       ")\n");
@@ -2022,7 +2019,7 @@ standard output and processing will terminate.
 Automatically provide support for the B<--help> and B<-?> options if
 the application did not specify a handler for this option itself.
 
-Getopt::Long will provide a help message using module Pod::Usage. The
+Getopt::Long will provide a help message using module L<Pod::Usage>. The
 message, derived from the SYNOPSIS POD section, will be written to
 standard output and processing will terminate.
 
@@ -2123,7 +2120,7 @@ Use this instead:
 =item HelpMessage
 
 This subroutine produces a standard help message, derived from the
-program's POD section SYNOPSIS using Pod::Usage. It takes the same
+program's POD section SYNOPSIS using L<Pod::Usage>. It takes the same
 arguments as VersionMessage(). In particular, you cannot tie it
 directly to an option, e.g.:
 
@@ -2238,7 +2235,7 @@ That's why they're called 'options'.
 
 The command line is not split by GetOptions, but by the command line
 interpreter (CLI). On Unix, this is the shell. On Windows, it is
-COMMAND.COM or CMD.EXE. Other operating systems have other CLIs. 
+COMMAND.COM or CMD.EXE. Other operating systems have other CLIs.
 
 It is important to know that these CLIs may behave different when the
 command line contains special characters, in particular quotes or
@@ -2279,7 +2276,7 @@ Johan Vromans <jvromans@squirrel.nl>
 
 =head1 COPYRIGHT AND DISCLAIMER
 
-This program is Copyright 2002,1990 by Johan Vromans.
+This program is Copyright 2003,1990 by Johan Vromans.
 This program is free software; you can redistribute it and/or
 modify it under the terms of the Perl Artistic License or the
 GNU General Public License as published by the Free Software
