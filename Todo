@@ -4,7 +4,6 @@ before embarking on an implementation tour.
 Bugs
 	remove recursion in regular expression engine
 	fix memory leaks during compile failures
-	make signal handling safe
 
 Tie Modules
 	VecArray		Implement array using vec()
@@ -81,7 +80,6 @@ Vague possibilities
 	make tr/// return histogram in list context?
 	loop control on do{} et al
 	explicit switch statements
-	built-in globbing
 	compile to real threaded code
 	structured types
 	autocroak?

@@ -8,7 +8,7 @@ This document describes differences between the 5.7.0 release and the
 5.7.1 release.  
 
 (To view the differences between the 5.6.0 release and the 5.7.0
-release, see L<perl570delta>).
+release, see L<perl570delta>.)
 
 =head1 Security Vulnerability Closed
 
@@ -62,12 +62,14 @@ natively, ASCII or EBCDIC, unless GLOB_ALPHASORT is specified.)
 
 =head1 Core Enhancements
 
-=over 4
-
-=item *
+=head1 AUTOLOAD Is Now Lvaluable
 
 AUTOLOAD is now lvaluable, meaning that you can add the :lvalue attribute
 to AUTOLOAD subroutines and you can assign to the AUTOLOAD return value.
+
+=head2 PerlIO is Now The Default
+
+=over 4
 
 =item *
 
@@ -191,6 +193,11 @@ isn't, since that includes the vertical tabulator character, whereas
 C<\s> doesn't.)
 
 =back
+
+=head2 Signals Are Now Safe
+
+Perl used to be fragile in that signals arriving at inopportune moments
+could corrupt Perl's internal state.
 
 =head1 Modules and Pragmata
 

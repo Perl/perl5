@@ -1,0 +1,202 @@
+=head1 NAME
+
+perl571delta - what's new for perl v5.7.2
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.7.1 release and the
+5.7.2 release.  
+
+(To view the differences between the 5.6.0 release and the 5.7.0
+release, see L<perl570delta>.  To view the differences between the
+5.7.0 release and the 5.7.1 release, see L<perl571delta>.)
+
+=head1 Security Vulnerability Closed
+
+(This change was already made in 5.7.0 but bears repeating here.)
+
+A security vulnerability affecting all Perl versions prior to 5.6.1
+was found in August 2000.  The vulnerability does not affect default
+installations and as far as is known affects only the Linux platform.
+
+You should upgrade your Perl to 5.6.1 as soon as possible.  Patches
+for earlier releases exist but they require full recompilation from
+the source code so 5.6.1 is your best choice.
+See http://www.cpan.org/src/5.0/sperl-2000-08-05/sperl-2000-08-05.txt
+for more information.
+
+=head1 Incompatible Changes
+
+=head1 Core Enhancements
+
+=head1 Modules and Pragmata
+
+=head2 New Modules
+
+=head2 Updated And Improved Modules and Pragmata
+
+=head1 Performance Enhancements
+
+=head1 Utility Changes
+
+=head1 New Documentation
+
+=head1 Installation and Configuration Improvements
+
+=head2 New Or Improved Platforms
+
+=head2 Generic Improvements
+
+=head1 Selected Bug Fixes
+
+=head2 Platform Specific Changes and Fixes
+
+=head1 New or Changed Diagnostics
+
+=head1 Changed Internals
+
+=head2 Regex pre-/post-compilation items matched up
+
+The regex compiler now maintains a structure that identifies nodes in
+the compiled bytecode with the corresponding syntactic features of the
+original regex expression.  The information is attached to the new
+C<offsets> member of the C<struct regexp>. See L<perldebguts> for more
+complete information.
+
+=head1 New Tests
+
+=head1 Known Problems
+
+Note that unlike other sections in this document (which describe
+changes since 5.7.0) this section is cumulative containing known
+problems for all the 5.7 releases.
+
+=head2 AIX vac 5.0.0.0 May Produce Buggy Code For Perl
+
+The AIX C compiler vac version 5.0.0.0 may produce buggy code,
+resulting in few random tests failing, but when the failing tests
+are run by hand, they succeed.  We suggest upgrading to at least
+vac version 5.0.1.0, that has been known to compile Perl correctly.
+"lslpp -L|grep vac.C" will tell you the vac version.
+
+=head2 lib/ftmp-security tests warn 'system possibly insecure'
+
+Don't panic.  Read INSTALL 'make test' section instead.
+
+=head2 lib/io_multihomed Fails In LP64-Configured HP-UX
+
+The lib/io_multihomed test may hang in HP-UX if Perl has been
+configured to be 64-bit. Because other 64-bit platforms do not hang in
+this test, HP-UX is suspect. All other tests pass in 64-bit HP-UX. The
+test attempts to create and connect to "multihomed" sockets (sockets
+which have multiple IP addresses).
+
+=head2 Test lib/posix Subtest 9 Fails In LP64-Configured HP-UX
+
+If perl is configured with -Duse64bitall, the successful result of the
+subtest 10 of lib/posix may arrive before the successful result of the
+subtest 9, which confuses the test harness so much that it thinks the
+subtest 9 failed.
+
+=head2 lib/b test 19
+
+The test fails on various platforms (PA64 and IA64 are known), but the
+exact cause is still being investigated.
+
+=head2 Linux With Sfio Fails op/misc Test 48
+
+No known fix.
+
+=head2 sigaction test 13 in VMS
+
+The test is known to fail; whether it's because of VMS of because
+of faulty test is not known.
+
+=head2 sprintf tests 129 and 130
+
+The op/sprintf tests 129 and 130 are known to fail on some platforms.
+Examples include any platform using sfio, and Compaq/Tandem's NonStop-UX.
+The failing platforms do not comply with the ANSI C Standard, line
+19ff on page 134 of ANSI X3.159 1989 to be exact.  (They produce
+something else than "1" and "-1" when formatting 0.6 and -0.6 using
+the printf format "%.0f", most often they produce "0" and "-0".)
+
+=head2  Failure of Thread tests
+
+The subtests 19 and 20 of lib/thr5005.t test are known to fail due to
+fundamental problems in the 5.005 threading implementation. These are
+not new failures--Perl 5.005_0x has the same bugs, but didn't have
+these tests. (Note that support for 5.005-style threading remains
+experimental.)
+
+=head2 Localising a Tied Variable Leaks Memory
+
+    use Tie::Hash;
+    tie my %tie_hash => 'Tie::StdHash';
+
+    ...
+
+    local($tie_hash{Foo}) = 1; # leaks
+
+Code like the above is known to leak memory every time the local()
+is executed.
+
+=head2 Self-tying of Arrays and Hashes Is Forbidden
+
+Self-tying of arrays and hashes is broken in rather deep and
+hard-to-fix ways.  As a stop-gap measure to avoid people from getting
+frustrated at the mysterious results (core dumps, most often) it is
+for now forbidden (you will get a fatal error even from an attempt).
+
+=head2 Building Extensions Can Fail Because Of Largefiles
+
+Some extensions like mod_perl are known to have issues with
+`largefiles', a change brought by Perl 5.6.0 in which file offsets
+default to 64 bits wide, where supported.  Modules may fail to compile
+at all or compile and work incorrectly.  Currently there is no good
+solution for the problem, but Configure now provides appropriate
+non-largefile ccflags, ldflags, libswanted, and libs in the %Config
+hash (e.g., $Config{ccflags_nolargefiles}) so the extensions that are
+having problems can try configuring themselves without the
+largefileness.  This is admittedly not a clean solution, and the
+solution may not even work at all.  One potential failure is whether
+one can (or, if one can, whether it's a good idea) link together at
+all binaries with different ideas about file offsets, all this is
+platform-dependent.
+
+=head2 The Compiler Suite Is Still Experimental
+
+The compiler suite is slowly getting better but is nowhere near
+working order yet.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the articles
+recently posted to the comp.lang.perl.misc newsgroup and the perl
+bug database at http://bugs.perl.org.  There may also be
+information at http://www.perl.com/perl/, the Perl Home Page.
+
+If you believe you have an unreported bug, please run the B<perlbug>
+program included with your release.  Be sure to trim your bug down
+to a tiny but sufficient test case.  Your bug report, along with the
+output of C<perl -V>, will be sent off to perlbug@perl.org to be
+analysed by the Perl porting team.
+
+=head1 SEE ALSO
+
+The F<Changes> file for exhaustive details on what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=head1 HISTORY
+
+Written by Jarkko Hietaniemi <F<jhi@iki.fi>>, with many contributions
+from The Perl Porters and Perl Users submitting feedback and patches.
+
+Send omissions or corrections to <F<perlbug@perl.org>>.
+
+=cut
