@@ -71,7 +71,7 @@ WINIOMAYBE =
 OPTIMIZE = -g -O2 $(RUNTIME)
 LINK_DBG = -g
 .ELSE
-OPTIMIZE = -O2 $(RUNTIME)
+OPTIMIZE = -g -O2 $(RUNTIME)
 LINK_DBG = 
 .ENDIF
 
@@ -86,15 +86,15 @@ OBJOUT_FLAG = -o
 # Rules
 # 
 .SUFFIXES : 
-.SUFFIXES : .c .obj .dll .lib .exe
+.SUFFIXES : .c .o .dll .lib .exe
 
-.c.obj:
+.c.o:
 	$(CC) -c $(CFLAGS) $(OBJOUT_FLAG) $@ $<
 
 .c.i:
 	$(CC) -E $(CFLAGS) $(OBJOUT_FLAG) $@ $<
 
-.obj.dll:
+.o.dll:
 	$(LINK32) -o $@ $(LINK_FLAGS) $< $(LIBFILES),
 	$(IMPLIB) -def $(*B).def $(*B).lib $@
 
@@ -164,48 +164,48 @@ CORE_C=	..\av.c		\
 	..\util.c	\
 	..\malloc.c
 
-CORE_OBJ= ..\av.obj	\
-	..\deb.obj	\
-	..\doio.obj	\
-	..\doop.obj	\
-	..\dump.obj	\
-	..\globals.obj	\
-	..\gv.obj	\
-	..\hv.obj	\
-	..\mg.obj	\
-	..\op.obj	\
-	..\perl.obj	\
-	..\perlio.obj	\
-	..\perly.obj	\
-	..\pp.obj	\
-	..\pp_ctl.obj	\
-	..\pp_hot.obj	\
-	..\pp_sys.obj	\
-	..\regcomp.obj	\
-	..\regexec.obj	\
-	..\run.obj	\
-	..\scope.obj	\
-	..\sv.obj	\
-	..\taint.obj	\
-	..\toke.obj	\
-	..\universal.obj\
-	..\util.obj     \
-	..\malloc.obj
+CORE_OBJ= ..\av.o	\
+	..\deb.o	\
+	..\doio.o	\
+	..\doop.o	\
+	..\dump.o	\
+	..\globals.o	\
+	..\gv.o	\
+	..\hv.o	\
+	..\mg.o	\
+	..\op.o	\
+	..\perl.o	\
+	..\perlio.o	\
+	..\perly.o	\
+	..\pp.o	\
+	..\pp_ctl.o	\
+	..\pp_hot.o	\
+	..\pp_sys.o	\
+	..\regcomp.o	\
+	..\regexec.o	\
+	..\run.o	\
+	..\scope.o	\
+	..\sv.o	\
+	..\taint.o	\
+	..\toke.o	\
+	..\universal.o\
+	..\util.o     \
+	..\malloc.o
 
 WIN32_C = perllib.c \
 	win32.c \
 	win32sck.c \
 	win32thread.c 
 
-WIN32_OBJ = win32.obj \
-	win32sck.obj \
-	win32thread.obj
+WIN32_OBJ = win32.o \
+	win32sck.o \
+	win32thread.o
 
-PERL95_OBJ = perl95.obj \
-	win32mt.obj \
-	win32sckmt.obj
+PERL95_OBJ = perl95.o \
+	win32mt.o \
+	win32sckmt.o
 
-DLL_OBJ = perllib.obj $(DYNALOADER).obj
+DLL_OBJ = perllib.o $(DYNALOADER).o
 
 CORE_H = ..\av.h	\
 	..\cop.h	\
@@ -283,20 +283,20 @@ MAKE = dmake
 
 all: $(PERLEXE) $(PERL95EXE) $(GLOBEXE) $(DYNALOADMODULES) $(MINIMOD) $(GLOBBAT)
 
-$(DYNALOADER).obj : $(DYNALOADER).c $(CORE_H) $(EXTDIR)\DynaLoader\dlutils.c
+$(DYNALOADER).o : $(DYNALOADER).c $(CORE_H) $(EXTDIR)\DynaLoader\dlutils.c
 
 #------------------------------------------------------------
 
-$(GLOBEXE): perlglob.obj
+$(GLOBEXE): perlglob.o
 	$(LINK32) $(LINK_FLAGS) -o $@  \
-	    perlglob.obj $(LIBFILES) 
+	    perlglob.o $(LIBFILES) 
 
 $(GLOBBAT) : ..\lib\File\DosGlob.pm $(MINIPERL)
 	$(MINIPERL) $(PL2BAT) - < ..\lib\File\DosGlob.pm > $(GLOBBAT)
 
-perlglob.obj  : perlglob.c
+perlglob.o  : perlglob.c
 
-..\miniperlmain.obj : ..\miniperlmain.c $(CORE_H)
+..\miniperlmain.o : ..\miniperlmain.c $(CORE_H)
 
 config.w32 : $(CFGSH_TMPL)
 	copy $(CFGSH_TMPL) config.w32
@@ -326,15 +326,15 @@ $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
 LKPRE = INPUT (
 LKPOST = )
 
-linkscript  : ..\miniperlmain.obj $(CORE_OBJ) $(WIN32_OBJ)
-	type $(mktmp $(LKPRE) ..\miniperlmain.obj \
+linkscript  : ..\miniperlmain.o $(CORE_OBJ) $(WIN32_OBJ)
+	type $(mktmp $(LKPRE) ..\miniperlmain.o \
 		$(CORE_OBJ:s,\,\\) $(WIN32_OBJ:s,\,\\) $(LIBFILES) $(LKPOST))
 
 
 
-$(MINIPERL) : ..\miniperlmain.obj $(CORE_OBJ) $(WIN32_OBJ)
+$(MINIPERL) : ..\miniperlmain.o $(CORE_OBJ) $(WIN32_OBJ)
 	$(LINK32) -v -o $@ $(LINK_FLAGS) \
-	    $(mktmp $(LKPRE) ..\miniperlmain.obj \
+	    $(mktmp $(LKPRE) ..\miniperlmain.o \
 		$(CORE_OBJ:s,\,\\) $(WIN32_OBJ:s,\,\\) $(LIBFILES) $(LKPOST))
 
 $(WIN32_OBJ) : $(CORE_H)
@@ -367,13 +367,13 @@ $(MINIMOD) : $(MINIPERL) ..\minimod.pl
 perlmain.c : runperl.c 
 	copy runperl.c perlmain.c
 
-perlmain.obj : perlmain.c
+perlmain.o : perlmain.c
 	$(CC) $(CFLAGS) -UPERLDLL -o $@ -c perlmain.c
 
 
-$(PERLEXE): $(PERLDLL) $(CONFIGPM) perlmain.obj  
+$(PERLEXE): $(PERLDLL) $(CONFIGPM) perlmain.o  
 	$(LINK32) -o perl.exe $(LINK_FLAGS)  \
-	perlmain.obj $(WINIOMAYBE) $(PERLIMPLIB) $(LIBFILES)
+	perlmain.o $(WINIOMAYBE) $(PERLIMPLIB) $(LIBFILES)
 	copy perl.exe $@
 	del perl.exe
 	copy splittree.pl .. 
@@ -456,7 +456,7 @@ distclean: clean
 	-del /f perl95.c
 .ENDIF
 	-del /f bin\*.bat
-	-cd $(EXTDIR) && del /s *.lib *.def *.map *.bs Makefile *.obj pm_to_blib
+	-cd $(EXTDIR) && del /s *.lib *.def *.map *.bs Makefile *.o pm_to_blib
 	-rmdir /s /q ..\lib\auto
 	-rmdir /s /q ..\lib\CORE
 
@@ -509,10 +509,10 @@ test-notty : test-prep
 	cd ..\t && $(PERLEXE) -I.\lib harness
 
 clean : 
-	-@erase miniperlmain.obj
+	-@erase miniperlmain.o
 	-@erase $(MINIPERL)
-	-@erase perlglob.obj
-	-@erase perlmain.obj
+	-@erase perlglob.o
+	-@erase perlmain.o
 	-@erase config.w32
 	-@erase /f config.h
 	-@erase $(GLOBEXE)
@@ -521,7 +521,7 @@ clean :
 	-@erase $(CORE_OBJ)
 	-@erase $(WIN32_OBJ)
 	-@erase $(DLL_OBJ)
-	-@erase ..\*.obj ..\*.lib ..\*.exp *.obj *.lib *.exp
+	-@erase ..\*.o ..\*.lib ..\*.exp *.o *.lib *.exp
 	-@erase ..\t\*.exe ..\t\*.dll ..\t\*.bat
 	-@erase *.ilk
 	-@erase *.pdb

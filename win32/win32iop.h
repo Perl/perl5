@@ -211,7 +211,9 @@ END_EXTERN_C
 #define perror			win32_perror
 #define setbuf			win32_setbuf
 #define setvbuf			win32_setvbuf
+#undef flushall
 #define flushall		win32_flushall
+#undef fcloseall
 #define fcloseall		win32_fcloseall
 #define fgets			win32_fgets
 #define gets			win32_gets

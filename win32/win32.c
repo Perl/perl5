@@ -28,10 +28,20 @@
 #include "XSUB.h"
 #include <fcntl.h>
 #include <sys/stat.h>
+#ifndef __GNUC__
+/* assert.h conflicts with #define of assert in perl.h */
 #include <assert.h>
+#endif
 #include <string.h>
 #include <stdarg.h>
 #include <float.h>
+
+#ifdef __GNUC__
+/* Mingw32 defaults to globing command line 
+ * So we turn it off like this:
+ */
+int _CRT_glob = 0;
+#endif
 
 #define EXECF_EXEC 1
 #define EXECF_SPAWN 2
@@ -1126,21 +1136,13 @@ win32_pipe(int *pfd, unsigned int size, int mode)
 DllExport FILE*
 win32_popen(const char *command, const char *mode)
 {
-#ifdef __GNUC__
-    return NULL;
-#else
     return _popen(command, mode);
-#endif
 }
 
 DllExport int
 win32_pclose(FILE *pf)
 {
-#ifdef __GNUC__
-    return fclose(pf);
-#else
     return _pclose(pf);
-#endif
 }
 
 DllExport int
@@ -1263,17 +1265,13 @@ win32_setvbuf(FILE *pf, char *buf, int type, size_t size)
 DllExport int
 win32_flushall(void)
 {
-#ifndef __GNUC__
     return flushall();
-#endif
 }
 
 DllExport int
 win32_fcloseall(void)
 {
-#ifndef __GNUC__
     return fcloseall();
-#endif
 }
 
 DllExport char*
