@@ -33,4 +33,4 @@ $out = runperl(
     stderr => 1,
 );
 
-like($out, qr/"foo"/, "-exec option with //=");
+like($out, qr/print/, "-exec option with //=");
