@@ -2180,7 +2180,7 @@ EXT U32 opargs[] = {
 	0x00000040,	/* padav */
 	0x00000040,	/* padhv */
 	0x00000040,	/* padany */
-	0x00000600,	/* pushre */
+	0x00000640,	/* pushre */
 	0x00000144,	/* rv2gv */
 	0x00000144,	/* rv2sv */
 	0x00000114,	/* av2arylen */

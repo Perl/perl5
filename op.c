@@ -2223,6 +2223,8 @@ pmruntime(OP *o, OP *expr, OP *repl)
 			     curop->op_type == OP_PADANY) {
 			repl_has_vars = 1;
 		    }
+		    else if (curop->op_type == OP_PUSHRE)
+			; /* Okay here, dangerous in newASSIGNOP */
 		    else
 			break;
 		}
@@ -2521,6 +2523,14 @@ newASSIGNOP(I32 flags, OP *left, I32 optype, OP *right)
 			     curop->op_type == OP_RV2GV) {
 			if (lastop->op_type != OP_GV)	/* funny deref? */
 			    break;
+		    }
+		    else if (curop->op_type == OP_PUSHRE) {
+			if (((PMOP*)curop)->op_pmreplroot) {
+			    GV *gv = (GV*)((PMOP*)curop)->op_pmreplroot;
+			    if (gv == defgv || SvCUR(gv) == generation)
+				break;
+			    SvCUR(gv) = generation;
+			}	
 		    }
 		    else
 			break;

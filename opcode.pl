@@ -248,7 +248,7 @@ padav		private array		ck_null		d0
 padhv		private hash		ck_null		d0
 padany		private something	ck_null		d0
 
-pushre		push regexp		ck_null		/
+pushre		push regexp		ck_null		d/
 
 # References and stuff.
 
