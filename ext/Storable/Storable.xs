@@ -1298,11 +1298,10 @@ I32 *classnum;
 
 	/*
 	 * Unknown classname, we need to record it.
-	 * The (IV) cast below is for 64-bit machines, to avoid compiler warnings.
 	 */
 
 	cxt->classnum++;
-	if (!hv_store(hclass, name, len, (SV*)(IV) cxt->classnum, 0))
+	if (!hv_store(hclass, name, len, INT2PTR(SV*, cxt->classnum), 0))
 		CROAK(("Unable to record new classname"));
 
 	*classnum = cxt->classnum;
@@ -2425,14 +2424,11 @@ SV *sv;
 	 * means that we must clean up the hash manually afterwards, but gives
 	 * us a 15% throughput increase.
 	 *
-	 * The (IV) cast below is for 64-bit machines, to avoid warnings from
-	 * the compiler. Please, let me know if it does not work.
-	 *		-- RAM, 14/09/1999
 	 */
 
 	cxt->tagnum++;
 	if (!hv_store(hseen,
-			(char *) &sv, sizeof(sv), (SV*)(IV) cxt->tagnum, 0))
+			(char *) &sv, sizeof(sv), INT2PTR(SV*, cxt->tagnum), 0))
 		return -1;
 
 	/*
