@@ -30,7 +30,7 @@ ok( $@ =~ /Cannot find blib/, 'Fails if blib directory not found' );
 _mkdirs(qw(blib blib/arch blib/lib));
 
 {
-    my $warnings;
+    my $warnings = '';
     local $SIG{__WARN__} = sub { $warnings = join '', @_ };
     use_ok('blib');
     is( $warnings, '',  'use blib is niiiice and quiet' );

@@ -1,8 +1,46 @@
 Revision history for Perl extension Test::Harness
 
+2.01  Thu Dec 27 18:54:36 EST 2001
+    * Added 'passing' to the results to tell you if the test passed
+    * Added Test::Harness::Straps example (examples/mini_harness.plx)
+    * Header-at-end tests were being interpreted as failing sometimes
+    - The 'skip_all' results from analyze* was not being set
+    - analyze_fh() and analyze_file() now work more efficiently, reading
+      line-by-line instead of slurping as before.
+
+2.00  Sun Dec 23 19:13:57 EST 2001
+    - Fixed a warning on VMS.
+    - Removed a little unnecessary code from analyze_file()
+    - Made sure filehandles are getting closed
+    - analyze() now considers "not \nok" to be a failure (VMSism)
+      but Test::Harness still doesn't.
+
+2.00_05 Mon Dec 17 22:08:02 EST 2001
+    * Wasn't filtering @INC properly when a test is run with -T, caused the 
+      command line to be too long on VMS.  VMS should be 100% now.
+    - Little bug in the skip 'various reasons' logic.
+    - Minor POD nit in 5.004_04
+    - Little speling mistak
+
+2.00_04 Sun Dec 16 00:33:32 EST 2001
+    * Major Test::Harness::Straps doc bug.
+
+2.00_03 Sat Dec 15 23:52:17 EST 2001
+    * First release candidate
+    * 'summary' is now 'details'
+    * Test #1 is now element 0 on the details array.  It works out better
+      that way.
+    * analyze_file() is more portable, but no longer taint clean
+    * analyze_file() properly preserves @INC and handles -T switches
+    - minor mistake in the test header line parsing
+
 1.26  Mon Nov 12 15:44:01 EST 2001
     * An excuse to upload a new version to CPAN to get Test::Harness
       back on the index.
+
+2.00_00  Sat Sep 29 00:12:03 EDT 2001
+    * Partial gutting of the internals
+    * Added Test::Harness::Straps
 
 1.25  Tue Aug  7 08:51:09 EDT 2001
     * Fixed a bug with tests failing if they're all skipped
@@ -13,7 +51,7 @@ Revision history for Perl extension Test::Harness
     -  minor fixes to the filename in the report
     -  '[no reason given]' skip reason
 
-1.24  2001/08/07 12:52:47   *UNRELEASED*
+1.24  Tue Aug  7 08:51:09 EDT 2001
     - Added internal information about number of todo tests
 
 1.23  Tue Jul 31 15:06:47 EDT 2001

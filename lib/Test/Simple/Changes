@@ -1,5 +1,34 @@
 Revision history for Perl extension Test::Simple
 
+0.41  Mon Dec 17 22:45:20 EST 2001
+    * chromatic added diag()
+    - Internal eval()'s sometimes interfering with $@ and $!.  Fixed.
+
+0.40  Fri Dec 14 15:41:39 EST 2001
+    * isa_ok() now accepts unblessed references gracefully
+    - Nick Clark found a bug with like() and a regex with % in it.
+    - exit.t was hanging on 5.005_03 VMS perl.  Test now skipped.
+    - can_ok() would pass if no methods were given.  Now fails.
+    - isnt() diagnostic output format changed
+    * Added some docs about embedding and extending Test::More
+    * Added Test::More->builder
+    * Added cmp_ok()
+    * Added todo_skip()
+    * Added unlike()
+    - Piers pointed out that sometimes people override isa().
+      isa_ok() now accounts for that.
+
+0.36  Thu Nov 29 14:07:39 EST 2001
+    - Matthias Urlichs found that intermixed prints to STDOUT and test 
+      output came out in the wrong order when piped.
+
+0.35  Tue Nov 27 19:57:03 EST 2001
+    - Little glitch in the test suite.  No actual bug.
+
+0.34  Tue Nov 27 15:43:56 EST 2001
+    * Empty string no longer matches undef in is() and isnt().
+    * Added isnt_eq and isnt_num to Test::Builder.
+
 0.33  Mon Oct 22 21:05:47 EDT 2001
     * It's now officially safe to redirect STDOUT and STDERR without
       affecting test output.

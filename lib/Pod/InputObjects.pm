@@ -268,7 +268,7 @@ sub new {
     ## If they are in the argument list, they will override the defaults.
     my $self = {
           -name       => undef,
-          -text       => (@_ == 1) ? $_[0] : undef,
+          -text       => (@_ == 1) ? shift : undef,
           -file       => '<unknown-file>',
           -line       => 0,
           -prefix     => '=',
@@ -892,7 +892,7 @@ sub _unset_child2parent_links {
    my $self = shift;
    local *ptree = $self;
    for (@ptree) {
-       next  unless (length  and  ref  and  ref ne 'SCALAR');
+       next  unless (defined and length  and  ref  and  ref ne 'SCALAR');
        $_->_unset_child2parent_links()
            if UNIVERSAL::isa($_, 'Pod::InteriorSequence');
    }

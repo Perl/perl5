@@ -31,6 +31,298 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 14190] By: jhi                                   on 2002/01/11  14:52:51
+        Log: Subject: [PATCH] Re: Magic numbers in B::Concise
+             From: Stephen McCamant <smcc@CSUA.Berkeley.EDU>
+             Date: Thu, 10 Jan 2002 18:21:34 -0800
+             Message-ID: <15422.19502.380275.403187@soda.csua.berkeley.edu>
+     Branch: perl
+	   + ext/B/t/concise.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 14189] By: jhi                                   on 2002/01/11  14:51:11
+        Log: Upgrade to CGI.pm 2.79.  Manual tweaks were
+             necessary in form.t and html.t @INC setups.
+     Branch: perl
+	   ! lib/CGI.pm lib/CGI/Carp.pm lib/CGI/t/form.t lib/CGI/t/html.t
+____________________________________________________________________________
+[ 14188] By: jhi                                   on 2002/01/11  14:31:17
+        Log: Yet another twist.
+     Branch: perl
+	   ! t/test.pl
+____________________________________________________________________________
+[ 14187] By: jhi                                   on 2002/01/11  14:14:12
+        Log: Subject: [ PATCH ] AIX to pick the correct CC if more than one installed
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Fri, 11 Jan 2002 13:04:15 +0100      
+             Message-Id: <20020111125951.BD84.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! hints/aix.sh
+____________________________________________________________________________
+[ 14186] By: jhi                                   on 2002/01/11  14:13:02
+        Log: Subject: [REPATCH] RE: [PATCH lib/AnyDBM_File.t] null key support back in DB v3
+             From: Jonathan Stowe <gellyfish@gellyfish.com> 
+             Date: Fri, 11 Jan 2002 09:28:46 +0000 (GMT)
+             Message-ID: <Pine.LNX.4.33.0201110927480.10327-100000@orpheus.gellyfish.com>
+     Branch: perl
+	   ! lib/AnyDBM_File.t
+____________________________________________________________________________
+[ 14185] By: jhi                                   on 2002/01/11  14:10:01
+        Log: Arguments were being mangled.
+     Branch: perl
+	   ! t/test.pl
+____________________________________________________________________________
+[ 14184] By: jhi                                   on 2002/01/11  14:05:53
+        Log: Subject: [PATCH lib/AnyDBM_File.t] Convert to Test::More
+             From: Jonathan Stowe <gellyfish@gellyfish.com>
+             Date: Thu, 10 Jan 2002 19:55:15 +0000 (GMT)
+             Message-ID: <Pine.LNX.4.33.0201101948360.9717-100000@orpheus.gellyfish.com>
+     Branch: perl
+	   ! lib/AnyDBM_File.t
+____________________________________________________________________________
+[ 14183] By: jhi                                   on 2002/01/11  13:59:22
+        Log: Subject: [PATCH t/run/kill_perl.t t/test.pl] Seperating kill_perl()
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Fri, 11 Jan 2002 04:26:27 -0500
+             Message-ID: <20020111092626.GA16544@blackrider>
+     Branch: perl
+	   ! t/run/kill_perl.t t/test.pl
+____________________________________________________________________________
+[ 14182] By: jhi                                   on 2002/01/11  13:57:59
+        Log: Subject: [PATCH] Test::Harness 2.01
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Thu, 10 Jan 2002 21:11:24 -0500
+             Message-ID: <20020111021123.GA30666@blackrider>
+     Branch: perl
+	   + lib/Test/Harness/Assert.pm lib/Test/Harness/Iterator.pm
+	   + lib/Test/Harness/Straps.pm lib/Test/Harness/t/00compile.t
+	   + lib/Test/Harness/t/assert.t lib/Test/Harness/t/callback.t
+	   + lib/Test/Harness/t/nonumbers.t
+	   + lib/Test/Harness/t/strap-analyze.t lib/Test/Harness/t/strap.t
+	   + t/lib/sample-tests/lone_not_bug
+	   + t/lib/sample-tests/out_of_order t/lib/sample-tests/taint
+	   + t/lib/sample-tests/vms_nit
+	   ! MANIFEST lib/Test/Harness.pm lib/Test/Harness/Changes
+	   ! lib/Test/Harness/t/base.t lib/Test/Harness/t/test-harness.t
+____________________________________________________________________________
+[ 14181] By: jhi                                   on 2002/01/11  13:57:38
+        Log: patch is silly when creating new files: don't run
+             patch more than once.
+     Branch: perl
+	   ! lib/Test/Simple/t/buffer.t lib/Test/Simple/t/diag.t
+____________________________________________________________________________
+[ 14180] By: jhi                                   on 2002/01/11  13:53:49
+        Log: Forgot from #14179.
+     Branch: perl
+	   ! lib/Pod/InputObjects.pm lib/Pod/t/InputObjects.t
+____________________________________________________________________________
+[ 14179] By: jhi                                   on 2002/01/11  13:24:13
+        Log: Subject: [PATCH] is() undef/'' behavior change
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Fri, 11 Jan 2002 03:35:51 -0500
+             Message-ID: <20020111083551.GC30666@blackrider>
+             
+             Subject: [PATCH] Pod::InputObjects warnings & is() undef/'' fix
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Fri, 11 Jan 2002 03:37:44 -0500
+             Message-ID: <20020111083744.GD30666@blackrider>
+     Branch: perl
+	   ! ext/re/re.t lib/AutoSplit.t lib/DB.t lib/ExtUtils/t/Command.t
+	   ! lib/ExtUtils/t/Manifest.t lib/Pod/InputObjects.pm
+	   ! lib/Pod/t/InputObjects.t lib/blib.t
+____________________________________________________________________________
+[ 14178] By: jhi                                   on 2002/01/11  13:21:59
+        Log: Subject: [PATCH] Test::Simple/More/Builder/Tutorial 0.41
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Thu, 10 Jan 2002 19:56:23 -0500
+             Message-ID: <20020111005623.GA13192@blackrider>
+     Branch: perl
+	   + lib/Test/Simple/t/buffer.t lib/Test/Simple/t/diag.t
+	   ! MANIFEST lib/Test/Builder.pm lib/Test/More.pm
+	   ! lib/Test/Simple.pm lib/Test/Simple/Changes
+	   ! lib/Test/Simple/t/Builder.t lib/Test/Simple/t/More.t
+	   ! lib/Test/Simple/t/exit.t lib/Test/Simple/t/extra.t
+	   ! lib/Test/Simple/t/fail-like.t lib/Test/Simple/t/fail-more.t
+	   ! lib/Test/Simple/t/fail.t lib/Test/Simple/t/filehandles.t
+	   ! lib/Test/Simple/t/import.t lib/Test/Simple/t/is_deeply.t
+	   ! lib/Test/Simple/t/missing.t lib/Test/Simple/t/no_ending.t
+	   ! lib/Test/Simple/t/no_header.t lib/Test/Simple/t/no_plan.t
+	   ! lib/Test/Simple/t/output.t lib/Test/Simple/t/plan.t
+	   ! lib/Test/Simple/t/plan_is_noplan.t
+	   ! lib/Test/Simple/t/plan_no_plan.t
+	   ! lib/Test/Simple/t/plan_skip_all.t lib/Test/Simple/t/simple.t
+	   ! lib/Test/Simple/t/skip.t lib/Test/Simple/t/skipall.t
+	   ! lib/Test/Simple/t/todo.t lib/Test/Simple/t/undef.t
+	   ! lib/Test/Simple/t/use_ok.t lib/Test/Simple/t/useing.t
+	   ! lib/Test/Tutorial.pod
+____________________________________________________________________________
+[ 14177] By: gsar                                  on 2002/01/11  02:56:05
+        Log: malloc() things must be free()d, not Safefree()d (bug in change#11280
+             revealed by -D_USE_MSVCRT_MEM_ALLOC -D_USE_LINKED_LIST)
+             
+             turns out even the malloc() was never really needed to begin with,
+             so get rid of it
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 14176] By: jhi                                   on 2002/01/11  02:11:21
+        Log: Small doc tweaks.
+     Branch: perl
+	   ! pod/perluniintro.pod
+____________________________________________________________________________
+[ 14175] By: gsar                                  on 2002/01/11  01:05:15
+        Log: support using the CRT's malloc() family of functions instead of
+             the internal one when ithreads is enabled; allocate large blocks
+             using VirtualAlloc() since the Heap*() functions may only be tuned
+             for small allocations (from Doug Lankshear <dougl@ActiveState.com>)
+             
+             pass -D_USE_MSVCRT_MEM_ALLOC via cflags to enable the CRT's malloc();
+             also see comments at the top of win32/vmem.h for other options that
+             can be set
+     Branch: perl
+	   ! win32/vmem.h
+____________________________________________________________________________
+[ 14174] By: jhi                                   on 2002/01/10  19:33:29
+        Log: Subject: micropatch
+             From: Hugo van der Sanden <hv@crypt.compulink.co.uk>
+             Date: Thu, 10 Jan 2002 18:20:58 +0000
+             Message-Id: <200201101820.g0AIKw208580@crypt.compulink.co.uk>
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[ 14173] By: jhi                                   on 2002/01/10  19:32:16
+        Log: Subject: [PATCH] Embed.t on Win32
+             From: "Mattia Barbon" <mbarbon@dsi.unive.it>
+             Date: Thu, 10 Jan 2002 18:56:21 +0100
+             Message-ID: <3C3DE3D5.7359.1FEB994@localhost>
+     Branch: perl
+	   ! lib/ExtUtils/t/Embed.t
+____________________________________________________________________________
+[ 14172] By: jhi                                   on 2002/01/10  19:31:00
+        Log: Subject: Re: [PATCH] No 'once' warnings for variables declared with our
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 10 Jan 2002 08:56:05 -0800
+             Message-ID: <lrg05ep2l6.fsf@caliper.activestate.com>
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[ 14171] By: jhi                                   on 2002/01/10  19:29:08
+        Log: Subject: [PATCH] doc fixes
+             From: "Brendan O'Dea" <bod@debian.org>
+             Date: Fri, 11 Jan 2002 03:49:54 +1100
+             Message-ID: <20020110164954.GA21891@compusol.com.au>
+     Branch: perl
+	   ! lib/I18N/Collate.pm pod/perlfunc.pod
+____________________________________________________________________________
+[ 14170] By: jhi                                   on 2002/01/10  17:48:42
+        Log: Integrate perlio; More signal hackery.
+     Branch: perl
+	  !> win32/win32.c
+____________________________________________________________________________
+[ 14169] By: jhi                                   on 2002/01/10  17:47:34
+        Log: No need to show internal encodings, or return them
+             in random order.
+     Branch: perl
+	   ! ext/Encode/Encode.pm
+____________________________________________________________________________
+[ 14166] By: jhi                                   on 2002/01/10  15:24:41
+        Log: I think we can claim to be supporting Unicode
+             "loose matching" now.
+     Branch: perl
+	   ! pod/perlunicode.pod
+____________________________________________________________________________
+[ 14165] By: jhi                                   on 2002/01/10  15:07:56
+        Log: Subject: doc patch
+             From: mjd@plover.com
+             Date: 10 Jan 2002 15:12:27 -0000
+             Message-ID: <20020110151227.14850.qmail@plover.com>
+     Branch: perl
+	   ! pod/perlrun.pod
+____________________________________________________________________________
+[ 14164] By: jhi                                   on 2002/01/10  14:54:38
+        Log: Subject: Re: [ID 20011223.001] accept leaks memory
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Thu, 10 Jan 2002 10:13:07 -0500 (EST)
+             Message-ID: <Pine.SOL.4.10.10201100919390.4429-100000@maxwell.phys.lafayette.edu>
+     Branch: perl
+	   ! hints/linux.sh
+____________________________________________________________________________
+[ 14163] By: jhi                                   on 2002/01/10  14:52:08
+        Log: Integrate perlio; Skeleton coding of more kill() support on Win32.
+     Branch: perl
+	  !> win32/win32.c
+____________________________________________________________________________
+[ 14162] By: jhi                                   on 2002/01/10  14:50:03
+        Log: Subject: [PATCH] Magic numbers in B::Concise
+             From: Stephen McCamant <smcc@CSUA.Berkeley.EDU> 
+             Date: Wed, 9 Jan 2002 23:04:01 -0800
+             Message-ID: <15421.15585.813580.211907@soda.csua.berkeley.edu>
+     Branch: perl
+	   ! ext/B/B/Concise.pm ext/B/O.pm
+____________________________________________________________________________
+[ 14161] By: jhi                                   on 2002/01/10  14:48:52
+        Log: Subject: [PATCH] No 'once' warnings for variables declared with our
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 09 Jan 2002 21:52:40 -0800
+             Message-ID: <lrg05e7nx3.fsf@caliper.activestate.com>
+     Branch: perl
+	   ! t/lib/strict/vars toke.c
+____________________________________________________________________________
+[ 14159] By: jhi                                   on 2002/01/09  21:28:13
+        Log: Subject: [PATCH] B::Deparse : support for \[...] prototypes
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Wed, 9 Jan 2002 23:24:32 +0100
+             Message-ID: <20020109232432.A692@rafael>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 14158] By: jhi                                   on 2002/01/09  21:25:19
+        Log: Subject: Re: [PATCH pp_sys.c] Fix segfault in dbmclose in DESTROY (was Re: [ID 20020104.007] coredump on dbmclose)
+             From: Jonathan Stowe <gellyfish@gellyfish.com>
+             Date: Wed, 9 Jan 2002 19:37:38 +0000 (GMT)
+             Message-ID: <Pine.LNX.4.33.0201091924020.21574-100000@orpheus.gellyfish.com>
+     Branch: perl
+	   ! t/run/kill_perl.t
+____________________________________________________________________________
+[ 14157] By: jhi                                   on 2002/01/09  19:59:28
+        Log: Subject: Re: [ID 20020109.002] /(?m:...\s*$)/ is not backtracking properly
+             From: Hugo van der Sanden <hv@crypt.compulink.co.uk>
+             Date: Wed, 09 Jan 2002 20:16:54 +0000
+             Message-Id: <200201092016.g09KGsi30119@crypt.compulink.co.uk>
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[ 14156] By: jhi                                   on 2002/01/09  19:46:27
+        Log: Subject: [Patch @14129] fixes Unicode::Normalize
+             From: SADAHIRO Tomoyuki <bqw10602@nifty.com>
+             Date: Thu, 10 Jan 2002 01:08:56 +0900
+             Message-Id: <20020110010110.690B.BQW10602@nifty.com>
+     Branch: perl
+	   - ext/Unicode/Normalize/Normalize.pod
+	   ! MANIFEST ext/Unicode/Normalize/Makefile.PL
+	   ! ext/Unicode/Normalize/Normalize.pm
+	   ! ext/Unicode/Normalize/Normalize.xs
+	   ! ext/Unicode/Normalize/mkheader
+____________________________________________________________________________
+[ 14155] By: jhi                                   on 2002/01/09  19:09:15
+        Log: Integrate perlio; (Re-)implement alarm() for Win32.
+     Branch: perl
+	  !> win32/config.vc win32/config_H.vc win32/win32.c win32/win32.h
+	  !> win32/win32iop.h
+____________________________________________________________________________
+[ 14154] By: jhi                                   on 2002/01/09  19:08:15
+        Log: Subject: [PATCH] op/readdir.t (was Re: perl@14152)
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Wed, 9 Jan 2002 17:56:04 +0000
+             Message-ID: <20020109175604.H354@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! t/op/readdir.t
+____________________________________________________________________________
+[ 14152] By: jhi                                   on 2002/01/09  14:37:01
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 14150] By: jhi                                   on 2002/01/09  14:27:23
         Log: Thinko.
      Branch: perl

@@ -1,4 +1,4 @@
-#!./perl -w
+#!./perl -Tw
 
 BEGIN {
 	chdir 't' if -d 't';
@@ -71,7 +71,7 @@ BEGIN {
 	ok( test_f(), 'testing non-existent file' );
 
 	@ARGV = ( 'ecmdfile' );
-	is( ! test_f(), (-f 'ecmdfile'), 'testing non-existent file' );
+	cmp_ok( ! test_f(), '==', (-f 'ecmdfile'), 'testing non-existent file' );
 
 	# these are destructive, have to keep setting @ARGV
 	@ARGV = ( 'ecmdfile' );

@@ -97,6 +97,7 @@ ext/B/t/asmdata.t       See if B::Asmdata works
 ext/B/t/assembler.t     See if B::Assembler, B::Disassembler comply
 ext/B/t/b.t		See if B works
 ext/B/t/bblock.t        See if B::Bblock works
+ext/B/t/concise.t	See whether B::Concise works
 ext/B/t/debug.t		See if B::Debug works
 ext/B/t/deparse.t	See if B::Deparse works
 ext/B/t/showlex.t	See if B::ShowLex works
@@ -1269,15 +1270,26 @@ lib/termcap.pl			Perl library supporting termcap usage
 lib/Test.pm			A simple framework for writing test scripts
 lib/Test/Builder.pm             For writing new test libraries
 lib/Test/Harness.pm		A test harness
+lib/Test/Harness/Assert.pm  Test::Harness::Assert (internal use only)
 lib/Test/Harness/Changes	Test::Harness
-lib/Test/Harness/t/base.t	Test::Harness
-lib/Test/Harness/t/ok.t		Test::Harness
+lib/Test/Harness/Iterator.pm    Test::Harness::Iterator (internal use only)
+lib/Test/Harness/Straps.pm      Test::Harness::Straps
+lib/Test/Harness/t/00compile.t  Test::Harness test
+lib/Test/Harness/t/assert.t     Test::Harness::Assert test
+lib/Test/Harness/t/base.t	Test::Harness test
+lib/Test/Harness/t/callback.t   Test::Harness test
+lib/Test/Harness/t/nonumbers.t  Test::Harness test
+lib/Test/Harness/t/ok.t		Test::Harness test
+lib/Test/Harness/t/strap-analyze.t      Test::Harness::Straps test
+lib/Test/Harness/t/strap.t              Test::Harness::Straps test
 lib/Test/Harness/t/test-harness.t	Test::Harness test
 lib/Test/More.pm                More utilities for writing tests
 lib/Test/Simple.pm              Basic utility for writing tests
 lib/Test/Simple/Changes		Test::Simple changes
 lib/Test/Simple/README		Test::Simple README
+lib/Test/Simple/t/buffer.t      Test::Builder buffering test
 lib/Test/Simple/t/Builder.t     Test::Builder tests
+lib/Test/Simple/t/diag.t        Test::More diag() test
 lib/Test/Simple/t/exit.t        Test::Simple test, exit codes
 lib/Test/Simple/t/extra.t       Test::Simple test
 lib/Test/Simple/t/fail-like.t   Test::More test, like() failures
@@ -2145,14 +2157,18 @@ t/lib/sample-tests/descriptive		Test data for Test::Harness
 t/lib/sample-tests/duplicates		Test data for Test::Harness
 t/lib/sample-tests/head_end	        Test data for Test::Harness
 t/lib/sample-tests/head_fail	        Test data for Test::Harness
+t/lib/sample-tests/lone_not_bug         Test data for Test::Harness
 t/lib/sample-tests/no_nums		Test data for Test::Harness
+t/lib/sample-tests/out_of_order         Test data for Test::Harness
 t/lib/sample-tests/simple		Test data for Test::Harness
 t/lib/sample-tests/simple_fail		Test data for Test::Harness
 t/lib/sample-tests/skip			Test data for Test::Harness
 t/lib/sample-tests/skip_all		Test data for Test::Harness
 t/lib/sample-tests/skip_no_msg	        Test data for Test::Harness
+t/lib/sample-tests/taint                Test data for Test::Harness
 t/lib/sample-tests/todo			Test data for Test::Harness
 t/lib/sample-tests/todo_inline	        Test data for Test::Harness
+t/lib/sample-tests/vms_nit              Test data for Test::Harness
 t/lib/sample-tests/with_comments	Test data for Test::Harness
 t/lib/st-dump.pl		See if Storable works
 t/lib/strict/refs		Tests of "use strict 'refs'" for strict.t

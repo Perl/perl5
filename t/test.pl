@@ -280,7 +280,8 @@ sub runperl {
     my %args = @_;
     my $runperl = $^X;
     if ($args{switches}) {
-	_quote_args(\$runperl, $args{switches});
+	_quote_args(\$runperl,
+		    ref $args{switches} ? $args{switches} : [$args{switches}]);
     }
     unless ($args{nolib}) {
 	if ($is_macos) {
@@ -390,4 +391,66 @@ sub unlink_all {
         print STDERR "# Couldn't unlink '$file': $!\n" if -f $file;
     }
 }
+
+
+my $tmpfile = "misctmp000";
+1 while -f ++$tmpfile;
+END { unlink_all $tmpfile }
+
+sub kill_perl {
+    my($prog, $expected, $runperl_args, $name) = @_;
+
+    $runperl_args ||= {};
+    $runperl_args->{progfile} = $tmpfile;
+    $runperl_args->{stderr} = 1;
+
+    open TEST, ">$tmpfile" or die "Cannot open $tmpfile: $!";
+
+    # VMS adjustments
+    if( $^O eq 'VMS' ) {
+        $prog =~ s#/dev/null#NL:#;
+
+        # VMS file locking 
+        $prog =~ s{if \(-e _ and -f _ and -r _\)}
+                  {if (-e _ and -f _)}
+    }
+
+    print TEST $prog, "\n";
+    close TEST or die "Cannot close $tmpfile: $!";
+
+    my $results = runperl(%$runperl_args);
+    my $status = $?;
+
+    # Clean up the results into something a bit more predictable.
+    $results =~ s/\n+$//;
+    $results =~ s/at\s+misctmp\d+\s+line/at - line/g;
+    $results =~ s/of\s+misctmp\d+\s+aborted/of - aborted/g;
+
+    # bison says 'parse error' instead of 'syntax error',
+    # various yaccs may or may not capitalize 'syntax'.
+    $results =~ s/^(syntax|parse) error/syntax error/mig;
+
+    if ($^O eq 'VMS') {
+        # some tests will trigger VMS messages that won't be expected
+        $results =~ s/\n?%[A-Z]+-[SIWEF]-[A-Z]+,.*//;
+
+        # pipes double these sometimes
+        $results =~ s/\n\n/\n/g;
+    }
+
+    $expected =~ s/\n+$//;
+
+    my $pass = $results eq $expected;
+    unless ($pass) {
+        print STDERR "# PROG: $switch\n$prog\n";
+        print STDERR "# EXPECTED:\n$expected\n";
+        print STDERR "# GOT:\n$results\n";
+        print STDERR "# STATUS: $status\n";
+    }
+
+    ($name) = $prog =~ /^(.{1,35})/ unless $name;
+
+    _ok($pass, _where(), "kill_perl - $name");
+}
+
 1;

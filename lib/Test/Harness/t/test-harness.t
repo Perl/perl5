@@ -1,14 +1,18 @@
-#!perl
+#!/usr/bin/perl
 
 BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
+    if( $ENV{PERL_CORE} ) {
+        chdir 't';
+        @INC = '../lib';
+    }
 }
+
+my $SAMPLE_TESTS = $ENV{PERL_CORE} ? "lib/sample-tests" : "t/sample-tests";
 
 use strict;
 
 # For shutting up Test::Harness.
-# Has to work on 5.004, which doesn't have Tie::StdHandle.
+# Has to work on 5.004 which doesn't have Tie::StdHandle.
 package My::Dev::Null;
 
 sub WRITE  {}
@@ -283,6 +287,22 @@ BEGIN {
                                       failed => { },
                                       all_ok => 1,
                                      },
+                taint             => {
+                                      total => {
+                                                bonus      => 0,
+                                                max        => 1,
+                                                'ok'       => 1,
+                                                files      => 1,
+                                                bad        => 0,
+                                                good       => 1,
+                                                tests      => 1,
+                                                sub_skipped=> 0,
+                                                todo       => 0,
+                                                skipped    => 0,
+                                               },
+                                      failed => { },
+                                      all_ok => 1,
+                                     },
                );
 
     $Total_tests = (keys(%samples) * 4);
@@ -296,7 +316,7 @@ while (my($test, $expect) = each %samples) {
     eval {
         select NULL;    # _run_all_tests() isn't as quiet as it should be.
         ($totals, $failed) = 
-          Test::Harness::_run_all_tests("lib/sample-tests/$test");
+          Test::Harness::_run_all_tests("$SAMPLE_TESTS/$test");
     };
     select STDOUT;
 
@@ -308,7 +328,7 @@ while (my($test, $expect) = each %samples) {
                     {map { $_=>$totals->{$_} } keys %{$expect->{total}}} ),
                                                          "$test - totals" );
         ok( eqhash( $expect->{failed}, 
-                    {map { $_=>$failed->{"lib/sample-tests/$test"}{$_} }
+                    {map { $_=>$failed->{"$SAMPLE_TESTS/$test"}{$_} }
                               keys %{$expect->{failed}}} ),
                                                          "$test - failed" );
     }

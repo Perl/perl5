@@ -1,11 +1,11 @@
 #!./perl
 
-use strict;
-
 BEGIN {
 	chdir 't' if -d 't';
 	@INC = '../lib';
 }
+
+use strict;
 
 use Test::More tests => 13;
 require_ok( 're' );
@@ -31,7 +31,7 @@ like( $warn, qr/Useless use/, 'bits() should warn with no args' );
 
 delete $ENV{PERL_RE_COLORS};
 re::bits(0, 'debug');
-is( $ENV{PERL_RE_COLORS}, '',
+is( $ENV{PERL_RE_COLORS}, undef,
 	"... should not set regex colors given 'debug'" );
 re::bits(0, 'debugcolor');
 isnt( $ENV{PERL_RE_COLORS}, '', 

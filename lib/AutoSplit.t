@@ -115,7 +115,7 @@ foreach (@tests) {
   }
 
   # test n+1
-  is ($output, $args{Get}, "Output from autosplit()ing $args{Name}");
+  cmp_ok ($output, 'eq', $args{Get}, "Output from autosplit()ing $args{Name}");
 
   if ($args{Files}) {
     $args{Files} =~ s!/!:!gs if $^O eq 'MacOS';

@@ -4666,7 +4666,7 @@ Using the empty pattern C<//> specifically matches the null string, and is
 not be confused with the use of C<//> to mean "the last successful pattern
 match".
 
-Empty leading (or trailing) fields are produced when there positive width
+Empty leading (or trailing) fields are produced when there are positive width
 matches at the beginning (or end) of the string; a zero-width match at the
 beginning (or end) of the string does not produce an empty field.  For
 example:

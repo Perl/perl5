@@ -217,7 +217,8 @@ CGI::Response
 
 require 5.000;
 use Exporter;
-use Carp;
+#use Carp;
+BEGIN { require Carp; }
 use File::Spec;
 
 @ISA = qw(Exporter);
@@ -226,7 +227,7 @@ use File::Spec;
 
 $main::SIG{__WARN__}=\&CGI::Carp::warn;
 $main::SIG{__DIE__}=\&CGI::Carp::die;
-$CGI::Carp::VERSION = '1.21';
+$CGI::Carp::VERSION = '1.22';
 $CGI::Carp::CUSTOM_MSG = undef;
 
 # fancy import routine detects and handles 'errorWrap' specially.
@@ -317,18 +318,10 @@ sub set_message {
     return $CGI::Carp::CUSTOM_MSG;
 }
 
-# Avoid generating "subroutine redefined" warnings with the following
-# hack:
-{
-    local $^W=0;
-    eval <<EOF;
 sub confess { CGI::Carp::die Carp::longmess \@_; }
 sub croak   { CGI::Carp::die Carp::shortmess \@_; }
 sub carp    { CGI::Carp::warn Carp::shortmess \@_; }
 sub cluck   { CGI::Carp::warn Carp::longmess \@_; }
-EOF
-    ;
-}
 
 # We have to be ready to accept a filehandle as a reference
 # or a string.

@@ -518,19 +518,20 @@ http://www.unicode.org/unicode/reports/tr10/
 
 =item *
 
-Character Ranges
+Character Ranges and Classes
 
 Character ranges in regular expression character classes (C</[a-z]/>)
 and in the C<tr///> (also known as C<y///>) operator are not magically
 Unicode-aware.  What this means that C<[A-Za-z]> will not magically start
 to mean "all alphabetic letters" (not that it does mean that even for
-8-bit characters, you should be using C</[[:alpha]]/> for that).
+8-bit characters, you should be using C</[[:alpha:]]/> for that).
 
 For specifying things like that in regular expressions, you can use
 the various Unicode properties, C<\pL> or perhaps C<\p{Alphabetic}>,
 in this particular case.  You can use Unicode code points as the end
 points of character ranges, but that means that particular code point
-range, nothing more.  For further information, see L<perlunicode>.
+range, nothing more.  For further information (there are dozens
+of Unicode character classes), see L<perlunicode>.
 
 =item *
 

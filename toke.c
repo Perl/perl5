@@ -6699,7 +6699,7 @@ intro_sym:
 		gv = gv_fetchpv(d,
 				(PL_in_eval
 				 ? (GV_ADDMULTI | GV_ADDINEVAL)
-				 : TRUE),
+				 : GV_ADDMULTI),
 				SVt_PV);
 		PL_lex_op = (OP*)newUNOP(OP_READLINE, 0,
 					    newUNOP(OP_RV2SV, 0,

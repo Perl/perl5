@@ -1,4 +1,4 @@
-#!./perl -w
+#!./perl -Tw
 
 BEGIN {
         chdir 't' if -d 't';
@@ -79,8 +79,10 @@ BEGIN {
 }
 
 # test DB::_clientname()
-is( DB::_clientname('foo=A(1)'), 'foo','DB::_clientname should return refname');
-is( DB::_clientname('bar'), '','DB::_clientname should not return non refname');
+is( DB::_clientname('foo=A(1)'), 'foo',
+    'DB::_clientname should return refname');
+cmp_ok( DB::_clientname('bar'), 'eq', '',
+        'DB::_clientname should not return non refname');
 
 # test DB::next() and DB::step()
 {
