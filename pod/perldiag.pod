@@ -1595,7 +1595,8 @@ rebuild Perl.
 =item invalid [] range in regexp
 
 (F) The range specified in a character class had a minimum character
-greater than the maximum character.  See L<perlre>.
+greater than the maximum character, or the range didn't start/end with
+a literal character.  See L<perlre>.
 
 =item Invalid conversion in %s: "%s"
 

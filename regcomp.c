@@ -192,6 +192,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 
 #define OOB_CHAR8		1234
 #define OOB_UTF8		123456
+#define OOB_NAMEDCLASS		-1
 
 #define CHR_SVLEN(sv) (UTF ? sv_len_utf8(sv) : SvCUR(sv))
 #define CHR_DIST(a,b) (UTF ? utf8_distance(a,b) : a - b)
@@ -2246,7 +2247,7 @@ S_regpposixcc(pTHX_ I32 value)
 			}
 			break;
 		    }
-		    if ((namedclass == -1 ||
+		    if ((namedclass == OOB_NAMEDCLASS ||
 			 !(posixcc + skip + 2 < PL_regxend &&
 			   (posixcc[skip] == ':' &&
 			    posixcc[skip + 1] == ']'))))
@@ -2275,7 +2276,7 @@ S_checkposixcc(pTHX)
 	 *PL_regcomp_parse == '=' ||
 	 *PL_regcomp_parse == '.')) {
 	char *s = PL_regcomp_parse;
-	char  c = *s++;
+ 	char  c = *s++;
 
 	while(*s && isALNUM(*s))
 	    s++;
@@ -2329,7 +2330,7 @@ S_regclass(pTHX)
 	goto skipcond;		/* allow 1st char to be ] or - */
     while (PL_regcomp_parse < PL_regxend && *PL_regcomp_parse != ']') {
        skipcond:
-	namedclass = -1;
+	namedclass = OOB_NAMEDCLASS;
 	value = UCHARAT(PL_regcomp_parse++);
 	if (value == '[')
 	    namedclass = regpposixcc(value);
@@ -2364,7 +2365,9 @@ S_regclass(pTHX)
 		break;
 	    }
 	}
-	if (!SIZE_ONLY && namedclass > -1) {
+	if (!SIZE_ONLY && namedclass > OOB_NAMEDCLASS) {
+	    if (range)
+		FAIL("invalid [] range in regexp"); /* [a-\w], [a-[:word:]] */
 	    switch (namedclass) {
 	    case ANYOF_ALNUM:
 		if (LOC)
@@ -2605,25 +2608,27 @@ S_regclass(pTHX)
 	    }
 	    if (LOC)
 		ANYOF_FLAGS(opnd) |= ANYOF_CLASS;
-	    lastvalue = OOB_CHAR8;
+	    continue;
 	}
-        else
 	if (range) {
 	    if (lastvalue > value)
-		FAIL("invalid [] range in regexp");
+		FAIL("invalid [] range in regexp"); /* [b-a] */
 	    range = 0;
 	}
 	else {
 	    lastvalue = value;
 	    if (*PL_regcomp_parse == '-' && PL_regcomp_parse+1 < PL_regxend &&
-	      PL_regcomp_parse[1] != ']') {
+		PL_regcomp_parse[1] != ']') {
+		if (namedclass > OOB_NAMEDCLASS)
+		    FAIL("invalid [] range in regexp"); /* [\w-a] */
 		PL_regcomp_parse++;
 		range = 1;
 		continue;	/* do it next time */
 	    }
 	}
+	/* now is the next time */
 	if (!SIZE_ONLY) {
-#ifndef ASCIIish
+#ifndef ASCIIish /* EBCDIC, for example. */
 	    if ((isLOWER(lastvalue) && isLOWER(value)) ||
 		(isUPPER(lastvalue) && isUPPER(value)))
 	    {
@@ -2643,7 +2648,7 @@ S_regclass(pTHX)
 		for ( ; lastvalue <= value; lastvalue++)
 		    ANYOF_BITMAP_SET(opnd, lastvalue);
         }
-	lastvalue = value;
+	range = 0;
     }
     /* optimize case-insensitive simple patterns (e.g. /[a-z]/i) */
     if (!SIZE_ONLY &&
@@ -2701,7 +2706,7 @@ S_regclassutf8(pTHX)
 
     while (PL_regcomp_parse < PL_regxend && *PL_regcomp_parse != ']') {
        skipcond:
-	namedclass = -1;
+	namedclass = OOB_NAMEDCLASS;
 	value = utf8_to_uv((U8*)PL_regcomp_parse, &numlen);
 	PL_regcomp_parse += numlen;
 
@@ -2773,7 +2778,9 @@ S_regclassutf8(pTHX)
 		break;
 	    }
 	}
-	if (!SIZE_ONLY && namedclass > -1) {
+	if (!SIZE_ONLY && namedclass > OOB_NAMEDCLASS) {
+	    if (range)
+		FAIL("invalid [] range in regexp"); /* [a-\w], [a-[:word:]] */
 	    switch (namedclass) {
 	    case ANYOF_ALNUM:
 		Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsWord\n");	break;
@@ -2828,11 +2835,11 @@ S_regclassutf8(pTHX)
 	    case ANYOF_NXDIGIT:
 		Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsXDigit\n");	break;
 	    }
+	    continue;
 	}
-        else
         if (range) {
 	    if (lastvalue > value)
-		FAIL("invalid [] range in regexp");
+		FAIL("invalid [] range in regexp"); /* [b-a] */
 #ifdef UV_IS_QUAD
 	    if (!SIZE_ONLY)
                 Perl_sv_catpvf(aTHX_ listsv, "%04" PERL_PRIx64 "\t%04" PERL_PRIx64 "\n", (UV)lastvalue, (UV)value);
@@ -2840,25 +2847,28 @@ S_regclassutf8(pTHX)
 	    if (!SIZE_ONLY)
 	        Perl_sv_catpvf(aTHX_ listsv, "%04x\t%04x\n", lastvalue, value);
 #endif
-	    lastvalue = value;
 	    range = 0;
 	}
 	else {
 	    lastvalue = value;
 	    if (*PL_regcomp_parse == '-' && PL_regcomp_parse+1 < PL_regxend &&
-	      PL_regcomp_parse[1] != ']') {
+		PL_regcomp_parse[1] != ']') {
+		if (namedclass > OOB_NAMEDCLASS)
+		    FAIL("invalid [] range in regexp"); /* [\w-a] */
 		PL_regcomp_parse++;
 		range = 1;
 		continue;	/* do it next time */
 	    }
-#ifdef UV_IS_QUAD
-	    if (!SIZE_ONLY)
-		Perl_sv_catpvf(aTHX_ listsv, "%04" PERL_PRIx64 "\n", (UV)value);
-#else
-	    if (!SIZE_ONLY)
-		Perl_sv_catpvf(aTHX_ listsv, "%04x\n", value);
-#endif
 	}
+	/* now is the next time */
+#ifdef UV_IS_QUAD
+	if (!SIZE_ONLY)
+	    Perl_sv_catpvf(aTHX_ listsv, "%04" PERL_PRIx64 "\n", (UV)value);
+#else
+	if (!SIZE_ONLY)
+	    Perl_sv_catpvf(aTHX_ listsv, "%04x\n", value);
+#endif
+	range = 0;
     }
 
     ret = reganode(ANYOFUTF8, 0);

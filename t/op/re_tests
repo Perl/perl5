@@ -735,3 +735,7 @@ foo.bart	foo.bart	y	-	-
 .[X](.+)+[X][X]	bbbbXXXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa	n	-	-
 .[X][X](.+)+[X]	bbbbXXXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa	n	-	-
 tt+$	xxxtt	y	-	-
+[a-\w]	-	c	-	/[a-\w]/: invalid [] range in regexp
+[\w-z]	-	c	-	/[\w-z]/: invalid [] range in regexp
+[0-[:digit:]]	-	c	-	/[0-[:digit:]]/: invalid [] range in regexp
+[[:digit:]-9]	-	c	-	/[[:digit:]-9]/: invalid [] range in regexp
