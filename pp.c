@@ -3089,6 +3089,13 @@ PP(pp_unpack)
 		    Copy(s, &aint, 1, int);
 		    s += sizeof(int);
 		    sv = NEWSV(40, 0);
+#ifdef __osf__
+                    /* Without the dummy below unpack("i", pack("i",-1))
+                     * return 0xFFffFFff instead of -1 for Digital Unix V4.0
+                     * cc with optimization turned on */
+                    (aint) ?
+		    	sv_setiv(sv, (IV)aint) :
+#endif
 		    sv_setiv(sv, (IV)aint);
 		    PUSHs(sv_2mortal(sv));
 		}
