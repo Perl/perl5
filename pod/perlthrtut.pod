@@ -202,14 +202,15 @@ system blocks the entire process on sleep(), Perl usually will as well.
 
 Perl Threads Are Different.
 
-=head1 Threadsafe Modules
+=head1 Thread-Safe Modules
 
-The addition of threads has changed Perl's internals 
+The addition of threads has changed Perl's internals
 substantially. There are implications for people who write
-modules with XS code or external libraries. However, since the threads
-do not share data, pure Perl modules that don't interact with external
-systems should be safe. Modules that are not tagged as thread-safe should
-be tested or code reviewed before being used in production code.
+modules with XS code or external libraries. However, since perl data is
+not shared among threads by default, Perl modules stand a high chance of
+being thread-safe or can be made thread-safe easily.  Modules that are not
+tagged as thread-safe should be tested or code reviewed before being used
+in production code.
 
 Not all modules that you might use are thread-safe, and you should
 always assume a module is unsafe unless the documentation says
@@ -217,17 +218,18 @@ otherwise.  This includes modules that are distributed as part of the
 core.  Threads are a new feature, and even some of the standard
 modules aren't thread-safe.
 
-Even if a module is threadsafe, it doesn't mean that the module is optimized
+Even if a module is thread-safe, it doesn't mean that the module is optimized
 to work well with threads. A module could possibly be rewritten to utilize
 the new features in threaded Perl to increase performance in a threaded
 environment.
 
 If you're using a module that's not thread-safe for some reason, you
-can protect yourself by using semaphores and lots of programming
-discipline to control access to the module.  Semaphores are covered
-later in the article.
+can protect yourself by using it from one, and only one thread at all.
+If you need multiple threads to access such a module, you can use semaphores and
+lots of programming discipline to control access to it.  Semaphores
+are covered in L</"Basic semaphores">.
 
-See also L</"Threadsafety of System Libraries">.
+See also L</"Thread-Safety of System Libraries">.
 
 =head1 Thread Basics
 
@@ -253,19 +255,19 @@ like:
 A possibly-threaded program using a possibly-threaded module might
 have code like this:
 
-    use Config; 
-    use MyMod; 
+    use Config;
+    use MyMod;
 
     BEGIN {
-        if ($Config{useithreads}) { 
-            # We have threads 
-            require MyMod_threaded; 
-           import MyMod_threaded; 
-        } else { 
-           require MyMod_unthreaded; 
-           import MyMod_unthreaded; 
+        if ($Config{useithreads}) {
+            # We have threads
+            require MyMod_threaded;
+           import MyMod_threaded;
+        } else {
+           require MyMod_unthreaded;
+           import MyMod_unthreaded;
         }
-    } 
+    }
 
 Since code that runs both with and without threads is usually pretty
 messy, it's best to isolate the thread-specific code in its own
@@ -404,7 +406,7 @@ automatically.
 
     $thr->detach; # Now we officially don't care any more
 
-    sub sub1 { 
+    sub sub1 {
         $a = 0; 
         while (1) { 
             $a++; 
@@ -974,20 +976,47 @@ be little different than ordinary code.
 Also note that under the current implementation, shared variables
 use a little more memory and are a little slower than ordinary variables.
 
-=head1 Threadsafety of System Libraries
+=head1 Process-scope Changes
 
-Whether various library calls are threadsafe is outside the control
-of Perl.  Calls often suffering from not being threadsafe include:
+Note that while threads themselves are separate execution threads and
+Perl data is thread-private unless explicitly shared, the threads can
+affect process-scope state, affecting all the threads.
+
+The most common example of this is changing the current working
+directory using chdir().  One thread calls chdir(), and the working
+directory of all the threads changes.
+
+Even more drastic example of a process-scope change is chroot():
+the root directory of all the threads changes, and no thread can
+undo it (as opposed to chdir()).
+
+Further examples of process-scope changes include umask() and
+changing uids/gids.
+
+Thinking of mixing fork() and threads?  Please lie down and wait
+until the feeling passes-- but in case you really want to know,
+the semantics is that fork() duplicates all the threads.
+(In UNIX, at least, other platforms will do something different.)
+
+Similarly, mixing signals and threads should not be attempted.
+Implementations are platform-dependent, and even the POSIX
+semantics may not be what you expect (and Perl doesn't even
+give you the full POSIX API).
+
+=head1 Thread-Safety of System Libraries
+
+Whether various library calls are thread-safe is outside the control
+of Perl.  Calls often suffering from not being thread-safe include:
 localtime(), gmtime(), get{gr,host,net,proto,serv,pw}*(), readdir(),
-rand(), and srand() -- in general, calls that depend on some external
-state.
+rand(), and srand() -- in general, calls that depend on some global
+external state.
 
-If the system Perl is compiled in has threadsafe variants of such
+If the system Perl is compiled in has thread-safe variants of such
 calls, they will be used.  Beyond that, Perl is at the mercy of
-the threadsafety or unsafety of the calls.  Please consult your
+the thread-safety or -unsafety of the calls.  Please consult your
 C library call documentation.
 
-In some platforms the threadsafe interfaces may fail if the result
+In some platforms the thread-safe interfaces may fail if the result
 buffer is too small (for example getgrent() may return quite large
 group member lists).  Perl will retry growing the result buffer
 a few times, but only up to 64k (for safety reasons).
@@ -1042,6 +1071,9 @@ Silberschatz, Abraham, and Peter B. Galvin. Operating System Concepts,
 Arnold, Ken and James Gosling. The Java Programming Language, 2nd
 ed. Addison-Wesley, 1998, ISBN 0-201-31006-6.
 
+comp.programming.threads FAQ,
+L<http://www.serpentine.com/~bos/threads-faq/>
+
 Le Sergent, T. and B. Berthomieu. "Incremental MultiThreaded Garbage
 Collection on Virtually Shared Memory Architectures" in Memory
 Management: Proc. of the International Workshop IWMM 92, St. Malo,
@@ -1064,6 +1096,9 @@ of the prime number generator.
 Dan Sugalski E<lt>dan@sidhe.org<gt>
 
 Slightly modified by Arthur Bergman to fit the new thread model/module.
+
+Reworked slightly by Jörg Walter E<lt>jwalt@cpan.org<gt> to be more concise
+about thread-safety of perl code.
 
 =head1 Copyrights
 

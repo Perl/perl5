@@ -115,6 +115,20 @@ function functions with their full qualified names.
 On the other hand, the built-ins are still available
 via the C<CORE::> pseudo-package.
 
+=head1 BUGS
+
+As of Perl 5.8.0 after using this module you cannot use the implicit
+C<$_> or the special filehandle C<_> with stat() or lstat(), trying
+to do so leads into strange errors.  The workaround is for C<$_> to
+be explicit
+
+    my $stat_obj = stat $_;
+
+and for C<_> to explicitly populate the object using the unexported
+and undocumented populate() function with CORE::stat():
+
+    my $stat_obj = File::stat::populate(CORE::stat(_));
+
 =head1 NOTE
 
 While this class is currently implemented using the Class::Struct

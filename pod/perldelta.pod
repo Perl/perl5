@@ -118,6 +118,24 @@ point format on OpenVMS Alpha, potentially breaking binary compatibility
 with external libraries or existing data.  G_FLOAT is still available as
 a configuration option.  The default on VAX (D_FLOAT) has not changed.
 
+=head2 New Unicode Semantics (no more C<use utf8>, almost)
+
+Previously in Perl 5.6 to use Unicode one would say "use utf8" and
+then the operations (like string concatenation) were Unicode-aware
+in that lexical scope.
+
+This was found to be an inconvenient interface, and in Perl 5.8 the
+Unicode model has completely changed: now the "Unicodeness" is bound
+to the data itself, and for most of the time "use utf8" is not needed
+at all.  The only remaining use of "use utf8" is when the Perl script
+itself has been written in the UTF-8 encoding of Unicode.  (UTF-8 has
+not been made the default since there are many Perl scripts out there
+that are using various national eight-bit character sets, which would
+be illegal in UTF-8.)
+
+See L<perluniintro> for the explanation of the current model,
+and L<utf8> for the current use of the utf8 pragma.
+
 =head2 New Unicode Properties
 
 Unicode I<scripts> are now supported. Scripts are similar to (and superior
@@ -177,6 +195,13 @@ it to make some sense, it is forbidden.
 
 The obsolete chat2 library that should never have been allowed
 to escape the laboratory has been decommissioned.
+
+=item *
+
+Using chdir("") or chdir(undef) instead of explicit chdir() is
+doubtful.  A failure (think chdir(some_function()) can lead into
+unintended chdir() to the home directory, therefore this behaviour
+is deprecated.
 
 =item *
 
@@ -427,22 +452,6 @@ Anonymous temporary files are available without need to
    open($fh,"+>", undef) || ...
 
 That is a literal undef, not an undefined value.
-
-=item *
-
-The list form of C<open> is now implemented for pipes (at least on UNIX):
-
-   open($fh,"-|", 'cat', '/etc/motd')
-
-creates a pipe, and runs the equivalent of exec('cat', '/etc/motd') in
-the child process.
-
-=item *
-
-If your locale environment variables (LANGUAGE, LC_ALL, LC_CTYPE, LANG)
-contain the strings 'UTF-8' or 'UTF8' (case-insensitive matching),
-the default encoding of your STDIN, STDOUT, and STDERR, and of
-B<any subsequent file open>, is UTF-8.
 
 =back
 
@@ -1003,10 +1012,10 @@ in quoted-printable encoding, as defined in RFC 2045 - I<MIME
 
     use MIME::QuotedPrint;
 
-    $encoded = encode_qp("Smiley in Unicode: \x{263a}");
+    $encoded = encode_qp("some eight-bit data \xDE\xAD\xBE\xEF");
     $decoded = decode_qp($encoded);
 
-    print $encoded, "\n"; # "Smiley in Unicode: =263A"
+    print $encoded, "\n"; # "some eight-bit data =DE=AD=BE=EF\n"
 
 See also L<PerlIO::via::QuotedPrint>.
 
@@ -2834,6 +2843,12 @@ gives a warning.
 
 =item *
 
+chdir("") and chdir(undef) now give a deprecation warning because they
+cause a possible unintentional chdir to the home directory.
+Say chdir() if you really mean that.
+
+=item *
+
 Two new debugging options have been added: if you have compiled your
 Perl with debugging, you can use the -DT [561] and -DR options to trace
 tokenising and to add reference counts to displaying variables,
@@ -3385,9 +3400,27 @@ failures are expected:
 
 NDBM_File fails and ODBM_File just coredumps.
 
-=head2 DJGPP does not build
+=head2 DJGPP Failures
 
-Unfortunately DJGPP build broke somewhere after 5.7.3.
+ t/op/stat............................FAILED at test 29
+ lib/File/Find/t/find.................FAILED at test 1
+ lib/File/Find/t/taint................FAILED at test 1
+ lib/h2xs.............................FAILED at test 15
+ lib/Pod/t/eol........................FAILED at test 1
+ lib/Test/Harness/t/strap-analyze.....FAILED at test 8
+ lib/Test/Harness/t/test-harness......FAILED at test 23
+ lib/Test/Simple/t/exit...............FAILED at test 1
+
+The above failures are known as of 5.8.0 with native builds with long
+filenames, but there are a few more if running under dosemu because of
+limitations (and maybe bugs) of dosemu:
+
+ t/comp/cpp...........................FAILED at test 3
+ t/op/inccode.........................(crash)
+
+and a few lib/ExtUtils tests, and several hundred Encode/t/Aliases.t
+failures that work fine with long filenames.  So you really might
+prefer native builds and long filenames.
 
 =head2 FreeBSD built with ithreads coredumps reading large directories
 
@@ -3470,10 +3503,11 @@ symbols, for example
 you probably have an old pre-Perl-5.8.0 installation (or parts of one)
 in /Library/Perl (the undefined symbols used to exist in pre-5.8.0 Perls).
 It seems that for some reason "make install" doesn't always completely
-overwrite the files in /Library/Perl.  You can remove the Perl
-shared library like this:
+overwrite the files in /Library/Perl.  You can move the old Perl
+shared library out of the way like this:
 
-   rm /Library/Perl/darwin/CORE/libperl.dylib
+    cd /Library/Perl/darwin/CORE
+    mv libperl.dylib libperlold.dylib
 
 and then reissue "make install".  Note that the above of course is
 extremely disruptive for anything using the /usr/local/bin/perl.
@@ -3485,19 +3519,12 @@ files from beneath /Library/Perl, and again "make install"-ing.
 The following tests are known to fail on OS/2 (for clarity
 only the failures are shown, not the full error messages):
 
- t/io/utf8............................FAILED at test 19
- t/op/grent...........................FAILED at test 2
- t/op/pwent...........................FAILED at test 1
- t/lib/os2_base.......................FAILED at test 13
- t/lib/os2_process....................FAILED at test 10
- t/lib/os2_process_kid................FAILED at test 10
- t/lib/rx_cmprt.......................FAILED at test 16
- ext/DB_File/t/db-btree...............FAILED at test 0
- ext/DB_File/t/db-hash................FAILED at test 0
- ext/DB_File/t/db-recno...............FAILED at test 0
- lib/ExtUtils/t/basic.................FAILED at test 14
- lib/ExtUtils/t/Constant..............FAILED at test 4
- lib/Memoize/t/errors.................FAILED at test 4
+ ../lib/ExtUtils/t/Mkbootstrap.t    1   256    18    1   5.56%  8
+ ../lib/ExtUtils/t/Packlist.t       1   256    34    1   2.94%  17
+ ../lib/ExtUtils/t/basic.t          1   256    17    1   5.88%  14
+ lib/os2_process.t                  2   512   227    2   0.88%  174 209
+ lib/os2_process_kid.t                        227    2   0.88%  174 209
+ lib/rx_cmprt.t                   255 65280    18    3  16.67%  16-18
 
 =head2 op/sprintf tests 91, 129, and 130
 

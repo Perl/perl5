@@ -3741,8 +3741,10 @@ If EXPR is omitted, uses C<$_>.
 
 Returns a random fractional number greater than or equal to C<0> and less
 than the value of EXPR.  (EXPR should be positive.)  If EXPR is
-omitted, or a C<0>, the value C<1> is used.  Automatically calls C<srand>
-unless C<srand> has already been called.  See also C<srand>.
+omitted, the value C<1> is used.  Currently EXPR with the value C<0> is
+also special-cased as C<1> - this has not been documented before perl 5.8.0
+and is subject to change in future versions of perl.  Automatically calls
+C<srand> unless C<srand> has already been called.  See also C<srand>.
 
 Apply C<int()> to the value returned by C<rand()> if you want random
 integers instead of random fractional numbers.  For example,
@@ -4952,7 +4954,7 @@ the join string using eg C<*2$v>:
 Arguments are usually formatted to be only as wide as required to
 display the given value. You can override the width by putting
 a number here, or get the width from the next argument (with C<*>)
-or from a specified argument (with eg C<2$>):
+or from a specified argument (with eg C<*2$>):
 
   printf '<%s>', "a";       # prints "<a>"
   printf '<%6s>', "a";      # prints "<     a>"
@@ -4965,7 +4967,7 @@ effect as the C<-> flag: left-justification.
 
 =item precision, or maximum width
 
-You can specify a precision (for numeric converions) or a maximum
+You can specify a precision (for numeric conversions) or a maximum
 width (for string conversions) by specifying a C<.> followed by a number.
 For floating point formats, this specifies the number of decimal places
 to show (the default being 6), eg:
@@ -5024,6 +5026,37 @@ The size specifier 'V' has no effect for Perl code, but it supported
 for compatibility with XS code; it means 'use the standard size for
 a Perl integer (or floating-point number)', which is already the
 default for Perl code.
+
+=item order of arguments
+
+Normally, sprintf takes the next unused argument as the value to
+format for each format specification. If the format specification
+uses C<*> to require additional arguments, these are consumed from
+the argument list in the order in which they appear in the format
+specification I<before> the value to format. Where an argument is
+specified using an explicit index, this does not affect the normal
+order for the arguments (even when the explicitly specified index
+would have been the next argument in any case).
+
+So:
+
+  printf '<%*.*s>', $a, $b, $c;
+
+would use C<$a> for the width, C<$b> for the precision and C<$c>
+as the value to format, while:
+
+  print '<%*1$.*s>', $a, $b;
+
+would use C<$a> for the width and the precision, and C<$b> as the
+value to format.
+
+Here are some more examples - beware that when using an explicit
+index, the C<$> may need to be escaped:
+
+  printf "%2\$d %d\n",    12, 34;		# will print "34 12\n"
+  printf "%2\$d %d %d\n", 12, 34;		# will print "34 12 34\n"
+  printf "%3\$d %d %d\n", 12, 34, 56;		# will print "56 12 34\n"
+  printf "%2\$*3\$d %d\n", 12, 34, 3;		# will print " 34 12\n"
 
 =back
 
@@ -5169,11 +5202,15 @@ meaning of the fields:
   7 size     total size of file, in bytes
   8 atime    last access time in seconds since the epoch
   9 mtime    last modify time in seconds since the epoch
- 10 ctime    inode change time (NOT creation time!) in seconds since the epoch
+ 10 ctime    inode change time in seconds since the epoch (*)
  11 blksize  preferred block size for file system I/O
  12 blocks   actual number of blocks allocated
 
 (The epoch was at 00:00 January 1, 1970 GMT.)
+
+(*) The ctime field is non-portable, in particular you cannot expect
+it to be a "creation time", see L<perlport/"Files and Filesystems">
+for details.
 
 If stat is passed the special filehandle consisting of an underline, no
 stat is done, but the current contents of the stat structure from the
