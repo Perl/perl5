@@ -19,6 +19,10 @@ alignbytes=8
 
 usemymalloc='n'
 
+# Intuiting the existence of system calls under AIX is difficult,
+# at best; the safest technique is to find them empirically.
+usenm='undef'
+
 so="a"
 dlext="so"
 
@@ -63,12 +67,11 @@ esac
 #                           symbol: boot_$(EXP)  can it be auto-generated?
 case "$osvers" in
 3*) 
-lddlflags='-H512 -T512 -bhalt:4 -bM:SRE -bI:$(PERL_INC)/perl.exp -bE:$(BASEEXT).exp -e _nostart -lc'
+    lddlflags='-H512 -T512 -bhalt:4 -bM:SRE -bI:$(PERL_INC)/perl.exp -bE:$(BASEEXT).exp -e _nostart -lc'
     ;;
 *) 
-lddlflags='-bhalt:4 -bM:SRE -bI:$(PERL_INC)/perl.exp -bE:$(BASEEXT).exp -b noentry -lc'
-
-;;
+    lddlflags='-bhalt:4 -bM:SRE -bI:$(PERL_INC)/perl.exp -bE:$(BASEEXT).exp -b noentry -lc'
+    ;;
 esac
 
 # This script UU/usethreads.cbu will get 'called-back' by Configure 
