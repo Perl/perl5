@@ -4065,6 +4065,16 @@ where the problem was discovered. See L<perlre>.
 its equivalent C<BEGIN> block found an internal inconsistency with
 the version number.
 
+=item v-string in use/require is non-portable
+
+(W) The use of v-strings is non-portable to older, pre-5.6, Perls.
+If you want your scripts to be backward portable, use the floating
+point version number: for example, instead of C<use 5.6.1> say
+C<use 5.006_001>.  This of course won't help: the older Perls
+won't suddenly start understanding newer features, but at least
+they will show a sensible error message indicating the required
+minimum version.
+
 =item Warning: something's wrong
 
 (W) You passed warn() an empty string (the equivalent of C<warn "">) or
