@@ -29,6 +29,97 @@ Version v5.8.2		Maintenance release working toward v5.8.2
 --------------
 ____________________________________________________________________________
 ____________________________________________________________________________
+[ 21668] By: nicholas                              on 2003/11/05  19:26:49
+        Log: Integrate:
+             [ 21667]
+             From: Craig Berry <craigberry@mac.com>
+             Subject: Opcode.xs/RC2 compile nit on VMS
+             Date: Wed, 05 Nov 2003 12:16:34 -0600
+             Message-ID: <2097592.1068056194261.JavaMail.craigberry@mac.com>
+     Branch: maint-5.8/perl
+	  !> ext/Opcode/Opcode.xs
+____________________________________________________________________________
+[ 21666] By: nicholas                              on 2003/11/05  19:01:16
+        Log: Note planned release date.
+     Branch: maint-5.8/perl
+	   ! pod/perlhist.pod
+____________________________________________________________________________
+[ 21665] By: nicholas                              on 2003/11/05  19:00:29
+        Log: Integrate:
+             [ 21661]
+             Subject: [PATCH pod/perlhist.pod]  Mention 5.8.2-RC2
+             From: Abigail <abigail@abigail.nl>
+             Date: Tue, 4 Nov 2003 10:40:57 +0100
+             Message-Id: <20031104094057.GA22508@abigail.nl>
+     Branch: maint-5.8/perl
+	  !> pod/perlhist.pod
+____________________________________________________________________________
+[ 21659] By: nicholas                              on 2003/11/05  08:18:49
+        Log: Integrate:
+             [ 21656]
+             Subject: Re: [gherteg@csc.com: your CPAN page on EBCDIC]
+             From: PPrymmer@factset.com
+             Date: Tue, 4 Nov 2003 10:00:07 -0500
+             Message-ID: <OF9A22A404.A32A5C26-ON85256DD4.00522E92-85256DD4.005268A4@factset.com>
+     Branch: maint-5.8/perl
+	  !> pod/perlebcdic.pod
+____________________________________________________________________________
+[ 21658] By: nicholas                              on 2003/11/05  08:12:08
+        Log: Subject: [PATCH 5.8.2]  reentr.pl is not defining _srandom_struct
+             From: Jan Dubois <jand@ActiveState.com>
+             Date: Tue, 04 Nov 2003 17:16:00 -0800
+             Message-ID: <0mjgqvk4f8idatljni3cfoeta3ljbm8a6c@4ax.com>
+     Branch: maint-5.8/perl
+	   ! reentr.h reentr.pl
+____________________________________________________________________________
+[ 21654] By: nicholas                              on 2003/11/04  22:10:35
+        Log: Subject: Re: [PATCH 5.8.1] make reentr.[ch] compatible with 5.8.0 again
+             From: Jan Dubois <jand@ActiveState.com>
+             Date: Mon, 03 Nov 2003 00:58:21 -0800
+             Message-ID: <ip5cqvcu5qk1mc2e38ne7iv81bpljjrfe6@4ax.com>
+     Branch: maint-5.8/perl
+	   ! reentr.inc reentr.pl
+____________________________________________________________________________
+[ 21653] By: nicholas                              on 2003/11/04  21:54:48
+        Log: Integrate:
+             [ 21651]
+             Subject: Re: [PATCH 5.8.2 @21574] OS/2 build
+             From: Ilya Zakharevich <nospam-abuse@ilyaz.org>
+             Date: Mon, 3 Nov 2003 20:20:44 -0800
+             Message-ID: <20031104042044.GA1682@math.berkeley.edu>
+     Branch: maint-5.8/perl
+	  !> os2/Makefile.SHs
+____________________________________________________________________________
+[ 21649] By: nicholas                              on 2003/11/03  20:43:47
+        Log: Integrate:
+             [ 21646]
+             Subject: Cwd.xs: off-by-one buffer overflow in realpath()
+             From: Casey West <casey@geeknest.com>
+             Date: Mon, 3 Nov 2003 10:11:43 -0500
+             Message-ID: <20031103151143.GB430@geeknest.com>
+     Branch: maint-5.8/perl
+	  !> ext/Cwd/Cwd.xs
+____________________________________________________________________________
+[ 21648] By: nicholas                              on 2003/11/03  20:26:54
+        Log: Disarm RC2
+     Branch: maint-5.8/perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[ 21643] By: nicholas                              on 2003/11/03  07:18:47
+        Log: I bet yes
+     Branch: maint-5.8/perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[ 21642] By: nicholas                              on 2003/11/03  07:18:04
+        Log: space should be tab for lib/I18N/LangTags/t/02decency.t
+     Branch: maint-5.8/perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 21641] By: nicholas                              on 2003/11/03  07:13:20
+        Log: Update changes
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 21640] By: nicholas                              on 2003/11/03  07:11:34
         Log: Integrate:
              [ 21638]
