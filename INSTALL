@@ -2,11 +2,59 @@
 
 Install - Build and Installation guide for perl5.
 
+=head1 Reporting Problems
+
+Wherever possible please use the perlbug tool supplied with this Perl
+to report problems, as it automatically includes summary configuration
+information about your perl, which may help us track down problems far
+more quickly. But first you should read the advice in this file,
+carefully re-read the error message and check the relevant manual pages
+on your system, as these may help you find an immediate solution.  If
+you are not sure whether what you are seeing is a bug, you can send a
+message describing the problem to the comp.lang.perl.misc newsgroup to
+get advice.
+
+The perlbug tool is installed along with perl, so after you have
+completed C<make install> it should be possible to run it with plain
+C<perlbug>.  If the install fails, or you want to report problems with
+C<make test> without installing perl, then you can use C<make nok> to
+run perlbug to report the problem, or run it by hand from this source
+directory with C<./perl -Ilib utils/perlbug>
+
+If the build fails too early to run perlbug uninstalled, then please
+B<run> the C<./myconfig> shell script, and mail its output along with
+an accurate description of your problem to perlbug@perl.org
+
+If C<Configure> itself fails, and does not generate a C<config.sh> file
+(needed to run C<./myconfig>), then please mail perlbug@perl.org the
+description of how C<Configure> fails along with details of your system
+- for example the output from running C<uname -a>
+
+Please try to make your message brief but clear.  Brief, clear bug
+reports tend to get answered more quickly.  Please don't worry if your
+written English is not great - what matters is how well you describe
+the important technical details of the problem you have encountered,
+not whether your grammar and spelling is flawless.
+
+You should trim out unnecessary information.  Do not include large
+files (such as config.sh or a complete Configure or make log) unless
+absolutely necessary.  Do not include a complete transcript of your
+build session.  Just include the failing commands, the relevant error
+messages, and whatever preceding commands are necessary to give the
+appropriate context.  Plain text should usually be sufficient--fancy
+attachments or encodings may actually reduce the number of people who
+read your message.  Your message will get relayed to over 400
+subscribers around the world so please try to keep it brief but clear.
+
+If you are unsure what makes a good bug report please read "How to
+report Bugs Effectively" by Simon Tatham:
+http://www.chiark.greenend.org.uk/~sgtatham/bugs.html
+
 =head1 SYNOPSIS
 
 First, make sure you are installing an up-to-date version of Perl.   If
 you didn't get your Perl source from CPAN, check the latest version at
-<URL:http://www.cpan.org/src/>.
+http://www.cpan.org/src/
 
 The basic steps to build and install perl5 on a Unix system
 with all the defaults are:
@@ -52,7 +100,7 @@ and you should say "make install-all".  (This confusion is brought to you
 by the Perl distribution having a file called INSTALL.)
 
 If you have problems, corrections, or questions, please see
-L<"Reporting Problems"> below.
+L<"Reporting Problems"> above.
 
 For information on what's new in this release, see the
 pod/perldelta.pod file.  For more detailed information about specific
@@ -145,7 +193,7 @@ open to you:
 =item *
 
 You may try obtaining GCC, available from GNU mirrors worldwide,
-listed at <URL:http://www.gnu.org/order/ftp.html>.  If, rather than
+listed at http://www.gnu.org/order/ftp.html .  If, rather than
 building gcc from source code, you locate a binary version configured
 for your platform, be sure that it is compiled for the version of the
 operating system that you are using.
@@ -1315,7 +1363,7 @@ using DB 3.1.17:
 =head2 What if it doesn't work?
 
 If you run into problems, try some of the following ideas.
-If none of them help, then see L<"Reporting Problems"> below.
+If none of them help, then see L<"Reporting Problems"> above.
 
 =over 4
 
@@ -1575,7 +1623,7 @@ These errors are normal, and can be ignored:
 If you can't compile successfully, try some of the following ideas.
 If none of them help, and careful reading of the error message and
 the relevant manual pages on your system doesn't help,
-then see L<"Reporting Problems"> below.
+then see L<"Reporting Problems"> above.
 
 =over 4
 
@@ -2544,31 +2592,6 @@ size about 1.2MB in its i386 version:
   /usr/lib/perl/5.6.1/auto/POSIX/load_imports.al
   /usr/lib/perl/5.6.1/auto/Socket/Socket.so
   /usr/lib/perl/5.6.1/auto/Socket/Socket.bs
-
-=head1 Reporting Problems
-
-If you have difficulty building perl, and none of the advice in this file
-helps, and careful reading of the error message and the relevant manual
-pages on your system doesn't help either, then you should send a message
-to either the comp.lang.perl.misc newsgroup or to perlbug@perl.org with
-an accurate description of your problem.
-
-Please include the output of the ./myconfig shell script that comes with
-the distribution.  Alternatively, you can use the perlbug program that
-comes with the perl distribution, but you need to have perl compiled
-before you can use it.  (If you have not installed it yet, you need to
-run C<./perl -Ilib utils/perlbug> instead of a plain C<perlbug>.)
-
-Please try to make your message brief but clear.  Trim out unnecessary
-information.  Do not include large files (such as config.sh or a complete
-Configure or make log) unless absolutely necessary.  Do not include a
-complete transcript of your build session.  Just include the failing
-commands, the relevant error messages, and whatever preceding commands
-are necessary to give the appropriate context.  Plain text should
-usually be sufficient--fancy attachments or encodings may actually
-reduce the number of people who read your message.  Your message
-will get relayed to over 400 subscribers around the world so please
-try to keep it brief but clear.
 
 =head1 DOCUMENTATION
 
