@@ -397,25 +397,20 @@ L<perlfunc/formline()>.
 =item $?
 
 The status returned by the last pipe close, back-tick (C<``>) command,
-or system() operator.  Note that this is the status word returned by the
-wait() system call (or else is made up to look like it -- see L<$^S>).
-Thus, the exit value of the subprocess is actually (C<$? E<gt>E<gt> 8>),
-and C<$? & 255> gives which signal, if any, the process died from, and
-whether there was a core dump.  (Mnemonic: similar to B<sh> and B<ksh>.)
+or system() operator.  Note that this is the status word returned by
+the wait() system call (or else is made up to look like it).  Thus,
+the exit value of the subprocess is actually (C<$? E<gt>E<gt> 8>), and
+C<$? & 255> gives which signal, if any, the process died from, and
+whether there was a core dump.  (Mnemonic: similar to B<sh> and
+B<ksh>.)
 
 Inside an C<END> subroutine C<$?> contains the value that is going to be
 given to C<exit()>.  You can modify C<$?> in an C<END> subroutine to
 change the exit status of the script.
 
-=item $SYSTEM_CHILD_STATUS
-
-=item $^S
-
-The status returned by the last pipe close, back-tick (C<``>) command, or
-system() operator, in the native system format.  On UNIX and UNIX-like
-systems, C<$^S> is a synonym for C<$?>.  Elsewhere, C<$^S> can be used to
-determine aspects of child status that are system-specific.  Check C<$^O>
-before using this variable.  (Mnemonic: System-Specific Subprocess Status.)
+Under VMS, the pragma C<use vmsish 'status'> make C<$?> reflect the
+actual VMS exit status, instead of the default emulation of POSIX
+status.
 
 =item $OS_ERROR
 

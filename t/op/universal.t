@@ -3,36 +3,53 @@
 # check UNIVERSAL
 #
 
-print "1..4\n";
-
-# explicit bless
+print "1..11\n";
 
 $a = {};
 bless $a, "Bob";
-if ($a->class eq "Bob") {print "ok 1\n";} else {print "not ok 1\n";}
+print "not " unless $a->isa("Bob");
+print "ok 1\n";
 
-# bless through a package
+package Human;
+sub eat {}
 
-package Fred;
+package Female;
+@ISA=qw(Human);
 
-$b = {};
-bless $b;
-if ($b->class eq "Fred") {print "ok 2\n";} else {print "not ok 2\n";}
+package Alice;
+@ISA=qw(Bob Female);
+sub drink {}
+sub new { bless {} }
 
 package main;
+$a = new Alice;
 
-# same as test 1 and 2, but with other object syntax
+print "not " unless $a->isa("Alice");
+print "ok 2\n";
 
-# explicit bless
+print "not " unless $a->isa("Bob");
+print "ok 3\n";
 
-$a = {};
-bless $a, "Bob";
-if (class $a eq "Bob") {print "ok 3\n";} else {print "not ok 3\n";}
+print "not " unless $a->isa("Female");
+print "ok 4\n";
 
-# bless through a package
+print "not " unless $a->isa("Human");
+print "ok 5\n";
 
-package Fred;
+print "not " if $a->isa("Male");
+print "ok 6\n";
 
-$b = {};
-bless $b;
-if (class $b eq "Fred") {print "ok 4\n";} else {print "not ok 4\n";}
+print "not " unless $a->can("drink");
+print "ok 7\n";
+
+print "not " unless $a->can("eat");
+print "ok 8\n";
+
+print "not " if $a->can("sleep");
+print "ok 9\n";
+
+print "not " unless UNIVERSAL::isa([], "ARRAY");
+print "ok 10\n";
+
+print "not " unless UNIVERSAL::isa({}, "HASH");
+print "ok 11\n";

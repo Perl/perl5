@@ -303,7 +303,6 @@ lib/ExtUtils/Mksymlists.pm	Writes a linker options file for extensions
 lib/ExtUtils/testlib.pm		Fixes up @INC to use just-built extension
 lib/ExtUtils/typemap		Extension interface types
 lib/ExtUtils/xsubpp		External subroutine preprocessor
-lib/Fatal.pm		Make do-or-die equivalents of functions
 lib/File/Basename.pm	Emulate the basename program
 lib/File/CheckTree.pm	Perl module supporting wholesale file mode validation
 lib/File/Compare.pm	Emulation of cmp command
@@ -600,7 +599,6 @@ t/lib/db-recno.t	See if DB_File works
 t/lib/dirhand.t		See if DirHandle works
 t/lib/english.t		See if English works
 t/lib/env.t		See if Env works
-t/lib/fatal.t		See if Fatal works
 t/lib/filecache.t	See if FileCache works
 t/lib/filecopy.t	See if File::Copy works
 t/lib/filefind.t	See if File::Find works
@@ -737,7 +735,9 @@ vms/ext/Stdio/Makefile.PL	MakeMaker driver for VMS::Stdio
 vms/ext/Stdio/Stdio.pm	VMS options to stdio routines
 vms/ext/Stdio/Stdio.xs	VMS options to stdio routines
 vms/ext/Stdio/test.pl	regression tests for VMS::Stdio
+vms/ext/XSSymSet.pm	manage linker symbols when building extensions
 vms/ext/filespec.t	See if VMS::Filespec funtions work
+vms/ext/vmsish.pm	Control VMS-specific behavior of Perl core
 vms/fndvers.com		parse Perl version from patchlevel.h
 vms/gen_shrfls.pl	generate options files and glue for shareable image
 vms/genconfig.pl	retcon config.sh from config.h

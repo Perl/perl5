@@ -1,4 +1,3 @@
-
 #!../miniperl
 
 # Written: 10 April 1996 Gary Ng (71564.1743@compuserve.com)
@@ -129,6 +128,7 @@ perl_init_ext
 perl_requirepv
 siggv
 stack
+statusvalue_vms
 tainting
 Perl_safexcalloc
 Perl_safexmalloc

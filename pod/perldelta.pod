@@ -79,15 +79,6 @@ See the F<INSTALL> file for information on how to enable this option.
 As a disincentive to casual use of this advanced feature,
 there is no C<use English> long name for this variable.
 
-=item $^S
-
-The status returned by the last pipe close, back-tick (C<``>) command, or
-system() operator, in the native system format.  On UNIX and UNIX-like
-systems, C<$^S> is a synonym for C<$?>.  Elsewhere, C<$^S> can be used to
-determine aspects of child status that are system-specific.  Check C<$^O>
-before using this variable.  (Mnemonic: System-Specific Subprocess Status.
-Also known as $SYSTEM_CHILD_STATUS if you C<use English>.)
-
 =back
 
 =head2 New and Changed Built-in Functions
@@ -277,34 +268,6 @@ C<VERSION> form of C<use>.
     # implies:
     A->VERSION(1.2);
 
-=item class()
-
-C<class> returns the class name of its object.
-
-=item is_instance()
-
-C<is_instance> returns true if its object is an instance of some
-class, false if its object is the class (package) itself. Example
-
-    A->is_instance();       # False
-
-    $var = 'A';
-    $var->is_instance();    # False
-
-    $ref = bless [], 'A';
-    $ref->is_instance();    # True
-
-This can be useful for methods that wish to easily distinguish
-whether they were invoked as class or as instance methods.
-
-    sub some_meth {
-	my $classname = shift;
-	if ($classname->is_instance()) {
-	    die "unexpectedly called as instance not class method";
-	} 
-	.....
-    } 
-
 =back
 
 B<NOTE:> C<can> directly uses Perl's internal code for method lookup, and
@@ -379,7 +342,7 @@ a fixed value are now inlined (e.g. C<sub PI () { 3.14159 }>).
 
 =head1 Pragmata
 
-Three new pragmatic modules exist:
+Four new pragmatic modules exist:
 
 =over
 
@@ -415,6 +378,15 @@ See L<perllocale> for more information.
 =item use ops
 
 Disable unsafe opcodes, or any named opcodes, when compiling Perl code.
+
+=item use vmsish
+
+Enable VMS-specific language features.  Currently, there are three
+VMS-specific feature available: 'status', which makes C<$?> and
+C<system> return genuine VMS status values instead of emulating POSIX;
+'exit', which makes C<exit> take a genuine VMS status value instead of
+assuming that C<exit 1> is an error; and 'time', which makes all times
+relative to the local time zone, in the VMS tradition.
 
 =back
 
@@ -476,7 +448,6 @@ alphabetically:
     ExtUtils/Embed.pm    Utilities for embedding Perl in C programs
     ExtUtils/testlib.pm  Fixes up @INC to use just-built extension
 
-    Fatal.pm             Make do-or-die equivalents of functions
     FindBin.pm           Find path of currently executing program
 
     Class/Template.pm    Structure/member template builder

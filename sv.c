@@ -1504,7 +1504,7 @@ SV *sv;
     register char *s;
     register char *send;
     register char *sbegin;
-    I32 numtype = 1;
+    I32 numtype;
     STRLEN len;
 
     if (SvPOK(sv)) {
@@ -1520,31 +1520,53 @@ SV *sv;
     s = sbegin;
     while (isSPACE(*s))
 	s++;
-    if (s >= send)
-	return 0;
     if (*s == '+' || *s == '-')
 	s++;
-    while (isDIGIT(*s))
-	s++;
-    if (s == send)
-	return numtype;
-    if (*s == '.') {
-	numtype = 1;
-	s++;
+
+    /* next must be digit or '.' */
+    if (isDIGIT(*s)) {
+        do {
+	    s++;
+        } while (isDIGIT(*s));
+        if (*s == '.') {
+	    s++;
+            while (isDIGIT(*s))  /* optional digits after "." */
+                s++;
+        }
     }
-    else if (s == SvPVX(sv))
-	return 0;
-    while (isDIGIT(*s))
-	s++;
-    if (s == send)
-	return numtype;
+    else if (*s == '.') {
+        s++;
+        /* no digits before '.' means we need digits after it */
+        if (isDIGIT(*s)) {
+	    do {
+	        s++;
+            } while (isDIGIT(*s));
+        }
+        else
+	    return 0;
+    }
+    else
+        return 0;
+
+    /*
+     * we return 1 if the number can be converted to _integer_ with atol()
+     * and 2 if you need (int)atof().
+     */
+    numtype = 1;
+
+    /* we can have an optional exponent part */
     if (*s == 'e' || *s == 'E') {
 	numtype = 2;
 	s++;
 	if (*s == '+' || *s == '-')
 	    s++;
-	while (isDIGIT(*s))
-	    s++;
+        if (isDIGIT(*s)) {
+            do {
+                s++;
+            } while (isDIGIT(*s));
+        }
+        else
+            return 0;
     }
     while (isSPACE(*s))
 	s++;
@@ -2929,6 +2951,11 @@ sv_collxfrm(sv, nxp)
 	    Safefree(mg->mg_ptr);
 	s = SvPV(sv, len);
 	if ((xf = mem_collxfrm(s, len, &xlen))) {
+	    if (SvREADONLY(sv)) {
+		SAVEFREEPV(xf);
+		*nxp = xlen;
+		return xf;
+	    }
 	    if (! mg) {
 		sv_magic(sv, 0, 'o', 0, 0);
 		mg = mg_find(sv, 'o');
@@ -2938,8 +2965,10 @@ sv_collxfrm(sv, nxp)
 	    mg->mg_len = xlen;
 	}
 	else {
-	    mg->mg_ptr = NULL;
-	    mg->mg_len = -1;
+	    if (mg) {
+		mg->mg_ptr = NULL;
+		mg->mg_len = -1;
+	    }
 	}
     }
     if (mg && mg->mg_ptr) {

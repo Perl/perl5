@@ -403,6 +403,10 @@ restrict unsafe constructs
 
 pre-declare sub names
 
+=item vmsish
+
+adopt certain VMS-specific behaviors
+
 =item vars
 
 pre-declare global variable names
@@ -532,10 +536,6 @@ write linker options files for dynamic extension
 =item ExtUtils::testlib
 
 add blib/* directories to @INC
-
-=item Fatal
-
-replace functions with equivalents which succeed or die
 
 =item Fcntl
 

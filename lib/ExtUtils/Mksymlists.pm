@@ -7,7 +7,7 @@ use Exporter;
 use vars qw( @ISA @EXPORT $VERSION );
 @ISA = 'Exporter';
 @EXPORT = '&Mksymlists';
-$VERSION = substr q$Revision: 1.12 $, 10;
+$VERSION = substr q$Revision: 1.13 $, 10;
 
 sub Mksymlists {
     my(%spec) = @_;
@@ -98,8 +98,10 @@ sub _write_vms {
     my($data) = @_;
 
     require Config; # a reminder for once we do $^O
+    require ExtUtils::XSSymSet;
 
     my($isvax) = $Config::Config{'arch'} =~ /VAX/i;
+    my($set) = new ExtUtils::XSSymSet;
     my($sym);
 
     rename "$data->{FILE}.opt", "$data->{FILE}.opt_old";
@@ -115,13 +117,15 @@ sub _write_vms {
     # the GSMATCH criteria for a dynamic extension
 
     foreach $sym (@{$data->{FUNCLIST}}) {
-        if ($isvax) { print OPT "UNIVERSAL=$sym\n" }
-        else        { print OPT "SYMBOL_VECTOR=($sym=PROCEDURE)\n"; }
+        my $safe = $set->addsym($sym);
+        if ($isvax) { print OPT "UNIVERSAL=$safe\n" }
+        else        { print OPT "SYMBOL_VECTOR=($safe=PROCEDURE)\n"; }
     }
     foreach $sym (@{$data->{DL_VARS}}) {
+        my $safe = $set->addsym($sym);
         print OPT "PSECT_ATTR=${sym},PIC,OVR,RD,NOEXE,WRT,NOSHR\n";
-        if ($isvax) { print OPT "UNIVERSAL=$sym\n" }
-        else        { print OPT "SYMBOL_VECTOR=($sym=DATA)\n"; }
+        if ($isvax) { print OPT "UNIVERSAL=$safe\n" }
+        else        { print OPT "SYMBOL_VECTOR=($safe=DATA)\n"; }
     }
     close OPT;
 

@@ -341,7 +341,7 @@ I32 create;
 #ifdef VMS
 	warn("Weird package name \"%s\" truncated", name);
 #else
-	warn("Weird package name \"%.*s...\" truncated", namelen, name);
+	warn("Weird package name \"%.*s...\" truncated", (int)namelen, name);
 #endif
     }
     Copy(name,tmpbuf,namelen,char);
@@ -636,6 +636,14 @@ I32 sv_type;
 	sv_setpv(GvSV(gv),chopset);
 	goto magicalize;
 
+    case '?':
+	if (len > 1)
+	    break;
+#ifdef COMPLEX_STATUS
+	sv_upgrade(GvSV(gv), SVt_PVLV);
+#endif
+	goto magicalize;
+
     case '#':
     case '*':
 	if (dowarn && len == 1 && sv_type == SVt_PV)
@@ -643,7 +651,6 @@ I32 sv_type;
 	/* FALL THROUGH */
     case '[':
     case '!':
-    case '?':
     case '^':
     case '~':
     case '=':
@@ -666,7 +673,6 @@ I32 sv_type;
     case '\017':
     case '\t':
     case '\020':
-    case '\023':
     case '\024':
     case '\027':
 	if (len > 1)

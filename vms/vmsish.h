@@ -100,6 +100,8 @@
 #  define vmsreaddirversions	Perl_vmsreaddirversions
 #  define getredirection	Perl_getredirection
 #  define my_gmtime		Perl_my_gmtime
+#  define my_localtime		Perl_my_localtime
+#  define my_time		Perl_my_time
 #  define cando_by_name		Perl_cando_by_name
 #  define flex_fstat		Perl_flex_fstat
 #  define flex_stat		Perl_flex_stat
@@ -174,6 +176,21 @@
 #  define set_errno(v)      (errno = (v))
 #  define set_vaxc_errno(v) (vaxc$errno = (v))
 #endif
+
+/* Support for 'vmsish' behaviors enabled with C<use vmsish> pragma */
+
+#define COMPLEX_STATUS	1	/* We track both "POSIX" and VMS values */
+
+#define HINT_S_VMSISH		24
+#define HINT_M_VMSISH_STATUS	0x01000000 /* system, $? return VMS status */
+#define HINT_M_VMSISH_EXIT	0x02000000 /* exit(1) ==> SS$_NORMAL */
+#define HINT_M_VMSISH_TIME	0x04000000 /* times are local, not UTC */
+#define NATIVE_HINTS		(hints >> HINT_S_VMSISH)  /* used in op.c */
+
+#define TEST_VMSISH(h)	(curcop->op_private & ((h) >> HINT_S_VMSISH))
+#define VMSISH_STATUS	TEST_VMSISH(HINT_M_VMSISH_STATUS)
+#define VMSISH_EXIT	TEST_VMSISH(HINT_M_VMSISH_EXIT)
+#define VMSISH_TIME	TEST_VMSISH(HINT_M_VMSISH_TIME)
 
 /* Handy way to vet calls to VMS system services and RTL routines. */
 #define _ckvmssts(call) STMT_START { register unsigned long int __ckvms_sts; \
@@ -294,9 +311,12 @@ struct utimbuf {
 /* Prior to VMS 7.0, the CRTL gmtime() routine was a stub which always
  * returned NULL.  Substitute our own routine, which uses the logical
  * SYS$TIMEZONE_DIFFERENTIAL, whcih the native UTC support routines
- * in VMS 6.0 or later use.*
+ * in VMS 6.0 or later use.  We also add shims for time() and localtime()
+ * so we can run on UTC by default.
  */
 #define gmtime(t) my_gmtime(t)
+#define localtime(t) my_localtime(t)
+#define time(t) my_time(t)
 
 /* VMS doesn't use a real sys_nerr, but we need this when scanning for error
  * messages in text strings . . .
@@ -489,7 +509,9 @@ long	telldir _((DIR *));
 void	seekdir _((DIR *, long));
 void	closedir _((DIR *));
 void	vmsreaddirversions _((DIR *, int));
-struct tm *my_gmtime _((const time_t *));
+struct tm *	my_gmtime _((const time_t *));
+struct tm *	my_localtime _((const time_t *));
+time_t	my_time _((time_t *));
 I32	cando_by_name _((I32, I32, char *));
 int	flex_fstat _((int, struct stat *));
 int	flex_stat _((char *, struct stat *));

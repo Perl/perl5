@@ -65,7 +65,7 @@ OBJVAL = $(MMS$TARGET_NAME)$(O)
 .endif
 
 # Updated by fndvers.com -- do not edit by hand
-PERL_VERSION = 5_00326#
+PERL_VERSION = 5_00327#
 
 
 ARCHDIR =  [.lib.$(ARCH).$(PERL_VERSION)]
@@ -265,6 +265,9 @@ CRTLOPTS =,$(CRTL)/Options
 	$(CC) $(CFLAGS) $(MMS$SOURCE_NAME).c
 .endif
 
+# Modules which must be installed before we can build extensions
+LIBPREREQ = $(ARCHDIR)Config.pm [.lib]DynaLoader.pm [.lib]vmsish.pm [.lib.VMS]Filespec.pm [.lib.ExtUtils]XSSymSet.pm
+
 utils1 = [.lib.pod]perldoc.com [.lib.ExtUtils]Miniperl.pm [.utils]c2ph.com [.utils]h2ph.com [.utils]h2xs.com [.lib]perlbug.com
 utils2 = [.lib]splain.com [.utils]pl2pm.com
 
@@ -274,7 +277,7 @@ base : miniperl perl
 	@ $(NOOP)
 extras : Fcntl IO Opcode $(POSIX) libmods utils podxform
 	@ $(NOOP)
-libmods : [.lib]Config.pm $(ARCHDIR)Config.pm [.lib]DynaLoader.pm [.lib.VMS]Filespec.pm 
+libmods : $(LIBPREREQ)
 	@ $(NOOP)
 utils : $(utils1) $(utils2)
 	@ $(NOOP)
@@ -284,12 +287,12 @@ x2p : [.x2p]a2p$(E) [.x2p]s2p.com [.x2p]find2perl.com
 	@ $(NOOP)
 
 pod1 = [.lib.pod]perl.pod [.lib.pod]perlapio.pod [.lib.pod]perlbook.pod [.lib.pod]perlbot.pod [.lib.pod]perlcall.pod
-pod2 = [.lib.pod]perldata.pod [.lib.pod]perldebug.pod [.lib.pod]perldiag.pod [.lib.pod]perldsc.pod
+pod2 = [.lib.pod]perldata.pod [.lib.pod]perldebug.pod [.lib.pod]perldelta.pod [.lib.pod]perldiag.pod [.lib.pod]perldsc.pod
 pod3 = [.lib.pod]perlembed.pod [.lib.pod]perlform.pod [.lib.pod]perlfunc.pod [.lib.pod]perlguts.pod
 pod4 = [.lib.pod]perlipc.pod [.lib.pod]perllocale.pod [.lib.pod]perllol.pod [.lib.pod]perlmod.pod [.lib.pod]perlobj.pod
-pod5 = [.lib.pod]perlop.pod [.lib.pod]perlpod.pod [.lib.pod]perlre.pod
-pod6 = [.lib.pod]perlref.pod [.lib.pod]perlrun.pod [.lib.pod]perlsec.pod [.lib.pod]perlstyle.pod
-pod7 = [.lib.pod]perlsub.pod [.lib.pod]perlsyn.pod [.lib.pod]perltie.pod [.lib.pod]perltoc.pod
+pod5 = [.lib.pod]perlop.pod [.lib.pod]perlpod.pod [.lib.pod]perlre.pod [.lib.pod]perlref.pod [.lib.pod]perlrun.pod
+pod6 = [.lib.pod]perlsec.pod [.lib.pod]perlstyle.pod [.lib.pod]perlsub.pod [.lib.pod]perlsyn.pod
+pod7 = [.lib.pod]perltie.pod [.lib.pod]perltoc.pod [.lib.pod]perltoot.pod
 pod8 = [.lib.pod]perltrap.pod [.lib.pod]perlvar.pod [.lib.pod]perlxs.pod [.lib.pod]perlxstut.pod
 
 perlpods : $(pod1) $(pod2) $(pod3) $(pod4) $(pod5) $(pod6) $(pod7) $(pod8) [.lib.pod]perlvms.pod
@@ -366,7 +369,7 @@ $(ARCHDIR)config.pm : [.lib]config.pm
 	@ Delete/NoLog/NoConfirm genconfig.opt;
 	$(MINIPERL) ConfigPM.
 
-[.ext.dynaloader]dl_vms.c : [.ext.dynaloader]dl_vms.xs $(MINIPERL_EXE)
+[.ext.dynaloader]dl_vms.c : [.ext.dynaloader]dl_vms.xs [.lib.ExtUtils]XSSymSet.pm $(MINIPERL_EXE)
 	$(XSUBPP) $(MMS$SOURCE) >$(MMS$TARGET)
 
 [.ext.dynaloader]dl_vms$(O) : [.ext.dynaloader]dl_vms.c
@@ -405,7 +408,7 @@ Opcode : [.lib]Opcode.pm [.lib]ops.pm [.lib]Safe.pm [.lib.auto.Opcode]Opcode$(E)
 
 # Add "-I[--.lib]" t $(MINIPERL) so we use this copy of lib after C<chdir>
 # ${@} necessary to distract different versions of MM[SK]/make
-[.ext.Opcode]Descrip.MMS : [.ext.Opcode]Makefile.PL $(ARCHDIR)Config.pm [.lib.VMS]Filespec.pm [.lib]DynaLoader.pm $(DBG)perlshr$(E)
+[.ext.Opcode]Descrip.MMS : [.ext.Opcode]Makefile.PL $(LIBPREREQ) $(DBG)perlshr$(E)
 	$(MINIPERL) "-I[--.lib]" -e "chdir('[.ext.Opcode]') or die $!; do 'Makefile.PL'; print ${@} if ${@};" "INST_LIB=[--.lib]" "INST_ARCHLIB=[--.lib]"
 
 Fcntl : [.lib]Fcntl.pm [.lib.auto.Fcntl]Fcntl$(E)
@@ -424,7 +427,7 @@ Fcntl : [.lib]Fcntl.pm [.lib.auto.Fcntl]Fcntl$(E)
 
 # Add "-I[--.lib]" t $(MINIPERL) so we use this copy of lib after C<chdir>
 # ${@} necessary to distract different versions of MM[SK]/make
-[.ext.Fcntl]Descrip.MMS : [.ext.Fcntl]Makefile.PL $(ARCHDIR)Config.pm [.lib.VMS]Filespec.pm [.lib]DynaLoader.pm $(DBG)perlshr$(E)
+[.ext.Fcntl]Descrip.MMS : [.ext.Fcntl]Makefile.PL $(LIBPREREQ) $(DBG)perlshr$(E)
 	$(MINIPERL) "-I[--.lib]" -e "chdir('[.ext.Fcntl]') or die $!; do 'Makefile.PL'; print ${@} if ${@};" "INST_LIB=[--.lib]" "INST_ARCHLIB=[--.lib]"
 
 POSIX : [.lib]POSIX.pm [.lib.auto.POSIX]POSIX$(E)
@@ -443,7 +446,7 @@ POSIX : [.lib]POSIX.pm [.lib.auto.POSIX]POSIX$(E)
 
 # Add "-I[--.lib]" t $(MINIPERL) so we use this copy of lib after C<chdir>
 # ${@} necessary to distract different versions of MM[SK]/make
-[.ext.POSIX]Descrip.MMS : [.ext.POSIX]Makefile.PL $(ARCHDIR)Config.pm [.lib.VMS]Filespec.pm [.lib]DynaLoader.pm $(DBG)perlshr$(E)
+[.ext.POSIX]Descrip.MMS : [.ext.POSIX]Makefile.PL $(LIBPREREQ) $(DBG)perlshr$(E)
 	$(MINIPERL) "-I[--.lib]" -e "chdir('[.ext.POSIX]') or die $!; do 'Makefile.PL'; print ${@} if ${@};" "INST_LIB=[--.lib]" "INST_ARCHLIB=[--.lib]"
 
 IO : [.lib]IO.pm [.lib.IO]File.pm [.lib.IO]Handle.pm [.lib.IO]Pipe.pm [.lib.IO]Seekable.pm [.lib.IO]Socket.pm [.lib.auto.IO]IO$(E)
@@ -492,10 +495,17 @@ IO : [.lib]IO.pm [.lib.IO]File.pm [.lib.IO]Handle.pm [.lib.IO]Pipe.pm [.lib.IO]S
 
 # Add "-I[--.lib]" t $(MINIPERL) so we use this copy of lib after C<chdir>
 # ${@} necessary to distract different versions of MM[SK]/make
-[.ext.IO]Descrip.MMS : [.ext.IO]Makefile.PL $(ARCHDIR)Config.pm [.lib.VMS]Filespec.pm [.lib]DynaLoader.pm $(DBG)perlshr$(E)
+[.ext.IO]Descrip.MMS : [.ext.IO]Makefile.PL $(LIBPREREQ) $(DBG)perlshr$(E)
 	$(MINIPERL) "-I[--.lib]" -e "chdir('[.ext.IO]') or die $!; do 'Makefile.PL'; print ${@} if ${@};" "INST_LIB=[--.lib]" "INST_ARCHLIB=[--.lib]"
 
+[.lib]vmsish.pm : [.vms.ext]vmsish.pm
+	Copy/Log/NoConfirm $(MMS$SOURCE) $(MMS$TARGET)
+
 [.lib.VMS]Filespec.pm : [.vms.ext]Filespec.pm
+	@ If F$Search("[.lib]VMS.Dir").eqs."" Then Create/Directory [.lib.VMS]
+	Copy/Log/NoConfirm $(MMS$SOURCE) $(MMS$TARGET)
+
+[.lib.ExtUtils]XSSymSet.pm : [.vms.ext]XSSymSet.pm
 	@ If F$Search("[.lib]VMS.Dir").eqs."" Then Create/Directory [.lib.VMS]
 	Copy/Log/NoConfirm $(MMS$SOURCE) $(MMS$TARGET)
 
@@ -566,7 +576,7 @@ IO : [.lib]IO.pm [.lib.IO]File.pm [.lib.IO]Handle.pm [.lib.IO]Pipe.pm [.lib.IO]S
 	$(MINIPERL) $(MMS$SOURCE)
 	Rename/Log [.pod]pod2text.com $(MMS$TARGET)
 
-preplibrary : $(MINIPERL_EXE) $(ARCHDIR)Config.pm [.lib]DynaLoader.pm [.lib.VMS]Filespec.pm $(SOCKPM)
+preplibrary : $(MINIPERL_EXE) $(LIBPREREQ) $(SOCKPM)
 	@ Write Sys$Output "Autosplitting Perl library . . ."
 	@ Create/Directory [.lib.auto]
 	@ $(MINIPERL) -e "use AutoSplit; autosplit_lib_modules(@ARGV)" [.lib]*.pm [.lib.*]*.pm
@@ -720,7 +730,7 @@ $(SOCKOBJ) : $(SOCKC) $(SOCKH)
 [.ext.Socket]Socket$(O) : [.ext.Socket]Socket.c
 	$(CC) $(CFLAGS) /Object=$(MMS$TARGET) $(MMS$SOURCE)
 
-[.ext.Socket]Socket.c : [.ext.Socket]Socket.xs $(MINIPERL_EXE)
+[.ext.Socket]Socket.c : [.ext.Socket]Socket.xs [.lib.ExtUtils]XSSymSet.pm $(MINIPERL_EXE)
 	$(XSUBPP) $(MMS$SOURCE) >$(MMS$TARGET)
 .endif # !LINK_ONLY
 
@@ -1639,6 +1649,8 @@ tidy : cleanlis
 	- If F$Search("[.Lib]Socket.pm;-1").nes."" Then Purge/NoConfirm/Log [.Lib]Socket.pm
 	- If F$Search("[.Lib]Config.pm;-1").nes."" Then Purge/NoConfirm/Log [.Lib]Config.pm
 	- If F$Search("$(ARCHDIR)Config.pm;-1").nes."" Then Purge/NoConfirm/Log $(ARCHDIR)Config.pm
+	- If F$Search("[.lib.ExtUtils]Miniperl.pm").nes."" Then Purge/NoConfirm/Log [.lib.ExtUtils]Miniperl.pm;*
+	- If F$Search("[.lib.ExtUtils]XSSymSet.pm").nes."" Then Purge/NoConfirm/Log [.lib.ExtUtils]XSSymSet.pm;*
 	- If F$Search("[.Lib.VMS]*.*;-1").nes."" Then Purge/NoConfirm/Log [.Lib.VMS]*.*
 	- If F$Search("[.Lib.Pod]*.Pod;-1").nes."" Then Purge/NoConfirm/Log [.Lib.Pod]*.Pod
 	- If F$Search("$(ARCHCORE)*.*").nes."" Then Purge/NoConfirm/Log $(ARCHCORE)*.*
@@ -1714,6 +1726,7 @@ realclean : clean
 	- If F$Search("[.x2p]*.com").nes."" Then Delete/NoConfirm/Log [.x2p]*.com;*
 	- If F$Search("$(ARCHDIR)Config.pm").nes."" Then Delete/NoConfirm/Log $(ARCHDIR)Config.pm;*
 	- If F$Search("[.lib.ExtUtils]Miniperl.pm").nes."" Then Delete/NoConfirm/Log [.lib.ExtUtils]Miniperl.pm;*
+	- If F$Search("[.lib.ExtUtils]XSSymSet.pm").nes."" Then Delete/NoConfirm/Log [.lib.ExtUtils]XSSymSet.pm;*
 	- If F$Search("[.lib.pod]*.pod").nes."" Then Delete/NoConfirm/Log [.lib.pod]*.pod;*
 	- If F$Search("[.lib.pod]perldoc.com").nes."" Then Delete/NoConfirm/Log [.lib.pod]perldoc.com;*
 	- If F$Search("[.lib.pod]pod2*.com").nes."" Then Delete/NoConfirm/Log [.lib.pod]pod2*.com;*

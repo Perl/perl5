@@ -9,6 +9,184 @@ releases.)
 
 
 ----------------
+Version 5.003_27
+----------------
+
+This release is beta candidate #5: Our last, best hope for a beta.
+
+ CORE LANGUAGE CHANGES
+
+  Title:  "Better looks_like_number() function [sv.c]"
+   From:  Gisle Aas <aas@bergen.sn.no>
+ Msg-ID:  <199702141708.SAA17546@bergen.sn.no>
+   Date:  Fri, 14 Feb 1997 18:08:52 +0100
+  Files:  sv.c
+
+  Title:  "Remove redundant functions UNIVERSAL::{class,is_instance}"
+   From:  Gisle Aas <aas@bergen.sn.no>
+ Msg-ID:  <hwwsbpeq2.fsf@bergen.sn.no>
+   Date:  14 Feb 1997 15:52:21 +0000
+  Files:  pod/perldelta.pod pod/perlobj.pod t/op/universal.t universal.c
+
+  Title:  "Allow C<setpgrp $$>"
+   From:  Roderick Schertler <roderick@gate.net>
+ Msg-ID:  <pzraigyshr.fsf@eeyore.ibcinc.com>
+   Date:  16 Feb 1997 23:19:12 -0500
+  Files:  pp_sys.c
+
+  Title:  "Fix syntax error on C<&$1>"
+   From:  Chip Salzenberg
+  Files:  toke.c
+
+  Title:  "Fix sub call through magic var (e.g. C<&$1>)"
+   From:  Chip Salzenberg
+  Files:  pp_hot.c
+
+  Title:  "Fix grep() with refs in array context"
+   From:  Chip Salzenberg
+  Files:  pp.c
+
+ CORE PORTABILITY
+
+  Title:  "Eliminate $^S; add C<use vmsish qw(status exit time)>"
+   From:  Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>
+ Msg-ID:  <01IFI9CFKL0S004R2V@hmivax.humgen.upenn.edu>
+   Date:  Mon, 17 Feb 1997 02:45:26 -0500 (EST)
+  Files:  MANIFEST gv.c lib/English.pm lib/ExtUtils/MM_VMS.pm
+          lib/ExtUtils/Mksymlists.pm lib/ExtUtils/xsubpp mg.c op.c
+          perl.c perl.h pod/perldelta.pod pod/perlmod.pod
+          pod/perlvar.pod pp_ctl.c pp_sys.c utils/perldoc.PL
+          vms/Makefile vms/config.vms vms/descrip.mms
+          vms/ext/Stdio/Stdio.pm vms/ext/Stdio/Stdio.xs
+          vms/ext/XSSymSet.pm vms/ext/vmsish.pm vms/vms.c vms/vmsish.h
+          win32/makedef.pl
+
+  Title:  "Eliminate FP exceptions under SCO 5"
+   From:  Chip Salzenberg
+  Files:  hints/sco.sh unixish.h
+
+  Title:  "Digital UNIX hints"
+   From:  Jarkko Hietaniemi <jhi@iki.fi>
+ Msg-ID:  <199702151906.VAA22999@alpha.hut.fi>
+   Date:  Sat, 15 Feb 1997 21:06:33 +0200 (EET)
+  Files:  hints/dec_osf.sh
+
+  Title:  "Irix6.4 (with 7.1 compilers)"
+   From:  John Stoffel <jfs@fluent.com>
+ Msg-ID:  <199702130238.VAA24468@jfs.Fluent.COM>
+   Date:  Wed, 12 Feb 1997 21:38:51 -0500 (EST)
+  Files:  hints/irix_6_2.sh hints/irix_6_4.sh
+
+  Title:  "Update Plan 9, Win32, VMS configs with $shortsize and $longsize"
+   From:  Chip Salzenberg
+  Files:  plan9/config.plan9 plan9/genconfig.pl
+          vms/genconfig.pl win32/config.w32
+
+ OTHER CORE CHANGES
+
+  Title:  "Fix core dump when embedding"
+   From:  Chip Salzenberg
+  Files:  perl.c
+
+  Title:  "Re: Fragile signals"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199702130644.BAA07572@monk.mps.ohio-state.edu>
+   Date:  Thu, 13 Feb 1997 01:44:39 -0500 (EST)
+  Files:  mg.c
+
+  Title:  "Make format strings correspond exactly to parameters"
+   From:  Roderick Schertler <roderick@gate.net>
+ Msg-ID:  <pz7mkc1h0g.fsf@eeyore.ibcinc.com>
+   Date:  13 Feb 1997 17:24:31 -0500
+  Files:  doio.c ext/DB_File/DB_File.xs ext/Opcode/Opcode.xs gv.c op.c
+          perl.c pp_ctl.c pp_sys.c regcomp.c toke.c
+
+  Title:  "Don't try to attach 'o' magic to read-only values"
+   From:  Chip Salzenberg
+  Files:  sv.c
+
+  Title:  "Fix carriage-return message"
+   From:  Chip Salzenberg
+  Files:  toke.c
+
+  Title:  "In <=>, test for equality first"
+   From:  Chip Salzenberg
+  Files:  pp.c
+
+  Title:  "Don't mark sv_{true,false} PADTMP"
+   From:  Chip Salzenberg
+  Files:  op.c
+
+ BUILD PROCESS
+
+  Title:  "Fix eval "" in Configure"
+   From:  allen@gateway.grumman.com (John L. Allen)
+ Msg-ID:  <9702141809.AA17001@gateway.grumman.com>
+   Date:  Fri, 14 Feb 1997 13:09:53 -0500
+  Files:  Configure
+
+  Title:  "Don't link with -lsfio if sfio is not requested"
+   From:  Chip Salzenberg
+  Files:  Configure
+
+  Title:  "perl5.003_26 Configure change "win" for AIX 4"
+   From:  Tim Mooney <mooney@dogbert.cc.ndsu.NoDak.edu>
+ Msg-ID:  <Pine.OSF.3.95.970214135751.32654A-100000@dogbert.cc.ndsu.NoD
+   Date:  Fri, 14 Feb 1997 13:59:02 -0600 (CST)
+  Files:  Configure
+
+  Title:  "Update os2/diff.configure"
+   From:  Chip Salzenberg
+  Files:  os2/diff.configure
+
+ LIBRARY AND EXTENSIONS
+
+  Title:  "Remove Fatal.pm"
+   From:  Chip Salzenberg
+  Files:  MANIFEST lib/Fatal.pm pod/perldelta.pod pod/perlmod.pod
+          pod/roffitall t/lib/fatal.t
+
+  Title:  "Refresh MakeMaker to 5.40"
+   From:  Andy Dougherty, Andreas Koenig, Tim Bunce
+  Files:  lib/ExtUtils/Liblist.pm lib/ExtUtils/MM_Unix.pm
+          lib/ExtUtils/MakeMaker.pm lib/ExtUtils/Mksymlists.pm
+
+  Title:  "Refresh CPAN.pm to 1.21"
+   From:  Andreas Koenig <a.koenig@mind.de>
+  Files:  lib/CPAN.pm lib/CPAN/FirstTime.pm lib/CPAN/Nox.pm
+
+  Title:  "Refresh Test::Harness to 1.15"
+   From:  Andreas Koenig <a.koenig@mind.de>
+  Files:  lib/Test/Harness.pm
+
+ TESTS
+
+  Title:  "Remove non-portable locale tests"
+   From:  Chip Salzenberg
+  Files:  t/pragma/locale.t
+
+ UTILITIES
+
+  Title:  "pod2man: missing '-' in name section shouldn't be fatal"
+   From:  Ulrich Pfeifer <pfeifer@charly.informatik.uni-dortmund.de>
+ Msg-ID:  <yfmzpxcimsa.fsf@ls6.informatik.uni-dortmund.de>
+   Date:  10 Feb 1997 18:38:45 +0100
+  Files:  pod/pod2man.PL
+
+ DOCUMENTATION
+
+  Title:  "Update To-Do list"
+   From:  Tim Bunce <Tim.Bunce@ig.co.uk>
+ Msg-ID:  <9702101900.AA25293@toad.ig.co.uk>
+   Date:  Mon, 10 Feb 1997 19:00:59 +0000
+  Files:  Todo
+
+  Title:  "Fix formatting in perldiag"
+   From:  Chip Salzenberg
+  Files:  pod/perldiag.pod
+
+
+----------------
 Version 5.003_26
 ----------------
 

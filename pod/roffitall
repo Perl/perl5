@@ -96,7 +96,6 @@ toroff=`
     $libdir/ExtUtils::Manifest.3	\
     $libdir/ExtUtils::Mkbootstrap.3	\
     $libdir/ExtUtils::Mksymlists.3	\
-    $libdir/Fatal.3	\
     $libdir/Fcntl.3	\
     $libdir/File::Basename.3	\
     $libdir/File::CheckTree.3	\

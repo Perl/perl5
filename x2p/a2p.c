@@ -2000,8 +2000,11 @@ short yyss[YYSTACKSIZE];
 YYSTYPE yyvs[YYSTACKSIZE];
 #define yystacksize YYSTACKSIZE
 #line 396 "a2p.y"
+
+int yyparse _((void));
+
 #include "a2py.c"
-#line 2005 "y.tab.c"
+#line 2008 "y.tab.c"
 #define YYABORT goto yyabort
 #define YYACCEPT goto yyaccept
 #define YYERROR goto yyerrlab
@@ -2667,7 +2670,7 @@ case 137:
 #line 392 "a2p.y"
 { yyval = oper3(OBLOCK,oper2(OJUNK,yyvsp[-3],yyvsp[-2]),Nullop,yyvsp[0]); }
 break;
-#line 2671 "y.tab.c"
+#line 2674 "y.tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

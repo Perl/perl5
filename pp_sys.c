@@ -523,8 +523,8 @@ PP(pp_untie)
                 mg = mg_find(sv, 'q') ;
     
             if (mg && SvREFCNT(SvRV(mg->mg_obj)) > 1)  
-		warn("untie attempted while %d inner references still exist",
-			SvREFCNT(SvRV(mg->mg_obj)) - 1 ) ;
+		warn("untie attempted while %lu inner references still exist",
+			(unsigned long)SvREFCNT(SvRV(mg->mg_obj)) - 1 ) ;
         }
     }
  
@@ -2946,7 +2946,7 @@ PP(pp_system)
 	STATUS_NATIVE_SET(result == -1 ? -1 : status);
 	do_execfree();	/* free any memory child malloced on vfork */
 	SP = ORIGMARK;
-	PUSHi(STATUS_POSIX);
+	PUSHi(STATUS_CURRENT);
 	RETURN;
     }
     if (op->op_flags & OPf_STACKED) {
@@ -2972,7 +2972,7 @@ PP(pp_system)
     STATUS_NATIVE_SET(value);
     do_execfree();
     SP = ORIGMARK;
-    PUSHi(STATUS_POSIX);
+    PUSHi(STATUS_CURRENT);
 #endif /* !FORK or VMS */
     RETURN;
 }
@@ -3048,7 +3048,7 @@ PP(pp_getpgrp)
 #ifdef BSD_GETPGRP
     value = (I32)BSD_GETPGRP(pid);
 #else
-    if (pid != 0)
+    if (pid != 0 && pid != getpid()) {
 	DIE("POSIX getpgrp can't take an argument");
     value = (I32)getpgrp();
 #endif
@@ -3078,7 +3078,7 @@ PP(pp_setpgrp)
 #ifdef BSD_SETPGRP
     SETi( BSD_SETPGRP(pid, pgrp) >= 0 );
 #else
-    if ((pgrp != 0) || (pid != 0)) {
+    if ((pgrp != 0 && pgrp != getpid())) || (pid != 0 && pid != getpid())) {
 	DIE("POSIX setpgrp can't take an argument");
     }
     SETi( setpgrp() >= 0 );

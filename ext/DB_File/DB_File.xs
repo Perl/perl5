@@ -161,7 +161,7 @@ const DBT * key2 ;
     SPAGAIN ;
 
     if (count != 1)
-        croak ("DB_File btree_compare: expected 1 return value from %s, got %d\n", count) ;
+        croak ("DB_File btree_compare: expected 1 return value from compare sub, got %d\n", count) ;
 
     retval = POPi ;
 
@@ -208,7 +208,7 @@ const DBT * key2 ;
     SPAGAIN ;
 
     if (count != 1)
-        croak ("DB_File btree_prefix: expected 1 return value from %s, got %d\n", count) ;
+        croak ("DB_File btree_prefix: expected 1 return value from prefix sub, got %d\n", count) ;
  
     retval = POPi ;
  
@@ -245,7 +245,7 @@ size_t size ;
     SPAGAIN ;
 
     if (count != 1)
-        croak ("DB_File hash_cb: expected 1 return value from %s, got %d\n", count) ;
+        croak ("DB_File hash_cb: expected 1 return value from hash sub, got %d\n", count) ;
 
     retval = POPi ;
 
@@ -339,7 +339,7 @@ I32      value ;
 
 	/* check for attempt to write before start of array */
 	if (length + value + 1 <= 0)
-	    croak("Modification of non-creatable array value attempted, subscript %d", value) ;
+	    croak("Modification of non-creatable array value attempted, subscript %ld", (long)value) ;
 
 	value = length + value + 1 ;
     }

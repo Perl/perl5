@@ -1,8 +1,8 @@
 #   VMS::Stdio - VMS extensions to Perl's stdio calls
 #
 #   Author:  Charles Bailey  bailey@genetics.upenn.edu
-#   Version: 2.01
-#   Revised: 10-Dec-1996
+#   Version: 2.02
+#   Revised: 15-Feb-1997
 
 package VMS::Stdio;
 
@@ -12,7 +12,7 @@ use Carp '&croak';
 use DynaLoader ();
 use Exporter ();
  
-$VERSION = '2.01';
+$VERSION = '2.02';
 @ISA = qw( Exporter DynaLoader IO::File );
 @EXPORT = qw( &O_APPEND &O_CREAT &O_EXCL  &O_NDELAY &O_NOWAIT
               &O_RDONLY &O_RDWR  &O_TRUNC &O_WRONLY );

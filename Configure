@@ -91,25 +91,39 @@ if test ! -t 0; then
 	exit 1
 fi
 
-: On HP-UX, large Configure scripts may exercise a bug in /bin/sh
-if test -f /hp-ux -a -f /bin/ksh; then
-	if (PATH=.; alias -x) >/dev/null 2>&1; then
-		: already under /bin/ksh
-	else
+: Test and see if we are running under ksh, either blatantly or in disguise.
+if (PATH=.; alias -x) >/dev/null 2>&1; then
+    : running under ksh.  Is this a good thing?
+    if test -d /usr/lpp -a -f /usr/bin/bsh -a -f /usr/bin/uname ; then
+        if test X`/usr/bin/uname -v` = X4 ; then
+            : on AIX 4, /bin/sh is really ksh, and it causes us problems.
+            : Avoid it
 		cat <<'EOM'
-(Feeding myself to ksh to avoid nasty sh bug in "here document" expansion.)
+(Feeding myself to /usr/bin/bsh to avoid AIX 4's /bin/sh.)
 EOM
 		unset ENV
-		exec /bin/ksh $0 "$@"
+            exec /usr/bin/bsh $0 "$@"
 	fi
-else
+    else
+        if test ! -f /hp-ux ; then
 	: Warn them if they use ksh on other systems
-	(PATH=.; alias -x) >/dev/null 2>&1 && \
 		cat <<EOM
 (I see you are using the Korn shell.  Some ksh's blow up on $me,
 especially on older exotic systems.  If yours does, try the Bourne 
 shell instead.)
 EOM
+        fi
+    fi
+else
+    : Not running under ksh.  Maybe we should be?
+    : On HP-UX, large Configure scripts may exercise a bug in /bin/sh
+    if test -f /hp-ux -a -f /bin/ksh; then
+        cat <<'EOM'
+(Feeding myself to ksh to avoid nasty sh bug in "here document" expansion.)
+EOM
+        unset ENV
+        exec /bin/ksh $0 "$@"
+    fi
 fi
 
 : Configure runs within the UU subdirectory
@@ -1220,7 +1234,7 @@ while expr "X\$ans" : "X!" >/dev/null; do
 	read answ
 	set x \$xxxm
 	shift
-	aok=''; eval "ans=\"\$answ\"" && aok=y
+	aok=''; eval ans="\\"\$answ\\"" && aok=y
 	case  "\$answ" in
 	"\$ans")
 		case "\$ans" in
@@ -7350,6 +7364,11 @@ $define)
 	y|Y) ;;
 	*)	echo "Ok, avoiding sfio this time.  I'll use stdio instead."
 		val="$undef"
+		: Remove sfio from list of libraries to use
+		set `echo X $libs | $sed -e 's/-lsfio / /' -e 's/-lsfio$//'`
+		shift
+		libs="$*"
+		echo "libs = $libs" >&4
 		;;
 	esac
 	;;

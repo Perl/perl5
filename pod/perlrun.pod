@@ -432,8 +432,7 @@ in L<perlvar> and L<perlfunc/warn>. See also L<perldiag> and L<perltrap>.
 tells Perl that the script is embedded in a message.  Leading
 garbage will be discarded until the first line that starts with #! and
 contains the string "perl".  Any meaningful switches on that line will
-be applied (but only one group of switches, as with normal #!
-processing).  If a directory name is specified, Perl will switch to
+be applied.  If a directory name is specified, Perl will switch to
 that directory before running the script.  The B<-x> switch controls
 only the disposal of leading garbage.  The script must be
 terminated with C<__END__> if there is trailing garbage to be ignored (the

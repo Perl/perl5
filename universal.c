@@ -170,26 +170,6 @@ XS(XS_UNIVERSAL_can)
 }
 
 static
-XS(XS_UNIVERSAL_is_instance)
-{
-    dXSARGS;
-    ST(0) = SvROK(ST(0)) ? &sv_yes : &sv_no;
-    XSRETURN(1);
-}
-
-static
-XS(XS_UNIVERSAL_class)
-{
-    dXSARGS;
-    if(SvROK(ST(0)) && SvOBJECT(SvRV(ST(0)))) {
-        SV *sv = sv_newmortal();
-        sv_setpv(sv, HvNAME(SvSTASH(SvRV(ST(0)))));
-        ST(0) = sv;
-    }
-    XSRETURN(1);
-}
-
-static
 XS(XS_UNIVERSAL_VERSION)
 {
     dXSARGS;
@@ -239,7 +219,5 @@ boot_core_UNIVERSAL()
 
     newXS("UNIVERSAL::isa",             XS_UNIVERSAL_isa,         file);
     newXS("UNIVERSAL::can",             XS_UNIVERSAL_can,         file);
-    newXS("UNIVERSAL::class",           XS_UNIVERSAL_class,       file);
-    newXS("UNIVERSAL::is_instance",     XS_UNIVERSAL_is_instance, file);
     newXS("UNIVERSAL::VERSION", 	XS_UNIVERSAL_VERSION, 	  file);
 }

@@ -8,7 +8,7 @@
  */
 
 struct xpvav {
-    char*	xav_array;	/* pointer to malloced string */
+    char*	xav_array;      /* pointer to first array element */
     SSize_t	xav_fill;
     SSize_t	xav_max;
     IV		xof_off;	/* ptr is incremented by offset */
@@ -16,7 +16,7 @@ struct xpvav {
     MAGIC*	xmg_magic;	/* magic for scalar array */
     HV*		xmg_stash;	/* class package */
 
-    SV**	xav_alloc;
+    SV**	xav_alloc;	/* pointer to malloced string */
     SV*		xav_arylen;
     U8		xav_flags;
 };

@@ -443,18 +443,10 @@
 #   endif
 #endif
 
-#define STATUS_POSIX		statusvalue
-#define STATUS_POSIX_SET(n)		\
-    STMT_START {			\
-	statusvalue = (n);		\
-	if (statusvalue != -1)		\
-	    statusvalue &= 0xFFFF;	\
-    } STMT_END
-
 #ifdef VMS
 #   define STATUS_NATIVE	statusvalue_vms
 #   define STATUS_NATIVE_EXPORT \
-	((I32)statusvalue_vms == -1 ? 4 : statusvalue_vms)
+	((I32)statusvalue_vms == -1 ? 44 : statusvalue_vms)
 #   define STATUS_NATIVE_SET(n)						\
 	STMT_START {							\
 	    statusvalue_vms = (n);					\
@@ -467,12 +459,35 @@
 	    else							\
 		statusvalue = (statusvalue_vms & STS$M_SEVERITY) << 8;	\
 	} STMT_END
+#   define STATUS_POSIX	statusvalue
+#   ifdef VMSISH_STATUS
+#	define STATUS_CURRENT	(VMSISH_STATUS ? STATUS_NATIVE : STATUS_POSIX)
+#   else
+#	define STATUS_CURRENT	STATUS_POSIX
+#   endif
+#   define STATUS_POSIX_SET(n)				\
+	STMT_START {					\
+	    statusvalue = (n);				\
+	    if (statusvalue != -1) {			\
+		statusvalue &= 0xFFFF;			\
+		statusvalue_vms = statusvalue ? 44 : 1;	\
+	    }						\
+	    else statusvalue_vms = -1;			\
+	} STMT_END
 #   define STATUS_ALL_SUCCESS	(statusvalue = 0, statusvalue_vms = 1)
-#   define STATUS_ALL_FAILURE	(statusvalue = 1, statusvalue_vms = 4)
+#   define STATUS_ALL_FAILURE	(statusvalue = 1, statusvalue_vms = 44)
 #else
 #   define STATUS_NATIVE	STATUS_POSIX
 #   define STATUS_NATIVE_EXPORT	STATUS_POSIX
 #   define STATUS_NATIVE_SET	STATUS_POSIX_SET
+#   define STATUS_POSIX		statusvalue
+#   define STATUS_POSIX_SET(n)		\
+	STMT_START {			\
+	    statusvalue = (n);		\
+	    if (statusvalue != -1)	\
+		statusvalue &= 0xFFFF;	\
+	} STMT_END
+#   define STATUS_CURRENT STATUS_POSIX
 #   define STATUS_ALL_SUCCESS	(statusvalue = 0)
 #   define STATUS_ALL_FAILURE	(statusvalue = 1)
 #endif
@@ -658,12 +673,8 @@
 #   ifdef convex
 #	define Quad_t long long
 #   else
-#	if defined(VMS) && defined(__ALPHA)
-#	    define Quad_t __int64
-#	else
-#	    if BYTEORDER > 0xFFFF
-#		define Quad_t long
-#	    endif
+#	if BYTEORDER > 0xFFFF
+#	    define Quad_t long
 #	endif
 #   endif
 #endif
@@ -1719,7 +1730,7 @@ IEXT I32	Imaxsysfd IINIT(MAXSYSFD); /* top fd to pass to subprocesses */
 IEXT int	Imultiline;		/* $*--do strings hold >1 line? */
 IEXT I32	Istatusvalue;		/* $? */
 #ifdef VMS
-IEXT U32	Istatusvalue_vms;	/* $^S */
+IEXT U32	Istatusvalue_vms;
 #endif
 
 IEXT struct stat Istatcache;		/* _ */

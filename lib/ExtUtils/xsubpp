@@ -80,7 +80,7 @@ use Cwd;
 use vars '$cplusplus';
 
 # Global Constants
-$XSUBPP_version = "1.94001";
+$XSUBPP_version = "1.9401";
 $Is_VMS = $^O eq 'VMS';
 
 sub Q ;
@@ -127,6 +127,13 @@ $pwd = cwd();
 
 my(@XSStack) = ({type => 'none'});	# Stack of conditionals and INCLUDEs
 my($XSS_work_idx, $cpp_next_tmp) = (0, "XSubPPtmpAAAA");
+my($SymSet);
+if ($Is_VMS) {
+    # Establish set of global symbols with max length 28, since xsubpp
+    # will later add the 'XS_' prefix.
+    require ExtUtils::XSSymSet;
+    $SymSet = new ExtUtils::XSSymSet 28;
+}
 
 sub TrimWhitespace
 {
@@ -798,6 +805,7 @@ while (fetch_para()) {
     ($pname = $func_name) =~ s/^($Prefix)?/$Packprefix/;
     ($clean_func_name = $func_name) =~ s/^$Prefix//;
     $Full_func_name = "${Packid}_$clean_func_name";
+    if ($Is_VMS) { $Full_func_name = $SymSet->addsym($Full_func_name); }
 
     # Check for duplicate function definition
     for $tmp (@XSStack) {
@@ -1295,6 +1303,9 @@ sub map_type {
 
 
 sub Exit {
-    # VMS error exit: SS$_ABORT.
-    exit $errors ? ($Is_VMS ? 44 : 1) : 0;
+# If this is VMS, the exit status has meaning to the shell, so we
+# use a predictable value (SS$_Normal or SS$_Abort) rather than an
+# arbitrary number.
+#    exit ($Is_VMS ? ($errors ? 44 : 1) : $errors) ;
+    exit ($errors ? 1 : 0);
 }

@@ -27,7 +27,7 @@ $   Copy/Log/NoConfirm [-]Perl'exe' []Perl.
 $
 $!  Make the environment look a little friendlier to tests which assume Unix
 $   cat = "Type"
-$   Macro/NoDebug/Object=Echo.Obj Sys$Input
+$   Macro/NoDebug/NoList/Object=Echo.Obj Sys$Input
 		.title echo
 		.psect data,wrt,noexe
 	dsc:
@@ -67,7 +67,7 @@ $   Macro/NoDebug/Object=Echo.Obj Sys$Input
 		movl	#1,r0
 		ret	
 		.end echo
-$   Link/NoTrace/Exe=Echo.Exe Echo.Obj;
+$   Link/NoMap/NoTrace/Exe=Echo.Exe Echo.Obj;
 $   Delete/Log/NoConfirm Echo.Obj;*
 $   echo = "$" + F$Parse("Echo.Exe")
 $

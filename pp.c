@@ -857,10 +857,10 @@ PP(pp_ncmp)
       dPOPTOPnnrl;
       I32 value;
 
-      if (left < right)
-	value = -1;
-      else if (left == right)
+      if (left == right)
 	value = 0;
+      else if (left < right)
+	value = -1;
       else if (left > right)
 	value = 1;
       else {
@@ -2130,7 +2130,7 @@ PP(pp_lslice)
 	    if (ix >= max || !(*lelem = firstrelem[ix]))
 		*lelem = &sv_undef;
 	}
-	if (!is_something_there && (SvOKp(*lelem) || SvGMAGICAL(*lelem)))
+	if (!is_something_there && (SvOK(*lelem) || SvGMAGICAL(*lelem)))
 	    is_something_there = TRUE;
     }
     if (is_something_there)

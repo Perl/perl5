@@ -459,22 +459,32 @@ sub path {
 
 Follows VMS naming conventions for executable files.
 If the name passed in doesn't exactly match an executable file,
-appends F<.Exe> to check for executable image, and F<.Com> to check
-for DCL procedure.  If this fails, checks F<Sys$System:> for an
-executable file having the name specified.  Finally, appends F<.Exe>
-and checks again.
+appends F<.Exe> (or equivalent) to check for executable image, and F<.Com>
+to check for DCL procedure.  If this fails, checks directories in DCL$PATH
+and finally F<Sys$System:> for an executable file having the name specified,
+with or without the F<.Exe>-equivalent suffix.
 
 =cut
 
 sub maybe_command {
     my($self,$file) = @_;
     return $file if -x $file && ! -d _;
-    return "$file.exe" if -x "$file.exe";
-    return "$file.com" if -x "$file.com";
+    my(@dirs) = ('');
+    my(@exts) = ('',$Config{'exe_ext'},'.exe','.com');
+    my($dir,$ext);
     if ($file !~ m![/:>\]]!) {
-	my($shrfile) = 'Sys$System:' . $file;
-	return $file if -x $shrfile && ! -d _;
-	return "$file.exe" if -x "$shrfile.exe";
+	for (my $i = 0; defined $ENV{"DCL\$PATH;$i"}; $i++) {
+	    $dir = $ENV{"DCL\$PATH;$i"};
+	    $dir .= ':' unless $dir =~ m%[\]:]$%;
+	    push(@dirs,$dir);
+	}
+	push(@dirs,'Sys$System:');
+	foreach $dir (@dirs) {
+	    my $sysfile = "$dir$file";
+	    foreach $ext (@exts) {
+		return $file if -x "$sysfile$ext" && ! -d _;
+	    }
+	}
     }
     return 0;
 }
@@ -517,8 +527,8 @@ sub maybe_command_in_dirs {	# $ver is optional argument if looking for perl
 
 =item perl_script (override)
 
-If name passed in doesn't specify a readable file, appends F<.pl> and
-tries again, since it's customary to have file types on all files
+If name passed in doesn't specify a readable file, appends F<.com> or
+F<.pl> and tries again, since it's customary to have file types on all files
 under VMS.
 
 =cut
@@ -526,7 +536,8 @@ under VMS.
 sub perl_script {
     my($self,$file) = @_;
     return $file if -r $file && ! -d _;
-    return "$file.pl" if -r "$file.pl" && ! -d _;
+    return "$file.com" if -r "$file.com";
+    return "$file.pl" if -r "$file.pl";
     return '';
 }
 
@@ -748,7 +759,7 @@ INST_STATIC =
 INST_DYNAMIC =
 INST_BOOT =
 EXPORT_LIST = $(BASEEXT).opt
-PERL_ARCHIVE = ',($ENV{'PERLSHR'} ? $ENV{'PERLSHR'} : 'Sys$Share:PerlShr.Exe'),'
+PERL_ARCHIVE = ',($ENV{'PERLSHR'} ? $ENV{'PERLSHR'} : "Sys\$Share:PerlShr.$Config{'dlext'}"),'
 ';
     }
 
@@ -1002,7 +1013,10 @@ sub xsubpp_version
     my $command = "$self->{PERL} \"-I$self->{PERL_LIB}\" $xsubpp -v";
     print "Running: $command\n" if $Verbose;
     $version = `$command` ;
-    warn "Running '$command' exits with status " . $? unless ($? & 1);
+    if ($?) {
+	use vmsish 'status';
+	warn "Running '$command' exits with status $?";
+    }
     chop $version ;
 
     return $1 if $version =~ /^xsubpp version (.*)/ ;
@@ -1325,7 +1339,7 @@ INST_DYNAMIC_DEP = $inst_dynamic_dep
     push @m, '
 $(INST_DYNAMIC) : $(INST_STATIC) $(PERL_INC)perlshr_attr.opt rtls.opt $(INST_ARCHAUTODIR).exists $(EXPORT_LIST) $(PERL_ARCHIVE) $(INST_DYNAMIC_DEP)
 	$(NOECHO) $(MKPATH) $(INST_ARCHAUTODIR)
-	$(NOECHO) If F$TrnLNm("PerlShr").eqs."" Then Define/NoLog/User PerlShr Sys$Share:PerlShr.Exe
+	$(NOECHO) If F$TrnLNm("PerlShr").eqs."" Then Define/NoLog/User PerlShr Sys$Share:PerlShr.',$Config{'dlext'},'
 	Link $(LDFLAGS) /Shareable=$(MMS$TARGET)$(OTHERLDFLAGS) $(BASEEXT).opt/Option,rtls.opt/Option,$(PERL_INC)perlshr_attr.opt/Option
 ';
 
@@ -2220,7 +2234,7 @@ $(MAP_TARGET) :: $(MAKE_APERL_FILE)
 	}
     }
 
-    $target = "Perl.Exe" unless $target;
+    $target = "Perl$Config{'exe_ext'}" unless $target;
     ($shrtarget,$targdir) = fileparse($target);
     $shrtarget =~ s/^([^.]*)/$1Shr/;
     $shrtarget = $targdir . $shrtarget;

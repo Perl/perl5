@@ -386,12 +386,6 @@ MAGIC *mg;
     case '\020':		/* ^P */
 	sv_setiv(sv, (IV)perldb);
 	break;
-    case '\023':		/* ^S */
-	if (STATUS_NATIVE == -1)
-	    sv_setiv(sv, (IV)-1);
-	else
-	    sv_setuv(sv, (UV)STATUS_NATIVE);
-	break;
     case '\024':		/* ^T */
 #ifdef BIG_TIME
  	sv_setnv(sv, basetime);
@@ -462,7 +456,11 @@ MAGIC *mg;
 #endif
 	break;
     case '?':
-	sv_setiv(sv, (IV)STATUS_POSIX);
+	sv_setiv(sv, (IV)STATUS_CURRENT);
+#ifdef COMPLEX_STATUS
+	LvTARGOFF(sv) = statusvalue;
+	LvTARGLEN(sv) = statusvalue_vms;
+#endif
 	break;
     case '^':
 	s = IoTOP_NAME(GvIOp(defoutgv));
@@ -708,13 +706,11 @@ MAGIC* mg;
 		warn("No such signal: SIG%s", s);
 	    return 0;
 	}
-        if(psig_ptr[i])
-   	    SvREFCNT_dec(psig_ptr[i]);
+	SvREFCNT_dec(psig_name[i]);
+	SvREFCNT_dec(psig_ptr[i]);
 	psig_ptr[i] = SvREFCNT_inc(sv);
-	if(psig_name[i])
-	    SvREFCNT_dec(psig_name[i]);
-	psig_name[i] = newSVpv(s,strlen(s));
 	SvTEMP_off(sv); /* Make sure it doesn't go away on us */
+	psig_name[i] = newSVpv(s, strlen(s));
 	SvREADONLY_on(psig_name[i]);
     }
     if (SvTYPE(sv) == SVt_PVGV || SvROK(sv)) {
@@ -1269,9 +1265,6 @@ MAGIC* mg;
 	}
 	perldb = i;
 	break;
-    case '\023':	/* ^S */
-	STATUS_NATIVE_SET(SvIOK(sv) ? SvUVX(sv) : sv_2uv(sv));
-	break;
     case '\024':	/* ^T */
 #ifdef BIG_TIME
 	basetime = (Time_t)(SvNOK(sv) ? SvNVX(sv) : sv_2nv(sv));
@@ -1351,7 +1344,19 @@ MAGIC* mg;
 	compiling.cop_arybase = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
 	break;
     case '?':
-	STATUS_POSIX_SET(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
+#ifdef COMPLEX_STATUS
+	if (localizing == 2) {
+	    statusvalue = LvTARGOFF(sv);
+	    statusvalue_vms = LvTARGLEN(sv);
+	}
+	else
+#endif
+#ifdef VMSISH_STATUS
+	if (VMSISH_STATUS)
+	    STATUS_NATIVE_SET((U32)(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv)));
+	else
+#endif
+	    STATUS_POSIX_SET(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 	break;
     case '!':
 	SETERRNO(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv),
@@ -1540,10 +1545,23 @@ int sig;
     SV *sv;
     CV *cv;
     AV *oldstack;
-    
-    if(!psig_ptr[sig])
-    	die("Signal SIG%s received, but no signal handler set.\n",
-    	sig_name[sig]);
+    bool long_savestack = (savestack_ix + 14) < savestack_max;
+    bool long_cxstack = (cxstack_ix + 1) < cxstack_max;
+
+    /* Protect PUSHXXX in progress. */
+    if (long_cxstack)
+	cxstack_ix++;
+
+    if (!psig_ptr[sig])
+	die("Signal SIG%s received, but no signal handler set.\n",
+	    sig_name[sig]);
+
+    /*
+     * Protect save in progress.  Max number of items pushed there is
+     * 3*n or 4. We cannot fix infinity, so we fix 4 (in fact 5).
+     */
+    if (long_savestack)
+	savestack_ix += 5;
 
     cv = sv_2cv(psig_ptr[sig],&st,&gv,TRUE);
     if (!cv || !CvROOT(cv)) {
@@ -1561,8 +1579,8 @@ int sig;
     if(psig_name[sig])
     	sv = SvREFCNT_inc(psig_name[sig]);
     else {
-        sv = sv_newmortal();
-        sv_setpv(sv,sig_name[sig]);
+	sv = sv_newmortal();
+	sv_setpv(sv,sig_name[sig]);
     }
     PUSHMARK(sp);
     PUSHs(sv);
@@ -1571,6 +1589,10 @@ int sig;
     perl_call_sv((SV*)cv, G_DISCARD);
 
     SWITCHSTACK(signalstack, oldstack);
-
+    if (long_savestack)
+	savestack_ix -= 5;	/* Unprotect save in progress. */
+    if (long_cxstack)
+	cxstack_ix--;		/* Unprotect PUSHXXX in progress. */
+    
     return;
 }

@@ -406,7 +406,7 @@ pad_free(PADOFFSET po)
     if (!po)
 	croak("panic: pad_free po");
     DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad free %d\n", po));
-    if (curpad[po] && curpad[po] != &sv_undef)
+    if (curpad[po] && !SvIMMORTAL(curpad[po]))
 	SvPADTMP_off(curpad[po]);
     if ((I32)po < padix)
 	padix = po - 1;
@@ -442,7 +442,7 @@ pad_reset()
     DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad reset\n"));
     if (!tainting) {	/* Can't mix tainted and non-tainted temporaries. */
 	for (po = AvMAX(comppad); po > padix_floor; po--) {
-	    if (curpad[po] && curpad[po] != &sv_undef)
+	    if (curpad[po] && !SvIMMORTAL(curpad[po]))
 		SvPADTMP_off(curpad[po]);
 	}
 	padix = padix_floor;
@@ -2377,6 +2377,9 @@ OP *op;
     }
     cop->op_flags = flags;
     cop->op_private = 0 | (flags >> 8);
+#ifdef NATIVE_HINTS
+    cop->op_private |= NATIVE_HINTS;
+#endif
     cop->op_next = (OP*)cop;
 
     if (label) {
@@ -3800,8 +3803,8 @@ OP *op;
 		    OP *newop = newAVREF(newGVOP(OP_GV, 0,
 			gv_fetchpv(name, TRUE, SVt_PVAV) ));
 		    if (dowarn)
-			warn("Array @%s missing the @ in argument %d of %s()",
-			    name, numargs, op_desc[type]);
+			warn("Array @%s missing the @ in argument %ld of %s()",
+			    name, (long)numargs, op_desc[type]);
 		    op_free(kid);
 		    kid = newop;
 		    kid->op_sibling = sibl;
@@ -3818,8 +3821,8 @@ OP *op;
 		    OP *newop = newHVREF(newGVOP(OP_GV, 0,
 			gv_fetchpv(name, TRUE, SVt_PVHV) ));
 		    if (dowarn)
-			warn("Hash %%%s missing the %% in argument %d of %s()",
-			    name, numargs, op_desc[type]);
+			warn("Hash %%%s missing the %% in argument %ld of %s()",
+			    name, (long)numargs, op_desc[type]);
 		    op_free(kid);
 		    kid = newop;
 		    kid->op_sibling = sibl;

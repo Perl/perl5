@@ -2,8 +2,8 @@
  *
  * VMS-specific routines for perl5
  *
- * Last revised: 29-Jan-1997 by Charles Bailey  bailey@genetics.upenn.edu
- * Version: 5.3.24
+ * Last revised: 15-Feb-1997 by Charles Bailey  bailey@genetics.upenn.edu
+ * Version: 5.3.27
  */
 
 #include <acedef.h>
@@ -451,163 +451,6 @@ kill_file(char *name)
     return rmsts;
 
 }  /* end of kill_file() */
-/*}}}*/
-
-/* my_utime - update modification time of a file
- * calling sequence is identical to POSIX utime(), but under
- * VMS only the modification time is changed; ODS-2 does not
- * maintain access times.  Restrictions differ from the POSIX
- * definition in that the time can be changed as long as the
- * caller has permission to execute the necessary IO$_MODIFY $QIO;
- * no separate checks are made to insure that the caller is the
- * owner of the file or has special privs enabled.
- * Code here is based on Joe Meadows' FILE utility.
- */
-
-/* Adjustment from Unix epoch (01-JAN-1970 00:00:00.00)
- *              to VMS epoch  (01-JAN-1858 00:00:00.00)
- * in 100 ns intervals.
- */
-static const long int utime_baseadjust[2] = { 0x4beb4000, 0x7c9567 };
-
-/*{{{int my_utime(char *path, struct utimbuf *utimes)*/
-int my_utime(char *file, struct utimbuf *utimes)
-{
-  register int i;
-  long int bintime[2], len = 2, lowbit, unixtime,
-           secscale = 10000000; /* seconds --> 100 ns intervals */
-  unsigned long int chan, iosb[2], retsts;
-  char vmsspec[NAM$C_MAXRSS+1], rsa[NAM$C_MAXRSS], esa[NAM$C_MAXRSS];
-  struct FAB myfab = cc$rms_fab;
-  struct NAM mynam = cc$rms_nam;
-#if defined (__DECC) && defined (__VAX)
-  /* VAX DEC C atrdef.h has unsigned type for pointer member atr$l_addr,
-   * at least through VMS V6.1, which causes a type-conversion warning.
-   */
-#  pragma message save
-#  pragma message disable cvtdiftypes
-#endif
-  struct atrdef myatr[2] = {{sizeof bintime, ATR$C_REVDATE, bintime}, {0,0,0}};
-  struct fibdef myfib;
-#if defined (__DECC) && defined (__VAX)
-  /* This should be right after the declaration of myatr, but due
-   * to a bug in VAX DEC C, this takes effect a statement early.
-   */
-#  pragma message restore
-#endif
-  struct dsc$descriptor fibdsc = {sizeof(myfib), DSC$K_DTYPE_Z, DSC$K_CLASS_S,(char *) &myfib},
-                        devdsc = {0,DSC$K_DTYPE_T, DSC$K_CLASS_S,0},
-                        fnmdsc = {0,DSC$K_DTYPE_T, DSC$K_CLASS_S,0};
-
-  if (file == NULL || *file == '\0') {
-    set_errno(ENOENT);
-    set_vaxc_errno(LIB$_INVARG);
-    return -1;
-  }
-  if (do_tovmsspec(file,vmsspec,0) == NULL) return -1;
-
-  if (utimes != NULL) {
-    /* Convert Unix time    (seconds since 01-JAN-1970 00:00:00.00)
-     * to VMS quadword time (100 nsec intervals since 01-JAN-1858 00:00:00.00).
-     * Since time_t is unsigned long int, and lib$emul takes a signed long int
-     * as input, we force the sign bit to be clear by shifting unixtime right
-     * one bit, then multiplying by an extra factor of 2 in lib$emul().
-     */
-    lowbit = (utimes->modtime & 1) ? secscale : 0;
-    unixtime = (long int) utimes->modtime;
-    unixtime >> 1;  secscale << 1;
-    retsts = lib$emul(&secscale, &unixtime, &lowbit, bintime);
-    if (!(retsts & 1)) {
-      set_errno(EVMSERR);
-      set_vaxc_errno(retsts);
-      return -1;
-    }
-    retsts = lib$addx(bintime,utime_baseadjust,bintime,&len);
-    if (!(retsts & 1)) {
-      set_errno(EVMSERR);
-      set_vaxc_errno(retsts);
-      return -1;
-    }
-  }
-  else {
-    /* Just get the current time in VMS format directly */
-    retsts = sys$gettim(bintime);
-    if (!(retsts & 1)) {
-      set_errno(EVMSERR);
-      set_vaxc_errno(retsts);
-      return -1;
-    }
-  }
-
-  myfab.fab$l_fna = vmsspec;
-  myfab.fab$b_fns = (unsigned char) strlen(vmsspec);
-  myfab.fab$l_nam = &mynam;
-  mynam.nam$l_esa = esa;
-  mynam.nam$b_ess = (unsigned char) sizeof esa;
-  mynam.nam$l_rsa = rsa;
-  mynam.nam$b_rss = (unsigned char) sizeof rsa;
-
-  /* Look for the file to be affected, letting RMS parse the file
-   * specification for us as well.  I have set errno using only
-   * values documented in the utime() man page for VMS POSIX.
-   */
-  retsts = sys$parse(&myfab,0,0);
-  if (!(retsts & 1)) {
-    set_vaxc_errno(retsts);
-    if      (retsts == RMS$_PRV) set_errno(EACCES);
-    else if (retsts == RMS$_DIR) set_errno(ENOTDIR);
-    else                         set_errno(EVMSERR);
-    return -1;
-  }
-  retsts = sys$search(&myfab,0,0);
-  if (!(retsts & 1)) {
-    set_vaxc_errno(retsts);
-    if      (retsts == RMS$_PRV) set_errno(EACCES);
-    else if (retsts == RMS$_FNF) set_errno(ENOENT);
-    else                         set_errno(EVMSERR);
-    return -1;
-  }
-
-  devdsc.dsc$w_length = mynam.nam$b_dev;
-  devdsc.dsc$a_pointer = (char *) mynam.nam$l_dev;
-
-  retsts = sys$assign(&devdsc,&chan,0,0);
-  if (!(retsts & 1)) {
-    set_vaxc_errno(retsts);
-    if      (retsts == SS$_IVDEVNAM)   set_errno(ENOTDIR);
-    else if (retsts == SS$_NOPRIV)     set_errno(EACCES);
-    else if (retsts == SS$_NOSUCHDEV)  set_errno(ENOTDIR);
-    else                               set_errno(EVMSERR);
-    return -1;
-  }
-
-  fnmdsc.dsc$a_pointer = mynam.nam$l_name;
-  fnmdsc.dsc$w_length = mynam.nam$b_name + mynam.nam$b_type + mynam.nam$b_ver;
-
-  memset((void *) &myfib, 0, sizeof myfib);
-#ifdef __DECC
-  for (i=0;i<3;i++) myfib.fib$w_fid[i] = mynam.nam$w_fid[i];
-  for (i=0;i<3;i++) myfib.fib$w_did[i] = mynam.nam$w_did[i];
-  /* This prevents the revision time of the file being reset to the current
-   * time as a result of our IO$_MODIFY $QIO. */
-  myfib.fib$l_acctl = FIB$M_NORECORD;
-#else
-  for (i=0;i<3;i++) myfib.fib$r_fid_overlay.fib$w_fid[i] = mynam.nam$w_fid[i];
-  for (i=0;i<3;i++) myfib.fib$r_did_overlay.fib$w_did[i] = mynam.nam$w_did[i];
-  myfib.fib$r_acctl_overlay.fib$l_acctl = FIB$M_NORECORD;
-#endif
-  retsts = sys$qiow(0,chan,IO$_MODIFY,iosb,0,0,&fibdsc,&fnmdsc,0,0,myatr,0);
-  _ckvmssts(sys$dassgn(chan));
-  if (retsts & 1) retsts = iosb[0];
-  if (!(retsts & 1)) {
-    set_vaxc_errno(retsts);
-    if (retsts == SS$_NOPRIV) set_errno(EACCES);
-    else                      set_errno(EVMSERR);
-    return -1;
-  }
-
-  return 0;
-}  /* end of my_utime() */
 /*}}}*/
 
 static void
@@ -3231,55 +3074,284 @@ void my_endpwent()
 /*}}}*/
 
 
-/* my_gmtime
- * If the CRTL has a real gmtime(), use it, else look for the logical
- * name SYS$TIMEZONE_DIFFERENTIAL used by the native UTC routines on
- * VMS >= 6.0.  Can be manually defined under earlier versions of VMS
- * to translate to the number of seconds which must be added to UTC
- * to get to the local time of the system.
- * Contributed by Chuck Lane  <lane@duphy4.physics.drexel.edu>
+/* Used for UTC calculation in my_gmtime(), my_localtime(), my_time(),
+ * my_utime(), and flex_stat(), all of which operate on UTC unless
+ * VMSISH_TIMES is true.
  */
+/* method used to handle UTC conversions:
+ *   1 == CRTL gmtime();  2 == SYS$TIMEZONE_DIFFERENTIAL;  3 == no correction
+ */
+static int gmtime_emulation_type;
+/* number of secs to add to UTC POSIX-style time to get local time */
+static long int utc_offset_secs;
 
-/*{{{struct tm *my_gmtime(const time_t *time)*/
-/* We #defined 'gmtime' as 'my_gmtime' in vmsish.h.  #undef it here
- * so we can call the CRTL's routine to see if it works.
+/* We #defined 'gmtime', 'localtime', and 'time' as 'my_gmtime' etc.
+ * in vmsish.h.  #undef them here so we can call the CRTL routines
+ * directly.
  */
 #undef gmtime
-struct tm *
-my_gmtime(const time_t *time)
+#undef localtime
+#undef time
+
+/* my_time(), my_localtime(), my_gmtime()
+ * By default traffic in UTC time values, suing CRTL gmtime() or
+ * SYS$TIMEZONE_DIFFERENTIAL to determine offset from local time zone.
+ * Contributed by Chuck Lane  <lane@duphy4.physics.drexel.edu>
+ * Modified by Charles Bailey <bailey@genetics.upenn.edu>
+ */
+
+/*{{{time_t my_time(time_t *timep)*/
+time_t my_time(time_t *timep)
 {
-  static int gmtime_emulation_type;
-  static long int utc_offset_secs;
-  char *p;
   time_t when;
 
   if (gmtime_emulation_type == 0) {
+    struct tm *tm_p;
+    time_t base = 15 * 86400; /* 15jan71; to avoid month ends */
+
     gmtime_emulation_type++;
-    when = 300000000;
-    if (gmtime(&when) == NULL) {  /* CRTL gmtime() is just a stub */
+    if ((tm_p = gmtime(&base)) == NULL) { /* CRTL gmtime() is a fake */
+      char *off;
+
       gmtime_emulation_type++;
-      if ((p = my_getenv("SYS$TIMEZONE_DIFFERENTIAL")) == NULL)
+      if ((off = my_getenv("SYS$TIMEZONE_DIFFERENTIAL")) == NULL) {
         gmtime_emulation_type++;
-      else
-        utc_offset_secs = atol(p);
+        warn("no UTC offset information; assuming local time is UTC");
+      }
+      else { utc_offset_secs = atol(off); }
+    }
+    else { /* We've got a working gmtime() */
+      struct tm gmt, local;
+
+      gmt = *tm_p;
+      tm_p = localtime(&base);
+      local = *tm_p;
+      utc_offset_secs  = (local.tm_mday - gmt.tm_mday) * 86400;
+      utc_offset_secs += (local.tm_hour - gmt.tm_hour) * 3600;
+      utc_offset_secs += (local.tm_min  - gmt.tm_min)  * 60;
+      utc_offset_secs += (local.tm_sec  - gmt.tm_sec);
     }
   }
 
-  switch (gmtime_emulation_type) {
-    case 1:
-      return gmtime(time);
-    case 2:
-      when = *time - utc_offset_secs;
-      return localtime(&when);
-    default:
-      warn("gmtime not supported on this system");
-      return NULL;
-  }
-}  /* end of my_gmtime() */
-/* Reset definition for later calls */
-#define gmtime(t) my_gmtime(t)
+  when = time(NULL);
+  if (
+#     ifdef VMSISH_TIME
+      !VMSISH_TIME &&
+#     endif
+                       when != -1) when -= utc_offset_secs;
+  if (timep != NULL) *timep = when;
+  return when;
+
+}  /* end of my_time() */
 /*}}}*/
 
+
+/*{{{struct tm *my_gmtime(const time_t *timep)*/
+struct tm *
+my_gmtime(const time_t *timep)
+{
+  char *p;
+  time_t when;
+
+  if (gmtime_emulation_type == 0) (void) my_time(NULL); /* Init UTC */
+
+  when = *timep;
+# ifdef VMSISH_TIME
+  if (VMSISH_TIME) when -= utc_offset_secs; /* Input was local time */
+# endif
+  /* CRTL localtime() wants local time as input, so does no tz correction */
+  return localtime(&when);
+
+}  /* end of my_gmtime() */
+/*}}}*/
+
+
+/*{{{struct tm *my_localtime(const time_t *timep)*/
+struct tm *
+my_localtime(const time_t *timep)
+{
+  time_t when;
+
+  if (gmtime_emulation_type == 0) (void) my_time(NULL); /* Init UTC */
+
+  when = *timep;
+# ifdef VMSISH_TIME
+  if (!VMSISH_TIME) when += utc_offset_secs;  /*  Input was UTC */
+# endif
+  /* CRTL localtime() wants local time as input, so does no tz correction */
+  return localtime(&when);
+
+} /*  end of my_localtime() */
+/*}}}*/
+
+/* Reset definitions for later calls */
+#define gmtime(t)    my_gmtime(t)
+#define localtime(t) my_localtime(t)
+#define time(t)      my_time(t)
+
+
+/* my_utime - update modification time of a file
+ * calling sequence is identical to POSIX utime(), but under
+ * VMS only the modification time is changed; ODS-2 does not
+ * maintain access times.  Restrictions differ from the POSIX
+ * definition in that the time can be changed as long as the
+ * caller has permission to execute the necessary IO$_MODIFY $QIO;
+ * no separate checks are made to insure that the caller is the
+ * owner of the file or has special privs enabled.
+ * Code here is based on Joe Meadows' FILE utility.
+ */
+
+/* Adjustment from Unix epoch (01-JAN-1970 00:00:00.00)
+ *              to VMS epoch  (01-JAN-1858 00:00:00.00)
+ * in 100 ns intervals.
+ */
+static const long int utime_baseadjust[2] = { 0x4beb4000, 0x7c9567 };
+
+/*{{{int my_utime(char *path, struct utimbuf *utimes)*/
+int my_utime(char *file, struct utimbuf *utimes)
+{
+  register int i;
+  long int bintime[2], len = 2, lowbit, unixtime,
+           secscale = 10000000; /* seconds --> 100 ns intervals */
+  unsigned long int chan, iosb[2], retsts;
+  char vmsspec[NAM$C_MAXRSS+1], rsa[NAM$C_MAXRSS], esa[NAM$C_MAXRSS];
+  struct FAB myfab = cc$rms_fab;
+  struct NAM mynam = cc$rms_nam;
+#if defined (__DECC) && defined (__VAX)
+  /* VAX DEC C atrdef.h has unsigned type for pointer member atr$l_addr,
+   * at least through VMS V6.1, which causes a type-conversion warning.
+   */
+#  pragma message save
+#  pragma message disable cvtdiftypes
+#endif
+  struct atrdef myatr[2] = {{sizeof bintime, ATR$C_REVDATE, bintime}, {0,0,0}};
+  struct fibdef myfib;
+#if defined (__DECC) && defined (__VAX)
+  /* This should be right after the declaration of myatr, but due
+   * to a bug in VAX DEC C, this takes effect a statement early.
+   */
+#  pragma message restore
+#endif
+  struct dsc$descriptor fibdsc = {sizeof(myfib), DSC$K_DTYPE_Z, DSC$K_CLASS_S,(char *) &myfib},
+                        devdsc = {0,DSC$K_DTYPE_T, DSC$K_CLASS_S,0},
+                        fnmdsc = {0,DSC$K_DTYPE_T, DSC$K_CLASS_S,0};
+
+  if (file == NULL || *file == '\0') {
+    set_errno(ENOENT);
+    set_vaxc_errno(LIB$_INVARG);
+    return -1;
+  }
+  if (do_tovmsspec(file,vmsspec,0) == NULL) return -1;
+
+  if (utimes != NULL) {
+    /* Convert Unix time    (seconds since 01-JAN-1970 00:00:00.00)
+     * to VMS quadword time (100 nsec intervals since 01-JAN-1858 00:00:00.00).
+     * Since time_t is unsigned long int, and lib$emul takes a signed long int
+     * as input, we force the sign bit to be clear by shifting unixtime right
+     * one bit, then multiplying by an extra factor of 2 in lib$emul().
+     */
+    lowbit = (utimes->modtime & 1) ? secscale : 0;
+    unixtime = (long int) utimes->modtime;
+#   ifdef VMSISH_TIME
+    if (!VMSISH_TIME) {  /* Input was UTC; convert to local for sys svc */
+      if (!gmtime_emulation_type) (void) time(NULL);  /* Initialize UTC */
+      unixtime += utc_offset_secs;
+    }
+#   endif
+    unixtime >> 1;  secscale << 1;
+    retsts = lib$emul(&secscale, &unixtime, &lowbit, bintime);
+    if (!(retsts & 1)) {
+      set_errno(EVMSERR);
+      set_vaxc_errno(retsts);
+      return -1;
+    }
+    retsts = lib$addx(bintime,utime_baseadjust,bintime,&len);
+    if (!(retsts & 1)) {
+      set_errno(EVMSERR);
+      set_vaxc_errno(retsts);
+      return -1;
+    }
+  }
+  else {
+    /* Just get the current time in VMS format directly */
+    retsts = sys$gettim(bintime);
+    if (!(retsts & 1)) {
+      set_errno(EVMSERR);
+      set_vaxc_errno(retsts);
+      return -1;
+    }
+  }
+
+  myfab.fab$l_fna = vmsspec;
+  myfab.fab$b_fns = (unsigned char) strlen(vmsspec);
+  myfab.fab$l_nam = &mynam;
+  mynam.nam$l_esa = esa;
+  mynam.nam$b_ess = (unsigned char) sizeof esa;
+  mynam.nam$l_rsa = rsa;
+  mynam.nam$b_rss = (unsigned char) sizeof rsa;
+
+  /* Look for the file to be affected, letting RMS parse the file
+   * specification for us as well.  I have set errno using only
+   * values documented in the utime() man page for VMS POSIX.
+   */
+  retsts = sys$parse(&myfab,0,0);
+  if (!(retsts & 1)) {
+    set_vaxc_errno(retsts);
+    if      (retsts == RMS$_PRV) set_errno(EACCES);
+    else if (retsts == RMS$_DIR) set_errno(ENOTDIR);
+    else                         set_errno(EVMSERR);
+    return -1;
+  }
+  retsts = sys$search(&myfab,0,0);
+  if (!(retsts & 1)) {
+    set_vaxc_errno(retsts);
+    if      (retsts == RMS$_PRV) set_errno(EACCES);
+    else if (retsts == RMS$_FNF) set_errno(ENOENT);
+    else                         set_errno(EVMSERR);
+    return -1;
+  }
+
+  devdsc.dsc$w_length = mynam.nam$b_dev;
+  devdsc.dsc$a_pointer = (char *) mynam.nam$l_dev;
+
+  retsts = sys$assign(&devdsc,&chan,0,0);
+  if (!(retsts & 1)) {
+    set_vaxc_errno(retsts);
+    if      (retsts == SS$_IVDEVNAM)   set_errno(ENOTDIR);
+    else if (retsts == SS$_NOPRIV)     set_errno(EACCES);
+    else if (retsts == SS$_NOSUCHDEV)  set_errno(ENOTDIR);
+    else                               set_errno(EVMSERR);
+    return -1;
+  }
+
+  fnmdsc.dsc$a_pointer = mynam.nam$l_name;
+  fnmdsc.dsc$w_length = mynam.nam$b_name + mynam.nam$b_type + mynam.nam$b_ver;
+
+  memset((void *) &myfib, 0, sizeof myfib);
+#ifdef __DECC
+  for (i=0;i<3;i++) myfib.fib$w_fid[i] = mynam.nam$w_fid[i];
+  for (i=0;i<3;i++) myfib.fib$w_did[i] = mynam.nam$w_did[i];
+  /* This prevents the revision time of the file being reset to the current
+   * time as a result of our IO$_MODIFY $QIO. */
+  myfib.fib$l_acctl = FIB$M_NORECORD;
+#else
+  for (i=0;i<3;i++) myfib.fib$r_fid_overlay.fib$w_fid[i] = mynam.nam$w_fid[i];
+  for (i=0;i<3;i++) myfib.fib$r_did_overlay.fib$w_did[i] = mynam.nam$w_did[i];
+  myfib.fib$r_acctl_overlay.fib$l_acctl = FIB$M_NORECORD;
+#endif
+  retsts = sys$qiow(0,chan,IO$_MODIFY,iosb,0,0,&fibdsc,&fnmdsc,0,0,myatr,0);
+  _ckvmssts(sys$dassgn(chan));
+  if (retsts & 1) retsts = iosb[0];
+  if (!(retsts & 1)) {
+    set_vaxc_errno(retsts);
+    if (retsts == SS$_NOPRIV) set_errno(EACCES);
+    else                      set_errno(EVMSERR);
+    return -1;
+  }
+
+  return 0;
+}  /* end of my_utime() */
+/*}}}*/
 
 /*
  * flex_stat, flex_fstat
@@ -3525,6 +3597,16 @@ flex_fstat(int fd, struct mystat *statbufp)
   if (!fstat(fd,(stat_t *) statbufp)) {
     if (statbufp == &statcache) *namecache == '\0';
     statbufp->st_dev = encode_dev(statbufp->st_devnam);
+#   ifdef VMSISH_TIME
+    if (!VMSISH_TIME) { /* Return UTC instead of local time */
+#   else
+    if (1) {
+#   endif
+      if (!gmtime_emulation_type) (void)time(NULL);
+      statbufp->st_mtime -= utc_offset_secs;
+      statbufp->st_atime -= utc_offset_secs;
+      statbufp->st_ctime -= utc_offset_secs;
+    }
     return 0;
   }
   return -1;
@@ -3569,7 +3651,19 @@ flex_stat(char *fspec, struct mystat *statbufp)
       if (!retval && statbufp == &statcache) strcpy(namecache,fileified);
     }
     if (retval) retval = stat(fspec,(stat_t *) statbufp);
-    if (!retval) statbufp->st_dev = encode_dev(statbufp->st_devnam);
+    if (!retval) {
+      statbufp->st_dev = encode_dev(statbufp->st_devnam);
+#     ifdef VMSISH_TIME
+      if (!VMSISH_TIME) { /* Return UTC instead of local time */
+#     else
+      if (1) {
+#     endif
+        if (!gmtime_emulation_type) (void)time(NULL);
+        statbufp->st_mtime -= utc_offset_secs;
+        statbufp->st_atime -= utc_offset_secs;
+        statbufp->st_ctime -= utc_offset_secs;
+      }
+    }
     return retval;
 
 }  /* end of flex_stat() */

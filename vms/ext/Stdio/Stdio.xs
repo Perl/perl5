@@ -1,8 +1,8 @@
 /* VMS::Stdio - VMS extensions to stdio routines 
  *
- * Version:  2.0
+ * Version:  2.02
  * Author:   Charles Bailey  bailey@genetics.upenn.edu
- * Revised:  28-Feb-1996
+ * Revised:  15-Feb-1997
  *
  */
 
@@ -127,7 +127,8 @@ flush(sv)
 	CODE:
 	    FILE *fp = Nullfp;
 	    if (SvOK(sv)) fp = IoIFP(sv_2io(sv));
-	    ST(0) = fflush(fp) ? &sv_undef : &sv_yes;
+	    if (fflush(fp)) { ST(0) = &sv_undef; }
+	    else            { clearerr(fp); ST(0) = &sv_yes; }
 
 char *
 getname(fp)
@@ -157,7 +158,8 @@ sync(fp)
 	FILE *	fp
 	PROTOTYPE: $
 	CODE:
-	    ST(0) = fsync(fileno(fp)) ? &sv_undef : &sv_yes;
+	    if (fsync(fileno(fp))) { ST(0) = &sv_undef; }
+	    else                   { clearerr(fp); ST(0) = &sv_yes; }
 
 char *
 tmpnam()

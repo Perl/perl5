@@ -156,7 +156,7 @@ set_opset_bits(bitmap, bitspec, on, opname)
 	if (myopcode >= maxo || myopcode < 0)
 	    croak("panic: opcode \"%s\" value %d is invalid", opname, myopcode);
 	if (opcode_debug >= 2)
-	    warn("set_opset_bits bit %2d (off=%d, bit=%d) %s on\n",
+	    warn("set_opset_bits bit %2d (off=%d, bit=%d) %s %s\n",
 			myopcode, offset, bit, opname, (on)?"on":"off");
 	if (on)
 	    bitmap[offset] |= 1 << bit;
@@ -175,8 +175,8 @@ set_opset_bits(bitmap, bitspec, on, opname)
 	    while(len-- > 0) bitmap[len] &= ~specbits[len];
     }
     else
-	croak("panic: invalid bitspec for \"%s\" (type %d)",
-		opname, SvTYPE(bitspec));
+	croak("panic: invalid bitspec for \"%s\" (type %u)",
+		opname, (unsigned)SvTYPE(bitspec));
 }
 
 
@@ -235,7 +235,7 @@ BOOT:
     assert(maxo < OP_MASK_BUF_SIZE);
     opset_len = (maxo + 7) / 8;
     if (opcode_debug >= 1)
-	warn("opset_len %d\n", opset_len);
+	warn("opset_len %ld\n", (long)opset_len);
     op_names_init();
 
 
@@ -413,8 +413,8 @@ opdesc(...)
 	    }
 	}
 	else
-	    croak("panic: invalid bitspec for \"%s\" (type %d)",
-		opname, SvTYPE(bitspec));
+	    croak("panic: invalid bitspec for \"%s\" (type %u)",
+		opname, (unsigned)SvTYPE(bitspec));
     }
 
 

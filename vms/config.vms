@@ -76,7 +76,7 @@
  * when Perl is built.  Please do not change it by hand; make
  * any changes to FndVers.Com instead.
  */
-#define ARCHLIB_EXP "/perl_root/lib/VMS_VAX/5_00326"  /**/
+#define ARCHLIB_EXP "/perl_root/lib/VMS_VAX/5_00327"  /**/
 #define ARCHLIB ARCHLIB_EXP	/*config-skip*/
 
 /* ARCHNAME:
@@ -114,17 +114,24 @@
  */
 #undef HAS_BCMP	/**/
 
+#include <string.h> /* Check whether new DECC has #defined bcopy and bzero */
 /* HAS_BCOPY:
  *	This symbol is defined if the bcopy() routine is available to
  *	copy blocks of memory.
  */
 #undef HAS_BCOPY	/**/
+#ifdef bcopy
+#  define HAS_BCOPY		/*config-skip*/
+#endif
 
 /* HAS_BZERO:
  *	This symbol is defined if the bzero() routine is available to
  *	set a memory block to 0.
  */
 #undef HAS_BZERO	/**/
+#ifdef bzero
+#  define HAS_BZERO		/*config-skip*/
+#endif
 
 /* CASTNEGFLOAT:
  *	This symbol is defined if the C compiler can cast negative

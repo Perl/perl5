@@ -1101,7 +1101,7 @@ filter_add(funcp, datasv)
         die("Can't upgrade filter_add data to SVt_PVIO");
     IoDIRP(datasv) = (DIR*)funcp; /* stash funcp into spare field */
     if (filter_debug)
-	warn("filter_add func %lx (%s)", funcp, SvPV(datasv,na));
+	warn("filter_add func %p (%s)", funcp, SvPV(datasv,na));
     av_unshift(rsfp_filters, 1);
     av_store(rsfp_filters, 0, datasv) ;
     return(datasv);
@@ -1114,7 +1114,7 @@ filter_del(funcp)
     filter_t funcp;
 {
     if (filter_debug)
-	warn("filter_del func %lx", funcp);
+	warn("filter_del func %p", funcp);
     if (!rsfp_filters || AvFILL(rsfp_filters)<0)
 	return;
     /* if filter is on top of stack (usual case) just pop it off */
@@ -1180,7 +1180,7 @@ filter_read(idx, buf_sv, maxlen)
     /* Get function pointer hidden within datasv	*/
     funcp = (filter_t)IoDIRP(datasv);
     if (filter_debug)
-	warn("filter_read %d: via function %lx (%s)\n",
+	warn("filter_read %d: via function %p (%s)\n",
 		idx, funcp, SvPV(datasv,na));
     /* Call function. The function is expected to 	*/
     /* call "FILTER_READ(idx+1, buf_sv)" first.		*/
@@ -1697,7 +1697,7 @@ yylex()
 	}
 	goto retry;
     case '\r':
-	croak("Illegal character \\%03o (carriage return)");
+	croak("Illegal character \\%03o (carriage return)", '\r');
     case ' ': case '\t': case '\f': case 013:
 	s++;
 	goto retry;
@@ -1733,7 +1733,7 @@ yylex()
 	    if (strnEQ(s,"=>",2)) {
 		if (dowarn)
 		    warn("Ambiguous use of -%c => resolved to \"-%c\" =>",
-			tmp, tmp);
+			(int)tmp, (int)tmp);
 		s = force_word(bufptr,WORD,FALSE,FALSE,FALSE);
 		OPERATOR('-');		/* unary minus */
 	    }
@@ -1768,7 +1768,7 @@ yylex()
 	    case 'A': gv_fetchpv("\024",TRUE, SVt_PV); FTST(OP_FTATIME);
 	    case 'C': gv_fetchpv("\024",TRUE, SVt_PV); FTST(OP_FTCTIME);
 	    default:
-		croak("Unrecognized file test: -%c", tmp);
+		croak("Unrecognized file test: -%c", (int)tmp);
 		break;
 	    }
 	}
@@ -2062,7 +2062,7 @@ yylex()
 	if (tmp == '~')
 	    PMop(OP_MATCH);
 	if (dowarn && tmp && isSPACE(*s) && strchr("+-*/%.^&|<",tmp))
-	    warn("Reversed %c= operator",tmp);
+	    warn("Reversed %c= operator",(int)tmp);
 	s--;
 	if (expect == XSTATE && isALPHA(tmp) &&
 		(s == linestart+1 || s[-2] == '\n') )
@@ -4332,7 +4332,7 @@ I32 ck_uni;
 	return s;
     }
     if (*s == '$' && s[1] &&
-      (isALPHA(s[1]) || strchr("$_{", s[1]) || strnEQ(s+1,"::",2)) )
+      (isALNUM(s[1]) || strchr("${", s[1]) || strnEQ(s+1,"::",2)) )
 	return s;
     if (*s == '{') {
 	bracket = s;
@@ -5170,7 +5170,7 @@ char *s;
     if (multi_start < multi_end && (U32)(curcop->cop_line - multi_end) <= 1) {
 	sprintf(buf+strlen(buf),
 	"  (Might be a runaway multi-line %c%c string starting on line %ld)\n",
-		multi_open,multi_close,(long)multi_start);
+		(int)multi_open,(int)multi_close,(long)multi_start);
         multi_end = 0;
     }
     if (in_eval & 2)

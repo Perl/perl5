@@ -1370,8 +1370,8 @@ SV **sp;
 	{
 	    a = SvPV(astr, len);
 	    if (len != infosize)
-		croak("Bad arg length for %s, is %d, should be %d",
-			op_desc[optype], len, infosize);
+		croak("Bad arg length for %s, is %d, should be %ld",
+			op_desc[optype], len, (long)infosize);
 	}
     }
     else

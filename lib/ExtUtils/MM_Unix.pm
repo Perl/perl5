@@ -8,8 +8,8 @@ use strict;
 use vars qw($VERSION $Is_Mac $Is_OS2 $Is_VMS
 	    $Verbose %pm %static $Xsubpp_Version);
 
-$VERSION = substr q$Revision: 1.109_01 $, 10;
-# $Id: MM_Unix.pm,v 1.109 1996/12/17 00:42:32 k Exp k $
+$VERSION = substr q$Revision: 1.113 $, 10;
+# $Id: MM_Unix.pm,v 1.113 1997/02/11 21:54:09 k Exp $
 
 Exporter::import('ExtUtils::MakeMaker',
 	qw( $Verbose &neatvalue));
@@ -1000,7 +1000,14 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)/.exists 
 	push(@m,'	$(RANLIB) '."$ldfrom\n");
     }
     $ldfrom = "-all $ldfrom -none" if ($^O eq 'dec_osf');
-    push(@m,'	LD_RUN_PATH="$(LD_RUN_PATH)" $(LD) -o $@ $(LDDLFLAGS) '.$ldfrom.
+
+    # Brain dead solaris linker does not use LD_RUN_PATH?
+    # This fixes dynamic extensions which need shared libs
+    my $ldrun = '';
+    $ldrun = join ' ', map "-R$_", split /:/, $self->{LD_RUN_PATH}
+       if ($^O eq 'solaris');
+
+    push(@m,'	LD_RUN_PATH="$(LD_RUN_PATH)" $(LD) -o $@ '.$ldrun.' $(LDDLFLAGS) '.$ldfrom.
 		' $(OTHERLDFLAGS) $(MYEXTLIB) $(PERL_ARCHIVE) $(LDLOADLIBS) $(EXPORT_LIST)');
     push @m, '
 	$(CHMOD) 755 $@
@@ -1696,9 +1703,9 @@ usually solves this kind of problem.
     foreach $component ($self->{PERL_SRC}, $self->path(), $Config::Config{binexp}) {
 	push @defpath, $component if defined $component;
     }
-    $self->{PERL} =
+    $self->{PERL} ||=
         $self->find_perl(5.0, [ $^X, 'miniperl','perl','perl5',"perl$]" ],
-	    \@defpath, $Verbose ) unless ($self->{PERL});
+	    \@defpath, $Verbose );
     # don't check if perl is executable, maybe they have decided to
     # supply switches with perl
 
@@ -2136,6 +2143,16 @@ MAP_PRELIBS   = $Config::Config{libs} $Config::Config{cryptlib}
 	$libperl   = "$dir/$libperl";
 	$lperl   ||= "libperl$self->{LIB_EXT}";
 	$lperl     = "$dir/$lperl";
+
+        if (! -f $libperl and ! -f $lperl) {
+          # We did not find a static libperl. Maybe there is a shared one?
+          if ($^O eq 'solaris' or $^O eq 'sunos') {
+            $lperl  = $libperl = "$dir/$Config::Config{libperl}";
+            # SUNOS ld does not take the full path to a shared library
+            $libperl = '' if $^O eq 'sunos';
+          }
+        }
+
 	print STDOUT "Warning: $libperl not found
     If you're going to build a static perl binary, make sure perl is installed
     otherwise ignore this warning\n"
@@ -2156,10 +2173,17 @@ MAP_LIBPERL = $libperl
     foreach $catfile (@$extra){
 	push @m, "\tcat $catfile >> \$\@\n";
     }
+    # SUNOS ld does not take the full path to a shared library
+    my $llibperl = ($libperl)?'$(MAP_LIBPERL)':'-lperl';
 
-    push @m, "
+    # Brain dead solaris linker does not use LD_RUN_PATH?
+    # This fixes dynamic extensions which need shared libs
+    my $ldfrom = ($^O eq 'solaris')?
+           join(' ', map "-R$_", split /:/, $self->{LD_RUN_PATH}):'';
+
+push @m, "
 \$(MAP_TARGET) :: $tmp/perlmain\$(OBJ_EXT) \$(MAP_LIBPERL) \$(MAP_STATIC) \$(INST_ARCHAUTODIR)/extralibs.all
-	\$(MAP_LINKCMD) -o \$\@ \$(OPTIMIZE) $tmp/perlmain\$(OBJ_EXT) \$(MAP_LIBPERL) \$(MAP_STATIC) `cat \$(INST_ARCHAUTODIR)/extralibs.all` \$(MAP_PRELIBS)
+	\$(MAP_LINKCMD) -o \$\@ \$(OPTIMIZE) $tmp/perlmain\$(OBJ_EXT) $ldfrom $llibperl \$(MAP_STATIC) `cat \$(INST_ARCHAUTODIR)/extralibs.all` \$(MAP_PRELIBS)
 	$self->{NOECHO}echo 'To install the new \"\$(MAP_TARGET)\" binary, call'
 	$self->{NOECHO}echo '    make -f $makefilename inst_perl MAP_TARGET=\$(MAP_TARGET)'
 	$self->{NOECHO}echo 'To remove the intermediate files say'

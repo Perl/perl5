@@ -198,12 +198,18 @@ register PerlInterpreter *sv_interp;
     LEAVE;
     FREETMPS;
 
-    /* We must account for everything.  First the syntax tree. */
+    /* We must account for everything.  */
+
+    /* Destroy the main CV and syntax tree */
     if (main_root) {
 	curpad = AvARRAY(comppad);
 	op_free(main_root);
-	main_root = 0;
+	main_root = Nullop;
     }
+    main_start = Nullop;
+    SvREFCNT_dec(main_cv);
+    main_cv = Nullcv;
+
     if (sv_objcount) {
 	/*
 	 * Try to destruct global references.  We do this first so that the
@@ -349,13 +355,17 @@ register PerlInterpreter *sv_interp;
     FREETMPS;
     if (destruct_level >= 2) {
 	if (scopestack_ix != 0)
-	    warn("Unbalanced scopes: %d more ENTERs than LEAVEs\n", scopestack_ix);
+	    warn("Unbalanced scopes: %ld more ENTERs than LEAVEs\n",
+		 (long)scopestack_ix);
 	if (savestack_ix != 0)
-	    warn("Unbalanced saves: %d more saves than restores\n", savestack_ix);
+	    warn("Unbalanced saves: %ld more saves than restores\n",
+		 (long)savestack_ix);
 	if (tmps_floor != -1)
-	    warn("Unbalanced tmps: %d more allocs than frees\n", tmps_floor + 1);
+	    warn("Unbalanced tmps: %ld more allocs than frees\n",
+		 (long)tmps_floor + 1);
 	if (cxstack_ix != -1)
-	    warn("Unbalanced context: %d more PUSHes than POPs\n", cxstack_ix + 1);
+	    warn("Unbalanced context: %ld more PUSHes than POPs\n",
+		 (long)cxstack_ix + 1);
     }
 
     /* Now absolutely destruct everything, somehow or other, loops or no. */
@@ -399,7 +409,7 @@ register PerlInterpreter *sv_interp;
     SvREFCNT_dec(strtab);
 
     if (sv_count != 0)
-	warn("Scalars leaked: %d\n", sv_count);
+	warn("Scalars leaked: %ld\n", (long)sv_count);
 
     sv_free_arenas();
 
@@ -476,11 +486,14 @@ setuid perl scripts securely.\n");
 	return 0;
     }
 
-    SvREFCNT_dec(main_cv);
-    if (main_root)
+    if (main_root) {
+	curpad = AvARRAY(comppad);
 	op_free(main_root);
-    main_cv = 0;
-    main_start = main_root = 0;
+	main_root = Nullop;
+    }
+    main_start = Nullop;
+    SvREFCNT_dec(main_cv);
+    main_cv = Nullcv;
 
     time(&basetime);
 
@@ -1785,12 +1798,12 @@ char *scriptname;
 		(void)PerlIO_close(rsfp);
 		if (rsfp = my_popen("/bin/mail root","w")) {	/* heh, heh */
 		    PerlIO_printf(rsfp,
-"User %d tried to run dev %d ino %d in place of dev %d ino %d!\n\
-(Filename of set-id script was %s, uid %d gid %d.)\n\nSincerely,\nperl\n",
-			uid,tmpstatbuf.st_dev, tmpstatbuf.st_ino,
-			statbuf.st_dev, statbuf.st_ino,
+"User %ld tried to run dev %ld ino %ld in place of dev %ld ino %ld!\n\
+(Filename of set-id script was %s, uid %ld gid %ld.)\n\nSincerely,\nperl\n",
+			(long)uid,(long)tmpstatbuf.st_dev, (long)tmpstatbuf.st_ino,
+			(long)statbuf.st_dev, (long)statbuf.st_ino,
 			SvPVX(GvSV(curcop->cop_filegv)),
-			statbuf.st_uid, statbuf.st_gid);
+			(long)statbuf.st_uid, (long)statbuf.st_gid);
 		    (void)my_pclose(rsfp);
 		}
 		croak("Permission denied\n");
@@ -2471,7 +2484,7 @@ my_failure_exit()
 	    STATUS_NATIVE_SET(44);
     }
     else {
-	if (!vaxc$errno && errno)	/* someone must have set $^E = 0 */
+	if (!vaxc$errno && errno)	/* unlikely */
 	    STATUS_NATIVE_SET(44);
 	else
 	    STATUS_NATIVE_SET(vaxc$errno);
@@ -2508,5 +2521,6 @@ my_exit_jump()
 	POPBLOCK(cx,curpm);
 	LEAVE;
     }
+
     Siglongjmp(top_env, 2);
 }

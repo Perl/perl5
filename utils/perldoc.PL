@@ -59,10 +59,9 @@ use Getopt::Std;
 $Is_VMS = $^O eq 'VMS';
 
 sub usage{
-        warn "@_\n" if @_;
-    # Make sure exit status is success under VMS, so shell doesn't
-    # display error messages left over from startup.
-    ($! = 0, $^E = 1) if $^O eq 'VMS';
+    warn "@_\n" if @_;
+    # Erase evidence of previous errors (if any), so exit status is simple.
+    $! = 0;
     die <<EOF;
 perldoc [options] PageName|ModuleName|ProgramName...
 perldoc [options] -f BuiltinFunction
