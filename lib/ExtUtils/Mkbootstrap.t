@@ -75,8 +75,12 @@ SKIP: {
 	close OUT;
 	chmod 0444, 'dasboot.bs';
 
-	eval{ Mkbootstrap('dasboot', 1) };
-	like( $@, qr/Unable to open dasboot\.bs/, 'should die given bad filename' );
+	SKIP: {
+	    skip("can write readonly files", 1) if -w 'dasboot.bs'; 
+
+	    eval{ Mkbootstrap('dasboot', 1) };
+	    like( $@, qr/Unable to open dasboot\.bs/, 'should die given bad filename' );
+	}
 
 	# now put it back like it was
 	chmod 0777, 'dasboot.bs';
