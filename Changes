@@ -106,6 +106,165 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  7368] By: jhi                                   on 2000/10/19  13:04:29
+        Log: Subject: Re: [ID 20001013.008] perl 5.6.0 on AIX w/GCC
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Wed, 18 Oct 2000 13:12:01 +0200
+             Message-Id: <20001018131021.F844.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! hints/aix.sh
+____________________________________________________________________________
+[  7367] By: jhi                                   on 2000/10/19  02:22:40
+        Log: Fix of sorts for bug id 20000901.092.  There seems to be no trace
+             of a 'pmshort' anywhere in the B, so the offending line was simply
+             removed.
+     Branch: perl
+	   ! ext/B/B/Debug.pm
+____________________________________________________________________________
+[  7366] By: jhi                                   on 2000/10/19  02:12:37
+        Log: Add the test case for the bug id 20000730.004 which seems
+             to have been fixed by now.
+     Branch: perl
+	   ! t/pragma/utf8.t
+____________________________________________________________________________
+[  7365] By: jhi                                   on 2000/10/18  23:36:24
+        Log: Subject: [PATCH 5.7.0] Re: [ID 20001018.008] flip-flop bug when there's no <FH> 
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Wed, 18 Oct 2000 23:25:58 +0100
+             Message-Id: <200010182225.XAA20330@crypt.compulink.co.uk>
+     Branch: perl
+	   ! pp_ctl.c pp_hot.c t/op/flip.t t/pragma/warn/pp_hot
+____________________________________________________________________________
+[  7364] By: jhi                                   on 2000/10/18  21:12:53
+        Log: (retracted)
+     Branch: perl
+	   ! pp.c
+____________________________________________________________________________
+[  7363] By: jhi                                   on 2000/10/18  20:55:38
+        Log: Missing change from #7362.
+     Branch: perl
+	   ! win32/perlhost.h
+____________________________________________________________________________
+[  7362] By: jhi                                   on 2000/10/18  20:52:01
+        Log: Borland C fstat() never saw the fd as writable.
+             
+             Subject: fix for Borland's weak "stat" (perl@7211)
+             From: "Konovalov, Vadim" <vkonovalov@lucent.com>
+             Date: Mon, 16 Oct 2000 09:55:03 +0400
+             Message-ID: <402099F49BEED211999700805FC7359F7C0E40@ru0028exch01.spb.lucent.com>
+     Branch: perl
+	   ! win32/win32.c
+____________________________________________________________________________
+[  7361] By: jhi                                   on 2000/10/18  17:43:50
+        Log: Regen toc.
+     Branch: perl
+	   ! pod/buildtoc.PL pod/perl.pod pod/perlport.pod pod/perltoc.pod
+____________________________________________________________________________
+[  7360] By: jhi                                   on 2000/10/18  17:07:44
+        Log: From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Subject: Re: [ID 20001013.008] perl 5.6.0 on AIX 4.3.2 w/GCC 2.95.2
+             Message-Id: <20001016151837.9977.H.M.BRAND@hccnet.nl>
+             Date: Mon, 16 Oct 2000 15:19:49 +0200
+     Branch: perl
+	   + README.aix
+	   ! MANIFEST
+____________________________________________________________________________
+[  7359] By: jhi                                   on 2000/10/18  17:04:49
+        Log: Subject: Pod patch for Devel::Peek
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Message-Id: <20001016121252.996B.H.M.BRAND@hccnet.nl>
+             Date: Mon, 16 Oct 2000 12:26:34 +0200
+     Branch: perl
+	   ! ext/Devel/Peek/Peek.pm
+____________________________________________________________________________
+[  7358] By: jhi                                   on 2000/10/18  17:03:15
+        Log: Make Cwd more bulletproof in chrooted environments.
+             
+             Subject: [ID 20001018.001] Fix for Cwd.pm (chroot)
+             From: "Eric E. Coe" <Eric.Coe@oracle.com>
+             Date: Wed, 18 Oct 2000 04:03:54 -0400
+             Message-Id: <39ED596A.70E599FE@oracle.com>
+     Branch: perl
+	   ! lib/Cwd.pm
+____________________________________________________________________________
+[  7357] By: jhi                                   on 2000/10/18  16:37:26
+        Log: Disable the UTF8 downgrade croakage for now to avoid
+             too many not okay messages.
+     Branch: perl
+	   ! doio.c
+____________________________________________________________________________
+[  7356] By: jhi                                   on 2000/10/17  23:29:41
+        Log: Show the failed remote port, instead of the failing line number.
+             
+             Subject: [PATCH 5.6.1 Debugger] More diagnostics
+             From: David Sparks <daves@ActiveState.com>
+             Date: Tue, 17 Oct 2000 15:00:24 -0700
+             Message-Id: <5.0.0.25.0.20001017144037.02551e10@pop3>
+     Branch: perl
+	   ! lib/perl5db.pl
+____________________________________________________________________________
+[  7355] By: jhi                                   on 2000/10/17  14:11:31
+        Log: On output try to downgrade to bytes, croak if impossible,
+             from Simon Cozens.  This means that outputting >255 UTF8
+             is impossible.  Consider this as a strong incentive to get
+             the I/O disciplines implemented.
+     Branch: perl
+	   ! doio.c pod/perldiag.pod sv.c
+____________________________________________________________________________
+[  7354] By: jhi                                   on 2000/10/17  13:42:23
+        Log: Clarify documentation on 'use bytes'.
+             
+             Subject: Re: What does 'use bytes' "mean" ?
+             From: Simon Cozens <simon@cozens.net>
+             Date: Mon, 18 Sep 2000 18:24:25 +0100
+             Message-ID: <20000918182425.A26765@deep-dark-truthful-mirror.perlhacker.org>
+     Branch: perl
+	   ! lib/bytes.pm
+____________________________________________________________________________
+[  7353] By: jhi                                   on 2000/10/17  13:28:12
+        Log: Workaround for a sfio bug where the stream error indicator
+             is not cleared as documented.
+             
+             Subject: PATCH (was Re: [ID 20001016.007] Not OK: perl v5.7.0 +DEVEL7228 on i586-linux 2.2.16 (UNINSTALLED))
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Mon, 16 Oct 2000 18:28:23 +0100
+             Message-ID: <20001016182823.J19700@plum.flirble.org>
+     Branch: perl
+	   ! doio.c
+____________________________________________________________________________
+[  7352] By: jhi                                   on 2000/10/17  13:06:19
+        Log: More IoTYPE sprinkling.
+     Branch: perl
+	   ! doio.c pp_hot.c
+____________________________________________________________________________
+[  7351] By: jhi                                   on 2000/10/16  22:47:07
+        Log: Detect early whether the std streams have gone bad.
+             
+             Subject: PATCH (was Re: [ID 20001016.007] Not OK: perl v5.7.0 +DEVEL7228 on i586-linux 2.2.16 (UNINSTALLED))
+             Date: Mon, 16 Oct 2000 23:28:42 +0100
+             From: Nicholas Clark <nick@ccl4.org>
+             Message-ID: <20001016232842.A37942@plum.flirble.org>
+     Branch: perl
+	   ! t/op/misc.t
+____________________________________________________________________________
+[  7350] By: jhi                                   on 2000/10/16  22:45:16
+        Log: Subject: [ID 20001016.012] [PATCHes Included]OK: perl v5.7.0 on dos-djgpp djgpp
+             From: "Peter J. Farley III" <pjfarley@banet.net>
+             Date: Mon, 16 Oct 2000 18:15:59 -0400
+             Message-Id: <4.3.1.0.20001016180235.00ac65a0@pop5.banet.net>
+     Branch: perl
+	   ! djgpp/djgpp.c dosish.h t/io/open.t
+____________________________________________________________________________
+[  7349] By: jhi                                   on 2000/10/16  22:36:45
+        Log: perldelta tweak.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  7348] By: jhi                                   on 2000/10/16  15:17:53
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  7347] By: jhi                                   on 2000/10/16  13:55:27
         Log: Add the capability to include/exclude branches.
      Branch: perl
