@@ -2316,11 +2316,11 @@ static
 XS(w32_DomainName)
 {
     dXSARGS;
-    EXTEND(SP,1);
 #ifndef HAS_NETWKSTAGETINFO
     /* mingw32 (and Win95) don't have NetWksta*(), so do it the old way */
     char name[256];
     DWORD size = sizeof(name);
+    EXTEND(SP,1);
     if (GetUserName(name,&size)) {
 	char sid[1024];
 	DWORD sidlen = sizeof(sid);
@@ -2339,6 +2339,7 @@ XS(w32_DomainName)
     char dname[256];
     DWORD dnamelen = sizeof(dname);
     PWKSTA_INFO_100 pwi;
+    EXTEND(SP,1);
     if (NERR_Success == NetWkstaGetInfo(NULL, 100, (LPBYTE*)&pwi)) {
 	if (pwi->wki100_langroup && *(pwi->wki100_langroup)) {
 	    WideCharToMultiByte(CP_ACP, NULL, pwi->wki100_langroup,
