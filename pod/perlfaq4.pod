@@ -246,8 +246,9 @@ and Date::Manip modules from CPAN.
 
 Neither Date::Manip nor Date::Calc deal with Julian days.  Instead,
 there is an example of Julian date calculation that should help you in
-http://www.perl.com/CPAN/authors/David_Muir_Sharnoff/modules/Time/JulianDay.pm.gz
-..
+Time::JulianDay (part of the Time-modules bundle) which can be found at
+http://www.perl.com/CPAN/modules/by-module/Time/.
+
 
 =head2 How do I find yesterday's date?
 
@@ -347,7 +348,7 @@ modules or oddities that will make your life a lot easier.  There is
 the CPAN module Parse::RecDescent, the standard module Text::Balanced,
 the byacc program, the CPAN module Parse::Yapp, and Mark-Jason
 Dominus's excellent I<py> tool at http://www.plover.com/~mjd/perl/py/
-..
+.
 
 One simple destructive, inside-out approach that you might try is to
 pull out the smallest nesting parts one at a time:
@@ -1605,10 +1606,10 @@ if you just want to say, ``Is this a float?''
 
     sub is_numeric { defined &getnum } 
 
-Or you could check out
-http://www.perl.com/CPAN/modules/by-module/String/String-Scanf-1.1.tar.gz
-instead.  The POSIX module (part of the standard Perl distribution)
-provides the C<strtol> and C<strtod> for converting strings to double
+Or you could check out String::Scanf which can be found at
+http://www.perl.com/CPAN/modules/by-module/String/.
+The POSIX module (part of the standard Perl distribution) provides 
+the C<strtol> and C<strtod> for converting strings to double
 and longs, respectively.
 
 =head2 How do I keep persistent data across program calls?
@@ -1662,7 +1663,7 @@ All rights reserved.
 
 When included as part of the Standard Version of Perl, or as part of
 its complete documentation whether printed or otherwise, this work
-may be distributed only under the terms of Perl's Artistic License.
+may be distributed only under the terms of Perl's Artistic Licence.
 Any distribution of this file or derivatives thereof I<outside>
 of that package require that special arrangements be made with
 copyright holder.
@@ -1672,3 +1673,4 @@ are hereby placed into the public domain.  You are permitted and
 encouraged to use this code in your own programs for fun
 or for profit as you see fit.  A simple comment in the code giving
 credit would be courteous but is not required.
+

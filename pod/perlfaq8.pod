@@ -896,6 +896,9 @@ Background yourself like this:
 
 =back
 
+The Proc::Daemon module, available from CPAN, provides a function to
+perform these actions for you.
+
 =head2 How do I make my program run with sh and csh?
 
 See the F<eg/nih> script (part of the perl source distribution).
@@ -1061,7 +1064,7 @@ Here are the suggested ways of modifying your include path:
 
     the PERLLIB environment variable
     the PERL5LIB environment variable
-    the perl -Idir commpand line flag
+    the perl -Idir command line flag
     the use lib pragma, as in
         use lib "$ENV{HOME}/myown_perllib";
 
@@ -1082,7 +1085,7 @@ All rights reserved.
 
 When included as part of the Standard Version of Perl, or as part of
 its complete documentation whether printed or otherwise, this work
-may be distributed only under the terms of Perl's Artistic License.
+may be distributed only under the terms of Perl's Artistic Licence.
 Any distribution of this file or derivatives thereof I<outside>
 of that package require that special arrangements be made with
 copyright holder.
@@ -1092,3 +1095,4 @@ are hereby placed into the public domain.  You are permitted and
 encouraged to use this code in your own programs for fun
 or for profit as you see fit.  A simple comment in the code giving
 credit would be courteous but is not required.
+

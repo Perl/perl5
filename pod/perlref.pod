@@ -2,6 +2,12 @@
 
 perlref - Perl references and nested data structures
 
+=head1 NOTE
+
+This is complete documentation about all aspects of references.
+For a shorter, tutorial introduction to just the essential features,
+see L<perlreftut>.
+
 =head1 DESCRIPTION
 
 Before release 5 of Perl it was difficult to represent complex data
@@ -553,7 +559,7 @@ access to those variables even though it doesn't get run until later,
 such as in a signal handler or a Tk callback.
 
 Using a closure as a function template allows us to generate many functions
-that act similarly.  Suppopose you wanted functions named after the colors
+that act similarly.  Suppose you wanted functions named after the colors
 that generated HTML font changes for the various colors:
 
     print "Be ", red("careful"), "with that ", green("light");

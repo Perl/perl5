@@ -48,8 +48,8 @@ To change the value of an *already-existing* SV, there are seven routines:
     void  sv_setiv(SV*, IV);
     void  sv_setuv(SV*, UV);
     void  sv_setnv(SV*, double);
-    void  sv_setpv(SV*, char*);
-    void  sv_setpvn(SV*, char*, int)
+    void  sv_setpv(SV*, const char*);
+    void  sv_setpvn(SV*, const char*, int)
     void  sv_setpvf(SV*, const char*, ...);
     void  sv_setpvfn(SV*, const char*, STRLEN, va_list *, SV **, I32, bool);
     void  sv_setsv(SV*, SV*);
@@ -68,7 +68,7 @@ C<sv_setpvfn> is an analogue of C<vsprintf>, but it allows you to specify
 either a pointer to a variable argument list or the address and length of
 an array of SVs.  The last argument points to a boolean; on return, if that
 boolean is true, then locale-specific information has been used to format
-the string, and the string's contents are therefore untrustworty (see
+the string, and the string's contents are therefore untrustworthy (see
 L<perlsec>).  This pointer may be NULL if that information is not
 important.  Note that this function requires you to specify the length of
 the format.
@@ -95,10 +95,20 @@ or string.
 
 In the C<SvPV> macro, the length of the string returned is placed into the
 variable C<len> (this is a macro, so you do I<not> use C<&len>).  If you do not
-care what the length of the data is, use the global variable C<PL_na>, though
-this is rather less efficient than using a local variable.  Remember,
-however, that Perl allows arbitrary strings of data that may both contain
-NULs and might not be terminated by a NUL.
+care what the length of the data is, use the global variable C<PL_na> or a
+local variable of type C<STRLEN>. However using C<PL_na> can be quite
+inefficient because C<PL_na> must be accessed in thread-local storage in
+threaded Perl.  In any case, remember that Perl allows arbitrary strings of
+data that may both contain NULs and might not be terminated by a NUL.
+
+Also remember that C doesn't allow you to safely say C<foo(SvPV(s, len),
+len);>. It might work with your compiler, but it won't work for everyone.
+Break this sort of statement up into separate assignments:
+
+	STRLEN len;
+	char * ptr;
+	ptr = SvPV(len);
+	foo(ptr, len);
 
 If you want to know if the scalar value is TRUE, you can use:
 
@@ -139,7 +149,7 @@ If you want to append something to the end of string stored in an C<SV*>,
 you can use the following functions:
 
     void  sv_catpv(SV*, char*);
-    void  sv_catpvn(SV*, char*, int);
+    void  sv_catpvn(SV*, char*, STRLEN);
     void  sv_catpvf(SV*, const char*, ...);
     void  sv_catpvfn(SV*, const char*, STRLEN, va_list *, SV **, I32, bool);
     void  sv_catsv(SV*, SV*);
@@ -351,11 +361,9 @@ This returns NULL if the variable does not exist.
 
 The hash algorithm is defined in the C<PERL_HASH(hash, key, klen)> macro:
 
-    i = klen;
     hash = 0;
-    s = key;
-    while (i--)
-	hash = hash * 33 + *s++;
+    while (klen--)
+	hash = (hash * 33) + *key++;
 
 See L<Understanding the Magic of Tied Hashes and Arrays> for more
 information on how to use the hash access functions on tied hashes.
@@ -489,7 +497,7 @@ reference is rv.  SV is blessed if C<classname> is non-null.
 Copies string into an SV whose reference is C<rv>.  Set length to 0 to let
 Perl calculate the string length.  SV is blessed if C<classname> is non-null.
 
-	SV* sv_setref_pvn(SV* rv, char* classname, PV iv, int length);
+	SV* sv_setref_pvn(SV* rv, char* classname, PV iv, STRLEN length);
 
 Tests whether the SV is blessed into the specified class.  It does not
 check inheritance relationships.
@@ -1234,7 +1242,12 @@ consult L<perlcall>.
 
 =head2 Memory Allocation
 
-It is suggested that you use the version of malloc that is distributed
+All memory meant to be used with the Perl API functions should be manipulated
+using the macros described in this section.  The macros provide the necessary
+transparency between differences in the actual malloc implementation that is
+used within perl.
+
+It is suggested that you enable the version of malloc that is distributed
 with Perl.  It keeps pools of various sizes of unallocated memory in
 order to satisfy allocation requests more quickly.  However, on some
 platforms, it may cause spurious malloc or free errors.
@@ -1501,7 +1514,7 @@ It is strongly recommended that all Perl API functions that don't begin
 with C<perl> be referenced with an explicit C<Perl_> prefix.
 
 The sort order of the listing is case insensitive, with any
-occurrences of '_' ignored for the the purpose of sorting.
+occurrences of '_' ignored for the purpose of sorting.
 
 =over 8
 
@@ -1772,7 +1785,7 @@ method's CV, which can be obtained from the GV with the C<GvCV> macro.
 =item gv_fetchmethod_autoload
 
 Returns the glob which contains the subroutine to call to invoke the
-method on the C<stash>.  In fact in the presense of autoloading this may
+method on the C<stash>.  In fact in the presence of autoloading this may
 be the glob for "AUTOLOAD".  In this case the corresponding variable
 $AUTOLOAD is already setup.
 
@@ -2168,6 +2181,14 @@ Turns on the magical status of an SV.  See C<sv_magic>.
 Do magic after a value is assigned to the SV.  See C<sv_magic>.
 
 	int	mg_set (SV* sv)
+
+=item modglobal
+
+C<modglobal> is a general purpose, interpreter global HV for use by
+extensions that need to keep information on a per-interpreter basis.
+In a pinch, it can also be used as a symbol table for extensions
+to share data among each other.  It is a good idea to use keys
+prefixed by the package name of the extension that owns the data.
 
 =item Move
 
@@ -2659,7 +2680,7 @@ Handles 'get' magic, but not 'set' magic.  See C<sv_catpv_mg>.
 
 Like C<sv_catpv>, but also handles 'set' magic.
 
-	void	sv_catpvn (SV* sv, char* ptr)
+	void	sv_catpv_mg (SV* sv, const char* ptr)
 
 =item sv_catpvn
 
@@ -2730,20 +2751,13 @@ Returns the length of the string which is in the SV.  See C<SvLEN>.
 
 Set the length of the string which is in the SV.  See C<SvCUR>.
 
-	void	SvCUR_set (SV* sv, int val )
+	void	SvCUR_set (SV* sv, int val)
 
 =item sv_dec
 
 Auto-decrement of the value in the SV.
 
 	void	sv_dec (SV* sv)
-
-=item sv_derived_from
-
-Returns a boolean indicating whether the SV is a subclass of the
-specified class.
-
-	int     sv_derived_from(SV* sv, char* class)
 
 =item sv_derived_from
 
@@ -2772,7 +2786,7 @@ identical.
 Invokes C<mg_get> on an SV if it has 'get' magic.  This macro evaluates
 its argument more than once.
 
-	void	SvGETMAGIC( SV *sv )
+	void	SvGETMAGIC(SV *sv)
 
 =item SvGROW
 
@@ -2781,7 +2795,7 @@ indicated number of bytes (remember to reserve space for an extra
 trailing NUL character).  Calls C<sv_grow> to perform the expansion if
 necessary.  Returns a pointer to the character buffer.
 
-	char*	SvGROW( SV* sv, STRLEN len )
+	char*	SvGROW(SV* sv, STRLEN len)
 
 =item sv_grow
 
@@ -3011,15 +3025,14 @@ Checks the B<private> setting.  Use C<SvPOK>.
 Returns a pointer to the string in the SV, or a stringified form of the SV
 if the SV does not contain a string.  Handles 'get' magic.
 
-	char*	SvPV (SV* sv, int len )
+	char*	SvPV (SV* sv, STRLEN len)
 
 =item SvPV_force
 
 Like <SvPV> but will force the SV into becoming a string (SvPOK).  You
 want force if you are going to update the SvPVX directly.
 
-	char*	SvPV_force(SV* sv, int len)
-
+	char*	SvPV_force(SV* sv, STRLEN len)
 
 =item SvPVX
 
@@ -3107,13 +3120,13 @@ Like C<sv_setnv>, but also handles 'set' magic.
 Copies a string into an SV.  The string must be null-terminated.
 Does not handle 'set' magic.  See C<sv_setpv_mg>.
 
-	void	sv_setpv (SV* sv, char* ptr)
+	void	sv_setpv (SV* sv, const char* ptr)
 
 =item sv_setpv_mg
 
 Like C<sv_setpv>, but also handles 'set' magic.
 
-	void	sv_setpv_mg (SV* sv, char* ptr)
+	void	sv_setpv_mg (SV* sv, const char* ptr)
 
 =item sv_setpviv
 
@@ -3133,13 +3146,13 @@ Like C<sv_setpviv>, but also handles 'set' magic.
 Copies a string into an SV.  The C<len> parameter indicates the number of
 bytes to be copied.  Does not handle 'set' magic.  See C<sv_setpvn_mg>.
 
-	void	sv_setpvn (SV* sv, char* ptr, STRLEN len)
+	void	sv_setpvn (SV* sv, const char* ptr, STRLEN len)
 
 =item sv_setpvn_mg
 
 Like C<sv_setpvn>, but also handles 'set' magic.
 
-	void	sv_setpvn_mg (SV* sv, char* ptr, STRLEN len)
+	void	sv_setpvn_mg (SV* sv, const char* ptr, STRLEN len)
 
 =item sv_setpvf
 

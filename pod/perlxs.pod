@@ -181,10 +181,10 @@ directive is used which sets ST(0) explicitly.
 
 Older versions of this document recommended to use C<void> return
 value in such cases. It was discovered that this could lead to
-segfaults in cases when XSUB was I<truely> C<void>. This practice is
+segfaults in cases when XSUB was I<truly> C<void>. This practice is
 now deprecated, and may be not supported at some future version. Use
 the return value C<SV *> in such cases. (Currently C<xsubpp> contains
-some heuristic code which tries to disambiguate between "truely-void"
+some heuristic code which tries to disambiguate between "truly-void"
 and "old-practice-declared-as-void" functions. Hence your code is at
 mercy of this heuristics unless you use C<SV *> as return value.)
 
@@ -387,9 +387,9 @@ the same line where the input variable is declared.  If the
 initialization begins with C<;> or C<+>, then it is output after
 all of the input variables have been declared.  The C<=> and C<;>
 cases replace the initialization normally supplied from the typemap.
-For the C<+> case, the initialization from the typemap will preceed
+For the C<+> case, the initialization from the typemap will precede
 the initialization code included after the C<+>.  A global
-variable, C<%v>, is available for the truely rare case where
+variable, C<%v>, is available for the truly rare case where
 information from one initialization is needed in another
 initialization.
 
@@ -553,7 +553,7 @@ The XS code, with ellipsis, follows.
           time_t timep = NO_INIT
 	  PREINIT:
           char *host = "localhost";
-          STRLEN n_a;
+	  STRLEN n_a;
           CODE:
 		  if( items > 1 )
 		       host = (char *)SvPV(ST(1), n_a);
@@ -787,7 +787,7 @@ prototypes.
 	  PROTOTYPE: $;$
 	  PREINIT:
           char *host = "localhost";
-          STRLEN n_a;
+	  STRLEN n_a;
           CODE:
 		  if( items > 1 )
 		       host = (char *)SvPV(ST(1), n_a);

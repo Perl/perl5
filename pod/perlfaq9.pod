@@ -20,7 +20,7 @@ may not be so well received.
 The useful FAQs and related documents are:
 
     CGI FAQ
-        http://www.webthing.com/page.cgi/cgifaq
+        http://www.webthing.com/tutorials/cgifaq.html
 
     Web FAQ
         http://www.boutell.com/faq/
@@ -93,7 +93,7 @@ Here's one "simple-minded" approach, that works for most files:
 If you want a more complete solution, see the 3-stage striphtml
 program in
 http://www.perl.com/CPAN/authors/Tom_Christiansen/scripts/striphtml.gz
-..
+.
 
 Here are some tricky cases that you should think about when picking
 a solution:
@@ -213,7 +213,7 @@ Here's an example of decoding:
     $string =~ s/%([a-fA-F0-9]{2})/chr(hex($1))/ge;
 
 Encoding is a bit harder, because you can't just blindly change
-all the non-alphanumunder character (C<\W>) into their hex escapes.
+all the non-alphanumeric characters (C<\W>) into their hex escapes.
 It's important that characters with special meaning like C</> and C<?>
 I<not> be translated.  Probably the easiest way to get this right is
 to avoid reinventing the wheel and just use the URI::Escape module,
@@ -541,7 +541,7 @@ All rights reserved.
 
 When included as part of the Standard Version of Perl, or as part of
 its complete documentation whether printed or otherwise, this work
-may be distributed only under the terms of Perl's Artistic License.
+may be distributed only under the terms of Perl's Artistic Licence.
 Any distribution of this file or derivatives thereof I<outside>
 of that package require that special arrangements be made with
 copyright holder.
@@ -551,3 +551,4 @@ are hereby placed into the public domain.  You are permitted and
 encouraged to use this code in your own programs for fun
 or for profit as you see fit.  A simple comment in the code giving
 credit would be courteous but is not required.
+

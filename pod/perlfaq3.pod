@@ -147,9 +147,16 @@ results are not particularly satisfying for sophisticated code.
 The a2ps at http://www.infres.enst.fr/~demaille/a2ps/ does lots of things
 related to generating nicely printed output of documents.
 
-=head2 Is there a ctags for Perl?
+=head2 Is there a etags/ctags for perl?
 
-There's a simple one at
+With respect to the source code for the Perl interpreter, yes.
+There has been support for etags in the source for a long time.
+Ctags was introduced in v5.005_54 (and probably 5.005_03).
+After building perl, type 'make etags' or 'make ctags' and both
+sets of tag files will be built.
+
+Now, if you're looking to build a tag file for perl code, then there's
+a simple one at
 http://www.perl.com/CPAN/authors/id/TOMC/scripts/ptags.gz which may do
 the trick.  And if not, it's easy to hack into what you want.
 
@@ -361,7 +368,7 @@ care.
 See http://www.perl.com/CPAN/modules/by-category/15_World_Wide_Web_HTML_HTTP_CGI/ .
 
 A non-free, commercial product, ``The Velocity Engine for Perl'',
-(http://www.binevolve.com/ or http://www.binevolve.com/bine/vep) might
+(http://www.binevolve.com/ or 
 also be worth looking at.  It will allow you to increase the performance
 of your perl scripts, upto 25 times faster than normal CGI perl by
 running in persistent perl mode, or 4 to 5 times faster without any
@@ -563,7 +570,7 @@ when it runs fine on the command line'', see these sources:
         http://www.boutell.com/faq/
 
     CGI FAQ
-        http://www.webthing.com/page.cgi/cgifaq
+		http://www.webthing.com/tutorials/cgifaq.html		
 
     HTTP Spec
         http://www.w3.org/pub/WWW/Protocols/HTTP/
@@ -578,6 +585,7 @@ when it runs fine on the command line'', see these sources:
     CGI Security FAQ
         http://www.go2net.com/people/paulp/cgi-security/safe-cgi.txt
 
+Also take a look at L<perlfaq9>
 
 =head2 Where can I learn about object-oriented Perl programming?
 
@@ -633,7 +641,7 @@ Copyright (c) 1997-1999 Tom Christiansen and Nathan Torkington.
 All rights reserved.
 
 When included as an integrated part of the Standard Distribution
-of Perl or of its documentation (printed or otherwise), this works is
+of Perl or of its documentation (printed or otherwise), this work is
 covered under Perl's Artistic Licence.  For separate distributions of
 all or part of this FAQ outside of that, see L<perlfaq>.
 
@@ -642,3 +650,4 @@ domain.  You are permitted and encouraged to use this code and any
 derivatives thereof in your own programs for fun or for profit as you
 see fit.  A simple comment in the code giving credit to the FAQ would
 be courteous but is not required.
+
