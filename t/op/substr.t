@@ -2,7 +2,7 @@
 
 # $RCSfile: substr.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:31 $
 
-print "1..22\n";
+print "1..25\n";
 
 $a = 'abcdefxyz';
 
@@ -45,3 +45,24 @@ $a = 'abcdefxyz';
 print (substr($a,6) eq 'xyz' ? "ok 20\n" : "not ok 20\n");
 print (substr($a,-3) eq 'xyz' ? "ok 21\n" : "not ok 21\n");
 print (substr($a,999) eq '' ? "ok 22\n" : "not ok 22\n");
+
+# with lexicals (and in re-entered scopes)
+for (0,1) {
+  my $txt;
+  unless ($_) {
+    $txt = "Foo";
+    substr($txt, -1) = "X";
+    print $txt eq "FoX" ? "ok 23\n" : "not ok 23\n";
+  }
+  else {
+    substr($txt, 0, 1) = "X";
+    print $txt eq "X" ? "ok 24\n" : "not ok 24\n";
+  }
+}
+
+# coersion of references
+{
+  my $s = [];
+  substr($s, 0, 1) = 'Foo';
+  print substr($s,0,7) eq "FooRRAY" ? "ok 25\n" : "not ok 25\n";
+}
