@@ -16,7 +16,7 @@ use Test::More;
 
 BEGIN {
 	if ($^O =~ /cygwin/i) {
-		plan tests => 13;
+		plan tests => 11;
 	} else {
 		plan skip_all => "This is not cygwin";
 	}
@@ -80,18 +80,6 @@ unlike( $MM->manifypods(), qr/foo/,
 $MM->{MAN3PODS} = { foo => 'foo.1' };
 my $res = $MM->manifypods();
 like( $res, qr/pure_all.*foo.*foo.1/s, '... should add MAN3PODS targets' );
-
-
-SKIP: {
-    skip "Only relevent in the core", 2 unless $ENV{PERL_CORE};
-    $MM->{PERL_SRC} = File::Spec->updir;
-    $MM->{MAN1PODS} = { bar => 1 };
-    my $out = tie *STDOUT, 'FakeOut';
-    $res = $MM->manifypods();
-    is( $$out, '', '... should not warn if PERL_SRC provided' );
-    like( $res, qr/bar \\\n\t1 \\\n\tfoo/,
-          '... should join MAN1PODS and MAN3PODS');
-}
 
 
 # init_linker

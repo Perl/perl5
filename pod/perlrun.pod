@@ -1097,7 +1097,7 @@ L<perlvms> and in F<README.vms> in the Perl source distribution.
 
 In Perls 5.8.1 and later.  If set to C<unsafe> the pre-Perl-5.8.0
 signals behaviour (immediate but unsafe) is restored.  If set to
-C<safe> the safe signals are used.
+C<safe> the safe (or deferred) signals are used.  See L<perlipc>.
 
 =item PERL_UNICODE
 

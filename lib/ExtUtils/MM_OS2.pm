@@ -6,7 +6,7 @@ use vars qw($VERSION @ISA);
 use ExtUtils::MakeMaker qw(neatvalue);
 use File::Spec;
 
-$VERSION = '1.03';
+$VERSION = '1.04';
 
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
@@ -42,7 +42,7 @@ sub init_dist {
     my($self) = @_;
 
     $self->{TO_UNIX} ||= <<'MAKE_TEXT';
-$(NOECHO) $(TEST_F) tmp.zip && $(RM) tmp.zip; $(ZIP) -ll -mr tmp.zip $(DISTVNAME) && unzip -o tmp.zip && $(RM) tmp.zip
+$(NOECHO) $(TEST_F) tmp.zip && $(RM_F) tmp.zip; $(ZIP) -ll -mr tmp.zip $(DISTVNAME) && unzip -o tmp.zip && $(RM_F) tmp.zip
 MAKE_TEXT
 
     $self->SUPER::init_dist;
@@ -134,6 +134,16 @@ sub init_linker {
       ? "\$(PERL_INC)/libperl_override\$(LIB_EXT)"
       : '';
     $self->{EXPORT_LIST} = '$(BASEEXT).def';
+}
+
+=item os_flavor
+
+OS/2 is OS/2
+
+=cut
+
+sub os_flavor {
+    return('OS/2');
 }
 
 =back

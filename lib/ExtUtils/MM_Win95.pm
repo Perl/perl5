@@ -1,7 +1,7 @@
 package ExtUtils::MM_Win95;
 
 use vars qw($VERSION @ISA);
-$VERSION = 0.02;
+$VERSION = 0.03;
 
 require ExtUtils::MM_Win32;
 @ISA = qw(ExtUtils::MM_Win32);
@@ -203,6 +203,19 @@ sub max_exec_len {
 
     return $self->{_MAX_EXEC_LEN} ||= 2500;
 }
+
+
+=item os_flavor
+
+Win95 and Win98 and WinME are collectively Win9x and Win32
+
+=cut
+
+sub os_flavor {
+    my $self = shift;
+    return ($self->SUPER::os_flavor, 'Win9x');
+}
+
 
 =back
 

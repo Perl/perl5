@@ -61,6 +61,21 @@ MakeMaker.
 
 =over 4
 
+=item How to I prevent "object version X.XX does not match bootstrap parameter Y.YY" errors?
+
+XS code is very sensitive to the module version number and will
+complain if the version number in your Perl module doesn't match.  If
+you change your module's version # without reruning Makefile.PL the old
+version number will remain in the Makefile causing the XS code to be built
+with the wrong number.
+
+To avoid this, you can force the Makefile to be rebuilt whenever you
+change the module containing the version number by adding this to your
+WriteMakefile() arguments.
+
+    depend => { '$(FIRST_MAKEFILE)' => '$(VERSION_FROM)' }
+
+
 =item How do I make two or more XS files coexist in the same directory?
 
 Sometimes you need to have two and more XS files in the same package.

@@ -14,13 +14,10 @@ Known Problems:
 ActivePerl likely broken if installed in C:\Program Files or other
 prefix with a space in the name.
 
-manifypods target produces command lines too long for some systems
-
 Using the MMS utility on VMS causes lots of extra newlines.  Unknown
 why this is so, might be a bug in MMS.  Problem not seen with MMK.
 
-ActivePerl/Win95 disttest produces "File creation error" from somewhere
-in running Makefile.PL after check_manifest() is run.  Don't know why.
+MacOS Classic is likely broken.
 
 
 See TODO for details.

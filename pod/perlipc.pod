@@ -382,7 +382,7 @@ there are un-waited-for completed child processes.
 
 If you want the old signal behaviour back regardless of possible
 memory corruption, set the environment variable C<PERL_SIGNALS> to
-C<"unsafe">.
+C<"unsafe"> (a new feature since Perl 5.8.1).
 
 =head1 Using open() for IPC
 

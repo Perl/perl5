@@ -29,7 +29,7 @@ use vars qw(@ISA $VERSION $BORLAND $GCC $DMAKE $NMAKE);
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
 @ISA = qw( ExtUtils::MM_Any ExtUtils::MM_Unix );
-$VERSION = '1.06';
+$VERSION = '1.07';
 
 $ENV{EMXSHELL} = 'sh'; # to run `commands`
 
@@ -144,8 +144,10 @@ Using \ for Windows.
 sub init_DIRFILESEP {
     my($self) = shift;
 
-    # gotta be careful this isn't interpreted as an escape.
-    $self->{DIRFILESEP} = '^\\';
+    # The ^ makes sure its not interpreted as an escape in nmake
+    $self->{DIRFILESEP} = $NMAKE ? '^\\' :
+                          $DMAKE ? '\\\\'
+                                 : '\\';
 }
 
 =item B<init_others>
@@ -166,7 +168,8 @@ sub init_others {
     my ($self) = @_;
 
     # Used in favor of echo because echo won't strip quotes. :(
-    $self->{ECHO}     ||= '$(PERLRUN) -le "print qq{@ARGV}"';
+    $self->{ECHO}     ||= $self->oneliner('print qq{@ARGV}', ['-l']);
+
     $self->{TOUCH}    ||= '$(PERLRUN) -MExtUtils::Command -e touch';
     $self->{CHMOD}    ||= '$(PERLRUN) -MExtUtils::Command -e chmod'; 
     $self->{CP}       ||= '$(PERLRUN) -MExtUtils::Command -e cp';
@@ -182,6 +185,9 @@ sub init_others {
     $self->{AR}     ||= $Config{ar} || 'lib';
 
     $self->SUPER::init_others;
+
+    # Setting SHELL from $Config{sh} can break dmake.  Its ok without it.
+    delete $self->{SHELL};
 
     $self->{LDLOADLIBS} ||= $Config{libs};
     # -Lfoo must come first for Borland, so we put it in LDDLFLAGS
@@ -458,6 +464,15 @@ sub quote_literal {
     # Win98's command.com
     $text =~ s{"}{\\"}g;
 
+    # dmake eats '{' inside double quotes and leaves alone { outside double
+    # quotes; however it transforms {{ into { either inside and outside double
+    # quotes.  It also translates }} into }.  The escaping below is not
+    # 100% correct.
+    if( $DMAKE ) {
+        $text =~ s/{/{{/g;
+        $text =~ s/}}/}}}/g;
+    }
+
     return qq{"$text"};
 }
 
@@ -482,6 +497,17 @@ sub max_exec_len {
     my $self = shift;
 
     return $self->{_MAX_EXEC_LEN} ||= 31 * 1024;
+}
+
+
+=item os_flavor
+
+Windows is Win32.
+
+=cut
+
+sub os_flavor {
+    return('Win32');
 }
 
 

@@ -20,7 +20,7 @@ use vars qw($VERSION @ISA
 
 use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
-$VERSION = '1.35';
+$VERSION = '1.36';
 
 require ExtUtils::MM_Any;
 @ISA = qw(ExtUtils::MM_Any);
@@ -96,6 +96,17 @@ my $Updir   = __PACKAGE__->updir;
 =head2 Methods
 
 =over 4
+
+=item os_flavor (o)
+
+Simply says that we're Unix.
+
+=cut
+
+sub os_flavor {
+    return('Unix');
+}
+
 
 =item c_o (o)
 
@@ -1059,12 +1070,14 @@ sub dynamic_lib {
     $armaybe = 'ar' if ($Is_OSF and $armaybe eq ':');
     my(@m);
     my $ld_opt = $Is_OS2 ? '$(OPTIMIZE) ' : '';	# Useful on other systems too?
+    my $ld_fix = $Is_OS2 ? '|| ( $(RM_F) $@ && sh -c false )' : '';
     push(@m,'
 # This section creates the dynamically loadable $(INST_DYNAMIC)
 # from $(OBJECT) and possibly $(MYEXTLIB).
 ARMAYBE = '.$armaybe.'
 OTHERLDFLAGS = '.$ld_opt.$otherldflags.'
 INST_DYNAMIC_DEP = '.$inst_dynamic_dep.'
+INST_DYNAMIC_FIX = '.$ld_fix.'
 
 $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)$(DIRFILESEP).exists $(EXPORT_LIST) $(PERL_ARCHIVE) $(PERL_ARCHIVE_AFTER) $(INST_DYNAMIC_DEP)
 ');
@@ -1105,7 +1118,7 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)$(DIRFILE
 
     push(@m,
 '	LD_RUN_PATH="$(LD_RUN_PATH)" $(LD) '.$ldrun.' $(LDDLFLAGS) '.$ldfrom.
-' $(OTHERLDFLAGS) -o $@ $(MYEXTLIB) $(PERL_ARCHIVE) '.$libs.' $(PERL_ARCHIVE_AFTER) $(EXPORT_LIST)');
+' $(OTHERLDFLAGS) -o $@ $(MYEXTLIB) $(PERL_ARCHIVE) '.$libs.' $(PERL_ARCHIVE_AFTER) $(EXPORT_LIST) $(INST_DYNAMIC_FIX)');
     push @m, '
 	$(CHMOD) $(PERM_RWX) $@
 ';
@@ -1237,6 +1250,9 @@ sub fixin { # stolen from the pink Camel book, more or less
 
     my($does_shbang) = $Config{'sharpbang'} =~ /^\s*\#\!/;
     for my $file (@files) {
+        my $file_new = "$file.new";
+        my $file_bak = "$file.bak";
+
 	local(*FIXIN);
 	local(*FIXOUT);
 	open(FIXIN, $file) or croak "Can't process '$file': $!";
@@ -1288,7 +1304,7 @@ eval 'exec $interpreter $arg -S \$0 \${1+"\$\@"}'
 	    next;
 	}
 
-	unless ( open(FIXOUT,">$file.new") ) {
+	unless ( open(FIXOUT,">$file_new") ) {
 	    warn "Can't create new $file: $!\n";
 	    next;
 	}
@@ -1301,19 +1317,21 @@ eval 'exec $interpreter $arg -S \$0 \${1+"\$\@"}'
 	close FIXIN;
 	close FIXOUT;
 
-	unless ( rename($file, "$file.bak") ) {	
-	    warn "Can't rename $file to $file.bak: $!";
+        chmod 0666, $file_bak;
+        unlink $file_bak;
+	unless ( rename($file, $file_bak) ) {	
+	    warn "Can't rename $file to $file_bak: $!";
 	    next;
 	}
-	unless ( rename("$file.new", $file) ) {	
-	    warn "Can't rename $file.new to $file: $!";
-	    unless ( rename("$file.bak", $file) ) {
-	        warn "Can't rename $file.bak back to $file either: $!";
-		warn "Leaving $file renamed as $file.bak\n";
+	unless ( rename($file_new, $file) ) {	
+	    warn "Can't rename $file_new to $file: $!";
+	    unless ( rename($file_bak, $file) ) {
+	        warn "Can't rename $file_bak back to $file either: $!";
+		warn "Leaving $file renamed as $file_bak\n";
 	    }
 	    next;
 	}
-	unlink "$file.bak";
+	unlink $file_bak;
     } continue {
 	close(FIXIN) if fileno(FIXIN);
 	system("$Config{'eunicefix'} $file") if $Config{'eunicefix'} ne ':';;
@@ -2901,7 +2919,7 @@ $(OBJECT) : $(FIRST_MAKEFILE)
     push @m, q{
 # We take a very conservative approach here, but it\'s worth it.
 # We move Makefile to Makefile.old here to avoid gnu make looping.
-$(FIRST_MAKEFILE) : Makefile.PL $(CONFIGDEP) $(VERSION_FROM)
+$(FIRST_MAKEFILE) : Makefile.PL $(CONFIGDEP)
 	$(NOECHO) $(ECHO) "Makefile out-of-date with respect to $?"
 	$(NOECHO) $(ECHO) "Cleaning current config before rebuilding Makefile..."
 	$(NOECHO) $(RM_F) $(MAKEFILE_OLD)
@@ -3892,7 +3910,8 @@ sub tool_xsubpp {
         }
     }
 
-    my(@tmdeps) = $self->catdir('$(XSUBPPDIR)','typemap');
+    my $tmdir   = File::Spec->catdir($self->{PERL_LIB},"ExtUtils");
+    my(@tmdeps) = $self->catfile($tmdir,'typemap');
     if( $self->{TYPEMAPS} ){
 	my $typemap;
 	foreach $typemap (@{$self->{TYPEMAPS}}){
@@ -3927,11 +3946,9 @@ sub tool_xsubpp {
 	}
     }
 
-    my $xsubpp = "xsubpp";
-
     return qq{
 XSUBPPDIR = $xsdir
-XSUBPP = \$(XSUBPPDIR)/$xsubpp
+XSUBPP = \$(XSUBPPDIR)/xsubpp
 XSPROTOARG = $self->{XSPROTOARG}
 XSUBPPDEPS = @tmdeps \$(XSUBPP)
 XSUBPPARGS = @tmargs
