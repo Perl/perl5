@@ -992,8 +992,8 @@ lib/ExtUtils/MM_VMS.pm		MakeMaker methods for VMS
 lib/ExtUtils/MM_Win32.pm	MakeMaker methods for Win32
 lib/ExtUtils/Packlist.pm	Manipulates .packlist files
 lib/ExtUtils/t/Command.t	See if ExtUtils::Command works (Win32 only)
+lib/ExtUtils/t/Constant.t	See if ExtUtils::Constant works
 lib/ExtUtils/t/Embed.t		See if ExtUtils::Embed and embedding works
-lib/ExtUtils/t/ExtUtils.t	See if extutils work
 lib/ExtUtils/t/hints.t      See if hint files are honored.
 lib/ExtUtils/t/Installed.t	See if ExtUtils::Installed works
 lib/ExtUtils/t/Manifest.t	See if ExtUtils::Manifest works
