@@ -9,41 +9,50 @@
 
 package Data::Dumper;
 
-$VERSION = '2.121_03';
+$VERSION = '2.121_04';
 
 #$| = 1;
 
 use 5.006_001;
 require Exporter;
-use XSLoader ();
 require overload;
 
 use Carp;
 
-@ISA = qw(Exporter);
-@EXPORT = qw(Dumper);
-@EXPORT_OK = qw(DumperX);
+BEGIN {
+    @ISA = qw(Exporter);
+    @EXPORT = qw(Dumper);
+    @EXPORT_OK = qw(DumperX);
 
-XSLoader::load 'Data::Dumper';
+    # if run under miniperl, or otherwise lacking dynamic loading,
+    # XSLoader should be attempted to load, or the pure perl flag
+    # toggled on load failure.
+    eval {
+	require XSLoader;
+	XSLoader::load( 'Data::Dumper' );
+	1;
+    };
+    $Useperl = 1 if $@;
+}
 
 # module vars and their defaults
-$Indent = 2 unless defined $Indent;
-$Purity = 0 unless defined $Purity;
-$Pad = "" unless defined $Pad;
-$Varname = "VAR" unless defined $Varname;
-$Useqq = 0 unless defined $Useqq;
-$Terse = 0 unless defined $Terse;
-$Freezer = "" unless defined $Freezer;
-$Toaster = "" unless defined $Toaster;
-$Deepcopy = 0 unless defined $Deepcopy;
-$Quotekeys = 1 unless defined $Quotekeys;
-$Bless = "bless" unless defined $Bless;
-#$Expdepth = 0 unless defined $Expdepth;
-$Maxdepth = 0 unless defined $Maxdepth;
-$Pair = ' => ' unless defined $Pair;
-$Useperl = 0 unless defined $Useperl;
-$Sortkeys = 0 unless defined $Sortkeys;
-$Deparse = 0 unless defined $Deparse;
+$Indent     = 2         unless defined $Indent;
+$Purity     = 0         unless defined $Purity;
+$Pad        = ""        unless defined $Pad;
+$Varname    = "VAR"     unless defined $Varname;
+$Useqq      = 0         unless defined $Useqq;
+$Terse      = 0         unless defined $Terse;
+$Freezer    = ""        unless defined $Freezer;
+$Toaster    = ""        unless defined $Toaster;
+$Deepcopy   = 0         unless defined $Deepcopy;
+$Quotekeys  = 1         unless defined $Quotekeys;
+$Bless      = "bless"   unless defined $Bless;
+#$Expdepth   = 0         unless defined $Expdepth;
+$Maxdepth   = 0         unless defined $Maxdepth;
+$Pair       = ' => '    unless defined $Pair;
+$Useperl    = 0         unless defined $Useperl;
+$Sortkeys   = 0         unless defined $Sortkeys;
+$Deparse    = 0         unless defined $Deparse;
 
 #
 # expects an arrayref of values to be dumped.
