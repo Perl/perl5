@@ -1995,21 +1995,21 @@ sed %s -e \"/^[^#]/b\" \
 	  scriptname, cpp, sv, CPPMINUS);
 	PL_doextract = FALSE;
 #ifdef IAMSUID				/* actually, this is caught earlier */
-	if (euid != uid && !euid) {	/* if running suidperl */
+	if (PL_euid != PL_uid && !PL_euid) {	/* if running suidperl */
 #ifdef HAS_SETEUID
-	    (void)seteuid(uid);		/* musn't stay setuid root */
+	    (void)seteuid(PL_uid);		/* musn't stay setuid root */
 #else
 #ifdef HAS_SETREUID
-	    (void)setreuid((Uid_t)-1, uid);
+	    (void)setreuid((Uid_t)-1, PL_uid);
 #else
 #ifdef HAS_SETRESUID
-	    (void)setresuid((Uid_t)-1, uid, (Uid_t)-1);
+	    (void)setresuid((Uid_t)-1, PL_uid, (Uid_t)-1);
 #else
-	    PerlProc_setuid(uid);
+	    PerlProc_setuid(PL_uid);
 #endif
 #endif
 #endif
-	    if (PerlProc_geteuid() != uid)
+	    if (PerlProc_geteuid() != PL_uid)
 		croak("Can't do seteuid!\n");
 	}
 #endif /* IAMSUID */
@@ -2031,8 +2031,8 @@ sed %s -e \"/^[^#]/b\" \
     if (!PL_rsfp) {
 #ifdef DOSUID
 #ifndef IAMSUID		/* in case script is not readable before setuid */
-	if (euid && PerlLIO_stat(SvPVX(GvSV(curcop->cop_filegv)),&statbuf) >= 0 &&
-	  statbuf.st_mode & (S_ISUID|S_ISGID)) {
+	if (PL_euid && PerlLIO_stat(SvPVX(GvSV(curcop->cop_filegv)),&PL_statbuf) >= 0 &&
+	  PL_statbuf.st_mode & (S_ISUID|S_ISGID)) {
 	    /* try again */
 	    PerlProc_execv(form("%s/sperl%s", BIN_EXP, patchlevel), origargv);
 	    croak("Can't do setuid\n");
@@ -2073,9 +2073,9 @@ validate_suid(char *validarg, char *scriptname, int fdscript)
     dTHR;
     char *s, *s2;
 
-    if (PerlLIO_fstat(PerlIO_fileno(rsfp),&statbuf) < 0)	/* normal stat is insecure */
+    if (PerlLIO_fstat(PerlIO_fileno(PL_rsfp),&PL_statbuf) < 0)	/* normal stat is insecure */
 	croak("Can't stat script \"%s\"",origfilename);
-    if (fdscript < 0 && statbuf.st_mode & (S_ISUID|S_ISGID)) {
+    if (fdscript < 0 && PL_statbuf.st_mode & (S_ISUID|S_ISGID)) {
 	I32 len;
 
 #ifdef IAMSUID
@@ -2101,54 +2101,54 @@ validate_suid(char *validarg, char *scriptname, int fdscript)
 
 	    if (
 #ifdef HAS_SETREUID
-		setreuid(euid,uid) < 0
+		setreuid(PL_euid,PL_uid) < 0
 #else
 # if HAS_SETRESUID
-		setresuid(euid,uid,(Uid_t)-1) < 0
+		setresuid(PL_euid,PL_uid,(Uid_t)-1) < 0
 # endif
 #endif
-		|| PerlProc_getuid() != euid || PerlProc_geteuid() != uid)
+		|| PerlProc_getuid() != PL_euid || PerlProc_geteuid() != PL_uid)
 		croak("Can't swap uid and euid");	/* really paranoid */
 	    if (PerlLIO_stat(SvPVX(GvSV(curcop->cop_filegv)),&tmpstatbuf) < 0)
 		croak("Permission denied");	/* testing full pathname here */
-	    if (tmpstatbuf.st_dev != statbuf.st_dev ||
-		tmpstatbuf.st_ino != statbuf.st_ino) {
-		(void)PerlIO_close(rsfp);
-		if (rsfp = PerlProc_popen("/bin/mail root","w")) {	/* heh, heh */
-		    PerlIO_printf(rsfp,
+	    if (tmpstatbuf.st_dev != PL_statbuf.st_dev ||
+		tmpstatbuf.st_ino != PL_statbuf.st_ino) {
+		(void)PerlIO_close(PL_rsfp);
+		if (PL_rsfp = PerlProc_popen("/bin/mail root","w")) {	/* heh, heh */
+		    PerlIO_printf(PL_rsfp,
 "User %ld tried to run dev %ld ino %ld in place of dev %ld ino %ld!\n\
 (Filename of set-id script was %s, uid %ld gid %ld.)\n\nSincerely,\nperl\n",
-			(long)uid,(long)tmpstatbuf.st_dev, (long)tmpstatbuf.st_ino,
-			(long)statbuf.st_dev, (long)statbuf.st_ino,
+			(long)PL_uid,(long)tmpstatbuf.st_dev, (long)tmpstatbuf.st_ino,
+			(long)PL_statbuf.st_dev, (long)PL_statbuf.st_ino,
 			SvPVX(GvSV(curcop->cop_filegv)),
-			(long)statbuf.st_uid, (long)statbuf.st_gid);
-		    (void)PerlProc_pclose(rsfp);
+			(long)PL_statbuf.st_uid, (long)PL_statbuf.st_gid);
+		    (void)PerlProc_pclose(PL_rsfp);
 		}
 		croak("Permission denied\n");
 	    }
 	    if (
 #ifdef HAS_SETREUID
-              setreuid(uid,euid) < 0
+              setreuid(PL_uid,PL_euid) < 0
 #else
 # if defined(HAS_SETRESUID)
-              setresuid(uid,euid,(Uid_t)-1) < 0
+              setresuid(PL_uid,PL_euid,(Uid_t)-1) < 0
 # endif
 #endif
-              || PerlProc_getuid() != uid || PerlProc_geteuid() != euid)
+              || PerlProc_getuid() != PL_uid || PerlProc_geteuid() != PL_euid)
 		croak("Can't reswap uid and euid");
-	    if (!cando(S_IXUSR,FALSE,&statbuf))		/* can real uid exec? */
+	    if (!cando(S_IXUSR,FALSE,&PL_statbuf))		/* can real uid exec? */
 		croak("Permission denied\n");
 	}
 #endif /* HAS_SETREUID */
 #endif /* IAMSUID */
 
-	if (!S_ISREG(statbuf.st_mode))
+	if (!S_ISREG(PL_statbuf.st_mode))
 	    croak("Permission denied");
-	if (statbuf.st_mode & S_IWOTH)
+	if (PL_statbuf.st_mode & S_IWOTH)
 	    croak("Setuid/gid script is writable by world");
 	doswitches = FALSE;		/* -s is insecure in suid */
 	curcop->cop_line++;
-	if (sv_gets(linestr, rsfp, 0) == Nullch ||
+	if (sv_gets(linestr, PL_rsfp, 0) == Nullch ||
 	  strnNE(SvPV(linestr,na),"#!",2) )	/* required even on Sys V */
 	    croak("No #! line");
 	s = SvPV(linestr,na)+2;
@@ -2170,15 +2170,15 @@ validate_suid(char *validarg, char *scriptname, int fdscript)
 	    croak("Args must match #! line");
 
 #ifndef IAMSUID
-	if (euid != uid && (statbuf.st_mode & S_ISUID) &&
-	    euid == statbuf.st_uid)
-	    if (!do_undump)
+	if (PL_euid != PL_uid && (PL_statbuf.st_mode & S_ISUID) &&
+	    PL_euid == PL_statbuf.st_uid)
+	    if (!PL_do_undump)
 		croak("YOU HAVEN'T DISABLED SET-ID SCRIPTS IN THE KERNEL YET!\n\
 FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 #endif /* IAMSUID */
 
-	if (euid) {	/* oops, we're not the setuid root perl */
-	    (void)PerlIO_close(rsfp);
+	if (PL_euid) {	/* oops, we're not the setuid root perl */
+	    (void)PerlIO_close(PL_rsfp);
 #ifndef IAMSUID
 	    /* try again */
 	    PerlProc_execv(form("%s/sperl%s", BIN_EXP, patchlevel), origargv);
@@ -2186,60 +2186,60 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 	    croak("Can't do setuid\n");
 	}
 
-	if (statbuf.st_mode & S_ISGID && statbuf.st_gid != egid) {
+	if (PL_statbuf.st_mode & S_ISGID && PL_statbuf.st_gid != PL_egid) {
 #ifdef HAS_SETEGID
-	    (void)setegid(statbuf.st_gid);
+	    (void)setegid(PL_statbuf.st_gid);
 #else
 #ifdef HAS_SETREGID
-           (void)setregid((Gid_t)-1,statbuf.st_gid);
+           (void)setregid((Gid_t)-1,PL_statbuf.st_gid);
 #else
 #ifdef HAS_SETRESGID
-           (void)setresgid((Gid_t)-1,statbuf.st_gid,(Gid_t)-1);
+           (void)setresgid((Gid_t)-1,PL_statbuf.st_gid,(Gid_t)-1);
 #else
-	    PerlProc_setgid(statbuf.st_gid);
+	    PerlProc_setgid(PL_statbuf.st_gid);
 #endif
 #endif
 #endif
-	    if (PerlProc_getegid() != statbuf.st_gid)
+	    if (PerlProc_getegid() != PL_statbuf.st_gid)
 		croak("Can't do setegid!\n");
 	}
-	if (statbuf.st_mode & S_ISUID) {
-	    if (statbuf.st_uid != euid)
+	if (PL_statbuf.st_mode & S_ISUID) {
+	    if (PL_statbuf.st_uid != PL_euid)
 #ifdef HAS_SETEUID
-		(void)seteuid(statbuf.st_uid);	/* all that for this */
+		(void)seteuid(PL_statbuf.st_uid);	/* all that for this */
 #else
 #ifdef HAS_SETREUID
-                (void)setreuid((Uid_t)-1,statbuf.st_uid);
+                (void)setreuid((Uid_t)-1,PL_statbuf.st_uid);
 #else
 #ifdef HAS_SETRESUID
-                (void)setresuid((Uid_t)-1,statbuf.st_uid,(Uid_t)-1);
+                (void)setresuid((Uid_t)-1,PL_statbuf.st_uid,(Uid_t)-1);
 #else
-		PerlProc_setuid(statbuf.st_uid);
+		PerlProc_setuid(PL_statbuf.st_uid);
 #endif
 #endif
 #endif
-	    if (PerlProc_geteuid() != statbuf.st_uid)
+	    if (PerlProc_geteuid() != PL_statbuf.st_uid)
 		croak("Can't do seteuid!\n");
 	}
-	else if (uid) {			/* oops, mustn't run as root */
+	else if (PL_uid) {			/* oops, mustn't run as root */
 #ifdef HAS_SETEUID
-          (void)seteuid((Uid_t)uid);
+          (void)seteuid((Uid_t)PL_uid);
 #else
 #ifdef HAS_SETREUID
-          (void)setreuid((Uid_t)-1,(Uid_t)uid);
+          (void)setreuid((Uid_t)-1,(Uid_t)PL_uid);
 #else
 #ifdef HAS_SETRESUID
-          (void)setresuid((Uid_t)-1,(Uid_t)uid,(Uid_t)-1);
+          (void)setresuid((Uid_t)-1,(Uid_t)PL_uid,(Uid_t)-1);
 #else
-          PerlProc_setuid((Uid_t)uid);
+          PerlProc_setuid((Uid_t)PL_uid);
 #endif
 #endif
 #endif
-	    if (PerlProc_geteuid() != uid)
+	    if (PerlProc_geteuid() != PL_uid)
 		croak("Can't do seteuid!\n");
 	}
 	init_ids();
-	if (!cando(S_IXUSR,TRUE,&statbuf))
+	if (!cando(S_IXUSR,TRUE,&PL_statbuf))
 	    croak("Permission denied\n");	/* they can't do this */
     }
 #ifdef IAMSUID
@@ -2253,15 +2253,15 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
     /* We absolutely must clear out any saved ids here, so we */
     /* exec the real perl, substituting fd script for scriptname. */
     /* (We pass script name as "subdir" of fd, which perl will grok.) */
-    PerlIO_rewind(rsfp);
-    PerlLIO_lseek(PerlIO_fileno(rsfp),(Off_t)0,0);  /* just in case rewind didn't */
+    PerlIO_rewind(PL_rsfp);
+    PerlLIO_lseek(PerlIO_fileno(PL_rsfp),(Off_t)0,0);  /* just in case rewind didn't */
     for (which = 1; origargv[which] && origargv[which] != scriptname; which++) ;
     if (!origargv[which])
 	croak("Permission denied");
     origargv[which] = savepv(form("/dev/fd/%d/%s",
-				  PerlIO_fileno(rsfp), origargv[which]));
+				  PerlIO_fileno(PL_rsfp), origargv[which]));
 #if defined(HAS_FCNTL) && defined(F_SETFD)
-    fcntl(PerlIO_fileno(rsfp),F_SETFD,0);	/* ensure no close-on-exec */
+    fcntl(PerlIO_fileno(PL_rsfp),F_SETFD,0);	/* ensure no close-on-exec */
 #endif
     PerlProc_execv(form("%s/perl%s", BIN_EXP, patchlevel), origargv);	/* try again */
     croak("Can't do setuid\n");
@@ -2270,12 +2270,12 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
     if (PL_euid != PL_uid || PL_egid != PL_gid) {	/* (suidperl doesn't exist, in fact) */
 #ifndef SETUID_SCRIPTS_ARE_SECURE_NOW
 	dTHR;
-	PerlLIO_fstat(PerlIO_fileno(rsfp),&statbuf);	/* may be either wrapped or real suid */
-	if ((euid != uid && euid == statbuf.st_uid && statbuf.st_mode & S_ISUID)
+	PerlLIO_fstat(PerlIO_fileno(PL_rsfp),&PL_statbuf);	/* may be either wrapped or real suid */
+	if ((PL_euid != PL_uid && PL_euid == PL_statbuf.st_uid && PL_statbuf.st_mode & S_ISUID)
 	    ||
-	    (egid != gid && egid == statbuf.st_gid && statbuf.st_mode & S_ISGID)
+	    (PL_egid != PL_gid && PL_egid == PL_statbuf.st_gid && PL_statbuf.st_mode & S_ISGID)
 	   )
-	    if (!do_undump)
+	    if (!PL_do_undump)
 		croak("YOU HAVEN'T DISABLED SET-ID SCRIPTS IN THE KERNEL YET!\n\
 FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 #endif /* SETUID_SCRIPTS_ARE_SECURE_NOW */
@@ -2322,8 +2322,8 @@ init_ids(void)
     PL_gid = (int)PerlProc_getgid();
     PL_egid = (int)PerlProc_getegid();
 #ifdef VMS
-    uid |= gid << 16;
-    euid |= egid << 16;
+    PL_uid |= PL_gid << 16;
+    PL_euid |= PL_egid << 16;
 #endif
     PL_tainting |= (PL_uid && (PL_euid != PL_uid || PL_egid != PL_gid));
 }

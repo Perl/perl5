@@ -2477,7 +2477,7 @@ find_script(char *scriptname, bool dosearch, char **search_ext, I32 flags)
 #endif
 	    DEBUG_p(PerlIO_printf(Perl_debug_log,
 				  "Looking for %s\n",cur));
-	    if (PerlLIO_stat(cur,&statbuf) >= 0) {
+	    if (PerlLIO_stat(cur,&PL_statbuf) >= 0) {
 		dosearch = 0;
 		scriptname = cur;
 #ifdef SEARCH_EXTS

@@ -301,7 +301,7 @@ do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawpe
 #ifdef S_IFMT
 	    !(PL_statbuf.st_mode & S_IFMT)
 #else
-	    !statbuf.st_mode
+	    !PL_statbuf.st_mode
 #endif
 	) {
 	    char tmpbuf[256];
@@ -388,7 +388,7 @@ nextargv(register GV *gv)
 #ifdef HAS_FCHMOD
 	(void)fchmod(PL_lastfd,PL_filemode);
 #else
-	(void)PerlLIO_chmod(oldname,filemode);
+	(void)PerlLIO_chmod(PL_oldname,PL_filemode);
 #endif
     }
     PL_filemode = 0;
@@ -408,8 +408,8 @@ nextargv(register GV *gv)
 		    return IoIFP(GvIOp(gv));
 		}
 #ifndef FLEXFILENAMES
-		filedev = statbuf.st_dev;
-		fileino = statbuf.st_ino;
+		filedev = PL_statbuf.st_dev;
+		fileino = PL_statbuf.st_ino;
 #endif
 		PL_filemode = PL_statbuf.st_mode;
 		fileuid = PL_statbuf.st_uid;
@@ -437,9 +437,9 @@ nextargv(register GV *gv)
 			sv_catpv(sv,PL_inplace);
 		    }
 #ifndef FLEXFILENAMES
-		    if (PerlLIO_stat(SvPVX(sv),&statbuf) >= 0
-		      && statbuf.st_dev == filedev
-		      && statbuf.st_ino == fileino
+		    if (PerlLIO_stat(SvPVX(sv),&PL_statbuf) >= 0
+		      && PL_statbuf.st_dev == filedev
+		      && PL_statbuf.st_ino == fileino
 #ifdef DJGPP
                       || (_djstat_fail_bits & _STFAIL_TRUENAME)!=0
 #endif
@@ -461,18 +461,18 @@ nextargv(register GV *gv)
 #else
 		    do_close(gv,FALSE);
 		    (void)PerlLIO_unlink(SvPVX(sv));
-		    (void)PerlLIO_rename(oldname,SvPVX(sv));
-		    do_open(gv,SvPVX(sv),SvCUR(sv),inplace!=0,0,0,Nullfp);
+		    (void)PerlLIO_rename(PL_oldname,SvPVX(sv));
+		    do_open(gv,SvPVX(sv),SvCUR(sv),PL_inplace!=0,0,0,Nullfp);
 #endif /* DOSISH */
 #else
 		    (void)UNLINK(SvPVX(sv));
-		    if (link(oldname,SvPVX(sv)) < 0) {
+		    if (link(PL_oldname,SvPVX(sv)) < 0) {
 			warn("Can't rename %s to %s: %s, skipping file",
-			  oldname, SvPVX(sv), Strerror(errno) );
+			  PL_oldname, SvPVX(sv), Strerror(errno) );
 			do_close(gv,FALSE);
 			continue;
 		    }
-		    (void)UNLINK(oldname);
+		    (void)UNLINK(PL_oldname);
 #endif
 		}
 		else {
@@ -508,7 +508,7 @@ nextargv(register GV *gv)
 #else
 #  if !(defined(WIN32) && defined(__BORLANDC__))
 		/* Borland runtime creates a readonly file! */
-		(void)PerlLIO_chmod(oldname,filemode);
+		(void)PerlLIO_chmod(PL_oldname,PL_filemode);
 #  endif
 #endif
 		if (fileuid != PL_statbuf.st_uid || filegid != PL_statbuf.st_gid) {
@@ -516,7 +516,7 @@ nextargv(register GV *gv)
 		    (void)fchown(PL_lastfd,fileuid,filegid);
 #else
 #ifdef HAS_CHOWN
-		    (void)PerlLIO_chown(oldname,fileuid,filegid);
+		    (void)PerlLIO_chown(PL_oldname,fileuid,filegid);
 #endif
 #endif
 		}
@@ -944,7 +944,7 @@ my_lstat(ARGSproto)
 #ifdef HAS_LSTAT
     PL_laststatval = PerlLIO_lstat(SvPV(sv, PL_na),&PL_statcache);
 #else
-    laststatval = PerlLIO_stat(SvPV(sv, na),&statcache);
+    PL_laststatval = PerlLIO_stat(SvPV(sv, PL_na),&PL_statcache);
 #endif
     if (PL_laststatval < 0 && PL_dowarn && strchr(SvPV(sv, PL_na), '\n'))
 	warn(warn_nl, "lstat");
@@ -1238,7 +1238,7 @@ nothing in the core.
 #ifdef HAS_LSTAT
 		if (PerlLIO_lstat(s,&PL_statbuf) < 0 || S_ISDIR(PL_statbuf.st_mode))
 #else
-		if (PerlLIO_stat(s,&statbuf) < 0 || S_ISDIR(statbuf.st_mode))
+		if (PerlLIO_stat(s,&PL_statbuf) < 0 || S_ISDIR(PL_statbuf.st_mode))
 #endif
 		    tot--;
 		else {

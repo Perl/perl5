@@ -271,7 +271,7 @@ PP(pp_glob)
 #if 0		/* XXX never used! */
 PP(pp_indread)
 {
-    last_in_gv = gv_fetchpv(SvPVx(GvSV((GV*)(*stack_sp--)), na), TRUE,SVt_PVIO);
+    last_in_gv = gv_fetchpv(SvPVx(GvSV((GV*)(*stack_sp--)), PL_na), TRUE,SVt_PVIO);
     return do_readline();
 }
 #endif
@@ -2579,7 +2579,7 @@ PP(pp_fttext)
 #ifdef HAS_OPEN3
 	i = PerlLIO_open3(SvPV(sv, PL_na), O_RDONLY, 0);
 #else
-	i = PerlLIO_open(SvPV(sv, na), 0);
+	i = PerlLIO_open(SvPV(sv, PL_na), 0);
 #endif
 	if (i < 0) {
 	    if (PL_dowarn && strchr(SvPV(sv, PL_na), '\n'))
@@ -2652,7 +2652,7 @@ PP(pp_chdir)
     if (!tmps || !*tmps) {
        svp = hv_fetch(GvHVn(envgv), "SYS$LOGIN", 9, FALSE);
        if (svp)
-           tmps = SvPV(*svp, na);
+           tmps = SvPV(*svp, PL_na);
     }
 #endif
     TAINT_PROPER("chdir");
@@ -3227,7 +3227,7 @@ PP(pp_system)
     else if (SP - MARK != 1)
 	value = (I32)do_aspawn(Nullsv, (void **)MARK, (void **)SP);
     else {
-	value = (I32)do_spawn(SvPVx(sv_mortalcopy(*SP), na));
+	value = (I32)do_spawn(SvPVx(sv_mortalcopy(*SP), PL_na));
     }
     STATUS_NATIVE_SET(value);
     do_execfree();
@@ -3259,7 +3259,7 @@ PP(pp_exec)
 	    TAINT_PROPER("exec");
 	}
 #ifdef VMS
-	value = (I32)vms_do_exec(SvPVx(sv_mortalcopy(*SP), na));
+	value = (I32)vms_do_exec(SvPVx(sv_mortalcopy(*SP), PL_na));
 #else
 	value = (I32)do_exec(SvPVx(sv_mortalcopy(*SP), PL_na));
 #endif

@@ -700,27 +700,27 @@ PP(pp_aassign)
     if (PL_delaymagic & ~DM_DELAY) {
 	if (PL_delaymagic & DM_UID) {
 #ifdef HAS_SETRESUID
-	    (void)setresuid(uid,euid,(Uid_t)-1);
+	    (void)setresuid(PL_uid,PL_euid,(Uid_t)-1);
 #else
 #  ifdef HAS_SETREUID
 	    (void)setreuid(PL_uid,PL_euid);
 #  else
 #    ifdef HAS_SETRUID
-	    if ((delaymagic & DM_UID) == DM_RUID) {
-		(void)setruid(uid);
-		delaymagic &= ~DM_RUID;
+	    if ((PL_delaymagic & DM_UID) == DM_RUID) {
+		(void)setruid(PL_uid);
+		PL_delaymagic &= ~DM_RUID;
 	    }
 #    endif /* HAS_SETRUID */
 #    ifdef HAS_SETEUID
-	    if ((delaymagic & DM_UID) == DM_EUID) {
-		(void)seteuid(uid);
-		delaymagic &= ~DM_EUID;
+	    if ((PL_delaymagic & DM_UID) == DM_EUID) {
+		(void)seteuid(PL_uid);
+		PL_delaymagic &= ~DM_EUID;
 	    }
 #    endif /* HAS_SETEUID */
-	    if (delaymagic & DM_UID) {
-		if (uid != euid)
+	    if (PL_delaymagic & DM_UID) {
+		if (PL_uid != PL_euid)
 		    DIE("No setreuid available");
-		(void)PerlProc_setuid(uid);
+		(void)PerlProc_setuid(PL_uid);
 	    }
 #  endif /* HAS_SETREUID */
 #endif /* HAS_SETRESUID */
@@ -729,27 +729,27 @@ PP(pp_aassign)
 	}
 	if (PL_delaymagic & DM_GID) {
 #ifdef HAS_SETRESGID
-	    (void)setresgid(gid,egid,(Gid_t)-1);
+	    (void)setresgid(PL_gid,PL_egid,(Gid_t)-1);
 #else
 #  ifdef HAS_SETREGID
 	    (void)setregid(PL_gid,PL_egid);
 #  else
 #    ifdef HAS_SETRGID
-	    if ((delaymagic & DM_GID) == DM_RGID) {
-		(void)setrgid(gid);
-		delaymagic &= ~DM_RGID;
+	    if ((PL_delaymagic & DM_GID) == DM_RGID) {
+		(void)setrgid(PL_gid);
+		PL_delaymagic &= ~DM_RGID;
 	    }
 #    endif /* HAS_SETRGID */
 #    ifdef HAS_SETEGID
-	    if ((delaymagic & DM_GID) == DM_EGID) {
-		(void)setegid(gid);
-		delaymagic &= ~DM_EGID;
+	    if ((PL_delaymagic & DM_GID) == DM_EGID) {
+		(void)setegid(PL_gid);
+		PL_delaymagic &= ~DM_EGID;
 	    }
 #    endif /* HAS_SETEGID */
-	    if (delaymagic & DM_GID) {
-		if (gid != egid)
+	    if (PL_delaymagic & DM_GID) {
+		if (PL_gid != PL_egid)
 		    DIE("No setregid available");
-		(void)PerlProc_setgid(gid);
+		(void)PerlProc_setgid(PL_gid);
 	    }
 #  endif /* HAS_SETREGID */
 #endif /* HAS_SETRESGID */
