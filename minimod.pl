@@ -101,9 +101,10 @@ sub canon{
 
 1;
 __END__
+
 =head1 NAME
 
-ExtUtils::Miniperl.PL
+ExtUtils::Miniperl, writemain - write the C code for perlmain.c
 
 =head1 SYNOPSIS
 
