@@ -217,7 +217,7 @@ pl = "::pod:pod2html.PL" "::pod:pod2latex.PL" "::pod:pod2man.PL" "::pod:pod2text
 	"::utils:piconv.PL" "::utils:enc2xs.PL" 
 
 plextract = "::pod:pod2html" "::pod:pod2latex" "::pod:pod2man" "::pod:pod2text" \
-	"::lib:lib.pm" "::utils:c2ph" "::utils:h2ph" "::utils:h2xs" \
+	"::lib:lib_pm" "::utils:c2ph" "::utils:h2ph" "::utils:h2xs" \
 	"::utils:perlbug" "::utils:perldoc" "::utils:perlivp" "::utils:pl2pm" \
 	"::utils:splain" "::utils:perlcc" "::utils:dprofpp" "::utils:libnetcfg" \
 	"::utils:piconv" "::utils:enc2xs" 

@@ -32,6 +32,7 @@ SOURCE =  MD5.c
 
 MODULES = :MD5.pm
 
+# wheee
 MWCPPCOptimize = -O1
 
 .INCLUDE : $(MACPERL_SRC)BuildRules.mk

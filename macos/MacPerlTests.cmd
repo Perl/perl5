@@ -973,6 +973,9 @@ perl -e 'chmod 0666, "TEST"; `rename TEST TEST-OLD`'
 echo ":perl -I::lib    ::ext:POSIX:t:sigaction.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::ext:POSIX:t:sigaction.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
+echo ":perl -I::lib -T ::ext:POSIX:t:taint.t" >> ::macos:MacPerlTests.out
+:perl -I::lib -T ::ext:POSIX:t:taint.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
 echo ":perl -I::lib    ::ext:POSIX:t:waitpid.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::ext:POSIX:t:waitpid.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
@@ -1894,6 +1897,9 @@ save ::macos:MacPerlTests.out
 echo ":perl -I::lib    ::lib:Test:Harness:t:test-harness.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::lib:Test:Harness:t:test-harness.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:Test:Simple:t:bad_plan.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:Test:Simple:t:bad_plan.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
 echo ":perl -I::lib    ::lib:Test:Simple:t:buffer.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::lib:Test:Simple:t:buffer.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
@@ -1974,6 +1980,9 @@ echo ":perl -I::lib    ::lib:Test:Simple:t:skipall.t" >> ::macos:MacPerlTests.ou
 save ::macos:MacPerlTests.out
 echo ":perl -I::lib    ::lib:Test:Simple:t:strays.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::lib:Test:Simple:t:strays.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:Test:Simple:t:threads.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:Test:Simple:t:threads.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
 echo ":perl -I::lib    ::lib:Test:Simple:t:todo.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::lib:Test:Simple:t:todo.t >> ::macos:MacPerlTests.out
@@ -2223,7 +2232,7 @@ echo ""
 echo "# Devel::DProf seems to work, but test needs major work :/"
 echo ":perl -I::lib    ::ext:Devel:DProf:DProf.t"
 echo ""
-echo "# fails tests 359 (known problem in sysopen warning)"
+echo "# fails tests 367 (known problem in sysopen warning)"
 echo ":perl -I::lib    ::lib:warnings.t"
 echo ""
 echo "# fails all tests (system() fails to return a good value)"
