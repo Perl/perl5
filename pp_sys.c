@@ -470,7 +470,7 @@ PP(pp_die)
 		GV *gv = gv_fetchmethod(stash, "PROPAGATE");
 		if (gv) {
 		    SV *file = sv_2mortal(newSVpv(CopFILE(PL_curcop),0));
-		    SV *line = sv_2mortal(newSViv(CopLINE(PL_curcop)));
+		    SV *line = sv_2mortal(newSVuv(CopLINE(PL_curcop)));
 		    EXTEND(SP, 3);
 		    PUSHMARK(SP);
 		    PUSHs(error);
@@ -864,9 +864,9 @@ PP(pp_dbmopen)
     PUSHs(sv);
     PUSHs(left);
     if (SvIV(right))
-	PUSHs(sv_2mortal(newSViv(O_RDWR|O_CREAT)));
+	PUSHs(sv_2mortal(newSVuv(O_RDWR|O_CREAT)));
     else
-	PUSHs(sv_2mortal(newSViv(O_RDWR)));
+	PUSHs(sv_2mortal(newSVuv(O_RDWR)));
     PUSHs(right);
     PUTBACK;
     call_sv((SV*)GvCV(gv), G_SCALAR);
@@ -877,7 +877,7 @@ PP(pp_dbmopen)
 	PUSHMARK(SP);
 	PUSHs(sv);
 	PUSHs(left);
-	PUSHs(sv_2mortal(newSViv(O_RDONLY)));
+	PUSHs(sv_2mortal(newSVuv(O_RDONLY)));
 	PUSHs(right);
 	PUTBACK;
 	call_sv((SV*)GvCV(gv), G_SCALAR);
@@ -1793,9 +1793,9 @@ PP(pp_sysseek)
 #if LSEEKSIZE > IVSIZE
 	XPUSHs(sv_2mortal(newSVnv((NV) offset)));
 #else
-	XPUSHs(sv_2mortal(newSViv((IV) offset)));
+	XPUSHs(sv_2mortal(newSViv(offset)));
 #endif
-	XPUSHs(sv_2mortal(newSViv((IV) whence)));
+	XPUSHs(sv_2mortal(newSViv(whence)));
 	PUTBACK;
 	ENTER;
 	call_method("SEEK", G_SCALAR);
@@ -1807,15 +1807,15 @@ PP(pp_sysseek)
     if (PL_op->op_type == OP_SEEK)
 	PUSHs(boolSV(do_seek(gv, offset, whence)));
     else {
-	Off_t n = do_sysseek(gv, offset, whence);
-        if (n < 0)
+	Off_t sought = do_sysseek(gv, offset, whence);
+        if (sought < 0)
             PUSHs(&PL_sv_undef);
         else {
-            SV* sv = n ?
+            SV* sv = sought ?
 #if LSEEKSIZE > IVSIZE
-                newSVnv((NV)n)
+                newSVnv((NV)sought)
 #else
-                newSViv((IV)n)
+                newSViv(sought)
 #endif
                 : newSVpvn(zero_but_true, ZBTLEN);
             PUSHs(sv_2mortal(sv));
@@ -2541,8 +2541,8 @@ PP(pp_stat)
 	EXTEND_MORTAL(max);
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_dev)));
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_ino)));
-	PUSHs(sv_2mortal(newSViv(PL_statcache.st_mode)));
-	PUSHs(sv_2mortal(newSViv(PL_statcache.st_nlink)));
+	PUSHs(sv_2mortal(newSVuv(PL_statcache.st_mode)));
+	PUSHs(sv_2mortal(newSVuv(PL_statcache.st_nlink)));
 #if Uid_t_size > IVSIZE
 	PUSHs(sv_2mortal(newSVnv(PL_statcache.st_uid)));
 #else
@@ -2573,8 +2573,8 @@ PP(pp_stat)
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_ctime)));
 #endif
 #ifdef USE_STAT_BLOCKS
-	PUSHs(sv_2mortal(newSViv(PL_statcache.st_blksize)));
-	PUSHs(sv_2mortal(newSViv(PL_statcache.st_blocks)));
+	PUSHs(sv_2mortal(newSVuv(PL_statcache.st_blksize)));
+	PUSHs(sv_2mortal(newSVuv(PL_statcache.st_blocks)));
 #else
 	PUSHs(sv_2mortal(newSVpvn("", 0)));
 	PUSHs(sv_2mortal(newSVpvn("", 0)));
