@@ -6,7 +6,7 @@
 #
 # And even when that will be fixed, this is a basic
 # test and should not rely on shared variables
-# 
+#
 # This will test the basic API, it will not use any coderefs
 # as they are more advanced
 #
@@ -25,7 +25,7 @@ BEGIN {
 
 use ExtUtils::testlib;
 use strict;
-BEGIN { print "1..15\n" };
+BEGIN { $| = 1; print "1..15\n" };
 use threads;
 
 
@@ -40,12 +40,12 @@ print "ok 1\n";
 
 sub ok {	
     my ($id, $ok, $name) = @_;
-    
+
     # You have to do it this way or VMS will get confused.
     print $ok ? "ok $id - $name\n" : "not ok $id - $name\n";
 
     printf "# Failed test at line %d\n", (caller)[2] unless $ok;
-    
+
     return $ok;
 }
 
