@@ -17,7 +17,13 @@
 
 # No version of Linux supports setuid scripts.
 d_suidsafe='undef'
-d_dosuid='define'
+#don't force people to install SUID if they don't want to (have said  
+#-Dd_dosuid=undef explicitly on command line) - MIKEDLR
+if [ ! "A$d_dosuid" = "Aundef" ] #do I need to be paranoid here?
+then
+    d_dosuid='define'
+fi
+
 
 # perl goes into the /usr tree.  See the Filesystem Standard
 # available via anonymous FTP at tsx-11.mit.edu in
@@ -138,8 +144,8 @@ fi
 rm -f try.c a.out
 
 if /bin/bash -c exit; then
-  echo
-  echo You appear to have a working bash. Good.
+  echo ''
+  echo 'You appear to have a working bash.  Good.'
 else
   cat << 'EOM' >&4
 
@@ -152,4 +158,33 @@ EOM
 
 fi
 
+# On SPARClinux,
+# The following csh consistently coredumped in the test directory
+# "/home/mikedlr/perl5.003_94/t", though not most other directories.
 
+#Name        : csh                    Distribution: Red Hat Linux (Rembrandt)
+#Version     : 5.2.6                        Vendor: Red Hat Software
+#Release     : 3                        Build Date: Fri May 24 19:42:14 1996
+#Install date: Thu Jul 11 16:20:14 1996 Build Host: itchy.redhat.com
+#Group       : Shells                   Source RPM: csh-5.2.6-3.src.rpm
+#Size        : 184417
+#Description : BSD c-shell
+
+# For this reason I suggest using the much bug-fixed tcsh for globbing
+# where available.
+
+if [  ! "`csh -c 'echo $version' 2>/dev/null`"  ] 
+then
+	echo 'Real csh found (might break); looking for tcsh ...'
+	if which tcsh >/dev/null 2>&1
+	then
+		echo 'Found tcsh; will use it for globbing.'
+		csh='tcsh'
+		d_csh='tcsh'
+		full_csh=`which tcsh` # we know this will work now.
+	else
+		echo "Couldn't find tcsh.  BEWARE BROKEN GLOBBING."
+	fi
+else
+	echo 'Your csh is really tcsh.  Good.'
+fi
