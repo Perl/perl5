@@ -284,8 +284,6 @@ newthread (pTHX_ SV *startsv, AV *initargs, char *classname)
             err = pthread_attr_setstacksize(&attr, THREAD_CREATE_NEEDS_STACK);
        if (err)
            croak("panic: pthread_attr_setstacksize failed");
-#else
-       croak("panic: can't pthread_attr_setstacksize");
 #  endif
 #  ifdef PTHREAD_ATTR_SETDETACHSTATE
 	if (err == 0)
