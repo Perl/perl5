@@ -179,9 +179,11 @@ the process. Many daemons provide this mechanism using the C<SIGHUP>
 signal handler. When you want to tell the daemon to re-read the file
 you simply send it the C<SIGHUP> signal.
 
-The implementation of such a mechanism in Perl using a normal signal
-handler works only the first time the signal is sent. The solution to
-this problem is to use C<POSIX> signal handlers if available.
+Not all platforms automatically reinstall their (native) signal
+handlers after a signal delivery.  This means that the handler works
+only the first time the signal is sent. The solution to this problem
+is to use C<POSIX> signal handlers if available, their behaviour
+is well-defined.
 
 The following example implements a simple daemon, which restarts
 itself every time the C<SIGHUP> signal is received. The actual code is
