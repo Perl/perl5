@@ -4414,6 +4414,12 @@ numbers, and even then only the standard modifiers are allowed).  As a
 result, any non-standard extensions in your local C<sprintf> are not
 available from Perl.
 
+Unlike C<printf>, C<sprintf> does not do what you probably mean when you
+pass it an array as your first argument. The array is given scalar context,
+and instead of using the 0th element of the array as the format, Perl will
+use the count of elements in the array as the format, which is almost never
+useful.
+
 Perl's C<sprintf> permits the following universally-known conversions:
 
    %%	a percent sign
