@@ -9,7 +9,7 @@ BEGIN {
     $| = 1;
 }
 
-print "1..80\n";
+print "1..84\n";
 
 $a = {};
 bless $a, "Bob";
@@ -118,6 +118,14 @@ if ('a' lt 'A') {
 }
 
 test $a->isa("UNIVERSAL");
+
+test ! UNIVERSAL::isa([], "UNIVERSAL");
+
+test ! UNIVERSAL::can({}, "can");
+
+test UNIVERSAL::isa(Alice => "UNIVERSAL");
+
+test UNIVERSAL::can(Alice => "can") == \&UNIVERSAL::can;
 
 # now use UNIVERSAL.pm and see what changes
 eval "use UNIVERSAL";
