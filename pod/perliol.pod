@@ -24,6 +24,51 @@ The aim of the implementation is to provide the PerlIO API in a flexible
 and platform neutral manner. It is also a trial of an "Object Oriented
 C, with vtables" approach which may be applied to perl6.
 
+=head2 Basic Structure
+
+PerlIO is as a stack of layers.
+
+The low levels of the stack work with the low-level operating system
+calls (file descriptors in C) getting bytes in and out, the higher
+layers of the stack buffer, filter, and otherwise manipulate the I/O.
+Terms I<above> and I<below> are used to refer to the relative
+positioning of the stack layers.
+
+A layer contains a "vtable", the table of I/O operations (at C level
+a table of function pointers), and status flags.  The functions in the
+vtable implement operations like "open", "read", and "write".
+
+When I/O, for example "read", is requested, the request goes from Perl
+first down the stack using "read" functions of each layer, then at the
+bottom the input is requested from the operating system services, then
+the result is returned up the stack, finally being interpreted as Perl
+data.
+
+When you do an open() and specify extra PerlIO layers to be deployed,
+the layers you specify are "pushed" on top of the already existing
+default stack.  What exact layers are in this default stack depends on
+a lot of things: your operating system, Perl version, Perl compile
+time configuration, and Perl runtime configuration.  See L<PerlIO>,
+L<perlrun/PERLIO>, and L<open> for more information.
+
+binmode() operates similarly to open(): by default the specified
+layers are pushed on top of the existing stack.
+
+However, note that even as the specified layers are "pushed on top"
+for open() and binmode(), this doesn't mean that the effects are
+limited to the "top": PerlIO layers can be very 'active' and inspect
+and affect layers also deeper in the stack.  As an example there
+is a layer called "raw" which repeatedly "pops" layers until
+it reaches the first layer that has declared itself capable of
+handling binary data.  The "pushed" layers are processed in left-to-right
+order.
+
+sysopen() operates (unsurprisingly) at a lower level in the stack than
+open().  For example in UNIX or UNIX-like systems sysopen() operates
+directly at the level of file descriptors: in the terms of PerlIO
+layers, it uses only the "unix" layer, which is a rather thin wrapper
+on top of the UNIX file descriptors.
+
 =head2 Layers vs Disciplines
 
 Initial discussion of the ability to modify IO streams behaviour used
@@ -690,6 +735,12 @@ look at the existing perlio layer implementations, which include:
 =over
 
 =item * C implementations
+
+The F<perlio.c> and F<perliol.h> in the Perl core implement the
+"unix", "perlio", "stdio", "crlf", "utf8", "byte", "raw", "pending"
+layers, and also the "mmap" and "win32" layers if applicable.
+(The "win32" is currently unfinished and unused, to see what is used
+instead in Win32, see L<PerlIO/"Querying the layers of filehandles"> .)
 
 PerlIO::encoding, PerlIO::scalar, PerlIO::via in the Perl core.
 

@@ -226,7 +226,7 @@ This can be used to see the effect of/bugs in the various layers e.g.
 
 For the various value of PERLIO see L<perlrun/PERLIO>.
 
-=head2 Querying the layers of filehandle
+=head2 Querying the layers of filehandles
 
 The following returns the B<names> of the PerlIO layers on a filehandle.
 
@@ -234,7 +234,8 @@ The following returns the B<names> of the PerlIO layers on a filehandle.
 
 The layers are returned in the order an open() or binmode() call would
 use them.  Note that the "default stack" depends on the operating
-system and on the perl version.
+system and on the Perl version, and both the compile-time and
+runtime configurations of Perl.
 
 The following table summarizes the default layers on UNIX-like and
 DOS-like platforms and depending on the setting of the C<$ENV{PERLIO}>:

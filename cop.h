@@ -578,3 +578,7 @@ typedef struct stackinfo PERL_SI;
 	    POPSTACK;							\
 	}								\
     } STMT_END
+
+#define IN_PERL_COMPILETIME	(PL_curcop == &PL_compiling)
+#define IN_PERL_RUNTIME		(PL_curcop != &PL_compiling)
+
