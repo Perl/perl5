@@ -989,9 +989,9 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 		else {
 		    while (s <= e) {
 			UV c = utf8_to_uvchr((U8*)s, &len);
-			if (c == UNICODE_GREEK_CAPITAL_LETTER_SIGMA ||
-			    c == UNICODE_GREEK_SMALL_LETTER_FINAL_SIGMA)
-			    c = UNICODE_GREEK_SMALL_LETTER_SIGMA;
+			if (c == (UV)UNICODE_GREEK_CAPITAL_LETTER_SIGMA ||
+			    c == (UV)UNICODE_GREEK_SMALL_LETTER_FINAL_SIGMA)
+			    c = (UV)UNICODE_GREEK_SMALL_LETTER_SIGMA;
 			if ( (c == c1 || c == c2)
 			     && (ln == len ||
 				 ibcmp_utf8(s, do_utf8, strend - s,
