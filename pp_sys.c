@@ -3048,7 +3048,7 @@ PP(pp_getpgrp)
 #ifdef BSD_GETPGRP
     value = (I32)BSD_GETPGRP(pid);
 #else
-    if (pid != 0)
+    if (pid != 0 && pid != getpid()) {
 	DIE("POSIX getpgrp can't take an argument");
     value = (I32)getpgrp();
 #endif
@@ -3078,7 +3078,7 @@ PP(pp_setpgrp)
 #ifdef BSD_SETPGRP
     SETi( BSD_SETPGRP(pid, pgrp) >= 0 );
 #else
-    if ((pgrp != 0) || (pid != 0)) {
+    if ((pgrp != 0 && pgrp != getpid())) || (pid != 0 && pid != getpid())) {
 	DIE("POSIX setpgrp can't take an argument");
     }
     SETi( setpgrp() >= 0 );
