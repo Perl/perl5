@@ -875,7 +875,8 @@ newIO(void)
     SvREFCNT(io) = 1;
     SvOBJECT_on(io);
     iogv = gv_fetchpv("FileHandle::", FALSE, SVt_PVHV);
-    if (!iogv)
+    /* unless exists($main::{FileHandle}) and defined(%main::FileHandle::) */
+    if (!(iogv && GvHV(iogv) && HvARRAY(GvHV(iogv))))
       iogv = gv_fetchpv("IO::Handle::", TRUE, SVt_PVHV);
     SvSTASH(io) = (HV*)SvREFCNT_inc(GvHV(iogv));
     return io;
