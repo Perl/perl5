@@ -61,7 +61,11 @@ case "$osvers" in
 esac
 
 so="a"
-dlext="o"
+# AIX itself uses .o (libc.o) but we prefer compatibility
+# with the rest of the world and with rest of the scripting
+# languages (Tcl, Python) and related systems (SWIG).
+# Stephanie Beals <bealzy@us.ibm.com>
+dlext="so"
 
 # Trying to set this breaks the POSIX.c compilation
 
