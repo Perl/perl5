@@ -1501,7 +1501,7 @@ Perl_hv_clear_placeholders(pTHX_ HV *hv)
 	if (!entry)
 	    continue;
 
-	for (; entry; first=0, oentry = &HeNEXT(entry), entry = *oentry) {
+	for (; entry; entry = *oentry) {
 	    if (HeVAL(entry) == &PL_sv_placeholder) {
 		*oentry = HeNEXT(entry);
 		if (first && !*oentry)
@@ -1519,6 +1519,9 @@ Perl_hv_clear_placeholders(pTHX_ HV *hv)
 		    HvPLACEHOLDERS(hv) = 0;
 		    return;
 		}
+	    } else {
+		oentry = &HeNEXT(entry);
+		first = 0;
 	    }
 	}
     } while (--i >= 0);
