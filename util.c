@@ -1194,6 +1194,9 @@ mess_alloc(void)
     if (!PL_dirty)
 	return sv_2mortal(newSVpvn("",0));
 
+    if (PL_mess_sv)
+	return PL_mess_sv;
+
     /* Create as PVMG now, to avoid any upgrading later */
     New(905, sv, 1, SV);
     Newz(905, any, 1, XPVMG);
