@@ -14,7 +14,7 @@ use vars qw($VERSION);
 use Carp;
 use Symbol;
 
-$VERSION = "1.12";
+$VERSION = "1.121";
 
 sub new {
     my $type = shift;
@@ -100,7 +100,7 @@ sub reader {
 
     close ${*$me}[1];
     bless $me, ref($fh);
-    *{*$me} = *{*$fh};          # Alias self to handle
+    *$me = *$fh;          # Alias self to handle
     $me->fdopen($fh->fileno,"r")
 	unless defined($me->fileno);
     bless $fh;                  # Really wan't un-bless here
@@ -123,7 +123,7 @@ sub writer {
 
     close ${*$me}[0];
     bless $me, ref($fh);
-    *{*$me} = *{*$fh};          # Alias self to handle
+    *$me = *$fh;          # Alias self to handle
     $me->fdopen($fh->fileno,"w")
 	unless defined($me->fileno);
     bless $fh;                  # Really wan't un-bless here
