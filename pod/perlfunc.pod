@@ -770,10 +770,10 @@ another C<open> on it, because C<open> will close it for you.  (See
 C<open>.)  However, an explicit C<close> on an input file resets the line
 counter (C<$.>), while the implicit close done by C<open> does not.
 
-If the file handle came from a piped open C<close> will additionally
-return false if one of the other system calls involved fails or if the
+If the file handle came from a piped open, C<close> will additionally
+return false if one of the other system calls involved fails, or if the
 program exits with non-zero status.  (If the only problem was that the
-program exited non-zero C<$!> will be set to C<0>.)  Closing a pipe
+program exited non-zero, C<$!> will be set to C<0>.)  Closing a pipe
 also waits for the process executing on the pipe to complete, in case you
 want to look at the output of the pipe afterwards, and
 implicitly puts the exit status value of that command into C<$?>.
