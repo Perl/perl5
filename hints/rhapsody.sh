@@ -105,8 +105,10 @@ useshrplib='true';
 # vfork works
 usevfork='true';
 
-# malloc works
-usemymalloc='n';
+# our malloc works (but allow users to override)
+case "$usemymalloc" in
+'') usemymalloc='n' ;;
+esac
 
 #
 # The libraries are not threadsafe in Rhapsody

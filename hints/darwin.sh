@@ -178,7 +178,7 @@ EOCBU
 usevfork='true';
 
 # our malloc works (but allow users to override)
-case "$usemymalloc" om
+case "$usemymalloc" in
 '') usemymalloc='n' ;;
 esac
 
