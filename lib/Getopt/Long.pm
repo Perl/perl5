@@ -14,7 +14,7 @@ require Exporter;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(&GetOptions $REQUIRE_ORDER $PERMUTE $RETURN_IN_ORDER);
-$VERSION = sprintf("%d.%02d", '$Revision: 2.6001 $ ' =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", '$Revision: 2.6002 $ ' =~ /(\d+)\.(\d+)/);
 use vars qw($autoabbrev $getopt_compat $ignorecase $bundling $order
 	    $passthrough $error $debug 
 	    $REQUIRE_ORDER $PERMUTE $RETURN_IN_ORDER
@@ -566,7 +566,7 @@ sub GetOptions {
 	my $opt = shift (@optionlist);
 
 	# Strip leading prefix so people can specify "--foo=i" if they like.
-	$opt = $+ if $opt =~ /^($genprefix)+(.*)/s;
+	$opt =~ s/^(?:$genprefix)+//s;
 
 	if ( $opt eq '<>' ) {
 	    if ( (defined $userlinkage)
