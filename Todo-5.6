@@ -16,6 +16,9 @@ Unicode support
 	to work similarly to Unicode tech reports and Java
 	notation \uXXXX (and already existing \x{XXXX))?
 	more than four hexdigits? make also \U+XXXX work?
+    overloadable regex assertions? e.g. in Thai \b cannot
+        be deduced by any simple character class boundary rules,
+        word boundaries must algorithmically computed
 
     see ext/Encode/Todo for notes and references about proper detection
     of malformed UTF-8
