@@ -889,12 +889,12 @@ Copy a string to a safe spot.  This does not use an SV.
 */
 
 char *
-Perl_savepv(pTHX_ const char *sv)
+Perl_savepv(pTHX_ const char *pv)
 {
     register char *newaddr = Nullch;
-    if (sv) {
-	New(902,newaddr,strlen(sv)+1,char);
-	(void)strcpy(newaddr,sv);
+    if (pv) {
+	New(902,newaddr,strlen(pv)+1,char);
+	(void)strcpy(newaddr,pv);
     }
     return newaddr;
 }
@@ -912,14 +912,14 @@ This does not use an SV.
 */
 
 char *
-Perl_savepvn(pTHX_ const char *sv, register I32 len)
+Perl_savepvn(pTHX_ const char *pv, register I32 len)
 {
     register char *newaddr;
 
     New(903,newaddr,len+1,char);
     /* Give a meaning to NULL pointer mainly for the use in sv_magic() */
-    if (sv) {
-    	Copy(sv,newaddr,len,char);	/* might not be null terminated */
+    if (pv) {
+    	Copy(pv,newaddr,len,char);	/* might not be null terminated */
     	newaddr[len] = '\0';		/* is now */
     }
     else {
@@ -937,12 +937,12 @@ This does not use an SV.
 =cut
 */
 char *
-Perl_savesharedpv(pTHX_ const char *sv)
+Perl_savesharedpv(pTHX_ const char *pv)
 {
     register char *newaddr = Nullch;
-    if (sv) {
-	newaddr = (char*)PerlMemShared_malloc(strlen(sv)+1);
-    	(void)strcpy(newaddr,sv);
+    if (pv) {
+	newaddr = (char*)PerlMemShared_malloc(strlen(pv)+1);
+    	(void)strcpy(newaddr,pv);
     }
     return newaddr;
 }

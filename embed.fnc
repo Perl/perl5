@@ -622,9 +622,9 @@ p	|void	|rxres_save	|void** rsp|REGEXP* prx
 #if !defined(HAS_RENAME)
 p	|I32	|same_dirent	|char* a|char* b
 #endif
-Apd	|char*	|savepv		|const char* sv
-Apd	|char*	|savesharedpv	|const char* sv
-Apd	|char*	|savepvn	|const char* sv|I32 len
+Apd	|char*	|savepv		|const char* pv
+Apd	|char*	|savesharedpv	|const char* pv
+Apd	|char*	|savepvn	|const char* pv|I32 len
 Ap	|void	|savestack_grow
 Ap	|void	|save_aelem	|AV* av|I32 idx|SV **sptr
 Ap	|I32	|save_alloc	|I32 size|I32 pad
