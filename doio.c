@@ -1389,21 +1389,6 @@ do_ipcget(I32 optype, SV **mark, SV **sp)
     return -1;			/* should never happen */
 }
 
-#if defined(__sun) && defined(__svr4__) /* XXX Need metaconfig test */
-/* Solaris manpage says that it uses (like linux)
-   int semctl (int semid, int semnum, int cmd, union semun arg)
-   but the system include files do not define union semun !!!!
-   Note: Linux/glibc *does* declare union semun in <sys/sem_buf.h>
-   but, unlike the older Linux libc and Solaris, it has an extra
-   struct seminfo * on the end.
-*/
-union semun {
-     int val;
-     struct semid_ds *buf;
-     ushort *array;
-};
-#endif
-
 I32
 do_ipcctl(I32 optype, SV **mark, SV **sp)
 {
@@ -1412,26 +1397,6 @@ do_ipcctl(I32 optype, SV **mark, SV **sp)
     char *a;
     I32 id, n, cmd, infosize, getinfo;
     I32 ret = -1;
-/* XXX REALLY need metaconfig test */
-/* linux and Solaris2 use:
-   int semctl (int semid, int semnum, int cmd, union semun arg)
-   instead of:
-   int semctl (int semid, int semnum, int cmd, struct semid_ds *arg);
-   Solaris and Linux (pre-glibc) use
-       union semun {
-            int val;
-            struct semid_ds *buf;
-            ushort *array;
-       };
-   but Solaris doesn't declare it in a header file (we declared it
-   explicitly earlier). Linux/glibc declares a *different* union semun
-   so we just refer to "union semun" here.
-    
-*/
-#if defined(__linux__) || (defined(__sun__) && defined(__svr4__))
-#   define SEMCTL_SEMUN
-    union semun unsemds, semun;
-#endif
 
     id = SvIVx(*++mark);
     n = (optype == OP_SEMCTL) ? SvIVx(*++mark) : 0;
@@ -1461,13 +1426,9 @@ do_ipcctl(I32 optype, SV **mark, SV **sp)
 	else if (cmd == GETALL || cmd == SETALL)
 	{
 	    struct semid_ds semds;
-#ifdef SEMCTL_SEMUN
+	    union semun semun;
+
             semun.buf = &semds;
-	    if (semctl(id, 0, IPC_STAT, semun) == -1)
-#else
-	    if (semctl(id, 0, IPC_STAT, &semds) == -1)
-#endif
-		return -1;
 	    getinfo = (cmd == GETALL);
 	    infosize = semds.sem_nsems * sizeof(short);
 		/* "short" is technically wrong but much more portable
@@ -1511,14 +1472,12 @@ do_ipcctl(I32 optype, SV **mark, SV **sp)
 	break;
 #endif
 #ifdef HAS_SEM
-    case OP_SEMCTL:
-#ifdef SEMCTL_SEMUN
-	/* XXX Need metaconfig test */
-        unsemds.buf = (struct semid_ds *)a;
-	ret = semctl(id, n, cmd, unsemds);
-#else
-	ret = semctl(id, n, cmd, (struct semid_ds *)a);
-#endif
+    case OP_SEMCTL: {
+            union semun unsemds;
+
+            unsemds.buf = (struct semid_ds *)a;
+	    ret = Semctl(id, n, cmd, unsemds);
+        }
 	break;
 #endif
 #ifdef HAS_SHM
