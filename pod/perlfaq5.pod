@@ -106,7 +106,7 @@ the changes you want, then copy that over the original.
     rename($new, $old)		or die "can't rename $new to $old: $!";
 
 Perl can do this sort of thing for you automatically with the C<-i>
-command-line switch or the closely-related C<$^I> variable (see
+command line switch or the closely-related C<$^I> variable (see
 L<perlrun> for more details).  Note that
 C<-i> may require a suffix on some non-Unix systems; see the
 platform-specific documentation that came with your port.
@@ -138,7 +138,7 @@ the last line of a file without making a copy or reading the
 whole file into memory:
 
 	open (FH, "+< $file");
-        while ( <FH> ) { $addr = tell(FH) unless eof(FH) } 
+        while ( <FH> ) { $addr = tell(FH) unless eof(FH) }
         truncate(FH, $addr);
 
 Error checking is left as an exercise for the reader.
@@ -233,7 +233,7 @@ one of its more specific derived classes.
 
 =head2 How can I set up a footer format to be used with write()?
 
-There's no built-in way to do this, but L<perlform> has a couple of
+There's no builtin way to do this, but L<perlform> has a couple of
 techniques to make it possible for the intrepid hacker.
 
 =head2 How can I write() into a string?
@@ -358,7 +358,7 @@ permissions, timestamps, inode info, etc.
 
 =head2 How can I lock a file?
 
-Perl's built-in flock() function (see L<perlfunc> for details) will call
+Perl's builtin flock() function (see L<perlfunc> for details) will call
 flock(2) if that exists, fcntl(2) if it doesn't (on perl version 5.004 and
 later), and lockf(3) if neither of the two previous system calls exists.
 On some systems, it may even use a different form of native locking.
@@ -409,10 +409,10 @@ over NFS, so this won't work (at least, not every time) over the net.
 Various schemes involving involving link() have been suggested, but
 these tend to involve busy-wait, which is also subdesirable.
 
-=head2 I still don't get locking.  I just want to increment the number 
+=head2 I still don't get locking.  I just want to increment the number
 in the file.  How can I do this?
 
-Didn't anyone ever tell you web-page hit counters were useless?
+Didn't anyone ever tell you web page hit counters were useless?
 
 Anyway, this is what to do:
 
@@ -426,7 +426,7 @@ Anyway, this is what to do:
     # DO NOT UNLOCK THIS UNTIL YOU CLOSE
     close FH 					 or die "can't close numfile: $!";
 
-Here's a much better web-page hit counter:
+Here's a much better web page hit counter:
 
     $hits = int( (time() - 850_000_000) / rand(1_000) );
 
@@ -455,14 +455,14 @@ like this:
 Locking and error checking are left as an exercise for the reader.
 Don't forget them, or you'll be quite sorry.
 
-Don't forget to set binmode() under DOS-like platforms when operating
+Don't forget to set binmode() under MS-DOS-like platforms when operating
 on files that have anything other than straight text in them.  See the
 docs on open() and on binmode() for more details.
 
 =head2 How do I get a file's timestamp in perl?
 
 If you want to retrieve the time at which the file was last read,
-written, or had its meta-data (owner, etc) changed, you use the B<-M>,
+written, or had its metadata (owner, etc) changed, you use the B<-M>,
 B<-A>, or B<-C> filetest operations as documented in L<perlfunc>.  These
 retrieve the age of the file (measured against the start-time of your
 program) in days as a floating point number.  To retrieve the "raw"
@@ -602,7 +602,7 @@ The Term::ReadKey module from CPAN may be easier to use:
     printf "\nYou said %s, char number %03d\n",
         $key, ord $key;
 
-For DOS systems, Dan Carson <dbc@tc.fluke.COM> reports the following:
+For MS-DOS systems, Dan Carson <dbc@tc.fluke.COM> reports the following:
 
 To put the PC in "raw" mode, use ioctl with some magic numbers gleaned
 from msdos.c (Perl source file) and Ralf Brown's interrupt list (comes
@@ -737,17 +737,17 @@ to, you may be able to do this:
     $rc = syscall(&SYS_close, $fd + 0);  # must force numeric
     die "can't sysclose $fd: $!" unless $rc == -1;
 
-=head2 Why can't I use "C:\temp\foo" in DOS paths?  What doesn't `C:\temp\foo.exe` work?
+=head2 Why can't I use "C:\temp\foo" in MS-DOS paths?  What doesn't `C:\temp\foo.exe` work?
 
 Whoops!  You just put a tab and a formfeed into that filename!
 Remember that within double quoted strings ("like\this"), the
 backslash is an escape character.  The full list of these is in
 L<perlop/Quote and Quote-like Operators>.  Unsurprisingly, you don't
 have a file called "c:(tab)emp(formfeed)oo" or
-"c:(tab)emp(formfeed)oo.exe" on your DOS filesystem.
+"c:(tab)emp(formfeed)oo.exe" on your MS-DOS filesystem.
 
 Either single-quote your strings, or (preferably) use forward slashes.
-Since all DOS and Windows versions since something like MS-DOS 2.0 or so
+Since all MS-DOS and Windows versions since something like MS-DOS 2.0 or so
 have treated C</> and C<\> the same in a path, you might as well use the
 one that doesn't clash with Perl -- or the POSIX shell, ANSI C and C++,
 awk, Tcl, Java, or Python, just to mention a few.
@@ -755,7 +755,7 @@ awk, Tcl, Java, or Python, just to mention a few.
 =head2 Why doesn't glob("*.*") get all the files?
 
 Because even on non-Unix ports, Perl's glob function follows standard
-Unix globbing semantics.  You'll need C<glob("*")> to get all (non-hidden)
+Unix globbing semantics.  You'll need C<glob("*")> to get all (nonhidden)
 files.
 
 =head2 Why does Perl let me delete read-only files?  Why does C<-i> clobber protected files?  Isn't this a bug in Perl?

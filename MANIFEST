@@ -40,6 +40,24 @@ dosish.h		Some defines for MS/DOSish machines
 dump.c			Debugging output
 eg/ADB			An adb wrapper to put in your crash dir
 eg/README		Intro to example perl scripts
+eg/cgi/RunMeFirst		Setup script for CGI examples
+eg/cgi/clickable_image.cgi	CGI example
+eg/cgi/cookie.cgi		CGI example
+eg/cgi/crash.cgi		CGI example
+eg/cgi/customize.cgi		CGI example
+eg/cgi/diff_upload.cgi		CGI example
+eg/cgi/file_upload.cgi		CGI example
+eg/cgi/frameset.cgi		CGI example
+eg/cgi/index.html		Index page for CGI examples
+eg/cgi/internal_links.cgi	CGI example
+eg/cgi/javascript.cgi		CGI example
+eg/cgi/monty.cgi		CGI example
+eg/cgi/multiple_forms.cgi	CGI example
+eg/cgi/nph-clock.cgi		CGI example
+eg/cgi/popup.cgi		CGI example
+eg/cgi/save_state.cgi		CGI example
+eg/cgi/tryit.cgi		CGI example
+eg/cgi/wilogo.gif.uu		Small image for CGI examples
 eg/changes		A program to list recently changed files
 eg/client		A sample client
 eg/down			A program to do things to subdirectories
@@ -272,6 +290,7 @@ hints/utekv.sh		Hints for named architecture
 hints/uts.sh		Hints for named architecture
 hv.c			Hash value code
 hv.h			Hash value header
+installhtml		Perl script to install html files for pods
 installman		Perl script to install man pages for pods
 installperl		Perl script to do "make install" dirty work
 interp.sym		Interpreter specific symbols to hide in a struct
@@ -282,6 +301,12 @@ lib/AutoLoader.pm	Autoloader base class
 lib/AutoSplit.pm	Split up autoload functions
 lib/Benchmark.pm	Measure execution time
 lib/Bundle/CPAN.pm	The CPAN bundle
+lib/CGI.pm		Web server interface
+lib/CGI/Apache.pm	Web server interface
+lib/CGI/Carp.pm		Web server interface
+lib/CGI/Fast.pm		Web server interface
+lib/CGI/Push.pm		Web server interface
+lib/CGI/Switch.pm	Web server interface
 lib/CPAN.pm		Interface to Comprehensive Perl Archive Network
 lib/CPAN/FirstTime.pm	Utility for creating CPAN config files
 lib/CPAN/Nox.pm		Runs CPAN while avoiding compiled extensions
@@ -332,6 +357,7 @@ lib/Net/netent.pm	By-name interface to Perl's built-in getnet*
 lib/Net/protoent.pm	By-name interface to Perl's built-in getproto*
 lib/Net/servent.pm	By-name interface to Perl's built-in getserv*
 lib/Pod/Functions.pm	used by pod/splitpod
+lib/Pod/Html.pm		Convert POD data to HTML
 lib/Pod/Text.pm		Convert POD data to formatted ASCII text
 lib/Search/Dict.pm	Perform binary search on dictionaries
 lib/SelectSaver.pm	Enforce proper select scoping
@@ -368,9 +394,8 @@ lib/bigint.pl		An arbitrary precision integer arithmetic package
 lib/bigrat.pl		An arbitrary precision rational arithmetic package
 lib/blib.pm		For "use blib"
 lib/cacheout.pl		Manages output filehandles when you need too many
-lib/chat2.inter		A chat2 with interaction
-lib/chat2.pl		Randal's famous expect-ish routines
 lib/complete.pl		A command completion subroutine
+lib/constant.pm		For "use constant"
 lib/ctime.pl		A ctime workalike
 lib/diagnostics.pm	Print verbose diagnostics
 lib/dotsh.pl		Code to "dot" in a shell script
@@ -652,6 +677,7 @@ t/lib/texttabs.t	See if Text::Tabs works
 t/lib/textwrap.t	See if Text::Wrap works
 t/lib/timelocal.t	See if Time::Local works
 t/op/append.t		See if . works
+t/op/arith.t		See if arithmetic works
 t/op/array.t		See if array operations work
 t/op/assignwarn.t	See if OP= operators warn correctly for undef targets
 t/op/auto.t		See if autoincrement et all work
@@ -716,6 +742,7 @@ t/op/universal.t	See if UNIVERSAL class works
 t/op/unshift.t		See if unshift works
 t/op/vec.t		See if vectors work
 t/op/write.t		See if write works
+t/pragma/constant.t	See if compile-time constants work
 t/pragma/locale.t	See if locale support (i18n and l10n) works
 t/pragma/overload.t	See if operator overloading works
 t/pragma/strict-refs	Tests of "use strict 'refs'" for strict.t
@@ -792,8 +819,8 @@ win32/VC-2.0/perl.mak		Win32 port
 win32/VC-2.0/perldll.mak	Win32 port
 win32/VC-2.0/perlglob.mak	Win32 port
 win32/autosplit.pl	Win32 port
-win32/bin/PL2BAT.BAT	Win32 port
 win32/bin/network.pl	Win32 port
+win32/bin/pl2bat.bat	Win32 port
 win32/bin/search.bat	Win32 port
 win32/bin/test.bat	Win32 port
 win32/bin/webget.bat	Win32 port
@@ -814,6 +841,7 @@ win32/makeperldef.pl	Win32 port
 win32/miniperl.mak	Win32 port
 win32/modules.mak	Win32 port
 win32/perl.mak		Win32 port
+win32/perl.rc		Win32 port
 win32/perldll.mak	Win32 port
 win32/perlglob.c	Win32 port
 win32/perlglob.mak	Win32 port

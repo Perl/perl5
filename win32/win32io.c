@@ -178,6 +178,9 @@ my_get_osfhandle( int filehandle )
     return _get_osfhandle(filehandle);
 }
 
+#ifdef PERLDLL
+__declspec(dllexport)
+#endif
 WIN32_IOSUBSYSTEM	win32stdio = {
     12345678L,		/* begin of structure; */
     dummy_errno,	/* (*pfunc_errno)(void); */

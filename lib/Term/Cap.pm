@@ -185,13 +185,16 @@ sub Tgetent { ## public -- static method
 
     # This is eval'ed inside the while loop for each file
     $search = q{
-	while ($_ = <TERMCAP>) {
+	while (<TERMCAP>) {
 	    next if /^\\t/ || /^#/;
 	    if ($_ =~ m/(^|\\|)${termpat}[:|]/o) {
 		chomp;
 		s/^[^:]*:// if $first++;
 		$state = 0;
-		while ($_ =~ s/\\\\$//) { $_ .= <TERMCAP>; chomp; }
+		while ($_ =~ s/\\\\$//) {
+		    defined(my $x = <TERMCAP>) or last;
+		    $_ .= $x; chomp;
+		}
 		last;
 	    }
 	}

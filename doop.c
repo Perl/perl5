@@ -649,6 +649,7 @@ dARGS
     HV *hv = (HV*)POPs;
     register HE *entry;
     SV *tmpstr;
+    I32 gimme = GIMME_V;
     I32 dokeys =   (op->op_type == OP_KEYS);
     I32 dovalues = (op->op_type == OP_VALUES);
 
@@ -667,10 +668,10 @@ dARGS
 
     (void)hv_iterinit(hv);	/* always reset iterator regardless */
 
-    if (op->op_private & OPpLEAVE_VOID)
+    if (gimme == G_VOID)
 	RETURN;
 
-    if (GIMME != G_ARRAY) {
+    if (gimme == G_SCALAR) {
 	I32 i;
 	dTARGET;
 

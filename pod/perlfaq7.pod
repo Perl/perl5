@@ -532,7 +532,7 @@ issue is the same here:
     my($foo) = <FILE>;	# WRONG
     my $foo  = <FILE>;	# right
 
-=head2 How do I redefine a built-in function, operator, or method?
+=head2 How do I redefine a builtin function, operator, or method?
 
 Why do you want to do that? :-)
 
@@ -576,7 +576,7 @@ how best to do this, so he left it out, even though it's been on the
 wish list since perl1.
 
 Here's a simple example of a switch based on pattern matching.  We'll
-do a multi-way conditional based on the type of reference stored in
+do a multiway conditional based on the type of reference stored in
 $whatchamacallit:
 
     SWITCH:

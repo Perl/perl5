@@ -123,10 +123,10 @@ LINK32_OBJS= \
 # PROP Output_Dir "debug"
 # PROP Intermediate_Dir "debug"
 # PROP Target_Dir ""
-OUTDIR=.\debug
+OUTDIR=.\..
 INTDIR=.\debug
 
-ALL : "..\perl.dll"
+ALL : "$(OUTDIR)\perl.dll"
 
 CLEAN : 
 	-@erase "$(INTDIR)\perllib.obj"
@@ -182,7 +182,7 @@ LINK32_OBJS= \
 	"..\libperl.lib" \
 	".\modules.lib"
 
-"..\perl.dll" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
+"$(OUTDIR)\perl.dll" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
   $(LINK32_FLAGS) $(LINK32_OBJS)
 <<

@@ -653,7 +653,7 @@ sub read_rc
 
     print "reading RC file: $file\n" if $show;
 
-    while ($_ = ($use_default ? shift(@default) : <RC>)) {
+    while (defined($_ = ($use_default ? shift(@default) : <RC>))) {
 	$ln = ++$line_num;			     ## note starting line num.
         $_ .= <RC>, $line_num++ while s/\\\n?$/\n/;  ## allow continuations
 	next if /^\s*(#.*)?$/;          ## skip blank or comment-only lines.

@@ -16,13 +16,13 @@ with an argument which is the name of the signal that triggered it.  A
 signal may be generated intentionally from a particular keyboard sequence like
 control-C or control-Z, sent to you from another process, or
 triggered automatically by the kernel when special events transpire, like
-a child process exiting, your process running out of stack space, or 
+a child process exiting, your process running out of stack space, or
 hitting file size limit.
 
 For example, to trap an interrupt signal, set up a handler like this.
 Notice how all we do is set a global variable and then raise an
 exception.  That's because on most systems libraries are not
-re-entrant, so calling any print() functions (or even anything that needs to
+reentrant, so calling any print() functions (or even anything that needs to
 malloc(3) more memory) could in theory trigger a memory fault
 and subsequent core dump.
 
@@ -30,7 +30,7 @@ and subsequent core dump.
 	my $signame = shift;
 	$shucks++;
 	die "Somebody sent me a SIG$signame";
-    } 
+    }
     $SIG{INT} = 'catch_zap';  # could fail in modules
     $SIG{INT} = \&catch_zap;  # best strategy
 
@@ -45,14 +45,14 @@ indexed by name to get the number:
 	$signo{$name} = $i;
 	$signame[$i] = $name;
 	$i++;
-    }   
+    }
 
 So to check whether signal 17 and SIGALRM were the same, do just this:
 
     print "signal #17 = $signame[17]\n";
-    if ($signo{ALRM}) { 
+    if ($signo{ALRM}) {
 	print "SIGALRM is $signo{ALRM}\n";
-    }   
+    }
 
 You may also choose to assign the strings C<'IGNORE'> or C<'DEFAULT'> as
 the handler, in which case Perl will try to discard the signal or do the
@@ -65,10 +65,10 @@ values are "inherited" by functions called from within that block.)
     sub precious {
 	local $SIG{INT} = 'IGNORE';
 	&more_functions;
-    } 
+    }
     sub more_functions {
 	# interrupts still ignored, for now...
-    } 
+    }
 
 Sending a signal to a negative process ID means that you send the signal
 to the entire Unix process-group.  This code send a hang-up signal to all
@@ -83,11 +83,11 @@ itself:
 
 Another interesting signal to send is signal number zero.  This doesn't
 actually affect another process, but instead checks whether it's alive
-or has changed its UID.  
+or has changed its UID.
 
     unless (kill 0 => $kid_pid) {
 	warn "something wicked happened to $kid_pid";
-    } 
+    }
 
 You might also want to employ anonymous functions for simple signal
 handlers:
@@ -95,18 +95,18 @@ handlers:
     $SIG{INT} = sub { die "\nOutta here!\n" };
 
 But that will be problematic for the more complicated handlers that need
-to re-install themselves.  Because Perl's signal mechanism is currently
+to reinstall themselves.  Because Perl's signal mechanism is currently
 based on the signal(3) function from the C library, you may sometimes be so
 misfortunate as to run on systems where that function is "broken", that
 is, it behaves in the old unreliable SysV way rather than the newer, more
 reasonable BSD and POSIX fashion.  So you'll see defensive people writing
 signal handlers like this:
 
-    sub REAPER { 
+    sub REAPER {
 	$waitedpid = wait;
 	# loathe sysV: it makes us not only reinstate
 	# the handler, but place it after the wait
-	$SIG{CHLD} = \&REAPER;  
+	$SIG{CHLD} = \&REAPER;
     }
     $SIG{CHLD} = \&REAPER;
     # now do something that forks...
@@ -114,11 +114,11 @@ signal handlers like this:
 or even the more elaborate:
 
     use POSIX ":sys_wait_h";
-    sub REAPER { 
+    sub REAPER {
 	my $child;
         while ($child = waitpid(-1,WNOHANG)) {
 	    $Kid_Status{$child} = $?;
-	} 
+	}
 	$SIG{CHLD} = \&REAPER;  # still loathe sysV
     }
     $SIG{CHLD} = \&REAPER;
@@ -134,11 +134,11 @@ using longjmp() or throw() in other languages.
 
 Here's an example:
 
-    eval { 
+    eval {
         local $SIG{ALRM} = sub { die "alarm clock restart" };
-        alarm 10; 
+        alarm 10;
         flock(FH, 2);   # blocking write lock
-        alarm 0; 
+        alarm 0;
     };
     if ($@ and $@ !~ /alarm clock restart/) { die }
 
@@ -151,7 +151,7 @@ examples in it.
 
 A named pipe (often referred to as a FIFO) is an old Unix IPC
 mechanism for processes communicating on the same machine.  It works
-just like a regular, connected anonymous pipes, except that the 
+just like a regular, connected anonymous pipes, except that the
 processes rendezvous using a filename and don't have to be related.
 
 To create a named pipe, use the Unix command mknod(1) or on some
@@ -160,16 +160,16 @@ systems, mkfifo(1).  These may not be in your normal path.
     # system return val is backwards, so && not ||
     #
     $ENV{PATH} .= ":/etc:/usr/etc";
-    if  (      system('mknod',  $path, 'p') 
+    if  (      system('mknod',  $path, 'p')
 	    && system('mkfifo', $path) )
     {
 	die "mk{nod,fifo} $path failed;
-    } 
+    }
 
 
 A fifo is convenient when you want to connect a process to an unrelated
 one.  When you open a fifo, the program will block until there's something
-on the other end.  
+on the other end.
 
 For example, let's say you'd like to have your F<.signature> file be a
 named pipe that has a Perl program on the other end.  Now every time any
@@ -185,9 +185,9 @@ to find out whether anyone (or anything) has accidentally removed our fifo.
     while (1) {
 	unless (-p $FIFO) {
 	    unlink $FIFO;
-	    system('mknod', $FIFO, 'p') 
+	    system('mknod', $FIFO, 'p')
 		&& die "can't mknod $FIFO: $!";
-	} 
+	}
 
 	# next line blocks until there's a reader
 	open (FIFO, "> $FIFO") || die "can't write $FIFO: $!";
@@ -204,7 +204,7 @@ communication by either appending or prepending a pipe symbol to the second
 argument to open().  Here's how to start something up in a child process you
 intend to write to:
 
-    open(SPOOLER, "| cat -v | lpr -h 2>/dev/null") 
+    open(SPOOLER, "| cat -v | lpr -h 2>/dev/null")
 		    || die "can't fork: $!";
     local $SIG{PIPE} = sub { die "spooler pipe broke" };
     print SPOOLER "stuff\n";
@@ -217,7 +217,7 @@ And here's how to start up a child process you intend to read from:
     while (<STATUS>) {
 	next if /^(tcp|udp)/;
 	print;
-    } 
+    }
     close STATUS || die "bad netstat: $! $?";
 
 If one can be sure that a particular program is a Perl script that is
@@ -231,7 +231,7 @@ read from the file F<f1>, the process F<cmd1>, standard input (F<tmpfile>
 in this case), the F<f2> file, the F<cmd2> command, and finally the F<f3>
 file.  Pretty nifty, eh?
 
-You might notice that you could use back-ticks for much the
+You might notice that you could use backticks for much the
 same effect as opening a pipe for reading:
 
     print grep { !/^(tcp|udp)/ } `netstat -an 2>&1`;
@@ -325,13 +325,13 @@ you opened whatever your kid writes to his STDOUT.
     use English;
     my $sleep_count = 0;
 
-    do { 
+    do {
 	$pid = open(KID_TO_WRITE, "|-");
 	unless (defined $pid) {
 	    warn "cannot fork: $!";
 	    die "bailing out" if $sleep_count++ > 6;
 	    sleep 10;
-	} 
+	}
     } until defined $pid;
 
     if ($pid) {  # parent
@@ -339,21 +339,21 @@ you opened whatever your kid writes to his STDOUT.
 	close(KID_TO_WRITE) || warn "kid exited $?";
     } else {     # child
 	($EUID, $EGID) = ($UID, $GID); # suid progs only
-	open (FILE, "> /safe/file") 
+	open (FILE, "> /safe/file")
 	    || die "can't open /safe/file: $!";
 	while (<STDIN>) {
 	    print FILE; # child's STDIN is parent's KID
-	} 
+	}
 	exit;  # don't forget this
-    } 
+    }
 
 Another common use for this construct is when you need to execute
 something without the shell's interference.  With system(), it's
-straightforward, but you can't use a pipe open or back-ticks safely.
+straightforward, but you can't use a pipe open or backticks safely.
 That's because there's no way to stop the shell from getting its hands on
 your arguments.   Instead, use lower-level control to call exec() directly.
 
-Here's a safe back-tick or pipe open for read:
+Here's a safe backtick or pipe open for read:
 
     # add error processing as above
     $pid = open(KID_TO_READ, "-|");
@@ -361,7 +361,7 @@ Here's a safe back-tick or pipe open for read:
     if ($pid) {   # parent
 	while (<KID_TO_READ>) {
 	    # do something interesting
-	} 	  
+	}
 	close(KID_TO_READ) || warn "kid exited $?";
 
     } else {      # child
@@ -369,7 +369,7 @@ Here's a safe back-tick or pipe open for read:
 	exec($program, @options, @args)
 	    || die "can't exec program: $!";
 	# NOTREACHED
-    } 
+    }
 
 
 And here's a safe pipe open for writing:
@@ -381,7 +381,7 @@ And here's a safe pipe open for writing:
     if ($pid) {  # parent
 	for (@data) {
 	    print KID_TO_WRITE;
-	} 
+	}
 	close(KID_TO_WRITE) || warn "kid exited $?";
 
     } else {     # child
@@ -389,11 +389,11 @@ And here's a safe pipe open for writing:
 	exec($program, @options, @args)
 	    || die "can't exec program: $!";
 	# NOTREACHED
-    } 
+    }
 
 Note that these operations are full Unix forks, which means they may not be
 correctly implemented on alien systems.  Additionally, these are not true
-multi-threading.  If you'd like to learn more about threading, see the
+multithreading.  If you'd like to learn more about threading, see the
 F<modules> file mentioned below in the SEE ALSO section.
 
 =head2 Bidirectional Communication
@@ -404,7 +404,7 @@ doesn't actually work:
 
     open(PROG_FOR_READING_AND_WRITING, "| some program |")
 
-and if you forget to use the B<-w> flag, then you'll miss out 
+and if you forget to use the B<-w> flag, then you'll miss out
 entirely on the diagnostic message:
 
     Can't do bidirectional pipe at -e line 1.
@@ -435,13 +435,13 @@ The problem with this is that Unix buffering is really going to
 ruin your day.  Even though your C<Writer> filehandle is auto-flushed,
 and the process on the other end will get your data in a timely manner,
 you can't usually do anything to force it to give it back to you
-in a similarly quick fashion.  In this case, we could, because we 
+in a similarly quick fashion.  In this case, we could, because we
 gave I<cat> a B<-u> flag to make it unbuffered.  But very few Unix
 commands are designed to operate over pipes, so this seldom works
-unless you yourself wrote the program on the other end of the 
+unless you yourself wrote the program on the other end of the
 double-ended pipe.
 
-A solution to this is the non-standard F<Comm.pl> library.  It uses
+A solution to this is the nonstandard F<Comm.pl> library.  It uses
 pseudo-ttys to make your program behave more reasonably:
 
     require 'Comm.pl';
@@ -452,8 +452,8 @@ pseudo-ttys to make your program behave more reasonably:
     }
 
 This way you don't have to have control over the source code of the
-program you're using.  The F<Comm> library also has expect() 
-and interact() functions.  Find the library (and we hope its 
+program you're using.  The F<Comm> library also has expect()
+and interact() functions.  Find the library (and we hope its
 successor F<IPC::Chat>) at your nearest CPAN archive as detailed
 in the SEE ALSO section below.
 
@@ -510,16 +510,16 @@ Here's a sample TCP client using Internet-domain sockets:
     $proto   = getprotobyname('tcp');
     socket(SOCK, PF_INET, SOCK_STREAM, $proto)	|| die "socket: $!";
     connect(SOCK, $paddr)    || die "connect: $!";
-    while ($line = <SOCK>) {
+    while (defined($line = <SOCK>)) {
 	print $line;
-    } 
+    }
 
     close (SOCK)	    || die "close: $!";
     exit;
 
 And here's a corresponding server to go along with it.  We'll
 leave the address as INADDR_ANY so that the kernel can choose
-the appropriate interface on multi-homed hosts.  If you want sit
+the appropriate interface on multihomed hosts.  If you want sit
 on a particular interface (like the external side of a gateway
 or firewall machine), you should fill this in with your real address
 instead.
@@ -531,14 +531,14 @@ instead.
     use Socket;
     use Carp;
 
-    sub logmsg { print "$0 $$: @_ at ", scalar localtime, "\n" } 
+    sub logmsg { print "$0 $$: @_ at ", scalar localtime, "\n" }
 
     my $port = shift || 2345;
     my $proto = getprotobyname('tcp');
     $port = $1 if $port =~ /(\d+)/; # untaint port number
 
     socket(Server, PF_INET, SOCK_STREAM, $proto)	|| die "socket: $!";
-    setsockopt(Server, SOL_SOCKET, SO_REUSEADDR, 
+    setsockopt(Server, SOL_SOCKET, SO_REUSEADDR,
 					pack("l", 1)) 	|| die "setsockopt: $!";
     bind(Server, sockaddr_in($port, INADDR_ANY))	|| die "bind: $!";
     listen(Server,SOMAXCONN) 				|| die "listen: $!";
@@ -553,16 +553,16 @@ instead.
 	my($port,$iaddr) = sockaddr_in($paddr);
 	my $name = gethostbyaddr($iaddr,AF_INET);
 
-	logmsg "connection from $name [", 
-		inet_ntoa($iaddr), "] 
+	logmsg "connection from $name [",
+		inet_ntoa($iaddr), "]
 		at port $port";
 
-	print Client "Hello there, $name, it's now ", 
+	print Client "Hello there, $name, it's now ",
 			scalar localtime, "\n";
-    } 
+    }
 
-And here's a multi-threaded version.  It's multi-threaded in that
-like most typical servers, it spawns (forks) a slave server to 
+And here's a multithreaded version.  It's multithreaded in that
+like most typical servers, it spawns (forks) a slave server to
 handle the client request so that the master server can quickly
 go back to service a new client.
 
@@ -574,14 +574,14 @@ go back to service a new client.
     use Carp;
 
     sub spawn;  # forward declaration
-    sub logmsg { print "$0 $$: @_ at ", scalar localtime, "\n" } 
+    sub logmsg { print "$0 $$: @_ at ", scalar localtime, "\n" }
 
     my $port = shift || 2345;
     my $proto = getprotobyname('tcp');
     $port = $1 if $port =~ /(\d+)/; # untaint port number
-    
+
     socket(Server, PF_INET, SOCK_STREAM, $proto)	|| die "socket: $!";
-    setsockopt(Server, SOL_SOCKET, SO_REUSEADDR, 
+    setsockopt(Server, SOL_SOCKET, SO_REUSEADDR,
 					pack("l", 1)) 	|| die "setsockopt: $!";
     bind(Server, sockaddr_in($port, INADDR_ANY))	|| die "bind: $!";
     listen(Server,SOMAXCONN) 				|| die "listen: $!";
@@ -591,7 +591,7 @@ go back to service a new client.
     my $waitedpid = 0;
     my $paddr;
 
-    sub REAPER { 
+    sub REAPER {
 	$waitedpid = wait;
 	$SIG{CHLD} = \&REAPER;  # loathe sysV
 	logmsg "reaped $waitedpid" . ($? ? " with exit $?" : '');
@@ -599,30 +599,30 @@ go back to service a new client.
 
     $SIG{CHLD} = \&REAPER;
 
-    for ( $waitedpid = 0; 
-	  ($paddr = accept(Client,Server)) || $waitedpid; 
-	  $waitedpid = 0, close Client) 
+    for ( $waitedpid = 0;
+	  ($paddr = accept(Client,Server)) || $waitedpid;
+	  $waitedpid = 0, close Client)
     {
 	next if $waitedpid and not $paddr;
 	my($port,$iaddr) = sockaddr_in($paddr);
 	my $name = gethostbyaddr($iaddr,AF_INET);
 
-	logmsg "connection from $name [", 
-		inet_ntoa($iaddr), "] 
+	logmsg "connection from $name [",
+		inet_ntoa($iaddr), "]
 		at port $port";
 
-	spawn sub { 
+	spawn sub {
 	    print "Hello there, $name, it's now ", scalar localtime, "\n";
-	    exec '/usr/games/fortune' 
+	    exec '/usr/games/fortune'
 		or confess "can't exec fortune: $!";
 	};
 
-    } 
+    }
 
     sub spawn {
 	my $coderef = shift;
 
-	unless (@_ == 0 && $coderef && ref($coderef) eq 'CODE') { 
+	unless (@_ == 0 && $coderef && ref($coderef) eq 'CODE') {
 	    confess "usage: spawn CODEREF";
 	}
 
@@ -640,7 +640,7 @@ go back to service a new client.
 	open(STDOUT, ">&Client")   || die "can't dup client to stdout";
 	## open(STDERR, ">&STDOUT") || die "can't dup stdout to stderr";
 	exit &$coderef();
-    } 
+    }
 
 This server takes the trouble to clone off a child version via fork() for
 each incoming request.  That way it can handle many requests at once,
@@ -666,11 +666,11 @@ differ from the system on which it's being run:
     use Socket;
 
     my $SECS_of_70_YEARS = 2208988800;
-    sub ctime { scalar localtime(shift) } 
+    sub ctime { scalar localtime(shift) }
 
-    my $iaddr = gethostbyname('localhost'); 
-    my $proto = getprotobyname('tcp');   
-    my $port = getservbyname('time', 'tcp');  
+    my $iaddr = gethostbyname('localhost');
+    my $proto = getprotobyname('tcp');
+    my $port = getservbyname('time', 'tcp');
     my $paddr = sockaddr_in(0, $iaddr);
     my($host);
 
@@ -695,7 +695,7 @@ differ from the system on which it's being run:
 That's fine for Internet-domain clients and servers, but what about local
 communications?  While you can use the same setup, sometimes you don't
 want to.  Unix-domain sockets are local to the current host, and are often
-used internally to implement pipes.  Unlike Internet domain sockets, UNIX
+used internally to implement pipes.  Unlike Internet domain sockets, Unix
 domain sockets can show up in the file system with an ls(1) listing.
 
     $ ls -l /dev/log
@@ -705,7 +705,7 @@ You can test for these with Perl's B<-S> file test:
 
     unless ( -S '/dev/log' ) {
 	die "something's wicked with the print system";
-    } 
+    }
 
 Here's a sample Unix-domain client:
 
@@ -718,12 +718,12 @@ Here's a sample Unix-domain client:
     $rendezvous = shift || '/tmp/catsock';
     socket(SOCK, PF_UNIX, SOCK_STREAM, 0)	|| die "socket: $!";
     connect(SOCK, sockaddr_un($rendezvous))	|| die "connect: $!";
-    while ($line = <SOCK>) {
+    while (defined($line = <SOCK>)) {
 	print $line;
-    } 
+    }
     exit;
 
-And here's a corresponding server.  
+And here's a corresponding server.
 
     #!/usr/bin/perl -Tw
     require 5.002;
@@ -746,17 +746,17 @@ And here's a corresponding server.
 
     $SIG{CHLD} = \&REAPER;
 
-    for ( $waitedpid = 0; 
-	  accept(Client,Server) || $waitedpid; 
-	  $waitedpid = 0, close Client) 
+    for ( $waitedpid = 0;
+	  accept(Client,Server) || $waitedpid;
+	  $waitedpid = 0, close Client)
     {
 	next if $waitedpid;
 	logmsg "connection on $NAME";
-	spawn sub { 
+	spawn sub {
 	    print "Hello there, it's now ", scalar localtime, "\n";
 	    exec '/usr/games/fortune' or die "can't exec fortune: $!";
 	};
-    } 
+    }
 
 As you see, it's remarkably similar to the Internet domain TCP server, so
 much so, in fact, that we've omitted several duplicate functions--spawn(),
@@ -799,8 +799,8 @@ with TCP, you'd have to use a different socket handle for each host.
     use Socket;
     use Sys::Hostname;
 
-    my ( $count, $hisiaddr, $hispaddr, $histime, 
-	 $host, $iaddr, $paddr, $port, $proto, 
+    my ( $count, $hisiaddr, $hispaddr, $histime,
+	 $host, $iaddr, $paddr, $port, $proto,
 	 $rin, $rout, $rtime, $SECS_of_70_YEARS);
 
     $SECS_of_70_YEARS      = 2208988800;
@@ -847,7 +847,7 @@ several processes.  That's because Perl would reallocate your string when
 you weren't wanting it to.
 
 
-Here's a small example showing shared memory usage.  
+Here's a small example showing shared memory usage.
 
     $IPC_PRIVATE = 0;
     $IPC_RMID = 0;
@@ -925,7 +925,7 @@ C<require "sys/ipc.ph">.  Better yet, perhaps someone should create an
 C<IPC::SysV> module the way we have the C<Socket> module for normal
 client-server communications.
 
-(... time passes)  
+(... time passes)
 
 Voila!  Check out the IPC::SysV modules written by Jack Shirazi.  You can
 find them at a CPAN store near you.
@@ -961,8 +961,8 @@ signals and to stick with simple TCP and UDP socket operations; e.g., don't
 try to pass open file descriptors over a local UDP datagram socket if you
 want your code to stand a chance of being portable.
 
-Because few vendors provide C libraries that are safely 
-re-entrant, the prudent programmer will do little else within 
+Because few vendors provide C libraries that are safely
+reentrant, the prudent programmer will do little else within
 a handler beyond die() to raise an exception and longjmp(3) out.
 
 =head1 AUTHOR

@@ -24,12 +24,12 @@ object, but we usually reserve the word for references to objects that
 have been officially "blessed" into a class package.)
 
 Symbolic references are names of variables or other objects, just as a
-symbolic link in a UNIX filesystem contains merely the name of a file.
+symbolic link in a Unix filesystem contains merely the name of a file.
 The C<*glob> notation is a kind of symbolic reference.  (Symbolic
 references are sometimes called "soft references", but please don't call
 them that; references are confusing enough without useless synonyms.)
 
-In contrast, hard references are more like hard links in a UNIX file
+In contrast, hard references are more like hard links in a Unix file
 system: They are used to access an underlying object without concern for
 what its (other) name is.  When the word "reference" is used without an
 adjective, like in the following paragraph, it usually is talking about a
@@ -41,14 +41,14 @@ scalar is holding a reference, it always behaves as a simple scalar.  It
 doesn't magically start being an array or hash or subroutine; you have to
 tell it explicitly to do so, by dereferencing it.
 
-References can be constructed several ways.
+References can be constructed in several ways.
 
 =over 4
 
 =item 1.
 
 By using the backslash operator on a variable, subroutine, or value.
-(This works much like the & (address-of) operator works in C.)  Note
+(This works much like the & (address-of) operator in C.)  Note
 that this typically creates I<ANOTHER> reference to a variable, because
 there's already a reference to the variable in the symbol table.  But
 the symbol table reference might go away, and you'll still have the
@@ -63,7 +63,7 @@ reference that the backslash returned.  Here are some examples:
 It isn't possible to create a true reference to an IO handle (filehandle or
 dirhandle) using the backslash operator.  See the explanation of the
 *foo{THING} syntax below.  (However, you're apt to find Perl code
-out there using globrefs as though they were IO handles, which is 
+out there using globrefs as though they were IO handles, which is
 grandfathered into continued functioning.)
 
 =item 2.
@@ -74,7 +74,7 @@ brackets:
     $arrayref = [1, 2, ['a', 'b', 'c']];
 
 Here we've constructed a reference to an anonymous array of three elements
-whose final element is itself reference to another anonymous array of three
+whose final element is itself a reference to another anonymous array of three
 elements.  (The multidimensional syntax described later can be used to
 access this.  For example, after the above, C<$arrayref-E<gt>[2][1]> would have
 the value "b".)
@@ -83,10 +83,10 @@ Note that taking a reference to an enumerated list is not the same
 as using square brackets--instead it's the same as creating
 a list of references!
 
-    @list = (\$a, \@b, \%c);  
+    @list = (\$a, \@b, \%c);
     @list = \($a, @b, %c);	# same thing!
 
-As a special case, C<\(@foo)> returns a list of references to the contents 
+As a special case, C<\(@foo)> returns a list of references to the contents
 of C<@foo>, not a reference to C<@foo> itself.  Likewise for C<%foo>.
 
 =item 3.
@@ -143,8 +143,8 @@ context even when it's called outside of the context.
 In human terms, it's a funny way of passing arguments to a subroutine when
 you define it as well as when you call it.  It's useful for setting up
 little bits of code to run later, such as callbacks.  You can even
-do object-oriented stuff with it, though Perl provides a different
-mechanism to do that already--see L<perlobj>.
+do object-oriented stuff with it, though Perl already provides a different
+mechanism to do that--see L<perlobj>.
 
 You can also think of closure as a way to write a subroutine template without
 using eval.  (In fact, in version 5.000, eval was the I<only> way to get
@@ -298,7 +298,7 @@ Admittedly, it's a little silly to use the curlies in this case, but
 the BLOCK can contain any arbitrary expression, in particular,
 subscripted expressions:
 
-    &{ $dispatch{$index} }(1,2,3);	# call correct routine 
+    &{ $dispatch{$index} }(1,2,3);	# call correct routine
 
 Because of being able to omit the curlies for the simple case of C<$$x>,
 people often make the mistake of viewing the dereferencing symbols as
@@ -416,7 +416,7 @@ that, you can say
     use strict 'refs';
 
 and then only hard references will be allowed for the rest of the enclosing
-block.  An inner block may countermand that with 
+block.  An inner block may countermand that with
 
     no strict 'refs';
 
@@ -429,7 +429,7 @@ invisible to this mechanism.  For example:
     {
 	my $value = 20;
 	print $$ref;
-    } 
+    }
 
 This will still print 10, not 20.  Remember that local() affects package
 variables, which are all "global" to the package.
@@ -495,7 +495,7 @@ converted into a string:
 
     $x{ \$a } = $a;
 
-If you try to dereference the key, it won't do a hard dereference, and 
+If you try to dereference the key, it won't do a hard dereference, and
 you won't accomplish what you're attempting.  You might want to do something
 more like
 

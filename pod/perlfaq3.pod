@@ -11,7 +11,7 @@ and programming support.
 
 Have you looked at CPAN (see L<perlfaq2>)?  The chances are that
 someone has already written a module that can solve your problem.
-Have you read the appropriate man pages?  Here's a brief index:
+Have you read the appropriate manpages?  Here's a brief index:
 
 	Objects		perlref, perlmod, perlobj, perltie
 	Data Structures	perlref, perllol, perldsc
@@ -22,12 +22,12 @@ Have you read the appropriate man pages?  Here's a brief index:
 	Various 	http://www.perl.com/CPAN/doc/FMTEYEWTK/index.html
 			(not a man-page but still useful)
 
-L<perltoc> provides a crude table of contents for the perl man page set.
+L<perltoc> provides a crude table of contents for the perl manpage set.
 
 =head2 How can I use Perl interactively?
 
 The typical approach uses the Perl debugger, described in the
-perldebug(1) man page, on an "empty" program, like this:
+perldebug(1) manpage, on an "empty" program, like this:
 
     perl -de 42
 
@@ -200,7 +200,7 @@ structure.  If you're working with specialist data structures
 less memory than equivalent Perl modules.
 
 Another thing to try is learning whether your Perl was compiled with
-the system malloc or with Perl's built-in malloc.  Whichever one it
+the system malloc or with Perl's builtin malloc.  Whichever one it
 is, try using the other one and see whether this makes a difference.
 Information about malloc is in the F<INSTALL> file in the source
 distribution.  You can find out whether you are using perl's malloc by
@@ -235,7 +235,7 @@ use in other parts of your program.  (NB: my() variables also execute
 about 10% faster than globals.)  A global variable, of course, never
 goes out of scope, so you can't get its space automatically reclaimed,
 although undef()ing and/or delete()ing it will achieve the same effect.
-In general, memory allocation and de-allocation isn't something you can
+In general, memory allocation and deallocation isn't something you can
 or should be worrying about much in Perl, but even this capability
 (preallocation of data types) is in the works.
 
@@ -244,15 +244,15 @@ or should be worrying about much in Perl, but even this capability
 Beyond the normal measures described to make general Perl programs
 faster or smaller, a CGI program has additional issues.  It may be run
 several times per second.  Given that each time it runs it will need
-to be re-compiled and will often allocate a megabyte or more of system
+to be recompiled and will often allocate a megabyte or more of system
 memory, this can be a killer.  Compiling into C B<isn't going to help
-you> because the process start-up overhead is where the bottleneck is.
+you> because the process startup overhead is where the bottleneck is.
 
 There are at least two popular ways to avoid this overhead.  One
 solution involves running the Apache HTTP server (available from
 http://www.apache.org/) with either of the mod_perl or mod_fastcgi
 plugin modules.  With mod_perl and the Apache::* modules (from CPAN),
-httpd will run with an embedded Perl interpreter which pre-compiles
+httpd will run with an embedded Perl interpreter which precompiles
 your script and then executes it within the same address space without
 forking.  The Apache extension also gives Perl access to the internal
 server API, so modules written in Perl can do just about anything a
@@ -286,8 +286,8 @@ instead of fixing them, is little security indeed.
 
 You can try using encryption via source filters (Filter::* from CPAN).
 But crackers might be able to decrypt it.  You can try using the
-byte-code compiler and interpreter described below, but crackers might
-be able to de-compile it.  You can try using the native-code compiler
+byte code compiler and interpreter described below, but crackers might
+be able to decompile it.  You can try using the native-code compiler
 described below, but crackers might be able to disassemble it.  These
 pose varying degrees of difficulty to people wanting to get at your
 code, but none can definitively conceal it (this is true of every
@@ -301,12 +301,12 @@ Your access to it does not give you permission to use it blah blah
 blah."  We are not lawyers, of course, so you should see a lawyer if
 you want to be sure your licence's wording will stand up in court.
 
-=head2 How can I compile my Perl program into byte-code or C?
+=head2 How can I compile my Perl program into byte code or C?
 
 Malcolm Beattie has written a multifunction backend compiler,
 available from CPAN, that can do both these things.  It is as of
 Feb-1997 in late alpha release, which means it's fun to play with if
-you're a programmer but not really for people looking for turn-key
+you're a programmer but not really for people looking for turnkey
 solutions.
 
 I<Please> understand that merely compiling into C does not in and of
@@ -334,14 +334,14 @@ you link your main perl binary with this, it will make it miniscule.
 For example, on one author's system, /usr/bin/perl is only 11k in
 size!
 
-=head2 How can I get '#!perl' to work on [MSDOS,NT,...]?
+=head2 How can I get '#!perl' to work on [MS-DOS,Windows NT,...]?
 
 For OS/2 just use
 
     extproc perl -S -your_switches
 
 as the first line in C<*.cmd> file (C<-S> due to a bug in cmd.exe's
-`extproc' handling).  For DOS one should first invent a corresponding
+`extproc' handling).  For MS-DOS one should first invent a corresponding
 batch file, and codify it in C<ALTERNATIVE_SHEBANG> (see the
 F<INSTALL> file in the source distribution for more information).
 
@@ -385,7 +385,7 @@ Yes.  Read L<perlrun> for more information.  Some examples follow.
 
 Ok, the last one was actually an obfuscated perl entry. :-)
 
-=head2 Why don't perl one-liners work on my DOS/Mac/VMS system?
+=head2 Why don't perl one-liners work on my MS-DOS/Macintosh/VMS system?
 
 The problem is usually that the command interpreters on those systems
 have rather different ideas about quoting than the Unix shells under
@@ -398,10 +398,10 @@ For example:
     # Unix
     perl -e 'print "Hello world\n"'
 
-    # DOS, etc.
+    # MS-DOS, etc.
     perl -e "print \"Hello world\n\""
 
-    # Mac
+    # Macintosh
     print "Hello world\n"
      (then Run "Myscript" or Shift-Command-R)
 
@@ -409,15 +409,15 @@ For example:
     perl -e "print ""Hello world\n"""
 
 The problem is that none of this is reliable: it depends on the command
-interpreter.  Under Unix, the first two often work. Under DOS, it's
+interpreter.  Under Unix, the first two often work. Under MS-DOS, it's
 entirely possible neither works.  If 4DOS was the command shell, I'd
 probably have better luck like this:
 
   perl -e "print <Ctrl-x>"Hello world\n<Ctrl-x>""
 
-Under the Mac, it depends which environment you are using.  The MacPerl
+Under the Macintosh, it depends which environment you are using.  The MacPerl
 shell, or MPW, is much like Unix shells in its support for several
-quoting variants, except that it makes free use of the Mac's non-ASCII
+quoting variants, except that it makes free use of the Macintosh's non-ASCII
 characters as control characters.
 
 I'm afraid that there is no general solution to all of this.  It is a
@@ -470,7 +470,7 @@ my C program, what am I doing wrong?
 
 Download the ExtUtils::Embed kit from CPAN and run `make test'.  If
 the tests pass, read the pods again and again and again.  If they
-fail, see L<perlbug> and send a bugreport with the output of 
+fail, see L<perlbug> and send a bug report with the output of
 C<make test TEST_VERBOSE=1> along with C<perl -V>.
 
 =head2 When I tried to run my script, I got this message. What does it

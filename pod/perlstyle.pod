@@ -6,7 +6,7 @@ perlstyle - Perl style guide
 
 Each programmer will, of course, have his or her own preferences in
 regards to formatting, but there are some general guidelines that will
-make your programs easier to read, understand, and maintain.  
+make your programs easier to read, understand, and maintain.
 
 The most important thing is to run your programs under the B<-w>
 flag at all times.  You may turn it off explicitly for particular
@@ -17,7 +17,7 @@ useful.
 
 Regarding aesthetics of code lay out, about the only thing Larry
 cares strongly about is that the closing curly brace of
-a multi-line BLOCK should line up with the keyword that started the construct.
+a multiline BLOCK should line up with the keyword that started the construct.
 Beyond that, he has other preferences that aren't so strong:
 
 =over 4
@@ -32,7 +32,7 @@ Opening curly on same line as keyword, if possible, otherwise line up.
 
 =item *
 
-Space before the opening curly of a multi-line BLOCK.
+Space before the opening curly of a multiline BLOCK.
 
 =item *
 
@@ -154,13 +154,13 @@ the middle.  Just "outdent" it a little to make it more visible:
 =item *
 
 Don't be afraid to use loop labels--they're there to enhance
-readability as well as to allow multi-level loop breaks.  See the
+readability as well as to allow multilevel loop breaks.  See the
 previous example.
 
 =item *
 
 Avoid using grep() (or map()) or `backticks` in a void context, that is,
-when you just throw away their return values.  Those functions all 
+when you just throw away their return values.  Those functions all
 have return values, so use them.  Otherwise use a foreach() loop or
 the system() function instead.
 
@@ -178,7 +178,7 @@ determined by the B<Configure> program when Perl was installed.
 Choose mnemonic identifiers.  If you can't remember what mnemonic means,
 you've got a problem.
 
-=item * 
+=item *
 
 While short identifiers like $gotit are probably ok, use underscores to
 separate words.  It is generally easier to read $var_names_like_this than
@@ -190,19 +190,19 @@ reserves lowercase module names for "pragma" modules like C<integer> and
 C<strict>.  Other modules should begin with a capital letter and use mixed
 case, but probably without underscores due to limitations in primitive
 file systems' representations of module names as files that must fit into a
-few sparse bites.
+few sparse bytes.
 
 =item *
 
-You may find it helpful to use letter case to indicate the scope 
-or nature of a variable. For example: 
+You may find it helpful to use letter case to indicate the scope
+or nature of a variable. For example:
 
-    $ALL_CAPS_HERE   constants only (beware clashes with perl vars!)  
-    $Some_Caps_Here  package-wide global/static 
-    $no_caps_here    function scope my() or local() variables 
+    $ALL_CAPS_HERE   constants only (beware clashes with perl vars!)
+    $Some_Caps_Here  package-wide global/static
+    $no_caps_here    function scope my() or local() variables
 
-Function and method names seem to work best as all lowercase. 
-E.g., $obj-E<gt>as_string(). 
+Function and method names seem to work best as all lowercase.
+E.g., $obj-E<gt>as_string().
 
 You can use a leading underscore to indicate that a variable or
 function should not be used outside the package that defined it.
@@ -227,12 +227,12 @@ Use here documents instead of repeated print() statements.
 =item *
 
 Line up corresponding things vertically, especially if it'd be too long
-to fit on one line anyway.  
+to fit on one line anyway.
 
-    $IDX = $ST_MTIME;       
-    $IDX = $ST_ATIME 	   if $opt_u; 
-    $IDX = $ST_CTIME 	   if $opt_c;     
-    $IDX = $ST_SIZE  	   if $opt_s;     
+    $IDX = $ST_MTIME;
+    $IDX = $ST_ATIME 	   if $opt_u;
+    $IDX = $ST_CTIME 	   if $opt_c;
+    $IDX = $ST_SIZE  	   if $opt_s;
 
     mkdir $tmpdir, 0700	or die "can't mkdir $tmpdir: $!";
     chdir($tmpdir)      or die "can't chdir $tmpdir: $!";

@@ -8,7 +8,7 @@ Perl operators have the following associativity and precedence,
 listed from highest precedence to lowest.  Note that all operators
 borrowed from C keep the same precedence relationship with each other,
 even where C's precedence is slightly screwy.  (This makes learning
-Perl easier for C folks.)  With very few exceptions, these all 
+Perl easier for C folks.)  With very few exceptions, these all
 operate on scalar values only, not array values.
 
     left	terms and list operators (leftward)
@@ -16,7 +16,7 @@ operate on scalar values only, not array values.
     nonassoc	++ --
     right	**
     right	! ~ \ and unary + and -
-    left	=~ !~ 
+    left	=~ !~
     left	* / % x
     left	+ - .
     left	<< >>
@@ -42,7 +42,7 @@ In the following sections, these operators are covered in precedence order.
 
 =head2 Terms and List Operators (Leftward)
 
-Any TERM is of highest precedence of Perl.  These includes variables,
+A TERM has the highest precedence in Perl.  They includes variables,
 quote and quote-like operators, any expression in parentheses,
 and any function whose arguments are parenthesized.  Actually, there
 aren't really functions in this sense, just list operators and unary
@@ -56,7 +56,7 @@ just like a normal function call.
 
 In the absence of parentheses, the precedence of list operators such as
 C<print>, C<sort>, or C<chmod> is either very high or very low depending on
-whether you look at the left side of operator or the right side of it.
+whether you are looking at the left side or the right side of the operator.
 For example, in
 
     @ary = (1, 3, sort 4, 2);
@@ -81,11 +81,11 @@ Also note that
 
     print ($foo & 255) + 1, "\n";
 
-probably doesn't do what you expect at first glance.  See 
+probably doesn't do what you expect at first glance.  See
 L<Named Unary Operators> for more discussion of this.
 
 Also parsed as terms are the C<do {}> and C<eval {}> constructs, as
-well as subroutine and method calls, and the anonymous 
+well as subroutine and method calls, and the anonymous
 constructors C<[]> and C<{}>.
 
 See also L<Quote and Quote-like Operators> toward the end of this section,
@@ -110,7 +110,7 @@ See L<perlobj>.
 increment or decrement the variable before returning the value, and if
 placed after, increment or decrement the variable after returning the value.
 
-The auto-increment operator has a little extra built-in magic to it.  If
+The auto-increment operator has a little extra builtin magic to it.  If
 you increment a variable that is numeric, or that has ever been used in
 a numeric context, you get a normal increment.  If, however, the
 variable has been used in only string contexts since it was set, and
@@ -179,7 +179,12 @@ Binary "*" multiplies two numbers.
 
 Binary "/" divides two numbers.
 
-Binary "%" computes the modulus of the two numbers.
+Binary "%" computes the modulus of two numbers.  Given integer
+operands C<$a> and C<$b>: If C<$b> is positive, then C<$a % $b> is
+C<$a> minus the largest multiple of C<$b> that is not greater than
+C<$a>.  If C<$b> is negative, then C<$a % $b> is C<$a> minus the
+smallest multiple of C<$b> that is not less than C<$a> (i.e. the
+result will be less than or equal to zero).
 
 Binary "x" is the repetition operator.  In a scalar context, it
 returns a string consisting of the left operand repeated the number of
@@ -347,12 +352,12 @@ operators depending on the context.  In a list context, it returns an
 array of values counting (by ones) from the left value to the right
 value.  This is useful for writing C<for (1..10)> loops and for doing
 slice operations on arrays.  Be aware that under the current implementation,
-a temporary array is created, so you'll burn a lot of memory if you 
+a temporary array is created, so you'll burn a lot of memory if you
 write something like this:
 
     for (1 .. 1_000_000) {
 	# code
-    } 
+    }
 
 In a scalar context, ".." returns a boolean value.  The operator is
 bistable, like a flip-flop, and emulates the line-range (comma) operator
@@ -416,11 +421,11 @@ like an if-then-else.  If the argument before the ? is true, the
 argument before the : is returned, otherwise the argument after the :
 is returned.  For example:
 
-    printf "I have %d dog%s.\n", $n, 
+    printf "I have %d dog%s.\n", $n,
 	    ($n == 1) ? '' : "s";
 
 Scalar or list context propagates downward into the 2nd
-or 3rd argument, whichever is selected.  
+or 3rd argument, whichever is selected.
 
     $a = $ok ? $b : $c;  # get a scalar
     @a = $ok ? @b : @c;  # get an array
@@ -446,8 +451,8 @@ is equivalent to
     $a = $a + 2;
 
 although without duplicating any side effects that dereferencing the lvalue
-might trigger, such as from tie().  Other assignment operators work similarly.  
-The following are recognized: 
+might trigger, such as from tie().  Other assignment operators work similarly.
+The following are recognized:
 
     **=    +=    *=    &=    <<=    &&=
            -=    /=    |=    >>=    ||=
@@ -533,12 +538,12 @@ Address-of operator.  (But see the "\" operator for taking a reference.)
 
 =item unary *
 
-Dereference-address operator. (Perl's prefix dereferencing 
+Dereference-address operator. (Perl's prefix dereferencing
 operators are typed: $, @, %, and &.)
 
 =item (TYPE)
 
-Type casting operator.  
+Type casting operator.
 
 =back
 
@@ -550,7 +555,7 @@ pattern matching capabilities.  Perl provides customary quote characters
 for these behaviors, but also provides a way for you to choose your
 quote character for any of them.  In the following table, a C<{}> represents
 any pair of delimiters you choose.  Non-bracketing delimiters use
-the same character fore and aft, but the 4 sorts of brackets 
+the same character fore and aft, but the 4 sorts of brackets
 (round, angle, square, curly) will all nest.
 
     Customary  Generic     Meaning    Interpolates
@@ -706,7 +711,7 @@ beginning.  Examples:
 
     # scalar context
     $/ = ""; $* = 1;  # $* deprecated in modern perls
-    while ($paragraph = <>) {
+    while (defined($paragraph = <>)) {
 	while ($paragraph =~ /[a-z]['")]*[.!?]+['")]*\s/g) {
 	    $sentences++;
 	}
@@ -792,7 +797,7 @@ A double-quoted, interpolated string.
 
 A string which is interpolated and then executed as a system command.
 The collected standard output of the command is returned.  In scalar
-context, it comes back as a single (potentially multi-line) string.
+context, it comes back as a single (potentially multiline) string.
 In list context, returns a list of lines (however you've defined lines
 with $/ or $INPUT_RECORD_SEPARATOR).
 
@@ -847,7 +852,7 @@ Options are:
 Any non-alphanumeric, non-whitespace delimiter may replace the
 slashes.  If single quotes are used, no interpretation is done on the
 replacement string (the C</e> modifier overrides this, however).  Unlike
-Perl 4, Perl 5 treats back-ticks as normal delimiters; the replacement
+Perl 4, Perl 5 treats backticks as normal delimiters; the replacement
 text is not evaluated as a command.  If the
 PATTERN is delimited by bracketing quotes, the REPLACEMENT has its own
 pair of quotes, which may or may not be bracketing quotes, e.g.,
@@ -892,7 +897,7 @@ Examples:
 
     s/([^ ]*) *([^ ]*)/$2 $1/;	# reverse 1st two fields
 
-Note the use of $ instead of \ in the last example.  Unlike 
+Note the use of $ instead of \ in the last example.  Unlike
 B<sed>, we use the \E<lt>I<digit>E<gt> form in only the left hand side.
 Anywhere else it's $E<lt>I<digit>E<gt>.
 
@@ -915,12 +920,12 @@ Translates all occurrences of the characters found in the search list
 with the corresponding character in the replacement list.  It returns
 the number of characters replaced or deleted.  If no string is
 specified via the =~ or !~ operator, the $_ string is translated.  (The
-string specified with =~ must be a scalar variable, an array element,
-or an assignment to one of those, i.e., an lvalue.)  For B<sed> devotees,
-C<y> is provided as a synonym for C<tr>.  If the SEARCHLIST is
-delimited by bracketing quotes, the REPLACEMENTLIST has its own pair of
-quotes, which may or may not be bracketing quotes, e.g., C<tr[A-Z][a-z]>
-or C<tr(+-*/)/ABCD/>.
+string specified with =~ must be a scalar variable, an array element, a
+hash element, or an assignment to one of those, i.e., an lvalue.)
+For B<sed> devotees, C<y> is provided as a synonym for C<tr>.  If the
+SEARCHLIST is delimited by bracketing quotes, the REPLACEMENTLIST has
+its own pair of quotes, which may or may not be bracketing quotes,
+e.g., C<tr[A-Z][a-z]> or C<tr(+-*/)/ABCD/>.
 
 Options:
 
@@ -983,8 +988,8 @@ an eval():
 
 =head2 I/O Operators
 
-There are several I/O operators you should know about.  
-A string is enclosed by back-ticks (grave accents) first undergoes
+There are several I/O operators you should know about.
+A string is enclosed by backticks (grave accents) first undergoes
 variable substitution just like a double quoted string.  It is then
 interpreted as a command, and the output of that command is the value
 of the pseudo-literal, like in a shell.  In a scalar context, a single
@@ -997,8 +1002,8 @@ of C<$?>).  Unlike in B<csh>, no translation is done on the return
 data--newlines remain newlines.  Unlike in any of the shells, single
 quotes do not hide variable names in the command from interpretation.
 To pass a $ through to the shell you need to hide it with a backslash.
-The generalized form of back-ticks is C<qx//>.  (Because back-ticks
-always undergo shell expansion as well, see L<perlsec> for 
+The generalized form of backticks is C<qx//>.  (Because backticks
+always undergo shell expansion as well, see L<perlsec> for
 security concerns.)
 
 Evaluating a filehandle in angle brackets yields the next line from
@@ -1063,7 +1068,7 @@ continue as if the input were one big happy file.  (But see example
 under eof() for how to reset line numbers on each file.)
 
 If you want to set @ARGV to your own list of files, go right ahead.  If
-you want to pass switches into your script, you can use one of the 
+you want to pass switches into your script, you can use one of the
 Getopts modules or put a loop on the front like this:
 
     while ($_ = $ARGV[0], /^-/) {
@@ -1120,7 +1125,7 @@ machine.)  Of course, the shortest way to do the above is:
 
 Because globbing invokes a shell, it's often faster to call readdir() yourself
 and do your own grep() on the filenames.  Furthermore, due to its current
-implementation of using a shell, the glob() routine may get "Arg list too 
+implementation of using a shell, the glob() routine may get "Arg list too
 long" errors (unless you've installed tcsh(1L) as F</bin/csh>).
 
 A glob evaluates its (embedded) argument only when it is starting a new
@@ -1138,7 +1143,7 @@ than
     $file = <blurch*>;
 
 because the latter will alternate between returning a filename and
-returning FALSE.  
+returning FALSE.
 
 It you're trying to do variable interpolation, it's definitely better
 to use the glob() function, because the older notation can cause people
@@ -1159,14 +1164,14 @@ compile time.  You can say
     'Now is the time for all' . "\n" .
 	'good men to come to.'
 
-and this all reduces to one string internally.  Likewise, if 
+and this all reduces to one string internally.  Likewise, if
 you say
 
     foreach $file (@filenames) {
 	if (-s $file > 5 + 100 * 2**16) { ... }
-    } 
+    }
 
-the compiler will pre-compute the number that
+the compiler will precompute the number that
 expression represents so that the interpreter
 won't have to.
 
@@ -1180,7 +1185,7 @@ floating point.  But by saying
 
 you may tell the compiler that it's okay to use integer operations
 from here to the end of the enclosing BLOCK.  An inner BLOCK may
-countermand this by saying 
+countermand this by saying
 
     no integer;
 

@@ -134,7 +134,7 @@ might do well to consider being a tad more explicit about it, like this:
 
     for $i (1..10) {
 	@list = somefunc($i);
-	$counts[$i] = scalar @list;	
+	$counts[$i] = scalar @list;
     }
 
 Here's the case of taking a reference to the same memory location
@@ -328,7 +328,7 @@ There's also a lowercase B<x> command which is nearly the same.
 
 =head1 CODE EXAMPLES
 
-Presented with little comment (these will get their own man pages someday)
+Presented with little comment (these will get their own manpages someday)
 here are short code examples illustrating access of various
 types of data structures.
 
@@ -457,7 +457,7 @@ types of data structures.
  }
 
  # print the whole thing sorted by number of members and name
- foreach $family ( sort { 
+ foreach $family ( sort {
 			    @{$HoL{$b}} <=> @{$HoL{$a}}
 					||
 				    $a cmp $b

@@ -220,7 +220,11 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix)
 		    if (CvANON(compcv) || SvTYPE(compcv) == SVt_PVFM) {
 			/* "It's closures all the way down." */
 			CvCLONE_on(compcv);
-			if (cv != startcv) {
+			if (cv == startcv) {
+			    if (CvANON(compcv))
+				oldsv = Nullsv; /* no need to keep ref */
+			}
+			else {
 			    CV *bcv;
 			    for (bcv = startcv;
 				 bcv && bcv != cv && !CvCLONE(bcv);
@@ -294,6 +298,7 @@ pad_findmy(name)
 char *name;
 {
     I32 off;
+    I32 pendoff = 0;
     SV *sv;
     SV **svp = AvARRAY(comppad_name);
     U32 seq = cop_seqmax;
@@ -302,18 +307,25 @@ char *name;
     for (off = AvFILL(comppad_name); off > 0; off--) {
 	if ((sv = svp[off]) &&
 	    sv != &sv_undef &&
-	    seq <= SvIVX(sv) &&
-	    seq > I_32(SvNVX(sv)) &&
+	    (!SvIVX(sv) ||
+	     (seq <= SvIVX(sv) &&
+	      seq > I_32(SvNVX(sv)))) &&
 	    strEQ(SvPVX(sv), name))
 	{
-	    return (PADOFFSET)off;
+	    if (SvIVX(sv))
+		return (PADOFFSET)off;
+	    pendoff = off;	/* this pending def. will override import */
 	}
     }
 
     /* See if it's in a nested scope */
     off = pad_findlex(name, 0, seq, CvOUTSIDE(compcv), cxstack_ix);
-    if (off)
+    if (off) {
+	/* If there is a pending local definition, this new alias must die */
+	if (pendoff)
+	    SvIVX(AvARRAY(comppad_name)[off]) = seq;
 	return off;
+    }
 
     return 0;
 }
@@ -596,12 +608,11 @@ OP *op;
     OP *kid;
 
     /* assumes no premature commitment */
-    if (!op || (op->op_flags & OPf_KNOW) || op->op_type == OP_RETURN
-	 || error_count)
+    if (!op || (op->op_flags & OPf_WANT) || error_count
+	 || op->op_type == OP_RETURN)
 	return op;
 
-    op->op_flags &= ~OPf_LIST;
-    op->op_flags |= OPf_KNOW;
+    op->op_flags = (op->op_flags & ~OPf_WANT) | OPf_WANT_SCALAR;
 
     switch (op->op_type) {
     case OP_REPEAT:
@@ -632,8 +643,16 @@ OP *op;
 	break;
     case OP_LEAVE:
     case OP_LEAVETRY:
-	scalar(cLISTOP->op_first);
-	/* FALL THROUGH */
+	kid = cLISTOP->op_first;
+	scalar(kid);
+	while (kid = kid->op_sibling) {
+	    if (kid->op_sibling)
+		scalarvoid(kid);
+	    else
+		scalar(kid);
+	}
+	curcop = &compiling;
+	break;
     case OP_SCOPE:
     case OP_LINESEQ:
     case OP_LIST:
@@ -657,12 +676,12 @@ OP *op;
     char* useless = 0;
     SV* sv;
 
-    if (!op || error_count)
-	return op;
-    if (op->op_flags & OPf_LIST)
+    /* assumes no premature commitment */
+    if (!op || (op->op_flags & OPf_WANT) == OPf_WANT_LIST || error_count
+	 || op->op_type == OP_RETURN)
 	return op;
 
-    op->op_flags |= OPf_KNOW;
+    op->op_flags = (op->op_flags & ~OPf_WANT) | OPf_WANT_VOID;
 
     switch (op->op_type) {
     default:
@@ -797,16 +816,22 @@ OP *op;
 	    curcop = ((COP*)op);		/* for warning below */
 	if (op->op_flags & OPf_STACKED)
 	    break;
+
+    case OP_REQUIRE:
+	/* since all requires must return a value, they're never void */
+	op->op_flags &= ~OPf_WANT;
+	return scalar(op);
+
     case OP_ENTERTRY:
     case OP_ENTER:
     case OP_SCALAR:
 	if (!(op->op_flags & OPf_KIDS))
 	    break;
+	/* FALL THROUGH */
     case OP_SCOPE:
     case OP_LEAVE:
     case OP_LEAVETRY:
     case OP_LEAVELOOP:
-	op->op_private |= OPpLEAVE_VOID;
     case OP_LINESEQ:
     case OP_LIST:
 	for (kid = cLISTOP->op_first; kid; kid = kid->op_sibling)
@@ -817,11 +842,6 @@ OP *op;
 	    if (!kPMOP->op_pmreplroot)
 		deprecate("implicit split to @_");
 	}
-	break;
-    case OP_KEYS:
-    case OP_VALUES:
-    case OP_DELETE:
-	op->op_private |= OPpLEAVE_VOID;
 	break;
     }
     if (useless && dowarn)
@@ -848,11 +868,11 @@ OP *op;
     OP *kid;
 
     /* assumes no premature commitment */
-    if (!op || (op->op_flags & OPf_KNOW) || op->op_type == OP_RETURN
-	 || error_count)
+    if (!op || (op->op_flags & OPf_WANT) || error_count
+	 || op->op_type == OP_RETURN)
 	return op;
 
-    op->op_flags |= (OPf_KNOW | OPf_LIST);
+    op->op_flags = (op->op_flags & ~OPf_WANT) | OPf_WANT_LIST;
 
     switch (op->op_type) {
     case OP_FLOP:
@@ -880,8 +900,16 @@ OP *op;
 	break;
     case OP_LEAVE:
     case OP_LEAVETRY:
-	list(cLISTOP->op_first);
-	/* FALL THROUGH */
+	kid = cLISTOP->op_first;
+	list(kid);
+	while (kid = kid->op_sibling) {
+	    if (kid->op_sibling)
+		scalarvoid(kid);
+	    else
+		list(kid);
+	}
+	curcop = &compiling;
+	break;
     case OP_SCOPE:
     case OP_LINESEQ:
 	for (kid = cLISTOP->op_first; kid; kid = kid->op_sibling) {
@@ -1623,7 +1651,7 @@ OP* op;
     if (!op || op->op_type != OP_LIST)
 	op = newLISTOP(OP_LIST, 0, op, Nullop);
     else
-	op->op_flags &= ~(OPf_KNOW|OPf_LIST);
+	op->op_flags &= ~OPf_WANT;
 
     if (!(opargs[type] & OA_MARK))
 	null(cLISTOP->op_first);
@@ -2390,7 +2418,7 @@ OP *right;
 			tmpop->op_sibling = Nullop;	/* don't free split */
 			right->op_next = tmpop->op_next;  /* fix starting loc */
 			op_free(op);			/* blow off assign */
-			right->op_flags &= ~(OPf_KNOW|OPf_LIST);
+			right->op_flags &= ~OPf_WANT;
 				/* "I don't know and I don't care." */
 			return right;
 		    }
@@ -3137,21 +3165,36 @@ cv_const_sv(cv)
 CV* cv;
 {
     OP *o;
-    SV *sv = Nullsv;
+    SV *sv;
     
-    if(cv && SvPOK(cv) && !SvCUR(cv)) {
-	for (o = CvSTART(cv); o; o = o->op_next) {
-	    OPCODE type = o->op_type;
-	
-	    if (type == OP_NEXTSTATE || type == OP_NULL || type == OP_PUSHMARK)
-		continue;
-	    if (type == OP_LEAVESUB || type == OP_RETURN)
-		break;
-	    if (type != OP_CONST || sv)
-		return Nullsv;
+    if (!cv || !SvPOK(cv) || SvCUR(cv))
+	return Nullsv;
 
+    sv = Nullsv;
+    for (o = CvSTART(cv); o; o = o->op_next) {
+	OPCODE type = o->op_type;
+	
+	if (type == OP_NEXTSTATE || type == OP_NULL || type == OP_PUSHMARK)
+	    continue;
+	if (type == OP_LEAVESUB || type == OP_RETURN)
+	    break;
+	if (sv)
+	    return Nullsv;
+	if (type == OP_CONST)
 	    sv = ((SVOP*)o)->op_sv;
+	else if (type == OP_PADSV) {
+	    AV* pad = (AV*)(AvARRAY(CvPADLIST(cv))[1]);
+	    sv = pad ? AvARRAY(pad)[o->op_targ] : Nullsv;
+	    if (!sv)
+		return Nullsv;
+	    if (!SvREADONLY(sv)) {
+		if (SvREFCNT(sv) > 1)
+		    return Nullsv;
+		SvREADONLY_on(sv);
+	    }
 	}
+	else
+	    return Nullsv;
     }
     return sv;
 }
@@ -3167,7 +3210,6 @@ OP *block;
     GV *gv = gv_fetchpv(name ? name : "__ANON__", GV_ADDMULTI, SVt_PVCV);
     char *ps = proto ? SvPVx(((SVOP*)proto)->op_sv, na) : Nullch;
     register CV *cv;
-    AV *av;
     I32 ix;
 
     if (op)
@@ -3241,18 +3283,44 @@ OP *block;
 	return cv;
     }
 
-    av = newAV();			/* Will be @_ */
-    av_extend(av, 0);
-    av_store(comppad, 0, (SV*)av);
-    AvFLAGS(av) = AVf_REIFY;
-
-    for (ix = AvFILL(comppad); ix > 0; ix--) {
-	if (!SvPADMY(curpad[ix]) && !SvIMMORTAL(curpad[ix]))
-	    SvPADTMP_on(curpad[ix]);
-    }
-
     if (AvFILL(comppad_name) < AvFILL(comppad))
 	av_store(comppad_name, AvFILL(comppad), Nullsv);
+
+    if (CvCLONE(cv)) {
+	SV **namep = AvARRAY(comppad_name);
+	for (ix = AvFILL(comppad); ix > 0; ix--) {
+	    SV *namesv;
+
+	    if (SvIMMORTAL(curpad[ix]))
+		continue;
+	    /*
+	     * The only things that a clonable function needs in its
+	     * pad are references to outer lexicals and anonymous subs.
+	     * The rest are created anew during cloning.
+	     */
+	    if (!((namesv = namep[ix]) != Nullsv &&
+		  namesv != &sv_undef &&
+		  (SvFAKE(namesv) ||
+		   *SvPVX(namesv) == '&')))
+	    {
+		SvREFCNT_dec(curpad[ix]);
+		curpad[ix] = Nullsv;
+	    }
+	}
+    }
+    else {
+	AV *av = newAV();			/* Will be @_ */
+	av_extend(av, 0);
+	av_store(comppad, 0, (SV*)av);
+	AvFLAGS(av) = AVf_REIFY;
+
+	for (ix = AvFILL(comppad); ix > 0; ix--) {
+	    if (SvIMMORTAL(curpad[ix]))
+		continue;
+	    if (!SvPADMY(curpad[ix]))
+		SvPADTMP_on(curpad[ix]);
+	}
+    }
 
     CvROOT(cv) = newUNOP(OP_LEAVESUB, 0, scalarseq(block));
     CvSTART(cv) = LINKLIST(CvROOT(cv));
@@ -4575,9 +4643,9 @@ register OP* o;
 	    o->op_seq = op_seqmax++;
 	    break;
 	case OP_STUB:
-	    if ((o->op_flags & (OPf_KNOW|OPf_LIST)) != (OPf_KNOW|OPf_LIST)) {
+	    if ((o->op_flags & OPf_WANT) != OPf_WANT_LIST) {
 		o->op_seq = op_seqmax++;
-		break;	/* Scalar stub must produce undef.  List stub is noop */
+		break; /* Scalar stub must produce undef.  List stub is noop */
 	    }
 	    goto nothin;
 	case OP_NULL:

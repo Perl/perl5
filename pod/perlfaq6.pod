@@ -11,7 +11,7 @@ with regular expressions, but those answers are found elsewhere in
 this document (in the section on Data and the Networking one on
 networking, to be precise).
 
-=head2 How can I hope to use regular expressions without creating illegible and unmaintainable code?  
+=head2 How can I hope to use regular expressions without creating illegible and unmaintainable code?
 
 Three techniques can make regular expressions maintainable and
 understandable.
@@ -96,8 +96,8 @@ record read in.
     while ( <> ) {
 	while ( /\b(\w\S+)(\s+\1)+\b/gi ) {
 	    print "Duplicate $1 at paragraph $.\n";
-	} 
-    } 
+	}
+    }
 
 Here's code that finds sentences that begin with "From " (which would
 be mangled by many mailers):
@@ -138,7 +138,7 @@ on matching balanced text.
 $/ must be a string, not a regular expression.  Awk has to be better
 for something. :-)
 
-Actually, you could do this if you don't mind reading the whole file into 
+Actually, you could do this if you don't mind reading the whole file into
 
     undef $/;
     @records = split /your_pattern/, <FH>;
@@ -217,10 +217,10 @@ See L<perllocale>.
 =head2 How can I match a locale-smart version of C</[a-zA-Z]/>?
 
 One alphabetic character would be C</[^\W\d_]/>, no matter what locale
-you're in.  Non-alphabetics would be C</[\W\d_]/> (assuming you don't 
+you're in.  Non-alphabetics would be C</[\W\d_]/> (assuming you don't
 consider an underscore a letter).
 
-=head2 How can I quote a variable to use in a regexp?  
+=head2 How can I quote a variable to use in a regexp?
 
 The Perl parser will expand $variable and @variable references in
 regular expressions unless the delimiter is a single quote.  Remember,
@@ -240,7 +240,7 @@ Without the \Q, the regexp would also spuriously match "di".
 
 =head2 What is C</o> really for?
 
-Using a variable in a regular expression match forces a re-evaluation
+Using a variable in a regular expression match forces a reevaluation
 (and perhaps recompilation) each time through.  The C</o> modifier
 locks in the regexp the first time it's used.  This always happens in a
 constant regular expression, and in fact, the pattern was compiled
@@ -325,13 +325,13 @@ playing hot potato.
 Use the split function:
 
     while (<>) {
-	foreach $word ( split ) { 
+	foreach $word ( split ) {
 	    # do something with $word here
-	} 
-    } 
+	}
+    }
 
-Note that this isn't really a word in the English sense; it's just 
-chunks of consecutive non-whitespace characters.  
+Note that this isn't really a word in the English sense; it's just
+chunks of consecutive non-whitespace characters.
 
 To work with only alphanumeric sequences, you might consider
 
@@ -344,25 +344,25 @@ To work with only alphanumeric sequences, you might consider
 =head2 How can I print out a word-frequency or line-frequency summary?
 
 To do this, you have to parse out each word in the input stream.  We'll
-pretend that by word you mean chunk of alphabetics, hyphens, or 
-apostrophes, rather than the non-whitespace chunk idea of a word given 
+pretend that by word you mean chunk of alphabetics, hyphens, or
+apostrophes, rather than the non-whitespace chunk idea of a word given
 in the previous question:
 
     while (<>) {
 	while ( /(\b[^\W_\d][\w'-]+\b)/g ) {   # misses "`sheep'"
 	    $seen{$1}++;
-	} 
-    } 
+	}
+    }
     while ( ($word, $count) = each %seen ) {
 	print "$count $word\n";
-    } 
+    }
 
 If you wanted to do the same thing for lines, you wouldn't need a
 regular expression:
 
-    while (<>) { 
+    while (<>) {
 	$seen{$_}++;
-    } 
+    }
     while ( ($line, $count) = each %seen ) {
 	print "$count $line";
     }
@@ -495,7 +495,7 @@ Of course, that could have been written as
     while (<>) {
       chomp;
       PARSER: {
-	   if ( /\G( \d+\b    )/gx  { 
+	   if ( /\G( \d+\b    )/gx  {
 		print "number: $1\n";
 		redo PARSER;
 	   }
@@ -520,7 +520,7 @@ But then you lose the vertical alignment of the regular expressions.
 
 While it's true that Perl's regular expressions resemble the DFAs
 (deterministic finite automata) of the egrep(1) program, they are in
-fact implemented as NFAs (non-deterministic finite automata) to allow
+fact implemented as NFAs (nondeterministic finite automata) to allow
 backtracking and backreferencing.  And they aren't POSIX-style either,
 because those guarantee worst-case behavior for all cases.  (It seems
 that some people prefer guarantees of consistency, even when what's
@@ -538,7 +538,7 @@ side-effects, and side-effects can be mystifying.  There's no void
 grep() that's not better written as a C<for> (well, C<foreach>,
 technically) loop.
 
-=head2 How can I match strings with multi-byte characters?
+=head2 How can I match strings with multibyte characters?
 
 This is hard, and there's no good way.  Perl does not directly support
 wide characters.  It pretends that a byte and a character are
@@ -578,7 +578,7 @@ Or like this:
 Or like this:
 
    while ($martian =~ m/\G([A-Z][A-Z]|.)/gs) {  # \G probably unneeded
-       print "found GX!\n", last if $1 eq 'GX';	
+       print "found GX!\n", last if $1 eq 'GX';
    }
 
 Or like this:
@@ -586,11 +586,11 @@ Or like this:
    die "sorry, Perl doesn't (yet) have Martian support )-:\n";
 
 In addition, a sample program which converts half-width to full-width
-katakana (in Shift-JIS or EUC encoding) is available from CPAN as 
+katakana (in Shift-JIS or EUC encoding) is available from CPAN as
 
 =for Tom make it so
 
-There are many double- (and multi-) byte encodings commonly used these
+There are many double (and multi) byte encodings commonly used these
 days.  Some versions of these have 1-, 2-, 3-, and 4-byte characters,
 all mixed.
 

@@ -16,7 +16,7 @@ old array @LoL that you can get at with two subscripts, like C<$LoL[3][2]>.  Her
 a declaration of the array:
 
     # assign to our array a list of list references
-    @LoL = ( 
+    @LoL = (
 	   [ "fred", "barney" ],
 	   [ "george", "jane", "elroy" ],
 	   [ "homer", "marge", "bart" ],
@@ -39,10 +39,10 @@ but rather just a reference to it, you could do something more like this:
 
     print $ref_to_LoL->[2][2];
 
-Notice that the outer bracket type has changed, and so our access syntax 
+Notice that the outer bracket type has changed, and so our access syntax
 has also changed.  That's because unlike C, in perl you can't freely
-interchange arrays and references thereto.  $ref_to_LoL is a reference to an 
-array, whereas @LoL is an array proper.  Likewise, C<$LoL[2]> is not an 
+interchange arrays and references thereto.  $ref_to_LoL is a reference to an
+array, whereas @LoL is an array proper.  Likewise, C<$LoL[2]> is not an
 array, but an array ref.  So how come you can write these:
 
     $LoL[2][2]
@@ -72,7 +72,7 @@ each line is a row and each word an element.  If you're trying to develop an
     while (<>) {
 	@tmp = split;
 	push @LoL, [ @tmp ];
-    } 
+    }
 
 You might also have loaded that from a function:
 
@@ -81,7 +81,7 @@ You might also have loaded that from a function:
     }
 
 Or you might have had a temporary variable sitting around with the
-list in it.  
+list in it.
 
     for $i ( 1 .. 10 ) {
 	@tmp = somefunc($i);
@@ -93,8 +93,8 @@ constructor.  That's because this will be very wrong:
 
     $LoL[$i] = @tmp;
 
-You see, assigning a named list like that to a scalar just counts the 
-number of elements in @tmp, which probably isn't what you want.  
+You see, assigning a named list like that to a scalar just counts the
+number of elements in @tmp, which probably isn't what you want.
 
 If you are running under C<use strict>, you'll have to add some
 declarations to make it happy:
@@ -104,13 +104,13 @@ declarations to make it happy:
     while (<>) {
 	@tmp = split;
 	push @LoL, [ @tmp ];
-    } 
+    }
 
 Of course, you don't need the temporary array to have a name at all:
 
     while (<>) {
 	push @LoL, [ split ];
-    } 
+    }
 
 You also don't have to use push().  You could just make a direct assignment
 if you knew where you wanted to put it:
@@ -119,30 +119,30 @@ if you knew where you wanted to put it:
     for $i ( 0 .. 10 ) {
 	$line = <>;
 	$LoL[$i] = [ split ' ', $line ];
-    } 
+    }
 
 or even just
 
     my (@LoL, $i);
     for $i ( 0 .. 10 ) {
 	$LoL[$i] = [ split ' ', <> ];
-    } 
+    }
 
 You should in general be leery of using potential list functions
-in a scalar context without explicitly stating such.  
+in a scalar context without explicitly stating such.
 This would be clearer to the casual reader:
 
     my (@LoL, $i);
     for $i ( 0 .. 10 ) {
 	$LoL[$i] = [ split ' ', scalar(<>) ];
-    } 
+    }
 
 If you wanted to have a $ref_to_LoL variable as a reference to an array,
 you'd have to do something like this:
 
     while (<>) {
 	push @$ref_to_LoL, [ split ];
-    } 
+    }
 
 Actually, if you were using strict, you'd have to declare not only
 $ref_to_LoL as you had to declare @LoL, but you'd I<also> having to
@@ -152,7 +152,7 @@ perl version 5.001m that's been fixed for the 5.002 release.)
     my $ref_to_LoL = [];
     while (<>) {
 	push @$ref_to_LoL, [ split ];
-    } 
+    }
 
 Ok, now you can add new rows.  What about adding new columns?  If you're
 dealing with just matrices, it's often easiest to use simple assignment:
@@ -165,9 +165,9 @@ dealing with just matrices, it's often easiest to use simple assignment:
 
     for $x ( 3, 7, 9 ) {
 	$LoL[$x][20] += func2($x);
-    } 
+    }
 
-It doesn't matter whether those elements are already 
+It doesn't matter whether those elements are already
 there or not: it'll gladly create them for you, setting
 intervening elements to C<undef> as need be.
 
@@ -186,7 +186,7 @@ to push() must be a real array, not just a reference to such.
 
 =head1 Access and Printing
 
-Now it's time to print your data structure out.  How 
+Now it's time to print your data structure out.  How
 are you going to do that?  Well, if you want only one
 of the elements, it's trivial:
 
@@ -198,10 +198,10 @@ say
     print @LoL;		# WRONG
 
 because you'll get just references listed, and perl will never
-automatically dereference things for you.  Instead, you have to 
+automatically dereference things for you.  Instead, you have to
 roll yourself a loop or two.  This prints the whole structure,
 using the shell-style for() construct to loop across the outer
-set of subscripts.  
+set of subscripts.
 
     for $aref ( @LoL ) {
 	print "\t [ @$aref ],\n";
@@ -221,7 +221,7 @@ or maybe even this.  Notice the inner loop.
 	}
     }
 
-As you can see, it's getting a bit complicated.  That's why 
+As you can see, it's getting a bit complicated.  That's why
 sometimes is easier to take a temporary on your way through:
 
     for $i ( 0 .. $#LoL ) {
@@ -254,10 +254,10 @@ Here's how to do one operation using a loop.  We'll assume an @LoL
 variable as before.
 
     @part = ();
-    $x = 4; 	
+    $x = 4;
     for ($y = 7; $y < 13; $y++) {
 	push @part, $LoL[$x][$y];
-    } 
+    }
 
 That same loop could be replaced with a slice operation:
 
@@ -273,9 +273,9 @@ $x run from 4..8 and $y run from 7 to 12?  Hmm... here's the simple way:
 	for ($starty = $y = 7; $x <= 12; $y++) {
 	    $newLoL[$x - $startx][$y - $starty] = $LoL[$x][$y];
 	}
-    } 
+    }
 
-We can reduce some of the looping through slices 
+We can reduce some of the looping through slices
 
     for ($x = 4; $x <= 8; $x++) {
 	push @newLoL, [ @{ $LoL[$x] } [ 7..12 ] ];
@@ -293,13 +293,13 @@ If I were you, I'd put that in a function:
     @newLoL = splice_2D( \@LoL, 4 => 8, 7 => 12 );
     sub splice_2D {
 	my $lrr = shift; 	# ref to list of list refs!
-	my ($x_lo, $x_hi, 
+	my ($x_lo, $x_hi,
 	    $y_lo, $y_hi) = @_;
 
-	return map { 
-	    [ @{ $lrr->[$_] } [ $y_lo .. $y_hi ] ] 
+	return map {
+	    [ @{ $lrr->[$_] } [ $y_lo .. $y_hi ] ]
 	} $x_lo .. $x_hi;
-    } 
+    }
 
 
 =head1 SEE ALSO

@@ -48,7 +48,7 @@ example, the third line above produces:
     Useless use of integer addition in void context at - line 1.
 
 For functions that can be used in either a scalar or list context,
-non-abortive failure is generally indicated in a scalar context by
+nonabortive failure is generally indicated in a scalar context by
 returning the undefined value, and in a list context by returning the
 null list.
 
@@ -126,7 +126,7 @@ stat, symlink, umask, unlink, utime
 caller, continue, die, do, dump, eval, exit, goto, last,
 next, redo, return, sub, wantarray
 
-=item Keywords related to scoping 
+=item Keywords related to scoping
 
 caller, import, local, my, package, use
 
@@ -225,7 +225,7 @@ operator may be any of:
 
     -e	File exists.
     -z	File has zero size.
-    -s	File has non-zero size (returns size).
+    -s	File has nonzero size (returns size).
 
     -f	File is a plain file.
     -d	File is a directory.
@@ -275,7 +275,7 @@ are found, it's a C<-B> file, otherwise it's a C<-T> file.  Also, any file
 containing null in the first block is considered a binary file.  If C<-T>
 or C<-B> is used on a filehandle, the current stdio buffer is examined
 rather than the first block.  Both C<-T> and C<-B> return TRUE on a null
-file, or a file at EOF when testing a filehandle.  Because you have to 
+file, or a file at EOF when testing a filehandle.  Because you have to
 read a file to do the C<-T> test, on most occasions you want to use a C<-f>
 against the file first, as in C<next unless -f $file && -T $file>.
 
@@ -300,7 +300,7 @@ symbolic link, not the real file.)  Example:
 
 =item abs VALUE
 
-=item abs 
+=item abs
 
 Returns the absolute value of its argument.
 If VALUE is omitted, uses $_.
@@ -313,7 +313,7 @@ See example in L<perlipc/"Sockets: Client/Server Communication">.
 
 =item alarm SECONDS
 
-=item alarm 
+=item alarm
 
 Arranges to have a SIGALRM delivered to this process after the
 specified number of seconds have elapsed.  If SECONDS is not specified,
@@ -326,8 +326,8 @@ starting a new one.  The returned value is the amount of time remaining
 on the previous timer.
 
 For delays of finer granularity than one second, you may use Perl's
-syscall() interface to access setitimer(2) if your system supports it, 
-or else see L</select()> below.  It is not advised to intermix alarm() 
+syscall() interface to access setitimer(2) if your system supports it,
+or else see L</select()>.  It is usually a mistake to intermix alarm()
 and sleep() calls.
 
 If you want to use alarm() to time out a system call you need to use an
@@ -370,9 +370,9 @@ L<perlipc/"Sockets: Client/Server Communication">.
 Arranges for the file to be read or written in "binary" mode in operating
 systems that distinguish between binary and text files.  Files that are
 not in binary mode have CR LF sequences translated to LF on input and LF
-translated to CR LF on output.  Binmode has no effect under Unix; in DOS
+translated to CR LF on output.  Binmode has no effect under Unix; in MS-DOS
 and similarly archaic systems, it may be imperative--otherwise your
-DOS-damaged C library may mangle your file.  The key distinction between
+MS-DOS-damaged C library may mangle your file.  The key distinction between
 systems that need binmode and those that don't is their text file
 formats.  Systems like Unix and Plan9 that delimit lines with a single
 character, and that encode that character in C as '\n', do not need
@@ -406,7 +406,7 @@ With EXPR, it returns some extra information that the debugger uses to
 print a stack trace.  The value of EXPR indicates how many call frames
 to go back before the current one.
 
-    ($package, $filename, $line, $subroutine, 
+    ($package, $filename, $line, $subroutine,
      $hasargs, $wantarray, $evaltext, $is_require) = caller($i);
 
 Here $subroutine may be C<"(eval)"> if the frame is not a subroutine
@@ -420,7 +420,7 @@ an C<L<eval EXPR>>) frame.
 
 Furthermore, when called from within the DB package, caller returns more
 detailed information: it sets the list variable @DB::args to be the
-arguments with which that subroutine was invoked.
+arguments with which the subroutine was invoked.
 
 =item chdir EXPR
 
@@ -509,7 +509,7 @@ Returns the number of files successfully changed.
     $cnt = chown $uid, $gid, 'foo', 'bar';
     chown $uid, $gid, @filenames;
 
-Here's an example that looks up non-numeric uids in the passwd file:
+Here's an example that looks up nonnumeric uids in the passwd file:
 
     print "User: ";
     chop($user = <STDIN>);
@@ -522,14 +522,14 @@ Here's an example that looks up non-numeric uids in the passwd file:
     @ary = <${pattern}>;	# expand filenames
     chown $uid, $gid, @ary;
 
-On most systems, you are not allowed to change the ownership of the 
+On most systems, you are not allowed to change the ownership of the
 file unless you're the superuser, although you should be able to change
 the group to any of your secondary groups.  On insecure systems, these
 restrictions may be relaxed, but this is not a portable assumption.
 
 =item chr NUMBER
 
-=item chr 
+=item chr
 
 Returns the character represented by that NUMBER in the character set.
 For example, C<chr(65)> is "A" in ASCII.  For the reverse, use L<ord>.
@@ -538,7 +538,7 @@ If NUMBER is omitted, uses $_.
 
 =item chroot FILENAME
 
-=item chroot 
+=item chroot
 
 This function works as the system call by the same name: it makes the
 named directory the new root directory for all further pathnames that
@@ -627,9 +627,9 @@ their own password:
 	die "Sorry...\n";
     } else {
 	print "ok\n";
-    } 
+    }
 
-Of course, typing in your own password to whomever asks you 
+Of course, typing in your own password to whomever asks you
 for it is unwise.
 
 =item dbmclose HASH
@@ -675,7 +675,7 @@ rich implementation.
 
 =item defined EXPR
 
-=item defined 
+=item defined
 
 Returns a Boolean value telling whether EXPR has a value other than
 the undefined value C<undef>.  If EXPR is not present, C<$_> will be
@@ -738,7 +738,7 @@ them as not defined anymore, but you shoudln't do that unless you don't
 plan to use them again, because it saves time when you load them up
 again to have memory already ready to be filled.
 
-This counter-intuitive behaviour of defined() on aggregates may be
+This counterintuitive behaviour of defined() on aggregates may be
 changed, fixed, or broken in a future release of Perl.
 
 See also L<undef>, L<exists>, L<ref>.
@@ -773,7 +773,7 @@ hash element lookup or hash slice:
 
 Outside of an eval(), prints the value of LIST to C<STDERR> and exits with
 the current value of C<$!> (errno).  If C<$!> is 0, exits with the value of
-C<($? E<gt>E<gt> 8)> (back-tick `command` status).  If C<($? E<gt>E<gt> 8)>
+C<($? E<gt>E<gt> 8)> (backtick `command` status).  If C<($? E<gt>E<gt> 8)>
 is 0, exits with 255.  Inside an eval(), the error message is stuffed into
 C<$@>, and the eval() is terminated with the undefined value; this makes
 die() the way to raise an exception.
@@ -781,7 +781,7 @@ die() the way to raise an exception.
 Equivalent examples:
 
     die "Can't cd to spool: $!\n" unless chdir '/usr/spool/news';
-    chdir '/usr/spool/news' or die "Can't cd to spool: $!\n" 
+    chdir '/usr/spool/news' or die "Can't cd to spool: $!\n"
 
 If the value of EXPR does not end in a newline, the current script line
 number and input line number (if any) are also printed, and a newline
@@ -832,7 +832,7 @@ except that it's more efficient, more concise, keeps track of the
 current filename for error messages, and searches all the B<-I>
 libraries if the file isn't in the current directory (see also the @INC
 array in L<perlvar/Predefined Names>).  It's the same, however, in that it does
-re-parse the file every time you call it, so you probably don't want to
+reparse the file every time you call it, so you probably don't want to
 do this inside a loop.
 
 Note that inclusion of library modules is better done with the
@@ -938,7 +938,7 @@ I<EACH> file in a while (E<lt>E<gt>) loop.  Examples:
     }
 
 Practical hint: you almost never need to use C<eof> in Perl, because the
-input operators return undef when they run out of data.  
+input operators return undef when they run out of data.
 
 =item eval EXPR
 
@@ -971,7 +971,7 @@ form to trap run-time errors without incurring the penalty of
 recompiling each time.  The error, if any, is still returned in C<$@>.
 Examples:
 
-    # make divide-by-zero non-fatal
+    # make divide-by-zero nonfatal
     eval { $answer = $a / $b; }; warn $@ if $@;
 
     # same thing, but less efficient
@@ -1001,7 +1001,7 @@ die() again, which has the effect of changing their error messages:
        print $@ if $@;                # prints "bar barfs here"
     }
 
-With an eval(), you should be especially careful to remember what's 
+With an eval(), you should be especially careful to remember what's
 being looked at when:
 
     eval $x;		# CASE 1
@@ -1020,7 +1020,7 @@ and 4 likewise behave in the same way: they run the code '$x', which
 does nothing but return the value of C<$x>.  (Case 4 is preferred for
 purely visual reasons, but it also has the advantage of compiling at
 compile-time instead of at run-time.)  Case 5 is a place where
-normally you I<WOULD> like to use double quotes, except that in that
+normally you I<WOULD> like to use double quotes, except that in this
 particular situation, you can just use symbolic references instead, as
 in case 6.
 
@@ -1047,7 +1047,7 @@ If you don't really want to execute the first argument, but want to lie
 to the program you are executing about its own name, you can specify
 the program you actually want to run as an "indirect object" (without a
 comma) in front of the LIST.  (This always forces interpretation of the
-LIST as a multi-valued list, even if there is only a single scalar in
+LIST as a multivalued list, even if there is only a single scalar in
 the list.)  Example:
 
     $shell = '/bin/csh';
@@ -1085,7 +1085,7 @@ are called before exit.)  Example:
     exit 0 if $ans =~ /^[Xx]/;
 
 See also die().  If EXPR is omitted, exits with 0 status.  The only
-univerally portable values for EXPR are 0 for success and 1 for error;
+universally portable values for EXPR are 0 for success and 1 for error;
 all other values are subject to unpredictable interpretation depending
 on the environment in which the Perl program is running.
 
@@ -1095,9 +1095,9 @@ which can be trapped by an eval().
 
 =item exp EXPR
 
-=item exp 
+=item exp
 
-Returns I<e> (the natural logarithm base) to the power of EXPR.  
+Returns I<e> (the natural logarithm base) to the power of EXPR.
 If EXPR is omitted, gives C<exp($_)>.
 
 =item fcntl FILEHANDLE,FUNCTION,SCALAR
@@ -1190,7 +1190,7 @@ zombies:
 
     $SIG{CHLD} = sub { wait };
 
-There's also the double-fork trick (error checking on 
+There's also the double-fork trick (error checking on
 fork() returns omitted);
 
     unless ($pid = fork) {
@@ -1218,7 +1218,7 @@ you're done.  You should reopen those to /dev/null if it's any issue.
 Declare a picture format with use by the write() function.  For
 example:
 
-    format Something = 
+    format Something =
 	Test: @<<<<<<<< @||||| @>>>>>
 	      $str,     $%,    '$' . int($num)
     .
@@ -1263,7 +1263,7 @@ single-characters, however.  For that, try something more like:
 	system "stty cbreak </dev/tty >/dev/tty 2>&1";
     }
     else {
-	system "stty", '-icanon', 'eol', "\001"; 
+	system "stty", '-icanon', 'eol', "\001";
     }
 
     $key = getc(STDIN);
@@ -1276,18 +1276,18 @@ single-characters, however.  For that, try something more like:
     }
     print "\n";
 
-Determination of whether $BSD_STYLE should be set 
-is left as an exercise to the reader.  
+Determination of whether $BSD_STYLE should be set
+is left as an exercise to the reader.
 
 The POSIX::getattr() function can do this more portably on systems
 alleging POSIX compliance.
 See also the C<Term::ReadKey> module from your nearest CPAN site;
-details on CPAN can be found on L<perlmod/CPAN>.  
+details on CPAN can be found on L<perlmod/CPAN>.
 
 =item getlogin
 
 Returns the current login from F</etc/utmp>, if any.  If null, use
-getpwuid().  
+getpwuid().
 
     $login = getlogin || getpwuid($<) || "Kilroy";
 
@@ -1446,26 +1446,26 @@ L<perlop/"I/O Operators">.
 =item gmtime EXPR
 
 Converts a time as returned by the time function to a 9-element array
-with the time localized for the standard Greenwich time zone.  
+with the time localized for the standard Greenwich time zone.
 Typically used as follows:
 
-
+    #  0    1    2     3     4    5     6     7     8
     ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
 					    gmtime(time);
 
 All array elements are numeric, and come straight out of a struct tm.
 In particular this means that $mon has the range 0..11 and $wday has
-the range 0..6.  Also, $year is the number of years since 1900, I<not>
-simply the last two digits of the year.
+the range 0..6 with sunday as day 0.  Also, $year is the number of
+years since 1900, I<not> simply the last two digits of the year.
 
 If EXPR is omitted, does C<gmtime(time())>.
 
-In a scalar context, prints out the ctime(3) value:
+In a scalar context, returns the ctime(3) value:
 
     $now_string = gmtime;  # e.g., "Thu Oct 13 04:54:34 1994"
 
-Also see the F<timegm.pl> library, and the strftime(3) function available
-via the POSIX module.
+Also see the timegm() function provided by the Time::Local module,
+and the strftime(3) function available via the POSIX module.
 
 =item goto LABEL
 
@@ -1501,7 +1501,7 @@ will be able to tell that this routine was called first.
 
 =item grep EXPR,LIST
 
-This is similar in spirit to, but not the same as, L<grep(1)>
+This is similar in spirit to, but not the same as, grep(1)
 and its relatives.  In particular, it is not limited to using
 regular expressions.
 
@@ -1526,9 +1526,9 @@ actually modifies the element in the original list.
 
 =item hex EXPR
 
-=item hex 
+=item hex
 
-Interprets EXPR as a hex string and returns the corresponding 
+Interprets EXPR as a hex string and returns the corresponding
 value.  (To convert strings that might start with either 0 or 0x
 see L<oct>.)  If EXPR is omitted, uses $_.
 
@@ -1537,10 +1537,10 @@ see L<oct>.)  If EXPR is omitted, uses $_.
 
 =item import
 
-There is no built-in import() function.  It is merely an ordinary
+There is no builtin import() function.  It is merely an ordinary
 method (subroutine) defined (or inherited) by modules that wish to export
 names to another module.  The use() function calls the import() method
-for the package used.  See also L</use>, L<perlmod>, and L<Exporter>.
+for the package used.  See also L</use()>, L<perlmod>, and L<Exporter>.
 
 =item index STR,SUBSTR,POSITION
 
@@ -1554,7 +1554,7 @@ one less than the base, ordinarily -1.
 
 =item int EXPR
 
-=item int 
+=item int
 
 Returns the integer portion of EXPR.  If EXPR is omitted, uses $_.
 
@@ -1568,7 +1568,7 @@ first to get the correct function definitions.  If F<ioctl.ph> doesn't
 exist or doesn't have the correct definitions you'll have to roll your
 own, based on your C header files such as F<E<lt>sys/ioctl.hE<gt>>.
 (There is a Perl script called B<h2ph> that comes with the Perl kit which
-may help you in this, but it's non-trivial.)  SCALAR will be read and/or
+may help you in this, but it's nontrivial.)  SCALAR will be read and/or
 written depending on the FUNCTION--a pointer to the string value of SCALAR
 will be passed as the third argument of the actual ioctl call.  (If SCALAR
 has no string value but does have a numeric value, that value will be
@@ -1605,7 +1605,7 @@ system:
 
 =item join EXPR,LIST
 
-Joins the separate strings of LIST or ARRAY into a single string with
+Joins the separate strings of LIST into a single string with
 fields separated by the value of EXPR, and returns the string.
 Example:
 
@@ -1635,7 +1635,7 @@ or how about sorted by key:
 	print $key, '=', $ENV{$key}, "\n";
     }
 
-To sort an array by value, you'll need to use a C<sort{}> function.
+To sort an array by value, you'll need to use a C<sort> function.
 Here's a descending numeric sort of a hash by its values:
 
     foreach $key (sort { $hash{$b} <=> $hash{$a} } keys %hash)) {
@@ -1658,8 +1658,8 @@ as trying has no effect).
 
 =item kill LIST
 
-Sends a signal to a list of processes.  The first element of 
-the list must be the signal to send.  Returns the number of 
+Sends a signal to a list of processes.  The first element of
+the list must be the signal to send.  Returns the number of
 processes successfully signaled.
 
     $cnt = kill 1, $child1, $child2;
@@ -1687,17 +1687,17 @@ C<continue> block, if any, is not executed:
 
 =item lc EXPR
 
-=item lc 
+=item lc
 
 Returns an lowercased version of EXPR.  This is the internal function
-implementing the \L escape in double-quoted strings.  
+implementing the \L escape in double-quoted strings.
 Respects current LC_CTYPE locale if C<use locale> in force.  See L<perllocale>.
 
 If EXPR is omitted, uses $_.
 
 =item lcfirst EXPR
 
-=item lcfirst 
+=item lcfirst
 
 Returns the value of EXPR with the first character lowercased.  This is
 the internal function implementing the \l escape in double-quoted strings.
@@ -1707,7 +1707,7 @@ If EXPR is omitted, uses $_.
 
 =item length EXPR
 
-=item length 
+=item length
 
 Returns the length in characters of the value of EXPR.  If EXPR is
 omitted, returns length of $_.
@@ -1739,24 +1739,27 @@ Converts a time as returned by the time function to a 9-element array
 with the time analyzed for the local time zone.  Typically used as
 follows:
 
+    #  0    1    2     3     4    5     6     7     8
     ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
 						localtime(time);
 
 All array elements are numeric, and come straight out of a struct tm.
 In particular this means that $mon has the range 0..11 and $wday has
-the range 0..6 and $year is year-1900, that is, $year is 123 in year
-2023.  If EXPR is omitted, uses the current time ("localtime(time)").
+the range 0..6 with sunday as day 0.  Also, $year is the number of
+years since 1900, that is, $year is 123 in year 2023.
+
+If EXPR is omitted, uses the current time (C<localtime(time)>).
 
 In a scalar context, returns the ctime(3) value:
 
     $now_string = localtime;  # e.g., "Thu Oct 13 04:54:34 1994"
 
-Also see the Time::Local module, and the strftime(3) function available
-via the POSIX module.
+Also see the Time::Local module, and the strftime(3) and mktime(3)
+function available via the POSIX module.
 
 =item log EXPR
 
-=item log 
+=item log
 
 Returns logarithm (base I<e>) of EXPR.  If EXPR is omitted, returns log
 of $_.
@@ -1765,7 +1768,7 @@ of $_.
 
 =item lstat EXPR
 
-=item lstat 
+=item lstat
 
 Does the same thing as the stat() function, but stats a symbolic link
 instead of the file the symbolic link points to.  If symbolic links are
@@ -1862,7 +1865,7 @@ See the "use" function, which "no" is the opposite of.
 
 =item oct EXPR
 
-=item oct 
+=item oct
 
 Interprets EXPR as an octal string and returns the corresponding
 value.  (If EXPR happens to start off with 0x, interprets it as
@@ -1907,9 +1910,9 @@ L<IPC::Open2>, L<IPC::Open3>, and L<perlipc/"Bidirectional Communication">
 for alternatives.)
 
 Opening '-' opens STDIN and opening 'E<gt>-' opens STDOUT.  Open returns
-non-zero upon success, the undefined value otherwise.  If the open
+nonzero upon success, the undefined value otherwise.  If the open
 involved a pipe, the return value happens to be the pid of the
-subprocess.  
+subprocess.
 
 If you're unfortunate enough to be running Perl on a system that
 distinguishes between text files and binary files (modern operating
@@ -2006,7 +2009,7 @@ In the child process the filehandle isn't opened--i/o happens from/to
 the new STDOUT or STDIN.  Typically this is used like the normal
 piped open when you want to exercise more control over just how the
 pipe command gets executed, such as when you are running setuid, and
-don't want to have to scan shell commands for metacharacters.  
+don't want to have to scan shell commands for metacharacters.
 The following pairs are more or less equivalent:
 
     open(FOO, "|tr '[a-z]' '[A-Z]'");
@@ -2072,7 +2075,7 @@ DIRHANDLEs have their own namespace separate from FILEHANDLEs.
 
 =item ord EXPR
 
-=item ord 
+=item ord
 
 Returns the numeric ascii value of the first character of EXPR.  If
 EXPR is omitted, uses $_.  For the reverse, see L<chr>.
@@ -2206,7 +2209,7 @@ for examples of such things.
 
 =item pop ARRAY
 
-=item pop 
+=item pop
 
 Pops and returns the last value of the array, shortening the array by
 1.  Has a similar effect to
@@ -2220,7 +2223,7 @@ like shift().
 
 =item pos SCALAR
 
-=item pos 
+=item pos
 
 Returns the offset of where the last C<m//g> search left off for the variable
 is in question ($_ is used when the variable is not specified).  May be
@@ -2300,7 +2303,7 @@ Generalized quotes.  See L<perlop>.
 
 =item quotemeta EXPR
 
-=item quotemeta 
+=item quotemeta
 
 Returns the value of EXPR with all non-alphanumeric
 characters backslashed.  (That is, all characters not matching
@@ -2316,7 +2319,7 @@ If EXPR is omitted, uses $_.
 =item rand
 
 Returns a random fractional number between 0 and the value of EXPR.
-(EXPR should be positive.)  If EXPR is omitted, returns a value between 
+(EXPR should be positive.)  If EXPR is omitted, returns a value between
 0 and 1.  Automatically calls srand() unless srand() has already been
 called.  See also srand().
 
@@ -2353,7 +2356,7 @@ chdir() there, it would have been testing the wrong file.
 
 =item readlink EXPR
 
-=item readlink 
+=item readlink
 
 Returns the value of a symbolic link, if symbolic links are
 implemented.  If not, gives a fatal error.  If there is some system
@@ -2367,7 +2370,7 @@ data into variable SCALAR from the specified SOCKET filehandle.
 Actually does a C recvfrom(), so that it can returns the address of the
 sender.  Returns the undefined value if there's an error.  SCALAR will
 be grown or shrunk to the length actually read.  Takes the same flags
-as the system call of the same name.  
+as the system call of the same name.
 See L<perlipc/"UDP: Message Passing"> for examples.
 
 =item redo LABEL
@@ -2399,7 +2402,7 @@ themselves about what was just input:
 
 =item ref EXPR
 
-=item ref 
+=item ref
 
 Returns a TRUE value if EXPR is a reference, FALSE otherwise.  If EXPR
 is not specified, $_ will be used.  The value returned depends on the
@@ -2413,15 +2416,15 @@ Builtin types include:
     CODE
     GLOB
 
-If the referenced object has been blessed into a package, then that package 
+If the referenced object has been blessed into a package, then that package
 name is returned instead.  You can think of ref() as a typeof() operator.
 
     if (ref($r) eq "HASH") {
 	print "r is a reference to a hash.\n";
-    } 
+    }
     if (!ref ($r) {
 	print "r is not a reference at all.\n";
-    } 
+    }
 
 See also L<perlref>.
 
@@ -2470,12 +2473,12 @@ end such a file with "1;" unless you're sure it'll return TRUE
 otherwise.  But it's better just to put the "C<1;>", in case you add more
 statements.
 
-If EXPR is a bare word, the require assumes a "F<.pm>" extension and
+If EXPR is a bareword, the require assumes a "F<.pm>" extension and
 replaces "F<::>" with "F</>" in the filename for you,
-to make it easy to load standard modules.  This form of loading of 
+to make it easy to load standard modules.  This form of loading of
 modules does not risk altering your namespace.
 
-For a yet-more-powerful import facility, see L</use> and 
+For a yet-more-powerful import facility, see L</use> and
 L<perlmod>.
 
 =item reset EXPR
@@ -2500,9 +2503,17 @@ ARGV and ENV arrays.  Resets only package variables--lexical variables
 are unaffected, but they clean themselves up on scope exit anyway,
 so you'll probably want to use them instead.  See L</my>.
 
-=item return LIST
+=item return EXPR
 
-Returns from a subroutine, eval(), or do FILE with the value specified.
+=item return
+
+Returns from a subroutine, eval(), or do FILE with the value of the
+given EXPR.  Evaluation of EXPR may be in a list, scalar, or void
+context, depending on how the return value will be used, and the context
+may vary from one execution to the next (see wantarray()).  If no EXPR
+is given, returns an empty list in a list context, an undefined value in
+a scalar context, or nothing in a void context.
+
 (Note that in the absence of a return, a subroutine, eval, or do FILE
 will automatically return the value of the last expression evaluated.)
 
@@ -2541,7 +2552,7 @@ last occurrence at or before that position.
 
 =item rmdir FILENAME
 
-=item rmdir 
+=item rmdir
 
 Deletes the directory specified by FILENAME if it is empty.  If it
 succeeds it returns 1, otherwise it returns 0 and sets C<$!> (errno).  If
@@ -2554,11 +2565,11 @@ The substitution operator.  See L<perlop>.
 =item scalar EXPR
 
 Forces EXPR to be interpreted in a scalar context and returns the value
-of EXPR.  
+of EXPR.
 
     @counts = ( scalar @a, scalar @b, scalar @c );
 
-There is no equivalent operator to force an expression to 
+There is no equivalent operator to force an expression to
 be interpolated in a list context because it's in practice never
 needed.  If you really wanted to do so, however, you could use
 the construction C<@{[ (some expression) ]}>, but usually a simple
@@ -2571,7 +2582,7 @@ call of stdio.  FILEHANDLE may be an expression whose value gives the name
 of the filehandle.  The values for WHENCE are 0 to set the file pointer to
 POSITION, 1 to set the it to current plus POSITION, and 2 to set it to EOF
 plus offset.  You may use the values SEEK_SET, SEEK_CUR, and SEEK_END for
-this from POSIX module.  Returns 1 upon success, 0 otherwise.
+this from the POSIX module.  Returns 1 upon success, 0 otherwise.
 
 On some systems you have to do a seek whenever you switch between reading
 and writing.  Amongst other things, this may have the effect of calling
@@ -2661,7 +2672,7 @@ The usual idiom is:
     ($nfound,$timeleft) =
       select($rout=$rin, $wout=$win, $eout=$ein, $timeout);
 
-or to block until something becomes ready just do this 
+or to block until something becomes ready just do this
 
     $nfound = select($rout=$rin, $wout=$win, $eout=$ein, undef);
 
@@ -2781,12 +2792,12 @@ has the same interpretation as in the system call of the same name.
 
 =item sin EXPR
 
-=item sin 
+=item sin
 
 Returns the sine of EXPR (expressed in radians).  If EXPR is omitted,
 returns sine of $_.
 
-For the inverse sine operation, you may use the POSIX::sin()
+For the inverse sine operation, you may use the POSIX::asin()
 function, or use this relation:
 
     sub asin { atan2($_[0], sqrt(1 - $_[0] * $_[0])) }
@@ -2805,8 +2816,8 @@ you requested, depending on how it counts seconds.  Most modern systems
 always sleep the full amount.
 
 For delays of finer granularity than one second, you may use Perl's
-syscall() interface to access setitimer(2) if your system supports it, 
-or else see L</select()> below.  
+syscall() interface to access setitimer(2) if your system supports it,
+or else see L</select()> below.
 
 See also the POSIX module's sigpause() function.
 
@@ -2862,7 +2873,7 @@ Examples:
     @articles = sort {$a cmp $b} @files;
 
     # now case-insensitively
-    @articles = sort { uc($a) cmp uc($b)} @files;
+    @articles = sort {uc($a) cmp uc($b)} @files;
 
     # same thing in reversed order
     @articles = sort {$b cmp $a} @files;
@@ -2893,8 +2904,8 @@ Examples:
     print sort @george, 'to', @harry;
 	    # prints AbelAxedCainPunishedcatchaseddoggonetoxyz
 
-    # inefficiently sort by descending numeric compare using 
-    # the first integer after the first = sign, or the 
+    # inefficiently sort by descending numeric compare using
+    # the first integer after the first = sign, or the
     # whole record case-insensitively otherwise
 
     @new = sort {
@@ -2907,10 +2918,10 @@ Examples:
     # we'll build auxiliary indices instead
     # for speed
     @nums = @caps = ();
-    for (@old) { 
+    for (@old) {
 	push @nums, /=(\d+)/;
 	push @caps, uc($_);
-    } 
+    }
 
     @new = @old[ sort {
 			$nums[$b] <=> $nums[$a]
@@ -3031,7 +3042,7 @@ produces the list value
 
     (1, '-', 10, ',', 20)
 
-If you had the entire header of a normal Unix email message in $header, 
+If you had the entire header of a normal Unix email message in $header,
 you could split it up into fields and their values this way:
 
     $header =~ s/\n\s+/ /g;  # fix continuation lines
@@ -3053,12 +3064,12 @@ Example:
 
     open(passwd, '/etc/passwd');
     while (<passwd>) {
-	($login, $passwd, $uid, $gid, $gcos, 
+	($login, $passwd, $uid, $gid, $gcos,
 	    $home, $shell) = split(/:/);
 	...
     }
 
-(Note that $shell above will still have a newline on it.  See L</chop>, 
+(Note that $shell above will still have a newline on it.  See L</chop>,
 L</chomp>, and L</join>.)
 
 =item sprintf FORMAT, LIST
@@ -3075,7 +3086,7 @@ dump core when fed ludicrous arguments.
 
 =item sqrt EXPR
 
-=item sqrt 
+=item sqrt
 
 Return the square root of EXPR.  If EXPR is omitted, returns square
 root of $_.
@@ -3113,11 +3124,11 @@ function is to "seed" the rand() function so that rand() can produce
 a different sequence each time you run your program.  Just do it once at the
 top of your program, or you I<won't> get random numbers out of rand()!
 
-Frequently called programs (like CGI scripts) that simply use 
+Frequently called programs (like CGI scripts) that simply use
 
     time ^ $$
 
-for a seed can fall prey to the mathematical property that 
+for a seed can fall prey to the mathematical property that
 
     a^b == (a+1)^(b+1)
 
@@ -3127,7 +3138,7 @@ one-third of the time.  So don't do that.
 
 =item stat EXPR
 
-=item stat 
+=item stat
 
 Returns a 13-element array giving the status info for a file, either the
 file opened via FILEHANDLE, or named by EXPR.  If EXPR is omitted, it
@@ -3139,22 +3150,22 @@ follows:
        $atime,$mtime,$ctime,$blksize,$blocks)
            = stat($filename);
 
-Not all fields are supported on all filesystem types.  Here are the 
+Not all fields are supported on all filesystem types.  Here are the
 meaning of the fields:
 
-  dev	    device number of filesystem 
-  ino	    inode number 
-  mode	    file mode  (type and permissions)
-  nlink	    number of (hard) links to the file 
-  uid	    numeric user ID of file's owner 
-  gid	    numeric group ID of file's owner 
-  rdev	    the device identifier (special files only)
-  size	    total size of file, in bytes 
-  atime	    last access time since the epoch
-  mtime	    last modify time since the epoch
-  ctime	    inode change time (NOT creation time!) since the epoch
-  blksize   preferred block size for file system I/O
-  blocks    actual number of blocks allocated
+  0 dev      device number of filesystem
+  1 ino      inode number
+  2 mode     file mode  (type and permissions)
+  3 nlink    number of (hard) links to the file
+  4 uid      numeric user ID of file's owner
+  5 gid      numeric group ID of file's owner
+  6 rdev     the device identifier (special files only)
+  7 size     total size of file, in bytes
+  8 atime    last access time since the epoch
+  9 mtime    last modify time since the epoch
+ 10 ctime    inode change time (NOT creation time!) since the epoch
+ 11 blksize  preferred block size for file system I/O
+ 12 blocks   actual number of blocks allocated
 
 (The epoch was at 00:00 January 1, 1970 GMT.)
 
@@ -3176,11 +3187,11 @@ Takes extra time to study SCALAR (C<$_> if unspecified) in anticipation of
 doing many pattern matches on the string before it is next modified.
 This may or may not save time, depending on the nature and number of
 patterns you are searching on, and on the distribution of character
-frequencies in the string to be searched--you probably want to compare
+frequencies in the string to be searched -- you probably want to compare
 run times with and without it to see which runs faster.  Those loops
 which scan for many short constant strings (including the constant
 parts of more complex patterns) will benefit most.  You may have only
-one study active at a time--if you study a different scalar the first
+one study active at a time -- if you study a different scalar the first
 is "unstudied".  (The way study works is this: a linked list of every
 character in the string to be searched is made, so we know, for
 example, where all the 'k' characters are.  From each search string,
@@ -3264,7 +3275,7 @@ Returns 1 for success, 0 otherwise.  On systems that don't support
 symbolic links, produces a fatal error at run time.  To check for that,
 use eval:
 
-    $symlink_exists = (eval 'symlink("","");', $@ eq '');
+    $symlink_exists = (eval {symlink("","")};, $@ eq '');
 
 =item syscall LIST
 
@@ -3334,41 +3345,41 @@ first, and the parent process waits for the child process to complete.
 Note that argument processing varies depending on the number of
 arguments.  The return value is the exit status of the program as
 returned by the wait() call.  To get the actual exit value divide by
-256.  See also L</exec>.  This is I<NOT> what you want to use to capture 
-the output from a command, for that you should use merely back-ticks or
+256.  See also L</exec>.  This is I<NOT> what you want to use to capture
+the output from a command, for that you should use merely backticks or
 qx//, as described in L<perlop/"`STRING`">.
 
-Because system() and back-ticks block SIGINT and SIGQUIT, killing the
+Because system() and backticks block SIGINT and SIGQUIT, killing the
 program they're running doesn't actually interrupt your program.
 
     @args = ("command", "arg1", "arg2");
-    system(@args) == 0 
-	 or die "system @args failed: $?" 
+    system(@args) == 0
+	 or die "system @args failed: $?"
 
 Here's a more elaborate example of analysing the return value from
-system() on a UNIX system to check for all possibilities, including for
-signals and coredumps.
+system() on a Unix system to check for all possibilities, including for
+signals and core dumps.
 
     $rc = 0xffff & system @args;
     printf "system(%s) returned %#04x: ", "@args", $rc;
     if ($rc == 0) {
 	print "ran with normal exit\n";
-    } 
+    }
     elsif ($rc == 0xff00) {
 	print "command failed: $!\n";
-    } 
+    }
     elsif ($rc > 0x80) {
 	$rc >>= 8;
 	print "ran with non-zero exit status $rc\n";
-    } 
+    }
     else {
 	print "ran with ";
 	if ($rc &   0x80) {
 	    $rc &= ~0x80;
-	    print "coredump from ";
-	} 
+	    print "core dump from ";
+	}
 	print "signal $rc\n"
-    } 
+    }
     $ok = ($rc != 0);
 
 =item syswrite FILEHANDLE,SCALAR,LENGTH,OFFSET
@@ -3384,7 +3395,7 @@ is available will be written.
 
 An OFFSET may be specified to write the data from some part of the
 string other than the beginning.  A negative OFFSET specifies writing
-from that many bytes counting backwards from the end of the string.
+that many bytes counting backwards from the end of the string.
 
 =item tell FILEHANDLE
 
@@ -3448,7 +3459,7 @@ A class implementing a scalar should have the following methods:
 
     TIESCALAR classname, LIST
     DESTROY this
-    FETCH this, 
+    FETCH this,
     STORE this, value
 
 Unlike dbmopen(), the tie() function will not use or require a module
@@ -3478,7 +3489,7 @@ seconds, for this process and the children of this process.
 
 =item tr///
 
-The translation operator.  See L<perlop>.
+The translation operator.  Same as y///. See L<perlop>.
 
 =item truncate FILEHANDLE,LENGTH
 
@@ -3490,7 +3501,7 @@ on your system.
 
 =item uc EXPR
 
-=item uc 
+=item uc
 
 Returns an uppercased version of EXPR.  This is the internal function
 implementing the \U escape in double-quoted strings.
@@ -3500,7 +3511,7 @@ If EXPR is omitted, uses $_.
 
 =item ucfirst EXPR
 
-=item ucfirst 
+=item ucfirst
 
 Returns the value of EXPR with the first character uppercased.  This is
 the internal function implementing the \u escape in double-quoted strings.
@@ -3521,8 +3532,8 @@ digits.  See also L<oct>, if all you have is a string.
 
 =item undef
 
-Undefines the value of EXPR, which must be an lvalue.  Use on only a
-scalar value, an entire array or hash, or a subroutine name (using
+Undefines the value of EXPR, which must be an lvalue.  Use only on a
+scalar value, an entire array, an entire hash, or a subroutine name (using
 "&").  (Using undef() will probably not do what you expect on most
 predefined variables or DBM list values, so don't do that.)  Always
 returns the undefined value.  You can omit the EXPR, in which case
@@ -3535,13 +3546,13 @@ pass as a parameter.  Examples:
     undef @ary;
     undef %hash;
     undef &mysub;
-    return (wantarray ? () : undef) if $they_blew_it;
+    return (wantarray ? (undef, $errmsg) : undef) if $they_blew_it;
     select undef, undef, undef, 0.25;
     ($a, $b, undef, $c) = &foo;       # Ignore third value returned
 
 =item unlink LIST
 
-=item unlink 
+=item unlink
 
 Deletes a list of files.  Returns the number of files successfully
 deleted.
@@ -3618,7 +3629,7 @@ package.  It is exactly equivalent to
 
     BEGIN { require Module; import Module LIST; }
 
-except that Module I<must> be a bare word.
+except that Module I<must> be a bareword.
 
 If the first argument to C<use> is a number, it is treated as a version
 number instead of a module name.  If the version of the Perl interpreter
@@ -3746,9 +3757,12 @@ not been harvested by the Perl script yet.)
 
 Returns TRUE if the context of the currently executing subroutine is
 looking for a list value.  Returns FALSE if the context is looking
-for a scalar.
+for a scalar.  Returns the undefined value if the context is looking
+for no value (void context).
 
-    return wantarray ? () : undef;
+    return unless defined wantarray;	# don't bother doing more
+    my @a = complex_calculation();
+    return wantarray ? @a : "@a";
 
 =item warn LIST
 
@@ -3791,9 +3805,9 @@ examples.
 
 =item write
 
-Writes a formatted record (possibly multi-line) to the specified file,
+Writes a formatted record (possibly multiline) to the specified file,
 using the format associated with that file.  By default the format for
-a file is the one having the same name is the filehandle, but the
+a file is the one having the same name as the filehandle, but the
 format for the current output channel (see the select() function) may be set
 explicitly by assigning the name of the format to the C<$~> variable.
 
@@ -3817,6 +3831,6 @@ Note that write is I<NOT> the opposite of read.  Unfortunately.
 
 =item y///
 
-The translation operator.  See L<perlop>.
+The translation operator.  Same as tr///.  See L<perlop>.
 
 =back

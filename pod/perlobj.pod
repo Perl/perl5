@@ -9,7 +9,7 @@ See L<perlref> for that.  Second, if you still find the following
 reference work too complicated, a tutorial on object-oriented programming
 in Perl can be found in L<perltoot>.
 
-If you're still with us, then 
+If you're still with us, then
 here are three very simple definitions that you should find reassuring.
 
 =over 4
@@ -44,11 +44,11 @@ constructor:
     package Critter;
     sub new { bless {} }
 
-The C<{}> constructs a reference to an anonymous hash containing no 
+The C<{}> constructs a reference to an anonymous hash containing no
 key/value pairs.  The bless() takes that reference and tells the object
 it references that it's now a Critter, and returns the reference.
 This is for convenience, because the referenced object itself knows that
-it has been blessed, and its reference to it could have been returned 
+it has been blessed, and the reference to it could have been returned
 directly, like this:
 
     sub new {
@@ -82,7 +82,7 @@ so that your constructors may be inherited:
 
 Or if you expect people to call not just C<CLASS-E<gt>new()> but also
 C<$obj-E<gt>new()>, then use something like this.  The initialize()
-method used will be of whatever $class we blessed the 
+method used will be of whatever $class we blessed the
 object into:
 
     sub new {
@@ -102,7 +102,7 @@ be accessed only through the class's methods.
 A constructor may re-bless a referenced object currently belonging to
 another class, but then the new class is responsible for all cleanup
 later.  The previous blessing is forgotten, as an object may belong
-to only one class at a time.  (Although of course it's free to 
+to only one class at a time.  (Although of course it's free to
 inherit methods from many classes.)
 
 A clarification:  Perl objects are blessed.  References are not.  Objects
@@ -115,7 +115,7 @@ the following example:
     bless $a, BLAH;
     print "\$b is a ", ref($b), "\n";
 
-This reports $b as being a BLAH, so obviously bless() 
+This reports $b as being a BLAH, so obviously bless()
 operated on the object and not on the reference.
 
 =head2 A Class is Simply a Package
@@ -130,7 +130,7 @@ package.  This is how Perl implements inheritance.  Each element of the
 @ISA array is just the name of another package that happens to be a
 class package.  The classes are searched (depth first) for missing
 methods in the order that they occur in @ISA.  The classes accessible
-through @ISA are known as base classes of the current class. 
+through @ISA are known as base classes of the current class.
 
 If a missing method is found in one of the base classes, it is cached
 in the current class for efficiency.  Changing @ISA or defining new
@@ -159,7 +159,7 @@ Unlike say C++, Perl doesn't provide any special syntax for method
 definition.  (It does provide a little syntax for method invocation
 though.  More on that later.)  A method expects its first argument
 to be the object or package it is being invoked on.  There are just two
-types of methods, which we'll call class and instance. 
+types of methods, which we'll call class and instance.
 (Sometimes you'll hear these called static and virtual, in honor of
 the two C++ method types they most closely resemble.)
 
@@ -324,7 +324,7 @@ You do not need to C<use UNIVERSAL> in order to make these methods
 available to your program.  This is necessary only if you wish to
 have C<isa> available as a plain subroutine in the current package.
 
-=head2 Destructors        
+=head2 Destructors
 
 When the last reference to an object goes away, the object is
 automatically destroyed.  (This may even be after you exit, if you've
@@ -345,14 +345,14 @@ automatically when the current object is freed.
 An indirect object is limited to a name, a scalar variable, or a block,
 because it would have to do too much lookahead otherwise, just like any
 other postfix dereference in the language.  The left side of -E<gt> is not so
-limited, because it's an infix operator, not a postfix operator.  
+limited, because it's an infix operator, not a postfix operator.
 
-That means that below, A and B are equivalent to each other, and C and D
-are equivalent, but AB and CD are different:
+That means that in the following, A and B are equivalent to each other, and
+C and D are equivalent, but A/B and C/D are different:
 
-    A: method $obref->{"fieldname"} 
+    A: method $obref->{"fieldname"}
     B: (method $obref)->{"fieldname"}
-    C: $obref->{"fieldname"}->method() 
+    C: $obref->{"fieldname"}->method()
     D: method {$obref->{"fieldname"}}
 
 =head2 Summary
@@ -372,12 +372,12 @@ probably won't matter.
 
 A more serious concern is that unreachable memory with a non-zero
 reference count will not normally get freed.  Therefore, this is a bad
-idea:  
+idea:
 
     {
 	my $a;
 	$a = \$a;
-    } 
+    }
 
 Even thought $a I<should> go away, it can't.  When building recursive data
 structures, you'll have to break the self-reference yourself explicitly
@@ -391,7 +391,7 @@ node such as one might use in a sophisticated tree structure:
 	$node->{LEFT} = $node->{RIGHT} = $node;
 	$node->{DATA} = [ @_ ];
 	return bless $node => $class;
-    } 
+    }
 
 If you create nodes like that, they (currently) won't go away unless you
 break their self reference yourself.  (In other words, this is not to be
@@ -403,10 +403,10 @@ When an interpreter thread finally shuts down (usually when your program
 exits), then a rather costly but complete mark-and-sweep style of garbage
 collection is performed, and everything allocated by that thread gets
 destroyed.  This is essential to support Perl as an embedded or a
-multi-threadable language.  For example, this program demonstrates Perl's
+multithreadable language.  For example, this program demonstrates Perl's
 two-phased garbage collection:
 
-    #!/usr/bin/perl 
+    #!/usr/bin/perl
     package Subtle;
 
     sub new {
@@ -414,12 +414,12 @@ two-phased garbage collection:
 	$test = \$test;
 	warn "CREATING " . \$test;
 	return bless \$test;
-    } 
+    }
 
     sub DESTROY {
 	my $self = shift;
 	warn "DESTROYING $self";
-    } 
+    }
 
     package main;
 
@@ -429,7 +429,7 @@ two-phased garbage collection:
 	my $b = Subtle->new;
 	$$a = 0;  # break selfref
 	warn "leaving block";
-    } 
+    }
 
     warn "just exited block";
     warn "time to die...";
@@ -447,7 +447,7 @@ When run as F</tmp/test>, the following output is produced:
     DESTROYING Subtle=SCALAR(0x8e57c) during global destruction.
 
 Notice that "global destruction" bit there?  That's the thread
-garbage collector reaching the unreachable.  
+garbage collector reaching the unreachable.
 
 Objects are always destructed, even when regular refs aren't and in fact
 are destructed in a separate pass before ordinary refs just to try to
@@ -462,8 +462,8 @@ at a future date.
 
 =head1 SEE ALSO
 
-A kinder, gentler tutorial on object-oriented programming in Perl can 
+A kinder, gentler tutorial on object-oriented programming in Perl can
 be found in L<perltoot>.
-You should also check out L<perlbot> for other object tricks, traps, and tips, 
+You should also check out L<perlbot> for other object tricks, traps, and tips,
 as well as L<perlmod> for some style guides on constructing both modules
 and classes.

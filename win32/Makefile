@@ -33,6 +33,7 @@ EXTUTILSDIR=$(LIBDIR)\extutils
 #
 # various targets
 PERLLIB=..\libperl.lib
+PERLIMPLIB=..\perl.lib
 MINIPERL=..\miniperl.exe
 PERLDLL=..\perl.dll
 PERLEXE=..\perl.exe
@@ -146,7 +147,7 @@ $(PERLEXE): $(MINIPERL) modules.lib $(PERLDLL)
 	attrib -r ..\t\*.*
 	copy test ..\t
 	$(XCOPY) ..\*.h ..\lib\CORE\*.*
-	$(XCOPY) ..\perl.lib ..\lib\CORE
+	$(XCOPY) $(PERLIMPLIB) ..\lib\CORE
 	$(XCOPY) $(PERLLIB) ..\lib\CORE
 	$(XCOPY) *.h ..\lib\CORE
 	$(XCOPY) /S include ..\lib\CORE
@@ -240,15 +241,17 @@ utils: $(PERLEXE)
 	cd ..\win32
 
 distclean:
-	-del /f $(MINIPERL) $(PERLEXE) $(PERLDLL) $(GLOBEXE) \
-		$(PERLLIB) modules.lib
+	-del /f $(MINIPERL) $(PERLEXE) $(PERLDLL) $(GLOBEXE) $(PERLLIB) \
+		$(PERLIMPLIB) ..\miniperl.lib modules.lib
 	-del /f *.def
-	-del /f $(SOCKET_DLL) $(IO_DLL) $(SDBM_FILE_DLL) \
-		$(FCNTL_DLL) $(OPCODE_DLL)
-	-del /f $(SOCKET).c $(IO).c $(SDBM_FILE).c $(FCNTL).c \
-		$(OPCODE).c $(DYNALOADER).c
+	-del /f $(SOCKET_DLL) $(IO_DLL) $(SDBM_FILE_DLL) $(FCNTL_DLL) \
+		$(OPCODE_DLL)
+	-del /f $(SOCKET).c $(IO).c $(SDBM_FILE).c $(FCNTL).c $(OPCODE).c \
+		$(DYNALOADER).c
 	-del /f $(PODDIR)\*.html
 	-del /f $(PODDIR)\*.bat
+	-rmdir /s /q ..\lib\auto
+	-rmdir /s /q ..\lib\CORE
 	-rmdir /s /q release
 	-rmdir /s /q debug
 

@@ -271,7 +271,7 @@ C<tr///> function like so:
 
     $string = "ThisXlineXhasXsomeXx'sXinXit":
     $count = ($string =~ tr/X//);
-    print "There are $count X charcters in the string";
+    print "There are $count X characters in the string";
 
 This is fine if you are just looking for a single character.  However,
 if you are trying to count multiple character substrings within a
@@ -900,7 +900,7 @@ they end up doing is not what they do with ordinary hashes.
 Using C<keys %hash> in a scalar context returns the number of keys in
 the hash I<and> resets the iterator associated with the hash.  You may
 need to do this if you use C<last> to exit a loop early so that when you
-re-enter it, the hash iterator has been reset.
+reenter it, the hash iterator has been reset.
 
 =head2 How can I get the unique keys from two hashes?
 
@@ -955,7 +955,7 @@ Normally, merely accessing a key's value for a nonexistent key does
 I<not> cause that key to be forever there.  This is different than
 awk's behavior.
 
-=head2 How can I make the Perl equivalent of a C structure/C++ class/hash 
+=head2 How can I make the Perl equivalent of a C structure/C++ class/hash
 or array of hashes or arrays?
 
 Use references (documented in L<perlref>).  Examples of complex data
@@ -983,7 +983,7 @@ versus "binary" files.  See L<perlfunc/"binmode">.
 
 If you're concerned about 8-bit ASCII data, then see L<perllocale>.
 
-If you want to deal with multi-byte characters, however, there are
+If you want to deal with multibyte characters, however, there are
 some gotchas.  See the section on Regular Expressions.
 
 =head2 How do I determine whether a scalar is a number/whole/integer/float?
@@ -994,7 +994,7 @@ Assuming that you don't care about IEEE notations like "NaN" or
    warn "has nondigits"        if     /\D/;
    warn "not a whole number"   unless /^\d+$/;
    warn "not an integer"       unless /^-?\d+$/;  # reject +3
-   warn "not an integer"       unless /^[+-]?\d+$/;  
+   warn "not an integer"       unless /^[+-]?\d+$/;
    warn "not a decimal number" unless /^-?\d+\.?\d*$/;  # rejects .2
    warn "not a decimal number" unless /^-?(?:\d+(?:\.\d*)?|\.\d+)$/;
    warn "not a C float"

@@ -104,7 +104,7 @@ give the numeric values you want directly, using octal ("\015"), hex
 
 Even though with normal text files, a "\n" will do the trick, there is
 still no unified scheme for terminating a line that is portable
-between Unix, DOS/Win, and Macintosh, except to terminate I<ALL> line
+between Unix, MS-DOS/Windows, and Macintosh, except to terminate I<ALL> line
 ends with "\015\012", and strip what you don't need from the output.
 This applies especially to socket I/O and autoflushing, discussed
 next.
@@ -208,7 +208,7 @@ You don't actually "trap" a control character.  Instead, that
 character generates a signal, which you then trap.  Signals are
 documented in L<perlipc/"Signals"> and chapter 6 of the Camel.
 
-Be warned that very few C libraries are re-entrant.  Therefore, if you
+Be warned that very few C libraries are reentrant.  Therefore, if you
 attempt to print() in a handler that got invoked during another stdio
 operation your internal structures will likely be in an
 inconsistent state, and your program will dump core.  You can
@@ -230,7 +230,7 @@ For example:
 However, because syscalls restart by default, you'll find that if
 you're in a "slow" call, such as E<lt>FHE<gt>, read(), connect(), or
 wait(), that the only way to terminate them is by "longjumping" out;
-that is, by raising an exception.  See the time-out handler for a
+that is, by raising an exception.  See the timeout handler for a
 blocking flock() in L<perlipc/"Signals"> or chapter 6 of the Camel.
 
 =head2 How do I modify the shadow password file on a Unix system?
@@ -267,7 +267,7 @@ http://www.perl.com/CPAN/doc/misc/ancient/tutorial/eg/itimers.pl .
 =head2 How can I measure time under a second?
 
 In general, you may not be able to.  The Time::HiRes module (available
-from CPAN) provides this functionality for some systems.   
+from CPAN) provides this functionality for some systems.
 
 In general, you may not be able to.  But if you system supports both the
 syscall() function in Perl as well as a system call like gettimeofday(2),
@@ -311,7 +311,7 @@ END blocks you should also use
 
 Perl's exception-handling mechanism is its eval() operator.  You can
 use eval() as setjmp and die() as longjmp.  For details of this, see
-the section on signals, especially the time-out handler for a blocking
+the section on signals, especially the timeout handler for a blocking
 flock() in L<perlipc/"Signals"> and chapter 6 of the Camel.
 
 If exception handling is all you're interested in, try the
@@ -352,7 +352,7 @@ Simple files like F<errno.h>, F<syscall.h>, and F<socket.h> were fine,
 but the hard ones like F<ioctl.h> nearly always need to hand-edited.
 Here's how to install the *.ph files:
 
-    1.  become super-user
+    1.  become superuser
     2.  cd /usr/include
     3.  h2ph *.h */*.h
 
@@ -513,7 +513,7 @@ You have to do this:
 
 Just as with system(), no shell escapes happen when you exec() a list.
 
-=head2 Why can't my script read from STDIN after I gave it EOF (^D on Unix, ^Z on MSDOS)?
+=head2 Why can't my script read from STDIN after I gave it EOF (^D on Unix, ^Z on MS-DOS)?
 
 Because some stdio's set error and eof flags that need clearing.  The
 POSIX module defines clearerr() that you can use.  That is the
@@ -552,7 +552,7 @@ Things that are awkward to do in the shell are easy to do in Perl, and
 this very awkwardness is what would make a shell->perl converter
 nigh-on impossible to write.  By rewriting it, you'll think about what
 you're really trying to do, and hopefully will escape the shell's
-pipeline datastream paradigm, which while convenient for some matters,
+pipeline data stream paradigm, which while convenient for some matters,
 causes many inefficiencies.
 
 =head2 Can I use perl to run a telnet or ftp session?

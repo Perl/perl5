@@ -150,7 +150,7 @@ MEM_SIZE size;
 
 /* safe version of free */
 
-void
+Free_t
 safefree(where)
 Malloc_t where;
 {
@@ -1209,7 +1209,7 @@ die(pat, va_alist)
 
     restartop = die_where(message);
     if ((!restartop && was_in_eval) || oldrunlevel > 1)
-	Siglongjmp(top_env, 3);
+	JMPENV_JUMP(3);
     return restartop;
 }
 
@@ -1264,7 +1264,7 @@ croak(pat, va_alist)
     }
     if (in_eval) {
 	restartop = die_where(message);
-	Siglongjmp(top_env, 3);
+	JMPENV_JUMP(3);
     }
     PerlIO_puts(PerlIO_stderr(),message);
     (void)PerlIO_flush(PerlIO_stderr());

@@ -51,7 +51,7 @@ http://www.perl.com/CPAN/authors/Tom_Christiansen/scripts/striphtml.gz
 
 =head2 How do I extract URLs?
 
-A quick but imperfect approach is 	
+A quick but imperfect approach is
 
     #!/usr/bin/perl -n00
     # qxurl - tchrist@perl.com
@@ -127,7 +127,7 @@ server, or perhaps check some of the other FAQs referenced above.
 
 The HTTPD::UserAdmin and HTTPD::GroupAdmin modules provide a
 consistent OO interface to these files, regardless of how they're
-stored.  Databases may be text, dbm, Berkley DB or any database with a
+stored.  Databases may be text, dbm, Berkeley DB or any database with a
 DBI compatible driver.  HTTPD::UserAdmin supports files used by the
 `Basic' and `Digest' authentication schemes.  Here's an example:
 
@@ -224,8 +224,8 @@ Again, the best way is often just to ask the user.
 =head2 How do I send/read mail?
 
 Sending mail: the Mail::Mailer module from CPAN (part of the MailTools
-package) is UNIX-centric, while Mail::Internet uses Net::SMTP which is
-not UNIX-centric.  Reading mail: use the Mail::Folder module from CPAN
+package) is Unix-centric, while Mail::Internet uses Net::SMTP which is
+not Unix-centric.  Reading mail: use the Mail::Folder module from CPAN
 (part of the MailFolder package) or the Mail::Internet module from
 CPAN (also part of the MailTools package).
 

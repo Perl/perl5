@@ -160,8 +160,7 @@ PP(pp_sassign)
     }
     if (tainting && tainted && !SvTAINTED(left))
 	TAINT_NOT;
-    SvSetSV(right, left);
-    SvSETMAGIC(right);
+    SvSetMagicSV(right, left);
     SETs(right);
     RETURN;
 }
@@ -221,7 +220,7 @@ PP(pp_padsv)
 	if (op->op_private & OPpLVAL_INTRO)
 	    SAVECLEARSV(curpad[op->op_targ]);
         else if (op->op_private & OPpDEREF)
-	    vivify_ref(curpad[op->op_targ], op->op_flags & OPpDEREF);
+	    vivify_ref(curpad[op->op_targ], op->op_private & OPpDEREF);
     }
     RETURN;
 }
@@ -237,7 +236,7 @@ PP(pp_eq)
     dSP; tryAMAGICbinSET(eq,0); 
     {
       dPOPnv;
-      SETs((TOPn == value) ? &sv_yes : &sv_no);
+      SETs(boolSV(TOPn == value));
       RETURN;
     }
 }
@@ -590,6 +589,7 @@ PP(pp_aassign)
     register SV *sv;
     register AV *ary;
 
+    I32 gimme;
     HV *hash;
     I32 i;
     int magic;
@@ -744,7 +744,16 @@ PP(pp_aassign)
 	tainting |= (uid && (euid != uid || egid != gid));
     }
     delaymagic = 0;
-    if (GIMME == G_ARRAY) {
+
+    gimme = GIMME_V;
+    if (gimme == G_VOID)
+	SP = firstrelem - 1;
+    else if (gimme == G_SCALAR) {
+	dTARGET;
+	SP = firstrelem;
+	SETi(lastrelem - firstrelem + 1);
+    }
+    else {
 	if (ary || hash)
 	    SP = lastrelem;
 	else
@@ -752,15 +761,8 @@ PP(pp_aassign)
 	lelem = firstlelem + (relem - firstrelem);
 	while (relem <= SP)
 	    *relem++ = (lelem <= lastlelem) ? *lelem++ : &sv_undef;
-	RETURN;
     }
-    else {
-	dTARGET;
-	SP = firstrelem;
-		
-	SETi(lastrelem - firstrelem + 1);
-	RETURN;
-    }
+    RETURN;
 }
 
 PP(pp_match)
@@ -976,6 +978,7 @@ do_readline()
     PerlIO *fp;
     register IO *io = GvIO(last_in_gv);
     register I32 type = op->op_type;
+    I32 gimme = GIMME_V;
     MAGIC *mg;
 
     if (SvMAGICAL(last_in_gv) && (mg = mg_find((SV*)last_in_gv, 'q'))) {
@@ -983,11 +986,11 @@ do_readline()
 	XPUSHs(mg->mg_obj);
 	PUTBACK;
 	ENTER;
-	perl_call_method("READLINE", GIMME);
+	perl_call_method("READLINE", gimme);
 	LEAVE;
 	SPAGAIN;
-	if (GIMME == G_SCALAR)
-	    SvSetSV_nosteal(TARG, TOPs);
+	if (gimme == G_SCALAR)
+	    SvSetMagicSV_nosteal(TARG, TOPs);
 	RETURN;
     }
     fp = Nullfp;
@@ -1134,17 +1137,13 @@ do_readline()
     if (!fp) {
 	if (dowarn && io && !(IoFLAGS(io) & IOf_START))
 	    warn("Read on closed filehandle <%s>", GvENAME(last_in_gv));
-	if (GIMME == G_SCALAR) {
+	if (gimme == G_SCALAR) {
 	    (void)SvOK_off(TARG);
 	    PUSHTARG;
 	}
 	RETURN;
     }
-    if (GIMME == G_ARRAY) {
-	sv = sv_2mortal(NEWSV(57, 80));
-	offset = 0;
-    }
-    else {
+    if (gimme == G_SCALAR) {
 	sv = TARG;
 	if (SvROK(sv))
 	    sv_unref(sv);
@@ -1156,6 +1155,10 @@ do_readline()
 	    offset = SvCUR(sv);
 	else
 	    offset = 0;
+    }
+    else {
+	sv = sv_2mortal(NEWSV(57, 80));
+	offset = 0;
     }
     for (;;) {
 	if (!sv_gets(sv, fp, offset)) {
@@ -1170,7 +1173,7 @@ do_readline()
 	    else if (type == OP_GLOB) {
 		(void)do_close(last_in_gv, FALSE);
 	    }
-	    if (GIMME == G_SCALAR) {
+	    if (gimme == G_SCALAR) {
 		(void)SvOK_off(TARG);
 		PUSHTARG;
 	    }
@@ -1203,7 +1206,7 @@ do_readline()
 		continue;
 	    }
 	}
-	if (GIMME == G_ARRAY) {
+	if (gimme == G_ARRAY) {
 	    if (SvLEN(sv) - SvCUR(sv) > 20) {
 		SvLEN_set(sv, SvCUR(sv)+1);
 		Renew(SvPVX(sv), SvLEN(sv), char);
@@ -1211,7 +1214,7 @@ do_readline()
 	    sv = sv_2mortal(NEWSV(58, 80));
 	    continue;
 	}
-	else if (!tmplen && SvLEN(sv) - SvCUR(sv) > 80) {
+	else if (gimme == G_SCALAR && !tmplen && SvLEN(sv) - SvCUR(sv) > 80) {
 	    /* try to reclaim a bit of scalar space (only on 1st alloc) */
 	    if (SvCUR(sv) < 60)
 		SvLEN_set(sv, 80);
@@ -1227,19 +1230,14 @@ PP(pp_enter)
 {
     dSP;
     register CONTEXT *cx;
-    I32 gimme;
+    I32 gimme = OP_GIMME(op, -1);
 
-    /*
-     * We don't just use the GIMME macro here because it assumes there's
-     * already a context, which ain't necessarily so at initial startup.
-     */
-
-    if (op->op_flags & OPf_KNOW)
-	gimme = op->op_flags & OPf_LIST;
-    else if (cxstack_ix >= 0)
-	gimme = cxstack[cxstack_ix].blk_gimme;
-    else
-	gimme = G_SCALAR;
+    if (gimme == -1) {
+	if (cxstack_ix >= 0)
+	    gimme = cxstack[cxstack_ix].blk_gimme;
+	else
+	    gimme = G_SCALAR;
+    }
 
     ENTER;
 
@@ -1306,31 +1304,30 @@ PP(pp_leave)
 
     POPBLOCK(cx,newpm);
 
-    if (op->op_flags & OPf_KNOW)
-	gimme = op->op_flags & OPf_LIST;
-    else if (cxstack_ix >= 0)
-	gimme = cxstack[cxstack_ix].blk_gimme;
-    else
-	gimme = G_SCALAR;
-
-    if (gimme == G_SCALAR) {
-	if (op->op_private & OPpLEAVE_VOID)
-	    SP = newsp;
-	else {
-	    MARK = newsp + 1;
-	    if (MARK <= SP)
-		if (SvFLAGS(TOPs) & (SVs_PADTMP|SVs_TEMP))
-		    *MARK = TOPs;
-		else
-		    *MARK = sv_mortalcopy(TOPs);
-	    else {
-		MEXTEND(mark,0);
-		*MARK = &sv_undef;
-	    }
-	    SP = MARK;
-	}
+    gimme = OP_GIMME(op, -1);
+    if (gimme == -1) {
+	if (cxstack_ix >= 0)
+	    gimme = cxstack[cxstack_ix].blk_gimme;
+	else
+	    gimme = G_SCALAR;
     }
-    else {
+
+    if (gimme == G_VOID)
+	SP = newsp;
+    else if (gimme == G_SCALAR) {
+	MARK = newsp + 1;
+	if (MARK <= SP)
+	    if (SvFLAGS(TOPs) & (SVs_PADTMP|SVs_TEMP))
+		*MARK = TOPs;
+	    else
+		*MARK = sv_mortalcopy(TOPs);
+	else {
+	    MEXTEND(mark,0);
+	    *MARK = &sv_undef;
+	}
+	SP = MARK;
+    }
+    else if (gimme == G_ARRAY) {
 	for (mark = newsp + 1; mark <= SP; mark++)
 	    if (!(SvFLAGS(*mark) & (SVs_PADTMP|SVs_TEMP)))
 		*mark = sv_mortalcopy(*mark);
@@ -1657,18 +1654,19 @@ PP(pp_grepwhile)
     /* All done yet? */
     if (stack_base + *markstack_ptr > sp) {
 	I32 items;
+	I32 gimme = GIMME_V;
 
 	LEAVE;					/* exit outer scope */
 	(void)POPMARK;				/* pop src */
 	items = --*markstack_ptr - markstack_ptr[-1];
 	(void)POPMARK;				/* pop dst */
 	SP = stack_base + POPMARK;		/* pop original mark */
-	if (GIMME != G_ARRAY) {
+	if (gimme == G_SCALAR) {
 	    dTARGET;
 	    XPUSHi(items);
-	    RETURN;
 	}
-	SP += items;
+	else if (gimme == G_ARRAY)
+	    SP += items;
 	RETURN;
     }
     else {
@@ -1708,7 +1706,7 @@ PP(pp_leavesub)
 	}
 	SP = MARK;
     }
-    else {
+    else if (gimme == G_ARRAY) {
 	for (MARK = newsp + 1; MARK <= SP; MARK++) {
 	    if (!SvTEMP(*MARK))
 		*MARK = sv_mortalcopy(*MARK);
@@ -1791,7 +1789,9 @@ PP(pp_entersub)
 	    goto retry;
 	}
 	/* should call AUTOLOAD now? */
-	if ((autogv = gv_autoload(GvESTASH(gv), GvNAME(gv), GvNAMELEN(gv)))) {
+	if ((autogv = gv_autoload4(GvSTASH(gv), GvNAME(gv), GvNAMELEN(gv),
+				   FALSE)))
+	{
 	    cv = GvCV(autogv);
 	    goto retry;
 	}
@@ -1801,7 +1801,7 @@ PP(pp_entersub)
 	DIE("Undefined subroutine &%s called", SvPVX(subname));
     }
 
-    gimme = GIMME;
+    gimme = GIMME_V;
     if ((op->op_private & OPpENTERSUB_DB) && GvCV(DBsub) && !CvNODEBUG(cv)) {
 	SV *oldsv = sv;
 	sv = GvSV(DBsub);

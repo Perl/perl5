@@ -40,9 +40,8 @@ static bool srand_called = FALSE;
 PP(pp_stub)
 {
     dSP;
-    if (GIMME != G_ARRAY) {
+    if (GIMME_V == G_SCALAR)
 	XPUSHs(&sv_undef);
-    }
     RETURN;
 }
 
@@ -81,15 +80,18 @@ PP(pp_padav)
 PP(pp_padhv)
 {
     dSP; dTARGET;
+    I32 gimme;
+
     XPUSHs(TARG);
     if (op->op_private & OPpLVAL_INTRO)
 	SAVECLEARSV(curpad[op->op_targ]);
     if (op->op_flags & OPf_REF)
 	RETURN;
-    if (GIMME == G_ARRAY) { /* array wanted */
+    gimme = GIMME_V;
+    if (gimme == G_ARRAY) {
 	RETURNOP(do_kv(ARGS));
     }
-    else {
+    else if (gimme == G_SCALAR) {
 	SV* sv = sv_newmortal();
 	if (HvFILL((HV*)TARG)) {
 	    sprintf(buf, "%ld/%ld",
@@ -99,8 +101,8 @@ PP(pp_padhv)
 	else
 	    sv_setiv(sv, 0);
 	SETs(sv);
-	RETURN;
     }
+    RETURN;
 }
 
 PP(pp_padany)
@@ -550,9 +552,9 @@ PP(pp_undef)
 	hv_undef((HV*)sv);
 	break;
     case SVt_PVCV:
-	if (!CvANON((CV*)sv) && cv_const_sv((CV*)sv))
+	if (cv_const_sv((CV*)sv))
 	    warn("Constant subroutine %s undefined",
-		 GvENAME(CvGV((CV*)sv)));
+		 CvANON((CV*)sv) ? "(anonymous)" : GvENAME(CvGV((CV*)sv)));
 	/* FALL THROUGH */
     case SVt_PVFM:
 	cv_undef((CV*)sv);
@@ -834,7 +836,7 @@ PP(pp_lt)
     dSP; tryAMAGICbinSET(lt,0); 
     {
       dPOPnv;
-      SETs((TOPn < value) ? &sv_yes : &sv_no);
+      SETs(boolSV(TOPn < value));
       RETURN;
     }
 }
@@ -844,7 +846,7 @@ PP(pp_gt)
     dSP; tryAMAGICbinSET(gt,0); 
     {
       dPOPnv;
-      SETs((TOPn > value) ? &sv_yes : &sv_no);
+      SETs(boolSV(TOPn > value));
       RETURN;
     }
 }
@@ -854,7 +856,7 @@ PP(pp_le)
     dSP; tryAMAGICbinSET(le,0); 
     {
       dPOPnv;
-      SETs((TOPn <= value) ? &sv_yes : &sv_no);
+      SETs(boolSV(TOPn <= value));
       RETURN;
     }
 }
@@ -864,7 +866,7 @@ PP(pp_ge)
     dSP; tryAMAGICbinSET(ge,0); 
     {
       dPOPnv;
-      SETs((TOPn >= value) ? &sv_yes : &sv_no);
+      SETs(boolSV(TOPn >= value));
       RETURN;
     }
 }
@@ -874,7 +876,7 @@ PP(pp_ne)
     dSP; tryAMAGICbinSET(ne,0); 
     {
       dPOPnv;
-      SETs((TOPn != value) ? &sv_yes : &sv_no);
+      SETs(boolSV(TOPn != value));
       RETURN;
     }
 }
@@ -909,7 +911,7 @@ PP(pp_slt)
       int cmp = ((op->op_private & OPpLOCALE)
 		 ? sv_cmp_locale(left, right)
 		 : sv_cmp(left, right));
-      SETs( cmp < 0 ? &sv_yes : &sv_no );
+      SETs(boolSV(cmp < 0));
       RETURN;
     }
 }
@@ -922,7 +924,7 @@ PP(pp_sgt)
       int cmp = ((op->op_private & OPpLOCALE)
 		 ? sv_cmp_locale(left, right)
 		 : sv_cmp(left, right));
-      SETs( cmp > 0 ? &sv_yes : &sv_no );
+      SETs(boolSV(cmp > 0));
       RETURN;
     }
 }
@@ -935,7 +937,7 @@ PP(pp_sle)
       int cmp = ((op->op_private & OPpLOCALE)
 		 ? sv_cmp_locale(left, right)
 		 : sv_cmp(left, right));
-      SETs( cmp <= 0 ? &sv_yes : &sv_no );
+      SETs(boolSV(cmp <= 0));
       RETURN;
     }
 }
@@ -948,7 +950,7 @@ PP(pp_sge)
       int cmp = ((op->op_private & OPpLOCALE)
 		 ? sv_cmp_locale(left, right)
 		 : sv_cmp(left, right));
-      SETs( cmp >= 0 ? &sv_yes : &sv_no );
+      SETs(boolSV(cmp >= 0));
       RETURN;
     }
 }
@@ -958,7 +960,7 @@ PP(pp_seq)
     dSP; tryAMAGICbinSET(seq,0); 
     {
       dPOPTOPssrl;
-      SETs( sv_eq(left, right) ? &sv_yes : &sv_no );
+      SETs(boolSV(sv_eq(left, right)));
       RETURN;
     }
 }
@@ -968,7 +970,7 @@ PP(pp_sne)
     dSP; tryAMAGICbinSET(sne,0); 
     {
       dPOPTOPssrl;
-      SETs( !sv_eq(left, right) ? &sv_yes : &sv_no );
+      SETs(boolSV(!sv_eq(left, right)));
       RETURN;
     }
 }
@@ -1092,7 +1094,7 @@ PP(pp_not)
 #ifdef OVERLOAD
     dSP; tryAMAGICunSET(not);
 #endif /* OVERLOAD */
-    *stack_sp = SvTRUE(*stack_sp) ? &sv_no : &sv_yes;
+    *stack_sp = boolSV(!SvTRUE(*stack_sp));
     return NORMAL;
 }
 
@@ -1199,7 +1201,7 @@ PP(pp_i_lt)
     dSP; tryAMAGICbinSET(lt,0); 
     {
       dPOPTOPiirl;
-      SETs((left < right) ? &sv_yes : &sv_no);
+      SETs(boolSV(left < right));
       RETURN;
     }
 }
@@ -1209,7 +1211,7 @@ PP(pp_i_gt)
     dSP; tryAMAGICbinSET(gt,0); 
     {
       dPOPTOPiirl;
-      SETs((left > right) ? &sv_yes : &sv_no);
+      SETs(boolSV(left > right));
       RETURN;
     }
 }
@@ -1219,7 +1221,7 @@ PP(pp_i_le)
     dSP; tryAMAGICbinSET(le,0); 
     {
       dPOPTOPiirl;
-      SETs((left <= right) ? &sv_yes : &sv_no);
+      SETs(boolSV(left <= right));
       RETURN;
     }
 }
@@ -1229,7 +1231,7 @@ PP(pp_i_ge)
     dSP; tryAMAGICbinSET(ge,0); 
     {
       dPOPTOPiirl;
-      SETs((left >= right) ? &sv_yes : &sv_no);
+      SETs(boolSV(left >= right));
       RETURN;
     }
 }
@@ -1239,7 +1241,7 @@ PP(pp_i_eq)
     dSP; tryAMAGICbinSET(eq,0); 
     {
       dPOPTOPiirl;
-      SETs((left == right) ? &sv_yes : &sv_no);
+      SETs(boolSV(left == right));
       RETURN;
     }
 }
@@ -1249,7 +1251,7 @@ PP(pp_i_ne)
     dSP; tryAMAGICbinSET(ne,0); 
     {
       dPOPTOPiirl;
-      SETs((left != right) ? &sv_yes : &sv_no);
+      SETs(boolSV(left != right));
       RETURN;
     }
 }
@@ -1363,28 +1365,50 @@ PP(pp_srand)
 static U32
 seed()
 {
+    /*
+     * This is really just a quick hack which grabs various garbage
+     * values.  It really should be a real hash algorithm which
+     * spreads the effect of every input bit onto every output bit,
+     * if someone who knows about such tings would bother to write it.
+     * Might be a good idea to add that function to CORE as well.
+     * No numbers below come from careful analysis or anyting here,
+     * except they are primes and SEED_C1 > 1E6 to get a full-width
+     * value from (tv_sec * SEED_C1 + tv_usec).  The multipliers should
+     * probably be bigger too.
+     */
+#if RANDBITS > 16
+#  define SEED_C1	1000003
+#define   SEED_C4	73819
+#else
+#  define SEED_C1	25747
+#define   SEED_C4	20639
+#endif
+#define   SEED_C2	3
+#define   SEED_C3	269
+#define   SEED_C5	26107
+
     U32 u;
 #ifdef VMS
 #  include <starlet.h>
     unsigned int when[2];
     _ckvmssts(sys$gettim(when));
-    u = when[0] ^ when[1];
+    /* Please tell us:  Which value is seconds and what is the other here? */
+    u = (U32)SEED_C1 * when[0] + (U32)SEED_C2 * when[1];
 #else
 #  ifdef HAS_GETTIMEOFDAY
     struct timeval when;
     gettimeofday(&when,(struct timezone *) 0);
-    u = when.tv_sec ^ when.tv_usec;
+    u = (U32)SEED_C1 * when.tv_sec + (U32)SEED_C2 * when.tv_usec;
 #  else
     Time_t when;
     (void)time(&when);
-    u = when;
+    u = (U32)SEED_C1 * when;
 #  endif
 #endif
-#ifndef PLAN9		/* XXX Plan9 assembler chokes on this; fix needed  */
-    /* What is a good hashing algorithm here? */
-    u ^= (   (  269 * (U32)getpid())
-	   ^ (26107 * (U32)&when)
-	   ^ (73819 * (U32)stack_sp));
+    u += SEED_C3 * (U32)getpid();
+    u += SEED_C4 * (U32)(UV)stack_sp;
+#ifndef PLAN9           /* XXX Plan9 assembler chokes on this; fix needed  */
+    u += SEED_C5 * (U32)(UV)&when;
 #endif
     return u;
 }
@@ -1999,22 +2023,23 @@ PP(pp_each)
     dSP; dTARGET;
     HV *hash = (HV*)POPs;
     HE *entry;
+    I32 gimme = GIMME_V;
     
     PUTBACK;
-    entry = hv_iternext(hash);                        /* might clobber stack_sp */
+    entry = hv_iternext(hash);		/* might clobber stack_sp */
     SPAGAIN;
 
     EXTEND(SP, 2);
     if (entry) {
-	PUSHs(hv_iterkeysv(entry));	              /* won't clobber stack_sp */
-	if (GIMME == G_ARRAY) {
+	PUSHs(hv_iterkeysv(entry));	/* won't clobber stack_sp */
+	if (gimme == G_ARRAY) {
 	    PUTBACK;
-	    sv_setsv(TARG, hv_iterval(hash, entry));  /* might clobber stack_sp */
+	    sv_setsv(TARG, hv_iterval(hash, entry));  /* might hit stack_sp */
 	    SPAGAIN;
 	    PUSHs(TARG);
 	}
     }
-    else if (GIMME == G_SCALAR)
+    else if (gimme == G_SCALAR)
 	RETPUSHUNDEF;
 
     RETURN;
@@ -2033,6 +2058,8 @@ PP(pp_keys)
 PP(pp_delete)
 {
     dSP;
+    I32 gimme = GIMME_V;
+    I32 discard = (gimme == G_VOID) ? G_DISCARD : 0;
     SV *sv;
     HV *hv;
 
@@ -2042,11 +2069,12 @@ PP(pp_delete)
 	if (SvTYPE(hv) != SVt_PVHV)
 	    DIE("Not a HASH reference");
 	while (++MARK <= SP) {
-	    sv = hv_delete_ent(hv, *MARK,
-			(op->op_private & OPpLEAVE_VOID ? G_DISCARD : 0), 0);
+	    sv = hv_delete_ent(hv, *MARK, discard, 0);
 	    *MARK = sv ? sv : &sv_undef;
 	}
-	if (GIMME != G_ARRAY) {
+	if (discard)
+	    SP = ORIGMARK;
+	else if (gimme == G_SCALAR) {
 	    MARK = ORIGMARK;
 	    *++MARK = *SP;
 	    SP = MARK;
@@ -2057,11 +2085,11 @@ PP(pp_delete)
 	hv = (HV*)POPs;
 	if (SvTYPE(hv) != SVt_PVHV)
 	    DIE("Not a HASH reference");
-	sv = hv_delete_ent(hv, keysv,
-			(op->op_private & OPpLEAVE_VOID ? G_DISCARD : 0), 0);
+	sv = hv_delete_ent(hv, keysv, discard, 0);
 	if (!sv)
 	    sv = &sv_undef;
-	PUSHs(sv);
+	if (!discard)
+	    PUSHs(sv);
     }
     RETURN;
 }
@@ -2490,7 +2518,7 @@ PP(pp_reverse)
 	if (SP - MARK > 1)
 	    do_join(TARG, &sv_no, MARK, SP);
 	else
-	    sv_setsv(TARG, *SP);
+	    sv_setsv(TARG, (SP > MARK) ? *SP : GvSV(defgv));
 	up = SvPV_force(TARG, len);
 	if (len > 1) {
 	    down = SvPVX(TARG) + len - 1;
@@ -2543,6 +2571,7 @@ PP(pp_unpack)
     dSP;
     dPOPPOPssrl;
     SV **oldsp = sp;
+    I32 gimme = GIMME_V;
     SV *sv;
     STRLEN llen;
     STRLEN rlen;
@@ -2576,7 +2605,7 @@ PP(pp_unpack)
     double cdouble;
     static char* bitcount = 0;
 
-    if (GIMME != G_ARRAY) {		/* arrange to do first one only */
+    if (gimme != G_ARRAY) {		/* arrange to do first one only */
 	/*SUPPRESS 530*/
 	for (patend = pat; !isALPHA(*patend) || *patend == 'x'; patend++) ;
 	if (strchr("aAbBhHP", *patend) || *pat == '%') {
@@ -3215,7 +3244,7 @@ PP(pp_unpack)
 	    checksum = 0;
 	}
     }
-    if (sp == oldsp && GIMME != G_ARRAY)
+    if (sp == oldsp && gimme == G_SCALAR)
 	PUSHs(&sv_undef);
     RETURN;
 }
@@ -3781,7 +3810,7 @@ PP(pp_split)
     I32 realarray = 0;
     I32 base;
     AV *oldstack = curstack;
-    I32 gimme = GIMME;
+    I32 gimme = GIMME_V;
     I32 oldsave = savestack_ix;
 
 #ifdef DEBUGGING

@@ -317,6 +317,7 @@ av_undef
 av_unshift
 bind_match
 block_end
+block_gimme
 block_start
 boot_core_UNIVERSAL
 call_list
@@ -436,7 +437,7 @@ gp_ref
 gv_AVadd
 gv_HVadd
 gv_IOadd
-gv_autoload
+gv_autoload4
 gv_check
 gv_efullname
 gv_efullname3

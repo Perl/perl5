@@ -120,8 +120,7 @@ XS(XS_UNIVERSAL_isa)
     sv = ST(0);
     name = (char *)SvPV(ST(1),na);
 
-    ST(0) = (sv_derived_from(sv, name) ? &sv_yes : &sv_no) ;
-
+    ST(0) = boolSV(sv_derived_from(sv, name));
     XSRETURN(1);
 }
 

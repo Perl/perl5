@@ -168,7 +168,7 @@ notice that perl is not itself written in Perl.
 The new native-code compiler for Perl may reduce the limitations given
 in the previous statement to some degree, but understand that Perl
 remains fundamentally a dynamically typed language, and not a
-statically typed one.  You certainly won't be chastized if you don't
+statically typed one.  You certainly won't be chastised if you don't
 trust nuclear-plant or brain-surgery monitoring code to it.  And
 Larry will sleep easier, too -- Wall Street programs not
 withstanding. :-)
@@ -193,7 +193,7 @@ programs, however, are usually neither strictly compiled nor strictly
 interpreted.  They can be compiled to a bytecode form (something of a Perl
 virtual machine) or to completely different languages, like C or assembly
 language.  You can't tell just by looking whether the source is destined
-for a pure interpreter, a parse-tree interpreter, a byte-code interpreter,
+for a pure interpreter, a parse-tree interpreter, a byte code interpreter,
 or a native-code compiler, so it's hard to give a definitive answer here.
 
 =head2 What is a JAPH?

@@ -5,20 +5,20 @@ perlform - Perl formats
 =head1 DESCRIPTION
 
 Perl has a mechanism to help you generate simple reports and charts.  To
-facilitate this, Perl helps you code up your output page 
-close to how it will look when it's printed.  It can keep
-track of things like how many lines on a page, what page you're on, when to
-print page headers, etc.  Keywords are borrowed from FORTRAN:
-format() to declare and write() to execute; see their entries in
-L<perlfunc>.  Fortunately, the layout is much more legible, more like
-BASIC's PRINT USING statement.  Think of it as a poor man's nroff(1).
+facilitate this, Perl helps you code up your output page close to how it
+will look when it's printed.  It can keep track of things like how many
+lines are on a page, what page you're on, when to print page headers,
+etc.  Keywords are borrowed from FORTRAN: format() to declare and write()
+to execute; see their entries in L<perlfunc>.  Fortunately, the layout is
+much more legible, more like BASIC's PRINT USING statement.  Think of it
+as a poor man's nroff(1).
 
-Formats, like packages and subroutines, are declared rather than executed,
-so they may occur at any point in your program.  (Usually it's best to
-keep them all together though.) They have their own namespace apart from
-all the other "types" in Perl.  This means that if you have a function
-named "Foo", it is not the same thing as having a format named "Foo".
-However, the default name for the format associated with a given
+Formats, like packages and subroutines, are declared rather than
+executed, so they may occur at any point in your program.  (Usually it's
+best to keep them all together though.) They have their own namespace
+apart from all the other "types" in Perl.  This means that if you have a
+function named "Foo", it is not the same thing as having a format named
+"Foo".  However, the default name for the format associated with a given
 filehandle is the same as the name of the filehandle.  Thus, the default
 format for STDOUT is name "STDOUT", and the default format for filehandle
 TEMP is name "TEMP".  They just look the same.  They aren't.
@@ -30,7 +30,7 @@ Output record formats are declared as follows:
     .
 
 If name is omitted, format "STDOUT" is defined.  FORMLIST consists of
-a sequence of lines, each of which may be of one of three types:
+a sequence of lines, each of which may be one of three types:
 
 =over 4
 
@@ -53,7 +53,7 @@ that substitute values into the line.  Each field in a picture line starts
 with either "@" (at) or "^" (caret).  These lines do not undergo any kind
 of variable interpolation.  The at field (not to be confused with the array
 marker @) is the normal kind of field; the other kind, caret fields, are used
-to do rudimentary multi-line text block filling.  The length of the field
+to do rudimentary multiline text block filling.  The length of the field
 is supplied by padding out the field with multiple "E<lt>", "E<gt>", or "|"
 characters to specify, respectively, left justification, right
 justification, or centering.  If the variable would exceed the width
@@ -63,8 +63,8 @@ As an alternate form of right justification, you may also use "#"
 characters (with an optional ".") to specify a numeric field.  This way
 you can line up the decimal points.  If any value supplied for these
 fields contains a newline, only the text up to the newline is printed.
-Finally, the special field "@*" can be used for printing multi-line,
-non-truncated values; it should appear by itself on a line.
+Finally, the special field "@*" can be used for printing multiline,
+nontruncated values; it should appear by itself on a line.
 
 The values are specified on the following line in the same order as
 the picture fields.  The expressions providing the values should be
@@ -105,7 +105,7 @@ first, the line will be repeated until all the fields on the line are
 exhausted.  (If you use a field of the at variety, the expression you
 supply had better not give the same value every time forever!)
 
-Top-of-form processing is by default handled by a format with the 
+Top-of-form processing is by default handled by a format with the
 same name as the current filehandle with "_TOP" concatenated to it.
 It's triggered at the top of each page.  See L<perlfunc/write>.
 
@@ -169,7 +169,7 @@ the first) is stored in C<$^L> (C<$FORMAT_FORMFEED>).  These variables are
 set on a per-filehandle basis, so you'll need to select() into a different
 one to affect them:
 
-    select((select(OUTF), 
+    select((select(OUTF),
 	    $~ = "My_Other_Format",
 	    $^ = "My_Top_Format"
 	   )[0]);
@@ -205,25 +205,25 @@ Much better!
 
 =head1 NOTES
 
-Because the values line may contain arbitrary expressions (for at fields, 
+Because the values line may contain arbitrary expressions (for at fields,
 not caret fields), you can farm out more sophisticated processing
 to other functions, like sprintf() or one of your own.  For example:
 
-    format Ident = 
+    format Ident =
 	@<<<<<<<<<<<<<<<
 	&commify($n)
     .
 
 To get a real at or caret into the field, do this:
 
-    format Ident = 
+    format Ident =
     I have an @ here.
 	    "@"
     .
 
 To center a whole line of text, do something like this:
 
-    format Ident = 
+    format Ident =
     @|||||||||||||||||||||||||||||||||||||||||||||||
 	    "Some text line"
     .
@@ -240,12 +240,12 @@ on the current number of columns, and then eval() it:
              . '$entry' . "\n";
              . ".\n";
     print $format if $Debugging;
-    eval $format; 
+    eval $format;
     die $@ if $@;
 
 Which would generate a format looking something like this:
 
- format STDOUT = 
+ format STDOUT =
  ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
  $entry
          ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<~~
@@ -254,7 +254,7 @@ Which would generate a format looking something like this:
 
 Here's a little program that's somewhat like fmt(1):
 
- format = 
+ format =
  ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ~~
  $_
 
@@ -264,7 +264,7 @@ Here's a little program that's somewhat like fmt(1):
  while (<>) {
      s/\s*\n\s*/ /g;
      write;
- } 
+ }
 
 =head2 Footers
 
@@ -277,10 +277,10 @@ Here's one strategy:  If you have a fixed-size footer, you can get footers
 by checking $FORMAT_LINES_LEFT before each write() and print the footer
 yourself if necessary.
 
-Here's another strategy; open a pipe to yourself, using C<open(MESELF, "|-")> 
-(see L<perlfunc/open()>) and always write() to MESELF instead of
-STDOUT.  Have your child process massage its STDIN to rearrange
-headers and footers however you like.  Not very convenient, but doable.
+Here's another strategy: Open a pipe to yourself, using C<open(MYSELF, "|-")>
+(see L<perlfunc/open()>) and always write() to MYSELF instead of STDOUT.
+Have your child process massage its STDIN to rearrange headers and footers
+however you like.  Not very convenient, but doable.
 
 =head2 Accessing Formatting Internals
 
@@ -305,7 +305,7 @@ is to printf(), do this:
 	$^A = "";
 	formline($format,@_);
 	return $^A;
-    } 
+    }
 
     $string = swrite(<<'END', 1, 2, 3);
  Check me out

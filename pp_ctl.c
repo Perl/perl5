@@ -23,7 +23,7 @@
 #define WORD_ALIGN sizeof(U16)
 #endif
 
-#define DOCATCH(o) (mustcatch ? docatch(o) : (o))
+#define DOCATCH(o) ((CATCH_GET == TRUE) ? docatch(o) : (o))
 
 static OP *docatch _((OP *o));
 static OP *doeval _((int gimme));
@@ -50,10 +50,14 @@ PP(pp_wantarray)
     if (cxix < 0)
 	RETPUSHUNDEF;
 
-    if (cxstack[cxix].blk_gimme == G_ARRAY)
+    switch (cxstack[cxix].blk_gimme) {
+    case G_ARRAY:
 	RETPUSHYES;
-    else
+    case G_SCALAR:
 	RETPUSHNO;
+    default:
+	RETPUSHUNDEF;
+    }
 }
 
 PP(pp_regcmaybe)
@@ -462,7 +466,7 @@ PP(pp_grepstart)
 
     if (stack_base + *markstack_ptr == sp) {
 	(void)POPMARK;
-	if (GIMME != G_ARRAY)
+	if (GIMME_V == G_SCALAR)
 	    XPUSHs(&sv_no);
 	RETURNOP(op->op_next->op_next);
     }
@@ -525,6 +529,7 @@ PP(pp_mapwhile)
     /* All done yet? */
     if (markstack_ptr[-1] > *markstack_ptr) {
 	I32 items;
+	I32 gimme = GIMME_V;
 
 	(void)POPMARK;				/* pop top */
 	LEAVE;					/* exit outer scope */
@@ -532,12 +537,12 @@ PP(pp_mapwhile)
 	items = --*markstack_ptr - markstack_ptr[-1];
 	(void)POPMARK;				/* pop dst */
 	SP = stack_base + POPMARK;		/* pop original mark */
-	if (GIMME != G_ARRAY) {
+	if (gimme == G_SCALAR) {
 	    dTARGET;
 	    XPUSHi(items);
-	    RETURN;
 	}
-	SP += items;
+	else if (gimme == G_ARRAY)
+	    SP += items;
 	RETURN;
     }
     else {
@@ -628,7 +633,7 @@ PP(pp_sort)
 	    AV *oldstack;
 	    CONTEXT *cx;
 	    SV** newsp;
-	    bool oldmustcatch = mustcatch;
+	    bool oldcatch = CATCH_GET;
 
 	    SAVETMPS;
 	    SAVESPTR(op);
@@ -639,7 +644,7 @@ PP(pp_sort)
 		AvREAL_off(sortstack);
 		av_extend(sortstack, 32);
 	    }
-	    mustcatch = TRUE;
+	    CATCH_SET(TRUE);
 	    SWITCHSTACK(curstack, sortstack);
 	    if (sortstash != stash) {
 		firstgv = gv_fetchpv("a", TRUE, SVt_PV);
@@ -656,7 +661,7 @@ PP(pp_sort)
 
 	    POPBLOCK(cx,curpm);
 	    SWITCHSTACK(sortstack, oldstack);
-	    mustcatch = oldmustcatch;
+	    CATCH_SET(oldcatch);
 	}
 	LEAVE;
     }
@@ -812,16 +817,29 @@ char *label;
 I32
 dowantarray()
 {
+    I32 gimme = block_gimme();
+    return (gimme == G_VOID) ? G_SCALAR : gimme;
+}
+
+I32
+block_gimme()
+{
     I32 cxix;
 
     cxix = dopoptosub(cxstack_ix);
     if (cxix < 0)
 	return G_SCALAR;
 
-    if (cxstack[cxix].blk_gimme == G_ARRAY)
-	return G_ARRAY;
-    else
+    switch (cxstack[cxix].blk_gimme) {
+    case G_VOID:
+	return G_VOID;
+    case G_SCALAR:
 	return G_SCALAR;
+    case G_ARRAY:
+	return G_ARRAY;
+    default:
+	croak("panic: bad gimme: %d\n", cxstack[cxix].blk_gimme);
+    }
 }
 
 static I32
@@ -1036,6 +1054,7 @@ PP(pp_caller)
     register I32 cxix = dopoptosub(cxstack_ix);
     register CONTEXT *cx;
     I32 dbcxix;
+    I32 gimme;
     SV *sv;
     I32 count = 0;
 
@@ -1087,7 +1106,11 @@ PP(pp_caller)
 	PUSHs(sv_2mortal(newSVpv("(eval)",0)));
 	PUSHs(sv_2mortal(newSViv(0)));
     }
-    PUSHs(sv_2mortal(newSViv((I32)cx->blk_gimme)));
+    gimme = (I32)cx->blk_gimme;
+    if (gimme == G_VOID)
+	PUSHs(&sv_undef);
+    else
+	PUSHs(sv_2mortal(newSViv(gimme & G_ARRAY)));
     if (cx->cx_type == CXt_EVAL) {
 	if (cx->blk_eval.old_op_type == OP_ENTEREVAL) {
 	    PUSHs(cx->blk_eval.cur_text);
@@ -1239,7 +1262,7 @@ PP(pp_enteriter)
 {
     dSP; dMARK;
     register CONTEXT *cx;
-    I32 gimme = GIMME;
+    I32 gimme = GIMME_V;
     SV **svp;
 
     ENTER;
@@ -1271,7 +1294,7 @@ PP(pp_enterloop)
 {
     dSP;
     register CONTEXT *cx;
-    I32 gimme = GIMME;
+    I32 gimme = GIMME_V;
 
     ENTER;
     SAVETMPS;
@@ -1297,15 +1320,13 @@ PP(pp_leaveloop)
     mark = newsp;
     POPLOOP1(cx);	/* Delay POPLOOP2 until stack values are safe */
 
-    if (gimme == G_SCALAR) {
-	if (op->op_private & OPpLEAVE_VOID)
-	    ;
-	else {
-	    if (mark < SP)
-		*++newsp = sv_mortalcopy(*SP);
-	    else
-		*++newsp = &sv_undef;
-	}
+    if (gimme == G_VOID)
+	; /* do nothing */
+    else if (gimme == G_SCALAR) {
+	if (mark < SP)
+	    *++newsp = sv_mortalcopy(*SP);
+	else
+	    *++newsp = &sv_undef;
     }
     else {
 	while (mark < SP)
@@ -1362,6 +1383,7 @@ PP(pp_return)
 	if (optype == OP_REQUIRE &&
 	    (MARK == SP || (gimme == G_SCALAR && !SvTRUE(*SP))) )
 	{
+	    /* Unassume the success we assumed earlier. */
 	    char *name = cx->blk_eval.old_name;
 	    (void)hv_delete(GvHVn(incgv), name, strlen(name), G_DISCARD);
 	    DIE("%s did not return a true value", name);
@@ -1378,7 +1400,7 @@ PP(pp_return)
 	else
 	    *++newsp = &sv_undef;
     }
-    else {
+    else if (gimme == G_ARRAY) {
 	while (++MARK <= SP)
 	    *++newsp = (popsub2 && SvTEMP(*MARK))
 			? *MARK : sv_mortalcopy(*MARK);
@@ -1450,7 +1472,7 @@ PP(pp_last)
 	else
 	    *++newsp = &sv_undef;
     }
-    else {
+    else if (gimme == G_ARRAY) {
 	while (++MARK <= SP)
 	    *++newsp = ((pop2 == CXt_SUB) && SvTEMP(*MARK))
 			? *MARK : sv_mortalcopy(*MARK);
@@ -1843,7 +1865,7 @@ PP(pp_goto)
 
     if (curstack == signalstack) {
         restartop = retop;
-        Siglongjmp(top_env, 3);
+        JMPENV_JUMP(3);
     }
 
     RETURNOP(retop);
@@ -1943,28 +1965,25 @@ OP *o;
     int ret;
     int oldrunlevel = runlevel;
     OP *oldop = op;
-    Sigjmp_buf oldtop;
+    dJMPENV;
 
     op = o;
-    Copy(top_env, oldtop, 1, Sigjmp_buf);
 #ifdef DEBUGGING
-    assert(mustcatch == TRUE);
+    assert(CATCH_GET == TRUE);
+    DEBUG_l(deb("(Setting up local jumplevel, runlevel = %d)\n", runlevel+1));
 #endif
-    mustcatch = FALSE;
-    switch ((ret = Sigsetjmp(top_env,1))) {
+    switch ((ret = JMPENV_PUSH)) {
     default:				/* topmost level handles it */
-	Copy(oldtop, top_env, 1, Sigjmp_buf);
+	JMPENV_POP;
 	runlevel = oldrunlevel;
-	mustcatch = TRUE;
 	op = oldop;
-	Siglongjmp(top_env, ret);
+	JMPENV_JUMP(ret);
 	/* NOTREACHED */
     case 3:
 	if (!restartop) {
 	    PerlIO_printf(PerlIO_stderr(), "panic: restartop\n");
 	    break;
 	}
-	mustcatch = FALSE;
 	op = restartop;
 	restartop = 0;
 	/* FALL THROUGH */
@@ -1972,9 +1991,8 @@ OP *o;
         runops();
 	break;
     }
-    Copy(oldtop, top_env, 1, Sigjmp_buf);
+    JMPENV_POP;
     runlevel = oldrunlevel;
-    mustcatch = TRUE;
     op = oldop;
     return Nullop;
 }
@@ -2078,7 +2096,9 @@ int gimme;
     rs = SvREFCNT_inc(nrs);
     compiling.cop_line = 0;
     SAVEFREEOP(eval_root);
-    if (gimme & G_ARRAY)
+    if (gimme & G_VOID)
+	scalarvoid(eval_root);
+    else if (gimme & G_ARRAY)
 	list(eval_root);
     else
 	scalar(eval_root);
@@ -2235,7 +2255,7 @@ PP(pp_entereval)
     dSP;
     register CONTEXT *cx;
     dPOPss;
-    I32 gimme = GIMME, was = sub_generation;
+    I32 gimme = GIMME_V, was = sub_generation;
     char tmpbuf[32], *safestr;
     STRLEN len;
     OP *ret;
@@ -2296,23 +2316,20 @@ PP(pp_leaveeval)
     POPEVAL(cx);
     retop = pop_return();
 
-    if (gimme == G_SCALAR) {
-	if (op->op_private & OPpLEAVE_VOID)
-	    MARK = newsp;
-	else {
-	    MARK = newsp + 1;
-	    if (MARK <= SP) {
-		if (SvFLAGS(TOPs) & SVs_TEMP)
-		    *MARK = TOPs;
-		else
-		    *MARK = sv_mortalcopy(TOPs);
-	    }
-	    else {
-		MEXTEND(mark,0);
-		*MARK = &sv_undef;
-	    }
+    if (gimme == G_VOID)
+	MARK = newsp;
+    else if (gimme == G_SCALAR) {
+	MARK = newsp + 1;
+	if (MARK <= SP) {
+	    if (SvFLAGS(TOPs) & SVs_TEMP)
+		*MARK = TOPs;
+	    else
+		*MARK = sv_mortalcopy(TOPs);
 	}
-	SP = MARK;
+	else {
+	    MEXTEND(mark,0);
+	    *MARK = &sv_undef;
+	}
     }
     else {
 	for (mark = newsp + 1; mark <= SP; mark++)
@@ -2328,10 +2345,10 @@ PP(pp_leaveeval)
     CvDEPTH(compcv) = 0;
 
     if (optype == OP_REQUIRE &&
-	!(gimme == G_SCALAR ? SvTRUE(*sp) : sp > newsp)) {
-	char *name = cx->blk_eval.old_name;
-
+	!(gimme == G_SCALAR ? SvTRUE(*sp) : sp > newsp))
+    {
 	/* Unassume the success we assumed earlier. */
+	char *name = cx->blk_eval.old_name;
 	(void)hv_delete(GvHVn(incgv), name, strlen(name), G_DISCARD);
 	retop = die("%s did not return a true value", name);
     }
@@ -2349,7 +2366,7 @@ PP(pp_entertry)
 {
     dSP;
     register CONTEXT *cx;
-    I32 gimme = GIMME;
+    I32 gimme = GIMME_V;
 
     ENTER;
     SAVETMPS;
@@ -2379,21 +2396,19 @@ PP(pp_leavetry)
     POPEVAL(cx);
     pop_return();
 
-    if (gimme == G_SCALAR) {
-	if (op->op_private & OPpLEAVE_VOID)
-	    MARK = newsp;
+    if (gimme == G_VOID)
+	SP = newsp;
+    else if (gimme == G_SCALAR) {
+	MARK = newsp + 1;
+	if (MARK <= SP) {
+	    if (SvFLAGS(TOPs) & (SVs_PADTMP|SVs_TEMP))
+		*MARK = TOPs;
+	    else
+		*MARK = sv_mortalcopy(TOPs);
+	}
 	else {
-	    MARK = newsp + 1;
-	    if (MARK <= SP) {
-		if (SvFLAGS(TOPs) & (SVs_PADTMP|SVs_TEMP))
-		    *MARK = TOPs;
-		else
-		    *MARK = sv_mortalcopy(TOPs);
-	    }
-	    else {
-		MEXTEND(mark,0);
-		*MARK = &sv_undef;
-	    }
+	    MEXTEND(mark,0);
+	    *MARK = &sv_undef;
 	}
 	SP = MARK;
     }

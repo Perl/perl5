@@ -28,7 +28,7 @@ guaranteed to be large enough to hold a pointer (as well as an integer).
 Perl also uses two special typedefs, I32 and I16, which will always be at
 least 32-bits and 16-bits long, respectively.
 
-=head2 Working with SV's
+=head2 Working with SVs
 
 An SV can be created and loaded with one command.  There are four types of
 values that can be loaded: an integer value (IV), a double (NV), a string,
@@ -56,7 +56,7 @@ argument to C<newSVpv>.  Be warned, though, that Perl will determine the
 string's length by using C<strlen>, which depends on the string terminating
 with a NUL character.
 
-All SV's that will contain strings should, but need not, be terminated
+All SVs that will contain strings should, but need not, be terminated
 with a NUL character.  If it is not NUL-terminated there is a risk of
 core dumps and corruptions from code which passes the string to C
 functions or system calls which expect a NUL-terminated string.
@@ -77,7 +77,7 @@ In the C<SvPV> macro, the length of the string returned is placed into the
 variable C<len> (this is a macro, so you do I<not> use C<&len>).  If you do not
 care what the length of the data is, use the global variable C<na>.  Remember,
 however, that Perl allows arbitrary strings of data that may both contain
-NUL's and might not be terminated by a NUL.
+NULs and might not be terminated by a NUL.
 
 If you want to know if the scalar value is TRUE, you can use:
 
@@ -184,21 +184,21 @@ stored in your SV.  The "p" stands for private.
 
 In general, though, it's best to use the C<Sv*V> macros.
 
-=head2 Working with AV's
+=head2 Working with AVs
 
 There are two ways to create and load an AV.  The first method creates an
 empty AV:
 
     AV*  newAV();
 
-The second method both creates the AV and initially populates it with SV's:
+The second method both creates the AV and initially populates it with SVs:
 
     AV*  av_make(I32 num, SV **ptr);
 
 The second argument points to an array containing C<num> C<SV*>'s.  Once the
-AV has been created, the SV's can be destroyed, if so desired.
+AV has been created, the SVs can be destroyed, if so desired.
 
-Once the AV has been created, the following operations are possible on AV's:
+Once the AV has been created, the following operations are possible on AVs:
 
     void  av_push(AV*, SV*);
     SV*   av_pop(AV*);
@@ -242,13 +242,13 @@ by using the following:
 
 This returns NULL if the variable does not exist.
 
-=head2 Working with HV's
+=head2 Working with HVs
 
 To create an HV, you use the following routine:
 
     HV*  newHV();
 
-Once the HV has been created, the following operations are possible on HV's:
+Once the HV has been created, the following operations are possible on HVs:
 
     SV**  hv_store(HV*, char* key, U32 klen, SV* val, U32 hash);
     SV**  hv_fetch(HV*, char* key, U32 klen, I32 lval);
@@ -256,7 +256,7 @@ Once the HV has been created, the following operations are possible on HV's:
 The C<klen> parameter is the length of the key being passed in (Note that
 you cannot pass 0 in as a value of C<klen> to tell Perl to measure the
 length of the key).  The C<val> argument contains the SV pointer to the
-scalar being stored, and C<hash> is the pre-computed hash value (zero if
+scalar being stored, and C<hash> is the precomputed hash value (zero if
 you want C<hv_store> to calculate it for you).  The C<lval> parameter
 indicates whether this fetch is actually a part of a store operation, in
 which case a new undefined value will be added to the HV with the supplied
@@ -468,7 +468,7 @@ There are additional macros whose values may be bitwise OR'ed with the
 C<TRUE> argument to enable certain extra features.  Those bits are:
 
     GV_ADDMULTI	Marks the variable as multiply defined, thus preventing the
-		"Indentifier <varname> used only once: possible typo" warning.
+		"Name <varname> used only once: possible typo" warning.
     GV_ADDWARN	Issues the warning "Had to create <varname> unexpectedly" if
 		the variable did not exist before the function was called.
 
@@ -477,8 +477,8 @@ package.
 
 =head2 Reference Counts and Mortality
 
-Perl uses an reference count-driven garbage collection mechanism. SV's,
-AV's, or HV's (xV for short in the following) start their life with a
+Perl uses an reference count-driven garbage collection mechanism. SVs,
+AVs, or HVs (xV for short in the following) start their life with a
 reference count of 1.  If the reference count of an xV ever drops to 0,
 then it will be destroyed and its memory made available for reuse.
 
@@ -514,11 +514,11 @@ the reference count of the SV will go to zero and it will be destroyed,
 stopping any memory leak.
 
 There are some convenience functions available that can help with the
-destruction of xV's.  These functions introduce the concept of "mortality".
+destruction of xVs.  These functions introduce the concept of "mortality".
 An xV that is mortal has had its reference count marked to be decremented,
 but not actually decremented, until "a short time later".  Generally the
 term "short time later" means a single Perl statement, such as a call to
-an XSUB function.  The actual determinant for when mortal xV's have their
+an XSUB function.  The actual determinant for when mortal xVs have their
 reference count decremented depends on two macros, SAVETMPS and FREETMPS.
 See L<perlcall> and L<perlxs> for more details on these macros.
 
@@ -540,7 +540,7 @@ The first call creates a mortal SV, the second converts an existing
 SV to a mortal SV (and thus defers a call to C<SvREFCNT_dec>), and the
 third creates a mortal copy of an existing SV.
 
-The mortal routines are not just for SV's -- AV's and HV's can be
+The mortal routines are not just for SVs -- AVs and HVs can be
 made mortal by passing their address (type-casted to C<SV*>) to the
 C<sv_2mortal> or C<sv_mortalcopy> routines.
 
@@ -601,7 +601,7 @@ as any other SV.
 
 For more information on references and blessings, consult L<perlref>.
 
-=head2 Double-Typed SV's
+=head2 Double-Typed SVs
 
 Scalar variables normally contain only one type of value, an integer,
 double, pointer, or reference.  Perl will automatically convert the
@@ -679,9 +679,9 @@ entry of the same type of magic is deleted.  Note that this can be
 overridden, and multiple instances of the same type of magic can be
 associated with an SV.
 
-The C<name> and C<namlem> arguments are used to associate a string with
-the magic, typically the name of a variable. C<namlem> is stored in the
-C<mg_len> field and if C<name> is non-null and C<namlem> >= 0 a malloc'd
+The C<name> and C<namlen> arguments are used to associate a string with
+the magic, typically the name of a variable. C<namlen> is stored in the
+C<mg_len> field and if C<name> is non-null and C<namlen> >= 0 a malloc'd
 copy of the name is stored in C<mg_ptr> field.
 
 The sv_magic function uses C<how> to determine which, if any, predefined
@@ -800,7 +800,7 @@ at the top of the private data area and check that.
 
 This routine returns a pointer to the C<MAGIC> structure stored in the SV.
 If the SV does not have that magical feature, C<NULL> is returned.  Also,
-if the SV is not of type SVt_PVMG, Perl may core-dump.
+if the SV is not of type SVt_PVMG, Perl may core dump.
 
     int mg_copy(SV* sv, SV* nsv, char* key, STRLEN klen);
 
@@ -836,7 +836,7 @@ where C<sp> is the stack pointer, and C<num> is the number of elements the
 stack should be extended by.
 
 Now that there is room on the stack, values can be pushed on it using the
-macros to push IV's, doubles, strings, and SV pointers respectively:
+macros to push IVs, doubles, strings, and SV pointers respectively:
 
     PUSHi(IV)
     PUSHn(double)
@@ -979,20 +979,20 @@ others, which use it via C<(X)PUSH[pni]>.
 
 =head2 Scratchpads
 
-The question remains on when the SV's which are I<target>s for opcodes
+The question remains on when the SVs which are I<target>s for opcodes
 are created. The answer is that they are created when the current unit --
 a subroutine or a file (for opcodes for statements outside of
 subroutines) -- is compiled. During this time a special anonymous Perl
 array is created, which is called a scratchpad for the current
 unit.
 
-A scratchpad keeps SV's which are lexicals for the current unit and are
+A scratchpad keeps SVs which are lexicals for the current unit and are
 targets for opcodes. One can deduce that an SV lives on a scratchpad
 by looking on its flags: lexicals have C<SVs_PADMY> set, and
 I<target>s have C<SVs_PADTMP> set.
 
-The correspondence between OP's and I<target>s is not 1-to-1. Different
-OP's in the compile tree of the unit can use the same target, if this
+The correspondence between OPs and I<target>s is not 1-to-1. Different
+OPs in the compile tree of the unit can use the same target, if this
 would not conflict with the expected life of the temporary.
 
 =head2 Scratchpads and recursion
@@ -1343,7 +1343,7 @@ L<perlcall>.
 
 =item G_ARRAY
 
-Used to indicate array context.  See C<GIMME> and L<perlcall>.
+Used to indicate array context.  See C<GIMME_V>, C<GIMME> and L<perlcall>.
 
 =item G_DISCARD
 
@@ -1356,8 +1356,14 @@ Used to force a Perl C<eval> wrapper around a callback.  See L<perlcall>.
 
 =item GIMME
 
-The XSUB-writer's equivalent to Perl's C<wantarray>.  Returns C<G_SCALAR> or
-C<G_ARRAY> for scalar or array context.
+A backward-compatible version of C<GIMME_V> which can only return
+C<G_SCALAR> or C<G_ARRAY>; in a void context, it returns C<G_SCALAR>.
+
+=item GIMME_V
+
+The XSUB-writer's equivalent to Perl's C<wantarray>.  Returns
+C<G_VOID>, C<G_SCALAR> or C<G_ARRAY> for void, scalar or array
+context, respectively.
 
 =item G_NOARGS
 
@@ -1365,7 +1371,11 @@ Indicates that no arguments are being sent to a callback.  See L<perlcall>.
 
 =item G_SCALAR
 
-Used to indicate scalar context.  See C<GIMME> and L<perlcall>.
+Used to indicate scalar context.  See C<GIMME_V>, C<GIMME>, and L<perlcall>.
+
+=item G_VOID
+
+Used to indicate void context.  See C<GIMME_V> and L<perlcall>.
 
 =item gv_fetchmeth
 
@@ -1526,7 +1536,7 @@ returned.
 
 Deletes a key/value pair in the hash.  The value SV is removed from the hash
 and returned to the caller.  The C<flags> value will normally be zero; if set
-to G_DISCARD then null will be returned.  C<hash> can be a valid pre-computed
+to G_DISCARD then null will be returned.  C<hash> can be a valid precomputed
 hash value, or 0 to ask for it to be computed.
 
 	SV*     hv_delete_ent _((HV* tb, SV* key, I32 flags, U32 hash));
@@ -1541,7 +1551,7 @@ C<klen> is the length of the key.
 =item hv_exists_ent
 
 Returns a boolean indicating whether the specified hash key exists. C<hash>
-can be a valid pre-computed hash value, or 0 to ask for it to be computed.
+can be a valid precomputed hash value, or 0 to ask for it to be computed.
 
 	bool    hv_exists_ent _((HV* tb, SV* key, U32 hash));
 
@@ -1557,7 +1567,7 @@ dereferencing it to a C<SV*>.
 =item hv_fetch_ent
 
 Returns the hash entry which corresponds to the specified key in the hash.
-C<hash> must be a valid pre-computed hash number for the given C<key>, or
+C<hash> must be a valid precomputed hash number for the given C<key>, or
 0 if you want the function to compute it.  IF C<lval> is set then the
 fetch will be part of a store.  Make sure the return value is non-null
 before accessing it.  The return value when C<tb> is a tied hash
@@ -1629,7 +1639,7 @@ Returns the package name of a stash.  See C<SvSTASH>, C<CvSTASH>.
 =item hv_store
 
 Stores an SV in a hash.  The hash key is specified as C<key> and C<klen> is
-the length of the key.  The C<hash> parameter is the pre-computed hash
+the length of the key.  The C<hash> parameter is the precomputed hash
 value; if it is zero then Perl will compute it.  The return value will be
 null if the operation failed, otherwise it can be dereferenced to get the
 original C<SV*>.
@@ -1639,7 +1649,7 @@ original C<SV*>.
 =item hv_store_ent
 
 Stores C<val> in a hash.  The hash key is specified as C<key>.  The C<hash>
-parameter is the pre-computed hash value; if it is zero then Perl will
+parameter is the precomputed hash value; if it is zero then Perl will
 compute it.  The return value is the new hash entry so created.  It will be
 null if the operation failed or if the entry was stored in a tied hash.
 Otherwise the contents of the return value can be accessed using the
@@ -2118,7 +2128,7 @@ C<SPAGAIN>.
 
 =item SPAGAIN
 
-Re-fetch the stack pointer.  Used after a callback.  See L<perlcall>.
+Refetch the stack pointer.  Used after a callback.  See L<perlcall>.
 
 	SPAGAIN;
 
@@ -2910,4 +2920,4 @@ API Listing by Dean Roehrich <F<roehrich@cray.com>>.
 
 =head1 DATE
 
-Version 31.3: 1997/3/14
+Version 31.4: 1997/3/30

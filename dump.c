@@ -131,14 +131,20 @@ register OP *op;
 #endif
     if (op->op_flags) {
 	*buf = '\0';
-	if (op->op_flags & OPf_KNOW) {
-	    if (op->op_flags & OPf_LIST)
-		(void)strcat(buf,"LIST,");
-	    else
-		(void)strcat(buf,"SCALAR,");
-	}
-	else
+	switch (op->op_flags & OPf_WANT) {
+	case OPf_WANT_VOID:
+	    (void)strcat(buf,"VOID,");
+	    break;
+	case OPf_WANT_SCALAR:
+	    (void)strcat(buf,"SCALAR,");
+	    break;
+	case OPf_WANT_LIST:
+	    (void)strcat(buf,"LIST,");
+	    break;
+	default:
 	    (void)strcat(buf,"UNKNOWN,");
+	    break;
+	}
 	if (op->op_flags & OPf_KIDS)
 	    (void)strcat(buf,"KIDS,");
 	if (op->op_flags & OPf_PARENS)

@@ -70,3 +70,43 @@
     SSPUSHINT(SAVEt_STACK_POS);		\
  } STMT_END
 
+
+/* A jmpenv packages the state required to perform a proper non-local jump.
+ * Note that there is a start_env initialized when perl starts, and top_env
+ * points to this initially, so top_env should always be non-null.
+ *
+ * Existence of a non-null top_env->je_prev implies it is valid to call
+ * longjmp() at that runlevel (we make sure start_env.je_prev is always
+ * null to ensure this).
+ *
+ * je_mustcatch, when set at any runlevel to TRUE, means eval ops must
+ * establish a local jmpenv to handle exception traps.  Care must be taken
+ * to restore the previous value of je_mustcatch before exiting the
+ * stack frame iff JMPENV_PUSH was not called in that stack frame.
+ * GSAR 97-03-27
+ */
+
+struct jmpenv {
+    struct jmpenv *	je_prev;
+    Sigjmp_buf		je_buf;		
+    int			je_ret;		/* return value of last setjmp() */
+    bool		je_mustcatch;	/* longjmp()s must be caught locally */
+};
+
+typedef struct jmpenv JMPENV;
+
+#define dJMPENV		JMPENV cur_env
+#define JMPENV_PUSH	(cur_env.je_prev = top_env,			\
+			 cur_env.je_ret = Sigsetjmp(cur_env.je_buf,1),	\
+			 top_env = &cur_env,				\
+			 cur_env.je_mustcatch = FALSE,			\
+			 cur_env.je_ret)
+#define JMPENV_POP	(top_env = cur_env.je_prev)
+#define JMPENV_JUMP(v)	(top_env->je_prev ? Siglongjmp(top_env->je_buf, (v))	\
+			 : ((v) == 2) ? exit(STATUS_NATIVE_EXPORT)		\
+			 : (PerlIO_printf(PerlIO_stderr(), "panic: top_env\n"),	\
+			     exit(1)))
+   
+#define CATCH_GET	(top_env->je_mustcatch)
+#define CATCH_SET(v)	(top_env->je_mustcatch = (v))
+   

@@ -311,7 +311,7 @@ be made through methods.
 
 Perl doesn't impose restrictions on who gets to use which methods.
 The public-versus-private distinction is by convention, not syntax.
-(Well, unless you use the Alias module described below in 
+(Well, unless you use the Alias module described below in
 L</"Data Members as Variables">.)  Occasionally you'll see method names beginning or ending
 with an underscore or two.  This marking is a convention indicating
 that the methods are private to that class alone and sometimes to its
@@ -350,7 +350,7 @@ Some might argue that one should go at these this way:
     }
 
 But since these methods are all executing in the class itself, this
-may not be critical.  There are trade-offs to be made.  Using direct
+may not be critical.  There are tradeoffs to be made.  Using direct
 hash access is faster (about an order of magnitude faster, in fact), and
 it's more convenient when you want to interpolate in strings.  But using
 methods (the external interface) internally shields not just the users of
@@ -1091,7 +1091,7 @@ In version 5.003, there were no predefined methods there, but you could put
 whatever you felt like into it.
 
 However, as of version 5.004 (or some subversive releases, like 5.003_08),
-UNIVERSAL has some methods in it already.  These are built-in to your Perl
+UNIVERSAL has some methods in it already.  These are builtin to your Perl
 binary, so they don't take any extra time to load.  Predefined methods
 include isa(), can(), and VERSION().  isa() tells you whether an object or
 class "is" another one without having to traverse the hierarchy yourself:
@@ -1417,7 +1417,7 @@ is modify %fields.  No new functions need be written.
 
 I could have avoided the C<_permitted> field entirely, but I
 wanted to demonstrate how to store a reference to class data on the
-object so you wouldn't have to access that class data 
+object so you wouldn't have to access that class data
 directly from an object method.
 
 =head2 Inherited Autoloaded Data Methods
@@ -1624,7 +1624,7 @@ functions in the 5.004 release of Perl in File::stat, Net::hostent,
 Net::netent, Net::protoent, Net::servent, Time::gmtime, Time::localtime,
 User::grent, and User::pwent.  These modules have a final component
 that's all lowercase, by convention reserved for compiler pragmas,
-because they affect the compilation and change a built-in function.
+because they affect the compilation and change a builtin function.
 They also have the type names that a C programmer would most expect.
 
 =head2 Data Members as Variables
@@ -1688,7 +1688,7 @@ update value fields in the hash.  Convenient, eh?
 
 The need for the C<use vars> declaration is because what Alias does
 is play with package globals with the same name as the fields.  To use
-globals while C<use strict> is in effect, you have to pre-declare them.
+globals while C<use strict> is in effect, you have to predeclare them.
 These package variables are localized to the block enclosing the attr()
 call just as if you'd used a local() on them.  However, that means that
 they're still considered global variables with temporary values, just
@@ -1726,7 +1726,7 @@ object (one expecting a reference), or vice versa.
 
 Z<>From the C++ perspective, all methods in Perl are virtual.
 This, by the way, is why they are never checked for function
-prototypes in the argument list as regular built-in and user-defined
+prototypes in the argument list as regular builtin and user-defined
 functions can be.
 
 Because a class is itself something of an object, Perl's classes can be
@@ -1737,7 +1737,7 @@ notion, but not the former.
 
 =head1 SEE ALSO
 
-The following man pages will doubtless provide more
+The following manpages will doubtless provide more
 background for this one:
 L<perlmod>,
 L<perlref>,
@@ -1755,7 +1755,7 @@ experiences have mandated its inclusion:
     Copyright 1996 Tom Christiansen.  All Rights Reserved.
 
 This work derives in part from the second edition of I<Programming Perl>.
-Although destined for release as a man page with the standard Perl
+Although destined for release as a manpage with the standard Perl
 distribution, it is not public domain (nor is any of Perl and its docset:
 publishers beware).  It's expected to someday make its way into a revision
 of the Camel Book.  While it is copyright by me with all rights reserved,

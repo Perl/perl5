@@ -18,7 +18,7 @@ QNX, and AmigaOS.
 Most importantly, many bugs were fixed.  See the F<Changes>
 file in the distribution for details.
 
-=head2 Compilation Option: Binary Compatibility With 5.003
+=head2 Compilation option: Binary compatibility with 5.003
 
 There is a new Configure question that asks if you want to maintain
 binary compatibility with Perl 5.003.  If you choose binary
@@ -26,6 +26,22 @@ compatibility, you do not have to recompile your extensions, but you
 might have symbol conflicts if you embed Perl in another application,
 just as in the 5.003 release.  By default, binary compatibility
 is preserved at the expense of symbol table pollution.
+
+=head2 $PERL5OPT environment variable
+
+You may now put Perl options in the $PERL5OPT environment variable.
+Unless Perl is running with taint checks, it will interpret this
+variable as if its contents had appeared on a "#!perl" line at the
+beginning of your script, except that hyphens are optional.  PERL5OPT
+may only be used to set the following switches: B<-[DIMUdmw]>.
+
+=head2 More precise warnings
+
+If you removed the -w option from your Perl 5.003 scripts because it
+made Perl too verbose, we recommend that you try putting it back when
+you upgrade to Perl 5.004.  Each new perl version tends to remove some
+undesirable warnings, while adding new warnings that may catch bugs in
+your scripts.
 
 =head2 Subroutine arguments created only when they're modified
 
@@ -51,7 +67,20 @@ After this code executes in Perl 5.004, $a{b} exists but $a[2] does
 not.  In Perl 5.002 and 5.003, both $a{b} and $a[2] would have existed
 (but $a[2]'s value would have been undefined).
 
-=head2 Fixed Parsing of $$<digit>, &$<digit>, etc.
+=head2 Simple functions' C<AUTOLOAD> not looked up as method
+
+Before Perl 5.004, C<AUTOLOAD> functions were looked up as methods
+(using the C<@ISA> hierarchy), even when the function to be autoloaded
+was called as a plain function (e.g. C<Foo::bar()>), not a method.
+Perl 5.004 no longer uses method lookup for C<AUTOLOAD>s of plain
+functions.
+
+The simple rule is: Inheritance does not work when autoloading plain
+functions.  The simple fix for old code is: In any module that used to
+depend on inheriting C<AUTOLOAD> from a base class named C<BaseClass>,
+execute C<*AUTOLOAD = *BaseClass::AUTOLOAD>.
+
+=head2 Fixed parsing of $$<digit>, &$<digit>, etc.
 
 A bug in previous versions of Perl 5.0 prevented proper parsing of
 numeric special variables as symbolic references.  That bug has been
@@ -59,14 +88,22 @@ fixed.  As a result, the string "$$0" is no longer equivalent to
 C<$$."0">, but rather to C<${$0}>.  To get the old behavior, change
 "$$" followed by a digit to "${$}".
 
-=head2 No Resetting of $. on Implicit Close
+=head2 No resetting of $. on implicit close
 
 The documentation for Perl 5.0 has always stated that C<$.> is I<not>
-reset when an already-open file handle is re-opened with no intervening
-call to C<close>.  Due to a bug, perl versions 5.000 through 5.0003
+reset when an already-open file handle is reopened with no intervening
+call to C<close>.  Due to a bug, perl versions 5.000 through 5.003
 I<did> reset C<$.> under that circumstance; Perl 5.004 does not.
 
-=head2 Changes to Tainting Checks
+=head2 C<wantarray> may return undef
+
+The C<wantarray> operator returns true if a subroutine is expected to
+return a list, and false otherwise.  In Perl 5.004, C<wantarray> can
+also return the undefined value if a subroutine's return value will
+not be used at all, which allows subroutines to avoid a time-consuming
+calculation of a return value if it isn't going to be used.
+
+=head2 Changes to tainting checks
 
 A bug in previous versions may have failed to detect some insecure
 conditions when taint checks are turned on. (Taint checks are used
@@ -76,14 +113,14 @@ previously-working script to now fail -- which should be construed
 as a blessing, since that indicates a potentially-serious security
 hole was just plugged.
 
-=head2 New Opcode Module and Revised Safe Module
+=head2 New Opcode module and revised Safe module
 
 A new Opcode module supports the creation, manipulation and
 application of opcode masks.  The revised Safe module has a new API
 and is implemented using the new Opcode module.  Please read the new
 Opcode and Safe documentation.
 
-=head2 Embedding Improvements
+=head2 Embedding improvements
 
 In older versions of Perl it was not possible to create more than one
 Perl interpreter instance inside a single process without leaking like a
@@ -92,7 +129,7 @@ fixed.  However, you still must take care when embedding Perl in a C
 program.  See the updated perlembed manpage for tips on how to manage
 your interpreters.
 
-=head2 Internal Change: FileHandle Class Based on IO::* Classes
+=head2 Internal change: FileHandle class based on IO::* classes
 
 File handles are now stored internally as type IO::Handle.  The
 FileHandle module is still supported for backwards compatibility, but
@@ -103,13 +140,13 @@ require, that you use the IO::* modules in new code.
 In harmony with this change, C<*GLOB{FILEHANDLE}> is now a
 backward-compatible synonym for C<*STDOUT{IO}>.
 
-=head2 Internal Change: PerlIO internal IO abstraction interface
+=head2 Internal change: PerlIO abstraction interface
 
 It is now possible to build Perl with AT&T's sfio IO package
 instead of stdio.  See L<perlapio> for more details, and
 the F<INSTALL> file for how to use it.
 
-=head2 New and Changed Built-in Variables
+=head2 New and changed builtin variables
 
 =over
 
@@ -142,7 +179,7 @@ there is no C<use English> long name for this variable.
 
 =back
 
-=head2 New and Changed Built-in Functions
+=head2 New and changed builtin functions
 
 =over
 
@@ -225,7 +262,7 @@ number instead of a module name.  If the version of the Perl interpreter
 is less than VERSION, then an error message is printed and Perl exits
 immediately.  Because C<use> occurs at compile time, this check happens
 immediately during the compilation process, unlike C<require VERSION>,
-which waits until run-time for the check.  This is often useful if you
+which waits until runtime for the check.  This is often useful if you
 need to check the current Perl version before C<use>ing library modules
 which have changed in incompatible ways from older versions of Perl.
 (We try not to do this more than we have to.)
@@ -283,7 +320,7 @@ zero-width assertion.  See L<perlop> and L<perlre>.
 
 The C<m//x> construct has always been intended to ignore all unescaped
 whitespace.  However, before Perl 5.004, whitespace had the effect of
-esacping repeat modifier like "*" or "?".  For example, C</a *b/x> was
+escaping repeat modifiers like "*" or "?"; for example, C</a *b/x> was
 (mis)interpreted as C</a\*b/x>.  This bug has been fixed in 5.004.
 
 =item nested C<sub{}> closures work now
@@ -309,7 +346,7 @@ before, and is fine now:
 
 =back
 
-=head2 New Built-in Methods
+=head2 New builtin methods
 
 The C<UNIVERSAL> package automatically contains the following methods that
 are inherited by all other classes:
@@ -359,7 +396,7 @@ You do not need to C<use UNIVERSAL> in order to make these methods
 available to your program.  This is necessary only if you wish to
 have C<isa> available as a plain subroutine in the current package.
 
-=head2 TIEHANDLE Now Supported
+=head2 TIEHANDLE now supported
 
 See L<perltie> for other kinds of tie()s.
 
@@ -428,7 +465,7 @@ possibly for cleaning up.
 
 =back
 
-=head2 Malloc Enhancements
+=head2 Malloc enhancements
 
 Four new compilation flags are recognized by malloc.c.  (They have no
 effect if perl is compiled with system malloc().)
@@ -487,7 +524,7 @@ negligible.
 
 =back
 
-=head2 Miscellaneous Efficiency Enhancements
+=head2 Miscellaneous efficiency enhancements
 
 Functions that have an empty prototype and that do nothing but return
 a fixed value are now inlined (e.g. C<sub PI () { 3.14159 }>).
@@ -498,9 +535,15 @@ same hash, the hash keys never have to be reallocated.
 
 =head1 Pragmata
 
-Four new pragmatic modules exist:
+Six new pragmatic modules exist:
 
 =over
+
+=item use autouse MODULE => qw(sub1 sub2 sub3)
+
+Defers C<require MODULE> until someone calls one of the specified
+subroutines (which must be exported by MODULE).  This pragma should be
+used with caution, and only when necessary.
 
 =item use blib
 
@@ -513,10 +556,15 @@ parent directories.
 Intended for use on command line with B<-M> option as a way of testing
 arbitrary scripts against an uninstalled version of a package.
 
+=item use constant NAME => VALUE
+
+Provides a convenient interface for creating compile-time constants,
+See L<perlsub/"Constant Functions">.
+
 =item use locale
 
 Tells the compiler to enable (or disable) the use of POSIX locales for
-built-in operations.
+builtin operations.
 
 When C<use locale> is in effect, the current LC_CTYPE locale is used
 for regular expressions and case mapping; LC_COLLATE for string
@@ -548,7 +596,7 @@ relative to the local time zone, in the VMS tradition.
 
 =head1 Modules
 
-=head2 Installation Directories
+=head2 Installation directories
 
 The I<installperl> script now places the Perl source files for
 extensions in the architecture-specific library directory, which is
@@ -558,31 +606,7 @@ library directory unchanged from a previous version, without running
 the risk of binary incompatibility between extensions' Perl source and
 shared libraries.
 
-=head2 Fcntl
-
-New constants in the existing Fcntl modules are now supported,
-provided that your operating system happens to support them:
-
-    F_GETOWN F_SETOWN
-    O_ASYNC O_DEFER O_DSYNC O_FSYNC O_SYNC
-    O_EXLOCK O_SHLOCK
-
-These constants are intended for use with the Perl operators sysopen()
-and fcntl() and the basic database modules like SDBM_File.  For the
-exact meaning of these and other Fcntl constants please refer to your
-operating system's documentation for fcntl() and open().
-
-In addition, the Fcntl module now provides these constants for use
-with the Perl operator flock():
-
-	LOCK_SH LOCK_EX LOCK_NB LOCK_UN
-
-These constants are defined in all environments (because where there is
-no flock() system call, Perl emulates it).  However, for historical
-reasons, these constants are not exported unless they are explicitly
-requested with the ":flock" tag (e.g. C<use Fcntl ':flock'>).
-
-=head2 Module Information Summary
+=head2 Module information summary
 
 Brand new modules, arranged by topic rather than strictly
 alphabetically:
@@ -621,6 +645,30 @@ alphabetically:
     Tie/RefHash.pm       Base class for tied hashes with references as keys
 
     UNIVERSAL.pm         Base class for *ALL* classes
+
+=head2 Fcntl
+
+New constants in the existing Fcntl modules are now supported,
+provided that your operating system happens to support them:
+
+    F_GETOWN F_SETOWN
+    O_ASYNC O_DEFER O_DSYNC O_FSYNC O_SYNC
+    O_EXLOCK O_SHLOCK
+
+These constants are intended for use with the Perl operators sysopen()
+and fcntl() and the basic database modules like SDBM_File.  For the
+exact meaning of these and other Fcntl constants please refer to your
+operating system's documentation for fcntl() and open().
+
+In addition, the Fcntl module now provides these constants for use
+with the Perl operator flock():
+
+	LOCK_SH LOCK_EX LOCK_NB LOCK_UN
+
+These constants are defined in all environments (because where there is
+no flock() system call, Perl emulates it).  However, for historical
+reasons, these constants are not exported unless they are explicitly
+requested with the ":flock" tag (e.g. C<use Fcntl ':flock'>).
 
 =head2 IO
 
@@ -697,9 +745,9 @@ changes. Everything after DB_File 1.01 has been added since 5.003.
 
 Major rewrite - support added for both udp echo and real icmp pings.
 
-=head2 Overridden Built-ins
+=head2 Object-oriented overrides for builtin operators
 
-Many of the Perl built-ins returning lists now have
+Many of the Perl builtins returning lists now have
 object-oriented overrides.  These are:
 
     File::stat
@@ -768,7 +816,7 @@ on the first call).
 Internal handling of hash keys has changed.  The old hashtable API is
 still fully supported, and will likely remain so.  The additions to the
 API allow passing keys as C<SV*>s, so that C<tied> hashes can be given
-real scalars as keys rather than plain strings (non-tied hashes still
+real scalars as keys rather than plain strings (nontied hashes still
 can only use strings as keys).  New extensions must use the new hash
 access functions and macros if they wish to use C<SV*> keys.  These
 additions also make it feasible to manipulate C<HE*>s (hash entries),
@@ -822,7 +870,7 @@ increasing order of desperation):
    (S) A severe warning (mandatory).
    (F) A fatal error (trappable).
    (P) An internal error you should never see (trappable).
-   (X) A very fatal error (non-trappable).
+   (X) A very fatal error (nontrappable).
    (A) An alien error message (not generated by Perl).
 
 =over
@@ -849,13 +897,22 @@ or a hash slice, such as
 
 =item Allocation too large: %lx
 
-(X) You can't allocate more than 64K on an MSDOS machine.
+(X) You can't allocate more than 64K on an MS-DOS machine.
 
 =item Allocation too large
 
 (F) You can't allocate more than 2^31+"small amount" bytes.
 
-=item Attempt to free non-existent shared string
+=item Applying %s to %s will act on scalar(%s)
+
+(W) The pattern match (//), substitution (s///), and translation (tr///)
+operators work on scalar values.  If you apply one of them to an array
+or a hash, it will convert the array or hash to a scalar value -- the
+length of an array, or the population info of a hash -- and then work on
+that scalar value.  This is probably not what you meant to do.  See
+L<perlfunc/grep> and L<perlfunc/map> for alternatives.
+
+=item Attempt to free nonexistent shared string
 
 (P) Perl maintains a reference counted internal table of strings to
 optimize the storage and access of hash keys and other strings.  This
@@ -868,38 +925,53 @@ that can no longer be found in the table.
 as an lvalue, which is pretty strange.  Perhaps you forgot to
 dereference it first.  See L<perlfunc/substr>.
 
-=item Unsupported function fork
-
-(F) Your version of executable does not support forking.
-
-Note that under some systems, like OS/2, there may be different flavors of
-Perl executables, some of which may support fork, some not. Try changing
-the name you call Perl by to C<perl_>, C<perl__>, and so on.
-
-=item Ill-formed logical name |%s| in prime_env_iter
-
-(W) A warning peculiar to VMS.  A logical name was encountered when preparing
-to iterate over %ENV which violates the syntactic rules governing logical
-names.  Since it cannot be translated normally, it is skipped, and will not
-appear in %ENV.  This may be a benign occurrence, as some software packages
-might directly modify logical name tables and introduce non-standard names,
-or it may indicate that a logical name table has been corrupted.
-
 =item Can't use bareword ("%s") as %s ref while "strict refs" in use
 
 (F) Only hard references are allowed by "strict refs".  Symbolic references
 are disallowed.  See L<perlref>.
 
+=item Cannot resolve method `%s' overloading `%s' in package `%s'
+
+(P) Internal error trying to resolve overloading specified by a method
+name (as opposed to a subroutine reference).
+
 =item Constant subroutine %s redefined
 
 (S) You redefined a subroutine which had previously been eligible for
+inlining.  See L<perlsub/"Constant Functions"for commentary and
+workarounds.
+
+=item Constant subroutine %s undefined
+
+(S) You undefined a subroutine which had previously been eligible for
 inlining.  See L<perlsub/"Constant Functions"> for commentary and
 workarounds.
+
+=item Copy method did not return a reference
+
+(F) The method which overloads "=" is buggy. See L<overload/Copy Constructor>.
 
 =item Died
 
 (F) You passed die() an empty string (the equivalent of C<die "">) or
 you called it with no args and both C<$@> and C<$_> were empty.
+
+=item Exiting pseudo-block via %s
+
+(W) You are exiting a rather special block construct (like a sort block or
+subroutine) by unconventional means, such as a goto, or a loop control
+statement.  See L<perlfunc/sort>.
+
+=item Illegal character %s (carriage return)
+
+(F) A carriage return character was found in the input.  This is an
+error, and not a warning, because carriage return characters can break
+multi-line strings, including here documents (e.g., C<print E<lt>E<lt>EOF;>).
+
+=item Illegal switch in PERL5OPT: %s
+
+(X) The PERL5OPT environment variable may only be used to set the
+following switches: B<-[DIMUdmw]>.
 
 =item Integer overflow in hex number
 
@@ -932,17 +1004,6 @@ supplied it an uninitialized value.  See L<perlform>.
 pointing outside the buffer.  This is difficult to imagine.
 The sole exception to this is that C<sysread()>ing past the buffer
 will extend the buffer and zero pad the new area.
-
-=item Stub found while resolving method `%s' overloading `%s' in package `%s'
-
-(P) Overloading resolution over @ISA tree may be broken by importing stubs.
-Stubs should never be implicitely created, but explicit calls to C<can>
-may break this.
-
-=item Cannot resolve method `%s' overloading `%s' in package `s'
-
-(P) Internal error trying to resolve overloading specified by a method
-name (as opposed to a subroutine reference).
 
 =item Out of memory!
 
@@ -1017,18 +1078,46 @@ assigning to it and when evaluating its argument, while C<@foo{&bar}> behaves
 like a list when you assign to it, and provides a list context to its
 subscript, which can do weird things if you're expecting only one subscript.
 
+=item Stub found while resolving method `%s' overloading `%s' in package `%s'
+
+(P) Overloading resolution over @ISA tree may be broken by importing stubs.
+Stubs should never be implicitely created, but explicit calls to C<can>
+may break this.
+
+=item Too late for "B<-T>" option
+
+(X) The #! line (or local equivalent) in a Perl script contains the
+B<-T> option, but Perl was not invoked with B<-T> in its argument
+list.  This is an error because, by the time Perl discovers a B<-T> in
+a script, it's too late to properly taint everything from the
+environment.  So Perl gives up.
+
 =item untie attempted while %d inner references still exist
 
 (W) A copy of the object returned from C<tie> (or C<tied>) was still
 valid when C<untie> was called.
 
-=item Value of %s construct can be "0"; test with defined()
+=item Unrecognized character %s
 
-(W) In a conditional expression, you used <HANDLE>, <*> (glob), or
-C<readdir> as a boolean value.  Each of these constructs can return a
-value of "0"; that would make the conditional expression false, which
-is probably not what you intended.  When using these constructs in
-conditional expressions, test their values with the C<defined> operator.
+(F) The Perl parser has no idea what to do with the specified character
+in your Perl script (or eval).  Perhaps you tried to run a compressed
+script, a binary program, or a directory as a Perl program.
+
+=item Unsupported function fork
+
+(F) Your version of executable does not support forking.
+
+Note that under some systems, like OS/2, there may be different flavors of
+Perl executables, some of which may support fork, some not. Try changing
+the name you call Perl by to C<perl_>, C<perl__>, and so on.
+
+=item Value of %s can be "0"; test with defined()
+
+(W) In a conditional expression, you used <HANDLE>, <*> (glob), C<each()>,
+or C<readdir()> as a boolean value.  Each of these constructs can return a
+value of "0"; that would make the conditional expression false, which is
+probably not what you intended.  When using these constructs in conditional
+expressions, test their values with the C<defined> operator.
 
 =item Variable "%s" may be unavailable
 
@@ -1071,13 +1160,22 @@ will I<never> share the given variable.
 This problem can usually be solved by making the inner subroutine
 anonymous, using the C<sub {}> syntax.  When inner anonymous subs that
 reference variables in outer subroutines are called or referenced,
-they are automatically re-bound to the current values of such
+they are automatically rebound to the current values of such
 variables.
 
 =item Warning: something's wrong
 
 (W) You passed warn() an empty string (the equivalent of C<warn "">) or
 you called it with no args and C<$_> was empty.
+
+=item Ill-formed logical name |%s| in prime_env_iter
+
+(W) A warning peculiar to VMS.  A logical name was encountered when preparing
+to iterate over %ENV which violates the syntactic rules governing logical
+names.  Since it cannot be translated normally, it is skipped, and will not
+appear in %ENV.  This may be a benign occurrence, as some software packages
+might directly modify logical name tables and introduce nonstandard names,
+or it may indicate that a logical name table has been corrupted.
 
 =item Got an error from DosAllocMem
 
@@ -1094,7 +1192,7 @@ or
 
     prefix1 prefix2
 
-with non-empty prefix1 and prefix2. If C<prefix1> is indeed a prefix of
+with nonempty prefix1 and prefix2. If C<prefix1> is indeed a prefix of
 a builtin library search path, prefix2 is substituted. The error may appear
 if components are not found, or are too long. See L<perlos2/"PERLLIB_PREFIX">.
 

@@ -265,9 +265,10 @@ struct context {
 /* "gimme" values */
 #define G_SCALAR	0
 #define G_ARRAY		1
+#define G_VOID		128	/* skip this bit when adding flags below */
 
 /* extra flags for perl_call_* routines */
 #define G_DISCARD	2	/* Call FREETMPS. */
 #define G_EVAL		4	/* Assume eval {} around subroutine call. */
 #define G_NOARGS	8	/* Don't construct a @_ array. */
-#define G_KEEPERR      16	/* Append errors to $@ rather than overwriting it */
+#define G_KEEPERR      16	/* Append errors to $@, don't overwrite it */

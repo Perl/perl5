@@ -557,19 +557,35 @@ SV *newRV_noinc _((SV *));
 
 #define SvSETMAGIC(x) if (SvSMAGICAL(x)) mg_set(x)
 
-#define SvSetSV(dst,src) if ((dst) != (src)) sv_setsv(dst,src)
-
-#define SvSetSV_nosteal(dst,src) \
+#define SvSetSV_and(dst,src,finally) \
+	    if ((dst) != (src)) {			\
+		sv_setsv(dst, src);			\
+		finally;				\
+	    }
+#define SvSetSV_nosteal_and(dst,src,finally) \
 	    if ((dst) != (src)) {			\
 		U32 tMpF = SvFLAGS(src) & SVs_TEMP;	\
 		SvTEMP_off(src);			\
 		sv_setsv(dst, src);			\
 		SvFLAGS(src) |= tMpF;			\
+		finally;				\
 	    }
+
+#define SvSetSV(dst,src) \
+		SvSetSV_and(dst,src,)
+#define SvSetSV_nosteal(dst,src) \
+		SvSetSV_nosteal_and(dst,src,)
+
+#define SvSetMagicSV(dst,src) \
+		SvSetSV_and(dst,src,SvSETMAGIC(dst))
+#define SvSetMagicSV_nosteal(dst,src) \
+		SvSetSV_nosteal_and(dst,src,SvSETMAGIC(dst))
 
 #define SvPEEK(sv) sv_peek(sv)
 
 #define SvIMMORTAL(sv) ((sv)==&sv_undef || (sv)==&sv_yes || (sv)==&sv_no)
+
+#define boolSV(b) ((b) ? &sv_yes : &sv_no)
 
 #define isGV(sv) (SvTYPE(sv) == SVt_PVGV)
 

@@ -66,7 +66,7 @@ authors
 
 =over
 
-=item Non-commercial Reproduction
+=item Noncommercial Reproduction
 
 =item Commercial Reproduction
 
@@ -224,13 +224,13 @@ MacPerl, Perl5-Porters, NTPerl, Perl-Packrats
 
 =item How can I hide the source for my Perl program?
 
-=item How can I compile my Perl program into byte-code or C?
+=item How can I compile my Perl program into byte code or C?
 
-=item How can I get '#!perl' to work on [MSDOS,NT,...]?
+=item How can I get '#!perl' to work on [MS-DOS,Windows NT,...]?
 
 =item Can I write useful perl programs on the command line?
 
-=item Why don't perl one-liners work on my DOS/Mac/VMS system?
+=item Why don't perl one-liners work on my MS-DOS/Macintosh/VMS system?
 
 =item Where can I learn about CGI or Web programming in Perl?
 
@@ -414,7 +414,7 @@ it?
 =item Why does passing a subroutine an undefined element in a hash create
 it?
 
-=item How can I make the Perl equivalent of a C structure/C++ class/hash 
+=item How can I make the Perl equivalent of a C structure/C++ class/hash
 or array of hashes or arrays?
 
 =item How can I use a reference as a hash key?
@@ -484,7 +484,7 @@ filehandles between subroutines?  How do I make an array of filehandles?
 
 =item What can't I just open(FH, ">file.lock")?
 
-=item I still don't get locking.  I just want to increment the number 
+=item I still don't get locking.  I just want to increment the number
 in the file.  How can I do this?
 
 =item How do I randomly update a binary file?
@@ -511,7 +511,7 @@ in the file.  How can I do this?
 
 =item How do I close a file descriptor by number?
 
-=item Why can't I use "C:\temp\foo" in DOS paths?  What doesn't
+=item Why can't I use "C:\temp\foo" in MS-DOS paths?  What doesn't
 `C:\temp\foo.exe` work?
 
 =item Why doesn't glob("*.*") get all the files?
@@ -532,7 +532,7 @@ protected files?  Isn't this a bug in Perl?
 =over
 
 =item How can I hope to use regular expressions without creating illegible
-and unmaintainable code?  
+and unmaintainable code?
 
 Comments Outside the Regexp, Comments Inside the Regexp, Different
 Delimiters
@@ -551,7 +551,7 @@ case on the RHS?
 
 =item How can I match a locale-smart version of C</[a-zA-Z]/>?
 
-=item How can I quote a variable to use in a regexp?  
+=item How can I quote a variable to use in a regexp?
 
 =item What is C</o> really for?
 
@@ -580,7 +580,7 @@ file?
 
 =item What's wrong with using grep or map in a void context?
 
-=item How can I match strings with multi-byte characters?
+=item How can I match strings with multibyte characters?
 
 =back
 
@@ -637,7 +637,7 @@ is in scope?
 
 =item Why doesn't "local($foo) = <FILE>;" work right?
 
-=item How do I redefine a built-in function, operator, or method?
+=item How do I redefine a builtin function, operator, or method?
 
 =item What's the difference between calling a function as &foo and foo()?
 
@@ -714,7 +714,7 @@ does the error message "Protocol not supported" mean?
 =item How can I call backticks without shell processing?
 
 =item Why can't my script read from STDIN after I gave it EOF (^D on Unix,
-^Z on MSDOS)?
+^Z on MS-DOS)?
 
 =item How can I convert my shell script to perl?
 
@@ -823,29 +823,37 @@ file on another machine?
 
 =over
 
-=item Compilation Option: Binary Compatibility With 5.003
+=item Compilation option: Binary compatibility with 5.003
+
+=item $PERL5OPT environment variable
+
+=item More precise warnings
 
 =item Subroutine arguments created only when they're modified
 
-=item Fixed Parsing of $$<digit>, &$<digit>, etc.
+=item Simple functions' C<AUTOLOAD> not looked up as method
 
-=item No Resetting of $. on Implicit Close
+=item Fixed parsing of $$<digit>, &$<digit>, etc.
 
-=item Changes to Tainting Checks
+=item No resetting of $. on implicit close
 
-=item New Opcode Module and Revised Safe Module
+=item C<wantarray> may return undef
 
-=item Embedding Improvements
+=item Changes to tainting checks
 
-=item Internal Change: FileHandle Class Based on IO::* Classes
+=item New Opcode module and revised Safe module
 
-=item Internal Change: PerlIO internal IO abstraction interface
+=item Embedding improvements
 
-=item New and Changed Built-in Variables
+=item Internal change: FileHandle class based on IO::* classes
+
+=item Internal change: PerlIO abstraction interface
+
+=item New and changed builtin variables
 
 $^E, $^H, $^M
 
-=item New and Changed Built-in Functions
+=item New and changed builtin functions
 
 delete on slices, flock, printf and sprintf, keys as an lvalue, my() in
 Control Structures, unpack() and pack(), use VERSION, use Module VERSION
@@ -853,36 +861,37 @@ LIST, prototype(FUNCTION), srand, $_ as Default, C<m//g> does not trigger a
 pos() reset on failure, C<m//x> ignores whitespace before ?*+{}, nested
 C<sub{}> closures work now, formats work right on changing lexicals
 
-=item New Built-in Methods
+=item New builtin methods
 
 isa(CLASS), can(METHOD), VERSION( [NEED] )
 
-=item TIEHANDLE Now Supported
+=item TIEHANDLE now supported
 
 TIEHANDLE classname, LIST, PRINT this, LIST, READ this LIST, READLINE this,
 GETC this, DESTROY this
 
-=item Malloc Enhancements
+=item Malloc enhancements
 
 -DDEBUGGING_MSTATS, -DEMERGENCY_SBRK, -DPACK_MALLOC, -DTWO_POT_OPTIMIZE
 
-=item Miscellaneous Efficiency Enhancements
+=item Miscellaneous efficiency enhancements
 
 =back
 
 =item Pragmata
 
-use blib, use blib 'dir', use locale, use ops, use vmsish
+use autouse MODULE => qw(sub1 sub2 sub3), use blib, use blib 'dir', use
+constant NAME => VALUE, use locale, use ops, use vmsish
 
 =item Modules
 
 =over
 
-=item Installation Directories
+=item Installation directories
+
+=item Module information summary
 
 =item Fcntl
-
-=item Module Information Summary
 
 =item IO
 
@@ -892,7 +901,7 @@ use blib, use blib 'dir', use locale, use ops, use vmsish
 
 =item Net::Ping
 
-=item Overridden Built-ins
+=item Object-oriented overrides for builtin operators
 
 =back
 
@@ -919,20 +928,24 @@ L<perlsec>
 
 "my" variable %s masks earlier declaration in same scope, %s argument is
 not a HASH element or slice, Allocation too large: %lx, Allocation too
-large, Attempt to free non-existent shared string, Attempt to use reference
-as lvalue in substr, Unsupported function fork, Ill-formed logical name
-|%s| in prime_env_iter, Can't use bareword ("%s") as %s ref while "strict
-refs" in use, Constant subroutine %s redefined, Died, Integer overflow in
-hex number, Integer overflow in octal number, Name "%s::%s" used only once:
-possible typo, Null picture in formline, Offset outside string, Stub found
-while resolving method `%s' overloading `%s' in package `%s', Cannot
-resolve method `%s' overloading `%s' in package `s', Out of memory!, Out of
-memory during request for %s, Possible attempt to put comments in qw()
-list, Possible attempt to separate words with commas, Scalar value @%s{%s}
-better written as $%s{%s}, untie attempted while %d inner references still
-exist, Value of %s construct can be "0"; test with defined(), Variable "%s"
-may be unavailable, Variable "%s" will not stay shared, Warning:
-something's wrong, Got an error from DosAllocMem, Malformed PERLLIB_PREFIX,
+large, Applying %s to %s will act on scalar(%s), Attempt to free
+nonexistent shared string, Attempt to use reference as lvalue in substr,
+Can't use bareword ("%s") as %s ref while "strict refs" in use, Cannot
+resolve method `%s' overloading `%s' in package `%s', Constant subroutine
+%s redefined, Constant subroutine %s undefined, Copy method did not return
+a reference, Died, Exiting pseudo-block via %s, Illegal character %s
+(carriage return), Illegal switch in PERL5OPT: %s, Integer overflow in hex
+number, Integer overflow in octal number, Name "%s::%s" used only once:
+possible typo, Null picture in formline, Offset outside string, Out of
+memory!, Out of memory during request for %s, Possible attempt to put
+comments in qw() list, Possible attempt to separate words with commas,
+Scalar value @%s{%s} better written as $%s{%s}, Stub found while resolving
+method `%s' overloading `%s' in package `%s', Too late for "B<-T>" option,
+untie attempted while %d inner references still exist, Unrecognized
+character %s, Unsupported function fork, Value of %s can be "0"; test with
+defined(), Variable "%s" may be unavailable, Variable "%s" will not stay
+shared, Warning: something's wrong, Ill-formed logical name |%s| in
+prime_env_iter, Got an error from DosAllocMem, Malformed PERLLIB_PREFIX,
 PERL_SH_DIR too long, Process terminated by SIG%s
 
 =item BUGS
@@ -1098,7 +1111,7 @@ i, m, s, x
 
 =item #! and quoting on non-Unix systems
 
-OS/2, DOS, Win95/NT, Macintosh
+OS/2, MS-DOS, Win95/NT, Macintosh
 
 =item Switches
 
@@ -1113,8 +1126,8 @@ B<-T>, B<-u>, B<-U>, B<-v>, B<-V>, B<-V:>I<name>, B<-w>, B<-x> I<directory>
 
 =item ENVIRONMENT
 
-HOME, LOGDIR, PATH, PERL5LIB, PERLLIB, PERL5DB, PERL_DEBUG_MSTATS,
-PERL_DESTRUCT_LEVEL
+HOME, LOGDIR, PATH, PERL5LIB, PERL5OPT, PERLLIB, PERL5DB,
+PERL_DEBUG_MSTATS, PERL_DESTRUCT_LEVEL
 
 =head2 perlfunc - Perl builtin functions
 
@@ -1179,9 +1192,9 @@ qx/STRING/, qw/STRING/, quotemeta EXPR, quotemeta, rand EXPR, rand, read
 FILEHANDLE,SCALAR,LENGTH,OFFSET, read FILEHANDLE,SCALAR,LENGTH, readdir
 DIRHANDLE, readlink EXPR, readlink, recv SOCKET,SCALAR,LEN,FLAGS, redo
 LABEL, redo, ref EXPR, ref, rename OLDNAME,NEWNAME, require EXPR, require,
-reset EXPR, reset, return LIST, reverse LIST, rewinddir DIRHANDLE, rindex
-STR,SUBSTR,POSITION, rindex STR,SUBSTR, rmdir FILENAME, rmdir, s///, scalar
-EXPR, seek FILEHANDLE,POSITION,WHENCE, seekdir DIRHANDLE,POS, select
+reset EXPR, reset, return EXPR, return, reverse LIST, rewinddir DIRHANDLE,
+rindex STR,SUBSTR,POSITION, rindex STR,SUBSTR, rmdir FILENAME, rmdir, s///,
+scalar EXPR, seek FILEHANDLE,POSITION,WHENCE, seekdir DIRHANDLE,POS, select
 FILEHANDLE, select, select RBITS,WBITS,EBITS,TIMEOUT, semctl
 ID,SEMNUM,CMD,ARG, semget KEY,NSEMS,FLAGS, semop KEY,OPSTRING, send
 SOCKET,MSG,FLAGS,TO, send SOCKET,MSG,FLAGS, setpgrp PID,PGRP, setpriority
@@ -1713,7 +1726,7 @@ more elaborate constructs
 
 isa(CLASS), can(METHOD), VERSION( [NEED] )
 
-=item Destructors	 
+=item Destructors
 
 =item WARNING
 
@@ -1866,7 +1879,7 @@ command, m expr, m package
 
 =item Debugger input/output
 
-Prompt, Multi-line commands, Stack backtrace, Listing, Frame listing
+Prompt, Multiline commands, Stack backtrace, Listing, Frame listing
 
 =item Debugging compile-time statements
 
@@ -2018,7 +2031,7 @@ Unclassified
 
 =item PREAMBLE
 
-B<Use C from Perl?>, B<Use a UNIX program from Perl?>, B<Use Perl from
+B<Use C from Perl?>, B<Use a Unix program from Perl?>, B<Use Perl from
 Perl?>, B<Use C from C?>, B<Use Perl from C?>
 
 =item ROADMAP
@@ -2228,13 +2241,13 @@ B<PerlIO_get_base(f)>, B<PerlIO_get_bufsiz(f)>
 
 =item What is an "IV"?
 
-=item Working with SV's
+=item Working with SVs
 
 =item What's Really Stored in an SV?
 
-=item Working with AV's
+=item Working with AVs
 
-=item Working with HV's
+=item Working with HVs
 
 =item Hash API Extensions
 
@@ -2248,7 +2261,7 @@ B<PerlIO_get_base(f)>, B<PerlIO_get_bufsiz(f)>
 
 =item Stashes and Globs
 
-=item Double-Typed SV's
+=item Double-Typed SVs
 
 =item Magic Variables
 
@@ -2304,27 +2317,28 @@ AvFILL, av_clear, av_extend, av_fetch, av_len, av_make, av_pop, av_push,
 av_shift, av_store, av_undef, av_unshift, CLASS, Copy, croak, CvSTASH,
 DBsingle, DBsub, DBtrace, dMARK, dORIGMARK, dowarn, dSP, dXSARGS, dXSI32,
 dXSI32, ENTER, EXTEND, FREETMPS, G_ARRAY, G_DISCARD, G_EVAL, GIMME,
-G_NOARGS, G_SCALAR, gv_fetchmeth, gv_fetchmethod, gv_stashpv, gv_stashsv,
-GvSV, HEf_SVKEY, HeHASH, HeKEY, HeKLEN, HePV, HeSVKEY, HeSVKEY_force,
-HeSVKEY_set, HeVAL, hv_clear, hv_delayfree_ent, hv_delete, hv_delete_ent,
-hv_exists, hv_exists_ent, hv_fetch, hv_fetch_ent, hv_free_ent, hv_iterinit,
-hv_iterkey, hv_iterkeysv, hv_iternext, hv_iternextsv, hv_iterval, hv_magic,
-HvNAME, hv_store, hv_store_ent, hv_undef, isALNUM, isALPHA, isDIGIT,
-isLOWER, isSPACE, isUPPER, items, ix, LEAVE, MARK, mg_clear, mg_copy,
-mg_find, mg_free, mg_get, mg_len, mg_magical, mg_set, Move, na, New, Newc,
-Newz, newAV, newHV, newRV_inc, newRV_noinc, newSV, newSViv, newSVnv,
-newSVpv, newSVrv, newSVsv, newXS, newXSproto, Nullav, Nullch, Nullcv,
-Nullhv, Nullsv, ORIGMARK, perl_alloc, perl_call_argv, perl_call_method,
-perl_call_pv, perl_call_sv, perl_construct, perl_destruct, perl_eval_sv,
-perl_free, perl_get_av, perl_get_cv, perl_get_hv, perl_get_sv, perl_parse,
-perl_require_pv, perl_run, POPi, POPl, POPp, POPn, POPs, PUSHMARK, PUSHi,
-PUSHn, PUSHp, PUSHs, PUTBACK, Renew, Renewc, RETVAL, safefree, safemalloc,
-saferealloc, savepv, savepvn, SAVETMPS, SP, SPAGAIN, ST, strEQ, strGE,
-strGT, strLE, strLT, strNE, strnEQ, strnNE, sv_2mortal, sv_bless, sv_catpv,
-sv_catpvn, sv_catsv, sv_cmp, sv_cmp, SvCUR, SvCUR_set, sv_dec, sv_dec,
-SvEND, sv_eq, SvGROW, sv_grow, sv_inc, SvIOK, SvIOK_off, SvIOK_on,
-SvIOK_only, SvIOK_only, SvIOKp, sv_isa, SvIV, sv_isobject, SvIVX, SvLEN,
-sv_len, sv_len, sv_magic, sv_mortalcopy, SvOK, sv_newmortal, sv_no, SvNIOK,
+GIMME_V, G_NOARGS, G_SCALAR, G_VOID, gv_fetchmeth, gv_fetchmethod,
+gv_stashpv, gv_stashsv, GvSV, HEf_SVKEY, HeHASH, HeKEY, HeKLEN, HePV,
+HeSVKEY, HeSVKEY_force, HeSVKEY_set, HeVAL, hv_clear, hv_delayfree_ent,
+hv_delete, hv_delete_ent, hv_exists, hv_exists_ent, hv_fetch, hv_fetch_ent,
+hv_free_ent, hv_iterinit, hv_iterkey, hv_iterkeysv, hv_iternext,
+hv_iternextsv, hv_iterval, hv_magic, HvNAME, hv_store, hv_store_ent,
+hv_undef, isALNUM, isALPHA, isDIGIT, isLOWER, isSPACE, isUPPER, items, ix,
+LEAVE, MARK, mg_clear, mg_copy, mg_find, mg_free, mg_get, mg_len,
+mg_magical, mg_set, Move, na, New, Newc, Newz, newAV, newHV, newRV_inc,
+newRV_noinc, newSV, newSViv, newSVnv, newSVpv, newSVrv, newSVsv, newXS,
+newXSproto, Nullav, Nullch, Nullcv, Nullhv, Nullsv, ORIGMARK, perl_alloc,
+perl_call_argv, perl_call_method, perl_call_pv, perl_call_sv,
+perl_construct, perl_destruct, perl_eval_sv, perl_free, perl_get_av,
+perl_get_cv, perl_get_hv, perl_get_sv, perl_parse, perl_require_pv,
+perl_run, POPi, POPl, POPp, POPn, POPs, PUSHMARK, PUSHi, PUSHn, PUSHp,
+PUSHs, PUTBACK, Renew, Renewc, RETVAL, safefree, safemalloc, saferealloc,
+savepv, savepvn, SAVETMPS, SP, SPAGAIN, ST, strEQ, strGE, strGT, strLE,
+strLT, strNE, strnEQ, strnNE, sv_2mortal, sv_bless, sv_catpv, sv_catpvn,
+sv_catsv, sv_cmp, sv_cmp, SvCUR, SvCUR_set, sv_dec, sv_dec, SvEND, sv_eq,
+SvGROW, sv_grow, sv_inc, SvIOK, SvIOK_off, SvIOK_on, SvIOK_only,
+SvIOK_only, SvIOKp, sv_isa, SvIV, sv_isobject, SvIVX, SvLEN, sv_len,
+sv_len, sv_magic, sv_mortalcopy, SvOK, sv_newmortal, sv_no, SvNIOK,
 SvNIOK_off, SvNIOKp, SvNOK, SvNOK_off, SvNOK_on, SvNOK_only, SvNOK_only,
 SvNOKp, SvNV, SvNVX, SvPOK, SvPOK_off, SvPOK_on, SvPOK_only, SvPOK_only,
 SvPOKp, SvPV, SvPVX, SvREFCNT, SvREFCNT_dec, SvREFCNT_inc, SvROK,
@@ -2355,6 +2369,8 @@ B<perl_call_sv>, B<perl_call_pv>, B<perl_call_method>, B<perl_call_argv>
 
 =over
 
+=item  G_VOID
+
 =item  G_SCALAR
 
 =item G_ARRAY
@@ -2363,11 +2379,11 @@ B<perl_call_sv>, B<perl_call_pv>, B<perl_call_method>, B<perl_call_argv>
 
 =item G_NOARGS
 
-=item G_EVAL	
+=item G_EVAL
 
 =item G_KEEPERR
 
-=item Determining the Context 
+=item Determining the Context
 
 =back
 
@@ -2399,7 +2415,7 @@ B<perl_call_sv>, B<perl_call_pv>, B<perl_call_method>, B<perl_call_argv>
 
 =item Using perl_call_method
 
-=item Using GIMME
+=item Using GIMME_V
 
 =item Using Perl to dispose of temporaries
 
@@ -2444,6 +2460,22 @@ callback
 =item BUGS
 
 =item AUTHOR
+
+=head2 constant - Perl pragma to declare constants
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item NOTES
+
+=item TECHNICAL NOTE
+
+=item BUGS
+
+=item AUTHOR
+
+=item COPYRIGHT
 
 =head2 diagnostics - Perl compiler pragma to force verbose warning
 diagnostics
@@ -2693,9 +2725,13 @@ new, debug
 
 =item Standard Exports
 
-timeit(COUNT, CODE), timethis, timethese, timediff, timestr
+timeit(COUNT, CODE), timethis ( COUNT, CODE, [ TITLE, [ STYLE ]] ),
+timethese ( COUNT, CODEHASHREF, [ STYLE ] ), timediff ( T1, T2 ), timestr (
+TIMEDIFF, [ STYLE, [ FORMAT ]] )
 
 =item Optional Exports
+
+clearcache ( COUNT ), clearallcache ( ), disablecache ( ), enablecache ( )
 
 =back
 
@@ -2716,6 +2752,271 @@ timeit(COUNT, CODE), timethis, timethese, timediff, timestr
 =item CONTENTS
 
 =item DESCRIPTION
+
+=item AUTHOR
+
+=head2 CGI - Simple Common Gateway Interface Class
+
+=item ABSTRACT
+
+=item INSTALLATION:
+
+=item DESCRIPTION
+
+=over
+
+=item CREATING A NEW QUERY OBJECT:
+
+=item CREATING A NEW QUERY OBJECT FROM AN INPUT FILE
+
+=item FETCHING A LIST OF KEYWORDS FROM THE QUERY:
+
+=item FETCHING THE NAMES OF ALL THE PARAMETERS PASSED TO YOUR SCRIPT:
+
+=item FETCHING THE VALUE OR VALUES OF A SINGLE NAMED PARAMETER:
+
+=item SETTING THE VALUE(S) OF A NAMED PARAMETER:
+
+=item APPENDING ADDITIONAL VALUES TO A NAMED PARAMETER:
+
+=item IMPORTING ALL PARAMETERS INTO A NAMESPACE:
+
+=item DELETING A PARAMETER COMPLETELY:
+
+=item DELETING ALL PARAMETERS:
+
+=item SAVING THE STATE OF THE FORM TO A FILE:
+
+=item CREATING A SELF-REFERENCING URL THAT PRESERVES STATE INFORMATION:
+
+=item COMPATIBILITY WITH CGI-LIB.PL
+
+=item CALLING CGI FUNCTIONS THAT TAKE MULTIPLE ARGUMENTS
+
+=item CREATING THE HTTP HEADER:
+
+=item GENERATING A REDIRECTION INSTRUCTION
+
+=item CREATING THE HTML HEADER:
+
+B<Parameters:>, 4, 5, 6..
+
+=item ENDING THE HTML DOCUMENT:
+
+=back
+
+=item CREATING FORMS:
+
+=over
+
+=item CREATING AN ISINDEX TAG
+
+=item STARTING AND ENDING A FORM
+
+B<application/x-www-form-urlencoded>, B<multipart/form-data>
+
+=item CREATING A TEXT FIELD
+
+B<Parameters>
+
+=item CREATING A BIG TEXT FIELD
+
+=item CREATING A PASSWORD FIELD
+
+=item CREATING A FILE UPLOAD FIELD
+
+B<Parameters>
+
+=item CREATING A POPUP MENU
+
+=item CREATING A SCROLLING LIST
+
+B<Parameters:>
+
+=item CREATING A GROUP OF RELATED CHECKBOXES
+
+B<Parameters:>
+
+=item CREATING A STANDALONE CHECKBOX
+
+B<Parameters:>
+
+=item CREATING A RADIO BUTTON GROUP
+
+B<Parameters:>
+
+=item CREATING A SUBMIT BUTTON 
+
+B<Parameters:>
+
+=item CREATING A RESET BUTTON
+
+=item CREATING A DEFAULT BUTTON
+
+=item CREATING A HIDDEN FIELD
+
+B<Parameters:>
+
+=item CREATING A CLICKABLE IMAGE BUTTON
+
+B<Parameters:>, 3.The third option (-align, optional) is an alignment type,
+and may be
+TOP, BOTTOM or MIDDLE
+
+=item CREATING A JAVASCRIPT ACTION BUTTON
+
+=back
+
+=item NETSCAPE COOKIES
+
+1. an expiration time, 2. a domain, 3. a path, 4. a "secure" flag,
+B<-name>, B<-value>, B<-path>, B<-domain>, B<-expires>, B<-secure>
+
+=item WORKING WITH NETSCAPE FRAMES
+
+1. Create a <Frameset> document, 2. Specify the destination for the
+document in the HTTP header, 3. Specify the destination for the document in
+the <FORM> tag
+
+=item DEBUGGING
+
+=over
+
+=item DUMPING OUT ALL THE NAME/VALUE PAIRS
+
+=back
+
+=item FETCHING ENVIRONMENT VARIABLES
+
+B<accept()>, B<raw_cookie()>, B<user_agent()>, B<path_info()>,
+B<path_translated()>, B<remote_host()>, B<script_name()>Return the script
+name as a partial URL, for self-refering
+scripts, B<referer()>, B<auth_type ()>, B<server_name ()>, B<virtual_host
+()>, B<server_software ()>, B<remote_user ()>, B<user_name ()>,
+B<request_method()>
+
+=item CREATING HTML ELEMENTS:
+
+=over
+
+=item PROVIDING ARGUMENTS TO HTML SHORTCUTS
+
+=item Generating new HTML tags
+
+=back
+
+=item IMPORTING CGI METHOD CALLS INTO YOUR NAME SPACE
+
+B<cgi>, B<form>, B<html2>, B<html3>, B<netscape>, B<shortcuts>,
+B<standard>, B<all>
+
+=item USING NPH SCRIPTS
+
+In the B<use> statementSimply add ":nph" to the list of symbols to be
+imported into your script:, By calling the B<nph()> method:, By using
+B<-nph> parameters in the B<header()> and B<redirect()>  statements:
+
+=item AUTHOR INFORMATION
+
+=item CREDITS
+
+Matt Heffron (heffron@falstaff.css.beckman.com), James Taylor
+(james.taylor@srs.gov), Scott Anguish <sanguish@digifix.com>, Mike Jewell
+(mlj3u@virginia.edu), Timothy Shimmin (tes@kbs.citri.edu.au), Joergen Haegg
+(jh@axis.se), Laurent Delfosse (delfosse@csgrad1.cs.wvu.edu), Richard
+Resnick (applepi1@aol.com), Craig Bishop (csb@barwonwater.vic.gov.au), Tony
+Curtis (tc@vcpc.univie.ac.at), Tim Bunce (Tim.Bunce@ig.co.uk), Tom
+Christiansen (tchrist@convex.com), Andreas Koenig
+(k@franz.ww.TU-Berlin.DE), Tim MacKenzie (Tim.MacKenzie@fulcrum.com.au),
+Kevin B. Hendricks (kbhend@dogwood.tyler.wm.edu), Stephen Dahmen
+(joyfire@inxpress.net), Ed Jordan (ed@fidalgo.net), David Alan Pisoni
+(david@cnation.com), ...and many many more..
+
+=item A COMPLETE EXAMPLE OF A SIMPLE FORM-BASED SCRIPT
+
+=item BUGS
+
+=item SEE ALSO
+
+=head2 CGI::Apache - Make things work with CGI.pm against Perl-Apache API
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item NOTE
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=head2 CGI::Carp, B<CGI::Carp> - CGI routines for writing to the HTTPD (or
+other) error log
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item REDIRECTING ERROR MESSAGES
+
+=item MAKING PERL ERRORS APPEAR IN THE BROWSER WINDOW
+
+=item CHANGE LOG
+
+=item AUTHORS
+
+=item SEE ALSO
+
+=head2 CGI::Fast - CGI Interface for Fast CGI
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item OTHER PIECES OF THE PUZZLE
+
+=item WRITING FASTCGI PERL SCRIPTS
+
+=item INSTALLING FASTCGI SCRIPTS
+
+=item USING FASTCGI SCRIPTS AS CGI SCRIPTS
+
+=item CAVEATS
+
+=item AUTHOR INFORMATION
+
+=item BUGS
+
+=item SEE ALSO
+
+=head2 CGI::Push - Simple Interface to Server Push
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item USING CGI::Push
+
+-last_page, -type, -delay, -cookie, -target, -expires
+
+=item INSTALLING CGI::Push SCRIPTS
+
+=item CAVEATS
+
+=item AUTHOR INFORMATION
+
+=item BUGS
+
+=item SEE ALSO
+
+=head2 CGI::Switch - Try more than one constructors and return the first
+object available
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item SEE ALSO
 
 =item AUTHOR
 
@@ -4066,6 +4367,27 @@ Constants
 Constants, Macros
 
 =item CREATION
+
+=head2 Pod::Html, Pod::HTML - module to convert pod files to HTML
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item ARGUMENTS
+
+help, htmlroot, infile, outfile, podroot, podpath, libpods, netscape,
+nonetscape, index, noindex, recurse, norecurse, title, verbose
+
+=item EXAMPLE
+
+=item AUTHOR
+
+=item BUGS
+
+=item SEE ALSO
+
+=item COPYRIGHT
 
 =head2 Pod::Text - convert POD data to formatted ASCII text
 

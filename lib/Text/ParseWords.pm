@@ -9,6 +9,8 @@ use Carp;
 @EXPORT = qw(shellwords quotewords);
 @EXPORT_OK = qw(old_shellwords);
 
+*AUTOLOAD = *AutoLoader::AUTOLOAD;
+
 =head1 NAME
 
 Text::ParseWords - parse text into an array of tokens

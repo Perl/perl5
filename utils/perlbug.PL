@@ -166,9 +166,14 @@ sub Query {
 	paraprint <<EOF;
 This program provides an easy way to create a message reporting a bug
 in perl, and e-mail it to $address.  It is *NOT* intended for
-sending test messages or simply verifying that perl works.  It is *ONLY*
-a means of reporting verifiable problems with perl, and any solutions to
-such problems, to the people who maintain perl.
+sending test messages or simply verifying that perl works, *NOR* is it
+intended for reporting bugs in third-party perl modules.  It is *ONLY*
+a means of reporting verifiable problems with the core perl distribution,
+and any solutions to such problems, to the people who maintain perl.
+
+If you're just looking for help with perl, try posting to the Usenet
+newsgroup comp.lang.perl.misc.  If you're looking for help with using
+perl with CGI, try posting to comp.infosystems.www.programming.cgi.
 
 EOF
 
@@ -471,11 +476,10 @@ EOF
 ---
 Environment for perl $]:
 EOF
-        for my $env (qw(PATH LD_LIBRARY_PATH
-		    PERL5LIB PERLLIB PERL5DB
-		    LC_ALL LC_COLLATE LC_CTYPE LC_MONETARY LC_NUMERIC LC_TIME
-		    LANG PERL_BADLANG
-		    SHELL HOME LOGDIR)) {
+        for my $env (qw(PATH LD_LIBRARY_PATH),
+		     sort grep { /^(?:PERL|LC_)/ } keys %ENV,
+		     qw(LANG PERL_BADLANG
+			SHELL HOME LOGDIR)) {
 	    print OUT "    $env",
                       exists $ENV{$env} ? "=$ENV{$env}" : ' (unset)',
 	              "\n";

@@ -54,7 +54,7 @@ items consistent: either use "=item *" for all of them, to produce bullets,
 or use "=item 1.", "=item 2.", etc., to produce numbered lists, or use
 "=item foo", "=item bar", etc., i.e., things that looks nothing like bullets
 or numbers. If you start with bullets or numbers, stick with them, as many
-formatters use the first "=item" type to decide how to format the list.  
+formatters use the first "=item" type to decide how to format the list.
 
 For, begin, and end let you include sections that are not interpreted
 as pod text, but passed directly to particular formatters. A formatter
@@ -63,12 +63,12 @@ completely ignored.  The directive "=for" specifies that the entire next
 paragraph is in the format indicated by the first word after
 "=for", like this:
 
- =for html <br> 
+ =for html <br>
   <p> This is a raw HTML paragraph </p>
 
 The paired commands "=begin" and "=end" work very similarly to "=for", but
 instead of only accepting a single paragraph, all text from "=begin" to a
-paragraph with a matching "=end" are treated as a particular format. 
+paragraph with a matching "=end" are treated as a particular format.
 
 Here are some examples of how to use these:
 
@@ -132,7 +132,7 @@ here and in commands:
     I<text>     italicize text, used for emphasis or variables
     B<text>     embolden text, used for switches and programs
     S<text>     text contains non-breaking spaces
-    C<code>	literal code 
+    C<code>	literal code
     L<name>     A link (cross reference) to name
 		    L<name>		manual page
 		    L<name/ident>	item in manual page

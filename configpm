@@ -70,8 +70,8 @@ print CONFIG "\n",
 print CONFIG "my \$summary = <<'!END!';\n";
 
 open(MYCONFIG,"<myconfig") || die "open myconfig failed: $!";
-1 while( ($_=<MYCONFIG>) !~ /^Summary of/);
-do { print CONFIG $_ } until ($_ = <MYCONFIG>) =~ /^\s*$/;
+1 while defined($_ = <MYCONFIG>) && !/^Summary of/;
+do { print CONFIG $_ } until !defined($_ = <MYCONFIG>) || /^\s*$/;
 close(MYCONFIG);
 
 print CONFIG "\n!END!\n", <<'EOT';

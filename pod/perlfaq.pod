@@ -91,7 +91,7 @@ Perl Porters.
 Copyright (c) 1997 Tom Christiansen and Nathan Torkington.
 All rights reserved.
 
-=head2 Non-commercial Reproduction
+=head2 Noncommercial Reproduction
 
 Permission is granted to distribute this document, in part or in full,
 via electronic means or printed copy providing that (1) that all credits

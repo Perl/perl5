@@ -30,13 +30,6 @@
 # include <sys/resource.h>
 #endif
 
-/* Put this after #includes because fork and vfork prototypes may
-   conflict.
-*/
-#ifndef HAS_VFORK
-#   define vfork fork
-#endif
-
 #if defined(HAS_SOCKET) && !defined(VMS) /* VMS handles sockets via vmsish.h */
 # include <sys/socket.h>
 # include <netdb.h>
@@ -89,6 +82,18 @@ extern int h_errno;
 #endif
 #ifdef I_SYS_FILE
 #include <sys/file.h>
+#endif
+
+/* Put this after #includes because fork and vfork prototypes may conflict. */
+#ifndef HAS_VFORK
+#   define vfork fork
+#endif
+
+/* Put this after #includes because <unistd.h> defines _XOPEN_VERSION. */
+#if _XOPEN_VERSION >= 4
+#   define Sock_size_t Size_t
+#else
+#   define Sock_size_t int
 #endif
 
 #if !defined(HAS_MKDIR) || !defined(HAS_RMDIR)
@@ -155,10 +160,17 @@ PP(pp_backtick)
     dSP; dTARGET;
     PerlIO *fp;
     char *tmps = POPp;
+    I32 gimme = GIMME_V;
+
     TAINT_PROPER("``");
     fp = my_popen(tmps, "r");
     if (fp) {
-	if (GIMME == G_SCALAR) {
+	if (gimme == G_VOID) {
+	    while (PerlIO_read(fp, buf, sizeof buf) > 0)
+		/*SUPPRESS 530*/
+		;
+	}
+	else if (gimme == G_SCALAR) {
 	    sv_setpv(TARG, "");	/* note that this preserves previous buffer */
 	    while (sv_gets(TARG, fp, SvCUR(TARG)) != Nullch)
 		/*SUPPRESS 530*/
@@ -188,7 +200,7 @@ PP(pp_backtick)
     }
     else {
 	STATUS_NATIVE_SET(-1);
-	if (GIMME == G_SCALAR)
+	if (gimme == G_SCALAR)
 	    RETPUSHUNDEF;
     }
 
@@ -320,7 +332,7 @@ PP(pp_close)
     else
 	gv = (GV*)POPs;
     EXTEND(SP, 1);
-    PUSHs( do_close(gv, TRUE) ? &sv_yes : &sv_no );
+    PUSHs(boolSV(do_close(gv, TRUE)));
     RETURN;
 }
 
@@ -463,7 +475,7 @@ PP(pp_tie)
     SV **mark = stack_base + ++*markstack_ptr;	/* reuse in entersub */
     I32 markoff = mark - stack_base - 1;
     char *methname;
-    bool oldmustcatch = mustcatch;
+    bool oldcatch = CATCH_GET;
 
     varsv = mark[0];
     if (SvTYPE(varsv) == SVt_PVHV)
@@ -483,8 +495,8 @@ PP(pp_tie)
     Zero(&myop, 1, BINOP);
     myop.op_last = (OP *) &myop;
     myop.op_next = Nullop;
-    myop.op_flags = OPf_KNOW|OPf_STACKED;
-    mustcatch = TRUE;
+    myop.op_flags = OPf_WANT_SCALAR | OPf_STACKED;
+    CATCH_SET(TRUE);
 
     ENTER;
     SAVESPTR(op);
@@ -499,7 +511,7 @@ PP(pp_tie)
         runops();
     SPAGAIN;
 
-    mustcatch = oldmustcatch;
+    CATCH_SET(oldcatch);
     sv = TOPs;
     if (sv_isobject(sv)) {
 	if (SvTYPE(varsv) == SVt_PVHV || SvTYPE(varsv) == SVt_PVAV) {
@@ -576,7 +588,7 @@ PP(pp_dbmopen)
     GV *gv;
     BINOP myop;
     SV *sv;
-    bool oldmustcatch = mustcatch;
+    bool oldcatch = CATCH_GET;
 
     hv = (HV*)POPs;
 
@@ -594,8 +606,8 @@ PP(pp_dbmopen)
     Zero(&myop, 1, BINOP);
     myop.op_last = (OP *) &myop;
     myop.op_next = Nullop;
-    myop.op_flags = OPf_KNOW|OPf_STACKED;
-    mustcatch = TRUE;
+    myop.op_flags = OPf_WANT_SCALAR | OPf_STACKED;
+    CATCH_SET(TRUE);
 
     ENTER;
     SAVESPTR(op);
@@ -638,7 +650,7 @@ PP(pp_dbmopen)
 	SPAGAIN;
     }
 
-    mustcatch = oldmustcatch;
+    CATCH_SET(oldcatch);
     if (sv_isobject(TOPs))
 	sv_magic((SV*)hv, TOPs, 'P', Nullch, 0);
     LEAVE;
@@ -843,15 +855,16 @@ PP(pp_getc)
 	gv = argvgv;
 
     if (SvMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q'))) {
+	I32 gimme = GIMME_V;
 	PUSHMARK(SP);
 	XPUSHs(mg->mg_obj);
 	PUTBACK;
 	ENTER;
-	perl_call_method("GETC", GIMME);
+	perl_call_method("GETC", gimme);
 	LEAVE;
 	SPAGAIN;
-	if (GIMME == G_SCALAR)
-	    SvSetSV_nosteal(TARG, TOPs);
+	if (gimme == G_SCALAR)
+	    SvSetMagicSV_nosteal(TARG, TOPs);
 	RETURN;
     }
     if (!gv || do_eof(gv)) /* make sure we have fp with something */
@@ -875,7 +888,7 @@ GV *gv;
 OP *retop;
 {
     register CONTEXT *cx;
-    I32 gimme = GIMME;
+    I32 gimme = GIMME_V;
     AV* padlist = CvPADLIST(cv);
     SV** svp = AvARRAY(padlist);
 
@@ -1334,7 +1347,7 @@ PP(pp_eof)
 	gv = last_in_gv;
     else
 	gv = last_in_gv = (GV*)POPs;
-    PUSHs(!gv || do_eof(gv) ? &sv_yes : &sv_no);
+    PUSHs(boolSV(!gv || do_eof(gv)));
     RETURN;
 }
 
@@ -1359,7 +1372,7 @@ PP(pp_seek)
     long offset = POPl;
 
     gv = last_in_gv = (GV*)POPs;
-    PUSHs( do_seek(gv, offset, whence) ? &sv_yes : &sv_no );
+    PUSHs(boolSV(do_seek(gv, offset, whence)));
     RETURN;
 }
 
@@ -1950,6 +1963,7 @@ PP(pp_stat)
 {
     dSP;
     GV *tmpgv;
+    I32 gimme;
     I32 max = 13;
 
     if (op->op_flags & OPf_REF) {
@@ -1991,17 +2005,15 @@ PP(pp_stat)
 	}
     }
 
-    if (GIMME != G_ARRAY) {
-	EXTEND(SP, 1);
-	if (max)
-	    RETPUSHYES;
-	else
-	    RETPUSHUNDEF;
+    gimme = GIMME_V;
+    if (gimme != G_ARRAY) {
+	if (gimme != G_VOID)
+	    XPUSHs(boolSV(max));
+	RETURN;
     }
     if (max) {
 	EXTEND(SP, max);
 	EXTEND_MORTAL(max);
-
 	PUSHs(sv_2mortal(newSViv((I32)statcache.st_dev)));
 	PUSHs(sv_2mortal(newSViv((I32)statcache.st_ino)));
 	PUSHs(sv_2mortal(newSViv((I32)statcache.st_mode)));

@@ -265,7 +265,7 @@ This example demonstrates an interface for the SDBM class.  This creates a
 	    $ref->FETCH(@_);
 	}
 	sub STORE {
-	    my $self = shift; 
+	    my $self = shift;
 	    if (defined $_[0]){
 		my $ref = $self->{'dbm'};
 		$ref->STORE(@_);
@@ -420,7 +420,7 @@ method where that data is located.
 
 	sub enter {
 		my $self = shift;
-	
+
 		# Don't try to guess if we should use %Bar::fizzle
 		# or %Foo::fizzle.  The object already knows which
 		# we should use, so just ask it.

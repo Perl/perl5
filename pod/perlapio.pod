@@ -7,16 +7,16 @@ perlapio - perl's IO abstraction interface.
     PerlIO *PerlIO_stdin(void);
     PerlIO *PerlIO_stdout(void);
     PerlIO *PerlIO_stderr(void);
-    
+
     PerlIO *PerlIO_open(const char *,const char *);
     int     PerlIO_close(PerlIO *);
 
     int     PerlIO_stdoutf(const char *,...)
     int     PerlIO_puts(PerlIO *,const char *);
     int     PerlIO_putc(PerlIO *,int);
-    int     PerlIO_write(PerlIO *,const void *,size_t); 
+    int     PerlIO_write(PerlIO *,const void *,size_t);
     int     PerlIO_printf(PerlIO *, const char *,...);
-    int     PerlIO_vprintf(PerlIO *, const char *, va_list); 
+    int     PerlIO_vprintf(PerlIO *, const char *, va_list);
     int     PerlIO_flush(PerlIO *);
 
     int     PerlIO_eof(PerlIO *);
@@ -25,7 +25,7 @@ perlapio - perl's IO abstraction interface.
 
     int     PerlIO_getc(PerlIO *);
     int     PerlIO_ungetc(PerlIO *,int);
-    int     PerlIO_read(PerlIO *,void *,size_t); 
+    int     PerlIO_read(PerlIO *,void *,size_t);
 
     int     PerlIO_fileno(PerlIO *);
     PerlIO *PerlIO_fdopen(int, const char *);
@@ -34,30 +34,30 @@ perlapio - perl's IO abstraction interface.
     FILE   *PerlIO_findFILE(PerlIO *);
     void    PerlIO_releaseFILE(PerlIO *,FILE *);
 
-    void    PerlIO_setlinebuf(PerlIO *); 
+    void    PerlIO_setlinebuf(PerlIO *);
 
     long    PerlIO_tell(PerlIO *);
     int     PerlIO_seek(PerlIO *,off_t,int);
-    int     PerlIO_getpos(PerlIO *,Fpos_t *) 
-    int     PerlIO_setpos(PerlIO *,Fpos_t *) 
+    int     PerlIO_getpos(PerlIO *,Fpos_t *)
+    int     PerlIO_setpos(PerlIO *,Fpos_t *)
     void    PerlIO_rewind(PerlIO *);
-     
-    int     PerlIO_has_base(PerlIO *); 
-    int     PerlIO_has_cntptr(PerlIO *); 
-    int     PerlIO_fast_gets(PerlIO *); 
-    int     PerlIO_canset_cnt(PerlIO *); 
 
-    char   *PerlIO_get_ptr(PerlIO *); 
-    int     PerlIO_get_cnt(PerlIO *); 
-    void    PerlIO_set_cnt(PerlIO *,int); 
-    void    PerlIO_set_ptrcnt(PerlIO *,char *,int); 
-    char   *PerlIO_get_base(PerlIO *); 
-    int     PerlIO_get_bufsiz(PerlIO *); 
+    int     PerlIO_has_base(PerlIO *);
+    int     PerlIO_has_cntptr(PerlIO *);
+    int     PerlIO_fast_gets(PerlIO *);
+    int     PerlIO_canset_cnt(PerlIO *);
+
+    char   *PerlIO_get_ptr(PerlIO *);
+    int     PerlIO_get_cnt(PerlIO *);
+    void    PerlIO_set_cnt(PerlIO *,int);
+    void    PerlIO_set_ptrcnt(PerlIO *,char *,int);
+    char   *PerlIO_get_base(PerlIO *);
+    int     PerlIO_get_bufsiz(PerlIO *);
 
 =head1 DESCRIPTION
 
 Perl's source code should use the above functions instead of those
-defined in ANSI C's I<stdio.h>,  I<perlio.h> will the C<#define> them to 
+defined in ANSI C's I<stdio.h>,  I<perlio.h> will the C<#define> them to
 the I/O mechanism selected at Configure time.
 
 The functions are modeled on those in I<stdio.h>, but parameter order
@@ -67,15 +67,15 @@ has been "tidied up a little".
 
 =item B<PerlIO *>
 
-This takes the place of FILE *. Unlike FILE * it should be treated as 
+This takes the place of FILE *. Unlike FILE * it should be treated as
 opaque (it is probably safe to assume it is a pointer to something).
 
 =item B<PerlIO_stdin()>, B<PerlIO_stdout()>, B<PerlIO_stderr()>
 
 Use these rather than C<stdin>, C<stdout>, C<stderr>. They are written
 to look like "function calls" rather than variables because this makes
-it easier to I<make them> function calls if platform cannot export data 
-to loaded modules, or if (say) different "threads" might have different 
+it easier to I<make them> function calls if platform cannot export data
+to loaded modules, or if (say) different "threads" might have different
 values.
 
 =item B<PerlIO_open(path, mode)>, B<PerlIO_fdopen(fd,mode)>
@@ -93,7 +93,7 @@ so it is (currently) legal to use C<printf(fmt,...)> in perl sources.
 
 =item B<PerlIO_read(f,buf,count)>, B<PerlIO_write(f,buf,count)>
 
-These correspond to fread() and fwrite(). Note that arguments 
+These correspond to fread() and fwrite(). Note that arguments
 are different, there is only one "count" and order has
 "file" first.
 
@@ -101,7 +101,7 @@ are different, there is only one "count" and order has
 
 =item B<PerlIO_puts(s,f)>, B<PerlIO_putc(c,f)>
 
-These correspond to fputs() and fputc(). 
+These correspond to fputs() and fputc().
 Note that arguments have been revised to have "file" first.
 
 =item B<PerlIO_ungetc(c,f)>
@@ -123,8 +123,8 @@ This corresponds to ferror().
 
 =item B<PerlIO_fileno(f)>
 
-This corresponds to fileno(), note that on some platforms, 
-the meaning of "fileno" may not match UNIX.
+This corresponds to fileno(), note that on some platforms,
+the meaning of "fileno" may not match Unix.
 
 =item B<PerlIO_clearerr(f)>
 
@@ -145,7 +145,7 @@ This corresponds to fseek().
 
 =item B<PerlIO_getpos(f,p)>, B<PerlIO_setpos(f,p)>
 
-These correspond to fgetpos() and fsetpos(). If platform does not 
+These correspond to fgetpos() and fsetpos(). If platform does not
 have the stdio calls then they are implemented in terms of PerlIO_tell()
 and PerlIO_seek().
 
@@ -159,14 +159,14 @@ in terms of PerlIO_seek() at some point.
 This corresponds to tmpfile(), i.e., returns an anonymous
 PerlIO which will automatically be deleted when closed.
 
-=back 
+=back
 
 =head2 Co-existence with stdio
 
 There is outline support for co-existence of PerlIO with stdio.
-Obviously if PerlIO is implemented in terms of stdio there is 
+Obviously if PerlIO is implemented in terms of stdio there is
 no problem. However if perlio is implemented on top of (say) sfio
-then mechanisms must exist to create a FILE * which can be passed 
+then mechanisms must exist to create a FILE * which can be passed
 to library code which is going to use stdio calls.
 
 =over 4
@@ -179,12 +179,12 @@ May need additional arguments, interface under review.
 =item B<PerlIO_exportFILE(f,flags)>
 
 Given an PerlIO * return a 'native' FILE * suitable for
-passing to code expecting to be compiled and linked with 
+passing to code expecting to be compiled and linked with
 ANSI C I<stdio.h>.
 
 The fact that such a FILE * has been 'exported' is recorded,
-and may affect future PerlIO operations on the original 
-PerlIO *. 
+and may affect future PerlIO operations on the original
+PerlIO *.
 
 =item B<PerlIO_findFILE(f)>
 
@@ -195,7 +195,7 @@ Place holder until interface is fully defined.
 
 Calling PerlIO_releaseFILE informs PerlIO that all use
 of FILE * is complete. It is removed from list of 'exported'
-FILE *s, and associated PerlIO * should revert to original 
+FILE *s, and associated PerlIO * should revert to original
 behaviour.
 
 =item B<PerlIO_setlinebuf(f)>
@@ -230,21 +230,21 @@ Return count of readable bytes in the buffer.
 
 =item B<PerlIO_canset_cnt(f)>
 
-Implementation can adjust its idea of number of 
+Implementation can adjust its idea of number of
 bytes in the buffer.
 
 =item B<PerlIO_fast_gets(f)>
 
-Implementation has all the interfaces required to 
+Implementation has all the interfaces required to
 allow perl's fast code to handle <FILE> mechanism.
 
-  PerlIO_fast_gets(f) = PerlIO_has_cntptr(f) && \ 
+  PerlIO_fast_gets(f) = PerlIO_has_cntptr(f) && \
                         PerlIO_canset_cnt(f) && \
                         `Can set pointer into buffer'
 
 =item B<PerlIO_set_ptrcnt(f,p,c)>
 
-Set pointer into buffer, and a count of bytes still in the 
+Set pointer into buffer, and a count of bytes still in the
 buffer. Should be used only to set
 pointer to within range implied by previous calls
 to C<PerlIO_get_ptr> and C<PerlIO_get_cnt>.
@@ -255,7 +255,7 @@ Obscure - set count of bytes in the buffer. Deprecated.
 Currently used in only doio.c to force count < -1 to -1.
 Perhaps should be PerlIO_set_empty or similar.
 This call may actually do nothing if "count" is deduced from pointer
-and a "limit". 
+and a "limit".
 
 =item B<PerlIO_has_base(f)>
 
@@ -271,4 +271,4 @@ Return I<start> of buffer.
 
 Return I<total size> of buffer.
 
-=back 
+=back

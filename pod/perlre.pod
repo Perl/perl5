@@ -23,18 +23,18 @@ Do case-insensitive pattern matching.
 If C<use locale> is in effect, the case map is taken from the current
 locale.  See L<perllocale>.
 
-=item m   
+=item m
 
 Treat string as multiple lines.  That is, change "^" and "$" from matching
 at only the very start or end of the string to the start or end of any
 line anywhere within the string,
 
-=item s   
+=item s
 
 Treat string as single line.  That is, change "." to match any character
 whatsoever, even a newline, which it normally would not match.
 
-=item x   
+=item x
 
 Extend your pattern's legibility by permitting whitespace and comments.
 
@@ -49,7 +49,7 @@ The C</x> modifier itself needs a little more explanation.  It tells
 the regular expression parser to ignore whitespace that is neither
 backslashed nor within a character class.  You can use this to break up
 your regular expression into (slightly) more readable parts.  The C<#>
-character is also treated as a meta-character introducing a comment,
+character is also treated as a metacharacter introducing a comment,
 just as in ordinary Perl code.  This also means that if you want real
 whitespace or C<#> characters in the pattern that you'll have to either
 escape them or encode them using octal or hex escapes.  Taken together,
@@ -67,7 +67,7 @@ See L<Version 8 Regular Expressions> for details.
 In particular the following metacharacters have their standard I<egrep>-ish
 meanings:
 
-    \	Quote the next meta-character
+    \	Quote the next metacharacter
     ^	Match the beginning of the line
     .	Match any character (except newline)
     $	Match the end of the line (or before newline at the end)
@@ -80,13 +80,13 @@ beginning of the string, the "$" character at only the end (or before the
 newline at the end) and Perl does certain optimizations with the
 assumption that the string contains only one line.  Embedded newlines
 will not be matched by "^" or "$".  You may, however, wish to treat a
-string as a multi-line buffer, such that the "^" will match after any
+string as a multiline buffer, such that the "^" will match after any
 newline within the string, and "$" will match before any newline.  At the
 cost of a little more overhead, you can do this by using the /m modifier
 on the pattern match operator.  (Older programs did this by setting C<$*>,
 but this practice is now deprecated.)
 
-To facilitate multi-line substitutions, the "." character never matches a
+To facilitate multiline substitutions, the "." character never matches a
 newline unless you use the C</s> modifier, which in effect tells Perl to pretend
 the string is a single line--even if it isn't.  The C</s> modifier also
 overrides the setting of C<$*>, in case you have some (badly behaved) older
@@ -106,13 +106,11 @@ as a regular character.)  The "*" modifier is equivalent to C<{0,}>, the "+"
 modifier to C<{1,}>, and the "?" modifier to C<{0,1}>.  n and m are limited
 to integral values less than 65536.
 
-By default, a quantified sub-pattern is "greedy", that is, it will match as
-many times as possible without causing the rest of the pattern not to match.  
-The standard quantifiers are all "greedy", in that they match as many
-occurrences as possible (given a particular starting location) without
-causing the pattern to fail.  If you want it to match the minimum number
-of times possible, follow the quantifier with a "?" after any of them.
-Note that the meanings don't change, just the "gravity":
+By default, a quantified subpattern is "greedy", that is, it will match as
+many times as possible (given a particular starting location) while still
+allowing the rest of the pattern to match.  If you want it to match the
+minimum number of times possible, follow the quantifier with a "?".  Note
+that the meanings don't change, just the "greediness":
 
     *?	   Match 0 or more times
     +?	   Match 1 or more times
@@ -176,7 +174,7 @@ just like "^" and "$" except that they won't match multiple times when the
 C</m> modifier is used, while "^" and "$" will match at every internal line
 boundary.  To match the actual end of the string, not ignoring newline,
 you can use C<\Z(?!\n)>.  The C<\G> assertion can be used to mix global
-matches (using C<m//g>) and non-global ones, as described in 
+matches (using C<m//g>) and non-global ones, as described in
 L<perlop/"Regexp Quote-Like Operators">.
 It is also useful when writing C<lex>-like scanners, when you have several
 regexps which you want to match against consequent substrings of your
@@ -230,14 +228,14 @@ You will note that all backslashed metacharacters in Perl are
 alphanumeric, such as C<\b>, C<\w>, C<\n>.  Unlike some other regular expression
 languages, there are no backslashed symbols that aren't alphanumeric.
 So anything that looks like \\, \(, \), \E<lt>, \E<gt>, \{, or \} is always
-interpreted as a literal character, not a meta-character.  This makes it
+interpreted as a literal character, not a metacharacter.  This makes it
 simple to quote a string that you want to use for a pattern but that
 you are afraid might contain metacharacters.  Quote simply all the
 non-alphanumeric characters:
 
     $pattern =~ s/(\W)/\\$1/g;
 
-You can also use the built-in quotemeta() function to do this.
+You can also use the builtin quotemeta() function to do this.
 An even easier way to quote metacharacters right in the match operator
 is to say
 
@@ -420,7 +418,7 @@ definition might succeed against a particular string.  And if there are
 multiple ways it might succeed, you need to understand backtracking to know which variety of success you will achieve.
 
 When using lookahead assertions and negations, this can all get even
-tricker.  Imagine you'd like to find a sequence of non-digits not 
+tricker.  Imagine you'd like to find a sequence of non-digits not
 followed by "123".  You might try to write that as
 
 	$_ = "ABC123";
@@ -454,14 +452,14 @@ backtracking, whereas test 1 will not.  What's happening is
 that you've asked "Is it true that at the start of $x, following 0 or more
 non-digits, you have something that's not 123?"  If the pattern matcher had
 let C<\D*> expand to "ABC", this would have caused the whole pattern to
-fail.  
+fail.
 The search engine will initially match C<\D*> with "ABC".  Then it will
 try to match C<(?!123> with "123" which, of course, fails.  But because
 a quantifier (C<\D*>) has been used in the regular expression, the
 search engine can backtrack and retry the match differently
-in the hope of matching the complete regular expression.  
+in the hope of matching the complete regular expression.
 
-Well now, 
+Well now,
 the pattern really, I<really> wants to succeed, so it uses the
 standard regexp back-off-and-retry and lets C<\D*> expand to just "AB" this
 time.  Now there's indeed something following "AB" that is not
@@ -503,7 +501,7 @@ it would take literally forever--or until you ran out of stack space.
 In case you're not familiar with the "regular" Version 8 regexp
 routines, here are the pattern-matching rules not described above.
 
-Any single character matches itself, unless it is a I<meta-character>
+Any single character matches itself, unless it is a I<metacharacter>
 with a special meaning described here or above.  You can cause
 characters which normally function as metacharacters to be interpreted
 literally by prefixing them with a "\" (e.g., "\." matches a ".", not any
@@ -518,13 +516,13 @@ in the list.  Within a list, the "-" character is used to specify a
 range, so that C<a-z> represents all the characters between "a" and "z",
 inclusive.
 
-Characters may be specified using a meta-character syntax much like that
+Characters may be specified using a metacharacter syntax much like that
 used in C: "\n" matches a newline, "\t" a tab, "\r" a carriage return,
 "\f" a form feed, etc.  More generally, \I<nnn>, where I<nnn> is a string
 of octal digits, matches the character whose ASCII value is I<nnn>.
 Similarly, \xI<nn>, where I<nn> are hexadecimal digits, matches the
 character whose ASCII value is I<nn>. The expression \cI<x> matches the
-ASCII character control-I<x>.  Finally, the "." meta-character matches any
+ASCII character control-I<x>.  Finally, the "." metacharacter matches any
 character except "\n" (unless you use C</s>).
 
 You can specify a series of alternatives for a pattern using "|" to
@@ -539,14 +537,14 @@ start and end.  Note however that "|" is interpreted as a literal with
 square brackets, so if you write C<[fee|fie|foe]> you're really only
 matching C<[feio|]>.
 
-Within a pattern, you may designate sub-patterns for later reference by
+Within a pattern, you may designate subpatterns for later reference by
 enclosing them in parentheses, and you may refer back to the I<n>th
-sub-pattern later in the pattern using the meta-character \I<n>.
-Sub-patterns are numbered based on the left to right order of their
+subpattern later in the pattern using the metacharacter \I<n>.
+Subpatterns are numbered based on the left to right order of their
 opening parenthesis.  Note that a backreference matches whatever
-actually matched the sub-pattern in the string being examined, not the
-rules for that sub-pattern.  Therefore, C<(0|0x)\d*\s\1\d*> will
-match "0x1234 0x4321",but not "0x1234 01234", because sub-pattern 1
+actually matched the subpattern in the string being examined, not the
+rules for that subpattern.  Therefore, C<(0|0x)\d*\s\1\d*> will
+match "0x1234 0x4321",but not "0x1234 01234", because subpattern 1
 actually matched "0x", even though the rule C<0|0x> could
 potentially match the leading 0 in the second number.
 

@@ -145,12 +145,12 @@ type "filehandle", or anything else.  Perl is a contextually polymorphic
 language whose scalars can be strings, numbers, or references (which
 includes objects).  While strings and numbers are considered pretty
 much the same thing for nearly all purposes, references are strongly-typed
-uncastable pointers with built-in reference-counting and destructor
+uncastable pointers with builtin reference-counting and destructor
 invocation.
 
 A scalar value is interpreted as TRUE in the Boolean sense if it is not
 the null string or the number 0 (or its string equivalent, "0").  The
-Boolean context is just a special kind of scalar context.  
+Boolean context is just a special kind of scalar context.
 
 There are actually two varieties of null scalars: defined and
 undefined.  Undefined null scalars are returned when there is no real
@@ -160,14 +160,14 @@ array.  An undefined null scalar may become defined the first time you
 use it as if it were defined, but prior to that you can use the
 defined() operator to determine whether the value is defined or not.
 
-To find out whether a given string is a valid non-zero number, it's usually
+To find out whether a given string is a valid nonzero number, it's usually
 enough to test it against both numeric 0 and also lexical "0" (although
 this will cause B<-w> noises).  That's because strings that aren't
 numbers count as 0, just as they do in B<awk>:
 
     if ($str == 0 && $str ne "0")  {
 	warn "That doesn't look like a number";
-    } 
+    }
 
 That's usually preferable because otherwise you won't treat IEEE notations
 like C<NaN> or C<Infinity> properly.  At other times you might prefer to
@@ -176,9 +176,9 @@ for details on regular expressions.
 
     warn "has nondigits"	if     /\D/;
     warn "not a whole number"   unless /^\d+$/;
-    warn "not an integer"       unless /^[+-]?\d+$/     
-    warn "not a decimal number" unless /^[+-]?\d+\.?\d*$/ 
-    warn "not a C float" 
+    warn "not an integer"       unless /^[+-]?\d+$/
+    warn "not a decimal number" unless /^[+-]?\d+\.?\d*$/
+    warn "not a C float"
 	unless /^([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?$/;
 
 The length of an array is a scalar value.  You may find the length of
@@ -310,7 +310,7 @@ say
 
 then any bareword that would NOT be interpreted as a subroutine call
 produces a compile-time error instead.  The restriction lasts to the
-end of the enclosing block.  An inner block may countermand this 
+end of the enclosing block.  An inner block may countermand this
 by saying C<no strict 'subs'>.
 
 Array variables are interpolated into double-quoted strings by joining all
@@ -346,7 +346,7 @@ identifier, which is valid, and matches the first empty line.)  The
 terminating string must appear by itself (unquoted and with no
 surrounding whitespace) on the terminating line.
 
-	print <<EOF;	
+	print <<EOF;
     The price is $Price.
     EOF
 
@@ -369,11 +369,11 @@ surrounding whitespace) on the terminating line.
     Here's a line
     or two.
     THIS
-    and here another.
+    and here's another.
     THAT
 
-Just don't forget that you have to put a semicolon on the end 
-to finish the statement, as Perl doesn't know you're not going to 
+Just don't forget that you have to put a semicolon on the end
+to finish the statement, as Perl doesn't know you're not going to
 try to do this:
 
 	print <<ABC
@@ -401,12 +401,12 @@ assigns the entire list value to array foo, but
 
 assigns the value of variable bar to variable foo.  Note that the value
 of an actual array in a scalar context is the length of the array; the
-following assigns to $foo the value 3:
+following assigns the value 3 to $foo:
 
     @foo = ('cc', '-E', $bar);
     $foo = @foo;		# $foo gets 3
 
-You may have an optional comma before the closing parenthesis of an
+You may have an optional comma before the closing parenthesis of a
 list literal, so that you can say:
 
     @foo = (
@@ -434,7 +434,7 @@ interpolating an array with no elements is the same as if no
 array had been interpolated at that point.
 
 A list value may also be subscripted like a normal array.  You must
-put the list in parentheses to avoid ambiguity.  Examples:
+put the list in parentheses to avoid ambiguity.  For example:
 
     # Stat returns list value.
     $time = (stat($file))[8];
@@ -514,7 +514,7 @@ or for initializing hash references to be used as records:
 
 or for using call-by-named-parameter to complicated functions:
 
-   $field = $query->radio_group( 
+   $field = $query->radio_group(
 	       name      => 'group_name',
                values    => ['eenie','meenie','minie'],
                default   => 'meenie',
@@ -530,7 +530,7 @@ of how to arrange for an output ordering.
 
 Perl uses an internal type called a I<typeglob> to hold an entire
 symbol table entry.  The type prefix of a typeglob is a C<*>, because
-it represents all types.  This used to be the preferred way to 
+it represents all types.  This used to be the preferred way to
 pass arrays and hashes by reference into a function, but now that
 we have real references, this is seldom needed.  It also used to be the
 preferred way to pass filehandles into a function, but now

@@ -46,7 +46,7 @@ B<Definitions for the locales which you use must be installed>.  You, or
 your system administrator, must make sure that this is the case. The
 available locales, the location in which they are kept, and the manner
 in which they are installed, vary from system to system.  Some systems
-provide only a few, hard-wired, locales, and do not allow more to be
+provide only a few, hardwired, locales, and do not allow more to be
 added; others allow you to add "canned" locales provided by the system
 supplier; still others allow you or the system administrator to define
 and add arbitrary locales.  (You may have to ask your supplier to
@@ -182,7 +182,7 @@ As the example shows, if the second argument is an empty string, the
 category's locale is returned to the default specified by the
 corresponding environment variables.  Generally, this results in a
 return to the default which was in force when Perl started up: changes
-to the environment made by the application after start-up may or may not
+to the environment made by the application after startup may or may not
 be noticed, depending on the implementation of your system's C library.
 
 If the second argument does not correspond to a valid locale, the locale
@@ -584,13 +584,13 @@ True/false results are never tainted.
 
 Three examples illustrate locale-dependent tainting.
 The first program, which ignores its locale, won't run: a value taken
-directly from the command-line may not be used to name an output file
+directly from the command line may not be used to name an output file
 when taint checks are enabled.
 
         #/usr/local/bin/perl -T
         # Run with taint checking
 
-        # Command-line sanity check omitted...
+        # Command line sanity check omitted...
         $tainted_output_file = shift;
 
         open(F, ">$tainted_output_file")
@@ -598,7 +598,7 @@ when taint checks are enabled.
 
 The program can be made to run by "laundering" the tainted value through
 a regular expression: the second example - which still ignores locale
-information - runs, creating the file named on its command-line
+information - runs, creating the file named on its command line
 if it can.
 
         #/usr/local/bin/perl -T
@@ -632,7 +632,7 @@ of a match involving C<\w> when C<use locale> is in effect.
 =item PERL_BADLANG
 
 A string that can suppress Perl's warning about failed locale settings
-at start-up.  Failure can occur if the locale support in the operating
+at startup.  Failure can occur if the locale support in the operating
 system is lacking (broken) is some way - or if you mistyped the name of
 a locale when you set up your environment.  If this environment variable
 is absent, or has a value which does not evaluate to integer zero - that

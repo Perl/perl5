@@ -264,17 +264,18 @@ char* name;
 	if (strEQ(name,"import"))
 	    gv = (GV*)&sv_yes;
 	else
-	    gv = gv_autoload(stash, name, nend - name);
+	    gv = gv_autoload4(stash, name, nend - name, TRUE);
     }
 
     return gv;
 }
 
 GV*
-gv_autoload(stash, name, len)
+gv_autoload4(stash, name, len, method)
 HV* stash;
 char* name;
 STRLEN len;
+I32 method;
 {
     static char autoload[] = "AUTOLOAD";
     static STRLEN autolen = 8;
@@ -286,9 +287,16 @@ STRLEN len;
 
     if (len == autolen && strnEQ(name, autoload, autolen))
 	return Nullgv;
-    if (!(gv = gv_fetchmeth(stash, autoload, autolen, 0)))
-	return Nullgv;
-    cv = GvCV(gv);
+    if (method) {
+	if (!(gv = gv_fetchmeth(stash, autoload, autolen, FALSE)))
+	    return Nullgv;
+	cv = GvCV(gv);
+    }
+    else {
+	GV** gvp = (GV**)hv_fetch(stash, autoload, autolen, FALSE);
+	if (!gvp || !(gv = *gvp) || !(cv = GvCVu(gv)))
+	    return Nullgv;
+    }
 
     /*
      * Given &FOO::AUTOLOAD, set $FOO::AUTOLOAD to desired function name.
@@ -1282,14 +1290,14 @@ int flags;
     dSP;
     BINOP myop;
     SV* res;
-    bool oldmustcatch = mustcatch;
+    bool oldcatch = CATCH_GET;
 
+    CATCH_SET(TRUE);
     Zero(&myop, 1, BINOP);
     myop.op_last = (OP *) &myop;
     myop.op_next = Nullop;
-    myop.op_flags = OPf_KNOW|OPf_STACKED;
+    myop.op_flags = OPf_WANT_SCALAR | OPf_STACKED;
 
-    mustcatch = TRUE;
     ENTER;
     SAVESPTR(op);
     op = (OP *) &myop;
@@ -1301,7 +1309,7 @@ int flags;
     EXTEND(sp, notfound + 5);
     PUSHs(lr>0? right: left);
     PUSHs(lr>0? left: right);
-    PUSHs( assign ? &sv_undef : (lr>0? &sv_yes: &sv_no));
+    PUSHs( assign ? &sv_undef : boolSV(lr>0) );
     if (notfound) {
       PUSHs( sv_2mortal(newSVpv((char *)AMG_names[method + assignshift],0)) );
     }
@@ -1315,7 +1323,7 @@ int flags;
 
     res=POPs;
     PUTBACK;
-    mustcatch = oldmustcatch;
+    CATCH_SET(oldcatch);
 
     if (postpr) {
       int ans;
@@ -1344,7 +1352,7 @@ int flags;
       case not_amg:
 	ans=!SvOK(res); break;
       }
-      return ans? &sv_yes: &sv_no;
+      return boolSV(ans);
     } else if (method==copy_amg) {
       if (!SvROK(res)) {
 	croak("Copy method did not return a reference");

@@ -41,7 +41,7 @@ package's symbol table.  All other symbols are kept in package C<main>,
 including all of the punctuation variables like $_.  In addition, the
 identifiers STDIN, STDOUT, STDERR, ARGV, ARGVOUT, ENV, INC, and SIG are
 forced to be in package C<main>, even when used for other purposes than
-their built-in one.  Note also that, if you have a package called C<m>,
+their builtin one.  Note also that, if you have a package called C<m>,
 C<s>, or C<y>, then you can't use the qualified form of an identifier
 because it will be interpreted instead as a pattern match, a substitution,
 or a translation.
@@ -77,8 +77,8 @@ use the C<*name> typeglob notation.  In fact, the following have the same
 effect, though the first is more efficient because it does the symbol
 table lookups at compile time:
 
-    local(*main::foo) = *main::bar; local($main::{'foo'}) =
-    $main::{'bar'};
+    local(*main::foo) = *main::bar;
+    local($main::{'foo'}) = $main::{'bar'};
 
 You can use this to print out all the variables in a package, for
 instance.  Here is F<dumpvar.pl> from the Perl library:
@@ -328,7 +328,7 @@ the rest of the current file.  This will not work if you use C<require>
 instead of C<use>.  With require you can get into this problem:
 
     require Cwd;		# make Cwd:: accessible
-    $here = Cwd::getcwd();	
+    $here = Cwd::getcwd();
 
     use Cwd;			# import names from Cwd::
     $here = getcwd();
@@ -381,7 +381,7 @@ F<.pl> files will all eventually be converted into standard modules, and
 the F<.ph> files made by B<h2ph> will probably end up as extension modules
 made by B<h2xs>.  (Some F<.ph> values may already be available through the
 POSIX module.)  The B<pl2pm> file in the distribution may help in your
-conversion, but it's just a mechanical process and therefore far from 
+conversion, but it's just a mechanical process and therefore far from
 bulletproof.
 
 =head2 Pragmatic Modules
@@ -398,7 +398,7 @@ which lasts until the end of that BLOCK.
 
 Unlike the pragmas that effect the C<$^H> hints variable, the C<use
 vars> and C<use subs> declarations are not BLOCK-scoped.  They allow
-you to pre-declare a variables or subroutines within a particular
+you to predeclare a variables or subroutines within a particular
 I<file> rather than just a block.  Such declarations are effective
 for the entire file for which they were declared.  You cannot rescind
 them with C<no vars> or C<no subs>.
@@ -430,7 +430,7 @@ manipulate @INC at compile time
 
 =item locale
 
-use or ignore current locale for built-in operations (see L<perllocale>)
+use or ignore current locale for builtin operations (see L<perllocale>)
 
 =item ops
 
@@ -450,7 +450,7 @@ restrict unsafe constructs
 
 =item subs
 
-pre-declare sub names
+predeclare sub names
 
 =item vmsish
 
@@ -458,7 +458,7 @@ adopt certain VMS-specific behaviors
 
 =item vars
 
-pre-declare global variable names
+predeclare global variable names
 
 =back
 
@@ -556,7 +556,7 @@ determine libraries to use and how to use them
 
 =item ExtUtils::MM_OS2
 
-methods to override UN*X behaviour in ExtUtils::MakeMaker
+methods to override Unix behaviour in ExtUtils::MakeMaker
 
 =item ExtUtils::MM_Unix
 
@@ -564,7 +564,7 @@ methods used by ExtUtils::MakeMaker
 
 =item ExtUtils::MM_VMS
 
-methods to override UN*X behaviour in ExtUtils::MakeMaker
+methods to override Unix behaviour in ExtUtils::MakeMaker
 
 =item ExtUtils::MakeMaker
 
@@ -616,7 +616,7 @@ create or remove a series of directories
 
 =item File::stat
 
-by-name interface to Perl's built-in stat() functions
+by-name interface to Perl's builtin stat() functions
 
 =item FileCache
 
@@ -704,19 +704,19 @@ Hello, anybody home?
 
 =item Net::hostent
 
-by-name interface to Perl's built-in gethost*() functions
+by-name interface to Perl's builtin gethost*() functions
 
 =item Net::netent
 
-by-name interface to Perl's built-in getnet*() functions
+by-name interface to Perl's builtin getnet*() functions
 
 =item Net::protoent
 
-by-name interface to Perl's built-in getproto*() functions
+by-name interface to Perl's builtin getproto*() functions
 
 =item Net::servent
 
-by-name interface to Perl's built-in getserv*() functions
+by-name interface to Perl's builtin getserv*() functions
 
 =item Opcode
 
@@ -768,7 +768,7 @@ try every conceivable way to get hostname
 
 =item Sys::Syslog
 
-interface to the UNIX syslog(3) calls
+interface to the Unix syslog(3) calls
 
 =item Term::Cap
 
@@ -800,7 +800,7 @@ implementation of the Soundex Algorithm as described by Knuth
 
 =item Text::Tabs
 
-expand and unexpand tabs per the unix expand(1) and unexpand(1)
+expand and unexpand tabs per the Unix expand(1) and unexpand(1)
 
 =item Text::Wrap
 
@@ -828,11 +828,11 @@ efficiently compute time from local and GMT time
 
 =item Time::gmtime
 
-by-name interface to Perl's built-in gmtime() function
+by-name interface to Perl's builtin gmtime() function
 
 =item Time::localtime
 
-by-name interface to Perl's built-in localtime() function
+by-name interface to Perl's builtin localtime() function
 
 =item Time::tm
 
@@ -844,11 +844,11 @@ base class for ALL classes (blessed references)
 
 =item User::grent
 
-by-name interface to Perl's built-in getgr*() functions
+by-name interface to Perl's builtin getgr*() functions
 
 =item User::pwent
 
-by-name interface to Perl's built-in getpw*() functions
+by-name interface to Perl's builtin getpw*() functions
 
 =back
 
@@ -862,7 +862,8 @@ your system man(1) command.  If that fails, try the I<perldoc> program.
 
 =head2 Extension Modules
 
-Extension modules are written in C (or a mix of Perl and C) and get
+Extension modules are written in C (or a mix of Perl and C) and may be
+statically linked or in general are
 dynamically loaded into Perl if and when you need them.  Supported
 extension modules include the Socket, Fcntl, and POSIX modules.
 
@@ -1213,7 +1214,7 @@ standards for naming modules and the interface to methods in
 those modules.
 
 To be portable each component of a module name should be limited to
-11 characters. If it might be used on DOS then try to ensure each is
+11 characters. If it might be used on MS-DOS then try to ensure each is
 unique in the first 8 characters. Nested modules make this easier.
 
 =item Have you got it right?
@@ -1279,8 +1280,8 @@ How you choose to license your work is a personal decision.
 The general mechanism is to assert your Copyright and then make
 a declaration of how others may copy/use/modify your work.
 
-Perl, for example, is supplied with two types of license: The GNU
-GPL and The Artistic License (see the files README, Copying, and
+Perl, for example, is supplied with two types of licence: The GNU
+GPL and The Artistic Licence (see the files README, Copying, and
 Artistic).  Larry has good reasons for NOT just using the GNU GPL.
 
 My personal recommendation, out of respect for Larry, Perl, and the

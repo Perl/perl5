@@ -172,7 +172,7 @@ explicitly.
 
 If PPCODE: directive is not used, C<void> return value should be used
 only for subroutines which do not return a value, I<even if> CODE:
-directive is used which sets ST(0) explicitly. 
+directive is used which sets ST(0) explicitly.
 
 Older versions of this document recommended to use C<void> return
 value in such cases. It was discovered that this could lead to
@@ -289,7 +289,7 @@ its parameters.  The Perl usage is given first.
 
      $status = rpcb_gettime( "localhost", $timep );
 
-The XSUB follows. 
+The XSUB follows.
 
      bool_t
      rpcb_gettime(host,timep)
@@ -319,7 +319,7 @@ above, this keyword does not affect the way the compiler handles RETVAL.
 =head2 The NO_INIT Keyword
 
 The NO_INIT keyword is used to indicate that a function
-parameter is being used as only an output value.  The B<xsubpp>
+parameter is being used only as an output value.  The B<xsubpp>
 compiler will normally generate code to read the values of
 all function parameters from the argument stack and assign
 them to C variables upon entry to the function.  NO_INIT
@@ -328,7 +328,7 @@ output rather than for input and that they will be handled
 before the function terminates.
 
 The following example shows a variation of the rpcb_gettime() function.
-This function uses the timep variable as only an output variable and does
+This function uses the timep variable only as an output variable and does
 not care about its initial contents.
 
      bool_t
@@ -694,7 +694,7 @@ To disable version checking:
 =head2 The PROTOTYPES: Keyword
 
 The PROTOTYPES: keyword corresponds to B<xsubpp>'s C<-prototypes> and
-C<-noprototypes> options.  This keyword overrides the command-line options.
+C<-noprototypes> options.  This keyword overrides the command line options.
 Prototypes are enabled by default.  When prototypes are enabled XSUBs will
 be given Perl prototypes.  This keyword may be used multiple times in an XS
 module to enable and disable prototypes for different parts of the module.

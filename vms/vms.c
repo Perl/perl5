@@ -4054,7 +4054,7 @@ candelete_fromperl(CV *cv)
     }
   }
 
-  ST(0) = cando_by_name(S_IDUSR,0,fsp) ? &sv_yes : &sv_no;
+  ST(0) = boolSV(cando_by_name(S_IDUSR,0,fsp));
   XSRETURN(1);
 }
 
@@ -4107,7 +4107,7 @@ rmscopy_fromperl(CV *cv)
   }
   date_flag = (items == 3) ? SvIV(ST(2)) : 0;
 
-  ST(0) = rmscopy(inp,outp,date_flag) ? &sv_yes : &sv_no;
+  ST(0) = boolSV(rmscopy(inp,outp,date_flag));
   XSRETURN(1);
 }
 

@@ -79,7 +79,7 @@ print PROG 'print "@ARGV\n"', "\n";
 close PROG;
 my $echo = "$Invoke_Perl $ECHO";
 
-print "1..98\n";
+print "1..112\n";
 
 # First, let's make sure that Perl is checking the dangerous
 # environment variables. Maybe they aren't set yet, so we'll
@@ -443,4 +443,24 @@ print "1..98\n";
     test 96, not tainted $fooref;
     test 97, tainted $$fooref;
     test 98, tainted $foo;
+}
+
+# Some tests involving assignment
+{
+    my $foo = $TAINT0;
+    my $bar = $foo;
+    test 99, all_tainted $foo, $bar;
+    test 100, tainted($foo = $bar);
+    test 101, tainted($bar = $bar);
+    test 102, tainted($bar += $bar);
+    test 103, tainted($bar -= $bar);
+    test 104, tainted($bar *= $bar);
+    test 105, tainted($bar++);
+    test 106, tainted($bar /= $bar);
+    test 107, tainted($bar += 0);
+    test 108, tainted($bar -= 2);
+    test 109, tainted($bar *= -1);
+    test 110, tainted($bar /= 1);
+    test 111, tainted($bar--);
+    test 112, $bar == 0;
 }

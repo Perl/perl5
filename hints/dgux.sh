@@ -18,7 +18,7 @@
 # your $LD_LIBRARY_PATH to include the source directory when you build,
 # test and install the software.
 #
-# -Roderick Schertler <roderick@gate.net>
+# -Roderick Schertler <roderick@argon.org>
 
 
 # Here are the things from some old DGUX hints files which are different

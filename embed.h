@@ -53,6 +53,7 @@
 #define band_amg		Perl_band_amg
 #define bind_match		Perl_bind_match
 #define block_end		Perl_block_end
+#define block_gimme		Perl_block_gimme
 #define block_start		Perl_block_start
 #define bool__amg		Perl_bool__amg
 #define bor_amg			Perl_bor_amg
@@ -219,7 +220,7 @@
 #define gv_AVadd		Perl_gv_AVadd
 #define gv_HVadd		Perl_gv_HVadd
 #define gv_IOadd		Perl_gv_IOadd
-#define gv_autoload		Perl_gv_autoload
+#define gv_autoload4		Perl_gv_autoload4
 #define gv_check		Perl_gv_check
 #define gv_efullname		Perl_gv_efullname
 #define gv_efullname3		Perl_gv_efullname3
@@ -1257,7 +1258,6 @@
 #define minus_n			(curinterp->Iminus_n)
 #define minus_p			(curinterp->Iminus_p)
 #define multiline		(curinterp->Imultiline)
-#define mustcatch		(curinterp->Imustcatch)
 #define mystack_base		(curinterp->Imystack_base)
 #define mystack_mark		(curinterp->Imystack_mark)
 #define mystack_max		(curinterp->Imystack_max)
@@ -1298,6 +1298,7 @@
 #define sortstack		(curinterp->Isortstack)
 #define sortstash		(curinterp->Isortstash)
 #define splitstr		(curinterp->Isplitstr)
+#define start_env		(curinterp->Istart_env)
 #define statcache		(curinterp->Istatcache)
 #define statgv			(curinterp->Istatgv)
 #define statname		(curinterp->Istatname)
@@ -1410,7 +1411,6 @@
 #define Iminus_n		minus_n
 #define Iminus_p		minus_p
 #define Imultiline		multiline
-#define Imustcatch		mustcatch
 #define Imystack_base		mystack_base
 #define Imystack_mark		mystack_mark
 #define Imystack_max		mystack_max
@@ -1451,6 +1451,7 @@
 #define Isortstack		sortstack
 #define Isortstash		sortstash
 #define Isplitstr		splitstr
+#define Istart_env		start_env
 #define Istatcache		statcache
 #define Istatgv			statgv
 #define Istatname		statname
@@ -1572,7 +1573,6 @@
 #define minus_n			Perl_minus_n
 #define minus_p			Perl_minus_p
 #define multiline		Perl_multiline
-#define mustcatch		Perl_mustcatch
 #define mystack_base		Perl_mystack_base
 #define mystack_mark		Perl_mystack_mark
 #define mystack_max		Perl_mystack_max
@@ -1612,6 +1612,7 @@
 #define sortstack		Perl_sortstack
 #define sortstash		Perl_sortstash
 #define splitstr		Perl_splitstr
+#define start_env		Perl_start_env
 #define statcache		Perl_statcache
 #define statgv			Perl_statgv
 #define statname		Perl_statname

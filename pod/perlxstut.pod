@@ -55,7 +55,7 @@ to use the following line:
 
 =item *
 
-This document assumes that the executable named "perl" is Perl version 5.  
+This document assumes that the executable named "perl" is Perl version 5.
 Some systems may have installed Perl version 5 as "perl5".
 
 =back
@@ -145,7 +145,7 @@ And the Mytest.xs file should look something like this:
 	#ifdef __cplusplus
 	}
 	#endif
-	
+
 	PROTOTYPES: DISABLE
 
 	MODULE = Mytest		PACKAGE = Mytest
@@ -185,11 +185,11 @@ example only, we'll create a special test script.  Create a file called hello
 that looks like this:
 
 	#! /opt/perl5/bin/perl
-	
+
 	use ExtUtils::testlib;
-	
+
 	use Mytest;
-	
+
 	Mytest::hello();
 
 Now we run the script and we should see the following output:
@@ -222,7 +222,7 @@ the four lines starting at the "CODE:" line to not be indented.  However,
 for readability purposes, it is suggested that you indent them 8 spaces
 (or one normal tab stop).
 
-Now re-run make to rebuild our new shared library.
+Now rerun make to rebuild our new shared library.
 
 Now perform the same steps as before, generating a Makefile from the
 Makefile.PL file, and running make.
@@ -453,7 +453,7 @@ this behavior is tolerated.  The next example will show how to do this.
 =head2 EXAMPLE 4
 
 In this example, we'll now begin to write XSUBs that will interact with
-pre-defined C libraries.  To begin with, we will build a small library of
+predefined C libraries.  To begin with, we will build a small library of
 our own, then let h2xs write our .pm and .xs files for us.
 
 Create a new directory called Mytest2 at the same level as the directory
@@ -475,7 +475,7 @@ Also create a file mylib.c that looks like this:
 
 	#include <stdlib.h>
 	#include "./mylib.h"
-	
+
 	double
 	foo(a, b, c)
 	int		a;
@@ -705,7 +705,7 @@ definition is placed.
 
 There is absolutely no excuse for not documenting your extension.
 Documentation belongs in the .pm file.  This file will be fed to pod2man,
-and the embedded documentation will be converted to the man page format,
+and the embedded documentation will be converted to the manpage format,
 then placed in the blib directory.  It will be copied to Perl's man
 page directory when the extension is installed.
 
@@ -718,7 +718,7 @@ See L<perlpod> for more information about the pod format.
 =head2 INSTALLING YOUR EXTENSION
 
 Once your extension is complete and passes all its tests, installing it
-is quite simple: you simply run "make install".  You will either need 
+is quite simple: you simply run "make install".  You will either need
 to have write permission into the directories where Perl is installed,
 or ask your system administrator to run the make for you.
 

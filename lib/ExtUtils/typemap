@@ -203,7 +203,7 @@ T_SYSRET
 T_ENUM
 	sv_setiv($arg, (IV)$var);
 T_BOOL
-	$arg = $var ? &sv_yes : &sv_no;
+	$arg = boolSV($var);
 T_U_INT
 	sv_setiv($arg, (IV)$var);
 T_SHORT

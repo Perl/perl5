@@ -1458,8 +1458,7 @@ yylex()
   retry:
     switch (*s) {
     default:
-	warn("Unrecognized character \\%03o ignored", *s++ & 255);
-	goto retry;
+	croak("Unrecognized character \\%03o", *s & 255);
     case 4:
     case 26:
 	goto fake_eof;			/* emulate EOF on ^D or ^Z */
@@ -1499,14 +1498,28 @@ yylex()
 		    if (gv)
 			GvIMPORTED_AV_on(gv);
 		    if (minus_F) {
-			char tmpbuf1[50];
-			if ( splitstr[0] == '/' || 
-			     splitstr[0] == '\'' || 
-			     splitstr[0] == '"' )
-			    sprintf( tmpbuf1, "@F=split(%s);", splitstr );
-			else
-			    sprintf( tmpbuf1, "@F=split('%s');", splitstr );
+			char *tmpbuf1;
+			New(201, tmpbuf1, strlen(splitstr) * 2 + 20, char);
+			if (strchr("/'\"", *splitstr)
+			      && strchr(splitstr + 1, *splitstr))
+			    sprintf(tmpbuf1, "@F=split(%s);", splitstr);
+			else {
+			    char delim;
+			    s = "'~#\200\1'"; /* surely one char is unused...*/
+			    while (s[1] && strchr(splitstr, *s))  s++;
+			    delim = *s;
+			    sprintf(tmpbuf1, "@F=split(%s%c",
+				    "q" + (delim == '\''), delim);
+			    d = tmpbuf1 + strlen(tmpbuf1);
+			    for (s = splitstr; *s; ) {
+				if (*s == '\\')
+				    *d++ = '\\';
+				*d++ = *s++;
+			    }
+			    sprintf(d, "%c);", delim);
+			}
 			sv_catpv(linestr,tmpbuf1);
+			Safefree(tmpbuf1);
 		    }
 		    else
 		        sv_catpv(linestr,"@F=split(' ');");
@@ -1704,7 +1717,9 @@ yylex()
 	}
 	goto retry;
     case '\r':
-	croak("Illegal character \\%03o (carriage return)", '\r');
+	warn("Illegal character \\%03o (carriage return)", '\r');
+	croak(
+      "(Maybe you didn't strip carriage returns after a network transfer?)\n");
     case ' ': case '\t': case '\f': case 013:
 	s++;
 	goto retry;
@@ -2504,7 +2519,7 @@ yylex()
 			curcop->cop_line++;
 		    }
 		    else
-			no_op("Bare word",s);
+			no_op("Bareword",s);
 		}
 
 		/* Look for a subroutine with this name in current package. */
@@ -5174,7 +5189,9 @@ char *s;
     char *context = NULL;
     int contlen = -1;
 
-    if (bufptr > oldoldbufptr && bufptr - oldoldbufptr < 200 &&
+    if (!yychar || (yychar == ';' && !rsfp))
+	where = "at EOF";
+    else if (bufptr > oldoldbufptr && bufptr - oldoldbufptr < 200 &&
       oldoldbufptr != oldbufptr && oldbufptr != bufptr) {
 	while (isSPACE(*oldoldbufptr))
 	    oldoldbufptr++;
@@ -5190,8 +5207,6 @@ char *s;
     }
     else if (yychar > 255)
 	where = "next token ???";
-    else if (!yychar || (yychar == ';' && !rsfp))
-	where = "at EOF";
     else if ((yychar & 127) == 127) {
 	if (lex_state == LEX_NORMAL ||
 	   (lex_state == LEX_KNOWNEXT && lex_defer == LEX_NORMAL))

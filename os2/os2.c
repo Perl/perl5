@@ -850,7 +850,7 @@ XS(XS_Cwd_sys_chdir)
 	bool	RETVAL;
 
 	RETVAL = sys_chdir(path);
-	ST(0) = RETVAL ? &sv_yes : &sv_no;
+	ST(0) = boolSV(RETVAL);
 	if (SvREFCNT(ST(0))) sv_2mortal(ST(0));
     }
     XSRETURN(1);
@@ -866,7 +866,7 @@ XS(XS_Cwd_change_drive)
 	bool	RETVAL;
 
 	RETVAL = change_drive(d);
-	ST(0) = RETVAL ? &sv_yes : &sv_no;
+	ST(0) = boolSV(RETVAL);
 	if (SvREFCNT(ST(0))) sv_2mortal(ST(0));
     }
     XSRETURN(1);
@@ -882,7 +882,7 @@ XS(XS_Cwd_sys_is_absolute)
 	bool	RETVAL;
 
 	RETVAL = sys_is_absolute(path);
-	ST(0) = RETVAL ? &sv_yes : &sv_no;
+	ST(0) = boolSV(RETVAL);
 	if (SvREFCNT(ST(0))) sv_2mortal(ST(0));
     }
     XSRETURN(1);
@@ -898,7 +898,7 @@ XS(XS_Cwd_sys_is_rooted)
 	bool	RETVAL;
 
 	RETVAL = sys_is_rooted(path);
-	ST(0) = RETVAL ? &sv_yes : &sv_no;
+	ST(0) = boolSV(RETVAL);
 	if (SvREFCNT(ST(0))) sv_2mortal(ST(0));
     }
     XSRETURN(1);
@@ -914,7 +914,7 @@ XS(XS_Cwd_sys_is_relative)
 	bool	RETVAL;
 
 	RETVAL = sys_is_relative(path);
-	ST(0) = RETVAL ? &sv_yes : &sv_no;
+	ST(0) = boolSV(RETVAL);
 	if (SvREFCNT(ST(0))) sv_2mortal(ST(0));
     }
     XSRETURN(1);
@@ -1101,7 +1101,7 @@ XS(XS_Cwd_extLibpath_set)
 	}
 
 	RETVAL = extLibpath_set(s, type);
-	ST(0) = RETVAL ? &sv_yes : &sv_no;
+	ST(0) = boolSV(RETVAL);
 	if (SvREFCNT(ST(0))) sv_2mortal(ST(0));
     }
     XSRETURN(1);

@@ -126,6 +126,31 @@ which can consist of any combination of the symbols defined below,
 OR'ed together.
 
 
+=head2  G_VOID
+
+Calls the Perl subroutine in a void context.
+
+This flag has 2 effects:
+
+=over 5
+
+=item 1.
+
+It indicates to the subroutine being called that it is executing in
+a void context (if it executes I<wantarray> the result will be the
+undefined value).
+
+=item 2.
+
+It ensures that nothing is actually returned from the subroutine.
+
+=back
+
+The value returned by the I<perl_call_*> function indicates how many
+items have been returned by the Perl subroutine - in this case it will
+be 0.
+
+
 =head2  G_SCALAR
 
 Calls the Perl subroutine in a scalar context.  This is the default
@@ -139,7 +164,6 @@ This flag has 2 effects:
 
 It indicates to the subroutine being called that it is executing in a
 scalar context (if it executes I<wantarray> the result will be false).
-
 
 =item 2.
 
@@ -164,7 +188,7 @@ accessible from the stack - think of the case where only one value is
 returned as being a list with only one element.  Any other items that
 were returned will not exist by the time control returns from the
 I<perl_call_*> function.  The section I<Returning a list in a scalar
-context> shows an example of this behaviour.
+context> shows an example of this behavior.
 
 
 =head2 G_ARRAY
@@ -251,7 +275,7 @@ What has happened is that C<fred> accesses the C<@_> array which
 belongs to C<joe>.
 
 
-=head2 G_EVAL	
+=head2 G_EVAL
 
 It is possible for the Perl subroutine you are calling to terminate
 abnormally, e.g., by calling I<die> explicitly or by not actually
@@ -293,7 +317,7 @@ from the stack.
 
 =back
 
-See I<Using G_EVAL> for details of using G_EVAL.
+See I<Using G_EVAL> for details on using G_EVAL.
 
 =head2 G_KEEPERR
 
@@ -326,14 +350,17 @@ The G_KEEPERR flag was introduced in Perl version 5.002.
 See I<Using G_KEEPERR> for an example of a situation that warrants the
 use of this flag.
 
-=head2 Determining the Context 
+=head2 Determining the Context
 
 As mentioned above, you can determine the context of the currently
-executing subroutine in Perl with I<wantarray>. The equivalent test can
-be made in C by using the C<GIMME> macro. This will return C<G_SCALAR>
-if you have been called in a scalar context and C<G_ARRAY> if in an
-array context. An example of using the C<GIMME> macro is shown in
-section I<Using GIMME>.
+executing subroutine in Perl with I<wantarray>.  The equivalent test
+can be made in C by using the C<GIMME_V> macro, which returns
+C<G_ARRAY> if you have been called in an array context, C<G_SCALAR> if
+in a a scalar context, or C<G_VOID> if in a void context (i.e. the
+return value will not be used).  An older version of this macro is
+called C<GIMME>; in a void context it returns C<G_SCALAR> instead of
+C<G_VOID>.  An example of using the C<GIMME_V> macro is shown in
+section I<Using GIMME_V>.
 
 =head1 KNOWN PROBLEMS
 
@@ -368,7 +395,7 @@ For example, say you want to call this Perl sub
     sub fred
     {
         eval { die "Fatal Error" ; }
-        print "Trapped error: $@\n" 
+        print "Trapped error: $@\n"
             if $@ ;
     }
 
@@ -565,7 +592,7 @@ Next, we come to XPUSHs. This is where the parameters actually get
 pushed onto the stack. In this case we are pushing a string and an
 integer.
 
-See the L<perlguts/"XSUBs and the Argument Stack"> for details
+See L<perlguts/"XSUBs and the Argument Stack"> for details
 on how the XPUSH macros work.
 
 =item 6.
@@ -626,7 +653,7 @@ Points to note this time are
 
 =over 5
 
-=item 1. 
+=item 1.
 
 The only flag specified this time was G_SCALAR. That means the C<@_>
 array will be created and that the value returned by I<Adder> will
@@ -654,7 +681,7 @@ temporaries we create.  This means that the temporaries we get rid of
 will be limited to those which were created after these calls.
 
 The C<FREETMPS>/C<LEAVE> pair will get rid of any values returned by
-the Perl subroutine, plus it will also dump the mortal SV's we have
+the Perl subroutine, plus it will also dump the mortal SVs we have
 created.  Having C<ENTER>/C<SAVETMPS> at the beginning of the code
 makes sure that no other mortals are destroyed.
 
@@ -672,7 +699,7 @@ allocated to the Perl stack has been reallocated whilst in the
 I<perl_call_pv> call.
 
 If you are making use of the Perl stack pointer in your code you must
-always refresh the your local copy using SPAGAIN whenever you make use
+always refresh the local copy using SPAGAIN whenever you make use
 of the I<perl_call_*> functions or any other Perl internal function.
 
 =item 4.
@@ -834,7 +861,7 @@ then the output will be
     Value 1 = 3
 
 In this case the main point to note is that only the last item in the
-list returned from the subroutine, I<Adder> actually made it back to
+list is returned from the subroutine, I<AddSubtract> actually made it back to
 I<call_AddSubScalar>.
 
 
@@ -977,7 +1004,7 @@ I<Subtract>.
 
 =item 2.
 
-The code 
+The code
 
     if (SvTRUE(GvSV(errgv)))
     {
@@ -1012,7 +1039,7 @@ version of the call_Subtract example above inside a destructor:
 
     package Foo;
     sub new { bless {}, $_[0] }
-    sub Subtract { 
+    sub Subtract {
         my($a,$b) = @_;
         die "death can be fatal" if $a < $b ;
         $a - $b;
@@ -1063,7 +1090,7 @@ Here is a snippet of XSUB which defines I<CallSubPV>.
     	PUSHMARK(sp) ;
     	perl_call_pv(name, G_DISCARD|G_NOARGS) ;
 
-That is fine as far as it goes. The thing is, the Perl subroutine 
+That is fine as far as it goes. The thing is, the Perl subroutine
 can be specified as only a string.  For Perl 4 this was adequate,
 but Perl 5 allows references to subroutines and anonymous subroutines.
 This is where I<perl_call_sv> is useful.
@@ -1121,22 +1148,22 @@ particularly true for these cases
     CallSavedSub1() ;
 
 By the time each of the C<SaveSub1> statements above have been executed,
-the SV*'s which corresponded to the parameters will no longer exist.
+the SV*s which corresponded to the parameters will no longer exist.
 Expect an error message from Perl of the form
 
     Can't use an undefined value as a subroutine reference at ...
 
 for each of the C<CallSavedSub1> lines.
 
-Similarly, with this code 
+Similarly, with this code
 
     $ref = \&fred ;
     SaveSub1($ref) ;
     $ref = 47 ;
     CallSavedSub1() ;
 
-you can expect one of these messages (which you actually get is dependent on 
-the version of Perl you are using) 
+you can expect one of these messages (which you actually get is dependent on
+the version of Perl you are using)
 
     Not a CODE reference at ...
     Undefined subroutine &main::47 called ...
@@ -1159,7 +1186,7 @@ A similar but more subtle problem is illustrated with this code
     CallSavedSub1() ;
 
 This time whenever C<CallSavedSub1> get called it will execute the Perl
-subroutine C<joe> (assuming it exists) rather than C<fred> as was 
+subroutine C<joe> (assuming it exists) rather than C<fred> as was
 originally requested in the call to C<SaveSub1>.
 
 To get around these problems it is necessary to take a full copy of the
@@ -1260,7 +1287,7 @@ single element of the array.  Here is an all Perl example of using it.
 will print
 
     1: green
-    This is Class Mine version 1.0 
+    This is Class Mine version 1.0
 
 Calling a Perl method from C is fairly straightforward. The following
 things are required
@@ -1320,26 +1347,31 @@ The only thing to note is that in both the static and virtual methods,
 the method name is not passed via the stack - it is used as the first
 parameter to I<perl_call_method>.
 
-=head2 Using GIMME
+=head2 Using GIMME_V
 
-Here is a trivial XSUB which prints the context in which it is 
+Here is a trivial XSUB which prints the context in which it is
 currently executing.
 
     void
     PrintContext()
         CODE:
-        if (GIMME == G_SCALAR)
+        I32 gimme = GIMME_V;
+        if (gimme == G_VOID)
+            printf ("Context is Void\n") ;
+        else if (gimme == G_SCALAR)
             printf ("Context is Scalar\n") ;
         else
             printf ("Context is Array\n") ;
 
 and here is some Perl to test it
 
+    PrintContext ;
     $a = PrintContext ;
     @a = PrintContext ;
 
 The output from that will be
 
+    Context is Void
     Context is Scalar
     Context is Array
 
@@ -1418,26 +1450,26 @@ will be more like this
 
     perl --> XSUB --> event handler
                       ...
-                      event handler --> perl_call --> perl 
+                      event handler --> perl_call --> perl
                                                        |
-                      event handler <-- perl_call --<--+
+                      event handler <-- perl_call <----+
                       ...
-                      event handler --> perl_call --> perl 
+                      event handler --> perl_call --> perl
                                                        |
-                      event handler <-- perl_call --<--+
+                      event handler <-- perl_call <----+
                       ...
-                      event handler --> perl_call --> perl 
+                      event handler --> perl_call --> perl
                                                        |
-                      event handler <-- perl_call --<--+
+                      event handler <-- perl_call <----+
 
 In this case the flow of control can consist of only the repeated
 sequence
 
     event handler --> perl_call --> perl
 
-for the practically the complete duration of the program.  This means
-that control may I<never> drop back to the surrounding scope in Perl at
-the extreme left.
+for practically the complete duration of the program.  This means that
+control may I<never> drop back to the surrounding scope in Perl at the
+extreme left.
 
 So what is the big problem? Well, if you are expecting Perl to tidy up
 those temporaries for you, you might be in for a long wait.  For Perl
@@ -1553,7 +1585,7 @@ This may expect the C I<ProcessRead> function of this form
     int	fh ;
     char *	buffer ;
     {
-         ... 
+         ...
     }
 
 To provide a Perl interface to this library we need to be able to map
@@ -1646,7 +1678,7 @@ the C<buffer> parameter like this
 Without the file handle there is no straightforward way to map from the
 C callback to the Perl subroutine.
 
-In this case a possible way around this problem is to pre-define a
+In this case a possible way around this problem is to predefine a
 series of C functions to act as the interface to Perl, thus
 
     #define MAX_CB		3
@@ -1763,7 +1795,7 @@ series of C functions to act as the interface to Perl, thus
 
 In this case the functions C<fn1>, C<fn2>, and C<fn3> are used to
 remember the Perl subroutine to be called. Each of the functions holds
-a separate hard-wired index which is used in the function C<Pcb> to
+a separate hardwired index which is used in the function C<Pcb> to
 access the C<Map> array and actually call the Perl subroutine.
 
 There are some obvious disadvantages with this technique.
@@ -1771,10 +1803,10 @@ There are some obvious disadvantages with this technique.
 Firstly, the code is considerably more complex than with the previous
 example.
 
-Secondly, there is a hard-wired limit (in this case 3) to the number of
+Secondly, there is a hardwired limit (in this case 3) to the number of
 callbacks that can exist simultaneously. The only way to increase the
 limit is by modifying the code to add more functions and then
-re-compiling.  None the less, as long as the number of functions is
+recompiling.  None the less, as long as the number of functions is
 chosen with some care, it is still a workable solution and in some
 cases is the only one available.
 
@@ -1878,7 +1910,7 @@ sets the stack up so that we can use the C<ST> macro.
 
 Unlike the original coding of this example, the returned
 values are not accessed in reverse order.  So C<ST(0)> refers to the
-first value returned by the Perl subroutine and C<ST(count-1)> 
+first value returned by the Perl subroutine and C<ST(count-1)>
 refers to the last.
 
 =back

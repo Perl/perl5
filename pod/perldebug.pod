@@ -13,7 +13,7 @@ Perl source debugger.  This works like an interactive Perl
 environment, prompting for debugger commands that let you examine
 source code, set breakpoints, get stack backtraces, change the values of
 variables, etc.  This is so convenient that you often fire up
-the debugger all by itself just to test out Perl constructs 
+the debugger all by itself just to test out Perl constructs
 interactively to see what they do.  For example:
 
     perl -d -e 42
@@ -23,7 +23,7 @@ typical compiled environment.  Instead, the B<-d> flag tells the compiler
 to insert source information into the parse trees it's about to hand off
 to the interpreter.  That means your code must first compile correctly
 for the debugger to work on it.  Then when the interpreter starts up, it
-pre-loads a Perl library file containing the debugger itself.  
+preloads a Perl library file containing the debugger itself.
 
 The program will halt I<right before> the first run-time executable
 statement (but see below regarding compile-time statements) and ask you
@@ -47,7 +47,7 @@ The debugger understands the following commands:
 
 =item h [command]
 
-Prints out a help message.  
+Prints out a help message.
 
 If you supply another debugger command as an argument to the C<h> command,
 it prints out the description for just that command.  The special
@@ -73,7 +73,7 @@ where STDOUT may be redirected to.
 
 =item x expr
 
-Evaluates its expression in list context and dumps out the result 
+Evaluates its expression in list context and dumps out the result
 in a pretty-printed fashion.  Nested data structures are printed out
 recursively, unlike the C<print> function.
 
@@ -308,7 +308,7 @@ Run Tk while prompting (with ReadLine).
 Level of verbosity.  By default the debugger is in a sane verbose mode,
 thus it will print backtraces on all the warnings and die-messages
 which are going to be printed out, and will print a message when
-interesting uncaught signals arrive. 
+interesting uncaught signals arrive.
 
 To disable this behaviour, set these values to 0.  If C<dieLevel> is 2,
 then the messages which will be caught by surrounding C<eval> are also
@@ -328,11 +328,11 @@ C<|visual_perl_db>), then a short, "emacs like" message is used.
 
 If 0, allows I<stepping off> the end of the script.
 
-=item C<PrintRet> 
+=item C<PrintRet>
 
 affects printing of return value after C<r> command.
 
-=item C<frame> 
+=item C<frame>
 
 affects printing messages on entry and exit from subroutines.  If
 C<frame & 2> is false, messages are printed on entry only. (Printing
@@ -383,7 +383,7 @@ can enable either double-quotish dump, or single-quotish by setting it
 to C<"> or C<'>.  By default, characters with high bit set are printed
 I<as is>.
 
-=item C<UsageOnly> 
+=item C<UsageOnly>
 
 I<very> rudimentally per-package memory usage dump.  Calculates total
 size of strings in variables in the package.
@@ -429,7 +429,7 @@ ReadLine applications.
 
 =item C<NonStop>
 
-If set, debugger goes into non-interactive mode until interrupted, or
+If set, debugger goes into noninteractive mode until interrupted, or
 programmatically by setting $DB::signal or $DB::single.
 
 =back
@@ -449,7 +449,7 @@ Other examples may include
 
   $ PERLDB_OPTS="N f A L=listing" perl -d myprogram
 
-- runs script non-interactively, printing info on each entry into a
+- runs script noninteractively, printing info on each entry into a
 subroutine and each executed line into the file F<listing>. (If you
 interrupt it, you would better reset C<LineInfo> to something
 "interactive"!)
@@ -468,37 +468,37 @@ See L<"Debugger Internals"> below for more details.
 =item E<lt> [ command ]
 
 Set an action (Perl command) to happen before every debugger prompt.
-A multi-line command may be entered by backslashing the newlines.  If
+A multiline command may be entered by backslashing the newlines.  If
 C<command> is missing, resets the list of actions.
 
 =item E<lt>E<lt> command
 
 Add an action (Perl command) to happen before every debugger prompt.
-A multi-line command may be entered by backslashing the newlines.
+A multiline command may be entered by backslashing the newlines.
 
 =item E<gt> command
 
 Set an action (Perl command) to happen after the prompt when you've
-just given a command to return to executing the script.  A multi-line
+just given a command to return to executing the script.  A multiline
 command may be entered by backslashing the newlines.  If C<command> is
 missing, resets the list of actions.
 
 =item E<gt>E<gt> command
 
 Adds an action (Perl command) to happen after the prompt when you've
-just given a command to return to executing the script.  A multi-line
+just given a command to return to executing the script.  A multiline
 command may be entered by backslashing the newlines.
 
 =item { [ command ]
 
 Set an action (debugger command) to happen before every debugger prompt.
-A multi-line command may be entered by backslashing the newlines.  If
+A multiline command may be entered by backslashing the newlines.  If
 C<command> is missing, resets the list of actions.
 
 =item {{ command
 
 Add an action (debugger command) to happen before every debugger prompt.
-A multi-line command may be entered by backslashing the newlines.
+A multiline command may be entered by backslashing the newlines.
 
 =item ! number
 
@@ -539,7 +539,7 @@ your history across this, but internal settings and command line options
 may be lost.
 
 Currently the following setting are preserved: history, breakpoints,
-actions, debugger C<O>ptions, and the following command-line
+actions, debugger C<O>ptions, and the following command line
 options: B<-w>, B<-I>, and B<-e>.
 
 =item |dbcmd
@@ -593,16 +593,16 @@ or even
     DB<<17>>
 
 where that number is the command number, which you'd use to access with
-the built-in B<csh>-like history mechanism, e.g., C<!17> would repeat
+the builtin B<csh>-like history mechanism, e.g., C<!17> would repeat
 command number 17.  The number of angle brackets indicates the depth of
 the debugger.  You could get more than one set of brackets, for example, if
 you'd already at a breakpoint and then printed out the result of a
 function call that itself also has a breakpoint, or you step into an
 expression via C<s/n/t expression> command.
 
-=item Multi-line commands
+=item Multiline commands
 
-If you want to enter a multi-line command, such as a subroutine
+If you want to enter a multiline command, such as a subroutine
 definition with several statements, or a format, you may escape the
 newline that would normally end the debugger command with a backslash.
 Here's an example:
@@ -667,7 +667,7 @@ next executed line is marked by C<==E<gt>>.
 When C<frame> option is set, debugger would print entered (and
 optionally exited) subroutines in different styles.
 
-What follows is the start of the listing of 
+What follows is the start of the listing of
 
   env "PERLDB_OPTS=f=1 N" perl -d -V
 
@@ -795,7 +795,7 @@ is printed with proper indentation.
 If you have any compile-time executable statements (code within a BEGIN
 block or a C<use> statement), these will C<NOT> be stopped by debugger,
 although C<require>s will (and compile-time statements can be traced
-with C<AutoTrace> option set in C<PERLDB_OPTS>).  From your own Perl 
+with C<AutoTrace> option set in C<PERLDB_OPTS>).  From your own Perl
 code, however, you can
 transfer control back to the debugger using the following statement,
 which is harmless if the debugger is not running:
@@ -859,7 +859,7 @@ the Term::ReadKey and Term::ReadLine modules from CPAN, you will
 have full editing capabilities much like GNU I<readline>(3) provides.
 Look for these in the F<modules/by-module/Term> directory on CPAN.
 
-A rudimentary command-line completion is also available.
+A rudimentary command line completion is also available.
 Unfortunately, the names of lexical variables are not available for
 completion.
 
@@ -901,7 +901,7 @@ in that profile.
 
 When you call the B<caller> function (see L<perlfunc/caller>) from the
 package DB, Perl sets the array @DB::args to contain the arguments the
-corresponding stack frame was called with.  
+corresponding stack frame was called with.
 
 If perl is run with B<-d> option, the following additional features
 are enabled:
@@ -1007,9 +1007,9 @@ statement, and would wait for your C<CR> to continue.
 
 The following debugger is quite functional:
 
-  { 
-    package DB; 
-    sub DB  {} 
+  {
+    package DB;
+    sub DB  {}
     sub sub {print ++$i, " $sub\n"; &$sub}
   }
 
@@ -1020,7 +1020,7 @@ package C<DB>.
 =head2 Debugger Internals
 
 At the start, the debugger reads your rc file (F<./.perldb> or
-F<~/.perldb> under UNIX), which can set important options.  This file may
+F<~/.perldb> under Unix), which can set important options.  This file may
 define a subroutine C<&afterinit> to be executed after the debugger is
 initialized.
 
@@ -1042,7 +1042,7 @@ C<context> (C<$> or C<@>), C<sub> (subroutine name, or info about
 eval), C<args> (C<undef> or a reference to an array), C<file>, and
 C<line>.
 
-The function C<DB::print_trace(FH, skip[, count[, short]])> prints 
+The function C<DB::print_trace(FH, skip[, count[, short]])> prints
 formatted info about caller frames.  The last two functions may be
 convenient as arguments to C<E<lt>>, C<E<lt>E<lt>> commands.
 

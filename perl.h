@@ -260,12 +260,6 @@
 
 #define MEM_SIZE Size_t
 
-#if _XOPEN_VERSION >= 4
-#   define Sock_size_t Size_t
-#else
-#   define Sock_size_t int
-#endif
-
 #if defined(STANDARD_C) && defined(I_STDDEF)
 #   include <stddef.h>
 #   define STRUCT_OFFSET(s,m)  offsetof(s,m)
@@ -1843,9 +1837,9 @@ IEXT line_t	Icopline IINIT(NOLINE);
 IEXT CONTEXT *	Icxstack;
 IEXT I32	Icxstack_ix IINIT(-1);
 IEXT I32	Icxstack_max IINIT(128);
-IEXT Sigjmp_buf	Itop_env;
+IEXT JMPENV 	Istart_env;	/* empty startup sigjmp() environment */
+IEXT JMPENV *	Itop_env;	/* ptr. to current sigjmp() environment */
 IEXT I32	Irunlevel;
-IEXT bool	Imustcatch;	/* doeval() must be caught locally */
 
 /* stack stuff */
 IEXT AV *	Icurstack;		/* THE STACK */

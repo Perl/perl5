@@ -41,11 +41,20 @@ typedef U32 PADOFFSET;
     U8		op_flags;		\
     U8		op_private;
 
-#define GIMME (op->op_flags & OPf_KNOW ? op->op_flags & OPf_LIST : dowantarray())
+#define OP_GIMME(op,dfl) \
+	(((op)->op_flags & OPf_WANT) == OPf_WANT_VOID   ? G_VOID   : \
+	 ((op)->op_flags & OPf_WANT) == OPf_WANT_SCALAR ? G_SCALAR : \
+	 ((op)->op_flags & OPf_WANT) == OPf_WANT_LIST   ? G_ARRAY   : \
+	 dfl)
+
+#define GIMME_V		OP_GIMME(op, block_gimme())
 
 /* Public flags */
-#define OPf_LIST	1	/* Do operator in list context. */
-#define OPf_KNOW	2	/* Context is known. */
+
+#define OPf_WANT	3	/* Mask for "want" bits: */
+#define  OPf_WANT_VOID	 1	/*   Want nothing */
+#define  OPf_WANT_SCALAR 2	/*   Want single value */
+#define  OPf_WANT_LIST	 3	/*   Want list of any length */
 #define OPf_KIDS	4	/* There is a firstborn child. */
 #define OPf_PARENS	8	/* This operator was parenthesized. */
 				/*  (Or block needs explicit scope entry.) */
@@ -64,6 +73,12 @@ typedef U32 PADOFFSET;
 				/*  On UNOPs, saw bare parens, e.g. eof(). */
 				/*  On OP_ENTERSUB || OP_NULL, saw a "do". */
 				/*  On OP_(ENTER|LEAVE)EVAL, don't clear $@ */
+
+/* old names; don't use in new code, but don't break them, either */
+#define OPf_LIST	1
+#define OPf_KNOW	2
+#define GIMME \
+	  (op->op_flags & OPf_KNOW ? op->op_flags & OPf_LIST : dowantarray())
 
 /* Private for lvalues */
 #define OPpLVAL_INTRO	128	/* Lvalue must be localized */
@@ -105,11 +120,8 @@ typedef U32 PADOFFSET;
 /* Private for OP_LIST */
 #define OPpLIST_GUESSED		64	/* Guessed that pushmark was needed. */
 
-/* Private for OP_LEAVE, OP_DELETE, and friends(?) */
-#define OPpLEAVE_VOID		64	/* No need to copy out values. */
-
 /* Private for OP_DELETE */
-#define OPpSLICE		32	/* Operating on a list of keys */
+#define OPpSLICE		64	/* Operating on a list of keys */
 
 /* Private for OP_SORT, OP_PRTF, OP_SPRINTF, string cmp'n, and case changers */
 #define OPpLOCALE		64	/* Use locale */

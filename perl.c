@@ -20,6 +20,10 @@
 #include <unistd.h>
 #endif
 
+#if !defined(STANDARD_C) && !defined(HAS_GETENV_PROTOTYPE)
+char *getenv _((char *)); /* Usually in <stdlib.h> */
+#endif
+
 dEXTCONST char rcsid[] = "perl.c\nPatch level: ###\n";
 
 #ifdef IAMSUID
@@ -140,6 +144,10 @@ register PerlInterpreter *sv_interp;
 
     init_ids();
 
+    start_env.je_prev = NULL;
+    start_env.je_ret = -1;
+    start_env.je_mustcatch = TRUE;
+    top_env     = &start_env;
     STATUS_ALL_SUCCESS;
 
     SET_NUMERIC_STANDARD();
@@ -432,9 +440,6 @@ PerlInterpreter *sv_interp;
 	return;
     Safefree(sv_interp);
 }
-#if !defined(STANDARD_C) && !defined(HAS_GETENV_PROTOTYPE)
-char *getenv _((char *)); /* Usually in <stdlib.h> */
-#endif
 
 int
 perl_parse(sv_interp, xsinit, argc, argv, env)
@@ -451,6 +456,7 @@ char **env;
     char *validarg = "";
     I32 oldscope;
     AV* comppadlist;
+    dJMPENV;
 
 #ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
 #ifdef IAMSUID
@@ -498,9 +504,8 @@ setuid perl scripts securely.\n");
 
     time(&basetime);
     oldscope = scopestack_ix;
-    mustcatch = FALSE;
 
-    switch (Sigsetjmp(top_env,1)) {
+    switch (JMPENV_PUSH) {
     case 1:
 	STATUS_ALL_FAILURE;
 	/* FALL THROUGH */
@@ -511,9 +516,10 @@ setuid perl scripts securely.\n");
 	curstash = defstash;
 	if (endav)
 	    call_list(oldscope, endav);
+	JMPENV_POP;
 	return STATUS_NATIVE_EXPORT;
     case 3:
-	mustcatch = FALSE;
+	JMPENV_POP;
 	PerlIO_printf(PerlIO_stderr(), "panic: top_env\n");
 	return 1;
     }
@@ -522,6 +528,7 @@ setuid perl scripts securely.\n");
     sv = newSVpv("",0);		/* first used for -I flags */
     SAVEFREESV(sv);
     init_main_stash();
+
     for (argc--,argv++; argc > 0; argc--,argv++) {
 	if (argv[0][0] != '-' || !argv[0][1])
 	    break;
@@ -619,13 +626,13 @@ setuid perl scripts securely.\n");
 #else
 		sv_catpv(Sv,"print \"\\nCharacteristics of this binary (from libperl): \\n\",");
 #endif
-#if defined(DEBUGGING) || defined(NOEMBED) || defined(MULTIPLICITY)
+#if defined(DEBUGGING) || defined(NO_EMBED) || defined(MULTIPLICITY)
 		strcpy(buf,"\"  Compile-time options:");
 #  ifdef DEBUGGING
 		strcat(buf," DEBUGGING");
 #  endif
-#  ifdef NOEMBED
-		strcat(buf," NOEMBED");
+#  ifdef NO_EMBED
+		strcat(buf," NO_EMBED");
 #  endif
 #  ifdef MULTIPLICITY
 		strcat(buf," MULTIPLICITY");
@@ -634,8 +641,8 @@ setuid perl scripts securely.\n");
 		sv_catpv(Sv,buf);
 #endif
 #if defined(LOCAL_PATCH_COUNT)
-		if (LOCAL_PATCH_COUNT > 0)
-		{   int i;
+		if (LOCAL_PATCH_COUNT > 0) {
+		    int i;
 		    sv_catpv(Sv,"print \"  Locally applied patches:\\n\",");
 		    for (i = 1; i <= LOCAL_PATCH_COUNT; i++) {
 			if (localpatches[i]) {
@@ -645,17 +652,21 @@ setuid perl scripts securely.\n");
 		    }
 		}
 #endif
-		sprintf(buf,"\"  Built under %s\\n\",",OSNAME);
+		sprintf(buf,"\"  Built under %s\\n\"",OSNAME);
 		sv_catpv(Sv,buf);
 #ifdef __DATE__
 #  ifdef __TIME__
-		sprintf(buf,"\"  Compiled at %s %s\\n\"",__DATE__,__TIME__);
+		sprintf(buf,",\"  Compiled at %s %s\\n\"",__DATE__,__TIME__);
 #  else
-		sprintf(buf,"\"  Compiled on %s\\n\"",__DATE__);
+		sprintf(buf,",\"  Compiled on %s\\n\"",__DATE__);
 #  endif
 		sv_catpv(Sv,buf);
 #endif
-		sv_catpv(Sv,"; $\"=\"\\n    \"; print \"  \\@INC:\\n    @INC\\n\"");
+		sv_catpv(Sv, "; \
+$\"=\"\\n    \"; \
+@env = map { \"$_=\\\"$ENV{$_}\\\"\" } sort grep {/^PERL/} keys %ENV; \
+print \"  \\%ENV:\\n    @env\\n\" if @env; \
+print \"  \\@INC:\\n    @INC\\n\";");
 	    }
 	    else {
 		Sv = newSVpv("config_vars(qw(",0);
@@ -682,6 +693,24 @@ setuid perl scripts securely.\n");
 	}
     }
   switch_end:
+
+    if (!tainting && (s = getenv("PERL5OPT"))) {
+	for (;;) {
+	    while (isSPACE(*s))
+		s++;
+	    if (*s == '-') {
+		s++;
+		if (isSPACE(*s))
+		    continue;
+	    }
+	    if (!*s)
+		break;
+	    if (!strchr("DIMUdmw", *s))
+		croak("Illegal switch in PERL5OPT: -%c", *s);
+	    s = moreswitches(s);
+	}
+    }
+
     if (!scriptname)
 	scriptname = argv[0];
     if (e_fp) {
@@ -784,6 +813,7 @@ setuid perl scripts securely.\n");
 
     ENTER;
     restartop = 0;
+    JMPENV_POP;
     return 0;
 }
 
@@ -791,6 +821,7 @@ int
 perl_run(sv_interp)
 PerlInterpreter *sv_interp;
 {
+    dJMPENV;
     I32 oldscope;
 
     if (!(curinterp = sv_interp))
@@ -798,7 +829,7 @@ PerlInterpreter *sv_interp;
 
     oldscope = scopestack_ix;
 
-    switch (Sigsetjmp(top_env,1)) {
+    switch (JMPENV_PUSH) {
     case 1:
 	cxstack_ix = -1;		/* start context stack again */
 	break;
@@ -814,12 +845,13 @@ PerlInterpreter *sv_interp;
 	if (getenv("PERL_DEBUG_MSTATS"))
 	    dump_mstats("after execution:  ");
 #endif
+	JMPENV_POP;
 	return STATUS_NATIVE_EXPORT;
     case 3:
-	mustcatch = FALSE;
 	if (!restartop) {
 	    PerlIO_printf(PerlIO_stderr(), "panic: restartop\n");
 	    FREETMPS;
+	    JMPENV_POP;
 	    return 1;
 	}
 	if (curstack != mainstack) {
@@ -858,6 +890,7 @@ PerlInterpreter *sv_interp;
     }
 
     my_exit(0);
+    /* NOTREACHED */
     return 0;
 }
 
@@ -968,10 +1001,10 @@ I32 flags;		/* See G_* flags in cop.h */
     SV** sp = stack_sp;
     I32 oldmark;
     I32 retval;
-    Sigjmp_buf oldtop;
     I32 oldscope;
     static CV *DBcv;
-    bool oldmustcatch = mustcatch;
+    bool oldcatch = CATCH_GET;
+    dJMPENV;
 
     if (flags & G_DISCARD) {
 	ENTER;
@@ -979,12 +1012,12 @@ I32 flags;		/* See G_* flags in cop.h */
     }
 
     Zero(&myop, 1, LOGOP);
+    myop.op_next = Nullop;
     if (!(flags & G_NOARGS))
 	myop.op_flags |= OPf_STACKED;
-    myop.op_next = Nullop;
-    myop.op_flags |= OPf_KNOW;
-    if (flags & G_ARRAY)
-	myop.op_flags |= OPf_LIST;
+    myop.op_flags |= ((flags & G_VOID) ? OPf_WANT_VOID :
+		      (flags & G_ARRAY) ? OPf_WANT_LIST :
+		      OPf_WANT_SCALAR);
     SAVESPTR(op);
     op = (OP*)&myop;
 
@@ -1002,14 +1035,12 @@ I32 flags;		/* See G_* flags in cop.h */
 	op->op_private |= OPpENTERSUB_DB;
 
     if (flags & G_EVAL) {
-	Copy(top_env, oldtop, 1, Sigjmp_buf);
-
 	cLOGOP->op_other = op;
 	markstack_ptr--;
 	/* we're trying to emulate pp_entertry() here */
 	{
 	    register CONTEXT *cx;
-	    I32 gimme = GIMME;
+	    I32 gimme = GIMME_V;
 	    
 	    ENTER;
 	    SAVETMPS;
@@ -1027,8 +1058,7 @@ I32 flags;		/* See G_* flags in cop.h */
 	}
 	markstack_ptr++;
 
-    restart:
-	switch (Sigsetjmp(top_env,1)) {
+	switch (JMPENV_PUSH) {
 	case 0:
 	    break;
 	case 1:
@@ -1038,17 +1068,16 @@ I32 flags;		/* See G_* flags in cop.h */
 	    /* my_exit() was called */
 	    curstash = defstash;
 	    FREETMPS;
-	    Copy(oldtop, top_env, 1, Sigjmp_buf);
+	    JMPENV_POP;
 	    if (statusvalue)
 		croak("Callback called exit");
 	    my_exit_jump();
 	    /* NOTREACHED */
 	case 3:
-	    mustcatch = FALSE;
 	    if (restartop) {
 		op = restartop;
 		restartop = 0;
-		goto restart;
+		break;
 	    }
 	    stack_sp = stack_base + oldmark;
 	    if (flags & G_ARRAY)
@@ -1061,7 +1090,7 @@ I32 flags;		/* See G_* flags in cop.h */
 	}
     }
     else
-	mustcatch = TRUE;
+	CATCH_SET(TRUE);
 
     if (op == (OP*)&myop)
 	op = pp_entersub();
@@ -1086,10 +1115,10 @@ I32 flags;		/* See G_* flags in cop.h */
 	    curpm = newpm;
 	    LEAVE;
 	}
-	Copy(oldtop, top_env, 1, Sigjmp_buf);
+	JMPENV_POP;
     }
     else
-	mustcatch = oldmustcatch;
+	CATCH_SET(oldcatch);
 
     if (flags & G_DISCARD) {
 	stack_sp = stack_base + oldmark;
@@ -1111,8 +1140,8 @@ I32 flags;		/* See G_* flags in cop.h */
     SV** sp = stack_sp;
     I32 oldmark = sp - stack_base;
     I32 retval;
-    Sigjmp_buf oldtop;
     I32 oldscope;
+    dJMPENV;
     
     if (flags & G_DISCARD) {
 	ENTER;
@@ -1130,16 +1159,13 @@ I32 flags;		/* See G_* flags in cop.h */
 	myop.op_flags = OPf_STACKED;
     myop.op_next = Nullop;
     myop.op_type = OP_ENTEREVAL;
-    myop.op_flags |= OPf_KNOW;
+    myop.op_flags |= ((flags & G_VOID) ? OPf_WANT_VOID :
+		      (flags & G_ARRAY) ? OPf_WANT_LIST :
+		      OPf_WANT_SCALAR);
     if (flags & G_KEEPERR)
 	myop.op_flags |= OPf_SPECIAL;
-    if (flags & G_ARRAY)
-	myop.op_flags |= OPf_LIST;
 
-    Copy(top_env, oldtop, 1, Sigjmp_buf);
-
-restart:
-    switch (Sigsetjmp(top_env,1)) {
+    switch (JMPENV_PUSH) {
     case 0:
 	break;
     case 1:
@@ -1149,17 +1175,16 @@ restart:
 	/* my_exit() was called */
 	curstash = defstash;
 	FREETMPS;
-	Copy(oldtop, top_env, 1, Sigjmp_buf);
+	JMPENV_POP;
 	if (statusvalue)
 	    croak("Callback called exit");
 	my_exit_jump();
 	/* NOTREACHED */
     case 3:
-	mustcatch = FALSE;
 	if (restartop) {
 	    op = restartop;
 	    restartop = 0;
-	    goto restart;
+	    break;
 	}
 	stack_sp = stack_base + oldmark;
 	if (flags & G_ARRAY)
@@ -1180,7 +1205,7 @@ restart:
 	sv_setpv(GvSV(errgv),"");
 
   cleanup:
-    Copy(oldtop, top_env, 1, Sigjmp_buf);
+    JMPENV_POP;
     if (flags & G_DISCARD) {
 	stack_sp = stack_base + oldmark;
 	retval = 0;
@@ -2442,25 +2467,23 @@ call_list(oldscope, list)
 I32 oldscope;
 AV* list;
 {
-    Sigjmp_buf oldtop;
+    dJMPENV;
     STRLEN len;
     line_t oldline = curcop->cop_line;
-
-    Copy(top_env, oldtop, 1, Sigjmp_buf);
 
     while (AvFILL(list) >= 0) {
 	CV *cv = (CV*)av_shift(list);
 
 	SAVEFREESV(cv);
 
-	switch (Sigsetjmp(top_env,1)) {
+	switch (JMPENV_PUSH) {
 	case 0: {
 		SV* atsv = GvSV(errgv);
 		PUSHMARK(stack_sp);
 		perl_call_sv((SV*)cv, G_EVAL|G_DISCARD);
 		(void)SvPV(atsv, len);
 		if (len) {
-		    Copy(oldtop, top_env, 1, Sigjmp_buf);
+		    JMPENV_POP;
 		    curcop = &compiling;
 		    curcop->cop_line = oldline;
 		    if (list == beginav)
@@ -2484,7 +2507,7 @@ AV* list;
 	    if (endav)
 		call_list(oldscope, endav);
 	    FREETMPS;
-	    Copy(oldtop, top_env, 1, Sigjmp_buf);
+	    JMPENV_POP;
 	    curcop = &compiling;
 	    curcop->cop_line = oldline;
 	    if (statusvalue) {
@@ -2501,14 +2524,13 @@ AV* list;
 		FREETMPS;
 		break;
 	    }
-	    Copy(oldtop, top_env, 1, Sigjmp_buf);
+	    JMPENV_POP;
 	    curcop = &compiling;
 	    curcop->cop_line = oldline;
-	    Siglongjmp(top_env, 3);
+	    JMPENV_JUMP(3);
 	}
+	JMPENV_POP;
     }
-
-    Copy(oldtop, top_env, 1, Sigjmp_buf);
 }
 
 void
@@ -2576,5 +2598,5 @@ my_exit_jump()
 	LEAVE;
     }
 
-    Siglongjmp(top_env, 2);
+    JMPENV_JUMP(2);
 }

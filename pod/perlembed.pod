@@ -14,7 +14,7 @@ Do you want to:
 
 Read L<perlcall> and L<perlxs>.
 
-=item B<Use a UNIX program from Perl?>
+=item B<Use a Unix program from Perl?>
 
 Read about back-quotes and about C<system> and C<exec> in L<perlfunc>.
 
@@ -96,29 +96,29 @@ Execute this statement for a hint about where to find CORE:
 
     perl -MConfig -e 'print $Config{archlib}'
 
-Here's how you'd compile the example in the next section, 
+Here's how you'd compile the example in the next section,
 L<Adding a Perl interpreter to your C program>, on my Linux box:
 
-    % gcc -O2 -Dbool=char -DHAS_BOOL -I/usr/local/include 
+    % gcc -O2 -Dbool=char -DHAS_BOOL -I/usr/local/include
     -I/usr/local/lib/perl5/i586-linux/5.003/CORE
-    -L/usr/local/lib/perl5/i586-linux/5.003/CORE 
+    -L/usr/local/lib/perl5/i586-linux/5.003/CORE
     -o interp interp.c -lperl -lm
 
-(That's all one line.)  On my DEC Alpha running 5.00305, the incantation 
+(That's all one line.)  On my DEC Alpha running 5.003_05, the incantation
 is a bit different:
 
-    % cc -O2 -Olimit 2900 -DSTANDARD_C -I/usr/local/include 
-    -I/usr/local/lib/perl5/alpha-dec_osf/5.00305/CORE 
-    -L/usr/local/lib/perl5/alpha-dec_osf/5.00305/CORE -L/usr/local/lib 
+    % cc -O2 -Olimit 2900 -DSTANDARD_C -I/usr/local/include
+    -I/usr/local/lib/perl5/alpha-dec_osf/5.00305/CORE
+    -L/usr/local/lib/perl5/alpha-dec_osf/5.00305/CORE -L/usr/local/lib
     -D__LANGUAGE_C__ -D_NO_PROTO -o interp interp.c -lperl -lm
 
 How can you figure out what to add?  Assuming your Perl is post-5.001,
 execute a C<perl -V> command and pay special attention to the "cc" and
-"ccflags" information.  
+"ccflags" information.
 
-You'll have to choose the appropriate compiler (I<cc>, I<gcc>, et al.) for 
+You'll have to choose the appropriate compiler (I<cc>, I<gcc>, et al.) for
 your machine: C<perl -MConfig -e 'print $Config{cc}'> will tell you what
-to use.  
+to use.
 
 You'll also have to choose the appropriate library directory
 (I</usr/local/lib/...>) for your machine.  If your compiler complains
@@ -132,7 +132,7 @@ Perhaps those printed by
 
    perl -MConfig -e 'print $Config{libs}'
 
-Provided your perl binary was properly configured and installed the 
+Provided your perl binary was properly configured and installed the
 B<ExtUtils::Embed> module will determine all of this information for
 you:
 
@@ -145,14 +145,14 @@ this documentation came from your Perl distribution, then you're
 running 5.004 or better and you already have it.)
 
 The B<ExtUtils::Embed> kit on CPAN also contains all source code for
-the examples in this document, tests, additional examples and other 
+the examples in this document, tests, additional examples and other
 information you may find useful.
 
 =head2 Adding a Perl interpreter to your C program
 
 In a sense, perl (the C program) is a good example of embedding Perl
 (the language), so I'll demonstrate embedding with I<miniperlmain.c>,
-from the source distribution.  Here's a bastardized, non-portable
+from the source distribution.  Here's a bastardized, nonportable
 version of I<miniperlmain.c> containing the essentials of embedding:
 
     #include <EXTERN.h>               /* from the Perl distribution     */
@@ -200,7 +200,7 @@ calling I<perl_run()>.
 =head2 Calling a Perl subroutine from your C program
 
 To call individual Perl subroutines, you can use any of the B<perl_call_*>
-functions documented in the L<perlcall> man page.
+functions documented in the L<perlcall> manpage.
 In this example we'll use I<perl_call_argv>.
 
 That's shown below, in a program I'll call I<showtime.c>.
@@ -493,7 +493,7 @@ which produces the output (again, long lines have been wrapped here)
    match: with
 
    substitute: s/[aeiou]//gi...139 substitutions made.
-   Now text is: Whn h s t  cnvnnc str nd th bll cms t sm mnt lk 76 cnts, 
+   Now text is: Whn h s t  cnvnnc str nd th bll cms t sm mnt lk 76 cnts,
    Mynrd s wr tht thr s smthng h *shld* d, smthng tht wll nbl hm t gt bck
    qrtr, bt h hs n d *wht*.  H fmbls thrgh hs rd sqzy chngprs nd gvs th by
    thr xtr pnns wth hs dllr, hpng tht h mght lck nt th crrct mnt.  Th by gvs
@@ -519,7 +519,7 @@ described in L<perlcall>.
 
 Once you've understood those, embedding Perl in C is easy.
 
-Because C has no built-in function for integer exponentiation, let's
+Because C has no builtin function for integer exponentiation, let's
 make Perl's ** operator available to it (this is less useful than it
 sounds, because Perl implements ** with C's I<pow()> function).  First
 I'll create a stub exponentiation function in I<power.pl>:
@@ -592,7 +592,7 @@ When developing interactive and/or potentially long-running
 applications, it's a good idea to maintain a persistent interpreter
 rather than allocating and constructing a new interpreter multiple
 times.  The major reason is speed: since Perl will only be loaded into
-memory once.  
+memory once.
 
 However, you have to be more cautious with namespace and variable
 scoping when using a persistent interpreter.  In previous examples
@@ -627,47 +627,47 @@ itself after a certain number of requests, to ensure that memory
 consumption is minimized.  You'll also want to scope your variables
 with L<perlfunc/my> whenever possible.
 
- 
+
  package Embed::Persistent;
  #persistent.pl
- 
+
  use strict;
  use vars '%Cache';
- 
+
  sub valid_package_name {
      my($string) = @_;
      $string =~ s/([^A-Za-z0-9\/])/sprintf("_%2x",unpack("C",$1))/eg;
      # second pass only for words starting with a digit
      $string =~ s|/(\d)|sprintf("/_%2x",unpack("C",$1))|eg;
- 
+
      # Dress it up as a real package name
      $string =~ s|/|::|g;
      return "Embed" . $string;
  }
- 
+
  #borrowed from Safe.pm
  sub delete_package {
      my $pkg = shift;
      my ($stem, $leaf);
- 
+
      no strict 'refs';
      $pkg = "main::$pkg\::";    # expand to full symbol table name
      ($stem, $leaf) = $pkg =~ m/(.*::)(\w+::)$/;
- 
+
      my $stem_symtab = *{$stem}{HASH};
- 
+
      delete $stem_symtab->{$leaf};
  }
- 
+
  sub eval_file {
      my($filename, $delete) = @_;
      my $package = valid_package_name($filename);
      my $mtime = -M $filename;
      if(defined $Cache{$package}{mtime}
         &&
-        $Cache{$package}{mtime} <= $mtime) 
+        $Cache{$package}{mtime} <= $mtime)
      {
-        # we have compiled this subroutine already, 
+        # we have compiled this subroutine already,
         # it has not been updated on disk, nothing left to do
         print STDERR "already compiled $package->handler\n";
      }
@@ -677,7 +677,7 @@ with L<perlfunc/my> whenever possible.
         local($/) = undef;
         my $sub = <FH>;
         close FH;
- 
+
         #wrap the code into a subroutine inside our unique package
         my $eval = qq{package $package; sub handler { $sub; }};
         {
@@ -686,35 +686,35 @@ with L<perlfunc/my> whenever possible.
             eval $eval;
         }
         die $@ if $@;
- 
+
         #cache it unless we're cleaning out each time
         $Cache{$package}{mtime} = $mtime unless $delete;
      }
- 
+
      eval {$package->handler;};
      die $@ if $@;
- 
+
      delete_package($package) if $delete;
- 
+
      #take a look if you want
      #print Devel::Symdump->rnew($package)->as_string, $/;
  }
- 
+
  1;
- 
+
  __END__
 
  /* persistent.c */
- #include <EXTERN.h> 
- #include <perl.h> 
- 
+ #include <EXTERN.h>
+ #include <perl.h>
+
  /* 1 = clean out filename's symbol table after each request, 0 = don't */
  #ifndef DO_CLEAN
  #define DO_CLEAN 0
  #endif
-  
+
  static PerlInterpreter *perl = NULL;
-  
+
  int
  main(int argc, char **argv, char **env)
  {
@@ -722,41 +722,40 @@ with L<perlfunc/my> whenever possible.
      char *args[] = { "", DO_CLEAN, NULL };
      char filename [1024];
      int exitstatus = 0;
- 
+
      if((perl = perl_alloc()) == NULL) {
         fprintf(stderr, "no memory!");
         exit(1);
      }
-     perl_construct(perl); 
-     
+     perl_construct(perl);
+
      exitstatus = perl_parse(perl, NULL, 2, embedding, NULL);
- 
-     if(!exitstatus) { 
+
+     if(!exitstatus) {
         exitstatus = perl_run(perl);
-   
+
         while(printf("Enter file name: ") && gets(filename)) {
- 
+
             /* call the subroutine, passing it the filename as an argument */
             args[0] = filename;
-            perl_call_argv("Embed::Persistent::eval_file", 
+            perl_call_argv("Embed::Persistent::eval_file",
                            G_DISCARD | G_EVAL, args);
- 
+
             /* check $@ */
-            if(SvTRUE(GvSV(errgv))) 
+            if(SvTRUE(GvSV(errgv)))
                 fprintf(stderr, "eval error: %s\n", SvPV(GvSV(errgv),na));
         }
      }
-     
+
      perl_destruct_level = 0;
-     perl_destruct(perl); 
-     perl_free(perl); 
+     perl_destruct(perl);
+     perl_free(perl);
      exit(exitstatus);
  }
 
-
 Now compile:
 
- % cc -o persistent persistent.c `perl -MExtUtils::Embed -e ccopts -e ldopts` 
+ % cc -o persistent persistent.c `perl -MExtUtils::Embed -e ccopts -e ldopts`
 
 Here's a example script file:
 
@@ -782,7 +781,7 @@ Now run:
 
 Some rare applications will need to create more than one interpreter
 during a session.  Such an application might sporadically decide to
-release any resources associated with the interpreter.  
+release any resources associated with the interpreter.
 
 The program must take care to ensure that this takes place I<before>
 the next interpreter is constructed.  By default, the global variable
@@ -791,22 +790,22 @@ needed when a program has only one interpreter.
 
 Setting C<perl_destruct_level> to C<1> makes everything squeaky clean:
 
- perl_destruct_level = 1; 
+ perl_destruct_level = 1;
 
  while(1) {
      ...
      /* reset global variables here with perl_destruct_level = 1 */
-     perl_construct(my_perl); 
+     perl_construct(my_perl);
      ...
      /* clean and reset _everything_ during perl_destruct */
-     perl_destruct(my_perl); 
-     perl_free(my_perl);      
+     perl_destruct(my_perl);
+     perl_free(my_perl);
      ...
      /* let's go do it again! */
  }
 
-When I<perl_destruct()> is called, the interpreter's syntax parse tree 
-and symbol tables are cleaned up, and global variables are reset.  
+When I<perl_destruct()> is called, the interpreter's syntax parse tree
+and symbol tables are cleaned up, and global variables are reset.
 
 Now suppose we have more than one interpreter instance running at the
 same time.  This is feasible, but only if you used the
@@ -826,9 +825,9 @@ Let's give it a try:
 
  int main(int argc, char **argv, char **env)
  {
-     PerlInterpreter 
+     PerlInterpreter
          *one_perl = perl_alloc(),
-         *two_perl = perl_alloc();  
+         *two_perl = perl_alloc();
      char *one_args[] = { "one_perl", SAY_HELLO };
      char *two_args[] = { "two_perl", SAY_HELLO };
 
