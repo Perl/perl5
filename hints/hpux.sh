@@ -72,7 +72,9 @@ case `$cc -v 2>&1`"" in
 			    gnu_as=yes
 			    ;;
 			*)			# HPas
-			    ccflags="$ccflags -Wa,+DA2.0"
+                           case "$gccversion" in
+                               [12]*) ccflags="$ccflags -Wa,+DA2.0" ;;
+                               esac
 			    ;;
 			esac
 		    # gcc with gld will not accept +vnocompatwarnings
@@ -107,12 +109,12 @@ toke_cflags='ccflags="$ccflags -DARG_ZERO_IS_SCRIPT"'
 
 ### 64 BITNESS
 
-# Some gcc versions do native 64 bit long (e.g. 2.9-hppa-000310)
+# Some gcc versions do native 64 bit long (e.g. 2.9-hppa-000310 and gcc-3.0)
 # We have to force 64bitness to go search the right libraries
     gcc_64native=no
 case "$ccisgcc" in
     $define|true|[Yy])
-	echo 'int main(){long l;printf("%d\n",sizeof(l));}'>try.c
+       echo 'int main(){long l;printf("%d\\n",sizeof(l));}'>try.c
 	$cc -o try $ccflags $ldflags try.c
 	if [ "`try`" = "8" ]; then
 	    cat <<EOM >&4
