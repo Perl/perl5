@@ -337,6 +337,9 @@ RunPerl(int argc, char **argv, char **env)
 EXTERN_C void
 set_w32_module_name(void);
 
+#ifdef __MINGW32__
+EXTERN_C		/* GCC in C++ mode mangles the name, otherwise */
+#endif
 BOOL APIENTRY
 DllMain(HANDLE hModule,		/* DLL module handle */
 	DWORD fdwReason,	/* reason called */

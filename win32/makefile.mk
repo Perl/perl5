@@ -712,10 +712,7 @@ CORE_NOCFG_H	=		\
 		.\include\dirent.h	\
 		.\include\netdb.h	\
 		.\include\sys\socket.h	\
-		.\win32.h	\
-		.\perlhost.h	\
-		.\vdir.h	\
-		.\vmem.h
+		.\win32.h
 
 CORE_H		= $(CORE_NOCFG_H) .\config.h
 
@@ -1000,8 +997,10 @@ $(MINIWIN32_OBJ) : $(CORE_NOCFG_H)
 
 # -DPERL_IMPLICIT_SYS needs C++ for perllib.c
 # rules wrapped in .IFs break Win9X build (we end up with unbalanced []s unless
-#  unless the .IF is true), so instead we use a .ELSE with the default
-perllib$(o)	: perllib.c
+# unless the .IF is true), so instead we use a .ELSE with the default.
+# This is the only file that depends on perlhost.h, vmem.h, and vdir.h
+
+perllib$(o)	: perllib.c .\perlhost.h .\vdir.h .\vmem.h
 .IF "$(USE_IMP_SYS)$(USE_OBJECT)" == "defineundef"
 	$(CC) -c -I. $(CFLAGS_O) $(CXX_FLAG) $(OBJOUT_FLAG)$@ perllib.c
 .ELSE

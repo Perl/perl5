@@ -92,15 +92,9 @@ if ($docc) {
 
   # check for gcc - if present, we'll need to use MACRO hack to
   # define global symbols for shared variables
-  $isvaxc = 0;
   $isgcc = `$cc_cmd _nla0:/Version` =~ /GNU/
            or 0; # make debug output nice
-  $isvaxc = (!$isgcc && $isvax &&
-             # Check exit status too, in case message is shut off
-             (`$cc_cmd /prefix=all _nla0:` =~ /IVQUAL/ || $? == 0x38240))
-            or 0; # again, make debug output nice
   print "\$isgcc: $isgcc\n" if $debug;
-  print "\$isvaxc: $isvaxc\n" if $debug;
   print "\$debugging_enabled: $debugging_enabled\n" if $debug;
 
 }
@@ -108,11 +102,8 @@ else {
   ($junk,$junk,$cpp_file,$cc_cmd) = split(/~~/,$cc_cmd,4);
   $isgcc = $cc_cmd =~ /case_hack/i
            or 0;  # for nice debug output
-  $isvaxc = (!$isgcc && $cc_cmd !~ /standard=/i)
-            or 0;  # again, for nice debug output
   $debugging_enabled = $cc_cmd =~ /\bdebugging\b/i;
   print "\$isgcc: \\$isgcc\\\n" if $debug;
-  print "\$isvaxc: \\$isvaxc\\\n" if $debug;
   print "\$debugging_enabled: \\$debugging_enabled\\\n" if $debug;
   print "Not running cc, preprocesor output in \\$cpp_file\\\n" if $debug;
 }
@@ -128,33 +119,6 @@ $extnames = shift @ARGV;
 print "\$extnames: \\$extnames\\\n" if $debug;
 $rtlopt = shift @ARGV;
 print "\$rtlopt: \\$rtlopt\\\n" if $debug;
-
-# This part gets tricky.  VAXC creates global symbols for each of the
-# constants in an enum if that enum is ever used as the data type of a
-# global[dr]ef.  We have to detect enums which are used in this way, so we
-# can set up the constants as universal symbols, since anything which
-# #includes perl.h will want to resolve these global symbols.
-# We're using a weak test here - we basically know that the only enums
-# we need to handle now are the big one in opcode.h, and the
-# "typedef enum { ... } expectation" in perl.h, so we hard code
-# appropriate tests below. Since we can't know in general whether a given
-# enum will be used elsewhere in a globaldef, it's hard to decide a
-# priori whether its constants need to be treated as global symbols.
-sub scan_enum {
-  my($line) = @_;
-
-  return unless $isvaxc;
-
-  return unless /^\s+(OP|X)/;  # we only want opcode and expectation enums
-  print "\tchecking for enum constant\n" if $debug > 1;
-  $line =~ s#/\*.+##;
-  $line =~ s/,?\s*\n?$//;
-  print "\tfiltered to \\$line\\\n" if $debug > 1;
-  if ($line =~ /(\w+)$/) {
-    print "\tconstant name is \\$1\\\n" if $debug > 1;
-    $enums{$1}++;
-  }
-}
 
 sub scan_var {
   my($line) = @_;
@@ -172,18 +136,6 @@ sub scan_var {
     print "\tvar name is \\$1\\" . ($const ? ' (const)' : '') . "\n" if $debug > 1;
    if ($const) { $cvars{$1}++; }
    else        { $vars{$1}++;  }
-  }
-  if ($isvaxc) {
-    my($type) = $line =~ /^\s*EXT\w*\s+(\w+)/;
-    print "\tchecking for use of enum (type is \"$type\")\n" if $debug > 2;
-    if ($type eq 'expectation') {
-      $used_expectation_enum++;
-      print "\tsaw global use of enum \"expectation\"\n" if $debug > 1;
-    }
-    if ($type eq 'opcode') {
-      $used_opcode_enum++;
-      print "\tsaw global use of enum \"opcode\"\n" if $debug > 1;
-    }
   }
 }
 
@@ -282,22 +234,6 @@ foreach (split /\s+/, $extnames) {
   print "Adding boot_$pkgname to \%fcns (for extension $_)\n" if $debug;
 }
 
-# If we're using VAXC, fold in the names of the constants for enums
-# we've seen as the type of global vars.
-if ($isvaxc) {
-  foreach (keys %enums) {
-    if (/^OP/) {
-      $vars{$_}++ if $used_opcode_enum;
-      next;
-    }
-    if (/^X/) {
-      $vars{$_}++ if $used_expectation_enum;
-      next;
-    }
-    print STDERR "Unrecognized enum constant \"$_\" ignored\n";
-  }
-}
-
 # Eventually, we'll check against existing copies here, so we can add new
 # symbols to an existing options file in an upwardly-compatible manner.
 
@@ -350,10 +286,7 @@ if ($isvax) {
 
 open(OPTATTR,">${dir}perlshr_attr.opt")
   or die "$0: Can't write to ${dir}perlshr_attr.opt: $!\n";
-if ($isvaxc) {
-  print OPTATTR "PSECT_ATTR=\$CHAR_STRING_CONSTANTS,PIC,SHR,NOEXE,RD,NOWRT\n";
-}
-elsif ($isgcc) {
+if ($isgcc) {
   foreach $var (sort keys %cvars) {
     print OPTATTR "PSECT_ATTR=${var},PIC,OVR,RD,NOEXE,NOWRT,SHR\n";
   }
