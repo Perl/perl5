@@ -2,6 +2,7 @@
 
 BEGIN {
     chdir 't' if -d 't';
+    @INC = '../lib';
     require Config; import Config;
     if ($Config{'extensions'} !~ m!\bI18N/Langinfo\b! ||
 	$Config{'extensions'} !~ m!\bPOSIX\b!)
