@@ -57,9 +57,10 @@ Enabling the C<utf8> pragma has the following effect:
 Bytes in the source text that have their high-bit set will be treated
 as being part of a literal UTF-8 character.  This includes most
 literals such as identifier names, string constants, and constant
-regular expression patterns.  On EBCDIC platforms characters in
-the Latin 1 character set are treated as being part of a literal
-UTF-EBCDIC character.
+regular expression patterns.
+
+On EBCDIC platforms characters in the Latin 1 character set are
+treated as being part of a literal UTF-EBCDIC character.
 
 =back
 
@@ -130,6 +131,19 @@ C<utf8::decode>.  Note that in the Perl 5.8.0 implementation the
 functions utf8::valid, utf8::encode, utf8::decode, utf8::upgrade,
 and utf8::downgrade are always available, without a C<require utf8>
 statement-- this may change in future releases.
+
+=head1 BUGS
+
+One can have Unicode in identifier names, but not in package/class or
+subroutine names.  While some limited functionality towards this does
+exist as of Perl 5.8.0, that is more accidental than designed; use of
+Unicode for the said purposes is unsupported.
+
+One reason of this unfinishedness is its (currently) inherent
+unportability: since both package names and subroutine names may need
+to be mapped to file and directory names, the Unicode capability of
+the filesystem becomes important-- and there unfortunately aren't
+portable answers.
 
 =head1 SEE ALSO
 

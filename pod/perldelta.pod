@@ -3284,6 +3284,19 @@ In case of failure please try running them manually, for example
 
     ./perl -Ilib ext/Time/HiRes/HiRes.t
 
+=head2 Unicode in package/class and subroutine names does not work
+
+One can have Unicode in identifier names, but not in package/class or
+subroutine names.  While some limited functionality towards this does
+exist as of Perl 5.8.0, that is more accidental than designed; use of
+Unicode for the said purposes is unsupported.
+
+One reason of this unfinishedness is its (currently) inherent
+unportability: since both package names and subroutine names may
+need to be mapped to file and directory names, the Unicode capability
+of the filesystem becomes important-- and there unfortunately aren't
+portable answers.
+
 =head2 UNICOS/mk
 
 =over 4
