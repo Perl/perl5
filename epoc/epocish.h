@@ -108,7 +108,7 @@
 
 /* epocemx setenv bug workaround */
 #ifndef PERL_SYS_INIT
-#    define PERL_SYS_INIT(c,v)    MALLOC_CHECK_TAINT2(*c,*v) putenv(".dummy=foo"); putenv(".dummy"); MALLOC_INIT
+#    define PERL_SYS_INIT(c,v)    EARLY_INIT2(*c,*v) MALLOC_CHECK_TAINT2(*c,*v) putenv(".dummy=foo"); putenv(".dummy"); MALLOC_INIT
 #endif
 
 #ifndef PERL_SYS_TERM

@@ -45,6 +45,7 @@ Anod	|void	|perl_free	|PerlInterpreter* interp
 Anod	|int	|perl_run	|PerlInterpreter* interp
 Anod	|int	|perl_parse	|PerlInterpreter* interp|XSINIT_t xsinit \
 				|int argc|char** argv|char** env
+Anp	|bool	|doing_taint	|int argc|char** argv|char** env
 #if defined(USE_ITHREADS)
 Anod	|PerlInterpreter*|perl_clone|PerlInterpreter* interp, UV flags
 #  if defined(PERL_IMPLICIT_SYS)
@@ -1401,6 +1402,9 @@ s	|CV*	|cv_clone2	|CV *proto|CV *outside
 #endif
 pd 	|CV*	|find_runcv	|U32 *db_seqp
 p	|void	|free_tied_hv_pool
+#if defined(DEBUGGING)
+p	|int	|get_debug_opts	|char **s
+#endif
 
 
 

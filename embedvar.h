@@ -275,6 +275,7 @@
 #define PL_gid			(PERL_GET_INTERP->Igid)
 #define PL_glob_index		(PERL_GET_INTERP->Iglob_index)
 #define PL_globalstash		(PERL_GET_INTERP->Iglobalstash)
+#define PL_hash_seed		(PERL_GET_INTERP->Ihash_seed)
 #define PL_he_arenaroot		(PERL_GET_INTERP->Ihe_arenaroot)
 #define PL_he_root		(PERL_GET_INTERP->Ihe_root)
 #define PL_hintgv		(PERL_GET_INTERP->Ihintgv)
@@ -1420,6 +1421,7 @@
 #define PL_curinterp		(PL_Vars.Gcurinterp)
 #define PL_do_undump		(PL_Vars.Gdo_undump)
 #define PL_dollarzero_mutex	(PL_Vars.Gdollarzero_mutex)
+#define PL_earlytaint		(PL_Vars.Gearlytaint)
 #define PL_hexdigit		(PL_Vars.Ghexdigit)
 #define PL_malloc_mutex		(PL_Vars.Gmalloc_mutex)
 #define PL_op_mutex		(PL_Vars.Gop_mutex)
@@ -1434,6 +1436,7 @@
 #define PL_Gcurinterp		PL_curinterp
 #define PL_Gdo_undump		PL_do_undump
 #define PL_Gdollarzero_mutex	PL_dollarzero_mutex
+#define PL_Gearlytaint		PL_earlytaint
 #define PL_Ghexdigit		PL_hexdigit
 #define PL_Gmalloc_mutex	PL_malloc_mutex
 #define PL_Gop_mutex		PL_op_mutex

@@ -3,6 +3,16 @@
 # $Id: Changes,v 1.96 2003/06/18 09:29:02 dankogai Exp $
 #
 $Revision: 1.96 $ $Date: 2003/06/18 09:29:02 $
+! lib/Encode/Guess.pm
+  $Encode::Guess::NoUTFAutoGuess is added so you can turn off
+  automatic  utf(8|16|32) guessing -- originally by Autrijus
+  Message-Id: <20030626162731.GA2077@not.autrijus.org>
+! Encode.pm
+  Addressed the following;
+  Subject: [perl #22835] FB_QUIET doesn't work with Encode::encode 
+  Message-Id: <rt-22835-59975.6.8650775354304@rt.perl.org>
+
+1.96 2003/06/18 09:29:02
 ! lib/Encode/JP/JP.pm t/guess.t
   m/(...)/ in void context then $1 is considered a Bad Thing
   Message-Id: <B5AB34D0-A019-11D7-AF03-000393AE4244@dan.co.jp>

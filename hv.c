@@ -1693,11 +1693,11 @@ Perl_hv_clear(pTHX_ HV *hv)
 
     xhv = (XPVHV*)SvANY(hv);
 
-    if(SvREADONLY(hv)) {
+    if (SvREADONLY(hv)) {
 	/* restricted hash: convert all keys to placeholders */
 	I32 i;
 	HE* entry;
-	for (i=0; i< (I32) xhv->xhv_max; i++) {
+	for (i = 0; i <= (I32) xhv->xhv_max; i++) {
 	    entry = ((HE**)xhv->xhv_array)[i];
 	    for (; entry; entry = HeNEXT(entry)) {
 		/* not already placeholder */

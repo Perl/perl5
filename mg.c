@@ -1982,8 +1982,13 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	break;
 
     case '\004':	/* ^D */
-	PL_debug = (SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv)) | DEBUG_TOP_FLAG;
+#ifdef DEBUGGING
+	s = SvPV_nolen(sv);
+	PL_debug = get_debug_opts(&s) | DEBUG_TOP_FLAG;
 	DEBUG_x(dump_all());
+#else
+	PL_debug = (SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv)) | DEBUG_TOP_FLAG;
+#endif
 	break;
     case '\005':  /* ^E */
 	if (*(mg->mg_ptr+1) == '\0') {
@@ -2378,60 +2383,26 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	     pstat(PSTAT_SETCMD, un, len, 0, 0);
 	}
 #endif
-	if (!PL_origalen) {
-	    s = PL_origargv[0];
-	    s += strlen(s);
-	    /* See if all the arguments are contiguous in memory */
-	    for (i = 1; i < PL_origargc; i++) {
-		if (PL_origargv[i] == s + 1
-#ifdef OS2
-		    || PL_origargv[i] == s + 2
-#endif
-		   )
-		{
-		    ++s;
-		    s += strlen(s);	/* this one is ok too */
-		}
-		else
-		    break;
-	    }
-	    /* can grab env area too? */
-	    if (PL_origenviron
-#ifdef USE_ITHREADS
-		&& PL_curinterp == aTHX
-#endif
-		&& (PL_origenviron[0] == s + 1))
-	    {
-		my_setenv("NoNe  SuCh", Nullch);
-					    /* force copy of environment */
-		for (i = 0; PL_origenviron[i]; i++)
-		    if (PL_origenviron[i] == s + 1) {
-			++s;
-			s += strlen(s);
-		    }
-		    else
-			break;
-	    }
-	    PL_origalen = s - PL_origargv[0];
-	}
+	/* PL_origalen is set in perl_parse(). */
 	s = SvPV_force(sv,len);
-	i = len;
-	if (i >= (I32)PL_origalen) {
-	    i = PL_origalen;
-	    /* don't allow system to limit $0 seen by script */
-	    /* SvCUR_set(sv, i); *SvEND(sv) = '\0'; */
-	    Copy(s, PL_origargv[0], i, char);
-	    s = PL_origargv[0]+i;
-	    *s = '\0';
+	if (len >= (I32)PL_origalen) {
+	    /* Longer than original, will be truncated. */
+	    Copy(s, PL_origargv[0], PL_origalen, char);
+	    PL_origargv[0][PL_origalen - 1] = 0;
 	}
 	else {
-	    Copy(s, PL_origargv[0], i, char);
-	    s = PL_origargv[0]+i;
-	    *s++ = '\0';
-	    while (++i < (I32)PL_origalen)
-		*s++ = '\0';
+	    /* Shorter than original, will be padded. */
+	    Copy(s, PL_origargv[0], len, char);
+	    PL_origargv[0][len] = 0;
+	    memset(PL_origargv[0] + len + 1,
+		   /* Is the space counterintuitive?  Yes.
+		    * (You were expecting \0?)  
+		    * Does it work?  Seems to.  (In Linux 2.4.20 at least.)
+		    * --jhi */
+		   (int)' ',
+		   PL_origalen - len - 1);
 	    for (i = 1; i < PL_origargc; i++)
-		PL_origargv[i] = Nullch;
+		 PL_origargv[i] = 0;
 	}
 	UNLOCK_DOLLARZERO_MUTEX;
 	break;

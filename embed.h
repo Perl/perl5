@@ -29,6 +29,7 @@
 
 #if defined(PERL_IMPLICIT_SYS)
 #endif
+#define doing_taint		Perl_doing_taint
 #if defined(USE_ITHREADS)
 #  if defined(PERL_IMPLICIT_SYS)
 #  endif
@@ -2165,6 +2166,11 @@
 #ifdef PERL_CORE
 #define free_tied_hv_pool	Perl_free_tied_hv_pool
 #endif
+#if defined(DEBUGGING)
+#ifdef PERL_CORE
+#define get_debug_opts		Perl_get_debug_opts
+#endif
+#endif
 #define ck_anoncode		Perl_ck_anoncode
 #define ck_bitop		Perl_ck_bitop
 #define ck_concat		Perl_ck_concat
@@ -2556,6 +2562,7 @@
 
 #if defined(PERL_IMPLICIT_SYS)
 #endif
+#define doing_taint		Perl_doing_taint
 #if defined(USE_ITHREADS)
 #  if defined(PERL_IMPLICIT_SYS)
 #  endif
@@ -4661,6 +4668,11 @@
 #endif
 #ifdef PERL_CORE
 #define free_tied_hv_pool()	Perl_free_tied_hv_pool(aTHX)
+#endif
+#if defined(DEBUGGING)
+#ifdef PERL_CORE
+#define get_debug_opts(a)	Perl_get_debug_opts(aTHX_ a)
+#endif
 #endif
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
 #define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)

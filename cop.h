@@ -340,6 +340,7 @@ struct block {
 	PL_retstack_ix	 = cx->blk_oldretsp,				\
 	pm		 = cx->blk_oldpm,				\
 	gimme		 = cx->blk_gimme;				\
+	DEBUG_SCOPE("POPBLOCK");					\
 	DEBUG_l( PerlIO_printf(Perl_debug_log, "Leaving block %ld, type %s\n",		\
 		    (long)cxstack_ix+1,PL_block_type[CxTYPE(cx)]); )
 
@@ -349,7 +350,8 @@ struct block {
 	PL_markstack_ptr = PL_markstack + cx->blk_oldmarksp,		\
 	PL_scopestack_ix = cx->blk_oldscopesp,				\
 	PL_retstack_ix	 = cx->blk_oldretsp,				\
-	PL_curpm         = cx->blk_oldpm
+	PL_curpm         = cx->blk_oldpm;				\
+	DEBUG_SCOPE("TOPBLOCK");
 
 /* substitution context */
 struct subst {

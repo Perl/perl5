@@ -1216,6 +1216,14 @@ important ones are explained in L<perlxs> as well. Pay special attention
 to L<perlguts/Background and PERL_IMPLICIT_CONTEXT> for information on
 the C<[pad]THX_?> macros.
 
+=head2 The .i Targets
+
+You can expand the macros in a F<foo.c> file by saying
+
+    make foo.i
+
+which will expand the macros using cpp.  Don't be scared by the results.
+
 =head2 Poking at Perl
 
 To really poke around with Perl, you'll probably want to build Perl for
@@ -1309,8 +1317,11 @@ blessing when stepping through miles of source code.
 =item print
 
 Execute the given C code and print its results. B<WARNING>: Perl makes
-heavy use of macros, and F<gdb> is not aware of macros. You'll have to
-substitute them yourself. So, for instance, you can't say
+heavy use of macros, and F<gdb> does not necessarily support macros
+(see later L</"gdb macro support">).  You'll have to substitute them
+yourself, or to invoke cpp on the source code files
+(see L</"The .i Targets">)
+So, for instance, you can't say
 
     print SvPV_nolen(sv)
 
@@ -1320,7 +1331,15 @@ but you have to say
 
 You may find it helpful to have a "macro dictionary", which you can
 produce by saying C<cpp -dM perl.c | sort>. Even then, F<cpp> won't
-recursively apply the macros for you. 
+recursively apply those macros for you. 
+
+=head2 gdb macro support
+
+Recent versions of F<gdb> have fairly good macro support, but
+in order to use it you'll need to compile perl with macro definitions
+included in the debugging information.  Using F<gcc> version 3.1, this
+means configuring with C<-Doptimize=-g3>.  Other compilers might use a
+different switch (if they support debugging macros at all).
 
 =back
 

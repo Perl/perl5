@@ -147,7 +147,7 @@ sub encode($$;$)
 	Carp::croak("Unknown encoding '$name'");
     }
     my $octets = $enc->encode($string,$check);
-    return undef if ($check && length($string));
+    $_[1] = $string if $check;
     return $octets;
 }
 

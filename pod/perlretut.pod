@@ -689,10 +689,11 @@ inside goes into the special variables C<$1>, C<$2>, etc.  They can be
 used just as ordinary variables:
 
     # extract hours, minutes, seconds
-    $time =~ /(\d\d):(\d\d):(\d\d)/;  # match hh:mm:ss format
-    $hours = $1;
-    $minutes = $2;
-    $seconds = $3;
+    if ($time =~ /(\d\d):(\d\d):(\d\d)/) {    # match hh:mm:ss format
+	$hours = $1;
+	$minutes = $2;
+	$seconds = $3;
+    }
 
 Now, we know that in scalar context,
 S<C<$time =~ /(\d\d):(\d\d):(\d\d)/> > returns a true or false

@@ -204,7 +204,7 @@ sub init_aliases
 	# CP936 doesn't have vendor-addon for GBK, so they're identical.
 	define_alias( qr/^gbk$/i => '"cp936"');
 	# This fixes gb2312 vs. euc-cn confusion, practically
-	define_alias( qr/\bGB[-_ ]?2312(?:\D.*$|$)/i => '"euc-cn"' );
+	define_alias( qr/\bGB[-_ ]?2312(?!-?raw)/i => '"euc-cn"' );
 	# for Encode::JP
 	define_alias( qr/\bjis$/i            => '"7bit-jis"' );
 	define_alias( qr/\beuc.*jp$/i        => '"euc-jp"' );

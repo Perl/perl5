@@ -91,7 +91,8 @@ ok(1,"");
     ok(1,"");
 }
 
-if ($^O eq 'linux') { # We parse ps output so this is OS-dependent.
+# We parse ps output so this is OS-dependent.
+if ($^O =~ /^(linux|dec_osf)$/) {
   # First modify $0 in a subthread.
   print "# mainthread: \$0 = $0\n";
   threads->new( sub {
@@ -100,20 +101,20 @@ if ($^O eq 'linux') { # We parse ps output so this is OS-dependent.
 		  print "# subthread: \$0 = $0\n" } )->join;
   print "# mainthread: \$0 = $0\n";
   print "# pid = $$\n";
-  if (open PS, "ps -f |") { # Note: must work in (all) Linux(es).
+  if (open PS, "ps -f |") { # Note: must work in (all) systems.
     my ($sawpid, $sawexe);
     while (<PS>) {
-      s/\s+$//; # there seems to be extra whitespace at the end by ps(1)?
-      print "# $_\n";
+      chomp;
+      print "# [$_]\n";
       if (/^\S+\s+$$\s/) {
 	$sawpid++;
-	if (/\sfoobar\b/) {
+	if (/\sfoobar$/) {
 	  $sawexe++;
         }
 	last;
       }
     }
-    close PS;
+    close PS or die;
     if ($sawpid) {
       ok($sawpid && $sawexe, 'altering $0 is effective');
     } else {
