@@ -251,7 +251,7 @@ require DynaLoader;
 @EXPORT_OK = qw(CR LF CRLF $CR $LF $CRLF);
 
 %EXPORT_TAGS = (
-    crlf    => [qw(CR LF CRLF $CR $LF $CRLF)]
+    crlf    => [qw(CR LF CRLF $CR $LF $CRLF)],
     all     => [@EXPORT, @EXPORT_OK],
 );
 
