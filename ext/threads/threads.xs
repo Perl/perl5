@@ -13,7 +13,7 @@
 #define PERL_THREAD_ALLOC_SPECIFIC(k) \
 STMT_START {\
   if((k = TlsAlloc()) == TLS_OUT_OF_INDEXES) {\
-    PerlIO_printf(PerlIO_stderr(),"panic threads.h: TlsAlloc");\
+    PerlIO_printf(PerlIO_stderr(),"panic threads.xs: TlsAlloc");\
     exit(1);\
   }\
 } STMT_END
@@ -31,7 +31,7 @@ typedef perl_os_thread pthread_t;
 #define PERL_THREAD_GETSPECIFIC(k,v) pthread_getspecific(k,&v)
 #define PERL_THREAD_ALLOC_SPECIFIC(k) STMT_START {\
   if(pthread_keycreate(&(k),0)) {\
-    PerlIO_printf(PerlIO_stderr(), "panic threads.h: pthread_key_create");\
+    PerlIO_printf(PerlIO_stderr(), "panic threads.xs: pthread_key_create");\
     exit(1);\
   }\
 } STMT_END
@@ -40,7 +40,7 @@ typedef perl_os_thread pthread_t;
 #define PERL_THREAD_GETSPECIFIC(k,v) v = pthread_getspecific(k)
 #define PERL_THREAD_ALLOC_SPECIFIC(k) STMT_START {\
   if(pthread_key_create(&(k),0)) {\
-    PerlIO_printf(PerlIO_stderr(), "panic threads.h: pthread_key_create");\
+    PerlIO_printf(PerlIO_stderr(), "panic threads.xs: pthread_key_create");\
     exit(1);\
   }\
 } STMT_END
