@@ -464,7 +464,7 @@ Perl_rninstr(pTHX_ register const char *big, const char *bigend, const char *lit
  * Set up for a new ctype locale.
  */
 void
-Perl_new_ctype(pTHX_ const char *newctype)
+Perl_new_ctype(pTHX_ char *newctype)
 {
 #ifdef USE_LOCALE_CTYPE
 
@@ -483,10 +483,54 @@ Perl_new_ctype(pTHX_ const char *newctype)
 }
 
 /*
+ * Standardize the locale name from a string returned by 'setlocale'.
+ *
+ * The standard return value of setlocale() is either
+ * (1) "xx_YY" if the first argument of setlocale() is not LC_ALL
+ * (2) "xa_YY xb_YY ..." if the first argument of setlocale() is LC_ALL
+ *     (the space-separated values represent the various sublocales,
+ *      in some unspecificed order)
+ *
+ * In some platforms it has a form like "LC_SOMETHING=Lang_Country.866\n",
+ * which is harmful for further use of the string in setlocale().
+ *
+ */
+STATIC char *
+S_stdize_locale(pTHX_ char *locs)
+{
+    char *s;
+    bool okay = TRUE;
+
+    if ((s = strchr(locs, '='))) {
+	char *t;
+
+	okay = FALSE;
+	if ((t = strchr(s, '.'))) {
+	    char *u;
+
+	    if ((u = strchr(t, '\n'))) {
+
+		if (u[1] == 0) {
+		    STRLEN len = u - s;
+		    Move(t + 1, locs, len, char);
+		    locs[len] = 0;
+		    okay = TRUE;
+		}
+	    }
+	}
+    }
+
+    if (!okay)
+	Perl_croak(aTHX_ "Can't fix broken locale name \"%s\"", locs);
+
+    return locs;
+}
+
+/*
  * Set up for a new collation locale.
  */
 void
-Perl_new_collate(pTHX_ const char *newcoll)
+Perl_new_collate(pTHX_ char *newcoll)
 {
 #ifdef USE_LOCALE_COLLATE
 
@@ -495,17 +539,17 @@ Perl_new_collate(pTHX_ const char *newcoll)
 	    ++PL_collation_ix;
 	    Safefree(PL_collation_name);
 	    PL_collation_name = NULL;
-	    PL_collation_standard = TRUE;
-	    PL_collxfrm_base = 0;
-	    PL_collxfrm_mult = 2;
 	}
+	PL_collation_standard = TRUE;
+	PL_collxfrm_base = 0;
+	PL_collxfrm_mult = 2;
 	return;
     }
 
     if (! PL_collation_name || strNE(PL_collation_name, newcoll)) {
 	++PL_collation_ix;
 	Safefree(PL_collation_name);
-	PL_collation_name = savepv(newcoll);
+	PL_collation_name = stdize_locale(savepv(newcoll));
 	PL_collation_standard = (strEQ(newcoll, "C") || strEQ(newcoll, "POSIX"));
 
 	{
@@ -549,7 +593,7 @@ Perl_set_numeric_radix(pTHX)
  * Set up for a new numeric locale.
  */
 void
-Perl_new_numeric(pTHX_ const char *newnum)
+Perl_new_numeric(pTHX_ char *newnum)
 {
 #ifdef USE_LOCALE_NUMERIC
 
@@ -557,15 +601,15 @@ Perl_new_numeric(pTHX_ const char *newnum)
 	if (PL_numeric_name) {
 	    Safefree(PL_numeric_name);
 	    PL_numeric_name = NULL;
-	    PL_numeric_standard = TRUE;
-	    PL_numeric_local = TRUE;
 	}
+	PL_numeric_standard = TRUE;
+	PL_numeric_local = TRUE;
 	return;
     }
 
     if (! PL_numeric_name || strNE(PL_numeric_name, newnum)) {
 	Safefree(PL_numeric_name);
-	PL_numeric_name = savepv(newnum);
+	PL_numeric_name = stdize_locale(savepv(newnum));
 	PL_numeric_standard = (strEQ(newnum, "C") || strEQ(newnum, "POSIX"));
 	PL_numeric_local = TRUE;
 	set_numeric_radix();
@@ -583,6 +627,7 @@ Perl_set_numeric_standard(pTHX)
 	setlocale(LC_NUMERIC, "C");
 	PL_numeric_standard = TRUE;
 	PL_numeric_local = FALSE;
+	set_numeric_radix();
     }
 
 #endif /* USE_LOCALE_NUMERIC */
@@ -1931,7 +1976,7 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 
 #ifdef USE_ENVIRON_ARRAY
        /* VMS' and EPOC's my_setenv() is in vms.c and epoc.c */
-#if !defined(WIN32) && !defined(__CYGWIN__)
+#if !defined(WIN32)
 void
 Perl_my_setenv(pTHX_ char *nam, char *val)
 {
@@ -1973,50 +2018,19 @@ Perl_my_setenv(pTHX_ char *nam, char *val)
     (void)sprintf(environ[i],"%s=%s",nam,val);/* all that work just for this */
 
 #else   /* PERL_USE_SAFE_PUTENV */
+#   if defined(__CYGWIN__)
+    setenv(nam, val, 1);
+#   else
     char *new_env;
 
     new_env = (char*)safesysmalloc((strlen(nam) + strlen(val) + 2) * sizeof(char));
     (void)sprintf(new_env,"%s=%s",nam,val);/* all that work just for this */
     (void)putenv(new_env);
+#   endif /* __CYGWIN__ */
 #endif  /* PERL_USE_SAFE_PUTENV */
 }
 
-#else /* WIN32 || __CYGWIN__ */
-#if defined(__CYGWIN__)
-/*
- * Save environ of perl.exe, currently Cygwin links in separate environ's
- * for each exe/dll.  Probably should be a member of impure_ptr.
- */
-static char ***Perl_main_environ;
-
-EXTERN_C void
-Perl_my_setenv_init(char ***penviron)
-{
-    Perl_main_environ = penviron;
-}
-
-void
-Perl_my_setenv(pTHX_ char *nam, char *val)
-{
-    /* You can not directly manipulate the environ[] array because
-     * the routines do some additional work that syncs the Cygwin
-     * environment with the Windows environment.
-     */
-    char *oldstr = environ[setenv_getix(nam)];
-
-    if (!val) {
-       if (!oldstr)
-           return;
-       unsetenv(nam);
-       safesysfree(oldstr);
-       return;
-    }
-    setenv(nam, val, 1);
-    environ = *Perl_main_environ; /* environ realloc can occur in setenv */
-    if(oldstr && environ[setenv_getix(nam)] != oldstr)
-       safesysfree(oldstr);
-}
-#else /* if WIN32 */
+#else /* WIN32 */
 
 void
 Perl_my_setenv(pTHX_ char *nam,char *val)
@@ -2077,7 +2091,6 @@ Perl_my_setenv(pTHX_ char *nam,char *val)
 }
 
 #endif /* WIN32 */
-#endif
 
 I32
 Perl_setenv_getix(pTHX_ char *nam)

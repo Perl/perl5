@@ -8,6 +8,18 @@ BEGIN {
 	print "1..0 # Skip: Sys::Syslog was not built\n";
 	exit 0;
     }
+
+    require Socket;
+
+    # This code inspired by Sys::Syslog::connect():
+    require Sys::Hostname;
+    my ($host_uniq) = Sys::Hostname::hostname();
+    my ($host)      = $host_uniq =~ /([A-Za-z0-9_.-]+)/;
+
+    if (! defined Socket::inet_aton($host)) {
+        print "1..0 # Skip: Can't lookup $host\n";
+        exit 0;
+    }
 }
 
 use Sys::Syslog qw(:DEFAULT setlogsock);

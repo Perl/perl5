@@ -150,7 +150,7 @@ extern int h_errno;
 #    include <fcntl.h>
 #  endif
 
-#  if defined(HAS_FCNTL) && defined(F_SETLK) && defined (F_SETLKW)
+#  if defined(HAS_FCNTL) && defined(FCNTL_CAN_LOCK)
 #    define FLOCK fcntl_emulate_flock
 #    define FCNTL_EMULATE_FLOCK
 #  else /* no flock() or fcntl(F_SETLK,...) */

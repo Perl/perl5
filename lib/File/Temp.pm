@@ -124,7 +124,7 @@ use Carp;
 use File::Spec 0.8;
 use File::Path qw/ rmtree /;
 use Fcntl 1.03;
-use Errno qw( EEXIST ENOENT ENOTDIR EINVAL );
+use Errno;
 require VMS::Stdio if $^O eq 'VMS';
 
 # Need the Symbol package if we are running older perl
@@ -443,7 +443,7 @@ sub _gettemp {
 
 	# Error opening file - abort with error
 	# if the reason was anything but EEXIST
-	unless ($! == EEXIST) {
+	unless ($!{EEXIST}) {
 	  carp "File::Temp: Could not create temp file $path: $!";
 	  return ();
 	}
@@ -473,7 +473,7 @@ sub _gettemp {
 
 	# Abort with error if the reason for failure was anything
 	# except EEXIST
-	unless ($! == EEXIST) {
+	unless ($!{EEXIST}) {
 	  carp "File::Temp: Could not create directory $path: $!";
 	  return ();
 	}

@@ -334,7 +334,10 @@ operating systems put mandatory locks on such files.
 
 Don't count on a specific environment variable existing in C<%ENV>.
 Don't count on C<%ENV> entries being case-sensitive, or even
-case-preserving.
+case-preserving.  Don't try to clear %ENV by saying C<%ENV = ();>, or,
+if you really have to, make it conditional on C<$^O ne 'VMS'> since in
+VMS the C<%ENV> table is much more than a per-process key-value string
+table.
 
 Don't count on signals or C<%SIG> for anything.
 
@@ -683,7 +686,7 @@ The ActiveState Pages, http://www.activestate.com/
 =item *
 
 The Cygwin environment for Win32; F<README.cygwin> (installed 
-as L<perlcygwin>), http://sources.redhat.com/cygwin/
+as L<perlcygwin>), http://www.cygwin.com/
 
 =item *
 
@@ -1210,7 +1213,7 @@ A free perl5-based PERL.NLM for Novell Netware is available in
 precompiled binary and source code form from http://www.novell.com/
 as well as from CPAN.
 
-=item 
+=item  *
 
 Plan 9, F<README.plan9>
 

@@ -10,7 +10,7 @@ WARNING: The implementation of Unicode support in Perl is incomplete.
 
 The following areas need further work.
 
-=over
+=over 4
 
 =item Input and Output Disciplines
 

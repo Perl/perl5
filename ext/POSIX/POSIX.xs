@@ -3940,6 +3940,14 @@ pathconf(filename, name)
 SysRet
 pause()
 
+SysRet
+setgid(gid)
+	Gid_t		gid
+
+SysRet
+setuid(uid)
+	Uid_t		uid
+
 SysRetLong
 sysconf(name)
 	int		name
@@ -3947,3 +3955,4 @@ sysconf(name)
 char *
 ttyname(fd)
 	int		fd
+

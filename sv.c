@@ -2555,7 +2555,8 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 	    SvIVX(dstr) = SvIVX(sstr);
 	    if (SvIsUV(sstr))
 		SvIsUV_on(dstr);
-	    SvTAINT(dstr);
+	    if (SvTAINTED(sstr))
+		SvTAINT(dstr);
 	    return;
 	}
 	goto undef_sstr;
@@ -2575,7 +2576,8 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 	    }
 	    SvNVX(dstr) = SvNVX(sstr);
 	    (void)SvNOK_only(dstr);
-	    SvTAINT(dstr);
+	    if (SvTAINTED(sstr))
+		SvTAINT(dstr);
 	    return;
 	}
 	goto undef_sstr;
@@ -2644,7 +2646,8 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 	    GvINTRO_off(dstr);		/* one-shot flag */
 	    gp_free((GV*)dstr);
 	    GvGP(dstr) = gp_ref(GvGP(sstr));
-	    SvTAINT(dstr);
+	    if (SvTAINTED(sstr))
+		SvTAINT(dstr);
 	    if (GvIMPORTED(dstr) != GVf_IMPORTED
 		&& CopSTASH_ne(PL_curcop, GvSTASH(dstr)))
 	    {
@@ -2790,7 +2793,8 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 		    SvREFCNT_dec(dref);
 		if (intro)
 		    SAVEFREESV(sref);
-		SvTAINT(dstr);
+		if (SvTAINTED(sstr))
+		    SvTAINT(dstr);
 		return;
 	    }
 	    if (SvPVX(dstr)) {
@@ -2898,7 +2902,8 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 	else
 	    (void)SvOK_off(dstr);
     }
-    SvTAINT(dstr);
+    if (SvTAINTED(sstr))
+	SvTAINT(dstr);
 }
 
 /*
@@ -6516,15 +6521,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		*--eptr = '#';
 	    *--eptr = '%';
 
-	    {
-		STORE_NUMERIC_STANDARD_SET_LOCAL();
-#ifdef USE_LOCALE_NUMERIC
-		if (!was_standard && maybe_tainted)
-		    *maybe_tainted = TRUE;
-#endif
-		(void)sprintf(PL_efloatbuf, eptr, nv);
-		RESTORE_NUMERIC_STANDARD();
-	    }
+	    (void)sprintf(PL_efloatbuf, eptr, nv);
 
 	    eptr = PL_efloatbuf;
 	    elen = strlen(PL_efloatbuf);

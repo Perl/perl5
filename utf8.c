@@ -205,17 +205,17 @@ Perl_utf8_to_uv(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
 	!(flags & UTF8_ALLOW_CONTINUATION)) {
 	if (dowarn)
 	    Perl_warner(aTHX_ WARN_UTF8,
-			"Malformed UTF-8 character (unexpected continuation byte 0x%02x)",
+			"Malformed UTF-8 character (unexpected continuation byte 0x%02"UVxf")",
 			uv);
 	goto malformed;
     }
 
-    if ((uv >= 0xc0 && uv <= 0xfd && s[1] < 0x80) &&
+    if ((uv >= 0xc0 && uv <= 0xfd && curlen >1 && s[1] < 0x80) &&
 	!(flags & UTF8_ALLOW_NON_CONTINUATION)) {
 	if (dowarn)
 	    Perl_warner(aTHX_ WARN_UTF8,
-			"Malformed UTF-8 character (unexpected non-continuation byte 0x%02x after byte 0x%02x)",
-			s[1], uv);
+			"Malformed UTF-8 character (unexpected non-continuation byte 0x%02"UVxf" after byte 0x%02"UVxf")",
+			(UV)s[1], uv);
 	goto malformed;
     }
     
@@ -223,7 +223,7 @@ Perl_utf8_to_uv(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
 	!(flags & UTF8_ALLOW_FE_FF)) {
 	if (dowarn)
 	    Perl_warner(aTHX_ WARN_UTF8,
-			"Malformed UTF-8 character (byte 0x%02x)",
+			"Malformed UTF-8 character (byte 0x%02"UVxf")",
 			uv);
 	goto malformed;
     }

@@ -1186,13 +1186,13 @@ S_scan_const(pTHX_ char *start)
     register char *s = start;			/* start of the constant */
     register char *d = SvPVX(sv);		/* destination for copies */
     bool dorange = FALSE;			/* are we in a translit range? */
-    bool has_utf = FALSE;			/* embedded \x{} */
+    bool has_utf8 = FALSE;			/* embedded \x{} */
     UV uv;
 
     I32 utf = (PL_lex_inwhat == OP_TRANS && PL_sublex_info.sub_op)
 	? (PL_sublex_info.sub_op->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF))
 	: UTF;
-    I32 thisutf = (PL_lex_inwhat == OP_TRANS && PL_sublex_info.sub_op)
+    I32 this_utf8 = (PL_lex_inwhat == OP_TRANS && PL_sublex_info.sub_op)
 	? (PL_sublex_info.sub_op->op_private & (PL_lex_repl ?
 						OPpTRANS_FROM_UTF : OPpTRANS_TO_UTF))
 	: UTF;
@@ -1311,7 +1311,7 @@ S_scan_const(pTHX_ char *start)
 
 	/* (now in tr/// code again) */
 
-	if (*s & 0x80 && thisutf) {
+	if (*s & 0x80 && this_utf8) {
 	    STRLEN len;
 	    UV uv;
 
@@ -1327,7 +1327,7 @@ S_scan_const(pTHX_ char *start)
 		while (len--)
 		    *d++ = *s++;
 	    }
-	    has_utf = TRUE;
+	    has_utf8 = TRUE;
 	    continue;
 	}
 
@@ -1400,9 +1400,10 @@ S_scan_const(pTHX_ char *start)
 			yyerror("Missing right brace on \\x{}");
 			e = s;
 		    }
-		    {
+		    else {
 			STRLEN len = 1;		/* allow underscores */
 			uv = (UV)scan_hex(s + 1, e - s - 1, &len);
+			has_utf8 = TRUE;
 		    }
 		    s = e + 1;
 		}
@@ -1419,8 +1420,8 @@ S_scan_const(pTHX_ char *start)
 		 * There will always enough room in sv since such escapes will
 		 * be longer than any utf8 sequence they can end up as
 		 */
-		if (uv > 127) {
-		    if (!thisutf && !has_utf && uv > 255) {
+		if (uv > 127 || has_utf8) {
+		    if (!this_utf8 && !has_utf8 && uv > 255) {
 		        /* might need to recode whatever we have accumulated so far
 			 * if it contains any hibit chars
 			 */
@@ -1452,9 +1453,9 @@ S_scan_const(pTHX_ char *start)
                         }
                     }
 
-                    if (thisutf || uv > 255) {
+                    if (has_utf8 || uv > 255) {
 		        d = (char*)uv_to_utf8((U8*)d, uv);
-			has_utf = TRUE;
+			this_utf8 = TRUE;
                     }
 		    else {
 		        *d++ = (char)uv;
@@ -1483,7 +1484,7 @@ S_scan_const(pTHX_ char *start)
 		    res = new_constant( Nullch, 0, "charnames", 
 					res, Nullsv, "\\N{...}" );
 		    str = SvPV(res,len);
-		    if (!has_utf && SvUTF8(res)) {
+		    if (!has_utf8 && SvUTF8(res)) {
 			char *ostart = SvPVX(sv);
 			SvCUR_set(sv, d - ostart);
 			SvPOK_on(sv);
@@ -1492,7 +1493,7 @@ S_scan_const(pTHX_ char *start)
 			/* this just broke our allocation above... */
 			SvGROW(sv, send - start);
 			d = SvPVX(sv) + SvCUR(sv);
-			has_utf = TRUE;
+			has_utf8 = TRUE;
 		    }
 		    if (len > e - s + 4) {
 			char *odest = SvPVX(sv);
@@ -1571,7 +1572,7 @@ S_scan_const(pTHX_ char *start)
     *d = '\0';
     SvCUR_set(sv, d - SvPVX(sv));
     SvPOK_on(sv);
-    if (has_utf)
+    if (has_utf8)
 	SvUTF8_on(sv);
 
     /* shrink the sv if we allocated more than we used */
@@ -2503,8 +2504,32 @@ Perl_yylex(pTHX)
 	    goto retry;
 	}
 	do {
-	    bool bof;
-	    bof = PL_rsfp && (PerlIO_tell(PL_rsfp) == 0); /* *Before* read! */
+	    bool bof = PL_rsfp ? TRUE : FALSE;
+	    if (bof) {
+#ifdef PERLIO_IS_STDIO
+#  ifdef __GNU_LIBRARY__
+#    if __GNU_LIBRARY__ == 1 /* Linux glibc5 */
+#      define FTELL_FOR_PIPE_IS_BROKEN
+#    endif
+#  else
+#    ifdef __GLIBC__
+#      if __GLIBC__ == 1 /* maybe some glibc5 release had it like this? */
+#        define FTELL_FOR_PIPE_IS_BROKEN
+#      endif
+#    endif
+#  endif
+#endif
+#ifdef FTELL_FOR_PIPE_IS_BROKEN
+		/* This loses the possibility to detect the bof
+		 * situation on perl -P when the libc5 is being used.
+		 * Workaround?  Maybe attach some extra state to PL_rsfp?
+		 */
+		if (!PL_preprocess)
+		    bof = PerlIO_tell(PL_rsfp) == 0;
+#else
+		bof = PerlIO_tell(PL_rsfp) == 0;
+#endif
+	    }
 	    s = filter_gets(PL_linestr, PL_rsfp, 0);
 	    if (s == Nullch) {
 	      fake_eof:
@@ -5182,7 +5207,7 @@ Perl_keyword(pTHX_ register char *d, I32 len)
 	    if (strEQ(d,"exit"))		return -KEY_exit;
 	    if (strEQ(d,"eval"))		return KEY_eval;
 	    if (strEQ(d,"exec"))		return -KEY_exec;
-	    if (strEQ(d,"each"))		return KEY_each;
+           if (strEQ(d,"each"))                return -KEY_each;
 	    break;
 	case 5:
 	    if (strEQ(d,"elsif"))		return KEY_elsif;
@@ -5332,7 +5357,7 @@ Perl_keyword(pTHX_ register char *d, I32 len)
 	break;
     case 'k':
 	if (len == 4) {
-	    if (strEQ(d,"keys"))		return KEY_keys;
+           if (strEQ(d,"keys"))                return -KEY_keys;
 	    if (strEQ(d,"kill"))		return -KEY_kill;
 	}
 	break;
@@ -5423,11 +5448,11 @@ Perl_keyword(pTHX_ register char *d, I32 len)
     case 'p':
 	switch (len) {
 	case 3:
-	    if (strEQ(d,"pop"))			return KEY_pop;
+           if (strEQ(d,"pop"))                 return -KEY_pop; 
 	    if (strEQ(d,"pos"))			return KEY_pos;
 	    break;
 	case 4:
-	    if (strEQ(d,"push"))		return KEY_push;
+           if (strEQ(d,"push"))                return -KEY_push;
 	    if (strEQ(d,"pack"))		return -KEY_pack;
 	    if (strEQ(d,"pipe"))		return -KEY_pipe;
 	    break;
@@ -5534,7 +5559,7 @@ Perl_keyword(pTHX_ register char *d, I32 len)
 	case 'h':
 	    switch (len) {
 	    case 5:
-		if (strEQ(d,"shift"))		return KEY_shift;
+               if (strEQ(d,"shift"))           return -KEY_shift;
 		break;
 	    case 6:
 		if (strEQ(d,"shmctl"))		return -KEY_shmctl;
@@ -5563,7 +5588,7 @@ Perl_keyword(pTHX_ register char *d, I32 len)
 	case 'p':
 	    if (strEQ(d,"split"))		return KEY_split;
 	    if (strEQ(d,"sprintf"))		return -KEY_sprintf;
-	    if (strEQ(d,"splice"))		return KEY_splice;
+           if (strEQ(d,"splice"))              return -KEY_splice;
 	    break;
 	case 'q':
 	    if (strEQ(d,"sqrt"))		return -KEY_sqrt;
@@ -5643,7 +5668,7 @@ Perl_keyword(pTHX_ register char *d, I32 len)
 	    if (strEQ(d,"unlink"))		return -KEY_unlink;
 	    break;
 	case 7:
-	    if (strEQ(d,"unshift"))		return KEY_unshift;
+           if (strEQ(d,"unshift"))             return -KEY_unshift;
 	    if (strEQ(d,"ucfirst"))		return -KEY_ucfirst;
 	    break;
 	}
@@ -5748,14 +5773,23 @@ S_new_constant(pTHX_ char *s, STRLEN len, const char *key, SV *sv, SV *pv,
     if (!table || !(PL_hints & HINT_LOCALIZE_HH)) {
 	SV *msg;
 	
-	why1 = "%^H is not consistent";
 	why2 = strEQ(key,"charnames")
-	       ? " (missing \"use charnames ...\"?)"
+	       ? "(possibly a missing \"use charnames ...\")"
 	       : "";
-	why3 = "";
+	msg = Perl_newSVpvf(aTHX_ "Constant(%s) unknown: %s", 
+			    (type ? type: "undef"), why2);
+
+	/* This is convoluted and evil ("goto considered harmful")
+	 * but I do not understand the intricacies of all the different
+	 * failure modes of %^H in here.  The goal here is to make
+	 * the most probable error message user-friendly. --jhi */
+
+	goto msgdone;
+
     report:
-	msg = Perl_newSVpvf(aTHX_ "constant(%s): %s%s%s", 
+	msg = Perl_newSVpvf(aTHX_ "Constant(%s): %s%s%s", 
 			    (type ? type: "undef"), why1, why2, why3);
+    msgdone:
 	yyerror(SvPVX(msg));
  	SvREFCNT_dec(msg);
   	return sv;
@@ -6553,7 +6587,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
     register char term;			/* terminating character */
     register char *to;			/* current position in the sv's data */
     I32 brackets = 1;			/* bracket nesting level */
-    bool has_utf = FALSE;		/* is there any utf8 content? */
+    bool has_utf8 = FALSE;		/* is there any utf8 content? */
 
     /* skip space before the delimiter */
     if (isSPACE(*s))
@@ -6565,7 +6599,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
     /* after skipping whitespace, the next character is the terminator */
     term = *s;
     if ((term & 0x80) && UTF)
-	has_utf = TRUE;
+	has_utf8 = TRUE;
 
     /* mark where we are */
     PL_multi_start = CopLINE(PL_curcop);
@@ -6611,8 +6645,8 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 		   have found the terminator */
 		else if (*s == term)
 		    break;
-		else if (!has_utf && (*s & 0x80) && UTF)
-		    has_utf = TRUE;
+		else if (!has_utf8 && (*s & 0x80) && UTF)
+		    has_utf8 = TRUE;
 		*to = *s;
 	    }
 	}
@@ -6640,8 +6674,8 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 		    break;
 		else if (*s == PL_multi_open)
 		    brackets++;
-		else if (!has_utf && (*s & 0x80) && UTF)
-		    has_utf = TRUE;
+		else if (!has_utf8 && (*s & 0x80) && UTF)
+		    has_utf8 = TRUE;
 		*to = *s;
 	    }
 	}
@@ -6701,7 +6735,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 
     if (keep_delims)
 	sv_catpvn(sv, s, 1);
-    if (has_utf)
+    if (has_utf8)
 	SvUTF8_on(sv);
     PL_multi_end = CopLINE(PL_curcop);
     s++;

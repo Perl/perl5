@@ -10,7 +10,7 @@ BEGIN {
     }
 }
 
-print "1..181\n";
+print "1..191\n";
 
 my $test = 1;
 
@@ -326,11 +326,16 @@ sub nok_bytes {
 {
     # bug id 20001009.001
 
-    my($a,$b);
-    { use bytes; $a = "\xc3\xa4"; }  
-    { use utf8;  $b = "\xe4"; }
-    { use bytes; ok_bytes $a, $b; $test++; } # 69
-    { use utf8;  nok      $a, $b; $test++; } # 70
+    my ($a, $b);
+
+    { use bytes; $a = "\xc3\xa4" }
+    { use utf8;  $b = "\xe4"     } # \xXX must not produce UTF-8
+
+    print "not " if $a eq $b;
+    print "ok $test\n"; $test++;
+
+    { use utf8; print "not " if $a eq $b; }
+    print "ok $test\n"; $test++;
 }
 
 {
@@ -723,6 +728,75 @@ __EOMK__
  	} else {
 	    moan "unknown format\n";
 	}
+    }
+}
+
+{
+    # tests 182..191
+
+    {
+	my $a = "\x{41}";
+
+	print "not " unless length($a) == 1;
+	print "ok $test\n";
+	$test++;
+
+	use bytes;
+	print "not " unless $a eq "\x41" && length($a) == 1;
+	print "ok $test\n";
+	$test++;
+    }
+
+    {
+	my $a = "\x{80}";
+
+	print "not " unless length($a) == 1;
+	print "ok $test\n";
+	$test++;
+
+	use bytes;
+	print "not " unless $a eq "\xc2\x80" && length($a) == 2;
+	print "ok $test\n";
+	$test++;
+    }
+
+    {
+	my $a = "\x{100}";
+
+	print "not " unless length($a) == 1;
+	print "ok $test\n";
+	$test++;
+
+	use bytes;
+	print "not " unless $a eq "\xc4\x80" && length($a) == 2;
+	print "ok $test\n";
+	$test++;
+    }
+
+    {
+	my $a = "\x{100}\x{80}";
+
+	print "not " unless length($a) == 2;
+	print "ok $test\n";
+	$test++;
+
+	use bytes;
+	print "not " unless $a eq "\xc4\x80\xc2\x80" && length($a) == 4;
+	print "ok $test\n";
+	$test++;
+    }
+
+    {
+	my $a = "\x{80}\x{100}";
+
+	print "not " unless length($a) == 2;
+	print "ok $test\n";
+	$test++;
+
+	use bytes;
+	print "not " unless $a eq "\xc2\x80\xc4\x80" && length($a) == 4;
+	print "ok $test\n";
+	$test++;
     }
 }
 

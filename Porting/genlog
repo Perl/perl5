@@ -73,6 +73,7 @@ else {
     while (@desc) {
 	my ($change,$who,$date,$time,@log,$branch,$file,$type,%files);
 	my $skip = 0;
+        my $nbranch = 0;
 	$_ = shift @desc;
 	if (/^Change (\d+) by (\w+)\@.+ on (\S+) (\S+)\s*$/) {
 	    ($change, $who, $date, $time) = ($1,$2,$3,$4);
@@ -88,6 +89,7 @@ else {
 		    last unless /^\.\.\./;
 		    if (m{^\.\.\. //depot/(.*?perl|[^/]*)/([^#]+)#\d+ (\w+)\s*$}) {
 			($branch,$file,$type) = ($1,$2,$3);
+ 		        $nbranch++;
 		        if (exists $branch_exclude{$branch} or
 			    @branch_include and
 			    not exists $branch_include{$branch}) {
@@ -103,7 +105,7 @@ else {
 		}
 	    }
 	}
-	next if not $change or $skip;
+	next if not $change or $skip == $nbranch;
 	print "_" x 76, "\n";
 	printf <<EOT, $change, $who, $date, $time;
 [%6s] By: %-25s             on %9s %9s

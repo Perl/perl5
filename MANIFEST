@@ -12,7 +12,6 @@ Copying			The GNU General Public License
 EXTERN.h		Included before foreign .h files
 INSTALL			Detailed installation instructions
 INTERN.h		Included before domestic .h files
-MAINTAIN		Who maintains which files
 MANIFEST		This list of files
 Makefile.SH		A script that generates Makefile
 Policy_sh.SH		Hold site-wide preferences between Configure runs.
@@ -1387,10 +1386,12 @@ t/lib/texttabs.t	See if Text::Tabs works
 t/lib/textwrap.t	See if Text::Wrap::wrap works
 t/lib/thr5005.t		Test 5.005-style threading (skipped if no use5005threads) 
 t/lib/tie-push.t	Test for Tie::Array
+t/lib/tie-refhash.t	Test for Tie::RefHash and Tie::RefHash::Nestable
 t/lib/tie-splice.t	Test for Tie::Array::SPLICE
 t/lib/tie-stdarray.t	Test for Tie::StdArray
 t/lib/tie-stdhandle.t	Test for Tie::StdHandle
 t/lib/tie-stdpush.t	Test for Tie::StdArray
+t/lib/tie-substrhash.t	Test for Tie::SubstrHash
 t/lib/timelocal.t	See if Time::Local works
 t/lib/trig.t		See if Math::Trig works
 t/op/64bitint.t		See if 64 bit integers work

@@ -23,7 +23,7 @@ frame was called with are copied to the @DB::args array.  The
 general mechanisms is enabled by calling Perl with the B<-d> switch, the
 following additional features are enabled (cf. L<perlvar/$^P>):
 
-=over
+=over 4
 
 =item *
 
@@ -402,7 +402,7 @@ shorter than 7 chars.
 
 The fields of interest which may appear in the last line are
 
-=over
+=over 4
 
 =item C<anchored> I<STRING> C<at> I<POS>
 
@@ -693,7 +693,7 @@ Devel::Peek module.
 
 Here is some explanation of that format:
 
-=over
+=over 4
 
 =item C<buckets SMALLEST(APPROX)..GREATEST(APPROX)>
 
@@ -840,7 +840,7 @@ per glob - for glob name, and glob stringification magic.
 
 Here are explanations for other I<Id>s above: 
 
-=over
+=over 4
 
 =item C<717> 
 
@@ -894,7 +894,7 @@ these categories.
 
 If warn() string starts with
 
-=over
+=over 4
 
 =item C<!!!> 
 

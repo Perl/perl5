@@ -308,8 +308,8 @@ p4desc and p4d2p are to be found in //depot/perl/Porting/.
 
 =head1 Contact Information
 
-The mail alias <perlforce@activestate.com> can be used to reach all
-current users of the repository.
+The mail alias <perl-repository-keepers@perl.org> can be used to reach
+all current users of the repository.
 
 The repository keeper is currently Gurusamy Sarathy
 <gsar@activestate.com>.

@@ -394,12 +394,12 @@ is considered a bug and should be fixed soon.
 
 =over 4
 
-=item
+=item *
 
 Did you run your programs with C<-w> switch? See 
 L<Starting OS/2 (and DOS) programs under Perl>.
 
-=item
+=item *
 
 Do you try to run I<internal> shell commands, like C<`copy a b`>
 (internal for F<cmd.exe>), or C<`glob a*b`> (internal for ksh)? You
@@ -1163,18 +1163,18 @@ eventually).
 
 =over 4
 
-=item
+=item *
 
 Since L<flock(3)> is present in EMX, but is not functional, it is 
 emulated by perl.  To disable the emulations, set environment variable
 C<USE_PERL_FLOCK=0>.
 
-=item
+=item *
 
 Here is the list of things which may be "broken" on
 EMX (from EMX docs):
 
-=over
+=over 4
 
 =item *
 
@@ -1205,7 +1205,7 @@ L<waitpid(3)>:
 
 Note that C<kill -9> does not work with the current version of EMX.
 
-=item
+=item *
 
 Since F<sh.exe> is used for globing (see L<perlfunc/glob>), the bugs
 of F<sh.exe> plague perl as well. 
@@ -1517,9 +1517,9 @@ cannot test it.
 For the details of the current situation with calling external programs,
 see L<Starting OS/2 (and DOS) programs under Perl>.
 
-=over
+=over 4
 
-=item
+=item *
 
 External scripts may be called by name.  Perl will try the same extensions
 as when processing B<-S> command-line switch.
@@ -1549,7 +1549,7 @@ preliminary.
 
 Most notable problems: 
 
-=over
+=over 4
 
 =item C<COND_WAIT> 
 

@@ -124,8 +124,8 @@ B<The POSIX date formatting function> (strftime()) uses C<LC_TIME>.
 
 =back
 
-C<LC_COLLATE>, C<LC_CTYPE>, and so on, are discussed further in L<LOCALE
-CATEGORIES>.
+C<LC_COLLATE>, C<LC_CTYPE>, and so on, are discussed further in 
+L<LOCALE CATEGORIES>.
 
 The default behavior is restored with the S<C<no locale>> pragma, or
 upon reaching the end of block enclosing C<use locale>.
@@ -348,8 +348,8 @@ commands.  You may see things like "en_US.ISO8859-1", but that isn't
 the same.  In this case, try running under a locale
 that you can list and which somehow matches what you tried.  The
 rules for matching locale names are a bit vague because
-standardization is weak in this area.  See again the L<Finding
-locales> about general rules.
+standardization is weak in this area.  See again the 
+L<Finding locales> about general rules.
 
 =head2 Fixing system locale configuration
 
@@ -580,11 +580,12 @@ The C standard defines the C<LC_MONETARY> category, but no function
 that is affected by its contents.  (Those with experience of standards
 committees will recognize that the working group decided to punt on the
 issue.)  Consequently, Perl takes no notice of it.  If you really want
-to use C<LC_MONETARY>, you can query its contents--see L<The localeconv
-function>--and use the information that it returns in your application's
-own formatting of currency amounts.  However, you may well find that
-the information, voluminous and complex though it may be, still does not
-quite meet your requirements: currency formatting is a hard nut to crack.
+to use C<LC_MONETARY>, you can query its contents--see 
+L<The localeconv function>--and use the information that it returns in your 
+application's own formatting of currency amounts.  However, you may well 
+find that the information, voluminous and complex though it may be, still 
+does not quite meet your requirements: currency formatting is a hard nut 
+to crack.
 
 =head2 LC_TIME
 

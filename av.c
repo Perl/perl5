@@ -796,9 +796,14 @@ Perl_av_exists(pTHX_ AV *av, I32 key)
     if (SvRMAGICAL(av)) {
 	if (mg_find((SV*)av,'P') || mg_find((SV*)av,'D')) {
 	    SV *sv = sv_newmortal();
+	    MAGIC *mg;
+
 	    mg_copy((SV*)av, sv, 0, key);
-	    magic_existspack(sv, mg_find(sv, 'p'));
-	    return SvTRUE(sv);
+	    mg = mg_find(sv, 'p');
+	    if (mg) {
+		magic_existspack(sv, mg);
+		return SvTRUE(sv);
+	    }
 	}
     }
     if (key <= AvFILLp(av) && AvARRAY(av)[key] != &PL_sv_undef

@@ -495,7 +495,7 @@ And a print to show what values we're currently using:
 
 	DB<1> p $deg, $num
 	f33.3
-		
+
 We can put another break point on any line beginning with a colon, we'll use
 line 17 as that's just as we come out of the subroutine, and we'd like to
 pause there later on:
@@ -538,7 +538,7 @@ it for inspection.  In this case though, we simply continue down to line 29:
 
 	DB<4> c 29  
 	main::f2c(temp:29):             return $c;
-   
+
 And have a look at the return value:
 
 	DB<5> p $c
@@ -616,7 +616,7 @@ the DEBUGGING flag for this one:
 	floating `'$ at 4..2147483647 (checking floating) stclass `EXACTF <pe>'
 anchored(BOL) minlen 4
 	Omitting $` $& $' support.
-	 
+
 	EXECUTING...
 
 	Freeing REx: `^pe(a)*rl$'  
@@ -656,7 +656,7 @@ script from the command-line, try something like this:
 
 	> perl -d my_cgi.pl -nodebug 
 
-Of course 'L<perldoc CGI>' and L<perlfaq9> will tell you more.
+Of course L<CGI> and L<perlfaq9> will tell you more.
 
 
 =head1 GUIs

@@ -952,7 +952,7 @@ looks like this:
 
 Here are what those parameters to the C<new> constructor mean:
 
-=over
+=over 4
 
 =item C<Proto>
 
@@ -1147,7 +1147,7 @@ does nothing but listen on a particular port for incoming connections.
 It does this by calling the C<< IO::Socket::INET->new() >> method with
 slightly different arguments than the client did.
 
-=over
+=over 4
 
 =item Proto
 
