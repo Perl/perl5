@@ -136,11 +136,11 @@ cat (Loc.U):
 cc (cc.U):
 	This variable holds the name of a command to execute a C compiler which
 	can resolve multiple global references that happen to have the same
-	name.  Usual values are "cc", "Mcc", "cc -M", and "gcc".
+	name.  Usual values are 'cc', 'Mcc', 'cc -M', and 'gcc'.
 
 cccdlflags (dlsrc.U):
 	This variable contains any special flags that might need to be
-	passed with cc -c to compile modules to be used to create a shared
+	passed with 'cc -c' to compile modules to be used to create a shared
 	library that will be used for dynamic loading.  For hpux, this
 	should be +z.  It is up to the makefile to use it.
 
@@ -1701,7 +1701,7 @@ lddlflags (dlsrc.U):
 	This variable contains any special flags that might need to be
 	passed to $ld to create a shared library suitable for dynamic
 	loading.  It is up to the makefile to use it.  For hpux, it
-	should be -b.  For sunos 4.1, it is empty.
+	should be '-b'.  For sunos 4.1, it is empty.
 
 ldflags (ccflags.U):
 	This variable contains any additional C loader flags desired by
@@ -1764,7 +1764,7 @@ lns (lns.U):
 
 locincpth (ccflags.U):
 	This variable contains a list of additional directories to be
-	searched by the compiler.  The appropriate -I directives will
+	searched by the compiler.  The appropriate '-I' directives will
 	be added to ccflags.  This is intended to simplify setting
 	local directories from the Configure command line.
 	It's not much, but it parallels the loclibpth stuff in libpth.U.
@@ -1827,7 +1827,7 @@ make_set_make (make.U):
 	make_set_make='#'		# If your make program handles this for you,
 	make_set_make="MAKE=$make"	# if it doesn't.
 	I used a comment character so that we can distinguish a
-	'set' value (from a previous config.sh or Configure -D option)
+	'set' value (from a previous config.sh or Configure '-D' option)
 	from an uncomputed value.
 
 mallocobj (mallocsrc.U):
@@ -1932,7 +1932,7 @@ myuname (Oldconfig.U):
 	whole thing is then lower-cased.
 
 n (n.U):
-	This variable contains the -n flag if that is what causes the echo
+	This variable contains the '-n' flag if that is what causes the echo
 	command to suppress newline.  Otherwise it is null.  Correct usage is
 	    $echo $n "prompt for a question: $c".
 
@@ -2170,9 +2170,9 @@ sh (sh.U):
 	/bin/sh, though it's possible that some systems will have /bin/ksh,
 	/bin/pdksh, /bin/ash, /bin/bash, or even something such as
 	D:/bin/sh.exe.
-	This unit comes before Options.U, so you can't set sh with a -D
+	This unit comes before Options.U, so you can't set sh with a '-D'
 	option, though you can override this (and startsh)
-	with -O -Dsh=/bin/whatever -Dstartsh=whatever
+	with '-O -Dsh=/bin/whatever -Dstartsh=whatever'
 
 shar (Loc.U):
 	This variable is defined but not used by Configure.
@@ -2275,7 +2275,7 @@ so (so.U):
 	(also known as shared objects) on the system. Usually set to 'so'.
 
 sockethdr (d_socket.U):
-	This variable has any cpp -I flags needed for socket support.
+	This variable has any cpp '-I' flags needed for socket support.
 
 socketlib (d_socket.U):
 	This variable has the names of any libraries needed for socket support.
@@ -2292,7 +2292,7 @@ spackage (package.U):
 
 spitshell (spitshell.U):
 	This variable contains the command necessary to spit out a runnable
-	shell on this system.  It is either cat or a grep -v for # comments.
+	shell on this system.  It is either cat or a grep '-v' for # comments.
 
 split (models.U):
 	This variable contains a flag which will tell the C compiler and loader

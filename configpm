@@ -288,37 +288,56 @@ some of the variables described below, or may have extraneous variables
 specific to that particular port.  See the port specific documentation
 in such cases.
 
-=over 4
-
 ENDOFTAIL
 
 open(GLOS, "<$glossary") or die "Can't open $glossary: $!";
+%seen = ();
+$text = 0;
+$/ = '';
 
-my ($var,$unit,$indentpara);
-my $text = "";
-while (<GLOS>) {
-    if (/^\s*(.*)\s*\(\s*(.+\.U)\s*\):\s*$/) {
-	print CONFIG "\n=item $var\n\n$text\n" if $var and $text;
-        ($var,$unit,$text) = ($1,$2,"");
-    }
-    else {
-        # bite off exactly one tab-width
-        s/^([ ]{8}|[ ]{0,7}\t)//;
+sub process {
+  s/\A(\w*)\s+\(([\w.]+)\):\s*\n(\t?)/=item C<$1>\n\nFrom F<$2>:\n\n/m;
+  my $c = substr $1, 0, 1;
+  unless ($seen{$c}++) {
+    print CONFIG <<EOF if $text;
+=back
 
-	# indented stuff starts a separate paragraph
-	if (/^\s/) {
-	    $text .= "\n" unless $indentpara;
-	    $indentpara = 1;
-	}
-	else {
-	    $text .= "\n" if $indentpara;
-	    $indentpara = 0;
-	}
-	$text .= $_;
-    }
+EOF
+    print CONFIG <<EOF;
+=head2 $c
+
+=over
+
+EOF
+    $text = 1;
+  }
+  s/n't/n\00t/g;		# leave can't, won't etc untouched
+  s/^\t\s+(.*)/\n\t$1\n/gm;	# Indented lines ===> paragraphs
+  s/^(?<!\n\n)\t(.*)/$1/gm;	# Not indented lines ===> text
+  s{([\'\"])(?=[^\'\"\s]*[./][^\'\"\s]*\1)([^\'\"\s]+)\1}(F<$2>)g; # '.o'
+  s{([\'\"])([^\'\"\s]+)\1}(C<$2>)g; # "date" command
+  s{\'([A-Za-z_\- *=/]+)\'}(C<$1>)g; # 'ln -s'
+  s{
+     (?<! [\w./<\'\"] )		# Only standalone file names
+     (?! e \. g \. )		# Not e.g.
+     (?! \. \. \. )		# Not ...
+     (?! \d )			# Not 5.004
+     ( [\w./]* [./] [\w./]* )	# Require . or / inside
+     (?<! \. (?= \s ) )		# Do not include trailing dot
+     (?! [\w/] )		# Include all of it
+   }
+   (F<$1>)xg;			# /usr/local
+  s/((?<=\s)~\w*)/F<$1>/g;	# ~name
+  s/(?<![.<\'\"])\b([A-Z_]{2,})\b(?![\'\"])/C<$1>/g;	# UNISTD
+  s/(?<![.<\'\"])\b(?!the\b)(\w+)\s+macro\b/C<$1> macro/g; # FILE_cnt macro
+  s/n[\0]t/n't/g;		# undo can't, won't damage
 }
 
-print CONFIG "\n=item $var\n\n$text\n" if $var and $text;
+<GLOS>;				# Skip the preamble
+while (<GLOS>) {
+  process;
+  print CONFIG;
+}
 
 print CONFIG <<'ENDOFTAIL';
 
