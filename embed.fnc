@@ -1361,8 +1361,8 @@ Ap	|PerlIO *|PerlIO_stderr
 
 p	|void	|deb_stack_all
 #ifdef PERL_IN_DEB_C
-s	|void	|deb_stack_n	|SV** stack_base, I32 stack_min, \
-				 I32 stack_max, I32 mark_min, I32 mark_max
+s	|void	|deb_stack_n	|SV** stack_base|I32 stack_min \
+				|I32 stack_max|I32 mark_min|I32 mark_max
 #endif
 
 

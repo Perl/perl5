@@ -2786,7 +2786,7 @@
 #endif /* PERLIO_LAYERS */
 #define deb_stack_all()		Perl_deb_stack_all(aTHX)
 #ifdef PERL_IN_DEB_C
-#define deb_stack_n(a)		S_deb_stack_n(aTHX_ a)
+#define deb_stack_n(a,b,c,d,e)	S_deb_stack_n(aTHX_ a,b,c,d,e)
 #endif
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
 #define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)
