@@ -1,56 +1,45 @@
 #!./perl
 
-print "1..11\n";
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
+
+require './test.pl';
+plan( tests => 20 );
 
 # test various operations on @_
 
-my $ord = 0;
 sub new1 { bless \@_ }
 {
     my $x = new1("x");
     my $y = new1("y");
-    ++$ord;
-    print "# got [@$y], expected [y]\nnot " unless "@$y" eq "y";
-    print "ok $ord\n";
-    ++$ord;
-    print "# got [@$x], expected [x]\nnot " unless "@$x" eq "x";
-    print "ok $ord\n";
+    is("@$y","y");
+    is("@$x","x");
 }
 
 sub new2 { splice @_, 0, 0, "a", "b", "c"; return \@_ }
 {
     my $x = new2("x");
     my $y = new2("y");
-    ++$ord;
-    print "# got [@$x], expected [a b c x]\nnot " unless "@$x" eq "a b c x";
-    print "ok $ord\n";
-    ++$ord;
-    print "# got [@$y], expected [a b c y]\nnot " unless "@$y" eq "a b c y";
-    print "ok $ord\n";
+    is("@$x","a b c x");
+    is("@$y","a b c y");
 }
 
 sub new3 { goto &new1 }
 {
     my $x = new3("x");
     my $y = new3("y");
-    ++$ord;
-    print "# got [@$y], expected [y]\nnot " unless "@$y" eq "y";
-    print "ok $ord\n";
-    ++$ord;
-    print "# got [@$x], expected [x]\nnot " unless "@$x" eq "x";
-    print "ok $ord\n";
+    is("@$y","y");
+    is("@$x","x");
 }
 
 sub new4 { goto &new2 }
 {
     my $x = new4("x");
     my $y = new4("y");
-    ++$ord;
-    print "# got [@$x], expected [a b c x]\nnot " unless "@$x" eq "a b c x";
-    print "ok $ord\n";
-    ++$ord;
-    print "# got [@$y], expected [a b c y]\nnot " unless "@$y" eq "a b c y";
-    print "ok $ord\n";
+    is("@$x","a b c x");
+    is("@$y","a b c y");
 }
 
 # see if POPSUB gets to see the right pad across a dounwind() with
@@ -71,18 +60,29 @@ sub try {
 }
 
 for (1..5) { try() }
-++$ord;
-print "ok $ord\n";
+pass();
 
 # bug #21542 local $_[0] causes reify problems and coredumps
 
 sub local1 { local $_[0] }
 my $foo = 'foo'; local1($foo); local1($foo);
 print "got [$foo], expected [foo]\nnot " if $foo ne 'foo';
-$ord++;
-print "ok $ord\n";
+pass();
 
 sub local2 { local $_[0]; last L }
 L: { local2 }
-$ord++;
-print "ok $ord\n";
+pass();
+
+# the following test for local(@_) used to be in t/op/nothr5005.t (because it
+# failed with 5005threads)
+
+$|=1;
+
+sub foo { local(@_) = ('p', 'q', 'r'); }
+sub bar { unshift @_, 'D'; @_ }
+sub baz { push @_, 'E'; return @_ }
+for (1..3) { 
+    is(join('',foo('a', 'b', 'c')),'pqr');
+    is(join('',bar('d')),'Dd');
+    is(join('',baz('e')),'eE');
+} 
