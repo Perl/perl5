@@ -4006,7 +4006,7 @@ Perl_sv_len_utf8(pTHX_ register SV *sv)
 	STRLEN len;
 	U8 *s = (U8*)SvPV(sv, len);
 
-	return Perl_utf8_length(s, s + len);
+	return Perl_utf8_length(aTHX_ s, s + len);
     }
 }
 

@@ -32,6 +32,10 @@
 int
 PerlIO_apply_layers(pTHX_ PerlIO *f, const char *mode, const char *names)
 {
+ if (!names || !*names || strEQ(names,":crlf") || strEQ(names,":raw"))
+  {
+   return 0;
+  } 
  Perl_croak(aTHX_ "Cannot apply \"%s\" in non-PerlIO perl",names);
  /* NOTREACHED */
  return -1; 
@@ -369,6 +373,7 @@ PerlIO_default_layer(I32 n)
    PerlIO_define_layer(&PerlIO_unix);
    PerlIO_define_layer(&PerlIO_perlio);
    PerlIO_define_layer(&PerlIO_stdio);
+   PerlIO_define_layer(&PerlIO_crlf);
 #ifdef HAS_MMAP
    PerlIO_define_layer(&PerlIO_mmap);
 #endif
@@ -446,7 +451,7 @@ PerlIO_apply_layers(pTHX_ PerlIO *f, const char *mode, const char *names)
          SV *layer = PerlIO_find_layer(s,e-s);
          if (layer)
           {
-           PerlIO_funcs *tab = INT2PTR(PerlIO_funcs *, SvIV(layer));
+           PerlIO_funcs *tab = INT2PTR(PerlIO_funcs *, SvIV(SvRV(layer)));
            if (tab)
             {
              PerlIO *new = PerlIO_push(f,tab,mode);
@@ -1822,6 +1827,40 @@ PerlIOBuf_set_ptrcnt(PerlIO *f, STDCHAR *ptr, SSize_t cnt)
 
 PerlIO_funcs PerlIO_perlio = {
  "perlio",
+ sizeof(PerlIOBuf),
+ 0,
+ PerlIOBase_fileno,
+ PerlIOBuf_fdopen,
+ PerlIOBuf_open,
+ PerlIOBuf_reopen,
+ PerlIOBase_pushed,
+ PerlIOBase_noop_ok,
+ PerlIOBuf_read,
+ PerlIOBuf_unread,
+ PerlIOBuf_write,
+ PerlIOBuf_seek,
+ PerlIOBuf_tell,
+ PerlIOBuf_close,
+ PerlIOBuf_flush,
+ PerlIOBuf_fill,
+ PerlIOBase_eof,
+ PerlIOBase_error,
+ PerlIOBase_clearerr,
+ PerlIOBuf_setlinebuf,
+ PerlIOBuf_get_base,
+ PerlIOBuf_bufsiz,
+ PerlIOBuf_get_ptr,
+ PerlIOBuf_get_cnt,
+ PerlIOBuf_set_ptrcnt,
+};
+
+/*--------------------------------------------------------------------------------------*/
+/* crlf - translation currently just a copy of perlio to prove
+   that extra buffering which real one will do is not an issue.
+ */
+
+PerlIO_funcs PerlIO_crlf = {
+ "crlf",
  sizeof(PerlIOBuf),
  0,
  PerlIOBase_fileno,
