@@ -236,8 +236,8 @@ unary &, unary *, (TYPE)
 =item Regexp Quote-Like Operators
 
 ?PATTERN?, m/PATTERN/cgimosx, /PATTERN/cgimosx, q/STRING/, C<'STRING'>,
-qq/STRING/, "STRING", qr/STRING/imosx, qw/STRING/, qu/STRING/, qx/STRING/,
-`STRING`, s/PATTERN/REPLACEMENT/egimosx, tr/SEARCHLIST/REPLACEMENTLIST/cds,
+qq/STRING/, "STRING", qr/STRING/imosx, qx/STRING/, `STRING`, qw/STRING/,
+s/PATTERN/REPLACEMENT/egimosx, tr/SEARCHLIST/REPLACEMENTLIST/cds,
 y/SEARCHLIST/REPLACEMENTLIST/cds
 
 =item Gory details of parsing quoted constructs
@@ -366,17 +366,16 @@ DIRHANDLE,EXPR, ord EXPR, ord, our EXPR, pack TEMPLATE,LIST, package
 NAMESPACE, package, pipe READHANDLE,WRITEHANDLE, pop ARRAY, pop, pos
 SCALAR, pos, print FILEHANDLE LIST, print LIST, print, printf FILEHANDLE
 FORMAT, LIST, printf FORMAT, LIST, prototype FUNCTION, push ARRAY,LIST,
-q/STRING/, qq/STRING/, qr/STRING/, qu/STRING/, qw/STRING/, qx/STRING/,
-quotemeta EXPR, quotemeta, rand EXPR, rand, read
-FILEHANDLE,SCALAR,LENGTH,OFFSET, read FILEHANDLE,SCALAR,LENGTH, readdir
-DIRHANDLE, readline EXPR, readlink EXPR, readlink, readpipe EXPR, recv
-SOCKET,SCALAR,LENGTH,FLAGS, redo LABEL, redo, ref EXPR, ref, rename
-OLDNAME,NEWNAME, require VERSION, require EXPR, require, reset EXPR, reset,
-return EXPR, return, reverse LIST, rewinddir DIRHANDLE, rindex
-STR,SUBSTR,POSITION, rindex STR,SUBSTR, rmdir FILENAME, rmdir, s///, scalar
-EXPR, seek FILEHANDLE,POSITION,WHENCE, seekdir DIRHANDLE,POS, select
-FILEHANDLE, select, select RBITS,WBITS,EBITS,TIMEOUT, semctl
-ID,SEMNUM,CMD,ARG, semget KEY,NSEMS,FLAGS, semop KEY,OPSTRING, send
+q/STRING/, qq/STRING/, qr/STRING/, qx/STRING/, qw/STRING/, quotemeta EXPR,
+quotemeta, rand EXPR, rand, read FILEHANDLE,SCALAR,LENGTH,OFFSET, read
+FILEHANDLE,SCALAR,LENGTH, readdir DIRHANDLE, readline EXPR, readlink EXPR,
+readlink, readpipe EXPR, recv SOCKET,SCALAR,LENGTH,FLAGS, redo LABEL, redo,
+ref EXPR, ref, rename OLDNAME,NEWNAME, require VERSION, require EXPR,
+require, reset EXPR, reset, return EXPR, return, reverse LIST, rewinddir
+DIRHANDLE, rindex STR,SUBSTR,POSITION, rindex STR,SUBSTR, rmdir FILENAME,
+rmdir, s///, scalar EXPR, seek FILEHANDLE,POSITION,WHENCE, seekdir
+DIRHANDLE,POS, select FILEHANDLE, select, select RBITS,WBITS,EBITS,TIMEOUT,
+semctl ID,SEMNUM,CMD,ARG, semget KEY,NSEMS,FLAGS, semop KEY,OPSTRING, send
 SOCKET,MSG,FLAGS,TO, send SOCKET,MSG,FLAGS, setpgrp PID,PGRP, setpriority
 WHICH,WHO,PRIORITY, setsockopt SOCKET,LEVEL,OPTNAME,OPTVAL, shift ARRAY,
 shift, shmctl ID,CMD,ARG, shmget KEY,SIZE,FLAGS, shmread ID,VAR,POS,SIZE,
@@ -3126,6 +3125,8 @@ CGI script to do bad things?
 
 =item How do I send mail?
 
+=item How do I use MIME to make an attachment to a mail message?
+
 =item How do I read mail?
 
 =item How do I find out my hostname/domainname/IP address?
@@ -3887,15 +3888,16 @@ sv_newmortal, sv_pvn_force, sv_pvutf8n_force, sv_reftype, sv_replace,
 sv_rvweaken, sv_setiv, sv_setiv_mg, sv_setnv, sv_setnv_mg, sv_setpv,
 sv_setpvf, sv_setpvf_mg, sv_setpviv, sv_setpviv_mg, sv_setpvn,
 sv_setpvn_mg, sv_setpv_mg, sv_setref_iv, sv_setref_nv, sv_setref_pv,
-sv_setref_pvn, sv_setsv, sv_setsv_mg, sv_setuv, sv_setuv_mg, sv_true,
-sv_unmagic, sv_unref, sv_unref_flags, sv_upgrade, sv_usepvn, sv_usepvn_mg,
-sv_utf8_downgrade, sv_utf8_encode, sv_utf8_upgrade, sv_vcatpvfn,
-sv_vsetpvfn, THIS, toLOWER, toUPPER, utf8_distance, utf8_hop, utf8_length,
-utf8_to_bytes, utf8_to_uv, utf8_to_uv_simple, uv_to_utf8, warn, XPUSHi,
-XPUSHn, XPUSHp, XPUSHs, XPUSHu, XS, XSRETURN, XSRETURN_EMPTY, XSRETURN_IV,
-XSRETURN_NO, XSRETURN_NV, XSRETURN_PV, XSRETURN_UNDEF, XSRETURN_YES,
-XST_mIV, XST_mNO, XST_mNV, XST_mPV, XST_mUNDEF, XST_mYES, XS_VERSION,
-XS_VERSION_BOOTCHECK, Zero
+sv_setref_pvn, sv_setref_uv, sv_setsv, sv_setsv_mg, sv_setuv, sv_setuv_mg,
+sv_true, sv_unmagic, sv_unref, sv_unref_flags, sv_upgrade, sv_usepvn,
+sv_usepvn_mg, sv_utf8_decode, sv_utf8_downgrade, sv_utf8_encode,
+sv_utf8_upgrade, sv_vcatpvfn, sv_vsetpvfn, THIS, toLOWER, toUPPER,
+utf8_distance, utf8_hop, utf8_length, utf8_to_bytes, utf8_to_uv,
+utf8_to_uv_simple, uv_to_utf8, warn, XPUSHi, XPUSHn, XPUSHp, XPUSHs,
+XPUSHu, XS, XSRETURN, XSRETURN_EMPTY, XSRETURN_IV, XSRETURN_NO,
+XSRETURN_NV, XSRETURN_PV, XSRETURN_UNDEF, XSRETURN_YES, XST_mIV, XST_mNO,
+XST_mNV, XST_mPV, XST_mUNDEF, XST_mYES, XS_VERSION, XS_VERSION_BOOTCHECK,
+Zero
 
 =item AUTHORS
 
@@ -5391,8 +5393,7 @@ sh Configure -Dprefix=/ade -Dloclibpth=/ade/lib
 
 =back
 
-=head2 perlbs2000, README.posix-bc - building and installing Perl for
-BS2000 POSIX.
+=head2 perlbs2000, README.BS2000 - building and installing Perl for BS2000.
 
 =over 4
 
@@ -5414,7 +5415,9 @@ BS2000 POSIX.
 
 =item Install
 
-=item Using Perl
+=item Using Perl in the Posix-Shell
+
+=item Using Perl in "native" BS2000
 
 =item Floating point anomalies
 
@@ -5529,11 +5532,15 @@ Source, Compiled Module Source, Perl Modules/Scripts
 
 =item INSTALLING PERL ON EPOC
 
+=item STARTING PERL ON EPOC
+
+=item STOPPING PERL ON EPOC
+
 =item USING PERL ON EPOC
 
 =over 4
 
-=item IO Redirection
+=item I/O Redirection
 
 =item PATH Names
 
@@ -7522,7 +7529,7 @@ parameters
 
 =item Server Push
 
-multipart_init(), multipart_start(), multipart_end()
+multipart_init(), multipart_start(), multipart_end(), multipart_final()
 
 =item Avoiding Denial of Service Attacks
 
@@ -7697,7 +7704,7 @@ B<name()>, B<value()>, B<domain()>, B<path()>, B<expires()>
 
 =item USING CGI::Push
 
--next_page, -last_page, -type, -delay, -cookie, -target, -expires
+-next_page, -last_page, -type, -delay, -cookie, -target, -expires, -nph
 
 =over 4
 
@@ -7730,6 +7737,20 @@ B<name()>, B<value()>, B<domain()>, B<path()>, B<expires()>
 =item AUTHOR INFORMATION
 
 =item BUGS
+
+=item SEE ALSO
+
+=back
+
+=head2 CGI::Util - Internal utilities used by CGI module
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item AUTHOR INFORMATION
 
 =item SEE ALSO
 
@@ -8588,21 +8609,81 @@ Perl code
 
 =over 4
 
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
 =item TERMINOLOGY
 
-=item bytes
+=back
 
-=item chars
+=item ENCODINGS
 
-=item chars With Encoding
+=over 4
 
-=item Testing For UTF-8
+=item Characteristics of an Encoding
 
-=item Toggling UTF-8-ness
+=item Types of Encodings
 
-=item UTF-16 and UTF-32 Encodings
+Fixed length 8-bit (or less) encodings, Fixed length 16-bit encodings,
+Fixed length 32-bit encodings, Multi-byte encodings, "Escape" encodings
+
+=item Specifying Encodings
+
+1. By name, 2. As an object
+
+=item Encoding Names
+
+The MIME name as defined in IETF RFC-XXXX, The name in the IANA registry,
+The name used by the the organization that defined it
+
+=back
+
+=item PERL ENCODING API
+
+=over 4
+
+=item Generic Encoding Interface
 
 =item Handling Malformed Data
+
+Scheme 1, Scheme 2, Other Schemes
+
+=item UTF-8 / utf8
+
+=item Other Encodings of Unicode
+
+=back
+
+=item Encoding and IO
+
+=item Encoding How to ...
+
+IO with mixed content (faking iso-2020-*), MIME's Content-Length:, UTF-8
+strings in binary data, perl/Encode wrappers on non-Unicode XS modules
+
+=item Messing with Perl's Internals
+
+utf8_downgrade($string[, CHECK]), is_utf8(STRING [, CHECK]),
+valid_utf8(STRING)
+
+=item IMPLEMENTATION CLASSES
+
+-E<gt>name, -E<gt>new_sequence, -E<gt>encode($string,$check),
+-E<gt>decode($octets,$check)
+
+=over 4
+
+=item Compiled Encodings
+
+.enc, .ucm, .ucm, .c, .xs, ascii and iso-8859-*, IBM-1047 and two other
+variants of EBCDIC, symbol and dingbats as used by Tk on X11
+
+=back
+
+=item SEE ALSO
 
 =back
 
@@ -12758,7 +12839,7 @@ NORMAL TESTS, SKIPPED TESTS, TODO TESTS
 
 B<1..M>, B<'ok', 'not ok'.  Ok?>, B<test numbers>,
 B<$Test::Harness::verbose>, B<$Test::Harness::switches>, B<Skipping tests>,
-B<Bail out!>, B<Comments>
+B<Todo tests>, B<Bail out!>, B<Comments>
 
 =back
 
@@ -12772,6 +12853,10 @@ C<All tests successful.\nFiles=%d,  Tests=%d, %s>, C<FAILED tests
 %s>, C<FAILED--Further testing stopped%s>
 
 =item ENVIRONMENT
+
+C<HARNESS_IGNORE_EXITCODE>, C<HARNESS_NOTTY>, C<HARNESS_COMPILE_TEST>,
+C<HARNESS_FILELEAK_IN_DIR>, C<HARNESS_PERL_SWITCHES>, C<HARNESS_COLUMNS>,
+C<HARNESS_ACTIVE>
 
 =item SEE ALSO
 

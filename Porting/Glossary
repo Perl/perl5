@@ -139,8 +139,9 @@ binexp (bin.U):
 	configuration time, for use in your makefiles.
 
 bison (Loc.U):
-	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+	This variable is used internally by Configure to determine the
+	full pathname (if any) of the bison program.  After Configure runs,
+	the value is reset to a plain "bison" and is not useful.
 
 byacc (Loc.U):
 	This variable is used internally by Configure to determine the
@@ -3786,6 +3787,14 @@ xs_apiversion (xs_apiversion.U):
 	debugging, 64bits, sfio, etc., are not checked for currently,
 	though in principle we could go snooping around in old
 	Config.pm files.
+
+yacc (yacc.U):
+	This variable holds the name of the compiler compiler we
+	want to use in the Makefile. It can be yacc, byacc, or bison -y.
+
+yaccflags (yacc.U):
+	This variable contains any additional yacc flags desired by the
+	user.  It is up to the Makefile to use this.
 
 zcat (Loc.U):
 	This variable is defined but not used by Configure.

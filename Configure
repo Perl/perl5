@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Feb 23 03:39:53 EET 2001 [metaconfig 3.0 PL70]
+# Generated on Sat Mar  3 02:41:27 EET 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -3146,7 +3146,7 @@ int main() {
 	exit(0);
 }
 EOM
-if $cc -o gccvers $ldflags gccvers.c; then
+if $cc -o gccvers $ccflags $ldflags gccvers.c; then
 	gccversion=`./gccvers`
 	case "$gccversion" in
 	'') echo "You are not using GNU cc." ;;
