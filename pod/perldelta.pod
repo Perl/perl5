@@ -206,6 +206,11 @@ will produce different results on platforms that have different
 $Config{ivsize}.  For portability, be sure to mask off the excess bits
 in the result of unary C<~>, e.g., C<~$x & 0xffffffff>.
 
+=head2 The shell returned by the getpwxxx() is now tainted
+
+Because the user can affect her own login shell the shell returned
+by the getpwent(), getpwnam(), and getpwuid() functions is tainted.
+
 =back
 
 =head2 C Source Incompatibilities

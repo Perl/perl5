@@ -4868,6 +4868,10 @@ PP(pp_gpwent)
 
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setpv(sv, pwent->pw_shell);
+#ifndef INCOMPLETE_TAINTS
+	/* pw_shell is tainted because user himself can diddle with it. */
+	SvTAINTED_on(sv);
+#endif
 
 #ifdef PWEXPIRE
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));

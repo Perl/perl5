@@ -1859,6 +1859,13 @@ various get routines are as follows:
 
 (If the entry doesn't exist you get a null list.)
 
+The exact meaning of the $gcos field varies but it usually contains
+the real name of the user (as opposed to the login name) and other
+information pertaining to the user.  Beware, however, that in many
+system users are able to change this information and therefore it
+cannot be trusted and therefore the $gcos is is tainted (see L<perlsec>). 
+The $shell, user's login shell, is also tainted, because of the same reason.
+
 In scalar context, you get the name, unless the function was a
 lookup by name, in which case you get the other thing, whatever it is.
 (If the entry doesn't exist you get the undefined value.)  For example:
@@ -1871,26 +1878,25 @@ lookup by name, in which case you get the other thing, whatever it is.
     $name  = getgrent();
     #etc.
 
-In I<getpw*()> the fields $quota, $comment, and $expire are
-special cases in the sense that in many systems they are unsupported.
-If the $quota is unsupported, it is an empty scalar.  If it is
-supported, it usually encodes the disk quota.  If the $comment
-field is unsupported, it is an empty scalar.  If it is supported it
-usually encodes some administrative comment about the user.  In some
-systems the $quota field may be $change or $age, fields that have
-to do with password aging.  In some systems the $comment field may
-be $class.  The $expire field, if present, encodes the expiration
-period of the account or the password.  For the availability and the
-exact meaning of these fields in your system, please consult your
-getpwnam(3) documentation and your F<pwd.h> file.  You can also find
-out from within Perl what your $quota and $comment fields mean
-and whether you have the $expire field by using the C<Config> module
-and the values C<d_pwquota>, C<d_pwage>, C<d_pwchange>, C<d_pwcomment>,
-and C<d_pwexpire>.  Shadow password files are only supported if your
-vendor has implemented them in the intuitive fashion that calling the
-regular C library routines gets the shadow versions if you're running
-under privilege.  Those that incorrectly implement a separate library
-call are not supported.
+In I<getpw*()> the fields $quota, $comment, and $expire are special
+cases in the sense that in many systems they are unsupported.  If the
+$quota is unsupported, it is an empty scalar.  If it is supported, it
+usually encodes the disk quota.  If the $comment field is unsupported,
+it is an empty scalar.  If it is supported it usually encodes some
+administrative comment about the user.  In some systems the $quota
+field may be $change or $age, fields that have to do with password
+aging.  In some systems the $comment field may be $class.  The $expire
+field, if present, encodes the expiration period of the account or the
+password.  For the availability and the exact meaning of these fields
+in your system, please consult your getpwnam(3) documentation and your
+F<pwd.h> file.  You can also find out from within Perl what your
+$quota and $comment fields mean and whether you have the $expire field
+by using the C<Config> module and the values C<d_pwquota>, C<d_pwage>,
+C<d_pwchange>, C<d_pwcomment>, and C<d_pwexpire>.  Shadow password
+files are only supported if your vendor has implemented them in the
+intuitive fashion that calling the regular C library routines gets the
+shadow versions if you're running under privilege.  Those that
+incorrectly implement a separate library call are not supported.
 
 The $members value returned by I<getgr*()> is a space separated list of
 the login names of the members of the group.
