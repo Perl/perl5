@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed May 30 17:55:32 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Thu May 31 16:30:15 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -6776,7 +6776,7 @@ case "$inc_version_list" in
 	fi
 	;;
 $undef) dflt='none' ;;
-*)  dflt="$inc_version_list" ;;
+*)  eval dflt=\"$inc_version_list\" ;;
 esac
 case "$dflt" in
 ''|' ') dflt=none ;;
