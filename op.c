@@ -118,12 +118,16 @@ char *name;
 }
 
 static PADOFFSET
+#ifndef CAN_PROTOTYPE
 pad_findlex(name, newoff, seq, startcv, cx_ix)
 char *name;
 PADOFFSET newoff;
 I32 seq;
 CV* startcv;
 I32 cx_ix;
+#else
+pad_findlex(char *name, PADOFFSET newoff, I32 seq, CV* startcv, I32 cx_ix)
+#endif
 {
     CV *cv;
     I32 off;
@@ -2638,6 +2642,8 @@ CV *cv;
 	}
 	SvREFCNT_dec(CvGV(cv));
 	CvGV(cv) = Nullgv;
+	SvREFCNT_dec(CvOUTSIDE(cv));
+	CvOUTSIDE(cv) = Nullcv;
 	LEAVE;
     }
 }
@@ -2669,7 +2675,8 @@ CV* proto;
     CvSTASH(cv)		= CvSTASH(proto);
     CvROOT(cv)		= CvROOT(proto);
     CvSTART(cv)		= CvSTART(proto);
-    CvOUTSIDE(cv)	= CvOUTSIDE(proto);
+    if (CvOUTSIDE(proto))
+	CvOUTSIDE(cv)	= (CV*)SvREFCNT_inc((SV*)CvOUTSIDE(proto));
 
     comppad = newAV();
 
@@ -2752,6 +2759,7 @@ OP *block;
 	    SvREFCNT_dec(CvGV(cv));
 	}
 	CvOUTSIDE(cv) = CvOUTSIDE(compcv);
+	CvOUTSIDE(compcv) = 0;
 	CvPADLIST(cv) = CvPADLIST(compcv);
 	SvREFCNT_dec(compcv);
     }

@@ -3358,6 +3358,7 @@ SV* sv;
 	fprintf(stderr, "  FILEGV = 0x%lx\n", (long)CvFILEGV(sv));
 	fprintf(stderr, "  DEPTH = %ld\n", (long)CvDEPTH(sv));
 	fprintf(stderr, "  PADLIST = 0x%lx\n", (long)CvPADLIST(sv));
+	fprintf(stderr, "  OUTSIDE = 0x%lx\n", (long)CvOUTSIDE(sv));
 	if (type == SVt_PVFM)
 	    fprintf(stderr, "  LINES = %ld\n", (long)FmLINES(sv));
 	break;

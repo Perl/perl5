@@ -4633,6 +4633,9 @@ start_subparse()
     CV* outsidecv = compcv;
     AV* comppadlist;
 
+    if (compcv) {
+	assert(SvTYPE(compcv) == SVt_PVCV);
+    }
     save_I32(&subline);
     save_item(subname);
     SAVEINT(padix);
@@ -4665,7 +4668,7 @@ start_subparse()
     av_store(comppadlist, 1, SvREFCNT_inc((SV*)comppad));
 
     CvPADLIST(compcv) = comppadlist;
-    CvOUTSIDE(compcv) = outsidecv;
+    CvOUTSIDE(compcv) = (CV*)SvREFCNT_inc((SV*)outsidecv);
 
     return oldsavestack_ix;
 }
