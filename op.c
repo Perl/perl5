@@ -1860,7 +1860,9 @@ Perl_scope(pTHX_ OP *o)
 		OP *kid;
 		o->op_type = OP_SCOPE;
 		o->op_ppaddr = PL_ppaddr[OP_SCOPE];
-		null(((LISTOP*)o)->op_first);
+		kid = ((LISTOP*)o)->op_first;
+		if (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE)
+		    null(kid);
 	    }
 	    else
 		o = newLISTOP(OP_SCOPE, 0, o, Nullop);
