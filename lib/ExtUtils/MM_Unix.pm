@@ -20,7 +20,7 @@ use vars qw($VERSION @ISA
 
 use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
-$VERSION = '1.45_01';
+$VERSION = '1.45_02';
 
 require ExtUtils::MM_Any;
 @ISA = qw(ExtUtils::MM_Any);
@@ -414,9 +414,16 @@ sub const_loadlibs {
 };
     my($tmp);
     for $tmp (qw/
-	 EXTRALIBS LDLOADLIBS BSLOADLIBS LD_RUN_PATH
+	 EXTRALIBS LDLOADLIBS BSLOADLIBS
 	 /) {
 	next unless defined $self->{$tmp};
+	push @m, "$tmp = $self->{$tmp}\n";
+    }
+    # don't set LD_RUN_PATH if empty
+    for $tmp (qw/
+	 LD_RUN_PATH
+	 /) {
+	next unless $self->{$tmp};
 	push @m, "$tmp = $self->{$tmp}\n";
     }
     return join "", @m;
@@ -1156,8 +1163,12 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) blibdirs.exists $(EXPORT_LIS
         }
     }
 
+    my $ld_run_path_shell = "";
+    if ($self->{LD_RUN_PATH} ne "") {
+	$ld_run_path_shell = 'LD_RUN_PATH="$(LD_RUN_PATH)" ';
+    }
     push(@m,
-'	LD_RUN_PATH="$(LD_RUN_PATH)" $(LD) '.$ldrun.' $(LDDLFLAGS) '.$ldfrom.
+'	'.$ld_run_path_shell.'$(LD) '.$ldrun.' $(LDDLFLAGS) '.$ldfrom.
 ' $(OTHERLDFLAGS) -o $@ $(MYEXTLIB) $(PERL_ARCHIVE) '.$libs.' $(PERL_ARCHIVE_AFTER) $(EXPORT_LIST) $(INST_DYNAMIC_FIX)');
     push @m, '
 	$(CHMOD) $(PERM_RWX) $@
