@@ -75,9 +75,6 @@ static void init_predump_symbols _((void));
 static void my_exit_jump _((void)) __attribute__((noreturn));
 static void nuke_stacks _((void));
 static void open_script _((char *, bool, SV *));
-#ifdef USE_THREADS
-static void thread_destruct _((void *));
-#endif /* USE_THREADS */
 static void usage _((char *));
 static void validate_suid _((char *, char*));
 
@@ -121,31 +118,32 @@ register PerlInterpreter *sv_interp;
     Zero(sv_interp, 1, PerlInterpreter);
 #endif
 
-   /* Init the real globals? */
+   /* Init the real globals (and main thread)? */
     if (!linestr) {
 #ifdef USE_THREADS
-#ifdef NEED_PTHREAD_INIT
-    	pthread_init();
-#endif /* NEED_PTHREAD_INIT */
+    	INIT_THREADS;
 	New(53, thr, 1, struct thread);
 	MUTEX_INIT(&malloc_mutex);
 	MUTEX_INIT(&sv_mutex);
 	MUTEX_INIT(&eval_mutex);
 	COND_INIT(&eval_cond);
-	MUTEX_INIT(&nthreads_mutex);
+	MUTEX_INIT(&threads_mutex);
 	COND_INIT(&nthreads_cond);
 	nthreads = 1;
 	cvcache = newHV();
-	thrflags = 0;
 	curcop = &compiling;
+	thr->flags = THRf_NORMAL;
+	thr->next = thr;
+	thr->prev = thr;
 #ifdef FAKE_THREADS
 	self = thr;
-	thr->next = thr->prev = thr->next_run = thr->prev_run = thr;
+	thr->next_run = thr->prev_run = thr;
 	thr->wait_queue = 0;
 	thr->private = 0;
+	thr->tid = 0;
 #else
 	self = pthread_self();
-	if (pthread_key_create(&thr_key, thread_destruct))
+	if (pthread_key_create(&thr_key, 0))
 	    croak("panic: pthread_key_create");
 	if (pthread_setspecific(thr_key, (void *) thr))
 	    croak("panic: pthread_setspecific");
@@ -227,28 +225,6 @@ register PerlInterpreter *sv_interp;
     ENTER;
 }
 
-#ifdef USE_THREADS
-void
-thread_destruct(arg)
-void *arg;
-{
-    struct thread *thr = (struct thread *) arg;
-    /*
-     * Decrement the global thread count and signal anyone listening.
-     * The only official thread listening is the original thread while
-     * in perl_destruct. It waits until it's the only thread and then
-     * performs END blocks and other process clean-ups.
-     */
-    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "thread_destruct: 0x%lx\n", (unsigned long) thr));
-
-    Safefree(thr);
-    MUTEX_LOCK(&nthreads_mutex);
-    nthreads--;
-    COND_BROADCAST(&nthreads_cond);
-    MUTEX_UNLOCK(&nthreads_mutex);
-}    
-#endif /* USE_THREADS */
-
 void
 perl_destruct(sv_interp)
 register PerlInterpreter *sv_interp;
@@ -257,24 +233,37 @@ register PerlInterpreter *sv_interp;
     int destruct_level;  /* 0=none, 1=full, 2=full with checks */
     I32 last_sv_count;
     HV *hv;
+    Thread t;
 
     if (!(curinterp = sv_interp))
 	return;
 
 #ifdef USE_THREADS
 #ifndef FAKE_THREADS
-    /* Wait until all user-created threads go away */
-    MUTEX_LOCK(&nthreads_mutex);
+    /* Detach any remaining joinable threads apart from ourself */
+    MUTEX_LOCK(&threads_mutex);
+    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+			  "perl_destruct: detaching remaining %d threads\n",
+			  nthreads - 1));
+    for (t = thr->next; t != thr; t = t->next) {
+	if (ThrSTATE(t) == THRf_NORMAL) {
+	    DETACH(t);
+	    ThrSETSTATE(t, THRf_DETACHED);
+	    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "...detached %p\n", t));
+	}
+    }
+    /* Now wait for the thread count nthreads to drop to one */
     while (nthreads > 1)
     {
-	DEBUG_L(PerlIO_printf(PerlIO_stderr(), "perl_destruct: waiting for %d threads\n",
-			nthreads - 1));
-	COND_WAIT(&nthreads_cond, &nthreads_mutex);
+	DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+			      "perl_destruct: waiting for %d threads\n",
+			      nthreads - 1));
+	COND_WAIT(&nthreads_cond, &threads_mutex);
     }
     /* At this point, we're the last thread */
-    MUTEX_UNLOCK(&nthreads_mutex);
+    MUTEX_UNLOCK(&threads_mutex);
     DEBUG_L(PerlIO_printf(PerlIO_stderr(), "perl_destruct: armageddon has arrived\n"));
-    MUTEX_DESTROY(&nthreads_mutex);
+    MUTEX_DESTROY(&threads_mutex);
     COND_DESTROY(&nthreads_cond);
 #endif /* !defined(FAKE_THREADS) */
 #endif /* USE_THREADS */

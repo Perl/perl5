@@ -1347,7 +1347,7 @@ EXT perl_mutex		eval_mutex;	/* Mutex for doeval */
 EXT perl_cond		eval_cond;	/* Condition variable for doeval */
 EXT struct thread *	eval_owner;	/* Owner thread for doeval */
 EXT int			nthreads;	/* Number of threads currently */
-EXT perl_mutex		nthreads_mutex;	/* Mutex for nthreads */
+EXT perl_mutex		threads_mutex;	/* Mutex for nthreads and thread list */
 EXT perl_cond		nthreads_cond;	/* Condition variable for nthreads */
 #ifdef FAKE_THREADS
 EXT struct thread *	thr;		/* Currently executing (fake) thread */

@@ -38,7 +38,6 @@ typedef struct thread *perl_thread;
 	SCHEDULE();			\
     } STMT_END
 #define COND_DESTROY(c)
-
 #else
 /* POSIXish threads */
 typedef pthread_t perl_thread;
@@ -70,6 +69,10 @@ typedef pthread_t perl_thread;
     if (pthread_cond_wait((c), (m))) croak("panic: COND_WAIT"); else 1
 #define COND_DESTROY(c) \
     if (pthread_cond_destroy((c))) croak("panic: COND_DESTROY"); else 1
+
+#define DETACH(t) \
+    if (pthread_detach((t)->Tself)) croak("panic: DETACH"); else 1
+
 /* XXX Add "old" (?) POSIX draft interface too */
 #ifdef OLD_PTHREADS_API
 struct thread *getTHR _((void));
@@ -80,20 +83,27 @@ struct thread *getTHR _((void));
 #define dTHR struct thread *thr = THR
 #endif /* FAKE_THREADS */
 
+#ifndef INIT_THREADS
+#  ifdef NEED_PTHREAD_INIT
+#    define INIT_THREADS pthread_init()
+#  else
+#    define INIT_THREADS NOOP
+#  endif
+#endif
+
 struct thread {
-    perl_thread	Tself;
-    SV *	Toursv;
-
     /* The fields that used to be global */
-    SV **	Tstack_base;
+    /* Important ones in the first cache line (if alignment is done right) */
     SV **	Tstack_sp;
-    SV **	Tstack_max;
-
 #ifdef OP_IN_REGISTER
     OP *	Topsave;
 #else
     OP *	Top;
 #endif
+    SV **	Tcurpad;
+    SV **	Tstack_base;
+
+    SV **	Tstack_max;
 
     I32 *	Tscopestack;
     I32		Tscopestack_ix;
@@ -110,8 +120,6 @@ struct thread {
     I32 *	Tmarkstack;
     I32 *	Tmarkstack_ptr;
     I32 *	Tmarkstack_max;
-
-    SV **	Tcurpad;
 
     SV *	TSv;
     XPV *	TXpv;
@@ -149,12 +157,15 @@ struct thread {
 
     /* XXX Sort stuff, firstgv, secongv and so on? */
 
+    perl_thread	Tself;
+    SV *	Toursv;
     perl_mutex *Tthreadstart_mutexp;
     HV *	Tcvcache;
-    U32		Tthrflags;
+    U32		flags;
+    U32		tid;
+    struct thread *next, *prev;		/* Circular linked list of threads */
 
 #ifdef FAKE_THREADS
-    perl_thread next, prev;		/* Linked list of all threads */
     perl_thread next_run, prev_run;	/* Linked list of runnable threads */
     perl_cond	wait_queue;		/* Wait queue that we are waiting on */
     IV		private;		/* Holds data across time slices */
@@ -164,7 +175,7 @@ struct thread {
 
 typedef struct thread *Thread;
 
-/* Values and macros for thrflags */
+/* Values and macros for thr->flags */
 #define THRf_STATE_MASK	3
 #define THRf_NORMAL	0
 #define THRf_DETACHED	1
@@ -173,10 +184,10 @@ typedef struct thread *Thread;
 
 #define THRf_DIE_FATAL	4
 
-#define ThrSTATE(t)	(t->Tthrflags & THRf_STATE_MASK)
+#define ThrSTATE(t)	(t->flags & THRf_STATE_MASK)
 #define ThrSETSTATE(t, s) STMT_START {		\
-	(t)->Tthrflags &= ~THRf_STATE_MASK;	\
-	(t)->Tthrflags |= (s);			\
+	(t)->flags &= ~THRf_STATE_MASK;	\
+	(t)->flags |= (s);			\
 	DEBUG_L(fprintf(stderr, "thread 0x%lx set to state %d\n", \
 			(unsigned long)(t), (s))); \
     } STMT_END
@@ -291,5 +302,4 @@ typedef struct condpair {
 
 #define	threadstart_mutexp	(thr->Tthreadstart_mutexp)
 #define	cvcache		(thr->Tcvcache)
-#define	thrflags	(thr->Tthrflags)
 #endif /* USE_THREADS */
