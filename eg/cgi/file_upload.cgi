@@ -1,5 +1,6 @@
 #!/usr/local/bin/perl -w
 
+use strict 'refs';
 use lib '..';
 use CGI qw(:standard);
 use CGI::Carp qw/fatalsToBrowser/;
@@ -18,7 +19,7 @@ print h1("File Upload Example"),
     will count the number of lines, words, and characters in
     the file.';
 
-@types = ('count lines','count words','count characters');
+my @types = ('count lines','count words','count characters');
 
 # Start a multipart form.
 print start_multipart_form(),
@@ -31,9 +32,10 @@ print start_multipart_form(),
     endform;
 
 # Process the form if there is a file name entered
-if ($file = param('filename')) {
-    $tmpfile=tmpFileName($file);
-    $mimetype = uploadInfo($file)->{'Content-Type'} || '';
+if (my $file = param('filename')) {
+    my %stats;
+    my $tmpfile=tmpFileName($file);
+    my $mimetype = uploadInfo($file)->{'Content-Type'} || '';
     print hr(),
           h2($file),
           h3($tmpfile),
