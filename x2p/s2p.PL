@@ -17,7 +17,6 @@ sub link { # This is a cut-down version of installperl:link().
 	      : die "Couldn't link $from to $to: $!\n";
     };
     if ($@) {
-	warn $@;
 	require File::Copy;
 	File::Copy::copy($from, $to)
 	    ? $success++
