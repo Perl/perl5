@@ -19,6 +19,8 @@ WriteMakefile(
 	'MAN3PODS'		=> {},
     'VERSION_FROM'	=> 'Storable.pm',
     'dist'			=> { SUFFIX => 'gz', COMPRESS => 'gzip -f' },
-    'clean'			=> {'FILES' => '*%'},
+# The % would be understood as a filename wildcard in VMS and
+# in some Windows shells.  (Charles Lane and Gurusamy Sarathy)
+#    'clean'			=> {'FILES' => '*%'},
 );
 
