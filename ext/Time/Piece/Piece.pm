@@ -1299,6 +1299,12 @@ including the ':override' tag in the import list:
 
 The excellent Calendar FAQ at L<http://www.tondering.dk/claus/calendar.html>
 
+If you just want an object-oriented interface to the usual time
+functions see L<Time::localtime> and L<Time::gmtime> which are part
+of the standard distribution.  Beware, though, that their fields are as
+in the C library: the I<year> is I<year-1900> (like $t->_year in Time::Piece)
+and I<months> begin from zero (like $t->_mon).
+
 L<strftime(3)>, L<strftime(3)>
 
 =head1 AUTHOR
