@@ -1215,6 +1215,7 @@
 #define sv_utf8_upgrade_flags	Perl_sv_utf8_upgrade_flags
 #define sv_pvn_force_flags	Perl_sv_pvn_force_flags
 #define sv_2pv_flags		Perl_sv_2pv_flags
+#define sv_copypv		Perl_sv_copypv
 #define my_atof2		Perl_my_atof2
 #define my_socketpair		Perl_my_socketpair
 #if defined(USE_PERLIO) && !defined(USE_SFIO)
@@ -2759,6 +2760,7 @@
 #define sv_utf8_upgrade_flags(a,b)	Perl_sv_utf8_upgrade_flags(aTHX_ a,b)
 #define sv_pvn_force_flags(a,b,c)	Perl_sv_pvn_force_flags(aTHX_ a,b,c)
 #define sv_2pv_flags(a,b,c)	Perl_sv_2pv_flags(aTHX_ a,b,c)
+#define sv_copypv(a,b)		Perl_sv_copypv(aTHX_ a,b)
 #define my_atof2(a,b)		Perl_my_atof2(aTHX_ a,b)
 #define my_socketpair		Perl_my_socketpair
 #if defined(USE_PERLIO) && !defined(USE_SFIO)

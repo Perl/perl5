@@ -1340,6 +1340,7 @@ PERL_CALLCONV void	Perl_sv_catsv_flags(pTHX_ SV* dsv, SV* ssv, I32 flags);
 PERL_CALLCONV STRLEN	Perl_sv_utf8_upgrade_flags(pTHX_ SV *sv, I32 flags);
 PERL_CALLCONV char*	Perl_sv_pvn_force_flags(pTHX_ SV* sv, STRLEN* lp, I32 flags);
 PERL_CALLCONV char*	Perl_sv_2pv_flags(pTHX_ SV* sv, STRLEN* lp, I32 flags);
+PERL_CALLCONV void	Perl_sv_copypv(pTHX_ SV* dsv, SV* ssv);
 PERL_CALLCONV char*	Perl_my_atof2(pTHX_ const char *s, NV* value);
 PERL_CALLCONV int	Perl_my_socketpair(int family, int type, int protocol, int fd[2]);
 

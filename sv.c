@@ -3148,6 +3148,43 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 }
 
 /*
+=for apidoc sv_copypv
+
+Copies a stringified representation of the source SV into the
+destination SV.  Automatically performs any necessary mg_get and
+coercion of numeric values into strings.  Guaranteed to preserve 
+UTF-8 flag even from overloaded objects.  Similar in nature to
+sv_2pv[_flags] but operates directly on an SV instead of just the 
+string.  Mostly uses sv_2pv_flags to do its work, except when that 
+would lose the UTF-8'ness of the PV.
+
+=cut
+*/
+
+void
+Perl_sv_copypv(pTHX_ SV *dsv, register SV *ssv)
+{
+    SV *tmpsv = sv_newmortal();
+
+    if ( SvTHINKFIRST(ssv) && SvROK(ssv) && SvAMAGIC(ssv) ) {
+	tmpsv=AMG_CALLun(ssv,string);
+	if (SvTYPE(tmpsv) != SVt_RV || (SvRV(tmpsv) != SvRV(ssv)))
+	    return SvSetSV(dsv,tmpsv);
+    }
+    {
+	STRLEN len;
+	char *s;
+	s = SvPV(ssv,len);
+	sv_setpvn(tmpsv,s,len);
+	if (SvUTF8(ssv))
+	    SvUTF8_on(tmpsv);
+	else
+	    SvUTF8_off(tmpsv);
+	return SvSetSV(dsv,tmpsv);
+    }
+}
+
+/*
 =for apidoc sv_2pvbyte_nolen
 
 Return a pointer to the byte-encoded representation of the SV.

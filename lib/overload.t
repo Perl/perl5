@@ -1046,5 +1046,25 @@ $r = Foo->new(0);
 
 test(($r || 0) == 0); # 222
 
+package utf8_o;
+
+use overload 
+  '""'  =>  sub { return $_[0]->{var}; }
+  ;
+  
+sub new
+  {
+    my $class = shift;
+    my $self =  {};
+    $self->{var} = shift;
+    bless $self,$class;
+  }
+
+package main;
+
+
+my $utfvar = new utf8_o 200.2.1;
+test("$utfvar" eq 200.2.1); # 223
+
 # Last test is:
-sub last {222}
+sub last {223}
