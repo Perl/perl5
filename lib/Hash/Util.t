@@ -6,7 +6,7 @@ BEGIN {
         chdir 't';
     }
 }
-use Test::More tests => 157;
+use Test::More tests => 61;
 use strict;
 
 my @Exported_Funcs;
@@ -226,60 +226,4 @@ like( $@, qr/^Attempt to access disallowed key 'I_DONT_EXIST' in a restricted ha
         "undef values should not be misunderstood as placeholders");
     is ($hash{nowt}, undef,
         "undef values should not be misunderstood as placeholders (again)");
-}
-
-{
-  # perl #18651 - tim@consultix-inc.com found a rather nasty data dependant
-  # bug whereby hash iterators could lose hash keys (and values, as the code
-  # is common) for restricted hashes.
-
-  my @keys = qw(small medium large);
-
-  # There should be no difference whether it is restricted or not
-  foreach my $lock (0, 1) {
-    # Try setting all combinations of the 3 keys
-    foreach my $usekeys (0..7) {
-      my @usekeys;
-      for my $bits (0,1,2) {
-	push @usekeys, $keys[$bits] if $usekeys & (1 << $bits);
-      }
-      my %clean = map {$_ => length $_} @usekeys;
-      my %target;
-      lock_keys ( %target, @keys ) if $lock;
-
-      while (my ($k, $v) = each %clean) {
-	$target{$k} = $v;
-      }
-
-      my $message
-	= ($lock ? 'locked' : 'not locked') . ' keys ' . join ',', @usekeys;
-
-      is (scalar keys %target, scalar keys %clean, "scalar keys for $message");
-      is (scalar values %target, scalar values %clean,
-	  "scalar values for $message");
-      # Yes. All these sorts are necessary. Even for "identical hashes"
-      # Because the data dependency of the test involves two of the strings
-      # colliding on the same bucket, so the iterator order (output of keys,
-      # values, each) depends on the addition order in the hash. And locking
-      # the keys of the hash involves behind the scenes key additions.
-      is_deeply( [sort keys %target] , [sort keys %clean],
-		 "list keys for $message");
-      is_deeply( [sort values %target] , [sort values %clean],
-		 "list values for $message");
-
-      is_deeply( [sort %target] , [sort %clean],
-		 "hash in list context for $message");
-
-      my (@clean, @target);
-      while (my ($k, $v) = each %clean) {
-	push @clean, $k, $v;
-      }
-      while (my ($k, $v) = each %target) {
-	push @target, $k, $v;
-      }
-
-      is_deeply( [sort @target] , [sort @clean],
-		 "iterating with each for $message");
-    }
-  }
 }

@@ -5072,23 +5072,6 @@ Perl_save_re_context(pTHX)
     SAVEVPTR(PL_reg_curpm);		/* from regexec.c */
     SAVEI32(PL_regnpar);		/* () count. */
     SAVEI32(PL_regsize);		/* from regexec.c */
-
-    {
-	/* Save $1..$n (#18107: UTF-8 s/(\w+)/uc($1)/e); AMS 20021106. */
-	int i;
-	GV *mgv;
-	REGEXP *rx;
-	char digits[16];
-
-	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
-	    for (i = 1; i <= rx->nparens; i++) {
-		sprintf(digits, "%lu", i);
-		if ((mgv = gv_fetchpv(digits, FALSE, SVt_PV)))
-		    save_scalar(mgv);
-	    }
-	}
-    }
-
 #ifdef DEBUGGING
     SAVEPPTR(PL_reg_starttry);		/* from regexec.c */
 #endif
