@@ -44,6 +44,7 @@ sub openunicode {
 	for my $d (@INC) {
 	    use File::Spec;
 	    $f = File::Spec->catfile($d, "unicode", @path);
+           next unless -f $f;
 	    if (open($$rfh, $f)) {
 		last;
 	    } else {
