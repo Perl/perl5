@@ -131,6 +131,11 @@ C<pack('U0a*', ...)> can now be used to force a string to UTF8.
 
 =item *
 
+The printf and sprintf now support parameter reordering using the
+C<%\d+\$> and C<*\d+\$> syntaxes.
+
+=item *
+
 prototype(\&) is now available.
 
 =item *

@@ -6054,7 +6054,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	bool has_precis = FALSE;
 	STRLEN precis = 0;
 	bool is_utf = FALSE;
-
+	
 	char esignbuf[4];
 	U8 utf8buf[UTF8_MAXLEN];
 	STRLEN esignlen = 0;
@@ -6082,6 +6082,9 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	STRLEN gap;
 	char *dotstr = ".";
 	STRLEN dotstrlen = 1;
+	I32 epix = 0; /* explicit parameter index */
+	I32 ewix = 0; /* explicit width index */
+	bool asterisk = FALSE;
 
 	for (q = p; q < patend && *q != '%'; ++q) ;
 	if (q > p) {
@@ -6142,6 +6145,15 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 	/* WIDTH */
 
+    scanwidth:
+
+	if (*q == '*') {
+	    if (asterisk)
+		goto unknown;
+	    asterisk = TRUE;
+	    q++;
+	}
+
 	switch (*q) {
 	case '1': case '2': case '3':
 	case '4': case '5': case '6':
@@ -6149,17 +6161,30 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    width = 0;
 	    while (isDIGIT(*q))
 		width = width * 10 + (*q++ - '0');
-	    break;
+	    if (*q == '$') {
+		if (asterisk && ewix == 0) {
+		    ewix  = width;
+		    width = 0;
+		    q++;
+		    goto scanwidth;
+		} else if (epix == 0) {
+		    epix  = width;
+		    width = 0;
+		    q++;
+		    goto scanwidth;
+		} else
+		    goto unknown;
+	    }
+	}
 
-	case '*':
+	if (asterisk) {
 	    if (args)
 		i = va_arg(*args, int);
 	    else
-		i = (svix < svmax) ? SvIVx(svargs[svix++]) : 0;
+		i = (ewix ? ewix <= svmax : svix < svmax) ?
+		    SvIVx(svargs[ewix ? ewix-1 : svix++]) : 0;
 	    left |= (i < 0);
 	    width = (i < 0) ? -i : i;
-	    q++;
-	    break;
 	}
 
 	/* PRECISION */
@@ -6170,7 +6195,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		if (args)
 		    i = va_arg(*args, int);
 		else
-		    i = (svix < svmax) ? SvIVx(svargs[svix++]) : 0;
+		    i = (ewix ? ewix <= svmax : svix < svmax)
+			? SvIVx(svargs[ewix ? ewix-1 : svix++]) : 0;
 		precis = (i < 0) ? 0 : i;
 		q++;
 	    }
@@ -6188,8 +6214,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		vecstr = (U8*)SvPVx(vecsv,veclen);
 		utf = DO_UTF8(vecsv);
 	    }
-	    else if (svix < svmax) {
-		vecsv = svargs[svix++];
+	    else if (epix ? epix <= svmax : svix < svmax) {
+		vecsv = svargs[epix ? epix-1 : svix++];
 		vecstr = (U8*)SvPVx(vecsv,veclen);
 		utf = DO_UTF8(vecsv);
 	    }
@@ -6243,7 +6269,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    if (args)
 		uv = va_arg(*args, int);
 	    else
-		uv = (svix < svmax) ? SvIVx(svargs[svix++]) : 0;
+		uv = (epix ? epix <= svmax : svix < svmax) ?
+		    SvIVx(svargs[epix ? epix-1 : svix++]) : 0;
 	    if ((uv > 255 || (uv > 127 && SvUTF8(sv))) && !IN_BYTE) {
 		eptr = (char*)utf8buf;
 		elen = uv_to_utf8((U8*)eptr, uv) - utf8buf;
@@ -6272,8 +6299,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		    elen = sizeof nullstr - 1;
 		}
 	    }
-	    else if (svix < svmax) {
-		argsv = svargs[svix++];
+	    else if (epix ? epix <= svmax : svix < svmax) {
+		argsv = svargs[epix ? epix-1 : svix++];
 		eptr = SvPVx(argsv, elen);
 		if (DO_UTF8(argsv)) {
 		    if (has_precis && precis < elen) {
@@ -6316,7 +6343,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    if (args)
 		uv = PTR2UV(va_arg(*args, void*));
 	    else
-		uv = (svix < svmax) ? PTR2UV(svargs[svix++]) : 0;
+		uv = (epix ? epix <= svmax : svix < svmax) ?
+		    PTR2UV(svargs[epix ? epix-1 : svix++]) : 0;
 	    base = 16;
 	    goto integer;
 
@@ -6356,7 +6384,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		}
 	    }
 	    else {
-		iv = (svix < svmax) ? SvIVx(svargs[svix++]) : 0;
+		iv = (epix ? epix <= svmax : svix < svmax) ?
+		    SvIVx(svargs[epix ? epix-1 : svix++]) : 0;
 		switch (intsize) {
 		case 'h':	iv = (short)iv; break;
 		default:	break;
@@ -6438,7 +6467,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		}
 	    }
 	    else {
-		uv = (svix < svmax) ? SvUVx(svargs[svix++]) : 0;
+		uv = (epix ? epix <= svmax : svix < svmax) ?
+		    SvUVx(svargs[epix ? epix-1 : svix++]) : 0;
 		switch (intsize) {
 		case 'h':	uv = (unsigned short)uv; break;
 		default:	break;
@@ -6530,7 +6560,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    if (args)
 		nv = va_arg(*args, NV);
 	    else
-		nv = (svix < svmax) ? SvNVx(svargs[svix++]) : 0.0;
+		nv = (epix ? epix <= svmax : svix < svmax) ?
+		    SvNVx(svargs[epix ? epix-1 : svix++]) : 0.0;
 
 	    need = 0;
 	    if (c != 'e' && c != 'E') {
@@ -6615,8 +6646,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 #endif
 		}
 	    }
-	    else if (svix < svmax)
-		sv_setuv_mg(svargs[svix++], (UV)i);
+	    else if (epix ? epix <= svmax : svix < svmax)
+		sv_setuv_mg(svargs[epix ? epix-1 : svix++], (UV)i);
 	    continue;	/* not "break" */
 
 	    /* UNKNOWN */

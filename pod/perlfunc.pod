@@ -4478,13 +4478,31 @@ and the conversion letter:
    h       interpret integer as C type "short" or "unsigned short"
            If no flags, interpret integer as C type "int" or "unsigned"
 
+Perl supports parameter ordering, in other words, fetching the
+parameters in some explicitly specified "random" ordering as opposed
+to the default implicit sequential ordering.  The syntax is, instead
+of the C<%> and C<*>, to use C<%>I<digits>C<$> and C<*>I<digits>C<$>,
+where the I<digits> is the wanted index, from one upwards.  For example:
+
+   printf "%2\$d %1\$d\n", 12, 34;		# will print "34 12\n"
+   printf "%*2\$d\n",      12, 3;		# will print " 12\n"
+
+Note that using the reordering syntax does not interfere with the usual
+implicit sequential fetching of the parameters:
+
+   printf "%2\$d %d\n",    12, 34;		# will print "34 12\n"
+   printf "%2\$d %d %d\n", 12, 34;		# will print "34 12 34\n"
+   printf "%3\$d %d %d\n", 12, 34, 56;		# will print "56 12 34\n"
+   printf "%2\$*3\$d %d\n", 12, 34, 3;		# will print " 34 12\n"
+   printf "%*3\$2\$d %d\n", 12, 34, 3;		# will print " 34 12\n"
+
 There are also two Perl-specific flags:
 
-   V       interpret integer as Perl's standard integer type
-   v       interpret string as a vector of integers, output as
-           numbers separated either by dots, or by an arbitrary
-	   string received from the argument list when the flag
-	   is preceded by C<*>
+    V       interpret integer as Perl's standard integer type
+    v       interpret string as a vector of integers, output as
+            numbers separated either by dots, or by an arbitrary
+	    string received from the argument list when the flag
+	    is preceded by C<*>
 
 Where a number would appear in the flags, an asterisk (C<*>) may be
 used instead, in which case Perl uses the next item in the parameter
