@@ -241,6 +241,10 @@ eval { alarm(-3) };
 print $@ =~ /::alarm\(-3, 0\): negative time not invented yet/ ?
     "ok 24\n" : "not ok 24\n";
 
-eval { ualarm(-4) };
-print $@ =~ /::ualarm\(-4, 0\): negative time not invented yet/ ?
+if ($have_ualarm) {
+    eval { ualarm(-4) };
+    print $@ =~ /::ualarm\(-4, 0\): negative time not invented yet/ ?
     "ok 25\n" : "not ok 25\n";
+} else {
+    skip 25;
+}
