@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-print "1..48\n";
+print "1..51\n";
 
 BEGIN {
     if( $ENV{PERL_CORE} ) {
@@ -509,6 +509,14 @@ EOT
 
 close FH or die "close $makefilePL: $!\n";
 
+################ MANIFEST
+# We really need a MANIFEST because make distclean checks it.
+my $manifest = catfile($dir, "MANIFEST");
+push @files, "MANIFEST";
+open FH, ">$manifest" or die "open >$manifest: $!\n";
+print FH "$_\n" foreach @files;
+close FH or die "close $manifest: $!\n";
+
 chdir $dir or die $!; push @INC,  '../../lib';
 END {chdir ".." or warn $!};
 
@@ -529,8 +537,9 @@ if (-f "$makefile$makefile_ext") {
 } else {
   print "not ok 2\n";
 }
-my $makefile_rename = ($^O eq 'VMS' ? '.mms' : '.old');
-push @files, "$makefile$makefile_rename"; # Renamed by make clean
+
+# Renamed by make clean
+my $makefile_rename = $makefile . ($^O eq 'VMS' ? '.mms' : '.old');
 
 my $make = $Config{make};
 
@@ -567,8 +576,6 @@ if ($Config{usedl}) {
     print "ok 4\n";
   }
 }
-
-push @files, $output;
 
 my $maketest = "$make test";
 print "# make = '$maketest'\n";
@@ -639,22 +646,52 @@ if ($?) {
 }
 $test++;
 
+sub check_for_bonus_files {
+  my $dir = shift;
+  my %expect = map {$_, 1} @_;
+
+  my $fail;
+  opendir DIR, $dir or die "opendir '$dir': $!";
+  while (defined (my $entry = readdir DIR)) {
+    next if $expect{$entry};
+    print "# Extra file '$entry'\n";
+    $fail = 1;
+  }
+
+  closedir DIR or warn "closedir '.': $!";
+  if ($fail) {
+    print "not ok $test\n";
+  } else {
+    print "ok $test\n";
+  }
+  $test++;
+}
+
+check_for_bonus_files ('.', @files, $output, $makefile_rename, '.', '..');
+
+rename $makefile_rename, $makefile
+ or die "Can't rename '$makefile_rename' to '$makefile': $!";
+
+unlink $output or warn "Can't unlink '$output': $!";
+
+# Need to make distclean to remove ../../lib/ExtTest.pm
+my $makedistclean = "$make distclean";
+print "# make = '$makedistclean'\n";
+@makeout = `$makedistclean`;
+if ($?) {
+  print "not ok $test # $make failed: $?\n";
+  print "# $_" foreach @makeout;
+} else {
+  print "ok $test\n";
+}
+$test++;
+
+check_for_bonus_files ('.', @files, '.', '..');
+
 unless ($keep_files) {
   foreach (@files) {
     unlink $_ or warn "unlink $_: $!";
   }
 }
 
-my $fail;
-opendir DIR, "." or die "opendir '.': $!";
-while (defined (my $entry = readdir DIR)) {
-  next if $entry =~ /^\.\.?$/;
-  print "# Extra file '$entry'\n";
-  $fail = 1;
-}
-closedir DIR or warn "closedir '.': $!";
-if ($fail) {
-  print "not ok $test\n";
-} else {
-  print "ok $test\n";
-}
+check_for_bonus_files ('.', '.', '..');
