@@ -105,6 +105,16 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  7014] By: jhi                                   on 2000/09/02  17:35:45
+        Log: Changes and patchlevel tweaks.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
+[  7013] By: jhi                                   on 2000/09/02  17:30:50
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  7012] By: nick                                  on 2000/09/02  17:25:20
         Log: More %{} and other deref special casing - do not pass to 'nomethod'.
      Branch: perl
