@@ -201,7 +201,7 @@ sub S_ISENFMT  { ( $_[0] & _S_IFMT() ) == S_IFENFMT() }
 
 sub AUTOLOAD {
     (my $constname = $AUTOLOAD) =~ s/.*:://;
-    my $val = constant($constname, 0);
+    my $val = constant($constname);
     if ($! != 0) {
 	if ($! =~ /Invalid/ || $!{EINVAL}) {
 	    $AutoLoader::AUTOLOAD = $AUTOLOAD;
