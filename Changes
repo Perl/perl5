@@ -34,6 +34,17 @@ Version v5.6.1 Trial release 3
 --------------
 
 ____________________________________________________________________________
+[  9238] By: gsar                                  on 2001/03/19  08:47:04
+        Log: some new symbols are only available under ithreads
+     Branch: maint-5.6/perl
+	   ! makedef.pl
+____________________________________________________________________________
+[  9237] By: gsar                                  on 2001/03/19  08:42:28
+        Log: update patchlevel.h, Changes, &c.
+     Branch: maint-5.6/perl
+	   ! Changes patchlevel.h pod/perlhist.pod
+	  !> AUTHORS
+____________________________________________________________________________
 [  9236] By: gsar                                  on 2001/03/19  08:17:49
         Log: integrate changes#8068,8717 from mainline
              
