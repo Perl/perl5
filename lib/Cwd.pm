@@ -1,4 +1,5 @@
 package Cwd;
+$VERSION = $VERSION = '2.14';
 
 =head1 NAME
 
@@ -137,9 +138,7 @@ L<File::chdir>
 
 use strict;
 use Exporter;
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
-
-$VERSION = '2.13';
+use vars qw(@ISA @EXPORT @EXPORT_OK);
 
 @ISA = qw/ Exporter /;
 @EXPORT = qw(cwd getcwd fastcwd fastgetcwd);

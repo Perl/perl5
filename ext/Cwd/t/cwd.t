@@ -11,7 +11,7 @@ use warnings;
 use File::Spec;
 use File::Path;
 
-use Test::More tests => 16;
+use Test::More tests => 20;
 
 my $IsVMS = $^O eq 'VMS';
 my $IsMacOS = $^O eq 'MacOS';
@@ -91,18 +91,19 @@ SKIP: {
 
 my $Top_Test_Dir = '_ptrslt_';
 my $Test_Dir     = File::Spec->catdir($Top_Test_Dir, qw/_path_ _to_ _a_ _dir_/);
-my $want = File::Spec->catdir('t', $Test_Dir);
+my $want = quotemeta File::Spec->catdir('t', $Test_Dir);
 
 mkpath([$Test_Dir], 0, 0777);
 Cwd::chdir $Test_Dir;
 
-like(cwd(),        qr|$want$|, 'chdir() + cwd()');
-like(getcwd(),     qr|$want$|, '        + getcwd()');    
-like(fastcwd(),    qr|$want$|, '        + fastcwd()');
-like(fastgetcwd(), qr|$want$|, '        + fastgetcwd()');
+foreach my $func (qw(cwd getcwd fastcwd fastgetcwd)) {
+  my $result = eval "$func()";
+  is $@, '';
+  like( File::Spec->canonpath($result), qr|$want$|, "$func()" );
+}
 
 # Cwd::chdir should also update $ENV{PWD}
-like($ENV{PWD}, qr|$want$|,      'Cwd::chdir() updates $ENV{PWD}');
+like(File::Spec->canonpath($ENV{PWD}), qr|$want$|,      'Cwd::chdir() updates $ENV{PWD}');
 my $updir = File::Spec->updir;
 Cwd::chdir $updir;
 print "#$ENV{PWD}\n";

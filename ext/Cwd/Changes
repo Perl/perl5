@@ -1,5 +1,12 @@
 Revision history for Perl extension Cwd.
 
+2.14  Thu Jan  8 18:51:08 CST 2004
+
+ - We now use File::Spec->canonpath() and properly-escaped regular
+   expressions when comparing paths in the regression tests.  This
+   fixes some testing failures in 2.13 on non-Unix platforms.  No
+   changes were made in the actual Cwd module code. [Steve Hay]
+
 2.13  Fri Jan  2 22:29:42 CST 2004
 
  - Changed a '//' comment to a '/* */' comment in the XS code, so that
