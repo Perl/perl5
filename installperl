@@ -177,6 +177,7 @@ else {
 mkpath("$installarchlib/CORE", 1, 0777);
 foreach $file (<*.h libperl*.*>) {
     cp_if_diff($file,"$installarchlib/CORE/$file");
+    &chmod(0444,"$installarchlib/CORE/$file");
 }
 # AIX needs perl.exp installed as well.
 cp_if_diff("perl.exp" ,"$installarchlib/CORE/perl.exp") if ($^O eq 'aix');
