@@ -1,4 +1,4 @@
-/* $Id: Base64.xs,v 3.0 2004/01/14 11:59:07 gisle Exp $
+/* $Id: Base64.xs,v 3.2 2004/03/29 11:35:13 gisle Exp $
 
 Copyright 1997-2004 Gisle Aas
 
@@ -28,6 +28,7 @@ metamail, which comes with this message:
 #ifdef __cplusplus
 extern "C" {
 #endif
+#define PERL_NO_GET_CONTEXT     /* we want efficiency */
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
