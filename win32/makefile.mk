@@ -388,6 +388,7 @@ config.w32 : $(CFGSH_TMPL)
 	    "INST_TOP=$(INST_TOP)" "cc=$(CC)" "ccflags=$(OPTIMIZE) $(DEFINES)" \
 	    "cf_email=$(EMAIL)" "libs=$(LIBFILES:f)" "incpath=$(CCINCDIR)" \
 	    "libpth=$(strip $(CCLIBDIR) $(LIBFILES:d))" "libc=$(LIBC)" \
+            "LINK_FLAGS=$(LINK_FLAGS)" \
 	    config.w32 > ..\config.sh
 
 $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
