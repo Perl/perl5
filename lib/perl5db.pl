@@ -899,9 +899,9 @@ EOP
 			print $OUT "Will stop on load of `@{[join '\', `', sort keys %break_on_load]}'.\n";
 			next CMD; };
 		    $cmd =~ /^b\b\s*(postpone|compile)\b\s*([':A-Za-z_][':\w]*)\s*(.*)/ && do {
-			my $cond = $3 || '1';
+			my $cond = length $3 ? $3 : '1';
 			my ($subname, $break) = ($2, $1 eq 'postpone');
-			$subname =~ s/\'/::/;
+			$subname =~ s/\'/::/g;
 			$subname = "${'package'}::" . $subname
 			  unless $subname =~ /::/;
 			$subname = "main".$subname if substr($subname,0,2) eq "::";
@@ -910,8 +910,8 @@ EOP
 			next CMD; };
 		    $cmd =~ /^b\b\s*([':A-Za-z_][':\w]*(?:\[.*\])?)\s*(.*)/ && do {
 			$subname = $1;
-			$cond = $2 || '1';
-			$subname =~ s/\'/::/;
+			$cond = length $2 ? $2 : '1';
+			$subname =~ s/\'/::/g;
 			$subname = "${'package'}::" . $subname
 			  unless $subname =~ /::/;
 			$subname = "main".$subname if substr($subname,0,2) eq "::";
@@ -931,7 +931,7 @@ EOP
 			next CMD; };
 		    $cmd =~ /^b\b\s*(\d*)\s*(.*)/ && do {
 			$i = $1 || $line;
-			$cond = $2 || '1';
+			$cond = defined $2 ? $2 : '1';
 			if ($dbline[$i] == 0) {
 			    print $OUT "Line $i not breakable.\n";
 			} else {
