@@ -25,8 +25,18 @@ static PerlInterpreter *my_perl;
 long _stksize = 64 * 1024;
 #endif
 
+/* If the compiler is in such a strict mood that it doesn't
+ * even like the third argument of main(). */
+#if (defined(__DECC) && defined(__STDC__) && __STDC__ == 1)
+#   define STRICT_ANSI_DISLIKES_ENVP
+#endif
+
 int
-main(int argc, char **argv, char **env)
+main(int argc, char **argv
+#ifndef STRICT_ANSI_DISLIKES_ENVP
+     , char **envp
+#endif
+     )
 {
     int exitstatus;
 
@@ -46,7 +56,8 @@ main(int argc, char **argv, char **env)
     /* noop unless Configure is given -Accflags=-DPERL_GPROF_CONTROL */
     PERL_GPROF_MONCONTROL(0);
 
-    PERL_SYS_INIT3(&argc,&argv,&env);
+    /* The default PERL_SYS_INIT3 ignores envp but e.g. OS/2 uses it. */
+    PERL_SYS_INIT3(&argc,&argv,&envp);
 
 #if defined(USE_5005THREADS) || defined(USE_ITHREADS)
     /* XXX Ideally, this should really be happening in perl_alloc() or
