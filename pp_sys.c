@@ -3902,7 +3902,13 @@ PP(pp_wait)
     Pid_t childpid;
     int argflags;
 
+#ifdef PERL_OLD_SIGNALS
     childpid = wait4pid(-1, &argflags, 0);
+#else
+    while ((childpid = wait4pid(-1, &argflags, 0)) == -1 && errno == EINTR) {
+	PERL_ASYNC_CHECK();
+    }
+#endif
 #  if defined(USE_ITHREADS) && defined(PERL_IMPLICIT_SYS)
     /* 0 and -1 are both error returns (the former applies to WNOHANG case) */
     STATUS_NATIVE_SET((childpid && childpid != -1) ? argflags : -1);
@@ -3926,7 +3932,13 @@ PP(pp_waitpid)
 
     optype = POPi;
     childpid = TOPi;
+#ifdef PERL_OLD_SIGNALS
     childpid = wait4pid(childpid, &argflags, optype);
+#else
+    while ((childpid = wait4pid(childpid, &argflags, optype)) == -1 && errno == EINTR) {
+	PERL_ASYNC_CHECK();
+    }
+#endif
 #  if defined(USE_ITHREADS) && defined(PERL_IMPLICIT_SYS)
     /* 0 and -1 are both error returns (the former applies to WNOHANG case) */
     STATUS_NATIVE_SET((childpid && childpid != -1) ? argflags : -1);
