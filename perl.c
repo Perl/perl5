@@ -1867,7 +1867,7 @@ init_main_stash(void)
     defgv = gv_fetchpv("_",TRUE, SVt_PVAV);
     errgv = gv_HVadd(gv_fetchpv("@", TRUE, SVt_PV));
     GvMULTI_on(errgv);
-    replgv = gv_HVadd(gv_fetchpv("\022", TRUE, SVt_PV)); /* ^R */
+    replgv = gv_fetchpv("\022", TRUE, SVt_PV); /* ^R */
     GvMULTI_on(replgv);
     (void)form("%240s","");	/* Preallocate temp - for immediate signals. */
     sv_grow(ERRSV, 240);	/* Preallocate - for immediate signals. */
