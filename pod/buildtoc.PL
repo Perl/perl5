@@ -145,7 +145,7 @@ if (-d "pod") {
 
     perlport
     perllocale
-    perlunintro
+    perluniintro
     perlunicode
     perlebcdic
 

@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlunintro - Perl Unicode introduction
+perluniintro - Perl Unicode introduction
 
 =head1 DESCRIPTION
 

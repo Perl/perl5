@@ -1893,7 +1893,7 @@ pod/perltodo.pod		Todo list explained
 pod/perltooc.pod		Tom's object-oriented tutorial (more on class data)
 pod/perltoot.pod		Tom's object-oriented tutorial
 pod/perltrap.pod		Trap info
-pod/perlunintro.pod		Unicode introduction
+pod/perluniintro.pod		Unicode introduction
 pod/perlunicode.pod		Unicode support info
 pod/perlutil.pod		Accompanying utilities explained
 pod/perlvar.pod			Variable info

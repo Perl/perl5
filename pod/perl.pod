@@ -85,7 +85,7 @@ For ease of access, the Perl manual has been split up into several sections.
 
     perlport		Perl portability guide
     perllocale		Perl locale support
-    perlunintro		Perl Unicode introduction
+    perluniintro	Perl Unicode introduction
     perlunicode		Perl Unicode support
     perlebcdic		Considerations for running Perl on EBCDIC platforms
 

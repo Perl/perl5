@@ -398,36 +398,37 @@ I<-X> FILEHANDLE, I<-X> EXPR, I<-X>, abs VALUE, abs, accept
 NEWSOCKET,GENERICSOCKET, alarm SECONDS, alarm, atan2 Y,X, bind SOCKET,NAME,
 binmode FILEHANDLE, DISCIPLINE, binmode FILEHANDLE, bless REF,CLASSNAME,
 bless REF, caller EXPR, caller, chdir EXPR, chmod LIST, chomp VARIABLE,
-chomp LIST, chomp, chop VARIABLE, chop LIST, chop, chown LIST, chr NUMBER,
-chr, chroot FILENAME, chroot, close FILEHANDLE, close, closedir DIRHANDLE,
-connect SOCKET,NAME, continue BLOCK, cos EXPR, cos, crypt PLAINTEXT,SALT,
-dbmclose HASH, dbmopen HASH,DBNAME,MASK, defined EXPR, defined, delete
-EXPR, die LIST, do BLOCK, do SUBROUTINE(LIST), do EXPR, dump LABEL, dump,
-each HASH, eof FILEHANDLE, eof (), eof, eval EXPR, eval BLOCK, exec LIST,
-exec PROGRAM LIST, exists EXPR, exit EXPR, exp EXPR, exp, fcntl
-FILEHANDLE,FUNCTION,SCALAR, fileno FILEHANDLE, flock FILEHANDLE,OPERATION,
-fork, format, formline PICTURE,LIST, getc FILEHANDLE, getc, getlogin,
-getpeername SOCKET, getpgrp PID, getppid, getpriority WHICH,WHO, getpwnam
-NAME, getgrnam NAME, gethostbyname NAME, getnetbyname NAME, getprotobyname
-NAME, getpwuid UID, getgrgid GID, getservbyname NAME,PROTO, gethostbyaddr
-ADDR,ADDRTYPE, getnetbyaddr ADDR,ADDRTYPE, getprotobynumber NUMBER,
-getservbyport PORT,PROTO, getpwent, getgrent, gethostent, getnetent,
-getprotoent, getservent, setpwent, setgrent, sethostent STAYOPEN, setnetent
-STAYOPEN, setprotoent STAYOPEN, setservent STAYOPEN, endpwent, endgrent,
-endhostent, endnetent, endprotoent, endservent, getsockname SOCKET,
-getsockopt SOCKET,LEVEL,OPTNAME, glob EXPR, glob, gmtime EXPR, goto LABEL,
-goto EXPR, goto &NAME, grep BLOCK LIST, grep EXPR,LIST, hex EXPR, hex,
-import, index STR,SUBSTR,POSITION, index STR,SUBSTR, int EXPR, int, ioctl
-FILEHANDLE,FUNCTION,SCALAR, join EXPR,LIST, keys HASH, kill SIGNAL, LIST,
-last LABEL, last, lc EXPR, lc, lcfirst EXPR, lcfirst, length EXPR, length,
-link OLDFILE,NEWFILE, listen SOCKET,QUEUESIZE, local EXPR, localtime EXPR,
-lock, log EXPR, log, lstat EXPR, lstat, m//, map BLOCK LIST, map EXPR,LIST,
-mkdir FILENAME,MASK, mkdir FILENAME, msgctl ID,CMD,ARG, msgget KEY,FLAGS,
-msgrcv ID,VAR,SIZE,TYPE,FLAGS, msgsnd ID,MSG,FLAGS, my EXPR, my EXPR :
-ATTRIBUTES, next LABEL, next, no Module LIST, oct EXPR, oct, open
-FILEHANDLE,EXPR, open FILEHANDLE,MODE,EXPR, open FILEHANDLE,MODE,EXPR,LIST,
-open FILEHANDLE, opendir DIRHANDLE,EXPR, ord EXPR, ord, our EXPR, our EXPR
-: ATTRIBUTES, pack TEMPLATE,LIST, package NAMESPACE, package, pipe
+chomp( LIST ), chomp, chop VARIABLE, chop( LIST ), chop, chown LIST, chr
+NUMBER, chr, chroot FILENAME, chroot, close FILEHANDLE, close, closedir
+DIRHANDLE, connect SOCKET,NAME, continue BLOCK, cos EXPR, cos, crypt
+PLAINTEXT,SALT, dbmclose HASH, dbmopen HASH,DBNAME,MASK, defined EXPR,
+defined, delete EXPR, die LIST, do BLOCK, do SUBROUTINE(LIST), do EXPR,
+dump LABEL, dump, each HASH, eof FILEHANDLE, eof (), eof, eval EXPR, eval
+BLOCK, exec LIST, exec PROGRAM LIST, exists EXPR, exit EXPR, exp EXPR, exp,
+fcntl FILEHANDLE,FUNCTION,SCALAR, fileno FILEHANDLE, flock
+FILEHANDLE,OPERATION, fork, format, formline PICTURE,LIST, getc FILEHANDLE,
+getc, getlogin, getpeername SOCKET, getpgrp PID, getppid, getpriority
+WHICH,WHO, getpwnam NAME, getgrnam NAME, gethostbyname NAME, getnetbyname
+NAME, getprotobyname NAME, getpwuid UID, getgrgid GID, getservbyname
+NAME,PROTO, gethostbyaddr ADDR,ADDRTYPE, getnetbyaddr ADDR,ADDRTYPE,
+getprotobynumber NUMBER, getservbyport PORT,PROTO, getpwent, getgrent,
+gethostent, getnetent, getprotoent, getservent, setpwent, setgrent,
+sethostent STAYOPEN, setnetent STAYOPEN, setprotoent STAYOPEN, setservent
+STAYOPEN, endpwent, endgrent, endhostent, endnetent, endprotoent,
+endservent, getsockname SOCKET, getsockopt SOCKET,LEVEL,OPTNAME, glob EXPR,
+glob, gmtime EXPR, goto LABEL, goto EXPR, goto &NAME, grep BLOCK LIST, grep
+EXPR,LIST, hex EXPR, hex, import, index STR,SUBSTR,POSITION, index
+STR,SUBSTR, int EXPR, int, ioctl FILEHANDLE,FUNCTION,SCALAR, join
+EXPR,LIST, keys HASH, kill SIGNAL, LIST, last LABEL, last, lc EXPR, lc,
+lcfirst EXPR, lcfirst, length EXPR, length, link OLDFILE,NEWFILE, listen
+SOCKET,QUEUESIZE, local EXPR, localtime EXPR, lock, log EXPR, log, lstat
+EXPR, lstat, m//, map BLOCK LIST, map EXPR,LIST, mkdir FILENAME,MASK, mkdir
+FILENAME, msgctl ID,CMD,ARG, msgget KEY,FLAGS, msgrcv
+ID,VAR,SIZE,TYPE,FLAGS, msgsnd ID,MSG,FLAGS, my EXPR, my EXPR : ATTRIBUTES,
+next LABEL, next, no Module LIST, oct EXPR, oct, open FILEHANDLE,EXPR, open
+FILEHANDLE,MODE,EXPR, open FILEHANDLE,MODE,EXPR,LIST, open FILEHANDLE,
+opendir DIRHANDLE,EXPR, ord EXPR, ord, our EXPR, our EXPR : ATTRIBUTES,
+pack TEMPLATE,LIST, package NAMESPACE, package, pipe
 READHANDLE,WRITEHANDLE, pop ARRAY, pop, pos SCALAR, pos, print FILEHANDLE
 LIST, print LIST, print, printf FILEHANDLE FORMAT, LIST, printf FORMAT,
 LIST, prototype FUNCTION, push ARRAY,LIST, q/STRING/, qq/STRING/,
@@ -766,7 +767,7 @@ Discontinuance, Deprecation, Discontinuance, Discontinuance
 
 =item Parsing Traps
 
-Parsing, Parsing, Parsing, Parsing
+Parsing, Parsing, Parsing, Parsing, Parsing
 
 =item Numerical Traps
 
@@ -2110,7 +2111,7 @@ LC_NUMERIC, LC_TIME, LANG
 
 =back
 
-=head2 perlunintro - Perl Unicode introduction
+=head2 perluniintro - Perl Unicode introduction
 
 =over 4
 
@@ -3815,6 +3816,10 @@ C<!!!>, C<!!>, C<!>
 
 =item The Typemap
 
+=item Safely Storing Static Data in XS
+
+MY_CXT_KEY, typedef my_cxt_t, START_MY_CXT, MY_CXT_INIT, dMY_CXT, MY_CXT
+
 =back
 
 =item EXAMPLES
@@ -4222,29 +4227,29 @@ ix, LEAVE, load_module, looks_like_number, MARK, mg_clear, mg_copy,
 mg_find, mg_free, mg_get, mg_length, mg_magical, mg_set, Move, New, newAV,
 Newc, newCONSTSUB, newHV, newRV_inc, newRV_noinc, NEWSV, newSV, newSViv,
 newSVnv, newSVpv, newSVpvf, newSVpvn, newSVpvn_share, newSVrv, newSVsv,
-newSVuv, newXS, newXSproto, Newz, Nullav, Nullch, Nullcv, Nullhv, Nullsv,
-ORIGMARK, perl_alloc, perl_clone, perl_construct, perl_destruct, perl_free,
-perl_parse, perl_run, PL_modglobal, PL_na, PL_sv_no, PL_sv_undef,
-PL_sv_yes, POPi, POPl, POPn, POPp, POPpbytex, POPpx, POPs, PUSHi, PUSHMARK,
-PUSHn, PUSHp, PUSHs, PUSHu, PUTBACK, Renew, Renewc, require_pv, RETVAL,
-Safefree, savepv, savepvn, SAVETMPS, scan_bin, scan_hex, scan_oct,
-sharedsv_find, sharedsv_init, sharedsv_lock, sharedsv_new,
-sharedsv_thrcnt_dec, sharedsv_thrcnt_inc, sharedsv_unlock, sortsv, SP,
-SPAGAIN, ST, strEQ, strGE, strGT, strLE, strLT, strNE, strnEQ, strnNE,
-StructCopy, SvCUR, SvCUR_set, SvEND, SvGETMAGIC, SvGROW, SvIOK, SvIOKp,
-SvIOK_notUV, SvIOK_off, SvIOK_on, SvIOK_only, SvIOK_only_UV, SvIOK_UV,
-SvIV, SvIVx, SvIVX, SvLEN, SvNIOK, SvNIOKp, SvNIOK_off, SvNOK, SvNOKp,
-SvNOK_off, SvNOK_on, SvNOK_only, SvNV, SvNVX, SvNVx, SvOK, SvOOK, SvPOK,
-SvPOKp, SvPOK_off, SvPOK_on, SvPOK_only, SvPOK_only_UTF8, SvPV, SvPVbyte,
-SvPVbytex, SvPVbytex_force, SvPVbyte_force, SvPVbyte_nolen, SvPVutf8,
-SvPVutf8x, SvPVutf8x_force, SvPVutf8_force, SvPVutf8_nolen, SvPVX, SvPVx,
-SvPV_force, SvPV_force_nomg, SvPV_nolen, SvREFCNT, SvREFCNT_dec,
-SvREFCNT_inc, SvROK, SvROK_off, SvROK_on, SvRV, SvSETMAGIC, SvSetMagicSV,
-SvSetMagicSV_nosteal, SvSetSV, SvSetSV_nosteal, SvSTASH, SvTAINT,
-SvTAINTED, SvTAINTED_off, SvTAINTED_on, SvTRUE, svtype, SvTYPE, SVt_IV,
-SVt_NV, SVt_PV, SVt_PVAV, SVt_PVCV, SVt_PVHV, SVt_PVMG, SvUOK, SvUPGRADE,
-SvUTF8, SvUTF8_off, SvUTF8_on, SvUV, SvUVx, SvUVX, sv_2bool, sv_2cv,
-sv_2io, sv_2iv, sv_2mortal, sv_2nv, sv_2pvbyte, sv_2pvbyte_nolen,
+newSVuv, newXS, newXSproto, Newz, new_vstring, Nullav, Nullch, Nullcv,
+Nullhv, Nullsv, ORIGMARK, perl_alloc, perl_clone, perl_construct,
+perl_destruct, perl_free, perl_parse, perl_run, PL_modglobal, PL_na,
+PL_sv_no, PL_sv_undef, PL_sv_yes, POPi, POPl, POPn, POPp, POPpbytex, POPpx,
+POPs, PUSHi, PUSHMARK, PUSHn, PUSHp, PUSHs, PUSHu, PUTBACK, Renew, Renewc,
+require_pv, RETVAL, Safefree, savepv, savepvn, SAVETMPS, scan_bin,
+scan_hex, scan_oct, sharedsv_find, sharedsv_init, sharedsv_lock,
+sharedsv_new, sharedsv_thrcnt_dec, sharedsv_thrcnt_inc, sharedsv_unlock,
+sortsv, SP, SPAGAIN, ST, strEQ, strGE, strGT, strLE, strLT, strNE, strnEQ,
+strnNE, StructCopy, SvCUR, SvCUR_set, SvEND, SvGETMAGIC, SvGROW, SvIOK,
+SvIOKp, SvIOK_notUV, SvIOK_off, SvIOK_on, SvIOK_only, SvIOK_only_UV,
+SvIOK_UV, SvIV, SvIVX, SvIVx, SvLEN, SvNIOK, SvNIOKp, SvNIOK_off, SvNOK,
+SvNOKp, SvNOK_off, SvNOK_on, SvNOK_only, SvNV, SvNVx, SvNVX, SvOK, SvOOK,
+SvPOK, SvPOKp, SvPOK_off, SvPOK_on, SvPOK_only, SvPOK_only_UTF8, SvPV,
+SvPVbyte, SvPVbytex, SvPVbytex_force, SvPVbyte_force, SvPVbyte_nolen,
+SvPVutf8, SvPVutf8x, SvPVutf8x_force, SvPVutf8_force, SvPVutf8_nolen,
+SvPVX, SvPVx, SvPV_force, SvPV_force_nomg, SvPV_nolen, SvREFCNT,
+SvREFCNT_dec, SvREFCNT_inc, SvROK, SvROK_off, SvROK_on, SvRV, SvSETMAGIC,
+SvSetMagicSV, SvSetMagicSV_nosteal, SvSetSV, SvSetSV_nosteal, SvSTASH,
+SvTAINT, SvTAINTED, SvTAINTED_off, SvTAINTED_on, SvTRUE, svtype, SvTYPE,
+SVt_IV, SVt_NV, SVt_PV, SVt_PVAV, SVt_PVCV, SVt_PVHV, SVt_PVMG, SvUOK,
+SvUPGRADE, SvUTF8, SvUTF8_off, SvUTF8_on, SvUV, SvUVx, SvUVX, sv_2bool,
+sv_2cv, sv_2io, sv_2iv, sv_2mortal, sv_2nv, sv_2pvbyte, sv_2pvbyte_nolen,
 sv_2pvutf8, sv_2pvutf8_nolen, sv_2pv_flags, sv_2pv_nolen, sv_2uv,
 sv_backoff, sv_bless, sv_catpv, sv_catpvf, sv_catpvf_mg, sv_catpvn,
 sv_catpvn_flags, sv_catpvn_mg, sv_catpv_mg, sv_catsv, sv_catsv_flags,
@@ -4309,9 +4314,6 @@ sv_clean_all, sv_clean_objs, sv_free_arenas
 =item Layers vs Disciplines
 
 =item Data Structures
-
-1. The functions and attributes of the "layer class", 2. The per-instance
-data for a particular handle
 
 =item Functions and Attributes
 
@@ -4546,7 +4548,7 @@ PerlIO_apply_layers(f,mode,layers), PerlIO_binmode(f,ptype,imode,layers),
 
 =item Prototypes versus indirect objects
 
-=item Install HMTL
+=item Install HTML
 
 =item Prototype method calls
 
@@ -5003,7 +5005,7 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item Cygwin intermittent failures of lib/Memoize/t/expire_file 11 and 12
 
-=item HP-UX lib/io_multihomed Fails When LP64-Configur
+=item HP-UX lib/io_multihomed Fails When LP64-Configured
 
 =item  HP-UX lib/posix Subtest 9 Fails When LP64-Configured
 
@@ -6536,7 +6538,7 @@ op/lexassign.t, pragma/warnings.t
 
 =item NOTE
 
-=item What's New in Perl ffor MPE/iX
+=item What's New in Perl for MPE/iX
 
 =item Welcome to Perl/iX
 
@@ -7343,8 +7345,8 @@ from perl
 
 =item DESCRIPTION
 
-new, function, LIST, $thread->join, $thread->detach, threads->self,
-$thread->tid
+$thread = new(function, LIST), $thread->join, $thread->detach,
+threads->self, $thread->tid
 
 =item TODO
 
@@ -7836,6 +7838,58 @@ C<strict refs>, C<strict vars>, C<strict subs>
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=back
+
+=head2 threads - Perl extension allowing use of interpreter based threads
+from perl
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+$thread = new(function, LIST), $thread->join, $thread->detach,
+threads->self, $thread->tid
+
+=item TODO
+
+Fix so the return value is returned when you join, Add join_all, Fix memory
+leaks!
+
+=item AUTHOR and COPYRIGHT
+
+=item BUGS
+
+creating a thread from within a thread is unsafe under win32,
+PERL_OLD_SIGNALS are not threadsafe, will not be
+
+=item SEE ALSO
+
+=back
+
+=head2 threadshared, threads::shared - Perl extension for sharing data
+structures between threads
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item EXPORT
+
+=item FUNCTIONS
+
+share VARIABLE, lock VARIABLE, unlock VARIABLE, cond_wait VARIABLE,
+cond_signal VARIABLE, cond_broadcast VARIABLE
+
+=item BUGS
+
+=item AUTHOR
+
+=item SEE ALSO
 
 =back
 
@@ -9790,6 +9844,8 @@ Dumper
 
 =over 4
 
+=item Runtime debugging
+
 =item Memory footprint debugging
 
 =back
@@ -11555,6 +11611,19 @@ $fh->print, $fh->printf, $fh->getline, $fh->getlines
 =item Disabling or changing <no> behaviour
 
 =item All-in-one interface
+
+=item Filtering only specific components of source code
+
+C<"code">, C<"executable">, C<"quotelike">, C<"string">, C<"regex">,
+C<"all">
+
+=item Filtering only the code parts of source code
+
+Most source code ceases to be grammatically correct when it is broken up
+into the pieces between string literals and regexes. So the C<'code'>
+component filter behaves slightly differently from the other partial
+filters
+described in the previous section.
 
 =item Using Filter::Simple and Exporter together
 
@@ -14666,7 +14735,7 @@ B<_clean_latex_commands>
 
 =item DESCRIPTION
 
-center, date, fixed, fixedbold, fixeditalic, fixedbolditalic, quotes,
+center, date, fixed, fixedbold, fixeditalic, fixedbolditalic, name, quotes,
 release, section
 
 =item DIAGNOSTICS
@@ -14678,6 +14747,20 @@ escape EE<lt>%sE<gt>, %s:%d: Unknown sequence %s, %s:%d: Unmatched =back
 =item BUGS
 
 =item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
+=head2 Pod::ParseLink -- Parse an L<> formatting code in POD text
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
 
 =item AUTHOR
 
@@ -16169,8 +16252,7 @@ unexpand(1)
 
 =back
 
-=head2 Thread - manipulate threads in Perl (EXPERIMENTAL, subject to
-change)
+=head2 Thread - manipulate threads in Perl
 
 =over 4
 
@@ -16182,9 +16264,9 @@ change)
 
 =item FUNCTIONS
 
-new \&start_sub, new \&start_sub, LIST, lock VARIABLE, async BLOCK;,
-Thread->self, Thread->list, cond_wait VARIABLE, cond_signal VARIABLE,
-cond_broadcast VARIABLE, yield
+$thread = Thread->new(\&start_sub), $thread = Thread->new(\&start_sub,
+LIST), lock VARIABLE, async BLOCK;, Thread->self, cond_wait VARIABLE,
+cond_signal VARIABLE, cond_broadcast VARIABLE, yield
 
 =item METHODS
 
