@@ -6,6 +6,7 @@ use ExtUtils::MakeMaker;
 # which perform the corresponding actions in the subdirectory.
 
 WriteMakefile(
+    NAME	=> 'SDBM_File',
     MYEXTLIB => 'sdbm/libsdbm$(LIB_EXT)',
     MAN3PODS 	=> ' ', 	# Pods will be built by installman.
     XSPROTOARG => '-noprototypes', 		# XXX remove later?

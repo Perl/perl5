@@ -1,6 +1,7 @@
 use ExtUtils::MakeMaker;
 
 WriteMakefile(
+    NAME	=> 'DynaLoader',
     LINKTYPE	=> 'static',
     DEFINE	=> '-DLIBC="$(LIBC)"',
     MAN3PODS 	=> ' ', 	# Pods will be built by installman.

@@ -1,5 +1,6 @@
 use ExtUtils::MakeMaker;
 WriteMakefile(
+    'NAME'	=> 'SDBM_File',
     'LINKTYPE'  => 'static',
     'DEFINE'	=> '-DSDBM -DDUFF',
     'SKIP'	=> [qw(static static_lib dynamic dynamic_lib)],
