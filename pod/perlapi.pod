@@ -1870,6 +1870,70 @@ L<perlcall>.
 =for hackers
 Found in file scope.h
 
+=item sharedsv_find
+
+Tries to find if a given SV has a shared backend, either by
+looking at magic, or by checking if it is tied again threads::shared.
+
+	shared_sv*	sharedsv_find(SV* sv)
+
+=for hackers
+Found in file sharedsv.c
+
+=item sharedsv_init
+
+Saves a space for keeping SVs wider than an interpreter,
+currently only stores a pointer to the first interpreter.
+
+	void	sharedsv_init()
+
+=for hackers
+Found in file sharedsv.c
+
+=item sharedsv_lock
+
+Recursive locks on a sharedsv.
+Locks are dynamicly scoped at the level of the first lock.
+	void	sharedsv_lock(shared_sv* ssv)
+
+=for hackers
+Found in file sharedsv.c
+
+=item sharedsv_new
+
+Allocates a new shared sv struct, you must yourself create the SV/AV/HV.
+	shared_sv*	sharedsv_new()
+
+=for hackers
+Found in file sharedsv.c
+
+=item sharedsv_thrcnt_dec
+
+Decrements the threadcount of a shared sv. When a threads frontend is freed
+this function should be called.
+
+	void	sharedsv_thrcnt_dec(shared_sv* ssv)
+
+=for hackers
+Found in file sharedsv.c
+
+=item sharedsv_thrcnt_inc
+
+Increments the threadcount of a sharedsv.
+	void	sharedsv_thrcnt_inc(shared_sv* ssv)
+
+=for hackers
+Found in file sharedsv.c
+
+=item sharedsv_unlock
+
+Recursively unlocks a shared sv.
+
+	void	sharedsv_unlock(shared_sv* ssv)
+
+=for hackers
+Found in file sharedsv.c
+
 =item SP
 
 Stack pointer.  This is usually handled by C<xsubpp>.  See C<dSP> and
@@ -2664,19 +2728,19 @@ false, defined or undefined.  Does not handle 'get' magic.
 =for hackers
 Found in file sv.h
 
+=item svtype
+
+An enum of flags for Perl types.  These are found in the file B<sv.h> 
+in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
+
+=for hackers
+Found in file sv.h
+
 =item SvTYPE
 
 Returns the type of the SV.  See C<svtype>.
 
 	svtype	SvTYPE(SV* sv)
-
-=for hackers
-Found in file sv.h
-
-=item svtype
-
-An enum of flags for Perl types.  These are found in the file B<sv.h> 
-in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
 
 =for hackers
 Found in file sv.h

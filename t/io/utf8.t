@@ -138,7 +138,11 @@ print "ok 21\n";
 # Now let's make it suffer.
 open F, ">", "a" or die $!;
 my $w;
-eval {local $SIG{__WARN__} = sub { $w = $_[0] };  print F $a; };
+{
+    use warnings 'utf8';
+    local $SIG{__WARN__} = sub { $w = $_[0] };
+    print F $a;
+}
 print "not " if ($@ || $w !~ /Wide character in print/i);
 print "ok 22\n";
 }

@@ -9554,6 +9554,8 @@ Create and return a new interpreter by cloning the current one.
 */
 
 /* XXX the above needs expanding by someone who actually understands it ! */
+EXTERN_C PerlInterpreter *
+perl_clone_host(PerlInterpreter* proto_perl, UV flags);
 
 PerlInterpreter *
 perl_clone(PerlInterpreter *proto_perl, UV flags)

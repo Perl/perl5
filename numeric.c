@@ -572,6 +572,40 @@ S_mulexp10(NV value, I32 exponent)
 	negative = 1;
 	exponent = -exponent;
     }
+
+    /* Avoid %SYSTEM-F-FLTOVF_F sans VAXC$ESTABLISH.
+     * In VAX VMS we by default use the D_FLOAT double format,
+     * and that format does not have *easy* capabilities [1] for
+     * overflowing doubles 'silently' as IEEE fp does.  Therefore we
+     * need to detect early whether we would overflow (this is
+     * the behaviour of the native string-to-float conversion routines,
+     * and therefore the behaviour of native applications, too.)
+     *
+     * [1] VAXC$EXTABLISH is the capability but it is basically a signal
+     * handler setup routine, and one cannot return from a fp exception
+     * handler and except much anything useful. */
+#if defined(VMS) && !defined(__IEEE_FP)
+#  if defined(__DECC_VER) && __DECC_VER <= 50390006
+    /* __F_FLT_MAX_10_EXP - 5 == 33 */
+    if (!negative &&
+          (log10(value) + exponent) >= (__F_FLT_MAX_10_EXP - 5))
+        return NV_MAX;
+#  endif
+#endif
+
+    /* In UNICOS and in certain Cray models (such as T90) there is no
+     * IEEE fp, and no way at all from C to catch fp overflows gracefully.
+     * There is something you can do if you are willing to use some
+     * inline assembler: the instruction is called DFI-- but that will
+     * disable *all* floating point interrupts, a little bit too large
+     * a hammer.  Therefore we need to catch potential overflows before
+     * it's too late. */
+#if defined(_UNICOS) && defined(NV_MAX_10_EXP)
+    if (!negative &&
+	(log10(value) + exponent) >= NV_MAX_10_EXP)
+        return NV_MAX;
+#endif
+
     for (bit = 1; exponent; bit <<= 1) {
 	if (exponent & bit) {
 	    exponent ^= bit;

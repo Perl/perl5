@@ -4348,6 +4348,11 @@ PP(pp_lock)
 #ifdef USE_THREADS
     sv_lock(sv);
 #endif /* USE_THREADS */
+#ifdef USE_ITHREADS
+    shared_sv *ssv = Perl_sharedsv_find(aTHX_ sv);
+    if(ssv)
+        Perl_sharedsv_lock(aTHX_ ssv);
+#endif /* USE_ITHREADS */
     if (SvTYPE(retsv) == SVt_PVAV || SvTYPE(retsv) == SVt_PVHV
 	|| SvTYPE(retsv) == SVt_PVCV) {
 	retsv = refto(retsv);

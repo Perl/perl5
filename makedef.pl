@@ -567,6 +567,13 @@ unless ($define{'USE_ITHREADS'}) {
 		    Perl_ptr_table_store
 		    perl_clone
 		    perl_clone_using
+		    Perl_sharedsv_find
+		    Perl_sharedsv_init
+		    Perl_sharedsv_lock
+		    Perl_sharedsv_new
+		    Perl_sharedsv_thrcnt_dec
+		    Perl_sharedsv_thrcnt_inc
+		    Perl_sharedsv_unlock
 		    )];
 }
 

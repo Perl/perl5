@@ -32,7 +32,9 @@ $PERL = ($Is_MSWin32 ? '.\perl' : ($Is_NetWare ? 'perl' : './perl'));
 print "1..41\n";
 
 eval '$ENV{"FOO"} = "hi there";';	# check that ENV is inited inside eval
-if ($Is_MSWin32) { ok 1, `set FOO` eq "FOO=hi there\n"; }
+# cmd.exe will echo 'variable=value' but 4nt will echo just the value
+# -- Nikola Knezevic
+if ($Is_MSWin32) { ok 1, `set FOO` =~ /^(FOO=)?hi there$/; }
 else             { ok 1, `echo \$FOO` eq "hi there\n"; }
 
 unlink 'ajslkdfpqjsjfk';
@@ -201,7 +203,9 @@ else {
 
 	$ENV{__NoNeSuCh} = "foo";
 	$0 = "bar";
-	ok 30, ($Is_MSWin32 ? (`set __NoNeSuCh` eq "__NoNeSuCh=foo\n")
+# cmd.exe will echo 'variable=value' but 4nt will echo just the value
+# -- Nikola Knezevic
+	ok 30, ($Is_MSWin32 ? (`set __NoNeSuCh` =~ /^(__NoNeSuCh=)?foo$/)
 			    : (`echo \$__NoNeSuCh` eq "foo\n") );
 }
 

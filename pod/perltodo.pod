@@ -283,6 +283,12 @@ is the bootstrapping build process of Perl: if the filesystem the
 target systems sees is not the same what the build host sees, various
 input, output, and (Perl) library files need to be copied back and forth.
 
+As of 5.8.0 Configure mostly works for cross-compilation
+(used successfully for iPAQ Linux), miniperl gets built,
+but then building DynaLoader (and other extensions) fails
+since MakeMaker knows nothing of cross-compilation.
+(See INSTALL/Cross-compilation for the state of things.)
+
 =head2 Perl preprocessor / macros
 
 Source filters help with this, but do not get us all the way. For
@@ -491,7 +497,7 @@ Ideas which have been discussed, and which may or may not happen.
 It's unclear what this should do or how to do it without breaking old
 code.
 
-=head2 Make tr/// return histogram
+=head2 Make tr/// return histogram of characters in list context
 
 There is a patch for this, but it may require Unicodification.
 
@@ -780,6 +786,7 @@ Suggesting this on P5P B<will> cause a boring and interminable flamewar.
 =head2 "class"-based lexicals
 
 Use flyweight objects, secure hashes or, dare I say it, pseudo-hashes instead.
+(Or whatever will replace pseudohashes in 5.10.)
 
 =head2 byteperl
 
@@ -787,18 +794,19 @@ C<ByteLoader> covers this.
 
 =head2 Lazy evaluation / tail recursion removal
 
-C<List::Util> in core gives some of these; tail recursion removal is
-done manually, with C<goto &whoami;>. (However, MJD has found that
-C<goto &whoami> introduces a performance penalty, so maybe there should
-be a way to do this after all: C<sub foo {START: ... goto START;> is
-better.)
+C<List::Util> gives first() (a short-circuiting grep); tail recursion
+removal is done manually, with C<goto &whoami;>. (However, MJD has
+found that C<goto &whoami> introduces a performance penalty, so maybe
+there should be a way to do this after all: C<sub foo {START: ... goto
+START;> is better.)
 
 =head2 Make "use utf8" the default
 
-There is a patch available for this, search p5p archives for
-the Subject "[EXPERIMENTAL PATCH] make unicode (utf8) default"
-but this would be unacceptable because of backward compatibility:
-scripts could not contain B<any legacy eight-bit data>.  Also would
-introduce a measurable slowdown of at least few percentages since all
-regular expression operations would be done in full UTF-8.
+Because of backward compatibility this is difficult: scripts could not
+contain B<any legacy eight-bit data> (like Latin-1) anymore, even in
+string literals or pod.  Also would introduce a measurable slowdown of
+at least few percentages since all regular expression operations would
+be done in full UTF-8.  But if you want to try this, add
+-DUSE_UTF8_SCRIPTS to your compilation flags.
+
 
