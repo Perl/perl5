@@ -1,14 +1,38 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.8 2004/10/24 13:00:29 dankogai Exp dankogai $
+# $Id: Changes,v 2.9 2004/12/03 19:16:53 dankogai Exp dankogai $
 #
-$Revision: 2.8 $ $Date: 2004/10/24 13:00:29 $
+$Revision: 2.9 $ $Date: 2004/12/03 19:16:53 $
+! Encode.pm Encode.xs
+  Addressed " :encoding(utf8) broken in perl-5.8.6".
+  Message-Id: <lrllcfeank.fsf_-_@caliper.activestate.com>
+! Encode.pm
+  Addressed "(de|en)code($valid_encoding, undef) does not warn".
+  http://rt.cpan.org/NoAuth/Bug.html?id=8723
+! Encode.pm t/Encode.t
+  Addressed "Can't encode URI".  When a reference is fed to (en|de)code,
+  Encode now stringifies instead of returning undef.
+  http://rt.cpan.org/NoAuth/Bug.html?id=8725
+! Encode.xs t/fallback.t
+  Addressed "FB_HTMLCREF and FB_XMLCREF for the UTF-8 decoder".
+  http://rt.cpan.org/NoAuth/Bug.html?id=8694
+! Encode.pm
+  Addressed "s/digit/number/".
+  http://rt.cpan.org/NoAuth/Bug.html?id=8695
+! Encode.pm
+  Addressed "while (defined(read )) { ... } is an infinite loop".
+  http://rt.cpan.org/NoAuth/Bug.html?id=8696
+! Encode.pm
+  Addressed "What the heck is UCM?".
+  Document fixed so that it no longer contains "UCM-Based Encodings".
+  http://rt.cpan.org/NoAuth/Bug.html?id=8697
+
+2.08 2004/10/24 13:00:29
 ! Encode.xs lib/Encode/Encoding.pm  Unicode/Unicode.{pm,xs}
-  Resolved the issue that was raised by the Encode::utf8 fallbacks vs.
-  PerlIO::encoding issue that was introduced in 2.07.  This is done by
-  making use of ->renew() method that used to be used only by
-  Encode::Unicode.  ->renewed() method was also introduced to fetch
-  the value thereof.
+  Resolved the issue that was raised by 2.07 --  Encode::utf8 fallbacks
+  that was introduce messed up  PerlIO::encoding.
+  * To do so, ->renew() is renewed and ->renewed() was introduced to
+  tell whether the caller is PerlIO or not.
   Message-Id: <94B2EB12-25B7-11D9-9E6A-000A95DBB50A@dan.co.jp>
 
 2.07 2004/10/22 19:35:52
