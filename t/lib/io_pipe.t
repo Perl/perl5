@@ -104,6 +104,7 @@ sub broken_pipe {
 print $pipe "not ok 9\n";
 $pipe->close;
 
+sleep 1;
 
 print "ok 10\n";
 

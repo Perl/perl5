@@ -163,7 +163,7 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix)
     I32 off;
     SV *sv;
     register I32 i;
-    register CONTEXT *cx;
+    register PERL_CONTEXT *cx;
     int saweval;
 
     for (cv = startcv; cv; cv = CvOUTSIDE(cv)) {

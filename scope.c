@@ -29,7 +29,7 @@ cxinc(void)
 {
     dTHR;
     cxstack_max = cxstack_max * 3 / 2;
-    Renew(cxstack, cxstack_max + 1, CONTEXT);	/* XXX should fix CXINC macro */
+    Renew(cxstack, cxstack_max + 1, PERL_CONTEXT);	/* XXX should fix CXINC macro */
     return cxstack_ix + 1;
 }
 
@@ -683,7 +683,7 @@ leave_scope(I32 base)
 #ifdef DEBUGGING
 
 void
-cx_dump(CONTEXT *cx)
+cx_dump(PERL_CONTEXT *cx)
 {
     dTHR;
     PerlIO_printf(Perl_debug_log, "CX %ld = %s\n", (long)(cx - cxstack), block_type[cx->cx_type]);

@@ -131,7 +131,7 @@ LIBFILES = oldnames.lib kernel32.lib user32.lib gdi32.lib \
 	version.lib odbc32.lib odbccp32.lib
 
 CFLAGS   = -nologo -W3 $(INCLUDES) $(DEFINES) $(LOCDEFS) $(PCHFLAGS) $(OPTIMIZE)
-LINK_FLAGS  = -nologo $(LIBFILES) $(LINK_DBG) -machine:$(PROCESSOR_ARCHITECTURE)
+LINK_FLAGS  = -nologo $(LINK_DBG) -machine:$(PROCESSOR_ARCHITECTURE)
 OBJOUT_FLAG = -Fo
 
 .ENDIF
@@ -157,7 +157,7 @@ OBJOUT_FLAG = -Fo
 
 .obj.dll:
 	$(LINK32) -dll -subsystem:windows -implib:$(*B).lib -def:$(*B).def \
-	    -out:$@ $(LINK_FLAGS) $< $(LIBPERL)  
+	    -out:$@ $(LINK_FLAGS) $(LIBFILES) $< $(LIBPERL)  
 
 .ENDIF
 
@@ -312,7 +312,8 @@ CORE_H = ..\av.h	\
 	.\include\sys\socket.h	\
 	.\win32.h
 
-EXTENSIONS=DynaLoader Socket IO Fcntl Opcode SDBM_File attrs Thread
+DYNAMIC_EXT=Socket IO Fcntl Opcode SDBM_File attrs Thread
+STATIC_EXT=DynaLoader
 
 DYNALOADER=$(EXTDIR)\DynaLoader\DynaLoader
 SOCKET=$(EXTDIR)\Socket\Socket
@@ -362,7 +363,8 @@ $(GLOBEXE): perlglob.obj
 	$(LINK32) -Tpe -ap $(LINK_FLAGS) c0x32.obj perlglob.obj \
 	    $(CCLIBDIR)\32BIT\wildargs.obj,$@,,import32.lib cw32mt.lib,
 .ELSE
-	$(LINK32) $(LINK_FLAGS) -out:$@ -subsystem:$(SUBSYS) perlglob.obj setargv.obj 
+	$(LINK32) $(LINK_FLAGS) $(LIBFILES) -out:$@ -subsystem:$(SUBSYS) \
+	    perlglob.obj setargv.obj 
 .ENDIF
 
 $(GLOBBAT) : ..\lib\File\DosGlob.pm $(MINIPERL)
@@ -384,7 +386,8 @@ config.w32 : $(CFGSH_TMPL)
 	    "INST_TOP=$(INST_TOP)" "cc=$(CC)" "ccflags=$(OPTIMIZE) $(DEFINES)" \
 	    "cf_email=$(EMAIL)" "libs=$(LIBFILES:f)" "incpath=$(CCINCDIR)" \
 	    "libpth=$(strip $(CCLIBDIR) $(LIBFILES:d))" "libc=$(LIBC)" \
-            "LINK_FLAGS=$(LINK_FLAGS)" \
+            "static_ext=$(STATIC_EXT)" "dynamic_ext=$(DYNAMIC_EXT)" \
+            "ldflags=$(LINK_FLAGS)" "optimize=$(OPTIMIZE)" \
 	    config.w32 > ..\config.sh
 
 $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
@@ -403,7 +406,7 @@ $(MINIPERL) : ..\miniperlmain.obj $(CORE_OBJ) $(WIN32_OBJ)
 		$(CORE_OBJ:s,\,\\) $(WIN32_OBJ:s,\,\\),$@,,$(LIBFILES),)
 .ELSE
 	$(LINK32) -subsystem:console -out:$@ \
-	    @$(mktmp $(LINK_FLAGS) ..\miniperlmain.obj \
+	    @$(mktmp $(LINK_FLAGS) $(LIBFILES) ..\miniperlmain.obj \
 		$(CORE_OBJ:s,\,\\) $(WIN32_OBJ:s,\,\\))
 .ENDIF
 
@@ -425,7 +428,7 @@ $(PERLDLL): perldll.def $(CORE_OBJ) $(WIN32_OBJ) $(DLL_OBJ)
 	$(IMPLIB) $*.lib $@
 .ELSE
 	$(LINK32) -dll -def:perldll.def -out:$@ \
-	    @$(mktmp $(LINK_FLAGS) $(CORE_OBJ:s,\,\\) \
+	    @$(mktmp $(LINK_FLAGS) $(LIBFILES) $(CORE_OBJ:s,\,\\) \
 		$(WIN32_OBJ:s,\,\\) $(DLL_OBJ:s,\,\\))
 .ENDIF
 	$(XCOPY) $(PERLIMPLIB) ..\lib\CORE
@@ -450,7 +453,7 @@ $(PERLEXE): $(PERLDLL) $(CONFIGPM) perlmain.obj
 	    $@,\n \
 	    $(PERLIMPLIB) $(LIBFILES)\n)
 .ELSE
-	$(LINK32) -subsystem:console -out:perl.exe $(LINK_FLAGS) \
+	$(LINK32) -subsystem:console -out:perl.exe $(LINK_FLAGS) $(LIBFILES) \
 	    perlmain.obj $(WINIOMAYBE) $(PERLIMPLIB) 
 	copy perl.exe $@
 	del perl.exe
@@ -473,7 +476,7 @@ win32mt.obj : win32.c
 	$(CC) $(CFLAGS) -MT -c $(OBJOUT_FLAG)win32mt.obj win32.c
 
 $(PERL95EXE): $(PERLDLL) $(CONFIGPM) $(PERL95_OBJ)
-	$(LINK32) -subsystem:console -out:perl95.exe $(LINK_FLAGS) \
+	$(LINK32) -subsystem:console -out:perl95.exe $(LINK_FLAGS) $(LIBFILES) \
 	    $(PERL95_OBJ) $(PERLIMPLIB) 
 	copy perl95.exe $@
 	del perl95.exe
@@ -542,7 +545,7 @@ utils: $(PERLEXE)
 			bin\pl2bat.pl
 
 distclean: clean
-	-del /f $(MINIPERL) $(PERLEXE) $(PERLDLL) $(GLOBEXE) \
+	-del /f $(MINIPERL) $(PERLEXE) $(PERL95EXE) $(PERLDLL) $(GLOBEXE) \
 		$(PERLIMPLIB) ..\miniperl.lib $(MINIMOD)
 	-del /f *.def *.map
 	-del /f $(SOCKET_DLL) $(IO_DLL) $(SDBM_FILE_DLL) $(FCNTL_DLL) \

@@ -8,4 +8,4 @@ print "Starting thread\n";
 $t = new Thread \&foo, qw(foo bar baz);
 print "Joining with $t\n";
 @results = $t->join();
-print "Joining returned @results\n";
+print "Joining returned ", scalar(@results), " values: @results\n";
