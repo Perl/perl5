@@ -1,5 +1,5 @@
 # This is a replacement for the old BEGIN preamble which heads (or
-# should head) up every core test program to prep it for running.  
+# should head) up every core test program to prepare it for running.
 # Now instead of:
 #
 # BEGIN {
@@ -7,11 +7,11 @@
 #   @INC = '../lib';
 # }
 #
-# t/TEST will use -MTestInit.  It also doesn't hurt if you "use TestInit"
-# (not require) in the test scripts.
+# t/TEST will use -MTestInit.  You may "use TestInit" in the test
+# programs but it is not required.
 #
-# PS this is not POD because this should be a very minimalist module in
-# case of funaemental perl breakage.
+# P.S. This documentation is not in POD format in order to avoid
+# problems when there are fundamental bugs in perl.
 
 package TestInit;
 
