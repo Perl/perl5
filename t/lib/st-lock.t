@@ -1,10 +1,13 @@
 #!./perl
 
-# $Id: lock.t,v 1.0.1.2 2000/10/23 18:03:07 ram Exp ram $
+# $Id: lock.t,v 1.0.1.3 2000/10/26 17:11:27 ram Exp ram $
 #
 #  @COPYRIGHT@
 #
 # $Log: lock.t,v $
+# Revision 1.0.1.3  2000/10/26 17:11:27  ram
+# patch5: just check $^O, there's no need for the whole Config
+#
 # Revision 1.0.1.2  2000/10/23 18:03:07  ram
 # patch4: protected calls to flock() for dos platform
 #

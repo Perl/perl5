@@ -1,3 +1,21 @@
+Thu Oct 26 19:14:38 MEST 2000   Raphael Manfredi <Raphael_Manfredi@pobox.com>
+
+. Description:
+
+	Version 1.0.5.
+
+	Documented that store() and retrieve() can return undef.
+	That is, the error reporting is not always made via exceptions,
+	as the paragraph on error reporting was implying.
+
+	Auto requires module of blessed ref when STORABLE_thaw misses.
+	When the Storable engine looks for the STORABLE_thaw hook and
+	does not find it, it now tries to require the package into which
+	the blessed reference is.
+
+	Just check $^O, in t/lock.t: there's no need to pull the whole
+	Config module for that.
+
 Fri Sep 29 21:52:29 MEST 2000   Raphael Manfredi <Raphael_Manfredi@pobox.com>
 
 . Description:

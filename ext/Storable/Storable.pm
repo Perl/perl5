@@ -1,9 +1,18 @@
-;# $Id: Storable.pm,v 1.0 2000/09/01 19:40:41 ram Exp $
+;# $Id: Storable.pm,v 1.0.1.5 2000/10/26 17:10:18 ram Exp ram $
 ;#
 ;#  Copyright (c) 1995-2000, Raphael Manfredi
 ;#  
 ;#  You may redistribute only under the same terms as Perl 5, as specified
 ;#  in the README file that comes with the distribution.
+;#
+;# $Log: Storable.pm,v $
+;# Revision 1.0.1.5  2000/10/26 17:10:18  ram
+;# patch5: documented that store() and retrieve() can return undef
+;# patch5: added paragraph explaining the auto require for thaw hooks
+;#
+;# Revision 1.0.1.4  2000/10/23 18:02:57  ram
+;# patch4: protected calls to flock() for dos platform
+;# patch4: added logcarp emulation if they don't have Log::Agent
 ;#
 ;# $Log: Storable.pm,v $
 ;# Revision 1.0  2000/09/01 19:40:41  ram
@@ -26,7 +35,7 @@ package Storable; @ISA = qw(Exporter DynaLoader);
 use AutoLoader;
 use vars qw($forgive_me $VERSION);
 
-$VERSION = '1.004';
+$VERSION = '1.005';
 *AUTOLOAD = \&AutoLoader::AUTOLOAD;		# Grrr...
 
 #
@@ -448,6 +457,9 @@ those exceptions.
 When Storable croaks, it tries to report the error via the C<logcroak()>
 routine from the C<Log::Agent> package, if it is available.
 
+Normal errors are reported by having store() or retrieve() return C<undef>.
+Such errors are usually I/O errors (or truncated stream errors at retrieval).
+
 =head1 WIZARDS ONLY
 
 =head2 Hooks
@@ -526,6 +538,13 @@ is the serialized string you returned to the engine in C<STORABLE_freeze>,
 and there may be an optional list of references, in the same order you gave
 them at serialization time, pointing to the deserialized objects (which
 have been processed courtesy of the Storable engine).
+
+When the Storable engine does not find any C<STORABLE_thaw> hook routine,
+it tries to load the class by requiring the package dynamically (using
+the blessed package name), and then re-attempts the lookup.  If at that
+time the hook cannot be located, the engine croaks.  Note that this mechanism
+will fail if you define several classes in the same file, but perlmod(1)
+warned you.
 
 It is up to you to use these information to populate I<obj> the way you want.
 
