@@ -1344,13 +1344,12 @@ within certain expressions, statements, contexts, or whatever.
 
 =item * Interpolation
 
-Double-quoted strings may no longer end with an unescaped $ or @.
+Double-quoted strings may no longer end with an unescaped $.
 
     $foo = "foo$";
-    $bar = "bar@";
-    print "foo is $foo, bar is $bar\n";
+    print "foo is $foo\n";
 
-    # perl4 prints: foo is foo$, bar is bar@
+    # perl4 prints: foo is foo$
     # perl5 errors: Final $ should be \$ or $name
 
 Note: perl5 DOES NOT error on the terminating @ in $bar
@@ -1436,12 +1435,25 @@ perl4 programs which unconsciously rely on the bugs in earlier perl versions.
 
 =item * Interpolation
 
-You also have to be careful about array references.
+You also have to be careful about array and hash brackets during
+interpolation.
+
+    print "$foo["
+
+    perl 4 prints: [
+    perl 5 prints: syntax error
 
     print "$foo{"
 
     perl 4 prints: {
     perl 5 prints: syntax error
+
+Perl 5 is expecting to find an index or key name following the respective
+brackets, as well as an ending bracket of the appropriate type.  In order
+to mimic the behavior of Perl 4, you must escape the bracket like so.
+
+    print "$foo\[";
+    print "$foo\{";
 
 =item * Interpolation
 

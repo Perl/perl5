@@ -1,4 +1,3 @@
-
 package Devel::PPPort;
 
 =head1 NAME
@@ -74,6 +73,10 @@ even if available, access to a fixed interface):
     dTHXa
     dTHXoa
     ERRSV
+    get_av
+    get_cv
+    get_hv
+    get_sv
     gv_stashpvn(str,len,flags)
     INT2PTR(type,int)
     IVdf
@@ -148,7 +151,7 @@ require DynaLoader;
 use strict;
 use vars qw( $VERSION @ISA @EXPORT @EXPORT_OK $data );
 
-$VERSION = "2.0002";
+$VERSION = "2.003";
 
 @ISA = qw(Exporter DynaLoader);
 @EXPORT =  qw();
@@ -741,6 +744,22 @@ SV *sv;
         STRLEN n_a;
         return sv_2pv(sv, &n_a);
     }
+#endif
+
+#ifndef get_cv
+#   define get_cv(name,create) perl_get_cv(name,create)
+#endif
+
+#ifndef get_sv
+#   define get_sv(name,create) perl_get_sv(name,create)
+#endif
+
+#ifndef get_av
+#   define get_av(name,create) perl_get_av(name,create)
+#endif
+
+#ifndef get_hv
+#   define get_hv(name,create) perl_get_hv(name,create)
 #endif
 
 #endif /* _P_P_PORTABILITY_H_ */

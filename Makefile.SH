@@ -860,6 +860,15 @@ regen_pods:	FORCE
 
 regen_all: $(PERLYVMS) regen regen_pods
 
+.PHONY:	manisort manicheck
+
+manisort:	FORCE
+	LC_ALL=C sort -fc MANIFEST || (echo "WARNING: re-sorting MANIFEST"; \
+		LC_ALL=C sort -fo MANIFEST MANIFEST)
+
+manicheck:	FORCE
+	perl Porting/manicheck
+
 # Extensions:
 # Names added to $(dynamic_ext) or $(static_ext) or $(nonxs_ext) will
 # automatically get built.  There should ordinarily be no need to change

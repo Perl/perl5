@@ -779,6 +779,8 @@ my @layer_syms = qw(
 			 PerlIOBase_read
 			 PerlIOBase_setlinebuf
 			 PerlIOBase_unread
+			 PerlIOBase_noop_ok
+			 PerlIOBase_noop_fail
 			 PerlIOBuf_bufsiz
 			 PerlIOBuf_fill
 			 PerlIOBuf_flush

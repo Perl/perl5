@@ -1,5 +1,11 @@
 Revision history for Perl extension Time::HiRes.
 
+1.47
+	- do not use -lrt in Linux (from March Lehmann)
+		- unnecessary (nanosleep is in libc anyway)
+		- harmful (-lrt slows down execution)
+		- incompatible (with many distributions' pthreads)
+
 1.46
 	- do not create files in blib directories under core
 	  (perl change #19160, from rgs)

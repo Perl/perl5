@@ -808,7 +808,7 @@ PP(pp_rv2hv)
 	    RETURN;
 	}
 	else if (LVRET) {
-	    if (GIMME == G_SCALAR)
+	    if (GIMME != G_SCALAR)
 		Perl_croak(aTHX_ "Can't return hash to lvalue scalar context");
 	    SETs((SV*)hv);
 	    RETURN;
@@ -1497,7 +1497,7 @@ Perl_do_readline(pTHX)
 	    /* undef TARG, and push that undefined value */
 	    if (type != OP_RCATLINE) {
 		SV_CHECK_THINKFIRST_COW_DROP(TARG);
-		SvOK_off(TARG);
+		(void)SvOK_off(TARG);
 	    }
 	    PUSHTARG;
 	}
@@ -1561,7 +1561,7 @@ Perl_do_readline(pTHX)
 	    if (gimme == G_SCALAR) {
 		if (type != OP_RCATLINE) {
 		    SV_CHECK_THINKFIRST_COW_DROP(TARG);
-		    SvOK_off(TARG);
+		    (void)SvOK_off(TARG);
 		}
 		SPAGAIN;
 		PUSHTARG;

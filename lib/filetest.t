@@ -57,7 +57,10 @@ SKIP: {
     my $tstfile = "filetest.tst";
     skip("No $chflags available", 4) if !-x $chflags;
 
- SKIP: {
+    skip("Test does not work on OpenBSD and BSD/OS", 4)
+	if $^O =~ /^(?:openbsd|bsdos)$/;
+
+  SKIP: {
 	eval {
 	    if (!-e $tstfile) {
 		open(T, ">$tstfile") or die "Can't create $tstfile: $!";

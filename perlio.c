@@ -50,6 +50,55 @@
 
 #include "XSUB.h"
 
+/* Call the callback or PerlIOBase, and return failure. */
+#define Perl_PerlIO_or_Base(f, callback, base, failure, args) 	\
+	if (PerlIOValid(f)) {					\
+		PerlIO_funcs *tab = PerlIOBase(f)->tab; 	\
+		if (tab && tab->callback)			\
+			return (*tab->callback) args;		\
+		else						\
+			return PerlIOBase_ ## base args;	\
+	}							\
+	else							\
+		SETERRNO(EBADF, SS_IVCHAN);			\
+	return failure
+
+/* Call the callback or fail, and return failure. */
+#define Perl_PerlIO_or_fail(f, callback, failure, args) 	\
+	if (PerlIOValid(f)) {					\
+		PerlIO_funcs *tab = PerlIOBase(f)->tab; 	\
+		if (tab && tab->callback)			\
+			return (*tab->callback) args;		\
+		SETERRNO(EINVAL, LIB_INVARG);			\
+	}							\
+	else							\
+		SETERRNO(EBADF, SS_IVCHAN);			\
+	return failure
+
+/* Call the callback or PerlIOBase, and be void. */
+#define Perl_PerlIO_or_Base_void(f, callback, base, args) 	\
+	if (PerlIOValid(f)) {					\
+		PerlIO_funcs *tab = PerlIOBase(f)->tab; 	\
+		if (tab && tab->callback)			\
+			(*tab->callback) args;			\
+		else						\
+			PerlIOBase_ ## base args;		\
+		SETERRNO(EINVAL, LIB_INVARG);			\
+	}							\
+	else							\
+		SETERRNO(EBADF, SS_IVCHAN)
+
+/* Call the callback or fail, and be void. */
+#define Perl_PerlIO_or_fail_void(f, callback, args) 		\
+	if (PerlIOValid(f)) {					\
+		PerlIO_funcs *tab = PerlIOBase(f)->tab; 	\
+		if (tab && tab->callback)			\
+			(*tab->callback) args;			\
+		SETERRNO(EINVAL, LIB_INVARG);			\
+	}							\
+	else							\
+		SETERRNO(EBADF, SS_IVCHAN)
+
 int
 perlsio_binmode(FILE *fp, int iotype, int mode)
 {
@@ -1286,24 +1335,27 @@ int
 Perl_PerlIO_close(pTHX_ PerlIO *f)
 {
     int code = -1;
+
     if (PerlIOValid(f)) {
-	code = (*PerlIOBase(f)->tab->Close) (aTHX_ f);
-	while (*f) {
-	    PerlIO_pop(aTHX_ f);
-	}
+	 PerlIO_funcs *tab = PerlIOBase(f)->tab;
+
+	 if (tab && tab->Close) {
+	      code = (*tab->Close)(aTHX_ f);
+	      while (*f) {
+		   PerlIO_pop(aTHX_ f);
+	      }
+	 }
+	 else
+	      PerlIOBase_close(aTHX_ f);
     }
+
     return code;
 }
 
 int
 Perl_PerlIO_fileno(pTHX_ PerlIO *f)
 {
-    if (PerlIOValid(f))
-	return (*PerlIOBase(f)->tab->Fileno) (aTHX_ f);
-    else {
-	SETERRNO(EBADF, SS_IVCHAN);
-	return -1;
-    }
+     Perl_PerlIO_or_Base(f, Fileno, fileno, -1, (aTHX_ f));
 }
 
 static const char *
@@ -1499,56 +1551,31 @@ PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd,
 SSize_t
 Perl_PerlIO_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 {
-    if (PerlIOValid(f))
-	return (*PerlIOBase(f)->tab->Read) (aTHX_ f, vbuf, count);
-    else {
-	SETERRNO(EBADF, SS_IVCHAN);
-	return -1;
-    }
+     Perl_PerlIO_or_Base(f, Read, read, -1, (aTHX_ f, vbuf, count));
 }
 
 SSize_t
 Perl_PerlIO_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 {
-    if (PerlIOValid(f))
-	return (*PerlIOBase(f)->tab->Unread) (aTHX_ f, vbuf, count);
-    else {
-	SETERRNO(EBADF, SS_IVCHAN);
-	return -1;
-    }
+     Perl_PerlIO_or_Base(f, Unread, unread, -1, (aTHX_ f, vbuf, count));
 }
 
 SSize_t
 Perl_PerlIO_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 {
-    if (PerlIOValid(f))
-	return (*PerlIOBase(f)->tab->Write) (aTHX_ f, vbuf, count);
-    else {
-	SETERRNO(EBADF, SS_IVCHAN);
-	return -1;
-    }
+     Perl_PerlIO_or_fail(f, Write, -1, (aTHX_ f, vbuf, count));
 }
 
 int
 Perl_PerlIO_seek(pTHX_ PerlIO *f, Off_t offset, int whence)
 {
-    if (PerlIOValid(f))
-	return (*PerlIOBase(f)->tab->Seek) (aTHX_ f, offset, whence);
-    else {
-	SETERRNO(EBADF, SS_IVCHAN);
-	return -1;
-    }
+     Perl_PerlIO_or_fail(f, Seek, -1, (aTHX_ f, offset, whence));
 }
 
 Off_t
 Perl_PerlIO_tell(pTHX_ PerlIO *f)
 {
-    if (PerlIOValid(f))
-	return (*PerlIOBase(f)->tab->Tell) (aTHX_ f);
-    else {
-	SETERRNO(EBADF, SS_IVCHAN);
-	return -1;
-    }
+     Perl_PerlIO_or_fail(f, Tell, -1, (aTHX_ f));
 }
 
 int
@@ -1557,14 +1584,11 @@ Perl_PerlIO_flush(pTHX_ PerlIO *f)
     if (f) {
 	if (*f) {
 	    PerlIO_funcs *tab = PerlIOBase(f)->tab;
-	    if (tab && tab->Flush) {
+
+	    if (tab && tab->Flush)
 		return (*tab->Flush) (aTHX_ f);
-	    }
-	    else {
-		PerlIO_debug("Cannot flush f=%p :%s\n", (void*)f, tab->name);
-		SETERRNO(EBADF, SS_IVCHAN);
-		return -1;
-	    }
+	    else
+		 return 0; /* If no Flush defined, silently succeed. */
 	}
 	else {
 	    PerlIO_debug("Cannot flush f=%p\n", (void*)f);
@@ -1617,81 +1641,73 @@ PerlIOBase_flush_linebuf(pTHX)
 int
 Perl_PerlIO_fill(pTHX_ PerlIO *f)
 {
-    if (PerlIOValid(f))
-	return (*PerlIOBase(f)->tab->Fill) (aTHX_ f);
-    else {
-	SETERRNO(EBADF, SS_IVCHAN);
-	return -1;
-    }
+     Perl_PerlIO_or_fail(f, Fill, -1, (aTHX_ f));
 }
 
 int
 PerlIO_isutf8(PerlIO *f)
 {
-    if (PerlIOValid(f))
-	return (PerlIOBase(f)->flags & PERLIO_F_UTF8) != 0;
-    else {
-	SETERRNO(EBADF, SS_IVCHAN);
-	return -1;
-    }
+     if (PerlIOValid(f))
+	  return (PerlIOBase(f)->flags & PERLIO_F_UTF8) != 0;
+     else
+	  SETERRNO(EBADF, SS_IVCHAN);
+     
+     return -1;
 }
 
 int
 Perl_PerlIO_eof(pTHX_ PerlIO *f)
 {
-    if (PerlIOValid(f))
-	return (*PerlIOBase(f)->tab->Eof) (aTHX_ f);
-    else {
-	SETERRNO(EBADF, SS_IVCHAN);
-	return -1;
-    }
+     Perl_PerlIO_or_Base(f, Eof, eof, -1, (aTHX_ f));
 }
 
 int
 Perl_PerlIO_error(pTHX_ PerlIO *f)
 {
-    if (PerlIOValid(f))
-	return (*PerlIOBase(f)->tab->Error) (aTHX_ f);
-    else {
-	SETERRNO(EBADF, SS_IVCHAN);
-	return -1;
-    }
+     Perl_PerlIO_or_Base(f, Error, error, -1, (aTHX_ f));
 }
 
 void
 Perl_PerlIO_clearerr(pTHX_ PerlIO *f)
 {
-    if (PerlIOValid(f))
-	(*PerlIOBase(f)->tab->Clearerr) (aTHX_ f);
-    else
-	SETERRNO(EBADF, SS_IVCHAN);
+     Perl_PerlIO_or_Base_void(f, Clearerr, clearerr, (aTHX_ f));
 }
 
 void
 Perl_PerlIO_setlinebuf(pTHX_ PerlIO *f)
 {
-    if (PerlIOValid(f))
-	(*PerlIOBase(f)->tab->Setlinebuf) (aTHX_ f);
-    else
-	SETERRNO(EBADF, SS_IVCHAN);
+     Perl_PerlIO_or_Base_void(f, Setlinebuf, setlinebuf, (aTHX_ f));
 }
 
 int
 PerlIO_has_base(PerlIO *f)
 {
-    if (PerlIOValid(f)) {
-	return (PerlIOBase(f)->tab->Get_base != NULL);
-    }
-    return 0;
+     if (PerlIOValid(f)) {
+	  PerlIO_funcs *tab = PerlIOBase(f)->tab;
+
+	  if (tab)
+	       return (tab->Get_base != NULL);
+	  SETERRNO(EINVAL, LIB_INVARG);
+     }
+     else
+	  SETERRNO(EBADF, SS_IVCHAN);
+
+     return 0;
 }
 
 int
 PerlIO_fast_gets(PerlIO *f)
 {
     if (PerlIOValid(f) && (PerlIOBase(f)->flags & PERLIO_F_FASTGETS)) {
-	PerlIO_funcs *tab = PerlIOBase(f)->tab;
-	return (tab->Set_ptrcnt != NULL);
+	 PerlIO_funcs *tab = PerlIOBase(f)->tab;
+
+	 if (tab)
+	      return (tab->Set_ptrcnt != NULL);
+	 SETERRNO(EINVAL, LIB_INVARG);
     }
+    else
+	 SETERRNO(EBADF, SS_IVCHAN);
+
     return 0;
 }
 
@@ -1700,8 +1716,14 @@ PerlIO_has_cntptr(PerlIO *f)
 {
     if (PerlIOValid(f)) {
 	PerlIO_funcs *tab = PerlIOBase(f)->tab;
-	return (tab->Get_ptr != NULL && tab->Get_cnt != NULL);
+
+	if (tab)
+	     return (tab->Get_ptr != NULL && tab->Get_cnt != NULL);
+	  SETERRNO(EINVAL, LIB_INVARG);
     }
+    else
+	 SETERRNO(EBADF, SS_IVCHAN);
+
     return 0;
 }
 
@@ -1709,70 +1731,52 @@ int
 PerlIO_canset_cnt(PerlIO *f)
 {
     if (PerlIOValid(f)) {
-	PerlIOl *l = PerlIOBase(f);
-	return (l->tab->Set_ptrcnt != NULL);
+	  PerlIO_funcs *tab = PerlIOBase(f)->tab;
+
+	  if (tab)
+	       return (tab->Set_ptrcnt != NULL);
+	  SETERRNO(EINVAL, LIB_INVARG);
     }
+    else
+	 SETERRNO(EBADF, SS_IVCHAN);
+
     return 0;
 }
 
 STDCHAR *
 Perl_PerlIO_get_base(pTHX_ PerlIO *f)
 {
-    if (PerlIOValid(f))
-	return (*PerlIOBase(f)->tab->Get_base) (aTHX_ f);
-    return NULL;
+     Perl_PerlIO_or_fail(f, Get_base, NULL, (aTHX_ f));
 }
 
 int
 Perl_PerlIO_get_bufsiz(pTHX_ PerlIO *f)
 {
-    if (PerlIOValid(f))
-	return (*PerlIOBase(f)->tab->Get_bufsiz) (aTHX_ f);
-    return 0;
+     Perl_PerlIO_or_fail(f, Get_bufsiz, -1, (aTHX_ f));
 }
 
 STDCHAR *
 Perl_PerlIO_get_ptr(pTHX_ PerlIO *f)
 {
-    if (PerlIOValid(f)) {
-	PerlIO_funcs *tab = PerlIOBase(f)->tab;
-	if (tab->Get_ptr == NULL)
-	    return NULL;
-	return (*tab->Get_ptr) (aTHX_ f);
-    }
-    return NULL;
+     Perl_PerlIO_or_fail(f, Get_ptr, NULL, (aTHX_ f));
 }
 
 int
 Perl_PerlIO_get_cnt(pTHX_ PerlIO *f)
 {
-    if (PerlIOValid(f)) {
-	PerlIO_funcs *tab = PerlIOBase(f)->tab;
-	if (tab->Get_cnt == NULL)
-	   return 0;
-	return (*tab->Get_cnt) (aTHX_ f);
-    }
-    return 0;
+     Perl_PerlIO_or_fail(f, Get_cnt, -1, (aTHX_ f));
 }
 
 void
 Perl_PerlIO_set_cnt(pTHX_ PerlIO *f, int cnt)
 {
-    if (PerlIOValid(f)) {
-	(*PerlIOBase(f)->tab->Set_ptrcnt) (aTHX_ f, NULL, cnt);
-    }
+     Perl_PerlIO_or_fail_void(f, Set_ptrcnt, (aTHX_ f, NULL, cnt));
 }
 
 void
 Perl_PerlIO_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, int cnt)
 {
-    if (PerlIOValid(f)) {
-	PerlIO_funcs *tab = PerlIOBase(f)->tab;
-	if (tab->Set_ptrcnt == NULL) {
-	    Perl_croak(aTHX_ "PerlIO buffer snooping abuse");
-	}
-	(*PerlIOBase(f)->tab->Set_ptrcnt) (aTHX_ f, ptr, cnt);
-    }
+     Perl_PerlIO_or_fail_void(f, Set_ptrcnt, (aTHX_ f, ptr, cnt));
 }
 
 

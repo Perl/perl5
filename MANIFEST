@@ -26,14 +26,14 @@ configure.gnu		Crude emulation of GNU configure
 config_h.SH		Produces config.h
 cop.h			Control operator header
 Copying			The GNU General Public License
-Cross/Makefile		Cross-compilation
-Cross/Makefile.SH.patch	Cross-compilation
-Cross/README		Cross-compilation
-Cross/TODO		Cross-compilation
 Cross/config		Cross-compilation
 Cross/config.sh-arm-linux	Cross-compilation
 Cross/generate_config_sh	Cross-compilation
 Cross/installperl.patch		Cross-compilation
+Cross/Makefile		Cross-compilation
+Cross/Makefile.SH.patch	Cross-compilation
+Cross/README		Cross-compilation
+Cross/TODO		Cross-compilation
 Cross/warp		Cross-compilation
 cv.h			Code value header
 cygwin/cygwin.c		Additional code for Cygwin port
@@ -1105,9 +1105,9 @@ lib/ExtUtils/MM_Win32.pm	MakeMaker methods for Win32
 lib/ExtUtils/MM_Win95.pm	MakeMaker methods for Win95
 lib/ExtUtils/MY.pm		MakeMaker user override class
 lib/ExtUtils/NOTES		Notes about MakeMaker internals
+lib/ExtUtils/Packlist.pm	Manipulates .packlist files
 lib/ExtUtils/PATCHING		Suggestions for patching MakeMaker
 lib/ExtUtils/README		MakeMaker README
-lib/ExtUtils/Packlist.pm	Manipulates .packlist files
 lib/ExtUtils/t/00compile.t	See if MakeMaker modules compile
 lib/ExtUtils/t/00setup_dummy.t	Setup MakeMaker test module
 lib/ExtUtils/t/backwards.t	Check MakeMaker's backwards compatibility
@@ -1267,11 +1267,11 @@ lib/Locale/Maketext.pm		Locale::Maketext
 lib/Locale/Maketext.pod		Locale::Maketext documentation
 lib/Locale/Maketext/ChangeLog	Locale::Maketext
 lib/Locale/Maketext/README	Locale::Maketext
-lib/Locale/Maketext/TPJ13.pod	Locale::Maketext documentation article
 lib/Locale/Maketext/t/00about.t	See if Locale::Maketext works
 lib/Locale/Maketext/t/01make.t	See if Locale::Maketext works
 lib/Locale/Maketext/t/02get.t	See if Locale::Maketext works
 lib/Locale/Maketext/t/03http.t	See if Locale::Maketext works
+lib/Locale/Maketext/TPJ13.pod	Locale::Maketext documentation article
 lib/Locale/Script.pm		Locale::Codes
 lib/Locale/Script.pod		Locale::Codes documentation
 lib/look.pl			A "look" equivalent
@@ -1655,12 +1655,17 @@ lib/Tie/File/t/23_rv_ac_splice.t	Like 07_rv_splice.t, but with autochomp
 lib/Tie/File/t/24_cache_loop.t	Regression for old Tie::File cache bug
 lib/Tie/File/t/25_gen_nocache.t	Like 01_gen.t, but with caching disabled
 lib/Tie/File/t/26_twrite.t	Unit tests for Tie::File::_twrite
+lib/Tie/File/t/27_iwrite.t	Unit tests for Tie::File::_iwrite
+lib/Tie/File/t/28_mtwrite.t	Unit tests for Tie::File::_mtwrite
+lib/Tie/File/t/29a_upcopy.t	Unit tests for Tie::File::_upcopy
+lib/Tie/File/t/29_downcopy.t	Unit tests for Tie::File::_downcopy
 lib/Tie/File/t/30_defer.t	deferred writing feature tests for Tie::File
 lib/Tie/File/t/31_autodefer.t	'autodefer' feature tests for Tie::File
 lib/Tie/File/t/32_defer_misc.t	Like 17_misc_meth.t, but with deferred writing
 lib/Tie/File/t/33_defer_vs.t	Like 30_defer.t, but with varying-length records
 lib/Tie/File/t/40_abs_cache.t	Unit tests for Tie::File::Cache
 lib/Tie/File/t/41_heap.t	Unit tests for Tie::File::Heap
+lib/Tie/File/t/42_offset.t	Unit tests for the offset method
 lib/Tie/Handle.pm		Base class for tied handles
 lib/Tie/Handle/stdhandle.t	Test for Tie::StdHandle
 lib/Tie/Hash.pm			Base class for tied hashes
@@ -1709,13 +1714,13 @@ lib/unicore/Index.txt		Unicode character database
 lib/unicore/Jamo.txt		Unicode character database
 lib/unicore/JamoShort.pl	Unicode character database
 lib/unicore/Lbrk.pl		Unicode character database
-lib/unicore/lib/ASCII.pl	Unicode character database
 lib/unicore/lib/Alnum.pl	Unicode character database
 lib/unicore/lib/Alpha.pl	Unicode character database
 lib/unicore/lib/Alphabet.pl	Unicode character database
 lib/unicore/lib/Any.pl		Unicode character database
 lib/unicore/lib/Arabic.pl	Unicode character database
 lib/unicore/lib/Armenian.pl	Unicode character database
+lib/unicore/lib/ASCII.pl	Unicode character database
 lib/unicore/lib/AsciiHex.pl	Unicode character database
 lib/unicore/lib/Assigned.pl	Unicode character database
 lib/unicore/lib/Bengali.pl	Unicode character database
@@ -1723,8 +1728,8 @@ lib/unicore/lib/BidiAL.pl	Unicode character database
 lib/unicore/lib/BidiAN.pl	Unicode character database
 lib/unicore/lib/BidiB.pl	Unicode character database
 lib/unicore/lib/BidiBN.pl	Unicode character database
-lib/unicore/lib/BidiCS.pl	Unicode character database
 lib/unicore/lib/BidiCont.pl	Unicode character database
+lib/unicore/lib/BidiCS.pl	Unicode character database
 lib/unicore/lib/BidiEN.pl	Unicode character database
 lib/unicore/lib/BidiES.pl	Unicode character database
 lib/unicore/lib/BidiET.pl	Unicode character database
@@ -1757,6 +1762,7 @@ lib/unicore/lib/Compat.pl	Unicode character database
 lib/unicore/lib/Cs.pl		Unicode character database
 lib/unicore/lib/Cypriot.pl	Unicode character database
 lib/unicore/lib/Cyrillic.pl	Unicode character database
+lib/unicore/lib/Dash.pl		Unicode character database
 lib/unicore/lib/DCcircle.pl	Unicode character database
 lib/unicore/lib/DCcompat.pl	Unicode character database
 lib/unicore/lib/DCfinal.pl	Unicode character database
@@ -1773,7 +1779,6 @@ lib/unicore/lib/DCsub.pl	Unicode character database
 lib/unicore/lib/DCsuper.pl	Unicode character database
 lib/unicore/lib/DCvertic.pl	Unicode character database
 lib/unicore/lib/DCwide.pl	Unicode character database
-lib/unicore/lib/Dash.pl		Unicode character database
 lib/unicore/lib/Deprecat.pl	Unicode character database
 lib/unicore/lib/Deseret.pl	Unicode character database
 lib/unicore/lib/Devanaga.pl	Unicode character database
@@ -1796,9 +1801,9 @@ lib/unicore/lib/HexDigit.pl	Unicode character database
 lib/unicore/lib/Hiragana.pl	Unicode character database
 lib/unicore/lib/Hyphen.pl	Unicode character database
 lib/unicore/lib/IdContin.pl	Unicode character database
-lib/unicore/lib/IdStart.pl	Unicode character database
 lib/unicore/lib/Ideograp.pl	Unicode character database
 lib/unicore/lib/IdsBinar.pl	Unicode character database
+lib/unicore/lib/IdStart.pl	Unicode character database
 lib/unicore/lib/IdsTrina.pl	Unicode character database
 lib/unicore/lib/InAegean.pl	Unicode character database
 lib/unicore/lib/InAlphab.pl	Unicode character database
@@ -1855,6 +1860,7 @@ lib/unicore/lib/InHangu3.pl	Unicode character database
 lib/unicore/lib/InHangul.pl	Unicode character database
 lib/unicore/lib/InHanuno.pl	Unicode character database
 lib/unicore/lib/InHebrew.pl	Unicode character database
+lib/unicore/lib/Inherite.pl	Unicode character database
 lib/unicore/lib/InHighPr.pl	Unicode character database
 lib/unicore/lib/InHighSu.pl	Unicode character database
 lib/unicore/lib/InHiraga.pl	Unicode character database
@@ -1923,16 +1929,14 @@ lib/unicore/lib/InUgarit.pl	Unicode character database
 lib/unicore/lib/InUnifie.pl	Unicode character database
 lib/unicore/lib/InVaria2.pl	Unicode character database
 lib/unicore/lib/InVariat.pl	Unicode character database
+lib/unicore/lib/InYijing.pl	Unicode character database
 lib/unicore/lib/InYiRadi.pl	Unicode character database
 lib/unicore/lib/InYiSyll.pl	Unicode character database
-lib/unicore/lib/InYijing.pl	Unicode character database
-lib/unicore/lib/Inherite.pl	Unicode character database
 lib/unicore/lib/JoinCont.pl	Unicode character database
 lib/unicore/lib/Kannada.pl	Unicode character database
 lib/unicore/lib/Katakana.pl	Unicode character database
 lib/unicore/lib/Khmer.pl	Unicode character database
 lib/unicore/lib/L.pl		Unicode character database
-lib/unicore/lib/L_.pl		Unicode character database
 lib/unicore/lib/Lao.pl		Unicode character database
 lib/unicore/lib/Latin.pl	Unicode character database
 lib/unicore/lib/Limbu.pl	Unicode character database
@@ -1945,6 +1949,7 @@ lib/unicore/lib/Lower.pl	Unicode character database
 lib/unicore/lib/Lowercas.pl	Unicode character database
 lib/unicore/lib/Lt.pl		Unicode character database
 lib/unicore/lib/Lu.pl		Unicode character database
+lib/unicore/lib/L_.pl		Unicode character database
 lib/unicore/lib/M.pl		Unicode character database
 lib/unicore/lib/Malayala.pl	Unicode character database
 lib/unicore/lib/Math.pl		Unicode character database
@@ -2539,9 +2544,9 @@ t/lib/sample-tests/shbang_misparse	Test data for Test::Harness
 t/lib/sample-tests/simple		Test data for Test::Harness
 t/lib/sample-tests/simple_fail		Test data for Test::Harness
 t/lib/sample-tests/skip			Test data for Test::Harness
-t/lib/sample-tests/skip_nomsg		Test data for Test::Harness
 t/lib/sample-tests/skipall		Test data for Test::Harness
 t/lib/sample-tests/skipall_nomsg	Test data for Test::Harness
+t/lib/sample-tests/skip_nomsg		Test data for Test::Harness
 t/lib/sample-tests/switches		Test data for Test::Harness
 t/lib/sample-tests/taint		Test data for Test::Harness
 t/lib/sample-tests/todo			Test data for Test::Harness
@@ -2768,8 +2773,8 @@ t/run/fresh_perl.t		Tests that require a fresh perl.
 t/run/noswitch.t		Test aliasing ARGV for other switch tests
 t/run/runenv.t			Test if perl honors its environment variables.
 t/run/switcha.t			Test the -a switch
-t/run/switchd.t			Test the -d switch
 t/run/switchC.t			Test the -C switch
+t/run/switchd.t			Test the -d switch
 t/run/switches.t		Tests for the other switches (-0, -l, -c, -s, -M, -m, -V)
 t/run/switchF.t			Test the -F switch
 t/run/switchI.t			Test the -I switch

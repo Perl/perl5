@@ -225,8 +225,8 @@ sub unixinit {
     $LIBS = ['-lc'] if $Config{'osname'} =~ /dynixptx/i;
 
     # For nanosleep
-    push @$LIBS, '-lrt'		unless $Config{'osname'} =~ /irix/;
-    push @$LIBS, '-lposix4'	;
+    push @$LIBS, '-lrt' unless $Config{'osname'} =~ /^(?:irix|linux)$/;
+    push @$LIBS, '-lposix4';
 
     my @goodlibs;
 
