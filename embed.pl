@@ -2262,6 +2262,7 @@ s	|I32	|do_trans_complex_utf8	|SV *sv
 
 #if defined(PERL_IN_GV_C) || defined(PERL_DECL_PROT)
 s	|void	|gv_init_sv	|GV *gv|I32 sv_type
+s	|void	|require_errno	|GV *gv
 #endif
 
 #if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)

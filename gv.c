@@ -471,6 +471,28 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
     return gv;
 }
 
+/* The "gv" parameter should be the glob known to Perl code as *!
+ * The scalar must already have been magicalized.
+ */
+STATIC void
+S_require_errno(pTHX_ GV *gv)
+{
+    HV* stash = gv_stashpvn("Errno",5,FALSE);
+
+    if (!stash || !(gv_fetchmethod(stash, "TIEHASH"))) { 
+	dSP;
+	PUTBACK;
+	ENTER;
+	save_scalar(gv); /* keep the value of $! */
+	require_pv("Errno.pm");
+	LEAVE;
+	SPAGAIN;
+	stash = gv_stashpvn("Errno",5,FALSE);
+	if (!stash || !(gv_fetchmethod(stash, "TIEHASH")))
+	    Perl_croak(aTHX_ "Can't use %%! because Errno.pm is not available");
+    }
+}
+
 /*
 =for apidoc gv_stashpv
 
@@ -694,6 +716,8 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	if (add) {
 	    GvMULTI_on(gv);
 	    gv_init_sv(gv, sv_type);
+	    if (*name=='!' && sv_type == SVt_PVHV && len==1)
+		require_errno(gv);
 	}
 	return gv;
     } else if (add & GV_NOINIT) {
@@ -814,19 +838,19 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
     case '!':
 	if (len > 1)
 	    break;
-	if (sv_type > SVt_PV && PL_curcop != &PL_compiling) {
-	    HV* stash = gv_stashpvn("Errno",5,FALSE);
-	    if (!stash || !(gv_fetchmethod(stash, "TIEHASH"))) {
-		dSP;
-		PUTBACK;
-		require_pv("Errno.pm");
-		SPAGAIN;
-		stash = gv_stashpvn("Errno",5,FALSE);
-		if (!stash || !(gv_fetchmethod(stash, "TIEHASH")))
-		    Perl_croak(aTHX_ "Can't use %%! because Errno.pm is not available");
-	    }
-	}
-	goto magicalize;
+
+	/* If %! has been used, automatically load Errno.pm.
+	   The require will itself set errno, so in order to
+	   preserve its value we have to set up the magic
+	   now (rather than going to magicalize)
+	*/
+
+	sv_magic(GvSV(gv), (SV*)gv, 0, name, len);
+
+	if (sv_type == SVt_PVHV)
+	    require_errno(gv);
+
+	break;
     case '-':
 	if (len > 1)
 	    break;

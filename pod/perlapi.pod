@@ -2179,6 +2179,7 @@ Found in file sv.h
 =item SvPOK_only
 
 Tells an SV that it is a string and disables all other OK bits.
+Will also turn off the UTF8 status.
 
 	void	SvPOK_only(SV* sv)
 
@@ -2187,8 +2188,8 @@ Found in file sv.h
 
 =item SvPOK_only_UTF8
 
-Tells an SV that it is a UTF8 string (do not use frivolously)
-and disables all other OK bits.
+Tells an SV that it is a string and disables all other OK bits,
+and leaves the UTF8 status as it was.
   
 	void	SvPOK_only_UTF8(SV* sv)
 
@@ -2494,7 +2495,8 @@ Found in file sv.h
 
 =item SvUTF8_on
 
-Tells an SV that it is a string and encoded in UTF8.  Do not use frivolously.
+Turn on the UTF8 status of an SV (the data is not changed, just the flag).
+Do not use frivolously.
 
 	void	SvUTF8_on(SV *sv)
 
@@ -2544,7 +2546,8 @@ Found in file sv.c
 =item sv_catpv
 
 Concatenates the string onto the end of the string which is in the SV.
-Handles 'get' magic, but not 'set' magic.  See C<sv_catpv_mg>.
+If the SV has the UTF8 status set, then the bytes appended should be
+valid UTF8.  Handles 'get' magic, but not 'set' magic.  See C<sv_catpv_mg>.
 
 	void	sv_catpv(SV* sv, const char* ptr)
 
@@ -2553,9 +2556,13 @@ Found in file sv.c
 
 =item sv_catpvf
 
-Processes its arguments like C<sprintf> and appends the formatted output
-to an SV.  Handles 'get' magic, but not 'set' magic.  C<SvSETMAGIC()> must
-typically be called after calling this function to handle 'set' magic.
+Processes its arguments like C<sprintf> and appends the formatted
+output to an SV.  If the appended data contains "wide" characters
+(including, but not limited to, SVs with a UTF-8 PV formatted with %s,
+and characters >255 formatted with %c), the original SV might get
+upgraded to UTF-8.  Handles 'get' magic, but not 'set' magic.
+C<SvSETMAGIC()> must typically be called after calling this function
+to handle 'set' magic.
 
 	void	sv_catpvf(SV* sv, const char* pat, ...)
 
@@ -2574,8 +2581,9 @@ Found in file sv.c
 =item sv_catpvn
 
 Concatenates the string onto the end of the string which is in the SV.  The
-C<len> indicates number of bytes to copy.  Handles 'get' magic, but not
-'set' magic.  See C<sv_catpvn_mg>.
+C<len> indicates number of bytes to copy.  If the SV has the UTF8
+status set, then the bytes appended should be valid UTF8.
+Handles 'get' magic, but not 'set' magic.  See C<sv_catpvn_mg>.
 
 	void	sv_catpvn(SV* sv, const char* ptr, STRLEN len)
 
