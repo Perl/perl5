@@ -1,5 +1,5 @@
 ##
-## This file created by ./mktables
+## This file created by mktables
 ## List of built-in \p{...}/\P{...} properties.
 ##
 ## '*' means name may be 'fuzzy'
@@ -16,32 +16,12 @@
 * \p{AsciiHexDigit}                          Extended property 'ASCII_Hex_Digit'
   \p{Assigned}                               All assigned code points
 * \p{Bengali}                                Script 'Bengali'
-  \p{BidiAL}                                 Bi-directional category 'AL'
-  \p{BidiAN}                                 Bi-directional category 'AN'
-  \p{BidiBN}                                 Bi-directional category 'BN'
-  \p{BidiB}                                  Bi-directional category 'B'
-  \p{BidiCS}                                 Bi-directional category 'CS'
 * \p{BidiControl}                            Extended property 'Bidi_Control'
-  \p{BidiEN}                                 Bi-directional category 'EN'
-  \p{BidiES}                                 Bi-directional category 'ES'
-  \p{BidiET}                                 Bi-directional category 'ET'
-  \p{BidiLRE}                                Bi-directional category 'LRE'
-  \p{BidiLRO}                                Bi-directional category 'LRO'
-  \p{BidiL}                                  Bi-directional category 'L'
-  \p{BidiNSM}                                Bi-directional category 'NSM'
-  \p{BidiON}                                 Bi-directional category 'ON'
-  \p{BidiPDF}                                Bi-directional category 'PDF'
-  \p{BidiRLE}                                Bi-directional category 'RLE'
-  \p{BidiRLO}                                Bi-directional category 'RLO'
-  \p{BidiR}                                  Bi-directional category 'R'
-  \p{BidiS}                                  Bi-directional category 'S'
-  \p{BidiWS}                                 Bi-directional category 'WS'
   \p{Blank}                                  [[:Blank:]]
 * \p{Bopomofo}                               Script 'Bopomofo'
 * \p{Braille}                                Script 'Braille'
 * \p{Buhid}                                  Script 'Buhid'
 * \p{CanadianAboriginal}                     Script 'Canadian_Aboriginal'
-  \p{Canon}                                  Decomposes to multiple characters
 * \p{Cc}                                     Alias for \p{Cc} (General Category 'Cc')
   \p{Cc}                                     General Category 'Cc'
 * \p{Cf}                                     Alias for \p{Cf} (General Category 'Cf')
@@ -51,7 +31,6 @@
 * \p{Cn}                                     Alias for \p{Cn} (General Category 'Cn' [not functional in Perl])
   \p{Cn}                                     General Category 'Cn' [not functional in Perl]
 * \p{Common}                                 Script 'Common'
-  \p{Compat}                                 Compatible with a more-basic character
 * \p{Co}                                     Alias for \p{Co} (General Category 'Co')
   \p{Co}                                     General Category 'Co'
 * \p{Cs}                                     Alias for \p{Cs} (General Category 'Cs')
@@ -60,22 +39,6 @@
 * \p{Cyrillic}                               Script 'Cyrillic'
 * \p{C}                                      Alias for \p{C} (Major Category 'C')
   \p{C}                                      Major Category 'C'
-  \p{DCcircle}                               Compatible with 'circle'
-  \p{DCcompat}                               Compatible with 'compat'
-  \p{DCfinal}                                Compatible with 'final'
-  \p{DCfont}                                 Compatible with 'font'
-  \p{DCfraction}                             Compatible with 'fraction'
-  \p{DCinitial}                              Compatible with 'initial'
-  \p{DCisolated}                             Compatible with 'isolated'
-  \p{DCmedial}                               Compatible with 'medial'
-  \p{DCnarrow}                               Compatible with 'narrow'
-  \p{DCnoBreak}                              Compatible with 'noBreak'
-  \p{DCsmall}                                Compatible with 'small'
-  \p{DCsquare}                               Compatible with 'square'
-  \p{DCsub}                                  Compatible with 'sub'
-  \p{DCsuper}                                Compatible with 'super'
-  \p{DCvertical}                             Compatible with 'vertical'
-  \p{DCwide}                                 Compatible with 'wide'
 * \p{Dash}                                   Extended property 'Dash'
 * \p{Deprecated}                             Extended property 'Deprecated'
 * \p{Deseret}                                Script 'Deseret'
@@ -234,7 +197,8 @@
 * \p{KatakanaOrHiragana}                     Script 'Katakana_Or_Hiragana'
 * \p{Katakana}                               Script 'Katakana'
 * \p{Khmer}                                  Script 'Khmer'
-  \p{L&}                                     [\p{Ll}\p{Lu}\p{Lt}]
+* \p{LC}                                     Alias for \p{LC} ([\p{Ll}\p{Lu}\p{Lt}])
+  \p{LC}                                     [\p{Ll}\p{Lu}\p{Lt}]
 * \p{Lao}                                    Script 'Lao'
 * \p{Latin}                                  Script 'Latin'
 * \p{Limbu}                                  Script 'Limbu'
@@ -260,7 +224,6 @@
   \p{Mc}                                     General Category 'Mc'
 * \p{Me}                                     Alias for \p{Me} (General Category 'Me')
   \p{Me}                                     General Category 'Me'
-  \p{Mirrored}                               Mirrored in bidirectional text
 * \p{Mn}                                     Alias for \p{Mn} (General Category 'Mn')
   \p{Mn}                                     General Category 'Mn'
 * \p{Mongolian}                              Script 'Mongolian'
