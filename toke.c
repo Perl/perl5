@@ -1500,12 +1500,17 @@ yylex()
 			GvIMPORTED_AV_on(gv);
 		    if (minus_F) {
 			char tmpbuf1[50];
-			if ( splitstr[0] == '/' || 
-			     splitstr[0] == '\'' || 
-			     splitstr[0] == '"' )
+			if ( (splitstr[0] == '/'  || 
+			      splitstr[0] == '\'' || 
+			      splitstr[0] == '"'    ) &&
+			     strchr( splitstr+1, splitstr[0] ) )
 			    sprintf( tmpbuf1, "@F=split(%s);", splitstr );
-			else
-			    sprintf( tmpbuf1, "@F=split('%s');", splitstr );
+			else {
+			    s = "'~#\200\1'"; /* surely one char is unused...*/
+			    while (s[1] && strchr(splitstr, *s))  s++;
+			    sprintf( tmpbuf1, "@F=split(%s%c%s%c);",
+				     "q" + (*s == '\''), *s, splitstr, *s );
+			}
 			sv_catpv(linestr,tmpbuf1);
 		    }
 		    else
