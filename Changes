@@ -79,6 +79,93 @@ Version 5.005_63        Development release working toward 5.6
 ----------------
 
 ____________________________________________________________________________
+[  4665] By: gsar                                  on 1999/12/08  02:22:31
+        Log: introduce save_I8() for saving byte values
+     Branch: perl
+	   ! embed.h embed.pl global.sym objXSUB.h perlapi.c proto.h
+	   ! regcomp.c regexec.c scope.c scope.h sv.c
+____________________________________________________________________________
+[  4664] By: gsar                                  on 1999/12/08  02:02:33
+        Log: use SAVEINT() rather than SAVEDESTRUCTOR() for saving PL_expect etc.
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[  4663] By: gsar                                  on 1999/12/08  01:11:44
+        Log: longstanding typo in lexer: PL_lex_expect was not properly
+             saved on reentry
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[  4662] By: gsar                                  on 1999/12/07  23:16:21
+        Log: typos in change#4546
+     Branch: perl
+	   ! ext/B/B.xs ext/B/B/Bytecode.pm ext/B/B/C.pm sv.c
+____________________________________________________________________________
+[  4661] By: gsar                                  on 1999/12/07  09:33:50
+        Log: typos in change#4660
+     Branch: perl
+	   ! embed.h embed.pl objXSUB.h perl.h perlapi.c pp_sys.c proto.h
+____________________________________________________________________________
+[  4660] By: gsar                                  on 1999/12/06  23:42:55
+        Log: tweaks for building with -DUSE_ITHREADS on !WIN32 platforms;
+             fix bug where lc($readonly) could result in bogus errors
+     Branch: perl
+	   ! embed.h embed.pl iperlsys.h makedef.pl objXSUB.h perlapi.c
+	   ! pp.c pp_sys.c proto.h sv.c
+____________________________________________________________________________
+[  4659] By: gsar                                  on 1999/12/06  15:24:31
+        Log: allow IRIX 6.5 to build perl (from Helmut Jarausch
+             <jarausch@igpm.rwth-aachen.de>)
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[  4658] By: gsar                                  on 1999/12/06  15:18:30
+        Log: fix for -Dp via $^D (suggested by Stephane Payrard
+             <stef@adnaccess.com>)
+     Branch: perl
+	   ! mg.c
+____________________________________________________________________________
+[  4657] By: gsar                                  on 1999/12/06  06:50:01
+        Log: change#4641 needs perldiag.pod edit
+     Branch: perl
+	   - lib/unicode/UnicodeData-Latest.txt
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[  4656] By: gsar                                  on 1999/12/06  01:36:56
+        Log: Makefile tweak for change#4649
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  4655] By: gsar                                  on 1999/12/05  17:23:57
+        Log: change#4653 was missing a patch reject
+     Branch: perl
+	   ! win32/makefile.mk
+____________________________________________________________________________
+[  4654] By: gsar                                  on 1999/12/05  11:41:04
+        Log: windows build tweaks for Borland compiler
+     Branch: perl
+	   ! win32/makefile.mk win32/perlhost.h win32/win32.c win32/win32.h
+____________________________________________________________________________
+[  4653] By: gsar                                  on 1999/12/05  11:07:37
+        Log: applied somewhat modified version of suggested patch
+             From: "Benjamin Stuhl" <sho_pi@hotmail.com>
+             Date: Thu, 18 Nov 1999 18:45:27 PST
+             Message-ID: <19991119024527.72749.qmail@hotmail.com>
+             Subject: [PATCH 5.005_62] Perl on Win95, Mark IIB
+     Branch: perl
+	   + win32/PerlCRT.def win32/gstartup.c win32/oldnames.def
+	   ! MANIFEST ext/SDBM_File/Makefile.PL lib/ExtUtils/MM_Unix.pm
+	   ! lib/ExtUtils/MM_Win32.pm win32/config_sh.PL win32/genmk95.pl
+	   ! win32/makefile.mk win32/win32.h
+____________________________________________________________________________
+[  4652] By: gsar                                  on 1999/12/05  09:24:45
+        Log: From: Mike Hopkirk (hops) <hops@scoot.pdev.sco.com>
+             Date: Thu, 4 Nov 1999 16:34:23 -0800 (PST)
+             Message-Id: <199911050034.QAA06499@scoot.pdev.sco.com>
+             Subject: [ID 19991104.005] modified hints file for UnixWare7 ( svr5)
+     Branch: perl
+	   ! Changes hints/svr5.sh
+____________________________________________________________________________
 [  4651] By: gsar                                  on 1999/12/05  09:01:19
         Log: on dosish platforms, avoid infinite recursion in File::Path::mkpath()
              when given non-existent drive names

@@ -936,8 +936,10 @@ in C<[]>, which will match any one character from the list.  If the
 first character after the "[" is "^", the class matches any character not
 in the list.  Within a list, the "-" character specifies a
 range, so that C<a-z> represents all characters between "a" and "z",
-inclusive.  If you want "-" itself to be a member of a class, put it
-at the start or end of the list, or escape it with a backslash.  (The
+inclusive.  If you want either "-" or "]" itself to be a member of a
+class, put it at the start of the list (possibly after a "^"), or
+escape it with a backslash.  "-" is also taken literally when it is
+at the end of the list, just before the closing "]".  (The
 following all specify the same class of three characters: C<[-az]>,
 C<[az-]>, and C<[a\-z]>.  All are different from C<[a-z]>, which
 specifies a class containing twenty-six characters.)

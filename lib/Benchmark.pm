@@ -2,17 +2,7 @@ package Benchmark;
 
 =head1 NAME
 
-Benchmark - benchmark running times of code
-
-timethis - run a chunk of code several times
-
-timethese - run several chunks of code several times
-
-cmpthese - print results of timethese as a comparison chart
-
-timeit - run a chunk of code and see how long it goes
-
-countit - see how many times a chunk of code runs in a given time
+Benchmark - benchmark running times of Perl code
 
 =head1 SYNOPSIS
 
@@ -62,6 +52,17 @@ countit - see how many times a chunk of code runs in a given time
 
 The Benchmark module encapsulates a number of routines to help you
 figure out how long it takes to execute some code.
+
+timethis - run a chunk of code several times
+
+timethese - run several chunks of code several times
+
+cmpthese - print results of timethese as a comparison chart
+
+timeit - run a chunk of code and see how long it goes
+
+countit - see how many times a chunk of code runs in a given time
+
 
 =head2 Methods
 
@@ -322,6 +323,10 @@ The system time of the null loop might be slightly
 more than the system time of the loop with the actual
 code and therefore the difference might end up being E<lt> 0.
 
+=head1 SEE ALSO
+
+L<Devel::DProf> - a Perl code profiler
+
 =head1 AUTHORS
 
 Jarkko Hietaniemi <F<jhi@iki.fi>>, Tim Bunce <F<Tim.Bunce@ig.co.uk>>
@@ -356,6 +361,8 @@ use Exporter;
 @EXPORT=qw(timeit timethis timethese timediff timestr);
 @EXPORT_OK=qw(timesum cmpthese countit
 	      clearcache clearallcache disablecache enablecache);
+
+$VERSION = 1.00;
 
 &init;
 
