@@ -1987,7 +1987,7 @@ PP(pp_subst)
 	doutf8 = DO_UTF8(dstr);
 	/* replacement needing upgrading? */
 	if (DO_UTF8(TARG) && !doutf8) {
-	     SV *nsv = newSVpvn(c, clen);
+	     SV *nsv = sv_2mortal(newSVpvn(c, clen));
 	     if (PL_encoding)
 		  sv_recode_to_utf8(nsv, PL_encoding);
 	     else
