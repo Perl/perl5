@@ -987,6 +987,7 @@ pipe_exit_routine()
     info = open_pipes;
 
     while (info) {
+      int need_eof;
       _ckvmssts(SYS$SETAST(0));
       need_eof = info->mode != 'r' && !info->done;
       _ckvmssts(SYS$SETAST(1));
