@@ -1,10 +1,7 @@
 #############################################################################
 # Pod/Parser.pm -- package which defines a base class for parsing POD docs.
 #
-# Based on Tom Christiansen's Pod::Text module
-# (with extensive modifications).
-#
-# Copyright (C) 1996-1999 Tom Christiansen. All rights reserved.
+# Copyright (C) 1996-1999 by Bradford Appleton. All rights reserved.
 # This file is part of "PodParser". PodParser is free software;
 # you can redistribute it and/or modify it under the same terms
 # as Perl itself.
@@ -13,7 +10,7 @@
 package Pod::Parser;
 
 use vars qw($VERSION);
-$VERSION = 1.081;  ## Current version of this package
+$VERSION = 1.085;  ## Current version of this package
 require  5.004;    ## requires this Perl version or later
 
 #############################################################################
@@ -145,6 +142,50 @@ For the most part, the B<Pod::Parser> base class should be able to
 do most of the input parsing for you and leave you free to worry about
 how to intepret the commands and translate the result.
 
+Note that all we have described here in this quick overview overview is
+the simplest most striaghtforward use of B<Pod::Parser> to do stream-based
+parsing. It is also possible to use the B<Pod::Parser::parse_text> function
+to do more sophisticated tree-based parsing. See L<"TREE-BASED PARSING">.
+
+=head1 PARSING OPTIONS
+
+A I<parse-option> is simply a named option of B<Pod::Parser> with a
+value that corresponds to a certain specified behavior. These various
+behaviors of B<Pod::Parser> may be enabled/disabled by setting or
+or unsetting one or more I<parse-options> using the B<parseopts()> method.
+The set of currently accepted parse-options is as follows:
+
+=over 3
+
+=item B<-want_nonPODs> (default: unset)
+
+Normally (by default) B<Pod::Parser> will only provide access to
+the POD sections of the input. Input paragraphs that are not part
+of the POD-format documentation are not made available to the caller
+(not even using B<preprocess_paragraph()>). Setting this option to a
+non-empty, non-zero value will allow B<preprocess_paragraph()> to see
+non-POD sectioins of the input as well as POD sections. The B<cutting()>
+method can be used to determine if the corresponding paragraph is a POD
+paragraph, or some other input paragraph.
+
+=item B<-process_cut_cmd> (default: unset)
+
+Normally (by default) B<Pod::Parser> handles the C<=cut> POD directive
+by itself and does not pass it on to the caller for processing. Setting
+this option to non-empty, non-zero value will cause B<Pod::Parser> to
+pass the C<=cut> directive to the caller just like any other POD command
+(and hence it may be processed by the B<command()> method).
+
+B<Pod::Parser> will still interpret the C<=cut> directive to mean that
+"cutting mode" has been (re)entered, but the caller will get a chance
+to capture the actual C<=cut> paragraph itself for whatever purpose
+it desires.
+
+=back
+
+Please see L<"parseopts()"> for a complete description of the interface
+for the setting and unsetting of parse-options.
+
 =cut
 
 #############################################################################
@@ -159,7 +200,7 @@ use Exporter;
 @ISA = qw(Exporter);
 
 ## These "variables" are used as local "glob aliases" for performance
-use vars qw(%myData @input_stack);
+use vars qw(%myData %myOpts @input_stack);
 
 #############################################################################
 
@@ -574,8 +615,9 @@ sub preprocess_paragraph {
 =head1 METHODS FOR PARSING AND PROCESSING
 
 B<Pod::Parser> provides several methods to process input text. These
-methods typically won't need to be overridden, but subclasses may want
-to invoke them to exploit their functionality.
+methods typically won't need to be overridden (and in some cases they
+can't be overridden), but subclasses may want to invoke them to exploit
+their functionality.
 
 =cut
 
@@ -629,6 +671,31 @@ is a reference to the interior-sequence object.
 [I<NOTE>: If the B<interior_sequence()> method is specified, then it is
 invoked according to the interface specified in L<"interior_sequence()">].
 
+=item B<-expand_text> =E<gt> I<code-ref>|I<method-name>
+
+Normally, the parse-tree returned by B<parse_text()> will contain a
+text-string for each contiguous sequence of characters outside of an
+interior-sequence. Specifying B<-expand_text> tells B<parse_text()> to
+"preprocess" every such text-string it sees by invoking the referenced
+function (or named method of the parser object) and using the return value
+as the preprocessed (or "expanded") result. [Note that if the result is
+an interior-sequence, then it will I<not> be expanded as specified by the
+B<-expand_seq> option; Any such recursive expansion needs to be handled by
+the specified callback routine.]
+
+If a subroutine reference was given, it is invoked as:
+
+  &$code_ref( $parser, $text, $ptree_node )
+
+and if a method-name was given, it is invoked as:
+
+  $parser->method_name( $text, $ptree_node )
+
+where C<$parser> is a reference to the parser object, C<$text> is the
+text-string encountered, and C<$ptree_node> is a reference to the current
+node in the parse-tree (usually an interior-sequence object or else the
+top-level node of the parse-tree).
+
 =item B<-expand_ptree> =E<gt> I<code-ref>|I<method-name>
 
 Rather than returning a C<Pod::ParseTree>, pass the parse-tree as an
@@ -652,10 +719,10 @@ is a reference to the parse-tree object.
 
 ## This global regex is used to see if the text before a '>' inside
 ## an interior sequence looks like '-' or '=', but not '--', '==',
-## '$-', or '$='
+## '!=', '$-', '$=' or <<op>>=
 use vars qw( $ARROW_RE );
-$ARROW_RE = join('', qw{ (?: [^-+*/=!&|%^x.<>$]= | [^$-]- )$ });  
-#$ARROW_RE = qr/(?:[^=]+=|[^-]+-)$/;  ## 5.005+ only!
+$ARROW_RE = join('', qw{ (?: [^-+*/=!&|%^x.<>$]= | [^-$]- )$ });
+#$ARROW_RE = qr/(?:[^-+*/=!&|%^x.<>$]+=|[^-$]+-)$/;  ## 5.005+ only!
 
 sub parse_text {
     my $self = shift;
@@ -664,6 +731,7 @@ sub parse_text {
     ## Get options and set any defaults
     my %opts = (ref $_[0]) ? %{ shift() } : ();
     my $expand_seq   = $opts{'-expand_seq'}   || undef;
+    my $expand_text  = $opts{'-expand_text'}  || undef;
     my $expand_ptree = $opts{'-expand_ptree'} || undef;
 
     my $text = shift;
@@ -673,6 +741,7 @@ sub parse_text {
 
     ## Convert method calls into closures, for our convenience
     my $xseq_sub   = $expand_seq;
+    my $xtext_sub  = $expand_text;
     my $xptree_sub = $expand_ptree;
     if (defined $expand_seq  and  $expand_seq eq 'interior_sequence') {
         ## If 'interior_sequence' is the method to use, we have to pass
@@ -685,6 +754,7 @@ sub parse_text {
         };
     }
     ref $xseq_sub    or  $xseq_sub   = sub { shift()->$expand_seq(@_) };
+    ref $xtext_sub   or  $xtext_sub  = sub { shift()->$expand_text(@_) };
     ref $xptree_sub  or  $xptree_sub = sub { shift()->$expand_ptree(@_) };
     
     ## Keep track of the "current" interior sequence, and maintain a stack
@@ -729,19 +799,24 @@ sub parse_text {
             ## Remember the current cmd-name
             $cmd = (@seq_stack > 1) ? $seq_stack[-1]->name : '';
         }
-        else {
-            ## In the middle of a sequence, append this text to it
-            $seq->append($_)  if length;
+        elsif (length) {
+            ## In the middle of a sequence, append this text to it, and
+            ## dont forget to "expand" it if that's what the caller wanted
+            $seq->append($expand_text ? &$xtext_sub($self,$_,$seq) : $_);
         }
         ## Remember the "current" sequence and the previously seen token
         ($seq, $prev) = ( $seq_stack[-1], $_ );
     }
 
     ## Handle unterminated sequences
+    my $errorsub = (@seq_stack > 1) ? $self->errorsub() : undef;
     while (@seq_stack > 1) {
        ($cmd, $file, $line) = ($seq->name, $seq->file_line);
        pop @seq_stack;
-       warn "** Unterminated $cmd<...> at $file line $line\n";
+       my $errmsg = "** Unterminated $cmd<...> at $file line $line\n";
+       (ref $errorsub) and &{$errorsub}($errmsg)
+           or (defined $errmsg) and $self->$errorsub($errmsg)
+               or  warn($errmsg);
        $seq_stack[-1]->append($expand_seq ? &$xseq_sub($self,$seq) : $seq);
        $seq = $seq_stack[-1];
     }
@@ -788,7 +863,8 @@ This method takes the text of a POD paragraph to be processed, along
 with its corresponding line number, and invokes the appropriate method
 (one of B<command()>, B<verbatim()>, or B<textblock()>).
 
-This method does I<not> usually need to be overridden by subclasses.
+For performance reasons, this method is invoked directly without any
+dynamic lookup; Hence subclasses may I<not> override it!
 
 =end __PRIVATE__
 
@@ -796,8 +872,15 @@ This method does I<not> usually need to be overridden by subclasses.
 
 sub parse_paragraph {
     my ($self, $text, $line_num) = @_;
-    local *myData = $self;  ## an alias to avoid deref-ing overhead
+    local *myData = $self;  ## alias to avoid deref-ing overhead
+    local *myOpts = ($myData{_PARSEOPTS} ||= {});  ## get parse-options
     local $_;
+
+    ## See if we want to preprocess nonPOD paragraphs as well as POD ones.
+    my $wantNonPods = $myOpts{'-want_nonPODs'} || 0;
+
+    ## Perform any desired preprocessing if we wanted it this early
+    $wantNonPods  and  $text = $self->preprocess_paragraph($text, $line_num);
 
     ## This is the end of a non-empty paragraph
     ## Ignore up until next POD directive if we are cutting
@@ -822,10 +905,13 @@ sub parse_paragraph {
         $self->is_selected($text)  or  return ($myData{_CUTTING} = 1);
     }
 
-    ## Perform any desired preprocessing and re-check the "cutting" state
-    $text = $self->preprocess_paragraph($text, $line_num);
-    return 1  unless ((defined $text) and (length $text));
-    return 1  if ($myData{_CUTTING});
+    ## If we havent already, perform any desired preprocessing and
+    ## then re-check the "cutting" state
+    unless ($wantNonPods) {
+       $text = $self->preprocess_paragraph($text, $line_num);
+       return 1  unless ((defined $text) and (length $text));
+       return 1  if ($myData{_CUTTING});
+    }
 
     ## Look for one of the three types of paragraphs
     my ($pfx, $cmd, $arg, $sep) = ('', '', '', '');
@@ -842,7 +928,7 @@ sub parse_paragraph {
         ## except return to "cutting" mode.
         if ($cmd eq 'cut') {
            $myData{_CUTTING} = 1;
-           return;
+           return  unless $myOpts{'-process_cut_cmd'};
         }
     }
     ## Save the attributes indicating how the command was specified.
@@ -1097,6 +1183,35 @@ instance data fields:
 
 ##---------------------------------------------------------------------------
 
+=head1 B<errorsub()>
+
+            $parser->errorsub("method_name");
+            $parser->errorsub(\&warn_user);
+            $parser->errorsub(sub { print STDERR, @_ });
+
+Specifies the method or subroutine to use when printing error messages
+about POD syntax. The supplied method/subroutine I<must> return TRUE upon
+successful printing of the message. If C<undef> is given, then the B<warn>
+builtin is used to issue error messages (this is the default behavior).
+
+            my $errorsub = $parser->errorsub()
+            my $errmsg = "This is an error message!\n"
+            (ref $errorsub) and &{$errorsub}($errmsg)
+                or (defined $errmsg) and $parser->$errorsub($errmsg)
+                    or  warn($errmsg);
+
+Returns a method name, or else a reference to the user-supplied subroutine
+used to print error messages. Returns C<undef> if the B<warn> builtin
+is used to issue error messages (this is the default behavior).
+
+=cut
+
+sub errorsub {
+   return (@_ > 1) ? ($_[0]->{_ERRORSUB} = $_[1]) : $_[0]->{_ERRORSUB};
+}
+
+##---------------------------------------------------------------------------
+
 =head1 B<cutting()>
 
             $boolean = $parser->cutting();
@@ -1114,6 +1229,58 @@ result.
 
 sub cutting {
    return (@_ > 1) ? ($_[0]->{_CUTTING} = $_[1]) : $_[0]->{_CUTTING};
+}
+
+##---------------------------------------------------------------------------
+
+##---------------------------------------------------------------------------
+
+=head1 B<parseopts()>
+
+When invoked with no additional arguments, B<parseopts> returns a hashtable
+of all the current parsing options.
+
+            ## See if we are parsing non-POD sections as well as POD ones
+            my %opts = $parser->parseopts();
+            $opts{'-want_nonPODs}' and print "-want_nonPODs\n";
+
+When invoked using a single string, B<parseopts> treats the string as the
+name of a parse-option and returns its corresponding value if it exists
+(returns C<undef> if it doesn't).
+
+            ## Did we ask to see '=cut' paragraphs?
+            my $want_cut = $parser->parseopts('-process_cut_cmd');
+            $want_cut and print "-process_cut_cmd\n";
+
+When invoked with multiple arguments, B<parseopts> treats them as
+key/value pairs and the specified parse-option names are set to the
+given values. Any unspecified parse-options are unaffected.
+
+            ## Set them back to the default
+            $parser->parseopts(-process_cut_cmd => 0);
+
+When passed a single hash-ref, B<parseopts> uses that hash to completely
+reset the existing parse-options, all previous parse-option values
+are lost.
+
+            ## Reset all options to default 
+            $parser->parseopts( { } );
+
+See L<"PARSING OPTIONS"> for more for the name and meaning of each
+parse-option currently recognized.
+
+=cut
+
+sub parseopts {
+   local *myData = shift;
+   local *myOpts = ($myData{_PARSEOPTS} ||= {});
+   return %myOpts  if (@_ == 0);
+   if (@_ == 1) {
+      local $_ = shift;
+      return  ref($_)  ?  $myData{_PARSEOPTS} = $_  :  $myOpts{$_};
+   }
+   my @newOpts = (%myOpts, @_);
+   $myData{_PARSEOPTS} = { @newOpts };
 }
 
 ##---------------------------------------------------------------------------
@@ -1360,6 +1527,159 @@ sub _pop_input_stream {
 }
 
 #############################################################################
+
+=head1 TREE-BASED PARSING
+
+If straightforward stream-based parsing wont meet your needs (as is
+likely the case for tasks such as translating PODs into structured
+markup languages like HTML and XML) then you may need to take the
+tree-based approach. Rather than doing everything in one pass and
+calling the B<interpolate()> method to expand sequences into text, it
+may be desirable to instead create a parse-tree using the B<parse_text()>
+method to return a tree-like structure which may contain an ordered list
+list of children (each of which may be a text-string, or a similar
+tree-like structure).
+
+Pay special attention to L<"METHODS FOR PARSING AND PROCESSING"> and
+to the objects described in L<Pod::InputObjects>. The former describes
+the gory details and parameters for how to customize and extend the
+parsing behavior of B<Pod::Parser>. B<Pod::InputObjects> provides
+several objects that may all be used interchangeably as parse-trees. The
+most obvious one is the B<Pod::ParseTree> object. It defines the basic
+interface and functionality that all things trying to be a POD parse-tree
+should do. A B<Pod::ParseTree> is defined such that each "node" may be a
+text-string, or a reference to another parse-tree.  Each B<Pod::Paragraph>
+object and each B<Pod::InteriorSequence> object also supports the basic
+parse-tree interface.
+
+The B<parse_text()> method takes a given paragraph of text, and
+returns a parse-tree that contains one or more children, each of which
+may be a text-string, or an InteriorSequence object. There are also
+callback-options that may be passed to B<parse_text()> to customize
+the way it expands or transforms interior-sequences, as well as the
+returned result. These callbacks can be used to create a parse-tree
+with custom-made objects (which may or may not support the parse-tree
+interface, depending on how you choose to do it).
+
+If you wish to turn an entire POD document into a parse-tree, that process
+is fairly straightforward. The B<parse_text()> method is the key to doing
+this successfully. Every paragraph-callback (i.e. the polymorphic methods
+for B<command()>, B<verbatim()>, and B<textblock()> paragraphs) takes
+a B<Pod::Paragraph> object as an argument. Each paragraph object has a
+B<parse_tree()> method that can be used to get or set a corresponding
+parse-tree. So for each of those paragraph-callback methods, simply call
+B<parse_text()> with the options you desire, and then use the returned
+parse-tree to assign to the given paragraph object.
+
+That gives you a parse-tree for each paragraph - so now all you need is
+an ordered list of paragraphs. You can maintain that yourself as a data
+element in the object/hash. The most straightforward way would be simply
+to use an array-ref, with the desired set of custom "options" for each
+invocation of B<parse_text>. Let's assume the desired option-set is
+given by the hash C<%options>. Then we might do something like the
+following:
+
+    package MyPodParserTree;
+
+    @ISA = qw( Pod::Parser );
+
+    ...
+
+    sub begin_pod {
+        my $self = shift;
+        $self->{'-paragraphs'} = [];  ## initialize paragraph list
+    }
+
+    sub command { 
+        my ($parser, $command, $paragraph, $line_num, $pod_para) = @_;
+        my $ptree = $parser->parse_text({%options}, $paragraph, ...);
+        $pod_para->parse_tree( $ptree );
+        push @{ $self->{'-paragraphs'} }, $pod_para;
+    }
+
+    sub verbatim { 
+        my ($parser, $paragraph, $line_num, $pod_para) = @_;
+        push @{ $self->{'-paragraphs'} }, $pod_para;
+    }
+
+    sub textblock { 
+        my ($parser, $paragraph, $line_num, $pod_para) = @_;
+        my $ptree = $parser->parse_text({%options}, $paragraph, ...);
+        $pod_para->parse_tree( $ptree );
+        push @{ $self->{'-paragraphs'} }, $pod_para;
+    }
+
+    ...
+
+    package main;
+    ...
+    my $parser = new MyPodParserTree(...);
+    $parser->parse_from_file(...);
+    my $paragraphs_ref = $parser->{'-paragraphs'};
+
+Of course, in this module-author's humble opinion, I'd be more inclined to
+use the existing B<Pod::ParseTree> object than a simple array. That way
+everything in it, paragraphs and sequences, all respond to the same core
+interface for all parse-tree nodes. The result would look something like:
+
+    package MyPodParserTree2;
+
+    ...
+
+    sub begin_pod {
+        my $self = shift;
+        $self->{'-ptree'} = new Pod::ParseTree;  ## initialize parse-tree
+    }
+
+    sub parse_tree {
+        ## convenience method to get/set the parse-tree for the entire POD
+        (@_ > 1)  and  $_[0]->{'-ptree'} = $_[1];
+        return $_[0]->{'-ptree'};
+    }
+
+    sub command { 
+        my ($parser, $command, $paragraph, $line_num, $pod_para) = @_;
+        my $ptree = $parser->parse_text({<<options>>}, $paragraph, ...);
+        $pod_para->parse_tree( $ptree );
+        $parser->parse_tree()->append( $pod_para );
+    }
+
+    sub verbatim { 
+        my ($parser, $paragraph, $line_num, $pod_para) = @_;
+        $parser->parse_tree()->append( $pod_para );
+    }
+
+    sub textblock { 
+        my ($parser, $paragraph, $line_num, $pod_para) = @_;
+        my $ptree = $parser->parse_text({<<options>>}, $paragraph, ...);
+        $pod_para->parse_tree( $ptree );
+        $parser->parse_tree()->append( $pod_para );
+    }
+
+    ...
+
+    package main;
+    ...
+    my $parser = new MyPodParserTree2(...);
+    $parser->parse_from_file(...);
+    my $ptree = $parser->parse_tree;
+    ...
+
+Now you have the entire POD document as one great big parse-tree. You
+can even use the B<-expand_seq> option to B<parse_text> to insert
+whole different kinds of objects. Just don't expect B<Pod::Parser>
+to know what to do with them after that. That will need to be in your
+code. Or, alternatively, you can insert any object you like so long as
+it conforms to the B<Pod::ParseTree> interface.
+
+One could use this to create subclasses of B<Pod::Paragraphs> and
+B<Pod::InteriorSequences> for specific commands (or to create your own
+custom node-types in the parse-tree) and add some kind of B<emit()>
+method to each custom node/subclass object in the tree. Then all you'd
+need to do is recursively walk the tree in the desired order, processing
+the children (most likely from left to right) by formatting them if
+they are text-strings, or by calling their B<emit()> method if they
+are objects/references.
 
 =head1 SEE ALSO
 

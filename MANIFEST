@@ -1344,14 +1344,20 @@ t/pod/included.t	Test =include directive
 t/pod/included.xr	Expected results for included.t
 t/pod/lref.t		Test L<...> sequences
 t/pod/lref.xr		Expected results for lref.t
+t/pod/multiline_items.t	Test multiline =items
+t/pod/multiline_items.xr	Test multiline =items
 t/pod/nested_items.t	Test nested =items
 t/pod/nested_items.xr	Expected results for nested_items.t
 t/pod/nested_seqs.t	Test nested interior sequences
 t/pod/nested_seqs.xr	Expected results for nested_seqs.t
 t/pod/oneline_cmds.t	Test single paragraph ==cmds
 t/pod/oneline_cmds.xr	Expected results for oneline_cmds.t
+t/pod/pod2usage.t	Test Pod::Usage
+t/pod/pod2usage.xr	Expected results for pod2usage.t
 t/pod/poderrs.t		Test POD errors
 t/pod/poderrs.xr	Expected results for emptycmd.t
+t/pod/podselect.t	Test Pod::Select
+t/pod/podselect.xr	Expected results for podselect.t
 t/pod/special_seqs.t	Test "special" interior sequences
 t/pod/special_seqs.xr	Expected results for emptycmd.t
 t/pod/testcmp.pl	Module to compare output against expected results

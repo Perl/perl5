@@ -13,8 +13,6 @@ BEGIN {
    push @INC, map { File::Spec->catfile($_, 'lib') } ($PARENTDIR, $THISDIR);
 }
 
-use Pod::PlainText;
-use vars qw(@ISA @EXPORT $MYPKG);
 #use strict;
 #use diagnostics;
 use Carp;
@@ -22,13 +20,23 @@ use Exporter;
 #use File::Compare;
 #use Cwd qw(abs_path);
 
-@ISA = qw(Pod::PlainText);
-@EXPORT = qw(&testpodplaintext);
+use vars qw($MYPKG @EXPORT @ISA);
 $MYPKG = eval { (caller)[0] };
+@EXPORT = qw(&testpodplaintext);
+BEGIN {
+    if ( $] >= 5.005_58 ) {
+       require Pod::Text;
+       @ISA = qw( Pod::Text );
+    }
+    else {
+       require Pod::PlainText;
+       @ISA = qw( Pod::PlainText );
+    }
+}
 
 ## Hardcode settings for TERMCAP and COLUMNS so we can try to get
 ## reproducible results between environments
-@ENV{qw(TERMCAP COLUMNS)} = ('co=72:do=^J', 72);
+@ENV{qw(TERMCAP COLUMNS)} = ('co=76:do=^J', 76);
 
 sub catfile(@) { File::Spec->catfile(@_); }
 
