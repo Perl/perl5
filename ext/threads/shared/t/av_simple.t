@@ -104,7 +104,7 @@ ok(37, delete($foo[0]) == undef, "Check that delete works from a thread");
 @foo = (1,2,3,4,5);
 
 {
-    my ($t1,$t2) = @foo[2,3]; 
+    my ($t1,$t2) = @foo[2,3];
     ok(38, $t1 == 3, "Check slice");
     ok(39, $t2 == 4, "Check slice again");
     my @t1 = @foo[1...4];
@@ -117,5 +117,5 @@ ok(37, delete($foo[0]) == undef, "Check that delete works from a thread");
     eval {
 	my @t1 = splice(@foo,0,2,"hop", "hej");
     };
-    ok(43, my $temp1 = $@ =~/Splice is not implmented for shared arrays/, "Check that the warning message is correct for non splice");
+    ok(43, my $temp1 = $@ =~/Splice not implemented for shared arrays/, "Check that the warning message is correct for non splice");
 }

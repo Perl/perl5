@@ -36,6 +36,13 @@ sub share_disabled { return @_}
 
 $threads::shared::threads_shared = 1;
 
+sub _thrcnt { 42 }
+
+sub threads::shared::tie::SPLICE
+{
+ die "Splice not implemented for shared arrays";
+}
+
 
 __END__
 

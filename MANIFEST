@@ -604,6 +604,7 @@ ext/threads/shared/Makefile.PL  thread shared variables
 ext/threads/shared/README       thread shared variables
 ext/threads/shared/shared.pm    thread shared variables
 ext/threads/shared/shared.xs    thread shared variables
+ext/threads/shared/t/0nothread.t	Tests for basic shared array functionality.
 ext/threads/shared/t/av_simple.t	Tests for basic shared array functionality.
 ext/threads/shared/t/hv_refs.t	Test shared hashes containing references
 ext/threads/shared/t/hv_simple.t	Tests for basic shared hash functionality.
