@@ -6,7 +6,7 @@ BEGIN {
     require "./test.pl";
 }
 
-plan tests => 47;
+plan 'no_plan';
 
 use_ok('Config');
 
@@ -40,7 +40,7 @@ ok(!exists $Config{d_bork},  "has no d_bork");
 
 like($Config{ivsize},     qr/^(4|8)$/, "ivsize is 4 or 8 (it is $Config{ivsize})");
 
-# byteorder is virtual, but it has rules. 
+# byteorder is virtual, but it has rules.
 
 like($Config{byteorder}, qr/^(1234|4321|12345678|87654321)$/, "byteorder is 1234 or 4321 or 12345678 or 87654321 (it is $Config{byteorder})");
 
@@ -64,8 +64,9 @@ ok(exists $Config{ccflags_nolargefiles}, "has ccflags_nolargefiles");
 
 like(Config::myconfig(),       qr/osname=\Q$Config{osname}\E/,   "myconfig");
 like(Config::config_sh(),      qr/osname='\Q$Config{osname}\E'/, "config_sh");
-like(join("\n", Config::config_re('c.*')),
-			       qr/^c.*?=/,                   'config_re' );
+foreach my $line (Config::config_re('c.*')) {
+  like($line,                  qr/^c.*?=.*$/,                   'config_re' );
+}
 
 my $out = tie *STDOUT, 'FakeOut';
 
