@@ -601,7 +601,7 @@ PP(pp_sort)
 	    sortcop = CvSTART(cv);
 	    SAVESPTR(CvROOT(cv)->op_ppaddr);
 	    CvROOT(cv)->op_ppaddr = ppaddr[OP_NULL];
-	    
+
 	    SAVESPTR(curpad);
 	    curpad = AvARRAY((AV*)AvARRAY(CvPADLIST(cv))[1]);
 	}
@@ -648,7 +648,16 @@ PP(pp_sort)
 
 	    SAVESPTR(GvSV(firstgv));
 	    SAVESPTR(GvSV(secondgv));
+
 	    PUSHBLOCK(cx, CXt_NULL, stack_base);
+	    if (!(op->op_flags & OPf_SPECIAL)) {
+		bool hasargs = FALSE;
+		cx->cx_type = CXt_SUB;
+		cx->blk_gimme = G_SCALAR;
+		PUSHSUB(cx);
+		if (!CvDEPTH(cv))
+		    SvREFCNT_inc(cv);	/* in preparation for POPSUB */
+	    }
 	    sortcxix = cxstack_ix;
 
 	    qsort((char*)(myorigmark+1), max, sizeof(SV*), sortcv);
@@ -1356,7 +1365,7 @@ PP(pp_return)
     I32 optype = 0;
 
     if (curstack == sortstack) {
-	if (cxstack_ix == sortcxix || dopoptosub(cxstack_ix) < sortcxix) {
+	if (cxstack_ix == sortcxix || dopoptosub(cxstack_ix) <= sortcxix) {
 	    if (cxstack_ix > sortcxix)
 		dounwind(sortcxix);
 	    AvARRAY(curstack)[1] = *SP;
@@ -1803,9 +1812,6 @@ PP(pp_goto)
 	for (ix = cxstack_ix; ix >= 0; ix--) {
 	    cx = &cxstack[ix];
 	    switch (cx->cx_type) {
-	    case CXt_SUB:
-		gotoprobe = CvROOT(cx->blk_sub.cv);
-		break;
 	    case CXt_EVAL:
 		gotoprobe = eval_root; /* XXX not good for nested eval */
 		break;
@@ -1820,6 +1826,12 @@ PP(pp_goto)
 		else
 		    gotoprobe = main_root;
 		break;
+	    case CXt_SUB:
+		if (CvDEPTH(cx->blk_sub.cv)) {
+		    gotoprobe = CvROOT(cx->blk_sub.cv);
+		    break;
+		}
+		/* FALL THROUGH */
 	    case CXt_NULL:
 		DIE("Can't \"goto\" outside a block");
 	    default:
