@@ -4598,9 +4598,9 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 
     cv = (!name || GvCVGEN(gv)) ? Nullcv : GvCV(gv);
 
-#ifdef GV_SHARED_CHECK
-    if (cv && GvSHARED(gv) && SvREADONLY(cv)) {
-        Perl_croak(aTHX_ "Can't define subroutine %s (GV is shared)", name);
+#ifdef GV_UNIQUE_CHECK
+    if (cv && GvUNIQUE(gv) && SvREADONLY(cv)) {
+        Perl_croak(aTHX_ "Can't define subroutine %s (GV is unique)", name);
     }
 #endif
 
@@ -4612,9 +4612,9 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     if (cv) {
         bool exists = CvROOT(cv) || CvXSUB(cv);
 
-#ifdef GV_SHARED_CHECK
-        if (exists && GvSHARED(gv)) {
-            Perl_croak(aTHX_ "Can't redefine shared subroutine %s", name);
+#ifdef GV_UNIQUE_CHECK
+        if (exists && GvUNIQUE(gv)) {
+            Perl_croak(aTHX_ "Can't redefine unique subroutine %s", name);
         }
 #endif
 
@@ -5102,9 +5102,9 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
     else
 	name = "STDOUT";
     gv = gv_fetchpv(name,TRUE, SVt_PVFM);
-#ifdef GV_SHARED_CHECK
-    if (GvSHARED(gv)) {
-        Perl_croak(aTHX_ "Bad symbol for form (GV is shared)");
+#ifdef GV_UNIQUE_CHECK
+    if (GvUNIQUE(gv)) {
+        Perl_croak(aTHX_ "Bad symbol for form (GV is unique)");
     }
 #endif
     GvMULTI_on(gv);

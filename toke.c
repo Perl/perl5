@@ -3092,7 +3092,7 @@ Perl_yylex(pTHX)
 			CvMETHOD_on(PL_compcv);
 #ifdef USE_ITHREADS
       else if (PL_in_my == KEY_our && len == 6 && strnEQ(s, "unique", len))
-			GvSHARED_on(cGVOPx_gv(yylval.opval));
+			GvUNIQUE_on(cGVOPx_gv(yylval.opval));
 #endif
 		    /* After we've set the flags, it could be argued that
 		       we don't need to do the attributes.pm-based setting

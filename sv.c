@@ -3613,8 +3613,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		Perl_croak(aTHX_ "Can't redefine active sort subroutine %s",
 		      GvNAME(dstr));
 
-#ifdef GV_SHARED_CHECK
-                if (GvSHARED((GV*)dstr)) {
+#ifdef GV_UNIQUE_CHECK
+                if (GvUNIQUE((GV*)dstr)) {
                     Perl_croak(aTHX_ PL_no_modify);
                 }
 #endif
@@ -3659,8 +3659,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		SV *dref = 0;
 		int intro = GvINTRO(dstr);
 
-#ifdef GV_SHARED_CHECK
-                if (GvSHARED((GV*)dstr)) {
+#ifdef GV_UNIQUE_CHECK
+                if (GvUNIQUE((GV*)dstr)) {
                     Perl_croak(aTHX_ PL_no_modify);
                 }
 #endif
@@ -8636,7 +8636,7 @@ S_gv_share(pTHX_ SV *sstr)
     SV *sv = &PL_sv_no; /* just need SvREADONLY-ness */
 
     if (GvIO(gv) || GvFORM(gv)) {
-        GvSHARED_off(gv); /* GvIOs cannot be shared. nor can GvFORMs */
+        GvUNIQUE_off(gv); /* GvIOs cannot be shared. nor can GvFORMs */
     }
     else if (!GvCV(gv)) {
         GvCV(gv) = (CV*)sv;
@@ -8644,11 +8644,11 @@ S_gv_share(pTHX_ SV *sstr)
     else {
         /* CvPADLISTs cannot be shared */
         if (!CvXSUB(GvCV(gv))) {
-            GvSHARED_off(gv);
+            GvUNIQUE_off(gv);
         }
     }
 
-    if (!GvSHARED(gv)) {
+    if (!GvUNIQUE(gv)) {
 #if 0
         PerlIO_printf(Perl_debug_log, "gv_share: unable to share %s::%s\n",
                       HvNAME(GvSTASH(gv)), GvNAME(gv));
@@ -8832,7 +8832,7 @@ Perl_sv_dup(pTHX_ SV *sstr, clone_params* param)
 	LvTYPE(dstr)	= LvTYPE(sstr);
 	break;
     case SVt_PVGV:
-	if (GvSHARED((GV*)sstr)) {
+	if (GvUNIQUE((GV*)sstr)) {
             SV *share;
             if ((share = gv_share(sstr))) {
                 del_SV(dstr);
