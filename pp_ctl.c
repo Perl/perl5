@@ -302,8 +302,13 @@ PP(pp_formline)
     bool item_is_utf = FALSE;
 
     if (!SvMAGICAL(tmpForm) || !SvCOMPILED(tmpForm)) {
-	SvREADONLY_off(tmpForm);
-	doparseform(tmpForm);
+	if (SvREADONLY(tmpForm)) {
+	    SvREADONLY_off(tmpForm);
+	    doparseform(tmpForm);
+	    SvREADONLY_on(tmpForm);
+	}
+	else
+	    doparseform(tmpForm);
     }
 
     SvPV_force(PL_formtarget, len);
