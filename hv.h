@@ -144,8 +144,8 @@ C<SV*>.
 /* The number of placeholders in the enumerated-keys hash */
 #define XHvPLACEHOLDERS(xhv)	((xhv)->xhv_placeholders)
 
-/* the number of keys that exist() (i.e. excluding placeholers) */
-#define XHvUSEDKEYS(xhv)      (XHvTOTALKEYS(xhv) - XHvPLACEHOLDERS(xhv))
+/* the number of keys that exist() (i.e. excluding placeholders) */
+#define XHvUSEDKEYS(xhv)      (XHvTOTALKEYS(xhv) - (IV)XHvPLACEHOLDERS(xhv))
 
 /*
  * HvKEYS gets the number of keys that actually exist(), and is provided
