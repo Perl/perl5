@@ -1863,7 +1863,7 @@ The exact meaning of the $gcos field varies but it usually contains
 the real name of the user (as opposed to the login name) and other
 information pertaining to the user.  Beware, however, that in many
 system users are able to change this information and therefore it
-cannot be trusted and therefore the $gcos is is tainted (see
+cannot be trusted and therefore the $gcos is tainted (see
 L<perlsec>).  The $passwd and $shell, user's encrypted password and
 login shell, are also tainted, because of the same reason.
 
@@ -2810,7 +2810,7 @@ otherwise it's necessary to protect any leading and trailing whitespace:
     open(FOO, "< $file\0");
 
 (this may not work on some bizzare filesystems).  One should
-conscientiously choose between the the I<magic> and 3-arguments form
+conscientiously choose between the I<magic> and 3-arguments form
 of open():
 
     open IN, $ARGV[0];
@@ -3927,7 +3927,7 @@ GETALL, then ARG must be a variable which will hold the returned
 semid_ds structure or semaphore value array.  Returns like C<ioctl>:
 the undefined value for error, "C<0 but true>" for zero, or the actual
 return value otherwise.  The ARG must consist of a vector of native
-short integers, which may may be created with C<pack("s!",(0)x$nsem)>.
+short integers, which may be created with C<pack("s!",(0)x$nsem)>.
 See also C<IPC::SysV> and C<IPC::Semaphore> documentation.
 
 =item semget KEY,NSEMS,FLAGS

@@ -863,7 +863,7 @@ See Time::HiRes.
 
 =head2 autocroak?
 
-This is the Fatal.pm module, so any builtin that that does
+This is the Fatal.pm module, so any builtin that does
 not return success automatically die()s.  If you're feeling brave, tie
 this in with the unified exceptions scheme.
 

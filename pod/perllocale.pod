@@ -289,7 +289,7 @@ than the PERL_BADLANG approach, but setting LC_ALL (or
 other locale variables) may affect other programs as well, not just
 Perl.  In particular, external programs run from within Perl will see
 these changes.  If you make the new settings permanent (read on), all
-programs you run see the changes.  See L<ENVIRONMENT> for for
+programs you run see the changes.  See L<ENVIRONMENT> for
 the full list of relevant environment variables and L<USING LOCALES>
 for their effects in Perl.  Effects in other programs are 
 easily deducible.  For example, the variable LC_COLLATE may well affect
