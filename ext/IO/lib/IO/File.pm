@@ -108,7 +108,6 @@ use vars qw($VERSION @EXPORT @EXPORT_OK $AUTOLOAD @ISA);
 use Carp;
 use Symbol;
 use SelectSaver;
-use IO::Handle qw(_open_mode_string);
 use IO::Seekable;
 
 require Exporter;
@@ -116,7 +115,7 @@ require DynaLoader;
 
 @ISA = qw(IO::Handle IO::Seekable Exporter DynaLoader);
 
-$VERSION = "1.06";
+$VERSION = "1.0601";
 
 @EXPORT = @IO::Seekable::EXPORT;
 
@@ -166,8 +165,8 @@ sub open {
 	    defined $perms or $perms = 0666;
 	    return sysopen($fh, $file, $mode, $perms);
 	}
-        $file = "./" . $file unless $file =~ m#^/#;
-	$file = _open_mode_string($mode) . " $file\0";
+	$file = './' . $file unless substr($file, 0, 1) eq '/';
+	$file = IO::Handle::_open_mode_string($mode) . " $file\0";
     }
     open($fh, $file);
 }

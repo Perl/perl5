@@ -58,16 +58,6 @@ to the caller.
 
 =head1 METHODS
 
-If the C function setvbuf() is available, then C<IO::Handle::setvbuf>
-sets the buffering policy for the IO::Handle.  The calling sequence
-for the Perl function is the same as its C counterpart, including the
-macros C<_IOFBF>, C<_IOLBF>, and C<_IONBF>, except that the buffer
-parameter specifies a scalar variable to use as a buffer.  WARNING: A
-variable used as a buffer by C<IO::Handle::setvbuf> must not be
-modified in any way until the IO::Handle is closed or until
-C<IO::Handle::setvbuf> is called again, or memory corruption may
-result!
-
 See L<perlfunc> for complete descriptions of each of the following
 supported C<IO::Handle> methods, which are just front ends for the
 corresponding built-in functions:
@@ -105,6 +95,16 @@ Furthermore, for doing normal I/O you might need these:
 
 =over 
 
+=item $fh->fdopen ( FD, MODE )
+
+C<fdopen> is like an ordinary C<open> except that its first parameter
+is not a filename but rather a file handle name, a IO::Handle object,
+or a file descriptor number.
+
+=item $fh->opened
+
+Returns true if the object is currently a valid file descriptor.
+
 =item $fh->getline
 
 This works like <$fh> described in L<perlop/"I/O Operators">
@@ -117,25 +117,44 @@ This works like <$fh> when called in an array context to
 read all the remaining lines in a file, except that it's more readable.
 It will also croak() if accidentally called in a scalar context.
 
-=item $fh->fdopen ( FD, MODE )
+=item $fh->ungetc ( ORD )
 
-C<fdopen> is like an ordinary C<open> except that its first parameter
-is not a filename but rather a file handle name, a IO::Handle object,
-or a file descriptor number.
+Pushes a character with the given ordinal value back onto the given
+handle's input stream.
 
 =item $fh->write ( BUF, LEN [, OFFSET }\] )
 
-C<write> is like C<write> found in C, that is it is the
+This C<write> is like C<write> found in C, that is it is the
 opposite of read. The wrapper for the perl C<write> function is
 called C<format_write>.
 
-=item $fh->opened
+=item $fh->flush
 
-Returns true if the object is currently a valid file descriptor.
+Flush the given handle's buffer.
+
+=item $fh->error
+
+Returns a true value if the given handle has experienced any errors
+since it was opened or since the last call to C<clearerr>.
+
+=item $fh->clearerr
+
+Clear the given handle's error indicator.
 
 =back
 
-Lastly, a special method for working under B<-T> and setuid/gid scripts:
+If the C functions setbuf() and/or setvbuf() are available, then
+C<IO::Handle::setbuf> and C<IO::Handle::setvbuf> set the buffering
+policy for an IO::Handle.  The calling sequences for the Perl functions
+are the same as their C counterparts--including the constants C<_IOFBF>,
+C<_IOLBF>, and C<_IONBF> for setvbuf()--except that the buffer parameter
+specifies a scalar variable to use as a buffer.  WARNING: A variable
+used as a buffer by C<setbuf> or C<setvbuf> must not be modified in any
+way until the IO::Handle is closed or C<setbuf> or C<setvbuf> is called
+again, or memory corruption may result!
+
+Lastly, there is a special method for working under B<-T> and setuid/gid
+scripts:
 
 =over
 
@@ -186,7 +205,7 @@ use SelectSaver;
 require Exporter;
 @ISA = qw(Exporter);
 
-$VERSION = "1.1503";
+$VERSION = "1.1504";
 $XS_VERSION = "1.15";
 
 @EXPORT_OK = qw(
@@ -215,8 +234,6 @@ $XS_VERSION = "1.15";
     _IOFBF
     _IOLBF
     _IONBF
-
-    _open_mode_string
 );
 
 
