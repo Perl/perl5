@@ -3476,7 +3476,7 @@ PP(pp_unpack)
 		    s += sizeof(unsigned Quad_t);
 		}
 		sv = NEWSV(43, 0);
-		if (aquad <= UV_MAX)
+		if (auquad <= UV_MAX)
 		    sv_setuv(sv, (UV)auquad);
 		else
 		    sv_setnv(sv, (double)auquad);
