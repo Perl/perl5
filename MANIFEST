@@ -2325,10 +2325,12 @@ win32/buildext.pl		Build extensions once miniperl is built
 win32/config.bc			Win32 base line config.sh (Borland C++ build)
 win32/config.gc			Win32 base line config.sh (mingw32/gcc build)
 win32/config.vc			Win32 base line config.sh (Visual C++ build)
+win32/config.win64		Win64 base line config.sh (MS IA64 compiler)
 win32/config_H.bc		Win32 config header (Borland C++ build)
 win32/config_H.gc		Win32 config header (GNU build)?
 win32/config_h.PL		Perl code to convert Win32 config.sh to config.h
 win32/config_H.vc		Win32 config header (Visual C++ build)
+win32/config_H.win64		Win64 config header (MS IA64 compiler)
 win32/config_sh.PL		Perl code to update Win32 config.sh from Makefile
 win32/des_fcrypt.patch		Win32 port
 win32/distclean.bat		Remove _ALL_ files not listed here in MANIFEST
@@ -2341,6 +2343,7 @@ win32/include/netdb.h		Win32 port
 win32/include/sys/socket.h	Win32 port
 win32/Makefile			Win32 makefile for NMAKE (Visual C++ build)
 win32/makefile.mk		Win32 makefile for DMAKE (BC++, VC++ builds)
+win32/Makefile.win64		Win64 makefile for NMAKE (MS IA64 compiler)
 win32/mdelete.bat		multifile delete
 win32/perlglob.c		Win32 port
 win32/perlhost.h		Perl "host" implementation
