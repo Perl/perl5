@@ -2749,10 +2749,13 @@ sub ppd {
     push(@m, "\t\@\$(PERL) -e \"print qq{<SOFTPKG NAME=\\\"$self->{DISTNAME}\\\" VERSION=\\\"$pack_ver\\\">\\n}");
     push(@m, ". qq{\\t<TITLE>$self->{DISTNAME}</TITLE>\\n}");
     my $abstract = $self->{ABSTRACT};
+    $abstract =~ s/\n/\\n/sg;
     $abstract =~ s/</&lt;/g;
     $abstract =~ s/>/&gt;/g;
     push(@m, ". qq{\\t<ABSTRACT>$abstract</ABSTRACT>\\n}");
     my ($author) = $self->{AUTHOR};
+    $author =~ s/</&lt;/g;
+    $author =~ s/>/&gt;/g;
     $author =~ s/@/\\@/g;
     push(@m, ". qq{\\t<AUTHOR>$author</AUTHOR>\\n}");
     push(@m, ". qq{\\t<IMPLEMENTATION>\\n}");
@@ -2892,13 +2895,18 @@ sub processPL {
     return "" unless $self->{PL_FILES};
     my(@m, $plfile);
     foreach $plfile (sort keys %{$self->{PL_FILES}}) {
+        my $list = ref($self->{PL_FILES}->{$plfile})
+		? $self->{PL_FILES}->{$plfile}
+		: [$self->{PL_FILES}->{$plfile}];
+	foreach $target (@$list) {
 	push @m, "
-all :: $self->{PL_FILES}->{$plfile}
+all :: $target
 	$self->{NOECHO}\$(NOOP)
 
-$self->{PL_FILES}->{$plfile} :: $plfile
-	\$(PERL) -I\$(INST_ARCHLIB) -I\$(INST_LIB) -I\$(PERL_ARCHLIB) -I\$(PERL_LIB) $plfile
+$target :: $plfile
+	\$(PERL) -I\$(INST_ARCHLIB) -I\$(INST_LIB) -I\$(PERL_ARCHLIB) -I\$(PERL_LIB) $plfile $target
 ";
+	}
     }
     join "", @m;
 }
