@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Feb 21 17:01:28 EET 2001 [metaconfig 3.0 PL70]
+# Generated on Thu Feb 22 15:00:27 EET 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -5293,26 +5293,26 @@ esac
 $rm -f try.* try
 
 case "$useperlio" in
-$define|true|[yY]*)	dflt='y';;
+$define|true|[yY]*|'')	dflt='y';;
 *) dflt='n';;
 esac
 cat <<EOM
 
 Previous version of $package used the standard IO mechanisms as
-defined in <stdio.h>.  Versions 5.003_02 and later of perl allow
+defined in <stdio.h>.  Versions 5.003_02 and later of $package allow
 alternate IO mechanisms via the PerlIO abstraction layer, but the
-stdio mechanism is still the default.  This abstraction layer can
-use AT&T's sfio (if you already have sfio installed) or regular stdio.
+stdio mechanism is still available if needed.  The abstraction layer
+can use AT&T's sfio (if you already have sfio installed) or regular stdio.
 Using PerlIO with sfio may cause problems with some extension modules.
 
 If this doesn't make any sense to you, just accept the default '$dflt'.
 EOM
-rp='Use the experimental PerlIO abstraction layer?'
+rp='Use the PerlIO abstraction layer?'
 . ./myread
 case "$ans" in
 y|Y) 
 	val="$define"
-	;;     
+	;;
 *)      
 	echo "Ok, doing things the stdio way."
 	val="$undef"
