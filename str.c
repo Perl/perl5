@@ -1,11 +1,15 @@
-/* $RCSfile: str.c,v $$Revision: 4.0.1.1 $$Date: 91/04/12 09:15:30 $
+/* $RCSfile: str.c,v $$Revision: 4.0.1.2 $$Date: 91/06/07 11:58:13 $
  *
- *    Copyright (c) 1989, Larry Wall
+ *    Copyright (c) 1991, Larry Wall
  *
- *    You may distribute under the terms of the GNU General Public License
- *    as specified in the README file that comes with the perl 3.0 kit.
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	str.c,v $
+ * Revision 4.0.1.2  91/06/07  11:58:13  lwall
+ * patch4: new copyright notice
+ * patch4: taint check on undefined string could cause core dump
+ * 
  * Revision 4.0.1.1  91/04/12  09:15:30  lwall
  * patch1: fixed undefined environ problem
  * patch1: substr($ENV{"PATH"},0,0) = "/foo:" didn't modify environment
@@ -369,11 +373,11 @@ str_scat(dstr,sstr)
 STR *dstr;
 register STR *sstr;
 {
+    if (!sstr)
+	return;
 #ifdef TAINT
     tainted |= sstr->str_tainted;
 #endif
-    if (!sstr)
-	return;
     if (!(sstr->str_pok))
 	(void)str_2ptr(sstr);
     if (sstr)

@@ -1,10 +1,12 @@
 #!./perl
 
-# $Header: stat.t,v 4.0 91/03/20 01:54:55 lwall Locked $
+# $RCSfile: stat.t,v $$Revision: 4.0.1.1 $$Date: 91/06/07 12:02:42 $
 
 print "1..56\n";
 
 chop($cwd = `pwd`);
+
+$DEV = `ls -l /dev`;
 
 unlink "Op.stat.tmp";
 open(foo, ">Op.stat.tmp");
@@ -81,16 +83,25 @@ if (-e 'Op.stat.tmp') {print "ok 27\n";} else {print "not ok 27\n";}
 `rm -f Op.stat.tmp Op.stat.tmp2`;
 if (! -e 'Op.stat.tmp') {print "ok 28\n";} else {print "not ok 28\n";}
 
-if (-c '/dev/tty') {print "ok 29\n";} else {print "not ok 29\n";}
+if ($DEV !~ /\nc.* (\S+)\n/)
+    {print "ok 29\n";}
+elsif (-c "/dev/$1")
+    {print "ok 29\n";}
+else
+    {print "not ok 29\n";}
 if (! -c '.') {print "ok 30\n";} else {print "not ok 30\n";}
 
-if (! -e '/dev/printer' || -c '/dev/printer' || -S '/dev/printer')
+if ($DEV !~ /\ns.* (\S+)\n/)
+    {print "ok 31\n";}
+elsif (-S "/dev/$1")
     {print "ok 31\n";}
 else
     {print "not ok 31\n";}
 if (! -S '.') {print "ok 32\n";} else {print "not ok 32\n";}
 
-if (! -e '/dev/mt0' || -b '/dev/mt0')
+if ($DEV !~ /\nb.* (\S+)\n/)
+    {print "ok 33\n";}
+elsif (-b "/dev/$1")
     {print "ok 33\n";}
 else
     {print "not ok 33\n";}

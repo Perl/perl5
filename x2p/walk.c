@@ -1,11 +1,15 @@
-/* $Header: walk.c,v 4.0 91/03/20 01:58:36 lwall Locked $
+/* $RCSfile: walk.c,v $$Revision: 4.0.1.1 $$Date: 91/06/07 12:22:04 $
  *
- *    Copyright (c) 1989, Larry Wall
+ *    Copyright (c) 1991, Larry Wall
  *
- *    You may distribute under the terms of the GNU General Public License
- *    as specified in the README file that comes with the perl 3.0 kit.
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	walk.c,v $
+ * Revision 4.0.1.1  91/06/07  12:22:04  lwall
+ * patch4: new copyright notice
+ * patch4: a2p didn't correctly implement -n switch
+ * 
  * Revision 4.0  91/03/20  01:58:36  lwall
  * 4.0 baseline.
  * 
@@ -22,6 +26,7 @@ bool saw_getline = FALSE;
 bool subretnum = FALSE;
 bool saw_FNR = FALSE;
 bool saw_argv0 = FALSE;
+bool saw_fh = FALSE;
 int maxtmp = 0;
 char *lparen;
 char *rparen;
@@ -60,6 +65,20 @@ int minprec;			/* minimum precedence without parens */
     type &= 255;
     switch (type) {
     case OPROG:
+	arymax = 0;
+	if (namelist) {
+	    while (isalpha(*namelist)) {
+		for (d = tokenbuf,s=namelist;
+		  isalpha(*s) || isdigit(*s) || *s == '_';
+		  *d++ = *s++) ;
+		*d = '\0';
+		while (*s && !isalpha(*s)) s++;
+		namelist = s;
+		nameary[++arymax] = savestr(tokenbuf);
+	    }
+	}
+	if (maxfld < arymax)
+	    maxfld = arymax;
 	opens = str_new(0);
 	subs = str_new(0);
 	str = walk(0,level,ops[node+1].ival,&numarg,P_MIN);
@@ -115,20 +134,6 @@ int minprec;			/* minimum precedence without parens */
 		str_cat(str,"chop;\t# strip record separator\n");
 		tab(str,level);
 	    }
-	    arymax = 0;
-	    if (namelist) {
-		while (isalpha(*namelist)) {
-		    for (d = tokenbuf,s=namelist;
-		      isalpha(*s) || isdigit(*s) || *s == '_';
-		      *d++ = *s++) ;
-		    *d = '\0';
-		    while (*s && !isalpha(*s)) s++;
-		    namelist = s;
-		    nameary[++arymax] = savestr(tokenbuf);
-		}
-	    }
-	    if (maxfld < arymax)
-		maxfld = arymax;
 	    if (do_split)
 		emit_split(str,level);
 	    str_scat(str,fstr);
@@ -584,11 +589,13 @@ sub Pick {\n\
 		s = savestr(tokenbuf);
 		for (t = tokenbuf; *t; t++) {
 		    *t &= 127;
+		    if (islower(*t))
+			*t = toupper(*t);
 		    if (!isalpha(*t) && !isdigit(*t))
 			*t = '_';
 		}
 		if (!index(tokenbuf,'_'))
-		    strcpy(t,"_fh");
+		    strcpy(t,"_FH");
 		tmp3str = hfetch(symtab,tokenbuf);
 		if (!tmp3str) {
 		    do_opens = TRUE;
@@ -1110,11 +1117,13 @@ sub Pick {\n\
 	    s = savestr(tokenbuf);
 	    for (t = tokenbuf; *t; t++) {
 		*t &= 127;
+		if (islower(*t))
+		    *t = toupper(*t);
 		if (!isalpha(*t) && !isdigit(*t))
 		    *t = '_';
 	    }
 	    if (!index(tokenbuf,'_'))
-		strcpy(t,"_fh");
+		strcpy(t,"_FH");
 	    str_free(tmpstr);
 	    safefree(s);
 	    str_set(str,"close ");
@@ -1145,11 +1154,13 @@ sub Pick {\n\
 		s = savestr(tokenbuf);
 		for (t = tokenbuf; *t; t++) {
 		    *t &= 127;
+		    if (islower(*t))
+			*t = toupper(*t);
 		    if (!isalpha(*t) && !isdigit(*t))
 			*t = '_';
 		}
 		if (!index(tokenbuf,'_'))
-		    strcpy(t,"_fh");
+		    strcpy(t,"_FH");
 		tmp3str = hfetch(symtab,tokenbuf);
 		if (!tmp3str) {
 		    str_cat(opens,"open(");
@@ -1195,9 +1206,12 @@ sub Pick {\n\
 	    str_cat(str,"printf");
 	else
 	    str_cat(str,"print");
+	saw_fh = 0;
 	if (len == 3 || do_fancy_opens) {
-	    if (*tokenbuf)
+	    if (*tokenbuf) {
 		str_cat(str," ");
+		saw_fh = 1;
+	    }
 	    str_cat(str,tokenbuf);
 	}
 	tmpstr = walk(1+(type==OPRINT),level,ops[node+1].ival,&numarg,P_MIN);
@@ -1224,7 +1238,13 @@ sub Pick {\n\
 	}
 	if (*tmpstr->str_ptr) {
 	    str_cat(str," ");
-	    str_scat(str,tmpstr);
+	    if (!saw_fh && *tmpstr->str_ptr == '(') {
+		str_cat(str,"(");
+		str_scat(str,tmpstr);
+		str_cat(str,")");
+	    }
+	    else
+		str_scat(str,tmpstr);
 	}
 	else {
 	    str_cat(str," $_");

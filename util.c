@@ -1,11 +1,18 @@
-/* $RCSfile: util.c,v $$Revision: 4.0.1.1 $$Date: 91/04/12 09:19:25 $
+/* $RCSfile: util.c,v $$Revision: 4.0.1.2 $$Date: 91/06/07 12:10:42 $
  *
- *    Copyright (c) 1989, Larry Wall
+ *    Copyright (c) 1991, Larry Wall
  *
- *    You may distribute under the terms of the GNU General Public License
- *    as specified in the README file that comes with the perl 3.0 kit.
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	util.c,v $
+ * Revision 4.0.1.2  91/06/07  12:10:42  lwall
+ * patch4: new copyright notice
+ * patch4: made some allowances for "semi-standard" C
+ * patch4: index() could blow up searching for null string
+ * patch4: taintchecks could improperly modify parent in vfork()
+ * patch4: exec would close files even if you cleared close-on-exec flag
+ * 
  * Revision 4.0.1.1  91/04/12  09:19:25  lwall
  * patch1: random cleanup in cpp namespace
  * 
@@ -60,9 +67,9 @@ MEM_SIZE size;
 #endif /* MSDOS */
 {
     char *ptr;
-#ifndef __STDC__
+#ifndef STANDARD_C
     char *malloc();
-#endif /* ! __STDC__ */
+#endif /* ! STANDARD_C */
 
 #ifdef MSDOS
 	if (size > 0xffff) {
@@ -108,9 +115,9 @@ unsigned long size;
 #endif /* MSDOS */
 {
     char *ptr;
-#ifndef __STDC__
+#ifndef STANDARD_C
     char *realloc();
-#endif /* ! __STDC__ */
+#endif /* ! STANDARD_C */
 
 #ifdef MSDOS
 	if (size > 0xffff) {
@@ -514,9 +521,12 @@ STR *littlestr;
     register unsigned char *oldlittle;
 
 #ifndef lint
-    if (!(littlestr->str_pok & SP_FBM))
+    if (!(littlestr->str_pok & SP_FBM)) {
+	if (!littlestr->str_ptr)
+	    return (char*)big;
 	return ninstr((char*)big,(char*)bigend,
 		littlestr->str_ptr, littlestr->str_ptr + littlestr->str_cur);
+    }
 #endif
 
     littlelen = littlestr->str_cur;
@@ -851,10 +861,12 @@ va_list args;
 {
     char *pat;
     char *s;
+#ifndef HAS_VPRINTF
 #ifdef CHARVSPRINTF
     char *vsprintf();
 #else
     int vsprintf();
+#endif
 #endif
 
     s = buf;
@@ -1196,6 +1208,12 @@ char	*mode;
 	return Nullfp;
     this = (*mode == 'w');
     that = !this;
+#ifdef TAINT
+    if (doexec) {
+	taintenv();
+	taintproper("Insecure dependency in exec");
+    }
+#endif
     while ((pid = (doexec?vfork():fork())) < 0) {
 	if (errno != EAGAIN) {
 	    close(p[this]);
@@ -1214,13 +1232,13 @@ char	*mode;
 	    close(p[THIS]);
 	}
 	if (doexec) {
-#if !defined(I_FCNTL) || !defined(F_SETFD)
+#if !defined(HAS_FCNTL) || !defined(F_SETFD)
 	    int fd;
 
 #ifndef NOFILE
 #define NOFILE 20
 #endif
-	    for (fd = 3; fd < NOFILE; fd++)
+	    for (fd = maxsysfd + 1; fd < NOFILE; fd++)
 		close(fd);
 #endif
 	    do_exec(cmd);	/* may or may not use the shell */
@@ -1273,7 +1291,7 @@ int newfd;
     close(newfd);
     fcntl(oldfd, F_DUPFD, newfd);
 #else
-    int fdtmp[20];
+    int fdtmp[256];
     int fdx = 0;
     int fd;
 

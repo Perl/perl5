@@ -1,11 +1,15 @@
-/* $Header: stab.h,v 4.0 91/03/20 01:39:49 lwall Locked $
+/* $RCSfile: stab.h,v $$Revision: 4.0.1.1 $$Date: 91/06/07 11:56:35 $
  *
- *    Copyright (c) 1989, Larry Wall
+ *    Copyright (c) 1991, Larry Wall
  *
- *    You may distribute under the terms of the GNU General Public License
- *    as specified in the README file that comes with the perl 3.0 kit.
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	stab.h,v $
+ * Revision 4.0.1.1  91/06/07  11:56:35  lwall
+ * patch4: new copyright notice
+ * patch4: length($`), length($&), length($') now optimized to avoid string copy
+ * 
  * Revision 4.0  91/03/20  01:39:49  lwall
  * 4.0 baseline.
  * 
@@ -93,7 +97,10 @@ struct sub {
 
 #define Nullstab Null(STAB*)
 
+STRLEN stab_len();
+
 #define STAB_STR(s) (tmpstab = (s), stab_flags(tmpstab) & SF_VMAGIC ? stab_str(stab_val(tmpstab)->str_magic) : stab_val(tmpstab))
+#define STAB_LEN(s) (tmpstab = (s), stab_flags(tmpstab) & SF_VMAGIC ? stab_len(stab_val(tmpstab)->str_magic) : stab_val(tmpstab)->str_cur)
 #define STAB_GET(s) (tmpstab = (s), str_get(stab_flags(tmpstab) & SF_VMAGIC ? stab_str(tmpstab->str_magic) : stab_val(tmpstab)))
 #define STAB_GNUM(s) (tmpstab = (s), str_gnum(stab_flags(tmpstab) & SF_VMAGIC ? stab_str(tmpstab->str_magic) : stab_val(tmpstab)))
 

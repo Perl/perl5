@@ -1,11 +1,17 @@
-/* $RCSfile: toke.c,v $$Revision: 4.0.1.1 $$Date: 91/04/12 09:18:18 $
+/* $RCSfile: toke.c,v $$Revision: 4.0.1.2 $$Date: 91/06/07 12:05:56 $
  *
- *    Copyright (c) 1989, Larry Wall
+ *    Copyright (c) 1991, Larry Wall
  *
- *    You may distribute under the terms of the GNU General Public License
- *    as specified in the README file that comes with the perl 3.0 kit.
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	toke.c,v $
+ * Revision 4.0.1.2  91/06/07  12:05:56  lwall
+ * patch4: new copyright notice
+ * patch4: debugger lost track of lines in eval
+ * patch4: //o and s///o now optimize themselves fully at runtime
+ * patch4: added global modifier for pattern matches
+ * 
  * Revision 4.0.1.1  91/04/12  09:18:18  lwall
  * patch1: perl -de "print" wouldn't stop at the first statement
  * 
@@ -23,6 +29,10 @@
 #endif
 #ifdef I_SYS_FILE
 #include <sys/file.h>
+#endif
+
+#ifdef f_next
+#undef f_next
 #endif
 
 /* which backslash sequences to keep in m// or s// */
@@ -326,13 +336,6 @@ yylex()
 		s++;
 	    if (s < d)
 		s++;
-	    if (perldb) {
-		STR *str = Str_new(85,0);
-
-		str_nset(str,linestr->str_ptr, s - linestr->str_ptr);
-		astore(stab_xarray(curcmd->c_filestab),(int)curcmd->c_line,str);
-		str_chop(linestr, s);
-	    }
 	    if (in_format) {
 		bufptr = s;
 		yylval.formval = load_format();
@@ -947,7 +950,7 @@ yylex()
 	if (strEQ(d,"oct"))
 	    UNI(O_OCT);
 	if (strEQ(d,"opendir"))
-	    FOP2(O_OPENDIR);
+	    FOP2(O_OPEN_DIR);
 	break;
     case 'p': case 'P':
 	SNARFWORD;
@@ -1417,7 +1420,8 @@ char *dest;
 }
 
 STR *
-scanconst(string,len)
+scanconst(spat,string,len)
+SPAT *spat;
 char *string;
 int len;
 {
@@ -1425,10 +1429,13 @@ int len;
     register char *t;
     register char *d;
     register char *e;
+    char *origstring = string;
+    static char *vert = "|";
 
-    if (index(string,'|')) {
+    if (ninstr(string, string+len, vert, vert+1))
 	return Nullstr;
-    }
+    if (*string == '^')
+	string++, len--;
     retstr = Str_new(86,len);
     str_nset(retstr,string,len);
     t = str_get(retstr);
@@ -1488,6 +1495,12 @@ int len;
     }
     *d = '\0';
     retstr->str_cur = d - t;
+    if (d == t+len)
+	spat->spat_flags |= SPAT_ALL;
+    if (*origstring != '^')
+	spat->spat_flags |= SPAT_SCANFIRST;
+    spat->spat_short = retstr;
+    spat->spat_slen = d - t;
     return retstr;
 }
 
@@ -1526,7 +1539,7 @@ register char *s;
 	return s;
     }
     s++;
-    while (*s == 'i' || *s == 'o') {
+    while (*s == 'i' || *s == 'o' || *s == 'g') {
 	if (*s == 'i') {
 	    s++;
 	    sawi = TRUE;
@@ -1535,6 +1548,10 @@ register char *s;
 	if (*s == 'o') {
 	    s++;
 	    spat->spat_flags |= SPAT_KEEP;
+	}
+	if (*s == 'g') {
+	    s++;
+	    spat->spat_flags |= SPAT_GLOBAL;
 	}
     }
     len = str->str_cur;
@@ -1575,23 +1592,7 @@ register char *s;
 #else
 	(void)bcopy((char *)spat, (char *)&savespat, sizeof(SPAT));
 #endif
-    if (*str->str_ptr == '^') {
-	spat->spat_short = scanconst(str->str_ptr+1,len-1);
-	if (spat->spat_short) {
-	    spat->spat_slen = spat->spat_short->str_cur;
-	    if (spat->spat_slen == len - 1)
-		spat->spat_flags |= SPAT_ALL;
-	}
-    }
-    else {
-	spat->spat_flags |= SPAT_SCANFIRST;
-	spat->spat_short = scanconst(str->str_ptr,len);
-	if (spat->spat_short) {
-	    spat->spat_slen = spat->spat_short->str_cur;
-	    if (spat->spat_slen == len)
-		spat->spat_flags |= SPAT_ALL;
-	}
-    }	
+    scanconst(spat,str->str_ptr,len);
     if ((spat->spat_flags & SPAT_ALL) && (spat->spat_flags & SPAT_SCANFIRST)) {
 	fbmcompile(spat->spat_short, spat->spat_flags & SPAT_FOLD);
 	spat->spat_regexp = regcomp(str->str_ptr,str->str_ptr+len,
@@ -1670,17 +1671,7 @@ register char *s;
 	    goto get_repl;		/* skip compiling for now */
 	}
     }
-    if (*str->str_ptr == '^') {
-	spat->spat_short = scanconst(str->str_ptr+1,len-1);
-	if (spat->spat_short)
-	    spat->spat_slen = spat->spat_short->str_cur;
-    }
-    else {
-	spat->spat_flags |= SPAT_SCANFIRST;
-	spat->spat_short = scanconst(str->str_ptr,len);
-	if (spat->spat_short)
-	    spat->spat_slen = spat->spat_short->str_cur;
-    }
+    scanconst(spat,str->str_ptr,len);
 get_repl:
     s = scanstr(s);
     if (s >= bufend) {
@@ -1690,7 +1681,6 @@ get_repl:
 	return s;
     }
     spat->spat_repl = yylval.arg;
-    spat->spat_flags |= SPAT_ONCE;
     if ((spat->spat_repl[1].arg_type & A_MASK) == A_SINGLE)
 	spat->spat_flags |= SPAT_CONST;
     else if ((spat->spat_repl[1].arg_type & A_MASK) == A_DOUBLE) {
@@ -1719,7 +1709,7 @@ get_repl:
 	}
 	if (*s == 'g') {
 	    s++;
-	    spat->spat_flags &= ~SPAT_ONCE;
+	    spat->spat_flags |= SPAT_GLOBAL;
 	}
 	if (*s == 'i') {
 	    s++;
@@ -1751,7 +1741,14 @@ get_repl:
 hoistmust(spat)
 register SPAT *spat;
 {
-    if (spat->spat_regexp->regmust) {	/* is there a better short-circuit? */
+    if (!spat->spat_short && spat->spat_regexp->regstart &&
+	(!spat->spat_regexp->regmust || spat->spat_regexp->reganch & ROPT_ANCH)
+       ) {
+	spat->spat_short = spat->spat_regexp->regstart;
+	if (!(spat->spat_regexp->reganch & ROPT_ANCH))
+	    spat->spat_flags |= SPAT_SCANFIRST;
+    }
+    else if (spat->spat_regexp->regmust) {/* is there a better short-circuit? */
 	if (spat->spat_short &&
 	  str_eq(spat->spat_short,spat->spat_regexp->regmust))
 	{
@@ -2119,6 +2116,7 @@ register char *s;
 	    STR *tmpstr;
 	    char *tmps;
 
+	    CLINE;
 	    multi_start = curcmd->c_line;
 	    if (hereis)
 		multi_open = multi_close = '<';

@@ -2,26 +2,35 @@
 			Perl Kit, Version 4.0
 
 		Copyright (c) 1989,1990,1991, Larry Wall
+			  All rights reserved.
 
     This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 1, or (at your option)
-    any later version.
+    it under the terms of either:
+    
+	a) the GNU General Public License as published by the Free
+	Software Foundation; either version 1, or (at your option) any
+	later version, or
+
+	b) the "Artistic License" which comes with this Kit.
 
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See either
+    the GNU General Public License or the Artistic License for more details.
 
-    You should have received a copy of the GNU General Public License
+    You should have received a copy of the Artistic License with this
+    Kit, in the file named "Artistic".  If not, I'll be glad to provide one.
+
+    You should also have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    My interpretation of the GNU General Public License is that no Perl
-    script falls under the terms of the License unless you explicitly put
-    said script under the terms of the License yourself.  Furthermore, any
+    For those of you that choose to use the GNU General Public License,
+    my interpretation of the GNU General Public License is that no Perl
+    script falls under the terms of the GPL unless you explicitly put
+    said script under the terms of the GPL yourself.  Furthermore, any
     object code linked with uperl.o does not automatically fall under the
-    terms of the License, provided such object code only adds definitions
+    terms of the GPL, provided such object code only adds definitions
     of subroutines and variables, and does not otherwise impair the
     resulting interpreter from executing any standard Perl script.  I
     consider linking in C subroutines in this manner to be the moral
@@ -31,16 +40,19 @@
     Public License.  (This is merely an alternate way of specifying input
     to the program.)  You may also sell a binary produced by the dumping of
     a running Perl script that belongs to you, provided that you provide or
-    offer to provide the Perl source as specified by the License.  (The
+    offer to provide the Perl source as specified by the GPL.  (The
     fact that a Perl interpreter and your code are in the same binary file
     is, in this case, a form of mere aggregation.)  This is my interpretation
-    of the License.  If you still have concerns or difficulties understanding
-    my intent, feel free to contact me.
+    of the GPL.  If you still have concerns or difficulties understanding
+    my intent, feel free to contact me.  Of course, the Artistic License
+    spells all this out for your protection, so you may prefer to use that.
 
 --------------------------------------------------------------------------
 
 Perl is a language that combines some of the features of C, sed, awk and shell.
-See the manual page for more hype.
+See the manual page for more hype.  There's also a Nutshell Handbook published
+by O'Reilly & Assoc.  Their U.S. number is 1-800-338-6887 (dev-nuts) and
+their international number is 1-707-829-0515.  E-mail to nuts@ora.com.
 
 Perl will probably not run on machines with a small address space.
 
@@ -107,13 +119,14 @@ Installation
     AIX/RT may need a -a switch and -DCRIPPLED_CC.
     AIX RS/6000 needs to use system malloc and avoid -O on eval.c and toke.c.
     AIX RS/6000 needs -D_NO_PROTO.
-    SUNOS 4.0.[12] needs #define fputs(str,fp) fprintf(fp,"%s",str) in perl.h
+    SUNOS 4.0.[12] needs -DFPUTS_BOTCH.
     SUNOS 3.[45] should use the system malloc.
     SGI machines may need -Ddouble="long float" and -O1.
     Vax-based systems may need to hand assemble teval.s with a -J switch.
     Ultrix on MIPS machines may need -DLANGUAGE_C.
     Ultrix 4.0 on MIPS machines may need -Olimit 2900 or so.
     Ultrix 3.[01] on MIPS needs to undefine WAITPID--the system call is busted.
+    MIPS machines need /bin before /bsd43/bin in PATH.
     MIPS machines may need to undef d_volatile.
     MIPS machines may need to turn off -O on cmd.c, perl.c and tperl.c.
     Some MIPS machines may need to undefine CASTNEGFLOAT.
@@ -164,7 +177,8 @@ Installation
 
     If possible, send in patches such that the patch program will apply them.
     Context diffs are the best, then normal diffs.  Don't send ed scripts--
-    I've probably changed my copy since the version you have.
+    I've probably changed my copy since the version you have.  It's also
+    helpful if you send the output of "uname -a".
 
     Watch for perl patches in comp.lang.perl.  Patches will generally be
     in a form usable by the patch program.  If you are just now bringing up

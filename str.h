@@ -1,11 +1,14 @@
-/* $RCSfile: str.h,v $$Revision: 4.0.1.1 $$Date: 91/04/12 09:16:12 $
+/* $RCSfile: str.h,v $$Revision: 4.0.1.2 $$Date: 91/06/07 11:58:33 $
  *
- *    Copyright (c) 1989, Larry Wall
+ *    Copyright (c) 1991, Larry Wall
  *
- *    You may distribute under the terms of the GNU General Public License
- *    as specified in the README file that comes with the perl 3.0 kit.
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	str.h,v $
+ * Revision 4.0.1.2  91/06/07  11:58:33  lwall
+ * patch4: new copyright notice
+ * 
  * Revision 4.0.1.1  91/04/12  09:16:12  lwall
  * patch1: you may now use "die" and "caller" in a signal handler
  * 
