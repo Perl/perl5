@@ -4758,6 +4758,15 @@ inconsistent results (sometimes saying C<$x[1]> is less than C<$x[2]> and
 sometimes saying the opposite, for example) the results are not
 well-defined.
 
+Because C<< <=> >> returns C<undef> when either operand is C<NaN>
+(not-a-number), and because C<sort> will trigger a fatal error unless the
+result of a comparison is defined, when sorting with a comparison function
+like C<< $a <=> $b >>, be careful about lists that might contain a C<NaN>.
+The following example takes advantage of the fact that C<NaN != NaN> to
+eliminate any C<NaN>s from the input.
+
+    @result = sort { $a <=> $b } grep { $_ == $_ } @input;
+
 =item splice ARRAY,OFFSET,LENGTH,LIST
 
 =item splice ARRAY,OFFSET,LENGTH
