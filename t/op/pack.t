@@ -14,11 +14,10 @@ my $no_signedness = $] > 5.009 ? '' :
   "Signed/unsigned pack modifiers not available on this perl";
 
 if ($] > 5.009) {
-    plan tests => 14604;
+    plan tests => 14606;
 } else {
-    plan tests => 14260;
+    plan tests => 14262;
 }
-$| = 1;
 
 use strict;
 # use warnings;
@@ -1502,6 +1501,18 @@ like ($@, qr/Not enough arguments for unpack/,
     is(scalar @a, 200,       "[perl #15288]");
     is($a[-1], "01234567\n", "[perl #15288]");
     is($a[-2], "X",          "[perl #15288]");
+}
+
+{
+    my $warning;
+    local $SIG{__WARN__} = sub {
+        $warning = $_[0];
+    };
+    my $out = pack("u99", "foo" x 99);
+    like($warning, qr/Field too wide in 'u' format in pack at /,
+         "Warn about too wide uuencode");
+    is($out, ("_" . "9F]O" x 21 . "\n") x 4 . "M" . "9F]O" x 15 . "\n",
+       "Use max width in case of too wide uuencode");
 }
 
 # checksums
