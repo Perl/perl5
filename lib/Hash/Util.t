@@ -6,7 +6,7 @@ BEGIN {
         chdir 't';
     }
 }
-use Test::More tests => 157;
+use Test::More tests => 155;
 use strict;
 
 my @Exported_Funcs;
@@ -74,21 +74,12 @@ $hash{locked} = 42;
 is( $hash{locked}, 42,  'unlock_value' );
 
 
-TODO: {
-#    local $TODO = 'assigning to a hash screws with locked keys';
-
+{
     my %hash = ( foo => 42, locked => 23 );
 
     lock_keys(%hash);
-    lock_value(%hash, 'locked');
     eval { %hash = ( wubble => 42 ) };  # we know this will bomb
-    like( $@, qr/^Attempt to clear a restricted hash/ );
-
-    eval { unlock_value(%hash, 'locked') }; # but this shouldn't
-    is( $@, '', 'unlock_value() after denied assignment' );
-
-    is_deeply( \%hash, { foo => 42, locked => 23 },
-                      'hash should not be altered by denied assignment' );
+    like( $@, qr/^Attempt to access disallowed key 'wubble'/ );
     unlock_keys(%hash);
 }
 
@@ -98,16 +89,14 @@ TODO: {
     lock_value(%hash, 'RO');
 
     eval { %hash = (KEY => 1) };
-    like( $@, qr/^Attempt to clear a restricted hash/ );
+    like( $@, qr/^Attempt to delete readonly key 'RO' from a restricted hash/ );
 }
 
-# TODO:  This should be allowed but it might require putting extra
-#        code into aassign.
 {
     my %hash = (KEY => 1, RO => 2);
     lock_keys(%hash);
     eval { %hash = (KEY => 1, RO => 2) };
-    like( $@, qr/^Attempt to clear a restricted hash/ );
+    is( $@, '');
 }
 
 

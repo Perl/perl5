@@ -3839,6 +3839,21 @@ operator is discussed in more detail in L<perlop/"I/O Operators">.
     $line = <STDIN>;
     $line = readline(*STDIN);		# same thing
 
+If readline encounters an operating system error, C<$!> will be set with the
+corresponding error message.  It can be helpful to check C<$!> when you are
+reading from filehandles you don't trust, such as a tty or a socket.  The
+following example uses the operator form of C<readline>, and takes the necessary
+steps to ensure that C<readline> was successful.
+
+    for (;;) {
+        undef $!;
+        unless (defined( $line = <> )) {
+            die $! if $!;
+            last; # reached EOF
+        }
+        # ...
+    }
+
 =item readlink EXPR
 
 =item readlink
@@ -4727,13 +4742,13 @@ If both OFFSET and LENGTH are omitted, removes everything. If OFFSET is
 past the end of the array, perl issues a warning, and splices at the
 end of the array.
 
-The following equivalences hold (assuming C<$[ == 0>):
+The following equivalences hold (assuming C<< $[ == 0 and $#a >= $i >> )
 
     push(@a,$x,$y)	splice(@a,@a,0,$x,$y)
     pop(@a)		splice(@a,-1)
     shift(@a)		splice(@a,0,1)
     unshift(@a,$x,$y)	splice(@a,0,0,$x,$y)
-    $a[$x] = $y		splice(@a,$x,1,$y)
+    $a[$i] = $y		splice(@a,$i,1,$y)
 
 Example, assuming array lengths are passed before arrays:
 

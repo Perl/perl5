@@ -97,7 +97,7 @@ PP(pp_regcomp)
 	    memNE(PM_GETRE(pm)->precomp, t, len))
 	{
 	    if (PM_GETRE(pm)) {
-		ReREFCNT_dec(PM_GETRE(pm));
+	        ReREFCNT_dec(PM_GETRE(pm));
 		PM_SETRE(pm, Null(REGEXP*));	/* crucial if regcomp aborts */
 	    }
 	    if (PL_op->op_flags & OPf_SPECIAL)
@@ -158,6 +158,15 @@ PP(pp_substcont)
     register REGEXP *rx = cx->sb_rx;
     SV *nsv = Nullsv;
 
+    { 
+      REGEXP *old = PM_GETRE(pm);
+      if(old != rx) {
+	if(old) 
+	  ReREFCNT_dec(old);
+	PM_SETRE(pm,rx);
+      }
+    }
+
     rxres_restore(&cx->sb_rxres, rx);
     RX_MATCH_UTF8_set(rx, SvUTF8(cx->sb_targ));
 
@@ -205,6 +214,7 @@ PP(pp_substcont)
 	    SvTAINT(targ);
 
 	    LEAVE_SCOPE(cx->sb_oldsave);
+	    ReREFCNT_dec(rx);
 	    POPSUBST(cx);
 	    RETURNOP(pm->op_next);
 	}
@@ -240,6 +250,7 @@ PP(pp_substcont)
 	    sv_pos_b2u(sv, &i);
 	mg->mg_len = i;
     }
+    ReREFCNT_inc(rx);
     cx->sb_rxtainted |= RX_MATCH_TAINTED(rx);
     rxres_save(&cx->sb_rxres, rx);
     RETURNOP(pm->op_pmreplstart);

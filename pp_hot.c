@@ -2156,6 +2156,7 @@ PP(pp_subst)
 	if (!c) {
 	    register PERL_CONTEXT *cx;
 	    SPAGAIN;
+	    ReREFCNT_inc(rx);
 	    PUSHSUBST(cx);
 	    RETURNOP(cPMOP->op_pmreplroot);
 	}
