@@ -73,9 +73,6 @@ converters: $(CONVERTERS)
 
 regen_pods: perlmodlib.pod toc
 
-buildtoc:	buildtoc.PL perl.pod ../MANIFEST
-	$(PERLILIB) buildtoc.PL
-
 perltoc.pod:	buildtoc
 
 man:	pod2man $(MAN)
