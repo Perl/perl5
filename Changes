@@ -884,6 +884,8 @@ NETaa14697: regexp comments were sometimes wrongly treated as literal text
 From: Tom Christiansen
 Files patched: regcomp.c
  The literal-character grabber didn't know about extended comments.
+ N.B. '#' is treated as a comment character whenever the /x option is
+ used now, so you can't include '#' as a simple literal in /x regexps.
  
  (By the way, Tom, the boxed form of quoting in the previous enclosure is
  exceeding antisocial when you want to extract the code from it.)
