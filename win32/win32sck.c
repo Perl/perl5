@@ -28,6 +28,7 @@ extern CPerlObj* pPerl;
 #include "XSUB.h"
 #endif
 
+#include "Win32iop.h"
 #include <sys/socket.h>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -36,7 +37,7 @@ extern CPerlObj* pPerl;
 
 /* thanks to Beverly Brown	(beverly@datacube.com) */
 #ifdef USE_SOCKETS_AS_HANDLES
-#	define OPEN_SOCKET(x)	_open_osfhandle(x,O_RDWR|O_BINARY)
+#	define OPEN_SOCKET(x)	win32_open_osfhandle(x,O_RDWR|O_BINARY)
 #	define TO_SOCKET(x)	_get_osfhandle(x)
 #else
 #	define OPEN_SOCKET(x)	(x)

@@ -50,15 +50,13 @@ debprofdump
 debop
 debstack
 debstackptrs
-deb_place_holder
-deb_growlevel_place_holder
-debprofdump_place_holder
-debop_place_holder
-debstack_place_holder
-debstackptrs_place_holder
+dump_fds
+dump_mstats
 fprintf
 find_threadsv
 magic_mutexfree
+my_memcmp
+my_memset
 my_pclose
 my_popen
 my_swap
@@ -291,7 +289,7 @@ ENDCODE
 #undef $name
 extern "C" $type $name ($args)
 {
-    return pPerl->perl_atexit(fn, ptr);
+    pPerl->perl_atexit(fn, ptr);
 }
 ENDCODE
                 print OUTFILE "#endif\n" unless ($separateObj == 0);
@@ -1179,11 +1177,11 @@ char ** _Perl_op_name ();
 #define Perl_op_name (_Perl_op_name())
 
 #undef Perl_no_modify
-char ** _Perl_no_modify ();
+char * _Perl_no_modify ();
 #define Perl_no_modify (_Perl_no_modify())
 
 #undef Perl_opargs
-char ** _Perl_opargs ();
+U32 * _Perl_opargs ();
 #define Perl_opargs (_Perl_opargs())
 
 

@@ -1824,6 +1824,16 @@ typedef enum {
 #define PERLVARI(var,type,init) type var;
 #define PERLVARIC(var,type,init) type var;
 
+/* Interpreter exitlist entry */
+typedef struct exitlistentry {
+#ifdef PERL_OBJECT
+    void (*fn) _((CPerlObj*, void*));
+#else
+    void (*fn) _((void*));
+#endif
+    void *ptr;
+} PerlExitListEntry;
+
 #ifdef PERL_OBJECT
 extern "C" CPerlObj* perl_alloc _((IPerlMem*, IPerlEnv*, IPerlStdIO*, IPerlLIO*, IPerlDir*, IPerlSock*, IPerlProc*));
 
@@ -1841,16 +1851,6 @@ public:
 	void Init(void);
 	void* operator new(size_t nSize, IPerlMem *pvtbl);
 #endif /* PERL_OBJECT */
-
-/* Interpreter exitlist entry */
-typedef struct exitlistentry {
-#ifdef PERL_OBJECT
-    void (*fn) _((CPerlObj*, void*));
-#else
-    void (*fn) _((void*));
-#endif
-    void *ptr;
-} PerlExitListEntry;
 
 #ifdef PERL_GLOBAL_STRUCT
 struct perl_vars {

@@ -896,6 +896,8 @@
 #define dump_all            pPerl->Perl_dump_all
 #undef  dump_eval
 #define dump_eval           pPerl->Perl_dump_eval
+#undef  dump_fds
+#define dump_fds            pPerl->Perl_dump_fds
 #undef  dump_form
 #define dump_form           pPerl->Perl_dump_form
 #undef  dump_gv
@@ -1403,6 +1405,8 @@
 #define pad_swipe           pPerl->Perl_pad_swipe
 #undef  peep
 #define peep                pPerl->Perl_peep
+#undef  perl_atexit
+#define perl_atexit         pPerl->perl_atexit
 #undef  perl_call_argv
 #define perl_call_argv      pPerl->perl_call_argv
 #undef  perl_call_method

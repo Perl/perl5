@@ -978,18 +978,34 @@ win32_getenv(const char *name)
     DWORD needlen;
     if (!curitem)
 	New(1305,curitem,curlen,char);
-    if (!(needlen = GetEnvironmentVariable(name,curitem,curlen)))
-	return Nullch;
-    while (needlen > curlen) {
-	Renew(curitem,needlen,char);
-	curlen = needlen;
-	needlen = GetEnvironmentVariable(name,curitem,curlen);
+
+    needlen = GetEnvironmentVariable(name,curitem,curlen);
+    if (needlen != 0) {
+	while (needlen > curlen) {
+	    Renew(curitem,needlen,char);
+	    curlen = needlen;
+	    needlen = GetEnvironmentVariable(name,curitem,curlen);
+	}
     }
-    if (curitem == NULL)
+    else
     {
-	if (strcmp("PERL5DB", name) == 0)
+	/* allow any environment variables that begin with 'PERL5'
+	   to be stored in the registry
+	*/
+	if(curitem != NULL)
+	    *curitem = '\0';
+
+	if (strncmp(name, "PERL5", 5) == 0) {
+	    if (curitem != NULL) {
+		Safefree(curitem);
+		curitem = NULL;
+	    }
 	    curitem = GetRegStr(name, &curitem, &curlen);
+	}
     }
+    if(curitem != NULL && *curitem == '\0')
+	return Nullch;
+
     return curitem;
 }
 
@@ -1184,6 +1200,10 @@ win32_crypt(const char *txt, const char *salt)
     dTHR;
     return des_fcrypt(crypt_buffer, txt, salt);
 }
+#endif
+
+#ifdef _M_IX86
+#define USE_FIXED_OSFHANDLE
 #endif
 
 #ifdef USE_FIXED_OSFHANDLE

@@ -226,9 +226,9 @@ OPTIMIZE	= -Od $(RUNTIME)d -Zi -D_DEBUG -DDEBUGGING
 LINK_DBG	= -debug -pdb:none
 .ELSE
 .IF "$(CCTYPE)" == "MSVC20"
-OPTIMIZE	= -Od $(RUNTIME) -DNDEBUG
+OPTIMIZE	= -O2 $(RUNTIME) -DNDEBUG
 .ELSE
-OPTIMIZE	= -Od $(RUNTIME) -DNDEBUG
+OPTIMIZE	= -O2 $(RUNTIME) -DNDEBUG
 .ENDIF
 LINK_DBG	= -release
 .ENDIF
@@ -300,9 +300,11 @@ EXTUTILSDIR	= $(LIBDIR)\extutils
 .IF "$(OBJECT)" == "-DPERL_OBJECT"
 PERLIMPLIB	= ..\perlcore.lib
 PERLDLL		= ..\perlcore.dll
+CAPILIB		= $(COREDIR)\PerlCAPI.lib
 .ELSE
 PERLIMPLIB	= ..\perl.lib
 PERLDLL		= ..\perl.dll
+CAPILIB		=
 .ENDIF
 
 MINIPERL	= ..\miniperl.exe
@@ -553,7 +555,7 @@ CFG_VARS	=					\
 # Top targets
 #
 
-all : $(GLOBEXE) $(MINIMOD) $(CONFIGPM) $(PERLEXE) $(PERL95EXE) $(X2P) \
+all : $(GLOBEXE) $(MINIMOD) $(CONFIGPM) $(PERLEXE) $(PERL95EXE) $(CAPILIB) $(X2P) \
 	$(EXTENSION_DLL)
 
 $(DYNALOADER)$(o) : $(DYNALOADER).c $(CORE_H) $(EXTDIR)\DynaLoader\dlutils.c
@@ -752,6 +754,18 @@ $(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
 	$(XCOPY) $(EXTDIR)\$(*B)\$(*B).pm $(LIBDIR)\$(NULL)
 	cd $(EXTDIR)\$(*B) && $(XSUBPP) dl_win32.xs > $(*B).c
 	$(XCOPY) $(EXTDIR)\$(*B)\dlutils.c .
+
+!IF "$(OBJECT)" == "-DPERL_OBJECT"
+PerlCAPI.cpp : $(MINIPERL)
+	$(MINIPERL) GenCAPI.pl $(COREDIR)
+
+PerlCAPI$(o) : PerlCAPI.cpp
+	$(CC) $(CFLAGS_O) -MT -UPERLDLL -DWIN95FIX -c \
+	    $(OBJOUT_FLAG)PerlCAPI$(o) PerlCAPI.cpp
+
+$(CAPILIB) : PerlCAPI.cpp PerlCAPI$(o)
+	lib /OUT:$(CAPILIB) PerlCAPI$(o)
+!ENDIF
 
 $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 	copy dl_win32.xs $(EXTDIR)\DynaLoader\dl_win32.xs

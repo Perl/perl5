@@ -325,6 +325,8 @@
 #define dump_form         CPerlObj::Perl_dump_form
 #undef  dump_gv
 #define dump_gv           CPerlObj::Perl_dump_gv
+#undef  dump_mstats
+#define dump_mstats       CPerlObj::Perl_dump_mstats
 #undef  dump_op
 #define dump_op           CPerlObj::Perl_dump_op
 #undef  dump_pm
@@ -710,7 +712,9 @@
 #undef  my_lstat
 #define my_lstat          CPerlObj::Perl_my_lstat
 #undef  my_memcmp
-#define my_memcmp         CPerlObj::my_memcmp
+#define my_memcmp         CPerlObj::Perl_my_memcmp
+#undef  my_memset
+#define my_memset         CPerlObj::Perl_my_memset
 #undef  my_pclose
 #define my_pclose         CPerlObj::Perl_my_pclose
 #undef  my_popen
