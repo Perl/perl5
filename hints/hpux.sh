@@ -160,7 +160,7 @@ EOM
 
     ccflags="$ccflags +DD64"
     ldflags="$ldflags +DD64"
-    loclibpth="$loclibpth /lib/pa20_64"
+    test -d /lib/pa20_64 && loclibpth="$loclibpth /lib/pa20_64"
     libscheck='case "`file $xxx`" in
 *LP64*|*PA-RISC2.0*) ;;
 *) xxx=/no/64-bit$xxx ;;
@@ -181,12 +181,12 @@ esac'
     libswanted="$*"
 
     case "`$cc -v 2>&1`" in
-    *gcc*) ccflags="$ccflags -L/lib/pa20_64" ;;
+    *gcc*) test -d /lib/pa20_64 && ccflags="$ccflags -L/lib/pa20_64" ;;
     esac
     ;;
 *) loclibpth="$loclibpth /lib/pa1.1"
     case "`$cc -v 2>&1`" in
-    *gcc*) ccflags="$ccflags -L/lib/pa20_64" ;;
+    *gcc*) test -d /lib/pa20_64 && ccflags="$ccflags -L/lib/pa20_64" ;;
     esac
     ;;
 esac

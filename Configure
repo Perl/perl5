@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Feb 28 08:07:01 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Mon Feb 28 08:28:06 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -3740,6 +3740,7 @@ for thislib in $libswanted; do
 		xxx=$thisdir/lib${thislib}_s$_a
 	        $test -f "$xxx" && eval $libscheck
 		$test -f "$xxx" && libstyle=static
+		$test -f "$xxx" && thislib=${thislib}_s
 	    fi
 	    if test ! -f "$xxx"; then
 		xxx=$thisdir/Slib$thislib$_a
