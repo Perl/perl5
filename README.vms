@@ -197,7 +197,7 @@ non-default location for where Perl will be installed:
     @ Configure "-d" "-Dprefix=dka100:[utils.perl5.]"
 
 Note that the installation location would be by default where you unpacked 
-the source with a "ROOT." appended.  For example if you unpacked the perl 
+the source with a "_ROOT." appended.  For example if you unpacked the perl 
 source into:
 
    DKA200:[PERL-5_10_2...]
@@ -205,7 +205,7 @@ source into:
 Then the PERL_SETUP.COM that gets written out by Configure.com will
 try to DEFINE your installation PERL_ROOT to be:
 
-   DKA200:[PERL-5_10_2ROOT.]
+   DKA200:[PERL-5_10_2_ROOT.]
 
 More help with configure.com is available from:
 
