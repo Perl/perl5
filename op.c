@@ -4993,23 +4993,27 @@ OP *
 Perl_ck_defined(pTHX_ OP *o)		/* 19990527 MJD */
 {
     dTHR;
-    if (ckWARN(WARN_DEPRECATED) && (o->op_flags & OPf_KIDS)) {
-      switch (cUNOPo->op_first->op_type) {
-      case OP_RV2AV:
-      case OP_PADAV:
-      case OP_AASSIGN:		/* Is this a good idea? */
-	Perl_warner(aTHX_ WARN_DEPRECATED, "defined(@array) is deprecated (and not really meaningful)");
-	Perl_warner(aTHX_ WARN_DEPRECATED, "(Maybe you should just omit the defined()?)\n");
+    if ((o->op_flags & OPf_KIDS) && ckWARN(WARN_DEPRECATED)) {
+	switch (cUNOPo->op_first->op_type) {
+	case OP_RV2AV:
+	case OP_PADAV:
+	case OP_AASSIGN:		/* Is this a good idea? */
+	    Perl_warner(aTHX_ WARN_DEPRECATED,
+			"defined(@array) is deprecated (and not really meaningful)");
+	    Perl_warner(aTHX_ WARN_DEPRECATED,
+			"(Maybe you should just omit the defined()?)\n");
 	break;
-      case OP_RV2HV:
-      case OP_PADHV:
-	Perl_warner(aTHX_ WARN_DEPRECATED, "defined(%hash) is deprecated (and not really meaningful)");
-	Perl_warner(aTHX_ WARN_DEPRECATED, "(Maybe you should just omit the defined()?)\n");
-	break;
-      default:
-	/* no warning */
-	break;
-      }
+	case OP_RV2HV:
+	case OP_PADHV:
+	    Perl_warner(aTHX_ WARN_DEPRECATED,
+			"defined(%hash) is deprecated (and not really meaningful)");
+	    Perl_warner(aTHX_ WARN_DEPRECATED,
+			"(Maybe you should just omit the defined()?)\n");
+	    break;
+	default:
+	    /* no warning */
+	    break;
+	}
     }
     return ck_rfun(o);
 }
