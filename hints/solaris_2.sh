@@ -3,7 +3,7 @@
 # Andy Dougherty  <doughera@lafcol.lafayette.edu>
 # Based on input from lots of folks, especially
 # Dean Roehrich <roehrich@ironwood-fddi.cray.com>
- 
+
 # See man vfork.
 usevfork=false
 
@@ -142,19 +142,7 @@ case "`${cc:-cc} -v 2>&1`" in
 		awk '{print $NF}'  | sed 's/specs$/include/'`
 
 	# Determine if the fixed-includes look like they'll work.
-	sed 1q $tmp/stdarg.h 2>&1 | grep 'stdarg.h for GNU' 2>&1 >/dev/null
-	case $? in
-	0) ;;
-	*)
-		cat <<END
-
-NOTE: The fixincludes or just-fixinc script for gcc was not run
-properly.  Your gcc may not be able to compile Perl.  Inform your system
-administrator that ${cc:-cc} is not properly installed.
-
-END
-		;;
-	esac
+	# Doesn't work anymore for gcc-2.7.2.
 
 	# See if as(1) is GNU as(1).  GNU as(1) won't work for this job.
 	case $verbose in
@@ -164,7 +152,7 @@ END
 
 NOTE: You are using GNU as(1).  GNU as(1) will not build Perl.
 You must arrange to use /usr/ccs/bin/as, perhaps by setting
-GCC_EXEC_PREFIX.
+GCC_EXEC_PREFIX or by including -B/usr/ccs/bin in your cc command.
 
 END
 	;;
@@ -178,7 +166,7 @@ END
 
 NOTE: You are using GNU ld(1).  GNU ld(1) will not build Perl.
 You must arrange to use /usr/ccs/bin/ld, perhaps by setting
-GCC_EXEC_PREFIX.
+GCC_EXEC_PREFIX or by including -B/usr/ccs/bin in your cc command.
 
 END
 	;;
