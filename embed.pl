@@ -19,21 +19,7 @@ sub do_not_edit ($)
 {
     my $file = shift;
     
-    my $years;
-
-    if ($file eq 'embed.h') {
-        $years = '1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004';
-    } elsif ($file eq 'embedvar.h') {
-        $years = '1999, 2000, 2001, 2002, 2003, 2004';
-    } elsif ($file eq 'global.sym') {
-        $years = '1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004';
-    } elsif ($file eq 'perlapi.c') {
-        $years = '1999, 2000, 2001';
-    } elsif ($file eq 'perlapi.h') {
-        $years = '1999, 2000, 2001, 2002, 2003, 2004';
-    } elsif ($file eq 'proto.h') {
-        $years = '1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004';
-    }
+    my $years = '1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005';
 
     $years =~ s/1999,/1999,\n  / if length $years > 40;
 
