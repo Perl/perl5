@@ -27,13 +27,13 @@ $ENV{EMXSHELL} = 'sh';        # For OS/2
 
 if ($#ARGV == -1) {
     @ARGV = split(/[ \n]/,
-      `echo base/*.t comp/*.t cmd/*.t run/*.t io/*.t; echo op/*.t pragma/*.t lib/*.t pod/*.t`);
+      `echo base/*.t comp/*.t cmd/*.t run/*.t io/*.t; echo op/*.t pragma/*.t lib/*.t pod/*.t camel-III/*.t`);
 }
 
-# %infinite = ( 'comp/require.t', 1, 'op/bop.t', 1, 'lib/hostname.t', 1 ); 
+# %infinite = ( 'comp/require.t', 1, 'op/bop.t', 1, 'lib/hostname.t', 1 );
 
 _testprogs('perl', @ARGV);
-_testprogs('compile', @ARGV) if (-e "../testcompile"); 
+_testprogs('compile', @ARGV) if (-e "../testcompile");
 
 sub _testprogs {
     $type = shift @_;
@@ -46,7 +46,7 @@ TESTING COMPILER
 --------------------------------------------------------------------------------
 EOT
 
-    $ENV{PERLCC_TIMEOUT} = 120 
+    $ENV{PERLCC_TIMEOUT} = 120
           if ($type eq 'compile' && !$ENV{PERLCC_TIMEOUT});
 
     $bad = 0;
@@ -65,7 +65,7 @@ EOT
     while ($test = shift @tests) {
 
 	if ( $infinite{$test} && $type eq 'compile' ) {
-	    print STDERR "$test creates infinite loop! Skipping.\n"; 
+	    print STDERR "$test creates infinite loop! Skipping.\n";
             next;
 	}
 	if ($test =~ /^$/) {
@@ -93,7 +93,7 @@ EOT
 	                    : '';
 	my $testswitch = '-I. -MTestInit'; # -T will strict . from @INC
 	if ($type eq 'perl') {
-	    my $run = "./perl $testswitch $switch $utf $test |"; 
+	    my $run = "./perl $testswitch $switch $utf $test |";
 	    open(RESULTS,$run) or print "can't run '$run': $!.\n";
 	}
 	else {
@@ -122,7 +122,7 @@ EOT
 		}
 		else {
 		    if (/^(not )?ok (\d+)(\s*#.*)?/ &&
-			$2 == $next) 
+			$2 == $next)
 		    {
 			my($not, $num, $extra) = ($1, $2, $3);
 			my($istodo) = $extra =~ /^\s*#\s*TODO/ if $extra;
@@ -189,8 +189,8 @@ EOT
    ### Since not all tests were successful, you may want to run some
    ### of them individually and examine any diagnostic messages they
    ### produce.  See the INSTALL document's section on "make test".
-   ### If you are testing the compiler, then ignore this message 
-   ### and run 
+   ### If you are testing the compiler, then ignore this message
+   ### and run
    ###      ./perl harness
    ### in the directory ./t.
 SHRDLU
@@ -198,7 +198,7 @@ SHRDLU
    ###
    ### Since most tests were successful, you have a good chance to
    ### get information with better granularity by running
-   ###     ./perl harness 
+   ###     ./perl harness
    ### in directory ./t.
 SHRDLU
     }
