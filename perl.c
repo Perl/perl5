@@ -58,29 +58,6 @@ static I32 read_e_script(pTHXo_ int idx, SV *buf_sv, int maxlen);
     } STMT_END
 #else
 #  if defined(USE_ITHREADS)
-
-/* this is called in parent before the fork() */
-void
-Perl_atfork_lock(void)
-{
-    /* locks must be held in locking order (if any) */
-#ifdef MYMALLOC
-    MUTEX_LOCK(&PL_malloc_mutex);
-#endif
-    OP_REFCNT_LOCK;
-}
-
-/* this is called in both parent and child after the fork() */
-void
-Perl_atfork_unlock(void)
-{
-    /* locks must be released in same order as in S_atfork_lock() */
-#ifdef MYMALLOC
-    MUTEX_UNLOCK(&PL_malloc_mutex);
-#endif
-    OP_REFCNT_UNLOCK;
-}
-
 #  define INIT_TLS_AND_INTERP \
     STMT_START {				\
 	if (!PL_curinterp) {			\

@@ -430,6 +430,9 @@
 #define my_exit			Perl_my_exit
 #define my_failure_exit		Perl_my_failure_exit
 #define my_fflush_all		Perl_my_fflush_all
+#define my_fork			Perl_my_fork
+#define atfork_lock		Perl_atfork_lock
+#define atfork_unlock		Perl_atfork_unlock
 #define my_lstat		Perl_my_lstat
 #if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
 #define my_memcmp		Perl_my_memcmp
@@ -1941,6 +1944,9 @@
 #define my_exit(a)		Perl_my_exit(aTHX_ a)
 #define my_failure_exit()	Perl_my_failure_exit(aTHX)
 #define my_fflush_all()		Perl_my_fflush_all(aTHX)
+#define my_fork			Perl_my_fork
+#define atfork_lock		Perl_atfork_lock
+#define atfork_unlock		Perl_atfork_unlock
 #define my_lstat()		Perl_my_lstat(aTHX)
 #if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
 #define my_memcmp		Perl_my_memcmp
@@ -3806,6 +3812,12 @@
 #define my_failure_exit		Perl_my_failure_exit
 #define Perl_my_fflush_all	CPerlObj::Perl_my_fflush_all
 #define my_fflush_all		Perl_my_fflush_all
+#define Perl_my_fork		CPerlObj::Perl_my_fork
+#define my_fork			Perl_my_fork
+#define Perl_atfork_lock	CPerlObj::Perl_atfork_lock
+#define atfork_lock		Perl_atfork_lock
+#define Perl_atfork_unlock	CPerlObj::Perl_atfork_unlock
+#define atfork_unlock		Perl_atfork_unlock
 #define Perl_my_lstat		CPerlObj::Perl_my_lstat
 #define my_lstat		Perl_my_lstat
 #if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)

@@ -1074,7 +1074,7 @@ struct IPerlProcInfo
 #define PerlProc_setjmp(b, n)	Sigsetjmp((b), (n))
 #define PerlProc_longjmp(b, n)	Siglongjmp((b), (n))
 #define PerlProc_signal(n, h)	signal((n), (h))
-#define PerlProc_fork()		fork()
+#define PerlProc_fork()		my_fork()
 #define PerlProc_getpid()	getpid()
 
 #ifdef WIN32

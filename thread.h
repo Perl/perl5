@@ -302,9 +302,6 @@
     } STMT_END
 #endif
 
-void Perl_atfork_lock(void);
-void Perl_atfork_unlock(void);
-
 #ifndef PTHREAD_ATFORK
 #  ifdef HAS_PTHREAD_ATFORK
 #    define PTHREAD_ATFORK(prepare,parent,child)		\

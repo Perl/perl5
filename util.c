@@ -26,17 +26,6 @@
 #endif
 #endif
 
-#ifdef I_VFORK
-#  include <vfork.h>
-#endif
-
-/* Put this after #includes because fork and vfork prototypes may
-   conflict.
-*/
-#ifndef HAS_VFORK
-#   define vfork fork
-#endif
-
 #ifdef I_SYS_WAIT
 #  include <sys/wait.h>
 #endif
@@ -1858,7 +1847,7 @@ Perl_my_popen_list(pTHX_ char *mode, int n, SV **args)
     /* Try for another pipe pair for error return */
     if (PerlProc_pipe(pp) >= 0)
 	did_pipes = 1;
-    while ((pid = vfork()) < 0) {
+    while ((pid = PerlProc_fork()) < 0) {
 	if (errno != EAGAIN) {
 	    PerlLIO_close(p[This]);
 	    if (did_pipes) {
@@ -1910,7 +1899,7 @@ Perl_my_popen_list(pTHX_ char *mode, int n, SV **args)
 #undef THAT
     }
     /* Parent */
-    do_execfree();	/* free any memory malloced by child on vfork */
+    do_execfree();	/* free any memory malloced by child on fork */
     /* Close child's end of pipe */
     PerlLIO_close(p[that]);
     if (did_pipes)
@@ -1991,7 +1980,7 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
 	return Nullfp;
     if (doexec && PerlProc_pipe(pp) >= 0)
 	did_pipes = 1;
-    while ((pid = (doexec?vfork():fork())) < 0) {
+    while ((pid = PerlProc_fork()) < 0) {
 	if (errno != EAGAIN) {
 	    PerlLIO_close(p[This]);
 	    if (did_pipes) {
@@ -2052,7 +2041,7 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
 #undef THIS
 #undef THAT
     }
-    do_execfree();	/* free any memory malloced by child on vfork */
+    do_execfree();	/* free any memory malloced by child on fork */
     PerlLIO_close(p[that]);
     if (did_pipes)
 	PerlLIO_close(pp[1]);
@@ -2126,6 +2115,53 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
 #endif
 
 #endif /* !DOSISH */
+
+/* this is called in parent before the fork() */
+void
+Perl_atfork_lock(void)
+{
+#if defined(USE_THREADS) || defined(USE_ITHREADS)
+    /* locks must be held in locking order (if any) */
+#  ifdef MYMALLOC
+    MUTEX_LOCK(&PL_malloc_mutex);
+#  endif
+    OP_REFCNT_LOCK;
+#endif
+}
+
+/* this is called in both parent and child after the fork() */
+void
+Perl_atfork_unlock(void)
+{
+#if defined(USE_THREADS) || defined(USE_ITHREADS)
+    /* locks must be released in same order as in atfork_lock() */
+#  ifdef MYMALLOC
+    MUTEX_UNLOCK(&PL_malloc_mutex);
+#  endif
+    OP_REFCNT_UNLOCK;
+#endif
+}
+
+Pid_t
+Perl_my_fork(void)
+{
+#if defined(HAS_FORK)
+    Pid_t pid;
+#if (defined(USE_THREADS) || defined(USE_ITHREADS)) && !defined(HAS_PTHREAD_ATFORK)
+    atfork_lock();
+    pid = fork();
+    atfork_unlock();
+#else
+    /* atfork_lock() and atfork_unlock() are installed as pthread_atfork()
+     * handlers elsewhere in the code */
+    pid = fork();
+#endif
+    return pid;
+#else
+    /* this "canna happen" since nothing should be calling here if !HAS_FORK */
+    Perl_croak_nocontext("fork() not available");
+#endif /* HAS_FORK */
+}
 
 #ifdef DUMP_FDS
 void

@@ -1769,6 +1769,9 @@ Anp	|char*	|my_bzero	|char* loc|I32 len
 Apr	|void	|my_exit	|U32 status
 Apr	|void	|my_failure_exit
 Ap	|I32	|my_fflush_all
+Anp	|Pid_t	|my_fork
+Anp	|void	|atfork_lock
+Anp	|void	|atfork_unlock
 Ap	|I32	|my_lstat
 #if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
 Anp	|I32	|my_memcmp	|const char* s1|const char* s2|I32 len
