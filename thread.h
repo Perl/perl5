@@ -5,7 +5,7 @@
 #else
 
 /* POSIXish threads */
-typedef pthread_t perl_thread;
+typedef pthread_t perl_os_thread;
 #ifdef OLD_PTHREADS_API
 #  define pthread_mutexattr_init(a) pthread_mutexattr_create(a)
 #  define pthread_mutexattr_settype(a,t) pthread_mutexattr_setkind_np(a,t)
@@ -216,7 +216,7 @@ struct thread {
 
     SV *	oursv;
     HV *	cvcache;
-    perl_thread	self;			/* Underlying thread object */
+    perl_os_thread	self;		/* Underlying thread object */
     U32		flags;
     AV *	threadsv;		/* Per-thread SVs ($_, $@ etc.) */
     AV *	specific;		/* Thread-specific user data */

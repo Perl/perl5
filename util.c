@@ -2322,7 +2322,7 @@ void
 perl_cond_signal(cp)
 perl_cond *cp;
 {
-    perl_thread t;
+    perl_os_thread t;
     perl_cond cond = *cp;
     
     if (!cond)
@@ -2343,7 +2343,7 @@ void
 perl_cond_broadcast(cp)
 perl_cond *cp;
 {
-    perl_thread t;
+    perl_os_thread t;
     perl_cond cond, cond_next;
     
     for (cond = *cp; cond; cond = cond_next) {

@@ -2,7 +2,7 @@
 #define _WIN32THREAD_H
 typedef struct win32_cond { LONG waiters; HANDLE sem; } perl_cond;
 typedef DWORD perl_key;
-typedef HANDLE perl_thread;
+typedef HANDLE perl_os_thread;
 
 #ifndef DONT_USE_CRITICAL_SECTION
 
