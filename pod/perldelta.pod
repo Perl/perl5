@@ -315,7 +315,7 @@ keys will stay ordered as they were before the sort).
 
 =item *
 
-INSTALL now explains how you can configure perl to use 64-bit
+INSTALL now explains how you can configure Perl to use 64-bit
 integers even on non-64-bit platforms.
 
 =item *
@@ -474,7 +474,7 @@ Several Unicode fixes (but still not perfect).
 
 BOMs (byte order marks) in the beginning of Perl files
 (scripts, modules) should now be transparently skipped.
-UTF16 encoded Perl files should now be read correctly.
+UTF-16 (UCS-2)encoded Perl files should now be read correctly.
 
 =item *
 
@@ -676,12 +676,12 @@ Fake signal handling reenabled, bugs and all.
 =item *
 
 Less stack reserved per thread so that more threads can run
-concurrently. (still 16M perl thread)
+concurrently. (Still 16M per thread.)
 
 =item *
 
 C<File::Spec->tmpdir()> now prefers C:/temp over /tmp
-(works better when perl running as service).
+(works better when perl is running as service).
 
 =item *
 
@@ -726,8 +726,8 @@ You can now build a really minimal perl called microperl.
 Building microperl does not require even running Configure;
 C<make -f Makefile.micro> should be enough.  Beware: microperl makes
 many assumptions, some of which may be too bold; the resulting
-executable may crash or otherwise misbehave in wondrous ways.  For
-careful hackers only.
+executable may crash or otherwise misbehave in wondrous ways.
+For careful hackers only.
 
 =item *
 
@@ -834,7 +834,7 @@ emit the following message for lib/thr5005
     # from deploying threads in production. ;-)
     #
  
-and another known warning is
+and another known thread-related warning is
 
    pragma/overload......Unbalanced saves: 3 more saves than restores
    panic: magic_mutexfree during global destruction.
@@ -848,9 +848,9 @@ and another known warning is
 
 =head2 The Compiler Suite Is Still Experimental
 
-The compiler suite is slowly getting better but is nowhere near yet.
-The backend part that has seen perhaps the most progress is the
-bytecode compiler.
+The compiler suite is slowly getting better but is nowhere near
+working order yet.  The backend part that has seen perhaps the most
+progress is the bytecode compiler.
 
 =back
 
