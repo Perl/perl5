@@ -74,7 +74,7 @@ use vars '@ISA';
 @ISA = qw(Tie::Hash);
 use strict;
 
-use overload; # to support objects with overloaded ""
+require overload; # to support objects with overloaded ""
 
 sub TIEHASH {
   my $c = shift;
