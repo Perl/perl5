@@ -2157,15 +2157,22 @@ PP(pp_negate)
 		sv_setsv(TARG, sv);
 		*SvPV_force(TARG, len) = *s == '-' ? '+' : '-';
 	    }
-	    else if (DO_UTF8(sv) && UTF8_IS_START(*s) && isIDFIRST_utf8((U8*)s)) {
-		sv_setpvn(TARG, "-", 1);
-		sv_catsv(TARG, sv);
+	    else if (DO_UTF8(sv)) {
+		SvIV_please(sv);
+		if (SvIOK(sv))
+		    goto oops_its_an_int;
+		if (SvNOK(sv))
+		    sv_setnv(TARG, -SvNV(sv));
+		else {
+		    sv_setpvn(TARG, "-", 1);
+		    sv_catsv(TARG, sv);
+		}
 	    }
 	    else {
-	      SvIV_please(sv);
-	      if (SvIOK(sv))
-		goto oops_its_an_int;
-	      sv_setnv(TARG, -SvNV(sv));
+		SvIV_please(sv);
+		if (SvIOK(sv))
+		  goto oops_its_an_int;
+		sv_setnv(TARG, -SvNV(sv));
 	    }
 	    SETTARG;
 	}

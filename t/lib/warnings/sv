@@ -326,3 +326,11 @@ no warnings 'numeric' ;
 $a = "\x{100}\x{200}" * 42;
 EXPECT
 Argument "\x{100}\x{200}" isn't numeric in multiplication (*) at - line 3.
+########
+# sv.c
+use warnings 'numeric' ;
+$a = "\x{100}\x{200}"; $a = -$a;
+no warnings 'numeric' ;
+$a = "\x{100}\x{200}"; $a = -$a;
+EXPECT
+Argument "\x{100}\x{200}" isn't numeric in negation (-) at - line 3.
