@@ -849,11 +849,12 @@ sub _check_integrity {
     $good = 0;
   }
 
+  local *_;
   local *F = $self->{fh};
   seek F, 0, SEEK_SET;
   local $/ = $self->{recsep};
   my $rsl = $self->{recseplen};
-  $. = 0;
+  local $. = 0;
 
   while (<F>) {
     my $n = $. - 1;
