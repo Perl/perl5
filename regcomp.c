@@ -4088,14 +4088,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 		else if (prevnatvalue == natvalue) {
 		    Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\n", natvalue);
 		    if (FOLD) {
-			 U8 tmpbuf [UTF8_MAXLEN+1];
 			 U8 foldbuf[UTF8_MAXLEN_FOLD+1];
 			 STRLEN foldlen;
-			 UV f;
-
-			 uvchr_to_utf8(tmpbuf, natvalue);
-			 to_utf8_fold(tmpbuf, foldbuf, &foldlen);
-			 f = UNI_TO_NATIVE(utf8_to_uvchr(foldbuf, 0));
+			 UV f = to_uni_fold(natvalue, foldbuf, &foldlen);
 
 			 /* If folding and foldable and a single
 			  * character, insert also the folded version
