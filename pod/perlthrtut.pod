@@ -966,12 +966,20 @@ use a little more memory and are a little slower than ordinary variables.
 =head1 Threadsafety of System Libraries
 
 Whether various library calls are threadsafe is outside the control
-of Perl.  Calls often suffering from not being threadsafe include
+of Perl.  Calls often suffering from not being threadsafe include:
 localtime(), gmtime(), get{gr,host,net,proto,serv,pw}*(), readdir(),
-rand(), srand().  If the system Perl is compiled in has threadsafe
-variants of these calls, they will be used, but besides that, Perl is
-at the mercy of the thread safety or unsafety of the calls.  Please
-consult your C library call documentation.
+rand(), and srand() -- in general, calls that depend on some external
+state.
+
+If the system Perl is compiled in has threadsafe variants of such
+calls, they will be used.  Beyond that, Perl is at the mercy of
+the threadsafety or unsafety of the calls.  Please consult your
+C library call documentation.
+
+In some platforms the threadsafe interfaces may fail if the result
+buffer is too small (for example getgrent() may return quite large
+group member lists).  Perl will retry growing the result buffer
+a few times, but only up to 64k (for safety reasons).
 
 =head1 Conclusion
 

@@ -54,7 +54,7 @@ B<You have to recompile your XS modules.>
 
 (Pure Perl modules should continue to work.)
 
-The major reason for the discontinity is the new IO architecture
+The major reason for the discontinuity is the new IO architecture
 called PerlIO.  PerlIO is the default configuration because
 without it many new features of Perl 5.8 cannot be used.  In other
 words: you just have to recompile your modules, sorry about that.
@@ -2765,12 +2765,6 @@ having slightly different types for their first argument.
 
 =back
 
-=head2 Amiga Perl Invoking Mystery
-
-One cannot call Perl using the C<volume:> syntax, that is, C<perl -v>
-works, but for example C<bin:perl -v> doesn't.  The exact reason isn't
-known but the current suspect is the F<ixemul> library.
-
 =head2 ext/threads/t/libc
 
 If this test fails, it indicates that your libc (C library) is not
@@ -3019,9 +3013,9 @@ platform-dependent.
 Though mostly working, Unicode support still has problem spots on
 EBCDIC platforms.  One such known spot are the C<\p{}> and C<\P{}>
 regular expression constructs for code points less than 256: the
-pP are testing for Unicode code points, not knowing about EBCDIC.
+C<pP> are testing for Unicode code points, not knowing about EBCDIC.
 
-=head2 The Compiler Suite Is Still Experimental
+=head2 The Compiler Suite Is Still Very Experimental
 
 The compiler suite is slowly getting better but it continues to be
 highly experimental.  Use in production environments is discouraged.
@@ -3044,6 +3038,11 @@ C<Time::Piece> (previously known as C<Time::Object>) was removed
 because it was felt that it didn't have enough value in it to be a
 core module.  It is still a useful module, though, and is available
 from the CPAN.
+
+Perl 5.8 unfortunately does not build anymore on AmigaOS,
+this broke at some point accidentally.  Since there are not that many
+Amiga developers available, we could not get this fixed and tested in
+time for 5.8.0.
 
 =head1 Reporting Bugs
 

@@ -22,7 +22,7 @@ for my $d (@Config{qw/bin sitebin vendorbin/},
 	   (split /$Config{path_sep}/o, $ENV{PATH})){
     for my $f (qw/enc2xs enc2xs5.7.3/){
         my $path = File::Spec->catfile($d, $f);
-        -x $path and $enc2xs = $path and last PATHLOOP;
+        -r $path and $enc2xs = $path and last PATHLOOP;
     }
 }
 $enc2xs or die "enc2xs not found!";
