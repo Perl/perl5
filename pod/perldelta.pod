@@ -4,10 +4,14 @@ perldelta - what is new for perl v5.8.0
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.6.0 release and the
-5.8.0 release.
+This document describes differences between the 5.6.0 release
+and the 5.8.0 release.
 
-=head1 Highlights
+Many of the bug fixes in 5.8.0 were already seen in the 5.6.1
+maintenance release since the two releases were kept closely
+coordinated.
+
+=head1 Highlights In 5.8.0
 
 =over 4
 
@@ -142,8 +146,14 @@ any C<\w> character.
 =item *
 
 The list of filenames from glob() (or <...>) is now by default sorted
-alphabetically to be csh-compliant.  (bsd_glob() does still sort platform
+alphabetically to be csh-compliant (which is what happened before
+in most UNIX platforms).  (bsd_glob() does still sort platform
 natively, ASCII or EBCDIC, unless GLOB_ALPHASORT is specified.)
+
+=item *
+
+Spurious syntax errors generated in certain situations, when glob()
+caused File::Glob to be loaded for the first time, have been fixed.
 
 =item *
 
@@ -360,6 +370,7 @@ Formats now support zero-padded decimal fields.
 =item *
 
 Lvalue subroutines can now return C<undef> in list context.
+However, the lvalue subroutine feature still remains experimental.
 
 =item *
 
@@ -410,7 +421,8 @@ prototype(\[$@%&]) is now available to implicitly create references
 
 =item *
 
-UNTIE method is now recognised.
+untie() will now call an UNTIE() hook if it exists.  See L<perltie>
+for details.
 
 =item *
 
@@ -837,6 +849,11 @@ using B::Deparse.
 
 =item *
 
+DB_File now supports newer Berkeley DB versions, among
+other improvements.
+
+=item *
+
 The English module can now be used without the infamous performance
 hit by saying
 
@@ -851,6 +868,10 @@ C<@LAST_MATCH_END> English aliases for C<@-> and C<@+>.
 Fcntl, Socket, and Sys::Syslog have been rewritten to use the
 new-style constant dispatch section (see L<ExtUtils::Constant>).
 This means that they will be more robust and hopefully faster.
+
+=item *
+
+File::Find now chdir()s correctly when chasing symbolic links.
 
 =item *
 
@@ -913,10 +934,13 @@ bignum libraries such as GMP and PARI as their backends.
 
 =item *
 
+Math::Complex handles inf, NaN etc., better.
+
+=item *
+
 Net::Ping has been enhanced.  There is now "external" protocol which
 uses Net::Ping::External module which runs external ping(1) and parses
-the output.  An alpha version of Net::Ping::External is available in
-CPAN and in 5.7.2 the Net::Ping::External may be integrated to Perl.
+the output.  A version of Net::Ping::External is available in CPAN.
 
 =item *
 
@@ -928,6 +952,12 @@ handlers, installing new handlers was not atomic.
 
 In Safe the C<%INC> now localised in a Safe compartment so that
 use/require work.
+
+=item *
+
+In SDBM_File on dosish platforms, some keys went missing because of
+lack of support for files with "holes".  A workaround for the problem
+has been added.
 
 =item *
 
@@ -1007,6 +1037,7 @@ perl.org, not perl.com.
 
 C<perlcc> has been rewritten and its user interface (that is,
 command line) is much more like that of the UNIX C compiler, cc.
+(The perlbc tools has been removed.  Use C<perlcc -B> instead.)
 
 =item *
 
@@ -1147,7 +1178,9 @@ confusion with the perlwin32 documentation on 8.3-restricted filesystems.
 
 =item *
 
-map() that changes the size of the list should now work faster.
+map() could get pathologically slow when the result list it generates
+is larger than the source list.  The performance has been improved for
+common scenarios.
 
 =item *
 
@@ -1293,6 +1326,11 @@ no longer suggests including the 5.005 modules in @INC.
 =item *
 
 Configure C<-S> can now run non-interactively.
+
+=item *
+
+Configure support for pdp11-style memory models has been removed due
+to obsolescence.
 
 =item *
 
@@ -1491,6 +1529,10 @@ NonStop-UX is now supported.
 
 =item *
 
+NEC SUPER-UX is now supported.
+
+=item *
+
 Amdahl UTS UNIX mainframe platform is now supported.
 
 =item *
@@ -1516,6 +1558,11 @@ a bit.
 =item *
 
 The autouse pragma didn't work for Multi::Part::Function::Names.
+
+=item *
+
+caller() could cause core dumps in certain situations.  Carp was sometimes
+affected by this problem.
 
 =item *
 
@@ -1545,8 +1592,13 @@ The order of DESTROYs has been made more predictable.
 
 Several debugger fixes: exit code now reflects the script exit code,
 condition C<"0"> now treated correctly, the C<d> command now checks
-line number, the C<$.> no longer gets corrupted, all debugger output now
-goes correctly to the socket if RemotePort is set.
+line number, the C<$.> no longer gets corrupted, all debugger output
+now goes correctly to the socket if RemotePort is set.
+
+=item *
+
+Perl 5.6.0 could emit spurious warnings about redefinition of dl_error()
+when statically building extensions into perl.  This has been corrected.
 
 =item *
 
@@ -1555,6 +1607,9 @@ L<dprofpp> -R didn't work.
 =item *
 
 C<*foo{FORMAT}> now works.
+=item *
+
+Infinity is now recognized as a number.
 
 =item *
 
@@ -1574,7 +1629,18 @@ were declared before the lexicals.
 
 =item *
 
-Lexical warnings now propagating correctly between scopes.
+Lexical warnings now propagating correctly between scopes
+and into C<eval "...">.
+
+=item *
+
+C<use warnings qw(FATAL all)> did not work as intended.  This has been
+corrected.
+
+=item *
+
+warnings::enabled() now reports the state of $^W correctly if the caller
+isn't using lexical warnings.
 
 =item *
 
@@ -1608,11 +1674,22 @@ more compatible with 5.005.  Infinity is now recognised as a number.
 
 =item *
 
+Numeric conversions did not recognize changes in the string value
+properly in certain circumstances.
+
+=item *
+
 Attributes (like :shared) didn't work with our().
 
 =item *
 
 our() variables will not cause "will not stay shared" warnings.
+
+=item *
+
+"our" variables of the same name declared in two sibling blocks
+resulted in bogus warnings about "redeclaration" of the variables.
+The problem has been corrected.
 
 =item *
 
@@ -1638,7 +1715,12 @@ printf() no longer resets the numeric locale to "C".
 
 =item *
 
-C<q(a\\b)> now parses correctly as C<'a\\b'>.
+C<qw(a\\b)> now parses correctly as C<'a\\b'>.
+
+=item *
+
+pos() did not return the correct value within s///ge in earlier
+versions.  This is now handled correctly.
 
 =item *
 
@@ -1666,6 +1748,8 @@ SOCKS support is now much more robust.
 
 sort() arguments are now compiled in the right wantarray context
 (they were accidentally using the context of the sort() itself).
+The comparison block is now run in scalar context, and the arguments
+to be sorted are always provided list context.
 
 =item *
 
@@ -1682,9 +1766,45 @@ behaviour consistent with that of string interpolation.
 
 =item *
 
+Some cases of inconsistent taint propagation (such as within hash
+values) have been fixed.
+
+=item *
+
+The RE engine found in Perl 5.6.0 accidentally pessimised certain kinds
+of simple pattern matches.  These are now handled better.
+
+=item *
+
+Regular expression debug output (whether through C<use re 'debug'>
+or via C<-Dr>) now looks better.
+
+=item *
+
+Multi-line matches like C<"a\nxb\n" =~ /(?!\A)x/m> were flawed.  The
+bug has been fixed.
+
+=item *
+
+Use of $& could trigger a core dump under some situations.  This
+is now avoided.
+
+=item *
+
 The regular expression captured submatches ($1, $2, ...) are now
 more consistently unset if the match fails, instead of leaving false
 data lying around in them.
+
+=item *
+
+readline() on files opened in "slurp" mode could return an extra "" at
+the end in certain situations.  This has been corrected.
+
+=item *
+
+Autovivification of symbolic references of special variables described
+in L<perlvar> (as in C<${$num}>) was accidentally disabled.  This works
+again now.
 
 =item *
 
@@ -1749,9 +1869,19 @@ C<eval "v200"> now works.
 
 =item *
 
+Perl 5.6.0 parsed m/\x{ab}/ incorrectly, leading to spurious warnings.
+This has been corrected.
+
+=item *
+
 Zero entries were missing from the Unicode classes like C<IsDigit>.
 
 =back
+
+=item *
+
+Large unsigned numbers (those above 2**31) could sometimes lose their
+unsignedness, causing bogus results in arithmetic operations.
 
 =back
 
@@ -1925,16 +2055,26 @@ New %ENV entries now propagate to subprocesses.
 
 =item *
 
+Current directory entries in %ENV are now correctly propagated to child
+processes.
+
+=item *
+
 $ENV{LIB} now used to search for libs under Visual C.
+
+=item *
+
+fork() emulation has been improved in various ways, but still continues
+to be experimental.  See L<perlfork> for known bugs and caveats.
+
+=item *
+
+A failed (pseudo)fork now returns undef and sets errno to EAGAIN.
 
 =item *
 
 Win32::GetCwd() correctly returns C:\ instead of C: when at the drive root.
 Other bugs in chdir() and Cwd::cwd() have also been fixed.
-
-=item *
-
-A failed (pseudo)fork now returns undef and sets errno to EAGAIN.
 
 =item *
 
@@ -1959,6 +2099,11 @@ Fake signal handling reenabled, bugs and all.
 
 =item *
 
+%SIG has been enabled under USE_ITHREADS, but its use is completely
+unsupported under all configurations.
+
+=item *
+
 Less stack reserved per thread so that more threads can run
 concurrently. (Still 16M per thread.)
 
@@ -1973,7 +2118,8 @@ Better UNC path handling under ithreads.
 
 =item *
 
-wait() and waitpid() now work much better.
+wait(), waitpid() and backticks now return the correct exit status under
+Windows 9x.
 
 =item *
 
@@ -2390,8 +2536,8 @@ pP are testing for Unicode code points, not knowing about EBCDIC.
 
 =head2 The Compiler Suite Is Still Experimental
 
-The compiler suite is slowly getting better but is nowhere near
-working order yet.
+The compiler suite is slowly getting better but it continues to be
+highly experimental.  Use in production environments is discouraged.
 
 =head2 The Long Double Support is Still Experimental
 
