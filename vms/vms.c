@@ -105,6 +105,12 @@ struct itmlst_3 {
 /* see system service docs for $TRNLNM -- NOT the same as LNM$_MAX_INDEX */
 #define PERL_LNM_MAX_ALLOWED_INDEX 127
 
+/* OpenVMS User's Guide says at least 9 iterative translations will be performed,
+ * depending on the facility.  SHOW LOGICAL does 10, so we'll imitate that for
+ * the Perl facility.
+ */
+#define PERL_LNM_MAX_ITER 10
+
 #define MAX_DCL_SYMBOL              255     /* well, what *we* can set, at least*/
 #define MAX_DCL_LINE_LENGTH        (4*MAX_DCL_SYMBOL-4)
 
@@ -3007,6 +3013,7 @@ static char *mp_do_fileify_dirspec(pTHX_ char *dir,char *buf,int ts)
     unsigned long int dirlen, retlen, addmfd = 0, hasfilename = 0;
     char *retspec, *cp1, *cp2, *lastdir;
     char trndir[NAM$C_MAXRSS+2], vmsdir[NAM$C_MAXRSS+1];
+    unsigned short int trnlnm_iter_count;
 
     if (!dir || !*dir) {
       set_errno(EINVAL); set_vaxc_errno(SS$_BADPARAM); return NULL;
@@ -3023,7 +3030,11 @@ static char *mp_do_fileify_dirspec(pTHX_ char *dir,char *buf,int ts)
     }
     if (!strpbrk(dir+1,"/]>:")) {
       strcpy(trndir,*dir == '/' ? dir + 1: dir);
-      while (!strpbrk(trndir,"/]>:>") && my_trnlnm(trndir,trndir,0)) ;
+      trnlnm_iter_count = 0;
+      while (!strpbrk(trndir,"/]>:>") && my_trnlnm(trndir,trndir,0)) {
+        trnlnm_iter_count++; 
+        if (trnlnm_iter_count >= PERL_LNM_MAX_ITER) break;
+      }
       dir = trndir;
       dirlen = strlen(dir);
     }
@@ -3329,6 +3340,7 @@ static char *mp_do_pathify_dirspec(pTHX_ char *dir,char *buf, int ts)
     static char __pathify_retbuf[NAM$C_MAXRSS+1];
     unsigned long int retlen;
     char *retpath, *cp1, *cp2, trndir[NAM$C_MAXRSS+1];
+    unsigned short int trnlnm_iter_count;
 
     if (!dir || !*dir) {
       set_errno(EINVAL); set_vaxc_errno(SS$_BADPARAM); return NULL;
@@ -3337,8 +3349,11 @@ static char *mp_do_pathify_dirspec(pTHX_ char *dir,char *buf, int ts)
     if (*dir) strcpy(trndir,dir);
     else getcwd(trndir,sizeof trndir - 1);
 
+    trnlnm_iter_count = 0;
     while (!strpbrk(trndir,"/]:>") && !no_translate_barewords
 	   && my_trnlnm(trndir,trndir,0)) {
+      trnlnm_iter_count++; 
+      if (trnlnm_iter_count >= PERL_LNM_MAX_ITER) break;
       STRLEN trnlen = strlen(trndir);
 
       /* Trap simple rooted lnms, and return lnm:[000000] */
@@ -3515,6 +3530,7 @@ static char *mp_do_tounixspec(pTHX_ char *spec, char *buf, int ts)
   static char __tounixspec_retbuf[NAM$C_MAXRSS+1];
   char *dirend, *rslt, *cp1, *cp2, *cp3, tmp[NAM$C_MAXRSS+1];
   int devlen, dirlen, retlen = NAM$C_MAXRSS+1, expand = 0;
+  unsigned short int trnlnm_iter_count;
 
   if (spec == NULL) return NULL;
   if (strlen(spec) > NAM$C_MAXRSS) return NULL;
@@ -3561,11 +3577,14 @@ static char *mp_do_tounixspec(pTHX_ char *spec, char *buf, int ts)
         if (ts) Safefree(rslt);
         return NULL;
       }
+      trnlnm_iter_count = 0;
       do {
         cp3 = tmp;
         while (*cp3 != ':' && *cp3) cp3++;
         *(cp3++) = '\0';
         if (strchr(cp3,']') != NULL) break;
+        trnlnm_iter_count++; 
+        if (trnlnm_iter_count >= PERL_LNM_MAX_ITER+1) break;
       } while (vmstrnenv(tmp,tmp,0,fildev,0));
       if (ts && !buf &&
           ((devlen = strlen(tmp)) + (dirlen = strlen(cp2)) + 1 > retlen)) {
@@ -6569,7 +6588,7 @@ Perl_cando_by_name(pTHX_ I32 bit, Uid_t effective, char *fname)
          {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, usrname};
   char vmsname[NAM$C_MAXRSS+1], fileified[NAM$C_MAXRSS+1];
   unsigned long int objtyp = ACL$C_FILE, access, retsts, privused, iosb[2];
-  unsigned short int retlen;
+  unsigned short int retlen, trnlnm_iter_count;
   struct dsc$descriptor_s namdsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
   union prvdef curprv;
   struct itmlst_3 armlst[3] = {{sizeof access, CHP$_ACCESS, &access, &retlen},
@@ -6585,7 +6604,11 @@ Perl_cando_by_name(pTHX_ I32 bit, Uid_t effective, char *fname)
   /* Make sure we expand logical names, since sys$check_access doesn't */
   if (!strpbrk(fname,"/]>:")) {
     strcpy(fileified,fname);
-    while (!strpbrk(fileified,"/]>:>") && my_trnlnm(fileified,fileified,0)) ;
+    trnlnm_iter_count = 0;
+    while (!strpbrk(fileified,"/]>:>") && my_trnlnm(fileified,fileified,0)) {
+        trnlnm_iter_count++; 
+        if (trnlnm_iter_count >= PERL_LNM_MAX_ITER) break;
+    }
     fname = fileified;
   }
   if (!do_tovmsspec(fname,vmsname,1)) return FALSE;

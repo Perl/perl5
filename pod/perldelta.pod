@@ -2394,8 +2394,7 @@ unimplemented.  It now works as documented.
 
 The C<waitpid> emulation has been improved.  The worst bug (now fixed)
 was that a pid of -1 would cause a wildcard search of all processes on
-the system.  The most significant enhancement is that we can now
-usually get the completion status of a terminated process.
+the system.  
 
 POSIX-style signals are now emulated much better on VMS versions prior
 to 7.0.
@@ -2406,6 +2405,14 @@ functionality and better error handling.
 File access tests now use current process privileges rather than the
 user's default privileges, which could sometimes result in a mismatch
 between reported access and actual access.
+
+There is a new C<kill> implementation based on C<sys$sigprc> that allows 
+older VMS systems (pre-7.0) to use C<kill> to send signals rather than
+simply force exit.  This implementation also allows later systems to
+call C<kill> from within a signal handler.
+
+Iterative logical name translations are now limited to 10 iterations in
+imitation of SHOW LOGICAL and other OpenVMS facilities.
 
 =item *
 
