@@ -31,6 +31,335 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 10764] By: jhi                                   on 2001/06/20  19:00:23
+        Log: Subject: Re: [PATCH] djgpp updates
+             From: Laszlo Molnar <laszlo.molnar@eth.ericsson.se>
+             Date: Wed, 20 Jun 2001 10:05:15 +0200
+             Message-ID: <20010620100515.L5600@libra.eth.ericsson.se>
+     Branch: perl
+	   ! djgpp/config.over
+____________________________________________________________________________
+[ 10763] By: jhi                                   on 2001/06/20  18:58:06
+        Log: Fix for ID 20010619.002 "When building hash, hash keys that
+             are function calls are not being called", from Abhijit.
+     Branch: perl
+	   ! t/base/lex.t toke.c
+____________________________________________________________________________
+[ 10762] By: jhi                                   on 2001/06/20  18:45:00
+        Log: Upgrade to Locale::Maketext 1.02, from Sean Burke.
+     Branch: perl
+	   + lib/Locale/Maketext/ChangeLog lib/Locale/Maketext/README
+	   + lib/Locale/Maketext/test.pl
+	   - lib/Locale/Maketext.t
+	   ! MANIFEST lib/Locale/Maketext.pm lib/Locale/Maketext.pod
+	   ! lib/Locale/Maketext/TPJ13.pod
+____________________________________________________________________________
+[ 10761] By: jhi                                   on 2001/06/20  18:44:15
+        Log: Metaconfig unit change for #10760.
+     Branch: metaconfig
+	   ! U/modified/Cppsym.U
+____________________________________________________________________________
+[ 10760] By: jhi                                   on 2001/06/20  18:42:04
+        Log: Do not remove the ccsym* Cppsym* files since
+             they are useful for metaconfig units coming after us.
+             (This is the Configure nit mentioned in #10752.)
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 10759] By: jhi                                   on 2001/06/20  18:02:18
+        Log: Update to I18N::LangTags 0.24, from Sean Burke.
+     Branch: perl
+	   + lib/I18N/LangTags/ChangeLog lib/I18N/LangTags/List.pm
+	   + lib/I18N/LangTags/README
+	   - lib/I18N/LangTags/List.pod
+	   ! MANIFEST lib/I18N/LangTags.pm lib/I18N/LangTags/test.pl
+____________________________________________________________________________
+[ 10758] By: jhi                                   on 2001/06/20  17:34:43
+        Log: Regen headers.
+     Branch: perl
+	   ! embed.h embedvar.h global.sym perlapi.c perlapi.h
+	   ! pod/perlapi.pod proto.h
+____________________________________________________________________________
+[ 10757] By: jhi                                   on 2001/06/20  17:23:08
+        Log: Subject: [PATCH] Fixes case of CvDEPTH for perl_clone
+             From: Artur Bergman <artur@contiller.se>
+             Date: Wed, 20 Jun 2001 11:31:32 +0200
+             Message-ID: <B7563A14.17D8%artur@contiller.se>
+     Branch: perl
+	   ! embed.pl hv.c intrpvar.h sv.c sv.h
+____________________________________________________________________________
+[ 10756] By: jhi                                   on 2001/06/20  17:13:26
+        Log: Subject: Fix for [ID 20010124.001] POSIX::errno unreliable
+             From: Tim Sweetman <tim@aldigital.co.uk> 
+             Date: Wed, 13 Jun 2001 14:25:17 +0100 
+             Message-ID: <3B2769BD.68B4F4B3@aldigital.co.uk> 
+     Branch: perl
+	   ! ext/POSIX/POSIX.t lib/AutoLoader.pm
+____________________________________________________________________________
+[ 10755] By: nick                                  on 2001/06/20  16:12:37
+        Log: Integrate mainline
+     Branch: perlio
+	  !> embed.h embed.pl ext/Cwd/Cwd.xs ext/Filter/t/call.t
+	  !> ext/IO/lib/IO/Socket/INET.pm ext/IO/lib/IO/t/io_sock.t
+	  !> ext/POSIX/POSIX.xs hints/mpeix.sh lib/File/Temp/security.t
+	  !> lib/FileHandle.t mpeix/mpeixish.h mpeix/relink objXSUB.h
+	  !> perlapi.c pod/perldiag.pod pp_sys.c proto.h t/op/pwent.t
+	  !> t/op/study.t util.c
+____________________________________________________________________________
+[ 10754] By: gsar                                  on 2001/06/20  15:22:27
+        Log: missing ld entry in Config.pm on Windows (makefile.mk had it,
+             but not Makefile)
+     Branch: maint-5.6/perl
+	   ! win32/Makefile
+____________________________________________________________________________
+[ 10753] By: jhi                                   on 2001/06/20  14:03:20
+        Log: Security tweak on readlink().
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[ 10752] By: jhi                                   on 2001/06/20  14:00:23
+        Log: MPE/iX fixes from Mark Bixby (a Configure fix is also needed.)
+     Branch: perl
+	   ! ext/Filter/t/call.t ext/IO/lib/IO/t/io_sock.t hints/mpeix.sh
+	   ! lib/File/Temp/security.t lib/FileHandle.t mpeix/mpeixish.h
+	   ! mpeix/relink t/op/pwent.t
+____________________________________________________________________________
+[ 10751] By: jhi                                   on 2001/06/20  13:57:27
+        Log: Reinstate #10725 (with probe for alarm()).
+     Branch: perl
+	   ! t/op/study.t
+____________________________________________________________________________
+[ 10750] By: jhi                                   on 2001/06/20  13:53:46
+        Log: Replace our implementation of realpath() with OpenBSD's
+             (src/lib/libc/stdlib/realpath.c 1.4).
+     Branch: perl
+	   ! embed.h embed.pl ext/Cwd/Cwd.xs objXSUB.h perlapi.c
+	   ! pod/perldiag.pod proto.h util.c
+____________________________________________________________________________
+[ 10749] By: jhi                                   on 2001/06/20  13:07:49
+        Log: Integrate perlio.
+     Branch: perl
+	  !> perlio.c
+____________________________________________________________________________
+[ 10748] By: jhi                                   on 2001/06/20  13:07:18
+        Log: No point in going into memory-saving contortions
+             with getcwd() since there's a danger of buffer overflow.
+             Also make the POSIX extension to use sv_getcwd().
+             Finally, a missed proto.h fragment.
+     Branch: perl
+	   ! ext/POSIX/POSIX.xs proto.h util.c
+____________________________________________________________________________
+[ 10747] By: nick                                  on 2001/06/20  12:38:26
+        Log: Fix PERLIO=unix bug, while restoring maximal buffer in PerlIOBuf_unread.
+     Branch: perlio
+	   ! perlio.c
+____________________________________________________________________________
+[ 10746] By: jhi                                   on 2001/06/20  11:51:10
+        Log: Subject: Re: Bug in IO::Socket::INET module (repeat)
+             From: Graham Barr <gbarr@pobox.com>
+             Date: Wed, 20 Jun 2001 11:05:49 +0100
+             Message-ID: <20010620110549.I19188@pobox.com>
+             
+             reported in	
+             
+             Subject: Bug in IO::Socket::INET module (repeat)
+             From: "Harmon S. Nine" <hnine@netarx.com>
+             Date: Tue, 19 Jun 2001 09:41:35 -0400
+             Message-ID: <3B2F568F.8080605@netarx.com>
+             
+             The bug was that the IO::Socket::INET constructor
+             did not allow a 'LocalPort' of 0.
+     Branch: perl
+	   ! ext/IO/lib/IO/Socket/INET.pm
+____________________________________________________________________________
+[ 10745] By: nick                                  on 2001/06/20  08:56:39
+        Log: Integrate mainline.
+     Branch: perlio
+	  !> (integrate 37 files)
+____________________________________________________________________________
+[ 10744] By: jhi                                   on 2001/06/20  04:54:53
+        Log: After some reading I don't think we can blindly
+             use systems' realpath().  Too many security problems,
+             too many buggy implementations.
+             
+             TODO: the realpath() emulation code in util.c doesn't
+             seem fully operational?  (readlink(), for example?)
+     Branch: perl
+	   ! Configure Makefile.micro Porting/Glossary Porting/config.sh
+	   ! Porting/config_H config_h.SH embed.h embed.pl global.sym
+	   ! objXSUB.h perlapi.c pod/perldiag.pod pod/perltoc.pod uconfig.h
+	   ! uconfig.sh util.c vos/config.alpha.def vos/config.alpha.h
+	   ! vos/config.ga.def vos/config.ga.h win32/config_H.bc
+	   ! win32/config_H.gc win32/config_H.vc
+____________________________________________________________________________
+[ 10743] By: jhi                                   on 2001/06/20  00:48:48
+        Log: Metaconfig unit change for #10738.
+     Branch: metaconfig
+	   ! U/compline/d_gconvert.U
+____________________________________________________________________________
+[ 10742] By: jhi                                   on 2001/06/20  00:48:20
+        Log: Integrate change #10739 from maintperl:
+             
+             C<eval "/x$\r\n/x"> fails to compile correctly 
+     Branch: perl
+	  !> t/op/pat.t toke.c
+____________________________________________________________________________
+[ 10741] By: jhi                                   on 2001/06/20  00:41:05
+        Log: Retract #10725 (Hugo asked NOT to apply the patch)
+     Branch: perl
+	   ! t/op/study.t
+____________________________________________________________________________
+[ 10740] By: jhi                                   on 2001/06/19  23:58:25
+        Log: The test.third results were funnily named because of the
+             new test scheme.
+     Branch: perl
+	   ! t/TEST
+____________________________________________________________________________
+[ 10739] By: gsar                                  on 2001/06/19  23:49:15
+        Log: C<eval "/x$\r\n/x"> fails to compile correctly
+     Branch: maint-5.6/perl
+	   ! t/op/pat.t toke.c
+____________________________________________________________________________
+[ 10738] By: jhi                                   on 2001/06/19  23:04:15
+        Log: Subject: [ID 20010619.012] Not OK: perl v5.7.1 +DEVEL10721 +devel-10722 on alpha-dec_osf-per lio 4.0f (UNINSTALLED) 
+             From: Spider Boardman <spider@Orb.Nashua.NH.US>
+             Date: Tue, 19 Jun 2001 19:15:40 -0400
+             Message-Id: <200106192315.TAA18531@Orb.Nashua.NH.US>
+             
+             The bigintpm.t #1183 failing in Tru64 (and also Cygwin)
+             because "1e+129" being expected but "1.e+129" being returned.
+             The culprit (at least in Tru64) is the use of gcvt().
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 10737] By: jhi                                   on 2001/06/19  22:56:52
+        Log: Subject: [PATCH perl@10722] test hunting on VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Message-Id: <5.1.0.14.0.20010619183530.01c4bdb8@exchi01>
+             Date: Tue, 19 Jun 2001 18:59:01 -0500
+     Branch: perl
+	   ! vms/test.com
+____________________________________________________________________________
+[ 10736] By: jhi                                   on 2001/06/19  21:32:29
+        Log: Subject: [PATCH] s/typos//
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Wed, 20 Jun 2001 02:15:02 +0530
+             Message-ID: <20010620021502.A14541@lustre.linux.in>
+             
+             Without the op.h s/bearword/bareword/ hunk, see
+             http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/1998-02/msg00370.html
+     Branch: perl
+	   ! util.c
+____________________________________________________________________________
+[ 10735] By: jhi                                   on 2001/06/19  21:26:43
+        Log: Metaconfig unit change for #10732 and #10733.
+     Branch: metaconfig/U/perl
+	   ! fflushall.U
+____________________________________________________________________________
+[ 10734] By: jhi                                   on 2001/06/19  21:24:41
+        Log: Subject: [PATCH perl@10722] build ext/Socket dynamically on VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Tue, 19 Jun 2001 17:19:48 -0500
+             Message-Id: <5.1.0.14.0.20010619165650.01bd8478@exchi01>
+     Branch: perl
+	   ! configure.com vms/descrip_mms.template
+____________________________________________________________________________
+[ 10733] By: jhi                                   on 2001/06/19  19:57:44
+        Log: Subject: [ID 20010619.011] Not OK: perl v5.7.1 +DEVEL10721 +devel-10722 on alpha-dec_osf-per lio 4.0f (UNINSTALLED)
+             From: Spider Boardman <spider@Orb.Nashua.NH.US>
+             Date: Tue, 19 Jun 2001 16:48:07 -0400
+             Message-Id: <200106192048.QAA20849@Orb.Nashua.NH.US>
+             
+             Further fixes to fflush(NULL) detection.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 10732] By: jhi                                   on 2001/06/19  19:38:20
+        Log: AIX test -s hangs with non-existent files?
+             (A genuine logic bug in Configure, but AIX also broken?)
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 10731] By: jhi                                   on 2001/06/19  19:17:35
+        Log: AUTHORS updates.
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[ 10730] By: jhi                                   on 2001/06/19  19:03:07
+        Log: Subject: [ID 20010619.007] Not OK: perl v5.7.1 +DEVEL10721 +devel-10722 on alpha-dec_osf-perlio 4.0f (UNINSTALLED)
+             From: Spider Boardman <spider@Orb.Nashua.NH.US>
+             Date: Tue, 19 Jun 2001 15:33:25 -0400
+             Message-Id: <200106191933.PAA08415@Orb.Nashua.NH.US>
+     Branch: perl
+	   ! ext/POSIX/POSIX.t lib/warnings.t perlio.c t/lib/1_compile.t
+	   ! t/lib/warnings/pp
+____________________________________________________________________________
+[ 10729] By: jhi                                   on 2001/06/19  18:34:10
+        Log: Integrate perlio.
+     Branch: perl
+	  !> lib/File/Find/find.t win32/distclean.bat
+____________________________________________________________________________
+[ 10728] By: nick                                  on 2001/06/19  18:24:53
+        Log: Hack File/Find/find.t to use File::Spec::Unix on Win32.
+     Branch: perlio
+	   ! lib/File/Find/find.t win32/distclean.bat
+____________________________________________________________________________
+[ 10727] By: jhi                                   on 2001/06/19  18:07:31
+        Log: Furthwer tweak the fdopen() spot as suggseted by Jeff Pinyan;
+             also add information how to find out whether one has PerlIO.
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 10726] By: jhi                                   on 2001/06/19  17:59:30
+        Log: Subject: [ID 20010619.005] two typos in pod/perlfunc.pod
+             From: Jeffrey Friedl <jfriedl@yahoo-inc.com>
+             Date: Tue, 19 Jun 2001 11:36:32 -0700 (PDT)
+             Message-Id: <200106191836.LAA21471@ventrue.corp.yahoo.com>
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 10725] By: jhi                                   on 2001/06/19  17:28:30
+        Log: Subject: Re: [ID 20010618.006] some end-anchored regexps hang when using study 
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Tue, 19 Jun 2001 12:37:30 +0100
+             Message-Id: <200106191137.MAA15185@crypt.compulink.co.uk>
+     Branch: perl
+	   ! t/op/study.t
+____________________________________________________________________________
+[ 10724] By: jhi                                   on 2001/06/19  17:22:20
+        Log: Subject: Re: [ID 20010618.006] some end-anchored regexps hang when using study 
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Message-Id: <200106191215.NAA17691@crypt.compulink.co.uk>
+             Date: Tue, 19 Jun 2001 13:15:17 +0100
+     Branch: perl
+	   ! util.c
+____________________________________________________________________________
+[ 10723] By: nick                                  on 2001/06/19  14:46:15
+        Log: Integrate mainline
+     Branch: perlio
+	  +> ext/IPC/SysV/ipcsysv.t ext/Thread/create.tx ext/Thread/die.tx
+	  +> ext/Thread/die2.tx ext/Thread/io.tx ext/Thread/join.tx
+	  +> ext/Thread/join2.tx ext/Thread/list.tx ext/Thread/lock.tx
+	  +> ext/Thread/queue.tx ext/Thread/specific.tx ext/Thread/sync.tx
+	  +> ext/Thread/sync2.tx ext/Thread/unsync.tx ext/Thread/unsync2.tx
+	  +> ext/Thread/unsync3.tx ext/Thread/unsync4.tx
+	   - ext/Thread/create.t ext/Thread/die.t ext/Thread/die2.t
+	   - ext/Thread/io.t ext/Thread/join.t ext/Thread/join2.t
+	   - ext/Thread/list.t ext/Thread/lock.t ext/Thread/queue.t
+	   - ext/Thread/specific.t ext/Thread/sync.t ext/Thread/sync2.t
+	   - ext/Thread/unsync.t ext/Thread/unsync2.t ext/Thread/unsync3.t
+	   - ext/Thread/unsync4.t
+	  !> Changes MANIFEST NetWare/Makefile NetWare/config.wc
+	  !> djgpp/config.over djgpp/fixpmain
+	  !> ext/DynaLoader/DynaLoader_pm.PL ext/IPC/SysV/t/msg.t
+	  !> ext/IPC/SysV/t/sem.t handy.h hv.c lib/ExtUtils/MM_Unix.pm
+	  !> patchlevel.h perl.h utils/libnetcfg.PL win32/Makefile
+____________________________________________________________________________
+[ 10722] By: jhi                                   on 2001/06/19  11:55:30
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 10721] By: jhi                                   on 2001/06/19  11:29:34
         Log: The existence shall be MANIFESted.
      Branch: perl
