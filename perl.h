@@ -1888,8 +1888,6 @@ struct ptr_tbl {
 #define U_V(what) (cast_uv((NV)(what)))
 #endif
 
-/* Mention NV_PRESERVES_UV so that Configure picks it up. */
-
 /* These do not care about the fractional part, only about the range. */
 #define NV_WITHIN_IV(nv) (I_V(nv) >= IV_MIN && I_V(nv) <= IV_MAX)
 #define NV_WITHIN_UV(nv) ((nv)>=0.0 && U_V(nv) >= UV_MIN && U_V(nv) <= UV_MAX)
@@ -3006,7 +3004,7 @@ typedef struct am_table_short AMTS;
 
 #endif /* !USE_LOCALE_NUMERIC */
 
-#if !defined(Atol) && defined(USE_LONG_LONG) && defined(HAS_LONG_LONG)
+#if !defined(Atol) && defined(HAS_LONG_LONG)
 #   if !defined(Atol) && defined(HAS_STRTOLL)
 #       define Atol(s) strtoll(s, (char**)NULL, 10)
 #   endif
@@ -3162,5 +3160,13 @@ typedef struct am_table_short AMTS;
 #define PERL_PATCHLEVEL_H_IMPLICIT
 #include "patchlevel.h"
 #undef PERL_PATCHLEVEL_H_IMPLICIT
+
+/* Mention
+   
+   NV_PRESERVES_UV
+   HAS_ICONV
+   I_ICONV
+
+   so that Configure picks them up. */
 
 #endif /* Include guard */

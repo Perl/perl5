@@ -1432,7 +1432,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_gethname HAS_GETHOSTNAME	/**/
 #$d_uname HAS_UNAME		/**/
-#$d_phostname HAS_PHOSTNAME
+#$d_phostname HAS_PHOSTNAME	/**/
 #ifdef HAS_PHOSTNAME
 #define PHOSTNAME "$aphostname"	/* How to get the host name */
 #endif
@@ -1590,6 +1590,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_htonl HAS_HTONS		/**/
 #$d_htonl HAS_NTOHL		/**/
 #$d_htonl HAS_NTOHS		/**/
+
+/* HAS_ICONV:
+ *	This symbol, if defined, indicates that the iconv routine is
+ *	available to do character set conversions.
+ */
+#$d_iconv HAS_ICONV		/**/
 
 /* HAS_ISASCII:
  *	This manifest constant lets the C program know that isascii 
@@ -2177,6 +2183,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$i_grp I_GRP		/**/
 #$d_grpasswd GRPASSWD	/**/
+
+/* I_ICONV:
+ *	This symbol, if defined, indicates that <iconv.h> exists and
+ *	should be included.
+ */
+#$i_iconv	I_ICONV		/**/
 
 /* I_INTTYPES:
  *     This symbol, if defined, indicates to the C program that it should
@@ -2795,7 +2807,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This symbol, if defined, indicates that Perl should
  *	be built to use multiplicity.
  */
-#ifndef MULTIPLICTY
+#ifndef MULTIPLICITY
 #$usemultiplicity	MULTIPLICITY		/**/
 #endif
 
