@@ -68,6 +68,12 @@ all.  This could be construed to be a bug.
 This is identical to the C function C<_exit()>.  It exits the program
 immediately which means among other things buffered I/O is B<not> flushed.
 
+Note that when using threads and in Linux this is B<not> a good way to
+exit a thread because in Linux processes and threads are kind of the
+same thing (Note: while this is the situation in early 2003 there are
+projects under way to have threads with more POSIXly semantics in Linux).
+If you want not to return from a thread, detach the thread.
+
 =item abort
 
 This is identical to the C function C<abort()>.  It terminates the

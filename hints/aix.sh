@@ -209,6 +209,24 @@ esac
 # the required -bE:$installarchlib/CORE/perl.exp is added by
 # libperl.U (Configure) later.
 
+case "$use64bitall" in
+    $define|true|[yY]*) use64bitint="$define" ;;
+    esac
+
+case "$usemorebits" in
+    $define|true|[yY]*) use64bitint="$define"; uselongdouble="$define" ;;
+    esac
+
+case $cc_type in
+    vac|xlc)
+	case "$uselongdouble" in
+	    $define|true|[yY]*)
+		ccflags="$ccflags -qlongdouble"
+		libswanted="c128 $libswanted"
+		;;
+	    esac
+    esac
+
 case "$cc" in
 *gcc*) ;;
 cc*|xlc*) # cc should've been set by line 116 or so if empty.
