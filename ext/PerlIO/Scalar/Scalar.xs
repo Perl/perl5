@@ -16,8 +16,30 @@ typedef struct
 IV
 PerlIOScalar_pushed(PerlIO *f, const char *mode, SV *arg)
 {
- PerlIOScalar *b = PerlIOSelf(f,PerlIOScalar);
- return PerlIOBase_pushed(f,mode,arg);
+ dTHX;
+ PerlIOScalar *s = PerlIOSelf(f,PerlIOScalar);
+ /* If called (normally) via open() then arg is ref to scalar we are
+    using, otherwise arg (from binmode presumably) is either NULL
+    or the _name_ of the scalar
+  */
+ if  (arg)
+  {
+   if (SvROK(arg))
+    {
+     s->var = SvREFCNT_inc(SvRV(arg));
+    }
+   else
+    {
+     s->var = SvREFCNT_inc(perl_get_sv(SvPV_nolen(arg),GV_ADD|GV_ADDMULTI));
+    }
+  }
+ else
+  {
+   s->var = newSVpvn("",0);
+  }
+ sv_upgrade(s->var,SVt_PV);
+ s->posn = 0;
+ return PerlIOBase_pushed(f,mode,Nullsv);
 }
 
 IV
@@ -171,20 +193,13 @@ PerlIO *
 PerlIOScalar_open(pTHX_ PerlIO_funcs *self, AV *layers, IV n, const char *mode, int fd, int imode, int perm, PerlIO *f, int narg, SV **args)
 {
  PerlIOScalar *s;
- if (narg > 0)
+ SV *arg = (narg > 0) ? *args : PerlIOArg;
+ if (SvROK(arg) || SvPOK(arg))
   {
-   SV *ref = *args;
-   if (SvROK(ref))
-    {
-     SV *var = SvRV(ref);
-     sv_upgrade(var,SVt_PV);
-     f = PerlIO_allocate(aTHX);
-     s = PerlIOSelf(PerlIO_push(aTHX_ f,self,mode,PerlIOArg),PerlIOScalar);
-     s->var = SvREFCNT_inc(var);
-     s->posn = 0;
-     PerlIOBase(f)->flags |= PERLIO_F_OPEN;
-     return f;
-    }
+   f = PerlIO_allocate(aTHX);
+   s = PerlIOSelf(PerlIO_push(aTHX_ f,self,mode,arg),PerlIOScalar);
+   PerlIOBase(f)->flags |= PERLIO_F_OPEN;
+   return f;
   }
  return NULL;
 }
