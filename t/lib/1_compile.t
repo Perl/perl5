@@ -140,6 +140,7 @@ CGI::Push
 CGI::Switch
 CGI::Util
 Carp::Heavy
+CPAN::Nox
 Devel::DProf
 Exporter::Heavy
 ExtUtils::Constant
