@@ -2546,14 +2546,14 @@ regrepeat_hard(regnode *p, I32 max, I32 *lp)
     register char *start;
     register char *loceol = PL_regeol;
     I32 l = 0;
-    I32 count = 0;
+    I32 count = 0, res = 1;
 
     if (!max)
 	return 0;
 
     start = PL_reginput;
     if (UTF) {
-	while (PL_reginput < loceol && (scan = PL_reginput, regmatch(p))) {
+	while (PL_reginput < loceol && (scan = PL_reginput, res = regmatch(p))) {
 	    if (!count++) {
 		l = 0;
 		while (start < PL_reginput) {
@@ -2569,7 +2569,7 @@ regrepeat_hard(regnode *p, I32 max, I32 *lp)
 	}
     }
     else {
-	while (PL_reginput < loceol && (scan = PL_reginput, regmatch(p))) {
+	while (PL_reginput < loceol && (scan = PL_reginput, res = regmatch(p))) {
 	    if (!count++) {
 		*lp = l = PL_reginput - start;
 		if (max != REG_INFTY && l*max < loceol - scan)
@@ -2579,7 +2579,7 @@ regrepeat_hard(regnode *p, I32 max, I32 *lp)
 	    }
 	}
     }
-    if (PL_reginput < loceol)
+    if (!res)
 	PL_reginput = scan;
     
     return count;
