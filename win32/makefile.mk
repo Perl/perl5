@@ -528,12 +528,12 @@ EXTENSION_DLL	=		\
 		$(SDBM_FILE_DLL)\
 		$(IO_DLL)	\
 		$(POSIX_DLL)	\
-		$(ATTRS_DLL)
+		$(ATTRS_DLL)	\
+		$(B_DLL)
 
 .IF "$(OBJECT)" == ""
 EXTENSION_DLL	+=		\
-		$(THREAD_DLL)	\
-		$(B_DLL)
+		$(THREAD_DLL)
 .ENDIF
 
 POD2HTML	= $(PODDIR)\pod2html
@@ -940,6 +940,7 @@ clean :
 	-@erase $(MINIPERL)
 	-@erase perlglob$(o)
 	-@erase perlmain$(o)
+	-@erase PerlCAPI.cpp
 	-@erase config.w32
 	-@erase /f config.h
 	-@erase $(GLOBEXE)

@@ -418,13 +418,13 @@ EXTENSION_DLL	= 		\
 		$(SDBM_FILE_DLL)\
 		$(IO_DLL)	\
 		$(POSIX_DLL)	\
-		$(ATTRS_DLL)
+		$(ATTRS_DLL)	\
+		$(B_DLL)
 
 !IF "$(OBJECT)" == ""
 EXTENSION_DLL	= 		\
 		$(EXTENSION_DLL)\
-		$(THREAD_DLL)	\
-		$(B_DLL)
+		$(THREAD_DLL)
 !ENDIF
 
 POD2HTML	= $(PODDIR)\pod2html

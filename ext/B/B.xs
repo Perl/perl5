@@ -12,6 +12,22 @@
 #include "XSUB.h"
 #include "INTERN.h"
 
+#ifdef PERL_OBJECT
+#undef op_name
+#undef opargs 
+#undef op_desc
+#define op_name (pPerl->Perl_get_op_names())
+#define opargs (pPerl->Perl_get_opargs())
+#define op_desc (pPerl->Perl_get_op_descs())
+#endif
+
+#ifdef PerlIO
+typedef PerlIO * InputStream;
+#else
+typedef FILE * InputStream;
+#endif
+
+
 static char *svclassnames[] = {
     "B::NULL",
     "B::IV",
@@ -295,7 +311,7 @@ void freadpv(U32 len, void *data)
     pv.xpv_cur = len - 1;
 }
 
-void byteload_fh(FILE *fp)
+void byteload_fh(InputStream fp)
 {
     struct bytestream bs;
     bs.data = fp;
@@ -343,7 +359,7 @@ void byteload_string(char *str)
     byterun(bs);
 }
 #else
-void byteload_fh(FILE *fp)
+void byteload_fh(InputStream fp)
 {
     byterun(fp);
 }
@@ -468,7 +484,7 @@ walkoptree_debug(...)
 
 int
 byteload_fh(fp)
-	FILE *	fp
+	InputStream    fp
     CODE:
 	byteload_fh(fp);
 	RETVAL = 1;

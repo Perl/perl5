@@ -1228,6 +1228,7 @@ void restore_expect _((void *e));
 void restore_lex_expect _((void *e));
 void yydestruct _((void *ptr));
 VIRTUAL int fprintf _((PerlIO *pf, const char *pat, ...));
+VIRTUAL SV**	get_specialsv_list _((void));
 
 #ifdef WIN32
 VIRTUAL int&	ErrorNo _((void));

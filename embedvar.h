@@ -220,6 +220,7 @@
 #define sortcop			(curinterp->Isortcop)
 #define sortcxix		(curinterp->Isortcxix)
 #define sortstash		(curinterp->Isortstash)
+#define specialsv_list	(curinterp->Ispecialsv_list)
 #define splitstr		(curinterp->Isplitstr)
 #define statcache		(curinterp->Istatcache)
 #define statgv			(curinterp->Istatgv)
@@ -383,6 +384,7 @@
 #define Isortcop		sortcop
 #define Isortcxix		sortcxix
 #define Isortstash		sortstash
+#define Ispecialsv_list	specialsv_list
 #define Isplitstr		splitstr
 #define Istatcache		statcache
 #define Istatgv			statgv
@@ -608,6 +610,7 @@
 #define sortcop			Perl_sortcop
 #define sortcxix		Perl_sortcxix
 #define sortstash		Perl_sortstash
+#define specialsv_list	Perl_specialsv_list
 #define splitstr		Perl_splitstr
 #define statcache		Perl_statcache
 #define statgv			Perl_statgv

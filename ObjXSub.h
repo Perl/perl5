@@ -551,6 +551,8 @@
 #define sortcxix		pPerl->Perl_sortcxix
 #undef  sortstash
 #define sortstash		pPerl->Perl_sortstash
+#undef  specialsv_list
+#define specialsv_list  pPerl->Perl_specialsv_list
 #undef  splitstr
 #define splitstr		pPerl->Perl_splitstr
 #undef  stack_base
@@ -949,7 +951,9 @@
 #undef  get_no_modify
 #define get_no_modify       pPerl->Perl_get_no_modify
 #undef  get_opargs
-#define get_opargs	    pPerl->Perl_get_opargs
+#define get_opargs	        pPerl->Perl_get_opargs
+#undef  get_specialsv_list
+#define get_specialsv_list  pPerl->Perl_get_specialsv_list
 #undef  gp_free
 #define gp_free             pPerl->Perl_gp_free
 #undef  gp_ref
