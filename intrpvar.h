@@ -295,7 +295,7 @@ PERLVAR(Ithisexpr,	I32)		/* name id for nothing_in_common() */
 PERLVAR(Ilast_uni,	char *)		/* position of last named-unary op */
 PERLVAR(Ilast_lop,	char *)		/* position of last list operator */
 PERLVAR(Ilast_lop_op,	OPCODE)		/* last list operator */
-PERLVAR(Iin_my,		bool)		/* we're compiling a "my" declaration */
+PERLVAR(Iin_my,		I32)		/* we're compiling a "my" (or "our") declaration */
 PERLVAR(Iin_my_stash,	HV *)		/* declared class of this "my" declaration */
 #ifdef FCRYPT
 PERLVAR(Icryptseen,	I32)		/* has fast crypt() been initialized? */

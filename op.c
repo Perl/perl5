@@ -18,6 +18,7 @@
 #include "EXTERN.h"
 #define PERL_IN_OP_C
 #include "perl.h"
+#include "keywords.h"
 
 /* #define PL_OP_SLAB_ALLOC */
                                                             
@@ -111,9 +112,10 @@ Perl_pad_allocmy(pTHX_ char *name)
     SV *sv;
 
     if (!(
+	PL_in_my == KEY_our ||
 	isALPHA(name[1]) ||
 	(PL_hints & HINT_UTF8 && (name[1] & 0xc0) == 0xc0) ||
-	name[1] == '_' && (int)strlen(name) > 2))
+	name[1] == '_' && (int)strlen(name) > 2 ))
     {
 	if (!isPRINT(name[1]) || strchr("\t\n\r\f", name[1])) {
 	    /* 1999-02-27 mjd@plover.com */
@@ -145,8 +147,10 @@ Perl_pad_allocmy(pTHX_ char *name)
 		&& strEQ(name, SvPVX(sv)))
 	    {
 		Perl_warner(aTHX_ WARN_UNSAFE,
-			"\"my\" variable %s masks earlier declaration in same %s", 
-			name, (SvIVX(sv) == PAD_MAX ? "scope" : "statement"));
+			"\"%s\" variable %s masks earlier declaration in same %s", 
+			(PL_in_my == KEY_our ? "our" : "my"),
+			name,
+			(SvIVX(sv) == PAD_MAX ? "scope" : "statement"));
 		break;
 	    }
 	}
@@ -164,6 +168,8 @@ Perl_pad_allocmy(pTHX_ char *name)
 	SvSTASH(sv) = (HV*)SvREFCNT_inc(PL_in_my_stash);
 	PL_sv_objcount++;
     }
+    if (PL_in_my == KEY_our)
+	SvFLAGS(sv) |= SVpad_OUR;
     av_store(PL_comppad_name, off, sv);
     SvNVX(sv) = (NV)PAD_MAX;
     SvIVX(sv) = 0;			/* Not yet introduced--see newSTATEOP */
@@ -231,6 +237,8 @@ S_pad_findlex(pTHX_ char *name, PADOFFSET newoff, U32 seq, CV* startcv,
 		    SvNVX(namesv) = (NV)PL_curcop->cop_seq;
 		    SvIVX(namesv) = PAD_MAX;	/* A ref, intro immediately */
 		    SvFAKE_on(namesv);		/* A ref, not a real var */
+		    if (SvFLAGS(sv) & SVpad_OUR)/* An "our" variable */
+			SvFLAGS(namesv) |= SVpad_OUR;
 		    if (SvOBJECT(sv)) {		/* A typed var */
 			SvOBJECT_on(namesv);
 			(void)SvUPGRADE(namesv, SVt_PVMG);
@@ -355,7 +363,7 @@ Perl_pad_findmy(pTHX_ char *name)
 	      seq > I_32(SvNVX(sv)))) &&
 	    strEQ(SvPVX(sv), name))
 	{
-	    if (SvIVX(sv))
+	    if (SvIVX(sv) || SvFLAGS(sv) & SVpad_OUR)
 		return (PADOFFSET)off;
 	    pendoff = off;	/* this pending def. will override import */
 	}
@@ -1730,6 +1738,10 @@ S_my_kid(pTHX_ OP *o, OP *attrs)
 	for (kid = cLISTOPo->op_first; kid; kid = kid->op_sibling)
 	    my_kid(kid, attrs);
     } else if (type == OP_UNDEF) {
+	return o;
+    } else if (type == OP_RV2SV ||	/* "our" declaration */
+	       type == OP_RV2AV ||
+	       type == OP_RV2HV) { /* XXX does this let anything illegal in? */
 	return o;
     } else if (type != OP_PADSV &&
 	     type != OP_PADAV &&

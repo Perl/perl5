@@ -417,7 +417,7 @@ END
 if( $opt_X || $opt_c || $opt_A ){
 	# we won't have our own AUTOLOAD(), so won't have $AUTOLOAD
 	print PM <<'END';
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
+our @EXPORT_OK;
 END
 }
 else{
@@ -425,7 +425,7 @@ else{
 	# will want Carp.
 	print PM <<'END';
 use Carp;
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK $AUTOLOAD);
+our @EXPORT_OK;
 END
 }
 
@@ -450,7 +450,7 @@ unless ($opt_A) { # no autoloader whatsoever.
 }
 
 # Determine @ISA.
-my $myISA = '@ISA = qw(Exporter';	# We seem to always want this.
+my $myISA = 'our @ISA = qw(Exporter';	# We seem to always want this.
 $myISA .= ' DynaLoader' 	unless $opt_X;  # no XS
 $myISA .= ');';
 print PM "\n$myISA\n\n";
@@ -459,10 +459,10 @@ print PM<<"END";
 # Items to export into callers namespace by default. Note: do not export
 # names by default without a very good reason. Use EXPORT_OK instead.
 # Do not simply export all your public functions/methods/constants.
-\@EXPORT = qw(
+our \@EXPORT = qw(
 	@const_names
 );
-\$VERSION = '$TEMPLATE_VERSION';
+our \$VERSION = '$TEMPLATE_VERSION';
 
 END
 
@@ -473,6 +473,7 @@ sub AUTOLOAD {
     # to the AUTOLOAD in AutoLoader.
 
     my \$constname;
+    our $AUTOLOAD;
     (\$constname = \$AUTOLOAD) =~ s/.*:://;
     croak "&$module::constant not defined" if \$constname eq 'constant';
     my \$val = constant(\$constname, \@_ ? \$_[0] : 0);

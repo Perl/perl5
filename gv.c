@@ -531,6 +531,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	    else if ((COP*)PL_curcop == &PL_compiling) {
 		stash = PL_curstash;
 		if (add && (PL_hints & HINT_STRICT_VARS) &&
+		    !(add & GV_ADDOUR) &&
 		    sv_type != SVt_PVCV &&
 		    sv_type != SVt_PVGV &&
 		    sv_type != SVt_PVFM &&

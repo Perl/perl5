@@ -1971,12 +1971,17 @@ Perl_yylex(pTHX)
 	   if it's a legal name, the OP is a PADANY.
 	*/
 	if (PL_in_my) {
-	    if (strchr(PL_tokenbuf,':'))
-		yyerror(Perl_form(aTHX_ PL_no_myglob,PL_tokenbuf));
+	    if (PL_in_my == KEY_our) {	/* "our" is merely analogous to "my" */
+		tmp = pad_allocmy(PL_tokenbuf);
+	    }
+	    else {
+		if (strchr(PL_tokenbuf,':'))
+		    yyerror(Perl_form(aTHX_ PL_no_myglob,PL_tokenbuf));
 
-	    yylval.opval = newOP(OP_PADANY, 0);
-	    yylval.opval->op_targ = pad_allocmy(PL_tokenbuf);
-	    return PRIVATEREF;
+		yylval.opval = newOP(OP_PADANY, 0);
+		yylval.opval->op_targ = pad_allocmy(PL_tokenbuf);
+		return PRIVATEREF;
+	    }
 	}
 
 	/* 
@@ -2004,6 +2009,22 @@ Perl_yylex(pTHX)
 	    }
 #endif /* USE_THREADS */
 	    if ((tmp = pad_findmy(PL_tokenbuf)) != NOT_IN_PAD) {
+		/* might be an "our" variable" */
+		if (SvFLAGS(AvARRAY(PL_comppad_name)[tmp]) & SVpad_OUR) {
+		    /* build ops for a bareword */
+		    yylval.opval = (OP*)newSVOP(OP_CONST, 0, newSVpv(PL_tokenbuf+1, 0));
+		    yylval.opval->op_private = OPpCONST_ENTERED;
+		    gv_fetchpv(PL_tokenbuf+1,
+			(PL_in_eval
+			    ? (GV_ADDMULTI | GV_ADDINEVAL | GV_ADDOUR)
+			    : GV_ADDOUR
+			),
+			((PL_tokenbuf[0] == '$') ? SVt_PV
+			 : (PL_tokenbuf[0] == '@') ? SVt_PVAV
+			 : SVt_PVHV));
+		    return WORD;
+		}
+
 		/* if it's a sort block and they're naming $a or $b */
 		if (PL_last_lop_op == OP_SORT &&
 		    PL_tokenbuf[0] == '$' &&
@@ -3959,8 +3980,16 @@ Perl_yylex(pTHX)
 		if ((PL_bufend - p) >= 3 &&
 		    strnEQ(p, "my", 2) && isSPACE(*(p + 2)))
 		    p += 2;
+		else if ((PL_bufend - p) >= 4 &&
+		    strnEQ(p, "our", 3) && isSPACE(*(p + 3)))
+		    p += 3;
 		p = skipspace(p);
-		if (isIDFIRST_lazy(p))
+		if (isIDFIRST_lazy(p)) {
+		    p = scan_ident(p, PL_bufend,
+			PL_tokenbuf, sizeof PL_tokenbuf, TRUE);
+		    p = skipspace(p);
+		}
+		if (*p != '$')
 		    Perl_croak(aTHX_ "Missing $ on loop variable");
 	    }
 	    OPERATOR(FOR);
@@ -4166,8 +4195,9 @@ Perl_yylex(pTHX)
 	case KEY_msgsnd:
 	    LOP(OP_MSGSND,XTERM);
 
+	case KEY_our:
 	case KEY_my:
-	    PL_in_my = TRUE;
+	    PL_in_my = tmp;
 	    s = skipspace(s);
 	    if (isIDFIRST_lazy(s)) {
 		s = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, TRUE, &len);
@@ -5120,8 +5150,7 @@ Perl_keyword(pTHX_ register char *d, I32 len)
 	case 3:
 	    if (strEQ(d,"ord"))			return -KEY_ord;
 	    if (strEQ(d,"oct"))			return -KEY_oct;
-	    if (strEQ(d,"our")) { deprecate("reserved word \"our\"");
-						return 0;}
+	    if (strEQ(d,"our"))			return KEY_our;
 	    break;
 	case 4:
 	    if (strEQ(d,"open"))		return -KEY_open;
