@@ -3,7 +3,7 @@
 #include "XSUB.h"
 
 #define UNIMPLEMENTED(x,y) y x (SV *sv, char *encoding) {   \
-                         Perl_croak("panic_unimplemented"); \
+                         Perl_croak(aTHX_ "panic_unimplemented"); \
 			 return (y)0; /* fool picky compilers */ \
                          } 
 UNIMPLEMENTED(_encoded_utf8_to_bytes, I32)

@@ -2440,7 +2440,7 @@ Perl_sv_utf8_downgrade(pTHX_ register SV* sv, bool fail_ok)
 	    if (fail_ok)
 		return FALSE;
 	    else
-		Perl_croak("big byte");
+		Perl_croak(aTHX_ "big byte");
 	}
 	SvCUR(sv) = len - 1;
 	SvUTF8_off(sv);
