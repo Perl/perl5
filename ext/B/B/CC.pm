@@ -8,7 +8,12 @@
 package B::CC;
 use strict;
 use B qw(main_start main_root class comppadlist peekop svref_2object
-	timing_info init_av);
+	timing_info init_av  
+	OPf_WANT_LIST OPf_WANT OPf_MOD OPf_STACKED OPf_SPECIAL
+	OPpASSIGN_BACKWARDS OPpLVAL_INTRO OPpDEREF_AV OPpDEREF_HV
+	OPpDEREF OPpFLIP_LINENUM G_ARRAY     
+	CXt_NULL CXt_SUB CXt_EVAL CXt_LOOP CXt_SUBST CXt_BLOCK
+	);
 use B::C qw(save_unused_subs objsym init_sections mark_unused
 	    output_all output_boilerplate output_main);
 use B::Bblock qw(find_leaders);
@@ -16,26 +21,6 @@ use B::Stackobj qw(:types :flags);
 
 # These should probably be elsewhere
 # Flags for $op->flags
-sub OPf_LIST () { 1 }
-sub OPf_KNOW () { 2 }
-sub OPf_MOD () { 32 }
-sub OPf_STACKED () { 64 }
-sub OPf_SPECIAL () { 128 }
-# op-specific flags for $op->private 
-sub OPpASSIGN_BACKWARDS () { 64 }
-sub OPpLVAL_INTRO () { 128 }
-sub OPpDEREF_AV () { 32 }
-sub OPpDEREF_HV () { 64 }
-sub OPpDEREF () { OPpDEREF_AV|OPpDEREF_HV }
-sub OPpFLIP_LINENUM () { 64 }
-sub G_ARRAY () { 1 }
-# cop.h
-sub CXt_NULL () { 0 }
-sub CXt_SUB () { 1 }
-sub CXt_EVAL () { 2 }
-sub CXt_LOOP () { 3 }
-sub CXt_SUBST () { 4 }
-sub CXt_BLOCK () { 5 }
 
 my $module;		# module name (when compiled with -m)
 my %done;		# hash keyed by $$op of leaders of basic blocks
@@ -457,7 +442,7 @@ sub doop {
 sub gimme {
     my $op = shift;
     my $flags = $op->flags;
-    return (($flags & OPf_KNOW) ? ($flags & OPf_LIST) : "dowantarray()");
+    return (($flags & OPf_WANT) ? ($flags & OPf_WANT_LIST) : "dowantarray()");
 }
 
 #
@@ -1077,12 +1062,12 @@ sub nyi {
 sub pp_range {
     my $op = shift;
     my $flags = $op->flags;
-    if (!($flags & OPf_KNOW)) {
+    if (!($flags & OPf_WANT)) {
 	error("context of range unknown at compile-time");
     }
     write_back_lexicals();
     write_back_stack();
-    if (!($flags & OPf_LIST)) {
+    if (!($flags & OPf_WANT_LIST)) {
 	# We need to save our UNOP structure since pp_flop uses
 	# it to find and adjust out targ. We don't need it ourselves.
 	$op->save;
@@ -1096,10 +1081,10 @@ sub pp_range {
 sub pp_flip {
     my $op = shift;
     my $flags = $op->flags;
-    if (!($flags & OPf_KNOW)) {
+    if (!($flags & OPf_WANT)) {
 	error("context of flip unknown at compile-time");
     }
-    if ($flags & OPf_LIST) {
+    if ($flags & OPf_WANT_LIST) {
 	return $op->first->false;
     }
     write_back_lexicals();

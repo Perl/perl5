@@ -116,13 +116,9 @@ Malcolm Beattie, mbeattie@sable.ox.ac.uk.
 =cut
 
 use strict;
-use B qw(walkoptree_slow main_root walksymtable svref_2object parents);
-
-# Constants (should probably be elsewhere)
-sub G_ARRAY () { 1 }
-sub OPf_LIST () { 1 }
-sub OPf_KNOW () { 2 }
-sub OPf_STACKED () { 64 }
+use B qw(walkoptree_slow main_root walksymtable svref_2object parents
+         OPf_WANT_LIST OPf_WANT OPf_STACKED G_ARRAY
+        );
 
 my $file = "unknown";		# shadows current filename
 my $line = 0;			# shadows current line number
@@ -165,8 +161,8 @@ sub warning {
 sub gimme {
     my $op = shift;
     my $flags = $op->flags;
-    if ($flags & OPf_KNOW) {
-	return(($flags & OPf_LIST) ? 1 : 0);
+    if ($flags & OPf_WANT) {
+	return(($flags & OPf_WANT_LIST) ? 1 : 0);
     }
     return undef;
 }

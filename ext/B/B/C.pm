@@ -103,8 +103,6 @@ sub walk_and_save_optree {
 # to "know" that op_seq is a U16 and use 65535. Ugh.
 my $op_seq = 65535;
 
-sub AVf_REAL () { 1 }
-
 # Look this up here so we can do just a number compare
 # rather than looking up the name of every BASEOP in B::OP
 my $OP_THREADSV = opnumber('threadsv');
