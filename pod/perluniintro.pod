@@ -345,6 +345,11 @@ If you run this code twice, the contents of the F<file> will be twice
 UTF-8 encoded.  A C<use open ':utf8'> would have avoided the bug, or
 explicitly opening also the F<file> for input as UTF-8.
 
+B<NOTE>: the C<:utf8> and C<:encoding> features work only if your
+Perl has been built with the new "perlio" feature.  Almost all 
+Perl 5.8 platforms do use "perlio", though: you can see whether
+yours is by running "perl -V" and looking for C<useperlio=define>.
+
 =head2 Displaying Unicode As Text
 
 Sometimes you might want to display Perl scalars containing Unicode as
