@@ -36,6 +36,8 @@ my $Ignore_Exitcode = $ENV{HARNESS_IGNORE_EXITCODE};
 
 my $Files_In_Dir = $ENV{HARNESS_FILELEAK_IN_DIR};
 
+my $Ok_Slow = $ENV{HARNESS_OK_SLOW};
+
 $Strap = Test::Harness::Straps->new;
 
 @ISA = ('Exporter');
@@ -745,7 +747,7 @@ sub _print_ml {
 # For slow connections, we save lots of bandwidth by printing only once
 # per second.
 sub _print_ml_less {
-    if( $Last_ML_Print != time ) {
+    if( !$Ok_Slow || $Last_ML_Print != time ) {
         _print_ml(@_);
         $Last_ML_Print = time;
     }
@@ -1047,6 +1049,12 @@ not a console.  You may need to set this if you don't want harness to
 output more frequent progress messages using carriage returns.  Some
 consoles may not handle carriage returns properly (which results in a
 somewhat messy output).
+
+=item C<HARNESS_OK_SLOW>
+
+If true, the C<ok> messages are printed out only every second.
+This reduces output and therefore may for example help testing
+over slow connections.
 
 =item C<HARNESS_PERL_SWITCHES>
 
