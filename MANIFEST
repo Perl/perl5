@@ -194,6 +194,7 @@ ext/Encode/Encode.pm		Encode extension
 ext/Encode/Encode.xs		Encode extension
 ext/Encode/Makefile.PL		Encode extension
 ext/Encode/Todo			Encode extension
+ext/Encode/Encode/EncodeFormat.pod	Encoding table format
 ext/Encode/Encode/ascii.enc	Encoding tables
 ext/Encode/Encode/big5.enc	Encoding tables
 ext/Encode/Encode/cp1006.enc	Encoding tables
