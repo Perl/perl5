@@ -42,7 +42,7 @@ the same paragraph as "=headn" forming the heading description.
 Item, over, and back require a little more explanation: Over starts a
 section specifically for the generation of a list using =item commands. At
 the end of your list, use =back to end it. You will probably want to give
-"4" as the number to =over, as some formatters will use this for indention.
+"4" as the number to =over, as some formatters will use this for indentation.
 This should probably be a default. Note also that there are some basic rules
 to using =item: don't use them outside of an =over/=back block, use at least
 one inside an =over/=back block, you don't _have_ to include the =back if
@@ -51,11 +51,11 @@ items consistent: either use "=item *" for all of them, to produce bullets,
 or use "=item 1.", "=item 2.", etc., to produce numbered lists, or use
 "=item foo", "=item bar", etc., i.e., things that looks nothing like bullets
 or numbers. If you start with bullets or numbers, stick with them, as many
-formatters you the first =item type to decide how to format the list.  
+formatters use the first =item type to decide how to format the list.  
 
 And don't forget, when using any command, that that command lasts up until
 the end of the B<paragraph>, not the line. Hence in the examples below, you
-can see the blank lines after each command to end it's paragraph.
+can see the blank lines after each command to end its paragraph.
 
 Some examples of lists include:
 

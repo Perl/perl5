@@ -106,7 +106,7 @@ supplied that includes function calls, it too will be single-stepped.
 Next.  Executes over subroutine calls, until it reaches the beginning
 of the next statement.
 
-=item <CR>
+=item E<lt>CRE<gt>
 
 Repeat last C<n> or C<s> command.
 
@@ -338,12 +338,12 @@ be uniquely abbreviated by the first letter.
 
 See "Debugger Internals" below for more details.
 
-=item < command
+=item E<lt> command
 
 Set an action to happen before every debugger prompt.  A multiline
 command may be entered by backslashing the newlines.
 
-=item > command
+=item E<gt> command
 
 Set an action to happen after the prompt when you've just given a
 command to return to executing the script.  A multiline command may be
@@ -581,7 +581,7 @@ If true, no I/O is performed until an interrupt.
 
 =item LineInfo
 
-File or pipe to print line number info to.  If it'sis a
+File or pipe to print line number info to.  If it is a
 pipe, then a short, "emacs like" message is used.
 
 Example rc file:

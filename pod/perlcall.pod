@@ -29,7 +29,7 @@ called instead.
 
 The classic example of where callbacks are used is when writing an
 event driven program like for an X windows application.  In this case
-your register functions to be called whenever specific events occur,
+you register functions to be called whenever specific events occur,
 e.g. a mouse button is pressed, the cursor moves into a window or a
 menu item is selected.
 
@@ -131,26 +131,26 @@ OR'ed together.
 Calls the Perl subroutine in a scalar context.  This is the default
 context flag setting for all the I<perl_call_*> functions.
 
-This flag has 2 effects
+This flag has 2 effects:
 
 =over 5
 
 =item 1.
 
-it indicates to the subroutine being called that it is executing in a
+It indicates to the subroutine being called that it is executing in a
 scalar context (if it executes I<wantarray> the result will be false).
 
 
 =item 2.
 
-it ensures that only a scalar is actually returned from the subroutine.
+It ensures that only a scalar is actually returned from the subroutine.
 The subroutine can, of course,  ignore the I<wantarray> and return a
 list anyway. If so, then only the last element of the list will be
 returned.
 
 =back
 
-The value returned by the I<perl_call_*> function indicates how may
+The value returned by the I<perl_call_*> function indicates how many
 items have been returned by the Perl subroutine - in this case it will
 be either 0 or 1.
 
@@ -171,27 +171,27 @@ context> shows an example of this behaviour.
 
 Calls the Perl subroutine in a list context.
 
-As with G_SCALAR, this flag has 2 effects
+As with G_SCALAR, this flag has 2 effects:
 
 =over 5
 
 =item 1.
 
-it indicates to the subroutine being called that it is executing in an
+It indicates to the subroutine being called that it is executing in an
 array context (if it executes I<wantarray> the result will be true).
 
 
 =item 2.
 
-it ensures that all items returned from the subroutine will be
+It ensures that all items returned from the subroutine will be
 accessible when control returns from the I<perl_call_*> function.
 
 =back
 
-The value returned by the I<perl_call_*> function indicates how may
+The value returned by the I<perl_call_*> function indicates how many
 items have been returned by the Perl subroutine.
 
-If 0, the you have specified the G_DISCARD flag.
+If 0, then you have specified the G_DISCARD flag.
 
 If not 0, then it will be a count of the number of items returned by
 the subroutine. These items will be stored on the Perl stack.  The
@@ -265,7 +265,7 @@ check the C<$@> variable as you would in a normal Perl script.
 
 The value returned from the I<perl_call_*> function is dependent on
 what other flags have been specified and whether an error has
-occurred.  Here are all the different cases that can occur
+occurred.  Here are all the different cases that can occur:
 
 =over 5
 
@@ -565,7 +565,7 @@ Next, we come to XPUSHs. This is where the parameters actually get
 pushed onto the stack. In this case we are pushing a string and an
 integer.
 
-See the section L<perlguts/"XSUB'S and the Argument Stack"> for details
+See the L<perlguts/"XSUBs and the Argument Stack"> for details
 on how the XPUSH macros work.
 
 =item 6.
@@ -1135,7 +1135,7 @@ Similarly, with this code
     $ref = 47 ;
     CallSavedSub1() ;
 
-you can expect one of these messages (which you actually get is dependant on 
+you can expect one of these messages (which you actually get is dependent on 
 the version of Perl you are using) 
 
     Not a CODE reference at ...
@@ -1889,7 +1889,7 @@ L<perlxs>, L<perlguts>, L<perlembed>
 
 =head1 AUTHOR
 
-Paul Marquess <pmarquess@bfsec.bt.co.uk>
+Paul Marquess E<lt>F<pmarquess@bfsec.bt.co.uk>E<gt>
 
 Special thanks to the following people who assisted in the creation of
 the document.

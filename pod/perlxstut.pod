@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlXStut - Tutorial for XSUB's
+perlXStut - Tutorial for XSUBs
 
 =head1 DESCRIPTION
 
@@ -33,7 +33,7 @@ read:
 
 =item *
 
-In versions of 5.002 prior to version beta 3, then the line in the .xs file
+In versions of 5.002 prior to version beta 3, the line in the .xs file
 about "PROTOTYPES: DISABLE" will cause a compiler error.  Simply remove that
 line from the file.
 
@@ -63,7 +63,7 @@ Some systems may have installed Perl version 5 as "perl5".
 =head2 DYNAMIC VERSUS STATIC
 
 It is commonly thought that if a system does not have the capability to
-dynamically load a library, you cannot build XSUB's.  This is incorrect.
+dynamically load a library, you cannot build XSUBs.  This is incorrect.
 You I<can> build them, but you must link the XSUB's subroutines with the
 rest of Perl, creating a new executable.  This situation is similar to
 Perl 4.
@@ -201,7 +201,7 @@ Now we run the script and we should see the following output:
 =head2 EXAMPLE 2
 
 Now let's add to our extension a subroutine that will take a single argument
-and return 0 if the argument is even, 1 if the argument is odd.
+and return 1 if the argument is even, 0 if the argument is odd.
 
 Add the following to the end of Mytest.xs:
 
@@ -261,7 +261,8 @@ h2xs creates a number of files in the extension directory.  The file
 Makefile.PL is a perl script which will generate a true Makefile to build
 the extension.  We'll take a closer look at it later.
 
-The files <extension>.pm and <extension>.xs contain the meat of the extension.
+The files E<lt>extensionE<gt>.pm and E<lt>extensionE<gt>.xs contain the meat
+of the extension.
 The .xs file holds the C routines that make up the extension.  The .pm file
 contains routines that tell Perl how to load your extension.
 
@@ -445,7 +446,7 @@ section on the argument stack.
 =head2 WARNING
 
 In general, it's not a good idea to write extensions that modify their input
-parameters, as in Example 3.  However, in order to better accomodate calling
+parameters, as in Example 3.  However, in order to better accommodate calling
 pre-existing C routines, which often do modify their input parameters,
 this behavior is tolerated.  The next example will show how to do this.
 
@@ -684,7 +685,7 @@ usually 0.  The "ST" is actually a macro that points to the n'th argument
 on the argument stack.  ST(0) is thus the first argument passed to the
 XSUB, ST(1) is the second argument, and so on.
 
-When you list the arguments to the XSUB in the .xs file, that tell xsubpp
+When you list the arguments to the XSUB in the .xs file, that tells xsubpp
 which argument corresponds to which of the argument stack (i.e., the first
 one listed is the first argument, and so on).  You invite disaster if you
 do not list them in the same order as the function expects them.
@@ -726,7 +727,7 @@ and L<perlpod>.
 
 =head2 Author
 
-Jeff Okamoto <okamoto@corp.hp.com>
+Jeff Okamoto E<lt>F<okamoto@corp.hp.com>E<gt>
 
 Reviewed and assisted by Dean Roehrich, Ilya Zakharevich, Andreas Koenig,
 and Tim Bunce.

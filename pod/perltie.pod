@@ -274,7 +274,7 @@ there.  For example:
 =item DESTROY this
 
 This method will be triggered when the tied variable needs to be destructed.
-As with the sclar tie class, this is almost never needed in a
+As with the scalar tie class, this is almost never needed in a
 language that does its own garbage collection, so this time we'll
 just leave it out.
 
@@ -574,7 +574,7 @@ second argument which is the last key that had been accessed.  This is
 useful if you're carrying about ordering or calling the iterator from more
 than one sequence, or not really storing things in a hash anywhere.
 
-For our example, we our using a real hash so we'll just do the simple
+For our example, we're using a real hash so we'll just do the simple
 thing, but we'll have to indirect through the LIST field.
 
     sub NEXTKEY  {
@@ -609,9 +609,9 @@ use the each() function to iterate over such.  Example:
 
 =head2 Tying FileHandles
 
-This is partially implemeted now.
+This is partially implemented now.
 
-A class implementing a tied filehandle should define the folowing methods:
+A class implementing a tied filehandle should define the following methods:
 TIEHANDLE, PRINT and/or READLINE, and possibly DESTROY.
 
 It is especially useful when perl is embedded in some other program,
@@ -627,7 +627,7 @@ In our example we're going to create a shouting handle.
 =item TIEHANDLE classname, LIST
 
 This is the constructor for the class.  That means it is expected to
-return a blessed reference of some sort. The refence can be used to
+return a blessed reference of some sort. The reference can be used to
 hold some internal information. We won't use it in out example.
 
     sub TIEHANDLE { print "<shout>\n"; my $i; bless \$i, shift }
@@ -635,7 +635,7 @@ hold some internal information. We won't use it in out example.
 =item PRINT this, LIST
 
 This method will be triggered every time the tied handle is printed to.
-Beyond its self refence it also expects the list that was passed to
+Beyond its self reference it also expects the list that was passed to
 the print function.
 
     sub PRINT { $r = shift; $$r++; print join($,,map(uc($_),@_)),$\ }
@@ -688,4 +688,4 @@ source code to MLDBM.
 
 Tom Christiansen
 
-TIEHANDLE by Sven Verdoolaege <skimo@dns.ufsia.ac.be>
+TIEHANDLE by Sven Verdoolaege E<lt>F<skimo@dns.ufsia.ac.be>E<gt>

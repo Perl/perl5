@@ -12,7 +12,7 @@ The most important thing is to run your programs under the B<-w>
 flag at all times.  You may turn it off explicitly for particular
 portions of code via the C<$^W> variable if you must.  You should
 also always run under C<use strict> or know the reason why not.
-The <use sigtrap> and even <use diagnostics> pragmas may also prove
+The C<use sigtrap> and even C<use diagnostics> pragmas may also prove
 useful.
 
 Regarding aesthetics of code lay out, about the only thing Larry
@@ -88,7 +88,7 @@ Omit redundant punctuation as long as clarity doesn't suffer.
 
 =back
 
-Larry has his reasons for each of these things, but he doen't claim that
+Larry has his reasons for each of these things, but he doesn't claim that
 everyone else's mind works the same as his does.
 
 Here are some other more substantive style issues to think about:
@@ -169,7 +169,7 @@ the system() function instead.
 For portability, when using features that may not be implemented on
 every machine, test the construct in an eval to see if it fails.  If
 you know what version or patchlevel a particular feature was
-implemented, you can test C<$]> ($PERL_VERSION in C<English>) to see if it
+implemented, you can test C<$]> (C<$PERL_VERSION> in C<English>) to see if it
 will be there.  The C<Config> module will also let you interrogate values
 determined by the B<Configure> program when Perl was installed.
 
@@ -202,7 +202,7 @@ or nature of a variable. For example:
     $no_caps_here    function scope my() or local() variables 
 
 Function and method names seem to work best as all lowercase. 
-E.g., $obj->as_string(). 
+E.g., $obj-E<gt>as_string(). 
 
 You can use a leading underscore to indicate that a variable or
 function should not be used outside the package that defined it.

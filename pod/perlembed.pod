@@ -16,12 +16,12 @@ Read L<perlcall> and L<perlxs>.
 
 =item B<Use a UNIX program from Perl?>
 
-Read about backquotes and L<perlfunc/system> and L<perlfunc/exec>.
+Read about backquotes and about C<system> and C<exec> in L<perlfunc>.
 
 =item B<Use Perl from Perl?>
 
-Read about L<perlfunc/do> and L<perlfunc/eval> and L<perlmod/use>
-and L<perlmod/require>.
+Read about C<do> and C<eval> in L<perlfunc> and C<use>
+and C<require> in L<perlmod>.
 
 =item B<Use C from C?>
 
@@ -226,7 +226,7 @@ L<Fiddling with the Perl stack from your C program>
 =head2 Evaluating a Perl statement from your C program
 
 NOTE: This section, and the next, employ some very brittle techniques
-for evaluting strings of Perl code.  Perl 5.002 contains some nifty
+for evaluating strings of Perl code.  Perl 5.002 contains some nifty
 features that enable A Better Way (such as with L<perlguts/perl_eval_sv>).
 Look for updates to this document soon.
 

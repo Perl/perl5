@@ -66,7 +66,7 @@ brackets:
 Here we've constructed a reference to an anonymous array of three elements
 whose final element is itself reference to another anonymous array of three
 elements.  (The multidimensional syntax described later can be used to
-access this.  For example, after the above, $arrayref-E<gt>[2][1] would have
+access this.  For example, after the above, C<$arrayref-E<gt>[2][1]> would have
 the value "b".)
 
 Note that taking a reference to an enumerated list is not the same
@@ -339,7 +339,7 @@ the whole block returns a reference to an array, which is then
 dereferenced by C<@{...}> and stuck into the double-quoted string. This
 chicanery is also useful for arbitrary expressions:
 
-    print "That yeilds @{[$n + 5]} widgets\n";
+    print "That yields @{[$n + 5]} widgets\n";
 
 =head2 Symbolic references
 
@@ -451,7 +451,7 @@ converted into a string:
     $x{ \$a } = $a;
 
 If you try to dereference the key, it won't do a hard dereference, and 
-you won't accomplish what you're attemping.  You might want to do something
+you won't accomplish what you're attempting.  You might want to do something
 more like
 
     $r = \@a;

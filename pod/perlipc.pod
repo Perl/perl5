@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlipc - Perl interprocess communication (signals, fifos, pipes, safe subprocceses, sockets, and semaphores)
+perlipc - Perl interprocess communication (signals, fifos, pipes, safe subprocesses, sockets, and semaphores)
 
 =head1 DESCRIPTION
 
@@ -96,7 +96,7 @@ handlers:
 
 But that will be problematic for the more complicated handlers that need
 to re-install themselves.  Because Perl's signal mechanism is currently
-based on the signal(3) function from the C library, you may somtimes be so
+based on the signal(3) function from the C library, you may sometimes be so
 misfortunate as to run on systems where that function is "broken", that
 is, it behaves in the old unreliable SysV way rather than the newer, more
 reasonable BSD and POSIX fashion.  So you'll see defensive people writing
@@ -341,7 +341,7 @@ And here's a safe pipe open for writing:
 Note that these operations are full Unix forks, which means they may not be
 correctly implemented on alien systems.  Additionally, these are not true
 multithreading.  If you'd like to learn more about threading, see the
-F<modules> file mentioned below in the L<"SEE ALSO"> section.
+F<modules> file mentioned below in the SEE ALSO section.
 
 =head2 Bidirectional Communication
 
@@ -402,13 +402,13 @@ This way you don't have to have control over the source code of the
 program you're using.  The F<Comm> library also has expect() 
 and interact() functions.  Find the library (and hopefully its 
 successor F<IPC::Chat>) at your nearest CPAN archive as detailed
-in the L<SEE ALSO> section below.
+in the SEE ALSO section below.
 
 =head1 Sockets: Client/Server Communication
 
 While not limited to Unix-derived operating systems (e.g. WinSock on PCs
 provides socket support, as do some VMS libraries), you may not have
-sockets on your system, in which this section probably isn't going to do
+sockets on your system, in which case this section probably isn't going to do
 you much good.  With sockets, you can do both virtual circuits (i.e. TCP
 streams) and datagrams (i.e. UDP packets).  You may be able to do even more
 depending on your system.

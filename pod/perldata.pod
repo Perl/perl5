@@ -21,7 +21,7 @@ may be a chain of identifiers, separated by C<::> (or by C<'>, but
 that's deprecated); all but the last are interpreted as names of
 packages, in order to locate the namespace in which to look
 up the final identifier (see L<perlmod/Packages> for details).
-It's possible to substutite for a simple identifier an expression
+It's possible to substitute for a simple identifier an expression
 which produces a reference to the value at runtime; this is
 described in more detail below, and in L<perlref>.
 
@@ -103,14 +103,14 @@ list context to each of its arguments.  For example, if you say
 
     int( <STDIN> )
 
-the integer operation provides a scalar context for the <STDIN>
+the integer operation provides a scalar context for the E<lt>STDINE<gt>
 operator, which responds by reading one line from STDIN and passing it
 back to the integer operation, which will then find the integer value
 of that line and return that.  If, on the other hand, you say
 
     sort( <STDIN> )
 
-then the sort operation provides a list context for <STDIN>, which
+then the sort operation provides a list context for E<lt>STDINE<gt>, which
 will proceed to read every line available up to the end of file, and
 pass that list of lines back to the sort routine, which will then
 sort those lines and return them as a list to whatever the context
@@ -163,7 +163,7 @@ defined() operator to determine whether the value is defined or not.
 To find out whether a given string is a valid non-zero number, it's usually
 enough to test it against both numeric 0 and also lexical "0" (although
 this will cause B<-w> noises).  That's because strings that aren't
-numbers count as 0, just as they do in I<awk>:
+numbers count as 0, just as they do in B<awk>:
 
     if ($str == 0 && $str ne "0")  {
 	warn "That doesn't look like a number";
@@ -204,9 +204,9 @@ last value, like the C comma operator.)  The following is always true:
 
     scalar(@whatever) == $#whatever - $[ + 1;
 
-Version 5 of Perl changed the semantics of $[: files that don't set
-the value of $[ no longer need to worry about whether another
-file changed its value.  (In other words, use of $[ is deprecated.)
+Version 5 of Perl changed the semantics of C<$[>: files that don't set
+the value of C<$[> no longer need to worry about whether another
+file changed its value.  (In other words, use of C<$[> is deprecated.)
 So in general you can just assume that
 
     scalar(@whatever) == $#whatever + 1;
@@ -254,7 +254,7 @@ on in the script.  Variable substitution inside strings is limited to
 scalar variables, arrays, and array slices.  (In other words,
 names beginning with $ or @, followed by an optional bracketed
 expression as a subscript.)  The following code segment prints out "The
-price is $100."
+price is $Z<>100."
 
     $Price = '$100';	# not interpreted
     print "The price is $Price.\n";	# interpreted
@@ -306,7 +306,7 @@ by saying C<no strict 'subs'>.
 
 Array variables are interpolated into double-quoted strings by joining all
 the elements of the array with the delimiter specified in the C<$">
-variable ($LIST_SEPARATOR in English), space by default.  The following
+variable (C<$LIST_SEPARATOR> in English), space by default.  The following
 are equivalent:
 
     $temp = join($",@ARGV);

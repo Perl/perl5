@@ -274,7 +274,7 @@ following a minus are interpreted as file tests.
 
 The C<-T> and C<-B> switches work as follows.  The first block or so of the
 file is examined for odd characters such as strange control codes or
-characters with the high bit set.  If too many odd characters (>30%)
+characters with the high bit set.  If too many odd characters (E<gt>30%)
 are found, it's a C<-B> file, otherwise it's a C<-T> file.  Also, any file
 containing null in the first block is considered a binary file.  If C<-T>
 or C<-B> is used on a filehandle, the current stdio buffer is examined
@@ -613,7 +613,7 @@ function to iterate over large DBM files.  Example:
     dbmclose(%HIST);
 
 See also L<AnyDBM_File> for a more general description of the pros and
-cons of the various dbm apparoches, as well as L<DB_File> for a particularly
+cons of the various dbm approaches, as well as L<DB_File> for a particularly
 rich implementation.
 
 =item defined EXPR
@@ -680,7 +680,7 @@ a hash key lookup:
 =item die LIST
 
 Outside of an eval(), prints the value of LIST to C<STDERR> and exits with
-the current value of $! (errno).  If $! is 0, exits with the value of
+the current value of C<$!> (errno).  If C<$!> is 0, exits with the value of
 C<($? E<gt>E<gt> 8)> (backtick `command` status).  If C<($? E<gt>E<gt> 8)> is 0,
 exits with 255.  Inside an eval(), the error message is stuffed into C<$@>,
 and the eval() is terminated with the undefined value; this makes die()
@@ -890,7 +890,7 @@ being looked at when:
 Cases 1 and 2 above behave identically: they run the code contained in the
 variable $x.  (Although case 2 has misleading double quotes making the
 reader wonder what else might be happening (nothing is).) Cases 3 and 4
-likewise behave in the same way: they run the code <$x>, which does
+likewise behave in the same way: they run the code E<lt>$xE<gt>, which does
 nothing at all.  (Case 4 is preferred for purely visual reasons.) Case 5
 is a place where normally you I<WOULD> like to use double quotes, except
 that in that particular situation, you can just use symbolic references
@@ -1061,7 +1061,7 @@ example:
     .
 
     $str = "widget";
-    $num = $cost/$quantiy;
+    $num = $cost/$quantity;
     $~ = 'Something';
     write;
 
@@ -1271,7 +1271,7 @@ Returns the socket option requested, or undefined if there is an error.
 =item glob EXPR
 
 Returns the value of EXPR with filename expansions such as a shell
-would do.  This is the internal function implementing the <*.*>
+would do.  This is the internal function implementing the E<lt>*.*E<gt>
 operator, except it's easier to use.
 
 =item gmtime EXPR
@@ -1356,7 +1356,7 @@ for the package used.  See also L</use>, L<perlmod>, and L<Exporter>.
 
 Returns the position of the first occurrence of SUBSTR in STR at or after
 POSITION.  If POSITION is omitted, starts searching from the beginning of
-the string.  The return value is based at 0 (or whatever you've set the $[
+the string.  The return value is based at 0 (or whatever you've set the C<$[>
 variable to--but don't do that).  If the substring is not found, returns
 one less than the base, ordinarily -1.
 
@@ -1577,7 +1577,7 @@ is just a funny way to write
 
 Creates the directory specified by FILENAME, with permissions specified
 by MODE (as modified by umask).  If it succeeds it returns 1, otherwise
-it returns 0 and sets $! (errno).
+it returns 0 and sets C<$!> (errno).
 
 =item msgctl ID,CMD,ARG
 
@@ -1653,13 +1653,13 @@ Opens the file whose filename is given by EXPR, and associates it with
 FILEHANDLE.  If FILEHANDLE is an expression, its value is used as the name
 of the real filehandle wanted.  If EXPR is omitted, the scalar variable of
 the same name as the FILEHANDLE contains the filename.  If the filename
-begins with "<" or nothing, the file is opened for input.  If the filename
-begins with ">", the file is opened for output.  If the filename begins
-with ">>", the file is opened for appending.  You can put a '+' in front
-of the '>' or '<' to indicate that you want both read and write access to
-the file; thus '+<' is usually preferred for read/write updates--the '+>'
-mode would clobber the file first.  These correspond to the fopen(3) modes
-of 'r', 'r+', 'w', 'w+', 'a', and 'a+'.
+begins with "E<lt>" or nothing, the file is opened for input.  If the filename
+begins with "E<gt>", the file is opened for output.  If the filename begins
+with "E<gt>E<gt>", the file is opened for appending.  You can put a '+' in
+front of the 'E<gt>' or 'E<lt>' to indicate that you want both read and write
+access to the file; thus '+E<lt>' is usually preferred for read/write
+updates--the '+E<gt>' mode would clobber the file first.  These correspond to
+the fopen(3) modes of 'r', 'r+', 'w', 'w+', 'a', and 'a+'.
 
 If the filename begins with "|", the filename is interpreted
 as a command to which output is to be piped, and if the filename ends with
@@ -1668,7 +1668,7 @@ for more examples of this.  as command which pipes input to us.  (You may
 not have a raw open() to a command that pipes both in I<and> out, but see L<open2>,
 L<open3>, and L<perlipc/"Bidirectional Communication"> for alternatives.)
 
-Opening '-' opens STDIN and opening '>-' opens STDOUT.  Open returns
+Opening '-' opens STDIN and opening 'E<gt>-' opens STDOUT.  Open returns
 non-zero upon success, the undefined value otherwise.  If the open
 involved a pipe, the return value happens to be the pid of the
 subprocess.  
@@ -1719,11 +1719,12 @@ Examples:
     }
 
 You may also, in the Bourne shell tradition, specify an EXPR beginning
-with ">&", in which case the rest of the string is interpreted as the
+with "E<gt>&", in which case the rest of the string is interpreted as the
 name of a filehandle (or file descriptor, if numeric) which is to be
-duped and opened.  You may use & after >, >>, <, +>, +>> and +<.  The
+duped and opened.  You may use & after E<gt>, E<gt>E<gt>, E<lt>, +E<gt>,
++E<gt>E<gt> and +E<lt>.  The
 mode you specify should match the mode of the original filehandle.
-(Duping a filehandle does not take into acount any existing contents of
+(Duping a filehandle does not take into account any existing contents of
 stdio buffers.)
 Here is a script that saves, redirects, and restores STDOUT and
 STDERR:
@@ -1751,7 +1752,7 @@ STDERR:
     print STDERR "stderr 2\n";
 
 
-If you specify "<&=N", where N is a number, then Perl will do an
+If you specify "E<lt>&=N", where N is a number, then Perl will do an
 equivalent of C's fdopen() of that file descriptor; this is more
 parsimonious of file descriptors.  For example:
 
@@ -1760,7 +1761,7 @@ parsimonious of file descriptors.  For example:
 If you open a pipe on the command "-", i.e. either "|-" or "-|", then
 there is an implicit fork done, and the return value of open is the pid
 of the child within the parent process, and 0 within the child
-process.  (Use defined($pid) to determine whether the open was successful.)
+process.  (Use C<defined($pid)> to determine whether the open was successful.)
 The filehandle behaves normally for the parent, but i/o to that
 filehandle is piped from/to the STDOUT/STDIN of the child process.
 In the child process the filehandle isn't opened--i/o happens from/to
@@ -1779,9 +1780,9 @@ The following pairs are more or less equivalent:
 See L<perlipc/"Safe Pipe Opens"> for more examples of this.
 
 Explicitly closing any piped filehandle causes the parent process to
-wait for the child to finish, and returns the status value in $?.
+wait for the child to finish, and returns the status value in C<$?>.
 Note: on any operation which may do a fork, unflushed buffers remain
-unflushed in both processes, which means you may need to set $| to
+unflushed in both processes, which means you may need to set C<$|> to
 avoid duplicate output.
 
 Using the FileHandle constructor from the FileHandle package,
@@ -1951,7 +1952,7 @@ and classes.  See L<perlsub> for other scoping issues.
 Opens a pair of connected pipes like the corresponding system call.
 Note that if you set up a loop of piped processes, deadlock can occur
 unless you are very careful.  In addition, note that Perl's pipes use
-stdio buffering, so you may need to set $| to flush your WRITEHANDLE
+stdio buffering, so you may need to set C<$|> to flush your WRITEHANDLE
 after each command, depending on the application.
 
 See L<open2>, L<open3>, and L<perlipc/"Bidirectional Communication">
@@ -2091,7 +2092,7 @@ chdir() there, it would have been testing the wrong file.
 
 Returns the value of a symbolic link, if symbolic links are
 implemented.  If not, gives a fatal error.  If there is some system
-error, returns the undefined value and sets $! (errno).  If EXPR is
+error, returns the undefined value and sets C<$!> (errno).  If EXPR is
 omitted, uses $_.
 
 =item recv SOCKET,SCALAR,LEN,FLAGS
@@ -2167,7 +2168,7 @@ not work across filesystem boundaries.
 
 Demands some semantics specified by EXPR, or by $_ if EXPR is not
 supplied.  If EXPR is numeric, demands that the current version of Perl
-($] or $PERL_VERSION) be equal or greater than EXPR.
+(C<$]> or $PERL_VERSION) be equal or greater than EXPR.
 
 Otherwise, demands that a library file be included if it hasn't already
 been included.  The file is included via the do-FILE mechanism, which is
@@ -2265,7 +2266,7 @@ last occurrence at or before that position.
 =item rmdir FILENAME
 
 Deletes the directory specified by FILENAME if it is empty.  If it
-succeeds it returns 1, otherwise it returns 0 and sets $! (errno).  If
+succeeds it returns 1, otherwise it returns 0 and sets C<$!> (errno).  If
 FILENAME is omitted, uses $_.
 
 =item s///
@@ -2398,7 +2399,7 @@ You can effect a 250-millisecond sleep this way:
 
     select(undef, undef, undef, 0.25);
 
-B<WARNING>: Do not attempt to mix buffered I/O (like read() or <FH>)
+B<WARNING>: Do not attempt to mix buffered I/O (like read() or E<lt>FHE<gt>)
 with select().  You have to use sysread() instead.
 
 =item semctl ID,SEMNUM,CMD,ARG
@@ -2547,7 +2548,7 @@ of arrays are stripped out.  If SUBNAME or BLOCK is omitted, sorts
 in standard string comparison order.  If SUBNAME is specified, it
 gives the name of a subroutine that returns an integer less than, equal
 to, or greater than 0, depending on how the elements of the array are
-to be ordered.  (The <=> and cmp operators are extremely useful in such
+to be ordered.  (The E<lt>=E<gt> and cmp operators are extremely useful in such
 routines.)  SUBNAME may be a scalar variable name, in which case the
 value provides the name of the subroutine to use.  In place of a
 SUBNAME, you can provide a BLOCK as an anonymous, in-line sort
@@ -2633,7 +2634,7 @@ Examples:
                $a->[2] cmp $b->[2]
         } map { [$_, /=(\d+)/, uc($_)] } @old;
 
-If you're and using strict, you I<MUST NOT> declare $a
+If you're using strict, you I<MUST NOT> declare $a
 and $b as lexicals.  They are package globals.  That means
 if you're in the C<main> package, it's
 
@@ -2657,7 +2658,7 @@ Removes the elements designated by OFFSET and LENGTH from an array, and
 replaces them with the elements of LIST, if any.  Returns the elements
 removed from the array.  The array grows or shrinks as necessary.  If
 LENGTH is omitted, removes everything from OFFSET onward.  The
-following equivalencies hold (assuming $[ == 0):
+following equivalencies hold (assuming C<$[ == 0>):
 
     push(@a,$x,$y)	splice(@a,$#a+1,0,$x,$y)
     pop(@a)		splice(@a,-1)
@@ -2830,7 +2831,7 @@ last stat or filetest are returned.  Example:
 
 =item study
 
-Takes extra time to study SCALAR ($_ if unspecified) in anticipation of
+Takes extra time to study SCALAR (C<$_> if unspecified) in anticipation of
 doing many pattern matches on the string before it is next modified.
 This may or may not save time, depending on the nature and number of
 patterns you are searching on, and on the distribution of character
@@ -2869,7 +2870,7 @@ runtime, you can build an entire loop as a string and eval that to
 avoid recompiling all your patterns all the time.  Together with
 undefining $/ to input entire files as one record, this can be very
 fast, often faster than specialized programs like fgrep(1).  The following
-scans a list of files (@files) for a list of words (@words), and prints
+scans a list of files (C<@files>) for a list of words (C<@words>), and prints
 out the names of those files that contain a match:
 
     $search = 'while (<>) { study;';
@@ -3169,8 +3170,8 @@ and then there's
 
     sub ordinal { unpack("c",$_[0]); } # same as ord()
 
-In addition, you may prefix a field with a %<number> to indicate that
-you want a <number>-bit checksum of the items instead of the items
+In addition, you may prefix a field with a %E<lt>numberE<gt> to indicate that
+you want a E<lt>numberE<gt>-bit checksum of the items instead of the items
 themselves.  Default is a 16-bit checksum.  For example, the following
 computes the same number as the System V sum program:
 
@@ -3311,13 +3312,13 @@ If you know the exact length in bits, it can be used in place of the *.
 
 Waits for a child process to terminate and returns the pid of the
 deceased process, or -1 if there are no child processes.  The status is
-returned in $?.
+returned in C<$?>.
 
 =item waitpid PID,FLAGS
 
 Waits for a particular child process to terminate and returns the pid
 of the deceased process, or -1 if there is no such child process.  The
-status is returned in $?.  If you say
+status is returned in C<$?>.  If you say
 
     use POSIX ":wait_h";
     ...
@@ -3353,7 +3354,7 @@ Writes a formatted record (possibly multi-line) to the specified file,
 using the format associated with that file.  By default the format for
 a file is the one having the same name is the filehandle, but the
 format for the current output channel (see the select() function) may be set
-explicitly by assigning the name of the format to the $~ variable.
+explicitly by assigning the name of the format to the C<$~> variable.
 
 Top of form processing is handled automatically:  if there is
 insufficient room on the current page for the formatted record, the
@@ -3361,9 +3362,9 @@ page is advanced by writing a form feed, a special top-of-page format
 is used to format the new page header, and then the record is written.
 By default the top-of-page format is the name of the filehandle with
 "_TOP" appended, but it may be dynamically set to the format of your
-choice by assigning the name to the $^ variable while the filehandle is
+choice by assigning the name to the C<$^> variable while the filehandle is
 selected.  The number of lines remaining on the current page is in
-variable $-, which can be set to 0 to force a new page.
+variable C<$->, which can be set to 0 to force a new page.
 
 If FILEHANDLE is unspecified, output goes to the current default output
 channel, which starts out as STDOUT but may be changed by the

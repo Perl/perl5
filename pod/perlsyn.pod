@@ -196,7 +196,7 @@ which is Perl short-hand for the more explicitly written version:
 	# now process $line
     } 
 
-Or here's a a simpleminded Pascal comment stripper (warning: assumes no { or } in strings)
+Or here's a simpleminded Pascal comment stripper (warning: assumes no { or } in strings).
 
     LINE: while (<STDIN>) {
 	while (s|({.*}.*){.*}|$1 |) {}
@@ -304,7 +304,7 @@ Here's how a C programmer might code up a particular algorithm in Perl:
 	# this is where that last takes me
     }
 
-Whereas here's how a Perl programmer more confortable with the idiom might
+Whereas here's how a Perl programmer more comfortable with the idiom might
 do it:
 
     OUTER: foreach $wid (@ary1) { 
@@ -492,7 +492,7 @@ and your documentation text freely, as in
     } 
 
 Note that pod translators should only look at paragraphs beginning 
-with a pod diretive (it makes parsing easier), whereas the compiler
+with a pod directive (it makes parsing easier), whereas the compiler
 actually knows to look for pod escapes even in the middle of a 
 paragraph.  This means that the following secret stuff will be
 ignored by both the compiler and the translators.
