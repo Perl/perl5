@@ -1917,6 +1917,7 @@ L<dprofpp> -R didn't work.
 =item *
 
 C<*foo{FORMAT}> now works.
+
 =item *
 
 Infinity is now recognized as a number.
