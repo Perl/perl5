@@ -17,7 +17,10 @@ package TestInit;
 
 chdir 't' if -d 't';
 @INC = '../lib';
-$ENV{PERL_CORE} = 1;
+
+# Don't interfere with the taintedness of %ENV, this could perturbate tests
+$ENV{PERL_CORE} = 1 unless ${^TAINT};
+
 $0 =~ s/\.dp$//; # for the test.deparse make target
 1;
 
