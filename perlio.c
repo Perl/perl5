@@ -33,6 +33,8 @@ int
 PerlIO_apply_layers(pTHX_ PerlIO *f, const char *mode, const char *names)
 {
  Perl_croak(aTHX_ "Cannot apply \"%s\" in non-PerlIO perl",names);
+ /* NOTREACHED */
+ return -1; 
 }
 #endif
 
