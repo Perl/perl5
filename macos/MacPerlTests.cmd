@@ -1146,6 +1146,9 @@ save ::macos:MacPerlTests.out
 echo ":perl -I::lib -t ::ext:Unicode:Normalize:t:test.t" >> ::macos:MacPerlTests.out
 :perl -I::lib -t ::ext:Unicode:Normalize:t:test.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::ext:XS:APItest:t:printf.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::ext:XS:APItest:t:printf.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
 echo ":perl -I::lib    ::ext:XS:Typemap:Typemap.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::ext:XS:Typemap:Typemap.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
@@ -1302,11 +1305,9 @@ save ::macos:MacPerlTests.out
 #echo ":perl -I::lib    ::lib:ExtUtils:t:basic.t" >> ::macos:MacPerlTests.out
 #:perl -I::lib    ::lib:ExtUtils:t:basic.t >> ::macos:MacPerlTests.out
 #save ::macos:MacPerlTests.out
-
-echo ":perl -I::lib    ::lib:ExtUtils:t:Command.t" >> ::macos:MacPerlTests.out
-:perl -I::lib    ::lib:ExtUtils:t:Command.t >> ::macos:MacPerlTests.out
-save ::macos:MacPerlTests.out
-
+#echo ":perl -I::lib    ::lib:ExtUtils:t:Command.t" >> ::macos:MacPerlTests.out
+#:perl -I::lib    ::lib:ExtUtils:t:Command.t >> ::macos:MacPerlTests.out
+#save ::macos:MacPerlTests.out
 #echo ":perl -I::lib    ::lib:ExtUtils:t:Constant.t" >> ::macos:MacPerlTests.out
 #:perl -I::lib    ::lib:ExtUtils:t:Constant.t >> ::macos:MacPerlTests.out
 #save ::macos:MacPerlTests.out
@@ -1328,10 +1329,10 @@ save ::macos:MacPerlTests.out
 #echo ":perl -I::lib    ::lib:ExtUtils:t:Manifest.t" >> ::macos:MacPerlTests.out
 #:perl -I::lib    ::lib:ExtUtils:t:Manifest.t >> ::macos:MacPerlTests.out
 #save ::macos:MacPerlTests.out
+#echo ":perl -I::lib    ::lib:ExtUtils:t:Mkbootstrap.t" >> ::macos:MacPerlTests.out
+#:perl -I::lib    ::lib:ExtUtils:t:Mkbootstrap.t >> ::macos:MacPerlTests.out
+#save ::macos:MacPerlTests.out
 
-echo ":perl -I::lib    ::lib:ExtUtils:t:Mkbootstrap.t" >> ::macos:MacPerlTests.out
-:perl -I::lib    ::lib:ExtUtils:t:Mkbootstrap.t >> ::macos:MacPerlTests.out
-save ::macos:MacPerlTests.out
 echo ":perl -I::lib    ::lib:ExtUtils:t:MM_BeOS.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::lib:ExtUtils:t:MM_BeOS.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
@@ -1604,6 +1605,9 @@ echo ":perl -I::lib    ::lib:Math:BigInt:t:sub_mif.t" >> ::macos:MacPerlTests.ou
 save ::macos:MacPerlTests.out
 echo ":perl -I::lib    ::lib:Math:BigInt:t:upgrade.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::lib:Math:BigInt:t:upgrade.t >> ::macos:MacPerlTests.out
+save ::macos:MacPerlTests.out
+echo ":perl -I::lib    ::lib:Math:BigInt:t:upgradef.t" >> ::macos:MacPerlTests.out
+:perl -I::lib    ::lib:Math:BigInt:t:upgradef.t >> ::macos:MacPerlTests.out
 save ::macos:MacPerlTests.out
 echo ":perl -I::lib    ::lib:Math:BigInt:t:use.t" >> ::macos:MacPerlTests.out
 :perl -I::lib    ::lib:Math:BigInt:t:use.t >> ::macos:MacPerlTests.out

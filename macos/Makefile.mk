@@ -128,6 +128,8 @@ Dynamic_Ext_Std	=	\
 	Encode:Encode Encode:Byte:Byte Encode:CN:CN \
 	Encode:EBCDIC:EBCDIC Encode:JP:JP Encode:KR:KR \
 	Encode:Symbol:Symbol Encode:TW:TW Encode:Unicode:Unicode \
+	XS:APItest:APItest
+
 Dynamic_Ext_Xtr =
 Static_Lib_Mac	= \
 	ExtUtils:MM_MacOS ExtUtils:Miniperl Config Errno \
@@ -215,7 +217,7 @@ pl = "::pod:pod2html.PL" "::pod:pod2latex.PL" "::pod:pod2man.PL" "::pod:pod2text
 	"::utils:piconv.PL" "::utils:enc2xs.PL" 
 
 plextract = "::pod:pod2html" "::pod:pod2latex" "::pod:pod2man" "::pod:pod2text" \
-	"::lib:lib_pm" "::utils:c2ph" "::utils:h2ph" "::utils:h2xs" \
+	"::lib:lib.pm" "::utils:c2ph" "::utils:h2ph" "::utils:h2xs" \
 	"::utils:perlbug" "::utils:perldoc" "::utils:perlivp" "::utils:pl2pm" \
 	"::utils:splain" "::utils:perlcc" "::utils:dprofpp" "::utils:libnetcfg" \
 	"::utils:piconv" "::utils:enc2xs" 
@@ -334,7 +336,7 @@ runperl: runperl.c
 # to prevent further builds until it is deleted.
 #
 preplibrary: miniperl
-	For i in :bundled_ext:{$(Static_Ext_Xtr:d)} :ext:{$(Static_Ext_Mac:d)} ::ext:{$(Static_Ext_Std:d)}
+	For i in :ext:{$(Static_Ext_Mac:d)} ::ext:{$(Static_Ext_Std:d)} :bundled_ext:{$(Static_Ext_Xtr:d)}
 		directory {{i}}
 		Set Echo 0
 		If `Newer Makefile.PL Makefile.mk` == "Makefile.PL"
@@ -352,7 +354,7 @@ preplibrary: miniperl
 	Echo > preplibrary
 
 dynlibrary: perl PerlStub
-	For i in :bundled_ext:{$(Dynamic_Ext_Xtr)} ::ext:{$(Dynamic_Ext_Std:d)} :ext:{$(Dynamic_Ext_Mac)}
+	For i in ::ext:{$(Dynamic_Ext_Std:d)} :bundled_ext:{$(Dynamic_Ext_Xtr)} :ext:{$(Dynamic_Ext_Mac)}
 		directory {{i}}
 		Set Echo 0
 		If `Exists Makefile.PL` != ""
@@ -366,22 +368,6 @@ dynlibrary: perl PerlStub
 		Set Echo 1
 	end
 	Echo > dynlibrary
-
-extrlibrary: dynlibrary
-	For i in :bundled_ext:{$(Dynamic_Ext_Xtr)}
-		directory {{i}}
-		Set Echo 0
-		If `Exists Makefile.PL` != ""
-			If `Newer Makefile.PL Makefile.mk` == "Makefile.PL"
-				$(MACPERL_SRC)perl -I$(MACPERL_SRC)lib -I$(MACPERL_SRC):lib Makefile.PL PERL_CORE=1
-			End
-		End
-		BuildProgram all
-		BuildProgram install
-		directory $(MACPERL_SRC)
-		Set Echo 1
-	end
-	Echo > extrlibrary
 
 perl: perl.{$(MACPERL_BUILD_TOOL)}
 	FatBuild perl $(MACPERL_INST_TOOL_PPC) $(MACPERL_INST_TOOL_68K)
