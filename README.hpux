@@ -38,6 +38,24 @@ files compiled with gcc-2.9-hppa-991112
 If you perform a new installation, then Perl will be installed
 automatically.
 
+=head2 Using perl from HP's porting centre
+
+HP porting centre tries very hard to keep up with customer demand and
+release updates from the Open Source community. Having precompiled
+Perl binaries available is obvious.
+
+The HP porting centres are limited in what systems they are allowed
+to port to and they usually choose the two most recent OS versions
+available. This means that at the moment of writing, there are only
+HPUX-11.00 and 11-20/22 (IA64) ports available on the porting centres.
+
+HP has asked the porting centre to move Open Source binaries
+from /opt to /usr/local, so binaries produced since the start
+of July 2002 are located in /usr/local.
+
+One of HP porting centres URL's is http://hpux.connect.org.uk/
+The port currently available is built with GNU gcc.
+
 =head2 Compiling Perl 5 on HP-UX
 
 When compiling Perl, you must use an ANSI C compiler.  The C compiler
@@ -470,8 +488,8 @@ the following:
   #0  0xc004216c in  () from /usr/lib/libc.2
   #1  0xc00d7550 in __nss_src_state_destr () from /usr/lib/libc.2
   #2  0xc00d7768 in __nss_src_state_destr () from /usr/lib/libc.2
-  #3  0xc00d78a8 in nss_delete () from /usr/lib/libc.2 
-  #4  0xc01126d8 in endpwent () from /usr/lib/libc.2 
+  #3  0xc00d78a8 in nss_delete () from /usr/lib/libc.2
+  #4  0xc01126d8 in endpwent () from /usr/lib/libc.2
   #5  0xd1950 in Perl_pp_epwent () from ./perl
   #6  0x94d3c in Perl_runops_standard () from ./perl
   #7  0x23728 in S_run_body () from ./perl
@@ -482,7 +500,7 @@ The key here is the C<nss_delete> call.  One workaround for this
 bug seems to be to create add to the file F</etc/nsswitch.conf>
 (at least) the following lines
 
-  group: files 
+  group: files
   passwd: files
 
 Whether you are using NIS does not matter.  Amazingly enough,
