@@ -475,7 +475,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
 #ifdef USE_PERLIO
     {
-      /* Set PL_wantutf8 to TRUE if using PerlIO _and_
+      /* Set PL_utf8locale to TRUE if using PerlIO _and_
 	 any of the following are true:
 	 - nl_langinfo(CODESET) contains /^utf-?8/i
 	 - $ENV{LC_ALL}   contains /^utf-?8/i
@@ -487,37 +487,44 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 	 it overrides LC_MESSAGES for GNU gettext, and it also
 	 can have more than one locale, separated by spaces,
 	 in case you need to know.)
-	 If PL_wantutf8 is true, perl.c:S_parse_body()
-	 will turn on the PerlIO :utf8 discipline on STDIN, STDOUT,
-	 STDERR, _and_ the default open discipline.
+	 If PL_utf8locale and PL_wantutf8 (set by -C) are true,
+	 perl.c:S_parse_body() will turn on the PerlIO :utf8 layer
+	 on STDIN, STDOUT, STDERR, _and_ the default open discipline.
       */
-	 bool wantutf8 = FALSE;
+	 bool utf8locale = FALSE;
 	 char *codeset = NULL;
 #if defined(HAS_NL_LANGINFO) && defined(CODESET)
 	 codeset = nl_langinfo(CODESET);
 #endif
 	 if (codeset)
-	      wantutf8 = (ibcmp(codeset,  "UTF-8", 5) == 0 ||
-			  ibcmp(codeset,  "UTF8",  4) == 0);
+	      utf8locale = (ibcmp(codeset,  "UTF-8", 5) == 0 ||
+ 			    ibcmp(codeset,  "UTF8",  4) == 0);
 #if defined(USE_LOCALE)
 	 else { /* nl_langinfo(CODESET) is supposed to correctly
 		 * interpret the locale environment variables,
 		 * but just in case it fails, let's do this manually. */ 
 	      if (lang)
-		   wantutf8 = (ibcmp(lang,     "UTF-8", 5) == 0 ||
-			       ibcmp(lang,     "UTF8",  4) == 0);
+		   utf8locale = (ibcmp(lang,     "UTF-8", 5) == 0 ||
+			         ibcmp(lang,     "UTF8",  4) == 0);
 #ifdef USE_LOCALE_CTYPE
 	      if (curctype)
-		   wantutf8 = (ibcmp(curctype,     "UTF-8", 5) == 0 ||
-			       ibcmp(curctype,     "UTF8",  4) == 0);
+		   utf8locale = (ibcmp(curctype,     "UTF-8", 5) == 0 ||
+			         ibcmp(curctype,     "UTF8",  4) == 0);
 #endif
 	      if (lc_all)
-		   wantutf8 = (ibcmp(lc_all,   "UTF-8", 5) == 0 ||
-			       ibcmp(lc_all,   "UTF8",  4) == 0);
-#endif /* USE_LOCALE */
+		   utf8locale = (ibcmp(lc_all,   "UTF-8", 5) == 0 ||
+			         ibcmp(lc_all,   "UTF8",  4) == 0);
 	 }
-	 if (wantutf8)
-	      PL_wantutf8 = TRUE;
+#endif /* USE_LOCALE */
+	 if (utf8locale)
+	      PL_utf8locale = TRUE;
+    }
+    /* Set PL_wantutf8 to $ENV{PERL_UTF8_LOCALE} if using PerlIO.
+       This is an alternative to using the -C command line switch
+       (the -C if present will override this). */
+    {
+	 char *p = PerlEnv_getenv("PERL_UTF8_LOCALE");
+	 PL_wantutf8 = p ? (bool) atoi(p) : FALSE;
     }
 #endif
 

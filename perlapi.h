@@ -584,14 +584,14 @@ END_EXTERN_C
 #define PL_utf8_upper		(*Perl_Iutf8_upper_ptr(aTHX))
 #undef  PL_utf8_xdigit
 #define PL_utf8_xdigit		(*Perl_Iutf8_xdigit_ptr(aTHX))
+#undef  PL_utf8locale
+#define PL_utf8locale		(*Perl_Iutf8locale_ptr(aTHX))
 #undef  PL_uudmap
 #define PL_uudmap		(*Perl_Iuudmap_ptr(aTHX))
 #undef  PL_wantutf8
 #define PL_wantutf8		(*Perl_Iwantutf8_ptr(aTHX))
 #undef  PL_warnhook
 #define PL_warnhook		(*Perl_Iwarnhook_ptr(aTHX))
-#undef  PL_widesyscalls
-#define PL_widesyscalls		(*Perl_Iwidesyscalls_ptr(aTHX))
 #undef  PL_xiv_arenaroot
 #define PL_xiv_arenaroot	(*Perl_Ixiv_arenaroot_ptr(aTHX))
 #undef  PL_xiv_root
