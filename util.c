@@ -4055,7 +4055,7 @@ Perl_new_vstring(pTHX_ char *s, SV *sv)
     return s;
 }
 
-#if !defined(HAS_SOCKETPAIR) && defined(HAS_SOCKET) && defined(AF_INET) && defined(PF_INET) && defined(SOCK_DGRAM)
+#if !defined(HAS_SOCKETPAIR) && defined(HAS_SOCKET) && defined(AF_INET) && defined(PF_INET) && defined(SOCK_DGRAM) && defined(HAS_SELECT)
 #   define EMULATE_SOCKETPAIR_UDP
 #endif
 
