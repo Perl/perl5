@@ -199,9 +199,11 @@ typedef struct termios* POSIX__Termios;
 
 /* Possibly needed prototypes */
 char *cuserid (char *);
+#ifndef WIN32
 double strtod (const char *, char **);
 long strtol (const char *, char **, int);
 unsigned long strtoul (const char *, char **, int);
+#endif
 
 #ifndef HAS_CUSERID
 #define cuserid(a) (char *) not_here("cuserid")

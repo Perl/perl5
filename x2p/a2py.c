@@ -61,7 +61,6 @@ main(register int argc, register char **argv, register char **env)
     for (argc--,argv++; argc; argc--,argv++) {
 	if (argv[0][0] != '-' || !argv[0][1])
 	    break;
-      reswitch:
 	switch (argv[0][1]) {
 #ifdef DEBUGGING
 	case 'D':
@@ -194,6 +193,8 @@ main(register int argc, register char **argv, register char **env)
 	  "The operation I've selected may be wrong for the operand types.\n");
     }
     exit(0);
+    /* by ANSI specs return is needed. This also shuts up VC++ and his warnings */
+    return(0);
 }
 
 #define RETURN(retval) return (bufptr = s,retval)
