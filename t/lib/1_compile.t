@@ -97,7 +97,7 @@ print "1..".@Core_Modules."\n";
 my $test_num = 1;
 
 foreach my $module (@Core_Modules) {
-    print "# $module compile failed\nnot " unless compile_module($module);
+    print "$module compile failed\nnot " unless compile_module($module);
     print "ok $test_num\n";
     $test_num++;
 }
