@@ -2372,13 +2372,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	     pstat(PSTAT_SETCMD, un, len, 0, 0);
 	}
 #endif
-	/* PL_origalen is set in perl_parse() to be the sum
-	 * of the contiguous argv[] elements plus the size of
-	 * the env in case that is contiguous with the argv[].
-	 *
-	 * This means that in the worst case the area we are able
-	 * to modify is limited to the size of the original argv[0].
-	 * --jhi */
+	/* PL_origalen is set in perl_parse(). */
 	s = SvPV_force(sv,len);
 	if (len >= (I32)PL_origalen) {
 	    /* Longer than original, will be truncated. */
@@ -2392,7 +2386,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    memset(PL_origargv[0] + len + 1,
 		   /* Is the space counterintuitive?  Yes.
 		    * (You were expecting \0?)  
-		    * Does it work?  Seems to.  (In Linux at least.)
+		    * Does it work?  Seems to.  (In Linux 2.4.20 at least.)
 		    * --jhi */
 		   (int)' ',
 		   PL_origalen - len - 1);

@@ -934,35 +934,52 @@ setuid perl scripts securely.\n");
     PL_origargv = argv;
 
     {
-	 char *s = PL_origargv[0];
+	/* Set PL_origalen be the sum of the contiguous argv[]
+	 * elements plus the size of the env in case that it is
+	 * contiguous with the argv[].  This is used in mg.c:mg_set()
+	 * as the maximum modifiable length of $0.  In the worst case
+	 * the area we are able to modify is limited to the size of
+	 * the original argv[0].
+	 * --jhi */
+	 char *s;
 	 int i;
+	 int mask =
+	   ~(PTRSIZE == 4 ? 3 : PTRSIZE == 8 ? 7 : PTRSIZE == 16 ? 15 : 0);
 
-	 s += strlen(s);
-	 /* See if all the arguments are contiguous in memory */
+	 /* See if all the arguments are contiguous in memory.
+	  * Note that 'contiguous' is a loose term because some
+	  * platforms align the argv[] and the envp[].  We just check
+	  * that they are within aligned PTRSIZE bytes.  As long as no
+	  * system has something bizarre like the argv[] interleaved
+	  * with some other data, we are fine.  (Did I just evoke
+	  * Murphy's Law?) --jhi */
+	 s = PL_origargv[0];
+	 while (*s) s++;
 	 for (i = 1; i < PL_origargc; i++) {
-	      if (PL_origargv[i] == s + 1
-#ifdef OS2
-		  || PL_origargv[i] == s + 2
-#endif
-		   )
-	      {
-		   ++s;
-		   s += strlen(s);	/* this one is ok too */
+	      if (PL_origargv[i] >  s &&
+		  PL_origargv[i] <=
+		  INT2PTR(char *, PTR2UV(s + PTRSIZE) & mask)) {
+		   s = PL_origargv[i];
+		   while (*s) s++;
 	      }
 	      else
 		   break;
 	 }
-	 /* Can we grab env area too to be used as the area for $0
-	  * (in case we later modify it)? */
-	 if (PL_origenviron
-	     && (PL_origenviron[0] == s + 1))
-	 {
+	 /* Can we grab env area too to be used as the area for $0? */
+	 if (PL_origenviron &&
+	     PL_origenviron[0] >  s &&
+	     PL_origenviron[0] <=
+	     INT2PTR(char *, PTR2UV(s + PTRSIZE) & mask)) {
+	      s = PL_origenviron[0];
+	      while (*s) s++;
 	      my_setenv("NoNe  SuCh", Nullch);
-	      /* force copy of environment */
-	      for (i = 0; PL_origenviron[i]; i++)
-		   if (PL_origenviron[i] == s + 1) {
-			++s;
-			s += strlen(s);
+	      /* Force copy of environment. */
+	      for (i = 1; PL_origenviron[i]; i++)
+		   if (PL_origenviron[i] >  s &&
+		       PL_origenviron[i] <=
+		       INT2PTR(char *, PTR2UV(s + PTRSIZE) & mask)) {
+			s = PL_origenviron[i];
+			while (*s) s++;
 		   }
 		   else
 			break;
