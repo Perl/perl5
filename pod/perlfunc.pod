@@ -4483,16 +4483,19 @@ sockets but not socketpair.
 
 =item sort LIST
 
-Sorts the LIST and returns the sorted list value.  If SUBNAME or BLOCK
-is omitted, C<sort>s in standard string comparison order.  If SUBNAME is
-specified, it gives the name of a subroutine that returns an integer
-less than, equal to, or greater than C<0>, depending on how the elements
-of the list are to be ordered.  (The C<< <=> >> and C<cmp>
-operators are extremely useful in such routines.)  SUBNAME may be a
-scalar variable name (unsubscripted), in which case the value provides
-the name of (or a reference to) the actual subroutine to use.  In place
-of a SUBNAME, you can provide a BLOCK as an anonymous, in-line sort
-subroutine.
+In list context, this sorts the LIST and returns the sorted list value.
+In scalar context, sort doesn't do anything and an undefined value is
+returned.
+
+If SUBNAME or BLOCK is omitted, C<sort>s in standard string comparison
+order.  If SUBNAME is specified, it gives the name of a subroutine
+that returns an integer less than, equal to, or greater than C<0>,
+depending on how the elements of the list are to be ordered.  (The C<<
+<=> >> and C<cmp> operators are extremely useful in such routines.)
+SUBNAME may be a scalar variable name (unsubscripted), in which case
+the value provides the name of (or a reference to) the actual
+subroutine to use.  In place of a SUBNAME, you can provide a BLOCK as
+an anonymous, in-line sort subroutine.
 
 If the subroutine's prototype is C<($$)>, the elements to be compared
 are passed by reference in C<@_>, as for a normal subroutine.  This is
