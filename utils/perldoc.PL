@@ -222,8 +222,9 @@ unless($Is_VMS) {
 	@pagers = qw( more less pg view cat );
 	unshift(@pagers,$ENV{PAGER}) if $ENV{PAGER};
 } else {
+	require Config;
 	$tmp = 'Sys$Scratch:perldoc.tmp1_'.$$;
-	@pagers = qw( most more less type/page );
+	@pagers = ($Config::Config{'pager'},qw( most more less type/page ));
 	unshift(@pagers,$ENV{PERLDOC_PAGER}) if $ENV{PERLDOC_PAGER};
 	$goodresult = 1;
 }
