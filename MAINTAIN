@@ -412,6 +412,7 @@ lib/File/Spec/Mac.pm		schinder
 lib/File/Spec/OS2.pm		ilya
 lib/File/Spec/VMS.pm		vms
 lib/File/Spec/Win32.pm		win32
+lib/File/Temp.pm		tjenness
 lib/File/stat.pm		tchrist
 lib/FileCache.pm	
 lib/FileHandle.pm	
@@ -707,6 +708,7 @@ t/lib/filehand.t
 t/lib/filepath.t	
 t/lib/filespec.t		kjahds
 t/lib/findbin.t	
+t/lib/ftmp-*.t			tjenness
 t/lib/gdbm.t	
 t/lib/getopt.t			jvromans
 t/lib/h2ph*			kstar

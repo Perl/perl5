@@ -44,7 +44,7 @@ These still go out B<STDERR>.
 Due to the interaction between runtime and compiletime issues,
 and because it's probably not a very good idea anyway,
 you may not use C<no diagnostics> to turn them off at compiletime.
-However, you may control there behaviour at runtime using the 
+However, you may control their behaviour at runtime using the 
 disable() and enable() methods to turn them off and on respectively.
 
 The B<-verbose> flag first prints out the L<perldiag> introduction before
@@ -432,8 +432,8 @@ sub enable { &import }
 sub disable {
     shift;
     return unless $SIG{__WARN__} eq \&warn_trap;
-    $SIG{__WARN__} = $oldwarn;
-    $SIG{__DIE__} = $olddie;
+    $SIG{__WARN__} = $oldwarn || '';
+    $SIG{__DIE__} = $olddie || '';
 } 
 
 sub warn_trap {
