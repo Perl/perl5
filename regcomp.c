@@ -1523,7 +1523,7 @@ regexp *r;
     register char *s;
     register char op = EXACT;	/* Arbitrary non-END op. */
     register char *next;
-
+    SV *sv = sv_newmortal();
 
     s = r->program + 1;
     while (op != END) {	/* While that wasn't END last time... */
@@ -1532,7 +1532,9 @@ regexp *r;
 	    s++;
 #endif
 	op = OP(s);
-	PerlIO_printf(Perl_debug_log, "%2d%s", s-r->program, regprop(s));	/* Where, what. */
+	/* where, what */
+	regprop(sv, s);
+	PerlIO_printf(Perl_debug_log, "%2d%s", s - r->program, SvPVX(sv));
 	next = regnext(s);
 	s += regarglen[(U8)op];
 	if (next == NULL)		/* Next ptr. */
@@ -1561,8 +1563,10 @@ regexp *r;
     /* Header fields of interest. */
     if (r->regstart)
 	PerlIO_printf(Perl_debug_log, "start `%s' ", SvPVX(r->regstart));
-    if (r->regstclass)
-	PerlIO_printf(Perl_debug_log, "stclass `%s' ", regprop(r->regstclass));
+    if (r->regstclass) {
+	regprop(sv, r->regstclass);
+	PerlIO_printf(Perl_debug_log, "stclass `%s' ", SvPVX(sv));
+    }
     if (r->reganch & ROPT_ANCH) {
 	PerlIO_printf(Perl_debug_log, "anchored");
 	if (r->reganch & ROPT_ANCH_BOL)
@@ -1585,14 +1589,14 @@ regexp *r;
 /*
 - regprop - printable representation of opcode
 */
-char *
-regprop(op)
+void
+regprop(sv, op)
+SV *sv;
 char *op;
 {
     register char *p = 0;
 
-    (void) strcpy(buf, ":");
-
+    sv_setpv(sv, ":");
     switch (OP(op)) {
     case BOL:
 	p = "BOL";
@@ -1655,23 +1659,19 @@ char *op;
 	p = "NBOUNDL";
 	break;
     case CURLY:
-	(void)sprintf(buf+strlen(buf), "CURLY {%d,%d}", ARG1(op),ARG2(op));
-	p = NULL;
+	sv_catpvf(sv, "CURLY {%d,%d}", ARG1(op), ARG2(op));
 	break;
     case CURLYX:
-	(void)sprintf(buf+strlen(buf), "CURLYX {%d,%d}", ARG1(op),ARG2(op));
-	p = NULL;
+	sv_catpvf(sv, "CURLYX {%d,%d}", ARG1(op), ARG2(op));
 	break;
     case REF:
-	(void)sprintf(buf+strlen(buf), "REF%d", ARG1(op));
-	p = NULL;
+	sv_catpvf(sv, "REF%d", ARG1(op));
 	break;
     case OPEN:
-	(void)sprintf(buf+strlen(buf), "OPEN%d", ARG1(op));
-	p = NULL;
+	sv_catpvf(sv, "OPEN%d", ARG1(op));
 	break;
     case CLOSE:
-	(void)sprintf(buf+strlen(buf), "CLOSE%d", ARG1(op));
+	sv_catpvf(sv, "CLOSE%d", ARG1(op));
 	p = NULL;
 	break;
     case STAR:
@@ -1731,9 +1731,8 @@ char *op;
     default:
 	FAIL("corrupted regexp opcode");
     }
-    if (p != NULL)
-	(void) strcat(buf, p);
-    return(buf);
+    if (p)
+	sv_catpv(sv, p);
 }
 #endif /* DEBUGGING */
 

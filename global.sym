@@ -19,7 +19,6 @@ band_amg
 block_type
 bool__amg
 bor_amg
-buf
 bufend
 bufptr
 bxor_amg
@@ -431,6 +430,7 @@ force_ident
 force_list
 force_next
 force_word
+form
 free_tmps
 gen_constant_list
 gp_free
@@ -599,6 +599,7 @@ newSVREF
 newSViv
 newSVnv
 newSVpv
+newSVpvf
 newSVrv
 newSVsv
 newUNOP
@@ -1071,6 +1072,7 @@ sv_2uv
 sv_add_arena
 sv_backoff
 sv_bless
+sv_catpvf
 sv_catpv
 sv_catpvn
 sv_catsv
@@ -1106,6 +1108,7 @@ sv_reftype
 sv_replace
 sv_report_used
 sv_reset
+sv_setpvf
 sv_setiv
 sv_setnv
 sv_setptrobj
@@ -1124,6 +1127,8 @@ sv_unref
 sv_untaint
 sv_upgrade
 sv_usepvn
+sv_vcatpvfn
+sv_vsetpvfn
 taint_env
 taint_proper
 too_few_arguments

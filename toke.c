@@ -163,13 +163,9 @@ char *s;
 {
     char *oldbp = bufptr;
     bool is_first = (oldbufptr == linestart);
-    char *msg;
 
     bufptr = s;
-    New(890, msg, strlen(what) + 40, char);
-    sprintf(msg, "%s found where operator expected", what);
-    yywarn(msg);
-    Safefree(msg);
+    yywarn(form("%s found where operator expected", what));
     if (is_first)
 	warn("\t(Missing semicolon on previous line?)\n");
     else if (oldoldbufptr && isIDFIRST(*oldoldbufptr)) {
@@ -1272,12 +1268,9 @@ yylex()
 	/* Force them to make up their mind on "@foo". */
 	if (pit == '@' && lex_state != LEX_NORMAL && !lex_brackets) {
 	    GV *gv = gv_fetchpv(tokenbuf+1, FALSE, SVt_PVAV);
-	    if (!gv || ((tokenbuf[0] == '@') ? !GvAV(gv) : !GvHV(gv))) {
-		char tmpbuf[1024];
-		sprintf(tmpbuf, "In string, %s now must be written as \\%s",
-			tokenbuf, tokenbuf);
-		yyerror(tmpbuf);
-	    }
+	    if (!gv || ((tokenbuf[0] == '@') ? !GvAV(gv) : !GvHV(gv)))
+		yyerror(form("In string, %s now must be written as \\%s",
+			     tokenbuf, tokenbuf));
 	}
 
 	yylval.opval = (OP*)newSVOP(OP_CONST, 0, newSVpv(tokenbuf+1, 0));
@@ -1506,28 +1499,23 @@ yylex()
 		    if (gv)
 			GvIMPORTED_AV_on(gv);
 		    if (minus_F) {
-			char *tmpbuf1;
-			New(201, tmpbuf1, strlen(splitstr) * 2 + 20, char);
 			if (strchr("/'\"", *splitstr)
 			      && strchr(splitstr + 1, *splitstr))
-			    sprintf(tmpbuf1, "@F=split(%s);", splitstr);
+			    sv_catpvf(linestr, "@F=split(%s);", splitstr);
 			else {
 			    char delim;
 			    s = "'~#\200\1'"; /* surely one char is unused...*/
 			    while (s[1] && strchr(splitstr, *s))  s++;
 			    delim = *s;
-			    sprintf(tmpbuf1, "@F=split(%s%c",
-				    "q" + (delim == '\''), delim);
-			    d = tmpbuf1 + strlen(tmpbuf1);
-			    for (s = splitstr; *s; ) {
+			    sv_catpvf(linestr, "@F=split(%s%c",
+				      "q" + (delim == '\''), delim);
+			    for (s = splitstr; *s; s++) {
 				if (*s == '\\')
-				    *d++ = '\\';
-				*d++ = *s++;
+				    sv_catpvn(linestr, "\\", 1);
+				sv_catpvn(linestr, s, 1);
 			    }
-			    sprintf(d, "%c);", delim);
+			    sv_catpvf(linestr, "%c);", delim);
 			}
-			sv_catpv(linestr,tmpbuf1);
-			Safefree(tmpbuf1);
 		    }
 		    else
 		        sv_catpv(linestr,"@F=split(' ');");
@@ -2618,13 +2606,14 @@ yylex()
 		/* Not a method, so call it a subroutine (if defined) */
 
 		if (gv && GvCVu(gv)) {
-		    CV* cv = GvCV(gv);
+		    CV* cv;
 		    if (lastchar == '-')
 			warn("Ambiguous use of -%s resolved as -&%s()",
 				tokenbuf, tokenbuf);
 		    last_lop = oldbufptr;
 		    last_lop_op = OP_ENTERSUB;
 		    /* Check for a constant sub */
+		    cv = GvCV(gv);
 		    if ((sv = cv_const_sv(cv))) {
 		  its_constant:
 			SvREFCNT_dec(((SVOP*)yylval.opval)->op_sv);
@@ -2689,12 +2678,13 @@ yylex()
 	    }
 
 	case KEY___FILE__:
+	    yylval.opval = (OP*)newSVOP(OP_CONST, 0,
+					newSVsv(GvSV(curcop->cop_filegv)));
+	    TERM(THING);
+
 	case KEY___LINE__:
-	    if (tokenbuf[2] == 'L')
-		(void)sprintf(tokenbuf,"%ld",(long)curcop->cop_line);
-	    else
-		strcpy(tokenbuf, SvPVX(GvSV(curcop->cop_filegv)));
-	    yylval.opval = (OP*)newSVOP(OP_CONST, 0, newSVpv(tokenbuf,0));
+	    yylval.opval = (OP*)newSVOP(OP_CONST, 0,
+				    newSVpvf("%ld", (long)curcop->cop_line));
 	    TERM(THING);
 
 	case KEY___PACKAGE__:
@@ -2710,12 +2700,10 @@ yylex()
 
 	    /*SUPPRESS 560*/
 	    if (rsfp && (!in_eval || tokenbuf[2] == 'D')) {
-		char dname[256];
 		char *pname = "main";
 		if (tokenbuf[2] == 'D')
 		    pname = HvNAME(curstash ? curstash : defstash);
-		sprintf(dname,"%s::DATA", pname);
-		gv = gv_fetchpv(dname,TRUE, SVt_PVIO);
+		gv = gv_fetchpv(form("%s::DATA", pname), TRUE, SVt_PVIO);
 		GvMULTI_on(gv);
 		if (!GvIO(gv))
 		    GvIOp(gv) = newIO();
@@ -5224,10 +5212,10 @@ int
 yyerror(s)
 char *s;
 {
-    char wbuf[40];
     char *where = NULL;
     char *context = NULL;
     int contlen = -1;
+    SV *msg;
 
     if (!yychar || (yychar == ';' && !rsfp))
 	where = "at EOF";
@@ -5256,35 +5244,37 @@ char *s;
 	else
 	    where = "within string";
     }
-    else if (yychar < 32)
-	(void)sprintf(where = wbuf, "next char ^%c", toCTRL(yychar));
-    else if (isPRINT_LC(yychar))
-	(void)sprintf(where = wbuf, "next char %c", yychar);
-    else
-	(void)sprintf(where = wbuf, "next char \\%03o", yychar & 255);
-    if (contlen == -1)
-	contlen = strlen(where);
-    (void)sprintf(buf, "%s at %s line %d, ",
-		  s, SvPVX(GvSV(curcop->cop_filegv)), curcop->cop_line);
+    else {
+	SV *where_sv = sv_2mortal(newSVpv("next char ", 0));
+	if (yychar < 32)
+	    sv_catpvf(where_sv, "^%c", toCTRL(yychar));
+	else if (isPRINT_LC(yychar))
+	    sv_catpvf(where_sv, "%c", yychar);
+	else
+	    sv_catpvf(where_sv, "\\%03o", yychar & 255);
+	where = SvPVX(where_sv);
+    }
+    msg = sv_2mortal(newSVpv(s, 0));
+    sv_catpvf(msg, " at %S line %ld, ",
+	      GvSV(curcop->cop_filegv), (long)curcop->cop_line);
     if (context)
-	(void)sprintf(buf+strlen(buf), "near \"%.*s\"\n", contlen, context);
+	sv_catpvf(msg, "near \"%.*s\"\n", contlen, context);
     else
-	(void)sprintf(buf+strlen(buf), "%s\n", where);
+	sv_catpvf(msg, "%s\n", where);
     if (multi_start < multi_end && (U32)(curcop->cop_line - multi_end) <= 1) {
-	sprintf(buf+strlen(buf),
+	sv_catpvf(msg,
 	"  (Might be a runaway multi-line %c%c string starting on line %ld)\n",
 		(int)multi_open,(int)multi_close,(long)multi_start);
         multi_end = 0;
     }
     if (in_eval & 2)
-	warn("%s",buf);
+	warn("%S", msg);
     else if (in_eval)
-	sv_catpv(GvSV(errgv),buf);
+	sv_catsv(GvSV(errgv), msg);
     else
-	PerlIO_printf(PerlIO_stderr(), "%s",buf);
+	PerlIO_write(PerlIO_stderr(), SvPVX(msg), SvCUR(msg));
     if (++error_count >= 10)
-	croak("%s has too many errors.\n",
-	SvPVX(GvSV(curcop->cop_filegv)));
+	croak("%S has too many errors.\n", GvSV(curcop->cop_filegv));
     in_my = 0;
     return 0;
 }

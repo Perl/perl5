@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq - frequently asked questions about Perl ($Date: 1997/03/25 18:20:48 $)
+perlfaq - frequently asked questions about Perl ($Date: 1997/04/23 18:11:06 $)
 
 =head1 DESCRIPTION
 
@@ -64,8 +64,8 @@ at http://www.perl.com/perl/faq/ .
 =head2 How to contribute to this document
 
 You may mail corrections, additions, and suggestions to
-perlfaq-suggestions@perl.com.  Mail sent to the old perlfaq alias will
-merely cause the FAQ to be sent to you.
+perlfaq-suggestions@perl.com .  Mail sent to the old perlfaq alias
+will merely cause the FAQ to be sent to you.
 
 =head2 What will happen if you mail your Perl programming problems to the authors
 
@@ -124,6 +124,20 @@ in respect of this information or its use.
 
 =over 4
 
+=item 23/April/97
+
+Added http://www.oasis.leo.org/perl/ to L<perlfaq2>.  Style fix to
+L<perlfaq3>.  Added floating point precision, fixed complex number
+arithmetic, cross-references, caveat for Text::Wrap, alternative
+answer for initial capitalizing, fixed incorrect regexp, added example
+of Tie::IxHash to L<perlfaq4>.  Added example of passing and storing
+filehandles, added commify to L<perlfaq5>.  Restored variable suicide,
+and added mass commenting to L<perlfaq7>.  Added Net::Telnet, fixed
+backticks, added reader/writer pair to telnet question, added FindBin,
+grouped module questions together in L<perlfaq8>.  Expanded caveats
+for the simple URL extractor, gave LWP example, added CGI security
+question, expanded on the email address answer in L<perlfaq9>.
+
 =item 25/March/97
 
 Added more info to the binary distribution section of L<perlfaq2>.
@@ -131,7 +145,7 @@ Added Net::Telnet to L<perlfaq6>.  Fixed typos in L<perlfaq8>.  Added
 mail sending example to L<perlfaq9>.  Added Merlyn's columns to
 L<perlfaq2>.
 
-=item 18/March/97 
+=item 18/March/97
 
 Added the DATE to the NAME section, indicating which sections have
 changed.

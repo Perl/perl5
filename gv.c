@@ -376,23 +376,22 @@ char *name;
 U32 namelen;
 I32 create;
 {
-    char tmpbuf[1203];
+    char smallbuf[256];
+    char *tmpbuf;
     HV *stash;
     GV *tmpgv;
 
-    if (namelen > 1200) {
-	namelen = 1200;
-#ifdef VMS
-	warn("Weird package name \"%s\" truncated", name);
-#else
-	warn("Weird package name \"%.*s...\" truncated", (int)namelen, name);
-#endif
-    }
+    if (namelen + 3 < sizeof smallbuf)
+	tmpbuf = smallbuf;
+    else
+	New(606, tmpbuf, namelen + 3, char);
     Copy(name,tmpbuf,namelen,char);
     tmpbuf[namelen++] = ':';
     tmpbuf[namelen++] = ':';
     tmpbuf[namelen] = '\0';
-    tmpgv = gv_fetchpv(tmpbuf,create, SVt_PVHV);
+    tmpgv = gv_fetchpv(tmpbuf, create, SVt_PVHV);
+    if (tmpbuf != smallbuf)
+	Safefree(tmpbuf);
     if (!tmpgv)
 	return 0;
     if (!GvHV(tmpgv))
@@ -873,8 +872,8 @@ GV *
 newGVgen(pack)
 char *pack;
 {
-    (void)sprintf(tokenbuf,"%s::_GEN_%ld",pack,(long)gensym++);
-    return gv_fetchpv(tokenbuf,TRUE, SVt_PVGV);
+    return gv_fetchpv(form("%s::_GEN_%ld", pack, (long)gensym++),
+		      TRUE, SVt_PVGV);
 }
 
 /* hopefully this is only called on local symbol table entries */
@@ -1066,16 +1065,13 @@ HV* stash;
     }
 
     for (i = 1; i < NofAMmeth; i++) {
-        cv = 0;
-        cp = AMG_names[i];
-      
-	*buf = '(';			/* A cookie: "(". */
-	strcpy(buf + 1, cp);
+	SV *cookie = sv_2mortal(newSVpvf("(%s", cp = AMG_names[i]));
 	DEBUG_o( deb("Checking overloading of `%s' in package `%.256s'\n",
 		     cp, HvNAME(stash)) );
-	gv = gv_fetchmeth(stash, buf, strlen(buf), -1); /* no filling stash! */
+	/* don't fill the cache while looking up! */
+	gv = gv_fetchmeth(stash, SvPVX(cookie), SvCUR(cookie), -1);
+        cv = 0;
         if(gv && (cv = GvCV(gv))) {
-	    char *name = buf;
 	    if (GvNAMELEN(CvGV(cv)) == 3 && strEQ(GvNAME(CvGV(cv)), "nil")
 		&& strEQ(HvNAME(GvSTASH(CvGV(cv))), "overload")) {
 		/* GvSV contains the name of the method. */
@@ -1097,7 +1093,6 @@ HV* stash;
 			      (SvPOK(GvSV(gv)) ?  SvPVX(GvSV(gv)) : "???" ),
 			      cp, HvNAME(stash));
 		}
-		name = SvPVX(GvSV(gv));
 		cv = GvCV(gv = ngv);
 	    }
 	    DEBUG_o( deb("Overloading `%s' in package `%.256s' via `%.256s::%.256s' \n",
@@ -1280,9 +1275,10 @@ int flags;
       } else if (cvp && (cv=cvp[nomethod_amg])) {
 	notfound = 1; lr = 1;
       } else {
+	SV *msg;
 	if (off==-1) off=method;
-	sprintf(buf,
-		"Operation `%s': no method found,%sargument %s%.256s%s%.256s",
+	msg = sv_2mortal(newSVpvf(
+		      "Operation `%s': no method found,%sargument %s%s%s%s",
 		      AMG_names[method + assignshift],
 		      (flags & AMGf_unary ? " " : "\n\tleft "),
 		      SvAMAGIC(left)? 
@@ -1298,11 +1294,11 @@ int flags;
 			 : ",\n\tright argument has no overloaded magic"),
 		      SvAMAGIC(right)? 
 		        HvNAME(SvSTASH(SvRV(right))):
-		        "");
+		        ""));
 	if (amtp && amtp->fallback >= AMGfallYES) {
-	  DEBUG_o( deb(buf) );
+	  DEBUG_o( deb("%s", SvPVX(msg)) );
 	} else {
-	  croak(buf);
+	  croak("%S", msg);
 	}
 	return NULL;
       }
@@ -1310,7 +1306,7 @@ int flags;
   }
   if (!notfound) {
     DEBUG_o( deb(
-  "Overloaded operator `%s'%s%s%s:\n\tmethod%s found%s in package %.256s%s\n",
+  "Overloaded operator `%s'%s%s%s:\n\tmethod%s found%s in package %s%s\n",
 		 AMG_names[off],
 		 method+assignshift==off? "" :
 		             " (initially `",

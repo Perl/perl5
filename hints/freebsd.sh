@@ -59,7 +59,6 @@ case "$osvers" in
 2.0.5*|2.0-built*|2.1*)
  	usevfork='true'
 	usemymalloc='n'
-	d_dosuid='define'
 	d_setregid='define'
 	d_setreuid='define'
 	d_setegid='undef'
@@ -73,7 +72,6 @@ case "$osvers" in
  	usevfork='true'
 	usemymalloc='n'
 	libswanted=`echo $libswanted | sed 's/ malloc / /'`
-	d_dosuid='define'
 	d_setregid='define'
 	d_setreuid='define'
 	d_setegid='undef'

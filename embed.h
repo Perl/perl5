@@ -57,7 +57,6 @@
 #define block_start		Perl_block_start
 #define bool__amg		Perl_bool__amg
 #define bor_amg			Perl_bor_amg
-#define buf			Perl_buf
 #define bufend			Perl_bufend
 #define bufptr			Perl_bufptr
 #define bxor_amg		Perl_bxor_amg
@@ -210,6 +209,7 @@
 #define force_list		Perl_force_list
 #define force_next		Perl_force_next
 #define force_word		Perl_force_word
+#define form			Perl_form
 #define free_tmps		Perl_free_tmps
 #define freq			Perl_freq
 #define ge_amg			Perl_ge_amg
@@ -431,6 +431,7 @@
 #define newSViv			Perl_newSViv
 #define newSVnv			Perl_newSVnv
 #define newSVpv			Perl_newSVpv
+#define newSVpvf		Perl_newSVpvf
 #define newSVrv			Perl_newSVrv
 #define newSVsv			Perl_newSVsv
 #define newUNOP			Perl_newUNOP
@@ -1000,6 +1001,7 @@
 #define sv_backoff		Perl_sv_backoff
 #define sv_bless		Perl_sv_bless
 #define sv_catpv		Perl_sv_catpv
+#define sv_catpvf		Perl_sv_catpvf
 #define sv_catpvn		Perl_sv_catpvn
 #define sv_catsv		Perl_sv_catsv
 #define sv_chop			Perl_sv_chop
@@ -1038,6 +1040,7 @@
 #define sv_setnv		Perl_sv_setnv
 #define sv_setptrobj		Perl_sv_setptrobj
 #define sv_setpv		Perl_sv_setpv
+#define sv_setpvf		Perl_sv_setpvf
 #define sv_setpvn		Perl_sv_setpvn
 #define sv_setref_iv		Perl_sv_setref_iv
 #define sv_setref_nv		Perl_sv_setref_nv
@@ -1053,6 +1056,8 @@
 #define sv_untaint		Perl_sv_untaint
 #define sv_upgrade		Perl_sv_upgrade
 #define sv_usepvn		Perl_sv_usepvn
+#define sv_vcatpvfn		Perl_sv_vcatpvfn
+#define sv_vsetpvfn		Perl_sv_vsetpvfn
 #define sv_yes			Perl_sv_yes
 #define taint_env		Perl_taint_env
 #define taint_proper		Perl_taint_proper
@@ -1254,6 +1259,7 @@
 #define mainstack		(curinterp->Imainstack)
 #define maxscream		(curinterp->Imaxscream)
 #define maxsysfd		(curinterp->Imaxsysfd)
+#define mess_sv			(curinterp->Imess_sv)
 #define minus_F			(curinterp->Iminus_F)
 #define minus_a			(curinterp->Iminus_a)
 #define minus_c			(curinterp->Iminus_c)
@@ -1407,6 +1413,7 @@
 #define Imainstack		mainstack
 #define Imaxscream		maxscream
 #define Imaxsysfd		maxsysfd
+#define Imess_sv		mess_sv
 #define Iminus_F		minus_F
 #define Iminus_a		minus_a
 #define Iminus_c		minus_c
@@ -1569,6 +1576,7 @@
 #define mainstack		Perl_mainstack
 #define maxscream		Perl_maxscream
 #define maxsysfd		Perl_maxsysfd
+#define mess_sv			Perl_mess_sv
 #define minus_F			Perl_minus_F
 #define minus_a			Perl_minus_a
 #define minus_c			Perl_minus_c

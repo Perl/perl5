@@ -240,7 +240,7 @@ Without the \Q, the regexp would also spuriously match "di".
 
 =head2 What is C</o> really for?
 
-Using a variable in a regular expression match forces a reevaluation
+Using a variable in a regular expression match forces a re-evaluation
 (and perhaps recompilation) each time through.  The C</o> modifier
 locks in the regexp the first time it's used.  This always happens in a
 constant regular expression, and in fact, the pattern was compiled
@@ -520,7 +520,7 @@ But then you lose the vertical alignment of the regular expressions.
 
 While it's true that Perl's regular expressions resemble the DFAs
 (deterministic finite automata) of the egrep(1) program, they are in
-fact implemented as NFAs (nondeterministic finite automata) to allow
+fact implemented as NFAs (non-deterministic finite automata) to allow
 backtracking and backreferencing.  And they aren't POSIX-style either,
 because those guarantee worst-case behavior for all cases.  (It seems
 that some people prefer guarantees of consistency, even when what's
@@ -590,7 +590,7 @@ katakana (in Shift-JIS or EUC encoding) is available from CPAN as
 
 =for Tom make it so
 
-There are many double (and multi) byte encodings commonly used these
+There are many double- (and multi-) byte encodings commonly used these
 days.  Some versions of these have 1-, 2-, 3-, and 4-byte characters,
 all mixed.
 
@@ -598,3 +598,4 @@ all mixed.
 
 Copyright (c) 1997 Tom Christiansen and Nathan Torkington.
 All rights reserved.  See L<perlfaq> for distribution information.
+

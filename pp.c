@@ -36,9 +36,9 @@ typedef unsigned UBW;
  * in a double without loss; that is, it has no 32-bit type.
  */
 #if BYTEORDER > 0xFFFF && defined(_CRAY) && !defined(_CRAYMPP)
-#  define BWBITS  32
-#  define BWMASK  ((1 << BWBITS) - 1)
-#  define BWSIGN  (1 << (BWBITS - 1))
+#  define BW_BITS  32
+#  define BW_MASK  ((1 << BW_BITS) - 1)
+#  define BW_SIGN  (1 << (BW_BITS - 1))
 #  define BWi(i)  (((i) & BW_SIGN) ? ((i) | ~BW_MASK) : ((i) & BW_MASK))
 #  define BWu(u)  ((u) & BW_MASK)
 #else
@@ -150,11 +150,9 @@ PP(pp_padhv)
     }
     else if (gimme == G_SCALAR) {
 	SV* sv = sv_newmortal();
-	if (HvFILL((HV*)TARG)) {
-	    sprintf(buf, "%ld/%ld",
-		    (long)HvFILL((HV*)TARG), (long)HvMAX((HV*)TARG)+1);
-	    sv_setpv(sv, buf);
-	}
+	if (HvFILL((HV*)TARG))
+	    sv_setpvf(sv, "%ld/%ld",
+		      (long)HvFILL((HV*)TARG), (long)HvMAX((HV*)TARG) + 1);
 	else
 	    sv_setiv(sv, 0);
 	SETs(sv);
@@ -863,7 +861,7 @@ PP(pp_left_shift)
       IBW shift = POPi;
       if (op->op_private & HINT_INTEGER) {
 	IBW i = TOPi;
-	i <<= shift;
+	i = BWi(i) << shift;
 	SETi(BWi(i));
       }
       else {
@@ -882,7 +880,7 @@ PP(pp_right_shift)
       IBW shift = POPi;
       if (op->op_private & HINT_INTEGER) {
 	IBW i = TOPi;
-	i >>= shift;
+	i = BWi(i) >> shift;
 	SETi(BWi(i));
       }
       else {
@@ -3114,12 +3112,9 @@ PP(pp_unpack)
 			auv = 0;
 		    }
 		    else if (++bytes >= sizeof(UV)) {	/* promote to string */
-			char decn[sizeof(UV) * 3 + 1];
 			char *t;
 
-			(void) sprintf(decn, "%0*ld",
-				       (int)sizeof(decn) - 1, auv);
-			sv = newSVpv(decn, 0);
+			sv = newSVpvf("%0*vu", (int)(sizeof(UV) * 3), auv);
 			while (s < strend) {
 			    sv = mul128(sv, *s & 0x7f);
 			    if (!(*s++ & 0x80)) {
@@ -3716,7 +3711,14 @@ PP(pp_pack)
 		if (adouble < 0)
 		    croak("Cannot compress negative numbers");
 
-		if (adouble <= UV_MAX) {
+		if (
+#ifdef BW_BITS
+		    adouble <= BW_MASK
+#else
+		    adouble <= UV_MAX
+#endif
+		    )
+		{
 		    char   buf[1 + sizeof(UV)];
 		    char  *in = buf + sizeof(buf);
 		    UV     auv = U_V(adouble);;

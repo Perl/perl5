@@ -1073,77 +1073,73 @@ register I32 len;
 
 #ifdef I_STDARG
 char *
-mess(const char *pat, va_list *args)
+form(const char* pat, ...)
 #else
 /*VARARGS0*/
+char *
+form(pat, va_alist)
+    const char *pat;
+    va_dcl
+#endif
+{
+    va_list args;
+#ifdef I_STDARG
+    va_start(args, pat);
+#else
+    va_start(args);
+#endif
+    if (mess_sv == &sv_undef) {
+	/* All late-destruction message must be short */
+	vsprintf(tokenbuf, pat, args);
+    }
+    else {
+	if (!mess_sv)
+	    mess_sv = NEWSV(905, 0);
+	sv_vsetpvfn(mess_sv, pat, strlen(pat), &args,
+		    Null(SV**), 0, Null(bool));
+    }
+    va_end(args);
+    return (mess_sv == &sv_undef) ? tokenbuf : SvPVX(mess_sv);
+}
+
 char *
 mess(pat, args)
     const char *pat;
     va_list *args;
-#endif
 {
-    char *s;
-    char *s_start;
-    SV *tmpstr;
-    I32 usermess;
-#ifndef HAS_VPRINTF
-#ifdef USE_CHAR_VSPRINTF
-    char *vsprintf();
-#else
-    I32 vsprintf();
-#endif
-#endif
+    SV *sv;
+    static char dgd[] = " during global destruction.\n";
 
-    s = s_start = buf;
-    usermess = strEQ(pat, "%s");
-    if (usermess) {
-	tmpstr = sv_newmortal();
-	sv_setpv(tmpstr, va_arg(*args, char *));
-	*s++ = SvCUR(tmpstr) ? SvPVX(tmpstr)[SvCUR(tmpstr)-1] : ' ';
+    if (mess_sv == &sv_undef) {
+	/* All late-destruction message must be short */
+	vsprintf(tokenbuf, pat, *args);
+	if (!tokenbuf[0] && tokenbuf[strlen(tokenbuf) - 1] != '\n')
+	    strcat(tokenbuf, dgd);
+	return tokenbuf;
     }
-    else {
-	(void) vsprintf(s,pat,*args);
-	s += strlen(s);
-    }
-    va_end(*args);
-
-    if (!(s > s_start && s[-1] == '\n')) {
+    if (!mess_sv)
+	mess_sv = NEWSV(905, 0);
+    sv = mess_sv;
+    sv_vsetpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool));
+    if (!SvCUR(sv) || *(SvEND(sv) - 1) != '\n') {
 	if (dirty)
-	    strcpy(s, " during global destruction.\n");
+	    sv_catpv(sv, dgd);
 	else {
-	    if (curcop->cop_line) {
-		(void)sprintf(s," at %s line %ld",
-		  SvPVX(GvSV(curcop->cop_filegv)), (long)curcop->cop_line);
-		s += strlen(s);
-	    }
+	    if (curcop->cop_line)
+		sv_catpvf(sv, " at %S line %ld",
+			  GvSV(curcop->cop_filegv), (long)curcop->cop_line);
 	    if (GvIO(last_in_gv) && IoLINES(GvIOp(last_in_gv))) {
 		bool line_mode = (RsSIMPLE(rs) &&
 				  SvLEN(rs) == 1 && *SvPVX(rs) == '\n');
-		(void)sprintf(s,", <%s> %s %ld",
-		  last_in_gv == argvgv ? "" : GvNAME(last_in_gv),
-		  line_mode ? "line" : "chunk", 
-		  (long)IoLINES(GvIOp(last_in_gv)));
-		s += strlen(s);
+		sv_catpvf(sv, ", <%s> %s %ld",
+			  last_in_gv == argvgv ? "" : GvNAME(last_in_gv),
+			  line_mode ? "line" : "chunk", 
+			  (long)IoLINES(GvIOp(last_in_gv)));
 	    }
-	    (void)strcpy(s,".\n");
-	    s += 2;
+	    sv_catpv(sv, ".\n");
 	}
-	if (usermess)
-	    sv_catpv(tmpstr,buf+1);
     }
-
-    if (s - s_start >= sizeof(buf)) {	/* Ooops! */
-	if (usermess)
-	    PerlIO_puts(PerlIO_stderr(), SvPVX(tmpstr));
-	else
-	    PerlIO_puts(PerlIO_stderr(), buf);
-	PerlIO_puts(PerlIO_stderr(), "panic: message overflow - memory corrupted!\n");
-	my_exit(1);
-    }
-    if (usermess)
-	return SvPVX(tmpstr);
-    else
-	return buf;
+    return SvPVX(sv);
 }
 
 #ifdef I_STDARG
@@ -1971,7 +1967,7 @@ int flags;
 {
     SV *sv;
     SV** svp;
-    char spid[16];
+    char spid[sizeof(int) * 3 + 1];
 
     if (!pid)
 	return -1;
@@ -2027,7 +2023,7 @@ int pid;
 int status;
 {
     register SV *sv;
-    char spid[16];
+    char spid[sizeof(int) * 3 + 1];
 
     sprintf(spid, "%d", pid);
     sv = *hv_fetch(pidstatus,spid,strlen(spid),TRUE);
@@ -2165,10 +2161,7 @@ char *b;
     char *fb = strrchr(b,'/');
     struct stat tmpstatbuf1;
     struct stat tmpstatbuf2;
-#ifndef MAXPATHLEN
-#define MAXPATHLEN 1024
-#endif
-    char tmpbuf[MAXPATHLEN+1];
+    SV *tmpsv = sv_newmortal();
 
     if (fa)
 	fa++;
@@ -2181,16 +2174,16 @@ char *b;
     if (strNE(a,b))
 	return FALSE;
     if (fa == a)
-	strcpy(tmpbuf,".");
+	sv_setpv(tmpsv, ".");
     else
-	strncpy(tmpbuf, a, fa - a);
-    if (Stat(tmpbuf, &tmpstatbuf1) < 0)
+	sv_setpvn(tmpsv, a, fa - a);
+    if (Stat(SvPVX(tmpsv), &tmpstatbuf1) < 0)
 	return FALSE;
     if (fb == b)
-	strcpy(tmpbuf,".");
+	sv_setpv(tmpsv, ".");
     else
-	strncpy(tmpbuf, b, fb - b);
-    if (Stat(tmpbuf, &tmpstatbuf2) < 0)
+	sv_setpvn(tmpsv, b, fb - b);
+    if (Stat(SvPVX(tmpsv), &tmpstatbuf2) < 0)
 	return FALSE;
     return tmpstatbuf1.st_dev == tmpstatbuf2.st_dev &&
 	   tmpstatbuf1.st_ino == tmpstatbuf2.st_ino;

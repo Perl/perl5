@@ -346,7 +346,7 @@ lib/File/Compare.pm	Emulation of cmp command
 lib/File/Copy.pm	Emulation of cp command
 lib/File/Find.pm	Routines to do a find
 lib/File/Path.pm	Do things like `mkdir -p' and `rm -r'
-lib/File/stat.pm	By-name interface to Perl's built-in stat
+lib/File/stat.pm	By-name interface to Perl's builtin stat
 lib/FileCache.pm	Keep more files open than the system permits
 lib/FileHandle.pm	Backward-compatible front end to IO extension
 lib/FindBin.pm		Find name of currently executing program
@@ -360,10 +360,10 @@ lib/Math/BigInt.pm	An arbitrary precision integer arithmetic package
 lib/Math/Complex.pm	A Complex package
 lib/Math/Trig.pm	A simple interface to complex trigonometry
 lib/Net/Ping.pm		Hello, anybody home?
-lib/Net/hostent.pm	By-name interface to Perl's built-in gethost*
-lib/Net/netent.pm	By-name interface to Perl's built-in getnet*
-lib/Net/protoent.pm	By-name interface to Perl's built-in getproto*
-lib/Net/servent.pm	By-name interface to Perl's built-in getserv*
+lib/Net/hostent.pm	By-name interface to Perl's builtin gethost*
+lib/Net/netent.pm	By-name interface to Perl's builtin getnet*
+lib/Net/protoent.pm	By-name interface to Perl's builtin getproto*
+lib/Net/servent.pm	By-name interface to Perl's builtin getserv*
 lib/Pod/Functions.pm	used by pod/splitpod
 lib/Pod/Html.pm		Convert POD data to HTML
 lib/Pod/Text.pm		Convert POD data to formatted ASCII text
@@ -388,12 +388,12 @@ lib/Tie/RefHash.pm	Base class for tied hashes with references as keys
 lib/Tie/Scalar.pm	Base class for tied scalars
 lib/Tie/SubstrHash.pm	Compact hash for known key, value and table size
 lib/Time/Local.pm	Reverse translation of localtime, gmtime
-lib/Time/gmtime.pm	By-name interface to Perl's built-in gmtime
-lib/Time/localtime.pm	By-name interface to Perl's built-in localtime
+lib/Time/gmtime.pm	By-name interface to Perl's builtin gmtime
+lib/Time/localtime.pm	By-name interface to Perl's builtin localtime
 lib/Time/tm.pm		Internal object for Time::{gm,local}time
 lib/UNIVERSAL.pm	Base class for ALL classes
-lib/User/grent.pm	By-name interface to Perl's built-in getgr*
-lib/User/pwent.pm	By-name interface to Perl's built-in getpw*
+lib/User/grent.pm	By-name interface to Perl's builtin getgr*
+lib/User/pwent.pm	By-name interface to Perl's builtin getpw*
 lib/abbrev.pl		An abbreviation table builder
 lib/assert.pl		assertion and panic with stack trace
 lib/autouse.pm		Load and call a function only when it's used

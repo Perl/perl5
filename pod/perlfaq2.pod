@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.15 $, $Date: 1997/03/25 18:15:48 $)
+perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.16 $, $Date: 1997/04/23 18:04:09 $)
 
 =head1 DESCRIPTION
 
@@ -62,7 +62,7 @@ eventually live on, and then type C<make install>.  Most other
 approaches are doomed to failure.
 
 One simple way to check that things are in the right place is to print out
-the hardcoded @INC which perl is looking for.
+the hard-coded @INC which perl is looking for.
 
 	perl -e 'print join("\n",@INC)'
 
@@ -76,7 +76,7 @@ module/library directory?">.
 =head2 I grabbed the sources and tried to compile but gdbm/dynamic loading/malloc/linking/... failed.  How do I make it work?
 
 Read the F<INSTALL> file, which is part of the source distribution.
-It describes in detail how to cope with most idiosyncrasies that the
+It describes in detail how to cope with most idiosyncracies that the
 Configure script can't work around for any given system or
 architecture.
 
@@ -84,7 +84,7 @@ architecture.
 
 CPAN stands for Comprehensive Perl Archive Network, a huge archive
 replicated on dozens of machines all over the world.  CPAN contains
-source code, nonnative ports, documentation, scripts, and many
+source code, non-native ports, documentation, scripts, and many
 third-party modules and extensions, designed for everything from
 commercial database interfaces to keyboard/screen control to web
 walking and CGI scripts.  The master machine for CPAN is
@@ -191,7 +191,7 @@ before you buy!
 What follows is a list of the books that the FAQ authors found personally
 useful.  Your mileage may (but, we hope, probably won't) vary.
 
-If you're already a hardcore systems programmer, then the Camel Book
+If you're already a hard-core systems programmer, then the Camel Book
 just might suffice for you to learn Perl from.  But if you're not,
 check out the "Llama Book".  It currently doesn't cover perl5, but the
 2nd edition is nearly done and should be out by summer 97:
@@ -260,6 +260,9 @@ following list is I<not> the complete list of CPAN mirrors.
   http://www.cs.ruu.nl/pub/PERL/CPAN/
   ftp://ftp.cs.colorado.edu/pub/perl/CPAN/
 
+http:/www.oasis.leo.org/perl/ has, amongst other things, source to
+versions 1 through 5 of Perl.
+
 =head2 What mailing lists are there for perl?
 
 Most of the major modules (tk, CGI, libwww-perl) have their own
@@ -279,7 +282,7 @@ There is a mailing list for discussing Macintosh Perl.  Contact
 "mac-perl-request@iis.ee.ethz.ch".
 
 Also see Matthias Neeracher's (the creator and maintainer of MacPerl)
-web page at http://www.iis.ee.ethz.ch/~neeri/macintosh/perl.html for
+webpage at http://www.iis.ee.ethz.ch/~neeri/macintosh/perl.html for
 many links to interesting MacPerl sites, and the applications/MPW
 tools, precompiled.
 
@@ -405,19 +408,19 @@ If you are reporting a bug in the perl interpreter or the modules
 shipped with perl, use the perlbug program in the perl distribution or
 email your report to perlbug@perl.com.
 
-If you are posting a bug with a nonstandard port (see the answer to
+If you are posting a bug with a non-standard port (see the answer to
 "What platforms is Perl available for?"), a binary distribution, or a
-nonstandard module (such as Tk, CGI, etc), then please see the
+non-standard module (such as Tk, CGI, etc), then please see the
 documentation that came with it to determine the correct place to post
 bugs.
 
-Read the perlbug manpage (perl5.004 or later) for more information.
+Read the perlbug man page (perl5.004 or later) for more information.
 
 =head2 What is perl.com?  perl.org?  The Perl Institute?
 
 perl.org is the official vehicle for The Perl Institute.  The motto of
 TPI is "helping people help Perl help people" (or something like
-that).  It's a nonprofit organization supporting development,
+that).  It's a non-profit organization supporting development,
 documentation, and dissemination of perl.  Current directors of TPI
 include Larry Wall, Tom Christiansen, and Randal Schwartz, whom you
 may have heard of somewhere else around here.
@@ -425,8 +428,8 @@ may have heard of somewhere else around here.
 The perl.com domain is Tom Christiansen's domain.  He created it as a
 public service long before perl.org came about.  It's the original PBS
 of the Perl world, a clearinghouse for information about all things
-Perlian, accepting no paid advertisements, glossy GIFs, or (gasp!)
-Java applets on its pages.
+Perlian, accepting no paid advertisements, glossy gifs, or (gasp!)
+java applets on its pages.
 
 =head2 How do I learn about object-oriented Perl programming?
 

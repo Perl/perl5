@@ -531,27 +531,20 @@ MAGIC *mg;
 	break;
     case '(':
 	sv_setiv(sv, (IV)gid);
-	s = buf;
-	(void)sprintf(s,"%d",(int)gid);
+	sv_setpvf(sv, "%vd", (IV)gid);
 	goto add_groups;
     case ')':
 	sv_setiv(sv, (IV)egid);
-	s = buf;
-	(void)sprintf(s,"%d",(int)egid);
+	sv_setpvf(sv, "%vd", (IV)egid);
       add_groups:
-	while (*s) s++;
 #ifdef HAS_GETGROUPS
 	{
 	    Groups_t gary[NGROUPS];
-
 	    i = getgroups(NGROUPS,gary);
-	    while (--i >= 0) {
-		(void)sprintf(s," %d", (int)gary[i]);
-		while (*s) s++;
-	    }
+	    while (--i >= 0)
+		sv_catpvf(sv, " %vd", (IV)gary[i]);
 	}
 #endif
-	sv_setpv(sv,buf);
 	SvIOK_on(sv);	/* what a wonderful hack! */
 	break;
     case '*':
@@ -769,10 +762,8 @@ MAGIC* mg;
 	 * access to a known hint bit in a known OP, we can't
 	 * tell whether HINT_STRICT_REFS is in force or not.
 	 */
-	if (!strchr(s,':') && !strchr(s,'\'')) {
-	    sprintf(tokenbuf, "main::%s",s);
-	    sv_setpv(sv,tokenbuf);
-	}
+	if (!strchr(s,':') && !strchr(s,'\''))
+	    sv_setpv(sv, form("main::%s", s));
 	if (i)
 	    (void)rsignal(i, sighandler);
 	else

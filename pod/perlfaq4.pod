@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq4 - Data Manipulation ($Revision: 1.17 $, $Date: 1997/03/25 18:16:24 $)
+perlfaq4 - Data Manipulation ($Revision: 1.18 $, $Date: 1997/04/23 18:04:37 $)
 
 =head1 DESCRIPTION
 
@@ -9,6 +9,34 @@ of data as numbers, dates, strings, arrays, hashes, and miscellaneous
 data issues.
 
 =head1 Data: Numbers
+
+=head2 Why am I getting long decimals (eg, 19.9499999999999) instead of the numbers I should be getting (eg, 19.95)?
+
+Internally, your computer represents floating-point numbers in binary.
+Floating-point numbers read in from a file, or appearing as literals
+in your program, are converted from their decimal floating-point
+representation (eg, 19.95) to the internal binary representation.
+
+However, 19.95 can't be precisely represented as a binary
+floating-point number, just like 1/3 can't be exactly represented as a
+decimal floating-point number.  The computer's binary representation
+of 19.95, therefore, isn't exactly 19.95.
+
+When a floating-point number gets printed, the binary floating-point
+representation is converted back to decimal.  These decimal numbers
+are displayed in either the format you specify with printf(), or the
+current output format for numbers (see L<perlvar/"$#"> if you use
+print.  C<$#> has a different default value in Perl5 than it did in
+Perl4.  Changing C<$#> yourself is deprecated.
+
+This affects B<all> computer languages that represent decimal
+floating-point numbers in binary, not just Perl.  Perl provides
+arbitrary-precision decimal numbers with the Math::BigFloat module
+(part of the standard Perl distribution), but mathematical operations
+are consequently slower.
+
+To get rid of the superfluous digits, just use a format (eg,
+C<printf("%.2f", 19.95)>) to get the required precision.
 
 =head2 Why isn't my octal data interpreted correctly?
 
@@ -36,10 +64,12 @@ The POSIX module (part of the standard perl distribution) implements
 ceil(), floor(), and a number of other mathematical and trigonometric
 functions.
 
-The Math::Complex module (part of the standard perl distribution)
-defines a number of mathematical functions that can also work on real
-numbers.  It's not as efficient as the POSIX library, but the POSIX
-library can't work with complex numbers.
+In 5.000 to 5.003 Perls, trigonometry was done in the Math::Complex
+module.  With 5.004, the Math::Trig module (part of the standard perl
+distribution) implements the trigonometric functions. Internally it
+uses the Math::Complex module and some functions can break out from
+the real axis into the complex plane, for example the inverse sine of
+2.
 
 Rounding in financial applications can have serious implications, and
 the rounding method used should be specified precisely.  In these
@@ -199,6 +229,9 @@ arbitrary expressions:
 
     print "That yields ${\($n + 5)} widgets\n";
 
+See also "How can I expand variables in text strings?" in this section
+of the FAQ.
+
 =head2 How do I find matching/nesting anything?
 
 This isn't something that can be tackled in one regular expression, no
@@ -233,6 +266,9 @@ Use Text::Wrap (part of the standard perl distribution):
 
     use Text::Wrap;
     print wrap("\t", '  ', @paragraphs);
+
+The paragraphs you give to Text::Wrap may not contain embedded
+newlines.  Text::Wrap doesn't justify the lines (flush-right).
 
 =head2 How can I access/change the first N letters of a string?
 
@@ -271,7 +307,7 @@ C<tr///> function like so:
 
     $string = "ThisXlineXhasXsomeXx'sXinXit":
     $count = ($string =~ tr/X//);
-    print "There are $count X characters in the string";
+    print "There are $count X charcters in the string";
 
 This is fine if you are just looking for a single character.  However,
 if you are trying to count multiple character substrings within a
@@ -288,6 +324,18 @@ integers:
 To make the first letter of each word upper case:
 
         $line =~ s/\b(\w)/\U$1/g;
+
+This has the strange effect of turning "C<don't do it>" into "C<Don'T
+Do It>".  Sometimes you might want this, instead (Suggested by Brian
+Foy E<lt>comdog@computerdog.comE<gt>):
+
+    $string =~ s/ (
+                 (^\w)    #at the beginning of the line
+                   |      # or
+                 (\s\w)   #preceded by whitespace
+                   )
+                /\U$1/xg;
+    $string =~ /([\w']+)/\u\L$1/g;
 
 To make the whole line upper case:
 
@@ -320,6 +368,11 @@ suggests (assuming your string is contained in $text):
        | ,
      }gx;
      push(@new, undef) if substr($text,-1,1) eq ',';
+
+If you want to represent quotation marks inside a
+quotation-mark-delimited field, escape them with backslashes (eg,
+C<"like \"this\"").  Unescaping them is a task addressed earlier in
+this section.
 
 Alternatively, the Text::ParseWords module (part of the standard perl
 distribution) lets you say:
@@ -367,6 +420,9 @@ substitution:
 
 Which is bizarre enough that you'll probably actually need an EEG
 afterwards. :-)
+
+See also "How do I expand function calls in a string?" in this section
+of the FAQ.
 
 =head2 What's wrong with always quoting "$vars"?
 
@@ -668,7 +724,7 @@ that's come to be known as the Schwartzian Transform:
 
     @sorted = map  { $_->[0] }
 	      sort { $a->[1] cmp $b->[1] }
-	      map  { [ $_, uc((/\d+\s*(\S+) )[0] ] } @data;
+	      map  { [ $_, uc((/\d+\s*(\S+)/ )[0] ] } @data;
 
 If you need to sort on several fields, the following paradigm is useful.
 
@@ -900,7 +956,7 @@ they end up doing is not what they do with ordinary hashes.
 Using C<keys %hash> in a scalar context returns the number of keys in
 the hash I<and> resets the iterator associated with the hash.  You may
 need to do this if you use C<last> to exit a loop early so that when you
-reenter it, the hash iterator has been reset.
+re-enter it, the hash iterator has been reset.
 
 =head2 How can I get the unique keys from two hashes?
 
@@ -937,6 +993,14 @@ it on top of either DB_File or GDBM_File.
 =head2 How can I make my hash remember the order I put elements into it?
 
 Use the Tie::IxHash from CPAN.
+
+    use Tie::IxHash;
+    tie(%myhash, Tie::IxHash);
+    for ($i=0; $i<20; $i++) {
+        $myhash{$i} = 2*$i;
+    }
+    @keys = keys %myhash;
+    # @keys = (0,1,2,3,...)
 
 =head2 Why does passing a subroutine an undefined element in a hash create it?
 
@@ -1035,3 +1099,4 @@ Get the Business::CreditCard module from CPAN.
 
 Copyright (c) 1997 Tom Christiansen and Nathan Torkington.
 All rights reserved.  See L<perlfaq> for distribution information.
+

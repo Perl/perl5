@@ -49,6 +49,7 @@ sub install {
 	opendir DIR, $source_dir_or_file or next;
 	for (readdir DIR) {
 	    next if $_ eq "." || $_ eq ".." || $_ eq ".exists";
+	    next if /^P\d+$/ && -d "$source_dir_or_file/$_"; # no Chip bk's
 	    if (-w $hash{$source_dir_or_file} || mkpath($hash{$source_dir_or_file})) {
 		last;
 	    } else {
@@ -88,6 +89,7 @@ sub install {
                          $atime,$mtime,$ctime,$blksize,$blocks) = stat;
 	    return unless -f _;
 	    return if $_ eq ".exists";
+	    return if /\bP\d+\b/;	# no Chip-style backups
 	    my $targetdir = $MY->catdir($hash{$source},$File::Find::dir);
 	    my $targetfile = $MY->catfile($targetdir,$_);
 

@@ -16,7 +16,6 @@ so='o'
 #sig_name='ZERO HUP INT QUIT ILL TRAP IOT EMT FPE KILL BUS SEGV SYS PIPE ALRM TERM URG STOP TSTP CONT CHLD TTIN TTOU IO XCPU XFSZ VTALRM PROF WINCH INFO USR1 USR2 '
 signal_t='void'
 d_voidsig='define'
-d_dosuid='define'
 
 # we don't want to use -lnm, since exp() is busted (in 1.1 anyway)
 set `echo X "$libswanted "| sed -e 's/ nm / /'`

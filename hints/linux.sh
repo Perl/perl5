@@ -17,13 +17,6 @@
 
 # No version of Linux supports setuid scripts.
 d_suidsafe='undef'
-#don't force people to install SUID if they don't want to (have said  
-#-Dd_dosuid=undef explicitly on command line) - MIKEDLR
-if [ ! "A$d_dosuid" = "Aundef" ] #do I need to be paranoid here?
-then
-    d_dosuid='define'
-fi
-
 
 # perl goes into the /usr tree.  See the Filesystem Standard
 # available via anonymous FTP at tsx-11.mit.edu in
@@ -175,16 +168,17 @@ fi
 
 if [  ! "`csh -c 'echo $version' 2>/dev/null`"  ] 
 then
-	echo 'Real csh found (might break); looking for tcsh ...'
-	if which tcsh >/dev/null 2>&1
-	then
-		echo 'Found tcsh; will use it for globbing.'
-		csh='tcsh'
-		d_csh='tcsh'
-		full_csh=`which tcsh` # we know this will work now.
-	else
-		echo "Couldn't find tcsh.  BEWARE BROKEN GLOBBING."
-	fi
+    echo 'Real csh found (might break); looking for tcsh ...'
+    # Use ../UU/loc to find tcsh.  (We run in the hints/ directory.)
+    if xxx=`../UU/loc tcsh blurfl $pth`; $test -f "$xxx"; then
+	echo "Found tcsh.  I'll use it for globbing."
+	# We can't change Configure's setting of $csh, due to the way
+	# Configure handles $d_portable and commands found in $loclist.
+	# We can set the value for CSH in config.h by setting full_csh.
+	full_csh=$xxx
+    else
+	echo "Couldn't find tcsh.  BEWARE:  GLOBBING MIGHT BE BROKEN."
+    fi
 else
-	echo 'Your csh is really tcsh.  Good.'
+    echo 'Your csh is really tcsh.  Good.'
 fi

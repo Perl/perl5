@@ -885,28 +885,29 @@ char *
 sv_peek(sv)
 register SV *sv;
 {
-    char *t = tokenbuf;
+    SV *t = sv_newmortal();
+    STRLEN prevlen;
     int unref = 0;
 
   retry:
     if (!sv) {
-	strcpy(t, "VOID");
+	sv_catpv(t, "VOID");
 	goto finish;
     }
     else if (sv == (SV*)0x55555555 || SvTYPE(sv) == 'U') {
-	strcpy(t, "WILD");
+	sv_catpv(t, "WILD");
 	goto finish;
     }
     else if (sv == &sv_undef || sv == &sv_no || sv == &sv_yes) {
 	if (sv == &sv_undef) {
-	    strcpy(t, "SV_UNDEF");
+	    sv_catpv(t, "SV_UNDEF");
 	    if (!(SvFLAGS(sv) & (SVf_OK|SVf_OOK|SVs_OBJECT|
 				 SVs_GMG|SVs_SMG|SVs_RMG)) &&
 		SvREADONLY(sv))
 		goto finish;
 	}
 	else if (sv == &sv_no) {
-	    strcpy(t, "SV_NO");
+	    sv_catpv(t, "SV_NO");
 	    if (!(SvFLAGS(sv) & (SVf_ROK|SVf_OOK|SVs_OBJECT|
 				 SVs_GMG|SVs_SMG|SVs_RMG)) &&
 		!(~SvFLAGS(sv) & (SVf_POK|SVf_NOK|SVf_READONLY|
@@ -916,7 +917,7 @@ register SV *sv;
 		goto finish;
 	}
 	else {
-	    strcpy(t, "SV_YES");
+	    sv_catpv(t, "SV_YES");
 	    if (!(SvFLAGS(sv) & (SVf_ROK|SVf_OOK|SVs_OBJECT|
 				 SVs_GMG|SVs_SMG|SVs_RMG)) &&
 		!(~SvFLAGS(sv) & (SVf_POK|SVf_NOK|SVf_READONLY|
@@ -926,17 +927,18 @@ register SV *sv;
 		SvNVX(sv) == 1.0)
 		goto finish;
 	}
-	t += strlen(t);
-	*t++ = ':';
+	sv_catpv(t, ":");
     }
     else if (SvREFCNT(sv) == 0) {
-	*t++ = '(';
+	sv_catpv(t, "(");
 	unref++;
     }
     if (SvROK(sv)) {
-	*t++ = '\\';
-	if (t - tokenbuf + unref > 10) {
-	    strcpy(tokenbuf + unref + 3,"...");
+	sv_catpv(t, "\\");
+	if (SvCUR(t) + unref > 10) {
+	    SvCUR(t) = unref + 3;
+	    *SvEND(t) = '\0';
+	    sv_catpv(t, "...");
 	    goto finish;
 	}
 	sv = (SV*)SvRV(sv);
@@ -944,88 +946,85 @@ register SV *sv;
     }
     switch (SvTYPE(sv)) {
     default:
-	strcpy(t,"FREED");
+	sv_catpv(t, "FREED");
 	goto finish;
 
     case SVt_NULL:
-	strcpy(t,"UNDEF");
+	sv_catpv(t, "UNDEF");
 	return tokenbuf;
     case SVt_IV:
-	strcpy(t,"IV");
+	sv_catpv(t, "IV");
 	break;
     case SVt_NV:
-	strcpy(t,"NV");
+	sv_catpv(t, "NV");
 	break;
     case SVt_RV:
-	strcpy(t,"RV");
+	sv_catpv(t, "RV");
 	break;
     case SVt_PV:
-	strcpy(t,"PV");
+	sv_catpv(t, "PV");
 	break;
     case SVt_PVIV:
-	strcpy(t,"PVIV");
+	sv_catpv(t, "PVIV");
 	break;
     case SVt_PVNV:
-	strcpy(t,"PVNV");
+	sv_catpv(t, "PVNV");
 	break;
     case SVt_PVMG:
-	strcpy(t,"PVMG");
+	sv_catpv(t, "PVMG");
 	break;
     case SVt_PVLV:
-	strcpy(t,"PVLV");
+	sv_catpv(t, "PVLV");
 	break;
     case SVt_PVAV:
-	strcpy(t,"AV");
+	sv_catpv(t, "AV");
 	break;
     case SVt_PVHV:
-	strcpy(t,"HV");
+	sv_catpv(t, "HV");
 	break;
     case SVt_PVCV:
 	if (CvGV(sv))
-	    sprintf(t, "CV(%s)", GvNAME(CvGV(sv)));
+	    sv_catpvf(t, "CV(%s)", GvNAME(CvGV(sv)));
 	else
-	    strcpy(t, "CV()");
+	    sv_catpv(t, "CV()");
 	goto finish;
     case SVt_PVGV:
-	strcpy(t,"GV");
+	sv_catpv(t, "GV");
 	break;
     case SVt_PVBM:
-	strcpy(t,"BM");
+	sv_catpv(t, "BM");
 	break;
     case SVt_PVFM:
-	strcpy(t,"FM");
+	sv_catpv(t, "FM");
 	break;
     case SVt_PVIO:
-	strcpy(t,"IO");
+	sv_catpv(t, "IO");
 	break;
     }
-    t += strlen(t);
 
     if (SvPOKp(sv)) {
 	if (!SvPVX(sv))
-	    strcpy(t, "(null)");
+	    sv_catpv(t, "(null)");
 	if (SvOOK(sv))
-	    sprintf(t,"(%ld+\"%.127s\")",(long)SvIVX(sv),SvPVX(sv));
+	    sv_catpvf(t, "(%ld+\"%.127s\")",(long)SvIVX(sv),SvPVX(sv));
 	else
-	    sprintf(t,"(\"%.127s\")",SvPVX(sv));
+	    sv_catpvf(t, "(\"%.127s\")",SvPVX(sv));
     }
     else if (SvNOKp(sv)) {
 	SET_NUMERIC_STANDARD();
-	sprintf(t,"(%g)",SvNVX(sv));
+	sv_catpvf(t, "(%g)",SvNVX(sv));
     }
     else if (SvIOKp(sv))
-	sprintf(t,"(%ld)",(long)SvIVX(sv));
+	sv_catpvf(t, "(%ld)",(long)SvIVX(sv));
     else
-	strcpy(t,"()");
+	sv_catpv(t, "()");
     
   finish:
     if (unref) {
-	t += strlen(t);
 	while (unref--)
-	    *t++ = ')';
-	*t = '\0';
+	    sv_catpv(t, ")");
     }
-    return tokenbuf;
+    return SvPV(t, na);
 }
 #endif
 
@@ -1592,6 +1591,7 @@ STRLEN *lp;
 {
     register char *s;
     int olderrno;
+    SV *tsv;
 
     if (!sv) {
 	*lp = 0;
@@ -1605,11 +1605,13 @@ STRLEN *lp;
 	}
 	if (SvIOKp(sv)) {
 	    (void)sprintf(tokenbuf,"%ld",(long)SvIVX(sv));
+	    tsv = Nullsv;
 	    goto tokensave;
 	}
 	if (SvNOKp(sv)) {
 	    SET_NUMERIC_STANDARD();
 	    Gconvert(SvNVX(sv), DBL_DIG, 0, tokenbuf);
+	    tsv = Nullsv;
 	    goto tokensave;
 	}
         if (!SvROK(sv)) {
@@ -1649,11 +1651,12 @@ STRLEN *lp;
 		case SVt_PVIO:	s = "IO";			break;
 		default:	s = "UNKNOWN";			break;
 		}
+		tsv = NEWSV(0,0);
 		if (SvOBJECT(sv))
-		    sprintf(tokenbuf, "%s=%s(0x%lx)",
-				HvNAME(SvSTASH(sv)), s, (unsigned long)sv);
+		    sv_setpvf(tsv, "%s=%s", HvNAME(SvSTASH(sv)), s);
 		else
-		    sprintf(tokenbuf, "%s(0x%lx)", s, (unsigned long)sv);
+		    sv_setpv(tsv, s);
+		sv_catpvf(tsv, "(0x%lx)", (unsigned long)sv);
 		goto tokensaveref;
 	    }
 	    *lp = strlen(s);
@@ -1663,10 +1666,12 @@ STRLEN *lp;
 	    if (SvNOKp(sv)) {
 		SET_NUMERIC_STANDARD();
 		Gconvert(SvNVX(sv), DBL_DIG, 0, tokenbuf);
+		tsv = Nullsv;
 		goto tokensave;
 	    }
 	    if (SvIOKp(sv)) {
 		(void)sprintf(tokenbuf,"%ld",(long)SvIVX(sv));
+		tsv = Nullsv;
 		goto tokensave;
 	    }
 	    if (dowarn)
@@ -1700,18 +1705,16 @@ STRLEN *lp;
 	while (*s) s++;
 #ifdef hcx
 	if (s[-1] == '.')
-	    s--;
+	    *--s = '\0';
 #endif
     }
     else if (SvIOKp(sv)) {
 	if (SvTYPE(sv) < SVt_PVIV)
 	    sv_upgrade(sv, SVt_PVIV);
-	SvGROW(sv, 11);
-	s = SvPVX(sv);
 	olderrno = errno;	/* some Xenix systems wipe out errno here */
-	(void)sprintf(s,"%ld",(long)SvIVX(sv));
+	sv_setpvf(sv, "%vd", SvIVX(sv));
 	errno = olderrno;
-	while (*s) s++;
+	s = SvEND(sv);
     }
     else {
 	if (dowarn && !localizing && !(SvFLAGS(sv) & SVs_PADTMP))
@@ -1719,7 +1722,6 @@ STRLEN *lp;
 	*lp = 0;
 	return "";
     }
-    *s = '\0';
     *lp = s - SvPVX(sv);
     SvCUR_set(sv, *lp);
     SvPOK_on(sv);
@@ -1731,23 +1733,36 @@ STRLEN *lp;
 	/* Sneaky stuff here */
 
       tokensaveref:
-	sv = sv_newmortal();
-	*lp = strlen(tokenbuf);
-	sv_setpvn(sv, tokenbuf, *lp);
-	return SvPVX(sv);
+	if (!tsv)
+	    tsv = newSVpv(tokenbuf, 0);
+	sv_2mortal(tsv);
+	*lp = SvCUR(tsv);
+	return SvPVX(tsv);
     }
     else {
 	STRLEN len;
-	
+	char *t;
+
+	if (tsv) {
+	    sv_2mortal(tsv);
+	    t = SvPVX(tsv);
+	    len = SvCUR(tsv);
+	}
+	else {
+	    t = tokenbuf;
+	    len = strlen(tokenbuf);
+	}
 #ifdef FIXNEGATIVEZERO
-	if (*tokenbuf == '-' && tokenbuf[1] == '0' && !tokenbuf[2])
-	    strcpy(tokenbuf,"0");
+	if (len == 2 && t[0] == '-' && t[1] == '0') {
+	    t = "0";
+	    len = 1;
+	}
 #endif
 	(void)SvUPGRADE(sv, SVt_PV);
-	len = *lp = strlen(tokenbuf);
+	*lp = len;
 	s = SvGROW(sv, len + 1);
 	SvCUR_set(sv, len);
-	(void)strcpy(s, tokenbuf);
+	(void)strcpy(s, t);
 	SvPOKp_on(sv);
 	return s;
     }
@@ -3444,6 +3459,35 @@ STRLEN len;
     return sv;
 }
 
+#ifdef I_STDARG
+SV *
+newSVpvf(const char* pat, ...)
+#else
+/*VARARGS0*/
+SV *
+newSVpvf(sv, pat, va_alist)
+const char *pat;
+va_dcl
+#endif
+{
+    register SV *sv;
+    va_list args;
+
+    new_SV(sv);
+    SvANY(sv) = 0;
+    SvREFCNT(sv) = 1;
+    SvFLAGS(sv) = 0;
+#ifdef I_STDARG
+    va_start(args, pat);
+#else
+    va_start(args);
+#endif
+    sv_vsetpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool));
+    va_end(args);
+    return sv;
+}
+
+
 SV *
 newSVnv(n)
 double n;
@@ -3593,6 +3637,40 @@ HV *stash;
 	    }
 	}
     }
+}
+
+IO*
+sv_2io(sv)
+SV *sv;
+{
+    IO* io;
+    GV* gv;
+
+    switch (SvTYPE(sv)) {
+    case SVt_PVIO:
+	io = (IO*)sv;
+	break;
+    case SVt_PVGV:
+	gv = (GV*)sv;
+	io = GvIO(gv);
+	if (!io)
+	    croak("Bad filehandle: %s", GvNAME(gv));
+	break;
+    default:
+	if (!SvOK(sv))
+	    croak(no_usym, "filehandle");
+	if (SvROK(sv))
+	    return sv_2io(SvRV(sv));
+	gv = gv_fetchpv(SvPV(sv,na), FALSE, SVt_PVIO);
+	if (gv)
+	    io = GvIO(gv);
+	else
+	    io = 0;
+	if (!io)
+	    croak("Bad filehandle: %s", SvPV(sv,na));
+	break;
+    }
+    return io;
 }
 
 CV *
@@ -3981,40 +4059,6 @@ SV* sv;
 	sv_2mortal(rv);		/* Schedule for freeing later */
 }
 
-IO*
-sv_2io(sv)
-SV *sv;
-{
-    IO* io;
-    GV* gv;
-
-    switch (SvTYPE(sv)) {
-    case SVt_PVIO:
-	io = (IO*)sv;
-	break;
-    case SVt_PVGV:
-	gv = (GV*)sv;
-	io = GvIO(gv);
-	if (!io)
-	    croak("Bad filehandle: %s", GvNAME(gv));
-	break;
-    default:
-	if (!SvOK(sv))
-	    croak(no_usym, "filehandle");
-	if (SvROK(sv))
-	    return sv_2io(SvRV(sv));
-	gv = gv_fetchpv(SvPV(sv,na), FALSE, SVt_PVIO);
-	if (gv)
-	    io = GvIO(gv);
-	else
-	    io = 0;
-	if (!io)
-	    croak("Bad filehandle: %s", SvPV(sv,na));
-	break;
-    }
-    return io;
-}
-
 void
 sv_taint(sv)
 SV *sv;
@@ -4045,13 +4089,451 @@ SV *sv;
     return FALSE;
 }
 
+#ifdef I_STDARG
+void
+sv_setpvf(SV *sv, const char* pat, ...)
+#else
+/*VARARGS0*/
+void
+sv_setpvf(sv, pat, va_alist)
+    SV *sv;
+    const char *pat;
+    va_dcl
+#endif
+{
+    va_list args;
+#ifdef I_STDARG
+    va_start(args, pat);
+#else
+    va_start(args);
+#endif
+    sv_vsetpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool));
+    va_end(args);
+}
+
+#ifdef I_STDARG
+void
+sv_catpvf(SV *sv, const char* pat, ...)
+#else
+/*VARARGS0*/
+void
+sv_catpvf(sv, pat, va_alist)
+    SV *sv;
+    const char *pat;
+    va_dcl
+#endif
+{
+    va_list args;
+#ifdef I_STDARG
+    va_start(args, pat);
+#else
+    va_start(args);
+#endif
+    sv_vcatpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool));
+    va_end(args);
+}
+
+void
+sv_vsetpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
+    SV *sv;
+    const char *pat;
+    STRLEN patlen;
+    va_list *args;
+    SV **svargs;
+    I32 svmax;
+    bool *used_locale;
+{
+    sv_setpvn(sv, "", 0);
+    sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale);
+}
+
+void
+sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
+    SV *sv;
+    const char *pat;
+    STRLEN patlen;
+    va_list *args;
+    SV **svargs;
+    I32 svmax;
+    bool *used_locale;
+{
+    char *p;
+    char *q;
+    char *patend;
+    I32 svix = 0;
+
+    /* no matter what, this is a string now */
+    (void)SvPV_force(sv, na);
+
+    /* special-case "" and "%s" */
+    if (patlen == 0)
+	return;
+    if (patlen == 2 && pat[0] == '%' && pat[1] == 's') {
+	if (args)
+	    sv_catpv(sv, va_arg(*args, char *));
+	else if (svix < svmax)
+	    sv_catsv(sv, *svargs);
+	return;
+    }
+
+    patend = (char*)pat + patlen;
+    for (p = (char*)pat; p < patend; p = q) {
+	bool alt = FALSE;
+	bool left = FALSE;
+	char fill = ' ';
+	char plus = 0;
+	char intsize = 0;
+	STRLEN width = 0;
+	bool has_precis = FALSE;
+	STRLEN precis = 0;
+
+	char esignbuf[4];
+	STRLEN esignlen = 0;
+
+	char *eptr = Nullch;
+        STRLEN elen = 0;
+	char ebuf[(sizeof(UV) * 3) * 2 + 16]; /* large enough for "%#.#f" */
+
+	static char *efloatbuf = Nullch;
+	static STRLEN efloatsize = 0;
+
+	char c;
+	int i;
+	unsigned base;
+	IV iv;
+	UV uv;
+	double nv;
+	STRLEN have;
+	STRLEN need;
+	STRLEN gap;
+
+	for (q = p; q < patend && *q != '%'; ++q) ;
+	if (q > p) {
+	    sv_catpvn(sv, p, q - p);
+	    p = q;
+	}
+	if (q++ >= patend)
+	    break;
+
+	while (*q) {
+	    switch (*q) {
+	    case ' ':
+	    case '+':
+		plus = *q++;
+		continue;
+
+	    case '-':
+		left = TRUE;
+		q++;
+		continue;
+
+	    case '0':
+		fill = *q++;
+		continue;
+
+	    case '#':
+		alt = TRUE;
+		q++;
+		continue;
+
+	    case 'l':
+#if 0  /* when quads have better support within Perl */
+		if (intsize == 'l') {
+		    intsize = 'q';
+		    q++;
+		    continue;
+		}
+#endif
+		/* FALL THROUGH */
+	    case 'h':
+	    case 'v':
+		intsize = *q++;
+		continue;
+
+	    case '1': case '2': case '3':
+	    case '4': case '5': case '6':
+	    case '7': case '8': case '9':
+		width = 0;
+		while (isDIGIT(*q))
+		    width = width * 10 + (*q++ - '0');
+		continue;
+
+	    case '*':
+		if (args)
+		    i = va_arg(*args, int);
+		else
+		    i = (svix < svmax) ? SvIVx(svargs[svix++]) : 0;
+		left ^= (i < 0);
+		width = (i < 0) ? -i : i;
+		q++;
+		continue;
+
+	    case '.':
+		q++;
+		if (*q == '*') {
+		    if (args)
+			precis = va_arg(*args, int);
+		    else
+			precis = (svix < svmax) ? SvUVx(svargs[svix++]) : 0;
+		    q++;
+		}
+		else {
+		    precis = 0;
+		    while (isDIGIT(*q))
+			precis = precis * 10 + (*q++ - '0');
+		}
+		has_precis = TRUE;
+		continue;
+
+	    default:
+		break;
+	    }
+
+	    break;
+	}
+
+	switch (c = *q++) {
+
+	    /* STRINGS */
+
+	case '%':
+	    eptr = q - 1;
+	    elen = 1;
+	    goto string;
+
+	case 'c':
+	    if (args)
+		c = va_arg(*args, int);
+	    else
+		c = (svix < svmax) ? SvIVx(svargs[svix++]) : 0;
+	    eptr = &c;
+	    elen = 1;
+	    goto string;
+
+	case 'S':
+	    if (args) {
+		eptr = SvPVx(va_arg(*args, SV *), elen);
+		goto string;
+	    }
+	    /* FALL THROUGH */
+
+	case 's':
+	    if (args) {
+		eptr = va_arg(*args, char *);
+		elen = strlen(eptr);
+	    }
+	    else if (svix < svmax)
+		eptr = SvPVx(svargs[svix++], elen);
+	    goto string;
+
+	string:
+	    if (has_precis && elen > precis)
+		elen = precis;
+	    break;
+
+	    /* INTEGERS */
+
+	case 'D':
+	    intsize = 'l';
+	    /* FALL THROUGH */
+	case 'd':
+	case 'i':
+	    if (args) {
+		switch (intsize) {
+		case 'h':	iv = (short)va_arg(*args, int); break;
+		default:	iv = va_arg(*args, int); break;
+		case 'l':	iv = va_arg(*args, long); break;
+		case 'v':	iv = va_arg(*args, IV); break;
+		}
+	    }
+	    else {
+		iv = (svix < svmax) ? SvIVx(svargs[svix++]) : 0;
+		switch (intsize) {
+		case 'h':	iv = (short)iv; break;
+		default:	iv = (int)iv; break;
+		case 'l':	iv = (long)iv; break;
+		case 'v':	break;
+		}
+	    }
+	    if (iv >= 0) {
+		uv = iv;
+		if (plus)
+		    esignbuf[esignlen++] = plus;
+	    }
+	    else {
+		uv = -iv;
+		esignbuf[esignlen++] = '-';
+	    }
+	    base = 10;
+	    goto integer;
+
+	case 'O':
+	    intsize = 'l';
+	    /* FALL THROUGH */
+	case 'o':
+	    base = 8;
+	    goto uns_integer;
+
+	case 'X':
+	    intsize = 'l';
+	    /* FALL THROUGH */
+	case 'x':
+	    base = 16;
+	    goto uns_integer;
+
+	case 'u':
+	    base = 10;
+
+	uns_integer:
+	    if (args) {
+		switch (intsize) {
+		case 'h':  uv = (unsigned short)va_arg(*args, unsigned); break;
+		default:   uv = va_arg(*args, unsigned); break;
+		case 'l':  uv = va_arg(*args, unsigned long); break;
+		case 'v':  uv = va_arg(*args, UV); break;
+		}
+	    }
+	    else {
+		uv = (svix < svmax) ? SvUVx(svargs[svix++]) : 0;
+		switch (intsize) {
+		case 'h':	uv = (unsigned short)uv; break;
+		default:	uv = (unsigned)uv; break;
+		case 'l':	uv = (unsigned long)uv; break;
+		case 'v':	break;
+		}
+	    }
+
+	integer:
+ 	    p = "0123456789abcdef";
+	    eptr = ebuf + sizeof ebuf;
+	    do {
+		unsigned dig = uv % base;
+		*--eptr = p[dig];
+	    } while (uv /= base);
+	    if (alt) {
+		switch (c) {
+		case 'o':
+		    if (*eptr != 0)
+			esignbuf[esignlen++] = '0';
+		    break;
+		case 'x':
+		    esignbuf[esignlen++] = '0';
+		    esignbuf[esignlen++] = 'x';
+		    break;
+		}
+	    }
+	    elen = (ebuf + sizeof ebuf) - eptr;
+	    if (has_precis) {
+		left = FALSE;
+		fill = '0';
+		width = esignlen + precis;
+	    }
+	    break;
+
+	    /* FLOATING POINT */
+
+	case 'e': case 'E':
+	case 'f': case 'F':
+	case 'g': case 'G':
+
+	    /* This is evil, but floating point is even more evil */
+
+	    need = width;
+	    if (has_precis && need < precis)
+		need = precis;
+	    need += 20; /* fudge factor */
+	    if (efloatsize < need) {
+		Safefree(efloatbuf);
+		efloatsize = need + 20; /* more fudge */
+		New(906, efloatbuf, efloatsize, char);
+	    }
+
+	    eptr = ebuf + sizeof ebuf;
+	    *--eptr = '\0';
+	    *--eptr = c;
+	    if (has_precis) {
+		base = precis;
+		do { *--eptr = '0' + (base % 10); } while (base /= 10);
+		*--eptr = '.';
+	    }
+	    if (width) {
+		base = width;
+		do { *--eptr = '0' + (base % 10); } while (base /= 10);
+	    }
+	    if (fill == '0')
+		*--eptr = fill;
+	    if (plus)
+		*--eptr = plus;
+	    if (alt)
+		*--eptr = '#';
+	    *--eptr = '%';
+
+	    if (args)
+		nv = va_arg(*args, double);
+	    else
+		nv = (svix < svmax) ? SvNVx(svargs[svix++]) : 0.0;
+	    (void)sprintf(efloatbuf, eptr, nv);
+
+	    eptr = efloatbuf;
+	    elen = strlen(efloatbuf);
+
+#ifdef LC_NUMERIC
+	    /*
+	     * User-defined locales may include arbitrary characters.
+	     * And, unfortunately, some system may alloc the "C" locale
+	     * to be overridden by a malicious user.
+	     */
+	    if (used_locale)
+		*used_locale = TRUE;
+#endif /* LC_NUMERIC */
+
+	    break;
+
+	default:
+	    /* output mangled stuff without comment */
+	    eptr = p;
+	    elen = q - p;
+	    break;
+	}
+
+	have = esignlen + elen;
+	need = (have > width ? have : width);
+	gap = need - have;
+
+	SvGROW(sv, SvLEN(sv) + need);
+	p = SvEND(sv);
+	if (esignlen && fill == '0') {
+	    for (i = 0; i < esignlen; i++)
+		*p++ = esignbuf[i];
+	}
+	if (gap && !left) {
+	    memset(p, fill, gap);
+	    p += gap;
+	}
+	if (esignlen && fill != '0') {
+	    for (i = 0; i < esignlen; i++)
+		*p++ = esignbuf[i];
+	}
+	if (elen) {
+	    memcpy(p, eptr, elen);
+	    p += elen;
+	}
+	if (gap && left) {
+	    memset(p, ' ', gap);
+	    p += gap;
+	}
+	*p = '\0';
+	SvCUR(sv) = p - SvPVX(sv);
+    }
+}
+
 #ifdef DEBUGGING
 void
 sv_dump(sv)
 SV* sv;
 {
-    char tmpbuf[1024];
-    char *d = tmpbuf;
+    SV *d = sv_newmortal();
+    char *s;
     U32 flags;
     U32 type;
 
@@ -4063,126 +4545,122 @@ SV* sv;
     flags = SvFLAGS(sv);
     type = SvTYPE(sv);
 
-    sprintf(d, "(0x%lx)\n  REFCNT = %ld\n  FLAGS = (",
-	(unsigned long)SvANY(sv), (long)SvREFCNT(sv));
-    d += strlen(d);
-    if (flags & SVs_PADBUSY)	strcat(d, "PADBUSY,");
-    if (flags & SVs_PADTMP)	strcat(d, "PADTMP,");
-    if (flags & SVs_PADMY)	strcat(d, "PADMY,");
-    if (flags & SVs_TEMP)	strcat(d, "TEMP,");
-    if (flags & SVs_OBJECT)	strcat(d, "OBJECT,");
-    if (flags & SVs_GMG)	strcat(d, "GMG,");
-    if (flags & SVs_SMG)	strcat(d, "SMG,");
-    if (flags & SVs_RMG)	strcat(d, "RMG,");
-    d += strlen(d);
+    sv_setpvf(d, "(0x%lx)\n  REFCNT = %ld\n  FLAGS = (",
+	      (unsigned long)SvANY(sv), (long)SvREFCNT(sv));
+    if (flags & SVs_PADBUSY)	sv_catpv(d, "PADBUSY,");
+    if (flags & SVs_PADTMP)	sv_catpv(d, "PADTMP,");
+    if (flags & SVs_PADMY)	sv_catpv(d, "PADMY,");
+    if (flags & SVs_TEMP)	sv_catpv(d, "TEMP,");
+    if (flags & SVs_OBJECT)	sv_catpv(d, "OBJECT,");
+    if (flags & SVs_GMG)	sv_catpv(d, "GMG,");
+    if (flags & SVs_SMG)	sv_catpv(d, "SMG,");
+    if (flags & SVs_RMG)	sv_catpv(d, "RMG,");
 
-    if (flags & SVf_IOK)	strcat(d, "IOK,");
-    if (flags & SVf_NOK)	strcat(d, "NOK,");
-    if (flags & SVf_POK)	strcat(d, "POK,");
-    if (flags & SVf_ROK)	strcat(d, "ROK,");
-    if (flags & SVf_OOK)	strcat(d, "OOK,");
-    if (flags & SVf_FAKE)	strcat(d, "FAKE,");
-    if (flags & SVf_READONLY)	strcat(d, "READONLY,");
-    d += strlen(d);
+    if (flags & SVf_IOK)	sv_catpv(d, "IOK,");
+    if (flags & SVf_NOK)	sv_catpv(d, "NOK,");
+    if (flags & SVf_POK)	sv_catpv(d, "POK,");
+    if (flags & SVf_ROK)	sv_catpv(d, "ROK,");
+    if (flags & SVf_OOK)	sv_catpv(d, "OOK,");
+    if (flags & SVf_FAKE)	sv_catpv(d, "FAKE,");
+    if (flags & SVf_READONLY)	sv_catpv(d, "READONLY,");
 
 #ifdef OVERLOAD
-    if (flags & SVf_AMAGIC)	strcat(d, "OVERLOAD,");
+    if (flags & SVf_AMAGIC)	sv_catpv(d, "OVERLOAD,");
 #endif /* OVERLOAD */
-    if (flags & SVp_IOK)	strcat(d, "pIOK,");
-    if (flags & SVp_NOK)	strcat(d, "pNOK,");
-    if (flags & SVp_POK)	strcat(d, "pPOK,");
-    if (flags & SVp_SCREAM)	strcat(d, "SCREAM,");
+    if (flags & SVp_IOK)	sv_catpv(d, "pIOK,");
+    if (flags & SVp_NOK)	sv_catpv(d, "pNOK,");
+    if (flags & SVp_POK)	sv_catpv(d, "pPOK,");
+    if (flags & SVp_SCREAM)	sv_catpv(d, "SCREAM,");
 
     switch (type) {
     case SVt_PVCV:
     case SVt_PVFM:
-      if (CvANON(sv))		strcat(d, "ANON,");
-      if (CvUNIQUE(sv))		strcat(d, "UNIQUE,");
-      if (CvCLONE(sv))		strcat(d, "CLONE,");
-      if (CvCLONED(sv))		strcat(d, "CLONED,");
-      if (CvNODEBUG(sv))	strcat(d, "NODEBUG,");
-      break;
+	if (CvANON(sv))		sv_catpv(d, "ANON,");
+	if (CvUNIQUE(sv))	sv_catpv(d, "UNIQUE,");
+	if (CvCLONE(sv))	sv_catpv(d, "CLONE,");
+	if (CvCLONED(sv))	sv_catpv(d, "CLONED,");
+	if (CvNODEBUG(sv))	sv_catpv(d, "NODEBUG,");
+	break;
     case SVt_PVHV:
-      if (HvSHAREKEYS(sv))	strcat(d, "SHAREKEYS,");
-      if (HvLAZYDEL(sv))	strcat(d, "LAZYDEL,");
-      break;
+	if (HvSHAREKEYS(sv))	sv_catpv(d, "SHAREKEYS,");
+	if (HvLAZYDEL(sv))	sv_catpv(d, "LAZYDEL,");
+	break;
     case SVt_PVGV:
-      if (GvINTRO(sv))		strcat(d, "INTRO,");
-      if (GvMULTI(sv))		strcat(d, "MULTI,");
-      if (GvASSUMECV(sv))	strcat(d, "ASSUMECV,");
-      if (GvIMPORTED(sv)) {
-	  strcat(d, "IMPORT");
-	  if (GvIMPORTED(sv) == GVf_IMPORTED)
-	      strcat(d, "ALL,");
-	  else {
-	      strcat(d, "(");
-	      if (GvIMPORTED_SV(sv))	strcat(d, " SV");
-	      if (GvIMPORTED_AV(sv))	strcat(d, " AV");
-	      if (GvIMPORTED_HV(sv))	strcat(d, " HV");
-	      if (GvIMPORTED_CV(sv))	strcat(d, " CV");
-	      strcat(d, " ),");
-	  }
-      }
+	if (GvINTRO(sv))	sv_catpv(d, "INTRO,");
+	if (GvMULTI(sv))	sv_catpv(d, "MULTI,");
+	if (GvASSUMECV(sv))	sv_catpv(d, "ASSUMECV,");
+	if (GvIMPORTED(sv)) {
+	    sv_catpv(d, "IMPORT");
+	    if (GvIMPORTED(sv) == GVf_IMPORTED)
+		sv_catpv(d, "ALL,");
+	    else {
+		sv_catpv(d, "(");
+		if (GvIMPORTED_SV(sv))	sv_catpv(d, " SV");
+		if (GvIMPORTED_AV(sv))	sv_catpv(d, " AV");
+		if (GvIMPORTED_HV(sv))	sv_catpv(d, " HV");
+		if (GvIMPORTED_CV(sv))	sv_catpv(d, " CV");
+		sv_catpv(d, " ),");
+	    }
+	}
     }
 
-    d += strlen(d);
-    if (d[-1] == ',')
-	d--;
-    *d++ = ')';
-    *d = '\0';
+    if (*(SvEND(d) - 1) == ',')
+	SvPVX(d)[--SvCUR(d)] = '\0';
+    sv_catpv(d, ")");
+    s = SvPVX(d);
 
     PerlIO_printf(Perl_debug_log, "SV = ");
     switch (type) {
     case SVt_NULL:
-	PerlIO_printf(Perl_debug_log, "NULL%s\n", tmpbuf);
+	PerlIO_printf(Perl_debug_log, "NULL%s\n", s);
 	return;
     case SVt_IV:
-	PerlIO_printf(Perl_debug_log, "IV%s\n", tmpbuf);
+	PerlIO_printf(Perl_debug_log, "IV%s\n", s);
 	break;
     case SVt_NV:
-	PerlIO_printf(Perl_debug_log, "NV%s\n", tmpbuf);
+	PerlIO_printf(Perl_debug_log, "NV%s\n", s);
 	break;
     case SVt_RV:
-	PerlIO_printf(Perl_debug_log, "RV%s\n", tmpbuf);
+	PerlIO_printf(Perl_debug_log, "RV%s\n", s);
 	break;
     case SVt_PV:
-	PerlIO_printf(Perl_debug_log, "PV%s\n", tmpbuf);
+	PerlIO_printf(Perl_debug_log, "PV%s\n", s);
 	break;
     case SVt_PVIV:
-	PerlIO_printf(Perl_debug_log, "PVIV%s\n", tmpbuf);
+	PerlIO_printf(Perl_debug_log, "PVIV%s\n", s);
 	break;
     case SVt_PVNV:
-	PerlIO_printf(Perl_debug_log, "PVNV%s\n", tmpbuf);
+	PerlIO_printf(Perl_debug_log, "PVNV%s\n", s);
 	break;
     case SVt_PVBM:
-	PerlIO_printf(Perl_debug_log, "PVBM%s\n", tmpbuf);
+	PerlIO_printf(Perl_debug_log, "PVBM%s\n", s);
 	break;
     case SVt_PVMG:
-	PerlIO_printf(Perl_debug_log, "PVMG%s\n", tmpbuf);
+	PerlIO_printf(Perl_debug_log, "PVMG%s\n", s);
 	break;
     case SVt_PVLV:
-	PerlIO_printf(Perl_debug_log, "PVLV%s\n", tmpbuf);
+	PerlIO_printf(Perl_debug_log, "PVLV%s\n", s);
 	break;
     case SVt_PVAV:
-	PerlIO_printf(Perl_debug_log, "PVAV%s\n", tmpbuf);
+	PerlIO_printf(Perl_debug_log, "PVAV%s\n", s);
 	break;
     case SVt_PVHV:
-	PerlIO_printf(Perl_debug_log, "PVHV%s\n", tmpbuf);
+	PerlIO_printf(Perl_debug_log, "PVHV%s\n", s);
 	break;
     case SVt_PVCV:
-	PerlIO_printf(Perl_debug_log, "PVCV%s\n", tmpbuf);
+	PerlIO_printf(Perl_debug_log, "PVCV%s\n", s);
 	break;
     case SVt_PVGV:
-	PerlIO_printf(Perl_debug_log, "PVGV%s\n", tmpbuf);
+	PerlIO_printf(Perl_debug_log, "PVGV%s\n", s);
 	break;
     case SVt_PVFM:
-	PerlIO_printf(Perl_debug_log, "PVFM%s\n", tmpbuf);
+	PerlIO_printf(Perl_debug_log, "PVFM%s\n", s);
 	break;
     case SVt_PVIO:
-	PerlIO_printf(Perl_debug_log, "PVIO%s\n", tmpbuf);
+	PerlIO_printf(Perl_debug_log, "PVIO%s\n", s);
 	break;
     default:
-	PerlIO_printf(Perl_debug_log, "UNKNOWN%s\n", tmpbuf);
+	PerlIO_printf(Perl_debug_log, "UNKNOWN%s\n", s);
 	return;
     }
     if (type >= SVt_PVIV || type == SVt_IV)
@@ -4227,14 +4705,12 @@ SV* sv;
 	PerlIO_printf(Perl_debug_log, "  MAX = %ld\n", (long)AvMAX(sv));
 	PerlIO_printf(Perl_debug_log, "  ARYLEN = 0x%lx\n", (long)AvARYLEN(sv));
 	flags = AvFLAGS(sv);
-	d = tmpbuf;
-	*d = '\0';
-	if (flags & AVf_REAL)	strcat(d, "REAL,");
-	if (flags & AVf_REIFY)	strcat(d, "REIFY,");
-	if (flags & AVf_REUSED)	strcat(d, "REUSED,");
-	if (*d)
-	    d[strlen(d)-1] = '\0';
-	PerlIO_printf(Perl_debug_log, "  FLAGS = (%s)\n", d);
+	sv_setpv(d, "");
+	if (flags & AVf_REAL)	sv_catpv(d, ",REAL");
+	if (flags & AVf_REIFY)	sv_catpv(d, ",REIFY");
+	if (flags & AVf_REUSED)	sv_catpv(d, ",REUSED");
+	PerlIO_printf(Perl_debug_log, "  FLAGS = (%s)\n",
+		      SvCUR(d) ? SvPVX(d) + 1 : "");
 	break;
     case SVt_PVHV:
 	PerlIO_printf(Perl_debug_log, "  ARRAY = 0x%lx\n",(long)HvARRAY(sv));

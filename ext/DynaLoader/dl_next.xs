@@ -72,7 +72,7 @@ enum dyldErrorSource
 static void TranslateError
     (const char *path, enum dyldErrorSource type, int number)
 {
-    char errorBuffer[128];
+    char *error;
     unsigned int index;
     static char *OFIErrorStrings[] =
     {
@@ -86,25 +86,22 @@ static void TranslateError
     };
 #define NUM_OFI_ERRORS (sizeof(OFIErrorStrings) / sizeof(OFIErrorStrings[0]))
 
-    if ( dl_last_error ) {
-        safefree(dl_last_error);
-    }
     switch (type)
     {
     case OFImage:
 	index = number;
 	if (index > NUM_OFI_ERRORS - 1)
 	    index = NUM_OFI_ERRORS - 1;
-	sprintf(errorBuffer, OFIErrorStrings[index], path, number);
+	error = form(OFIErrorStrings[index], path, number);
 	break;
 
     default:
-	sprintf(errorBuffer, "%s(%d): Totally unknown error type %d\n",
-	    path, number, type);
+	error = form("%s(%d): Totally unknown error type %d\n",
+		     path, number, type);
 	break;
     }
-    dl_last_error = safemalloc(strlen(errorBuffer)+1);
-    strcpy(dl_last_error, errorBuffer);
+    safefree(dl_last_error);
+    dl_last_error = savepv(error);
 }
 
 static char *dlopen(char *path, int mode /* mode is ignored */)
@@ -209,13 +206,10 @@ void *handle;
 char *symbol;
 {
     NXStream	*nxerr = OpenError();
-    char	symbuf[1024];
     unsigned long	symref = 0;
 
-    sprintf(symbuf, "_%s", symbol);
-    if (!rld_lookup(nxerr, symbuf, &symref)) {
+    if (!rld_lookup(nxerr, form("_%s", symbuf), &symref))
 	TransferError(nxerr);
-    }
     CloseError(nxerr);
     return (void*) symref;
 }
@@ -265,13 +259,14 @@ dl_find_symbol(libhandle, symbolname)
     char *		symbolname
     CODE:
 #if NS_TARGET_MAJOR >= 4
-    char symbolname_buf[1024];
-    symbolname = dl_add_underscore(symbolname, symbolname_buf);
+    symbolname = form("_%s", symbolname);
 #endif
-    DLDEBUG(2,PerlIO_printf(PerlIO_stderr(), "dl_find_symbol(handle=%x, symbol=%s)\n",
-	    libhandle, symbolname));
+    DLDEBUG(2, PerlIO_printf(PerlIO_stderr(),
+			     "dl_find_symbol(handle=%lx, symbol=%s)\n",
+			     (unsigned long) libhandle, symbolname));
     RETVAL = dlsym(libhandle, symbolname);
-    DLDEBUG(2,PerlIO_printf(PerlIO_stderr(), "  symbolref = %x\n", RETVAL));
+    DLDEBUG(2, PerlIO_printf(PerlIO_stderr(),
+			     "  symbolref = %lx\n", (unsigned long) RETVAL));
     ST(0) = sv_newmortal() ;
     if (RETVAL == NULL)
 	SaveError("%s",dlerror()) ;

@@ -175,13 +175,14 @@ dl_find_symbol(libhandle, symbolname)
     char *	symbolname
     CODE:
 #ifdef DLSYM_NEEDS_UNDERSCORE
-    char symbolname_buf[1024];
-    symbolname = dl_add_underscore(symbolname, symbolname_buf);
+    symbolname = form("_%s", symbolname);
 #endif
-    DLDEBUG(2,PerlIO_printf(PerlIO_stderr(), "dl_find_symbol(handle=%lx, symbol=%s)\n",
-	(unsigned long) libhandle, symbolname));
+    DLDEBUG(2, PerlIO_printf(PerlIO_stderr(),
+			     "dl_find_symbol(handle=%lx, symbol=%s)\n",
+			     (unsigned long) libhandle, symbolname));
     RETVAL = dlsym(libhandle, symbolname);
-    DLDEBUG(2,PerlIO_printf(PerlIO_stderr(), "  symbolref = %lx\n", (unsigned long) RETVAL));
+    DLDEBUG(2, PerlIO_printf(PerlIO_stderr(),
+			     "  symbolref = %lx\n", (unsigned long) RETVAL));
     ST(0) = sv_newmortal() ;
     if (RETVAL == NULL)
 	SaveError("%s",dlerror()) ;

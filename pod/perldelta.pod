@@ -490,6 +490,19 @@ the print function.
 	return print join( $, => map {uc} @_), $\;
     }
 
+=item PRINTF this, LIST
+
+This method will be triggered every time the tied handle is printed to
+with the C<printf()> function.
+Beyond its self reference it also expects the format and list that was
+passed to the printf function.
+
+    sub PRINTF {
+        shift;
+	  my $fmt = shift;
+        print sprintf($fmt, @_)."\n";
+    }
+
 =item READ this LIST
 
 This method will be called when the handle is read from via the C<read>
@@ -717,16 +730,16 @@ alphabetically:
     FindBin.pm           Find path of currently executing program
 
     Class/Struct.pm      Declare struct-like datatypes as Perl classes
-    File/stat.pm         By-name interface to Perl's built-in stat
-    Net/hostent.pm       By-name interface to Perl's built-in gethost*
-    Net/netent.pm        By-name interface to Perl's built-in getnet*
-    Net/protoent.pm      By-name interface to Perl's built-in getproto*
-    Net/servent.pm       By-name interface to Perl's built-in getserv*
-    Time/gmtime.pm       By-name interface to Perl's built-in gmtime
-    Time/localtime.pm    By-name interface to Perl's built-in localtime
+    File/stat.pm         By-name interface to Perl's builtin stat
+    Net/hostent.pm       By-name interface to Perl's builtin gethost*
+    Net/netent.pm        By-name interface to Perl's builtin getnet*
+    Net/protoent.pm      By-name interface to Perl's builtin getproto*
+    Net/servent.pm       By-name interface to Perl's builtin getserv*
+    Time/gmtime.pm       By-name interface to Perl's builtin gmtime
+    Time/localtime.pm    By-name interface to Perl's builtin localtime
     Time/tm.pm           Internal object for Time::{gm,local}time
-    User/grent.pm        By-name interface to Perl's built-in getgr*
-    User/pwent.pm        By-name interface to Perl's built-in getpw*
+    User/grent.pm        By-name interface to Perl's builtin getgr*
+    User/pwent.pm        By-name interface to Perl's builtin getpw*
 
     Tie/RefHash.pm       Base class for tied hashes with references as keys
 

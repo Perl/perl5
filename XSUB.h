@@ -39,20 +39,18 @@
 #ifdef XS_VERSION
 # define XS_VERSION_BOOTCHECK \
     STMT_START {							\
-	char vn[255], *module = SvPV(ST(0),na);				\
+	char *vn = "", *module = SvPV(ST(0),na);			\
 	if (items >= 2)	 /* version supplied as bootstrap arg */	\
 	    Sv = ST(1);							\
 	else {								\
-	    sprintf(vn,"%s::XS_VERSION", module);			\
-	    Sv = perl_get_sv(vn, FALSE);   /* XXX GV_ADDWARN */		\
-	    if (!Sv || !SvOK(Sv)) {					\
-		sprintf(vn,"%s::VERSION", module);			\
-		Sv = perl_get_sv(vn, FALSE);   /* XXX GV_ADDWARN */	\
-	    }								\
+	    /* XXX GV_ADDWARN */					\
+	    Sv = perl_get_sv(vn = form("%s::XS_VERSION", module), FALSE); \
+	    if (!Sv || !SvOK(Sv))					\
+		Sv = perl_get_sv(vn = form("%s::VERSION", module), FALSE); \
 	}								\
 	if (Sv && (!SvOK(Sv) || strNE(XS_VERSION, SvPV(Sv, na))))	\
-	    croak("%s object version %s does not match $%s %s",		\
-		  module, XS_VERSION, vn, SvPV(Sv, na));		\
+	    croak("%s object version %s does not match $%s %S",		\
+		  module, XS_VERSION, vn, Sv);				\
     } STMT_END
 #else
 # define XS_VERSION_BOOTCHECK

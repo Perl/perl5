@@ -59,6 +59,7 @@ dEXTCONST char rcsid[] = "perl.c\nPatch level: ###\n";
     dlmax       = 128;		\
     laststatval = -1;		\
     laststype   = OP_STAT;	\
+    mess_sv     = Nullsv;	\
   } STMT_END
 
 static void find_beginning _((void));
@@ -376,6 +377,11 @@ register PerlInterpreter *sv_interp;
 		 (long)cxstack_ix + 1);
     }
 
+
+    /* Without SVs, messages must be primitive. */
+    SvREFCNT_dec(mess_sv);
+    mess_sv = &sv_undef;
+
     /* Now absolutely destruct everything, somehow or other, loops or no. */
     last_sv_count = 0;
     SvFLAGS(strtab) |= SVTYPEMASK;		/* don't clean out strtab now */
@@ -629,40 +635,35 @@ setuid perl scripts securely.\n");
 		sv_catpv(Sv,"print \"\\nCharacteristics of this binary (from libperl): \\n\",");
 #endif
 #if defined(DEBUGGING) || defined(NO_EMBED) || defined(MULTIPLICITY)
-		strcpy(buf,"\"  Compile-time options:");
+		sv_catpv(Sv,"\"  Compile-time options:");
 #  ifdef DEBUGGING
-		strcat(buf," DEBUGGING");
+		sv_catpv(Sv," DEBUGGING");
 #  endif
 #  ifdef NO_EMBED
-		strcat(buf," NO_EMBED");
+		sv_catpv(Sv," NO_EMBED");
 #  endif
 #  ifdef MULTIPLICITY
-		strcat(buf," MULTIPLICITY");
+		sv_catpv(Sv," MULTIPLICITY");
 #  endif
-		strcat(buf,"\\n\",");
-		sv_catpv(Sv,buf);
+		sv_catpv(Sv,"\\n\",");
 #endif
 #if defined(LOCAL_PATCH_COUNT)
 		if (LOCAL_PATCH_COUNT > 0) {
 		    int i;
 		    sv_catpv(Sv,"\"  Locally applied patches:\\n\",");
 		    for (i = 1; i <= LOCAL_PATCH_COUNT; i++) {
-			if (localpatches[i]) {
-			    sprintf(buf,"\"  \\t%s\\n\",",localpatches[i]);
-			    sv_catpv(Sv,buf);
-			}
+			if (localpatches[i])
+			    sv_catpvf(Sv,"\"  \\t%s\\n\",",localpatches[i]);
 		    }
 		}
 #endif
-		sprintf(buf,"\"  Built under %s\\n\"",OSNAME);
-		sv_catpv(Sv,buf);
+		sv_catpvf(Sv,"\"  Built under %s\\n\"",OSNAME);
 #ifdef __DATE__
 #  ifdef __TIME__
-		sprintf(buf,",\"  Compiled at %s %s\\n\"",__DATE__,__TIME__);
+		sv_catpvf(Sv,",\"  Compiled at %s %s\\n\"",__DATE__,__TIME__);
 #  else
-		sprintf(buf,",\"  Compiled on %s\\n\"",__DATE__);
+		sv_catpvf(Sv,",\"  Compiled on %s\\n\"",__DATE__);
 #  endif
-		sv_catpv(Sv,buf);
 #endif
 		sv_catpv(Sv, "; \
 $\"=\"\\n    \"; \
@@ -1341,9 +1342,8 @@ char *s;
 	forbid_setid("-d");
 	s++;
 	if (*s == ':' || *s == '=')  {
-	    sprintf(buf, "use Devel::%s;", ++s);
+	    my_setenv("PERL5DB", form("use Devel::%s;", ++s));
 	    s += strlen(s);
-	    my_setenv("PERL5DB",buf);
 	}
 	if (!perldb) {
 	    perldb = TRUE;
@@ -1539,15 +1539,20 @@ void
 my_unexec()
 {
 #ifdef UNEXEC
+    SV*    prog;
+    SV*    file;
     int    status;
     extern int etext;
 
-    sprintf (buf, "%s.perldump", origfilename);
-    sprintf (tokenbuf, "%s/perl", BIN_EXP);
+    prog = newSVpv(BIN_EXP);
+    sv_catpv(prog, "/perl");
+    file = newSVpv(origfilename);
+    sv_catpv(file, ".perldump");
 
-    status = unexec(buf, tokenbuf, &etext, sbrk(0), 0);
+    status = unexec(SvPVX(file), SvPVX(prog), &etext, sbrk(0), 0);
     if (status)
-	PerlIO_printf(PerlIO_stderr(), "unexec of %s into %s failed!\n", tokenbuf, buf);
+	PerlIO_printf(PerlIO_stderr(), "unexec of %s into %s failed!\n",
+		      SvPVX(prog), SvPVX(file));
     exit(status);
 #else
 #  ifdef VMS
@@ -1714,16 +1719,19 @@ SV *sv;
 #endif
     }
     else if (preprocess) {
-	char *cpp = CPPSTDIN;
+	char *cpp_cfg = CPPSTDIN;
+	SV *cpp = NEWSV(0,0);
+	SV *cmd = NEWSV(0,0);
 
-	if (strEQ(cpp,"cppstdin"))
-	    sprintf(tokenbuf, "%s/%s", BIN_EXP, cpp);
-	else
-	    sprintf(tokenbuf, "%s", cpp);
+	if (strEQ(cpp_cfg, "cppstdin"))
+	    sv_catpvf(cpp, "%s/", BIN_EXP);
+	sv_catpv(cpp, cpp_cfg);
+
 	sv_catpv(sv,"-I");
 	sv_catpv(sv,PRIVLIB_EXP);
+
 #ifdef MSDOS
-	(void)sprintf(buf, "\
+	sv_setpvf(cmd, "\
 sed %s -e \"/^[^#]/b\" \
  -e \"/^#[ 	]*include[ 	]/b\" \
  -e \"/^#[ 	]*define[ 	]/b\" \
@@ -1735,10 +1743,10 @@ sed %s -e \"/^[^#]/b\" \
  -e \"/^#[ 	]*undef[ 	]/b\" \
  -e \"/^#[ 	]*endif/b\" \
  -e \"s/^#.*//\" \
- %s | %s -C %s %s",
+ %s | %S -C %S %s",
 	  (doextract ? "-e \"1,/^#/d\n\"" : ""),
 #else
-	(void)sprintf(buf, "\
+	sv_setpvf(cmd, "\
 %s %s -e '/^[^#]/b' \
  -e '/^#[ 	]*include[ 	]/b' \
  -e '/^#[ 	]*define[ 	]/b' \
@@ -1750,7 +1758,7 @@ sed %s -e \"/^[^#]/b\" \
  -e '/^#[ 	]*undef[ 	]/b' \
  -e '/^#[ 	]*endif/b' \
  -e 's/^[ 	]*#.*//' \
- %s | %s -C %s %s",
+ %s | %S -C %S %s",
 #ifdef LOC_SED
 	  LOC_SED,
 #else
@@ -1758,7 +1766,7 @@ sed %s -e \"/^[^#]/b\" \
 #endif
 	  (doextract ? "-e '1,/^#/d\n'" : ""),
 #endif
-	  scriptname, tokenbuf, SvPV(sv, na), CPPMINUS);
+	  scriptname, cpp, sv, CPPMINUS);
 	doextract = FALSE;
 #ifdef IAMSUID				/* actually, this is caught earlier */
 	if (euid != uid && !euid) {	/* if running suidperl */
@@ -1779,7 +1787,9 @@ sed %s -e \"/^[^#]/b\" \
 		croak("Can't do seteuid!\n");
 	}
 #endif /* IAMSUID */
-	rsfp = my_popen(buf,"r");
+	rsfp = my_popen(SvPVX(cmd), "r");
+	SvREFCNT_dec(cmd);
+	SvREFCNT_dec(cpp);
     }
     else if (!*scriptname) {
 	forbid_setid("program input from stdin");
@@ -1800,8 +1810,8 @@ sed %s -e \"/^[^#]/b\" \
 #ifndef IAMSUID		/* in case script is not readable before setuid */
 	if (euid && Stat(SvPVX(GvSV(curcop->cop_filegv)),&statbuf) >= 0 &&
 	  statbuf.st_mode & (S_ISUID|S_ISGID)) {
-	    (void)sprintf(buf, "%s/sperl%s", BIN_EXP, patchlevel);
-	    execv(buf, origargv);	/* try again */
+	    /* try again */
+	    execv(form("%s/sperl%s", BIN_EXP, patchlevel), origargv);
 	    croak("Can't do setuid\n");
 	}
 #endif
@@ -1948,8 +1958,8 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 	if (euid) {	/* oops, we're not the setuid root perl */
 	    (void)PerlIO_close(rsfp);
 #ifndef IAMSUID
-	    (void)sprintf(buf, "%s/sperl%s", BIN_EXP, patchlevel);
-	    execv(buf, origargv);	/* try again */
+	    /* try again */
+	    execv(form("%s/sperl%s", BIN_EXP, patchlevel), origargv);
 #endif
 	    croak("Can't do setuid\n");
 	}
@@ -2026,15 +2036,12 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
     for (which = 1; origargv[which] && origargv[which] != scriptname; which++) ;
     if (!origargv[which])
 	croak("Permission denied");
-    (void)sprintf(buf, "/dev/fd/%d/%.127s", PerlIO_fileno(rsfp), origargv[which]);
-    origargv[which] = buf;
-
+    origargv[which] = savepv(form("/dev/fd/%d/%s",
+				  PerlIO_fileno(rsfp), origargv[which]));
 #if defined(HAS_FCNTL) && defined(F_SETFD)
     fcntl(PerlIO_fileno(rsfp),F_SETFD,0);	/* ensure no close-on-exec */
 #endif
-
-    (void)sprintf(tokenbuf, "%s/perl%s", BIN_EXP, patchlevel);
-    execv(tokenbuf, origargv);	/* try again */
+    execv(form("%s/perl%s", BIN_EXP, patchlevel), origargv);	/* try again */
     croak("Can't do setuid\n");
 #endif /* IAMSUID */
 #else /* !DOSUID */

@@ -634,8 +634,11 @@ char *prog;
 #define sayNO goto no
 #define saySAME(x) if (x) goto yes; else goto no
 	if (regnarrate) {
-	    PerlIO_printf(Perl_debug_log, "%*s%2d%-8.8s\t<%.10s>\n", regindent*2, "",
-		scan - regprogram, regprop(scan), locinput);
+	    SV *prop = sv_newmortal();
+	    regprop(prop, scan);
+	    PerlIO_printf(Perl_debug_log, "%*s%2d%-8.8s\t<%.10s>\n",
+			  regindent*2, "", scan - regprogram,
+			  SvPVX(prop), locinput);
 	}
 #else
 #define sayYES return 1

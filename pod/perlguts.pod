@@ -34,19 +34,21 @@ An SV can be created and loaded with one command.  There are four types of
 values that can be loaded: an integer value (IV), a double (NV), a string,
 (PV), and another scalar (SV).
 
-The four routines are:
+The five routines are:
 
     SV*  newSViv(IV);
     SV*  newSVnv(double);
     SV*  newSVpv(char*, int);
+    SV*  newSVpvf(const char*, ...);
     SV*  newSVsv(SV*);
 
-To change the value of an *already-existing* SV, there are five routines:
+To change the value of an *already-existing* SV, there are six routines:
 
     void  sv_setiv(SV*, IV);
     void  sv_setnv(SV*, double);
-    void  sv_setpvn(SV*, char*, int)
     void  sv_setpv(SV*, char*);
+    void  sv_setpvn(SV*, char*, int)
+    void  sv_setpvf(SV*, const char*, ...);
     void  sv_setsv(SV*, SV*);
 
 Notice that you can choose to specify the length of the string to be
@@ -54,7 +56,8 @@ assigned by using C<sv_setpvn> or C<newSVpv>, or you may allow Perl to
 calculate the length by using C<sv_setpv> or by specifying 0 as the second
 argument to C<newSVpv>.  Be warned, though, that Perl will determine the
 string's length by using C<strlen>, which depends on the string terminating
-with a NUL character.
+with a NUL character.  The arguments of C<sv_setpvf> are processed like
+C<sprintf>, and the formatted output becomes the value.
 
 All SVs that will contain strings should, but need not, be terminated
 with a NUL character.  If it is not NUL-terminated there is a risk of
@@ -119,13 +122,15 @@ you can use the following functions:
 
     void  sv_catpv(SV*, char*);
     void  sv_catpvn(SV*, char*, int);
+    void  sv_catpvf(SV*, const char*, ...);
     void  sv_catsv(SV*, SV*);
 
 The first function calculates the length of the string to be appended by
 using C<strlen>.  In the second, you specify the length of the string
-yourself.  The third function extends the string stored in the first SV
-with the string stored in the second SV.  It also forces the second SV to
-be interpreted as a string.
+yourself.  The third function processes its arguments like C<sprintf> and
+appends the formatted output.  The fourth function extends the string
+stored in the first SV with the string stored in the second SV.  It also
+forces the second SV to be interpreted as a string.
 
 If you know the name of a scalar variable, you can get a pointer to its SV
 by using the following:
@@ -2236,6 +2241,13 @@ C<len> indicates number of bytes to copy.
 
 	void	sv_catpvn _((SV* sv, char* ptr, STRLEN len));
 
+=item sv_catpvf
+
+Processes its arguments like C<sprintf> and appends the formatted output
+to an SV.
+
+	void	sv_catpvf _((SV* sv, const char* pat, ...));
+
 =item sv_catsv
 
 Concatenates the string from SV C<ssv> onto the end of the string in SV
@@ -2614,6 +2626,13 @@ Copies a string into an SV.  The C<len> parameter indicates the number of
 bytes to be copied.
 
 	void	sv_setpvn _((SV* sv, char* ptr, STRLEN len));
+
+=item sv_setpvf
+
+Processes its arguments like C<sprintf> and sets an SV to the formatted
+output.
+
+	void	sv_setpvf _((SV* sv, const char* pat, ...));
 
 =item sv_setref_iv
 

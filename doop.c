@@ -142,217 +142,18 @@ register SV **sp;
 
 void
 do_sprintf(sv,len,sarg)
-register SV *sv;
-register I32 len;
-register SV **sarg;
+SV *sv;
+I32 len;
+SV **sarg;
 {
-    register char *s;
-    register char *t;
-    register char *f;
-    char dotype;
-    char ch;
-    register char *send;
-    register SV *arg;
-    char *xs;
-    I32 xlen;
-    I32 pre;
-    I32 post;
-    double value;
-    STRLEN arglen;
+    STRLEN patlen;
+    char *pat = SvPV(*sarg, patlen);
+    bool do_taint = FALSE;
 
-    sv_setpv(sv,"");
-    len--;			/* don't count pattern string */
-    t = s = SvPV(*sarg, arglen);	/* XXX Don't know t is writeable */
-    send = s + arglen;
-    sarg++;
-    for ( ; ; len--) {
-
-	/*SUPPRESS 560*/
-	if (len <= 0 || !(arg = *sarg++))
-	    arg = &sv_no;
-
-	/*SUPPRESS 530*/
-	for ( ; t < send && *t != '%'; t++) ;
-	if (t >= send)
-	    break;		/* end of run_format string, ignore extra args */
-	f = t;
-	*buf = '\0';
-	xs = buf;
-	dotype = '\0';
-	pre = post = 0;
-	for (t++; t < send; t++) {
-	    switch (*t) {
-	    default:
-		ch = *(++t);
-		*t = '\0';
-		(void)sprintf(xs,f);
-		len++, sarg--;
-		xlen = strlen(xs);
-		break;
-	    case 'n': case '*':
-		croak("Use of %c in printf format not supported", *t);
-
-	    case '0': case '1': case '2': case '3': case '4':
-	    case '5': case '6': case '7': case '8': case '9': 
-	    case '.': case '#': case '-': case '+': case ' ':
-		continue;
-	    case 'l':
-#ifdef HAS_QUAD
-		if (dotype == 'l')
-		    dotype = 'q';
-		else
-#endif
-		    dotype = 'l';
-		continue;
-	    case 'h':
-		dotype = 's';
-		continue;
-	    case 'c':
-		ch = *(++t);
-		*t = '\0';
-		xlen = SvIV(arg);
-		if (strEQ(f,"%c")) { /* some printfs fail on null chars */
-		    *xs = xlen;
-		    xs[1] = '\0';
-		    xlen = 1;
-		}
-		else {
-		    (void)sprintf(xs,f,xlen);
-		    xlen = strlen(xs);
-		}
-		break;
-	    case 'D':
-		dotype = 'l';
-		/* FALL THROUGH */
-	    case 'd':
-	    case 'i':
-		ch = *(++t);
-		*t = '\0';
-		switch (dotype) {
-#ifdef HAS_QUAD
-		case 'q':
-		    /* perl.h says that if quad is available, IV is quad */
-		    (void)sprintf(xs,f,(Quad_t)SvIV(arg));
-		    break;
-#endif
-		case 'l':
-		    (void)sprintf(xs,f,(long)SvIV(arg));
-		    break;
-		default:
-		    (void)sprintf(xs,f,(int)SvIV(arg));
-		    break;
-		case 's':
-		    (void)sprintf(xs,f,(short)SvIV(arg));
-		    break;
-		}
-		xlen = strlen(xs);
-		break;
-	    case 'X': case 'O':
-		dotype = 'l';
-		/* FALL THROUGH */
-	    case 'x': case 'o': case 'u':
-		ch = *(++t);
-		*t = '\0';
-		switch (dotype) {
-#ifdef HAS_QUAD
-		case 'q':
-		    /* perl.h says that if quad is available, UV is quad */
-		    (void)sprintf(xs,f,(unsigned Quad_t)SvUV(arg));
-		    break;
-#endif
-		case 'l':
-		    (void)sprintf(xs,f,(unsigned long)SvUV(arg));
-		    break;
-		default:
-		    (void)sprintf(xs,f,(unsigned int)SvUV(arg));
-		    break;
-		case 's':
-		    (void)sprintf(xs,f,(unsigned short)SvUV(arg));
-		    break;
-		}
-		xlen = strlen(xs);
-		break;
-	    case 'E': case 'e': case 'f': case 'G': case 'g':
-		ch = *(++t);
-		*t = '\0';
-		(void)sprintf(xs,f,SvNV(arg));
-		xlen = strlen(xs);
-#ifdef LC_NUMERIC
-		/*
-		 * User-defined locales may include arbitrary characters.
-		 * And, unfortunately, some system may alloc the "C" locale
-		 * to be overridden by a malicious user.
-		 */
-		if (op->op_type == OP_SPRINTF)
-		    SvTAINTED_on(sv);
-#endif /* LC_NUMERIC */
-		break;
-	    case 's':
-		ch = *(++t);
-		*t = '\0';
-		xs = SvPV(arg, arglen);
-		xlen = (I32)arglen;
-		if (strEQ(f,"%s")) {	/* some printfs fail on >128 chars */
-		    break;		/* so handle simple cases */
-		}
-		else if (f[1] == '-') {
-		    char *mp = strchr(f, '.');
-		    I32 min = atoi(f+2);
-
-		    if (mp) {
-			I32 max = atoi(mp+1);
-
-			if (xlen > max)
-			    xlen = max;
-		    }
-		    if (xlen < min)
-			post = min - xlen;
-		    break;
-		}
-		else if (isDIGIT(f[1])) {
-		    char *mp = strchr(f, '.');
-		    I32 min = atoi(f+1);
-
-		    if (mp) {
-			I32 max = atoi(mp+1);
-
-			if (xlen > max)
-			    xlen = max;
-		    }
-		    if (xlen < min)
-			pre = min - xlen;
-		    break;
-		}
-		strcpy(tokenbuf+64,f);	/* sprintf($s,...$s...) */
-		*t = ch;
-		(void)sprintf(buf,tokenbuf+64,xs);
-		xs = buf;
-		xlen = strlen(xs);
-		break;
-	    }
-	    /* end of switch, copy results */
-	    *t = ch;
-	    if (xs == buf && xlen >= sizeof(buf)) {	/* Ooops! */
-		PerlIO_puts(PerlIO_stderr(),"panic: sprintf overflow - memory corrupted!\n");
-		my_exit(1);
-	    }
-	    SvGROW(sv, SvCUR(sv) + (f - s) + xlen + 1 + pre + post);
-	    sv_catpvn(sv, s, f - s);
-	    if (pre) {
-		repeatcpy(SvPVX(sv) + SvCUR(sv), " ", 1, pre);
-		SvCUR(sv) += pre;
-	    }
-	    sv_catpvn(sv, xs, xlen);
-	    if (post) {
-		repeatcpy(SvPVX(sv) + SvCUR(sv), " ", 1, post);
-		SvCUR(sv) += post;
-	    }
-	    s = t;
-	    break;		/* break from for loop */
-	}
-    }
-    sv_catpvn(sv, s, t - s);
+    sv_vsetpvfn(sv, pat, patlen, Null(va_list*), sarg + 1, len - 1, &do_taint);
     SvSETMAGIC(sv);
+    if (do_taint)
+	SvTAINTED_on(sv);
 }
 
 void
@@ -708,18 +509,15 @@ dARGS
 	if (dokeys)
 	    XPUSHs(hv_iterkeysv(entry));	/* won't clobber stack_sp */
 	if (dovalues) {
-	    tmpstr = NEWSV(45,0);
+	    tmpstr = sv_newmortal();
 	    PUTBACK;
 	    sv_setsv(tmpstr,hv_iterval(hv,entry));
+	    DEBUG_H(sv_setpvf(tmpstr, "%lu%%%d=%lu",
+			    (unsigned long)HeHASH(entry),
+			    HvMAX(hv)+1,
+			    (unsigned long)(HeHASH(entry) & HvMAX(hv))));
 	    SPAGAIN;
-	    DEBUG_H( {
-			sprintf(buf,"%lu%%%d=%lu\n",
-				(unsigned long)HeHASH(entry),
-				HvMAX(hv)+1,
-				(unsigned long)(HeHASH(entry) & HvMAX(hv)));
-			sv_setpv(tmpstr,buf);
-	    } )
-	    XPUSHs(sv_2mortal(tmpstr));
+	    XPUSHs(tmpstr);
 	}
 	PUTBACK;
     }

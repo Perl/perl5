@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq8 - System Interaction ($Revision: 1.17 $, $Date: 1997/03/25 18:17:12 $)
+perlfaq8 - System Interaction ($Revision: 1.20 $, $Date: 1997/04/23 18:11:50 $)
 
 =head1 DESCRIPTION
 
@@ -10,7 +10,7 @@ control over the user-interface (keyboard, screen and pointing
 devices), and most anything else not related to data manipulation.
 
 Read the FAQs and documentation specific to the port of perl to your
-operating system (eg, L<perlvms>, F<REAMDE.os2>, ...).  These should
+operating system (eg, L<perlvms>, L<perlplan9>, ...).  These should
 contain more detailed information on the vagaries of your perl.
 
 =head2 How do I find out which operating system I'm running under?
@@ -104,7 +104,7 @@ give the numeric values you want directly, using octal ("\015"), hex
 
 Even though with normal text files, a "\n" will do the trick, there is
 still no unified scheme for terminating a line that is portable
-between Unix, MS-DOS/Windows, and Macintosh, except to terminate I<ALL> line
+between Unix, DOS/Win, and Macintosh, except to terminate I<ALL> line
 ends with "\015\012", and strip what you don't need from the output.
 This applies especially to socket I/O and autoflushing, discussed
 next.
@@ -208,7 +208,7 @@ You don't actually "trap" a control character.  Instead, that
 character generates a signal, which you then trap.  Signals are
 documented in L<perlipc/"Signals"> and chapter 6 of the Camel.
 
-Be warned that very few C libraries are reentrant.  Therefore, if you
+Be warned that very few C libraries are re-entrant.  Therefore, if you
 attempt to print() in a handler that got invoked during another stdio
 operation your internal structures will likely be in an
 inconsistent state, and your program will dump core.  You can
@@ -230,7 +230,7 @@ For example:
 However, because syscalls restart by default, you'll find that if
 you're in a "slow" call, such as E<lt>FHE<gt>, read(), connect(), or
 wait(), that the only way to terminate them is by "longjumping" out;
-that is, by raising an exception.  See the timeout handler for a
+that is, by raising an exception.  See the time-out handler for a
 blocking flock() in L<perlipc/"Signals"> or chapter 6 of the Camel.
 
 =head2 How do I modify the shadow password file on a Unix system?
@@ -311,7 +311,7 @@ END blocks you should also use
 
 Perl's exception-handling mechanism is its eval() operator.  You can
 use eval() as setjmp and die() as longjmp.  For details of this, see
-the section on signals, especially the timeout handler for a blocking
+the section on signals, especially the time-out handler for a blocking
 flock() in L<perlipc/"Signals"> and chapter 6 of the Camel.
 
 If exception handling is all you're interested in, try the
@@ -352,7 +352,7 @@ Simple files like F<errno.h>, F<syscall.h>, and F<socket.h> were fine,
 but the hard ones like F<ioctl.h> nearly always need to hand-edited.
 Here's how to install the *.ph files:
 
-    1.  become superuser
+    1.  become super-user
     2.  cd /usr/include
     3.  h2ph *.h */*.h
 
@@ -381,14 +381,14 @@ documentation, though (see L<IPC::Open2>).
 
 =head2 Why can't I get the output of a command with system()?
 
-You're confusing the purpose of system() and backticks ('').  system()
-runs a command and returns exit status information (as a 16 bit value
--- the low 8 bits are the signal the process died from, if any, and
-the high 8 bits are the actual exit value).  Backticks ('') run a
+You're confusing the purpose of system() and backticks (``).  system()
+runs a command and returns exit status information (as a 16 bit value:
+the low 8 bits are the signal the process died from, if any, and
+the high 8 bits are the actual exit value).  Backticks (``) run a
 command and return what it sent to STDOUT.
 
-    $status = system("mail-users");
-    $output = `ls`;
+    $exit_status   = system("mail-users");
+    $output_string = `ls`;
 
 =head2 How can I capture STDERR from an external command?
 
@@ -552,14 +552,32 @@ Things that are awkward to do in the shell are easy to do in Perl, and
 this very awkwardness is what would make a shell->perl converter
 nigh-on impossible to write.  By rewriting it, you'll think about what
 you're really trying to do, and hopefully will escape the shell's
-pipeline data stream paradigm, which while convenient for some matters,
+pipeline datastream paradigm, which while convenient for some matters,
 causes many inefficiencies.
 
 =head2 Can I use perl to run a telnet or ftp session?
 
-Try the Net::FTP and TCP::Client modules (available from CPAN).
-http://www.perl.com/CPAN/scripts/netstuff/telnet.emul.shar will also
-help for emulating the telnet protocol.
+Try the Net::FTP, TCP::Client, and Net::Telnet modules (available from
+CPAN).  http://www.perl.com/CPAN/scripts/netstuff/telnet.emul.shar
+will also help for emulating the telnet protocol, but Net::Telnet is
+quite probably easier to use..
+
+If all you want to do is pretend to be telnet but don't need
+the initial telnet handshaking, then the standard dual-process
+approach will suffice:
+
+    use IO::Socket; 	    	# new in 5.004
+    $handle = IO::Socket::INET->new('www.perl.com:80')
+	    || die "can't connect to port 80 on www.perl.com: $!";
+    $handle->autoflush(1);
+    if (fork()) { 	    	# XXX: undef means failure
+	select($handle);
+	print while <STDIN>;    # everything from stdin to socket
+    } else {
+	print while <$handle>;  # everything from socket to stdout
+    }
+    close $handle;
+    exit;
 
 =head2 How can I write expect in Perl?
 
@@ -619,7 +637,7 @@ module for other solutions.
 
 =item *
 
-Open /dev/tty and use the TIOCNOTTY ioctl on it.  See L<tty(4)>
+Open /dev/tty and use the the TIOCNOTTY ioctl on it.  See L<tty(4)>
 for details.
 
 =item *
@@ -642,20 +660,6 @@ Background yourself like this:
 =head2 How do I make my program run with sh and csh?
 
 See the F<eg/nih> script (part of the perl source distribution).
-
-=head2 How do I keep my own module/library directory?
-
-When you build modules, use the PREFIX option when generating
-Makefiles:
-
-    perl Makefile.PL PREFIX=/u/mydir/perl
-
-then either set the PERL5LIB environment variable before you run
-scripts that use the modules/libraries (see L<perlrun>) or say
-
-    use lib '/u/mydir/perl';
-
-See Perl's L<lib> for more information.
 
 =head2 How do I find out if I'm running interactively or not?
 
@@ -754,7 +758,42 @@ If your version of perl is compiled without dynamic loading, then you
 just need to replace step 3 (B<make>) with B<make perl> and you will
 get a new F<perl> binary with your extension linked in.
 
-See L<ExtUtils::MakeMaker> for more details on building extensions.
+See L<ExtUtils::MakeMaker> for more details on building extensions,
+the question "How do I keep my own module/library directory?"
+
+=head2 How do I keep my own module/library directory?
+
+When you build modules, use the PREFIX option when generating
+Makefiles:
+
+    perl Makefile.PL PREFIX=/u/mydir/perl
+
+then either set the PERL5LIB environment variable before you run
+scripts that use the modules/libraries (see L<perlrun>) or say
+
+    use lib '/u/mydir/perl';
+
+See Perl's L<lib> for more information.
+
+=head2 How do I add the directory my program lives in to the module/library search path?
+
+    use FindBin;
+    use lib "$FindBin:Bin";
+    use your_own_modules;
+
+=head2 How do I add a directory to my include path at runtime?
+
+Here are the suggested ways of modifying your include path:
+
+    the PERLLIB environment variable
+    the PERL5LIB environment variable
+    the perl -Idir commpand line flag
+    the use lib pragma, as in
+        use lib "$ENV{HOME}/myown_perllib";
+
+The latter is particularly useful because it knows about machine
+dependent architectures.  The lib.pm pragmatic module was first
+included with the 5.002 release of Perl.
 
 =head1 AUTHOR AND COPYRIGHT
 

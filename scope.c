@@ -525,7 +525,8 @@ I32 base;
 	    break;
 	case SAVEt_FREEOP:
 	    ptr = SSPOPPTR;
-	    curpad = AvARRAY(comppad);
+	    if (comppad)
+		curpad = AvARRAY(comppad);
 	    op_free((OP*)ptr);
 	    break;
 	case SAVEt_FREEPV:

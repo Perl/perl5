@@ -168,7 +168,7 @@ notice that perl is not itself written in Perl.
 The new native-code compiler for Perl may reduce the limitations given
 in the previous statement to some degree, but understand that Perl
 remains fundamentally a dynamically typed language, and not a
-statically typed one.  You certainly won't be chastised if you don't
+statically typed one.  You certainly won't be chastized if you don't
 trust nuclear-plant or brain-surgery monitoring code to it.  And
 Larry will sleep easier, too -- Wall Street programs not
 withstanding. :-)
@@ -187,10 +187,10 @@ ok, while "awk and Perl" and "Python and perl" do not.
 It doesn't matter.
 
 In "standard terminology" a I<program> has been compiled to physical
-machine code once, and can then be run multiple times, whereas a
+machine code once, and can then be be run multiple times, whereas a
 I<script> must be translated by a program each time it's used.  Perl
 programs, however, are usually neither strictly compiled nor strictly
-interpreted.  They can be compiled to a bytecode form (something of a Perl
+interpreted.  They can be compiled to a byte code form (something of a Perl
 virtual machine) or to completely different languages, like C or assembly
 language.  You can't tell just by looking whether the source is destined
 for a pure interpreter, a parse-tree interpreter, a byte code interpreter,

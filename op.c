@@ -48,11 +48,11 @@ static PADOFFSET pad_findlex _((char* name, PADOFFSET newoff, U32 seq,
 	CV* startcv, I32 cx_ix));
 
 static char*
-CvNAME(cv)
-CV* cv;
+gv_ename(gv)
+GV* gv;
 {
     SV* tmpsv = sv_newmortal();
-    gv_efullname3(tmpsv, CvGV(cv), Nullch);
+    gv_efullname3(tmpsv, gv, Nullch);
     return SvPV(tmpsv,na);
 }
 
@@ -60,9 +60,8 @@ static OP *
 no_fh_allowed(op)
 OP *op;
 {
-    sprintf(tokenbuf,"Missing comma after first argument to %s function",
-	op_desc[op->op_type]);
-    yyerror(tokenbuf);
+    yyerror(form("Missing comma after first argument to %s function",
+		 op_desc[op->op_type]));
     return op;
 }
 
@@ -71,8 +70,7 @@ too_few_arguments(op, name)
 OP* op;
 char* name;
 {
-    sprintf(tokenbuf,"Not enough arguments for %s", name);
-    yyerror(tokenbuf);
+    yyerror(form("Not enough arguments for %s", name));
     return op;
 }
 
@@ -81,8 +79,7 @@ too_many_arguments(op, name)
 OP *op;
 char* name;
 {
-    sprintf(tokenbuf,"Too many arguments for %s", name);
-    yyerror(tokenbuf);
+    yyerror(form("Too many arguments for %s", name));
     return op;
 }
 
@@ -93,9 +90,8 @@ char *t;
 char *name;
 OP *kid;
 {
-    sprintf(tokenbuf, "Type of arg %d to %s must be %s (not %s)",
-	(int) n, name, t, op_desc[kid->op_type]);
-    yyerror(tokenbuf);
+    yyerror(form("Type of arg %d to %s must be %s (not %s)",
+		 (int)n, name, t, op_desc[kid->op_type]));
     return op;
 }
 
@@ -105,8 +101,7 @@ OP *op;
 {
     int type = op->op_type;
     if (type != OP_AELEM && type != OP_HELEM) {
-	sprintf(tokenbuf, "Can't use subscript on %s", op_desc[type]);
-	yyerror(tokenbuf);
+	yyerror(form("Can't use subscript on %s", op_desc[type]));
 	if (type == OP_ENTERSUB || type == OP_RV2HV || type == OP_PADHV)
 	    warn("(Did you mean $ or @ instead of %c?)\n",
 		 type == OP_ENTERSUB ? '&' : '%');
@@ -123,8 +118,11 @@ char *name;
     SV *sv;
 
     if (!(isALPHA(name[1]) || name[1] == '_' && (int)strlen(name) > 2)) {
-	if (!isPRINT(name[1]))
-	    sprintf(name+1, "^%c", toCTRL(name[1])); /* XXX tokenbuf, really */
+	if (!isPRINT(name[1])) {
+	    name[3] = '\0';
+	    name[2] = toCTRL(name[1]);
+	    name[1] = '^';
+	}
 	croak("Can't use global %s in \"my\"",name);
     }
     if (AvFILL(comppad_name) >= 0) {
@@ -1016,10 +1014,9 @@ I32 type;
 	/* grep, foreach, subcalls, refgen */
 	if (type == OP_GREPSTART || type == OP_ENTERSUB || type == OP_REFGEN)
 	    break;
-	sprintf(tokenbuf, "Can't modify %s in %s",
-	    op_desc[op->op_type],
-	    type ? op_desc[type] : "local");
-	yyerror(tokenbuf);
+	yyerror(form("Can't modify %s in %s",
+		     op_desc[op->op_type],
+		     type ? op_desc[type] : "local"));
 	return op;
 
     case OP_PREINC:
@@ -1321,8 +1318,7 @@ OP *op;
 	     type != OP_PADHV &&
 	     type != OP_PUSHMARK)
     {
-	sprintf(tokenbuf, "Can't declare %s in my", op_desc[op->op_type]);
-	yyerror(tokenbuf);
+	yyerror(form("Can't declare %s in my", op_desc[op->op_type]));
 	return op;
     }
     op->op_flags |= OPf_MOD;
@@ -2945,8 +2941,16 @@ CV *cv;
 	    I32 i = AvFILL(CvPADLIST(cv));
 	    while (i >= 0) {
 		SV** svp = av_fetch(CvPADLIST(cv), i--, FALSE);
-		if (svp)
-		    SvREFCNT_dec(*svp);
+		SV* sv = svp ? *svp : Nullsv;
+		if (!sv)
+		    continue;
+		if (sv == (SV*)comppad_name)
+		    comppad_name = Nullav;
+		else if (sv == (SV*)comppad) {
+		    comppad = Nullav;
+		    curpad = Null(SV**);
+		}
+		SvREFCNT_dec(sv);
 	    }
 	    SvREFCNT_dec((SV*)CvPADLIST(cv));
 	}
@@ -3022,6 +3026,7 @@ CV* outside;
     ENTER;
     SAVESPTR(curpad);
     SAVESPTR(comppad);
+    SAVESPTR(comppad_name);
     SAVESPTR(compcv);
 
     cv = compcv = (CV*)NEWSV(1104,0);
@@ -3041,11 +3046,15 @@ CV* outside;
     if (SvPOK(proto))
 	sv_setpvn((SV*)cv, SvPVX(proto), SvCUR(proto));
 
+    comppad_name = newAV();
+    for (ix = fname; ix >= 0; ix--)
+	av_store(comppad_name, ix, SvREFCNT_inc(pname[ix]));
+
     comppad = newAV();
 
     comppadlist = newAV();
     AvREAL_off(comppadlist);
-    av_store(comppadlist, 0, SvREFCNT_inc((SV*)protopad_name));
+    av_store(comppadlist, 0, (SV*)comppad_name);
     av_store(comppadlist, 1, (SV*)comppad);
     CvPADLIST(cv) = comppadlist;
     av_fill(comppad, AvFILL(protopad));
@@ -3137,26 +3146,22 @@ GV* gv;
 char* p;
 {
     if ((!p != !SvPOK(cv)) || (p && strNE(p, SvPVX(cv)))) {
-	char* buf;
+	SV* msg = sv_newmortal();
 	SV* name = Nullsv;
 
 	if (gv)
-	    gv_efullname3(name = NEWSV(606, 40), gv, Nullch);
-	New(607, buf, ((name ? SvCUR(name) : 0)
-		       + (SvPOK(cv) ? SvCUR(cv) : 0)
-		       + (p ? strlen(p) : 0)
-		       + 60), char);
-	strcpy(buf, "Prototype mismatch:");
-	if (name) {
-	    sprintf(buf + strlen(buf), " sub %s", SvPVX(name));
-	    SvREFCNT_dec(name);
-	}
+	    gv_efullname3(name = sv_newmortal(), gv, Nullch);
+	sv_setpv(msg, "Prototype mismatch:");
+	if (name)
+	    sv_catpvf(msg, " sub %S", name);
 	if (SvPOK(cv))
-	    sprintf(buf + strlen(buf), " (%s)", SvPVX(cv));
-	strcat(buf, " vs ");
-	sprintf(buf + strlen(buf), p ? "(%s)" : "none", p);
-	warn("%s", buf);
-	Safefree(buf);
+	    sv_catpvf(msg, " (%s)", SvPVX(cv));
+	sv_catpv(msg, " vs ");
+	if (p)
+	    sv_catpvf(msg, "(%s)", p);
+	else
+	    sv_catpv(msg, "none");
+	warn("%S", msg);
     }
 }
 
@@ -3337,18 +3342,15 @@ OP *block;
 	char *s;
 
 	if (perldb && curstash != debstash) {
-	    SV *sv;
+	    SV *sv = NEWSV(0,0);
 	    SV *tmpstr = sv_newmortal();
 	    static GV *db_postponed;
 	    CV *cv;
 	    HV *hv;
 
-	    sprintf(buf, "%s:%ld",
-		    SvPVX(GvSV(curcop->cop_filegv)), (long)subline);
-	    sv = newSVpv(buf,0);
-	    sv_catpv(sv,"-");
-	    sprintf(buf,"%ld",(long)curcop->cop_line);
-	    sv_catpv(sv,buf);
+	    sv_setpvf(sv, "%S:%ld-%ld",
+		    GvSV(curcop->cop_filegv),
+		    (long)subline, (long)curcop->cop_line);
 	    gv_efullname3(tmpstr, gv, Nullch);
 	    hv_store(GvHV(DBsub), SvPVX(tmpstr), SvCUR(tmpstr), sv, 0);
 	    if (!db_postponed) {
@@ -4088,8 +4090,14 @@ OP *op;
     GV *gv = gv_fetchpv("glob", FALSE, SVt_PVCV);
 
     if (gv && GvIMPORTED_CV(gv)) {
+	static int glob_index;
+
+	append_elem(OP_GLOB, op,
+		    newSVOP(OP_CONST, 0, newSViv(glob_index++)));
 	op->op_type = OP_LIST;
 	op->op_ppaddr = ppaddr[OP_LIST];
+	((LISTOP*)op)->op_first->op_type = OP_PUSHMARK;
+	((LISTOP*)op)->op_first->op_ppaddr = ppaddr[OP_PUSHMARK];
 	op = newUNOP(OP_ENTERSUB, OPf_STACKED,
 		     append_elem(OP_LIST, op, 
 				 scalar(newUNOP(OP_RV2CV, 0,
@@ -4476,6 +4484,7 @@ OP *op;
     OP *cvop;
     char *proto = 0;
     CV *cv = 0;
+    GV *namegv = 0;
     int optional = 0;
     I32 arg = 0;
 
@@ -4487,8 +4496,10 @@ OP *op;
 	tmpop = (SVOP*)((UNOP*)cvop)->op_first;
 	if (tmpop->op_type == OP_GV) {
 	    cv = GvCVu(tmpop->op_sv);
-	    if (cv && SvPOK(cv) && !(op->op_private & OPpENTERSUB_AMPER))
-		proto = SvPV((SV*)cv,na);
+	    if (cv && SvPOK(cv) && !(op->op_private & OPpENTERSUB_AMPER)) {
+		namegv = CvANON(cv) ? (GV*)tmpop->op_sv : CvGV(cv);
+		proto = SvPV((SV*)cv, na);
+	    }
 	}
     }
     op->op_private |= (hints & HINT_STRICT_REFS);
@@ -4498,7 +4509,7 @@ OP *op;
 	if (proto) {
 	    switch (*proto) {
 	    case '\0':
-		return too_many_arguments(op, CvNAME(cv));
+		return too_many_arguments(op, gv_ename(namegv));
 	    case ';':
 		optional = 1;
 		proto++;
@@ -4517,7 +4528,7 @@ OP *op;
 		proto++;
 		arg++;
 		if (o->op_type != OP_REFGEN && o->op_type != OP_UNDEF)
-		    bad_type(arg, "block", CvNAME(cv), o);
+		    bad_type(arg, "block", gv_ename(namegv), o);
 		break;
 	    case '*':
 		proto++;
@@ -4538,23 +4549,23 @@ OP *op;
 		switch (*proto++) {
 		case '*':
 		    if (o->op_type != OP_RV2GV)
-			bad_type(arg, "symbol", CvNAME(cv), o);
+			bad_type(arg, "symbol", gv_ename(namegv), o);
 		    goto wrapref;
 		case '&':
 		    if (o->op_type != OP_RV2CV)
-			bad_type(arg, "sub", CvNAME(cv), o);
+			bad_type(arg, "sub", gv_ename(namegv), o);
 		    goto wrapref;
 		case '$':
 		    if (o->op_type != OP_RV2SV && o->op_type != OP_PADSV)
-			bad_type(arg, "scalar", CvNAME(cv), o);
+			bad_type(arg, "scalar", gv_ename(namegv), o);
 		    goto wrapref;
 		case '@':
 		    if (o->op_type != OP_RV2AV && o->op_type != OP_PADAV)
-			bad_type(arg, "array", CvNAME(cv), o);
+			bad_type(arg, "array", gv_ename(namegv), o);
 		    goto wrapref;
 		case '%':
 		    if (o->op_type != OP_RV2HV && o->op_type != OP_PADHV)
-			bad_type(arg, "hash", CvNAME(cv), o);
+			bad_type(arg, "hash", gv_ename(namegv), o);
 		  wrapref:
 		    {
 			OP* kid = o;
@@ -4573,7 +4584,7 @@ OP *op;
 	    default:
 	      oops:
 		croak("Malformed prototype for %s: %s",
-			CvNAME(cv),SvPV((SV*)cv,na));
+			gv_ename(namegv), SvPV((SV*)cv, na));
 	    }
 	}
 	else
@@ -4583,7 +4594,7 @@ OP *op;
 	o = o->op_sibling;
     }
     if (proto && !optional && *proto == '$')
-	return too_few_arguments(op, CvNAME(cv));
+	return too_few_arguments(op, gv_ename(namegv));
     return op;
 }
 

@@ -46,9 +46,6 @@ esac
 
 # MachTen doesn't have secure setid scripts
 d_suidsafe='undef'
-case "$d_dosuid" in
-'') d_dosuid='define' ;;
-esac
 
 # groupstype should be gid_t, as near as I can tell, but it only
 # seems to work right when it's int. 

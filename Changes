@@ -46,6 +46,119 @@ And the Keepers of the Patch Pumpkin:
 
 
 -----------------
+Version 5.003_97h
+-----------------
+
+This patch eliminates almost all possible sources of buffer overflow;
+in particular, there are no more sprintf() bugs.  (!!)  This patch
+also has a few other fixes.  With these changes in place, I can sleep
+at night.  (Because I've stopped hacking.  :-))
+
+ CORE LANGUAGE CHANGES
+
+  Title:  "Support PRINTF for tied handles"
+   From:  Doug MacEachern
+ Msg-ID:  <199704202226.SAA08032@postman.osf.org>
+   Date:  Sun, 20 Apr 1997 18:26:13 -0400
+  Files:  pod/perldelta.pod pod/perltie.pod pp_sys.c t/op/misc.t
+
+ CORE PORTABILITY
+
+  Title:  "Fix bitwise shifts and pack('w') on Crays"
+   From:  Chip Salzenberg
+  Files:  pp.c
+
+  Title:  "Win32 update (two patches)"
+   From:  Gurusamy Sarathy
+  Files:  lib/AutoSplit.pm lib/ExtUtils/MM_Unix.pm win32/config.w32
+          win32/makedef.pl
+
+ OTHER CORE CHANGES
+
+  Title:  "Mondo Cool patch for buffer safety and convenience"
+   From:  Chip Salzenberg
+  Files:  XSUB.h doop.c dump.c ext/DynaLoader/dl_dlopen.xs
+          ext/DynaLoader/dl_hpux.xs ext/DynaLoader/dl_next.xs
+          ext/DynaLoader/dlutils.c ext/ODBM_File/ODBM_File.xs
+          global.sym gv.c interp.sym mg.c op.c perl.c perl.h
+          pod/perlguts.pod pp.c pp_ctl.c pp_hot.c pp_sys.c proto.h
+          regcomp.c regexec.c sv.c toke.c util.c
+
+  Title:  "Problems with glob"
+   From:  Ilya Zakharevich
+ Msg-ID:  <1997Apr20.024432.1941365@hmivax.humgen.upenn.edu>
+   Date:  Sun, 20 Apr 1997 02:44:32 -0400 (EDT)
+  Files:  op.c
+
+  Title:  "Fix scalar leak in closures"
+   From:  Chip Salzenberg
+  Files:  op.c scope.c
+
+  Title:  "Refine error messages re: anon subs' prototypes"
+   From:  Chip Salzenberg
+  Files:  op.c
+
+  Title:  "Outermost scope is void, not scalar"
+   From:  Chip Salzenberg
+  Files:  pp_ctl.c
+
+ BUILD PROCESS
+
+  Title:  "Fix up Linux hints for tcsh, and Configure patch"
+   From:  Andy Dougherty
+ Msg-ID:  <Pine.SOL.3.95q.970422101051.2506C-100000@fractal.lafayette.e
+   Date:  Tue, 22 Apr 1997 11:02:27 -0400 (EDT)
+  Files:  Configure hints/linux.sh
+
+  Title:  "There is no standard answer to 'Use suidperl?'"
+   From:  Chip Salzenberg
+  Files:  hints/bsdos.sh hints/freebsd.sh hints/linux.sh
+          hints/machten_2.sh
+
+ LIBRARY AND EXTENSIONS
+
+  Title:  "Math::Complex update"
+   From:  Jarkko Hietaniemi
+  Files:  lib/Math/Complex.pm t/lib/complex.t
+
+  Title:  "Croak on C<use autouse> without module name"
+   From:  Chip Salzenberg
+  Files:  lib/autouse.pm
+
+  Title:  "Silence warnings on simple C<use ops>"
+   From:  Roderick Schertler
+ Msg-ID:  <pzybafum6k.fsf@eeyore.ibcinc.com>
+   Date:  19 Apr 1997 10:22:43 -0400
+  Files:  ext/Opcode/ops.pm
+
+ TESTS
+
+  Title:  "Don't put leading newline on numeric strings"
+   From:  Andreas Koenig
+ Msg-ID:  <199704230847.KAA22752@anna.in-berlin.de>
+   Date:  Wed, 23 Apr 1997 10:47:00 +0200
+  Files:  t/pragma/constant.t
+
+ UTILITIES
+
+   (no changes)
+
+ DOCUMENTATION
+
+  Title:  "FAQ udpate (23-apr-97)"
+   From:  Nathan Torkington <gnat@prometheus.frii.com>
+ Msg-ID:  <199704231822.MAA05074@prometheus.frii.com>
+   Date:  Wed, 23 Apr 1997 12:22:55 -0600 (MDT)
+  Files:  pod/perlfaq*.pod
+
+  Title:  "Two doublewords less"
+   From:  Jarkko Hietaniemi
+ Msg-ID:  <199704201938.WAA07722@alpha.hut.fi>
+   Date:  Sun, 20 Apr 1997 22:38:13 +0300 (EET DST)
+  Files:  pod/perlrun.pod vms/perlvms.pod
+
+
+-----------------
 Version 5.003_97g
 -----------------
 

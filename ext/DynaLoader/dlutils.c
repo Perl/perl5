@@ -82,15 +82,3 @@ SaveError(pat, va_alist)
     DLDEBUG(2,PerlIO_printf(PerlIO_stderr(), "DynaLoader: stored error msg '%s'\n",LastError));
 }
 
-
-/* prepend underscore to s. write into buf. return buf. */
-static char *
-dl_add_underscore(s, buf)
-char *s;
-char *buf;
-{
-    *buf = '_';
-    (void)strcpy(buf + 1, s);
-    return buf;
-}
-

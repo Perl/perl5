@@ -564,10 +564,9 @@ PP(pp_rv2hv)
     }
     else {
 	dTARGET;
-	if (HvFILL(hv)) {
-	    sprintf(buf, "%ld/%ld", (long)HvFILL(hv), (long)HvMAX(hv)+1);
-	    sv_setpv(TARG, buf);
-	}
+	if (HvFILL(hv))
+	    sv_setpvf(TARG, "%ld/%ld",
+		      (long)HvFILL(hv), (long)HvMAX(hv) + 1);
 	else
 	    sv_setiv(TARG, 0);
 	SETTARG;

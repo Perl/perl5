@@ -1354,7 +1354,6 @@ EXT SV **	curpad;
 /* temp space */
 EXT SV *	Sv;
 EXT XPV *	Xpv;
-EXT char	buf[2048];	/* should be longer than PATH_MAX */
 EXT char	tokenbuf[256];
 EXT struct stat	statbuf;
 #ifdef HAS_TIMES
@@ -1879,6 +1878,7 @@ IEXT bool	Ipreambled;
 IEXT AV *	Ipreambleav;
 IEXT int	Ilaststatval IINIT(-1);
 IEXT I32	Ilaststype IINIT(OP_STAT);
+IEXT SV *	Imess_sv;
 
 #undef IEXT
 #undef IINIT

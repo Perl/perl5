@@ -38,13 +38,7 @@
  */
 static	char	*local_patches[] = {
 	NULL
-	,"Dev97A - First development patch to 5.003_97"
-	,"Dev97B - Second development patch to 5.003_97"
-	,"Dev97C - Third development patch to 5.003_97"
-	,"Dev97D - Fourth development patch to 5.003_97"
-	,"Dev97E - Fifth development patch to 5.003_97"
-	,"Dev97F - Sixth development patch to 5.003_97"
-	,"Dev97G - Seventh development patch to 5.003_97"
+	,"Dev97A-H - Eight development patches to 5.003_97"
 	,NULL
 };
 

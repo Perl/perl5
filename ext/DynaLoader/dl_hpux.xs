@@ -88,11 +88,12 @@ dl_find_symbol(libhandle, symbolname)
     void *symaddr = NULL;
     int status;
 #ifdef __hp9000s300
-    char symbolname_buf[MAXPATHLEN];
-    symbolname = dl_add_underscore(symbolname, symbolname_buf);
+    symbolname = form("_%s", symbolname);
 #endif
-    DLDEBUG(2,PerlIO_printf(PerlIO_stderr(), "dl_find_symbol(handle=%x, symbol=%s)\n",
-		libhandle, symbolname));
+    DLDEBUG(2, PerlIO_printf(PerlIO_stderr(),
+			     "dl_find_symbol(handle=%lx, symbol=%s)\n",
+			     (unsigned long) libhandle, symbolname));
+
     ST(0) = sv_newmortal() ;
     errno = 0;
 
