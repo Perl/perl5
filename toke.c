@@ -4084,7 +4084,7 @@ Perl_yylex(pTHX)
 	    Rop(OP_SGE);
 
 	case KEY_grep:
-	    LOP(OP_GREPSTART, *s == '(' ? XTERM : XREF);
+	    LOP(OP_GREPSTART, XREF);
 
 	case KEY_goto:
 	    s = force_word(s,WORD,TRUE,FALSE,FALSE);
@@ -4246,7 +4246,7 @@ Perl_yylex(pTHX)
 	    TERM(sublex_start());
 
 	case KEY_map:
-	    LOP(OP_MAPSTART, *s == '(' ? XTERM : XREF);
+	    LOP(OP_MAPSTART, XREF);
 
 	case KEY_mkdir:
 	    LOP(OP_MKDIR,XTERM);
