@@ -2966,8 +2966,12 @@ Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
     if (!sv)
 	return 0;
 
-    if (!SvPOK(sv))
-	(void) SvPV_nolen(sv);
+    if (!SvPOK(sv)) {
+	STRLEN len = 0;
+	(void) sv_2pv(sv,&len);
+	if (!SvPOK(sv))
+	     return len;
+    }
 
     if (SvUTF8(sv))
 	return SvCUR(sv);
