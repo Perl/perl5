@@ -408,6 +408,9 @@ ext/POSIX/typemap		POSIX extension interface types
 ext/PerlIO/Scalar/Makefile.PL	PerlIO layer for scalars
 ext/PerlIO/Scalar/Scalar.pm	PerlIO layer for scalars
 ext/PerlIO/Scalar/Scalar.xs	PerlIO layer for scalars
+ext/PerlIO/Via/Makefile.PL	PerlIO layer for layers in perl
+ext/PerlIO/Via/Via.pm		PerlIO layer for layers in perl
+ext/PerlIO/Via/Via.xs		PerlIO layer for layers in perl
 ext/SDBM_File/Makefile.PL	SDBM extension makefile writer
 ext/SDBM_File/SDBM_File.pm	SDBM extension Perl module
 ext/SDBM_File/SDBM_File.xs	SDBM extension external subroutines
