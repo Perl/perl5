@@ -120,7 +120,8 @@ Found in file av.c
 =item av_delete
 
 Deletes the element indexed by C<key> from the array.  Returns the
-deleted element. C<flags> is currently ignored.
+deleted element. If C<flags> equals C<G_DISCARD>, the element is freed
+and null is returned.
 
 	SV*	av_delete(AV* ar, I32 key, I32 flags)
 
@@ -1924,6 +1925,21 @@ converted into version objects.
 =for hackers
 Found in file util.c
 
+=item vnormal
+
+Accepts a version object and returns the normalized string
+representation.  Call like:
+
+    sv = vnormal(rv);
+
+NOTE: you can pass either the object directly or the SV
+contained within the RV.
+
+	SV*	vnormal(SV *vs)
+
+=for hackers
+Found in file util.c
+
 =item vnumify
 
 Accepts a version object and returns the normalized floating
@@ -1941,13 +1957,10 @@ Found in file util.c
 
 =item vstringify
 
-Accepts a version object and returns the normalized string
-representation.  Call like:
-
-    sv = vstringify(rv);
-
-NOTE: you can pass either the object directly or the SV
-contained within the RV.
+In order to maintain maximum compatibility with earlier versions
+of Perl, this function will return either the floating point
+notation or the multiple dotted notation, depending on whether
+the original version contained 1 or more dots, respectively
 
 	SV*	vstringify(SV *vs)
 
@@ -3029,22 +3042,22 @@ which guarantees to evaluate sv only once.
 =for hackers
 Found in file sv.h
 
-=item SvNVx
-
-Coerces the given SV to a double and returns it. Guarantees to evaluate
-sv only once. Use the more efficient C<SvNV> otherwise.
-
-	NV	SvNVx(SV* sv)
-
-=for hackers
-Found in file sv.h
-
 =item SvNVX
 
 Returns the raw value in the SV's NV slot, without checks or conversions.
 Only use when you are sure SvNOK is true. See also C<SvNV()>.
 
 	NV	SvNVX(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvNVx
+
+Coerces the given SV to a double and returns it. Guarantees to evaluate
+sv only once. Use the more efficient C<SvNV> otherwise.
+
+	NV	SvNVx(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -3238,21 +3251,21 @@ Like C<SvPV_nolen>, but converts sv to utf8 first if necessary.
 =for hackers
 Found in file sv.h
 
+=item SvPVx
+
+A version of C<SvPV> which guarantees to evaluate sv only once.
+
+	char*	SvPVx(SV* sv, STRLEN len)
+
+=for hackers
+Found in file sv.h
+
 =item SvPVX
 
 Returns a pointer to the physical string in the SV.  The SV must contain a
 string.
 
 	char*	SvPVX(SV* sv)
-
-=for hackers
-Found in file sv.h
-
-=item SvPVx
-
-A version of C<SvPV> which guarantees to evaluate sv only once.
-
-	char*	SvPVx(SV* sv, STRLEN len)
 
 =for hackers
 Found in file sv.h
@@ -3500,22 +3513,22 @@ for a version which guarantees to evaluate sv only once.
 =for hackers
 Found in file sv.h
 
-=item SvUVx
-
-Coerces the given SV to an unsigned integer and returns it. Guarantees to
-evaluate sv only once. Use the more efficient C<SvUV> otherwise.
-
-	UV	SvUVx(SV* sv)
-
-=for hackers
-Found in file sv.h
-
 =item SvUVX
 
 Returns the raw value in the SV's UV slot, without checks or conversions.
 Only use when you are sure SvIOK is true. See also C<SvUV()>.
 
 	UV	SvUVX(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvUVx
+
+Coerces the given SV to an unsigned integer and returns it. Guarantees to
+evaluate sv only once. Use the more efficient C<SvUV> otherwise.
+
+	UV	SvUVx(SV* sv)
 
 =for hackers
 Found in file sv.h

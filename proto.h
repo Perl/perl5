@@ -518,6 +518,7 @@ PERL_CALLCONV char*	Perl_scan_version(pTHX_ char *vstr, SV *sv, bool qv);
 PERL_CALLCONV SV*	Perl_new_version(pTHX_ SV *ver);
 PERL_CALLCONV SV*	Perl_upg_version(pTHX_ SV *ver);
 PERL_CALLCONV SV*	Perl_vnumify(pTHX_ SV *vs);
+PERL_CALLCONV SV*	Perl_vnormal(pTHX_ SV *vs);
 PERL_CALLCONV SV*	Perl_vstringify(pTHX_ SV *vs);
 PERL_CALLCONV int	Perl_vcmp(pTHX_ SV *lvs, SV *rvs);
 PERL_CALLCONV PerlIO*	Perl_nextargv(pTHX_ GV* gv);

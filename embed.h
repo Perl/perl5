@@ -738,6 +738,7 @@
 #define new_version		Perl_new_version
 #define upg_version		Perl_upg_version
 #define vnumify			Perl_vnumify
+#define vnormal			Perl_vnormal
 #define vstringify		Perl_vstringify
 #define vcmp			Perl_vcmp
 #ifdef PERL_CORE
@@ -3235,6 +3236,7 @@
 #define new_version(a)		Perl_new_version(aTHX_ a)
 #define upg_version(a)		Perl_upg_version(aTHX_ a)
 #define vnumify(a)		Perl_vnumify(aTHX_ a)
+#define vnormal(a)		Perl_vnormal(aTHX_ a)
 #define vstringify(a)		Perl_vstringify(aTHX_ a)
 #define vcmp(a,b)		Perl_vcmp(aTHX_ a,b)
 #ifdef PERL_CORE

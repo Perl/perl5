@@ -369,12 +369,12 @@ XS(XS_UNIVERSAL_VERSION)
 	}
 
 	if ( vcmp( req, sv ) > 0 )
-	    Perl_croak(aTHX_
-		"%s version %"SVf" required--this is only version %"SVf,
-		HvNAME(pkg), req, sv);
+	    Perl_croak(aTHX_ "%s version %"SVf" (%"SVf") required--"
+		    "this is only version %"SVf" (%"SVf")", HvNAME(pkg),
+		    vnumify(req),vnormal(req),vnumify(sv),vnormal(sv));
     }
 
-    ST(0) = sv;
+    ST(0) = vnumify(sv);
 
     XSRETURN(1);
 }

@@ -539,6 +539,7 @@ Apd	|char*	|scan_version	|char *vstr|SV *sv|bool qv
 Apd	|SV*	|new_version	|SV *ver
 Apd	|SV*	|upg_version	|SV *ver
 Apd	|SV*	|vnumify	|SV *vs
+Apd	|SV*	|vnormal	|SV *vs
 Apd	|SV*	|vstringify	|SV *vs
 Apd	|int	|vcmp		|SV *lvs|SV *rvs
 p	|PerlIO*|nextargv	|GV* gv
