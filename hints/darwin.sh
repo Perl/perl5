@@ -66,7 +66,7 @@ ccflags="${ccflags} -pipe -fno-common -DHAS_TELLDIR_PROTOTYPE";
 ccflags="${ccflags} -DINT32_MIN_BROKEN -DINT64_MIN_BROKEN"
 
 # cpp-precomp is problematic.
-cppflags='-no-precomp';
+cppflags='-traditional-cpp';
 
 # Shared library extension is .dylib.
 # Bundle extension is .bundle.
