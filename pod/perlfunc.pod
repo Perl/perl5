@@ -3202,6 +3202,15 @@ equal $foo).
 
 =item *
 
+If the pattern begins with a C<U>, the resulting string will be treated
+as Unicode-encoded. You can force UTF8 encoding on in a string with an
+initial C<U0>, and the bytes that follow will be interpreted as Unicode
+characters. If you don't want this to happen, you can begin your pattern
+with C<C0> (or anything else) to force Perl not to UTF8 encode your
+string, and then follow this with a C<U*> somewhere in your pattern.
+
+=item *
+
 You must yourself do any alignment or padding by inserting for example
 enough C<'x'>es while packing.  There is no way to pack() and unpack()
 could know where the bytes are going to or coming from.  Therefore

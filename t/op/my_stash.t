@@ -2,6 +2,10 @@
 
 package Foo;
 
+BEGIN {
+    unshift @INC, "../lib";
+}
+
 use Test;
 
 plan tests => 7;
