@@ -24,18 +24,13 @@ our @EXPORT = qw(
 );
 our $VERSION = '0.05';
 
-sub new {
-    my $class = shift;
-    return $class->create(@_);
-}
-
 
 sub equals {
     return 1 if($_[0]->tid() == $_[1]->tid());
     return 0;
 }
 
-$Config::threads = 1;
+$threads::threads = 1;
 
 bootstrap threads $VERSION;
 

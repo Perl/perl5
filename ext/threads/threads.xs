@@ -332,6 +332,24 @@ create (class, function_to_call, ...)
 			RETVAL
 
 SV *
+new (class, function_to_call, ...)
+        char *  class
+        SV *    function_to_call
+		CODE:
+			AV* params = newAV();
+			if(items > 2) {
+				int i;
+				for(i = 2; i < items ; i++) {
+					av_push(params, ST(i));
+				}
+			}
+			RETVAL = Perl_thread_create(class, function_to_call, newRV_noinc((SV*) params));
+			OUTPUT:
+			RETVAL
+
+
+
+SV *
 self (class)
 		char* class
 	CODE:
