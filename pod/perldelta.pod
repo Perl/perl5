@@ -386,6 +386,21 @@ pathname for FILENAME in scalar context. In list context it returns
 a two element list containing the fully qualified directory name and
 the filename.
 
+=item DBM Filters
+
+A new feature called "DBM Filters" has been added to all the
+DBM modules -- DB_File, GDBM_File, NDBM_File, ODBM_File and SDBM_File.
+DBM Filters add four new methods to each of the DBM modules 
+
+    filter_store_key
+    filter_store_value
+    filter_fetch_key
+    filter_fetch_value
+
+These can be used to filter the contents of keys/values before they are
+written to the database or just after they are read from the database.
+See L<perldbmfilter> for further information.
+
 =back
 
 =head2 Pragmata

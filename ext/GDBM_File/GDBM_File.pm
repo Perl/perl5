@@ -33,7 +33,7 @@ The available functions and the gdbm/perl interface need to be documented.
 
 =head1 SEE ALSO
 
-L<perl(1)>, L<DB_File(3)>. 
+L<perl(1)>, L<DB_File(3)>, L<perldbmfilter>. 
 
 =cut
 
@@ -59,7 +59,7 @@ require DynaLoader;
 	GDBM_WRITER
 );
 
-$VERSION = "1.01";
+$VERSION = "1.02";
 
 sub AUTOLOAD {
     my($constname);

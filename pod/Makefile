@@ -43,6 +43,7 @@ POD = \
 	perlbot.pod	\
 	perlipc.pod	\
 	perlthrtut.pod	\
+	perldbmfilter.pod	\
 	perldebug.pod	\
 	perldiag.pod	\
 	perlsec.pod	\
@@ -100,6 +101,7 @@ MAN = \
 	perlbot.man	\
 	perlipc.man	\
 	perlthrtut.man	\
+	perldbmfilter.man	\
 	perldebug.man	\
 	perldiag.man	\
 	perlsec.man	\
@@ -157,6 +159,7 @@ HTML = \
 	perlbot.html	\
 	perlipc.html	\
 	perlthrtut.html	\
+	perldbmfilter.html	\
 	perldebug.html	\
 	perldiag.html	\
 	perlsec.html	\
@@ -214,6 +217,7 @@ TEX = \
 	perlbot.tex	\
 	perlipc.tex	\
 	perlthrtut.tex	\
+	perldbmfilter.tex	\
 	perldebug.tex	\
 	perldiag.tex	\
 	perlsec.tex	\
