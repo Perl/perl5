@@ -8,7 +8,7 @@
 
 # Package name      : perl5
 # Source directory  : .
-# Configuration time: Thu Jun 28 18:05:29 EET DST 2001
+# Configuration time: Thu Jul 12 21:13:57 EET DST 2001
 # Configured by     : jhi
 # Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
 
@@ -63,7 +63,7 @@ ccsymbols='__alpha=1 __LANGUAGE_C__=1 __osf__=1 __unix__=1 _LONGLONG=1 _SYSTYPE_
 ccversion='V5.6-082'
 cf_by='jhi'
 cf_email='yourname@yourhost.yourplace.com'
-cf_time='Thu Jun 28 18:05:29 EET DST 2001'
+cf_time='Thu Jul 12 21:13:57 EET DST 2001'
 charsize='1'
 chgrp=''
 chmod='chmod'
@@ -429,7 +429,7 @@ dlext='so'
 dlsrc='dl_dlopen.xs'
 doublesize='8'
 drand01='drand48()'
-dynamic_ext='B ByteLoader Cwd DB_File Data/Dumper Devel/DProf Devel/Peek Digest/MD5 Encode Fcntl File/Glob Filter/Util/Call IO IPC/SysV List/Util MIME/Base64 NDBM_File ODBM_File Opcode POSIX PerlIO/Scalar PerlIO/Via SDBM_File Socket Storable Sys/Hostname Sys/Syslog Thread Time/HiRes Time/Piece XS/Typemap attrs re'
+dynamic_ext='B ByteLoader Cwd DB_File Data/Dumper Devel/DProf Devel/Peek Digest/MD5 Encode Fcntl File/Glob Filter/Util/Call I18N/Langinfo IO IPC/SysV List/Util MIME/Base64 NDBM_File ODBM_File Opcode POSIX PerlIO/Scalar PerlIO/Via SDBM_File Socket Storable Sys/Hostname Sys/Syslog Thread Time/HiRes Time/Piece XS/Typemap attrs re'
 eagain='EAGAIN'
 ebcdic='undef'
 echo='echo'
@@ -438,7 +438,7 @@ emacs=''
 eunicefix=':'
 exe_ext=''
 expr='expr'
-extensions='B ByteLoader Cwd DB_File Data/Dumper Devel/DProf Devel/Peek Digest/MD5 Encode Fcntl File/Glob Filter/Util/Call IO IPC/SysV List/Util MIME/Base64 NDBM_File ODBM_File Opcode POSIX PerlIO/Scalar PerlIO/Via SDBM_File Socket Storable Sys/Hostname Sys/Syslog Thread Time/HiRes Time/Piece XS/Typemap attrs re Errno'
+extensions='B ByteLoader Cwd DB_File Data/Dumper Devel/DProf Devel/Peek Digest/MD5 Encode Fcntl File/Glob Filter/Util/Call I18N/Langinfo IO IPC/SysV List/Util MIME/Base64 NDBM_File ODBM_File Opcode POSIX PerlIO/Scalar PerlIO/Via SDBM_File Socket Storable Sys/Hostname Sys/Syslog Thread Time/HiRes Time/Piece XS/Typemap attrs re Errno'
 fflushNULL='define'
 fflushall='undef'
 find=''
@@ -580,7 +580,7 @@ issymlink='test -h'
 ivdformat='"ld"'
 ivsize='8'
 ivtype='long'
-known_extensions='B ByteLoader Cwd DB_File Data/Dumper Devel/DProf Devel/Peek Digest/MD5 Encode Fcntl File/Glob Filter/Util/Call GDBM_File IO IPC/SysV List/Util MIME/Base64 NDBM_File ODBM_File Opcode POSIX PerlIO/Scalar PerlIO/Via SDBM_File Socket Storable Sys/Hostname Sys/Syslog Thread Time/HiRes Time/Piece XS/Typemap attrs re'
+known_extensions='B ByteLoader Cwd DB_File Data/Dumper Devel/DProf Devel/Peek Digest/MD5 Encode Fcntl File/Glob Filter/Util/Call GDBM_File I18N/Langinfo IO IPC/SysV List/Util MIME/Base64 NDBM_File ODBM_File Opcode POSIX PerlIO/Scalar PerlIO/Via SDBM_File Socket Storable Sys/Hostname Sys/Syslog Thread Time/HiRes Time/Piece XS/Typemap attrs re'
 ksh=''
 ld='ld'
 lddlflags='-shared -expect_unresolved "*" -msym -std -s'
@@ -670,9 +670,9 @@ pager='/c/bin/less'
 passcat='cat /etc/passwd'
 patchlevel='7'
 path_sep=':'
-perl5='/usr/local/bin/perl'
+perl5='/u/vieraat/vieraat/jhi/Perl/bin//perl'
 perl=''
-perl_patchlevel='10995'
+perl_patchlevel='11277'
 perladmin='yourname@yourhost.yourplace.com'
 perllibs='-lm -liconv -lutil -lpthread -lexc'
 perlpath='/opt/perl/bin/perl'
@@ -840,12 +840,13 @@ vendorlibexp=''
 vendorprefix=''
 vendorprefixexp=''
 version='5.7.1'
+version_patchlevel_string='version 7 subversion 1 patch 11277'
 versiononly='define'
 vi=''
 voidflags='15'
 xlibpth='/usr/lib/386 /lib/386'
 xs_apiversion='5.7.1'
-yacc='/usr/local/bin/byacc'
+yacc='/u/vieraat/vieraat/jhi/Perl/bin//byacc'
 yaccflags=''
 zcat=''
 zip='zip'
@@ -872,7 +873,7 @@ PERL_SUBVERSION=1
 PERL_API_REVISION=5
 PERL_API_VERSION=5
 PERL_API_SUBVERSION=0
-PERL_PATCHLEVEL=10995
+PERL_PATCHLEVEL=11277
 PERL_CONFIG_SH=true
 # Variables propagated from previous config.sh file.
 pp_sys_cflags='ccflags="$ccflags -DNO_EFF_ONLY_OK"'

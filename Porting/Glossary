@@ -3913,6 +3913,15 @@ version (patchlevel.U):
 	This is suitable for use as a directory name, and hence is
 	filesystem dependent.
 
+version_patchlevel_string (patchlevel.U):
+	This is a string combining version, subversion and
+	perl_patchlevel (if perl_patchlevel is non-zero).  
+	It is typically something like 
+	'version 7 subversion 1'  or
+	'version 7 subversion 1 patchlevel 11224'
+	It is computed here to avoid duplication of code in myconfig.SH
+	and lib/Config.pm. 
+
 versiononly (versiononly.U):
 	If set, this symbol indicates that only the version-specific
 	components of a perl installation should be installed.

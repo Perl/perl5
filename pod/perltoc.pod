@@ -2225,24 +2225,24 @@ Filter::Simple, FindBin, Getopt::Long, Getopt::Std, I18N::Collate,
 I18N::LangTags, I18N::LangTags::List, IO, IPC::Open2, IPC::Open3,
 Locale::Constants, Locale::Country, Locale::Currency, Locale::Language,
 Locale::Maketext, Locale::Maketext::TPJ13, Math::BigFloat, Math::BigInt,
-Math::Complex, Math::Trig, Memoize, Memoize::AnyDBM_File, Memoize::Expire,
-Memoize::ExpireFile, Memoize::ExpireTest, Memoize::NDBM_File,
-Memoize::SDBM_File, Memoize::Saves, Memoize::Storable, NDBM_File, NEXT,
-Net::Cmd, Net::Config, Net::Domain, Net::FTP, Net::NNTP, Net::Netrc,
-Net::POP3, Net::Ping, Net::SMTP, Net::Time, Net::hostent, Net::libnetFAQ,
-Net::netent, Net::protoent, Net::servent, O, ODBM_File, Opcode, POSIX,
-PerlIO, Pod::Checker, Pod::Find, Pod::Html, Pod::InputObjects, Pod::LaTeX,
+Math::BigInt::Calc, Math::Complex, Math::Trig, Memoize,
+Memoize::AnyDBM_File, Memoize::Expire, Memoize::ExpireFile,
+Memoize::ExpireTest, Memoize::NDBM_File, Memoize::SDBM_File,
+Memoize::Saves, Memoize::Storable, NDBM_File, NEXT, Net::Cmd, Net::Config,
+Net::Domain, Net::FTP, Net::NNTP, Net::Netrc, Net::POP3, Net::Ping,
+Net::SMTP, Net::Time, Net::hostent, Net::libnetFAQ, Net::netent,
+Net::protoent, Net::servent, O, ODBM_File, Opcode, POSIX, PerlIO,
+Pod::Checker, Pod::Find, Pod::Html, Pod::InputObjects, Pod::LaTeX,
 Pod::Man, Pod::ParseUtils, Pod::Parser, Pod::Plainer, Pod::Select,
 Pod::Text, Pod::Text::Color, Pod::Text::Overstrike, Pod::Text::Termcap,
 Pod::Usage, SDBM_File, Safe, Search::Dict, SelectSaver, SelfLoader, Shell,
 Socket, Storable, Switch, Symbol, Term::ANSIColor, Term::Cap,
 Term::Complete, Term::ReadLine, Test, Test::Harness, Test::More,
 Test::Simple, Text::Abbrev, Text::Balanced, Text::ParseWords,
-Text::Soundex, Text::Tabs, Text::Wrap, Thread, Thread::Queue,
-Thread::Semaphore, Thread::Signal, Thread::Specific, Tie::Array,
-Tie::Handle, Tie::Hash, Tie::RefHash, Tie::Scalar, Tie::SubstrHash,
-Time::Local, Time::gmtime, Time::localtime, Time::tm, UNIVERSAL,
-Unicode::UCD, User::grent, User::pwent, Win32
+Text::Soundex, Text::Tabs, Text::Wrap, Tie::Array, Tie::Handle, Tie::Hash,
+Tie::RefHash, Tie::Scalar, Tie::SubstrHash, Time::Local, Time::gmtime,
+Time::localtime, Time::tm, UNIVERSAL, Unicode::UCD, User::grent,
+User::pwent, Win32
 
 =item Extension Modules
 
@@ -3647,6 +3647,8 @@ save_hptr(HV **hptr)>
 =item Compile pass 2: context propagation
 
 =item Compile pass 3: peephole optimization
+
+=item Pluggable runops
 
 =back
 
@@ -5698,9 +5700,7 @@ long, Process terminated by SIG%s
 
 =item 64-bit Perl
 
-=item GDBM and Threads
-
-=item NFS filesystems and utime(2)
+=item AIX 4.2 and extensions using C++ with statics
 
 =back
 
@@ -6503,15 +6503,17 @@ C<COND_WAIT>, F<os2.c>
 
 =over 4
 
-=item Required Software for Compiling Perl on QNX
+=item Required Software for Compiling Perl on QNX4
 
 /bin/sh, ar, nm, cpp, make
 
-=item Outstanding Issues with Perl on QNX
+=item Outstanding Issues with Perl on QNX4
 
 =item QNX auxiliary files
 
 qnx/ar, qnx/cpp
+
+=item Outstanding issues with perl under QNX6
 
 =back
 
@@ -15802,7 +15804,7 @@ VAL, TYPE ), UNIVERSAL::can ( VAL, METHOD )
 
 =back
 
-=head2 Unicode::UCD - Unicode character database
+=head2 UnicodeCD - Unicode character database
 
 =over 4
 
@@ -15874,7 +15876,7 @@ VAL, TYPE ), UNIVERSAL::can ( VAL, METHOD )
 
 =over 4
 
-=item Unicode::UCD::UnicodeVersion
+=item UnicodeCD::UnicodeVersion
 
 =back
 

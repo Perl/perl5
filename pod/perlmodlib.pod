@@ -938,7 +938,7 @@ Internal object used by Time::gmtime and Time::localtime
 
 Base class for ALL classes (blessed references)
 
-=item Unicode::UCD
+=item UnicodeCD
 
 Unicode character database
 
