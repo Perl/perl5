@@ -1422,6 +1422,7 @@ PerlIOBuf_fdopen(PerlIO_funcs *self, int fd, const char *mode)
  return f;
 }
 
+
 PerlIO *
 PerlIOBuf_open(PerlIO_funcs *self, const char *path, const char *mode)
 {
@@ -1430,15 +1431,24 @@ PerlIOBuf_open(PerlIO_funcs *self, const char *path, const char *mode)
  if (f)
   {
    PerlIOBuf *b = PerlIOSelf(PerlIO_push(f,self,NULL),PerlIOBuf);
-   b->posn = 0;
+   b->posn = PerlIO_tell(PerlIONext(f));
   }
  return f;
 }
 
 int
-PerlIOBase_reopen(const char *path, const char *mode, PerlIO *f)
+PerlIOBuf_reopen(const char *path, const char *mode, PerlIO *f)
 {
- return (*PerlIOBase(f)->tab->Reopen)(path,mode,PerlIONext(f));
+ PerlIO *next = PerlIONext(f);
+ int code = (*PerlIOBase(next)->tab->Reopen)(path,mode,next);
+ if (code = 0)
+  code = (*PerlIOBase(f)->tab->Pushed)(f,mode);
+ if (code == 0)
+  {
+   PerlIOBuf *b = PerlIOSelf(f,PerlIOBuf);
+   b->posn = PerlIO_tell(PerlIONext(f));
+  }
+ return code;
 }
 
 /* This "flush" is akin to sfio's sync in that it handles files in either
@@ -1773,7 +1783,7 @@ PerlIO_funcs PerlIO_perlio = {
  PerlIOBase_fileno,
  PerlIOBuf_fdopen,
  PerlIOBuf_open,
- PerlIOBase_reopen,
+ PerlIOBuf_reopen,
  PerlIOBase_pushed,
  PerlIOBase_noop_ok,
  PerlIOBuf_read,
@@ -1802,9 +1812,13 @@ PerlIO_funcs PerlIO_perlio = {
 typedef struct
 {
  PerlIOBuf	base;         /* PerlIOBuf stuff */
+ Mmap_t		mptr;        /* Mapped address */
  Size_t		len;          /* mapped length */
  STDCHAR	*bbuf;        /* malloced buffer if map fails */
+
 } PerlIOMmap;
+
+static size_t page_size = 0;
 
 IV
 PerlIOMmap_map(PerlIO *f)
@@ -1826,16 +1840,27 @@ PerlIOMmap_map(PerlIO *f)
      SSize_t len = st.st_size - b->posn;
      if (len > 0)
       {
-       b->buf = (STDCHAR *) mmap(NULL, len, PROT_READ, MAP_PRIVATE, fd, b->posn);
-       if (b->buf && b->buf != (STDCHAR *) -1)
+       Off_t posn;
+       if (!page_size)
+        page_size = getpagesize();
+       if (b->posn < 0)
+        {
+         /* This is a hack - should never happen - open should have set it ! */
+         b->posn = PerlIO_tell(PerlIONext(f));
+        }
+       posn = (b->posn / page_size) * page_size;
+       len  = st.st_size - posn;
+       m->mptr = mmap(NULL, len, PROT_READ, MAP_PRIVATE, fd, posn);
+       if (m->mptr && m->mptr != (Mmap_t) -1)
         {
 #if defined(HAS_MADVISE) && defined(MADV_SEQUENTIAL)
-         madvise((Mmap_t) b->buf, len, MADV_SEQUENTIAL);
+         madvise(m->mptr, len, MADV_SEQUENTIAL);
 #endif
-         PerlIOBase(f)->flags = flags | PERLIO_F_RDBUF;
-         b->end = b->buf+len;
-         b->ptr = b->buf;
-         m->len = len;
+         PerlIOBase(f)->flags = (flags & ~PERLIO_F_EOF) | PERLIO_F_RDBUF;
+         b->end  = ((STDCHAR *)m->mptr) + len;
+         b->buf  = ((STDCHAR *)m->mptr) + (b->posn - posn);
+         b->ptr  = b->buf;
+         m->len  = len;
         }
        else
         {
@@ -1864,9 +1889,10 @@ PerlIOMmap_unmap(PerlIO *f)
   {
    if (b->buf)
     {
-     code = munmap((Mmap_t) b->buf, m->len);
-     b->buf = NULL;
-     m->len = 0;
+     code = munmap(m->mptr, m->len);
+     b->buf  = NULL;
+     m->len  = 0;
+     m->mptr = NULL;
      if (PerlIO_seek(PerlIONext(f),b->posn,SEEK_SET) != 0)
       code = -1;
     }
@@ -1924,6 +1950,14 @@ PerlIOMmap_unread(PerlIO *f, const void *vbuf, Size_t count)
   {
    /* Loose the unwritable mapped buffer */
    PerlIO_flush(f);
+   /* If flush took the "buffer" see if we have one from before */
+   if (!b->buf && m->bbuf)
+    b->buf = m->bbuf;
+   if (!b->buf)
+    {
+     PerlIOBuf_get_base(f);
+     m->bbuf = b->buf;
+    }
   }
  return PerlIOBuf_unread(f,vbuf,count);
 }
@@ -2020,7 +2054,7 @@ PerlIO_funcs PerlIO_mmap = {
  PerlIOBase_fileno,
  PerlIOBuf_fdopen,
  PerlIOBuf_open,
- PerlIOBase_reopen,
+ PerlIOBuf_reopen,
  PerlIOBase_pushed,
  PerlIOBase_noop_ok,
  PerlIOBuf_read,
