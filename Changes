@@ -9,6 +9,167 @@ releases.)
 
 
 ----------------
+Version 5.003_90
+----------------
+
+At last, a mil[le]stone:  The first beta of Perl 5.004.
+
+ CORE LANGUAGE CHANGES
+
+  Title:  "Automatically call srand() before rand() if user didn't"
+   From:  Chip Salzenberg
+  Files:  pod/perlfunc.pod pp.c
+
+ CORE PORTABILITY
+
+  Title:  "Ultrix hints"
+   From:  Spider Boardman <spider@Orb.Nashua.NH.US>
+ Msg-ID:  <199702220951.EAA08156@Orb.Nashua.NH.US>
+   Date:  Sat, 22 Feb 1997 04:51:48 -0500
+  Files:  hints/ultrix_4.sh
+
+  Title:  "Digital UNIX and 3_28"
+   From:  Jarkko Hietaniemi <jhi@iki.fi>
+ Msg-ID:  <199702231427.QAA13807@alpha.hut.fi>
+   Date:  Sun, 23 Feb 1997 16:27:19 +0200 (EET)
+  Files:  Configure MANIFEST ext/NDBM_File/hints/dec_osf.pl
+          ext/ODBM_File/hints/dec_osf.pl hints/dec_osf.sh
+
+  Title:  "AmigaOS patches to 5.003_28"
+   From:  "Norbert Pueschel" <pueschel@imsdd.meb.uni-bonn.de>
+ Msg-ID:  <77724759@Armageddon.meb.uni-bonn.de>
+   Date:  Sat, 22 Feb 1997 18:08:02 +0100
+  Files:  README.amiga hints/amigaos.sh t/io/fs.t t/lib/anydbm.t
+          t/lib/db-btree.t t/lib/db-hash.t t/lib/db-recno.t
+          t/lib/gdbm.t t/lib/ndbm.t t/lib/odbm.t t/lib/sdbm.t
+          t/op/magic.t t/op/stat.t
+
+    #20:  "Hints for DC/OSx"
+   From:  Stephen Zander <srz@loopback>
+ Msg-ID:  <199702242124.NAA03796@wsuse5.mckesson.com>
+   Date:  Mon, 24 Feb 1997 13:24:54 -0800
+  Files:  hints/dcosx.sh
+
+  Title:  "Update VMS version"
+   From:  Chip Salzenberg
+  Files:  vms/config.vms vms/descrip.mms
+
+ OTHER CORE CHANGES
+
+  Title:  "Don't assume that sizeof(int) >= sizeof(void*)"
+   From:  Chip Salzenberg
+  Files:  doio.c malloc.c regexec.c
+
+ BUILD PROCESS
+
+  Title:  "Re: ccdlflags don't quite work"
+   From:  Andy Dougherty <doughera@fractal.phys.lafayette.edu>
+ Msg-ID:  <Pine.SOL.3.95q.970224160630.5700E-100000@fractal.lafayette.e
+   Date:  Mon, 24 Feb 1997 16:07:07 -0500 (EST)
+  Files:  Configure
+
+  Title:  "Use $ccflags, $ldflags, $libs when determining $randbits"
+   From:  Chip Salzenberg
+  Files:  Configure
+
+  Title:  "'installperl -v' doesn't do enough"
+   From:  Spider Boardman <spider@Orb.Nashua.NH.US>
+ Msg-ID:  <199702241342.IAA25945@Orb.Nashua.NH.US>
+   Date:  Mon, 24 Feb 1997 08:42:59 -0500
+  Files:  installperl
+
+  Title:  "installperl breaks running system (for a while)"
+   From:  Spider Boardman <spider@Orb.Nashua.NH.US>
+ Msg-ID:  <199702241412.JAA11829@Orb.Nashua.NH.US>
+   Date:  Mon, 24 Feb 1997 09:12:11 -0500
+  Files:  installperl
+
+ LIBRARY AND EXTENSIONS
+
+  Title:  "Don't clobber $1 et al in debugger's DB::sub()"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+  Files:  lib/perl5db.pl
+
+  Title:  "Fix fd leak in IO::Pipe"
+   From:  Roderick Schertler <roderick@gate.net>
+ Msg-ID:  <pzn2sv722y.fsf@eeyore.ibcinc.com>
+   Date:  23 Feb 1997 14:29:57 -0500
+  Files:  ext/IO/lib/IO/Pipe.pm
+
+  Title:  "Pod::Text fixes"
+   From:  Roderick Schertler <roderick@gate.net>
+ Msg-ID:  <350.856634588@eeyore.ibcinc.com>
+   Date:  Sat, 22 Feb 1997 13:03:08 -0500
+  Files:  lib/Pod/Text.pm
+
+  Title:  "Trivial patch to make ExtUtils::Install more -w clean"
+   From:  Tim Bunce <Tim.Bunce@ig.co.uk>
+ Msg-ID:  <9702241605.AA17436@toad.ig.co.uk>
+   Date:  Mon, 24 Feb 1997 16:05:17 +0000
+  Files:  lib/ExtUtils/Install.pm
+
+  Title:  "C<use vars> didn't work until 5.002"
+   From:  Chip Salzenberg
+  Files:  lib/vars.pm
+
+ TESTS
+
+  Title:  "More thoroughly test rand() and srand()"
+   From:  Tom Phoenix <rootbeer@teleport.com>
+  Files:  t/op/rand.t
+
+  Title:  "Don't use <*> where readdir() will do"
+   From:  Chip Salzenberg
+  Files:  t/op/stat.t
+
+  Title:  "Allow for $^X to be 'miniperl'"
+   From:  Dominic Dunlop <domo@slipper.ip.lu>
+ Msg-ID:  <v03020903af360f31aced@[194.51.248.65]>
+   Date:  Sun, 23 Feb 1997 16:22:45 +0100
+  Files:  t/op/magic.t
+
+ UTILITIES
+
+  Title:  "Post-28 INSTALL updates"
+   From:  Andy Dougherty <doughera@fractal.phys.lafayette.edu>
+ Msg-ID:  <Pine.SOL.3.95q.970224170713.5700H-100000@fractal.lafayette.e
+   Date:  Mon, 24 Feb 1997 17:09:09 -0500 (EST)
+  Files:  INSTALL
+
+  Title:  "Re: Hash key created by subroutine call? (fwd) "
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199702242229.RAA04395@aatma.engin.umich.edu>
+   Date:  Mon, 24 Feb 1997 17:29:30 -0500
+  Files:  pod/perlsub.pod pod/perltrap.pod
+
+  Title:  "Add documentation and '-h' option to perlbug"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+ Msg-ID:  <199702240854.DAA27128@aatma.engin.umich.edu>
+          and <199702242009.PAA02849@aatma.engin.umich.edu>
+   Date:  Mon, 24 Feb 1997
+  Files:  pod/perl.pod pod/perldelta.pod installman
+          utils/perlbug.PL
+
+  Title:  "pumpkin-1.9.pod"
+   From:  Andy Dougherty <doughera@fractal.phys.lafayette.edu>
+ Msg-ID:  <Pine.SOL.3.95q.970224155702.5700D-100000@fractal.lafayette.e
+   Date:  Mon, 24 Feb 1997 16:06:02 -0500 (EST)
+  Files:  Porting/pumpkin.pod
+
+ DOCUMENTATION
+
+  Title:  "Fix typo in 'Tolkien quotation typo' fix"
+   From:  Jarkko Hietaniemi <jhi@hut.fi>
+  Files:  Changes
+
+  Title:  "Document one-argument limitation with #! line"
+   From:  Tom Phoenix <rootbeer@teleport.com>
+ Msg-ID:  <Pine.GSO.3.95q.970223182745.15989A-100000@kelly.teleport.com
+   Date:  Sun, 23 Feb 1997 18:41:02 -0800 (PST)
+  Files:  pod/perldiag.pod pod/perlsec.pod
+
+
+----------------
 Version 5.003_28
 ----------------
 
@@ -94,7 +255,7 @@ I'll eat a floppy disk.  (Okay, it's a chocolate floppy, but still....)
    Date:  Thu, 20 Feb 1997 21:44:13 -0500 (EST)
   Files:  malloc.c
 
-  Title:  "Fix the Tolkein quote"
+  Title:  "Fix the Tolkien quotation"
    From:  Chip Salzenberg
   Files:  perly.y
 
