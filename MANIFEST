@@ -1135,6 +1135,7 @@ lib/Net/t/config.t		libnet
 lib/Net/t/ftp.t			libnet
 lib/Net/t/hostname.t		libnet
 lib/Net/t/libnet_t.pl		libnet
+lib/Net/t/netrc.t		libnet
 lib/Net/t/nntp.t		libnet
 lib/Net/t/require.t		libnet
 lib/Net/t/smtp.t		libnet
