@@ -245,10 +245,6 @@ else {
     # [als] hard-coded 'libperl' name... not good!
     @corefiles = <*.h libperl*.*>;
 
-    # cygwin needs special stub for dll loading
-    push @corefiles, 'impure_ptr.o'
-      if ($Is_Cygwin and $Config{useshrplib} eq 'true');
-
     # AIX needs perl.exp installed as well.
     push(@corefiles,'perl.exp') if $^O eq 'aix';
     if ($^O eq 'mpeix') {

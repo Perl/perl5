@@ -55,7 +55,7 @@ if ($args !~ /\-o (\S+)/) {
   $libname ="lib$libname" unless ($libname =~ /^lib/);
   print DEBUGFILE "dll name: $dllname\nimport library: $libname\npath: $path\n" if $DEBUG;
 
-  $command ="$DLLWRAP --dllname $dllname --exclude-symbol=_impure_ptr";
+  $command ="$DLLWRAP --dllname $dllname";
   $command .=" --driver-name $WRAPDRIVER" if $WRAPDRIVER;
   $command .=" --dlltool $DLLTOOL" if $DLLTOOL;
   $command .=" --export-all-symbols" if $EXPORT_ALL;

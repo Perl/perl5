@@ -2424,7 +2424,7 @@ PERLVAR(object_compatibility[30],	char)
 #undef PERLVARI
 #undef PERLVARIC
 
-#if defined(HASATTRIBUTE) && defined(WIN32)
+#if defined(HASATTRIBUTE) && defined(WIN32) && !defined(CYGWIN32)
 /*
  * This provides a layer of functions and macros to ensure extensions will
  * get to use the same RTL functions as the core.

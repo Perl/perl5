@@ -26,9 +26,7 @@ calls.
 //   modules are dynamically built. This should be similar to the behavoir on sunOS.
 //   Leaving in the logic would have required changes to the standard perlmain.c code
 //
-// // Includes call a dll function to initialize it's impure_ptr.
 #include <stdio.h>
-void (*impure_setupptr)(struct _reent *);  // pointer to the impure_setup routine
 
 //#include <windows.h>
 #define LOAD_WITH_ALTERED_SEARCH_PATH	(8)
@@ -36,6 +34,7 @@ typedef void *HANDLE;
 typedef HANDLE HINSTANCE;
 #define STDCALL     __attribute__ ((stdcall))
 typedef int STDCALL (*FARPROC)();
+#define MAX_PATH	260
 
 HINSTANCE
 STDCALL
@@ -82,6 +81,11 @@ dl_load_file(filename,flags=0)
     int			flags
     PREINIT:
     CODE:
+    {
+    char	win32_path[MAX_PATH];
+    cygwin_conv_to_full_win32_path(filename, win32_path);
+    filename = win32_path;
+
     DLDEBUG(1,PerlIO_printf(PerlIO_stderr(),"dl_load_file(%s):\n", filename));
 
     RETVAL = (void*) LoadLibraryExA(filename, NULL, LOAD_WITH_ALTERED_SEARCH_PATH ) ;
@@ -90,20 +94,9 @@ dl_load_file(filename,flags=0)
     ST(0) = sv_newmortal() ;
     if (RETVAL == NULL){
 	SaveError("%d",GetLastError()) ;
+    } else {
+	sv_setiv( ST(0), (IV)RETVAL);
     }
-    else{
-	// setup the dll's impure_ptr:
-	impure_setupptr = GetProcAddress(RETVAL, "impure_setup");
-	if( impure_setupptr == NULL){
-		printf(
-    "Cygwin32 dynaloader error: could not load impure_setup symbol\n");
-		RETVAL = NULL;		
-	}
-	else{
-		// setup the DLLs impure_ptr:
-		(*impure_setupptr)(_impure_ptr);
-		sv_setiv( ST(0), (IV)RETVAL);
-	}
    }
 	
 
