@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Mar 19 18:17:12 EET 2002 [metaconfig 3.0 PL70]
+# Generated on Wed Mar 20 05:22:55 EET 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -3440,16 +3440,12 @@ case "$usethreads" in
 $define)
 	$cat <<EOM
 
-As of 5.5.640, Perl has two different internal threading implementations,
-the 5.005 version (5005threads) and an interpreter-based version
-(ithreads) that has one interpreter per thread.  Both are very 
-experimental.  This arrangement exists to help developers work out
-which one is better.
+As of release 5.6, Perl has two different threading implementations,
+an interpreter-based version (ithreads) with one interpreter per
+thread, and the 5.005 version (5005threads).  Both implementations
+are considered experimental, but since 5.8 ithreads somewhat less so.
+The 5005threads is effectively unmaintained.
 
-If you're a casual user, you probably don't want interpreter-threads
-at this time.  But if you do, the 'threads' module allows their use,
-and the 'Thread' module offers an interface to both 5005threads and
-ithreads (whichever has been configured).
 EOM
 	: Default to ithreads unless overridden on command line or with
 	: old config.sh
