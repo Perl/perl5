@@ -2879,9 +2879,10 @@ tryagain:
 		  /* a lovely hack--pretend we saw [\pX] instead */
 		    RExC_end = strchr(RExC_parse, '}');
 		    if (!RExC_end) {
+		        U8 c = (U8)*RExC_parse;
 			RExC_parse += 2;
 			RExC_end = oldregxend;
-			vFAIL2("Missing right brace on \\%c{}", UCHARAT(RExC_parse - 2));
+			vFAIL2("Missing right brace on \\%c{}", c);
 		    }
 		    RExC_end++;
 		}
@@ -3421,13 +3422,14 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	    case 'p':
 	    case 'P':
 		if (*RExC_parse == '{') {
+		    U8 c = (U8)value;
 		    e = strchr(RExC_parse++, '}');
                     if (!e)
-                        vFAIL2("Missing right brace on \\%c{}", value);
+                        vFAIL2("Missing right brace on \\%c{}", c);
 		    while (isSPACE(UCHARAT(RExC_parse)))
 		        RExC_parse++;
                     if (e == RExC_parse)
-                        vFAIL2("Empty \\%c{}", value);
+                        vFAIL2("Empty \\%c{}", c);
 		    n = e - RExC_parse;
 		    while (isSPACE(UCHARAT(RExC_parse + n - 1)))
 		        n--;

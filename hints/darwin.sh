@@ -113,3 +113,20 @@ LC_ALL=C; export LC_ALL;
 # makefile in the same place.  Since Darwin uses GNU make, this dodges
 # the problem.
 firstmakefile=GNUmakefile;
+
+#
+# The libraries are not threadsafe as of OS X 10. (10.1?)
+# Better stop now.
+#
+# Fix when Apple fixes libc.
+#
+case "$usethreads$useithreads$use5005threads" in
+*define*)
+cat <<EOM >&4
+
+*** You do not have threadsafe libraries, I cannot use threads.
+*** Cannot continue, aborting.
+EOM
+	exit 1
+	;;
+esac

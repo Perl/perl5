@@ -4039,7 +4039,7 @@ dynprep(pTHX_ gptr *list1, gptr *list2, size_t nmemb, SVCOMPARE_t cmp)
 /* 
 =for apidoc sortsv
    
-Sort an array in place. Here is an example:
+Sort an array. Here is an example:
 
     sortsv(AvARRAY(av), av_len(av)+1, Perl_sv_cmp_locale); 
 

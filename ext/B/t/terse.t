@@ -10,20 +10,20 @@ use Test::More tests => 15;
 use_ok( 'B::Terse' );
 
 # indent should return a string indented four spaces times the argument
-is( B::Terse::indent(2), ' ' x 8, 'indent works with an argument' );
-is( B::Terse::indent(), '', 'indent works with no argument' );
+is( B::Terse::indent(2), ' ' x 8, 'indent with an argument' );
+is( B::Terse::indent(), '', 'indent with no argument' );
 
 # this should fail without a reference
 eval { B::Terse::terse('scalar') };
-like( $@, qr/not a reference/, 'terse() caught bad parameters okay' );
+like( $@, qr/not a reference/, 'terse() fed bad parameters' );
 
 # now point it at a sub and see what happens
 sub foo {}
 
 my $sub;
 eval{ $sub = B::Terse::compile('', 'foo') };
-is( $@, '', 'compile() worked without error' );
-ok( defined &$sub, 'got a valid subref back from compile()' );
+is( $@, '', 'compile()' );
+ok( defined &$sub, 'valid subref back from compile()' );
 
 # and point it at a real sub and hope the returned ops look alright
 my $out = tie *STDOUT, 'TieOut';
@@ -44,7 +44,7 @@ foreach (@lines) {
 	if (/^([A-Z]+)\s+/) {
 		my $op = $1;
 		next unless exists $ops{$op};
-		like( $_, $ops{$op}, "$op appears okay" );
+		like( $_, $ops{$op}, "$op " );
 		delete $ops{$op};
 		s/$ops{$op}//;
 		redo if $_;
@@ -84,7 +84,7 @@ sub bar {
 my $path = join " ", map { qq["-I$_"] } @INC;
 my $redir = $^O eq 'MacOS' ? '' : "2>&1";
 my $items = qx{$^X $path "-MO=Terse" -le "print \\42" $redir};
-like( $items, qr/RV $hex \\42/, 'found an RV, appears okay!' );
+like( $items, qr/RV $hex \\42/, 'RV' );
 
 package TieOut;
 

@@ -12,6 +12,18 @@ sub tryeq ($$$) {
     print "not ok $_[0] # $_[1] != $_[2]\n";
   }
 }
+sub tryeq_sloppy ($$$) {
+  if ($_[1] == $_[2]) {
+    print "ok $_[0]\n";
+  } else {
+    my $error = abs ($_[1] - $_[2]) / $_[1];
+    if ($error < 1e-10) {
+      print "ok $_[0] # $_[1] is close to $_[2], \$^O eq $^O\n";
+    } else {
+      print "not ok $_[0] # $_[1] != $_[2]\n";
+    }
+  }
+}
 
 tryeq 1,  13 %  4, 1;
 tryeq 2, -13 %  4, 3;
@@ -233,7 +245,7 @@ tryeq 125, -4.5 / 2, -2.25;
 tryeq 126, -5.5 / -2, 2.75;
 
 # Bluuurg if your floating point can't accurately cope with powers of 2
-tryeq 127, 18446744073709551616/1, 18446744073709551616;
+tryeq_sloppy 127, 18446744073709551616/1, 18446744073709551616; # Bluuurg
 tryeq 128, 18446744073709551616/2, 9223372036854775808;
 tryeq 129, 18446744073709551616/4294967296, 4294967296;
 tryeq 130, 18446744073709551616/9223372036854775808, 2;
