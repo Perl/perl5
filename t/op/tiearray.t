@@ -101,7 +101,7 @@ sub SPLICE
 
 package main;
 
-print "1..29\n";                   
+print "1..30\n";                   
 my $test = 1;
 
 {my @ary;
@@ -130,9 +130,18 @@ print "ok ", $test++,"\n";
 
 print "not " unless $seen{'STORE'} >= 3;
 print "ok ", $test++,"\n";
-
 print "not " unless join(':',@ary) eq '1:2:3';
 print "ok ", $test++,"\n";         
+
+{my @thing = @ary;
+print "not " unless join(':',@thing) eq '1:2:3';
+print "ok ", $test++,"\n";         
+
+tie @thing,'Implement';
+@thing = @ary;
+print "not " unless join(':',@thing) eq '1:2:3';
+print "ok ", $test++,"\n";
+} 
 
 print "not " unless pop(@ary) == 3;
 print "ok ", $test++,"\n";
@@ -194,7 +203,7 @@ untie @ary;
 
 }
                            
-print "not " unless $seen{'DESTROY'} == 1;
+print "not " unless $seen{'DESTROY'} == 2;
 print "ok ", $test++,"\n";         
 
 

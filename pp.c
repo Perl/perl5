@@ -4088,7 +4088,8 @@ PP(pp_split)
     I32 base;
     AV *oldstack = curstack;
     I32 gimme = GIMME_V;
-    I32 oldsave = savestack_ix;
+    I32 oldsave = savestack_ix; 
+    I32 stacks_switched = 0;
 
 #ifdef DEBUGGING
     Copy(&LvTARGOFF(POPs), &pm, 1, PMOP*);
@@ -4114,15 +4115,18 @@ PP(pp_split)
 	ary = Nullav;
     if (ary && (gimme != G_ARRAY || (pm->op_pmflags & PMf_ONCE))) {
 	realarray = 1;
-	if (!AvREAL(ary)) {
-	    AvREAL_on(ary);
-	    for (i = AvFILLp(ary); i >= 0; i--)
-		AvARRAY(ary)[i] = &sv_undef;	/* don't free mere refs */
-	}
 	av_extend(ary,0);
-	av_clear(ary);
-	/* temporarily switch stacks */
-	SWITCHSTACK(curstack, ary);
+	av_clear(ary);                 
+	if (!SvRMAGICAL(ary) || !mg_find((SV *) ary, 'P')) {
+	    if (!AvREAL(ary)) {
+		AvREAL_on(ary);
+		for (i = AvFILLp(ary); i >= 0; i--)
+		    AvARRAY(ary)[i] = &sv_undef;	/* don't free mere refs */
+	    }
+	    /* temporarily switch stacks */
+	    SWITCHSTACK(curstack, ary);
+	    stacks_switched = 1;
+	}
     }
     base = SP - stack_base;
     orig = s;
@@ -4273,17 +4277,44 @@ PP(pp_split)
 	    iters--, SP--;
     }
     if (realarray) {
-	SWITCHSTACK(ary, oldstack);
-	if (SvSMAGICAL(ary)) {
-	    PUTBACK;
-	    mg_set((SV*)ary);
-	    SPAGAIN;
-	}
-	if (gimme == G_ARRAY) {
-	    EXTEND(SP, iters);
-	    Copy(AvARRAY(ary), SP + 1, iters, SV*);
-	    SP += iters;
-	    RETURN;
+	if (stacks_switched) {
+	    SWITCHSTACK(ary, oldstack);
+	    if (SvSMAGICAL(ary)) {
+		PUTBACK;
+		mg_set((SV*)ary);
+		SPAGAIN;
+	    }
+	    if (gimme == G_ARRAY) {
+		EXTEND(SP, iters);
+		Copy(AvARRAY(ary), SP + 1, iters, SV*);
+		SP += iters;
+		RETURN;
+	    }
+	} 
+	else {
+	    av_extend(ary, iters -1); 
+	    for (i= 0; i < iters; i++) {
+		dstr = SP[i+1-iters];           
+		PUTBACK;
+		fprintf(stderr,"%d:%p %d '%s'\n",i,dstr,SvREFCNT(dstr), SvPV(dstr,na));
+		av_store(ary, i, dstr);
+		SPAGAIN;
+	    }
+	    if (SvSMAGICAL(ary)) {
+		PUTBACK;
+		mg_set((SV*)ary);
+		SPAGAIN;
+	    }
+	    for (i= 0; i < iters; i++) {
+		dstr = *av_fetch(ary,i,FALSE);
+		if (SvGMAGICAL(dstr))
+		    mg_get(dstr);
+		fprintf(stderr,"%d:%p '%s'\n",i,dstr,SvPV(dstr,na));
+	    }
+	    if (gimme != G_ARRAY) {
+		SP -= iters;
+		RETURN;
+	    }
 	}
     }
     else {
