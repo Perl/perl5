@@ -1756,7 +1756,7 @@ Gid_t getegid (void);
 #define DEBUG_o(a) if (PL_debug & 16)	a
 #define DEBUG_c(a) if (PL_debug & 32)	a
 #define DEBUG_P(a) if (PL_debug & 64)	a
-#  if defined(PERL_OBJECT) || defined(PERL_IMPLICIT_CONTEXT)
+#  if defined(PERL_OBJECT)
 #    define DEBUG_m(a) if (PL_debug & 128)	a
 #  else
 #    define DEBUG_m(a) if (PL_curinterp && PL_debug & 128)	a

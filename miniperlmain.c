@@ -38,8 +38,6 @@ main(int argc, char **argv, char **env)
 
     PERL_SYS_INIT(&argc,&argv);
 
-    init_i18nl10n(1);
-
     if (!PL_do_undump) {
 	my_perl = perl_alloc();
 	if (!my_perl)

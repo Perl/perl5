@@ -308,7 +308,7 @@
 
 #ifdef DEBUGGING
 #  undef DEBUG_m
-#  define DEBUG_m(a)  if (PL_debug & 128)   a
+#  define DEBUG_m(a)  if (PL_curinterp && PL_debug & 128)   a
 #endif
 
 /*

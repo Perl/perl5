@@ -178,6 +178,7 @@ perl_construct(register PerlInterpreter *my_perl)
     JMPENV_BOOTSTRAP;
     STATUS_ALL_SUCCESS;
 
+    init_i18nl10n(1);
     SET_NUMERIC_STANDARD();
 #if defined(PERL_SUBVERSION) && PERL_SUBVERSION > 0
     sprintf(PL_patchlevel, "%7.5f",   (double) PERL_REVISION
