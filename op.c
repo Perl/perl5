@@ -6854,6 +6854,7 @@ Perl_peep(pTHX_ register OP *o)
 	    break;
 
 	case OP_ENTERLOOP:
+	case OP_ENTERITER:
 	    o->op_seq = PL_op_seqmax++;
 	    while (cLOOP->op_redoop->op_type == OP_NULL)
 		cLOOP->op_redoop = cLOOP->op_redoop->op_next;
