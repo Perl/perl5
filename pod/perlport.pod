@@ -1450,6 +1450,11 @@ Not implemented. (VMS)
 
 Truncation to zero-length only. (VOS)
 
+If a FILEHANDLE is supplied, it must be writable and opened in append
+mode (i.e., use C<open(FH, '>>filename')>
+or C<sysopen(FH,...,O_APPEND|O_RDWR)>.  If a filename is supplied, it
+should not be held open elsewhere. (Win32)
+
 =item umask EXPR
 
 =item umask
