@@ -923,7 +923,9 @@ Perl4-to-Perl5 traps involving precedence order.
 
 =item * Precedence
 
-LHS vs. RHS when both sides are getting an op.
+LHS vs. RHS of any assignment operator.  LHS is evaluated first
+in perl4, second in perl5; this can affect the relationship
+between side-effects in sub-expressions.
 
     @arr = ( 'left', 'right' );
     $a{shift @arr} = shift @arr;
@@ -998,18 +1000,6 @@ concatenation precedence over filetest operator?
 
     # perl4 prints: no output
     # perl5 prints: Can't modify -e in concatenation
-
-=item * Precedence
-
-Assignment to value takes precedence over assignment to key in
-perl5 when using the shift operator on both sides.
-
-    @arr = ( 'left', 'right' );
-    $a{shift @arr} = shift @arr;
-    print join( ' ', keys %a );
-
-    # perl4 prints: left
-    # perl5 prints: right
 
 =back
 
