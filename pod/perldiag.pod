@@ -1707,7 +1707,9 @@ L<perlfunc/sprintf>.
 =item invalid [] range "%s" in regexp
 
 (F) The range specified in a character class had a minimum character
-greater than the maximum character.  See L<perlre>.
+greater than the maximum character.  One possibility is that you
+forgot the C<{}> from your ending C<\x{}> - C<\x> without the curly
+braces can go only up to C<ff>.  See L<perlre>.
 
 =item invalid [] range "%s" in transliteration operator
 
