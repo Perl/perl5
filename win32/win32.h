@@ -465,6 +465,9 @@ DllExport int win32_async_check(pTHX);
 #ifdef PERL_CORE
 
 /* C doesn't like repeat struct definitions */
+#if defined(__MINGW32__) && (__MINGW32_MAJOR_VERSION>=3D3)
+#undef _CRTIMP
+#endif
 #ifndef _CRTIMP
 #define _CRTIMP __declspec(dllimport)
 #endif
