@@ -502,7 +502,9 @@ DOS is now supported under the DJGPP tools.  See L<README.dos>.
 
 MPE/iX is now supported.  See L<README.mpeix>.
 
-MVS (OS390) is now supported.  See L<README.os390>.
+MVS (aka OS390, aka Open Edition) is now supported.  See L<README.os390>.
+
+Stratus VOS is now supported.  See L<README.vos>.
 
 =head2 Changes in existing support
 
