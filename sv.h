@@ -61,7 +61,7 @@ typedef enum {
 
 /* Using C's structural equivalence to help emulate C++ inheritance here... */
 
-struct STRUCT_SV {
+struct STRUCT_SV {		/* struct sv { */
     void*	sv_any;		/* pointer to something */
     U32		sv_refcnt;	/* how many references to us */
     U32		sv_flags;	/* what we are */
@@ -1215,6 +1215,7 @@ Returns a pointer to the character buffer.
 
 #define CLONEf_COPY_STACKS 1
 #define CLONEf_KEEP_PTR_TABLE 2
+#define CLONEf_CLONE_HOST 4
 
 typedef struct {
   AV* stashes;

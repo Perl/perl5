@@ -1321,6 +1321,9 @@ STATIC void	S_xstat(pTHX_ int);
 #if defined(PERL_OBJECT)
 };
 #endif
+
+START_EXTERN_C
+
 PERL_CALLCONV void	Perl_sv_setsv_flags(pTHX_ SV* dsv, SV* ssv, I32 flags);
 PERL_CALLCONV void	Perl_sv_catpvn_flags(pTHX_ SV* sv, const char* ptr, STRLEN len, I32 flags);
 PERL_CALLCONV void	Perl_sv_catsv_flags(pTHX_ SV* dsv, SV* ssv, I32 flags);
@@ -1328,3 +1331,6 @@ PERL_CALLCONV STRLEN	Perl_sv_utf8_upgrade_flags(pTHX_ SV *sv, I32 flags);
 PERL_CALLCONV char*	Perl_sv_pvn_force_flags(pTHX_ SV* sv, STRLEN* lp, I32 flags);
 PERL_CALLCONV char*	Perl_sv_2pv_flags(pTHX_ SV* sv, STRLEN* lp, I32 flags);
 PERL_CALLCONV char*	Perl_my_atof2(pTHX_ const char *s, NV* value);
+
+END_EXTERN_C
+

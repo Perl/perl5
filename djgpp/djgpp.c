@@ -1,3 +1,4 @@
+#define PERLIO_NOT_STDIO 0
 #include <libc/stubs.h>
 #include <io.h>
 #include <errno.h>
@@ -27,7 +28,7 @@ struct pipe_list {
 static struct pipe_list *pl = NULL;
 
 FILE *
-popen (const char *cm, const char *md) /* program name, pipe mode */
+djgpp_popen (const char *cm, const char *md) /* program name, pipe mode */
 {
   struct pipe_list *l1;
   int fd;
@@ -75,7 +76,7 @@ popen (const char *cm, const char *md) /* program name, pipe mode */
 }
 
 int
-pclose (FILE *pp)
+djgpp_pclose (FILE *pp)
 {
   struct pipe_list *l1, **l2;   /* list pointers */
   int retval=-1;		/* function return value */

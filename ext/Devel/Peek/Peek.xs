@@ -151,7 +151,6 @@ void
 fill_mstats(SV *sv, int level)
 {
     dTHX;
-    struct mstats_buffer buf;
 
     if (SvREADONLY(sv))
 	croak("Cannot modify a readonly value");

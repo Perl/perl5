@@ -148,6 +148,7 @@ if ($PLATFORM eq 'win32') {
     if ($define{PERL_IMPLICIT_SYS}) {
 	output_symbol("perl_get_host_info");
 	output_symbol("perl_alloc_override");
+    output_symbol("perl_clone_host");
     }
 }
 elsif ($PLATFORM eq 'os2') {
@@ -185,6 +186,7 @@ elsif ($PLATFORM eq 'netware') {
 	if ($define{PERL_IMPLICIT_SYS}) {
 	output_symbol("perl_get_host_info");
 	output_symbol("perl_alloc_override");
+    output_symbol("perl_clone_host");
 	}
 }
 
@@ -340,6 +342,8 @@ elsif ($PLATFORM eq 'os2') {
 		    init_PMWIN_entries
 		    PMWIN_entries
 		    Perl_hab_GET
+		    loadByOrdinal
+		    pExtFCN
 		    )]);
 }
 elsif ($PLATFORM eq 'MacOS') {
@@ -1096,6 +1100,8 @@ sub emit_symbol {
     $export{$symbol} = 1;
 }
 
+my $sym_ord = 0;
+
 sub output_symbol {
     my $symbol = shift;
     $symbol = $bincompat5005{$symbol}
@@ -1126,7 +1132,7 @@ sub output_symbol {
 #	}
     }
     elsif ($PLATFORM eq 'os2') {
-	print qq(    "$symbol"\n);
+	printf qq(    %-31s \@%s\n), qq("$symbol"), ++$sym_ord;
     }
     elsif ($PLATFORM eq 'aix' || $PLATFORM eq 'MacOS') {
 	print "$symbol\n";

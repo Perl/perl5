@@ -362,7 +362,7 @@ use Exporter;
 @EXPORT_OK=qw(timesum cmpthese countit
 	      clearcache clearallcache disablecache enablecache);
 
-$VERSION = 1.00;
+$VERSION = 1.01;
 
 &init;
 

@@ -850,7 +850,7 @@ win32_readdir(DIR *dirp)
 		long endpos = dirp->end - dirp->start;
 		long newsize = endpos + strlen(ptr) + 1;
 		/* bump the string table size by enough for the
-		 * new name and it's null terminator */
+		 * new name and its null terminator */
 		while (newsize > dirp->size) {
 		    long curpos = dirp->curr - dirp->start;
 		    dirp->size *= 2;

@@ -8,11 +8,11 @@
  */
 
 /*
- * FILENAME		:	nw5sck.c
- * DESCRIPTION	:	Socket related functions.
- * Author		:	SGP
- * Date			:	January 2001.
- *
+ * FILENAME     :  nw5sck.c
+ * DESCRIPTION	:  Socket related functions.
+ * Author		:  SGP
+ * Date			:  January 2001.
+ * Date Modified:  June 26th 2001.
  */
 
 
@@ -29,11 +29,6 @@
 #include "nw5sck.h"
 #include <fcntl.h>
 #include <sys/stat.h>
-
-static struct servent* nw_savecopyservent(struct servent*d,
-                                             struct servent*s,
-                                             const char *proto);
-
 
 u_long
 nw_htonl(u_long hostlong)
@@ -171,28 +166,14 @@ nw_getprotobynumber(int num)
 struct servent *
 nw_getservbyname(const char *name, const char *proto)
 {
-	dTHXo; 
-    struct servent *r;
-
-    r = getservbyname((char*)name, (char*)proto);
-    if (r) {
-		/*r = nw_savecopyservent(&nw_servent, r, proto);*/
-    }
-    return r;
+    return (struct servent *)getservbyname((char*)name, (char*)proto);
 }
 
 
 struct servent *
 nw_getservbyport(int port, const char *proto)
 {
-    dTHXo; 
-    struct servent *r;
-
-    r = getservbyport(port, (char*)proto);
-    if (r) {
-		//r = nw_savecopyservent(&nw_servent, r, proto);
-    }
-    return r;
+    return (struct servent *)getservbyport(port, (char*)proto);
 }
 
 struct servent *
@@ -228,7 +209,7 @@ nw_setservent(int stayopen)
 int
 nw_setsockopt(SOCKET s, int level, int optname, const char* optval, int optlen)
 {
-	return setsockopt(s, level, optname, optval, optlen);
+	return setsockopt(s, level, optname, (char*)optval, optlen);
 }
 
 int
@@ -249,25 +230,6 @@ nw_inet_addr(const char *cp)
     return inet_addr((char*)cp);
 }
 
-static struct servent*
-nw_savecopyservent(struct servent*d, struct servent*s, const char *proto)
-{
-    d->s_name = s->s_name;
-    d->s_aliases = s->s_aliases;
-    d->s_port = s->s_port;
-#ifndef __BORLANDC__	/* Buggy on Win95 and WinNT-with-Borland-WSOCK */
-    if (/*!IsWin95() && */s->s_proto && strlen(s->s_proto))
-	d->s_proto = s->s_proto;
-    else
-#endif
-    if (proto && strlen(proto))
-	d->s_proto = (char *)proto;
-    else
-	d->s_proto = "tcp";
-   
-    return d;
-}
-
 SOCKET
 nw_socket(int af, int type, int protocol)
 {
@@ -276,7 +238,6 @@ nw_socket(int af, int type, int protocol)
 #ifndef USE_SOCKETS_AS_HANDLES
     s = socket(af, type, protocol);
 #else
-    //StartSockets();
     if((s = socket(af, type, protocol)) == INVALID_SOCKET)
 	//errno = WSAGetLastError();
     else

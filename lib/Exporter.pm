@@ -8,7 +8,7 @@ no strict 'refs';
 our $Debug = 0;
 our $ExportLevel = 0;
 our $Verbose ||= 0;
-our $VERSION = '5.562';
+our $VERSION = '5.563';
 
 sub export_to_level {
   require Exporter::Heavy;

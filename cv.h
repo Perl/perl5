@@ -55,6 +55,11 @@ Returns the stash of the CV.
 #define CvXSUBANY(sv)	((XPVCV*)SvANY(sv))->xcv_xsubany
 #define CvGV(sv)	((XPVCV*)SvANY(sv))->xcv_gv
 #define CvFILE(sv)	((XPVCV*)SvANY(sv))->xcv_file
+#ifdef USE_ITHREADS
+#  define CvFILE_set_from_cop(sv, cop)	(CvFILE(sv) = savepv(CopFILE(cop)))
+#else
+#  define CvFILE_set_from_cop(sv, cop)	(CvFILE(sv) = CopFILE(cop))
+#endif
 #define CvFILEGV(sv)	(gv_fetchfile(CvFILE(sv))
 #define CvDEPTH(sv)	((XPVCV*)SvANY(sv))->xcv_depth
 #define CvPADLIST(sv)	((XPVCV*)SvANY(sv))->xcv_padlist

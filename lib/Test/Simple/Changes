@@ -1,0 +1,44 @@
+Revision history for Perl extension Test::Simple
+
+0.09  Wed Jun 27 02:55:54 EDT 2001
+    - VMS fixes
+
+0.08  Fri Jun 15 14:39:50 EDT 2001
+    - Guarding against $/ and -l
+    - Reformatted the way failed tests are reported to make them stand out
+      a bit better.
+
+0.07  Tue Jun 12 15:55:54 BST 2001
+    - 'use Test::Simple' by itself no longer causes death
+    - Yet more fixes for death in eval
+    - Limiting max failures reported via exit code to 254.
+
+0.06  Wed May  9 23:38:17 BST 2001
+    - Whoops, left a private method in the public docs.
+
+0.05  Wed May  9 20:40:35 BST 2001
+    - Forgot to include the exit tests.
+    - Trouble with exiting properly under 5.005_03 and 5.6.1 fixed
+    - Turned off buffering
+    * 5.004 new minimum version
+    - Now explicitly tested with 5.6.1, 5.6.0, 5.005_03 and 5.004
+
+0.04  Mon Apr  2 11:05:01 BST 2001
+    - Fixed "require Test::Simple" so it doesn't bitch and exit 255
+    - Now installable with the CPAN shell.
+
+0.03  Fri Mar 30 08:08:33 BST 2001
+    - ok() now prints on what line and file it failed.
+    - eval 'die' was considered abnormal.  Fixed.
+
+0.02  Fri Mar 30 05:12:14 BST 2001      *UNRELEASED*
+    - exit codes tested
+    * exit code on abnormal exit changed to 255 (thanks to Tim Bunce for
+      pointing out that Unix can't do negative exit codes)
+    - abnormal exits now better caught.
+    - No longer using Test.pm to test this, but still minimum of 5.005
+      due to needing $^S.
+
+0.01  Wed Mar 28 06:44:44 BST 2001
+    - First working version released to CPAN
+

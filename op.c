@@ -4153,6 +4153,13 @@ Perl_cv_undef(pTHX_ CV *cv)
     }
 #endif /* USE_THREADS */
 
+#ifdef USE_ITHREADS
+    if (CvFILE(cv) && !CvXSUB(cv)) {
+	Safefree(CvFILE(cv));
+	CvFILE(cv) = 0;
+    }
+#endif
+
     if (!CvXSUB(cv) && CvROOT(cv)) {
 #ifdef USE_THREADS
 	if (CvDEPTH(cv) || (CvOWNER(cv) && CvOWNER(cv) != thr))
@@ -4298,7 +4305,12 @@ S_cv_clone2(pTHX_ CV *proto, CV *outside)
     MUTEX_INIT(CvMUTEXP(cv));
     CvOWNER(cv)		= 0;
 #endif /* USE_THREADS */
+#ifdef USE_ITHREADS
+    CvFILE(cv)		= CvXSUB(proto) ? CvFILE(proto)
+					: savepv(CvFILE(proto));
+#else
     CvFILE(cv)		= CvFILE(proto);
+#endif
     CvGV(cv)		= CvGV(proto);
     CvSTASH(cv)		= CvSTASH(proto);
     CvROOT(cv)		= OpREFCNT_inc(CvROOT(proto));
@@ -4732,7 +4744,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	}
     }
     CvGV(cv) = gv;
-    CvFILE(cv) = CopFILE(PL_curcop);
+    CvFILE_set_from_cop(cv, PL_curcop);
     CvSTASH(cv) = PL_curstash;
 #ifdef USE_THREADS
     CvOWNER(cv) = 0;
@@ -5110,7 +5122,7 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
     cv = PL_compcv;
     GvFORM(gv) = cv;
     CvGV(cv) = gv;
-    CvFILE(cv) = CopFILE(PL_curcop);
+    CvFILE_set_from_cop(cv, PL_curcop);
 
     for (ix = AvFILLp(PL_comppad); ix > 0; ix--) {
 	if (!SvPADMY(PL_curpad[ix]) && !SvIMMORTAL(PL_curpad[ix]))

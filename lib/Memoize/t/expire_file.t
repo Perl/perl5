@@ -11,7 +11,7 @@ if (-e '.fast') {
   exit 0;
 }
 
-print "1..11\n";
+print "1..12\n";
 
 ++$n; print "ok $n\n";
 
@@ -34,8 +34,12 @@ sub readfile {
   $data;
 }
 
+require Memoize::ExpireFile;
+++$n; print "ok $n\n";
+
+tie my %cache => 'Memoize::ExpireFile';
 memoize 'readfile',
-    SCALAR_CACHE => ['TIE', 'Memoize::ExpireFile', ],
+    SCALAR_CACHE => [HASH => \%cache],
     LIST_CACHE => 'FAULT'
     ;
 
@@ -61,4 +65,4 @@ my $t3 = readfile($FILE);
 ++$n; print ((($READFILE_CALLS == 2) ? '' : 'not '), "ok $n\n");
 ++$n; print ((($t1 ne $t3) ? '' : 'not '), "ok $n\n");
 
-END { 1 while unlink 'TESTFILE' }
+END { 1 while unlink $FILE }

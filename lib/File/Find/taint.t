@@ -25,14 +25,7 @@ use File::Find;
 use File::Spec;
 use Cwd;
 
-# Remove insecure directories from PATH
-my @path;
-my $sep = ($^O eq 'MSWin32') ? ';' : ':';
-foreach my $dir (split(/$sep/,$ENV{'PATH'}))
- {
-  push(@path,$dir) unless -w $dir;
- }
-$ENV{'PATH'} = join($sep,@path);
+my $NonTaintedCwd = $^O eq 'MSWin32' || $^O eq 'cygwin';
 
 cleanup();
 
@@ -321,7 +314,7 @@ eval {File::Find::find( {wanted => \&simple_wanted, untaint => 1,
 
 print "# $@" if $@;
 #$^D = 8;
-if ($^O eq 'MSWin32') {
+if ($NonTaintedCwd) {
 	Skip("$^O does not taint cwd");
     } 
 else {
@@ -394,7 +387,12 @@ if ( $symlink_exists ) {
     eval {File::Find::find( {wanted => \&simple_wanted, untaint => 1,
                              untaint_skip => 1, untaint_pattern =>
                              qr|^(NO_MATCH)$|}, topdir('fa') );};
-    Check( $@ =~ m|insecure cwd| );
+    if ($NonTaintedCwd) {
+	Skip("$^O does not taint cwd");
+    } 
+    else {
+	Check( $@ =~ m|insecure cwd| );
+    }
     chdir($cwd_untainted);
 } 
 

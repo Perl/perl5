@@ -177,5 +177,6 @@ $x = <F>; chomp $x;
 eval { sprintf "%vd\n", $x; }
 }
 
+close F;
 unlink('a');
 

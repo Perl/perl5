@@ -28,11 +28,25 @@ always be set to true, but it needs to be set to false when F<utf8.pm>
 is being compiled. (To stop Perl trying to autoload the C<utf8>
 pragma...)
 
-=head2 Create a char *sv_printify(sv, STRLEN *lenp, UV flags) function
+=head2 Create a char *sv_printify(sv, STRLEN *lenp, UV flags)
 
 For displaying PVs with control characters, embedded nulls, and Unicode.
 This would be useful for printing warnings, or data and regex dumping,
 not_a_number(), and so on.
+
+Requirements: should handle both byte and UTF8 strings.  isPRINT()
+characters printed as-is, character less than 256 as \xHH, Unicode
+characters as \x{HHH}.
+
+Possible options, controlled by the flags:
+- whitespace (other than ' ' of isPRINTF()) printed as-is
+- use isPRINT_LC() instead of isPRINT()
+- print control characters like this: "\cA"
+- print control characters like this: "^A"
+- non-printables printed as '.' instead of \xHH
+- print the \OOO instead of \xHH
+- have a maximum length for the produced string (read it from *lenp)
+- append a "..." to the produced string if the maximum length is exceeded
 
 =head2 Autoload byte.pm
 

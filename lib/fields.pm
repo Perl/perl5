@@ -133,7 +133,7 @@ no strict 'refs';
 use warnings::register;
 our(%attr, $VERSION);
 
-$VERSION = "1.01";
+$VERSION = "1.02";
 
 # some constants
 sub _PUBLIC    () { 1 }

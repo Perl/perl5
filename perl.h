@@ -1752,6 +1752,22 @@ typedef struct ptr_tbl PTR_TBL_t;
 #   define NEED_ENVIRON_DUP_FOR_MODIFY
 #endif
 
+/*
+ * initialise to avoid floating-point exceptions from overflow, etc
+ */
+#ifndef PERL_FPU_INIT
+#  ifdef HAS_FPSETMASK
+#    if HAS_FLOATINGPOINT_H
+#      include <floatingpoint.h>
+#    endif
+#    define PERL_FPU_INIT fpsetmask(0);
+#  elif PERL_IGNORE_FPUSIG
+#    define PERL_FPU_INIT signal(PERL_IGNORE_FPUSIG, SIG_IGN);
+#  else
+#    define PERL_FPU_INIT
+#  endif
+#endif
+
 #ifndef PERL_SYS_INIT3
 #  define PERL_SYS_INIT3(argvp,argcp,envp) PERL_SYS_INIT(argvp,argcp)
 #endif
@@ -3508,6 +3524,7 @@ typedef struct am_table_short AMTS;
 #define RESTORE_NUMERIC_LOCAL()		/**/
 #define RESTORE_NUMERIC_STANDARD()	/**/
 #define Atof				Perl_atof
+#define IN_LOCALE_RUNTIME		0
 
 #endif /* !USE_LOCALE_NUMERIC */
 
@@ -3823,6 +3840,8 @@ extern void moncontrol(int);
    HAS_STRUCT_CMSGHDR
 
    USE_REENTRANT_API
+
+   HAS_NL_LANGINFO
 
    so that Configure picks them up. */
 

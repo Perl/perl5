@@ -42,6 +42,18 @@ sub xs_o {	# many makes are too dumb to use xs_c then c_o
 ';
 }
 
+sub top_targets {	# many makes are too dumb to use xs_c then c_o
+    my($self) = shift;
+    my $out = $self->SUPER::top_targets(@_);
+    $out .
+'
+
+ListUtil.c: Util.c
+	@$(NOOP)
+
+';
+}
+
 __EOMM__
     }
 }

@@ -12,7 +12,7 @@ require Exporter;
 our(@ISA, @EXPORT, $VERSION);
 @ISA     = qw(Exporter);
 @EXPORT  = qw(cp rm_f rm_rf mv cat eqtime mkpath touch test_f);
-$VERSION = '1.01';
+$VERSION = '1.02';
 
 =head1 NAME
 

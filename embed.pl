@@ -2600,6 +2600,9 @@ s	|void	|xstat		|int
 #if defined(PERL_OBJECT)
 };
 #endif
+
+START_EXTERN_C
+
 Apd	|void	|sv_setsv_flags	|SV* dsv|SV* ssv|I32 flags
 Apd	|void	|sv_catpvn_flags|SV* sv|const char* ptr|STRLEN len|I32 flags
 Apd	|void	|sv_catsv_flags	|SV* dsv|SV* ssv|I32 flags
@@ -2607,3 +2610,6 @@ Apd	|STRLEN	|sv_utf8_upgrade_flags|SV *sv|I32 flags
 Apd	|char*	|sv_pvn_force_flags|SV* sv|STRLEN* lp|I32 flags
 Apd	|char*	|sv_2pv_flags	|SV* sv|STRLEN* lp|I32 flags
 Ap	|char*	|my_atof2	|const char *s|NV* value
+
+END_EXTERN_C
+

@@ -43,7 +43,7 @@ static I32 utf16rev_textfilter(pTHXo_ int idx, SV *sv, int maxlen);
 #define UTF ((PL_linestr && DO_UTF8(PL_linestr)) || (PL_hints & HINT_UTF8))
 #endif
 
-/* In variables name $^X, these are the legal values for X.
+/* In variables named $^X, these are the legal values for X.
  * 1999-02-27 mjd-perl-patch@plover.com */
 #define isCONTROLVAR(x) (isUPPER(x) || strchr("[\\]^_?", (x)))
 
@@ -3091,7 +3091,7 @@ Perl_yylex(pTHX)
 		    else if (!PL_in_my && len == 6 && strnEQ(s, "method", len))
 			CvMETHOD_on(PL_compcv);
 #ifdef USE_ITHREADS
-		    else if (PL_in_my == KEY_our && len == 6 && strnEQ(s, "shared", len))
+      else if (PL_in_my == KEY_our && len == 6 && strnEQ(s, "unique", len))
 			GvSHARED_on(cGVOPx_gv(yylval.opval));
 #endif
 		    /* After we've set the flags, it could be argued that

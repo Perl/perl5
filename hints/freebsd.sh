@@ -123,6 +123,7 @@ case "$osvers" in
 0*|1*|2*|3*) ;;
 
 *)
+	ccflags="${ccflags} -DHAS_FPSETMASK -DHAS_FLOATINGPOINT_H"
 	if /usr/bin/file -L /usr/lib/libc.so | /usr/bin/grep -vq "not stripped" ; then
 	    usenm=false
 	fi

@@ -16,7 +16,7 @@ our($VERSION, $PACKAGE, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
 @ISA = qw(Exporter);
 
-$VERSION = 1.00;
+$VERSION = 1.01;
 
 my @angcnv = qw(rad2deg rad2grad
 	     deg2rad deg2grad

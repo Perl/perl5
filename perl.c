@@ -226,8 +226,8 @@ perl_construct(pTHXx)
 	 * space.  The other alternative would be to provide STDAUX and STDPRN
 	 * filehandles.
 	 */
-	(void)fclose(stdaux);
-	(void)fclose(stdprn);
+	(void)PerlIO_close(PerlIO_importFILE(stdaux, 0));
+	(void)PerlIO_close(PerlIO_importFILE(stdprn, 0));
 #endif
     }
 
@@ -1152,7 +1152,12 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #endif
 		sv_catpv(PL_Sv, "; \
 $\"=\"\\n    \"; \
-@env = map { \"$_=\\\"$ENV{$_}\\\"\" } sort grep {/^PERL/} keys %ENV; \
+@env = map { \"$_=\\\"$ENV{$_}\\\"\" } sort grep {/^PERL/} keys %ENV; ");
+#ifdef __CYGWIN__
+		sv_catpv(PL_Sv,"\
+push @env, \"CYGWIN=\\\"$ENV{CYGWIN}\\\"\";");
+#endif
+		sv_catpv(PL_Sv, "\
 print \"  \\%ENV:\\n    @env\\n\" if @env; \
 print \"  \\@INC:\\n    @INC\\n\";");
 	    }
@@ -3136,7 +3141,8 @@ S_find_beginning(pTHX)
 	if ((s = sv_gets(PL_linestr, PL_rsfp, 0)) == Nullch)
 	    Perl_croak(aTHX_ "No Perl script found in input\n");
 #endif
-	if (*s == '#' && s[1] == '!' && (s = instr(s,"perl"))) {
+	s2 = s;
+	if (*s == '#' && s[1] == '!' && ((s = instr(s,"perl")) || (s = instr(s2,"PERL")))) {
 	    PerlIO_ungetc(PL_rsfp, '\n');		/* to keep line count right */
 	    PL_doextract = FALSE;
 	    while (*s && !(isSPACE (*s) || *s == '#')) s++;

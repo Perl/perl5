@@ -75,7 +75,7 @@ hold a reference count on the object it references. Also when the reference
 count on that object reaches zero, REF will be set to undef.
 
 This is useful for keeping copies of references , but you don't want to
-prevent the object being DESTROY-ed at it's usual time.
+prevent the object being DESTROY-ed at its usual time.
 
 =back
 

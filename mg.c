@@ -1734,7 +1734,9 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 #    ifdef WIN32
 	SetLastError( SvIV(sv) );
 #    else
-#      ifndef OS2
+#      ifdef OS2
+	os2_setsyserrno(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
+#      else
 	/* will anyone ever use this? */
 	SETERRNO(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv), 4);
 #      endif

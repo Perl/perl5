@@ -3360,7 +3360,8 @@ sub read_metadata_cache {
                             # does initialize to some protocol
     $LAST_TIME = $cache->{last_time};
     $DATE_OF_02 = $cache->{DATE_OF_02};
-    $CPAN::Frontend->myprint("  Database was generated on $DATE_OF_02\n");
+    $CPAN::Frontend->myprint("  Database was generated on $DATE_OF_02\n")
+	if defined $DATE_OF_02; # An old cache may not contain DATE_OF_02
     return;
 }
 

@@ -81,15 +81,17 @@ path. On UNIX eliminated successive slashes and successive "/.".
 
 sub canonpath {
     my($self,$path) = @_;
+    
+    # Handle POSIX-style node names beginning with double slash
     my $node = '';
-    if ( $^O eq 'qnx' && $path =~ s|^(//\d+)/|/|s ) {
+    if ( $^O =~ m/^qnx|nto$/ && $path =~ s:^(//[^/]+)(/|\z):/:s ) {
       $node = $1;
     }
     $path =~ s|(?<=[^/])/+|/|g ;                   # xx////xx  -> xx/xx
     $path =~ s|(/\.)+/|/|g ;                       # xx/././xx -> xx/xx
     $path =~ s|^(\./)+||s unless $path eq "./";    # ./xx      -> xx
     $path =~ s|(?<=[^/])/\z|| ;                    # xx/       -> xx
-    "$node$path";
+    return "$node$path";
 }
 
 =item catdir
@@ -466,8 +468,9 @@ EOT
     push(@otherfiles, qw[./blib $(MAKE_APERL_FILE) $(INST_ARCHAUTODIR)/extralibs.all
 			 perlmain.c tmon.out mon.out core core.*perl.*.?
 			 *perl.core so_locations pm_to_blib
-			 *$(OBJ_EXT) *$(LIB_EXT) perl.exe
-			 $(BOOTSTRAP) $(BASEEXT).bso $(BASEEXT).def
+			 *$(OBJ_EXT) *$(LIB_EXT) perl.exe perl perl$(EXE_EXT)
+			 $(BOOTSTRAP) $(BASEEXT).bso
+			 $(BASEEXT).def lib$(BASEEXT).def
 			 $(BASEEXT).exp
 			]);
     push @m, "\t-$self->{RM_RF} @otherfiles\n";
@@ -1073,11 +1076,12 @@ sub dynamic_lib {
     my($ldfrom) = '$(LDFROM)';
     $armaybe = 'ar' if ($^O eq 'dec_osf' and $armaybe eq ':');
     my(@m);
+    my $ld_opt = $Is_OS2 ? '$(OPTIMIZE) ' : '';	# Useful on other systems too?
     push(@m,'
 # This section creates the dynamically loadable $(INST_DYNAMIC)
 # from $(OBJECT) and possibly $(MYEXTLIB).
 ARMAYBE = '.$armaybe.'
-OTHERLDFLAGS = '.$otherldflags.'
+OTHERLDFLAGS = '.$ld_opt.$otherldflags.'
 INST_DYNAMIC_DEP = '.$inst_dynamic_dep.'
 
 $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)/.exists $(EXPORT_LIST) $(PERL_ARCHIVE) $(PERL_ARCHIVE_AFTER) $(INST_DYNAMIC_DEP)
@@ -3251,7 +3255,7 @@ sub static_lib {
 $(INST_STATIC): $(OBJECT) $(MYEXTLIB) $(INST_ARCHAUTODIR)/.exists
 	$(RM_RF) $@
 END
-    # If this extension has it's own library (eg SDBM_File)
+    # If this extension has its own library (eg SDBM_File)
     # then copy that to $(INST_STATIC) and add $(OBJECT) into it.
     push(@m, "\t$self->{CP} \$(MYEXTLIB) \$\@\n") if $self->{MYEXTLIB};
 
@@ -3610,6 +3614,7 @@ XSUBPP = \$(XSUBPPDIR)/$xsubpp
 XSPROTOARG = $self->{XSPROTOARG}
 XSUBPPDEPS = @tmdeps \$(XSUBPP)
 XSUBPPARGS = @tmargs
+XSUBPP_EXTRA_ARGS = 
 };
 };
 
@@ -3788,7 +3793,7 @@ sub xs_c {
     return '' unless $self->needs_linking();
     '
 .xs.c:
-	$(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) $(XSUBPP) $(XSPROTOARG) $(XSUBPPARGS) $*.xs > $*.xsc && $(MV) $*.xsc $*.c
+	$(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) $(XSUBPP) $(XSPROTOARG) $(XSUBPPARGS) $(XSUBPP_EXTRA_ARGS) $*.xs > $*.xsc && $(MV) $*.xsc $*.c
 ';
 }
 

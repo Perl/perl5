@@ -31,7 +31,9 @@ my $stat = stat "TEST"; # This is the OO stat.
 print "not " unless $stat->dev     == $stat[ 0];
 print "ok 2\n";
 
-print "not " unless $stat->ino     == $stat[ 1];
+# On OS/2 (fake) ino is not constant, it is incremented each time
+print "# ino=>@{[$stat->ino]}, 1=>$stat[ 1]\nnot "
+	     unless $stat->ino     == $stat[ 1] or $^O eq 'os2';
 print "ok 3\n";
 
 print "not " unless $stat->mode    == $stat[ 2];

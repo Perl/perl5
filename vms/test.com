@@ -189,23 +189,51 @@ while ($test = shift) {
 	    $te = '';
 	}
 	unless (/^#/) {
-	    if (/^1\.\.([0-9]+)/) {
+	    if (/^1\.\.([0-9]+)( todo ([\d ]+))?/) {
 		$max = $1;
+                %todo = map { $_ => 1 } split / /, $3 if $3;
 		$totmax += $max;
 		$files += 1;
 		$next = 1;
 		$ok = 1;
 	    } else {
-		$next = $1, $ok = 0, last if /^not ok ([0-9]*)/;
-		next if /^\s*$/; # our 'echo' substitute produces one more \n than Unix'
-		if (/^ok (.*)/ && $1 == $next) {
-		    $next = $1, $ok=0, last if $pending_not;
-		    $next = $next + 1;
-		} elsif (/^not/) {
-		    $pending_not = 1;
-		} else {
-		    $ok = 0;
+                # our 'echo' substitute produces one more \n than Unix'
+		next if /^\s*$/;
+
+
+                if (/^(not )?ok (\d+)(\s*#.*)?/ &&
+                    $2 == $next)
+                {
+                    my($not, $num, $extra) = ($1, $2, $3);
+                    my($istodo) = $extra =~ /^\s*#\s*TODO/ if $extra;
+                    $istodo = 1 if $todo{$num};
+
+                    if( $not && !$istodo ) {
+                        $ok = 0;
+                        $next = $num;
+                        last;
+                    }
+                    elsif( $pending_not ) {
+                        $next = $num;
+                        $ok = 0;
+                    }
+                    else {
+                        $next = $next + 1;
+                    }
+                }
+                elsif(/^not $/) {
+                    # VMS has this problem.  It sometimes adds newlines
+                    # between prints.  This sometimes means you get
+                    # "not \nok 42"
+                    $pending_not = 1;
+                }
+                elsif (/^Bail out!\s*(.*)/i) { # magic words
+                    die "FAILED--Further testing stopped" . ($1 ? ": $1\n" : ".\n");
 		}
+		else {
+                    $ok = 0;
+		}
+
 	    }
 	}
     }

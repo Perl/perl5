@@ -413,7 +413,9 @@ can often make a dramatic difference.  Jon Bentley's book
 on optimization, too.  Advice on benchmarking boils down to: benchmark
 and profile to make sure you're optimizing the right part, look for
 better algorithms instead of microtuning your code, and when all else
-fails consider just buying faster hardware.
+fails consider just buying faster hardware.  You will probably want to
+read the answer to the earlier question ``How do I profile my Perl programs?''
+if you haven't done so already.
 
 A different approach is to autoload seldom-used Perl code.  See the
 AutoSplit and AutoLoader modules in the standard distribution for

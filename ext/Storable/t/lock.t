@@ -28,6 +28,10 @@ sub BEGIN {
         print "1..0 # Skip: Storable was not built\n";
         exit 0;
     }
+    if ($^O eq 'mpeix') {
+	print "1..0 # Skip: truncate missing on MPE\n";
+	exit 0;
+    }	
 
     require 'lib/st-dump.pl';
 }

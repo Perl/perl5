@@ -9,7 +9,7 @@ package Math::Complex;
 
 our($VERSION, @ISA, @EXPORT, %EXPORT_TAGS, $Inf);
 
-$VERSION = 1.31;
+$VERSION = 1.32;
 
 BEGIN {
     unless ($^O eq 'unicosmk') {

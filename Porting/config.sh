@@ -8,7 +8,7 @@
 
 # Package name      : perl5
 # Source directory  : .
-# Configuration time: Sat Jun 23 00:03:07 EET DST 2001
+# Configuration time: Thu Jun 28 18:05:29 EET DST 2001
 # Configured by     : jhi
 # Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
 
@@ -63,10 +63,10 @@ ccsymbols='__alpha=1 __LANGUAGE_C__=1 __osf__=1 __unix__=1 _LONGLONG=1 _SYSTYPE_
 ccversion='V5.6-082'
 cf_by='jhi'
 cf_email='yourname@yourhost.yourplace.com'
-cf_time='Sat Jun 23 00:03:07 EET DST 2001'
+cf_time='Thu Jun 28 18:05:29 EET DST 2001'
 charsize='1'
 chgrp=''
-chmod=''
+chmod='chmod'
 chown=''
 clocktype='clock_t'
 comm='comm'
@@ -260,6 +260,7 @@ d_msync='define'
 d_munmap='define'
 d_mymalloc='undef'
 d_nice='define'
+d_nl_langinfo='define'
 d_nv_preserves_uv='undef'
 d_nv_preserves_uv_bits='53'
 d_off64_t='undef'
@@ -487,6 +488,7 @@ i_grp='define'
 i_iconv='define'
 i_ieeefp='undef'
 i_inttypes='undef'
+i_langinfo='define'
 i_libutil='undef'
 i_limits='define'
 i_locale='define'
@@ -668,9 +670,9 @@ pager='/c/bin/less'
 passcat='cat /etc/passwd'
 patchlevel='7'
 path_sep=':'
-perl5='/u/vieraat/vieraat/jhi/Perl/bin/perl'
+perl5='/usr/local/bin/perl'
 perl=''
-perl_patchlevel='10824'
+perl_patchlevel='10995'
 perladmin='yourname@yourhost.yourplace.com'
 perllibs='-lm -liconv -lutil -lpthread -lexc'
 perlpath='/opt/perl/bin/perl'
@@ -843,7 +845,7 @@ vi=''
 voidflags='15'
 xlibpth='/usr/lib/386 /lib/386'
 xs_apiversion='5.7.1'
-yacc='/u/vieraat/vieraat/jhi/Perl/bin/byacc'
+yacc='/usr/local/bin/byacc'
 yaccflags=''
 zcat=''
 zip='zip'
@@ -870,7 +872,7 @@ PERL_SUBVERSION=1
 PERL_API_REVISION=5
 PERL_API_VERSION=5
 PERL_API_SUBVERSION=0
-PERL_PATCHLEVEL=10824
+PERL_PATCHLEVEL=10995
 PERL_CONFIG_SH=true
 # Variables propagated from previous config.sh file.
 pp_sys_cflags='ccflags="$ccflags -DNO_EFF_ONLY_OK"'

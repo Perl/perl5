@@ -3,7 +3,7 @@ package Safe;
 use 5.003_11;
 use strict;
 
-our $VERSION = "2.06";
+our $VERSION = "2.07";
 
 use Carp;
 

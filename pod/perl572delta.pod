@@ -36,14 +36,30 @@ used because it simply does not work with 8-byte pointers.  Also,
 usually the system malloc on such platforms are much better optimized
 for such large memory models than the Perl malloc.
 
-=head2 Future Deprecations
+=head2 AIX Dynaloading
+
+The AIX dynaloading now uses the native dlopen interface of AIX,
+(given the AIX is recent enough) instead of the old emulated interface.
+This will probably break backward compatibility with compiled modules.
+
+=head2 Socket Extension Dynamic in VMS
+
+The Socket extension is now dynamically loaded instead of being
+statically built in.  This may or may not be a problem with ancient
+TCP/IP stacks of VMS: we do not know since we weren't able to test
+Perl in such configurations.
+
+=head2 Deprecations
 
 The current user-visible implementation of pseudo-hashes (the weird
 use of the first array element) is deprecated starting from Perl 5.8.0
-and will be removed in Perl 5.10.0, and the feature will be implemented
-differently.  Not only is the current interface rather ugly, but the
-current implementation slows down normal array and hash use quite
-noticeably. The 'fields' pragma interface will remain available.
+and will be removed in Perl 5.10.0, and the feature will be
+implemented differently.  Not only is the current interface rather
+ugly, but the current implementation slows down normal array and hash
+use quite noticeably. The 'fields' pragma interface will remain
+available.
+
+The syntaxes C<@a->[...]> and  C<@h->{...}> have now been deprecated.
 
 The suidperl is also considered to be too much a risk to continue
 maintaining and the suidperl code is likely to be removed in a future
@@ -51,11 +67,11 @@ release.
 
 =head1 Core Enhancements
 
-In general a lot of fixing has happened in the area of Perl's understanding
-of numbers, both integer and floating point.  Since in many systems the
-standard number parsing functions like C<strtoul()> and C<atof()> seem
-to have bugs, Perl tries to work around their deficiencies.  This results
-hopefully in more accurate numbers.
+In general a lot of fixing has happened in the area of Perl's
+understanding of numbers, both integer and floating point.  Since in
+many systems the standard number parsing functions like C<strtoul()>
+and C<atof()> seem to have bugs, Perl tries to work around their
+deficiencies.  This results hopefully in more accurate numbers.
 
 =over 4
 
@@ -67,12 +83,23 @@ B<between digits>.
 
 =item *
 
-VMS now works under PerlIO.
+GMAGIC (right-hand side magic) could in many cases such as concatenation
+of string be invoked too many times.
 
 =item *
 
-GMAGIC (right-hand side magic) could in many cases such as concatenation
-of string be invoked too many times.
+Lexicals I: lexicals outside an eval "" weren't resolved
+correctly inside a subroutine definition inside the eval "" if they
+were not already referenced in the top level of the eval""ed code.
+
+=item *
+
+Lexicals II: lexicals leaked at file scope into subroutines that
+were declared before the lexicals.
+
+=item *
+
+Lvalue subroutines can now return C<undef> in list context.
 
 =item *
 
@@ -87,12 +114,20 @@ The C<op_clear> and C<op_null> are now exported.
 =item *
 
 L<utime> now supports C<utime undef, undef, @files> to change the
-times to the current time.
+file timestamps to the current time.
 
 =item *
 
 The Perl parser has been stress tested using both random input and
 Markov chain input.
+
+=item *
+
+C<eval "v200"> now works.
+
+=item *
+
+VMS now works under PerlIO.
 
 =back
 
@@ -118,6 +153,8 @@ L<I18N::LangTags> - functions for dealing with RFC3066-style language tags
 
 L<libnet> - a collection of perl5 modules related to network programming
 
+Perl installation leaves libnet unconfigured, use F<libnetcfg> to configure.
+
 =item *
 
 L<List::Util> - selection of general-utility list subroutines
@@ -140,11 +177,21 @@ L<Scalar::Util> - selection of general-utility scalar subroutines
 
 =item *
 
+L<Test::More> - yet another framework for writing test scripts
+
+=item *
+
+L<Test::Simple> - Basic utilities for writing tests
+
+=item *
+
 L<Time::HiRes> - high resolution ualarm, usleep, and gettimeofday
 
 =item *
 
 L<Time::Piece> - Object Oriented time objects
+
+(Previously known as L<Time::Object>.)
 
 =back
 
@@ -189,7 +236,13 @@ size of the returned list of filenames.
 
 =item *
 
-L<vars> now supports declaring qualified variables.
+L<IO::Socket::INET> now supports C<LocalPort> of zero (usually meaning
+that the operating system will make one up.)
+
+=item *
+
+The L<vars> pragma now supports declaring fully qualified variables.
+(Something that C<our()> does not and will not support.)
 
 =back
 
@@ -200,6 +253,10 @@ L<vars> now supports declaring qualified variables.
 =item *
 
 The F<emacs/e2ctags.pl> is now much faster.
+
+=item *
+
+L<h2ph> now supports C trigraphs.
 
 =item *
 
@@ -250,6 +307,11 @@ The F<Todo> and F<Todo-5.6> files have been merged into L<perltodo>.
 Use of the F<gprof> tool to profile Perl has been documented in
 L<perlhack>.  There is a make target "perl.gprof" for generating a
 gprofiled Perl executable.
+
+=item *
+
+(Code documentation) F<perly.c> and F<sv.c> have now been extensively
+commented.
 
 =back
 
@@ -429,7 +491,22 @@ Note that unlike other sections in this document (which describe
 changes since 5.7.0) this section is cumulative containing known
 problems for all the 5.7 releases.
 
-=head2 AIX vac 5.0.0.0 May Produce Buggy Code For Perl
+=head2 AIX
+
+=over 4
+
+=item *
+
+If Perl is configured to use long doubles the op/int subtests 13 and
+14 and the ext/POSIX subtest 14 may fail.
+
+=item *
+
+If Perl is configured to use threads the op/magic subtest 28 may fail.
+
+=item *
+
+vac 5.0.0.0 May Produce Buggy Code For Perl
 
 The AIX C compiler vac version 5.0.0.0 may produce buggy code,
 resulting in few random tests failing, but when the failing tests
@@ -437,11 +514,23 @@ are run by hand, they succeed.  We suggest upgrading to at least
 vac version 5.0.1.0, that has been known to compile Perl correctly.
 "lslpp -L|grep vac.C" will tell you the vac version.
 
+=back
+
+=head2 Amiga Perl Invoking Mystery
+
+One cannot call Perl using the C<volume:> syntax, that is, C<perl -v>
+works, but for example C<bin:perl -v> doesn't.  The exact reason is
+known but the current suspect is the F<ixemul> library.
+
 =head2 lib/ftmp-security tests warn 'system possibly insecure'
 
 Don't panic.  Read INSTALL 'make test' section instead.
 
-=head2 lib/io_multihomed Fails In LP64-Configured HP-UX
+=head2 Cygwin intermittent failures of lib/Memoize/t/expire_file 11 and 12
+
+The subtests 11 and 12 sometimes fail and sometimes work.
+
+=head2 HP-UX lib/io_multihomed Fails When LP64-Configur
 
 The lib/io_multihomed test may hang in HP-UX if Perl has been
 configured to be 64-bit. Because other 64-bit platforms do not hang in
@@ -449,28 +538,18 @@ this test, HP-UX is suspect. All other tests pass in 64-bit HP-UX. The
 test attempts to create and connect to "multihomed" sockets (sockets
 which have multiple IP addresses).
 
-=head2 Test lib/posix Subtest 9 Fails In LP64-Configured HP-UX
+=head2  HP-UX lib/posix Subtest 9 Fails When LP64-Configured
 
 If perl is configured with -Duse64bitall, the successful result of the
 subtest 10 of lib/posix may arrive before the successful result of the
 subtest 9, which confuses the test harness so much that it thinks the
 subtest 9 failed.
 
-=head2 lib/b test 19
-
-The test fails on various platforms (PA64 and IA64 are known), but the
-exact cause is still being investigated.
-
 =head2 Linux With Sfio Fails op/misc Test 48
 
 No known fix.
 
-=head2 sigaction test 13 in VMS
-
-The test is known to fail; whether it's because of VMS of because
-of faulty test is not known.
-
-=head2 sprintf tests 129 and 130
+=head2 op/sprintf tests 129 and 130
 
 The op/sprintf tests 129 and 130 are known to fail on some platforms.
 Examples include any platform using sfio, and Compaq/Tandem's NonStop-UX.
@@ -487,10 +566,51 @@ The following tests are known to fail due to fundamental problems in
 the 5.005 threading implementation. These are not new failures--Perl
 5.005_0x has the same bugs, but didn't have these tests.
 
-lib/Memoize/t/correctness.t  23-25
-lib/Memoize/t/unmemoize.t    2-5
-t/pragma/autouse.t           4
-t/lib/thr5005.t              19-20
+  lib/autouse.t                 4
+  t/lib/thr5005.t               19-20
+
+=head2 UNICOS
+
+=over 4
+
+=item *
+
+ext/POSIX/sigaction subtests 6 and 13 may fail.
+
+=item *
+
+lib/ExtUtils may spuriously claim that subtest 28 failed,
+which is interesting since the test only has 27 tests.
+
+=item *
+
+Numerous numerical test failures
+
+  op/numconvert                 209,210,217,218
+  op/override                   7
+  ext/Time/HiRes/HiRes          9
+  lib/Math/BigInt/t/bigintpm    1145
+  lib/Math/Trig                 25
+
+These tests fail because of yet unresolved floating point inaccuracies.
+
+=back
+
+=head2 UNICOS/mk ext/IPC/SysV/t/sem test 8
+
+No known fix.
+
+=head2 UTS
+
+Many floating point inaccuracies:
+
+  op/numconvert            511,657,658,659,665-667,831,991,1151
+  op/pack                  10,22,149,156
+  op/sprintf               8,10,13,102-107,134-135,146-153,159-162
+  lib/Math/BigInt/bigintpm 1145,1183
+  lib/Math/Complex         250,257,514,521,722-724,
+                           934,935,945,949,955,956,975,976
+  ext/POSIX/POSIX          14
 
 =head2 Localising a Tied Variable Leaks Memory
 
@@ -536,6 +656,18 @@ platform-dependent.
 
 The compiler suite is slowly getting better but is nowhere near
 working order yet.
+
+=head2 The Long Double Support is Still Experimental
+
+The ability to configure Perl's numbers to use "long doubles",
+floating point numbers of hopefully better accuracy, is still
+experimental.  The implementations of long doubles are not yet
+widespread and the existing implementations are not quite mature
+or standardised, therefore trying to support them is a rare
+and moving target.  The gain of more precision may also be offset
+by slowdown in computations (more bits to move around, and the
+operations are more likely to be executed by less optimised
+libraries).
 
 =head1 Reporting Bugs
 

@@ -20,6 +20,7 @@ print "1..29\n";
 $Is_W32 = $^O eq 'MSWin32';
 $Is_NetWare = $^O eq 'NetWare';
 $Is_Dos = $^O eq 'dos';
+$Is_MPE = $^O eq 'mpeix';
 
 $testfd = open("TEST", O_RDONLY, 0) and print "ok 1\n";
 read($testfd, $buffer, 9) if $testfd > 2;
@@ -72,7 +73,11 @@ sub SigINT {
 }
 }
 
-print &_POSIX_OPEN_MAX > $fds[1] ? "ok 12\n" : "not ok 12\n";
+if ($Is_MPE) {
+    print "ok 12 # skipped, _POSIX_OPEN_MAX is inaccurate on MPE\n"
+} else {
+    print &_POSIX_OPEN_MAX > $fds[1] ? "ok 12\n" : "not ok 12\n"
+}
 
 print getcwd() =~ m#/t$# ? "ok 13\n" : "not ok 13\n";
 

@@ -124,7 +124,6 @@ $PREAMBLE = <<'----END OF PREAMBLE----';
 .\"
 .\" Accent mark definitions (@(#)ms.acc 1.5 88/02/08 SMI; from UCB 4.2).
 .\" Fear.  Run.  Save yourself.  No user-serviceable parts.
-.bd B 3
 .    \" fudge factors for nroff and troff
 .if n \{\
 .    ds #H 0

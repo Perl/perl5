@@ -3,7 +3,7 @@
 use lib qw(. ..);
 use Memoize 0.45 qw(memoize unmemoize);
 use Fcntl;
-# use Memoize::GDBM_File;
+# use Memoize::SDBM_File;
 # $Memoize::GDBM_File::Verbose = 0;
 
 sub i {
@@ -20,7 +20,7 @@ sub n {
   $_[0]+1;
 }
 
-eval {require GDBM_File};
+eval {require Memoize::SDBM_File};
 if ($@) {
   print "1..0\n";
   exit 0;
@@ -29,22 +29,25 @@ if ($@) {
 print "1..4\n";
 
 if (eval {require File::Spec::Functions}) {
- File::Spec::Functions->import();
+  File::Spec::Functions->import('tmpdir', 'catfile');
+  $tmpdir = tmpdir();
 } else {
   *catfile = sub { join '/', @_ };
+  $tmpdir = $ENV{TMP} || $ENV{TMPDIR} || '/tmp';
 }
-$tmpdir = $ENV{TMP} || $ENV{TMPDIR} ||  '/tmp';  
 $file = catfile($tmpdir, "md$$");
-unlink $file, "$file.dir", "$file.pag";
-tryout('GDBM_File', $file, 1);  # Test 1..4
-unlink $file, "$file.dir", "$file.pag";
+1 while unlink $file, "$file.dir", "$file.pag";
+tryout('Memoize::SDBM_File', $file, 1);  # Test 1..4
+1 while unlink $file, "$file.dir", "$file.pag";
 
 sub tryout {
   my ($tiepack, $file, $testno) = @_;
 
+  tie my %cache => $tiepack, $file, O_RDWR | O_CREAT, 0666
+    or die $!;
 
   memoize 'c5', 
-  SCALAR_CACHE => ['TIE', $tiepack, $file, O_RDWR | O_CREAT, 0666], 
+  SCALAR_CACHE => [HASH => \%cache],
   LIST_CACHE => 'FAULT'
     ;
 
@@ -58,7 +61,7 @@ sub tryout {
   # Now something tricky---we'll memoize c23 with the wrong table that
   # has the 5 already cached.
   memoize 'c23', 
-  SCALAR_CACHE => ['TIE', $tiepack, $file, O_RDWR, 0666], 
+  SCALAR_CACHE => [HASH => \%cache],
   LIST_CACHE => 'FAULT'
     ;
   

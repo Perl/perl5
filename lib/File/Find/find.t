@@ -20,10 +20,10 @@ else                   { print "1..78\n";  }
 
 use File::Find;
 use File::Spec;
-if ($^O eq 'MSWin32' || $^O eq 'cygwin')
+if ($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'VMS')
  {
-  # This is a hack - at present File::Find does not produce native names on Win32
-  # So force File::Spec to use Unix names.
+  # This is a hack - at present File::Find does not produce native names on 
+  # Win32 or VMS, so force File::Spec to use Unix names.
   require File::Spec::Unix;
   @File::Spec::ISA = 'File::Spec::Unix';
  }
@@ -146,6 +146,7 @@ sub my_preprocess {
     print "# --preprocess--\n";
     print "#   \$File::Find::dir => '$File::Find::dir' \n";
     foreach $file (@files) {
+        $file =~ s/\.(dir)?$// if $^O eq 'VMS';
         print "#   $file \n";
         delete $Expect_Dir{ $File::Find::dir }->{$file};
     }
@@ -168,7 +169,7 @@ sub my_postprocess {
 # chdir, rmdir etc.
 #
 # dir_path() concatenates directory names to form a _relative_
-# directory path, independant from the platform it's run on, although
+# directory path, independent from the platform it's run on, although
 # there are limitations.  Don't try to create an absolute path,
 # because that may fail on operating systems that have the concept of
 # volume names (e.g. Mac OS). Be careful when you want to create an
@@ -225,7 +226,7 @@ sub topdir {
 #
 # file_path() concatenates directory names (if any) and a filename to
 # form a _relative_ file path (the last argument is assumed to be a
-# file). It's independant from the platform it's run on, although
+# file). It's independent from the platform it's run on, although
 # there are limitations (see the warnings for dir_path() above). As a
 # special case, you can pass it a "." as first argument, to create a
 # file path like "./fa/file" on operating systems other than Mac OS

@@ -469,7 +469,7 @@ whatever:
 Use the <> (glob()) operator, documented in L<perlfunc>.  Older
 versions of Perl require that you have a shell installed that groks
 tildes.  Recent perl versions have this feature built in. The
-Glob::KGlob module (available from CPAN) gives more portable glob
+File::KGlob module (available from CPAN) gives more portable glob
 functionality.
 
 Within Perl, you may use this directly:
@@ -569,7 +569,7 @@ C<Argument list too long>.  People who installed tcsh as csh won't
 have this problem, but their users may be surprised by it.
 
 To get around this, either upgrade to Perl v5.6.0 or later, do the glob
-yourself with readdir() and patterns, or use a module like Glob::KGlob,
+yourself with readdir() and patterns, or use a module like File::KGlob,
 one that doesn't use the shell to do globbing.
 
 =head2 Is there a leak/bug in glob()?

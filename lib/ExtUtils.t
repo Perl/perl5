@@ -397,7 +397,6 @@ if ($?) {
 if ($Config{usedl}) {
   print "ok 4\n";
 } else {
-  push @files, "perl$Config{exe_ext}";
   my $makeperl = "$make perl";
   print "# make = '$makeperl'\n";
   $makeout = `$makeperl`;

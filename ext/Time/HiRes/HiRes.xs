@@ -107,15 +107,23 @@ gettimeofday (struct timeval *tp, int nothing)
 */
 static $DESCRIPTOR(dscepoch,"01-JAN-1970 00:00:00.00");
 
+#ifdef __VAX
+static long base_adjust=0L;
+#else
 static __int64 base_adjust=0;
+#endif
 
 int
 gettimeofday (struct timeval *tp, void *tpz)
 {
  long ret;
+#ifdef __VAX
+ long quad;
+ div_t ans1,ans2;
+#else
  __int64 quad;
  __qdiv_t ans1,ans2;
-
+#endif
 /*
         In case of error, tv_usec = 0 and tv_sec = VMS condition code.
         The return from function is also set to -1.
@@ -135,8 +143,13 @@ gettimeofday (struct timeval *tp, void *tpz)
  ret=sys$gettim(&quad); /* Get VMS system time */
  if ((1 && ret) == 1) {
         quad -= base_adjust; /* convert to epoch offset */
+#ifdef __VAX
+        ans1=div(quad,DIV_100NS_TO_SECS);
+        ans2=div(ans1.rem,DIV_100NS_TO_USECS);
+#else
         ans1=qdiv(quad,DIV_100NS_TO_SECS);
         ans2=qdiv(ans1.rem,DIV_100NS_TO_USECS);
+#endif
         tp->tv_sec = ans1.quot; /* Whole seconds */
         tp->tv_usec = ans2.quot; /* Micro-seconds */
  } else {

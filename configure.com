@@ -1076,6 +1076,9 @@ $!: determine the architecture name
 $! genconfig.pl has either archname='VMS_AXP' or 'VMS_VAX'
 $! Note that DCL in VMS V5.4 does not have F$GETSYI("ARCH_NAME")
 $! but does have F$GETSYI("HW_MODEL").
+$! Please try to use either archname .EQS. "VMS_VAX" or archname .EQS. 
+$! "VMS_AXP" from here on to allow cross-platform configuration (e.g.
+$! configure a VAX build on an Alpha).
 $!
 $ IF (F$GETSYI("HW_MODEL") .LT. 1024)
 $ THEN 
@@ -1104,11 +1107,8 @@ $ vms_prefix = "perl_root"
 $ vms_prefixup = F$EDIT(vms_prefix,"UPCASE")
 $ rp = "Will you be sharing your ''vms_prefixup' with ''otherarch'? [''dflt'] "
 $ GOSUB myread
-$ if ans.NES.""
-$ THEN
-$   ans = F$EXTRACT(0,1,F$EDIT(ans,"COLLAPSE, UPCASE"))
-$ ENDIF
-$ IF (ans.NES."Y")
+$ if ans .EQS. "" THEN ans = dflt
+$ IF .NOT. ans
 $ THEN
 $   sharedperl = "N"
 $ ELSE
@@ -1953,7 +1953,7 @@ $!
 $List_Parse:
 $ OPEN/READ CONFIG ccvms.lis
 $ READ CONFIG line
-$ IF (F$GETSYI("HW_MODEL") .LT. 1024)
+$ IF archname .EQS. "VMS_VAX"
 $ THEN
 $   read CONFIG line
 $   archsufx = "VAX"
@@ -2822,7 +2822,7 @@ $ usemymalloc=mymalloc
 $!
 $ perl_cc=Mcc
 $!
-$ IF (sharedperl .AND. F$GETSYI("HW_MODEL") .GE. 1024)
+$ IF (sharedperl .AND. archname .EQS. "VMS_AXP")
 $ THEN
 $   obj_ext=".abj"
 $   so="axe"
@@ -4651,7 +4651,9 @@ $   d_strcoll="define"
 $   d_strxfrm="define"
 $   d_wctomb="define"
 $   i_locale="define"
+$   i_langinfo="define"
 $   d_locconv="define"
+$   d_nl_langinfo="define"
 $   d_setlocale="define"
 $   vms_cc_type="decc"
 $ ELSE
@@ -4668,7 +4670,9 @@ $   d_strcoll="undef"
 $   d_strxfrm="undef"
 $   d_wctomb="undef"
 $   i_locale="undef"
+$   i_langinfo="undef"
 $   d_locconv="undef"
+$   d_nl_langinfo="undef"
 $   d_setlocale="undef"
 $ ENDIF
 $ d_stdio_ptr_lval_sets_cnt="undef"
@@ -5137,6 +5141,7 @@ $ WC "d_msync='undef'"
 $ WC "d_munmap='undef'"
 $ WC "d_mymalloc='" + d_mymalloc + "'"
 $ WC "d_nice='define'"
+$ WC "d_nl_langinfo='" + d_nl_langinfo + "'"
 $ WC "d_nv_preserves_uv='" + d_nv_preserves_uv + "'"
 $ WC "d_nv_preserves_uv_bits='" + d_nv_preserves_uv_bits + "'"
 $ WC "d_off64_t='" + d_off64_t + "'"
@@ -5348,6 +5353,7 @@ $ WC "i_grp='undef'"
 $ WC "i_iconv='" + i_iconv +"'"
 $ WC "i_ieeefp='undef'"
 $ WC "i_inttypes='" + i_inttypes + "'"
+$ WC "i_langinfo='" + i_langinfo + "'"
 $ WC "i_libutil='" + i_libutil + "'"
 $ WC "i_limits='define'"
 $ WC "i_locale='" + i_locale + "'"
@@ -5692,6 +5698,13 @@ $ IF be_case_sensitive THEN WC "#define VMS_WE_ARE_CASE_SENSITIVE"
 $ IF d_herrno .EQS. "undef" THEN WC "#define NEED_AN_H_ERRNO"
 $ WC "#define HAS_ENVGETENV"
 $ WC "#define PERL_EXTERNAL_GLOB"
+$ IF archname .EQS. "VMS_VAX" .AND. -
+     ccname .EQS. "DEC" .AND. -
+     ccversion .LE. 50390006
+$ THEN
+$! Alas this does not help to build Fcntl
+$!   WC "#define PERL_IGNORE_FPUSIG SIGFPE"
+$ ENDIF
 $ CLOSE CONFIG
 $!
 $ echo4 "Doing variable substitutions on .SH files..."
@@ -5943,7 +5956,7 @@ $   echo ""
 $   echo4 "The perl.cld file is now being written..."
 $   OPEN/WRITE CONFIG 'file_2_find'
 $   ext = ".exe"
-$   IF ((sharedperl) .AND. (F$GETSYI("HW_MODEL") .GE. 1024)) THEN ext := .AXE
+$   IF (sharedperl .AND. archname .EQS. "VMS_AXP") THEN ext := .AXE
 $   IF (use_vmsdebug_perl)
 $   THEN
 $     WRITE CONFIG "define verb dbgperl"

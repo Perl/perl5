@@ -6,7 +6,7 @@ use Memoize;
 my $n = 0;
 
 
-print "1..21\n";
+print "1..22\n";
 
 ++$n; print "ok $n\n";
 
@@ -19,8 +19,12 @@ sub call {
   $RETURN;
 }
 
+require Memoize::Expire;
+++$n; print "ok $n\n";
+
+tie my %cache => 'Memoize::Expire', NUM_USES => 2;
 memoize 'call',
-    SCALAR_CACHE => ['TIE', 'Memoize::Expire', NUM_USES => 2],
+    SCALAR_CACHE => [HASH => \%cache],
     LIST_CACHE => 'FAULT';
 
 # $Memoize::Expire::DEBUG = 1;
@@ -56,5 +60,3 @@ for (0,1,2,3) {
   print "not " unless $CALLS{$_} == (1,2,2,1)[$_];
   ++$n; print "ok $n\n";
 }
-
-

@@ -8,7 +8,7 @@ Perl for NetWare5.x
 
 =head1 Description
 
-This file gives the instructions for building Perl5.6.1 for
+This file gives the instructions for building Perl5.6 and above for
 NetWare5.x.  Please read and understand the terms under which this
 software is distributed.
 
@@ -161,11 +161,9 @@ Also fork() is not currently implemented.
 
 =head1 Acknowledgements
 
-For the porting purpose, the PerlHost of Win32 port was used as
-reference and NetWare portions are added.  Also the makefile for Win32
-is used as a reference to create the makefile for NetWare build.
-Additionally the make process for NetWare port uses miniperl.exe to
-run scripts during the make and installation process.
+The makefile for Win32 is used as a reference to create the makefile
+for NetWare build.  Also, the make process for NetWare port uses miniperl.exe
+to run scripts during the make and installation process.
 
 =head1 Author
 
@@ -181,7 +179,7 @@ Created - 18th Jan 2001
 
 =item *
 
-Modified -  16th April 2001
+Modified -  25th June 2001
 
 =back
 

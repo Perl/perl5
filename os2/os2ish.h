@@ -1,4 +1,6 @@
 #include <signal.h>
+#include <io.h>
+/* #include <sys/select.h> */
 
 /* HAS_IOCTL:
  *	This symbol, if defined, indicates that the ioctl() routine is
@@ -467,10 +469,167 @@ void init_PMWIN_entries(void);
 
 #define STATIC_FILE_LENGTH 127
 
+    /* This should match loadOrdinals[] array in os2.c */
+enum entries_ordinals {
+    ORD_DosQueryExtLibpath,
+    ORD_DosSetExtLibpath,
+    ORD_DosVerifyPidTid,
+    ORD_SETHOSTENT,
+    ORD_SETNETENT, 
+    ORD_SETPROTOENT,
+    ORD_SETSERVENT,
+    ORD_GETHOSTENT,
+    ORD_GETNETENT, 
+    ORD_GETPROTOENT,
+    ORD_GETSERVENT,
+    ORD_ENDHOSTENT,
+    ORD_ENDNETENT,
+    ORD_ENDPROTOENT,
+    ORD_ENDSERVENT,
+    ORD_WinInitialize,
+    ORD_WinCreateMsgQueue,
+    ORD_WinDestroyMsgQueue,
+    ORD_WinPeekMsg,
+    ORD_WinGetMsg,
+    ORD_WinDispatchMsg,
+    ORD_WinGetLastError,
+    ORD_WinCancelShutdown,
+    ORD_RexxStart,
+    ORD_RexxVariablePool,
+    ORD_RexxRegisterFunctionExe,
+    ORD_RexxDeregisterFunction,
+    ORD_DOSSMSETTITLE,
+    ORD_PRF32QUERYPROFILESIZE,
+    ORD_PRF32OPENPROFILE,
+    ORD_PRF32CLOSEPROFILE,
+    ORD_PRF32QUERYPROFILE,
+    ORD_PRF32RESET,
+    ORD_PRF32QUERYPROFILEDATA,
+    ORD_PRF32WRITEPROFILEDATA,
+
+    ORD_WinChangeSwitchEntry,
+    ORD_WinQuerySwitchEntry,
+    ORD_WinQuerySwitchHandle,
+    ORD_WinQuerySwitchList,
+    ORD_WinSwitchToProgram,
+    ORD_WinBeginEnumWindows,
+    ORD_WinEndEnumWindows,
+    ORD_WinEnumDlgItem,
+    ORD_WinGetNextWindow,
+    ORD_WinIsChild,
+    ORD_WinQueryActiveWindow,
+    ORD_WinQueryClassName,
+    ORD_WinQueryFocus,
+    ORD_WinQueryWindow,
+    ORD_WinQueryWindowPos,
+    ORD_WinQueryWindowProcess,
+    ORD_WinQueryWindowText,
+    ORD_WinQueryWindowTextLength,
+    ORD_WinSetFocus,
+    ORD_WinSetWindowPos,
+    ORD_WinSetWindowText,
+    ORD_WinShowWindow,
+    ORD_WinIsWindow,
+    ORD_WinWindowFromId,
+    ORD_WinWindowFromPoint,
+    ORD_WinPostMsg,
+    ORD_NENTRIES
+};
+
+/* RET: return type, AT: argument signature in (), ARGS: should be in () */
+#define CallORD(ret,o,at,args)	(((ret (*)at) loadByOrdinal(o, 1))args)
+#define DeclFuncByORD(ret,name,o,at,args)	\
+  ret name at { return CallORD(ret,o,at,args); }
+#define DeclVoidFuncByORD(name,o,at,args)	\
+  void name at { CallORD(void,o,at,args); }
+
+/* These functions return false on error, and save the error info in $^E */
+#define DeclOSFuncByORD(ret,name,o,at,args)	\
+  ret name at { unsigned long rc; return !CheckOSError(CallORD(ret,o,at,args)); }
+#define DeclWinFuncByORD(ret,name,o,at,args)	\
+  ret name at { return SaveWinError(CallORD(ret,o,at,args)); }
+
+#define AssignFuncPByORD(p,o)	(*(Perl_PFN*)&(p) = (loadByOrdinal(o, 1)))
+
 #define PERLLIB_MANGLE(s, n) perllib_mangle((s), (n))
 char *perllib_mangle(char *, unsigned int);
 
+typedef int (*Perl_PFN)();
+Perl_PFN loadByOrdinal(enum entries_ordinals ord, int fail);
+extern const Perl_PFN * const pExtFCN;
 char *os2error(int rc);
+int os2_stat(const char *name, struct stat *st);
+int setpriority(int which, int pid, int val);
+int getpriority(int which /* ignored */, int pid);
+
+#ifdef PERL_CORE
+int os2_do_spawn(pTHX_ char *cmd);
+int os2_do_aspawn(pTHX_ SV *really, void **vmark, void **vsp);
+#endif
+
+#ifndef LOG_DAEMON
+
+/* Replacement for syslog.h */
+#  define	LOG_EMERG	0	/* system is unusable */
+#  define	LOG_ALERT	1	/* action must be taken immediately */
+#  define	LOG_CRIT	2	/* critical conditions */
+#  define	LOG_ERR	3	/* error conditions */
+#  define	LOG_WARNING	4	/* warning conditions */
+#  define	LOG_NOTICE	5	/* normal but significant condition */
+#  define	LOG_INFO	6	/* informational */
+#  define	LOG_DEBUG	7	/* debug-level messages */
+
+#  define	LOG_PRIMASK	0x007	/* mask to extract priority part (internal) */
+				/* extract priority */
+#  define	LOG_PRI(p)	((p) & LOG_PRIMASK)
+#  define	LOG_MAKEPRI(fac, pri)	(((fac) << 3) | (pri))
+
+/* facility codes */
+#  define	LOG_KERN	(0<<3)	/* kernel messages */
+#  define	LOG_USER	(1<<3)	/* random user-level messages */
+#  define	LOG_MAIL	(2<<3)	/* mail system */
+#  define	LOG_DAEMON	(3<<3)	/* system daemons */
+#  define	LOG_AUTH	(4<<3)	/* security/authorization messages */
+#  define	LOG_SYSLOG	(5<<3)	/* messages generated internally by syslogd */
+#  define	LOG_LPR	(6<<3)	/* line printer subsystem */
+#  define	LOG_NEWS	(7<<3)	/* network news subsystem */
+#  define	LOG_UUCP	(8<<3)	/* UUCP subsystem */
+#  define	LOG_CRON	(15<<3)	/* clock daemon */
+	/* other codes through 15 reserved for system use */
+#  define	LOG_LOCAL0	(16<<3)	/* reserved for local use */
+#  define	LOG_LOCAL1	(17<<3)	/* reserved for local use */
+#  define	LOG_LOCAL2	(18<<3)	/* reserved for local use */
+#  define	LOG_LOCAL3	(19<<3)	/* reserved for local use */
+#  define	LOG_LOCAL4	(20<<3)	/* reserved for local use */
+#  define	LOG_LOCAL5	(21<<3)	/* reserved for local use */
+#  define	LOG_LOCAL6	(22<<3)	/* reserved for local use */
+#  define	LOG_LOCAL7	(23<<3)	/* reserved for local use */
+
+#  define	LOG_NFACILITIES	24	/* current number of facilities */
+#  define	LOG_FACMASK	0x03f8	/* mask to extract facility part */
+				/* facility of pri */
+#  define	LOG_FAC(p)	(((p) & LOG_FACMASK) >> 3)
+
+/*
+ * arguments to setlogmask.
+ */
+#  define	LOG_MASK(pri)	(1 << (pri))		/* mask for one priority */
+#  define	LOG_UPTO(pri)	((1 << ((pri)+1)) - 1)	/* all priorities through pri */
+
+/*
+ * Option flags for openlog.
+ *
+ * LOG_ODELAY no longer does anything.
+ * LOG_NDELAY is the inverse of what it used to be.
+ */
+#  define	LOG_PID		0x01	/* log the pid with each message */
+#  define	LOG_CONS	0x02	/* log on the console if errors in sending */
+#  define	LOG_ODELAY	0x04	/* delay open until first syslog() (default) */
+#  define	LOG_NDELAY	0x08	/* don't delay open */
+#  define	LOG_NOWAIT	0x10	/* don't wait for console forks: DEPRECATED */
+#  define	LOG_PERROR	0x20	/* log to stderr as well */
+
+#endif
 
 /* ************************************************************ */
 #define Dos32QuerySysState DosQuerySysState

@@ -31,7 +31,6 @@ typedef struct tagThreadInfo
 	void*	m_allocList;
 }ThreadInfo;
 
-
 void fnInitializeThreadInfo(void);
 BOOL fnTerminateThreadInfo(void);
 BOOL fnRegisterWithThreadTable(void);
@@ -42,7 +41,11 @@ BOOL fnRemoveThreadInfo(int tid);
 ThreadInfo* fnGetThreadInfo(int tid);
 
 //For storing and retrieving Watcom Hash list address
-BOOL fnInsertHashListAddrs(void *addrs, BOOL dontTouchHashList);
+#ifdef __cplusplus
+	extern "C" BOOL fnInsertHashListAddrs(void *addrs, BOOL dontTouchHashList);
+#else
+	BOOL fnInsertHashListAddrs(void *addrs, BOOL dontTouchHashList);
+#endif
 BOOL fnGetHashListAddrs(void **addrs, BOOL *dontTouchHashList);
 
 //New TLS to set and get the thread contex - may be redundant,

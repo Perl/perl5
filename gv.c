@@ -126,7 +126,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 
 	PL_sub_generation++;
 	CvGV(GvCV(gv)) = gv;
-	CvFILE(GvCV(gv)) = CopFILE(PL_curcop);
+	CvFILE_set_from_cop(GvCV(gv), PL_curcop);
 	CvSTASH(GvCV(gv)) = PL_curstash;
 #ifdef USE_THREADS
 	CvOWNER(GvCV(gv)) = 0;
@@ -447,7 +447,7 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
          * pass along the same data via some unused fields in the CV
          */
         CvSTASH(cv) = stash;
-        SvPVX(cv) = (char *)name; /* cast to loose constness warning */
+        SvPVX(cv) = (char *)name; /* cast to lose constness warning */
         SvCUR(cv) = len;
         return gv;
     }

@@ -2,8 +2,8 @@ BEGIN {
 	chdir 't' if -d 't';
 	@INC = '../lib';
 	require Config; import Config;
-	if ($Config{'extensions'} !~ /\bPerlIO\b/) {
-	    print "1..0 # Skip: PerlIO was not built\n";
+	unless ($Config{'useperlio'}) {
+	    print "1..0 # Skip: PerlIO not used\n";
 	    exit 0;
 	}
 }

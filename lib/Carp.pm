@@ -21,6 +21,9 @@ confess - die of errors with stack backtrace
     use Carp qw(cluck);
     cluck "This is how we got here!";
 
+    print FH Carp::shortmess("This will have caller's details added");
+    print FH Carp::longmess("This will have stack backtrace added");
+
 =head1 DESCRIPTION
 
 The Carp routines are useful in your own modules because
@@ -29,6 +32,11 @@ was in the code they were called from.  Thus if you have a
 routine Foo() that has a carp() in it, then the carp() 
 will report the error as occurring where Foo() was called, 
 not where carp() was called.
+
+The routine shortmess() can be used to generate the string that
+carp/croak would have produced.   The routine longmess() can be
+used to generate the backtrace that cluck/confess would have
+produced.
 
 =head2 Forcing a Stack Trace
 
@@ -75,7 +83,7 @@ $CarpInternal{Carp}++;
 require Exporter;
 @ISA = ('Exporter');
 @EXPORT = qw(confess croak carp);
-@EXPORT_OK = qw(cluck verbose);
+@EXPORT_OK = qw(cluck verbose longmess shortmess);
 @EXPORT_FAIL = qw(verbose);	# hook to enable verbose mode
 
 

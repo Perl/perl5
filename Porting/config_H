@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Sat Jun 23 00:03:07 EET DST 2001
+ * Configuration time: Thu Jun 28 18:05:29 EET DST 2001
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -3378,6 +3378,13 @@
  */
 /*#define	HAS_FLOCK_PROTO	/ **/
 
+/* HAS_NL_LANGINFO:
+ *	This symbol, if defined, indicates that the nl_langinfo routine is
+ *	available to return local data.  You will also need <langinfo.h>
+ *	and therefore I_LANGINFO.
+ */
+#define HAS_NL_LANGINFO		/**/
+
 /* HAS_SIGPROCMASK:
  *	This symbol, if defined, indicates that the sigprocmask
  *	system call is available to examine or change the signal mask
@@ -3443,5 +3450,11 @@
  *		extern int usleep(useconds_t);
  */
 /*#define	HAS_USLEEP_PROTO	/ **/
+
+/* I_LANGINFO:
+ *	This symbol, if defined, indicates that <langinfo.h> exists and
+ *	should be included.
+ */
+#define	I_LANGINFO		/**/
 
 #endif

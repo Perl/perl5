@@ -268,7 +268,7 @@ Any alphanumeric or punctuation (special) character.
 
 =item print
 
-Any alphanumeric or punctuation (special) character or space.
+Any alphanumeric or punctuation (special) character or the space character.
 
 =item punct
 

@@ -3374,6 +3374,13 @@
  */
 /*#define	HAS_FLOCK_PROTO	/**/
 
+/* HAS_NL_LANGINFO:
+ *	This symbol, if defined, indicates that the nl_langinfo routine is
+ *	available to return local data.  You will also need <langinfo.h>
+ *	and therefore I_LANGINFO.
+ */
+/*#define HAS_NL_LANGINFO		/**/
+
 /* HAS_SIGPROCMASK:
  *	This symbol, if defined, indicates that the sigprocmask
  *	system call is available to examine or change the signal mask
@@ -3439,5 +3446,11 @@
  *		extern int usleep(useconds_t);
  */
 /*#define	HAS_USLEEP_PROTO	/**/
+
+/* I_LANGINFO:
+ *	This symbol, if defined, indicates that <langinfo.h> exists and
+ *	should be included.
+ */
+/*#define	I_LANGINFO		/**/
 
 #endif
