@@ -645,8 +645,8 @@ as if copies of the byte strings were upgraded to UTF-8: for example,
     $b = "\x{100}";
     print "$a = $b\n";
 
-the output string will be UTF-8-encoded C<ab\x80c\x{100}\n>, but note
-that C<$a> will stay byte-encoded.
+the output string will be UTF-8-encoded C<ab\x80c = \x{100}\n>, but
+C<$a> will stay byte-encoded.
 
 Sometimes you might really need to know the byte length of a string
 instead of the character length. For that use either the
