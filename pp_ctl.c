@@ -31,8 +31,9 @@ static I32 dopoptolabel _((char *label));
 static I32 dopoptoloop _((I32 startingblock));
 static I32 dopoptosub _((I32 startingblock));
 static void save_lines _((AV *array, SV *sv));
-static int sortcmp _((const void *, const void *));
 static int sortcv _((const void *, const void *));
+static int sortcmp _((const void *, const void *));
+static int sortcmp_locale _((const void *, const void *));
 
 static I32 sortcxix;
 
@@ -376,6 +377,8 @@ PP(pp_formline)
 	    }
 	    gotsome = TRUE;
 	    value = SvNV(sv);
+	    /* Formats aren't yet marked for locales, so assume "yes". */
+	    NUMERIC_LOCAL();
 	    if (arg & 256) {
 		sprintf(t, "%#*.*f", (int) fieldsize, (int) arg & 255, value);
 	    } else {
@@ -649,7 +652,8 @@ PP(pp_sort)
     else {
 	if (max > 1) {
 	    MEXTEND(SP, 20);	/* Can't afford stack realloc on signal. */
-	    qsort((char*)(ORIGMARK+1), max, sizeof(SV*), sortcmp);
+	    qsort((char*)(ORIGMARK+1), max, sizeof(SV*),
+		  (op->op_private & OPpLOCALE) ? sortcmp_locale : sortcmp);
 	}
     }
     stack_sp = ORIGMARK + max;
@@ -707,18 +711,16 @@ PP(pp_flop)
 	I32 max;
 
 	if (SvNIOKp(left) || !SvPOKp(left) ||
-	  (looks_like_number(left) && *SvPVX(left) != '0') ) {
-	    SV *sv_iv;
-
+	  (looks_like_number(left) && *SvPVX(left) != '0') )
+	{
 	    i = SvIV(left);
 	    max = SvIV(right);
-	    if (max > i)
+	    if (max >= i) {
+		EXTEND_MORTAL(max - i + 1);
 		EXTEND(SP, max - i + 1);
-	    sv_iv = sv_2mortal(newSViv(i));
-	    if (i++ <= max) PUSHs(sv_iv);
+	    }
 	    while (i <= max) {
-		sv = sv_mortalcopy(sv_iv);
-		sv_setiv(sv,i++);
+		sv = sv_2mortal(newSViv(i++));
 		PUSHs(sv);
 	    }
 	}
@@ -945,6 +947,7 @@ die(pat, va_alist)
 	PUSHs(sv_2mortal(newSVpv(message,0)));
 	PUTBACK;
 	perl_call_sv((SV*)cv, G_DISCARD);
+	message = mess(pat, &args);	/* Static buffer could be reused. */
     }
     restartop = die_where(message);
     if ((!restartop && was_in_eval) || oldrunlevel > 1)
@@ -1193,63 +1196,15 @@ sortcmp(a, b)
 const void *a;
 const void *b;
 {
-    register SV *str1 = *(SV **) a;
-    register SV *str2 = *(SV **) b;
-    I32 retval;
+    return sv_cmp(*(SV **)a, *(SV **)b);
+}
 
-    if (!SvPOKp(str1)) {
-	if (!SvPOKp(str2))
-	    return 0;
-	else
-	    return -1;
-    }
-    if (!SvPOKp(str2))
-	return 1;
-
-    if (lc_collate_active) {	/* NOTE: this is the LC_COLLATE branch */
-      register char * pv1, * pv2, * pvx;
-      STRLEN cur1, cur2, curx;
-
-      pv1 = SvPV(str1, cur1);
-      pvx = mem_collxfrm(pv1, cur1, &curx);
-      pv1 = pvx;
-      cur1 = curx;
-
-      pv2 = SvPV(str2, cur2);
-      pvx = mem_collxfrm(pv2, cur2, &curx);
-      pv2 = pvx;
-      cur2 = curx;
-
-      retval = memcmp((void *)pv1, (void *)pv2, cur1 < cur2 ? cur1 : cur2);
-
-      Safefree(pv1);
-      Safefree(pv2);
-
-      if (retval)
-	return retval < 0 ? -1 : 1;
-
-      if (cur1 == cur2)
-	return 0;
-      else
-	return cur1 < cur2 ? -1 : 1;
-    }
-
-    /* NOTE: this is the non-LC_COLLATE area */
-
-    if (SvCUR(str1) < SvCUR(str2)) {
-	/*SUPPRESS 560*/
-	if (retval = memcmp(SvPVX(str1), SvPVX(str2), SvCUR(str1)))
-	    return retval;
-	else
-	    return -1;
-    }
-    /*SUPPRESS 560*/
-    else if (retval = memcmp(SvPVX(str1), SvPVX(str2), SvCUR(str2)))
-	return retval;
-    else if (SvCUR(str1) == SvCUR(str2))
-	return 0;
-    else
-	return 1;
+static int
+sortcmp_locale(a, b)
+const void *a;
+const void *b;
+{
+    return sv_cmp_locale(*(SV **)a, *(SV **)b);
 }
 
 PP(pp_reset)
@@ -2117,6 +2072,7 @@ PP(pp_require)
 
     sv = POPs;
     if (SvNIOKp(sv) && !SvPOKp(sv)) {
+	NUMERIC_STANDARD();
 	if (atof(patchlevel) + 0.00000999 < SvNV(sv))
 	    DIE("Perl %s required--this is only version %s, stopped",
 		SvPV(sv,na),patchlevel);
@@ -2142,8 +2098,8 @@ PP(pp_require)
       || (tmpname[0] && tmpname[1] == ':')
 #endif
 #ifdef VMS
-	|| (strchr(tmpname,':') || ((*tmpname == '[' || *tmpname == '<') &&
-	    (tmpname[1] == '-' || tmpname[1] == ']' || tmpname[1] == '>')))
+	|| (strchr(tmpname,':')  || ((*tmpname == '[' || *tmpname == '<') &&
+	    (isALNUM(tmpname[1]) || strchr("$-_]>",tmpname[1]))))
 #endif
     )
     {
@@ -2152,13 +2108,15 @@ PP(pp_require)
     else {
 	AV *ar = GvAVn(incgv);
 	I32 i;
-
-	for (i = 0; i <= AvFILL(ar); i++) {
 #ifdef VMS
+	char unixified[256];
+	if (tounixspec_ts(tmpname,unixified) != NULL)
+	  for (i = 0; i <= AvFILL(ar); i++) {
 	    if (tounixpath_ts(SvPVx(*av_fetch(ar, i, TRUE), na),buf) == NULL)
 		continue;
-	    strcat(buf,name);
+	    strcat(buf,unixified);
 #else
+	for (i = 0; i <= AvFILL(ar); i++) {
 	    (void)sprintf(buf, "%s/%s",
 		SvPVx(*av_fetch(ar, i, TRUE), na), name);
 #endif
@@ -2418,7 +2376,7 @@ SV *sv;
     bool ischop;
 
     if (len == 0)
-	die("Null picture in formline");
+	croak("Null picture in formline");
     
     New(804, fops, (send - s)*3+10, U16);    /* Almost certainly too long... */
     fpc = fops;

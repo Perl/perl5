@@ -26,6 +26,12 @@
 #  endif
 #endif
 
+#define TAINT_FROM_REGEX(sv,rx) \
+	if ((rx)->exec_tainted) {	\
+	    SvTAINTED_on(sv);		\
+	} else				\
+	    SvTAINTED_off(sv);
+
 /*
  * Use the "DESTRUCTOR" scope cleanup to reinstate magic.
  */
@@ -269,28 +275,31 @@ MAGIC *mg;
     register I32 paren;
     register char *s;
     register I32 i;
+    register REGEXP *rx;
     char *t;
 
     switch (*mg->mg_ptr) {
     case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9': case '&':
-	if (curpm) {
+	if (curpm && (rx = curpm->op_pmregexp)) {
 	    paren = atoi(mg->mg_ptr);
 	  getparen:
-	    if (curpm->op_pmregexp &&
-	      paren <= curpm->op_pmregexp->nparens &&
-	      (s = curpm->op_pmregexp->startp[paren]) &&
-	      (t = curpm->op_pmregexp->endp[paren]) ) {
+	    if (paren <= rx->nparens &&
+		(s = rx->startp[paren]) &&
+		(t = rx->endp[paren]))
+	    {
 		i = t - s;
-		if (i >= 0)
+		if (i >= 0) {
+		    TAINT_IF(rx->exec_tainted);
 		    return i;
+		}
 	    }
 	}
 	return 0;
 	break;
     case '+':
-	if (curpm) {
-	    paren = curpm->op_pmregexp->lastparen;
+	if (curpm && (rx = curpm->op_pmregexp)) {
+	    paren = rx->lastparen;
 	    if (!paren)
 		return 0;
 	    goto getparen;
@@ -298,20 +307,21 @@ MAGIC *mg;
 	return 0;
 	break;
     case '`':
-	if (curpm) {
-	    if (curpm->op_pmregexp &&
-	      (s = curpm->op_pmregexp->subbeg) ) {
-		i = curpm->op_pmregexp->startp[0] - s;
-		if (i >= 0)
+	if (curpm && (rx = curpm->op_pmregexp)) {
+	    if ((s = rx->subbeg)) {
+		i = rx->startp[0] - s;
+		if (i >= 0) {
+		    TAINT_IF(rx->exec_tainted);
 		    return i;
+		}
 	    }
 	}
 	return 0;
     case '\'':
-	if (curpm) {
-	    if (curpm->op_pmregexp &&
-	      (s = curpm->op_pmregexp->endp[0]) ) {
-		return (STRLEN) (curpm->op_pmregexp->subend - s);
+	if (curpm && (rx = curpm->op_pmregexp)) {
+	    if ((s = rx->endp[0])) {
+		TAINT_IF(rx->exec_tainted);
+		return (STRLEN) (rx->subend - s);
 	    }
 	}
 	return 0;
@@ -336,6 +346,7 @@ MAGIC *mg;
     register I32 paren;
     register char *s;
     register I32 i;
+    register REGEXP *rx;
     char *t;
 
     switch (*mg->mg_ptr) {
@@ -399,19 +410,17 @@ MAGIC *mg;
 	break;
     case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9': case '&':
-	if (curpm) {
+	if (curpm && (rx = curpm->op_pmregexp)) {
 	    paren = atoi(GvENAME((GV*)mg->mg_obj));
 	  getparen:
-	    if (curpm->op_pmregexp &&
-	      paren <= curpm->op_pmregexp->nparens &&
-	      (s = curpm->op_pmregexp->startp[paren]) &&
-	      (t = curpm->op_pmregexp->endp[paren]) ) {
+	    if (paren <= rx->nparens &&
+		(s = rx->startp[paren]) &&
+		(t = rx->endp[paren]))
+	    {
 		i = t - s;
 		if (i >= 0) {
-		    MAGIC *tmg;
 		    sv_setpvn(sv,s,i);
-		    if (tainting && (tmg = mg_find(sv,'t')))
-			tmg->mg_len = 0;	/* guarantee $1 untainted */
+		    TAINT_FROM_REGEX(sv,rx);
 		    break;
 		}
 	    }
@@ -419,20 +428,20 @@ MAGIC *mg;
 	sv_setsv(sv,&sv_undef);
 	break;
     case '+':
-	if (curpm) {
-	    paren = curpm->op_pmregexp->lastparen;
+	if (curpm && (rx = curpm->op_pmregexp)) {
+	    paren = rx->lastparen;
 	    if (paren)
 		goto getparen;
 	}
 	sv_setsv(sv,&sv_undef);
 	break;
     case '`':
-	if (curpm) {
-	    if (curpm->op_pmregexp &&
-	      (s = curpm->op_pmregexp->subbeg) ) {
-		i = curpm->op_pmregexp->startp[0] - s;
+	if (curpm && (rx = curpm->op_pmregexp)) {
+	    if ((s = rx->subbeg)) {
+		i = rx->startp[0] - s;
 		if (i >= 0) {
 		    sv_setpvn(sv,s,i);
+		    TAINT_FROM_REGEX(sv,rx);
 		    break;
 		}
 	    }
@@ -440,10 +449,10 @@ MAGIC *mg;
 	sv_setsv(sv,&sv_undef);
 	break;
     case '\'':
-	if (curpm) {
-	    if (curpm->op_pmregexp &&
-	      (s = curpm->op_pmregexp->endp[0]) ) {
-		sv_setpvn(sv,s, curpm->op_pmregexp->subend - s);
+	if (curpm && (rx = curpm->op_pmregexp)) {
+	    if ((s = rx->endp[0])) {
+		sv_setpvn(sv,s, rx->subend - s);
+		TAINT_FROM_REGEX(sv,rx);
 		break;
 	    }
 	}
@@ -1106,10 +1115,8 @@ magic_gettaint(sv,mg)
 SV* sv;
 MAGIC* mg;
 {
-    if (mg->mg_len & 1)
-	tainted = TRUE;
-    else if (mg->mg_len & 2 && mg->mg_obj == sv)	/* kludge */
-	tainted = TRUE;
+    TAINT_IF((mg->mg_len & 1) ||
+	     (mg->mg_len & 2) && mg->mg_obj == sv);	/* kludge */
     return 0;
 }
 
@@ -1179,6 +1186,19 @@ MAGIC* mg;
 
     if (uf && uf->uf_set)
 	(*uf->uf_set)(uf->uf_index, sv);
+    return 0;
+}
+
+int
+magic_setcollxfrm(sv,mg)
+SV* sv;
+MAGIC* mg;
+{
+    /*
+     * René Descartes said "I think not."
+     * and vanished with a faint plop.
+     */
+    sv_unmagic(sv, 'o');
     return 0;
 }
 
@@ -1436,7 +1456,8 @@ MAGIC* mg;
 		if (origargv[i] == s + 1)
 		    s += strlen(++s);	/* this one is ok too */
 	    }
-	    if (origenviron[0] == s + 1) {	/* can grab env area too? */
+	    /* can grab env area too? */
+	    if (origenviron && origenviron[0] == s + 1) {
 		my_setenv("NoNeSuCh", Nullch);
 					    /* force copy of environment */
 		for (i = 0; origenviron[i]; i++)

@@ -1,0 +1,156 @@
+#!./perl
+
+print "1..30\n";
+
+chdir('op') || die "sysio.t: cannot look for myself: $!";
+
+open(I, 'sysio.t') || die "sysio.t: cannot find myself: $!";
+
+$x = 'abc';
+
+# should not be able to do negative lengths
+eval { sysread(I, $x, -1) };
+print 'not ' unless ($@ =~ /^Negative length /);
+print "ok 1\n";
+
+# $x should be intact
+print 'not ' unless ($x eq 'abc');
+print "ok 2\n";
+
+# should not be able to read before the buffer
+eval { sysread(I, $x, 1, -4) };
+print 'not ' unless ($x eq 'abc');
+print "ok 3\n";
+
+# $x should be intact
+print 'not ' unless ($x eq 'abc');
+print "ok 4\n";
+
+$a ='0123456789';
+
+# default offset 0
+print 'not ' unless(sysread(I, $a, 3) == 3);
+print "ok 5\n";
+
+# $a should be as follows
+print 'not ' unless ($a eq '#!.');
+print "ok 6\n";
+
+# reading past the buffer should zero pad
+print 'not ' unless(sysread(I, $a, 2, 5) == 2);
+print "ok 7\n";
+
+# the zero pad should be seen now
+print 'not ' unless ($a eq "#!.\0\0/p");
+print "ok 8\n";
+
+# try changing the last two characters of $a
+print 'not ' unless(sysread(I, $a, 3, -2) == 3);
+print "ok 9\n";
+
+# the last two characters of $a should have changed (into three)
+print 'not ' unless ($a eq "#!.\0\0erl");
+print "ok 10\n";
+
+$outfile = 'sysio.out';
+
+open(O, ">$outfile") || die "sysio.t: cannot write $outfile: $!";
+
+select(O); $|=1; select(STDOUT);
+
+# cannot write negative lengths
+eval { syswrite(O, $x, -1) };
+print 'not ' unless ($@ =~ /^Negative length /);
+print "ok 11\n";
+
+# $x still intact
+print 'not ' unless ($x eq 'abc');
+print "ok 12\n";
+
+# $outfile still intact
+print 'not ' if (-s $outfile);
+print "ok 13\n";
+
+# should not be able to write from after the buffer
+eval { syswrite(O, $x, 1, 3) };
+print 'not ' unless ($@ =~ /^Offset outside string /);
+print "ok 14\n";
+
+# $x still intact
+print 'not ' unless ($x eq 'abc');
+print "ok 15\n";
+
+# $outfile still intact
+print 'not ' if (-s $outfile);
+print "ok 16\n";
+
+# should not be able to write from before the buffer
+
+eval { syswrite(O, $x, 1, -4) };
+print 'not ' unless ($@ =~ /^Offset outside string /);
+print "ok 17\n";
+
+# $x still intact
+print 'not ' unless ($x eq 'abc');
+print "ok 18\n";
+
+# $outfile still intact
+print 'not ' if (-s $outfile);
+print "ok 19\n";
+
+# default offset 0
+print 'not ' unless (syswrite(O, $a, 2) == 2);
+print "ok 20\n";
+
+# $a still intact
+print 'not ' unless ($a eq "#!.\0\0erl");
+print "ok 21\n";
+
+# $outfile should have grown now
+print 'not ' unless (-s $outfile == 2);
+print "ok 22\n";
+
+# with offset
+print 'not ' unless (syswrite(O, $a, 2, 5) == 2);
+print "ok 23\n";
+
+# $a still intact
+print 'not ' unless ($a eq "#!.\0\0erl");
+print "ok 24\n";
+
+# $outfile should have grown now
+print 'not ' unless (-s $outfile == 4);
+print "ok 25\n";
+
+# with negative offset and a bit too much length
+print 'not ' unless (syswrite(O, $a, 5, -3) == 3);
+print "ok 26\n";
+
+# $a still intact
+print 'not ' unless ($a eq "#!.\0\0erl");
+print "ok 27\n";
+
+# $outfile should have grown now
+print 'not ' unless (-s $outfile == 7);
+print "ok 28\n";
+
+close(O);
+
+open(I, $outfile) || die "sysio.t: cannot read $outfile: $!";
+
+$b = 'xyz';
+
+# reading too much only return as much as available
+print 'not ' unless (sysread(I, $b, 100) == 7);
+print "ok 29\n";
+# this we should have
+print 'not ' unless ($b eq '#!ererl');
+print "ok 30\n";
+
+close(I);
+
+unlink $outfile;
+
+1;
+
+# eof

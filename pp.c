@@ -313,6 +313,7 @@ PP(pp_refgen)
 	MARK[1] = *SP;
 	SP = MARK + 1;
     }
+    EXTEND_MORTAL(SP - MARK);
     while (MARK < SP) {
 	sv = *++MARK;
 	rv = sv_newmortal();
@@ -421,13 +422,6 @@ PP(pp_study)
 	else
 	    snext[pos] = -pos;
 	sfirst[ch] = pos;
-
-	/* If there were any case insensitive searches, we must assume they
-	 * all are.  This speeds up insensitive searches much more than
-	 * it slows down sensitive ones.
-	 */
-	if (sawi)
-	    sfirst[fold[ch]] = pos;
     }
 
     SvSCREAM_on(sv);
@@ -859,7 +853,10 @@ PP(pp_slt)
     dSP; tryAMAGICbinSET(slt,0); 
     {
       dPOPTOPssrl;
-      SETs( sv_cmp(left, right) < 0 ? &sv_yes : &sv_no );
+      int cmp = ((op->op_private & OPpLOCALE)
+		 ? sv_cmp_locale(left, right)
+		 : sv_cmp(left, right));
+      SETs( cmp < 0 ? &sv_yes : &sv_no );
       RETURN;
     }
 }
@@ -869,7 +866,10 @@ PP(pp_sgt)
     dSP; tryAMAGICbinSET(sgt,0); 
     {
       dPOPTOPssrl;
-      SETs( sv_cmp(left, right) > 0 ? &sv_yes : &sv_no );
+      int cmp = ((op->op_private & OPpLOCALE)
+		 ? sv_cmp_locale(left, right)
+		 : sv_cmp(left, right));
+      SETs( cmp > 0 ? &sv_yes : &sv_no );
       RETURN;
     }
 }
@@ -879,7 +879,10 @@ PP(pp_sle)
     dSP; tryAMAGICbinSET(sle,0); 
     {
       dPOPTOPssrl;
-      SETs( sv_cmp(left, right) <= 0 ? &sv_yes : &sv_no );
+      int cmp = ((op->op_private & OPpLOCALE)
+		 ? sv_cmp_locale(left, right)
+		 : sv_cmp(left, right));
+      SETs( cmp <= 0 ? &sv_yes : &sv_no );
       RETURN;
     }
 }
@@ -889,7 +892,10 @@ PP(pp_sge)
     dSP; tryAMAGICbinSET(sge,0); 
     {
       dPOPTOPssrl;
-      SETs( sv_cmp(left, right) >= 0 ? &sv_yes : &sv_no );
+      int cmp = ((op->op_private & OPpLOCALE)
+		 ? sv_cmp_locale(left, right)
+		 : sv_cmp(left, right));
+      SETs( cmp >= 0 ? &sv_yes : &sv_no );
       RETURN;
     }
 }
@@ -899,7 +905,10 @@ PP(pp_sne)
     dSP; tryAMAGICbinSET(sne,0); 
     {
       dPOPTOPssrl;
-      SETs( !sv_eq(left, right) ? &sv_yes : &sv_no );
+      bool ne = ((op->op_private & OPpLOCALE)
+		 ? (sv_cmp_locale(left, right) != 0)
+		 : !sv_eq(left, right));
+      SETs( ne ? &sv_yes : &sv_no );
       RETURN;
     }
 }
@@ -909,7 +918,10 @@ PP(pp_scmp)
     dSP; dTARGET;  tryAMAGICbin(scmp,0);
     {
       dPOPTOPssrl;
-      SETi( sv_cmp(left, right) );
+      int cmp = ((op->op_private & OPpLOCALE)
+		 ? sv_cmp_locale(left, right)
+		 : sv_cmp(left, right));
+      SETi( cmp );
       RETURN;
     }
 }
@@ -988,7 +1000,7 @@ PP(pp_negate)
 	else if (SvPOKp(sv)) {
 	    STRLEN len;
 	    char *s = SvPV(sv, len);
-	    if (isALPHA(*s) || *s == '_') {
+	    if (isIDFIRST(*s)) {
 		sv_setpvn(TARG, "-", 1);
 		sv_catsv(TARG, sv);
 	    }
@@ -1311,8 +1323,10 @@ PP(pp_log)
     {
       double value;
       value = POPn;
-      if (value <= 0.0)
+      if (value <= 0.0) {
+	NUMERIC_STANDARD();
 	DIE("Can't take log of %g", value);
+      }
       value = log(value);
       XPUSHn(value);
       RETURN;
@@ -1325,8 +1339,10 @@ PP(pp_sqrt)
     {
       double value;
       value = POPn;
-      if (value < 0.0)
+      if (value < 0.0) {
+	NUMERIC_STANDARD();
 	DIE("Can't take sqrt of %g", value);
+      }
       value = sqrt(value);
       XPUSHn(value);
       RETURN;
@@ -1613,7 +1629,14 @@ PP(pp_rindex)
 PP(pp_sprintf)
 {
     dSP; dMARK; dORIGMARK; dTARGET;
+#ifdef LC_NUMERIC
+    if (op->op_private & OPpLOCALE)
+	NUMERIC_LOCAL();
+    else
+	NUMERIC_STANDARD();
+#endif /* LC_NUMERIC */
     do_sprintf(TARG, SP-MARK, MARK+1);
+    TAINT_IF(SvTAINTED(TARG));
     SP = ORIGMARK;
     PUSHTARG;
     RETURN;
@@ -1685,8 +1708,15 @@ PP(pp_ucfirst)
 	SETs(sv);
     }
     s = SvPV_force(sv, na);
-    if (isLOWER(*s))
-	*s = toUPPER(*s);
+    if (*s) {
+	if (op->op_private & OPpLOCALE) {
+	    TAINT;
+	    SvTAINTED_on(sv);
+	    *s = toUPPER_LC(*s);
+	}
+	else
+	    *s = toUPPER(*s);
+    }
 
     RETURN;
 }
@@ -1704,8 +1734,15 @@ PP(pp_lcfirst)
 	SETs(sv);
     }
     s = SvPV_force(sv, na);
-    if (isUPPER(*s))
-	*s = toLOWER(*s);
+    if (*s) {
+	if (op->op_private & OPpLOCALE) {
+	    TAINT;
+	    SvTAINTED_on(sv);
+	    *s = toLOWER_LC(*s);
+	}
+	else
+	    *s = toLOWER(*s);
+    }
 
     SETs(sv);
     RETURN;
@@ -1716,7 +1753,6 @@ PP(pp_uc)
     dSP;
     SV *sv = TOPs;
     register char *s;
-    register char *send;
     STRLEN len;
 
     if (!SvPADTMP(sv)) {
@@ -1725,12 +1761,21 @@ PP(pp_uc)
 	sv = TARG;
 	SETs(sv);
     }
+
     s = SvPV_force(sv, len);
-    send = s + len;
-    while (s < send) {
-	if (isLOWER(*s))
-	    *s = toUPPER(*s);
-	s++;
+    if (len) {
+	register char *send = s + len;
+
+	if (op->op_private & OPpLOCALE) {
+	    TAINT;
+	    SvTAINTED_on(sv);
+	    for (; s < send; s++)
+		*s = toUPPER_LC(*s);
+	}
+	else {
+	    for (; s < send; s++)
+		*s = toUPPER(*s);
+	}
     }
     RETURN;
 }
@@ -1740,7 +1785,6 @@ PP(pp_lc)
     dSP;
     SV *sv = TOPs;
     register char *s;
-    register char *send;
     STRLEN len;
 
     if (!SvPADTMP(sv)) {
@@ -1749,12 +1793,21 @@ PP(pp_lc)
 	sv = TARG;
 	SETs(sv);
     }
+
     s = SvPV_force(sv, len);
-    send = s + len;
-    while (s < send) {
-	if (isUPPER(*s))
-	    *s = toLOWER(*s);
-	s++;
+    if (len) {
+	register char *send = s + len;
+
+	if (op->op_private & OPpLOCALE) {
+	    TAINT;
+	    SvTAINTED_on(sv);
+	    for (; s < send; s++)
+		*s = toLOWER_LC(*s);
+	}
+	else {
+	    for (; s < send; s++)
+		*s = toLOWER(*s);
+	}
     }
     RETURN;
 }
@@ -2098,6 +2151,7 @@ PP(pp_splice)
 	    MEXTEND(MARK, length);
 	    Copy(AvARRAY(ary)+offset, MARK, length, SV*);
 	    if (AvREAL(ary)) {
+		EXTEND_MORTAL(length);
 		for (i = length, dst = MARK; i; i--)
 		    sv_2mortal(*dst++);	/* free them eventualy */
 	    }
@@ -2192,6 +2246,7 @@ PP(pp_splice)
 	    if (length) {
 		Copy(tmparyval, MARK, length, SV*);
 		if (AvREAL(ary)) {
+		    EXTEND_MORTAL(length);
 		    for (i = length, dst = MARK; i; i--)
 			sv_2mortal(*dst++);	/* free them eventualy */
 		}
@@ -2574,6 +2629,7 @@ PP(pp_unpack)
 	    }
 	    else {
 		EXTEND(SP, len);
+		EXTEND_MORTAL(len);
 		while (len-- > 0) {
 		    aint = *s++;
 		    if (aint >= 128)	/* fake up signed chars */
@@ -2596,6 +2652,7 @@ PP(pp_unpack)
 	    }
 	    else {
 		EXTEND(SP, len);
+		EXTEND_MORTAL(len);
 		while (len-- > 0) {
 		    auint = *s++ & 255;
 		    sv = NEWSV(37, 0);
@@ -2617,6 +2674,7 @@ PP(pp_unpack)
 	    }
 	    else {
 		EXTEND(SP, len);
+		EXTEND_MORTAL(len);
 		while (len-- > 0) {
 		    Copy(s, &ashort, 1, I16);
 		    s += sizeof(I16);
@@ -2649,6 +2707,7 @@ PP(pp_unpack)
 	    }
 	    else {
 		EXTEND(SP, len);
+		EXTEND_MORTAL(len);
 		while (len-- > 0) {
 		    Copy(s, &aushort, 1, U16);
 		    s += sizeof(U16);
@@ -2682,6 +2741,7 @@ PP(pp_unpack)
 	    }
 	    else {
 		EXTEND(SP, len);
+		EXTEND_MORTAL(len);
 		while (len-- > 0) {
 		    Copy(s, &aint, 1, int);
 		    s += sizeof(int);
@@ -2707,6 +2767,7 @@ PP(pp_unpack)
 	    }
 	    else {
 		EXTEND(SP, len);
+		EXTEND_MORTAL(len);
 		while (len-- > 0) {
 		    Copy(s, &auint, 1, unsigned int);
 		    s += sizeof(unsigned int);
@@ -2735,6 +2796,7 @@ PP(pp_unpack)
 	    }
 	    else {
 		EXTEND(SP, len);
+		EXTEND_MORTAL(len);
 		while (len-- > 0) {
 		    Copy(s, &along, 1, I32);
 		    s += sizeof(I32);
@@ -2770,6 +2832,7 @@ PP(pp_unpack)
 	    }
 	    else {
 		EXTEND(SP, len);
+		EXTEND_MORTAL(len);
 		while (len-- > 0) {
 		    Copy(s, &aulong, 1, U32);
 		    s += sizeof(U32);
@@ -2792,6 +2855,7 @@ PP(pp_unpack)
 	    if (len > along)
 		len = along;
 	    EXTEND(SP, len);
+	    EXTEND_MORTAL(len);
 	    while (len-- > 0) {
 		if (sizeof(char*) > strend - s)
 		    break;
@@ -2806,61 +2870,47 @@ PP(pp_unpack)
 	    }
 	    break;
 	case 'w':
-	    along = (strend - s) / sizeof(char);
-	    if (len > along)
-		len = along;
 	    EXTEND(SP, len);
-            { 
-              I8  bytes = 0;
+	    EXTEND_MORTAL(len);
+	    { 
+		UV auv = 0;
+		U32 bytes = 0;
+		
+		while ((len > 0) && (s < strend)) {
+		    auv = (auv << 7) | (*s & 0x7f);
+		    if (!(*s++ & 0x80)) {
+			bytes = 0;
+			sv = NEWSV(40, 0);
+			sv_setuv(sv, auv);
+			PUSHs(sv_2mortal(sv));
+			len--;
+			auv = 0;
+		    }
+		    else if (++bytes >= sizeof(UV)) {	/* promote to string */
+			char decn[sizeof(UV) * 3 + 1];
+			char *t;
 
-              auint = 0;
-              while  (len > 0) {
-                if (s >= strend) {
-                  if (auint) {
-                    croak("Unterminated compressed integer");
-                  } else {
-                    break;
-                  }
-                }
-                auint = (auint << 7) | (*s & 0x7f);
-                if (!(*s & 0x80)) {
-                  sv = NEWSV(40, 0);
-                  sv_setiv(sv, (I32) auint);
-                  PUSHs(sv_2mortal(sv));
-                  len--;
-                  auint = 0;
-                  bytes = 0;
-                } else if (++bytes >= sizeof(auint)) {	/* promote to string */
-                  char            zero[10];
-
-                  (void) sprintf(zero, "%010ld", auint);
-                  sv = newSVpv(zero, 10);
-            
-                  while (*s &  0x80) {
-                    sv = mul128(sv, (U8) (*(++s) & 0x7f));
-                    if (s >= strend) {
-                      croak("Unterminated compressed integer");
-                    }
-                  }
-                  /* remove leading '0's */
-                  {
-                    char           *s = SvPV(sv, na);
-            
-                    while (*s == '0') {
-                      s++;
-                      na--;
-                    }
-                    /* overlapping copy !! */
-                    sv_setpvn(sv, s, na);
-                  }
-                  PUSHs(sv_2mortal(sv));
-                  len--;
-                  auint = 0;
-                  bytes = 0;
-                }
-                s++;
-              }
-            }
+			(void) sprintf(decn, "%0*ld", sizeof(decn) - 1, auv);
+			sv = newSVpv(decn, 0);
+			while (s < strend) {
+			    sv = mul128(sv, *s & 0x7f);
+			    if (!(*s++ & 0x80)) {
+				bytes = 0;
+				break;
+			    }
+			}
+			t = SvPV(sv, na);
+			while (*t == '0')
+			    t++;
+			sv_chop(sv, t);
+			PUSHs(sv_2mortal(sv));
+			len--;
+			auv = 0;
+		    }
+		}
+		if ((s >= strend) && bytes)
+		    croak("Unterminated compressed integer");
+	    }
 	    break;
 	case 'P':
 	    EXTEND(SP, 1);
@@ -2878,6 +2928,7 @@ PP(pp_unpack)
 #ifdef HAS_QUAD
 	case 'q':
 	    EXTEND(SP, len);
+	    EXTEND_MORTAL(len);
 	    while (len-- > 0) {
 		if (s + sizeof(Quad_t) > strend)
 		    aquad = 0;
@@ -2892,6 +2943,7 @@ PP(pp_unpack)
 	    break;
 	case 'Q':
 	    EXTEND(SP, len);
+	    EXTEND_MORTAL(len);
 	    while (len-- > 0) {
 		if (s + sizeof(unsigned Quad_t) > strend)
 		    auquad = 0;
@@ -2920,6 +2972,7 @@ PP(pp_unpack)
 	    }
 	    else {
 		EXTEND(SP, len);
+		EXTEND_MORTAL(len);
 		while (len-- > 0) {
 		    Copy(s, &afloat, 1, float);
 		    s += sizeof(float);
@@ -2943,6 +2996,7 @@ PP(pp_unpack)
 	    }
 	    else {
 		EXTEND(SP, len);
+		EXTEND_MORTAL(len);
 		while (len-- > 0) {
 		    Copy(s, &adouble, 1, double);
 		    s += sizeof(double);
@@ -3418,69 +3472,61 @@ PP(pp_pack)
 	    break;
 	case 'w':
             while (len-- > 0) {
-              fromstr = NEXTFROM;
-              adouble = floor((double)SvNV(fromstr));
+		fromstr = NEXTFROM;
+		adouble = floor(SvNV(fromstr));
 
-              if (adouble <= PERL_ULONG_MAX) {	/* we can use integers */
-                unsigned char   buf[5];         /* buffer for compressed int */
-                unsigned char  *in = buf + 4;
-            
-                auint = U_I(adouble);
+		if (adouble < 0)
+		    croak("Cannot compress negative numbers");
 
-                do {
-                  *(in--) = (unsigned char) ((auint & 0x7f) |  0x80); 
-                  auint >>= 7;
-                } while (auint);
-                buf[4] &= 0x7f;		/* clear continue bit */
-                sv_catpvn(cat, (char *) in + 1, buf + 4 - in);
-              } else if (SvPOKp(fromstr)) {     /* decimal string arithmetics */
-                char           *from;
-                SV             *norm;
-                STRLEN          len;
+		if (adouble <= UV_MAX) {
+		    char   buf[1 + sizeof(UV)];
+		    char  *in = buf + sizeof(buf);
+		    UV     auv = U_V(adouble);;
+
+		    do {
+			*--in = (auv & 0x7f) | 0x80;
+			auv >>= 7;
+		    } while (auv);
+		    buf[sizeof(buf) - 1] &= 0x7f; /* clear continue bit */
+		    sv_catpvn(cat, in, (buf + sizeof(buf)) - in);
+		}
+		else if (SvPOKp(fromstr)) {  /* decimal string arithmetics */
+		    char           *from, *result, *in;
+		    SV             *norm;
+		    STRLEN          len;
+		    bool            done;
             
-                /* Copy string and check for compliance */
-                from = SvPV(fromstr, len);
-                if ((norm = is_an_int(from, len)) == NULL) {
-                  croak("can compress only unsigned integer");
-              } else {
-                  bool            done = 0;
-                  char           *result, *in;
-            
-                  New('w', result, len, char);
-                  in = result + len;
-                  while (!done) {
-                    U8              digit = div128(norm, &done);
-            
-                    *(--in) = digit | 0x80;
-                  }
-                  result[len - 1] &= 0x7F;
-                  sv_catpvn(cat, in, result + len - in);
-                  SvREFCNT_dec(norm);	/* free norm */
+		    /* Copy string and check for compliance */
+		    from = SvPV(fromstr, len);
+		    if ((norm = is_an_int(from, len)) == NULL)
+			croak("can compress only unsigned integer");
+
+		    New('w', result, len, char);
+		    in = result + len;
+		    done = FALSE;
+		    while (!done)
+			*--in = div128(norm, &done) | 0x80;
+		    result[len - 1] &= 0x7F; /* clear continue bit */
+		    sv_catpvn(cat, in, (result + len) - in);
+		    SvREFCNT_dec(norm);	/* free norm */
                 }
-              } else if (SvNOKp(fromstr)) {
-                I8              msize = sizeof(double) * 2; /* 8/7 <= 2 */
-                unsigned char   buf[sizeof(double) * 2];
-                unsigned char *in = buf + msize -1;
-            
-                if (adouble<0) {
-                  croak("Cannot compress negative numbers");
-                }
-                do  {
-                  double next = adouble/128;
-            
-                  *in = (unsigned char) (adouble - floor(next)*128);
-                  *in |= 0x80;                     /* set continue bit */
-                  if (--in < buf) {                /* this cannot happen ;-) */
-                    croak ("Cannot compress integer");
-                  }
-                  adouble = next;
-                } while (floor(adouble));	/* floor() not necessary? */
-                buf[msize-1] &= 0x7f;              /* clear continue bit */
-                sv_catpvn(cat, (char*) in+1, buf+msize-in-1);
-              } else {
-                croak("Cannot compress non integer");
-              }
-            }
+		else if (SvNOKp(fromstr)) {
+		    char   buf[sizeof(double) * 2];	/* 8/7 <= 2 */
+		    char  *in = buf + sizeof(buf);
+
+		    do {
+			double next = floor(adouble / 128);
+			*--in = (unsigned char)(adouble - (next * 128)) | 0x80;
+			if (--in < buf)  /* this cannot happen ;-) */
+			    croak ("Cannot compress integer");
+			adouble = next;
+		    } while (adouble > 0);
+		    buf[sizeof(buf) - 1] &= 0x7f; /* clear continue bit */
+		    sv_catpvn(cat, in, (buf + sizeof(buf)) - in);
+		}
+		else
+		    croak("Cannot compress non integer");
+	    }
             break;
 	case 'i':
 	    while (len-- > 0) {
@@ -3604,6 +3650,10 @@ PP(pp_split)
 
     if (!pm || !s)
 	DIE("panic: do_split");
+
+    TAINT_IF((pm->op_pmflags & PMf_LOCALE) &&
+	     (pm->op_pmflags & (PMf_WHITE | PMf_SKIPWHITE)));
+
     if (pm->op_pmreplroot)
 	ary = GvAVn((GV*)pm->op_pmreplroot);
     else if (gimme != G_ARRAY)
@@ -3625,8 +3675,14 @@ PP(pp_split)
     base = SP - stack_base;
     orig = s;
     if (pm->op_pmflags & PMf_SKIPWHITE) {
-	while (isSPACE(*s))
-	    s++;
+	if (pm->op_pmflags & PMf_LOCALE) {
+	    while (isSPACE_LC(*s))
+		s++;
+	}
+	else {
+	    while (isSPACE(*s))
+		s++;
+	}
     }
     if (pm->op_pmflags & (PMf_MULTILINE|PMf_SINGLELINE)) {
 	SAVEINT(multiline);
@@ -3637,17 +3693,25 @@ PP(pp_split)
 	limit = maxiters + 2;
     if (pm->op_pmflags & PMf_WHITE) {
 	while (--limit) {
-	    /*SUPPRESS 530*/
-	    for (m = s; m < strend && !isSPACE(*m); m++) ;
+	    m = s;
+	    while (m < strend &&
+		   !((pm->op_pmflags & PMf_LOCALE)
+		     ? isSPACE_LC(*m) : isSPACE(*m)))
+		++m;
 	    if (m >= strend)
 		break;
+
 	    dstr = NEWSV(30, m-s);
 	    sv_setpvn(dstr, s, m-s);
 	    if (!realarray)
 		sv_2mortal(dstr);
 	    XPUSHs(dstr);
-	    /*SUPPRESS 530*/
-	    for (s = m + 1; s < strend && isSPACE(*s); s++) ;
+
+	    s = m + 1;
+	    while (s < strend &&
+		   ((pm->op_pmflags & PMf_LOCALE)
+		    ? isSPACE_LC(*s) : isSPACE(*s)))
+		++s;
 	}
     }
     else if (strEQ("^", rx->precomp)) {
@@ -3668,20 +3732,10 @@ PP(pp_split)
     else if (pm->op_pmshort) {
 	i = SvCUR(pm->op_pmshort);
 	if (i == 1) {
-	    I32 fold = (pm->op_pmflags & PMf_FOLD);
 	    i = *SvPVX(pm->op_pmshort);
-	    if (fold && isUPPER(i))
-		i = toLOWER(i);
 	    while (--limit) {
-		if (fold) {
-		    for ( m = s;
-			  m < strend && *m != i &&
-			    (!isUPPER(*m) || toLOWER(*m) != i);
-			  m++)			/*SUPPRESS 530*/
-			;
-		}
-		else				/*SUPPRESS 530*/
-		    for (m = s; m < strend && *m != i; m++) ;
+		/*SUPPRESS 530*/
+		for (m = s; m < strend && *m != i; m++) ;
 		if (m >= strend)
 		    break;
 		dstr = NEWSV(30, m-s);
@@ -3711,7 +3765,9 @@ PP(pp_split)
     else {
 	maxiters += (strend - s) * rx->nparens;
 	while (s < strend && --limit &&
-	    pregexec(rx, s, strend, orig, 1, Nullsv, TRUE) ) {
+	       pregexec(rx, s, strend, orig, 1, Nullsv, TRUE))
+	{
+	    TAINT_IF(rx->exec_tainted);
 	    if (rx->subbase
 	      && rx->subbase != orig) {
 		m = s;

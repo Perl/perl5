@@ -335,6 +335,7 @@ lib/assert.pl		assertion and panic with stack trace
 lib/bigfloat.pl		An arbitrary precision floating point package
 lib/bigint.pl		An arbitrary precision integer arithmetic package
 lib/bigrat.pl		An arbitrary precision rational arithmetic package
+lib/blib.pm		For "use blib"
 lib/cacheout.pl		Manages output filehandles when you need too many
 lib/chat2.inter		A chat2 with interaction
 lib/chat2.pl		Randal's famous expect-ish routines
@@ -357,6 +358,7 @@ lib/importenv.pl	Perl routine to get environment into variables
 lib/integer.pm		For "use integer"
 lib/less.pm		For "use less"
 lib/lib.pm		For "use lib"
+lib/locale.pm		For "use locale"
 lib/look.pl		A "look" equivalent
 lib/newgetopt.pl	A perl library supporting long option parsing
 lib/open2.pl		Open a two-ended pipe
@@ -653,6 +655,7 @@ t/op/stat.t		See if stat works
 t/op/study.t		See if study works
 t/op/subst.t		See if substitution works
 t/op/substr.t		See if substr works
+t/op/sysio.t		See if sysread and syswrite work
 t/op/tie.t		See if tie/untie functions work
 t/op/time.t		See if time functions work
 t/op/undef.t		See if undef works

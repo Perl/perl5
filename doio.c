@@ -1073,9 +1073,10 @@ register SV **sp;
 
     if (tainting) {
 	while (++mark <= sp) {
-	    MAGIC *mg;
-	    if (SvMAGICAL(*mark) && (mg = mg_find(*mark, 't')) && mg->mg_len & 1)
-		tainted = TRUE;
+	    if (SvTAINTED(*mark)) {
+		TAINT;
+		break;
+	    }
 	}
 	mark = oldmark;
     }

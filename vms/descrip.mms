@@ -65,7 +65,7 @@ OBJVAL = $(MMS$TARGET_NAME)$(O)
 .endif
 
 # Updated by fndvers.com -- do not edit by hand
-PERL_VERSION = 5_00307#
+PERL_VERSION = 5_00308#
 
 
 ARCHDIR =  [.lib.$(ARCH).$(PERL_VERSION)]
@@ -1565,9 +1565,9 @@ cleanlis :
 	- If F$Search("*.Map").nes."" Then Delete/NoConfirm/Log *.Map;*
 
 tidy : cleanlis
-	- If F$Search("*.Opt;-1").nes."" Then Purge/NoConfirm/Log *.Opt
-	- If F$Search("*$(O);-1").nes."" Then Purge/NoConfirm/Log *$(O)
-	- If F$Search("*$(E);-1").nes."" Then Purge/NoConfirm/Log *$(E)
+	- If F$Search("[...]*.Opt;-1").nes."" Then Purge/NoConfirm/Log [...]*.Opt
+	- If F$Search("[...]*$(O);-1").nes."" Then Purge/NoConfirm/Log [...]*$(O)
+	- If F$Search("[...]*$(E);-1").nes."" Then Purge/NoConfirm/Log [...]*$(E)
 	- If F$Search("Config.H;-1").nes."" Then Purge/NoConfirm/Log Config.H
 	- If F$Search("Config.SH;-1").nes."" Then Purge/NoConfirm/Log Config.SH
 	- If F$Search("perly.c;-1").nes."" Then Purge/NoConfirm/Log perly.c
@@ -1592,6 +1592,7 @@ tidy : cleanlis
 	- If F$Search("[.Lib.Pod]*.Pod;-1").nes."" Then Purge/NoConfirm/Log [.Lib.Pod]*.Pod
 	- If F$Search("$(ARCHCORE)*.*").nes."" Then Purge/NoConfirm/Log $(ARCHCORE)*.*
 	- If F$Search("[.utils]*.;-1").nes."" Then Purge/NoConfirm/Log [.utils]*.
+	- If F$Search("[.lib]perlbug.;-1").nes."" Then Purge/NoConfirm/Log [.lib]perlbug.
 	- If F$Search("[.lib.pod]*.;-1").nes."" Then Purge/NoConfirm/Log [.lib.pod]*.
 
 clean : tidy

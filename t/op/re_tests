@@ -53,6 +53,42 @@ a[^-b]c	adc	y	$&	adc
 a[^-b]c	a-c	n	-	-
 a[^]b]c	a]c	n	-	-
 a[^]b]c	adc	y	$&	adc
+\ba\b	a-	y	-	-
+\ba\b	-a	y	-	-
+\ba\b	-a-	y	-	-
+\by\b	xy	n	-	-
+\by\b	yz	n	-	-
+\by\b	xyz	n	-	-
+\Ba\B	a-	n	-	-
+\Ba\B	-a	n	-	-
+\Ba\B	-a-	n	-	-
+\By\b	xy	y	-	-
+\by\B	yz	y	-	-
+\By\B	xyz	y	-	-
+\w	a	y	-	-
+\w	-	n	-	-
+\W	a	n	-	-
+\W	-	y	-	-
+a\sb	a b	y	-	-
+a\sb	a-b	n	-	-
+a\Sb	a b	n	-	-
+a\Sb	a-b	y	-	-
+\d	1	y	-	-
+\d	-	n	-	-
+\D	1	n	-	-
+\D	-	y	-	-
+[\w]	a	y	-	-
+[\w]	-	n	-	-
+[\W]	a	n	-	-
+[\W]	-	y	-	-
+a[\s]b	a b	y	-	-
+a[\s]b	a-b	n	-	-
+a[\S]b	a b	n	-	-
+a[\S]b	a-b	y	-	-
+[\d]	1	y	-	-
+[\d]	-	n	-	-
+[\D]	1	n	-	-
+[\D]	-	y	-	-
 ab|cd	abc	y	$&	ab
 ab|cd	abcd	y	$&	ab
 ()ef	def	y	$&-$1	ef-

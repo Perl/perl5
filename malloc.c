@@ -193,11 +193,11 @@ emergency_sbrk(size)
 	    return (char *)-1;		/* Now die die die... */
 
 	/* Got it, now detach SvPV: */
-	pv = SvPV(sv);
+	pv = SvPV(sv, na);
 	/* Check alignment: */
 	if ((pv - M_OVERHEAD) & (1<<11 - 1)) {
 	    PerlIO_puts(PerlIO_stderr(),"Bad alignment of $^M!\n");
-	    return -1;			/* die die die */
+	    return (char *)-1;		/* die die die */
 	}
 
 	emergency_buffer = pv - M_OVERHEAD;
@@ -362,7 +362,7 @@ morecore(bucket)
   	register union overhead *op;
   	register int rnu;       /* 2^rnu bytes will be requested */
   	register int nblks;     /* become nblks blocks of the desired size */
-	register MEM_SIZE siz;
+	register MEM_SIZE siz, needed;
 	int slack = 0;
 
   	if (nextf[bucket])
@@ -402,15 +402,11 @@ morecore(bucket)
   	rnu = (bucket <= 11) ? 14 : bucket + 3;
 #endif
   	nblks = 1 << (rnu - (bucket + 3));  /* how many blocks to get */
-  	/* if (rnu < bucket)
-		rnu = bucket;	Why anyone needs this? */
+	needed = (MEM_SIZE)1 << rnu;
 #ifdef TWO_POT_OPTIMIZE
-	op = (union overhead *)sbrk((1L << rnu) 
-				    + ( bucket >= (FIRST_BIG_TWO_POT - 3) 
-					? PERL_PAGESIZE : 0));
-#else
-	op = (union overhead *)sbrk(1L << rnu);
+	needed += (bucket >= (FIRST_BIG_TWO_POT - 3) ? PERL_PAGESIZE : 0);
 #endif 
+	op = (union overhead *)sbrk(needed);
 	/* no more room! */
   	if ((int)op == -1 &&
 	    (int)(op = (union overhead *)emergency_sbrk(size)) == -1)

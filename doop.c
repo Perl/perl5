@@ -273,6 +273,11 @@ register SV **sarg;
 		*t = '\0';
 		(void)sprintf(xs,f,SvNV(arg));
 		xlen = strlen(xs);
+#ifdef LC_NUMERIC
+		/* User-defined locales may include arbitrary characters */
+		if (! numeric_standard)
+		    SvTAINTED_on(sv);
+#endif
 		break;
 	    case 's':
 		ch = *(++t);

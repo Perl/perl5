@@ -330,7 +330,7 @@ if ($isvax) {
   print DRVR "\$ Set Verify\n";
   print DRVR "\$ If F\$Search(\"$libperl\").eqs.\"\" Then Library/Object/Create $libperl\n";
   do {
-    $incstr .= ",perlshr_gbl$marord";
+    push(@symfiles,"perlshr_gbl$marord");
     print DRVR "\$ Macro/NoDebug/Object=PerlShr_Gbl${marord}$objsuffix PerlShr_Gbl$marord.Mar\n";
     print DRVR "\$ Library/Object/Replace/Log $libperl PerlShr_Gbl${marord}$objsuffix\n";
   } while (--$marord); 
@@ -345,6 +345,17 @@ if ($isvax) {
   close DRVR;
 }
 
+# Initial hack to permit building of compatible shareable images for a
+# given version of Perl.
+if ($ENV{PERLSHR_USE_GSMATCH}) {
+  my $major = int($] * 1000)                        & 0xFF;  # range 0..255
+  my $minor = int(($] * 1000 - $major) * 100 + 0.5) & 0xFF;  # range 0..255
+  print OPTBLD "GSMATCH=LEQUAL,$major,$minor\n";
+  foreach (@symfiles) {
+    print OPTBLD "CLUSTER=\$\$TRANSFER_VECTOR,,,$_.$objsuffix\n";
+  }
+}
+else { $incstr .= ',' . join(',',@symfiles); }
 # Include object modules and RTLs in options file
 # Linker wants /Include and /Library on different lines
 print OPTBLD "$libperl/Include=($incstr)\n";

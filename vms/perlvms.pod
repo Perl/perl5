@@ -140,13 +140,16 @@ be added to the linker options file F<PGPLOT.Opt> produced
 during the build process for the Perl extension.
 
 By default, the shareable image for an extension is placed
-in the F<[.Lib.Auto.>I<Arch>.I<Extname>F<]> directory of the
+F<[.lib.site_perl.auto>I<Arch>.I<Extname>F<]> directory of the
 installed Perl directory tree (where I<Arch> is F<VMS_VAX> or
-F<VMS_AXP>, followed by the Perl version number, and I<Extname>
-is the name of the extension, with each C<::> translated to C<.>).
+F<VMS_AXP>, and I<Extname> is the name of the extension, with
+each C<::> translated to C<.>).  (See the MakeMaker documentation
+for more details on installation options for extensions.)
 However, it can be manually placed in any of several locations:
-   - the F<[.Lib.Auto.>I<Extname>F<]> subdirectory of one of
-     the directories in C<@INC>, or
+   - the F<[.Lib.Auto.>I<Arch>I<$PVers>I<Extname>F<]> subdirectory
+     of one of the directories in C<@INC> (where I<PVers>
+     is the version of Perl you're using, as supplied in C<$]>,
+     with '.' converted to '_'), or
    - one of the directories in C<@INC>, or
    - a directory which the extensions Perl library module
      passes to the DynaLoader when asking it to map

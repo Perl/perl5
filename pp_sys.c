@@ -787,7 +787,7 @@ PP(pp_getc)
 	gv = argvgv;
     if (!gv || do_eof(gv)) /* make sure we have fp with something */
 	RETPUSHUNDEF;
-    TAINT_IF(1);
+    TAINT;
     sv_setpv(TARG, " ");
     *SvPVX(TARG) = PerlIO_getc(IoIFP(GvIOp(gv))); /* should never be EOF */
     PUSHTARG;
@@ -1007,6 +1007,12 @@ PP(pp_prtf)
 	goto just_say_no;
     }
     else {
+#ifdef LC_NUMERIC
+	if (op->op_private & OPpLOCALE)
+	    NUMERIC_LOCAL();
+	else
+	    NUMERIC_STANDARD();
+#endif /* LC_NUMERIC */
 	do_sprintf(sv, SP - MARK, MARK + 1);
 	if (!do_print(sv, fp))
 	    goto just_say_no;
@@ -1087,6 +1093,7 @@ PP(pp_sysread)
     if (op->op_type == OP_RECV) {
 	bufsize = sizeof buf;
 	buffer = SvGROW(bufsv, length+1);
+	/* 'offset' means 'flags' here */
 	length = recvfrom(PerlIO_fileno(IoIFP(io)), buffer, length, offset,
 	    (struct sockaddr *)buf, &bufsize);
 	if (length < 0)
@@ -1096,8 +1103,8 @@ PP(pp_sysread)
 	(void)SvPOK_only(bufsv);
 	SvSETMAGIC(bufsv);
 	/* This should not be marked tainted if the fp is marked clean */
-	if (tainting && !(IoFLAGS(io) & IOf_UNTAINT))
-	    sv_magic(bufsv, Nullsv, 't', Nullch, 0);
+	if (!(IoFLAGS(io) & IOf_UNTAINT))
+	    SvTAINTED_on(bufsv);
 	SP = ORIGMARK;
 	sv_setpvn(TARG, buf, bufsize);
 	PUSHs(TARG);
@@ -1107,6 +1114,11 @@ PP(pp_sysread)
     if (op->op_type == OP_RECV)
 	DIE(no_sock_func, "recv");
 #endif
+    if (offset < 0) {
+	if (-offset > blen)
+	    DIE("Offset outside string");
+	offset += blen;
+    }
     bufsize = SvCUR(bufsv);
     buffer = SvGROW(bufsv, length+offset+1);
     if (offset > bufsize) { /* Zero any newly allocated space */
@@ -1132,8 +1144,8 @@ PP(pp_sysread)
     (void)SvPOK_only(bufsv);
     SvSETMAGIC(bufsv);
     /* This should not be marked tainted if the fp is marked clean */
-    if (tainting && !(IoFLAGS(io) & IOf_UNTAINT))
-	sv_magic(bufsv, Nullsv, 't', Nullch, 0);
+    if (!(IoFLAGS(io) & IOf_UNTAINT))
+	SvTAINTED_on(bufsv);
     SP = ORIGMARK;
     PUSHi(length);
     RETURN;
@@ -1179,9 +1191,15 @@ PP(pp_send)
 	}
     }
     else if (op->op_type == OP_SYSWRITE) {
-	if (MARK < SP)
+	if (MARK < SP) {
 	    offset = SvIVx(*++MARK);
-	else
+	    if (offset < 0) {
+		if (-offset > blen)
+		    DIE("Offset outside string");
+		offset += blen;
+	    } else if (offset >= blen)
+		DIE("Offset outside string");
+	} else
 	    offset = 0;
 	if (length > blen - offset)
 	    length = blen - offset;
@@ -1293,7 +1311,7 @@ PP(pp_truncate)
 	    int tmpfd;
 
 	    if ((tmpfd = open(SvPV (sv, na), O_RDWR)) < 0)
-	        result = 0;
+		result = 0;
 	    else {
 		if (my_chsize(tmpfd, len) < 0)
 		    result = 0;
@@ -1873,6 +1891,7 @@ PP(pp_stat)
     }
 
     EXTEND(SP, 13);
+    EXTEND_MORTAL(13);
     if (GIMME != G_ARRAY) {
 	if (max)
 	    RETPUSHYES;
@@ -3134,6 +3153,7 @@ PP(pp_gmtime)
 	tmbuf = gmtime(&when);
 
     EXTEND(SP, 9);
+    EXTEND_MORTAL(9);
     if (GIMME != G_ARRAY) {
 	dTARGET;
 	char mybuf[30];
@@ -3974,9 +3994,10 @@ PP(pp_syscall)
 
     if (tainting) {
 	while (++MARK <= SP) {
-	    if (SvGMAGICAL(*MARK) && SvSMAGICAL(*MARK) &&
-	      (mg = mg_find(*MARK, 't')) && mg->mg_len & 1)
-		tainted = TRUE;
+	    if (SvTAINTED(*MARK)) {
+		TAINT;
+		break;
+	    }
 	}
 	MARK = ORIGMARK;
 	TAINT_PROPER("syscall");

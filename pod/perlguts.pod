@@ -655,7 +655,8 @@ To create a mortal variable, use the functions:
     SV*  sv_mortalcopy(SV*)
 
 The first call creates a mortal SV, the second converts an existing SV to
-a mortal SV, the third creates a mortal copy of an existing SV.
+a mortal SV, the third creates a mortal copy of an existing SV (possibly
+destroying it in the process).
 
 The mortal routines are not just for SVs -- AVs and HVs can be made mortal
 by passing their address (and casting them to C<SV*>) to the C<sv_2mortal> or
@@ -848,6 +849,7 @@ The current kinds of Magic Virtual Tables are:
     i        vtbl_isaelem        @ISA array element
     L        0 (but sets RMAGICAL)     Perl Module/Debugger???
     l        vtbl_dbline         Debugger?
+    o        vtbl_collxfrm       Locale Collation
     P        vtbl_pack           Tied Array or Hash
     p        vtbl_packelem       Tied Array or Hash element
     q        vtbl_packelem       Tied Scalar or Handle
@@ -2051,7 +2053,7 @@ Adds magic to an SV.
 =item sv_mortalcopy
 
 Creates a new SV which is a copy of the original SV.  The new SV is marked
-as mortal.
+as mortal.  The old SV may become invalid if it was marked as a temporary.
 
 	SV*	sv_mortalcopy _((SV* oldsv));
 
@@ -2310,9 +2312,13 @@ Note that C<sv_setref_pv> copies the pointer while this copies the string.
 =item sv_setsv
 
 Copies the contents of the source SV C<ssv> into the destination SV C<dsv>.
-The source SV may be destroyed if it is mortal.
+The source SV may be destroyed if it is mortal or temporary.
 
 	void	sv_setsv _((SV* dsv, SV* ssv));
+
+=item SvSetSV
+
+A wrapper around C<sv_setsv>. Safe even if C<dst==ssv>.
 
 =item SvSTASH
 

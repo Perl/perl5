@@ -55,6 +55,31 @@ more_he()
     return new_he();
 }
 
+static HEK *
+save_hek(str, len, hash)
+char *str;
+I32 len;
+U32 hash;
+{
+    char *k;
+    register HEK *hek;
+    
+    New(54, k, sizeof(U32) + sizeof(I32) + len + 1, char);
+    hek = (HEK*)k;
+    Copy(str, HK_KEY(hek), len, char);
+    (HK_KEY(hek))[len] = '\0';
+    HK_LEN(hek) = len;
+    HK_HASH(hek) = hash;
+    return hek;
+}
+
+void
+unshare_hek(hek)
+HEK *hek;
+{
+    unsharepvn(HK_KEY(hek),HK_LEN(hek),HK_HASH(hek));
+}
+
 /* (klen == HEf_SVKEY) is special for MAGICAL hv entries, meaning key slot
  * contains an SV* */
 
@@ -143,13 +168,16 @@ register U32 hash;
 	return 0;
 
     if (SvRMAGICAL(hv) && mg_find((SV*)hv,'P')) {
+	HEK *hek;
+	Newz(74, hek, 1, HEK);
 	sv = sv_newmortal();
 	keysv = sv_2mortal(newSVsv(keysv));
 	mg_copy((SV*)hv, sv, (char*)keysv, HEf_SVKEY);
 	entry = &He;
 	HeVAL(entry) = sv;
-	HeKEY(entry) = (char*)keysv;
-	HeKLEN(entry) = HEf_SVKEY;		/* hent_key is holding an SV* */
+	HeKEY_hk(entry) = hek;
+	HeSVKEY_set(entry, keysv);
+	HeKLEN(entry) = HEf_SVKEY;	/* hent_key is holding an SV* */
 	return entry;
     }
 
@@ -248,13 +276,11 @@ register U32 hash;
     }
 
     entry = new_he();
-    HeKLEN(entry) = klen;
     if (HvSHAREKEYS(hv))
-	HeKEY(entry) = sharepvn(key, klen, hash);
+	HeKEY_hk(entry) = share_hek(key, klen, hash);
     else                                       /* gotta do the real thing */
-	HeKEY(entry) = savepvn(key,klen);
+	HeKEY_hk(entry) = save_hek(key, klen, hash);
     HeVAL(entry) = val;
-    HeHASH(entry) = hash;
     HeNEXT(entry) = *oentry;
     *oentry = entry;
 
@@ -323,13 +349,11 @@ register U32 hash;
     }
 
     entry = new_he();
-    HeKLEN(entry) = klen;
     if (HvSHAREKEYS(hv))
-	HeKEY(entry) = sharepvn(key, klen, hash);
+	HeKEY_hk(entry) = share_hek(key, klen, hash);
     else                                       /* gotta do the real thing */
-	HeKEY(entry) = savepvn(key,klen);
+	HeKEY_hk(entry) = save_hek(key, klen, hash);
     HeVAL(entry) = val;
-    HeHASH(entry) = hash;
     HeNEXT(entry) = *oentry;
     *oentry = entry;
 
@@ -726,12 +750,13 @@ I32 shared;
     if (!hent)
 	return;
     SvREFCNT_dec(HeVAL(hent));
-    if (HeKLEN(hent) == HEf_SVKEY)
-	SvREFCNT_dec((SV*)HeKEY(hent));
-    else if (shared)
-	unsharepvn(HeKEY(hent), HeKLEN(hent), HeHASH(hent));
+    if (HeKLEN(hent) == HEf_SVKEY) {
+	SvREFCNT_dec(HeKEY_sv(hent));
+        Safefree(HeKEY_hk(hent));
+    } else if (shared)
+	unshare_hek(HeKEY_hk(hent));
     else
-	Safefree(HeKEY(hent));
+	Safefree(HeKEY_hk(hent));
     del_he(hent);
 }
 
@@ -743,12 +768,13 @@ I32 shared;
     if (!hent)
 	return;
     sv_2mortal(HeVAL(hent));	/* free between statements */
-    if (HeKLEN(hent) == HEf_SVKEY)
-	sv_2mortal((SV*)HeKEY(hent));
-    else if (shared)
-	unsharepvn(HeKEY(hent), HeKLEN(hent), HeHASH(hent));
+    if (HeKLEN(hent) == HEf_SVKEY) {
+	sv_2mortal(HeKEY_sv(hent));
+	Safefree(HeKEY_hk(hent));
+    } else if (shared)
+	unshare_hek(HeKEY_hk(hent));
     else
-	Safefree(HeKEY(hent));
+	Safefree(HeKEY_hk(hent));
     del_he(hent);
 }
 
@@ -868,18 +894,22 @@ HV *hv;
 	    SvREFCNT_dec(HeSVKEY(entry));	/* get rid of previous key */
 	}
 	else {
+	    HEK *hek;
 	    xhv->xhv_eiter = entry = new_he();	/* only one HE per MAGICAL hash */
 	    Zero(entry, 1, HE);
+	    Newz(74, hek, 1, HEK);
+	    HeKEY_hk(entry) = hek;
 	    HeKLEN(entry) = HEf_SVKEY;
 	}
 	magic_nextpack((SV*) hv,mg,key);
         if (SvOK(key)) {
 	    /* force key to stay around until next time */
-	    HeKEY(entry) = (char*)SvREFCNT_inc(key);
-	    return entry;			/* beware, hent_val is not set */
+	    HeSVKEY_set(entry, SvREFCNT_inc(key));
+	    return entry;		/* beware, hent_val is not set */
         }
 	if (HeVAL(entry))
 	    SvREFCNT_dec(HeVAL(entry));
+	Safefree(HeKEY_hk(entry));
 	del_he(entry);
 	xhv->xhv_eiter = Null(HE*);
 	return Null(HE*);
@@ -913,7 +943,7 @@ register HE *entry;
 I32 *retlen;
 {
     if (HeKLEN(entry) == HEf_SVKEY) {
-	return SvPV((SV*)HeKEY(entry), *(STRLEN*)retlen);
+	return SvPV(HeKEY_sv(entry), *(STRLEN*)retlen);
     }
     else {
 	*retlen = HeKLEN(entry);
@@ -927,7 +957,7 @@ hv_iterkeysv(entry)
 register HE *entry;
 {
     if (HeKLEN(entry) == HEf_SVKEY)
-	return sv_mortalcopy((SV*)HeKEY(entry));
+	return sv_mortalcopy(HeKEY_sv(entry));
     else
 	return sv_2mortal(newSVpv((HeKLEN(entry) ? HeKEY(entry) : ""),
 				  HeKLEN(entry)));
@@ -941,7 +971,9 @@ register HE *entry;
     if (SvRMAGICAL(hv)) {
 	if (mg_find((SV*)hv,'P')) {
 	    SV* sv = sv_newmortal();
-	    mg_copy((SV*)hv, sv, HeKEY(entry), HeKLEN(entry));
+	    if (HeKLEN(entry) == HEf_SVKEY)
+		mg_copy((SV*)hv, sv, (char*)HeKEY_sv(entry), HEf_SVKEY);
+	    else mg_copy((SV*)hv, sv, HeKEY(entry), HeKLEN(entry));
 	    return sv;
 	}
     }
@@ -970,12 +1002,67 @@ int how;
     sv_magic((SV*)hv, (SV*)gv, how, Nullch, 0);
 }
 
+char*	
+sharepvn(sv, len, hash)
+char* sv;
+I32 len;
+U32 hash;
+{
+    return share_hek(sv, len, hash)->hk_key;
+}
+
+/* possibly free a shared string if no one has access to it
+ * len and hash must both be valid for str.
+ */
+void
+unsharepvn(str, len, hash)
+char* str;
+I32 len;
+U32 hash;
+{
+    register XPVHV* xhv;
+    register HE *entry;
+    register HE **oentry;
+    register I32 i = 1;
+    I32 found = 0;
+    
+    /* what follows is the moral equivalent of:
+    if ((Svp = hv_fetch(strtab, tmpsv, FALSE, hash))) {
+	if (--*Svp == Nullsv)
+	    hv_delete(strtab, str, len, G_DISCARD, hash);
+    } */
+    xhv = (XPVHV*)SvANY(strtab);
+    /* assert(xhv_array != 0) */
+    oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
+    for (entry = *oentry; entry; i=0, oentry = &HeNEXT(entry), entry = *oentry) {
+	if (HeHASH(entry) != hash)		/* strings can't be equal */
+	    continue;
+	if (HeKLEN(entry) != len)
+	    continue;
+	if (memcmp(HeKEY(entry),str,len))		/* is this it? */
+	    continue;
+	found = 1;
+	if (--HeVAL(entry) == Nullsv) {
+	    *oentry = HeNEXT(entry);
+	    if (i && !*oentry)
+		xhv->xhv_fill--;
+	    Safefree(HeKEY_hk(entry));
+	    del_he(entry);
+	    --xhv->xhv_keys;
+	}
+	break;
+    }
+    
+    if (!found)
+	warn("Attempt to free non-existent shared string");    
+}
+
 /* get a (constant) string ptr from the global string table
  * string will get added if it is not already there.
  * len and hash must both be valid for str.
  */
-char *
-sharepvn(str, len, hash)
+HEK *
+share_hek(str, len, hash)
 char *str;
 I32 len;
 register U32 hash;
@@ -1006,10 +1093,8 @@ register U32 hash;
     }
     if (!found) {
 	entry = new_he();
-	HeKLEN(entry) = len;
-	HeKEY(entry) = savepvn(str,len);
+	HeKEY_hk(entry) = save_hek(str, len, hash);
 	HeVAL(entry) = Nullsv;
-	HeHASH(entry) = hash;
 	HeNEXT(entry) = *oentry;
 	*oentry = entry;
 	xhv->xhv_keys++;
@@ -1021,52 +1106,7 @@ register U32 hash;
     }
 
     ++HeVAL(entry);				/* use value slot as REFCNT */
-    return HeKEY(entry);
+    return HeKEY_hk(entry);
 }
 
-/* possibly free a shared string if no one has access to it
- * len and hash must both be valid for str.
- */
-void
-unsharepvn(str, len, hash)
-char *str;
-I32 len;
-register U32 hash;
-{
-    register XPVHV* xhv;
-    register HE *entry;
-    register HE **oentry;
-    register I32 i = 1;
-    I32 found = 0;
-    
-    /* what follows is the moral equivalent of:
-    if ((Svp = hv_fetch(strtab, tmpsv, FALSE, hash))) {
-	if (--*Svp == Nullsv)
-	    hv_delete(strtab, str, len, G_DISCARD, hash);
-    } */
-    xhv = (XPVHV*)SvANY(strtab);
-    /* assert(xhv_array != 0) */
-    oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
-    for (entry = *oentry; entry; i=0, oentry = &HeNEXT(entry), entry = *oentry) {
-	if (HeHASH(entry) != hash)		/* strings can't be equal */
-	    continue;
-	if (HeKLEN(entry) != len)
-	    continue;
-	if (memcmp(HeKEY(entry),str,len))		/* is this it? */
-	    continue;
-	found = 1;
-	if (--HeVAL(entry) == Nullsv) {
-	    *oentry = HeNEXT(entry);
-	    if (i && !*oentry)
-		xhv->xhv_fill--;
-	    Safefree(HeKEY(entry));
-	    del_he(entry);
-	    --xhv->xhv_keys;
-	}
-	break;
-    }
-    
-    if (!found)
-	warn("Attempt to free non-existent shared string");    
-}
 

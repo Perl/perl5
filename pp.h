@@ -66,15 +66,15 @@
 #define TOPl		((long)SvIV(TOPs))
 
 /* Go to some pains in the rare event that we must extend the stack. */
-#define EXTEND(p,n)	STMT_START { if (stack_max - p < (n)) {		  	    \
-			    sp = stack_grow(sp,p, (int) (n));		    \
+#define EXTEND(p,n)	STMT_START { if (stack_max - p < (n)) {		\
+			    sp = stack_grow(sp,p, (int) (n));		\
 			} } STMT_END
 
 /* Same thing, but update mark register too. */
-#define MEXTEND(p,n)	STMT_START {if (stack_max - p < (n)) {			    \
-			    int markoff = mark - stack_base;		    \
-			    sp = stack_grow(sp,p,(int) (n));		    \
-			    mark = stack_base + markoff;		    \
+#define MEXTEND(p,n)	STMT_START {if (stack_max - p < (n)) {		\
+			    int markoff = mark - stack_base;		\
+			    sp = stack_grow(sp,p,(int) (n));		\
+			    mark = stack_base + markoff;		\
 			} } STMT_END
 
 #define PUSHs(s)	(*++sp = (s))
@@ -133,6 +133,12 @@
 				stack_max = stack_base + AvMAX(t);	\
 				sp = stack_sp = stack_base + AvFILL(t);	\
 				curstack = t;
+
+#define EXTEND_MORTAL(n) \
+	STMT_START { \
+	    if (tmps_ix + (n) >= tmps_max) \
+		Renew(tmps_stack, tmps_max = tmps_ix + (n) + 1, SV*); \
+	} STMT_END
 
 #ifdef OVERLOAD
 

@@ -2736,8 +2736,59 @@ setlocale(category, locale = 0)
 	char *		locale
     CODE:
 	RETVAL = setlocale(category, locale);
-	if (RETVAL)
-	    perl_init_fold();
+	if (RETVAL) {
+#ifdef LC_CTYPE
+	    if (category == LC_CTYPE
+#ifdef LC_ALL
+		|| category == LC_ALL
+#endif
+		)
+	    {
+		char *newctype;
+#ifdef LC_ALL
+		if (category == LC_ALL)
+		    newctype = setlocale(LC_CTYPE, NULL);
+		else
+#endif
+		    newctype = RETVAL;
+		perl_new_ctype(newctype);
+	    }
+#endif /* LC_CTYPE */
+#ifdef LC_COLLATE
+	    if (category == LC_COLLATE
+#ifdef LC_ALL
+		|| category == LC_ALL
+#endif
+		)
+	    {
+		char *newcoll;
+#ifdef LC_ALL
+		if (category == LC_ALL)
+		    newcoll = setlocale(LC_COLLATE, NULL);
+		else
+#endif
+		    newcoll = RETVAL;
+		perl_new_collate(newcoll);
+	    }
+#endif /* LC_COLLATE */
+#ifdef LC_NUMERIC
+	    if (category == LC_NUMERIC
+#ifdef LC_ALL
+		|| category == LC_ALL
+#endif
+		)
+	    {
+		char *newnum;
+#ifdef LC_ALL
+		if (category == LC_ALL)
+		    newnum = setlocale(LC_NUMERIC, NULL);
+		else
+#endif
+		    newnum = RETVAL;
+		perl_new_numeric(newnum);
+	    }
+#endif /* LC_NUMERIC */
+	}
     OUTPUT:
 	RETVAL
 
@@ -2962,8 +3013,7 @@ read(fd, buffer, nbytes)
             SvCUR(sv_buffer) = RETVAL;
             SvPOK_only(sv_buffer);
             *SvEND(sv_buffer) = '\0';
-            if (tainting)
-                sv_magic(sv_buffer, 0, 't', 0, 0);
+            SvTAINTED_on(sv_buffer);
         }
 
 SysRet
@@ -3053,6 +3103,7 @@ strtod(str)
 	double num;
 	char *unparsed;
     PPCODE:
+	NUMERIC_LOCAL();
 	num = strtod(str, &unparsed);
 	PUSHs(sv_2mortal(newSVnv(num)));
 	if (GIMME == G_ARRAY) {

@@ -154,11 +154,8 @@ PP(pp_sassign)
 	SV *temp;
 	temp = left; left = right; right = temp;
     }
-    if (tainting && tainted && (!SvGMAGICAL(left) || !SvSMAGICAL(left) ||
-				!((mg = mg_find(left, 't')) && mg->mg_len & 1)))
-    {
+    if (tainting && tainted && !SvTAINTED(left))
 	TAINT_NOT;
-    }
     SvSetSV(right, left);
     SvSETMAGIC(right);
     SETs(right);
@@ -190,7 +187,10 @@ PP(pp_seq)
     dSP; tryAMAGICbinSET(seq,0); 
     {
       dPOPTOPssrl;
-      SETs( sv_eq(left, right) ? &sv_yes : &sv_no );
+      bool eq = ((op->op_private & OPpLOCALE)
+		 ? (sv_cmp_locale(left, right) == 0)
+		 : sv_eq(left, right));
+      SETs( eq ? &sv_yes : &sv_no );
       RETURN;
     }
 }
@@ -599,7 +599,7 @@ PP(pp_aassign)
     ary = Null(AV*);
     hash = Null(HV*);
     while (lelem <= lastlelem) {
-	tainted = 0;		/* Each item stands on its own, taintwise. */
+	TAINT_NOT;		/* Each item stands on its own, taintwise. */
 	sv = *lelem++;
 	switch (SvTYPE(sv)) {
 	case SVt_PVAV:
@@ -616,7 +616,7 @@ PP(pp_aassign)
 		(void)av_store(ary,i++,sv);
 		if (magic)
 		    mg_set(sv);
-		tainted = 0;
+		TAINT_NOT;
 	    }
 	    break;
 	case SVt_PVHV: {
@@ -639,7 +639,7 @@ PP(pp_aassign)
 		    (void)hv_store_ent(hash,sv,tmpstr,0);
 		    if (magic)
 			mg_set(tmpstr);
-		    tainted = 0;
+		    TAINT_NOT;
 		}
 		if (relem == lastrelem)
 		    warn("Odd number of elements in hash list");
@@ -833,15 +833,10 @@ play_it_again:
 		s = t;
 	}
 	else if (!multiline) {
-	    if (*SvPVX(pm->op_pmshort) != *s ||
-	      memcmp(SvPVX(pm->op_pmshort), s, pm->op_pmslen) ) {
-		if (pm->op_pmflags & PMf_FOLD) {
-		    if (ibcmp((U8*)SvPVX(pm->op_pmshort), (U8*)s, pm->op_pmslen) )
-			goto nope;
-		}
-		else
-		    goto nope;
-	    }
+	    if (*SvPVX(pm->op_pmshort) != *s
+		|| (pm->op_pmslen > 1
+		    && memcmp(SvPVX(pm->op_pmshort), s, pm->op_pmslen)))
+		goto nope;
 	}
 	if (!rx->naughty && --BmUSEFUL(pm->op_pmshort) < 0) {
 	    SvREFCNT_dec(pm->op_pmshort);
@@ -849,8 +844,8 @@ play_it_again:
 	}
     }
     if (pregexec(rx, s, strend, truebase, minmatch,
-      SvSCREAM(TARG) ? TARG : Nullsv,
-      safebase)) {
+		 SvSCREAM(TARG) ? TARG : Nullsv, safebase))
+    {
 	curpm = pm;
 	if (pm->op_pmflags & PMf_ONCE)
 	    pm->op_pmflags |= PMf_USED;
@@ -864,12 +859,14 @@ play_it_again:
     if (gimme == G_ARRAY) {
 	I32 iters, i, len;
 
+	TAINT_IF(rx->exec_tainted);
 	iters = rx->nparens;
 	if (global && !iters)
 	    i = 1;
 	else
 	    i = 0;
 	EXTEND(SP, iters + i);
+	EXTEND_MORTAL(iters + i);
 	for (i = !i; i <= iters; i++) {
 	    PUSHs(sv_newmortal());
 	    /*SUPPRESS 560*/
@@ -1160,14 +1157,13 @@ do_readline()
 	    }
 	    RETURN;
 	}
+	/* This should not be marked tainted if the fp is marked clean */
+	if (!(IoFLAGS(io) & IOf_UNTAINT)) {
+	    TAINT;
+	    SvTAINTED_on(sv);
+	}
 	IoLINES(io)++;
 	XPUSHs(sv);
-	if (tainting) {
-	    /* This should not be marked tainted if the fp is marked clean */
-	    if (!(IoFLAGS(io) & IOf_UNTAINT))
-		tainted = TRUE;
-	    SvTAINT(sv); /* Anything from the outside world...*/
-	}
 	if (type == OP_GLOB) {
 	    char *tmps;
 
@@ -1410,15 +1406,10 @@ PP(pp_subst)
 		s = m;
 	}
 	else if (!multiline) {
-	    if (*SvPVX(pm->op_pmshort) != *s ||
-	      memcmp(SvPVX(pm->op_pmshort), s, pm->op_pmslen) ) {
-		if (pm->op_pmflags & PMf_FOLD) {
-		    if (ibcmp((U8*)SvPVX(pm->op_pmshort), (U8*)s, pm->op_pmslen) )
-			goto nope;
-		}
-		else
-		    goto nope;
-	    }
+	    if (*SvPVX(pm->op_pmshort) != *s
+		|| (pm->op_pmslen > 1
+		    && memcmp(SvPVX(pm->op_pmshort), s, pm->op_pmslen)))
+		goto nope;
 	}
 	if (!rx->naughty && --BmUSEFUL(pm->op_pmshort) < 0) {
 	    SvREFCNT_dec(pm->op_pmshort);
@@ -1750,8 +1741,7 @@ PP(pp_entersub)
 	    if (ngv && ngv != gv && (cv = GvCV(ngv))) {	/* One more chance... */
 		gv = ngv;
 		sv_setsv(GvSV(CvGV(cv)), tmpstr);	/* Set CV's $AUTOLOAD */
-		if (tainting)
-		    sv_unmagic(GvSV(CvGV(cv)), 't');
+		SvTAINTED_off(GvSV(CvGV(cv)));
 		goto retry;
 	    }
 	    else

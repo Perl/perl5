@@ -322,6 +322,7 @@ my_crypt(const char *textpasswd, const char *usrname)
 /*}}}*/
 
 
+static char *do_rmsexpand(char *, char *, int, char *, unsigned);
 static char *do_fileify_dirspec(char *, char *, int);
 static char *do_tovmsspec(char *, char *, int);
 
@@ -353,7 +354,7 @@ do_rmdir(char *name)
 int
 kill_file(char *name)
 {
-    char vmsname[NAM$C_MAXRSS+1];
+    char vmsname[NAM$C_MAXRSS+1], rspec[NAM$C_MAXRSS+1];
     unsigned long int jpicode = JPI$_UIC, type = ACL$C_FILE;
     unsigned long int cxt = 0, aclsts, fndsts, rmsts = -1;
     struct dsc$descriptor_s fildsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
@@ -374,7 +375,12 @@ kill_file(char *name)
        lcklst[2] = {{sizeof newace, ACL$C_WLOCK_ACL, &newace, 0},{0,0,0,0}},
        ulklst[2] = {{sizeof newace, ACL$C_UNLOCK_ACL, &newace, 0},{0,0,0,0}};
       
-    if (!remove(name)) return 0;   /* Can we just get rid of it? */
+    /* Expand the input spec using RMS, since the CRTL remove() and
+     * system services won't do this by themselves, so we may miss
+     * a file "hiding" behind a logical name or search list. */
+    if (do_tovmsspec(name,vmsname,0) == NULL) return -1;
+    if (do_rmsexpand(vmsname,rspec,1,NULL,0) == NULL) return -1;
+    if (!remove(rspec)) return 0;   /* Can we just get rid of it? */
     /* If not, can changing protections help? */
     if (vaxc$errno != RMS$_PRV) return -1;
 
@@ -383,9 +389,8 @@ kill_file(char *name)
      * to delete the file.
      */
     _ckvmssts(lib$getjpi(&jpicode,0,0,&(oldace.myace$l_ident),0,0));
-    if (do_tovmsspec(name,vmsname,0) == NULL) return -1;
-    fildsc.dsc$w_length = strlen(vmsname);
-    fildsc.dsc$a_pointer = vmsname;
+    fildsc.dsc$w_length = strlen(rspec);
+    fildsc.dsc$a_pointer = rspec;
     cxt = 0;
     newace.myace$l_ident = oldace.myace$l_ident;
     if (!((aclsts = sys$change_acl(0,&type,&fildsc,lcklst,0,0,0)) & 1)) {
@@ -758,6 +763,28 @@ I32 my_pclose(FILE *fp)
       /* get here => no such pipe open */
       croak("No such pipe open");
 
+    /* If we were writing to a subprocess, insure that someone reading from
+     * the mailbox gets an EOF.  It looks like a simple fclose() doesn't
+     * produce an EOF record in the mailbox.  */
+    if (info->mode != 'r') {
+      char devnam[NAM$C_MAXRSS+1], *cp;
+      unsigned long int chan, iosb[2], retsts, retsts2;
+      struct dsc$descriptor devdsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, devnam};
+
+      if (fgetname(info->fp,devnam)) {
+        /* It oughta be a mailbox, so fgetname should give just the device
+         * name, but just in case . . . */
+        if ((cp = strrchr(devnam,':')) != NULL) *(cp+1) = '\0';
+        devdsc.dsc$w_length = strlen(devnam);
+        _ckvmssts(sys$assign(&devdsc,&chan,0,0));
+        retsts = sys$qiow(0,chan,IO$_WRITEOF,iosb,0,0,0,0,0,0,0,0);
+        if (retsts & 1) retsts = iosb[0];
+        retsts2 = sys$dassgn(chan);  /* Be sure to deassign the channel */
+        if (retsts & 1) retsts = retsts2;
+        _ckvmssts(retsts);
+      }
+      else _ckvmssts(vaxc$errno);  /* Should never happen */
+    }
     PerlIO_close(info->fp);
 
     if (info->done) retsts = info->completion;
@@ -843,6 +870,108 @@ my_gconvert(double val, int ndig, int trail, char *buf)
 
 }
 /*}}}*/
+
+
+/*{{{char *do_rmsexpand(char *fspec, char *out, int ts, char *def, unsigned opts)*/
+/* Shortcut for common case of simple calls to $PARSE and $SEARCH
+ * to expand file specification.  Allows for a single default file
+ * specification and a simple mask of options.  If outbuf is non-NULL,
+ * it must point to a buffer at least NAM$C_MAXRSS bytes long, into which
+ * the resultant file specification is placed.  If outbuf is NULL, the
+ * resultant file specification is placed into a static buffer.
+ * The third argument, if non-NULL, is taken to be a default file
+ * specification string.  The fourth argument is unused at present.
+ * rmesexpand() returns the address of the resultant string if
+ * successful, and NULL on error.
+ */
+static char *
+do_rmsexpand(char *filespec, char *outbuf, int ts, char *defspec, unsigned opts)
+{
+  static char __rmsexpand_retbuf[NAM$C_MAXRSS+1];
+  char esa[NAM$C_MAXRSS], *cp, *out = NULL;
+  struct FAB myfab = cc$rms_fab;
+  struct NAM mynam = cc$rms_nam;
+  STRLEN speclen;
+  unsigned long int retsts, haslower = 0;
+
+  if (!filespec || !*filespec) {
+    set_vaxc_errno(LIB$_INVARG); set_errno(EINVAL);
+    return NULL;
+  }
+  if (!outbuf) {
+    if (ts) out = New(7019,outbuf,NAM$C_MAXRSS+1,char);
+    else    outbuf = __rmsexpand_retbuf;
+  }
+
+  myfab.fab$l_fna = filespec;
+  myfab.fab$b_fns = strlen(filespec);
+  myfab.fab$l_nam = &mynam;
+
+  if (defspec && *defspec) {
+    myfab.fab$l_dna = defspec;
+    myfab.fab$b_dns = strlen(defspec);
+  }
+
+  mynam.nam$l_esa = esa;
+  mynam.nam$b_ess = sizeof esa;
+  mynam.nam$l_rsa = outbuf;
+  mynam.nam$b_rss = NAM$C_MAXRSS;
+
+  retsts = sys$parse(&myfab,0,0);
+  if (!(retsts & 1)) {
+    if (retsts == RMS$_DNF || retsts == RMS$_DIR ||
+        retsts == RMS$_DEV || retsts == RMS$_DEV) {
+      mynam.nam$b_nop |= NAM$M_SYNCHK;
+      retsts = sys$parse(&myfab,0,0);
+      if (retsts & 1) goto expanded;
+    }  
+    if (out) Safefree(out);
+    set_vaxc_errno(retsts);
+    if      (retsts == RMS$_PRV) set_errno(EACCES);
+    else if (retsts == RMS$_DEV) set_errno(ENODEV);
+    else if (retsts == RMS$_DIR) set_errno(ENOTDIR);
+    else                         set_errno(EVMSERR);
+    return NULL;
+  }
+  retsts = sys$search(&myfab,0,0);
+  if (!(retsts & 1) && retsts != RMS$_FNF) {
+    if (out) Safefree(out);
+    set_vaxc_errno(retsts);
+    if      (retsts == RMS$_PRV) set_errno(EACCES);
+    else                         set_errno(EVMSERR);
+    return NULL;
+  }
+
+  /* If the input filespec contained any lowercase characters,
+   * downcase the result for compatibility with Unix-minded code. */
+  expanded:
+  for (out = myfab.fab$l_fna; *out; out++)
+    if (islower(*out)) { haslower = 1; break; }
+  if (mynam.nam$b_rsl) { out = outbuf; speclen = mynam.nam$b_rsl; }
+  else                 { out = esa;    speclen = mynam.nam$b_esl; }
+  if (!(mynam.nam$l_fnb & NAM$M_EXP_VER) &&
+      (!defspec || !*defspec || !strchr(myfab.fab$l_dna,';')))
+    speclen = mynam.nam$l_ver - out;
+  /* If we just had a directory spec on input, $PARSE "helpfully"
+   * adds an empty name and type for us */
+  if (mynam.nam$l_name == mynam.nam$l_type &&
+      mynam.nam$l_ver  == mynam.nam$l_type + 1 &&
+      !(mynam.nam$l_fnb & NAM$M_EXP_NAME))
+    speclen = mynam.nam$l_name - out;
+  out[speclen] = '\0';
+  if (haslower) __mystrtolower(out);
+
+  /* Have we been working with an expanded, but not resultant, spec? */
+  if (!mynam.nam$b_rsl) strcpy(outbuf,esa);
+  return outbuf;
+}
+/*}}}*/
+/* External entry points */
+char *rmsexpand(char *spec, char *buf, char *def, unsigned opt)
+{ return do_rmsexpand(spec,buf,0,def,opt); }
+char *rmsexpand_ts(char *spec, char *buf, char *def, unsigned opt)
+{ return do_rmsexpand(spec,buf,1,def,opt); }
+
 
 /*
 ** The following routines are provided to make life easier when
@@ -3258,10 +3387,13 @@ cando_by_name(I32 bit, I32 effective, char *fname)
   }
 
   retsts = sys$check_access(&objtyp,&namdsc,&usrdsc,armlst);
-  if (retsts == SS$_NOPRIV || retsts == SS$_NOSUCHOBJECT ||
-      retsts == RMS$_FNF   || retsts == RMS$_DIR         ||
-      retsts == RMS$_DEV) {
-    set_errno(retsts == SS$_NOPRIV ? EACCES : ENOENT); set_vaxc_errno(retsts);
+  if (retsts == SS$_NOPRIV      || retsts == SS$_NOSUCHOBJECT ||
+      retsts == SS$_INVFILFOROP || retsts == RMS$_FNF    ||
+      retsts == RMS$_DIR        || retsts == RMS$_DEV) {
+    set_vaxc_errno(retsts);
+    if (retsts == SS$_NOPRIV) set_errno(EACCES);
+    else if (retsts == SS$_INVFILFOROP) set_errno(EINVAL);
+    else set_errno(ENOENT);
     return FALSE;
   }
   if (retsts == SS$_NORMAL) {
@@ -3309,10 +3441,8 @@ int
 flex_stat(char *fspec, struct mystat *statbufp)
 {
     char fileified[NAM$C_MAXRSS+1];
-    int retval,myretval;
-    struct mystat tmpbuf;
+    int retval = -1;
 
-    
     if (statbufp == &statcache) do_tovmsspec(fspec,namecache,0);
     if (is_null_device(fspec)) { /* Fake a stat() for the null device */
       memset(statbufp,0,sizeof *statbufp);
@@ -3325,22 +3455,19 @@ flex_stat(char *fspec, struct mystat *statbufp)
       return 0;
     }
 
-    if (do_fileify_dirspec(fspec,fileified,0) == NULL) myretval = -1;
-    else {
-      myretval = stat(fileified,(stat_t *) &tmpbuf);
+    /* Try for a directory name first.  If fspec contains a filename without
+     * a type (e.g. sea:[dark.dark]water), and both sea:[wine.dark]water.dir
+     * and sea:[wine.dark]water. exist, we prefer the directory here.
+     * Similarly, sea:[wine.dark] returns the result for sea:[wine]dark.dir,
+     * not sea:[wine.dark]., if the latter exists.  If the intended target is
+     * the file with null type, specify this by calling flex_stat() with
+     * a '.' at the end of fspec.
+     */
+    if (do_fileify_dirspec(fspec,fileified,0) != NULL) {
+      retval = stat(fileified,(stat_t *) statbufp);
+      if (!retval && statbufp == &statcache) strcpy(namecache,fileified);
     }
-    retval = stat(fspec,(stat_t *) statbufp);
-    if (!myretval) {
-      if (retval == -1) {
-        *statbufp = tmpbuf;
-        retval = 0;
-      }
-      else if (!retval) { /* Dir with same name.  Substitute it. */
-        statbufp->st_mode &= ~S_IFDIR;
-        statbufp->st_mode |= tmpbuf.st_mode & S_IFDIR;
-        strcpy(namecache,fileified);
-      }
-    }
+    if (retval) retval = stat(fspec,(stat_t *) statbufp);
     if (!retval) statbufp->st_dev = encode_dev(statbufp->st_devnam);
     return retval;
 
@@ -3583,71 +3710,17 @@ void
 rmsexpand_fromperl(CV *cv)
 {
   dXSARGS;
-  char esa[NAM$C_MAXRSS], rsa[NAM$C_MAXRSS], *cp, *out;
-  struct FAB myfab = cc$rms_fab;
-  struct NAM mynam = cc$rms_nam;
-  STRLEN speclen;
-  unsigned long int retsts, haslower = 0;
+  char *fspec, *defspec = NULL, *rslt;
 
-  if (items > 2) croak("Usage: VMS::Filespec::rmsexpand(spec[,defspec])");
+  if (!items || items > 2)
+    croak("Usage: VMS::Filespec::rmsexpand(spec[,defspec])");
+  fspec = SvPV(ST(0),na);
+  if (!fspec || !*fspec) XSRETURN_UNDEF;
+  if (items == 2) defspec = SvPV(ST(1),na);
 
-  myfab.fab$l_fna = SvPV(ST(0),speclen);
-  myfab.fab$b_fns = speclen;
-  myfab.fab$l_nam = &mynam;
-
-  if (items == 2) {
-    myfab.fab$l_dna = SvPV(ST(1),speclen);
-    myfab.fab$b_dns = speclen;
-  }
-
-  mynam.nam$l_esa = esa;
-  mynam.nam$b_ess = sizeof esa;
-  mynam.nam$l_rsa = rsa;
-  mynam.nam$b_rss = sizeof rsa;
-
-  retsts = sys$parse(&myfab,0,0);
-  if (!(retsts & 1)) {
-    if (retsts == RMS$_DNF || retsts == RMS$_DIR ||
-        retsts == RMS$_DEV || retsts == RMS$_DEV) {
-      mynam.nam$b_nop |= NAM$M_SYNCHK;
-      retsts = sys$parse(&myfab,0,0);
-      if (retsts & 1) goto expanded;
-    }  
-    set_vaxc_errno(retsts);
-    if      (retsts == RMS$_PRV) set_errno(EACCES);
-    else if (retsts == RMS$_DEV) set_errno(ENODEV);
-    else if (retsts == RMS$_DIR) set_errno(ENOTDIR);
-    else                         set_errno(EVMSERR);
-    XSRETURN_UNDEF;
-  }
-  retsts = sys$search(&myfab,0,0);
-  if (!(retsts & 1) && retsts != RMS$_FNF) {
-    set_vaxc_errno(retsts);
-    if      (retsts == RMS$_PRV) set_errno(EACCES);
-    else                         set_errno(EVMSERR);
-    XSRETURN_UNDEF;
-  }
-
-  /* If the input filespec contained any lowercase characters,
-   * downcase the result for compatibility with Unix-minded code. */
-  expanded:
-  for (out = myfab.fab$l_fna; *out; out++)
-    if (islower(*out)) { haslower = 1; break; }
-  if (mynam.nam$b_rsl) { out = rsa; speclen = mynam.nam$b_rsl; }
-  else                 { out = esa; speclen = mynam.nam$b_esl; }
-  if (!(mynam.nam$l_fnb & NAM$M_EXP_VER) &&
-      (items == 1 || !strchr(myfab.fab$l_dna,';')))
-    speclen = mynam.nam$l_ver - out;
-  /* If we just had a directory spec on input, $PARSE "helpfully"
-   * adds an empty name and type for us */
-  if (mynam.nam$l_name == mynam.nam$l_type &&
-      mynam.nam$l_ver  == mynam.nam$l_type + 1 &&
-      !(mynam.nam$l_fnb & NAM$M_EXP_NAME))
-    speclen = mynam.nam$l_name - out;
-  out[speclen] = '\0';
-  if (haslower) __mystrtolower(out);
-
-  ST(0) = sv_2mortal(newSVpv(out, speclen));
+  rslt = do_rmsexpand(fspec,NULL,1,defspec,0);
+  ST(0) = sv_newmortal();
+  if (rslt != NULL) sv_usepvn(ST(0),rslt,strlen(rslt));
   XSRETURN(1);
 }
 

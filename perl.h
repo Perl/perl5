@@ -100,10 +100,11 @@
 #   define VOL
 #endif
 
-#define TAINT_IF(c)	(tainted |= (c))
-#define TAINT_NOT	(tainted = 0)
-#define TAINT_PROPER(s)	if (tainting) taint_proper(no_security, s)
-#define TAINT_ENV()	if (tainting) taint_env()
+#define TAINT		(tainted = TRUE)
+#define TAINT_NOT	(tainted = FALSE)
+#define TAINT_IF(c)	if (c) { tainted = TRUE; }
+#define TAINT_ENV()	if (tainting) { taint_env(); }
+#define TAINT_PROPER(s)	if (tainting) { taint_proper(no_security, s); }
 
 /* XXX All process group stuff is handled in pp_sys.c.  Should these 
    defines move there?  If so, I could simplify this a lot. --AD  9/96.
@@ -1192,7 +1193,6 @@ EXT char *** environ_pointer;
 #  endif
 #endif /* environ processing */
 
-EXT int		lc_collate_active;
 EXT int		uid;		/* current real user id */
 EXT int		euid;		/* current effective user id */
 EXT int		gid;		/* current real group id */
@@ -1322,8 +1322,10 @@ EXT SV  * psig_ptr[];
 EXT SV  * psig_name[];
 #endif
 
+/* fast case folding tables */
+
 #ifdef DOINIT
-EXT unsigned char fold[] = {	/* fast case folding table */
+EXT const unsigned char fold[] = {
 	0,	1,	2,	3,	4,	5,	6,	7,
 	8,	9,	10,	11,	12,	13,	14,	15,
 	16,	17,	18,	19,	20,	21,	22,	23,
@@ -1359,6 +1361,45 @@ EXT unsigned char fold[] = {	/* fast case folding table */
 };
 #else
 EXT unsigned char fold[];
+#endif
+
+#ifdef DOINIT
+EXT unsigned char fold_locale[] = {
+	0,	1,	2,	3,	4,	5,	6,	7,
+	8,	9,	10,	11,	12,	13,	14,	15,
+	16,	17,	18,	19,	20,	21,	22,	23,
+	24,	25,	26,	27,	28,	29,	30,	31,
+	32,	33,	34,	35,	36,	37,	38,	39,
+	40,	41,	42,	43,	44,	45,	46,	47,
+	48,	49,	50,	51,	52,	53,	54,	55,
+	56,	57,	58,	59,	60,	61,	62,	63,
+	64,	'a',	'b',	'c',	'd',	'e',	'f',	'g',
+	'h',	'i',	'j',	'k',	'l',	'm',	'n',	'o',
+	'p',	'q',	'r',	's',	't',	'u',	'v',	'w',
+	'x',	'y',	'z',	91,	92,	93,	94,	95,
+	96,	'A',	'B',	'C',	'D',	'E',	'F',	'G',
+	'H',	'I',	'J',	'K',	'L',	'M',	'N',	'O',
+	'P',	'Q',	'R',	'S',	'T',	'U',	'V',	'W',
+	'X',	'Y',	'Z',	123,	124,	125,	126,	127,
+	128,	129,	130,	131,	132,	133,	134,	135,
+	136,	137,	138,	139,	140,	141,	142,	143,
+	144,	145,	146,	147,	148,	149,	150,	151,
+	152,	153,	154,	155,	156,	157,	158,	159,
+	160,	161,	162,	163,	164,	165,	166,	167,
+	168,	169,	170,	171,	172,	173,	174,	175,
+	176,	177,	178,	179,	180,	181,	182,	183,
+	184,	185,	186,	187,	188,	189,	190,	191,
+	192,	193,	194,	195,	196,	197,	198,	199,
+	200,	201,	202,	203,	204,	205,	206,	207,
+	208,	209,	210,	211,	212,	213,	214,	215,
+	216,	217,	218,	219,	220,	221,	222,	223,	
+	224,	225,	226,	227,	228,	229,	230,	231,
+	232,	233,	234,	235,	236,	237,	238,	239,
+	240,	241,	242,	243,	244,	245,	246,	247,
+	248,	249,	250,	251,	252,	253,	254,	255
+};
+#else
+EXT unsigned char fold_locale[];
 #endif
 
 #ifdef DOINIT
@@ -1439,6 +1480,7 @@ EXT I32		lex_formbrack;	/* bracket count at outer format level */
 EXT I32		lex_fakebrack;	/* outer bracket is mere delimiter */
 EXT I32		lex_casemods;	/* casemod count */
 EXT I32		lex_dojoin;	/* doing an array interpolation */
+EXT I32		lex_endscope;	/* maybe end of scope; defer lexical vars */
 EXT I32		lex_starts;	/* how many interps done on level */
 EXT SV *	lex_stuff;	/* runtime pattern from m// or s/// */
 EXT SV *	lex_repl;	/* runtime replacement from s/// */
@@ -1503,6 +1545,7 @@ EXT U32		hints;		/* various compilation flags */
 #define HINT_BLOCK_SCOPE	0x00000100
 #define HINT_STRICT_SUBS	0x00000200
 #define HINT_STRICT_VARS	0x00000400
+#define HINT_LOCALE		0x00000800
 
 /**************************************************************************/
 /* This regexp stuff is global since it always happens within 1 expr eval */
@@ -1577,7 +1620,6 @@ IEXT bool	Idowarn;
 IEXT bool	Idoextract;
 IEXT bool	Isawampersand;	/* must save all match strings */
 IEXT bool	Isawstudy;	/* do fbm_instr on all strings */
-IEXT bool	Isawi;		/* study must assume case insensitive */
 IEXT bool	Isawvec;
 IEXT bool	Iunsafe;
 IEXT char *	Iinplace;
@@ -1765,6 +1807,7 @@ extern "C" {
 /* The following must follow proto.h */
 
 #ifdef DOINIT
+
 EXT MGVTBL vtbl_sv =	{magic_get,
 				magic_set,
 					magic_len,
@@ -1817,6 +1860,12 @@ EXT MGVTBL vtbl_uvar =	{magic_getuvar,
 				magic_setuvar,
 					0,	0,	0};
 
+#ifdef LC_COLLATE
+EXT MGVTBL vtbl_collxfrm = {0,
+				magic_setcollxfrm,
+					0,	0,	0};
+#endif
+
 #ifdef OVERLOAD
 EXT MGVTBL vtbl_amagic =       {0,     magic_setamagic,
                                         0,      0,      magic_setamagic};
@@ -1824,7 +1873,8 @@ EXT MGVTBL vtbl_amagicelem =   {0,     magic_setamagic,
                                         0,      0,      magic_setamagic};
 #endif /* OVERLOAD */
 
-#else
+#else /* !DOINIT */
+
 EXT MGVTBL vtbl_sv;
 EXT MGVTBL vtbl_env;
 EXT MGVTBL vtbl_envelem;
@@ -1847,12 +1897,16 @@ EXT MGVTBL vtbl_bm;
 EXT MGVTBL vtbl_fm;
 EXT MGVTBL vtbl_uvar;
 
+#ifdef HAS_STRXFRM
+EXT MGVTBL vtbl_collxfrm;
+#endif
+
 #ifdef OVERLOAD
 EXT MGVTBL vtbl_amagic;
 EXT MGVTBL vtbl_amagicelem;
 #endif /* OVERLOAD */
 
-#endif
+#endif /* !DOINIT */
 
 #ifdef OVERLOAD
 EXT long amagic_generation;
@@ -1938,6 +1992,32 @@ enum {
   copy_amg,	neg_amg
 };
 #endif /* OVERLOAD */
+  
+#ifdef LC_COLLATE
+EXT U32		collation_ix;		/* Collation generation index */
+EXT char *	collation_name;		/* Name of current collation */
+EXT bool	collation_standard INIT(TRUE); /* Assume simple collation */
+EXT Size_t	collxfrm_base;		/* Basic overhead in *xfrm() */
+EXT Size_t	collxfrm_mult INIT(2);	/* Expansion factor in *xfrm() */
+#endif /* LC_COLLATE */
+
+#ifdef LC_NUMERIC
+
+EXT char *	numeric_name;		/* Name of current numeric locale */
+EXT bool	numeric_standard INIT(TRUE); /* Assume simple numerics */
+EXT bool	numeric_local INIT(TRUE);    /* Assume local numerics */
+
+#define NUMERIC_STANDARD() \
+    STMT_START { if (! numeric_standard) perl_numeric_standard(); } STMT_END
+#define NUMERIC_LOCAL() \
+    STMT_START { if (! numeric_local) perl_numeric_local(); } STMT_END
+
+#else /* !LC_NUMERIC */
+
+#define NUMERIC_STANDARD()  /**/
+#define NUMERIC_LOCAL()     /**/
+
+#endif /* !LC_NUMERIC */
 
 #if !defined(PERLIO_IS_STDIO) && defined(HAS_ATTRIBUTE)
 /* 

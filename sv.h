@@ -128,8 +128,7 @@ struct io {
 #define SVpfm_COMPILED	0x80000000
 
 #define SVpbm_VALID	0x80000000
-#define SVpbm_CASEFOLD	0x40000000
-#define SVpbm_TAIL	0x20000000
+#define SVpbm_TAIL	0x40000000
 
 #define SVphv_SHAREKEYS 0x20000000	/* keys live on shared string table */
 #define SVphv_LAZYDEL	0x40000000	/* entry in xhv_eiter must be deleted */
@@ -404,10 +403,6 @@ struct xpvio {
 #define SvTAIL_on(sv)		(SvFLAGS(sv) |= SVpbm_TAIL)
 #define SvTAIL_off(sv)		(SvFLAGS(sv) &= ~SVpbm_TAIL)
 
-#define SvCASEFOLD(sv)		(SvFLAGS(sv) & SVpbm_CASEFOLD)
-#define SvCASEFOLD_on(sv)	(SvFLAGS(sv) |= SVpbm_CASEFOLD)
-#define SvCASEFOLD_off(sv)	(SvFLAGS(sv) &= ~SVpbm_CASEFOLD)
-
 #define SvVALID(sv)		(SvFLAGS(sv) & SVpbm_VALID)
 #define SvVALID_on(sv)		(SvFLAGS(sv) |= SVpbm_VALID)
 #define SvVALID_off(sv)		(SvFLAGS(sv) &= ~SVpbm_VALID)
@@ -476,7 +471,11 @@ struct xpvio {
 #define IoTYPE(sv)	((XPVIO*)  SvANY(sv))->xio_type
 #define IoFLAGS(sv)	((XPVIO*)  SvANY(sv))->xio_flags
 
-#define SvTAINT(sv) if (tainting && tainted) sv_magic(sv, Nullsv, 't', Nullch, 0)
+#define SvTAINTED(sv)	  (SvMAGICAL(sv) && sv_tainted(sv))
+#define SvTAINTED_on(sv)  STMT_START{ if(tainting){sv_taint(sv);}   }STMT_END
+#define SvTAINTED_off(sv) STMT_START{ if(tainting){sv_untaint(sv);} }STMT_END
+
+#define SvTAINT(sv)	  STMT_START{ if(tainted){SvTAINTED_on(sv);} }STMT_END
 
 #ifdef CRIPPLED_CC
 

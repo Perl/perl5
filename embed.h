@@ -41,6 +41,11 @@
 #define bufptr		Perl_bufptr
 #define bxor_amg	Perl_bxor_amg
 #define check		Perl_check
+#define collation_ix	Perl_collation_ix
+#define collation_name	Perl_collation_name
+#define collation_standard	Perl_collation_standard
+#define collxfrm_base	Perl_collxfrm_base
+#define collxfrm_mult	Perl_collxfrm_mult
 #define compcv		Perl_compcv
 #define compiling	Perl_compiling
 #define compl_amg	Perl_compl_amg
@@ -79,6 +84,7 @@
 #define filter_del	Perl_filter_del
 #define filter_read	Perl_filter_read
 #define fold		Perl_fold
+#define fold_locale	Perl_fold_locale
 #define freq		Perl_freq
 #define ge_amg		Perl_ge_amg
 #define gid		Perl_gid
@@ -92,7 +98,6 @@
 #define last_lop	Perl_last_lop
 #define last_lop_op	Perl_last_lop_op
 #define last_uni	Perl_last_uni
-#define lc_collate_active	Perl_lc_collate_active
 #define le_amg		Perl_le_amg
 #define lex_brackets	Perl_lex_brackets
 #define lex_brackstack	Perl_lex_brackstack
@@ -157,6 +162,9 @@
 #define nomemok		Perl_nomemok
 #define nomethod_amg	Perl_nomethod_amg
 #define not_amg		Perl_not_amg
+#define numeric_local	Perl_numeric_local
+#define numeric_name	Perl_numeric_name
+#define numeric_standard	Perl_numeric_standard
 #define numer_amg	Perl_numer_amg
 #define oldbufptr	Perl_oldbufptr
 #define oldoldbufptr	Perl_oldoldbufptr
@@ -189,7 +197,6 @@
 #define regendp		Perl_regendp
 #define regeol		Perl_regeol
 #define regflags	Perl_regflags
-#define regfold		Perl_regfold
 #define reginput	Perl_reginput
 #define regkind		Perl_regkind
 #define reglastparen	Perl_reglastparen
@@ -261,6 +268,7 @@
 #define vtbl_amagicelem	Perl_vtbl_amagicelem
 #define vtbl_arylen	Perl_vtbl_arylen
 #define vtbl_bm		Perl_vtbl_bm
+#define vtbl_collxfrm	Perl_vtbl_collxfrm
 #define vtbl_dbline	Perl_vtbl_dbline
 #define vtbl_env	Perl_vtbl_env
 #define vtbl_envelem	Perl_vtbl_envelem
@@ -338,9 +346,9 @@
 #define ck_eof		Perl_ck_eof
 #define ck_eval		Perl_ck_eval
 #define ck_exec		Perl_ck_exec
-#define ck_formline	Perl_ck_formline
 #define ck_ftst		Perl_ck_ftst
 #define ck_fun		Perl_ck_fun
+#define ck_fun_locale	Perl_ck_fun_locale
 #define ck_glob		Perl_ck_glob
 #define ck_grep		Perl_ck_grep
 #define ck_gvconst	Perl_ck_gvconst
@@ -355,6 +363,7 @@
 #define ck_retarget	Perl_ck_retarget
 #define ck_rfun		Perl_ck_rfun
 #define ck_rvconst	Perl_ck_rvconst
+#define ck_scmp		Perl_ck_scmp
 #define ck_select	Perl_ck_select
 #define ck_shift	Perl_ck_shift
 #define ck_sort		Perl_ck_sort
@@ -475,8 +484,10 @@
 #define hv_store_ent	Perl_hv_store_ent
 #define hv_undef	Perl_hv_undef
 #define ibcmp		Perl_ibcmp
+#define ibcmp_locale	Perl_ibcmp_locale
 #define ingroup		Perl_ingroup
 #define instr		Perl_instr
+#define intro_my	Perl_intro_my
 #define intuit_more	Perl_intuit_more
 #define invert		Perl_invert
 #define jmaybe		Perl_jmaybe
@@ -507,6 +518,7 @@
 #define magic_setamagic	Perl_magic_setamagic
 #define magic_setarylen	Perl_magic_setarylen
 #define magic_setbm	Perl_magic_setbm
+#define magic_setcollxfrm	Perl_magic_setcollxfrm
 #define magic_setdbline	Perl_magic_setdbline
 #define magic_setenv	Perl_magic_setenv
 #define magic_setfm	Perl_magic_setfm
@@ -1062,6 +1074,8 @@
 #define sv_clean_objs	Perl_sv_clean_objs
 #define sv_clear	Perl_sv_clear
 #define sv_cmp		Perl_sv_cmp
+#define sv_cmp_locale	Perl_sv_cmp_locale
+#define sv_collxfrm	Perl_sv_collxfrm
 #define sv_dec		Perl_sv_dec
 #define sv_derived_from	Perl_sv_derived_from
 #define sv_dump		Perl_sv_dump
@@ -1097,12 +1111,14 @@
 #define sv_setref_pvn	Perl_sv_setref_pvn
 #define sv_setsv	Perl_sv_setsv
 #define sv_setuv	Perl_sv_setuv
+#define sv_taint	Perl_sv_taint
+#define sv_tainted	Perl_sv_tainted
 #define sv_unmagic	Perl_sv_unmagic
 #define sv_unref	Perl_sv_unref
+#define sv_untaint	Perl_sv_untaint
 #define sv_upgrade	Perl_sv_upgrade
 #define sv_usepvn	Perl_sv_usepvn
 #define taint_env	Perl_taint_env
-#define taint_not	Perl_taint_not
 #define taint_proper	Perl_taint_proper
 #define too_few_arguments	Perl_too_few_arguments
 #define too_many_arguments	Perl_too_many_arguments
@@ -1247,7 +1263,6 @@
 #define rs		(curinterp->Irs)
 #define runlevel	(curinterp->Irunlevel)
 #define sawampersand	(curinterp->Isawampersand)
-#define sawi		(curinterp->Isawi)
 #define sawstudy	(curinterp->Isawstudy)
 #define sawvec		(curinterp->Isawvec)
 #define screamfirst	(curinterp->Iscreamfirst)
@@ -1400,7 +1415,6 @@
 #define Irs		rs
 #define Irunlevel	runlevel
 #define Isawampersand	sawampersand
-#define Isawi		sawi
 #define Isawstudy	sawstudy
 #define Isawvec		sawvec
 #define Iscreamfirst	screamfirst
@@ -1433,6 +1447,8 @@
 #define Itoptarget	toptarget
 #define Iunsafe		unsafe
 #define Iwarnhook	warnhook
+
+#ifdef EMBED
 
 #define Argv		Perl_Argv
 #define Cmd		Perl_Cmd
@@ -1551,7 +1567,6 @@
 #define rs		Perl_rs
 #define runlevel	Perl_runlevel
 #define sawampersand	Perl_sawampersand
-#define sawi		Perl_sawi
 #define sawstudy	Perl_sawstudy
 #define sawvec		Perl_sawvec
 #define screamfirst	Perl_screamfirst
@@ -1584,5 +1599,7 @@
 #define toptarget	Perl_toptarget
 #define unsafe		Perl_unsafe
 #define warnhook	Perl_warnhook
+
+#endif /* EMBED */
 
 #endif /* MULTIPLICITY */

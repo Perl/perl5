@@ -304,7 +304,10 @@ symbolic link, not the real file.)  Example:
 
 =item abs VALUE
 
+=item abs 
+
 Returns the absolute value of its argument.
+If VALUE is omitted, uses $_.
 
 =item accept NEWSOCKET,GENERICSOCKET
 
@@ -314,8 +317,11 @@ See example in L<perlipc/"Sockets: Client/Server Communication">.
 
 =item alarm SECONDS
 
+=item alarm 
+
 Arranges to have a SIGALRM delivered to this process after the
-specified number of seconds have elapsed.  (On some machines,
+specified number of seconds have elapsed.  If SECONDS is not specified,
+the value stored in $_ is used. (On some machines,
 unfortunately, the elapsed time may be up to one second less than you
 specified because of how seconds are counted.)  Only one timer may be
 counting at once.  Each call disables the previous timer, and an
@@ -488,10 +494,16 @@ restrictions may be relaxed, but this is not a portable assumption.
 
 =item chr NUMBER
 
+=item chr 
+
 Returns the character represented by that NUMBER in the character set.
 For example, C<chr(65)> is "A" in ASCII.
 
+If NUMBER is omitted, uses $_.
+
 =item chroot FILENAME
+
+=item chroot 
 
 This function works as the system call by the same name: it makes the
 named directory the new root directory for all further pathnames that
@@ -618,10 +630,13 @@ rich implementation.
 
 =item defined EXPR
 
+=item defined 
+
 Returns a boolean value saying whether EXPR has a real value
-or not.  Many operations return the undefined value under exceptional
-conditions, such as end of file, uninitialized variable, system error
-and such.  This function allows you to distinguish between an undefined
+or not. If EXPR is not present, $_ will be checked. Many operations
+return the undefined value under exceptional conditions, such as end of
+file, uninitialized variable, system error and such.  This function
+allows you to distinguish between an undefined
 null scalar and a defined null scalar with operations that might return
 a real null string, such as referencing elements of an array.  You may
 also check to see if arrays or subroutines exist.  Use of defined on
@@ -961,6 +976,8 @@ are called before exit.)  Example:
 See also die().  If EXPR is omitted, exits with 0 status.
 
 =item exp EXPR
+
+=item exp 
 
 Returns I<e> (the natural logarithm base) to the power of EXPR.  
 If EXPR is omitted, gives C<exp($_)>.
@@ -1343,6 +1360,8 @@ array.
 
 =item hex EXPR
 
+=item hex 
+
 Interprets EXPR as a hex string and returns the corresponding decimal
 value.  (To convert strings that might start with 0 or 0x see
 oct().)  If EXPR is omitted, uses $_.
@@ -1365,6 +1384,8 @@ variable to--but don't do that).  If the substring is not found, returns
 one less than the base, ordinarily -1.
 
 =item int EXPR
+
+=item int 
 
 Returns the integer portion of EXPR.  If EXPR is omitted, uses $_.
 
@@ -1497,17 +1518,27 @@ C<continue> block, if any, is not executed:
 
 =item lc EXPR
 
+=item lc 
+
 Returns an lowercased version of EXPR.  This is the internal function
 implementing the \L escape in double-quoted strings.  
 Should respect any POSIX setlocale() settings.
 
+If EXPR is omitted, uses $_.
+
 =item lcfirst EXPR
+
+=item lcfirst 
 
 Returns the value of EXPR with the first character lowercased.  This is
 the internal function implementing the \l escape in double-quoted strings.
 Should respect any POSIX setlocale() settings.
 
+If EXPR is omitted, uses $_.
+
 =item length EXPR
+
+=item length 
 
 Returns the length in characters of the value of EXPR.  If EXPR is
 omitted, returns length of $_.
@@ -1555,6 +1586,8 @@ via the POSIX module.
 
 =item log EXPR
 
+=item log 
+
 Returns logarithm (base I<e>) of EXPR.  If EXPR is omitted, returns log
 of $_.
 
@@ -1562,9 +1595,13 @@ of $_.
 
 =item lstat EXPR
 
+=item lstat 
+
 Does the same thing as the stat() function, but stats a symbolic link
 instead of the file the symbolic link points to.  If symbolic links are
 unimplemented on your system, a normal stat() is done.
+
+If EXPR is omitted, stats $_.
 
 =item m//
 
@@ -1654,6 +1691,8 @@ refers to the innermost enclosing loop.
 See the "use" function, which "no" is the opposite of.
 
 =item oct EXPR
+
+=item oct 
 
 Interprets EXPR as an octal string and returns the corresponding
 decimal value.  (If EXPR happens to start off with 0x, interprets it as
@@ -1852,6 +1891,8 @@ DIRHANDLEs have their own namespace separate from FILEHANDLEs.
 
 =item ord EXPR
 
+=item ord 
+
 Returns the numeric ascii value of the first character of EXPR.  If
 EXPR is omitted, uses $_.
 
@@ -1996,8 +2037,11 @@ like shift().
 
 =item pos SCALAR
 
+=item pos 
+
 Returns the offset of where the last C<m//g> search left off for the variable
-in question.  May be modified to change that offset.
+is in question ($_ is used when the variable is not specified). May be
+modified to change that offset.
 
 =item print FILEHANDLE LIST
 
@@ -2065,9 +2109,13 @@ Generalized quotes.  See L<perlop>.
 
 =item quotemeta EXPR
 
+=item quotemeta 
+
 Returns the value of EXPR with with all regular expression
 metacharacters backslashed.  This is the internal function implementing
 the \Q escape in double-quoted strings.
+
+If EXPR is omitted, uses $_.
 
 =item rand EXPR
 
@@ -2114,6 +2162,8 @@ chdir() there, it would have been testing the wrong file.
 
 =item readlink EXPR
 
+=item readlink 
+
 Returns the value of a symbolic link, if symbolic links are
 implemented.  If not, gives a fatal error.  If there is some system
 error, returns the undefined value and sets C<$!> (errno).  If EXPR is
@@ -2158,8 +2208,11 @@ themselves about what was just input:
 
 =item ref EXPR
 
-Returns a TRUE value if EXPR is a reference, FALSE otherwise.  The value
-returned depends on the type of thing the reference is a reference to.
+=item ref 
+
+Returns a TRUE value if EXPR is a reference, FALSE otherwise. If EXPR
+is not specified, $_ will be used. The value returned depends on the
+type of thing the reference is a reference to.
 Builtin types include:
 
     REF
@@ -2288,6 +2341,8 @@ occurrence of SUBSTR in STR.  If POSITION is specified, returns the
 last occurrence at or before that position.
 
 =item rmdir FILENAME
+
+=item rmdir 
 
 Deletes the directory specified by FILENAME if it is empty.  If it
 succeeds it returns 1, otherwise it returns 0 and sets C<$!> (errno).  If
@@ -2526,6 +2581,8 @@ Shuts down a socket connection in the manner indicated by HOW, which
 has the same interpretation as in the system call of the same name.
 
 =item sin EXPR
+
+=item sin 
 
 Returns the sine of EXPR (expressed in radians).  If EXPR is omitted,
 returns sine of $_.
@@ -2804,6 +2861,8 @@ dump core when fed ludicrous arguments.
 
 =item sqrt EXPR
 
+=item sqrt 
+
 Return the square root of EXPR.  If EXPR is omitted, returns square
 root of $_.
 
@@ -2821,9 +2880,13 @@ the comp.security.unix newsgroup.
 
 =item stat EXPR
 
+=item stat 
+
 Returns a 13-element array giving the status info for a file, either the
-file opened via FILEHANDLE, or named by EXPR.  Returns a null list if
-the stat fails.  Typically used as follows:
+file opened via FILEHANDLE, or named by EXPR. If EXPR is omitted, it
+stats $_.  Returns a null list if the stat fails.  Typically used as
+follows:
+
 
     ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
        $atime,$mtime,$ctime,$blksize,$blocks)
@@ -3003,9 +3066,12 @@ Attempts to read LENGTH bytes of data into variable SCALAR from the
 specified FILEHANDLE, using the system call read(2).  It bypasses
 stdio, so mixing this with other kinds of reads may cause confusion.
 Returns the number of bytes actually read, or undef if there was an
-error.  SCALAR will be grown or shrunk to the length actually read.  An
-OFFSET may be specified to place the read data at some other place than
-the beginning of the string.
+error.  SCALAR will be grown or shrunk to the length actually read.
+In the case of growing the new data area will be padded with "\0" bytes.
+An OFFSET may be specified to place the read data at some other
+place than the beginning of the string. A negative OFFSET means
+placing the read data at that many bytes counting backwards from the end
+of the string.
 
 =item system LIST
 
@@ -3025,9 +3091,12 @@ described in L<perlop/"`STRING`">.
 Attempts to write LENGTH bytes of data from variable SCALAR to the
 specified FILEHANDLE, using the system call write(2).  It bypasses
 stdio, so mixing this with prints may cause confusion.  Returns the
-number of bytes actually written, or undef if there was an error.  An
-OFFSET may be specified to get the write data from some other place than
-the beginning of the string.
+number of bytes actually written, or undef if there was an error.
+If the length is greater than the available data, only as much data as
+is available will be written.  An OFFSET may be specified to write the
+data from some other place than the beginning of the string.
+A negative OFFSET means starting the writing from that many bytes
+counting backwards from the end of the string.
 
 =item tell FILEHANDLE
 
@@ -3134,15 +3203,23 @@ on your system.
 
 =item uc EXPR
 
+=item uc 
+
 Returns an uppercased version of EXPR.  This is the internal function
 implementing the \U escape in double-quoted strings.
 Should respect any POSIX setlocale() settings.
 
+If EXPR is omitted, uses $_.
+
 =item ucfirst EXPR
+
+=item ucfirst 
 
 Returns the value of EXPR with the first character uppercased.  This is
 the internal function implementing the \u escape in double-quoted strings.
 Should respect any POSIX setlocale() settings.
+
+If EXPR is omitted, uses $_.
 
 =item umask EXPR
 
@@ -3172,6 +3249,8 @@ subroutine.  Examples:
 
 =item unlink LIST
 
+=item unlink 
+
 Deletes a list of files.  Returns the number of files successfully
 deleted.
 
@@ -3183,6 +3262,8 @@ Note: unlink will not delete directories unless you are superuser and
 the B<-U> flag is supplied to Perl.  Even if these conditions are
 met, be warned that unlinking a directory can inflict damage on your
 filesystem.  Use rmdir instead.
+
+If LIST is omitted, uses $_.
 
 =item unpack TEMPLATE,EXPR
 

@@ -324,7 +324,7 @@ if (open(PL,"${outdir}patchlevel.h")) {
 else { warn "Can't read ${outdir}patchlevel.h - skipping 'PATCHLEVEL'"; }
 
 # simple pager support for perldoc                                             
-if    (`most` =~ /IVVERB/) {
+if    (`most not..file` =~ /IVVERB/) {
   $pager = 'more';
   if (`more nl:` =~ /IVVERB/) { $pager = 'type/page'; }
 }

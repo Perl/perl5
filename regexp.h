@@ -26,7 +26,7 @@ typedef struct regexp {
 	char *subend;		/* end of subbase */
 	U16 naughty;		/* how exponential is this pattern? */
 	char reganch;		/* Internal use only. */
-	char do_folding;	/* do case-insensitive match? */
+	char exec_tainted;	/* Tainted information used by regexec? */
 	char program[1];	/* Unwarranted chumminess with compiler. */
 } regexp;
 

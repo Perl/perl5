@@ -1000,8 +1000,10 @@ register SV *sv;
 	else
 	    sprintf(t,"(\"%.127s\")",SvPVX(sv));
     }
-    else if (SvNOKp(sv))
+    else if (SvNOKp(sv)) {
+	NUMERIC_STANDARD();
 	sprintf(t,"(%g)",SvNVX(sv));
+    }
     else if (SvIOKp(sv))
 	sprintf(t,"(%ld)",(long)SvIVX(sv));
     else
@@ -1187,17 +1189,33 @@ SV *sv;
     int i;
 
     for (s = SvPVX(sv), i = 50; *s && i; s++,i--) {
-	int ch = *s;
-	if (ch & 128 && !isprint(ch)) {
+	int ch = *s & 0xFF;
+	if (ch & 128 && !isPRINT_LC(ch)) {
 	    *d++ = 'M';
 	    *d++ = '-';
 	    ch &= 127;
 	}
-	if (isprint(ch))
+	if (ch == '\n') {
+	    *d++ = '\\';
+	    *d++ = 'n';
+	}
+	else if (ch == '\r') {
+	    *d++ = '\\';
+	    *d++ = 'r';
+	}
+	else if (ch == '\f') {
+	    *d++ = '\\';
+	    *d++ = 'f';
+	}
+	else if (ch == '\\') {
+	    *d++ = '\\';
+	    *d++ = '\\';
+	}
+	else if (isPRINT_LC(ch))
 	    *d++ = ch;
 	else {
 	    *d++ = '^';
-	    *d++ = ch ^ 64;
+	    *d++ = toCTRL(ch);
 	}
     }
     if (*s) {
@@ -1312,6 +1330,7 @@ register SV *sv;
 	if (SvPOKp(sv) && SvLEN(sv)) {
 	    if (dowarn && !SvIOKp(sv) && !looks_like_number(sv))
 		not_a_number(sv);
+	    NUMERIC_STANDARD();
 	    return atof(SvPVX(sv));
 	}
 	if (SvIOKp(sv))
@@ -1333,6 +1352,7 @@ register SV *sv;
 	    if (SvPOKp(sv) && SvLEN(sv)) {
 		if (dowarn && !SvIOKp(sv) && !looks_like_number(sv))
 		    not_a_number(sv);
+		NUMERIC_STANDARD();
 		return atof(SvPVX(sv));
 	    }
 	    if (SvIOKp(sv))
@@ -1347,7 +1367,9 @@ register SV *sv;
 	    sv_upgrade(sv, SVt_PVNV);
 	else
 	    sv_upgrade(sv, SVt_NV);
-	DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx num(%g)\n",(unsigned long)sv,SvNVX(sv)));
+	DEBUG_c(NUMERIC_STANDARD());
+	DEBUG_c(PerlIO_printf(Perl_debug_log,
+			      "0x%lx num(%g)\n",(unsigned long)sv,SvNVX(sv)));
     }
     else if (SvTYPE(sv) < SVt_PVNV)
 	sv_upgrade(sv, SVt_PVNV);
@@ -1359,6 +1381,7 @@ register SV *sv;
     else if (SvPOKp(sv) && SvLEN(sv)) {
 	if (dowarn && !SvIOKp(sv) && !looks_like_number(sv))
 	    not_a_number(sv);
+	NUMERIC_STANDARD();
 	SvNVX(sv) = atof(SvPVX(sv));
     }
     else  {
@@ -1367,7 +1390,9 @@ register SV *sv;
 	return 0.0;
     }
     SvNOK_on(sv);
-    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2nv(%g)\n",(unsigned long)sv,SvNVX(sv)));
+    DEBUG_c(NUMERIC_STANDARD());
+    DEBUG_c(PerlIO_printf(Perl_debug_log,
+			  "0x%lx 2nv(%g)\n",(unsigned long)sv,SvNVX(sv)));
     return SvNVX(sv);
 }
 
@@ -1394,6 +1419,7 @@ STRLEN *lp;
 	    goto tokensave;
 	}
 	if (SvNOKp(sv)) {
+	    NUMERIC_STANDARD();
 	    Gconvert(SvNVX(sv), DBL_DIG, 0, tokenbuf);
 	    goto tokensave;
 	}
@@ -1444,6 +1470,7 @@ STRLEN *lp;
 	}
 	if (SvREADONLY(sv)) {
 	    if (SvNOKp(sv)) {
+		NUMERIC_STANDARD();
 		Gconvert(SvNVX(sv), DBL_DIG, 0, tokenbuf);
 		goto tokensave;
 	    }
@@ -1470,7 +1497,10 @@ STRLEN *lp;
 	    (void)strcpy(s,"0");
 	else
 #endif /*apollo*/
+	{
+	    NUMERIC_STANDARD();
 	    Gconvert(SvNVX(sv), DBL_DIG, 0, s);
+	}
 	errno = olderrno;
 #ifdef FIXNEGATIVEZERO
         if (*s == '-' && s[1] == '0' && !s[2])
@@ -1830,7 +1860,7 @@ register SV *sstr;
 	 * has to be allocated and SvPVX(sstr) has to be freed.
 	 */
 
-	if (SvTEMP(sstr) &&		/* slated for free anyway? */
+	if ((SvTEMP(sstr) || SvPADTMP(sstr)) && /* slated for free anyway? */
 	    !(sflags & SVf_OOK)) 	/* and not involved in OOK hack? */
 	{
 	    if (SvPVX(dstr)) {		/* we know that dtype >= SVt_PV */
@@ -2177,6 +2207,11 @@ I32 namlen;
     case 'l':
 	mg->mg_virtual = &vtbl_dbline;
 	break;
+#ifdef HAS_STRXFRM
+    case 'o':
+        mg->mg_virtual = &vtbl_collxfrm;
+        break;
+#endif
     case 'P':
 	mg->mg_virtual = &vtbl_pack;
 	break;
@@ -2617,84 +2652,15 @@ register SV *str2;
 }
 
 I32
-sv_cmp(str1,str2)
+sv_cmp(str1, str2)
 register SV *str1;
 register SV *str2;
 {
+    STRLEN cur1 = 0;
+    char *pv1 = str1 ? SvPV(str1, cur1) : NULL;
+    STRLEN cur2 = 0;
+    char *pv2 = str2 ? SvPV(str2, cur2) : NULL;
     I32 retval;
-    char *pv1;
-    STRLEN cur1;
-    char *pv2;
-    STRLEN cur2;
-
-    if (lc_collate_active) {	/* NOTE: this is the LC_COLLATE branch */
-
-    if (!str1) {
-	pv1 = "";
-	cur1 = 0;
-      } else {
-	pv1 = SvPV(str1, cur1);
-
-	{
-	  STRLEN cur1x;
-	  char * pv1x = mem_collxfrm(pv1, cur1, &cur1x);
-
-	  pv1 = pv1x;
-	  cur1 = cur1x;
-	}
-      }
-
-    if (!str2) {
-	pv2 = "";
-	cur2 = 0;
-      } else {
-	pv2 = SvPV(str2, cur2);
-
-        {
-	  STRLEN cur2x;
-	  char * pv2x = mem_collxfrm(pv2, cur2, &cur2x);
-
-	  pv2 = pv2x;
-	  cur2 = cur2x;
-	}
-    }
-
-      if (!cur1) {
-	Safefree(pv2);
-	return cur2 ? -1 : 0;
-      }
-
-      if (!cur2) {
-	Safefree(pv1);
-	return 1;
-      }
-
-      retval = memcmp((void*)pv1, (void*)pv2, cur1 < cur2 ? cur1 : cur2);
-
-      Safefree(pv1);
-      Safefree(pv2);
-
-      if (retval)
-	return retval < 0 ? -1 : 1;
-
-      if (cur1 == cur2)
-	return 0;
-    else
-	return cur1 < cur2 ? -1 : 1;
-
-    } else {			/* NOTE: this is the non-LC_COLLATE branch */
-
-      if (!str1) {
-	pv1 = "";
-	cur1 = 0;
-      } else
-	pv1 = SvPV(str1, cur1);
-
-      if (!str2) {
-	pv2 = "";
-	cur2 = 0;
-      } else
-	pv2 = SvPV(str2, cur2);
 
     if (!cur1)
 	return cur2 ? -1 : 0;
@@ -2702,17 +2668,112 @@ register SV *str2;
     if (!cur2)
 	return 1;
 
-      retval = memcmp((void*)pv1, (void*)pv2, cur1 < cur2 ? cur1 : cur2);
+    retval = memcmp((void*)pv1, (void*)pv2, cur1 < cur2 ? cur1 : cur2);
 
-      if (retval)
+    if (retval)
 	return retval < 0 ? -1 : 1;
 
-      if (cur1 == cur2)
+    if (cur1 == cur2)
 	return 0;
     else
 	return cur1 < cur2 ? -1 : 1;
+}
+
+I32
+sv_cmp_locale(sv1, sv2)
+register SV *sv1;
+register SV *sv2;
+{
+#ifdef LC_COLLATE
+
+    char *pv1, *pv2;
+    STRLEN len1, len2;
+    I32 retval;
+
+    if (collation_standard)
+	goto raw_compare;
+
+    len1 = 0;
+    pv1 = sv1 ? sv_collxfrm(sv1, &len1) : NULL;
+    len2 = 0;
+    pv2 = sv2 ? sv_collxfrm(sv2, &len2) : NULL;
+
+    if (!pv1 || !len1) {
+	if (pv2 && len2)
+	    return -1;
+	else
+	    goto raw_compare;
+    }
+    else {
+	if (!pv2 || !len2)
+	    return 1;
+    }
+
+    retval = memcmp((void*)pv1, (void*)pv2, len1 < len2 ? len1 : len2);
+
+    if (retval)
+	return retval < 0 ? -1 : 1;
+
+    /*
+     * When the result of collation is equality, that doesn't mean
+     * that there are no differences -- some locales exclude some
+     * characters from consideration.  So to avoid false equalities,
+     * we use the raw string as a tiebreaker.
+     */
+
+  raw_compare:
+    /* FALL THROUGH */
+
+#endif /* LC_COLLATE */
+
+    return sv_cmp(sv1, sv2);
+}
+
+#ifdef LC_COLLATE
+
+char *
+sv_collxfrm(sv, nxp)
+     SV *sv;
+     STRLEN *nxp;
+{
+    /* Any scalar variable may carry an 'o' magic that contains the
+     * scalar data of the variable transformed to such a format that
+     * a normal memcmp() can be used to compare the data according
+     * to the locale settings. */
+
+    MAGIC *mg = NULL;
+
+    if (SvMAGICAL(sv)) {
+	mg = mg_find(sv, 'o');
+	if (mg && *(U32*)mg->mg_ptr != collation_ix)
+	    mg = NULL;
+    }
+
+    if (! mg) {
+	char *s, *xf;
+	STRLEN len, xlen;
+
+	s = SvPV(sv, len);
+	if ((xf = mem_collxfrm(s, len, &xlen))) {
+	    sv_magic(sv, 0, 'o', 0, 0);
+	    if ((mg = mg_find(sv, 'o'))) {
+		mg->mg_ptr = xf;
+		mg->mg_len = xlen;
+	    }
+	}
+    }
+
+    if (mg) {
+	*nxp = mg->mg_len;
+	return mg->mg_ptr + sizeof(collation_ix);
+    }
+    else {
+	*nxp = 0;
+	return NULL;
     }
 }
+
+#endif /* LC_COLLATE */
 
 char *
 sv_gets(sv,fp,append)
@@ -2801,7 +2862,8 @@ I32 append;
 	}
 	else {
 	    shortbuffered = 0;
-	    SvGROW(sv, append+cnt+2);/* (remembering cnt can be -1) */
+	    /* remember that cnt can be negative */
+	    SvGROW(sv, append + (cnt <= 0 ? 2 : (cnt + 1)));
 	}
     }
     else
@@ -2812,7 +2874,8 @@ I32 append;
 	"Screamer: entering, ptr=%d, cnt=%d\n",ptr,cnt));
     DEBUG_P(PerlIO_printf(Perl_debug_log,
 	"Screamer: entering: FILE * thinks ptr=%d, cnt=%d, base=%d\n",
-	       PerlIO_get_ptr(fp), PerlIO_get_cnt(fp), PerlIO_get_base(fp)));
+	       PerlIO_get_ptr(fp), PerlIO_get_cnt(fp), 
+	       PerlIO_has_base(fp) ? PerlIO_get_base(fp) : 0));
     for (;;) {
       screamer:
 	if (cnt > 0) {
@@ -2846,7 +2909,8 @@ I32 append;
 	PerlIO_set_ptrcnt(fp, ptr, cnt); /* deregisterize cnt and ptr */
 	DEBUG_P(PerlIO_printf(Perl_debug_log,
 	    "Screamer: pre: FILE * thinks ptr=%d, cnt=%d, base=%d\n",
-	    PerlIO_get_ptr(fp), PerlIO_get_cnt(fp), PerlIO_get_base(fp)));
+	    PerlIO_get_ptr(fp), PerlIO_get_cnt(fp), 
+	    PerlIO_has_base (fp) ? PerlIO_get_base(fp) : 0));
 	/* This used to call 'filbuf' in stdio form, but as that behaves like 
 	   getc when cnt <= 0 we use PerlIO_getc here to avoid another 
 	   abstraction.  This may also avoid issues with different named 
@@ -2856,7 +2920,8 @@ I32 append;
 	i   = PerlIO_getc(fp);		/* get more characters */
 	DEBUG_P(PerlIO_printf(Perl_debug_log,
 	    "Screamer: post: FILE * thinks ptr=%d, cnt=%d, base=%d\n",
-	    PerlIO_get_ptr(fp), PerlIO_get_cnt(fp), PerlIO_get_base(fp)));
+	    PerlIO_get_ptr(fp), PerlIO_get_cnt(fp), 
+	    PerlIO_has_base (fp) ? PerlIO_get_base(fp) : 0));
 	cnt = PerlIO_get_cnt(fp);
 	ptr = (STDCHAR*)PerlIO_get_ptr(fp);	/* reregisterize cnt and ptr */
 	DEBUG_P(PerlIO_printf(Perl_debug_log,
@@ -2888,7 +2953,8 @@ thats_really_all_folks:
     PerlIO_set_ptrcnt(fp, ptr, cnt);	/* put these back or we're in trouble */
     DEBUG_P(PerlIO_printf(Perl_debug_log,
 	"Screamer: end: FILE * thinks ptr=%d, cnt=%d, base=%d\n",
-	PerlIO_get_ptr(fp), PerlIO_get_cnt(fp), PerlIO_get_base(fp)));
+	PerlIO_get_ptr(fp), PerlIO_get_cnt(fp), 
+	PerlIO_has_base (fp) ? PerlIO_get_base(fp) : 0));
     *bp = '\0';
     SvCUR_set(sv, bp - (STDCHAR*)SvPVX(sv));	/* set length */
     DEBUG_P(PerlIO_printf(Perl_debug_log,
@@ -2992,7 +3058,8 @@ register SV *sv;
     while (isALPHA(*d)) d++;
     while (isDIGIT(*d)) d++;
     if (*d) {
-        sv_setnv(sv,atof(SvPVX(sv)) + 1.0);  /* punt */
+	NUMERIC_STANDARD();
+	sv_setnv(sv,atof(SvPVX(sv)) + 1.0);  /* punt */
 	return;
     }
     d--;
@@ -3062,7 +3129,8 @@ register SV *sv;
 	(void)SvNOK_only(sv);
 	return;
     }
-    sv_setnv(sv,atof(SvPVX(sv)) - 1.0);
+    NUMERIC_STANDARD();
+    sv_setnv(sv,atof(SvPVX(sv)) - 1.0);	/* punt */
 }
 
 /* Make a string that will exist for the duration of the expression
@@ -3196,6 +3264,7 @@ newSVsv(old)
 register SV *old;
 {
     register SV *sv;
+    U32 oflags;
 
     if (!old)
 	return Nullsv;
@@ -3207,10 +3276,11 @@ register SV *old;
     SvANY(sv) = 0;
     SvREFCNT(sv) = 1;
     SvFLAGS(sv) = 0;
-    if (SvTEMP(old)) {
-	SvTEMP_off(old);
+    oflags = SvFLAGS(old) & (SVs_TEMP|SVs_PADTMP);
+    if (oflags) {
+	SvFLAGS(old) &= ~(SVs_TEMP|SVs_PADTMP);
 	sv_setsv(sv,old);
-	SvTEMP_on(old);
+	SvFLAGS(old) |= oflags;
     }
     else
 	sv_setsv(sv,old);
@@ -3648,6 +3718,65 @@ SV* sv;
 	sv_2mortal(rv);		/* Schedule for freeing later */
 }
 
+IO*
+sv_2io(sv)
+SV *sv;
+{
+    IO* io;
+    GV* gv;
+
+    switch (SvTYPE(sv)) {
+    case SVt_PVIO:
+	io = (IO*)sv;
+	break;
+    case SVt_PVGV:
+	gv = (GV*)sv;
+	io = GvIO(gv);
+	if (!io)
+	    croak("Bad filehandle: %s", GvNAME(gv));
+	break;
+    default:
+	if (!SvOK(sv))
+	    croak(no_usym, "filehandle");
+	if (SvROK(sv))
+	    return sv_2io(SvRV(sv));
+	gv = gv_fetchpv(SvPV(sv,na), FALSE, SVt_PVIO);
+	if (gv)
+	    io = GvIO(gv);
+	else
+	    io = 0;
+	if (!io)
+	    croak("Bad filehandle: %s", SvPV(sv,na));
+	break;
+    }
+    return io;
+}
+
+void
+sv_taint(sv)
+SV *sv;
+{
+    sv_magic((sv), Nullsv, 't', Nullch, 0);
+}
+
+void
+sv_untaint(sv)
+SV *sv;
+{
+    MAGIC *mg = mg_find(sv, 't');
+    if (mg)
+	mg->mg_len &= ~1;
+}
+
+bool
+sv_tainted(sv)
+SV *sv;
+{
+    MAGIC *mg = mg_find(sv, 't');
+    return (mg && ((mg->mg_len & 1)
+		   || (mg->mg_len & 2) && mg->mg_obj == sv));
+}
+
 #ifdef DEBUGGING
 void
 sv_dump(sv)
@@ -3790,8 +3919,10 @@ SV* sv;
     }
     if (type >= SVt_PVIV || type == SVt_IV)
 	PerlIO_printf(Perl_debug_log, "  IV = %ld\n", (long)SvIVX(sv));
-    if (type >= SVt_PVNV || type == SVt_NV)
+    if (type >= SVt_PVNV || type == SVt_NV) {
+	NUMERIC_STANDARD();
 	PerlIO_printf(Perl_debug_log, "  NV = %.*g\n", DBL_DIG, SvNVX(sv));
+    }
     if (SvROK(sv)) {
 	PerlIO_printf(Perl_debug_log, "  RV = 0x%lx\n", (long)SvRV(sv));
 	sv_dump(SvRV(sv));
@@ -3916,38 +4047,3 @@ SV* sv;
 {
 }
 #endif
-
-IO*
-sv_2io(sv)
-SV *sv;
-{
-    IO* io;
-    GV* gv;
-
-    switch (SvTYPE(sv)) {
-    case SVt_PVIO:
-	io = (IO*)sv;
-	break;
-    case SVt_PVGV:
-	gv = (GV*)sv;
-	io = GvIO(gv);
-	if (!io)
-	    croak("Bad filehandle: %s", GvNAME(gv));
-	break;
-    default:
-	if (!SvOK(sv))
-	    croak(no_usym, "filehandle");
-	if (SvROK(sv))
-	    return sv_2io(SvRV(sv));
-	gv = gv_fetchpv(SvPV(sv,na), FALSE, SVt_PVIO);
-	if (gv)
-	    io = GvIO(gv);
-	else
-	    io = 0;
-	if (!io)
-	    croak("Bad filehandle: %s", SvPV(sv,na));
-	break;
-    }
-    return io;
-}
-

@@ -296,13 +296,13 @@ i_ne		integer ne		ck_null		ifs	S S
 ncmp		spaceship operator	ck_null		Iifst	S S
 i_ncmp		integer spaceship	ck_null		ifst	S S
 
-slt		string lt		ck_null		ifs	S S
-sgt		string gt		ck_null		ifs	S S
-sle		string le		ck_null		ifs	S S
-sge		string ge		ck_null		ifs	S S
-seq		string eq		ck_null		ifs	S S
-sne		string ne		ck_null		ifs	S S
-scmp		string comparison	ck_null		ifst	S S
+slt		string lt		ck_scmp		ifs	S S
+sgt		string gt		ck_scmp		ifs	S S
+sle		string le		ck_scmp		ifs	S S
+sge		string ge		ck_scmp		ifs	S S
+seq		string eq		ck_scmp		ifs	S S
+sne		string ne		ck_scmp		ifs	S S
+scmp		string comparison	ck_scmp		ifst	S S
 
 bit_and		bitwise and		ck_bitop	fst	S S
 bit_xor		bitwise xor		ck_bitop	fst	S S
@@ -338,15 +338,15 @@ vec		vec			ck_fun		ist	S S S
 index		index			ck_index	ist	S S S?
 rindex		rindex			ck_index	ist	S S S?
 
-sprintf		sprintf			ck_fun		mst	S L
-formline	formline		ck_formline	ms	S L
+sprintf		sprintf			ck_fun_locale	mst	S L
+formline	formline		ck_fun		ms	S L
 ord		ord			ck_fun		ifstu	S?
 chr		chr			ck_fun		fstu	S?
 crypt		crypt			ck_fun		fst	S S
-ucfirst		upper case first	ck_fun		fstu	S?
-lcfirst		lower case first	ck_fun		fstu	S?
-uc		upper case		ck_fun		fstu	S?
-lc		lower case		ck_fun		fstu	S?
+ucfirst		upper case first	ck_fun_locale	fstu	S?
+lcfirst		lower case first	ck_fun_locale	fstu	S?
+uc		upper case		ck_fun_locale	fstu	S?
+lc		lower case		ck_fun_locale	fstu	S?
 quotemeta	quote metachars		ck_fun		fstu	S?
 
 # Arrays.

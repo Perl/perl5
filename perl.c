@@ -35,6 +35,7 @@ dEXT char rcsid[] = "perl.c\nPatch level: ###\n";
 #endif
 
 static void find_beginning _((void));
+static void forbid_setid _((char *));
 static void incpush _((char *));
 static void init_ids _((void));
 static void init_debugger _((void));
@@ -120,6 +121,7 @@ register PerlInterpreter *sv_interp;
 
     init_ids();
 
+    NUMERIC_STANDARD();
 #if defined(SUBVERSION) && SUBVERSION > 0
     sprintf(patchlevel, "%7.5f",   (double) 5 
 				+ ((double) PATCHLEVEL / (double) 1000)
@@ -414,7 +416,7 @@ setuid perl scripts securely.\n");
 	    (void)PerlIO_putc(e_fp,'\n');
 	    break;
 	case 'I':
-	    taint_not("-I");
+	    forbid_setid("-I");
 	    sv_catpv(sv,"-");
 	    sv_catpv(sv,s);
 	    sv_catpv(sv," ");
@@ -429,12 +431,12 @@ setuid perl scripts securely.\n");
 	    }
 	    break;
 	case 'P':
-	    taint_not("-P");
+	    forbid_setid("-P");
 	    preprocess = TRUE;
 	    s++;
 	    goto reswitch;
 	case 'S':
-	    taint_not("-S");
+	    forbid_setid("-S");
 	    dosearch = TRUE;
 	    s++;
 	    goto reswitch;
@@ -1152,7 +1154,7 @@ char *s;
 	s++;
 	return s;
     case 'd':
-	taint_not("-d");
+	forbid_setid("-d");
 	s++;
 	if (*s == ':' || *s == '=')  {
 	    sprintf(buf, "use Devel::%s;", ++s);
@@ -1166,7 +1168,7 @@ char *s;
 	return s;
     case 'D':
 #ifdef DEBUGGING
-	taint_not("-D");
+	forbid_setid("-D");
 	if (isALPHA(s[1])) {
 	    static char debopts[] = "psltocPmfrxuLHXD";
 	    char *d;
@@ -1197,7 +1199,7 @@ char *s;
 	*s = '\0';
 	break;
     case 'I':
-	taint_not("-I");
+	forbid_setid("-I");
 	if (*++s) {
 	    char *e;
 	    for (e = s; *e && !isSPACE(*e); e++) ;
@@ -1230,10 +1232,10 @@ char *s;
 	}
 	return s;
     case 'M':
-	taint_not("-M");	/* XXX ? */
+	forbid_setid("-M");	/* XXX ? */
 	/* FALL THROUGH */
     case 'm':
-	taint_not("-m");	/* XXX ? */
+	forbid_setid("-m");	/* XXX ? */
 	if (*++s) {
 	    char *start;
 	    char *use = "use ";
@@ -1273,7 +1275,7 @@ char *s;
 	s++;
 	return s;
     case 's':
-	taint_not("-s");
+	forbid_setid("-s");
 	doswitches = TRUE;
 	s++;
 	return s;
@@ -1589,7 +1591,7 @@ sed %s -e \"/^[^#]/b\" \
 	rsfp = my_popen(buf,"r");
     }
     else if (!*scriptname) {
-	taint_not("program input from stdin");
+	forbid_setid("program input from stdin");
 	rsfp = PerlIO_stdin();
     }
     else {
@@ -1867,7 +1869,7 @@ find_beginning()
 
     /* skip forward in input to the real script? */
 
-    taint_not("-x");
+    forbid_setid("-x");
     while (doextract) {
 	if ((s = sv_gets(linestr, rsfp, 0)) == Nullch)
 	    croak("No Perl script found in input\n");
@@ -1901,6 +1903,16 @@ init_ids()
     euid |= egid << 16;
 #endif
     tainting |= (uid && (euid != uid || egid != gid));
+}
+
+static void
+forbid_setid(s)
+char *s;
+{
+    if (euid != uid)
+        croak("No %s allowed while running setuid", s);
+    if (egid != gid)
+        croak("No %s allowed while running setgid", s);
 }
 
 static void
@@ -2069,7 +2081,7 @@ register char **env;
     sv_setpvn(bodytarget, "", 0);
     formtarget = bodytarget;
 
-    tainted = 1;
+    TAINT;
     if (tmpgv = gv_fetchpv("0",TRUE, SVt_PV)) {
 	sv_setpv(GvSV(tmpgv),origfilename);
 	magicname("0", "0", 1);
@@ -2118,10 +2130,9 @@ register char **env;
 #endif
 	hv_magic(hv, envgv, 'E');
     }
-    tainted = 0;
+    TAINT_NOT;
     if (tmpgv = gv_fetchpv("$",TRUE, SVt_PV))
 	sv_setiv(GvSV(tmpgv),(I32)getpid());
-
 }
 
 static void

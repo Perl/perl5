@@ -51,6 +51,9 @@
 #include <unixio.h>
 #include <unixlib.h>
 #include <file.h>  /* it's not <sys/file.h>, so don't use I_SYS_FILE */
+#ifdef __DECC
+#  include <unistd.h> /* DECC has this; VAXC and gcc don't */
+#endif
 
 /* Our own contribution to PerlShr's global symbols . . . */
 #ifdef EMBED
@@ -64,6 +67,8 @@
 #  define do_rmdir		Perl_do_rmdir
 #  define kill_file		Perl_kill_file
 #  define my_utime		Perl_my_utime
+#  define rmsexpand	Perl_rmsexpand
+#  define rmsexpand_ts	Perl_rmsexpand_ts
 #  define fileify_dirspec	Perl_fileify_dirspec
 #  define fileify_dirspec_ts	Perl_fileify_dirspec_ts
 #  define pathify_dirspec	Perl_pathify_dirspec
@@ -413,6 +418,8 @@ char *	my_gconvert _((double, int, int, char *));
 int	do_rmdir _((char *));
 int	kill_file _((char *));
 int	my_utime _((char *, struct utimbuf *));
+char *	rmsexpand _((char *, char *, char *, unsigned));
+char *	rmsexpand_ts _((char *, char *, char *, unsigned));
 char *	fileify_dirspec _((char *, char *));
 char *	fileify_dirspec_ts _((char *, char *));
 char *	pathify_dirspec _((char *, char *));

@@ -285,8 +285,7 @@ char* name;
 		sv_catpvn(tmpstr,"::", 2);
 		sv_catpvn(tmpstr, name, nend - name);
 		sv_setsv(GvSV(CvGV(cv)), tmpstr);
-		if (tainting)
-		    sv_unmagic(GvSV(CvGV(cv)), 't');
+		SvTAINTED_off(GvSV(CvGV(cv)));
 	    }
 	}
     }
@@ -1231,7 +1230,7 @@ int flags;
 	ans=SvIV(res)!=0; break;
       case inc_amg:
       case dec_amg:
-	SvSetSV(left,res); return res; break;
+	SvSetSV(left,res); return left;
       case not_amg:
 ans=!SvOK(res); break;
       }

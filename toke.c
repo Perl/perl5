@@ -50,6 +50,8 @@ static void restore_rsfp _((void *f));
 
 static char *linestart;		/* beg. of most recently read line */
 
+static char pending_ident;	/* pending identifier lookup */
+
 static struct {
     I32 super_state;	/* lexer state to save */
     I32 sub_inwhat;	/* "lex_inwhat" to use */
@@ -189,7 +191,7 @@ char *s;
     }
     else if (multi_close < 32 || multi_close == 127) {
 	*tmpbuf = '^';
-	tmpbuf[1] = multi_close ^ 64;
+	tmpbuf[1] = toCTRL(multi_close);
 	s = "\\n";
 	tmpbuf[2] = '\0';
 	s = tmpbuf;
@@ -822,10 +824,8 @@ char *start;
 		continue;
 	    case 'c':
 		s++;
-		*d = *s++;
-		if (isLOWER(*d))
-		    *d = toUPPER(*d);
-		*d++ ^= 64;
+		len = *s++;
+		*d++ = toCTRL(len);
 		continue;
 	    case 'b':
 		*d++ = '\b';
@@ -1217,6 +1217,59 @@ yylex()
     register char *d;
     register I32 tmp;
     STRLEN len;
+
+    if (pending_ident) {
+	char pit = pending_ident;
+	pending_ident = 0;
+
+	if (in_my) {
+	    if (strchr(tokenbuf,':'))
+		croak(no_myglob,tokenbuf);
+	    yylval.opval = newOP(OP_PADANY, 0);
+	    yylval.opval->op_targ = pad_allocmy(tokenbuf);
+	    return PRIVATEREF;
+	}
+
+	if (!strchr(tokenbuf,':') && (tmp = pad_findmy(tokenbuf))) {
+	    if (last_lop_op == OP_SORT &&
+		tokenbuf[0] == '$' &&
+		(tokenbuf[1] == 'a' || tokenbuf[1] == 'b')
+		&& !tokenbuf[2])
+	    {
+		for (d = in_eval ? oldoldbufptr : linestart;
+		     d < bufend && *d != '\n';
+		     d++)
+		{
+		    if (strnEQ(d,"<=>",3) || strnEQ(d,"cmp",3)) {
+			croak("Can't use \"my %s\" in sort comparison",
+			      tokenbuf);
+		    }
+		}
+	    }
+
+	    yylval.opval = newOP(OP_PADANY, 0);
+	    yylval.opval->op_targ = tmp;
+	    return PRIVATEREF;
+	}
+
+	/* Force them to make up their mind on "@foo". */
+	if (pit == '@' && lex_state != LEX_NORMAL && !lex_brackets) {
+	    GV *gv = gv_fetchpv(tokenbuf+1, FALSE, SVt_PVAV);
+	    if (!gv || (tokenbuf[0] == '@') ? !GvAV(gv) : !GvHV(gv)) {
+		char tmpbuf[1024];
+		sprintf(tmpbuf, "Literal %s now requires backslash", tokenbuf);
+		yyerror(tmpbuf);
+	    }
+	}
+
+	yylval.opval = (OP*)newSVOP(OP_CONST, 0, newSVpv(tokenbuf+1, 0));
+	yylval.opval->op_private = OPpCONST_ENTERED;
+	gv_fetchpv(tokenbuf+1, in_eval ? GV_ADDMULTI : TRUE,
+		   ((tokenbuf[0] == '$') ? SVt_PV
+		    : (tokenbuf[0] == '@') ? SVt_PVAV
+		    : SVt_PVHV));
+	return WORD;
+    }
 
     switch (lex_state) {
 #ifdef COMMENTARY
@@ -1716,35 +1769,19 @@ yylex()
 	Mop(OP_MULTIPLY);
 
     case '%':
-	if (expect != XOPERATOR) {
-	    s = scan_ident(s, bufend, tokenbuf + 1, TRUE);
-	    if (tokenbuf[1]) {
-		expect = XOPERATOR;
-		tokenbuf[0] = '%';
-		if (in_my) {
-		    if (strchr(tokenbuf,':'))
-			croak(no_myglob,tokenbuf);
-		    nextval[nexttoke].opval = newOP(OP_PADANY, 0);
-		    nextval[nexttoke].opval->op_targ = pad_allocmy(tokenbuf);
-		    force_next(PRIVATEREF);
-		    TERM('%');
-		}
-		if (!strchr(tokenbuf,':')) {
-		    if (tmp = pad_findmy(tokenbuf)) {
-			nextval[nexttoke].opval = newOP(OP_PADANY, 0);
-			nextval[nexttoke].opval->op_targ = tmp;
-			force_next(PRIVATEREF);
-			TERM('%');
-		    }
-		}
-		force_ident(tokenbuf + 1, *tokenbuf);
-	    }
-	    else
-		PREREF('%');
-	    TERM('%');
+	if (expect == XOPERATOR) {
+	    ++s;
+	    Mop(OP_MODULO);
 	}
-	++s;
-	Mop(OP_MODULO);
+	tokenbuf[0] = '%';
+	s = scan_ident(s, bufend, tokenbuf+1, TRUE);
+	if (!tokenbuf[1]) {
+	    if (s == bufend)
+		yyerror("Final % should be \\% or %name");
+	    PREREF('%');
+	}
+	pending_ident = '%';
+	TERM('%');
 
     case '^':
 	s++;
@@ -2027,67 +2064,68 @@ yylex()
 	Rop(OP_GT);
 
     case '$':
-	if (s[1] == '#'  && (isALPHA(s[2]) || strchr("_{$:", s[2]))) {
-	    s = scan_ident(s+1, bufend, tokenbuf+1, FALSE);
-	    if (expect == XOPERATOR) {
-		if (lex_formbrack && lex_brackets == lex_formbrack) {
-		    expect = XTERM;
-		    depcom();
-		    return ','; /* grandfather non-comma-format format */
-		}
-		else
-		    no_op("Array length",s);
-	    }
-	    else if (!tokenbuf[1])
-		PREREF(DOLSHARP);
-	    if (!strchr(tokenbuf+1,':')) {
-		tokenbuf[0] = '@';
-		if (tmp = pad_findmy(tokenbuf)) {
-		    nextval[nexttoke].opval = newOP(OP_PADANY, 0);
-		    nextval[nexttoke].opval->op_targ = tmp;
-		    expect = XOPERATOR;
-		    force_next(PRIVATEREF);
-		    TOKEN(DOLSHARP);
-		}
-	    }
-	    expect = XOPERATOR;
-	    force_ident(tokenbuf+1, *tokenbuf);
-	    TOKEN(DOLSHARP);
-	}
-	s = scan_ident(s, bufend, tokenbuf+1, FALSE);
+	CLINE;
+
 	if (expect == XOPERATOR) {
 	    if (lex_formbrack && lex_brackets == lex_formbrack) {
 		expect = XTERM;
 		depcom();
-		return ',';	/* grandfather non-comma-format format */
+		return ','; /* grandfather non-comma-format format */
 	    }
-	    else
-		no_op("Scalar",s);
 	}
-	if (tokenbuf[1]) {
-	    expectation oldexpect = expect;
 
-	    /* This kludge not intended to be bulletproof. */
-	    if (tokenbuf[1] == '[' && !tokenbuf[2]) {
-		yylval.opval = newSVOP(OP_CONST, 0,
-					newSViv((IV)compiling.cop_arybase));
-		yylval.opval->op_private = OPpCONST_ARYBASE;
-		TERM(THING);
-	    }
-	    tokenbuf[0] = '$';
-	    if (dowarn) {
-		char *t;
-		if (*s == '[' && oldexpect != XREF) {
-		    for (t = s+1; isSPACE(*t) || isALNUM(*t) || *t == '$'; t++) ;
+	if (s[1] == '#' && (isALPHA(s[2]) || strchr("_{$:", s[2]))) {
+	    if (expect == XOPERATOR)
+		no_op("Array length", bufptr);
+	    tokenbuf[0] = '@';
+	    s = scan_ident(s+1, bufend, tokenbuf+1, FALSE);
+	    if (!tokenbuf[1])
+		PREREF(DOLSHARP);
+	    expect = XOPERATOR;
+	    pending_ident = '#';
+	    TOKEN(DOLSHARP);
+	}
+
+	if (expect == XOPERATOR)
+	    no_op("Scalar", bufptr);
+	tokenbuf[0] = '$';
+	s = scan_ident(s, bufend, tokenbuf+1, FALSE);
+	if (!tokenbuf[1]) {
+	    if (s == bufend)
+		yyerror("Final $ should be \\$ or $name");
+	    PREREF('$');
+	}
+
+	/* This kludge not intended to be bulletproof. */
+	if (tokenbuf[1] == '[' && !tokenbuf[2]) {
+	    yylval.opval = newSVOP(OP_CONST, 0,
+				   newSViv((IV)compiling.cop_arybase));
+	    yylval.opval->op_private = OPpCONST_ARYBASE;
+	    TERM(THING);
+	}
+
+	if ((expect != XREF || oldoldbufptr == last_lop) && intuit_more(s)) {
+	    char *t;
+	    if (*s == '[') {
+		tokenbuf[0] = '@';
+		if (dowarn) {
+		    for(t = s + 1;
+			isSPACE(*t) || isALNUM(*t) || *t == '$';
+			t++) ;
 		    if (*t++ == ',') {
 			bufptr = skipspace(bufptr);
-			while (t < bufend && *t != ']') t++;
+			while (t < bufend && *t != ']')
+			    t++;
 			warn("Multidimensional syntax %.*s not supported",
-			    t-bufptr+1, bufptr);
+			     (t - bufptr) + 1, bufptr);
 		    }
 		}
-		if (*s == '{' && strEQ(tokenbuf, "$SIG") &&
-		  (t = strchr(s,'}')) && (t = strchr(t,'='))) {
+	    }
+	    else if (*s == '{') {
+		tokenbuf[0] = '%';
+		if (dowarn && strEQ(tokenbuf+1, "SIG") &&
+		    (t = strchr(s, '}')) && (t = strchr(t, '=')))
+		{
 		    char tmpbuf[1024];
 		    STRLEN len;
 		    for (t++; isSPACE(*t); t++) ;
@@ -2098,114 +2136,43 @@ yylex()
 		    }
 		}
 	    }
-	    expect = XOPERATOR;
-	    if (lex_state == LEX_NORMAL && isSPACE(*s)) {
-		bool islop = (last_lop == oldoldbufptr);
-		s = skipspace(s);
-		if (!islop || last_lop_op == OP_GREPSTART)
-		    expect = XOPERATOR;
-		else if (strchr("$@\"'`q", *s))
-		    expect = XTERM;		/* e.g. print $fh "foo" */
-		else if (strchr("&*<%", *s) && isIDFIRST(s[1]))
-		    expect = XTERM;		/* e.g. print $fh &sub */
-		else if (isDIGIT(*s))
-		    expect = XTERM;		/* e.g. print $fh 3 */
-		else if (*s == '.' && isDIGIT(s[1]))
-		    expect = XTERM;		/* e.g. print $fh .3 */
-		else if (strchr("/?-+", *s) && !isSPACE(s[1]))
-		    expect = XTERM;		/* e.g. print $fh -1 */
-		else if (*s == '<' && s[1] == '<' && !isSPACE(s[2]))
-		    expect = XTERM;		/* print $fh <<"EOF" */
-	    }
-	    if (in_my) {
-		if (strchr(tokenbuf,':'))
-		    croak(no_myglob,tokenbuf);
-		nextval[nexttoke].opval = newOP(OP_PADANY, 0);
-		nextval[nexttoke].opval->op_targ = pad_allocmy(tokenbuf);
-		force_next(PRIVATEREF);
-	    }
-	    else if (!strchr(tokenbuf,':')) {
-		if (oldexpect != XREF || oldoldbufptr == last_lop) {
-		    if (intuit_more(s)) {
-			if (*s == '[')
-			    tokenbuf[0] = '@';
-			else if (*s == '{')
-			    tokenbuf[0] = '%';
-		    }
-		}
-		if (tmp = pad_findmy(tokenbuf)) {
-		    if (last_lop_op == OP_SORT &&
-			!tokenbuf[2] && *tokenbuf =='$' &&
-			tokenbuf[1] <= 'b' && tokenbuf[1] >= 'a')
-		    {
-			for (d = in_eval ? oldoldbufptr : linestart;
-			    d < bufend && *d != '\n';
-			    d++)
-			{
-			    if (strnEQ(d,"<=>",3) || strnEQ(d,"cmp",3)) {
-			        croak("Can't use \"my %s\" in sort comparison",
-				    tokenbuf);
-			    }
-			}
-		    }
-		    nextval[nexttoke].opval = newOP(OP_PADANY, 0);
-		    nextval[nexttoke].opval->op_targ = tmp;
-		    force_next(PRIVATEREF);
-		}
-		else
-		    force_ident(tokenbuf+1, *tokenbuf);
-	    }
-	    else
-		force_ident(tokenbuf+1, *tokenbuf);
 	}
-	else {
-	    if (s == bufend)
-		yyerror("Final $ should be \\$ or $name");
-	    PREREF('$');
+
+	expect = XOPERATOR;
+	if (lex_state == LEX_NORMAL && isSPACE(*s)) {
+	    bool islop = (last_lop == oldoldbufptr);
+	    s = skipspace(s);
+	    if (!islop || last_lop_op == OP_GREPSTART)
+		expect = XOPERATOR;
+	    else if (strchr("$@\"'`q", *s))
+		expect = XTERM;		/* e.g. print $fh "foo" */
+	    else if (strchr("&*<%", *s) && isIDFIRST(s[1]))
+		expect = XTERM;		/* e.g. print $fh &sub */
+	    else if (isDIGIT(*s))
+		expect = XTERM;		/* e.g. print $fh 3 */
+	    else if (*s == '.' && isDIGIT(s[1]))
+		expect = XTERM;		/* e.g. print $fh .3 */
+	    else if (strchr("/?-+", *s) && !isSPACE(s[1]))
+		expect = XTERM;		/* e.g. print $fh -1 */
+	    else if (*s == '<' && s[1] == '<' && !isSPACE(s[2]))
+		expect = XTERM;		/* print $fh <<"EOF" */
 	}
+	pending_ident = '$';
 	TOKEN('$');
 
     case '@':
-	s = scan_ident(s, bufend, tokenbuf+1, FALSE);
 	if (expect == XOPERATOR)
-	    no_op("Array",s);
-	if (tokenbuf[1]) {
-	    GV* gv;
-
-	    tokenbuf[0] = '@';
-	    expect = XOPERATOR;
-	    if (in_my) {
-		if (strchr(tokenbuf,':'))
-		    croak(no_myglob,tokenbuf);
-		nextval[nexttoke].opval = newOP(OP_PADANY, 0);
-		nextval[nexttoke].opval->op_targ = pad_allocmy(tokenbuf);
-		force_next(PRIVATEREF);
-		TERM('@');
-	    }
-	    else if (!strchr(tokenbuf,':')) {
-		if (intuit_more(s)) {
-		    if (*s == '{')
-			tokenbuf[0] = '%';
-		}
-		if (tmp = pad_findmy(tokenbuf)) {
-		    nextval[nexttoke].opval = newOP(OP_PADANY, 0);
-		    nextval[nexttoke].opval->op_targ = tmp;
-		    force_next(PRIVATEREF);
-		    TERM('@');
-		}
-	    }
-
-	    /* Force them to make up their mind on "@foo". */
-	    if (lex_state != LEX_NORMAL && !lex_brackets &&
-		    ( !(gv = gv_fetchpv(tokenbuf+1, FALSE, SVt_PVAV)) ||
-		      (*tokenbuf == '@'
-			? !GvAV(gv)
-			: !GvHV(gv) )))
-	    {
-		char tmpbuf[1024];
-		sprintf(tmpbuf, "Literal @%s now requires backslash",tokenbuf+1);
-		yyerror(tmpbuf);
-	    }
+	    no_op("Array", s);
+	tokenbuf[0] = '@';
+	s = scan_ident(s, bufend, tokenbuf+1, FALSE);
+	if (!tokenbuf[1]) {
+	    if (s == bufend)
+		yyerror("Final @ should be \\@ or @name");
+	    PREREF('@');
+	}
+	if ((expect != XREF || oldoldbufptr == last_lop) && intuit_more(s)) {
+	    if (*s == '{')
+		tokenbuf[0] = '%';
 
 	    /* Warn about @ where they meant $. */
 	    if (dowarn) {
@@ -2221,13 +2188,8 @@ yylex()
 		    }
 		}
 	    }
-	    force_ident(tokenbuf+1, *tokenbuf);
 	}
-	else {
-	    if (s == bufend)
-		yyerror("Final @ should be \\@ or @name");
-	    PREREF('@');
-	}
+	pending_ident = '@';
 	TERM('@');
 
     case '/':			/* may either be division or pattern */
@@ -4291,7 +4253,8 @@ I32 ck_uni;
 	*d = *s++;
     d[1] = '\0';
     if (*d == '^' && *s && (isUPPER(*s) || strchr("[\\]^_?", *s))) {
-	*d = *s++ ^ 64;
+	*d = toCTRL(*s);
+	s++;
     }
     if (bracket) {
 	if (isSPACE(s[-1])) {
@@ -4341,10 +4304,8 @@ void pmflag(pmfl,ch)
 U16* pmfl;
 int ch;
 {
-    if (ch == 'i') {
-	sawi = TRUE;
+    if (ch == 'i')
 	*pmfl |= PMf_FOLD;
-    }
     else if (ch == 'g')
 	*pmfl |= PMf_GLOBAL;
     else if (ch == 'o')
@@ -4371,14 +4332,16 @@ char *start;
 	lex_stuff = Nullsv;
 	croak("Search pattern not terminated");
     }
+
     pm = (PMOP*)newPMOP(OP_MATCH, 0);
     if (multi_open == '?')
 	pm->op_pmflags |= PMf_ONCE;
-
+    if (hints & HINT_LOCALE)
+	pm->op_pmflags |= PMf_LOCALE;
     while (*s && strchr("iogmsx", *s))
 	pmflag(&pm->op_pmflags,*s++);
-
     pm->op_pmpermflags = pm->op_pmflags;
+
     lex_op = (OP*)pm;
     yylval.ival = OP_MATCH;
     return s;
@@ -4456,8 +4419,6 @@ register PMOP *pm;
        ) {
 	if (!(pm->op_pmregexp->reganch & ROPT_ANCH))
 	    pm->op_pmflags |= PMf_SCANFIRST;
-	else if (pm->op_pmflags & PMf_FOLD)
-	    return;
 	pm->op_pmshort = SvREFCNT_inc(pm->op_pmregexp->regstart);
 	pm->op_pmslen = SvCUR(pm->op_pmshort);
     }
@@ -4916,6 +4877,7 @@ char *start;
 	}
 	*d = '\0';
 	sv = NEWSV(92,0);
+	NUMERIC_STANDARD();
 	value = atof(tokenbuf);
 	tryi32 = I_32(value);
 	if (!floatit && (double)tryi32 == value)
@@ -5100,7 +5062,7 @@ char *s;
 	    (void)strcpy(tname,"within string");
     }
     else if (yychar < 32)
-	(void)sprintf(tname,"next char ^%c",yychar+64);
+	(void)sprintf(tname,"next char ^%c",toCTRL(yychar));
     else
 	(void)sprintf(tname,"next char %c",yychar);
     (void)sprintf(buf, "%s at %s line %d, %s\n",

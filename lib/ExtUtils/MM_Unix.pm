@@ -2370,12 +2370,14 @@ sub pasthru {
     my(@m,$key);
 
     my(@pasthru);
+    my($sep) = $Is_VMS ? ',' : '';
+    $sep .= "\\\n\t";
 
     foreach $key (qw(LIBPERL_A LINKTYPE PREFIX OPTIMIZE)){
 	push @pasthru, "$key=\"\$($key)\"";
     }
 
-    push @m, "\nPASTHRU = ", join ("\\\n\t", @pasthru), "\n";
+    push @m, "\nPASTHRU = ", join ($sep, @pasthru), "\n";
     join "", @m;
 }
 

@@ -1058,9 +1058,9 @@ OP *	ck_delete	_((OP* op));
 OP *	ck_eof		_((OP* op));
 OP *	ck_eval		_((OP* op));
 OP *	ck_exec		_((OP* op));
-OP *	ck_formline	_((OP* op));
 OP *	ck_ftst		_((OP* op));
 OP *	ck_fun		_((OP* op));
+OP *	ck_fun_locale	_((OP* op));
 OP *	ck_glob		_((OP* op));
 OP *	ck_grep		_((OP* op));
 OP *	ck_index	_((OP* op));
@@ -1073,6 +1073,7 @@ OP *	ck_repeat	_((OP* op));
 OP *	ck_require	_((OP* op));
 OP *	ck_rfun		_((OP* op));
 OP *	ck_rvconst	_((OP* op));
+OP *	ck_scmp		_((OP* op));
 OP *	ck_select	_((OP* op));
 OP *	ck_shift	_((OP* op));
 OP *	ck_sort		_((OP* op));
@@ -1862,13 +1863,13 @@ EXT OP * (*check[]) _((OP *op)) = {
 	ck_null,	/* i_ne */
 	ck_null,	/* ncmp */
 	ck_null,	/* i_ncmp */
-	ck_null,	/* slt */
-	ck_null,	/* sgt */
-	ck_null,	/* sle */
-	ck_null,	/* sge */
-	ck_null,	/* seq */
-	ck_null,	/* sne */
-	ck_null,	/* scmp */
+	ck_scmp,	/* slt */
+	ck_scmp,	/* sgt */
+	ck_scmp,	/* sle */
+	ck_scmp,	/* sge */
+	ck_scmp,	/* seq */
+	ck_scmp,	/* sne */
+	ck_scmp,	/* scmp */
 	ck_bitop,	/* bit_and */
 	ck_bitop,	/* bit_xor */
 	ck_bitop,	/* bit_or */
@@ -1893,15 +1894,15 @@ EXT OP * (*check[]) _((OP *op)) = {
 	ck_fun,		/* vec */
 	ck_index,	/* index */
 	ck_index,	/* rindex */
-	ck_fun,		/* sprintf */
-	ck_formline,	/* formline */
+	ck_fun_locale,	/* sprintf */
+	ck_fun,		/* formline */
 	ck_fun,		/* ord */
 	ck_fun,		/* chr */
 	ck_fun,		/* crypt */
-	ck_fun,		/* ucfirst */
-	ck_fun,		/* lcfirst */
-	ck_fun,		/* uc */
-	ck_fun,		/* lc */
+	ck_fun_locale,	/* ucfirst */
+	ck_fun_locale,	/* lcfirst */
+	ck_fun_locale,	/* uc */
+	ck_fun_locale,	/* lc */
 	ck_fun,		/* quotemeta */
 	ck_rvconst,	/* rv2av */
 	ck_null,	/* aelemfast */

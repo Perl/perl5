@@ -396,20 +396,128 @@ char *lend;
     return Nullch;
 }
 
-/* Initialize the fold[] array. */
-void
-perl_init_fold()
-{
-  int i;
+#ifdef LC_CTYPE
 
-  for (i = 0; i < 256; i++) {
-    if (isUPPER(i)) fold[i] = toLOWER(i);
-    else if (isLOWER(i)) fold[i] = toUPPER(i);
-    else fold[i] = i;
-  }
+/*
+ * Set up for a new ctype locale.
+ */
+void
+perl_new_ctype(newctype)
+    char *newctype;
+{
+    int i;
+
+    for (i = 0; i < 256; i++) {
+	if (isUPPER_LC(i))
+	    fold_locale[i] = toLOWER_LC(i);
+	else if (isLOWER_LC(i))
+	    fold_locale[i] = toUPPER_LC(i);
+	else
+	    fold_locale[i] = i;
+    }
 }
 
-/* Initialize locale (and the fold[] array).*/
+#endif /* LC_CTYPE */
+
+#ifdef LC_COLLATE
+
+/*
+ * Set up for a new collation locale.
+ */
+void
+perl_new_collate(newcoll)
+    char *newcoll;
+{
+    if (! newcoll) {
+	if (collation_name) {
+	    ++collation_ix;
+	    Safefree(collation_name);
+	    collation_name = NULL;
+	    collation_standard = TRUE;
+#ifdef HAS_STRXFRM
+	    collxfrm_base = 0;
+	    collxfrm_mult = 2;
+#endif /* HAS_STRXFRM */
+	}
+	return;
+    }
+
+    if (! collation_name || strNE(collation_name, newcoll)) {
+	++collation_ix;
+	Safefree(collation_name);
+	collation_name = savepv(newcoll);
+	collation_standard = strEQ(newcoll, "C");
+
+#ifdef HAS_STRXFRM
+	{
+	  /*  2: at most so many chars ('a', 'b'). */
+	  /* 50: surely no system expands a char more. */
+#define XFRMBUFSIZE  (2 * 50)
+	  char xbuf[XFRMBUFSIZE];
+	  Size_t fa = strxfrm(xbuf, "a",  XFRMBUFSIZE);
+	  Size_t fb = strxfrm(xbuf, "ab", XFRMBUFSIZE);
+	  SSize_t mult = fb - fa;
+	  if (mult < 1)
+	      croak("strxfrm() gets absurd");
+	  collxfrm_base = (fa > mult) ? (fa - mult) : 0;
+	  collxfrm_mult = mult;
+	}
+#endif /* HAS_STRXFRM */
+    }
+}
+
+#endif /* LC_COLLATE */
+
+#ifdef LC_NUMERIC
+
+/*
+ * Set up for a new numeric locale.
+ */
+void
+perl_new_numeric(newnum)
+    char *newnum;
+{
+    if (! newnum) {
+	if (numeric_name) {
+	    Safefree(numeric_name);
+	    numeric_name = NULL;
+	    numeric_standard = TRUE;
+	    numeric_local = TRUE;
+	}
+	return;
+    }
+
+    if (! numeric_name || strNE(numeric_name, newnum)) {
+	Safefree(numeric_name);
+	numeric_name = savepv(newnum);
+	numeric_standard = strEQ(newnum, "C");
+	numeric_local = TRUE;
+    }
+}
+
+void
+perl_numeric_standard()
+{
+    if (! numeric_standard) {
+	setlocale(LC_NUMERIC, "C");
+	numeric_standard = TRUE;
+	numeric_local = FALSE;
+    }
+}
+
+void
+perl_numeric_local()
+{
+    if (! numeric_local) {
+	setlocale(LC_NUMERIC, numeric_name);
+	numeric_standard = FALSE;
+	numeric_local = TRUE;
+    }
+}
+
+#endif /* LC_NUMERIC */
+
+/* Initialize locale awareness */
 int
 perl_init_i18nl10n(printwarn)	
     int printwarn;
@@ -420,28 +528,47 @@ perl_init_i18nl10n(printwarn)
      *    0 = fallback to C locale,
      *   -1 = fallback to C locale failed
      */
-#if defined(HAS_SETLOCALE)
-    char * lc_all   = getenv("LC_ALL");
-    char * lc_ctype = getenv("LC_CTYPE");
-    char * lc_collate = getenv("LC_COLLATE");
-    char * lang       = getenv("LANG");
-    int setlocale_failure = 0;
 
-#define SETLOCALE_LC_CTYPE   0x01
-#define SETLOCALE_LC_COLLATE 0x02
-    
+#ifdef HAS_SETLOCALE
+
+    char *lc_all     = getenv("LC_ALL");
+    char *lang       = getenv("LANG");
 #ifdef LC_CTYPE
-    if (setlocale(LC_CTYPE, "")   == 0)
-      setlocale_failure |= SETLOCALE_LC_CTYPE;
-#endif
-
+    char *lc_ctype   = getenv("LC_CTYPE");
+    char *curctype   = NULL;
+#endif /* LC_CTYPE */
 #ifdef LC_COLLATE
-    if (setlocale(LC_COLLATE, "") == 0)
-      setlocale_failure |= SETLOCALE_LC_COLLATE;
-    else
-      lc_collate_active = 1;
-#endif
-    
+    char *lc_collate = getenv("LC_COLLATE");
+    char *curcoll    = NULL;
+#endif /* LC_COLLATE */
+#ifdef LC_NUMERIC
+    char *lc_numeric = getenv("LC_NUMERIC");
+    char *curnum     = NULL;
+#endif /* LC_NUMERIC */
+    bool setlocale_failure = FALSE;
+    char *subloc;
+
+#ifdef LC_ALL
+    subloc = NULL;
+    if (! setlocale(LC_ALL, ""))
+	setlocale_failure = TRUE;
+#else
+    subloc = "";
+#endif /* LC_ALL */
+
+#ifdef LC_CTYPE
+    if (! (curctype = setlocale(LC_CTYPE, subloc)))
+	setlocale_failure = TRUE;
+#endif /* LC_CTYPE */
+#ifdef LC_COLLATE
+    if (! (curcoll = setlocale(LC_COLLATE, subloc)))
+	setlocale_failure = TRUE;
+#endif /* LC_COLLATE */
+#ifdef LC_NUMERIC
+    if (! (curnum = setlocale(LC_NUMERIC, subloc)))
+	setlocale_failure = TRUE;
+#endif /* LC_NUMERIC */
+
     if (setlocale_failure && (lc_all || lang)) {
 	char *perl_badlang;
 
@@ -449,146 +576,183 @@ perl_init_i18nl10n(printwarn)
 	    printwarn &&
 	    (!(perl_badlang = getenv("PERL_BADLANG")) || atoi(perl_badlang))) {
 	  
-	  PerlIO_printf(PerlIO_stderr(),
-			"perl: warning: Setting locale failed for the categories:\n\t");
+	    PerlIO_printf(PerlIO_stderr(),
+	       "perl: warning: Setting locale failed for the categories:\n\t");
 #ifdef LC_CTYPE
-	  if (setlocale_failure & SETLOCALE_LC_CTYPE)
-	    PerlIO_printf(PerlIO_stderr(),
-			  "LC_CTYPE ");
-#endif
+	    if (! curctype)
+		PerlIO_printf(PerlIO_stderr(), "LC_CTYPE ");
+#endif /* LC_CTYPE */
 #ifdef LC_COLLATE
-	  if (setlocale_failure & SETLOCALE_LC_COLLATE)
-	    PerlIO_printf(PerlIO_stderr(),
-			  "LC_COLLATE ");
-#endif
-	  PerlIO_printf(PerlIO_stderr(),
-			"\n");
+	    if (! curcoll)
+		PerlIO_printf(PerlIO_stderr(), "LC_COLLATE ");
+#endif /* LC_COLLATE */
+#ifdef LC_NUMERIC
+	    if (! curnum)
+		PerlIO_printf(PerlIO_stderr(), "LC_NUMERIC ");
+#endif /* LC_NUMERIC */
+	    PerlIO_printf(PerlIO_stderr(), "\n");
 
 	    PerlIO_printf(PerlIO_stderr(),
-			"perl: warning: Please check that your locale settings:\n");
+		"perl: warning: Please check that your locale settings:\n");
 
-	  PerlIO_printf(PerlIO_stderr(),
-			"\tLC_ALL = %c%s%c,\n",
-			lc_all ? '"' : '(',
-			lc_all ? lc_all : "unset",
-			  lc_all ? '"' : ')'
-	      );
+	    PerlIO_printf(PerlIO_stderr(),
+			  "\tLC_ALL = %c%s%c,\n",
+			  lc_all ? '"' : '(',
+			  lc_all ? lc_all : "unset",
+			  lc_all ? '"' : ')');
 #ifdef LC_CTYPE
-	  if (setlocale_failure & SETLOCALE_LC_CTYPE)
-	    PerlIO_printf(PerlIO_stderr(),
-			  "\tLC_CTYPE = %c%s%c,\n",
-			  lc_ctype ? '"' : '(',
-			  lc_ctype ? lc_ctype : "unset",
-			  lc_ctype ? '"' : ')'
-			  );
-#endif
+	    if (! curctype)
+		PerlIO_printf(PerlIO_stderr(),
+			      "\tLC_CTYPE = %c%s%c,\n",
+			      lc_ctype ? '"' : '(',
+			      lc_ctype ? lc_ctype : "unset",
+			      lc_ctype ? '"' : ')');
+#endif /* LC_CTYPE */
 #ifdef LC_COLLATE
-	  if (setlocale_failure & SETLOCALE_LC_COLLATE)
+	    if (! curcoll)
+		PerlIO_printf(PerlIO_stderr(),
+			      "\tLC_COLLATE = %c%s%c,\n",
+			      lc_collate ? '"' : '(',
+			      lc_collate ? lc_collate : "unset",
+			      lc_collate ? '"' : ')');
+#endif /* LC_COLLATE */
+#ifdef LC_NUMERIC
+	    if (! curcoll)
+		PerlIO_printf(PerlIO_stderr(),
+			      "\tLC_NUMERIC = %c%s%c,\n",
+			      lc_numeric ? '"' : '(',
+			      lc_numeric ? lc_numeric : "unset",
+			      lc_numeric ? '"' : ')');
+#endif /* LC_NUMERIC */
 	    PerlIO_printf(PerlIO_stderr(),
-			  "\tLC_COLLATE = %c%s%c,\n",
-			  lc_collate ? '"' : '(',
-			  lc_collate ? lc_collate : "unset",
-			  lc_collate ? '"' : ')'
-			  );
-#endif
-	  PerlIO_printf(PerlIO_stderr(),
-			"\tLANG = %c%s%c\n",
-			lang ? '"' : ')',
-			lang ? lang : "unset",
-			lang ? '"' : ')'
-			);
+			  "\tLANG = %c%s%c\n",
+			  lang ? '"' : ')',
+			  lang ? lang : "unset",
+			  lang ? '"' : ')');
 
-	  PerlIO_printf(PerlIO_stderr(),
-			"    are supported and installed on your system.\n");
+	    PerlIO_printf(PerlIO_stderr(),
+			  "    are supported and installed on your system.\n");
 
-	ok = 0;
-	  
+	    ok = 0;
 	}
+
 #ifdef LC_ALL
 	if (setlocale_failure) {
-	  PerlIO_printf(PerlIO_stderr(),
-			"perl: warning: Falling back to the \"C\" locale.\n");
-	  if (setlocale(LC_ALL, "C") == NULL) {
-	    ok = -1;
 	    PerlIO_printf(PerlIO_stderr(),
-			  "perl: warning: Failed to fall back to the \"C\" locale.\n");
-    }
-    }
-#else
+			"perl: warning: Falling back to the \"C\" locale.\n");
+	    if (setlocale(LC_ALL, "C")) {
+#ifdef LC_CTYPE
+		curctype = "C";
+#endif /* LC_CTYPE */
+#ifdef LC_COLLATE
+		curcoll = "C";
+#endif /* LC_COLLATE */
+#ifdef LC_NUMERIC
+		curnum = "C";
+#endif /* LC_NUMERIC */
+	    }
+	    else {
+		PerlIO_printf(PerlIO_stderr(),
+		  "perl: warning: Failed to fall back to the \"C\" locale.\n");
+		ok = -1;
+	    }
+	}
+#else /* ! LC_ALL */
 	PerlIO_printf(PerlIO_stderr(),
-		      "perl: warning: Cannot fall back to the \"C\" locale.\n");
-#endif
+		   "perl: warning: Cannot fall back to the \"C\" locale.\n");
+#endif /* ! LC_ALL */
     }
 
-    if (setlocale_failure & SETLOCALE_LC_CTYPE == 0)
-      perl_init_fold();
+#ifdef LC_CTYPE
+    perl_new_ctype(curctype);
+#endif /* LC_NUMERIC */
+
+#ifdef LC_COLLATE
+    perl_new_collate(curcoll);
+#endif /* LC_NUMERIC */
+
+#ifdef LC_NUMERIC
+    perl_new_numeric(curnum);
+#endif /* LC_NUMERIC */
 
 #endif /* #if defined(HAS_SETLOCALE) */
 
     return ok;
 }
 
-char *
-mem_collxfrm(m, n, nx)	/* mem_collxfrm() does strxfrm() for (data,size) */
-     const char *m;	/* "strings", that is, transforms normal eight-bit */
-     const Size_t n;	/* data into a format that can be memcmp()ed to get */
-     Size_t * nx;	/* 'the right' result for each locale. */
-{			/* Uses strxfrm() but handles embedded NULs. */
-  char * mx = 0;
+/* Backwards compatibility. */
+int
+perl_init_i18nl14n(printwarn)	
+    int printwarn;
+{
+    perl_init_i18nl10n(printwarn);
+}
 
 #ifdef HAS_STRXFRM
-  Size_t ma;
 
-  /* the expansion factor of 16 has been seen with strxfrm() */
-  ma = (lc_collate_active ? 16 : 1) * n + 1;
+/*
+ * mem_collxfrm() is a bit like strxfrm() but with two important
+ * differences. First, it handles embedded NULs. Second, it allocates
+ * a bit more memory than needed for the transformed data itself.
+ * The real transformed data begins at offset sizeof(collationix).
+ * Please see sv_collxfrm() to see how this is used.
+ */
+char *
+mem_collxfrm(s, len, xlen)
+     const char *s;
+     STRLEN len;
+     STRLEN *xlen;
+{
+    char *xbuf;
+    STRLEN xalloc, xin, xout;
 
-#define RENEW_mx()			\
-  do {					\
-	ma = 2 * ma + 1;		\
-	Renew(mx, ma, char);		\
-	if (mx == 0) 			\
-	  goto out;			\
-  } while (0)
+    /* the first sizeof(collationix) bytes are used by sv_collxfrm(). */
+    /* the +1 is for the terminating NUL. */
 
-  New(171, mx, ma, char);
+    xalloc = sizeof(collation_ix) + collxfrm_base + (collxfrm_mult * len) + 1;
+    New(171, xbuf, xalloc, char);
+    if (! xbuf)
+	goto bad;
 
-  if (mx) {
-    Size_t xc, dx;
-    int xok;
+    *(U32*)xbuf = collation_ix;
+    xout = sizeof(collation_ix);
+    for (xin = 0; xin < len; ) {
+	SSize_t xused;
 
-    for (*nx = 0, xc = 0; xc < n; ) {
-      if (m[xc] == 0)
-	do {
-	  if (*nx == ma)
-	    RENEW_mx();
-	  mx[*nx++] = m[xc++];
-	} while (xc < n && m[xc] == 0);
-      else {
-	do {
-	  dx = strxfrm(mx + *nx, m + xc, ma - *nx);
-	  if (dx + *nx > ma) {
-	    RENEW_mx();
-	    xok = 0;
-	  } else
-	    xok = 1;
-	} while (!xok);
-	xc += strlen(mx + *nx);
-	*nx += dx;
-      }
+	for (;;) {
+	    xused = strxfrm(xbuf + xout, s + xin, xalloc - xout);
+	    if (xused == -1)
+		goto bad;
+	    if (xused < xalloc - xout)
+		break;
+	    xalloc = (2 * xalloc) + 1;
+	    Renew(xbuf, xalloc, char);
+	    if (! xbuf)
+		goto bad;
+	}
+
+	xin += strlen(s + xin) + 1;
+	xout += xused;
+
+	/* Embedded NULs are understood but silently skipped
+	 * because they make no sense in locale collation. */
     }
-  }
 
-out:
+    xbuf[xout] = '\0';
+    *xlen = xout - sizeof(collation_ix);
+    return xbuf;
+
+  bad:
+    Safefree(xbuf);
+    *xlen = 0;
+    return NULL;
+}
 
 #endif /* HAS_STRXFRM */
 
-  return mx;
-}
-
 void
-fbm_compile(sv, iflag)
+fbm_compile(sv)
 SV *sv;
-I32 iflag;
 {
     register unsigned char *s;
     register unsigned char *table;
@@ -608,47 +772,19 @@ I32 iflag;
     i = 0;
     while (s >= (unsigned char*)(SvPVX(sv)))
     {
-	if (table[*s] == len) {
-#ifndef pdp11
-	    if (iflag)
-		table[*s] = table[fold[*s]] = i;
-#else
-	    if (iflag) {
-		I32 j;
-		j = fold[*s];
-		table[j] = i;
-		table[*s] = i;
-	    }
-#endif /* pdp11 */
-	    else
-		table[*s] = i;
-	}
+	if (table[*s] == len)
+	    table[*s] = i;
 	s--,i++;
     }
     sv_upgrade(sv, SVt_PVBM);
-    sv_magic(sv, Nullsv, 'B', Nullch, 0);			/* deep magic */
+    sv_magic(sv, Nullsv, 'B', Nullch, 0);	/* deep magic */
     SvVALID_on(sv);
 
     s = (unsigned char*)(SvPVX(sv));		/* deeper magic */
-    if (iflag) {
-	register U32 tmp, foldtmp;
-	SvCASEFOLD_on(sv);
-	for (i = 0; i < len; i++) {
-	    tmp=freq[s[i]];
-	    foldtmp=freq[fold[s[i]]];
-	    if (tmp < frequency && foldtmp < frequency) {
-		rarest = i;
-		/* choose most frequent among the two */
-		frequency = (tmp > foldtmp) ? tmp : foldtmp;
-	    }
-	}
-    }
-    else {
-	for (i = 0; i < len; i++) {
-	    if (freq[s[i]] < frequency) {
-		rarest = i;
-		frequency = freq[s[i]];
-	    }
+    for (i = 0; i < len; i++) {
+	if (freq[s[i]] < frequency) {
+	    rarest = i;
+	    frequency = freq[s[i]];
 	}
     }
     BmRARE(sv) = s[rarest];
@@ -683,91 +819,50 @@ SV *littlestr;
 	if (littlelen > bigend - big)
 	    return Nullch;
 	little = (unsigned char*)SvPVX(littlestr);
-	if (SvCASEFOLD(littlestr)) {	/* oops, fake it */
-	    big = bigend - littlelen;		/* just start near end */
-	    if (bigend[-1] == '\n' && little[littlelen-1] != '\n')
-		big--;
-	}
-	else {
-	    s = bigend - littlelen;
+	s = bigend - littlelen;
+	if (*s == *little && memcmp((char*)s,(char*)little,littlelen)==0)
+	    return (char*)s;		/* how sweet it is */
+	else if (bigend[-1] == '\n' && little[littlelen-1] != '\n'
+		 && s > big) {
+	    s--;
 	    if (*s == *little && memcmp((char*)s,(char*)little,littlelen)==0)
-		return (char*)s;		/* how sweet it is */
-	    else if (bigend[-1] == '\n' && little[littlelen-1] != '\n'
-	      && s > big) {
-		    s--;
-		if (*s == *little && memcmp((char*)s,(char*)little,littlelen)==0)
-		    return (char*)s;
-	    }
-	    return Nullch;
+		return (char*)s;
 	}
+	return Nullch;
     }
     table = (unsigned char*)(SvPVX(littlestr) + littlelen + 1);
     if (--littlelen >= bigend - big)
 	return Nullch;
     s = big + littlelen;
     oldlittle = little = table - 2;
-    if (SvCASEFOLD(littlestr)) {	/* case insensitive? */
-	if (s < bigend) {
-	  top1:
-	    /*SUPPRESS 560*/
-	    if (tmp = table[*s]) {
+    if (s < bigend) {
+      top2:
+	/*SUPPRESS 560*/
+	if (tmp = table[*s]) {
 #ifdef POINTERRIGOR
-		if (bigend - s > tmp) {
-		    s += tmp;
-		    goto top1;
-		}
+	    if (bigend - s > tmp) {
+		s += tmp;
+		goto top2;
+	    }
 #else
-		if ((s += tmp) < bigend)
-		    goto top1;
+	    if ((s += tmp) < bigend)
+		goto top2;
 #endif
-		return Nullch;
-	    }
-	    else {
-		tmp = littlelen;	/* less expensive than calling strncmp() */
-		olds = s;
-		while (tmp--) {
-		    if (*--s == *--little || fold[*s] == *little)
-			continue;
-		    s = olds + 1;	/* here we pay the price for failure */
-		    little = oldlittle;
-		    if (s < bigend)	/* fake up continue to outer loop */
-			goto top1;
-		    return Nullch;
-		}
-		return (char *)s;
-	    }
+	    return Nullch;
 	}
-    }
-    else {
-	if (s < bigend) {
-	  top2:
-	    /*SUPPRESS 560*/
-	    if (tmp = table[*s]) {
-#ifdef POINTERRIGOR
-		if (bigend - s > tmp) {
-		    s += tmp;
+	else {
+	    tmp = littlelen;	/* less expensive than calling strncmp() */
+	    olds = s;
+	    while (tmp--) {
+		if (*--s == *--little)
+		    continue;
+		s = olds + 1;	/* here we pay the price for failure */
+		little = oldlittle;
+		if (s < bigend)	/* fake up continue to outer loop */
 		    goto top2;
-		}
-#else
-		if ((s += tmp) < bigend)
-		    goto top2;
-#endif
 		return Nullch;
 	    }
-	    else {
-		tmp = littlelen;	/* less expensive than calling strncmp() */
-		olds = s;
-		while (tmp--) {
-		    if (*--s == *--little)
-			continue;
-		    s = olds + 1;	/* here we pay the price for failure */
-		    little = oldlittle;
-		    if (s < bigend)	/* fake up continue to outer loop */
-			goto top2;
-		    return Nullch;
-		}
-		return (char *)s;
-	    }
+	    return (char *)s;
 	}
     }
     return Nullch;
@@ -800,96 +895,66 @@ SV *littlestr;
 	    return Nullch;
     }
 #ifdef POINTERRIGOR
-    if (SvCASEFOLD(littlestr)) {	/* case insignificant? */
-	do {
-	    if (big[pos-previous] != first && big[pos-previous] != fold[first])
-		continue;
-	    for (x=big+pos+1-previous,s=little; s < littleend; /**/ ) {
-		if (x >= bigend)
-		    return Nullch;
-		if (*s++ != *x++ && fold[*(s-1)] != *(x-1)) {
-		    s--;
-		    break;
-		}
+    do {
+	if (big[pos-previous] != first)
+	    continue;
+	for (x=big+pos+1-previous,s=little; s < littleend; /**/ ) {
+	    if (x >= bigend)
+		return Nullch;
+	    if (*s++ != *x++) {
+		s--;
+		break;
 	    }
-	    if (s == littleend)
-		return (char *)(big+pos-previous);
-	} while (
-		pos += screamnext[pos]	/* does this goof up anywhere? */
-	    );
-    }
-    else {
-	do {
-	    if (big[pos-previous] != first)
-		continue;
-	    for (x=big+pos+1-previous,s=little; s < littleend; /**/ ) {
-		if (x >= bigend)
-		    return Nullch;
-		if (*s++ != *x++) {
-		    s--;
-		    break;
-		}
-	    }
-	    if (s == littleend)
-		return (char *)(big+pos-previous);
-	} while ( pos += screamnext[pos] );
-    }
+	}
+	if (s == littleend)
+	    return (char *)(big+pos-previous);
+    } while ( pos += screamnext[pos] );
 #else /* !POINTERRIGOR */
     big -= previous;
-    if (SvCASEFOLD(littlestr)) {	/* case insignificant? */
-	do {
-	    if (big[pos] != first && big[pos] != fold[first])
-		continue;
-	    for (x=big+pos+1,s=little; s < littleend; /**/ ) {
-		if (x >= bigend)
-		    return Nullch;
-		if (*s++ != *x++ && fold[*(s-1)] != *(x-1)) {
-		    s--;
-		    break;
-		}
+    do {
+	if (big[pos] != first)
+	    continue;
+	for (x=big+pos+1,s=little; s < littleend; /**/ ) {
+	    if (x >= bigend)
+		return Nullch;
+	    if (*s++ != *x++) {
+		s--;
+		break;
 	    }
-	    if (s == littleend)
-		return (char *)(big+pos);
-	} while (
-		pos += screamnext[pos]	/* does this goof up anywhere? */
-	    );
-    }
-    else {
-	do {
-	    if (big[pos] != first)
-		continue;
-	    for (x=big+pos+1,s=little; s < littleend; /**/ ) {
-		if (x >= bigend)
-		    return Nullch;
-		if (*s++ != *x++) {
-		    s--;
-		    break;
-		}
-	    }
-	    if (s == littleend)
-		return (char *)(big+pos);
-	} while (
-		pos += screamnext[pos]
-	    );
-    }
+	}
+	if (s == littleend)
+	    return (char *)(big+pos);
+    } while ( pos += screamnext[pos] );
 #endif /* POINTERRIGOR */
     return Nullch;
 }
 
 I32
-ibcmp(a,b,len)
-register U8 *a;
-register U8 *b;
+ibcmp(s1, s2, len)
+char *s1, *s2;
 register I32 len;
 {
+    register U8 *a = (U8 *)s1;
+    register U8 *b = (U8 *)s2;
     while (len--) {
-	if (*a == *b) {
-	    a++,b++;
-	    continue;
-	}
-	if (fold[*a++] == *b++)
-	    continue;
-	return 1;
+	if (*a != *b && *a != fold[*b])
+	    return 1;
+	a++,b++;
+    }
+    return 0;
+}
+
+I32
+ibcmp_locale(s1, s2, len)
+char *s1, *s2;
+register I32 len;
+{
+    register U8 *a = (U8 *)s1;
+    register U8 *b = (U8 *)s2;
+    while (len--) {
+	if (*a != *b && *a != fold_locale[*b])
+	    return 1;
+	a++,b++;
     }
     return 0;
 }
@@ -1595,11 +1660,9 @@ char	*mode;
 	return Nullfp;
     this = (*mode == 'w');
     that = !this;
-    if (tainting) {
-	if (doexec) {
-	    taint_env();
-	    taint_proper("Insecure %s%s", "EXEC");
-	}
+    if (doexec && tainting) {
+	taint_env();
+	taint_proper("Insecure %s%s", "EXEC");
     }
     while ((pid = (doexec?vfork():fork())) < 0) {
 	if (errno != EAGAIN) {

@@ -8,10 +8,10 @@
  * GenConfig.pl when producing Config.pm.
  *
  * config.h for VMS
- * Version: 5.003_07
+ * Version: 5.003_08
  */                 
 
-/* Configuration time: 22-Mar-1996 14:45
+/* Configuration time: 19-Nov-1996 23:34
  * Configured by: Charles Bailey  bailey@genetics.upenn.edu
  * Target system: VMS
  */
@@ -76,7 +76,7 @@
  * when Perl is built.  Please do not change it by hand; make
  * any changes to FndVers.Com instead.
  */
-#define ARCHLIB_EXP "/perl_root/lib/VMS_VAX/5_00307"  /**/
+#define ARCHLIB_EXP "/perl_root/lib/VMS_VAX/5_00308"  /**/
 #define ARCHLIB ARCHLIB_EXP	/*config-skip*/
 
 /* CPPSTDIN:
@@ -1116,6 +1116,24 @@
  *	available to compare strings using collating information.
  */
 #undef HAS_STRCOLL	/**/
+
+/* HAS_STRTOD:
+ *	This symbol, if defined, indicates that the strtod routine is
+ *	available to translate strings to doubles.
+ */
+#define HAS_STRTOD	/**/
+
+/* HAS_STRTOL:
+ *	This symbol, if defined, indicates that the strtol routine is
+ *	available to translate strings to integers.
+ */
+#define HAS_STRTOL	/**/
+
+/* HAS_STRTOUL:
+ *	This symbol, if defined, indicates that the strtoul routine is
+ *	available to translate strings to integers.
+ */
+#define HAS_STRTOUL	/**/
 
 /* HAS_STRXFRM:
  *	This symbol, if defined, indicates that the strxfrm() routine is

@@ -357,8 +357,6 @@ register PMOP *pm;
 	    (void)strcat(buf,"ALL,");
 	if (pm->op_pmflags & PMf_SKIPWHITE)
 	    (void)strcat(buf,"SKIPWHITE,");
-	if (pm->op_pmflags & PMf_FOLD)
-	    (void)strcat(buf,"FOLD,");
 	if (pm->op_pmflags & PMf_CONST)
 	    (void)strcat(buf,"CONST,");
 	if (pm->op_pmflags & PMf_KEEP)

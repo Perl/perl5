@@ -299,7 +299,7 @@ sub full_setup {
     # we will use all these variables in the Makefile
     @Get_from_Config = 
 	qw(
-	   ar cc cccdlflags ccdlflags ccflags dlext dlsrc ld lddlflags ldflags libc
+	   ar cc cccdlflags ccdlflags dlext dlsrc ld lddlflags ldflags libc
 	   lib_ext obj_ext ranlib sitelibexp sitearchexp so
 	  );
 
@@ -430,8 +430,12 @@ sub ExtUtils::MakeMaker::new {
 	for $key (keys %Prepend_dot_dot) {
 	    next unless defined $self->{PARENT}{$key};
 	    $self->{$key} = $self->{PARENT}{$key};
+		# PERL and FULLPERL may be command verbs instead of full
+		# file specifications under VMS.  If so, don't turn them
+		# into a filespec.
 	    $self->{$key} = $self->catdir("..",$self->{$key})
-		unless $self->file_name_is_absolute($self->{$key});
+		unless $self->file_name_is_absolute($self->{$key})
+		|| ($^O eq 'VMS' and ($key =~ /PERL$/ && $self->{key} =~ /^[\w\-\$]$/));
 	}
 	$self->{PARENT}->{CHILDREN}->{$newclass} = $self if $self->{PARENT};
     } else {
@@ -554,10 +558,10 @@ sub parse_args{
 		 ]ex;
 	}
 	# This may go away, in mid 1996
-	if ($self->{Correct_relativ_directories}){
-	    $value = $self->catdir("..",$value)
-		if $Prepend_dot_dot{$name} && ! $self->file_name_is_absolute($value);
-	}
+#	if ($self->{Correct_relativ_directories}){
+#	    $value = $self->catdir("..",$value)
+#		if $Prepend_dot_dot{$name} && ! $self->file_name_is_absolute($value);
+#	}
 	$self->{uc($name)} = $value;
     }
     # This may go away, in mid 1996

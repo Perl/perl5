@@ -107,7 +107,7 @@ static char *regnode _((char));
 static char *regpiece _((I32 *));
 static void reginsert _((char, char *));
 static void regoptail _((char *, char *));
-static void regset _((char *, I32, I32));
+static void regset _((char *, I32));
 static void regtail _((char *, char *));
 static char* nextchar _((void));
 
@@ -132,7 +132,6 @@ char* exp;
 char* xend;
 PMOP* pm;
 {
-    I32 fold = pm->op_pmflags & PMf_FOLD;
     register regexp *r;
     register char *scan;
     register SV *longish;
@@ -150,13 +149,14 @@ PMOP* pm;
     if (exp == NULL)
 	croak("NULL regexp argument");
 
-    /* First pass: determine size, legality. */
+    regprecomp = savepvn(exp, xend - exp);
     regflags = pm->op_pmflags;
+    regsawback = 0;
+
+    /* First pass: determine size, legality. */
     regparse = exp;
     regxend = xend;
-    regprecomp = savepvn(exp,xend-exp);
     regnaughty = 0;
-    regsawback = 0;
     regnpar = 1;
     regsize = 0L;
     regcode = &regdummy;
@@ -171,17 +171,18 @@ PMOP* pm;
     if (regsize >= 32767L)		/* Probably could be 65535L. */
 	FAIL("regexp too big");
 
-    /* Allocate space. */
+    /* Allocate space and initialize. */
     Newc(1001, r, sizeof(regexp) + (unsigned)regsize, char, regexp);
     if (r == NULL)
 	FAIL("regexp out of space");
-
-    /* Second pass: emit code. */
-    r->prelen = xend-exp;
+    r->prelen = xend - exp;
     r->precomp = regprecomp;
     r->subbeg = r->subbase = NULL;
-    regnaughty = 0;
+
+    /* Second pass: emit code. */
     regparse = exp;
+    regxend = xend;
+    regnaughty = 0;
     regnpar = 1;
     regcode = r->program;
     regc((char)MAGIC);
@@ -190,7 +191,6 @@ PMOP* pm;
 
     /* Dig out information for optimizations. */
     pm->op_pmflags = regflags;
-    fold = pm->op_pmflags & PMf_FOLD;
     r->regstart = Nullsv;	/* Worst-case defaults. */
     r->reganch = 0;
     r->regmust = Nullsv;
@@ -216,16 +216,16 @@ PMOP* pm;
 
 	/* Starting-point info. */
       again:
-	if (OP(first) == EXACTLY) {
+	if (OP(first) == EXACT) {
 	    r->regstart = newSVpv(OPERAND(first)+1,*OPERAND(first));
-	    if (SvCUR(r->regstart) > !(sawstudy|fold))
-		fbm_compile(r->regstart,fold);
-	    else
-		sv_upgrade(r->regstart, SVt_PVBM);
+	    if (SvCUR(r->regstart) > !sawstudy)
+		fbm_compile(r->regstart);
+	    (void)SvUPGRADE(r->regstart, SVt_PVBM);
 	}
 	else if (strchr(simple+2,OP(first)))
 	    r->regstclass = first;
-	else if (OP(first) == BOUND || OP(first) == NBOUND)
+	else if (regkind[(U8)OP(first)] == BOUND ||
+		 regkind[(U8)OP(first)] == NBOUND)
 	    r->regstclass = first;
 	else if (regkind[(U8)OP(first)] == BOL) {
 	    r->reganch = ROPT_ANCH;
@@ -280,7 +280,7 @@ PMOP* pm;
 		scan = regnext(scan);
 		continue;
 	    }
-	    if (OP(scan) == EXACTLY) {
+	    if (OP(scan) == EXACT) {
 		char *t;
 
 		first = scan;
@@ -333,8 +333,8 @@ PMOP* pm;
 
 	/* Prefer earlier on tie, unless we can tail match latter */
 
-	if (SvCUR(longish) + (regkind[(U8)OP(first)] == EOL) >
-		SvCUR(longest))
+	if (SvCUR(longish) + (regkind[(U8)OP(first)] == EOL)
+		> SvCUR(longest))
 	{
 	    sv_setsv(longest,longish);
 	    backest = backish;
@@ -342,23 +342,18 @@ PMOP* pm;
 	else
 	    sv_setpvn(longish,"",0);
 	if (SvCUR(longest)
-	    &&
-	    (!r->regstart
-	     ||
-	     !fbm_instr((unsigned char*) SvPVX(r->regstart),
-		  (unsigned char *) SvPVX(r->regstart)
-		    + SvCUR(r->regstart),
-		  longest)
-	    )
-	   )
+	    && (!r->regstart
+		|| !fbm_instr((unsigned char*) SvPVX(r->regstart),
+			      (unsigned char *) (SvPVX(r->regstart)
+						 + SvCUR(r->regstart)),
+			      longest)))
 	{
 	    r->regmust = longest;
 	    if (backest < 0)
 		backest = -1;
 	    r->regback = backest;
-	    if (SvCUR(longest) > !(sawstudy || fold ||
-			regkind[(U8)OP(first)]==EOL))
-		fbm_compile(r->regmust,fold);
+	    if (SvCUR(longest) > !(sawstudy || regkind[(U8)OP(first)] == EOL))
+		fbm_compile(r->regmust);
 	    (void)SvUPGRADE(r->regmust, SVt_PVBM);
 	    BmUSEFUL(r->regmust) = 100;
 	    if (regkind[(U8)OP(first)] == EOL && SvCUR(longish))
@@ -371,7 +366,6 @@ PMOP* pm;
 	SvREFCNT_dec(longish);
     }
 
-    r->do_folding = fold;
     r->nparens = regnpar - 1;
     r->minlen = minlen;
     Newz(1002, r->startp, regnpar, char*);
@@ -793,32 +787,32 @@ tryagain:
 	    nextchar();
 	    break;
 	case 'w':
-	    ret = regnode(ALNUM);
+	    ret = regnode((regflags & PMf_LOCALE) ? ALNUML : ALNUM);
 	    *flagp |= HASWIDTH|SIMPLE;
 	    nextchar();
 	    break;
 	case 'W':
-	    ret = regnode(NALNUM);
+	    ret = regnode((regflags & PMf_LOCALE) ? NALNUML : NALNUM);
 	    *flagp |= HASWIDTH|SIMPLE;
 	    nextchar();
 	    break;
 	case 'b':
-	    ret = regnode(BOUND);
+	    ret = regnode((regflags & PMf_LOCALE) ? BOUNDL : BOUND);
 	    *flagp |= SIMPLE;
 	    nextchar();
 	    break;
 	case 'B':
-	    ret = regnode(NBOUND);
+	    ret = regnode((regflags & PMf_LOCALE) ? NBOUNDL : NBOUND);
 	    *flagp |= SIMPLE;
 	    nextchar();
 	    break;
 	case 's':
-	    ret = regnode(SPACE);
+	    ret = regnode((regflags & PMf_LOCALE) ? SPACEL : SPACE);
 	    *flagp |= HASWIDTH|SIMPLE;
 	    nextchar();
 	    break;
 	case 'S':
-	    ret = regnode(NSPACE);
+	    ret = regnode((regflags & PMf_LOCALE) ? NSPACEL : NSPACE);
 	    *flagp |= HASWIDTH|SIMPLE;
 	    nextchar();
 	    break;
@@ -887,7 +881,9 @@ tryagain:
 	    regparse++;
 
 	defchar:
-	    ret = regnode(EXACTLY);
+	    ret = regnode((regflags & PMf_FOLD)
+			  ? ((regflags & PMf_LOCALE) ? EXACTFL : EXACTF)
+			  : EXACT);
 	    regc(0);		/* save spot for len */
 	    for (len = 0, p = regparse - 1;
 	      len < 127 && p < regxend;
@@ -948,10 +944,8 @@ tryagain:
 			break;
 		    case 'c':
 			p++;
-			ender = *p++;
-			if (isLOWER(ender))
-			    ender = toUPPER(ender);
-			ender ^= 64;
+			ender = UCHARAT(p++);
+			ender = toCTRL(ender);
 			break;
 		    case '0': case '1': case '2': case '3':case '4':
 		    case '5': case '6': case '7': case '8':case '9':
@@ -990,8 +984,6 @@ tryagain:
 		    ender = *p++;
 		    break;
 		}
-		if (regflags & PMf_FOLD && isUPPER(ender))
-		    ender = toLOWER(ender);
 		if (ISMULT2(p)) { /* Back off on ?+*. */
 		    if (len)
 			p = oldp;
@@ -1023,24 +1015,20 @@ tryagain:
 }
 
 static void
-regset(bits,def,c)
-char *bits;
-I32 def;
+regset(opnd, c)
+char *opnd;
 register I32 c;
 {
-    if (regcode == &regdummy)
-      return;
-    c &= 255;
-    if (def)
-	bits[c >> 3] &= ~(1 << (c & 7));
-    else
-	bits[c >> 3] |=  (1 << (c & 7));
+    if (opnd == &regdummy)
+	return;
+    c &= 0xFF;
+    opnd[1 + (c >> 3)] |= (1 << (c & 7));
 }
 
 static char *
 regclass()
 {
-    register char *bits;
+    register char *opnd;
     register I32 class;
     register I32 lastclass = 1234;
     register I32 range = 0;
@@ -1049,16 +1037,21 @@ regclass()
     I32 numlen;
 
     ret = regnode(ANYOF);
+    opnd = regcode;
+    for (class = 0; class < 33; class++)
+	regc(0);
     if (*regparse == '^') {	/* Complement of range. */
 	regnaughty++;
 	regparse++;
-	def = 0;
-    } else {
-	def = 255;
+	if (opnd != &regdummy)
+	    *opnd |= ANYOF_INVERT;
     }
-    bits = regcode;
-    for (class = 0; class < 32; class++)
-      regc(def);
+    if (opnd != &regdummy) {
+	if (regflags & PMf_FOLD)
+	    *opnd |= ANYOF_FOLD;
+	if (regflags & PMf_LOCALE)
+	    *opnd |= ANYOF_LOCALE;
+    }
     if (*regparse == ']' || *regparse == '-')
 	goto skipcond;		/* allow 1st char to be ] or - */
     while (regparse < regxend && *regparse != ']') {
@@ -1068,39 +1061,63 @@ regclass()
 	    class = UCHARAT(regparse++);
 	    switch (class) {
 	    case 'w':
-		for (class = 0; class < 256; class++)
-		  if (isALNUM(class))
-		    regset(bits,def,class);
+		if (regflags & PMf_LOCALE) {
+		    if (opnd != &regdummy)
+			*opnd |= ANYOF_ALNUML;
+		}
+		else {
+		    for (class = 0; class < 256; class++)
+			if (isALNUM(class))
+			    regset(opnd, class);
+		}
 		lastclass = 1234;
 		continue;
 	    case 'W':
-		for (class = 0; class < 256; class++)
-		  if (!isALNUM(class))
-		    regset(bits,def,class);
+		if (regflags & PMf_LOCALE) {
+		    if (opnd != &regdummy)
+			*opnd |= ANYOF_NALNUML;
+		}
+		else {
+		    for (class = 0; class < 256; class++)
+			if (!isALNUM(class))
+			    regset(opnd, class);
+		}
 		lastclass = 1234;
 		continue;
 	    case 's':
-		for (class = 0; class < 256; class++)
-		  if (isSPACE(class))
-		    regset(bits,def,class);
+		if (regflags & PMf_LOCALE) {
+		    if (opnd != &regdummy)
+			*opnd |= ANYOF_SPACEL;
+		}
+		else {
+		    for (class = 0; class < 256; class++)
+			if (isSPACE(class))
+			    regset(opnd, class);
+		}
 		lastclass = 1234;
 		continue;
 	    case 'S':
-		for (class = 0; class < 256; class++)
-		  if (!isSPACE(class))
-		    regset(bits,def,class);
+		if (regflags & PMf_LOCALE) {
+		    if (opnd != &regdummy)
+			*opnd |= ANYOF_NSPACEL;
+		}
+		else {
+		    for (class = 0; class < 256; class++)
+			if (!isSPACE(class))
+			    regset(opnd, class);
+		}
 		lastclass = 1234;
 		continue;
 	    case 'd':
 		for (class = '0'; class <= '9'; class++)
-		    regset(bits,def,class);
+		    regset(opnd, class);
 		lastclass = 1234;
 		continue;
 	    case 'D':
 		for (class = 0; class < '0'; class++)
-		    regset(bits,def,class);
+		    regset(opnd, class);
 		for (class = '9' + 1; class < 256; class++)
-		    regset(bits,def,class);
+		    regset(opnd, class);
 		lastclass = 1234;
 		continue;
 	    case 'n':
@@ -1129,10 +1146,8 @@ regclass()
 		regparse += numlen;
 		break;
 	    case 'c':
-		class = *regparse++;
-		if (isLOWER(class))
-		  class = toUPPER(class);
-		class ^= 64;
+		class = UCHARAT(regparse++);
+		class = toCTRL(class);
 		break;
 	    case '0': case '1': case '2': case '3': case '4':
 	    case '5': case '6': case '7': case '8': case '9':
@@ -1155,11 +1170,8 @@ regclass()
 		continue;	/* do it next time */
 	    }
 	}
-	for ( ; lastclass <= class; lastclass++) {
-	    regset(bits,def,lastclass);
-	    if (regflags & PMf_FOLD && isUPPER(lastclass))
-		regset(bits,def,toLOWER(lastclass));
-	}
+	for ( ; lastclass <= class; lastclass++)
+	    regset(opnd, lastclass);
 	lastclass = class;
     }
     if (*regparse != ']')
@@ -1439,7 +1451,7 @@ regdump(r)
 regexp *r;
 {
     register char *s;
-    register char op = EXACTLY;	/* Arbitrary non-END op. */
+    register char op = EXACT;	/* Arbitrary non-END op. */
     register char *next;
 
 
@@ -1459,9 +1471,9 @@ regexp *r;
 	    PerlIO_printf(Perl_debug_log, "(%d)", (s-r->program)+(next-s));
 	s += 3;
 	if (op == ANYOF) {
-	    s += 32;
+	    s += 33;
 	}
-	if (op == EXACTLY) {
+	if (regkind[(U8)op] == EXACT) {
 	    /* Literal string, where present. */
 	    s++;
 	    (void)PerlIO_putc(Perl_debug_log, ' ');
@@ -1536,8 +1548,14 @@ char *op;
     case BRANCH:
 	p = "BRANCH";
 	break;
-    case EXACTLY:
-	p = "EXACTLY";
+    case EXACT:
+	p = "EXACT";
+	break;
+    case EXACTF:
+	p = "EXACTF";
+	break;
+    case EXACTFL:
+	p = "EXACTFL";
 	break;
     case NOTHING:
 	p = "NOTHING";
@@ -1548,29 +1566,17 @@ char *op;
     case END:
 	p = "END";
 	break;
-    case ALNUM:
-	p = "ALNUM";
-	break;
-    case NALNUM:
-	p = "NALNUM";
-	break;
     case BOUND:
 	p = "BOUND";
+	break;
+    case BOUNDL:
+	p = "BOUNDL";
 	break;
     case NBOUND:
 	p = "NBOUND";
 	break;
-    case SPACE:
-	p = "SPACE";
-	break;
-    case NSPACE:
-	p = "NSPACE";
-	break;
-    case DIGIT:
-	p = "DIGIT";
-	break;
-    case NDIGIT:
-	p = "NDIGIT";
+    case NBOUNDL:
+	p = "NBOUNDL";
 	break;
     case CURLY:
 	(void)sprintf(buf+strlen(buf), "CURLY {%d,%d}", ARG1(op),ARG2(op));
@@ -1615,6 +1621,36 @@ char *op;
 	break;
     case WHILEM:
 	p = "WHILEM";
+	break;
+    case DIGIT:
+	p = "DIGIT";
+	break;
+    case NDIGIT:
+	p = "NDIGIT";
+	break;
+    case ALNUM:
+	p = "ALNUM";
+	break;
+    case NALNUM:
+	p = "NALNUM";
+	break;
+    case SPACE:
+	p = "SPACE";
+	break;
+    case NSPACE:
+	p = "NSPACE";
+	break;
+    case ALNUML:
+	p = "ALNUML";
+	break;
+    case NALNUML:
+	p = "NALNUML";
+	break;
+    case SPACEL:
+	p = "SPACEL";
+	break;
+    case NSPACEL:
+	p = "NSPACEL";
 	break;
     default:
 	FAIL("corrupted regexp opcode");

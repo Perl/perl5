@@ -124,45 +124,86 @@ typedef unsigned short	U16;
 #define strnNE(s1,s2,l) (strncmp(s1,s2,l))
 #define strnEQ(s1,s2,l) (!strncmp(s1,s2,l))
 
+/*
+ * Character classes.
+ *
+ * Unfortunately, the introduction of locales means that we
+ * can't trust isupper(), etc. to tell the truth.  And when
+ * it comes to /\w+/ with tainting enabled, we *must* be able
+ * to trust our character classes.
+ *
+ * Therefore, the default tests in the text of Perl will be
+ * independent of locale.  Any code that wants to depend on
+ * the current locale will use the tests that begin with "lc".
+ */
+
 #ifdef HAS_SETLOCALE  /* XXX Is there a better test for this? */
 #  ifndef CTYPE256
 #    define CTYPE256
 #  endif
 #endif
 
-#ifdef USE_NEXT_CTYPE 
-#define isALNUM(c)   (NXIsAlpha((unsigned int)c) || NXIsDigit((unsigned int)c) || c == '_')
-#define isIDFIRST(c) (NXIsAlpha((unsigned int)c) || c == '_')
-#define isALPHA(c)   NXIsAlpha((unsigned int)c)
-#define isSPACE(c)   NXIsSpace((unsigned int)c)
-#define isDIGIT(c)   NXIsDigit((unsigned int)c)
-#define isUPPER(c)   NXIsUpper((unsigned int)c)
-#define isLOWER(c)   NXIsLower((unsigned int)c)
-#define toUPPER(c)   NXToUpper((unsigned int)c)
-#define toLOWER(c)   NXToLower((unsigned int)c)
-#else /* USE_NEXT_CTYPE */
-#if defined(CTYPE256) || (!defined(isascii) && !defined(HAS_ISASCII))
-#define isALNUM(c)   (isalpha((unsigned char)(c)) || isdigit((unsigned char)(c)) || c == '_')
-#define isIDFIRST(c) (isalpha((unsigned char)(c)) || (c) == '_')
-#define isALPHA(c)   isalpha((unsigned char)(c))
-#define isSPACE(c)   isspace((unsigned char)(c))
-#define isDIGIT(c)   isdigit((unsigned char)(c))
-#define isUPPER(c)   isupper((unsigned char)(c))
-#define isLOWER(c)   islower((unsigned char)(c))
-#define toUPPER(c)   toupper((unsigned char)(c))
-#define toLOWER(c)   tolower((unsigned char)(c))
-#else
-#define isALNUM(c)   (isascii(c) && (isalpha(c) || isdigit(c) || c == '_'))
-#define isIDFIRST(c) (isascii(c) && (isalpha(c) || (c) == '_'))
-#define isALPHA(c)   (isascii(c) && isalpha(c))
-#define isSPACE(c)   (isascii(c) && isspace(c))
-#define isDIGIT(c)   (isascii(c) && isdigit(c))
-#define isUPPER(c)   (isascii(c) && isupper(c))
-#define isLOWER(c)   (isascii(c) && islower(c))
-#define toUPPER(c)   toupper(c)
-#define toLOWER(c)   tolower(c)
-#endif
+#define isALNUM(c)	(isALPHA(c) || isDIGIT(c) || (c) == '_')
+#define isIDFIRST(c)	(isALPHA(c) || (c) == '_')
+#define isALPHA(c)	(isUPPER(c) || isLOWER(c))
+#define isSPACE(c) \
+	((c) == ' ' || (c) == '\t' || (c) == '\n' || (c) =='\r' || (c) == '\f')
+#define isDIGIT(c)	((c) >= '0' && (c) <= '9')
+#define isUPPER(c)	((c) >= 'A' && (c) <= 'Z')
+#define isLOWER(c)	((c) >= 'a' && (c) <= 'z')
+#define isPRINT(c)	(((c) > 32 && (c) < 127) || isSPACE(c))
+#define toUPPER(c)	(isLOWER(c) ? (c) - ('a' - 'A') : (c))
+#define toLOWER(c)	(isUPPER(c) ? (c) + ('a' - 'A') : (c))
+
+#ifdef USE_NEXT_CTYPE
+
+#  define isALNUM_LC(c) \
+	(NXIsAlpha((unsigned int)c) || NXIsDigit((unsigned int)c) || c == '_')
+#  define isIDFIRST_LC(c)	(NXIsAlpha((unsigned int)c) || c == '_')
+#  define isALPHA_LC(c)		NXIsAlpha((unsigned int)c)
+#  define isSPACE_LC(c)		NXIsSpace((unsigned int)c)
+#  define isDIGIT_LC(c)		NXIsDigit((unsigned int)c)
+#  define isUPPER_LC(c)		NXIsUpper((unsigned int)c)
+#  define isLOWER_LC(c)		NXIsLower((unsigned int)c)
+#  define isPRINT_LC(c)		NXIsPrint((unsigned int)c)
+#  define toUPPER_LC(c)		NXToUpper((unsigned int)c)
+#  define toLOWER_LC(c)		NXToLower((unsigned int)c)
+
+#else /* !USE_NEXT_CTYPE */
+#  if defined(CTYPE256) || (!defined(isascii) && !defined(HAS_ISASCII))
+
+#    define isALNUM_LC(c) \
+	(isalpha((unsigned char)(c)) || \
+	 isdigit((unsigned char)(c)) || c == '_')
+#    define isIDFIRST_LC(c)	(isalpha((unsigned char)(c)) || (c) == '_')
+#    define isALPHA_LC(c)	isalpha((unsigned char)(c))
+#    define isSPACE_LC(c)	isspace((unsigned char)(c))
+#    define isDIGIT_LC(c)	isdigit((unsigned char)(c))
+#    define isUPPER_LC(c)	isupper((unsigned char)(c))
+#    define isLOWER_LC(c)	islower((unsigned char)(c))
+#    define isPRINT_LC(c)	isprint((unsigned char)(c))
+#    define toUPPER_LC(c)	toupper((unsigned char)(c))
+#    define toLOWER_LC(c)	tolower((unsigned char)(c))
+
+#  else
+
+#    define isALNUM_LC(c) \
+	(isascii(c) && (isalpha(c) || isdigit(c) || c == '_'))
+#    define isIDFIRST_LC(c)	(isascii(c) && (isalpha(c) || (c) == '_'))
+#    define isALPHA_LC(c)	(isascii(c) && isalpha(c))
+#    define isSPACE_LC(c)	(isascii(c) && isspace(c))
+#    define isDIGIT_LC(c)	(isascii(c) && isdigit(c))
+#    define isUPPER_LC(c)	(isascii(c) && isupper(c))
+#    define isLOWER_LC(c)	(isascii(c) && islower(c))
+#    define isPRINT_LC(c)	(isascii(c) && isprint(c))
+#    define toUPPER_LC(c)	toupper(c)
+#    define toLOWER_LC(c)	tolower(c)
+
+#  endif
 #endif /* USE_NEXT_CTYPE */
+
+/* This conversion works both ways, strangely enough. */
+#define toCTRL(c)    (toUPPER(c) ^ 64)
 
 /* Line numbers are unsigned, 16 bits. */
 typedef U16 line_t;

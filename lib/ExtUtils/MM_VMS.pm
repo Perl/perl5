@@ -6,7 +6,7 @@
 #   Author:  Charles Bailey  bailey@genetics.upenn.edu
 
 package ExtUtils::MM_VMS;
-$ExtUtils::MM_VMS::Revision=$ExtUtils::MM_VMS::Revision = '5.38 (22-Oct-1996)';
+$ExtUtils::MM_VMS::Revision=$ExtUtils::MM_VMS::Revision = '5.38 (19-Nov-1996)';
 unshift @MM::ISA, 'ExtUtils::MM_VMS';
 
 use Config;
@@ -160,6 +160,30 @@ sub catfile {
     else { $rslt = vmsify($file); }
     print "catfile(",join(',',@_[1..$#_]),") = |$rslt|\n" if $Verbose >= 3;
     $rslt;
+}
+
+=item wraplist
+
+Converts a list into a string wrapped at approximately 80 columns.
+
+=cut
+
+sub wraplist {
+    my($self) = shift;
+    my($line,$hlen) = ('',0);
+    my($word);
+
+    foreach $word (@_) {
+      # Perl bug -- seems to occasionally insert extra elements when
+      # traversing array (scalar(@array) doesn't show them, but
+      # foreach(@array) does) (5.00307)
+      next unless $word =~ /\w/;
+      $line .= ', ' if length($line);
+      if ($hlen > 80) { $line .= "\\\n\t"; $hlen = 0; }
+      $line .= $word;
+      $hlen += length($word) + 2;
+    }
+    $line;
 }
 
 =item curdir (override)
@@ -428,7 +452,7 @@ sub path {
 Follows VMS naming conventions for executable files.
 If the name passed in doesn't exactly match an executable file,
 appends F<.Exe> to check for executable image, and F<.Com> to check
-for DCL procedure.  If this fails, checks F<Sys$Share:> for an
+for DCL procedure.  If this fails, checks F<Sys$System:> for an
 executable file having the name specified.  Finally, appends F<.Exe>
 and checks again.
 
@@ -440,7 +464,7 @@ sub maybe_command {
     return "$file.exe" if -x "$file.exe";
     return "$file.com" if -x "$file.com";
     if ($file !~ m![/:>\]]!) {
-	my($shrfile) = 'Sys$Share:' . $file;
+	my($shrfile) = 'Sys$System:' . $file;
 	return $file if -x $shrfile && ! -d _;
 	return "$file.exe" if -x "$shrfile.exe";
     }
@@ -506,6 +530,8 @@ Checks for VMS directory spec as well as Unix separators.
 
 sub file_name_is_absolute {
     my($self,$file) = @_;
+    # If it's a logical name, expand it.
+    $file = $ENV{$file} while $file =~ /^[\w\$\-]+$/ and $ENV{$file};
     $file =~ m!^/! or $file =~ m![<\[][^.\-\]>]! or $file =~ /:[^<\[]/;
 }
 
@@ -571,7 +597,7 @@ sub constants {
 
     if ($self->{OBJECT} =~ /\s/) {
 	$self->{OBJECT} =~ s/(\\)?\n+\s+/ /g;
-	$self->{OBJECT} = map($self->fixpath($_),split(/,?\s+/,$self->{OBJECT}));
+	$self->{OBJECT} = join(' ',map($self->fixpath($_),split(/,?\s+/,$self->{OBJECT})));
     }
     $self->{LDFROM} = join(' ',map($self->fixpath($_),split(/,?\s+/,$self->{LDFROM})));
 
@@ -665,12 +691,12 @@ MM_VMS_REVISION = $ExtUtils::MM_VMS::Revision
     push @m,'
 
 # Handy lists of source code files:
-XS_FILES = ',join(', ', sort keys %{$self->{XS}}),'
-C_FILES  = ',join(', ', @{$self->{C}}),'
-O_FILES  = ',join(', ', @{$self->{O_FILES}} ),'
-H_FILES  = ',join(', ', @{$self->{H}}),'
-MAN1PODS = ',join(', ', sort keys %{$self->{MAN1PODS}}),'
-MAN3PODS = ',join(', ', sort keys %{$self->{MAN3PODS}}),'
+XS_FILES = ',$self->wraplist(', ', sort keys %{$self->{XS}}),'
+C_FILES  = ',$self->wraplist(', ', @{$self->{C}}),'
+O_FILES  = ',$self->wraplist(', ', @{$self->{O_FILES}} ),'
+H_FILES  = ',$self->wraplist(', ', @{$self->{H}}),'
+MAN1PODS = ',$self->wraplist(', ', sort keys %{$self->{MAN1PODS}}),'
+MAN3PODS = ',$self->wraplist(', ', sort keys %{$self->{MAN3PODS}}),'
 
 ';
 
@@ -714,9 +740,9 @@ PERL_ARCHIVE = ',($ENV{'PERLSHR'} ? $ENV{'PERLSHR'} : 'Sys$Share:PerlShr.Exe'),'
     $self->{TO_INST_PM} = [ sort keys %{$self->{PM}} ];
     $self->{PM_TO_BLIB} = [ %{$self->{PM}} ];
     push @m,'
-TO_INST_PM = ',join(', ',@{$self->{TO_INST_PM}}),'
+TO_INST_PM = ',$self->wraplist(', ',@{$self->{TO_INST_PM}}),'
 
-PM_TO_BLIB = ',join(', ',@{$self->{PM_TO_BLIB}}),'
+PM_TO_BLIB = ',$self->wraplist(', ',@{$self->{PM_TO_BLIB}}),'
 ';
 
     join('',@m);
@@ -1416,9 +1442,7 @@ qq[POD2MAN_EXE = $pod2man_exe\n],
 q[POD2MAN = $(PERL) -we "%m=@ARGV;for (keys %m){" -
 -e "system(""MCR $^X $(POD2MAN_EXE) $_ >$m{$_}"");}"
 ];
-    push @m, "\nmanifypods : ";
-    push @m, join " ", keys %{$self->{MAN1PODS}}, keys %{$self->{MAN3PODS}};
-    push(@m,"\n");
+    push @m, "\nmanifypods : \$(MAN1PODS) \$(MAN3PODS)\n";
     if (%{$self->{MAN1PODS}} || %{$self->{MAN3PODS}}) {
 	my($pod);
 	foreach $pod (sort keys %{$self->{MAN1PODS}}) {
@@ -1444,12 +1468,14 @@ sub processPL {
     return "" unless $self->{PL_FILES};
     my(@m, $plfile);
     foreach $plfile (sort keys %{$self->{PL_FILES}}) {
+	my $vmsplfile = vmsify($plfile);
+	my $vmsfile = vmsify($self->{PL_FILES}->{$plfile});
 	push @m, "
-all :: $self->{PL_FILES}->{$plfile}
+all :: $vmsfile
 	\$(NOECHO) \$(NOOP)
 
-$self->{PL_FILES}->{$plfile} :: $plfile
-",'	$(PERL) "-I$(INST_ARCHLIB)" "-I$(INST_LIB)" "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" '," $plfile
+$vmsfile :: $vmsplfile
+",'	$(PERL) "-I$(INST_ARCHLIB)" "-I$(INST_LIB)" "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" '," $vmsplfile
 ";
     }
     join "", @m;
@@ -1468,16 +1494,17 @@ sub installbin {
     return '' unless $self->{EXE_FILES} && ref $self->{EXE_FILES} eq "ARRAY";
     return '' unless @{$self->{EXE_FILES}};
     my(@m, $from, $to, %fromto, @to, $line);
-    for $from (@{$self->{EXE_FILES}}) {
+    my(@exefiles) = map { vmsify($_) } @{$self->{EXE_FILES}};
+    for $from (@exefiles) {
 	my($path) = '$(INST_SCRIPT)' . basename($from);
 	local($_) = $path;  # backward compatibility
 	$to = $self->libscan($path);
 	print "libscan($from) => '$to'\n" if ($Verbose >=2);
-	$fromto{$from}=$to;
+	$fromto{$from} = vmsify($to);
     }
-    @to   = values %fromto;
+    @to = values %fromto;
     push @m, "
-EXE_FILES = @{$self->{EXE_FILES}}
+EXE_FILES = @exefiles
 
 all :: @to
 	\$(NOECHO) \$(NOOP)
@@ -1745,11 +1772,11 @@ sub install {
 	foreach $file (@{$self->{EXE_FILES}}) {
 	    $line .= "$file ";
 	    if (length($line) > 128) {
-		push(@docfiles,qq[\t\$(PERL) -e "print $line" >>.MM_tmp\n]);
+		push(@docfiles,qq[\t\$(PERL) -e "print '$line'" >>.MM_tmp\n]);
 		$line = '';
 	    }
 	}
-	push(@docfiles,qq[\t\$(PERL) -e "print $line" >>.MM_tmp\n]) if $line;
+	push(@docfiles,qq[\t\$(PERL) -e "print '$line'" >>.MM_tmp\n]) if $line;
     }
 
     push @m, q[

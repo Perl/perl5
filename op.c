@@ -41,7 +41,7 @@ static OP *scalarboolean _((OP *op));
 static OP *too_few_arguments _((OP *op, char* name));
 static OP *too_many_arguments _((OP *op, char* name));
 static void null _((OP* op));
-static PADOFFSET pad_findlex _((char* name, PADOFFSET newoff, I32 seq,
+static PADOFFSET pad_findlex _((char* name, PADOFFSET newoff, U32 seq,
 	CV* startcv, I32 cx_ix));
 
 static char*
@@ -120,8 +120,8 @@ char *name;
     SV *sv;
 
     if (!(isALPHA(name[1]) || name[1] == '_' && (int)strlen(name) > 2)) {
-	if (!isprint(name[1]))
-	    sprintf(name+1, "^%c", name[1] ^ 64); /* XXX is tokenbuf, really */
+	if (!isPRINT(name[1]))
+	    sprintf(name+1, "^%c", toCTRL(name[1])); /* XXX tokenbuf, really */
 	croak("Can't use global %s in \"my\"",name);
     }
     if (AvFILL(comppad_name) >= 0) {
@@ -160,11 +160,11 @@ static PADOFFSET
 pad_findlex(name, newoff, seq, startcv, cx_ix)
 char *name;
 PADOFFSET newoff;
-I32 seq;
+U32 seq;
 CV* startcv;
 I32 cx_ix;
 #else
-pad_findlex(char *name, PADOFFSET newoff, I32 seq, CV* startcv, I32 cx_ix)
+pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix)
 #endif
 {
     CV *cv;
@@ -253,7 +253,7 @@ char *name;
     I32 off;
     SV *sv;
     SV **svp = AvARRAY(comppad_name);
-    I32 seq = cop_seqmax;
+    U32 seq = cop_seqmax;
 
     /* The one we're looking for is probably just before comppad_name_fill. */
     for (off = AvFILL(comppad_name); off > 0; off--) {
@@ -314,9 +314,21 @@ U32 tmptype;
 	retval = AvFILL(comppad);
     }
     else {
-	do {
-	    sv = *av_fetch(comppad, ++padix, TRUE);
-	} while (SvFLAGS(sv) & (SVs_PADTMP|SVs_PADMY));
+	SV **names = AvARRAY(comppad_name);
+	SSize_t names_fill = AvFILL(comppad_name);
+	for (;;) {
+	    /*
+	     * "foreach" index vars temporarily become aliases to non-"my"
+	     * values.  Thus we must skip, not just pad values that are
+	     * marked as current pad values, but also those with names.
+	     */
+	    if (++padix <= names_fill &&
+		   (sv = names[padix]) && sv != &sv_undef)
+		continue;
+	    sv = *av_fetch(comppad, padix, TRUE);
+	    if (!(SvFLAGS(sv) & (SVs_PADTMP|SVs_PADMY)))
+		break;
+	}
 	retval = padix;
     }
     SvFLAGS(sv) |= tmptype;
@@ -1307,6 +1319,7 @@ OP* seq;
     if (needblockscope)
 	hints |= HINT_BLOCK_SCOPE; /* propagate out */
     pad_leavemy(comppad_name_fill);
+    cop_seqmax++;
     return retval;
 }
 
@@ -2302,22 +2315,8 @@ I32 flags;
 char *label;
 OP *op;
 {
+    U32 seq = intro_my();
     register COP *cop;
-
-    /* Introduce my variables. */
-    if (min_intro_pending) {
-	SV **svp = AvARRAY(comppad_name);
-	I32 i;
-	SV *sv;
-	for (i = min_intro_pending; i <= max_intro_pending; i++) {
-	    if ((sv = svp[i]) && sv != &sv_undef && !SvIVX(sv)) {
-		SvIVX(sv) = 999999999;	/* Don't know scope end yet. */
-		SvNVX(sv) = (double)cop_seqmax;
-	    }
-	}
-	min_intro_pending = 0;
-	comppad_name_fill = max_intro_pending;	/* Needn't search higher */
-    }
 
     Newz(1101, cop, 1, COP);
     if (perldb && curcop->cop_line && curstash != debstash) {
@@ -2336,7 +2335,7 @@ OP *op;
 	cop->cop_label = label;
 	hints |= HINT_BLOCK_SCOPE;
     }
-    cop->cop_seq = cop_seqmax++;
+    cop->cop_seq = seq;
     cop->cop_arybase = curcop->cop_arybase;
 
     if (copline == NOLINE)
@@ -2358,6 +2357,29 @@ OP *op;
     }
 
     return prepend_elem(OP_LINESEQ, (OP*)cop, op);
+}
+
+/* "Introduce" my variables to visible status. */
+U32
+intro_my()
+{
+    SV **svp;
+    SV *sv;
+    I32 i;
+
+    if (! min_intro_pending)
+	return cop_seqmax;
+
+    svp = AvARRAY(comppad_name);
+    for (i = min_intro_pending; i <= max_intro_pending; i++) {
+	if ((sv = svp[i]) && sv != &sv_undef && !SvIVX(sv)) {
+	    SvIVX(sv) = 999999999;	/* Don't know scope end yet. */
+	    SvNVX(sv) = (double)cop_seqmax;
+	}
+    }
+    min_intro_pending = 0;
+    comppad_name_fill = max_intro_pending;	/* Needn't search higher */
+    return cop_seqmax++;
 }
 
 OP *
@@ -3458,13 +3480,6 @@ register OP *op;
 }
 
 OP *
-ck_formline(op)
-OP *op;
-{
-    return ck_fun(op);
-}
-
-OP *
 ck_ftst(op)
 OP *op;
 {
@@ -3713,7 +3728,7 @@ OP *op;
     if (op->op_flags & OPf_KIDS) {
 	OP *kid = cLISTOP->op_first->op_sibling;	/* get past pushmark */
 	if (kid && kid->op_type == OP_CONST)
-	    fbm_compile(((SVOP*)kid)->op_sv, 0);
+	    fbm_compile(((SVOP*)kid)->op_sv);
     }
     return ck_fun(op);
 }
@@ -3768,7 +3783,42 @@ OP *op;
     if (!kid)
 	append_elem(op->op_type, op, newSVREF(newGVOP(OP_GV, 0, defgv)) );
 
-    return listkids(op);
+    op = listkids(op);
+
+    op->op_private = 0;
+#ifdef HAS_SETLOCALE
+    if (hints & HINT_LOCALE)
+	op->op_private |= OPpLOCALE;
+#endif
+
+    return op;
+}
+
+OP *
+ck_fun_locale(op)
+OP *op;
+{
+    op = ck_fun(op);
+
+    op->op_private = 0;
+#ifdef HAS_SETLOCALE
+    if (hints & HINT_LOCALE)
+	op->op_private |= OPpLOCALE;
+#endif
+
+    return op;
+}
+
+OP *
+ck_scmp(op)
+OP *op;
+{
+    op->op_private = 0;
+#ifdef LC_COLLATE
+    if (hints & HINT_LOCALE)
+	op->op_private |= OPpLOCALE;
+#endif
+    return op;
 }
 
 OP *
@@ -3873,6 +3923,12 @@ OP *
 ck_sort(op)
 OP *op;
 {
+    op->op_private = 0;
+#ifdef LC_COLLATE
+    if (hints & HINT_LOCALE)
+	op->op_private |= OPpLOCALE;
+#endif
+
     if (op->op_flags & OPf_STACKED) {
 	OP *kid = cLISTOP->op_first->op_sibling;	/* get past pushmark */
 	OP *k;
@@ -3909,6 +3965,7 @@ OP *op;
 	    op->op_flags |= OPf_SPECIAL;
 	}
     }
+
     return op;
 }
 

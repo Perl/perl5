@@ -880,7 +880,7 @@ if ($^O eq 'VMS') {
     # Fix up for case-sensitive file systems
     s/$modfname/$modfname/i && next;
     $_ = "\U$_" if $_ eq 'manifest' or $_ eq 'changes';
-    $_ = 'Makefile.PL' if $_ = 'makefile.pl';
+    $_ = 'Makefile.PL' if $_ eq 'makefile.pl';
   }
 }
 print MANI join("\n",@files);

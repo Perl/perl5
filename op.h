@@ -103,6 +103,9 @@ typedef U32 PADOFFSET;
 /* Private for OP_LEAVE and friends */
 #define OPpLEAVE_VOID		64	/* No need to copy out values. */
 
+/* Private for OP_SORT, OP_PRTF, OP_SPRINTF, string cmp'n, and case changers */
+#define OPpLOCALE		64	/* Use locale */
+
 struct op {
     BASEOP
 };
@@ -167,7 +170,7 @@ struct pmop {
 #define PMf_WHITE	0x0800		/* pattern is \s+ */
 #define PMf_MULTILINE	0x1000		/* assume multiple lines */
 #define PMf_SINGLELINE	0x2000		/* assume single line */
-#define PMf_UNUSED	0x4000		/* (unused) */
+#define PMf_LOCALE	0x4000		/* use locale for character types */
 #define PMf_EXTENDED	0x8000		/* chuck embedded whitespace */
 
 struct svop {

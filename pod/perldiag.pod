@@ -214,6 +214,13 @@ know which context to supply to the right side.
 be garbage collected on exit.  An SV was discovered to be outside any
 of those arenas.
 
+=item Attempt to free non-existent shared string
+
+(P) Perl maintains a reference counted internal table of strings to
+optimize the storage and access of hash keys and other strings.  This
+indicates someone tried to decrement the reference count of a string
+that can no longer be found in the table.
+
 =item Attempt to free temp prematurely
 
 (W) Mortalized values are supposed to be freed by the free_tmps()
@@ -1062,6 +1069,18 @@ setgid script if C<$ENV{PATH}> is derived from data supplied (or
 potentially supplied) by the user.  The script must set the path to a
 known value, using trustworthy data.  See L<perlsec>.
 
+=item Integer overflow in hex number
+
+(S) The literal hex number you have specified is too big for your
+architecture. On a 32-bit architecture the largest hex literal is
+0xFFFFFFFF.
+
+=item Integer overflow in octal number
+
+(S) The literal octal number you have specified is too big for your
+architecture. On a 32-bit architecture the largest octal literal is
+037777777777.
+
 =item Internal inconsistency in tracking vforks
 
 (S) A warning peculiar to VMS.  Perl keeps track of the number
@@ -1425,6 +1444,13 @@ supplied it an uninitialized value.  See L<perlform>.
 (S) You specified an odd number of elements to a hash list, which is odd,
 since hash lists come in key/value pairs.
 
+=item Offset outside string
+
+(F) You tried to do a read/write/send/recv operation with an offset
+pointing outside the buffer.  This is difficult to imagine.
+The sole exception to this is that C<sysread()>ing past the buffer
+will extend the buffer and zero pad the new area.
+
 =item oops: oopsAV
 
 (S) An internal warning that the grammar is screwed up.
@@ -1654,6 +1680,30 @@ perspective, it's probably not what you intended.
 
 (F) Your C compiler uses POSIX getpgrp(), which takes no argument, unlike
 the BSD version, which takes a pid.
+
+=item Possible attempt to put comments in qw() list
+
+(W) You probably wrote somthing like this:
+
+    qw( a # a comment
+        b # another comment
+      ) ;
+
+when you should have written this:
+
+    qw( a 
+        b 
+      ) ;
+
+=item Possible attempt to separate words with commas
+
+(W) You probably wrote somthing like this:
+
+    qw( a, b, c );
+
+when you should have written this:
+
+    qw( a b c );
 
 =item Possible memory corruption: %s overflowed 3rd argument
 
