@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat Mar 16 20:51:19 EET 2002 [metaconfig 3.0 PL70]
+# Generated on Sat Mar 16 21:39:24 EET 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -9280,8 +9280,8 @@ eval $inlibc
 case "$d_asctime_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_time time.h"
-	case "$d_asctime_r_proto" in
-	'')	d_asctime_r_proto=define
+	case "$d_asctime_r_proto:$usethreads" in
+	":define")	d_asctime_r_proto=define
 		set d_asctime_r_proto asctime_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -9315,7 +9315,10 @@ case "$d_asctime_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have asctime_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "asctime_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	asctime_r_proto=0
@@ -9933,8 +9936,8 @@ eval $inlibc
 case "$d_crypt_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_crypt crypt.h"
-	case "$d_crypt_r_proto" in
-	'')	d_crypt_r_proto=define
+	case "$d_crypt_r_proto:$usethreads" in
+	":define")	d_crypt_r_proto=define
 		set d_crypt_r_proto crypt_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -9956,7 +9959,10 @@ case "$d_crypt_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have crypt_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "crypt_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	crypt_r_proto=0
@@ -9981,8 +9987,8 @@ eval $inlibc
 case "$d_ctermid_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_stdio stdio.h"
-	case "$d_ctermid_r_proto" in
-	'')	d_ctermid_r_proto=define
+	case "$d_ctermid_r_proto:$usethreads" in
+	":define")	d_ctermid_r_proto=define
 		set d_ctermid_r_proto ctermid_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -10004,7 +10010,10 @@ case "$d_ctermid_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have ctermid_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "ctermid_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	ctermid_r_proto=0
@@ -10017,8 +10026,8 @@ eval $inlibc
 case "$d_ctime_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_time time.h"
-	case "$d_ctime_r_proto" in
-	'')	d_ctime_r_proto=define
+	case "$d_ctime_r_proto:$usethreads" in
+	":define")	d_ctime_r_proto=define
 		set d_ctime_r_proto ctime_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -10052,7 +10061,10 @@ case "$d_ctime_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have ctime_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "ctime_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	ctime_r_proto=0
@@ -10385,8 +10397,8 @@ eval $inlibc
 case "$d_drand48_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_stdlib stdlib.h"
-	case "$d_drand48_r_proto" in
-	'')	d_drand48_r_proto=define
+	case "$d_drand48_r_proto:$usethreads" in
+	":define")	d_drand48_r_proto=define
 		set d_drand48_r_proto drand48_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -10408,7 +10420,10 @@ case "$d_drand48_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have drand48_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "drand48_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	drand48_r_proto=0
@@ -10463,8 +10478,8 @@ eval $inlibc
 case "$d_endgrent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_grp grp.h"
-	case "$d_endgrent_r_proto" in
-	'')	d_endgrent_r_proto=define
+	case "$d_endgrent_r_proto:$usethreads" in
+	":define")	d_endgrent_r_proto=define
 		set d_endgrent_r_proto endgrent_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -10490,7 +10505,10 @@ case "$d_endgrent_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have endgrent_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "endgrent_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	endgrent_r_proto=0
@@ -10511,8 +10529,8 @@ eval $inlibc
 case "$d_endhostent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "$d_endhostent_r_proto" in
-	'')	d_endhostent_r_proto=define
+	case "$d_endhostent_r_proto:$usethreads" in
+	":define")	d_endhostent_r_proto=define
 		set d_endhostent_r_proto endhostent_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -10538,7 +10556,10 @@ case "$d_endhostent_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have endhostent_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "endhostent_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	endhostent_r_proto=0
@@ -10555,8 +10576,8 @@ eval $inlibc
 case "$d_endnetent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "$d_endnetent_r_proto" in
-	'')	d_endnetent_r_proto=define
+	case "$d_endnetent_r_proto:$usethreads" in
+	":define")	d_endnetent_r_proto=define
 		set d_endnetent_r_proto endnetent_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -10582,7 +10603,10 @@ case "$d_endnetent_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have endnetent_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "endnetent_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	endnetent_r_proto=0
@@ -10599,8 +10623,8 @@ eval $inlibc
 case "$d_endprotoent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "$d_endprotoent_r_proto" in
-	'')	d_endprotoent_r_proto=define
+	case "$d_endprotoent_r_proto:$usethreads" in
+	":define")	d_endprotoent_r_proto=define
 		set d_endprotoent_r_proto endprotoent_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -10626,7 +10650,10 @@ case "$d_endprotoent_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have endprotoent_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "endprotoent_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	endprotoent_r_proto=0
@@ -10731,8 +10758,8 @@ eval $inlibc
 case "$d_endpwent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_pwd pwd.h"
-	case "$d_endpwent_r_proto" in
-	'')	d_endpwent_r_proto=define
+	case "$d_endpwent_r_proto:$usethreads" in
+	":define")	d_endpwent_r_proto=define
 		set d_endpwent_r_proto endpwent_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -10758,7 +10785,10 @@ case "$d_endpwent_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have endpwent_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "endpwent_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	endpwent_r_proto=0
@@ -10775,8 +10805,8 @@ eval $inlibc
 case "$d_endservent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "$d_endservent_r_proto" in
-	'')	d_endservent_r_proto=define
+	case "$d_endservent_r_proto:$usethreads" in
+	":define")	d_endservent_r_proto=define
 		set d_endservent_r_proto endservent_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -10802,7 +10832,10 @@ case "$d_endservent_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have endservent_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "endservent_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	endservent_r_proto=0
@@ -11446,8 +11479,8 @@ eval $inlibc
 case "$d_getgrent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_grp grp.h"
-	case "$d_getgrent_r_proto" in
-	'')	d_getgrent_r_proto=define
+	case "$d_getgrent_r_proto:$usethreads" in
+	":define")	d_getgrent_r_proto=define
 		set d_getgrent_r_proto getgrent_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -11489,7 +11522,10 @@ case "$d_getgrent_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have getgrent_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "getgrent_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	getgrent_r_proto=0
@@ -11502,8 +11538,8 @@ eval $inlibc
 case "$d_getgrgid_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_grp grp.h"
-	case "$d_getgrgid_r_proto" in
-	'')	d_getgrgid_r_proto=define
+	case "$d_getgrgid_r_proto:$usethreads" in
+	":define")	d_getgrgid_r_proto=define
 		set d_getgrgid_r_proto getgrgid_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -11537,7 +11573,10 @@ case "$d_getgrgid_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have getgrgid_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "getgrgid_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	getgrgid_r_proto=0
@@ -11550,8 +11589,8 @@ eval $inlibc
 case "$d_getgrnam_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_grp grp.h"
-	case "$d_getgrnam_r_proto" in
-	'')	d_getgrnam_r_proto=define
+	case "$d_getgrnam_r_proto:$usethreads" in
+	":define")	d_getgrnam_r_proto=define
 		set d_getgrnam_r_proto getgrnam_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -11589,7 +11628,10 @@ case "$d_getgrnam_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have getgrnam_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "getgrnam_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	getgrnam_r_proto=0
@@ -11699,8 +11741,8 @@ eval $inlibc
 case "$d_gethostbyaddr_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "$d_gethostbyaddr_r_proto" in
-	'')	d_gethostbyaddr_r_proto=define
+	case "$d_gethostbyaddr_r_proto:$usethreads" in
+	":define")	d_gethostbyaddr_r_proto=define
 		set d_gethostbyaddr_r_proto gethostbyaddr_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -11758,7 +11800,10 @@ case "$d_gethostbyaddr_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have gethostbyaddr_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "gethostbyaddr_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	gethostbyaddr_r_proto=0
@@ -11771,8 +11816,8 @@ eval $inlibc
 case "$d_gethostbyname_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "$d_gethostbyname_r_proto" in
-	'')	d_gethostbyname_r_proto=define
+	case "$d_gethostbyname_r_proto:$usethreads" in
+	":define")	d_gethostbyname_r_proto=define
 		set d_gethostbyname_r_proto gethostbyname_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -11802,7 +11847,10 @@ case "$d_gethostbyname_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have gethostbyname_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "gethostbyname_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	gethostbyname_r_proto=0
@@ -11815,8 +11863,8 @@ eval $inlibc
 case "$d_gethostent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "$d_gethostent_r_proto" in
-	'')	d_gethostent_r_proto=define
+	case "$d_gethostent_r_proto:$usethreads" in
+	":define")	d_gethostent_r_proto=define
 		set d_gethostent_r_proto gethostent_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -11858,7 +11906,10 @@ case "$d_gethostent_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have gethostent_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "gethostent_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	gethostent_r_proto=0
@@ -11884,8 +11935,8 @@ eval $inlibc
 case "$d_getlogin_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_unistd unistd.h"
-	case "$d_getlogin_r_proto" in
-	'')	d_getlogin_r_proto=define
+	case "$d_getlogin_r_proto:$usethreads" in
+	":define")	d_getlogin_r_proto=define
 		set d_getlogin_r_proto getlogin_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -11919,7 +11970,10 @@ case "$d_getlogin_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have getlogin_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "getlogin_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	getlogin_r_proto=0
@@ -11952,8 +12006,8 @@ eval $inlibc
 case "$d_getnetbyaddr_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "$d_getnetbyaddr_r_proto" in
-	'')	d_getnetbyaddr_r_proto=define
+	case "$d_getnetbyaddr_r_proto:$usethreads" in
+	":define")	d_getnetbyaddr_r_proto=define
 		set d_getnetbyaddr_r_proto getnetbyaddr_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -11999,7 +12053,10 @@ case "$d_getnetbyaddr_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have getnetbyaddr_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "getnetbyaddr_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	getnetbyaddr_r_proto=0
@@ -12012,8 +12069,8 @@ eval $inlibc
 case "$d_getnetbyname_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "$d_getnetbyname_r_proto" in
-	'')	d_getnetbyname_r_proto=define
+	case "$d_getnetbyname_r_proto:$usethreads" in
+	":define")	d_getnetbyname_r_proto=define
 		set d_getnetbyname_r_proto getnetbyname_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -12047,7 +12104,10 @@ case "$d_getnetbyname_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have getnetbyname_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "getnetbyname_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	getnetbyname_r_proto=0
@@ -12060,8 +12120,8 @@ eval $inlibc
 case "$d_getnetent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "$d_getnetent_r_proto" in
-	'')	d_getnetent_r_proto=define
+	case "$d_getnetent_r_proto:$usethreads" in
+	":define")	d_getnetent_r_proto=define
 		set d_getnetent_r_proto getnetent_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -12103,7 +12163,10 @@ case "$d_getnetent_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have getnetent_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "getnetent_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	getnetent_r_proto=0
@@ -12154,8 +12217,8 @@ eval $inlibc
 case "$d_getprotobyname_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "$d_getprotobyname_r_proto" in
-	'')	d_getprotobyname_r_proto=define
+	case "$d_getprotobyname_r_proto:$usethreads" in
+	":define")	d_getprotobyname_r_proto=define
 		set d_getprotobyname_r_proto getprotobyname_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -12185,7 +12248,10 @@ case "$d_getprotobyname_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have getprotobyname_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "getprotobyname_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	getprotobyname_r_proto=0
@@ -12198,8 +12264,8 @@ eval $inlibc
 case "$d_getprotobynumber_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "$d_getprotobynumber_r_proto" in
-	'')	d_getprotobynumber_r_proto=define
+	case "$d_getprotobynumber_r_proto:$usethreads" in
+	":define")	d_getprotobynumber_r_proto=define
 		set d_getprotobynumber_r_proto getprotobynumber_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -12229,7 +12295,10 @@ case "$d_getprotobynumber_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have getprotobynumber_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "getprotobynumber_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	getprotobynumber_r_proto=0
@@ -12242,8 +12311,8 @@ eval $inlibc
 case "$d_getprotoent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "$d_getprotoent_r_proto" in
-	'')	d_getprotoent_r_proto=define
+	case "$d_getprotoent_r_proto:$usethreads" in
+	":define")	d_getprotoent_r_proto=define
 		set d_getprotoent_r_proto getprotoent_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -12277,7 +12346,10 @@ case "$d_getprotoent_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have getprotoent_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "getprotoent_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	getprotoent_r_proto=0
@@ -12303,8 +12375,8 @@ eval $inlibc
 case "$d_getpwent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_pwd pwd.h"
-	case "$d_getpwent_r_proto" in
-	'')	d_getpwent_r_proto=define
+	case "$d_getpwent_r_proto:$usethreads" in
+	":define")	d_getpwent_r_proto=define
 		set d_getpwent_r_proto getpwent_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -12346,7 +12418,10 @@ case "$d_getpwent_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have getpwent_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "getpwent_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	getpwent_r_proto=0
@@ -12359,8 +12434,8 @@ eval $inlibc
 case "$d_getpwnam_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_pwd pwd.h"
-	case "$d_getpwnam_r_proto" in
-	'')	d_getpwnam_r_proto=define
+	case "$d_getpwnam_r_proto:$usethreads" in
+	":define")	d_getpwnam_r_proto=define
 		set d_getpwnam_r_proto getpwnam_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -12394,7 +12469,10 @@ case "$d_getpwnam_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have getpwnam_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "getpwnam_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	getpwnam_r_proto=0
@@ -12407,8 +12485,8 @@ eval $inlibc
 case "$d_getpwuid_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_pwd pwd.h"
-	case "$d_getpwuid_r_proto" in
-	'')	d_getpwuid_r_proto=define
+	case "$d_getpwuid_r_proto:$usethreads" in
+	":define")	d_getpwuid_r_proto=define
 		set d_getpwuid_r_proto getpwuid_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -12442,7 +12520,10 @@ case "$d_getpwuid_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have getpwuid_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "getpwuid_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	getpwuid_r_proto=0
@@ -12468,8 +12549,8 @@ eval $inlibc
 case "$d_getservbyname_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "$d_getservbyname_r_proto" in
-	'')	d_getservbyname_r_proto=define
+	case "$d_getservbyname_r_proto:$usethreads" in
+	":define")	d_getservbyname_r_proto=define
 		set d_getservbyname_r_proto getservbyname_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -12499,7 +12580,10 @@ case "$d_getservbyname_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have getservbyname_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "getservbyname_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	getservbyname_r_proto=0
@@ -12512,8 +12596,8 @@ eval $inlibc
 case "$d_getservbyport_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "$d_getservbyport_r_proto" in
-	'')	d_getservbyport_r_proto=define
+	case "$d_getservbyport_r_proto:$usethreads" in
+	":define")	d_getservbyport_r_proto=define
 		set d_getservbyport_r_proto getservbyport_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -12543,7 +12627,10 @@ case "$d_getservbyport_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have getservbyport_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "getservbyport_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	getservbyport_r_proto=0
@@ -12556,8 +12643,8 @@ eval $inlibc
 case "$d_getservent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "$d_getservent_r_proto" in
-	'')	d_getservent_r_proto=define
+	case "$d_getservent_r_proto:$usethreads" in
+	":define")	d_getservent_r_proto=define
 		set d_getservent_r_proto getservent_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -12591,7 +12678,10 @@ case "$d_getservent_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have getservent_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "getservent_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	getservent_r_proto=0
@@ -12617,8 +12707,8 @@ eval $inlibc
 case "$d_getspnam_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_shadow shadow.h"
-	case "$d_getspnam_r_proto" in
-	'')	d_getspnam_r_proto=define
+	case "$d_getspnam_r_proto:$usethreads" in
+	":define")	d_getspnam_r_proto=define
 		set d_getspnam_r_proto getspnam_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -12644,7 +12734,10 @@ case "$d_getspnam_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have getspnam_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "getspnam_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	getspnam_r_proto=0
@@ -12676,8 +12769,8 @@ eval $inlibc
 case "$d_gmtime_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_time time.h"
-	case "$d_gmtime_r_proto" in
-	'')	d_gmtime_r_proto=define
+	case "$d_gmtime_r_proto:$usethreads" in
+	":define")	d_gmtime_r_proto=define
 		set d_gmtime_r_proto gmtime_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -12703,7 +12796,10 @@ case "$d_gmtime_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have gmtime_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "gmtime_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	gmtime_r_proto=0
@@ -12911,8 +13007,8 @@ eval $inlibc
 case "$d_localtime_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_time time.h"
-	case "$d_localtime_r_proto" in
-	'')	d_localtime_r_proto=define
+	case "$d_localtime_r_proto:$usethreads" in
+	":define")	d_localtime_r_proto=define
 		set d_localtime_r_proto localtime_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -12938,7 +13034,10 @@ case "$d_localtime_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have localtime_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "localtime_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	localtime_r_proto=0
@@ -13673,8 +13772,8 @@ eval $inlibc
 case "$d_random_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_stdlib stdlib.h"
-	case "$d_random_r_proto" in
-	'')	d_random_r_proto=define
+	case "$d_random_r_proto:$usethreads" in
+	":define")	d_random_r_proto=define
 		set d_random_r_proto random_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -13696,7 +13795,10 @@ case "$d_random_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have random_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "random_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	random_r_proto=0
@@ -13719,8 +13821,8 @@ eval $inlibc
 case "$d_readdir64_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_dirent dirent.h"
-	case "$d_readdir64_r_proto" in
-	'')	d_readdir64_r_proto=define
+	case "$d_readdir64_r_proto:$usethreads" in
+	":define")	d_readdir64_r_proto=define
 		set d_readdir64_r_proto readdir64_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -13746,7 +13848,10 @@ case "$d_readdir64_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have readdir64_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "readdir64_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	readdir64_r_proto=0
@@ -13759,8 +13864,8 @@ eval $inlibc
 case "$d_readdir_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_dirent dirent.h"
-	case "$d_readdir_r_proto" in
-	'')	d_readdir_r_proto=define
+	case "$d_readdir_r_proto:$usethreads" in
+	":define")	d_readdir_r_proto=define
 		set d_readdir_r_proto readdir_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -13786,7 +13891,10 @@ case "$d_readdir_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have readdir_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "readdir_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	readdir_r_proto=0
@@ -14303,8 +14411,8 @@ eval $inlibc
 case "$d_setgrent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_grp grp.h"
-	case "$d_setgrent_r_proto" in
-	'')	d_setgrent_r_proto=define
+	case "$d_setgrent_r_proto:$usethreads" in
+	":define")	d_setgrent_r_proto=define
 		set d_setgrent_r_proto setgrent_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -14330,7 +14438,10 @@ case "$d_setgrent_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have setgrent_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "setgrent_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	setgrent_r_proto=0
@@ -14347,8 +14458,8 @@ eval $inlibc
 case "$d_sethostent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "$d_sethostent_r_proto" in
-	'')	d_sethostent_r_proto=define
+	case "$d_sethostent_r_proto:$usethreads" in
+	":define")	d_sethostent_r_proto=define
 		set d_sethostent_r_proto sethostent_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -14374,7 +14485,10 @@ case "$d_sethostent_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have sethostent_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "sethostent_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	sethostent_r_proto=0
@@ -14403,8 +14517,8 @@ eval $inlibc
 case "$d_setlocale_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_locale locale.h"
-	case "$d_setlocale_r_proto" in
-	'')	d_setlocale_r_proto=define
+	case "$d_setlocale_r_proto:$usethreads" in
+	":define")	d_setlocale_r_proto=define
 		set d_setlocale_r_proto setlocale_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -14426,7 +14540,10 @@ case "$d_setlocale_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have setlocale_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "setlocale_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	setlocale_r_proto=0
@@ -14443,8 +14560,8 @@ eval $inlibc
 case "$d_setnetent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "$d_setnetent_r_proto" in
-	'')	d_setnetent_r_proto=define
+	case "$d_setnetent_r_proto:$usethreads" in
+	":define")	d_setnetent_r_proto=define
 		set d_setnetent_r_proto setnetent_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -14470,7 +14587,10 @@ case "$d_setnetent_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have setnetent_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "setnetent_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	setnetent_r_proto=0
@@ -14503,8 +14623,8 @@ eval $inlibc
 case "$d_setprotoent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "$d_setprotoent_r_proto" in
-	'')	d_setprotoent_r_proto=define
+	case "$d_setprotoent_r_proto:$usethreads" in
+	":define")	d_setprotoent_r_proto=define
 		set d_setprotoent_r_proto setprotoent_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -14530,7 +14650,10 @@ case "$d_setprotoent_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have setprotoent_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "setprotoent_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	setprotoent_r_proto=0
@@ -14547,8 +14670,8 @@ eval $inlibc
 case "$d_setpwent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_pwd pwd.h"
-	case "$d_setpwent_r_proto" in
-	'')	d_setpwent_r_proto=define
+	case "$d_setpwent_r_proto:$usethreads" in
+	":define")	d_setpwent_r_proto=define
 		set d_setpwent_r_proto setpwent_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -14574,7 +14697,10 @@ case "$d_setpwent_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have setpwent_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "setpwent_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	setpwent_r_proto=0
@@ -14611,8 +14737,8 @@ eval $inlibc
 case "$d_setservent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
-	case "$d_setservent_r_proto" in
-	'')	d_setservent_r_proto=define
+	case "$d_setservent_r_proto:$usethreads" in
+	":define")	d_setservent_r_proto=define
 		set d_setservent_r_proto setservent_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -14638,7 +14764,10 @@ case "$d_setservent_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have setservent_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "setservent_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	setservent_r_proto=0
@@ -14906,8 +15035,8 @@ eval $inlibc
 case "$d_srand48_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_stdlib stdlib.h"
-	case "$d_srand48_r_proto" in
-	'')	d_srand48_r_proto=define
+	case "$d_srand48_r_proto:$usethreads" in
+	":define")	d_srand48_r_proto=define
 		set d_srand48_r_proto srand48_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -14929,7 +15058,10 @@ case "$d_srand48_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have srand48_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "srand48_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	srand48_r_proto=0
@@ -14942,8 +15074,8 @@ eval $inlibc
 case "$d_srandom_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_stdlib stdlib.h"
-	case "$d_srandom_r_proto" in
-	'')	d_srandom_r_proto=define
+	case "$d_srandom_r_proto:$usethreads" in
+	":define")	d_srandom_r_proto=define
 		set d_srandom_r_proto srandom_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -14965,7 +15097,10 @@ case "$d_srandom_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have srandom_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "srandom_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	srandom_r_proto=0
@@ -15377,8 +15512,8 @@ eval $inlibc
 case "$d_strerror_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_string string.h"
-	case "$d_strerror_r_proto" in
-	'')	d_strerror_r_proto=define
+	case "$d_strerror_r_proto:$usethreads" in
+	":define")	d_strerror_r_proto=define
 		set d_strerror_r_proto strerror_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -15408,7 +15543,10 @@ case "$d_strerror_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have strerror_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "strerror_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	strerror_r_proto=0
@@ -15743,8 +15881,8 @@ eval $inlibc
 case "$d_tmpnam_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_stdio stdio.h"
-	case "$d_tmpnam_r_proto" in
-	'')	d_tmpnam_r_proto=define
+	case "$d_tmpnam_r_proto:$usethreads" in
+	":define")	d_tmpnam_r_proto=define
 		set d_tmpnam_r_proto tmpnam_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -15766,7 +15904,10 @@ case "$d_tmpnam_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have tmpnam_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "tmpnam_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	tmpnam_r_proto=0
@@ -15783,8 +15924,8 @@ eval $inlibc
 case "$d_ttyname_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_unistd unistd.h"
-	case "$d_ttyname_r_proto" in
-	'')	d_ttyname_r_proto=define
+	case "$d_ttyname_r_proto:$usethreads" in
+	":define")	d_ttyname_r_proto=define
 		set d_ttyname_r_proto ttyname_r $hdrs
 		eval $hasproto ;;
 	*)	;;
@@ -15814,7 +15955,10 @@ case "$d_ttyname_r" in
 		echo "Prototype: $try" ;;
 	esac
 	;;
-	*)	echo "You have ttyname_r but no prototype, not using it." >&4 ;;
+	*)	case "$usethreads" in
+		define) echo "ttyname_r has no prototype, not using it." >&4 ;;
+		esac
+		;;
 	esac
 	;;
 *)	ttyname_r_proto=0
