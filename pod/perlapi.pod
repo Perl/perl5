@@ -555,8 +555,20 @@ Found in file op.h
 Recognise (or not) a number.  The type of the number is returned
 (0 if unrecognised), otherwise it is a bit-ORed combination of
 IS_NUMBER_IN_UV, IS_NUMBER_GREATER_THAN_UV_MAX, IS_NUMBER_NOT_INT,
-IS_NUMBER_NEG, IS_NUMBER_INFINITY (defined in perl.h).  If the value
-of the number can fit an in UV, it is returned in the *valuep.
+IS_NUMBER_NEG, IS_NUMBER_INFINITY (defined in perl.h).
+
+If the value of the number can fit an in UV, it is returned in the *valuep
+IS_NUMBER_IN_UV will be set to indicate that *valuep is valid, IS_NUMBER_IN_UV
+will never be set unless *valuep is valid, but *valuep may have been assigned
+to during processing even though IS_NUMBER_IN_UV is not set on return.
+If valuep is NULL, IS_NUMBER_IN_UV will be set for the same cases as when
+valuep is non-NULL, but no actual assignment (or SEGV) will occur.
+
+IS_NUMBER_NOT_INT will be set with IS_NUMBER_IN_UV if trailing decimals were
+seen (in which case *valuep gives the true value truncated to an integer), and
+IS_NUMBER_NEG if the number is negative (in which case *valuep holds the
+absolute value).  IS_NUMBER_IN_UV is not set if e notation was used or the
+number is larger than a UV.
 
 	int	grok_number(const char *pv, STRLEN len, UV *valuep)
 
