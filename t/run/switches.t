@@ -9,10 +9,11 @@ BEGIN {
 
 require "./test.pl";
 
-plan(tests => 14);
+plan(tests => 19);
 
 # due to a bug in VMS's piping which makes it impossible for runperl()
-# to emulate echo -n, these tests almost totally fail.
+# to emulate echo -n (ie. stdin always winds up with a newline), these 
+# tests almost totally fail.
 $TODO = "runperl() unable to emulate echo -n due to pipe bug" if $^O eq 'VMS';
 
 my $r;
@@ -168,4 +169,34 @@ SWTESTPM
     );
     is( $r, '<swtest><foo><bar>', '-m with import parameters' );
     push @tmpfiles, $filename;
+}
+
+# Tests for -V
+
+{
+    local $TODO = '';   # these ones should work on VMS
+
+    # basic perl -V should generate significant output.
+    # we don't test actual format since it could change
+    like( runperl( switches => ['-V'] ), qr/(\n.*){20}/,
+          '-V generates 20+ lines' );
+
+    # lookup a known config var
+    chomp( $r=runperl( switches => ['-V:osname'] ) );
+    is( $r, "osname='$^O';", 'perl -V:osname');
+
+    # lookup a nonexistent var
+    chomp( $r=runperl( switches => ['-V:this_var_makes_switches_test_fail'] ) );
+    is( $r, "this_var_makes_switches_test_fail='UNKNOWN';",
+        'perl -V:unknown var');
+
+    # regexp lookup
+    # platforms that don't like this quoting can either skip this test
+    # or fix test.pl _quote_args
+    $r = runperl( switches => ['"-V:i\D+size"'] );
+    # should be unlike( $r, qr/^$|not found|UNKNOWN/ );
+    like( $r, qr/^(?!.*(not found|UNKNOWN))./, 'perl -V:re got a result' );
+
+    # make sure each line we got matches the re
+    ok( !( grep !/^i\D+size=/, split /^/, $r ), '-V:re correct' );
 }
