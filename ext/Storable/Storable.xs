@@ -1452,7 +1452,7 @@ static int store_scalar(stcxt_t *cxt, SV *sv)
 	string:
 
 		STORE_SCALAR(pv, len);
-		TRACEME(("ok (scalar 0x%"UVxf" '%s', length = %d)",
+		TRACEME(("ok (scalar 0x%"UVxf" '%s', length = %"IVdf")",
 			 PTR2UV(sv), SvPVX(sv), len));
 
 	} else if (flags & SVp_NOK) {		/* SvNOKp(sv) => double */
@@ -2080,8 +2080,8 @@ static int store_hook(
 	sv_seen:
 		SvREFCNT_dec(xsv);
 		ary[i] = *svh;
-		TRACEME(("listed object %d at 0x%"UVxf" is tag #%d",
-			 i-1, PTR2UV(xsv), (I32) *svh));
+		TRACEME(("listed object %d at 0x%"UVxf" is tag #%"UVdf,
+			 i-1, PTR2UV(xsv), PTR2UV(*svh)));
 	}
 
 	/*
@@ -2109,8 +2109,8 @@ static int store_hook(
 	 * If we recursed, the SX_HOOK has already been emitted.
 	 */
 
-	TRACEME(("SX_HOOK (recursed=%d) flags=0x%x class=%"IVdf" len=%"IVdf" len2=%"IVdf" len3=%"IVdf,
-		recursed, flags, classnum, len, len2, count-1));
+	TRACEME(("SX_HOOK (recursed=%d) flags=0x%x class=%"IVdf" len=%"IVdf" len2=%"IVdf" len3=%d",
+		 recursed, flags, (IV)classnum, (IV)len, (IV)len2, count-1));
 
 	/* SX_HOOK <flags> */
 	if (!recursed)
