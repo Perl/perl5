@@ -52,6 +52,9 @@ struct block_sub {
 	}								\
 	if (cx->blk_sub.cv) {						\
 	    if (!(CvDEPTH(cx->blk_sub.cv) = cx->blk_sub.olddepth)) {	\
+	        if (cx->blk_sub.hasargs) {				\
+	    	    SvREFCNT_inc((SV*)cx->blk_sub.argarray);		\
+		}							\
 		SvREFCNT_dec((SV*)cx->blk_sub.cv);			\
 	    }								\
 	}
