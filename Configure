@@ -6095,12 +6095,14 @@ eval $setvar
 : get csh whereabouts
 case "$csh" in
 'csh')	val="$undef" ;;
-'tcsh')	val="$undef" ;;
 *)	val="$define" ;;
 esac
 set d_csh
 eval $setvar
-full_csh=$csh
+: Respect a hint or command line value for full_csh.
+case "$full_csh" in
+'') full_csh=$csh ;;
+esac
 
 : see if cuserid exists
 set cuserid d_cuserid
