@@ -326,7 +326,7 @@ S_cr_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 }
 #endif
 
-#ifdef PERL_UTF16_FILTER
+#ifndef PERL_NO_UTF16_FILTER
 STATIC I32
 S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 {
@@ -987,8 +987,8 @@ S_sublex_start(pTHX)
 
 	    p = SvPV(sv, len);
 	    nsv = newSVpvn(p, len);
-            if (SvUTF8(sv))
-               SvUTF8_on(nsv);
+	    if (SvUTF8(sv))
+		SvUTF8_on(nsv);
 	    SvREFCNT_dec(sv);
 	    sv = nsv;
 	} 
@@ -1242,11 +1242,10 @@ S_scan_const(pTHX_ char *start)
 		min = (U8)*d;			/* first char in range */
 		max = (U8)d[1];			/* last char in range  */
 
-
                 if (min > max) {
-                    Perl_croak(aTHX_
-                           "Invalid [] range \"%c-%c\" in transliteration operator",
-                           min, max);
+		    Perl_croak(aTHX_
+			       "Invalid [] range \"%c-%c\" in transliteration operator",
+			       min, max);
                 }
 
 #ifndef ASCIIish
@@ -1269,15 +1268,15 @@ S_scan_const(pTHX_ char *start)
 
 		/* mark the range as done, and continue */
 		dorange = FALSE;
-                didrange = TRUE;
+		didrange = TRUE;
 		continue;
 	    } 
 
 	    /* range begins (ignore - as first or last char) */
 	    else if (*s == '-' && s+1 < send  && s != start) {
-                if (didrange) { 
+		if (didrange) { 
 		    Perl_croak(aTHX_ "Ambiguous range in transliteration operator");
-                }
+		}
 		if (utf) {
 		    *d++ = (char)0xff;	/* use illegal utf8 byte--see pmtrans */
 		    s++;
@@ -1285,9 +1284,10 @@ S_scan_const(pTHX_ char *start)
 		}
 		dorange = TRUE;
 		s++;
-	    } else {
-              didrange = FALSE;
-            }
+	    }
+	    else {
+		didrange = FALSE;
+	    }
 	}
 
 	/* if we get here, we're not doing a transliteration */
@@ -2020,17 +2020,19 @@ S_filter_gets(pTHX_ register SV *sv, register PerlIO *fp, STRLEN append)
         return (sv_gets(sv, fp, append));
 }
 
-STATIC HV *S_find_in_my_stash(pTHX_ char *pkgname, I32 len)
+STATIC HV *
+S_find_in_my_stash(pTHX_ char *pkgname, I32 len)
 {
     GV *gv;
 
-    if (*pkgname == '_' && strEQ(pkgname, "__PACKAGE__"))
+    if (len == 11 && *pkgname == '_' && strEQ(pkgname, "__PACKAGE__"))
         return PL_curstash;
 
     if (len > 2 &&
         (pkgname[len - 2] == ':' && pkgname[len - 1] == ':') &&
-        (gv = gv_fetchpv(pkgname, FALSE, SVt_PVHV))) {
-        return GvHV(gv); /* Foo:: */
+        (gv = gv_fetchpv(pkgname, FALSE, SVt_PVHV)))
+    {
+        return GvHV(gv);			/* Foo:: */
     }
 
     /* use constant CLASS => 'MyClass' */
@@ -2504,8 +2506,8 @@ Perl_yylex(pTHX)
 	    goto retry;
 	}
 	do {
-        bool bof;
-        bof = PL_rsfp && (PerlIO_tell(PL_rsfp)==0); /* *Before* read! */
+	    bool bof;
+	    bof = PL_rsfp && (PerlIO_tell(PL_rsfp) == 0); /* *Before* read! */
 	    if ((s = filter_gets(PL_linestr, PL_rsfp, 0)) == Nullch) {
 	      fake_eof:
 		if (PL_rsfp) {
@@ -2542,8 +2544,8 @@ Perl_yylex(pTHX)
 		    PL_doextract = FALSE;
 		}
 	    } 
-        if (bof)
-            s = swallow_bom(s);
+	    if (bof)
+		s = swallow_bom(s);
 	    incline(s);
 	} while (PL_doextract);
 	PL_oldoldbufptr = PL_oldbufptr = PL_bufptr = PL_linestart = s;
@@ -6171,8 +6173,8 @@ S_scan_trans(pTHX_ char *start)
 	Perl_croak(aTHX_ "Transliteration replacement not terminated");
     }
 
-	New(803,tbl,256,short);
-	o = newPVOP(OP_TRANS, 0, (char*)tbl);
+    New(803,tbl,256,short);
+    o = newPVOP(OP_TRANS, 0, (char*)tbl);
 
     complement = del = squash = 0;
     while (strchr("cds", *s)) {
@@ -7404,57 +7406,59 @@ Perl_yyerror(pTHX_ char *s)
     return 0;
 }
 
-
 STATIC char*
-S_swallow_bom(pTHX_ char *s) {
+S_swallow_bom(pTHX_ char *s)
+{
     STRLEN slen;
     slen = SvCUR(PL_linestr);
     switch (*s) {
     case -1:       
-    if ((s[1] & 255) == 254) { 
-        /* UTF-16 little-endian */
-#ifdef PERL_UTF16_FILTER
-        U8 *news;
+	if ((s[1] & 255) == 254) { 
+	    /* UTF-16 little-endian */
+#ifndef PERL_NO_UTF16_FILTER
+	    U8 *news;
 #endif
-        s+=2;
-        if (*s == 0 && s[1] == 0)  /* UTF-32 little-endian */
-            Perl_croak(aTHX_ "Unsupported script encoding");
-#ifdef PERL_UTF16_FILTER
-        filter_add(S_utf16rev_textfilter, NULL);
-        New(898, news, (PL_bufend - s) * 3 / 2 + 1, U8);
-        PL_bufend = utf16_to_utf8((U16*)s, news, PL_bufend - s);
-        s = news;
+	    s += 2;
+	    if (*s == 0 && s[1] == 0)  /* UTF-32 little-endian */
+		Perl_croak(aTHX_ "Unsupported script encoding");
+#ifndef PERL_NO_UTF16_FILTER
+	    filter_add(S_utf16rev_textfilter, NULL);
+	    New(898, news, (PL_bufend - s) * 3 / 2 + 1, U8);
+	    PL_bufend = utf16_to_utf8((U16*)s, news, PL_bufend - s);
+	    s = news;
 #else
-        Perl_croak(aTHX_ "Unsupported script encoding");
+	    Perl_croak(aTHX_ "Unsupported script encoding");
 #endif
-    }
-    break;
+	}
+	break;
 
     case -2:
-    if ((s[1] & 255) == 255) {   /* UTF-16 big-endian */
-#ifdef PERL_UTF16_FILTER
-        U8 *news;
-        filter_add(S_utf16_textfilter, NULL);
-        New(898, news, (PL_bufend - s) * 3 / 2 + 1, U8);
-        PL_bufend = utf16_to_utf8((U16*)s, news, PL_bufend - s);
-        s = news;
+	if ((s[1] & 255) == 255) {   /* UTF-16 big-endian */
+#ifndef PERL_NO_UTF16_FILTER
+	    U8 *news;
+	    filter_add(S_utf16_textfilter, NULL);
+	    New(898, news, (PL_bufend - s) * 3 / 2 + 1, U8);
+	    PL_bufend = utf16_to_utf8((U16*)s, news, PL_bufend - s);
+	    s = news;
 #else
-        Perl_croak(aTHX_ "Unsupported script encoding");
+	    Perl_croak(aTHX_ "Unsupported script encoding");
 #endif
-   }
-   break;
+	}
+	break;
 
-   case -17:
-   if ( slen>2 && (s[1] & 255) == 187 && (s[2] & 255) == 191) {
-        s+=3;                      /* UTF-8 */
-   }
-   break;
-   case 0:
-   if (slen > 3 && s[1] == 0 &&  /* UTF-32 big-endian */
-       s[2] & 255 == 254 && s[3] & 255 == 255)
-       Perl_croak(aTHX_ "Unsupported script encoding");
-} 
-return s;
+    case -17:
+	if (slen > 2 && (s[1] & 255) == 187 && (s[2] & 255) == 191) {
+	    s += 3;                      /* UTF-8 */
+	}
+	break;
+    case 0:
+	if (slen > 3 && s[1] == 0 &&  /* UTF-32 big-endian */
+	    s[2] & 255 == 254 && s[3] & 255 == 255)
+	{
+	    Perl_croak(aTHX_ "Unsupported script encoding");
+	}
+    }
+    return s;
 }
 
 #ifdef PERL_OBJECT

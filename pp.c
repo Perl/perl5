@@ -4418,7 +4418,7 @@ PP(pp_pack)
 	    patcopy++;
 	    continue;
         }
-	if (datumtype == 'U' && pat==patcopy+1) 
+	if (datumtype == 'U' && pat == patcopy+1) 
 	    SvUTF8_on(cat);
 	if (datumtype == '#') {
 	    while (pat < patend && *pat != '\n')

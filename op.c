@@ -2684,7 +2684,9 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	if (!squash) {
 		if (t == r ||
 		    (tlen == rlen && memEQ((char *)t, (char *)r, tlen)))
+		{
 		    o->op_private |= OPpTRANS_IDENTICAL;
+		}
 	}
 
 	while (t < tend || tfirst <= tlast) {
@@ -4467,7 +4469,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
          * skipping the prototype check
          */
         if (exists || SvPOK(cv))
-            cv_ckproto(cv, gv, ps);
+	    cv_ckproto(cv, gv, ps);
 	/* already defined (or promised)? */
 	if (exists || GvASSUMECV(gv)) {
 	    SV* const_sv;
