@@ -405,6 +405,8 @@ PERL_CALLCONV void	Perl_load_module(pTHX_ U32 flags, SV* name, SV* ver, ...);
 PERL_CALLCONV void	Perl_vload_module(pTHX_ U32 flags, SV* name, SV* ver, va_list* args);
 PERL_CALLCONV OP*	Perl_localize(pTHX_ OP* arg, I32 lexical);
 PERL_CALLCONV I32	Perl_looks_like_number(pTHX_ SV* sv);
+PERL_CALLCONV int	Perl_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep);
+PERL_CALLCONV bool	Perl_grok_numeric_radix(pTHX_ const char **sp, const char *send);
 PERL_CALLCONV int	Perl_magic_clearenv(pTHX_ SV* sv, MAGIC* mg);
 PERL_CALLCONV int	Perl_magic_clear_all_env(pTHX_ SV* sv, MAGIC* mg);
 PERL_CALLCONV int	Perl_magic_clearpack(pTHX_ SV* sv, MAGIC* mg);
@@ -1245,8 +1247,6 @@ STATIC I32	S_expect_number(pTHX_ char** pattern);
 #  if defined(USE_ITHREADS)
 STATIC SV*	S_gv_share(pTHX_ SV *sv);
 #  endif
-STATIC int	S_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep);
-STATIC int	S_grok_numeric_radix(pTHX_ const char **sp, const char *send);
 #endif
 
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)

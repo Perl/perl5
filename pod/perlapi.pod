@@ -318,7 +318,7 @@ L<perlsub/"Constant Functions">.
 	SV*	cv_const_sv(CV* cv)
 
 =for hackers
-Found in file opmini.c
+Found in file op.c
 
 =item dMARK
 
@@ -518,6 +518,28 @@ respectively.
 
 =for hackers
 Found in file op.h
+
+=item grok_number
+
+Recognise (or not) a number.  The type of the number is returned
+(0 if unrecognised), otherwise it is a bit-ORed combination of
+IS_NUMBER_IN_UV, IS_NUMBER_GREATER_THAN_UV_MAX, IS_NUMBER_NOT_INT,
+IS_NUMBER_NEG, IS_NUMBER_INFINITY (defined in perl.h).  If the value
+of the number can fit an in UV, it is returned in the *valuep.
+
+	int	grok_number(const char *pv, STRLEN len, UV *valuep)
+
+=for hackers
+Found in file util.c
+
+=item grok_numeric_radix
+
+Scan and skip for a numeric decimal separator (radix).
+
+	bool	grok_numeric_radix(const char **sp, const char *send)
+
+=for hackers
+Found in file util.c
 
 =item GvSV
 
@@ -1100,7 +1122,7 @@ method, similar to C<use Foo::Bar VERSION LIST>.
 	void	load_module(U32 flags, SV* name, SV* ver, ...)
 
 =for hackers
-Found in file opmini.c
+Found in file op.c
 
 =item looks_like_number
 
@@ -1239,7 +1261,7 @@ eligible for inlining at compile-time.
 	CV*	newCONSTSUB(HV* stash, char* name, SV* sv)
 
 =for hackers
-Found in file opmini.c
+Found in file op.c
 
 =item newHV
 
@@ -1385,7 +1407,7 @@ Found in file sv.c
 Used by C<xsubpp> to hook up XSUBs as Perl subs.
 
 =for hackers
-Found in file opmini.c
+Found in file op.c
 
 =item newXSproto
 
@@ -2408,19 +2430,19 @@ false, defined or undefined.  Does not handle 'get' magic.
 =for hackers
 Found in file sv.h
 
-=item svtype
-
-An enum of flags for Perl types.  These are found in the file B<sv.h> 
-in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
-
-=for hackers
-Found in file sv.h
-
 =item SvTYPE
 
 Returns the type of the SV.  See C<svtype>.
 
 	svtype	SvTYPE(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item svtype
+
+An enum of flags for Perl types.  These are found in the file B<sv.h> 
+in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
 
 =for hackers
 Found in file sv.h

@@ -20,12 +20,19 @@ was found in August 2000.  The vulnerability does not affect default
 installations and as far as is known affects only the Linux platform.
 
 You should upgrade your Perl to 5.6.1 as soon as possible.  Patches
-for earlier releases exist but they require full recompilation from
-the source code so 5.6.1 is your best choice.
+for earlier releases exist but using the patches require full
+recompilation from the source code anyway, so 5.6.1 is your best
+choice.
+
 See http://www.cpan.org/src/5.0/sperl-2000-08-05/sperl-2000-08-05.txt
 for more information.
 
 =head1 Incompatible Changes
+
+If your pointers are 64 bits wide, the Perl malloc is no more being
+used because it simply does not work with 8-byte pointers.  Also,
+usually the system malloc on such platforms are much better optimized
+for such large memory models than the Perl malloc.
 
 =head1 Future Deprecations
 
@@ -36,31 +43,302 @@ differently.  Not only is the current interface rather ugly, but the
 current implementation slows down normal array and hash use quite
 noticeably. The 'fields' pragma interface will remain available.
 
+The suidperl is also considered to be too much a risk to continue
+maintaining and the suidperl code is likely to be removed in a future
+release.
+
 =head1 Core Enhancements
+
+In general a lot of fixing has happened in the area of Perl's understanding
+of numbers, both integer and floating point.  Since in many systems the
+standard number parsing functions like C<strtoul()> and C<atof()> seem
+to have bugs, Perl tries to work around their deficiencies.  This results
+hopefully in more accurate numbers.
+
+=over 4
+
+=item *
+
+The rules for allowing underscores (underbars) in numeric constants
+have been relaxed and simplified: now you can have an underscore
+B<between digits>.
+
+=item *
+
+VMS now works under PerlIO.
+
+=item *
+
+GMAGIC (right-hand side magic) could in many cases such as concatenation
+of string be invoked too many times.
+
+=item *
+
+The MAGIC constants (e.g. C<'P'>) have been macrofied
+(e.g. C<PERL_MAGIC_TIED>) for better source code readability
+and maintainability.
+
+=item *
+
+The C<op_clear> and C<op_null> are now exported.
+
+=item *
+
+The Perl parser has been stress tested using both random input and
+Markov chain input.
+
+=back
 
 =head1 Modules and Pragmata
 
 =head2 New Modules
 
+=over 4
+
+=item *
+
+Attribute::Handlers - Simpler definition of attribute handlers
+
+=item *
+
+ExtUtils::Constant - generate XS code to import C header constants
+
+=item *
+
+I18N::LangTags - functions for dealing with RFC3066-style language tags
+
+=item *
+
+List::Util - selection of general-utility list subroutines
+
+=item *
+
+Locale::Maketext - framework for localization
+
+=item *
+
+NEXT - pseudo-class for method redispatch
+
+=item *
+
+Scalar::Util - selection of general-utility scalar subroutines
+
+=item *
+
+Time::HiRes - high resolution ualarm, usleep, and gettimeofday
+
+=back
+
 =head2 Updated And Improved Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<B::Deparse> module has been significantly enhanced.  It now
+can deparse almost all of the standard test suite (so that the
+tests still succeed).
+
+=item *
+
+L<Class::Struct> now assigns the array/hash element if the accessor
+is called with an array/hash element as the B<sole> argument.
+
+=item *
+
+L<Cwd> extension is now (even) faster.
+
+=item *
+
+L<DB_File> extension has been updated to version 1.77.
+
+=item *
+
+L<Fcntl>, L<Socket>, and L<Sys::Syslog> have been rewritten to use the
+new-style constant dispatch section (see L<ExtUtils::Constant>).
+
+=item *
+
+L<File::Glob> now supports C<GLOB_LIMIT> constant to limit the
+size of the returned list of filenames.
+
+=back
 
 =head1 Performance Enhancements
 
 =head1 Utility Changes
 
+=over 4
+
+=item *
+
+L<h2xs> uses the new L<ExtUtils::Constant> module which will affect
+newly created extensions that define constants.  Since the new code is
+more correct (if you have two constants where the first one is a
+prefix of the second one, the first constant B<never> gets defined),
+less lossy (it uses integers for integer constant, as opposed to the
+old code that used floating point numbers even for integer constants),
+and slightly faster, you might want to consider regenerating your
+extension code (the new scheme makes regenerating easy).
+
+=item *
+
+The F<emacs/e2ctags.pl> is now much faster.
+
+=item *
+
+The F<Pod::Html> (and thusly L<pod2html>) now allows specifying
+a cache directory.
+
+=back
+
 =head1 New Documentation
+
+=over 4
+
+=item *
+
+L<Locale::Maketext::TPJ13> is an article about software localization,
+originally published in The Perl Journal #13, republished here with
+kind permission.
+
+=item *
+
+More README.$PLATFORM files have been converted into pod, which also
+means that they also be installed as perl$PLATFORM documentation
+files.  The new files are L<perlapollo>, L<perlbeos>, L<perldgux>,
+L<perlhurd>, L<perlmint>, L<perlplan9>, L<perlqnx>, and L<perltru64>.
+
+=item *
+
+The F<Todo> and F<Todo-5.6> files have been merged into L<perltodo>.
+
+=item *
+
+Use of the F<gprof> tool to profile Perl has been documented in L<perlhack>.
+
+=back
 
 =head1 Installation and Configuration Improvements
 
 =head2 New Or Improved Platforms
 
+=over 4
+
+=item *
+
+AIX should now work better with gcc.  Also longdouble support in
+AIX should be better now.
+
+=item *
+
+AtheOS (http://www.atheos.cx/) is a new platform.
+
+=item *
+
+DG/UX platform now supports the 5.005-style threads.
+
+=item *
+
+MacOS (Classic) [HOPEFULLY]
+
+=item *
+
+MacOS X (or Darwin) should now be able to build Perl even on HFS+ filesystem.
+(The case-insensitivity confused the Perl build process.)
+
+=item *
+
+Netware [HOPEFULLY]
+
+=item *
+
+The Amdahl UTS UNIX mainframe platform is now supported.
+
+=back
+
 =head2 Generic Improvements
+
+=over 4
+
+=item *
+
+The C code has been made much more C<gcc -Wall> clean.  Some warning
+messages still remain, though, so if you are compiling with gcc you
+will see some warnings about dubious practices.  The warnings are
+being worked on.
+
+=item *
+
+In AFS installations one can configure the root of the AFS to be
+somewhere else than the default F</afs> by using the Configure
+parameter C<-Dafsroot=/some/where/else>.
+
+=item *
+
+The version of Berkeley DB used when the Perl (and, presumably, the
+DB_File extension) was built is now available as
+C<@Config{qw(db_version_major db_version_minor db_version_patch)}>
+from Perl and as C<DB_VERSION_MAJOR_CFG DB_VERSION_MINOR_CFG
+DB_VERSION_PATCH_CFG> from C.
+
+=item *
+
+The Thread extension is not built at all under ithreads (C<Configure
+-Duseithreads>) because it wouldn't work anyway (the Thread extension
+requires being Configured with C<-Duse5005threads>).
+
+=item *
+
+The C<B::Deparse> compiler backend has been so significantly improved
+that almost the whole Perl test suite passes after being deparsed.  A
+make target has been added to help in further testing: C<make test.deparse>.
+
+=back
 
 =head1 Selected Bug Fixes
 
 =head2 Platform Specific Changes and Fixes
 
+=over 4
+
+=item *
+
+Some versions of glibc have a broken modfl().  This affects builds
+with C<-Duselongdouble>.  This version of Perl detects this brokenness
+and has a workaround for it.  The glibc release 2.2.2 is known to have
+fixed the modfl() bug.
+
+=back
+
 =head1 New or Changed Diagnostics
+
+=over 4
+
+=item *
+
+In the regular expression diagnostics the C<E<lt>E<lt> HERE> marker
+introduced in 5.7.0 has been changed to be C<E<lt>-- HERE> since too
+many people found the C<E<lt>E<lt>> to be too similar to here-document
+starters.
+
+=item *
+
+If you try to L<perlfunc/pack> a number less than 0 or larger than 255
+using the C<"C"> format you will get an optional warning.  Similarly
+for the C<"c"> format and a number less than -128 or more than 127.
+
+=item *
+
+Certain regex modifiers such as C<(?o)> make sense only if applied to
+the entire regex.  You will an optional warning if you try to do otherwise.
+
+=item *
+
+Using arrays or hashes as references (e.g. C<%foo->{bar}> has been
+deprecated for a while.  Now you will get an optional warning.
+
+=back
 
 =head1 Changed Internals
 
@@ -73,6 +351,12 @@ C<offsets> member of the C<struct regexp>. See L<perldebguts> for more
 complete information.
 
 =head1 New Tests
+
+Several new tests have been added, especially for the F<lib> subsection.
+
+=back
+
+The test F<camel-III/vstring> has been merged with F<op/ver>.
 
 =head1 Known Problems
 

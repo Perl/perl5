@@ -1505,6 +1505,20 @@ Perl_looks_like_number(pTHXo_ SV* sv)
 {
     return ((CPerlObj*)pPerl)->Perl_looks_like_number(sv);
 }
+
+#undef  Perl_grok_number
+int
+Perl_grok_number(pTHXo_ const char *pv, STRLEN len, UV *valuep)
+{
+    return ((CPerlObj*)pPerl)->Perl_grok_number(pv, len, valuep);
+}
+
+#undef  Perl_grok_numeric_radix
+bool
+Perl_grok_numeric_radix(pTHXo_ const char **sp, const char *send)
+{
+    return ((CPerlObj*)pPerl)->Perl_grok_numeric_radix(sp, send);
+}
 #if defined(USE_THREADS)
 #endif
 #if defined(USE_LOCALE_COLLATE)
@@ -1596,7 +1610,7 @@ Perl_mg_set(pTHXo_ SV* sv)
 }
 
 #undef  Perl_mg_size
-I32
+IV
 Perl_mg_size(pTHXo_ SV* sv)
 {
     return ((CPerlObj*)pPerl)->Perl_mg_size(sv);

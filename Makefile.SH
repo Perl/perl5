@@ -676,7 +676,10 @@ install.html: all installhtml
 # to run with precisely the same version of byacc as I use.  You
 # normally shouldn't remake perly.[ch].
 
-run_byacc:	FORCE
+check_byacc:
+	@$(BYACC) -V 2>&1 | grep 'version 1\.8\.2'
+
+run_byacc:	FORCE check_byacc
 	$(BYACC) -d perly.y
 	-chmod 664 perly.c perly.h
 	sh $(shellflags) ./perly.fixer y.tab.c perly.c

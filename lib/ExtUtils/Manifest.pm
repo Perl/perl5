@@ -121,7 +121,7 @@ sub _manicheck {
 	    }
 	    warn "Debug: manicheck checking from disk $file\n" if $Debug;
 	    unless ( exists $read->{$file} ) {
-		my $canon = "\t" . _unmacify($file) if $Is_MacOS;
+		my $canon = $Is_MacOS ? "\t" . _unmacify($file) : '';
 		warn "Not in $MANIFEST: $file$canon\n" unless $Quiet;
 		push @missentry, $file;
 	    }

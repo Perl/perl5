@@ -2,7 +2,7 @@
 
 # Fix up yacc output to allow dynamic allocation.  Since perly.c
 # is now provided with the perl source, this should not be necessary.
-#  
+#
 # However, if the user wishes to use byacc, or wishes to try another 
 # compiler compiler (e.g. bison or yacc), this script will get run.
 # See makefile run_byacc target for more details.
@@ -14,6 +14,9 @@
 #
 # Additional information to make the BSD section work with SunOS 4.0.2
 #   tdinger@East.Sun.COM (Tom Dinger)	4/15/1991
+#
+# Also edit some practices gcc -Wall finds questionable.
+#  
 
 input=$1
 output=$2
@@ -41,6 +44,11 @@ if grep 'yaccpar 1.8 (Berkeley)' $input >/dev/null 2>&1; then
 	    -e '/^static static/s/^static //' \
 	    -e '/^#define.WORD/,/^#define.ARROW/d' \
 	    -e '/^int.yydebug/,/^#define.yystacksize/d' \
+	    -e 's/^yyerrlab:$//' \
+	    -e 's/^    goto yyerrlab;//' \
+	    -e 's/^yynewerror:$//' \
+	    -e 's/^    goto yynewerror;//' \
+	    -e 's|^static char yysccsid\(.*\)|/* static char yysccsid\1 */|' \
 	    < $output > $tmp && mv -f $tmp $output || exit 1
 	rm -rf $input
 	echo "If you need to debug perly.c, you need to fix up the #line"
@@ -56,6 +64,11 @@ elif grep 'yaccpar	1.9 (Berkeley)' $input >/dev/null 2>&1; then
 	    -e '/^static static/s/^static //' \
 	    -e '/^#define.WORD/,/^#define.ARROW/d' \
 	    -e '/^int.yydebug/,/^#define.yystacksize/d' \
+	    -e 's/^yyerrlab:$//' \
+	    -e 's/^    goto yyerrlab;//' \
+	    -e 's/^yynewerror:$//' \
+	    -e 's/^    goto yynewerror;//' \
+	    -e 's|^static char yysccsid\(.*\)|/* static char yysccsid\1 */|' \
 	    < $output > $tmp && mv -f $tmp $output || exit 1
 	rm -rf $input
 	echo "If you need to debug perly.c, you need to fix up the #line"
