@@ -24,7 +24,7 @@ them.  If you find something that was missed, please let me know.
 This tutorial assumes that the make program that Perl is configured to
 use is called C<make>.  Instead of running "make" in the examples that
 follow, you may have to substitute whatever make program Perl has been
-configured to use.  Running "perl -V:make" should tell you what it is.
+configured to use.  Running B<perl -V:make> should tell you what it is.
 
 =head2 Version caveat
 
@@ -190,7 +190,7 @@ You can safely ignore the line about "prototyping behavior".
 
 If you are on a Win32 system, and the build process fails with linker
 errors for functions in the C library, check if your Perl is configured
-to use PerlCRT (running "perl -V:libc" should show you if this is the
+to use PerlCRT (running B<perl -V:libc> should show you if this is the
 case).  If Perl is configured to use PerlCRT, you have to make sure
 PerlCRT.lib is copied to the same location that msvcrt.lib lives in,
 so that the compiler can find it on its own.  msvcrt.lib is usually

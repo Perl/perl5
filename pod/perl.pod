@@ -297,7 +297,7 @@ Perl developers, please write to perl-thanks@perl.org .
  s2p	sed to perl translator
 
  http://www.perl.com/	    the Perl Home Page
- http://www.perl.com/CPAN   the Comphrehensive Perl Archive
+ http://www.perl.com/CPAN   the Comprehensive Perl Archive
 
 =head1 DIAGNOSTICS
 
