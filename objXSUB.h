@@ -2023,6 +2023,22 @@
 #define Perl_sv_pvbyte		pPerl->Perl_sv_pvbyte
 #undef  sv_pvbyte
 #define sv_pvbyte		Perl_sv_pvbyte
+#undef  Perl_sv_utf8_upgrade
+#define Perl_sv_utf8_upgrade	pPerl->Perl_sv_utf8_upgrade
+#undef  sv_utf8_upgrade
+#define sv_utf8_upgrade		Perl_sv_utf8_upgrade
+#undef  Perl_sv_utf8_downgrade
+#define Perl_sv_utf8_downgrade	pPerl->Perl_sv_utf8_downgrade
+#undef  sv_utf8_downgrade
+#define sv_utf8_downgrade	Perl_sv_utf8_downgrade
+#undef  Perl_sv_utf8_encode
+#define Perl_sv_utf8_encode	pPerl->Perl_sv_utf8_encode
+#undef  sv_utf8_encode
+#define sv_utf8_encode		Perl_sv_utf8_encode
+#undef  Perl_sv_utf8_decode
+#define Perl_sv_utf8_decode	pPerl->Perl_sv_utf8_decode
+#undef  sv_utf8_decode
+#define sv_utf8_decode		Perl_sv_utf8_decode
 #undef  Perl_sv_force_normal
 #define Perl_sv_force_normal	pPerl->Perl_sv_force_normal
 #undef  sv_force_normal

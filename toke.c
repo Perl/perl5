@@ -6904,7 +6904,7 @@ Perl_scan_num(pTHX_ char *start)
 		pos++;
 	    if (*pos == '.' && isDIGIT(pos[1])) {
 		UV rev;
-		U8 tmpbuf[10];
+		U8 tmpbuf[UTF8_MAXLEN];
 		U8 *tmpend;
 		NV nshift = 1.0;
 		bool utf8 = FALSE;
@@ -6930,7 +6930,6 @@ Perl_scan_num(pTHX_ char *start)
 			tmpbuf[0] = (U8)rev;
 			tmpend = &tmpbuf[1];
 		    }
-		    *tmpend = '\0';
 		    sv_catpvn(sv, (const char*)tmpbuf, tmpend - tmpbuf);
 		    if (rev > 0)
 			SvNVX(sv) += (NV)rev/nshift;
@@ -6943,7 +6942,6 @@ Perl_scan_num(pTHX_ char *start)
 		s = pos;
 		tmpend = uv_to_utf8(tmpbuf, rev);
 		utf8 = utf8 || rev > 127;
-		*tmpend = '\0';
 		sv_catpvn(sv, (const char*)tmpbuf, tmpend - tmpbuf);
 		if (rev > 0)
 		    SvNVX(sv) += (NV)rev/nshift;
@@ -6951,8 +6949,10 @@ Perl_scan_num(pTHX_ char *start)
 		SvPOK_on(sv);
 		SvNOK_on(sv);
 		SvREADONLY_on(sv);
-		if (utf8)
+		if (utf8) {
 		    SvUTF8_on(sv);
+		    sv_utf8_downgrade(sv, TRUE);
+		}
 	    }
 	}
 	break;

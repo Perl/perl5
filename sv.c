@@ -2214,7 +2214,8 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
 char *
 Perl_sv_2pvbyte_nolen(pTHX_ register SV *sv)
 {
-    return sv_2pv_nolen(sv);
+    STRLEN n_a;
+    return sv_2pvbyte(sv, &n_a);
 }
 
 char *
@@ -2226,12 +2227,14 @@ Perl_sv_2pvbyte(pTHX_ register SV *sv, STRLEN *lp)
 char *
 Perl_sv_2pvutf8_nolen(pTHX_ register SV *sv)
 {
-    return sv_2pv_nolen(sv);
+    STRLEN n_a;
+    return sv_2pvutf8(sv, &n_a);
 }
 
 char *
 Perl_sv_2pvutf8(pTHX_ register SV *sv, STRLEN *lp)
 {
+    sv_utf8_upgrade(sv);
     return sv_2pv(sv,lp);
 }
  
@@ -2272,6 +2275,139 @@ Perl_sv_2bool(pTHX_ register SV *sv)
 	}
     }
 }
+
+void
+Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
+{
+    int hicount;
+    char *c;
+
+    if (!sv || !SvPOK(sv) || SvUTF8(sv))
+	return;
+
+    /* This function could be much more efficient if we had a FLAG
+     * to signal if there are any hibit chars in the string
+     */
+    hicount = 0;
+    for (c = SvPVX(sv); c < SvEND(sv); c++) {
+	if (*c & 0x80)
+	    hicount++;
+    }
+
+    if (hicount) {
+	char *src, *dst;
+	SvGROW(sv, SvCUR(sv) + hicount + 1);
+
+	src = SvEND(sv) - 1;
+	SvCUR_set(sv, SvCUR(sv) + hicount);
+	dst = SvEND(sv) - 1;
+
+	while (src < dst) {
+	    if (*src & 0x80) {
+		dst--;
+		uv_to_utf8((U8*)dst, (U8)*src--);
+		dst--;
+	    }
+	    else {
+		*dst-- = *src--;
+	    }
+	}
+
+	SvUTF8_on(sv);
+    }
+}
+
+bool
+Perl_sv_utf8_downgrade(pTHX_ register SV* sv, bool fail_ok)
+{
+    if (SvPOK(sv) && SvUTF8(sv)) {
+        char *c = SvPVX(sv);
+        char *first_hi = 0;
+        /* need to figure out if this is possible at all first */
+        while (c < SvEND(sv)) {
+            if (*c & 0x80) {
+                I32 len;
+                UV uv = utf8_to_uv(c, &len);
+                if (uv >= 256) {
+		    if (fail_ok)
+			return FALSE;
+		    else {
+			/* XXX might want to make a callback here instead */
+			croak("Big byte");
+		    }
+		}
+                if (!first_hi)
+                    first_hi = c;
+                c += len;
+            }
+            else {
+                c++;
+            }
+        }
+
+        if (first_hi) {
+            char *src = first_hi;
+            char *dst = first_hi;
+            while (src < SvEND(sv)) {
+                if (*src & 0x80) {
+                    I32 len;
+                    U8 u = (U8)utf8_to_uv(src, &len);
+                    *dst++ = u;
+                    src += len;
+                }
+                else {
+                    *dst++ = *src++;
+                }
+            }
+            SvCUR_set(sv, dst - SvPVX(sv));
+        }
+        SvUTF8_off(sv);
+    }
+    return TRUE;
+}
+
+void
+Perl_sv_utf8_encode(pTHX_ register SV *sv)
+{
+    sv_utf8_upgrade(sv);
+    SvUTF8_off(sv);
+}
+
+bool
+Perl_sv_utf8_decode(pTHX_ register SV *sv)
+{
+    if (SvPOK(sv)) {
+        char *c;
+        bool has_utf = FALSE;
+        if (!sv_utf8_downgrade(sv, TRUE))
+	    return FALSE;
+
+        /* it is actually just a matter of turning the utf8 flag on, but
+         * we want to make sure everything inside is valid utf8 first.
+         */
+        c = SvPVX(sv);
+        while (c < SvEND(sv)) {
+            if (*c & 0x80) {
+                I32 len;
+                (void)utf8_to_uv((U8*)c, &len);
+                if (len == 1) {
+                    /* bad utf8 */
+                    return FALSE;
+                }
+                c += len;
+                has_utf = TRUE;
+            }
+            else {
+                c++;
+            }
+        }
+
+        if (has_utf)
+            SvUTF8_on(sv);
+    }
+    return TRUE;
+}
+
 
 /* Note: sv_setsv() should not be called with a source string that needs
  * to be reused, since it may destroy the source string if it is marked
@@ -2955,10 +3091,13 @@ Perl_sv_catsv(pTHX_ SV *dstr, register SV *sstr)
     STRLEN len;
     if (!sstr)
 	return;
-    if (s = SvPV(sstr, len))
+    if (s = SvPV(sstr, len)) {
+	if (SvUTF8(sstr))
+	    sv_utf8_upgrade(dstr);
 	sv_catpvn(dstr,s,len);
-    if (SvUTF8(sstr))
-	SvUTF8_on(dstr);
+	if (SvUTF8(sstr))
+	    SvUTF8_on(dstr);
+    }
 }
 
 /*
@@ -3807,11 +3946,42 @@ C<sv2>.
 I32
 Perl_sv_cmp(pTHX_ register SV *str1, register SV *str2)
 {
-    STRLEN cur1 = 0;
-    char *pv1 = str1 ? SvPV(str1, cur1) : (char *) NULL;
-    STRLEN cur2 = 0;
-    char *pv2 = str2 ? SvPV(str2, cur2) : (char *) NULL;
+    STRLEN cur1, cur2;
+    char *pv1, *pv2;
     I32 retval;
+    bool utf1;
+
+    if (str1) {
+        pv1 = SvPV(str1, cur1);
+    }
+    else {
+	cur1 = 0;
+    }
+
+    if (str2) {
+	if (SvPOK(str2)) {
+	    if (SvPOK(str1) && SvUTF8(str1) != SvUTF8(str2) && !IN_BYTE) {
+		/* must upgrade other to UTF8 first */
+		if (SvUTF8(str1)) {
+		    sv_utf8_upgrade(str2);
+		}
+		else {
+		    sv_utf8_upgrade(str1);
+		    /* refresh pointer and length */
+		    pv1  = SvPVX(str1);
+		    cur1 = SvCUR(str1);
+		}
+	    }
+	    pv2  = SvPVX(str2);
+	    cur2 = SvCUR(str2);
+    	}
+	else {
+	    pv2 = sv_2pv(str2, &cur2);
+	}
+    }
+    else {
+	cur2 = 0;
+    }
 
     if (!cur1)
 	return cur2 ? -1 : 0;
@@ -4957,18 +5127,21 @@ Perl_sv_pvbyten_force(pTHX_ SV *sv, STRLEN *lp)
 char *
 Perl_sv_pvutf8(pTHX_ SV *sv)
 {
+    sv_utf8_upgrade(sv);
     return sv_pv(sv);
 }
 
 char *
 Perl_sv_pvutf8n(pTHX_ SV *sv, STRLEN *lp)
 {
+    sv_utf8_upgrade(sv);
     return sv_pvn(sv,lp);
 }
 
 char *
 Perl_sv_pvutf8n_force(pTHX_ SV *sv, STRLEN *lp)
 {
+    sv_utf8_upgrade(sv);
     return sv_pvn_force(sv,lp);
 }
 

@@ -3659,6 +3659,34 @@ Perl_sv_pvbyte(pTHXo_ SV *sv)
     return ((CPerlObj*)pPerl)->Perl_sv_pvbyte(sv);
 }
 
+#undef  Perl_sv_utf8_upgrade
+void
+Perl_sv_utf8_upgrade(pTHXo_ SV *sv)
+{
+    ((CPerlObj*)pPerl)->Perl_sv_utf8_upgrade(sv);
+}
+
+#undef  Perl_sv_utf8_downgrade
+bool
+Perl_sv_utf8_downgrade(pTHXo_ SV *sv, bool fail_ok)
+{
+    return ((CPerlObj*)pPerl)->Perl_sv_utf8_downgrade(sv, fail_ok);
+}
+
+#undef  Perl_sv_utf8_encode
+void
+Perl_sv_utf8_encode(pTHXo_ SV *sv)
+{
+    ((CPerlObj*)pPerl)->Perl_sv_utf8_encode(sv);
+}
+
+#undef  Perl_sv_utf8_decode
+bool
+Perl_sv_utf8_decode(pTHXo_ SV *sv)
+{
+    return ((CPerlObj*)pPerl)->Perl_sv_utf8_decode(sv);
+}
+
 #undef  Perl_sv_force_normal
 void
 Perl_sv_force_normal(pTHXo_ SV *sv)
