@@ -81,13 +81,15 @@ Using the C<undef> operator on a readonly value (such as $1) has
 the same effect as assigning C<undef> to the readonly value--it
 throws an exception.
 
-=item Close-on-exec bit may be set on pipe() handles
+=item Close-on-exec bit may be set on pipe and socket handles
 
 On systems that support a close-on-exec flag on filehandles, the
-flag will be set for any handles created by pipe(), if that is
-warranted by the value of $^F that may be in effect.  Earlier
-versions neglected to set the flag for handles created with
-pipe().  See L<perlfunc/pipe> and L<perlvar/$^F>.
+flag will be set for any handles created by pipe(), socketpair(),
+socket(), and accept(), if that is warranted by the value of $^F
+that may be in effect.  Earlier versions neglected to set the flag
+for handles created with these operators.  See L<perlfunc/pipe>,
+L<perlfunc/socketpair>, L<perlfunc/socket>, L<perlfunc/accept>,
+and L<perlvar/$^F>.
 
 =item Writing C<"$$1"> to mean C<"${$}1"> is unsupported
 

@@ -715,7 +715,8 @@ descriptors are not.  Also, during an open(), system file descriptors are
 preserved even if the open() fails.  (Ordinary file descriptors are
 closed before the open() is attempted.)  The close-on-exec
 status of a file descriptor will be decided according to the value of
-C<$^F> when the open() or pipe() was called, not the time of the exec().
+C<$^F> when the corresponding file, pipe, or socket was opened, not the
+time of the exec().
 
 =item $^H
 

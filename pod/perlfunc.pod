@@ -376,6 +376,10 @@ Accepts an incoming socket connect, just as the accept(2) system call
 does.  Returns the packed address if it succeeded, false otherwise.
 See the example in L<perlipc/"Sockets: Client/Server Communication">.
 
+On systems that support a close-on-exec flag on files, the flag will
+be set for the newly opened file descriptor, as determined by the
+value of $^F.  See L<perlvar/$^F>.
+
 =item alarm SECONDS
 
 =item alarm
@@ -4006,12 +4010,20 @@ the system call of the same name.  You should C<use Socket> first
 to get the proper definitions imported.  See the examples in
 L<perlipc/"Sockets: Client/Server Communication">.
 
+On systems that support a close-on-exec flag on files, the flag will
+be set for the newly opened file descriptor, as determined by the
+value of $^F.  See L<perlvar/$^F>.
+
 =item socketpair SOCKET1,SOCKET2,DOMAIN,TYPE,PROTOCOL
 
 Creates an unnamed pair of sockets in the specified domain, of the
 specified type.  DOMAIN, TYPE, and PROTOCOL are specified the same as
 for the system call of the same name.  If unimplemented, yields a fatal
 error.  Returns true if successful.
+
+On systems that support a close-on-exec flag on files, the flag will
+be set for the newly opened file descriptors, as determined by the value
+of $^F.  See L<perlvar/$^F>.
 
 Some systems defined C<pipe> in terms of C<socketpair>, in which a call
 to C<pipe(Rdr, Wtr)> is essentially:
