@@ -575,11 +575,18 @@ Perl_set_numeric_radix(pTHX)
     struct lconv* lc;
 
     lc = localeconv();
-    if (lc && lc->decimal_point)
-	/* We assume that decimal separator aka the radix
-	 * character is always a single character.  If it
-	 * ever is a string, this needs to be rethunk. */
-	PL_numeric_radix = *lc->decimal_point;
+    if (lc && lc->decimal_point) {
+	if (lc->decimal_point[0] == '.' && lc->decimal_point[1] == 0) {
+	    SvREFCNT_dec(PL_numeric_radix);
+	    PL_numeric_radix = 0;
+	}
+	else {
+	    if (PL_numeric_radix)
+		sv_setpv(PL_numeric_radix, lc->decimal_point);
+	    else
+		PL_numeric_radix = newSVpv(lc->decimal_point, 0);
+	}
+    }
     else
 	PL_numeric_radix = 0;
 # endif /* HAS_LOCALECONV */

@@ -362,8 +362,8 @@ PERLVARI(Inumeric_standard,	bool,	TRUE)
 					/* Assume simple numerics */
 PERLVARI(Inumeric_local,	bool,	TRUE)
 					/* Assume local numerics */
-PERLVAR(Inumeric_radix,		char)
-					/* The radix character if not '.' */
+PERLVAR(Inumeric_radix,		SV *)
+					/* The radix separator if not '.' */
 
 #endif /* !USE_LOCALE_NUMERIC */
 
