@@ -1713,16 +1713,16 @@ PP(pp_leavesub)
 }
 
 static CV *
-get_db_sub(sv)
-SV *sv;
+get_db_sub(svp, cv)
+SV **svp;
+CV *cv;
 {
     dTHR;
-    SV *oldsv = sv;
+    SV *oldsv = *svp;
     GV *gv;
-    CV *cv;
 
-    sv = GvSV(DBsub);
-    save_item(sv);
+    *svp = GvSV(DBsub);
+    save_item(*svp);
     gv = CvGV(cv);
     if ( (CvFLAGS(cv) & (CVf_ANON | CVf_CLONED))
 	 || strEQ(GvNAME(gv), "END") 
@@ -1731,10 +1731,10 @@ SV *sv;
     		&& (gv = (GV*)oldsv) ))) {
 	/* Use GV from the stack as a fallback. */
 	/* GV is potentially non-unique, or contain different CV. */
-	sv_setsv(sv, newRV((SV*)cv));
+	sv_setsv(*svp, newRV((SV*)cv));
     }
     else {
-	gv_efullname3(sv, gv, Nullch);
+	gv_efullname3(*svp, gv, Nullch);
     }
     cv = GvCV(DBsub);
     if (CvXSUB(cv))
@@ -1827,7 +1827,7 @@ PP(pp_entersub)
 
     gimme = GIMME_V;
     if ((op->op_private & OPpENTERSUB_DB) && GvCV(DBsub) && !CvNODEBUG(cv))
-	cv = get_db_sub(sv);
+	cv = get_db_sub(&sv, cv);
     if (!cv)
 	DIE("No DBsub routine");
 
