@@ -7,7 +7,7 @@ d_voidsig=define
 d_charsprf=undef
 
 case "$cc" in
-*gcc) ccflags="$ccflags -D_BSD_TYPES" ;;
+*gcc*) ccflags="$ccflags -D_BSD_TYPES" ;;
 *) ccflags="$ccflags -ansiposix -signed" ;;
 esac
 

@@ -6,7 +6,7 @@
 # Fri May  5 10:59:43 EDT 1995
 
 case "$cc" in
-gcc)	optimize='-O2'
+*gcc*)	optimize='-O2'
 	ccflags="$ccflags -D_POSIX_SOURCE"
 	echo "Setting hints for GNU CC."
 	;;

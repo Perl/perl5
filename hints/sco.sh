@@ -30,7 +30,7 @@ glibpth=`echo $glibpth | sed -e 's! /usr/lib/386 ! !' -e 's! /lib/386 ! !'`
 xlibpth=''
 
 case "$cc" in
-gcc)
+*gcc*)
 	ccflags="$ccflags -U M_XENIX"
 	optimize="$optimize -O2"
 	;;
