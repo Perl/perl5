@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..64\n";
+print "1..66\n";
 
 my $test = 0;
 sub ok ($$) {
@@ -118,6 +118,12 @@ $_ = "global";
     ok( $x eq '1globallocal-2globallocal', 'map without {}' );
 }
 {
+    for my $_ (1) {
+	my $x = map $_, qw(a b);
+	ok( $x == 2, 'map in scalar context' );
+    }
+}
+{
     my $buf = '';
     sub tgrep1 { /(.)/; $buf .= $1 }
     my $_ = 'y';
@@ -140,6 +146,12 @@ $_ = "global";
     my $x = join '-', grep $_=$_.tgrep3.tgrep4, 1 .. 2;
     ok( $x eq '1globallocal-2globallocal', 'grep without {} with side-effect' );
     ok( $_ eq 'local', '...but without extraneous side-effects' );
+}
+{
+    for my $_ (1) {
+	my $x = grep $_, qw(a b);
+	ok( $x == 2, 'grep in scalar context' );
+    }
 }
 {
     my $s = "toto";

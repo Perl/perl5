@@ -954,8 +954,15 @@ PP(pp_mapwhile)
 	(void)POPMARK;				/* pop dst */
 	SP = PL_stack_base + POPMARK;		/* pop original mark */
 	if (gimme == G_SCALAR) {
-	    dTARGET;
-	    XPUSHi(items);
+	    if (PL_op->op_private & OPpGREP_LEX) {
+		SV* sv = sv_newmortal();
+		sv_setiv(sv, items);
+		PUSHs(sv);
+	    }
+	    else {
+		dTARGET;
+		XPUSHi(items);
+	    }
 	}
 	else if (gimme == G_ARRAY)
 	    SP += items;
