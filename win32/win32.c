@@ -11,6 +11,9 @@
 #define WIN32_LEAN_AND_MEAN
 #define WIN32IO_IS_STDIO
 #include <tchar.h>
+#ifdef __GNUC__
+#define Win32_Winsock
+#endif
 #include <windows.h>
 
 /* #include "config.h" */
@@ -25,10 +28,20 @@
 #include "XSUB.h"
 #include <fcntl.h>
 #include <sys/stat.h>
+#ifndef __GNUC__
+/* assert.h conflicts with #define of assert in perl.h */
 #include <assert.h>
+#endif
 #include <string.h>
 #include <stdarg.h>
 #include <float.h>
+
+#ifdef __GNUC__
+/* Mingw32 defaults to globing command line 
+ * So we turn it off like this:
+ */
+int _CRT_glob = 0;
+#endif
 
 #define EXECF_EXEC 1
 #define EXECF_SPAWN 2
@@ -532,15 +545,15 @@ getegid(void)
 }
 
 int
-setuid(uid_t uid)
+setuid(uid_t auid)
 { 
-    return (uid == ROOT_UID ? 0 : -1);
+    return (auid == ROOT_UID ? 0 : -1);
 }
 
 int
-setgid(gid_t gid)
+setgid(gid_t agid)
 {
-    return (gid == ROOT_GID ? 0 : -1);
+    return (agid == ROOT_GID ? 0 : -1);
 }
 
 /*
@@ -923,7 +936,15 @@ win32_feof(FILE *fp)
  * we have to roll our own.
  */
 
+#ifdef USE_THREADS
+#ifdef USE_DECLSPEC_THREAD
 __declspec(thread) char	strerror_buffer[512];
+#else
+#define strerror_buffer (thr->i.Wstrerror_buffer)
+#endif
+#else
+char	strerror_buffer[512];
+#endif
 
 DllExport char *
 win32_strerror(int e) 
@@ -934,6 +955,7 @@ win32_strerror(int e)
     DWORD source = 0;
 
     if(e < 0 || e > sys_nerr) {
+        dTHR;
 	if(e < 0)
 	    e = GetLastError();
 
@@ -1109,9 +1131,9 @@ win32_abort(void)
 }
 
 DllExport int
-win32_fstat(int fd,struct stat *bufptr)
+win32_fstat(int fd,struct stat *sbufptr)
 {
-    return fstat(fd,bufptr);
+    return fstat(fd,sbufptr);
 }
 
 DllExport int
@@ -1720,9 +1742,10 @@ Perl_win32_init(int *argcp, char ***argvp)
      * want to be at the vendor's whim on the default, we set
      * it explicitly here.
      */
-#if !defined(_ALPHA_)
+#if !defined(_ALPHA_) && !defined(__GNUC__)
     _control87(MCW_EM, MCW_EM);
 #endif
+    MALLOC_INIT; 
 }
 
 #ifdef USE_BINMODE_SCRIPTS
@@ -1749,6 +1772,8 @@ win32_strip_return(SV *sv)
 }
 
 #endif
+
+
 
 
 

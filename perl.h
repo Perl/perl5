@@ -1359,39 +1359,19 @@ typedef Sighandler_t Sigsave_t;
 #  define MALLOC_TERM
 #endif
 
+
 /*
  * These need prototyping here because <proto.h> isn't
  * included until after runops is initialised.
  */
 
+typedef int runops_proc_t _((void));
 int runops_standard _((void));
 #ifdef DEBUGGING
 int runops_debug _((void));
 #endif
 
 #define THREADSV_NAMES "_123456789&`'+/.,\\\";^-%=|~:\001\005!@"
-
-/****************/
-/* Truly global */
-/****************/
-
-/* global state */
-EXT PerlInterpreter *	curinterp;	/* currently running interpreter */
-#ifdef USE_THREADS
-EXT perl_key		thr_key;	/* For per-thread struct perl_thread* */
-EXT perl_mutex		sv_mutex;	/* Mutex for allocating SVs in sv.c */
-EXT perl_mutex		malloc_mutex;	/* Mutex for malloc */
-EXT perl_mutex		eval_mutex;	/* Mutex for doeval */
-EXT perl_cond		eval_cond;	/* Condition variable for doeval */
-EXT struct perl_thread *	eval_owner;	/* Owner thread for doeval */
-EXT int			nthreads;	/* Number of threads currently */
-EXT perl_mutex		threads_mutex;	/* Mutex for nthreads and thread list */
-EXT perl_cond		nthreads_cond;	/* Condition variable for nthreads */
-EXT char *		threadsv_names INIT(THREADSV_NAMES);
-#ifdef FAKE_THREADS
-EXT struct perl_thread *	thr;	/* Currently executing (fake) thread */
-#endif
-#endif /* USE_THREADS */
 
 /* VMS doesn't use environ array and NeXT has problems with crt0.o globals */
 #if !defined(VMS) && !(defined(NeXT) && defined(__DYNAMIC__))
@@ -1407,74 +1387,6 @@ EXT char *** environ_pointer;
 #  endif
 #endif /* environ processing */
 
-EXT int		uid;		/* current real user id */
-EXT int		euid;		/* current effective user id */
-EXT int		gid;		/* current real group id */
-EXT int		egid;		/* current effective group id */
-EXT bool	nomemok;	/* let malloc context handle nomem */
-EXT U32		an;		/* malloc sequence number */
-EXT U32		cop_seqmax;	/* statement sequence number */
-EXT U16		op_seqmax;	/* op sequence number */
-EXT U32		evalseq;	/* eval sequence number */
-EXT U32		sub_generation;	/* inc to force methods to be looked up again */
-EXT char **	origenviron;
-EXT U32		origalen;
-EXT HV *	pidstatus;	/* pid-to-status mappings for waitpid */
-EXT U32 *	profiledata;
-EXT int		maxo INIT(MAXO);/* Number of ops */
-EXT char *	osname;		/* operating system */
-EXT char *	sh_path INIT(SH_PATH); /* full path of shell */
-EXT Sighandler_t	sighandlerp;
-
-EXT XPV*	xiv_arenaroot;	/* list of allocated xiv areas */
-EXT IV **	xiv_root;	/* free xiv list--shared by interpreters */
-EXT double *	xnv_root;	/* free xnv list--shared by interpreters */
-EXT XRV *	xrv_root;	/* free xrv list--shared by interpreters */
-EXT XPV *	xpv_root;	/* free xpv list--shared by interpreters */
-EXT HE *	he_root;	/* free he list--shared by interpreters */
-EXT char *	nice_chunk;	/* a nice chunk of memory to reuse */
-EXT U32		nice_chunk_size;/* how nice the chunk of memory is */
-
-/* Stack for currently executing thread--context switch must handle this.     */
-EXT SV **	stack_base;	/* stack->array_ary */
-EXT SV **	stack_sp;	/* stack pointer now */
-EXT SV **	stack_max;	/* stack->array_ary + stack->array_max */
-
-/* likewise for these */
-
-#ifdef OP_IN_REGISTER
-EXT OP *	opsave;		/* save current op register across longjmps */
-#else
-EXT OP *	op;		/* current op--when not in a global register */
-#endif
-EXT int		(*runops) _((void)) INIT(RUNOPS_DEFAULT);
-EXT I32 *	scopestack;	/* blocks we've entered */
-EXT I32		scopestack_ix;
-EXT I32		scopestack_max;
-
-EXT ANY*	savestack;	/* to save non-local values on */
-EXT I32		savestack_ix;
-EXT I32		savestack_max;
-
-EXT OP **	retstack;	/* returns we've pushed */
-EXT I32		retstack_ix;
-EXT I32		retstack_max;
-
-EXT I32 *	markstack;	/* stackmarks we're remembering */
-EXT I32 *	markstack_ptr;	/* stackmarks we're remembering */
-EXT I32 *	markstack_max;	/* stackmarks we're remembering */
-
-EXT SV **	curpad;
-
-/* temp space */
-EXT SV *	Sv;
-EXT XPV *	Xpv;
-EXT char	tokenbuf[256];
-EXT struct stat	statbuf;
-#ifdef HAS_TIMES
-EXT struct tms	timesbuf;
-#endif
-EXT STRLEN na;		/* for use in SvPV when length is Not Applicable */
 
 /* for tmp use in stupid debuggers */
 EXT int *	di;
@@ -1482,12 +1394,6 @@ EXT short *	ds;
 EXT char *	dc;
 
 /* handy constants */
-EXTCONST char *	Yes INIT("1");
-EXTCONST char *	No INIT("");
-EXTCONST char *	hexdigit INIT("0123456789abcdef0123456789ABCDEFx");
-EXTCONST char *	patleave INIT("\\.^$@dDwWsSbB+*?|()-nrtfeaxc0123456789[{]}");
-EXTCONST char *	vert INIT("|");
-
 EXTCONST char warn_uninit[]
   INIT("Use of uninitialized value");
 EXTCONST char warn_nosemi[]
@@ -1520,14 +1426,6 @@ EXTCONST char no_func[]
   INIT("The %s function is unimplemented");
 EXTCONST char no_myglob[]
   INIT("\"my\" variable %s can't be in a package");
-
-EXT SV		sv_undef;
-EXT SV		sv_no;
-EXT SV		sv_yes;
-#ifdef CSH
-    EXT char *	cshname INIT(CSH);
-    EXT I32	cshlen;
-#endif
 
 #ifdef DOINIT
 EXT char *sig_name[] = { SIG_NAME };
@@ -1693,70 +1591,6 @@ typedef enum {
     XTERMBLOCK
 } expectation;
 
-EXT U32		lex_state;	/* next token is determined */
-EXT U32		lex_defer;	/* state after determined token */
-EXT expectation	lex_expect;	/* expect after determined token */
-EXT I32		lex_brackets;	/* bracket count */
-EXT I32		lex_formbrack;	/* bracket count at outer format level */
-EXT I32		lex_fakebrack;	/* outer bracket is mere delimiter */
-EXT I32		lex_casemods;	/* casemod count */
-EXT I32		lex_dojoin;	/* doing an array interpolation */
-EXT I32		lex_starts;	/* how many interps done on level */
-EXT SV *	lex_stuff;	/* runtime pattern from m// or s/// */
-EXT SV *	lex_repl;	/* runtime replacement from s/// */
-EXT OP *	lex_op;		/* extra info to pass back on op */
-EXT OP *	lex_inpat;	/* in pattern $) and $| are special */
-EXT I32		lex_inwhat;	/* what kind of quoting are we in */
-EXT char *	lex_brackstack;	/* what kind of brackets to pop */
-EXT char *	lex_casestack;	/* what kind of case mods in effect */
-
-/* What we know when we're in LEX_KNOWNEXT state. */
-EXT YYSTYPE	nextval[5];	/* value of next token, if any */
-EXT I32		nexttype[5];	/* type of next token */
-EXT I32		nexttoke;
-
-EXT PerlIO * VOL	rsfp INIT(Nullfp);
-EXT SV *	linestr;
-EXT char *	bufptr;
-EXT char *	oldbufptr;
-EXT char *	oldoldbufptr;
-EXT char *	bufend;
-EXT expectation expect INIT(XSTATE);	/* how to interpret ambiguous tokens */
-EXT AV * 	rsfp_filters;
-
-EXT I32		multi_start;	/* 1st line of multi-line string */
-EXT I32		multi_end;	/* last line of multi-line string */
-EXT I32		multi_open;	/* delimiter of said string */
-EXT I32		multi_close;	/* delimiter of said string */
-
-EXT GV *	scrgv;
-EXT I32		error_count;	/* how many errors so far, max 10 */
-EXT I32		subline;	/* line this subroutine began on */
-EXT SV *	subname;	/* name of current subroutine */
-
-EXT CV *	compcv;		/* currently compiling subroutine */
-EXT AV *	comppad;	/* storage for lexically scoped temporaries */
-EXT AV *	comppad_name;	/* variable names for "my" variables */
-EXT I32		comppad_name_fill;/* last "introduced" variable offset */
-EXT I32		comppad_name_floor;/* start of vars in innermost block */
-EXT I32		min_intro_pending;/* start of vars to introduce */
-EXT I32		max_intro_pending;/* end of vars to introduce */
-EXT I32		padix;		/* max used index in current "register" pad */
-EXT I32		padix_floor;	/* how low may inner block reset padix */
-EXT I32		pad_reset_pending; /* reset pad on next attempted alloc */
-EXT COP		compiling;
-
-EXT I32		thisexpr;	/* name id for nothing_in_common() */
-EXT char *	last_uni;	/* position of last named-unary operator */
-EXT char *	last_lop;	/* position of last list operator */
-EXT OPCODE	last_lop_op;	/* last list operator */
-EXT bool	in_my;		/* we're compiling a "my" declaration */
-EXT HV *	in_my_stash;	/* declared class of this "my" declaration */
-#ifdef FCRYPT
-EXT I32		cryptseen;	/* has fast crypt() been initialized? */
-#endif
-
-EXT U32		hints;		/* various compilation flags */
 
 				/* Note: the lowest 8 bits are reserved for
 				   stuffing into op->op_private */
@@ -1768,231 +1602,74 @@ EXT U32		hints;		/* various compilation flags */
 #define HINT_STRICT_VARS	0x00000400
 #define HINT_LOCALE		0x00000800
 
-EXT bool	do_undump;	/* -u or dump seen? */
-EXT VOL U32	debug;
-
-/***********************************************/
-/* Global only to current interpreter instance */
-/***********************************************/
-
-#ifdef MULTIPLICITY
-#define IEXT
-#define IINIT(x)
-struct interpreter {
-#else
-#define IEXT EXT
-#define IINIT(x) INIT(x)
-#endif
-
-/* pseudo environmental stuff */
-IEXT int	Iorigargc;
-IEXT char **	Iorigargv;
-IEXT GV *	Ienvgv;
-IEXT GV *	Isiggv;
-IEXT GV *	Iincgv;
-IEXT char *	Iorigfilename;
-IEXT SV *	Idiehook;
-IEXT SV *	Iwarnhook;
-IEXT SV *	Iparsehook;
-
 /* Various states of an input record separator SV (rs, nrs) */
 #define RsSNARF(sv)   (! SvOK(sv))
 #define RsSIMPLE(sv)  (SvOK(sv) && SvCUR(sv))
 #define RsPARA(sv)    (SvOK(sv) && ! SvCUR(sv))
 
-/* switches */
-IEXT char *	Icddir;
-IEXT bool	Iminus_c;
-IEXT char	Ipatchlevel[10];
-IEXT char **	Ilocalpatches;
-IEXT SV *	Inrs;
-IEXT char *	Isplitstr IINIT(" ");
-IEXT bool	Ipreprocess;
-IEXT bool	Iminus_n;
-IEXT bool	Iminus_p;
-IEXT bool	Iminus_l;
-IEXT bool	Iminus_a;
-IEXT bool	Iminus_F;
-IEXT bool	Idoswitches;
-IEXT bool	Idowarn;
-IEXT bool	Idoextract;
-IEXT bool	Isawampersand;	/* must save all match strings */
-IEXT bool	Isawstudy;	/* do fbm_instr on all strings */
-IEXT bool	Isawvec;
-IEXT bool	Iunsafe;
-IEXT char *	Iinplace;
-IEXT char *	Ie_tmpname;
-IEXT PerlIO *	Ie_fp;
-IEXT U32	Iperldb;
-	/* This value may be raised by extensions for testing purposes */
-IEXT int	Iperl_destruct_level IINIT(0);	/* 0=none, 1=full, 2=full with checks */
+/* Set up PERLVAR macros for populating structs */
+#define PERLVAR(var,type) type var;
+#define PERLVARI(var,type,init) type var;
+#define PERLVARIC(var,type,init) type var;
 
-/* magical thingies */
-IEXT Time_t	Ibasetime;		/* $^T */
-IEXT SV *	Iformfeed;		/* $^L */
-IEXT char *	Ichopset IINIT(" \n-");	/* $: */
-IEXT SV *	Irs;			/* $/ */
-IEXT char *	Iofs;			/* $, */
-IEXT STRLEN	Iofslen;
-IEXT char *	Iors;			/* $\ */
-IEXT STRLEN	Iorslen;
-IEXT char *	Iofmt;			/* $# */
-IEXT I32	Imaxsysfd IINIT(MAXSYSFD); /* top fd to pass to subprocesses */
-IEXT int	Imultiline;		/* $*--do strings hold >1 line? */
-IEXT I32	Istatusvalue;		/* $? */
-#ifdef VMS
-IEXT U32	Istatusvalue_vms;
+#ifdef PERL_GLOBAL_STRUCT
+struct perl_vars {
+#include "perlvars.h"
+};
+
+#ifdef PERL_CORE
+EXT struct perl_vars Perl_Vars;
+EXT struct perl_vars *Perl_VarsPtr INIT(&Perl_Vars);
+#else
+#if !defined(__GNUC__) || !defined(WIN32)
+EXT
 #endif
-
-IEXT struct stat Istatcache;		/* _ */
-IEXT GV *	Istatgv;
-IEXT SV *	Istatname IINIT(Nullsv);
-
-/* shortcuts to various I/O objects */
-IEXT GV *	Istdingv;
-IEXT GV *	Ilast_in_gv;
-IEXT GV *	Idefgv;
-IEXT GV *	Iargvgv;
-IEXT GV *	Idefoutgv;
-IEXT GV *	Iargvoutgv;
-
-/* shortcuts to regexp stuff */
-IEXT GV *	Ileftgv;
-IEXT GV *	Iampergv;
-IEXT GV *	Irightgv;
-IEXT PMOP *	Icurpm;		/* what to do \ interps from */
-IEXT I32 *	Iscreamfirst;
-IEXT I32 *	Iscreamnext;
-IEXT I32	Imaxscream IINIT(-1);
-IEXT SV *	Ilastscream;
-
-/* shortcuts to misc objects */
-IEXT GV *	Ierrgv;
-
-/* shortcuts to debugging objects */
-IEXT GV *	IDBgv;
-IEXT GV *	IDBline;
-IEXT GV *	IDBsub;
-IEXT SV *	IDBsingle;
-IEXT SV *	IDBtrace;
-IEXT SV *	IDBsignal;
-IEXT AV *	Ilineary;	/* lines of script for debugger */
-IEXT AV *	Idbargs;	/* args to call listed by caller function */
-
-/* symbol tables */
-IEXT HV *	Idefstash;	/* main symbol table */
-IEXT HV *	Icurstash;	/* symbol table for current package */
-IEXT HV *	Idebstash;	/* symbol table for perldb package */
-IEXT HV *	Iglobalstash;	/* global keyword overrides imported here */
-IEXT SV *	Icurstname;	/* name of current package */
-IEXT AV *	Ibeginav;	/* names of BEGIN subroutines */
-IEXT AV *	Iendav;		/* names of END subroutines */
-IEXT AV *	Iinitav;	/* names of INIT subroutines */
-IEXT HV *	Istrtab;	/* shared string table */
-
-/* memory management */
-IEXT SV **	Itmps_stack;
-IEXT I32	Itmps_ix IINIT(-1);
-IEXT I32	Itmps_floor IINIT(-1);
-IEXT I32	Itmps_max;
-IEXT I32	Isv_count;	/* how many SV* are currently allocated */
-IEXT I32	Isv_objcount;	/* how many objects are currently allocated */
-IEXT SV*	Isv_root;	/* storage for SVs belonging to interp */
-IEXT SV*	Isv_arenaroot;	/* list of areas for garbage collection */
-
-/* funky return mechanisms */
-IEXT I32	Ilastspbase;
-IEXT I32	Ilastsize;
-IEXT int	Iforkprocess;	/* so do_open |- can return proc# */
-
-/* subprocess state */
-IEXT AV *	Ifdpid;		/* keep fd-to-pid mappings for my_popen */
-
-/* internal state */
-IEXT VOL int	Iin_eval;	/* trap "fatal" errors? */
-IEXT OP *	Irestartop;	/* Are we propagating an error from croak? */
-IEXT int	Idelaymagic;	/* ($<,$>) = ... */
-IEXT bool	Idirty;		/* In the middle of tearing things down? */
-IEXT U8		Ilocalizing;	/* are we processing a local() list? */
-IEXT bool	Itainted;	/* using variables controlled by $< */
-IEXT bool	Itainting;	/* doing taint checks */
-IEXT char *	Iop_mask IINIT(NULL);	/* masked operations for safe evals */
-
-/* trace state */
-IEXT I32	Idlevel;
-IEXT I32	Idlmax IINIT(128);
-IEXT char *	Idebname;
-IEXT char *	Idebdelim;
-
-/* current interpreter roots */
-IEXT CV *	Imain_cv;
-IEXT OP *	Imain_root;
-IEXT OP *	Imain_start;
-IEXT OP *	Ieval_root;
-IEXT OP *	Ieval_start;
-
-/* runtime control stuff */
-IEXT COP * VOL	Icurcop IINIT(&compiling);
-IEXT COP *	Icurcopdb IINIT(NULL);
-IEXT line_t	Icopline IINIT(NOLINE);
-IEXT PERL_CONTEXT *	Icxstack;
-IEXT I32	Icxstack_ix IINIT(-1);
-IEXT I32	Icxstack_max IINIT(128);
-IEXT JMPENV 	Istart_env;	/* empty startup sigjmp() environment */
-IEXT JMPENV *	Itop_env;	/* ptr. to current sigjmp() environment */
-
-/* stack stuff */
-IEXT AV *	Icurstack;		/* THE STACK */
-IEXT AV *	Imainstack;	/* the stack when nothing funny is happening */
-
-/* format accumulators */
-IEXT SV *	Iformtarget;
-IEXT SV *	Ibodytarget;
-IEXT SV *	Itoptarget;
-
-/* statics moved here for shared library purposes */
-IEXT SV		Istrchop;	/* return value from chop */
-IEXT int	Ifilemode;	/* so nextargv() can preserve mode */
-IEXT int	Ilastfd;	/* what to preserve mode on */
-IEXT char *	Ioldname;	/* what to preserve mode on */
-IEXT char **	IArgv;		/* stuff to free from do_aexec, vfork safe */
-IEXT char *	ICmd;		/* stuff to free from do_aexec, vfork safe */
-IEXT OP *	Isortcop;	/* user defined sort routine */
-IEXT HV *	Isortstash;	/* which is in some package or other */
-IEXT GV *	Ifirstgv;	/* $a */
-IEXT GV *	Isecondgv;	/* $b */
-IEXT AV *	Isortstack;	/* temp stack during pp_sort() */
-IEXT AV *	Isignalstack;	/* temp stack during sighandler() */
-IEXT SV *	Imystrk;	/* temp key string for do_each() */
-IEXT I32	Idumplvl;	/* indentation level on syntax tree dump */
-IEXT PMOP *	Ioldlastpm;	/* for saving regexp context during debugger */
-IEXT I32	Igensym;	/* next symbol for getsym() to define */
-IEXT bool	Ipreambled;
-IEXT AV *	Ipreambleav;
-IEXT int	Ilaststatval IINIT(-1);
-IEXT I32	Ilaststype IINIT(OP_STAT);
-IEXT SV *	Imess_sv;
-
-#ifdef USE_THREADS
-/* threads stuff */
-IEXT SV *	Ithrsv;		/* holds struct perl_thread for main thread */
-#endif /* USE_THREADS */
-
-#undef IEXT
-#undef IINIT
+struct perl_vars *Perl_VarsPtr;
+#define Perl_Vars (*((Perl_VarsPtr) ? Perl_VarsPtr : (Perl_VarsPtr =  Perl_GetVars())))
+#endif
+#endif /* PERL_GLOBAL_STRUCT */
 
 #ifdef MULTIPLICITY
+/* If we have multiple interpreters define a struct 
+   holding variables which must be per-interpreter
+   If we don't have threads anything that would have 
+   be per-thread is per-interpreter.
+*/
+
+struct interpreter {
+#ifndef USE_THREADS
+#include "thrdvar.h"
+#endif
+#include "intrpvar.h"
 };
+
 #else
 struct interpreter {
     char broiled;
 };
 #endif
 
+#ifdef USE_THREADS
+/* If we have threads define a struct with all the variables
+ * that have to be per-thread
+ */
+
+
+struct perl_thread {
+#include "thrdvar.h"
+};
+
+#endif
+
+/* Done with PERLVAR macros for now ... */
+#undef PERLVAR
+#undef PERLVARI
+#undef PERLVARIC
+
+typedef struct perl_thread *Thread;
+
 #include "thread.h"
 #include "pp.h"
-
-START_EXTERN_C
 #include "proto.h"
 
 #ifdef EMBED
@@ -2003,9 +1680,45 @@ START_EXTERN_C
 #define sv_setptrref(rv,ptr) sv_setref_iv(rv,Nullch,(IV)ptr)
 #endif
 
-END_EXTERN_C
+/* The following must follow proto.h as #defines mess up syntax */
 
-/* The following must follow proto.h */
+#include "embedvar.h"
+
+/* Now include all the 'global' variables 
+ * If we don't have threads or multiple interpreters
+ * these include variables that would have been their struct-s 
+ */
+
+#define PERLVAR(var,type) EXT type var;
+#define PERLVARI(var,type,init) EXT type var INIT(init);
+#define PERLVARIC(var,type,init) EXTCONST type var INIT(init);
+
+#ifndef PERL_GLOBAL_STRUCT
+#include "perlvars.h"
+#endif
+
+#ifndef MULTIPLICITY
+
+#ifndef USE_THREADS
+#include "thrdvar.h"
+#endif
+
+#include "intrpvar.h"
+#endif
+
+
+#undef PERLVAR
+#undef PERLVARI
+
+#if defined(HASATTRIBUTE) && defined(WIN32)
+/*
+ * This provides a layer of functions and macros to ensure extensions will
+ * get to use the same RTL functions as the core.
+ * It has to go here or #define of printf messes up __attribute__
+ * stuff in proto.h  
+ */
+#  include <win32iop.h>
+#endif	/* WIN32 */
 
 #ifdef DOINIT
 
@@ -2127,8 +1840,6 @@ EXT MGVTBL vtbl_amagicelem;
 #endif /* !DOINIT */
 
 #ifdef OVERLOAD
-
-EXT long amagic_generation;
 
 #define NofAMmeth 58
 #ifdef DOINIT
@@ -2272,19 +1983,8 @@ enum {
 #define PERLDB_SUBLINE	(perldb && (perldb & PERLDBf_SUBLINE))
 #define PERLDB_SINGLE	(perldb && (perldb & PERLDBf_SINGLE))
 
-#ifdef USE_LOCALE_COLLATE
-EXT U32		collation_ix;		/* Collation generation index */
-EXT char *	collation_name;		/* Name of current collation */
-EXT bool	collation_standard INIT(TRUE); /* Assume simple collation */
-EXT Size_t	collxfrm_base;		/* Basic overhead in *xfrm() */
-EXT Size_t	collxfrm_mult INIT(2);	/* Expansion factor in *xfrm() */
-#endif /* USE_LOCALE_COLLATE */
 
 #ifdef USE_LOCALE_NUMERIC
-
-EXT char *	numeric_name;		/* Name of current numeric locale */
-EXT bool	numeric_standard INIT(TRUE); /* Assume simple numerics */
-EXT bool	numeric_local INIT(TRUE);    /* Assume local numerics */
 
 #define SET_NUMERIC_STANDARD() \
     STMT_START {				\
@@ -2329,6 +2029,7 @@ EXT bool	numeric_local INIT(TRUE);    /* Assume local numerics */
 	}						\
 	MUTEX_UNLOCK(&sv_mutex);			\
     } while (0)
+
 
 #endif /* Include guard */
 

@@ -107,9 +107,11 @@ sub _write_win32 {
     open(DEF,">$data->{FILE}.def")
         or croak("Can't create $data->{FILE}.def: $!\n");
     # put library name in quotes (it could be a keyword, like 'Alias')
-    print DEF "LIBRARY \"$data->{DLBASE}\"\n";
-    print DEF "CODE LOADONCALL\n";
-    print DEF "DATA LOADONCALL NONSHARED MULTIPLE\n";
+    if ($Config::Config{'cc'} !~ /^gcc/i) {
+      print DEF "LIBRARY \"$data->{DLBASE}\"\n";
+      print DEF "CODE LOADONCALL\n";
+      print DEF "DATA LOADONCALL NONSHARED MULTIPLE\n";
+    }
     print DEF "EXPORTS\n  ";
     my @syms;
     # Export public symbols both with and without underscores to

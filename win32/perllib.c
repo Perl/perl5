@@ -15,6 +15,16 @@ RunPerl(int argc, char **argv, char **env, void *iosubsystem)
     int exitstatus;
     PerlInterpreter *my_perl;
 
+#ifdef PERL_GLOBAL_STRUCT
+#define PERLVAR(var,type) /**/
+#define PERLVARI(var,type,init) Perl_Vars.var = init;
+#define PERLVARIC(var,type,init) Perl_Vars.var = init;
+#include "perlvars.h"
+#undef PERLVAR
+#undef PERLVARI
+#undef PERLVARIC
+#endif
+
     PERL_SYS_INIT(&argc,&argv);
 
     perl_init_i18nl10n(1);

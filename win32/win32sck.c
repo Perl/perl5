@@ -11,6 +11,9 @@
 #define WIN32IO_IS_STDIO
 #define WIN32SCK_IS_STDSCK
 #define WIN32_LEAN_AND_MEAN
+#ifdef __GNUC__
+#define Win32_Winsock
+#endif
 #include <windows.h>
 #include "EXTERN.h"
 #include "perl.h"
@@ -54,7 +57,16 @@ static struct servent* win32_savecopyservent(struct servent*d,
                                              struct servent*s,
                                              const char *proto);
 
+#ifdef USE_THREADS
+#ifdef USE_DECLSPEC_THREAD
 __declspec(thread) struct servent myservent;
+#else
+#define myservent (thr->i.Wservent)
+#endif
+#else
+static struct servent myservent;
+#endif
+
 static int wsock_started = 0;
 
 void
@@ -432,7 +444,8 @@ struct servent *
 win32_getservbyname(const char *name, const char *proto)
 {
     struct servent *r;
-   
+    dTHR;    
+
     SOCKET_TEST(r = getservbyname(name, proto), NULL);
     if (r) {
 	r = win32_savecopyservent(&myservent, r, proto);
@@ -444,6 +457,7 @@ struct servent *
 win32_getservbyport(int port, const char *proto)
 {
     struct servent *r;
+    dTHR; 
 
     SOCKET_TEST(r = getservbyport(port, proto), NULL);
     if (r) {

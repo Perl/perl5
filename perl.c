@@ -1102,7 +1102,7 @@ perl_get_cv(char *name, I32 create)
 /* Be sure to refetch the stack pointer after calling these routines. */
 
 I32
-perl_call_argv(char *subname, I32 flags, register char **argv)
+perl_call_argv(char *sub_name, I32 flags, register char **argv)
               
           		/* See G_* flags in cop.h */
                      	/* null terminated arg list */
@@ -1117,15 +1117,15 @@ perl_call_argv(char *subname, I32 flags, register char **argv)
 	}
 	PUTBACK;
     }
-    return perl_call_pv(subname, flags);
+    return perl_call_pv(sub_name, flags);
 }
 
 I32
-perl_call_pv(char *subname, I32 flags)
+perl_call_pv(char *sub_name, I32 flags)
               		/* name of the subroutine */
           		/* See G_* flags in cop.h */
 {
-    return perl_call_sv((SV*)perl_get_cv(subname, TRUE), flags);
+    return perl_call_sv((SV*)perl_get_cv(sub_name, TRUE), flags);
 }
 
 I32
@@ -2985,5 +2985,6 @@ my_exit_jump(void)
 
     JMPENV_JUMP(2);
 }
+
 
 

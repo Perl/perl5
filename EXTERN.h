@@ -23,8 +23,8 @@
 #  define EXTCONST globalref
 #  define dEXTCONST globaldef {"$GLOBAL_RO_VARS"} readonly
 #else
-#  if (defined(_MSC_VER) && defined(_WIN32)) || (defined(__BORLANDC__) && defined(__WIN32__))
-#    ifdef PERL_CORE
+#  if defined(WIN32) && !defined(__GNUC__)
+#    ifdef PERLDLL
 #      define EXT extern __declspec(dllexport)
 #      define dEXT 
 #      define EXTCONST extern __declspec(dllexport) const

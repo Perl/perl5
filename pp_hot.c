@@ -1840,7 +1840,7 @@ PP(pp_entersub)
 
     if (!CvROOT(cv) && !CvXSUB(cv)) {
 	GV* autogv;
-	SV* subname;
+	SV* sub_name;
 
 	/* anonymous or undef'd function leaves us no recourse */
 	if (CvANON(cv) || !(gv = CvGV(cv)))
@@ -1858,9 +1858,9 @@ PP(pp_entersub)
 	    goto retry;
 	}
 	/* sorry */
-	subname = sv_newmortal();
-	gv_efullname3(subname, gv, Nullch);
-	DIE("Undefined subroutine &%s called", SvPVX(subname));
+	sub_name = sv_newmortal();
+	gv_efullname3(sub_name, gv, Nullch);
+	DIE("Undefined subroutine &%s called", SvPVX(sub_name));
     }
 
     gimme = GIMME_V;
@@ -2343,3 +2343,4 @@ PP(pp_method)
     SETs(isGV(gv) ? (SV*)GvCV(gv) : (SV*)gv);
     RETURN;
 }
+

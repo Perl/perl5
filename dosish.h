@@ -20,7 +20,7 @@ void Perl_DJGPP_init();
 #  endif
 #endif	/* DJGPP */
 
-#define PERL_SYS_TERM()
+#define PERL_SYS_TERM() MALLOC_TERM
 #define dXSUB_SYS
 #define TMPPATH "plXXXXXX"
 
@@ -98,5 +98,7 @@ void Perl_DJGPP_init();
  * This provides a layer of functions and macros to ensure extensions will
  * get to use the same RTL functions as the core.
  */
+#ifndef HASATTRIBUTE
 #  include <win32iop.h>
+#endif
 #endif	/* WIN32 */

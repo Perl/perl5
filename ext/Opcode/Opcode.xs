@@ -28,15 +28,16 @@ op_names_init(void)
 {
     int i;
     STRLEN len;
-    char *opname;
+    char **op_names;
     char *bitmap;
 
     op_named_bits = newHV();
+    op_names = get_op_names();
     for(i=0; i < maxo; ++i) {
 	SV *sv;
 	sv = newSViv(i);
 	SvREADONLY_on(sv);
-	hv_store(op_named_bits, op_name[i], strlen(op_name[i]), sv, 0);
+	hv_store(op_named_bits, op_names[i], strlen(op_names[i]), sv, 0);
     }
 
     put_op_bitspec(":none",0, sv_2mortal(new_opset(Nullsv)));
@@ -290,7 +291,7 @@ opset_to_ops(opset, desc = 0)
     STRLEN len;
     int i, j, myopcode;
     char *bitmap = SvPV(opset, len);
-    char **names = (desc) ? op_desc : op_name;
+    char **names = (desc) ? get_op_descs() : get_op_names();
     verify_opset(opset,1);
     for (myopcode=0, i=0; i < opset_len; i++) {
 	U16 bits = bitmap[i];
@@ -375,6 +376,7 @@ opdesc(...)
     int i, myopcode;
     STRLEN len;
     SV **args;
+    char **op_desc = get_op_descs(); 
     /* copy args to a scratch area since we may push output values onto	*/
     /* the stack faster than we read values off it if masks are used.	*/
     args = (SV**)SvPVX(sv_2mortal(newSVpv((char*)&ST(0), items*sizeof(SV*))));

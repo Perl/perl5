@@ -16,8 +16,6 @@
  * know.  Run now!  Hope is in speed!"  --Gandalf
  */
 
-dEXT char **watchaddr = 0;
-dEXT char *watchok;
 
 int
 runops_standard(void) {
@@ -30,6 +28,10 @@ runops_standard(void) {
 }
 
 #ifdef DEBUGGING
+
+dEXT char **watchaddr = 0;
+dEXT char *watchok;
+
 static void debprof _((OP*o));
 
 int
@@ -112,5 +114,5 @@ debprofdump(void)
     }
 }
 
-#endif
+#endif /* DEBUGGING */
 

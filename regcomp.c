@@ -60,9 +60,9 @@
 #define REG_COMP_C
 #include "regcomp.h"
 
-#ifdef USE_THREADS
+#ifdef op
 #undef op
-#endif /* USE_THREADS */
+#endif /* op */
 
 static regnode regdummy;
 static char *  regparse;       /* Input-scan pointer. */
@@ -2661,5 +2661,6 @@ re_croak2(const char* pat1,const char* pat2, va_alist)
     buf[l1] = '\0';			/* Overwrite \n */
     croak("%s", buf);
 }
+
 
 

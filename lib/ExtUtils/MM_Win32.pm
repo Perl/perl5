@@ -30,6 +30,7 @@ $ENV{EMXSHELL} = 'sh'; # to run `commands`
 unshift @MM::ISA, 'ExtUtils::MM_Win32';
 
 $BORLAND = 1 if $Config{'cc'} =~ /^bcc/i;
+$GCC     = 1 if $Config{'cc'} =~ /^gcc/i;
 $DMAKE = 1 if $Config{'make'} =~ /^dmake/i;
 $NMAKE = 1 if $Config{'make'} =~ /^nmake/i;
 
@@ -153,13 +154,20 @@ sub init_others
  $self->{'TEST_F'} = '$(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) -MExtUtils::Command -e test_f';
  $self->{'LD'}     = $Config{'ld'} || 'link';
  $self->{'AR'}     = $Config{'ar'} || 'lib';
- $self->{'LDLOADLIBS'}
-    ||= ( $BORLAND
-          ? 'import32.lib cw32mti.lib '
-          : 'msvcrt.lib oldnames.lib kernel32.lib comdlg32.lib winspool.lib gdi32.lib '
-	    .'advapi32.lib user32.lib shell32.lib netapi32.lib ole32.lib '
-	    .'oleaut32.lib uuid.lib wsock32.lib mpr.lib winmm.lib version.lib '
-	) . ' odbc32.lib odbccp32.lib';
+ if ($GCC)
+  {
+   $self->{'LDLOADLIBS'} ||= ' ';
+  }
+ else
+  {
+   $self->{'LDLOADLIBS'}
+      ||= ( $BORLAND
+            ? 'import32.lib cw32mti.lib '
+            : 'msvcrt.lib oldnames.lib kernel32.lib comdlg32.lib winspool.lib gdi32.lib '
+	      .'advapi32.lib user32.lib shell32.lib netapi32.lib ole32.lib '
+	      .'oleaut32.lib uuid.lib wsock32.lib mpr.lib winmm.lib version.lib '
+  	) . ' odbc32.lib odbccp32.lib';
+  }
  $self->{'DEV_NULL'} = '> NUL';
  # $self->{'NOECHO'} = ''; # till we have it working
 }
@@ -344,7 +352,9 @@ END
     push(@m, "\t$self->{CP} \$(MYEXTLIB) \$\@\n") if $self->{MYEXTLIB};
 
     push @m,
-q{	$(AR) }.($BORLAND ? '$@ $(OBJECT:^"+")' : '-out:$@ $(OBJECT)').q{
+q{	$(AR) }.($BORLAND ? '$@ $(OBJECT:^"+")'
+			  : ($GCC ? '-ru $@ $(OBJECT)'
+			          : '-out:$@ $(OBJECT)')).q{
 	}.$self->{NOECHO}.q{echo "$(EXTRALIBS)" > $(INST_ARCHAUTODIR)\extralibs.ld
 	$(CHMOD) 755 $@
 };
@@ -415,11 +425,18 @@ INST_DYNAMIC_DEP = '.$inst_dynamic_dep.'
 
 $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)\.exists $(EXPORT_LIST) $(PERL_ARCHIVE) $(INST_DYNAMIC_DEP)
 ');
-
-    push(@m, $BORLAND ?
-q{	$(LD) $(LDDLFLAGS) $(OTHERLDFLAGS) }.$ldfrom.q{,$@,,$(PERL_ARCHIVE:s,/,\,) $(LDLOADLIBS:s,/,\,) $(MYEXTLIB:s,/,\,),$(EXPORT_LIST:s,/,\,),$(RESFILES)} :
-q{	$(LD) -out:$@ $(LDDLFLAGS) }.$ldfrom.q{ $(OTHERLDFLAGS) $(MYEXTLIB) $(PERL_ARCHIVE) $(LDLOADLIBS) -def:$(EXPORT_LIST)}
+    if ($GCC) {
+      push(@m,  
+       q{	dlltool --def $(EXPORT_LIST) --output-exp dll.exp
+	$(LD) -o $@ -Wl,--base-file -Wl,dll.base $(LDDLFLAGS) }.$ldfrom.q{ $(OTHERLDFLAGS) $(MYEXTLIB) $(PERL_ARCHIVE) $(LDLOADLIBS) dll.exp
+	dlltool --def $(EXPORT_LIST) --base-file dll.base --output-exp dll.exp
+	$(LD) -o $@ $(LDDLFLAGS) }.$ldfrom.q{ $(OTHERLDFLAGS) $(MYEXTLIB) $(PERL_ARCHIVE) $(LDLOADLIBS) dll.exp });
+    } else {
+      push(@m, $BORLAND ?
+       q{	$(LD) $(LDDLFLAGS) $(OTHERLDFLAGS) }.$ldfrom.q{,$@,,$(PERL_ARCHIVE:s,/,\,) $(LDLOADLIBS:s,/,\,) $(MYEXTLIB:s,/,\,),$(EXPORT_LIST:s,/,\,),$(RESFILES)} :
+       q{	$(LD) -out:$@ $(LDDLFLAGS) }.$ldfrom.q{ $(OTHERLDFLAGS) $(MYEXTLIB) $(PERL_ARCHIVE) $(LDLOADLIBS) -def:$(EXPORT_LIST)}
 	);
+    }
     push @m, '
 	$(CHMOD) 755 $@
 ';
@@ -781,4 +798,5 @@ __END__
 =back
 
 =cut 
+
 
