@@ -1812,6 +1812,7 @@ init_interp(void)
     rsfp	= Nullfp;	\
     rsfp_filters= Nullav;	\
   } STMT_END
+    I_REINIT;
 #else
 #  ifdef MULTIPLICITY
 #    define PERLVAR(var,type)
