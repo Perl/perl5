@@ -40,7 +40,7 @@ while test $# -gt 0; do
 	case $1 in
     --help)
 		cat <<EOM
-Usage: configure [options]
+Usage: configure.gnu [options]
 This is GNU configure-like front end for a metaconfig-generated Configure.
 It emulates the following GNU configure options (must be fully spelled out):
 	--help
