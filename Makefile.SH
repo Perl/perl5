@@ -20,6 +20,10 @@ esac
 # #22227 $baserev
 # #22302 $yacc $byacc
 
+# H.Merijn Brand [30 Oct 2004]
+# Mentioned for the same reason for future reference
+# #23434 $d_strlcat $d_strlcpy
+
 : This forces SH files to create target in same directory as SH file.
 : This is so that make depend always knows where to find SH derivatives.
 case "$0" in
