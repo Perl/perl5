@@ -3891,7 +3891,7 @@ void
 Perl_report_evil_fh(pTHX_ GV *gv, IO *io, I32 op)
 {
     char *vile;
-    I32   warn;
+    I32   warn_type;
     char *func =
 	op == OP_READLINE   ? "readline"  :	/* "<HANDLE>" not nice */
 	op == OP_LEAVEWRITE ? "write" :		/* "write exit" not nice */
@@ -3903,11 +3903,11 @@ Perl_report_evil_fh(pTHX_ GV *gv, IO *io, I32 op)
 
     if (io && IoTYPE(io) == IoTYPE_CLOSED) {
 	vile = "closed";
-	warn = WARN_CLOSED;
+	warn_type = WARN_CLOSED;
     }
     else {
 	vile = "unopened";
-	warn = WARN_UNOPENED;
+	warn_type = WARN_UNOPENED;
     }
 
     if (gv && isGV(gv)) {
@@ -3917,18 +3917,18 @@ Perl_report_evil_fh(pTHX_ GV *gv, IO *io, I32 op)
     }
 
     if (name && *name) {
-	Perl_warner(aTHX_ warn,
+	Perl_warner(aTHX_ warn_type,
 		    "%s%s on %s %s %s", func, pars, vile, type, name);
 	if (io && IoDIRP(io) && !(IoFLAGS(io) & IOf_FAKE_DIRP))
-	    Perl_warner(aTHX_ warn,
+	    Perl_warner(aTHX_ warn_type,
 			"\t(Are you trying to call %s%s on dirhandle %s?)\n",
 			func, pars, name);
     }
     else {
-	Perl_warner(aTHX_ warn,
+	Perl_warner(aTHX_ warn_type,
 		    "%s%s on %s %s", func, pars, vile, type);
 	if (io && IoDIRP(io) && !(IoFLAGS(io) & IOf_FAKE_DIRP))
-	    Perl_warner(aTHX_ warn,
+	    Perl_warner(aTHX_ warn_type,
 			"\t(Are you trying to call %s%s on dirhandle?)\n",
 			func, pars);
     }

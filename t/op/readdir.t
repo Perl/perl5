@@ -20,7 +20,7 @@ if (opendir(OP, "op")) { print "ok 1\n"; } else { print "not ok 1\n"; }
 @D = grep(/^[^\.].*\.t$/i, readdir(OP));
 closedir(OP);
 
-if (@D > 20 && @D < 100) { print "ok 2\n"; } else { print "not ok 2\n"; }
+if (@D > 20 && @D < 150) { print "ok 2\n"; } else { print "not ok 2\n"; }
 
 @R = sort @D;
 @G = sort <op/*.t>;
