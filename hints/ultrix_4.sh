@@ -69,13 +69,6 @@ d_dirnamlen='define'
 # which is rather useless state of things for Perl.
 d_mmap='undef'
 
-# Configure gets fooled somehow into thinking that Ultrix would have mkstemp.
-d_mkstemp='undef'
-
 # There simply isn't dynaloading in Ultrix.
 usedl='undef'
 
-# There are <netinet/in.h> and gettimeofday(),
-# despite of what Configure thinks.
-i_niin='define'
-d_gettimeod='define'
