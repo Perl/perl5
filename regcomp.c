@@ -38,7 +38,7 @@
 /* *These* symbols are masked to allow static link. */
 #  define Perl_pregfree my_regfree
 #  define Perl_regnext my_regnext
-#  define save_re_context my_save_re_context
+#  define Perl_save_re_context my_save_re_context
 #endif 
 
 /*SUPPRESS 112*/
