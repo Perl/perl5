@@ -67,11 +67,14 @@ sub import {
 		if ($locale_encoding =~ /^utf-?8$/i) {
 		    $layer = "utf8";
 		} else {
-		    $layer = "encoding($locale_encoding)";
+		    $layer = "encoding";
 		}
 	    }
 	    unless(PerlIO::Layer::->find($layer)) {
 		carp("Unknown discipline layer '$layer'");
+	    }
+	    if (defined $locale_encoding) {
+		$layer = "$layer($locale_encoding)";
 	    }
 	    push(@val,":$layer");
 	    if ($layer =~ /^(crlf|raw)$/) {
