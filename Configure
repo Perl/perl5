@@ -4348,27 +4348,25 @@ else
 fi
 
 echo " "
-case "$installusrbinperl" in
-'') if test -d /usr/bin -a "X$installbin" != X/usr/bin; then
+if test -d /usr/bin -a "X$installbin" != X/usr/bin; then
 	$cat <<EOM
 Many scripts expect to perl to be installed as /usr/bin/perl.
 I can install the perl you are about to compile also as /usr/bin/perl
 (in addition to $installbin/perl).
 EOM
-	dflt='y'
+	case "$installusrbinperl" in
+	"$undef"|[nN]*)	dflt='n';;
+	*)		dflt='y';;
+	esac
 	rp="Do you want to install perl as /usr/bin/perl?"
 	. ./myread
 	case "$ans" in
 	[yY]*)	val="$define";;
-	*)	val="$undef";;
+	*)	val="$undef" ;;
 	esac
-    fi
-    ;;
-esac
-case "$installusrbinperl" in
-"$undef"|[nN]*)	val="$undef";;
-*)		val="$define";;
-esac
+else
+	val="$undef"
+fi
 set installusrbinperl
 eval $setvar
 
