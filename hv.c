@@ -1532,6 +1532,7 @@ S_hsplit(pTHX_ HV *hv)
     xhv->xhv_fill = 0;
     HvSHAREKEYS_off(hv);
     HvREHASH_on(hv);
+    HvHASKFLAGS_on(hv);
 
     aep = (HE **) xhv->xhv_array;
 
@@ -1854,6 +1855,7 @@ Perl_hv_clear(pTHX_ HV *hv)
 	mg_clear((SV*)hv);
 
     HvHASKFLAGS_off(hv);
+    HvREHASH_off(hv);
 }
 
 STATIC void
