@@ -323,7 +323,7 @@ functions
 =item Alphabetical Listing of Perl Functions
 
 
--X FILEHANDLE, -X EXPR, -X, abs VALUE, accept NEWSOCKET,GENERICSOCKET,
+-I<X> FILEHANDLE, -I<X> EXPR, -I<X>, abs VALUE, accept NEWSOCKET,GENERICSOCKET,
 alarm SECONDS, atan2 Y,X, bind SOCKET,NAME, binmode FILEHANDLE, bless
 REF,CLASSNAME, bless REF, caller EXPR, caller, chdir EXPR, chmod LIST,
 chomp VARIABLE, chomp LIST, chomp, chop VARIABLE, chop LIST, chop,
@@ -1697,7 +1697,7 @@ I<Concatenation>, I<Comparison operations>, I<Copy operator>
 
 
 overload::StrVal(arg), overload::Overloaded(arg),
-overload::Method(obj,op)
+C<overload::Method(obj,op)>
 
 =item IMPLEMENTATION
 
@@ -1831,7 +1831,7 @@ new, debug
 =item Standard Exports
 
 
-timeit(COUNT, CODE), timethis, timethese, timediff, timestr
+C<timeit(COUNT, CODE)>, timethis, timethese, timediff, timestr
 
 =item Optional Exports
 
