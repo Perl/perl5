@@ -910,7 +910,7 @@ CPANPLUS, Inline, and Module::Build will become core modules.
 
 =item *
 
-True lexically scoped pragmas will be introduced.
+The ability to write true lexically scoped pragmas will be introduced.
 
 =item *
 
