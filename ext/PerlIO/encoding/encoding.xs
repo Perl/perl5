@@ -161,7 +161,7 @@ PerlIOEncode_popped(pTHX_ PerlIO * f)
     }
     if (e->chk) {
 	SvREFCNT_dec(e->chk);
-	e->dataSV = Nullsv;
+	e->chk = Nullsv;
     }
     return 0;
 }
@@ -595,10 +595,16 @@ BOOT:
      * is invoked without prior "use Encode". -- dankogai
      */
     if (!gv_stashpvn("Encode", 6, FALSE)) {
+#if 0
+	/* This would just be an irritant now loading works */
 	Perl_warner(aTHX_ packWARN(WARN_IO), ":encoding without 'use Encode'");
+#endif
 	ENTER;
+	/* Encode needs a lot of stack - it is likely to move ... */
+	PUTBACK;
 	/* The SV is magically freed by load_module */
 	load_module(PERL_LOADMOD_NOIMPORT, newSVpvn("Encode", 6), Nullsv, Nullsv);
+	SPAGAIN;
 	LEAVE;
     }
     PUSHMARK(sp);
