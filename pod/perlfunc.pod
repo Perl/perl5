@@ -4503,8 +4503,7 @@ sockets but not socketpair.
 =item sort LIST
 
 In list context, this sorts the LIST and returns the sorted list value.
-In scalar context, sort doesn't do anything and an undefined value is
-returned.
+In scalar context, the behaviour of C<sort()> is undefined.
 
 If SUBNAME or BLOCK is omitted, C<sort>s in standard string comparison
 order.  If SUBNAME is specified, it gives the name of a subroutine
