@@ -997,7 +997,7 @@ Perl_do_eof(pTHX_ GV *gv)
 		PerlIO_set_cnt(IoIFP(io),-1);
 	}
 	if (PL_op->op_flags & OPf_SPECIAL) { /* not necessarily a real EOF yet? */
-	    if (!nextargv(PL_argvgv))	/* get another fp handy */
+	    if (gv != PL_argvgv || !nextargv(gv))	/* get another fp handy */
 		return TRUE;
 	}
 	else

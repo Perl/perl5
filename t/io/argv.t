@@ -7,7 +7,7 @@ BEGIN {
 
 require "./test.pl";
 
-plan(tests => 21);
+plan(tests => 22);
 
 use File::Spec;
 
@@ -111,4 +111,22 @@ ok( eof(),      'eof() true after closing ARGV' );
     close F or die "Could not close: $!";
 }
 
-END { unlink 'Io_argv1.tmp', 'Io_argv1.tmp_bak', 'Io_argv2.tmp', 'Io_argv2.tmp_bak' }
+# This used to dump core
+fresh_perl_is( <<'**PROG**', "foobar", {}, "ARGV aliasing and eof()" ); 
+open OUT, ">Io_argv3.tmp" or die "Can't open temp file: $!";
+print OUT "foo";
+close OUT;
+open IN, "Io_argv3.tmp" or die "Can't open temp file: $!";
+*ARGV = *IN;
+while (<>) {
+    print;
+    print "bar" if eof();
+}
+close IN;
+unlink "Io_argv3.tmp";
+**PROG**
+
+END {
+    unlink 'Io_argv1.tmp', 'Io_argv1.tmp_bak',
+	'Io_argv2.tmp', 'Io_argv2.tmp_bak', 'Io_argv3.tmp';
+}

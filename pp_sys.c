@@ -1894,7 +1894,7 @@ PP(pp_eof)
     if (MAXARG == 0) {
 	if (PL_op->op_flags & OPf_SPECIAL) {	/* eof() */
 	    IO *io;
-	    gv = PL_last_in_gv = PL_argvgv;
+	    gv = PL_last_in_gv = GvEGV(PL_argvgv);
 	    io = GvIO(gv);
 	    if (io && !IoIFP(io)) {
 		if ((IoFLAGS(io) & IOf_START) && av_len(GvAVn(gv)) < 0) {
