@@ -2143,6 +2143,14 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #define M_VOID			/* Xenix strikes again */
 #endif
 
+/* PERL_BINCOMPAT_5005:
+ *	This symbol, if defined, indicates that Perl 5.006 should be
+ *	binary-compatible with Perl 5.005.  This is impossible for builds
+ *	that use features like threads and multiplicity it is always $undef
+ *	for those versions.
+ */
+#$d_bincompat5005 PERL_BINCOMPAT_5005			/**/
+
 /* DLSYM_NEEDS_UNDERSCORE:
  *	This symbol, if defined, indicates that we need to prepend an
  *	underscore to the symbol name before calling dlsym().  This only

@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Jul 28 20:32:22 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Thu Jul 29 23:50:22 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -282,6 +282,8 @@ baserev=''
 bin=''
 binexp=''
 installbin=''
+bincompat5005=''
+d_bincompat5005=''
 byteorder=''
 cc=''
 gccversion=''
@@ -3255,6 +3257,38 @@ if $test X"$prefix" != X"$installprefix"; then
 else
 	installarchlib="$archlibexp"
 fi
+
+
+: Binary compatibility with 5.005 is not possible for builds
+: with advanced features
+case "$usethreads$usemultiplicity" in
+*define*) bincompat5005="$undef" ;;
+*)	$cat <<EOM
+
+Perl 5.006 can be compiled for binary compatibility with 5.005.
+If you decide to do so, you will be able to continue using most
+of the extensions that were compiled for Perl 5.005.
+
+EOM
+	case "$d_bincompat5005" in
+	"$undef") dflt=n ;;
+	*) dflt=y ;;
+	esac
+	rp='Binary compatibility with Perl 5.005?'
+	. ./myread
+	case "$ans" in
+	y*) val="$define" ;;
+	*)  val="$undef" ;;
+	esac
+	set d_bincompat5005
+	eval $setvar
+	case "$d_bincompat5005" in
+	"$define") bincompat5005="$define" ;;
+	*) bincompat5005="$undef" ;;
+	esac
+	;;
+esac
+
 
 : make some quick guesses about what we are up against
 echo " "
@@ -13071,6 +13105,7 @@ awk='$awk'
 baserev='$baserev'
 bash='$bash'
 bin='$bin'
+bincompat5005='$bincompat5005'
 binexp='$binexp'
 bison='$bison'
 byacc='$byacc'
@@ -13115,6 +13150,7 @@ d_archlib='$d_archlib'
 d_attribut='$d_attribut'
 d_bcmp='$d_bcmp'
 d_bcopy='$d_bcopy'
+d_bincompat5005='$d_bincompat5005'
 d_bsd='$d_bsd'
 d_bsdgetpgrp='$d_bsdgetpgrp'
 d_bsdsetpgrp='$d_bsdsetpgrp'
