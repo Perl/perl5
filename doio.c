@@ -1364,6 +1364,7 @@ SV **sp;
 	    infosize = sizeof(struct semid_ds);
 	else if (cmd == GETALL || cmd == SETALL)
 	{
+	    struct semid_ds semds;
 #ifdef __linux__	/* XXX Need metaconfig test */
 /* linux uses :
    int semctl (int semid, int semnun, int cmd, union semun arg)
@@ -1374,19 +1375,14 @@ SV **sp;
             ushort *array;
        };
 */
-            union semun semds;
-	    if (semctl(id, 0, IPC_STAT, semds) == -1)
+	    unsemds.buf = &semds;
+	    if (semctl(id, 0, IPC_STAT, unsemds) == -1)
 #else
-	    struct semid_ds semds;
 	    if (semctl(id, 0, IPC_STAT, &semds) == -1)
 #endif
 		return -1;
 	    getinfo = (cmd == GETALL);
-#ifdef __linux__	/* XXX Need metaconfig test */
-	    infosize = semds.buf->sem_nsems * sizeof(short);
-#else
 	    infosize = semds.sem_nsems * sizeof(short);
-#endif
 		/* "short" is technically wrong but much more portable
 		   than guessing about u_?short(_t)? */
 	}
