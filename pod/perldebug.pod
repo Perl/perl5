@@ -182,10 +182,12 @@ accessible.
 =item /pattern/
 
 Search forwards for pattern (a Perl regex); final / is optional.
+The search is case-independent by default.
 
 =item ?pattern?
 
 Search backwards for pattern; final ? is optional.
+The search is case-independent by default.
 
 =item L
 
