@@ -6445,9 +6445,9 @@ else
 $cat <<EOM
 
 In some special cases, particularly when building $package for distribution,
-it is convenient to distinguish between the directory in which files should 
-be installed from the directory ($prefix) in which they 
-will eventually reside.  For most users, these two directories are the same.
+it is convenient to distinguish the directory in which files should be
+installed from the directory ($prefix) in which they will
+eventually reside.  For most users, these two directories are the same.
 
 EOM
 	case "$installprefix" in
