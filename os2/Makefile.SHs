@@ -116,6 +116,14 @@ dlfcn.h: os2/dlfcn.h
 perl___: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
 	$(SHRPENV) $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o perl___ perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LIBPERL) `cat ext.libs` $(libs)
 
+# This one is compiled -Zsys, so cannot do many things:
+
+# Remove -Zcrtdll, add -Zsys
+SYS_CLDFLAGS = -Zexe -Zomf -Zmt -Zsys -Zstack 32000
+
+perl_sys: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
+	$(SHRPENV) $(CC) $(LARGE) $(SYS_CLDFLAGS) $(CCDLFLAGS) -o perl_sys perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LIBPERL) `cat ext.libs` $(libs)
+
 installcmd : 
 	perl -e 'die qq{Give the option INSTALLCMDDIR=... to make!} if $$ARGV[0] eq ""' $(INSTALLCMDDIR)
 	perl os2/perl2cmd.pl $(INSTALLCMDDIR)
@@ -180,6 +188,14 @@ aout_install.perl: perl_ installperl
 
 aout_test: perl_
 	- cd t && (rm -f perl_$(EXE_EXT); $(LNS) ../perl_$(EXE_EXT) perl$(EXE_EXT)) && ./perl TEST </dev/tty
+
+# To test with harness, set HARNESS_BAD_EXITCODE=2
+
+sys_test: perl_sys
+	- cd t && (rm -f perl_$(EXE_EXT); $(LNS) ../perl_sys$(EXE_EXT) perl$(EXE_EXT)) && ./perl TEST </dev/tty
+
+sys_harness: perl_sys
+	- cd t && (rm -f perl_$(EXE_EXT); $(LNS) ../perl_sys$(EXE_EXT) perl$(EXE_EXT)) && env HARNESS_BAD_EXITCODE=2 ./perl harness </dev/tty
 
 lib/auto/OS2/*/%.a : ext/OS2/%/Makefile.aout
 	cd ext/OS2/$(basename $(notdir $@)) ; make -f Makefile.aout config || echo "$make config failed, continuing anyway..."
