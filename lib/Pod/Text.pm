@@ -52,6 +52,8 @@ require Exporter;
 use vars qw($VERSION);
 $VERSION = "1.0203";
 
+use locale;	# make \w work right in non-ASCII lands
+
 $termcap=0;
 
 $opt_alt_format = 0;

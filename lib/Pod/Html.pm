@@ -11,6 +11,8 @@ use Cwd;
 
 use Carp;
 
+use locale;	# make \w work right in non-ASCII lands
+
 use strict;
 
 use Config;
@@ -1550,6 +1552,7 @@ sub finish_list {
 # specification for HTML.  if first arg is 1, only takes 1st word.
 #
 sub htmlify {
+    my($compact, $heading) = @_;
     my($compact, $heading) = @_;
 
     if ($compact) {
