@@ -28,16 +28,16 @@ see L<perltrap> for information about how they differ.
 
 =head2 Declarations
 
-The only things you need to declare in Perl are report formats
-and subroutines--and even undefined subroutines can be handled
-through AUTOLOAD.  A variable holds the undefined value (C<undef>)
-until it has been assigned a defined value, which is anything
-other than C<undef>.  When used as a number, C<undef> is treated
-as C<0>; when used as a string, it is treated the empty string,
-C<"">; and when used as a reference that isn't being assigned
-to, it is treated as an error.  If you enable warnings, you'll
-be notified of an uninitialized value whenever you treat C<undef>
-as a string or a number.  Well, usually.  Boolean contexts, such as:
+The only things you need to declare in Perl are report formats and
+subroutines (and sometimes not even subroutines).  A variable holds
+the undefined value (C<undef>) until it has been assigned a defined
+value, which is anything other than C<undef>.  When used as a number,
+C<undef> is treated as C<0>; when used as a string, it is treated as
+the empty string, C<"">; and when used as a reference that isn't being
+assigned to, it is treated as an error.  If you enable warnings,
+you'll be notified of an uninitialized value whenever you treat
+C<undef> as a string or a number.  Well, usually.  Boolean contexts,
+such as:
 
     my $a;
     if ($a) {}
@@ -94,11 +94,23 @@ expression.
 The only kind of simple statement is an expression evaluated for its
 side effects.  Every simple statement must be terminated with a
 semicolon, unless it is the final statement in a block, in which case
-the semicolon is optional.  (A semicolon is still encouraged there if the
-block takes up more than one line, because you may eventually add another line.)
-Note that there are some operators like C<eval {}> and C<do {}> that look
-like compound statements, but aren't (they're just TERMs in an expression),
-and thus need an explicit termination if used as the last item in a statement.
+the semicolon is optional.  (A semicolon is still encouraged there if
+the block takes up more than one line, because you may eventually add
+another line.)  Note that there are some operators like C<eval {}> and
+C<do {}> that look like compound statements, but aren't (they're just
+TERMs in an expression), and thus need an explicit termination if used
+as the last item in a statement.
+
+=head2 Truth and Falsehood
+
+A false value is C<undef>, the number 0, the string C<'0'> and the
+empty string C<''>.  Note that unlike some languages, these are three
+distinctly different values.  A true value is everything which is not
+false.
+
+Note that while 0, 0.0 and C<'0'> are false, C<'0.0'> is true.
+
+=head2 Statement Modifiers
 
 Any simple statement may optionally be followed by a I<SINGLE> modifier,
 just before the terminating semicolon (or block ending).  The possible
@@ -108,16 +120,36 @@ modifiers are:
     unless EXPR
     while EXPR
     until EXPR
-    foreach EXPR
+    foreach LIST
 
-The C<if> and C<unless> modifiers have the expected semantics,
-presuming you're a speaker of English.  The C<foreach> modifier is an
-iterator:  For each value in EXPR, it aliases C<$_> to the value and
-executes the statement.  The C<while> and C<until> modifiers have the
-usual "C<while> loop" semantics (conditional evaluated first), except
-when applied to a C<do>-BLOCK (or to the deprecated C<do>-SUBROUTINE
-statement), in which case the block executes once before the
-conditional is evaluated.  This is so that you can write loops like:
+The C<EXPR> following the modifier is referred to as the "condition".
+Its truth or falsehood determines how the modifier will behave.
+
+C<if> executes the statement once I<if> and only if the condition is
+true.  C<unless> is the opposite, it executes the statement I<unless>
+the condition is true (i.e., if the condition is false).
+
+    print "Basset hounds got long ears" if length $ear >= 10;
+    go_outside() and play() unless $is_raining;
+
+The C<foreach> modifier is an iterator: it executes the statement once
+for each item in the LIST (with C<$_> aliased to each item in turn).
+
+    print "Hello $_!\n" foreach qw(world Dolly nurse);
+
+C<while> repeats the statement I<while> the condition is true.
+C<until> does the opposite, it repeats the statement I<until> the
+condition is true (or while the condition is false):
+
+    # Both of these count from 0 to 10.
+    print $i++ while $i <= 10;
+    print $j++ until $j >  10;
+
+The C<while> and C<until> modifiers have the usual "C<while> loop"
+semantics (conditional evaluated first), except when applied to a
+C<do>-BLOCK (or to the deprecated C<do>-SUBROUTINE statement), in
+which case the block executes once before the conditional is
+evaluated.  This is so that you can write loops like:
 
     do {
 	$line = <STDIN>;
