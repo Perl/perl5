@@ -25,7 +25,7 @@ Perl history in brief, by Larry Wall:
 Larry Wall, Andy Dougherty, Tom Christiansen, Charles Bailey, Nick
 Ing-Simmons, Chip Salzenberg, Tim Bunce, Malcolm Beattie, Gurusamy
 Sarathy, Graham Barr, Jarkko Hietaniemi, Hugo van der Sanden,
-Michael Schwern, Rafael Garcia-Suarez, Nicholas Clark.
+Michael Schwern, Rafael Garcia-Suarez, Nicholas Clark, Richard Clamp.
 
 =head2 PUMPKIN?
 
@@ -67,6 +67,7 @@ the strings?).
           1.001..10     1988-Jan-30
           1.011..14     1988-Feb-02
  Schwern  1.0.15        2002-Dec-18     Modernization
+ Richard  1.0.16        2003-Dec-18
 
  Larry   2.000          1988-Jun-05
 
