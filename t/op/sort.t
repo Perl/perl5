@@ -2,7 +2,7 @@
 
 # $RCSfile: sort.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:24 $
 
-print "1..19\n";
+print "1..21\n";
 
 sub backwards { $a lt $b ? 1 : $a gt $b ? -1 : 0 }
 
@@ -91,3 +91,14 @@ print ($@ =~ /redefine active sort/ ? "ok 18\n" : "not ok 18\n");
 	       };
 eval { @b = sort twoface 4,1 };
 print $@ ? "$@" : "not ok 19\n";
+
+eval <<'CODE';
+    my @result = sort main'backwards 'one', 'two';
+CODE
+print $@ ? "not ok 20\n# $@" : "ok 20\n";
+
+eval <<'CODE';
+    # "sort 'one', 'two'" should not try to parse "'one" as a sort sub
+    my @result = sort 'one', 'two';
+CODE
+print $@ ? "not ok 21\n# $@" : "ok 21\n";
