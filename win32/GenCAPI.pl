@@ -3,34 +3,34 @@
 # takes one argument, the path to lib/CORE directory.
 # creates 2 files: "perlCAPI.cpp" and "perlCAPI.h".
 
-my $hdrfile = "$ARGV[0]\\perlCAPI.h";
-my $infile = '..\\proto.h';
-my $embedfile = '..\\embed.h';
+my $hdrfile = "$ARGV[0]/perlCAPI.h";
+my $infile = '../proto.h';
+my @embedsyms = ('../global.sym', '../pp.sym');
 my $separateObj = 0;
 
 my %skip_list;
 my %embed;
 
-sub readembed(\%$) {
-    my ($syms, $file) = @_;
+sub readsyms(\%@) {
+    my ($syms, @files) = @_;
     my ($line, @words);
     %$syms = ();
-    local (*FILE, $_);
-    open(FILE, "< $file")
-	or die "$0: Can't open $file: $!\n";
-    while ($line = <FILE>) {
-	chop($line);
-	if ($line =~ /^#define\s+\w+/) {
-	    $line =~ s/^#define\s+//;
-	    @words = split ' ', $line;
-#	    print "$words[0]\t$words[1]\n";
-	    $$syms{$words[0]} = $words[1];
+    foreach my $file (@files) {
+	local (*FILE, $_);
+	open(FILE, "< $file")
+	    or die "$0: Can't open $file: $!\n";
+	while (<FILE>) {
+	    s/[ \t]*#.*$//;	# delete comments
+	    if (/^\s*(\S+)\s*$/) {
+		my $sym = $1;
+		$$syms{$sym} = "Perl_$sym";
+	    }
 	}
+	close(FILE);
     }
-    close(FILE);
 }
 
-readembed %embed, $embedfile;
+readsyms %embed, @embedsyms;
 
 sub skip_these {
     my $list = shift;
