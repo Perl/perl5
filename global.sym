@@ -50,6 +50,7 @@ dec_amg
 di
 div_amg
 div_ass_amg
+do_binmode
 do_undump
 ds
 egid
@@ -426,6 +427,7 @@ fetch_io
 filter_add
 filter_del
 filter_read
+find_script
 fold_constants
 force_ident
 force_list

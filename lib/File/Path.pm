@@ -124,6 +124,7 @@ sub mkpath {
     $paths = [$paths] unless ref $paths;
     my(@created,$path);
     foreach $path (@$paths) {
+	$path .= '/' if $^O eq 'os2' and $path =~ /^\w:$/; # feature of CRT 
 	next if -d $path;
 	# Logic wants Unix paths, so go with the flow.
 	$path = VMS::Filespec::unixify($path) if $Is_VMS;
