@@ -4182,8 +4182,12 @@ Perl_yylex(pTHX)
 			(void)PerlIO_seek(PL_rsfp, 0L, 0);
 		    }
 		    if (PerlLIO_setmode(PerlIO_fileno(PL_rsfp), O_TEXT) != -1) {
+#ifdef PERLIO_IS_STDIO /* really? */
+#  if defined(__BORLANDC__)
 			/* XXX see note in do_binmode() */
 			((FILE*)PL_rsfp)->flags &= ~_F_BIN;
+#  endif
+#endif
 			if (loc > 0)
 			    PerlIO_seek(PL_rsfp, loc, 0);
 		    }
