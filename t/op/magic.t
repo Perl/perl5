@@ -36,7 +36,7 @@ sub skip {
     return 1;
 }
 
-print "1..47\n";
+print "1..48\n";
 
 $Is_MSWin32 = $^O eq 'MSWin32';
 $Is_NetWare = $^O eq 'NetWare';
@@ -308,9 +308,10 @@ open(FOO, "nonesuch"); # Generate ENOENT
 my %errs = %{"!"}; # Cause Errno.pm to be loaded at run-time
 ok ${"!"}{ENOENT};
 
-ok $^S == 0;
+ok $^S == 0 && defined $^S;
 eval { ok $^S == 1 };
-ok $^S == 0;
+eval " BEGIN { ok ! defined \$^S } ";
+ok $^S == 0 && defined $^S;
 
 ok ${^TAINT} == 0;
 eval { ${^TAINT} = 1 };
