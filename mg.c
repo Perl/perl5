@@ -1159,8 +1159,26 @@ Perl_despatch_signals(pTHX)
     PL_sig_pending = 0;
     for (sig = 1; sig < SIG_SIZE; sig++) {
 	if (PL_psig_pend[sig]) {
-	    PL_psig_pend[sig] = 0;
-	    (*PL_sighandlerp)(sig);
+#define PERL_BLOCK_SIGNALS
+#if defined(HAS_SIGPROCMASK) && defined(PERL_BLOCK_SIGNALS)
+#   define BLOCK_SIGNALS_WITH_SIGPROCMASK
+#endif
+#ifdef BLOCK_SIGNALS_WITH_SIGPROCMASK
+	     /* From sigaction(2) (FreeBSD man page):
+	      * | Signal routines normally execute with the signal that
+	      * | caused their invocation blocked, but other signals may
+	      * | yet occur.
+	      * Emulate this behavior.
+	      */
+	     sigset_t set;
+	     sigemptyset(&set);
+	     sigaddset(&set,sig);
+#endif
+	     PL_psig_pend[sig] = 0;
+#ifdef BLOCK_SIGNALS_WITH_SIGPROCMASK
+	     sigprocmask(SIG_BLOCK, &set, NULL);
+#endif
+	     (*PL_sighandlerp)(sig);
 	}
     }
 }
