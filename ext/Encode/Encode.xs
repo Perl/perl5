@@ -613,6 +613,8 @@ SV *	sv
 bool	check
       CODE:
 	{
+	  if (SvGMAGICAL(sv)) /* it could be $1, for example */
+	    sv = newSVsv(sv); /* GMAGIG will be done */
 	  if (SvPOK(sv)) {
 	    RETVAL = SvUTF8(sv) ? TRUE : FALSE;
 	    if (RETVAL &&
@@ -622,6 +624,8 @@ bool	check
 	  } else {
 	    RETVAL = FALSE;
 	  }
+	  if (sv != ST(0))
+	    SvREFCNT_dec(sv); /* it was a temp copy */
 	}
       OUTPUT:
 	RETVAL
