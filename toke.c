@@ -69,12 +69,6 @@ static I32 utf16rev_textfilter(pTHXo_ int idx, SV *sv, int maxlen);
 #define LEX_FORMLINE		 1
 #define LEX_KNOWNEXT		 0
 
-/* XXX If this causes problems, set i_unistd=undef in the hint file.  */
-#ifdef I_UNISTD
-#  include <unistd.h> /* Needed for execv() */
-#endif
-
-
 #ifdef ff_next
 #undef ff_next
 #endif

@@ -35,11 +35,6 @@
 #   include <shadow.h>
 #endif
 
-/* XXX If this causes problems, set i_unistd=undef in the hint file.  */
-#ifdef I_UNISTD
-# include <unistd.h>
-#endif
-
 #ifdef HAS_SYSCALL
 #ifdef __cplusplus
 extern "C" int syscall(unsigned long,...);
@@ -3729,6 +3724,9 @@ PP(pp_fork)
     if (childpid < 0)
 	RETSETUNDEF;
     if (!childpid) {
+#ifdef SOCKS_64BIT_BUG
+	Perl_do_s64_init_buffer();
+#endif
 	/*SUPPRESS 560*/
 	if ((tmpgv = gv_fetchpv("$", TRUE, SVt_PV)))
 	    sv_setiv(GvSV(tmpgv), (IV)PerlProc_getpid());

@@ -45,6 +45,7 @@
 		(feof(f) ? EOF : getc(f))
 #  define PerlIO_read(f,buf,count) \
 		(feof(f) ? 0 : (SSize_t)fread(buf,1,count,f))
+#  define PerlIO_tell(f)		ftell(f)
 #else
 #  ifdef SOCKS_64BIT_BUG
 #    define PerlIO_getc(f)		Perl_do_s64_getc(f)

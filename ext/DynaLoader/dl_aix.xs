@@ -11,6 +11,8 @@
  *  on statup...   It can probably be trimmed more.
  */
 
+#define PERLIO_NOT_STDIO 0
+
 /*
  * @(#)dlfcn.c	1.5 revision of 93/02/14  20:14:17
  * This is an unpublished work copyright (c) 1992 Helios Software GmbH
@@ -85,14 +87,6 @@
 #endif
 #ifndef FREAD
 # define FREAD(p,s,n,ldptr)	fread(p,s,n,IOPTR(ldptr))
-#endif
-
-/* If using PerlIO, redefine these macros from <ldfcn.h> */
-#ifdef USE_PERLIO
-#undef FSEEK
-#undef FREAD
-#define FSEEK(ldptr,o,p)        PerlIO_seek(IOPTR(ldptr),(p==BEGINNING)?(OFFSET(ldptr)+o):o,p)
-#define FREAD(p,s,n,ldptr)      PerlIO_read(IOPTR(ldptr),p,s*n)
 #endif
 
 /*
@@ -532,11 +526,7 @@ static int readExports(ModulePtr mp)
 	}
 /* This first case is a hack, since it assumes that the 3rd parameter to
    FREAD is 1. See the redefinition of FREAD above to see how this works. */
-#ifdef USE_PERLIO
-	if (FREAD(ldbuf, sh.s_size, 1, ldp) != sh.s_size) {
-#else
 	if (FREAD(ldbuf, sh.s_size, 1, ldp) != 1) {
-#endif
 		errvalid++;
 		strcpy(errbuf, "readExports: cannot read loader section");
 		safefree(ldbuf);

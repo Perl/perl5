@@ -51,11 +51,6 @@
 #include <signal.h>
 #endif
 
-/* XXX If this causes problems, set i_unistd=undef in the hint file.  */
-#ifdef I_UNISTD
-#  include <unistd.h>
-#endif
-
 #ifdef SOCKS_64BIT_BUG
 typedef struct __s64_iobuffer {
     struct __s64_iobuffer *next, *last;		/* Queue pointer */
@@ -65,9 +60,6 @@ typedef struct __s64_iobuffer {
     int *buffer;				/* the buffer */
 } S64_IOB;
 
-static S64_IOB *_s64_get_buffer( PerlIO *f);
-static S64_IOB *_s64_create_buffer( PerlIO *f);
-static int _s64_malloc( S64_IOB *ptr);
 #endif
 
 bool
@@ -2099,6 +2091,12 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
 
 static S64_IOB *s64_buffer = (S64_IOB *) NULL;
 
+/* initialize the buffer area */
+/* required after a fork(2) call in order to remove side effects */
+void Perl_do_s64_init_buffer() {
+    s64_buffer = (S64_IOB *) NULL;
+}
+
 /* get a buffered stream pointer */
 static S64_IOB *S_s64_get_buffer( PerlIO *fp) {
     S64_IOB *ptr = s64_buffer;
@@ -2108,7 +2106,7 @@ static S64_IOB *S_s64_get_buffer( PerlIO *fp) {
 }
 
 /* create a buffered stream pointer */
-static S64_IOB *_s64_create_buffer( PerlIO *f) {
+static S64_IOB *S_s64_create_buffer( PerlIO *f) {
     S64_IOB *ptr = malloc( sizeof( S64_IOB));
     if( ptr) {
 	ptr->fp = f;
@@ -2140,7 +2138,7 @@ void Perl_do_s64_delete_buffer( PerlIO *f) {
 
 /* internal buffer management */
 #define _S64_BUFFER_SIZE 32
-static int _s64_malloc( S64_IOB *ptr) {
+static int S_s64_malloc( S64_IOB *ptr) {
     if( ptr) {
 	if( !ptr->buffer) {
 	    ptr->buffer = (int *) calloc( _S64_BUFFER_SIZE, sizeof( int));

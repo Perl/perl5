@@ -2961,8 +2961,11 @@ void
 Perl_sv_setpvn(pTHX_ register SV *sv, register const char *ptr, register STRLEN len)
 {
     register char *dptr;
-    assert(len >= 0);  /* STRLEN is probably unsigned, so this may
-			  elicit a warning, but it won't hurt. */
+    {
+        /* len is STRLEN which is unsigned, need to copy to signed */
+	IV iv = len;
+	assert(iv >= 0);
+    }
     SV_CHECK_THINKFIRST(sv);
     if (!ptr) {
 	(void)SvOK_off(sv);

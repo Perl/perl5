@@ -779,3 +779,5 @@ tt+$	xxxtt	y	-	-
 ^(a\1?){4}$	aaaaaa	y	$1	aa
 ^(0+)?(?:x(1))?	x1	y	-	-
 ^([0-9a-fA-F]+)(?:x([0-9a-fA-F]+)?)(?:x([0-9a-fA-F]+))?	012cxx0190	y	-	-
+^(b+?|a){1,2}c	bbbac	y	$1	a
+^(b+?|a){1,2}c	bbbbac	y	$1	a

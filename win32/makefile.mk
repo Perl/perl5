@@ -50,7 +50,7 @@ INST_ARCH	*= \$(ARCHNAME)
 # uncomment to enable multiple interpreters.  This is need for fork()
 # emulation.
 #
-USE_MULTI	*= define
+#USE_MULTI	*= define
 
 #
 # Beginnings of interpreter cloning/threads; still very incomplete.
@@ -111,7 +111,7 @@ CCTYPE		*= GCC
 # If not enabled, we automatically try to use maximum optimization
 # with all compilers that are known to have a working optimizer.
 #
-CFG		*= Debug
+#CFG		*= Debug
 
 #
 # uncomment to enable use of PerlCRT.DLL when using the Visual C compiler.
@@ -579,6 +579,9 @@ CFGH_TMPL	= config_H.vc
 
 .ENDIF
 
+# makedef.pl must be updated if this changes, and this should normally
+# only change when there is an incompatible revision of the public API.
+# XXX so why did we change it from perl56 to perl57?
 PERLIMPLIB	*= ..\perl57$(a)
 PERLDLL		= ..\perl57.dll
 
@@ -712,7 +715,7 @@ SETARGV_OBJ	= setargv$(o)
 
 DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B re \
 		Data/Dumper Devel/Peek ByteLoader Devel/DProf File/Glob \
-		Sys/Hostname Storable
+		Sys/Hostname Storable Filter/Util
 STATIC_EXT	= DynaLoader
 NONXS_EXT	= Errno
 
@@ -735,6 +738,7 @@ DPROF		= $(EXTDIR)\Devel\DProf\DProf
 GLOB		= $(EXTDIR)\File\Glob\Glob
 HOSTNAME	= $(EXTDIR)\Sys\Hostname\Hostname
 STORABLE	= $(EXTDIR)\Storable\Storable
+FILTER		= $(EXTDIR)\Filter\Util\Call
 
 SOCKET_DLL	= $(AUTODIR)\Socket\Socket.dll
 FCNTL_DLL	= $(AUTODIR)\Fcntl\Fcntl.dll
@@ -753,6 +757,7 @@ DPROF_DLL	= $(AUTODIR)\Devel\DProf\DProf.dll
 GLOB_DLL	= $(AUTODIR)\File\Glob\Glob.dll
 HOSTNAME_DLL	= $(AUTODIR)\Sys\Hostname\Hostname.dll
 STORABLE_DLL	= $(AUTODIR)\Storable\Storable.dll
+FILTER_DLL	= $(EXTDIR)\Filter\Util\Call.dll
 
 ERRNO_PM	= $(LIBDIR)\Errno.pm
 
@@ -773,7 +778,8 @@ EXTENSION_C	=		\
 		$(DPROF).c	\
 		$(GLOB).c	\
 		$(HOSTNAME).c	\
-		$(STORABLE).c
+		$(STORABLE).c	\
+		$(FILTER).c
 
 EXTENSION_DLL	=		\
 		$(SOCKET_DLL)	\
@@ -792,7 +798,8 @@ EXTENSION_DLL	=		\
 		$(DPROF_DLL)	\
 		$(GLOB_DLL)	\
 		$(HOSTNAME_DLL)	\
-		$(STORABLE_DLL)
+		$(STORABLE_DLL)	\
+		$(FILTER_DLL)
 
 EXTENSION_PM	=		\
 		$(ERRNO_PM)
@@ -1180,6 +1187,11 @@ $(STORABLE_DLL): $(PERLEXE) $(STORABLE).xs
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
 
+$(FILTER_DLL): $(PERLEXE) $(FILTER).xs
+	cd $(EXTDIR)\Filter\Util && \
+	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
+	cd $(EXTDIR)\Filter\Util && $(MAKE)
+
 $(ERRNO_PM): $(PERLEXE) $(ERRNO)_pm.PL
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
@@ -1221,10 +1233,12 @@ distclean: clean
 	-del /f $(LIBDIR)\Devel\Peek.pm $(LIBDIR)\Devel\DProf.pm
 	-del /f $(LIBDIR)\File\Glob.pm
 	-del /f $(LIBDIR)\Storable.pm
+	-del /f $(LIBDIR)\Filter\Util\Call.pm
 	-if exist $(LIBDIR)\IO rmdir /s /q $(LIBDIR)\IO || rmdir /s $(LIBDIR)\IO
 	-if exist $(LIBDIR)\Thread rmdir /s /q $(LIBDIR)\Thread || rmdir /s $(LIBDIR)\Thread
 	-if exist $(LIBDIR)\B rmdir /s /q $(LIBDIR)\B || rmdir /s $(LIBDIR)\B
 	-if exist $(LIBDIR)\Data rmdir /s /q $(LIBDIR)\Data || rmdir /s $(LIBDIR)\Data
+	-if exist $(LIBDIR)\Filter rmdir /s /q $(LIBDIR)\Filter || rmdir /s $(LIBDIR)\Filter
 	-del /f $(PODDIR)\*.html
 	-del /f $(PODDIR)\*.bat
 	-cd ..\utils && del /f h2ph splain perlbug pl2pm c2ph h2xs perldoc \

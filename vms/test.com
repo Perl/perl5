@@ -236,7 +236,7 @@ if ($bad == 0) {
     }
 }
 ($user,$sys,$cuser,$csys) = times;
-print sprintf("u=%g  s=%g  cu=%g  cs=%g  files=%d  tests=%d\n",
+print sprintf("u=%g  s=%g  cu=%g  cs=%g  scripts=%d  tests=%d\n",
     $user,$sys,$cuser,$csys,$files,$totmax);
 $$END-OF-TEST$$
 $ wrapup:

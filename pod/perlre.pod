@@ -910,10 +910,14 @@ ways they can use backtracking to try match.  For example, without
 internal optimizations done by the regular expression engine, this will
 take a painfully long time to run:
 
-    'aaaaaaaaaaaa' =~ /((a{0,5}){0,5}){0,5}[c]/
+    'aaaaaaaaaaaa' =~ /((a{0,5}){0,5})*[c]/
 
-And if you used C<*>'s instead of limiting it to 0 through 5 matches,
-then it would take forever--or until you ran out of stack space.
+And if you used C<*>'s in the internal groups instead of limiting them
+to 0 through 5 matches, then it would take forever--or until you ran
+out of stack space.  Moreover, these internal optimizations are not
+always applicable.  For example, if you put C<{0,5}> instead of C<*>
+on the external group, no current optimization is applicable, and the
+match takes a long time to finish.
 
 A powerful tool for optimizing such beasts is what is known as an
 "independent group",

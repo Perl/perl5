@@ -496,10 +496,14 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #   include <sys/param.h>
 #endif
 
-
 /* Use all the "standard" definitions? */
 #if defined(STANDARD_C) && defined(I_STDLIB)
 #   include <stdlib.h>
+#endif
+
+/* If this causes problems, set i_unistd=undef in the hint file.  */
+#ifdef I_UNISTD
+#   include <unistd.h>
 #endif
 
 #ifdef PERL_MICRO /* Last chance to export Perl_my_swap */
@@ -3437,6 +3441,16 @@ typedef struct am_table_short AMTS;
 
 #ifdef I_LIBUTIL
 #   include <libutil.h>		/* setproctitle() in some FreeBSDs */
+#endif
+
+#ifdef SOCKS_64BIT_BUG
+typedef struct __s64_iobuffer {
+    struct __s64_iobuffer *next, *last;		/* Queue pointer */
+    PerlIO *fp;					/* Assigned file pointer */
+    int cnt;					/* Buffer counter */
+    int size;					/* Buffer size */
+    int *buffer;				/* The buffer */
+} S64_IOB;
 #endif
 
 /* and finally... */

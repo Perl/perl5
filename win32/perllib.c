@@ -371,7 +371,9 @@ DllMain(HANDLE hModule,		/* DLL module handle */
 	 * process termination or call to FreeLibrary.
 	 */
     case DLL_PROCESS_DETACH:
+#if !defined(PERLIO_IS_STDIO) && !defined(USE_SFIO)
         PerlIO_cleanup();     
+#endif
 	EndSockets();
 #if defined(USE_THREADS) || defined(USE_ITHREADS)
 	if (PL_curinterp)

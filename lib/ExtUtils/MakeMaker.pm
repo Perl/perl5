@@ -44,7 +44,7 @@ use vars qw(
 # default routine without having to know under what OS
 # it's running.
 #
-@MM::ISA = qw[ExtUtils::MM_Unix ExtUtils::Liblist ExtUtils::MakeMaker];
+@MM::ISA = qw[ExtUtils::MM_Unix ExtUtils::Liblist::Kid ExtUtils::MakeMaker];
 
 #
 # Setup dummy package:
@@ -60,7 +60,7 @@ use vars qw(
 
 # "predeclare the package: we only load it via AUTOLOAD
 # but we have already mentioned it in @ISA
-package ExtUtils::Liblist;
+package ExtUtils::Liblist::Kid;
 
 package ExtUtils::MakeMaker;
 #

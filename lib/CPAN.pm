@@ -5596,12 +5596,12 @@ the make processes and deletes excess space according to a simple FIFO
 mechanism.
 
 For extended searching capabilities there's a plugin for CPAN available,
-L<CPAN::WAIT>. C<CPAN::WAIT> is a full-text search engine that indexes
-all documents available in CPAN authors directories. If C<CPAN::WAIT>
-is installed on your system, the interactive shell of <CPAN.pm> will
-enable the C<wq>, C<wr>, C<wd>, C<wl>, and C<wh> commands which send
-queries to the WAIT server that has been configured for your
-installation.
+L<C<CPAN::WAIT>|CPAN::WAIT>. C<CPAN::WAIT> is a full-text search engine
+that indexes all documents available in CPAN authors directories. If
+C<CPAN::WAIT> is installed on your system, the interactive shell
+of CPAN.pm will enable the C<wq>, C<wr>, C<wd>, C<wl>, and C<wh>
+commands which send queries to the WAIT server that has been configured
+for your installation.
 
 All other methods provided are accessible in a programmer style and in an
 interactive shell style.
@@ -5845,7 +5845,7 @@ expression //modules are up to date// and decide to mail the output
 only if it doesn't match. Ick?
 
 If you prefer to do it more in a programmer style in one single
-process, maybe something like this suites you better:
+process, maybe something like this suits you better:
 
   # list all modules on my disk that have newer versions on CPAN
   for $mod (CPAN::Shell->expand("Module","/./")){
@@ -6113,8 +6113,8 @@ oneliners.
 
 =head1 POPULATE AN INSTALLATION WITH LOTS OF MODULES
 
-To populate a freshly installed perl with my favorite modules is pretty
-easiest by maintaining a private bundle definition file. To get a useful
+Populating a freshly installed perl with your favorite modules is pretty
+easy if you maintain a private bundle definition file. To get a useful
 blueprint of a bundle definition file, the command autobundle can be used
 on the CPAN shell command line. This command writes a bundle definition
 file for all modules that are installed for the currently running perl
@@ -6126,7 +6126,7 @@ Bundle/my_bundle.pm. With a clever bundle file you can then simply say
 
 then answer a few questions and then go out for a coffee.
 
-Maintaining a bundle definition file means to keep track of two
+Maintaining a bundle definition file means keeping track of two
 things: dependencies and interactivity. CPAN.pm sometimes fails on
 calculating dependencies because not all modules define all MakeMaker
 attributes correctly, so a bundle definition file should specify
@@ -6135,7 +6135,7 @@ annoying that many distributions need some interactive configuring. So
 what I try to accomplish in my private bundle file is to have the
 packages that need to be configured early in the file and the gentle
 ones later, so I can go out after a few minutes and leave CPAN.pm
-unattained.
+untended.
 
 =head1 WORKING WITH CPAN.pm BEHIND FIREWALLS
 

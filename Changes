@@ -32,6 +32,212 @@ Version v5.7.1		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  7825] By: jhi                                   on 2000/11/23  00:20:41
+        Log: Subject: Re: av.c patch (having slight problems)
+             From: "Ben Tilly" <ben_tilly@hotmail.com>
+             Date: Tue, 21 Nov 2000 23:29:31 -0500
+             Message-ID: <LAW2-F113pL32ctFfj800000d81@hotmail.com>
+             
+             unshift() speedup.
+     Branch: perl
+	   ! av.c
+____________________________________________________________________________
+[  7824] By: jhi                                   on 2000/11/22  23:59:15
+        Log: Fixes for signedness warnings noticed by VMSperlers.
+     Branch: perl
+	   ! ext/Storable/Storable.xs regcomp.c sv.c
+____________________________________________________________________________
+[  7823] By: jhi                                   on 2000/11/22  23:19:31
+        Log: Subject: [PATCH perl@7795] small cleanup task for test suite
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Wed, 22 Nov 2000 15:04:13 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10011221457530.519633-100000@aspara.forte.com>
+     Branch: perl
+	   ! t/pragma/warn/pp_hot
+____________________________________________________________________________
+[  7822] By: jhi                                   on 2000/11/22  22:52:20
+        Log: Be clean.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  7821] By: jhi                                   on 2000/11/22  22:46:39
+        Log: Add the simple frontend to Filter::Util:Call, Filter::Simple 0.01
+             by Damian Conway, as suggested by Paul Marquess.
+     Branch: perl
+	   + lib/Filter/Simple.pm
+____________________________________________________________________________
+[  7820] By: jhi                                   on 2000/11/22  22:45:51
+        Log: Add the Filter::Util::Call 1.04 by Paul Marquess from Filter-1.19.
+     Branch: perl
+	   + ext/Filter/Util/Call.pm ext/Filter/Util/Call.xs
+	   + ext/Filter/Util/Makefile.PL t/lib/filt-util.pl
+	   + t/lib/filt-util.t
+	   ! MANIFEST
+____________________________________________________________________________
+[  7819] By: jhi                                   on 2000/11/22  22:03:27
+        Log: Integrate perlio.
+     Branch: perl
+	  !> README.win32 perlio.c t/pragma/warnings.t win32/config_H.gc
+	  !> win32/makefile.mk
+____________________________________________________________________________
+[  7818] By: jhi                                   on 2000/11/22  21:56:02
+        Log: More SOCKS versus 64-bit patches from Jens Hamisch.
+     Branch: perl
+	   ! doio.c embed.h embed.pl makedef.pl perl.h pp_sys.c proto.h
+	   ! t/lib/io_sock.t
+____________________________________________________________________________
+[  7817] By: jhi                                   on 2000/11/22  21:39:49
+        Log: Subject: [PATCH 5.7.0] Liblist returns found libraries
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Wed, 22 Nov 2000 16:08:12 -0500
+             Message-ID: <20001122160812.A24269@monk.mps.ohio-state.edu>
+     Branch: perl
+	   ! lib/ExtUtils/Liblist.pm
+____________________________________________________________________________
+[  7816] By: jhi                                   on 2000/11/22  21:38:25
+        Log: Go ahead and #include <unistd.h> in perl.h.
+     Branch: perl
+	   ! doio.c malloc.c mg.c perl.h pp.c pp_hot.c pp_sys.c toke.c
+	   ! util.c
+____________________________________________________________________________
+[  7815] By: jhi                                   on 2000/11/22  21:22:52
+        Log: Subject: [PATCH 5.7.0] Overeager visited-positions optimizations
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 20 Nov 2000 18:30:52 -0500
+             Message-ID: <20001120183051.A15228@monk.mps.ohio-state.edu>
+     Branch: perl
+	   ! pod/perlre.pod regcomp.c t/op/re_tests
+____________________________________________________________________________
+[  7814] By: jhi                                   on 2000/11/22  21:21:46
+        Log: Subject: [PATCH 5.7.0] Liblist finally works
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Tue, 21 Nov 2000 22:02:17 -0500
+             Message-ID: <20001121220217.A24174@monk.mps.ohio-state.edu>
+     Branch: perl
+	   ! lib/ExtUtils/Liblist.pm lib/ExtUtils/MM_VMS.pm
+	   ! lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[  7813] By: jhi                                   on 2000/11/22  21:20:23
+        Log: Subject: Re: [PATCH bleadperl] Re: Not OK: perl5.7.0 +DEVEL7706    +Duseperlio on AIX4.[23]
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Wed, 22 Nov 2000 17:53:15 +0100
+             Message-Id: <20001122174544.49A2.H.M.BRAND@hccnet.nl>
+             
+             AIX dynaloader and perlio patch.
+     Branch: perl
+	   ! ext/DynaLoader/dl_aix.xs
+____________________________________________________________________________
+[  7812] By: jhi                                   on 2000/11/22  21:17:52
+        Log: (Accidentally empty patch.)
+     Branch: perl
+	   ! av.c
+____________________________________________________________________________
+[  7811] By: jhi                                   on 2000/11/22  21:16:31
+        Log: Subject: [PATCH: perl@7777] make VMS' test.com tail compatible w/ unix
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Mon, 20 Nov 2000 16:53:54 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10011201651050.373336-100000@aspara.forte.com>
+     Branch: perl
+	   ! vms/test.com
+____________________________________________________________________________
+[  7810] By: jhi                                   on 2000/11/22  21:15:36
+        Log: Subject: Re: perl@7777 
+             From: "John P. Linderman" <jpl@research.att.com>
+             Date: Wed, 22 Nov 2000 13:11:11 -0500
+             Message-Id: <200011221811.NAA90072@raptor.research.att.com>
+             
+             Detypoing.
+     Branch: perl
+	   ! lib/CPAN.pm
+____________________________________________________________________________
+[  7809] By: jhi                                   on 2000/11/22  21:14:19
+        Log: Subject:  [PATCH perl@7795] Perlio_tell fix
+             From: lane@DUPHY4.Physics.Drexel.Edu (Charles Lane)
+             Date:     Wed, 22 Nov 2000 13:51:37 EST
+             Message-Id: <001122135058.56e24@DUPHY4.Physics.Drexel.Edu>
+     Branch: perl
+	   ! perlsdio.h
+____________________________________________________________________________
+[  7808] By: jhi                                   on 2000/11/22  21:13:27
+        Log: Subject: [ID 20001120.003] [PATCH] io_udp.t fails without 'localhost'
+             From: Casey Tweten <crt@kiski.net>
+             Date: Mon, 20 Nov 2000 11:53:03 -0500 (EST)
+             Message-Id: <200011201653.LAA10194@home.kiski.net>
+     Branch: perl
+	   ! t/lib/io_udp.t
+____________________________________________________________________________
+[  7807] By: jhi                                   on 2000/11/22  21:12:35
+        Log: Subject: [ID 20001120.002] [PATCH] io_sock.t fails without 'localhost'
+             From: Casey Tweten <crt@kiski.net>
+             Date: Mon, 20 Nov 2000 11:36:11 -0500 (EST)
+             Message-Id: <200011201636.LAA07227@home.kiski.net>
+     Branch: perl
+	   ! t/lib/io_sock.t
+____________________________________________________________________________
+[  7806] By: jhi                                   on 2000/11/22  21:10:59
+        Log: Subject: Re: [PATCH] Evolution of h2xs [WAS: Re: PATCH subs.pm]
+             From: "Casey R. Tweten" <crt@kiski.net>
+             Date: Wed, 22 Nov 2000 09:05:07 -0500 (EST)
+             Message-ID: <Pine.OSF.4.21.0011220903580.1811-100000@home.kiski.net>
+     Branch: perl
+	   ! utils/h2xs.PL
+____________________________________________________________________________
+[  7805] By: nick                                  on 2000/11/22  21:05:06
+        Log: Integrate mainline
+     Branch: perlio
+	  !> Changes Porting/genlog ext/DB_File/DB_File.xs
+	  !> ext/DB_File/version.c lib/Test.pm patchlevel.h
+	  !> utils/perlbug.PL
+____________________________________________________________________________
+[  7804] By: jhi                                   on 2000/11/22  21:01:12
+        Log: Subject: [PATCH] Test.pm POD peculiarity
+             From: "Casey R. Tweten" <crt@kiski.net>
+             Date: Tue, 21 Nov 2000 15:01:25 -0500 (EST)
+             Message-ID: <Pine.OSF.4.21.0011211458020.20114-100000@home.kiski.net>
+     Branch: perl
+	   ! lib/Test.pm
+____________________________________________________________________________
+[  7803] By: jhi                                   on 2000/11/22  20:59:59
+        Log: Subject: [ID 20001122.002] [PATCH 5.7.0@7795] two small patches to perlbug
+             From: "Philip Newton" <pnewton@gmx.de>
+             Date: Wed, 22 Nov 2000 14:25:53 +0100
+             Message-Id: <3A1BD771.25462.1939FAD@localhost>
+             
+             Be case-understanding also on 's', and use the -oi of sendmail
+             not to terminate the transmission on a lone '.'.
+     Branch: perl
+	   ! utils/perlbug.PL
+____________________________________________________________________________
+[  7802] By: nick                                  on 2000/11/22  20:51:42
+        Log: Win32 PerlIO intermediate state now working as expected.
+             - In current state we are still using C runtime in text/binary
+             mode and "crlf" layer is just a dummy (clone of perlio buffer layer).
+             - PERLIO=stdio and PERLIO=unix pass all expected tests.
+             - PERLIO=perlio fails t/lib/dprof.t because Dprof.xs calls PerlIO_tell()
+             and PerlIO_seek() and the dummy crlf layer is not making adjustments
+             for CRLF translation happening in C runtime. All other tests pass.
+             
+             Added note to README.win32 to point out the snags of doing a perl build
+             with Norton AntiVirus turned on.
+             
+             Tweaked t/pragma/warnings.t so that when run stand-alone you can tell
+             which file a fail comes from.
+             
+             Updated "canned" config.h to match the one generated.
+     Branch: perlio
+	   ! README.win32 perlio.c t/pragma/warnings.t win32/config_H.gc
+	   ! win32/makefile.mk
+____________________________________________________________________________
+[  7801] By: jhi                                   on 2000/11/22  06:50:20
+        Log: Nickety nits.
+     Branch: perl
+	   ! ext/DB_File/DB_File.xs ext/DB_File/version.c
+____________________________________________________________________________
+[  7800] By: jhi                                   on 2000/11/22  01:29:55
+        Log: Changes had accidentally gone too silent on non-main branches.
+     Branch: perl
+	   ! Changes Porting/genlog patchlevel.h
+____________________________________________________________________________
 [  7799] By: gsar                                  on 2000/11/22  01:02:56
         Log: some lib_pm.PL changes snuck in via change#7772
      Branch: maint-5.6/perl

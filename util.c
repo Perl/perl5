@@ -26,11 +26,6 @@
 #endif
 #endif
 
-/* XXX If this causes problems, set i_unistd=undef in the hint file.  */
-#ifdef I_UNISTD
-#  include <unistd.h>
-#endif
-
 #ifdef I_VFORK
 #  include <vfork.h>
 #endif
