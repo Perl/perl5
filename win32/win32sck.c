@@ -11,6 +11,7 @@
 #define WIN32IO_IS_STDIO
 #define WIN32SCK_IS_STDSCK
 #define WIN32_LEAN_AND_MEAN
+#define PERLIO_NOT_STDIO 0
 #ifdef __GNUC__
 #define Win32_Winsock
 #endif
