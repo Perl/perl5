@@ -34,8 +34,10 @@ dump data into different files, and then compared the files to see
 whether the data has changed, now you will have false positives since
 the order in which hashes are dumped will vary.  In general the cure
 is to sort the keys (or the values); in particular for Data::Dumper to
-use the C<Sortkeys> option; or if some particular order is really
-important, use tied hashes.
+use the C<Sortkeys> option.  If some particular order is really
+important, use tied hashes: for example the Tie::IxHash module
+which by default preserves the order in which the hash elements
+were added.
 
 More subtle problem is reliance on the order of "global destruction".
 That is what happens at the end of execution: Perl destroys all data
@@ -89,8 +91,9 @@ more natural interpretation
 
 	%h = ( 'v65' => 42 );
 
-The multi-number v-strings like v65.66 and 65.66.67 still continue
-to be v-strings.
+The multi-number v-strings like v65.66 and 65.66.67 still continue to
+be v-strings in Perl 5.8.  Note, however, that v-strings as a whole
+are now deprecated, see L</"Deprecation Warnings">.
 
 =head2 (Win32) The -C Switch Has Been Repurposed
 
@@ -162,7 +165,7 @@ network operations have their own blocking and timeout mechanisms, and
 being able to interrupt them immediately would be nice.
 
 Therefore perl 5.8.1 introduces a "backdoor" to restore the pre-5.8.0
-(5.7.3, really) signal behaviour.  Just set the environment variable
+(pre-5.7.3, really) signal behaviour.  Just set the environment variable
 PERL_SIGNALS to C<unsafe>, and the old immediate (and unsafe)
 signal handling behaviour returns.
 
@@ -210,7 +213,7 @@ see the deprecation warnings, use:
 
     no warnings 'deprecated';
 
-=head3 (Reminder) Pseudo-hashes really are deprecated
+=head3 (Reminder) Pseudo-hashes are deprecated (really)
 
 Pseudo-hashes were deprecated in Perl 5.8.0 and will be removed in
 Perl 5.10.0, see L<perl58delta> for details.  Each attempt to access
@@ -223,7 +226,7 @@ deprecation warnings, use:
 Or you can continue to use the L<fields> pragma, but please don't
 expect the data structures to be pseudohashes any more.
 
-=head3 (Reminder) 5.005-style threads really are deprecated
+=head3 (Reminder) 5.005-style threads are deprecated (really)
 
 5.005-style threads (activated by C<use Thread;>) were deprecated in
 Perl 5.8.0 and will be removed after Perl 5.8, see L<perl58delta> for
@@ -233,7 +236,7 @@ using the 5.005 threads but not to see the deprecation warnings, use:
 
     no warnings 'deprecated';
 
-=head3 (Reminder) The $* variable really is deprecated
+=head3 (Reminder) The $* variable is deprecated (really)
 
 The C<$*> variable controlling multi-line matching has been deprecated
 and will be removed after 5.8.  The variable has been deprecated for a
@@ -261,17 +264,17 @@ B::Concise
 
 B::Deparse
 
-Benchmark - An optional feature, C<:hireswallclock>, now allows
+Benchmark - an optional feature, C<:hireswallclock>, now allows
 for high resolution wall clock times (uses Time::HiRes).
 
 CGI
 
-charnames - One can now have custom character name aliases.
+charnames - one can now have custom character name aliases.
 
-CPAN - There is now a simple command line frontend to the CPAN.pm
+CPAN - there is now a simple command line frontend to the CPAN.pm
 module called F<cpan>.
 
-Data::Dumper - A new option, Pair, allows choosing the separator
+Data::Dumper - a new option, Pair, allows choosing the separator
 between hash keys and values.
 
 DB_File
@@ -292,7 +295,7 @@ Math::BigInt
 
 MIME::Base64
 
-NEXT
+NEXT - diamond inheritance now works
 
 Net::Ping
 
@@ -302,9 +305,9 @@ Pod::LaTeX
 
 PodParsers
 
-Pod::Perldoc
+Pod::Perldoc - complete rewrite
 
-Scalar::Util - New utilities: refaddr, isvstring, looks_like_number,
+Scalar::Util - new utilities: refaddr, isvstring, looks_like_number,
 set_prototype.
 
 Storable - can now store code references (via B::Deparse, so not
@@ -321,14 +324,14 @@ Test::Simple
 
 Text::Balanced
 
-Time::HiRes - Use of nanosleep(), if available, allows mixing
+Time::HiRes - use of nanosleep(), if available, allows mixing
 subsecond sleeps with alarms.
 
-threads - Several fixes, for example for join() problems and memory
+threads - several fixes, for example for join() problems and memory
 leaks.  In some platforms (like Linux) that use glibc the memory
 footprint of one ithread has been reduced by several hundred kilobytes.
 
-threads::shared - Many memory leaks have been fixed.
+threads::shared - many memory leaks have been fixed.
 
 Unicode::Collate
 
@@ -336,7 +339,7 @@ Unicode::Normalize
 
 Win32::GetFolderPath
 
-Win32::GetOSVersion
+Win32::GetOSVersion - now returns extra information
 
 =head1 Utility Changes
 
@@ -667,7 +670,8 @@ potential for Surprise and Confusion.
 =head1 Changed Internals
 
 These news matter to you only if you either write XS code or like to
-hack Perl internals, or like to run Perl with the C<-D> option.
+know about or hack Perl internals (using Devel::Peek or any of the
+C<B::> modules counts), or like to run Perl with the C<-D> option.
 
 The embedding examples of L<perlembed> have been reviewed to be
 uptodate and consistent: for example, the correct use of
@@ -685,10 +689,11 @@ of an SV: the UTF-8 cache does not get cleared as it should.
 APIs obsoleted in Perl 5.8.0, like sv_2pv, sv_catpvn, sv_catsv,
 sv_setsv, are again available.
 
-Certain Perl core C APIs like cxinc and regatom are no longer available.
-They never should have been, and if you application depends on them,
-you should (be ashamed and) contact perl5-porters to discuss what are
-the proper APIs.
+Certain Perl core C APIs like cxinc and regatom are no longer
+available.  This is intentional.  They never should have been
+available with the shorter names, and if you application depends on
+them, you should (be ashamed and) contact perl5-porters to discuss
+what are the proper APIs.
 
 Certain APIs like C<Perl_list> are no longer available without their
 C<Perl_> prefix.  If your XS module stops working because some
