@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Dec 21 20:17:57 EET 2001 [metaconfig 3.0 PL70]
+# Generated on Sat Dec 22 19:52:24 EET 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -2169,22 +2169,26 @@ ln)
 	ln=$cp
 	;;
 esac
-case "$make$gmake" in
-*/gmake|?:[\\/]gmake)
-	# We can't have osname yet.
+case "$make" in
+make)	
+	case "$gmake" in
+	gmake)
+	echo "I can't find make or gmake, and my life depends on it." >&4
+	echo "Go find a public domain implementation or fix your PATH setting!" >&4
+	exit 1
+	;;
+	esac
+	;;
+esac	
+case "$gmake" in
+gmake)	;;
+*)	# We can't have osname yet.
 	if test -f "/system/gnu_library/bin/ar.pm"; then # Stratus VOS
 		# Assume that gmake, if found, is definitely GNU make
 		# and prefer it over the system make.
 		echo "Substituting gmake for make."
 		make=$gmake
 	fi
-	;;
-*/make|?:[\\/]make)
-	;;
-*)
-	echo "I can't find make or gmake, and my life depends on it." >&4
-	echo "Go find a public domain implementation or fix your PATH setting!" >&4
-	exit 1
 	;;
 esac
 case "$test" in
