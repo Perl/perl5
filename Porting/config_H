@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Wed Feb  9 21:48:10 EET 2000
+ * Configuration time: Sat Feb 12 01:09:19 EET 2000
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -2841,14 +2841,6 @@
  */
 #ifndef USE_LONG_DOUBLE
 /*#define	USE_LONG_DOUBLE		/ **/
-#endif
-
-/* USE_LONG_LONG:
- *	This symbol, if defined, indicates that long longs should
- *	be used when available.
- */
-#ifndef USE_LONG_LONG
-#define	USE_LONG_LONG		/**/
 #endif
 
 /* USE_MORE_BITS:

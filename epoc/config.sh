@@ -758,7 +758,7 @@ d_ustat='undef'
 i_sysstatfs='undef'
 i_sysvfs='undef'
 i_ustat='undef'
-uselonglong='define'
+use64bits='define'
 uidsize='2'
 gidsize='2'
 

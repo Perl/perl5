@@ -3341,10 +3341,6 @@ uselongdouble (uselongdbl.U):
 	This variable conditionally defines the USE_LONG_DOUBLE symbol,
 	and indicates that long doubles should be used when available.
 
-uselonglong (uselonglong.U):
-	This variable conditionally defines the USE_LONG_LONG symbol,
-	and indicates that long longs should be used when available.
-
 usemorebits (usemorebits.U):
 	This variable conditionally defines the USE_MORE_BITS symbol,
 	and indicates that explicit 64-bit interfaces and long doubles

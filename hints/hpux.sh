@@ -296,22 +296,28 @@ case "$use64bits" in
 $define|true|[yY]*)
 	if [ "$xxOsRevMajor" -lt 11 ]; then
 		cat <<EOM >&4
+
 64-bit compilation is not supported on HP-UX $xxOsRevMajor.
 You need at least HP-UX 11.0.
 Cannot continue, aborting.
-EOM
-		exit 1
-	fi
-	if [ ! -f /lib/pa20_64/libc.sl ]; then
-		cat <<EOM >&4
-You do not seem to have the 64-bit libraries in /lib/pa20_64.
-Most importantly, I cannot find /lib/pa20_64/libc.sl.
-Cannot continue, aborting.
+
 EOM
 		exit 1
 	fi
 
+	# Without the 64-bit libc we cannot do much.
+	if [ ! -f /lib/pa20_64/libc.sl ]; then
+		cat <<EOM >&4
+
+You do not seem to have the 64-bit libraries in /lib/pa20_64.
+Most importantly, I cannot find /lib/pa20_64/libc.sl.
+Cannot continue, aborting.
+
+EOM
+		exit 1
+	fi
         ccflags="$ccflags +DD64"
+        ldflags="$ldflags +DD64"
 	ld=/usr/bin/ld
 	ar=/usr/bin/ar
 	loclibpth="/lib/pa20_64 $loclibpth"
@@ -322,12 +328,6 @@ EOM
 	set `echo " $libswanted " | sed -e 's@ dl @ @'`
 	libswanted="$*"
 
-	libscheck='
-case "`/usr/bin/file $xxx`" in
-*LP64*) ;;
-*) xxx=/non/64/bit$xxx ;;
-esac
-'
 	;;
 esac
 EOCBU

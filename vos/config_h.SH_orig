@@ -2571,14 +2571,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$uselongdouble	USE_LONG_DOUBLE		/**/
 #endif
 
-/* USE_LONG_LONG:
- *	This symbol, if defined, indicates that long longs should
- *	be used when available.
- */
-#ifndef USE_LONG_LONG
-#$uselonglong	USE_LONG_LONG		/**/
-#endif
-
 #ifndef USE_MORE_BITS
 #$usemorebits	USE_MORE_BITS		/**/
 #endif

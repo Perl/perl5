@@ -343,10 +343,14 @@ $define|true|[yY]*)
 	lflibs="`getconf LFS_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g`"
 	case "$lfcflags$lfldflags$lflibs" in
 	'');;
-	*) uselonglong="$define"
-           echo "(Large files in Solaris require also long longs, using long longs...)"
-	   ccflags="$ccflags -DUSE_LONG_LONG $lfcflags"
-	   ldflags="$ldflags $ldldflags"
+	*) use64bits="$define"
+           echo "(Large files in Solaris require also using long longs...)"
+	   case "$ccflags" in
+	   *-DUSE_64_BITS*) ;;
+	   *) ccflags="$ccflags -DUSE_64_BITS" ;;
+	   esac
+	   ccflags="$ccflags $lfcflags"
+	   ldflags="$ldflags $lfldflags"
 	   libswanted="$libswanted $lflibs"
 	   ;;
 	esac
