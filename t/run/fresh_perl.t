@@ -760,7 +760,7 @@ EXPECT
 123456789
 ######## [ID 20020104.007] "coredump on dbmclose"
 package Foo;
-eval { dbmclose %h }; # not all places have dbm* functions
+eval { require AnyDBM_File }; # not all places have dbm* functions
 if ($@) {
     print "ok\n";
     exit 0;
