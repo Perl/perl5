@@ -6133,6 +6133,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    /* INTEGERS */
 
 	case 'p':
+	    if (alt)
+		goto unknown;
 	    if (args)
 		uv = PTR2UV(va_arg(*args, void*));
 	    else
@@ -6429,7 +6431,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		}
 	    }
 	    else if (svix < svmax)
-		sv_setuv(svargs[svix++], (UV)i);
+		sv_setuv_mg(svargs[svix++], (UV)i);
 	    continue;	/* not "break" */
 
 	    /* UNKNOWN */
