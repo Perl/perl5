@@ -169,7 +169,7 @@ Do not, however, be tempted to do this:
 
 Like the flattened incoming parameter list, the return list is also
 flattened on return.  So all you have managed to do here is stored
-everything in C<@a> and made C<@b> an empty list.  See 
+everything in C<@a> and made C<@b> empty.  See 
 L<Pass by Reference> for alternatives.
 
 A subroutine may be called using an explicit C<&> prefix.  The
@@ -727,7 +727,7 @@ table entries:
 
     sub ioqueue {
         local  (*READER, *WRITER);    # not my!
-        pipe    (READER,  WRITER);    or die "pipe: $!";
+        pipe    (READER,  WRITER)     or die "pipe: $!";
         return (*READER, *WRITER);
     }
     ($head, $tail) = ioqueue();
