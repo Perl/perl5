@@ -15,7 +15,9 @@ d_setruid='undef'
 
 alignbytes=8
 
-usemymalloc='n'
+case "$usemymalloc" in
+'') usemymalloc='n' ;;
+esac
 
 # Intuiting the existence of system calls under AIX is difficult, at
 # best; the safest technique is to find them empirically.
