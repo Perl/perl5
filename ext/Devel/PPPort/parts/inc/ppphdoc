@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 17 $
+##  $Revision: 18 $
 ##  $Author: mhx $
-##  $Date: 2004/08/13 12:45:56 +0200 $
+##  $Date: 2004/12/29 14:55:00 +0100 $
 ##
 ################################################################################
 ##
@@ -51,6 +51,7 @@ ppport.h - Perl/Pollution/Portability version __VERSION__
 
   --list-provided             list provided API
   --list-unsupported          list unsupported API
+  --api-info=name             show Perl API portability information
 
 =head1 COMPATIBILITY
 
@@ -130,6 +131,11 @@ if it has dependencies, and if there are hints for it.
 Lists the API elements that are known not to be supported by
 F<ppport.h> and below which version of Perl they probably
 won't be available or work.
+
+=head2 --api-info=I<name>
+
+Show portability information for API elements matching I<name>.
+I<name> is treated as a Perl regular expression.
 
 =head1 DESCRIPTION
 

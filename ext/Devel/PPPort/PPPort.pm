@@ -873,7 +873,7 @@ require DynaLoader;
 use strict;
 use vars qw($VERSION @ISA $data);
 
-$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.03 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
+$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.04 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
 
 @ISA = qw(DynaLoader);
 
@@ -952,6 +952,7 @@ POD   --nochanges                 don't suggest changes
 POD 
 POD   --list-provided             list provided API
 POD   --list-unsupported          list unsupported API
+POD   --api-info=name             show Perl API portability information
 POD 
 POD =head1 COMPATIBILITY
 POD 
@@ -1031,6 +1032,11 @@ POD
 POD Lists the API elements that are known not to be supported by
 POD F<ppport.h> and below which version of Perl they probably
 POD won't be available or work.
+POD 
+POD =head2 --api-info=I<name>
+POD 
+POD Show portability information for API elements matching I<name>.
+POD I<name> is treated as a Perl regular expression.
 POD 
 POD =head1 DESCRIPTION
 POD 
@@ -1222,7 +1228,7 @@ eval {
   Getopt::Long::GetOptions(\%opt, qw(
     help quiet diag! hints! changes! cplusplus
     patch=s copy=s diff=s compat-version=s
-    list-provided list-unsupported
+    list-provided list-unsupported api-info=s
   )) or usage();
 };
 
@@ -2893,6 +2899,40 @@ while (<DATA>) {
   $need{$1} = 1 if m{^#if\s+defined\(NEED_(\w+)(?:_GLOBAL)?\)};
 }
 
+if (exists $opt{'api-info'}) {
+  my $f;
+  my $count = 0;
+  for $f (sort { lc $a cmp lc $b } keys %API) {
+    next unless $f =~ /$opt{'api-info'}/;
+    print "\n=== $f ===\n\n";
+    my $info = 0;
+    if ($API{$f}{base} || $API{$f}{todo}) {
+      my $base = format_version($API{$f}{base} || $API{$f}{todo});
+      print "May not be supported below perl-$base.\n";
+      $info++;
+    }
+    if ($API{$f}{provided}) {
+      my $todo = $API{$f}{todo} ? format_version($API{$f}{todo}) : "5.003";
+      print "Support by $ppport provided down to perl-$todo.\n";
+      print "Support needs to be explicitly requested by NEED_$f.\n" if exists $need{$f};
+      print "Depends on: ", join(', ', @{$depends{$f}}), ".\n" if exists $depends{$f};
+      print "$hints{$f}" if exists $hints{$f};
+      $info++;
+    }
+    unless ($info) {
+      print "No portability information available.\n";
+    }
+    $count++;
+  }
+  if ($count > 0) {
+    print "\n";
+  }
+  else {
+    print "Found no API matching $opt{'api-info'}.\n";
+  }
+  exit 0;
+}
+
 if (exists $opt{'list-provided'}) {
   my $f;
   for $f (sort { lc $a cmp lc $b } keys %API) {
@@ -4527,7 +4567,7 @@ DPPP_(my_sv_2pvbyte)(pTHX_ register SV *sv, STRLEN *lp)
 #  define sv_pvn(sv, len)                SvPV(sv, len)
 #endif
 
-/* Hint: sv_pvn
+/* Hint: sv_pvn_force
  * Always use the SvPV_force() macro instead of sv_pvn_force().
  */
 #ifndef sv_pvn_force

@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 21 $
+##  $Revision: 22 $
 ##  $Author: mhx $
-##  $Date: 2004/08/17 20:00:22 +0200 $
+##  $Date: 2004/12/29 14:54:27 +0100 $
 ##
 ################################################################################
 ##
@@ -40,7 +40,7 @@ eval {
   Getopt::Long::GetOptions(\%opt, qw(
     help quiet diag! hints! changes! cplusplus
     patch=s copy=s diff=s compat-version=s
-    list-provided list-unsupported
+    list-provided list-unsupported api-info=s
   )) or usage();
 };
 
@@ -143,6 +143,40 @@ while (<DATA>) {
   }
 
   $need{$1} = 1 if m{^#if\s+defined\(NEED_(\w+)(?:_GLOBAL)?\)};
+}
+
+if (exists $opt{'api-info'}) {
+  my $f;
+  my $count = 0;
+  for $f (sort { lc $a cmp lc $b } keys %API) {
+    next unless $f =~ /$opt{'api-info'}/;
+    print "\n=== $f ===\n\n";
+    my $info = 0;
+    if ($API{$f}{base} || $API{$f}{todo}) {
+      my $base = format_version($API{$f}{base} || $API{$f}{todo});
+      print "May not be supported below perl-$base.\n";
+      $info++;
+    }
+    if ($API{$f}{provided}) {
+      my $todo = $API{$f}{todo} ? format_version($API{$f}{todo}) : "__MIN_PERL__";
+      print "Support by $ppport provided down to perl-$todo.\n";
+      print "Support needs to be explicitly requested by NEED_$f.\n" if exists $need{$f};
+      print "Depends on: ", join(', ', @{$depends{$f}}), ".\n" if exists $depends{$f};
+      print "$hints{$f}" if exists $hints{$f};
+      $info++;
+    }
+    unless ($info) {
+      print "No portability information available.\n";
+    }
+    $count++;
+  }
+  if ($count > 0) {
+    print "\n";
+  }
+  else {
+    print "Found no API matching $opt{'api-info'}.\n";
+  }
+  exit 0;
 }
 
 if (exists $opt{'list-provided'}) {
