@@ -53,8 +53,8 @@ $foo
 EOF
 EOE
 
-print <<'EOS' . <<\EOF;
-ok 12 - make sure single quotes are honored \nnot ok
+print <<`EOS` . <<\EOF;
+echo ok 12
 EOS
 ok 13
 EOF
