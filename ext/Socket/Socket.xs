@@ -221,8 +221,13 @@ inet_ntoa(ip_address_sv)
 	}
 
 	Copy( ip_address, &addr, sizeof addr, char );
+#if defined(__hpux) && defined(__GNUC__) && defined(USE_64_BIT_INT)
+        /* GCC on HP_UX breaks the call to inet_ntoa, // sky*/
+	addr_str = (char *) malloc(16);
+	sprintf(addr_str, "%d.%d.%d.%d", ((addr.s_addr >> 24) & 0xFF) , ((addr.s_addr >> 16) & 0xFF), ((addr.s_addr >> 8) & 0xFF), (addr.s_addr  & 0xFF));
+#else
 	addr_str = inet_ntoa(addr);
-
+#endif
 	ST(0) = sv_2mortal(newSVpvn(addr_str, strlen(addr_str)));
 	}
 
