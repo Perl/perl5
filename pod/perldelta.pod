@@ -3060,12 +3060,14 @@ find out whether it is threadsafe.  See L<perlthrtut> for more information.
 This is a known bug in FreeBSD's readdir_r() (see L<perlfreebsd>
 (README.freebsd)), which hopefully will be fixed in FreeBSD 4.6.
 
-=head2 FreeBSD Failing locale Test 117 For ISO8859-15 Locales
+=head2 FreeBSD Failing locale Test 117 For ISO 8859-15 Locales
 
-The ISO8859-15 locales may fail the locale test 117 in FreeBSD.
+The ISO 8859-15 locales may fail the locale test 117 in FreeBSD.
 This is caused by the characters \xFF (y with diaeresis) and \xBE
 (Y with diaeresis) not behaving correctly when being matched
-case-insensitively.
+case-insensitively.  Apparently this problem has been fixed in
+the latest FreeBSD releases.
+( http://www.freebsd.org/cgi/query-pr.cgi?pr=34308 )
 
 =head2 IRIX fails ext/List/Util/t/shuffle.t
 
