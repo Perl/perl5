@@ -15,10 +15,10 @@ usevfork='true'
 # setre?[ug]id() have been replaced by the _POSIX_SAVED_IDS versions
 # in 4.4BSD.  Configure will find these but they are just emulated
 # and do not have the same semantics as in 4.3BSD.
-d_setregid='undef'
-d_setreuid='undef'
-d_setrgid='undef'
-d_setruid='undef'
+d_setregid=$undef
+d_setreuid=$undef
+d_setrgid=$undef
+d_setruid=$undef
 
 #
 # Not all platforms support shared libs...
@@ -37,12 +37,22 @@ alpha|mips|powerpc|vax)
 	;;
 esac
 
+#
+# Tweaks for various versions of OpenBSD
+#
+case "$osvers" in
+2.5)
+	# OpenBSD 2.5 has broken odbm support
+	i_dbm=$undef
+	;;
+esac
+
 # OpenBSD doesn't need libcrypt but many folks keep a stub lib
 # around for old NetBSD binaries.
 libswanted=`echo $libswanted | sed 's/ crypt / /'`
 
 # Configure can't figure this out non-interactively
-d_suidsafe='define'
+d_suidsafe=$define
 
 # cc is gcc so we can do better than -O
 # Allow a command-line override, such as -Doptimize=-g
