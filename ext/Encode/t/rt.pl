@@ -1,12 +1,14 @@
 #!/usr/local/bin/perl
 #
-# $Id: rt.pl,v 1.1 2002/10/20 15:44:00 dankogai Exp $
+# $Id: rt.pl,v 1.2 2002/11/08 18:29:27 dankogai Exp $
 #
 
 BEGIN {
+    my $ucmdir  = "ucm";
     if ($ENV{'PERL_CORE'}){
         chdir 't';
         unshift @INC, '../lib';
+        $ucmdir = "../ext/Encode/ucm";
     }
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bEncode\b/) {
@@ -19,7 +21,6 @@ BEGIN {
     }
     use strict;
     require Test::More;
-    my $ucmdir  = "ucm";
     our $DEBUG;
     our @ucm;
     unless(@ARGV){

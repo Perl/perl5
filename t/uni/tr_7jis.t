@@ -1,7 +1,8 @@
 #
 # $Id$
 #
-# This script is written intentionally in EUC-JP
+# This script is written intentionally in ISO-2022-JP
+# requires Encode 1.83 or better to work
 # -- dankogai
 
 BEGIN {
@@ -23,8 +24,6 @@ BEGIN {
         exit 0;
     }
     $| = 1;
-    print "1..0 # does not work with iso-2022-jp yet\n";
-    exit 0;
 }
 
 use strict;
@@ -49,10 +48,10 @@ is($str, $katakana, "tr// # hiragana -> katakana");
 $str = $katakana; $str =~ tr/ァ-ン/ぁ-ん/;
 is($str, $hiragana, "tr// # hiragana -> katakana");
 
-$str = $hiragana; eval qq(\$str =~ tr/ぁ-ん/ァ-ン/);
-is($str, $katakana, "eval qq(tr//) # hiragana -> katakana");
-$str = $katakana; eval qq(\$str =~ tr/ァ-ン/ぁ-ん/);
-is($str, $hiragana, "eval qq(tr//) # hiragana -> katakana");
+$str = $hiragana; eval qq{\$str =~ tr/ぁ-ん/ァ-ン/};
+is($str, $katakana, "eval qq{tr//} # hiragana -> katakana");
+$str = $katakana; eval qq{\$str =~ tr/ァ-ン/ぁ-ん/};
+is($str, $hiragana, "eval qq{tr//} # hiragana -> katakana");
 
 $str = $hiragana; $str =~ s/([ぁ-ん])/$h2k{$1}/go;
 is($str, $katakana, "s/// # hiragana -> katakana");

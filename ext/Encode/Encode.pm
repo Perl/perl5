@@ -1,9 +1,9 @@
 #
-# $Id: Encode.pm,v 1.80 2002/10/21 20:38:45 dankogai Exp $
+# $Id: Encode.pm,v 1.83 2002/11/18 17:28:29 dankogai Exp $
 #
 package Encode;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 1.80 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.83 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 use XSLoader ();
 XSLoader::load(__PACKAGE__, $VERSION);
@@ -191,7 +191,7 @@ sub decode_utf8($)
     return $str;
 }
 
-predefine_encodings();
+predefine_encodings(1);
 
 #
 # This is to restore %Encoding if really needed;
@@ -199,6 +199,8 @@ predefine_encodings();
 
 sub predefine_encodings{
     use Encode::Encoding;
+    no warnings 'redefine';
+    my $use_xs = shift;
     if ($ON_EBCDIC) {
 	# was in Encode::UTF_EBCDIC
 	package Encode::UTF_EBCDIC;
@@ -243,7 +245,29 @@ sub predefine_encodings{
 	# was in Encode::utf8
 	package Encode::utf8;
 	push @Encode::utf8::ISA, 'Encode::Encoding';
-	# encode and decode methods now in Encode.xs
+	# 
+	if ($use_xs){
+	    $DEBUG and warn __PACKAGE__, " XS on";
+	    *decode = \&decode_xs;
+	    *encode = \&encode_xs;
+	}else{
+	    $DEBUG and warn __PACKAGE__, " XS off";
+	    *decode = sub{
+		my ($obj,$octets,$chk) = @_;
+		my $str = Encode::decode_utf8($octets);
+		if (defined $str) {
+		    $_[1] = '' if $chk;
+		    return $str;
+		}
+		return undef;
+	    };
+	    *encode = sub {
+		my ($obj,$string,$chk) = @_;
+		my $octets = Encode::encode_utf8($string);
+		$_[1] = '' if $chk;
+		return $octets;
+	    };
+	}
 	$Encode::Encoding{utf8} =
 	    bless {Name => "utf8"} => "Encode::utf8";
     }

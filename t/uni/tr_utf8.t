@@ -1,7 +1,8 @@
 #
 # $Id$
 #
-# This script is written intentionally in EUC-JP
+# This script is written intentionally in UTF-8
+# Requires Encode 1.83 or better
 # -- dankogai
 
 BEGIN {
@@ -29,10 +30,7 @@ use strict;
 #use Test::More qw(no_plan);
 use Test::More tests => 6;
 
-# use encoding 'utf8'; # you can't uncomment this!
-# if you uncomment above, you'll get the following (as of Encode 1.80)
-#  Assertion ((dst)->sv_flags & 0xff) >= SVt_PV failed:
-#  file "Encode.xs", line 255 at t/uni/tr_utf8.t line 35.
+use encoding 'utf8';
 
 my @hiragana =  map {chr} ord("ぁ")..ord("ん");
 my @katakana =  map {chr} ord("ァ")..ord("ン");

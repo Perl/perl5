@@ -1,7 +1,7 @@
 package Encode::JP::JIS7;
 use strict;
 
-our $VERSION = do { my @r = (q$Revision: 1.8 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.9 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode qw(:fallbacks);
 
@@ -62,21 +62,23 @@ sub encode($$;$)
 
 
 # JIS<->EUC
+our $re_scan_jis = qr{
+   (?:($RE{JIS_0212})|$RE{JIS_0208}|($RE{ISO_ASC})|($RE{JIS_KANA}))([^\e]*)
+}x;
 
 sub jis_euc {
+    local ${^ENCODING};
     my $r_str = shift;
-    $$r_str =~ s(
-		 ($RE{JIS_0212}|$RE{JIS_0208}|$RE{ISO_ASC}|$RE{JIS_KANA})
-		 ([^\e]*)
-		 )
+    $$r_str =~ s($re_scan_jis)
     {
-	my ($esc, $chunk) = ($1, $2);
-	if ($esc !~ /$RE{ISO_ASC}/o) {
+	my ($esc_0212, $esc_asc, $esc_kana, $chunk) =
+	   ($1, $2, $3, $4);
+	if (!$esc_asc) {
 	    $chunk =~ tr/\x21-\x7e/\xa1-\xfe/;
-	    if ($esc =~ /$RE{JIS_KANA}/o) {
+	    if ($esc_kana) {
 		$chunk =~ s/([\xa1-\xdf])/\x8e$1/og;
 	    }
-	    elsif ($esc =~ /$RE{JIS_0212}/o) {
+	    elsif ($esc_0212) {
 		$chunk =~ s/([\xa1-\xfe][\xa1-\xfe])/\x8f$1/og;
 	    }
 	}

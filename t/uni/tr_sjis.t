@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# This script is written intentionally in EUC-JP
+# This script is written intentionally in Shift JIS
 # -- dankogai
 
 BEGIN {
