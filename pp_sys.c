@@ -4821,11 +4821,11 @@ PP(pp_gpwent)
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 #   ifdef HAS_GETSPNAM
       if (spwent)
-              sv_setpv(sv, spwent->sp_pwdp);
+	  sv_setpv(sv, spwent->sp_pwdp);
       else
-              sv_setpv(sv, pwent->pw_passwd);
+	  sv_setpv(sv, pwent->pw_passwd);
 #   else
-	sv_setpv(sv, pwent->pw_passwd);
+      sv_setpv(sv, pwent->pw_passwd);
 #   endif
 #   ifndef INCOMPLETE_TAINTS
 	/* passwd is tainted because user himself can diddle with it. */
@@ -4853,8 +4853,9 @@ PP(pp_gpwent)
 #       ifdef PWQUOTA
 	sv_setiv(sv, (IV)pwent->pw_quota);
 #       else
-#       ifdef PWAGE
+#           ifdef PWAGE
 	sv_setpv(sv, pwent->pw_age);
+#           endif
 #       endif
 #   endif
 
