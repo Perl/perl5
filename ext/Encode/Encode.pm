@@ -300,6 +300,11 @@ Encode - character encodings
 
     use Encode;
 
+    use Encode::TW; # for Taiwan-based Chinese encodings
+    use Encode::CN; # for China-based Chinese encodings
+    use Encode::JP; # for Japanese encodings
+    use Encode::KR; # for Korean encodings
+
 =head1 DESCRIPTION
 
 The C<Encode> module provides the interfaces between Perl's strings
@@ -322,6 +327,10 @@ of numbers, pixels in an image - or just about anything.
 When Perl is processing "binary data" the programmer wants Perl to process
 "sequences of bytes". This is not a problem for Perl - as a byte has 256
 possible values it easily fits in Perl's much larger "logical character".
+
+Due to size concerns, before using B<CJK> (Chinese, Japanese & Korean)
+encodings, you have to C<use> the corresponding
+B<Encode::>(B<TW>|B<CN>|B<JP>|B<KR>) modules first.
 
 =head2 TERMINOLOGY
 
@@ -488,8 +497,9 @@ The CJKV: Chinese, Japanese, Korean, Vietnamese:
   Shift-JIS				GBK	  Big5-HKSCS EUC-KR
   VISCII				ISO-IR-165
 
-(Due to size concerns, GB 18030 and EUC-TW are available separately on CPAN,
-under the name L<Encode::HanExtra>.)
+(Due to size concerns, additional Chinese encodings including C<GB 18030>,
+C<EUC-TW> and C<BIG5PLUS> are distributed separately on CPAN, under the name
+L<Encode::HanExtra>.)
 
 The PC codepages:
 
