@@ -1096,14 +1096,16 @@ STATIC U32	S_seed(pTHX);
 #endif
 
 #if defined(PERL_IN_PP_PACK_C) || defined(PERL_DECL_PROT)
-STATIC void	S_doencodes(pTHX_ SV* sv, char* s, I32 len);
+STATIC I32	S_unpack_rec(pTHX_ tempsym_t* symptr, char *s, char *strbeg, char *strend, char **new_s);
+STATIC SV **	S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist);
 STATIC SV*	S_mul128(pTHX_ SV *sv, U8 m);
+STATIC I32	S_measure_struct(pTHX_ tempsym_t* symptr);
+STATIC char *	S_group_end(pTHX_ char *pat, char *patend, char ender);
+STATIC char *	S_get_num(pTHX_ char *ppat, I32 *);
+STATIC bool	S_next_symbol(pTHX_ tempsym_t* symptr);
+STATIC void	S_doencodes(pTHX_ SV* sv, char* s, I32 len);
 STATIC SV*	S_is_an_int(pTHX_ char *s, STRLEN l);
 STATIC int	S_div128(pTHX_ SV *pnum, bool *done);
-STATIC char *	S_next_symbol(pTHX_ char *pat, char *patend);
-STATIC I32	S_find_count(pTHX_ char **ppat, char *patend, int *star);
-STATIC char *	S_group_end(pTHX_ char *pat, char *patend, char ender);
-STATIC I32	S_measure_struct(pTHX_ char *pat, char *patend);
 #endif
 
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)

@@ -3355,6 +3355,25 @@ typedef void *Thread;
 #undef PERLVARI
 #undef PERLVARIC
 
+/* Types used by pack/unpack */ 
+typedef enum {
+  e_no_len,     /* no length  */
+  e_number,     /* number, [] */
+  e_star        /* asterisk   */
+} howlen_t;
+
+typedef struct {
+  char*    patptr;   /* current template char */
+  char*    patend;   /* one after last char   */
+  char*    grpbeg;   /* 1st char of ()-group  */
+  char*    grpend;   /* end of ()-group       */
+  I32      code;     /* template code (!)     */
+  I32      length;   /* length/repeat count   */
+  howlen_t howlen;   /* how length is given   */ 
+  int      level;    /* () nesting level      */
+  U32      flags;    /* /=4, comma=2, pack=1  */
+} tempsym_t;
+
 #include "thread.h"
 #include "pp.h"
 

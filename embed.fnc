@@ -1060,14 +1060,16 @@ s	|U32	|seed
 #endif
 
 #if defined(PERL_IN_PP_PACK_C) || defined(PERL_DECL_PROT)
-s	|void	|doencodes	|SV* sv|char* s|I32 len
+s       |I32    |unpack_rec     |tempsym_t* symptr|char *s|char *strbeg|char *strend|char **new_s
+s       |SV **  |pack_rec       |SV *cat|tempsym_t* symptr|SV **beglist|SV **endlist
 s	|SV*	|mul128		|SV *sv|U8 m
+s	|I32	|measure_struct	|tempsym_t* symptr
+s	|char *	|group_end	|char *pat|char *patend|char ender
+s       |char * |get_num        |char *ppat|I32 *
+s	|bool	|next_symbol	|tempsym_t* symptr
+s	|void	|doencodes	|SV* sv|char* s|I32 len
 s	|SV*	|is_an_int	|char *s|STRLEN l
 s	|int	|div128		|SV *pnum|bool *done
-s	|char *	|next_symbol	|char *pat|char *patend
-s	|I32	|find_count	|char **ppat|char *patend|int *star
-s	|char *	|group_end	|char *pat|char *patend|char ender
-s	|I32	|measure_struct	|char *pat|char *patend
 #endif
 
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)

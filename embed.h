@@ -1469,28 +1469,34 @@
 #endif
 #if defined(PERL_IN_PP_PACK_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
-#define doencodes		S_doencodes
+#define unpack_rec		S_unpack_rec
+#endif
+#ifdef PERL_CORE
+#define pack_rec		S_pack_rec
 #endif
 #ifdef PERL_CORE
 #define mul128			S_mul128
+#endif
+#ifdef PERL_CORE
+#define measure_struct		S_measure_struct
+#endif
+#ifdef PERL_CORE
+#define group_end		S_group_end
+#endif
+#ifdef PERL_CORE
+#define get_num			S_get_num
+#endif
+#ifdef PERL_CORE
+#define next_symbol		S_next_symbol
+#endif
+#ifdef PERL_CORE
+#define doencodes		S_doencodes
 #endif
 #ifdef PERL_CORE
 #define is_an_int		S_is_an_int
 #endif
 #ifdef PERL_CORE
 #define div128			S_div128
-#endif
-#ifdef PERL_CORE
-#define next_symbol		S_next_symbol
-#endif
-#ifdef PERL_CORE
-#define find_count		S_find_count
-#endif
-#ifdef PERL_CORE
-#define group_end		S_group_end
-#endif
-#ifdef PERL_CORE
-#define measure_struct		S_measure_struct
 #endif
 #endif
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
@@ -3927,28 +3933,34 @@
 #endif
 #if defined(PERL_IN_PP_PACK_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
-#define doencodes(a,b,c)	S_doencodes(aTHX_ a,b,c)
+#define unpack_rec(a,b,c,d,e)	S_unpack_rec(aTHX_ a,b,c,d,e)
+#endif
+#ifdef PERL_CORE
+#define pack_rec(a,b,c,d)	S_pack_rec(aTHX_ a,b,c,d)
 #endif
 #ifdef PERL_CORE
 #define mul128(a,b)		S_mul128(aTHX_ a,b)
+#endif
+#ifdef PERL_CORE
+#define measure_struct(a)	S_measure_struct(aTHX_ a)
+#endif
+#ifdef PERL_CORE
+#define group_end(a,b,c)	S_group_end(aTHX_ a,b,c)
+#endif
+#ifdef PERL_CORE
+#define get_num(a,b)		S_get_num(aTHX_ a,b)
+#endif
+#ifdef PERL_CORE
+#define next_symbol(a)		S_next_symbol(aTHX_ a)
+#endif
+#ifdef PERL_CORE
+#define doencodes(a,b,c)	S_doencodes(aTHX_ a,b,c)
 #endif
 #ifdef PERL_CORE
 #define is_an_int(a,b)		S_is_an_int(aTHX_ a,b)
 #endif
 #ifdef PERL_CORE
 #define div128(a,b)		S_div128(aTHX_ a,b)
-#endif
-#ifdef PERL_CORE
-#define next_symbol(a,b)	S_next_symbol(aTHX_ a,b)
-#endif
-#ifdef PERL_CORE
-#define find_count(a,b,c)	S_find_count(aTHX_ a,b,c)
-#endif
-#ifdef PERL_CORE
-#define group_end(a,b,c)	S_group_end(aTHX_ a,b,c)
-#endif
-#ifdef PERL_CORE
-#define measure_struct(a,b)	S_measure_struct(aTHX_ a,b)
 #endif
 #endif
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)

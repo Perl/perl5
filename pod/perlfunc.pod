@@ -3259,7 +3259,8 @@ of values, as follows:
 
     x	A null byte.
     X	Back up a byte.
-    @	Null fill to absolute position.
+    @	Null fill to absolute position, counted from the start of
+        the innermost ()-group.
     (	Start of a ()-group.
 
 The following rules apply:
@@ -3377,9 +3378,11 @@ how the length value is packed.  The ones likely to be of most use are
 integer-packing ones like C<n> (for Java strings), C<w> (for ASN.1 or
 SNMP) and C<N> (for Sun XDR).
 
-The I<string-item> must, at present, be C<"A*">, C<"a*"> or C<"Z*">.
-For C<unpack> the length of the string is obtained from the I<length-item>,
-but if you put in the '*' it will be ignored.
+For C<pack>, the I<string-item> must, at present, be C<"A*">, C<"a*"> or
+C<"Z*">. For C<unpack> the length of the string is obtained from the
+I<length-item>, but if you put in the '*' it will be ignored. For all other
+codes, C<unpack> applies the length value to the next item, which must not
+have a repeat count.
 
     unpack 'C/a', "\04Gurusamy";        gives 'Guru'
     unpack 'a3/A* A*', '007 Bond  J ';  gives (' Bond','J')
@@ -3417,7 +3420,7 @@ L<Config>:
        print $Config{longsize},     "\n";
        print $Config{longlongsize}, "\n";
 
-(The C<$Config{longlongsize}> will be undefine if your system does
+(The C<$Config{longlongsize}> will be undefined if your system does
 not support long longs.)
 
 =item *
@@ -3500,8 +3503,14 @@ sequences of bytes.
 =item *
 
 A ()-group is a sub-TEMPLATE enclosed in parentheses.  A group may
-take a repeat count, both as postfix, and via the C</> template
-character.
+take a repeat count, both as postfix, and for unpack() also via the C</>
+template character. Within each repetition of a group, positioning with
+C<@> starts again at 0. Therefore, the result of
+
+    pack( '@1A((@2A)@3A)', 'a', 'b', 'c' )
+
+is the string "\0a\0\0bc".
+
 
 =item *
 
@@ -3518,6 +3527,8 @@ both result in no-ops.
 =item *
 
 A comment in a TEMPLATE starts with C<#> and goes to the end of line.
+White space may be used to separate pack codes from each other, but
+a C<!> modifier and a repeat count must follow immediately.
 
 =item *
 
@@ -5994,9 +6005,12 @@ has no way of checking whether the value passed to C<unpack()>
 corresponds to a valid memory location, passing a pointer value that's
 not known to be valid is likely to have disastrous consequences.
 
-If the repeat count of a field is larger than what the remainder of
-the input string allows, repeat count is decreased.  If the input string
-is longer than one described by the TEMPLATE, the rest is ignored.
+If there are more pack codes or if the repeat count of a field or a group
+is larger than what the remainder of the input string allows, the result
+is not well defined: in some cases, the repeat count is decreased, or
+C<unpack()> will produce null strings or zeroes, or terminate with an
+error. If the input string is longer than one described by the TEMPLATE,
+the rest is ignored.
 
 See L</pack> for more examples and notes.
 
