@@ -8,7 +8,7 @@ require Exporter;
 use vars qw/@ISA $VERSION/;
 @ISA = qw(Exporter);
 
-$VERSION = '0.12';
+$VERSION = '0.13';
 
 # Package to store unsigned big integers in decimal and do math with them
 
@@ -29,14 +29,16 @@ $VERSION = '0.12';
  
 # constants for easier life
 my $nan = 'NaN';
-
 my ($BASE,$RBASE,$BASE_LEN,$MAX_VAL);
 
 sub _base_len 
   {
+  # set/get the BASE_LEN and assorted other, connected values
+  # used only be the testsuite, set is used only by the BEGIN block below
   my $b = shift;
   if (defined $b)
     {
+    $b = 8 if $b > 8;			# cap, for VMS, OS/390 and other 64 bit
     $BASE_LEN = $b;
     $BASE = int("1e".$BASE_LEN);
     $RBASE = abs('1e-'.$BASE_LEN);	# see USE_MUL
@@ -46,35 +48,34 @@ sub _base_len
     if (int($BASE * $RBASE) == 0)		# should be 1
       {
       # must USE_MUL
-     # print "use mul\n";
       *{_mul} = \&_mul_use_mul;
       *{_div} = \&_div_use_mul;
       }
     else
       {
-    #  print "use div\n";
       # can USE_DIV instead
       *{_mul} = \&_mul_use_div;
       *{_div} = \&_div_use_div;
       }
     }
-  $BASE_LEN-1;
+  $BASE_LEN;
   }
 
 BEGIN
   {
   # from Daniel Pfeiffer: determine largest group of digits that is precisely
   # multipliable with itself plus carry
-  my ($e, $num) = 4;
+  # Test now changed to expect the proper pattern, not a result off by 1 or 2
+  my ($e, $num) = 3;	# lowest value we will use is 3+1-1 = 3
   do 
     {
     $num = ('9' x ++$e) + 0;
     $num *= $num + 1;
-    } until ($num == $num - 1 or $num - 1 == $num - 2);
+    # print "$num $e\n";
+    } while ("$num" =~ /9{$e}0{$e}/);		# must be a certain pattern
+  # last test failed, so retract one step:
   _base_len($e-1);
   }
-
-# for quering and setting, to debug/benchmark things
 
 ##############################################################################
 # create objects from various representations
@@ -229,7 +230,7 @@ sub _mul_use_mul
   # multiply two numbers in internal representation
   # modifies first arg, second need not be different from first
   my ($c,$xv,$yv) = @_;
- 
+
   my @prod = (); my ($prod,$car,$cty,$xi,$yi);
   # since multiplying $x with $x fails, make copy in this case
   $yv = [@$xv] if "$xv" eq "$yv";	# same references?
@@ -477,6 +478,58 @@ sub _div_use_div
   return $x;
   }
 
+sub _mod
+  {
+  # if possible, use mod shortcut
+  my ($c,$x,$yo) = @_;
+
+  # slow way since $y to big
+  if (scalar @$yo > 1)
+    {
+    my ($xo,$rem) = _div($c,$x,$yo);
+    return $rem;
+    }
+  my $y = $yo->[0];
+  # both are single element
+  if (scalar @$x == 1)
+    {
+    $x->[0] %= $y;
+    return $x;
+    }
+
+  my $b = $BASE % $y;
+  if ($b == 0)
+    {
+    # when BASE % Y == 0 then (B * BASE) % Y == 0
+    # (B * BASE) % $y + A % Y => A % Y
+    # so need to consider only last element: O(1)
+    $x->[0] %= $y;
+    }
+  else
+    {
+    # else need to go trough all elemens: O(N)
+    # XXX not ready yet
+    my ($xo,$rem) = _div($c,$x,$yo);
+    return $rem;
+
+#    my $i = 0; my $r = 1;
+#    print "Multi: ";
+#    foreach (@$x)
+#      {
+#      print "$_ $r $b $y\n";
+#      print "\$_ % \$y = ",$_ % $y,"\n";
+#      print "\$_ % \$y * \$b = ",($_ % $y) * $b,"\n";
+#      $r += ($_ % $y) * $b;
+#      print "$r $b $y =>";
+#      $r %= $y if $r > $y;
+#      print " $r\n";
+#      }
+#    $x->[0] = $r;
+    }
+  splice (@$x,1);
+  return $x;
+  }
+
 ##############################################################################
 # shifts
 
@@ -494,7 +547,7 @@ sub _rsft
     # multiples of $BASE_LEN
     my $dst = 0;				# destination
     my $src = _num($c,$y);			# as normal int
-    my $rem = $src % $BASE_LEN;			# reminder to shift
+    my $rem = $src % $BASE_LEN;			# remainder to shift
     $src = int($src / $BASE_LEN);		# source
     if ($rem == 0)
       {
@@ -540,7 +593,7 @@ sub _lsft
     # multiples of $BASE_LEN:
     my $src = scalar @$x;			# source
     my $len = _num($c,$y);			# shift-len as normal int
-    my $rem = $len % $BASE_LEN;			# reminder to shift
+    my $rem = $len % $BASE_LEN;			# remainder to shift
     my $dst = $src + int($len/$BASE_LEN);	# destination
     my $vd;					# further speedup
     #print "src $src:",$x->[$src]||0," dst $dst:",$v->[$dst]||0," rem $rem\n";
@@ -612,9 +665,9 @@ sub _acmp
 
 sub _len
   {
-  # computer number of digits in bigint, minus the sign
+  # compute number of digits in bigint, minus the sign
   # int() because add/sub sometimes leaves strings (like '00005') instead of
-  # int ('5') in this place, causing length to fail
+  # int ('5') in this place, thus causing length() to report wrong length
   my $cx = $_[1];
 
   return (@$cx-1)*$BASE_LEN+length(int($cx->[-1]));
@@ -729,6 +782,10 @@ sub _check
     $e = $x->[$i]; $e = 'undef' unless defined $e;
     $try = '=~ /^[\+]?[0-9]+\$/; '."($x, $e)";
     last if $e !~ /^[+]?[0-9]+$/;
+    $try = '=~ /^[\+]?[0-9]+\$/; '."($x, $e) (stringify)";
+    last if "$e" !~ /^[+]?[0-9]+$/;
+    $try = '=~ /^[\+]?[0-9]+\$/; '."($x, $e) (cat-stringify)";
+    last if '' . "$e" !~ /^[+]?[0-9]+$/;
     $try = ' < 0 || >= $BASE; '."($x, $e)";
     last if $e <0 || $e >= $BASE;
     # this test is disabled, since new/bnorm and certain ops (like early out
@@ -820,13 +877,16 @@ slow, Perl way as fallback to emulate these:
 			'0b' must be prepended.
 	
 	_rsft(obj,N,B)	shift object in base B by N 'digits' right
+			For unsupported bases B, return undef to signal failure
 	_lsft(obj,N,B)	shift object in base B by N 'digits' left
+			For unsupported bases B, return undef to signal failure
 	
 	_xor(obj1,obj2)	XOR (bit-wise) object 1 with object 2
-			Mote: XOR, AND and OR pad with zeros if size mismatches
+			Note: XOR, AND and OR pad with zeros if size mismatches
 	_and(obj1,obj2)	AND (bit-wise) object 1 with object 2
 	_or(obj1,obj2)	OR (bit-wise) object 1 with object 2
 
+	_mod(obj,obj)	Return remainder of div of the 1st by the 2nd object
 	_sqrt(obj)	return the square root of object
 	_pow(obj,obj)	return object 1 to the power of object 2
 	_gcd(obj,obj)	return Greatest Common Divisor of two objects
@@ -845,12 +905,13 @@ zero or similar cases.
 
 The first parameter can be modified, that includes the possibility that you
 return a reference to a completely different object instead. Although keeping
-the reference is prefered over creating and returning a different one.
+the reference and just changing it's contents is prefered over creating and
+returning a different reference.
 
 Return values are always references to objects or strings. Exceptions are
 C<_lsft()> and C<_rsft()>, which return undef if they can not shift the
 argument. This is used to delegate shifting of bases different than 10 back
-to BigInt, which will use some generic code to calculate the result.
+to Math::BigInt, which will use some generic code to calculate the result.
 
 =head1 WRAP YOUR OWN
 

@@ -6,11 +6,11 @@ use strict;
 BEGIN
   {
   $| = 1;
-  unshift @INC, '../../lib'; # for running manually
+  unshift @INC, '../lib'; # for running manually
   my $location = $0; $location =~ s/bigfltpm.t//;
   unshift @INC, $location; # to locate the testing files
   # chdir 't' if -d 't';
-  plan tests => 1273;
+  plan tests => 1277;
   }
 
 use Math::BigInt;
