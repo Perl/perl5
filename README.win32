@@ -85,7 +85,7 @@ popular 4DOS/NT shell have incompatibilities that may cause you trouble.
 If the build fails under that shell, try building again with the cmd
 shell.
 
-The nmake Makefile also has known incompatibilites with the
+The nmake Makefile also has known incompatibilities with the
 "command.com" shell that comes with Windows 9x.  You will need to
 use dmake and makefile.mk to build under Windows 9x.
 

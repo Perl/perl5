@@ -95,8 +95,8 @@ line?, Why don't perl one-liners work on my DOS/Mac/VMS system?, Where can
 I learn about CGI or Web programming in Perl?, Where can I learn about
 object-oriented Perl programming?, Where can I learn about linking C with
 Perl? [h2xs, xsubpp], I've read perlembed, perlguts, etc., but I can't
-embed perl inmy C program, what am I doing wrong?, When I tried to run my
-script, I got this message. What does itmean?, What's MakeMaker?,
+embed perl in my C program, what am I doing wrong?, When I tried to run my
+script, I got this message. What does it mean?, What's MakeMaker?,
 L<perlfaq4>: Data Manipulation, Why am I getting long decimals (eg,
 19.9499999999999) instead of the numbers I should be getting (eg, 19.95)?,
 Why isn't my octal data interpreted correctly?, Does Perl have a round()
