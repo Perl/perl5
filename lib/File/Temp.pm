@@ -95,12 +95,12 @@ filehandle of a temporary file.  The tempdir() function can
 be used to create a temporary directory.
 
 The security aspect of temporary file creation is emphasized such that
-a filehandle and filename are returned together.  This helps guarantee that 
-a race condition can not occur where the temporary file is created by another process 
-between checking for the existence of the file and its
-opening.  Additional security levels are provided to check, for 
-example, that the sticky bit is set on world writable directories.
-See L<"safe_level"> for more information.
+a filehandle and filename are returned together.  This helps guarantee
+that a race condition can not occur where the temporary file is
+created by another process between checking for the existence of the
+file and its opening.  Additional security levels are provided to
+check, for example, that the sticky bit is set on world writable
+directories.  See L<"safe_level"> for more information.
 
 For compatibility with popular C library functions, Perl implementations of
 the mkstemp() family of functions are provided. These are, mkstemp(),

@@ -1748,6 +1748,50 @@ test, it does not necessarily mean you have a broken perl.  This test
 tries to exercise the regular expression subsystem quite thoroughly,
 and may well be far more demanding than your normal usage.
 
+=item Test failures from lib/ftmp-security saying "system possibly insecure"
+
+Firstly, test failures from the ftmp-security are not necessarily
+serious or indicative of a real security threat.  That being said,
+they bear investigating.
+
+The tests may fail for the following reasons.   Note that each of the
+tests is run both in the building directory and the temporary
+directory, as returned by File::Spec->tmpdir().
+
+(1) If the directory the tests are being run is owned by somebody else
+than the user running the tests, or root (uid 0).  This failure can
+happen if the Perl source code distribution is unpacked in a way that
+the user ids in the distribution package are used as-is.  Some tar
+programs do this.
+
+(2) If the directory the test are being run in is writable by group
+or by other (remember: with UNIX/POSIX semantics, write access to
+a directory means the right to add/remove files in that directory),
+and there is no sticky bit set in the directory.  'Sticky bit' is
+a feature used in some UNIXes to give extra protection to files: if
+the bit is on a directory, no one but the owner (or the root) can remove
+that file even if the permissions of the directory would allow file
+removal by others.  This failure can happen if the permissions in the
+directory simply are a bit too liberal for the tests' liking.  This
+may or may not be a real problem: it depends on the permissions policy
+used on this particular directory/project/system/site.  This failure
+can also happen if the system either doesn't support the sticky bit
+(this is the case with many non-UNIX platforms: in principle the
+File::Temp should know about these platforms and skip the tests), or
+if the system supports the sticky bit but for some reason or reasons
+it is not being used.  This is for example the case with HP-UX: as of
+HP-UX release 11.00, the sticky bit is very much supported, but HP-UX
+doesn't use it on its /tmp directory as shipped.  Also as with the
+permissions, some local policy might dictate that the stickiness is
+not used.
+
+(3) If any of the parent directories of the temporary file back to the
+root directory of the are 'unsafe', using the definitions given above
+in (1) and (2).
+
+See the documentation for the File::Temp module for more information
+about the various security aspects.
+
 =back
 
 =head1 make install

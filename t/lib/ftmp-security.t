@@ -24,8 +24,11 @@ END { foreach (@files) { ok( !(-e $_) )} }
 use File::Temp qw/ tempfile unlink0 /;
 ok(1);
 
-# The high security tests must currently be skipped on Windows
-my $skipplat = ( ($^O eq 'MSWin32' || $^O eq 'os2' || $^O eq 'dos') ? 1 : 0 );
+# The high security tests must currently be skipped on some platforms
+my $skipplat = ( (
+		  # No sticky bits.
+		  $^O eq 'MSWin32' || $^O eq 'os2' || $^O eq 'dos'
+		  ) ? 1 : 0 );
 
 # Can not run high security tests in perls before 5.6.0
 my $skipperl  = ($] < 5.006 ? 1 : 0 );
@@ -93,28 +96,32 @@ sub test_security {
   }
 
   # Create the tempfile
-  my $template = "temptestXXXXXXXX";
+  my $template = "tmpXXXXX";
   my ($fh1, $fname1) = tempfile ( $template, 
 				  DIR => File::Spec->tmpdir,
 				  UNLINK => 1,
 				);
-  print "# Fname1 = $fname1\n";
-  ok( ( -e $fname1) );
+  if (defined $fname1) {
+      print "# fname1 = $fname1\n";
+      ok( (-e $fname1) );
+  } elsif (File::Temp->safe_level() != File::Temp::STANDARD) {
+      skip("system possibly insecure, see INSTALL, section 'make test'", 1);
+  } else {
+      ok(0);
+  }
 
   # Explicitly 
-# Disabled temporarily since people seem to have funky owner/permissions setups
-# --jhi 2000-08-29
-#  my ($fh2, $fname2) = tempfile ($template,  UNLINK => 1 );
-  my($fname2) = "foobar$$";
-  my $fh2;
-  open($fh2, ">$fname2") || warn "$0: failed to create '$fname2': $!\n";
-  END { unlink($fname2) }
-  ok( (-e $fname2) );
-  close($fh2);
+  my ($fh2, $fname2) = tempfile ($template,  UNLINK => 1 );
+  if (defined $fname2) {
+      print "# fname2 = $fname2\n";
+      ok( (-e $fname2) );
+      close($fh2);
+  } elsif (File::Temp->safe_level() != File::Temp::STANDARD) {
+      skip("system possibly insecure, see INSTALL, section 'make test'", 1);
+  } else {
+      ok(0);
+  }
 
   # Store filenames for the end block
   push(@files, $fname1, $fname2);
-
-
-
 }
