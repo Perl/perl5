@@ -165,8 +165,11 @@ struct utsname {
 
 #ifdef __BORLANDC__		/* Borland C++ */
 
+#if (__BORLANDC__ <= 0x520)
 #define _access access
 #define _chdir chdir
+#endif
+
 #define _getpid getpid
 #define wcsicmp _wcsicmp
 #include <sys/types.h>
@@ -183,8 +186,6 @@ struct utsname {
 #pragma warn -aus	/* "'foo' is assigned a value that is never used" */
 #pragma warn -use	/* "'foo' is declared but never used" */
 #pragma warn -csu	/* "comparing signed and unsigned values" */
-#pragma warn -pro	/* "call to function with no prototype" */
-#pragma warn -stu	/* "undefined structure 'foo'" */
 
 /* Borland is picky about a bare member function name used as its ptr */
 #ifdef PERL_OBJECT
