@@ -1209,6 +1209,11 @@ d_PRIXU64 (quadfio.U):
 	The 'U' in the name is to separate this from d_PRIx64 so that even
 	case-blind systems can see the difference.
 
+d_pthread_atfork (d_pthread_atfork.U):
+	This variable conditionally defines the HAS_PTHREAD_ATFORK symbol,
+	which indicates to the C program that the pthread_atfork()
+	routine is available.
+
 d_pthread_yield (d_pthread_y.U):
 	This variable conditionally defines the HAS_PTHREAD_YIELD
 	symbol if the pthread_yield routine is available to yield

@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Thu Jul 12 21:13:57 EET DST 2001
+ * Configuration time: Fri Jul 13 03:15:46 EET DST 2001
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -3456,5 +3456,11 @@
  *	should be included.
  */
 #define	I_LANGINFO		/**/
+
+/* HAS_PTHREAD_ATFORK:
+ *	This symbol, if defined, indicates that the pthread_atfork routine
+ *	is available setup fork handlers.
+ */
+#define HAS_PTHREAD_ATFORK		/**/
 
 #endif

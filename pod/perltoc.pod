@@ -4578,7 +4578,7 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =back
 
-=head2 perl572delta, perl571delta - what's new for perl v5.7.2
+=head2 perl572delta - what's new for perl v5.7.2
 
 =over 4
 
