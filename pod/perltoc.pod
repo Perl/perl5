@@ -3666,7 +3666,7 @@ South Africa
 =item Asia
 
 China, Indonesia, Israel, Japan, Malaysia, Russian Federation, Saudi
-Arabia, Singapore, South Korea, Taiwan
+Arabia, Singapore, South Korea, Taiwan, Thailand
 
 =item Central America
 
@@ -3674,19 +3674,19 @@ Costa Rica
 
 =item Europe
 
-Austria, Belgium, Bulgaria, Croatia, Czech Republic, Denmark, Estonia,
-Finland, France, Germany, Greece, Hungary, Iceland, Ireland, Italy, Latvia,
-Lithuania, Netherlands, Norway, Poland, Portugal, Romania, Russia,
-Slovakia, Slovenia, Spain, Sweden, Switzerland, Turkey, Ukraine, United
-Kingdom
+Austria, Belgium, Bosnia and Herzegovina, Bulgaria, Croatia, Czech
+Republic, Denmark, Estonia, Finland, France, Germany, Greece, Hungary,
+Iceland, Ireland, Italy, Latvia, Lithuania, Netherlands, Norway, Poland,
+Portugal, Romania, Russia, Slovakia, Slovenia, Spain, Sweden, Switzerland,
+Turkey, Ukraine, United Kingdom
 
 =item North America
 
 Canada, Alberta, Manitoba, Nova Scotia, Ontario, Mexico, United States,
 Alabama, California, Colorado, Delaware, District of Columbia, Florida,
-Illinois, Indiana, Kentucky, Massachusetts, Michigan, Nevada, New Jersey,
-New York, North Carolina, Oklahoma, Oregon, Pennsylvania, Tennessee, Texas,
-Utah, Virginia, Washington, Wisconsin
+Indiana, Kentucky, Massachusetts, Michigan, Nevada, New Jersey, New York,
+North Carolina, Oklahoma, Oregon, Pennsylvania, Tennessee, Texas, Utah,
+Virginia, Washington, Wisconsin
 
 =item Oceania
 
@@ -8968,7 +8968,7 @@ inf(), NaN(), upgrade()
 
 =back
 
-=head2 bigrat - Transparent BigNumber/BigRationale support for Perl
+=head2 bigrat - Transparent BigNumber/BigRational support for Perl
 
 =over 4
 
@@ -16376,7 +16376,7 @@ the same terms as Perl itself.
 
 =back
 
-=head2 Math::BigRat - arbitrarily big rationales
+=head2 Math::BigRat - arbitrarily big rationals
 
 =over 4
 

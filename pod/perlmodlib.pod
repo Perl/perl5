@@ -81,7 +81,7 @@ Transparent BigNumber support for Perl
 
 =item bigrat
 
-Transparent BigNumber/BigRationale support for Perl
+Transparent BigNumber/BigRational support for Perl
 
 =item blib
 
@@ -919,7 +919,7 @@ Pure Perl module to test Math::BigInt with scalars
 
 =item Math::BigRat
 
-Arbitrarily big rationales
+Arbitrarily big rationals
 
 =item Math::Complex
 
