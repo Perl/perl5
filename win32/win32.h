@@ -135,6 +135,12 @@ struct utsname {
 #define USE_FIXED_OSFHANDLE
 #endif
 
+/* Define PERL_WIN32_SOCK_DLOAD to have Perl dynamically load the winsock
+   DLL when needed. Don't use if your compiler supports delayloading (ie, VC++ 6.0)
+	-- BKS 5-29-2000 */
+#if !(defined(_M_IX86) && _MSC_VER >= 1200)
+#define PERL_WIN32_SOCK_DLOAD
+#endif
 #define ENV_IS_CASELESS
 
 #ifndef VER_PLATFORM_WIN32_WINDOWS	/* VC-2.0 headers don't have this */
@@ -213,6 +219,7 @@ typedef long		gid_t;
 #endif
 #define flushall	_flushall
 #define fcloseall	_fcloseall
+#define isnan		_isnan	/* ...same libraries as MSVC */
 
 #ifdef PERL_OBJECT
 #  define MEMBER_TO_FPTR(name)	&(name)
