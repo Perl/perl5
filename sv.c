@@ -5524,7 +5524,7 @@ Perl_sv_len_utf8(pTHX_ register SV *sv)
  *
  */
 STATIC bool
-S_utf8_mg_pos_init(SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offsetp, U8 *s, U8 *start)
+S_utf8_mg_pos_init(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offsetp, U8 *s, U8 *start)
 {
     bool found = FALSE; 
 
@@ -5559,7 +5559,7 @@ S_utf8_mg_pos_init(SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offsetp, U8
  *
  */
 STATIC bool
-S_utf8_mg_pos(SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offsetp, I32 uoff, U8 **sp, U8 *start, U8 *send)
+S_utf8_mg_pos(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offsetp, I32 uoff, U8 **sp, U8 *start, U8 *send)
 {
     bool found = FALSE;
 
