@@ -77,8 +77,34 @@ if ($Config{'d_msgget'} eq 'define' &&
     my $msgtype = 1;
     my $msgtext = "hello";
 
-    msgsnd($msg,pack("L a*",$msgtype,$msgtext),0) or print "not ";
+    my $test2bad;
+    my $test5bad;
+    my $test6bad;
+
+    unless (msgsnd($msg,pack("L a*",$msgtype,$msgtext),IPC_NOWAIT)) {
+	print "not ";
+         $test2bad = 1;
+    }
     print "ok 2\n";
+    if ($test2bad) {
+	print <<EOM;
+#
+# The failure of the subtest #2 may indicate that the message queue
+# resource limits either of the system or of the testing account
+# have been reached.  Error message "Operating would block" is
+# usually indicative of this situation.  The error message was now:
+# "$!"
+#
+# You can check the message queues with the 'ipcs' command and
+# you can remove unneeded queues with the 'ipcrm -q id' command.
+# You may also consider configuring your system or account
+# to have more message queue resources.
+#
+# Because of the subtest #2 failing also the substests #5 and #6 will
+# very probably also fail.
+#
+EOM
+    }
 
     my $data;
     msgctl($msg,IPC_STAT,$data) or print "not ";
@@ -88,13 +114,33 @@ if ($Config{'d_msgget'} eq 'define' &&
     print "ok 4\n";
 
     my $msgbuf;
-    msgrcv($msg,$msgbuf,256,0,IPC_NOWAIT) or print "not ";
+    unless (msgrcv($msg,$msgbuf,256,0,IPC_NOWAIT)) {
+	print "not ";
+	$test5bad = 1;
+    }
     print "ok 5\n";
+    if ($test5bad && $test2bad) {
+	print <<EOM;
+#
+# This failure was to be expected because the subtest #2 failed.
+#
+EOM
+    }
 
     my($rmsgtype,$rmsgtext) = unpack("L a*",$msgbuf);
 
-    print "not " unless($rmsgtype == $msgtype && $rmsgtext eq $msgtext);
+    unless($rmsgtype == $msgtype && $rmsgtext eq $msgtext) {
+	print "not ";
+	$test6bad = 1;
+    }
     print "ok 6\n";
+    if ($test6bad && $test2bad) {
+	print <<EOM;
+#
+# This failure was to be expected because the subtest #2 failed.
+#
+EOM
+     }
 } else {
     for (1..6) {
 	print "ok $_\n"; # fake it
