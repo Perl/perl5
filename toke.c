@@ -2824,7 +2824,7 @@ yylex()
 		if (len > 2 &&
 		    tokenbuf[len - 2] == ':' && tokenbuf[len - 1] == ':')
 		{
-		    if (! gv_fetchpv(tokenbuf, FALSE, SVt_PVHV))
+		    if (dowarn && ! gv_fetchpv(tokenbuf, FALSE, SVt_PVHV))
 			warn("Bareword \"%s\" refers to nonexistent package",
 			     tokenbuf);
 		    len -= 2;
