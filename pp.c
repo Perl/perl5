@@ -4427,10 +4427,16 @@ PP(pp_pack)
 	case 'a':
 	    fromstr = NEXTFROM;
 	    aptr = SvPV(fromstr, fromlen);
-	    if (pat[-1] == '*')
+	    if (pat[-1] == '*') {
 		len = fromlen;
-	    if (fromlen > len)
+		if (datumtype == 'Z')
+		    ++len;
+	    }
+	    if (fromlen >= len) {
 		sv_catpvn(cat, aptr, len);
+		if (datumtype == 'Z')
+		    *(SvEND(cat)-1) = '\0';
+	    }
 	    else {
 		sv_catpvn(cat, aptr, fromlen);
 		len -= fromlen;

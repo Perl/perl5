@@ -2724,8 +2724,13 @@ it differs from "use vars", which is package scoped.)
 
 =item pack TEMPLATE,LIST
 
-Takes a list of values and packs it into a binary structure,
-returning the string containing the structure.  The TEMPLATE is a
+Takes a LIST of values and converts it into a string using the rules
+given by the TEMPLATE.  The resulting string is the concatenation of
+the converted values.  Typically, each converted value looks
+like its machine-level representation.  For example, on 32-bit machines
+a converted integer may be represented by a sequence of 4 bytes.
+
+The TEMPLATE is a
 sequence of characters that give the order and type of values, as
 follows:
 
@@ -2733,8 +2738,8 @@ follows:
     A	An ascii string, will be space padded.
     Z	A null terminated (asciz) string, will be null padded.
 
-    b	A bit string (ascending bit order, like vec()).
-    B	A bit string (descending bit order).
+    b	A bit string (ascending bit order inside each byte, like vec()).
+    B	A bit string (descending bit order inside each byte).
     h	A hex string (low nybble first).
     H	A hex string (high nybble first).
 
@@ -2802,18 +2807,46 @@ Each letter may optionally be followed by a number giving a repeat
 count.  With all types except C<"a">, C<"A">, C<"Z">, C<"b">, C<"B">, C<"h">,
 C<"H">, and C<"P"> the pack function will gobble up that many values from
 the LIST.  A C<*> for the repeat count means to use however many items are
-left.
+left, except for C<"@">, C<"x">, C<"X">, where it is equivalent
+to C<"0">, and C<"u">, where it is equivalent to 1 (or 45, what is the
+same).
+
+When used with C<"Z">, C<*> results in the addition of a trailing null
+byte (so the packed result will be one longer than the byte C<length>
+of the item).
+
+The repeat count for C<"u"> is interpreted as the maximal number of bytes
+to encode per line of output, with 0 and 1 replaced by 45.
 
 =item *
 
 The C<"a">, C<"A">, and C<"Z"> types gobble just one value, but pack it as a
 string of length count, padding with nulls or spaces as necessary.  When
 unpacking, C<"A"> strips trailing spaces and nulls, C<"Z"> strips everything
-after the first null, and C<"a"> returns data verbatim.
+after the first null, and C<"a"> returns data verbatim.  When packing,
+C<"a">, and C<"Z"> are equivalent.
+
+If the value-to-pack is too long, it is truncated.  If too long and an
+explicit count is provided, C<"Z"> packs only C<$count-1> bytes, followed
+by a null byte.  Thus C<"Z"> always packs a trailing null byte under
+all circumstances.
 
 =item *
 
 Likewise, the C<"b"> and C<"B"> fields pack a string that many bits long.
+Each byte of the input field generates 1 bit of the result basing on
+the least-signifant bit of each input byte, i.e., on C<ord($byte)%2>.
+In particular, bytes C<"0"> and C<"1"> generate bits 0 and 1.
+
+Starting from the beginning of the input string, each 8-tuple of bytes
+is converted to 1 byte of output.  If the length of the input string
+is not divisible by 8, the remainder is packed as if padded by 0s.
+Similarly, during unpack()ing the "extra" bits are ignored.
+
+If the input string is longer than needed, extra bytes are ignored.
+A C<*> for the repeat count of pack() means to use all the bytes of
+the input field.  On unpack()ing the bits are converted to a string
+of C<"0">s and C<"1">s.
 
 =item *
 
@@ -2827,7 +2860,7 @@ responsible for ensuring the string is not a temporary value (which can
 potentially get deallocated before you get around to using the packed result).
 The C<"P"> type packs a pointer to a structure of the size indicated by the
 length.  A NULL pointer is created if the corresponding value for C<"p"> or
-C<"P"> is C<undef>.
+C<"P"> is C<undef>, similarly for unpack().
 
 =item *
 
@@ -2956,6 +2989,12 @@ sequences of bytes.
 =item *
 
 A comment in a TEMPLATE starts with C<#> and goes to the end of line.
+
+=item *
+
+If TEMPLATE requires more arguments to pack() than actually given, pack()
+assumes additional C<""> arguments.  If TEMPLATE requires less arguments
+to pack() than actually given, extra arguments are ignored.
 
 =back
 
@@ -4869,8 +4908,14 @@ If LIST is omitted, uses C<$_>.
 =item unpack TEMPLATE,EXPR
 
 C<unpack> does the reverse of C<pack>: it takes a string
-representing a structure and expands it out into a list of values.
+and expands it out into a list of values.
 (In scalar context, it returns merely the first value produced.)
+
+The string is broken into chunks described by the TEMPLATE.  Each chunk
+is converted separately to a value.  Typically, either the string is a result
+of C<pack>, or the bytes of the string represent a C structure of some
+kind.
+
 The TEMPLATE has the same format as in the C<pack> function.
 Here's a subroutine that does substring:
 
@@ -4883,9 +4928,14 @@ and then there's
 
     sub ordinal { unpack("c",$_[0]); } # same as ord()
 
-In addition, you may prefix a field with a %E<lt>numberE<gt> to indicate that
+In addition to fields allowed in pack(), you may prefix a field with
+a %E<lt>numberE<gt> to indicate that
 you want a E<lt>numberE<gt>-bit checksum of the items instead of the items
-themselves.  Default is a 16-bit checksum.  For example, the following
+themselves.  Default is a 16-bit checksum.  Checksum is calculated by
+summing numeric values of expanded values (for string fields the sum of
+C<ord($char)> is taken, for bit fields the sum of zeroes and ones).
+
+For example, the following
 computes the same number as the System V sum program:
 
     $checksum = do {
@@ -4901,6 +4951,10 @@ The C<"p"> and C<"P"> formats should be used with care.  Since Perl
 has no way of checking whether the value passed to C<unpack()>
 corresponds to a valid memory location, passing a pointer value that's
 not known to be valid is likely to have disastrous consequences.
+
+If the repeat count of a field is larger than what the remainder of
+the input string allows, repeat count is decreased.  If the input string
+is longer than one described by the TEMPLATE, the rest is ignored. 
 
 See L</pack> for more examples and notes.
 
