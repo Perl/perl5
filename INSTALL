@@ -1662,12 +1662,12 @@ bval settings.  Upgrade your DB library or OS.
 
 =item Bad arg length for semctl, is XX, should be ZZZ
 
-If you get this error message from the lib/ipc_sysv test, your System
+If you get this error message from the ext/IPC/SysV/t/sem test, your System
 V IPC may be broken.  The XX typically is 20, and that is what ZZZ
 also should be.  Consider upgrading your OS, or reconfiguring your OS
 to include the System V semaphores.
 
-=item lib/ipc_sysv........semget: No space left on device
+=item ext/IPC/SysV/t/sem........semget: No space left on device
 
 Either your account or the whole system has run out of semaphores.  Or
 both.  Either list the semaphores with "ipcs" and remove the unneeded
@@ -1713,7 +1713,7 @@ NCR Tower 32 (OS 2.01.01) may need -W2,-Sl,2000 and #undef MKDIR.
 
 UTS may need one or more of -K or -g, and undef LSTAT.
 
-FreeBSD can fail the lib/ipc_sysv.t test if SysV IPC has not been
+FreeBSD can fail the ext/IPC/SysV/t/sem.t test if SysV IPC has not been
 configured in the kernel.  Perl tries to detect this, though, and
 you will get a message telling what to do.
 
