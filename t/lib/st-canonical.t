@@ -14,6 +14,11 @@
 
 sub BEGIN {
     chdir('t') if -d 't';
+    require Config; import Config;
+    if ($Config{'extensions'} !~ /\bStorable\b/) {
+        print "1..0 # Skip: Storable was not built\n";
+        exit 0;
+    }
     unshift @INC, '../lib';
 }
 
