@@ -1060,7 +1060,26 @@ This is identical to Perl's builtin C<index()> function.
 
 =item strtod
 
-strtod() is C-specific.
+String to double translation. Returns the parsed number and the number
+of characters in the unparsed portion of the string.  Truly
+POSIX-compliant systems set $! ($ERRNO) to indicate a translation
+error, so clear $! before calling strtod.  However, non-POSIX systems
+may not check for overflow, and therefore will never set $!.
+
+strtod should respect any POSIX I<setlocale()> settings.
+
+To parse a string $str as a floating point number use
+
+    $! = 0;
+    ($num, $n_unparsed) = POSIX::strtod($str);
+
+The second returned item and $! can be used to check for valid input:
+
+    if (($str eq '') || ($n_unparsed != 0) || !$!) {
+        die "Non-numeric input $str" . $! ? ": $!\n" : "\n";
+    }
+
+When called in a scalar context strtod returns the parsed number.
 
 =item strtok
 
@@ -1068,7 +1087,42 @@ strtok() is C-specific.
 
 =item strtol
 
-strtol() is C-specific.
+String to (long) integer translation.  Returns the parsed number and
+the number of characters in the unparsed portion of the string.  Truly
+POSIX-compliant systems set $! ($ERRNO) to indicate a translation
+error, so clear $! before calling strtol.  However, non-POSIX systems
+may not check for overflow, and therefore will never set $!.
+
+strtol should respect any POSIX I<setlocale()> settings.
+
+To parse a string $str as a number in some base $base use
+
+    $! = 0;
+    ($num, $n_unparsed) = POSIX::strtol($str, $base);
+
+The base should be zero or between 2 and 36, inclusive.  When the base
+is zero or omitted strtol will use the string itself to determine the
+base: a leading "0x" or "0X" means hexadecimal; a leading "0" means
+octal; any other leading characters mean decimal.  Thus, "1234" is
+parsed as a decimal number, "01234" as an octal number, and "0x1234"
+as a hexadecimal number.
+
+The second returned item and $! can be used to check for valid input:
+
+    if (($str eq '') || ($n_unparsed != 0) || !$!) {
+        die "Non-numeric input $str" . $! ? ": $!\n" : "\n";
+    }
+
+When called in a scalar context strtol returns the parsed number.
+
+=item strtoul
+
+String to unsigned (long) integer translation.  strtoul is identical
+to strtol except that strtoul only parses unsigned integers.  See
+I<strtol> for details.
+
+Note: Some vendors supply strtod and strtol but not strtoul.
+Other vendors that do suply strtoul parse "-1" as a valid value.
 
 =item strxfrm
 

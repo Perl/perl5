@@ -394,6 +394,9 @@ d_strerrm=''
 d_strerror=''
 d_sysernlst=''
 d_syserrlst=''
+d_strtod=''
+d_strtol=''
+d_strtoul=''
 d_strxfrm=''
 d_symlink=''
 d_syscall=''
@@ -7598,6 +7601,18 @@ else
 	d_strerrm='"unknown"'
 fi
 
+: see if strtod exists
+set strtod d_strtod
+eval $inlibc
+
+: see if strtol exists
+set strtol d_strtol
+eval $inlibc
+
+: see if strtoul exists
+set strtoul d_strtoul
+eval $inlibc
+
 : see if strxfrm exists
 set strxfrm d_strxfrm
 eval $inlibc
@@ -9444,19 +9459,24 @@ known_extensions=''
 : some additional extensions into the source tree and expect them
 : to be built.
 for xxx in * ; do
-	if $test -f $xxx/$xxx.xs; then
-		known_extensions="$known_extensions $xxx"
-	else
-		if $test -d $xxx; then
-			cd $xxx
-			for yyy in * ; do
-				if $test -f $yyy/$yyy.xs; then
-					known_extensions="$known_extensions $xxx/$yyy"
-				fi
-			done
-			cd ..
-		fi
-	fi
+	case "$xxx" in
+	DynaLoader)
+		known_extensions="$known_extensions $xxx" ;;
+	*)
+		if $test -f $xxx/$xxx.xs; then
+			known_extensions="$known_extensions $xxx"
+		else
+			if $test -d $xxx; then
+				cd $xxx
+				for yyy in * ; do
+					if $test -f $yyy/$yyy.xs; then
+						known_extensions="$known_extensions $xxx/$yyy"
+					fi
+				done
+				cd ..
+			fi
+		fi ;;
+	esac
 done
 set X $known_extensions
 shift
@@ -9845,6 +9865,9 @@ d_strcoll='$d_strcoll'
 d_strctcpy='$d_strctcpy'
 d_strerrm='$d_strerrm'
 d_strerror='$d_strerror'
+d_strtod='$d_strtod'
+d_strtol='$d_strtol'
+d_strtoul='$d_strtoul'
 d_strxfrm='$d_strxfrm'
 d_suidsafe='$d_suidsafe'
 d_symlink='$d_symlink'

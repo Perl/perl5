@@ -800,6 +800,24 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_syserrlst HAS_SYS_ERRLIST	/**/
 #define Strerror(e) $d_strerrm
 
+/* HAS_STRTOD:
+ *	This symbol, if defined, indicates that the strtod routine is
+ *	available to translate strings to doubles.
+ */
+#$d_strtod HAS_STRTOD	/**/
+
+/* HAS_STRTOL:
+ *	This symbol, if defined, indicates that the strtol routine is
+ *	available to translate strings to integers.
+ */
+#$d_strtol HAS_STRTOL	/**/
+
+/* HAS_STRTOUL:
+ *	This symbol, if defined, indicates that the strtoul routine is
+ *	available to translate strings to integers.
+ */
+#$d_strtoul HAS_STRTOUL	/**/
+
 /* HAS_STRXFRM:
  *	This symbol, if defined, indicates that the strxfrm() routine is
  *	available to transform strings.

@@ -96,7 +96,7 @@ $VERSION = "1.00" ;
     stdlib_h =>	[qw(EXIT_FAILURE EXIT_SUCCESS MB_CUR_MAX NULL RAND_MAX
 		abort atexit atof atoi atol bsearch calloc div
 		free getenv labs ldiv malloc mblen mbstowcs mbtowc
-		qsort realloc strtod strtol stroul wcstombs wctomb)],
+		qsort realloc strtod strtol strtoul wcstombs wctomb)],
 
     string_h =>	[qw(NULL memchr memcmp memcpy memmove memset strcat
 		strchr strcmp strcoll strcpy strcspn strerror strlen
@@ -626,18 +626,6 @@ sub realloc {
 
 sub srand {
     unimpl "srand()";
-}
-
-sub strtod {
-    unimpl "strtod() is C-specific, stopped";
-}
-
-sub strtol {
-    unimpl "strtol() is C-specific, stopped";
-}
-
-sub stroul {
-    unimpl "stroul() is C-specific, stopped";
 }
 
 sub system {

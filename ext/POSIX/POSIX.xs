@@ -191,6 +191,9 @@ typedef struct termios* POSIX__Termios;
 
 /* Possibly needed prototypes */
 char *cuserid _((char *));
+double strtod _((const char *, char **));
+long strtol _((const char *, char **, int));
+unsigned long strtoul _((const char *, char **, int));
 
 #ifndef HAS_CUSERID
 #define cuserid(a) (char *) not_here("cuserid")
@@ -226,6 +229,15 @@ char *cuserid _((char *));
 #endif
 #ifndef HAS_STRCOLL
 #define strcoll(s1,s2) not_here("strcoll")
+#endif
+#ifndef HAS_STRTOD
+#define strtod(s1,s2) not_here("strtod")
+#endif
+#ifndef HAS_STRTOL
+#define strtol(s1,s2,b) not_here("strtol")
+#endif
+#ifndef HAS_STRTOUL
+#define strtoul(s1,s2,b) not_here("strtoul")
 #endif
 #ifndef HAS_STRXFRM
 #define strxfrm(s1,s2,n) not_here("strxfrm")
@@ -3033,6 +3045,65 @@ int
 strcoll(s1, s2)
 	char *		s1
 	char *		s2
+
+void
+strtod(str)
+	char *		str
+    PREINIT:
+	double num;
+	char *unparsed;
+    PPCODE:
+	num = strtod(str, &unparsed);
+	PUSHs(sv_2mortal(newSVnv(num)));
+	if (GIMME == G_ARRAY) {
+	    EXTEND(sp, 1);
+	    if (unparsed)
+		PUSHs(sv_2mortal(newSViv(strlen(unparsed))));
+	    else
+		PUSHs(&sv_undef);
+	}
+
+void
+strtol(str, base = 0)
+	char *		str
+	int		base
+    PREINIT:
+	long num;
+	char *unparsed;
+    PPCODE:
+	num = strtol(str, &unparsed, base);
+	if (num >= IV_MIN && num <= IV_MAX)
+	    PUSHs(sv_2mortal(newSViv((IV)num)));
+	else
+	    PUSHs(sv_2mortal(newSVnv((double)num)));
+	if (GIMME == G_ARRAY) {
+	    EXTEND(sp, 1);
+	    if (unparsed)
+		PUSHs(sv_2mortal(newSViv(strlen(unparsed))));
+	    else
+		PUSHs(&sv_undef);
+	}
+
+void
+strtoul(str, base = 0)
+	char *		str
+	int		base
+    PREINIT:
+	unsigned long num;
+	char *unparsed;
+    PPCODE:
+	num = strtoul(str, &unparsed, base);
+	if (num <= IV_MAX)
+	    PUSHs(sv_2mortal(newSViv((IV)num)));
+	else
+	    PUSHs(sv_2mortal(newSVnv((double)num)));
+	if (GIMME == G_ARRAY) {
+	    EXTEND(sp, 1);
+	    if (unparsed)
+		PUSHs(sv_2mortal(newSViv(strlen(unparsed))));
+	    else
+		PUSHs(&sv_undef);
+	}
 
 SV *
 strxfrm(src)
