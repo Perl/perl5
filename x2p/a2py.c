@@ -1297,10 +1297,10 @@ int prevargs;
 	numargs = fixrargs(name,ops[arg+3].ival,numargs);
     }
     else {
-	char tmpbuf[128];
-
+	char *tmpbuf = safemalloc(strlen(name) + (sizeof(prevargs) * 3) + 5);
 	sprintf(tmpbuf,"%s:%d",name,prevargs);
 	str = hfetch(curarghash,tmpbuf);
+	safefree(tmpbuf);
 	if (str && strEQ(str->str_ptr,"*")) {
 	    if (type == OVAR || type == OSTAR) {
 		ops[arg].ival &= ~255;
