@@ -25,7 +25,19 @@
 #endif
 
 #ifndef YIELD
-#  define YIELD SCHED_YIELD
+#  ifdef SCHED_YIELD
+#    define YIELD SCHED_YIELD
+#  else
+#    ifdef HAS_SCHED_YIELD
+#      define YIELD sched_yield()
+#    else
+#      ifdef HAS_PTHREAD_YIELD
+    /* pthread_yield(NULL) platforms are expected
+     * to have #defined YIELD for themselves. */
+#        define YIELD pthread_yield()
+#      endif
+#    endif
+#  endif
 #endif
 
 #ifdef PTHREAD_CREATE_JOINABLE
