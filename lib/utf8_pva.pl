@@ -11,7 +11,8 @@ for (@INC) {
 
 use Carp 'confess';
 
-local $_;
+local *_;
+local $.; # localizes Pl_last_in_gv
 
     open PA, "< $dir/unicore/PropertyAliases.txt"
 	or confess "Can't open PropertyAliases.txt: $!";
