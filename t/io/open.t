@@ -138,7 +138,7 @@ open my $f, '<&', 'afile';
 1;
 EOE
 ok;
-$@ =~ /Bad filehandle:\s+afile/ or print "not ($@)";
+$@ =~ /Bad filehandle:\s+afile/ or print "not ";
 ok;
 
 # local $file tests
@@ -262,7 +262,7 @@ open local $f, '<&', 'afile';
 1;
 EOE
 ok;
-$@ =~ /Bad filehandle:\s+afile/ or print "not ($@) ";
+$@ =~ /Bad filehandle:\s+afile/ or print "not ";
 ok;
 
 # 65..66
