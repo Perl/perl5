@@ -524,6 +524,22 @@
 #define PL_xnv_root		(*Perl_Ixnv_root_ptr(aTHXo))
 #undef  PL_xpv_root
 #define PL_xpv_root		(*Perl_Ixpv_root_ptr(aTHXo))
+#undef  PL_xpvav_root
+#define PL_xpvav_root		(*Perl_Ixpvav_root_ptr(aTHXo))
+#undef  PL_xpvbm_root
+#define PL_xpvbm_root		(*Perl_Ixpvbm_root_ptr(aTHXo))
+#undef  PL_xpvcv_root
+#define PL_xpvcv_root		(*Perl_Ixpvcv_root_ptr(aTHXo))
+#undef  PL_xpvhv_root
+#define PL_xpvhv_root		(*Perl_Ixpvhv_root_ptr(aTHXo))
+#undef  PL_xpviv_root
+#define PL_xpviv_root		(*Perl_Ixpviv_root_ptr(aTHXo))
+#undef  PL_xpvlv_root
+#define PL_xpvlv_root		(*Perl_Ixpvlv_root_ptr(aTHXo))
+#undef  PL_xpvmg_root
+#define PL_xpvmg_root		(*Perl_Ixpvmg_root_ptr(aTHXo))
+#undef  PL_xpvnv_root
+#define PL_xpvnv_root		(*Perl_Ixpvnv_root_ptr(aTHXo))
 #undef  PL_xrv_root
 #define PL_xrv_root		(*Perl_Ixrv_root_ptr(aTHXo))
 #undef  PL_yychar

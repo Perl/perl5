@@ -938,14 +938,39 @@
 #define more_xiv		S_more_xiv
 #define more_xnv		S_more_xnv
 #define more_xpv		S_more_xpv
+#define more_xpviv		S_more_xpviv
+#define more_xpvnv		S_more_xpvnv
+#define more_xpvcv		S_more_xpvcv
+#define more_xpvav		S_more_xpvav
+#define more_xpvhv		S_more_xpvhv
+#define more_xpvmg		S_more_xpvmg
+#define more_xpvlv		S_more_xpvlv
+#define more_xpvbm		S_more_xpvbm
 #define more_xrv		S_more_xrv
 #define new_xiv			S_new_xiv
 #define new_xnv			S_new_xnv
 #define new_xpv			S_new_xpv
+#define new_xpv			S_new_xpv
+#define new_xpviv		S_new_xpviv
+#define new_xpvnv		S_new_xpvnv
+#define new_xpvcv		S_new_xpvcv
+#define new_xpvav		S_new_xpvav
+#define new_xpvhv		S_new_xpvhv
+#define new_xpvmg		S_new_xpvmg
+#define new_xpvlv		S_new_xpvlv
+#define new_xpvbm		S_new_xpvbm
 #define new_xrv			S_new_xrv
 #define del_xiv			S_del_xiv
 #define del_xnv			S_del_xnv
 #define del_xpv			S_del_xpv
+#define del_xpviv		S_del_xpviv
+#define del_xpvnv		S_del_xpvnv
+#define del_xpvcv		S_del_xpvcv
+#define del_xpvav		S_del_xpvav
+#define del_xpvhv		S_del_xpvhv
+#define del_xpvmg		S_del_xpvmg
+#define del_xpvlv		S_del_xpvlv
+#define del_xpvbm		S_del_xpvbm
 #define del_xrv			S_del_xrv
 #define sv_unglob		S_sv_unglob
 #define not_a_number		S_not_a_number
@@ -2264,14 +2289,39 @@
 #define more_xiv()		S_more_xiv(aTHX)
 #define more_xnv()		S_more_xnv(aTHX)
 #define more_xpv()		S_more_xpv(aTHX)
+#define more_xpviv()		S_more_xpviv(aTHX)
+#define more_xpvnv()		S_more_xpvnv(aTHX)
+#define more_xpvcv()		S_more_xpvcv(aTHX)
+#define more_xpvav()		S_more_xpvav(aTHX)
+#define more_xpvhv()		S_more_xpvhv(aTHX)
+#define more_xpvmg()		S_more_xpvmg(aTHX)
+#define more_xpvlv()		S_more_xpvlv(aTHX)
+#define more_xpvbm()		S_more_xpvbm(aTHX)
 #define more_xrv()		S_more_xrv(aTHX)
 #define new_xiv()		S_new_xiv(aTHX)
 #define new_xnv()		S_new_xnv(aTHX)
 #define new_xpv()		S_new_xpv(aTHX)
+#define new_xpv()		S_new_xpv(aTHX)
+#define new_xpviv()		S_new_xpviv(aTHX)
+#define new_xpvnv()		S_new_xpvnv(aTHX)
+#define new_xpvcv()		S_new_xpvcv(aTHX)
+#define new_xpvav()		S_new_xpvav(aTHX)
+#define new_xpvhv()		S_new_xpvhv(aTHX)
+#define new_xpvmg()		S_new_xpvmg(aTHX)
+#define new_xpvlv()		S_new_xpvlv(aTHX)
+#define new_xpvbm()		S_new_xpvbm(aTHX)
 #define new_xrv()		S_new_xrv(aTHX)
 #define del_xiv(a)		S_del_xiv(aTHX_ a)
 #define del_xnv(a)		S_del_xnv(aTHX_ a)
 #define del_xpv(a)		S_del_xpv(aTHX_ a)
+#define del_xpviv(a)		S_del_xpviv(aTHX_ a)
+#define del_xpvnv(a)		S_del_xpvnv(aTHX_ a)
+#define del_xpvcv(a)		S_del_xpvcv(aTHX_ a)
+#define del_xpvav(a)		S_del_xpvav(aTHX_ a)
+#define del_xpvhv(a)		S_del_xpvhv(aTHX_ a)
+#define del_xpvmg(a)		S_del_xpvmg(aTHX_ a)
+#define del_xpvlv(a)		S_del_xpvlv(aTHX_ a)
+#define del_xpvbm(a)		S_del_xpvbm(aTHX_ a)
 #define del_xrv(a)		S_del_xrv(aTHX_ a)
 #define sv_unglob(a)		S_sv_unglob(aTHX_ a)
 #define not_a_number(a)		S_not_a_number(aTHX_ a)
@@ -4427,6 +4477,22 @@
 #define more_xnv		S_more_xnv
 #define S_more_xpv		CPerlObj::S_more_xpv
 #define more_xpv		S_more_xpv
+#define S_more_xpviv		CPerlObj::S_more_xpviv
+#define more_xpviv		S_more_xpviv
+#define S_more_xpvnv		CPerlObj::S_more_xpvnv
+#define more_xpvnv		S_more_xpvnv
+#define S_more_xpvcv		CPerlObj::S_more_xpvcv
+#define more_xpvcv		S_more_xpvcv
+#define S_more_xpvav		CPerlObj::S_more_xpvav
+#define more_xpvav		S_more_xpvav
+#define S_more_xpvhv		CPerlObj::S_more_xpvhv
+#define more_xpvhv		S_more_xpvhv
+#define S_more_xpvmg		CPerlObj::S_more_xpvmg
+#define more_xpvmg		S_more_xpvmg
+#define S_more_xpvlv		CPerlObj::S_more_xpvlv
+#define more_xpvlv		S_more_xpvlv
+#define S_more_xpvbm		CPerlObj::S_more_xpvbm
+#define more_xpvbm		S_more_xpvbm
 #define S_more_xrv		CPerlObj::S_more_xrv
 #define more_xrv		S_more_xrv
 #define S_new_xiv		CPerlObj::S_new_xiv
@@ -4435,6 +4501,24 @@
 #define new_xnv			S_new_xnv
 #define S_new_xpv		CPerlObj::S_new_xpv
 #define new_xpv			S_new_xpv
+#define S_new_xpv		CPerlObj::S_new_xpv
+#define new_xpv			S_new_xpv
+#define S_new_xpviv		CPerlObj::S_new_xpviv
+#define new_xpviv		S_new_xpviv
+#define S_new_xpvnv		CPerlObj::S_new_xpvnv
+#define new_xpvnv		S_new_xpvnv
+#define S_new_xpvcv		CPerlObj::S_new_xpvcv
+#define new_xpvcv		S_new_xpvcv
+#define S_new_xpvav		CPerlObj::S_new_xpvav
+#define new_xpvav		S_new_xpvav
+#define S_new_xpvhv		CPerlObj::S_new_xpvhv
+#define new_xpvhv		S_new_xpvhv
+#define S_new_xpvmg		CPerlObj::S_new_xpvmg
+#define new_xpvmg		S_new_xpvmg
+#define S_new_xpvlv		CPerlObj::S_new_xpvlv
+#define new_xpvlv		S_new_xpvlv
+#define S_new_xpvbm		CPerlObj::S_new_xpvbm
+#define new_xpvbm		S_new_xpvbm
 #define S_new_xrv		CPerlObj::S_new_xrv
 #define new_xrv			S_new_xrv
 #define S_del_xiv		CPerlObj::S_del_xiv
@@ -4443,6 +4527,22 @@
 #define del_xnv			S_del_xnv
 #define S_del_xpv		CPerlObj::S_del_xpv
 #define del_xpv			S_del_xpv
+#define S_del_xpviv		CPerlObj::S_del_xpviv
+#define del_xpviv		S_del_xpviv
+#define S_del_xpvnv		CPerlObj::S_del_xpvnv
+#define del_xpvnv		S_del_xpvnv
+#define S_del_xpvcv		CPerlObj::S_del_xpvcv
+#define del_xpvcv		S_del_xpvcv
+#define S_del_xpvav		CPerlObj::S_del_xpvav
+#define del_xpvav		S_del_xpvav
+#define S_del_xpvhv		CPerlObj::S_del_xpvhv
+#define del_xpvhv		S_del_xpvhv
+#define S_del_xpvmg		CPerlObj::S_del_xpvmg
+#define del_xpvmg		S_del_xpvmg
+#define S_del_xpvlv		CPerlObj::S_del_xpvlv
+#define del_xpvlv		S_del_xpvlv
+#define S_del_xpvbm		CPerlObj::S_del_xpvbm
+#define del_xpvbm		S_del_xpvbm
 #define S_del_xrv		CPerlObj::S_del_xrv
 #define del_xrv			S_del_xrv
 #define S_sv_unglob		CPerlObj::S_sv_unglob

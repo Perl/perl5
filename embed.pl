@@ -1966,14 +1966,39 @@ s	|SV*	|more_sv
 s	|void	|more_xiv
 s	|void	|more_xnv
 s	|void	|more_xpv
+s	|void	|more_xpviv
+s	|void	|more_xpvnv
+s	|void	|more_xpvcv
+s	|void	|more_xpvav
+s	|void	|more_xpvhv
+s	|void	|more_xpvmg
+s	|void	|more_xpvlv
+s	|void	|more_xpvbm
 s	|void	|more_xrv
 s	|XPVIV*	|new_xiv
 s	|XPVNV*	|new_xnv
 s	|XPV*	|new_xpv
+s	|XPV*	|new_xpv
+s	|XPVIV*	|new_xpviv
+s	|XPVNV*	|new_xpvnv
+s	|XPVCV*	|new_xpvcv
+s	|XPVAV*	|new_xpvav
+s	|XPVHV*	|new_xpvhv
+s	|XPVMG*	|new_xpvmg
+s	|XPVLV*	|new_xpvlv
+s	|XPVBM*	|new_xpvbm
 s	|XRV*	|new_xrv
 s	|void	|del_xiv	|XPVIV* p
 s	|void	|del_xnv	|XPVNV* p
 s	|void	|del_xpv	|XPV* p
+s	|void	|del_xpviv	|XPVIV* p
+s	|void	|del_xpvnv	|XPVNV* p
+s	|void	|del_xpvcv	|XPVCV* p
+s	|void	|del_xpvav	|XPVAV* p
+s	|void	|del_xpvhv	|XPVHV* p
+s	|void	|del_xpvmg	|XPVMG* p
+s	|void	|del_xpvlv	|XPVLV* p
+s	|void	|del_xpvbm	|XPVBM* p
 s	|void	|del_xrv	|XRV* p
 s	|void	|sv_unglob	|SV* sv
 s	|void	|not_a_number	|SV *sv

@@ -375,7 +375,7 @@ sub B::NULL::save {
     #if ($$sv == 0) {
     #	warn "NULL::save for sv = 0 called from @{[(caller(1))[3]]}\n";
     #}
-    $svsect->add(sprintf("0, %u, 0x%x", $sv->REFCNT + 1, $sv->FLAGS));
+    $svsect->add(sprintf("0, %u, 0x%x", $sv->REFCNT , $sv->FLAGS));
     return savesym($sv, sprintf("&sv_list[%d]", $svsect->index));
 }
 
@@ -385,7 +385,7 @@ sub B::IV::save {
     return $sym if defined $sym;
     $xpvivsect->add(sprintf("0, 0, 0, %d", $sv->IVX));
     $svsect->add(sprintf("&xpviv_list[%d], %lu, 0x%x",
-			 $xpvivsect->index, $sv->REFCNT + 1, $sv->FLAGS));
+			 $xpvivsect->index, $sv->REFCNT , $sv->FLAGS));
     return savesym($sv, sprintf("&sv_list[%d]", $svsect->index));
 }
 
@@ -397,7 +397,7 @@ sub B::NV::save {
     $val .= '.00' if $val =~ /^-?\d+$/;
     $xpvnvsect->add(sprintf("0, 0, 0, %d, %s", $sv->IVX, $val));
     $svsect->add(sprintf("&xpvnv_list[%d], %lu, 0x%x",
-			 $xpvnvsect->index, $sv->REFCNT + 1, $sv->FLAGS));
+			 $xpvnvsect->index, $sv->REFCNT , $sv->FLAGS));
     return savesym($sv, sprintf("&sv_list[%d]", $svsect->index));
 }
 
@@ -413,7 +413,7 @@ sub B::PVLV::save {
 			    $pvsym, $len, $pvmax, $sv->IVX, $sv->NVX, 
 			    $sv->TARGOFF, $sv->TARGLEN, cchar($sv->TYPE)));
     $svsect->add(sprintf("&xpvlv_list[%d], %lu, 0x%x",
-			 $xpvlvsect->index, $sv->REFCNT + 1, $sv->FLAGS));
+			 $xpvlvsect->index, $sv->REFCNT , $sv->FLAGS));
     if (!$pv_copy_on_grow) {
 	$init->add(sprintf("xpvlv_list[%d].xpv_pv = savepvn(%s, %u);",
 			   $xpvlvsect->index, cstring($pv), $len));
@@ -431,7 +431,7 @@ sub B::PVIV::save {
     my ($pvsym, $pvmax) = savepv($pv);
     $xpvivsect->add(sprintf("%s, %u, %u, %d", $pvsym, $len, $pvmax, $sv->IVX));
     $svsect->add(sprintf("&xpviv_list[%d], %u, 0x%x",
-			 $xpvivsect->index, $sv->REFCNT + 1, $sv->FLAGS));
+			 $xpvivsect->index, $sv->REFCNT , $sv->FLAGS));
     if (!$pv_copy_on_grow) {
 	$init->add(sprintf("xpviv_list[%d].xpv_pv = savepvn(%s, %u);",
 			   $xpvivsect->index, cstring($pv), $len));
@@ -452,7 +452,7 @@ sub B::PVNV::save {
     $xpvnvsect->add(sprintf("%s, %u, %u, %d, %s",
 			    $pvsym, $len, $pvmax, $sv->IVX, $val));
     $svsect->add(sprintf("&xpvnv_list[%d], %lu, 0x%x",
-			 $xpvnvsect->index, $sv->REFCNT + 1, $sv->FLAGS));
+			 $xpvnvsect->index, $sv->REFCNT , $sv->FLAGS));
     if (!$pv_copy_on_grow) {
 	$init->add(sprintf("xpvnv_list[%d].xpv_pv = savepvn(%s,%u);",
 			   $xpvnvsect->index, cstring($pv), $len));
@@ -470,7 +470,7 @@ sub B::BM::save {
 			    $len, $len + 258, $sv->IVX, $sv->NVX,
 			    $sv->USEFUL, $sv->PREVIOUS, $sv->RARE));
     $svsect->add(sprintf("&xpvbm_list[%d], %lu, 0x%x",
-			 $xpvbmsect->index, $sv->REFCNT + 1, $sv->FLAGS));
+			 $xpvbmsect->index, $sv->REFCNT , $sv->FLAGS));
     $sv->save_magic;
     $init->add(sprintf("xpvbm_list[%d].xpv_pv = savepvn(%s, %u);",
 		       $xpvbmsect->index, cstring($pv), $len),
@@ -488,7 +488,7 @@ sub B::PV::save {
     my ($pvsym, $pvmax) = savepv($pv);
     $xpvsect->add(sprintf("%s, %u, %u", $pvsym, $len, $pvmax));
     $svsect->add(sprintf("&xpv_list[%d], %lu, 0x%x",
-			 $xpvsect->index, $sv->REFCNT + 1, $sv->FLAGS));
+			 $xpvsect->index, $sv->REFCNT , $sv->FLAGS));
     if (!$pv_copy_on_grow) {
 	$init->add(sprintf("xpv_list[%d].xpv_pv = savepvn(%s, %u);",
 			   $xpvsect->index, cstring($pv), $len));
@@ -506,7 +506,7 @@ sub B::PVMG::save {
     $xpvmgsect->add(sprintf("%s, %u, %u, %d, %s, 0, 0",
 			    $pvsym, $len, $pvmax, $sv->IVX, $sv->NVX));
     $svsect->add(sprintf("&xpvmg_list[%d], %lu, 0x%x",
-			 $xpvmgsect->index, $sv->REFCNT + 1, $sv->FLAGS));
+			 $xpvmgsect->index, $sv->REFCNT , $sv->FLAGS));
     if (!$pv_copy_on_grow) {
 	$init->add(sprintf("xpvmg_list[%d].xpv_pv = savepvn(%s, %u);",
 			   $xpvmgsect->index, cstring($pv), $len));
@@ -560,7 +560,7 @@ sub B::RV::save {
     $rv =~ s/^\([AGHS]V\s*\*\)\s*(\&sv_list.*)$/$1/;
     $xrvsect->add($rv);
     $svsect->add(sprintf("&xrv_list[%d], %lu, 0x%x",
-			 $xrvsect->index, $sv->REFCNT + 1, $sv->FLAGS));
+			 $xrvsect->index, $sv->REFCNT , $sv->FLAGS));
     return savesym($sv, sprintf("&sv_list[%d]", $svsect->index));
 }
 
@@ -712,7 +712,7 @@ sub B::CV::save {
 		     $$stash, $$cv) if $debug_cv;
     }
     $symsect->add(sprintf("svix%d\t(XPVCV*)&xpvcv_list[%u], %lu, 0x%x",
-			  $sv_ix, $xpvcv_ix, $cv->REFCNT + 1, $cv->FLAGS));
+			  $sv_ix, $xpvcv_ix, $cv->REFCNT +1 , $cv->FLAGS));
     return $sym;
 }
 
@@ -819,7 +819,7 @@ sub B::AV::save {
     $xpvavsect->add(sprintf("0, -1, -1, 0, 0.0, 0, Nullhv, 0, 0, 0x%x",
 			    $avflags));
     $svsect->add(sprintf("&xpvav_list[%d], %lu, 0x%x",
-			 $xpvavsect->index, $av->REFCNT + 1, $av->FLAGS));
+			 $xpvavsect->index, $av->REFCNT  , $av->FLAGS));
     my $sv_list_index = $svsect->index;
     my $fill = $av->FILL;
     $av->save_magic;
@@ -885,7 +885,7 @@ sub B::HV::save {
     $xpvhvsect->add(sprintf("0, 0, %d, 0, 0.0, 0, Nullhv, %d, 0, 0, 0",
 			    $hv->MAX, $hv->RITER));
     $svsect->add(sprintf("&xpvhv_list[%d], %lu, 0x%x",
-			 $xpvhvsect->index, $hv->REFCNT + 1, $hv->FLAGS));
+			 $xpvhvsect->index, $hv->REFCNT  , $hv->FLAGS));
     my $sv_list_index = $svsect->index;
     my @contents = $hv->ARRAY;
     if (@contents) {
@@ -921,7 +921,7 @@ sub B::IO::save {
 			    cstring($io->BOTTOM_NAME), $io->SUBPROCESS,
 			    cchar($io->IoTYPE), $io->IoFLAGS));
     $svsect->add(sprintf("&xpvio_list[%d], %lu, 0x%x",
-			 $xpviosect->index, $io->REFCNT + 1, $io->FLAGS));
+			 $xpviosect->index, $io->REFCNT , $io->FLAGS));
     $sym = savesym($io, sprintf("(IO*)&sv_list[%d]", $svsect->index));
     my ($field, $fsym);
     foreach $field (qw(TOP_GV FMT_GV BOTTOM_GV)) {
