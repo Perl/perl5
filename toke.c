@@ -286,6 +286,7 @@ SV *line;
 void
 lex_end()
 {
+    doextract = FALSE;
 }
 
 static void
