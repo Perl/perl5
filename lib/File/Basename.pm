@@ -45,8 +45,7 @@ they assume you are using UNIX emulation and apply the UNIX syntax
 rules instead, for that function call only.
 
 If you haven't called fileparse_set_fstype(), the syntax is chosen
-by examining the "osname" entry from the C<Config> package
-according to these rules.
+by examining the builtin variable C<$^O> according to these rules.
 
 =item fileparse
 
@@ -111,8 +110,7 @@ directory name to be F<.>).
 
 =cut
 
-require 5.000;
-use Config;
+require 5.002;
 require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(fileparse fileparse_set_fstype basename dirname);
@@ -148,7 +146,7 @@ sub fileparse_set_fstype {
 #   according to the syntax of the OS (code is provided below to handle
 #   VMS, Unix, MSDOS and MacOS; you can pick the one you want using
 #   fileparse_set_fstype(), or you can accept the default, which is
-#   based on the information in the %Config array).  It then compares
+#   based on the information in the builtin variable $^O).  It then compares
 #   each element of @excludelist to $filename, and if that element is a
 #   suffix of $filename, it is removed from $filename and prepended to
 #   $tail.  By specifying the elements of @excludelist in the right order,
@@ -184,14 +182,14 @@ sub fileparse {
   }
   if ($fstype =~ /^MSDOS/i) {
     ($dirpath,$basename) = ($fullname =~ /(.*\\)?(.*)/);
-    $dirpath = '.' unless $dirpath;
+    $dirpath = '.\\' unless $dirpath;
   }
   elsif ($fstype =~ /^MAC/i) {
     ($dirpath,$basename) = ($fullname =~ /(.*:)?(.*)/);
   }
   elsif ($fstype !~ /^VMS/i) {  # default to Unix
     ($dirpath,$basename) = ($fullname =~ m#(.*/)?(.*)#);
-    $dirpath = '.' unless $dirpath;
+    $dirpath = './' unless $dirpath;
   }
 
   if (@suffices) {
@@ -249,6 +247,6 @@ sub dirname {
     $dirname;
 }
 
-$Fileparse_fstype = $Config{'osname'};
+$Fileparse_fstype = $^O;
 
 1;
