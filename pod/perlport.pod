@@ -2199,7 +2199,7 @@ Andrew M. Langmead <aml@world.std.com>,
 Larry Moore <ljmoore@freespace.net>,
 Paul Moore <Paul.Moore@uk.origin-it.com>,
 Chris Nandor <pudge@pobox.com>,
-Matthias Neeracher <neeri@iis.ee.ethz.ch>,
+Matthias Neeracher <neeracher@mac.com>,
 Philip Newton <pne@cpan.org>,
 Gary Ng <71564.1743@CompuServe.COM>,
 Tom Phoenix <rootbeer@teleport.com>,
@@ -2212,6 +2212,3 @@ Michael G Schwern <schwern@pobox.com>,
 Dan Sugalski <dan@sidhe.org>,
 Nathan Torkington <gnat@frii.com>.
 
-=head1 VERSION
-
-Version 1.50, last modified 10 Jul 2001
