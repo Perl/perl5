@@ -135,3 +135,11 @@ sub ok {
     $test++;
 }
 
+{
+    sub add_an_x(@){
+        map {"${_}x"} @_;
+    };
+    ok join("-",add_an_x(1,2,3,4)), "1x-2x-3x-4x";
+}
+
+
