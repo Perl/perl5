@@ -78,17 +78,16 @@ $type = '<A HREF="';
 
 ################################################################################
 # location of all podfiles unless on command line
-# $installprivlib="HD:usr:local:lib:perl5"; # uncomment and reset for Mac
-# $installprivlib="C:\usr\local\lib\perl5"; # uncomment and reset for DOS (I hope)
-
-# $installprivlib="/usr/local/lib/perl5"; # Unix
+# $installprivlib='HD:usr:local:lib:perl5'; # uncomment for Mac
+# $installprivlib='C:\usr\local\lib\perl5'; # uncomment for DOS (I hope)
+# $installprivlib='/usr/local/lib/perl5'; # Unix
 $installprivlib="./"; # Standard perl pod directory for intallation
 
 ################################################################################
 # Where to write out the html files
-# $installhtmldir="HD:usr:local:lib:perl5:html"; # uncomment and reset for Mac
-# $installhtmldir="C:\usr\local\lib\perl5\html"; # uncomment and reset for DOS (I hope)
-$installhtmldir = "./";  
+# $installhtmldir='HD:usr:local:lib:perl5:html'; # uncomment for Mac
+# $installhtmldir='C:\usr\local\lib\perl5\html'; # uncomment for DOS (I hope)
+$installhtmldir = './'; 
 
 # test for validness
 
@@ -154,7 +153,7 @@ loop1:
     foreach $podfh ( @Pods ) {
 	$didindex = 0;
 	$refname = $podfh;
-	$refname =~ s/$installprivlib${sep}?//;
+	$refname =~ s/\Q$installprivlib${sep}\E?//;
 	$refname =~ s/${sep}/::/g;
 	$refname =~ s/\.p(m|od)$//;
 	$refname =~ s/^pod:://;
