@@ -1260,6 +1260,23 @@ characters, you must type the parameter without quoting, seperating
 multiple overloads with whitespace.  Note that "" (the stringify 
 overload) should be entered as \"\" (i.e. escaped).
 
+=head2 The FALLBACK: Keyword
+
+In addition to the OVERLOAD keyword, if you need to control how
+Perl autogenerates missing overloaded operators, you can set the
+FALLBACK keyword in the module header section, like this:
+
+    MODULE = RPC  PACKAGE = RPC
+
+    FALLBACK: TRUE
+    ...
+
+where FALLBACK can take any of the three values TRUE, FALSE, or
+UNDEF.  If you do not set any FALLBACK value when using OVERLOAD,
+it defaults to UNDEF.  FALLBACK is not used except when one or 
+more functions using OVERLOAD have been defined.  Please see
+L<overload/Fallback> for more details.
+
 =head2 The INTERFACE: Keyword
 
 This keyword declares the current XSUB as a keeper of the given
