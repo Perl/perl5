@@ -1131,28 +1131,28 @@ t/pragma/strict-subs	Tests of "use strict 'subs'" for strict.t
 t/pragma/strict-vars	Tests of "use strict 'vars'" for strict.t
 t/pragma/strict.t	See if strictures work
 t/pragma/subs.t		See if subroutine pseudo-importation works
-t/pragma/warn-1global	Tests of global warnings for warning.t
-t/pragma/warn-2use	Tests for "use warning" for warning.t
-t/pragma/warn-3both	Tests for interaction of $^W and "use warning"
-t/pragma/warn-4lint	Tests for -W switch
-t/pragma/warn-5nolint	Tests for -X switch
-t/pragma/warn-doio	Tests for doio.c for warning.t
-t/pragma/warn-gv	Tests for gv.c for warning.t
-t/pragma/warn-mg	Tests for mg.c for warning.t
-t/pragma/warn-op	Tests for op.c for warning.t
-t/pragma/warn-perl	Tests for perl.c for warning.t
-t/pragma/warn-perly	Tests for perly.y for warning.t
-t/pragma/warn-pp	Tests for pp.c for warning.t
-t/pragma/warn-pp_ctl	Tests for pp_ctl.c for warning.t
-t/pragma/warn-pp_hot	Tests for pp_hot.c for warning.t
-t/pragma/warn-pp_sys	Tests for pp_sys.c for warning.t
-t/pragma/warn-regcomp	Tests for regcomp.c for warning.t
-t/pragma/warn-regexec	Tests for regexec.c for warning.t
-t/pragma/warn-sv	Tests for sv.c for warning.t
-t/pragma/warn-taint	Tests for taint.c for warning.t
-t/pragma/warn-toke	Tests for toke.c for warning.t
-t/pragma/warn-universal	Tests for universal.c for warning.t
-t/pragma/warn-util	Tests for util.c for warning.t
+t/pragma/warn/1global	Tests of global warnings for warning.t
+t/pragma/warn/2use	Tests for "use warning" for warning.t
+t/pragma/warn/3both	Tests for interaction of $^W and "use warning"
+t/pragma/warn/4lint	Tests for -W switch
+t/pragma/warn/5nolint	Tests for -X switch
+t/pragma/warn/doio	Tests for doio.c for warning.t
+t/pragma/warn/gv	Tests for gv.c for warning.t
+t/pragma/warn/mg	Tests for mg.c for warning.t
+t/pragma/warn/op	Tests for op.c for warning.t
+t/pragma/warn/perl	Tests for perl.c for warning.t
+t/pragma/warn/perly	Tests for perly.y for warning.t
+t/pragma/warn/pp	Tests for pp.c for warning.t
+t/pragma/warn/pp_ctl	Tests for pp_ctl.c for warning.t
+t/pragma/warn/pp_hot	Tests for pp_hot.c for warning.t
+t/pragma/warn/pp_sys	Tests for pp_sys.c for warning.t
+t/pragma/warn/regcomp	Tests for regcomp.c for warning.t
+t/pragma/warn/regexec	Tests for regexec.c for warning.t
+t/pragma/warn/sv	Tests for sv.c for warning.t
+t/pragma/warn/taint	Tests for taint.c for warning.t
+t/pragma/warn/toke	Tests for toke.c for warning.t
+t/pragma/warn/universal	Tests for universal.c for warning.t
+t/pragma/warn/util	Tests for util.c for warning.t
 t/pragma/warning.t	See if warning controls work
 taint.c			Tainting code
 thrdvar.h		Per-thread variables
