@@ -24,7 +24,7 @@ of these two (which is quite a lot easier than using gcc), be sure to
 upgrade to the latest available patch level. Currently:
 
     xlC.C     3.1.4.0
-    vac.C     4.4.0.3	(5.0 is already available)
+    vac.C     4.4.0.3 or 5.0.2.0
 
 Perl can be compiled with either IBM's ANSI C compiler or with gcc.
 The former is recommended, as not only can it compile Perl with no
@@ -33,7 +33,8 @@ require the use of IBM compiler-specific command-line flags.
 
 If you decide to use gcc, make sure your installation is recent and
 complete, and be sure to read the Perl README file for more gcc-specific
-details.
+details. Please report any hoops you had to jump through to the development
+team.
 
 =head2 OS level
 
@@ -59,7 +60,7 @@ because *all* libraries are shared ;-).
 All defaults for Configure can be used.
 
 If you've chosen to use vac 4, be sure to run 4.4.0.3. Older versions
-will turn up nasty later on.
+will turn up nasty later on. For vac 5 be sure to run at least 5.0.1.0.
 
 Here's a brief lead of how to upgrade the compiler to the latest
 level.  Of course this is subject to changes.  You can only upgrade
@@ -139,19 +140,21 @@ Follow the messages ... and you're done.
 
 =head2 Using GNU's gcc for building perl
 
-... ?
+We're woking on this using gcc-3.0 ... (any input highly appreciated)
 
 =head2 Using Large Files with Perl
 
-... ?
+Should yield no problems.
 
 =head2 Threaded Perl
 
-... ?
+Threads seem to work OK, though at the moment not all tests pass when
+threads are used in combination with 64bit configurations.
 
 =head2 64-bit Perl
 
-... ?
+If your AIX is installed with 64-bit support, you can expect 64bit
+configurations to work. In combination with threads some tests might still fail.
 
 =head2 GDBM and Threads
 
@@ -169,6 +172,6 @@ Structure copied from README.hpux
 
 =head1 DATE
 
-Version 0.0.1: 16-10-2000
+Version 0.0.2: 12 Jul 2001
 
 =cut
