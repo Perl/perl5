@@ -398,7 +398,7 @@ CODE:
 OUTPUT:
     RETVAL
 
-IV
+UV
 refaddr(sv)
     SV * sv
 PROTOTYPE: $
@@ -407,7 +407,7 @@ CODE:
     if(!SvROK(sv)) {
 	XSRETURN_UNDEF;
     }
-    RETVAL = PTR2IV(SvRV(sv));
+    RETVAL = PTR2UV(SvRV(sv));
 }
 OUTPUT:
     RETVAL
