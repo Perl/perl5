@@ -775,6 +775,7 @@ lib/Math/BigFloat.pm	An arbitrary precision floating-point arithmetic package
 lib/Math/BigInt.pm	An arbitrary precision integer arithmetic package
 lib/Math/Complex.pm	A Complex package
 lib/Math/Trig.pm	A simple interface to complex trigonometry
+lib/NEXT.pm		Pseudo-class NEXT for method redispatch
 lib/Net/Ping.pm		Hello, anybody home?
 lib/Net/hostent.pm	By-name interface to Perl's builtin gethost*
 lib/Net/netent.pm	By-name interface to Perl's builtin getnet*
@@ -899,14 +900,6 @@ lib/unicode/EAWidth.txt				Unicode character database
 lib/unicode/In.pl				Unicode character database
 lib/unicode/In/0.pl				Unicode character database
 lib/unicode/In/1.pl				Unicode character database
-lib/unicode/In/2.pl				Unicode character database
-lib/unicode/In/3.pl				Unicode character database
-lib/unicode/In/4.pl				Unicode character database
-lib/unicode/In/5.pl				Unicode character database
-lib/unicode/In/6.pl				Unicode character database
-lib/unicode/In/7.pl				Unicode character database
-lib/unicode/In/8.pl				Unicode character database
-lib/unicode/In/9.pl				Unicode character database
 lib/unicode/In/10.pl				Unicode character database
 lib/unicode/In/11.pl				Unicode character database
 lib/unicode/In/12.pl				Unicode character database
@@ -917,6 +910,7 @@ lib/unicode/In/16.pl				Unicode character database
 lib/unicode/In/17.pl				Unicode character database
 lib/unicode/In/18.pl				Unicode character database
 lib/unicode/In/19.pl				Unicode character database
+lib/unicode/In/2.pl				Unicode character database
 lib/unicode/In/20.pl				Unicode character database
 lib/unicode/In/21.pl				Unicode character database
 lib/unicode/In/22.pl				Unicode character database
@@ -927,6 +921,7 @@ lib/unicode/In/26.pl				Unicode character database
 lib/unicode/In/27.pl				Unicode character database
 lib/unicode/In/28.pl				Unicode character database
 lib/unicode/In/29.pl				Unicode character database
+lib/unicode/In/3.pl				Unicode character database
 lib/unicode/In/30.pl				Unicode character database
 lib/unicode/In/31.pl				Unicode character database
 lib/unicode/In/32.pl				Unicode character database
@@ -937,6 +932,7 @@ lib/unicode/In/36.pl				Unicode character database
 lib/unicode/In/37.pl				Unicode character database
 lib/unicode/In/38.pl				Unicode character database
 lib/unicode/In/39.pl				Unicode character database
+lib/unicode/In/4.pl				Unicode character database
 lib/unicode/In/40.pl				Unicode character database
 lib/unicode/In/41.pl				Unicode character database
 lib/unicode/In/42.pl				Unicode character database
@@ -947,6 +943,7 @@ lib/unicode/In/46.pl				Unicode character database
 lib/unicode/In/47.pl				Unicode character database
 lib/unicode/In/48.pl				Unicode character database
 lib/unicode/In/49.pl				Unicode character database
+lib/unicode/In/5.pl				Unicode character database
 lib/unicode/In/50.pl				Unicode character database
 lib/unicode/In/51.pl				Unicode character database
 lib/unicode/In/52.pl				Unicode character database
@@ -957,6 +954,7 @@ lib/unicode/In/56.pl				Unicode character database
 lib/unicode/In/57.pl				Unicode character database
 lib/unicode/In/58.pl				Unicode character database
 lib/unicode/In/59.pl				Unicode character database
+lib/unicode/In/6.pl				Unicode character database
 lib/unicode/In/60.pl				Unicode character database
 lib/unicode/In/61.pl				Unicode character database
 lib/unicode/In/62.pl				Unicode character database
@@ -967,6 +965,7 @@ lib/unicode/In/66.pl				Unicode character database
 lib/unicode/In/67.pl				Unicode character database
 lib/unicode/In/68.pl				Unicode character database
 lib/unicode/In/69.pl				Unicode character database
+lib/unicode/In/7.pl				Unicode character database
 lib/unicode/In/70.pl				Unicode character database
 lib/unicode/In/71.pl				Unicode character database
 lib/unicode/In/72.pl				Unicode character database
@@ -977,6 +976,7 @@ lib/unicode/In/76.pl				Unicode character database
 lib/unicode/In/77.pl				Unicode character database
 lib/unicode/In/78.pl				Unicode character database
 lib/unicode/In/79.pl				Unicode character database
+lib/unicode/In/8.pl				Unicode character database
 lib/unicode/In/80.pl				Unicode character database
 lib/unicode/In/81.pl				Unicode character database
 lib/unicode/In/82.pl				Unicode character database
@@ -987,6 +987,7 @@ lib/unicode/In/86.pl				Unicode character database
 lib/unicode/In/87.pl				Unicode character database
 lib/unicode/In/88.pl				Unicode character database
 lib/unicode/In/89.pl				Unicode character database
+lib/unicode/In/9.pl				Unicode character database
 lib/unicode/In/90.pl				Unicode character database
 lib/unicode/In/91.pl				Unicode character database
 lib/unicode/In/92.pl				Unicode character database
@@ -1564,6 +1565,7 @@ t/lib/mimeb64u.t		see whether MIME::Base64 works
 t/lib/mimeqp.t		see whether MIME::QuotedPrint works
 t/lib/ndbm.t		See if NDBM_File works
 t/lib/net-hostent.t	See if Net::hostent works
+t/lib/next.t		See if NEXT works
 t/lib/odbm.t		See if ODBM_File works
 t/lib/opcode.t		See if Opcode works
 t/lib/open2.t		See if IPC::Open2 works
