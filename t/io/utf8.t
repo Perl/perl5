@@ -66,17 +66,17 @@ close(F);
 {
     $a = chr(300); # This *is* UTF-encoded
     $b = chr(130); # This is not.
-    
+
     open F, ">:utf8", 'a' or die $!;
     print F $a,"\n";
     close F;
-    
+
     open F, "<:utf8", 'a' or die $!;
     $x = <F>;
     chomp($x);
     print "not " unless $x eq chr(300);
     print "ok 14\n";
-    
+
     open F, "a" or die $!; # Not UTF
     binmode(F, ":bytes");
     $x = <F>;
@@ -86,9 +86,10 @@ close(F);
     print "not " unless $x eq $chr;
     print "ok 15\n";
     close F;
-    
+
     open F, ">:utf8", 'a' or die $!;
     binmode(F);  # we write a "\n" and then tell() - avoid CRLF issues.
+    binmode(F,":utf8"); # turn UTF-8-ness back on
     print F $a;
     my $y;
     { my $x = tell(F);
@@ -96,30 +97,30 @@ close(F);
       print "not " unless $x == $y;
       print "ok 16\n";
   }
-    
+
     { # Check byte length of $b
 	use bytes; my $y = length($b);
 	print "not " unless $y == 1;
 	print "ok 17\n";
     }
-    
+
     print F $b,"\n"; # Don't upgrades $b
-    
+
     { # Check byte length of $b
 	use bytes; my $y = length($b);
 	print "not ($y) " unless $y == 1;
 	print "ok 18\n";
     }
-    
+
     {
 	my $x = tell(F);
 	{ use bytes; if (ord('A')==193){$y += 2;}else{$y += 3;}} # EBCDIC ASCII
 	print "not ($x,$y) " unless $x == $y;
 	print "ok 19\n";
     }
-    
+
     close F;
-    
+
     open F, "a" or die $!; # Not UTF
     binmode(F, ":bytes");
     $x = <F>;
@@ -128,14 +129,14 @@ close(F);
     if (ord('A') == 193) { $chr = v141.83.130; } # EBCDIC
     printf "not (%vd) ", $x unless $x eq $chr;
     print "ok 20\n";
-    
+
     open F, "<:utf8", "a" or die $!;
     $x = <F>;
     chomp($x);
     close F;
     printf "not (%vd) ", $x unless $x eq chr(300).chr(130);
     print "ok 21\n";
-    
+
     open F, ">", "a" or die $!;
     if (${^OPEN} =~ /:utf8/) {
         binmode(F, ":bytes:");
@@ -158,7 +159,7 @@ print F $a;
 binmode(F, ":bytes");
 print F chr(130)."\n";
 close F;
- 
+
 open F, "<", "a" or die $!;
 binmode(F, ":bytes");
 $x = <F>; chomp $x;
