@@ -2,7 +2,7 @@ perl_cflags='optimize="-g"'
 d_volatile=undef
 d_castneg=undef
 cc=cc
-libpth="/usr/lib/cmplrs/cc $libpth"
+glibpth="/usr/lib/cmplrs/cc $glibpth"
 groupstype=int
 nm_opt='-B'
 case $PATH in
