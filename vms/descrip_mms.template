@@ -1286,6 +1286,10 @@ test_harness : all [.t.lib]vmsfspec.t [.t.lib]vms_dclsym.t [.t.lib]vms_stdio.t
 	- @[.VMS]Test.Com "$(E)" "$(__DEBUG__)"
 	@ $(MINIPERL) -e "print ""Ran tests"";" > [.t]rantests.
 
+minitest : $(MINITEST_EXE) [.lib]re.pm [.lib]lib.pm [.lib.VMS]Filespec.pm unidatafiles.ts
+	@ PERL_TEST_DRIVER == "minitest"
+	- @[.VMS]Test.Com "$(E)" "$(__DEBUG__)"
+
 # install ought not need a source, but it doesn't work if one's not
 # there. Go figure...
 install : $(MINIPERL_EXE)
