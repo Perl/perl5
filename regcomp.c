@@ -698,7 +698,11 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		    FAIL("variable length lookbehind not implemented");
 		}
 		else if (minnext > U8_MAX) {
+#ifdef UV_IS_QUAD
+		    FAIL2("lookbehind longer than %" PERL_PRIu64 " not implemented", (UV)U8_MAX);
+#else
 		    FAIL2("lookbehind longer than %d not implemented", U8_MAX);
+#endif
 		}
 		scan->flags = minnext;
 	    }

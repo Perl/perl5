@@ -5193,10 +5193,21 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		SV *msg = sv_newmortal();
 		Perl_sv_setpvf(aTHX_ msg, "Invalid conversion in %s: ",
 			  (PL_op->op_type == OP_PRTF) ? "printf" : "sprintf");
-		if (c)
-		    Perl_sv_catpvf(aTHX_ msg, isPRINT(c) ? "\"%%%c\"" : "\"%%\\%03o\"",
-			      c & 0xFF);
-		else
+		if (c) {
+#ifdef UV_IS_QUAD
+		    if (isPRINT(c))
+			Perl_sv_catpvf(aTHX_ msg, 
+				       "\"%%%c\"", c & 0xFF);
+		    else
+			Perl_sv_catpvf(aTHX_ msg,
+				       "\"%%\\%03" PERL_PRIo64 "\"",
+				       (UV)c & 0xFF);
+#else
+		    Perl_sv_catpvf(aTHX_ msg, isPRINT(c) ?
+				   "\"%%%c\"" : "\"%%\\%03o\"",
+				   c & 0xFF);
+#endif
+		} else
 		    sv_catpv(msg, "end of string");
 		Perl_warner(aTHX_ WARN_PRINTF, "%_", msg); /* yes, this is reentrant */
 	    }
