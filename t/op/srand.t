@@ -53,6 +53,7 @@ ok( !eq_array(\@first_run, \@second_run),
 
 # This test checks whether Perl called srand for you.
 @first_run  = `$^X -le "print int rand 100 for 1..100"`;
+sleep(1); # in case our srand() is too time-dependent
 @second_run = `$^X -le "print int rand 100 for 1..100"`;
 
 ok( !eq_array(\@first_run, \@second_run), 'srand() called automatically');

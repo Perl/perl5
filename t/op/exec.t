@@ -17,6 +17,8 @@ $ENV{LANGUAGE} = 'C';		# Ditto in GNU.
 my $Is_VMS   = $^O eq 'VMS';
 my $Is_Win32 = $^O eq 'MSWin32';
 
+skip_all("Tests mostly usesless on MacOS") if $^O eq 'MacOS';
+
 plan(tests => 20);
 
 my $Perl = which_perl();

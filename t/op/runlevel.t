@@ -11,6 +11,7 @@ chdir 't' if -d 't';
 $Is_VMS = $^O eq 'VMS';
 $Is_MSWin32 = $^O eq 'MSWin32';
 $Is_NetWare = $^O eq 'NetWare';
+$Is_MacOS = $^O eq 'MacOS';
 $ENV{PERL5LIB} = "../lib" unless $Is_VMS;
 
 $|=1;

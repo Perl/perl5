@@ -95,7 +95,7 @@ EXPECT
 ########
 eval {sub bar {print "In bar";}}
 ########
-system './perl -ne "print if eof" /dev/null'
+system './perl -ne "print if eof" /dev/null' unless $^O eq 'MacOS'
 ########
 chop($file = <DATA>);
 ########
@@ -282,7 +282,7 @@ print "ok\n" if ("\0" lt "\xFF");
 EXPECT
 ok
 ########
-open(H,'run/fresh_perl.t'); # must be in the 't' directory
+open(H,$^O eq 'MacOS' ? ':run:fresh_perl.t' : 'run/fresh_perl.t'); # must be in the 't' directory
 stat(H);
 print "ok\n" if (-e _ and -f _ and -r _);
 EXPECT

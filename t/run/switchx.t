@@ -6,5 +6,6 @@ BEGIN {
 }
 
 require './test.pl';
+use File::Spec::Functions;
 
-print runperl( switches => ['-x'], progfile => 'run/switchx.aux' );
+print runperl( switches => ['-x'], progfile => catfile(curdir(), 'run', 'switchx.aux') );
