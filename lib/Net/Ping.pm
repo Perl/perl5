@@ -1,15 +1,16 @@
 package Net::Ping;
 
-# Author:   mose@ccsn.edu (Russell Mosemann)
+# Current maintainer: colinm@cpan.org (Colin McMillen)
+#
+# Original author:   mose@ccsn.edu (Russell Mosemann)
 #
 # Authors of the original pingecho():
 #           karrer@bernina.ethz.ch (Andreas Karrer)
 #           Paul.Marquess@btinternet.com (Paul Marquess)
 #
-# Copyright (c) 1996 Russell Mosemann.  All rights reserved.  This
+# Copyright (c) 2001, Colin McMillen.  All rights reserved.  This
 # program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
-
 use 5.005_64;
 require Exporter;
 
@@ -17,12 +18,12 @@ use strict;
 our(@ISA, @EXPORT, $VERSION, $def_timeout, $def_proto, $max_datasize);
 use FileHandle;
 use Socket qw( SOCK_DGRAM SOCK_STREAM SOCK_RAW PF_INET
-               inet_aton sockaddr_in );
+               inet_aton inet_ntoa sockaddr_in );
 use Carp;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(pingecho);
-$VERSION = 2.02;
+$VERSION = 2.03;
 
 # Constants
 
@@ -69,8 +70,8 @@ sub new
     bless($self, $class);
 
     $proto = $def_proto unless $proto;          # Determine the protocol
-    croak("Protocol for ping must be \"tcp\", \"udp\" or \"icmp\"")
-        unless $proto =~ m/^(tcp|udp|icmp)$/;
+    croak('Protocol for ping must be "icmp", "tcp", "udp", or "external"')
+        unless $proto =~ m/^(tcp|udp|icmp|external)$/;
     $self->{"proto"} = $proto;
 
     $timeout = $def_timeout unless $timeout;    # Determine the timeout
@@ -148,23 +149,25 @@ sub ping
     $ip = inet_aton($host);
     return(undef) unless defined($ip);      # Does host exist?
 
-    if ($self->{"proto"} eq "udp")
-    {
-        $ret = $self->ping_udp($ip, $timeout);
-    }
-    elsif ($self->{"proto"} eq "icmp")
-    {
-        $ret = $self->ping_icmp($ip, $timeout);
-    }
-    elsif ($self->{"proto"} eq "tcp")
-    {
-        $ret = $self->ping_tcp($ip, $timeout);
-    }
-    else
-    {
-        croak("Unknown protocol \"$self->{proto}\" in ping()");
-    }
-    return($ret);
+    # Dispatch to the appropriate routine.
+    return $self->ping_external($ip, $timeout) if $self->{"proto"} eq "external";
+    return $self->ping_udp($ip, $timeout)      if $self->{"proto"} eq "udp";
+    return $self->ping_icmp($ip, $timeout)     if $self->{"proto"} eq "icmp";
+    return $self->ping_tcp($ip, $timeout)      if $self->{"proto"} eq "tcp";
+
+    croak("Unknown protocol \"$self->{proto}\" in ping()");
+}
+
+# Uses Net::Ping::External to do an external ping.
+sub ping_external {
+  my ($self,
+      $ip,                # Packed IP number of the host
+      $timeout            # Seconds after which ping times out
+     ) = @_;
+
+  eval { require Net::Ping::External; };
+  croak('Protocol "external" not supported on your system: Net::Ping::External not found') if $@;
+  return Net::Ping::External::ping(ip => $ip, timeout => $timeout);
 }
 
 sub ping_icmp
@@ -284,37 +287,118 @@ sub checksum
 # host specific, we have to open and close each connection here.  We
 # can't just leave a socket open.  Because of the robust nature of
 # tcp, it will take a while before it gives up trying to establish a
-# connection.  Therefore, we have to set the alarm to break out of the
-# connection sooner if the timeout expires.  No data bytes are actually
+# connection.  Therefore, we use select() on a non-blocking socket to
+# check against our timeout. No data bytes are actually
 # sent since the successful establishment of a connection is proof
 # enough of the reachability of the remote host.  Also, tcp is
 # expensive and doesn't need our help to add to the overhead.
 
 sub ping_tcp
 {
+  my ($self,
+      $ip,                # Packed IP number of the host
+      $timeout            # Seconds after which ping times out
+     ) = @_;
+  my ($saddr,             # sockaddr_in with port and ip
+      $rin,               # Used in select()
+      $ret                # The return value
+     );
+
+  socket($self->{"fh"}, &PF_INET(), &SOCK_STREAM(), $self->{"proto_num"}) ||
+    croak("tcp socket error - $!");
+
+  $saddr = sockaddr_in($self->{"port_num"}, $ip);
+
+  $ret = 0;               # Default to unreachable
+
+  # Buggy Winsock API doesn't allow us to use non-blocking connect()
+  # calls. Hence, if our OS is Windows, we need to create a new process
+  # to run a blocking connect attempt, and kill it after the timeout has
+  # passed.
+  if ($^O =~ /win32/i)
+  {
+      my ($child, $ret, $pid, $time);
+      my $host = inet_ntoa($ip);
+
+      # The code we will be executing in our new process.
+      my $code = '"use Net::Ping; $p = Net::Ping->new(\'tcp\'); ';
+      $code .= 'exit($p->_ping_tcp_win(' . $host . '))"';
+
+      # Call the process.
+      $pid = system(1, "perl", "-e", $code);
+
+      # Import the POSIX version of <sys/wait.h>
+      require POSIX;
+      import POSIX qw(:sys_wait_h);
+
+      # Get the current time; will be used to tell if we've timed out.
+      $time = time;
+
+      # Wait for the child to return or for the timeout to expire.
+      do {
+	  $child = waitpid($pid, &WNOHANG);
+          $ret = $?;
+      } until time > ($time + $timeout) or $child;
+
+      # Return an appropriate value; 0 if the child didn't return,
+      # the return value of the child otherwise.
+      return $ret >> 8 if $child;
+
+      kill $pid;
+      return 0;
+  }
+
+  # If our OS isn't Windows, do this stuff instead...
+  else
+  {
+      # Try a non-blocking TCP connect to the remote echo port.
+      # Our call to select() below will stop after the timeout has
+      # passed or set the return value to true if the connection
+      # succeeds in time.
+      $self->{"fh"}->blocking(0);
+      connect($self->{"fh"}, $saddr);
+
+      $rin = "";
+      vec($rin, fileno($self->{"fh"}), 1) = 1;
+      $ret = 1 if select($rin, undef, undef, $timeout);
+
+      # Close our filehandle, restore it to its default state (i.e. blocking),
+      # and return our result.
+      $self->{"fh"}->blocking(1);
+      $self->{"fh"}->close();
+  }
+  return($ret);
+}
+
+# Warning: this method may generate false positives.
+# It is meant to be a private method and should only
+# be invoked by ping_tcp() if $^O =~ /win32/i.
+sub _ping_tcp_win
+{
     my ($self,
         $ip,                # Packed IP number of the host
-        $timeout            # Seconds after which ping times out
         ) = @_;
     my ($saddr,             # sockaddr_in with port and ip
         $ret                # The return value
         );
-                            
+
     socket($self->{"fh"}, &PF_INET(), &SOCK_STREAM(), $self->{"proto_num"}) ||
         croak("tcp socket error - $!");
+
     $saddr = sockaddr_in($self->{"port_num"}, $ip);
 
-    $SIG{'ALRM'} = sub { die };
-    alarm($timeout);        # Interrupt connect() if we have to
-            
     $ret = 0;               # Default to unreachable
-    eval <<'EOM' ;
-        return unless connect($self->{"fh"}, $saddr);
-        $ret = 1;
-EOM
-    alarm(0);
+
+    eval { $ret = connect($self->{"fh"}, $saddr) };
+
+    # If the remote host exists but returns "Connection refused",
+    # the call to connect() sets $! to "Unknown error". So, we
+    # assume that an "Unknown error" actually means the host is
+    # alive. This assumption may occassionally give false positives.
+    $ret = 1 if $! =~ /Unknown error/i;
+
     $self->{"fh"}->close();
-    return($ret);
+    return $ret;
 }
 
 # Description:  Perform a udp echo ping.  Construct a message of
@@ -423,7 +507,7 @@ Net::Ping - check a remote host for reachability
         sleep(1);
     }
     $p->close();
-
+    
     $p = Net::Ping->new("tcp", 2);
     while ($stop_time > time())
     {
@@ -432,7 +516,7 @@ Net::Ping - check a remote host for reachability
         sleep(300);
     }
     undef($p);
-
+    
     # For backward compatibility
     print "$host is alive.\n" if pingecho($host);
 
@@ -443,7 +527,7 @@ hosts on a network.  A ping object is first created with optional
 parameters, a variable number of hosts may be pinged multiple
 times and then the connection is closed.
 
-You may choose one of three different protocols to use for the
+You may choose one of four different protocols to use for the
 ping. The "udp" protocol is the default. Note that a live remote host
 may still fail to be pingable by one or more of these protocols. For
 example, www.microsoft.com is generally alive but not pingable.
@@ -460,7 +544,7 @@ received from the remote host and the received packet contains the
 same data as the packet that was sent, the remote host is considered
 reachable.  This protocol does not require any special privileges.
 
-It should be borne in mind that, for both tcp and udp ping, a host
+It should be borne in mind that, for both udp ping, a host
 will be reported as unreachable if it is not running the
 appropriate echo service.  For Unix-like systems see L<inetd(8)> for
 more information.
@@ -471,6 +555,13 @@ does.  If the echoed message is received from the remote host and
 the echoed information is correct, the remote host is considered
 reachable.  Specifying the "icmp" protocol requires that the program
 be run as root or that the program be setuid to root.
+
+If the "external" protocol is specified, the ping() method attempts to
+use the C<Net::Ping::External> module to ping the remote host.
+C<Net::Ping::External> interfaces with your system's default C<ping>
+utility to perform the ping, and generally produces relatively
+accurate results. If C<Net::Ping::External> if not installed on your
+system, specifying the "external" protocol will result in an error.
 
 =head2 Functions
 
@@ -520,13 +611,6 @@ method.  This subroutine is obsolete and may be removed in a future
 version of Net::Ping.
 
 =back
-
-=head1 WARNING
-
-pingecho() or a ping object with the tcp protocol use alarm() to
-implement the timeout.  So, don't use alarm() in your program while
-you are using pingecho() or a ping object with the tcp protocol.  The
-udp and icmp protocols do not use alarm() to implement the timeout.
 
 =head1 NOTES
 
