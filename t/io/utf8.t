@@ -12,7 +12,7 @@ BEGIN {
 no utf8; # needed for use utf8 not griping about the raw octets
 
 $| = 1;
-print "1..27\n";
+print "1..29\n";
 
 open(F,"+>:utf8",'a');
 print F chr(0x100).'£';
@@ -192,17 +192,22 @@ unshift @a, chr(0); # ... and a null byte in front just for fun
 print F @a;
 close F;
 
+my $c;
+
+# read() should work on characters, not bytes
 open F, "<:utf8", "a";
 $a = 0;
 for (@a) {
-    unless (read(F, $b, 1) == 1  &&
-            length($b)     == 1  &&
-            ord($b)        == ord($_) &&
-            tell(F)        == ($a += bytes::length($b))) {
+    unless (($c = read(F, $b, 1) == 1)  &&
+            length($b)           == 1  &&
+            ord($b)              == ord($_) &&
+            tell(F)              == ($a += bytes::length($b))) {
         print '# ord($_)    == ', ord($_), "\n";
         print '# ord($b)    == ', ord($b), "\n";
         print '# length($b) == ', length($b), "\n";
         print '# tell(F)    == ', tell(F), "\n";
+        print '# $a         == ', $a, "\n";
+        print '# $c         == ', $c, "\n";
         print "not ";
         last;
     }
@@ -210,17 +215,20 @@ for (@a) {
 close F;
 print "ok 26\n";
 
+# sysread() should work on characters, not bytes
 open F, "<:utf8", "a";
 $a = 0;
 for (@a) {
-    unless (sysread(F, $b, 1) == 1  &&
-            length($b)        == 1  &&
-            ord($b)           == ord($_) &&
-            tell(F)           == ($a += bytes::length($b))) {
+    unless (($c = sysread(F, $b, 1)) == 1  &&
+            length($b)               == 1  &&
+            ord($b)                  == ord($_) &&
+            tell(F)                  == ($a += bytes::length($b))) {
         print '# ord($_)    == ', ord($_), "\n";
         print '# ord($b)    == ', ord($b), "\n";
         print '# length($b) == ', length($b), "\n";
         print '# tell(F)    == ', tell(F), "\n";
+        print '# $a         == ', $a, "\n";
+        print '# $c         == ', $c, "\n";
         print "not ";
         last;
     }
@@ -228,4 +236,45 @@ for (@a) {
 close F;
 print "ok 27\n";
 
-END { 1 while unlink "a" }
+# syswrite() on should work on characters, not bytes
+open G, ">:utf8", "b";
+$a = 0;
+for (@a) {
+    unless (($c = syswrite(G, $_, 1)) == 1 &&
+            tell(G)                   == ($a += bytes::length($_))) {
+        print '# ord($_)    == ', ord($_), "\n";
+        print '# tell(G)    == ', tell(G), "\n";
+        print '# $a         == ', $a, "\n";
+        print '# $c         == ', $c, "\n";
+        print "not ";
+        last;
+    }
+}
+close G;
+print "ok 28\n";
+
+# did syswrite() get it right?
+open G, "<:utf8", "b";
+$a = 0;
+for (@a) {
+    unless (($c = sysread(G, $b, 1)) == 1 &&
+	    length($b)               == 1 &&
+	    ord($b)                  == ord($_) &&
+            tell(G)                  == ($a += bytes::length($_))) {
+        print '# ord($_)    == ', ord($_), "\n";
+        print '# ord($b)    == ', ord($b), "\n";
+        print '# length($b) == ', length($b), "\n";
+        print '# tell(G)    == ', tell(G), "\n";
+        print '# $a         == ', $a, "\n";
+        print '# $c         == ', $c, "\n";
+        print "not ";
+        last;
+    }
+}
+close G;
+print "ok 29\n";
+
+END {
+    1 while unlink "a";
+    1 while unlink "b";
+}
