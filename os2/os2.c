@@ -1429,11 +1429,10 @@ Perl_hab_GET()			/* Needed if perl.h cannot be included */
 HMQ
 Perl_Register_MQ(int serve)
 {
+  if (Perl_hmq_refcnt <= 0) {
     PPIB pib;
     PTIB tib;
 
-    if (Perl_hmq_refcnt > 0)
-	return Perl_hmq;
     Perl_hmq_refcnt = 0;		/* Be extra safe */
     DosGetInfoBlocks(&tib, &pib);
     Perl_os2_initial_mode = pib->pib_ultype;
@@ -1451,6 +1450,7 @@ Perl_Register_MQ(int serve)
 	    _exit(188);			/* Panic can try to create a window. */
 	Perl_croak_nocontext("Cannot create a message queue, or morph to a PM application");
     }
+  }
     if (serve) {
 	if ( Perl_hmq_servers <= 0	/* Safe to inform us on shutdown, */
 	     && Perl_hmq_refcnt > 0 )	/* this was switched off before... */
