@@ -1119,8 +1119,7 @@ B<-t> or B<-TU>).  This variable is read-only.
 
 Reflects certain Unicode settings of Perl.  See L<perlrun> for more
 information about the possible values. This variable is set during
-Perl startup and thereafter read-only.  See L<perluniintro>,
-L<perlfunc/open>, and L<open> for more information.
+Perl startup and thereafter read-only.
 
 =item $PERL_VERSION
 

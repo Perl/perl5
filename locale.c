@@ -487,7 +487,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 	 it overrides LC_MESSAGES for GNU gettext, and it also
 	 can have more than one locale, separated by spaces,
 	 in case you need to know.)
-	 If PL_utf8locale and PL_unicode (set by -C or by $ENV{PERL_UNICODE)
+	 If PL_utf8locale and PL_unicode (set by -C or by $ENV{PERL_UNICODE})
          are true, perl.c:S_parse_body() will turn on the PerlIO :utf8 layer
 	 on STDIN, STDOUT, STDERR, _and_ the default open discipline.
       */
