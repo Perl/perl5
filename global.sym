@@ -93,6 +93,7 @@ Perl_do_join
 Perl_do_open
 Perl_do_open9
 Perl_do_openn
+Perl_do_sprintf
 Perl_dowantarray
 Perl_dump_all
 Perl_dump_eval
@@ -301,6 +302,7 @@ Perl_newSVsv
 Perl_newUNOP
 Perl_newWHILEOP
 Perl_new_stackinfo
+Perl_new_vstring
 Perl_ninstr
 Perl_op_free
 Perl_pad_sv

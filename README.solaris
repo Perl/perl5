@@ -381,7 +381,7 @@ need to use perl's malloc, you can rebuild Perl from the sources
 and Configure the build with 
 
 	sh Configure -Dusemymalloc
-  
+
 You should not use perl's malloc if you are building with gcc.  There
 are reports of core dumps, especially in the PDL module.  The problem
 appears to go away under -DDEBUGGING, so it has been difficult to

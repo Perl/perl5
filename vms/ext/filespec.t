@@ -10,19 +10,16 @@ foreach (<DATA>) {
   next if /^\s*$/;
   push(@tests,$_);
 }
-print '1..',scalar(@tests)+6,"\n";
+
+require './test.pl';
+plan(tests => scalar(2*@tests)+6);
 
 foreach $test (@tests) {
-  ($arg,$func,$expect) = split(/\t+/,$test);
-  $idx++;
+  ($arg,$func,$expect) = split(/\s+/,$test);
+
   $rslt = eval "$func('$arg')";
-  if ($@) { print "not ok $idx  : eval error: $@\n"; next; }
-  else {
-    if ($rslt ne $expect) {
-      print "not ok $idx  : $func('$arg') expected |$expect|, got |$rslt|\n";
-    }
-    else { print "ok $idx\n"; }
-  }
+  is($@, '', "eval func('$arg')");
+  is($rslt, $expect, "  result");
 }
 
 $defwarn = <<'EOW';
@@ -32,38 +29,18 @@ $defwarn = <<'EOW';
 # file specifications shwn above are in fact equivalent.
 EOW
 
-if (rmsexpand('[]') eq "\U$ENV{DEFAULT}") { print 'ok ',++$idx,"\n"; }
-else {
-  print 'not ok ', ++$idx, ": rmsexpand('[]') = |", rmsexpand('[]'),
-        "|, \$ENV{DEFAULT} = |\U$ENV{DEFAULT}|\n$defwarn";
-}
-if (rmsexpand('from.here') eq "\L$ENV{DEFAULT}from.here") {
-   print 'ok ', ++$idx, "\n";
-}
-else {
-  print 'not ok ', ++$idx, ": rmsexpand('from.here') = |",
-        rmsexpand('from.here'),
-        "|, \$ENV{DEFAULT}from.here = |\L$ENV{DEFAULT}from.here|\n$defwarn";
-}
-if (rmsexpand('from') eq "\L$ENV{DEFAULT}from") {
-   print 'ok ', ++$idx, "\n";
-}
-else {
-  print 'not ok ', ++$idx, ": rmsexpand('from') = |",
-        rmsexpand('from'),
-        "|, \$ENV{DEFAULT}from = |\L$ENV{DEFAULT}from|\n$defwarn";
-}
-if (rmsexpand('from.here','cant:[get.there];2') eq
-    'cant:[get.there]from.here;2')                 { print 'ok ',++$idx,"\n"; }
-else {
-  print 'not ok ', ++$idx, ': expected |cant:[get.there]from.here;2|, got |',
-        rmsexpand('from.here','cant:[get.there];2'),"|\n";
-}
+is(rmsexpand('[]'),       "\U$ENV{DEFAULT}", 'rmsexpand()') || print $defwarn;
+is(rmsexpand('from.here'),"\L$ENV{DEFAULT}from.here") || print $defwarn;
+is(rmsexpand('from'),     "\L$ENV{DEFAULT}from")      || print $defwarn;
+
+is(rmsexpand('from.here','cant:[get.there];2'),
+   'cant:[get.there]from.here;2')                     || print $defwarn;
+
 
 # Make sure we're using redirected mkdir, which strips trailing '/', since
 # the CRTL's mkdir can't handle this.
-print +(mkdir('testdir/',0777) ? 'ok ' : 'not ok '),++$idx,"\n";
-print +(rmdir('testdir/') ? 'ok ' : 'not ok '),++$idx,"\n";
+ok(mkdir('testdir/',0777),      'using redirected mkdir()');
+ok(rmdir('testdir/'),           '    rmdir()');
 
 __DATA__
 
@@ -121,7 +98,7 @@ down_logical_name_not_likely:[the]garden.path	pathify
 /down_logical_name_not_likely/the/garden/path.	pathify	# N.B. trailing . ==> null type
 /down_logical_name_not_likely/the/garden.path	pathify	
 down_logical_name_not_likely:[the.garden]path.dir;2	pathify	#N.B. ;2
-path	pathify	path/
+__path	pathify	__path/
 /down_logical_name_not_likely/the/garden/.	pathify	/down_logical_name_not_likely/the/garden/./
 /down_logical_name_not_likely/the/garden/..	pathify	/down_logical_name_not_likely/the/garden/../
 /down_logical_name_not_likely/the/garden/...	pathify	/down_logical_name_not_likely/the/garden/.../
@@ -135,7 +112,7 @@ down_logical_name_not_likely:[the.garden.path...]	unixpath	/down_logical_name_no
 /down_logical_name_not_likely/the/garden/path.dir	vmspath	down_logical_name_not_likely:[the.garden.path]
 [.down_logical_name_not_likely.the.garden]path.dir	unixpath	down_logical_name_not_likely/the/garden/path/
 down_logical_name_not_likely/the/garden/path	vmspath	[.down_logical_name_not_likely.the.garden.path]
-path	vmspath	[.path]
+__path	vmspath	[.__path]
 /	vmspath	sys$disk:[000000]
 
 # Redundant characters in Unix paths
@@ -144,4 +121,3 @@ path	vmspath	[.path]
 ..//../	vmspath	[--]
 ./././	vmspath	[]
 ./../.	vmsify	[-]
-

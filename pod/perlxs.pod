@@ -816,7 +816,7 @@ pointer would not modify the Perl parameter, but is put in the output
 list.
 
 The C<OUTLIST>/C<OUT> parameter differ from C<IN_OUTLIST>/C<IN_OUT>
-parameters only by the the initial value of the Perl parameter not
+parameters only by the initial value of the Perl parameter not
 being read (and not being given to the C function - which gets some
 garbage instead).  For example, the same C function as above can be
 interfaced with as
@@ -1344,7 +1344,7 @@ of C<&>, but provide a pointer to this value when the C function is called.
 
 This is useful to avoid a CODE: block for a C function which takes a parameter
 by reference.  Typically, the parameter should be not a pointer type (an
-C<int> or C<long> but not a C<int*> or C<long*>).
+C<int> or C<long> but not an C<int*> or C<long*>).
 
 The following XSUB will generate incorrect C code.  The B<xsubpp> compiler will
 turn this into code which calls C<rpcb_gettime()> with parameters C<(char
@@ -1701,6 +1701,133 @@ double-colons (::), and declare C<Net_Config> to be of that type:
 The INPUT and OUTPUT sections substitute underscores for double-colons
 on the fly, giving the desired effect.  This example demonstrates some
 of the power and versatility of the typemap facility.
+
+=head2 Safely Storing Static Data in XS
+
+Starting with Perl 5.8, a macro framework has been defined to allow
+static data to be safely stored in XS modules that will be accessed from
+a multi-threaded Perl.
+
+Although primarily designed for use with multi-threaded Perl, the macros
+have been designed so that they will work with non-threaded Perl as well.
+
+It is therefore strongly recommended that these macros be used by all
+XS modules that make use of static data.
+
+The easiest way to get a template set of macros to use is by specifiying
+the C<-g> (C<--global>) option with h2xs (see L<h2xs>).
+
+Below is an example module that makes use of the macros.
+
+    #include "EXTERN.h"
+    #include "perl.h"
+    #include "XSUB.h"
+ 
+    /* Global Data */
+ 
+    #define MY_CXT_KEY "BlindMice::_guts" XS_VERSION
+ 
+    typedef struct {
+        int count;
+        char name[3][100];
+    } my_cxt_t;
+ 
+    START_MY_CXT
+ 
+    MODULE = BlindMice           PACKAGE = BlindMice
+ 
+    BOOT:
+    {
+        MY_CXT_INIT;
+        MY_CXT.count = 0;
+        strcpy(MY_CXT.name[0], "None");
+        strcpy(MY_CXT.name[1], "None");
+        strcpy(MY_CXT.name[2], "None");
+    }                              
+
+    int
+    newMouse(char * name)
+        char * name;
+        PREINIT:
+          dMY_CXT;
+        CODE:
+          if (MY_CXT.count >= 3) {
+              warn("Already have 3 blind mice") ;
+              RETVAL = 0;
+          }
+          else {
+              RETVAL = ++ MY_CXT.count;
+              strcpy(MY_CXT.name[MY_CXT.count - 1], name);
+          }
+
+    char *
+    get_mouse_name(index)
+      int index
+      CODE:
+        dMY_CXT;
+        RETVAL = MY_CXT.lives ++;
+        if (index > MY_CXT.count)
+          croak("There are only 3 blind mice.");
+        else
+          RETVAL = newSVpv(MY_CXT.name[index - 1]);
+
+
+B<REFERENCE>
+
+=over 5
+
+=item MY_CXT_KEY
+
+This macro is used to define a unique key to refer to the static data
+for an XS module. The suggested naming scheme, as used by h2xs, is to
+use a string that consists of the module name, the string "::_guts"
+and the module version number.
+
+    #define MY_CXT_KEY "MyModule::_guts" XS_VERSION
+
+=item typedef my_cxt_t
+
+This struct typedef I<must> always be called C<my_cxt_t> -- the other
+C<CXT*> macros assume the existence of the C<my_cxt_t> typedef name.
+
+Declare a typedef named C<my_cxt_t> that is a structure that contains
+all the data that needs to be interpreter-local.
+
+    typedef struct {
+        int some_value;
+    } my_cxt_t;
+
+=item START_MY_CXT
+
+Always place the START_MY_CXT macro directly after the declaration
+of C<my_cxt_t>.
+
+=item MY_CXT_INIT
+
+The MY_CXT_INIT macro initialises storage for the C<my_cxt_t> struct.
+
+It I<must> be called exactly once -- typically in a BOOT: section.
+
+=item dMY_CXT
+
+Use the dMY_CXT macro (a declaration) in all the functions that access
+MY_CXT.
+
+=item MY_CXT
+
+Use the MY_CXT macro to access members of the C<my_cxt_t> struct. For
+example, if C<my_cxt_t> is 
+
+    typedef struct {
+        int index;
+    } my_cxt_t;
+
+then use this to access the C<index> member
+
+    dMY_CXT;
+    MY_CXT.index = 2;
+
+=back
 
 =head1 EXAMPLES
 

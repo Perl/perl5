@@ -41,7 +41,7 @@ Before you start, you need to build celib.dll and w32console.
 See instructions in these packages for building.
 
 In the wince directory, type "nmake -f makefile.ce". This should
-build perl.exe and and perl.dll. For building extension dlls,
+build perl.exe and perl.dll. For building extension dlls,
 type "nmake -f makefile.ce dlls"
 
 When building ext dlls, you get lots of macro redefinition

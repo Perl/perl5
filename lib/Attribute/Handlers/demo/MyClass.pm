@@ -1,4 +1,5 @@
 package MyClass;
+$VERSION = '1.00';
 use v5.6.0;
 use base Attribute::Handlers;
 no warnings 'redefine';

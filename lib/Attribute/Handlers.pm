@@ -2,7 +2,7 @@ package Attribute::Handlers;
 use 5.006;
 use Carp;
 use warnings;
-$VERSION = '0.75';
+$VERSION = '0.76';
 # $DB::single=1;
 
 my %symcache;
@@ -44,8 +44,7 @@ sub import {
     while (@_) {
 	my $cmd = shift;
         if ($cmd =~ /^autotie((?:ref)?)$/) {
-	    my $tiedata = '($was_arrayref ? $data : @$data)';
-	       $tiedata = ($1 ? '$ref, ' : '') . $tiedata;
+	    my $tiedata = ($1 ? '$ref, ' : '') . '@$data';
             my $mapping = shift;
 	    _usage_AH_ $class unless ref($mapping) eq 'HASH';
 	    while (my($attr, $tieclass) = each %$mapping) {
@@ -187,8 +186,8 @@ Attribute::Handlers - Simpler definition of attribute handlers
 
 =head1 VERSION
 
-This document describes version 0.75 of Attribute::Handlers,
-released September  3, 2001.
+This document describes version 0.76 of Attribute::Handlers,
+released November 15, 2001.
 
 =head1 SYNOPSIS
 
@@ -279,7 +278,7 @@ attribute C<:ATTR>. For example:
 			"in phase $phase\n";
 	}
 
-This creates an handler for the attribute C<:Loud> in the class LoudDecl.
+This creates a handler for the attribute C<:Loud> in the class LoudDecl.
 Thereafter, any subroutine declared with a C<:Loud> attribute in the class
 LoudDecl:
 
@@ -441,7 +440,7 @@ the data argument (C<$_[4]>) to a useable form before passing it to
 the handler get in the way.
 
 You can turn off that eagerness-to-help by declaring
-an attribute handler with the the keyword C<RAWDATA>. For example:
+an attribute handler with the keyword C<RAWDATA>. For example:
 
         sub Raw          : ATTR(RAWDATA) {...}
         sub Nekkid       : ATTR(SCALAR,RAWDATA) {...}
@@ -502,9 +501,28 @@ variables. For example:
                 print $next;
         }
 
-In fact, this pattern is so widely applicable that Attribute::Handlers
+Note that, because the C<Cycle> attribute receives its arguments in the
+C<$data> variable, if the attribute is given a list of arguments, C<$data>
+will consist of a single array reference; otherwise, it will consist of the
+single argument directly. Since Tie::Cycle requires its cycling values to
+be passed as an array reference, this means that we need to wrap
+non-array-reference arguments in an array constructor:
+
+        $data = [ $data ] unless ref $data eq 'ARRAY';
+
+Typically, however, things are the other way around: the tieable class expects
+its arguments as a flattened list, so the attribute looks like:
+
+        sub UNIVERSAL::Cycle : ATTR(SCALAR) {
+                my ($package, $symbol, $referent, $attr, $data, $phase) = @_;
+                my @data = ref $data eq 'ARRAY' ? @$data : $data;
+                tie $$referent, 'Tie::Whatever', @data;
+        }
+
+
+This software pattern is so widely applicable that Attribute::Handlers
 provides a way to automate it: specifying C<'autotie'> in the
-C<use Attribute::Handlers> statement. So, the previous example,
+C<use Attribute::Handlers> statement. So, the cycling example,
 could also be written:
 
         use Attribute::Handlers autotie => { Cycle => 'Tie::Cycle' };
@@ -513,10 +531,15 @@ could also be written:
 
         package main;
 
-        my $next : Cycle('A'..'Z');     # $next is now a tied variable
+        my $next : Cycle(['A'..'Z']);     # $next is now a tied variable
 
         while (<>) {
                 print $next;
+
+Note that we now have to pass the cycling values as an array reference,
+since the C<autotie> mechanism passes C<tie> a list of arguments as a list
+(as in the Tie::Whatever example), I<not> as an array reference (as in
+the original Tie::Cycle example at the start of this section).
 
 The argument after C<'autotie'> is a reference to a hash in which each key is
 the name of an attribute to be created, and each value is the class to which

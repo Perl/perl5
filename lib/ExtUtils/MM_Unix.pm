@@ -220,6 +220,7 @@ sub ExtUtils::MM_Unix::postamble ;
 sub ExtUtils::MM_Unix::ppd ;
 sub ExtUtils::MM_Unix::prefixify ;
 sub ExtUtils::MM_Unix::processPL ;
+sub ExtUtils::MM_Unix::quote_paren ;
 sub ExtUtils::MM_Unix::realclean ;
 sub ExtUtils::MM_Unix::replace_manpage_separator ;
 sub ExtUtils::MM_Unix::static ;
@@ -397,6 +398,9 @@ sub cflags {
 	$pollute = '$(PERL_MALLOC_DEF)';
     }
 
+    $self->{CCFLAGS}  = quote_paren($self->{CCFLAGS});
+    $self->{OPTIMIZE} = quote_paren($self->{CCFLAGS});
+
     return $self->{CFLAGS} = qq{
 CCFLAGS = $self->{CCFLAGS}
 OPTIMIZE = $self->{OPTIMIZE}
@@ -502,7 +506,8 @@ sub const_config {
     foreach $m (@{$self->{CONFIG}}){
 	# SITE*EXP macros are defined in &constants; avoid duplicates here
 	next if $once_only{$m} or $m eq 'sitelibexp' or $m eq 'sitearchexp';
-	push @m, "\U$m\E = ".$self->{uc $m}."\n";
+	$self->{uc $m} = quote_paren($self->{uc $m});
+	push @m, uc($m) , ' = ' , $self->{uc $m}, "\n";
 	$once_only{$m} = 1;
     }
     join('', @m);
@@ -1796,7 +1801,7 @@ usually solves this kind of problem.
     $self->{INST_SCRIPT} ||= $self->catdir($self->curdir,'blib','script');
 
     # The user who requests an installation directory explicitly
-    # should not have to tell us a architecture installation directory
+    # should not have to tell us an architecture installation directory
     # as well. We look if a directory exists that is named after the
     # architecture. If not we take it as a sign that it should be the
     # same as the requested installation directory. Otherwise we take
@@ -3154,6 +3159,22 @@ $target :: $plfile
 	}
     }
     join "", @m;
+}
+
+=item quote_paren
+
+Backslashes parentheses C<()> in command line arguments.
+Doesn't handle recursive Makefile C<$(...)> constructs,
+but handles simple ones.
+
+=cut
+
+sub quote_paren {
+    local $_ = shift;
+    s/\$\((.+?)\)/\$\\\\($1\\\\)/g;	# protect $(...)
+    s/(?<!\\)([()])/\\$1/g;		# quote unprotected
+    s/\$\\\\\((.+?)\\\\\)/\$($1)/g;	# unprotect $(...)
+    return $_;
 }
 
 =item realclean (o)

@@ -84,6 +84,16 @@ sub _make_tag_func {
 		 (ref(\$_[0]) eq 'ARRAY') ? \@{\$_[0]} : "\@_";
 	    }
 	    else {
+                my \@args;
+		if(ref(\$_[0]) eq 'ARRAY') {
+                    \@args = \@{\$_[0]}
+                } else {
+                    foreach (\@_) {
+                        \$args[0] .= \$_;
+                        \$args[0] .= " " unless \$args[0] =~ /\\s\$/;
+                    }
+                    chop \$args[0];
+                }
 		\@result = map { 
 		    chomp; 
 		    if ( \$_ !~ /<\\// ) {
@@ -94,8 +104,8 @@ sub _make_tag_func {
 			CGI::Pretty::_prettyPrint( \\\$tmp );
 			\$_ = \$tmp;
 		    }
-		    "\$tag\$CGI::Pretty::LINEBREAK\$CGI::Pretty::INDENT\$_\$CGI::Pretty::LINEBREAK\$untag\$CGI::Pretty::LINEBREAK" } 
-		(ref(\$_[0]) eq 'ARRAY') ? \@{\$_[0]} : "\@_";
+		    "\$tag\$CGI::Pretty::LINEBREAK\$CGI::Pretty::INDENT\$_\$CGI::Pretty::LINEBREAK\$untag\$CGI::Pretty::LINEBREAK" 
+                } \@args;
 	    }
 	    local \$" = "";
 	    return "\@result";

@@ -19,7 +19,7 @@ package Math::BigInt;
 my $class = "Math::BigInt";
 require 5.005;
 
-$VERSION = '1.45';
+$VERSION = '1.46';
 use Exporter;
 @ISA =       qw( Exporter );
 @EXPORT_OK = qw( bneg babs bcmp badd bmul bdiv bmod bnorm bsub
@@ -774,9 +774,14 @@ sub bsub
   my ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
 
   return $x if $x->modify('bsub');
-  $x->badd($y->bneg()); # badd does not leave internal zeros
-  $y->bneg();           # refix y, assumes no one reads $y in between
-  return $x->round($a,$p,$r,$y);
+ 
+  if (!$y->is_zero())		# don't need to do anything if $y is 0
+    {
+    $y->{sign} =~ tr/+\-/-+/; 	# does nothing for NaN
+    $x->badd($y,$a,$p,$r); 	# badd does not leave internal zeros
+    $y->{sign} =~ tr/+\-/-+/; 	# refix $y (does nothing for NaN)
+    }
+  $x;				# already rounded by badd()
   }
 
 sub binc
@@ -784,7 +789,20 @@ sub binc
   # increment arg by one
   my ($self,$x,$a,$p,$r) = ref($_[0]) ? (ref($_[0]),@_) : objectify(1,@_);
   return $x if $x->modify('binc');
-  $x->badd($self->__one())->round($a,$p,$r);
+
+  if ($x->{sign} eq '+')
+    {
+    $x->{value} = $CALC->_inc($x->{value});
+    return $x->round($a,$p,$r);
+    }
+  elsif ($x->{sign} eq '-')
+    {
+    $x->{value} = $CALC->_dec($x->{value});
+    $x->{sign} = '+' if $CALC->_is_zero($x->{value}); # -1 +1 => -0 => +0
+    return $x->round($a,$p,$r);
+    }
+  # inf, nan handling etc
+  $x->badd($self->__one(),$a,$p,$r);		# does round
   }
 
 sub bdec
@@ -792,7 +810,24 @@ sub bdec
   # decrement arg by one
   my ($self,$x,$a,$p,$r) = ref($_[0]) ? (ref($_[0]),@_) : objectify(1,@_);
   return $x if $x->modify('bdec');
-  $x->badd($self->__one('-'))->round($a,$p,$r);
+  
+  my $zero = $CALC->_is_zero($x->{value}) && $x->{sign} eq '+';
+  # <= 0
+  if (($x->{sign} eq '-') || $zero) 
+    {
+    $x->{value} = $CALC->_inc($x->{value});
+    $x->{sign} = '-' if $zero;			# 0 => 1 => -1
+    $x->{sign} = '+' if $CALC->_is_zero($x->{value}); # -1 +1 => -0 => +0
+    return $x->round($a,$p,$r);
+    }
+  # > 0
+  elsif ($x->{sign} eq '+')
+    {
+    $x->{value} = $CALC->_dec($x->{value});
+    return $x->round($a,$p,$r);
+    }
+  # inf, nan handling etc
+  $x->badd($self->__one('-'),$a,$p,$r);			# does round
   } 
 
 sub blcm 

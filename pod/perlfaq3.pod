@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq3 - Programming Tools ($Revision: 1.8 $, $Date: 2001/10/17 14:14:20 $)
+perlfaq3 - Programming Tools ($Revision: 1.9 $, $Date: 2001/11/09 08:06:04 $)
 
 =head1 DESCRIPTION
 
@@ -22,7 +22,7 @@ Have you read the appropriate manpages?  Here's a brief index:
 	Regexes		perlre, perlfunc, perlop, perllocale
 	Moving to perl5	perltrap, perl
 	Linking w/C	perlxstut, perlxs, perlcall, perlguts, perlembed
-	Various 	http://www.perl.com/CPAN/doc/FMTEYEWTK/index.html
+	Various 	http://www.cpan.org/doc/FMTEYEWTK/index.html
 			(not a man-page but still useful)
 
 A crude table of contents for the Perl manpage set is found in L<perltoc>.
@@ -152,11 +152,11 @@ Put that in your F<.exrc> file (replacing the caret characters
 with control characters) and away you go.  In insert mode, ^T is
 for indenting, ^D is for undenting, and ^O is for blockdenting--
 as it were.  A more complete example, with comments, can be found at
-http://www.perl.com/CPAN-local/authors/id/TOMC/scripts/toms.exrc.gz
+http://www.cpan.org/authors/id/TOMC/scripts/toms.exrc.gz
 
 If you are used to using the I<vgrind> program for printing out nice code
 to a laser printer, you can take a stab at this using
-http://www.perl.com/CPAN/doc/misc/tips/working.vgrind.entry, but the
+http://www.cpan.org/doc/misc/tips/working.vgrind.entry, but the
 results are not particularly satisfying for sophisticated code.
 
 The a2ps at http://www.infres.enst.fr/%7Edemaille/a2ps/ does lots of things
@@ -169,7 +169,7 @@ EXUBERANT CTAGS is available from http://ctags.sourceforge.net/
 and does a good job of making tags files for perl code.
 
 There is also a simple one at
-http://www.perl.com/CPAN/authors/id/TOMC/scripts/ptags.gz which may do
+http://www.cpan.org/authors/id/TOMC/scripts/ptags.gz which may do
 the trick.  It can be easy to hack this into what you want.
 
 =head2 Is there an IDE or Windows Perl Editor?
@@ -385,10 +385,10 @@ OS X and BeOS respectively (http://www.hekkelman.com/).
 =head2 Where can I get Perl macros for vi?
 
 For a complete version of Tom Christiansen's vi configuration file,
-see http://www.perl.com/CPAN/authors/Tom_Christiansen/scripts/toms.exrc.gz ,
+see http://www.cpan.org/authors/Tom_Christiansen/scripts/toms.exrc.gz ,
 the standard benchmark file for vi emulators.  The file runs best with nvi,
 the current version of vi out of Berkeley, which incidentally can be built
-with an embedded Perl interpreter--see http://www.perl.com/CPAN/src/misc.
+with an embedded Perl interpreter--see http://www.cpan.org/src/misc.
 
 =head2 Where can I get perl-mode for emacs?
 
@@ -409,7 +409,7 @@ shouldn't be an issue.
 
 The Curses module from CPAN provides a dynamically loadable object
 module interface to a curses library.  A small demo can be found at the
-directory http://www.perl.com/CPAN/authors/Tom_Christiansen/scripts/rep;
+directory http://www.cpan.org/authors/Tom_Christiansen/scripts/rep;
 this program repeats a command and updates the screen as needed, rendering
 B<rep ps axu> similar to B<top>.
 
@@ -418,18 +418,18 @@ B<rep ps axu> similar to B<top>.
 Tk is a completely Perl-based, object-oriented interface to the Tk toolkit
 that doesn't force you to use Tcl just to get at Tk.  Sx is an interface
 to the Athena Widget set.  Both are available from CPAN.  See the
-directory http://www.perl.com/CPAN/modules/by-category/08_User_Interfaces/
+directory http://www.cpan.org/modules/by-category/08_User_Interfaces/
 
 Invaluable for Perl/Tk programming are the Perl/Tk FAQ at
 http://w4.lns.cornell.edu/%7Epvhp/ptk/ptkTOC.html , the Perl/Tk Reference
 Guide available at
-http://www.perl.com/CPAN-local/authors/Stephen_O_Lidie/ , and the
+http://www.cpan.org/authors/Stephen_O_Lidie/ , and the
 online manpages at
 http://www-users.cs.umn.edu/%7Eamundson/perl/perltk/toc.html .
 
 =head2 How can I generate simple menus without using CGI or Tk?
 
-The http://www.perl.com/CPAN/authors/id/SKUNZ/perlmenu.v4.0.tar.gz
+The http://www.cpan.org/authors/id/SKUNZ/perlmenu.v4.0.tar.gz
 module, which is curses-based, can help with this.
 
 =head2 What is undump?
@@ -670,7 +670,7 @@ Both of these solutions can have far-reaching effects on your system
 and on the way you write your CGI programs, so investigate them with
 care.
 
-See http://www.perl.com/CPAN/modules/by-category/15_World_Wide_Web_HTML_HTTP_CGI/ .
+See http://www.cpan.org/modules/by-category/15_World_Wide_Web_HTML_HTTP_CGI/ .
 
 A non-free, commercial product, ``The Velocity Engine for Perl'',
 (http://www.binevolve.com/ or http://www.binevolve.com/velocigen/ )
@@ -873,13 +873,13 @@ when it runs fine on the command line'', see the troubleshooting
 guides and references in L<perlfaq9> or in the CGI MetaFAQ:
 
 	http://www.perl.org/CGI_MetaFAQ.html
-	
+
 =head2 Where can I learn about object-oriented Perl programming?
 
 A good place to start is L<perltoot>, and you can use L<perlobj>,
 L<perlboot>, and L<perlbot> for reference.  Perltoot didn't come out
 until the 5.004 release; you can get a copy (in pod, html, or
-postscript) from http://www.perl.com/CPAN/doc/FMTEYEWTK/ .
+postscript) from http://www.cpan.org/doc/FMTEYEWTK/ .
 
 =head2 Where can I learn about linking C with Perl? [h2xs, xsubpp]
 

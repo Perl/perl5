@@ -130,7 +130,7 @@ handled by C<xsubpp>.
 Return an integer from an XSUB immediately.  Uses C<XST_mIV>.
 
 =for apidoc Am|void|XSRETURN_NV|NV nv
-Return an double from an XSUB immediately.  Uses C<XST_mNV>.
+Return a double from an XSUB immediately.  Uses C<XST_mNV>.
 
 =for apidoc Am|void|XSRETURN_PV|char* str
 Return a copy of a string from an XSUB immediately.  Uses C<XST_mPV>.

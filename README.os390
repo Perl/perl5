@@ -253,16 +253,16 @@ Out of Memory!
 Recent perl test suite is quite memory hunrgy. In addition to the comments
 above on memory limitations it is also worth checking for _CEE_RUNOPTS
 in your environment. Perl now has (in miniperlmain.c) a C #pragma
-to set CEE run options, but the enviroment variable wins.
+to set CEE run options, but the environment variable wins.
 
-The C code ask for:
+The C code asks for:
 
  #pragma runopts(HEAP(2M,500K,ANYWHERE,KEEP,8K,4K) STACK(,,ANY,) ALL31(ON))
 
 The important parts of that are the second argument (the increment) to HEAP,
 and allowing the stack to be "Above the (16M) line". If the heap
-increment is too small then when perl (for example loading unicode/Name.pl) trys
-to create a "big" (400K+) string it cannot fit in a single segement
+increment is too small then when perl (for example loading unicode/Name.pl) tries
+to create a "big" (400K+) string it cannot fit in a single segment
 and you get "Out of Memory!" - even if there is still plenty of memory
 available.
 

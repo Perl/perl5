@@ -2139,7 +2139,7 @@ PP(pp_redo)
 STATIC OP *
 S_dofindlabel(pTHX_ OP *o, char *label, OP **opstack, OP **oplimit)
 {
-    OP *kid;
+    OP *kid = Nullop;
     OP **ops = opstack;
     static char too_deep[] = "Target of goto is too deeply nested";
 
@@ -4053,7 +4053,7 @@ dynprep(pTHX_ gptr *list1, gptr *list2, size_t nmemb, SVCOMPARE_t cmp)
 
 /* 
 =for apidoc sortsv
-   
+
 Sort an array. Here is an example:
 
     sortsv(AvARRAY(av), av_len(av)+1, Perl_sv_cmp_locale); 

@@ -55,7 +55,7 @@ CONFIGURE
 
 Normally when perl Makefile.PL is run it will run Configure which will
 ask some questions about your system. The results of these questions
-will be stored in in a file called libnet.cfg which will be installed
+will be stored in a file called libnet.cfg which will be installed
 alongside the other perl modules in this distribution. The Makefile.PL
 will run Configure in an interactive mode unless these exists a file
 called libnet.cfg in the build directory.

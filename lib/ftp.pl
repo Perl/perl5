@@ -330,7 +330,7 @@ sub ftp'cwd
 # &ftp'dir( remote LIST options )
 # Start a list goin with the given options.
 # Presuming that the remote deamon uses the ls command to generate the
-# data to send back then then you can send it some extra options (eg: -lRa)
+# data to send back then you can send it some extra options (eg: -lRa)
 # return 1 if sucessful and 0 on a failure
 sub ftp'dir_open
 {

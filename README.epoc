@@ -12,7 +12,7 @@ Perl 5 README file for the EPOC operating system.
 
 =head1 INTRODUCTION
 
-EPOC is a OS for palmtops and mobile phones. For more informations look at:
+EPOC is an OS for palmtops and mobile phones. For more informations look at:
 http://www.symbian.com/
 
 This is a port of perl to EPOC. It runs on ER5 machines: Psion 5mx,
@@ -50,7 +50,7 @@ start perl with a double click on the camel icon. Be sure to configure
 the perl installation drive first. You can even provide a script with
 a special commandline, if needed.
 
-Alternativly you can get ESHELL from symbian: 
+Alternatively you can get ESHELL from symbian: 
 http://developer.epocworld.com/downloads/progs/Eshell.zip
 
 Running ESHELL you can enter: perl -de 0 in order to run the perl
@@ -58,7 +58,7 @@ debugger. If you are leaving perl, you get into the system screen. You
 have to switch back manually to ESHELL. When perl is running, you will
 see a task with the name STDOUT in the task list. 
 
-If you have a ER3 machine (i.e. a PSION 5), you may have to supply the
+If you have an ER3 machine (i.e. a PSION 5), you may have to supply the
 full path to the perl executable C:\system\programs\perl.exe.
 
 If you need to set the current directory of perl, please use the
@@ -68,7 +68,7 @@ command line switch '-x'. See L<perlrun> for details.
 
 You can stop a running perl process in the task list by closing the
 application `STDOUT'. You cannot stop a running perl process if it has
-not written anyting to stdout or stderr! Be very cautious with I/O
+not written anything to stdout or stderr! Be very cautious with I/O
 redirection. You will have to reboot the PDA!
 
 =head1 USING PERL ON EPOC
@@ -129,7 +129,7 @@ backquoting, pipes etc.
 
 =item *
 
-system() does not inherit ressources like: file descriptors,
+system() does not inherit resources like: file descriptors,
 environment etc.
 
 =item *

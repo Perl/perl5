@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq1 - General Questions About Perl ($Revision: 1.1 $, $Date: 2001/09/20 03:03:00 $)
+perlfaq1 - General Questions About Perl ($Revision: 1.2 $, $Date: 2001/11/09 08:06:04 $)
 
 =head1 DESCRIPTION
 
@@ -252,12 +252,12 @@ programmers prefer to avoid them altogether.
 These are the "just another perl hacker" signatures that some people
 sign their postings with.  Randal Schwartz made these famous.  About
 100 of the earlier ones are available from
-http://www.perl.com/CPAN/misc/japh .
+http://www.cpan.org/misc/japh .
 
 =head2 Where can I get a list of Larry Wall witticisms?
 
 Over a hundred quips by Larry, from postings of his or source code,
-can be found at http://www.perl.com/CPAN/misc/lwall-quotes.txt.gz .
+can be found at http://www.cpan.org/misc/lwall-quotes.txt.gz .
 
 =head2 How can I convince my sysadmin/supervisor/employees to use version 5/5.005/Perl instead of some other language?
 

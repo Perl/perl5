@@ -4,10 +4,10 @@ use 5.006;
 use strict;
 use warnings;
 use Carp;
-use Lingua::KO::Hangul::Util;
+
 require Exporter;
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 our $PACKAGE = __PACKAGE__;
 
 our @ISA = qw(Exporter);
@@ -19,7 +19,7 @@ our @EXPORT = ();
 (our $Path = $INC{'Unicode/Collate.pm'}) =~ s/\.pm$//;
 our $KeyFile = "allkeys.txt";
 
-our %Combin; # combining class from Unicode::Normalize
+our $getCombinClass; # coderef for combining class from Unicode::Normalize
 
 use constant Min2      => 0x20;   # minimum weight at level 2
 use constant Min3      => 0x02;   # minimum weight at level 3
@@ -39,22 +39,26 @@ sub new
      ! defined $self->{alternate} ? '' : $self->{alternate};
 
   # collation level
-  $self->{level} ||= ($self->{alternate} =~ /shift/ ? 4 : 3);
+  $self->{level} ||= ($self->{alternate} =~ /^shift/ ? 4 : 3);
 
   # normalization form
   $self->{normalization} = 'D' if ! exists $self->{normalization};
 
-  eval "use Unicode::Normalize;" if defined $self->{normalization};
+  if(defined $self->{normalization}){
+    eval "use Unicode::Normalize;";
+    croak "you'd install Unicode::Normalize for normalization forms: $@"
+	if $@;
+    $getCombinClass = \&Unicode::Normalize::getCombinClass
+	if ! $getCombinClass;
+  }
 
-  $self->{normalize} = 
+  $self->{UNF} = 
     ! defined $self->{normalization}        ? undef :
     $self->{normalization} =~ /^(?:NF)?C$/  ? \&NFC :
     $self->{normalization} =~ /^(?:NF)?D$/  ? \&NFD :
     $self->{normalization} =~ /^(?:NF)?KC$/ ? \&NFKC :
     $self->{normalization} =~ /^(?:NF)?KD$/ ? \&NFKD :
     croak "$PACKAGE unknown normalization form name: $self->{normalization}";
-
-  *Combin = \%Unicode::Normalize::Combin if $self->{normalize} && ! %Combin;
 
   # backwards
   $self->{backwards} ||= [];
@@ -180,7 +184,7 @@ sub splitCE
 {
   my $self = shift;
   my $code = $self->{preprocess};
-  my $norm = $self->{normalize};
+  my $norm = $self->{UNF};
   my $ent  = $self->{entries};
   my $max  = $self->{maxlength};
   my $rear = $self->{rearrangeHash};
@@ -221,15 +225,15 @@ sub splitCE
     }
     else {  $ch = pack('U', $u) }
 
-    if(%Combin && defined $ch) # with Combining Char
+  # with Combining Char (UTS#10, 4.2.1), here requires Unicode::Normalize.
+    if($getCombinClass && defined $ch)
     {
-      for(my $j = $i+1; $j < @src && $Combin{ $src[$j] }; $j++)
+      for(my $j = $i+1; $j < @src && $getCombinClass->( $src[$j] ); $j++)
       {
         my $comb = pack 'U', $src[$j];
         next if ! $ent->{ $ch.$comb };
         $ch .= $comb;
         splice(@src, $j, 1);
-        last;
       }
     }
     push @buf, $ch;
@@ -256,7 +260,7 @@ sub getWt
     _isHangul($u)
       ? $hang
         ? &$hang($u)
-        : map(@{ $ent->{pack('U', $_)} }, decomposeHangul($u))
+        : map(@{ $ent->{pack('U', $_)} }, _decompHangul($u))
       : _isCJK($u)
         ? $cjk ? &$cjk($u) : map($self->altCE(0,@$_), _CJK($u))
         : map($self->altCE(0,@$_), _derivCE($u));
@@ -372,13 +376,13 @@ sub getSortKey
 ##
 ## int compare = cmp(string a, string b)
 ##
-sub cmp
-{
-  my $obj = shift;
-  my $a   = shift;
-  my $b   = shift;
-  $obj->getSortKey($a) cmp $obj->getSortKey($b);
-}
+sub cmp { $_[0]->getSortKey($_[1]) cmp $_[0]->getSortKey($_[2]) }
+sub eq  { $_[0]->getSortKey($_[1]) eq  $_[0]->getSortKey($_[2]) }
+sub ne  { $_[0]->getSortKey($_[1]) ne  $_[0]->getSortKey($_[2]) }
+sub lt  { $_[0]->getSortKey($_[1]) lt  $_[0]->getSortKey($_[2]) }
+sub le  { $_[0]->getSortKey($_[1]) le  $_[0]->getSortKey($_[2]) }
+sub gt  { $_[0]->getSortKey($_[1]) gt  $_[0]->getSortKey($_[2]) }
+sub ge  { $_[0]->getSortKey($_[1]) ge  $_[0]->getSortKey($_[2]) }
 
 ##
 ## list[strings] sorted = sort(list[strings] arg)
@@ -408,11 +412,7 @@ sub _derivCE
 ##
 ## "hhhh hhhh hhhh" to (dddd, dddd, dddd)
 ##
-sub _getHexArray
-{
-  my $str = shift;
-  map hex(), $str =~ /([0-9a-fA-F]+)/g;
-}
+sub _getHexArray { map hex(), $_[0] =~ /([0-9a-fA-F]+)/g }
 
 ##
 ## bool is_a_CJK_Unified_Ideograph = _isCJK(int codepoint)
@@ -428,19 +428,25 @@ sub _isCJK
 ##
 ## list[arrayref] CE = _CJK(int codepoint_of_CJK)
 ##
-sub _CJK
-{
-  my $u = shift;
-  $u > 0xFFFF ? _derivCE($u) : [$u,0x20,0x02,$u];
-}
+sub _CJK { $_[0] > 0xFFFF ? _derivCE($_[0]) : [$_[0], 0x20, 0x02, $_[0]] }
 
 ##
 ## bool is_a_Hangul_Syllable = _isHangul(int codepoint) 
 ##
-sub _isHangul
-{
-  my $code = shift;
-  return 0xAC00 <= $code && $code <= 0xD7A3;
+sub _isHangul { return 0xAC00 <= $_[0] && $_[0] <= 0xD7A3 }
+
+sub _decompHangul {
+    my $code = shift;
+  # $code must be in Hangul syllable. check it before you enter here.
+    my $SIndex = $code - 0xAC00;
+    my $LIndex = int( $SIndex / 588);
+    my $VIndex = int(($SIndex % 588) / 28);
+    my $TIndex =      $SIndex % 28;
+    return (
+       0x1100 + $LIndex,
+       0x1161 + $VIndex,
+      $TIndex ? (0x11A7 + $TIndex) : (),
+    );
 }
 
 1;
@@ -455,13 +461,13 @@ Unicode::Collate - use UCA (Unicode Collation Algorithm)
   use Unicode::Collate;
 
   #construct
-  $UCA = Unicode::Collate->new(%tailoring);
+  $Collator = Unicode::Collate->new(%tailoring);
 
   #sort
-  @sorted = $UCA->sort(@not_sorted);
+  @sorted = $Collator->sort(@not_sorted);
 
   #compare
-  $result = $UCA->cmp($a, $b); # returns 1, 0, or -1. 
+  $result = $Collator->cmp($a, $b); # returns 1, 0, or -1. 
 
 =head1 DESCRIPTION
 
@@ -469,7 +475,7 @@ Unicode::Collate - use UCA (Unicode Collation Algorithm)
 
 The C<new> method returns a collator object.
 
-   $UCA = Unicode::Collate->new(
+   $Collator = Unicode::Collate->new(
       alternate => $alternate,
       backwards => $levelNumber, # or \@levelNumbers
       entry => $element,
@@ -488,7 +494,7 @@ The C<new> method returns a collator object.
       upper_before_lower => $bool,
    );
    # if %tailoring is false (empty),
-   # $UCA should do the default collation.
+   # $Collator should do the default collation.
 
 =over 4
 
@@ -664,17 +670,38 @@ If the parameter is true, this is reversed.
 
 =over 4
 
-=item C<@sorted = $UCA-E<gt>sort(@not_sorted)>
+=item C<@sorted = $Collator-E<gt>sort(@not_sorted)>
 
 Sorts a list of strings.
 
-=item C<$result = $UCA-E<gt>cmp($a, $b)>
+=item C<$result = $Collator-E<gt>cmp($a, $b)>
 
 Returns 1 (when C<$a> is greater than C<$b>)
 or 0 (when C<$a> is equal to C<$b>)
 or -1 (when C<$a> is lesser than C<$b>).
 
-=item C<$sortKey = $UCA-E<gt>getSortKey($string)>
+=item C<$result = $Collator-E<gt>eq($a, $b)>
+
+=item C<$result = $Collator-E<gt>ne($a, $b)>
+
+=item C<$result = $Collator-E<gt>lt($a, $b)>
+
+=item C<$result = $Collator-E<gt>le($a, $b)>
+
+=item C<$result = $Collator-E<gt>gt($a, $b)>
+
+=item C<$result = $Collator-E<gt>ge($a, $b)>
+
+They works like the same name operators as theirs. 
+
+   eq : whether $a is equal to $b.
+   ne : whether $a is not equal to $b.
+   lt : whether $a is lesser than $b.
+   le : whether $a is lesser than $b or equal to $b.
+   gt : whether $a is greater than $b.
+   ge : whether $a is greater than $b or equal to $b.
+
+=item C<$sortKey = $Collator-E<gt>getSortKey($string)>
 
 -- see 4.3 Form a sort key for each string, UTR #10.
 
@@ -683,15 +710,15 @@ Returns a sort key.
 You compare the sort keys using a binary comparison
 and get the result of the comparison of the strings using UCA.
 
-   $UCA->getSortKey($a) cmp $UCA->getSortKey($b)
+   $Collator->getSortKey($a) cmp $Collator->getSortKey($b)
 
       is equivalent to
 
-   $UCA->cmp($a, $b)
+   $Collator->cmp($a, $b)
 
-=item C<$position = $UCA-E<gt>index($string, $substring)>
+=item C<$position = $Collator-E<gt>index($string, $substring)>
 
-=item C<($position, $length) = $UCA-E<gt>index($string, $substring)>
+=item C<($position, $length) = $Collator-E<gt>index($string, $substring)>
 
 -- see 6.8 Searching, UTR #10.
 
@@ -716,12 +743,12 @@ an empty list in list context.
 
 e.g. you say
 
-  my $UCA = Unicode::Collate->new( normalization => undef, level => 1 );
+  my $Collator = Unicode::Collate->new( normalization => undef, level => 1 );
   my $str = "Ich mu\x{00DF} studieren.";
   my $sub = "m\x{00FC}ss";
   my $match;
-  if(my @tmp = $UCA->index($str, $sub)){
-    $match = substr($str, $tmp[0], $tmp[1]);
+  if(my($pos,$len) = $Collator->index($str, $sub)){
+      $match = substr($str, $pos, $len);
   }
 
 and get C<"mu\x{00DF}"> in C<$match> since C<"mu>E<223>C<">
@@ -738,9 +765,11 @@ None by default.
 Use of the C<normalization> parameter requires
 the B<Unicode::Normalize> module.
 
-If you need not it (e.g. in the case when you need not
+If you need not it (say, in the case when you need not
 handle any combining characters),
 assign C<normalization =E<gt> undef> explicitly.
+
+-- see 6.5 Avoiding Normalization, UTR #10.
 
 =head1 AUTHOR
 
@@ -757,17 +786,13 @@ SADAHIRO Tomoyuki, E<lt>SADAHIRO@cpan.orgE<gt>
 
 =over 4
 
-=item L<Lingua::KO::Hangul::Util>
+=item Unicode Collation Algorithm - Unicode TR #10
 
-utility functions for Hangul Syllables
+http://www.unicode.org/unicode/reports/tr10/
 
 =item L<Unicode::Normalize>
 
 normalized forms of Unicode text
-
-=item Unicode Collation Algorithm - Unicode TR #10
-
-http://www.unicode.org/unicode/reports/tr10/
 
 =back
 

@@ -728,8 +728,11 @@ $       DECK
 $       EOD
 $       bool_dflt="n"
 $       rp="Do you really want to continue? [''bool_dflt'] "
-$       IF (fastread) THEN fastread := FALSE
+$       fastread_save = fastread
+$       fastread := FALSE
 $       GOSUB myread
+$       fastread = fastread_save
+$       delete/symbol fastread_save
 $       IF ans
 $       THEN
 $         echo4 "Okay, continuing."

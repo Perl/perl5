@@ -98,7 +98,7 @@ For Digital Unix 4.x:
     Add -lpthread -lc_r to lddlflags
 
     For some reason, the extra includes for pthreads make Digital UNIX
-    complain fatally about the sbrk() delcaration in perl's malloc.c
+    complain fatally about the sbrk() declaration in perl's malloc.c
     so use the native malloc, e.g.  sh Configure -Uusemymalloc, or
     manually edit your config.sh as follows:
 	Change usemymalloc to n
@@ -145,7 +145,7 @@ Now you can do a
     make
 
 When you succeed in compiling and testing ("make test" after your
-build) a threaded Perl in a platform previosuly unknown to support
+build) a threaded Perl in a platform previously unknown to support
 threaded perl, please let perlbug@perl.com know about your victory.
 Explain what you did in painful detail.
 
@@ -265,7 +265,7 @@ their associated mutex is held. (This constraint simplifies the
 implementation of condition variables in certain porting situations.)
 For POSIX threads, perl mutexes and condition variables correspond to
 POSIX ones.  For FAKE_THREADS, mutexes are stubs and condition variables
-are implmented as lists of waiting threads. For FAKE_THREADS, a thread
+are implemented as lists of waiting threads. For FAKE_THREADS, a thread
 waits on a condition variable by removing itself from the runnable
 list, calling SCHEDULE to change thr to the next appropriate
 runnable thread and returning op (i.e. the new threads next op).

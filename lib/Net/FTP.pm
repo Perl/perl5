@@ -1247,17 +1247,17 @@ this if you really know what you're doing).
 =item new (HOST [,OPTIONS])
 
 This is the constructor for a new Net::FTP object. C<HOST> is the
-name of the remote host to which a FTP connection is required.
+name of the remote host to which an FTP connection is required.
 
 C<OPTIONS> are passed in a hash like fashion, using key and value pairs.
 Possible options are:
 
-B<Firewall> - The name of a machine which acts as a FTP firewall. This can be
+B<Firewall> - The name of a machine which acts as an FTP firewall. This can be
 overridden by an environment variable C<FTP_FIREWALL>. If specified, and the
 given host cannot be directly connected to, then the
 connection is made to the firewall machine and the string C<@hostname> is
 appended to the login identifier. This kind of setup is also refered to
-as a ftp proxy.
+as an ftp proxy.
 
 B<FirewallType> - The type of firewall running on the machine indicated by
 B<Firewall>. This can be overridden by an environment variable
@@ -1394,7 +1394,7 @@ a scalar context, returns a reference to a list.
 =item get ( REMOTE_FILE [, LOCAL_FILE [, WHERE]] )
 
 Get C<REMOTE_FILE> from the server and store locally. C<LOCAL_FILE> may be
-a filename or a filehandle. If not specified the the file will be stored in
+a filename or a filehandle. If not specified, the file will be stored in
 the current directory with the same leafname as the remote file.
 
 If C<WHERE> is given then the first C<WHERE> bytes of the file will
@@ -1476,7 +1476,7 @@ reference to a C<Net::FTP::dataconn> based object.
 
 =item nlst ( [ DIR ] )
 
-Send a C<NLST> command to the server, with an optional parameter.
+Send an C<NLST> command to the server, with an optional parameter.
 
 =item list ( [ DIR ] )
 
@@ -1517,7 +1517,7 @@ C<put_unique> and those that do not require data connections.
 =item port ( [ PORT ] )
 
 Send a C<PORT> command to the server. If C<PORT> is specified then it is sent
-to the server. If not the a listen socket is created and the correct information
+to the server. If not, the a listen socket is created and the correct information
 sent to the server.
 
 =item pasv ()
@@ -1593,7 +1593,7 @@ be performed using these.
 
 Read C<SIZE> bytes of data from the server and place it into C<BUFFER>, also
 performing any <CRLF> translation necessary. C<TIMEOUT> is optional, if not
-given the the timeout value from the command connection will be used.
+given, the timeout value from the command connection will be used.
 
 Returns the number of bytes read before any <CRLF> translation.
 
@@ -1601,7 +1601,7 @@ Returns the number of bytes read before any <CRLF> translation.
 
 Write C<SIZE> bytes of data from C<BUFFER> to the server, also
 performing any <CRLF> translation necessary. C<TIMEOUT> is optional, if not
-given the the timeout value from the command connection will be used.
+given, the timeout value from the command connection will be used.
 
 Returns the number of bytes written before any <CRLF> translation.
 

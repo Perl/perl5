@@ -2957,7 +2957,7 @@ sub pp_entersub {
 	}
     } else {
 	# glob() invocations can be translated into calls of
-	# CORE::GLOBAL::glob with an second parameter, a number.
+	# CORE::GLOBAL::glob with a second parameter, a number.
 	# Reverse this.
 	if ($kid eq "CORE::GLOBAL::glob") {
 	    $kid = "glob";

@@ -298,7 +298,7 @@ if C<+=> is not overloaded.
 
 =back
 
-B<Warning.>  Due to the presense of assignment versions of operations,
+B<Warning.>  Due to the presence of assignment versions of operations,
 routines which may be called in assignment context may create
 self-referential structures.  Currently Perl will not free self-referential
 structures until cycles are C<explicitly> broken.  You may get problems
@@ -852,7 +852,7 @@ C<$a = $b> values of $a and $b become I<indistinguishable>.
 On the other hand, anyone who has used algebraic notation knows the
 expressive power of the arithmetic metaphor.  Overloading works hard
 to enable this metaphor while preserving the Perlian way as far as
-possible.  Since it is not not possible to freely mix two contradicting
+possible.  Since it is not possible to freely mix two contradicting
 metaphors, overloading allows the arithmetic way to write things I<as
 far as all the mutators are called via overloaded access only>.  The
 way it is done is described in L<Copy Constructor>.
@@ -969,7 +969,7 @@ TIEHASH() method is a scalar reference.
 
 Second, we create a new tied hash each time the hash syntax is used.
 This allows us not to worry about a possibility of a reference loop,
-would would lead to a memory leak.
+which would lead to a memory leak.
 
 Both these problems can be cured.  Say, if we want to overload hash
 dereference on a reference to an object which is I<implemented> as a
@@ -1135,7 +1135,7 @@ which outputs
 and one can inspect the value in debugger using all the possible
 methods.
 
-Something is is still amiss: consider the loop variable $cnt of the
+Something is still amiss: consider the loop variable $cnt of the
 script.  It was a number, not an object.  We cannot make this value of
 type C<symbolic>, since then the loop will not terminate.
 

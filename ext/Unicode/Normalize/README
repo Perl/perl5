@@ -1,4 +1,4 @@
-Unicode/Normalize version 0.04
+Unicode/Normalize version 0.10
 ===================================
 
 Unicode::Normalize - normalized forms of Unicode text
@@ -23,9 +23,19 @@ SYNOPSIS
 
 INSTALLATION
 
+Perl 5.006 or later
+
 To install this module type the following:
 
    perl Makefile.PL
+   make
+   make test
+   make install
+
+If you have a C compiler and want to use the XS version,
+type the following:
+
+   perl Makefile.PL xs
    make
    make test
    make install
@@ -36,13 +46,12 @@ This module requires these other modules and libraries:
 
 Carp
 Exporter
+File::Copy
 File::Spec
-Lingua::KO::Hangul::Util
-$unidir/CombiningClass.pl
-$unidir/Decomposition.pl
-$unidir/CompExcl.txt
-
-# $unidir is $LIB/unicore or $LIB/unicode
+Lingua::KO::Hangul::Util 0.06
+unicore/CombiningClass.pl or unicode/CombiningClass.pl
+unicore/Decomposition.pl  or unicode/Decomposition.pl
+unicore/CompExcl.txt      or unicode/CompExcl.txt
 
 COPYRIGHT AND LICENCE
 

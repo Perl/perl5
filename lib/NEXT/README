@@ -25,7 +25,7 @@ DESCRIPTION
     the current class -- to look for a suitable method in other
     ancestors of C<$self> -- whereas C<$self->SUPER::m()> cannot.
 
-    An particularly interesting use of redispatch is in
+    A particularly interesting use of redispatch is in
     C<AUTOLOAD>'ed methods. If such a method determines that it is
     not able to handle a particular call, it may choose to
     redispatch that call, in the hope that some other C<AUTOLOAD>

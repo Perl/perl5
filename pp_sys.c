@@ -1517,6 +1517,9 @@ PP(pp_sysread)
     int fp_utf8;
     Size_t got = 0;
     Size_t wanted;
+    bool charstart = FALSE;
+    STRLEN charskip = 0;
+    STRLEN skip = 0;
 
     gv = (GV*)*++MARK;
     if ((PL_op->op_type == OP_READ || PL_op->op_type == OP_SYSREAD)
@@ -1562,6 +1565,10 @@ PP(pp_sysread)
     if (length < 0)
 	DIE(aTHX_ "Negative length");
     wanted = length;
+
+    charstart = TRUE;
+    charskip  = 0;
+    skip = 0;
 
 #ifdef HAS_SOCKET
     if (PL_op->op_type == OP_RECV) {
@@ -1683,23 +1690,30 @@ PP(pp_sysread)
 	/* Look at utf8 we got back and count the characters */
 	char *bend = buffer + count;
 	while (buffer < bend) {
-	    STRLEN skip = UTF8SKIP(buffer);
-	    if (buffer+skip > bend) {
+	    if (charstart) {
+	        skip = UTF8SKIP(buffer);
+		charskip = 0;
+	    }
+	    if (buffer - charskip + skip > bend) {
 		/* partial character - try for rest of it */
 		length = skip - (bend-buffer);
 		offset = bend - SvPVX(bufsv);
+		charstart = FALSE;
+		charskip += count;
 		goto more_bytes;
 	    }
 	    else {
 		got++;
 		buffer += skip;
+		charstart = TRUE;
+		charskip  = 0;
 	    }
         }
 	/* If we have not 'got' the number of _characters_ we 'wanted' get some more
 	   provided amount read (count) was what was requested (length)
 	 */
 	if (got < wanted && count == length) {
-	    length = (wanted-got);
+	    length = wanted - got;
 	    offset = bend - SvPVX(bufsv);
 	    goto more_bytes;
 	}

@@ -736,7 +736,7 @@ sub _is_verysafe {
   # Split directory into components - assume no file
   my ($volume, $directories, undef) = File::Spec->splitpath( $path, 1);
 
-  # Slightly less efficient than having a a function in File::Spec
+  # Slightly less efficient than having a function in File::Spec
   # to chop off the end of a directory or even a function that
   # can handle ../ in a directory tree
   # Sometimes splitdir() returns a blank at the end

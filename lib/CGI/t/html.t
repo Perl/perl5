@@ -1,13 +1,15 @@
 #!/usr/local/bin/perl -w
 
 BEGIN {
-    chdir('t') if -d 't';
-    @INC = '../lib';
+	chdir 't' if -d 't';
+	if ($ENV{PERL_CORE}) {
+		@INC = '../lib';
+	} else {
+		unshift @INC, qw( ../blib/lib ../blib/arch lib );
+	}
 }
-
 # Test ability to retrieve HTTP request info
 ######################### We start with some black magic to print on failure.
-use lib '../blib/lib','../blib/arch';
 
 BEGIN {$| = 1; print "1..24\n"; }
 END {print "not ok 1\n" unless $loaded;}
@@ -15,7 +17,12 @@ use CGI (':standard','-no_debug','*h3','start_table');
 $loaded = 1;
 print "ok 1\n";
 
-no utf8; # we contain Latin-1
+BEGIN {
+    if ($] >= 5.006) {
+	require utf8;	# we contain Latin-1 in subtest #22,
+	utf8->unimport;	# possible "use utf8" must be undone
+    }
+}
 
 ######################### End of black magic.
 

@@ -1,4 +1,7 @@
 package Encode::Tcl;
+
+our $VERSION = '1.00';
+
 use strict;
 use Encode qw(find_encoding);
 use base 'Encode::Encoding';

@@ -123,7 +123,7 @@ print PROG 'print "@ARGV\n"', "\n";
 close PROG;
 my $echo = "$Invoke_Perl $ECHO";
 
-print "1..179\n";
+print "1..182\n";
 
 # First, let's make sure that Perl is checking the dangerous
 # environment variables. Maybe they aren't set yet, so we'll
@@ -906,3 +906,15 @@ ok( ${^TAINT},  '$^TAINT is not assignable' );
 ok( $@ =~ /^Modification of a read-only value attempted/,
                                 'Assigning to ${^TAINT} fails' );
 
+{
+    # bug 20011111.105
+    
+    my $re1 = qr/x$TAINT/;
+    test 180, tainted $re1;
+    
+    my $re2 = qr/^$re1\z/;
+    test 181, tainted $re2;
+    
+    my $re3 = "$re2";
+    test 182, tainted $re3;
+}

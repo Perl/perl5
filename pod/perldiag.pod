@@ -611,7 +611,7 @@ line.
 
 =item Can't exec "%s": %s
 
-(W exec) An system(), exec(), or piped open call could not execute the
+(W exec) A system(), exec(), or piped open call could not execute the
 named program for the indicated reason.  Typical reasons include: the
 permissions were wrong on the file, the file wasn't found in
 C<$ENV{PATH}>, the executable in question was compiled for another
@@ -1629,11 +1629,11 @@ two from 1 to 32 (or 64, if your platform supports that).
 
 =item Illegal octal digit %s
 
-(F) You used an 8 or 9 in a octal number.
+(F) You used an 8 or 9 in an octal number.
 
 =item Illegal octal digit %s ignored
 
-(W digit) You may have tried to use an 8 or 9 in a octal number.
+(W digit) You may have tried to use an 8 or 9 in an octal number.
 Interpretation of the octal number stopped before the 8 or 9.
 
 =item Illegal switch in PERL5OPT: %s
@@ -1837,7 +1837,7 @@ L<perlfunc/listen>.
 
 =item lstat() on filehandle %s
 
-(W io) You tried to do a lstat on a filehandle.  What did you mean
+(W io) You tried to do an lstat on a filehandle.  What did you mean
 by that?  lstat() makes sense only on filenames.  (Perl did a fstat()
 instead on the filehandle.)
 
@@ -2688,7 +2688,7 @@ the result of the value of the environment variable PERLIO.
 =item perlio: invalid separator character %s in attribute list
 
 (S) When pushing layers onto the Perl I/O system, something other than a
-colon or whitespace was seen between the elements of an layer list.
+colon or whitespace was seen between the elements of a layer list.
 If the previous attribute had a parenthesised parameter list, perhaps that
 list was terminated too soon.
 
@@ -3150,8 +3150,8 @@ account you tested it under), does not rely on any environment variables
 location where the CGI server can't find it, basically, more or less.
 Please see the following for more information:
 
-	http://www.perl.com/CPAN/doc/FAQs/cgi/idiots-guide.html
-	http://www.perl.com/CPAN/doc/FAQs/cgi/perl-cgi-faq.html
+	http://www.cpan.org/doc/FAQs/cgi/idiots-guide.html
+	http://www.cpan.org/doc/FAQs/cgi/perl-cgi-faq.html
 	ftp://rtfm.mit.edu/pub/usenet/news.answers/www/cgi-faq
 	http://hoohoo.ncsa.uiuc.edu/cgi/interface.html
 	http://www-genome.wi.mit.edu/WWW/faqs/www-security-faq.html
@@ -3284,13 +3284,13 @@ L<perlop/"Quote and Quote-like Operators">.
 
 =item Substitution pattern not terminated
 
-(F) The lexer couldn't find the interior delimiter of a s/// or s{}{}
+(F) The lexer couldn't find the interior delimiter of an s/// or s{}{}
 construct.  Remember that bracketing delimiters count nesting level.
 Missing the leading C<$> from variable C<$s> may cause this error.
 
 =item Substitution replacement not terminated
 
-(F) The lexer couldn't find the final delimiter of a s/// or s{}{}
+(F) The lexer couldn't find the final delimiter of an s/// or s{}{}
 construct.  Remember that bracketing delimiters count nesting level.
 Missing the leading C<$> from variable C<$s> may cause this error.
 

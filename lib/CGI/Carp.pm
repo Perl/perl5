@@ -226,7 +226,7 @@ use File::Spec;
 
 $main::SIG{__WARN__}=\&CGI::Carp::warn;
 $main::SIG{__DIE__}=\&CGI::Carp::die;
-$CGI::Carp::VERSION = '1.20';
+$CGI::Carp::VERSION = '1.21';
 $CGI::Carp::CUSTOM_MSG = undef;
 
 # fancy import routine detects and handles 'errorWrap' specially.
@@ -256,7 +256,7 @@ sub id {
 sub stamp {
     my $time = scalar(localtime);
     my $frame = 0;
-     my ($id,$pack,$file,$dev,$dirs);
+    my ($id,$pack,$file,$dev,$dirs);
     do {
 	$id = $file;
 	($pack,$file) = caller($frame++);
@@ -289,7 +289,7 @@ sub _warn {
     }
 }
 
-sub ineval { _longmess() =~ /eval [\{\']/m }
+sub ineval { $^S }
 
 # The mod_perl package Apache::Registry loads CGI programs by calling
 # eval.  These evals don't count when looking at the stack backtrace.

@@ -765,7 +765,7 @@ uses locking and another doesn't, all bets are off.
 
 By default, the C<flock> call will block until a lock is granted.
 A request for a shared lock will be granted as soon as there is no
-exclusive locker.  A request for a exclusive lock will be granted as
+exclusive locker.  A request for an exclusive lock will be granted as
 soon as there is no locker of any kind.  Locks are on file descriptors,
 not file names.  You can't lock a file until you open it, and you can't
 hold on to a lock once the file has been closed.

@@ -634,6 +634,8 @@ S_skipspace(pTHX_ register char *s)
 
 	    sv_upgrade(sv, SVt_PVMG);
 	    sv_setpvn(sv,PL_bufptr,PL_bufend-PL_bufptr);
+            (void)SvIOK_on(sv);
+            SvIVX(sv) = 0;
 	    av_store(CopFILEAV(PL_curcop),(I32)CopLINE(PL_curcop),sv);
 	}
     }
@@ -2469,6 +2471,8 @@ Perl_yylex(pTHX)
 
 		sv_upgrade(sv, SVt_PVMG);
 		sv_setsv(sv,PL_linestr);
+                (void)SvIOK_on(sv);
+                SvIVX(sv) = 0;
 		av_store(CopFILEAV(PL_curcop),(I32)CopLINE(PL_curcop),sv);
 	    }
 	    goto retry;
@@ -2552,6 +2556,8 @@ Perl_yylex(pTHX)
 
 	    sv_upgrade(sv, SVt_PVMG);
 	    sv_setsv(sv,PL_linestr);
+            (void)SvIOK_on(sv);
+            SvIVX(sv) = 0;
 	    av_store(CopFILEAV(PL_curcop),(I32)CopLINE(PL_curcop),sv);
 	}
 	PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
@@ -2592,7 +2598,7 @@ Perl_yylex(pTHX)
 		     * at least, set argv[0] to the basename of the Perl
 		     * interpreter. So, having found "#!", we'll set it right.
 		     */
-		    SV *x = GvSV(gv_fetchpv("\030", TRUE, SVt_PV));
+		    SV *x = GvSV(gv_fetchpv("\030", TRUE, SVt_PV)); /* $^X */
 		    assert(SvPOK(x) || SvGMAGICAL(x));
 		    if (sv_eq(x, CopFILESV(PL_curcop))) {
 			sv_setpvn(x, ipath, ipathend - ipath);
@@ -2682,6 +2688,7 @@ Perl_yylex(pTHX)
 		    while (SPACE_OR_TAB(*d)) d++;
 
 		    if (*d++ == '-') {
+			bool switches_done = PL_doswitches;
 			do {
 			    if (*d == 'M' || *d == 'm') {
 				char *m = d;
@@ -2704,6 +2711,14 @@ Perl_yylex(pTHX)
 			    if (PERLDB_LINE)
 				(void)gv_fetchfile(PL_origfilename);
 			    goto retry;
+			}
+			if (PL_doswitches && !switches_done) {
+			    int argc = PL_origargc;
+			    char **argv = PL_origargv;
+			    do {
+				argc--,argv++;
+			    } while (argc && argv[0][0] == '-' && argv[0][1]);
+			    init_argv_symbols(argc,argv);
 			}
 		    }
 		}
@@ -5315,12 +5330,12 @@ Perl_keyword(pTHX_ register char *d, I32 len)
 	    if (strEQ(d,"cos"))			return -KEY_cos;
 	    break;
 	case 4:
-	    if (strEQ(d,"chop"))		return -KEY_chop;
+	    if (strEQ(d,"chop"))		return KEY_chop;
 	    break;
 	case 5:
 	    if (strEQ(d,"close"))		return -KEY_close;
 	    if (strEQ(d,"chdir"))		return -KEY_chdir;
-	    if (strEQ(d,"chomp"))		return -KEY_chomp;
+	    if (strEQ(d,"chomp"))		return KEY_chomp;
 	    if (strEQ(d,"chmod"))		return -KEY_chmod;
 	    if (strEQ(d,"chown"))		return -KEY_chown;
 	    if (strEQ(d,"crypt"))		return -KEY_crypt;
@@ -6533,6 +6548,8 @@ S_scan_heredoc(pTHX_ register char *s)
 
 	    sv_upgrade(sv, SVt_PVMG);
 	    sv_setsv(sv,PL_linestr);
+            (void)SvIOK_on(sv);
+            SvIVX(sv) = 0;
 	    av_store(CopFILEAV(PL_curcop), (I32)CopLINE(PL_curcop),sv);
 	}
 	if (*s == term && memEQ(s,PL_tokenbuf,len)) {
@@ -6883,6 +6900,8 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 
 	    sv_upgrade(sv, SVt_PVMG);
 	    sv_setsv(sv,PL_linestr);
+            (void)SvIOK_on(sv);
+            SvIVX(sv) = 0;
 	    av_store(CopFILEAV(PL_curcop), (I32)CopLINE(PL_curcop), sv);
 	}
 
@@ -7203,7 +7222,7 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
 	    }
 	    if (*s == '.' && isDIGIT(s[1])) {
 		/* oops, it's really a v-string, but without the "v" */
-		s = start - 1;
+		s = start;
 		goto vstring;
 	    }
 	}
@@ -7297,58 +7316,8 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
     /* if it starts with a v, it could be a v-string */
     case 'v':
 vstring:
-	{
-	    char *pos = s;
-	    pos++;
-	    while (isDIGIT(*pos) || *pos == '_')
-		pos++;
-	    if (!isALPHA(*pos)) {
-		UV rev;
-		U8 tmpbuf[UTF8_MAXLEN+1];
-		U8 *tmpend;
-		s++;				/* get past 'v' */
-
-		sv = NEWSV(92,5);
-		sv_setpvn(sv, "", 0);
-
-		for (;;) {
-		    if (*s == '0' && isDIGIT(s[1]))
-			yyerror("Octal number in vector unsupported");
-		    rev = 0;
-		    {
-			/* this is atoi() that tolerates underscores */
-			char *end = pos;
-			UV mult = 1;
-			while (--end >= s) {
-			    UV orev;
-			    if (*end == '_')
-				continue;
-			    orev = rev;
-			    rev += (*end - '0') * mult;
-			    mult *= 10;
-			    if (orev > rev && ckWARN_d(WARN_OVERFLOW))
-				Perl_warner(aTHX_ WARN_OVERFLOW,
-					    "Integer overflow in decimal number");
-			}
-		    }
-		    /* Append native character for the rev point */
-		    tmpend = uvchr_to_utf8(tmpbuf, rev);
-		    sv_catpvn(sv, (const char*)tmpbuf, tmpend - tmpbuf);
-		    if (!UNI_IS_INVARIANT(NATIVE_TO_UNI(rev)))
-			SvUTF8_on(sv);
-		    if (*pos == '.' && isDIGIT(pos[1]))
-			s = ++pos;
-		    else {
-			s = pos;
-			break;
-		    }
-		    while (isDIGIT(*pos) || *pos == '_')
-			pos++;
-		}
-		SvPOK_on(sv);
-		SvREADONLY_on(sv);
-	    }
-	}
+		sv = NEWSV(92,5); /* preallocate storage space */
+		s = new_vstring(s,sv);
 	break;
     }
 

@@ -1,41 +1,48 @@
 #!/usr/local/bin/perl -w
 
 BEGIN {
-    chdir('t') if -d 't';
-    @INC = '../lib';
+	chdir 't' if -d 't';
+	if ($ENV{PERL_CORE}) {
+		@INC = '../lib';
+	} else {
+		unshift @INC, qw( ../blib/lib ../blib/arch lib );
+	}
 }
 
-# Test ability to retrieve HTTP request info
-######################### We start with some black magic to print on failure.
-use lib '../blib/lib','../blib/arch';
+use strict;
+use Test::More tests => 5;
 
-BEGIN {$| = 1; print "1..5\n"; }
-END {print "not ok 1\n" unless $loaded;}
-use CGI::Pretty (':standard','-no_debug','*h3','start_table');
-$loaded = 1;
-print "ok 1\n";
+BEGIN { use_ok('CGI::Pretty') };
 
-######################### End of black magic.
+# This is silly use_ok should take arguments
+use CGI::Pretty (':all');
 
-# util
-sub test {
-    local($^W) = 0;
-    my($num, $true,$msg) = @_;
-    print($true ? "ok $num\n" : "not ok $num $msg\n");
-}
+is(h1(), '<h1>',"single tag");
 
-# all the automatic tags
-test(2,h1() eq '<h1>',"single tag");
-test(3,ol(li('fred'),li('ethel')) eq "<ol>\n\t<li>\n\t\tfred\n\t</li>\n\t <li>\n\t\tethel\n\t</li>\n</ol>\n","basic indentation");
-test(4,p('hi',pre('there'),'frog') eq 
-'<p>
+is(ol(li('fred'),li('ethel')), <<HTML,   "basic indentation");
+<ol>
+	<li>
+		fred
+	</li>
+	<li>
+		ethel
+	</li>
+</ol>
+HTML
+
+
+is(p('hi',pre('there'),'frog'), <<HTML, "<pre> tags");
+<p>
 	hi <pre>there</pre>
-	 frog
+	frog
 </p>
-',"<pre> tags");
-test(5,p('hi',a({-href=>'frog'},'there'),'frog') eq 
-'<p>
+HTML
+
+
+is(p('hi',a({-href=>'frog'},'there'),'frog'), <<HTML,   "as-is");
+<p>
 	hi <a href="frog">there</a>
-	 frog
+	frog
 </p>
-',"as-is");
+HTML
+

@@ -1247,7 +1247,7 @@ p	|bool	|do_print	|SV* sv|PerlIO* fp
 p	|OP*	|do_readline
 p	|I32	|do_chomp	|SV* sv
 p	|bool	|do_seek	|GV* gv|Off_t pos|int whence
-p	|void	|do_sprintf	|SV* sv|I32 len|SV** sarg
+Ap	|void	|do_sprintf	|SV* sv|I32 len|SV** sarg
 p	|Off_t	|do_sysseek	|GV* gv|Off_t pos|int whence
 p	|Off_t	|do_tell	|GV* gv
 p	|I32	|do_trans	|SV* sv
@@ -1334,6 +1334,7 @@ Apd	|void	|hv_undef	|HV* tb
 Ap	|I32	|ibcmp		|const char* a|const char* b|I32 len
 Ap	|I32	|ibcmp_locale	|const char* a|const char* b|I32 len
 p	|bool	|ingroup	|Gid_t testgid|Uid_t effective
+p	|void	|init_argv_symbols|int|char **
 p	|void	|init_debugger
 Ap	|void	|init_stacks
 Ap	|void	|init_tm	|struct tm *ptm
@@ -1572,6 +1573,7 @@ Ap	|OP*	|newWHILEOP	|I32 flags|I32 debuggable|LOOP* loop \
 				|I32 whileline|OP* expr|OP* block|OP* cont
 
 Ap	|PERL_SI*|new_stackinfo|I32 stitems|I32 cxitems
+Apd	|char*	|new_vstring	|char *vstr|SV *sv
 p	|PerlIO*|nextargv	|GV* gv
 Ap	|char*	|ninstr		|const char* big|const char* bigend \
 				|const char* little|const char* lend
@@ -2185,11 +2187,9 @@ s	|U8*	|reghopmaybe3	|U8 *pos|I32 off|U8 *lim
 s	|char*	|find_byclass	|regexp * prog|regnode *c|char *s|char *strend|char *startpos|I32 norun
 #endif
 
-#if defined(PERL_IN_RUN_C) || defined(PERL_DECL_PROT)
-#   ifdef DEBUGGING
+#if defined(PERL_IN_DUMP_C) || defined(PERL_DECL_PROT)
 s	|CV*	|deb_curcv	|I32 ix
 s	|void	|debprof	|OP *o
-#   endif
 #endif
 
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)

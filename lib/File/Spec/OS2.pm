@@ -33,7 +33,15 @@ my $tmpdir;
 sub tmpdir {
     return $tmpdir if defined $tmpdir;
     my $self = shift;
-    foreach (@ENV{qw(TMPDIR TEMP TMP)}, qw(/tmp /)) {
+    my @dirlist = ( @ENV{qw(TMPDIR TEMP TMP)}, qw(/tmp /) );
+    {
+	no strict 'refs';
+	if (${"\cTAINT"}) { # Check for taint mode on perl >= 5.8.0
+	    require Scalar::Util;
+	    @dirlist = grep { ! Scalar::Util::tainted $_ } @dirlist;
+	}
+    }
+    foreach (@dirlist) {
 	next unless defined && -d;
 	$tmpdir = $_;
 	last;

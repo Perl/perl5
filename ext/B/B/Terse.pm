@@ -1,4 +1,7 @@
 package B::Terse;
+
+our $VERSION = '1.00';
+
 use strict;
 use B qw(peekop class walkoptree walkoptree_exec walkoptree_slow
 	 main_start main_root cstring svref_2object SVf_IVisUV);

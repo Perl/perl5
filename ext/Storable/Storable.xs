@@ -191,8 +191,8 @@ typedef double NV;			/* Older perls lack the NV type */
  */
 #define SX_ITEM		'i'		/* An array item introducer */
 #define SX_IT_UNDEF	'I'		/* Undefined array item */
-#define SX_KEY		'k'		/* An hash key introducer */
-#define SX_VALUE	'v'		/* An hash value introducer */
+#define SX_KEY		'k'		/* A hash key introducer */
+#define SX_VALUE	'v'		/* A hash value introducer */
 #define SX_VL_UNDEF	'V'		/* Undefined hash value */
 
 /*
@@ -238,7 +238,7 @@ struct extendable {
 
 /*
  * At store time:
- * An hash table records the objects which have already been stored.
+ * A hash table records the objects which have already been stored.
  * Those are referred to as SX_OBJECT in the file, and their "tag" (i.e.
  * an arbitrary sequence number) is used to identify them.
  *
@@ -1853,7 +1853,7 @@ sortcmp(const void *a, const void *b)
 /*
  * store_hash
  *
- * Store an hash table.
+ * Store a hash table.
  *
  * Layout is SX_HASH <size> followed by each key/value pair, in random order.
  * Values are stored as <object>.
@@ -2796,7 +2796,7 @@ static int store(stcxt_t *cxt, SV *sv)
 	 * stored, before recursing...
 	 *
 	 * In order to avoid creating new SvIVs to hold the tagnum we just
-	 * cast the tagnum to a SV pointer and store that in the hash.  This
+	 * cast the tagnum to an SV pointer and store that in the hash.  This
 	 * means that we must clean up the hash manually afterwards, but gives
 	 * us a 15% throughput increase.
 	 *
@@ -3377,7 +3377,7 @@ static SV *retrieve_hook(stcxt_t *cxt, char *cname)
 	TRACEME(("class name: %s", class));
 
 	/*
-	 * Decode user-frozen string length and read it in a SV.
+	 * Decode user-frozen string length and read it in an SV.
 	 *
 	 * For efficiency reasons, we read data directly into the SV buffer.
 	 * To understand that code, read retrieve_scalar()

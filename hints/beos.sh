@@ -55,6 +55,3 @@ case "$ldlibpthname" in
 '') ldlibpthname=LIBRARY_PATH ;;
 esac
 
-case "$csh" in
-'') csh='bash' ;;
-esac

@@ -6,6 +6,9 @@
 #      License or the Artistic License, as specified in the README file.
 #
 package B::C::Section;
+
+our $VERSION = '1.00';
+
 use B ();
 use base B::Section;
 

@@ -447,7 +447,7 @@ C<-line> keywords indicate the filename and line number corresponding
 to the beginning of the interior sequence. If the C<$ptree> argument is
 given, it must be the last argument, and it must be either string, or
 else an array-ref suitable for passing to B<Pod::ParseTree::new> (or
-it may be a reference to an Pod::ParseTree object).
+it may be a reference to a Pod::ParseTree object).
 
 =cut
 

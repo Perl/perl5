@@ -1,5 +1,5 @@
 # Pod::Text::Overstrike -- Convert POD data to formatted overstrike text
-# $Id: Overstrike.pm,v 1.3 2001/10/20 08:11:29 eagle Exp $
+# $Id: Overstrike.pm,v 1.4 2001/11/15 08:04:18 eagle Exp $
 #
 # Created by Joe Smith <Joe.Smith@inwap.com> 30-Nov-2000
 #   (based on Pod::Text::Color by Russ Allbery <rra@stanford.edu>)
@@ -36,7 +36,7 @@ use vars qw(@ISA $VERSION);
 # Don't use the CVS revision as the version, since this module is also in Perl
 # core and too many things could munge CVS magic revision strings.  This
 # number should ideally be the same as the CVS revision in podlators, however.
-$VERSION = 1.03;
+$VERSION = 1.04;
 
 
 ##############################################################################
@@ -156,7 +156,7 @@ There may be some better approach possible.
 
 =head1 SEE ALSO
 
-L<Pod::Text|Pod::Text>, L<Pod::Parser|Pod::Parser>
+L<Pod::Text>, L<Pod::Parser>
 
 =head1 AUTHOR
 

@@ -599,7 +599,7 @@ Don't panic.  Read INSTALL 'make test' section instead.
 
 The subtests 11 and 12 sometimes fail and sometimes work.
 
-=head2 HP-UX lib/io_multihomed Fails When LP64-Configur
+=head2 HP-UX lib/io_multihomed Fails When LP64-Configured
 
 The lib/io_multihomed test may hang in HP-UX if Perl has been
 configured to be 64-bit. Because other 64-bit platforms do not hang in
@@ -726,7 +726,7 @@ Compaq C V6.2-008 on OpenVMS Alpha V7.1
   [.lib]vmsish............................FAILED on test 13
   Failed 4/399 tests, 92.48% okay.
 
-Compac C V6.4-005 on OpenVMS Alpha 7.2.1
+Compaq C V6.4-005 on OpenVMS Alpha 7.2.1
 
   [-.ext.b]showlex........................FAILED on test 1
   [-.ext.list.util.t]tainted..............FAILED on test 3

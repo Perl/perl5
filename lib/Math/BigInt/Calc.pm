@@ -8,7 +8,7 @@ require Exporter;
 use vars qw/@ISA $VERSION/;
 @ISA = qw(Exporter);
 
-$VERSION = '0.13';
+$VERSION = '0.14';
 
 # Package to store unsigned big integers in decimal and do math with them
 
@@ -173,15 +173,49 @@ sub _add
   my $i; my $car = 0; my $j = 0;
   for $i (@$y)
     {
-    $x->[$j] -= $BASE
-      if $car = (($x->[$j] += $i + $car) >= $BASE) ? 1 : 0;
+    $x->[$j] -= $BASE if $car = (($x->[$j] += $i + $car) >= $BASE) ? 1 : 0;
     $j++;
     }
   while ($car != 0)
     {
     $x->[$j] -= $BASE if $car = (($x->[$j] += $car) >= $BASE) ? 1 : 0; $j++;
     }
-    return $x;
+  return $x;
+  }                                                                             
+
+sub _inc
+  {
+  # (ref to int_num_array, ref to int_num_array)
+  # routine to add 1 to a base 1eX numbers
+  # This routine clobbers up array x, but not y.
+  my ($c,$x) = @_;
+
+  for my $i (@$x)
+    {
+    return $x if (($i += 1) < $BASE);		# early out
+    $i -= $BASE;
+    }
+  if ($x->[-1] == 0)				# last overflowed
+    {
+    push @$x,1;					# extend
+    }
+  return $x;
+  }                                                                             
+
+sub _dec
+  {
+  # (ref to int_num_array, ref to int_num_array)
+  # routine to add 1 to a base 1eX numbers
+  # This routine clobbers up array x, but not y.
+  my ($c,$x) = @_;
+
+  for my $i (@$x)
+    {
+    last if (($i -= 1) >= 0);			# early out
+    $i = $MAX_VAL;
+    }
+  pop @$x if $x->[-1] == 0 && @$x > 1;		# last overflowed (but leave 0)
+  return $x;
   }                                                                             
 
 sub _sub
@@ -846,6 +880,9 @@ the use by Math::BigInt:
 			are swapped. In this case, the first param needs to
 			be preserved, while you can destroy the second.
 			sub (x,y,1) => return x - y and keep x intact!
+	_dec(obj)	decrement object by one (input is garant. to be > 0)
+	_inc(obj)	increment object by one
+
 
 	_acmp(obj,obj)	<=> operator for objects (return -1, 0 or 1)
 
@@ -892,9 +929,6 @@ slow, Perl way as fallback to emulate these:
 	_gcd(obj,obj)	return Greatest Common Divisor of two objects
 	
 	_zeros(obj)	return number of trailing decimal zeros
-
-	_dec(obj)	decrement object by one (input is >= 1)
-	_inc(obj)	increment object by one
 
 Input strings come in as unsigned but with prefix (i.e. as '123', '0xabc'
 or '0b1101').

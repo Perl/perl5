@@ -370,7 +370,7 @@ In its simplest form this is simply:
 
   \end{document}
 
-but can be more complicated if a index is required.
+but can be more complicated if an index is required.
 Can be used to set or retrieve the current value.
 
   $add = $parser->AddPostamble();

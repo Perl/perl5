@@ -420,7 +420,7 @@ parsing algorithms.  See L<Text::Balanced> for more information.
 =item *
 
 Tie::RefHash::Nestable, by Edward Avis, allows storing hash references
-(unlike the standard Tie::Refhash)  The module is contained within
+(unlike the standard Tie::RefHash)  The module is contained within
 Tie::RefHash.
 
 =item *

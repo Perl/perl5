@@ -1,5 +1,7 @@
 package vmsish;
 
+our $VERSION = '1.00';
+
 =head1 NAME
 
 vmsish - Perl pragma to control VMS-specific language features
@@ -24,6 +26,8 @@ vmsish - Perl pragma to control VMS-specific language features
 If no import list is supplied, all possible VMS-specific features are
 assumed.  Currently, there are four VMS-specific features available:
 'status' (a.k.a '$?'), 'exit', 'time' and 'hushed'.
+
+If you're not running VMS, this module does nothing.
 
 =over 6
 
@@ -107,10 +111,7 @@ See L<perlmod/Pragmatic Modules>.
 
 =cut
 
-if ($^O ne 'VMS') {
-    require Carp;
-    Carp::croak("This isn't VMS");
-}
+my $IsVMS = $^O eq 'VMS';
 
 sub bits {
     my $bits = 0;
@@ -123,6 +124,8 @@ sub bits {
 }
 
 sub import {
+    return unless $IsVMS;
+
     shift;
     $^H |= bits(@_ ? @_ : qw(status time));
     my $sememe;
@@ -134,6 +137,8 @@ sub import {
 }
 
 sub unimport {
+    return unless $IsVMS;
+
     shift;
     $^H &= ~ bits(@_ ? @_ : qw(status time));
     my $sememe;

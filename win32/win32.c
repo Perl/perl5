@@ -3109,6 +3109,7 @@ create_command_line(char *cname, STRLEN clen, const char * const *args)
     STRLEN len = 0;
     bool bat_file = FALSE;
     bool cmd_shell = FALSE;
+    bool dumb_shell = FALSE;
     bool extra_quotes = FALSE;
     bool quote_next = FALSE;
 
@@ -3154,6 +3155,11 @@ create_command_line(char *cname, STRLEN clen, const char * const *args)
 		cmd_shell = TRUE;
 		len += 3;
 	    }
+	    else if (stricmp(exe, "command.com") == 0
+		     || stricmp(exe, "command") == 0)
+	    {
+		dumb_shell = TRUE;
+	    }
 	}
     }
 
@@ -3182,25 +3188,27 @@ create_command_line(char *cname, STRLEN clen, const char * const *args)
 
 	/* we want to protect empty arguments and ones with spaces with
 	 * dquotes, but only if they aren't already there */
-	if (!curlen) {
-	    do_quote = 1;
-	}
-	else if (!(arg[0] == '"' && curlen > 1 && arg[curlen-1] == '"')) {
-	    STRLEN i = 0;
-	    while (i < curlen) {
-		if (isSPACE(arg[i])) {
-		    do_quote = 1;
-		    break;
-		}
-		i++;
-	    }
-	}
-	else if (quote_next) {
-	    /* ok, we know the argument already has quotes; see if it
-	     * really is multiple arguments pretending to be one and
-	     * force a set of quotes around it */
-	    if (*find_next_space(arg))
+	if (!dumb_shell) {
+	    if (!curlen) {
 		do_quote = 1;
+	    }
+	    else if (!(arg[0] == '"' && curlen > 1 && arg[curlen-1] == '"')) {
+		STRLEN i = 0;
+		while (i < curlen) {
+		    if (isSPACE(arg[i])) {
+			do_quote = 1;
+			break;
+		    }
+		    i++;
+		}
+	    }
+	    else if (quote_next) {
+		/* ok, we know the argument already has quotes; see if it
+		 * really is multiple arguments pretending to be one and
+		 * force a set of quotes around it */
+		if (*find_next_space(arg))
+		    do_quote = 1;
+	    }
 	}
 
 	if (do_quote)

@@ -527,7 +527,7 @@ blocks get included.
 Once you can identify individual blocks, try allowing them to be
 nested. That isn't difficult either.
 
-Here is a interesting idea that doesn't involve the Debug filter.
+Here is an interesting idea that doesn't involve the Debug filter.
 Currently Perl subroutines have fairly limited support for formal
 parameter lists. You can specify the number of parameters and their
 type, but you still have to manually take them out of the C<@_> array

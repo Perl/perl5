@@ -61,3 +61,13 @@ Revision history for Perl extension Attribute::Handlers
 	- Changed licence for inclusion in core distribution
 
 	- Fixed 'autotie' for tied classes with multi-level names (thanks Jeff)
+
+
+0.76	Thu Nov 15 06:31:51 2001
+
+	- Fixed documentation nit (thanks Rick)
+
+	- Improving intuitiveness of autotie mechanism (thanks Marcel)
+
+	- Added $VERSION numbrs to demo modules (seems bizarre to me, but
+	  they're core too now).

@@ -5,6 +5,9 @@
 #      You may distribute under the terms of either the GNU General Public
 #      License or the Artistic License, as specified in the README file.
 package B::Disassembler::BytecodeStream;
+
+our $VERSION = '1.00';
+
 use FileHandle;
 use Carp;
 use B qw(cstring cast_I32);

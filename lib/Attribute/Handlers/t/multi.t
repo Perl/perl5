@@ -126,6 +126,6 @@ $loud++;
 my @noisy : Noisy(34);
 $noisy[0]++;
 
-my %rowdy : Rowdy(37);
+my %rowdy : Rowdy(37,'this arg should be ignored');
 $rowdy{key}++;
 

@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq8 - System Interaction ($Revision: 1.2 $, $Date: 2001/10/16 13:27:22 $)
+perlfaq8 - System Interaction ($Revision: 1.4 $, $Date: 2001/11/09 08:06:04 $)
 
 =head1 DESCRIPTION
 
@@ -635,7 +635,7 @@ STDOUT).
 Note that you I<must> use Bourne shell (sh(1)) redirection syntax in
 backticks, not csh(1)!  Details on why Perl's system() and backtick
 and pipe opens all use the Bourne shell are in
-http://www.perl.com/CPAN/doc/FMTEYEWTK/versus/csh.whynot .
+http://www.cpan.org/doc/FMTEYEWTK/versus/csh.whynot .
 To capture a command's STDERR and STDOUT together:
 
     $output = `cmd 2>&1`;                       # either with backticks
@@ -811,7 +811,7 @@ causes many inefficiencies.
 =head2 Can I use perl to run a telnet or ftp session?
 
 Try the Net::FTP, TCP::Client, and Net::Telnet modules (available from
-CPAN).  http://www.perl.com/CPAN/scripts/netstuff/telnet.emul.shar
+CPAN).  http://www.cpan.org/scripts/netstuff/telnet.emul.shar
 will also help for emulating the telnet protocol, but Net::Telnet is
 quite probably easier to use..
 
@@ -953,9 +953,8 @@ in L<perlfunc/fork>.
 =head2 How do I use an SQL database?
 
 There are a number of excellent interfaces to SQL databases.  See the
-DBD::* modules available from http://www.perl.com/CPAN/modules/DBD .
-A lot of information on this can be found at 
-http://www.symbolstone.org/technology/perl/DBI/
+DBD::* modules available from http://www.cpan.org/modules/DBD .
+A lot of information on this can be found at http://dbi.perl.org/
 
 =head2 How do I make a system() exit on control-C?
 

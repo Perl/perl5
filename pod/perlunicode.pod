@@ -6,19 +6,9 @@ perlunicode - Unicode support in Perl
 
 =head2 Important Caveats
 
-WARNING: While the implementation of Unicode support in Perl is now
-fairly complete it is still evolving to some extent.
-
-In particular the way Unicode is handled on EBCDIC platforms is still
-rather experimental. On such a platform references to UTF-8 encoding
-in this document and elsewhere should be read as meaning UTF-EBCDIC as
-specified in Unicode Technical Report 16 unless ASCII vs EBCDIC issues
-are specifically discussed. There is no C<utfebcdic> pragma or
-":utfebcdic" layer, rather "utf8" and ":utf8" are re-used to mean
-platform's "natural" 8-bit encoding of Unicode. See L<perlebcdic> for
-more discussion of the issues.
-
-The following areas are still under development.
+Unicode support is an extensive requirement. While perl does not
+implement the Unicode standard or the accompanying technical reports
+from cover to cover, Perl does support many Unicode features.
 
 =over 4
 
@@ -27,30 +17,30 @@ The following areas are still under development.
 A filehandle can be marked as containing perl's internal Unicode
 encoding (UTF-8 or UTF-EBCDIC) by opening it with the ":utf8" layer.
 Other encodings can be converted to perl's encoding on input, or from
-perl's encoding on output by use of the ":encoding()" layer.  There is
-not yet a clean way to mark the Perl source itself as being in an
-particular encoding.
+perl's encoding on output by use of the ":encoding(...)" layer.
+See L<open>.
+
+To mark the Perl source itself as being in a particular encoding,
+see L<encoding>.
 
 =item Regular Expressions
 
-The regular expression compiler does now attempt to produce
-polymorphic opcodes.  That is the pattern should now adapt to the data
-and automatically switch to the Unicode character scheme when
-presented with Unicode data, or a traditional byte scheme when
-presented with byte data.  The implementation is still new and
-(particularly on EBCDIC platforms) may need further work.
+The regular expression compiler produces polymorphic opcodes.  That is,
+the pattern adapts to the data and automatically switch to the Unicode
+character scheme when presented with Unicode data, or a traditional
+byte scheme when presented with byte data.
 
 =item C<use utf8> still needed to enable UTF-8/UTF-EBCDIC in scripts
 
 The C<utf8> pragma implements the tables used for Unicode support.
-These tables are automatically loaded on demand, so the C<utf8> pragma
-need not normally be used.
+However, these tables are automatically loaded on demand, so the
+C<utf8> pragma should not normally be used.
 
-However, as a compatibility measure, this pragma must be explicitly
-used to enable recognition of UTF-8 in the Perl scripts themselves on
-ASCII based machines or recognize UTF-EBCDIC on EBCDIC based machines.
-B<NOTE: this should be the only place where an explicit C<use utf8> is
-needed>.
+As a compatibility measure, this pragma must be explicitly used to
+enable recognition of UTF-8 in the Perl scripts themselves on ASCII
+based machines or recognize UTF-EBCDIC on EBCDIC based machines.
+B<NOTE: this should be the only place where an explicit C<use utf8>
+is needed>.
 
 You can also use the C<encoding> pragma to change the default encoding
 of the data in your script; see L<encoding>.
@@ -81,11 +71,11 @@ character data.  Such data may come from filehandles, from calls to
 external programs, from information provided by the system (such as %ENV),
 or from literals and constants in the source text.
 
-If the C<-C> command line switch is used, (or the
+On Windows platforms, if the C<-C> command line switch is used, (or the
 ${^WIDE_SYSTEM_CALLS} global flag is set to C<1>), all system calls
 will use the corresponding wide character APIs.  Note that this is
-currently only implemented on Windows since other platforms API
-standard on this area.
+currently only implemented on Windows since other platforms lack an
+API standard on this area.
 
 Regardless of the above, the C<bytes> pragma can always be used to
 force byte semantics in a particular lexical scope.  See L<bytes>.
@@ -284,6 +274,8 @@ have their directionality defined:
     BidiS       Segment Separator
     BidiWS      Whitespace
     BidiON      Other Neutrals
+
+=back
 
 =head2 Scripts
 
@@ -491,6 +483,8 @@ below list that have the C<Block> appended).
    Yi Radicals
    Yi Syllables
 
+=over 4
+
 =item *
 
 The special pattern C<\X> match matches any extended Unicode sequence
@@ -573,7 +567,7 @@ than one Unicode character
 
 =back
 
-What doesn't yet work are the followng cases:
+What doesn't yet work are the following cases:
 
 =over 8
 
@@ -632,19 +626,28 @@ Level 1 - Basic Unicode Support
         2.2 Categories                          - done          [3][4]
         2.3 Subtraction                         - MISSING       [5][6]
         2.4 Simple Word Boundaries              - done          [7]
-        2.5 Simple Loose Matches                - MISSING       [8]
+        2.5 Simple Loose Matches                - done          [8]
         2.6 End of Line                         - MISSING       [9][10]
 
         [ 1] \x{...}
         [ 2] \N{...}
         [ 3] . \p{Is...} \P{Is...}
-        [ 4] now scripts (see UTR#24 Script Names) in  addition to blocks
+        [ 4] now scripts (see UTR#24 Script Names) in addition to blocks
         [ 5] have negation
-        [ 6] can use look-ahead to emulate subtracion
+        [ 6] can use look-ahead to emulate subtraction (*)
         [ 7] include Letters in word characters
-        [ 8] see UTR#21 Case Mappings
+        [ 8] see UTR#21 Case Mappings: Perl implements 1:1 mappings
         [ 9] see UTR#13 Unicode Newline Guidelines
         [10] should do ^ and $ also on \x{2028} and \x{2029}
+
+(*) Instead of [\u0370-\u03FF-[{UNASSIGNED}]] as suggested by the TR
+18 you can use negated lookahead: to match currently assigned modern
+Greek characters use for example
+
+		/(?!\p{Cn})[\x{0370}-\x{03ff}]/
+
+In other words: the matched character must not be a non-assigned
+character, but it must be in the block of modern Greek characters.
 
 =item *
 
@@ -677,8 +680,109 @@ Level 3 - Locale-Sensitive Support
 
 =back
 
+=head2 Unicode Encodings
+
+Unicode characters are assigned to I<code points> which are abstract
+numbers.  To use these numbers various encodings are needed.
+
+=over 4
+
+=item UTF-8
+
+UTF-8 is the encoding used internally by Perl.  UTF-8 is a variable
+length (1 to 6 bytes, current character allocations require 4 bytes), 
+byteorder independent encoding.  For ASCII, UTF-8 is transparent
+(and we really do mean 7-bit ASCII, not any 8-bit encoding).
+
+=item UTF-16, UTF-16BE, UTF16-LE, Surrogates, and BOMs (Byte Order Marks)
+
+UTF-16 is a 2 or 4 byte encoding.  The Unicode code points
+0x0000..0xFFFF are stored in two 16-bit units, and the code points
+0x010000..0x10FFFF in four 16-bit units.  The latter case is
+using I<surrogates>, the first 16-bit unit being the I<high
+surrogate>, and the second being the I<low surrogate>.
+
+Surrogates are code points set aside to encode the 0x01000..0x10FFFF
+range of Unicode code points in pairs of 16-bit units.  The I<high
+surrogates> are the range 0xD800..0xDBFF, and the I<low surrogates>
+are the range 0xDC00..0xDFFFF.  The surrogate encoding is
+
+	$hi = ($uni - 0x10000) / 0x400 + 0xD800;
+	$lo = ($uni - 0x10000) % 0x400 + 0xDC00;
+
+and the decoding is
+
+	$uni = 0x10000 + ($hi - 0xD8000) * 0x400 + ($lo - 0xDC00);
+
+Because of the 16-bitness, UTF-16 is byteorder dependent.  UTF-16
+itself can be used for in-memory computations, but if storage or
+transfer is required, either UTF-16BE (Big Endian) or UTF-16LE
+(Little Endian) must be chosen.
+
+This introduces another problem: what if you just know that your data
+is UTF-16, but you don't know which endianness?  Byte Order Marks
+(BOMs) are a solution to this.  A special character has been reserved
+in Unicode to function as a byte order marker: the character with the
+code point 0xFEFF is the BOM.
+
+The trick is that if you read a BOM, you will know the byte order,
+since if it was written on a big endian platform, you will read the
+bytes 0xFE 0xFF, but if it was written on a little endian platform,
+you will read the bytes 0xFF 0xFE.  (And if the originating platform
+was writing in UTF-8, you will read the bytes 0xEF 0xBB 0xBF.)
+
+The way this trick works is that the character with the code point
+0xFFFE is guaranteed not to be a valid Unicode character, so the
+sequence of bytes 0xFF 0xFE is unambiguously "BOM, represented in
+little-endian format" and cannot be "0xFFFE, represented in big-endian
+format".
+
+=item UTF-32, UTF-32BE, UTF32-LE
+
+The UTF-32 family is pretty much like the UTF-16 family, expect that
+the units are 32-bit, and therefore the surrogate scheme is not
+needed.  The BOM signatures will be 0x00 0x00 0xFE 0xFF for BE and
+0xFF 0xFE 0x00 0x00 for LE.
+
+=item UCS-2, UCS-4
+
+Encodings defined by the ISO 10646 standard.  UCS-2 is a 16-bit
+encoding, UCS-4 is a 32-bit encoding.  Unlike UTF-16, UCS-2
+is not extensible beyond 0xFFFF, because it does not use surrogates.
+
+=item UTF-7
+
+A seven-bit safe (non-eight-bit) encoding, useful if the
+transport/storage is not eight-bit safe.  Defined by RFC 2152.
+
+=head2 Security Implications of Malformed UTF-8
+
+Unfortunately, the specification of UTF-8 leaves some room for
+interpretation of how many bytes of encoded output one should generate
+from one input Unicode character.  Strictly speaking, one is supposed
+to always generate the shortest possible sequence of UTF-8 bytes,
+because otherwise there is potential for input buffer overflow at the
+receiving end of a UTF-8 connection.  Perl always generates the shortest
+length UTF-8, and with warnings on (C<-w> or C<use warnings;>) Perl will
+warn about non-shortest length UTF-8 (and other malformations, too,
+such as the surrogates, which are not real character code points.)
+
+=head2 Unicode in Perl on EBCDIC
+
+The way Unicode is handled on EBCDIC platforms is still rather
+experimental.  On such a platform, references to UTF-8 encoding in this
+document and elsewhere should be read as meaning UTF-EBCDIC as
+specified in Unicode Technical Report 16 unless ASCII vs EBCDIC issues
+are specifically discussed. There is no C<utfebcdic> pragma or
+":utfebcdic" layer, rather, "utf8" and ":utf8" are re-used to mean
+the platform's "natural" 8-bit encoding of Unicode. See L<perlebcdic>
+for more discussion of the issues.
+
+=back
+
 =head1 SEE ALSO
 
-L<bytes>, L<utf8>, L<perlretut>, L<perlvar/"${^WIDE_SYSTEM_CALLS}">
+L<perluniintro>, L<encoding>, L<Encode>, L<open>, L<utf8>, L<bytes>,
+L<perlretut>, L<perlvar/"${^WIDE_SYSTEM_CALLS}">
 
 =cut

@@ -38,6 +38,11 @@
 #define PERL_IN_PERLIO_C
 #include "perl.h"
 
+#ifdef PERL_IMPLICIT_CONTEXT
+#undef dSYS
+#define dSYS dTHX
+#endif
+
 #include "XSUB.h"
 
 int
@@ -779,8 +784,8 @@ PerlIO_parse_layers(pTHX_ PerlIO_list_t *av, const char *names)
 		     */
 		    char q = ((*s == '\'') ? '"' : '\'');
 		    Perl_warn(aTHX_
-			      "perlio: invalid separator character %c%c%c in layer specification list",
-			      q, *s, q);
+			      "perlio: invalid separator character %c%c%c in layer specification list %s",
+			      q, *s, q, s);
 		    return -1;
 		}
 		do {
@@ -1067,16 +1072,19 @@ PerlIO_binmode(pTHX_ PerlIO *f, int iotype, int mode, const char *names)
     PerlIO_debug("PerlIO_binmode f=%p %s %c %x %s\n",
 		 f, PerlIOBase(f)->tab->name, iotype, mode,
 		 (names) ? names : "(Null)");
-    PerlIO_flush(f);
-    if (!names && (O_TEXT != O_BINARY && (mode & O_BINARY))) {
-	PerlIO *top = f;
-	while (*top) {
-	    if (PerlIOBase(top)->tab == &PerlIO_crlf) {
-		PerlIOBase(top)->flags &= ~PERLIO_F_CRLF;
-		break;
+    /* Can't flush if switching encodings. */
+    if (!(names && memEQ(names, ":encoding(", 10))) {
+        PerlIO_flush(f);
+	if (!names && (O_TEXT != O_BINARY && (mode & O_BINARY))) {
+	    PerlIO *top = f;
+	    while (*top) {
+	        if (PerlIOBase(top)->tab == &PerlIO_crlf) {
+		  PerlIOBase(top)->flags &= ~PERLIO_F_CRLF;
+		  break;
+		}
+		top = PerlIONext(top);
+		PerlIO_flush(top);
 	    }
-	    top = PerlIONext(top);
-	    PerlIO_flush(top);
 	}
     }
     return PerlIO_apply_layers(aTHX_ f, NULL, names) == 0 ? TRUE : FALSE;
@@ -3518,7 +3526,7 @@ PerlIOCrlf_get_cnt(PerlIO *f)
 			int code;
 			b->ptr++;	/* say we have read it as far as
 					 * flush() is concerned */
-			b->buf++;	/* Leave space an front of buffer */
+			b->buf++;	/* Leave space in front of buffer */
 			b->bufsiz--;	/* Buffer is thus smaller */
 			code = PerlIO_fill(f);	/* Fetch some more */
 			b->bufsiz++;	/* Restore size for next time */

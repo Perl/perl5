@@ -141,7 +141,7 @@ C<share>, C<lock>, C<unlock>, C<cond_wait>, C<cond_signal>, C<cond_broadcast>
 
 =item share VARIABLE
 
-C<share> takes a value and marks it as shared, you can share an scalar, array, hash
+C<share> takes a value and marks it as shared, you can share a scalar, array, hash
 scalar ref, array ref and hash ref, C<share> will return the shared value.
 
 C<share> will traverse up references exactly I<one> level.

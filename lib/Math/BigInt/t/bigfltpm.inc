@@ -110,6 +110,7 @@ while (<DATA>)
         $try .= '$x % $y;';
       } else { warn "Unknown op '$f'"; }
     }
+    # print "# Trying: '$try'\n";
     $ans1 = eval $try;
     if ($ans =~ m|^/(.*)$|)
       {
@@ -664,6 +665,12 @@ fdecNaN:NaN
 -1:-2
 1.23:0.23
 -1.23:-2.23
+100:99
+101:100
+-100:-101
+-99:-100
+-98:-99
+99:98
 &finc
 fincNaN:NaN
 +inf:inf
@@ -673,6 +680,11 @@ fincNaN:NaN
 -1:0
 1.23:2.23
 -1.23:-0.23
+100:101
+-100:-99
+-99:-98
+-101:-100
+99:100
 &fadd
 abc:abc:NaN
 abc:+0:NaN

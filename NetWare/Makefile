@@ -258,28 +258,30 @@ NW_CFG_VARS = \
 NW_CFGSH_TMPL	= config.wc
 NW_CFGH_TMPL	= config_H.wc
 
-SOCKET_NLP	= $(AUTODIR)\Socket\Socket.nlp
-FCNTL_NLP	= $(AUTODIR)\Fcntl\Fcntl.nlp
-IO_NLP		= $(AUTODIR)\IO\IO.nlp
-OPCODE_NLP	= $(AUTODIR)\Opcode\Opcode.nlp
-SDBM_FILE_NLP	= $(AUTODIR)\SDBM_File\SDBM_File.nlp
-POSIX_NLP	= $(AUTODIR)\POSIX\POSIX.nlp
-ATTRS_NLP	= $(AUTODIR)\attrs\attrs.nlp
-THREAD_NLP	= $(AUTODIR)\Thread\Thread.nlp
-B_NLP		= $(AUTODIR)\B\B.nlp
-DUMPER_NLP	= $(AUTODIR)\Data\Dumper\Dumper.nlp
-PEEK_NLP	= $(AUTODIR)\Devel\Peek\Peek.nlp
-RE_NLP		= $(AUTODIR)\re\re.nlp
-BYTELOADER_NLP	= $(AUTODIR)\ByteLoader\ByteLoader.nlp
-DPROF_NLP	= $(AUTODIR)\Devel\DProf\DProf.nlp
-GLOB_NLP	= $(AUTODIR)\File\Glob\Glob.nlp
-CWD_NLP		= $(AUTODIR)\Cwd\Cwd.nlp
-STORABLE_NLP	= $(AUTODIR)\Storable\Storable.nlp
-LISTUTIL_NLP	= $(AUTODIR)\List\Util\Util.nlp
-MIMEBASE64_NLP	= $(AUTODIR)\MIME\Base64\Base64.nlp
-XSTYPEMAP_NLP	= $(AUTODIR)\XS\Typemap\Typemap.nlp
+SOCKET_NLP		= $(AUTODIR)\Socket\Socket.nlp
+FCNTL_NLP		= $(AUTODIR)\Fcntl\Fcntl.nlp
+IO_NLP			= $(AUTODIR)\IO\IO.nlp
+OPCODE_NLP		= $(AUTODIR)\Opcode\Opcode.nlp
+SDBM_FILE_NLP		= $(AUTODIR)\SDBM_File\SDBM_File.nlp
+POSIX_NLP		= $(AUTODIR)\POSIX\POSIX.nlp
+ATTRS_NLP		= $(AUTODIR)\attrs\attrs.nlp
+THREAD_NLP		= $(AUTODIR)\Thread\Thread.nlp
+B_NLP			= $(AUTODIR)\B\B.nlp
+DUMPER_NLP		= $(AUTODIR)\Data\Dumper\Dumper.nlp
+PEEK_NLP		= $(AUTODIR)\Devel\Peek\Peek.nlp
+RE_NLP			= $(AUTODIR)\re\re.nlp
+BYTELOADER_NLP		= $(AUTODIR)\ByteLoader\ByteLoader.nlp
+DPROF_NLP		= $(AUTODIR)\Devel\DProf\DProf.nlp
+GLOB_NLP		= $(AUTODIR)\File\Glob\Glob.nlp
+HOSTNAME_NLP		= $(AUTODIR)\Sys\Hostname\Hostname.nlp
+CWD_NLP			= $(AUTODIR)\Cwd\Cwd.nlp
+STORABLE_NLP		= $(AUTODIR)\Storable\Storable.nlp
+LISTUTIL_NLP		= $(AUTODIR)\List\Util\Util.nlp
+MIMEBASE64_NLP		= $(AUTODIR)\MIME\Base64\Base64.nlp
+XSTYPEMAP_NLP		= $(AUTODIR)\XS\Typemap\Typemap.nlp
+UNICODENORMALIZE_NLP	= $(AUTODIR)\XS\Typemap\Typemap.nlp
 
-EXTENSION_NLP	= 		\
+EXTENSION_NLP	=		\
 		$(FCNTL_NLP)	\
 		$(BYTELOADER_NLP)	\
 		$(IO_NLP)		\
@@ -295,10 +297,12 @@ EXTENSION_NLP	= 		\
 		$(PEEK_NLP)		\
 		$(RE_NLP)	\
 		$(DPROF_NLP)	\
+		$(HOSTNAME_NLP) \
 		$(STORABLE_NLP)	\
 		$(LISTUTIL_NLP)	\
 		$(MIMEBASE64_NLP) \
 		$(XSTYPEMAP_NLP)	\
+		$(UNICODENORMALIZE_NLP)	\
 #		$(CWD_NLP)	\
 # cwd.pm needs to be modifed for NetWare.
 
@@ -326,11 +330,6 @@ TYPE_NLM	= TestNLM\type\type.nlm
 TEST_NLMS	=	\
 			$(ECHO_NLM)	\
 			$(TYPE_NLM)	\
-
-ERRNO_PM_NW	= $(LIBDIR)\Errno.pm
-
-EXTENSION_NPM =	\
-		$(ERRNO_PM_NW)	\
 
 
 !ifndef SCREEN
@@ -764,35 +763,41 @@ X2P_OBJ		= $(X2P_SRC:.c=.obj)
 
 DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B re \
 		Data/Dumper Devel/Peek ByteLoader Devel/DProf File/Glob \
-		Storable/Storable List/Util MIME/Base64/Base64 XS/Typemap/Typemap
+		Storable/Storable List/Util MIME/Base64/Base64 \
+		XS/Typemap/Typemap Unicode/Normalize/Normalize Sys/Hostnamees
+
 
 STATIC_EXT	= DynaLoader
 NONXS_EXT	= Errno
 
-DYNALOADER	= $(EXTDIR)\DynaLoader\DynaLoader
-SOCKET		= $(EXTDIR)\Socket\Socket
-FCNTL		= $(EXTDIR)\Fcntl\Fcntl
-OPCODE		= $(EXTDIR)\Opcode\Opcode
-SDBM_FILE	= $(EXTDIR)\SDBM_File\SDBM_File
+DYNALOADER		= $(EXTDIR)\DynaLoader\DynaLoader
+SOCKET			= $(EXTDIR)\Socket\Socket
+FCNTL			= $(EXTDIR)\Fcntl\Fcntl
+OPCODE			= $(EXTDIR)\Opcode\Opcode
+SDBM_FILE		= $(EXTDIR)\SDBM_File\SDBM_File
 IO			= $(EXTDIR)\IO\IO
-POSIX		= $(EXTDIR)\POSIX\POSIX
-ATTRS		= $(EXTDIR)\attrs\attrs
-THREAD		= $(EXTDIR)\Thread\Thread
+POSIX			= $(EXTDIR)\POSIX\POSIX
+ATTRS			= $(EXTDIR)\attrs\attrs
+THREAD			= $(EXTDIR)\Thread\Thread
 B			= $(EXTDIR)\B\B
 RE			= $(EXTDIR)\re\re
-DUMPER		= $(EXTDIR)\Data\Dumper\Dumper
-ERRNO		= $(EXTDIR)\Errno\Errno
-PEEK		= $(EXTDIR)\Devel\Peek\Peek
-BYTELOADER	= $(EXTDIR)\ByteLoader\ByteLoader
-DPROF		= $(EXTDIR)\Devel\DProf\DProf
-GLOB		= $(EXTDIR)\File\Glob\Glob
+DUMPER			= $(EXTDIR)\Data\Dumper\Dumper
+ERRNO			= $(EXTDIR)\Errno\Errno
+PEEK			= $(EXTDIR)\Devel\Peek\Peek
+BYTELOADER		= $(EXTDIR)\ByteLoader\ByteLoader
+DPROF			= $(EXTDIR)\Devel\DProf\DProf
+GLOB			= $(EXTDIR)\File\Glob\Glob
+HOSTNAME		= $(EXTDIR)\Sys\Hostname\Hostname
 CWD			= $(EXTDIR)\Cwd\Cwd
-STORABLE	= $(EXTDIR)\Storable\Storable
-LISTUTIL	= $(EXTDIR)\List\Util
-MIMEBASE64	= $(EXTDIR)\MIME\Base64\Base64
-XSTYPEMAP	= $(EXTDIR)\XS\Typemap\Typemap
+STORABLE		= $(EXTDIR)\Storable\Storable
+LISTUTIL		= $(EXTDIR)\List\Util
+MIMEBASE64		= $(EXTDIR)\MIME\Base64\Base64
+XSTYPEMAP		= $(EXTDIR)\XS\Typemap\Typemap
+UNICODENORMALIZE	= $(EXTDIR)\Unicode\Normalize\Normalize
 
-EXTENSION_C	= 		\
+ERRNO_PM_NW	= $(LIBDIR)\Errno.pm
+
+EXTENSION_C	=		\
 		$(SOCKET).c	\
 		$(FCNTL).c	\
 		$(OPCODE).c	\
@@ -808,11 +813,16 @@ EXTENSION_C	= 		\
 		$(BYTELOADER).c	\
 		$(DPROF).c	\
 		$(GLOB).c	\
+		$(HOSTNAME).c \
 		$(CWD).c	\
 		$(STORABLE).c	\
 		$(LISTUTIL).c	\
 		$(MIMEBASE64).c	\
 		$(XSTYPEMAP).c	\
+		$(UNICODENORMALIZE).c	\
+
+EXTENSION_NPM =	\
+		$(ERRNO_PM_NW)	\
 
 POD2HTML	= $(PODDIR)\pod2html
 POD2MAN		= $(PODDIR)\pod2man
@@ -1171,6 +1181,12 @@ $(SOCKET_NLP): $(NLM_NAME) $(SOCKET).xs
 	$(MAKE)
 	cd ..\..\netware
 
+$(HOSTNAME_NLP): $(NLM_NAME) $(HOSTNAME).xs
+	cd $(EXTDIR)\Sys\$(*B)
+	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(MAKE)
+	cd ..\..\..\netware
+
 $(FCNTL_NLP):
 	cd $(EXTDIR)\$(*B)
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
@@ -1281,6 +1297,12 @@ $(MIMEBASE64_NLP):
 
 $(XSTYPEMAP_NLP):
 	cd $(EXTDIR)\XS\$(*B)
+	..\..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(MAKE)
+	cd ..\..\..\netware
+
+$(UNICODENORMALIZE_NLP):
+	cd $(EXTDIR)\Unicode\$(*B)
 	..\..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	$(MAKE)
 	cd ..\..\..\netware
@@ -1414,6 +1436,7 @@ utils: $(BLDDIR)\$(NLM_NAME8).$(NLM_EXT) $(X2P)
 distclean: clean nwclean
 	-del /f $(PERLIMPLIB) ..\miniperl.lib $(MINIMOD)
 	-del /f *.def *.map
+	-del /f $(EXTENSION_NPM)
 	-del /f $(EXTENSION_C) $(DYNALOADER).c $(ERRNO).pm
 	-del /f $(EXTDIR)\DynaLoader\dl_netware.xs
 	-del /f $(LIBDIR)\.exists $(LIBDIR)\attrs.pm $(LIBDIR)\DynaLoader.pm
@@ -1425,6 +1448,7 @@ distclean: clean nwclean
 	-del /f $(LIBDIR)\Data\Dumper.pm $(LIBDIR)\ByteLoader.pm
 	-del /f $(LIBDIR)\Devel\Peek.pm $(LIBDIR)\Devel\DProf.pm
 	-del /f $(LIBDIR)\File\Glob.pm
+	-del /f $(LIBDIR)\Unicode\Normalize.pm
 	-rmdir /s /q $(LIBDIR)\IO || rmdir /s $(LIBDIR)\IO
 	-rmdir /s /q $(LIBDIR)\Thread || rmdir /s $(LIBDIR)\Thread
 	-rmdir /s /q $(LIBDIR)\B || rmdir /s $(LIBDIR)\B

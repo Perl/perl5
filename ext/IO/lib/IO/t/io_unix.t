@@ -30,7 +30,6 @@ BEGIN {
 	} elsif ($^O =~ m/^(?:qnx|nto)$/ ) {
 	    $reason = 'Not implemented';
 	}
-	undef $reason if $^O eq 'VMS' and $Config{d_socket};
 	if ($reason) {
 	    print "1..0 # Skip: $reason\n";
 	    exit 0;

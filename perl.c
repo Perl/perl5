@@ -469,8 +469,10 @@ perl_destruct(pTHXx)
     }
 
     /* jettison our possibly duplicated environment */
-
-#ifdef USE_ENVIRON_ARRAY
+    /* if PERL_USE_SAFE_PUTENV is defined environ will not have been copied
+     * so we certainly shouldn't free it here
+     */
+#if defined(USE_ENVIRON_ARRAY) && !defined(PERL_USE_SAFE_PUTENV)
     if (environ != PL_origenviron) {
 	I32 i;
 
@@ -2189,8 +2191,10 @@ Perl_moreswitches(pTHX_ char *s)
 	return s;
     case 'F':
 	PL_minus_F = TRUE;
-	PL_splitstr = savepv(s + 1);
-	s += strlen(s);
+	PL_splitstr = ++s;
+	while (*s && !isSPACE(*s)) ++s;
+	*s = '\0';
+	PL_splitstr = savepv(PL_splitstr);
 	return s;
     case 'a':
 	PL_minus_a = TRUE;
@@ -2269,7 +2273,7 @@ Perl_moreswitches(pTHX_ char *s)
 	        s++;
 	}
 	return s;
-    case 'I':	/* -I handled both here and in parse_perl() */
+    case 'I':	/* -I handled both here and in parse_body() */
 	forbid_setid("-I");
 	++s;
 	while (*s && isSPACE(*s))
@@ -3370,17 +3374,10 @@ S_init_predump_symbols(pTHX)
     PL_osname = savepv(OSNAME);
 }
 
-STATIC void
-S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register char **env)
+void
+Perl_init_argv_symbols(pTHX_ register int argc, register char **argv)
 {
     char *s;
-    SV *sv;
-    GV* tmpgv;
-#ifdef NEED_ENVIRON_DUP_FOR_MODIFY
-    char **dup_env_base = 0;
-    int dup_env_count = 0;
-#endif
-
     argc--,argv++;	/* skip name of script */
     if (PL_doswitches) {
 	for (; argc > 0 && **argv == '-'; argc--,argv++) {
@@ -3398,30 +3395,6 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 		sv_setiv(GvSV(gv_fetchpv(argv[0]+1,TRUE, SVt_PV)),1);
 	}
     }
-    PL_toptarget = NEWSV(0,0);
-    sv_upgrade(PL_toptarget, SVt_PVFM);
-    sv_setpvn(PL_toptarget, "", 0);
-    PL_bodytarget = NEWSV(0,0);
-    sv_upgrade(PL_bodytarget, SVt_PVFM);
-    sv_setpvn(PL_bodytarget, "", 0);
-    PL_formtarget = PL_bodytarget;
-
-    TAINT;
-    if ((tmpgv = gv_fetchpv("0",TRUE, SVt_PV))) {
-#ifdef MACOS_TRADITIONAL
-	/* $0 is not majick on a Mac */
-	sv_setpv(GvSV(tmpgv),MacPerl_MPWFileName(PL_origfilename));
-#else
-	sv_setpv(GvSV(tmpgv),PL_origfilename);
-	magicname("0", "0", 1);
-#endif
-    }
-    if ((tmpgv = gv_fetchpv("\030",TRUE, SVt_PV)))
-#ifdef OS2
-	sv_setpv(GvSV(tmpgv), os2_execname(aTHX));
-#else
-	sv_setpv(GvSV(tmpgv),PL_origargv[0]);
-#endif
     if ((PL_argvgv = gv_fetchpv("ARGV",TRUE, SVt_PVAV))) {
 	GvMULTI_on(PL_argvgv);
 	(void)gv_AVadd(PL_argvgv);
@@ -3433,6 +3406,46 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 		(void)sv_utf8_decode(sv);
 	}
     }
+}
+
+STATIC void
+S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register char **env)
+{
+    char *s;
+    SV *sv;
+    GV* tmpgv;
+#ifdef NEED_ENVIRON_DUP_FOR_MODIFY
+    char **dup_env_base = 0;
+    int dup_env_count = 0;
+#endif
+
+    PL_toptarget = NEWSV(0,0);
+    sv_upgrade(PL_toptarget, SVt_PVFM);
+    sv_setpvn(PL_toptarget, "", 0);
+    PL_bodytarget = NEWSV(0,0);
+    sv_upgrade(PL_bodytarget, SVt_PVFM);
+    sv_setpvn(PL_bodytarget, "", 0);
+    PL_formtarget = PL_bodytarget;
+
+    TAINT;
+
+    init_argv_symbols(argc,argv);
+
+    if ((tmpgv = gv_fetchpv("0",TRUE, SVt_PV))) {
+#ifdef MACOS_TRADITIONAL
+	/* $0 is not majick on a Mac */
+	sv_setpv(GvSV(tmpgv),MacPerl_MPWFileName(PL_origfilename));
+#else
+	sv_setpv(GvSV(tmpgv),PL_origfilename);
+	magicname("0", "0", 1);
+#endif
+    }
+    if ((tmpgv = gv_fetchpv("\030",TRUE, SVt_PV))) /* $^X */
+#ifdef OS2
+	sv_setpv(GvSV(tmpgv), os2_execname(aTHX));
+#else
+	sv_setpv(GvSV(tmpgv),PL_origargv[0]);
+#endif
     if ((PL_envgv = gv_fetchpv("ENV",TRUE, SVt_PVHV))) {
 	HV *hv;
 	GvMULTI_on(PL_envgv);

@@ -325,7 +325,7 @@ CRTLOPTS =,$(CRTL)/Options
 .endif
 
 # Modules which must be installed before we can build extensions
-LIBPREREQ = $(ARCHDIR)Config.pm [.lib.VMS]Filespec.pm [.lib]DynaLoader.pm [.lib]XSLoader.pm [.lib]lib.pm [.lib]vmsish.pm [.lib.ExtUtils]XSSymSet.pm $(ARCHDIR)vmspipe.com [.lib]re.pm
+LIBPREREQ = $(ARCHDIR)Config.pm [.lib.VMS]Filespec.pm [.lib]DynaLoader.pm [.lib]XSLoader.pm [.lib]lib.pm [.lib.ExtUtils]XSSymSet.pm $(ARCHDIR)vmspipe.com [.lib]re.pm
 
 utils1 = [.lib.pod]perldoc.com [.lib.ExtUtils]Miniperl.pm [.utils]c2ph.com [.utils]h2ph.com [.utils]h2xs.com [.lib]perlbug.com [.lib]perlcc.com [.utils]dprofpp.com
 utils2 = [.utils]perlivp.com [.lib]splain.com [.utils]pl2pm.com
@@ -488,9 +488,6 @@ $(ARCHDIR)vmspipe.com : vmspipe.com
 
 dynext : $(LIBPREREQ) $(DBG)perlshr$(E) preplibrary
 	@make_ext "$(MINIPERL_EXE)" "$(MMS)"
-
-[.lib]vmsish.pm : [.vms.ext]vmsish.pm
-	Copy/Log/NoConfirm $(MMS$SOURCE) $(MMS$TARGET)
 
 [.lib]lib.pm : [.lib]lib_pm.PL
 	$(MINIPERL) $(MMS$SOURCE)
@@ -908,9 +905,6 @@ perly$(O) : perly.c, perly.h, $(h)
 [.t.lib]vmsfspec.t : [.vms.ext]filespec.t
 	Copy/Log/NoConfirm $(MMS$SOURCE) $(MMS$TARGET)
 
-[.t.lib]vmsish.t : [.vms.ext]vmsish.t
-	Copy/Log/NoConfirm $(MMS$SOURCE) $(MMS$TARGET)
-
 [.t.lib]vms_dclsym.t : [.vms.ext.DCLsym]test.pl
 	Copy/Log/NoConfirm $(MMS$SOURCE) $(MMS$TARGET)
 
@@ -920,7 +914,7 @@ perly$(O) : perly.c, perly.h, $(h)
 check : test
 	@ Continue
 
-test : all [.t.lib]vmsfspec.t [.t.lib]vmsish.t [.t.lib]vms_dclsym.t [.t.lib]vms_stdio.t
+test : all [.t.lib]vmsfspec.t [.t.lib]vms_dclsym.t [.t.lib]vms_stdio.t
 	- @[.VMS]Test.Com "$(E)" "$(__DEBUG__)"
 	@ $(MINIPERL) -e "print ""Ran tests"";" > [.t]rantests.
 

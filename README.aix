@@ -19,7 +19,7 @@ an ANSI compliant C-compiler with AIX by default, but binary builds of
 gcc for AIX are widely available.
 
 At the moment of writing, AIX supports two different native C compilers,
-for which you have to pay: B<xlc> and B<VAC>. If you decide to use eiter
+for which you have to pay: B<xlc> and B<VAC>. If you decide to use either
 of these two (which is quite a lot easier than using gcc), be sure to
 upgrade to the latest available patch level. Currently:
 
@@ -154,7 +154,7 @@ Follow the messages ... and you're done.
 
 =head2 Using GNU's gcc for building perl
 
-We're woking on this using gcc-3.0 ... (any input highly appreciated)
+We're working on this using gcc-3.0 ... (any input highly appreciated)
 
 =head2 Using Large Files with Perl
 

@@ -85,7 +85,7 @@ static void TranslateError
     {
 	"%s(%d): Object Image Load Failure\n",
 	"%s(%d): Object Image Load Success\n",
-	"%s(%d): Not an recognisable object file\n",
+	"%s(%d): Not a recognisable object file\n",
 	"%s(%d): No valid architecture\n",
 	"%s(%d): Object image has an invalid format\n",
 	"%s(%d): Invalid access (permissions?)\n",

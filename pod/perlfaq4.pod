@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq4 - Data Manipulation ($Revision: 1.7 $, $Date: 2001/10/26 19:46:03 $)
+perlfaq4 - Data Manipulation ($Revision: 1.8 $, $Date: 2001/11/09 08:06:04 $)
 
 =head1 DESCRIPTION
 
@@ -136,13 +136,15 @@ functions is that it works with numbers of ANY size, that it is
 optimized for speed on some operations, and for at least some
 programmers the notation might be familiar.
 
+=over 4
+
 =item B<How do I convert Hexadecimal into decimal:>
 
 Using perl's built in conversion of 0x notation:
 
     $int = 0xDEADBEEF;
     $dec = sprintf("%d", $int);
- 
+
 Using the hex function:
 
     $int = hex("DEADBEEF");
@@ -247,6 +249,7 @@ Using Bit::Vector:
 The remaining transformations (e.g. hex -> oct, bin -> hex, etc.)
 are left as an exercise to the inclined reader.
 
+=back
 
 =head2 Why doesn't & work the way I want it to?
 
@@ -322,7 +325,7 @@ will not create a list of 500,000 integers.
 
 =head2 How can I output Roman numerals?
 
-Get the http://www.perl.com/CPAN/modules/by-module/Roman module.
+Get the http://www.cpan.org/modules/by-module/Roman module.
 
 =head2 Why aren't my random numbers random?
 
@@ -334,7 +337,7 @@ than more.
 
 Computers are good at being predictable and bad at being random
 (despite appearances caused by bugs in your programs :-).
-http://www.perl.com/CPAN/doc/FMTEYEWTK/random , courtesy of Tom
+http://www.cpan.org/doc/FMTEYEWTK/random , courtesy of Tom
 Phoenix, talks more about this.  John von Neumann said, ``Anyone who
 attempts to generate random numbers by deterministic means is, of
 course, living in a state of sin.''
@@ -1473,7 +1476,7 @@ If you need to sort on several fields, the following paradigm is useful.
 This can be conveniently combined with precalculation of keys as given
 above.
 
-See http://www.perl.com/CPAN/doc/FMTEYEWTK/sort.html for more about
+See http://www.cpan.org/doc/FMTEYEWTK/sort.html for more about
 this approach.
 
 See also the question below on sorting hashes.
@@ -1849,7 +1852,7 @@ in L<perltoot>.
 
 =head2 How can I use a reference as a hash key?
 
-You can't do this directly, but you could use the standard Tie::Refhash
+You can't do this directly, but you could use the standard Tie::RefHash
 module distributed with Perl.
 
 =head1 Data: Misc

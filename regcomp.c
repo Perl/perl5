@@ -1764,7 +1764,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     r->reganch = pm->op_pmflags & PMf_COMPILETIME; /* Again? */
     pm->op_pmflags = RExC_flags16;
     if (UTF)
-	r->reganch |= ROPT_UTF8;
+        r->reganch |= ROPT_UTF8;	/* Unicode in it? */
     r->regstclass = NULL;
     if (RExC_naughty >= 10)	/* Probably an expensive pattern. */
 	r->reganch |= ROPT_NAUGHTY;
@@ -2016,6 +2016,8 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	r->reganch |= ROPT_EVAL_SEEN;
     if (RExC_seen & REG_SEEN_CANY)
 	r->reganch |= ROPT_CANY_SEEN;
+    if (RExC_seen & REG_SEEN_SEOL)
+	r->reganch |= ROPT_SEOL_SEEN;
     Newz(1002, r->startp, RExC_npar, I32);
     Newz(1002, r->endp, RExC_npar, I32);
     PL_regdata = r->data; /* for regprop() */
@@ -2794,6 +2796,7 @@ tryagain:
 	    break;
 	case 'Z':
 	    ret = reg_node(pRExC_state, SEOL);
+	    RExC_seen |= REG_SEEN_SEOL;
 	    *flagp |= SIMPLE;
 	    nextchar(pRExC_state);
 	    break;
@@ -3168,6 +3171,7 @@ tryagain:
 	      RExC_emit += STR_SZ(newlen) - STR_SZ(oldlen);
 	 } else
 	      RExC_size += STR_SZ(newlen) - STR_SZ(oldlen);
+	 RExC_utf8 = 1;
     }
 
     return(ret);

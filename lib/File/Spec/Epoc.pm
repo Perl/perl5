@@ -1,5 +1,7 @@
 package File::Spec::Epoc;
 
+our $VERSION = '1.00';
+
 use strict;
 use Cwd;
 use vars qw(@ISA);

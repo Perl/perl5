@@ -504,7 +504,7 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 	sv_catpvn(sv, "\n", 1);		/* Taken into account in fbm_instr() */
     s = (U8*)SvPV_force(sv, len);
     (void)SvUPGRADE(sv, SVt_PVBM);
-    if (len == 0)		/* TAIL might be on on a zero-length string. */
+    if (len == 0)		/* TAIL might be on a zero-length string. */
 	return;
     if (len > 2) {
 	U8 mlen;
@@ -1496,6 +1496,16 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
     }
 }
 
+/* since we've already done strlen() for both nam and val
+ * we can use that info to make things faster than
+ * sprintf(s, "%s=%s", nam, val)
+ */
+#define my_setenv_format(s, nam, nlen, val, vlen) \
+   Copy(nam, s, nlen, char); \
+   *(s+nlen) = '='; \
+   Copy(val, s+(nlen+1), vlen, char); \
+   *(s+(nlen+1+vlen)) = '\0'
+
 #ifdef USE_ENVIRON_ARRAY
        /* VMS' and EPOC's my_setenv() is in vms.c and epoc.c */
 #if !defined(WIN32) && !defined(NETWARE)
@@ -1505,6 +1515,7 @@ Perl_my_setenv(pTHX_ char *nam, char *val)
 #ifndef PERL_USE_SAFE_PUTENV
     /* most putenv()s leak, so we manipulate environ directly */
     register I32 i=setenv_getix(nam);		/* where does it go? */
+    int nlen, vlen;
 
     if (environ == PL_origenviron) {	/* need we copy environment? */
 	I32 j;
@@ -1515,8 +1526,9 @@ Perl_my_setenv(pTHX_ char *nam, char *val)
 	for (max = i; environ[max]; max++) ;
 	tmpenv = (char**)safesysmalloc((max+2) * sizeof(char*));
 	for (j=0; j<max; j++) {		/* copy environment */
-	    tmpenv[j] = (char*)safesysmalloc((strlen(environ[j])+1)*sizeof(char));
-	    strcpy(tmpenv[j], environ[j]);
+            int len = strlen(environ[j]);
+            tmpenv[j] = (char*)safesysmalloc((len+1)*sizeof(char));
+            Copy(environ[j], tmpenv[j], len+1, char);
 	}
 	tmpenv[max] = Nullch;
 	environ = tmpenv;		/* tell exec where it is now */
@@ -1535,18 +1547,26 @@ Perl_my_setenv(pTHX_ char *nam, char *val)
     }
     else
 	safesysfree(environ[i]);
-    environ[i] = (char*)safesysmalloc((strlen(nam)+strlen(val)+2) * sizeof(char));
+    nlen = strlen(nam);
+    vlen = strlen(val);
 
-    (void)sprintf(environ[i],"%s=%s",nam,val);/* all that work just for this */
+    environ[i] = (char*)safesysmalloc((nlen+vlen+2) * sizeof(char));
+    /* all that work just for this */
+    my_setenv_format(environ[i], nam, nlen, val, vlen);
 
 #else   /* PERL_USE_SAFE_PUTENV */
 #   if defined(__CYGWIN__)
     setenv(nam, val, 1);
 #   else
     char *new_env;
-
-    new_env = (char*)safesysmalloc((strlen(nam) + strlen(val) + 2) * sizeof(char));
-    (void)sprintf(new_env,"%s=%s",nam,val);/* all that work just for this */
+    int nlen = strlen(nam), vlen;
+    if (!val) {
+        val = "";
+    }
+    vlen = strlen(val);
+    new_env = (char*)safesysmalloc((nlen + vlen + 2) * sizeof(char));
+    /* all that work just for this */
+    my_setenv_format(new_env, nam, nlen, val, vlen);
     (void)putenv(new_env);
 #   endif /* __CYGWIN__ */
 #endif  /* PERL_USE_SAFE_PUTENV */
@@ -1558,13 +1578,14 @@ void
 Perl_my_setenv(pTHX_ char *nam,char *val)
 {
     register char *envstr;
-    STRLEN len = strlen(nam) + 3;
+    int nlen = strlen(nam), vlen;
+
     if (!val) {
 	val = "";
     }
-    len += strlen(val);
-    New(904, envstr, len, char);
-    (void)sprintf(envstr,"%s=%s",nam,val);
+    vlen = strlen(val);
+    New(904, envstr, nlen+vlen+2, char);
+    my_setenv_format(envstr, nam, nlen, val, vlen);
     (void)PerlEnv_putenv(envstr);
     Safefree(envstr);
 }
@@ -3862,4 +3883,77 @@ Perl_getcwd_sv(pTHX_ register SV *sv)
     return FALSE;
 #endif
 }
+
+/*
+=for apidoc new_vstring
+
+Returns a pointer to the next character after the parsed
+vstring, as well as updating the passed in sv.
+ * 
+Function must be called like 
+ 	
+        sv = NEWSV(92,5);
+	s = new_vstring(s,sv);
+
+The sv must already be large enough to store the vstring
+passed in.
+
+=cut
+*/
+
+char *
+Perl_new_vstring(pTHX_ char *s, SV *sv)
+{
+    char *pos = s;
+    if (*pos == 'v') pos++;  /* get past 'v' */
+    while (isDIGIT(*pos) || *pos == '_')
+    pos++;
+    if (!isALPHA(*pos)) {
+	UV rev;
+	U8 tmpbuf[UTF8_MAXLEN+1];
+	U8 *tmpend;
+
+	if (*s == 'v') s++;  /* get past 'v' */
+
+	sv_setpvn(sv, "", 0);
+
+	for (;;) {
+	    rev = 0;
+	    {
+	    /* this is atoi() that tolerates underscores */
+	    char *end = pos;
+	    UV mult = 1;
+	    if ( *(s-1) == '_') {
+	    	mult = 10;
+	    }
+	    while (--end >= s) {
+		UV orev;
+		orev = rev;
+		rev += (*end - '0') * mult;
+		mult *= 10;
+		if (orev > rev && ckWARN_d(WARN_OVERFLOW))
+		Perl_warner(aTHX_ WARN_OVERFLOW,
+			"Integer overflow in decimal number");
+	    }
+	    }
+	    /* Append native character for the rev point */
+	    tmpend = uvchr_to_utf8(tmpbuf, rev);
+	    sv_catpvn(sv, (const char*)tmpbuf, tmpend - tmpbuf);
+	    if (!UNI_IS_INVARIANT(NATIVE_TO_UNI(rev)))
+	    SvUTF8_on(sv);
+	    if ( (*pos == '.' || *pos == '_') && isDIGIT(pos[1]))
+	    s = ++pos;
+	    else {
+	    s = pos;
+	    break;
+	    }
+	    while (isDIGIT(*pos) )
+	    pos++;
+	}
+	SvPOK_on(sv);
+	SvREADONLY_on(sv);
+    }
+    return s;
+}
+
 

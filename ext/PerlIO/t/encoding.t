@@ -9,11 +9,12 @@ BEGIN {
     }
 }
 
-print "1..10\n";
+print "1..11\n";
 
 my $grk = "grk$$";
 my $utf = "utf$$";
 my $fail1 = "fail$$";
+my $russki = "koi8r$$";
 
 if (open(GRK, ">$grk")) {
     # alpha beta gamma in ISO 8859-7
@@ -73,6 +74,29 @@ if (!defined $warn) {
     print "not ok 10 # warning is '$warn'";
 }
 
+if (open(RUSSKI, ">$russki")) {
+    print RUSSKI "\x3c\x3f\x78";
+    close RUSSKI;
+    open(RUSSKI, "$russki");
+    binmode(RUSSKI, ":raw");
+    my $buf1;
+    read(RUSSKI, $buf1, 1);
+    eof(RUSSKI);
+    binmode(RUSSKI, ":encoding(koi8-r)");
+    my $buf2;
+    read(RUSSKI, $buf2, 1);
+    my $offset = tell(RUSSKI);
+    if (ord($buf1) == 0x3c && ord($buf2) == 0x3f && $offset == 2) {
+	print "ok 11\n";
+    } else {
+	printf "not ok 11 # %#x %#x %d\n",
+	       ord($buf1), ord($buf2), $offset;
+    }
+    close(RUSSKI);
+} else {
+    print "not ok 11 # open failed: $!\n";
+}
+
 END {
-    unlink($grk, $utf, $fail1);
+    unlink($grk, $utf, $fail1, $russki);
 }

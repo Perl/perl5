@@ -1016,7 +1016,7 @@ the beginning of the test string just inside the open square
 bracket.
 
 The final operation uses the backslash character to
-invalidate the special meaning of the a open square bracket C<[>,
+invalidate the special meaning of an open square bracket C<[>,
 the asterisk, backslash or the question mark. Two backslashes in
 sequence will result in the evaluation of the backslash as a
 character with no special meaning.

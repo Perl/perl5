@@ -12,9 +12,7 @@ BEGIN {
 no utf8; # needed for use utf8 not griping about the raw octets
 
 $| = 1;
-my $total_tests = 25;
-if (ord('A') == 193) { $total_tests = 24; } # EBCDIC platforms do not warn on UTF-8
-print "1..$total_tests\n";
+print "1..26\n";
 
 open(F,"+>:utf8",'a');
 print F chr(0x100).'£';
@@ -175,12 +173,38 @@ print "not " unless $x eq $chr;
 print "ok 24\n";
 
 # Now we have a deformed file.
-open F, "<:utf8", "a" or die $!;
-$x = <F>; chomp $x;
-{ local $SIG{__WARN__} = sub { print "ok 25\n"; };
-eval { sprintf "%vd\n", $x; }
+
+if (ord('A') == 193) {
+    print "ok 25 # Skip: EBCDIC\n"; # EBCDIC doesn't complain
+} else {
+    open F, "<:utf8", "a" or die $!;
+    $x = <F>; chomp $x;
+    local $SIG{__WARN__} = sub { print "ok 25\n" };
+    eval { sprintf "%vd\n", $x };
 }
 
 close F;
 unlink('a');
 
+open F, ">a";
+@a = map { chr(1 << ($_ << 2)) } 0..5; # 0x1, 0x10, .., 0x100000
+print F @a;
+close F;
+open F, "<:utf8", "a";
+$a = 0;
+for (@a) {
+    unless (read(F, $b, 1) == 1  &&
+            length($b)     == 1  &&
+            ord($b)        == ord($_) &&
+            tell(F)        == ($a += bytes::length($b))) {
+        print '# ord($_)    == ', ord($_), "\n";
+        print '# ord($b)    == ', ord($b), "\n";
+        print '# length($b) == ', length($b), "\n";
+        print '# tell(F)    == ', tell(F), "\n";
+        print "not ";
+        last;
+    }
+}
+print "ok 26\n";
+
+END { 1 while unlink "a" }

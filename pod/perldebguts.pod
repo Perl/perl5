@@ -774,7 +774,7 @@ were
 	   4     12    24    48    80
 
 With non-C<DEBUGGING> perl, the buckets starting from C<128> have
-a 4-byte overhead, and thus a 8192-long bucket may take up to
+a 4-byte overhead, and thus an 8192-long bucket may take up to
 8188-byte allocations.
 
 =item C<Total sbrk(): SBRKed/SBRKs:CONTINUOUS>

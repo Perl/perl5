@@ -5,7 +5,7 @@ use strict;
 use warnings;
 
 use overload 
-    '==' => \&equals,
+    '==' => \&equal,
     'fallback' => 1;
 
 #use threads::Shared;
@@ -25,7 +25,7 @@ our @EXPORT = qw(
 our $VERSION = '0.05';
 
 
-sub equals {
+sub equal {
     return 1 if($_[0]->tid() == $_[1]->tid());
     return 0;
 }
@@ -68,39 +68,43 @@ $thread->tid();
 
 =head1 DESCRIPTION
 
-Perl 5.6 introduced something called interpreter threads. Interpreter
-threads are different from 5005 threads by creating a new perl
-interpreter per thread and not sharing any data or state between threads.
+Perl 5.6 introduced something called interpreter threads.  Interpreter
+threads are different from "5005threads" (the thread model of Perl
+5.005) by creating a new perl interpreter per thread and not sharing
+any data or state between threads.
 
-Prior to perl 5.8 this has only been available to people embedding perl and
-for emulating fork() on windows.
+Prior to perl 5.8 this has only been available to people embedding
+perl and for emulating fork() on windows.
 
-The threads API is loosly based on the old Thread.pm API. It is very important
-to note that variables are not shared between threads, all variables are per
-default thread local. To use shared variables one must use threads::shared.
+The threads API is loosely based on the old Thread.pm API. It is very
+important to note that variables are not shared between threads, all
+variables are per default thread local.  To use shared variables one
+must use threads::shared.
 
-It is also important to note that you preferebly enable threads by doing
-C<use threads> as early as possible and it is not possible to enable threading
-by in an eval ""; 
+It is also important to note that you preferably enable threads by
+doing C<use threads> as early as possible and that it is not possible
+to enable threading inside an eval "";
 
 =over
 
-=item new, function, LIST
+=item $thread = new(function, LIST)
 
 This will create a new thread with the entry point function and give
 it LIST as parameters.  It will return the corresponding threads
 object.
 
-create is an alias to new
+create() is an alias to new.
 
 =item $thread->join
 
-This will wait for the corresponding thread to join. When it finishes join will return the return values of the root function.
-If a thread has been detached, join will return without wait.
+This will wait for the corresponding thread to join. When it finishes
+join will return the return values of the entry point function.  If a
+thread has been detached, join will return without wait.
 
 =item $thread->detach
 
-Will throw away the return value from the thread and make non joinable
+Will throw away the return value from the thread and make it
+non-joinable.
 
 =item threads->self
 
@@ -108,8 +112,8 @@ This will return the object for the current thread.
 
 =item $thread->tid
 
-This will return the id of the thread.
-threads->self->tid() is a quick way to get current thread id
+This will return the id of the thread.  threads->self->tid() is a
+quick way to get current thread id.
 
 =back
 
@@ -118,9 +122,9 @@ threads->self->tid() is a quick way to get current thread id
 
 =over
 
-=item Fix so the return value is returned when you join
+=item Fix so the return value is returned when you join.
 
-=item Add join_all
+=item Add join_all.
 
 =item Fix memory leaks!
 
@@ -130,7 +134,7 @@ threads->self->tid() is a quick way to get current thread id
 
 Arthur Bergman E<lt>arthur at contiller.seE<gt>
 
-threads is released under the same license as Perl
+threads is released under the same license as Perl.
 
 Thanks to 
 

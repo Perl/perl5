@@ -405,7 +405,7 @@ specified below.
             /* Get the key from an HE structure and also return
                the length of the key string */
     SV*    hv_iterval(HV*, HE* entry);
-            /* Return a SV pointer to the value of the HE
+            /* Return an SV pointer to the value of the HE
                structure */
     SV*    hv_iternextsv(HV*, char** key, I32* retlen);
             /* This convenience routine combines hv_iternext,
@@ -609,7 +609,7 @@ package.
 
 =head2 Reference Counts and Mortality
 
-Perl uses an reference count-driven garbage collection mechanism. SVs,
+Perl uses a reference count-driven garbage collection mechanism. SVs,
 AVs, or HVs (xV for short in the following) start their life with a
 reference count of 1.  If the reference count of an xV ever drops to 0,
 then it will be destroyed and its memory made available for reuse.
@@ -866,7 +866,7 @@ was initially made magical.
 
 =head2 Magic Virtual Tables
 
-The C<mg_virtual> field in the C<MAGIC> structure is a pointer to a
+The C<mg_virtual> field in the C<MAGIC> structure is a pointer to an
 C<MGVTBL>, which is a structure of function pointers and stands for
 "Magic Virtual Table" to handle the various operations that might be
 applied to that variable.
@@ -1255,7 +1255,7 @@ C<sarg> of C<SV*> of length C<maxsarg>.
 
 =item C<SV* save_svref(SV **sptr)>
 
-Similar to C<save_scalar>, but will reinstate a C<SV *>.
+Similar to C<save_scalar>, but will reinstate an C<SV *>.
 
 =item C<void save_aptr(AV **aptr)>
 
@@ -1695,7 +1695,7 @@ C<sv_dump> to produce debugging output from Perl-space, so users of that
 module should already be familiar with its format.
 
 C<Perl_op_dump> can be used to dump an C<OP> structure or any of its
-derivatives, and produces output similiar to C<perl -Dx>; in fact,
+derivatives, and produces output similar to C<perl -Dx>; in fact,
 C<Perl_dump_eval> will dump the main root of the code being evaluated,
 exactly like C<-Dx>.
 

@@ -1,4 +1,7 @@
 package B::Debug;
+
+our $VERSION = '1.00';
+
 use strict;
 use B qw(peekop class walkoptree walkoptree_exec
          main_start main_root cstring sv_undef);

@@ -18,6 +18,23 @@ BEGIN {
 if ( $symlink_exists ) { print "1..188\n"; }
 else                   { print "1..78\n";  }
 
+# Uncomment this to see where File::Find is chdir'ing to.  Helpful for
+# debugging its little jaunts around the filesystem.
+# BEGIN {
+#     use Cwd;
+#     *CORE::GLOBAL::chdir = sub ($) { 
+#         my($file, $line) = (caller)[1,2];
+#
+#         printf "# cwd:      %s\n", cwd();
+#         print "# chdir: @_ from $file at $line\n";
+#         my($return) = CORE::chdir($_[0]);
+#         printf "# newcwd:   %s\n", cwd();
+#
+#         return $return;
+#     };
+# }
+
+
 BEGIN {
     use File::Spec;
     if ($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'VMS')
@@ -60,7 +77,7 @@ sub cleanup {
         rmdir dir_path('fa');
         rmdir dir_path('fb', 'fba');
         rmdir dir_path('fb');
-        chdir File::Spec->updir;
+        chdir(File::Spec->updir);
         rmdir dir_path('for_find');
     }
 }

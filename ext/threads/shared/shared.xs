@@ -323,7 +323,7 @@ STORE(self, index, value)
 	if(SvROK(value)) {
 	    shared_sv* target = Perl_sharedsv_find(aTHX_ SvRV(value));
 	    if(!target) {
-	         Perl_croak(aTHX_ "You cannot assign a non shared reference to an shared array");
+	         Perl_croak(aTHX_ "You cannot assign a non shared reference to a shared array");
 	    }
             value = newRV_noinc(newSViv(PTR2IV(target)));
         }
@@ -396,7 +396,7 @@ PUSH(self, ...)
 	    if(SvROK(tmp)) {
                  shared_sv* target = Perl_sharedsv_find(aTHX_ SvRV(tmp));
                  if(!target) {
-                     Perl_croak(aTHX_ "You cannot assign a non shared reference to an shared array");
+                     Perl_croak(aTHX_ "You cannot assign a non shared reference to a shared array");
                  }
                  tmp = newRV_noinc(newSViv(PTR2IV(target)));
             }
@@ -425,7 +425,7 @@ UNSHIFT(self, ...)
 	    if(SvROK(tmp)) {
                  shared_sv* target = Perl_sharedsv_find(aTHX_ SvRV(tmp));
                  if(!target) {
-                     Perl_croak(aTHX_ "You cannot assign a non shared reference to an shared array");
+                     Perl_croak(aTHX_ "You cannot assign a non shared reference to a shared array");
                  }
                  tmp = newRV_noinc(newSViv(PTR2IV(target)));
             }

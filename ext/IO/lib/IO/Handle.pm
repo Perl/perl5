@@ -48,7 +48,7 @@ Creates a new C<IO::Handle> object.
 
 =item new_from_fd ( FD, MODE )
 
-Creates a C<IO::Handle> like C<new> does.
+Creates an C<IO::Handle> like C<new> does.
 It requires two parameters, which are passed to the method C<fdopen>;
 if the fdopen fails, the object is destroyed. Otherwise, it is returned
 to the caller.
@@ -105,7 +105,7 @@ Furthermore, for doing normal I/O you might need these:
 =item $io->fdopen ( FD, MODE )
 
 C<fdopen> is like an ordinary C<open> except that its first parameter
-is not a filename but rather a file handle name, a IO::Handle object,
+is not a filename but rather a file handle name, an IO::Handle object,
 or a file descriptor number.
 
 =item $io->opened
@@ -220,7 +220,7 @@ the taint-clean flag failed. (eg invalid handle)
 
 =head1 NOTE
 
-A C<IO::Handle> object is a reference to a symbol/GLOB reference (see
+An C<IO::Handle> object is a reference to a symbol/GLOB reference (see
 the C<Symbol> package).  Some modules that
 inherit from C<IO::Handle> may want to keep object related variables
 in the hash table part of the GLOB. In an attempt to prevent modules

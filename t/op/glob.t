@@ -13,6 +13,10 @@ if ($^O eq 'MSWin32') {
   map { $files{lc($_)}++ } <op/*>;
   map { delete $files{"op/$_"} } split /[\s\n]/, `dir /b /l op & dir /b /l /ah op 2>nul`,
 }
+elsif ($^O eq 'VMS') {
+  map { $files{lc($_)}++ } <[.op]*>;
+  map { s/;.*$//; delete $files{lc($_)}; } split /[\n]/, `directory/noheading/notrailing/versions=1 [.op]`,
+}
 else {
   map { $files{$_}++ } <op/*>;
   map { delete $files{$_} } split /[\s\n]/, `echo op/*`;

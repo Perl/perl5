@@ -1189,6 +1189,8 @@ PP(pp_qr)
     register PMOP *pm = cPMOP;
     SV *rv = sv_newmortal();
     SV *sv = newSVrv(rv, "Regexp");
+    if (pm->op_pmdynflags & PMdf_TAINTED)
+        SvTAINTED_on(rv);
     sv_magic(sv,(SV*)ReREFCNT_inc(PM_GETRE(pm)), PERL_MAGIC_qr,0,0);
     RETURNX(PUSHs(rv));
 }
@@ -1262,9 +1264,7 @@ PP(pp_match)
 	    }
 	}
     }
-    if ((!global && rx->nparens)
-	    || SvTEMP(TARG) || PL_sawampersand)
-	r_flags |= REXEC_COPY_STR;
+    r_flags |= REXEC_COPY_STR;
     if (SvSCREAM(TARG))
 	r_flags |= REXEC_SCREAM;
 
@@ -1289,7 +1289,7 @@ play_it_again:
 	if (!s)
 	    goto nope;
 	if ( (rx->reganch & ROPT_CHECK_ALL)
-	     && !PL_sawampersand
+	     && !((rx->reganch & ROPT_SEOL_SEEN) && PL_multiline)
 	     && ((rx->reganch & ROPT_NOSCAN)
 		 || !((rx->reganch & RE_INTUIT_TAIL)
 		      && (r_flags & REXEC_SCREAM)))
@@ -1406,19 +1406,12 @@ yup:					/* Confirmed by INTUIT */
 	rx->sublen = strend - truebase;
 	goto gotcha;
     }
-    if (PL_sawampersand) {
-	I32 off;
 
-	rx->subbeg = savepvn(t, strend - t);
-	rx->sublen = strend - t;
-	RX_MATCH_COPIED_on(rx);
-	off = rx->startp[0] = s - t;
-	rx->endp[0] = off + rx->minlen;
-    }
-    else {			/* startp/endp are used by @- @+. */
-	rx->startp[0] = s - truebase;
-	rx->endp[0] = s - truebase + rx->minlen;
-    }
+    rx->sublen = strend - t;
+    rx->subbeg = savepvn(t, rx->sublen);
+    RX_MATCH_COPIED_on(rx);
+    rx->startp[0] = s - truebase;
+    rx->endp[0] = s - truebase + rx->minlen;
     rx->nparens = rx->lastparen = 0;	/* used by @- and @+ */
     LEAVE_SCOPE(oldsave);
     RETPUSHYES;

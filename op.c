@@ -3305,7 +3305,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *id, OP *arg)
 
 	/* Fake up a method call to import/unimport */
 	meth = aver ? newSVpvn("import",6) : newSVpvn("unimport", 8);;
-	sv_upgrade(meth, SVt_PVIV);
+	(void)SvUPGRADE(meth, SVt_PVIV);
 	(void)SvIOK_on(meth);
 	PERL_HASH(SvUVX(meth), SvPVX(meth), SvCUR(meth));
 	imop = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL,
@@ -3695,10 +3695,10 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
 
     if (PERLDB_LINE && PL_curstash != PL_debstash) {
 	SV **svp = av_fetch(CopFILEAV(PL_curcop), (I32)CopLINE(cop), FALSE);
-	if (svp && *svp != &PL_sv_undef && !SvIOK(*svp)) {
-	    (void)SvIOK_on(*svp);
+        if (svp && *svp != &PL_sv_undef ) { 
+           (void)SvIOK_on(*svp);
 	    SvIVX(*svp) = PTR2IV(cop);
-	}
+	} 
     }
 
     return prepend_elem(OP_LINESEQ, (OP*)cop, o);

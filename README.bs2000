@@ -1,5 +1,5 @@
 This document is written in pod format hence there are punctuation
-characters in in odd places.  Do not worry, you've apparently got the
+characters in odd places.  Do not worry, you've apparently got the
 ASCII->EBCDIC translation worked out correctly.  You can read more
 about pod in pod/perlpod.pod or the short summary in the INSTALL file.
 
@@ -151,7 +151,7 @@ C</START-PROG FROM-FILE=*MODULE(PERL,PERL),PROG-MODE=*ANY,RUN-MODE=*ADV>
 First you get the BS2000 commandline prompt ('*').  Here you may enter
 your parameters, e.g. C<-e 'print "Hello World!\\n";'> (note the
 double backslash!) or C<-w> and the name of your Perl script.
-Filenames starting with C</> are searched in in the Posix filesystem,
+Filenames starting with C</> are searched in the Posix filesystem,
 others are searched in the BS2000 filesystem.  You may even use
 wildcards if you put a C<%> in front of your filename (e.g. C<-w
 checkfiles.pl %*.c>).  Read your C/C++ manual for additional

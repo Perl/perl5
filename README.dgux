@@ -57,10 +57,10 @@ machine is to run the command:
 This will automatically accept all the defaults and
 in particular /usr/local/ as installation directory.
 Note that GCC-2.95.x rev(DG/UX) knows the switch
--pthread whcih allows it to link correctly DG/UX's
+-pthread which allows it to link correctly DG/UX's
 -lthread library.
 
-If you want to change the installtion directory or
+If you want to change the installation directory or
 have a standard DG/UX with C compiler GCC-2.7.2.x
 then you have no choice than to do an interactive
 build by issuing the command:

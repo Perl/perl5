@@ -130,6 +130,7 @@ ext/DB_File/typemap		Berkeley DB extension interface types
 ext/DB_File/version.c		Berkeley DB extension interface version check
 ext/Devel/DProf/Changes		Perl code profiler changelog
 ext/Devel/DProf/DProf.pm	Perl code profiler
+ext/Devel/DProf/DProf.t		Perl code profiler
 ext/Devel/DProf/DProf.xs	Perl code profiler
 ext/Devel/DProf/Makefile.PL	Perl code profiler makefile writer
 ext/Devel/DProf/Todo		Perl code profiler todo list
@@ -560,7 +561,6 @@ ext/Thread/specific.tx		Test thread-specific user data
 ext/Thread/sync.tx		Test thread synchronisation
 ext/Thread/sync2.tx		Test thread synchronisation
 ext/Thread/thr5005.t		Test 5.005-style threading (skipped if no use5005threads)
-ext/Thread/Thread.pm		Thread extension Perl module
 ext/Thread/Thread.xs		Thread extension external subroutines
 ext/Thread/Thread/Queue.pm	Thread synchronised queue objects
 ext/Thread/Thread/Semaphore.pm	Thread semaphore objects
@@ -596,6 +596,16 @@ ext/Time/HiRes/HiRes.pm		Time::HiRes extension
 ext/Time/HiRes/HiRes.t		Test for Time::HiRes
 ext/Time/HiRes/HiRes.xs		Time::HiRes extension
 ext/Time/HiRes/Makefile.PL	Time::HiRes extension
+ext/Unicode/Normalize/Changes	Unicode::Normalize
+ext/Unicode/Normalize/Makefile.PL	Unicode::Normalize
+ext/Unicode/Normalize/mkheader	Unicode::Normalize
+ext/Unicode/Normalize/Normalize.pm	Unicode::Normalize
+ext/Unicode/Normalize/Normalize.pod	Unicode::Normalize
+ext/Unicode/Normalize/Normalize.xs	Unicode::Normalize
+ext/Unicode/Normalize/README	Unicode::Normalize
+ext/Unicode/Normalize/t/func.t	Unicode::Normalize
+ext/Unicode/Normalize/t/norm.t	Unicode::Normalize
+ext/Unicode/Normalize/t/test.t	Unicode::Normalize
 ext/util/make_ext		Used by Makefile to execute extension Makefiles
 ext/XS/Typemap/Makefile.PL	XS::Typemap extension
 ext/XS/Typemap/README		XS::Typemap extension
@@ -792,7 +802,6 @@ lib/autouse.pm			Load and call a function only when it's used
 lib/autouse.t			See if autouse works
 lib/base.pm			Establish IS-A relationship at compile time
 lib/Benchmark.pm		Measure execution time
-lib/Benchmark.t			Perl code profiler testsuite driver
 lib/bigfloat.pl			An arbitrary precision floating point package
 lib/bigfloat.t			See if bigfloat.pl works
 lib/bigint.pl			An arbitrary precision integer arithmetic package
@@ -801,6 +810,7 @@ lib/bigrat.pl			An arbitrary precision rational arithmetic package
 lib/blib.pm			For "use blib"
 lib/blib.t                      blib.pm test
 lib/bytes.pm			Pragma to enable byte operations
+lib/bytes.t			bytes.pm test
 lib/bytes_heavy.pl		Support routines for byte pragma
 lib/cacheout.pl			Manages output filehandles when you need too many
 lib/Carp.pm			Error message base class
@@ -966,6 +976,8 @@ lib/Filter/Simple.pm		Simple frontend to Filter::Util::Call
 lib/Filter/Simple/Changes	Filter::Simple
 lib/Filter/Simple/README	Filter::Simple
 lib/Filter/Simple/t/filter.t	See if Filter::Simple works
+lib/Filter/Simple/t/data.t	See if Filter::Simple works
+lib/Filter/Simple/t/filter_only.t	See if Filter::Simple works
 lib/find.pl			A find emulator--used by find2perl
 lib/FindBin.pm			Find name of currently executing program
 lib/FindBin.t			See if FindBin works
@@ -1005,10 +1017,6 @@ lib/IPC/SysV.t			See if IPC::SysV works
 lib/less.pm			For "use less"
 lib/less.t			See if less support works
 lib/lib_pm.PL			For "use lib", produces lib/lib.pm
-lib/Lingua/KO/Hangul/Util.pm		Lingua::KO::Hangul::Util
-lib/Lingua/KO/Hangul/Util/Changes	Lingua::KO::Hangul::Util
-lib/Lingua/KO/Hangul/Util/README	Lingua::KO::Hangul::Util
-lib/Lingua/KO/Hangul/Util/t/test.t		Lingua::KO::Hangul::Util
 lib/locale.pm			For "use locale"
 lib/locale.t			See if locale support works
 lib/Locale/Codes/t/all.t	See if Locale::Codes work
@@ -1137,6 +1145,7 @@ lib/Pod/Html.pm			Convert POD data to HTML
 lib/Pod/InputObjects.pm		Pod-Parser - define objects for input streams
 lib/Pod/LaTeX.pm		Convert POD data to LaTeX
 lib/Pod/Man.pm			Convert POD data to *roff
+lib/Pod/ParseLink.pm		Perl an L<> formatting code in POD text
 lib/Pod/Parser.pm		Pod-Parser - define base class for parsing POD
 lib/Pod/ParseUtils.pm		Pod-Parser - pod utility functions
 lib/Pod/Plainer.pm		Pod migration utility module
@@ -1250,6 +1259,7 @@ lib/Text/TabsWrap/t/fill.t	See if Text::Wrap::fill works
 lib/Text/TabsWrap/t/tabs.t	See if Text::Tabs works
 lib/Text/TabsWrap/t/wrap.t	See if Text::Wrap::wrap works
 lib/Text/Wrap.pm		Paragraph formatter
+lib/Thread.pm			Thread extensions frontend
 lib/Tie/Array.pm		Base class for tied arrays
 lib/Tie/Array/push.t		Test for Tie::Array
 lib/Tie/Array/splice.t		Test for Tie::Array::SPLICE
@@ -1277,11 +1287,6 @@ lib/Unicode/Collate/Changes	Unicode::Collate
 lib/Unicode/Collate/keys.txt	Unicode::Collate
 lib/Unicode/Collate/README	Unicode::Collate
 lib/Unicode/Collate/t/test.t	Unicode::Collate
-lib/Unicode/Normalize.pm	Unicode::Normalize
-lib/Unicode/Normalize/Changes	Unicode::Normalize
-lib/Unicode/Normalize/README	Unicode::Normalize
-lib/Unicode/Normalize/t/norm.t	Unicode::Normalize
-lib/Unicode/Normalize/t/test.t	Unicode::Normalize
 lib/Unicode/README		Explanation what happened to lib/unicode.
 lib/Unicode/UCD.pm		Unicode character database
 lib/Unicode/UCD.t		See if Unicode character database works
@@ -1631,6 +1636,8 @@ lib/utf8_heavy.pl		Support routines for utf8 pragma
 lib/validate.pl			Perl library supporting wholesale file mode validation
 lib/vars.pm			Declare pseudo-imported global variables
 lib/vars.t			See if "use vars" work
+lib/vmsish.pm		        Control VMS-specific behavior of Perl core
+lib/vmsish.t		        Tests for vmsish.pm
 lib/warnings.pm			For "use warnings"
 lib/warnings.t			See if warning controls work
 lib/warnings/register.pm	For "use warnings::register"
@@ -1886,6 +1893,7 @@ pod/perltodo.pod		Todo list explained
 pod/perltooc.pod		Tom's object-oriented tutorial (more on class data)
 pod/perltoot.pod		Tom's object-oriented tutorial
 pod/perltrap.pod		Trap info
+pod/perluniintro.pod		Unicode introduction
 pod/perlunicode.pod		Unicode support info
 pod/perlutil.pod		Accompanying utilities explained
 pod/perlvar.pod			Variable info
@@ -1905,6 +1913,7 @@ pod/splitpod			Splits perlfunc into multiple pod pages
 Policy_sh.SH		Hold site-wide preferences between Configure runs.
 Porting/apply		Apply patches sent by mail
 Porting/check83.pl	Check whether we are 8.3-friendly
+Porting/checkVERSION.pl	Check whether we have $VERSIONs
 Porting/config.sh	Sample config.sh
 Porting/config_H	Sample config.h
 Porting/Contract	Social contract for contributed modules in Perl core
@@ -2039,6 +2048,7 @@ t/lib/dprof/test6_v		Perl code profiler tests
 t/lib/dprof/V.pm		Perl code profiler tests
 t/lib/filter-util.pl		See if Filter::Util::Call works
 t/lib/FilterTest.pm		Helper file for lib/Filter/Simple/t/filter.t
+t/lib/FilterOnlyTest.pm		Helper file for lib/Filter/Simple/t/filter_only.t
 t/lib/h2ph.h			Test header file for h2ph
 t/lib/h2ph.pht			Generated output from h2ph.h by h2ph, for comparison
 t/lib/locale/latin1		Part of locale.t in Latin 1
@@ -2262,6 +2272,14 @@ t/README			Instructions for regression tests
 t/run/exit.t                    Test perl's exit status.
 t/run/kill_perl.t               Tests that kill perl.
 t/run/runenv.t			Test if perl honors its environment variables.
+t/run/noswitch.t		Test aliasing ARGV for other switch tests
+t/run/switcha.t			Test the -a switch
+t/run/switchn.t			Test the -n switch
+t/run/switchp.t			Test the -p switch
+t/run/switchx.t                 Test the -x switch
+t/run/switchx.aux               Data for switchx.t
+t/run/switchF.t			Test the -F switch
+t/run/switches.t		Tests for the other switches
 t/TEST				The regression tester
 t/test.pl			Simple testing library
 t/TestInit.pm			Preamble library for core tests
@@ -2310,8 +2328,6 @@ vms/ext/Stdio/Makefile.PL	MakeMaker driver for VMS::Stdio
 vms/ext/Stdio/Stdio.pm		VMS options to stdio routines
 vms/ext/Stdio/Stdio.xs		VMS options to stdio routines
 vms/ext/Stdio/test.pl		regression tests for VMS::Stdio
-vms/ext/vmsish.pm		Control VMS-specific behavior of Perl core
-vms/ext/vmsish.t		Tests for vmsish.pm
 vms/ext/XSSymSet.pm		manage linker symbols when building extensions
 vms/genconfig.pl		retcon config.sh from config.h
 vms/genopt.com			hack to write options files in case of broken makes

@@ -262,6 +262,7 @@
 #define ibcmp			Perl_ibcmp
 #define ibcmp_locale		Perl_ibcmp_locale
 #define ingroup			Perl_ingroup
+#define init_argv_symbols	Perl_init_argv_symbols
 #define init_debugger		Perl_init_debugger
 #define init_stacks		Perl_init_stacks
 #define init_tm			Perl_init_tm
@@ -497,6 +498,7 @@
 #define newUNOP			Perl_newUNOP
 #define newWHILEOP		Perl_newWHILEOP
 #define new_stackinfo		Perl_new_stackinfo
+#define new_vstring		Perl_new_vstring
 #define nextargv		Perl_nextargv
 #define ninstr			Perl_ninstr
 #define oopsCV			Perl_oopsCV
@@ -1050,11 +1052,9 @@
 #define reghopmaybe3		S_reghopmaybe3
 #define find_byclass		S_find_byclass
 #endif
-#if defined(PERL_IN_RUN_C) || defined(PERL_DECL_PROT)
-#   ifdef DEBUGGING
+#if defined(PERL_IN_DUMP_C) || defined(PERL_DECL_PROT)
 #define deb_curcv		S_deb_curcv
 #define debprof			S_debprof
-#   endif
 #endif
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
 #define save_scalar_at		S_save_scalar_at
@@ -1781,6 +1781,7 @@
 #define ibcmp(a,b,c)		Perl_ibcmp(aTHX_ a,b,c)
 #define ibcmp_locale(a,b,c)	Perl_ibcmp_locale(aTHX_ a,b,c)
 #define ingroup(a,b)		Perl_ingroup(aTHX_ a,b)
+#define init_argv_symbols(a,b)	Perl_init_argv_symbols(aTHX_ a,b)
 #define init_debugger()		Perl_init_debugger(aTHX)
 #define init_stacks()		Perl_init_stacks(aTHX)
 #define init_tm(a)		Perl_init_tm(aTHX_ a)
@@ -2013,6 +2014,7 @@
 #define newUNOP(a,b,c)		Perl_newUNOP(aTHX_ a,b,c)
 #define newWHILEOP(a,b,c,d,e,f,g)	Perl_newWHILEOP(aTHX_ a,b,c,d,e,f,g)
 #define new_stackinfo(a,b)	Perl_new_stackinfo(aTHX_ a,b)
+#define new_vstring(a,b)	Perl_new_vstring(aTHX_ a,b)
 #define nextargv(a)		Perl_nextargv(aTHX_ a)
 #define ninstr(a,b,c,d)		Perl_ninstr(aTHX_ a,b,c,d)
 #define oopsCV(a)		Perl_oopsCV(aTHX_ a)
@@ -2557,11 +2559,9 @@
 #define reghopmaybe3(a,b,c)	S_reghopmaybe3(aTHX_ a,b,c)
 #define find_byclass(a,b,c,d,e,f)	S_find_byclass(aTHX_ a,b,c,d,e,f)
 #endif
-#if defined(PERL_IN_RUN_C) || defined(PERL_DECL_PROT)
-#   ifdef DEBUGGING
+#if defined(PERL_IN_DUMP_C) || defined(PERL_DECL_PROT)
 #define deb_curcv(a)		S_deb_curcv(aTHX_ a)
 #define debprof(a)		S_debprof(aTHX_ a)
-#   endif
 #endif
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
 #define save_scalar_at(a)	S_save_scalar_at(aTHX_ a)

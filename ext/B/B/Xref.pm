@@ -1,5 +1,7 @@
 package B::Xref;
 
+our $VERSION = '1.00';
+
 =head1 NAME
 
 B::Xref - Generates cross reference reports for Perl programs

@@ -369,7 +369,7 @@ is (&*MOD*::zombie, "You didn't use fire.", "Are our zombies undead?");
 True, so don't scrub this directory.
 ################################################################
 ## Name
-Without the the timestamp check make sure that nothing happens
+Without the timestamp check make sure that nothing happens
 ## Extra
 0, 1, 1
 ## Require
@@ -391,7 +391,7 @@ is (&*MOD*::zombie, "You didn't use fire.", "Are our zombies still undead?");
 True, so don't scrub this directory.
 ################################################################
 ## Name
-With the the timestamp check make sure that things happen (stuff gets deleted)
+With the timestamp check make sure that things happen (stuff gets deleted)
 ## Extra
 0, 1, 0
 ## Get

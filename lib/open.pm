@@ -25,8 +25,12 @@ sub _get_locale_encoding {
 	    } elsif ($ENV{LANG} =~ /^([^.]+)\.([^.]+)$/) {
 		($country_language, $locale_encoding) = ($1, $2);
 	    }
-	} else {
-	    # Could do heuristics based on the country and language
+	} elsif (not $locale_encoding) {
+	    if ($ENV{LC_ALL} =~ /\butf-?8\b/i ||
+		$ENV{LANG}   =~ /\butf-?8\b/i) {
+		$locale_encoding = 'utf8';
+	    }
+	    # Could do more heuristics based on the country and language
 	    # parts of LC_ALL and LANG (the parts before the dot (if any)),
 	    # since we have Locale::Country and Locale::Language available.
 	    # TODO: get a database of Language -> Encoding mappings
@@ -37,11 +41,11 @@ sub _get_locale_encoding {
 	    $locale_encoding eq 'euc' &&
 	    defined $country_language) {
 	    if ($country_language =~ /^ja_JP|japan(?:ese)?$/i) {
-		$locale_encoding = 'eucjp';
+		$locale_encoding = 'euc-jp';
 	    } elsif ($country_language =~ /^ko_KR|korean?$/i) {
-		$locale_encoding = 'euckr';
+		$locale_encoding = 'euc-kr';
 	    } elsif ($country_language =~ /^zh_TW|taiwan(?:ese)?$/i) {
-		$locale_encoding = 'euctw';
+		$locale_encoding = 'euc-tw';
 	    }
 	    croak "Locale encoding 'euc' too ambiguous"
 		if $locale_encoding eq 'euc';
@@ -56,9 +60,15 @@ sub import {
     my ($in,$out) = split(/\0/,(${^OPEN} || "\0"), -1);
     while (@args) {
 	my $type = shift(@args);
-	my $discp = shift(@args);
+	my $dscp;
+	if ($type =~ /^:?(utf8|locale|encoding\(.+\))$/) {
+	    $type = 'IO';
+	    $dscp = ":$1";
+	} else {
+	    $dscp = shift(@args);
+	}
 	my @val;
-	foreach my $layer (split(/\s+/,$discp)) {
+	foreach my $layer (split(/\s+/,$dscp)) {
             $layer =~ s/^://;
 	    if ($layer eq 'locale') {
 		use Encode;
@@ -88,14 +98,14 @@ sub import {
 	elsif ($type eq 'OUT') {
 	    $out = join(' ',@val);
 	}
-	elsif ($type eq 'INOUT') {
+	elsif ($type eq 'IO') {
 	    $in = $out = join(' ',@val);
 	}
 	else {
 	    croak "Unknown discipline class '$type'";
 	}
     }
-    ${^OPEN} = join('\0',$in,$out);
+    ${^OPEN} = join("\0",$in,$out);
 }
 
 1;
@@ -107,8 +117,15 @@ open - perl pragma to set default disciplines for input and output
 
 =head1 SYNOPSIS
 
-    use open IN => ":crlf", OUT => ":raw";
-    use open INOUT => ":utf8";
+    use open IN  => ":crlf", OUT => ":raw";
+    use open OUT => ':utf8';
+    use open IO  => ":encoding(iso-8859-7)";
+
+    use open IO  => ':locale';
+  
+    use open ':utf8';
+    use open ':locale';
+    use open ':encoding(iso-8859-7)';
 
 =head1 DESCRIPTION
 
@@ -123,6 +140,42 @@ The C<open> pragma is used to declare one or more default layers for
 I/O operations.  Any open(), readpipe() (aka qx//) and similar
 operators found within the lexical scope of this pragma will use the
 declared defaults.
+
+With the C<IN> subpragma you can declare the default layers
+of input sterams, and with the C<OUT> subpragma you can declare
+the default layers of output streams.  With the C<IO>  subpragma
+you can control both input and output streams simultaneously.
+
+If you have a legacy encoding, you can use the C<:encoding(...)> tag.
+
+if you want to set your encoding disciplines based on your
+locale environment variables, you can use the C<:locale> tag.
+For example:
+
+    $ENV{LANG} = 'ru_RU.KOI8-R';
+    # the :locale will probe the locale environment variables like LANG
+    use open OUT => ':locale';
+    open(O, ">koi8");
+    print O chr(0x430); # Unicode CYRILLIC SMALL LETTER A = KOI8-R 0xc1
+    close O;
+    open(I, "<koi8");
+    printf "%#x\n", ord(<I>), "\n"; # this should print 0xc1
+    close I;
+
+These are equivalent
+
+    use open ':utf8';
+    use open IO => ':utf8';
+
+as are these
+
+    use open ':locale';
+    use open IO => ':locale';
+
+and these
+
+    use open ':encoding(iso-8859-7)';
+    use open IO => ':encoding(iso-8859-7)';
 
 When open() is given an explicit list of layers they are appended to
 the list declared using this pragma.

@@ -417,7 +417,7 @@ Send the PASS command. Returns the number of messages in the mailbox.
 
 =item login ( [ USER [, PASS ]] )
 
-Send both the the USER and PASS commands. If C<PASS> is not given the
+Send both the USER and PASS commands. If C<PASS> is not given the
 C<Net::POP3> uses C<Net::Netrc> to lookup the password using the host
 and username. If the username is not specified then the current user name
 will be used.

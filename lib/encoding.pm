@@ -1,5 +1,7 @@
 package encoding;
 
+our $VERSION = '1.00';
+
 use Encode;
 
 sub import {

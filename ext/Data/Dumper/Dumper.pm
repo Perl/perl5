@@ -747,7 +747,7 @@ references are not dumped; instead, their names are inserted wherever they
 are encountered subsequently.  This is useful especially for properly
 dumping subroutine references.
 
-Expects a anonymous hash of name => value pairs.  Same rules apply for names
+Expects an anonymous hash of name => value pairs.  Same rules apply for names
 as in C<new>.  If no argument is supplied, will return the "seen" list of
 name => value pairs, in a list context.  Otherwise, returns the object
 itself.

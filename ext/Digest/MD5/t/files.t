@@ -20,7 +20,7 @@ $EXPECT = <<EOT;
 EOT
 } else { # ASCII
 $EXPECT = <<EOT;
-bf8c3c72d071d1c0303fc9e311820708  ext/Digest/MD5/MD5.pm
+665ddc08b12d6b1bf85ac6dc5aae68b3  ext/Digest/MD5/MD5.pm
 95444a9c6ad17e443e4606c6c7fd9e28  ext/Digest/MD5/MD5.xs
 EOT
 }

@@ -79,14 +79,14 @@ increase cc1's stacksize, if you run out of memory you should
 either decrease the stacksize or follow some more hints:
 
 Perl's building process is very handy on machines with a lot
-of virtual memory but may result in a desaster if you are short
+of virtual memory but may result in a disaster if you are short
 of memory.  If gcc fails to compile many source files you should
 reduce the optimization.  Grep for "optimize" in the file
 config.sh and change the flags.
 
 If only several huge files cause problems (actually it is not a
 matter of the file size resp. the amount of code but depends on
-the size of the individual funtions) it is useful to bypass
+the size of the individual functions) it is useful to bypass
 the make program and compile these files directly from the
 command line.  For example if you got something like the
 following from make:
@@ -103,7 +103,7 @@ Please note that you have to add the name of the source file
 (here toke.c) at the end.
 
 If none of this helps, you're helpless.  Wait for a binary
-release.  If you have succeded you may encounter another problem
+release.  If you have succeeded you may encounter another problem
 at the linking process.  If gcc complains that it can't find
 some libraries within the perl distribution you probably have
 an old linker.  If it complains for example about "file not

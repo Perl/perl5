@@ -196,6 +196,9 @@ if ($^O eq 'MacOS') {
 [ "Win32->canonpath('//a/b/../../c')",  '\\\\a\\b\\..\\..\\c' ],
 [ "Win32->canonpath('//a/../../c')",    '\\\\a\\..\\..\\c'    ],
 
+## Hmmm, we should test missing and relative base paths some day...
+## would need to cd to a known place, get the cwd() and use it I
+## think.
 [  "Win32->abs2rel('/t1/t2/t3','/t1/t2/t3')",    ''                       ],
 [  "Win32->abs2rel('/t1/t2/t4','/t1/t2/t3')",    '..\\t4'                 ],
 [  "Win32->abs2rel('/t1/t2','/t1/t2/t3')",       '..'                     ],
@@ -208,6 +211,8 @@ if ($^O eq 'MacOS') {
 [  "Win32->abs2rel('/./','/t1/t2/t3')",          '..\\..\\..'             ],
 [  "Win32->abs2rel('\\\\a/t1/t2/t4','/t2/t3')",  '..\\t4'                 ],
 [  "Win32->abs2rel('//a/t1/t2/t4','/t2/t3')",    '..\\t4'                 ],
+[  "Win32->abs2rel('A:/t1/t2/t3','B:/t1/t2/t3')",''                       ],
+[  "Win32->abs2rel('A:/t1/t2/t3/t4','B:/t1/t2/t3')",'t4'                  ],
 
 [ "Win32->rel2abs('temp','C:/')",                       'C:\\temp'                        ],
 [ "Win32->rel2abs('temp','C:/a')",                      'C:\\a\\temp'                     ],

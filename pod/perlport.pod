@@ -559,7 +559,7 @@ often happens when tests spawn off other processes or call external
 programs to aid in the testing, or when (as noted above) the tests
 assume certain things about the filesystem and paths.  Be careful
 not to depend on a specific output style for errors, such as when
-checking C<$!> after an system call.  Some platforms expect a certain
+checking C<$!> after a system call.  Some platforms expect a certain
 output format, and perl on those platforms may have been adjusted
 accordingly.  Most specifically, don't anchor a regex when testing
 an error value.
@@ -1416,6 +1416,17 @@ Implemented via Spawn. (VM/ESA)
 Does not automatically flush output handles on some platforms.
 (SunOS, Solaris, HP-UX)
 
+=item exit EXPR
+
+=item exit
+
+Emulates UNIX exit() (which considers C<exit 1> to indicate an error) by
+mapping the C<1> to SS$_ABORT (C<44>).  This behavior may be overridden
+with the pragma C<use vmsish 'exit'>.  As with the CRTL's exit()
+function, C<exit 0> is also mapped to an exit status of SS$_NORMAL
+(C<1>); this mapping cannot be overridden.  Any other argument to exit()
+is used directly as Perl's exit status. (VMS)
+
 =item fcntl FILEHANDLE,FUNCTION,SCALAR
 
 Not implemented. (Win32, VMS)
@@ -1559,17 +1570,6 @@ Not implemented. (S<Mac OS>, Win32, Plan9)
 
 Not implemented. (Plan9, Win32)
 
-=item exit EXPR
-
-=item exit
-
-Emulates UNIX exit() (which considers C<exit 1> to indicate an error) by
-mapping the C<1> to SS$_ABORT (C<44>).  This behavior may be overridden
-with the pragma C<use vmsish 'exit'>.  As with the CRTL's exit()
-function, C<exit 0> is also mapped to an exit status of SS$_NORMAL
-(C<1>); this mapping cannot be overridden.  Any other argument to exit()
-is used directly as Perl's exit status. (VMS)
-
 =item getsockopt SOCKET,LEVEL,OPTNAME
 
 Not implemented. (Plan9)
@@ -1658,11 +1658,11 @@ Not implemented. (Win32, VMS, S<RISC OS>)
 
 =item select RBITS,WBITS,EBITS,TIMEOUT
 
-Only implemented on sockets. (Win32)
+Only implemented on sockets. (Win32, VMS)
 
 Only reliable on sockets. (S<RISC OS>)
 
-Note that the C<socket FILEHANDLE> form is generally portable.
+Note that the C<select FILEHANDLE> form is generally portable.
 
 =item semctl ID,SEMNUM,CMD,ARG
 
@@ -1937,7 +1937,7 @@ First public release with perl5.005.
 
 As of early 2001 (the Perl releases 5.6.1 and 5.7.1), the following
 platforms are able to build Perl from the standard source code
-distribution available at http://www.perl.com/CPAN/src/index.html
+distribution available at http://www.cpan.org/src/index.html
 
 	AIX
 	AmigaOS
@@ -2063,7 +2063,7 @@ Support for the following platform is planned for a future Perl release:
 	Netware
 
 The following platforms have their own source code distributions and
-binaries available via http://www.perl.com/CPAN/ports/index.html:
+binaries available via http://www.cpan.org/ports/index.html:
 
 				Perl release
 
@@ -2072,7 +2072,7 @@ binaries available via http://www.perl.com/CPAN/ports/index.html:
 	Tandem Guardian		5.004
 
 The following platforms have only binaries available via
-http://www.perl.com/CPAN/ports/index.html :
+http://www.cpan.org/ports/index.html :
 
 				Perl release
 
@@ -2083,7 +2083,7 @@ http://www.perl.com/CPAN/ports/index.html :
 Although we do suggest that you always build your own Perl from
 the source code, both for maximal configurability and for security,
 in case you are in a hurry you can check
-http://www.perl.com/CPAN/ports/index.html for binary distributions.
+http://www.cpan.org/ports/index.html for binary distributions.
 
 =head1 SEE ALSO
 

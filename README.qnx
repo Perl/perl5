@@ -109,6 +109,8 @@ generate a similar cover, but it doesn't handle all the command-line
 options that perl throws at it. This might be reasonably placed in
 /usr/local/bin.
 
+=back
+
 =head2 Outstanding issues with perl under QNX6
 
 The following tests are still failing for Perl 5.7.1 under QNX 6.1.0:
@@ -117,8 +119,6 @@ The following tests are still failing for Perl 5.7.1 under QNX 6.1.0:
   lib/1_compile......................FAILED at test 33
   ext/IO/lib/IO/t/io_sock............FAILED at test 12
   ext/IO/lib/IO/t/io_udp.............FAILED at test 4
-
-=back
 
 =head1 AUTHOR
 

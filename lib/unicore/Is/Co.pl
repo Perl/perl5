@@ -2,10 +2,7 @@
 # This file is built by mktables from e.g. Unicode.txt.
 # Any changes made here will be lost!
 return <<'END';
-E000		
-F8FF		
-F0000		
-FFFFD		
-100000		
-10FFFD		
+E000	F8FF	
+F0000	FFFFD	
+100000	10FFFD	
 END

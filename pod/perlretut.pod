@@ -550,7 +550,7 @@ to give them a chance to match.
 
 The last example points out that character classes are like
 alternations of characters.  At a given character position, the first
-alternative that allows the regexp match to succeed wil be the one
+alternative that allows the regexp match to succeed will be the one
 that matches.
 
 =head2 Grouping things and hierarchical matching
@@ -587,7 +587,7 @@ are
 
 Alternations behave the same way in groups as out of them: at a given
 string position, the leftmost alternative that allows the regexp to
-match is taken.  So in the last example at tth first string position,
+match is taken.  So in the last example at the first string position,
 C<"20"> matches the second alternative, but there is nothing left over
 to match the next two digits C<\d\d>.  So perl moves on to the next
 alternative, which is the null alternative and that works, since
@@ -1415,7 +1415,7 @@ naive regexp
     $dna = "ATCGTTGAATGCAAATGACATGAC";
     $dna =~ /TGA/;
 
-doesn't work; it may match an C<TGA>, but there is no guarantee that
+doesn't work; it may match a C<TGA>, but there is no guarantee that
 the match is aligned with codon boundaries, e.g., the substring
 S<C<GTT GAA> > gives a match.  A better solution is
 
@@ -1653,12 +1653,11 @@ Unicode characters in the range of 128-255 use two hexadecimal digits
 with braces: C<\x{ab}>.  Note that this is different than C<\xab>,
 which is just a hexadecimal byte with no Unicode significance.
 
-B<NOTE>: in perl 5.6.0 it used to be that one needed to say C<use utf8>
-to use any Unicode features.  This is no more the case: for almost all
-Unicode processing, the explicit C<utf8> pragma is not needed.
-(The only case where it matters is if your Perl script is in Unicode,
-that is, encoded in UTF-8/UTF-16/UTF-EBCDIC: then an explicit C<use utf8>
-is needed.)
+B<NOTE>: in Perl 5.6.0 it used to be that one needed to say C<use
+utf8> to use any Unicode features.  This is no more the case: for
+almost all Unicode processing, the explicit C<utf8> pragma is not
+needed.  (The only case where it matters is if your Perl script is in
+Unicode and encoded in UTF-8, then an explicit C<use utf8> is needed.)
 
 Figuring out the hexadecimal sequence of a Unicode character you want
 or deciphering someone else's hexadecimal Unicode regexp is about as

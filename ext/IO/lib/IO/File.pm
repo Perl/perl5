@@ -51,7 +51,7 @@ these classes with methods that are specific to file handles.
 
 =item new ( FILENAME [,MODE [,PERMS]] )
 
-Creates a C<IO::File>.  If it receives any parameters, they are passed to
+Creates an C<IO::File>.  If it receives any parameters, they are passed to
 the method C<open>; if the open fails, the object is destroyed.  Otherwise,
 it is returned to the caller.
 
@@ -78,7 +78,7 @@ whitespace or other special characters, and the second parameter is
 the open mode, optionally followed by a file permission value.
 
 If C<IO::File::open> receives a Perl mode string ("E<gt>", "+E<lt>", etc.)
-or a ANSI C fopen() mode string ("w", "r+", etc.), it uses the basic
+or an ANSI C fopen() mode string ("w", "r+", etc.), it uses the basic
 Perl C<open> operator (but protects any special characters).
 
 If C<IO::File::open> is given a numeric mode, it passes that mode

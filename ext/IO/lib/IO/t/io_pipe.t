@@ -18,7 +18,6 @@ BEGIN {
 	elsif ($Config{'extensions'} !~ /\bIO\b/) {
 	    $reason = 'IO extension unavailable';
 	}
-	undef $reason if $^O eq 'VMS';
 	if ($reason) {
 	    print "1..0 # Skip: $reason\n";
 	    exit 0;

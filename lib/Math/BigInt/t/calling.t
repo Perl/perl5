@@ -8,8 +8,28 @@ use Test;
 BEGIN 
   {
   $| = 1;
-  # chdir 't' if -d 't';
-  unshift @INC, '../lib'; # for running manually
+  # to locate the testing files
+  my $location = $0; $location =~ s/calling.t//i;
+  if ($ENV{PERL_CORE})
+    {
+    # testing with the core distribution
+    @INC = qw(../lib);
+    }
+  else
+    {
+    unshift @INC, '../lib';
+    }
+  if (-d 't')
+    {
+    chdir 't';
+    require File::Spec;
+    unshift @INC, File::Spec->catdir(File::Spec->updir, $location);
+    }
+  else
+    {
+    unshift @INC, $location;
+    }
+  print "# INC = @INC\n";
   plan tests => 141;
   }
 
@@ -33,7 +53,7 @@ use Math::BigInt;
 use Math::BigFloat;
 
 my ($x,$y,$z,$u);
-my $version = '1.45';	# adjust manually to match latest release
+my $version = '1.46';	# adjust manually to match latest release
 
 ###############################################################################
 # check whether op's accept normal strings, even when inherited by subclasses

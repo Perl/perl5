@@ -137,7 +137,7 @@ So now you'd see...
 =head2 Test the manual
 
 Simplest way to build up a decent testing suite is to just test what
-the manual says it does. [3] Let's pull something out of of the
+the manual says it does. [3] Let's pull something out of the
 Date::ICal SYNOPSIS and test that all it's bits work.
 
     #!/usr/bin/perl -w

@@ -1,14 +1,12 @@
 package FilterTest;
 
-BEGIN {
-    chdir('t') if -d 't';    
-    @INC = '../lib';
-}
+use Filter::Simple;
 
-use Filter::Simple sub {
-    while (my ($from, $to) = splice @_, 0, 2) {
-	s/$from/$to/g;
-    }
+FILTER {
+	my $class = shift;
+	while (my($pat, $str) = splice @_, 0, 2) {
+		s/$pat/$str/g;
+	}
 };
 
 1;

@@ -48,3 +48,14 @@ Revision history for Perl extension Switch.
 	- Changed licence for inclusion in core distribution
 
 	- Added new test file for non-fallthrough and nested switches
+
+
+2.06	Wed Nov 14 16:18:54 2001
+
+	- Fixed parsing of ternary operators in Switch'ed source code
+	  (at the expense of no longer correctly parsing ?...? regexes)
+	  (thanks Mark)
+
+	- Fixed the parsing of embedded POD (thanks Brent)
+
+	- Fixed bug encountered when -s or -m file test used (thanks Jochen)

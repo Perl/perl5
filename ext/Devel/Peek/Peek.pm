@@ -4,14 +4,14 @@
 package Devel::Peek;
 
 # Underscore to allow older Perls to access older version from CPAN
-$VERSION = '1.00_02';
+$VERSION = '1.00_03';
 
 require Exporter;
 use XSLoader ();
 
 @ISA = qw(Exporter);
 @EXPORT = qw(Dump mstat DeadCode DumpArray DumpWithOP DumpProg
-	     fill_mstats mstats_fillhash mstats2hash);
+	     fill_mstats mstats_fillhash mstats2hash runops_debug debug_flags);
 @EXPORT_OK = qw(SvREFCNT SvREFCNT_inc SvREFCNT_dec CvGV);
 %EXPORT_TAGS = ('ALL' => [@EXPORT, @EXPORT_OK]);
 
@@ -21,6 +21,26 @@ sub DumpWithOP ($;$) {
    local($Devel::Peek::dump_ops)=1;
    my $depth = @_ > 1 ? $_[1] : 4 ;
    Dump($_[0],$depth);
+}
+
+$D_flags = 'psltocPmfrxuLHXDSTR';
+
+sub debug_flags (;$) {
+  my $out = "";
+  for my $i (0 .. length($D_flags)-1) {
+    $out .= substr $D_flags, $i, 1 if $^D & (1<<$i);
+  }
+  my $arg = shift;
+  my $num = $arg;
+  if (defined $arg and $arg =~ /\D/) {
+    die "unknown flags in debug_flags()" if $arg =~ /[^-$D_flags]/;
+    my ($on,$off) = split /-/, "$arg-";
+    $num = $^D;
+    $num |=  (1<<index($D_flags, $_)) for split //, $on;
+    $num &= ~(1<<index($D_flags, $_)) for split //, $off;
+  }
+  $^D = $num if defined $arg;
+  $out
 }
 
 1;
@@ -67,6 +87,22 @@ need to analyze returns of functions).
 The global variable $Devel::Peek::pv_limit can be set to limit the
 number of character printed in various string values.  Setting it to 0
 means no limit.
+
+=head2 Runtime debugging
+
+C<CvGV($cv)> return one of the globs associated to a subroutine reference $cv.
+
+debug_flags() returns a string representation of C<$^D> (similar to
+what is allowed for B<-D> flag).  When called with a numeric argument,
+sets $^D to the corresponding value.  When called with an argument of
+the form C<"flags-flags">, set on/off bits of C<$^D> corresponding to
+letters before/after C<->.  (The returned value is for C<$^D> before
+the modification.)
+
+runops_debug() returns true if the current I<opcode dispatcher> is the
+debugging one.  When called with an argument, switches to debugging or
+non-debugging dispatcher depending on the argument (active for
+newly-entered subs/etc only).  (The returned value is for the dispatcher before the modification.)
 
 =head2 Memory footprint debugging
 

@@ -198,7 +198,7 @@ processes.
 
 =item new ( [READER, WRITER] )
 
-Creates a C<IO::Pipe>, which is a reference to a newly created symbol
+Creates an C<IO::Pipe>, which is a reference to a newly created symbol
 (see the C<Symbol> package). C<IO::Pipe::new> optionally takes two
 arguments, which should be objects blessed into C<IO::Handle>, or a
 subclass thereof. These two objects will be used for the system call

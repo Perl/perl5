@@ -50,7 +50,6 @@ our %winlatin2cp   = (
 		      'Latin1'     => 1252,
 		      'Latin2'     => 1250,
 		      'Cyrillic'   => 1251,
-		      'Baltic'     => 1257,
 		      'Greek'      => 1253,
 		      'Turkish'    => 1254,
 		      'Hebrew'     => 1255,
@@ -69,6 +68,7 @@ sub findAlias
 {
  my $class = shift;
  local $_ = shift;
+ # print "# findAlias $_\n";
  unless (exists $alias{$_})
   {
    for (my $i=0; $i < @alias; $i += 2)
@@ -121,6 +121,9 @@ define_alias( qr/^iso8859(\d+)$/i => '"iso-8859-$1"' );
 # More HP stuff.
 define_alias( qr/^(?:hp-)?(arabic|greek|hebrew|kana|roman|thai|turkish)8$/i => '"${1}8"' );
 
+# The Official name of ASCII. 
+define_alias( qr/^ANSI[-_]?X3\.4[-_]?1968$/i => '"ascii"' );
+
 # This is a font issue, not an encoding issue.
 # (The currency symbol of the Latin 1 upper half
 #  has been redefined as the euro symbol.)
@@ -158,7 +161,7 @@ define_alias( qr/^koi8u$/i => 'koi8-u' );
 # TODO: Hebrew encoding ISO-8859-8-1
 # TODO: Thai encoding TCVN
 # TODO: Korean encoding Johab
-# TODO: Vietnamese encodings VISCII VPS
+# TODO: Vietnamese encodings VPS
 # TODO: Japanese encoding JIS (not the same as SJIS)
 # TODO: Mac Asian+African encodings: Arabic Armenian Bengali Burmese
 #       ChineseSimp ChineseTrad Devanagari Ethiopic ExtArabic
@@ -193,14 +196,21 @@ sub getEncoding
   {
    return $name;
   }
+ my $lc = lc $name;
  if (exists $encoding{$name})
   {
    return $encoding{$name};
   }
- else
+ if (exists $encoding{$lc})
   {
-   return $class->findAlias($name);
+   return $encoding{$lc};
   }
+
+  my $oc = $class->findAlias($name);
+  return $oc if defined $oc;
+  return $class->findAlias($lc) if $lc ne $name;
+
+  return;
 }
 
 sub find_encoding
@@ -582,17 +592,100 @@ the encoding by picking the first in the following sequence:
 
 =over 4
 
-=item * The MIME name as defined in IETF RFC-XXXX.
+=item * The MIME name as defined in IETF RFCs.
 
 =item * The name in the IANA registry.
 
-=item * The name used by the the organization that defined it.
+=item * The name used by the organization that defined it.
 
 =back
 
 Because of all the alias issues, and because in the general case
 encodings have state C<Encode> uses the encoding object internally
 once an operation is in progress.
+
+As of Perl 5.8.0, at least the following encodings are recognized
+(the => marks aliases):
+
+  ASCII
+
+  US-ASCII => ASCII
+
+The Unicode:
+
+  UTF-8   
+  UTF-16
+  UCS-2
+
+  ISO 10646-1 => UCS-2
+
+The ISO 8859 and KOI:
+
+  ISO 8859-1  ISO 8859-6   ISO 8859-11         KOI8-F
+  ISO 8859-2  ISO 8859-7   (12 doesn't exist)  KOI8-R
+  ISO 8859-3  ISO 8859-8   ISO 8859-13         KOI8-U
+  ISO 8859-4  ISO 8859-9   ISO 8859-14
+  ISO 8859-5  ISO 8859-10  ISO 8859-15
+                           ISO 8859-16
+
+  Latin1  => 8859-1  Latin6  => 8859-10
+  Latin2  => 8859-2  Latin7  => 8859-13
+  Latin3  => 8859-3  Latin8  => 8859-14 
+  Latin4  => 8859-4  Latin9  => 8859-15
+  Latin5  => 8859-9  Latin10 => 8859-16
+
+  Cyrillic => 8859-5
+  Arabic   => 8859-6
+  Greek    => 8859-7
+  Hebrew   => 8859-8
+  Thai     => 8859-11
+  TIS620   => 8859-11 
+
+The CJKV: Chinese, Japanese, Korean, Vietnamese:
+
+  ISO 2022     ISO 2022 JP-1  JIS 0201  GB 1988   Big5       EUC-CN       
+  ISO 2022 CN  ISO 2022 JP-2  JIS 0208  GB 2312   HZ         EUC-JP     
+  ISO 2022 JP  ISO 2022 KR    JIS 0210  GB 12345  CNS 11643  EUC-JP-0212
+  Shift-JIS                                                  EUC-KR     
+  VISCII
+
+The PC codepages:
+
+  CP37   CP852  CP861  CP866  CP949   CP1251  CP1256
+  CP424  CP855  CP862  CP869  CP950   CP1252  CP1257
+  CP737  CP856  CP863  CP874  CP1006  CP1253  CP1258
+  CP775  CP857  CP864  CP932  CP1047  CP1254
+  CP850  CP860  CP865  CP936  CP1250  CP1255
+
+  WinLatin1     => CP1252
+  WinLatin2     => CP1250
+  WinCyrillic   => CP1251
+  WinGreek      => CP1253
+  WinTurkiskh   => CP1254
+  WinHebrew     => CP1255
+  WinArabic     => CP1256
+  WinBaltic     => CP1257
+  WinVietnamese => CP1258
+
+(All the CPI<NNN...> are available also as IBMI<NNN...>.)
+
+The Mac codepages:
+
+  MacCentralEuropean   MacJapanese        
+  MacCroatian          MacRoman           
+  MacCyrillic          MacRumanian        
+  MacDingbats          MacSami            
+  MacGreek             MacThai            
+  MacIcelandic         MacTurkish         
+                       MacUkraine         
+
+Miscellaneous:
+
+  7bit-greek  IR-197
+  7bit-kana   NeXTstep
+  7bit-latin1 POSIX-BC
+  DingBats    Roman8
+  GSM 0338    Symbol
 
 =head1 PERL ENCODING API
 
@@ -728,8 +821,20 @@ For CHECK see L</"Handling Malformed Data">.
 =head2 Other Encodings of Unicode
 
 UTF-16 is similar to UCS-2, 16 bit or 2-byte chunks.  UCS-2 can only
-represent 0..0xFFFF, while UTF-16 has a "surrogate pair" scheme which
+represent 0..0xFFFF, while UTF-16 has a I<surrogate pair> scheme which
 allows it to cover the whole Unicode range.
+
+Surrogates are code points set aside to encode the 0x01000..0x10FFFF
+range of Unicode code points in pairs of 16-bit units.  The I<high
+surrogates> are the range 0xD800..0xDBFF, and the I<low surrogates>
+are the range 0xDC00..0xDFFFF.  The surrogate encoding is
+
+	$hi = ($uni - 0x10000) / 0x400 + 0xD800;
+	$lo = ($uni - 0x10000) % 0x400 + 0xDC00;
+
+and the decoding is
+
+	$uni = 0x10000 + ($hi - 0xD8000) * 0x400 + ($lo - 0xDC00);
 
 Encode implements big-endian UCS-2 aliased to "iso-10646-1" as that
 happens to be the name used by that representation when used with X11

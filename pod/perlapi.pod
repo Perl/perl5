@@ -575,7 +575,7 @@ returns UV_MAX, sets C<PERL_SCAN_GREATER_THAN_UV_MAX> in the output flags,
 and writes the value to I<*result> (or the value is discarded if I<result>
 is NULL).
 
-The hex number may optinally be prefixed with "0b" or "b" unless
+The hex number may optionally be prefixed with "0b" or "b" unless
 C<PERL_SCAN_DISALLOW_PREFIX> is set in I<*flags> on entry. If
 C<PERL_SCAN_ALLOW_UNDERSCORES> is set in I<*flags> then the binary
 number may use '_' characters to separate digits.
@@ -601,7 +601,7 @@ returns UV_MAX, sets C<PERL_SCAN_GREATER_THAN_UV_MAX> in the output flags,
 and writes the value to I<*result> (or the value is discarded if I<result>
 is NULL).
 
-The hex number may optinally be prefixed with "0x" or "x" unless
+The hex number may optionally be prefixed with "0x" or "x" unless
 C<PERL_SCAN_DISALLOW_PREFIX> is set in I<*flags> on entry. If
 C<PERL_SCAN_ALLOW_UNDERSCORES> is set in I<*flags> then the hex
 number may use '_' characters to separate digits.
@@ -794,7 +794,7 @@ Found in file cop.h
 =item HEf_SVKEY
 
 This flag, used in the length slot of hash entries and magic structures,
-specifies the structure contains a C<SV*> pointer where a C<char*> pointer
+specifies the structure contains an C<SV*> pointer where a C<char*> pointer
 is to be expected. (For information only--not to be used).
 
 =for hackers
@@ -958,7 +958,7 @@ Found in file hv.c
 Returns the SV which corresponds to the specified key in the hash.  The
 C<klen> is the length of the key.  If C<lval> is set then the fetch will be
 part of a store.  Check that the return value is non-null before
-dereferencing it to a C<SV*>.
+dereferencing it to an C<SV*>.
 
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
@@ -1553,6 +1553,24 @@ memory is zeroed with C<memzero>.
 =for hackers
 Found in file handy.h
 
+=item new_vstring
+
+Returns a pointer to the next character after the parsed
+vstring, as well as updating the passed in sv.
+ * 
+Function must be called like 
+ 	
+        sv = NEWSV(92,5);
+	s = new_vstring(s,sv);
+
+The sv must already be large enough to store the vstring
+passed in.
+
+	char*	new_vstring(char *vstr, SV *sv)
+
+=for hackers
+Found in file util.c
+
 =item Nullav
 
 Null AV pointer.
@@ -1980,7 +1998,7 @@ Found in file sharedsv.c
 =item sharedsv_lock
 
 Recursive locks on a sharedsv.
-Locks are dynamicly scoped at the level of the first lock.
+Locks are dynamically scoped at the level of the first lock.
 	void	sharedsv_lock(shared_sv* ssv)
 
 =for hackers
@@ -2023,7 +2041,6 @@ Found in file sharedsv.c
 
 =item sortsv
 
-   
 Sort an array. Here is an example:
 
     sortsv(AvARRAY(av), av_len(av)+1, Perl_sv_cmp_locale); 
@@ -2220,7 +2237,7 @@ Found in file sv.h
 
 =item SvIOK_notUV
 
-Returns a boolean indicating whether the SV contains an signed integer.
+Returns a boolean indicating whether the SV contains a signed integer.
 
 	void	SvIOK_notUV(SV* sv)
 
@@ -2282,22 +2299,22 @@ version which guarantees to evaluate sv only once.
 =for hackers
 Found in file sv.h
 
-=item SvIVx
-
-Coerces the given SV to an integer and returns it. Guarantees to evaluate
-sv only once. Use the more efficent C<SvIV> otherwise.
-
-	IV	SvIVx(SV* sv)
-
-=for hackers
-Found in file sv.h
-
 =item SvIVX
 
 Returns the raw value in the SV's IV slot, without checks or conversions.
 Only use when you are sure SvIOK is true. See also C<SvIV()>.
 
 	IV	SvIVX(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvIVx
+
+Coerces the given SV to an integer and returns it. Guarantees to evaluate
+sv only once. Use the more efficient C<SvIV> otherwise.
+
+	IV	SvIVx(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -2397,22 +2414,22 @@ which guarantees to evaluate sv only once.
 =for hackers
 Found in file sv.h
 
+=item SvNVx
+
+Coerces the given SV to a double and returns it. Guarantees to evaluate
+sv only once. Use the more efficient C<SvNV> otherwise.
+
+	NV	SvNVx(SV* sv)
+
+=for hackers
+Found in file sv.h
+
 =item SvNVX
 
 Returns the raw value in the SV's NV slot, without checks or conversions.
 Only use when you are sure SvNOK is true. See also C<SvNV()>.
 
 	NV	SvNVX(SV* sv)
-
-=for hackers
-Found in file sv.h
-
-=item SvNVx
-
-Coerces the given SV to a double and returns it. Guarantees to evaluate
-sv only once. Use the more efficent C<SvNV> otherwise.
-
-	NV	SvNVx(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -2519,7 +2536,7 @@ Found in file sv.h
 =item SvPVbytex
 
 Like C<SvPV>, but converts sv to byte representation first if necessary.
-Guarantees to evalute sv only once; use the more efficient C<SvPVbyte>
+Guarantees to evaluate sv only once; use the more efficient C<SvPVbyte>
 otherwise.
 
 
@@ -2531,7 +2548,7 @@ Found in file sv.h
 =item SvPVbytex_force
 
 Like C<SvPV_force>, but converts sv to byte representation first if necessary.
-Guarantees to evalute sv only once; use the more efficient C<SvPVbyte_force>
+Guarantees to evaluate sv only once; use the more efficient C<SvPVbyte_force>
 otherwise.
 
 	char*	SvPVbytex_force(SV* sv, STRLEN len)
@@ -2569,7 +2586,7 @@ Found in file sv.h
 =item SvPVutf8x
 
 Like C<SvPV>, but converts sv to utf8 first if necessary.
-Guarantees to evalute sv only once; use the more efficient C<SvPVutf8>
+Guarantees to evaluate sv only once; use the more efficient C<SvPVutf8>
 otherwise.
 
 	char*	SvPVutf8x(SV* sv, STRLEN len)
@@ -2580,7 +2597,7 @@ Found in file sv.h
 =item SvPVutf8x_force
 
 Like C<SvPV_force>, but converts sv to utf8 first if necessary.
-Guarantees to evalute sv only once; use the more efficient C<SvPVutf8_force>
+Guarantees to evaluate sv only once; use the more efficient C<SvPVutf8_force>
 otherwise.
 
 	char*	SvPVutf8x_force(SV* sv, STRLEN len)
@@ -2953,7 +2970,7 @@ Found in file sv.h
 =item SvUVx
 
 Coerces the given SV to an unsigned integer and returns it. Guarantees to
-evaluate sv only once. Use the more efficent C<SvUV> otherwise.
+evaluate sv only once. Use the more efficient C<SvUV> otherwise.
 
 	UV	SvUVx(SV* sv)
 
@@ -4245,7 +4262,7 @@ $utf8::ToLower, which is stored in lib/unicore/To/Lower.pl,
 and loaded by SWASHGET, using lib/utf8_heavy.pl.
 
 The "special" is a string like "utf8::ToSpecLower", which means
-the hash %utf8::ToSpecLower, which is stored in in the same file,
+the hash %utf8::ToSpecLower, which is stored in the same file,
 lib/unicore/To/Lower.pl, and also loaded by SWASHGET.  The access
 to the hash is by Perl_to_utf8_case().
 
@@ -4521,7 +4538,7 @@ Found in file XSUB.h
 
 =item XSRETURN_NV
 
-Return an double from an XSUB immediately.  Uses C<XST_mNV>.
+Return a double from an XSUB immediately.  Uses C<XST_mNV>.
 
 	void	XSRETURN_NV(NV nv)
 
