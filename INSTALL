@@ -20,7 +20,7 @@ The basic steps to build and install perl5 on a Unix system are:
 Each of these is explained in further detail below.
 
 For information on non-Unix systems, see the section on
-L<"Porting Information"> below.
+L<"Porting information"> below.
 
 =head1 DESCRIPTION
 
