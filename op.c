@@ -125,7 +125,7 @@ S_trlist_upgrade(pTHX_ U8** sp, U8** ep)
     *ep = d;
     return *sp;
 }
-  
+
 
 /* "register" allocation */
 
@@ -1361,7 +1361,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	PL_modcount++;
 	return o;
     case OP_CONST:
-        if (o->op_private & (OPpCONST_BARE) && 
+        if (o->op_private & (OPpCONST_BARE) &&
                 !(type == OP_GREPSTART || type == OP_ENTERSUB || type == OP_REFGEN)) {
             SV *sv = ((SVOP*)o)->op_sv;
             GV *gv;
@@ -1376,8 +1376,8 @@ Perl_mod(pTHX_ OP *o, I32 type)
                 OP* enter;
                 gv = gv_fetchpv(SvPV_nolen(sv), TRUE, SVt_PVCV);
 
-                enter = newUNOP(OP_ENTERSUB,0, 
-                        newUNOP(OP_RV2CV, 0, 
+                enter = newUNOP(OP_ENTERSUB,0,
+                        newUNOP(OP_RV2CV, 0,
                             newGVOP(OP_GV, 0, gv)
                         ));
                 enter->op_private |= OPpLVAL_INTRO;
@@ -2708,26 +2708,27 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    for (j = 0; j < i; j++) {
 		U8 *s = cp[j];
 		I32 cur = j < i - 1 ? cp[j+1] - s : tend - s;
-		UV  val = utf8_to_uv(s, cur, &ulen, 0);
+		/* CHECKME: Use unicode code points for ranges - needs more thought ... NI-S */
+		UV  val = utf8n_to_uvuni(s, cur, &ulen, 0);
 		s += ulen;
 		diff = val - nextmin;
 		if (diff > 0) {
-		    t = uv_to_utf8(tmpbuf,nextmin);
+		    t = uvuni_to_utf8(tmpbuf,nextmin);
 		    sv_catpvn(transv, (char*)tmpbuf, t - tmpbuf);
 		    if (diff > 1) {
-			t = uv_to_utf8(tmpbuf, val - 1);
+			t = uvuni_to_utf8(tmpbuf, val - 1);
 			sv_catpvn(transv, "\377", 1);
 			sv_catpvn(transv, (char*)tmpbuf, t - tmpbuf);
 		    }
 	        }
 		if (s < tend && *s == 0xff)
-		    val = utf8_to_uv(s+1, cur - 1, &ulen, 0);
+		    val = utf8n_to_uvuni(s+1, cur - 1, &ulen, 0);
 		if (val >= nextmin)
 		    nextmin = val + 1;
 	    }
-	    t = uv_to_utf8(tmpbuf,nextmin);
+	    t = uvuni_to_utf8(tmpbuf,nextmin);
 	    sv_catpvn(transv, (char*)tmpbuf, t - tmpbuf);
-	    t = uv_to_utf8(tmpbuf, 0x7fffffff);
+	    t = uvuni_to_utf8(tmpbuf, 0x7fffffff);
 	    sv_catpvn(transv, "\377", 1);
 	    sv_catpvn(transv, (char*)tmpbuf, t - tmpbuf);
 	    t = (U8*)SvPVX(transv);
@@ -2749,11 +2750,11 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	while (t < tend || tfirst <= tlast) {
 	    /* see if we need more "t" chars */
 	    if (tfirst > tlast) {
-		tfirst = (I32)utf8_to_uv(t, tend - t, &ulen, 0);
+		tfirst = (I32)utf8n_to_uvuni(t, tend - t, &ulen, 0);
 		t += ulen;
 		if (t < tend && *t == 0xff) {	/* illegal utf8 val indicates range */
 		    t++;
-		    tlast = (I32)utf8_to_uv(t, tend - t, &ulen, 0);
+		    tlast = (I32)utf8n_to_uvuni(t, tend - t, &ulen, 0);
 		    t += ulen;
 		}
 		else
@@ -2763,11 +2764,11 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    /* now see if we need more "r" chars */
 	    if (rfirst > rlast) {
 		if (r < rend) {
-		    rfirst = (I32)utf8_to_uv(r, rend - r, &ulen, 0);
+		    rfirst = (I32)utf8n_to_uvuni(r, rend - r, &ulen, 0);
 		    r += ulen;
 		    if (r < rend && *r == 0xff) {	/* illegal utf8 val indicates range */
 			r++;
-			rlast = (I32)utf8_to_uv(r, rend - r, &ulen, 0);
+			rlast = (I32)utf8n_to_uvuni(r, rend - r, &ulen, 0);
 			r += ulen;
 		    }
 		    else
@@ -6796,7 +6797,7 @@ Perl_peep(pTHX_ register OP *o)
 	case OP_MATCH:
 	case OP_SUBST:
 	    o->op_seq = PL_op_seqmax++;
-	    while (cPMOP->op_pmreplstart && 
+	    while (cPMOP->op_pmreplstart &&
 		   cPMOP->op_pmreplstart->op_type == OP_NULL)
 		cPMOP->op_pmreplstart = cPMOP->op_pmreplstart->op_next;
 	    peep(cPMOP->op_pmreplstart);

@@ -65,7 +65,7 @@ END_EXTERN_C
 #define UTF8_QUAD_MAX	UINT64_C(0x1000000000)
 
 /*
- 
+
  The following table is from Unicode 3.1.
 
  Code Points		1st Byte  2nd Byte  3rd Byte  4th Byte
@@ -100,7 +100,7 @@ END_EXTERN_C
 		      (uv) < 0x200000       ? 4 : \
 		      (uv) < 0x4000000      ? 5 : \
 		      (uv) < 0x80000000     ? 6 : \
-                      (uv) < UTF8_QUAD_MAX ? 7 : 13 ) 
+                      (uv) < UTF8_QUAD_MAX ? 7 : 13 )
 #else
 /* No, I'm not even going to *TRY* putting #ifdef inside a #define */
 #define UNISKIP(uv) ( (uv) < 0x80           ? 1 : \
@@ -132,21 +132,17 @@ END_EXTERN_C
 #define isIDFIRST_lazy(p)	isIDFIRST_lazy_if(p,1)
 #define isALNUM_lazy(p)		isALNUM_lazy_if(p,1)
 
-/* EBCDIC-happy ways of converting native code to UTF8; the reverse
-   process is taken care of in utf8_to_uv */
+/* EBCDIC-happy ways of converting native code to UTF8 */
 
 #ifdef EBCDIC
 #define NATIVE_TO_ASCII(ch)                  PL_e2a[(ch)]
 #define ASCII_TO_NATIVE(ch)                  PL_a2e[(ch)]
+#define UNI_TO_NATIVE(ch)                    (((ch) > 0x100) ? (ch) : (UV) PL_a2e[(ch)])
+#define NATIVE_TO_UNI(ch)                    (((ch) > 0x100) ? (ch) : (UV) PL_e2a[(ch)])
 #else
 #define NATIVE_TO_ASCII(ch)                  (ch)
 #define ASCII_TO_NATIVE(ch)                  (ch)
+#define UNI_TO_NATIVE(ch)                    (ch)
+#define NATIVE_TO_UNI(ch)                    (ch)
 #endif
 
-#define UTF8_NEEDS_UPGRADE(ch)        (NATIVE_TO_ASCII(ch) & 0x80)
-#define NATIVE_TO_UTF8(ch, string)    STMT_START { \
-                                        if (!UTF8_NEEDS_UPGRADE(ch)) \
-                                            *(string)++ = NATIVE_TO_ASCII(ch); \
-                                        else /*  uv_to_utf8 is EBCDIC-aware */ \
-					    string = uv_to_utf8(string, ch); \
-                                      } STMT_END

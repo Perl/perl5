@@ -66,10 +66,10 @@ S_do_trans_simple(pTHX_ SV *sv)
         UV c;
 
         /* Need to check this, otherwise 128..255 won't match */
-	c = utf8_to_uv(s, send - s, &ulen, 0);
+	c = utf8n_to_uvchr(s, send - s, &ulen, 0);
         if (c < 0x100 && (ch = tbl[c]) >= 0) {
             matches++;
-	    d = uv_to_utf8(d, ch);
+	    d = uvchr_to_utf8(d, ch);
             s += ulen;
         }
 	else { /* No match -> copy */
@@ -117,7 +117,7 @@ S_do_trans_count(pTHX_ SV *sv)/* SPC - OK */
 	while (s < send) {
 	    UV c;
 	    STRLEN ulen;
-	    c = utf8_to_uv(s, send - s, &ulen, 0);
+	    c = utf8n_to_uvchr(s, send - s, &ulen, 0);
 	    if (c < 0x100) {
 		if (tbl[c] >= 0)
 		    matches++;
@@ -203,7 +203,7 @@ S_do_trans_complex(pTHX_ SV *sv)/* SPC - NOT OK */
 	    UV pch = 0xfeedface;
 	    while (s < send) {
 		STRLEN len;
-	        UV comp = utf8_to_uv_simple(s, &len);
+	        UV comp = utf8_to_uvchr(s, &len);
 
 		if (comp > 0xff) {
 		    if (!complement) {
@@ -216,7 +216,7 @@ S_do_trans_complex(pTHX_ SV *sv)/* SPC - NOT OK */
 			    ch = (comp - 0x100 < rlen) ?
 				tbl[comp+1] : tbl[0x100+rlen];
 			    if (ch != pch) {
-				d = uv_to_utf8(d, ch);
+				d = uvchr_to_utf8(d, ch);
 				pch = ch;
 			    }
 			    s += len;
@@ -227,7 +227,7 @@ S_do_trans_complex(pTHX_ SV *sv)/* SPC - NOT OK */
 		else if ((ch = tbl[comp]) >= 0) {
 		    matches++;
 		    if (ch != pch) {
-		        d = uv_to_utf8(d, ch);
+		        d = uvchr_to_utf8(d, ch);
 		        pch = ch;
 		    }
 		    s += len;
@@ -246,7 +246,7 @@ S_do_trans_complex(pTHX_ SV *sv)/* SPC - NOT OK */
 	else {
 	    while (s < send) {
 		STRLEN len;
-	        UV comp = utf8_to_uv_simple(s, &len);
+	        UV comp = utf8_to_uvchr(s, &len);
 		if (comp > 0xff) {
 		    if (!complement) {
 			Copy(s, d, len, U8);
@@ -255,15 +255,15 @@ S_do_trans_complex(pTHX_ SV *sv)/* SPC - NOT OK */
 		    else {
 			matches++;
 			if (!del) {
-			    if (comp - 0x100 < rlen) 
-				d = uv_to_utf8(d, tbl[comp+1]);
+			    if (comp - 0x100 < rlen)
+				d = uvchr_to_utf8(d, tbl[comp+1]);
 			    else
-				d = uv_to_utf8(d, tbl[0x100+rlen]);
+				d = uvchr_to_utf8(d, tbl[0x100+rlen]);
 			}
 		    }
 		}
 		else if ((ch = tbl[comp]) >= 0) {
-		    d = uv_to_utf8(d, ch);
+		    d = uvchr_to_utf8(d, ch);
 		    matches++;
 		}
 		else if (ch == -1) {	/* -1 is unmapped character */
@@ -343,7 +343,7 @@ S_do_trans_simple_utf8(pTHX_ SV *sv)/* SPC - OK */
 	if ((uv = swash_fetch(rv, s)) < none) {
 	    s += UTF8SKIP(s);
 	    matches++;
-	    d = uv_to_utf8(d, uv);
+	    d = uvchr_to_utf8(d, uv);
 	}
 	else if (uv == none) {
 	    int i = UTF8SKIP(s);
@@ -355,7 +355,7 @@ S_do_trans_simple_utf8(pTHX_ SV *sv)/* SPC - OK */
 	    int i = UTF8SKIP(s);
 	    s += i;
 	    matches++;
-	    d = uv_to_utf8(d, final);
+	    d = uvchr_to_utf8(d, final);
 	}
 	else
 	    s += UTF8SKIP(s);
@@ -382,6 +382,7 @@ S_do_trans_simple_utf8(pTHX_ SV *sv)/* SPC - OK */
     }
     SvSETMAGIC(sv);
     SvUTF8_on(sv);
+    /* Downgrading just 'cos it will is suspect - NI-S */
     if (!isutf8 && !(PL_hints & HINT_UTF8))
 	sv_utf8_downgrade(sv, TRUE);
 
@@ -479,7 +480,7 @@ S_do_trans_complex_utf8(pTHX_ SV *sv) /* SPC - NOT OK */
 	UV puv = 0xfeedface;
 	while (s < send) {
 	    uv = swash_fetch(rv, s);
-	    
+	
 	    if (d > dend) {
 	        STRLEN clen = d - dstart;
 		STRLEN nlen = dend - dstart + len + UTF8_MAXLEN;
@@ -493,7 +494,7 @@ S_do_trans_complex_utf8(pTHX_ SV *sv) /* SPC - NOT OK */
 		matches++;
 		s += UTF8SKIP(s);
 		if (uv != puv) {
-		    d = uv_to_utf8(d, uv);
+		    d = uvchr_to_utf8(d, uv);
 		    puv = uv;
 		}
 		continue;
@@ -510,7 +511,7 @@ S_do_trans_complex_utf8(pTHX_ SV *sv) /* SPC - NOT OK */
 		matches++;
 		s += UTF8SKIP(s);
 		if (uv != puv) {
-		    d = uv_to_utf8(d, final);
+		    d = uvchr_to_utf8(d, final);
 		    puv = final;
 		}
 		continue;
@@ -534,7 +535,7 @@ S_do_trans_complex_utf8(pTHX_ SV *sv) /* SPC - NOT OK */
 	    if (uv < none) {
 		matches++;
 		s += UTF8SKIP(s);
-		d = uv_to_utf8(d, uv);
+		d = uvchr_to_utf8(d, uv);
 		continue;
 	    }
 	    else if (uv == none) {	/* "none" is unmapped character */
@@ -547,7 +548,7 @@ S_do_trans_complex_utf8(pTHX_ SV *sv) /* SPC - NOT OK */
 	    else if (uv == extra && !del) {
 		matches++;
 		s += UTF8SKIP(s);
-		d = uv_to_utf8(d, final);
+		d = uvchr_to_utf8(d, final);
 		continue;
 	    }
 	    matches++;			/* "none+1" is delete character */
@@ -934,7 +935,7 @@ Perl_do_chop(pTHX_ register SV *astr, register SV *sv)
 	    s = send - 1;
 	    while (s > start && UTF8_IS_CONTINUATION(*s))
 		s--;
-	    if (utf8_to_uv_simple((U8*)s, 0)) {
+	    if (utf8_to_uvchr((U8*)s, 0)) {
 		sv_setpvn(astr, s, send - s);
 		*s = '\0';
 		SvCUR_set(sv, s - start);
@@ -1100,14 +1101,14 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 	switch (optype) {
 	case OP_BIT_AND:
 	    while (lulen && rulen) {
-		luc = utf8_to_uv((U8*)lc, lulen, &ulen, UTF8_ALLOW_ANYUV);
+		luc = utf8n_to_uvchr((U8*)lc, lulen, &ulen, UTF8_ALLOW_ANYUV);
 		lc += ulen;
 		lulen -= ulen;
-		ruc = utf8_to_uv((U8*)rc, rulen, &ulen, UTF8_ALLOW_ANYUV);
+		ruc = utf8n_to_uvchr((U8*)rc, rulen, &ulen, UTF8_ALLOW_ANYUV);
 		rc += ulen;
 		rulen -= ulen;
 		duc = luc & ruc;
-		dc = (char*)uv_to_utf8((U8*)dc, duc);
+		dc = (char*)uvchr_to_utf8((U8*)dc, duc);
 	    }
 	    if (sv == left || sv == right)
 		(void)sv_usepvn(sv, dcsave, needlen);
@@ -1115,26 +1116,26 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 	    break;
 	case OP_BIT_XOR:
 	    while (lulen && rulen) {
-		luc = utf8_to_uv((U8*)lc, lulen, &ulen, UTF8_ALLOW_ANYUV);
+		luc = utf8n_to_uvchr((U8*)lc, lulen, &ulen, UTF8_ALLOW_ANYUV);
 		lc += ulen;
 		lulen -= ulen;
-		ruc = utf8_to_uv((U8*)rc, rulen, &ulen, UTF8_ALLOW_ANYUV);
+		ruc = utf8n_to_uvchr((U8*)rc, rulen, &ulen, UTF8_ALLOW_ANYUV);
 		rc += ulen;
 		rulen -= ulen;
 		duc = luc ^ ruc;
-		dc = (char*)uv_to_utf8((U8*)dc, duc);
+		dc = (char*)uvchr_to_utf8((U8*)dc, duc);
 	    }
 	    goto mop_up_utf;
 	case OP_BIT_OR:
 	    while (lulen && rulen) {
-		luc = utf8_to_uv((U8*)lc, lulen, &ulen, UTF8_ALLOW_ANYUV);
+		luc = utf8n_to_uvchr((U8*)lc, lulen, &ulen, UTF8_ALLOW_ANYUV);
 		lc += ulen;
 		lulen -= ulen;
-		ruc = utf8_to_uv((U8*)rc, rulen, &ulen, UTF8_ALLOW_ANYUV);
+		ruc = utf8n_to_uvchr((U8*)rc, rulen, &ulen, UTF8_ALLOW_ANYUV);
 		rc += ulen;
 		rulen -= ulen;
 		duc = luc | ruc;
-		dc = (char*)uv_to_utf8((U8*)dc, duc);
+		dc = (char*)uvchr_to_utf8((U8*)dc, duc);
 	    }
 	  mop_up_utf:
 	    if (sv == left || sv == right)

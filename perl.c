@@ -253,9 +253,10 @@ perl_construct(pTHXx)
 	if (PERL_REVISION > 127 || PERL_VERSION > 127 || PERL_SUBVERSION > 127)
 	    SvGROW(PL_patchlevel, UTF8_MAXLEN*3+1);
 	s = (U8*)SvPVX(PL_patchlevel);
-	s = uv_to_utf8(s, (UV)(ASCII_TO_NATIVE(PERL_REVISION)));
-	s = uv_to_utf8(s, (UV)(ASCII_TO_NATIVE(PERL_VERSION)));
-	s = uv_to_utf8(s, (UV)(ASCII_TO_NATIVE(PERL_SUBVERSION)));
+	/* Build version strings using "native" characters */
+	s = uvchr_to_utf8(s, (UV)PERL_REVISION);
+	s = uvchr_to_utf8(s, (UV)PERL_VERSION);
+	s = uvchr_to_utf8(s, (UV)PERL_SUBVERSION);
 	*s = '\0';
 	SvCUR_set(PL_patchlevel, s - (U8*)SvPVX(PL_patchlevel));
 	SvPOK_on(PL_patchlevel);
@@ -3357,7 +3358,7 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 #ifdef NEED_ENVIRON_DUP_FOR_MODIFY
 	{
 	    char **env_base;
-	    for (env_base = env; *env; env++) 
+	    for (env_base = env; *env; env++)
 		dup_env_count++;
 	    if ((dup_env_base = (char **)
 		 safesysmalloc( sizeof(char *) * (dup_env_count+1) ))) {

@@ -164,7 +164,7 @@ PP(pp_substcont)
     register char *m = cx->sb_m;
     char *orig = cx->sb_orig;
     register REGEXP *rx = cx->sb_rx;
-    
+
     rxres_restore(&cx->sb_rxres, rx);
 
     if (cx->sb_iters++) {
@@ -3049,13 +3049,13 @@ PP(pp_require)
 	    U8 *s = (U8*)SvPVX(sv);
 	    U8 *end = (U8*)SvPVX(sv) + SvCUR(sv);
 	    if (s < end) {
-		rev = utf8_to_uv(s, end - s, &len, 0);
+		rev = utf8n_to_uvchr(s, end - s, &len, 0);
 		s += len;
 		if (s < end) {
-		    ver = utf8_to_uv(s, end - s, &len, 0);
+		    ver = utf8n_to_uvchr(s, end - s, &len, 0);
 		    s += len;
 		    if (s < end)
-			sver = utf8_to_uv(s, end - s, &len, 0);
+			sver = utf8n_to_uvchr(s, end - s, &len, 0);
 		}
 	    }
 	    if (PERL_REVISION < rev

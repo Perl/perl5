@@ -27,14 +27,14 @@
 /* Unicode support */
 
 /*
-=for apidoc A|U8*|uv_to_utf8|U8 *d|UV uv
+=for apidoc A|U8*|uvuni_to_utf8|U8 *d|UV uv
 
 Adds the UTF8 representation of the Unicode codepoint C<uv> to the end
 of the string C<d>; C<d> should be have at least C<UTF8_MAXLEN+1> free
 bytes available. The return value is the pointer to the byte after the
-end of the new character. In other words, 
+end of the new character. In other words,
 
-    d = uv_to_utf8(d, uv);
+    d = uvuni_to_utf8(d, uv);
 
 is the recommended Unicode-aware way of saying
 
@@ -44,10 +44,8 @@ is the recommended Unicode-aware way of saying
 */
 
 U8 *
-Perl_uv_to_utf8(pTHX_ U8 *d, UV uv)
+Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 {
-    if (uv < 0x100) 
-    uv = NATIVE_TO_ASCII(uv);
     if (uv < 0x80) {
 	*d++ = uv;
 	return d;
@@ -121,13 +119,39 @@ Perl_uv_to_utf8(pTHX_ U8 *d, UV uv)
 }
 
 /*
+=for apidoc A|U8*|uvchr_to_utf8|U8 *d|UV uv
+
+Adds the UTF8 representation of the Native codepoint C<uv> to the end
+of the string C<d>; C<d> should be have at least C<UTF8_MAXLEN+1> free
+bytes available. The return value is the pointer to the byte after the
+end of the new character. In other words,
+
+    d = uvchr_to_utf8(d, uv);
+
+is the recommended wide native character-aware way of saying
+
+    *(d++) = uv;
+
+=cut
+*/
+
+U8 *
+Perl_uvchr_to_utf8(pTHX_ U8 *d, UV uv)
+{
+    if (uv < 0x100)
+	uv = NATIVE_TO_ASCII(uv);
+    return Perl_uvuni_to_utf8(aTHX_ d, uv);
+}
+
+
+/*
 =for apidoc A|STRLEN|is_utf8_char|U8 *s
 
 Tests if some arbitrary number of bytes begins in a valid UTF-8
 character.  Note that an ASCII character is a valid UTF-8 character.
 The actual number of bytes in the UTF-8 character will be returned if
 it is valid, otherwise 0.
- 
+
 =cut */
 STRLEN
 Perl_is_utf8_char(pTHX_ U8 *s)
@@ -202,9 +226,10 @@ Perl_is_utf8_string(pTHX_ U8 *s, STRLEN len)
 }
 
 /*
-=for apidoc A|UV|utf8_to_uv|U8 *s|STRLEN curlen|STRLEN *retlen|U32 flags
+=for apidoc A|UV|utf8n_to_uvuni|U8 *s|STRLEN curlen|STRLEN *retlen|U32 flags
 
-Returns the character value of the first character in the string C<s>
+Bottom level UTF-8 decode routine.
+Returns the unicode code point value of the first character in the string C<s>
 which is assumed to be in UTF8 encoding and no longer than C<curlen>;
 C<retlen> will be set to the length, in bytes, of that character.
 
@@ -219,10 +244,12 @@ length of the UTF-8 character in bytes, and zero will be returned.
 The C<flags> can also contain various flags to allow deviations from
 the strict UTF-8 encoding (see F<utf8.h>).
 
+Most code should use utf8_to_uvchr() rather than call this directly.
+
 =cut */
 
 UV
-Perl_utf8_to_uv(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
+Perl_utf8n_to_uvuni(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
 {
     UV uv = *s, ouv;
     STRLEN len = 1;
@@ -256,7 +283,7 @@ Perl_utf8_to_uv(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
     if (UTF8_IS_ASCII(uv)) {
 	if (retlen)
 	    *retlen = 1;
-	return ASCII_TO_NATIVE(*s);
+	return (UV) (*s);
     }
 
     if (UTF8_IS_CONTINUATION(uv) &&
@@ -270,7 +297,7 @@ Perl_utf8_to_uv(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
 	warning = UTF8_WARN_NON_CONTINUATION;
 	goto malformed;
     }
-    
+
     if ((uv == 0xfe || uv == 0xff) &&
 	!(flags & UTF8_ALLOW_FE_FF)) {
 	warning = UTF8_WARN_FE_FF;
@@ -287,7 +314,7 @@ Perl_utf8_to_uv(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
 	
     if (retlen)
 	*retlen = len;
-    
+
     expectlen = len;
 
     if ((curlen < expectlen) &&
@@ -417,9 +444,30 @@ malformed:
 }
 
 /*
-=for apidoc A|U8* s|utf8_to_uv_simple|STRLEN *retlen
+=for apidoc A|U8* s|utf8n_to_uvchr|STRLEN curlen, STRLEN *retlen, U32 flags
 
-Returns the character value of the first character in the string C<s>
+Returns the native character value of the first character in the string C<s>
+which is assumed to be in UTF8 encoding; C<retlen> will be set to the
+length, in bytes, of that character.
+
+Allows length and flags to be passed to low level routine.
+
+=cut
+*/
+
+UV
+Perl_utf8n_to_uvchr(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
+{
+    UV uv = Perl_utf8n_to_uvuni(aTHX_ s, curlen, retlen, flags);
+    if (uv < 0x100)
+        return (UV) ASCII_TO_NATIVE(uv);
+    return uv;
+}
+
+/*
+=for apidoc A|U8* s|utf8_to_uvchr|STRLEN *retlen
+
+Returns the native character value of the first character in the string C<s>
 which is assumed to be in UTF8 encoding; C<retlen> will be set to the
 length, in bytes, of that character.
 
@@ -430,9 +478,32 @@ returned and retlen is set, if possible, to -1.
 */
 
 UV
-Perl_utf8_to_uv_simple(pTHX_ U8* s, STRLEN* retlen)
+Perl_utf8_to_uvchr(pTHX_ U8* s, STRLEN* retlen)
 {
-    return Perl_utf8_to_uv(aTHX_ s, UTF8_MAXLEN, retlen, 0);
+    return Perl_utf8n_to_uvchr(aTHX_ s, UTF8_MAXLEN, retlen, 0);
+}
+
+/*
+=for apidoc A|U8* s|utf8_to_uvuni|STRLEN *retlen
+
+Returns the Unicode code point of the first character in the string C<s>
+which is assumed to be in UTF8 encoding; C<retlen> will be set to the
+length, in bytes, of that character.
+
+This function should only be used when returned UV is considered
+an index into the Unicode semantic tables (e.g. swashes).
+
+If C<s> does not point to a well-formed UTF8 character, zero is
+returned and retlen is set, if possible, to -1.
+
+=cut
+*/
+
+UV
+Perl_utf8_to_uvuni(pTHX_ U8* s, STRLEN* retlen)
+{
+    /* Call the low level routine asking for checks */
+    return Perl_utf8n_to_uvuni(aTHX_ s, UTF8_MAXLEN, retlen, 0);
 }
 
 /*
@@ -578,7 +649,7 @@ Perl_utf8_to_bytes(pTHX_ U8* s, STRLEN *len)
     d = s = save;
     while (s < send) {
         STRLEN ulen;
-        *d++ = (U8)utf8_to_uv_simple(s, &ulen);
+        *d++ = (U8)utf8_to_uvchr(s, &ulen);
         s += ulen;
     }
     *d = '\0';
@@ -751,7 +822,7 @@ bool
 Perl_is_uni_alnum(pTHX_ U32 c)
 {
     U8 tmpbuf[UTF8_MAXLEN+1];
-    uv_to_utf8(tmpbuf, (UV)c);
+    uvuni_to_utf8(tmpbuf, (UV)c);
     return is_utf8_alnum(tmpbuf);
 }
 
@@ -759,7 +830,7 @@ bool
 Perl_is_uni_alnumc(pTHX_ U32 c)
 {
     U8 tmpbuf[UTF8_MAXLEN+1];
-    uv_to_utf8(tmpbuf, (UV)c);
+    uvuni_to_utf8(tmpbuf, (UV)c);
     return is_utf8_alnumc(tmpbuf);
 }
 
@@ -767,7 +838,7 @@ bool
 Perl_is_uni_idfirst(pTHX_ U32 c)
 {
     U8 tmpbuf[UTF8_MAXLEN+1];
-    uv_to_utf8(tmpbuf, (UV)c);
+    uvuni_to_utf8(tmpbuf, (UV)c);
     return is_utf8_idfirst(tmpbuf);
 }
 
@@ -775,7 +846,7 @@ bool
 Perl_is_uni_alpha(pTHX_ U32 c)
 {
     U8 tmpbuf[UTF8_MAXLEN+1];
-    uv_to_utf8(tmpbuf, (UV)c);
+    uvuni_to_utf8(tmpbuf, (UV)c);
     return is_utf8_alpha(tmpbuf);
 }
 
@@ -783,7 +854,7 @@ bool
 Perl_is_uni_ascii(pTHX_ U32 c)
 {
     U8 tmpbuf[UTF8_MAXLEN+1];
-    uv_to_utf8(tmpbuf, (UV)c);
+    uvuni_to_utf8(tmpbuf, (UV)c);
     return is_utf8_ascii(tmpbuf);
 }
 
@@ -791,7 +862,7 @@ bool
 Perl_is_uni_space(pTHX_ U32 c)
 {
     U8 tmpbuf[UTF8_MAXLEN+1];
-    uv_to_utf8(tmpbuf, (UV)c);
+    uvuni_to_utf8(tmpbuf, (UV)c);
     return is_utf8_space(tmpbuf);
 }
 
@@ -799,7 +870,7 @@ bool
 Perl_is_uni_digit(pTHX_ U32 c)
 {
     U8 tmpbuf[UTF8_MAXLEN+1];
-    uv_to_utf8(tmpbuf, (UV)c);
+    uvuni_to_utf8(tmpbuf, (UV)c);
     return is_utf8_digit(tmpbuf);
 }
 
@@ -807,7 +878,7 @@ bool
 Perl_is_uni_upper(pTHX_ U32 c)
 {
     U8 tmpbuf[UTF8_MAXLEN+1];
-    uv_to_utf8(tmpbuf, (UV)c);
+    uvuni_to_utf8(tmpbuf, (UV)c);
     return is_utf8_upper(tmpbuf);
 }
 
@@ -815,7 +886,7 @@ bool
 Perl_is_uni_lower(pTHX_ U32 c)
 {
     U8 tmpbuf[UTF8_MAXLEN+1];
-    uv_to_utf8(tmpbuf, (UV)c);
+    uvuni_to_utf8(tmpbuf, (UV)c);
     return is_utf8_lower(tmpbuf);
 }
 
@@ -823,7 +894,7 @@ bool
 Perl_is_uni_cntrl(pTHX_ U32 c)
 {
     U8 tmpbuf[UTF8_MAXLEN+1];
-    uv_to_utf8(tmpbuf, (UV)c);
+    uvuni_to_utf8(tmpbuf, (UV)c);
     return is_utf8_cntrl(tmpbuf);
 }
 
@@ -831,7 +902,7 @@ bool
 Perl_is_uni_graph(pTHX_ U32 c)
 {
     U8 tmpbuf[UTF8_MAXLEN+1];
-    uv_to_utf8(tmpbuf, (UV)c);
+    uvuni_to_utf8(tmpbuf, (UV)c);
     return is_utf8_graph(tmpbuf);
 }
 
@@ -839,7 +910,7 @@ bool
 Perl_is_uni_print(pTHX_ U32 c)
 {
     U8 tmpbuf[UTF8_MAXLEN+1];
-    uv_to_utf8(tmpbuf, (UV)c);
+    uvuni_to_utf8(tmpbuf, (UV)c);
     return is_utf8_print(tmpbuf);
 }
 
@@ -847,7 +918,7 @@ bool
 Perl_is_uni_punct(pTHX_ U32 c)
 {
     U8 tmpbuf[UTF8_MAXLEN+1];
-    uv_to_utf8(tmpbuf, (UV)c);
+    uvuni_to_utf8(tmpbuf, (UV)c);
     return is_utf8_punct(tmpbuf);
 }
 
@@ -855,7 +926,7 @@ bool
 Perl_is_uni_xdigit(pTHX_ U32 c)
 {
     U8 tmpbuf[UTF8_MAXLEN+1];
-    uv_to_utf8(tmpbuf, (UV)c);
+    uvuni_to_utf8(tmpbuf, (UV)c);
     return is_utf8_xdigit(tmpbuf);
 }
 
@@ -863,7 +934,7 @@ U32
 Perl_to_uni_upper(pTHX_ U32 c)
 {
     U8 tmpbuf[UTF8_MAXLEN+1];
-    uv_to_utf8(tmpbuf, (UV)c);
+    uvuni_to_utf8(tmpbuf, (UV)c);
     return to_utf8_upper(tmpbuf);
 }
 
@@ -871,7 +942,7 @@ U32
 Perl_to_uni_title(pTHX_ U32 c)
 {
     U8 tmpbuf[UTF8_MAXLEN+1];
-    uv_to_utf8(tmpbuf, (UV)c);
+    uvuni_to_utf8(tmpbuf, (UV)c);
     return to_utf8_title(tmpbuf);
 }
 
@@ -879,7 +950,7 @@ U32
 Perl_to_uni_lower(pTHX_ U32 c)
 {
     U8 tmpbuf[UTF8_MAXLEN+1];
-    uv_to_utf8(tmpbuf, (UV)c);
+    uvuni_to_utf8(tmpbuf, (UV)c);
     return to_utf8_lower(tmpbuf);
 }
 
@@ -1158,7 +1229,7 @@ Perl_to_utf8_upper(pTHX_ U8 *p)
     if (!PL_utf8_toupper)
 	PL_utf8_toupper = swash_init("utf8", "ToUpper", &PL_sv_undef, 4, 0);
     uv = swash_fetch(PL_utf8_toupper, p);
-    return uv ? uv : utf8_to_uv(p,UTF8_MAXLEN,0,0);
+    return uv ? UNI_TO_NATIVE(uv) : utf8_to_uvchr(p,0);
 }
 
 UV
@@ -1169,7 +1240,7 @@ Perl_to_utf8_title(pTHX_ U8 *p)
     if (!PL_utf8_totitle)
 	PL_utf8_totitle = swash_init("utf8", "ToTitle", &PL_sv_undef, 4, 0);
     uv = swash_fetch(PL_utf8_totitle, p);
-    return uv ? uv : utf8_to_uv(p,UTF8_MAXLEN,0,0);
+    return uv ? UNI_TO_NATIVE(uv) : utf8_to_uvchr(p,0);
 }
 
 UV
@@ -1180,7 +1251,7 @@ Perl_to_utf8_lower(pTHX_ U8 *p)
     if (!PL_utf8_tolower)
 	PL_utf8_tolower = swash_init("utf8", "ToLower", &PL_sv_undef, 4, 0);
     uv = swash_fetch(PL_utf8_tolower, p);
-    return uv ? uv : utf8_to_uv(p,UTF8_MAXLEN,0,0);
+    return uv ? UNI_TO_NATIVE(uv) : utf8_to_uvchr(p,0);
 }
 
 /* a "swash" is a swatch hash */
@@ -1274,7 +1345,10 @@ Perl_swash_fetch(pTHX_ SV *sv, U8 *ptr)
 	    PUSHMARK(SP);
 	    EXTEND(SP,3);
 	    PUSHs((SV*)sv);
-	    PUSHs(sv_2mortal(newSViv(utf8_to_uv(ptr, UTF8_MAXLEN, 0, 0) & ~(needents - 1))));
+	    /* We call utf8_to_uni as we want and index into Unicode tables,
+	       not a native character number.
+	     */
+	    PUSHs(sv_2mortal(newSViv(utf8_to_uvuni(ptr, 0) & ~(needents - 1))));
 	    PUSHs(sv_2mortal(newSViv(needents)));
 	    PUTBACK;
 	    if (call_method("SWASHGET", G_SCALAR))
