@@ -153,6 +153,9 @@ DllExport void		win32_free_childdir(char* d);
 
 END_EXTERN_C
 
+#undef alarm
+#define alarm			win32_alarm
+
 /*
  * the following six(6) is #define in stdio.h
  */
@@ -169,7 +172,6 @@ END_EXTERN_C
 #undef pause
 #undef sleep
 #undef times
-#undef alarm
 #undef ioctl
 #undef unlink
 #undef utime
@@ -283,7 +285,6 @@ END_EXTERN_C
 #define pause()			win32_sleep((32767L << 16) + 32767)
 #define sleep			win32_sleep
 #define times			win32_times
-#define alarm			win32_alarm
 #define ioctl			win32_ioctl
 #define link			win32_link
 #define unlink			win32_unlink

@@ -1124,17 +1124,6 @@ alien_process:
     return -1;
 }
 
-/*
- * File system stuff
- */
-
-DllExport unsigned int
-win32_sleep(unsigned int t)
-{
-    Sleep(t*1000);
-    return 0;
-}
-
 DllExport int
 win32_stat(const char *path, struct stat *sbuf)
 {
@@ -1689,6 +1678,85 @@ win32_uname(struct utsname *name)
     return 0;
 }
 
+/* Timing related stuff */
+
+DllExport int
+win32_async_check(pTHX)
+{
+    MSG msg;
+    int ours = 1;
+    while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+	switch(msg.message) {
+
+	/* plan to use WM_USER to fake kill() with other signals */
+	case WM_USER: {
+	    break;
+	}
+	
+	case WM_TIMER: {
+	    /* alarm() is a one-shot but SetTimer() repeats so kill it */
+	    KillTimer(NULL,w32_timerid);
+	    w32_timerid=0;  
+	    /* Now fake a call to signal handler */
+	    CALL_FPTR(PL_sighandlerp)(14);
+	    break;
+	}
+
+	/* Otherwise do normal Win32 thing - in case it is useful */
+	default:
+	    TranslateMessage(&msg);
+	    DispatchMessage(&msg);
+	    ours = 0;
+	    break;
+	}
+    }
+
+    if (PL_sig_pending) {
+	despatch_signals();
+    }
+    return ours; 
+}
+
+DllExport DWORD
+win32_msgwait(pTHX_ DWORD count, LPHANDLE handles, DWORD timeout, LPDWORD resultp)
+{
+    /* We may need several goes at this - so compute when we stop */
+    DWORD ticks = 0;
+    if (timeout != INFINITE) {
+	ticks = GetTickCount();
+	timeout += ticks;
+    }
+    while (1) {
+	DWORD result = MsgWaitForMultipleObjects(count,handles,FALSE,timeout-ticks, QS_ALLEVENTS);
+	if (resultp)
+	   *resultp = result;
+	if (result == WAIT_TIMEOUT) {
+	    /* Ran out of time - explicit return of zero to avoid -ve if we 
+	       have scheduling issues 
+             */	
+	    return 0;
+	}
+	if (timeout != INFINITE) {
+	    ticks = GetTickCount();
+        }
+	if (result == WAIT_OBJECT_0 + count) {
+	    /* Message has arrived - check it */
+	    if (win32_async_check(aTHX)) {
+		/* was one of ours */
+		break;
+	    }
+	}
+	else {
+	   /* Not timeout or message - one of handles is ready */
+	   break;
+	}
+    }
+    /* compute time left to wait */
+    ticks = timeout - ticks;
+    /* If we are past the end say zero */
+    return (ticks > 0) ? ticks : 0;
+}
+
 int
 win32_internal_wait(int *status, DWORD timeout)
 {
@@ -1701,10 +1769,8 @@ win32_internal_wait(int *status, DWORD timeout)
 
 #ifdef USE_ITHREADS
     if (w32_num_pseudo_children) {
-	waitcode = WaitForMultipleObjects(w32_num_pseudo_children,
-					  w32_pseudo_child_handles,
-					  FALSE,
-					  timeout);
+	win32_msgwait(aTHX_ w32_num_pseudo_children, w32_pseudo_child_handles,
+		      timeout, &waitcode);
         /* Time out here if there are no other children to wait for. */
 	if (waitcode == WAIT_TIMEOUT) {
 	    if (!w32_num_children) {
@@ -1733,10 +1799,7 @@ win32_internal_wait(int *status, DWORD timeout)
     }
 
     /* if a child exists, wait for it to die */
-    waitcode = WaitForMultipleObjects(w32_num_children,
-				      w32_child_handles,
-				      FALSE,
-				      timeout);
+    win32_msgwait(aTHX_ w32_num_children, w32_child_handles, timeout, &waitcode);
     if (waitcode == WAIT_TIMEOUT) {
 	return 0;
     }
@@ -1773,11 +1836,12 @@ win32_waitpid(int pid, int *status, int flags)
 	child = find_pseudo_pid(-pid);
 	if (child >= 0) {
 	    HANDLE hThread = w32_pseudo_child_handles[child];
-	    DWORD waitcode = WaitForSingleObject(hThread, timeout);
+	    DWORD waitcode;
+	    win32_msgwait(aTHX_ 1, &hThread, timeout, &waitcode);
 	    if (waitcode == WAIT_TIMEOUT) {
 		return 0;
 	    }
-	    else if (waitcode != WAIT_FAILED) {
+	    else if (waitcode == WAIT_OBJECT_0) {
 		if (GetExitCodeThread(hThread, &waitcode)) {
 		    *status = (int)((waitcode & 0xff) << 8);
 		    retval = (int)w32_pseudo_child_pids[child];
@@ -1800,11 +1864,11 @@ win32_waitpid(int pid, int *status, int flags)
 	child = find_pid(pid);
 	if (child >= 0) {
 	    hProcess = w32_child_handles[child];
-	    waitcode = WaitForSingleObject(hProcess, timeout);
+	    win32_msgwait(aTHX_ 1, &hProcess, timeout, &waitcode);
 	    if (waitcode == WAIT_TIMEOUT) {
 		return 0;
 	    }
-	    else if (waitcode != WAIT_FAILED) {
+	    else if (waitcode == WAIT_OBJECT_0) {
 		if (GetExitCodeProcess(hProcess, &waitcode)) {
 		    *status = (int)((waitcode & 0xff) << 8);
 		    retval = (int)w32_child_pids[child];
@@ -1820,11 +1884,11 @@ alien_process:
 	    hProcess = OpenProcess(PROCESS_ALL_ACCESS, TRUE,
 				   (IsWin95() ? -pid : pid));
 	    if (hProcess) {
-		waitcode = WaitForSingleObject(hProcess, timeout);
+		win32_msgwait(aTHX_ 1, &hProcess, timeout, &waitcode);
 		if (waitcode == WAIT_TIMEOUT) {
 		    return 0;
 		}
-		else if (waitcode != WAIT_FAILED) {
+		else if (waitcode == WAIT_OBJECT_0) {
 		    if (GetExitCodeProcess(hProcess, &waitcode)) {
 			*status = (int)((waitcode & 0xff) << 8);
 			CloseHandle(hProcess);
@@ -1846,49 +1910,33 @@ win32_wait(int *status)
     return win32_internal_wait(status, INFINITE);
 }
 
-#ifndef PERL_IMPLICIT_CONTEXT
-
-static UINT timerid = 0;
-
-static VOID CALLBACK TimerProc(HWND win, UINT msg, UINT id, DWORD time)
+DllExport unsigned int
+win32_sleep(unsigned int t)
 {
     dTHX;
-    KillTimer(NULL,timerid);
-    timerid=0;  
-    CALL_FPTR(PL_sighandlerp)(14);
+    /* Win32 times are in ms so *1000 in and /1000 out */
+    return win32_msgwait(aTHX_ 0, NULL, t*1000, NULL)/1000;
 }
-
-#endif /* !PERL_IMPLICIT_CONTEXT */
 
 DllExport unsigned int
 win32_alarm(unsigned int sec)
 {
-#ifndef PERL_IMPLICIT_CONTEXT
     /* 
      * the 'obvious' implentation is SetTimer() with a callback
      * which does whatever receiving SIGALRM would do 
      * we cannot use SIGALRM even via raise() as it is not 
      * one of the supported codes in <signal.h>
-     *
-     * Snag is unless something is looking at the message queue
-     * nothing happens :-(
      */ 
     dTHX;
-    if (sec)
-     {
-      timerid = SetTimer(NULL,timerid,sec*1000,(TIMERPROC)TimerProc);
-      if (!timerid)
-       Perl_croak_nocontext("Cannot set timer");
-     } 
-    else
-     {
-      if (timerid)
-       {
-        KillTimer(NULL,timerid);
-        timerid=0;  
-       }
-     }
-#endif /* !PERL_IMPLICIT_CONTEXT */
+    if (sec) {
+	w32_timerid = SetTimer(NULL,w32_timerid,sec*1000,NULL);
+    }
+    else {
+    	if (w32_timerid) {
+            KillTimer(NULL,w32_timerid);
+  	    w32_timerid=0;  
+    	}
+    }	
     return 0;
 }
 
@@ -3562,7 +3610,7 @@ RETRY:
     }
     else  {
 	DWORD status;
-	WaitForSingleObject(ProcessInformation.hProcess, INFINITE);
+	win32_msgwait(aTHX_ 1, &ProcessInformation.hProcess, INFINITE, NULL);
 	GetExitCodeProcess(ProcessInformation.hProcess, &status);
 	ret = (int)status;
 	CloseHandle(ProcessInformation.hProcess);
@@ -4442,4 +4490,7 @@ win32_argv2utf8(int argc, char** argv)
     }
     GlobalFree((HGLOBAL)lpwStr);
 }
+
+
+
 
