@@ -314,7 +314,13 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 			     * be optimized away on most platforms;
 			     * only Solaris and Linux seem to flush
 			     * on that. --jhi */
-			    PerlIO_seek(fp, 0, SEEK_CUR);
+#ifdef USE_SFIO
+			    /* sfio fails to clear error on next
+			       sfwrite, contrary to documentation.
+			       -- Nick Clark */
+			    if (PerlIO_seek(fp, 0, SEEK_CUR) == -1)
+				PerlIO_clearerr(fp);
+#endif
 			    /* On the other hand, do all platforms
 			     * take gracefully to flushing a read-only
 			     * filehandle?  Perhaps we should do
