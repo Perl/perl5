@@ -843,7 +843,7 @@ like so:
     use Config; 
     $Running_Threaded = 0;
 
-    BEGIN { $Running_Threaded = $Config{'usethreaded'} }
+    BEGIN { $Running_Threaded = $Config{'usethreads'} }
 
     sub sub1 { lock(\&sub1) if $Running_Threaded }
 
