@@ -37,7 +37,7 @@ utf8 - Perl pragma to enable/disable UTF-8 (or UTF-EBCDIC) in source code
     utf8::encode($string);
     utf8::decode($string);
 
-    $flag = utf8::is_utf8(STRING);
+    $flag = utf8::is_utf8(STRING); # since Perl 5.8.1
     $flag = utf8::valid(STRING);
 
 =head1 DESCRIPTION
@@ -126,7 +126,8 @@ byte encoding: use Encode for that.
 
 =item * $flag = utf8::is_utf8(STRING)
 
-Test whether STRING is in UTF-8.  Same as Encode::is_utf8().
+(Since Perl 5.8.1)  Test whether STRING is in UTF-8.  Functionally
+the same as Encode::is_utf8().
 
 =item * $flag = utf8::valid(STRING)
 
@@ -144,8 +145,8 @@ cleared.  See L<perlunicode> for more on the UTF8 flag and the C API
 functions C<sv_utf8_upgrade>, C<sv_utf8_downgrade>, C<sv_utf8_encode>,
 and C<sv_utf8_decode>, which are wrapped by the Perl functions
 C<utf8::upgrade>, C<utf8::downgrade>, C<utf8::encode> and
-C<utf8::decode>.  Note that in the Perl 5.8.0 implementation the
-functions utf8::is_utf8, utf8::valid, utf8::encode, utf8::decode,
+C<utf8::decode>.  Note that in the Perl 5.8.0 and 5.8.1 implementation
+the functions utf8::is_utf8, utf8::valid, utf8::encode, utf8::decode,
 utf8::upgrade, and utf8::downgrade are always available, without a
 C<require utf8> statement-- this may change in future releases.
 
@@ -164,6 +165,6 @@ portable answers.
 
 =head1 SEE ALSO
 
-L<perlunicode>, L<bytes>
+L<perluniintro>, L<perlunicode>, L<bytes>
 
 =cut
