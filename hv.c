@@ -1013,7 +1013,6 @@ S_hsplit(pTHX_ HV *hv)
       return;
     }
 #else
-#define MALLOC_OVERHEAD 16
     New(2, a, PERL_HV_ARRAY_ALLOC_BYTES(newsize), char);
     if (!a) {
       PL_nomemok = FALSE;
