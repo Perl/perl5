@@ -7211,91 +7211,39 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
 	    }
 	}
 
-	/* terminate the string */
-	*d = '\0';
 
 	/* make an sv from the string */
 	sv = NEWSV(92,0);
 
-#if defined(Strtol) && defined(Strtoul)
-
 	/*
-	   strtol/strtoll sets errno to ERANGE if the number is too big
-	   for an integer. We try to do an integer conversion first
-	   if no characters indicating "float" have been found.
+           We try to do an integer conversion first if no characters
+           indicating "float" have been found.
 	 */
 
 	if (!floatit) {
-    	    IV iv = 0;
-    	    UV uv = 0;
-	    errno = 0;
-	    if (*PL_tokenbuf == '-')
-		iv = Strtol(PL_tokenbuf, (char**)NULL, 10);
-	    else
-		uv = Strtoul(PL_tokenbuf, (char**)NULL, 10);
-	    if (errno)
-	    	floatit = TRUE; /* Probably just too large. */
-	    else if (*PL_tokenbuf == '-')
-	    	sv_setiv(sv, iv);
-	    else if (uv <= IV_MAX)
+    	    UV uv;
+            int flags = grok_number (PL_tokenbuf, d - PL_tokenbuf, &uv);
+
+            if (flags == IS_NUMBER_IN_UV) {
+              if (uv <= IV_MAX)
 		sv_setiv(sv, uv); /* Prefer IVs over UVs. */
-	    else
+              else
 	    	sv_setuv(sv, uv);
-	}
+            } else if (flags == (IS_NUMBER_IN_UV | IS_NUMBER_NEG)) {
+              if (uv <= (UV) IV_MIN)
+                sv_setiv(sv, -(IV)uv);
+              else
+	    	floatit = TRUE;
+            } else
+              floatit = TRUE;
+        }
 	if (floatit) {
+	    /* terminate the string */
+	    *d = '\0';
 	    nv = Atof(PL_tokenbuf);
 	    sv_setnv(sv, nv);
 	}
-#else
-	/*
-	   No working strtou?ll?.
 
-	   Unfortunately atol() doesn't do range checks (returning
-	   LONG_MIN/LONG_MAX, and setting errno to ERANGE on overflows)
-	   everywhere [1], so we cannot use use atol() (or atoll()).
-	   If we could, they would be used, as Atol(), very much like
-	   Strtol() and Strtoul() are used above.
-
-	   [1] XXX Configure test needed to check for atol()
-	           (and atoll()) overflow behaviour XXX
-
-	   --jhi
-
-	   We need to do this the hard way.  */
-
-	nv = Atof(PL_tokenbuf);
-
-	/* See if we can make do with an integer value without loss of
-	   precision.  We use U_V to cast to a UV, because some
-	   compilers have issues.  Then we try casting it back and see
-	   if it was the same [1].  We only do this if we know we
-	   specifically read an integer.  If floatit is true, then we
-	   don't need to do the conversion at all.
-
-	   [1] Note that this is lossy if our NVs cannot preserve our
-	   UVs.  There are metaconfig defines NV_PRESERVES_UV (a boolean)
-	   and NV_PRESERVES_UV_BITS (a number), but in general we really
-	   do hope all such potentially lossy platforms have strtou?ll?
-	   to do a lossless IV/UV conversion.
-
-	   Maybe could do some tricks with DBL_DIG, LDBL_DIG and
-	   DBL_MANT_DIG and LDBL_MANT_DIG (these are already available
-	   as NV_DIG and NV_MANT_DIG)?
-	
-	   --jhi
-	   */
-	{
-	    UV uv = U_V(nv);
-	    if (!floatit && (NV)uv == nv) {
-		if (uv <= IV_MAX)
-		    sv_setiv(sv, uv); /* Prefer IVs over UVs. */
-		else
-		    sv_setuv(sv, uv);
-	    }
-	    else
-		sv_setnv(sv, nv);
-	}
-#endif
 	if ( floatit ? (PL_hints & HINT_NEW_FLOAT) :
 	               (PL_hints & HINT_NEW_INTEGER) )
 	    sv = new_constant(PL_tokenbuf, d - PL_tokenbuf,
