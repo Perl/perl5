@@ -991,8 +991,11 @@ perllib$(o)	: perllib.c .\perlhost.h .\vdir.h .\vmem.h
 $(MINI_OBJ)	: $(CORE_NOCFG_H)
 
 $(WIN32_OBJ)	: $(CORE_H)
+
 $(CORE_OBJ)	: $(CORE_H)
+
 $(DLL_OBJ)	: $(CORE_H)
+
 $(X2P_OBJ)	: $(CORE_H)
 
 perldll.def : $(MINIPERL) $(CONFIGPM) ..\global.sym ..\pp.sym ..\makedef.pl
