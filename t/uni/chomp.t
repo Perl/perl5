@@ -26,7 +26,8 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => (4 * 4 * 4) * (3); # (@char ** 3) * (keys %mbchars)
+# 2 * (@char ** 3) * (keys %mbchars)
+use Test::More tests => 2 * (4 * 4 * 4) * (3);
 
 # %mbchars = (encoding => { bytes => utf8, ... }, ...);
 # * pack('C*') is expected to return bytes even if ${^ENCODING} is true.
@@ -55,9 +56,18 @@ for my $enc (sort keys %mbchars) {
 	for my $start (@char) {
 	    for my $end (@char) {
 		my $string = $start.$end;
-		my $expect = $end eq $rs ? $start : $string;
-		chomp $string;
-		is($string, $expect);
+		my ($expect, $return);
+		if ($end eq $rs) {
+		    $expect = $start;
+		    # The answer will always be a length in utf8, even if the
+		    # scalar was encoded with a different length
+		    $return = length ($end . "\x{100}") - 1;
+		} else {
+		    $expect = $string;
+		    $return = 0;
+		}
+		is (chomp ($string), $return);
+		is ($string, $expect); # "$enc \$/=$rs $start $end"
 	    }
 	}
     }
