@@ -4738,6 +4738,8 @@ $ GOSUB link_ok
 $ IF compile_status .EQ. good_compile .AND. link_status .EQ. good_link
 $ THEN
 $   drand01 = "drand48()"
+$   randbits = "48"
+$   randfunc = "drand48"
 $   randseedtype = "long int"
 $   seedfunc = "srand48"
 $   echo4 "Good, found drand48()."
@@ -4745,6 +4747,8 @@ $   d_drand48proto = "define"
 $ ELSE
 $   d_drand48proto = "undef"
 $   drand01="random()"
+$   randbits = "31"
+$   randfunc = "random"
 $   randseedtype = "unsigned"
 $   seedfunc = "srandom"
 $   OS
@@ -4764,6 +4768,7 @@ $   THEN
 $     echo4 "OK, found random()."
 $   ELSE
 $     drand01="(((float)rand())*MY_INV_RAND_MAX)"
+$     randfunc = "rand"
 $     randseedtype = "unsigned"
 $     seedfunc = "srand"
 $     echo4 "Yick, looks like I have to use rand()."
@@ -5870,7 +5875,8 @@ $ WC "prototype='define'"
 $ WC "ptrsize='" + ptrsize + "'"
 $ WC "quadkind='" + quadkind + "'"
 $ WC "quadtype='" + quadtype + "'" 
-$ WC "randbits='31'"
+$ WC "randbits='" + randbits + "'"
+$ WC "randfunc='" + randfunc + "'"
 $ WC "randseedtype='" + randseedtype + "'"
 $ WC "ranlib='" + "'"
 $ WC "rd_nodata=' '"
