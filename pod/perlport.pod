@@ -1042,7 +1042,8 @@ Also see:
 
 *
 
-L<perlos390>, F<README.os390>, F<README.posix-bc>, F<README.vmesa>
+L<perlos390>, F<README.os390>, F<perlposix-bc>, F<README.vmesa>,
+L<perlebcdic>.
 
 =item *
 
