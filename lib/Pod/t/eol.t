@@ -1,12 +1,5 @@
 #!./perl -w
 
-BEGIN {
-    if (ord("A") == 193) {
-	print "1..0 \# Skip: EBCDIC\n";
-	exit(0);
-    }
-}
-
 use Test::More tests => 3;
 
 open(POD, ">$$.pod") or die "$$.pod: $!";
@@ -44,8 +37,8 @@ use Pod::Html;
 open(POD, "<$$.pod") or die "$$.pod: $!";
 open(IN,  ">$$.in")  or die "$$.in: $!";
 while (<POD>) {
-  tr/\x0D\x0A//d;
-  print IN $_, "\x0D";
+  s/[\r\n]+/\r/gs;
+  print IN $_;
 }
 close(POD);
 close(IN);
@@ -57,8 +50,8 @@ pod2html("--title=eol", "--infile=$$.in", "--outfile=$$.o1");
 open(POD, "<$$.pod") or die "$$.pod: $!";
 open(IN,  ">$$.in")  or die "$$.in: $!";
 while (<POD>) {
-  tr/\x0D\x0A//d;
-  print IN $_, "\x0A";
+  s/[\r\n]+/\n/gs;
+  print IN $_;
 }
 close(POD);
 close(IN);
@@ -70,8 +63,8 @@ pod2html("--title=eol", "--infile=$$.in", "--outfile=$$.o2");
 open(POD, "<$$.pod") or die "$$.pod: $!";
 open(IN,  ">$$.in")  or die "$$.in: $!";
 while (<POD>) {
-  tr/\x0D\x0A//d;
-  print IN $_, "\x0D\x0A";
+  s/[\r\n]+/\r\n/gs;
+  print IN $_;
 }
 close(POD);
 close(IN);

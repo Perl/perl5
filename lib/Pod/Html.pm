@@ -372,14 +372,14 @@ sub pod2html {
 
     # be eol agnostic
     for (@poddata) {
-	if (/\x0D/) {
-	    if (/\x0D\x0A/) {
-		@poddata = map { s/\x0D\x0A/\n/g;
+	if (/\r/) {
+	    if (/\r\n/) {
+		@poddata = map { s/\r\n/\n/g;
 				 /\n\n/ ?
 				     map { "$_\n\n" } split /\n\n/ :
 				     $_ } @poddata;
 	    } else {
-		@poddata = map { s/\x0D/\n/g;
+		@poddata = map { s/\r/\n/g;
 				 /\n\n/ ?
 				     map { "$_\n\n" } split /\n\n/ :
 				     $_ } @poddata;

@@ -46,6 +46,6 @@ is( $@, "ALARM!\n",             'alarm w/$SIG{ALRM} vs system()' );
 
 {
     local $TODO = "Why does system() block alarm() on $^O?"
-		if $^O eq 'VMS' || $^O eq'MacOS';
+		if $^O eq 'VMS' || $^O eq'MacOS' || $^O eq 'dos';
     ok( abs($diff - 3) <= 1,   "   right time (waited $diff secs for 3-sec alarm)" );
 }

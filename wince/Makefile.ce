@@ -526,6 +526,12 @@ PERLEXE		= $(MACHINE)\perl.exe
 CONFIGPM	= ..\xlib\$(CROSS_NAME)\Config.pm
 MINIMOD		= ..\lib\ExtUtils\Miniperl.pm
 
+# Nominate a target which causes extensions to be re-built
+# This used to be $(PERLEXE), but at worst it is the .dll that they depend
+# on and really only the interface - i.e. the .def file used to export symbols
+# from the .dll
+PERLDEP		= perldll.def
+
 MAKE		= nmake -nologo
 
 CFGSH_TMPL	= config.ce
@@ -534,7 +540,7 @@ CFGH_TMPL	= config_H.ce
 #
 # filenames given to xsubpp must have forward slashes (since it puts
 # full pathnames in #line strings)
-XSUBPP		= $(HPERL) -I..\..\lib -MCross=$(CROSS_NAME) ...\$(EXTUTILSDIR)\xsubpp \
+XSUBPP		= $(HPERL) -I..\..\lib -MCross=$(CROSS_NAME) ..\$(EXTUTILSDIR)\xsubpp \
 		-C++ -prototypes
 
 MICROCORE_SRC	=		\
@@ -760,20 +766,21 @@ all: hostminiperl $(MINIMOD) $(CONFIGPM) $(PERLEXE)
 $(DYNALOADER)$(o) : $(DYNALOADER).c $(CORE_H) $(EXTDIR)\DynaLoader\dlutils.c
 
 $(CONFIGPM): .\config.h ..\config.sh ..\minimod.pl
-        cd .. && $(HPERL) configpm --cross=$(CROSS_NAME) --no-glossary
+	cd .. && $(HPERL) configpm --cross=$(CROSS_NAME) --no-glossary
 	-mkdir $(XCOREDIR)
 	$(XCOPY) ..\*.h $(XCOREDIR)\*.*
 	$(XCOPY) *.h $(XCOREDIR)\*.*
 	$(XCOPY) ..\ext\re\re.pm $(LIBDIR)\*.*
 	$(RCOPY) include $(XCOREDIR)\*.*
-	$(HPERL) -I..\lib -MCross=$(CROSS_NAME) config_h.PL "INST_VER=$(INST_VER)" "CORE_DIR=$(XCOREDIR)"
+	-$(HPERL) -I..\lib -MCross=$(CROSS_NAME) config_h.PL "INST_VER=$(INST_VER)" "CORE_DIR=$(XCOREDIR)"
+	if errorlevel 1 $(MAKE) /$(MAKEFLAGS) $(CONFIGPM)
 
 .\config.h:
 	-del /f config.h
 	copy config_H.ce config.h
 
 ..\config.sh: config.ce config_sh.PL
-	$(HPERL) -I..\lib config_sh.PL $(CFG_VARS) config.ce > ..\config.sh
+	$(HPERL) -I..\lib -I..\win32 config_sh.PL $(CFG_VARS) config.ce > ..\config.sh
 
 $(MINIMOD) : ..\minimod.pl
 	cd .. && $(HPERL) minimod.pl > lib\ExtUtils\Miniperl.pm
@@ -795,6 +802,16 @@ $(DYNALOADER).c: $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
 
 $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 	$(COPY) dl_win32.xs $(EXTDIR)\DynaLoader\dl_win32.xs
+
+#----------------------------------------------------------------------------------
+Extensions: ..\win32\buildext.pl $(PERLDEP) $(CONFIGPM)
+	$(HPERL) -I..\lib -I..\win32 -MCross=$(CROSS_NAME) ..\win32\buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) \
+	!Errno !File/Glob !POSIX !Time/HiRes
+
+Extensions_clean: 
+	-if exist $(MINIPERL) $(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) clean
+
+#----------------------------------------------------------------------------------
 
 $(DUMPER_DLL): $(PERLEXE) $(DUMPER).xs
 	cd $(EXTDIR)\Data\$(*B)

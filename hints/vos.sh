@@ -108,9 +108,12 @@ echo "Testing whether bug gnu_g++-220 is fixed in your compiler..."
 # Try compiling the test case.
 if $cc -o t001 -O $ccflags $ldflags ../hints/t001.c; then
 	gccbug=`$run ./t001`
+	if [ "X$gccversion" = "X" ]; then
+		# Done too late in Configure if hinted
+		gccversion=`$cc --version | sed 's/.*(GCC) *//'`
+	fi
 	case "$gccbug" in
-	*fails*)	gccversion=`$cc --version`
-			cat >&4 <<EOF
+	*fails*)	cat >&4 <<EOF
 This C compiler ($gccversion) is known to have optimizer
 problems when compiling pp_pack.c.  The Stratus bug number
 for this problem is gnu_g++-220.

@@ -76,7 +76,7 @@ case `$cc -v 2>&1`"" in
 	    ccflags="$cc_cppflags"
 	    if [ "X$gccversion" = "X" ]; then
 		# Done too late in Configure if hinted
-               gccversion=`$cc --version | sed 's/.*(GCC) *//`
+		gccversion=`$cc --version | sed 's/.*(GCC) *//'`
 		fi
 	    case "$gccversion" in
 		[012]*) # HP-UX and gcc-2.* break UINT32_MAX :-(

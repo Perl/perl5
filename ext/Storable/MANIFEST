@@ -19,10 +19,10 @@ t/overload.t		    See if Storable works
 t/recurse.t		    See if Storable works
 t/restrict.t		    See if Storable works
 t/retrieve.t		    See if Storable works
+t/st-dump.pl		    helper routines for tests
 t/store.t		    See if Storable works
 t/tied.t		    See if Storable works
 t/tied_hook.t		    See if Storable works
 t/tied_items.t		    See if Storable works
 t/utf8.t		    See if Storable works
 t/utf8hash.t		    See if Storable works
-lib/st-dump.pl		    helper routines for tests

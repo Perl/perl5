@@ -10,8 +10,11 @@
 case "$cc" in
 *gcc*)
     #  "$gccversion" not set yet
-    vers=`gcc -v 2>&1 | sed -n -e 's@.*version \([^ ][^ ]*\) .*@\1@p'`
-    case $vers in
+    if [ "X$gccversion" = "X" ]; then
+	# Done too late in Configure if hinted
+	gccversion=`$cc --version | sed 's/.*(GCC) *//'`
+    fi
+    case $gccversion in
     *2.95*)
          ccflags='-fno-strict-aliasing'
         # More optimisation provided in gcc-2.95 causes miniperl to segv.
