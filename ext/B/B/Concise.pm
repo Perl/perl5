@@ -326,7 +326,7 @@ sub concise_op {
     } elsif ($h{targ}) {
 	my $padname = (($curcv->PADLIST->ARRAY)[0]->ARRAY)[$h{targ}];
 	if (defined $padname and class($padname) ne "SPECIAL") {
-	    $h{targarg}  = $padname->PV;
+	    $h{targarg}  = $padname->PVX;
 	    my $intro = $padname->NVX - $cop_seq_base;
 	    my $finish = int($padname->IVX) - $cop_seq_base;
 	    $finish = "end" if $finish == 999999999 - $cop_seq_base;
