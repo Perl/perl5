@@ -2380,8 +2380,8 @@ S_regmatch(pTHX_ regnode *prog)
 		char *l = locinput;
 		char *e = PL_regeol;
 
-		if (ibcmp_utf8(s, 0,  ln, do_utf8,
-			       l, &e, 0,  UTF)) {
+		if (ibcmp_utf8(s, 0,  ln, UTF,
+			       l, &e, 0,  do_utf8)) {
 		     /* One more case for the sharp s:
 		      * pack("U0U*", 0xDF) =~ /ss/i,
 		      * the 0xC3 0x9F are the UTF-8
