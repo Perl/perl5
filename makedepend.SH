@@ -88,6 +88,10 @@ for file in `$cat .clist`; do
 	-e '}'
     $cpp -I/usr/local/include -I. $file.c | \
     $sed \
+	-e '/^#.*<stdin>/d' \
+	-e '/^#.*<builtin>/d' \
+	-e '/^#.*<built-in>/d' \
+	-e '/^#.*<command line>/d' \
 	-e '/^# *[0-9]/!d' \
 	-e 's/^.*"\(.*\)".*$/'$filebase'.o: \1/' \
 	-e 's|: \./|: |' \

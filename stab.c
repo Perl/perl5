@@ -13,6 +13,7 @@
  */
 
 #include <signal.h>
+#include <errno.h>
 #include "handy.h"
 #include "EXTERN.h"
 #include "search.h"
@@ -66,8 +67,6 @@ static char *sig_name[] = {
 #endif /* SIGTSTP */
     ,0
     };
-
-extern int errno;
 
 STR *
 stab_str(stab)
