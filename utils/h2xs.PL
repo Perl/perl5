@@ -302,6 +302,9 @@ See L<perlxs> and L<perlxstut> for additional details.
 
 =cut
 
+use strict;
+
+
 my( $H2XS_VERSION ) = ' $Revision: 1.20 $ ' =~ /\$Revision:\s+([^\s]+)/;
 my $TEMPLATE_VERSION = '0.01';
 my @ARGS = @ARGV;
@@ -337,6 +340,8 @@ extra_libraries
 
 
 getopts("ACF:M:OPXcdfhn:o:p:s:v:x") || usage;
+use vars qw($opt_A $opt_C $opt_F $opt_M $opt_O $opt_P $opt_X $opt_c
+	    $opt_d $opt_f $opt_h $opt_n $opt_o $opt_p $opt_s $opt_v $opt_x);
 
 usage if $opt_h;
 
@@ -350,7 +355,9 @@ $opt_c = 1 if $opt_A;
 # -X implies -c and -f
 $opt_c = $opt_f = 1 if $opt_X;
 
-%const_xsub = map { $_,1 } split(/,+/, $opt_s) if $opt_s;
+my %const_xsub = map { $_,1 } split(/,+/, $opt_s) if $opt_s;
+my $extralibs;
+my @path_h;
 
 while (my $arg = shift) {
     if ($arg =~ /^-l/i) {
@@ -364,7 +371,7 @@ usage "Must supply header file or module name\n"
         unless (@path_h or $opt_n);
 
 my $fmask;
-my $omask;
+my $tmask;
 
 $fmask = qr{$opt_M} if defined $opt_M;
 $tmask = qr{$opt_o} if defined $opt_o;
@@ -392,14 +399,17 @@ Options -o and -F do not make sense without -x.
 EOD
 }
 
-my %seen_define;
-my %prefixless;
+my @path_h_ini = @path_h;
+my ($name, %fullpath, %prefix, %seen_define, %prefixless, %const_names);
 
 if( @path_h ){
     use Config;
     use File::Spec;
     my @paths;
     if ($^O eq 'VMS') {  # Consider overrides of default location
+      # XXXX This is not equivalent to what the older version did:
+      #		it was looking at $hadsys header-file per header-file...
+      my($hadsys) = grep s!^sys/!!i , @path_h;
       @paths = qw( Sys\$Library VAXC$Include );
       push @paths, ($hadsys ? 'GNU_CC_Include[vms]' : 'GNU_CC_Include[000000]');
       push @paths, qw( DECC$Library_Include DECC$System_Include );
@@ -413,8 +423,9 @@ if( @path_h ){
 	warn "Nesting of headerfile ignored with -n\n";
     }
     $path_h .= ".h" unless $path_h =~ /\.h$/;
-    $fullpath = $path_h;
+    my $fullpath = $path_h;
     $path_h =~ s/,.*$// if $opt_x;
+    $fullpath{$path_h} = $fullpath;
 
     if (not -f $path_h) {
       my $tmp_path_h = $path_h;
@@ -431,7 +442,7 @@ if( @path_h ){
       open(CH, "<$path_h") || die "Can't open $path_h: $!\n";
     defines:
       while (<CH>) {
-	if (/^#[ \t]*define\s+([\$\w]+)\b(?!\()\s*(?=[^" \t])(.*)/) {
+	if (/^[ \t]*#[ \t]*define\s+([\$\w]+)\b(?!\()\s*(?=[^" \t])(.*)/) {
 	    my $def = $1;
 	    my $rest = $2;
 	    $rest =~ s!/\*.*?(\*/|\n)|//.*!!g; # Remove comments
@@ -469,7 +480,7 @@ if( @path_h ){
 }
 
 
-$module = $opt_n || do {
+my $module = $opt_n || do {
 	$name =~ s/\.h$//;
 	if( $name !~ /::/ ){
 		$name =~ s#^.*/##;
@@ -478,6 +489,7 @@ $module = $opt_n || do {
 	$name;
 };
 
+my ($ext, $nested, @modparts, $modfname, $modpname);
 (chdir 'ext', $ext = 'ext/') if -d 'ext';
 
 if( $module =~ /::/ ){
@@ -499,7 +511,7 @@ if ($opt_O) {
 	die "Won't overwrite existing $ext$modpname\n" if -e $modpname;
 }
 if( $nested ){
-	$modpath = "";
+	my $modpath = "";
 	foreach (@modparts){
 		mkdir("$modpath$_", 0777);
 		$modpath .= "$_/";
@@ -516,17 +528,24 @@ my $typedef_rex;
 my %typedefs_pre;
 my %known_fnames;
 
+my @fnames;
+my @fnames_no_prefix;
+
 if( ! $opt_X ){  # use XS, unless it was disabled
   open(XS, ">$modfname.xs") || die "Can't create $ext$modpname/$modfname.xs: $!\n";
   if ($opt_x) {
     require Config;		# Run-time directive
     warn "Scanning typemaps...\n";
     get_typemap();
-    my $c;
-    my $filter;
+    my @td;
+    my @good_td;
+    my $addflags = $opt_F || '';
+
     foreach my $filename (@path_h) {
-      my $addflags = $opt_F || '';
-      if ($fullpath =~ /,/) {
+      my $c;
+      my $filter;
+
+      if ($fullpath{$filename} =~ /,/) {
 	$filename = $`;
 	$filter = $';
       }
@@ -537,6 +556,20 @@ if( ! $opt_X ){  # use XS, unless it was disabled
 
       push @$fdecls_parsed, @{ $c->get('parsed_fdecls') };
       push(@$fdecls, @{$c->get('fdecls')});
+
+      push @td, @{$c->get('typedefs_maybe')};
+
+      unless ($tmask_all) {
+	warn "Scanning $filename for typedefs...\n";
+	my $td = $c->get('typedef_hash');
+	# eval {require 'dumpvar.pl'; ::dumpValue($td)} or warn $@ if $opt_d;
+	my @f_good_td = grep $td->{$_}[1] eq '', keys %$td;
+	push @good_td, @f_good_td;
+	@typedefs_pre{@f_good_td}  = map $_->[0], @$td{@f_good_td};
+      }
+    }
+    { local $" = '|';
+      $typedef_rex = qr(\b(?<!struct )(?:@good_td)\b);
     }
     %known_fnames = map @$_[1,3], @$fdecls_parsed; # [1,3] is NAME, FULLTEXT
     if ($fmask) {
@@ -550,18 +583,16 @@ if( ! $opt_X ){  # use XS, unless it was disabled
       $fdecls = [@$fdecls[@good]];
       $fdecls_parsed = [@$fdecls_parsed[@good]];
     }
-    unless ($tmask_all) {
-      warn "Scanning $filename for typedefs...\n";
-      my $td = $c->get('typedef_hash');
-      # eval {require 'dumpvar.pl'; ::dumpValue($td)} or warn $@ if $opt_d;
-      my @good_td = grep $td->{$_}[1] eq '', keys %$td;
-      @typedefs_pre{@good_td}  = map $_->[0], @$td{@good_td};
-      { local $" = '|';
-	$typedef_rex = qr(\b(?<!struct )(?:@good_td)\b);
-      }
+    @fnames = sort map $_->[1], @$fdecls_parsed; # 1 is NAME
+    # Sort declarations:
+    {
+      my %h = map( ($_->[1], $_), @$fdecls_parsed);
+      $fdecls_parsed = [ @h{@fnames} ];
     }
+    @fnames_no_prefix = @fnames;
+    @fnames_no_prefix
+      = sort map { ++$prefix{$_} if s/^$opt_p(?!\d)//; $_ } @fnames_no_prefix;
     # Remove macros which expand to typedefs
-    my @td = @{$c->get('typedefs_maybe')};
     print "Typedefs are @td.\n" if $opt_d;
     my %td = map {($_, $_)} @td;
     # Add some other possible but meaningless values for macros
@@ -586,7 +617,7 @@ if( ! $opt_X ){  # use XS, unless it was disabled
     }
   }
 }
-@const_names = sort keys %const_names;
+my @const_names = sort keys %const_names;
 
 open(PM, ">$modfname.pm") || die "Can't create $ext$modpname/$modfname.pm: $!\n";
 
@@ -640,6 +671,8 @@ $myISA .= ' DynaLoader' 	unless $opt_X;  # no XS
 $myISA .= ');';
 print PM "\n$myISA\n\n";
 
+my @exported_names = (@const_names, @fnames_no_prefix);
+
 print PM<<"END";
 # Items to export into callers namespace by default. Note: do not export
 # names by default without a very good reason. Use EXPORT_OK instead.
@@ -648,11 +681,11 @@ print PM<<"END";
 # This allows declaration	use $module ':all';
 # If you do not need this, moving things directly into \@EXPORT or \@EXPORT_OK
 # will save memory.
-%EXPORT_TAGS = ( ':all' => [ qw(
-	@const_names
+%EXPORT_TAGS = ( 'all' => [ qw(
+	@exported_names
 ) ] );
 
-\@EXPORT_OK = ( \@{ \$EXPORT_TAGS{':all'} } );
+\@EXPORT_OK = ( \@{ \$EXPORT_TAGS{'all'} } );
 
 \@EXPORT = (
 
@@ -683,7 +716,11 @@ sub AUTOLOAD {
     {  no strict 'refs';
        # Next line doesn't help with older Perls; in newers: no such warnings
        # local \$^W = 0;		# Prototype mismatch: sub XXX vs ()
-       *\$AUTOLOAD = sub () { \$val };
+       if (\$] >= 5.00561) {	# Fixed between 5.005_53 and 5.005_61
+	 *\$AUTOLOAD = sub () { \$val };
+       } else {
+	 *\$AUTOLOAD = sub { \$val };
+       }
     }
     goto &\$AUTOLOAD;
 }
@@ -696,6 +733,7 @@ bootstrap $module \$VERSION;
 END
 }
 
+my $after;
 if( $opt_P ){ # if POD is disabled
 	$after = '__END__';
 }
@@ -719,8 +757,8 @@ print PM <<"END";
 __END__
 END
 
-$author = "A. U. Thor";
-$email = 'a.u.thor@a.galaxy.far.far.away';
+my $author = "A. U. Thor";
+my $email = 'a.u.thor@a.galaxy.far.far.away';
 
 my $revhist = '';
 $revhist = <<EOT if $opt_C;
@@ -755,17 +793,21 @@ if (@const_names and not $opt_P) {
 EOD
 }
 if (defined $fdecls and @$fdecls and not $opt_P) {
-  my @fnames = sort map $_->[1], @$fdecls_parsed; # 1 is NAME
-
   $exp_doc .= <<EOD;
 =head2 Exportable functions
 
+EOD
+  $exp_doc .= <<EOD if $opt_p;
+When accessing these functions from Perl, prefix C<$opt_p> should be removed.
+
+EOD
+  $exp_doc .= <<EOD;
   @{[join "\n  ", @known_fnames{@fnames}]}
 
 EOD
 }
 
-$pod = <<"END" unless $opt_P;
+my $pod = <<"END" unless $opt_P;
 ## Below is the stub of documentation for your module. You better edit it!
 #
 #=head1 NAME
@@ -812,7 +854,7 @@ print XS <<"END";
 
 END
 if( @path_h ){
-    foreach my $path_h (@path_h) {
+    foreach my $path_h (@path_h_ini) {
 	my($h) = $path_h;
 	$h =~ s#^/usr/include/##;
 	if ($^O eq 'VMS') { $h =~ s#.*vms\]#sys/# or $h =~ s#.*[:>\]]##; }
@@ -892,7 +934,7 @@ sub write_const {
   if (@$list == 0) {		# Can happen on the initial iteration only
     print $fh <<"END";
 static double
-constant(char *name, int arg)
+constant(char *name, int len, int arg)
 {
     errno = EINVAL;
     return 0;
@@ -906,7 +948,7 @@ END
 
     print $fh <<"END";
 static double
-constant(char *name, int arg)
+constant(char *name, int len, int arg)
 {
     if (strEQ(name + $offarg, "$list->[0]")) {	/* $pref removed */
 #ifdef $pref$list->[0]
@@ -934,7 +976,7 @@ END
   }
 
   my $leader = substr $list->[0], 0, $off;
-  foreach $letter (keys %leading) {
+  foreach my $letter (keys %leading) {
     write_const $fh, "$pref$leader$letter", 0, $leading{$letter}
       if @{$leading{$letter}} > 1;
   }
@@ -944,13 +986,23 @@ END
 
   print $fh <<"END";
 static double
-constant$npref(char *name, int arg)
+constant$npref(char *name, int len, int arg)
 {
     errno = 0;
+END
+
+  print $fh <<"END" if $off;
+    if ($offarg + $off >= len ) {
+	errno = EINVAL;
+	return 0;
+    }
+END
+
+  print $fh <<"END";
     switch (name[$offarg + $off]) {
 END
 
-  foreach $letter (sort keys %leading) {
+  foreach my $letter (sort keys %leading) {
     my $let = $letter;
     $let = '\0' if $letter eq '';
 
@@ -966,7 +1018,7 @@ EOP
 EOP
       }
       print $fh <<EOP;
-	return constant_$pref$leader$letter(name, arg);
+	return constant_$pref$leader$letter(name, len, arg);
 EOP
     } else {
       # Do it ourselves
@@ -1012,7 +1064,9 @@ END
   write_const(\*XS, '', 0, \@const_names);
 }
 
+my $prefix;
 $prefix = "PREFIX = $opt_p" if defined $opt_p;
+
 # Now switch from C to XS by issuing the first MODULE declaration:
 print XS <<"END";
 
@@ -1043,9 +1097,17 @@ END
 print XS <<"END" unless $opt_c;
 
 double
-constant(name,arg)
-	char *		name
+constant(sv,arg)
+PREINIT:
+	STRLEN		len;
+INPUT:
+	SV *		sv
+	char *		s = SvPV(sv, len);
 	int		arg
+CODE:
+	RETVAL = constant(s,len,arg);
+OUTPUT:
+	RETVAL
 
 END
 
@@ -1075,7 +1137,7 @@ $type
 $name(@argnames)
 EOP
 
-  for $arg (0 .. $numargs - 1) {
+  for my $arg (0 .. $numargs - 1) {
     print $fh <<"EOP";
 	$argtypes[$arg]	$argnames[$arg]$argarrays[$arg]
 EOP
@@ -1089,12 +1151,11 @@ sub get_typemap {
   my $stdtypemap =  "$Config::Config{privlib}/ExtUtils/typemap";
   unshift @tm, $stdtypemap;
   my $proto_re = "[" . quotemeta('\$%&*@;') . "]" ;
-  my $image;
 
   # Start with useful default values
   $typemap{float} = 'T_DOUBLE';
 
-  foreach $typemap (@tm) {
+  foreach my $typemap (@tm) {
     next unless -e $typemap ;
     # skip directories, binary files etc.
     warn " Scanning $typemap\n";
@@ -1110,6 +1171,7 @@ sub get_typemap {
       elsif (/^TYPEMAP\s*$/) { $mode = 'Typemap'; next; }
       elsif ($mode eq 'Typemap') {
 	next if /^\s*($|\#)/ ;
+	my ($type, $image);
 	if ( ($type, $image) =
 	     /^\s*(.*?\S)\s+(\S+)\s*($proto_re*)\s*$/o
 	     # This may reference undefined functions:
@@ -1127,11 +1189,16 @@ sub get_typemap {
 
 sub normalize_type {		# Second arg: do not strip const's before \*
   my $type = shift;
-  # XXXX function-pointer declarations?
-  my $keep_deep_const = shift() ? '\b(?![^(,)]*\*)' : '';
+  my $do_keep_deep_const = shift;
+  # If $do_keep_deep_const this is heuristical only
+  my $keep_deep_const = ($do_keep_deep_const ? '\b(?![^(,)]*\*)' : '');
   my $ignore_mods 
-    = "(?:\b(?:(?:__const__|const)$keep_deep_const|static|inline|__inline__)\b\s*)*";
-  $type =~ s/$ignore_mods//go;
+    = "(?:\\b(?:(?:__const__|const)$keep_deep_const|static|inline|__inline__)\\b\\s*)*";
+  if ($do_keep_deep_const) {	# Keep different compiled /RExen/o separately!
+    $type =~ s/$ignore_mods//go;
+  } else {
+    $type =~ s/$ignore_mods//go;
+  }
   $type =~ s/([^\s\w])/ \1 /g;
   $type =~ s/\s+$//;
   $type =~ s/^\s+//;
@@ -1167,7 +1234,7 @@ sub assign_typemap_entry {
 }
 
 if ($opt_x) {
-    for $decl (@$fdecls_parsed) { print_decl(\*XS, $decl) }
+    for my $decl (@$fdecls_parsed) { print_decl(\*XS, $decl) }
 }
 
 close XS;
@@ -1177,7 +1244,7 @@ if (%types_seen) {
   warn "Writing $ext$modpname/typemap\n";
   open TM, ">typemap" or die "Cannot open typemap file for write: $!";
 
-  for $type (keys %types_seen) {
+  for $type (sort keys %types_seen) {
     my $entry = assign_typemap_entry $type;
     print TM $type, "\t" x (5 - int((length $type)/8)), "\t$entry\n"
   }
@@ -1276,7 +1343,7 @@ EOP
 
 warn "Writing $ext$modpname/MANIFEST\n";
 open(MANI,'>MANIFEST') or die "Can't create MANIFEST: $!";
-@files = <*>;
+my @files = <*>;
 if (!@files) {
   eval {opendir(D,'.');};
   unless ($@) { @files = readdir(D); closedir(D); }
