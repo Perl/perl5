@@ -1914,16 +1914,14 @@ PP(pp_leavesub)
     PMOP *newpm;
     I32 gimme;
     register PERL_CONTEXT *cx;
-    struct block_sub cxsub;
 
     POPBLOCK(cx,newpm);
-    POPSUB1(cx);	/* Delay POPSUB2 until stack values are safe */
  
     TAINT_NOT;
     if (gimme == G_SCALAR) {
 	MARK = newsp + 1;
 	if (MARK <= SP) {
-	    if (cxsub.cv && CvDEPTH(cxsub.cv) > 1) {
+	    if (cx->blk_sub.cv && CvDEPTH(cx->blk_sub.cv) > 1) {
 		if (SvTEMP(TOPs)) {
 		    *MARK = SvREFCNT_inc(TOPs);
 		    FREETMPS;
@@ -1953,7 +1951,7 @@ PP(pp_leavesub)
     }
     PUTBACK;
     
-    POPSUB2();		/* Stack values are safe: release CV and @_ ... */
+    POPSUB(cx);		/* Stack values are safe: release CV and @_ ... */
     PL_curpm = newpm;	/* ... and pop $1 et al */
 
     LEAVE;
@@ -1970,10 +1968,8 @@ PP(pp_leavesublv)
     PMOP *newpm;
     I32 gimme;
     register PERL_CONTEXT *cx;
-    struct block_sub cxsub;
 
     POPBLOCK(cx,newpm);
-    POPSUB1(cx);	/* Delay POPSUB2 until stack values are safe */
  
     TAINT_NOT;
 
@@ -1988,7 +1984,7 @@ PP(pp_leavesublv)
 	if (gimme == G_SCALAR)
 	    goto temporise;
 	if (gimme == G_ARRAY) {
-	    if (!CvLVALUE(cxsub.cv))
+	    if (!CvLVALUE(cx->blk_sub.cv))
 		goto temporise_array;
 	    EXTEND_MORTAL(SP - newsp);
 	    for (mark = newsp + 1; mark <= SP; mark++) {
@@ -2008,8 +2004,8 @@ PP(pp_leavesublv)
 	/* Here we go for robustness, not for speed, so we change all
 	 * the refcounts so the caller gets a live guy. Cannot set
 	 * TEMP, so sv_2mortal is out of question. */
-	if (!CvLVALUE(cxsub.cv)) {
-	    POPSUB2();
+	if (!CvLVALUE(cx->blk_sub.cv)) {
+	    POPSUB(cx);
 	    PL_curpm = newpm;
 	    DIE(aTHX_ "Can't modify non-lvalue subroutine call");
 	}
@@ -2018,7 +2014,7 @@ PP(pp_leavesublv)
 	    EXTEND_MORTAL(1);
 	    if (MARK == SP) {
 		if (SvFLAGS(TOPs) & (SVs_TEMP | SVs_PADTMP | SVf_READONLY)) {
-		    POPSUB2();
+		    POPSUB(cx);
 		    PL_curpm = newpm;
 		    DIE(aTHX_ "Can't return a %s from lvalue subroutine",
 			SvREADONLY(TOPs) ? "readonly value" : "temporary");
@@ -2030,7 +2026,7 @@ PP(pp_leavesublv)
 		}
 	    }
 	    else {			/* Should not happen? */
-		POPSUB2();
+		POPSUB(cx);
 		PL_curpm = newpm;
 		DIE(aTHX_ "%s returned from lvalue subroutine in scalar context",
 		    (MARK > SP ? "Empty array" : "Array"));
@@ -2043,7 +2039,7 @@ PP(pp_leavesublv)
 		if (SvFLAGS(*mark) & (SVs_TEMP | SVs_PADTMP | SVf_READONLY)) {
 		    /* Might be flattened array after $#array =  */
 		    PUTBACK;
-		    POPSUB2();
+		    POPSUB(cx);
 		    PL_curpm = newpm;
 		    DIE(aTHX_ "Can't return %s from lvalue subroutine",
 			(*mark != &PL_sv_undef)
@@ -2065,7 +2061,7 @@ PP(pp_leavesublv)
 	  temporise:
 	    MARK = newsp + 1;
 	    if (MARK <= SP) {
-		if (cxsub.cv && CvDEPTH(cxsub.cv) > 1) {
+		if (cx->blk_sub.cv && CvDEPTH(cx->blk_sub.cv) > 1) {
 		    if (SvTEMP(TOPs)) {
 			*MARK = SvREFCNT_inc(TOPs);
 			FREETMPS;
@@ -2097,7 +2093,7 @@ PP(pp_leavesublv)
     }
     PUTBACK;
     
-    POPSUB2();		/* Stack values are safe: release CV and @_ ... */
+    POPSUB(cx);		/* Stack values are safe: release CV and @_ ... */
     PL_curpm = newpm;	/* ... and pop $1 et al */
 
     LEAVE;

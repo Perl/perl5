@@ -52,40 +52,32 @@ struct block_sub {
 	cx->blk_sub.dfoutgv = PL_defoutgv;				\
 	(void)SvREFCNT_inc(cx->blk_sub.dfoutgv)
 
-#define POPSUB(cx)							\
-	{ struct block_sub cxsub;					\
-	  POPSUB1(cx);							\
-	  POPSUB2(); }
-
-#define POPSUB1(cx)							\
-	cxsub = cx->blk_sub;	/* because DESTROY may clobber *cx */
-
 #ifdef USE_THREADS
 #define POPSAVEARRAY() NOOP
 #else
 #define POPSAVEARRAY()							\
     STMT_START {							\
 	SvREFCNT_dec(GvAV(PL_defgv));					\
-	GvAV(PL_defgv) = cxsub.savearray;				\
+	GvAV(PL_defgv) = cx->blk_sub.savearray;				\
     } STMT_END
 #endif /* USE_THREADS */
 
-#define POPSUB2()							\
-	if (cxsub.hasargs) {						\
+#define POPSUB(cx)							\
+	if (cx->blk_sub.hasargs) {					\
 	    POPSAVEARRAY();						\
 	    /* abandon @_ if it got reified */				\
-	    if (AvREAL(cxsub.argarray)) {				\
-		SSize_t fill = AvFILLp(cxsub.argarray);			\
-		SvREFCNT_dec(cxsub.argarray);				\
-		cxsub.argarray = newAV();				\
-		av_extend(cxsub.argarray, fill);			\
-		AvFLAGS(cxsub.argarray) = AVf_REIFY;			\
-		PL_curpad[0] = (SV*)cxsub.argarray;			\
+	    if (AvREAL(cx->blk_sub.argarray)) {				\
+		SSize_t fill = AvFILLp(cx->blk_sub.argarray);		\
+		SvREFCNT_dec(cx->blk_sub.argarray);			\
+		cx->blk_sub.argarray = newAV();				\
+		av_extend(cx->blk_sub.argarray, fill);			\
+		AvFLAGS(cx->blk_sub.argarray) = AVf_REIFY;		\
+		PL_curpad[0] = (SV*)cx->blk_sub.argarray;		\
 	    }								\
 	}								\
-	if (cxsub.cv) {							\
-	    if (!(CvDEPTH(cxsub.cv) = cxsub.olddepth))			\
-		SvREFCNT_dec(cxsub.cv);					\
+	if (cx->blk_sub.cv) {						\
+	    if (!(CvDEPTH(cx->blk_sub.cv) = cx->blk_sub.olddepth))	\
+		SvREFCNT_dec(cx->blk_sub.cv);				\
 	}
 
 #define POPFORMAT(cx)							\
@@ -103,9 +95,9 @@ struct block_eval {
 
 #define PUSHEVAL(cx,n,fgv)						\
 	cx->blk_eval.old_in_eval = PL_in_eval;				\
-	cx->blk_eval.old_op_type = PL_op->op_type;				\
+	cx->blk_eval.old_op_type = PL_op->op_type;			\
 	cx->blk_eval.old_name = n;					\
-	cx->blk_eval.old_eval_root = PL_eval_root;				\
+	cx->blk_eval.old_eval_root = PL_eval_root;			\
 	cx->blk_eval.cur_text = PL_linestr;
 
 #define POPEVAL(cx)							\
@@ -141,22 +133,13 @@ struct block_loop {
 	cx->blk_loop.iterix = -1;
 
 #define POPLOOP(cx)							\
-	{ struct block_loop cxloop;					\
-	  POPLOOP1(cx);							\
-	  POPLOOP2(); }
-
-#define POPLOOP1(cx)							\
-	cxloop = cx->blk_loop;	/* because DESTROY may clobber *cx */	\
-	newsp = PL_stack_base + cxloop.resetsp;
-
-#define POPLOOP2()							\
-	SvREFCNT_dec(cxloop.iterlval);					\
-	if (cxloop.itervar) {						\
-	    sv_2mortal(*cxloop.itervar);				\
-	    *cxloop.itervar = cxloop.itersave;				\
+	SvREFCNT_dec(cx->blk_loop.iterlval);				\
+	if (cx->blk_loop.itervar) {					\
+	    sv_2mortal(*(cx->blk_loop.itervar));			\
+	    *(cx->blk_loop.itervar) = cx->blk_loop.itersave;		\
 	}								\
-	if (cxloop.iterary && cxloop.iterary != PL_curstack)		\
-	    SvREFCNT_dec(cxloop.iterary);
+	if (cx->blk_loop.iterary && cx->blk_loop.iterary != PL_curstack)\
+	    SvREFCNT_dec(cx->blk_loop.iterary);
 
 /* context common to subroutines, evals and loops */
 struct block {
