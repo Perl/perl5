@@ -2,7 +2,7 @@ package ExtUtils::MM_Any;
 
 use strict;
 use vars qw($VERSION @ISA);
-$VERSION = 0.05;
+$VERSION = 0.06;
 @ISA = qw(File::Spec);
 
 use Config;
@@ -606,7 +606,7 @@ MAKE_FRAG
 
     my $add_meta = $self->oneliner(<<'CODE', ['-MExtUtils::Manifest=maniadd']);
 eval { maniadd({q{META.yml} => q{Module meta-data (added by MakeMaker)}}) } 
-    or warn "Could not add META.yml to MANIFEST: $@\n"
+    or print "Could not add META.yml to MANIFEST: $${'@'}\n"
 CODE
 
     return sprintf <<'MAKE_FRAG', $add_meta;
