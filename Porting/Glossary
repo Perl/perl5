@@ -5,13 +5,15 @@ generates pod documentation for Config.pm from this file--please try to keep
 the formatting regular.]
 
 _a (Unix.U):
-	This variable defines the extension used for ordinary libraries.
+	This variable defines the extension used for ordinary library files.
 	For unix, it is '.a'.  The '.' is included.  Other possible
 	values include '.lib'.
 
 _exe (Unix.U):
 	This variable defines the extension used for executable files.
-	For unix it is empty.  Other possible values include '.exe'.
+	DJGPP, Cygwin and OS/2 use '.exe'.  Stratus VOS uses '.pm'.
+	No other operating systems require an extension for executable
+	files, so it is empty for all others.
 
 _o (Unix.U):
 	This variable defines the extension used for object files.
@@ -3072,7 +3074,7 @@ libpth (libpth.U):
 
 libs (libs.U):
 	This variable holds the additional libraries we want to use.
-	It is up to the Makefile to deal with it.
+	It is up to the Makefile to deal with it.  The list can be empty.
 
 libsdirs (libs.U):
 	This variable holds the directory names aka dirnames of the libraries
@@ -3184,8 +3186,11 @@ mailx (Loc.U):
 
 make (Loc.U):
 	This variable is used internally by Configure to determine the
-	full pathname (if any) of the make program.  After Configure runs,
-	the value is reset to a plain "make" and is not useful.
+	full pathname (if any) of the make program.  Both the directory
+	and the command name can vary from system to system; while most
+	systems call the command 'make', other values include 'gmake' and
+	'gnumake'.  After Configure runs, the value is reset to a plain
+	"make" and is not useful.
 
 make_set_make (make.U):
 	Some versions of 'make' set the variable MAKE.  Others do not.
