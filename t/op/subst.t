@@ -7,7 +7,7 @@ BEGIN {
 }
 
 require './test.pl';
-plan( tests => 108 );
+plan( tests => 122 );
 
 $x = 'foo';
 $_ = "x";
@@ -445,3 +445,45 @@ is($pv1, $pv2);
     like($a, qr/\x{100}/);
     is(length($a), 1);
 }
+
+{
+    # subst with mixed utf8/non-utf8 type
+    my($ua, $ub, $uc, $ud) = ("\x{101}", "\x{102}", "\x{103}", "\x{104}");
+    my($na, $nb) = ("\x{ff}", "\x{fe}");
+    my $a = "$ua--$ub";
+    my $b;
+    ($b = $a) =~ s/--/$na/;
+    is($b, "$ua$na$ub", "s///: replace non-utf8 into utf8");
+    ($b = $a) =~ s/--/--$na--/;
+    is($b, "$ua--$na--$ub", "s///: replace long non-utf8 into utf8");
+    ($b = $a) =~ s/--/$uc/;
+    is($b, "$ua$uc$ub", "s///: replace utf8 into utf8");
+    ($b = $a) =~ s/--/--$uc--/;
+    is($b, "$ua--$uc--$ub", "s///: replace long utf8 into utf8");
+    $a = "$na--$nb";
+    ($b = $a) =~ s/--/$ua/;
+    is($b, "$na$ua$nb", "s///: replace utf8 into non-utf8");
+    ($b = $a) =~ s/--/--$ua--/;
+    is($b, "$na--$ua--$nb", "s///: replace long utf8 into non-utf8");
+
+    # now with utf8 pattern
+    $a = "$ua--$ub";
+    ($b = $a) =~ s/-($ud)?-/$na/;
+    is($b, "$ua$na$ub", "s///: replace non-utf8 into utf8 (utf8 pattern)");
+    ($b = $a) =~ s/-($ud)?-/--$na--/;
+    is($b, "$ua--$na--$ub", "s///: replace long non-utf8 into utf8 (utf8 pattern)");
+    ($b = $a) =~ s/-($ud)?-/$uc/;
+    is($b, "$ua$uc$ub", "s///: replace utf8 into utf8 (utf8 pattern)");
+    ($b = $a) =~ s/-($ud)?-/--$uc--/;
+    is($b, "$ua--$uc--$ub", "s///: replace long utf8 into utf8 (utf8 pattern)");
+    $a = "$na--$nb";
+    ($b = $a) =~ s/-($ud)?-/$ua/;
+    is($b, "$na$ua$nb", "s///: replace utf8 into non-utf8 (utf8 pattern)");
+    ($b = $a) =~ s/-($ud)?-/--$ua--/;
+    is($b, "$na--$ua--$nb", "s///: replace long utf8 into non-utf8 (utf8 pattern)");
+    ($b = $a) =~ s/-($ud)?-/$na/;
+    is($b, "$na$na$nb", "s///: replace non-utf8 into non-utf8 (utf8 pattern)");
+    ($b = $a) =~ s/-($ud)?-/--$na--/;
+    is($b, "$na--$na--$nb", "s///: replace long non-utf8 into non-utf8 (utf8 pattern)");
+}
+
