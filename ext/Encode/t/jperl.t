@@ -20,6 +20,8 @@ BEGIN {
     $| = 1;
 }
 
+no utf8; # we have raw Japanese encodings here
+
 use strict;
 use Test::More tests => 18;
 my $Debug = shift;
