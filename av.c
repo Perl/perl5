@@ -157,8 +157,8 @@ av_fetch(register AV *av, I32 key, I32 lval)
 	    dTHR;
 	    sv = sv_newmortal();
 	    mg_copy((SV*)av, sv, 0, key);
-	    Sv = sv;
-	    return &Sv;
+	    av_fetch_sv = sv;
+	    return &av_fetch_sv;
 	}
     }
 

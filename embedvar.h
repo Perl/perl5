@@ -22,6 +22,7 @@
 
 #define Sv			(curinterp->TSv)
 #define Xpv			(curinterp->TXpv)
+#define av_fetch_sv		(curinterp->Tav_fetch_sv)
 #define bodytarget		(curinterp->Tbodytarget)
 #define chopset			(curinterp->Tchopset)
 #define curcop			(curinterp->Tcurcop)
@@ -37,6 +38,8 @@
 #define delaymagic		(curinterp->Tdelaymagic)
 #define dirty			(curinterp->Tdirty)
 #define formtarget		(curinterp->Tformtarget)
+#define hv_fetch_ent_mh		(curinterp->Thv_fetch_ent_mh)
+#define hv_fetch_sv		(curinterp->Thv_fetch_sv)
 #define in_eval			(curinterp->Tin_eval)
 #define last_in_gv		(curinterp->Tlast_in_gv)
 #define localizing		(curinterp->Tlocalizing)
@@ -316,6 +319,7 @@
 
 #define TSv			Sv
 #define TXpv			Xpv
+#define Tav_fetch_sv		av_fetch_sv
 #define Tbodytarget		bodytarget
 #define Tchopset		chopset
 #define Tcurcop			curcop
@@ -331,6 +335,8 @@
 #define Tdelaymagic		delaymagic
 #define Tdirty			dirty
 #define Tformtarget		formtarget
+#define Thv_fetch_ent_mh	hv_fetch_ent_mh
+#define Thv_fetch_sv		hv_fetch_sv
 #define Tin_eval		in_eval
 #define Tlast_in_gv		last_in_gv
 #define Tlocalizing		localizing
@@ -494,6 +500,7 @@
 
 #define Sv			Perl_Sv
 #define Xpv			Perl_Xpv
+#define av_fetch_sv		Perl_av_fetch_sv
 #define bodytarget		Perl_bodytarget
 #define chopset			Perl_chopset
 #define curcop			Perl_curcop
@@ -509,6 +516,8 @@
 #define delaymagic		Perl_delaymagic
 #define dirty			Perl_dirty
 #define formtarget		Perl_formtarget
+#define hv_fetch_ent_mh		Perl_hv_fetch_ent_mh
+#define hv_fetch_sv		Perl_hv_fetch_sv
 #define in_eval			Perl_in_eval
 #define last_in_gv		Perl_last_in_gv
 #define localizing		Perl_localizing
@@ -556,6 +565,7 @@
 
 #define Sv			(thr->TSv)
 #define Xpv			(thr->TXpv)
+#define av_fetch_sv		(thr->Tav_fetch_sv)
 #define bodytarget		(thr->Tbodytarget)
 #define chopset			(thr->Tchopset)
 #define curcop			(thr->Tcurcop)
@@ -571,6 +581,8 @@
 #define delaymagic		(thr->Tdelaymagic)
 #define dirty			(thr->Tdirty)
 #define formtarget		(thr->Tformtarget)
+#define hv_fetch_ent_mh		(thr->Thv_fetch_ent_mh)
+#define hv_fetch_sv		(thr->Thv_fetch_sv)
 #define in_eval			(thr->Tin_eval)
 #define last_in_gv		(thr->Tlast_in_gv)
 #define localizing		(thr->Tlocalizing)

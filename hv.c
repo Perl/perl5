@@ -94,8 +94,8 @@ hv_fetch(HV *hv, char *key, U32 klen, I32 lval)
 	    dTHR;
 	    sv = sv_newmortal();
 	    mg_copy((SV*)hv, sv, key, klen);
-	    Sv = sv;
-	    return &Sv;
+	    hv_fetch_sv = sv;
+	    return &hv_fetch_sv;
 	}
 #ifdef ENV_IS_CASELESS
 	else if (mg_find((SV*)hv,'E')) {
@@ -170,19 +170,17 @@ hv_fetch_ent(HV *hv, SV *keysv, I32 lval, register U32 hash)
 
     if (SvRMAGICAL(hv)) {
 	if (mg_find((SV*)hv,'P')) {
-	    static HE mh;
-
 	    sv = sv_newmortal();
 	    keysv = sv_2mortal(newSVsv(keysv));
 	    mg_copy((SV*)hv, sv, (char*)keysv, HEf_SVKEY);
-	    if (!HeKEY_hek(&mh)) {
+	    if (!HeKEY_hek(&hv_fetch_ent_mh)) {
 		char *k;
 		New(54, k, HEK_BASESIZE + sizeof(SV*), char);
-		HeKEY_hek(&mh) = (HEK*)k;
+		HeKEY_hek(&hv_fetch_ent_mh) = (HEK*)k;
 	    }
-	    HeSVKEY_set(&mh, keysv);
-	    HeVAL(&mh) = sv;
-	    return &mh;
+	    HeSVKEY_set(&hv_fetch_ent_mh, keysv);
+	    HeVAL(&hv_fetch_ent_mh) = sv;
+	    return &hv_fetch_ent_mh;
 	}
 #ifdef ENV_IS_CASELESS
 	else if (mg_find((SV*)hv,'E')) {
