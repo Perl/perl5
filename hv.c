@@ -677,6 +677,10 @@ HV *hv;
     nomemok = TRUE;
 #ifdef STRANGE_MALLOC
     Renew(a, newsize, HE*);
+    if (!a) {
+      nomemok = FALSE;
+      return;
+    }
 #else
     i = newsize * sizeof(HE*);
 #define MALLOC_OVERHEAD 16
@@ -687,6 +691,10 @@ HV *hv;
     tmp /= sizeof(HE*);
     assert(tmp >= newsize);
     New(2,a, tmp, HE*);
+    if (!a) {
+      nomemok = FALSE;
+      return;
+    }
     Copy(xhv->xhv_array, a, oldsize, HE*);
     if (oldsize >= 64 && !nice_chunk) {
 	nice_chunk = (char*)xhv->xhv_array;
@@ -752,6 +760,10 @@ IV newmax;
 	nomemok = TRUE;
 #ifdef STRANGE_MALLOC
 	Renew(a, newsize, HE*);
+        if (!a) {
+	  nomemok = FALSE;
+	  return;
+	}
 #else
 	i = newsize * sizeof(HE*);
 	j = MALLOC_OVERHEAD;
@@ -761,6 +773,10 @@ IV newmax;
 	j /= sizeof(HE*);
 	assert(j >= newsize);
 	New(2, a, j, HE*);
+        if (!a) {
+	  nomemok = FALSE;
+	  return;
+	}
 	Copy(xhv->xhv_array, a, oldsize, HE*);
 	if (oldsize >= 64 && !nice_chunk) {
 	    nice_chunk = (char*)xhv->xhv_array;
