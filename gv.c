@@ -111,6 +111,7 @@ gv_init(GV *gv, HV *stash, char *name, STRLEN len, int multi)
     if (multi)
 	GvMULTI_on(gv);
     if (doproto) {			/* Replicate part of newSUB here. */
+	SvIOK_off(gv);
 	ENTER;
 	start_subparse(0,0);		/* Create CV in compcv. */
 	GvCV(gv) = compcv;
@@ -443,11 +444,11 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 
 	    len = namend - name;
 	    if (len > 0) {
+		char smallbuf[256];
 		char *tmpbuf;
-		char autobuf[64];
 
-		if (len < sizeof(autobuf) - 2)
-		    tmpbuf = autobuf;
+		if (len + 3 < sizeof smallbuf)
+		    tmpbuf = smallbuf;
 		else
 		    New(601, tmpbuf, len+3, char);
 		Copy(name, tmpbuf, len, char);
@@ -462,7 +463,7 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 		    else
 			GvMULTI_on(gv);
 		}
-		if (tmpbuf != autobuf)
+		if (tmpbuf != smallbuf)
 		    Safefree(tmpbuf);
 		if (!gv || gv == (GV*)&sv_undef)
 		    return Nullgv;
@@ -709,13 +710,28 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 #endif
 	goto magicalize;
 
+    case '!':
+	if(len > 1)
+	    break;
+	if(sv_type > SVt_PV) {
+	    HV* stash = gv_stashpvn("Errno",5,FALSE);
+	    if(!stash || !(gv_fetchmethod(stash, "TIEHASH"))) {
+		dSP;
+		PUTBACK;
+		perl_require_pv("Errno.pm");
+		SPAGAIN;
+		stash = gv_stashpvn("Errno",5,FALSE);
+		if (!stash || !(gv_fetchmethod(stash, "TIEHASH")))
+		    croak("Can't use %%! because Errno.pm is not avaliable");
+	    }
+	}
+	goto magicalize;
     case '#':
     case '*':
 	if (dowarn && len == 1 && sv_type == SVt_PV)
 	    warn("Use of $%s is deprecated", name);
 	/* FALL THROUGH */
     case '[':
-    case '!':
     case '^':
     case '~':
     case '=':

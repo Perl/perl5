@@ -915,14 +915,16 @@ block_gimme(void)
 	return G_VOID;
 
     switch (cxstack[cxix].blk_gimme) {
+    case G_VOID:
+	return G_VOID;
     case G_SCALAR:
 	return G_SCALAR;
     case G_ARRAY:
 	return G_ARRAY;
     default:
 	croak("panic: bad gimme: %d\n", cxstack[cxix].blk_gimme);
-    case G_VOID:
-	return G_VOID;
+	/* NOTREACHED */
+	return 0;
     }
 }
 
@@ -1041,29 +1043,33 @@ die_where(char *message)
 	I32 gimme;
 	SV **newsp;
 
-	if (in_eval & 4) {
-	    SV **svp;
-	    STRLEN klen = strlen(message);
-	    
-	    svp = hv_fetch(ERRHV, message, klen, TRUE);
-	    if (svp) {
-		if (!SvIOK(*svp)) {
-		    static char prefix[] = "\t(in cleanup) ";
-		    SV *err = ERRSV;
-		    sv_upgrade(*svp, SVt_IV);
-		    (void)SvIOK_only(*svp);
-		    if (!SvPOK(err))
-			sv_setpv(err,"");
-		    SvGROW(err, SvCUR(err)+sizeof(prefix)+klen);
-		    sv_catpvn(err, prefix, sizeof(prefix)-1);
-		    sv_catpvn(err, message, klen);
+	if (message) {
+	    if (in_eval & 4) {
+		SV **svp;
+		STRLEN klen = strlen(message);
+		
+		svp = hv_fetch(ERRHV, message, klen, TRUE);
+		if (svp) {
+		    if (!SvIOK(*svp)) {
+			static char prefix[] = "\t(in cleanup) ";
+			SV *err = ERRSV;
+			sv_upgrade(*svp, SVt_IV);
+			(void)SvIOK_only(*svp);
+			if (!SvPOK(err))
+			    sv_setpv(err,"");
+			SvGROW(err, SvCUR(err)+sizeof(prefix)+klen);
+			sv_catpvn(err, prefix, sizeof(prefix)-1);
+			sv_catpvn(err, message, klen);
+		    }
+		    sv_inc(*svp);
 		}
-		sv_inc(*svp);
 	    }
+	    else
+		sv_setpv(ERRSV, message);
 	}
 	else
-	    sv_setpv(ERRSV, message);
-	
+	    message = SvPVx(ERRSV, na);
+
 	while ((cxix = dopoptoeval(cxstack_ix)) < 0 && curstackinfo->si_prev) {
 	    dounwind(-1);
 	    POPSTACK();
@@ -2459,7 +2465,7 @@ PP(pp_require)
     SvREFCNT_dec(namesv);
     if (!tryrsfp) {
 	if (op->op_type == OP_REQUIRE) {
-	    SV *msg = sv_2mortal(newSVpvf("Can't locate file '%s' in @INC", name));
+	    SV *msg = sv_2mortal(newSVpvf("Can't locate %s in @INC", name));
 	    SV *dirmsgsv = NEWSV(0, 0);
 	    AV *ar = GvAVn(incgv);
 	    I32 i;

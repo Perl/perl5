@@ -2998,9 +2998,10 @@ function, or use this relation:
 =item sleep
 
 Causes the script to sleep for EXPR seconds, or forever if no EXPR.
-May be interrupted by sending the process a SIGALRM.  Returns the
-number of seconds actually slept.  You probably cannot mix alarm() and
-sleep() calls, because sleep() is often implemented using alarm().
+May be interrupted if the process receives a signal such as SIGALRM.
+Returns the number of seconds actually slept.  You probably cannot
+mix alarm() and sleep() calls, because sleep() is often implemented
+using alarm().
 
 On some older systems, it may sleep up to a full second less than what
 you requested, depending on how it counts seconds.  Most modern systems
@@ -3038,9 +3039,10 @@ specified, it gives the name of a subroutine that returns an integer
 less than, equal to, or greater than 0, depending on how the elements
 of the array are to be ordered.  (The C<E<lt>=E<gt>> and C<cmp>
 operators are extremely useful in such routines.)  SUBNAME may be a
-scalar variable name, in which case the value provides the name of the
-subroutine to use.  In place of a SUBNAME, you can provide a BLOCK as
-an anonymous, in-line sort subroutine.
+scalar variable name (unsubscripted), in which case the value provides
+the name of (or a reference to) the actual subroutine to use.  In place
+of a SUBNAME, you can provide a BLOCK as an anonymous, in-line sort
+subroutine.
 
 In the interests of efficiency the normal calling code for subroutines is
 bypassed, with the following effects: the subroutine may not be a
@@ -4044,6 +4046,22 @@ the correct precedence as in
 Vectors created with vec() can also be manipulated with the logical
 operators |, &, and ^, which will assume a bit vector operation is
 desired when both operands are strings.
+
+The following code will build up an ASCII string saying 'PerlPerlPerl'.
+The comments show the string after each step. Note that this code works
+in the same way on big-endian or little-endian machines.
+
+    my $foo = '';
+    vec($foo,  0, 32) = 0x5065726C;	# 'Perl'
+    vec($foo,  2, 16) = 0x5065;		# 'PerlPe'
+    vec($foo,  3, 16) = 0x726C;		# 'PerlPerl'
+    vec($foo,  8,  8) = 0x50;		# 'PerlPerlP'
+    vec($foo,  9,  8) = 0x65;		# 'PerlPerlPe'
+    vec($foo, 20,  4) = 2;		# 'PerlPerlPe'   . "\x02"
+    vec($foo, 21,  4) = 7;		# 'PerlPerlPer'  # 'r' is "\x72"
+    vec($foo, 45,  2) = 3;		# 'PerlPerlPer'  . "\x0c"
+    vec($foo, 93,  1) = 1;		# 'PerlPerlPer'  . "\x2c"
+    vec($foo, 94,  1) = 1;		# 'PerlPerlPerl' # 'l' is "\x6c"
 
 To transform a bit vector into a string or array of 0's and 1's, use these:
 

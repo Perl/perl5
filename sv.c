@@ -2071,6 +2071,12 @@ sv_setsv(SV *dstr, register SV *sstr)
 			    if (!GvCVGEN((GV*)dstr) &&
 				(CvROOT(cv) || CvXSUB(cv)))
 			    {
+				SV *const_sv = cv_const_sv(cv);
+				bool const_changed = TRUE; 
+				if(const_sv)
+				    const_changed = sv_cmp(const_sv, 
+					   op_const_sv(CvSTART((CV*)sref), 
+						       Nullcv));
 				/* ahem, death to those who redefine
 				 * active sort subs */
 				if (curstackinfo->si_type == SI_SORT &&
@@ -2078,15 +2084,14 @@ sv_setsv(SV *dstr, register SV *sstr)
 				    croak(
 				    "Can't redefine active sort subroutine %s",
 					  GvENAME((GV*)dstr));
-				if (cv_const_sv(cv))
-				    warn("Constant subroutine %s redefined",
-					 GvENAME((GV*)dstr));
-				else if (dowarn) {
+				if (dowarn || (const_changed && const_sv)) {
 				    if (!(CvGV(cv) && GvSTASH(CvGV(cv))
 					  && HvNAME(GvSTASH(CvGV(cv)))
 					  && strEQ(HvNAME(GvSTASH(CvGV(cv))),
 						   "autouse")))
-					warn("Subroutine %s redefined",
+					warn(const_sv ? 
+					     "Constant subroutine %s redefined"
+					     : "Subroutine %s redefined", 
 					     GvENAME((GV*)dstr));
 				}
 			    }
@@ -3569,9 +3574,7 @@ newSVpv(char *s, STRLEN len)
 }
 
 SV *
-newSVpvn(s,len)
-char *s;
-STRLEN len;
+newSVpvn(char *s, STRLEN len)
 {
     register SV *sv;
 

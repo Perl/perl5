@@ -437,6 +437,7 @@
 #define oopsAV			Perl_oopsAV
 #define oopsCV			Perl_oopsCV
 #define oopsHV			Perl_oopsHV
+#define op_const_sv		Perl_op_const_sv
 #define op_desc			Perl_op_desc
 #define op_free			Perl_op_free
 #define op_name			Perl_op_name

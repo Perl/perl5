@@ -137,8 +137,8 @@ sub import {
 # Error status.
 
 	*CHILD_ERROR				= *?	;
-	*OS_ERROR				= *!	;
-	    *ERRNO				= *!	;
+	*OS_ERROR				= \$!	;
+	    *ERRNO				= \$!	;
 	*EXTENDED_OS_ERROR			= *^E	;
 	*EVAL_ERROR				= *@	;
 

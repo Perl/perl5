@@ -72,6 +72,7 @@ nomem
 nomethod_amg
 not_amg
 numer_amg
+op_const_sv
 op_desc
 op_name
 opargs

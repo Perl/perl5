@@ -65,6 +65,7 @@ void	croak _((const char* pat,...)) __attribute__((noreturn));
 void	cv_ckproto _((CV* cv, GV* gv, char* p));
 CV*	cv_clone _((CV* proto));
 SV*	cv_const_sv _((CV* cv));
+SV*	op_const_sv _((OP* o, CV* cv));
 void	cv_undef _((CV* cv));
 #ifdef DEBUGGING
 void	cx_dump _((PERL_CONTEXT* cs));

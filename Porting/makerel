@@ -32,10 +32,10 @@ if ($subversion) {
 }
 
 $perl = "perl$vers";
-$reldir = "$relroot/$perl";
+$reldir = "$perl";
 $reldir .= "-$ARGV[0]" if $ARGV[0];
 
-print "\nMaking a release for $perl in $reldir\n\n";
+print "\nMaking a release for $perl in $relroot/$reldir\n\n";
 
 
 print "Cross-checking the MANIFEST...\n";
@@ -87,23 +87,24 @@ system("chmod +x @exe");
 print "\n";
 
 
-print "Creating $reldir release directory...\n";
-die "$reldir release directory already exists\n"   if -e "../$reldir";
-die "$reldir.tar.gz release file already exists\n" if -e "../$reldir.tar.gz";
-mkdir($reldir, 0755) or die "mkdir $reldir: $!\n";
+print "Creating $relroot/$reldir release directory...\n";
+die "$relroot/$reldir release directory already exists\n"   if -e "$relroot/$reldir";
+die "$relroot/$reldir.tar.gz release file already exists\n" if -e "$relroot/$reldir.tar.gz";
+mkdir("$relroot/$reldir", 0755) or die "mkdir $relroot/$reldir: $!\n";
 print "\n";
 
 
 print "Copying files to release directory...\n";
 # ExtUtils::Manifest maniread does not preserve the order
-$cmd = "awk '{print \$1}' MANIFEST | cpio -pdm $reldir";
+$cmd = "awk '{print \$1}' MANIFEST | cpio -pdm $relroot/$reldir";
 system($cmd) == 0 or die "$cmd failed";
 print "\n";
 
 chdir $relroot or die $!;
 
 print "Creating and compressing the tar file...\n";
-$cmd = "tar cf - $perl | gzip --best > $perl.tar.gz";
+my $src = (-e $perl) ? $perl : 'perl'; # 'perl' in maint branch
+$cmd = "tar cf - $reldir | gzip --best > $perl.tar.gz";
 system($cmd) == 0 or die "$cmd failed";
 print "\n";
 

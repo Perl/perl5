@@ -54,27 +54,35 @@ BEGIN {
 	return if exists $done{$path};
 	$done{$path} = 1;
 
-	unless(defined $path) {
-	    warn "Cannot find '$file'" if $level == 0;
+	if(not defined $path and $level == 0) {
+	    warn "Cannot find '$file'";
 	    return;
 	}
 
-        local *F;
-
+	local(*F);
 	open(F,$path) or return;
-	$level = 0 unless defined $level;
+        $level = 1 unless defined $level;
+	my $indent = " " x $level;
+	print "#$indent open $path\n";
 	while(<F>) {
 	    s#/\*.*(\*/|$)##;
 
-	    process_file($1,$level+1)
-		    if /^#\s*include\s*[<"]([^>"]+)[>"]/;
+	    if ( /^#\s*include\s*[<"]([^>"]+)[>"]/ ) {
+	        print "#${indent} include $1\n";
+		process_file($1,$level+1);
+	        print "#${indent} done include $1\n";
+	        print "#${indent} back in $path\n";
+	    }
 
 	    s/(?:\([^)]*\)\s*)//;
 
-	    $define{$1} = $2
-		if /^#\s*define\s+(\w+)\s+((0x)?\d+|\w+)/;
+	    if ( /^#\s*define\s+(\w+)\s+(\w+)/ ) {
+	        print "#${indent} define $1 $2\n";
+		$define{$1} = $2;
+	    }
        }
        close(F);
+       print "#$indent close $path\n";
     }
 
     process_file("sys/sem.h");
@@ -87,13 +95,14 @@ BEGIN {
 		    ? $define{$define{$d}} : undef;
 	}
 	unless(defined $define{$d}) {
+	    print "# $d undefined\n";
 	    print "1..0\n";
 	    exit;
 	}
 	{
 	    no strict 'refs';
 	    ${ $d } = eval $define{$d};
-	}
+        }
     }
 }
 
@@ -101,8 +110,9 @@ use strict;
 
 print "1..6\n";
 
-my $msg = msgget($IPC_PRIVATE, $S_IRWXU | $S_IRWXG | $S_IRWXO)
-	|| die "msgget failed: $!\n";
+my $msg = msgget($IPC_PRIVATE, $S_IRWXU | $S_IRWXG | $S_IRWXO);
+# Very first time called after machine is booted value may be 0 
+die "msgget failed: $!\n" unless defined($msg) && $msg >= 0;
 
 print "ok 1\n";
 

@@ -290,10 +290,11 @@ PP(pp_warn)
 	tmps = SvPV(TOPs, na);
     }
     if (!tmps || !*tmps) {
-	(void)SvUPGRADE(ERRSV, SVt_PV);
-	if (SvPOK(ERRSV) && SvCUR(ERRSV))
-	    sv_catpv(ERRSV, "\t...caught");
-	tmps = SvPV(ERRSV, na);
+  	SV *error = ERRSV;
+	(void)SvUPGRADE(error, SVt_PV);
+	if (SvPOK(error) && SvCUR(error))
+	    sv_catpv(error, "\t...caught");
+	tmps = SvPV(error, na);
     }
     if (!tmps || !*tmps)
 	tmps = "Warning: something's wrong";
@@ -305,6 +306,8 @@ PP(pp_die)
 {
     djSP; dMARK;
     char *tmps;
+    SV *tmpsv = Nullsv;
+    char *pat = "%s";
     if (SP - MARK != 1) {
 	dTARGET;
 	do_join(TARG, &sv_no, MARK, SP);
@@ -312,17 +315,43 @@ PP(pp_die)
 	SP = MARK + 1;
     }
     else {
-	tmps = SvPV(TOPs, na);
+	tmpsv = TOPs;
+	tmps = SvROK(tmpsv) ? Nullch : SvPV(tmpsv, na);
     }
     if (!tmps || !*tmps) {
-	(void)SvUPGRADE(ERRSV, SVt_PV);
-	if (SvPOK(ERRSV) && SvCUR(ERRSV))
-	    sv_catpv(ERRSV, "\t...propagated");
-	tmps = SvPV(ERRSV, na);
+  	SV *error = ERRSV;
+	(void)SvUPGRADE(error, SVt_PV);
+	if(tmpsv ? SvROK(tmpsv) : SvROK(error)) {
+	    if(tmpsv)
+		SvSetSV(error,tmpsv);
+	    else if(sv_isobject(error)) {
+		HV *stash = SvSTASH(SvRV(error));
+		GV *gv = gv_fetchmethod(stash, "PROPAGATE");
+		if (gv) {
+		    SV *file = sv_2mortal(newSVsv(GvSV(curcop->cop_filegv)));
+		    SV *line = sv_2mortal(newSViv(curcop->cop_line));
+		    EXTEND(SP, 3);
+		    PUSHMARK(SP);
+		    PUSHs(error);
+		    PUSHs(file);
+ 		    PUSHs(line);
+		    PUTBACK;
+		    perl_call_sv((SV*)GvCV(gv),
+				 G_SCALAR|G_EVAL|G_KEEPERR);
+		    sv_setsv(error,*stack_sp--);
+		}
+	    }
+	    pat = Nullch;
+	}
+	else {
+	    if (SvPOK(error) && SvCUR(error))
+		sv_catpv(error, "\t...propagated");
+	    tmps = SvPV(error, na);
+	}
     }
     if (!tmps || !*tmps)
 	tmps = "Died";
-    DIE("%s", tmps);
+    DIE(pat, tmps);
 }
 
 /* I/O. */
@@ -569,7 +598,8 @@ PP(pp_untie)
 {
     djSP;
     SV * sv ;
-    sv = POPs;          
+
+    sv = POPs;
 
     if (dowarn) {
         MAGIC * mg ;
@@ -4140,7 +4170,7 @@ PP(pp_gpwent)
 	sv_setpv(sv, pwent->pw_gecos);
 #endif
 #ifndef INCOMPLETE_TAINTS
-	/* pw_gecos is tainted. */
+	/* pw_gecos is tainted because user himself can diddle with it. */
 	SvTAINTED_on(sv);
 #endif
 
@@ -4291,7 +4321,7 @@ PP(pp_getlogin)
 
 PP(pp_syscall)
 {
-#ifdef HAS_SYSCALL   
+#ifdef HAS_SYSCALL
     djSP; dMARK; dORIGMARK; dTARGET;
     register I32 items = SP - MARK;
     unsigned long a[20];
@@ -4505,4 +4535,3 @@ int operation;
 }
 
 #endif /* LOCKF_EMULATE_FLOCK */
-

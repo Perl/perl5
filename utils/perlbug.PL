@@ -84,7 +84,7 @@ BEGIN {
     $::HaveUtil = ($@ eq "");
 };
 
-my $Version = "1.22";
+my $Version = "1.23";
 
 # Changed in 1.06 to skip Mail::Send and Mail::Util if not available.
 # Changed in 1.07 to see more sendmail execs, and added pipe output.
@@ -111,6 +111,7 @@ my $Version = "1.22";
 # Changed in 1.20 Added patchlevel.h reading and version/config checks
 # Changed in 1.21 Added '-nok' for reporting build failure DFD 98-05-05
 # Changed in 1.22 Heavy reformatting & minor bugfixes HVDS 98-05-10
+# Changed in 1.23 Restore -ok(ay): say 'success'; don't prompt
 
 # TODO: - Allow the user to re-name the file on mail failure, and
 #       make sure failure (transmission-wise) of Mail::Send is
@@ -137,7 +138,7 @@ EOF
 if (!-t STDOUT) { Dump(*STDOUT); exit; }
 
 Query();
-Edit() unless $usefile;
+Edit() unless $usefile || ($ok and not $::opt_n);
 NowWhat();
 Send();
 
@@ -435,7 +436,7 @@ EOF
 
     # Generate report
     open(REP,">$filename");
-    my $reptype = $ok ? "build failure" : "bug";
+    my $reptype = !$ok ? "bug" : $::opt_n ? "build failure" : "success";
 
     print REP <<EOF;
 This is a $reptype report for perl from $from,

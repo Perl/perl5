@@ -87,6 +87,7 @@ static void nuke_stacks _((void));
 static void open_script _((char *, bool, SV *));
 static void usage _((char *));
 static void validate_suid _((char *, char*));
+static I32 read_e_script _((int idx, SV *buf_sv, int maxlen));
 
 static int fdscript = -1;
 
@@ -395,12 +396,9 @@ perl_destruct(register PerlInterpreter *sv_interp)
     Safefree(inplace);
     inplace = Nullch;
 
-    Safefree(e_tmpname);
-    e_tmpname = Nullch;
-
-    if (e_fp) {
-	PerlIO_close(e_fp);
-	e_fp = Nullfp;
+    if (e_script) {
+	SvREFCNT_dec(e_script);
+	e_script = Nullsv;
     }
 
     /* magical thingies */
@@ -579,7 +577,6 @@ perl_parse(PerlInterpreter *sv_interp, void (*xsinit) (void), int argc, char **a
     char *validarg = "";
     I32 oldscope;
     AV* comppadlist;
-    int e_tmpfd = -1;
     dJMPENV;
     int ret;
 
@@ -604,7 +601,6 @@ setuid perl scripts securely.\n");
 #ifndef VMS  /* VMS doesn't have environ array */
     origenviron = environ;
 #endif
-    e_tmpname = Nullch;
 
     if (do_undump) {
 
@@ -699,48 +695,21 @@ setuid perl scripts securely.\n");
 	case 'e':
 	    if (euid != uid || egid != gid)
 		croak("No -e allowed in setuid scripts");
-	    if (!e_fp) {
-#if defined(HAS_UMASK) && !defined(VMS)
-		int oldumask = PerlLIO_umask(0177);
-#endif
-	        e_tmpname = savepv(TMPPATH);
-#ifdef HAS_MKSTEMP
-		e_tmpfd = PerlLIO_mkstemp(e_tmpname);
-#else /* use mktemp() */
-		(void)PerlLIO_mktemp(e_tmpname);
-		if (!*e_tmpname)
-		    croak("Cannot generate temporary filename");
-# if defined(HAS_OPEN3) && defined(O_EXCL)
-		e_tmpfd = open(e_tmpname,
-			       O_WRONLY | O_CREAT | O_EXCL,
-			       0600);
-# else
-		(void)UNLINK(e_tmpname);
-		/* Yes, potential race.  But at least we can say we tried. */
-		e_fp = PerlIO_open(e_tmpname,"w");
-# endif
-#endif /* ifdef HAS_MKSTEMP */
-#if defined(HAS_MKSTEMP) || (defined(HAS_OPEN3) && defined(O_EXCL))
-		if (e_tmpfd < 0)
-		    croak("Cannot create temporary file \"%s\"", e_tmpname);
-		e_fp = PerlIO_fdopen(e_tmpfd,"w");
-#endif
-  		if (!e_fp)
- 		    croak("Cannot create temporary file \"%s\"", e_tmpname);
-#if defined(HAS_UMASK) && !defined(VMS)
-		(void)PerlLIO_umask(oldumask);
-#endif
+	    if (!e_script) {
+		e_script = newSVpv("",0);
+		filter_add(read_e_script, NULL);
 	    }
 	    if (*++s)
-		PerlIO_puts(e_fp,s);
+		sv_catpv(e_script, s);
 	    else if (argv[1]) {
-		PerlIO_puts(e_fp,argv[1]);
+		sv_catpv(e_script, argv[1]);
 		argc--,argv++;
 	    }
 	    else
 		croak("No code specified for -e");
-	    (void)PerlIO_putc(e_fp,'\n');
+	    sv_catpv(e_script, "\n");
 	    break;
+
 	case 'I':	/* -I handled both here and in moreswitches() */
 	    forbid_setid("-I");
 	    if (!*++s && (s=argv[1]) != Nullch) {
@@ -875,16 +844,9 @@ print \"  \\@INC:\\n    @INC\\n\";");
 
     if (!scriptname)
 	scriptname = argv[0];
-    if (e_fp) {
-	if (PerlIO_flush(e_fp) || PerlIO_error(e_fp) || PerlIO_close(e_fp)) {
-#ifndef MULTIPLICITY
-	    warn("Did you forget to compile with -DMULTIPLICITY?");
-#endif	    
-	    croak("Can't write to temp file for -e: %s", Strerror(errno));
-	}
-	e_fp = Nullfp;
+    if (e_script) {
 	argc++,argv--;
-	scriptname = e_tmpname;
+	scriptname = BIT_BUCKET;	/* don't look for script or read stdin */
     }
     else if (scriptname == Nullch) {
 #ifdef MSDOS
@@ -937,6 +899,9 @@ print \"  \\@INC:\\n    @INC\\n\";");
 #endif
 
     init_predump_symbols();
+    /* init_postdump_symbols not currently designed to be called */
+    /* more than once (ENV isn't cleared first, for example)	 */
+    /* But running with -u leaves %ENV & @ARGV undefined!    XXX */
     if (!do_undump)
 	init_postdump_symbols(argc,argv,env);
 
@@ -957,11 +922,9 @@ print \"  \\@INC:\\n    @INC\\n\";");
     curcop->cop_line = 0;
     curstash = defstash;
     preprocess = FALSE;
-    if (e_tmpname) {
-	(void)UNLINK(e_tmpname);
-	Safefree(e_tmpname);
-	e_tmpname = Nullch;
-	e_tmpfd = -1;
+    if (e_script) {
+	SvREFCNT_dec(e_script);
+	e_script = Nullsv;
     }
 
     /* now that script is parsed, we can modify record separator */
@@ -1825,7 +1788,7 @@ open_script(char *scriptname, bool dosearch, SV *sv)
     }
     else
 	fdscript = -1;
-    origfilename = savepv(e_tmpname ? "-e" : scriptname);
+    origfilename = savepv(e_script ? "-e" : scriptname);
     curcop->cop_filegv = gv_fetchfile(origfilename);
     if (strEQ(origfilename,"-"))
 	scriptname = "";
@@ -1919,9 +1882,6 @@ sed %s -e \"/^[^#]/b\" \
 	if (rsfp)
 	    fcntl(PerlIO_fileno(rsfp),F_SETFD,1);  /* ensure close-on-exec */
 #endif
-    }
-    if (e_tmpname) {
-	e_fp = rsfp;
     }
     if (!rsfp) {
 #ifdef DOSUID
@@ -2208,6 +2168,22 @@ find_beginning(void)
     }
 }
 
+
+static I32
+read_e_script(int idx, SV *buf_sv, int maxlen)
+{
+    char *p, *nl;
+    p  = SvPVX(e_script);
+    nl = strchr(p, '\n');
+    nl = (nl) ? nl+1 : SvEND(e_script);
+    if (nl-p == 0)
+	return 0;
+    sv_catpvn(buf_sv, p, nl-p);
+    sv_chop(e_script, nl);
+    return 1;
+}
+
+
 static void
 init_ids(void)
 {
@@ -2452,7 +2428,7 @@ init_postdump_symbols(register int argc, register char **argv, register char **e
 	    if (!(s = strchr(*env,'=')))
 		continue;
 	    *s++ = '\0';
-#if defined(WIN32) || defined(MSDOS)
+#if defined(MSDOS)
 	    (void)strupr(*env);
 #endif
 	    sv = newSVpv(s--,0);
@@ -2699,7 +2675,7 @@ call_list(I32 oldscope, AV *list)
     dJMPENV;
     int ret;
 
-    while (AvFILL(list) >= 0) { 
+    while (AvFILL(list) >= 0) {
 	CV *cv = (CV*)av_shift(list);
 
 	SAVEFREESV(cv);
@@ -2822,14 +2798,9 @@ my_exit_jump(void)
     I32 gimme;
     SV **newsp;
 
-    if (e_tmpname) {
-	if (e_fp) {
-	    PerlIO_close(e_fp);
-	    e_fp = Nullfp;
-	}
-	(void)UNLINK(e_tmpname);
-	Safefree(e_tmpname);
-	e_tmpname = Nullch;
+    if (e_script) {
+	SvREFCNT_dec(e_script);
+	e_script = Nullsv;
     }
 
     POPSTACK_TO(mainstack);
@@ -2842,6 +2813,3 @@ my_exit_jump(void)
 
     JMPENV_JUMP(2);
 }
-
-
-

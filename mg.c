@@ -1377,7 +1377,7 @@ magic_getdefelem(SV *sv, MAGIC *mg)
 		targ = HeVAL(he);
 	}
 	else {
-	    AV* av = (AV*)LvTARG(sv); 
+	    AV* av = (AV*)LvTARG(sv);
 	    if ((I32)LvTARGOFF(sv) <= AvFILL(av))
 		targ = AvARRAY(av)[LvTARGOFF(sv)];
 	}

@@ -37,8 +37,7 @@ doextract
 doswitches
 dowarn
 dumplvl
-e_fp
-e_tmpname
+e_script
 endav
 envgv
 errgv
