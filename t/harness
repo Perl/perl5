@@ -9,10 +9,17 @@ BEGIN {
     $ENV{PERL5LIB} = '../lib';    # so children will see it too
 }
 
+my $torture; # torture testing?
+
 use Test::Harness;
 
 $Test::Harness::switches = "";    # Too much noise otherwise
 $Test::Harness::verbose = shift if @ARGV && $ARGV[0] eq '-v';
+
+if ($ARGV[0] eq '-torture') {
+    shift;
+    $torture = 1;
+}
 
 # Let tests know they're running in the perl core.  Useful for modules
 # which live dual lives on CPAN.
@@ -57,6 +64,7 @@ if (@ARGV) {
         push @tests, <op/*.t>;
         push @tests, <uni/*.t>;
         push @tests, <lib/*.t>;
+        push @tests, <japh/*.t> if $torture;
 	push @tests, <win32/*.t> if $^O eq 'MSWin32';
 	use File::Spec;
 	my $updir = File::Spec->updir;
