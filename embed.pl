@@ -344,7 +344,7 @@ walk_table {
 		$ret .= hide($func,"Perl_$func");
 	    }
 	}
-         unless ($flags =~ /A/) {
+	if ($ret ne '' && $flags !~ /A/) {
 	    if ($flags =~ /E/) {
 		$ret = "#if defined(PERL_CORE) || defined(PERL_EXT)\n$ret#endif\n";
 	    } else {

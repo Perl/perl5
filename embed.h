@@ -776,8 +776,6 @@
 #ifdef PERL_CORE
 #define peep			Perl_peep
 #endif
-#ifdef PERL_CORE
-#endif
 #if defined(USE_REENTRANT_API)
 #define reentrant_size		Perl_reentrant_size
 #define reentrant_init		Perl_reentrant_init
@@ -1003,8 +1001,6 @@
 #define sv_derived_from		Perl_sv_derived_from
 #define sv_eq			Perl_sv_eq
 #define sv_free			Perl_sv_free
-#ifdef PERL_CORE
-#endif
 #ifdef PERL_CORE
 #define sv_free_arenas		Perl_sv_free_arenas
 #endif
