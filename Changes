@@ -79,6 +79,121 @@ Version 5.005_57        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  3472] By: gsar                                  on 1999/05/25  08:28:57
+        Log: assorted tweaks
+     Branch: perl
+	   ! doio.c iperlsys.h win32/config.bc win32/config.gc
+	   ! win32/config.vc win32/config_H.bc win32/config_H.gc
+           ! win32/config_H.vc win32/makedef.pl
+____________________________________________________________________________
+[  3471] By: gsar                                  on 1999/05/25  06:06:04
+        Log: perlref update from Tom Christiansen
+     Branch: perl
+           ! pod/perlref.pod
+____________________________________________________________________________
+[  3470] By: gsar                                  on 1999/05/25  06:03:27
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 24 May 1999 17:43:56 -0400
+             Message-ID: <19990524174356.A1944@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.005_*] hv.c calling negative malloc()
+     Branch: perl
+           ! hv.c
+____________________________________________________________________________
+[  3469] By: gsar                                  on 1999/05/25  05:59:22
+        Log: avoid temporary files that have a constant name (from a suggestion
+             by Anthony J. Lill <ajlill@ajlc.waterloo.on.ca>)
+     Branch: perl
+           ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[  3468] By: gsar                                  on 1999/05/25  05:54:29
+        Log: From: pvhp@forte.com (Peter Prymmer)
+             Date: Mon, 24 May 99 11:20:25 PDT
+             Message-Id: <9905241820.AA28071@forte.com>
+             Subject: [PATCH: _56 and _03]EBCDIC %HTML_Escapes for Pod::Text, plus sync patch.
+     Branch: perl
+           ! lib/Pod/Text.pm
+____________________________________________________________________________
+[  3467] By: gsar                                  on 1999/05/25  04:08:50
+        Log: fix glob() bug that resulted in missing symlinks that don't point
+             anywhere
+     Branch: perl
+           ! pp_hot.c
+____________________________________________________________________________
+[  3466] By: gsar                                  on 1999/05/25  03:00:00
+        Log: avoid enumerating @INC contents in diagnostic if @INC was never
+             searched
+     Branch: perl
+           ! pod/perldiag.pod pp_ctl.c
+____________________________________________________________________________
+[  3465] By: gsar                                  on 1999/05/25  02:24:08
+        Log: add caveat about close(PIPE) carelessness
+     Branch: perl
+           ! pod/perlfunc.pod
+____________________________________________________________________________
+[  3464] By: gsar                                  on 1999/05/24  23:55:53
+        Log: fix bogus line numbers for void context warnings
+             (change#2548 was overeager)
+     Branch: perl
+           ! op.c
+____________________________________________________________________________
+[  3463] By: gsar                                  on 1999/05/24  23:31:58
+        Log: change#3455 had a typo
+     Branch: perl
+           ! pp_ctl.c
+____________________________________________________________________________
+[  3462] By: gsar                                  on 1999/05/24  17:32:20
+        Log: more pod updates from Tom Christiansen; regen perltoc
+     Branch: perl
+	   ! pod/perl.pod pod/perldelta.pod pod/perlmod.pod pod/perlobj.pod
+           ! pod/perlre.pod pod/perltoc.pod pod/perlvar.pod
+____________________________________________________________________________
+[  3461] By: gsar                                  on 1999/05/24  07:41:32
+        Log: perlmod notes from Damian Conway (via Tom Christiansen)
+     Branch: perl
+           ! pod/perlmod.pod
+____________________________________________________________________________
+[  3460] By: gsar                                  on 1999/05/24  07:24:11
+        Log: major pod update from Tom Christiansen
+     Branch: perl
+           + pod/perltootc.pod
+	   ! MANIFEST lib/Pod/Functions.pm pod/Makefile pod/buildtoc
+	   ! pod/perl.pod pod/perl5004delta.pod pod/perlcall.pod
+	   ! pod/perldata.pod pod/perldebug.pod pod/perldelta.pod
+	   ! pod/perldsc.pod pod/perlfunc.pod pod/perlipc.pod
+	   ! pod/perllol.pod pod/perlmod.pod pod/perlmodinstall.pod
+	   ! pod/perlmodlib.pod pod/perlobj.pod pod/perlop.pod
+	   ! pod/perlopentut.pod pod/perlpod.pod pod/perlport.pod
+	   ! pod/perlre.pod pod/perlref.pod pod/perlrun.pod pod/perlsec.pod
+	   ! pod/perlsub.pod pod/perlsyn.pod pod/perlthrtut.pod
+	   ! pod/perltie.pod pod/perltrap.pod pod/perlvar.pod
+           ! pod/perlxs.pod pod/pod2man.PL
+____________________________________________________________________________
+[  3459] By: gsar                                  on 1999/05/24  06:26:48
+        Log: perlfaq update from Tom Christiansen
+     Branch: perl
+	   ! pod/perlfaq.pod pod/perlfaq1.pod pod/perlfaq2.pod
+	   ! pod/perlfaq3.pod pod/perlfaq4.pod pod/perlfaq5.pod
+	   ! pod/perlfaq6.pod pod/perlfaq7.pod pod/perlfaq8.pod
+           ! pod/perlfaq9.pod
+____________________________________________________________________________
+[  3458] By: gsar                                  on 1999/05/24  05:55:11
+        Log: updated to v1.50 from CPAN
+     Branch: perl
+           ! lib/CPAN.pm lib/CPAN/FirstTime.pm lib/CPAN/Nox.pm
+____________________________________________________________________________
+[  3457] By: gsar                                  on 1999/05/24  05:46:20
+        Log: From: Hugo van der Sanden <hv@crypt.compulink.co.uk>
+             Date: Sun, 23 May 1999 16:35:07 +0100
+             Message-Id: <199905231535.QAA00032@crypt.compulink.co.uk>
+             Subject: [PATCH 5.005_56] name PL_in_eval bits
+     Branch: perl
+           ! cop.h op.c perl.c pp_ctl.c toke.c util.c
+____________________________________________________________________________
+[  3456] By: gsar                                  on 1999/05/24  05:18:06
+        Log: make -t mode the default on emacs/dumb terminals
+     Branch: perl
+           ! Changes utils/perldoc.PL
+____________________________________________________________________________
 [  3455] By: gsar                                  on 1999/05/24  05:05:19
         Log: return 0 rather than "" when scalar grep has nothing to iterate
              on (brings behavior in line with documentation)
