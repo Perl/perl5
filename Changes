@@ -79,6 +79,196 @@ Version 5.005_55        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  2858] By: gsar                                  on 1999/02/11  07:10:59
+        Log: remove dup hunk
+     Branch: maint-5.005/perl
+           ! pod/perldelta.pod
+____________________________________________________________________________
+[  2857] By: gsar                                  on 1999/02/11  07:09:20
+        Log: sync with parent version of perldelta.pod
+     Branch: maint-5.005/perl
+          !> pod/perldelta.pod
+____________________________________________________________________________
+[  2856] By: gsar                                  on 1999/02/11  07:07:39
+        Log: integrate perldelta changes from maint-5.005
+     Branch: perl
+          !> pod/perl5005delta.pod
+____________________________________________________________________________
+[  2855] By: gsar                                  on 1999/02/11  06:31:50
+        Log: applied suggested patch; added tests
+             From: Adam Krolnik <adamk@gypsy.cyrix.com>
+             Date: Sat, 12 Dec 98 15:30:18 -0600
+             Message-Id: <9812122130.AA03717@gypsy.eng.cyrix.com>
+             Subject: Range operation doesn't handle IV_MAX
+     Branch: perl
+           ! pp_ctl.c t/op/range.t
+____________________________________________________________________________
+[  2854] By: gsar                                  on 1999/02/11  05:00:55
+        Log: compatibility fix: magic non-propagation in foreach implicit localization
+     Branch: perl
+           ! pp_ctl.c t/op/local.t win32/config.gc
+____________________________________________________________________________
+[  2853] By: gsar                                  on 1999/02/11  00:33:06
+        Log: integrate change#2816 from mainline
+             
+             minor bug in dumping blessed subrefs
+     Branch: maint-5.005/perl
+          !> ext/Data/Dumper/Dumper.pm
+____________________________________________________________________________
+[  2852] By: gsar                                  on 1999/02/10  23:17:49
+        Log: fair warning about -Dusethreads
+     Branch: maint-5.005/perl
+           ! Configure INSTALL README.threads
+____________________________________________________________________________
+[  2851] By: jhi                                   on 1999/02/10  23:00:39
+        Log: Snapshot of the ongoing AVAILABILITY discussion.
+     Branch: maint-5.005/perl
+           ! pod/perl.pod
+____________________________________________________________________________
+[  2850] By: jhi                                   on 1999/02/10  16:07:32
+        Log: OS390 and Windows AVAILABILITY entries enhanced.
+     Branch: maint-5.005/perl
+           ! pod/perl.pod
+____________________________________________________________________________
+[  2849] By: jhi                                   on 1999/02/10  12:39:46
+        Log: AS/400 and Mac were not described right.
+     Branch: maint-5.005/perl
+           ! pod/perl.pod
+____________________________________________________________________________
+[  2848] By: jhi                                   on 1999/02/10  09:13:49
+        Log: Added AVAILABILITY section.
+     Branch: maint-5.005/perl
+           ! pod/perl.pod
+____________________________________________________________________________
+[  2847] By: jhi                                   on 1999/02/09  19:13:28
+        Log: Integrate from mainperl.
+     Branch: cfgperl
+	  !> pod/perldelta.pod pod/perlfunc.pod pod/perlobj.pod
+          !> pod/perlop.pod pp.c t/op/method.t t/op/pack.t
+____________________________________________________________________________
+[  2846] By: gsar                                  on 1999/02/09  13:53:28
+        Log: a modified version of suggested patch for pack template 'Z'; added docs
+             From: "Valeriy E. Ushakov" <uwe@ptc.spbu.ru>
+             Date: Mon, 16 Jun 1997 03:00:31 +0400 (MSD)
+             Message-ID: <%lOHpzIuGV@snark.ptc.spbu.ru>
+             Subject: lack of pack/unpack letter with useful symmetry for C null delimited strings
+     Branch: perl
+           ! pod/perldelta.pod pod/perlfunc.pod pp.c t/op/pack.t
+____________________________________________________________________________
+[  2845] By: gsar                                  on 1999/02/09  00:03:26
+        Log: clarify docs for change#2835
+     Branch: perl
+           ! pod/perldelta.pod pod/perlop.pod
+____________________________________________________________________________
+[  2844] By: gsar                                  on 1999/02/08  23:40:57
+        Log: addendum to change#2823
+             From: Stephen McCamant <smccam@uclink4.berkeley.edu>
+             Date: Sun, 13 Dec 1998 16:06:04 -0800 (PST)
+             Message-ID: <13940.21805.470054.299@fre-76-120.reshall.berkeley.edu>
+             Subject: [PATCH] Docs and tests for method-call syntax
+     Branch: perl
+           ! pod/perlobj.pod t/op/method.t
+____________________________________________________________________________
+[  2843] By: jhi                                   on 1999/02/08  21:06:28
+        Log: Ultrix mmap tidbit.
+     Branch: cfgperl
+           ! hints/ultrix_4.sh
+____________________________________________________________________________
+[  2842] By: jhi                                   on 1999/02/08  20:22:55
+        Log: Integrate from mainperl.
+     Branch: cfgperl
+          +> t/op/subst_wamp.t
+          !> (integrate 35 files)
+____________________________________________________________________________
+[  2841] By: jhi                                   on 1999/02/08  18:23:26
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             To: Mailing list Perl5 <perl5-porters@perl.org>
+             Subject: [PATCH 5.005_53] s/\ba/./g was over-optimized
+             Date: Sun, 7 Feb 1999 17:25:22 -0500
+             Message-ID: <19990207172522.B894@monk.mps.ohio-state.edu>
+     Branch: cfgperl
+           + t/op/subst_amp.t
+           ! MANIFEST regcomp.c t/op/subst.t
+____________________________________________________________________________
+[  2840] By: jhi                                   on 1999/02/08  18:16:54
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             To: Mailing list Perl5 <perl5-porters@perl.org>
+             Subject: [PATCH 5.005_53] Fix list-context //g with zero-length matches
+             Date: Sun, 7 Feb 1999 17:00:10 -0500
+             Message-ID: <19990207170009.A894@monk.mps.ohio-state.edu>
+     Branch: cfgperl
+           ! pp_hot.c t/op/pat.t
+____________________________________________________________________________
+[  2839] By: jhi                                   on 1999/02/08  17:25:30
+        Log: A require was missing.
+     Branch: cfgperl
+           ! t/lib/h2ph.pht
+____________________________________________________________________________
+[  2838] By: jhi                                   on 1999/02/08  16:38:41
+        Log: Bring in the change #2809 (the Configure part has been
+             modified rather a lot since the #2809, though.)
+     Branch: cfgperl
+           ! Configure utils/h2ph.PL
+____________________________________________________________________________
+[  2837] By: jhi                                   on 1999/02/08  14:51:39
+        Log: Fix typo introduced in change #2836.
+     Branch: maint-5.005/perl
+           ! Configure
+____________________________________________________________________________
+[  2836] By: jhi                                   on 1999/02/08  14:44:31
+        Log: Augment change #2809, the h2ph-*symbols patch.
+     Branch: maint-5.005/perl
+           ! Configure t/lib/h2ph.pht
+____________________________________________________________________________
+[  2835] By: gsar                                  on 1999/02/08  14:40:23
+        Log: make qw() into a true list at compile time (slightly modified
+             variant of patch suggested by Tom Hughes <tom@compton.demon.co.uk>)
+     Branch: perl
+           ! pod/perldelta.pod pod/perlop.pod pp_hot.c toke.c
+____________________________________________________________________________
+[  2834] By: gsar                                  on 1999/02/08  13:23:16
+        Log: make safesysmalloc() etc., always available; safemalloc() et al are
+             now macros that point to the right malloc; fix various places in
+             sources that need to always use safesysmalloc() et al
+     Branch: perl
+	   ! embed.h embedvar.h global.sym iperlsys.h mg.c objXSUB.h perl.h
+           ! perl_exp.SH proto.h util.c vms/gen_shrfls.pl win32/makedef.pl
+____________________________________________________________________________
+[  2833] By: gsar                                  on 1999/02/08  10:56:16
+        Log: remove spurious #endif in last change
+     Branch: perl
+           ! perl.h
+____________________________________________________________________________
+[  2832] By: gsar                                  on 1999/02/08  10:34:55
+        Log: make EMBEDMYMALLOC the default and provide PERL_POLLUTE_MALLOC to let
+             them ask for insanity (untested)
+     Branch: perl
+	   ! INSTALL Todo-5.005 ext/SDBM_File/sdbm/sdbm.h hints/machten.sh
+	   ! hints/next_3.sh hints/next_4.sh hints/qnx.sh iperlsys.h
+           ! malloc.c perl.h pod/perldelta.pod pod/perlguts.pod sv.c
+____________________________________________________________________________
+[  2831] By: jhi                                   on 1999/02/08  08:33:33
+        Log: Update vms/subconfigure.com along the lines of change #2829.
+     Branch: cfgperl
+           ! vms/subconfigure.com
+____________________________________________________________________________
+[  2830] By: gsar                                  on 1999/02/08  00:19:46
+        Log: integrate cfgperl changes into mainline
+     Branch: perl
+	  +> ext/DynaLoader/dl_beos.xs ext/GDBM_File/hints/sco.pl
+          +> lib/File/PathConvert.pm pod/perlthrtut.pod
+           ! Changes
+          !> (integrate 93 files)
+____________________________________________________________________________
+[  2829] By: jhi                                   on 1999/02/07  23:49:46
+        Log: Configure update.
+             
+             Probe for mmap() et alia.
+             The *cc*symbols patch (just Configure, no h2ph).
+     Branch: cfgperl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+           ! config_h.SH perl.h
+____________________________________________________________________________
 [  2828] By: gsar                                  on 1999/02/07  23:38:47
         Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
              Date: Sun, 7 Feb 1999 17:25:22 -0500
