@@ -504,7 +504,7 @@ C<ST(1)>.
 
 Default values for XSUB arguments can be specified by placing an
 assignment statement in the parameter list.  The default value may
-be a number, a string or the special string C<undef>.  Defaults should
+be a number, a string or the special string C<NO_INIT>.  Defaults should
 always be used on the right-most parameters only.
 
 To allow the XSUB for rpcb_gettime() to have a default host
@@ -1317,7 +1317,7 @@ methods will be called as this:
 You could also write a single get/set method using an optional argument:
 
      int
-     color::blue( val = undef )
+     color::blue( val = NO_INIT )
          int val
          PROTOTYPE $;$
          CODE:
