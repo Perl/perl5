@@ -152,7 +152,7 @@ ok (close RIGHT, "close right");
 # guarantee that the stack won't drop a UDP packet, even if it is for localhost.
 
 SKIP: {
-  skip "No usable SOCK_DGRAM", 24 if ($^O eq 'MSWin32');
+  skip "No usable SOCK_DGRAM for socketpair", 24 if ($^O =~ /^(MSWin32|os2)\z/);
 
 
 ok (socketpair (LEFT, RIGHT, AF_UNIX, SOCK_DGRAM, PF_UNSPEC),

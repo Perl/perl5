@@ -2939,3 +2939,9 @@ my_getpwnam (__const__ char *n)
 {
     return passw_wrap(getpwnam(n));
 }
+
+char *
+gcvt_os2 (double value, int digits, char *buffer)
+{
+  return gcvt (value, digits, buffer);
+}

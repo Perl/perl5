@@ -654,7 +654,7 @@ sperl$(OBJ_EXT): perl.c $(h)
 #	test -d lib/auto || mkdir lib/auto
 #
 .PHONY: preplibrary
-preplibrary: miniperl$(EXE_EXT) lib/Config.pm lib/lib.pm
+preplibrary: miniperl$(EXE_EXT) lib/Config.pm lib/lib.pm $(PREPLIBRARY_LIBPERL)
 	@sh ./makedir lib/auto
 	@echo "	AutoSplitting perl library"
 	$(LDLIBPTH) ./miniperl -Ilib -e 'use AutoSplit; \

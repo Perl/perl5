@@ -3,6 +3,9 @@
 require 5.003;	# keep this compatible, an old perl is all we may have before
                 # we build the new one
 
+BEGIN {  push @INC, 'lib' }	# glob() below requires File::Glob
+
+
 #
 # See database of global and static function prototypes at the __END__.
 # This is used to generate prototype headers under various configurations,

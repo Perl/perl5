@@ -310,6 +310,7 @@ int my_rmdir (__const__ char *);
 struct passwd *my_getpwent (void);
 void my_setpwent (void);
 void my_endpwent (void);
+char *gcvt_os2(double value, int digits, char *buffer);
 
 struct group *getgrent (void);
 void setgrent (void);

@@ -281,6 +281,10 @@ close ON or die "Error closing opnames.h: $!";
 chmod 0600, 'opcode.h';  # required by dosish filesystems
 chmod 0600, 'opnames.h'; # required by dosish filesystems
 
+# Some dosish systems can't rename over an existing file:
+unlink		"$_-old"	for qw(opcode.h opnames.h);
+rename $_,	"$_-old"	for qw(opcode.h opnames.h);
+
 rename $opcode_new, 'opcode.h' or die "renaming opcode.h: $!\n";
 rename $opname_new, 'opnames.h' or die "renaming opnames.h: $!\n";
 
@@ -328,6 +332,10 @@ close PPSYM or die "Error closing pp.sym: $!";
 
 chmod 0600, 'pp_proto.h'; # required by dosish filesystems
 chmod 0600, 'pp.sym';     # required by dosish filesystems
+
+# Some dosish systems can't rename over an existing file:
+unlink		"$_-old"	for qw(pp_proto.h pp.sym);
+rename $_,	"$_-old"	for qw(pp_proto.h pp.sym);
 
 rename $pp_proto_new, 'pp_proto.h' or die "rename pp_proto.h: $!\n";
 rename $pp_sym_new, 'pp.sym' or die "rename pp.sym: $!\n";
