@@ -344,7 +344,7 @@ PP(pp_print)
     if (!(io = GvIO(gv))) {
 	if (dowarn) {
 	    SV* sv = sv_newmortal();
-            gv_fullname(sv, gv, Nullch);
+            gv_fullname3(sv, gv, Nullch);
             warn("Filehandle %s never opened", SvPV(sv,na));
         }
 
@@ -354,7 +354,7 @@ PP(pp_print)
     else if (!(fp = IoOFP(io))) {
 	if (dowarn)  {
 	    SV* sv = sv_newmortal();
-            gv_fullname(sv, gv, Nullch);
+            gv_fullname3(sv, gv, Nullch);
 	    if (IoIFP(io))
 		warn("Filehandle %s opened only for input", SvPV(sv,na));
 	    else
@@ -1166,7 +1166,9 @@ do_readline()
 	IoLINES(io)++;
 	XPUSHs(sv);
 	if (tainting) {
-	    tainted = TRUE;
+	    /* This should not be marked tainted if the fp is marked clean */
+	    if (!(IoFLAGS(io) & IOf_UNTAINT))
+		tainted = TRUE;
 	    SvTAINT(sv); /* Anything from the outside world...*/
 	}
 	if (type == OP_GLOB) {
@@ -1746,7 +1748,7 @@ PP(pp_entersub)
 		goto retry;
 	    }
 	    tmpstr = sv_newmortal();
-	    gv_efullname(tmpstr, gv, Nullch);
+	    gv_efullname3(tmpstr, gv, Nullch);
 	    ngv = gv_fetchmethod(GvESTASH(gv), "AUTOLOAD");
 	    if (ngv && ngv != gv && (cv = GvCV(ngv))) {	/* One more chance... */
 		gv = ngv;
@@ -1772,7 +1774,7 @@ PP(pp_entersub)
 	    sv_setsv(sv, newRV((SV*)cv));
 	}
 	else {
-	    gv_efullname(sv, gv, Nullch);
+	    gv_efullname3(sv, gv, Nullch);
 	}
 	cv = GvCV(DBsub);
 	if (CvXSUB(cv)) curcopdb = curcop;
