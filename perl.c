@@ -472,8 +472,7 @@ perl_destruct(register PerlInterpreter *sv_interp)
     envgv = Nullgv;
     siggv = Nullgv;
     incgv = Nullgv;
-    errhv = Nullhv;
-    errsv = Nullsv;
+    errgv = Nullgv;
     argvgv = Nullgv;
     argvoutgv = Nullgv;
     stdingv = Nullgv;
@@ -1791,8 +1790,8 @@ init_main_stash(void)
     incgv = gv_HVadd(gv_AVadd(gv_fetchpv("INC",TRUE, SVt_PVAV)));
     GvMULTI_on(incgv);
     defgv = gv_fetchpv("_",TRUE, SVt_PVAV);
-    errsv = newSVpv("", 0);
-    errhv = newHV();
+    errgv = gv_HVadd(gv_fetchpv("@", TRUE, SVt_PV));
+    GvMULTI_on(errgv);
     (void)form("%240s","");	/* Preallocate temp - for immediate signals. */
     sv_grow(ERRSV, 240);	/* Preallocate - for immediate signals. */
     sv_setpvn(ERRSV, "", 0);
@@ -2885,18 +2884,18 @@ call_list(I32 oldscope, AV *list)
 		SV* atsv = ERRSV;
 		PUSHMARK(stack_sp);
 		perl_call_sv((SV*)cv, G_EVAL|G_DISCARD);
-		(void)SvPV(errsv, len);
+		(void)SvPV(atsv, len);
 		if (len) {
 		    JMPENV_POP;
 		    curcop = &compiling;
 		    curcop->cop_line = oldline;
 		    if (list == beginav)
-			sv_catpv(errsv, "BEGIN failed--compilation aborted");
+			sv_catpv(atsv, "BEGIN failed--compilation aborted");
 		    else
-			sv_catpv(errsv, "END failed--cleanup aborted");
+			sv_catpv(atsv, "END failed--cleanup aborted");
 		    while (scopestack_ix > oldscope)
 			LEAVE;
-		    croak("%s", SvPVX(errsv));
+		    croak("%s", SvPVX(atsv));
 		}
 	    }
 	    break;

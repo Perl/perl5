@@ -4297,7 +4297,7 @@ PP(pp_lock)
 
 PP(pp_threadsv)
 {
-    dSP;
+    djSP;
 #ifdef USE_THREADS
     SV **svp = av_fetch(thr->magicals, op->op_targ, FALSE);
     if (!svp)

@@ -1878,8 +1878,7 @@ IEXT I32	Imaxscream IINIT(-1);
 IEXT SV *	Ilastscream;
 
 /* shortcuts to misc objects */
-IEXT HV *	Ierrhv;
-IEXT SV *	Ierrsv;
+IEXT GV *	Ierrgv;
 
 /* shortcuts to debugging objects */
 IEXT GV *	IDBgv;

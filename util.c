@@ -2407,8 +2407,7 @@ condpair_magic(SV *sv)
  * thread calling new_struct_thread) clearly satisfies this constraint.
  */
 struct thread *
-new_struct_thread(t)
-struct thread *t;
+new_struct_thread(struct thread *t)
 {
     struct thread *thr;
     SV *sv;
@@ -2488,122 +2487,6 @@ struct thread *t;
 
 #ifdef HAVE_THREAD_INTERN
     init_thread_intern(thr);
-#else
-    thr->self = pthread_self();
-#endif /* HAVE_THREAD_INTERN */
-    return thr;
-}
-
-/*
- * Make a new perl thread structure using t as a prototype. Some of the
- * fields for the new thread are copied from the prototype thread, t,
- * so t should not be running in perl at the time this function is
- * called. The use by ext/Thread/Thread.xs in core perl (where t is the
- * thread calling new_struct_thread) clearly satisfies this constraint.
- */
-struct thread *
-new_struct_thread(struct thread *t)
-{
-    struct thread *thr;
-    SV *sv;
-    SV **svp;
-    I32 i;
-
-    sv = newSVpv("", 0);
-    SvGROW(sv, sizeof(struct thread) + 1);
-    SvCUR_set(sv, sizeof(struct thread));
-    thr = (Thread) SvPVX(sv);
-    /* debug */
-    memset(thr, 0xab, sizeof(struct thread));
-    markstack = 0;
-    scopestack = 0;
-    savestack = 0;
-    retstack = 0;
-    dirty = 0;
-    localizing = 0;
-    /* end debug */
-
-    thr->oursv = sv;
-    init_stacks(ARGS);
-
-    curcop = &compiling;
-    thr->cvcache = newHV();
-    thr->magicals = newAV();
-    thr->specific = newAV();
-    thr->flags = THRf_R_JOINABLE;
-    MUTEX_INIT(&thr->mutex);
-
-    curcop = t->Tcurcop;       /* XXX As good a guess as any? */
-    defstash = t->Tdefstash;   /* XXX maybe these should */
-    curstash = t->Tcurstash;   /* always be set to main? */
-
-
-    /* top_env needs to be non-zero. It points to an area
-       in which longjmp() stuff is stored, as C callstack
-       info there at least is thread specific this has to
-       be per-thread. Otherwise a 'die' in a thread gives
-       that thread the C stack of last thread to do an eval {}!
-       See comments in scope.h    
-       Initialize top entry (as in perl.c for main thread)
-     */
-    start_env.je_prev = NULL;
-    start_env.je_ret = -1;
-    start_env.je_mustcatch = TRUE;
-    top_env  = &start_env;
-
-    runlevel = 0;		/* Let entering sub do increment */
-
-    in_eval = FALSE;
-    restartop = 0;
-
-    tainted = t->Ttainted;
-    curpm = t->Tcurpm;         /* XXX No PMOP ref count */
-    nrs = newSVsv(t->Tnrs);
-    rs = newSVsv(t->Trs);
-    last_in_gv = (GV*)SvREFCNT_inc(t->Tlast_in_gv);
-    ofslen = t->Tofslen;
-    ofs = savepvn(t->Tofs, ofslen);
-    defoutgv = (GV*)SvREFCNT_inc(t->Tdefoutgv);
-    chopset = t->Tchopset;
-    formtarget = newSVsv(t->Tformtarget);
-    bodytarget = newSVsv(t->Tbodytarget);
-    toptarget = newSVsv(t->Ttoptarget);
-    
-    /* Initialise all per-thread magicals that the template thread used */
-    svp = AvARRAY(t->magicals);
-    for (i = 0; i <= AvFILL(t->magicals); i++, svp++) {
-	if (*svp && *svp != &sv_undef) {
-	    SV *sv = newSVsv(*svp);
-	    av_store(thr->magicals, i, sv);
-	    sv_magic(sv, 0, 0, &per_thread_magicals[i], 1);
-	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
-				  "new_struct_thread: copied magical %d %p->%p\n",i,
-                                  t, thr));
-	}
-    } 
-
-    MUTEX_LOCK(&threads_mutex);
-    nthreads++;
-    thr->tid = ++threadnum;
-    thr->next = t->next;
-    thr->prev = t;
-    t->next = thr;
-    thr->next->prev = thr;
-    MUTEX_UNLOCK(&threads_mutex);
-
-/*
- * This is highly suspect - new_struct_thread is executed
- * by creating thread so pthread_self() or equivalent
- * is parent thread not the child.
- * In particular this should _NOT_ change dTHR value of calling thread.
- * 
- * But a good place to have a 'hook' for filling in port-private
- * fields of thr. 
- */
-#ifdef INIT_THREAD_INTERN
-    INIT_THREAD_INTERN(thr);
-#else
-    thr->self = pthread_self();
 #endif /* HAVE_THREAD_INTERN */
     return thr;
 }
