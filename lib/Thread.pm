@@ -316,7 +316,8 @@ BEGIN {
 	    no strict 'refs';
 	    *{"Thread::$m"} = \&{"threads::shared::${m}_enabled"};
 	}
-	unimplement(qw(list done eval flags));
+	# trying to unimplement eval gives redefined warning
+	unimplement(qw(list done flags));
     } elsif ($othreads) {
 	XSLoader::load 'Thread';
 	unimplement(qw(unlock));
