@@ -1044,7 +1044,7 @@ use strict;
 my $r = Foo->new(8);
 $r = Foo->new(0);
 
-test(($r || 0) == 0); # 221
+test(($r || 0) == 0); # 222
 
 # Last test is:
-sub last {221}
+sub last {222}
