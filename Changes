@@ -31,6 +31,161 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[  9817] By: jhi                                   on 2001/04/24  14:09:17
+        Log: Subject: Re: [PATCH t/lib/1_compile.t] Skipping known tested libraries 
+             From: "Philip Newton" <pnewton@gmx.de>
+             Date: Tue, 24 Apr 2001 12:58:12 +0200
+             Message-ID: <3AE57864.8304.B77A0A@localhost> 
+             
+             plus add CPAN to the list of modules that have their own tests.
+     Branch: perl
+	   ! t/lib/1_compile.t
+____________________________________________________________________________
+[  9816] By: jhi                                   on 2001/04/24  14:07:03
+        Log: Subject: Re: [PATCH t/lib/1_compile.t] Skipping known tested libraries
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sat, 21 Apr 2001 22:35:00 +0100
+             Message-ID: <20010421223500.N2946@blackrider.blackstar.co.uk>
+     Branch: perl
+	   ! t/lib/1_compile.t
+____________________________________________________________________________
+[  9815] By: jhi                                   on 2001/04/24  13:54:32
+        Log: Subject: Re: [ID 20010423.006] Test failed in perl@9794
+             From: Robin Houston <robin@kitsite.com>
+             Date: Tue, 24 Apr 2001 15:51:18 +0100
+             Message-ID: <20010424155118.A22913@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  9814] By: jhi                                   on 2001/04/24  13:17:34
+        Log: Subject: Re: [ID 20010421.010] Perl 5.6.1 on Unixware 7
+             From: Bill Glicker <billg@burrelles.com>
+             Date: Tue, 24 Apr 2001 09:22:40 -0400 (EDT)
+             Message-ID: <Pine.SCO.4.30.0104240918160.13514-100000@laura.burrelles.com>
+     Branch: perl
+	   ! hints/svr5.sh
+____________________________________________________________________________
+[  9813] By: jhi                                   on 2001/04/24  12:54:23
+        Log: Prevent path disclosure (probing for existence of filenames)
+             using suidperl; bug id 20010322.218.
+     Branch: perl
+	   ! perl.c pod/perldiag.pod
+____________________________________________________________________________
+[  9812] By: jhi                                   on 2001/04/24  12:08:36
+        Log: Retract #9811.
+     Branch: perl
+	   ! ext/POSIX/POSIX.xs
+____________________________________________________________________________
+[  9811] By: jhi                                   on 2001/04/24  11:57:35
+        Log: (Retracted by #9812.)
+     Branch: perl
+	   ! ext/POSIX/POSIX.xs
+____________________________________________________________________________
+[  9810] By: jhi                                   on 2001/04/24  03:32:35
+        Log: Fix for 20010219.013, "perlio perl -we tell goes SEGV".
+     Branch: perl
+	   ! util.c
+____________________________________________________________________________
+[  9809] By: jhi                                   on 2001/04/24  03:16:13
+        Log: The Math::BigFloat::import() was broken.
+             (Fixes bug id 20010422.002.)
+     Branch: perl
+	   ! lib/Math/BigFloat.pm
+____________________________________________________________________________
+[  9808] By: jhi                                   on 2001/04/24  01:11:40
+        Log: Additional dependencies; should help for parallel makes
+             not to fail on missing lib/lib.pm or lib/re.pm.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  9807] By: jhi                                   on 2001/04/24  00:57:01
+        Log: Update the test failure disclaimer.
+     Branch: perl
+	   ! t/pragma/warn/pp_hot
+____________________________________________________________________________
+[  9806] By: jhi                                   on 2001/04/24  00:54:04
+        Log: Add make target "install-all" which is alias for "install"
+             to cater for case-preserving filesystems like HFS+.
+     Branch: perl
+	   ! INSTALL Makefile.SH
+____________________________________________________________________________
+[  9805] By: jhi                                   on 2001/04/24  00:47:28
+        Log: Subject: Re: 5.6.1 darwin Configure fails to extract Makefile
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Wed, 11 Apr 2001 10:43:52 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10104111038480.113314-100000@aspara.forte.com>
+             
+             (Ken William's message forwarded from macosx@perl.org)
+     Branch: perl
+	   ! hints/darwin.sh
+____________________________________________________________________________
+[  9804] By: jhi                                   on 2001/04/23  23:57:35
+        Log: Cut-and-pasto.
+     Branch: perl
+	   ! perlio.c
+____________________________________________________________________________
+[  9803] By: jhi                                   on 2001/04/23  23:52:25
+        Log: More PerlIO robustness.
+     Branch: perl
+	   ! perlio.c
+____________________________________________________________________________
+[  9802] By: jhi                                   on 2001/04/23  23:43:35
+        Log: Make the "STD* opened only for ..." errors more consistent.
+     Branch: perl
+	   ! doio.c
+____________________________________________________________________________
+[  9801] By: jhi                                   on 2001/04/23  23:34:26
+        Log: Test case for #9800.
+     Branch: perl
+	   ! t/op/misc.t
+____________________________________________________________________________
+[  9800] By: jhi                                   on 2001/04/23  23:14:43
+        Log: Avoid coredump on 'close STDERR; die' by making
+             the PerlIO calls more robust.  Also use SETERRNO()
+             instead of errno = to be more VMS-ready.
+     Branch: perl
+	   ! perlio.c
+____________________________________________________________________________
+[  9799] By: jhi                                   on 2001/04/23  21:41:10
+        Log: Subject: test for ID 20010423.002
+             From: Robin Houston <robin@kitsite.com>
+             Date: Mon, 23 Apr 2001 16:52:21 +0100
+             Message-ID: <20010423165221.A20739@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! t/op/avhv.t
+____________________________________________________________________________
+[  9798] By: jhi                                   on 2001/04/23  21:40:07
+        Log: Subject: patch to installperl (change warn to print STDERR in sub yn)
+             From: David Dyck <dcd@tc.fluke.com>
+             Date: Mon, 23 Apr 2001 10:19:46 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.33.0104231018270.10985-100000@dd.tc.fluke.com>
+     Branch: perl
+	   ! installperl
+____________________________________________________________________________
+[  9797] By: jhi                                   on 2001/04/23  21:37:56
+        Log: Subject: [PATCH] Implement Cwd::abs_path in XS
+             From: Benjamin Sugars <bsugars@canoe.ca>
+             Date: Mon, 23 Apr 2001 11:59:48 -0400 (EDT)
+             Message-ID: <Pine.LNX.4.21.0104231151340.3238-100000@marmot.rim.canoe.ca>
+     Branch: perl
+	   ! ext/Cwd/Cwd.xs lib/Cwd.pm
+____________________________________________________________________________
+[  9796] By: jhi                                   on 2001/04/23  21:29:24
+        Log: Synchronize h2xs and pod2man some more on the documentation
+             templates they propose.
+     Branch: perl
+	   ! pod/pod2man.PL utils/h2xs.PL
+____________________________________________________________________________
+[  9795] By: jhi                                   on 2001/04/23  17:30:40
+        Log: Add one more naughty test for base64; make encoding logic cleaner.
+     Branch: perl
+	   ! t/lib/mimeb64.t
+____________________________________________________________________________
+[  9794] By: jhi                                   on 2001/04/23  13:51:32
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  9793] By: jhi                                   on 2001/04/23  13:44:18
         Log: Duplicate lines.
      Branch: perl
