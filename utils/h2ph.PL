@@ -391,6 +391,7 @@ if ($opt_e && (scalar(keys %bad_file) > 0)) {
 exit $Exit;
 
 sub expr {
+    $new = '"(assembly code)"' and return if /\b__asm__\b/; # freak out.
     my $joined_args;
     if(keys(%curargs)) {
 	$joined_args = join('|', keys(%curargs));
