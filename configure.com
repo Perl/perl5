@@ -4948,15 +4948,16 @@ $ kill_by_sigprc = "undef"
 $ OS
 $ WS "#include <stdio.h>"
 $ WS "#include <signal.h>"
+$ WS "#include <unistd.h>"
 $ WS "void handler(int s) { printf(""%d\n"",s); } "
 $ WS "main(){"
 $ WS "    printf(""0"");"
-$ WS "    signal(1,handler); kill(0,1);"
+$ WS "    signal(1,handler); kill(getpid(),1);"
 $ WS "}"
 $ CS
 $ ON ERROR THEN CONTINUE
 $ GOSUB compile
-$ IF tmp .NES. "0"
+$ IF tmp .NES. "01"
 $ THEN 
 $   echo4 "Yes, it does." 
 $   echo4 "Checking whether we can use SYS$SIGPRC instead"
