@@ -31,6 +31,12 @@ in F<?:\JUST_ADD\view.exe>. This gives one an access to EMX's
 F<.INF> docs as well (text form is available in F</emx/doc> in 
 EMX's distribution).
 
+Note that if you have F<lynx.exe> installed, you can follow WWW links
+from this document in F<.INF> format. If you have EMX docs installed 
+correctly, you can follow library links (you need to have C<view emxbook>
+working by setting C<EMXBOOK> environment variable as it is described
+in EMX docs).
+
 =cut
 
 Contents
@@ -176,8 +182,8 @@ under earlier versions of EMX, but this is not tested.
 
 One can get different parts of EMX from, say
 
-  ftp://ftp.cdrom.com/pub/os2/emx0.9c/
-  ftp://hobbes.nmsu.edu/os2/unix/gnu/
+  ftp://ftp.cdrom.com/pub/os2/emx09c/
+  ftp://hobbes.nmsu.edu/os2/unix/emx09c/
 
 The runtime component should have the name F<emxrt.zip>.
 
@@ -202,14 +208,15 @@ can have Perl development environment under DOS.
 
 One can get RSX from, say
 
-  ftp://ftp.cdrom.com/pub/os2/emx0.9c/contrib
+  ftp://ftp.cdrom.com/pub/os2/emx09c/contrib
   ftp://ftp.uni-bielefeld.de/pub/systems/msdos/misc
+  ftp://ftp.leo.org/pub/comp/os/os2/leo/devtools/emx+gcc/contrib
 
 Contact the author on C<rainer@mathematik.uni-bielefeld.de>.
 
 The latest F<sh.exe> with DOS hooks is available at
 
-  ftp://ftp.math.ohio-state.edu/pub/users/ilya/os2/sh_dos.exe
+  ftp://ftp.math.ohio-state.edu/pub/users/ilya/os2/sh_dos.zip
 
 =item HPFS
 
@@ -232,7 +239,7 @@ For best results use EMX pdksh. The soon-to-be-available standard
 binary (5.2.12?) runs under DOS (with L<RSX>) as well, meanwhile use
 the binary from
 
-  ftp://ftp.math.ohio-state.edu/pub/users/ilya/os2/sh_dos.exe
+  ftp://ftp.math.ohio-state.edu/pub/users/ilya/os2/sh_dos.zip
 
 =back
 
@@ -652,10 +659,10 @@ check use
 
 Possible locations to get this from are
 
-  ftp://hobbes.nmsu.edu/os2/unix/gnu/
+  ftp://hobbes.nmsu.edu/os2/unix/
   ftp://ftp.cdrom.com/pub/os2/unix/
   ftp://ftp.cdrom.com/pub/os2/dev32/
-  ftp://ftp.cdrom.com/pub/os2/emx0.9c/
+  ftp://ftp.cdrom.com/pub/os2/emx09c/
 
 
 Make sure that no copies or perl are currently running.  Later steps
@@ -1006,7 +1013,7 @@ C<OS2::FTP>, are included into my ftp directory, mirrored on CPAN.
 
 =item C<File::Copy::syscopy>
 
-used by C<File::Copy::copy>, see L<File::Copy/copy>.
+used by C<File::Copy::copy>, see L<File::Copy>.
 
 =item C<DynaLoader::mod2fname>
 
@@ -1069,20 +1076,38 @@ eventually).
 
 =item
 
-Since <flock> is present in EMX, but is not functional, the same is
+Since L<flock(3)> is present in EMX, but is not functional, the same is
 true for perl. Here is the list of things which may be "broken" on
 EMX (from EMX docs):
 
-  - The functions recvmsg(), sendmsg(), and socketpair() are not
-    implemented.
-  - sock_init() is not required and not implemented.
-  - flock() is not yet implemented (dummy function).
-  - kill:
-      Special treatment of PID=0, PID=1 and PID=-1 is not implemented.
-  - waitpid:
+=over
+
+=item *
+
+The functions L<recvmsg(3)>, L<sendmsg(3)>, and L<socketpair(3)> are not
+implemented.
+
+=item *
+
+L<sock_init(3)> is not required and not implemented.
+
+=item *
+
+L<flock(3)> is not yet implemented (dummy function).
+
+=item *
+
+L<kill(3)>:  Special treatment of PID=0, PID=1 and PID=-1 is not implemented.
+
+=item *
+
+L<waitpid(3)>:
+
       WUNTRACED
 	      Not implemented.
       waitpid() is not implemented for negative values of PID.
+
+=back
 
 Note that C<kill -9> does not work with the current version of EMX.
 
