@@ -3,7 +3,7 @@
 # Andy Dougherty  <doughera@lafcol.lafayette.edu>
 # Based on input from lots of folks, especially
 # Dean Roehrich <roehrich@ironwood-fddi.cray.com>
-
+ 
 # See man vfork.
 usevfork=false
 
@@ -152,7 +152,7 @@ case "`${cc:-cc} -v 2>&1`" in
 
 NOTE: You are using GNU as(1).  GNU as(1) will not build Perl.
 You must arrange to use /usr/ccs/bin/as, perhaps by setting
-GCC_EXEC_PREFIX or by including -B/usr/ccs/bin in your cc command.
+GCC_EXEC_PREFIX or by including -B/usr/ccs/bin/ in your cc command.
 
 END
 	;;
@@ -166,7 +166,7 @@ END
 
 NOTE: You are using GNU ld(1).  GNU ld(1) will not build Perl.
 You must arrange to use /usr/ccs/bin/ld, perhaps by setting
-GCC_EXEC_PREFIX or by including -B/usr/ccs/bin in your cc command.
+GCC_EXEC_PREFIX or by including -B/usr/ccs/bin/ in your cc command.
 
 END
 	;;
