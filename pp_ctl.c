@@ -950,8 +950,7 @@ PP(pp_flop)
 	if (SvNIOKp(left) || !SvPOKp(left) ||
 	    SvNIOKp(right) || !SvPOKp(right) ||
 	    (looks_like_number(left) && *SvPVX(left) != '0' &&
-	     looks_like_number(right) && (*SvPVX(right) != '0' ||
-					  SvCUR(right) == 1)))
+	     looks_like_number(right)))
 	{
 	    if (SvNV(left) < IV_MIN || SvNV(right) > IV_MAX)
 		DIE(aTHX_ "Range iterator outside integer range");

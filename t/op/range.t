@@ -75,5 +75,7 @@ for my $x ("0"..-1) {
 print "ok 15\n";
 
 # [#18165] Should allow "-4".."0", broken by #4730. (AMS 20021031)
-print "not " unless 5 == (() = "-4".."0");
-print "ok 16\n";
+print join(":","-4".."0")      eq "-4:-3:-2:-1:0" ? "ok 16\n" : "not ok 16\n";
+print join(":","-4".."-0")     eq "-4:-3:-2:-1:0" ? "ok 17\n" : "not ok 17\n";
+print join(":","-4\n".."0\n")  eq "-4:-3:-2:-1:0" ? "ok 18\n" : "not ok 18\n";
+print join(":","-4\n".."-0\n") eq "-4:-3:-2:-1:0" ? "ok 19\n" : "not ok 19\n";
