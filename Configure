@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Dec 24 04:14:27 EET 2001 [metaconfig 3.0 PL70]
+# Generated on Mon Dec 24 20:13:53 EET 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1052,7 +1052,6 @@ useopcode=true
 : Trailing extension.  Override this in a hint file, if needed.
 : Extra object files, if any, needed on this platform.
 archobjs=''
-_exe="$_exe"
 archname=''
 : Possible local include directories to search.
 : Set locincpth to "" in a hint file to defeat local include searches.
