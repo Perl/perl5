@@ -3119,6 +3119,9 @@ S_init_perllib(pTHX)
     incpush(PRIVLIB_EXP, FALSE);
 #endif
 
+#if defined(WIN32)
+    incpush(SITELIB_EXP, TRUE);	/* XXX Win32 needs inc_version_list support */
+#else
 #ifdef SITELIB_EXP
     {
 	char *path = SITELIB_EXP;
@@ -3131,6 +3134,7 @@ S_init_perllib(pTHX)
 	    incpush(buf, TRUE);
 	}
     }
+#endif
 #endif
 #if defined(PERL_VENDORLIB_EXP)
 #if defined(WIN32) 
@@ -3227,6 +3231,12 @@ S_incpush(pTHX_ char *p, int addsubdirs)
 	    Perl_sv_setpvf(aTHX_ subdir, "%"SVf"/"PERL_FS_VER_FMT, libdir,
 			   (int)PERL_REVISION, (int)PERL_VERSION,
 			   (int)PERL_SUBVERSION);
+	    if (PerlLIO_stat(SvPVX(subdir), &tmpstatbuf) >= 0 &&
+		  S_ISDIR(tmpstatbuf.st_mode))
+		av_push(GvAVn(PL_incgv), newSVsv(subdir));
+
+	    /* .../archname if -d .../archname */
+	    Perl_sv_setpvf(aTHX_ subdir, "%"SVf"/%s", libdir, ARCHNAME);
 	    if (PerlLIO_stat(SvPVX(subdir), &tmpstatbuf) >= 0 &&
 		  S_ISDIR(tmpstatbuf.st_mode))
 		av_push(GvAVn(PL_incgv), newSVsv(subdir));
