@@ -54,7 +54,7 @@ is the recommended Unicode-aware way of saying
 U8 *
 Perl_uvuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 {
-    if (ckWARN_d(WARN_UTF8)) {
+    if (ckWARN(WARN_UTF8)) {
 	 if (UNICODE_IS_SURROGATE(uv) &&
 	     !(flags & UNICODE_ALLOW_SURROGATE))
 	      Perl_warner(aTHX_ WARN_UTF8, "UTF-16 surrogate 0x%04"UVxf, uv);
@@ -1285,16 +1285,14 @@ to the hash is by Perl_to_utf8_case().
  */
 
 UV
-Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp,char *normal, char *special)
+Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *normal, char *special)
 {
     UV uv;
 
     if (!*swashp)
         *swashp = swash_init("utf8", normal, &PL_sv_undef, 4, 0);
     uv = swash_fetch(*swashp, p, TRUE);
-    if (uv)
-	 uv = UNI_TO_NATIVE(uv);
-    else {
+    if (!uv) {
 	 HV *hv;
 	 SV *keysv;
 	 HE *he;
@@ -1307,6 +1305,7 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp,char *normal
 	      SV *val = HeVAL(he);
 	      char *s = SvPV(val, *lenp);
 	      U8 c = *(U8*)s;
+
 	      if (*lenp > 1 || UNI_IS_INVARIANT(c))
 		   Copy(s, ustrp, *lenp, U8);
 	      else {
@@ -1315,8 +1314,24 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp,char *normal
 		   ustrp[1] = UTF8_EIGHT_BIT_LO(c);
 		   *lenp = 2;
 	      }
+#ifdef EBCDIC
+	      {
+		   U8 tmpbuf[UTF8_MAXLEN_FOLD+1];
+		   U8 *d = tmpbuf;
+		   U8 *t, *tend;
+		   STRLEN tlen;
+
+		   for (t = ustrp, tend = t + *lenp; t < tend; t += tlen) {
+			UV c = utf8_to_uvchr(t, &tlen);
+			d = uvchr_to_utf8(d, UNI_TO_NATIVE(c));
+		   }
+		   *lenp = d - tmpbuf; 
+		   Copy(tmpbuf, ustrp, *lenp, U8);
+	      }
+#endif
 	      return utf8_to_uvchr(ustrp, 0);
 	 }
+	 uv  = NATIVE_TO_UNI(uv);
     }
     if (lenp)
        *lenp = UNISKIP(uv);
@@ -1792,6 +1807,9 @@ Perl_ibcmp_utf8(pTHX_ const char *s1, char **pe1, register UV l1, bool u1, const
 
      if ((e1 == 0 && f1 == 0) || (e2 == 0 && f2 == 0) || (f1 == 0 && f2 == 0))
 	  return 1; /* mismatch; possible infinite loop or false positive */
+
+     if (!u1 || !u2)
+	  natbuf[1] = 0; /* Need to terminate the buffer. */
 
      while ((e1 == 0 || p1 < e1) &&
 	    (f1 == 0 || p1 < f1) &&

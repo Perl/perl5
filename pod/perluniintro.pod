@@ -147,17 +147,17 @@ Unicode strings. Specifically, if all code points in the string are
 0xFF or less, Perl uses the native eight-bit character set.
 Otherwise, it uses UTF-8.
 
-A user of Perl does not normally need to know nor care how Perl happens
-to encodes its internal strings, but it becomes relevant when outputting
-Unicode strings to a stream without a discipline (one with the "default
-default").  In such a case, the raw bytes used internally (the native
-character set or UTF-8, as appropriate for each string) will be used,
-and if warnings are turned on, a "Wide character" warning will be issued
-if those strings contain a character beyond 0x00FF.
+A user of Perl does not normally need to know nor care how Perl
+happens to encodes its internal strings, but it becomes relevant when
+outputting Unicode strings to a stream without a discipline (one with
+the "default default").  In such a case, the raw bytes used internally
+(the native character set or UTF-8, as appropriate for each string)
+will be used, and a "Wide character" warning will be issued if those
+strings contain a character beyond 0x00FF.
 
 For example,
 
-      perl -w -e 'print "\x{DF}\n", "\x{0100}\x{DF}\n"'              
+      perl -e 'print "\x{DF}\n", "\x{0100}\x{DF}\n"'              
 
 produces a fairly useless mixture of native bytes and UTF-8, as well
 as a warning.
@@ -275,10 +275,10 @@ Normally, writing out Unicode data
 produces raw bytes that Perl happens to use to internally encode the
 Unicode string (which depends on the system, as well as what
 characters happen to be in the string at the time). If any of the
-characters are at code points 0x100 or above, you will get a warning
-if you use C<-w> or C<use warnings>. To ensure that the output is
-explicitly rendered in the encoding you desire (and to avoid the
-warning), open the stream with the desired encoding. Some examples:
+characters are at code points 0x100 or above, you will get a warning.
+To ensure that the output is explicitly rendered in the encoding you
+desire (and to avoid the warning), open the stream with the desired
+encoding. Some examples:
 
     open FH, ">:ucs2",      "file"
     open FH, ">:utf8",      "file";

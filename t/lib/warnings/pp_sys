@@ -83,9 +83,6 @@
     flock STDIN, 8;
     flock $a, 8;
 
-  The stat preceding lstat() wasn't an lstat %s	[pp_stat]
-    lstat(STDIN);
-
   warn(warn_nl, "stat");			[pp_stat]
 
   -T on closed filehandle %s
@@ -346,24 +343,6 @@ no warnings 'newline' ;
 stat "abc\ndef";
 EXPECT
 Unsuccessful stat on filename containing newline at - line 3.
-########
-# pp_sys.c [pp_stat]
-use Config; 
-BEGIN { 
-  if ($^O eq 'd_lstat') {
-    print <<EOM ;
-SKIPPED
-# lstat not present
-EOM
-    exit ;
-  } 
-}
-use warnings 'io' ;
-lstat(STDIN) ;
-no warnings 'io' ;
-lstat(STDIN) ;
-EXPECT
-The stat preceding lstat() wasn't an lstat at - line 13.
 ########
 # pp_sys.c [pp_fttext]
 use warnings qw(unopened closed) ;

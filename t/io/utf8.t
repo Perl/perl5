@@ -12,7 +12,7 @@ BEGIN {
 no utf8; # needed for use utf8 not griping about the raw octets
 
 $| = 1;
-print "1..26\n";
+print "1..31\n";
 
 open(F,"+>:utf8",'a');
 print F chr(0x100).'£';
@@ -186,7 +186,7 @@ if (ord('A') == 193) {
 close F;
 unlink('a');
 
-open F, ">a";
+open F, ">:utf8", "a";
 @a = map { chr(1 << ($_ << 2)) } 0..5; # 0x1, 0x10, .., 0x100000
 unshift @a, chr(0); # ... and a null byte in front just for fun
 print F @a;
@@ -216,11 +216,56 @@ for (@a) {
 close F;
 print "ok 26\n";
 
+{
+    # Check that warnings are on on I/O, and that they can be muffled.
+
+    local $SIG{__WARN__} = sub { $@ = shift };
+
+    undef $@;
+    open F, ">a";
+    print F chr(0x100);
+    close(F);
+
+    print $@ =~ /Wide character in print/ ? "ok 27\n" : "not ok 27\n";
+
+    undef $@;
+    open F, ">:utf8", "a";
+    print F chr(0x100);
+    close(F);
+
+    print defined $@ ? "not ok 28\n" : "ok 28\n";
+
+    undef $@;
+    open F, ">a";
+    binmode(F, ":utf8");
+    print F chr(0x100);
+    close(F);
+
+    print defined $@ ? "not ok 29\n" : "ok 29\n";
+
+    no warnings 'utf8';
+
+    undef $@;
+    open F, ">a";
+    print F chr(0x100);
+    close(F);
+
+    print defined $@ ? "not ok 30\n" : "ok 30\n";
+
+    use warnings 'utf8';
+
+    undef $@;
+    open F, ">a";
+    print F chr(0x100);
+    close(F);
+
+    print $@ =~ /Wide character in print/ ? "ok 31\n" : "not ok 31\n";
+}
+
 # sysread() and syswrite() tested in lib/open.t since Fnctl is used
 
 END {
     1 while unlink "a";
     1 while unlink "b";
 }
-
 

@@ -350,7 +350,9 @@ the special filehandle consisting of a solitary underline, then the stat
 structure of the previous file test (or stat operator) is used, saving
 a system call.  (This doesn't work with C<-t>, and you need to remember
 that lstat() and C<-l> will leave values in the stat structure for the
-symbolic link, not the real file.)  Example:
+symbolic link, not the real file.)  (Also, if the stat buffer was filled by
+a C<lstat> call, C<-T> and C<-B> will reset it with the results of C<stat _>).
+Example:
 
     print "Can do.\n" if -r $a || -w _ || -x _;
 

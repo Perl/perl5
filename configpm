@@ -249,7 +249,7 @@ sub config_sh {
 
 sub config_re {
     my $re = shift;
-    my @matches = ($config_sh =~ /^$re=.*\n/mg);
+    my @matches = grep /^$re=/, split /^/, $config_sh;
     @matches ? (print @matches) : print "$re: not found\n";
 }
 

@@ -66,7 +66,7 @@ sub import {
 	    $type = 'IO';
 	    $dscp = ":$1";
 	} else {
-	    $dscp = shift(@args);
+	    $dscp = shift(@args) || '';
 	}
 	my @val;
 	foreach my $layer (split(/\s+/,$dscp)) {
@@ -123,7 +123,7 @@ open - perl pragma to set default disciplines for input and output
     use open IO  => ":encoding(iso-8859-7)";
 
     use open IO  => ':locale';
-  
+
     use open ':utf8';
     use open ':locale';
     use open ':encoding(iso-8859-7)';

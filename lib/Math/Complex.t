@@ -16,7 +16,7 @@ use Math::Complex;
 
 use vars qw($VERSION);
 
-$VERSION = 1.91;
+$VERSION = 1.92;
 
 my ($args, $op, $target, $test, $test_set, $try, $val, $zvalue, @set, @val);
 
@@ -302,6 +302,42 @@ EOS
 }
 
 test_display_format();
+
+sub test_remake {
+    $test++;
+    push @script, <<EOS;
+    print "# remake 2+3i\n";
+    my \$z = cplx('2+3i');
+    print "not " unless \$z == Math::Complex->make(2,3);
+    print "ok $test\n";
+EOS
+
+    $test++;
+    push @script, <<EOS;
+    print "# remake 3i\n";
+    my \$z = Math::Complex->make('3i');
+    print "not " unless \$z == cplx(0,3);
+    print "ok $test\n";
+EOS
+
+    $test++;
+    push @script, <<EOS;
+    print "# remake [2,3]\n";
+    my \$z = cplxe('[2,3]');
+    print "not " unless \$z == Math::Complex->emake(2,3);
+    print "ok $test\n";
+EOS
+
+    $test++;
+    push @script, <<EOS;
+    print "# remake [2]\n";
+    my \$z = Math::Complex->emake('[2]');
+    print "not " unless \$z == cplxe(2);
+    print "ok $test\n";
+EOS
+}
+
+test_remake();
 
 print "1..$test\n";
 eval join '', @script;

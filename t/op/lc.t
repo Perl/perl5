@@ -82,14 +82,31 @@ ok(lc($b)         eq "\x{101}\x{101}aa",  'lc');
 # \x{149} is LATIN SMALL LETTER N PRECEDED BY APOSTROPHE, its uppercase is
 # \x{2BC}\x{E4} or MODIFIER LETTER APOSTROPHE and N.
 
-ok("\U\x{DF}ab\x{149}cd" eq "SSAB\x{2BC}NCD",
-   "multicharacter uppercase");
+# In EBCDIC \x{DF} is LATIN SMALL LETTER Y WITH DIAERESIS,
+# and it's uppercase is \x{178}, LATIN CAPITAL LETTER Y WITH DIAERESIS.
+
+if (ord("A") == 193) { # EBCDIC
+    ok("\U\x{DF}aB\x{149}cD" eq "\x{178}AB\x{2BC}NCD",
+       "multicharacter uppercase");
+} elsif (ord("A") == 65) {
+    ok("\U\x{DF}aB\x{149}cD" eq "SSAB\x{2BC}NCD",
+       "multicharacter uppercase");
+} else {
+    ok(0, "what is your encoding?");
+}
 
 # The \x{DF} is its own lowercase, ditto for \x{149}.
 # There are no single character -> multiple characters lowercase mappings.
 
-ok("\L\x{DF}AB\x{149}CD" eq "\x{DF}ab\x{149}cd",
-   "multicharacter lowercase");
+if (ord("A") == 193) { # EBCDIC
+    ok("\LaB\x{149}cD" eq "ab\x{149}cd",
+       "multicharacter lowercase");
+} elsif (ord("A") == 65) {
+    ok("\L\x{DF}aB\x{149}cD" eq "\x{DF}ab\x{149}cd",
+       "multicharacter lowercase");
+} else {
+    ok(0, "what is your encoding?");
+}
 
 # titlecase is used for \u / ucfirst.
 

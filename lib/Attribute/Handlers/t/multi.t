@@ -165,3 +165,11 @@ sub dummy_our { our $banjo : Dummy; }
 $applied = 0;
 dummy_our(); dummy_our();
 ok( $applied == 0, 51 );
+
+sub UNIVERSAL::Stooge :ATTR(END) {};
+eval {
+	local $SIG{__WARN__} = sub { die @_ };
+	my $groucho : Stooge;
+};
+my $match = $@ =~ /^Won't be able to apply END handler/; 
+ok( $match, 52 );
