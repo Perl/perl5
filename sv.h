@@ -149,6 +149,8 @@ struct io {
 
 #ifdef OVERLOAD
 #define SVf_AMAGIC    0x10000000      /* has magical overloaded methods */
+#else
+#define SVf_AMAGIC    0               /* can be or-ed without effect */
 #endif /* OVERLOAD */
 
 #define PRIVSHIFT 8
@@ -324,13 +326,8 @@ struct xpvio {
 						  SVp_IOK|SVp_NOK))
 
 #define SvOK(sv)		(SvFLAGS(sv) & SVf_OK)
-
-#ifdef OVERLOAD
 #define SvOK_off(sv)		(SvFLAGS(sv) &=	~(SVf_OK|SVf_AMAGIC),	\
 							SvOOK_off(sv))
-#else
-#define SvOK_off(sv)		(SvFLAGS(sv) &=	~SVf_OK, SvOOK_off(sv))
-#endif /* OVERLOAD */
 
 #define SvOKp(sv)		(SvFLAGS(sv) & (SVp_IOK|SVp_NOK|SVp_POK))
 #define SvIOKp(sv)		(SvFLAGS(sv) & SVp_IOK)
@@ -344,7 +341,7 @@ struct xpvio {
 #define SvIOK_on(sv)		(SvOOK_off(sv), \
 				    SvFLAGS(sv) |= (SVf_IOK|SVp_IOK))
 #define SvIOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_IOK|SVp_IOK))
-#define SvIOK_only(sv)		(SvOOK_off(sv), SvOK_off(sv), \
+#define SvIOK_only(sv)		(SvOK_off(sv), \
 				    SvFLAGS(sv) |= (SVf_IOK|SVp_IOK))
 
 #define SvNOK(sv)		(SvFLAGS(sv) & SVf_NOK)
@@ -356,14 +353,8 @@ struct xpvio {
 #define SvPOK(sv)		(SvFLAGS(sv) & SVf_POK)
 #define SvPOK_on(sv)		(SvFLAGS(sv) |= (SVf_POK|SVp_POK))
 #define SvPOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_POK|SVp_POK))
-
-#ifdef OVERLOAD
-#define SvPOK_only(sv)            (SvFLAGS(sv) &= ~(SVf_OK|SVf_AMAGIC),   \
+#define SvPOK_only(sv)		(SvFLAGS(sv) &= ~(SVf_OK|SVf_AMAGIC),	\
 				    SvFLAGS(sv) |= (SVf_POK|SVp_POK))
-#else
-#define SvPOK_only(sv)            (SvFLAGS(sv) &= ~SVf_OK, \
-				    SvFLAGS(sv) |= (SVf_POK|SVp_POK))
-#endif /* OVERLOAD */
 
 #define SvOOK(sv)		(SvFLAGS(sv) & SVf_OOK)
 #define SvOOK_on(sv)		(SvIOK_off(sv), SvFLAGS(sv) |= SVf_OOK)
@@ -375,12 +366,7 @@ struct xpvio {
 
 #define SvROK(sv)		(SvFLAGS(sv) & SVf_ROK)
 #define SvROK_on(sv)		(SvFLAGS(sv) |= SVf_ROK)
-
-#ifdef OVERLOAD
 #define SvROK_off(sv)		(SvFLAGS(sv) &= ~(SVf_ROK|SVf_AMAGIC))
-#else
-#define SvROK_off(sv)		(SvFLAGS(sv) &= ~SVf_ROK)
-#endif /* OVERLOAD */
 
 #define SvMAGICAL(sv)		(SvFLAGS(sv) & (SVs_GMG|SVs_SMG|SVs_RMG))
 #define SvMAGICAL_on(sv)	(SvFLAGS(sv) |= (SVs_GMG|SVs_SMG|SVs_RMG))

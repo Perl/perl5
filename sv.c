@@ -1209,14 +1209,8 @@ sv_setnv(register SV *sv, double num)
     case SVt_PV:
     case SVt_PVIV:
 	sv_upgrade(sv, SVt_PVNV);
-	/* FALL THROUGH */
-    case SVt_PVNV:
-    case SVt_PVMG:
-    case SVt_PVBM:
-    case SVt_PVLV:
-	if (SvOOK(sv))
-	    (void)SvOOK_off(sv);
 	break;
+
     case SVt_PVGV:
 	if (SvFAKE(sv)) {
 	    sv_unglob(sv);
