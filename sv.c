@@ -9781,12 +9781,21 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	IoPAGE(dstr)		= IoPAGE(sstr);
 	IoPAGE_LEN(dstr)	= IoPAGE_LEN(sstr);
 	IoLINES_LEFT(dstr)	= IoLINES_LEFT(sstr);
+        if(IoFLAGS(sstr) & IOf_FAKE_DIRP) { 
+            /* I have no idea why fake dirp (rsfps)
+               should be treaded differently but otherwise
+               we end up with leaks -- sky*/
+            IoTOP_GV(dstr)      = gv_dup_inc(IoTOP_GV(sstr), param);
+            IoFMT_GV(dstr)      = gv_dup_inc(IoFMT_GV(sstr), param);
+            IoBOTTOM_GV(dstr)   = gv_dup_inc(IoBOTTOM_GV(sstr), param);
+        } else {
+            IoTOP_GV(dstr)      = gv_dup(IoTOP_GV(sstr), param);
+            IoFMT_GV(dstr)      = gv_dup(IoFMT_GV(sstr), param);
+            IoBOTTOM_GV(dstr)   = gv_dup(IoBOTTOM_GV(sstr), param);
+        }
 	IoTOP_NAME(dstr)	= SAVEPV(IoTOP_NAME(sstr));
-	IoTOP_GV(dstr)		= gv_dup(IoTOP_GV(sstr), param);
 	IoFMT_NAME(dstr)	= SAVEPV(IoFMT_NAME(sstr));
-	IoFMT_GV(dstr)		= gv_dup(IoFMT_GV(sstr), param);
 	IoBOTTOM_NAME(dstr)	= SAVEPV(IoBOTTOM_NAME(sstr));
-	IoBOTTOM_GV(dstr)	= gv_dup(IoBOTTOM_GV(sstr), param);
 	IoSUBPROCESS(dstr)	= IoSUBPROCESS(sstr);
 	IoTYPE(dstr)		= IoTYPE(sstr);
 	IoFLAGS(dstr)		= IoFLAGS(sstr);

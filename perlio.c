@@ -3228,7 +3228,7 @@ PerlIO_funcs PerlIO_stdio = {
     PerlIOStdio_get_ptr,
     PerlIOStdio_get_cnt,
 #   if defined(HAS_FAST_STDIO) && defined(USE_FAST_STDIO)
-    PerlIOStdio_get_ptr,
+    PerlIOStdio_set_ptrcnt,
 #   else
     NULL,
 #   endif /* HAS_FAST_STDIO && USE_FAST_STDIO */
