@@ -20,6 +20,10 @@
 #  include "../config.h"
 #endif
 
+#if defined(__STDC__) || defined(vax11c) || defined(_AIX) || defined(__stdc__) || defined(__cplusplus)
+# define STANDARD_C 1
+#endif
+
 #ifdef WIN32
 #undef USE_STDIO_PTR		/* XXX fast gets won't work, must investigate */
 #  ifndef STANDARD_C
@@ -38,10 +42,6 @@
 #  elif defined(_MSC_VER)
 #  elif defined(__MINGW32__)
 #  endif
-#endif
-
-#if defined(__STDC__) || defined(vax11c) || defined(_AIX) || defined(__stdc__) || defined(__cplusplus)
-# define STANDARD_C 1
 #endif
 
 /* Use all the "standard" definitions? */

@@ -166,7 +166,8 @@ END_EXTERN_C
 #define JOIN(t, avp)							\
     STMT_START {							\
 	if ((WaitForSingleObject((t)->self,INFINITE) == WAIT_FAILED)	\
-	     || (GetExitCodeThread((t)->self,(LPDWORD)(avp)) == 0))	\
+	     || (GetExitCodeThread((t)->self,(LPDWORD)(avp)) == 0)	\
+	     || (CloseHandle((t)->self) == 0))				\
 	    croak("panic: JOIN");					\
 	*avp = (AV *)((t)->i.retv);					\
     } STMT_END
@@ -174,7 +175,8 @@ END_EXTERN_C
 #define JOIN(t, avp)							\
     STMT_START {							\
 	if ((WaitForSingleObject((t)->self,INFINITE) == WAIT_FAILED)	\
-	     || (GetExitCodeThread((t)->self,(LPDWORD)(avp)) == 0))	\
+	     || (GetExitCodeThread((t)->self,(LPDWORD)(avp)) == 0)	\
+	     || (CloseHandle((t)->self) == 0))				\
 	    croak("panic: JOIN");					\
     } STMT_END
 #endif	/* !USE_RTL_THREAD_API || _MSC_VER */

@@ -48,7 +48,7 @@ CCTYPE		*= BORLAND
 # set the install locations of the compiler include/libraries
 #CCHOME		*= f:\msdev\vc
 CCHOME		*= C:\bc5
-#CCHOME		*= C:\mingw32
+#CCHOME		*= D:\packages\mingw32
 CCINCDIR	*= $(CCHOME)\include
 CCLIBDIR	*= $(CCHOME)\lib
 
@@ -136,7 +136,7 @@ EXEOUT_FLAG = -e
 .ELIF "$(CCTYPE)" == "GCC"
 
 CC = gcc -pipe
-LINK32 = gcc
+LINK32 = gcc -pipe
 LIB32 = ar
 IMPLIB = dlltool
 
@@ -207,9 +207,9 @@ OPTIMIZE = -Od $(RUNTIME)d -Z7 -D_DEBUG -DDEBUGGING
 LINK_DBG = -debug -pdb:none
 .ELSE
 .IF "$(CCTYPE)" == "MSVC20"
-OPTIMIZE = -Od $(RUNTIME) -DNDEBUG
+OPTIMIZE = -O1 $(RUNTIME) -DNDEBUG
 .ELSE
-OPTIMIZE = -Od $(RUNTIME) -DNDEBUG
+OPTIMIZE = -O1 $(RUNTIME) -DNDEBUG
 .ENDIF
 LINK_DBG = -release
 .ENDIF
@@ -243,7 +243,7 @@ o *= .obj
 .SUFFIXES : .c $(o) .dll .lib .exe .a
 
 .c$(o):
-	$(CC) -c -I$(<:d) $(CFLAGS) $(OBJOUT_FLAG)$@ $<
+	$(CC) -c $(null,$(<:d) $(NULL) -I$(<:d)) $(CFLAGS) $(OBJOUT_FLAG)$@ $<
 
 .y.c:
 	$(NOOP)
@@ -434,7 +434,7 @@ CORE_H = ..\av.h	\
 	.\include\sys\socket.h	\
 	.\win32.h
 
-DYNAMIC_EXT=Socket IO Fcntl Opcode SDBM_File attrs Thread
+DYNAMIC_EXT=Socket IO Fcntl Opcode SDBM_File attrs Thread B
 STATIC_EXT=DynaLoader
 
 DYNALOADER=$(EXTDIR)\DynaLoader\DynaLoader
@@ -445,6 +445,7 @@ SDBM_FILE=$(EXTDIR)\SDBM_File\SDBM_File
 IO=$(EXTDIR)\IO\IO
 ATTRS=$(EXTDIR)\attrs\attrs
 THREAD=$(EXTDIR)\Thread\Thread
+B=$(EXTDIR)\B\B
 
 SOCKET_DLL=..\lib\auto\Socket\Socket.dll
 FCNTL_DLL=..\lib\auto\Fcntl\Fcntl.dll
@@ -453,6 +454,7 @@ SDBM_FILE_DLL=..\lib\auto\SDBM_File\SDBM_File.dll
 IO_DLL=..\lib\auto\IO\IO.dll
 ATTRS_DLL=..\lib\auto\attrs\attrs.dll
 THREAD_DLL=..\lib\auto\Thread\Thread.dll
+B_DLL=..\lib\auto\B\B.dll
 
 STATICLINKMODULES=DynaLoader
 DYNALOADMODULES=	\
@@ -462,7 +464,8 @@ DYNALOADMODULES=	\
 	$(SDBM_FILE_DLL)\
 	$(IO_DLL)	\
 	$(ATTRS_DLL)	\
-	$(THREAD_DLL)
+	$(THREAD_DLL)	\
+	$(B_DLL)
 
 POD2HTML=$(PODDIR)\pod2html
 POD2MAN=$(PODDIR)\pod2man
@@ -568,7 +571,7 @@ $(PERLDLL): perldll.def $(CORE_OBJ) $(WIN32_OBJ) $(DLL_OBJ)
 		perldll.def\n)
 	$(IMPLIB) $*.lib $@
 .ELIF "$(CCTYPE)" == "GCC"
-	$(LINK32) -dll -o $@ -Wl,--base-file -Wl,perl.base $(LINK_FLAGS) \
+	$(LINK32) -mdll -o $@ -Wl,--base-file -Wl,perl.base $(LINK_FLAGS) \
 	    $(mktmp $(LKPRE) $(CORE_OBJ:s,\,\\) $(WIN32_OBJ:s,\,\\) \
 	        $(DLL_OBJ:s,\,\\) $(LIBFILES) $(LKPOST))
 	dlltool --output-lib $(PERLIMPLIB) \
@@ -576,7 +579,7 @@ $(PERLDLL): perldll.def $(CORE_OBJ) $(WIN32_OBJ) $(DLL_OBJ)
                 --def perldll.def \
                 --base-file perl.base \
                 --output-exp perl.exp
-	$(LINK32) -dll -o $@ $(LINK_FLAGS) \
+	$(LINK32) -mdll -o $@ $(LINK_FLAGS) \
 	    $(mktmp $(LKPRE) $(CORE_OBJ:s,\,\\) $(WIN32_OBJ:s,\,\\) \
 	        $(DLL_OBJ:s,\,\\) $(LIBFILES) perl.exp $(LKPOST))
 .ELSE
@@ -659,6 +662,11 @@ $(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
 $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 	copy dl_win32.xs $(EXTDIR)\DynaLoader\dl_win32.xs
 
+$(B_DLL): $(PERLEXE) $(B).xs
+	cd $(EXTDIR)\$(*B) && \
+	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	cd $(EXTDIR)\$(*B) && $(MAKE)
+
 $(THREAD_DLL): $(PERLEXE) $(THREAD).xs
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
@@ -716,9 +724,9 @@ distclean: clean
 		$(PERLIMPLIB) ..\miniperl.lib $(MINIMOD)
 	-del /f *.def *.map
 	-del /f $(SOCKET_DLL) $(IO_DLL) $(SDBM_FILE_DLL) $(FCNTL_DLL) \
-		$(OPCODE_DLL) $(ATTRS_DLL) $(THREAD_DLL)
+		$(OPCODE_DLL) $(ATTRS_DLL) $(THREAD_DLL) $(B_DLL)
 	-del /f $(SOCKET).c $(IO).c $(SDBM_FILE).c $(FCNTL).c $(OPCODE).c \
-		$(DYNALOADER).c $(ATTRS).c $(THREAD).c
+		$(DYNALOADER).c $(ATTRS).c $(THREAD).c $(B).c
 	-del /f $(PODDIR)\*.html
 	-del /f $(PODDIR)\*.bat
 	-del /f ..\config.sh ..\splittree.pl perlmain.c dlutils.c config.h.new

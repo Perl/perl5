@@ -116,6 +116,10 @@ set `echo X "$libswanted "|sed -e 's/ sun / /' -e 's/ crypt / /' -e 's/ bsd / /'
 shift
 libswanted="$*"
 
+# Perl 5.004_57 introduced new qsort code into pp_ctl.c that
+# makes IRIX 6.2 cc to emit bad code.
+pp_ctl_cflags='optimize=-O'
+
 if [ "X$usethreads" != "X" ]; then
     if test ! -f /usr/include/pthread.h -o ! -f /usr/lib/libpthread.so; then
 	uname_r=`uname -r`
@@ -154,7 +158,7 @@ EOF
 	    exit 1
 	    ;;
 	esac
-	unset uname-r
+	unset uname_r
     fi
     ccflags="-DUSE_THREADS $ccflags"
     cppflags="-DUSE_THREADS $cppflags"
@@ -166,4 +170,5 @@ EOF
     ld="cc"
     shift
     libswanted="$*"
+    usemymalloc='n'
 fi

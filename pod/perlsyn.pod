@@ -270,15 +270,22 @@ implicitly local to the loop and regains its former value upon exiting
 the loop.  If the variable was previously declared with C<my>, it uses
 that variable instead of the global one, but it's still localized to
 the loop.  (Note that a lexically scoped variable can cause problems
-with you have subroutine or format declarations.)
+if you have subroutine or format declarations within the loop which
+refer to it.)
 
 The C<foreach> keyword is actually a synonym for the C<for> keyword, so
 you can use C<foreach> for readability or C<for> for brevity.  If VAR is
-omitted, $_ is set to each value.  If LIST is an actual array (as opposed
-to an expression returning a list value), you can modify each element of
-the array by modifying VAR inside the loop.  That's because the C<foreach>
-loop index variable is an implicit alias for each item in the list that
-you're looping over.
+omitted, $_ is set to each value.  If any element of LIST is an lvalue,
+you can modify it by modifying VAR inside the loop.  That's because
+the C<foreach> loop index variable is an implicit alias for each item
+in the list that you're looping over.
+
+If any part of LIST is an array, C<foreach> will get very confused if
+you add or remove elements within the loop body, for example with
+C<splice>.   So don't do that.
+
+C<foreach> probably won't do what you expect if VAR is a tied or other
+special variable.   Don't do that either.
 
 Examples:
 

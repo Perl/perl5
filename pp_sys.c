@@ -79,7 +79,7 @@ extern int h_errno;
 #endif
 
 #ifdef I_UTIME
-#  ifdef _MSC_VER
+#  if defined(_MSC_VER) || defined(__MINGW32__)
 #    include <sys/utime.h>
 #  else
 #    include <utime.h>

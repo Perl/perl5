@@ -451,7 +451,7 @@ the same as C<$!>.
 Under VMS, C<$^E> provides the VMS status value from the last
 system error.  This is more specific information about the last
 system error than that provided by C<$!>.  This is particularly
-important when C<$!> is set to E<EVMSERR>.
+important when C<$!> is set to B<EVMSERR>.
 
 Under OS/2, C<$^E> is set based on the value returned by the OS/2
 call C<_syserrno()> only when a call into the OS/2 API generates

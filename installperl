@@ -158,6 +158,16 @@ foreach $file (@corefiles) {
 		   "$installarchlib/CORE/$file");
 }
 
+# Install main perl executables
+# Make links to ordinary names if installbin directory isn't current directory.
+
+if (! $versiononly && ! samepath($installbin, '.') && ($^O ne 'dos')) {
+    safe_unlink("$installbin/perl$exe_ext", "$installbin/suidperl$exe_ext");
+    link("$installbin/perl$ver$exe_ext", "$installbin/perl$exe_ext");
+    link("$installbin/sperl$ver$exe_ext", "$installbin/suidperl$exe_ext") 
+      if $d_dosuid;
+}
+
 # Offer to install perl in a "standard" location
 
 $mainperl_is_instperl = 0;
@@ -194,13 +204,6 @@ if (!$versiononly && !$nonono && $^O ne 'MSWin32' && -t STDIN && -t STDERR
 }
 
 # Make links to ordinary names if installbin directory isn't current directory.
-
-if (! $versiononly && ! samepath($installbin, '.') && ($^O ne 'dos')) {
-    safe_unlink("$installbin/perl$exe_ext", "$installbin/suidperl$exe_ext");
-    link("$installbin/perl$ver$exe_ext", "$installbin/perl$exe_ext");
-    link("$installbin/sperl$ver$exe_ext", "$installbin/suidperl$exe_ext") 
-      if $d_dosuid;
-}
 
 if (!$versiononly && ! samepath($installbin, 'x2p')) {
     safe_unlink("$installbin/a2p$exe_ext");

@@ -36,7 +36,7 @@
 #include <stdarg.h>
 #include <float.h>
 #include <time.h>
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || defined(__MINGW32__)
 #include <sys/utime.h>
 #else
 #include <utime.h>
@@ -1193,7 +1193,7 @@ win32_strerror(int e)
 }
 
 DllExport void
-win32_str_os_error(SV *sv, unsigned long dwErr)
+win32_str_os_error(void *sv, DWORD dwErr)
 {
     DWORD dwLen;
     char *sMsg;
@@ -1214,7 +1214,7 @@ win32_str_os_error(SV *sv, unsigned long dwErr)
 			"Unknown error #0x%lX (lookup 0x%lX)",
 			dwErr, GetLastError());
     }
-    sv_setpvn(sv, sMsg, dwLen);
+    sv_setpvn((SV*)sv, sMsg, dwLen);
     LocalFree(sMsg);
 }
 

@@ -2,7 +2,7 @@
 
 # $RCSfile: array.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:37 $
 
-print "1..39\n";
+print "1..40\n";
 
 @ary = (1,2,3,4,5);
 if (join('',@ary) eq '12345') {print "ok 1\n";} else {print "not ok 1\n";}
@@ -144,3 +144,7 @@ eval {
 };
 print "not " unless $@ =~ /Can't multiply inherit %FIELDS/;
 print "ok 39\n";
+
+@foo = ( 'foo', 'bar', 'burbl');
+push(foo, 'blah');
+print $#foo == 3 ? "ok 40\n" : "not ok 40\n";
