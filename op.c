@@ -4569,17 +4569,11 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     if (const_sv) {
 	SvREFCNT_inc(const_sv);
 	if (cv) {
-	    cv_undef(cv);
-#ifdef USE_THREADS
-	    New(666, CvMUTEXP(cv), 1, perl_mutex);
-	    MUTEX_INIT(CvMUTEXP(cv));
-	    CvOWNER(cv) = 0;
-#endif /* USE_THREADS */
+	    assert(!CvROOT(cv) && !CvCONST(cv));
 	    sv_setpv((SV*)cv, "");  /* prototype is "" */
 	    CvXSUBANY(cv).any_ptr = const_sv;
 	    CvXSUB(cv) = const_sv_xsub;
 	    CvCONST_on(cv);
-	    /* XXX Does anybody care that CvFILE(cv) is blank? */
 	}
 	else {
 	    GvCV(gv) = Nullcv;
@@ -6939,6 +6933,6 @@ const_sv_xsub(pTHXo_ CV* cv)
 {
     dXSARGS;
     EXTEND(sp, 1);
-    ST(0) = sv_2mortal(SvREFCNT_inc((SV*)XSANY.any_ptr));
+    ST(0) = (SV*)XSANY.any_ptr;
     XSRETURN(1);
 }
