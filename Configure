@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Mar 21 17:43:57 EET 2002 [metaconfig 3.0 PL70]
+# Generated on Thu Mar 21 20:56:19 EET 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -2387,7 +2387,16 @@ EOM
                     fi
                 fi  
                 case "$ans" in
-                [yY]*) cc=gcc; ccname=gcc; ccflags=''; despair=no ;;
+                [yY]*) cc=gcc; ccname=gcc; ccflags=''; despair=no;
+                       if $test -f usethreads.cbu; then
+                           $cat >&4 <<EOM 
+
+*** However, any setting of the C compiler flags (e.g. for thread support)
+*** has been lost.  It may be necessary to pass -Dcc=gcc to Configure
+*** (together with e.g. -Dusethreads).
+
+EOM
+                       fi;;
                 esac
             fi
         fi
