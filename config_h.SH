@@ -987,19 +987,19 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #if defined(USE_CROSS_COMPILE) || defined(MULTIARCH)
 #  ifdef __LITTLE_ENDIAN__
-#    if UVSIZE == 4
+#    if LONGSIZE == 4
 #      define BYTEORDER 0x1234
 #    else
-#      if UVSIZE == 8
+#      if LONGSIZE == 8
 #        define BYTEORDER 0x12345678
 #      endif
 #    endif
 #  else
 #    ifdef __BIG_ENDIAN__
-#      if UVSIZE == 4
+#      if LONGSIZE == 4
 #        define BYTEORDER 0x4321
 #      else
-#        if UVSIZE == 8
+#        if LONGSIZE == 8
 #          define BYTEORDER 0x87654321
 #        endif
 #      endif
@@ -3228,6 +3228,19 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define	NVSIZE		$nvsize		/**/
 #$d_nv_preserves_uv	NV_PRESERVES_UV
 #define	NV_PRESERVES_UV_BITS	$nv_preserves_uv_bits
+#if UVSIZE == 8
+#   ifdef BYTEORDER
+#       if BYTEORDER == 0x1234
+#           undef BYTEORDER
+#           define BYTEORDER 0x12345678
+#       else
+#           if BYTEORDER == 0x4321
+#               undef BYTEORDER
+#               define BYTEORDER 0x87654321
+#           endif
+#       endif
+#   endif
+#endif
 
 /* IVdf:
  *	This symbol defines the format string used for printing a Perl IV

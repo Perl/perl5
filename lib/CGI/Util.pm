@@ -167,7 +167,7 @@ sub utf8_chr ($) {
 
         } elsif ($c < 0x80000000) {
                 return sprintf("%c%c%c%c%c%c",
-                                           0xfe |  ($c >> 30),
+                                           0xfc |  ($c >> 30),
                                            0x80 | (($c >> 24) & 0x3f),
                                            0x80 | (($c >> 18) & 0x3f),
                                            0x80 | (($c >> 12) & 0x3f),
