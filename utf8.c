@@ -1751,7 +1751,7 @@ Perl_pv_uni_display(pTHX_ SV *dsv, U8 *spv, STRLEN len, STRLEN pvlim, UV flags)
 		 case '\a':
 		     Perl_sv_catpvf(aTHX_ dsv, "\\a"); ok = TRUE; break;
 		 case '\\':
-		     Perl_sv_catpvf(aTHX_ dsv, "\\" ); ok = TRUE; break;
+		     Perl_sv_catpvf(aTHX_ dsv, "\\\\" ); ok = TRUE; break;
 		 default: break;
 		 }
 	     }

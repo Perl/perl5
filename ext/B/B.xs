@@ -233,6 +233,34 @@ cstring(pTHX_ SV *sv, bool perlstyle)
 
     if (!SvOK(sv))
 	sv_setpvn(sstr, "0", 1);
+    else if (perlstyle && SvUTF8(sv))
+    {
+	SV *tmpsv = sv_newmortal(); /* Temporary SV to feed sv_uni_display */
+	len = SvCUR(sv);
+	s = sv_uni_display(tmpsv, sv, 8*len, UNI_DISPLAY_QQ);
+	sv_setpv(sstr,"\"");
+	while (*s)
+	{
+	    if (*s == '"')
+		sv_catpv(sstr, "\\\"");
+	    else if (*s == '$')
+		sv_catpv(sstr, "\\$");
+	    else if (*s == '@')
+		sv_catpv(sstr, "\\@");
+	    else if (*s == '\\')
+	    {
+		if (strchr("nrftax\\",*(s+1)))
+		    sv_catpvn(sstr, s++, 2);
+		else
+		    sv_catpv(sstr, "\\\\");
+	    }
+	    else /* should always be printable */
+		sv_catpvn(sstr, s, 1);
+	    ++s;
+	}
+	sv_catpv(sstr, "\"");
+	return sstr;
+    }
     else
     {
 	/* XXX Optimise? */
