@@ -1452,7 +1452,8 @@ S_scan_const(pTHX_ char *start)
 		++s;
 		if (*s == '{') {
 		    char* e = strchr(s, '}');
-                    I32 flags = PERL_SCAN_ALLOW_UNDERSCORES;
+                    I32 flags = PERL_SCAN_ALLOW_UNDERSCORES |
+                      PERL_SCAN_DISALLOW_PREFIX;
 		    STRLEN len;
 
                     ++s;
@@ -1467,7 +1468,7 @@ S_scan_const(pTHX_ char *start)
 		else {
 		    {
 			STRLEN len = 2;
-                        I32 flags = 0;
+                        I32 flags = PERL_SCAN_DISALLOW_PREFIX;
 			uv = grok_hex(s, &len, &flags, NULL);
 			s += len;
 		    }

@@ -3039,7 +3039,8 @@ tryagain:
 				vFAIL("Missing right brace on \\x{}");
 			    }
 			    else {
-                                I32 flags = PERL_SCAN_ALLOW_UNDERSCORES;
+                                I32 flags = PERL_SCAN_ALLOW_UNDERSCORES
+                                    | PERL_SCAN_DISALLOW_PREFIX;
                                 numlen = e - p - 1;
 				ender = grok_hex(p + 1, &numlen, &flags, NULL);
 				if (ender > 0xff)
@@ -3053,7 +3054,7 @@ tryagain:
 			    }
 			}
 			else {
-                            I32 flags = 0;
+                            I32 flags = PERL_SCAN_DISALLOW_PREFIX;
 			    numlen = 2;
 			    ender = grok_hex(p, &numlen, &flags, NULL);
 			    p += numlen;
@@ -3449,7 +3450,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	    case 'a':	value = ASCII_TO_NATIVE('\007');break;
 	    case 'x':
 		if (*RExC_parse == '{') {
-                    I32 flags = PERL_SCAN_ALLOW_UNDERSCORES;
+                    I32 flags = PERL_SCAN_ALLOW_UNDERSCORES
+                        | PERL_SCAN_DISALLOW_PREFIX;
 		    e = strchr(RExC_parse++, '}');
                     if (!e)
                         vFAIL("Missing right brace on \\x{}");
@@ -3459,7 +3461,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 		    RExC_parse = e + 1;
 		}
 		else {
-                    I32 flags = 0;
+                    I32 flags = PERL_SCAN_DISALLOW_PREFIX;
 		    numlen = 2;
 		    value = grok_hex(RExC_parse, &numlen, &flags, NULL);
 		    RExC_parse += numlen;

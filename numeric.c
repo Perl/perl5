@@ -122,8 +122,9 @@ returns UV_MAX, sets C<PERL_SCAN_GREATER_THAN_UV_MAX> in the output flags,
 and writes the value to I<*result> (or the value is discarded if I<result>
 is NULL).
 
-The hex number may optinally be prefixed with "0b" or "b". If
-C<PERL_SCAN_ALLOW_UNDERSCORES> is set in I<*flags> on entry then the binary
+The hex number may optinally be prefixed with "0b" or "b" unless
+C<PERL_SCAN_DISALLOW_PREFIX> is set in I<*flags> on entry. If
+C<PERL_SCAN_ALLOW_UNDERSCORES> is set in I<*flags> then the binary
 number may use '_' characters to separate digits.
 
 =cut
@@ -140,18 +141,20 @@ Perl_grok_bin(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result) {
     bool allow_underscores = *flags & PERL_SCAN_ALLOW_UNDERSCORES;
     bool overflowed = FALSE;
 
-    /* strip off leading b or 0b.
-       for compatibility silently suffer "b" and "0b" as valid binary numbers.
-    */
-    if (len >= 1) {
-	if (s[0] == 'b') {
-	    s++;
-	    len--;
-	}
-	else if (len >= 2 && s[0] == '0' && s[1] == 'b') {
-	    s+=2;
-	    len-=2;
-	}
+    if (!(*flags & PERL_SCAN_DISALLOW_PREFIX)) {
+        /* strip off leading b or 0b.
+           for compatibility silently suffer "b" and "0b" as valid binary
+           numbers. */
+        if (len >= 1) {
+            if (s[0] == 'b') {
+                s++;
+                len--;
+            }
+            else if (len >= 2 && s[0] == '0' && s[1] == 'b') {
+                s+=2;
+                len-=2;
+            }
+        }
     }
 
     for (; len-- && *s; s++) {
@@ -233,8 +236,9 @@ returns UV_MAX, sets C<PERL_SCAN_GREATER_THAN_UV_MAX> in the output flags,
 and writes the value to I<*result> (or the value is discarded if I<result>
 is NULL).
 
-The hex number may optinally be prefixed with "0x" or "x". If
-C<PERL_SCAN_ALLOW_UNDERSCORES> is set in I<*flags> on entry then the hex
+The hex number may optinally be prefixed with "0x" or "x" unless
+C<PERL_SCAN_DISALLOW_PREFIX> is set in I<*flags> on entry. If
+C<PERL_SCAN_ALLOW_UNDERSCORES> is set in I<*flags> then the hex
 number may use '_' characters to separate digits.
 
 =cut
@@ -252,17 +256,20 @@ Perl_grok_hex(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result) {
     bool overflowed = FALSE;
     const char *hexdigit;
 
-    /* strip off leading x or 0x.
-       for compatibility silently suffer "x" and "0x" as valid hex numbers.  */
-    if (len >= 1) {
-	if (s[0] == 'x') {
-	    s++;
-	    len--;
-	}
-	else if (len >= 2 && s[0] == '0' && s[1] == 'x') {
-	    s+=2;
-	    len-=2;
-	}
+    if (!(*flags & PERL_SCAN_DISALLOW_PREFIX)) {
+        /* strip off leading x or 0x.
+           for compatibility silently suffer "x" and "0x" as valid hex numbers.
+        */
+        if (len >= 1) {
+            if (s[0] == 'x') {
+                s++;
+                len--;
+            }
+            else if (len >= 2 && s[0] == '0' && s[1] == 'x') {
+                s+=2;
+                len-=2;
+            }
+        }
     }
 
     for (; len-- && *s; s++) {

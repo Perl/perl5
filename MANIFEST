@@ -2096,6 +2096,7 @@ t/op/pat.t			See if esoteric patterns work
 t/op/pos.t			See if pos works
 t/op/push.t			See if push and pop work
 t/op/pwent.t			See if getpw*() functions work
+t/op/qq.t			See if qq works
 t/op/quotemeta.t		See if quotemeta works
 t/op/rand.t			See if rand works
 t/op/range.t			See if .. works
