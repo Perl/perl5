@@ -3072,12 +3072,31 @@ destination and autosplits them. See L<ExtUtils::Install/DESCRIPTION>
 sub pm_to_blib {
     my $self = shift;
     my($autodir) = $self->catdir('$(INST_LIB)','auto');
-    return q{
+    my $r = q{
 pm_to_blib: $(TO_INST_PM)
-	}.$self->{NOECHO}.q{$(PERLRUNINST) -MExtUtils::Install \
-        -e "pm_to_blib({qw{$(PM_TO_BLIB)}},'}.$autodir.q{','$(PM_FILTER)')"
-	}.$self->{NOECHO}.q{$(TOUCH) $@
 };
+    my %pm_to_blib = %{$self->{PM}};
+    my @a;
+    my $l;
+    sub _pm_to_blib_flush {
+	$r .= 
+q{	}.$self->{NOECHO}.q[$(PERLRUNINST) -MExtUtils::Install \
+	-e "pm_to_blib({qw{].qq[@a].q[}},'].$autodir.q{','$(PM_FILTER)')"
+};
+        @a = ();
+        $l = 0;
+    }
+    while (my ($pm, $blib) = each %pm_to_blib) {
+	my $la = length $pm;
+	my $lb = length $blib;
+	if ($l + $la + $lb + @a / 2 > 200) {
+	    _pm_to_blib_flush();
+        }
+        push @a, $pm, $blib;
+	$l += $la + $lb;
+    }
+    _pm_to_blib_flush();
+    return $r.q{	}.$self->{NOECHO}.q{$(TOUCH) $@};
 }
 
 =item post_constants (o)
