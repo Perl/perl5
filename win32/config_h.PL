@@ -69,7 +69,7 @@ if (compare("$file.new",$file))
   chmod(0666,$file);
   unlink($file);
   rename("$file.new",$file);
-  chmod(0444,$file);
+  #chmod(0444,$file);
   exit(1);
  }
 

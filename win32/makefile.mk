@@ -17,7 +17,7 @@ INST_TOP	*= $(INST_DRV)\perl5004.5x
 
 #
 # uncomment to enable threads-capabilities
-#USE_THREADS	*= -DUSE_THREADS
+#USE_THREADS	*= define
 
 #
 # uncomment one
@@ -67,19 +67,22 @@ D_CRYPT=define
 CRYPT_FLAG=-DHAVE_DES_FCRYPT
 .ENDIF
 
-BUILDOPT	*= $(USE_THREADS)
-#BUILDOPT	*= $(USE_THREADS) -DMULTIPLICITY 
-#BUILDOPT	*= $(USE_THREADS) -DPERL_GLOBAL_STRUCT -DMULTIPLICITY 
+#BUILDOPT	*= -DMULTIPLICITY 
+#BUILDOPT	*= -DPERL_GLOBAL_STRUCT -DMULTIPLICITY 
 # -DUSE_PERLIO -D__STDC__=1 -DUSE_SFIO -DI_SFIO -I\sfio97\include
+
+.IF "$(USE_THREADS)" == ""
+USE_THREADS	= undef
+.ENDIF
 
 .IMPORT .IGNORE : PROCESSOR_ARCHITECTURE
 
 PROCESSOR_ARCHITECTURE *= x86
 
-.IF "$(USE_THREADS)" == ""
-ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)
-.ELSE
+.IF "$(USE_THREADS)" == "define"
 ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)-thread
+.ELSE
+ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)
 .ENDIF
 
 ARCHDIR		= ..\lib\$(ARCHNAME)
@@ -280,7 +283,6 @@ CFGH_TMPL = config_H.gc
 
 .ELSE
 
-MAKE = nmake -nologo
 CFGSH_TMPL = config.vc
 CFGH_TMPL = config_H.vc
 PERL95EXE=..\perl95.exe
@@ -302,6 +304,7 @@ CRYPT_OBJ=$(CRYPT_SRC:db:+$(o))
 XSUBPP=..\$(MINIPERL) -I..\..\lib ..\$(EXTUTILSDIR)\xsubpp -C++ -prototypes
 
 CORE_C=	..\av.c		\
+	..\byterun.c	\
 	..\deb.c	\
 	..\doio.c	\
 	..\doop.c	\
@@ -331,6 +334,7 @@ CORE_C=	..\av.c		\
 	$(CRYPT_SRC)
 
 CORE_OBJ= ..\av$(o)	\
+	..\byterun$(o)	\
 	..\deb$(o)	\
 	..\doio$(o)	\
 	..\doop$(o)	\
@@ -382,6 +386,8 @@ X2P_OBJ = ..\x2p\a2p$(o)	\
 	..\x2p\walk$(o)
 
 CORE_H = ..\av.h	\
+	..\byterun.h	\
+	..\bytecode.h	\
 	..\cop.h	\
 	..\cv.h		\
 	..\dosish.h	\
@@ -456,6 +462,23 @@ POD2MAN=$(PODDIR)\pod2man
 POD2LATEX=$(PODDIR)\pod2latex
 POD2TEXT=$(PODDIR)\pod2text
 
+CFG_VARS=   "INST_DRV=$(INST_DRV)"		\
+	    "INST_TOP=$(INST_TOP)"		\
+	    "archname=$(ARCHNAME)"		\
+	    "cc=$(CC)"				\
+	    "ccflags=$(OPTIMIZE) $(DEFINES)"	\
+	    "cf_email=$(EMAIL)"			\
+	    "d_crypt=$(D_CRYPT)"		\
+	    "libs=$(LIBFILES:f)"		\
+	    "incpath=$(CCINCDIR)"		\
+	    "libpth=$(strip $(CCLIBDIR) $(LIBFILES:d))" \
+	    "libc=$(LIBC)"			\
+	    "static_ext=$(STATIC_EXT)"		\
+	    "dynamic_ext=$(DYNAMIC_EXT)"	\
+	    "usethreads=$(USE_THREADS)"		\
+	    "LINK_FLAGS=$(LINK_FLAGS)"		\
+	    "optimize=$(OPTIMIZE)"
+
 #
 # Top targets
 #
@@ -491,23 +514,19 @@ config.w32 : $(CFGSH_TMPL)
 	copy $(CFGH_TMPL) config.h
 
 ..\config.sh : config.w32 $(MINIPERL) config_sh.PL
-	$(MINIPERL) -I..\lib config_sh.PL	\
-	    "INST_DRV=$(INST_DRV)"		\
-	    "INST_TOP=$(INST_TOP)"		\
-	    "archname=$(ARCHNAME)"		\
-	    "cc=$(CC)"				\
-	    "ccflags=$(OPTIMIZE) $(DEFINES)"	\
-	    "cf_email=$(EMAIL)"			\
-	    "d_crypt=$(D_CRYPT)"		\
-	    "libs=$(LIBFILES:f)"		\
-	    "incpath=$(CCINCDIR)"		\
-	    "libpth=$(strip $(CCLIBDIR) $(LIBFILES:d))" \
-	    "libc=$(LIBC)"			\
-	    "static_ext=$(STATIC_EXT)"		\
-	    "dynamic_ext=$(DYNAMIC_EXT)"	\
-	    "LINK_FLAGS=$(LINK_FLAGS)"		\
-	    "optimize=$(OPTIMIZE)"		\
-	    config.w32				> ..\config.sh
+	$(MINIPERL) -I..\lib config_sh.PL $(CFG_VARS) config.w32 > ..\config.sh
+
+# this target is for when changes to the main config.sh happen
+# edit config.{b,v,g}c and make this target once for each supported
+# compiler (e.g. `dmake CCTYPE=BORLAND regen_config_h`)
+regen_config_h:
+	perl config_sh.PL $(CFG_VARS) $(CFGSH_TMPL) > ..\config.sh
+	-cd .. && del /f perl.exe
+	cd .. && perl configpm
+	-del /f $(CFGH_TMPL)
+	-mkdir ..\lib\CORE
+	-perl -I..\lib config_h.PL
+	rename config.h $(CFGH_TMPL)
 
 $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
 	cd .. && miniperl configpm

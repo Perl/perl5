@@ -27,6 +27,7 @@ open(CFG,'config.h') || die "Cannot open config.h:$!";
 while (<CFG>)
  {
   $define{$1} = 1 if /^\s*#\s*define\s+(MYMALLOC)\b/;
+  $define{$1} = 1 if /^\s*#\s*define\s+(USE_THREADS)\b/;
  }
 close(CFG);
 
