@@ -10,7 +10,7 @@ Perl code that they think will be useful to the world, they register
 as a Perl developer at http://www.cpan.org/modules/04pause.html
 so that they can then upload their code to the CPAN.  The CPAN is the
 Comprehensive Perl Archive Network and can be accessed at
-http://www.cpan.org/.
+http://www.cpan.org/ , and searched at http://search.cpan.org/ .
 
 This documentation is for people who want to download CPAN modules
 and install them on their own computer.
@@ -19,7 +19,7 @@ and install them on their own computer.
 
 First, are you sure that the module isn't already on your system?  Try
 C<perl -MFoo -e 1>.  (Replace "Foo" with the name of the module; for
-instance, C<perl -MCGI::Carp -e 1>.  
+instance, C<perl -MCGI::Carp -e 1>.
 
 If you don't see an error message, you have the module.  (If you do
 see an error message, it's still possible you have the module, but
@@ -45,7 +45,7 @@ take:
 =back
 
 Here's how to perform each step for each operating system.  This is
-I<not> a substitute for reading the README and INSTALL files that
+<not> a substitute for reading the README and INSTALL files that
 might have come with your module!
 
 Also note that these instructions are tailored for installing the
@@ -59,7 +59,7 @@ sometimes just C<use "/my/perl_directory";>.  If you're on a system
 that requires superuser/root access to install modules into the
 directories you see when you type C<perl -e "print qq(@INC)">, you'll
 want to install them into a local directory (such as your home
-directory) and use this approach.  
+directory) and use this approach.
 
 =over 4
 
@@ -67,15 +67,15 @@ directory) and use this approach.
 
 B<If you're on a Unix or Linux system,>
 
-You can use Andreas Koenig's CPAN module 
-( http://www.cpan.org/modules/by-module/CPAN ) 
+You can use Andreas Koenig's CPAN module
+( http://www.cpan.org/modules/by-module/CPAN )
 to automate the following steps, from DECOMPRESS through INSTALL.
 
-A. DECOMPRESS 
+A. DECOMPRESS
 
 Decompress the file with C<gzip -d yourmodule.tar.gz>
 
-You can get gzip from ftp://prep.ai.mit.edu/pub/gnu. 
+You can get gzip from ftp://prep.ai.mit.edu/pub/gnu.
 
 Or, you can combine this step with the next to save disk space:
 
@@ -93,7 +93,7 @@ Go into the newly-created directory and type:
       make
       make test
 
-or 
+or
 
       perl Makefile.PL PREFIX=/my/perl_directory
 
@@ -148,7 +148,7 @@ ftp://ftp.microsoft.com/Softlib/MSLFILES/nmake15.exe.
    D. INSTALL
 
 Copy the module into your Perl's I<lib> directory.  That'll be one
-of the directories you see when you type 
+of the directories you see when you type
 
    perl -e 'print "@INC"'
 
@@ -242,7 +242,7 @@ B<If you're on the DJGPP port of DOS,>
    A. DECOMPRESS
 
 djtarx ( ftp://ftp.simtel.net/pub/simtelnet/gnu/djgpp/v2/ )
-will both uncompress and unpack.  
+will both uncompress and unpack.
 
    B. UNPACK
 
@@ -256,7 +256,7 @@ Go into the newly-created directory and type:
       make
       make test
 
-You will need the packages mentioned in C<Readme.dos>
+You will need the packages mentioned in F<README.dos>
 in the Perl distribution.
 
    D. INSTALL
@@ -264,8 +264,8 @@ in the Perl distribution.
 While still in that directory, type:
 
      make install	
-     
-You will need the packages mentioned in Readme.dos in the Perl distribution.
+
+You will need the packages mentioned in F<README.dos> in the Perl distribution.
 
 =item *
 
@@ -287,20 +287,22 @@ C<Your-Module-1_33.tgz>.
 
 A. DECOMPRESS
 
-Type 
+Type
 
     gzip -d Your-Module.tgz
 
-or, for zipped modules, type 
+or, for zipped modules, type
 
     unzip Your-Module.zip
 
-Executables for gzip, zip, and VMStar ( Alphas:
-http://www.openvms.digital.com/cd/000TOOLS/ALPHA/ and Vaxen:
-http://www.openvms.digital.com/cd/000TOOLS/VAX/ ).  
+Executables for gzip, zip, and VMStar:
 
-gzip and tar
-are also available at ftp://ftp.digital.com/pub/VMS.
+    http://www.openvms.digital.com/freeware/
+    http://www.crinoid.com/utils/
+
+and their source code:
+
+    http://www.fsf.org/order/ftp.html
 
 Note that GNU's gzip/gunzip is not the same as Info-ZIP's zip/unzip
 package.  The former is a simple compression tool; the latter permits
@@ -316,10 +318,11 @@ Or, if you're fond of VMS command syntax:
 
      tar/extract/verbose Your_Module.tar
 
-C. BUILD 
+C. BUILD
 
-Make sure you have MMS (from Digital) or the freeware MMK ( available from MadGoat at  http://www.madgoat.com ).  Then type this to create the
-DESCRIP.MMS for the module: 
+Make sure you have MMS (from Digital) or the freeware MMK ( available
+from MadGoat at http://www.madgoat.com ).  Then type this to create
+the DESCRIP.MMS for the module:
 
     perl Makefile.PL
 
@@ -332,7 +335,7 @@ Substitute C<mmk> for C<mms> above if you're using MMK.
 
 D. INSTALL
 
-Type 
+Type
 
     mms install
 
@@ -342,19 +345,19 @@ Substitute C<mmk> for C<mms> above if you're using MMK.
 
 B<If you're on MVS>,
 
-Introduce the .tar.gz file into an HFS as binary; don't translate from
+Introduce the F<.tar.gz> file into an HFS as binary; don't translate from
 ASCII to EBCDIC.
 
-A. DECOMPRESS 
+A. DECOMPRESS
 
       Decompress the file with C<gzip -d yourmodule.tar.gz>
 
-      You can get gzip from 
+      You can get gzip from
       http://www.s390.ibm.com/products/oe/bpxqp1.html.
 
 B. UNPACK
 
-Unpack the result with 
+Unpack the result with
 
      pax -o to=IBM-1047,from=ISO8859-1 -r < yourmodule.tar
 
@@ -420,7 +423,7 @@ familiar with Perl on your operating system.
 
 =head1 AUTHOR
 
-Jon Orwant 
+Jon Orwant
 
 orwant@tpj.com
 
