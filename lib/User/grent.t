@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-use Test::More tests => 5;
+use Test::More;
 
 BEGIN {
     our $hasgr;
@@ -22,6 +22,7 @@ BEGIN {
     unless (@grent) { plan skip_all => "no gid 0"; }
 }
 
+plan tests => 5;
 
 BEGIN { use_ok('User::grent'); }
 can_ok(__PACKAGE__, 'getgrgid');
