@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq5 - Files and Formats ($Revision: 1.4 $, $Date: 2001/11/09 08:06:04 $)
+perlfaq5 - Files and Formats ($Revision: 1.5 $, $Date: 2001/12/18 09:01:14 $)
 
 =head1 DESCRIPTION
 
@@ -901,8 +901,8 @@ set it to C<""> to eliminate empty paragraphs (C<"abc\n\n\n\ndef">,
 for instance, gets treated as two paragraphs and not three), or
 C<"\n\n"> to accept empty paragraphs.
 
-Note that a blank line must have no blanks in it.  Thus C<"fred\n
-\nstuff\n\n"> is one paragraph, but C<"fred\n\nstuff\n\n"> is two.
+Note that a blank line must have no blanks in it.  Thus 
+C<"fred\n \nstuff\n\n"> is one paragraph, but C<"fred\n\nstuff\n\n"> is two.
 
 =head2 How can I read a single character from a file?  From the keyboard?
 

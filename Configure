@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Dec 12 17:09:05 EET 2001 [metaconfig 3.0 PL70]
+# Generated on Wed Dec 19 03:25:46 EET 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -81,6 +81,7 @@ paths="$paths /sys5.3/bin /sys5.3/usr/bin /bsd4.3/bin /bsd4.3/usr/ucb"
 paths="$paths /bsd4.3/usr/bin /usr/bsd /bsd43/bin /usr/ccs/bin"
 paths="$paths /etc /usr/lib /usr/ucblib /lib /usr/ccs/lib"
 paths="$paths /sbin /usr/sbin /usr/libexec"
+paths="$paths /system/gnu_library/bin"
 
 for p in $paths
 do
@@ -210,6 +211,7 @@ emacs=''
 expr=''
 find=''
 flex=''
+gmake=''
 grep=''
 gzip=''
 inews=''
@@ -1122,6 +1124,9 @@ case "$sh" in
 			if test -f "$xxx"; then
 				sh="$xxx";
 				break
+			elif test "X$_exe" != X -a -f "$xxx$_exe"; then
+				sh="$xxx";
+				break
 			elif test -f "$xxx.exe"; then
 				sh="$xxx";
 				break
@@ -1149,6 +1154,18 @@ if `$sh -c '#' >/dev/null 2>&1`; then
 	spitshell=cat
 	xcat=/bin/cat
 	test -f $xcat || xcat=/usr/bin/cat
+	if test ! -f $xcat; then
+		for p in $paths; do
+			if test -f $p/cat; then
+				xcat=$p/cat
+				break
+			fi
+		done
+		if test ! -f $xcat; then
+			echo "Can't find cat anywhere!" >&4
+			exit 1
+		fi
+	fi
 	echo "#!$xcat" >sharp
 	$eunicefix sharp
 	chmod +x sharp
@@ -2011,6 +2028,9 @@ for dir in \$*; do
 	if test -f \$thisthing; then
 		echo \$thisthing
 		exit 0
+	elif test "X$_exe" != X -a -f \$thisthing$_exe; then
+		echo \$thisthing
+        	exit 0
 	elif test -f \$dir/\$thing.exe; then
 		if test -n "$DJGPP"; then
 			echo \$dir/\$thing.exe
@@ -2038,7 +2058,6 @@ echo
 expr
 grep
 ls
-make
 mkdir
 rm
 sed
@@ -2059,6 +2078,7 @@ egrep
 gzip
 less
 ln
+make
 more
 nm
 nroff
@@ -2083,7 +2103,7 @@ for file in $loclist; do
 	'') xxx=`./loc $file $file $pth`;;
 	*) xxx=`./loc $xxx $xxx $pth`;;
 	esac
-	eval $file=$xxx
+	eval $file=$xxx$_exe
 	eval _$file=$xxx
 	case "$xxx" in
 	/*)
@@ -2132,15 +2152,24 @@ for file in $trylist; do
 	esac
 done
 case "$egrep" in
-egrep)
+egrep$_exe)
 	echo "Substituting grep for egrep."
 	egrep=$grep
 	;;
 esac
 case "$ln" in
-ln)
+ln$_exe)
 	echo "Substituting cp for ln."
 	ln=$cp
+	;;
+esac
+case "$make$gmake" in
+*make$_exe)
+	;;
+*)
+	echo "I can't find make or gmake, and my life depends on it." >&4
+	echo "Go find a public domain implementation or fix your PATH setting!" >&4
+	exit 1
 	;;
 esac
 case "$test" in
@@ -2290,7 +2319,7 @@ case "$lns" in
 				echo "Trying external '$test -h'." >&4
 				issymlink="$test -h"
 				if $test ! -h sym >/dev/null 2>&1; then
-					echo "External '$test -h' is broken, too." >& 4
+					echo "External '$test -h' is broken, too." >&4
 					issymlink=''
 				fi
 				;;
@@ -2762,6 +2791,7 @@ EOM
 	$test -d /usr/apollo/bin && osname=apollo
 	$test -f /etc/saf/_sactab && osname=svr4
 	$test -d /usr/include/minix && osname=minix
+	$test -d /system && osname=vos
 	if $test -d /MachTen -o -d /MachTen_Folder; then
 		osname=machten
 		if $test -x /sbin/version; then
@@ -2934,8 +2964,10 @@ EOM
 		unixware) osname=svr5
 			osvers="$4"
 			;;
-		uts) osname=uts
+		uts)	osname=uts
 			osvers="$3"
+			;;
+		vos) osvers="$3"
 			;;
 		$2) case "$osname" in
 			*isc*) ;;
@@ -4823,6 +4855,10 @@ $rm -f try.* try
 : determine filename position in cpp output
 echo " "
 echo "Computing filename position in cpp output for #include directives..." >&4
+case "$osname" in
+vos) testaccess=-e ;;
+*)   testaccess=-r ;;
+esac
 echo '#include <stdio.h>' > foo.c
 $cat >fieldn <<EOF
 $startsh
@@ -4832,7 +4868,7 @@ while read cline; do
 	pos=1
 	set \$cline
 	while $test \$# -gt 0; do
-		if $test -r \`echo \$1 | $tr -d '"'\`; then
+		if $test $testaccess \`echo \$1 | $tr -d '"'\`; then
 			echo "\$pos"
 			exit 0
 		fi
@@ -4853,6 +4889,10 @@ case $fieldn in
 esac
 echo "Your cpp writes the filename in the $pos field of the line."
 
+case "$osname" in
+vos) cppfilter="tr '\\\\>' '/' |" ;; # path component separator is >
+*)   cppfilter='' ;;
+esac
 : locate header file
 $cat >findhdr <<EOF
 $startsh
@@ -4868,7 +4908,7 @@ done
 awkprg='{ print \$$fieldn }'
 echo "#include <\$wanted>" > foo\$\$.c
 $cppstdin $cppminus $cppflags < foo\$\$.c 2>/dev/null | \
-$grep "^[ 	]*#.*\$wanted" | \
+$cppfilter $grep "^[ 	]*#.*\$wanted" | \
 while read cline; do
 	name=\`echo \$cline | $awk "\$awkprg" | $tr -d '"'\`
 	case "\$name" in
@@ -6364,7 +6404,7 @@ val="$undef"
 case "$d_suidsafe" in
 "$define")
 	val="$undef"
-	echo "No need to emulate SUID scripts since they are secure here." >& 4
+	echo "No need to emulate SUID scripts since they are secure here." >&4
 	;;
 *)
 	$cat <<EOM
@@ -9233,7 +9273,7 @@ else
 							sockethdr="-I/usr/netinclude"
 							;;
 						esac
-						echo "Found Berkeley sockets interface in lib$net." >& 4 
+						echo "Found Berkeley sockets interface in lib$net." >&4 
 						if $contains setsockopt libc.list >/dev/null 2>&1; then
 							d_oldsock="$undef"
 						else
@@ -9259,7 +9299,7 @@ eval $inlibc
 
 
 echo " "
-echo "Checking the availability of certain socket constants..." >& 4
+echo "Checking the availability of certain socket constants..." >&4
 for ENUM in MSG_CTRUNC MSG_DONTROUTE MSG_OOB MSG_PEEK MSG_PROXY SCM_RIGHTS; do
 	enum=`$echo $ENUM|./tr '[A-Z]' '[a-z]'`
 	$cat >try.c <<EOF
@@ -9315,36 +9355,42 @@ eval $setvar
 
 : see if crypt exists
 echo " "
-if set crypt val -f d_crypt; eval $csym; $val; then
-	echo 'crypt() found.' >&4
-	val="$define"
-	cryptlib=''
-else
-	cryptlib=`./loc Slibcrypt$_a "" $xlibpth`
-	if $test -z "$cryptlib"; then
-		cryptlib=`./loc Mlibcrypt$_a "" $xlibpth`
-	else
-		cryptlib=-lcrypt
-	fi
-	if $test -z "$cryptlib"; then
-		cryptlib=`./loc Llibcrypt$_a "" $xlibpth`
-	else
-		cryptlib=-lcrypt
-	fi
-	if $test -z "$cryptlib"; then
-		cryptlib=`./loc libcrypt$_a "" $libpth`
-	else
-		cryptlib=-lcrypt
-	fi
-	if $test -z "$cryptlib"; then
-		echo 'crypt() NOT found.' >&4
-		val="$undef"
-	else
+set crypt d_crypt
+eval $inlibc
+case "$d_crypt" in
+$define) cryptlib='' ;;
+*)	if set crypt val -f d_crypt; eval $csym; $val; then
+		echo 'crypt() found.' >&4
 		val="$define"
+		cryptlib=''
+	else
+		cryptlib=`./loc Slibcrypt$_a "" $xlibpth`
+		if $test -z "$cryptlib"; then
+			cryptlib=`./loc Mlibcrypt$_a "" $xlibpth`
+		else
+			cryptlib=-lcrypt
+		fi
+		if $test -z "$cryptlib"; then
+			cryptlib=`./loc Llibcrypt$_a "" $xlibpth`
+		else
+			cryptlib=-lcrypt
+		fi
+		if $test -z "$cryptlib"; then
+			cryptlib=`./loc libcrypt$_a "" $libpth`
+		else
+			cryptlib=-lcrypt
+		fi
+		if $test -z "$cryptlib"; then
+			echo 'crypt() NOT found.' >&4
+			val="$undef"
+		else
+			val="$define"
+		fi
 	fi
-fi
-set d_crypt
-eval $setvar
+	set d_crypt
+	eval $setvar
+	;;
+esac
 
 : get csh whereabouts
 case "$csh" in
@@ -9692,7 +9738,7 @@ EOM
 	;;
 esac
 		
-$rm -f fred fred.? dyna.$dlext dyna.? tmp-dyna.?
+$rm -f fred fred.* dyna.$dlext dyna.* tmp-dyna.*
 
 set d_dlsymun
 eval $setvar
@@ -9806,6 +9852,59 @@ case "$i_string" in
 *)	  strings=`./findhdr string.h`;;
 esac
 
+: see if this is a sys/file.h system
+val=''
+set sys/file.h val
+eval $inhdr
+
+: do we need to include sys/file.h ?
+case "$val" in
+"$define")
+	echo " "
+	if $h_sysfile; then
+		val="$define"
+		echo "We'll be including <sys/file.h>." >&4
+	else
+		val="$undef"
+		echo "We won't be including <sys/file.h>." >&4
+	fi
+	;;
+*)
+	h_sysfile=false
+	;;
+esac
+set i_sysfile
+eval $setvar
+
+: see if fcntl.h is there
+val=''
+set fcntl.h val
+eval $inhdr
+
+: see if we can include fcntl.h
+case "$val" in
+"$define")
+	echo " "
+	if $h_fcntl; then
+		val="$define"
+		echo "We'll be including <fcntl.h>." >&4
+	else
+		val="$undef"
+		if $h_sysfile; then
+	echo "We don't need to include <fcntl.h> if we include <sys/file.h>." >&4
+		else
+			echo "We won't be including <fcntl.h>." >&4
+		fi
+	fi
+	;;
+*)
+	h_fcntl=false
+	val="$undef"
+	;;
+esac
+set i_fcntl
+eval $setvar
+
 : check for non-blocking I/O stuff
 case "$h_sysfile" in
 true) echo "#include <sys/file.h>" > head.c;;
@@ -9821,9 +9920,13 @@ echo "Figuring out the flag used by open() for non-blocking I/O..." >&4
 case "$o_nonblock" in
 '')
 	$cat head.c > try.c
-	$cat >>try.c <<'EOCP'
+	$cat >>try.c <<EOCP
 #include <stdio.h>
 #include <stdlib.h>
+#$i_fcntl I_FCNTL
+#ifdef I_FCNTL
+#include <fcntl.h>
+#endif
 int main() {
 #ifdef O_NONBLOCK
 	printf("O_NONBLOCK\n");
@@ -10259,30 +10362,6 @@ eval $inlibc
 : see if flock exists
 set flock d_flock
 eval $inlibc
-
-: see if this is a sys/file.h system
-val=''
-set sys/file.h val
-eval $inhdr
-
-: do we need to include sys/file.h ?
-case "$val" in
-"$define")
-	echo " "
-	if $h_sysfile; then
-		val="$define"
-		echo "We'll be including <sys/file.h>." >&4
-	else
-		val="$undef"
-		echo "We won't be including <sys/file.h>." >&4
-	fi
-	;;
-*)
-	h_sysfile=false
-	;;
-esac
-set i_sysfile
-eval $setvar
 
 : see if prototype for flock is available
 echo " "
@@ -14626,7 +14705,7 @@ else
 fi
 
 case "$ivdformat" in
-'') echo "$0: Fatal: failed to find format strings, cannot continue." >& 4
+'') echo "$0: Fatal: failed to find format strings, cannot continue." >&4
     exit 1
     ;;
 esac
@@ -15872,11 +15951,11 @@ case "$yacc" in
 esac
 echo " "
 comp='yacc'
-if $test -f "$byacc"; then
+if $test -f "$byacc$_exe"; then
 	dflt="$byacc"
 	comp="byacc or $comp"
 fi
-if $test -f "$bison"; then
+if $test -f "$bison$_exe"; then
 	comp="$comp or bison -y"
 fi
 rp="Which compiler compiler ($comp) shall I use?"
@@ -15893,35 +15972,6 @@ case "$yacc" in
 	esac
 	;;
 esac
-
-: see if fcntl.h is there
-val=''
-set fcntl.h val
-eval $inhdr
-
-: see if we can include fcntl.h
-case "$val" in
-"$define")
-	echo " "
-	if $h_fcntl; then
-		val="$define"
-		echo "We'll be including <fcntl.h>." >&4
-	else
-		val="$undef"
-		if $h_sysfile; then
-	echo "We don't need to include <fcntl.h> if we include <sys/file.h>." >&4
-		else
-			echo "We won't be including <fcntl.h>." >&4
-		fi
-	fi
-	;;
-*)
-	h_fcntl=false
-	val="$undef"
-	;;
-esac
-set i_fcntl
-eval $setvar
 
 : see if this is a fp.h system
 set fp.h i_fp
@@ -17245,6 +17295,7 @@ gidsign='$gidsign'
 gidsize='$gidsize'
 gidtype='$gidtype'
 glibpth='$glibpth'
+gmake='$gmake'
 grep='$grep'
 groupcat='$groupcat'
 groupstype='$groupstype'

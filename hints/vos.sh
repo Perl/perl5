@@ -21,6 +21,11 @@ archname="hppa1.1"
 # POSIX commands are here.
 # paths="/system/gnu_library/bin"
 
+# Executable suffix.
+# No, this is not a typo.  The ".pm" really is the native
+# executable suffix in VOS.  Talk about cosmic resonance.
+_exe=".pm"
+
 # Object library paths.
 loclibpth="/system/stcp/object_library"
 loclibpth="$loclibpth /system/stcp/object_library/common"

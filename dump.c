@@ -285,7 +285,7 @@ Perl_sv_peek(pTHX_ SV *sv)
     }
     else if (SvNOKp(sv)) {
 	STORE_NUMERIC_LOCAL_SET_STANDARD();
-	Perl_sv_catpvf(aTHX_ t, "(%g)",SvNVX(sv));
+	Perl_sv_catpvf(aTHX_ t, "(%"NVgf")",SvNVX(sv));
 	RESTORE_NUMERIC_LOCAL();
     }
     else if (SvIOKp(sv)) {

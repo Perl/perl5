@@ -251,9 +251,11 @@ Most code should use utf8_to_uvchr() rather than call this directly.
 UV
 Perl_utf8n_to_uvuni(pTHX_ U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 {
+    U8 *s0 = s;
     UV uv = *s, ouv = 0;
     STRLEN len = 1;
     bool dowarn = ckWARN_d(WARN_UTF8);
+    U8 startbyte = *s;
     STRLEN expectlen = 0;
     U32 warning = 0;
 
@@ -396,23 +398,28 @@ malformed:
 	    Perl_sv_catpvf(aTHX_ sv, "(empty string)");
 	    break;
 	case UTF8_WARN_CONTINUATION:
-	    Perl_sv_catpvf(aTHX_ sv, "(unexpected continuation byte 0x%02"UVxf")", uv);
+	    Perl_sv_catpvf(aTHX_ sv, "(unexpected continuation byte 0x%02"UVxf", with no preceding start byte)", uv);
 	    break;
 	case UTF8_WARN_NON_CONTINUATION:
-	    Perl_sv_catpvf(aTHX_ sv, "(unexpected non-continuation byte 0x%02"UVxf" after start byte 0x%02"UVxf")",
-                           (UV)s[1], uv);
+	    if (s == s0)
+	        Perl_sv_catpvf(aTHX_ sv, "(unexpected non-continuation byte 0x%02"UVxf", immediately after start byte 0x%02"UVxf")",
+                           (UV)s[1], startbyte);
+	    else
+	        Perl_sv_catpvf(aTHX_ sv, "(unexpected non-continuation byte 0x%02"UVxf", %d byte%s after start byte 0x%02"UVxf", expected %d bytes)",
+                           (UV)s[1], s - s0, s - s0 > 1 ? "s" : "", startbyte, expectlen);
+	      
 	    break;
 	case UTF8_WARN_FE_FF:
 	    Perl_sv_catpvf(aTHX_ sv, "(byte 0x%02"UVxf")", uv);
 	    break;
 	case UTF8_WARN_SHORT:
-	    Perl_sv_catpvf(aTHX_ sv, "(%d byte%s, need %d)",
-                           curlen, curlen == 1 ? "" : "s", expectlen);
+	    Perl_sv_catpvf(aTHX_ sv, "(%d byte%s, need %d, after start byte 0x%02"UVxf")",
+                           curlen, curlen == 1 ? "" : "s", expectlen, startbyte);
 	    expectlen = curlen;		/* distance for caller to skip */
 	    break;
 	case UTF8_WARN_OVERFLOW:
-	    Perl_sv_catpvf(aTHX_ sv, "(overflow at 0x%"UVxf", byte 0x%02x)",
-                           ouv, *s);
+	    Perl_sv_catpvf(aTHX_ sv, "(overflow at 0x%"UVxf", byte 0x%02x, after start byte 0x%02"UVxf")",
+                           ouv, *s, startbyte);
 	    break;
 	case UTF8_WARN_SURROGATE:
 	    Perl_sv_catpvf(aTHX_ sv, "(UTF-16 surrogate 0x%04"UVxf")", uv);
@@ -421,8 +428,8 @@ malformed:
 	    Perl_sv_catpvf(aTHX_ sv, "(byte order mark 0x%04"UVxf")", uv);
 	    break;
 	case UTF8_WARN_LONG:
-	    Perl_sv_catpvf(aTHX_ sv, "(%d byte%s, need %d)",
-			   expectlen, expectlen == 1 ? "": "s", UNISKIP(uv));
+	    Perl_sv_catpvf(aTHX_ sv, "(%d byte%s, need %d, after start byte 0x%02"UVxf")",
+			   expectlen, expectlen == 1 ? "": "s", UNISKIP(uv), startbyte);
 	    break;
 	case UTF8_WARN_FFFF:
 	    Perl_sv_catpvf(aTHX_ sv, "(character 0x%04"UVxf")", uv);

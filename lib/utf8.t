@@ -159,7 +159,7 @@ plan tests => 94;
     use utf8; %a = ("\xE1\xA0"=>"sterling");
     print 'start'; printf '%x,', ord \$_ foreach keys %a; print "end\n";
 BANG
-	      qr/^Malformed UTF-8 character \(2 bytes, need 3\).*start\d+,end$/s
+	      qr/^Malformed UTF-8 character \(2 bytes, need 3.+\).*start\d+,end$/s
 	     ],
             );
     foreach (@tests) {
