@@ -204,7 +204,7 @@ esac
 
 # Fixed in V5.0A.
 case "`/usr/sbin/sizer -v`" in
-*5.0[A-Z]*|*[6-9].[0-9]*)
+*5.0[A-Z]*|*5.[1-9]*|*[6-9].[0-9]*)
 	: ok
 	;;
 *)
@@ -215,9 +215,9 @@ esac
 
 # The off_t is already 8 bytes, so we do have largefileness.
 
+cat > UU/usethreads.cbu <<'EOCBU'
 # This script UU/usethreads.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use threads.
-cat > UU/usethreads.cbu <<'EOCBU'
 case "$usethreads" in
 $define|true|[yY]*)
 	# Threads interfaces changed with V4.0.
@@ -240,6 +240,14 @@ $define|true|[yY]*)
 		;;
 	esac
 	;;
+esac
+EOCBU
+
+cat > UU/uselongdouble.cbu <<'EOCBU'
+# This script UU/uselongdouble.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to use long doubles.
+case "$uselongdouble" in
+$define|true|[yY]*) d_Gconvert='sprintf((b),"%.*Lg",(n),(x))' ;;
 esac
 EOCBU
 

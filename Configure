@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Feb 29 19:47:23 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Wed Mar  1 01:33:58 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -650,6 +650,7 @@ i_stddef=''
 i_stdlib=''
 i_string=''
 strings=''
+i_sunmath=''
 i_sysaccess=''
 i_sysdir=''
 i_sysfile=''
@@ -3704,9 +3705,7 @@ case "$libswanted" in
 '') libswanted='c_s';;
 esac
 case "$usesocks" in
-$define)
-	libswanted="$libswanted socks5 socks5_sh"
-	;;
+"$define") libswanted="$libswanted socks5 socks5_sh" ;;
 esac
 libsfound=''
 libsfiles=''
@@ -4414,7 +4413,6 @@ case "$usemorebits" in
 esac
 
 
-# Backward compatibility (uselonglong is deprecated).
 case "$uselonglong" in
 "$define"|true|[yY]*)
 	cat <<EOM >&4
@@ -4424,7 +4422,6 @@ EOM
 	use64bitint="$define"
 	;;
 esac                          
-# Backward compatibility (use64bits is deprecated).
 case "$use64bits" in
 "$define"|true|[yY]*)
 	cat <<EOM >&4
@@ -4434,12 +4431,29 @@ EOM
 	use64bitint="$define"
 	;;
 esac                          
-# Thinko compatibilities.
 case "$use64bitints" in
 "$define"|true|[yY]*)
 	cat <<EOM >&4
 
 *** There is no Configure -Duse64bitints, using -Duse64bitint instead.
+EOM
+	use64bitint="$define"
+	;;
+esac                          
+case "$use64bitsint" in
+"$define"|true|[yY]*)
+	cat <<EOM >&4
+
+*** There is no Configure -Duse64bitsint, using -Duse64bitint instead.
+EOM
+	use64bitint="$define"
+	;;
+esac                          
+case "$uselonglongs" in
+"$define"|true|[yY]*)
+	cat <<EOM >&4
+
+*** There is no Configure -Duselonglongs, using -Duse64bitint instead.
 EOM
 	use64bitint="$define"
 	;;
@@ -14359,6 +14373,10 @@ $rm -f varargs*
 set stddef.h i_stddef
 eval $inhdr
 
+: see if this is a sunmath.h system
+set sunmath.h i_sunmath
+eval $inhdr
+
 : see if sys/access.h is available
 set sys/access.h i_sysaccess
 eval $inhdr
@@ -15234,6 +15252,7 @@ i_stdarg='$i_stdarg'
 i_stddef='$i_stddef'
 i_stdlib='$i_stdlib'
 i_string='$i_string'
+i_sunmath='$i_sunmath'
 i_sysaccess='$i_sysaccess'
 i_sysdir='$i_sysdir'
 i_sysfile='$i_sysfile'
