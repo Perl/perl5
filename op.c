@@ -4561,9 +4561,6 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     CvGV(cv) = (GV*)SvREFCNT_inc(gv);
     CvFILE(cv) = CopFILE(PL_curcop);
     CvSTASH(cv) = PL_curstash;
-    /* use subs; etc may have turned this on
-       As we're (re)defining the sub here it's definately not imported */
-    GvIMPORTED_CV_off(gv);
 #ifdef USE_THREADS
     CvOWNER(cv) = 0;
     if (!CvMUTEXP(cv)) {

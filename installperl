@@ -511,7 +511,7 @@ sub safe_unlink {
 
 sub safe_rename {
     my($from,$to) = @_;
-    if (-f $to and not &unlink($to)) {
+    if (-f $to and not unlink($to)) {
 	my($i);
 	for ($i = 1; $i < 50; $i++) {
 	    last if rename($to, "$to.$i");
@@ -520,7 +520,7 @@ sub safe_rename {
 	   if $i >= 50;	# Give up!
     }
     link($from,$to) || return 0;
-    &unlink($from);
+    unlink($from);
 }
 
 sub link {
@@ -625,16 +625,16 @@ sub installlib {
 	    #but we have to delete old *.al and *.ix files from the 5.000
 	    #distribution:
 	    #This might not work because $archname might have changed.
-	    &unlink("$installarchlib/$name");
+	    unlink("$installarchlib/$name");
 	}
         $packlist->{"$installlib/$name"} = { type => 'file' };
 	if (compare($_, "$installlib/$name") || $nonono) {
-	    &unlink("$installlib/$name");
+	    unlink("$installlib/$name");
 	    mkpath("$installlib/$dir", $verbose, 0777);
 	    # HP-UX (at least) needs to maintain execute permissions
 	    # on dynamically-loaded libraries.
 	    copy_if_diff($_, "$installlib/$name")
-		and &chmod($name =~ /\.(so|$dlext)$/o ? 0555 : 0444,
+		and chmod($name =~ /\.(so|$dlext)$/o ? 0555 : 0444,
 			   "$installlib/$name");
 	}
     }
