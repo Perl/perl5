@@ -315,18 +315,13 @@ PP(pp_die)
 		HV *stash = SvSTASH(SvRV(error));
 		GV *gv = gv_fetchmethod(stash, "PROPAGATE");
 		if (gv) {
-		    SV line,file;
-		    Zero(&line, 1, SV);
-		    SvREFCNT(&file) = 1;
-		    sv_setsv(&file,GvSV(curcop->cop_filegv));
-		    Zero(&file, 1, SV);
-		    SvREFCNT(&line) = 1;
-		    sv_setiv(&line,(long)curcop->cop_line);
+		    SV *file = sv_2mortal(newSVsv(GvSV(curcop->cop_filegv)));
+		    SV *line = sv_2mortal(newSViv(curcop->cop_line));
 		    EXTEND(SP, 3);
 		    PUSHMARK(SP);
 		    PUSHs(error);
-		    PUSHs(&file);
- 		    PUSHs(&line);
+		    PUSHs(file);
+ 		    PUSHs(line);
 		    PUTBACK;
 		    perl_call_sv((SV*)GvCV(gv),
 				 G_SCALAR|G_EVAL|G_KEEPERR);
