@@ -80,6 +80,7 @@ $Is_MacOS  = $^O eq 'MacOS';
 my $Mac_FS;
 $Mac_FS = eval { require Mac::FileSpec::Unixish } if $Is_MacOS;
 
+@dl_shared_objects  = ();       # shared objects for symbols we have 
 @dl_require_symbols = ();       # names of symbols we need
 @dl_resolve_using   = ();       # names of files to link with
 @dl_library_path    = ();       # path to look for files
@@ -339,6 +340,9 @@ print OUT <<'EOT';
     my $xs = dl_install_xsub("${module}::bootstrap", $boot_symbol_ref, $file);
 
     # See comment block above
+
+	push(@dl_shared_objects, $file); # record files loaded
+
     &$xs(@args);
 }
 
@@ -555,6 +559,7 @@ DynaLoader Interface Summary
   $dl_debug
   @dl_librefs
   @dl_modules
+  @dl_shared_objects
                                                   Implemented in:
   bootstrap($modulename)                               Perl
   @filepaths = dl_findfile(@names)                     Perl
@@ -629,6 +634,10 @@ the loaded files.
 =item @dl_modules
 
 An array of module (package) names that have been bootstrap'ed.
+
+=item @dl_shared_objects
+
+An array of file names for the shared objects that were loaded.
 
 =item dl_error()
 
