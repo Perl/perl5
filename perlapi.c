@@ -4025,6 +4025,13 @@ Perl_sys_intern_init(pTHXo)
 #  if defined(LEAKTEST)
 #  endif
 #endif
+
+#undef  Perl_lock
+SV*
+Perl_lock(pTHXo_ SV *sv)
+{
+    return ((CPerlObj*)pPerl)->Perl_lock(sv);
+}
 #if defined(PERL_OBJECT)
 #endif
 

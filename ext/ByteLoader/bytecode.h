@@ -8,26 +8,29 @@ typedef OP *opindex;
 typedef IV IV64;
 
 #define BGET_FREAD(argp, len, nelem)	\
-	 bs.pfread((char*)(argp),(len),(nelem),bs.data)
-#define BGET_FGETC() bs.pfgetc(bs.data)
+	 PerlIO_read(PL_rsfp,(char*)(argp),(len)*(nelem))
+#define BGET_FGETC() PerlIO_getc(PL_rsfp)
 
 #define BGET_U32(arg)	\
-	BGET_FREAD(&arg, sizeof(U32), 1); arg = PerlSock_ntohl((U32)arg)
+	BGET_FREAD(&arg, sizeof(U32), 1)
 #define BGET_I32(arg)	\
-	BGET_FREAD(&arg, sizeof(I32), 1); arg = (I32)PerlSock_ntohl((U32)arg)
+	BGET_FREAD(&arg, sizeof(I32), 1)
 #define BGET_U16(arg)	\
-	BGET_FREAD(&arg, sizeof(U16), 1); arg = PerlSock_ntohs((U16)arg)
+	BGET_FREAD(&arg, sizeof(U16), 1)
 #define BGET_U8(arg)	arg = BGET_FGETC()
 
-#define BGET_PV(arg)	STMT_START {	\
-	BGET_U32(arg);			\
-	if (arg)			\
-	    bs.pfreadpv(arg, bs.data, &bytecode_pv);	\
-	else {				\
-	    bytecode_pv.xpv_pv = 0;		\
-	    bytecode_pv.xpv_len = 0;		\
-	    bytecode_pv.xpv_cur = 0;		\
-	}				\
+#define BGET_PV(arg)	STMT_START {					\
+	BGET_U32(arg);							\
+	if (arg) {							\
+	    New(666, bytecode_pv.xpv_pv, arg, char);			\
+	    PerlIO_read(PL_rsfp, (void*)bytecode_pv.xpv_pv, arg);	\
+	    bytecode_pv.xpv_len = arg;					\
+	    bytecode_pv.xpv_cur = arg - 1;				\
+	} else {							\
+	    bytecode_pv.xpv_pv = 0;					\
+	    bytecode_pv.xpv_len = 0;					\
+	    bytecode_pv.xpv_cur = 0;					\
+	}								\
     } STMT_END
 
 #ifdef BYTELOADER_LOG_COMMENTS
@@ -63,19 +66,17 @@ typedef IV IV64;
 	    arg = (I32)lo;				\
 	}						\
 	else {						\
-	    bytecode_iv_overflows++;				\
+	    bytecode_iv_overflows++;			\
 	    arg = 0;					\
 	}						\
     } STMT_END
 
-#define BGET_op_tr_array(arg) do {	\
-	unsigned short *ary;		\
-	int i;				\
-	New(666, ary, 256, unsigned short); \
-	BGET_FREAD(ary, 256, 2);	\
-	for (i = 0; i < 256; i++)	\
-	    ary[i] = PerlSock_ntohs(ary[i]);	\
-	arg = (char *) ary;		\
+#define BGET_op_tr_array(arg) do {			\
+	unsigned short *ary;				\
+	int i;						\
+	New(666, ary, 256, unsigned short);		\
+	BGET_FREAD(ary, sizeof(unsigned short), 256);	\
+	arg = (char *) ary;				\
     } while (0)
 
 #define BGET_pvcontents(arg)	arg = bytecode_pv.xpv_pv
@@ -126,7 +127,13 @@ typedef IV IV64;
 #define BSET_pregcomp(o, arg) \
 	((PMOP*)o)->op_pmregexp = arg ? \
 		CALLREGCOMP(aTHX_ arg, arg + bytecode_pv.xpv_cur, ((PMOP*)o)) : 0
-#define BSET_newsv(sv, arg)	sv = NEWSV(666,0); SvUPGRADE(sv, arg)
+#define BSET_newsv(sv, arg)				\
+	STMT_START {					\
+	    sv = (arg == SVt_PVAV ? (SV*)newAV() :	\
+		  arg == SVt_PVHV ? (SV*)newHV() :	\
+		  NEWSV(666,0));			\
+	    SvUPGRADE(sv, arg);				\
+	} STMT_END
 #define BSET_newop(o, arg)	((o = (OP*)safemalloc(optype_size[arg])), \
 				 memzero((char*)o,optype_size[arg]))
 #define BSET_newopn(o, arg) STMT_START {	\
@@ -135,7 +142,12 @@ typedef IV IV64;
 	oldop->op_next = o;			\
     } STMT_END
 
-#define BSET_ret(foo) return
+#define BSET_ret(foo) STMT_START {			\
+	if (bytecode_obj_list)				\
+	    Safefree(bytecode_obj_list);		\
+	LEAVE;						\
+	return;						\
+    } STMT_END
 
 /*
  * Kludge special-case workaround for OP_MAPSTART
@@ -152,10 +164,73 @@ typedef IV IV64;
 	PL_comppad = (AV *)arg;			\
 	pad = AvARRAY(arg);			\
     } STMT_END
+/* this works now that Sarathy's changed the CopFILE_set macro to do the SvREFCNT_inc()
+	-- BKS 6-2-2000 */
 #define BSET_cop_file(cop, arg)		CopFILE_set(cop,arg)
 #define BSET_cop_line(cop, arg)		CopLINE_set(cop,arg)
 #define BSET_cop_stashpv(cop, arg)	CopSTASHPV_set(cop,arg)
 
-#define BSET_OBJ_STORE(obj, ix)		\
+/* this is simply stolen from the code in newATTRSUB() */
+#define BSET_push_begin(ary,cv)				\
+	STMT_START {					\
+	    I32 oldscope = PL_scopestack_ix;		\
+	    ENTER;					\
+	    SAVECOPFILE(&PL_compiling);			\
+	    SAVECOPLINE(&PL_compiling);			\
+	    save_svref(&PL_rs);				\
+	    sv_setsv(PL_rs, PL_nrs);			\
+	    if (!PL_beginav)				\
+		PL_beginav = newAV();			\
+	    av_push(PL_beginav, cv);			\
+	    call_list(oldscope, PL_beginav);		\
+	    PL_curcop = &PL_compiling;			\
+	    PL_compiling.op_private = PL_hints;		\
+	    LEAVE;					\
+	} STMT_END
+#define BSET_push_init(ary,cv)								\
+	STMT_START {									\
+	    av_unshift((PL_initav ? PL_initav : (PL_initav = newAV(), PL_initav)), 1); 	\
+	    av_store(PL_initav, 0, cv);							\
+	} STMT_END
+#define BSET_push_end(ary,cv)									\
+	STMT_START {									\
+	    av_unshift((PL_endav ? PL_endav : (PL_endav = newAV(), PL_endav)), 1);	\
+	    av_store(PL_endav, 0, cv);							\
+	} STMT_END
+#define BSET_OBJ_STORE(obj, ix)			\
 	(I32)ix > bytecode_obj_list_fill ?	\
 	bset_obj_store(aTHXo_ obj, (I32)ix) : (bytecode_obj_list[ix] = obj)
+#define BYTECODE_HEADER_CHECK				\
+	STMT_START {					\
+	    U32 sz;					\
+	    strconst str;				\
+	    char *badpart;				\
+							\
+	    BGET_U32(sz); /* Magic: 'PLBC' */		\
+	    if (sz != 0x43424c50) {			\
+		badpart = "bad magic";			\
+		goto bch_fail;				\
+	    }						\
+	    BGET_strconst(str);	/* archname */		\
+	    if (strNE(str, ARCHNAME)) {			\
+		badpart = "wrong architecture";		\
+		goto bch_fail;				\
+	    }						\
+	    BGET_U32(sz); /* ivsize */			\
+	    if (sz != IVSIZE) {				\
+		badpart = "different IVSIZE";		\
+		goto bch_fail;				\
+	    }						\
+	    BGET_U32(sz); /* ptrsize */			\
+	    if (sz != PTRSIZE) {			\
+		badpart = "different PTRSIZE";		\
+		goto bch_fail;				\
+	    }						\
+	    BGET_strconst(str); /* byteorder */		\
+	    if (strNE(str, STRINGIFY(BYTEORDER))) {	\
+		badpart = "different byteorder";	\
+	bch_fail:					\
+		Perl_croak(aTHX_ "Invalid bytecode for this architecture: %s\n",	\
+				badpart);		\
+	    }						\
+	} STMT_END

@@ -408,8 +408,10 @@ B_init_av()
 
 B::AV
 B_begin_av()
+
 B::AV
 B_end_av()
+
 B::CV
 B_main_cv()
 
@@ -527,6 +529,7 @@ void
 save_BEGINs()
     CODE:
 	PL_minus_c |= 0x10;
+
 SV *
 cstring(sv)
 	SV *	sv

@@ -26,7 +26,7 @@
 #include "bytecode.h"
 
 
-static int optype_size[] = {
+static const int optype_size[] = {
     sizeof(OP),
     sizeof(UNOP),
     sizeof(BINOP),
@@ -40,12 +40,8 @@ static int optype_size[] = {
     sizeof(COP)
 };
 
-static SV *specialsv_list[4];
-
 static int bytecode_iv_overflows = 0;
-static SV *bytecode_sv;
-static XPV bytecode_pv;
-static void **bytecode_obj_list;
+static void **bytecode_obj_list = Null(void**);
 static I32 bytecode_obj_list_fill = -1;
 
 void *
@@ -53,9 +49,9 @@ bset_obj_store(pTHXo_ void *obj, I32 ix)
 {
     if (ix > bytecode_obj_list_fill) {
 	if (bytecode_obj_list_fill == -1)
-	    New(666, bytecode_obj_list, ix + 1, void*);
+	    New(666, bytecode_obj_list, ix + 32, void*);
 	else
-	    Renew(bytecode_obj_list, ix + 1, void*);
+	    Renew(bytecode_obj_list, ix + 32, void*);
 	bytecode_obj_list_fill = ix;
     }
     bytecode_obj_list[ix] = obj;
@@ -63,15 +59,26 @@ bset_obj_store(pTHXo_ void *obj, I32 ix)
 }
 
 void
-byterun(pTHXo_ struct bytestream bs)
+byterun(pTHXo)
 {
     dTHR;
     int insn;
+    SV *bytecode_sv;
+    XPV bytecode_pv;
+    SV *specialsv_list[6];
+    ENTER;
+    SAVEVPTR(bytecode_obj_list);
+    SAVEI32(bytecode_obj_list_fill);
+    bytecode_obj_list = Null(void**);
+    bytecode_obj_list_fill = -1;
 
+    BYTECODE_HEADER_CHECK;	/* croak if incorrect platform */
     specialsv_list[0] = Nullsv;
     specialsv_list[1] = &PL_sv_undef;
     specialsv_list[2] = &PL_sv_yes;
     specialsv_list[3] = &PL_sv_no;
+    specialsv_list[4] = pWARN_ALL;
+    specialsv_list[5] = pWARN_NONE;
 
     while ((insn = BGET_FGETC()) != EOF) {
 	switch (insn) {
@@ -889,6 +896,27 @@ byterun(pTHXo_ struct bytestream bs)
 		svindex arg;
 		BGET_svindex(arg);
 		BSET_curpad(PL_curpad, arg);
+		break;
+	    }
+	  case INSN_PUSH_BEGIN:		/* 118 */
+	    {
+		svindex arg;
+		BGET_svindex(arg);
+		BSET_push_begin(PL_beginav, arg);
+		break;
+	    }
+	  case INSN_PUSH_INIT:		/* 119 */
+	    {
+		svindex arg;
+		BGET_svindex(arg);
+		BSET_push_init(PL_initav, arg);
+		break;
+	    }
+	  case INSN_PUSH_END:		/* 120 */
+	    {
+		svindex arg;
+		BGET_svindex(arg);
+		BSET_push_end(PL_endav, arg);
 		break;
 	    }
 	  default:

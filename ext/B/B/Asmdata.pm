@@ -15,7 +15,7 @@ use Exporter;
 our(%insn_data, @insn_name, @optype, @specialsv_name);
 
 @optype = qw(OP UNOP BINOP LOGOP LISTOP PMOP SVOP PADOP PVOP LOOP COP);
-@specialsv_name = qw(Nullsv &PL_sv_undef &PL_sv_yes &PL_sv_no);
+@specialsv_name = qw(Nullsv &PL_sv_undef &PL_sv_yes &PL_sv_no pWARN_ALL pWARN_NONE);
 
 # XXX insn_data is initialised this way because with a large
 # %insn_data = (foo => [...], bar => [...], ...) initialiser
@@ -138,6 +138,9 @@ $insn_data{cop_warnings} = [114, \&PUT_svindex, "GET_svindex"];
 $insn_data{main_start} = [115, \&PUT_opindex, "GET_opindex"];
 $insn_data{main_root} = [116, \&PUT_opindex, "GET_opindex"];
 $insn_data{curpad} = [117, \&PUT_svindex, "GET_svindex"];
+$insn_data{push_begin} = [118, \&PUT_svindex, "GET_svindex"];
+$insn_data{push_init} = [119, \&PUT_svindex, "GET_svindex"];
+$insn_data{push_end} = [120, \&PUT_svindex, "GET_svindex"];
 
 my ($insn_name, $insn_data);
 while (($insn_name, $insn_data) = each %insn_data) {

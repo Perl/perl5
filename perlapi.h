@@ -130,6 +130,8 @@ START_EXTERN_C
 #define PL_basetime		(*Perl_Ibasetime_ptr(aTHXo))
 #undef  PL_beginav
 #define PL_beginav		(*Perl_Ibeginav_ptr(aTHXo))
+#undef  PL_beginav_save
+#define PL_beginav_save		(*Perl_Ibeginav_save_ptr(aTHXo))
 #undef  PL_bitcount
 #define PL_bitcount		(*Perl_Ibitcount_ptr(aTHXo))
 #undef  PL_bufend
@@ -230,6 +232,8 @@ START_EXTERN_C
 #define PL_expect		(*Perl_Iexpect_ptr(aTHXo))
 #undef  PL_fdpid
 #define PL_fdpid		(*Perl_Ifdpid_ptr(aTHXo))
+#undef  PL_fdpid_mutex
+#define PL_fdpid_mutex		(*Perl_Ifdpid_mutex_ptr(aTHXo))
 #undef  PL_filemode
 #define PL_filemode		(*Perl_Ifilemode_ptr(aTHXo))
 #undef  PL_forkprocess
@@ -492,6 +496,8 @@ START_EXTERN_C
 #define PL_sv_arenaroot		(*Perl_Isv_arenaroot_ptr(aTHXo))
 #undef  PL_sv_count
 #define PL_sv_count		(*Perl_Isv_count_ptr(aTHXo))
+#undef  PL_sv_lock_mutex
+#define PL_sv_lock_mutex	(*Perl_Isv_lock_mutex_ptr(aTHXo))
 #undef  PL_sv_mutex
 #define PL_sv_mutex		(*Perl_Isv_mutex_ptr(aTHXo))
 #undef  PL_sv_no
