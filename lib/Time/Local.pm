@@ -88,16 +88,11 @@ sub cheat {
     $year -= 1900
     	if $year > 1900;
     $month = $_[4];
-    croak "Month out of range 0..11 in timelocal.pl" 
-	if $month > 11 || $month < 0;
-    croak "Day out of range 1..31 in timelocal.pl" 
-	if $_[3] > 31 || $_[3] < 1;
-    croak "Hour out of range 0..23 in timelocal.pl"
-	if $_[2] > 23 || $_[2] < 0;
-    croak "Minute out of range 0..59 in timelocal.pl"
-	if $_[1] > 59 || $_[1] < 0;
-    croak "Second out of range 0..59 in timelocal.pl"
-	if $_[0] > 59 || $_[0] < 0;
+    croak "Month '$month' out of range 0..11"	if $month > 11 || $month < 0;
+    croak "Day '$_[3]' out of range 1..31"	if $_[3] > 31 || $_[3] < 1;
+    croak "Hour '$_[2]' out of range 0..23"	if $_[2] > 23 || $_[2] < 0;
+    croak "Minute '$_[1]' out of range 0..59"	if $_[1] > 59 || $_[1] < 0;
+    croak "Second '$_[0]' out of range 0..59"	if $_[0] > 59 || $_[0] < 0;
     $guess = $^T;
     @g = gmtime($guess);
     $year += $YearFix if $year < $epoch;
