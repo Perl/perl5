@@ -3310,7 +3310,7 @@ tryagain:
 	    }
 	    if (len > 0)
 		*flagp |= HASWIDTH;
-	    if (len == 1)
+	    if (len == 1 && UNI_IS_INVARIANT(ender))
 		*flagp |= SIMPLE;
 	    if (!SIZE_ONLY)
 		STR_LEN(ret) = len;

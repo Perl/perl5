@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..1015\n";
+print "1..1033\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3221,7 +3221,34 @@ ok("  \x{1E01}x" =~ qr/\x{1E00}X/i,
     ok($s =~ /\x{a0}/,       "[perl #23769]");
     ok($s =~ /\x{a0}+/,      "[perl #23769]");
     ok($s =~ /\x{a0}\x{a0}/, "[perl #23769]");
+
+    ok("aaa\x{100}" =~ /(a+)/, "[perl #23769] easy invariant");
+    ok($1 eq "aaa", "[perl #23769]");
+
+    ok("\xa0\xa0\xa0\x{100}" =~ /(\xa0+)/, "[perl #23769] regrepeat invariant");
+    ok($1 eq "\xa0\xa0\xa0", "[perl #23769]");
+
+    ok("ababab\x{100}  " =~ /((?:ab)+)/, "[perl #23769] hard invariant");
+    ok($1 eq "ababab", "[perl #23769]");
+
+    ok("\xa0\xa1\xa0\xa1\xa0\xa1\x{100}" =~ /((?:\xa0\xa1)+)/, "[perl #23769] hard variant");
+    ok($1 eq "\xa0\xa1\xa0\xa1\xa0\xa1", "[perl #23769]");
+
+    ok("aaa\x{100}     " =~ /(a+?)/, "[perl #23769] easy invariant");
+    ok($1 eq "a", "[perl #23769]");
+
+    ok("\xa0\xa0\xa0\x{100}    " =~ /(\xa0+?)/, "[perl #23769] regrepeat variant");
+    ok($1 eq "\xa0", "[perl #23769]");
+
+    ok("ababab\x{100}  " =~ /((?:ab)+?)/, "[perl #23769] hard invariant");
+    ok($1 eq "ab", "[perl #23769]");
+
+    ok("\xa0\xa1\xa0\xa1\xa0\xa1\x{100}" =~ /((?:\xa0\xa1)+?)/, "[perl #23769] hard variant");
+    ok($1 eq "\xa0\xa1", "[perl #23769]");
+
+    ok("\xc4\xc4\xc4" !~ /(\x{100}+)/, "[perl #23769] don't match first byte of utf8 representation");
+    ok("\xc4\xc4\xc4" !~ /(\x{100}+?)/, "[perl #23769] don't match first byte of utf8 representation");
 }
 
-# last test 1015
+# last test 1033
 
