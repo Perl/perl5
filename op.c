@@ -3848,7 +3848,10 @@ Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP *loop, I32 whileline, OP *
 	loopflags |= OPpLOOP_CONTINUE;
     }
     if (expr) {
-	cont = append_elem(OP_LINESEQ, cont, newOP(OP_UNSTACK, 0));
+	OP *unstack = newOP(OP_UNSTACK, 0);
+	if (!next)
+	    next = unstack;
+	cont = append_elem(OP_LINESEQ, cont, unstack);
 	if ((line_t)whileline != NOLINE) {
 	    PL_copline = whileline;
 	    cont = append_elem(OP_LINESEQ, cont,
@@ -3871,8 +3874,6 @@ Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP *loop, I32 whileline, OP *
 	if (listop)
 	    ((LISTOP*)listop)->op_last->op_next = condop =
 		(o == listop ? redo : LINKLIST(o));
-	if (!next)
-	    next = condop;
     }
     else
 	o = listop;
