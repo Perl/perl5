@@ -2070,6 +2070,7 @@ typedef pthread_key_t	perl_key;
 
 /* flags in PL_exit_flags for nature of exit() */
 #define PERL_EXIT_EXPECTED	0x01
+#define PERL_EXIT_DESTRUCT_END  0x02  /* Run END in perl_destruct */
 
 #ifndef MEMBER_TO_FPTR
 #  define MEMBER_TO_FPTR(name)		name
