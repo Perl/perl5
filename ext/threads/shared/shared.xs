@@ -3,6 +3,7 @@
 #include "perl.h"
 #include "XSUB.h"
 
+MGVTBL svtable;
 
 SV* shared_sv_attach_sv (SV* sv, shared_sv* shared) {
     HV* shared_hv = get_hv("threads::shared::shared", FALSE);
@@ -19,7 +20,26 @@ SV* shared_sv_attach_sv (SV* sv, shared_sv* shared) {
 	    sv = newRV(SvRV(tiedobject));
 	}
     } else {
-        croak("die\n");
+	switch(SvTYPE(SHAREDSvGET(shared))) {
+	    default: {
+	        MAGIC* shared_magic;
+		SV* value = newSVsv(SHAREDSvGET(shared));
+	        SV* obj = newSViv((IV)shared);
+        	sv_magic(value, 0, PERL_MAGIC_ext, "threads::shared", 16);
+        	shared_magic = mg_find(value, PERL_MAGIC_ext);
+        	shared_magic->mg_virtual = &svtable;
+        	shared_magic->mg_obj = newSViv((IV)shared);
+        	shared_magic->mg_flags |= MGf_REFCOUNTED;
+        	shared_magic->mg_private = 0;
+        	SvMAGICAL_on(value);
+	        sv = newRV_noinc(value);
+	        value = newRV(value);
+ 		sv_rvweaken(value);
+	        hv_store(shared_hv, SvPV(id,length),length, value, 0);
+		Perl_sharedsv_thrcnt_inc(aTHX_ shared);
+	    }
+	    	
+	}
     }
     return sv;
 }
@@ -74,6 +94,12 @@ int shared_sv_destroy_mg (pTHX_ SV* sv, MAGIC *mg) {
     shared_sv* shared = (shared_sv*) SvIV(mg->mg_obj);
     if(!shared) 
         return 0;
+    {
+	HV* shared_hv = get_hv("threads::shared::shared", FALSE);
+        SV* id = newSViv((IV)shared);
+        STRLEN length = sv_len(id);
+        hv_delete(shared_hv, SvPV(id,length), length,0);
+    }
     Perl_sharedsv_thrcnt_dec(aTHX_ shared);
 }
 
@@ -504,14 +530,16 @@ STORE(self, key, value)
         SV** hentry_;
 	STRLEN len;
 	char* ckey = SvPV(key, len);
+        SHAREDSvLOCK(shared);
 	if(SvROK(value)) {
 	    shared_sv* target = Perl_sharedsv_find(aTHX_ SvRV(value));
 	    if(!target) {
 		Perl_croak(aTHX_ "You cannot assign a non shared reference to a shared hash");
             }
+	    SHAREDSvEDIT(shared);
 	    value = newRV_noinc(newSViv((IV)target));
+	    SHAREDSvRELEASE(shared);
 	}
-        SHAREDSvLOCK(shared);
         hentry_ = hv_fetch((HV*) SHAREDSvGET(shared), ckey, len, 0);
         if(hentry_ && SvIV((*hentry_))) {
             hentry = (*hentry_);
