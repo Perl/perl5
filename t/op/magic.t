@@ -201,6 +201,9 @@ EOT
     elsif ($Is_VMS) {
       $script = "[]show-shebang";
     }
+    else {
+      $script = "./show-shebang";
+    }
     if ($^O eq 'os390' or $^O eq 'posix-bc' or $^O eq 'vmesa') {  # no shebang
 	$headmaybe = <<EOH ;
     eval 'exec ./perl -S \$0 \${1+"\$\@"}'
