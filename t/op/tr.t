@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..46\n";
+print "1..49\n";
 
 $_ = "abcdefghijklmnopqrstuvwxyz";
 
@@ -272,4 +272,18 @@ print "ok 45\n";
 ($a = v196.172.300.300.196.172.172) =~ tr/\x{12c}/\x{12d}/s;
 print "not " unless $a eq v196.172.301.196.172.172;
 print "ok 46\n";
+
+# Tricky cases by Simon Cozens.
+
+($a = v196.172.200) =~ tr/\x{12c}/a/;
+print "not " unless sprintf("%vd", $a) eq '196.172.200';
+print "ok 47\n";
+
+($a = v196.172.200) =~ tr/\x{12c}/\x{12c}/;
+print "not " unless sprintf("%vd", $a) eq '196.172.200';
+print "ok 48\n";
+
+($a = v196.172.200) =~ tr/\x{12c}//d;
+print "not " unless sprintf("%vd", $a) eq '196.172.200';
+print "ok 49\n";
 
