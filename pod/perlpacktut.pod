@@ -370,10 +370,10 @@ C and Perl. (If you'd like to use values from C<%Config> in your program
 you have to import it with C<use Config>.)
 
    signed unsigned  byte length in C   byte length in Perl       
-   C<s!>  C<S!>     sizeof(short)      $Config{shortsize}
-   C<i!>  C<I!>     sizeof(int)        $Config{intsize}
-   C<l!>  C<L!>     sizeof(long)       $Config{longsize}
-   C<q!>  C<Q!>     sizeof(longlong)   $Config{longlongsize}
+     s!     S!      sizeof(short)      $Config{shortsize}
+     i!     I!      sizeof(int)        $Config{intsize}
+     l!     L!      sizeof(long)       $Config{longsize}
+     q!     Q!      sizeof(longlong)   $Config{longlongsize}
 
 The C<i!> and C<I!> codes aren't different from C<i> and C<I>; they are
 tolerated for completeness' sake.
@@ -666,7 +666,7 @@ is added after being converted with the template code after the slash.
 This saves us the trouble of inserting the C<length> call, but it is 
 in C<unpack> where we really score: The value of the length byte marks the
 end of the string to be taken from the buffer. Since this combination
-doesn't make sense execpt when the second pack code isn't C<a*>, C<A*>
+doesn't make sense except when the second pack code isn't C<a*>, C<A*>
 or C<Z*>, Perl won't let you.
 
 The pack code preceding C</> may be anything that's fit to represent a
@@ -996,10 +996,14 @@ and C<unpack>:
     # Prepare argument for the nanosleep system call
     my $timespec = pack( 'L!L!', $secs, $nanosecs );
 
-    # A simple memory dump
+For a simple memory dump we unpack some bytes into just as 
+many pairs of hex digits, and use C<map> to handle the traditional
+spacing - 16 bytes to a line:
+
     my $i;
-    map { ++$i % 16 ? "$_ " : "$_\n" }
-    unpack( 'H2' x length( $mem ), $mem );
+    print map { ++$i % 16 ? "$_ " : "$_\n" }
+          unpack( 'H2' x length( $mem ), $mem ),
+          length( $mem ) % 16 ? "\n" : '';
 
 
 =head1 Authors
