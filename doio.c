@@ -504,8 +504,8 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
     IoFLAGS(io) &= ~IOf_NOLINE;
     if (writing) {
 	dTHR;
-	if (IoTYPE(io) == 's'
-	    || (IoTYPE(io) == '>' && S_ISCHR(PL_statbuf.st_mode)) )
+        bool is_reg = IoTYPE(io) == '>' && S_ISCHR(PL_statbuf.st_mode);
+	if (IoTYPE(io) == 's' || is_reg)
 	{
 	    char *mode;
 	    if (out_raw)
@@ -520,6 +520,10 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		IoIFP(io) = Nullfp;
 		goto say_false;
 	    }
+            else {
+                if (is_reg)
+                    IoIFP(io) = IoOFP(io); /* avoid double close() */
+            }
 	}
 	else
 	    IoOFP(io) = fp;
