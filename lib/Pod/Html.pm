@@ -1487,7 +1487,7 @@ sub process_L {
 	if (m,^(.*?)/"?(.*?)"?$,) {	# yes
 	    ($page, $section) = ($1, $2);
 	} else {			# no
-	    ($page, $section) = ($str, "");
+	    ($page, $section) = ($_, "");
 	}
 
 	# check if we know that this is a section in this page
