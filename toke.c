@@ -187,7 +187,7 @@ missingterm(char *s)
     char q;
     if (s) {
 	char *nl = strrchr(s,'\n');
-	if (nl)
+	if (nl) 
 	    *nl = '\0';
     }
     else if (multi_close < 32 || multi_close == 127) {
@@ -218,6 +218,19 @@ depcom(void)
 {
     deprecate("comma-less variable list");
 }
+
+#ifdef WIN32
+
+static I32
+win32_textfilter(int idx, SV *sv, int maxlen)
+{
+ I32 count = FILTER_READ(idx+1, sv, maxlen);
+ if (count > 0 && !maxlen)
+  win32_strip_return(sv);
+ return count;
+}
+#endif
+
 
 void
 lex_start(SV *line)
@@ -1158,6 +1171,7 @@ filter_read(int idx, SV *buf_sv, int maxlen)
 	        else
 		    return 0 ;		/* end of file */
 	    }
+
 	}
 	return SvCUR(buf_sv);
     }
@@ -1178,9 +1192,15 @@ filter_read(int idx, SV *buf_sv, int maxlen)
     return (*funcp)(idx, buf_sv, maxlen);
 }
 
+
 static char *
 filter_gets(register SV *sv, register FILE *fp, STRLEN append)
 {
+#ifdef WIN32FILTER
+    if (!rsfp_filters) {
+	filter_add(win32_textfilter,NULL);
+    }
+#endif
     if (rsfp_filters) {
 
 	if (!append)
@@ -1192,7 +1212,6 @@ filter_gets(register SV *sv, register FILE *fp, STRLEN append)
     }
     else 
         return (sv_gets(sv, fp, append));
-    
 }
 
 
@@ -1211,6 +1230,8 @@ yylex(void)
     register char *d;
     register I32 tmp;
     STRLEN len;
+    GV *gv = Nullgv;
+    GV **gvp = 0;
 
     if (pending_ident) {
 	char pit = pending_ident;
@@ -1723,9 +1744,11 @@ yylex(void)
 	}
 	goto retry;
     case '\r':
+#ifndef WIN32CHEAT
 	warn("Illegal character \\%03o (carriage return)", '\r');
 	croak(
       "(Maybe you didn't strip carriage returns after a network transfer?)\n");
+#endif
     case ' ': case '\t': case '\f': case 013:
 	s++;
 	goto retry;
@@ -2524,8 +2547,8 @@ yylex(void)
     case 'z': case 'Z':
 
       keylookup: {
-	GV *gv = Nullgv;
-	GV **gvp = 0;
+	gv = Nullgv;
+	gvp = 0;
 
 	bufptr = s;
 	s = scan_word(s, tokenbuf, sizeof tokenbuf, FALSE, &len);
@@ -5359,4 +5382,5 @@ yyerror(char *s)
     in_my_stash = Nullhv;
     return 0;
 }
+
 

@@ -20,7 +20,7 @@ CORECCOPT=
 
 #
 # uncomment next line if you want debug version of perl (big,slow)
-#CFG=Debug
+CFG=Debug
 
 #
 # set the install locations of the compiler include/libraries
@@ -166,7 +166,8 @@ CORE_C=	..\av.c		\
 	..\taint.c	\
 	..\toke.c	\
 	..\universal.c	\
-	..\util.c
+	..\util.c	\
+	..\malloc.c
 
 CORE_OBJ= ..\av.obj	\
 	..\deb.obj	\
@@ -193,7 +194,8 @@ CORE_OBJ= ..\av.obj	\
 	..\taint.obj	\
 	..\toke.obj	\
 	..\universal.obj\
-	..\util.obj
+	..\util.obj	\
+	..\malloc.obj      
 
 WIN32_C = perllib.c \
 	win32.c \
@@ -335,7 +337,7 @@ $(WIN32_OBJ) : $(CORE_H)
 $(CORE_OBJ)  : $(CORE_H)
 $(DLL_OBJ)   : $(CORE_H) 
 
-perldll.def : $(MINIPERL) $(CONFIGPM)
+perldll.def : $(MINIPERL) $(CONFIGPM) makedef.pl ..\global.sym
 	$(MINIPERL) -w makedef.pl $(DEFINES) $(CCTYPE) > perldll.def
 
 $(PERLDLL): perldll.def $(CORE_OBJ) $(WIN32_OBJ) $(DLL_OBJ)
@@ -371,10 +373,10 @@ perl95.obj : perl95.c
 	$(CC) $(CFLAGS) -MT -UPERLDLL -c perl95.c
 
 win32sckmt.obj : win32sck.c
-	$(CC) $(CFLAGS) -MT -c $(OBJOUT_FLAG)win32sckmt.obj win32sck.c
+	$(CC) $(CFLAGS) -MT -UPERLDLL -c $(OBJOUT_FLAG)win32sckmt.obj win32sck.c
 
 win32mt.obj : win32.c
-	$(CC) $(CFLAGS) -MT -c $(OBJOUT_FLAG)win32mt.obj win32.c
+	$(CC) $(CFLAGS) -MT -UPERLDLL -c $(OBJOUT_FLAG)win32mt.obj win32.c
 
 $(PERL95EXE): $(PERLDLL) $(CONFIGPM) $(PERL95_OBJ)
 	$(LINK32) -subsystem:console -out:perl95.exe $(LINK_FLAGS) $(LIBFILES) \

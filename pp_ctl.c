@@ -2119,7 +2119,7 @@ sv_compile_2op(SV *sv, OP** startop, char *code, AV** avp)
     dSP;				/* Make POPBLOCK work. */
     PERL_CONTEXT *cx;
     SV **newsp;
-    I32 gimme;
+    I32 gimme = 0;   /* SUSPECT - INITIALZE TO WHAT?  NI-S */
     I32 optype;
     OP dummy;
     OP *oop = op, *rop;
@@ -2378,7 +2378,7 @@ PP(pp_require)
     )
     {
 	tryname = name;
-	tryrsfp = PerlIO_open(name,"r");
+	tryrsfp = PerlIO_open(name,PERL_SCRIPT_MODE);
     }
     else {
 	AV *ar = GvAVn(incgv);
@@ -2401,7 +2401,7 @@ PP(pp_require)
 		sv_setpvf(namesv, "%s/%s", dir, name);
 #endif
 		tryname = SvPVX(namesv);
-		tryrsfp = PerlIO_open(tryname, "r");
+		tryrsfp = PerlIO_open(tryname, PERL_SCRIPT_MODE);
 		if (tryrsfp) {
 		    if (tryname[0] == '.' && tryname[1] == '/')
 			tryname += 2;
@@ -2880,4 +2880,5 @@ doparseform(SV *sv)
     sv_magic(sv, Nullsv, 'f', Nullch, 0);
     SvCOMPILED_on(sv);
 }
+
 

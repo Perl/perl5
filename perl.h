@@ -2297,6 +2297,10 @@ EXT bool	numeric_local INIT(TRUE);    /* Assume local numerics */
 #define printf PerlIO_stdoutf
 #endif
 
+#ifndef PERL_SCRIPT_MODE
+#define PERL_SCRIPT_MODE "r"
+#endif
+
 /*
  * nice_chunk and nice_chunk size need to be set
  * and queried under the protection of sv_mutex
