@@ -393,6 +393,11 @@ Recommended books on (or mostly on) Perl follow.
 	ISBN 1-56592-716-8 [1st edition January 2002]
 	http://www.oreilly.com/catalog/mastperltk/
 
+    Extending and Embedding Perl
+       by Tim Jenness and Simon Cozens
+       ISBN 1-930110-82-0 [1st edition August 2002]
+       http://www.manning.com/jenness
+
 =back
 
 =head2 Perl in Magazines
