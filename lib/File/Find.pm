@@ -130,6 +130,8 @@ sub find_opt {
 		warn "Can't cd to $dir: $!\n";
 	    }
 	}
+    }
+    continue {
 	chdir $cwd;
     }
 }
