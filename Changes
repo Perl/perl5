@@ -9,6 +9,172 @@ releases.)
 
 
 ----------------
+Version 5.003_95
+----------------
+
+ CORE LANGUAGE CHANGES
+
+  Title:  "Don't compile scalar mods of aggregates, like C<@a =~ s/a/b/>"
+   From:  Chip Salzenberg
+  Files:  op.c t/op/misc.t
+
+  Title:  "Automatically flush on C< $| = 1 >"
+   From:  Chip Salzenberg
+  Files:  mg.c
+
+  Title:  "Refine modulus ("%") per suggestion of Tim Goodwin"
+   From:  Chip Salzenberg
+  Files:  pp.c
+
+  Title:  "If C<perl -a>, do equivalent of C<use vars '@F'>"
+   From:  Chip Salzenberg
+  Files:  toke.c
+
+  Title:  "Warn about undef magic values just like non-magic"
+   From:  Chip Salzenberg
+  Files:  ext/Opcode/Safe.pm sv.c t/lib/db-btree.t t/lib/db-hash.t
+          t/lib/db-recno.t t/pragma/locale.t
+
+ CORE PORTABILITY
+
+  Title:  "Remove redundant patch to hints/bsdos.sh"
+   From:  Shigeya Suzuki <shigeya@foretune.co.jp>
+ Msg-ID:  <19970322222244K.shigeya@foretune.co.jp>
+   Date:  Sat, 22 Mar 1997 22:22:44 +0900
+  Files:  hints/bsdos.sh
+
+  Title:  "Another MachTen Patch"
+   From:  Tom Phoenix <rootbeer@teleport.com>
+ Msg-ID:  <Pine.GSO.3.96.970324152150.20610P-100000@kelly.teleport.com>
+   Date:  Mon, 24 Mar 1997 15:26:48 -0800 (PST)
+  Files:  hints/machten_2.sh
+
+  Title:  "Win32 update (five patches)"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu> and
+          nick@ni-s.u-net.com (Nick Ing-Simmons)
+  Files:  MANIFEST README.win32 doio.c dosish.h pp_sys.c
+          lib/ExtUtils/Command.pm t/comp/multiline.t t/op/magic.t
+          t/op/mkdir.t t/op/runlevel.t t/op/stat.t t/op/write.t
+          win32/Makefile win32/config.H win32/config.w32 win32/win32.c
+          win32/win32.h win32/win32aux.c win32/*.mak win32/VC-2.0/*.mak
+
+ OTHER CORE CHANGES
+
+  Title:  "Fix botch with G_NOARGS; PUSHMARK *is* required"
+   From:  Chip Salzenberg
+  Files:  perl.c
+
+  Title:  "Improve 'prototype mismatch' warning"
+   From:  Chip Salzenberg
+  Files:  global.sym op.c pod/perldiag.pod proto.h sv.c t/comp/redef.t
+
+  Title:  "In perlio, fix vprintf() definition and define vfprintf()"
+   From:  Chip Salzenberg
+  Files:  perlio.c
+
+ BUILD PROCESS
+
+   (no changes)
+
+ LIBRARY AND EXTENSIONS
+
+  Title:  "Fix C<require> in Getopt::Long to work with 5.003"
+   From:  Chip Salzenberg
+  Files:  lib/Getopt/Long.pm
+
+  Title:  "Extraneous blank lines from Pod::Text"
+   From:  Russ Allbery <rra@stanford.edu>
+ Msg-ID:  <qumend4qq08.fsf@cyclone.stanford.edu>
+   Date:  25 Mar 1997 01:28:55 -0800
+  Files:  lib/Pod/Text.pm
+
+  Title:  "Exporting UNIVERSAL::can"
+   From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+ Msg-ID:  <E0w9DwX-0000Zr-00@taurus.cus.cam.ac.uk>
+   Date:  Mon, 24 Mar 1997 17:54:01 +0000
+  Files:  lib/UNIVERSAL.pm
+
+  Title:  "Term::Readline patch for AmigaOS"
+   From:  "Norbert Pueschel" <pueschel@imsdd.meb.uni-bonn.de>
+ Msg-ID:  <77724797@Armageddon.meb.uni-bonn.de>
+   Date:  Sun, 23 Mar 1997 18:57:22 +0100
+  Files:  lib/Term/ReadLine.pm
+
+ TESTS
+
+  Title:  "Reduce memory footprint of complex.t"
+   From:  Dominic Dunlop <domo@slipper.ip.lu>
+ Msg-ID:  <v03020902af5d8e03c5ab@[194.51.248.84]>
+   Date:  Tue, 25 Mar 1997 15:39:26 +0100
+  Files:  t/lib/complex.t
+
+ UTILITIES
+
+  Title:  "Improve pod2man diagnostic when NAME is invalid"
+   From:  Chip Salzenberg
+  Files:  pod/pod2man.PL
+
+ DOCUMENTATION
+
+  Title:  "INSTALL-1.8 to INSTALL-1.9 updates"
+   From:  Andy Dougherty <doughera@fractal.phys.lafayette.edu>
+ Msg-ID:  <Pine.SOL.3.95q.970325135138.3374A-100000@fractal.lafayette.e
+   Date:  Tue, 25 Mar 1997 13:52:53 -0500 (EST)
+  Files:  INSTALL
+
+  Title:  "Document possible problems with -Mdiagnostics after upgrade"
+   From:  Chip Salzenberg
+  Files:  INSTALL
+
+  Title:  "Mention perldelta in INSTALL"
+   From:  Chip Salzenberg
+  Files:  INSTALL
+
+  Title:  "Describe pod format at top of INSTALL"
+   From:  Chip Salzenberg
+  Files:  INSTALL
+
+  Title:  "Document C</a *b/x> fix"
+   From:  Chip Salzenberg
+  Files:  pod/perldelta.pod
+
+  Title:  "pods for subroutine argument autovivication"
+   From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+ Msg-ID:  <E0w9489-0005YT-00@ursa.cus.cam.ac.uk>
+   Date:  Mon, 24 Mar 1997 07:25:21 +0000
+  Files:  pod/perldelta.pod pod/perlsub.pod
+
+  Title:  "Missing item in perldiag"
+   From:  "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+ Msg-ID:  <E0w8jVZ-0005va-00@ursa.cus.cam.ac.uk>
+   Date:  Sun, 23 Mar 1997 09:24:09 +0000
+  Files:  pod/perldiag.pod
+
+  Title:  "Mention and discourage use of term 'soft reference'"
+   From:  Chip Salzenberg
+  Files:  pod/perlref.pod
+
+  Title:  "Pod problems & fixes"
+   From:  Hallvard B Furuseth <h.b.furuseth@usit.uio.no>
+ Msg-ID:  <199703242031.VAA14997@bombur2.uio.no>
+   Date:  Mon, 24 Mar 1997 21:31:51 +0100 (MET)
+  Files:  INSTALL lib/Term/Complete.pm lib/subs.pm pod/perlcall.pod
+          pod/perldata.pod pod/perldiag.pod pod/perlembed.pod
+          pod/perlguts.pod pod/perlmod.pod pod/perlop.pod
+          pod/perlpod.pod pod/pod2html.PL
+
+  Title:  "DB_File documentation fix"
+   From:  pmarquess@bfsec.bt.co.uk (Paul Marquess)
+ Msg-ID:  <9703240854.AA08401@claudius.bfsec.bt.co.uk>
+   Date:  Mon, 24 Mar 97 08:54:16 GMT
+  Files:  ext/DB_File/DB_File.pm
+
+  Title:  "FAQ update"
+   From:  Nathan Torkington <gnat@prometheus.frii.com>
+  Files:  pod/perlfaq*.pod
+
+
+----------------
 Version 5.003_94
 ----------------
 

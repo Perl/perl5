@@ -39,6 +39,7 @@ static I32 list_assignment _((OP *op));
 static OP *bad_type _((I32 n, char *t, char *name, OP *kid));
 static OP *modkids _((OP *op, I32 type));
 static OP *no_fh_allowed _((OP *op));
+static bool scalar_mod_type _((OP *op, I32 type));
 static OP *scalarboolean _((OP *op));
 static OP *too_few_arguments _((OP *op, char* name));
 static OP *too_many_arguments _((OP *op, char* name));
@@ -1031,6 +1032,8 @@ I32 type;
 	}
 	/* FALL THROUGH */
     case OP_RV2GV:
+	if (scalar_mod_type(op, type))
+	    goto nomod;
 	ref(cUNOP->op_first, op->op_type);
 	/* FALL THROUGH */
     case OP_AASSIGN:
@@ -1059,6 +1062,8 @@ I32 type;
 	modcount = 10000;
 	if (type == OP_REFGEN && op->op_flags & OPf_PARENS)
 	    return op;		/* Treat \(@foo) like ordinary list. */
+	if (scalar_mod_type(op, type))
+	    goto nomod;
 	/* FALL THROUGH */
     case OP_PADSV:
 	modcount++;
@@ -1124,6 +1129,52 @@ I32 type;
     else if (type != OP_GREPSTART && type != OP_ENTERSUB)
 	op->op_flags |= OPf_REF;
     return op;
+}
+
+static bool
+scalar_mod_type(op, type)
+OP *op;
+I32 type;
+{
+    switch (type) {
+    case OP_SASSIGN:
+	if (op->op_type == OP_RV2GV)
+	    return FALSE;
+	/* FALL THROUGH */
+    case OP_PREINC:
+    case OP_PREDEC:
+    case OP_POSTINC:
+    case OP_POSTDEC:
+    case OP_I_PREINC:
+    case OP_I_PREDEC:
+    case OP_I_POSTINC:
+    case OP_I_POSTDEC:
+    case OP_POW:
+    case OP_MULTIPLY:
+    case OP_DIVIDE:
+    case OP_MODULO:
+    case OP_REPEAT:
+    case OP_ADD:
+    case OP_SUBTRACT:
+    case OP_I_MULTIPLY:
+    case OP_I_DIVIDE:
+    case OP_I_MODULO:
+    case OP_I_ADD:
+    case OP_I_SUBTRACT:
+    case OP_LEFT_SHIFT:
+    case OP_RIGHT_SHIFT:
+    case OP_BIT_AND:
+    case OP_BIT_XOR:
+    case OP_BIT_OR:
+    case OP_CONCAT:
+    case OP_SUBST:
+    case OP_TRANS:
+    case OP_ANDASSIGN:	/* may work later */
+    case OP_ORASSIGN:	/* may work later */
+	return TRUE;
+    default:
+	return FALSE;
+    }
 }
 
 OP *
@@ -3051,9 +3102,39 @@ CV* proto;
     return cv_clone2(proto, CvOUTSIDE(proto));
 }
 
+void
+cv_ckproto(cv, gv, p)
+CV* cv;
+GV* gv;
+char* p;
+{
+    if ((!p != !SvPOK(cv)) || (p && strNE(p, SvPVX(cv)))) {
+	char* buf;
+	SV* name = Nullsv;
+
+	if (gv)
+	    gv_efullname3(name = NEWSV(606, 40), gv, Nullch);
+	New(607, buf, ((name ? SvCUR(name) : 0)
+		       + (SvPOK(cv) ? SvCUR(cv) : 0)
+		       + (p ? strlen(p) : 0)
+		       + 60), char);
+	strcpy(buf, "Prototype mismatch:");
+	if (name) {
+	    sprintf(buf + strlen(buf), " sub %s", SvPVX(name));
+	    SvREFCNT_dec(name);
+	}
+	if (SvPOK(cv))
+	    sprintf(buf + strlen(buf), " (%s)", SvPVX(cv));
+	strcat(buf, " vs ");
+	sprintf(buf + strlen(buf), p ? "(%s)" : "none", p);
+	warn("%s", buf);
+	Safefree(buf);
+    }
+}
+
 SV *
 cv_const_sv(cv)
-CV *cv;
+CV* cv;
 {
     OP *o;
     SV *sv = Nullsv;
@@ -3084,21 +3165,20 @@ OP *block;
 {
     char *name = op ? SvPVx(cSVOP->op_sv, na) : Nullch;
     GV *gv = gv_fetchpv(name ? name : "__ANON__", GV_ADDMULTI, SVt_PVCV);
+    char *ps = proto ? SvPVx(((SVOP*)proto)->op_sv, na) : Nullch;
     register CV *cv;
     AV *av;
     I32 ix;
 
     if (op)
 	SAVEFREEOP(op);
+    if (proto)
+	SAVEFREEOP(proto);
+
     if (!name || GvCVGEN(gv))
 	cv = Nullcv;
     else if (cv = GvCV(gv)) {
-	/* prototype mismatch? */
-	char *p = proto ? SvPVx(((SVOP*)proto)->op_sv, na) : Nullch;
-	if ((!proto != !SvPOK(cv)) || (p && strNE(p, SvPVX(cv)))) {
-	    warn("Prototype mismatch: (%s) vs (%s)",
-		 SvPOK(cv) ? SvPVX(cv) : "none", p ? p : "none");
-	}
+	cv_ckproto(cv, gv, ps);
 	/* already defined (or promised)? */
 	if (CvROOT(cv) || CvXSUB(cv) || GvASSUMECV(gv)) {
 	    SV* const_sv;
@@ -3142,11 +3222,8 @@ OP *block;
     CvFILEGV(cv) = curcop->cop_filegv;
     CvSTASH(cv) = curstash;
 
-    if (proto) {
-	char *p = SvPVx(((SVOP*)proto)->op_sv, na);
-	sv_setpv((SV*)cv, p);
-	op_free(proto);
-    }
+    if (ps)
+	sv_setpv((SV*)cv, ps);
 
     if (error_count) {
 	op_free(block);

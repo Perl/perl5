@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq - frequently asked questions about Perl ($Date: 1997/03/17 22:17:56 $)
+perlfaq - frequently asked questions about Perl ($Date: 1997/03/25 18:20:48 $)
 
 =head1 DESCRIPTION
 
@@ -123,6 +123,23 @@ in respect of this information or its use.
 =head1 Changes
 
 =over 4
+
+=item 25/March/97
+
+Added more info to the binary distribution section of L<perlfaq2>.
+Added Net::Telnet to L<perlfaq6>.  Fixed typos in L<perlfaq8>.  Added
+mail sending example to L<perlfaq9>.  Added Merlyn's columns to
+L<perlfaq2>.
+
+=item 18/March/97 
+
+Added the DATE to the NAME section, indicating which sections have
+changed.
+
+Mentioned SIGPIPE and L<perlipc> in the forking open answer in
+L<perlfaq8>.
+
+Fixed description of a regular expression in L<perlfaq4>.
 
 =item 17/March/97 Version
 

@@ -34,7 +34,10 @@ close(FOO);
 
 sleep 2;
 
-`rm -f Op.stat.tmp2; ln Op.stat.tmp Op.stat.tmp2; chmod 644 Op.stat.tmp`;
+if ($Is_MSWin32) { unlink "Op.stat.tmp2" }
+else {
+    `rm -f Op.stat.tmp2;ln Op.stat.tmp Op.stat.tmp2; chmod 644 Op.stat.tmp`;
+}
 
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat('Op.stat.tmp');
@@ -52,19 +55,20 @@ else {
 }
 print "#4	:$mtime: != :$ctime:\n";
 
-`rm -f Op.stat.tmp`;
-`touch Op.stat.tmp`;
+unlink "Op.stat.tmp";
+if ($Is_MSWin32) {  open F, '>Op.stat.tmp' and close F }
+else             { `touch Op.stat.tmp` }
 
 if (-z 'Op.stat.tmp') {print "ok 5\n";} else {print "not ok 5\n";}
 if (! -s 'Op.stat.tmp') {print "ok 6\n";} else {print "not ok 6\n";}
 
-`echo hi >Op.stat.tmp`;
+$Is_MSWin32 ? `cmd /c echo hi > Op.stat.tmp` : `echo hi >Op.stat.tmp`;
 if (! -z 'Op.stat.tmp') {print "ok 7\n";} else {print "not ok 7\n";}
 if (-s 'Op.stat.tmp') {print "ok 8\n";} else {print "not ok 8\n";}
 
 unlink 'Op.stat.tmp';
 $olduid = $>;		# can't test -r if uid == 0
-`echo hi >Op.stat.tmp`;
+$Is_MSWin32 ? `cmd /c echo hi > Op.stat.tmp` : `echo hi >Op.stat.tmp`;
 chmod 0,'Op.stat.tmp';
 eval '$> = 1;';		# so switch uid (may not be implemented)
 if (!$> || ! -r 'Op.stat.tmp') {print "ok 9\n";} else {print "not ok 9\n";}
@@ -98,7 +102,7 @@ else {
 if (-o 'Op.stat.tmp') {print "ok 26\n";} else {print "not ok 26\n";}
 
 if (-e 'Op.stat.tmp') {print "ok 27\n";} else {print "not ok 27\n";}
-`rm -f Op.stat.tmp Op.stat.tmp2`;
+unlink 'Op.stat.tmp', 'Op.stat.tmp2';
 if (! -e 'Op.stat.tmp') {print "ok 28\n";} else {print "not ok 28\n";}
 
 if ($Is_MSWin32)
@@ -169,7 +173,7 @@ else {
 }
 if (! -t tty) {print "ok 38\n";} else {print "not ok 38\n";}
 open(null,"/dev/null");
-if (! -t null || -e '/xenix' || -e '/MachTen')
+if (! -t null || -e '/xenix' || -e '/MachTen' || $Is_MSWin32)
 	{print "ok 39\n";} else {print "not ok 39\n";}
 close(null);
 if (-t) {print "ok 40\n";} else {print "not ok 40\n";}

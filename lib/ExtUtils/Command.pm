@@ -1,6 +1,7 @@
 package ExtUtils::Command;
 use strict;
 # use AutoLoader;
+use Carp;
 use File::Copy;
 use File::Compare;
 use File::Basename;
@@ -35,14 +36,22 @@ Most commands are wrapers on generic modules File::Path and File::Basename.
 
 =over 4
 
+=cut
+
+sub expand_wildcards
+{
+ @ARGV = map(/[\*\?]/ ? glob($_) : $_,@ARGV);
+}
+
 =item cat 
 
-Concatenates all files menthion on command line to STDOUT.
+Concatenates all files mentioned on command line to STDOUT.
 
 =cut 
 
 sub cat ()
 {
+ expand_wildcards();
  print while (<>);
 }
 
@@ -68,7 +77,7 @@ Removes directories - recursively (even if readonly)
 
 sub rm_rf
 {
- rmtree([@ARGV],0,0);
+ rmtree([grep -e $_,expand_wildcards()],0,0);
 }
 
 =item rm_f files....
@@ -79,12 +88,13 @@ Removes files (even if readonly)
 
 sub rm_f
 {
- foreach (@ARGV)
+ foreach (expand_wildcards())
   {
-   next unless -e $_;
-   chmod(0777,$_);
-   next if (-f $_ and unlink($_));
-   die "Cannot delete $_:$!";
+   next unless -f $_;        
+   next if unlink($_);
+   chmod(0777,$_);           
+   next if unlink($_);
+   carp "Cannot delete $_:$!";
   }
 }
 
@@ -96,6 +106,7 @@ Makes files exist, with current timestamp
 
 sub touch
 {
+ expand_wildcards();
  while (@ARGV)
   {
    my $file = shift(@ARGV);               
@@ -114,19 +125,12 @@ Multiple sources are allowed if destination is an existing directory.
 sub mv
 {
  my $dst = pop(@ARGV);
- if (-d $dst)
+ expand_wildcards();
+ croak("Too many arguments") if (@ARGV > 1 && ! -d $dst);
+ while (@ARGV)
   {
-   while (@ARGV)
-    {
-     my $src = shift(@ARGV);               
-     my $leaf = basename($src);            
-     move($src,"$dst/$leaf");  # fixme
-    }
-  }
- else
-  {
-   my $src = shift(@ARGV);
-   move($src,$dst) || die "Cannot move $src $dst:$!";
+   my $src = shift(@ARGV);               
+   move($src,$dst);
   }
 }
 
@@ -140,18 +144,12 @@ Multiple sources are allowed if destination is an existing directory.
 sub cp
 {
  my $dst = pop(@ARGV);
- if (-d $dst)
+ expand_wildcards();
+ croak("Too many arguments") if (@ARGV > 1 && ! -d $dst);
+ while (@ARGV)
   {
-   while (@ARGV)
-    {
-     my $src = shift(@ARGV);               
-     my $leaf = basename($src);            
-     copy($src,"$dst/$leaf");  # fixme
-    }
-  }
- else
-  {
-   copy(shift,$dst);
+   my $src = shift(@ARGV);               
+   copy($src,$dst);
   }
 }
 
@@ -163,7 +161,8 @@ Sets UNIX like permissions 'mode' on all the files.
 
 sub chmod
 {
- chmod(@ARGV) || die "Cannot chmod ".join(' ',@ARGV).":$!";
+ my $mode = shift(@ARGV);
+ chmod($mode,expand_wildcards()) || die "Cannot chmod ".join(' ',$mode,@ARGV).":$!";
 }
 
 =item mkpath directory...
@@ -174,7 +173,7 @@ Creates directory, including any parent directories.
 
 sub mkpath
 {
- File::Path::mkpath([@ARGV],1,0777);
+ File::Path::mkpath([expand_wildcards()],1,0777);
 }
 
 =item test_f file
@@ -194,9 +193,6 @@ __END__
 =back
 
 =head1 BUGS
-
-eqtime does not work right on Win32 due to problems with utime() built-in
-command.
 
 Should probably be Auto/Self loaded.
 

@@ -95,7 +95,8 @@ EXPECT
 ########
 %@x=0;
 EXPECT
-Can't coerce HASH to string in repeat at - line 1.
+Can't modify hash deref in repeat at - line 1, near "0;"
+Execution of - aborted due to compilation errors.
 ########
 $_="foo";
 printf(STDOUT "%s\n", $_);

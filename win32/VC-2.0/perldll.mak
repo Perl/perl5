@@ -145,9 +145,9 @@ CLEAN :
 "$(OUTDIR)" :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
-# ADD BASE CPP /nologo /MTd /W3 /Gm /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /c
-# ADD CPP /nologo /MTd /W3 /Gm /Zi /Od /I "." /I ".\include" /I ".." /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "PERLDLL" /YX /c
-CPP_PROJ=/nologo /MTd /W3 /Gm /Zi /Od /I "." /I ".\include" /I ".." /D\
+# ADD BASE CPP /nologo /MT /W3 /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /c
+# ADD CPP /nologo /MT /W3 /Zi /Od /I "." /I ".\include" /I ".." /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "PERLDLL" /YX /c
+CPP_PROJ=/nologo /MT /W3 /Zi /Od /I "." /I ".\include" /I ".." /D\
  "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "PERLDLL" /Fp"$(INTDIR)/perldll.pch" /YX\
  /Fo"$(INTDIR)/" /Fd"$(INTDIR)/" /c 
 CPP_OBJS=.\debug/
@@ -251,7 +251,7 @@ DEP_CPP_PERLL=\
 	"..\unixish.h"\
 	"..\util.h"\
 	".\config.h"\
-	".\EXTERN.h"\
+	"..\EXTERN.h"\
 	".\include\dirent.h"\
 	".\include\netdb.h"\
 	".\include\sys/socket.h"\
@@ -326,7 +326,7 @@ DEP_CPP_WIN32=\
 	"..\unixish.h"\
 	"..\util.h"\
 	".\config.h"\
-	".\EXTERN.h"\
+	"..\EXTERN.h"\
 	".\include\dirent.h"\
 	".\include\netdb.h"\
 	".\include\sys/socket.h"\
@@ -360,7 +360,7 @@ DEP_CPP_WIN32_=\
 	"..\perlsdio.h"\
 	"..\perlsfio.h"\
 	".\config.h"\
-	".\EXTERN.h"\
+	"..\EXTERN.h"\
 	".\include\dirent.h"\
 	".\include\netdb.h"\
 	".\include\sys/socket.h"\
@@ -376,7 +376,7 @@ DEP_CPP_WIN32_=\
 
 DEP_CPP_WIN32_=\
 	"..\perl.h"\
-	".\EXTERN.h"\
+	"..\EXTERN.h"\
 	"$(INCLUDE)\sys\stat.h"\
 	"$(INCLUDE)\sys\types.h"\
 	

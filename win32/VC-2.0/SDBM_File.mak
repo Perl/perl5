@@ -136,9 +136,9 @@ CLEAN :
 "$(OUTDIR)" :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
-# ADD BASE CPP /nologo /MTd /W3 /Gm /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /c
-# ADD CPP /nologo /MTd /W3 /Gm /Zi /Od /I ".\include" /I "." /I ".." /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "MSDOS" /c
-CPP_PROJ=/nologo /MTd /W3 /Gm /Zi /Od /I ".\include" /I "." /I ".." /D\
+# ADD BASE CPP /nologo /MT /W3 /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /c
+# ADD CPP /nologo /MT /W3 /Zi /Od /I ".\include" /I "." /I ".." /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "MSDOS" /c
+CPP_PROJ=/nologo /MT /W3 /Zi /Od /I ".\include" /I "." /I ".." /D\
  "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "MSDOS" \
  /Fo"$(INTDIR)/" /Fd"$(INTDIR)/" /c 
 CPP_OBJS=.\Debug/
@@ -211,7 +211,7 @@ LINK32_OBJS= \
 
 SOURCE=..\ext\SDBM_File\SDBM_File.c
 DEP_CPP_SDBM_=\
-	".\EXTERN.h"\
+	"..\EXTERN.h"\
 	".\..\perl.h"\
 	".\..\XSUB.h"\
 	".\..\ext\SDBM_File\sdbm\sdbm.h"\

@@ -38,8 +38,8 @@ expression enhancements, Innumerable Unbundled Modules, Compilability
 
 =item NOTES
 
-=head2 perlfaq - frequently asked questions about Perl ($Date: 1997/03/17
-22:17:56 $)
+=head2 perlfaq - frequently asked questions about Perl ($Date: 1997/03/25
+18:20:48 $)
 
 =item DESCRIPTION
 
@@ -76,9 +76,10 @@ authors
 
 =item Changes
 
-17/March/97 Version, Initial Release: 11/March/97
+25/March/97, 18/March/97, 17/March/97 Version, Initial Release: 11/March/97
 
-=head2 perlfaq1 - General Questions About Perl ($Revision: 1.10 $)
+=head2 perlfaq1 - General Questions About Perl ($Revision: 1.11 $, $Date:
+1997/03/19 17:23:09 $)
 
 =item DESCRIPTION
 
@@ -118,7 +119,8 @@ Scheme, or Tcl?
 
 =item AUTHOR AND COPYRIGHT
 
-=head2 perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.13 $)
+=head2 perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.15 $,
+$Date: 1997/03/25 18:15:48 $)
 
 =item DESCRIPTION
 
@@ -127,6 +129,8 @@ Scheme, or Tcl?
 =item What machines support Perl?  Where do I get it?
 
 =item How can I get a binary version of Perl?
+
+=item I don't have a C compiler on my system.  How can I compile perl?
 
 =item I copied the Perl binary from one machine to another, but scripts
 don't work.
@@ -171,7 +175,8 @@ MacPerl, Perl5-Porters, NTPerl, Perl-Packrats
 
 =item AUTHOR AND COPYRIGHT
 
-=head2 perlfaq3 - Programming Tools ($Revision: 1.19 $)
+=head2 perlfaq3 - Programming Tools ($Revision: 1.20 $, $Date: 1997/03/19
+17:23:43 $)
 
 =item DESCRIPTION
 
@@ -245,7 +250,8 @@ mean?
 
 =item AUTHOR AND COPYRIGHT
 
-=head2 perlfaq4 - Data Manipulation ($Revision: 1.15 $)
+=head2 perlfaq4 - Data Manipulation ($Revision: 1.17 $, $Date: 1997/03/25
+18:16:24 $)
 
 =item DESCRIPTION
 
@@ -435,7 +441,8 @@ or array of hashes or arrays?
 
 =item AUTHOR AND COPYRIGHT
 
-=head2 perlfaq5 - Files and Formats ($Revision: 1.19 $)
+=head2 perlfaq5 - Files and Formats ($Revision: 1.20 $, $Date: 1997/03/19
+17:24:51 $)
 
 =item DESCRIPTION
 
@@ -518,7 +525,7 @@ protected files?  Isn't this a bug in Perl?
 
 =item AUTHOR AND COPYRIGHT
 
-=head2 perlfaq6 - Regexps ($Revision: 1.14 $)
+=head2 perlfaq6 - Regexps ($Revision: 1.16 $, $Date: 1997/03/25 18:16:56 $)
 
 =item DESCRIPTION
 
@@ -579,7 +586,8 @@ file?
 
 =item AUTHOR AND COPYRIGHT
 
-=head2 perlfaq7 - Perl Language Issues ($Revision: 1.15 $)
+=head2 perlfaq7 - Perl Language Issues ($Revision: 1.16 $, $Date:
+1997/03/19 17:25:23 $)
 
 =item DESCRIPTION
 
@@ -645,7 +653,8 @@ is in scope?
 
 =item AUTHOR AND COPYRIGHT
 
-=head2 perlfaq8 - System Interaction ($Revision: 1.15 $)
+=head2 perlfaq8 - System Interaction ($Revision: 1.17 $, $Date: 1997/03/25
+18:17:12 $)
 
 =item DESCRIPTION
 
@@ -693,6 +702,8 @@ does the error message "Protocol not supported" mean?
 =item Why do setuid perl scripts complain about kernel problems?
 
 =item How can I open a pipe both to and from a command?
+
+=item Why can't I get the output of a command with system()?
 
 =item How can I capture STDERR from an external command?
 
@@ -749,7 +760,8 @@ complete?
 
 =item AUTHOR AND COPYRIGHT
 
-=head2 perlfaq9 - Networking ($Revision: 1.13 $)
+=head2 perlfaq9 - Networking ($Revision: 1.15 $, $Date: 1997/03/25 18:17:20
+$)
 
 =item DESCRIPTION
 
@@ -813,7 +825,7 @@ file on another machine?
 
 =item Compilation Option: Binary Compatibility With 5.003
 
-=item No Autovivification of Subroutine Parameters
+=item Subroutine arguments created only when they're modified
 
 =item Fixed Parsing of $$<digit>, &$<digit>, etc.
 
@@ -838,8 +850,8 @@ $^E, $^H, $^M
 delete on slices, flock, printf and sprintf, keys as an lvalue, my() in
 Control Structures, unpack() and pack(), use VERSION, use Module VERSION
 LIST, prototype(FUNCTION), srand, $_ as Default, C<m//g> does not trigger a
-pos() reset on failure, nested C<sub{}> closures work now, formats work
-right on changing lexicals
+pos() reset on failure, C<m//x> ignores whitespace before ?*+{}, nested
+C<sub{}> closures work now, formats work right on changing lexicals
 
 =item New Built-in Methods
 
@@ -2296,38 +2308,34 @@ G_NOARGS, G_SCALAR, gv_fetchmeth, gv_fetchmethod, gv_stashpv, gv_stashsv,
 GvSV, HEf_SVKEY, HeHASH, HeKEY, HeKLEN, HePV, HeSVKEY, HeSVKEY_force,
 HeSVKEY_set, HeVAL, hv_clear, hv_delayfree_ent, hv_delete, hv_delete_ent,
 hv_exists, hv_exists_ent, hv_fetch, hv_fetch_ent, hv_free_ent, hv_iterinit,
-hv_iterkey, hv_iterkeysv    
-Returns the key as an C<SV*> from the current position of the hash
-iterator.  The return value will always be a mortal copy of the
-key.  Also see C<hv_iterinit>, hv_iternext, hv_iternextsv, hv_iterval,
-hv_magic, HvNAME, hv_store, hv_store_ent, hv_undef, isALNUM, isALPHA,
-isDIGIT, isLOWER, isSPACE, isUPPER, items, ix, LEAVE, MARK, mg_clear,
-mg_copy, mg_find, mg_free, mg_get, mg_len, mg_magical, mg_set, Move, na,
-New, Newc, Newz, newAV, newHV, newRV_inc, newRV_noinc, newSV, newSViv,
-newSVnv, newSVpv, newSVrv, newSVsv, newXS, newXSproto, Nullav, Nullch,
-Nullcv, Nullhv, Nullsv, ORIGMARK, perl_alloc, perl_call_argv,
-perl_call_method, perl_call_pv, perl_call_sv, perl_construct,
-perl_destruct, perl_eval_sv, perl_free, perl_get_av, perl_get_cv,
-perl_get_hv, perl_get_sv, perl_parse, perl_require_pv, perl_run, POPi,
-POPl, POPp, POPn, POPs, PUSHMARK, PUSHi, PUSHn, PUSHp, PUSHs, PUTBACK,
-Renew, Renewc, RETVAL, safefree, safemalloc, saferealloc, savepv, savepvn,
-SAVETMPS, SP, SPAGAIN, ST, strEQ, strGE, strGT, strLE, strLT, strNE,
-strnEQ, strnNE, sv_2mortal, sv_bless, sv_catpv, sv_catpvn, sv_catsv,
-sv_cmp, sv_cmp, SvCUR, SvCUR_set, sv_dec, sv_dec, SvEND, sv_eq, SvGROW,
-sv_grow, sv_inc, SvIOK, SvIOK_off, SvIOK_on, SvIOK_only, SvIOK_only,
-SvIOKp, sv_isa, SvIV, sv_isobject, SvIVX, SvLEN, sv_len, sv_len, sv_magic,
-sv_mortalcopy, SvOK, sv_newmortal, sv_no, SvNIOK, SvNIOK_off, SvNIOKp,
-SvNOK, SvNOK_off, SvNOK_on, SvNOK_only, SvNOK_only, SvNOKp, SvNV, SvNVX,
-SvPOK, SvPOK_off, SvPOK_on, SvPOK_only, SvPOK_only, SvPOKp, SvPV, SvPVX,
-SvREFCNT, SvREFCNT_dec, SvREFCNT_inc, SvROK, SvROK_off, SvROK_on, SvRV,
-sv_setiv, sv_setnv, sv_setpv, sv_setpvn, sv_setref_iv, sv_setref_nv,
-sv_setref_pv, sv_setref_pvn, sv_setsv, SvSTASH, SVt_IV, SVt_PV, SVt_PVAV,
-SVt_PVCV, SVt_PVHV, SVt_PVMG, SVt_NV, SvTRUE, SvTYPE, svtype, SvUPGRADE,
-sv_upgrade, sv_undef, sv_unref, sv_usepvn, sv_yes, THIS, toLOWER, toUPPER,
-warn, XPUSHi, XPUSHn, XPUSHp, XPUSHs, XS, XSRETURN, XSRETURN_EMPTY,
-XSRETURN_IV, XSRETURN_NO, XSRETURN_NV, XSRETURN_PV, XSRETURN_UNDEF,
-XSRETURN_YES, XST_mIV, XST_mNV, XST_mNO, XST_mPV, XST_mUNDEF, XST_mYES,
-XS_VERSION, XS_VERSION_BOOTCHECK, Zero
+hv_iterkey, hv_iterkeysv, hv_iternext, hv_iternextsv, hv_iterval, hv_magic,
+HvNAME, hv_store, hv_store_ent, hv_undef, isALNUM, isALPHA, isDIGIT,
+isLOWER, isSPACE, isUPPER, items, ix, LEAVE, MARK, mg_clear, mg_copy,
+mg_find, mg_free, mg_get, mg_len, mg_magical, mg_set, Move, na, New, Newc,
+Newz, newAV, newHV, newRV_inc, newRV_noinc, newSV, newSViv, newSVnv,
+newSVpv, newSVrv, newSVsv, newXS, newXSproto, Nullav, Nullch, Nullcv,
+Nullhv, Nullsv, ORIGMARK, perl_alloc, perl_call_argv, perl_call_method,
+perl_call_pv, perl_call_sv, perl_construct, perl_destruct, perl_eval_sv,
+perl_free, perl_get_av, perl_get_cv, perl_get_hv, perl_get_sv, perl_parse,
+perl_require_pv, perl_run, POPi, POPl, POPp, POPn, POPs, PUSHMARK, PUSHi,
+PUSHn, PUSHp, PUSHs, PUTBACK, Renew, Renewc, RETVAL, safefree, safemalloc,
+saferealloc, savepv, savepvn, SAVETMPS, SP, SPAGAIN, ST, strEQ, strGE,
+strGT, strLE, strLT, strNE, strnEQ, strnNE, sv_2mortal, sv_bless, sv_catpv,
+sv_catpvn, sv_catsv, sv_cmp, sv_cmp, SvCUR, SvCUR_set, sv_dec, sv_dec,
+SvEND, sv_eq, SvGROW, sv_grow, sv_inc, SvIOK, SvIOK_off, SvIOK_on,
+SvIOK_only, SvIOK_only, SvIOKp, sv_isa, SvIV, sv_isobject, SvIVX, SvLEN,
+sv_len, sv_len, sv_magic, sv_mortalcopy, SvOK, sv_newmortal, sv_no, SvNIOK,
+SvNIOK_off, SvNIOKp, SvNOK, SvNOK_off, SvNOK_on, SvNOK_only, SvNOK_only,
+SvNOKp, SvNV, SvNVX, SvPOK, SvPOK_off, SvPOK_on, SvPOK_only, SvPOK_only,
+SvPOKp, SvPV, SvPVX, SvREFCNT, SvREFCNT_dec, SvREFCNT_inc, SvROK,
+SvROK_off, SvROK_on, SvRV, sv_setiv, sv_setnv, sv_setpv, sv_setpvn,
+sv_setref_iv, sv_setref_nv, sv_setref_pv, sv_setref_pvn, sv_setsv, SvSTASH,
+SVt_IV, SVt_PV, SVt_PVAV, SVt_PVCV, SVt_PVHV, SVt_PVMG, SVt_NV, SvTRUE,
+SvTYPE, svtype, SvUPGRADE, sv_upgrade, sv_undef, sv_unref, sv_usepvn,
+sv_yes, THIS, toLOWER, toUPPER, warn, XPUSHi, XPUSHn, XPUSHp, XPUSHs, XS,
+XSRETURN, XSRETURN_EMPTY, XSRETURN_IV, XSRETURN_NO, XSRETURN_NV,
+XSRETURN_PV, XSRETURN_UNDEF, XSRETURN_YES, XST_mIV, XST_mNV, XST_mNO,
+XST_mPV, XST_mUNDEF, XST_mYES, XS_VERSION, XS_VERSION_BOOTCHECK, Zero
 
 =item EDITOR
 
@@ -4207,8 +4215,7 @@ setlogmask $mask_priority, closelog
 
 =item DESCRIPTION
 
-E<lt>tabE<gt>Attempts word completion.
-Cannot be changed, ^D, ^U, E<lt>delE<gt>, E<lt>bsE<gt>
+E<lt>tabE<gt>, ^D, ^U, E<lt>delE<gt>, E<lt>bsE<gt>
 
 =item DIAGNOSTICS
 
@@ -4401,7 +4408,8 @@ function
 
 =item DESCRIPTION
 
-isa ( TYPE ), can ( METHOD ), VERSION ( [ REQUIRE ] ), isa ( REF, TYPE )
+isa ( TYPE ), can ( METHOD ), VERSION ( [ REQUIRE ] ), isa ( VAL, TYPE ),
+can ( VAL, METHOD )
 
 =head2 User::grent - by-name interface to Perl's built-in getgr*()
 functions

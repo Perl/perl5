@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq4 - Data Manipulation ($Revision: 1.15 $)
+perlfaq4 - Data Manipulation ($Revision: 1.17 $, $Date: 1997/03/25 18:16:24 $)
 
 =head1 DESCRIPTION
 
@@ -254,7 +254,7 @@ Although those with a regexp kind of thought process will likely prefer
 
 You have to keep track.  For example, let's say you want
 to change the fifth occurrence of "whoever" or "whomever"
-into "whosoever", case insensitively.
+into "whosoever" or "whomsoever", case insensitively.
 
     $count = 0;
     s{((whom?)ever)}{
@@ -286,12 +286,15 @@ integers:
 =head2 How do I capitalize all the words on one line?
 
 To make the first letter of each word upper case:
+
         $line =~ s/\b(\w)/\U$1/g;
 
 To make the whole line upper case:
+
         $line = uc($line);
 
 To force each word to be lower case, with the first letter upper case:
+
         $line =~ s/(\w+)/\u\L$1/g;
 
 =head2 How can I split a [character] delimited string except when inside
@@ -770,7 +773,7 @@ find one of the associated keys.   This may or may not worry you.
 If you mean how many keys, then all you have to do is
 take the scalar sense of the keys() function:
 
-	$num_keys = scalar keys %hash;
+    $num_keys = scalar keys %hash;
 
 In void context it just resets the iterator, which is faster
 for tied hashes.

@@ -47,9 +47,17 @@ there's really no difference from the language's perspective.)
 
 Any arguments passed to the routine come in as the array @_.  Thus if you
 called a function with two arguments, those would be stored in C<$_[0]>
-and C<$_[1]>.  The array @_ is a local array, but its values are implicit
-references (predating L<perlref>) to the actual scalar parameters.  The
-return value of the subroutine is the value of the last expression
+and C<$_[1]>.  The array @_ is a local array, but its elements are
+aliases for the actual scalar parameters.  In particular, if an element
+C<$_[0]> is updated, the corresponding argument is updated (or an error
+occurs if it is not updatable).  If an argument is an array or hash
+element which did not exist when the function was called, that element is
+created only when (and if) it is modified or if a reference to it is
+taken.  (Some earlier versions of Perl created the element whether or not
+it was assigned to.)  Note that assigning to the whole array @_ removes
+the aliasing, and does not update any arguments.
+
+The return value of the subroutine is the value of the last expression
 evaluated.  Alternatively, a return statement may be used to specify the
 returned value and exit the subroutine.  If you return one or more arrays
 and/or hashes, these will be flattened together into one large

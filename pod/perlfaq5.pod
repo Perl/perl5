@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq5 - Files and Formats ($Revision: 1.19 $)
+perlfaq5 - Files and Formats ($Revision: 1.20 $, $Date: 1997/03/19 17:24:51 $)
 
 =head1 DESCRIPTION
 

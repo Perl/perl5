@@ -1241,7 +1241,7 @@
  *	This symbol, if defined, indicates to the C program that it should
  *	include <utime.h>.
  */
-/*#define I_UTIME		/**/
+#define I_UTIME		/**/
 
 /* I_STDARG:
  *	This symbol, if defined, indicates that <stdarg.h> exists and should

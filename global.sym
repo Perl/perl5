@@ -45,7 +45,6 @@ cshlen
 cshname
 curinterp
 curpad
-cv_const_sv
 dc
 debug
 dec_amg
@@ -363,7 +362,9 @@ ck_trunc
 convert
 cpytill
 croak
+cv_ckproto
 cv_clone
+cv_const_sv
 cv_undef
 cx_dump
 cxinc

@@ -45,9 +45,10 @@ OP*	convert _((I32 optype, I32 flags, OP* op));
 char*	cpytill _((char* to, char* from, char* fromend, int delim, I32* retlen));
 void	croak _((const char* pat,...))
 		__attribute__((format(printf,1,2),noreturn));
+void	cv_ckproto _((CV* cv, GV* gv, char* p));
 CV*	cv_clone _((CV* proto));
-void	cv_undef _((CV* cv));
 SV*	cv_const_sv _((CV* cv));
+void	cv_undef _((CV* cv));
 #ifdef DEBUGGING
 void	cx_dump _((CONTEXT* cs));
 #endif

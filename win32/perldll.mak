@@ -251,7 +251,7 @@ DEP_CPP_PERLL=\
 	"..\unixish.h"\
 	"..\util.h"\
 	".\config.h"\
-	".\EXTERN.h"\
+	"..\EXTERN.h"\
 	".\include\dirent.h"\
 	".\include\netdb.h"\
 	".\include\sys/socket.h"\
@@ -326,7 +326,7 @@ DEP_CPP_WIN32=\
 	"..\unixish.h"\
 	"..\util.h"\
 	".\config.h"\
-	".\EXTERN.h"\
+	"..\EXTERN.h"\
 	".\include\dirent.h"\
 	".\include\netdb.h"\
 	".\include\sys/socket.h"\
@@ -360,7 +360,7 @@ DEP_CPP_WIN32_=\
 	"..\perlsdio.h"\
 	"..\perlsfio.h"\
 	".\config.h"\
-	".\EXTERN.h"\
+	"..\EXTERN.h"\
 	".\include\dirent.h"\
 	".\include\netdb.h"\
 	".\include\sys/socket.h"\
@@ -376,7 +376,7 @@ DEP_CPP_WIN32_=\
 
 DEP_CPP_WIN32_=\
 	"..\perl.h"\
-	".\EXTERN.h"\
+	"..\EXTERN.h"\
 	{$(INCLUDE)}"\sys\stat.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	

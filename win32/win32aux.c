@@ -16,6 +16,7 @@ extern "C" {
 #include <assert.h>
 #include <errno.h>
 
+#include "win32.h"
 #include "win32iop.h"
 
 struct servent*
@@ -24,7 +25,7 @@ win32_savecopyservent(struct servent*d, struct servent*s, const char *proto)
     d->s_name = s->s_name;
     d->s_aliases = s->s_aliases;
     d->s_port = s->s_port;
-    if (s->s_proto && strlen(s->s_proto))
+    if (!IsWin95() && s->s_proto && strlen(s->s_proto))
 	d->s_proto = s->s_proto;
     else if (proto && strlen(proto))
 	d->s_proto = (char *)proto;

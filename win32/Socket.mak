@@ -116,7 +116,7 @@ ALL : "$(OUTDIR)\Socket.dll"
 CLEAN : 
 	-@erase ".\debug\vc40.pdb"
 	-@erase ".\debug\vc40.idb"
-	-@erase ".\debug\Socket.dll"
+	-@erase "..\lib\auto\Socket\Socket.dll"
 	-@erase ".\debug\Socket.obj"
 	-@erase ".\debug\Socket.ilk"
 	-@erase ".\debug\Socket.lib"
@@ -148,8 +148,8 @@ LINK32=link.exe
 # ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib /nologo /subsystem:windows /dll /debug /machine:I386
 LINK32_FLAGS=kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib\
  advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib /nologo\
- /subsystem:windows /dll /incremental:yes /pdb:"$(OUTDIR)/Socket.pdb" /debug\
- /machine:I386 /def:".\Socket.def" /out:"$(OUTDIR)/Socket.dll"\
+ /subsystem:windows /dll /incremental:no /pdb:"$(OUTDIR)/Socket.pdb" /debug\
+ /machine:I386 /def:".\Socket.def" /out:"..\lib\auto\Socket\Socket.dll"\
  /implib:"$(OUTDIR)/Socket.lib" 
 DEF_FILE= \
 	".\Socket.def"
@@ -199,7 +199,7 @@ LINK32_OBJS= \
 
 SOURCE=..\ext\Socket\Socket.c
 DEP_CPP_SOCKE=\
-	".\EXTERN.h"\
+	"..\EXTERN.h"\
 	".\..\perl.h"\
 	".\..\XSUB.h"\
 	{$(INCLUDE)}"\sys\Types.h"\

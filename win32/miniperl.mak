@@ -293,7 +293,7 @@ DEP_CPP_WIN32=\
 	".\..\unixish.h"\
 	".\..\util.h"\
 	".\config.h"\
-	".\EXTERN.h"\
+	".\..\EXTERN.h"\
 	".\include\dirent.h"\
 	".\include\netdb.h"\
 	".\include\sys/socket.h"\
@@ -343,7 +343,7 @@ DEP_CPP_WIN32S=\
 	".\..\unixish.h"\
 	".\..\util.h"\
 	".\config.h"\
-	".\EXTERN.h"\
+	".\..\EXTERN.h"\
 	".\include\dirent.h"\
 	".\include\netdb.h"\
 	".\include\sys/socket.h"\

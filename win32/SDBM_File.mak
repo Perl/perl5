@@ -211,7 +211,7 @@ LINK32_OBJS= \
 
 SOURCE=..\ext\SDBM_File\SDBM_File.c
 DEP_CPP_SDBM_=\
-	".\EXTERN.h"\
+	"..\EXTERN.h"\
 	".\..\perl.h"\
 	".\..\XSUB.h"\
 	".\..\ext\SDBM_File\sdbm\sdbm.h"\

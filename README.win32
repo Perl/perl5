@@ -13,12 +13,12 @@ These are instructions for building Perl under WindowsNT (versions
 
 =head1 DESCRIPTION
 
-Before you start, you should glance through the README file found
+Before you start, you should glance through the README file
 found in the top-level directory where the Perl distribution
 was extracted.  Make sure you read and understand the terms under
 which this software is being distributed.
 
-Make sure you read the L<BUGS AND CAVEATS> section below for the
+Also make sure you read the L<BUGS AND CAVEATS> section below for the
 known limitations of this port.
 
 The INSTALL file in the perl top-level has much information that is
@@ -76,8 +76,8 @@ but it doesn't hurt to do so.
 
 The "win32" directory contains *.mak files for use with the NMAKE that
 comes with Visual C++ ver. 4.0 and above.  If you wish to build perl
-using Visual C++ versions between 2.0 and 4.0, do the following three
-additional steps (these three steps are not required if you are
+using Visual C++ versions between 2.0 and 4.0, do the following two
+additional steps (these steps are not required if you are
 using Visual C++ versions 4.0 and above):
 
 =over 8
@@ -85,9 +85,7 @@ using Visual C++ versions 4.0 and above):
 =item 1.
 
 Overwrite the *.mak files in the win32 subdirectory with the versions
-in the win32\VC-2.0 directory.  (The only difference in those makefiles
-is in how the $(INCLUDE) variable is handled--VC 2.0 NMAKE does not
-grok a path list in $(INCLUDE)).
+in the win32\VC-2.0 directory.
 
 =item 2.
 
@@ -99,15 +97,6 @@ For example:
 This must have only one directory (a list of directories will not work).
 VCVARS32.BAT may put multiple locations in there, which is why this step
 is required.
-
-=item 3.
-
-Apply the patch found in win32\VC-2.0\vc2.patch, like so:
-
-	cd win32
-	patch -p2 -N < VC-2.0\vc2.patch
-
-You may have to edit win32\win32.c manually if you don't have GNU patch.
 
 =back
 
@@ -152,16 +141,17 @@ This should produce a summary very similar to the following:
     Failed Test  Status Wstat Total Fail  Failed  List of failed
     ------------------------------------------------------------------------------
     io/fs.t                      26   16  61.54%  1-5, 7-11, 16-18, 23-25
-    io/tell.t                    13    1   7.69%  10
     lib/anydbm.t                 12    1   8.33%  2
     lib/findbin.t                 1    1 100.00%  1
     lib/sdbm.t                   12    1   8.33%  2
+    op/magic.t                   28    1   3.57%  16
     op/mkdir.t                    7    2  28.57%  3, 7
     op/runlevel.t                 8    1  12.50%  4
-    op/stat.t                    56    3   5.36%  3-4, 20
+    op/stat.t                    56    3   5.36%  2-3, 20
     op/taint.t                   98   20  20.41%  1-6, 14, 16, 19-21, 24, 26, 35-3
     pragma/locale.t              98   40  40.82%  1, 13-14, 21-27, 33, 39, 45-53,
-    Failed 10/149 test scripts, 93.29% okay. 86/3506 subtests failed, 97.55% okay.
+    Failed 10/149 test scripts, 93.29% okay. 86/3871 subtests failed, 97.78% okay.
+
 
 Check if any additional tests other than the ones shown here
 failed.  The standard testsuite will ultimately be modified so
@@ -173,7 +163,7 @@ This is still very much an experimental port, and should be considered
 alpha quality software.  You can expect changes in virtually all of
 these areas: build process, installation structure, supported
 utilities/modules, and supported perl functionality.  Specifically,
-functionality that supports the Win32 environment may be ultimately
+functionality that supports the Win32 environment may ultimately
 be supported as either core modules or extensions.
 
 Many tests from the standard testsuite either fail or produce different

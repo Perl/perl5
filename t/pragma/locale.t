@@ -40,6 +40,7 @@ sub ok {
 # even the default locale will taint under 'use locale'.
 
 sub is_tainted { # hello, camel two.
+    local $^W;	# no warnings 'undef'
     my $dummy;
     not eval { $dummy = join("", @_), kill 0; 1 }
 }

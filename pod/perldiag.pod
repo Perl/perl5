@@ -334,6 +334,12 @@ wasn't a symbol table entry.
 of Perl.  Check the #! line, or manually feed your script into
 Perl yourself.
 
+=item Bareword "%s" not allowed while "strict subs" in use
+
+(F) With "strict subs" in use, a bareword is only allowed as a
+subroutine identifier, in curly braces or to the left of the "=>" symbol.
+Perhaps you need to pre-declare a subroutine?
+
 =item BEGIN failed--compilation aborted
 
 (F) An untrapped exception was raised while executing a BEGIN subroutine.
@@ -475,7 +481,7 @@ They must have ordinary identifiers as names.
 =item Can't do in-place edit without backup
 
 (F) You're on a system such as MSDOS that gets confused if you try reading
-from a deleted (but still opened) file.  You have to say B<-i>C<.bak>, or some
+from a deleted (but still opened) file.  You have to say C<-i.bak>, or some
 such.
 
 =item Can't do inplace edit: %s E<gt> 14 characters
@@ -1869,10 +1875,10 @@ last argument of the previous construct, for example:
 
     open FOO || die;
 
-=item Prototype mismatch: (%s) vs (%s)
+=item Prototype mismatch: %s vs %s
 
-(S) The subroutine being defined had a pre-declared (forward) declaration
-with a different function prototype.
+(S) The subroutine being declared or defined had previously been declared
+or defined with a different function prototype.
 
 =item Read on closed filehandle E<lt>%sE<gt>
 
@@ -2461,7 +2467,7 @@ bad side effects.
 =item Use of bare E<lt>E<lt> to mean E<lt>E<lt>"" is deprecated
 
 (D) You are now encouraged to use the explicitly quoted form if you
-wish to use a blank line as the terminator of the here-document.
+wish to use an empty line as the terminator of the here-document.
 
 =item Use of implicit split to @_ is deprecated
 

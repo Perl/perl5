@@ -1,3 +1,15 @@
+This document is written in a format called Plain Old Documentation,
+or "pod" for short.  For a description of the pod format, please read
+"pod/perlpod.pod".
+
+Here's the short version: lines that begin with "=" are special, like
+headings and list items; lines that begin with whitespace are to be
+read verbatim, perhaps because they are source code; B<> surrounds
+bold text, I<> surrounds italicized text, C<> surrounds verbatim text
+like source code, F<> surrounds a filename, L<> surrounds a link to
+another document (e.g. L<perlpod> means "pod/perlpod.pod"), and E<>
+represents a special character (E<lt> is "<" and E<gt> is ">").
+
 =head1 NAME
 
 Install - Build and Installation guide for perl5.
@@ -19,8 +31,7 @@ The basic steps to build and install perl5 on a Unix system are:
 
 Each of these is explained in further detail below.
 
-For information on non-Unix systems, see the section on
-L<"Porting information"> below.
+For information on non-Unix systems, see L<"Porting information"> below.
 
 =head1 DESCRIPTION
 
@@ -39,7 +50,7 @@ provide additional or different instructions for building Perl.
 =head1 Space Requirements
 
 The complete perl5 source tree takes up about 7 MB of disk space.
-The complete tree after completing C<make> takes roughly
+The complete tree after completing B<make> takes roughly
 15 MB, though the actual total is likely to be quite
 system-dependent.  The installation directories need something
 on the order of 7 MB, though again that value is system-dependent.
@@ -217,14 +228,14 @@ F</usr/local/lib/libgdbm.a>.  Configure should figure all the
 necessary steps out automatically.
 
 Specifically, when Configure prompts you for flags for
-your C compiler, you should include  C<-I/usr/local/include>.
+your C compiler, you should include  B<-I/usr/local/include>.
 
 When Configure prompts you for linker flags, you should include
-C<-L/usr/local/lib>.
+B<-L/usr/local/lib>.
 
 If you are using dynamic loading, then when Configure prompts you for
 linker flags for dynamic loading, you should again include
-C<-L/usr/local/lib>.
+B<-L/usr/local/lib>.
 
 Again, this should all happen automatically.  If you want to accept the
 defaults for all the questions and have Configure print out only terse
@@ -420,6 +431,10 @@ answer "n" when B<Configure> asks if you want binary compatibility.
 
 The default answer of "y" to maintain binary compatibility is probably
 appropriate for almost everyone.
+
+In a related issue, old extensions may also be affected by the changes
+in the Perl language from 5.003 to 5.004.  Please see L<perldelta> for
+a description of what's changed.
 
 =head2 Selecting File IO mechanisms
 
@@ -662,16 +677,20 @@ negligible.
 =head2 Building a debugging perl
 
 You can run perl scripts under the perl debugger at any time with
-B<perl -d>.  If, however, you want to debug perl itself,
+B<perl -d your_script>.  If, however, you want to debug perl itself,
 you probably want to do
 
 	sh Configure -Doptimize='-g'
 
 This will do two things:  First, it will force compilation to use
 B<cc -g> so that you can use your system's debugger on the executable.
-Second, it will add a C<-DDEBUGGING> to your ccflags variable in
+Second, it will add a B<-DDEBUGGING> to your ccflags variable in
 F<config.sh> so that you can use B<perl -D> to access perl's internal
-state.
+state.  Note, however, that Configure will only add -DDEBUGGING by
+default if you are not reusing your old F<config.sh>.  If you want to
+reuse your old F<config.sh>, then you can just edit it and change the
+optimize and ccflags variables by hand and then propagate your changes
+as shown in L<"Propagating your changes to config.sh"> below.
 
 If you are using a shared libperl, see the warnings about multiple
 versions of perl under L<Building a shared libperl.so Perl library>.
@@ -689,7 +708,7 @@ following:
 
 	sh Configure -Dccflags='-Drand=random -Dsrand=srandom'
 
-or by adding C<-Drand=random> and C<-Dsrandom=srandom> to your ccflags
+or by adding B<-Drand=random> and B<-Dsrandom=srandom> to your ccflags
 at the appropriate Configure prompt.  (You may also have to adjust
 Configure's guess for 'randbits' as well.)
 
@@ -964,6 +983,13 @@ If Configure guessed wrong, it is likely that Configure guessed wrong
 on a number of other common functions too.  You are probably better off
 re-running Configure without using nm extraction (see previous item).
 
+=item do_aspawn
+
+If you run into problems relating to do_aspawn or do_spawn, the
+problem is probably that Configure failed to detect your system's
+fork() function.  Follow the procedure in the previous items
+on L<"vsprintf"> and L<"nm extraction">.
+
 =item Optimizer
 
 If you can't compile successfully, try turning off your compiler's
@@ -980,7 +1006,7 @@ with B<make depend; make>.
 
 =item *
 
-If you still can't compile successfully, try adding a C<-DCRIPPLED_CC>
+If you still can't compile successfully, try adding a B<-DCRIPPLED_CC>
 flag.  (Just because you get no errors doesn't mean it compiled right!)
 This simplifies some complicated expressions for compilers that get
 indigestion easily.
@@ -1088,7 +1114,7 @@ comments that apply to your system.
 
 B<Note>:  One possible reason for errors is that some external programs
 may be broken due to the combination of your environment and the way
-C<make test> exercises them.  For example, this may happen if you have
+B<make test> exercises them.  For example, this may happen if you have
 one or more of these environment variables set:  C<LC_ALL LC_CTYPE
 LC_COLLATE LANG>.  In some versions of UNIX, the non-English locales
 are known to cause programs to exhibit mysterious errors.
@@ -1101,7 +1127,7 @@ If you have any of the above environment variables set, please try
 
 	LC_ALL=C;export LC_ALL
 
-for Bourne or Korn shell) from the command line and then retry C<make
+for Bourne or Korn shell) from the command line and then retry B<make
 test>.  If the tests then succeed, you may have a broken program that
 is confusing the testing.  Please run the troublesome test by hand as
 shown above and see whether you can locate the program.  Look for
@@ -1187,8 +1213,12 @@ directory.  They are simply in F</usr/local/lib/perl5/$archname>.  If
 you will not be using 5.000 or 5.001, you may safely remove those
 files.
 
-The standard library files in F</usr/local/lib/perl5>
-should be usable by all versions of perl5.
+The standard library files in F</usr/local/lib/perl5> should be usable
+by all versions of perl5.  However, the L<diagnostics> module uses the
+F<pod/perldiag.pod> documentation file relative to this directory.  So
+after you install 5.004, the C<use diagnostics> pragma and the
+B<splain> script may not correctly identify and explain any warnings
+or errors that Perl 5.004 would not have generated.
 
 Most extensions will probably not need to be recompiled to use with a newer
 version of perl.  If you do run into problems, and you want to continue
@@ -1302,4 +1332,5 @@ from the original README by Larry Wall.
 
 =head1 LAST MODIFIED
 
-$Id: INSTALL,v 1.8 1997/03/21 16:21:53 doughera Released $
+$Id: INSTALL,v 1.9 1997/03/25 18:50:19 doughera Released $
+Additional modification by Chip Salzenberg, 1997/03/25

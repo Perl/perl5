@@ -4,6 +4,8 @@
 
 print "1..5\n";
 
+my $CAT = ($^O eq 'MSWin32') ? 'type' : 'cat';
+
 format OUT =
 the quick brown @<<
 $fox
@@ -42,7 +44,7 @@ the course
 of huma...
 now is the time for all good men to come to\n";
 
-if (`cat Op_write.tmp` eq $right)
+if (`$CAT Op_write.tmp` eq $right)
     { print "ok 1\n"; unlink 'Op_write.tmp'; }
 else
     { print "not ok 1\n"; }
@@ -84,7 +86,7 @@ becomes
 necessary
 now is the time for all good men to come to\n";
 
-if (`cat Op_write.tmp` eq $right)
+if (`$CAT Op_write.tmp` eq $right)
     { print "ok 2\n"; unlink 'Op_write.tmp'; }
 else
     { print "not ok 2\n"; }
@@ -128,7 +130,7 @@ becomes
 necessary
 now is the time for all good men to come to\n";
 
-if (`cat Op_write.tmp` eq $right)
+if (`$CAT Op_write.tmp` eq $right)
     { print "ok 3\n"; unlink 'Op_write.tmp'; }
 else
     { print "not ok 3\n"; }

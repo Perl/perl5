@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq9 - Networking ($Revision: 1.13 $)
+perlfaq9 - Networking ($Revision: 1.15 $, $Date: 1997/03/25 18:17:20 $)
 
 =head1 DESCRIPTION
 
@@ -228,6 +228,23 @@ package) is UNIX-centric, while Mail::Internet uses Net::SMTP which is
 not UNIX-centric.  Reading mail: use the Mail::Folder module from CPAN
 (part of the MailFolder package) or the Mail::Internet module from
 CPAN (also part of the MailTools package).
+
+   # sending mail
+    use Mail::Internet;
+    use Mail::Header;
+    # say which mail host to use
+    $ENV{SMTPHOSTS} = 'mail.frii.com';
+    # create headers
+    $header = new Mail::Header;
+    $header->add('From', 'gnat@frii.com');
+    $header->add('Subject', 'Testing');
+    $header->add('To', 'gnat@frii.com');
+    # create body
+    $body = 'This is a test, ignore';
+    # create mail object
+    $mail = new Mail::Internet(undef, Header => $header, Body => \[$body]);
+    # send it
+    $mail->smtpsend or die;
 
 =head2 How do I find out my hostname/domainname/IP address?
 

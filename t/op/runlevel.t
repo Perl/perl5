@@ -17,6 +17,7 @@
 chdir 't' if -d 't';
 @INC = "../lib";
 $Is_VMS = $^O eq 'VMS';
+$Is_MSWin32 = $^O eq 'MSWin32';
 $ENV{PERL5LIB} = "../lib" unless $Is_VMS;
 
 $|=1;
@@ -40,7 +41,9 @@ for (@prgs){
     close TEST;
     my $results = $Is_VMS ?
 		  `MCR $^X "-I[-.lib]" $switch $tmpfile` :
-		  `sh -c './perl $switch $tmpfile' 2>&1`;
+		      $Is_MSWin32 ?  
+			  `.\\perl -I../lib $switch $tmpfile 2>&1` :
+			      `sh -c './perl $switch $tmpfile' 2>&1`;
     my $status = $?;
     $results =~ s/\n+$//;
     # allow expected output to be written as if $prog is on STDIN

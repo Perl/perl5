@@ -40,7 +40,7 @@ GLOBEXE=..\perlglob.exe
 
 PL2BAT=bin\PL2BAT.BAT
 MAKE=nmake /nologo
-XCOPY=xcopy /d /f /r
+XCOPY=xcopy /i /d /f /r
 NULL=
 
 #
@@ -117,9 +117,6 @@ $(GLOBEXE):
 	$(MAKE) -f perlglob.mak CFG="perlglob - Win32 Release"
 
 $(PERLLIB): $(CORE_C)
-	attrib -r ..\*.h
-	copy dosish.h ..
-	copy EXTERN.h ..
 	$(MAKE) -f libperl.mak CFG="libperl - Win32 $(CFG)"
 
 $(MINIPERL): $(PERLLIB)
@@ -136,8 +133,6 @@ $(PERLDLL): $(MINIPERL) $(PERLLIB)
 	$(MAKE) -A -f perldll.mak CFG="perldll - Win32 $(CFG)"
 
 $(PERLEXE): $(MINIPERL) modules.lib $(PERLDLL)
-	attrib -r perlmain.c 
-	attrib -r perl.def
 #	$(MINIPERL) makemain.pl $(STATICLINKMODUES) > perlmain.c
 #	$(MINIPERL) makeperldef.pl $(STATICLINKMODUES) > perl.def
 	$(MINIPERL) makeperldef.pl $(NULL) > perl.def
@@ -236,6 +231,14 @@ doc: $(PERLEXE)
         $(PERLEXE) pod2html.bat *.pod
         cd ..\win32
 
+utils: $(PERLEXE)
+	cd ..\utils
+	nmake PERL=$(MINIPERL)
+	$(PERLEXE) ..\win32\$(PL2BAT) h2ph splain perlbug pl2pm c2ph \
+			h2xs perldoc pstruct
+	$(XCOPY) *.bat ..\win32\bin\*.*
+	cd ..\win32
+
 distclean:
 	-del /f $(MINIPERL) $(PERLEXE) $(PERLDLL) $(GLOBEXE) \
 		$(PERLLIB) modules.lib
@@ -249,12 +252,13 @@ distclean:
 	-rmdir /s /q release
 	-rmdir /s /q debug
 
-install : ALL doc
+install : ALL doc utils
 	if not exist $(INST_TOP) mkdir $(INST_TOP)
 	echo I $(INST_TOP) L $(LIBDIR)
 	$(XCOPY) $(PERLEXE) $(INST_BIN)\*.*
 	$(XCOPY) $(GLOBEXE) $(INST_BIN)\*.*
 	$(XCOPY) $(PERLDLL) $(INST_BIN)\*.*
+	$(XCOPY) bin\*.* $(INST_BIN)\*.*
 	$(XCOPY) /e ..\lib $(INST_LIB)\*.*
 	$(XCOPY) ..\pod\*.bat $(INST_BIN)\*.*
 	$(XCOPY) ..\pod\*.pod $(INST_POD)\*.*

@@ -388,8 +388,8 @@ When C<Call_fred> is executed it will print
 As control never returns to C<Call_fred>, the C<"back in Call_fred">
 string will not get printed.
 
-To work around this problem, you can either upgrade to Perl 5.002 (or
-later), or use the G_EVAL flag with I<perl_call_*> as shown below
+To work around this problem, you can either upgrade to Perl 5.002 or
+higher, or use the G_EVAL flag with I<perl_call_*> as shown below
 
     void
     Call_fred()

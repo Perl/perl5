@@ -25,7 +25,7 @@ $PERL = ($Is_MSWin32 ? '.\perl' : './perl');
 print "1..28\n";
 
 eval '$ENV{"foo"} = "hi there";';	# check that ENV is inited inside eval
-if ($Is_MSWin32) { ok 1, `set foo` eq "foo=hi there\n"; }
+if ($Is_MSWin32) { ok 1, `cmd /x /c set foo` eq "foo=hi there\n"; }
 else             { ok 1, `echo \$foo` eq "hi there\n"; }
 
 unlink 'ajslkdfpqjsjfk';

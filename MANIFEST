@@ -773,7 +773,6 @@ vms/vms.c		VMS-specific C code for Perl core
 vms/vms_yfix.pl		convert Unix perly.[ch] to VMS perly_[ch].vms
 vms/vmsish.h		VMS-specific C header for Perl core
 vms/writemain.pl	Generate perlmain.c from miniperlmain.c+extensions
-win32/EXTERN.h		Win32 port
 win32/Fcntl.mak		Win32 port
 win32/IO.mak		Win32 port
 win32/Makefile		Win32 port
@@ -781,6 +780,9 @@ win32/Opcode.mak	Win32 port
 win32/SDBM_File.mak	Win32 port
 win32/Socket.mak	Win32 port
 win32/TEST		Win32 port
+win32/VC-2.0/Fcntl.mak		Win32 port
+win32/VC-2.0/IO.mak		Win32 port
+win32/VC-2.0/Opcode.mak		Win32 port
 win32/VC-2.0/SDBM_File.mak	Win32 port
 win32/VC-2.0/Socket.mak		Win32 port
 win32/VC-2.0/libperl.mak	Win32 port
@@ -788,7 +790,7 @@ win32/VC-2.0/miniperl.mak	Win32 port
 win32/VC-2.0/modules.mak	Win32 port
 win32/VC-2.0/perl.mak		Win32 port
 win32/VC-2.0/perldll.mak	Win32 port
-win32/VC-2.0/vc2.patch		Win32 port
+win32/VC-2.0/perlglob.mak	Win32 port
 win32/autosplit.pl	Win32 port
 win32/bin/PL2BAT.BAT	Win32 port
 win32/bin/network.pl	Win32 port
@@ -800,7 +802,6 @@ win32/config.H		Win32 config header (suffix not ".h" for metaconfig)
 win32/config.w32	Win32 port
 win32/dl_win32.xs	Win32 port
 win32/dosish.diff	Win32 port
-win32/dosish.h		Win32 port
 win32/genxsdef.pl	Win32 port
 win32/include/arpa/inet.h	Win32 port
 win32/include/dirent.h		Win32 port
@@ -817,7 +818,6 @@ win32/perldll.mak	Win32 port
 win32/perlglob.c	Win32 port
 win32/perlglob.mak	Win32 port
 win32/perllib.c		Win32 port
-win32/perlmain.c	Win32 port
 win32/runperl.c		Win32 port
 win32/splittree.pl	Win32 port
 win32/win32.c		Win32 port

@@ -105,4 +105,11 @@ typedef  char *		caddr_t;	/* In malloc.c (core address). */
 
 #pragma  warning(disable: 4018 4035 4101 4102 4244 4245 4761)
 
+int IsWin95(void);
+int IsWinNT(void);
+
+#ifndef VER_PLATFORM_WIN32_WINDOWS	/* VC-2.0 headers dont have this */
+#define VER_PLATFORM_WIN32_WINDOWS	1
+#endif
+
 #endif /* _INC_WIN32_PERL5 */

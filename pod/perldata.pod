@@ -342,7 +342,7 @@ quoted, the type of quotes you use determines the treatment of the
 text, just as in regular quoting.  An unquoted identifier works like
 double quotes.  There must be no space between the C<E<lt>E<lt>> and
 the identifier.  (If you put a space it will be treated as a null
-identifier, which is valid, and matches the first blank line.)  The
+identifier, which is valid, and matches the first empty line.)  The
 terminating string must appear by itself (unquoted and with no
 surrounding whitespace) on the terminating line.
 

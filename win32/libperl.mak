@@ -191,7 +191,7 @@ CLEAN :
 # ADD BASE CPP /nologo /W3 /Z7 /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /c
 # ADD CPP /nologo /MTd /W3 /Z7 /Od /I ".\include" /I ".." /I "." /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /c
 CPP_PROJ=/nologo /MTd /W3 /Z7 /Od /I ".\include" /I ".." /I "." /D "WIN32"\
- /D "_DEBUG" /D "_WINDOWS" /Fp"$(INTDIR)/libperl.pch" /YX /Fo"$(INTDIR)/" /c 
+/D "PERLDLL" /D "_DEBUG" /D "_WINDOWS" /Fp"$(INTDIR)/libperl.pch" /YX /Fo"$(INTDIR)/" /c 
 CPP_OBJS=.\Debug/
 CPP_SBRS=.\.
 BSC32=bscmake.exe

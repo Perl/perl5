@@ -32,14 +32,12 @@ umask(0);
 
 my $dbh = new DB_File::HASHINFO ;
 
-ok(1, $dbh->{bsize} == 0) ;
-ok(2, $dbh->{ffactor} == 0) ;
-ok(3, $dbh->{nelem} == 0) ;
-ok(4, $dbh->{cachesize} == 0) ;
-$^W = 0 ;
-ok(5, $dbh->{hash} == undef) ;
-$^W = 1 ;
-ok(6, $dbh->{lorder} == 0) ;
+ok(1, ! defined $dbh->{bsize}) ;
+ok(2, ! defined $dbh->{ffactor}) ;
+ok(3, ! defined $dbh->{nelem}) ;
+ok(4, ! defined $dbh->{cachesize}) ;
+ok(5, ! defined $dbh->{hash}) ;
+ok(6, ! defined $dbh->{lorder}) ;
 
 $dbh->{bsize} = 3000 ;
 ok(7, $dbh->{bsize} == 3000 );

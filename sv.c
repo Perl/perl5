@@ -1261,8 +1261,11 @@ register SV *sv;
 	}
 	if (SvPOKp(sv) && SvLEN(sv))
 	    return asIV(sv);
-	if (!SvROK(sv))
+	if (!SvROK(sv)) {
+	    if (dowarn && !localizing && !(SvFLAGS(sv) & SVs_PADTMP))
+		warn(warn_uninit);
 	    return 0;
+	}
     }
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
@@ -1333,8 +1336,11 @@ register SV *sv;
 	    return U_V(SvNVX(sv));
 	if (SvPOKp(sv) && SvLEN(sv))
 	    return asUV(sv);
-	if (!SvROK(sv))
+	if (!SvROK(sv)) {
+	    if (dowarn && !localizing && !(SvFLAGS(sv) & SVs_PADTMP))
+		warn(warn_uninit);
 	    return 0;
+	}
     }
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
@@ -1404,6 +1410,8 @@ register SV *sv;
 	if (SvIOKp(sv))
 	    return (double)SvIVX(sv);
         if (!SvROK(sv)) {
+	    if (dowarn && !localizing && !(SvFLAGS(sv) & SVs_PADTMP))
+		warn(warn_uninit);
             return 0;
         }
     }
@@ -1605,6 +1613,8 @@ STRLEN *lp;
 	    goto tokensave;
 	}
         if (!SvROK(sv)) {
+	    if (dowarn && !localizing && !(SvFLAGS(sv) & SVs_PADTMP))
+		warn(warn_uninit);
             *lp = 0;
             return "";
         }
@@ -1985,13 +1995,8 @@ register SV *sstr;
 				    warn("Subroutine %s redefined",
 					 GvENAME((GV*)dstr));
 			    }
-			    if (SvPOK(cv) != SvPOK(sref)
-				|| (SvPOK(cv)
-				    && strNE(SvPVX(cv), SvPVX(sref)))) {
-				warn("Prototype mismatch: (%s) vs (%s)",
-				     SvPOK(cv) ? SvPVX(cv) : "none",
-				     SvPOK(sref) ? SvPVX(sref) : "none");
-			    }
+			    cv_ckproto(cv, (GV*)dstr,
+				       SvPOK(sref) ? SvPVX(sref) : Nullch);
 			}
 			GvCV(dstr) = (CV*)sref;
 			GvCVGEN(dstr) = 0; /* Switch off cacheness. */

@@ -124,6 +124,7 @@
 #define cshname			Perl_cshname
 #define curinterp		Perl_curinterp
 #define curpad			Perl_curpad
+#define cv_ckproto		Perl_cv_ckproto
 #define cv_clone		Perl_cv_clone
 #define cv_const_sv		Perl_cv_const_sv
 #define cv_undef		Perl_cv_undef

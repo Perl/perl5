@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.13 $)
+perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.15 $, $Date: 1997/03/25 18:15:48 $)
 
 =head1 DESCRIPTION
 
@@ -39,6 +39,21 @@ grab a binary version of gcc from the net and use that to compile perl
 with.  CPAN only has binaries for systems that are terribly hard to
 get free compilers for, not for Unix systems.
 
+Your first stop should be http://www.perl.com/CPAN/ports to see what
+information is already available.  A simple installation guide for
+MS-DOS is available at http://www.cs.ruu.nl/~piet/perl5dos.html , and
+similarly for Windows 3.1 at http://www.cs.ruu.nl/~piet/perlwin3.html
+.
+
+=head2 I don't have a C compiler on my system.  How can I compile perl?
+
+Since you don't have a C compiler, you're doomed and your vendor
+should be sacrificed to the Sun gods.  But that doesn't help you.
+
+What you need to do is get a binary version of gcc for your system
+first.  Consult the Usenet FAQs for your operating system for
+information on where to get such a binary version.
+
 =head2 I copied the Perl binary from one machine to another, but scripts don't work.
 
 That's probably because you forgot libraries, or library paths differ.
@@ -54,6 +69,9 @@ the hard-coded @INC which perl is looking for.
 If this command lists any paths which don't exist on your system, then you
 may need to move the appropriate libraries to these locations, or create
 symlinks, aliases, or shortcuts appropriately.
+
+You might also want to check out L<perlfaq8/"How do I keep my own
+module/library directory?">.
 
 =head2 I grabbed the sources and tried to compile but gdbm/dynamic loading/malloc/linking/... failed.  How do I make it work?
 
@@ -222,15 +240,18 @@ It is published (on paper, not online) quarterly by Jon Orwant
 (orwant@tpj.com), editor.  Subscription information is at http://tpj.com
 or via email to subscriptions@tpj.com.
 
-Beyond this, two other magazines that frequently carry high-quality articles
-on Perl are Web Techniques (see http://www.webtechniques.com/) and
-Unix Review (http://www.unixreview.com/).
+Beyond this, two other magazines that frequently carry high-quality
+articles on Perl are Web Techniques (see
+http://www.webtechniques.com/) and Unix Review
+(http://www.unixreview.com/).  Randal Schwartz's Web Technique's
+columns are available on the web at
+http://www.stonehenge.com/merlyn/WebTechniques/ .
 
 =head2 Perl on the Net: FTP and WWW Access
 
 To get the best (and possibly cheapest) performance, pick a site from
 the list below and use it to grab the complete list of mirror sites.
->From there you can find the quickest site for you.  Remember, the
+From there you can find the quickest site for you.  Remember, the
 following list is I<not> the complete list of CPAN mirrors.
 
   http://www.perl.com/CPAN	(redirects to another mirror)

@@ -150,26 +150,27 @@ sub share_from {
     my $vars = shift;
     my $no_record = shift || 0;
     my $root = $obj->root();
-    my ($var, $arg);
     croak("vars not an array ref") unless ref $vars eq 'ARRAY';
 	no strict 'refs';
     # Check that 'from' package actually exists
     croak("Package \"$pkg\" does not exist")
 	unless keys %{"$pkg\::"};
+    my $arg;
     foreach $arg (@$vars) {
 	# catch some $safe->share($var) errors:
 	croak("'$arg' not a valid symbol table name")
 	    unless $arg =~ /^[\$\@%*&]?\w[\w:]*$/
 	    	or $arg =~ /^\$\W$/;
-	($var = $arg) =~ s/^(\W)//;	# get type char
-	# warn "share_from $pkg $1 $var";
-	*{$root."::$var"} = ($1 eq '$') ? \${$pkg."::$var"}
-			  : ($1 eq '@') ? \@{$pkg."::$var"}
-			  : ($1 eq '%') ? \%{$pkg."::$var"}
-			  : ($1 eq '*') ?  *{$pkg."::$var"}
-			  : ($1 eq '&') ? \&{$pkg."::$var"}
-			  : (!$1)       ? \&{$pkg."::$var"}
-			  : croak(qq(Can't share "$1$var" of unknown type));
+	my ($var, $type);
+	$type = $1 if ($var = $arg) =~ s/^(\W)//;
+	# warn "share_from $pkg $type $var";
+	*{$root."::$var"} = (!$type)       ? \&{$pkg."::$var"}
+			  : ($type eq '&') ? \&{$pkg."::$var"}
+			  : ($type eq '$') ? \${$pkg."::$var"}
+			  : ($type eq '@') ? \@{$pkg."::$var"}
+			  : ($type eq '%') ? \%{$pkg."::$var"}
+			  : ($type eq '*') ?  *{$pkg."::$var"}
+			  : croak(qq(Can't share "$type$var" of unknown type));
     }
     $obj->share_record($pkg, $vars) unless $no_record or !$vars;
 }

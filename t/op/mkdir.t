@@ -4,7 +4,7 @@
 
 print "1..7\n";
 
-`rm -rf blurfl`;
+$^O eq 'MSWin32' ? `cmd /x /c del /s /q blurfl` : `rm -rf blurfl`;
 
 print (mkdir('blurfl',0777) ? "ok 1\n" : "not ok 1\n");
 print (mkdir('blurfl',0777) ? "not ok 2\n" : "ok 2\n");

@@ -23,6 +23,7 @@ declarations with C<no vars> or C<no subs>.
 See L<perlmod/Pragmatic Modules> and L<strict/strict subs>.
 
 =cut
+
 require 5.000;
 
 sub import {

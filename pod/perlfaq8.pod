@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq8 - System Interaction ($Revision: 1.15 $)
+perlfaq8 - System Interaction ($Revision: 1.17 $, $Date: 1997/03/25 18:17:12 $)
 
 =head1 DESCRIPTION
 
@@ -379,6 +379,17 @@ easy-to-use approach that internally uses pipe(), fork(), and exec()
 to do the job.  Make sure you read the deadlock warnings in its
 documentation, though (see L<IPC::Open2>).
 
+=head2 Why can't I get the output of a command with system()?
+
+You're confusing the purpose of system() and backticks ('').  system()
+runs a command and returns exit status information (as a 16 bit value
+-- the low 8 bits are the signal the process died from, if any, and
+the high 8 bits are the actual exit value).  Backticks ('') run a
+command and return what it sent to STDOUT.
+
+    $status = system("mail-users");
+    $output = `ls`;
+
 =head2 How can I capture STDERR from an external command?
 
 There are three basic ways of running external commands:
@@ -437,7 +448,9 @@ process ID of the child.  The child exec()s the command to be piped
 to/from.  The parent can't know whether the exec() was successful or
 not - all it can return is whether the fork() succeeded or not.  To
 find out if the command succeeded, you have to catch SIGCHLD and
-wait() to get the exit status.
+wait() to get the exit status.  You should also catch SIGPIPE if
+you're writing to the child -- you may not have found out the exec()
+failed by the time you write.  This is documented in L<perlipc>.
 
 On systems that follow the spawn() paradigm, open() I<might> do what
 you expect - unless perl uses a shell to start your command. In this

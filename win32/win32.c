@@ -41,8 +41,15 @@ char  szShellPath[MAX_PATH+1];
 char  szPerlLibRoot[MAX_PATH+1];
 HANDLE PerlDllHandle = INVALID_HANDLE_VALUE;
 
-#define IsWin95()	(Win32System == VER_PLATFORM_WIN32_WINDOWS)
-#define IsWinNT()	(Win32System == VER_PLATFORM_WIN32_NT)
+int 
+IsWin95(void) {
+    return (Win32System == VER_PLATFORM_WIN32_WINDOWS);
+}
+
+int
+IsWinNT(void) {
+    return (Win32System == VER_PLATFORM_WIN32_NT);
+}
 
 void *
 SetIOSubSystem(void *p)
@@ -344,7 +351,8 @@ do_aspawn(void* really, void** mark, void** arglast)
 	cmd = SvPV(sv, length);
     }
     else {
-	cmd = GetShell();
+	argv[index++] = cmd = GetShell();
+	argv[index++] = "/x";	/* always enable command extensions */
 	argv[index++] = "/c";
     }
 
@@ -410,6 +418,7 @@ do_spawn(char *cmd)
 	status = win32_spawnle(P_WAIT,
 			       shell,
 			       shell,
+			       "/x",
 			       "/c", cmd, (char*)0, environ);
     }
 
@@ -1039,8 +1048,9 @@ win32_spawnle(int mode, const char *cmdname, const char *arglist,...)
 
     argp = &arglist;
     while (*argp++) ;
+    envp = (const char* const*)*argp;
 
-    return pIOSubSystem->pfnspawnvpe(mode, cmdname, &arglist, argp);
+    return pIOSubSystem->pfnspawnvpe(mode, cmdname, &arglist, envp);
 }
 
 int

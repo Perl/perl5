@@ -46,17 +46,14 @@ umask(0);
 # Check the interface to BTREEINFO
 
 my $dbh = new DB_File::BTREEINFO ;
-ok(1, $dbh->{flags} == 0) ;
-ok(2, $dbh->{cachesize} == 0) ;
-ok(3, $dbh->{psize} == 0) ;
-ok(4, $dbh->{lorder} == 0) ;
-ok(5, $dbh->{minkeypage} == 0) ;
-ok(6, $dbh->{maxkeypage} == 0) ;
-{
-  local $^W = 0 ;
-  ok(7, $dbh->{compare} == undef) ;
-  ok(8, $dbh->{prefix} == undef) ;
-}
+ok(1, ! defined $dbh->{flags}) ;
+ok(2, ! defined $dbh->{cachesize}) ;
+ok(3, ! defined $dbh->{psize}) ;
+ok(4, ! defined $dbh->{lorder}) ;
+ok(5, ! defined $dbh->{minkeypage}) ;
+ok(6, ! defined $dbh->{maxkeypage}) ;
+ok(7, ! defined $dbh->{compare}) ;
+ok(8, ! defined $dbh->{prefix}) ;
 
 $dbh->{flags} = 3000 ;
 ok(9, $dbh->{flags} == 3000) ;

@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq6 - Regexps ($Revision: 1.14 $)
+perlfaq6 - Regexps ($Revision: 1.16 $, $Date: 1997/03/25 18:16:56 $)
 
 =head1 DESCRIPTION
 
@@ -142,6 +142,26 @@ Actually, you could do this if you don't mind reading the whole file into
 
     undef $/;
     @records = split /your_pattern/, <FH>;
+
+The Net::Telnet module (available from CPAN) has the capability to
+wait for a pattern in the input stream, or timeout if it doesn't
+appear within a certain time.
+
+    ## Create a file with three lines.
+    open FH, ">file";
+    print FH "The first line\nThe second line\nThe third line\n";
+    close FH;
+
+    ## Get a read/write filehandle to it.
+    $fh = new FileHandle "+<file";
+
+    ## Attach it to a "stream" object.
+    use Net::Telnet;
+    $file = new Net::Telnet (-fhopen => $fh);
+
+    ## Search for the second line and print out the third.
+    $file->waitfor('/second line\n/');
+    print $file->getline;
 
 =head2 How do I substitute case insensitively on the LHS, but preserving case on the RHS?
 
@@ -542,7 +562,7 @@ This is a big problem.
 
 Here are a few ways, all painful, to deal with it:
 
-   $martian =~ s/([A-Z][A-Z])/ $1 /g; # Make sure adjacent ``maritan'' bytes
+   $martian =~ s/([A-Z][A-Z])/ $1 /g; # Make sure adjacent ``martian'' bytes
                                       # are no longer adjacent.
    print "found GX!\n" if $martian =~ /GX/;
 

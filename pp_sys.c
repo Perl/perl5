@@ -78,7 +78,11 @@ extern int h_errno;
 #endif
 
 #ifdef I_UTIME
-#include <utime.h>
+#  ifdef WIN32
+#    include <sys/utime.h>
+#  else
+#    include <utime.h>
+#  endif
 #endif
 #ifdef I_FCNTL
 #include <fcntl.h>

@@ -29,6 +29,7 @@ The following command characters are defined:
 =over 4
 
 =item E<lt>tabE<gt>
+
 Attempts word completion.
 Cannot be changed.
 

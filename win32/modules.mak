@@ -201,7 +201,7 @@ DEP_CPP_DYNAL=\
 	"..\XSUB.h"\
 	".\..\ext\DynaLoader\dlutils.c"\
 	".\config.h"\
-	".\EXTERN.h"\
+	"..\EXTERN.h"\
 	".\include\dirent.h"\
 	".\include\netdb.h"\
 	".\include\sys/socket.h"\
@@ -250,7 +250,7 @@ DEP_CPP_DYNAL=\
 	"..\XSUB.h"\
 	".\..\ext\DynaLoader\dlutils.c"\
 	".\config.h"\
-	".\EXTERN.h"\
+	"..\EXTERN.h"\
 	".\include\dirent.h"\
 	".\include\netdb.h"\
 	".\include\sys/socket.h"\
@@ -308,7 +308,7 @@ DEP_CPP_FCNTL=\
 	"..\util.h"\
 	"..\XSUB.h"\
 	".\config.h"\
-	".\EXTERN.h"\
+	"..\EXTERN.h"\
 	".\include\dirent.h"\
 	".\include\netdb.h"\
 	".\include\sys/socket.h"\
@@ -356,7 +356,7 @@ DEP_CPP_FCNTL=\
 	"..\util.h"\
 	"..\XSUB.h"\
 	".\config.h"\
-	".\EXTERN.h"\
+	"..\EXTERN.h"\
 	".\include\dirent.h"\
 	".\include\netdb.h"\
 	".\include\sys/socket.h"\
@@ -414,7 +414,7 @@ DEP_CPP_IO_C4=\
 	"..\util.h"\
 	"..\XSUB.h"\
 	".\config.h"\
-	".\EXTERN.h"\
+	"..\EXTERN.h"\
 	".\include\dirent.h"\
 	".\include\netdb.h"\
 	".\include\sys/socket.h"\
@@ -462,7 +462,7 @@ DEP_CPP_IO_C4=\
 	"..\util.h"\
 	"..\XSUB.h"\
 	".\config.h"\
-	".\EXTERN.h"\
+	"..\EXTERN.h"\
 	".\include\dirent.h"\
 	".\include\netdb.h"\
 	".\include\sys/socket.h"\
@@ -520,7 +520,7 @@ DEP_CPP_OPCOD=\
 	"..\util.h"\
 	"..\XSUB.h"\
 	".\config.h"\
-	".\EXTERN.h"\
+	"..\EXTERN.h"\
 	".\include\dirent.h"\
 	".\include\netdb.h"\
 	".\include\sys/socket.h"\
@@ -568,7 +568,7 @@ DEP_CPP_OPCOD=\
 	"..\util.h"\
 	"..\XSUB.h"\
 	".\config.h"\
-	".\EXTERN.h"\
+	"..\EXTERN.h"\
 	".\include\dirent.h"\
 	".\include\netdb.h"\
 	".\include\sys/socket.h"\
@@ -624,7 +624,7 @@ DEP_CPP_SDBM_=\
 	"..\XSUB.h"\
 	".\..\ext\SDBM_File\sdbm\sdbm.h"\
 	".\config.h"\
-	".\EXTERN.h"\
+	"..\EXTERN.h"\
 	".\include\dirent.h"\
 	".\include\netdb.h"\
 	".\include\sys/socket.h"\
@@ -675,7 +675,7 @@ DEP_CPP_SOCKE=\
 	"..\util.h"\
 	"..\XSUB.h"\
 	".\config.h"\
-	".\EXTERN.h"\
+	"..\EXTERN.h"\
 	".\include\arpa/inet.h"\
 	".\include\dirent.h"\
 	".\include\netdb.h"\

@@ -27,17 +27,29 @@ might have symbol conflicts if you embed Perl in another application,
 just as in the 5.003 release.  By default, binary compatibility
 is preserved at the expense of symbol table pollution.
 
-=head2 No Autovivification of Subroutine Parameters
+=head2 Subroutine arguments created only when they're modified
 
-In Perl versions 5.002 and 5.003, array and hash elements used as
-subroutine parameters were "autovivified"; that is, they were brought
-into existence if they did not already exist.  For example, calling
-C<func($h{foo})> would create C<$h{foo}> if it did not already exist,
-causing C<exists $h{foo}> to become true and C<keys %h> to return
-C<('foo')>.
+In Perl 5.004, nonexistent array and hash elements used as subroutine
+parameters are brought into existence only if they are actually
+assigned to (via C<@_>).
 
-Perl 5.004 returns to the pre-5.002 behavior of I<not> autovivifying
-array and hash elements used as subroutine parameters.
+Earlier versions of Perl vary in their handling of such arguments.
+Perl versions 5.002 and 5.003 always brought them into existence.
+Perl versions 5.000, 5.001, and 5.002 brought them into existence only
+if they were not the first argument (which was almost certainly a
+bug).  Earlier versions of Perl never brought them into existence.
+
+For example, given this code:
+
+     undef @a; undef %a;
+     sub show { print $_[0] };
+     sub change { $_[0]++ };
+     show($a[2]);
+     change($a{b});
+
+After this code executes in Perl 5.004, $a{b} exists but $a[2] does
+not.  In Perl 5.002 and 5.003, both $a{b} and $a[2] would have existed
+(but $a[2]'s value would have been undefined).
 
 =head2 Fixed Parsing of $$<digit>, &$<digit>, etc.
 
@@ -266,6 +278,13 @@ C<pos $str = 0;> to reset the "last match" position, or modify the
 string in some way.  This change makes it practical to chain C<m//g>
 matches together in conjunction with ordinary matches using the C<\G>
 zero-width assertion.  See L<perlop> and L<perlre>.
+
+=item C<m//x> ignores whitespace before ?*+{}
+
+The C<m//x> construct has always been intended to ignore all unescaped
+whitespace.  However, before Perl 5.004, whitespace had the effect of
+esacping repeat modifier like "*" or "?".  For example, C</a *b/x> was
+(mis)interpreted as C</a\*b/x>.  This bug has been fixed in 5.004.
 
 =item nested C<sub{}> closures work now
 
