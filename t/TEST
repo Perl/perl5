@@ -25,20 +25,6 @@ if ($#ARGV == -1) {
       `echo base/*.t comp/*.t cmd/*.t io/*.t; echo op/*.t pragma/*.t lib/*.t`);
 }
 
-if ($^O eq 'os2' || $^O eq 'qnx') {
-    $sharpbang = 0;
-}
-else {
-    open(CONFIG, "../config.sh");
-    while (<CONFIG>) {
-	if (/sharpbang='(.*)'/) {
-	    $sharpbang = ($1 eq '#!');
-	    last;
-	}
-    }
-    close(CONFIG);
-}
-
 %infinite = ( 'comp/require.t', 1, 'op/bop.t', 1, 'lib/hostname.t', 1 ); 
 
 _testprogs('perl', @ARGV);
@@ -72,43 +58,30 @@ EOT
 	$te = $test;
 	chop($te);
 	print "$te" . '.' x (18 - length($te));
-	if ($sharpbang) {
-	    eval { chmod 0555, $test } unless -x $test;
 
-	    if ($type eq 'perl') {
-		unless (open(RESULTS, "./$test |")) {
-		    print "$test not executable, " unless -x $test;
-		    print "can't run.\n";
-		}
-	    }
-	    else { 
-		open(RESULTS, "./perl -I../lib ../utils/perlcc ./$test "
-			     ."-run -verbose dcf -log ../compilelog |")
-		    or print "can't compile.\n";
+	open(SCRIPT,"<$test") or die "Can't run $test.\n";
+	$_ = <SCRIPT>;
+	close(SCRIPT);
+	if (/#!.*perl(.*)$/) {
+	    $switch = $1;
+	    if ($^O eq 'VMS') {
+		# Must protect uppercase switches with "" on command line
+		$switch =~ s/-([A-Z]\S*)/"-$1"/g;
 	    }
 	}
 	else {
-	    open(SCRIPT,"$test") or die "Can't run $test.\n";
-	    $_ = <SCRIPT>;
-	    close(SCRIPT);
-	    if (/#!..perl(.*)/) {
-		$switch = $1;
-		if ($^O eq 'VMS') {
-		    # Must protect uppercase switches with "" on command line
-		    $switch =~ s/-([A-Z]\S*)/"-$1"/g;
-		}
-	    }
-	    else {
-		$switch = '';
-	    }
-
-	    if ($type eq 'perl') {
-		open(RESULTS,"./perl$switch $test |") || (print "can't run.\n");
-	    }
-	    else {
-		open(RESULTS, "./perl -I../lib ../utils/perlcc ./$test -run -verbose dcf -log ../compilelog |") or print "can't compile.\n";
-	    }
+	    $switch = '';
 	}
+
+	if ($type eq 'perl') {
+	    open(RESULTS,"./perl$switch $test |") or print "can't run.\n";
+	}
+	else {
+	    open(RESULTS, "./perl -I../lib ../utils/perlcc ./$test "
+	    		 ."-run -verbose dcf -log ../compilelog |")
+		or print "can't compile.\n";
+	}
+
 	$ok = 0;
 	$next = 0;
 	while (<RESULTS>) {
