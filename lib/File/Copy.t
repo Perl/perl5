@@ -9,7 +9,7 @@ BEGIN {
 $| = 1;
 
 my @pass = (0,1);
-my $tests = $^O eq 'MacOS' ? 14 : 11;
+my $tests = $^O eq 'MacOS' ? 15 : 12;
 printf "1..%d\n", $tests * scalar(@pass);
 
 use File::Copy;
@@ -116,6 +116,11 @@ for my $pass (@pass) {
     print "not " unless $foo eq sprintf("ok %d\n", 3+$loopconst)
         and not -e "file-$$";;
     printf "ok %d\n", 14+$loopconst;
+
+    eval { copy("copy-$$", "copy-$$") };
+    printf "ok %d\n", 15+$loopconst
+	unless $@ =~ /are identical/ && -s "copy-$$";
+
     unlink ":lib:file-$$" or die "unlink: $!";
   
   } else {
@@ -131,6 +136,11 @@ for my $pass (@pass) {
     print "not " unless $foo eq sprintf("ok %d\n", 3+$loopconst)
         and not -e "file-$$";;
     printf "ok %d\n", 11+$loopconst;
+
+    eval { copy("copy-$$", "copy-$$") };
+    printf "ok %d\n", 12+$loopconst
+	unless $@ =~ /are identical/ && -s "copy-$$";
+
     unlink "lib/file-$$" or die "unlink: $!";
   
   }

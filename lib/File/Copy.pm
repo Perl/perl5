@@ -12,6 +12,7 @@ use strict;
 use warnings;
 use Carp;
 use File::Spec;
+use Config;
 our(@ISA, @EXPORT, @EXPORT_OK, $VERSION, $Too_Big, $Syscopy_is_copy);
 sub copy;
 sub syscopy;
@@ -64,6 +65,21 @@ sub copy {
 			    || UNIVERSAL::isa($to, 'GLOB')
                             || UNIVERSAL::isa($to, 'IO::Handle'))
 			 : (ref(\$to) eq 'GLOB'));
+
+    if ($from eq $to) { # works for references, too
+	croak("'$from' and '$to' are identical (not copied)");
+    }
+
+    if ($Config{d_symlink} && $Config{d_readlink} &&
+	!($^O eq 'Win32' || $^O eq 'os2' || $^O eq 'vms')) {
+	if (-l $from || -l $to) {
+	    my @fs = stat($from);
+	    my @ts = stat($to);
+	    if ($fs[0] == $ts[0] && $fs[1] == $ts[1]) {
+		croak("'$from' and '$to' are identical (not copied)");
+	    }
+	}
+    }
 
     if (!$from_a_handle && !$to_a_handle && -d $to && ! -d $from) {
 	$to = _catname($from, $to);
@@ -275,7 +291,8 @@ argument may be a string, a FileHandle reference or a FileHandle
 glob. Obviously, if the first argument is a filehandle of some
 sort, it will be read from, and if it is a file I<name> it will
 be opened for reading. Likewise, the second argument will be
-written to (and created if need be).
+written to (and created if need be).  Trying to copy a file on top
+of itself is a fatal error.
 
 B<Note that passing in
 files as handles instead of names may lead to loss of information
