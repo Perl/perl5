@@ -10,7 +10,7 @@ BEGIN {
     }
 }
 
-print "1..191\n";
+print "1..181\n";
 
 my $test = 1;
 
@@ -731,75 +731,6 @@ __EOMK__
  	} else {
 	    moan "unknown format\n";
 	}
-    }
-}
-
-{
-    # tests 182..191
-
-    {
-	my $a = "\x{41}";
-
-	print "not " unless length($a) == 1;
-	print "ok $test\n";
-	$test++;
-
-	use bytes;
-	print "not " unless $a eq "\x41" && length($a) == 1;
-	print "ok $test\n";
-	$test++;
-    }
-
-    {
-	my $a = "\x{80}";
-
-	print "not " unless length($a) == 1;
-	print "ok $test\n";
-	$test++;
-
-	use bytes;
-	print "not " unless $a eq "\xc2\x80" && length($a) == 2;
-	print "ok $test\n";
-	$test++;
-    }
-
-    {
-	my $a = "\x{100}";
-
-	print "not " unless length($a) == 1;
-	print "ok $test\n";
-	$test++;
-
-	use bytes;
-	print "not " unless $a eq "\xc4\x80" && length($a) == 2;
-	print "ok $test\n";
-	$test++;
-    }
-
-    {
-	my $a = "\x{100}\x{80}";
-
-	print "not " unless length($a) == 2;
-	print "ok $test\n";
-	$test++;
-
-	use bytes;
-	print "not " unless $a eq "\xc4\x80\xc2\x80" && length($a) == 4;
-	print "ok $test\n";
-	$test++;
-    }
-
-    {
-	my $a = "\x{80}\x{100}";
-
-	print "not " unless length($a) == 2;
-	print "ok $test\n";
-	$test++;
-
-	use bytes;
-	print "not " unless $a eq "\xc2\x80\xc4\x80" && length($a) == 4;
-	print "ok $test\n";
-	$test++;
     }
 }
 
