@@ -1644,7 +1644,12 @@ PP(pp_helem)
 
     if (SvTYPE(hv) == SVt_PVHV) {
 	if (PL_op->op_private & OPpLVAL_INTRO)
-	    preeminent = SvRMAGICAL(hv) ? 1 : hv_exists_ent(hv, keysv, 0);
+	    preeminent =  
+		( SvRMAGICAL(hv)
+		  && !mg_find((SV*)hv, PERL_MAGIC_tied)
+		  && !mg_find((SV*)hv, PERL_MAGIC_env)
+		) ? 1 : hv_exists_ent(hv, keysv, 0);
+
 	he = hv_fetch_ent(hv, keysv, lval && !defer, hash);
 	svp = he ? &HeVAL(he) : 0;
     }

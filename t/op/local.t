@@ -130,6 +130,7 @@ print +(!defined $a[0]) ? "" : "not ", "ok 41\n";
     sub TIEHASH { bless {}, $_[0] }
     sub STORE { print "# STORE [@_]\n"; $_[0]->{$_[1]} = $_[2] }
     sub FETCH { my $v = $_[0]->{$_[1]}; print "# FETCH [@_=$v]\n"; $v }
+    sub EXISTS { print "# EXISTS [@_]\n"; exists $_[0]->{$_[1]}; }
     sub DELETE { print "# DELETE [@_]\n"; delete $_[0]->{$_[1]}; }
     sub CLEAR { print "# CLEAR [@_]\n"; %{$_[0]} = (); }
 }
