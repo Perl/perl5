@@ -2385,7 +2385,6 @@ s	|void	|del_xrv	|XRV* p
 s	|void	|sv_unglob	|SV* sv
 s	|void	|not_a_number	|SV *sv
 s	|void	|visit		|SVFUNC_t f
-ns	|void*	|my_safemalloc	|MEM_SIZE size
 s	|void	|sv_add_backref	|SV *tsv|SV *sv
 s	|void	|sv_del_backref	|SV *sv
 #  if defined(DEBUGGING)

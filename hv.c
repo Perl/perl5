@@ -52,6 +52,18 @@ S_more_he(pTHX)
     HeNEXT(he) = 0;
 }
 
+#ifdef PURIFY
+
+#define new_HE() (HE*)safemalloc(sizeof(HE))
+#define del_HE(p) safefree((char*)p)
+
+#else
+
+#define new_HE() new_he()
+#define del_HE(p) del_he(p)
+
+#endif
+
 STATIC HEK *
 S_save_hek(pTHX_ const char *str, I32 len, U32 hash)
 {
@@ -87,7 +99,7 @@ Perl_he_dup(pTHX_ HE *e, bool shared)
 	return ret;
 
     /* create anew and remember what it is */
-    ret = new_he();
+    ret = new_HE();
     ptr_table_store(PL_ptr_table, e, ret);
 
     HeNEXT(ret) = he_dup(HeNEXT(e),shared);
@@ -393,7 +405,7 @@ Perl_hv_store(pTHX_ HV *hv, const char *key, U32 klen, SV *val, register U32 has
 	return &HeVAL(entry);
     }
 
-    entry = new_he();
+    entry = new_HE();
     if (HvSHAREKEYS(hv))
 	HeKEY_hek(entry) = share_hek(key, klen, hash);
     else                                       /* gotta do the real thing */
@@ -494,7 +506,7 @@ Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, register U32 hash)
 	return entry;
     }
 
-    entry = new_he();
+    entry = new_HE();
     if (HvSHAREKEYS(hv))
 	HeKEY_hek(entry) = share_hek(key, klen, hash);
     else                                       /* gotta do the real thing */
@@ -1062,7 +1074,7 @@ Perl_hv_free_ent(pTHX_ HV *hv, register HE *entry)
 	unshare_hek(HeKEY_hek(entry));
     else
 	Safefree(HeKEY_hek(entry));
-    del_he(entry);
+    del_HE(entry);
 }
 
 void
@@ -1081,7 +1093,7 @@ Perl_hv_delayfree_ent(pTHX_ HV *hv, register HE *entry)
 	unshare_hek(HeKEY_hek(entry));
     else
 	Safefree(HeKEY_hek(entry));
-    del_he(entry);
+    del_HE(entry);
 }
 
 /*
@@ -1236,7 +1248,7 @@ Perl_hv_iternext(pTHX_ HV *hv)
 	    char *k;
 	    HEK *hek;
 
-	    xhv->xhv_eiter = entry = new_he();  /* one HE per MAGICAL hash */
+	    xhv->xhv_eiter = entry = new_HE();  /* one HE per MAGICAL hash */
 	    Zero(entry, 1, HE);
 	    Newz(54, k, HEK_BASESIZE + sizeof(SV*), char);
 	    hek = (HEK*)k;
@@ -1252,7 +1264,7 @@ Perl_hv_iternext(pTHX_ HV *hv)
 	if (HeVAL(entry))
 	    SvREFCNT_dec(HeVAL(entry));
 	Safefree(HeKEY_hek(entry));
-	del_he(entry);
+	del_HE(entry);
 	xhv->xhv_eiter = Null(HE*);
 	return Null(HE*);
     }
@@ -1426,7 +1438,7 @@ Perl_unsharepvn(pTHX_ const char *str, I32 len, U32 hash)
 	    if (i && !*oentry)
 		xhv->xhv_fill--;
 	    Safefree(HeKEY_hek(entry));
-	    del_he(entry);
+	    del_HE(entry);
 	    --xhv->xhv_keys;
 	}
 	break;
@@ -1473,7 +1485,7 @@ Perl_share_hek(pTHX_ const char *str, I32 len, register U32 hash)
 	break;
     }
     if (!found) {
-	entry = new_he();
+	entry = new_HE();
 	HeKEY_hek(entry) = save_hek(str, len, hash);
 	HeVAL(entry) = Nullsv;
 	HeNEXT(entry) = *oentry;
