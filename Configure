@@ -4718,7 +4718,7 @@ if "$useshrplib"; then
 	freebsd)
 		xxx="-Wl,-R$shrpdir"
 		;;
-	linux|irix*)
+	linux|irix*|dec_osf)
 		xxx="-Wl,-rpath,$shrpdir"
 		;;
 	*)

@@ -1,0 +1,37 @@
+#!/bin/sh
+
+#
+# test perl compilation with different compilers and library schema
+#
+
+for cc in cc gcc
+do
+  for Duseshrplib in '' '-Duseshrplib'
+  do
+    rm -f config.sh *.a *.so *.o */*.o */*/*.o
+    log=log-$cc$Duseshrplib
+    rm -f $log
+    (
+      nproc=`sizer -p`
+      if test -x /p/bin/pmake
+      then
+        make="pmake -J$nproc -L$nproc"
+      else
+        make="gmake -k -j$nproc;make"
+      fi
+
+      date
+      sh Configure -ders -Dcc=$cc $Duseshrplib
+      date
+
+      LD_LIBRARY_PATH=`pwd`
+      export LD_LIBRARY_PATH
+
+      date
+      eval "$make test"
+      date
+    ) 2>&1 > $log
+  done
+done
+
+# eof
