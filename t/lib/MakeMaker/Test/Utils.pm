@@ -96,9 +96,9 @@ Sets up environment variables so perl can find its libraries.
 my $old5lib = $ENV{PERL5LIB};
 my $had5lib = exists $ENV{PERL5LIB};
 sub perl_lib {
-                               # perl-src/lib/ExtUtils/t/Foo
-    my $lib =  $ENV{PERL_CORE} ? qq{../../../lib}
-                               # ExtUtils-MakeMaker/t/Foo
+                               # perl-src/t/
+    my $lib =  $ENV{PERL_CORE} ? qq{../lib}
+                               # ExtUtils-MakeMaker/t/
                                : qq{../blib/lib};
     $lib = File::Spec->rel2abs($lib);
     my @libs = ($lib);
