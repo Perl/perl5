@@ -47,6 +47,14 @@ The following pragmas are defined (and have their own documentation).
 
 =over 12
 
+=item assertions
+
+Selects assertions
+
+=item assertions::activate
+
+Assertions activation
+
 =item attributes
 
 Get/set subroutine or variable attributes
@@ -385,6 +393,10 @@ Stringified perl data structures, suitable for both printing and C<eval>
 
 A Perl code profiler
 
+=item Devel::PPPort
+
+Perl/Pollution/Portability
+
 =item Devel::Peek
 
 A data debugging tool for the XS programmer
@@ -607,7 +619,19 @@ ExtUtils::MakeMaker subclass for customization
 
 =item ExtUtils::MakeMaker
 
-Create an extension Makefile
+Create a module Makefile
+
+=item ExtUtils::MakeMaker::FAQ
+
+Frequently Asked Questions About MakeMaker
+
+=item ExtUtils::MakeMaker::Tutorial
+
+Writing a module with MakeMaker
+
+=item ExtUtils::MakeMaker::vmsish
+
+Platform agnostic vmsish.pm
 
 =item ExtUtils::Manifest
 
@@ -1073,6 +1097,42 @@ Helpers for POD parsing and conversion
 
 Base class for creating POD filters and translators
 
+=item Pod::Perldoc::ToChecker
+
+Let Perldoc check Pod for errors
+
+=item Pod::Perldoc::ToMan
+
+Let Perldoc render Pod as man pages
+
+=item Pod::Perldoc::ToNroff
+
+Let Perldoc convert Pod to nroff
+
+=item Pod::Perldoc::ToPod
+
+Let Perldoc render Pod as ... Pod!
+
+=item Pod::Perldoc::ToRtf
+
+Let Perldoc render Pod as RTF
+
+=item Pod::Perldoc::ToText
+
+Let Perldoc render Pod as plaintext
+
+=item Pod::Perldoc::ToTk
+
+Let Perldoc use Tk::Pod to render Pod
+
+=item Pod::Perldoc::ToXml
+
+Let Perldoc render Pod as XML
+
+=item Pod::PlainText
+
+Convert POD data to formatted ASCII text
+
 =item Pod::Plainer
 
 Perl extension for converting Pod to old style Pod.
@@ -1345,9 +1405,12 @@ Dynamically load C libraries into Perl code
 
 To find out I<all> modules installed on your system, including
 those without documentation or outside the standard release,
-just do this:
+just use the following command (under the default win32 shell,
+double quotes should be used instead of single quotes).
 
-    % find `perl -Te 'print "@INC"'` -name '*.pm' -print
+    % perl -MFile::Find=find -MFile::Spec::Functions -Tlwe \
+      'find { wanted => sub { print canonpath $_ if /\.pm\z/ },
+      no_chdir => 1 }, @INC'
 
 (The -T is here to prevent '.' from being listed in @INC.)
 They should all have their own documentation installed and accessible

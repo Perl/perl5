@@ -147,9 +147,12 @@ print OUT <<'EOF';
 
 To find out I<all> modules installed on your system, including
 those without documentation or outside the standard release,
-just do this:
+just use the following command (under the default win32 shell,
+double quotes should be used instead of single quotes).
 
-    % find `perl -Te 'print "@INC"'` -name '*.pm' -print
+    % perl -MFile::Find=find -MFile::Spec::Functions -Tlwe \
+      'find { wanted => sub { print canonpath $_ if /\.pm\z/ },
+      no_chdir => 1 }, @INC'
 
 (The -T is here to prevent '.' from being listed in @INC.)
 They should all have their own documentation installed and accessible
