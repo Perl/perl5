@@ -44,4 +44,7 @@ $diff = time - $start_time;
 # alarm time might be one second less than you said.
 is( $@, "ALARM!\n",             'alarm w/$SIG{ALRM} vs system()' );
 
-ok( abs($diff - 3) <= 1,   '   right time' );
+{
+    local $TODO = 'Why does system() block alarm() on VMS?' if $^O eq 'VMS';
+    ok( abs($diff - 3) <= 1,   "   right time (waited $diff secs for 3-sec alarm)" );
+}
