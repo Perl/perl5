@@ -1768,6 +1768,11 @@ Not useful. (S<RISC OS>)
 
 =over 4
 
+=item v1.48, 02 February 2001
+
+Various updates from perl5-porters over the past year, supported
+platforms update from Jarkko Hietaniemi.
+
 =item v1.47, 22 March 2000
 
 Various cleanups from Tom Christiansen, including migration of 
@@ -1857,13 +1862,16 @@ distribution available at http://www.perl.com/CPAN/src/index.html
 	AIX
 	AmigaOS
 	Darwin		(Rhapsody)
+	DG/UX
 	DOS DJGPP 	1)
+	DYNIX/ptx
 	EPOC
 	FreeBSD
 	HP-UX
 	IRIX
 	Linux
 	MachTen
+	OpenVMS		(VMS)
 	OS/2
 	OS X
 	QNX
@@ -1871,8 +1879,7 @@ distribution available at http://www.perl.com/CPAN/src/index.html
 	Tru64 UNIX      (DEC OSF/1, Digital UNIX)
 	UNICOS
 	UNICOS/mk
-	VMS
-	Win32		*)
+	Win32/NT/2K	*)
 
         *) compilers: Borland, Cygwin, Mingw32 EGCS/GCC, VC++
 
@@ -1880,7 +1887,6 @@ The following platforms worked for the previous release (5.6.0),
 but be did not manage to test these in time for the 5.6.1 release.
 There is a very good chance that these will work fine with 5.6.1.
 
-	DYNIX/ptx
 	DomainOS
 	Hurd
 	LynxOS
@@ -1901,24 +1907,26 @@ There is a very good chance that these will work fine with 5.6.1.
 
         1) in DOS mode either the DOS or OS/2 ports can be used
 
-The following platform worked for the previous major release (5.005_03
-being the latest maintenance release of that, as of early March 2000).
-However, standardization on UTF-8 as the internal string representation
-in 5.6.0 has introduced incompatibilities in this EBCDIC platform.
-Support for this platform may be enabled in a future release:
+The following platform worked for the 5.005_03 major release but not 5.6.0.
+Standardization on UTF-8 as the internal string representation
+in 5.6.0 and 5.6.1 has introduced incompatibilities in this EBCDIC platform.
+While Perl 5.6.1 will build on this platform some regression tests may fail 
+and the C<use utf8;> pragma typically introduces text handling errors.
+UTF-8 support for this platform may be enabled in a future release:
 
-	OS390	1)
+	OS/390	1)
 
-	1) Previously known as MVS, or OpenEdition MVS.
+	1) Previously known as MVS, or OpenEdition MVS, about to become z/OS.
 
-Strongly related to the OS390 platform by also being EBCDIC-based
+Strongly related to the OS/390 platform by also being EBCDIC-based
 mainframe platforms are the following platforms:
 
-	BS2000
+	BS2000	(POSIX-BC)
 	VM/ESA
 
-These are also not expected to work under 5.6.0 for the same reasons
-as OS390.  Contact the mailing list perl-mvs@perl.org for more details.
+These are also expected to work, albeit with no UTF-8 support, under 5.6.1 
+for the same reasons as OS/390.  Contact the mailing list perl-mvs@perl.org 
+for more details.
 
 MacOS (Classic, pre-X) is almost 5.6.1-ready; building from the source
 does work with 5.6.1, but additional MacOS specific source code is needed
@@ -1941,7 +1949,6 @@ of any trouble.
 	CX/UX
 	DC/OSx
 	DDE SMES
-	DG/UX
 	DOS EMX
 	Dynix
 	EP/IX
@@ -1980,8 +1987,8 @@ binaries available via http://www.perl.com/CPAN/ports/index.html:
 
 				Perl release
 
-	AS/400			5.003
 	Netware			5.003_07
+	OS/400			5.003
 	Tandem Guardian		5.004
 
 The following platforms have only binaries available via
