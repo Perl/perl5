@@ -10,7 +10,7 @@
 
 pid_t beos_waitpid(pid_t process_id, int *status_location, int options) {
     pid_t got = waitpid(procedd_is, status_location, options);
-    if (status_localtion)
+    if (status_location)
         *status_location <<= 8;
     return got;
 }
