@@ -380,26 +380,30 @@ $pv1 =~ s/A/\x{100}/;
 substr($pv2,0,1) = "\x{100}";
 is($pv1, $pv2);
 
-{   
-    # Gregor Chrupala <gregor.chrupala@star-group.net>
-    use utf8;
-    $a = 'Espa&ntilde;a';
-    $a =~ s/&ntilde;/ñ/;
-    like($a, qr/ñ/, "use utf8 RHS");
-}
+SKIP: {
+    skip("EBCDIC", 3) if ord("A") == 193; 
 
-{
-    use utf8;
-    $a = 'España España';
-    $a =~ s/ñ/&ntilde;/;
-    like($a, qr/ñ/, "use utf8 LHS");
-}
+    {   
+	# Gregor Chrupala <gregor.chrupala@star-group.net>
+	use utf8;
+	$a = 'Espa&ntilde;a';
+	$a =~ s/&ntilde;/ñ/;
+	like($a, qr/ñ/, "use utf8 RHS");
+    }
 
-{
-    use utf8;
-    $a = 'España';
-    $a =~ s/ñ/ñ/;
-    like($a, qr/ñ/, "use utf8 LHS and RHS");
+    {
+	use utf8;
+	$a = 'España España';
+	$a =~ s/ñ/&ntilde;/;
+	like($a, qr/ñ/, "use utf8 LHS");
+    }
+
+    {
+	use utf8;
+	$a = 'España';
+	$a =~ s/ñ/ñ/;
+	like($a, qr/ñ/, "use utf8 LHS and RHS");
+    }
 }
 
 {

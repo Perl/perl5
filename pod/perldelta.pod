@@ -3406,8 +3406,6 @@ tests have been added.
  op/split.t                                  46    1   2.17%  11
  op/sprintf.t                               224    3   1.34%  98 100 136
  op/stat.t                                   73    2   2.74%  41-42
- op/subst.t                                 122    2   1.64%  91-92
- op/subst_wamp.t                            122    2   1.64%  91-92
  op/taint.t                                 203    4   1.97%  1 3 31 37
  op/tr.t                                     97    5   5.15%  63 71-74
  run/fresh_perl.t                            97    1   1.03%  11
