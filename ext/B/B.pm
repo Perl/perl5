@@ -21,7 +21,9 @@ require Exporter;
 		amagic_generation perlstring
 		walkoptree_slow walkoptree walkoptree_exec walksymtable
 		parents comppadlist sv_undef compile_stats timing_info
-		begin_av init_av check_av end_av regex_padav);
+		begin_av init_av check_av end_av regex_padav dowarn
+		defstash curstash warnhook diehook inc_gv
+		);
 
 sub OPf_KIDS ();
 use strict;
@@ -51,7 +53,6 @@ use strict;
 @B::SVOP::ISA = 'B::OP';
 @B::PADOP::ISA = 'B::OP';
 @B::PVOP::ISA = 'B::OP';
-@B::CVOP::ISA = 'B::OP';
 @B::LOOP::ISA = 'B::LISTOP';
 @B::PMOP::ISA = 'B::LISTOP';
 @B::COP::ISA = 'B::OP';
@@ -880,7 +881,7 @@ For constant subroutines, returns the constant SV returned by the subroutine.
 =head2 OP-RELATED CLASSES
 
 C<B::OP>, C<B::UNOP>, C<B::BINOP>, C<B::LOGOP>, C<B::LISTOP>, C<B::PMOP>,
-C<B::SVOP>, C<B::PADOP>, C<B::PVOP>, C<B::CVOP>, C<B::LOOP>, C<B::COP>.
+C<B::SVOP>, C<B::PADOP>, C<B::PVOP>, C<B::LOOP>, C<B::COP>.
 
 These classes correspond in the obvious way to the underlying C
 structures of similar names. The inheritance hierarchy mimics the
@@ -888,9 +889,9 @@ underlying C "inheritance":
 
                                  B::OP
                                    |
-                   +---------------+--------+--------+------+
-                   |               |        |        |      |
-                B::UNOP          B::SVOP B::PADOP B::CVOP B::COP
+                   +---------------+--------+--------+
+                   |               |        |        |
+                B::UNOP          B::SVOP B::PADOP  B::COP
                  ,'  `-.
                 /       `--.
            B::BINOP     B::LOGOP
@@ -990,7 +991,7 @@ This returns the op description from the global C PL_op_desc array
 
 =item precomp
 
-=item pmoffet
+=item pmoffset
 
 Only when perl was compiled with ithreads.
 
