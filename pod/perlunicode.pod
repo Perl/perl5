@@ -53,8 +53,7 @@ B<NOTE: this should be the only place where an explicit C<use utf8> is
 needed>.
 
 You can also use the C<encoding> pragma to change the default encoding
-of the data in your script; see L<encoding>.   Currently this cannot
-be combined with C<use utf8>.
+of the data in your script; see L<encoding>.
 
 =back
 

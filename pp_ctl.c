@@ -3036,6 +3036,8 @@ PP(pp_require)
     SV *filter_state = 0;
     SV *filter_sub = 0;
     SV *hook_sv = 0;
+    SV *encoding;
+    OP *op;
 
     sv = POPs;
     if (SvNIOKp(sv)) {
@@ -3379,7 +3381,17 @@ trylocal: {
     PL_eval_owner = thr;
     MUTEX_UNLOCK(&PL_eval_mutex);
 #endif /* USE_5005THREADS */
-    return DOCATCH(doeval(gimme, NULL));
+
+    /* Store and reset encoding. */
+    encoding = PL_encoding;
+    PL_encoding = Nullsv;
+
+    op = DOCATCH(doeval(gimme, NULL));
+    
+    /* Restore encoding. */
+    PL_encoding = encoding;
+
+    return op;
 }
 
 PP(pp_dofile)

@@ -61,19 +61,13 @@ If no encoding is specified, the environment variable L<PERL_ENCODING>
 is consulted.  If that fails, "latin1" (ISO 8859-1) is assumed.
 If no encoding can be found, C<Unknown encoding '...'> error will be thrown.
 
-=head1 FUTURE POSSIBILITIES
-
-The C<\x..> and C<\0...> in regular expressions are not affected by
-this pragma.  They probably should.
-
-The charnames "\N{...}" does not work with this pragma.
-
 =head1 KNOWN PROBLEMS
 
-Cannot be combined with C<use utf8>.  Note that this is a problem
-B<only> if you would like to have Unicode identifiers in your scripts.
-You should not need C<use utf8> for anything else these days
-(since Perl 5.8.0).
+The C<\x..> and C<\0...> in regular expressions are not affected by
+this pragma.  They very probably should.
+
+The charnames pragma ("\N{LATIN SMALL SHARP LETTER S}") does not work
+with this pragma.
 
 =head1 SEE ALSO
 
