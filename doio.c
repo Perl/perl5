@@ -48,9 +48,7 @@
 #  define OPEN_EXCL 0
 #endif
 
-#if !defined(NSIG) || defined(M_UNIX) || defined(__unix) || defined(M_XENIX)
 #include <signal.h>
-#endif
 
 bool
 Perl_do_open(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
