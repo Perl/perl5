@@ -3658,6 +3658,26 @@ S_dooneliner(pTHX_ char *cmd, char *filename)
 }
 #endif
 
+/* This macro removes trailing slashes from a directory name.
+ * Different operating and file systems take differently to
+ * trailing slashes.  According to POSIX 1003.1 1996 Edition
+ * any number of trailing slashes should be allowed.
+ * Thusly we snip them away so that even non-conforming
+ * systems are happy.
+ * We should probably do this "filtering" for all
+ * the functions that expect (potentially) directory names:
+ * -d, chdir(), chmod(), chown(), chroot(), fcntl()?,
+ * (mkdir()), opendir(), rename(), rmdir(), stat(). --jhi */
+
+#define TRIMSLASHES(tmps,len,copy) (tmps) = SvPV(TOPs, (len)); \
+    if ((len) > 1 && (tmps)[(len)-1] == '/') { \
+	do { \
+	    (len)--; \
+	} while ((len) > 1 && (tmps)[(len)-1] == '/'); \
+	(tmps) = savepvn((tmps), (len)); \
+	(copy) = TRUE; \
+    }
+
 PP(pp_mkdir)
 {
     dSP; dTARGET;
@@ -3674,22 +3694,7 @@ PP(pp_mkdir)
     else
 	mode = 0777;
 
-    tmps = SvPV(TOPs, len);
-    /* Different operating and file systems take differently to
-     * trailing slashes.  According to POSIX 1003.1 1996 Edition
-     * any number of trailing slashes should be allowed.
-     * Thusly we snip them away so that even non-conforming
-     * systems are happy. */
-    /* We should probably do this "filtering" for all
-     * the functions that expect (potentially) directory names:
-     * -d, chdir(), chmod(), chown(), chroot(), fcntl()?,
-     * (mkdir()), opendir(), rename(), rmdir(), stat(). --jhi */
-    if (len > 1 && tmps[len-1] == '/') {
-	while (tmps[len-1] == '/' && len > 1)
-	    len--;
-	tmps = savepvn(tmps, len);
-	copy = TRUE;
-    }
+    TRIMSLASHES(tmps,len,copy);
 
     TAINT_PROPER("mkdir");
 #ifdef HAS_MKDIR
@@ -3708,16 +3713,19 @@ PP(pp_mkdir)
 PP(pp_rmdir)
 {
     dSP; dTARGET;
+    STRLEN len;
     char *tmps;
-    STRLEN n_a;
+    bool copy = FALSE;
 
-    tmps = POPpx;
+    TRIMSLASHES(tmps,len,copy);
     TAINT_PROPER("rmdir");
 #ifdef HAS_RMDIR
-    XPUSHi( PerlDir_rmdir(tmps) >= 0 );
+    SETi( PerlDir_rmdir(tmps) >= 0 );
 #else
-    XPUSHi( dooneliner("rmdir", tmps) );
+    SETi( dooneliner("rmdir", tmps) );
 #endif
+    if (copy)
+	Safefree(tmps);
     RETURN;
 }
 
