@@ -6292,7 +6292,15 @@ Perl_peep(pTHX_ register OP *o)
 
 	case OP_GV:
 	    if (o->op_next->op_type == OP_RV2SV) {
-		if (!(o->op_next->op_private & OPpDEREF)) {
+		/* don't execute our($foo) */
+		if (o->op_next->op_private & OPpOUR_INTRO) {
+		    null(o->op_next);
+		    o->op_next = o->op_next->op_next;
+		    null(o);
+		    if (oldop && o->op_next)
+			oldop->op_next = o->op_next;
+		}
+		else if (!(o->op_next->op_private & OPpDEREF)) {
 		    null(o->op_next);
 		    o->op_private |= o->op_next->op_private & OPpLVAL_INTRO;
 		    o->op_next = o->op_next->op_next;
