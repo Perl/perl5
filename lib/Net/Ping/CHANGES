@@ -1,6 +1,14 @@
 CHANGES
 -------
 
+2.10  Dec 26 12:00 2001
+	- Added bind() function useful for clients with multiple
+	  network interfaces performing the ping check thanks to
+	  sethb@clarkhill.com (Seth Blumberg).
+	- Execution optimizations for several constants (Seth).
+	- More test changes in case Socket module is not available
+	  (Jarkko Hietaniemi).
+
 2.09  Dec 06 19:00 2001
 	- Documental and test changes only.
 	- No functional changes.

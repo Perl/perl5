@@ -7,6 +7,10 @@ BEGIN {
 	chdir 't' if -d 't';
 	@INC = qw(../lib);
     }
+    unless (eval "require Socket") {
+	print "1..0 \# Skip: no Socket\n";
+	exit;
+    }
 }
 
 # Remote network test using tcp protocol.

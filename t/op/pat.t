@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..770\n";
+print "1..825\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2290,6 +2290,55 @@ print "# some Unicode properties\n";
 
     print "not " unless "A\x{100}" =~ /A/i;
     print "ok 757\n";
+
+    print "not " unless "\x{101}a" =~ /\x{100}/i;
+    print "ok 758\n";
+
+    print "not " unless "\x{100}a" =~ /\x{100}/i;
+    print "ok 759\n";
+
+    print "not " unless "\x{101}a" =~ /\x{101}/i;
+    print "ok 760\n";
+
+    print "not " unless "\x{100}a" =~ /\x{101}/i;
+    print "ok 761\n";
+
+    print "not " unless "a\x{100}" =~ /A\x{100}/i;
+    print "ok 762\n";
+
+    print "not " unless "A\x{100}" =~ /A\x{100}/i;
+    print "ok 763\n";
+
+    print "not " unless "a\x{100}" =~ /a\x{100}/i;
+    print "ok 764\n";
+
+    print "not " unless "A\x{100}" =~ /A\x{100}/i;
+    print "ok 765\n";
+
+    print "not " unless "a\x{100}" =~ /[A]/i;
+    print "ok 766\n";
+
+    print "not " unless "A\x{100}" =~ /[A]/i;
+    print "ok 767\n";
+
+    print "not " unless "a\x{100}" =~ /[a]/i;
+    print "ok 768\n";
+
+    print "not " unless "A\x{100}" =~ /[A]/i;
+    print "ok 769\n";
+
+    print "not " unless "\x{101}a" =~ /[\x{100}]/i;
+    print "ok 770\n";
+
+    print "not " unless "\x{100}a" =~ /[\x{100}]/i;
+    print "ok 771\n";
+
+    print "not " unless "\x{101}a" =~ /[\x{101}]/i;
+    print "ok 772\n";
+
+    print "not " unless "\x{100}a" =~ /[\x{101}]/i;
+    print "ok 773\n";
+
 }
 
 {
@@ -2299,30 +2348,29 @@ print "# some Unicode properties\n";
     my $lower = "\N{LATIN SMALL LETTER A WITH GRAVE}";
     my $UPPER = "\N{LATIN CAPITAL LETTER A WITH GRAVE}";
 
-    print $lower =~ m/$UPPER/i   ? "ok 758\n" : "not ok 758\n";
-    print $UPPER =~ m/$lower/i   ? "ok 759\n" : "not ok 759\n";
-    print $lower =~ m/[$UPPER]/i ? "ok 760\n" : "not ok 760\n";
-    print $UPPER =~ m/[$lower]/i ? "ok 761\n" : "not ok 761\n";
+    print $lower =~ m/$UPPER/i   ? "ok 774\n" : "not ok 774\n";
+    print $UPPER =~ m/$lower/i   ? "ok 775\n" : "not ok 775\n";
+    print $lower =~ m/[$UPPER]/i ? "ok 776\n" : "not ok 776\n";
+    print $UPPER =~ m/[$lower]/i ? "ok 777\n" : "not ok 777\n";
 
     print "# GREEK LETTER ALPHA WITH VRACHY\n";
 
     $lower = "\N{GREEK CAPITAL LETTER ALPHA WITH VRACHY}";
     $UPPER = "\N{GREEK SMALL LETTER ALPHA WITH VRACHY}";
 
-    print $lower =~ m/$UPPER/i   ? "ok 762\n" : "not ok 762\n";
-    print $UPPER =~ m/$lower/i   ? "ok 763\n" : "not ok 763\n";
-    print $lower =~ m/[$UPPER]/i ? "ok 764\n" : "not ok 764\n";
-    print $UPPER =~ m/[$lower]/i ? "ok 765\n" : "not ok 765\n";
+    print $lower =~ m/$UPPER/i   ? "ok 778\n" : "not ok 778\n";
+    print $UPPER =~ m/$lower/i   ? "ok 779\n" : "not ok 779\n";
+    print $lower =~ m/[$UPPER]/i ? "ok 780\n" : "not ok 780\n";
+    print $UPPER =~ m/[$lower]/i ? "ok 781\n" : "not ok 781\n";
 
     print "# LATIN LETTER Y WITH DIAERESIS\n";
 
     $lower = "\N{LATIN CAPITAL LETTER Y WITH DIAERESIS}";
     $UPPER = "\N{LATIN SMALL LETTER Y WITH DIAERESIS}";
-
-    print $lower =~ m/$UPPER/i   ? "ok 766\n" : "not ok 766\n";
-    print $UPPER =~ m/$lower/i   ? "ok 767\n" : "not ok 767\n";
-    print $lower =~ m/[$UPPER]/i ? "ok 768\n" : "not ok 768\n";
-    print $UPPER =~ m/[$lower]/i ? "ok 769\n" : "not ok 769\n";
+    print $lower =~ m/$UPPER/i   ? "ok 782\n" : "not ok 782\n";
+    print $UPPER =~ m/$lower/i   ? "ok 783\n" : "not ok 783\n";
+    print $lower =~ m/[$UPPER]/i ? "ok 784\n" : "not ok 784\n";
+    print $UPPER =~ m/[$lower]/i ? "ok 785\n" : "not ok 785\n";
 }
 
 {
@@ -2338,6 +2386,137 @@ print "# some Unicode properties\n";
     my $char = "\N{COMBINING GREEK PERISPOMENI}";
     my $code = sprintf "%04x", ord($char);
 
-    # Before #13843 this was failing.
-    print "_:$char:_" =~ m/_:$SIGMA:_/i ? "not ok 770\n" : "ok 770\n";
+    # Before #13843 this was failing by matching falsely.
+    print "_:$char:_" =~ m/_:$SIGMA:_/i ? "not ok 786\n" : "ok 786\n";
+}
+
+{
+    print "# \\X\n";
+
+    use charnames ':full';
+
+    print "a!"              =~ /^(\X)!/ && $1 eq "a" ?
+	"ok 787\n" : "not ok 787 # $1\n";
+    print "\xDF!"           =~ /^(\X)!/ && $1 eq "\xDF" ?
+	"ok 788\n" : "not ok 788 # $1\n";
+    print "\x{100}!"        =~ /^(\X)!/ && $1 eq "\x{100}" ?
+	"ok 789\n" : "not ok 789 # $1\n";
+    print "\x{100}\x{300}!" =~ /^(\X)!/ && $1 eq "\x{100}\x{300}" ?
+	"ok 790\n" : "not ok 790 # $1\n";
+    print "\N{LATIN CAPITAL LETTER E}!" =~ /^(\X)!/ &&
+	$1 eq "\N{LATIN CAPITAL LETTER E}" ?
+	"ok 791\n" : "not ok 791 # $1\n";
+    print "\N{LATIN CAPITAL LETTER E}\N{COMBINING GRAVE ACCENT}!" =~
+	/^(\X)!/ &&
+	$1 eq "\N{LATIN CAPITAL LETTER E}\N{COMBINING GRAVE ACCENT}" ?
+	"ok 792\n" : "not ok 792 # $1\n";
+}
+
+{
+    print "#\\C and \\X\n";
+
+    print "!abc!" =~ /a\Cc/ ? "ok 793\n" : "not ok 793\n";
+    print "!abc!" =~ /a\Xc/ ? "ok 794\n" : "not ok 794\n";
+}
+
+{
+    print "# FINAL SIGMA\n";
+
+    my $SIGMA = "\x{03A3}"; # CAPITAL
+    my $Sigma = "\x{03C2}"; # SMALL FINAL
+    my $sigma = "\x{03C3}"; # SMALL
+
+    print $SIGMA =~ /$SIGMA/i ? "ok 795\n" : "not ok 795\n";
+    print $SIGMA =~ /$Sigma/i ? "ok 796\n" : "not ok 796\n";
+    print $SIGMA =~ /$sigma/i ? "ok 797\n" : "not ok 797\n";
+
+    print $Sigma =~ /$SIGMA/i ? "ok 798\n" : "not ok 798\n";
+    print $Sigma =~ /$Sigma/i ? "ok 799\n" : "not ok 799\n";
+    print $Sigma =~ /$sigma/i ? "ok 800\n" : "not ok 800\n";
+
+    print $sigma =~ /$SIGMA/i ? "ok 801\n" : "not ok 801\n";
+    print $sigma =~ /$Sigma/i ? "ok 802\n" : "not ok 802\n";
+    print $sigma =~ /$sigma/i ? "ok 803\n" : "not ok 803\n";
+    
+    print $SIGMA =~ /[$SIGMA]/i ? "ok 804\n" : "not ok 804\n";
+    print $SIGMA =~ /[$Sigma]/i ? "ok 805\n" : "not ok 805\n";
+    print $SIGMA =~ /[$sigma]/i ? "ok 806\n" : "not ok 806\n";
+
+    print $Sigma =~ /[$SIGMA]/i ? "ok 807\n" : "not ok 807\n";
+    print $Sigma =~ /[$Sigma]/i ? "ok 808\n" : "not ok 808\n";
+    print $Sigma =~ /[$sigma]/i ? "ok 809\n" : "not ok 809\n";
+
+    print $sigma =~ /[$SIGMA]/i ? "ok 810\n" : "not ok 810\n";
+    print $sigma =~ /[$Sigma]/i ? "ok 811\n" : "not ok 811\n";
+    print $sigma =~ /[$sigma]/i ? "ok 812\n" : "not ok 812\n";
+}
+
+{
+    print "# parlez-vous?\n";
+
+    use charnames ':full';
+
+    print "fran\N{LATIN SMALL LETTER C}ais" =~
+	  /fran.ais/ &&
+	$& eq "francais" ?
+	"ok 813\n" : "not ok 813\n";
+
+    print "fran\N{LATIN SMALL LETTER C WITH CEDILLA}ais" =~
+	  /fran.ais/ &&
+	$& eq "fran\N{LATIN SMALL LETTER C WITH CEDILLA}ais" ?
+	"ok 814\n" : "not ok 814\n";
+
+    print "fran\N{LATIN SMALL LETTER C}ais" =~
+	   /fran\Cais/ &&
+        $& eq "francais" ?
+	"ok 815\n" : "not ok 815\n";
+
+    print "franc\N{COMBINING CEDILLA}ais" =~
+	  /franc\C\Cais/ ? # COMBINING CEDILLA is two bytes when encoded
+	"ok 816\n" : "not ok 816\n";
+
+    print "fran\N{LATIN SMALL LETTER C}ais" =~
+	  /fran\Xais/ &&
+	$& eq "francais" ?
+	"ok 817\n" : "not ok 817\n";
+
+    print "fran\N{LATIN SMALL LETTER C WITH CEDILLA}ais" =~
+	  /fran\Xais/  &&
+        $& eq "fran\N{LATIN SMALL LETTER C WITH CEDILLA}ais" ?
+	"ok 818\n" : "not ok 818\n";
+
+    print "franc\N{COMBINING CEDILLA}ais" =~
+	  /fran\Xais/ &&
+         $& eq "franc\N{COMBINING CEDILLA}ais" ?
+	 "ok 819\n" : "not ok 819\n";
+
+    print "fran\N{LATIN SMALL LETTER C WITH CEDILLA}ais" =~
+	  /fran\N{LATIN SMALL LETTER C WITH CEDILLA}ais/  &&
+        $& eq "fran\N{LATIN SMALL LETTER C WITH CEDILLA}ais" ?
+	"ok 820\n" : "not ok 820\n";
+
+    print "franc\N{COMBINING CEDILLA}ais" =~
+	  /franc\N{COMBINING CEDILLA}ais/  &&
+        $& eq "franc\N{COMBINING CEDILLA}ais" ?
+	"ok 821\n" : "not ok 821\n";
+
+    print "fran\N{LATIN SMALL LETTER C}ais" =~
+	  /fran(?:c\N{COMBINING CEDILLA}?|\N{LATIN SMALL LETTER C WITH CEDILLA})ais/ &&
+	$& eq "francais" ?
+	"ok 822\n" : "not ok 822\n";
+
+    print "fran\N{LATIN SMALL LETTER C}ais" =~
+	  /fran(?:c\N{COMBINING CEDILLA}?|\N{LATIN SMALL LETTER C WITH CEDILLA})ais/ &&
+	$& eq "francais" ?
+	"ok 823\n" : "not ok 823\n";
+
+    print "fran\N{LATIN SMALL LETTER C WITH CEDILLA}ais" =~
+	  /fran(?:c\N{COMBINING CEDILLA}?|\N{LATIN SMALL LETTER C WITH CEDILLA})ais/ &&
+	$& eq "fran\N{LATIN SMALL LETTER C WITH CEDILLA}ais" ?
+	"ok 824\n" : "not ok 824\n";
+
+    print "franc\N{COMBINING CEDILLA}ais" =~
+	  /fran(?:c\N{COMBINING CEDILLA}?|\N{LATIN SMALL LETTER C WITH CEDILLA})ais/ &&
+	$& eq "franc\N{COMBINING CEDILLA}ais" ?
+	"ok 825\n" : "not ok 825\n";
 }

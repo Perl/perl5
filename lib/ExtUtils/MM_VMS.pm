@@ -19,7 +19,6 @@ our($Revision, @ISA, $VERSION, $Verbose);
 # All on one line so MakeMaker can see it.
 ($VERSION) = ($Revision = '5.56 (27-Apr-1999)') =~ /^([\d.]+)/;
 
-@ISA = qw( File::Spec );
 unshift @MM::ISA, 'ExtUtils::MM_VMS';
 
 require ExtUtils::MakeMaker;
@@ -74,7 +73,7 @@ Returns a string representing of the root directory.
 =cut
 
 sub rootdir {
-    return '';
+    return File::Spec->rootdir();'
 }
 
 package ExtUtils::MM_VMS;
@@ -241,8 +240,8 @@ sub find_perl {
     local *TCF;
     # Check in relative directories first, so we pick up the current
     # version of Perl if we're running MakeMaker as part of the main build.
-    @sdirs = sort { my($absa) = $self->file_name_is_absolute($a);
-                    my($absb) = $self->file_name_is_absolute($b);
+    @sdirs = sort { my($absa) = File::Spec->file_name_is_absolute($a);
+                    my($absb) = File::Spec->file_name_is_absolute($b);
                     if ($absa && $absb) { return $a cmp $b }
                     else { return $absa ? 1 : ($absb ? -1 : ($a cmp $b)); }
                   } @$dirs;
@@ -268,7 +267,7 @@ sub find_perl {
     }
     foreach $dir (@sdirs){
 	next unless defined $dir; # $self->{PERL_SRC} may be undefined
-	$inabs++ if $self->file_name_is_absolute($dir);
+	$inabs++ if File::Spec->file_name_is_absolute($dir);
 	if ($inabs == 1) {
 	    # We've covered relative dirs; everything else is an absolute
 	    # dir (probably an installed location).  First, we'll try potential
@@ -277,7 +276,7 @@ sub find_perl {
 	    $inabs++; # Should happen above in next $dir, but just in case . . .
 	}
 	foreach $name (@snames){
-	    if ($name !~ m![/:>\]]!) { push(@cand,$self->catfile($dir,$name)); }
+	    if ($name !~ m![/:>\]]!) { push(@cand,File::Spec->catfile($dir,$name)); }
 	    else                     { push(@cand,$self->fixpath($name,0));    }
 	}
     }
@@ -322,9 +321,7 @@ to C<split> string value of C<$ENV{'PATH'}>.
 =cut
 
 sub path {
-    my(@dirs,$dir,$i);
-    while ($dir = $ENV{'DCL$PATH;' . $i++}) { push(@dirs,$dir); }
-    @dirs;
+    return File::Spec->path();
 }
 
 =item maybe_command (override)
@@ -374,10 +371,10 @@ sub maybe_command_in_dirs {	# $ver is optional argument if looking for perl
 	next unless defined $dir; # $self->{PERL_SRC} may be undefined
 	foreach $name (@$names){
 	    my($abs,$tryabs);
-	    if ($self->file_name_is_absolute($name)) {
+	    if (File::Spec->file_name_is_absolute($name)) {
 		$abs = $name;
 	    } else {
-		$abs = $self->catfile($dir, $name);
+		$abs = File::Spec->catfile($dir, $name);
 	    }
 	    print "Checking $abs for $name\n" if ($trace >= 2);
 	    next unless $tryabs = $self->maybe_command($abs);
@@ -420,10 +417,8 @@ Checks for VMS directory spec as well as Unix separators.
 =cut
 
 sub file_name_is_absolute {
-    my($self,$file) = @_;
-    # If it's a logical name, expand it.
-    $file = $ENV{$file} while $file =~ /^[\w\$\-]+$/ and $ENV{$file};
-    $file =~ m!^/! or $file =~ m![<\[][^.\-\]>]! or $file =~ /:[^<\[]/;
+    shift;
+    return File::Spec->file_name_is_absolute(@_);
 }
 
 =item replace_manpage_separator
@@ -520,7 +515,7 @@ sub constants {
 	next unless defined $self->{$macro};
 	$self->{$macro} = $self->fixpath($self->{$macro},1);
     }
-    $self->{PERL_VMS} = $self->catdir($self->{PERL_SRC},q(VMS))
+    $self->{PERL_VMS} = File::Spec->catdir($self->{PERL_SRC},q(VMS))
 	if ($self->{PERL_SRC});
                         
 
@@ -552,7 +547,7 @@ DEFINE_VERSION = "$(VERSION_MACRO)=""$(VERSION)"""
 XS_VERSION_MACRO = XS_VERSION
 XS_DEFINE_VERSION = "$(XS_VERSION_MACRO)=""$(XS_VERSION)"""
 
-MAKEMAKER = ],$self->catfile($self->{PERL_LIB},'ExtUtils','MakeMaker.pm'),qq[
+MAKEMAKER = ],File::Spec->catfile($self->{PERL_LIB},'ExtUtils','MakeMaker.pm'),qq[
 MM_VERSION = $ExtUtils::MakeMaker::VERSION
 MM_REVISION = $ExtUtils::MakeMaker::Revision
 MM_VMS_REVISION = $ExtUtils::MM_VMS::Revision
@@ -808,7 +803,7 @@ command line to find args.
 sub pm_to_blib {
     my($self) = @_;
     my($line,$from,$to,@m);
-    my($autodir) = $self->catdir('$(INST_LIB)','auto');
+    my($autodir) = File::Spec->catdir('$(INST_LIB)','auto');
     my(@files) = @{$self->{PM_TO_BLIB}};
 
     push @m, q{
@@ -867,9 +862,9 @@ Use VMS-style quoting on xsubpp command line.
 sub tool_xsubpp {
     my($self) = @_;
     return '' unless $self->needs_linking;
-    my($xsdir) = $self->catdir($self->{PERL_LIB},'ExtUtils');
+    my($xsdir) = File::Spec->catdir($self->{PERL_LIB},'ExtUtils');
     # drop back to old location if xsubpp is not in new location yet
-    $xsdir = $self->catdir($self->{PERL_SRC},'ext') unless (-f $self->catfile($xsdir,'xsubpp'));
+    $xsdir = File::Spec->catdir($self->{PERL_SRC},'ext') unless (-f File::Spec->catfile($xsdir,'xsubpp'));
     my(@tmdeps) = '$(XSUBPPDIR)typemap';
     if( $self->{TYPEMAPS} ){
 	my $typemap;
@@ -893,7 +888,7 @@ sub tool_xsubpp {
         (!exists($self->{XSOPT}) || $self->{XSOPT} !~ /linenumbers/)) {
         unshift(@tmargs,'-nolinenumbers');
     }
-    my $xsubpp_version = $self->xsubpp_version($self->catfile($xsdir,'xsubpp'));
+    my $xsubpp_version = $self->xsubpp_version(File::Spec->catfile($xsdir,'xsubpp'));
 
     # What are the correct thresholds for version 1 && 2 Paul?
     if ( $xsubpp_version > 1.923 ){
@@ -1371,9 +1366,9 @@ sub manifypods {
     my($dist);
     my($pod2man_exe);
     if (defined $self->{PERL_SRC}) {
-	$pod2man_exe = $self->catfile($self->{PERL_SRC},'pod','pod2man');
+	$pod2man_exe = File::Spec->catfile($self->{PERL_SRC},'pod','pod2man');
     } else {
-	$pod2man_exe = $self->catfile($Config{scriptdirexp},'pod2man');
+	$pod2man_exe = File::Spec->catfile($Config{scriptdirexp},'pod2man');
     }
     if (not ($pod2man_exe = $self->perl_script($pod2man_exe))) {
 	# No pod2man but some MAN3PODS to be installed
@@ -1551,7 +1546,7 @@ clean ::
 	}
     }
     push(@otherfiles, qw[ blib $(MAKE_APERL_FILE) extralibs.ld perlmain.c pm_to_blib.ts ]);
-    push(@otherfiles,$self->catfile('$(INST_ARCHAUTODIR)','extralibs.all'));
+    push(@otherfiles,File::Spec->catfile('$(INST_ARCHAUTODIR)','extralibs.all'));
     my($file,$line);
     $line = '';  #avoid unitialized var warning
     # Occasionally files are repeated several times from different sources
@@ -1792,8 +1787,8 @@ doc__install : doc_site_install
 
 # This hack brought to you by DCL's 255-character command line limit
 pure_perl_install ::
-	$(NOECHO) $(PERL) -e "print 'read ].$self->catfile('$(PERL_ARCHLIB)','auto','$(FULLEXT)','.packlist').q[ '" >.MM_tmp
-	$(NOECHO) $(PERL) -e "print 'write ].$self->catfile('$(INSTALLARCHLIB)','auto','$(FULLEXT)','.packlist').q[ '" >>.MM_tmp
+	$(NOECHO) $(PERL) -e "print 'read ].File::Spec->catfile('$(PERL_ARCHLIB)','auto','$(FULLEXT)','.packlist').q[ '" >.MM_tmp
+	$(NOECHO) $(PERL) -e "print 'write ].File::Spec->catfile('$(INSTALLARCHLIB)','auto','$(FULLEXT)','.packlist').q[ '" >>.MM_tmp
 	$(NOECHO) $(PERL) -e "print '$(INST_LIB) $(INSTALLPRIVLIB) '" >>.MM_tmp
 	$(NOECHO) $(PERL) -e "print '$(INST_ARCHLIB) $(INSTALLARCHLIB) '" >>.MM_tmp
 	$(NOECHO) $(PERL) -e "print '$(INST_BIN) $(INSTALLBIN) '" >>.MM_tmp
@@ -1802,12 +1797,12 @@ pure_perl_install ::
 	$(NOECHO) $(PERL) -e "print '$(INST_MAN3DIR) $(INSTALLMAN3DIR) '" >>.MM_tmp
 	$(MOD_INSTALL) <.MM_tmp
 	$(NOECHO) Delete/NoLog/NoConfirm .MM_tmp;
-	$(NOECHO) $(WARN_IF_OLD_PACKLIST) ].$self->catfile('$(SITEARCHEXP)','auto','$(FULLEXT)','.packlist').q[
+	$(NOECHO) $(WARN_IF_OLD_PACKLIST) ].File::Spec->catfile('$(SITEARCHEXP)','auto','$(FULLEXT)','.packlist').q[
 
 # Likewise
 pure_site_install ::
-	$(NOECHO) $(PERL) -e "print 'read ].$self->catfile('$(SITEARCHEXP)','auto','$(FULLEXT)','.packlist').q[ '" >.MM_tmp
-	$(NOECHO) $(PERL) -e "print 'write ].$self->catfile('$(INSTALLSITEARCH)','auto','$(FULLEXT)','.packlist').q[ '" >>.MM_tmp
+	$(NOECHO) $(PERL) -e "print 'read ].File::Spec->catfile('$(SITEARCHEXP)','auto','$(FULLEXT)','.packlist').q[ '" >.MM_tmp
+	$(NOECHO) $(PERL) -e "print 'write ].File::Spec->catfile('$(INSTALLSITEARCH)','auto','$(FULLEXT)','.packlist').q[ '" >>.MM_tmp
 	$(NOECHO) $(PERL) -e "print '$(INST_LIB) $(INSTALLSITELIB) '" >>.MM_tmp
 	$(NOECHO) $(PERL) -e "print '$(INST_ARCHLIB) $(INSTALLSITEARCH) '" >>.MM_tmp
 	$(NOECHO) $(PERL) -e "print '$(INST_BIN) $(INSTALLBIN) '" >>.MM_tmp
@@ -1816,7 +1811,7 @@ pure_site_install ::
 	$(NOECHO) $(PERL) -e "print '$(INST_MAN3DIR) $(INSTALLMAN3DIR) '" >>.MM_tmp
 	$(MOD_INSTALL) <.MM_tmp
 	$(NOECHO) Delete/NoLog/NoConfirm .MM_tmp;
-	$(NOECHO) $(WARN_IF_OLD_PACKLIST) ].$self->catfile('$(PERL_ARCHLIB)','auto','$(FULLEXT)','.packlist').q[
+	$(NOECHO) $(WARN_IF_OLD_PACKLIST) ].File::Spec->catfile('$(PERL_ARCHLIB)','auto','$(FULLEXT)','.packlist').q[
 
 # Ditto
 doc_perl_install ::
@@ -1827,7 +1822,7 @@ q%	$(NOECHO) $(PERL) -e "print q[@ARGV=split(/\\|/,<STDIN>);]" >.MM2_tmp
 	$(NOECHO) $(PERL) -e "print q[print '=head2 ',scalar(localtime),': C<',shift,qq[>\\n\\n=over 4\\n\\n];]" >>.MM2_tmp
 	$(NOECHO) $(PERL) -e "print q[while(($key=shift) && ($val=shift)) ]" >>.MM2_tmp
 	$(NOECHO) $(PERL) -e "print q[{print qq[=item *\\n\\nC<$key: $val>\\n\\n];}print qq[=back\\n\\n];]" >>.MM2_tmp
-	$(NOECHO) $(PERL) .MM2_tmp <.MM_tmp >>%.$self->catfile('$(INSTALLARCHLIB)','perllocal.pod').q[
+	$(NOECHO) $(PERL) .MM2_tmp <.MM_tmp >>%.File::Spec->catfile('$(INSTALLARCHLIB)','perllocal.pod').q[
 	$(NOECHO) Delete/NoLog/NoConfirm .MM_tmp;,.MM2_tmp;
 
 # And again
@@ -1839,7 +1834,7 @@ q%	$(NOECHO) $(PERL) -e "print q[@ARGV=split(/\\|/,<STDIN>);]" >.MM2_tmp
 	$(NOECHO) $(PERL) -e "print q[print '=head2 ',scalar(localtime),': C<',shift,qq[>\\n\\n=over 4\\n\\n];]" >>.MM2_tmp
 	$(NOECHO) $(PERL) -e "print q[while(($key=shift) && ($val=shift)) ]" >>.MM2_tmp
 	$(NOECHO) $(PERL) -e "print q[{print qq[=item *\\n\\nC<$key: $val>\\n\\n];}print qq[=back\\n\\n];]" >>.MM2_tmp
-	$(NOECHO) $(PERL) .MM2_tmp <.MM_tmp >>%.$self->catfile('$(INSTALLARCHLIB)','perllocal.pod').q[
+	$(NOECHO) $(PERL) .MM2_tmp <.MM_tmp >>%.File::Spec->catfile('$(INSTALLARCHLIB)','perllocal.pod').q[
 	$(NOECHO) Delete/NoLog/NoConfirm .MM_tmp;,.MM2_tmp;
 
 ];
@@ -1849,13 +1844,13 @@ uninstall :: uninstall_from_$(INSTALLDIRS)dirs
 	$(NOECHO) $(NOOP)
 
 uninstall_from_perldirs ::
-	$(NOECHO) $(UNINSTALL) ].$self->catfile('$(PERL_ARCHLIB)','auto','$(FULLEXT)','.packlist').q[
+	$(NOECHO) $(UNINSTALL) ].File::Spec->catfile('$(PERL_ARCHLIB)','auto','$(FULLEXT)','.packlist').q[
 	$(NOECHO) $(SAY) "Uninstall is now deprecated and makes no actual changes."
 	$(NOECHO) $(SAY) "Please check the list above carefully for errors, and manually remove"
 	$(NOECHO) $(SAY) "the appropriate files.  Sorry for the inconvenience."
 
 uninstall_from_sitedirs ::
-	$(NOECHO) $(UNINSTALL) ],$self->catfile('$(SITEARCHEXP)','auto','$(FULLEXT)','.packlist'),"\n",q[
+	$(NOECHO) $(UNINSTALL) ],File::Spec->catfile('$(SITEARCHEXP)','auto','$(FULLEXT)','.packlist'),"\n",q[
 	$(NOECHO) $(SAY) "Uninstall is now deprecated and makes no actual changes."
 	$(NOECHO) $(SAY) "Please check the list above carefully for errors, and manually remove"
 	$(NOECHO) $(SAY) "the appropriate files.  Sorry for the inconvenience."
@@ -2214,15 +2209,15 @@ $(MAP_TARGET) :: $(MAKE_APERL_FILE)
     # that's what we're building here).
     push @optlibs, grep { !/PerlShr/i } split ' ', +($self->ext())[2];
     if ($libperl) {
-	unless (-f $libperl || -f ($libperl = $self->catfile($Config{'installarchlib'},'CORE',$libperl))) {
+	unless (-f $libperl || -f ($libperl = File::Spec->catfile($Config{'installarchlib'},'CORE',$libperl))) {
 	    print STDOUT "Warning: $libperl not found\n";
 	    undef $libperl;
 	}
     }
     unless ($libperl) {
 	if (defined $self->{PERL_SRC}) {
-	    $libperl = $self->catfile($self->{PERL_SRC},"libperl$self->{LIB_EXT}");
-	} elsif (-f ($libperl = $self->catfile($Config{'installarchlib'},'CORE',"libperl$self->{LIB_EXT}")) ) {
+	    $libperl = File::Spec->catfile($self->{PERL_SRC},"libperl$self->{LIB_EXT}");
+	} elsif (-f ($libperl = File::Spec->catfile($Config{'installarchlib'},'CORE',"libperl$self->{LIB_EXT}")) ) {
 	} else {
 	    print STDOUT "Warning: $libperl not found
     If you're going to build a static perl binary, make sure perl is installed
@@ -2273,9 +2268,9 @@ $(MAP_TARGET) : $(MAP_SHRTARGET) ',"${tmp}perlmain\$(OBJ_EXT) ${tmp}PerlShr.Opt"
 doc_inst_perl :
 	$(NOECHO) $(PERL) -e "print 'Perl binary $(MAP_TARGET)|'" >.MM_tmp
 	$(NOECHO) $(PERL) -e "print 'MAP_STATIC|$(MAP_STATIC)|'" >>.MM_tmp
-	$(NOECHO) $(PERL) -pl040 -e " " ].$self->catfile('$(INST_ARCHAUTODIR)','extralibs.all'),q[ >>.MM_tmp
+	$(NOECHO) $(PERL) -pl040 -e " " ].File::Spec->catfile('$(INST_ARCHAUTODIR)','extralibs.all'),q[ >>.MM_tmp
 	$(NOECHO) $(PERL) -e "print 'MAP_LIBPERL|$(MAP_LIBPERL)|'" >>.MM_tmp
-	$(DOC_INSTALL) <.MM_tmp >>].$self->catfile('$(INSTALLARCHLIB)','perllocal.pod').q[
+	$(DOC_INSTALL) <.MM_tmp >>].File::Spec->catfile('$(INSTALLARCHLIB)','perllocal.pod').q[
 	$(NOECHO) Delete/NoLog/NoConfirm .MM_tmp;
 ];
 

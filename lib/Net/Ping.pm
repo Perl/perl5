@@ -1,6 +1,6 @@
 package Net::Ping;
 
-# $Id: Ping.pm,v 1.13 2001/12/07 02:18:44 rob Exp $
+# $Id: Ping.pm,v 1.15 2001/12/26 20:55:55 rob Exp $
 
 require 5.002;
 require Exporter;
@@ -15,7 +15,7 @@ use Carp;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(pingecho);
-$VERSION = 2.09;
+$VERSION = "2.10";
 
 # Constants
 
@@ -86,6 +86,8 @@ sub new
         $self->{"data"} .= chr($cnt % 256);
     }
 
+    $self->{"local_addr"} = undef;              # Don't bind by default
+
     $self->{"seq"} = 0;                         # For counting packets
     if ($self->{"proto"} eq "udp")              # Open a socket
     {
@@ -94,7 +96,7 @@ sub new
         $self->{"port_num"} = (getservbyname('echo', 'udp'))[2] ||
             croak("Can't get udp echo port by name");
         $self->{"fh"} = FileHandle->new();
-        socket($self->{"fh"}, &PF_INET(), &SOCK_DGRAM(),
+        socket($self->{"fh"}, PF_INET, SOCK_DGRAM,
                $self->{"proto_num"}) ||
             croak("udp socket error - $!");
     }
@@ -105,7 +107,7 @@ sub new
                     croak("Can't get icmp protocol by name");
         $self->{"pid"} = $$ & 0xffff;           # Save lower 16 bits of pid
         $self->{"fh"} = FileHandle->new();
-        socket($self->{"fh"}, &PF_INET(), &SOCK_RAW(), $self->{"proto_num"}) ||
+        socket($self->{"fh"}, PF_INET, SOCK_RAW, $self->{"proto_num"}) ||
             croak("icmp socket error - $!");
     }
     elsif ($self->{"proto"} eq "tcp" || $self->{"proto"} eq "stream")
@@ -117,9 +119,42 @@ sub new
         $self->{"fh"} = FileHandle->new();
     }
 
-
     return($self);
 }
+
+# Description: Set the local IP address from which pings will be sent.
+# For ICMP and UDP pings, this calls bind() on the already-opened socket;
+# for TCP pings, just saves the address to be used when the socket is
+# opened.  Returns non-zero if successful; croaks on error.
+sub bind
+{
+    my ($self,
+        $local_addr         # Name or IP number of local interface
+        ) = @_;
+    my ($ip                 # Packed IP number of $local_addr
+        );
+
+    croak("Usage: \$p->bind(\$local_addr)") unless @_ == 2;
+    croak("already bound") if defined($self->{"local_addr"}) &&
+            ($self->{"proto"} eq "udp" || $self->{"proto"} eq "icmp");
+
+    $ip = inet_aton($local_addr);
+    croak("nonexistent local address $local_addr") unless defined($ip);
+    $self->{"local_addr"} = $ip; # Only used if proto is tcp
+
+    if ($self->{"proto"} eq "udp" || $self->{"proto"} eq "icmp")
+    {
+        CORE::bind($self->{"fh"}, sockaddr_in(0, $ip)) ||
+                croak("$self->{'proto'} bind error - $!");
+    }
+    elsif ($self->{"proto"} ne "tcp")
+    {
+        croak("Unknown protocol \"$self->{proto}\" in bind()");
+    }
+
+    return 1;
+}
+
 
 # Description: Ping a host name or IP number with an optional timeout.
 # First lookup the host, and return undef if it is not found.  Otherwise
@@ -165,19 +200,19 @@ sub ping_external {
   return Net::Ping::External::ping(ip => $ip, timeout => $timeout);
 }
 
+use constant ICMP_ECHOREPLY => 0; # ICMP packet types
+use constant ICMP_ECHO      => 8;
+use constant ICMP_STRUCT    => "C2 S3 A";  # Structure of a minimal ICMP packet
+use constant SUBCODE        => 0; # No ICMP subcode for ECHO and ECHOREPLY
+use constant ICMP_FLAGS     => 0; # No special flags for send or recv
+use constant ICMP_PORT      => 0; # No port with ICMP
+
 sub ping_icmp
 {
     my ($self,
         $ip,                # Packed IP number of the host
         $timeout            # Seconds after which ping times out
         ) = @_;
-
-    my $ICMP_ECHOREPLY = 0; # ICMP packet types
-    my $ICMP_ECHO = 8;
-    my $icmp_struct = "C2 S3 A";  # Structure of a minimal ICMP packet
-    my $subcode = 0;        # No ICMP subcode for ECHO and ECHOREPLY
-    my $flags = 0;          # No special flags when opening a socket
-    my $port = 0;           # No port with ICMP
 
     my ($saddr,             # sockaddr_in with port and ip
         $checksum,          # Checksum of ICMP packet
@@ -202,14 +237,14 @@ sub ping_icmp
 
     $self->{"seq"} = ($self->{"seq"} + 1) % 65536; # Increment sequence
     $checksum = 0;                          # No checksum for starters
-    $msg = pack($icmp_struct . $self->{"data_size"}, $ICMP_ECHO, $subcode,
+    $msg = pack(ICMP_STRUCT . $self->{"data_size"}, ICMP_ECHO, SUBCODE,
                 $checksum, $self->{"pid"}, $self->{"seq"}, $self->{"data"});
     $checksum = Net::Ping->checksum($msg);
-    $msg = pack($icmp_struct . $self->{"data_size"}, $ICMP_ECHO, $subcode,
+    $msg = pack(ICMP_STRUCT . $self->{"data_size"}, ICMP_ECHO, SUBCODE,
                 $checksum, $self->{"pid"}, $self->{"seq"}, $self->{"data"});
     $len_msg = length($msg);
-    $saddr = sockaddr_in($port, $ip);
-    send($self->{"fh"}, $msg, $flags, $saddr); # Send the message
+    $saddr = sockaddr_in(ICMP_PORT, $ip);
+    send($self->{"fh"}, $msg, ICMP_FLAGS, $saddr); # Send the message
 
     $rbits = "";
     vec($rbits, $self->{"fh"}->fileno(), 1) = 1;
@@ -228,14 +263,14 @@ sub ping_icmp
         elsif ($nfound)                     # Got a packet from somewhere
         {
             $recv_msg = "";
-            $from_saddr = recv($self->{"fh"}, $recv_msg, 1500, $flags);
+            $from_saddr = recv($self->{"fh"}, $recv_msg, 1500, ICMP_FLAGS);
             ($from_port, $from_ip) = sockaddr_in($from_saddr);
             ($from_type, $from_subcode, $from_chk,
              $from_pid, $from_seq, $from_msg) =
-                unpack($icmp_struct . $self->{"data_size"},
+                unpack(ICMP_STRUCT . $self->{"data_size"},
                        substr($recv_msg, length($recv_msg) - $len_msg,
                               $len_msg));
-            if (($from_type == $ICMP_ECHOREPLY) &&
+            if (($from_type == ICMP_ECHOREPLY) &&
                 ($from_ip eq $ip) &&
                 ($from_pid == $self->{"pid"}) && # Does the packet check out?
                 ($from_seq == $self->{"seq"}))
@@ -318,8 +353,12 @@ sub tcp_connect
     my $ret = 0;            # Default to unreachable
 
     my $do_socket = sub {
-      socket($self->{"fh"}, &PF_INET(), &SOCK_STREAM(), $self->{"proto_num"}) ||
+      socket($self->{"fh"}, PF_INET, SOCK_STREAM, $self->{"proto_num"}) ||
         croak("tcp socket error - $!");
+      if (defined $self->{"local_addr"} &&
+          !CORE::bind($self->{"fh"}, sockaddr_in(0, $self->{"local_addr"}))) {
+        croak("tcp bind error - $!");
+      }
     };
     my $do_connect = sub {
       eval {
@@ -513,14 +552,14 @@ sub open
 # done.  Otherwise go back and wait for the message until we run out
 # of time.  Return the result of our efforts.
 
+use constant UDP_FLAGS => 0; # Nothing special on send or recv
+
 sub ping_udp
 {
     my ($self,
         $ip,                # Packed IP number of the host
         $timeout            # Seconds after which ping times out
         ) = @_;
-
-    my $flags = 0;          # Nothing special on open
 
     my ($saddr,             # sockaddr_in with port and ip
         $ret,               # The return value
@@ -538,7 +577,7 @@ sub ping_udp
     $saddr = sockaddr_in($self->{"port_num"}, $ip);
     $self->{"seq"} = ($self->{"seq"} + 1) % 256;    # Increment sequence
     $msg = chr($self->{"seq"}) . $self->{"data"};   # Add data if any
-    send($self->{"fh"}, $msg, $flags, $saddr);      # Send it
+    send($self->{"fh"}, $msg, UDP_FLAGS, $saddr);   # Send it
 
     $rbits = "";
     vec($rbits, $self->{"fh"}->fileno(), 1) = 1;
@@ -558,7 +597,7 @@ sub ping_udp
         elsif ($nfound)         # A packet is waiting
         {
             $from_msg = "";
-            $from_saddr = recv($self->{"fh"}, $from_msg, 1500, $flags)
+            $from_saddr = recv($self->{"fh"}, $from_msg, 1500, UDP_FLAGS)
 		or last; # For example an unreachable host will make recv() fail.
 	    ($from_port, $from_ip) = sockaddr_in($from_saddr);
 	    if (($from_ip eq $ip) &&        # Does the packet check out?
@@ -595,7 +634,7 @@ __END__
 
 Net::Ping - check a remote host for reachability
 
-$Id: Ping.pm,v 1.13 2001/12/07 02:18:44 rob Exp $
+$Id: Ping.pm,v 1.15 2001/12/26 20:55:55 rob Exp $
 
 =head1 SYNOPSIS
 
@@ -606,6 +645,7 @@ $Id: Ping.pm,v 1.13 2001/12/07 02:18:44 rob Exp $
     $p->close();
 
     $p = Net::Ping->new("icmp");
+    $p->bind($my_addr); # Specify source interface of pings
     foreach $host (@host_array)
     {
         print "$host is ";
@@ -691,6 +731,20 @@ data bytes is ignored if the protocol is "tcp".  The minimum (and
 default) number of data bytes is 1 if the protocol is "udp" and 0
 otherwise.  The maximum number of data bytes that can be specified is
 1024.
+
+=item $p->bind($local_addr);
+
+Sets the source address from which pings will be sent.  This must be
+the address of one of the interfaces on the local host.  $local_addr
+may be specified as a hostname or as a text IP address such as
+"192.168.1.1".
+
+If the protocol is set to "tcp", this method may be called any
+number of times, and each call to the ping() method (below) will use
+the most recent $local_addr.  If the protocol is "icmp" or "udp",
+then bind() must be called at most once per object, and (if it is
+called at all) must be called before the first call to ping() for that
+object.
 
 =item $p->ping($host [, $timeout]);
 
@@ -778,10 +832,11 @@ routines to pack and unpack ICMP packets.  It would be better for a
 separate module to be written which understands all of the different
 kinds of ICMP packets.
 
-=head1 AUTHOR(S)
+=head1 AUTHORS
 
-  Current maintainer Net::Ping base code:
+  Current maintainers:
     colinm@cpan.org (Colin McMillen)
+    bbb@cpan.org (Rob Brown)
 
   Stream protocol:
     bronson@trestle.com (Scott Bronson)
@@ -793,12 +848,10 @@ kinds of ICMP packets.
   Original Net::Ping author:
     mose@ns.ccsn.edu (Russell Mosemann)
 
-  Compatibility porting:
-    bbb@cpan.org (Rob Brown)
-
 =head1 COPYRIGHT
 
 Copyright (c) 2001, Colin McMillen.  All rights reserved.
+
 Copyright (c) 2001, Rob Brown.  All rights reserved.
 
 This program is free software; you may redistribute it and/or

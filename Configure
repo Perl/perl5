@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Dec 21 20:17:57 EET 2001 [metaconfig 3.0 PL70]
+# Generated on Wed Dec 26 20:19:46 EET 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1162,12 +1162,12 @@ if `$sh -c '#' >/dev/null 2>&1`; then
 	if test ! -f $xcat$_exe; then
 		for p in $paths; do
 			if test -f $p/cat$_exe; then
-				xcat=$p/cat$_exe
+				xcat=$p/cat
 				break
 			fi
 		done
-		if test ! -f $xcat; then
-			echo "Can't find cat anywhere!" >&4
+		if test ! -f $xcat$_exe; then
+			echo "Can't find cat anywhere!"
 			exit 1
 		fi
 	fi
@@ -2169,22 +2169,26 @@ ln)
 	ln=$cp
 	;;
 esac
-case "$make$gmake" in
-*/gmake|?:[\\/]gmake)
-	# We can't have osname yet.
+case "$make" in
+make)	
+	case "$gmake" in
+	gmake)
+	echo "I can't find make or gmake, and my life depends on it." >&4
+	echo "Go find a public domain implementation or fix your PATH setting!" >&4
+	exit 1
+	;;
+	esac
+	;;
+esac	
+case "$gmake" in
+gmake)	;;
+*)	# We can't have osname yet.
 	if test -f "/system/gnu_library/bin/ar.pm"; then # Stratus VOS
 		# Assume that gmake, if found, is definitely GNU make
 		# and prefer it over the system make.
 		echo "Substituting gmake for make."
 		make=$gmake
 	fi
-	;;
-*/make|?:[\\/]make)
-	;;
-*)
-	echo "I can't find make or gmake, and my life depends on it." >&4
-	echo "Go find a public domain implementation or fix your PATH setting!" >&4
-	exit 1
 	;;
 esac
 case "$test" in
@@ -2806,7 +2810,7 @@ EOM
 	$test -d /usr/apollo/bin && osname=apollo
 	$test -f /etc/saf/_sactab && osname=svr4
 	$test -d /usr/include/minix && osname=minix
-	$test -d /system && osname=vos
+	$test -f /system/gnu_library/bin/ar.pm && osname=vos
 	if $test -d /MachTen -o -d /MachTen_Folder; then
 		osname=machten
 		if $test -x /sbin/version; then
@@ -9984,6 +9988,10 @@ case "$eagain" in
 #include <signal.h>
 #include <stdio.h> 
 #include <stdlib.h> 
+#$i_fcntl I_FCNTL
+#ifdef I_FCNTL
+#include <fcntl.h>
+#endif
 #define MY_O_NONBLOCK $o_nonblock
 #ifndef errno  /* XXX need better Configure test */
 extern int errno;
@@ -13467,7 +13475,8 @@ EOM
 $cat >try.c <<EOCP
 #include <stdio.h>
 #define U32 $u32type
-#define BYTEORDER $byteorder
+#define BYTEORDER 0x$byteorder
+#define U8 $u8type
 int main() {
 #if BYTEORDER == 0x1234 || BYTEORDER == 0x4321
     U8 buf[] = "\0\0\0\1\0\0\0\0";
@@ -13513,7 +13522,7 @@ int main() {
 EOCP
 set try
 if eval $compile_ok; then
-	echo "(Testing for character data alignment may dump core.)" >&4
+	echo "(Testing for character data alignment may crash the test.  That's okay.)" >&4
 	$run ./try 2>&1 >/dev/null
 	case "$?" in
 	0)	cat >&4 <<EOM

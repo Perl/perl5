@@ -393,11 +393,22 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
     SV *dsv = PERL_DEBUG_PAD_ZERO(0);
 #endif
 
+    if (prog->reganch & ROPT_UTF8) {
+	DEBUG_r(PerlIO_printf(Perl_debug_log,
+			      "UTF-8 regex...\n"));
+	PL_reg_flags |= RF_utf8;
+    }
+
     DEBUG_r({
-	 char*s   = UTF ? sv_uni_display(dsv, sv, 60, 0) : strpos;
-	 int  len = UTF ? strlen(s) : strend - strpos;
+	 char *s   = PL_reg_match_utf8 ?
+	                 sv_uni_display(dsv, sv, 60, 0) : strpos;
+	 int   len = PL_reg_match_utf8 ?
+	                 strlen(s) : strend - strpos;
 	 if (!PL_colorset)
 	      reginitcolors();
+	 if (PL_reg_match_utf8)
+	     DEBUG_r(PerlIO_printf(Perl_debug_log,
+				   "UTF-8 target...\n"));
 	 PerlIO_printf(Perl_debug_log,
 		       "%sGuessing start of match, REx%s `%s%.60s%s%s' against `%s%.*s%s%s'...\n",
 		       PL_colors[4],PL_colors[5],PL_colors[0],
@@ -410,9 +421,6 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		       (len > 60 ? "..." : "")
 	      );
     });
-
-    if (prog->reganch & ROPT_UTF8)
-	PL_reg_flags |= RF_utf8;
 
     if (prog->minlen > CHR_DIST((U8*)strend, (U8*)strpos)) {
 	DEBUG_r(PerlIO_printf(Perl_debug_log,
@@ -967,27 +975,32 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 		 * Fortunately, not getting this right is allowed
 		 * for Unicode Regular Expression Support level 1,
 		 * only one-to-one matching is required. --jhi */
-		if (c1 == c2)
+		if (c1 == c2) {
 		    while (s <= e) {
 			if ( utf8_to_uvchr((U8*)s, &len) == c1
-			     && (ln == 1 ||
+			     && (ln == len ||
 				 ibcmp_utf8(s, do_utf8,  strend - s,
 					    m, UTF, ln))
 			     && (norun || regtry(prog, s)) )
 			    goto got_it;
 			s += len;
 		    }
-		else
+		}
+		else {
 		    while (s <= e) {
 			UV c = utf8_to_uvchr((U8*)s, &len);
+			if (c == (UV)UNICODE_GREEK_CAPITAL_LETTER_SIGMA ||
+			    c == (UV)UNICODE_GREEK_SMALL_LETTER_FINAL_SIGMA)
+			    c = (UV)UNICODE_GREEK_SMALL_LETTER_SIGMA;
 			if ( (c == c1 || c == c2)
-			     && (ln == 1 ||
+			     && (ln == len ||
 				 ibcmp_utf8(s, do_utf8, strend - s,
 					    m, UTF, ln))
 			     && (norun || regtry(prog, s)) )
 			    goto got_it;
 			s += len;
 		    }
+		}
 	    }
 	    else {
 		if (c1 == c2)
@@ -2232,10 +2245,10 @@ S_regmatch(pTHX_ regnode *prog)
 	    s = STRING(scan);
 	    ln = STR_LEN(scan);
 	    if (do_utf8 != (UTF!=0)) {
-		/* The target and the pattern have differing "utf8ness". */
+		/* The target and the pattern have differing utf8ness. */
 		char *l = locinput;
 		char *e = s + ln;
-		STRLEN len;
+		STRLEN ulen;
 
 		if (do_utf8) {
 		    /* The target is utf8, the pattern is not utf8. */
@@ -2243,9 +2256,9 @@ S_regmatch(pTHX_ regnode *prog)
 			if (l >= PL_regeol)
 			     sayNO;
 			if (NATIVE_TO_UNI(*(U8*)s) !=
-			    utf8_to_uvchr((U8*)l, &len))
+			    utf8_to_uvchr((U8*)l, &ulen))
 			     sayNO;
-			l += len;
+			l += ulen;
 			s ++;
 		    }
 		}
@@ -2255,9 +2268,9 @@ S_regmatch(pTHX_ regnode *prog)
 			if (l >= PL_regeol)
 			    sayNO;
 			if (NATIVE_TO_UNI(*((U8*)l)) !=
-			    utf8_to_uvchr((U8*)s, &len))
+			    utf8_to_uvchr((U8*)s, &ulen))
 			    sayNO;
-			s += len;
+			s += ulen;
 			l ++;
 		    }
 		}
@@ -2265,7 +2278,7 @@ S_regmatch(pTHX_ regnode *prog)
 		nextchr = UCHARAT(locinput);
 		break;
 	    }
-	    /* The target and the pattern have the same "utf8ness". */
+	    /* The target and the pattern have the same utf8ness. */
 	    /* Inline the first character, for speed. */
 	    if (UCHARAT(s) != nextchr)
 		sayNO;
@@ -2283,25 +2296,84 @@ S_regmatch(pTHX_ regnode *prog)
 	    s = STRING(scan);
 	    ln = STR_LEN(scan);
 
-	    if (do_utf8) {
+	    {
 		char *l = locinput;
-		char *e;
-		STRLEN ulen;
-		U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
-		e = s + ln;
-		while (s < e) {
-		    if (l >= PL_regeol)
-			sayNO;
-		    toLOWER_utf8((U8*)l, tmpbuf, &ulen);
-		    if (memNE(s, (char*)tmpbuf, ulen))
-		        sayNO;
-		    s += UTF8SKIP(s);
-		    l += ulen;
+		char *e = s + ln;
+		U8 tmpbuf[UTF8_MAXLEN_FOLD+1];
+
+		if (do_utf8 != (UTF!=0)) {
+		     /* The target and the pattern have differing utf8ness. */
+		     STRLEN ulen1, ulen2;
+		     UV cs, cl;
+
+		     if (do_utf8) {
+			  /* The target is utf8, the pattern is not utf8. */
+			  while (s < e) {
+			       if (l >= PL_regeol)
+				    sayNO;
+
+			       cs = to_uni_fold(NATIVE_TO_UNI(*(U8*)s),
+						(U8*)s, &ulen1);
+			       cl = utf8_to_uvchr((U8*)l, &ulen2);
+
+			       if (cs != cl) {
+				    cl = to_uni_fold(cl, (U8*)l, &ulen2);
+				    if (ulen1 != ulen2 || cs != cl)
+					 sayNO;
+			       }
+			       l += ulen1;
+			       s ++;
+			  }
+		     }
+		     else {
+			  /* The target is not utf8, the pattern is utf8. */
+			  while (s < e) {
+			       if (l >= PL_regeol)
+				    sayNO;
+
+			       cs = utf8_to_uvchr((U8*)s, &ulen1);
+
+			       cl = to_uni_fold(NATIVE_TO_UNI(*(U8*)l),
+						(U8*)l, &ulen2);
+
+			       if (cs != cl) {
+				    cs = to_uni_fold(cs, (U8*)s, &ulen1);
+				    if (ulen1 != ulen2 || cs != cl)
+					 sayNO;
+			       }
+			       l ++;
+			       s += ulen1;
+			  }
+		     }
+		     locinput = l;
+		     nextchr = UCHARAT(locinput);
+		     break;
 		}
-		locinput = l;
-		nextchr = UCHARAT(locinput);
-		break;
+
+		if (do_utf8 && UTF) {
+		     /* Both the target and the pattern are utf8. */
+		     STRLEN ulen;
+		     
+		     while (s < e) {
+			  if (l >= PL_regeol)
+			       sayNO;
+			  if (UTF8SKIP(s) != UTF8SKIP(l) ||
+			      memNE(s, (char*)l, UTF8SKIP(s))) {
+			       to_utf8_fold((U8*)l, tmpbuf, &ulen);
+			       if (UTF8SKIP(s) != ulen ||
+				   memNE(s, (char*)tmpbuf, ulen))
+				    sayNO;
+			  }
+			  l += UTF8SKIP(l);
+			  s += UTF8SKIP(s);
+		     }
+		     locinput = l;
+		     nextchr = UCHARAT(locinput);
+		     break;
+		}
 	    }
+
+	    /* Neither the target and the pattern are utf8. */
 
 	    /* Inline the first character, for speed. */
 	    if (UCHARAT(s) != nextchr &&
@@ -2524,16 +2596,21 @@ S_regmatch(pTHX_ regnode *prog)
 	    nextchr = UCHARAT(++locinput);
 	    break;
 	case CLUMP:
-	    LOAD_UTF8_CHARCLASS(mark,"~");
-	    if (locinput >= PL_regeol ||
-		swash_fetch(PL_utf8_mark,(U8*)locinput, do_utf8))
+	    if (locinput >= PL_regeol)
 		sayNO;
-	    locinput += PL_utf8skip[nextchr];
-	    while (locinput < PL_regeol &&
-		   swash_fetch(PL_utf8_mark,(U8*)locinput, do_utf8))
-		locinput += UTF8SKIP(locinput);
-	    if (locinput > PL_regeol)
-		sayNO;
+	    if  (do_utf8) {
+		LOAD_UTF8_CHARCLASS(mark,"~");
+		if (swash_fetch(PL_utf8_mark,(U8*)locinput, do_utf8))
+		    sayNO;
+		locinput += PL_utf8skip[nextchr];
+		while (locinput < PL_regeol &&
+		       swash_fetch(PL_utf8_mark,(U8*)locinput, do_utf8))
+		    locinput += UTF8SKIP(locinput);
+		if (locinput > PL_regeol)
+		    sayNO;
+	    } 
+	    else
+	       locinput++;
 	    nextchr = UCHARAT(locinput);
 	    break;
 	case REFFL:

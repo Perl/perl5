@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..41\n";
+print "1..45\n";
 
 eval 'print "ok 1\n";';
 
@@ -220,4 +220,17 @@ print $@;
 	}
     };
     print "not ok 41\n" if $@;
+}
+
+# Make sure that "my $$x" is forbidden
+# 20011224 MJD
+{
+  eval q{my $$x};
+  print $@ ? "ok 42\n" : "not ok 42\n";
+  eval q{my @$x};
+  print $@ ? "ok 43\n" : "not ok 43\n";
+  eval q{my %$x};
+  print $@ ? "ok 44\n" : "not ok 44\n";
+  eval q{my $$$x};
+  print $@ ? "ok 45\n" : "not ok 45\n";
 }

@@ -89,6 +89,7 @@ perlsio_binmode(FILE *fp, int iotype, int mode)
 #  endif
 #else
 #  if defined(USEMYBINMODE)
+    dTHX;
     if (my_binmode(fp, iotype, mode) != FALSE)
 	return 1;
     else

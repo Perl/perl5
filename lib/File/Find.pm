@@ -44,7 +44,7 @@ I<the wanted() function> below.
 
 Reports the name of a directory only AFTER all its entries
 have been reported.  Entry point finddepth() is a shortcut for
-specifying C<{ bydepth => 1 }> in the first argument of find().
+specifying C<{ bydepth =E<gt> 1 }> in the first argument of find().
 
 =item C<preprocess>
 
@@ -565,8 +565,6 @@ sub _find_opt {
 		$cwd = "$cwd:" unless ($cwd =~ /:$/); # for safety
 
 		if ($top_item eq $File::Find::current_dir) {
-                  # avoid empty name after return to '/'
-                  $name = '/' unless length( $name );
 		    $abs_dir = $cwd;
 		}
 		else {
@@ -733,8 +731,6 @@ sub _find_dir($$$) {
 	    $_= ($no_chdir ? $dir_name : $dir_rel ); # $_
 	    # prune may happen here
 	    $prune= 0;
-            # guarantee lstat for directory
-            lstat( $dir_name );
 	    { &$wanted_callback };	# protect against wild "next"
 	    next if $prune;
 	}
@@ -886,8 +882,6 @@ sub _find_dir($$$) {
 			substr($_, length($_) == 2 ? -1 : -2) = '';
 		    }
 		}
-                # guarantee lstat at return to directory
-		lstat( $dir_name );
 		{ &$wanted_callback }; # protect against wild "next"
 	     }
 	     else {
@@ -1071,12 +1065,12 @@ sub _find_dir_symlnk($$$) {
 		}
 		else {
 		    if ( substr($name,-2) eq '/.' ) {
-			$name =~ s|/\.$||; # $File::Find::name
+			substr($name, length($name) == 2 ? -1 : -2) = ''; # $File::Find::name
 		    }
 		    $dir = $p_dir; # $File::Find::dir
 		    $_ = ($no_chdir ? $dir_name : $dir_rel); # $_
 		    if ( substr($_,-2) eq '/.' ) {
-			s|/\.$||;
+			substr($_, length($_) == 2 ? -1 : -2) = '';
 		    }
 		}
 

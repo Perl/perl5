@@ -951,21 +951,7 @@ Perl_do_eof(pTHX_ GV *gv)
     if (!io)
 	return TRUE;
     else if (ckWARN(WARN_IO) && (IoTYPE(io) == IoTYPE_WRONLY))
-    {
-	/* integrate to report_evil_fh()? */
-        char *name = NULL;
-	if (isGV(gv)) {
-	    SV* sv = sv_newmortal();
-	    gv_efullname4(sv, gv, Nullch, FALSE);
-	    name = SvPV_nolen(sv);
-	}
-	if (name && *name)
-	    Perl_warner(aTHX_ WARN_IO,
-			"Filehandle %s opened only for output", name);
-	else
-	    Perl_warner(aTHX_ WARN_IO,
-			"Filehandle opened only for output");
-    }
+	report_evil_fh(gv, io, OP_phoney_OUTPUT_ONLY);
 
     while (IoIFP(io)) {
 

@@ -215,6 +215,11 @@ SKIP: {
     $DEV =~ s{^[cp].+?\sstdout$}{}m;
     @DEV =  grep { $_ ne 'stdout' } @DEV;
 
+    # /dev/printer is also naughty: in IRIX it shows up as
+    # Srwx-----, not srwx------.
+    $DEV =~ s{^.+?\sprinter$}{}m;
+    @DEV =  grep { $_ ne 'printer' } @DEV;
+
     # If running as root, we will see .files in the ls result,
     # and readdir() will see them always.  Potential for conflict,
     # so let's weed them out.

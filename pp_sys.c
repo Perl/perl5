@@ -2280,7 +2280,7 @@ PP(pp_socket)
 
 PP(pp_sockpair)
 {
-#ifdef HAS_SOCKETPAIR
+#if defined (HAS_SOCKETPAIR) || defined (HAS_SOCKET)
     dSP;
     GV *gv1;
     GV *gv2;
@@ -4311,6 +4311,10 @@ PP(pp_time)
    Probably we ought to use _sysconf(_SC_CLK_TCK), if
    it's supported.    --AD  9/96.
 */
+
+#ifdef __BEOS__
+#  define HZ 1000000
+#endif
 
 #ifndef HZ
 #  ifdef CLK_TCK

@@ -57,3 +57,47 @@ please email me.
 Tom Spindler
 dogcow@isi.net
 
+=head2 Update 2001-12-26
+
+I managed to compile one of the developer snapshots (13885 plus a few
+tweaks) leading up to (some day) Perl 5.8.0, and the following tests
+fail:
+
+        op/magic                        24-26
+        ext/POSIX/t/sigaction           13
+        ext/POSIX/t/waitpid             1
+        lib/ExtUtils/t/Installed        9-10 25-27 29-30 33-36
+
+None of the failures look too serious:
+
+=over 4
+
+=item *
+
+The op/magic failures look like something funny going on with $0 and
+$^X that I can't now figure out: none of the generated pathnames are
+wrong as such, they just seem to accumulate "./" prefixes and infixes
+in ways that define logic.
+
+=item *
+
+The sigaction #13 means that signal mask doesn't get properly restored
+if sigaction returns early.
+
+=item *
+
+The waitpid failure means that after there are no more child
+processes, waitpid is supposed to start returning -1 (and set errno
+to ECHILD).  In BeOS, it doesn't seem to.
+
+=item *
+
+The Installed test has some filesystem portability assumptions.
+
+=back
+
+Disclaimer: I just installed BeOS Personal Edition 5.0 and the
+Developer Tools, that is the whole extent of my BeOS expertise,
+so pelase don't ask for further help in BeOS Perl problems, sorry.
+
+jhi@iki.fi

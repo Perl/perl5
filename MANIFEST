@@ -535,6 +535,7 @@ ext/Socket/Makefile.PL		Socket extension makefile writer
 ext/Socket/Socket.pm		Socket extension Perl module
 ext/Socket/Socket.t		See if Socket works
 ext/Socket/Socket.xs		Socket extension external subroutines
+ext/Socket/socketpair.t		See if socketpair works
 ext/Storable/ChangeLog		Storable extension
 ext/Storable/Makefile.PL	Storable extension
 ext/Storable/MANIFEST		Storable extension
@@ -981,6 +982,8 @@ lib/File/Spec.pm		portable operations on file names
 lib/File/Spec/Epoc.pm		portable operations on EPOC file names
 lib/File/Spec/Functions.pm	Function interface to File::Spec object methods
 lib/File/Spec/Mac.pm		portable operations on Mac file names
+lib/File/Spec/Cygwin.pm		portable operations on Cygwin file names
+lib/File/Spec/NW5.pm		portable operations on NetWare file names
 lib/File/Spec/OS2.pm		portable operations on OS2 file names
 lib/File/Spec/t/Functions.t     See if File::Spec::Functions works
 lib/File/Spec/t/rel2abs2rel.t   See if File::Spec->rel2abs/abs2rel works

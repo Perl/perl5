@@ -1331,6 +1331,37 @@ PERL_CALLCONV STRLEN	Perl_sv_utf8_upgrade_flags(pTHX_ SV *sv, I32 flags);
 PERL_CALLCONV char*	Perl_sv_pvn_force_flags(pTHX_ SV* sv, STRLEN* lp, I32 flags);
 PERL_CALLCONV char*	Perl_sv_2pv_flags(pTHX_ SV* sv, STRLEN* lp, I32 flags);
 PERL_CALLCONV char*	Perl_my_atof2(pTHX_ const char *s, NV* value);
+#if !defined(HAS_SOCKETPAIR) && defined(HAS_SOCKET)
+PERL_CALLCONV int	Perl_my_socketpair(pTHX_ int family, int type, int protocol, int fd[2]);
+#endif
+
+
+#if defined(USE_PERLIO) && !defined(USE_SFIO)
+PERL_CALLCONV int	Perl_PerlIO_close(pTHX_ PerlIO *);
+PERL_CALLCONV int	Perl_PerlIO_fill(pTHX_ PerlIO *);
+PERL_CALLCONV int	Perl_PerlIO_fileno(pTHX_ PerlIO *);
+PERL_CALLCONV int	Perl_PerlIO_eof(pTHX_ PerlIO *);
+PERL_CALLCONV int	Perl_PerlIO_error(pTHX_ PerlIO *);
+PERL_CALLCONV int	Perl_PerlIO_flush(pTHX_ PerlIO *);
+PERL_CALLCONV void	Perl_PerlIO_clearerr(pTHX_ PerlIO *);
+PERL_CALLCONV void	Perl_PerlIO_set_cnt(pTHX_ PerlIO *, int);
+PERL_CALLCONV void	Perl_PerlIO_set_ptrcnt(pTHX_ PerlIO *, STDCHAR *, int);
+PERL_CALLCONV void	Perl_PerlIO_setlinebuf(pTHX_ PerlIO *);
+PERL_CALLCONV SSize_t	Perl_PerlIO_read(pTHX_ PerlIO *, void *, Size_t);
+PERL_CALLCONV SSize_t	Perl_PerlIO_write(pTHX_ PerlIO *, const void *, Size_t);
+PERL_CALLCONV SSize_t	Perl_PerlIO_unread(pTHX_ PerlIO *, const void *, Size_t);
+PERL_CALLCONV Off_t	Perl_PerlIO_tell(pTHX_ PerlIO *);
+PERL_CALLCONV int	Perl_PerlIO_seek(pTHX_ PerlIO *, Off_t, int);
+
+PERL_CALLCONV STDCHAR *	Perl_PerlIO_get_base(pTHX_ PerlIO *);
+PERL_CALLCONV STDCHAR *	Perl_PerlIO_get_ptr(pTHX_ PerlIO *);
+PERL_CALLCONV int	Perl_PerlIO_get_bufsiz(pTHX_ PerlIO *);
+PERL_CALLCONV int	Perl_PerlIO_get_cnt(pTHX_ PerlIO *);
+
+PERL_CALLCONV PerlIO *	Perl_PerlIO_stdin(pTHX);
+PERL_CALLCONV PerlIO *	Perl_PerlIO_stdout(pTHX);
+PERL_CALLCONV PerlIO *	Perl_PerlIO_stderr(pTHX);
+#endif /* PERLIO_LAYERS */
 
 
 #if defined(USE_PERLIO) && !defined(USE_SFIO)

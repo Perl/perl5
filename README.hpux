@@ -201,10 +201,13 @@ library that is already linked into perl.
 
 Some extensions, like DB_File and Compress::Zlib use/require prebuilt
 libraries for the perl extensions/modules to work. If these libraries
-are built using the default configuration, it might happen that you run
-into an error like "invalid loader fixup" during load phase. HP is aware
-of this problem and address it at
-  http://h21007.www2.hp.com/dspp/tech/tech_TechDocumentDetailPage_IDX/1,,392!0!,00.html
+are built using the default configuration, it might happen that you
+run into an error like "invalid loader fixup" during load phase.
+HP is aware of this problem.  Search the HP-UX cxx-dev forums for
+discussions about the subject.  The short answer is that B<everything>
+(all libraries, everything) must be compiled with C<+z> or C<+Z> to be
+PIC (position independent code).  In HP-UX 11.00 or newer the linker
+error message should tell the name of the offending object file.
 
 A more general approach is to intervene manually, as with an example for
 the DB_File module, which requires SleepyCat's libdb.sl:

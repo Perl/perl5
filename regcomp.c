@@ -3017,6 +3017,8 @@ tryagain:
 		case '\\':
 		    switch (*++p) {
 		    case 'A':
+		    case 'C':
+		    case 'X':
 		    case 'G':
 		    case 'Z':
 		    case 'z':
@@ -3129,7 +3131,7 @@ tryagain:
 		if (RExC_flags16 & PMf_EXTENDED)
 		    p = regwhite(p, RExC_end);
 		if (UTF && FOLD) {
-		    toLOWER_uni(ender, tmpbuf, &ulen);
+		    toFOLD_uni(ender, tmpbuf, &ulen);
 		    ender = utf8_to_uvchr(tmpbuf, 0);
 		}
 		if (ISMULT2(p)) { /* Back off on ?+*. */
@@ -3178,20 +3180,26 @@ tryagain:
 	break;
     }
 
-    if (PL_encoding && PL_regkind[(U8)OP(ret)] == EXACT && !RExC_utf8) {
+    if (PL_encoding && PL_regkind[(U8)OP(ret)] == EXACT) {
 	 STRLEN oldlen = STR_LEN(ret);
 	 SV *sv        = sv_2mortal(newSVpvn(STRING(ret), oldlen));
-	 char *s       = Perl_sv_recode_to_utf8(aTHX_ sv, PL_encoding);
-	 STRLEN newlen = SvCUR(sv);
-	 if (!SIZE_ONLY) {
-	      DEBUG_r(PerlIO_printf(Perl_debug_log, "recode %*s to %*s\n",
-				    (int)oldlen, STRING(ret), (int)newlen, s));
-	      Copy(s, STRING(ret), newlen, char);
-	      STR_LEN(ret) += newlen - oldlen;
-	      RExC_emit += STR_SZ(newlen) - STR_SZ(oldlen);
-	 } else
-	      RExC_size += STR_SZ(newlen) - STR_SZ(oldlen);
-	 RExC_utf8 = 1;
+
+	 if (RExC_utf8)
+	      SvUTF8_on(sv);
+	 if (sv_utf8_downgrade(sv, TRUE)) {
+	      char *s       = Perl_sv_recode_to_utf8(aTHX_ sv, PL_encoding);
+	      STRLEN newlen = SvCUR(sv);
+	 
+	      if (!SIZE_ONLY) {
+		   DEBUG_r(PerlIO_printf(Perl_debug_log, "recode %*s to %*s\n",
+					 (int)oldlen, STRING(ret),
+					 (int)newlen, s));
+		   Copy(s, STRING(ret), newlen, char);
+		   STR_LEN(ret) += newlen - oldlen;
+		   RExC_emit += STR_SZ(newlen) - STR_SZ(oldlen);
+	      } else
+		   RExC_size += STR_SZ(newlen) - STR_SZ(oldlen);
+	 }
     }
 
     return(ret);
@@ -3973,9 +3981,21 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 		if (prevvalue < value)
 		    Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\t%04"UVxf"\n",
 				   (UV)prevvalue, (UV)value);
-		else if (prevvalue == value)
+		else if (prevvalue == value) {
 		    Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\n",
 				   (UV)value);
+		    if (FOLD) {
+			 if (value == UNICODE_GREEK_SMALL_LETTER_FINAL_SIGMA) {
+			      Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\n",
+					     (UV)UNICODE_GREEK_CAPITAL_LETTER_SIGMA);
+			      Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\n",
+					     (UV)UNICODE_GREEK_SMALL_LETTER_SIGMA);
+			 }
+			 else if (value == UNICODE_GREEK_CAPITAL_LETTER_SIGMA)
+			      Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\n",
+					     (UV)UNICODE_GREEK_SMALL_LETTER_SIGMA);
+		    }
+		}
 	    }
         }
 

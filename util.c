@@ -948,6 +948,25 @@ Perl_form_nocontext(const char* pat, ...)
 }
 #endif /* PERL_IMPLICIT_CONTEXT */
 
+/*
+=for apidoc form
+
+Takes a sprintf-style format pattern and conventional
+(non-SV) arguments and returns the formatted string.
+
+    (char *) Perl_form(pTHX_ const char* pat, ...)
+
+can be used any place a string (char *) is required:
+
+    char * s = Perl_form("%d.%d",major,minor);
+
+Uses a single private buffer so if you want to format several strings you
+must explicitly copy the earlier strings away (and free the copies when you
+are done).
+
+=cut
+*/
+
 char *
 Perl_form(pTHX_ const char* pat, ...)
 {
@@ -3967,4 +3986,229 @@ Perl_new_vstring(pTHX_ char *s, SV *sv)
     return s;
 }
 
+#if !defined(HAS_SOCKETPAIR) && defined(HAS_SOCKET)
+static int
+S_socketpair_udp (int fd[2]) {
+    /* Fake a datagram socketpair using UDP to localhost.  */
+    int sockets[2] = {-1, -1};
+    struct sockaddr_in addresses[2];
+    int i;
+    Sock_size_t size = sizeof (struct sockaddr_in);
+    unsigned short port;
+    int got;
 
+    memset (&addresses, 0, sizeof (addresses));
+    i = 1;
+    do {
+        sockets[i] = socket (AF_INET, SOCK_DGRAM, 0);
+        if (sockets[i] == -1)
+            goto tidy_up_and_fail;
+
+        addresses[i].sin_family = AF_INET;
+        addresses[i].sin_addr.s_addr = htonl (INADDR_LOOPBACK);
+        addresses[i].sin_port = 0;	/* kernel choses port.  */
+        if (bind (sockets[i], (struct sockaddr *) &addresses[i],
+                  sizeof (struct sockaddr_in))
+            == -1)
+            goto tidy_up_and_fail;
+    } while (i--);
+
+    /* Now have 2 UDP sockets. Find out which port each is connected to, and
+       for each connect the other socket to it.  */
+    i = 1;
+    do {
+        if (getsockname (sockets[i], (struct sockaddr *) &addresses[i], &size)
+            == -1)
+            goto tidy_up_and_fail;
+        if (size != sizeof (struct sockaddr_in))
+            goto abort_tidy_up_and_fail;
+        /* !1 is 0, !0 is 1 */
+        if (connect(sockets[!i], (struct sockaddr *) &addresses[i],
+                    sizeof (struct sockaddr_in)) == -1)
+            goto tidy_up_and_fail;
+    } while (i--);
+
+    /* Now we have 2 sockets connected to each other. I don't trust some other
+       process not to have already sent a packet to us (by random) so send
+       a packet from each to the other.  */
+    i = 1;
+    do {
+        /* I'm going to send my own port number.  As a short.
+           (Who knows if someone somewhere has sin_port as a bitfield and needs
+           this routine. (I'm assuming crays have socketpair)) */
+        port = addresses[i].sin_port;
+        got = write (sockets[i], &port, sizeof(port));
+        if (got != sizeof(port)) {
+            if (got == -1)
+                goto tidy_up_and_fail;
+            goto abort_tidy_up_and_fail;
+        }
+    } while (i--);
+
+    /* Packets sent. I don't trust them to have arrived though.
+       (As I understand it Solaris TCP stack is multithreaded. Non-blocking
+       connect to localhost will use a second kernel thread. In 2.6 the
+       first thread running the connect() returns before the second completes,
+       so EINPROGRESS> In 2.7 the improved stack is faster and connect()
+       returns 0. Poor programs have tripped up. One poor program's authors'
+       had a 50-1 reverse stock split. Not sure how connected these were.)
+       So I don't trust someone not to have an unpredictable UDP stack.
+    */
+
+    {
+        struct timeval waitfor = {0, 100000}; /* You have 0.1 seconds */
+        int max = sockets[1] > sockets[0] ? sockets[1] : sockets[0];
+        fd_set rset;
+
+        FD_ZERO (&rset);
+        FD_SET (sockets[0], &rset);
+        FD_SET (sockets[1], &rset);
+
+        got = select (max + 1, &rset, NULL, NULL, &waitfor);
+        if (got != 2 || !FD_ISSET (sockets[0], &rset)
+            || !FD_ISSET (sockets[1], &rset)) {
+             /* I hope this is portable and appropriate.  */
+            if (got == -1)
+                goto tidy_up_and_fail;
+            goto abort_tidy_up_and_fail;
+        }
+    }
+
+    /* And the paranoia department even now doesn't trust it to have arrive
+       (hence MSG_DONTWAIT). Or that what arrives was sent by us.  */
+    {
+        struct sockaddr_in readfrom;
+        unsigned short buffer[2];
+
+        i = 1;
+        do {
+            got = recvfrom (sockets[i], (char *) &buffer, sizeof(buffer),
+#ifdef MSG_DONTWAIT
+                            MSG_DONTWAIT,
+#else
+                            0,
+#endif
+                            (struct sockaddr *) &readfrom, &size);
+
+            if (got == -1)
+                    goto tidy_up_and_fail;
+            if (got != sizeof(port)
+                || size != sizeof (struct sockaddr_in)
+                /* Check other socket sent us its port.  */
+                || buffer[0] != (unsigned short) addresses[!i].sin_port
+                /* Check kernel says we got the datagram from that socket.  */
+                || readfrom.sin_family != addresses[!i].sin_family
+                || readfrom.sin_addr.s_addr != addresses[!i].sin_addr.s_addr
+                || readfrom.sin_port != addresses[!i].sin_port)
+                goto abort_tidy_up_and_fail;
+        } while (i--);
+    }
+    /* My caller (my_socketpair) has validated that this is non-NULL  */
+    fd[0] = sockets[0];
+    fd[1] = sockets[1];
+    /* I hereby declare this connection open.  May God bless all who cross
+       her.  */
+    return 0;
+
+  abort_tidy_up_and_fail:
+    errno = ECONNABORTED;
+  tidy_up_and_fail:
+    {
+        int save_errno = errno;
+        if (sockets[0] != -1)
+            close (sockets[0]);
+        if (sockets[1] != -1)
+            close (sockets[1]);
+        errno = save_errno;
+        return -1;
+    }
+}
+
+int
+Perl_my_socketpair (int family, int type, int protocol, int fd[2]) {
+    /* Stevens says that family must be AF_LOCAL, protocol 0.
+       I'm going to enforce that, then ignore it, and use TCP.  */
+    int listener = -1;
+    int connector = -1;
+    int acceptor = -1;
+    struct sockaddr_in listen_addr;
+    struct sockaddr_in connect_addr;
+    Sock_size_t size;
+
+    if (protocol
+#ifdef AF_UNIX
+	|| family != AF_UNIX
+#endif
+	) {
+        errno = EAFNOSUPPORT;
+        return -1;
+    }
+    if (!fd)
+        return EINVAL;
+
+    if (type == SOCK_DGRAM)
+        return S_socketpair_udp (fd);
+
+    listener = socket (AF_INET, type, 0);
+    if (listener == -1)
+        return -1;
+    memset (&listen_addr, 0, sizeof (listen_addr));
+    listen_addr.sin_family = AF_INET;
+    listen_addr.sin_addr.s_addr = htonl (INADDR_LOOPBACK);
+    listen_addr.sin_port = 0;	/* kernel choses port.  */
+    if (bind (listener, (struct sockaddr *) &listen_addr, sizeof (listen_addr))
+        == -1)
+        goto tidy_up_and_fail;
+    if (listen(listener, 1) == -1)
+        goto tidy_up_and_fail;
+
+    connector = socket (AF_INET, type, 0);
+    if (connector == -1)
+        goto tidy_up_and_fail;
+    /* We want to find out the port number to connect to.  */
+    size = sizeof (connect_addr);
+    if (getsockname (listener, (struct sockaddr *) &connect_addr, &size) == -1)
+        goto tidy_up_and_fail;
+    if (size != sizeof (connect_addr))
+        goto abort_tidy_up_and_fail;
+    if (connect(connector, (struct sockaddr *) &connect_addr,
+                sizeof (connect_addr)) == -1)
+        goto tidy_up_and_fail;
+
+    size = sizeof (listen_addr);
+    acceptor = accept (listener, (struct sockaddr *) &listen_addr, &size);
+    if (acceptor == -1)
+        goto tidy_up_and_fail;
+    if (size != sizeof (listen_addr))
+        goto abort_tidy_up_and_fail;
+    close (listener);
+    /* Now check we are talking to ourself by matching port and host on the
+       two sockets.  */
+    if (getsockname (connector, (struct sockaddr *) &connect_addr, &size) == -1)
+        goto tidy_up_and_fail;
+    if (size != sizeof (connect_addr)
+        || listen_addr.sin_family != connect_addr.sin_family
+        || listen_addr.sin_addr.s_addr != connect_addr.sin_addr.s_addr
+        || listen_addr.sin_port != connect_addr.sin_port) {
+        goto abort_tidy_up_and_fail;
+    }
+    fd[0] = connector;
+    fd[1] = acceptor;
+    return 0;
+
+  abort_tidy_up_and_fail:
+    errno = ECONNABORTED; /* I hope this is portable and appropriate.  */
+  tidy_up_and_fail:
+    {
+        int save_errno = errno;
+        if (listener != -1)
+            close (listener);
+        if (connector != -1)
+            close (connector);
+        if (acceptor != -1)
+            close (acceptor);
+        errno = save_errno;
+        return -1;
+    }
+}
+#endif /* !defined(HAS_SOCKETPAIR) && defined(HAS_SOCKET) */

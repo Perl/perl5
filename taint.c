@@ -13,9 +13,26 @@ Perl_taint_proper(pTHX_ const char *f, const char *s)
 {
     char *ug;
 
-#ifdef HAS_SETEUID
-    DEBUG_u(PerlIO_printf(Perl_debug_log,
-            "%s %d %"Uid_t_f" %"Uid_t_f"\n", s, PL_tainted, (Uid_t)PL_uid, (Uid_t)PL_euid));
+#if defined(HAS_SETEUID) && defined(DEBUGGING)
+#   if Uid_t_size == 1
+    {
+	 UV  uid = PL_uid;
+	 UV euid = PL_euid;
+
+	 DEBUG_u(PerlIO_printf(Perl_debug_log,
+			       "%s %d %"UVuf" %"UVuf"\n",
+			       s, PL_tainted, uid, euid));
+    }
+#   else
+    {
+	 IV  uid = PL_uid;
+	 IV euid = PL_euid;
+
+	 DEBUG_u(PerlIO_printf(Perl_debug_log,
+			       "%s %d %"IVdf" %"IVdf"\n",
+			       s, PL_tainted, uid, euid));
+    }
+#   endif
 #endif
 
     if (PL_tainted) {
