@@ -2935,8 +2935,14 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	if (SvROK(sv)) {
 	    SV* tmpstr;
             if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,string)) &&
-                (SvTYPE(tmpstr) != SVt_RV || (SvRV(tmpstr) != SvRV(sv))))
-		return SvPV(tmpstr,*lp);
+                (SvTYPE(tmpstr) != SVt_RV || (SvRV(tmpstr) != SvRV(sv)))) {
+                char *pv = SvPV(tmpstr, *lp);
+                if (SvUTF8(tmpstr))
+                    SvUTF8_on(sv);
+                else
+                    SvUTF8_off(sv);
+                return pv;
+            }
 	    sv = (SV*)SvRV(sv);
 	    if (!sv)
 		s = "NULLREF";
@@ -3193,28 +3199,16 @@ would lose the UTF-8'ness of the PV.
 void
 Perl_sv_copypv(pTHX_ SV *dsv, register SV *ssv)
 {
-    SV *tmpsv;
-
-    if ( SvTHINKFIRST(ssv) && SvROK(ssv) && SvAMAGIC(ssv) &&
-	 (tmpsv = AMG_CALLun(ssv,string))) {
-	if (SvTYPE(tmpsv) != SVt_RV || (SvRV(tmpsv) != SvRV(ssv))) {
-	    SvSetSV(dsv,tmpsv);
-	    return;
-	}
-    } else {
-        tmpsv = sv_newmortal();
-    }
-    {
-	STRLEN len;
-	char *s;
-	s = SvPV(ssv,len);
-	sv_setpvn(tmpsv,s,len);
-	if (SvUTF8(ssv))
-	    SvUTF8_on(tmpsv);
-	else
-	    SvUTF8_off(tmpsv);
-	SvSetSV(dsv,tmpsv);
-    }
+    SV *tmpsv = sv_newmortal();
+    STRLEN len;
+    char *s;
+    s = SvPV(ssv,len);
+    sv_setpvn(tmpsv,s,len);
+    if (SvUTF8(ssv))
+	SvUTF8_on(tmpsv);
+    else
+	SvUTF8_off(tmpsv);
+    SvSetSV(dsv,tmpsv);
 }
 
 /*

@@ -207,7 +207,7 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SVp_POK		0x04000000	/* has valid non-public pointer value */
 #define SVp_SCREAM	0x08000000	/* has been studied? */
 
-#define SVf_UTF8        0x20000000      /* SvPVX is UTF-8 encoded */
+#define SVf_UTF8        0x20000000      /* SvPV is UTF-8 encoded */
 
 #define SVf_THINKFIRST	(SVf_READONLY|SVf_ROK|SVf_FAKE)
 
