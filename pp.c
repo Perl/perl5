@@ -4427,6 +4427,7 @@ PP(pp_split)
 	    }
 	    /* temporarily switch stacks */
 	    SWITCHSTACK(PL_curstack, ary);
+	    PL_curstackinfo->si_stack = ary;
 	    make_mortal = 0;
 	}
     }
@@ -4624,6 +4625,7 @@ PP(pp_split)
     if (realarray) {
 	if (!mg) {
 	    SWITCHSTACK(ary, oldstack);
+	    PL_curstackinfo->si_stack = oldstack;
 	    if (SvSMAGICAL(ary)) {
 		PUTBACK;
 		mg_set((SV*)ary);
