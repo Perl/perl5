@@ -479,7 +479,5 @@ PERLVAR(Inumeric_radix_sv,	SV *)	/* The radix separator if not '.' */
  * XSUB.h provides wrapper functions via perlapi.h that make this
  * irrelevant, but not all code may be expected to #include XSUB.h. */
 
-#if defined(USE_ITHREADS)
-PERLVAR(Iclone_callbacks, AV*)  /* used for collecting callbacks during perl_clone*/
-#endif
+
 

@@ -1,5 +1,5 @@
 
-# Time-stamp: "2001-05-25 07:50:08 MDT"
+# Time-stamp: "2001-06-20 02:02:33 MDT"
 
 =head1 NAME
 
@@ -110,9 +110,7 @@ These are to do with constructing a language handle:
 
 =over
 
-=item *
-
-$lh = YourProjClass->get_handle( ...langtags... ) || die "lg-handle?";
+=item $lh = YourProjClass->get_handle( ...langtags... ) || die "lg-handle?";
 
 This tries loading classes based on the language-tags you give (like
 C<("en-US", "sk", "kon", "es-MX", "ja", "i-klingon")>, and for the first class
@@ -133,9 +131,7 @@ then if nothing comes of that, we use classes named by
 YourProjClass->fallback_language_classes().  Then in the (probably
 quite unlikely) event that that fails, we just return undef.
 
-=item * 
-
-$lh = YourProjClass->get_handleB<()> || die "lg-handle?";
+=item $lh = YourProjClass->get_handleB<()> || die "lg-handle?";
 
 When C<get_handle> is called with an empty parameter list, magic happens:
 
@@ -728,6 +724,13 @@ then that group is interpreted like this:
   $lh->that_method_name(
     ...rest of items in this group...
   ),
+
+=item *
+
+If the first item in a bracket group is "*", it's taken as shorthand
+for the so commonly called "quant" method.  Similarly, if the first
+item in a bracket group is "#", it's taken to be shorthand for
+"numf".
 
 =item *
 

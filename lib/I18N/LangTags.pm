@@ -1,23 +1,23 @@
 
-# Time-stamp: "2001-05-27 19:53:11 MDT"
+# Time-stamp: "2001-06-20 01:28:32 MDT"
 # Sean M. Burke <sburke@cpan.org>
 
 require 5.000;
 package I18N::LangTags;
 use strict;
-use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION); # $Debug
+use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $VERSION %Panic);
 require Exporter;
-# $Debug = 0;
 @ISA = qw(Exporter);
 @EXPORT = qw();
 @EXPORT_OK = qw(is_language_tag same_language_tag
                 extract_language_tags super_languages
                 similarity_language_tag is_dialect_of
                 locale2language_tag alternate_language_tags
-                encode_language_tag
+                encode_language_tag panic_languages
                );
+%EXPORT_TAGS = ('ALL' => \@EXPORT_OK);
 
-$VERSION = "0.22";
+$VERSION = "0.24";
 
 =head1 NAME
 
@@ -29,12 +29,17 @@ I18N::LangTags - functions for dealing with RFC3066-style language tags
                           extract_language_tags super_languages
                           similarity_language_tag is_dialect_of
                           locale2language_tag alternate_language_tags
-                          encode_language_tag
+                          encode_language_tag panic_languages
                          );
 
 ...or whatever of those functions you want to import.  Those are
 all the exportable functions -- you're free to import only some,
-or none at all.  By default, none are imported.
+or none at all.  By default, none are imported.  If you say:
+
+    use I18N::LangTags qw(:ALL)
+
+...then all are exported.  (This saves you from having to use
+something less obvious like C<use I18N::LangTags qw(/./)>.)
 
 If you don't import any of these functions, assume a C<&I18N::LangTags::>
 in front of all the function names in the following examples.
@@ -92,7 +97,7 @@ sub is_language_tag {
   my($tag) = lc($_[0]);
 
   return 0 if $tag eq "i" or $tag eq "x";
-  # Bad degenerate cases the following
+  # Bad degenerate cases that the following
   #  regexp would erroneously let pass
 
   return $tag =~ 
@@ -166,6 +171,8 @@ representing the same language-form.
       (all-English is not the SAME as US English)
    same_language_tag('x-kadara', 'x-kadar')   is FALSE
       (these are totally unrelated tags)
+   same_language_tag('no-bok',    'nb')       is TRUE
+      (no-bok is a legacy tag for nb (Norwegian Bokmal))
 
 C<same_language_tag> works by just seeing whether
 C<encode_language_tag($lang1)> is the same as
@@ -221,7 +228,9 @@ without regard to case and to x/i- alternation.
 sub similarity_language_tag {
   my $lang1 = &encode_language_tag($_[0]);
   my $lang2 = &encode_language_tag($_[1]);
-
+   # And encode_language_tag takes care of the whole
+   #  no-nyn==nn, i-hakka==zh-hakka, etc, things
+   
   # NB: (i-sil-...)?  (i-sgn-...)?
 
   return undef if !defined($lang1) and !defined($lang2);
@@ -245,7 +254,7 @@ sub similarity_language_tag {
 
 =item * the function is_dialect_of($lang1, $lang2)
 
-Returns true iff language tag $lang1 represents a subdialect of
+Returns true iff language tag $lang1 represents a subform of
 language tag $lang2.
 
 B<Get the order right!  It doesn't work the other way around!>
@@ -262,12 +271,17 @@ B<Get the order right!  It doesn't work the other way around!>
 
    is_dialect_of('fr', 'en-CA')            is FALSE
 
-   is_dialect_of('en',    'en'   )            is TRUE
-   is_dialect_of('en-US', 'en-US')            is TRUE
+   is_dialect_of('en',    'en'   )         is TRUE
+   is_dialect_of('en-US', 'en-US')         is TRUE
      (B<Note:> these are degenerate cases)
 
    is_dialect_of('i-mingo-tom', 'x-Mingo') is TRUE
      (the x/i thing doesn't matter, nor does case)
+
+   is_dialect_of('nn', 'no')               is TRUE
+     (because 'nn' (New Norse) is aliased to 'no-nyn',
+      as a special legacy case, and 'no-nyn' is a
+      subform of 'no' (Norwegian))
 
 =cut
 
@@ -324,6 +338,13 @@ carefully.
 sub super_languages {
   my $lang1 = $_[0];
   return() unless defined($lang1) && &is_language_tag($lang1);
+
+  # a hack for those annoying new (2001) tags:
+  $lang1 =~ s/^nb\b/no-bok/i; # yes, backwards
+  $lang1 =~ s/^nn\b/no-nyn/i; # yes, backwards
+  $lang1 =~ s/^[ix](-hakka\b)/zh$1/i; # goes the right way
+   # i-hakka-bork-bjork-bjark => zh-hakka-bork-bjork-bjark
+
   my @l1_subtags = split('-', $lang1);
 
   ## Changes in the language tagging standards may have to be reflected here.
@@ -501,15 +522,29 @@ sub encode_language_tag {
 
   ## Changes in the language tagging standards may have to be reflected here.
 
-  my($tag) = uc($_[0]); # smash case
+  my($tag) = $_[0] || return undef;
   return undef unless &is_language_tag($tag);
-   # If it's not a language tag, its encoding is undef
+
+  # For the moment, these legacy variances are few enough that
+  #  we can just handle them here with regexps.
+  $tag =~ s/^iw\b/he/i; # Hebrew
+  $tag =~ s/^in\b/id/i; # Indonesian
+  $tag =~ s/^[ix]-lux\b/lb/i;  # Luxemburger
+  $tag =~ s/^[ix]-navajo\b/nv/i;  # Navajo
+  $tag =~ s/^ji\b/yi/i;  # Yiddish
+  #
+  # These go FROM the simplex to complex form, to get
+  #  similarity-comparison right.  And that's okay, since
+  #  similarity_language_tag is the only thing that
+  #  analyzes our output.
+  $tag =~ s/^[ix]-hakka\b/zh-hakka/i;  # Hakka
+  $tag =~ s/^nb\b/no-bok/i;  # BACKWARDS for Bokmal
+  $tag =~ s/^nn\b/no-nyn/i;  # BACKWARDS for Nynorsk
 
   $tag =~ s/^[xiXI]-//s;
    # Just lop off any leading "x/i-"
-   # Or I suppose I could do s/^[xiXI]-/_/s or something.
 
-  return "~$tag";
+  return "~" . uc($tag);
 }
 
 #--------------------------------------------------------------------------
@@ -517,39 +552,184 @@ sub encode_language_tag {
 =item * the function alternate_language_tags($lang1)
 
 This function, if given a language tag, returns all language tags that
-are alternate forms of this language tag.  (There is little
-alternation in the C<current> language tagging formalism, but
-extensions to the formalism are under consideration which could add a
-great deal of alternation.)
+are alternate forms of this language tag.  (I.e., tags which refer to
+the same language.)  This is meant to handle legacy tags caused by
+the minor changes in language tag standards over the years; and
+the x-/i- alternation is also dealt with.
 
-Examples from the current formalism:
+Note that this function does I<not> try to equate new (and never-used,
+and unusable)
+ISO639-2 three-letter tags to old (and still in use) ISO639-1
+two-letter equivalents -- like "ara" -> "ar" -- because
+"ara" has I<never> been in use as an Internet language tag,
+and RFC 3066 stipulates that it never should be, since a shorter
+tag ("ar") exists.
 
-          alternate_language_tags('en')           is   ()
-          alternate_language_tags('x-mingo-tom')  is   ('i-mingo-tom')
-          alternate_language_tags('x-klikitat')   is   ('i-klikitat')
-          alternate_language_tags('i-klikitat')   is   ('x-klikitat')
+Examples:
 
-This function returns undef if given anything other than a formally
+          alternate_language_tags('no-bok')       is ('nb')
+          alternate_language_tags('nb')           is ('no-bok')
+          alternate_language_tags('he')           is ('iw')
+          alternate_language_tags('iw')           is ('he')
+          alternate_language_tags('i-hakka')      is ('zh-hakka', 'x-hakka')
+          alternate_language_tags('zh-hakka')     is ('i-hakka', 'x-hakka')
+          alternate_language_tags('en')           is ()
+          alternate_language_tags('x-mingo-tom')  is ('i-mingo-tom')
+          alternate_language_tags('x-klikitat')   is ('i-klikitat')
+          alternate_language_tags('i-klikitat')   is ('x-klikitat')
+
+This function returns empty-list if given anything other than a formally
 valid language tag.
 
 =cut
 
 my %alt = qw( i x   x i   I X   X I );
 sub alternate_language_tags {
-  ## Changes in the language tagging standards may have to be reflected here.
   my $tag = $_[0];
   return() unless &is_language_tag($tag);
 
- # might as well preserve case
+  my @em; # push 'em real goood!
 
-  if($tag =~ /^([XIxi])(-.+)/) {
-    # This handles all the alternation that exists CURRENTLY
-    return($alt{$1} . $2);
+  # For the moment, these legacy variances are few enough that
+  #  we can just handle them here with regexps.
+  
+  if(     $tag =~ m/^[ix]-hakka\b(.*)/i) {push @em, "zh-hakka$1";
+  } elsif($tag =~ m/^zh-hakka\b(.*)/i) {  push @em, "x-hakka$1", "i-hakka$1";
+
+  } elsif($tag =~ m/^he\b(.*)/i) { push @em, "iw$1";
+  } elsif($tag =~ m/^iw\b(.*)/i) { push @em, "he$1";
+
+  } elsif($tag =~ m/^in\b(.*)/i) { push @em, "id$1";
+  } elsif($tag =~ m/^id\b(.*)/i) { push @em, "in$1";
+
+  } elsif($tag =~ m/^[ix]-lux\b(.*)/i) { push @em, "lb$1";
+  } elsif($tag =~ m/^lb\b(.*)/i) {       push @em, "i-lux$1", "x-lux$1";
+
+  } elsif($tag =~ m/^[ix]-navajo\b(.*)/i) { push @em, "nv$1";
+  } elsif($tag =~ m/^nv\b(.*)/i) {          push @em, "i-navajo$1", "x-navajo$1";
+
+  } elsif($tag =~ m/^yi\b(.*)/i) { push @em, "ji$1";
+  } elsif($tag =~ m/^ji\b(.*)/i) { push @em, "yi$1";
+
+  } elsif($tag =~ m/^nb\b(.*)/i) {     push @em, "no-bok$1";
+  } elsif($tag =~ m/^no-bok\b(.*)/i) { push @em, "nb$1";
+  
+  } elsif($tag =~ m/^nn\b(.*)/i) {     push @em, "no-nyn$1";
+  } elsif($tag =~ m/^no-nyn\b(.*)/i) { push @em, "nn$1";
   }
-  return();
+
+  push @em, $alt{$1} . $2 if $tag =~ /^([XIxi])(-.+)/;
+  return @em;
 }
 
 ###########################################################################
+
+{
+  # Init %Panic...
+  
+  my @panic = (  # MUST all be lowercase!
+   # Only large ("national") languages make it in this list.
+   #  If you, as a user, are so bizarre that the /only/ language
+   #  you claim to accept is Galician, then no, we won't do you
+   #  the favor of providing Catalan as a panic-fallback for
+   #  you.  Because if I start trying to add "little languages" in
+   #  here, I'll just go crazy.
+
+   # In a pinch, consider Scandinavian languages (minus
+   #  Icelandic?) to be mutually intelligible.
+   ([qw(no nn nb se da fo)]) x 2,
+   
+   # I think this is about the extent of tolerable intelligibility
+   #  among large modern Romance languages.
+   'pt' => [qw(es ca it fr)], # Portuguese, Spanish, Catalan, Italian, French
+   'ca' => [qw(es pt it fr)],
+   'es' => [qw(ca it fr pt)],
+   'it' => [qw(es fr ca pt)],
+   'fr' => [qw(es it ca pt)],
+   
+   # Also assume that speakers of the main Indian languages prefer
+   #  to read/hear Hindi over English
+   [qw(
+     as bn gu kn ks kok ml mni mr ne or pa sa sd te ta ur
+   )] => 'hi',
+    # Assamese, Bengali, Gujarati, [Hindi,] Kannada (Kanarese), Kashmiri,
+    # Konkani, Malayalam, Meithei (Manipuri), Marathi, Nepali, Oriya,
+    # Punjabi, Sanskrit, Sindhi, Telugu, Tamil, and Urdu.
+   'hi' => [qw(bn pa as or)],
+   # I welcome finer data for the other Indian languages.
+   #  E.g., what should Oriya's list be, besides just Hindi?
+   
+   # And the panic languages for English is, of course, nil!
+
+   # My guesses at Slavic intelligibility:
+   ([qw(ru be uk)]) x 2,  # Russian, Belarusian, Ukranian
+   'sr' => 'hr', 'hr' => 'sr', # Serb + Croat
+   'cs' => 'sk', 'sk' => 'cs', # Czech + Slovak
+
+   'ms' => 'id', 'id' => 'ms', # Malay + Indonesian
+
+   'et' => 'fi', 'fi' => 'et', # Estonian + Finnish
+
+   #?? 'lo' => 'th', 'th' => 'lo', # Lao + Thai
+
+  );
+  my($k,$v);
+  while(@panic) {
+    ($k,$v) = splice(@panic,0,2);
+    foreach my $k (ref($k) ? @$k : $k) {
+      foreach my $v (ref($v) ? @$v : $v) {
+        push @{$Panic{$k} ||= []}, $v unless $k eq $v;
+      }
+    }
+  }
+}
+
+=item * the function @langs = panic_languages(@accept_languages)
+
+This function takes a list of 0 or more language
+tags that constitute a given user's Accept-Language list, and
+returns a list of tags for I<other> (non-super)
+languages that are probably acceptable to the user, to be
+used I<if all else fails>.
+
+For example, if a user accepts only 'ca' (Catalan) and
+'es' (Spanish), and the documents/interfaces you have
+available are just in German, Italian, and Chinese, then
+the user will most likely want the Italian one (and not
+the Chinese or German one!), instead of getting
+nothing.  So C<panic_languages('ca', 'es')> returns
+a list containing 'it' (Italian).
+
+English ('en') is I<always> in the return list, but
+whether it's at the very end or not depends
+on the input languages.  This function works by consulting
+an internal table that stipulates what common
+languages are "close" to each other.
+
+A useful construct you might consider using is:
+
+  @fallbacks = super_languages(@accept_languages);
+  push @fallbacks, panic_languages(
+    @accept_languages, @fallbacks,
+  );
+
+=cut
+
+sub panic_languages {
+  # When in panic or in doubt, run in circles, scream, and shout!
+  my(@out, %seen);
+  foreach my $t (@_) {
+    next unless $t;
+    next if $seen{$t}++; # so we don't return it or hit it again
+    # push @out, super_languages($t); # nah, keep that separate
+    push @out, @{ $Panic{lc $t} || next };
+  }
+  return grep !$seen{$_}++,  @out, 'en';
+}
+
+###########################################################################
+1;
+__END__
 
 =back
 
@@ -615,6 +795,3 @@ Sean M. Burke C<sburke@cpan.org>
 
 =cut
 
-1;
-
-__END__

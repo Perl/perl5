@@ -3925,6 +3925,7 @@ Perl_yylex(pTHX)
 	default:			/* not a keyword */
 	  just_a_word: {
 		SV *sv;
+		int pkgname = 0;
 		char lastchar = (PL_bufptr == PL_oldoldbufptr ? 0 : PL_bufptr[-1]);
 
 		/* Get the rest if it looks like a package qualifier */
@@ -3937,6 +3938,7 @@ Perl_yylex(pTHX)
 			Perl_croak(aTHX_ "Bad name after %s%s", PL_tokenbuf,
 				*s == '\'' ? "'" : "::");
 		    len += morelen;
+		    pkgname = 1;
 		}
 
 		if (PL_expect == XOPERATOR) {
@@ -4024,12 +4026,11 @@ Perl_yylex(pTHX)
 		    }
 		}
 
-
 		PL_expect = XOPERATOR;
 		s = skipspace(s);
 
 		/* Is this a word before a => operator? */
-		if (*s == '=' && s[1] == '>') {
+		if (*s == '=' && s[1] == '>' && !pkgname) {
 		    CLINE;
 		    sv_setpv(((SVOP*)yylval.opval)->op_sv, PL_tokenbuf);
 		    if (UTF && !IN_BYTES && is_utf8_string((U8*)PL_tokenbuf, len))

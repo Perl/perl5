@@ -974,7 +974,9 @@ lib/Getopt/Std.t		See if Getopt::Std and Getopt::Long work
 lib/I18N/Collate.pm		Routines to do strxfrm-based collation
 lib/I18N/Collate.t		See if I18N::Collate works
 lib/I18N/LangTags.pm		I18N::LangTags
-lib/I18N/LangTags/List.pod	list of tags for human languages
+lib/I18N/LangTags/ChangeLog	I18N::LangTags
+lib/I18N/LangTags/List.pm	List of tags for human languages
+lib/I18N/LangTags/README	I18N::LangTags
 lib/I18N/LangTags/test.pl	See if I18N::LangTags works
 lib/IPC/Open2.pm		Open a two-ended pipe
 lib/IPC/Open2.t			See if IPC::Open2 works
@@ -993,7 +995,9 @@ lib/Locale/Currency.pm		Locale::Codes
 lib/Locale/Language.pm		Locale::Codes
 lib/Locale/Maketext.pm		Locale::Maketext
 lib/Locale/Maketext.pod		Locale::Maketext documentation
-lib/Locale/Maketext.t		See if Locale::Maketext works
+lib/Locale/Maketext/ChangeLog	Locale::Maketext
+lib/Locale/Maketext/README	Locale::Maketext
+lib/Locale/Maketext/test.pl	See if Locale::Maketext works
 lib/Locale/Maketext/TPJ13.pod	Locale::Maketext documentation article
 lib/Math/BigFloat.pm		An arbitrary precision floating-point arithmetic package
 lib/Math/BigInt.pm		An arbitrary precision integer arithmetic package

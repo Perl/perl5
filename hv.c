@@ -99,7 +99,7 @@ Perl_unshare_hek(pTHX_ HEK *hek)
 
 #if defined(USE_ITHREADS)
 HE *
-Perl_he_dup(pTHX_ HE *e, bool shared)
+Perl_he_dup(pTHX_ HE *e, bool shared, clone_params* param)
 {
     HE *ret;
 
@@ -114,14 +114,14 @@ Perl_he_dup(pTHX_ HE *e, bool shared)
     ret = new_HE();
     ptr_table_store(PL_ptr_table, e, ret);
 
-    HeNEXT(ret) = he_dup(HeNEXT(e),shared);
+    HeNEXT(ret) = he_dup(HeNEXT(e),shared, param);
     if (HeKLEN(e) == HEf_SVKEY)
-	HeKEY_sv(ret) = SvREFCNT_inc(sv_dup(HeKEY_sv(e)));
+	HeKEY_sv(ret) = SvREFCNT_inc(sv_dup(HeKEY_sv(e), param));
     else if (shared)
 	HeKEY_hek(ret) = share_hek(HeKEY(e), HeKLEN_UTF8(e), HeHASH(e));
     else
 	HeKEY_hek(ret) = save_hek(HeKEY(e), HeKLEN_UTF8(e), HeHASH(e));
-    HeVAL(ret) = SvREFCNT_inc(sv_dup(HeVAL(e)));
+    HeVAL(ret) = SvREFCNT_inc(sv_dup(HeVAL(e), param));
     return ret;
 }
 #endif	/* USE_ITHREADS */

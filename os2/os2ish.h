@@ -17,6 +17,23 @@
 #define HAS_DLERROR
 #define HAS_WAITPID_RUNTIME (_emx_env & 0x200)
 
+/* HAS_PASSWD
+ *	This symbol, if defined, indicates that the getpwnam() and
+ *	getpwuid() routines are available to get password entries.
+ *	The getpwent() has a separate definition, HAS_GETPWENT.
+ */
+#define HAS_PASSWD
+
+/* HAS_GROUP
+ *	This symbol, if defined, indicates that the getgrnam() and
+ *	getgrgid() routines are available to get group entries.
+ *	The getgrent() has a separate definition, HAS_GETGRENT.
+ */
+#define HAS_GROUP
+#define HAS_GETGRENT			/* fake */
+#define HAS_SETGRENT			/* fake */
+#define HAS_ENDGRENT			/* fake */
+
 /* USEMYBINMODE
  *	This symbol, if defined, indicates that the program should
  *	use the routine my_binmode(FILE *fp, char iotype, int mode) to insure
@@ -263,6 +280,16 @@ FILE *my_tmpfile (void);
 char *my_tmpnam (char *);
 int my_mkdir (__const__ char *, long);
 int my_rmdir (__const__ char *);
+struct passwd *my_getpwent (void);
+void my_setpwent (void);
+void my_endpwent (void);
+
+struct group *getgrent (void);
+void setgrent (void);
+void endgrent (void);
+
+struct passwd *my_getpwuid (uid_t);
+struct passwd *my_getpwnam (__const__ char *);
 
 #undef L_tmpnam
 #define L_tmpnam MAXPATHLEN
@@ -287,6 +314,11 @@ int my_rmdir (__const__ char *);
 #define flock	my_flock
 #define rmdir	my_rmdir
 #define mkdir	my_mkdir
+#define setpwent	my_setpwent
+#define getpwent	my_getpwent
+#define endpwent	my_endpwent
+#define getpwuid	my_getpwuid
+#define getpwnam	my_getpwnam
 
 void *emx_calloc (size_t, size_t);
 void emx_free (void *);

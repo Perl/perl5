@@ -304,6 +304,14 @@ elsif ($PLATFORM eq 'os2') {
 		    my_flock
 		    my_rmdir
 		    my_mkdir
+		    my_getpwuid
+		    my_getpwnam
+		    my_getpwent
+		    my_setpwent
+		    my_endpwent
+		    setgrent
+		    endgrent
+		    getgrent
 		    malloc_mutex
 		    threads_mutex
 		    nthreads

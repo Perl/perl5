@@ -21,6 +21,8 @@
 #include <limits.h>
 #include <process.h>
 #include <fcntl.h>
+#include <pwd.h>
+#include <grp.h>
 
 #define PERLIO_NOT_STDIO 0
 
@@ -2413,4 +2415,109 @@ my_flock(int handle, int o)
 
   errno = 0;
   return 0;
+}
+
+static int pwent_cnt;
+static int _my_pwent = -1;
+
+static int
+use_my_pwent(void)
+{
+  if (_my_pwent == -1) {
+    char *s = getenv("USE_PERL_PWENT");
+    if (s)
+	_my_pwent = atoi(s);
+    else 
+	_my_pwent = 1;
+  }
+  return _my_pwent;
+}
+
+#undef setpwent
+#undef getpwent
+#undef endpwent
+
+void
+my_setpwent(void)
+{
+  if (!use_my_pwent()) {
+    setpwent();			/* Delegate to EMX. */
+    return;
+  }
+  pwent_cnt = 0;
+}
+
+void
+my_endpwent(void)
+{
+  if (!use_my_pwent()) {
+    endpwent();			/* Delegate to EMX. */
+    return;
+  }
+}
+
+struct passwd *
+my_getpwent (void)
+{
+  if (!use_my_pwent())
+    return getpwent();			/* Delegate to EMX. */
+  if (pwent_cnt++)
+    return 0;				// Return one entry only
+  return getpwuid(0);
+}
+
+static int grent_cnt;
+
+void
+setgrent(void)
+{
+  grent_cnt = 0;
+}
+
+void
+endgrent(void)
+{
+}
+
+struct group *
+getgrent (void)
+{
+  if (grent_cnt++)
+    return 0;				// Return one entry only
+  return getgrgid(0);
+}
+
+#undef getpwuid
+#undef getpwnam
+
+/* Too long to be a crypt() of anything, so it is not-a-valid pw_passwd. */
+static const char pw_p[] = "Jf0Wb/BzMFvk7K7lrzK";
+
+static struct passwd *
+passw_wrap(struct passwd *p)
+{
+    static struct passwd pw;
+    char *s;
+
+    if (!p || (p->pw_passwd && *p->pw_passwd)) /* Not a dangerous password */
+	return p;
+    pw = *p;
+    s = getenv("PW_PASSWD");
+    if (!s)
+	s = (char*)pw_p;		/* Make match impossible */
+
+    pw.pw_passwd = s;
+    return &pw;    
+}
+
+struct passwd *
+my_getpwuid (uid_t id)
+{
+    return passw_wrap(getpwuid(id));
+}
+
+struct passwd *
+my_getpwnam (__const__ char *n)
+{
+    return passw_wrap(getpwnam(n));
 }

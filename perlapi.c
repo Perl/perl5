@@ -4047,23 +4047,23 @@ Perl_newMYSUB(pTHXo_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 
 #undef  Perl_cx_dup
 PERL_CONTEXT*
-Perl_cx_dup(pTHXo_ PERL_CONTEXT* cx, I32 ix, I32 max)
+Perl_cx_dup(pTHXo_ PERL_CONTEXT* cx, I32 ix, I32 max, clone_params* param)
 {
-    return ((CPerlObj*)pPerl)->Perl_cx_dup(cx, ix, max);
+    return ((CPerlObj*)pPerl)->Perl_cx_dup(cx, ix, max, param);
 }
 
 #undef  Perl_si_dup
 PERL_SI*
-Perl_si_dup(pTHXo_ PERL_SI* si)
+Perl_si_dup(pTHXo_ PERL_SI* si, clone_params* param)
 {
-    return ((CPerlObj*)pPerl)->Perl_si_dup(si);
+    return ((CPerlObj*)pPerl)->Perl_si_dup(si, param);
 }
 
 #undef  Perl_ss_dup
 ANY*
-Perl_ss_dup(pTHXo_ PerlInterpreter* proto_perl)
+Perl_ss_dup(pTHXo_ PerlInterpreter* proto_perl, clone_params* param)
 {
-    return ((CPerlObj*)pPerl)->Perl_ss_dup(proto_perl);
+    return ((CPerlObj*)pPerl)->Perl_ss_dup(proto_perl, param);
 }
 
 #undef  Perl_any_dup
@@ -4075,9 +4075,9 @@ Perl_any_dup(pTHXo_ void* v, PerlInterpreter* proto_perl)
 
 #undef  Perl_he_dup
 HE*
-Perl_he_dup(pTHXo_ HE* e, bool shared)
+Perl_he_dup(pTHXo_ HE* e, bool shared, clone_params* param)
 {
-    return ((CPerlObj*)pPerl)->Perl_he_dup(e, shared);
+    return ((CPerlObj*)pPerl)->Perl_he_dup(e, shared, param);
 }
 
 #undef  Perl_re_dup
@@ -4103,23 +4103,23 @@ Perl_dirp_dup(pTHXo_ DIR* dp)
 
 #undef  Perl_gp_dup
 GP*
-Perl_gp_dup(pTHXo_ GP* gp)
+Perl_gp_dup(pTHXo_ GP* gp, clone_params* param)
 {
-    return ((CPerlObj*)pPerl)->Perl_gp_dup(gp);
+    return ((CPerlObj*)pPerl)->Perl_gp_dup(gp, param);
 }
 
 #undef  Perl_mg_dup
 MAGIC*
-Perl_mg_dup(pTHXo_ MAGIC* mg)
+Perl_mg_dup(pTHXo_ MAGIC* mg, clone_params* param)
 {
-    return ((CPerlObj*)pPerl)->Perl_mg_dup(mg);
+    return ((CPerlObj*)pPerl)->Perl_mg_dup(mg, param);
 }
 
 #undef  Perl_sv_dup
 SV*
-Perl_sv_dup(pTHXo_ SV* sstr)
+Perl_sv_dup(pTHXo_ SV* sstr, clone_params* param)
 {
-    return ((CPerlObj*)pPerl)->Perl_sv_dup(sstr);
+    return ((CPerlObj*)pPerl)->Perl_sv_dup(sstr, param);
 }
 #if defined(HAVE_INTERP_INTERN)
 

@@ -37,13 +37,15 @@ use Sys::Syslog qw(:DEFAULT setlogsock);
 # Most don't (or at least shouldn't)
 my $Test_Syslog_INET = 0;
 
+my $test_string = "uid $< is testing perl $] syslog capabilities";
+
 print "1..6\n";
 
 if (Sys::Syslog::_PATH_LOG()) {
     if (-e Sys::Syslog::_PATH_LOG()) {
         print defined(eval { setlogsock('unix') }) ? "ok 1\n" : "not ok 1\n";
         print defined(eval { openlog('perl', 'ndelay', 'local0') }) ? "ok 2\n" : "not ok 2\n";
-        print defined(eval { syslog('info', 'test') }) ? "ok 3\n" : "not ok 3\n";
+        print defined(eval { syslog('info', $test_string ) }) ? "ok 3\n" : "not ok 3\n";
     }
     else {
         for (1..3) {
@@ -63,7 +65,7 @@ if( $Test_Syslog_INET ) {
                                                : "not ok 4\n";
     print defined(eval { openlog('perl', 'ndelay', 'local0') }) ? "ok 5\n" 
                                                                 : "not ok 5\n";
-    print defined(eval { syslog('info', 'test') }) ? "ok 6\n" 
+    print defined(eval { syslog('info', $test_string ) }) ? "ok 6\n" 
                                                    : "not ok 6\n";
 }
 else {
