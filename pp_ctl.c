@@ -667,7 +667,7 @@ PP(pp_grepstart)
     if (PL_stack_base + *PL_markstack_ptr == SP) {
 	(void)POPMARK;
 	if (GIMME_V == G_SCALAR)
-	    XPUSHi(0);
+	    XPUSHs(sv_2mortal(newSViv(0)));
 	RETURNOP(PL_op->op_next->op_next);
     }
     PL_stack_sp = PL_stack_base + *PL_markstack_ptr + 1;
