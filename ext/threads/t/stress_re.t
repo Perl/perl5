@@ -34,7 +34,7 @@ sub ok {
 ok(2,1,"");
 
 sub test9 {
-  my $s = "abcd" x (1000 + $_);
+  my $s = "abcd" x (1000 + $_[0]);
   my $t = '';
   while ($s =~ /(.)/g) { $t .= $1 }
   print "not ok $_[0]\n" if $s ne $t;
