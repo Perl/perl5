@@ -116,7 +116,8 @@ DeadCode()
 }
 #endif /* !PURIFY */
 
-#if defined(PERL_DEBUGGING_MSTATS)
+#if defined(PERL_DEBUGGING_MSTATS) || defined(DEBUGGING_MSTATS) \
+	|| (defined(MYMALLOC) && !defined(PLAIN_MALLOC))
 #   define mstat(str) dump_mstats(str)
 #else
 #   define mstat(str) \

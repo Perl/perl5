@@ -320,6 +320,7 @@
 #define my_chsize		Perl_my_chsize
 #define my_exit			Perl_my_exit
 #define my_failure_exit		Perl_my_failure_exit
+#define my_fflush_all		Perl_my_fflush_all
 #define my_htonl		Perl_my_htonl
 #define my_lstat		Perl_my_lstat
 #define my_memcmp		Perl_my_memcmp
@@ -1378,6 +1379,7 @@
 #define my_exit			CPerlObj::Perl_my_exit
 #define my_exit_jump		CPerlObj::Perl_my_exit_jump
 #define my_failure_exit		CPerlObj::Perl_my_failure_exit
+#define my_fflush_all		CPerlObj::Perl_my_fflush_all
 #define my_htonl		CPerlObj::Perl_my_htonl
 #define my_lstat		CPerlObj::Perl_my_lstat
 #define my_memcmp		CPerlObj::Perl_my_memcmp

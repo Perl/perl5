@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Apr 19 22:21:08 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Fri May 14 10:24:50 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -404,6 +404,7 @@ d_madvise=''
 d_mblen=''
 d_mbstowcs=''
 d_mbtowc=''
+d_memchr=''
 d_memcmp=''
 d_memcpy=''
 d_memmove=''
@@ -572,6 +573,8 @@ lddlflags=''
 usedl=''
 doublesize=''
 ebcdic=''
+fflushNULL=''
+fflushall=''
 fpostype=''
 gidtype=''
 groupstype=''
@@ -605,6 +608,7 @@ i_mntent=''
 i_ndbm=''
 i_netdb=''
 i_neterrno=''
+i_netinettcp=''
 i_niin=''
 i_sysin=''
 i_poll=''
@@ -795,6 +799,8 @@ d_fsetpos64=''
 d_ftell64=''
 d_ftello64=''
 d_tmpfile64=''
+d_stdio_stream_array=''
+stdio_stream_array=''
 sysman=''
 trnl=''
 uidtype=''
@@ -4342,6 +4348,7 @@ echo "Your cpp writes the filename in the $pos field of the line."
 $cat >findhdr <<EOF
 $startsh
 wanted=\$1
+name=''
 for usrincdir in $usrinc
 do
 	if test -f \$usrincdir/\$wanted; then
@@ -4357,6 +4364,7 @@ while read cline; do
 	name=\`echo \$cline | $awk "\$awkprg" | $tr -d '"'\`
 	case "\$name" in
 	*[/\\\\]\$wanted) echo "\$name"; exit 0;;
+	*[\\\\/]\$wanted) echo "\$name"; exit 0;;
 	*) name='';;
 	esac;
 done;
@@ -8008,6 +8016,7 @@ else
 		eval $setvar
 	done
 fi
+
 : see if flock exists
 set flock d_flock
 eval $inlibc
@@ -8672,6 +8681,10 @@ eval $inlibc
 
 : see if mbtowc exists
 set mbtowc d_mbtowc
+eval $inlibc
+
+: see if memchr exists
+set memchr d_memchr
 eval $inlibc
 
 : see if memcmp exists
@@ -9948,6 +9961,41 @@ esac
 set d_stdiobase
 eval $setvar
 
+$cat >&4 <<EOM
+Checking how to access stdio streams by file descriptor number...
+EOM
+case "$stdio_stream_array" in
+'') 	$cat >try.c <<EOCP
+#include <stdio.h>
+int main() {
+  if (&STDIO_STREAM_ARRAY[fileno(stdin)] == stdin)
+    printf("yes\n");
+}
+EOCP
+	for s in _iob __iob __sF
+	do
+	        set try -DSTDIO_STREAM_ARRAY=$s
+		if eval $compile; then
+		    	case "`./try$exe_ext`" in
+			yes)	stdio_stream_array=$s; break ;;
+			esac
+		fi
+	done
+	$rm -f try.* try$exe_ext
+esac
+case "$stdio_stream_array" in
+'')	$cat >&4 <<EOM
+I can't figure out how to access stdio streams by file descriptor number.
+EOM
+	d_stdio_stream_array="$undef"
+	;;
+*)	$cat >&4 <<EOM
+You can access stdio streams by file descriptor number by the $stdio_stream_array array.
+EOM
+	d_stdio_stream_array="$define"
+	;;
+esac
+
 : see if strcoll exists
 set strcoll d_strcoll
 eval $inlibc
@@ -10913,6 +10961,179 @@ fi
 $rm -f tebcdic.c tebcdic
 set ebcdic
 eval $setvar
+
+# SunOS has a <unistd.h> which we generally avoid, but need for this test.
+# For everyone else, we'll trust i_unistd.
+t_unistd=$i_unistd
+case "$osname" in
+sunos) $test -f /usr/include/unistd.h && t_unistd=$define ;;
+esac
+$cat >&4 <<EOM
+Checking how to flush all pending stdio output...
+EOM
+$cat >try.c <<EOCP
+#include <stdio.h>
+#$t_unistd I_UNISTD
+#ifdef I_UNISTD
+#include <unistd.h>
+#endif
+#$d_sysconf HAS_SYSCONF
+#$stdio_stream_array
+int main() {
+  FILE* p = fopen("try.out", "w");
+#ifdef TRY_FPUTC
+  fputc('x', p);
+#else
+# ifdef TRY_FPRINTF
+  fprintf(p, "x");
+# endif
+#endif
+#ifdef TRY_FFLUSH_NULL
+  fflush(NULL);
+#endif
+#ifdef TRY_FFLUSH_ALL
+  {
+    long open_max = -1;
+# if defined(HAS_SYSCONF) && defined(_SC_OPEN_MAX)
+    open_max = sysconf(_SC_OPEN_MAX);
+# else
+#  ifdef FOPEN_MAX
+#   open_max = FOPEN_MAX;
+#  else
+#   ifdef OPEN_MAX
+#   open_max = OPEN_MAX;
+#   else
+#    ifdef _NFILE
+#   open_max = _NFILE;
+#    endif
+#   endif
+#  endif
+# endif
+# ifdef HAS_STDIO_STREAM_ARRAY
+    if (open_max > 0) {
+      long i;
+      for (i = 0; i < open_max; i++)
+         fflush(&$stdio_stream_array[i]);
+    }	
+  }
+# endif
+#endif
+  _exit(42);
+}
+EOCP
+: first we have to find out how _not_ to flush
+if $test "X$fflushNULL" = X -o "X$fflushall" = X; then
+    output=''
+    set try -DTRY_FPUTC
+    $rm -f try.out
+    if eval $compile; then
+ 	    ./try$exe_ext 2>/dev/null
+	    if $test ! -s try.out -a "X$?" = X42; then
+		output=-DTRY_FPUTC
+	    fi
+    fi
+    case "$output" in
+    '')
+	    set try -DTRY_FPRINTF
+	    $rm -f try.out
+	    if eval $compile; then
+ 		    ./try$exe_ext 2>/dev/null
+		    if $test ! -s try.out -a "X$?" = X42; then
+			output=-DTRY_FPRINTF
+		    fi
+	    fi
+	;;
+    esac
+fi
+: check for fflush NULL behaviour
+case "$fflushNULL" in
+'') 	set try -DTRY_FFLUSH_NULL $output
+	$rm -f try.out
+	if eval $compile; then
+	    	./try$exe_ext 2>/dev/null
+		if $test -s try.out -a "X$?" = X42; then
+			fflushNULL="`$cat try.out`"
+		fi
+	fi
+	$rm -f core try.core core.try.*
+	case "$fflushNULL" in
+	x)	$cat >&4 <<EOM
+Your fflush(NULL) works okay.
+EOM
+		fflushNULL="$define"
+		;;
+	'')	$cat >&4 <<EOM
+Your fflush(NULL) isn't working (contrary to ANSI C).
+EOM
+		fflushNULL="$undef"
+		;;
+	*)	$cat >&4 <<EOM
+Cannot figure out whether your fflush(NULL) works or not.
+I'm assuming it doesn't (contrary to ANSI C).
+EOM
+		fflushNULL="$undef"
+		;;
+	esac
+	;;
+$define|true|[yY]*)
+	fflushNULL="$define"
+	;;
+*)
+	fflushNULL="$undef"
+	;;
+esac
+: check for fflush all behaviour
+case "$fflushall" in
+'') 	set try -DTRY_FFLUSH_ALL $output
+	$rm -f try.out
+	if eval $compile; then
+	    	./try$exe_ext 2>/dev/null
+		if $test -s try.out -a "X$?" = X42; then
+			fflushall="`$cat try.out`"
+		fi
+	fi
+	$rm -f core try.core core.try.*
+	case "$fflushall" in
+	x)	$cat >&4 <<EOM
+Flushing explicitly all the stdio streams works.
+EOM
+		fflushall="$define"
+		;;
+	'')	$cat >&4 <<EOM
+Flushing explicitly all the stdio streams doesn't work.
+EOM
+		fflushall="$undef"
+		;;
+	*)	$cat >&4 <<EOM
+Cannot figure out whether flushing stdio streams explicitly works or not.
+I'm assuming it doesn't.
+EOM
+		fflushall="$undef"
+		;;
+	esac
+	case "$fflushall$fflushNULL" in
+	undefdefine)
+                $cat >&4 <<EOM
+(That's ok.  I'll use fflush(NULL) instead.)
+EOM
+		;;
+	esac
+	;;
+$define|true|[yY]*)
+	fflushall="$define"
+	;;
+*)
+	fflushall="$undef"
+	;;
+esac
+case "$fflushNULL$fflushall" in
+undefundef)
+	$cat <<EOM
+I cannot figure out how to flush pending stdio output.
+EOM
+	;;
+esac
+$rm -f try.* try$exe_ext
 
 : see what type file positions are declared as in the library
 rp="What is the type for file position used by fsetpos()?"
@@ -11957,6 +12178,10 @@ esac
 set i_neterrno
 eval $setvar
 
+: see if netinet/tcp.h is available
+set netinet/tcp.h i_netinettcp
+eval $inhdr
+
 : see if this is a poll.h system
 set poll.h i_poll
 eval $inhdr
@@ -12821,6 +13046,7 @@ d_madvise='$d_madvise'
 d_mblen='$d_mblen'
 d_mbstowcs='$d_mbstowcs'
 d_mbtowc='$d_mbtowc'
+d_memchr='$d_memchr'
 d_memcmp='$d_memcmp'
 d_memcpy='$d_memcpy'
 d_memmove='$d_memmove'
@@ -12933,6 +13159,7 @@ d_statfsflags='$d_statfsflags'
 d_statvfs='$d_statvfs'
 d_stdio_cnt_lval='$d_stdio_cnt_lval'
 d_stdio_ptr_lval='$d_stdio_ptr_lval'
+d_stdio_stream_array='$d_stdio_stream_array'
 d_stdiobase='$d_stdiobase'
 d_stdstdio='$d_stdstdio'
 d_store64='$d_store64'
@@ -12997,6 +13224,8 @@ eunicefix='$eunicefix'
 exe_ext='$exe_ext'
 expr='$expr'
 extensions='$extensions'
+fflushNULL='$fflushNULL'
+fflushall='$fflushall'
 find='$find'
 firstmakefile='$firstmakefile'
 flex='$flex'
@@ -13039,6 +13268,7 @@ i_mntent='$i_mntent'
 i_ndbm='$i_ndbm'
 i_netdb='$i_netdb'
 i_neterrno='$i_neterrno'
+i_netinettcp='$i_netinettcp'
 i_niin='$i_niin'
 i_poll='$i_poll'
 i_pthread='$i_pthread'
@@ -13242,6 +13472,7 @@ stdio_bufsiz='$stdio_bufsiz'
 stdio_cnt='$stdio_cnt'
 stdio_filbuf='$stdio_filbuf'
 stdio_ptr='$stdio_ptr'
+stdio_stream_array='$stdio_stream_array'
 strings='$strings'
 submit='$submit'
 subversion='$subversion'

@@ -1992,6 +1992,32 @@ $ SET DEFAULT [-.vms]
 $ @subconfigure
 $ SET DEFAULT 'dflt
 $!
+$!  Warn of dangerous logical names
+$!
+$Bad_logical: SUBROUTINE
+$   IF f$trnlnm(p1) .nes. ""
+$   THEN
+$     IF f$search("config.msg") .nes. ""
+$     THEN
+$       OPEN/APPEND CONFIG config.msg
+$     ELSE
+$       OPEN/WRITE CONFIG config.msg
+$     ENDIF
+$     WRITE CONFIG "Logical name ''p1' found in environment as " + f$trnlnm(p1)
+$     WRITE CONFIG " deassign before building ''package'"
+$     CLOSE CONFIG
+$   ENDIF
+$ EXIT
+$ ENDSUBROUTINE ! Bad_logical
+$ echo ""
+$ echo4 "%Config-I-VMS, Checking for dangerous pre extant logical names."
+$ CALL Bad_logical "TMP"
+$ CALL Bad_logical "LIB"
+$ CALL Bad_logical "T"
+$ CALL Bad_logical "FOO"
+$ CALL Bad_logical "EXT"
+$ IF f$search("config.msg") .eqs. "" THEN echo "OK."
+$!
 $! %Config-I-VMS, write perl_setup.com here
 $!
 $ echo ""
@@ -2077,6 +2103,15 @@ $   echo4 ""
 $ ENDIF
 $ echo4 " ''make'''makefile'", macros
 $ echo4 ""
+$!
+$ IF ( F$SEARCH("config.msg").NES."" ) 
+$ THEN
+$   echo "Hmm.  I also noted the following information while running:"
+$   echo ""
+$   type config.msg
+$   SET PROTECTION=(SYSTEM:RWED,OWNER:RWED) config.msg
+$   DELETE/NOLOG/NOCONFIRM config.msg;
+$ ENDIF
 $!
 $Clean_up:
 $ IF (silent)

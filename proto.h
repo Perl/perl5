@@ -329,6 +329,7 @@ char*	my_bzero _((char* loc, I32 len));
 #endif
 VIRTUAL void	my_exit _((U32 status)) __attribute__((noreturn));
 VIRTUAL void	my_failure_exit _((void)) __attribute__((noreturn));
+VIRTUAL I32	my_fflush_all _((void));
 VIRTUAL I32	my_lstat _((ARGSproto));
 #if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
 VIRTUAL I32	my_memcmp _((const char* s1, const char* s2, I32 len));

@@ -149,10 +149,19 @@ case "`uname -r`" in
 *)            if $test "X$optimize" = "X$undef"; then
                       lddlflags="$lddlflags -msym"
               else
-                      lddlflags="$lddlflags $optimize -msym"
+		  case "`sizer -v`" in
+		  *4.0D*)
+		      # QAR 56761: -O4 + .so may produce broken code,
+		      # fixed in 4.0E or better.
+		      ;;
+		  *)    
+                      lddlflags="$lddlflags $optimize"
+		      ;;
+		  esac
+		  # -msym: If using a sufficiently recent /sbin/loader,
+		  # keep the module symbols with the modules.
+                  lddlflags="$lddlflags -msym"
               fi
-		# -msym: If using a sufficiently recent /sbin/loader,
-		# keep the module symbols with the modules.
 		;;
 esac
 # Yes, the above loses if gcc does not use the system linker.

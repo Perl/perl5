@@ -3195,3 +3195,37 @@ get_vtbl(int vtbl_id)
     return result;
 }
 
+I32
+my_fflush_all(void)
+{
+#ifdef FFLUSH_NULL
+    return fflush(NULL);
+#else
+    long open_max = -1;
+# if defined(FFLUSH_ALL) && defined(HAS_STDIO_STREAM_ARRAY)
+#  if defined(HAS_SYSCONF) && defined(_SC_OPEN_MAX)
+    open_max = sysconf(_SC_OPEN_MAX);
+#  else
+#   ifdef FOPEN_MAX
+#   open_max = FOPEN_MAX;
+#   else
+#    ifdef OPEN_MAX
+#   open_max = OPEN_MAX;
+#    else
+#     ifdef _NFILE
+#   open_max = _NFILE;
+#     endif
+#    endif
+#   endif
+#  endif
+    if (open_max > 0) {
+      long i;
+      for (i = 0; i < open_max; i++)
+         fflush(&STDIO_STREAM_ARRAY[i]);
+      return 0;
+    }
+# endif
+    SETERRNO(EBADF,RMS$_IFI);
+    return EOF;
+#endif
+}

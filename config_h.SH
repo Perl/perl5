@@ -1449,17 +1449,17 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This macro surrounds its token with double quotes.
  */
 #if $cpp_stuff == 1
-# define CAT2(a,b)a/**/b
-# define STRINGIFY(a)"a"
+#define CAT2(a,b)a/**/b
+#define STRINGIFY(a)"a"
 		/* If you can get stringification with catify, tell me how! */
-#else
-# if $cpp_stuff == 42
-#  define CAT2(a,b)a ## b
-#  define StGiFy(a)# a
-#  define STRINGIFY(a)StGiFy(a)
-# else
-#  include "Bletch: How does this C preprocessor catenate tokens?"
-# endif
+#endif
+#if $cpp_stuff == 42
+#define CAT2(a,b)a ## b
+#define StGiFy(a)# a
+#define STRINGIFY(a)StGiFy(a)
+#endif
+#if $cpp_stuff != 1 && $cpp_stuff != 42
+#include "Bletch: How does this C preprocessor catenate tokens?"
 #endif
 
 /* CPPSTDIN:
@@ -1699,6 +1699,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #ifdef HAS_LONG_LONG
 #define LONGLONGSIZE $longlongsize		/**/
 #endif
+
+/* HAS_MEMCHR:
+ *	This symbol, if defined, indicates that the memchr routine is available
+ *	to locate characters within a C string.
+ */
+#$d_memchr HAS_MEMCHR	/**/
 
 /* HAS_MMAP:
  *	This symbol, if defined, indicates that the mmap system call is
@@ -2213,6 +2219,18 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$usedl USE_DYNAMIC_LOADING		/**/
 
+/* FFLUSH_NULL:
+ *	This symbol, if defined, tells that fflush(NULL) does flush
+ *	all pending stdio output.
+ */
+/* FFLUSH_ALL:
+ *	This symbol, if defined, tells that to flush
+ *	all pending stdio output one must loop through all
+ *	the stdio file handles and fflush them.
+ */
+#$fflushNULL	FFLUSH_NULL 		/**/
+#$fflushall	FFLUSH_ALL 		/**/
+
 /* DB_Prefix_t:
  *	This symbol contains the type of the prefix structure element
  *	in the <db.h> header file.  In older versions of DB, it was
@@ -2243,6 +2261,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	should be included.
  */
 #$i_mntent	I_MNTENT		/**/
+
+/* I_NETINET_TCP:
+ *     This symbol, if defined, indicates to the C program that it should
+ *     include <netinet/tcp.h>.
+ */
+#$i_netinettcp   I_NETINET_TCP                /**/
 
 /* I_POLL:
  *	This symbol, if defined, indicates that <poll.h> exists and
@@ -2444,6 +2468,17 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_ftell64     HAS_FTELL64		/**/
 #$d_ftello64    HAS_FTELLO64		/**/
 #$d_tmpfile64   HAS_TMPFILE64	/**/
+
+/* HAS_STDIO_STREAM_ARRAY:
+ *	This symbol, if defined, tells that there is an array
+ *	holding the stdio streams.
+ */
+/* STDIO_STREAM_ARRAY:
+ *	This symbol tells the name of the array holding the stdio streams.
+ *	Usual values include _iob, __iob, and __sF.
+ */
+#$d_stdio_stream_array	HAS_STDIO_STREAM_ARRAY	/**/
+#define STDIO_STREAM_ARRAY	$stdio_stream_array
 
 /* USE_64_BITS:
  *	This symbol, if defined, indicates that 64-bit interfaces should

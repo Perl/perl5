@@ -311,6 +311,7 @@ my_bzero
 my_chsize
 my_exit
 my_failure_exit
+my_fflush_all
 my_htonl
 my_lstat
 my_memcmp
