@@ -81,7 +81,16 @@ static int findbucket _((union overhead *freep, int srchlen));
 
 #define	MAGIC		0xff		/* magic # on accounting info */
 #define RMAGIC		0x55555555	/* magic # on range info */
-#ifdef RCHECK
+
+/*
+ * The following nasty hack is required to make MachTen perl pass
+ * the lib/gdbm.t test: there's some -- as yet untraced -- interaction
+ * between libgdbm's use of system malloc and perl's.  This problem
+ * is not present in development track perl -- 5.004_70 and later.
+ *
+ * 980708 Dominic Dunlop <domo@computer.org>
+ */
+#if defined (RCHECK) || defined (__MACHTEN_PPC__)
 #  define	RSLOP		sizeof (u_int)
 #  ifdef TWO_POT_OPTIMIZE
 #    define MAX_SHORT_BUCKET 12
@@ -752,9 +761,27 @@ dump_mstats(s)
 #      define PERL_SBRK_VIA_MALLOC
 #   endif
 
+#   ifdef __MACHTEN_PPC__
+#      define PERL_SBRK_VIA_MALLOC
+/*
+ * MachTen's malloc() returns a buffer aligned on a two-byte boundary.
+ * While this is adequate, it may slow down access to longer data
+ * types by forcing multiple memory accesses.  It also causes
+ * complaints when RCHECK is in force.  So we allocate six bytes
+ * more than we need to, and return an address rounded up to an
+ * eight-byte boundary.
+ *
+ * 980701 Dominic Dunlop <domo@computer.org>
+ */
+#      define SYSTEM_ALLOC(a) ((void *)(((unsigned)malloc((a)+6)+6)&~7))
+#   endif
+
 #   ifdef PERL_SBRK_VIA_MALLOC
 #      if defined(HIDEMYMALLOC) || defined(EMBEDMYMALLOC)
-#         undef malloc
+#         undef malloc		/* Expose names that  */
+#         undef calloc		/* HIDEMYMALLOC hides */
+#         undef realloc
+#         undef free
 #      else
 #         include "Error: -DPERL_SBRK_VIA_MALLOC needs -D(HIDE|EMBED)MYMALLOC"
 #      endif
@@ -764,7 +791,9 @@ dump_mstats(s)
 /* frequent core dumps within nxzonefreenolock. This sbrk routine put an */
 /* end to the cores */
 
-#      define SYSTEM_ALLOC(a) malloc(a)
+#      ifndef SYSTEM_ALLOC
+#         define SYSTEM_ALLOC(a) malloc(a)
+#      endif
 
 #   endif  /* PERL_SBRK_VIA_MALLOC */
 

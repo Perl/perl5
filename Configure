@@ -1749,12 +1749,7 @@ EOM
 			osvers="$3" ;;
 		genix) osname=genix ;;
 		hp*) osname=hpux 
-			case "$3" in
-			*.08.*) osvers=9 ;;
-			*.09.*) osvers=9 ;;
-			*.10.*) osvers=10 ;;
-			*)	osvers="$3" ;;
-			esac
+			osvers=`echo "$3" | $sed 's,.*\.\([0-9]*\.[0-9]*\),\1,'`
 			;;
 		irix*) osname=irix
 			case "$3" in
