@@ -105,6 +105,76 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  7158] By: jhi                                   on 2000/10/06  12:48:40
+        Log: Eliminate $Is_VMS code from the test.
+             
+             Subject:  Re: [ID 20001004.005] Not OK: perl v5.7.0 +DEVEL7129 on VMS_AXP V7.1
+             From: lane@DUPHY4.Physics.Drexel.Edu (Charles Lane)
+             Message-Id: <001005074528.21621@DUPHY4.Physics.Drexel.Edu>
+             Date:     Thu, 5 Oct 2000 07:46:33 EDT
+     Branch: perl
+	   ! t/lib/b.t
+____________________________________________________________________________
+[  7157] By: jhi                                   on 2000/10/06  12:47:13
+        Log: Also the $ccflags is needed for the C compiler check.
+             
+             Subject: Configure (check for C-compiler)
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Fri, 06 Oct 2000 08:47:15 +0200
+             Message-Id: <20001006084120.C52B.H.M.BRAND@hccnet.nl>
+     Branch: metaconfig/U/perl
+	   ! Checkcc.U
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[  7156] By: jhi                                   on 2000/10/06  11:45:15
+        Log: The HINT_BYTE patch is apparently unnecessary, retracted.
+     Branch: perl
+	   ! perl.c pp_ctl.c sv.h utf8.c
+____________________________________________________________________________
+[  7155] By: jhi                                   on 2000/10/06  11:40:41
+        Log: IO::Handle->syswrite() did not handle length omission
+             like CORE::syswrite() does.
+             
+             Subject: [Fwd] IO::Handle, syswrite and arguments
+             From: Graham Barr <gbarr@pobox.com>
+             Date: Fri, 6 Oct 2000 10:22:05 +0100
+             Message-ID: <20001006102205.U6312@pobox.com>
+             
+             The original patch from andrew@ugh.net.au.
+     Branch: perl
+	   ! ext/IO/lib/IO/Handle.pm
+____________________________________________________________________________
+[  7154] By: jhi                                   on 2000/10/06  01:42:15
+        Log: Tweak #7153.
+     Branch: perl
+	   ! utf8.h
+____________________________________________________________________________
+[  7153] By: jhi                                   on 2000/10/06  00:39:55
+        Log: Patch from Simon Cozens to avoid using utf8 routines in EBCDIC.
+     Branch: perl
+	   ! utf8.h
+____________________________________________________________________________
+[  7152] By: jhi                                   on 2000/10/06  00:38:11
+        Log: Patch from Peter Prymmer to disable utf8 in EBCDIC platforms.
+     Branch: perl
+	   ! perl.c pp_ctl.c sv.h utf8.c
+____________________________________________________________________________
+[  7151] By: jhi                                   on 2000/10/06  00:36:38
+        Log: Subject: Re: Questions about Tie::Array and perl modules
+             From: Nick Ing-Simmons <nik@tiuk.ti.com>
+             Date: Thu, 5 Oct 2000 09:37:11 +0100 (BST)
+             Message-Id: <200010050837.JAA00564@mikado.tiuk.ti.com>
+             
+             Bug reported and fix suggested by Philip D Crow <pcrow@hertz.com>.
+     Branch: perl
+	   ! lib/Tie/Array.pm t/op/array.t
+____________________________________________________________________________
+[  7150] By: jhi                                   on 2000/10/05  00:20:45
+        Log: Regen Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  7149] By: jhi                                   on 2000/10/05  00:20:01
         Log: Regen toc.
      Branch: perl
