@@ -9,6 +9,8 @@ use Mac::Resources;
 use Mac::Memory;
 use strict;
 
+sub fix_text (\$);
+
 die "Need at least one Perl script!\n" unless @ARGV;
 
 # select which type of compiled script you want ... hardcode this
@@ -54,14 +56,12 @@ sub get_text {
 	$text = qq'tell application "MacPerl"\n	 activate\n	 Do Script "\n$script\n"\nend tell';
 }
 
-sub fix_text {
+sub fix_text (\$) {
 	my $text = shift;
 	
 	# more to do than just fix " marks and \ ?
 	$$text =~ s/\\/\\\\/g;
 	$$text =~ s/"/\\"/g;
-
-	1;
 }
 
 __END__

@@ -2,7 +2,7 @@ package Mac::OSA::Simple;
 
 use strict;
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS
-    %ScriptComponents);
+    $REVISION %ScriptComponents);
 use Mac::Components;
 use Mac::OSA;
 use Mac::AppleEvents;
