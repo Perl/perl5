@@ -9,7 +9,7 @@ use vars (qw($VERSION @ISA @EXPORT @EXPORT_OK $ntest $TestLevel), #public-ish
 	  qw($TESTOUT $ONFAIL %todo %history $planned @FAILDETAIL)#private-ish
          );
 
-$VERSION = '1.17';
+$VERSION = '1.18';
 require Exporter;
 @ISA=('Exporter');
 
@@ -319,11 +319,12 @@ sub skip ($;$$$) {
         return 1;
     } else {
         # backwards compatiblity (I think).  skip() used to be
-        # called like ok() and was expected to fail, which is weird.
-        warn <<WARN if $^W;
-This looks like a skip() using the very old interface.  Please upgrade to
-the documented interface as this has been deprecated.
-WARN
+        # called like ok(), which is weird.  I haven't decided what to do with
+        # this yet.
+#        warn <<WARN if $^W;
+#This looks like a skip() using the very old interface.  Please upgrade to
+#the documented interface as this has been deprecated.
+#WARN
 
 	local($TestLevel) = $TestLevel+1;  #ignore this stack frame
         return &ok(@_);
