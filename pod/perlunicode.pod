@@ -711,21 +711,25 @@ is UTF-16, but you don't know which endianness?  Byte Order Marks
 (BOMs) are a solution to this.  A special character has been reserved
 in Unicode to function as a byte order marker: the character with the
 code point 0xFEFF is the BOM.
+
 The trick is that if you read a BOM, you will know the byte order,
 since if it was written on a big endian platform, you will read the
 bytes 0xFE 0xFF, but if it was written on a little endian platform,
 you will read the bytes 0xFF 0xFE.  (And if the originating platform
 was writing in UTF-8, you will read the bytes 0xEF 0xBB 0xBF.)
+
 The way this trick works is that the character with the code point
 0xFFFE is guaranteed not to be a valid Unicode character, so the
 sequence of bytes 0xFF 0xFE is unambiguously "BOM, represented in
-little-endian format" and cannot be "0xFFFE, represented in
-big-endian format".
+little-endian format" and cannot be "0xFFFE, represented in big-endian
+format".
 
 =item UTF-32, UTF-32BE, UTF32-LE
 
 The UTF-32 family is pretty much like the UTF-16 family, expect that
-the units are 32-bit, and therefore the surrogate scheme is not needed.
+the units are 32-bit, and therefore the surrogate scheme is not
+needed.  The BOM signatures will be 0x00 0x00 0xFE 0xFF for BE and
+0xFF 0xFE 0x00 0x00 for LE.
 
 =item UCS-2, UCS-4
 
