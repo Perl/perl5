@@ -2040,6 +2040,10 @@ i_sysioctl (i_sysioctl.U):
 	indicates to the C program that <sys/ioctl.h> exists and should
 	be included.
 
+i_syslog (i_syslog.U):
+	This variable conditionally defines the I_SYSLOG symbol,
+	and indicates whether a C program should include <syslog.h>.
+
 i_sysmman (i_sysmman.U):
 	This variable conditionally defines the I_SYS_MMAN symbol, and
 	indicates whether a C program should include <sys/mman.h>.

@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Feb  9 05:56:14 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Wed Feb  9 21:43:07 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -651,6 +651,7 @@ i_bsdioctl=''
 i_sysfilio=''
 i_sysioctl=''
 i_syssockio=''
+i_syslog=''
 i_sysmman=''
 i_sysmount=''
 i_sysndir=''
@@ -14123,6 +14124,11 @@ fi
 set i_sysioctl
 eval $setvar
 
+
+: see if this is a syslog.h system
+set syslog.h i_syslog
+eval $inhdr
+
 : see if sys/resource.h has to be included
 set sys/resource.h i_sysresrc
 eval $inhdr
@@ -14941,6 +14947,7 @@ i_sysfile='$i_sysfile'
 i_sysfilio='$i_sysfilio'
 i_sysin='$i_sysin'
 i_sysioctl='$i_sysioctl'
+i_syslog='$i_syslog'
 i_sysmman='$i_sysmman'
 i_sysmount='$i_sysmount'
 i_sysndir='$i_sysndir'
