@@ -2375,6 +2375,28 @@ PerlIOUnix_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
     return code;
 }
 
+IV
+PerlIOUnix_seek(pTHX_ PerlIO *f, Off_t offset, int whence)
+{
+    int fd = PerlIOSelf(f, PerlIOUnix)->fd;
+    Off_t new;
+    if (PerlIOBase(f)->flags & PERLIO_F_NOTREG) {
+#ifdef  ESPIPE
+	SETERRNO(ESPIPE, LIB_INVARG);
+#else
+	SETERRNO(EINVAL, LIB_INVARG);
+#endif
+	return -1;
+    }
+    new  = PerlLIO_lseek(fd, offset, whence);
+    if (new == (Off_t) - 1)
+     {
+      return -1;
+     }
+    PerlIOBase(f)->flags &= ~PERLIO_F_EOF;
+    return  0;
+}
+
 PerlIO *
 PerlIOUnix_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 		IV n, const char *mode, int fd, int imode,
@@ -2409,6 +2431,8 @@ PerlIOUnix_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 	}
         PerlIOUnix_setfd(aTHX_ f, fd, imode);
 	PerlIOBase(f)->flags |= PERLIO_F_OPEN;
+	if (*mode == IoTYPE_APPEND)
+	    PerlIOUnix_seek(aTHX_ f, 0, SEEK_END);
 	return f;
     }
     else {
@@ -2483,28 +2507,6 @@ PerlIOUnix_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 	}
 	PERL_ASYNC_CHECK();
     }
-}
-
-IV
-PerlIOUnix_seek(pTHX_ PerlIO *f, Off_t offset, int whence)
-{
-    int fd = PerlIOSelf(f, PerlIOUnix)->fd;
-    Off_t new;
-    if (PerlIOBase(f)->flags & PERLIO_F_NOTREG) {
-#ifdef  ESPIPE
-	SETERRNO(ESPIPE, LIB_INVARG);
-#else
-	SETERRNO(EINVAL, LIB_INVARG);
-#endif
-	return -1;
-    }
-    new  = PerlLIO_lseek(fd, offset, whence);
-    if (new == (Off_t) - 1)
-     {
-      return -1;
-     }
-    PerlIOBase(f)->flags &= ~PERLIO_F_EOF;
-    return  0;
 }
 
 Off_t
