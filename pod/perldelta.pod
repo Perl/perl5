@@ -2297,10 +2297,6 @@ Sys::Syslog ignored the C<LOG_AUTH> constant.
 
 =item *
 
-Also the LENGTH argument of syswrite() is now optional.
-
-=item *
-
 $AUTOLOAD, sort(), lock(), and spawning subprocesses
 in multiple threads simultaneously are now thread-safe.
 
