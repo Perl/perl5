@@ -6,7 +6,7 @@ BEGIN {
 use strict;
 use Getopt::Std;
 my @orig_ARGV = @ARGV;
-my $perforce  = '$Id$';
+our $VERSION  = '0.30';
 
 # These may get re-ordered.
 # RAW is a do_now as inserted by &enter
