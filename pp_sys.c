@@ -46,6 +46,9 @@ extern "C" int syscall(unsigned long,...);
 
 #if defined(HAS_SOCKET) && !defined(VMS) /* VMS handles sockets via vmsish.h */
 # include <sys/socket.h>
+# if defined(USE_SOCKS) && defined(I_SOCKS)
+#   include <socks.h>
+# endif 
 # ifdef I_NETDB
 #  include <netdb.h>
 # endif
@@ -1461,6 +1464,10 @@ PP(pp_sysread)
 	bufsize = sizeof (struct sockaddr_in);
 #else
 	bufsize = sizeof namebuf;
+#endif
+#ifdef OS2	/* At least Warp3+IAK: only the first byte of bufsize set */
+	if (bufsize >= 256)
+	    bufsize = 255;
 #endif
 #ifdef OS2	/* At least Warp3+IAK: only the first byte of bufsize set */
 	if (bufsize >= 256)

@@ -70,6 +70,7 @@ true)
 		esac
 		aixinstdir=`pwd | sed 's/\/UU$//'`
 		linklibperl="-L $archlibexp/CORE -L $aixinstdir -lperl"
+		ldlibpth="LIBPATH=`pwd`:${LIBPATH}"
 		;;
 	hpux*)
 		linklibperl="-L `pwd | sed 's/\/UU$//'` -Wl,+s -Wl,+b$archlibexp/CORE -lperl"

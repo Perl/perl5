@@ -52,9 +52,8 @@ echo "#!" > perl.exp
 # No interp.sym since 5.005_03.
 # perlio.sym will added later if needed.
 
-syms="global.sym pp.sym"
-
-cat $syms                                              >> perl.exp
+grep '^Perl_' global.sym                               >> perl.exp
+grep '^Perl_' pp.sym                                   >> perl.exp
 sed -n '/^[A-Za-z]/ s/^/PL_/p'   globvar.sym           >> perl.exp
 
 sed -n 's/^PERLVAR.*(G\([^[,]*\).*/PL_\1/p' perlvars.h >> perl.exp
@@ -77,6 +76,56 @@ fi
 
 #cat >>perl.exp <<END
 #END
+
+case "$usemymalloc" in
+true|[yY]*) usemymalloc=define ;;
+esac
+
+# Remove mymalloc if needed.
+case "$usemymalloc$d_mymalloc" in
+definedefine) ;;
+*)
+	egrep -v '^(Perl_(calloc|malloc|malloced_size|mfree|realloc|safexcalloc|safexfree|safexmalloc|safexrealloc)|^PL_malloc_mutex)$' < perl.exp > perl.exp$$
+	mv -f perl.exp$$ perl.exp
+	case "$ccflags" in
+	*DEBUGGING*) ;;
+	*)
+		egrep -v '^(Perl_dump_mstats)$' < perl.exp > perl.exp$$
+		mv -f perl.exp$$ perl.exp
+		;;
+	esac
+	;;
+esac
+
+# Remove unneeded utility functions.
+egrep -v '^(Perl_my_(bcopy|bzero|chsize|htonl|memcmp|memset|ntohl|swap))$' < perl.exp > perl.exp$$
+mv -f perl.exp$$ perl.exp
+
+case "$usethreads" in
+true|[yY]*) usethreads=define ;;
+esac
+
+# Remove thread symbols if needed.
+case "$usethreads" in
+define)	;;
+*)
+	egrep -v '^(Perl_(condpair_magic|find_threadsv|magic_mutexfree|new_struct_thread|unlock_condpair)|^PL_((eval|nthreads)_cond|curthr|eval_owner|(cred|eval|strtab|sv|svref|threads|malloc|vtbl)_mutex|nthreads|threadnum|threadsv_names|thr_key|thrsv))$' < perl.exp > perl.exp$$
+	mv -f perl.exp$$ perl.exp
+	;;
+esac
+
+# Remove debugging symbols if needed.
+case "$ccflags" in
+*DEBUGGING*) ;;
+*)
+	egrep -v '^(PL_(block_type|watchaddr|watchok))$' < perl.exp > perl.exp$$
+	mv -f perl.exp$$ perl.exp
+	;;
+esac
+
+# Remove unneeded globals.
+egrep -v '^(Perl_(ErrorNo|GetVars|same_dirent|unlnk)|PL_(cryptseen|statusvalue_vms))' < perl.exp > perl.exp$$
+mv -f perl.exp$$ perl.exp
 
 # The shebang line nicely sorts as the first one.
 sort -o perl.exp -u perl.exp

@@ -1,0 +1,7 @@
+#{"perl5.005"},(0x010),57,5,0
+; Installation with an embedded .sis file
+"\epoc32\release\marm\rel\perl.exe"-"!:\perl.exe"
+"\perl5.005\perl5.005_57\lib\perl5db.pl"-"!:\perl\lib\5.00557\perl5db.pl"
+"\perl5.005\perl5.005_57\lib\Term\ReadLine.pm"-"!:\perl\lib\5.00557\Term\ReadLine.pm"
+; Component .sis files
+@"\epoc32\release\marm\rel\stdlib.sis",(0x010002c3)

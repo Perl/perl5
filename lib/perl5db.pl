@@ -316,6 +316,10 @@ if ($notty) {
     $console = undef;
   }
 
+  if ($^O eq 'epoc') {
+    $console = undef;
+  }
+
   $console = $tty if defined $tty;
 
   if (defined $console) {

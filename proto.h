@@ -307,9 +307,7 @@ VIRTUAL I32	Perl_mg_size(pTHX_ SV* sv);
 VIRTUAL OP*	Perl_mod(pTHX_ OP* o, I32 type);
 VIRTUAL char*	Perl_moreswitches(pTHX_ char* s);
 VIRTUAL OP*	Perl_my(pTHX_ OP* o);
-#ifdef USE_LOCALE_NUMERIC
 VIRTUAL double	Perl_my_atof(pTHX_ const char *s);
-#endif
 #if !defined(HAS_BCOPY) || !defined(HAS_SAFE_BCOPY)
 VIRTUAL char*	Perl_my_bcopy(pTHX_ const char* from, char* to, I32 len);
 #endif

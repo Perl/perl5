@@ -7,6 +7,9 @@
 #  include <sys/types.h>
 # endif
 # include <sys/socket.h>
+# if defined(USE_SOCKS) && defined(I_SOCKS)
+#   include <socks.h>
+# endif 
 # ifdef MPE
 #  define PF_INET AF_INET
 #  define PF_UNIX AF_UNIX
@@ -18,7 +21,9 @@
 # ifdef I_NETINET_IN
 #  include <netinet/in.h>
 # endif
-# include <netdb.h>
+# ifdef I_NETDB
+#  include <netdb.h>
+# endif
 # ifdef I_ARPA_INET
 #  include <arpa/inet.h>
 # endif

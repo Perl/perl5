@@ -64,7 +64,12 @@
 
 #if defined(HAS_SOCKET) && !defined(VMS) /* VMS handles sockets via vmsish.h */
 # include <sys/socket.h>
-# include <netdb.h>
+# if defined(USE_SOCKS) && defined(I_SOCKS)
+#   include <socks.h>
+# endif 
+# ifdef I_NETBSD
+#  include <netdb.h>
+# endif
 # ifndef ENOTSOCK
 #  ifdef I_NET_ERRNO
 #   include <net/errno.h>
@@ -1056,7 +1061,7 @@ Perl_do_execfree(pTHX)
     }
 }
 
-#if !defined(OS2) && !defined(WIN32) && !defined(DJGPP)
+#if !defined(OS2) && !defined(WIN32) && !defined(DJGPP) && !defined(EPOC)
 
 bool
 Perl_do_exec(pTHX_ char *cmd)

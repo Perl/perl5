@@ -1919,12 +1919,10 @@
 #define Perl_my			pPerl->Perl_my
 #undef  my
 #define my			Perl_my
-#ifdef USE_LOCALE_NUMERIC
 #undef  Perl_my_atof
 #define Perl_my_atof		pPerl->Perl_my_atof
 #undef  my_atof
 #define my_atof			Perl_my_atof
-#endif
 #if !defined(HAS_BCOPY) || !defined(HAS_SAFE_BCOPY)
 #undef  Perl_my_bcopy
 #define Perl_my_bcopy		pPerl->Perl_my_bcopy

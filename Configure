@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sun May 30 15:51:19 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Mon Jul  5 22:55:23 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -628,6 +628,7 @@ d_pwquota=''
 i_pwd=''
 i_sfio=''
 i_shadow=''
+i_socks=''
 i_stddef=''
 i_stdlib=''
 i_string=''
@@ -817,6 +818,7 @@ nm_so_opt=''
 runnm=''
 usenm=''
 useperlio=''
+usesocks=''
 d_oldpthreads=''
 usethreads=''
 incpath=''
@@ -950,6 +952,7 @@ useposix=true
 : set useopcode=false in your hint file to disable the Opcode extension.
 useopcode=true
 : set usemultiplicity on the Configure command line to enable multiplicity.
+: set usesocks on the Configure command line to enable socks.
 : set usethreads on the Configure command line to enable threads.
 : List of libraries we want.
 : If anyone needs -lnet, put it in a hint file.
@@ -2627,7 +2630,7 @@ case "$use64bits" in
 		. ./use64bits.cbu
 	fi
 	case "$osname" in
-	dec_osf|hpux|irix|solaris|unicos)
+	aix|dec_osf|hpux|irix|solaris|unicos)
 		# Known 64-bit capable platforms.
 		;;
 	*)
@@ -3625,7 +3628,7 @@ int main() {
 	exit(0);
 }
 EOM
-if $cc -o gccvers gccvers.c >/dev/null 2>&1; then
+if $cc -o gccvers gccvers.c; then
 	gccversion=`./gccvers`
 	case "$gccversion" in
 	'') echo "You are not using GNU cc." ;;
@@ -3945,6 +3948,27 @@ case "$firstmakefile" in
 '') firstmakefile='makefile';;
 esac
 
+cat <<EOM
+
+Perl can be built to use the SOCKS proxy protocol library.  To do so,
+Configure must be run with -Dusesocks.
+
+Normally you do not need this and you should answer no.
+
+EOM
+case "$usesocks" in
+$define|true|[yY]*)	dflt='y';;
+*) dflt='n';;
+esac
+rp='Build Perl for SOCKS?'
+. ./myread
+case "$ans" in
+y|Y)	val="$define" ;;     
+*)      val="$undef" ;;
+esac
+set usesocks
+eval $setvar
+
 : Looking for optional libraries
 echo " "
 echo "Checking for optional libraries..." >&4
@@ -3954,6 +3978,11 @@ case "$libs" in
 esac
 case "$libswanted" in
 '') libswanted='c_s';;
+esac
+case "$usesocks" in
+$define)
+	libswanted="$libswanted socks5 socks5_sh"
+	;;
 esac
 for thislib in $libswanted; do
 	
@@ -4010,20 +4039,14 @@ case "$dflt" in
 esac
 
 $cat <<EOM
- 
-Some versions of Unix support shared libraries, which make executables smaller
-but make load time slightly longer.
 
-On some systems, mostly System V Release 3's, the shared library is included
-by putting the option "-lc_s" as the last thing on the cc command line when
-linking.  Other systems use shared libraries by default.  There may be other
-libraries needed to compile $package on your machine as well.  If your system
-needs the "-lc_s" option, include it here.  Include any other special libraries
-here as well.  Say "none" for none.
+In order to compile $package on your machine, a number of libraries
+are usually needed.  Include any other special libraries here as well.
+Say "none" for none.  The default list is almost always right.
 EOM
 
 echo " "
-rp="Any additional libraries?"
+rp="What libraries to use?"
 . ./myread
 case "$ans" in
 none) libs=' ';;
@@ -4104,6 +4127,12 @@ if $xxx; then
 fi'
 
 set signal.h LANGUAGE_C; eval $inctest
+
+case "$usesocks" in
+$define)
+	ccflags="$ccflags -DSOCKS"
+	;;
+esac
 
 case "$hint" in
 none|recommended) dflt="$ccflags $dflt" ;;
@@ -10991,6 +11020,7 @@ $rm -f tebcdic.c tebcdic
 set ebcdic
 eval $setvar
 
+echo " "
 $cat >&4 <<EOM
 Checking how to flush all pending stdio output...
 EOM
@@ -12425,6 +12455,10 @@ val=$val3; set i_termios; eval $setvar
 set shadow.h i_shadow
 eval $inhdr
 
+: see if this is a socks.h system
+set socks.h i_socks
+eval $inhdr
+
 : see if stdarg is available
 echo " "
 if $test `./findhdr stdarg.h`; then
@@ -13338,6 +13372,7 @@ i_rpcsvcdbm='$i_rpcsvcdbm'
 i_sfio='$i_sfio'
 i_sgtty='$i_sgtty'
 i_shadow='$i_shadow'
+i_socks='$i_socks'
 i_stdarg='$i_stdarg'
 i_stddef='$i_stddef'
 i_stdlib='$i_stdlib'
@@ -13563,6 +13598,7 @@ useperlio='$useperlio'
 useposix='$useposix'
 usesfio='$usesfio'
 useshrplib='$useshrplib'
+usesocks='$usesocks'
 usethreads='$usethreads'
 usevfork='$usevfork'
 usrinc='$usrinc'

@@ -228,6 +228,7 @@ dl_load_file(filespec, flags)
     char *	filespec
     int		flags
     PREINIT:
+    dTHX;
     char vmsspec[NAM$C_MAXRSS];
     SV *reqSV, **reqSVhndl;
     STRLEN deflen;

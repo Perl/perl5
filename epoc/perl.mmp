@@ -1,0 +1,19 @@
+target  perl.exe
+targettype exe
+uid        0x010  0
+unicodeuid 0x010 0
+project perl5.005
+subproject perl5.005_57
+
+SOURCE av.c byterun.c deb.c doio.c doop.c dump.c globals.c gv.c hv.c mg.c miniperlmain.c op.c perl.c perlio.c perly.c pp.c pp_ctl.c pp_hot.c pp_sys.c regcomp.c regexec.c run.c scope.c sv.c taint.c toke.c universal.c utf8.c  util.c epoc.c
+systeminclude \epoc32\include\libc \epoc32\include
+
+#if defined(MARM)
+LIBRARY  ecrt0.o
+#else
+LIBRARY  ecrt0.obj
+#endif
+
+epocstacksize 49152
+
+LIBRARY estlib.lib euser.lib

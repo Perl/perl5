@@ -2308,26 +2308,27 @@ PP(pp_ucfirst)
 	    s = (U8*)SvPV_force(sv, slen);
 	    Copy(tmpbuf, s, ulen, U8);
 	}
-	RETURN;
     }
-
-    if (!SvPADTMP(sv)) {
-	dTARGET;
-	sv_setsv(TARG, sv);
-	sv = TARG;
-	SETs(sv);
-    }
-    s = (U8*)SvPV_force(sv, slen);
-    if (*s) {
-	if (PL_op->op_private & OPpLOCALE) {
-	    TAINT;
-	    SvTAINTED_on(sv);
-	    *s = toUPPER_LC(*s);
+    else {
+	if (!SvPADTMP(sv)) {
+	    dTARGET;
+	    sv_setsv(TARG, sv);
+	    sv = TARG;
+	    SETs(sv);
 	}
-	else
-	    *s = toUPPER(*s);
+	s = (U8*)SvPV_force(sv, slen);
+	if (*s) {
+	    if (PL_op->op_private & OPpLOCALE) {
+		TAINT;
+		SvTAINTED_on(sv);
+		*s = toUPPER_LC(*s);
+	    }
+	    else
+		*s = toUPPER(*s);
+	}
     }
-
+    if (SvSMAGICAL(sv))
+	mg_set(sv);
     RETURN;
 }
 
@@ -2364,27 +2365,28 @@ PP(pp_lcfirst)
 	    s = (U8*)SvPV_force(sv, slen);
 	    Copy(tmpbuf, s, ulen, U8);
 	}
-	RETURN;
     }
-
-    if (!SvPADTMP(sv)) {
-	dTARGET;
-	sv_setsv(TARG, sv);
-	sv = TARG;
+    else {
+	if (!SvPADTMP(sv)) {
+	    dTARGET;
+	    sv_setsv(TARG, sv);
+	    sv = TARG;
+	    SETs(sv);
+	}
+	s = (U8*)SvPV_force(sv, slen);
+	if (*s) {
+	    if (PL_op->op_private & OPpLOCALE) {
+		TAINT;
+		SvTAINTED_on(sv);
+		*s = toLOWER_LC(*s);
+	    }
+	    else
+		*s = toLOWER(*s);
+	}
 	SETs(sv);
     }
-    s = (U8*)SvPV_force(sv, slen);
-    if (*s) {
-	if (PL_op->op_private & OPpLOCALE) {
-	    TAINT;
-	    SvTAINTED_on(sv);
-	    *s = toLOWER_LC(*s);
-	}
-	else
-	    *s = toLOWER(*s);
-    }
-
-    SETs(sv);
+    if (SvSMAGICAL(sv))
+	mg_set(sv);
     RETURN;
 }
 
@@ -2405,56 +2407,57 @@ PP(pp_uc)
 	if (!len) {
 	    sv_setpvn(TARG, "", 0);
 	    SETs(TARG);
-	    RETURN;
-	}
-
-	(void)SvUPGRADE(TARG, SVt_PV);
-	SvGROW(TARG, (len * 2) + 1);
-	(void)SvPOK_only(TARG);
-	d = (U8*)SvPVX(TARG);
-	send = s + len;
-	if (PL_op->op_private & OPpLOCALE) {
-	    TAINT;
-	    SvTAINTED_on(TARG);
-	    while (s < send) {
-		d = uv_to_utf8(d, toUPPER_LC_uni( utf8_to_uv(s, &ulen)));
-		s += ulen;
-	    }
 	}
 	else {
-	    while (s < send) {
-		d = uv_to_utf8(d, toUPPER_utf8( s ));
-		s += UTF8SKIP(s);
+	    (void)SvUPGRADE(TARG, SVt_PV);
+	    SvGROW(TARG, (len * 2) + 1);
+	    (void)SvPOK_only(TARG);
+	    d = (U8*)SvPVX(TARG);
+	    send = s + len;
+	    if (PL_op->op_private & OPpLOCALE) {
+		TAINT;
+		SvTAINTED_on(TARG);
+		while (s < send) {
+		    d = uv_to_utf8(d, toUPPER_LC_uni( utf8_to_uv(s, &ulen)));
+		    s += ulen;
+		}
+	    }
+	    else {
+		while (s < send) {
+		    d = uv_to_utf8(d, toUPPER_utf8( s ));
+		    s += UTF8SKIP(s);
+		}
+	    }
+	    *d = '\0';
+	    SvCUR_set(TARG, d - (U8*)SvPVX(TARG));
+	    SETs(TARG);
+	}
+    }
+    else {
+	if (!SvPADTMP(sv)) {
+	    dTARGET;
+	    sv_setsv(TARG, sv);
+	    sv = TARG;
+	    SETs(sv);
+	}
+	s = (U8*)SvPV_force(sv, len);
+	if (len) {
+	    register U8 *send = s + len;
+
+	    if (PL_op->op_private & OPpLOCALE) {
+		TAINT;
+		SvTAINTED_on(sv);
+		for (; s < send; s++)
+		    *s = toUPPER_LC(*s);
+	    }
+	    else {
+		for (; s < send; s++)
+		    *s = toUPPER(*s);
 	    }
 	}
-	*d = '\0';
-	SvCUR_set(TARG, d - (U8*)SvPVX(TARG));
-	SETs(TARG);
-	RETURN;
     }
-
-    if (!SvPADTMP(sv)) {
-	dTARGET;
-	sv_setsv(TARG, sv);
-	sv = TARG;
-	SETs(sv);
-    }
-
-    s = (U8*)SvPV_force(sv, len);
-    if (len) {
-	register U8 *send = s + len;
-
-	if (PL_op->op_private & OPpLOCALE) {
-	    TAINT;
-	    SvTAINTED_on(sv);
-	    for (; s < send; s++)
-		*s = toUPPER_LC(*s);
-	}
-	else {
-	    for (; s < send; s++)
-		*s = toUPPER(*s);
-	}
-    }
+    if (SvSMAGICAL(sv))
+	mg_set(sv);
     RETURN;
 }
 
@@ -2475,56 +2478,58 @@ PP(pp_lc)
 	if (!len) {
 	    sv_setpvn(TARG, "", 0);
 	    SETs(TARG);
-	    RETURN;
-	}
-
-	(void)SvUPGRADE(TARG, SVt_PV);
-	SvGROW(TARG, (len * 2) + 1);
-	(void)SvPOK_only(TARG);
-	d = (U8*)SvPVX(TARG);
-	send = s + len;
-	if (PL_op->op_private & OPpLOCALE) {
-	    TAINT;
-	    SvTAINTED_on(TARG);
-	    while (s < send) {
-		d = uv_to_utf8(d, toLOWER_LC_uni( utf8_to_uv(s, &ulen)));
-		s += ulen;
-	    }
 	}
 	else {
-	    while (s < send) {
-		d = uv_to_utf8(d, toLOWER_utf8(s));
-		s += UTF8SKIP(s);
+	    (void)SvUPGRADE(TARG, SVt_PV);
+	    SvGROW(TARG, (len * 2) + 1);
+	    (void)SvPOK_only(TARG);
+	    d = (U8*)SvPVX(TARG);
+	    send = s + len;
+	    if (PL_op->op_private & OPpLOCALE) {
+		TAINT;
+		SvTAINTED_on(TARG);
+		while (s < send) {
+		    d = uv_to_utf8(d, toLOWER_LC_uni( utf8_to_uv(s, &ulen)));
+		    s += ulen;
+		}
+	    }
+	    else {
+		while (s < send) {
+		    d = uv_to_utf8(d, toLOWER_utf8(s));
+		    s += UTF8SKIP(s);
+		}
+	    }
+	    *d = '\0';
+	    SvCUR_set(TARG, d - (U8*)SvPVX(TARG));
+	    SETs(TARG);
+	}
+    }
+    else {
+	if (!SvPADTMP(sv)) {
+	    dTARGET;
+	    sv_setsv(TARG, sv);
+	    sv = TARG;
+	    SETs(sv);
+	}
+
+	s = (U8*)SvPV_force(sv, len);
+	if (len) {
+	    register U8 *send = s + len;
+
+	    if (PL_op->op_private & OPpLOCALE) {
+		TAINT;
+		SvTAINTED_on(sv);
+		for (; s < send; s++)
+		    *s = toLOWER_LC(*s);
+	    }
+	    else {
+		for (; s < send; s++)
+		    *s = toLOWER(*s);
 	    }
 	}
-	*d = '\0';
-	SvCUR_set(TARG, d - (U8*)SvPVX(TARG));
-	SETs(TARG);
-	RETURN;
     }
-
-    if (!SvPADTMP(sv)) {
-	dTARGET;
-	sv_setsv(TARG, sv);
-	sv = TARG;
-	SETs(sv);
-    }
-
-    s = (U8*)SvPV_force(sv, len);
-    if (len) {
-	register U8 *send = s + len;
-
-	if (PL_op->op_private & OPpLOCALE) {
-	    TAINT;
-	    SvTAINTED_on(sv);
-	    for (; s < send; s++)
-		*s = toLOWER_LC(*s);
-	}
-	else {
-	    for (; s < send; s++)
-		*s = toLOWER(*s);
-	}
-    }
+    if (SvSMAGICAL(sv))
+	mg_set(sv);
     RETURN;
 }
 
@@ -2572,6 +2577,8 @@ PP(pp_quotemeta)
     else
 	sv_setpvn(TARG, s, len);
     SETs(TARG);
+    if (SvSMAGICAL(TARG))
+	mg_set(TARG);
     RETURN;
 }
 

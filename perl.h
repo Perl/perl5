@@ -285,11 +285,11 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #define DOSISH 1
 #endif
 
-#if defined(__STDC__) || defined(vax11c) || defined(_AIX) || defined(__stdc__) || defined(__cplusplus)
+#if defined(__STDC__) || defined(vax11c) || defined(_AIX) || defined(__stdc__) || defined(__cplusplus) || defined( EPOC)
 # define STANDARD_C 1
 #endif
 
-#if defined(__cplusplus) || defined(WIN32) || defined(__sgi) || defined(OS2) || defined(__DGUX)
+#if defined(__cplusplus) || defined(WIN32) || defined(__sgi) || defined(OS2) || defined(__DGUX) || defined( EPOC)
 # define DONT_DECLARE_STD 1
 #endif
 
@@ -1386,7 +1386,11 @@ typedef union any ANY;
 #       if defined(__VOS__)
 #         include "vosish.h"
 #       else
-#         include "unixish.h"
+#         if defined(EPOC)
+#           include "epocish.h"
+#         else
+#           include "unixish.h"
+#         endif
 #       endif
 #     endif
 #   endif
@@ -1887,7 +1891,9 @@ char *crypt (const char*, const char*);
 #    ifndef getenv
 char *getenv (const char*);
 #    endif /* !getenv */
+#ifndef EPOC
 Off_t lseek (int,Off_t,int);
+#endif
 #  endif /* !DONT_DECLARE_STD */
 char *getlogin (void);
 #endif /* !__cplusplus */
@@ -1983,7 +1989,7 @@ EXT char *** environ_pointer;
 #    if !defined(DONT_DECLARE_STD) || \
         (defined(__svr4__) && defined(__GNUC__) && defined(sun)) || \
         defined(__sgi) || \
-        defined(__DGUX)
+        defined(__DGUX) || defined(EPOC)
 extern char **	environ;	/* environment variables supplied via exec */
 #    endif
 #  endif
@@ -2864,7 +2870,7 @@ typedef struct am_table_short AMTS;
 
 #define RESTORE_NUMERIC_LOCAL()		if ((PL_hints & HINT_LOCALE) && PL_numeric_standard) SET_NUMERIC_LOCAL()
 #define RESTORE_NUMERIC_STANDARD()	if ((PL_hints & HINT_LOCALE) && PL_numeric_local) SET_NUMERIC_STANDARD()
-#define Atof(s)				Perl_my_atof(s)
+#define Atof				my_atof
 
 #else /* !USE_LOCALE_NUMERIC */
 
@@ -2873,7 +2879,7 @@ typedef struct am_table_short AMTS;
 #define IS_NUMERIC_RADIX(c)		(0)
 #define RESTORE_NUMERIC_LOCAL()		/**/
 #define RESTORE_NUMERIC_STANDARD()	/**/
-#define Atof(s)				atof(s)
+#define Atof				atof
 
 #endif /* !USE_LOCALE_NUMERIC */
 

@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Sat May 22 00:43:12 EET DST 1999
+ * Configuration time: Mon Jul  5 22:50:29 EET DST 1999
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -581,7 +581,7 @@
 /* HAS_SHMAT_PROTOTYPE:
  *	This symbol, if defined, indicates that the sys/shm.h includes
  *	a prototype for shmat().  Otherwise, it is up to the program to
- *	guess one.  Shmat_t shmat (int, Shmat_t, int) is a good guess,
+ *	guess one.  Shmat_t shmat _((int, Shmat_t, int)) is a good guess,
  *	but not always right so it should be emitted by the program only
  *	when HAS_SHMAT_PROTOTYPE is not defined to avoid conflicting defs.
  */
@@ -2069,8 +2069,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define ARCHLIB "/opt/perl/lib/5.00556/alpha-dec_osf-thread"		/**/
-#define ARCHLIB_EXP "/opt/perl/lib/5.00556/alpha-dec_osf-thread"		/**/
+#define ARCHLIB "/opt/perl/lib/5.00557/alpha-dec_osf-thread"		/**/
+#define ARCHLIB_EXP "/opt/perl/lib/5.00557/alpha-dec_osf-thread"		/**/
 
 /* DLSYM_NEEDS_UNDERSCORE:
  *	This symbol, if defined, indicates that we need to prepend an
@@ -2079,6 +2079,12 @@
  *	case if you're using dl_dlopen.xs.
  */
 /*#define 	DLSYM_NEEDS_UNDERSCORE 	/ **/
+
+/* HAS_ENDSPENT:
+ *	This symbol, if defined, indicates that the endspent system call is
+ *	available to finalize the scan of SysV shadow password entries.
+ */
+/*#define HAS_ENDSPENT		/ **/
 
 /* HAS_FSEEKO:
  *	This symbol, if defined, indicates that the fseeko routine is
@@ -2097,6 +2103,18 @@
  *	available to iterate through mounted file systems.
  */
 /*#define HAS_GETMNTENT		/ **/
+
+/* HAS_GETSPENT:
+ *	This symbol, if defined, indicates that the getspent system call is
+ *	available to retrieve SysV shadow password entries sequentially.
+ */
+/*#define HAS_GETSPENT		/ **/
+
+/* HAS_GETSPNAM:
+ *	This symbol, if defined, indicates that the getspnam system call is
+ *	available to retrieve SysV shadow password entries by name.
+ */
+/*#define HAS_GETSPNAM		/ **/
 
 /* HAS_HASMNTOPT:
  *	This symbol, if defined, indicates that the hasmntopt routine is
@@ -2122,6 +2140,12 @@
  *	and there I_SYSUIO.
  */
 #define HAS_READV		/**/
+
+/* HAS_SETSPENT:
+ *	This symbol, if defined, indicates that the setspent system call is
+ *	available to initialize the scan of SysV shadow password entries.
+ */
+/*#define HAS_SETSPENT		/ **/
 
 /* USE_SFIO:
  *	This symbol, if defined, indicates that sfio should
@@ -2153,7 +2177,7 @@
  *	This symbol, if defined, indicates that the system provides
  *	a prototype for the telldir() function.  Otherwise, it is up
  *	to the program to supply one.  A good guess is
- *		extern long telldir (DIR*);
+ *		extern long telldir _((DIR*));
  */
 #define	HAS_TELLDIR_PROTO	/**/
 
@@ -2262,6 +2286,18 @@
  */
 #define	I_POLL		/**/
 
+/* I_SHADOW:
+ *	This symbol, if defined, indicates that <shadow.h> exists and
+ *	should be included.
+ */
+/*#define	I_SHADOW		/ **/
+
+/* I_SOCKS:
+ *	This symbol, if defined, indicates that <socks.h> exists and
+ *	should be included.
+ */
+/*#define	I_SOCKS		/ **/
+
 /* I_SYS_MMAN:
  *	This symbol, if defined, indicates that <sys/mman.h> exists and
  *	should be included.
@@ -2360,8 +2396,8 @@
  *	This symbol contains the ~name expanded version of PRIVLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define PRIVLIB "/opt/perl/lib/5.00556"		/**/
-#define PRIVLIB_EXP "/opt/perl/lib/5.00556"		/**/
+#define PRIVLIB "/opt/perl/lib/5.00557"		/**/
+#define PRIVLIB_EXP "/opt/perl/lib/5.00557"		/**/
 
 /* SELECT_MIN_BITS:
  *	This symbol holds the minimum number of bits operated by select.
@@ -2385,8 +2421,8 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITEARCH "/opt/perl/lib/site_perl/5.00556/alpha-dec_osf-thread"		/**/
-#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.00556/alpha-dec_osf-thread"		/**/
+#define SITEARCH "/opt/perl/lib/site_perl/5.00557/alpha-dec_osf-thread"		/**/
+#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.00557/alpha-dec_osf-thread"		/**/
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.
@@ -2401,8 +2437,8 @@
  *	This symbol contains the ~name expanded version of SITELIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITELIB "/opt/perl/lib/site_perl/5.00556"		/**/
-#define SITELIB_EXP "/opt/perl/lib/site_perl/5.00556"		/**/
+#define SITELIB "/opt/perl/lib/site_perl/5.00557"		/**/
+#define SITELIB_EXP "/opt/perl/lib/site_perl/5.00557"		/**/
 
 /* STARTPERL:
  *	This variable contains the string to put in front of a perl
@@ -2488,11 +2524,17 @@
  */
 /*#define	USE_PERLIO		/ **/
 
+/* USE_SOCKS:
+ *	This symbol, if defined, indicates that Perl should
+ *	be built to use socks.
+ */
+/*#define	USE_SOCKS		/ **/
+
 /* HAS_DRAND48_PROTO:
  *	This symbol, if defined, indicates that the system provides
  *	a prototype for the drand48() function.  Otherwise, it is up
  *	to the program to supply one.  A good guess is
- *		extern double drand48 (void);
+ *		extern double drand48 _((void));
  */
 #define	HAS_DRAND48_PROTO	/**/
 

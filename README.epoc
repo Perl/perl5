@@ -1,0 +1,80 @@
+=================================================
+Perl 5 README file for the EPOC operating system.
+==================================================
+
+Olaf Flebbe <o.flebbe@gmx.de>
+http://www.fortunecity.de/wolkenkratzer/trumpet/84/perl5.html
+June 27, 1999
+
+Introduction
+------------ 
+
+This is a port of Perl version 5, revision 005-57 to EPOC. 
+
+There are many features left out, because of restrictions of the posix
+support in the SDK.
+
+The following known problems do exist:
+
+1) very little testing.
+
+2) no support for system, backquoting, pipes etc. One cannot exec a
+   different process.
+
+3) no signals, kill. Do not try to use them.
+
+4) select is missing.
+
+5) binmode does not work. (No CR LF to LF translation for text files)
+
+6) no Config.pm
+
+7) no I/O redirection.
+
+8) it may not run from a drive other than C: (I have no CF Card to test)
+
+9) sockets may hardly of any use.
+
+10) You need a shell in order to run perl.exe.
+
+
+Compiling Perl 5 on the EPOC cross compiling envionment.
+--------------------------------------------------------
+
+0. You will need the C++ SDK from
+   http://developer.epocworld.com/. Install it on a separate drive.
+
+1. Unpack the sources in the epoc development drive: The sources
+   should be in a directory perl5.005/perl5.005_57
+
+2. Move all files in the directory perl5.005_57/epoc to perl5.005_57.
+
+3. Check the perl.mmp file: It should have the correct locations for
+   project und subproject (see step 1)
+
+4. Change to the EPOC development drive and run 
+     makmake perl marm
+     nmake -f perl.marm
+     makesis perl.pkg perl5.005.sis
+
+5. Beam the perl5.005.sis to the Psion5, install and enjoy!
+
+ToDo List
+---------
+
+- Allocate an UID from symbian.
+
+- Implement system() and I/O redirection, in order to run the
+  tests.
+
+- Implement getprotcolbyname() and relatives.
+
+- Implement perl as a OPX module. (What do you think?)
+
+Support Status
+--------------
+
+I'm offering this port "as is".  You can ask me questions, but I can't
+guarantee I'll be able to answer them; I don't know much about Perl
+itself;
+

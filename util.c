@@ -1489,7 +1489,7 @@ Perl_die_nocontext(const char* pat, ...)
     OP *o;
     va_list args;
     va_start(args, pat);
-    o = do_die(aTHX_ pat, &args);
+    o = do_die(pat, &args);
     va_end(args);
     return o;
 }
@@ -1501,7 +1501,7 @@ Perl_die(pTHX_ const char* pat, ...)
     OP *o;
     va_list args;
     va_start(args, pat);
-    o = do_die(aTHX_ pat, &args);
+    o = do_die(pat, &args);
     va_end(args);
     return o;
 }
@@ -2169,7 +2169,7 @@ VTOH(vtohl,long)
 #endif
 
     /* VMS' my_popen() is in VMS.c, same with OS/2. */
-#if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(__OPEN_VM)
+#if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(__OPEN_VM) && !defined(EPOC)
 PerlIO *
 Perl_my_popen(pTHX_ char *cmd, char *mode)
 {
@@ -2460,7 +2460,7 @@ Perl_rsignal_restore(pTHX_ int signo, Sigsave_t *save)
 #endif /* !HAS_SIGACTION */
 
     /* VMS' my_pclose() is in VMS.c; same with OS/2 */
-#if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(__OPEN_VM)
+#if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(__OPEN_VM) && !defined(EPOC)
 I32
 Perl_my_pclose(pTHX_ PerlIO *ptr)
 {
@@ -3507,7 +3507,7 @@ Perl_my_fflush_all(pTHX)
 }
 
 double
-Perl_my_atof(const char* s) {
+Perl_my_atof(pTHX_ const char* s) {
 #ifdef USE_LOCALE_NUMERIC
     if ((PL_hints & HINT_LOCALE) && PL_numeric_local) {
 	double x, y;
