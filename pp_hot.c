@@ -1337,6 +1337,8 @@ PP(pp_helem)
 	svp = he ? &HeVAL(he) : 0;
     }
     else if (SvTYPE(hv) == SVt_PVAV) {
+	if (PL_op->op_private & OPpLVAL_INTRO)
+	    DIE("Can't localize pseudo-hash element");
 	svp = avhv_fetch_ent((AV*)hv, keysv, lval && !defer, 0);
     }
     else {

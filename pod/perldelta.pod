@@ -492,6 +492,13 @@ only with arrays that have a hash reference at index 0.
 (F) The "goto subroutine" call can't be used to jump out of an eval "string".
 (You can use it to jump out of an eval {BLOCK}, but you probably don't want to.)
 
+=item Can't localize pseudo-hash element
+
+(F) You said something like C<local $ar-E<gt>{'key'}>, where $ar is
+a reference to a pseudo-hash.  That hasn't been implemented yet, but
+you can get a similar effect by localizing the corresponding array
+element directly -- C<local $ar-E<gt>[$ar-E<gt>[0]{'key'}]>.
+
 =item Can't use %%! because Errno.pm is not available
 
 (F) The first time the %! hash is used, perl automatically loads the

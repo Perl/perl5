@@ -2414,6 +2414,9 @@ PP(pp_hslice)
     register I32 lval = PL_op->op_flags & OPf_MOD;
     I32 realhv = (SvTYPE(hv) == SVt_PVHV);
 
+    if (!realhv && PL_op->op_private & OPpLVAL_INTRO)
+	DIE("Can't localize pseudo-hash element");
+
     if (realhv || SvTYPE(hv) == SVt_PVAV) {
 	while (++MARK <= SP) {
 	    SV *keysv = *MARK;

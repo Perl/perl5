@@ -697,6 +697,13 @@ lexical variable using "my".  This is not allowed.  If you want to
 localize a package variable of the same name, qualify it with the
 package name.
 
+=item Can't localize pseudo-hash element
+
+(F) You said something like C<local $ar-E<gt>{'key'}>, where $ar is
+a reference to a pseudo-hash.  That hasn't been implemented yet, but
+you can get a similar effect by localizing the corresponding array
+element directly -- C<local $ar-E<gt>[$ar-E<gt>[0]{'key'}]>.
+
 =item Can't locate auto/%s.al in @INC
 
 (F) A function (or method) was called in a package which allows autoload,
