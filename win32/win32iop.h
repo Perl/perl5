@@ -7,8 +7,8 @@
 #  define END_EXTERN_C }
 #  define EXTERN_C extern "C"
 #else
-#  define START_EXTERN_C 
-#  define END_EXTERN_C 
+#  define START_EXTERN_C
+#  define END_EXTERN_C
 #  define EXTERN_C
 #endif
 #endif
@@ -150,6 +150,8 @@ DllExport void		win32_free_childenv(void* d);
 DllExport void		win32_clearenv(void);
 DllExport char *	win32_get_childdir(void);
 DllExport void		win32_free_childdir(char* d);
+DllExport Sighandler_t	win32_signal(int sig, Sighandler_t subcode);
+
 
 END_EXTERN_C
 
@@ -324,4 +326,3 @@ END_EXTERN_C
 
 #endif /* WIN32IO_IS_STDIO */
 #endif /* WIN32IOP_H */
-

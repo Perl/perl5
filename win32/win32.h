@@ -1,6 +1,6 @@
 /* WIN32.H
  *
- * (c) 1995 Microsoft Corporation. All rights reserved. 
+ * (c) 1995 Microsoft Corporation. All rights reserved.
  * 		Developed by hip communications inc., http://info.hip.com/info/
  *
  *    You may distribute under the terms of either the GNU General Public
@@ -34,15 +34,15 @@
 #  define Win32_Winsock
 #ifdef __cplusplus
 /* Mingw32 gcc -xc++ objects to __attribute((unused)) at least */
-#undef  PERL_UNUSED_DECL 
-#define PERL_UNUSED_DECL 
+#undef  PERL_UNUSED_DECL
+#define PERL_UNUSED_DECL
 #endif
 #endif
 
 
-/* Define DllExport akin to perl's EXT, 
+/* Define DllExport akin to perl's EXT,
  * If we are in the DLL or mimicing the DLL for Win95 work round
- * then Export the symbol, 
+ * then Export the symbol,
  * otherwise import it.
  */
 
@@ -51,7 +51,7 @@
 #if defined(PERLDLL) || defined(WIN95FIX)
 #define DllExport
 /*#define DllExport __declspec(dllexport)*/	/* noises with VC5+sp3 */
-#else 
+#else
 #define DllExport __declspec(dllimport)
 #endif
 
@@ -103,8 +103,8 @@ struct utsname {
 #  define END_EXTERN_C }
 #  define EXTERN_C extern "C"
 #else
-#  define START_EXTERN_C 
-#  define END_EXTERN_C 
+#  define START_EXTERN_C
+#  define END_EXTERN_C
 #  define EXTERN_C
 #endif
 #endif
@@ -276,14 +276,14 @@ typedef struct {
      *	  wShowWindow = SW_HIDE;
      */
     DWORD	dwFlags;
-    DWORD	dwX; 
-    DWORD	dwY; 
-    DWORD	dwXSize; 
-    DWORD	dwYSize; 
-    DWORD	dwXCountChars; 
-    DWORD	dwYCountChars; 
+    DWORD	dwX;
+    DWORD	dwY;
+    DWORD	dwXSize;
+    DWORD	dwYSize;
+    DWORD	dwXCountChars;
+    DWORD	dwYCountChars;
     DWORD	dwFillAttribute;
-    WORD	wShowWindow; 
+    WORD	wShowWindow;
 } child_IO_table;
 
 DllExport void		win32_get_child_IO(child_IO_table* ptr);
@@ -335,8 +335,8 @@ typedef  char *		caddr_t;	/* In malloc.c (core address). */
 #  define PERL_SCRIPT_MODE		"rb"
 #endif
 
-/* 
- * Now Win32 specific per-thread data stuff 
+/*
+ * Now Win32 specific per-thread data stuff
  */
 
 struct thread_intern {
@@ -368,6 +368,11 @@ typedef struct {
     HANDLE	handles[MAXIMUM_WAIT_OBJECTS];
 } child_tab;
 
+#ifndef Sighandler_t
+typedef Signal_t (*Sighandler_t) (int);
+#define Sighandler_t	Sighandler_t
+#endif
+
 struct interp_intern {
     char *	perlshell_tokens;
     char **	perlshell_vec;
@@ -384,6 +389,7 @@ struct interp_intern {
 #endif
     UINT	timerid;
     unsigned 	poll_count;
+    Sighandler_t sigtable[SIG_SIZE];
 };
 
 DllExport int win32_async_check(pTHX);
@@ -406,6 +412,7 @@ DllExport int win32_async_check(pTHX);
 #define w32_pseudo_child_handles	(w32_pseudo_children->handles)
 #define w32_internal_host		(PL_sys_intern.internal_host)
 #define w32_timerid			(PL_sys_intern.timerid)
+#define w32_sighandler			(PL_sys_intern.sigtable)
 #define w32_poll_count			(PL_sys_intern.poll_count)
 #define w32_do_async			(w32_poll_count++ > WIN32_POLL_INTERVAL)
 #ifdef USE_5005THREADS
@@ -502,7 +509,7 @@ EXTERN_C _CRTIMP ioinfo* __pioinfo[];
 #endif
 #endif
 
-/* IO.xs and POSIX.xs define PERLIO_NOT_STDIO to 1 */ 
+/* IO.xs and POSIX.xs define PERLIO_NOT_STDIO to 1 */
 #if defined(PERL_EXT_IO) || defined(PERL_EXT_POSIX)
 #undef  PERLIO_NOT_STDIO
 #endif
@@ -529,5 +536,4 @@ DllExport PerlInterpreter *win32_signal_context(void);
 #define PERL_GET_SIG_CONTEXT win32_signal_context()
 
 #endif /* _INC_WIN32_PERL5 */
-
 
