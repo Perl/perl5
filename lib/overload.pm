@@ -93,11 +93,7 @@ sub AddrRef {
 	return sprintf("$class_prefix$type(0x%x)", $addr);
 }
 
-sub StrVal {
-  (ref $_[0] && OverloadedStringify($_[0]) or ref($_[0]) eq 'Regexp') ?
-    (AddrRef(shift)) :
-    "$_[0]";
-}
+*StrVal = *AddrRef;
 
 sub mycan {				# Real can would leave stubs.
   my ($package, $meth) = @_;
