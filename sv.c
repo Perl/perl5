@@ -9799,8 +9799,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	for(i = 0; i <= len; i++) {                             
 	    av_push(PL_regex_padav,
             SvREFCNT_inc(
-                        newSViv((IV)re_dup((REGEXP *)
-                             SvIVX(regexen[i]), param))
+                        newSViv(PTR2IV(re_dup(INT2PTR(REGEXP *, 
+                             SvIVX(regexen[i])), param)))
                     ));
 	}
     }

@@ -1779,7 +1779,7 @@ PP(pp_enteriter)
 	SAVESPTR(*svp);
 #else
 	SAVEPADSV(PL_op->op_targ);
-	iterdata = (void*)PL_op->op_targ;
+	iterdata = INT2PTR(void*, PL_op->op_targ);
 	cxtype |= CXp_PADVAR;
 #endif
     }

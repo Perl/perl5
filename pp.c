@@ -4199,7 +4199,7 @@ PP(pp_split)
 
     if (pm->op_pmreplroot) {
 #ifdef USE_ITHREADS
-	ary = GvAVn((GV*)PL_curpad[(PADOFFSET)pm->op_pmreplroot]);
+	ary = GvAVn((GV*)PL_curpad[INT2PTR(PADOFFSET, pm->op_pmreplroot)]);
 #else
 	ary = GvAVn((GV*)pm->op_pmreplroot);
 #endif
