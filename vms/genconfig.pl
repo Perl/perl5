@@ -78,10 +78,6 @@ ar=''
 eunicefix=':'
 hint='none'
 hintfile=''
-intsize='4'
-longsize='4'
-shortsize='2'
-alignbytes='8'
 shrplib='define'
 usemymalloc='n'
 usevfork='true'
@@ -256,13 +252,15 @@ while (<IN>) {
   $val =~ s!\s*/\*.*!!; # strip off trailing comment
   my($had_val); # Maybe a macro with args that we just #undefd or commented
   if (!length($val) and $val_vars{$token} and ($un || $blocked)) {
-    print OUT "$val_vars{$token}=''\n";
+    print OUT "$val_vars{$token}=''\n" unless exists $done{$val_vars{$token}};
+    $done{$val_vars{$token}}++;
     delete $val_vars{$token};
     $had_val = 1;
   }
   $state = ($blocked || $un) ? 'undef' : 'define';
   if ($pp_vars{$token}) {
-    print OUT "$pp_vars{$token}='$state'\n";
+    print OUT "$pp_vars{$token}='$state'\n" unless exists $done{$pp_vars{$token}};
+    $done{$pp_vars{$token}}++;
     delete $pp_vars{$token};
   }
   elsif (not length $val and not $had_val) {
@@ -278,8 +276,11 @@ while (<IN>) {
   # Library directory; convert to VMS syntax
   $val = VMS::Filespec::vmspath($val) if ($token =~ /EXP$/);
   if ($val_vars{$token}) {
-    print OUT "$val_vars{$token}='$val'\n";
-    if ($val_vars{$token} =~ s/exp$//) {print OUT "$val_vars{$token}='$val'\n";}
+    print OUT "$val_vars{$token}='$val'\n" unless exists $done{$val_vars{$token}};
+    if ($val_vars{$token} =~ s/exp$//) {
+      print OUT "$val_vars{$token}='$val'\n" unless exists $done{$val_vars{$token}};;
+    }
+    $done{$val_vars{$token}}++;
     delete $val_vars{$token};
   }
   elsif (!$pp_vars{$token}) {  # Haven't seen it previously, either

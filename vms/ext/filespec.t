@@ -1,5 +1,7 @@
 #!./perl
 
+BEGIN { unshift(@INC,'../lib') if -d '../lib'; }
+
 use VMS::Filespec;
 
 foreach (<DATA>) {

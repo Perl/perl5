@@ -135,7 +135,7 @@ I32 lval;
     if (HvNAME(hv) && strEQ(HvNAME(hv),ENV_HV_NAME)) {
       char *gotenv;
 
-      gotenv = my_getenv(key);
+      gotenv = ENV_getenv(key);
       if (gotenv != NULL) {
         sv = newSVpv(gotenv,strlen(gotenv));
         return hv_store(hv,key,klen,sv,hash);
@@ -215,7 +215,7 @@ register U32 hash;
     if (HvNAME(hv) && strEQ(HvNAME(hv),ENV_HV_NAME)) {
       char *gotenv;
 
-      gotenv = my_getenv(key);
+      gotenv = ENV_getenv(key);
       if (gotenv != NULL) {
         sv = newSVpv(gotenv,strlen(gotenv));
         return hv_store_ent(hv,keysv,sv,hash);
@@ -854,7 +854,7 @@ HV *hv;
 	HvNAME(hv) = 0;
     }
     xhv->xhv_array = 0;
-    xhv->xhv_max = 7;		/* it's a normal associative array */
+    xhv->xhv_max = 7;		/* it's a normal hash */
     xhv->xhv_fill = 0;
     xhv->xhv_keys = 0;
 
@@ -866,10 +866,16 @@ I32
 hv_iterinit(hv)
 HV *hv;
 {
-    register XPVHV* xhv = (XPVHV*)SvANY(hv);
-    HE *entry = xhv->xhv_eiter;
+    register XPVHV* xhv;
+    HE *entry;
+
+    if (!hv)
+	croak("Bad hash");
+    xhv = (XPVHV*)SvANY(hv);
+    entry = xhv->xhv_eiter;
 #ifdef DYNAMIC_ENV_FETCH  /* set up %ENV for iteration */
-    if (HvNAME(hv) && strEQ(HvNAME(hv),ENV_HV_NAME)) prime_env_iter();
+    if (HvNAME(hv) && strEQ(HvNAME(hv), ENV_HV_NAME))
+	prime_env_iter();
 #endif
     if (entry && HvLAZYDEL(hv)) {	/* was deleted earlier? */
 	HvLAZYDEL_off(hv);
@@ -890,7 +896,7 @@ HV *hv;
     MAGIC* mg;
 
     if (!hv)
-	croak("Bad associative array");
+	croak("Bad hash");
     xhv = (XPVHV*)SvANY(hv);
     oldentry = entry = xhv->xhv_eiter;
 

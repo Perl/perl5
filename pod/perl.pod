@@ -90,26 +90,28 @@ system management tasks.  The language is intended to be practical
 (easy to use, efficient, complete) rather than beautiful (tiny,
 elegant, minimal).
 
-Perl combines (in the author's opinion, anyway) some
-of the best features of C, B<sed>, B<awk>, and B<sh>, so people
-familiar with those languages should have little difficulty with it.
-(Language historians will also note some vestiges of B<csh>, Pascal,
-and even BASIC-PLUS.)  Expression syntax corresponds quite closely to C
+Perl combines (in the author's opinion, anyway) some of the best
+features of C, B<sed>, B<awk>, and B<sh>, so people familiar with
+those languages should have little difficulty with it.  (Language
+historians will also note some vestiges of B<csh>, Pascal, and even
+BASIC-PLUS.)  Expression syntax corresponds quite closely to C
 expression syntax.  Unlike most Unix utilities, Perl does not
 arbitrarily limit the size of your data--if you've got the memory,
-Perl can slurp in your whole file as a single string.  Recursion is
-of unlimited depth.  And the hash tables used by associative arrays
-grow as necessary to prevent degraded performance.  Perl uses
-sophisticated pattern matching techniques to scan large amounts of data
-very quickly.  Although optimized for scanning text, Perl can also
-deal with binary data, and can make dbm files look like associative
-arrays.  Setuid Perl scripts are safer than
-C programs through a dataflow tracing mechanism which prevents many
-stupid security holes.  If you have a problem that would ordinarily use
-B<sed> or B<awk> or B<sh>, but it exceeds their capabilities or must
-run a little faster, and you don't want to write the silly thing in C,
-then Perl may be for you.  There are also translators to turn your
-B<sed> and B<awk> scripts into Perl scripts.
+Perl can slurp in your whole file as a single string.  Recursion is of
+unlimited depth.  And the tables used by hashes (previously called
+"associative arrays") grow as necessary to prevent degraded
+performance.  Perl uses sophisticated pattern matching techniques to
+scan large amounts of data very quickly.  Although optimized for
+scanning text, Perl can also deal with binary data, and can make dbm
+files look like hashes.  Setuid Perl scripts are safer than C programs
+through a dataflow tracing mechanism which prevents many stupid
+security holes.
+
+If you have a problem that would ordinarily use B<sed> or B<awk> or
+B<sh>, but it exceeds their capabilities or must run a little faster,
+and you don't want to write the silly thing in C, then Perl may be for
+you.  There are also translators to turn your B<sed> and B<awk>
+scripts into Perl scripts.
 
 But wait, there's more...
 

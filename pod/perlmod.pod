@@ -67,15 +67,15 @@ or L<perlref> regarding closures.
 
 =head2 Symbol Tables
 
-The symbol table for a package happens to be stored in the associative
-array of that name appended with two colons.  The main symbol table's
-name is thus C<%main::>, or C<%::> for short.  Likewise symbol table for
-the nested package mentioned earlier is named C<%OUTER::INNER::>.
+The symbol table for a package happens to be stored in the hash of that
+name with two colons appended.  The main symbol table's name is thus
+C<%main::>, or C<%::> for short.  Likewise symbol table for the nested
+package mentioned earlier is named C<%OUTER::INNER::>.
 
-The value in each entry of the associative array is what you are referring
-to when you use the C<*name> typeglob notation.  In fact, the following
-have the same effect, though the first is more efficient because it does
-the symbol table lookups at compile time:
+The value in each entry of the hash is what you are referring to when you
+use the C<*name> typeglob notation.  In fact, the following have the same
+effect, though the first is more efficient because it does the symbol
+table lookups at compile time:
 
     local(*main::foo) = *main::bar; local($main::{'foo'}) =
     $main::{'bar'};

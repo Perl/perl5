@@ -104,12 +104,10 @@ else {
     $wd = '.';
 }
 $script = "$wd/show-shebang";
+$s1 = $s2 = "\$^X is $wd/perl, \$0 is $script\n";
 if ($^O eq 'os2') {
     # Started by ksh, which adds suffixes '.exe' and '.' to perl and script
-    $s = "\$^X is $wd/perl.exe, \$0 is $script.\n";
-}
-else {
-    $s = "\$^X is $wd/perl, \$0 is $script\n";
+    $s2 = "\$^X is $wd/perl.exe, \$0 is $script.\n";
 }
 ok 19, open(SCRIPT, ">$script"), $!;
 ok 20, print(SCRIPT <<EOB . <<'EOF'), $!;
@@ -121,9 +119,9 @@ ok 21, close(SCRIPT), $!;
 ok 22, chmod(0755, $script), $!;
 $_ = `$script`;
 s{is perl}{is $wd/perl}; # for systems where $^X is only a basename
-ok 23, $_ eq $s, ":$_:!=:$s:";
+ok 23, $_ eq $s2, ":$_:!=:$s2:";
 $_ = `$wd/perl $script`;
-ok 24, $_ eq $s, ":$_:!=:$s:";
+ok 24, $_ eq $s1, ":$_:!=:$s1: after `$wd/perl $script`";
 ok 25, unlink($script), $!;
 
 # $], $^O, $^T

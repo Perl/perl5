@@ -667,6 +667,9 @@ dARGS
 
     (void)hv_iterinit(hv);	/* always reset iterator regardless */
 
+    if (op->op_private & OPpLEAVE_VOID)
+	RETURN;
+
     if (GIMME != G_ARRAY) {
 	I32 i;
 	dTARGET;

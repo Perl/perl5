@@ -105,8 +105,6 @@
 #define Fstat(fd,bufptr)   fstat((fd),(bufptr))
 #define Fflush(fp)         fflush(fp)
 
-#define my_getenv(var) getenv(var)
-
 #ifdef PERL_SCO5
 #  define PERL_SYS_INIT(c,v)	fpsetmask(0)
 #else

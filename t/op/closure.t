@@ -408,22 +408,31 @@ END
 	  } else {
 	    # No fork().  Do it the hard way.
 	    my $cmdfile = "tcmd$$";  $cmdfile++ while -e $cmdfile;
-	    my $outfile = "tout$$";  $outfile++ while -e $outfile;
 	    my $errfile = "terr$$";  $errfile++ while -e $errfile;
+	    my @tmpfiles = ($cmdfile, $errfile);
 	    open CMD, ">$cmdfile"; print CMD $code; close CMD;
 	    my $cmd = ($^O eq 'VMS') ? "MCR $^X" : "./perl";
-	    $cmd .= " -w $cmdfile >$outfile 2>$errfile";
-	    system $cmd;
-	    $? = 0 if $^O eq 'VMS' and $? & 1;  # Keep Unix-minded code below happy
+	    $cmd .= " -w $cmdfile 2>$errfile";
+	    if ($^O eq 'VMS') {
+	      # Use pipe instead of system so we don't inherit STD* from
+	      # this process, and then foul our pipe back to parent by
+	      # redirecting output in the child.
+	      open PERL,"$cmd |" or die "Can't open pipe: $!\n";
+	      { local $/; $output = join '', <PERL> }
+	      close PERL;
+	    } else {
+	      my $outfile = "tout$$";  $outfile++ while -e $outfile;
+	      push @tmpfiles, $outfile;
+	      system "$cmd >$outfile";
+	      { local $/; open IN, $outfile; $output = <IN>; close IN }
+	    }
 	    if ($?) {
 	      printf "not ok: exited with error code %04X\n", $?;
-	      $debugging or do { 1 while unlink $cmdfile, $outfile, $errfile };
+	      $debugging or do { 1 while unlink @tmpfiles };
 	      exit;
 	    }
-	    { local $/;
-	      open IN, $outfile; $output = <IN>; close IN;
-	      open IN, $errfile; $errors = <IN>; close IN; }
-	    1 while unlink $cmdfile, $outfile, $errfile;
+	    { local $/; open IN, $errfile; $errors = <IN>; close IN }
+	    1 while unlink @tmpfiles;
 	  }
 	  print $output;
 	  print STDERR $errors;

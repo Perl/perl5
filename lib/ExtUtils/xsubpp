@@ -79,11 +79,20 @@ require 5.002;
 use Cwd;
 use vars '$cplusplus';
 
-# Global Constants
-$XSUBPP_version = "1.9401";
-$Is_VMS = $^O eq 'VMS';
-
 sub Q ;
+
+# Global Constants
+
+$XSUBPP_version = "1.9402";
+
+my ($Is_VMS, $SymSet);
+if ($^O eq 'VMS') {
+    $Is_VMS = 1;
+    # Establish set of global symbols with max length 28, since xsubpp
+    # will later add the 'XS_' prefix.
+    require ExtUtils::XSSymSet;
+    $SymSet = new ExtUtils::XSSymSet 28;
+}
 
 $FH = 'File0000' ;
 
@@ -127,13 +136,7 @@ $pwd = cwd();
 
 my(@XSStack) = ({type => 'none'});	# Stack of conditionals and INCLUDEs
 my($XSS_work_idx, $cpp_next_tmp) = (0, "XSubPPtmpAAAA");
-my($SymSet);
-if ($Is_VMS) {
-    # Establish set of global symbols with max length 28, since xsubpp
-    # will later add the 'XS_' prefix.
-    require ExtUtils::XSSymSet;
-    $SymSet = new ExtUtils::XSSymSet 28;
-}
+
 
 sub TrimWhitespace
 {

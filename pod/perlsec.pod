@@ -20,11 +20,10 @@ mode explicitly by using the B<-T> command line flag. This flag is
 I<strongly> suggested for server programs and any program run on behalf of
 someone else, such as a CGI script.
 
-While in this mode, Perl takes special precautions called I<taint
-checks> to prevent both obvious and subtle traps.  Some of these checks
-are reasonably simple, such as verifying that path directories aren't
-writable by others; careful programmers have always used checks like
-these.  Other checks, however, are best supported by the language itself,
+While in this mode, Perl takes special precautions called I<taint checks> to
+prevent both obvious and subtle traps.  Some of these checks are reasonably
+simple, such as not blindly using the PATH inherited from one's parent
+process.  Other checks, however, are best supported by the language itself,
 and it is these checks especially that contribute to making a setuid Perl
 program more secure than the corresponding C program.
 
@@ -145,15 +144,13 @@ block.  See L<perllocale/SECURITY> for further discussion and examples.
 =head2 Cleaning Up Your Path
 
 For "Insecure C<$ENV{PATH}>" messages, you need to set C<$ENV{'PATH'}> to a
-known value, and each directory in the path must be non-writable by others
-than its owner and group.  You may be surprised to get this message even
-if the pathname to your executable is fully qualified.  This is I<not>
-generated because you didn't supply a full path to the program; instead,
-it's generated because you never set your PATH environment variable, or
-you didn't set it to something that was safe.  Because Perl can't
-guarantee that the executable in question isn't itself going to turn
-around and execute some other program that is dependent on your PATH, it
-makes sure you set the PATH.  
+known value.  You may be surprised to get this message even if the pathname
+to your executable is fully qualified.  This is I<not> generated because you
+didn't supply a full path to the program; instead, it's generated because
+you never set your PATH environment variable.  Because Perl can't guarantee
+that the executable in question isn't itself going to turn around and
+execute some other program that is dependent on your PATH, it makes sure you
+set the PATH.
 
 It's also possible to get into trouble with other operations that don't
 care whether they use tainted values.  Make judicious use of the file

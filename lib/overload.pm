@@ -588,9 +588,9 @@ function).
 
 =head1 BUGS
 
-Because it is used for overloading, the per-package associative array
-%OVERLOAD now has a special meaning in Perl. The symbol table is
-filled with names looking like line-noise.
+Because it is used for overloading, the per-package hash %OVERLOAD now
+has a special meaning in Perl. The symbol table is filled with names
+looking like line-noise.
 
 For the purpose of inheritance every overloaded package behaves as if
 C<fallback> is present (possibly undefined). This may create

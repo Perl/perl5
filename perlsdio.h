@@ -32,10 +32,14 @@
           ((*(f) && !((*(f))->_flag & _IONBF) && \
           ((*(f))->_ptr > (*(f))->_base)) ? \
           ((*(f))->_cnt++, *(--(*(f))->_ptr) = (c)) : decc$ungetc(c,f)))
+   /* Work around bug in DECCRTL/AXP (DECC v5.x) which causes read
+    * from a pipe after EOF has been returned once to hang.
+    */
+#  define PerlIO_getc(f)		(feof(f) ? EOF : getc(f))
 #else
 #  define PerlIO_ungetc(f,c)		ungetc(c,f)
+#  define PerlIO_getc(f)		getc(f)
 #endif
-#define PerlIO_getc(f)			getc(f)
 #define PerlIO_eof(f)			feof(f)
 #define PerlIO_getname(f,b)		fgetname(f,b)
 #define PerlIO_error(f)			ferror(f)

@@ -2,8 +2,8 @@
  *
  * VMS-specific C header file for perl5.
  *
- * Last revised: 01-Oct-1995 by Charles Bailey  bailey@genetics.upenn.edu
- * Version: 5.1.6
+ * Last revised: 18-Feb-1997 by Charles Bailey  bailey@genetics.upenn.edu
+ * Version: 5.3.28
  */
 
 #ifndef __vmsish_h_included
@@ -54,6 +54,18 @@
 #include <file.h>  /* it's not <sys/file.h>, so don't use I_SYS_FILE */
 #if defined(__DECC) && defined(__DECC_VER) && __DECC_VER > 20000000
 #  include <unistd.h> /* DECC has this; VAXC and gcc don't */
+#endif
+
+#ifdef NO_PERL_TYPEDEFS /* a2p; we don't want Perl's special routines */
+#  define DONT_MASK_RTL_CALLS
+#endif
+
+    /* defined for vms.c so we can see CRTL |  defined for a2p */
+#ifndef DONT_MASK_RTL_CALLS
+#  ifdef getenv
+#    undef getenv
+#  endif
+#  define getenv(v) my_getenv(v)  /* getenv used for regular logical names */
 #endif
 
 /* DECC introduces this routine in the RTL as of VMS 7.0; for now,
@@ -130,7 +142,7 @@
  * exec should be handled in VMSish or Unixish style.
  */
 #define fork my_vfork
-#ifndef __DONT_MASK_VFORK  /* #defined in vms.c so we see real vfork */
+#ifndef DONT_MASK_RTL_CALLS     /* #defined in vms.c so we see real vfork */
 #  ifdef vfork
 #    undef vfork
 #  endif
@@ -181,13 +193,13 @@
 
 #define COMPLEX_STATUS	1	/* We track both "POSIX" and VMS values */
 
-#define HINT_S_VMSISH		24
+#define HINT_V_VMSISH		24
 #define HINT_M_VMSISH_STATUS	0x01000000 /* system, $? return VMS status */
 #define HINT_M_VMSISH_EXIT	0x02000000 /* exit(1) ==> SS$_NORMAL */
 #define HINT_M_VMSISH_TIME	0x04000000 /* times are local, not UTC */
-#define NATIVE_HINTS		(hints >> HINT_S_VMSISH)  /* used in op.c */
+#define NATIVE_HINTS		(hints >> HINT_V_VMSISH)  /* used in op.c */
 
-#define TEST_VMSISH(h)	(curcop->op_private & ((h) >> HINT_S_VMSISH))
+#define TEST_VMSISH(h)	(curcop->op_private & ((h) >> HINT_V_VMSISH))
 #define VMSISH_STATUS	TEST_VMSISH(HINT_M_VMSISH_STATUS)
 #define VMSISH_EXIT	TEST_VMSISH(HINT_M_VMSISH_EXIT)
 #define VMSISH_TIME	TEST_VMSISH(HINT_M_VMSISH_TIME)
@@ -327,6 +339,9 @@ struct utimbuf {
 /* Look up new %ENV values on the fly */
 #define DYNAMIC_ENV_FETCH 1
 #define ENV_HV_NAME "%EnV%VmS%"
+  /* Special getenv function for retrieving %ENV elements. */
+#define ENV_getenv(v) my_getenv(v)
+
 
 /* Thin jacket around cuserid() tomatch Unix' calling sequence */
 #define getlogin my_getlogin
@@ -430,11 +445,16 @@ struct mystat
         char	st_fab_fsz;	/* fixed header size */
         unsigned st_dev;	/* encoded device name */
 };
-#define stat mystat
 typedef unsigned mydev_t;
-#define dev_t mydev_t
 typedef unsigned myino_t;
-#define ino_t myino_t
+#ifndef DONT_MASK_RTL_CALLS  /* defined for vms.c so we can see RTL calls */
+#  ifdef stat
+#    undef stat
+#  endif
+#  define stat mystat
+#  define dev_t mydev_t
+#  define ino_t myino_t
+#endif
 #if defined(__DECC) || defined(__DECCXX)
 #  pragma __member_alignment __restore
 #endif
@@ -513,8 +533,8 @@ struct tm *	my_gmtime _((const time_t *));
 struct tm *	my_localtime _((const time_t *));
 time_t	my_time _((time_t *));
 I32	cando_by_name _((I32, I32, char *));
-int	flex_fstat _((int, struct stat *));
-int	flex_stat _((char *, struct stat *));
+int	flex_fstat _((int, struct mystat *));
+int	flex_stat _((char *, struct mystat *));
 int	trim_unixpath _((char *, char*, int));
 int	my_vfork _(());
 bool	vms_do_aexec _((SV *, SV **, SV **));

@@ -82,13 +82,13 @@ block to bypass the block under such circumstances can be simplified
 by removing the conditional in the END block and just exiting directly
 from the perl script.
 
-Perl has two kinds of array, numerically-indexed and associative.  Awk
-arrays are usually translated to associative arrays, but if you happen
-to know that the index is always going to be numeric you could change
-the {...} to [...].  Iteration over an associative array is done using
-the keys() function, but iteration over a numeric array is NOT.  You
-might need to modify any loop that is iterating over the array in
-question.
+Perl has two kinds of array, numerically-indexed and associative.
+Perl associative arrays are called "hashes".  Awk arrays are usually
+translated to hashes, but if you happen to know that the index is
+always going to be numeric you could change the {...} to [...].
+Iteration over a hash is done using the keys() function, but iteration
+over an array is NOT.  You might need to modify any loop that iterates
+over such an array.
 
 Awk starts by assuming OFMT has the value %.6g.  Perl starts by
 assuming its equivalent, $#, to have the value %.20g.  You'll want to

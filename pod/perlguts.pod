@@ -504,12 +504,12 @@ C<sv_2mortal> or C<sv_mortalcopy> routines.
 
 =head2 Stashes and Globs
 
-A stash is a hash table (associative array) that contains all of the
-different objects that are contained within a package.  Each key of the
-stash is a symbol name (shared by all the different types of objects
-that have the same name), and each value in the hash table is called a
-GV (for Glob Value).  This GV in turn contains references to the various
-objects of that name, including (but not limited to) the following:
+A "stash" is a hash that contains all of the different objects that
+are contained within a package.  Each key of the stash is a symbol
+name (shared by all the different types of objects that have the same
+name), and each value in the hash table is a GV (Glob Value).  This GV
+in turn contains references to the various objects of that name,
+including (but not limited to) the following:
 
     Scalar Value
     Array Value

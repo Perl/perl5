@@ -404,11 +404,14 @@ C<$? & 255> gives which signal, if any, the process died from, and
 whether there was a core dump.  (Mnemonic: similar to B<sh> and
 B<ksh>.)
 
+Note that if you have installed a signal handler for C<SIGCHLD>, the
+value of C<$?> will usually be wrong outside that handler.
+
 Inside an C<END> subroutine C<$?> contains the value that is going to be
 given to C<exit()>.  You can modify C<$?> in an C<END> subroutine to
 change the exit status of the script.
 
-Under VMS, the pragma C<use vmsish 'status'> make C<$?> reflect the
+Under VMS, the pragma C<use vmsish 'status'> makes C<$?> reflect the
 actual VMS exit status, instead of the default emulation of POSIX
 status.
 

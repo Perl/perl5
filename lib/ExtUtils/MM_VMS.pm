@@ -1978,7 +1978,14 @@ $(PERL_ARCHLIB)Config.pm : $(PERL_VMS)config.vms $(PERL_VMS)genconfig.pl
 	$(NOECHO) Write Sys$Error "$(PERL_ARCHLIB)Config.pm may be out of date with config.vms or genconfig.pl"
 	olddef = F$Environment("Default")
 	Set Default $(PERL_SRC)
-	$(MMS)],$mmsquals,q[ $(MMS$TARGET)
+	$(MMS)],$mmsquals,);
+	if ($self->{PERL_ARCHLIB} =~ m|\[-| && $self->{PERL_SRC} =~ m|(\[-+)|) {
+	    my($prefix,$target) = ($1,$self->fixpath('$(PERL_ARCHLIB)Config.pm'));
+	    $target =~ s/\Q$prefix/[/;
+	    push(@m," $target");
+	}
+	else { push(@m,' $(MMS$TARGET)'); }
+	push(@m,q[
 	Set Default 'olddef'
 ]);
     }

@@ -154,12 +154,13 @@ PP(pp_backtick)
     TAINT_PROPER("``");
     fp = my_popen(tmps, "r");
     if (fp) {
-	sv_setpv(TARG, "");	/* note that this preserves previous buffer */
 	if (GIMME == G_SCALAR) {
+	    sv_setpv(TARG, "");	/* note that this preserves previous buffer */
 	    while (sv_gets(TARG, fp, SvCUR(TARG)) != Nullch)
 		/*SUPPRESS 530*/
 		;
 	    XPUSHs(TARG);
+	    SvTAINTED_on(TARG);
 	}
 	else {
 	    SV *sv;
@@ -175,9 +176,11 @@ PP(pp_backtick)
 		    SvLEN_set(sv, SvCUR(sv)+1);
 		    Renew(SvPVX(sv), SvLEN(sv), char);
 		}
+		SvTAINTED_on(sv);
 	    }
 	}
 	STATUS_NATIVE_SET(my_pclose(fp));
+	TAINT;		/* "I believe that this is not gratuitous!" */
     }
     else {
 	STATUS_NATIVE_SET(-1);
@@ -3048,7 +3051,7 @@ PP(pp_getpgrp)
 #ifdef BSD_GETPGRP
     value = (I32)BSD_GETPGRP(pid);
 #else
-    if (pid != 0 && pid != getpid()) {
+    if (pid != 0 && pid != getpid())
 	DIE("POSIX getpgrp can't take an argument");
     value = (I32)getpgrp();
 #endif
@@ -3078,9 +3081,8 @@ PP(pp_setpgrp)
 #ifdef BSD_SETPGRP
     SETi( BSD_SETPGRP(pid, pgrp) >= 0 );
 #else
-    if ((pgrp != 0 && pgrp != getpid())) || (pid != 0 && pid != getpid())) {
+    if ((pgrp != 0 && pgrp != getpid())) || (pid != 0 && pid != getpid()))
 	DIE("POSIX setpgrp can't take an argument");
-    }
     SETi( setpgrp() >= 0 );
 #endif /* USE_BSDPGRP */
     RETURN;

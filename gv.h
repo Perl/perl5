@@ -13,7 +13,7 @@ struct gp {
     struct io *	gp_io;		/* filehandle value */
     CV *	gp_form;	/* format value */
     AV *	gp_av;		/* array value */
-    HV *	gp_hv;		/* associative array value */
+    HV *	gp_hv;		/* hash value */
     GV *	gp_egv;		/* effective gv, if *glob */
     CV *	gp_cv;		/* subroutine value */
     U32		gp_cvgen;	/* generational validity of cached gv_cv */

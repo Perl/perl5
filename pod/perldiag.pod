@@ -267,10 +267,6 @@ shmctl().  In C parlance, the correct sizes are, respectively,
 S<sizeof(struct msqid_ds *)>, S<sizeof(struct semid_ds *)>, and
 S<sizeof(struct shmid_ds *)>.
 
-=item Bad associative array
-
-(P) One of the internal hash routines was passed a null HV pointer.
-
 =item Bad filehandle: %s
 
 (F) A symbol was passed to something wanting a filehandle, but the symbol
@@ -287,6 +283,10 @@ This message can be quite often seen with DB_File on systems with
 "hard" dynamic linking, like C<AIX> and C<OS/2>. It is a bug of
 C<Berkeley DB> which is left unnoticed if C<DB> uses I<forgiving>
 system malloc().
+
+=item Bad hash
+
+(P) One of the internal hash routines was passed a null HV pointer.
 
 =item Bad name after %s::
 

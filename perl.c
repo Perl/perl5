@@ -948,7 +948,7 @@ I32 flags;		/* See G_* flags in cop.h */
 {
     LOGOP myop;		/* fake syntax tree node */
     SV** sp = stack_sp;
-    I32 oldmark = TOPMARK;
+    I32 oldmark;
     I32 retval;
     Sigjmp_buf oldtop;
     I32 oldscope;
@@ -959,19 +959,23 @@ I32 flags;		/* See G_* flags in cop.h */
 	SAVETMPS;
     }
 
-    SAVESPTR(op);
-    op = (OP*)&myop;
-    Zero(op, 1, LOGOP);
-    EXTEND(stack_sp, 1);
-    *++stack_sp = sv;
-    oldscope = scopestack_ix;
-
-    if (!(flags & G_NOARGS))
-	myop.op_flags = OPf_STACKED;
+    Zero(&myop, 1, LOGOP);
+    if (flags & G_NOARGS) {
+	PUSHMARK(sp);
+    }
+    else
+	myop.op_flags |= OPf_STACKED;
     myop.op_next = Nullop;
     myop.op_flags |= OPf_KNOW;
     if (flags & G_ARRAY)
-      myop.op_flags |= OPf_LIST;
+	myop.op_flags |= OPf_LIST;
+    SAVESPTR(op);
+    op = (OP*)&myop;
+
+    EXTEND(stack_sp, 1);
+    *++stack_sp = sv;
+    oldmark = TOPMARK;
+    oldscope = scopestack_ix;
 
     if (perldb && curstash != debstash
 	   /* Handle first BEGIN of -d. */
@@ -1435,6 +1439,10 @@ GNU General Public License, which may be found in the Perl 5.0 source kit.\n\n")
     case '\n':
     case '\t':
 	break;
+#ifdef ALTERNATE_SHEBANG
+    case 'S':			/* OS/2 needs -S on "extproc" line. */
+	break;
+#endif
     case 'P':
 	if (preprocess)
 	    return s+1;
@@ -1467,9 +1475,9 @@ my_unexec()
 #  ifdef VMS
 #    include <lib$routines.h>
      lib$signal(SS$_DEBUG);  /* ssdef.h #included from vmsish.h */
-#else
+#  else
     ABORT();		/* for use with undump */
-#endif
+#  endif
 #endif
 }
 
@@ -2332,6 +2340,11 @@ int addsubdirs;
 			  + sizeof("//auto"));
 	    New(55, archpat_auto, len, char);
 	    sprintf(archpat_auto, "/%s/%s/auto", ARCHNAME, patchlevel);
+#ifdef VMS
+	for (len = sizeof(ARCHNAME) + 2;
+	     archpat_auto[len] != '\0' && archpat_auto[len] != '/'; len++)
+		if (archpat_auto[len] == '.') archpat_auto[len] = '_';
+#endif
 	}
     }
 
@@ -2363,7 +2376,20 @@ int addsubdirs;
 	 */
 	if (addsubdirs) {
 	    struct stat tmpstatbuf;
+#ifdef VMS
+	    char *unix;
+	    STRLEN len;
 
+	    if ((unix = tounixspec_ts(SvPV(libdir,na),Nullch)) != Nullch) {
+		len = strlen(unix);
+		while (unix[len-1] == '/') len--;  /* Cosmetic */
+		sv_usepvn(libdir,unix,len);
+	    }
+	    else
+		PerlIO_printf(PerlIO_stderr(),
+		              "Failed to unixify @INC element \"%s\"\n",
+			      SvPV(libdir,na));
+#endif
 	    /* .../archname/version if -d .../archname/version/auto */
 	    sv_setsv(subdir, libdir);
 	    sv_catpv(subdir, archpat_auto);

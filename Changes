@@ -9,6 +9,185 @@ releases.)
 
 
 ----------------
+Version 5.003_28
+----------------
+
+This release is beta candidate #6.  If this isn't good enough to go beta,
+I'll eat a floppy disk.  (Okay, it's a chocolate floppy, but still....)
+
+ CORE LANGUAGE CHANGES
+
+  Title:  "Don't let C<sub foo;> undefine &foo"
+   From:  Chip Salzenberg
+  Files:  op.c
+
+  Title:  "Make code, doc agree on $ENV{PATH} and `cmd`"
+   From:  Chip Salzenberg
+  Files:  pod/perlsec.pod pp_sys.c
+
+  Title:  "Don't taint $x in C<$x = ($tainted =~ /(\w+)/)>"
+   From:  Chip Salzenberg
+  Files:  pp_ctl.c pp_hot.c
+
+  Title:  "Turn off 'expression tainted' flag at end of runops()"
+   From:  Chip Salzenberg
+  Files:  run.c
+
+  Title:  "When overloading, don't throw away nomethod's value"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+  Files:  gv.c
+
+  Title:  "Optimize keys() and values() in void context"
+   From:  Chip Salzenberg
+  Files:  doop.c op.c
+
+ CORE PORTABILITY
+
+  Title:  "New hints for Digital UNIX"
+   From:  Jarkko Hietaniemi <jhi@iki.fi>
+  Files:  hints/dec_osf.sh
+
+  Title:  "No version of AIX has working setre[ug]id()"
+   From:  neufeld@fast.pvi.org (Keith Neufeld)
+  Files:  hints/aix.sh
+
+  Title:  "VMS patches post _27"
+   From:  Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>
+ Msg-ID:  <01IFMEMPN1IU0057E2@hmivax.humgen.upenn.edu>
+   Date:  Thu, 20 Feb 1997 01:58:46 -0500 (EST)
+  Files:  MANIFEST dosish.h hv.c lib/ExtUtils/MM_VMS.pm
+          lib/ExtUtils/xsubpp perl.c perlsdio.h pod/perldelta.pod
+          pod/perlvar.pod t/op/closure.t unixish.h vms/Makefile
+          vms/descrip.mms vms/ext/filespec.t vms/genconfig.pl
+          vms/vms.c vms/vmsish.h
+
+  Title:  "Re: OS/2 patch for _27"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199702210024.TAA03174@monk.mps.ohio-state.edu>
+   Date:  Thu, 20 Feb 1997 19:24:16 -0500 (EST)
+  Files:  INSTALL README.os2 lib/Test/Harness.pm os2/Changes
+          os2/OS2/PrfDB/t/os2_prfdb.t os2/os2.c os2/os2ish.h
+          os2/perl2cmd.pl perl.c pod/perldelta.pod t/TEST t/harness
+          t/op/magic.t
+
+ OTHER CORE CHANGES
+
+  Title:  "Fix a typo"
+   From:  Chip Salzenberg
+  Files:  pp_sys.c
+
+  Title:  "Undo signal patch -- it broke die() in signal"
+   From:  Chip Salzenberg
+  Files:  mg.c
+
+  Title:  "Fix perl_call_sv(..., G_NOARGS)"
+   From:  Chip Salzenberg
+  Files:  perl.c
+
+  Title:  "Fix SIGSEGV when cloning sub with complex expression"
+   From:  Chip Salzenberg
+  Files:  op.c
+
+  Title:  "Minor update to malloc.c"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199702210244.VAA03676@monk.mps.ohio-state.edu>
+   Date:  Thu, 20 Feb 1997 21:44:13 -0500 (EST)
+  Files:  malloc.c
+
+  Title:  "Fix the Tolkein quote"
+   From:  Chip Salzenberg
+  Files:  perly.y
+
+ BUILD PROCESS
+
+   (no changes)
+
+ LIBRARY AND EXTENSIONS
+
+  Title:  "Debugger patch"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199702210737.CAA03951@monk.mps.ohio-state.edu>
+   Date:  Fri, 21 Feb 1997 02:37:59 -0500 (EST)
+  Files:  lib/perl5db.pl
+
+  Title:  "Avoid $` $& $' in libraries"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+ Msg-ID:  <199702210207.VAA03560@monk.mps.ohio-state.edu>
+   Date:  Thu, 20 Feb 1997 21:07:30 -0500 (EST)
+  Files:  lib/Getopt/Long.pm lib/Pod/Text.pm lib/diagnostics.pm
+          os2/OS2/REXX/REXX.pm
+
+  Title:  "Remove redundant clearerr() from IO::Seekable"
+   From:  Chip Salzenberg
+  Files:  ext/IO/lib/IO/Handle.pm ext/IO/lib/IO/Seekable.pm
+
+  Title:  "prototype error in File::stat"
+   From:  Graham.Barr@tiuk.ti.com
+ Msg-ID:  <199702180748.HAA14151@ultra-boy>
+   Date:  Tue, 18 Feb 1997 07:48:40 GMT
+  Files:  lib/File/stat.pm
+
+ TESTS
+
+  Title:  "Include 'study' in regexp.t"
+   From:  Chip Salzenberg
+  Files:  t/op/regexp.t
+
+  Title:  "Don't run locale test if -DNO_LOCALE"
+   From:  Chip Salzenberg
+  Files:  t/pragma/locale.t
+
+  Title:  "Tweak tests to notice $dont_use_nlink"
+   From:  Chip Salzenberg
+  Files:  t/io/fs.t t/op/stat.t
+
+  Title:  "Add test for grep() and wantarray"
+   From:  Hugo van der Sanden <hv@iii.co.uk>
+ Msg-ID:  <199702181105.LAA17895@tyree.iii.co.uk>
+   Date:  Tue, 18 Feb 1997 11:05:59 +0000
+  Files:  t/op/misc.t
+
+ UTILITIES
+
+   (no changes)
+
+ DOCUMENTATION
+
+  Title:  "INSTALL updates since _26"
+   From:  Andy Dougherty <doughera@fractal.phys.lafayette.edu>
+ Msg-ID:  <Pine.SOL.3.95q.970218155815.2014F-100000@fractal.lafayette.e
+   Date:  Tue, 18 Feb 1997 16:00:08 -0500 (EST)
+  Files:  INSTALL
+
+  Title:  "Document "$$0" change"
+   From:  Chip Salzenberg
+  Files:  pod/perldelta.pod
+
+  Title:  "Don't recommend impossible //o for C<$x =~ $y>"
+   From:  Chip Salzenberg
+  Files:  pod/perlop.pod
+
+  Title:  "Correct doc that claimed that <FH> was never false"
+   From:  Chip Salzenberg
+  Files:  pod/perldelta.pod pod/perlop.pod
+
+  Title:  "Document C<$?> vs. $SIG{CHLD}"
+   From:  Ulrich Pfeifer <pfeifer@charly.informatik.uni-dortmund.de>
+  Files:  pod/perlvar.pod
+
+  Title:  "Add pumpkin.pod"
+   From:  Chip Salzenberg
+  Files:  MANIFEST Porting/pumpkin.pod
+
+  Title:  "Don't say "associat*ve arr*y""
+   From:  Chip Salzenberg
+  Files:  MANIFEST gv.h hv.c lib/Env.pm lib/overload.pm opcode.pl
+          pod/perl.pod pod/perldelta.pod pod/perldiag.pod
+          pod/perlfunc.pod pod/perlguts.pod pod/perlmod.pod
+          pod/perltie.pod pod/perltoc.pod pod/perltrap.pod x2p/a2p.pod
+
+
+----------------
 Version 5.003_27
 ----------------
 

@@ -546,7 +546,7 @@ IO : [.lib]IO.pm [.lib.IO]File.pm [.lib.IO]Handle.pm [.lib.IO]Pipe.pm [.lib.IO]S
 # Rename catches problem with some DECC versions in which object file is
 # placed in current default dir, not same one as source file.
 [.x2p]$(DBG)a2p$(E) : [.x2p]a2p$(O), [.x2p]hash$(O), [.x2p]str$(O), [.x2p]util$(O), [.x2p]walk$(O)
-	@ If F$Search("a2p$(O)").nes."" Then Rename/NoLog a2p$(O),hash$(O),str$(O),util$(O),walk$(O) [.x2p]
+	@ If F$Search("hash$(O)").nes."" Then Rename/NoLog hash$(O),str$(O),util$(O),walk$(O) [.x2p]
 	Link $(LINKFLAGS) /Exe=$(MMS$TARGET) $(MMS$SOURCE_LIST) $(CRTLOPTS)
 
 # Accomodate buggy cpp in some version of DECC, which chokes on illegal
@@ -606,6 +606,10 @@ preplibrary : $(MINIPERL_EXE) $(LIBPREREQ) $(SOCKPM)
 	@ Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 
 [.lib.pod]perldebug.pod : [.pod]perldebug.pod
+	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
+	@ Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+
+[.lib.pod]perldelta.pod : [.pod]perldelta.pod
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	@ Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 
@@ -694,6 +698,10 @@ preplibrary : $(MINIPERL_EXE) $(LIBPREREQ) $(SOCKPM)
 	@ Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 
 [.lib.pod]perltoc.pod : [.pod]perltoc.pod
+	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
+	@ Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+
+[.lib.pod]perltoot.pod : [.pod]perltoot.pod
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	@ Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 
@@ -1640,7 +1648,6 @@ tidy : cleanlis
 	- If F$Search("[.Ext.DynaLoader]DL_VMS$(O);-1").nes."" Then Purge/NoConfirm/Log [.Ext.DynaLoader]DL_VMS$(O)
 	- If F$Search("[.Ext.DynaLoader]DL_VMS.C;-1").nes."" Then Purge/NoConfirm/Log [.Ext.DynaLoader]DL_VMS.C
 	- If F$Search("[.Ext.Opcode...];-1").nes."" Then Purge/NoConfirm/Log [.Ext.Opcode]
-	- If F$Search("[.Ext.FileHandle...];-1").nes."" Then Purge/NoConfirm/Log [.Ext.FileHandle]
 	- If F$Search("[.VMS.Ext...]*.C;-1").nes."" Then Purge/NoConfirm/Log [.VMS.Ext...]*.C
 	- If F$Search("[.VMS.Ext...]*$(O);-1").nes."" Then Purge/NoConfirm/Log [.VMS.Ext...]*$(O)
 	- If F$Search("[.Lib.Auto...]*.al;-1").nes."" Then Purge/NoConfirm/Log [.Lib.Auto...]*.al
@@ -1661,9 +1668,6 @@ tidy : cleanlis
 
 clean : tidy
 	Set Default [.ext.Fcntl]
-	- $(MMS) clean
-	Set Default [--]
-	Set Default [.ext.FileHandle]
 	- $(MMS) clean
 	Set Default [--]
 	Set Default [.ext.IO]
@@ -1699,9 +1703,6 @@ clean : tidy
 
 realclean : clean
 	Set Default [.ext.Fcntl]
-	- $(MMS) realclean
-	Set Default [--]
-	Set Default [.ext.FileHandle]
 	- $(MMS) realclean
 	Set Default [--]
 	Set Default [.ext.IO]

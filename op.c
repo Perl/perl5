@@ -693,8 +693,6 @@ OP *op;
     case OP_AELEM:
     case OP_AELEMFAST:
     case OP_ASLICE:
-    case OP_VALUES:
-    case OP_KEYS:
     case OP_HELEM:
     case OP_HSLICE:
     case OP_UNPACK:
@@ -817,6 +815,8 @@ OP *op;
 		deprecate("implicit split to @_");
 	}
 	break;
+    case OP_KEYS:
+    case OP_VALUES:
     case OP_DELETE:
 	op->op_private |= OPpLEAVE_VOID;
 	break;
@@ -2949,11 +2949,11 @@ CV* outside;
     AvFLAGS(av) = AVf_REIFY;
 
     for (ix = AvFILL(protopad); ix > 0; ix--) {
-	SV* sv;
-	if (pname[ix] != &sv_undef) {
-	    char *name = SvPVX(pname[ix]);    /* XXX */
-	    if (SvFLAGS(pname[ix]) & SVf_FAKE) {   /* lexical from outside? */
-		I32 off = pad_findlex(name, ix, SvIVX(pname[ix]),
+	SV* namesv = pname[ix];
+	if (namesv && namesv != &sv_undef) {
+	    char *name = SvPVX(namesv);    /* XXX */
+	    if (SvFLAGS(namesv) & SVf_FAKE) {   /* lexical from outside? */
+		I32 off = pad_findlex(name, ix, SvIVX(namesv),
 				      CvOUTSIDE(cv), cxstack_ix);
 		if (!off)
 		    curpad[ix] = SvREFCNT_inc(ppad[ix]);
@@ -2961,6 +2961,7 @@ CV* outside;
 		    croak("panic: cv_clone: %s", name);
 	    }
 	    else {				/* our own lexical */
+		SV* sv;
 		if (*name == '&') {
 		    /* anon code -- we'll come back for it */
 		    sv = SvREFCNT_inc(ppad[ix]);
@@ -2977,7 +2978,7 @@ CV* outside;
 	    }
 	}
 	else {
-	    sv = NEWSV(0,0);
+	    SV* sv = NEWSV(0,0);
 	    SvPADTMP_on(sv);
 	    curpad[ix] = sv;
 	}
@@ -2986,9 +2987,11 @@ CV* outside;
     /* Now that vars are all in place, clone nested closures. */
 
     for (ix = AvFILL(protopad); ix > 0; ix--) {
-	if (pname[ix] != &sv_undef
-	    && !(SvFLAGS(pname[ix]) & SVf_FAKE)
-	    && *SvPVX(pname[ix]) == '&'
+	SV* namesv = pname[ix];
+	if (namesv
+	    && namesv != &sv_undef
+	    && !(SvFLAGS(namesv) & SVf_FAKE)
+	    && *SvPVX(namesv) == '&'
 	    && CvCLONE(ppad[ix]))
 	{
 	    CV *kid = cv_clone2((CV*)ppad[ix], cv);
@@ -3074,6 +3077,11 @@ OP *block;
 		warn("Prototype mismatch: (%s) vs (%s)",
 			SvPOK(cv) ? SvPV((SV*)cv,na) : "none",
 			p ? p : "none");
+	    }
+	    if (!block) {
+		/* just a "sub foo;" when &foo is already defined */
+		SAVEFREESV(compcv);
+		goto done;
 	    }
 	    if (const_sv || dowarn) {
 		line_t oldline = curcop->cop_line;
@@ -3206,6 +3214,7 @@ OP *block;
 	}
     }
 
+  done:
     copline = NOLINE;
     LEAVE_SCOPE(floor);
     return cv;

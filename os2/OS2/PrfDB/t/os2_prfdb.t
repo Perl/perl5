@@ -88,6 +88,8 @@ print( OS2::Prf::Set($ini,'bbb', 'xxx','abc') ? "ok 18\n" :
 print( OS2::Prf::Set($ini,'bbb', 'yyy','456') ? "ok 19\n" :
     "not ok 19\n# err: `$^E'\n");
 
+OS2::Prf::Close($ini);
+
 my %hash1;
 
 tie %hash1, 'OS2::PrfDB::Sub', $inifile, 'aaa';

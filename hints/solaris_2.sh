@@ -142,6 +142,7 @@ case "`${cc:-cc} -v 2>&1`" in
 NOTE: You are using GNU as(1).  GNU as(1) will not build Perl.
 You must arrange to use /usr/ccs/bin/as, perhaps by setting
 GCC_EXEC_PREFIX or by including -B/usr/ccs/bin/ in your cc command.
+(Note that the trailing "/" is required.)
 
 END
 	;;

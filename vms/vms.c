@@ -42,9 +42,9 @@
 #  define SS$_NOSUCHOBJECT 2696
 #endif
 
-/* Don't intercept calls to vfork, since my_vfork below needs to
- * get to the underlying CRTL routine. */
-#define __DONT_MASK_VFORK
+/* Don't replace system definitions of vfork, getenv, and stat, 
+ * code below needs to get to the underlying CRTL routines. */
+#define DONT_MASK_RTL_CALLS
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
@@ -333,7 +333,7 @@ do_rmdir(char *name)
 {
     char dirfile[NAM$C_MAXRSS+1];
     int retval;
-    struct stat st;
+    struct mystat st;
 
     if (do_fileify_dirspec(name,dirfile,0) == NULL) return -1;
     if (flex_stat(dirfile,&st) || !S_ISDIR(st.st_mode)) retval = -1;
@@ -2965,7 +2965,7 @@ struct passwd *my_getpwnam(char *name)
 {
     struct dsc$descriptor_s name_desc;
     union uicdef uic;
-    unsigned long int status, stat;
+    unsigned long int status, sts;
                                   
     __pwdcache = __passwd_empty;
     if (!fillpasswd(name, &__pwdcache)) {
@@ -2974,17 +2974,17 @@ struct passwd *my_getpwnam(char *name)
       name_desc.dsc$b_dtype=   DSC$K_DTYPE_T;
       name_desc.dsc$b_class=   DSC$K_CLASS_S;
       name_desc.dsc$a_pointer= (char *) name;
-      if ((stat = sys$asctoid(&name_desc, &uic, 0)) == SS$_NORMAL) {
+      if ((sts = sys$asctoid(&name_desc, &uic, 0)) == SS$_NORMAL) {
         __pwdcache.pw_uid= uic.uic$l_uic;
         __pwdcache.pw_gid= uic.uic$v_group;
       }
       else {
-        if (stat == SS$_NOSUCHID || stat == SS$_IVIDENT || stat == RMS$_PRV) {
-          set_vaxc_errno(stat);
-          set_errno(stat == RMS$_PRV ? EACCES : EINVAL);
+        if (sts == SS$_NOSUCHID || sts == SS$_IVIDENT || sts == RMS$_PRV) {
+          set_vaxc_errno(sts);
+          set_errno(sts == RMS$_PRV ? EACCES : EINVAL);
           return NULL;
         }
-        else { _ckvmssts(stat); }
+        else { _ckvmssts(sts); }
       }
     }
     strncpy(__pw_namecache, name, sizeof(__pw_namecache));
@@ -3388,11 +3388,11 @@ int my_utime(char *file, struct utimbuf *utimes)
  * on the first call.
  */
 #define LOCKID_MASK 0x80000000     /* Use 0 to force device name use only */
-static dev_t encode_dev (const char *dev)
+static mydev_t encode_dev (const char *dev)
 {
   int i;
   unsigned long int f;
-  dev_t enc;
+  mydev_t enc;
   char c;
   const char *q;
 
@@ -3456,14 +3456,15 @@ is_null_device(name)
 
 /* Do the permissions allow some operation?  Assumes statcache already set. */
 /* Do this via $Check_Access on VMS, since the CRTL stat() returns only a
- * subset of the applicable information.
+ * subset of the applicable information.  (We have to stick with struct
+ * stat instead of struct mystat in the prototype since we have to match
+ * the one in proto.h.)
  */
 /*{{{I32 cando(I32 bit, I32 effective, struct stat *statbufp)*/
 I32
 cando(I32 bit, I32 effective, struct stat *statbufp)
 {
-  if (statbufp == &statcache) 
-    return cando_by_name(bit,effective,namecache);
+  if (statbufp == &statcache) return cando_by_name(bit,effective,namecache);
   else {
     char fname[NAM$C_MAXRSS+1];
     unsigned long int retsts;
@@ -3472,13 +3473,13 @@ cando(I32 bit, I32 effective, struct stat *statbufp)
 
     /* If the struct mystat is stale, we're OOL; stat() overwrites the
        device name on successive calls */
-    devdsc.dsc$a_pointer = statbufp->st_devnam;
-    devdsc.dsc$w_length = strlen(statbufp->st_devnam);
+    devdsc.dsc$a_pointer = ((struct mystat *)statbufp)->st_devnam;
+    devdsc.dsc$w_length = strlen(((struct mystat *)statbufp)->st_devnam);
     namdsc.dsc$a_pointer = fname;
     namdsc.dsc$w_length = sizeof fname - 1;
 
-    retsts = lib$fid_to_name(&devdsc,&(statbufp->st_ino),&namdsc,
-                             &namdsc.dsc$w_length,0,0);
+    retsts = lib$fid_to_name(&devdsc,&(((struct mystat *)statbufp)->st_ino),
+                             &namdsc,&namdsc.dsc$w_length,0,0);
     if (retsts & 1) {
       fname[namdsc.dsc$w_length] = '\0';
       return cando_by_name(bit,effective,fname);
@@ -3589,13 +3590,12 @@ cando_by_name(I32 bit, I32 effective, char *fname)
 /*}}}*/
 
 
-/*{{{ int flex_fstat(int fd, struct stat *statbuf)*/
-#undef stat
+/*{{{ int flex_fstat(int fd, struct mystat *statbuf)*/
 int
 flex_fstat(int fd, struct mystat *statbufp)
 {
   if (!fstat(fd,(stat_t *) statbufp)) {
-    if (statbufp == &statcache) *namecache == '\0';
+    if (statbufp == (struct mystat *) &statcache) *namecache == '\0';
     statbufp->st_dev = encode_dev(statbufp->st_devnam);
 #   ifdef VMSISH_TIME
     if (!VMSISH_TIME) { /* Return UTC instead of local time */
@@ -3614,19 +3614,15 @@ flex_fstat(int fd, struct mystat *statbufp)
 }  /* end of flex_fstat() */
 /*}}}*/
 
-/*{{{ int flex_stat(char *fspec, struct stat *statbufp)*/
-/* We defined 'stat' as 'mystat' in vmsish.h so that declarations of
- * 'struct stat' elsewhere in Perl would use our struct.  We go back
- * to the system version here, since we're actually calling their
- * stat().
- */
+/*{{{ int flex_stat(char *fspec, struct mystat *statbufp)*/
 int
 flex_stat(char *fspec, struct mystat *statbufp)
 {
     char fileified[NAM$C_MAXRSS+1];
     int retval = -1;
 
-    if (statbufp == &statcache) do_tovmsspec(fspec,namecache,0);
+    if (statbufp == (struct mystat *) &statcache)
+      do_tovmsspec(fspec,namecache,0);
     if (is_null_device(fspec)) { /* Fake a stat() for the null device */
       memset(statbufp,0,sizeof *statbufp);
       statbufp->st_dev = encode_dev("_NLA0:");
@@ -3648,7 +3644,8 @@ flex_stat(char *fspec, struct mystat *statbufp)
      */
     if (do_fileify_dirspec(fspec,fileified,0) != NULL) {
       retval = stat(fileified,(stat_t *) statbufp);
-      if (!retval && statbufp == &statcache) strcpy(namecache,fileified);
+      if (!retval && statbufp == (struct mystat *) &statcache)
+        strcpy(namecache,fileified);
     }
     if (retval) retval = stat(fspec,(stat_t *) statbufp);
     if (!retval) {
@@ -3667,8 +3664,6 @@ flex_stat(char *fspec, struct mystat *statbufp)
     return retval;
 
 }  /* end of flex_stat() */
-/* Reset definition for later calls */
-#define stat mystat
 /*}}}*/
 
 /* Insures that no carriage-control translation will be done on a file. */

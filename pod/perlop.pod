@@ -167,9 +167,8 @@ supposed to be searched, substituted, or translated instead of the default
 $_.  The return value indicates the success of the operation.  (If the
 right argument is an expression rather than a search pattern,
 substitution, or translation, it is interpreted as a search pattern at run
-time.  This is less efficient than an explicit search, because the pattern
-must be compiled every time the expression is evaluated--unless you've
-used C</o>.)
+time.  This can be is less efficient than an explicit search, because the
+pattern must be compiled every time the expression is evaluated.
 
 Binary "!~" is just like "=~" except the return value is negated in
 the logical sense.
@@ -1001,15 +1000,15 @@ always undergo shell expansion as well, see L<perlsec> for
 security concerns.)
 
 Evaluating a filehandle in angle brackets yields the next line from
-that file (newline included, so it's never false until end of file, at
-which time an undefined value is returned).  Ordinarily you must assign
-that value to a variable, but there is one situation where an automatic
-assignment happens.  I<If and ONLY if> the input symbol is the only
-thing inside the conditional of a C<while> loop, the value is
-automatically assigned to the variable C<$_>.  The assigned value is
-then tested to see if it is defined.  (This may seem like an odd thing
-to you, but you'll use the construct in almost every Perl script you
-write.)  Anyway, the following lines are equivalent to each other:
+that file (newline, if any, included), or C<undef> at end of file.
+Ordinarily you must assign that value to a variable, but there is one
+situation where an automatic assignment happens.  I<If and ONLY if> the
+input symbol is the only thing inside the conditional of a C<while> or
+C<for(;;)> loop, the value is automatically assigned to the variable
+C<$_>.  The assigned value is then tested to see if it is defined.
+(This may seem like an odd thing to you, but you'll use the construct
+in almost every Perl script you write.)  Anyway, the following lines
+are equivalent to each other:
 
     while (defined($_ = <STDIN>)) { print; }
     while (<STDIN>) { print; }

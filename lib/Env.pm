@@ -11,10 +11,9 @@ Env - perl module that imports environment variables
 
 =head1 DESCRIPTION
 
-Perl maintains environment variables in a pseudo-associative-array
-named %ENV.  For when this access method is inconvenient, the Perl
-module C<Env> allows environment variables to be treated as simple
-variables.
+Perl maintains environment variables in a pseudo-hash named %ENV.  For
+when this access method is inconvenient, the Perl module C<Env> allows
+environment variables to be treated as simple variables.
 
 The Env::import() function ties environment variables with suitable
 names to global Perl variables with the same names.  By default it

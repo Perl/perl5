@@ -54,6 +54,8 @@ HOME, LOGDIR, PATH, PERL5LIB, PERL5DB, PERL_DESTRUCT_LEVEL, PERLLIB
 
 =item New Opcode Module and Revised Safe Module
 
+=item Fixed Parsing of $$<digit>, &$<digit>, etc.
+
 =item Internal Change: FileHandle Deprecated
 
 =item Internal Change: PerlIO internal IO abstraction interface
@@ -76,8 +78,13 @@ isa(CLASS), can(METHOD), VERSION( [NEED] )
 
 =item TIEHANDLE Now Supported
 
-TIEHANDLE classname, LIST, PRINT this, LIST, READLINE this, DESTROY this,
-Efficiency Enhancements
+TIEHANDLE classname, LIST, PRINT this, LIST, READLINE this, DESTROY this
+
+=item Malloc Enhancements
+
+-DEMERGENCY_SBRK, -DPACK_MALLOC, -DTWO_POT_OPTIMIZE
+
+=item Miscellaneous Efficiency Enhancements
 
 =back
 
@@ -346,11 +353,11 @@ binmode FILEHANDLE, bless REF,CLASSNAME, bless REF, caller EXPR, caller,
 chdir EXPR, chmod LIST, chomp VARIABLE, chomp LIST, chomp, chop VARIABLE,
 chop LIST, chop, chown LIST, chr NUMBER, chr, chroot FILENAME, chroot,
 close FILEHANDLE, closedir DIRHANDLE, connect SOCKET,NAME, continue BLOCK,
-cos EXPR, crypt PLAINTEXT,SALT, dbmclose ASSOC_ARRAY, dbmopen
-ASSOC,DBNAME,MODE, defined EXPR, defined, delete EXPR, die LIST, do BLOCK,
-do SUBROUTINE(LIST), do EXPR, dump LABEL, each ASSOC_ARRAY, eof FILEHANDLE,
-eof (), eof, eval EXPR, eval BLOCK, exec LIST, exists EXPR, exit EXPR, exp
-EXPR, exp, fcntl FILEHANDLE,FUNCTION,SCALAR, fileno FILEHANDLE, flock
+cos EXPR, crypt PLAINTEXT,SALT, dbmclose HASH, dbmopen HASH,DBNAME,MODE,
+defined EXPR, defined, delete EXPR, die LIST, do BLOCK, do
+SUBROUTINE(LIST), do EXPR, dump LABEL, each HASH, eof FILEHANDLE, eof (),
+eof, eval EXPR, eval BLOCK, exec LIST, exists EXPR, exit EXPR, exp EXPR,
+exp, fcntl FILEHANDLE,FUNCTION,SCALAR, fileno FILEHANDLE, flock
 FILEHANDLE,OPERATION, fork, format, formline PICTURE, LIST, getc
 FILEHANDLE, getc, getlogin, getpeername SOCKET, getpgrp PID, getppid,
 getpriority WHICH,WHO, getpwnam NAME, getgrnam NAME, gethostbyname NAME,
@@ -364,24 +371,24 @@ endprotoent, endservent, getsockname SOCKET, getsockopt
 SOCKET,LEVEL,OPTNAME, glob EXPR, glob, gmtime EXPR, goto LABEL, goto EXPR,
 goto &NAME, grep BLOCK LIST, grep EXPR,LIST, hex EXPR, hex, import, index
 STR,SUBSTR,POSITION, index STR,SUBSTR, int EXPR, int, ioctl
-FILEHANDLE,FUNCTION,SCALAR, join EXPR,LIST, keys ASSOC_ARRAY, kill LIST,
-last LABEL, last, lc EXPR, lc, lcfirst EXPR, lcfirst, length EXPR, length,
-link OLDFILE,NEWFILE, listen SOCKET,QUEUESIZE, local EXPR, localtime EXPR,
-log EXPR, log, lstat FILEHANDLE, lstat EXPR, lstat, m//, map BLOCK LIST,
-map EXPR,LIST, mkdir FILENAME,MODE, msgctl ID,CMD,ARG, msgget KEY,FLAGS,
-msgsnd ID,MSG,FLAGS, msgrcv ID,VAR,SIZE,TYPE,FLAGS, my EXPR, next LABEL,
-next, no Module LIST, oct EXPR, oct, open FILEHANDLE,EXPR, open FILEHANDLE,
-opendir DIRHANDLE,EXPR, ord EXPR, ord, pack TEMPLATE,LIST, package
-NAMESPACE, pipe READHANDLE,WRITEHANDLE, pop ARRAY, pop, pos SCALAR, pos,
-print FILEHANDLE LIST, print LIST, print, printf FILEHANDLE FORMAT, LIST,
-printf FORMAT, LIST, prototype FUNCTION, push ARRAY,LIST, q/STRING/,
-qq/STRING/, qx/STRING/, qw/STRING/, quotemeta EXPR, quotemeta, rand EXPR,
-rand, read FILEHANDLE,SCALAR,LENGTH,OFFSET, read FILEHANDLE,SCALAR,LENGTH,
-readdir DIRHANDLE, readlink EXPR, readlink, recv SOCKET,SCALAR,LEN,FLAGS,
-redo LABEL, redo, ref EXPR, ref, rename OLDNAME,NEWNAME, require EXPR,
-require, reset EXPR, reset, return LIST, reverse LIST, rewinddir DIRHANDLE,
-rindex STR,SUBSTR,POSITION, rindex STR,SUBSTR, rmdir FILENAME, rmdir, s///,
-scalar EXPR, seek FILEHANDLE,POSITION,WHENCE, seekdir DIRHANDLE,POS, select
+FILEHANDLE,FUNCTION,SCALAR, join EXPR,LIST, keys HASH, kill LIST, last
+LABEL, last, lc EXPR, lc, lcfirst EXPR, lcfirst, length EXPR, length, link
+OLDFILE,NEWFILE, listen SOCKET,QUEUESIZE, local EXPR, localtime EXPR, log
+EXPR, log, lstat FILEHANDLE, lstat EXPR, lstat, m//, map BLOCK LIST, map
+EXPR,LIST, mkdir FILENAME,MODE, msgctl ID,CMD,ARG, msgget KEY,FLAGS, msgsnd
+ID,MSG,FLAGS, msgrcv ID,VAR,SIZE,TYPE,FLAGS, my EXPR, next LABEL, next, no
+Module LIST, oct EXPR, oct, open FILEHANDLE,EXPR, open FILEHANDLE, opendir
+DIRHANDLE,EXPR, ord EXPR, ord, pack TEMPLATE,LIST, package NAMESPACE, pipe
+READHANDLE,WRITEHANDLE, pop ARRAY, pop, pos SCALAR, pos, print FILEHANDLE
+LIST, print LIST, print, printf FILEHANDLE FORMAT, LIST, printf FORMAT,
+LIST, prototype FUNCTION, push ARRAY,LIST, q/STRING/, qq/STRING/,
+qx/STRING/, qw/STRING/, quotemeta EXPR, quotemeta, rand EXPR, rand, read
+FILEHANDLE,SCALAR,LENGTH,OFFSET, read FILEHANDLE,SCALAR,LENGTH, readdir
+DIRHANDLE, readlink EXPR, readlink, recv SOCKET,SCALAR,LEN,FLAGS, redo
+LABEL, redo, ref EXPR, ref, rename OLDNAME,NEWNAME, require EXPR, require,
+reset EXPR, reset, return LIST, reverse LIST, rewinddir DIRHANDLE, rindex
+STR,SUBSTR,POSITION, rindex STR,SUBSTR, rmdir FILENAME, rmdir, s///, scalar
+EXPR, seek FILEHANDLE,POSITION,WHENCE, seekdir DIRHANDLE,POS, select
 FILEHANDLE, select, select RBITS,WBITS,EBITS,TIMEOUT, semctl
 ID,SEMNUM,CMD,ARG, semget KEY,NSEMS,FLAGS, semop KEY,OPSTRING, send
 SOCKET,MSG,FLAGS,TO, send SOCKET,MSG,FLAGS, setpgrp PID,PGRP, setpriority
@@ -404,9 +411,8 @@ VARIABLE, time, times, tr///, truncate FILEHANDLE,LENGTH, truncate
 EXPR,LENGTH, uc EXPR, uc, ucfirst EXPR, ucfirst, umask EXPR, umask, undef
 EXPR, undef, unlink LIST, unlink, unpack TEMPLATE,EXPR, untie VARIABLE,
 unshift ARRAY,LIST, use Module LIST, use Module, use Module VERSION LIST,
-use VERSION, utime LIST, values ASSOC_ARRAY, vec EXPR,OFFSET,BITS, wait,
-waitpid PID,FLAGS, wantarray, warn LIST, write FILEHANDLE, write EXPR,
-write, y///
+use VERSION, utime LIST, values HASH, vec EXPR,OFFSET,BITS, wait, waitpid
+PID,FLAGS, wantarray, warn LIST, write FILEHANDLE, write EXPR, write, y///
 
 =back
 

@@ -14,6 +14,7 @@ INTERN.h		Included before domestic .h files
 MANIFEST		This list of files
 Makefile.SH		A script that generates Makefile
 Porting/Glossary	Glossary of config.sh variables
+Porting/pumpkin.pod	Guidelines and hints for Perl maintainers
 README			The Instructions
 README.amiga		Notes about AmigaOS port
 README.os2		Notes about OS/2 port
@@ -646,7 +647,7 @@ t/op/cmp.t		See if the various string and numeric compare work
 t/op/cond.t		See if conditional expressions work
 t/op/delete.t		See if delete works
 t/op/do.t		See if subroutines work
-t/op/each.t		See if associative iterators work
+t/op/each.t		See if hash iterators work
 t/op/eval.t		See if eval operator works
 t/op/exec.t		See if exec and system work
 t/op/exp.t		See if math functions work
@@ -721,7 +722,6 @@ utils/perlbug.PL	A simple tool to submit a bug report
 utils/perldoc.PL	A simple tool to find & display perl's documentation
 utils/pl2pm.PL		A pl to pm translator
 utils/splain.PL		Stand-alone version of diagnostics.pm
-vms/Makefile		VMS port
 vms/config.vms		default config.h for VMS
 vms/descrip.mms		MM[SK] description file for build
 vms/ext/DCLsym/0README.txt	ReadMe file for VMS::DCLsym
@@ -813,7 +813,7 @@ x2p/a2p.y		A yacc grammer for awk
 x2p/a2py.c		Awk compiler, sort of
 x2p/cflags.SH		A script that emits C compilation flags per file
 x2p/find2perl.PL	A find to perl translator
-x2p/hash.c		Associative arrays again
+x2p/hash.c		Hashes again
 x2p/hash.h		Public declarations for the above
 x2p/proto.h		Dummy header
 x2p/s2p.PL		Sed to perl translator

@@ -34,6 +34,14 @@ application of opcode masks.  The revised Safe module has a new API
 and is implemented using the new Opcode module.  Please read the new
 Opcode and Safe documentation.
 
+=head2 Fixed Parsing of $$<digit>, &$<digit>, etc.
+
+A bug in previous versions of Perl 5.0 prevented proper parsing of
+numeric special variables as symbolic references.  That bug has been
+fixed.  As a result, the string "$$0" is no longer equivalent to
+C<$$."0">, but rather to C<${$0}>.  To get the old behavior, change
+"$$" followed by a digit to "${$}".
+
 =head2 Internal Change: FileHandle Deprecated
 
 Filehandles are now stored internally as type IO::Handle.
@@ -103,10 +111,9 @@ So "%hi" means "short integer in decimal", and "%ho" means
 =item keys as an lvalue
 
 As an lvalue, C<keys> allows you to increase the number of hash buckets
-allocated for the given associative array.  This can gain you a measure
-of efficiency if you know the hash is going to get big.  (This is
-similar to pre-extending an array by assigning a larger number to
-$#array.)  If you say
+allocated for the given hash.  This can gain you a measure of efficiency if
+you know the hash is going to get big.  (This is similar to pre-extending
+an array by assigning a larger number to $#array.)  If you say
 
     keys %hash = 200;
 
@@ -122,7 +129,7 @@ as trying has no effect).
 You can now use my() (with or without the parentheses) in the control
 expressions of control structures such as:
 
-    while (my $line = <>) {
+    while (defined(my $line = <>)) {
         $line = lc $line;
     } continue {
         print $line;
@@ -331,14 +338,71 @@ possibly for cleaning up.
 
 =back
 
-=item Efficiency Enhancements
+=head2 Malloc Enhancements
 
-All hash keys with the same string are only allocated once, so
-even if you have 100 copies of the same hash, the immutable keys
-never have to be re-allocated.
+If perl's malloc() is used, you can print memory statistics at runtime
+by running Perl thusly:
+
+  env PERL_DEBUG_MSTATS=2 perl your_script_here
+
+The value of 2 means to print statistics after compilation and on
+exit; with a value of 1, the statistics ares printed only on exit.
+(If you want the statistics at an arbitrary time, you'll need to
+install the optional module Devel::Peek.)
+
+In addition, three new compilation flags are recognized by malloc.c.
+(They have no effect if perl is compiled with system malloc().)
+
+=over
+
+=item -DEMERGENCY_SBRK
+
+If this macro is defined, running out of memory need not be a fatal
+error: a memory pool can allocated by assigning to the special
+variable C<$^M>.  See L<"$^M">.
+
+=item -DPACK_MALLOC
+
+Perl memory allocation is by bucket with sizes close to powers of two.
+Because of these malloc overhead may be big, especially for data of
+size exactly a power of two.  If C<PACK_MALLOC> is defined, perl uses
+a slightly different algorithm for small allocations (up to 64 bytes
+long), which makes it possible to have overhead down to 1 byte for
+allocations which are powers of two (and appear quite often).
+
+Expected memory savings (with 8-byte alignment in C<alignbytes>) is
+about 20% for typical Perl usage.  Expected slowdown due to additional
+malloc overhead is in fractions of a percent (hard to measure, because
+of the effect of saved memory on speed).
+
+=item -DTWO_POT_OPTIMIZE
+
+Similarly to C<PACK_MALLOC>, this macro improves allocations of data
+with size close to a power of two; but this works for big allocations
+(starting with 16K by default).  Such allocations are typical for big
+hashes and special-purpose scripts, especially image processing.
+
+On recent systems, the fact that perl requires 2M from system for 1M
+allocation will not affect speed of execution, since the tail of such
+a chunk is not going to be touched (and thus will not require real
+memory).  However, it may result in a premature out-of-memory error.
+So if you will be manipulating very large blocks with sizes close to
+powers of two, it would be wise to define this macro.
+
+Expected saving of memory is 0-100% (100% in applications which
+require most memory in such 2**n chunks); expected slowdown is
+negligible.
+
+=back
+
+=head2 Miscellaneous Efficiency Enhancements
 
 Functions that have an empty prototype and that do nothing but return
 a fixed value are now inlined (e.g. C<sub PI () { 3.14159 }>).
+
+Each unique hash key is only allocated once, no matter how many hashes
+have an entry with that key.  So even if you have 100 copies of the
+same hash, the hash keys never have to be re-allocated.
 
 =head1 Pragmata
 
@@ -382,7 +446,7 @@ Disable unsafe opcodes, or any named opcodes, when compiling Perl code.
 =item use vmsish
 
 Enable VMS-specific language features.  Currently, there are three
-VMS-specific feature available: 'status', which makes C<$?> and
+VMS-specific features available: 'status', which makes C<$?> and
 C<system> return genuine VMS status values instead of emulating POSIX;
 'exit', which makes C<exit> take a genuine VMS status value instead of
 assuming that C<exit 1> is an error; and 'time', which makes all times

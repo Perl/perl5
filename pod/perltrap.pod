@@ -47,8 +47,7 @@ You have to decide whether your array has numeric or string indices.
 
 =item *
 
-Associative array values do not spring into existence upon mere
-reference.
+Hash values do not spring into existence upon mere reference.
 
 =item *
 
@@ -795,7 +794,7 @@ The behavior is slightly different for:
 =item * (Variable Suicide)
 
 Variable suicide behavior is more consistent under Perl 5.
-Perl5 exhibits the same behavior for associative arrays and scalars,
+Perl5 exhibits the same behavior for hashes and scalars,
 that perl4 exhibits for only scalars.
 
     $aGlobal{ "aKey" } = "global value";

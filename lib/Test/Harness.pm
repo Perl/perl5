@@ -11,7 +11,7 @@ use vars qw($VERSION $verbose $switches $have_devel_corestack $curtest
 	    @ISA @EXPORT @EXPORT_OK);
 $have_devel_corestack = 0;
 
-$VERSION = "1.15";
+$VERSION = "1.1501";
 
 @ISA=('Exporter');
 @EXPORT= qw(&runtests);
@@ -60,9 +60,14 @@ sub runtests {
 	chop($te);
 	print "$te" . '.' x (20 - length($te));
 	my $fh = new FileHandle;
-	my $cmd = "$^X $switches $test|";
+	$fh->open($test) or print "can't open $test. $!\n";
+	my $first = <$fh>;
+	my $s = $switches;
+	$s .= " -T" if $first =~ /^#!.*\bperl.*-\w*T/;
+	$fh->close or print "can't close $test. $!\n";
+	my $cmd = "$^X $s $test|";
 	$cmd = "MCR $cmd" if $^O eq 'VMS';
-	$fh->open($cmd) or print "can't run. $!\n";
+	$fh->open($cmd) or print "can't run $test. $!\n";
 	$ok = $next = $max = 0;
 	@failed = ();
 	while (<$fh>) {
@@ -100,6 +105,7 @@ sub runtests {
 	my $wstatus = $?;
 	my $estatus = $^O eq 'VMS' ? $wstatus : $wstatus >> 8;
 	if ($^O eq 'VMS' ? !($wstatus & 1) : $wstatus) {
+	    my ($failed, $canon, $percent) = ('??', '??');
 	    print "dubious\n\tTest returned status $estatus (wstat $wstatus)\n";
 	    if (corestatus($wstatus)) { # until we have a wait module
 		if ($have_devel_corestack) {
@@ -109,9 +115,22 @@ sub runtests {
 		}
 	    }
 	    $bad++;
-	    $failedtests{$test} = { canon => '??',  max => $max || '??',
-				    failed => '??', 
-				    name => $test, percent => undef,
+	    if ($max) {
+	      if ($next == $max + 1 and not @failed) {
+		print "\tafter all the subtests completed successfully\n";
+		$percent = 0;
+		$failed = 0;	# But we do not set $canon!
+	      } else {
+		push @failed, $next..$max;
+		$failed = @failed;
+		(my $txt, $canon) = canonfailed($max,@failed);
+		$percent = 100*(scalar @failed)/$max;
+		print "DIED. ",$txt;
+	      }
+	    }
+	    $failedtests{$test} = { canon => $canon,  max => $max || '??',
+				    failed => $failed, 
+				    name => $test, percent => $percent,
 				    estat => $estatus, wstat => $wstatus,
 				  };
 	} elsif ($ok == $max && $next == $max+1) {
@@ -186,6 +205,7 @@ sub runtests {
     return ($bad == 0 && $totmax) ;
 }
 
+my $tried_devel_corestack;
 sub corestatus {
     my($st) = @_;
     my($ret);
@@ -199,8 +219,8 @@ sub corestatus {
 	$ret = WCOREDUMP($st);
     }
 
-    eval {require Devel::CoreStack};
-    $have_devel_corestack++ unless $@;
+    eval { require Devel::CoreStack; $have_devel_corestack++ } 
+      unless $tried_devel_corestack++;
 
     $ret;
 }

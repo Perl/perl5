@@ -358,16 +358,16 @@ aelemfast	known array element	ck_null		s	A S
 aelem		array element		ck_null		s	A S
 aslice		array slice		ck_null		m	A L
 
-# Associative arrays.
+# Hashes.
 
 each		each			ck_fun		t	H
 values		values			ck_fun		t	H
 keys		keys			ck_fun		t	H
 delete		delete			ck_delete	0	S
 exists		exists operator		ck_exists	is	S
-rv2hv		associative array deref	ck_rvconst	dt	
-helem		associative array elem	ck_null		s	H S
-hslice		associative array slice	ck_null		m	H L
+rv2hv		hash deref		ck_rvconst	dt	
+helem		hash elem		ck_null		s	H S
+hslice		hash slice		ck_null		m	H L
 
 # Explosives and implosives.
 
