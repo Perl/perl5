@@ -1066,7 +1066,7 @@ Also see:
 
 *
 
-L<perlos390>, F<README.os390>, F<perlposix-bc>, F<README.vmesa>,
+L<perlos390>, F<README.os390>, F<perlbs2000>, F<README.vmesa>,
 L<perlebcdic>.
 
 =item *
@@ -2018,7 +2018,7 @@ http://www.perl.com/CPAN/ports/index.html for binary distributions.
 =head1 SEE ALSO
 
 L<perlaix>, L<perlamiga>, L<perlcygwin>, L<perldos>, L<perlepoc>,
-L<perlebcdic>, L<perlhpux>, L<perlos2>, L<perlos390>, L<perlposix-bc>,
+L<perlebcdic>, L<perlhpux>, L<perlos2>, L<perlos390>, L<perlbs2000>,
 L<perlwin32>, L<perlvms>, L<perlvos>, and L<Win32>.
 
 =head1 AUTHORS / CONTRIBUTORS

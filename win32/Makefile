@@ -1028,7 +1028,8 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\README.machten .\perlmachten.pod
 	copy ..\README.os2 .\perlos2.pod
 	copy ..\README.os390 .\perlos390.pod
-	copy ..\README.posix .\perlposix.pod
+	copy ..\README.vmesa .\perlvmesa.pod
+	copy ..\README.bs2000 .\perlbs2000.pod
 	copy ..\README.solaris .\perlsolaris.pod
 	copy ..\vms\perlvms.pod .\perlvms.pod
 	copy ..\README.vos .\perlvos.pod

@@ -236,8 +236,8 @@ unary &, unary *, (TYPE)
 =item Regexp Quote-Like Operators
 
 ?PATTERN?, m/PATTERN/cgimosx, /PATTERN/cgimosx, q/STRING/, C<'STRING'>,
-qq/STRING/, "STRING", qr/STRING/imosx, qx/STRING/, `STRING`, qw/STRING/,
-s/PATTERN/REPLACEMENT/egimosx, tr/SEARCHLIST/REPLACEMENTLIST/cds,
+qq/STRING/, "STRING", qr/STRING/imosx, qw/STRING/, qu/STRING/, qx/STRING/,
+`STRING`, s/PATTERN/REPLACEMENT/egimosx, tr/SEARCHLIST/REPLACEMENTLIST/cds,
 y/SEARCHLIST/REPLACEMENTLIST/cds
 
 =item Gory details of parsing quoted constructs
@@ -366,16 +366,17 @@ DIRHANDLE,EXPR, ord EXPR, ord, our EXPR, pack TEMPLATE,LIST, package
 NAMESPACE, package, pipe READHANDLE,WRITEHANDLE, pop ARRAY, pop, pos
 SCALAR, pos, print FILEHANDLE LIST, print LIST, print, printf FILEHANDLE
 FORMAT, LIST, printf FORMAT, LIST, prototype FUNCTION, push ARRAY,LIST,
-q/STRING/, qq/STRING/, qr/STRING/, qx/STRING/, qw/STRING/, quotemeta EXPR,
-quotemeta, rand EXPR, rand, read FILEHANDLE,SCALAR,LENGTH,OFFSET, read
-FILEHANDLE,SCALAR,LENGTH, readdir DIRHANDLE, readline EXPR, readlink EXPR,
-readlink, readpipe EXPR, recv SOCKET,SCALAR,LENGTH,FLAGS, redo LABEL, redo,
-ref EXPR, ref, rename OLDNAME,NEWNAME, require VERSION, require EXPR,
-require, reset EXPR, reset, return EXPR, return, reverse LIST, rewinddir
-DIRHANDLE, rindex STR,SUBSTR,POSITION, rindex STR,SUBSTR, rmdir FILENAME,
-rmdir, s///, scalar EXPR, seek FILEHANDLE,POSITION,WHENCE, seekdir
-DIRHANDLE,POS, select FILEHANDLE, select, select RBITS,WBITS,EBITS,TIMEOUT,
-semctl ID,SEMNUM,CMD,ARG, semget KEY,NSEMS,FLAGS, semop KEY,OPSTRING, send
+q/STRING/, qq/STRING/, qr/STRING/, qu/STRING/, qw/STRING/, qx/STRING/,
+quotemeta EXPR, quotemeta, rand EXPR, rand, read
+FILEHANDLE,SCALAR,LENGTH,OFFSET, read FILEHANDLE,SCALAR,LENGTH, readdir
+DIRHANDLE, readline EXPR, readlink EXPR, readlink, readpipe EXPR, recv
+SOCKET,SCALAR,LENGTH,FLAGS, redo LABEL, redo, ref EXPR, ref, rename
+OLDNAME,NEWNAME, require VERSION, require EXPR, require, reset EXPR, reset,
+return EXPR, return, reverse LIST, rewinddir DIRHANDLE, rindex
+STR,SUBSTR,POSITION, rindex STR,SUBSTR, rmdir FILENAME, rmdir, s///, scalar
+EXPR, seek FILEHANDLE,POSITION,WHENCE, seekdir DIRHANDLE,POS, select
+FILEHANDLE, select, select RBITS,WBITS,EBITS,TIMEOUT, semctl
+ID,SEMNUM,CMD,ARG, semget KEY,NSEMS,FLAGS, semop KEY,OPSTRING, send
 SOCKET,MSG,FLAGS,TO, send SOCKET,MSG,FLAGS, setpgrp PID,PGRP, setpriority
 WHICH,WHO,PRIORITY, setsockopt SOCKET,LEVEL,OPTNAME,OPTVAL, shift ARRAY,
 shift, shmctl ID,CMD,ARG, shmget KEY,SIZE,FLAGS, shmread ID,VAR,POS,SIZE,
@@ -1341,6 +1342,8 @@ C<(?(condition)yes-pattern|no-pattern)>
 =over 4
 
 =item DESCRIPTION
+
+=item Class Data in a Can
 
 =item Class Data as Package Variables
 
@@ -3813,14 +3816,14 @@ B<filter_fetch_value>
 
 AvFILL, av_clear, av_delete, av_exists, av_extend, av_fetch, av_fill,
 av_len, av_make, av_pop, av_push, av_shift, av_store, av_undef, av_unshift,
-bytes_to_utf8, call_argv, call_method, call_pv, call_sv, CLASS, Copy,
-croak, CvSTASH, cv_const_sv, dMARK, dORIGMARK, dSP, dXSARGS, dXSI32, ENTER,
-eval_pv, eval_sv, EXTEND, fbm_compile, fbm_instr, FREETMPS, get_av, get_cv,
-get_hv, get_sv, GIMME, GIMME_V, GvSV, gv_fetchmeth, gv_fetchmethod,
-gv_fetchmethod_autoload, gv_stashpv, gv_stashsv, G_ARRAY, G_DISCARD,
-G_EVAL, G_NOARGS, G_SCALAR, G_VOID, HEf_SVKEY, HeHASH, HeKEY, HeKLEN, HePV,
-HeSVKEY, HeSVKEY_force, HeSVKEY_set, HeVAL, HvNAME, hv_clear, hv_delete,
-hv_delete_ent, hv_exists, hv_exists_ent, hv_fetch, hv_fetch_ent,
+bytes_from_utf8, bytes_to_utf8, call_argv, call_method, call_pv, call_sv,
+CLASS, Copy, croak, CvSTASH, cv_const_sv, dMARK, dORIGMARK, dSP, dXSARGS,
+dXSI32, ENTER, eval_pv, eval_sv, EXTEND, fbm_compile, fbm_instr, FREETMPS,
+get_av, get_cv, get_hv, get_sv, GIMME, GIMME_V, GvSV, gv_fetchmeth,
+gv_fetchmethod, gv_fetchmethod_autoload, gv_stashpv, gv_stashsv, G_ARRAY,
+G_DISCARD, G_EVAL, G_NOARGS, G_SCALAR, G_VOID, HEf_SVKEY, HeHASH, HeKEY,
+HeKLEN, HePV, HeSVKEY, HeSVKEY_force, HeSVKEY_set, HeVAL, HvNAME, hv_clear,
+hv_delete, hv_delete_ent, hv_exists, hv_exists_ent, hv_fetch, hv_fetch_ent,
 hv_iterinit, hv_iterkey, hv_iterkeysv, hv_iternext, hv_iternextsv,
 hv_iterval, hv_magic, hv_store, hv_store_ent, hv_undef, isALNUM, isALPHA,
 isDIGIT, isLOWER, isSPACE, isUPPER, is_utf8_char, is_utf8_string, items,
@@ -3830,10 +3833,9 @@ newHV, newRV_inc, newRV_noinc, NEWSV, newSViv, newSVnv, newSVpv, newSVpvf,
 newSVpvn, newSVpvn_share, newSVrv, newSVsv, newSVuv, newXS, newXSproto,
 Newz, Nullav, Nullch, Nullcv, Nullhv, Nullsv, ORIGMARK, perl_alloc,
 perl_construct, perl_destruct, perl_free, perl_parse, perl_run,
-PL_DBsingle, PL_DBsub, PL_DBtrace, PL_dowarn, PL_last_in_gv, PL_modglobal,
-PL_na, PL_ofs_sv, PL_rs, PL_sv_no, PL_sv_undef, PL_sv_yes, POPi, POPl,
-POPn, POPp, POPs, PUSHi, PUSHMARK, PUSHn, PUSHp, PUSHs, PUSHu, PUTBACK,
-Renew, Renewc, require_pv, RETVAL, Safefree, savepv, savepvn, SAVETMPS, SP,
+PL_modglobal, PL_na, PL_sv_no, PL_sv_undef, PL_sv_yes, POPi, POPl, POPn,
+POPp, POPs, PUSHi, PUSHMARK, PUSHn, PUSHp, PUSHs, PUSHu, PUTBACK, Renew,
+Renewc, require_pv, RETVAL, Safefree, savepv, savepvn, SAVETMPS, SP,
 SPAGAIN, ST, strEQ, strGE, strGT, strLE, strLT, strNE, strnEQ, strnNE,
 StructCopy, SvCUR, SvCUR_set, SvEND, SvGETMAGIC, SvGROW, SvIOK, SvIOKp,
 SvIOK_notUV, SvIOK_off, SvIOK_on, SvIOK_only, SvIOK_only_UV, SvIOK_UV,
@@ -3876,11 +3878,80 @@ XS_VERSION_BOOTCHECK, Zero
 
 =item DESCRIPTION
 
-djSP, is_gv_magical, LVRET, start_glob
+djSP, is_gv_magical, LVRET, PL_DBsingle, PL_DBsub, PL_DBtrace, PL_dowarn,
+PL_last_in_gv, PL_ofs_sv, PL_rs, start_glob
 
 =item AUTHORS
 
 =item SEE ALSO
+
+=back
+
+=head2 perliol - C API for Perl's implementation of IO in Layers.
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item History and Background
+
+=item Layers vs Disciplines
+
+=item Data Structures
+
+1. The functions and attributes of the "layer class", 2. The per-instance
+data for a particular handle
+
+=item Functions and Attributes
+
+1. Opening and setup functions, 2. Basic IO operations, 3. Stdio class
+buffering options, 4. Functions to support Perl's traditional "fast" access
+to the buffer
+
+=item Per-instance Data
+
+=item Layers in action.
+
+=item Per-instance flag bits
+
+PERLIO_F_EOF, PERLIO_F_CANWRITE,  PERLIO_F_CANREAD, PERLIO_F_ERROR,
+PERLIO_F_TRUNCATE, PERLIO_F_APPEND, PERLIO_F_CRLF, PERLIO_F_UTF8,
+PERLIO_F_UNBUF, PERLIO_F_WRBUF, PERLIO_F_RDBUF, PERLIO_F_LINEBUF,
+PERLIO_F_TEMP, PERLIO_F_OPEN, PERLIO_F_FASTGETS
+
+=item Methods in Detail
+
+IV	(*Fileno)(PerlIO *f);,	PerlIO *	(*Fdopen)(PerlIO_funcs
+*tab, int fd, const char *mode);,  PerlIO *	 (*Open)(PerlIO_funcs *tab,
+const char *path, const char *mode);,  int	     (*Reopen)(const char
+*path, const char *mode, PerlIO *f);,  IV	   (*Pushed)(PerlIO
+*f,const char *mode,const char *arg,STRLEN len);,  IV	      
+(*Popped)(PerlIO *f);,	SSize_t (*Read)(PerlIO *f, void *vbuf, Size_t
+count);,  SSize_t (*Unread)(PerlIO *f, const void *vbuf, Size_t count);, 
+SSize_t (*Write)(PerlIO *f, const void *vbuf, Size_t count);,  IV	   
+    (*Seek)(PerlIO *f, Off_t offset, int whence);,  Off_t	   
+(*Tell)(PerlIO *f);,  IV		(*Close)(PerlIO *f);,  IV	   
+    (*Flush)(PerlIO *f);,  IV		    (*Fill)(PerlIO *f);,  IV	   
+	(*Eof)(PerlIO *f);,  IV 	(*Error)(PerlIO *f);,  void	   
+    (*Clearerr)(PerlIO *f);,  void	    (*Setlinebuf)(PerlIO *f);, 
+STDCHAR *   (*Get_base)(PerlIO *f);,  Size_t		   
+(*Get_bufsiz)(PerlIO *f);,  STDCHAR *	(*Get_ptr)(PerlIO *f);,  SSize_t   
+    (*Get_cnt)(PerlIO *f);,  void	    (*Set_ptrcnt)(PerlIO *f,STDCHAR
+*ptr,SSize_t cnt);
+
+=item Core Layers
+
+"unix", "perlio", "stdio", "crlf", "mmap", "pending", "raw", "utf8"
+
+=item Extension Layers
+
+"encoding"
+
+=back
 
 =back
 
@@ -3892,27 +3963,36 @@ djSP, is_gv_magical, LVRET, start_glob
 
 =item DESCRIPTION
 
-B<PerlIO *>, B<PerlIO_stdin()>, B<PerlIO_stdout()>, B<PerlIO_stderr()>,
-B<PerlIO_open(path, mode)>, B<PerlIO_fdopen(fd,mode)>,
+1. USE_STDIO, 2. USE_SFIO, 3. USE_PERLIO, B<PerlIO_stdin()>,
+B<PerlIO_stdout()>, B<PerlIO_stderr()>, B<PerlIO_open(path, mode)>,
+B<PerlIO_fdopen(fd,mode)>, B<PerlIO_reopen(path,mode,f)>,
 B<PerlIO_printf(f,fmt,...)>, B<PerlIO_vprintf(f,fmt,a)>,
 B<PerlIO_stdoutf(fmt,...)>, B<PerlIO_read(f,buf,count)>,
 B<PerlIO_write(f,buf,count)>, B<PerlIO_close(f)>, B<PerlIO_puts(f,s)>,
 B<PerlIO_putc(f,c)>, B<PerlIO_ungetc(f,c)>, B<PerlIO_getc(f)>,
 B<PerlIO_eof(f)>, B<PerlIO_error(f)>, B<PerlIO_fileno(f)>,
-B<PerlIO_clearerr(f)>, B<PerlIO_flush(f)>, B<PerlIO_tell(f)>,
-B<PerlIO_seek(f,o,w)>, B<PerlIO_getpos(f,p)>, B<PerlIO_setpos(f,p)>,
-B<PerlIO_rewind(f)>, B<PerlIO_tmpfile()>
+B<PerlIO_clearerr(f)>, B<PerlIO_flush(f)>, B<PerlIO_seek(f,offset,whence)>,
+B<PerlIO_tell(f)>, B<PerlIO_getpos(f,p)>, B<PerlIO_setpos(f,p)>,
+B<PerlIO_rewind(f)>, B<PerlIO_tmpfile()>, B<PerlIO_setlinebuf(f)>
 
 =over 4
 
 =item Co-existence with stdio
 
 B<PerlIO_importFILE(f,flags)>, B<PerlIO_exportFILE(f,flags)>,
-B<PerlIO_findFILE(f)>, B<PerlIO_releaseFILE(p,f)>, B<PerlIO_setlinebuf(f)>,
-B<PerlIO_has_cntptr(f)>, B<PerlIO_get_ptr(f)>, B<PerlIO_get_cnt(f)>,
-B<PerlIO_canset_cnt(f)>, B<PerlIO_fast_gets(f)>,
-B<PerlIO_set_ptrcnt(f,p,c)>, B<PerlIO_set_cnt(f,c)>, B<PerlIO_has_base(f)>,
-B<PerlIO_get_base(f)>, B<PerlIO_get_bufsiz(f)>
+B<PerlIO_findFILE(f)>, B<PerlIO_releaseFILE(p,f)>
+
+=item "Fast gets" Functions
+
+B<PerlIO_fast_gets(f)>, B<PerlIO_has_cntptr(f)>, B<PerlIO_get_cnt(f)>,
+B<PerlIO_get_ptr(f)>, B<PerlIO_set_ptrcnt(f,p,c)>, B<PerlIO_canset_cnt(f)>,
+B<PerlIO_set_cnt(f,c)>, B<PerlIO_has_base(f)>, B<PerlIO_get_base(f)>,
+B<PerlIO_get_bufsiz(f)>
+
+=item Other Functions
+
+PerlIO_apply_layers(f,mode,layers), PerlIO_binmode(f,ptype,imode,layers),
+'E<lt>' read, 'E<gt>' write, '+' read/write, PerlIO_debug(fmt,...)
 
 =back
 
@@ -5279,6 +5359,49 @@ sh Configure -Dprefix=/ade -Dloclibpth=/ade/lib
 
 =back
 
+=head2 perlbs2000, README.posix-bc - building and installing Perl for
+BS2000 POSIX.
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item gzip
+
+=item bison
+
+=item Unpacking
+
+=item Compiling
+
+=item Testing
+
+=item Install
+
+=item Using Perl
+
+=item Floating point anomalies
+
+=back
+
+=item AUTHORS
+
+=item SEE ALSO
+
+=over 4
+
+=item Mailing list
+
+=back
+
+=item HISTORY
+
+=back
+
 =head2 perlcygwin, README.cygwin - Perl for Cygwin
 
 =over 4
@@ -5361,6 +5484,50 @@ Source, Compiled Module Source, Perl Modules/Scripts
 =item AUTHORS
 
 =item HISTORY
+
+=back
+
+=head2 perldos - Perl under DOS, W31, W95.
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Prerequisites
+
+DJGPP, Pthreads
+
+=item Shortcomings of Perl under DOS
+
+=item Building
+
+=item Testing
+
+=item Installation
+
+=back
+
+=item BUILDING AND INSTALLING MODULES
+
+=over 4
+
+=item Prerequisites
+
+=item Unpacking CPAN Modules
+
+=item Building Non-XS Modules
+
+=item Building XS Modules
+
+=back
+
+=item AUTHOR
+
+=item SEE ALSO
 
 =back
 
@@ -5746,50 +5913,13 @@ C<COND_WAIT>, F<os2.c>
 
 =item testing anomalies
 
+=item installation anomalies
+
 =item Usage Hints
 
+=item Floating point anomalies
+
 =item Modules and Extensions
-
-=back
-
-=item AUTHORS
-
-=item SEE ALSO
-
-=over 4
-
-=item Mailing list
-
-=back
-
-=item HISTORY
-
-=back
-
-=head2 perlposix-bc, README.posix-bc - building and installing Perl for
-BS2000 POSIX.
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=over 4
-
-=item gzip
-
-=item bison
-
-=item Unpacking
-
-=item Compiling
-
-=item Testing
-
-=item Install
-
-=item Using Perl
 
 =back
 
@@ -5888,6 +6018,52 @@ DATAMODEL_NATIVE specified", sh: ar: not found
 =item AUTHOR
 
 =item LAST MODIFIED
+
+=back
+
+=head2 perlvmesa, README.vmesa - building and installing Perl for VM/ESA.
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Unpacking
+
+=item Setup and utilities
+
+=item Configure
+
+- Don't turn on the compiler optimization flag "-O".  There's	  a bug in
+the compiler (APAR PQ18812) that generates some bad code       the
+optimizer is on, - As VM/ESA doesn't fully support the fork() API programs
+relying on	 this call will not work. I've replaced fork()/exec() with
+spawn()       and the standalone exec() with spawn(). This has a side
+effect when	opening unnamed pipes in a shell script: there is no child
+process      generated under
+
+=item testing anomalies
+
+=item Usage Hints
+
+When using perl on VM/ESA please keep in mind that the EBCDIC and ASCII
+character sets are different.  Perl builtin functions that may behave
+differently under EBCDIC are mentioned in the perlport.pod document.
+
+=back
+
+=item AUTHORS
+
+=item SEE ALSO
+
+=over 4
+
+=item Mailing list
+
+=back
 
 =back
 
@@ -6001,6 +6177,48 @@ LIST, waitpid PID,FLAGS
 =item AUTHOR
 
 =item LAST UPDATE
+
+=back
+
+=head2 perlwin32 - Perl under Win32
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Setting Up
+
+Make, Command Shell, Borland C++, Microsoft Visual C++, Mingw32 with GCC
+
+=item Building
+
+=item Testing
+
+=item Installation
+
+=item Usage Hints
+
+Environment Variables, File Globbing, Using perl from the command line,
+Building Extensions, Command-line Wildcard Expansion, Win32 Specific
+Extensions, Running Perl Scripts, Miscellaneous Things
+
+=back
+
+=item BUGS AND CAVEATS
+
+=item AUTHORS
+
+Gary Ng E<lt>71564.1743@CompuServe.COME<gt>, Gurusamy Sarathy
+E<lt>gsar@activestate.comE<gt>, Nick Ing-Simmons
+E<lt>nick@ing-simmons.netE<gt>
+
+=item SEE ALSO
+
+=item HISTORY
 
 =back
 
@@ -7987,17 +8205,17 @@ C<revision>, C<rm>, C<rmail>, C<runnm>
 C<sched_yield>, C<scriptdir>, C<scriptdirexp>, C<sed>, C<seedfunc>,
 C<selectminbits>, C<selecttype>, C<sendmail>, C<sh>, C<shar>, C<sharpbang>,
 C<shmattype>, C<shortsize>, C<shrpenv>, C<shsharp>, C<sig_count>,
-C<sig_name>, C<sig_name_init>, C<sig_num>, C<sig_num_init>, C<signal_t>,
-C<sitearch>, C<sitearchexp>, C<sitebin>, C<sitebinexp>, C<sitelib>,
-C<sitelib_stem>, C<sitelibexp>, C<siteprefix>, C<siteprefixexp>,
-C<sizesize>, C<sizetype>, C<sleep>, C<smail>, C<so>, C<sockethdr>,
-C<socketlib>, C<socksizetype>, C<sort>, C<spackage>, C<spitshell>,
-C<sPRId64>, C<sPRIeldbl>, C<sPRIEUldbl>, C<sPRIfldbl>, C<sPRIFUldbl>,
-C<sPRIgldbl>, C<sPRIGUldbl>, C<sPRIi64>, C<sPRIo64>, C<sPRIu64>,
-C<sPRIx64>, C<sPRIXU64>, C<src>, C<sSCNfldbl>, C<ssizetype>, C<startperl>,
-C<startsh>, C<static_ext>, C<stdchar>, C<stdio_base>, C<stdio_bufsiz>,
-C<stdio_cnt>, C<stdio_filbuf>, C<stdio_ptr>, C<stdio_stream_array>,
-C<strings>, C<submit>, C<subversion>, C<sysman>
+C<sig_name>, C<sig_name_init>, C<sig_num>, C<sig_num_init>, C<sig_size>,
+C<signal_t>, C<sitearch>, C<sitearchexp>, C<sitebin>, C<sitebinexp>,
+C<sitelib>, C<sitelib_stem>, C<sitelibexp>, C<siteprefix>,
+C<siteprefixexp>, C<sizesize>, C<sizetype>, C<sleep>, C<smail>, C<so>,
+C<sockethdr>, C<socketlib>, C<socksizetype>, C<sort>, C<spackage>,
+C<spitshell>, C<sPRId64>, C<sPRIeldbl>, C<sPRIEUldbl>, C<sPRIfldbl>,
+C<sPRIFUldbl>, C<sPRIgldbl>, C<sPRIGUldbl>, C<sPRIi64>, C<sPRIo64>,
+C<sPRIu64>, C<sPRIx64>, C<sPRIXU64>, C<src>, C<sSCNfldbl>, C<ssizetype>,
+C<startperl>, C<startsh>, C<static_ext>, C<stdchar>, C<stdio_base>,
+C<stdio_bufsiz>, C<stdio_cnt>, C<stdio_filbuf>, C<stdio_ptr>,
+C<stdio_stream_array>, C<strings>, C<submit>, C<subversion>, C<sysman>
 
 =item t
 
@@ -12589,6 +12807,10 @@ NORMAL TESTS, SKIPPED TESTS, TODO TESTS
 =over 4
 
 =item The test script output
+
+B<1..M>, B<'ok', 'not ok'.  Ok?>, B<test numbers>,
+B<$Test::Harness::verbose>, B<$Test::Harness::switches>, B<Skipping tests>,
+B<Bail out!>, B<Comments>
 
 =back
 
