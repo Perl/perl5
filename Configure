@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu May 20 10:07:46 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Sat May 22 00:54:37 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -10975,7 +10975,7 @@ $cat >try.c <<EOCP
 #include <stdio.h>
 #$t_unistd I_UNISTD
 #ifdef I_UNISTD
-#include <unistd.h>
+# include <unistd.h>
 #endif
 #$d_sysconf HAS_SYSCONF
 #$d_stdio_stream_array HAS_STDIO_STREAM_ARRAY
@@ -11053,12 +11053,16 @@ case "$fflushNULL" in
 '') 	set try -DTRY_FFLUSH_NULL $output
 	$rm -f try.out
 	if eval $compile; then
-	        $cat >&4 <<EOM
-(This test may fail, saying "Core dumped" or something equally evil.)
-EOM
 	    	./try$exe_ext 2>/dev/null
-		if $test -s try.out -a "X$?" = X42; then
+		code="$?"
+		if $test -s try.out -a "X$code" = X42; then
 			fflushNULL="`$cat try.out`"
+		else
+			if $test "X$code" != X42; then
+				$cat >&4 <<EOM
+(If this test failed, don't worry, we'll try another method shortly.)
+EOM
+			fi
 		fi
 	fi
 	$rm -f core try.core core.try.*
@@ -11088,51 +11092,51 @@ $define|true|[yY]*)
 	fflushNULL="$undef"
 	;;
 esac
-: check for fflush all behaviour
-case "$fflushall" in
-'') 	set try -DTRY_FFLUSH_ALL $output
-	$rm -f try.out
-	if eval $compile; then
-	        $cat >&4 <<EOM
-(Also this test may fail.)
-EOM
-	    	./try$exe_ext 2>/dev/null
-		if $test -s try.out -a "X$?" = X42; then
-			fflushall="`$cat try.out`"
-		fi
-	fi
-	$rm -f core try.core core.try.*
+: check explicit looping only if NULL did not work
+case "$fflushNULL" in
+"$undef")
+	: check for fflush all behaviour
 	case "$fflushall" in
-	x)	$cat >&4 <<EOM
-Flushing explicitly all the stdio streams works.
+	'') 	set try -DTRY_FFLUSH_ALL $output
+		$rm -f try.out
+		if eval $compile; then
+	        $cat >&4 <<EOM
+(Now testing the other method--but note that also this may fail.)
 EOM
-		fflushall="$define"
-		;;
-	'')	$cat >&4 <<EOM
-Flushing explicitly all the stdio streams doesn't work.
+		    	./try$exe_ext 2>/dev/null
+			if $test -s try.out -a "X$?" = X42; then
+				fflushall="`$cat try.out`"
+			fi
+		fi
+		$rm -f core try.core core.try.*
+		case "$fflushall" in
+		x)	$cat >&4 <<EOM
+Whew. Flushing explicitly all the stdio streams works.
 EOM
-		fflushall="$undef"
-		;;
-	*)	$cat >&4 <<EOM
+			fflushall="$define"
+			;;
+		'')	$cat >&4 <<EOM
+Sigh. Flushing explicitly all the stdio streams doesn't work.
+EOM
+			fflushall="$undef"
+			;;
+		*)	$cat >&4 <<EOM
 Cannot figure out whether flushing stdio streams explicitly works or not.
 I'm assuming it doesn't.
 EOM
+			fflushall="$undef"
+			;;
+		esac
+		;;
+	"$define"|true|[yY]*)
+		fflushall="$define"
+		;;
+	*)
 		fflushall="$undef"
 		;;
 	esac
-	case "$fflushall$fflushNULL" in
-	undefdefine)
-                $cat >&4 <<EOM
-(That's ok.  I'll use fflush(NULL) instead.)
-EOM
-		;;
-	esac
 	;;
-$define|true|[yY]*)
-	fflushall="$define"
-	;;
-*)
-	fflushall="$undef"
+*)	fflushall="$undef"	
 	;;
 esac
 case "$fflushNULL$fflushall" in
