@@ -64,20 +64,6 @@
 #undef op
 #endif /* op */
 
-static regnode regdummy;
-static char *  regparse;       /* Input-scan pointer. */
-static char *  regxend;        /* End of input for compile */
-static regnode *       regcode;        /* Code-emit pointer; &regdummy = don't. */
-static I32             regnaughty;     /* How bad is this pattern? */
-static I32             regsawback;     /* Did we see \1, ...? */
-
-/* This guys appear both in regcomp.c and regexec.c, but there is no
-   other reason to have them global. */
-static char *  regprecomp;     /* uncompiled string. */
-static I32		regnpar;	/* () count. */
-static I32		regsize;	/* Code size. */
-static U16		regflags;	/* are we folding, multilining? */
-
 #ifdef MSDOS
 # if defined(BUGGY_MSC6)
  /* MSC 6.00A breaks on op/regexp.t test 85 unless we turn this off */
@@ -116,6 +102,7 @@ static U16		regflags;	/* are we folding, multilining? */
  * Forward declarations for pregcomp()'s friends.
  */
 
+#ifndef PERL_OBJECT
 static regnode *reg _((I32, I32 *));
 static regnode *reganode _((U8, U32));
 static regnode *regatom _((I32 *));
@@ -131,18 +118,11 @@ static void regtail _((regnode *, regnode *));
 static char* regwhite _((char *, char *));
 static char* nextchar _((void));
 static void re_croak2 _((const char* pat1,const char* pat2,...)) __attribute__((noreturn));
-
-static U32 regseen;
-static I32 seen_zerolen;
-static regexp *rx;
-static I32 extralen;
-
-#ifdef DEBUGGING
-static int colorset;
-#endif 
+#endif
 
 /* Length of a variant. */
 
+#ifndef PERL_OBJECT
 typedef struct {
     I32 len_min;
     I32 len_delta;
@@ -160,6 +140,7 @@ typedef struct {
     I32 offset_float_max;
     I32 flags;
 } scan_data_t;
+#endif
 
 static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
@@ -188,7 +169,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 #define SF_HAS_EVAL		0x200
 #define SCF_DO_SUBSTR		0x400
 
-static void
+STATIC void
 scan_commit(scan_data_t *data)
 {
     STRLEN l = SvCUR(data->last_found);
@@ -223,7 +204,7 @@ scan_commit(scan_data_t *data)
 /* Stops at toplevel WHILEM as well as at `last'. At end *scanp is set
    to the position after last scanned or to NULL. */
 
-static I32
+STATIC I32
 study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 flags)
 			/* scanp: Start here (read-write). */
 			/* deltap: Write maxlen-minlen here. */
@@ -674,7 +655,7 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
     return min;
 }
 
-static I32
+STATIC I32
 add_data(I32 n, char *s)
 {
     if (rx->data) {
@@ -988,7 +969,7 @@ pregcomp(char *exp, char *xend, PMOP *pm)
  * is a trifle forced, but the need to tie the tails of the branches to what
  * follows makes it hard to avoid.
  */
-static regnode *
+STATIC regnode *
 reg(I32 paren, I32 *flagp)
     /* paren: Parenthesized? 0=top, 1=(, inside: changed to letter. */
 {
@@ -1269,7 +1250,7 @@ reg(I32 paren, I32 *flagp)
  *
  * Implements the concatenation operator.
  */
-static regnode *
+STATIC regnode *
 regbranch(I32 *flagp, I32 first)
 {
     register regnode *ret;
@@ -1333,7 +1314,7 @@ regbranch(I32 *flagp, I32 first)
  * It might seem that this node could be dispensed with entirely, but the
  * endmarker role is not redundant.
  */
-static regnode *
+STATIC regnode *
 regpiece(I32 *flagp)
 {
     register regnode *ret;
@@ -1489,7 +1470,7 @@ regpiece(I32 *flagp)
  *
  * [Yes, it is worth fixing, some scripts can run twice the speed.]
  */
-static regnode *
+STATIC regnode *
 regatom(I32 *flagp)
 {
     register regnode *ret = 0;
@@ -1816,7 +1797,7 @@ tryagain:
     return(ret);
 }
 
-static char *
+STATIC char *
 regwhite(char *p, char *e)
 {
     while (p < e) {
@@ -1833,7 +1814,7 @@ regwhite(char *p, char *e)
     return p;
 }
 
-static regnode *
+STATIC regnode *
 regclass(void)
 {
     register char *opnd, *s;
@@ -2037,7 +2018,7 @@ regclass(void)
     return ret;
 }
 
-static char*
+STATIC char*
 nextchar(void)
 {
     char* retval = regparse++;
@@ -2069,7 +2050,7 @@ nextchar(void)
 /*
 - reg_node - emit a node
 */
-static regnode *			/* Location. */
+STATIC regnode *			/* Location. */
 reg_node(U8 op)
 {
     register regnode *ret;
@@ -2097,7 +2078,7 @@ reg_node(U8 op)
 /*
 - reganode - emit a node with an argument
 */
-static regnode *			/* Location. */
+STATIC regnode *			/* Location. */
 reganode(U8 op, U32 arg)
 {
     register regnode *ret;
@@ -2125,7 +2106,7 @@ reganode(U8 op, U32 arg)
 /*
 - regc - emit (if appropriate) a byte of code
 */
-static void
+STATIC void
 regc(U8 b, char* s)
 {
     if (!SIZE_ONLY)
@@ -2137,7 +2118,7 @@ regc(U8 b, char* s)
 *
 * Means relocating the operand.
 */
-static void
+STATIC void
 reginsert(U8 op, regnode *opnd)
 {
     register regnode *src;
@@ -2170,7 +2151,7 @@ reginsert(U8 op, regnode *opnd)
 /*
 - regtail - set the next-pointer at the end of a node chain of p to val.
 */
-static void
+STATIC void
 regtail(regnode *p, regnode *val)
 {
     register regnode *scan;
@@ -2215,7 +2196,7 @@ regtail(regnode *p, regnode *val)
 /*
 - regoptail - regtail on operand of first argument; nop if operandless
 */
-static void
+STATIC void
 regoptail(regnode *p, regnode *val)
 {
     /* "Operandless" and "op != BRANCH" are synonymous in practice. */
@@ -2250,11 +2231,11 @@ regcurly(register char *s)
     return TRUE;
 }
 
-#ifdef DEBUGGING
 
-static regnode *
+STATIC regnode *
 dumpuntil(regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
 {
+#ifdef DEBUGGING
     register char op = EXACT;	/* Arbitrary non-END op. */
     register regnode *next, *onode;
 
@@ -2311,6 +2292,7 @@ dumpuntil(regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
 	else if (op == WHILEM)
 	    l--;
     }
+#endif	/* DEBUGGING */
     return node;
 }
 
@@ -2320,6 +2302,7 @@ dumpuntil(regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
 void
 regdump(regexp *r)
 {
+#ifdef DEBUGGING
     SV *sv = sv_newmortal();
 
     (void)dumpuntil(r->program, r->program + 1, NULL, sv, 0);
@@ -2372,6 +2355,7 @@ regdump(regexp *r)
 	PerlIO_printf(Perl_debug_log, "implicit ");
     PerlIO_printf(Perl_debug_log, "minlen %ld ", (long) r->minlen);
     PerlIO_printf(Perl_debug_log, "\n");
+#endif	/* DEBUGGING */
 }
 
 /*
@@ -2380,6 +2364,7 @@ regdump(regexp *r)
 void
 regprop(SV *sv, regnode *o)
 {
+#ifdef DEBUGGING
     register char *p = 0;
 
     sv_setpv(sv, ":");
@@ -2577,8 +2562,8 @@ regprop(SV *sv, regnode *o)
     }
     if (p)
 	sv_catpv(sv, p);
+#endif	/* DEBUGGING */
 }
-#endif /* DEBUGGING */
 
 void
 pregfree(struct regexp *r)
@@ -2648,17 +2633,8 @@ regnext(register regnode *p)
 #endif
 }
 
-#ifdef I_STDARG
-static void	
+STATIC void	
 re_croak2(const char* pat1,const char* pat2,...)
-#else
-/*VARARGS0*/
-static void	
-re_croak2(const char* pat1,const char* pat2, va_alist)
-    const char* pat1;
-    const char* pat2;
-    va_dcl
-#endif 
 {
     va_list args;
     STRLEN l1 = strlen(pat1);
@@ -2674,11 +2650,7 @@ re_croak2(const char* pat1,const char* pat2, va_alist)
     Copy(pat2, buf + l1, l2 , char);
     buf[l1 + l2 + 1] = '\n';
     buf[l1 + l2 + 2] = '\0';
-#ifdef I_STDARG
     va_start(args, pat2);
-#else
-    va_start(args);
-#endif
     message = mess(buf, &args);
     va_end(args);
     l1 = strlen(message);

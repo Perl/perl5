@@ -3,13 +3,14 @@
 #
 # This is set up to build a perl.exe that runs off a shared library
 # (perl.dll).  Also makes individual DLLs for the XS extensions.
-#
-
+# NB: Miniperl has a different set of objects it depends on than
+# perl.exe
+# Also, Miniperl will not build with -DPERL_OBJECT defined
 #
 # Set these to wherever you want "nmake install" to put your
 # newly built perl.
 INST_DRV	= c:
-INST_TOP	= $(INST_DRV)\perl5004.5x
+INST_TOP	= $(INST_DRV)\perl\5004.5x
 
 #
 # uncomment to enable threads-capabilities
@@ -18,6 +19,11 @@ INST_TOP	= $(INST_DRV)\perl5004.5x
 #
 # uncomment next line if you are using Visual C++ 2.x
 #CCTYPE		= MSVC20
+
+#
+# uncomment next line if you want to use the perl object
+# Currently, this cannot be enabled if you ask for threads above
+#OBJECT		= -DPERL_OBJECT
 
 #
 # uncomment next line if you want debug version of perl (big,slow)
@@ -39,8 +45,9 @@ INST_TOP	= $(INST_DRV)\perl5004.5x
 # set this if you wish to use perl's malloc
 # WARNING: Turning this on/off WILL break binary compatibility with extensions
 # you may have compiled with/without it.  Be prepared to recompile all extensions
-# if you change the default.
-PERL_MALLOC	= define
+# if you change the default.  Currently, this cannot be enabled if you ask for
+# PERL_OBJECT above.
+#PERL_MALLOC	= define
 
 #
 # set the install locations of the compiler include/libraries
@@ -107,8 +114,12 @@ LIB32		= $(LINK32) -lib
 #
 # Options
 #
-
-!IF "$(RUNTIME)" == ""
+!IF  "$(OBJECT)" == "-DPERL_OBJECT"
+RUNTIME		= -MT
+# XXX building with -MD fails many tests, but cannot investigate
+# because building with debug crashes compiler :-( GSAR )-:
+#RUNTIME	= -MD
+!ELSE
 RUNTIME		= -MD
 !ENDIF
 
@@ -129,14 +140,14 @@ LIBC		= libcmt.lib
 !  IF "$(CCTYPE)" == "MSVC20"
 OPTIMIZE	= -Od $(RUNTIME) -Z7 -D_DEBUG -DDEBUGGING
 !  ELSE
-OPTIMIZE	= -Od $(RUNTIME)d -Z7 -D_DEBUG -DDEBUGGING
+OPTIMIZE	= -Od $(RUNTIME)d -Zi -D_DEBUG -DDEBUGGING
 !  ENDIF
 LINK_DBG	= -debug -pdb:none
 !ELSE
 !  IF "$(CCTYPE)" == "MSVC20"
-OPTIMIZE	= -Od $(RUNTIME) -DNDEBUG
+OPTIMIZE	= -O2 $(RUNTIME) -DNDEBUG
 !  ELSE
-OPTIMIZE	= -Od $(RUNTIME) -DNDEBUG
+OPTIMIZE	= -O2 $(RUNTIME) -DNDEBUG
 !  ENDIF
 LINK_DBG	= -release
 !ENDIF
@@ -145,7 +156,7 @@ LINK_DBG	= -release
 OPTIMIZE	= $(OPTIMIZE) $(CXX_FLAG)
 !ENDIF
 
-# we don't add LIBC here, the compiler do it based on -MD/-MT
+# we don't add LIBC here, the compiler does it based on -MD/-MT
 LIBFILES	= $(CRYPT_LIB) oldnames.lib kernel32.lib user32.lib gdi32.lib \
 		winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib \
 		oleaut32.lib netapi32.lib uuid.lib wsock32.lib mpr.lib winmm.lib \
@@ -195,9 +206,11 @@ EXTUTILSDIR	= $(LIBDIR)\extutils
 !IF "$(OBJECT)" == "-DPERL_OBJECT"
 PERLIMPLIB	= ..\perlcore.lib
 PERLDLL		= ..\perlcore.dll
+CAPILIB		= $(COREDIR)\PerlCAPI.lib
 !ELSE
 PERLIMPLIB	= ..\perl.lib
 PERLDLL		= ..\perl.dll
+CAPILIB		=
 !ENDIF
 
 MINIPERL	= ..\miniperl.exe
@@ -344,7 +357,7 @@ WIN32_OBJ	= $(WIN32_SRC:.c=.obj)
 MINICORE_OBJ	= $(CORE_OBJ:..\=.\mini\) $(MINIDIR)\miniperlmain$(o)
 MINIWIN32_OBJ	= $(WIN32_OBJ:.\=.\mini\)
 MINI_OBJ	= $(MINICORE_OBJ) $(MINIWIN32_OBJ)
-PERL95_OBJ	= $(PERL95_SRC:.c=.obj)
+PERL95_OBJ	= $(PERL95_SRC:.c=.obj) DynaLoadmt$(o)
 DLL_OBJ		= $(DLL_SRC:.c=.obj)
 X2P_OBJ		= $(X2P_SRC:.c=.obj)
 
@@ -403,9 +416,14 @@ EXTENSION_DLL	= 		\
 		$(SDBM_FILE_DLL)\
 		$(IO_DLL)	\
 		$(POSIX_DLL)	\
-		$(ATTRS_DLL)	\
+		$(ATTRS_DLL)
+
+!IF "$(OBJECT)" == ""
+EXTENSION_DLL	= 		\
+		$(EXTENSION_DLL)\
 		$(THREAD_DLL)	\
 		$(B_DLL)
+!ENDIF
 
 POD2HTML	= $(PODDIR)\pod2html
 POD2MAN		= $(PODDIR)\pod2man
@@ -417,12 +435,13 @@ CFG_VARS	=					\
 		"INST_TOP=$(INST_TOP)"			\
 		"archname=$(ARCHNAME)"			\
 		"cc=$(CC)"				\
-		"ccflags=$(OPTIMIZE) $(DEFINES)"	\
+		"ccflags=$(OPTIMIZE) $(DEFINES) $(OBJECT)"	\
 		"cf_email=$(EMAIL)"			\
 		"d_crypt=$(D_CRYPT)"			\
 		"d_mymalloc=$(PERL_MALLOC)"		\
 		"libs=$(LIBFILES)"			\
 		"incpath=$(CCINCDIR)"			\
+		"libperl=$(PERLIMPLIB)"			\
 		"libpth=$(CCLIBDIR)"			\
 		"libc=$(LIBC)"				\
 		"make=nmake"				\
@@ -436,7 +455,7 @@ CFG_VARS	=					\
 # Top targets
 #
 
-all : $(GLOBEXE) $(MINIMOD) $(CONFIGPM) $(PERLEXE) $(PERL95EXE) $(X2P) \
+all : $(GLOBEXE) $(MINIMOD) $(CONFIGPM) $(PERLEXE) $(PERL95EXE) $(CAPILIB) $(X2P) \
 	$(EXTENSION_DLL)
 
 $(DYNALOADER)$(o) : $(DYNALOADER).c $(CORE_H) $(EXTDIR)\DynaLoader\dlutils.c
@@ -458,6 +477,20 @@ config.w32 : $(CFGSH_TMPL)
 
 ..\config.sh : config.w32 $(MINIPERL) config_sh.PL
 	$(MINIPERL) -I..\lib config_sh.PL $(CFG_VARS) config.w32 > ..\config.sh
+
+# this target is for when changes to the main config.sh happen
+# edit config.{b,v,g}c and make this target once for each supported
+# compiler (e.g. `dmake CCTYPE=BORLAND regen_config_h`)
+regen_config_h:
+	perl config_sh.PL $(CFG_VARS) $(CFGSH_TMPL) > ..\config.sh
+	cd ..
+	-del /f perl.exe
+	perl configpm
+	cd win32
+	-del /f $(CFGH_TMPL)
+	-mkdir ..\lib\CORE
+	-perl -I..\lib config_h.PL
+	rename config.h $(CFGH_TMPL)
 
 $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
 	cd .. && miniperl configpm
@@ -530,7 +563,7 @@ perlmain.c : runperl.c
 	copy runperl.c perlmain.c
 
 perlmain$(o) : perlmain.c
-	$(CC) $(CFLAGS_O) -UPERLDLL $(EXEOUT_FLAG)$@ -c perlmain.c
+	$(CC) $(CFLAGS_O) -UPERLDLL $(OBJOUT_FLAG)$@ -c perlmain.c
 
 $(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ)
 	$(LINK32) -subsystem:console -out:$@ $(LINK_FLAGS) $(LIBFILES) \
@@ -552,6 +585,10 @@ win32mt$(o) : win32.c
 	$(CC) $(CFLAGS_O) -MT -UPERLDLL -DWIN95FIX -c \
 	    $(OBJOUT_FLAG)win32mt$(o) win32.c
 
+DynaLoadmt$(o) : $(DYNALOADER).c
+	$(CC) $(CFLAGS_O) -MT -UPERLDLL -DWIN95FIX -c \
+	    $(OBJOUT_FLAG)DynaLoadmt$(o) $(DYNALOADER).c
+
 $(PERL95EXE): $(PERLDLL) $(CONFIGPM) $(PERL95_OBJ)
 	$(LINK32) -subsystem:console -nodefaultlib -out:$@ $(LINK_FLAGS) \
 	    $(LIBFILES) $(PERL95_OBJ) $(PERLIMPLIB) libcmt.lib
@@ -565,6 +602,18 @@ $(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
 	cd $(EXTDIR)\$(*B)
 	$(XSUBPP) dl_win32.xs > $(*B).c
 	cd ..\..\win32
+
+!IF "$(OBJECT)" == "-DPERL_OBJECT"
+PerlCAPI.cpp : $(MINIPERL)
+	$(MINIPERL) GenCAPI.pl $(COREDIR)
+
+PerlCAPI$(o) : PerlCAPI.cpp
+	$(CC) $(CFLAGS_O) -MT -UPERLDLL -DWIN95FIX -c \
+	    $(OBJOUT_FLAG)PerlCAPI$(o) PerlCAPI.cpp
+
+$(CAPILIB) : PerlCAPI.cpp PerlCAPI$(o)
+	lib /OUT:$(CAPILIB) PerlCAPI$(o)
+!ENDIF
 
 $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 	copy dl_win32.xs $(EXTDIR)\DynaLoader\dl_win32.xs
@@ -730,10 +779,12 @@ clean :
 	-@erase perlmain$(o)
 	-@erase config.w32
 	-@erase /f config.h
+	-@erase PerlCAPI.cpp
 	-@erase $(GLOBEXE)
 	-@erase $(PERLEXE)
 	-@erase $(PERLDLL)
 	-@erase $(CORE_OBJ)
+	-@erase $(CAPILIB)
 	-rmdir /s /q $(MINIDIR) || rmdir /s $(MINIDIR)
 	-@erase $(WIN32_OBJ)
 	-@erase $(DLL_OBJ)

@@ -34,6 +34,7 @@ README.vms		Notes about VMS port
 README.win32		Notes about Win32 port
 Todo			The Wishlist
 Todo.5.005		What needs doing before 5.005 release
+XSLock.h		Include file for extensions built with PERL_OBJECT defined
 XSUB.h			Include file for extension subroutines
 atomic.h		Atomic refcount handling for multi-threading
 av.c			Array value code
@@ -400,6 +401,13 @@ installman		Perl script to install man pages for pods
 installperl		Perl script to do "make install" dirty work
 interp.sym		Interpreter specific symbols to hide in a struct
 intrpvar.h		Variables held in each interpreter instance
+ipdir.h			Directory interface for Perl Object
+ipenv.h			Environment interface for Perl Object
+iplio.h			Low level IO interface for Perl Object
+ipmem.h			Memory interface for Perl Object
+ipproc.h		Process interface for Perl Object
+ipsock.h		Socket interface for Perl Object
+ipstdio.h		Stdio interface for Perl Object
 keywords.h		The keyword numbers
 keywords.pl		Program to write keywords.h
 lib/AnyDBM_File.pm	Perl module to emulate dbmopen
@@ -562,6 +570,8 @@ miniperlmain.c		Basic perl w/o dynamic loading or extensions
 mv-if-diff		Script to mv a file if it changed
 myconfig		Prints summary of the current configuration
 nostdio.h		Cause compile error on stdio calls
+objpp.h			Scoping macros for Perl Object
+ObjXSub.h		Scoping macros for Perl Object in extensions
 op.c			Opcode syntax tree code
 op.h			Opcode syntax tree header
 opcode.h		Automatically generated opcode header
@@ -614,18 +624,18 @@ patchlevel.h		The current patch level of perl
 perl.c			main()
 perl.h			Global declarations
 perl_exp.SH		Creates list of exported symbols for AIX
-perldir.h		perldir stuff
-perlenv.h		perlenv stuff
+perldir.h		Macros for directory abstraction
+perlenv.h		Macros for environment abstraction
 perlio.c		C code for PerlIO abstraction
 perlio.h		Interface to PerlIO abstraction
 perlio.sym		Symbols for PerlIO abstraction
-perllio.h		perllio stuff
-perlmem.h		perlmem stuff
-perlproc.h		perlproc stuff
+perllio.h		Macros for Low level IO abstraction
+perlmem.h		Macros for memory allocation abstraction
+perlproc.h		Macros for process abstraction
 perlsdio.h		Fake stdio using perlio
 perlsfio.h		Prototype sfio mapping for PerlIO
 perlsh			A poor man's perl shell
-perlsock.h		perlsock stuff
+perlsock.h		Macros for socket abstraction
 perlvars.h		Global variables
 perly.c			A byacc'ed perly.y
 perly.c.diff		Fixup perly.c to allow recursion
@@ -781,6 +791,9 @@ t/lib/filepath.t	See if File::Path works
 t/lib/findbin.t		See if FindBin works
 t/lib/gdbm.t		See if GDBM_File works
 t/lib/getopt.t		See if Getopt::Std and Getopt::Long works
+t/lib/h2ph.h		Test header file for h2ph
+t/lib/h2ph.pht		Generated output from h2ph.h by h2ph, for comparison
+t/lib/h2ph.t		See if h2ph works like it should
 t/lib/hostname.t	See if Sys::Hostname works
 t/lib/io_dup.t		See if dup()-related methods from IO work
 t/lib/io_pipe.t		See if pipe()-related methods from IO work
@@ -975,6 +988,7 @@ win32/config_h.PL	Perl code to convert Win32 config.sh to config.h
 win32/config_sh.PL	Perl code to update Win32 config.sh from Makefile 
 win32/dl_win32.xs	Win32 port
 win32/genxsdef.pl	Win32 port
+win32/GenCAPI.pl	Win32 port for C API with PERL_OBJECT
 win32/include/arpa/inet.h	Win32 port
 win32/include/dirent.h		Win32 port
 win32/include/netdb.h		Win32 port
@@ -988,6 +1002,7 @@ win32/perllib.c		Win32 port
 win32/pod.mak		Win32 port
 win32/runperl.c		Win32 port
 win32/splittree.pl	Win32 port
+win32/TEST
 win32/win32.c		Win32 port
 win32/win32.h		Win32 port
 win32/win32iop.h	Win32 port

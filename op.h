@@ -35,7 +35,7 @@ typedef U32 PADOFFSET;
 #define BASEOP				\
     OP*		op_next;		\
     OP*		op_sibling;		\
-    OP*		(*op_ppaddr)_((ARGSproto));		\
+    OP*		(CPERLscope(*op_ppaddr))_((ARGSproto));		\
     PADOFFSET	op_targ;		\
     OPCODE	op_type;		\
     U16		op_seq;			\

@@ -69,6 +69,9 @@ dEXTCONST char rcsid[] = "perl.c\nPatch level: ###\n";
     mess_sv     = Nullsv;	\
   } STMT_END
 
+#ifdef PERL_OBJECT
+static I32 read_e_script _((CPerlObj* pPerl, int idx, SV *buf_sv, int maxlen));
+#else
 static void find_beginning _((void));
 static void forbid_setid _((char *));
 static void incpush _((char *, int));
@@ -84,13 +87,23 @@ static void init_postdump_symbols _((int, char **, char **));
 static void init_predump_symbols _((void));
 static void my_exit_jump _((void)) __attribute__((noreturn));
 static void nuke_stacks _((void));
-static void open_script _((char *, bool, SV *));
+static void open_script _((char *, bool, SV *, int *fd));
 static void usage _((char *));
-static void validate_suid _((char *, char*));
+static void validate_suid _((char *, char*, int));
 static I32 read_e_script _((int idx, SV *buf_sv, int maxlen));
+#endif
 
-static int fdscript = -1;
+#ifdef PERL_OBJECT
+CPerlObj* perl_alloc(IPerlMem* ipM, IPerlEnv* ipE, IPerlStdIO* ipStd,
+					     IPerlLIO* ipLIO, IPerlDir* ipD, IPerlSock* ipS, IPerlProc* ipP)
+{
+    CPerlObj* pPerl = new(ipM) CPerlObj(ipM, ipE, ipStd, ipLIO, ipD, ipS, ipP);
+    if(pPerl != NULL)
+	pPerl->Init();
 
+    return pPerl;
+}
+#else
 PerlInterpreter *
 perl_alloc(void)
 {
@@ -100,9 +113,14 @@ perl_alloc(void)
     New(53, sv_interp, 1, PerlInterpreter);
     return sv_interp;
 }
+#endif /* PERL_OBJECT */
 
 void
+#ifdef PERL_OBJECT
+CPerlObj::perl_construct(void)
+#else
 perl_construct(register PerlInterpreter *sv_interp)
+#endif
 {
 #ifdef USE_THREADS
     int i;
@@ -111,8 +129,10 @@ perl_construct(register PerlInterpreter *sv_interp)
 #endif /* FAKE_THREADS */
 #endif /* USE_THREADS */
     
+#ifndef PERL_OBJECT
     if (!(curinterp = sv_interp))
 	return;
+#endif
 
 #ifdef MULTIPLICITY
     Zero(sv_interp, 1, PerlInterpreter);
@@ -163,7 +183,12 @@ perl_construct(register PerlInterpreter *sv_interp)
 	nrs = newSVpv("\n", 1);
 	rs = SvREFCNT_inc(nrs);
 
+#ifdef PERL_OBJECT
+	/* TODO: */
+	/* sighandlerp = sighandler; */
+#else
 	sighandlerp = sighandler;
+#endif
 	pidstatus = newHV();
 
 #ifdef MSDOS
@@ -223,7 +248,11 @@ perl_construct(register PerlInterpreter *sv_interp)
 }
 
 void
+#ifdef PERL_OBJECT
+CPerlObj::perl_destruct(void)
+#else
 perl_destruct(register PerlInterpreter *sv_interp)
+#endif
 {
     dTHR;
     int destruct_level;  /* 0=none, 1=full, 2=full with checks */
@@ -233,8 +262,10 @@ perl_destruct(register PerlInterpreter *sv_interp)
     Thread t;
 #endif /* USE_THREADS */
 
+#ifndef PERL_OBJECT
     if (!(curinterp = sv_interp))
 	return;
+#endif
 
 #ifdef USE_THREADS
 #ifndef FAKE_THREADS
@@ -355,7 +386,7 @@ perl_destruct(register PerlInterpreter *sv_interp)
 
     /* call exit list functions */
     while (exitlistlen-- > 0)
-	exitlist[exitlistlen].fn(exitlist[exitlistlen].ptr);
+	exitlist[exitlistlen].fn(THIS_ exitlist[exitlistlen].ptr);
 
     Safefree(exitlist);
 
@@ -550,15 +581,27 @@ perl_destruct(register PerlInterpreter *sv_interp)
 }
 
 void
+#ifdef PERL_OBJECT
+CPerlObj::perl_free(void)
+#else
 perl_free(PerlInterpreter *sv_interp)
+#endif
 {
+#ifdef PERL_OBJECT
+	Safefree(this);
+#else
     if (!(curinterp = sv_interp))
 	return;
     Safefree(sv_interp);
+#endif
 }
 
 void
+#ifdef PERL_OBJECT
+CPerlObj::perl_atexit(void (*fn) (CPerlObj*,void *), void *ptr)
+#else
 perl_atexit(void (*fn) (void *), void *ptr)
+#endif
 {
     Renew(exitlist, exitlistlen+1, PerlExitListEntry);
     exitlist[exitlistlen].fn = fn;
@@ -567,7 +610,11 @@ perl_atexit(void (*fn) (void *), void *ptr)
 }
 
 int
+#ifdef PERL_OBJECT
+CPerlObj::perl_parse(void (*xsinit) (CPerlObj*), int argc, char **argv, char **env)
+#else
 perl_parse(PerlInterpreter *sv_interp, void (*xsinit) (void), int argc, char **argv, char **env)
+#endif
 {
     dTHR;
     register SV *sv;
@@ -579,6 +626,7 @@ perl_parse(PerlInterpreter *sv_interp, void (*xsinit) (void), int argc, char **a
     AV* comppadlist;
     dJMPENV;
     int ret;
+    int fdscript = -1;
 
 #ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
 #ifdef IAMSUID
@@ -588,8 +636,10 @@ setuid perl scripts securely.\n");
 #endif
 #endif
 
+#ifndef PERL_OBJECT
     if (!(curinterp = sv_interp))
 	return 255;
+#endif
 
 #if defined(NeXT) && defined(__DYNAMIC__)
     _dyld_lookup_and_bind
@@ -858,9 +908,9 @@ print \"  \\@INC:\\n    @INC\\n\";");
 
     init_perllib();
 
-    open_script(scriptname,dosearch,sv);
+    open_script(scriptname,dosearch,sv,&fdscript);
 
-    validate_suid(validarg, scriptname);
+    validate_suid(validarg, scriptname,fdscript);
 
     if (doextract)
 	find_beginning();
@@ -892,8 +942,9 @@ print \"  \\@INC:\\n    @INC\\n\";");
     CvPADLIST(compcv) = comppadlist;
 
     boot_core_UNIVERSAL();
+
     if (xsinit)
-	(*xsinit)();	/* in case linked C routines want magical variables */
+	(*xsinit)(THIS);	/* in case linked C routines want magical variables */
 #if defined(VMS) || defined(WIN32) || defined(DJGPP)
     init_os_extras();
 #endif
@@ -952,15 +1003,21 @@ print \"  \\@INC:\\n    @INC\\n\";");
 }
 
 int
+#ifdef PERL_OBJECT
+CPerlObj::perl_run(void)
+#else
 perl_run(PerlInterpreter *sv_interp)
+#endif
 {
     dSP;
     I32 oldscope;
     dJMPENV;
     int ret;
 
+#ifndef PERL_OBJECT
     if (!(curinterp = sv_interp))
 	return 255;
+#endif
 
     oldscope = scopestack_ix;
 
@@ -1020,12 +1077,12 @@ perl_run(PerlInterpreter *sv_interp)
     if (restartop) {
 	op = restartop;
 	restartop = 0;
-	runops();
+	CALLRUNOPS();
     }
     else if (main_start) {
 	CvDEPTH(main_cv) = 1;
 	op = main_start;
-	runops();
+	CALLRUNOPS();
     }
 
     my_exit(0);
@@ -1145,7 +1202,6 @@ perl_call_sv(SV *sv, I32 flags)
     I32 oldmark;
     I32 retval;
     I32 oldscope;
-    static CV *DBcv;
     bool oldcatch = CATCH_GET;
     dJMPENV;
     int ret;
@@ -1242,7 +1298,7 @@ perl_call_sv(SV *sv, I32 flags)
     if (op == (OP*)&myop)
 	op = pp_entersub(ARGS);
     if (op)
-	runops();
+	CALLRUNOPS();
     retval = stack_sp - (stack_base + oldmark);
     if ((flags & G_EVAL) && !(flags & G_KEEPERR))
 	sv_setpv(ERRSV,"");
@@ -1350,7 +1406,7 @@ perl_eval_sv(SV *sv, I32 flags)
     if (op == (OP*)&myop)
 	op = pp_entereval(ARGS);
     if (op)
-	runops();
+	CALLRUNOPS();
     retval = stack_sp - (stack_base + oldmark);
     if (!(flags & G_KEEPERR))
 	sv_setpv(ERRSV,"");
@@ -1408,14 +1464,14 @@ magicname(char *sym, char *name, I32 namlen)
 	sv_magic(GvSV(gv), (SV*)gv, 0, name, namlen);
 }
 
-static void
+STATIC void
 usage(char *name)		/* XXX move this out into a module ? */
            
 {
     /* This message really ought to be max 23 lines.
      * Removed -h because the user already knows that opton. Others? */
 
-    static char *usage[] = {
+    static char *usage_msg[] = {
 "-0[octal]       specify record separator (\\0, if no argument)",
 "-a              autosplit mode with -n or -p (splits $_ into @F)",
 "-c              check syntax only (runs BEGIN and END blocks)",
@@ -1442,7 +1498,7 @@ usage(char *name)		/* XXX move this out into a module ? */
 "\n",
 NULL
 };
-    char **p = usage;
+    char **p = usage_msg;
 
     printf("\nUsage: %s [switches] [--] [programfile] [arguments]", name);
     while (*p)
@@ -1733,7 +1789,7 @@ my_unexec(void)
 #endif
 }
 
-static void
+STATIC void
 init_main_stash(void)
 {
     dTHR;
@@ -1770,8 +1826,8 @@ init_main_stash(void)
     sv_setpvn(GvSV(gv_fetchpv("/", TRUE, SVt_PV)), "\n", 1);
 }
 
-static void
-open_script(char *scriptname, bool dosearch, SV *sv)
+STATIC void
+open_script(char *scriptname, bool dosearch, SV *sv, int *fdscript)
 {
     dTHR;
     register char *s;
@@ -1780,20 +1836,20 @@ open_script(char *scriptname, bool dosearch, SV *sv)
 
     if (strnEQ(scriptname, "/dev/fd/", 8) && isDIGIT(scriptname[8]) ) {
 	char *s = scriptname + 8;
-	fdscript = atoi(s);
+	*fdscript = atoi(s);
 	while (isDIGIT(*s))
 	    s++;
 	if (*s)
 	    scriptname = s + 1;
     }
     else
-	fdscript = -1;
+	*fdscript = -1;
     origfilename = savepv(e_script ? "-e" : scriptname);
     curcop->cop_filegv = gv_fetchfile(origfilename);
     if (strEQ(origfilename,"-"))
 	scriptname = "";
-    if (fdscript >= 0) {
-	rsfp = PerlIO_fdopen(fdscript,PERL_SCRIPT_MODE);
+    if (*fdscript >= 0) {
+	rsfp = PerlIO_fdopen(*fdscript,PERL_SCRIPT_MODE);
 #if defined(HAS_FCNTL) && defined(F_SETFD)
 	if (rsfp)
 	    fcntl(PerlIO_fileno(rsfp),F_SETFD,1);  /* ensure close-on-exec */
@@ -1860,11 +1916,11 @@ sed %s -e \"/^[^#]/b\" \
 #ifdef HAS_SETRESUID
 	    (void)setresuid((Uid_t)-1, uid, (Uid_t)-1);
 #else
-	    setuid(uid);
+	    PerlProc_setuid(uid);
 #endif
 #endif
 #endif
-	    if (geteuid() != uid)
+	    if (PerlProc_geteuid() != uid)
 		croak("Can't do seteuid!\n");
 	}
 #endif /* IAMSUID */
@@ -1899,8 +1955,8 @@ sed %s -e \"/^[^#]/b\" \
     }
 }
 
-static void
-validate_suid(char *validarg, char *scriptname)
+STATIC void
+validate_suid(char *validarg, char *scriptname, int fdscript)
 {
     int which;
 
@@ -1962,7 +2018,7 @@ validate_suid(char *validarg, char *scriptname)
 		setresuid(euid,uid,(Uid_t)-1) < 0
 # endif
 #endif
-		|| getuid() != euid || geteuid() != uid)
+		|| PerlProc_getuid() != euid || PerlProc_geteuid() != uid)
 		croak("Can't swap uid and euid");	/* really paranoid */
 	    if (PerlLIO_stat(SvPVX(GvSV(curcop->cop_filegv)),&tmpstatbuf) < 0)
 		croak("Permission denied");	/* testing full pathname here */
@@ -1989,7 +2045,7 @@ validate_suid(char *validarg, char *scriptname)
               setresuid(uid,euid,(Uid_t)-1) < 0
 # endif
 #endif
-              || getuid() != uid || geteuid() != euid)
+              || PerlProc_getuid() != uid || PerlProc_geteuid() != euid)
 		croak("Can't reswap uid and euid");
 	    if (!cando(S_IXUSR,FALSE,&statbuf))		/* can real uid exec? */
 		croak("Permission denied\n");
@@ -2051,11 +2107,11 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 #ifdef HAS_SETRESGID
            (void)setresgid((Gid_t)-1,statbuf.st_gid,(Gid_t)-1);
 #else
-	    setgid(statbuf.st_gid);
+	    PerlProc_setgid(statbuf.st_gid);
 #endif
 #endif
 #endif
-	    if (getegid() != statbuf.st_gid)
+	    if (PerlProc_getegid() != statbuf.st_gid)
 		croak("Can't do setegid!\n");
 	}
 	if (statbuf.st_mode & S_ISUID) {
@@ -2069,11 +2125,11 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 #ifdef HAS_SETRESUID
                 (void)setresuid((Uid_t)-1,statbuf.st_uid,(Uid_t)-1);
 #else
-		setuid(statbuf.st_uid);
+		PerlProc_setuid(statbuf.st_uid);
 #endif
 #endif
 #endif
-	    if (geteuid() != statbuf.st_uid)
+	    if (PerlProc_geteuid() != statbuf.st_uid)
 		croak("Can't do seteuid!\n");
 	}
 	else if (uid) {			/* oops, mustn't run as root */
@@ -2086,11 +2142,11 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 #ifdef HAS_SETRESUID
           (void)setresuid((Uid_t)-1,(Uid_t)uid,(Uid_t)-1);
 #else
-          setuid((Uid_t)uid);
+          PerlProc_setuid((Uid_t)uid);
 #endif
 #endif
 #endif
-	    if (geteuid() != uid)
+	    if (PerlProc_geteuid() != uid)
 		croak("Can't do seteuid!\n");
 	}
 	init_ids();
@@ -2139,7 +2195,7 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 #endif /* DOSUID */
 }
 
-static void
+STATIC void
 find_beginning(void)
 {
     register char *s, *s2;
@@ -2169,28 +2225,13 @@ find_beginning(void)
 }
 
 
-static I32
-read_e_script(int idx, SV *buf_sv, int maxlen)
-{
-    char *p, *nl;
-    p  = SvPVX(e_script);
-    nl = strchr(p, '\n');
-    nl = (nl) ? nl+1 : SvEND(e_script);
-    if (nl-p == 0)
-	return 0;
-    sv_catpvn(buf_sv, p, nl-p);
-    sv_chop(e_script, nl);
-    return 1;
-}
-
-
-static void
+STATIC void
 init_ids(void)
 {
-    uid = (int)getuid();
-    euid = (int)geteuid();
-    gid = (int)getgid();
-    egid = (int)getegid();
+    uid = (int)PerlProc_getuid();
+    euid = (int)PerlProc_geteuid();
+    gid = (int)PerlProc_getgid();
+    egid = (int)PerlProc_getegid();
 #ifdef VMS
     uid |= gid << 16;
     euid |= egid << 16;
@@ -2198,7 +2239,7 @@ init_ids(void)
     tainting |= (uid && (euid != uid || egid != gid));
 }
 
-static void
+STATIC void
 forbid_setid(char *s)
 {
     if (euid != uid)
@@ -2207,7 +2248,7 @@ forbid_setid(char *s)
         croak("No %s allowed while running setgid", s);
 }
 
-static void
+STATIC void
 init_debugger(void)
 {
     dTHR;
@@ -2293,7 +2334,7 @@ init_stacks(ARGSproto)
 
 #undef REASONABLE
 
-static void
+STATIC void
 nuke_stacks(void)
 {
     dTHR;
@@ -2313,11 +2354,16 @@ nuke_stacks(void)
     } )
 }
 
+#ifndef PERL_OBJECT
 static PerlIO *tmpfp;  /* moved outside init_lexer() because of UNICOS bug */
+#endif
 
-static void
+STATIC void
 init_lexer(void)
 {
+#ifdef PERL_OBJECT
+	PerlIO *tmpfp;
+#endif
     tmpfp = rsfp;
     rsfp = Nullfp;
     lex_start(linestr);
@@ -2325,7 +2371,7 @@ init_lexer(void)
     subname = newSVpv("main",4);
 }
 
-static void
+STATIC void
 init_predump_symbols(void)
 {
     dTHR;
@@ -2361,7 +2407,7 @@ init_predump_symbols(void)
 	osname = savepv(OSNAME);
 }
 
-static void
+STATIC void
 init_postdump_symbols(register int argc, register char **argv, register char **env)
 {
     dTHR;
@@ -2449,7 +2495,7 @@ init_postdump_symbols(register int argc, register char **argv, register char **e
 	sv_setiv(GvSV(tmpgv), (IV)getpid());
 }
 
-static void
+STATIC void
 init_perllib(void)
 {
     char *s;
@@ -2487,13 +2533,21 @@ init_perllib(void)
 #ifndef PRIVLIB_EXP
 #define PRIVLIB_EXP "/usr/local/lib/perl5:/usr/local/lib/perl"
 #endif
+#if defined(WIN32) 
+    incpush(PRIVLIB_EXP, TRUE);
+#else
     incpush(PRIVLIB_EXP, FALSE);
+#endif
 
 #ifdef SITEARCH_EXP
     incpush(SITEARCH_EXP, FALSE);
 #endif
 #ifdef SITELIB_EXP
+#if defined(WIN32) 
+    incpush(SITELIB_EXP, TRUE);
+#else
     incpush(SITELIB_EXP, FALSE);
+#endif
 #endif
     if (!tainting)
 	incpush(".", FALSE);
@@ -2512,11 +2566,10 @@ init_perllib(void)
 #  define PERLLIB_MANGLE(s,n) (s)
 #endif 
 
-static void
+STATIC void
 incpush(char *p, int addsubdirs)
 {
     SV *subdir = Nullsv;
-    static char *archpat_auto;
 
     if (!p)
 	return;
@@ -2603,7 +2656,7 @@ incpush(char *p, int addsubdirs)
 }
 
 #ifdef USE_THREADS
-static struct perl_thread *
+STATIC struct perl_thread *
 init_main_thread()
 {
     struct perl_thread *thr;
@@ -2667,7 +2720,7 @@ init_main_thread()
 #endif /* USE_THREADS */
 
 void
-call_list(I32 oldscope, AV *list)
+call_list(I32 oldscope, AV *paramList)
 {
     dTHR;
     line_t oldline = curcop->cop_line;
@@ -2675,8 +2728,8 @@ call_list(I32 oldscope, AV *list)
     dJMPENV;
     int ret;
 
-    while (AvFILL(list) >= 0) {
-	CV *cv = (CV*)av_shift(list);
+    while (AvFILL(paramList) >= 0) {
+	CV *cv = (CV*)av_shift(paramList);
 
 	SAVEFREESV(cv);
 
@@ -2691,7 +2744,7 @@ call_list(I32 oldscope, AV *list)
 		    JMPENV_POP;
 		    curcop = &compiling;
 		    curcop->cop_line = oldline;
-		    if (list == beginav)
+		    if (paramList == beginav)
 			sv_catpv(atsv, "BEGIN failed--compilation aborted");
 		    else
 			sv_catpv(atsv, "END failed--cleanup aborted");
@@ -2716,7 +2769,7 @@ call_list(I32 oldscope, AV *list)
 	    curcop = &compiling;
 	    curcop->cop_line = oldline;
 	    if (statusvalue) {
-		if (list == beginav)
+		if (paramList == beginav)
 		    croak("BEGIN failed--compilation aborted");
 		else
 		    croak("END failed--cleanup aborted");
@@ -2790,7 +2843,7 @@ my_failure_exit(void)
     my_exit_jump();
 }
 
-static void
+STATIC void
 my_exit_jump(void)
 {
     dSP;
@@ -2813,3 +2866,26 @@ my_exit_jump(void)
 
     JMPENV_JUMP(2);
 }
+
+
+#include "XSUB.h"
+
+static I32
+#ifdef PERL_OBJECT
+read_e_script(CPerlObj *pPerl, int idx, SV *buf_sv, int maxlen)
+#else
+read_e_script(int idx, SV *buf_sv, int maxlen)
+#endif
+{
+    char *p, *nl;
+    p  = SvPVX(e_script);
+    nl = strchr(p, '\n');
+    nl = (nl) ? nl+1 : SvEND(e_script);
+    if (nl-p == 0)
+	return 0;
+    sv_catpvn(buf_sv, p, nl-p);
+    sv_chop(e_script, nl);
+    return 1;
+}
+
+

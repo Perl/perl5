@@ -6,11 +6,20 @@ static char yysccsid[] = "@(#)yaccpar 1.8 (Berkeley) 01/20/91";
 #include "EXTERN.h"
 #include "perl.h"
 
+#ifdef PERL_OBJECT
+static void
+Dep(CPerlObj *pPerl)
+{
+    pPerl->deprecate("\"do\" to call subroutines");
+}
+#define dep() Dep(this)
+#else
 static void
 dep(void)
 {
     deprecate("\"do\" to call subroutines");
 }
+#endif
 
 #line 16 "perly.c"
 #define YYERRCODE 256

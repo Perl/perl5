@@ -101,9 +101,11 @@ typedef unsigned UBW;
 #  define CAT32(sv,p)  sv_catpvn(sv, (char*)(p), SIZE32)
 #endif
 
+#ifndef PERL_OBJECT
 static void doencodes _((SV* sv, char* s, I32 len));
 static SV* refto _((SV* sv));
 static U32 seed _((void));
+#endif
 
 static bool srand_called = FALSE;
 
@@ -460,7 +462,7 @@ PP(pp_refgen)
     RETURN;
 }
 
-static SV*
+STATIC SV*
 refto(SV *sv)
 {
     SV* rv;
@@ -528,40 +530,40 @@ PP(pp_gelem)
 {
     GV *gv;
     SV *sv;
-    SV *ref;
+    SV *tmpRef;
     char *elem;
     djSP;
 
     sv = POPs;
     elem = SvPV(sv, na);
     gv = (GV*)POPs;
-    ref = Nullsv;
+    tmpRef = Nullsv;
     sv = Nullsv;
     switch (elem ? *elem : '\0')
     {
     case 'A':
 	if (strEQ(elem, "ARRAY"))
-	    ref = (SV*)GvAV(gv);
+	    tmpRef = (SV*)GvAV(gv);
 	break;
     case 'C':
 	if (strEQ(elem, "CODE"))
-	    ref = (SV*)GvCVu(gv);
+	    tmpRef = (SV*)GvCVu(gv);
 	break;
     case 'F':
 	if (strEQ(elem, "FILEHANDLE")) /* XXX deprecate in 5.005 */
-	    ref = (SV*)GvIOp(gv);
+	    tmpRef = (SV*)GvIOp(gv);
 	break;
     case 'G':
 	if (strEQ(elem, "GLOB"))
-	    ref = (SV*)gv;
+	    tmpRef = (SV*)gv;
 	break;
     case 'H':
 	if (strEQ(elem, "HASH"))
-	    ref = (SV*)GvHV(gv);
+	    tmpRef = (SV*)GvHV(gv);
 	break;
     case 'I':
 	if (strEQ(elem, "IO"))
-	    ref = (SV*)GvIOp(gv);
+	    tmpRef = (SV*)GvIOp(gv);
 	break;
     case 'N':
 	if (strEQ(elem, "NAME"))
@@ -573,11 +575,11 @@ PP(pp_gelem)
 	break;
     case 'S':
 	if (strEQ(elem, "SCALAR"))
-	    ref = GvSV(gv);
+	    tmpRef = GvSV(gv);
 	break;
     }
-    if (ref)
-	sv = newRV(ref);
+    if (tmpRef)
+	sv = newRV(tmpRef);
     if (sv)
 	sv_2mortal(sv);
     else
@@ -919,7 +921,7 @@ PP(pp_divide)
 
 PP(pp_modulo)
 {
-    djSP; dATARGET; tryAMAGICbin(mod,opASSIGN);
+    djSP; dATARGET; tryAMAGICbin(modulo,opASSIGN);
     {
       UV left;
       UV right;
@@ -1405,7 +1407,7 @@ PP(pp_i_divide)
 
 PP(pp_i_modulo)
 {
-    djSP; dATARGET; tryAMAGICbin(mod,opASSIGN);
+    djSP; dATARGET; tryAMAGICbin(modulo,opASSIGN); 
     {
       dPOPTOPiirl;
       if (!right)
@@ -1601,7 +1603,7 @@ PP(pp_srand)
     RETPUSHYES;
 }
 
-static U32
+STATIC U32
 seed(void)
 {
     /*
@@ -2884,7 +2886,7 @@ PP(pp_reverse)
     RETURN;
 }
 
-static SV      *
+STATIC SV      *
 mul128(SV *sv, U8 m)
 {
   STRLEN          len;
@@ -3613,7 +3615,7 @@ PP(pp_unpack)
     RETURN;
 }
 
-static void
+STATIC void
 doencodes(register SV *sv, register char *s, register I32 len)
 {
     char hunk[5];
@@ -3637,7 +3639,7 @@ doencodes(register SV *sv, register char *s, register I32 len)
     sv_catpvn(sv, "\n", 1);
 }
 
-static SV      *
+STATIC SV      *
 is_an_int(char *s, STRLEN l)
 {
   SV             *result = newSVpv("", l);
@@ -3685,7 +3687,7 @@ is_an_int(char *s, STRLEN l)
   return (result);
 }
 
-static int
+STATIC int
 div128(SV *pnum, bool *done)
                           		    /* must be '\0' terminated */
 

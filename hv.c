@@ -14,12 +14,14 @@
 #include "EXTERN.h"
 #include "perl.h"
 
+static void hv_magic_check _((HV *hv, bool *needs_copy, bool *needs_store));
+#ifndef PERL_OBJECT
 static void hsplit _((HV *hv));
 static void hfreeentries _((HV *hv));
-static void hv_magic_check _((HV *hv, bool *needs_copy, bool *needs_store));
 static HE* more_he _((void));
+#endif
 
-static HE*
+STATIC HE*
 new_he(void)
 {
     HE* he;
@@ -31,14 +33,14 @@ new_he(void)
     return more_he();
 }
 
-static void
+STATIC void
 del_he(HE *p)
 {
     HeNEXT(p) = (HE*)he_root;
     he_root = p;
 }
 
-static HE*
+STATIC HE*
 more_he(void)
 {
     register HE* he;
@@ -54,7 +56,7 @@ more_he(void)
     return new_he();
 }
 
-static HEK *
+STATIC HEK *
 save_hek(char *str, I32 len, U32 hash)
 {
     char *k;
@@ -140,7 +142,7 @@ hv_fetch(HV *hv, char *key, U32 klen, I32 lval)
     if (HvNAME(hv) && strEQ(HvNAME(hv),ENV_HV_NAME)) {
       char *gotenv;
 
-      if ((gotenv = ENV_getenv(key)) != Nullch) {
+      if ((gotenv = PerlEnv_getenv(key)) != Nullch) {
         sv = newSVpv(gotenv,strlen(gotenv));
         SvTAINTED_on(sv);
         return hv_store(hv,key,klen,sv,hash);
@@ -231,7 +233,7 @@ hv_fetch_ent(HV *hv, SV *keysv, I32 lval, register U32 hash)
     if (HvNAME(hv) && strEQ(HvNAME(hv),ENV_HV_NAME)) {
       char *gotenv;
 
-      if ((gotenv = ENV_getenv(key)) != Nullch) {
+      if ((gotenv = PerlEnv_getenv(key)) != Nullch) {
         sv = newSVpv(gotenv,strlen(gotenv));
         SvTAINTED_on(sv);
         return hv_store_ent(hv,keysv,sv,hash);
@@ -656,7 +658,7 @@ hv_exists_ent(HV *hv, SV *keysv, U32 hash)
     return FALSE;
 }
 
-static void
+STATIC void
 hsplit(HV *hv)
 {
     register XPVHV* xhv = (XPVHV*)SvANY(hv);
@@ -891,7 +893,7 @@ hv_clear(HV *hv)
 	mg_clear((SV*)hv); 
 }
 
-static void
+STATIC void
 hfreeentries(HV *hv)
 {
     register HE **array;

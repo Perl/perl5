@@ -20,7 +20,59 @@
 extern void PerlIO_init _((void));
 #endif
 
+#ifdef PERL_OBJECT
+
+#include "ipstdio.h"
+
+#define PerlIO_canset_cnt(f)	1
+#define PerlIO_has_base(f)	1
+#define PerlIO_has_cntptr(f)	1
+#define PerlIO_fast_gets(f)	1
+
+#define PerlIO_stdin()		piStdIO->Stdin()
+#define PerlIO_stdout()		piStdIO->Stdout()
+#define PerlIO_stderr()		piStdIO->Stderr()
+#define PerlIO_open(x,y)	piStdIO->Open((x),(y), ErrorNo())
+#define PerlIO_close(f)		piStdIO->Close((f), ErrorNo())
+#define PerlIO_eof(f)		piStdIO->Eof((f), ErrorNo())
+#define PerlIO_error(f)		piStdIO->Error((f), ErrorNo())
+#define PerlIO_clearerr(f)	piStdIO->Clearerr((f), ErrorNo())
+#define PerlIO_getc(f)		piStdIO->Getc((f), ErrorNo())
+#define PerlIO_get_base(f)	piStdIO->GetBase((f), ErrorNo())
+#define PerlIO_get_bufsiz(f)	piStdIO->GetBufsiz((f), ErrorNo())
+#define PerlIO_get_cnt(f)	piStdIO->GetCnt((f), ErrorNo())
+#define PerlIO_get_ptr(f)	piStdIO->GetPtr((f), ErrorNo())
+#define PerlIO_putc(f,c)	piStdIO->Putc((f),(c), ErrorNo())
+#define PerlIO_puts(f,s)	piStdIO->Puts((f),(s), ErrorNo())
+#define PerlIO_flush(f)		piStdIO->Flush((f), ErrorNo())
+#define PerlIO_gets(s, n, fp)   piStdIO->Gets((fp), s, n, ErrorNo())
+#define PerlIO_ungetc(f,c)	piStdIO->Ungetc((f),(c), ErrorNo())
+#define PerlIO_fileno(f)	piStdIO->Fileno((f), ErrorNo())
+#define PerlIO_fdopen(f, s)	piStdIO->Fdopen((f),(s), ErrorNo())
+#define PerlIO_reopen(p, m, f)  piStdIO->Reopen((p), (m), (f), ErrorNo())
+#define PerlIO_read(f,buf,count)	(SSize_t)piStdIO->Read((f), (buf), (count), ErrorNo())
+#define PerlIO_write(f,buf,count)	piStdIO->Write((f), (buf), (count), ErrorNo())
+#define PerlIO_setbuf(f,b)	piStdIO->SetBuf((f), (b), ErrorNo())
+#define PerlIO_setvbuf(f,b,t,s)	piStdIO->SetVBuf((f), (b), (t), (s), ErrorNo())
+#define PerlIO_set_cnt(f,c)	piStdIO->SetCnt((f), (c), ErrorNo())
+#define PerlIO_set_ptrcnt(f,p,c)	piStdIO->SetPtrCnt((f), (p), (c), ErrorNo())
+#define PerlIO_setlinebuf(f)	piStdIO->Setlinebuf((f), ErrorNo())
+#define PerlIO_printf		fprintf
+#define PerlIO_stdoutf		piStdIO->Printf
+#define PerlIO_vprintf(f,fmt,a)	piStdIO->Vprintf((f), ErrorNo(), (fmt),a)          
+#define PerlIO_tell(f)		piStdIO->Tell((f), ErrorNo())
+#define PerlIO_seek(f,o,w)	piStdIO->Seek((f),(o),(w), ErrorNo())
+#define PerlIO_getpos(f,p)	piStdIO->Getpos((f),(p), ErrorNo())
+#define PerlIO_setpos(f,p)	piStdIO->Setpos((f),(p), ErrorNo())
+#define PerlIO_rewind(f)	piStdIO->Rewind((f), ErrorNo())
+#define PerlIO_tmpfile()	piStdIO->Tmpfile(ErrorNo())
+#define PerlIO_init()		piStdIO->Init(ErrorNo())
+#undef 	init_os_extras
+#define init_os_extras()	piStdIO->InitOSExtras(this)
+
+#else
 #include "perlsdio.h"
+#endif
 
 #ifndef PERLIO_IS_STDIO
 #ifdef USE_SFIO

@@ -506,7 +506,7 @@ nextargv(register GV *gv)
 		    (void)fchown(lastfd,fileuid,filegid);
 #else
 #ifdef HAS_CHOWN
-		    (void)chown(oldname,fileuid,filegid);
+		    (void)PerlLIO_chown(oldname,fileuid,filegid);
 #endif
 #endif
 		}
@@ -579,14 +579,17 @@ do_close(GV *gv, bool not_implicit)
     if (!gv)
 	gv = argvgv;
     if (!gv || SvTYPE(gv) != SVt_PVGV) {
-	SETERRNO(EBADF,SS$_IVCHAN);
+	if (not_implicit)
+	    SETERRNO(EBADF,SS$_IVCHAN);
 	return FALSE;
     }
     io = GvIO(gv);
     if (!io) {		/* never opened */
-	if (dowarn && not_implicit)
-	    warn("Close on unopened file <%s>",GvENAME(gv));
-	SETERRNO(EBADF,SS$_IVCHAN);
+	if (not_implicit) {
+	    if (dowarn)
+		warn("Close on unopened file <%s>",GvENAME(gv));
+	    SETERRNO(EBADF,SS$_IVCHAN);
+	}
 	return FALSE;
     }
     retval = io_close(io);
@@ -741,7 +744,7 @@ do_binmode(PerlIO *fp, int iotype, int flag)
 	 * document this anywhere). GSAR 97-5-24
 	 */
 	PerlIO_seek(fp,0L,0);
-	fp->flags |= _F_BIN;
+	((FILE*)fp)->flags |= _F_BIN;
 #endif
 	return 1;
     }
@@ -1085,7 +1088,9 @@ apply(I32 type, register SV **mark, register SV **sp)
     SV **oldmark = mark;
 
 #define APPLY_TAINT_PROPER() \
-    if (!(tainting && tainted)) {} else { goto taint_proper; }
+    STMT_START {						\
+	if (tainting && tainted) { goto taint_proper_label; }	\
+    } STMT_END
 
     /* This is a first heuristic; it doesn't catch tainting magic. */
     if (tainting) {
@@ -1125,7 +1130,7 @@ apply(I32 type, register SV **mark, register SV **sp)
 	    while (++mark <= sp) {
 		char *name = SvPVx(*mark, na);
 		APPLY_TAINT_PROPER();
-		if (chown(name, val, val2))
+		if (PerlLIO_chown(name, val, val2))
 		    tot--;
 	    }
 	}
@@ -1271,7 +1276,7 @@ nothing in the core.
     }
     return tot;
 
-  taint_proper:
+  taint_proper_label:
     TAINT_PROPER(what);
     return 0;	/* this should never happen */
 

@@ -24,6 +24,111 @@
 #define USE_STDIO
 #endif /* PERL_FOR_X2P */
 
+#ifdef PERL_OBJECT
+
+/* PERL_OBJECT explained  - DickH and DougL @ ActiveState.com
+
+Defining PERL_OBJECT turns on creation of a C++ object that
+contains all writable core perl global variables and functions.
+Stated another way, all necessary global variables and functions
+are members of a big C++ object. This object's class is CPerlObj.
+This allows a Perl Host to have multiple, independent perl
+interpreters in the same process space. This is very important on
+Win32 systems as the overhead of process creation is quite high --
+this could be even higher than the script compile and execute time
+for small scripts.
+
+The perl executable implementation on Win32 is composed of perl.exe
+(the Perl Host) and perlX.dll. (the Perl Core). This allows the
+same Perl Core to easily be embedded in other applications that use
+the perl interpreter.
+
++-----------+
+| Perl Host |
++-----------+
+      ^
+	  |
+	  v
++-----------+   +-----------+
+| Perl Core |<->| Extension |
++-----------+   +-----------+ ...
+
+Defining PERL_OBJECT has the following effects:
+
+PERL CORE
+1. CPerlObj is defined (this is the PERL_OBJECT)
+2. all static functions that needed to access either global
+variables or functions needed are made member functions
+3. all writable static variables are made member variables
+4. all global variables and functions are defined as:
+	#define var CPerlObj::Perl_var
+	#define func CPerlObj::Perl_func
+	* these are in objpp.h
+This necessitated renaming some local variables and functions that
+had the same name as a global variable or function. This was
+probably a _good_ thing anyway.
+
+
+EXTENSIONS
+1. Access to global variables and perl functions is through a
+pointer to the PERL_OBJECT. This pointer type is CPerlObj*. This is
+made transparent to extension developers by the following macros:
+	#define var pPerl->Perl_var
+	#define func pPerl->Perl_func
+	* these are done in ObjXSub.h
+This requires that the extension be compiled as C++, which means
+that the code must be ANSI C and not K&R C. For K&R extensions,
+please see the C API notes located in Win32/GenCAPI.pl. This script
+creates a PerlCAPI.lib that provides a K & R compatible C interface
+to the PERL_OBJECT.
+2. Local variables and functions cannot have the same name as perl's
+variables or functions since the macros will redefine these. Look for
+this if you get some strange error message and it does not look like
+the code that you had written. This often happens with variables that
+are local to a function.
+
+PERL HOST
+1. The perl host is linked with perlX.lib to get perl_alloc. This
+function will return a pointer to CPerlObj (the PERL_OBJECT). It
+takes pointers to the various PerlXXX_YYY interfaces (see ipdir.h for
+information on this).
+2. The perl host calls the same functions as normally would be
+called in setting up and running a perl script, except that the
+functions are now member functions of the PERL_OBJECT.
+
+*/
+
+
+class CPerlObj;
+
+#define STATIC
+#define CPERLscope(x) CPerlObj::x
+#define CPERLproto CPerlObj *
+#define _CPERLproto ,CPERLproto
+#define CPERLarg CPerlObj *pPerl
+#define CPERLarg_ CPERLarg,
+#define _CPERLarg ,CPERLarg
+#define THIS this
+#define _THIS ,this
+#define THIS_ this,
+#define CALLRUNOPS (this->*runops)
+
+#else /* !PERL_OBJECT */
+
+#define STATIC static
+#define CPERLscope(x) x
+#define CPERLproto
+#define _CPERLproto
+#define CPERLarg void
+#define CPERLarg_
+#define _CPERLarg
+#define THIS
+#define _THIS
+#define THIS_
+#define CALLRUNOPS runops
+
+#endif /* PERL_OBJECT */
+
 #define VOIDUSED 1
 #include "config.h"
 
@@ -208,6 +313,7 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 #endif
 
 #include "perlio.h"
+#include "perlmem.h"
 #include "perllio.h"
 #include "perlsock.h"
 #include "perlproc.h"
@@ -971,7 +1077,12 @@ typedef union any ANY;
 
 #include "handy.h"
 
+#ifdef PERL_OBJECT
+typedef I32 (*filter_t) _((CPerlObj*, int, SV *, int));
+#else
 typedef I32 (*filter_t) _((int, SV *, int));
+#endif
+
 #define FILTER_READ(idx, sv, len)  filter_read(idx, sv, len)
 #define FILTER_DATA(idx)	   (AvARRAY(rsfp_filters)[idx])
 #define FILTER_ISREADER(idx)	   (idx >= AvFILLp(rsfp_filters))
@@ -993,6 +1104,10 @@ typedef I32 (*filter_t) _((int, SV *, int));
 #   endif
 # endif
 #endif         
+
+#ifndef FUNC_NAME_TO_PTR
+#define FUNC_NAME_TO_PTR(name)		name
+#endif
 
 /* 
  * USE_THREADS needs to be after unixish.h as <pthread.h> includes
@@ -1097,7 +1212,11 @@ union any {
     I32		any_i32;
     IV		any_iv;
     long	any_long;
-    void	(*any_dptr) _((void*));
+    void	(CPERLscope(*any_dptr)) _((void*));
+#if defined(WIN32) && !defined(PERL_OBJECT)
+	/* Visual C thinks that a pointer to a member variable is 16 bytes in size. */
+	char	handle_VC_problem[16];
+#endif
 };
 
 #ifdef USE_THREADS
@@ -1126,6 +1245,55 @@ union any {
 #include "scope.h"
 #include "bytecode.h"
 #include "byterun.h"
+
+/* Current curly descriptor */
+typedef struct curcur CURCUR;
+struct curcur {
+    int		parenfloor;	/* how far back to strip paren data */
+    int		cur;		/* how many instances of scan we've matched */
+    int		min;		/* the minimal number of scans to match */
+    int		max;		/* the maximal number of scans to match */
+    int		minmod;		/* whether to work our way up or down */
+    regnode *	scan;		/* the thing to match */
+    regnode *	next;		/* what has to match after it */
+    char *	lastloc;	/* where we started matching this scan */
+    CURCUR *	oldcc;		/* current curly before we started this one */
+};
+
+typedef struct _sublex_info SUBLEXINFO;
+struct _sublex_info {
+    I32 super_state;	/* lexer state to save */
+    I32 sub_inwhat;	/* "lex_inwhat" to use */
+    OP *sub_op;		/* "lex_op" to use */
+};
+
+#ifdef PERL_OBJECT
+struct magic_state {
+    SV* mgs_sv;
+    U32 mgs_flags;
+};
+typedef struct magic_state MGS;
+
+typedef struct {
+    I32 len_min;
+    I32 len_delta;
+    I32 pos_min;
+    I32 pos_delta;
+    SV *last_found;
+    I32 last_end;			/* min value, <0 unless valid. */
+    I32 last_start_min;
+    I32 last_start_max;
+    SV **longest;			/* Either &l_fixed, or &l_float. */
+    SV *longest_fixed;
+    I32 offset_fixed;
+    SV *longest_float;
+    I32 offset_float_min;
+    I32 offset_float_max;
+    I32 flags;
+} scan_data_t;
+
+typedef I32 CHECKPOINT;
+#endif /* PERL_OBJECT */
 
 /* work around some libPW problems */
 #ifdef DOINIT
@@ -1404,11 +1572,13 @@ typedef Sighandler_t Sigsave_t;
  * included until after runops is initialised.
  */
 
+#ifndef PERL_OBJECT
 typedef int runops_proc_t _((void));
 int runops_standard _((void));
 #ifdef DEBUGGING
 int runops_debug _((void));
 #endif
+#endif  /* PERL_OBJECT */
 
 /* _ (for $_) must be first in the following list (DEFSV requires it) */
 #define THREADSV_NAMES "_123456789&`'+/.,\\\";^-%=|~:\001\005!@"
@@ -1656,9 +1826,31 @@ typedef enum {
 
 /* Interpreter exitlist entry */
 typedef struct exitlistentry {
+#ifdef PERL_OBJECT
+    void (*fn) _((CPerlObj*, void*));
+#else
     void (*fn) _((void*));
+#endif
     void *ptr;
 } PerlExitListEntry;
+
+#ifdef PERL_OBJECT
+extern "C" CPerlObj* perl_alloc _((IPerlMem*, IPerlEnv*, IPerlStdIO*, IPerlLIO*, IPerlDir*, IPerlSock*, IPerlProc*));
+
+typedef int (CPerlObj::*runops_proc_t) _((void));
+#undef EXT
+#define EXT
+#undef EXTCONST
+#define EXTCONST
+#undef INIT
+#define INIT(x)
+
+class CPerlObj {
+public:
+	CPerlObj(IPerlMem*, IPerlEnv*, IPerlStdIO*, IPerlLIO*, IPerlDir*, IPerlSock*, IPerlProc*);
+	void Init(void);
+	void* operator new(size_t nSize, IPerlMem *pvtbl);
+#endif /* PERL_OBJECT */
 
 #ifdef PERL_GLOBAL_STRUCT
 struct perl_vars {
@@ -1756,6 +1948,17 @@ typedef void *Thread;
 #include "intrpvar.h"
 #endif
 
+#ifdef PERL_OBJECT
+};
+
+#include "objpp.h"
+#ifdef DOINIT
+#include "INTERN.h"
+#else
+#include "EXTERN.h"
+#endif
+#endif  /* PERL_OBJECT */
+
 
 #undef PERLVAR
 #undef PERLVARI
@@ -1768,7 +1971,9 @@ typedef void *Thread;
  * It has to go here or #define of printf messes up __attribute__
  * stuff in proto.h  
  */
+#ifndef PERL_OBJECT
 #  include <win32iop.h>
+#endif  /* PERL_OBJECT */
 #endif	/* WIN32 */
 
 #ifdef DOINIT
@@ -1963,7 +2168,7 @@ enum {
   subtr_amg,	subtr_ass_amg,
   mult_amg,	mult_ass_amg,
   div_amg,	div_ass_amg,
-  mod_amg,	mod_ass_amg,
+  modulo_amg,	modulo_ass_amg,
   pow_amg,	pow_ass_amg,
   lshift_amg,	lshift_ass_amg,
   rshift_amg,	rshift_ass_amg,

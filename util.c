@@ -844,13 +844,13 @@ char *
 mem_collxfrm(const char *s, STRLEN len, STRLEN *xlen)
 {
     char *xbuf;
-    STRLEN xalloc, xin, xout;
+    STRLEN xAlloc, xin, xout; /* xalloc is a reserved word in VC */
 
     /* the first sizeof(collationix) bytes are used by sv_collxfrm(). */
     /* the +1 is for the terminating NUL. */
 
-    xalloc = sizeof(collation_ix) + collxfrm_base + (collxfrm_mult * len) + 1;
-    New(171, xbuf, xalloc, char);
+    xAlloc = sizeof(collation_ix) + collxfrm_base + (collxfrm_mult * len) + 1;
+    New(171, xbuf, xAlloc, char);
     if (! xbuf)
 	goto bad;
 
@@ -860,13 +860,13 @@ mem_collxfrm(const char *s, STRLEN len, STRLEN *xlen)
 	SSize_t xused;
 
 	for (;;) {
-	    xused = strxfrm(xbuf + xout, s + xin, xalloc - xout);
+	    xused = strxfrm(xbuf + xout, s + xin, xAlloc - xout);
 	    if (xused == -1)
 		goto bad;
-	    if (xused < xalloc - xout)
+	    if (xused < xAlloc - xout)
 		break;
-	    xalloc = (2 * xalloc) + 1;
-	    Renew(xbuf, xalloc, char);
+	    xAlloc = (2 * xAlloc) + 1;
+	    Renew(xbuf, xAlloc, char);
 	    if (! xbuf)
 		goto bad;
 	}
@@ -1178,7 +1178,7 @@ savepvn(char *sv, register I32 len)
 
 /* the SV for form() and mess() is not kept in an arena */
 
-static SV *
+STATIC SV *
 mess_alloc(void)
 {
     SV *sv;
@@ -1193,23 +1193,11 @@ mess_alloc(void)
     return sv;
 }
 
-#ifdef I_STDARG
 char *
 form(const char* pat, ...)
-#else
-/*VARARGS0*/
-char *
-form(pat, va_alist)
-    const char *pat;
-    va_dcl
-#endif
 {
     va_list args;
-#ifdef I_STDARG
     va_start(args, pat);
-#else
-    va_start(args);
-#endif
     if (!mess_sv)
 	mess_sv = mess_alloc();
     sv_vsetpvfn(mess_sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
@@ -1249,16 +1237,8 @@ mess(const char *pat, va_list *args)
     return SvPVX(sv);
 }
 
-#ifdef I_STDARG
 OP *
 die(const char* pat, ...)
-#else
-/*VARARGS0*/
-OP *
-die(pat, va_alist)
-    const char *pat;
-    va_dcl
-#endif
 {
     dTHR;
     va_list args;
@@ -1274,11 +1254,7 @@ die(pat, va_alist)
 			  thr, curstack, mainstack));
 #endif /* USE_THREADS */
 
-#ifdef I_STDARG
     va_start(args, pat);
-#else
-    va_start(args);
-#endif
     message = pat ? mess(pat, &args) : Nullch;
     va_end(args);
 
@@ -1330,16 +1306,8 @@ die(pat, va_alist)
     return restartop;
 }
 
-#ifdef I_STDARG
 void
 croak(const char* pat, ...)
-#else
-/*VARARGS0*/
-void
-croak(pat, va_alist)
-    char *pat;
-    va_dcl
-#endif
 {
     dTHR;
     va_list args;
@@ -1348,11 +1316,7 @@ croak(pat, va_alist)
     GV *gv;
     CV *cv;
 
-#ifdef I_STDARG
     va_start(args, pat);
-#else
-    va_start(args);
-#endif
     message = mess(pat, &args);
     va_end(args);
 #ifdef USE_THREADS
@@ -1394,14 +1358,7 @@ croak(pat, va_alist)
 }
 
 void
-#ifdef I_STDARG
 warn(const char* pat,...)
-#else
-/*VARARGS0*/
-warn(pat,va_alist)
-    const char *pat;
-    va_dcl
-#endif
 {
     va_list args;
     char *message;
@@ -1409,11 +1366,7 @@ warn(pat,va_alist)
     GV *gv;
     CV *cv;
 
-#ifdef I_STDARG
     va_start(args, pat);
-#else
-    va_start(args);
-#endif
     message = mess(pat, &args);
     va_end(args);
 
@@ -1672,7 +1625,6 @@ register I32 len;
 }
 #endif /* !HAS_MEMCMP || !HAS_SANE_MEMCMP */
 
-#if defined(I_STDARG) || defined(I_VARARGS)
 #ifndef HAS_VPRINTF
 
 #ifdef USE_CHAR_VSPRINTF
@@ -1703,7 +1655,6 @@ char *args;
 }
 
 #endif /* HAS_VPRINTF */
-#endif /* I_VARARGS || I_STDARGS */
 
 #ifdef MYSWAP
 #if BYTEORDER != 0x4321
@@ -1876,6 +1827,8 @@ my_popen(char *cmd, char *mode)
     if (pid == 0) {
 	GV* tmpgv;
 
+#undef THIS
+#undef THAT
 #define THIS that
 #define THAT This
 	PerlLIO_close(p[THAT]);
@@ -1935,8 +1888,8 @@ char	*mode;
 #endif /* !DOSISH */
 
 #ifdef DUMP_FDS
-dump_fds(s)
-char *s;
+void
+dump_fds(char *s)
 {
     int fd;
     struct stat tmpstatbuf;
@@ -1948,7 +1901,7 @@ char *s;
     }
     PerlIO_printf(PerlIO_stderr(),"\n");
 }
-#endif
+#endif	/* DUMP_FDS */
 
 #ifndef HAS_DUP2
 int
@@ -2188,7 +2141,7 @@ wait4pid(int pid, int *statusp, int flags)
 	if (flags)
 	    croak("Can't do waitpid with flags");
 	else {
-	    while ((result = wait(statusp)) != pid && pid > 0 && result >= 0)
+	    while ((result = PerlProc_wait(statusp)) != pid && pid > 0 && result >= 0)
 		pidgone(result,*statusp);
 	    if (result < 0)
 		*statusp = -1;
@@ -2882,4 +2835,16 @@ char **
 get_op_descs(void)
 {
  return op_desc;
+}
+
+char *
+get_no_modify(void)
+{
+ return (char*)no_modify;
+}
+
+U32 *
+get_opargs(void)
+{
+ return opargs;
 }

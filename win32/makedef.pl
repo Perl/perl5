@@ -33,6 +33,14 @@ close(CFG);
 
 warn join(' ',keys %define)."\n";
 
+if ($define{PERL_OBJECT}) {
+    print "LIBRARY PerlCore\n";
+    print "DESCRIPTION 'Perl interpreter'\n";
+    print "EXPORTS\n";
+    output_symbol("perl_alloc");
+    exit(0);
+}
+
 if ($CCTYPE ne 'GCC') 
  {
   print "LIBRARY Perl\n";
@@ -71,15 +79,20 @@ sub emit_symbols
 
 skip_symbols [qw(
 Perl_statusvalue_vms
+Perl_archpat_auto
 Perl_block_type
+Perl_bostr
 Perl_additem
 Perl_cast_ulong
 Perl_check_uni
 Perl_checkcomma
 Perl_chsize
 Perl_ck_aelem
+Perl_colors
+Perl_colorset
 Perl_cryptseen
 Perl_cx_dump
+Perl_DBcv
 Perl_do_ipcctl
 Perl_do_ipcget
 Perl_do_msgrcv
@@ -99,15 +112,23 @@ Perl_dump_packsubs
 Perl_dump_pm
 Perl_dump_sub
 Perl_expectterm
+Perl_error_no
+Perl_extralen
 Perl_fetch_gv
 Perl_fetch_io
 Perl_force_ident
 Perl_force_next
 Perl_force_word
+Perl_generation
 Perl_hv_stashpv
+Perl_in_clean_all
+Perl_in_clean_objs
 Perl_intuit_more
 Perl_init_thread_intern
 Perl_know_next
+Perl_lastgotoprobe
+Perl_linestart
+Perl_modcount
 Perl_modkids
 Perl_mstats
 Perl_my_bzero
@@ -120,6 +141,7 @@ Perl_no_fh_allowed
 Perl_no_op
 Perl_nointrp
 Perl_nomem
+Perl_pending_ident
 Perl_pp_cswitch
 Perl_pp_entersubr
 Perl_pp_evalonce
@@ -129,13 +151,41 @@ Perl_pp_nswitch
 Perl_q
 Perl_rcsid
 Perl_reall_srchlen
+Perl_reg_eval_set
+Perl_reg_flags
+Perl_reg_start_tmp
+Perl_reg_start_tmpl
+Perl_regbol
+Perl_regcc
+Perl_regcode
+Perl_regdata
+Perl_regdummy
 Perl_regdump
 Perl_regfold
+Perl_regendp
+Perl_regeol
+Perl_regflags
+Perl_regindent
+Perl_reginput
+Perl_reglastparen
 Perl_regmyendp
 Perl_regmyp_size
 Perl_regmystartp
 Perl_regnarrate
+Perl_regnaughty
+Perl_regnpar
+Perl_regparse
+Perl_regprecomp
+Perl_regprev
+Perl_regprogram
 Perl_regprop
+Perl_regsawback
+Perl_regseen
+Perl_regsize
+Perl_regstartp
+Perl_regtill
+Perl_regxend
+Perl_rx
 Perl_same_dirent
 Perl_saw_return
 Perl_scan_const
@@ -149,9 +199,13 @@ Perl_scan_str
 Perl_scan_subst
 Perl_scan_trans
 Perl_scan_word
+Perl_seen_zerolen
 Perl_setenv_getix
 Perl_skipspace
+Perl_sort_mutex
+Perl_sortcxix
 Perl_sublex_done
+Perl_sublex_info
 Perl_sublex_start
 Perl_sv_ref
 Perl_sv_setptrobj
@@ -342,31 +396,36 @@ while (<DATA>) {
 
 foreach my $symbol (sort keys %export)
  {
-	if ($CCTYPE eq "BORLAND") {
-		# workaround Borland quirk by exporting both the straight
-		# name and a name with leading underscore.  Note the
-		# alias *must* come after the symbol itself, if both
-		# are to be exported. (Linker bug?)
-		print "\t_$symbol\n";
-		print "\t$symbol = _$symbol\n";
-	}
-        elsif ($CCTYPE eq 'GCC') {
-                # Symbols have leading _ whole process is $%£"% slow
-                # so skip aliases for now
-		print "\t$symbol\n";
-        }
-	else {
-		# for binary coexistence, export both the symbol and
-		# alias with leading underscore
-		print "\t$symbol\n";
-		print "\t_$symbol = $symbol\n";
-	}
+   output_symbol($symbol);
  }
 
 sub emit_symbol {
 	my $symbol = shift;
         chomp($symbol); 
 	$export{$symbol} = 1;
+}
+
+sub output_symbol {
+    my $symbol = shift;
+    if ($CCTYPE eq "BORLAND") {
+	    # workaround Borland quirk by exporting both the straight
+	    # name and a name with leading underscore.  Note the
+	    # alias *must* come after the symbol itself, if both
+	    # are to be exported. (Linker bug?)
+	    print "\t_$symbol\n";
+	    print "\t$symbol = _$symbol\n";
+    }
+    elsif ($CCTYPE eq 'GCC') {
+	    # Symbols have leading _ whole process is $%£"% slow
+	    # so skip aliases for now
+	    print "\t$symbol\n";
+    }
+    else {
+	    # for binary coexistence, export both the symbol and
+	    # alias with leading underscore
+	    print "\t$symbol\n";
+	    print "\t_$symbol = $symbol\n";
+    }
 }
 
 1;

@@ -40,6 +40,12 @@
 #  define FAST_SV_GETS
 #endif
 
+#ifdef PERL_OBJECT
+#define FCALL this->*f
+#define VTBL this->*vtbl
+
+#else /* !PERL_OBJECT */
+
 static IV asIV _((SV* sv));
 static UV asUV _((SV* sv));
 static SV *more_sv _((void));
@@ -59,13 +65,17 @@ static void sv_mortalgrow _((void));
 static void sv_unglob _((SV* sv));
 static void sv_check_thinkfirst _((SV *sv));
 
-#define SV_CHECK_THINKFIRST(sv) if (SvTHINKFIRST(sv)) sv_check_thinkfirst(sv)
-
 #ifndef PURIFY
 static void *my_safemalloc(MEM_SIZE size);
 #endif
 
 typedef void (*SVFUNC) _((SV*));
+#define VTBL *vtbl
+#define FCALL *f
+
+#endif /* PERL_OBJECT */
+
+#define SV_CHECK_THINKFIRST(sv) if (SvTHINKFIRST(sv)) sv_check_thinkfirst(sv)
 
 #ifdef PURIFY
 
@@ -208,7 +218,7 @@ U32 flags;
 	UNLOCK_SV_MUTEX;	\
     } while (0)
 
-static void
+STATIC void
 del_sv(SV *p)
 {
     if (debug & 32768) {
@@ -264,7 +274,7 @@ sv_add_arena(char *ptr, U32 size, U32 flags)
 }
 
 /* sv_mutex must be held while calling more_sv() */
-static SV*
+STATIC SV*
 more_sv(void)
 {
     register SV* sv;
@@ -282,7 +292,7 @@ more_sv(void)
     return sv;
 }
 
-static void
+STATIC void
 visit(SVFUNC f)
 {
     SV* sva;
@@ -293,14 +303,14 @@ visit(SVFUNC f)
 	svend = &sva[SvREFCNT(sva)];
 	for (sv = sva + 1; sv < svend; ++sv) {
 	    if (SvTYPE(sv) != SVTYPEMASK)
-		(*f)(sv);
+		(FCALL)(sv);
 	}
     }
 }
 
 #endif /* PURIFY */
 
-static void
+STATIC void
 do_report_used(SV *sv)
 {
     if (SvTYPE(sv) != SVTYPEMASK) {
@@ -313,10 +323,10 @@ do_report_used(SV *sv)
 void
 sv_report_used(void)
 {
-    visit(do_report_used);
+    visit(FUNC_NAME_TO_PTR(do_report_used));
 }
 
-static void
+STATIC void
 do_clean_objs(SV *sv)
 {
     SV* rv;
@@ -332,7 +342,7 @@ do_clean_objs(SV *sv)
 }
 
 #ifndef DISABLE_DESTRUCTOR_KLUDGE
-static void
+STATIC void
 do_clean_named_objs(SV *sv)
 {
     if (SvTYPE(sv) == SVt_PVGV) {
@@ -351,20 +361,18 @@ do_clean_named_objs(SV *sv)
 }
 #endif
 
-static bool in_clean_objs = FALSE;
-
 void
 sv_clean_objs(void)
 {
     in_clean_objs = TRUE;
 #ifndef DISABLE_DESTRUCTOR_KLUDGE
-    visit(do_clean_named_objs);
+    visit(FUNC_NAME_TO_PTR(do_clean_named_objs));
 #endif
-    visit(do_clean_objs);
+    visit(FUNC_NAME_TO_PTR(do_clean_objs));
     in_clean_objs = FALSE;
 }
 
-static void
+STATIC void
 do_clean_all(SV *sv)
 {
     DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning loops:\n "), sv_dump(sv));)
@@ -372,13 +380,11 @@ do_clean_all(SV *sv)
     SvREFCNT_dec(sv);
 }
 
-static bool in_clean_all = FALSE;
-
 void
 sv_clean_all(void)
 {
     in_clean_all = TRUE;
-    visit(do_clean_all);
+    visit(FUNC_NAME_TO_PTR(do_clean_all));
     in_clean_all = FALSE;
 }
 
@@ -408,7 +414,7 @@ sv_free_arenas(void)
     sv_root = 0;
 }
 
-static XPVIV*
+STATIC XPVIV*
 new_xiv(void)
 {
     IV** xiv;
@@ -423,7 +429,7 @@ new_xiv(void)
     return more_xiv();
 }
 
-static void
+STATIC void
 del_xiv(XPVIV *p)
 {
     IV** xiv = (IV**)((char*)(p) + sizeof(XPV));
@@ -431,7 +437,7 @@ del_xiv(XPVIV *p)
     xiv_root = xiv;
 }
 
-static XPVIV*
+STATIC XPVIV*
 more_xiv(void)
 {
     register IV** xiv;
@@ -453,7 +459,7 @@ more_xiv(void)
     return new_xiv();
 }
 
-static XPVNV*
+STATIC XPVNV*
 new_xnv(void)
 {
     double* xnv;
@@ -465,7 +471,7 @@ new_xnv(void)
     return more_xnv();
 }
 
-static void
+STATIC void
 del_xnv(XPVNV *p)
 {
     double* xnv = (double*)((char*)(p) + sizeof(XPVIV));
@@ -473,7 +479,7 @@ del_xnv(XPVNV *p)
     xnv_root = xnv;
 }
 
-static XPVNV*
+STATIC XPVNV*
 more_xnv(void)
 {
     register double* xnv;
@@ -490,7 +496,7 @@ more_xnv(void)
     return new_xnv();
 }
 
-static XRV*
+STATIC XRV*
 new_xrv(void)
 {
     XRV* xrv;
@@ -502,14 +508,14 @@ new_xrv(void)
     return more_xrv();
 }
 
-static void
+STATIC void
 del_xrv(XRV *p)
 {
     p->xrv_rv = (SV*)xrv_root;
     xrv_root = p;
 }
 
-static XRV*
+STATIC XRV*
 more_xrv(void)
 {
     register XRV* xrv;
@@ -525,7 +531,7 @@ more_xrv(void)
     return new_xrv();
 }
 
-static XPV*
+STATIC XPV*
 new_xpv(void)
 {
     XPV* xpv;
@@ -537,14 +543,14 @@ new_xpv(void)
     return more_xpv();
 }
 
-static void
+STATIC void
 del_xpv(XPV *p)
 {
     p->xpv_pv = (char*)xpv_root;
     xpv_root = p;
 }
 
-static XPV*
+STATIC XPV*
 more_xpv(void)
 {
     register XPV* xpv;
@@ -596,7 +602,7 @@ more_xpv(void)
 #  define my_safemalloc(s) safemalloc(s)
 #  define my_safefree(s) free(s)
 #else
-static void* 
+STATIC void* 
 my_safemalloc(MEM_SIZE size)
 {
     char *p;
@@ -913,10 +919,10 @@ sv_upgrade(register SV *sv, U32 mt)
     return TRUE;
 }
 
-#ifdef DEBUGGING
 char *
 sv_peek(SV *sv)
 {
+#ifdef DEBUGGING
     SV *t = sv_newmortal();
     STRLEN prevlen;
     int unref = 0;
@@ -1058,8 +1064,10 @@ sv_peek(SV *sv)
 	    sv_catpv(t, ")");
     }
     return SvPV(t, na);
+#else	/* DEBUGGING */
+    return "";
+#endif	/* DEBUGGING */
 }
-#endif
 
 int
 sv_backoff(register SV *sv)
@@ -1231,7 +1239,7 @@ sv_setnv_mg(register SV *sv, double num)
     SvSETMAGIC(sv);
 }
 
-static void
+STATIC void
 not_a_number(SV *sv)
 {
     dTHR;
@@ -1526,7 +1534,7 @@ sv_2nv(register SV *sv)
     return SvNVX(sv);
 }
 
-static IV
+STATIC IV
 asIV(SV *sv)
 {
     I32 numtype = looks_like_number(sv);
@@ -1544,7 +1552,7 @@ asIV(SV *sv)
 	return (IV) U_V(d);
 }
 
-static UV
+STATIC UV
 asUV(SV *sv)
 {
     I32 numtype = looks_like_number(sv);
@@ -1703,7 +1711,7 @@ sv_2pv(register SV *sv, STRLEN *lp)
 		case SVt_PVHV:	s = "HASH";			break;
 		case SVt_PVCV:	s = "CODE";			break;
 		case SVt_PVGV:	s = "GLOB";			break;
-		case SVt_PVFM:	s = "FORMLINE";			break;
+		case SVt_PVFM:	s = "FORMAT";			break;
 		case SVt_PVIO:	s = "IO";			break;
 		default:	s = "UNKNOWN";			break;
 		}
@@ -2327,7 +2335,7 @@ sv_usepvn_mg(register SV *sv, register char *ptr, register STRLEN len)
     SvSETMAGIC(sv);
 }
 
-static void
+STATIC void
 sv_check_thinkfirst(register SV *sv)
 {
     if (SvREADONLY(sv)) {
@@ -2613,8 +2621,8 @@ sv_unmagic(SV *sv, int type)
 	if (mg->mg_type == type) {
 	    MGVTBL* vtbl = mg->mg_virtual;
 	    *mgp = mg->mg_moremagic;
-	    if (vtbl && vtbl->svt_free)
-		(*vtbl->svt_free)(sv, mg);
+	    if (vtbl && (vtbl->svt_free != NULL))
+		(VTBL->svt_free)(sv, mg);
 	    if (mg->mg_ptr && mg->mg_type != 'g')
 		if (mg->mg_len >= 0)
 		    Safefree(mg->mg_ptr);
@@ -2758,13 +2766,13 @@ sv_clear(register SV *sv)
 	if (defstash) {		/* Still have a symbol table? */
 	    djSP;
 	    GV* destructor;
-	    SV ref;
+	    SV tmpref;
 
-	    Zero(&ref, 1, SV);
-	    sv_upgrade(&ref, SVt_RV);
-	    SvROK_on(&ref);
-	    SvREADONLY_on(&ref);	/* DESTROY() could be naughty */
-	    SvREFCNT(&ref) = 1;
+	    Zero(&tmpref, 1, SV);
+	    sv_upgrade(&tmpref, SVt_RV);
+	    SvROK_on(&tmpref);
+	    SvREADONLY_on(&tmpref);	/* DESTROY() could be naughty */
+	    SvREFCNT(&tmpref) = 1;
 
 	    do {
 		stash = SvSTASH(sv);
@@ -2772,10 +2780,10 @@ sv_clear(register SV *sv)
 		if (destructor) {
 		    ENTER;
 		    PUSHSTACK(SI_DESTROY);
-		    SvRV(&ref) = SvREFCNT_inc(sv);
+		    SvRV(&tmpref) = SvREFCNT_inc(sv);
 		    EXTEND(SP, 2);
 		    PUSHMARK(SP);
-		    PUSHs(&ref);
+		    PUSHs(&tmpref);
 		    PUTBACK;
 		    perl_call_sv((SV*)GvCV(destructor),
 				 G_DISCARD|G_EVAL|G_KEEPERR);
@@ -2785,7 +2793,7 @@ sv_clear(register SV *sv)
 		}
 	    } while (SvOBJECT(sv) && SvSTASH(sv) != stash);
 
-	    del_XRV(SvANY(&ref));
+	    del_XRV(SvANY(&tmpref));
 	}
 
 	if (SvOBJECT(sv)) {
@@ -2967,7 +2975,7 @@ sv_len(register SV *sv)
 	return 0;
 
     if (SvGMAGICAL(sv))
-	len = mg_len(sv);
+	len = mg_length(sv);
     else
 	junk = SvPV(sv, len);
     return len;
@@ -3499,7 +3507,7 @@ sv_dec(register SV *sv)
  * hopefully we won't free it until it has been assigned to a
  * permanent location. */
 
-static void
+STATIC void
 sv_mortalgrow(void)
 {
     dTHR;
@@ -3586,16 +3594,8 @@ newSVpvn(char *s, STRLEN len)
     return sv;
 }
 
-#ifdef I_STDARG
 SV *
 newSVpvf(const char* pat, ...)
-#else
-/*VARARGS0*/
-SV *
-newSVpvf(pat, va_alist)
-const char *pat;
-va_dcl
-#endif
 {
     register SV *sv;
     va_list args;
@@ -3604,11 +3604,7 @@ va_dcl
     SvANY(sv) = 0;
     SvREFCNT(sv) = 1;
     SvFLAGS(sv) = 0;
-#ifdef I_STDARG
     va_start(args, pat);
-#else
-    va_start(args);
-#endif
     sv_vsetpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
     va_end(args);
     return sv;
@@ -3642,7 +3638,7 @@ newSViv(IV i)
 }
 
 SV *
-newRV(SV *ref)
+newRV(SV *tmpRef)
 {
     dTHR;
     register SV *sv;
@@ -3652,8 +3648,8 @@ newRV(SV *ref)
     SvREFCNT(sv) = 1;
     SvFLAGS(sv) = 0;
     sv_upgrade(sv, SVt_RV);
-    SvTEMP_off(ref);
-    SvRV(sv) = SvREFCNT_inc(ref);
+    SvTEMP_off(tmpRef);
+    SvRV(sv) = SvREFCNT_inc(tmpRef);
     SvROK_on(sv);
     return sv;
 }
@@ -3661,12 +3657,12 @@ newRV(SV *ref)
 
 
 SV *
-Perl_newRV_noinc(SV *ref)
+Perl_newRV_noinc(SV *tmpRef)
 {
     register SV *sv;
 
-    sv = newRV(ref);
-    SvREFCNT_dec(ref);
+    sv = newRV(tmpRef);
+    SvREFCNT_dec(tmpRef);
     return sv;
 }
 
@@ -3993,7 +3989,7 @@ sv_reftype(SV *sv, int ob)
 	case SVt_PVHV:		return "HASH";
 	case SVt_PVCV:		return "CODE";
 	case SVt_PVGV:		return "GLOB";
-	case SVt_PVFM:		return "FORMLINE";
+	case SVt_PVFM:		return "FORMAT";
 	default:		return "UNKNOWN";
 	}
     }
@@ -4097,24 +4093,24 @@ SV*
 sv_bless(SV *sv, HV *stash)
 {
     dTHR;
-    SV *ref;
+    SV *tmpRef;
     if (!SvROK(sv))
         croak("Can't bless non-reference value");
-    ref = SvRV(sv);
-    if (SvFLAGS(ref) & (SVs_OBJECT|SVf_READONLY)) {
-	if (SvREADONLY(ref))
+    tmpRef = SvRV(sv);
+    if (SvFLAGS(tmpRef) & (SVs_OBJECT|SVf_READONLY)) {
+	if (SvREADONLY(tmpRef))
 	    croak(no_modify);
-	if (SvOBJECT(ref)) {
-	    if (SvTYPE(ref) != SVt_PVIO)
+	if (SvOBJECT(tmpRef)) {
+	    if (SvTYPE(tmpRef) != SVt_PVIO)
 		--sv_objcount;
-	    SvREFCNT_dec(SvSTASH(ref));
+	    SvREFCNT_dec(SvSTASH(tmpRef));
 	}
     }
-    SvOBJECT_on(ref);
-    if (SvTYPE(ref) != SVt_PVIO)
+    SvOBJECT_on(tmpRef);
+    if (SvTYPE(tmpRef) != SVt_PVIO)
 	++sv_objcount;
-    (void)SvUPGRADE(ref, SVt_PVMG);
-    SvSTASH(ref) = (HV*)SvREFCNT_inc(stash);
+    (void)SvUPGRADE(tmpRef, SVt_PVMG);
+    SvSTASH(tmpRef) = (HV*)SvREFCNT_inc(stash);
 
 #ifdef OVERLOAD
     if (Gv_AMG(stash))
@@ -4126,7 +4122,7 @@ sv_bless(SV *sv, HV *stash)
     return sv;
 }
 
-static void
+STATIC void
 sv_unglob(SV *sv)
 {
     assert(SvTYPE(sv) == SVt_PVGV);
@@ -4225,92 +4221,40 @@ sv_setpviv_mg(SV *sv, IV iv)
     SvSETMAGIC(sv);
 }
 
-#ifdef I_STDARG
 void
 sv_setpvf(SV *sv, const char* pat, ...)
-#else
-/*VARARGS0*/
-void
-sv_setpvf(sv, pat, va_alist)
-    SV *sv;
-    const char *pat;
-    va_dcl
-#endif
 {
     va_list args;
-#ifdef I_STDARG
     va_start(args, pat);
-#else
-    va_start(args);
-#endif
     sv_vsetpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
     va_end(args);
 }
 
 
-#ifdef I_STDARG
 void
 sv_setpvf_mg(SV *sv, const char* pat, ...)
-#else
-/*VARARGS0*/
-void
-sv_setpvf_mg(sv, pat, va_alist)
-    SV *sv;
-    const char *pat;
-    va_dcl
-#endif
 {
     va_list args;
-#ifdef I_STDARG
     va_start(args, pat);
-#else
-    va_start(args);
-#endif
     sv_vsetpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
     va_end(args);
     SvSETMAGIC(sv);
 }
 
-#ifdef I_STDARG
 void
 sv_catpvf(SV *sv, const char* pat, ...)
-#else
-/*VARARGS0*/
-void
-sv_catpvf(sv, pat, va_alist)
-    SV *sv;
-    const char *pat;
-    va_dcl
-#endif
 {
     va_list args;
-#ifdef I_STDARG
     va_start(args, pat);
-#else
-    va_start(args);
-#endif
     sv_vcatpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
     va_end(args);
 }
 
-#ifdef I_STDARG
 void
 sv_catpvf_mg(SV *sv, const char* pat, ...)
-#else
-/*VARARGS0*/
-void
-sv_catpvf_mg(sv, pat, va_alist)
-    SV *sv;
-    const char *pat;
-    va_dcl
-#endif
 {
     va_list args;
-#ifdef I_STDARG
     va_start(args, pat);
-#else
-    va_start(args);
-#endif
     sv_vcatpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
     va_end(args);
     SvSETMAGIC(sv);
@@ -4819,10 +4763,10 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
     }
 }
 
-#ifdef DEBUGGING
 void
 sv_dump(SV *sv)
 {
+#ifdef DEBUGGING
     SV *d = sv_newmortal();
     char *s;
     U32 flags;
@@ -5086,14 +5030,5 @@ sv_dump(SV *sv)
 	PerlIO_printf(Perl_debug_log, "  FLAGS = 0x%lx\n", (long)IoFLAGS(sv));
 	break;
     }
+#endif	/* DEBUGGING */
 }
-#else
-void
-sv_dump(SV *sv)
-{
-}
-#endif
-
-
-
-

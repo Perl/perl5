@@ -271,7 +271,7 @@ struct xpvfm {
     HV *	xcv_stash;
     OP *	xcv_start;
     OP *	xcv_root;
-    void      (*xcv_xsub)_((CV*));
+    void      (*xcv_xsub)_((CV* _CPERLproto));
     ANY		xcv_xsubany;
     GV *	xcv_gv;
     GV *	xcv_filegv;
@@ -638,7 +638,7 @@ struct xpvio {
 #  undef newRV_noinc
 #  define newRV_noinc(sv) ({SV *nsv=newRV((sv)); --SvREFCNT(SvRV(nsv)); nsv;})
 #else
-#  if defined(CRIPPLED_CC) || defined(USE_THREADS)
+#  if defined(CRIPPLED_CC) || defined(USE_THREADS) || defined(PERL_OBJECT)
 #  else
 #    undef newRV_noinc
 #    define newRV_noinc(sv)	((Sv = newRV(sv)), --SvREFCNT(SvRV(Sv)), Sv)

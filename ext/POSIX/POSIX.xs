@@ -5,6 +5,13 @@
 #define PERLIO_NOT_STDIO 1
 #include "perl.h"
 #include "XSUB.h"
+#ifdef PERL_OBJECT	/* XXX _very_ temporary hacks */
+#  undef signal
+#  undef open
+#  define open PerlLIO_open3
+#  undef TAINT_PROPER
+#  define TAINT_PROPER(a)
+#endif
 #include <ctype.h>
 #ifdef I_DIRENT    /* XXX maybe better to just rely on perl.h? */
 #include <dirent.h>
@@ -23,9 +30,8 @@
 #endif
 #include <setjmp.h>
 #include <signal.h>
-#ifdef I_STDARG
 #include <stdarg.h>
-#endif
+
 #ifdef I_STDDEF
 #include <stddef.h>
 #endif
@@ -44,7 +50,7 @@
 #include <sys/types.h>
 #include <time.h>
 #ifdef I_UNISTD
-#include <unistd.h>	/* see hints/sunos_4_1.sh */
+#include <unistd.h>
 #endif
 #include <fcntl.h>
 
@@ -99,7 +105,7 @@
 #if defined (WIN32)
 #  undef mkfifo  /* #defined in perl.h */
 #  define mkfifo(a,b) not_here("mkfifo")
-#  define ttyname(a) not_here("ttyname")
+#  define ttyname(a) (char*)not_here("ttyname")
 #  define sigset_t long
 #  define pid_t long
 #  ifdef __BORLANDC__

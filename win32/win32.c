@@ -13,6 +13,10 @@
 #include <tchar.h>
 #ifdef __GNUC__
 #define Win32_Winsock
+#  ifdef __cplusplus
+#undef __attribute__		/* seems broken in 2.8.0 */
+#define __attribute__(p)
+#  endif
 #endif
 #include <windows.h>
 
@@ -37,7 +41,14 @@
 
 #include "EXTERN.h"
 #include "perl.h"
+
+#define NO_XSLOCKS
+#ifdef PERL_OBJECT
+extern CPerlObj* pPerl;
+#endif
 #include "XSUB.h"
+
+#include "Win32iop.h"
 #include <fcntl.h>
 #include <sys/stat.h>
 #ifndef __GNUC__
@@ -65,13 +76,41 @@ int _CRT_glob = 0;
 #define EXECF_SPAWN 2
 #define EXECF_SPAWN_NOWAIT 3
 
+#if defined(PERL_OBJECT)
+#undef win32_get_stdlib
+#define win32_get_stdlib g_win32_get_stdlib
+#undef win32_get_sitelib
+#define win32_get_sitelib g_win32_get_sitelib
+#undef do_aspawn
+#define do_aspawn g_do_aspawn
+#undef do_spawn
+#define do_spawn g_do_spawn
+#undef do_exec
+#define do_exec g_do_exec
+#undef opendir
+#define opendir g_opendir
+#undef readdir
+#define readdir g_readdir
+#undef telldir
+#define telldir g_telldir
+#undef seekdir
+#define seekdir g_seekdir
+#undef rewinddir
+#define rewinddir g_rewinddir
+#undef closedir
+#define closedir g_closedir
+#undef getlogin
+#define getlogin g_getlogin
+#endif
+
 static DWORD		os_id(void);
 static void		get_shell(void);
 static long		tokenize(char *str, char **dest, char ***destv);
-static int		do_spawn2(char *cmd, int exectype);
+	int		do_spawn2(char *cmd, int exectype);
 static BOOL		has_redirection(char *ptr);
 static long		filetime_to_clock(PFILETIME ft);
 static BOOL		filetime_from_time(PFILETIME ft, time_t t);
+
 
 HANDLE	w32_perldll_handle = INVALID_HANDLE_VALUE;
 static DWORD	w32_platform = (DWORD)-1;
@@ -109,31 +148,214 @@ IsWinNT(void) {
     return (os_id() == VER_PLATFORM_WIN32_NT);
 }
 
-char *
-win32_perllib_path(char *sfx,...)
-{
-    dTHR;
-    va_list ap;
-    char *end;
+char*
+GetRegStrFromKey(HKEY hkey, const char *lpszValueName, char** ptr, DWORD* lpDataLen)
+{   /* Retrieve a REG_SZ or REG_EXPAND_SZ from the registry */
+    HKEY handle;
+    DWORD type;
+    const char *subkey = "Software\\Perl";
+    long retval;
 
-    va_start(ap,sfx);
-    GetModuleFileName((w32_perldll_handle == INVALID_HANDLE_VALUE) 
-		      ? GetModuleHandle(NULL)
-		      : w32_perldll_handle,
-		      w32_perllib_root, 
-		      sizeof(w32_perllib_root));
-    *(end = strrchr(w32_perllib_root, '\\')) = '\0';
-    if (stricmp(end-4,"\\bin") == 0)
-     end -= 4;
-    strcpy(end,"\\lib");
-    while (sfx)
-     {
-      strcat(end,"\\");
-      strcat(end,sfx);
-      sfx = va_arg(ap,char *);
-     }
-    va_end(ap); 
-    return (w32_perllib_root);
+    retval = RegOpenKeyEx(hkey, subkey, 0, KEY_READ, &handle);
+    if (retval == ERROR_SUCCESS){
+	retval = RegQueryValueEx(handle, lpszValueName, 0, &type, NULL, lpDataLen);
+	if (retval == ERROR_SUCCESS && type == REG_SZ) {
+	    if (*ptr != NULL) {
+		Renew(*ptr, *lpDataLen, char);
+	    }
+	    else {
+		New(1312, *ptr, *lpDataLen, char);
+	    }
+	    retval = RegQueryValueEx(handle, lpszValueName, 0, NULL, (PBYTE)*ptr, lpDataLen);
+	    if (retval != ERROR_SUCCESS) {
+		Safefree(ptr);
+		ptr = NULL;
+	    }
+	}
+	RegCloseKey(handle);
+    }
+    return *ptr;
+}
+
+char*
+GetRegStr(const char *lpszValueName, char** ptr, DWORD* lpDataLen)
+{
+    *ptr = GetRegStrFromKey(HKEY_CURRENT_USER, lpszValueName, ptr, lpDataLen);
+    if (*ptr == NULL)
+    {
+	*ptr = GetRegStrFromKey(HKEY_LOCAL_MACHINE, lpszValueName, ptr, lpDataLen);
+    }
+    return *ptr;
+}
+
+char *
+win32_get_stdlib(char *pl)
+{
+    static char szStdLib[] = "lib";
+    int len = 0, newSize;
+    char szBuffer[MAX_PATH+1];
+    char szModuleName[MAX_PATH];
+    int result;
+    DWORD dwDataLen;
+    char *lpPath = NULL;
+    char *ptr;
+
+    /* $stdlib = $HKCU{"lib-$]"} || $HKLM{"lib-$]"} || $HKCU{"lib"} || $HKLM{"lib"} || "";  */
+    sprintf(szBuffer, "%s-%s", szStdLib, pl);
+    lpPath = GetRegStr(szBuffer, &lpPath, &dwDataLen);
+    if (lpPath == NULL)
+	lpPath = GetRegStr(szStdLib, &lpPath, &dwDataLen);
+
+    /* $stdlib .= ";$EMD/../../lib" */
+    GetModuleFileName(GetModuleHandle(NULL), szModuleName, sizeof(szModuleName));
+    ptr = strrchr(szModuleName, '\\');
+    if (ptr != NULL)
+    {
+	*ptr = '\0';
+	ptr = strrchr(szModuleName, '\\');
+	if (ptr != NULL)
+	{
+	    *ptr = '\0';
+	    ptr = strrchr(szModuleName, '\\');
+	}
+    }
+    if (ptr == NULL)
+    {
+	ptr = szModuleName;
+	*ptr = '\\';
+    }
+    strcpy(++ptr, szStdLib);
+
+    /* check that this path exists */
+    GetCurrentDirectory(sizeof(szBuffer), szBuffer);
+    result = SetCurrentDirectory(szModuleName);
+    SetCurrentDirectory(szBuffer);
+    if (result == 0)
+    {
+	GetModuleFileName(GetModuleHandle(NULL), szModuleName, sizeof(szModuleName));
+	ptr = strrchr(szModuleName, '\\');
+	if (ptr != NULL)
+	    strcpy(++ptr, szStdLib);
+    }
+
+    newSize = strlen(szModuleName) + 1;
+    if (lpPath != NULL)
+    {
+	len = strlen(lpPath);
+	newSize += len + 1; /* plus 1 for ';' */
+	lpPath = Renew(lpPath, newSize, char);
+    }
+    else
+	New(1310, lpPath, newSize, char);
+
+    if (lpPath != NULL)
+    {
+	if (len != 0)
+	    lpPath[len++] = ';';
+	strcpy(&lpPath[len], szModuleName);
+    }
+    return lpPath;
+}
+
+char *
+get_sitelib_part(char* lpRegStr, char* lpPathStr)
+{
+    char szBuffer[MAX_PATH+1];
+    char szModuleName[MAX_PATH];
+    DWORD dwDataLen;
+    int len = 0;
+    int result;
+    char *lpPath = NULL;
+    char *ptr;
+
+    lpPath = GetRegStr(lpRegStr, &lpPath, &dwDataLen);
+
+    /* $sitelib .= ";$EMD/../../../<lpPathStr>" */
+    GetModuleFileName(GetModuleHandle(NULL), szModuleName, sizeof(szModuleName));
+    ptr = strrchr(szModuleName, '\\');
+    if (ptr != NULL)
+    {
+	*ptr = '\0';
+	ptr = strrchr(szModuleName, '\\');
+	if (ptr != NULL)
+	{
+	    *ptr = '\0';
+	    ptr = strrchr(szModuleName, '\\');
+	    if (ptr != NULL)
+	    {
+		*ptr = '\0';
+		ptr = strrchr(szModuleName, '\\');
+	    }
+	}
+    }
+    if (ptr == NULL)
+    {
+	ptr = szModuleName;
+	*ptr = '\\';
+    }
+    strcpy(++ptr, lpPathStr);
+
+    /* check that this path exists */
+    GetCurrentDirectory(sizeof(szBuffer), szBuffer);
+    result = SetCurrentDirectory(szModuleName);
+    SetCurrentDirectory(szBuffer);
+
+    if (result)
+    {
+	int newSize = strlen(szModuleName) + 1;
+	if (lpPath != NULL)
+	{
+	    len = strlen(lpPath);
+	    newSize += len + 1; /* plus 1 for ';' */
+	    lpPath = Renew(lpPath, newSize, char);
+	}
+	else
+	    New(1311, lpPath, newSize, char);
+
+	if (lpPath != NULL)
+	{
+	    if (len != 0)
+		lpPath[len++] = ';';
+	    strcpy(&lpPath[len], szModuleName);
+	}
+    }
+    return lpPath;
+}
+
+char *
+win32_get_sitelib(char *pl)
+{
+    static char szSiteLib[] = "sitelib";
+    char szRegStr[40];
+    char szPathStr[MAX_PATH];
+    char *lpPath1;
+    char *lpPath2;
+	int len, newSize;
+
+    /* $HKCU{"sitelib-$]"} || $HKLM{"sitelib-$]"} . ---; */
+    sprintf(szRegStr, "%s-%s", szSiteLib, pl);
+    sprintf(szPathStr, "site\\%s\\lib", pl);
+    lpPath1 = get_sitelib_part(szRegStr, szPathStr);
+
+    /* $HKCU{'sitelib'} || $HKLM{'sitelib'} . ---; */
+    lpPath2 = get_sitelib_part(szSiteLib, "site\\lib");
+    if (lpPath1 == NULL)
+	return lpPath2;
+
+    if (lpPath2 == NULL)
+	return lpPath1;
+
+    len = strlen(lpPath1);
+    newSize = len + strlen(lpPath2) + 2; /* plus one for ';' */
+
+    lpPath1 = Renew(lpPath1, newSize, char);
+    if (lpPath1 != NULL)
+    {
+	lpPath1[len++] = ';';
+	strcpy(&lpPath1[len], lpPath2);
+    }
+    Safefree(lpPath2);
+    return lpPath1;
 }
 
 
@@ -175,6 +397,7 @@ has_redirection(char *ptr)
     return FALSE;
 }
 
+#if !defined(PERL_OBJECT)
 /* since the current process environment is being updated in util.c
  * the library functions will get the correct environment
  */
@@ -207,6 +430,7 @@ my_pclose(PerlIO *fp)
 {
     return win32_pclose(fp);
 }
+#endif
 
 static DWORD
 os_id(void)
@@ -325,7 +549,7 @@ do_aspawn(void *vreally, void **vmark, void **vsp)
     argv[index++] = 0;
    
     status = win32_spawnvp(flag,
-			   (really ? SvPV(really,na) : argv[0]),
+			   (const char*)(really ? SvPV(really,na) : argv[0]),
 			   (const char* const*)argv);
 
     if (status < 0 && errno == ENOEXEC) {
@@ -338,7 +562,7 @@ do_aspawn(void *vreally, void **vmark, void **vsp)
 	    argv[sh_items] = w32_perlshell_vec[sh_items];
    
 	status = win32_spawnvp(flag,
-			       (really ? SvPV(really,na) : argv[0]),
+			       (const char*)(really ? SvPV(really,na) : argv[0]),
 			       (const char* const*)argv);
     }
 
@@ -356,7 +580,7 @@ do_aspawn(void *vreally, void **vmark, void **vsp)
     return (status);
 }
 
-static int
+int
 do_spawn2(char *cmd, int exectype)
 {
     char **a;
@@ -689,7 +913,7 @@ kill(int pid, int sig)
     }
     return 0;
 }
-      
+
 /*
  * File system stuff
  */
@@ -754,13 +978,34 @@ win32_getenv(const char *name)
     DWORD needlen;
     if (!curitem)
 	New(1305,curitem,curlen,char);
-    if (!(needlen = GetEnvironmentVariable(name,curitem,curlen)))
-	return Nullch;
-    while (needlen > curlen) {
-	Renew(curitem,needlen,char);
-	curlen = needlen;
-	needlen = GetEnvironmentVariable(name,curitem,curlen);
+
+    needlen = GetEnvironmentVariable(name,curitem,curlen);
+    if (needlen != 0) {
+	while (needlen > curlen) {
+	    Renew(curitem,needlen,char);
+	    curlen = needlen;
+	    needlen = GetEnvironmentVariable(name,curitem,curlen);
+	}
     }
+    else
+    {
+	/* allow any environment variables that begin with 'PERL5'
+	   to be stored in the registry
+	*/
+	if(curitem != NULL)
+	    *curitem = '\0';
+
+	if (strncmp(name, "PERL5", 5) == 0) {
+	    if (curitem != NULL) {
+		Safefree(curitem);
+		curitem = NULL;
+	    }
+	    curitem = GetRegStr(name, &curitem, &curlen);
+	}
+    }
+    if(curitem != NULL && *curitem == '\0')
+	return Nullch;
+
     return curitem;
 }
 
@@ -1199,7 +1444,7 @@ win32_str_os_error(void *sv, DWORD dwErr)
 	sMsg[dwLen]= '\0';
     }
     if (0 == dwLen) {
-	sMsg = LocalAlloc(0, 64/**sizeof(TCHAR)*/);
+	sMsg = (char*)LocalAlloc(0, 64/**sizeof(TCHAR)*/);
 	dwLen = sprintf(sMsg,
 			"Unknown error #0x%lX (lookup 0x%lX)",
 			dwErr, GetLastError());
@@ -2113,6 +2358,714 @@ XS(w32_Sleep)
     XSRETURN_YES;
 }
 
+#define TMPBUFSZ 1024
+#define MAX_LENGTH 2048
+#define SUCCESSRETURNED(x)	(x == ERROR_SUCCESS)
+#define REGRETURN(x) XSRETURN_IV(SUCCESSRETURNED(x))
+#define SvHKEY(index) (HKEY)((unsigned long)SvIV(index))
+#define SETIV(index,value) sv_setiv(ST(index), value)
+#define SETNV(index,value) sv_setnv(ST(index), value)
+#define SETPV(index,string) sv_setpv(ST(index), string)
+#define SETPVN(index, buffer, length) sv_setpvn(ST(index), (char*)buffer, length)
+#define SETHKEY(index, hkey)	SETIV(index,(long)hkey)
+
+static time_t ft2timet(FILETIME *ft)
+{
+    SYSTEMTIME st;
+    struct tm tm;
+
+    FileTimeToSystemTime(ft, &st);
+    tm.tm_sec = st.wSecond;
+    tm.tm_min = st.wMinute;
+    tm.tm_hour = st.wHour;
+    tm.tm_mday = st.wDay;
+    tm.tm_mon = st.wMonth - 1;
+    tm.tm_year = st.wYear - 1900;
+    tm.tm_wday = st.wDayOfWeek;
+    tm.tm_yday = -1;
+    tm.tm_isdst = -1;
+    return mktime (&tm);
+}
+
+static
+XS(w32_RegCloseKey)
+{
+    dXSARGS;
+
+    if (items != 1) 
+    {
+	croak("usage: Win32::RegCloseKey($hkey);\n");
+    }
+
+    REGRETURN(RegCloseKey(SvHKEY(ST(0))));
+}
+
+static
+XS(w32_RegConnectRegistry)
+{
+    dXSARGS;
+    HKEY handle;
+
+    if (items != 3) 
+    {
+	croak("usage: Win32::RegConnectRegistry($machine, $hkey, $handle);\n");
+    }
+
+    if (SUCCESSRETURNED(RegConnectRegistry((char *)SvPV(ST(0), na), SvHKEY(ST(1)), &handle))) 
+    {
+	SETHKEY(2,handle);
+	XSRETURN_YES;
+    }
+    XSRETURN_NO;
+}
+
+static
+XS(w32_RegCreateKey)
+{
+    dXSARGS;
+    HKEY handle;
+    DWORD disposition;
+    long retval;
+
+    if (items != 3) 
+    {
+	croak("usage: Win32::RegCreateKey($hkey, $subkey, $handle);\n");
+    }
+
+    retval =  RegCreateKeyEx(SvHKEY(ST(0)), (char *)SvPV(ST(1), na), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS,
+					NULL, &handle, &disposition);
+
+    if (SUCCESSRETURNED(retval)) 
+    {
+	SETHKEY(2,handle);
+	XSRETURN_YES;
+    }
+    XSRETURN_NO;
+}
+
+static
+XS(w32_RegCreateKeyEx)
+{
+    dXSARGS;
+
+    unsigned int length;
+    long retval;
+    HKEY hkey, handle;
+    char *subkey;
+    char *keyclass;
+    DWORD options, disposition;
+    REGSAM sam;
+    SECURITY_ATTRIBUTES sa, *psa;
+
+    if (items != 9) 
+    {
+	croak("usage: Win32::RegCreateKeyEx($hkey, $subkey, $reserved, $class, $options, $sam, "
+			"$security, $handle, $disposition);\n");
+    }
+
+    hkey = SvHKEY(ST(0));
+    subkey = (char *)SvPV(ST(1), na);
+    keyclass = (char *)SvPV(ST(3), na);
+    options = (DWORD) ((unsigned long)SvIV(ST(4)));
+    sam = (REGSAM) ((unsigned long)SvIV(ST(5)));
+    psa = (SECURITY_ATTRIBUTES*)SvPV(ST(6), length);
+    if (length != sizeof(SECURITY_ATTRIBUTES))
+    {
+	psa = &sa;
+	memset(&sa, 0, sizeof(SECURITY_ATTRIBUTES));
+	sa.nLength = sizeof(SECURITY_ATTRIBUTES);
+    }
+
+    retval =  RegCreateKeyEx(hkey, subkey, 0, keyclass, options, sam,
+					psa, &handle, &disposition);
+
+    if (SUCCESSRETURNED(retval)) 
+    {
+	if (psa == &sa)
+	    SETPVN(6, &sa, sizeof(sa));
+
+	SETHKEY(7,handle);
+	SETIV(8,disposition);
+	XSRETURN_YES;
+    }
+    XSRETURN_NO;
+}
+
+static
+XS(w32_RegDeleteKey)
+{
+    dXSARGS;
+
+    if (items != 2) 
+    {
+	croak("usage: Win32::RegDeleteKey($hkey, $subkey);\n");
+    }
+
+    REGRETURN(RegDeleteKey(SvHKEY(ST(0)), (char *)SvPV(ST(1), na)));
+}
+
+static
+XS(w32_RegDeleteValue)
+{
+    dXSARGS;
+
+    if (items != 2) 
+    {
+	croak("usage: Win32::RegDeleteValue($hkey, $valname);\n");
+    }
+
+    REGRETURN(RegDeleteValue(SvHKEY(ST(0)), (char *)SvPV(ST(1), na)));
+}
+
+static
+XS(w32_RegEnumKey)
+{
+    dXSARGS;
+
+    char keybuffer[TMPBUFSZ];
+
+    if (items != 3) 
+    {
+	croak("usage: Win32::RegEnumKey($hkey, $idx, $subkeyname);\n");
+    }
+
+    if (SUCCESSRETURNED(RegEnumKey(SvHKEY(ST(0)), SvIV(ST(1)), keybuffer, sizeof(keybuffer)))) 
+    {
+	SETPV(2, keybuffer);
+	XSRETURN_YES;
+    }
+    XSRETURN_NO;
+}
+
+static
+XS(w32_RegEnumKeyEx)
+{
+    dXSARGS;
+    int length;
+
+    DWORD keysz, classsz;
+    char keybuffer[TMPBUFSZ];
+    char classbuffer[TMPBUFSZ];
+    long retval;
+    FILETIME filetime;
+
+    if (items != 6) 			
+    {
+	croak("usage: Win32::RegEnumKeyEx($hkey, $idx, $subkeyname, $reserved, $class, $time);\n");
+    }
+
+    keysz = sizeof(keybuffer);
+    classsz = sizeof(classbuffer);
+    retval = RegEnumKeyEx(SvHKEY(ST(0)), SvIV(ST(1)), keybuffer, &keysz, 0,
+						classbuffer, &classsz, &filetime);
+    if (SUCCESSRETURNED(retval)) 
+    {
+	SETPV(2, keybuffer);
+	SETPV(4, classbuffer);
+	SETIV(5, ft2timet(&filetime));
+	XSRETURN_YES;
+    }
+    XSRETURN_NO;
+}
+
+static
+XS(w32_RegEnumValue)
+{
+    dXSARGS;
+    HKEY hkey;
+    DWORD type, namesz, valsz;
+    long retval;
+    static HKEY last_hkey;
+    char  myvalbuf[MAX_LENGTH];
+    char  mynambuf[MAX_LENGTH];
+
+    if (items != 6) 
+    {
+	croak("usage: Win32::RegEnumValue($hkey, $i, $name, $reserved, $type, $value);\n");
+    }
+
+    hkey = SvHKEY(ST(0));
+
+    // If this is a new key, find out how big the maximum name and value sizes are and
+    // allocate space for them. Free any old storage and set the old key value to the
+    // current key.
+
+    if (hkey != (HKEY)last_hkey) 
+    {
+	char keyclass[TMPBUFSZ];
+	DWORD classsz, subkeys, maxsubkey, maxclass, values, salen, maxnamesz, maxvalsz;
+	FILETIME ft;
+	classsz = sizeof(keyclass);
+	retval = RegQueryInfoKey(hkey, keyclass, &classsz, 0, &subkeys, &maxsubkey, &maxclass,
+						&values, &maxnamesz, &maxvalsz, &salen, &ft);
+
+	if (!SUCCESSRETURNED(retval)) 
+	{
+	    XSRETURN_NO;
+	}
+	memset(myvalbuf, 0, MAX_LENGTH);
+	memset(mynambuf, 0, MAX_LENGTH);
+	last_hkey = hkey;
+    }
+
+    namesz = MAX_LENGTH;
+    valsz = MAX_LENGTH;
+    retval = RegEnumValue(hkey, SvIV(ST(1)), mynambuf, &namesz, 0, &type, (LPBYTE) myvalbuf, &valsz);
+    if (!SUCCESSRETURNED(retval)) 
+    {
+	XSRETURN_NO;
+    }
+    else 
+    {
+	SETPV(2, mynambuf);
+	SETIV(4, type);
+
+	// return includes the null terminator so delete it if REG_SZ, REG_MULTI_SZ or REG_EXPAND_SZ
+	switch(type)
+	{
+	    case REG_SZ:
+	    case REG_MULTI_SZ:
+	    case REG_EXPAND_SZ:
+		if (valsz)
+		    --valsz;
+	    case REG_BINARY:
+		SETPVN(5, myvalbuf, valsz);
+		break;
+
+	    case REG_DWORD_BIG_ENDIAN:
+		{
+		    BYTE tmp = myvalbuf[0];
+		    myvalbuf[0] = myvalbuf[3];
+		    myvalbuf[3] = tmp;
+		    tmp = myvalbuf[1];
+		    myvalbuf[1] = myvalbuf[2];
+		    myvalbuf[2] = tmp;
+		}
+	    case REG_DWORD_LITTLE_ENDIAN:	// same as REG_DWORD
+		SETNV(5, (double)*((DWORD*)myvalbuf));
+		break;
+
+	    default:
+		break;
+	}
+
+	XSRETURN_YES;
+    }
+}
+
+static
+XS(w32_RegFlushKey)
+{
+    dXSARGS;
+
+    if (items != 1) 
+    {
+	croak("usage: Win32::RegFlushKey($hkey);\n");
+    }
+
+    REGRETURN(RegFlushKey(SvHKEY(ST(0))));
+}
+
+static
+XS(w32_RegGetKeySecurity)
+{
+    dXSARGS;
+    SECURITY_DESCRIPTOR sd;
+    DWORD sdsz;
+
+    if (items != 3) 
+    {
+	croak("usage: Win32::RegGetKeySecurity($hkey, $security_info, $security_descriptor);\n");
+    }
+
+    if (SUCCESSRETURNED(RegGetKeySecurity(SvHKEY(ST(0)), SvIV(ST(1)), &sd, &sdsz))) 
+    {
+	SETPVN(2, &sd, sdsz);
+	XSRETURN_YES;
+    }
+    XSRETURN_NO;
+}
+
+static
+XS(w32_RegLoadKey)
+{
+    dXSARGS;
+
+    if (items != 3) 
+    {
+	croak("usage: Win32::RegLoadKey($hkey, $subkey, $filename);\n");
+    }
+
+    REGRETURN(RegLoadKey(SvHKEY(ST(0)), (char *)SvPV(ST(1), na), (char *)SvPV(ST(2), na)));
+}
+
+static
+XS(w32_RegNotifyChangeKeyValue)
+{
+    croak("Win32::RegNotifyChangeKeyValue not yet implemented!\n");
+}
+
+static
+XS(w32_RegOpenKey)
+{
+    dXSARGS;
+    HKEY handle;
+
+    if (items != 3) 
+    {
+	croak("usage: Win32::RegOpenKey($hkey, $subkey, $handle);\n");
+    }
+
+    if (SUCCESSRETURNED(RegOpenKey(SvHKEY(ST(0)), (char *)SvPV(ST(1), na), &handle))) 
+    {
+	SETHKEY(2,handle);
+	XSRETURN_YES;
+    }
+    XSRETURN_NO;
+}
+
+static
+XS(w32_RegOpenKeyEx)
+{
+    dXSARGS;
+    HKEY handle;
+
+    if (items != 5) 
+    {
+	croak("usage: Win32::RegOpenKeyEx($hkey, $subkey, $reserved, $sam, $handle);\n");
+    }
+
+    if (SUCCESSRETURNED(RegOpenKeyEx(SvHKEY(ST(0)), (char *)SvPV(ST(1), na), 
+				0, (REGSAM) ((unsigned long)SvIV(ST(3))), &handle))) 
+    {
+	SETHKEY(4,handle);
+	XSRETURN_YES;
+    }
+    XSRETURN_NO;
+}
+
+#pragma optimize("", off)
+static
+XS(w32_RegQueryInfoKey)
+{
+    dXSARGS;
+    int length;
+
+    char keyclass[TMPBUFSZ];
+    DWORD subkeys, maxsubkey, maxclass, values, maxvalname, maxvaldata;
+    DWORD seclen, classsz;
+    FILETIME ft;
+    long retval;
+
+    if (items != 10) 
+    {
+	croak("usage: Win32::RegQueryInfoKey($hkey, $class, $numsubkeys, $maxsubkey,"
+		"$maxclass, $values, $maxvalname, $maxvaldata, $secdesclen,"
+			"$lastwritetime);\n");
+    }
+
+    classsz = sizeof(keyclass);
+    retval = RegQueryInfoKey(SvHKEY(ST(0)), keyclass, &classsz, 0, &subkeys, &maxsubkey,
+				&maxclass, &values, &maxvalname, &maxvaldata,
+					&seclen, &ft);
+    if (SUCCESSRETURNED(retval)) 
+    {
+	SETPV(1, keyclass);
+	SETIV(2, subkeys);
+	SETIV(3, maxsubkey);
+	SETIV(4, maxclass);
+	SETIV(5, values);
+	SETIV(6, maxvalname);
+	SETIV(7, maxvaldata);
+	SETIV(8, seclen);
+	SETIV(9, ft2timet(&ft));
+	XSRETURN_YES;
+    }
+    XSRETURN_NO;
+}
+#pragma optimize("", on)
+
+static
+XS(w32_RegQueryValue)
+{
+    dXSARGS;
+
+    unsigned char databuffer[TMPBUFSZ*2];
+    long datasz = sizeof(databuffer);
+
+    if (items != 3) 
+    {
+	croak("usage: Win32::RegQueryValue($hkey, $valuename, $data);\n");
+    }
+
+    if (SUCCESSRETURNED(RegQueryValue(SvHKEY(ST(0)), SvPV(ST(1), na), (char*)databuffer, &datasz))) 
+    {
+	// return includes the null terminator so delete it
+	SETPVN(2, databuffer, --datasz);
+	XSRETURN_YES;
+    }
+    XSRETURN_NO;
+}
+
+static
+XS(w32_RegQueryValueEx)
+{
+    dXSARGS;
+
+    unsigned char databuffer[TMPBUFSZ*2];
+    DWORD datasz = sizeof(databuffer);
+    DWORD type;
+    LONG result;
+    LPBYTE ptr = databuffer;
+
+    if (items != 5) 
+    {
+	croak("usage: Win32::RegQueryValueEx($hkey, $valuename, $reserved, $type, $data);\n");
+    }
+
+    result = RegQueryValueEx(SvHKEY(ST(0)), SvPV(ST(1), na), 0, &type, ptr, &datasz);
+    if (result == ERROR_MORE_DATA)
+    {
+	New(0, ptr, datasz+1, BYTE);
+	result = RegQueryValueEx(SvHKEY(ST(0)), SvPV(ST(1), na), 0, &type, ptr, &datasz);
+    }
+    if (SUCCESSRETURNED(result)) 
+    {
+	SETIV(3, type);
+
+	// return includes the null terminator so delete it if REG_SZ, REG_MULTI_SZ or REG_EXPAND_SZ
+	switch(type)
+	{
+	    case REG_SZ:
+	    case REG_MULTI_SZ:
+	    case REG_EXPAND_SZ:
+		--datasz;
+	    case REG_BINARY:
+		SETPVN(4, ptr, datasz);
+		break;
+
+	    case REG_DWORD_BIG_ENDIAN:
+		{
+		    BYTE tmp = ptr[0];
+		    ptr[0] = ptr[3];
+		    ptr[3] = tmp;
+		    tmp = ptr[1];
+		    ptr[1] = ptr[2];
+		    ptr[2] = tmp;
+		}
+	    case REG_DWORD_LITTLE_ENDIAN:	// same as REG_DWORD
+		SETNV(4, (double)*((DWORD*)ptr));
+		break;
+
+	    default:
+		break;
+	}
+
+	if (ptr != databuffer)
+	    safefree(ptr);
+
+	XSRETURN_YES;
+    }
+    if (ptr != databuffer)
+	safefree(ptr);
+
+    XSRETURN_NO;
+}
+
+static
+XS(w32_RegReplaceKey)
+{
+    dXSARGS;
+
+    if (items != 4) 
+    {
+	croak("usage: Win32::RegReplaceKey($hkey, $subkey, $newfile, $oldfile);\n");
+    }
+
+    REGRETURN(RegReplaceKey(SvHKEY(ST(0)), (char *)SvPV(ST(1), na), (char *)SvPV(ST(2), na), (char *)SvPV(ST(3), na)));
+}
+
+static
+XS(w32_RegRestoreKey)
+{
+    dXSARGS;
+
+    if (items < 2 || items > 3) 
+    {
+	croak("usage: Win32::RegRestoreKey($hkey, $filename [, $flags]);\n");
+    }
+
+    REGRETURN(RegRestoreKey(SvHKEY(ST(0)), (char*)SvPV(ST(1), na), (DWORD)((items == 3) ? SvIV(ST(2)) : 0)));
+}
+
+static
+XS(w32_RegSaveKey)
+{
+    dXSARGS;
+
+    if (items != 2) 
+    {
+	croak("usage: Win32::RegSaveKey($hkey, $filename);\n");
+    }
+
+    REGRETURN(RegSaveKey(SvHKEY(ST(0)), (char *)SvPV(ST(1), na), NULL));
+}
+
+static
+XS(w32_RegSetKeySecurity)
+{
+    dXSARGS;
+
+    if (items != 3) 
+    {
+	croak("usage: Win32::RegSetKeySecurity($hkey, $security_info, $security_descriptor);\n");
+    }
+
+    REGRETURN(RegSetKeySecurity(SvHKEY(ST(0)), SvIV(ST(1)), (SECURITY_DESCRIPTOR*)SvPV(ST(2), na)));
+}
+
+static
+XS(w32_RegSetValue)
+{
+    dXSARGS;
+
+    unsigned int size;
+    char *buffer;
+	DWORD type;
+
+    if (items != 4) 
+    {
+	croak("usage: Win32::RegSetValue($hkey, $subKey, $type, $data);\n");
+    }
+
+    type = SvIV(ST(2));
+    if (type != REG_SZ && type != REG_EXPAND_SZ)
+    {
+	croak("Win32::RegSetValue: Type was not REG_SZ or REG_EXPAND_SZ, cannot set %s\n", (char *)SvPV(ST(1), na));
+    }
+
+    buffer = (char *)SvPV(ST(3), size);
+    REGRETURN(RegSetValue(SvHKEY(ST(0)), SvPV(ST(1), na), REG_SZ, buffer, size));
+}
+
+static
+XS(w32_RegSetValueEx)
+{
+    dXSARGS;
+
+    DWORD type;
+    DWORD val;
+    unsigned int size;
+    char *buffer;
+
+    if (items != 5) 
+    {
+	croak("usage: Win32::RegSetValueEx($hkey, $valname, $reserved, $type, $data);\n");
+    }
+
+    type = (DWORD)SvIV(ST(3));
+    switch(type) 
+    {
+	case REG_SZ:
+	case REG_BINARY:
+	case REG_MULTI_SZ:
+	case REG_EXPAND_SZ:
+	    buffer = (char *)SvPV(ST(4), size);
+	    if (type != REG_BINARY)
+		size++; // include null terminator in size
+
+	    REGRETURN(RegSetValueEx(SvHKEY(ST(0)), (char *)SvPV(ST(1), na), 0, type, (PBYTE) buffer, size));
+	    break;
+
+	case REG_DWORD_BIG_ENDIAN:
+	case REG_DWORD_LITTLE_ENDIAN: // Same as REG_DWORD
+	    val = (DWORD)SvIV(ST(4));
+	    REGRETURN(RegSetValueEx(SvHKEY(ST(0)), (char *)SvPV(ST(1), na), 0, type, (PBYTE) &val, sizeof(DWORD)));
+	    break;
+
+	default:
+	    croak("Win32::RegSetValueEx: Type not specified, cannot set %s\n", (char *)SvPV(ST(1), na));
+    }
+}
+
+static
+XS(w32_RegUnloadKey)
+{
+    dXSARGS;
+
+    if (items != 2) 
+    {
+	croak("usage: Win32::RegUnLoadKey($hkey, $subkey);\n");
+    }
+
+    REGRETURN(RegUnLoadKey(SvHKEY(ST(0)), (char *)SvPV(ST(1), na)));
+}
+
+static
+XS(w32_RegisterServer)
+{
+    dXSARGS;
+    BOOL bSuccess = FALSE;
+    HINSTANCE hInstance;
+    unsigned int length;
+    FARPROC sFunc;
+
+    if (items != 1) 
+    {
+	croak("usage: Win32::RegisterServer($LibraryName)\n");
+    }
+
+    hInstance = LoadLibrary((char *)SvPV(ST(0), length));
+    if (hInstance != NULL)
+    {
+	sFunc = GetProcAddress(hInstance, "DllRegisterServer");
+	if (sFunc != NULL)
+	{
+	    bSuccess = (sFunc() == 0);
+	}
+	FreeLibrary(hInstance);
+    }
+
+    if (bSuccess)
+    {
+	XSRETURN_YES;
+    }
+    XSRETURN_NO;
+}
+
+static
+XS(w32_UnregisterServer)
+{
+    dXSARGS;
+    BOOL bSuccess = FALSE;
+    HINSTANCE hInstance;
+    unsigned int length;
+    FARPROC sFunc;
+
+    if (items != 1) 
+    {
+	croak("usage: Win32::UnregisterServer($LibraryName)\n");
+    }
+
+    hInstance = LoadLibrary((char *)SvPV(ST(0), length));
+    if (hInstance != NULL)
+    {
+	sFunc = GetProcAddress(hInstance, "DllUnregisterServer");
+	if (sFunc != NULL)
+	{
+	    bSuccess = (sFunc() == 0);
+	}
+	FreeLibrary(hInstance);
+    }
+
+    if (bSuccess)
+    {
+	XSRETURN_YES;
+    }
+    XSRETURN_NO;
+}
+
+
 void
 Perl_init_os_extras()
 {
@@ -2143,6 +3096,40 @@ Perl_init_os_extras()
     newXS("Win32::GetTickCount", w32_GetTickCount, file);
     newXS("Win32::GetShortPathName", w32_GetShortPathName, file);
     newXS("Win32::Sleep", w32_Sleep, file);
+
+    /* the following extensions are used interally and may be changed at any time */
+    /* therefore no documentation is provided */
+    newXS("Win32::RegCloseKey", w32_RegCloseKey, file);
+    newXS("Win32::RegConnectRegistry", w32_RegConnectRegistry, file);
+    newXS("Win32::RegCreateKey", w32_RegCreateKey, file);
+    newXS("Win32::RegCreateKeyEx", w32_RegCreateKeyEx, file);
+    newXS("Win32::RegDeleteKey", w32_RegDeleteKey, file);
+    newXS("Win32::RegDeleteValue", w32_RegDeleteValue, file);
+
+    newXS("Win32::RegEnumKey", w32_RegEnumKey, file);
+    newXS("Win32::RegEnumKeyEx", w32_RegEnumKeyEx, file);
+    newXS("Win32::RegEnumValue", w32_RegEnumValue, file);
+
+    newXS("Win32::RegFlushKey", w32_RegFlushKey, file);
+    newXS("Win32::RegGetKeySecurity", w32_RegGetKeySecurity, file);
+
+    newXS("Win32::RegLoadKey", w32_RegLoadKey, file);
+    newXS("Win32::RegOpenKey", w32_RegOpenKey, file);
+    newXS("Win32::RegOpenKeyEx", w32_RegOpenKeyEx, file);
+    newXS("Win32::RegQueryInfoKey", w32_RegQueryInfoKey, file);
+    newXS("Win32::RegQueryValue", w32_RegQueryValue, file);
+    newXS("Win32::RegQueryValueEx", w32_RegQueryValueEx, file);
+
+    newXS("Win32::RegReplaceKey", w32_RegReplaceKey, file);
+    newXS("Win32::RegRestoreKey", w32_RegRestoreKey, file);
+    newXS("Win32::RegSaveKey", w32_RegSaveKey, file);
+    newXS("Win32::RegSetKeySecurity", w32_RegSetKeySecurity, file);
+    newXS("Win32::RegSetValue", w32_RegSetValue, file);
+    newXS("Win32::RegSetValueEx", w32_RegSetValueEx, file);
+    newXS("Win32::RegUnloadKey", w32_RegUnloadKey, file);
+
+    newXS("Win32::RegisterServer", w32_RegisterServer, file);
+    newXS("Win32::UnregisterServer", w32_UnregisterServer, file);
 
     /* XXX Bloat Alert! The following Activeware preloads really
      * ought to be part of Win32::Sys::*, so they're not included

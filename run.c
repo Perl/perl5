@@ -16,12 +16,18 @@
  * know.  Run now!  Hope is in speed!"  --Gandalf
  */
 
+#ifdef PERL_OBJECT
+#define CALLOP this->*op
+#else
+#define CALLOP *op
+#endif
 
 int
-runops_standard(void) {
+runops_standard(void)
+{
     dTHR;
 
-    while ( op = (*op->op_ppaddr)(ARGS) ) ;
+    while ( op = (CALLOP->op_ppaddr)(ARGS) ) ;
 
     TAINT_NOT;
     return 0;
@@ -32,10 +38,16 @@ runops_standard(void) {
 dEXT char **watchaddr = 0;
 dEXT char *watchok;
 
+#ifndef PERL_OBJECT
 static void debprof _((OP*o));
+#endif
+
+#endif	/* DEBUGGING */
 
 int
-runops_debug(void) {
+runops_debug(void)
+{
+#ifdef DEBUGGING
     dTHR;
     if (!op) {
 	warn("NULL OP IN RUN");
@@ -51,15 +63,19 @@ runops_debug(void) {
 	    DEBUG_t(debop(op));
 	    DEBUG_P(debprof(op));
 	}
-    } while ( op = (*op->op_ppaddr)(ARGS) );
+    } while ( op = (CALLOP->op_ppaddr)(ARGS) );
 
     TAINT_NOT;
     return 0;
+#else
+    return runops_standard();
+#endif	/* DEBUGGING */
 }
 
 I32
 debop(OP *o)
 {
+#ifdef DEBUGGING
     SV *sv;
     deb("%s", op_name[o->op_type]);
     switch (o->op_type) {
@@ -81,29 +97,35 @@ debop(OP *o)
 	break;
     }
     PerlIO_printf(Perl_debug_log, "\n");
+#endif	/* DEBUGGING */
     return 0;
 }
 
 void
 watch(char **addr)
 {
+#ifdef DEBUGGING
     watchaddr = addr;
     watchok = *addr;
     PerlIO_printf(Perl_debug_log, "WATCHING, %lx is currently %lx\n",
 	(long)watchaddr, (long)watchok);
+#endif	/* DEBUGGING */
 }
 
-static void
+STATIC void
 debprof(OP *o)
 {
+#ifdef DEBUGGING
     if (!profiledata)
 	New(000, profiledata, MAXO, U32);
     ++profiledata[o->op_type];
+#endif /* DEBUGGING */
 }
 
 void
 debprofdump(void)
 {
+#ifdef DEBUGGING
     unsigned i;
     if (!profiledata)
 	return;
@@ -112,7 +134,5 @@ debprofdump(void)
 	    PerlIO_printf(Perl_debug_log,
 			  "%u\t%lu\n", i, (unsigned long)profiledata[i]);
     }
+#endif	/* DEBUGGING */
 }
-
-#endif /* DEBUGGING */
-

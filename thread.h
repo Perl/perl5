@@ -226,5 +226,9 @@ typedef struct condpair {
 
 #define THR
 /* Rats: if dTHR is just blank then the subsequent ";" throws an error */
+#ifdef WIN32
+#define dTHR extern int Perl___notused
+#else
 #define dTHR extern int errno
+#endif
 #endif /* USE_THREADS */

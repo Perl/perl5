@@ -13,7 +13,7 @@
 # Set these to wherever you want "nmake install" to put your
 # newly built perl.
 INST_DRV	*= c:
-INST_TOP	*= $(INST_DRV)\perl5004.5x
+INST_TOP	*= $(INST_DRV)\perl\5004.5x
 
 #
 # uncomment to enable threads-capabilities
@@ -25,6 +25,11 @@ INST_TOP	*= $(INST_DRV)\perl5004.5x
 #CCTYPE		*= MSVC
 CCTYPE		*= BORLAND
 #CCTYPE		*= GCC
+
+#
+# uncomment next line if you want to use the perl object
+# Currently, this cannot be enabled if you ask for threads above
+#OBJECT		*= -DPERL_OBJECT
 
 #
 # uncomment next line if you want debug version of perl (big,slow)
@@ -46,8 +51,9 @@ CCTYPE		*= BORLAND
 # set this if you wish to use perl's malloc
 # WARNING: Turning this on/off WILL break binary compatibility with extensions
 # you may have compiled with/without it.  Be prepared to recompile all extensions
-# if you change the default.
-PERL_MALLOC	*= define
+# if you change the default.  Currently, this cannot be enabled if you ask for
+# PERL_OBJECT above.
+#PERL_MALLOC	*= define
 
 #
 # set the install locations of the compiler include/libraries
@@ -115,7 +121,7 @@ AUTODIR		= ..\lib\auto
 
 CC		= bcc32
 LINK32		= tlink32
-LIB32		= tlib
+LIB32		= tlib /P128
 IMPLIB		= implib -c
 
 #
@@ -145,12 +151,13 @@ CFLAGS		= -w -d -tWM -tWD $(INCLUDES) $(DEFINES) $(LOCDEFS) \
 LINK_FLAGS	= $(LINK_DBG) -L$(CCLIBDIR)
 OBJOUT_FLAG	= -o
 EXEOUT_FLAG	= -e
+LIBOUT_FLAG	= 
 
 .ELIF "$(CCTYPE)" == "GCC"
 
 CC		= gcc -pipe
 LINK32		= gcc -pipe
-LIB32		= ar
+LIB32		= ar rc
 IMPLIB		= dlltool
 
 o = .o
@@ -181,6 +188,7 @@ CFLAGS		= $(INCLUDES) $(DEFINES) $(LOCDEFS) $(OPTIMIZE)
 LINK_FLAGS	= $(LINK_DBG) -L$(CCLIBDIR)
 OBJOUT_FLAG	= -o
 EXEOUT_FLAG	= -o
+LIBOUT_FLAG	= 
 
 .ELSE
 
@@ -191,8 +199,12 @@ LIB32		= $(LINK32) -lib
 #
 # Options
 #
-
-.IF "$(RUNTIME)" == ""
+.IF "$(OBJECT)" == "-DPERL_OBJECT"
+RUNTIME		= -MT
+# XXX building with -MD fails many tests, but cannot investigate
+# because building with debug crashes compiler :-( GSAR )-:
+#RUNTIME	= -MD
+.ELSE
 RUNTIME		= -MD
 .ENDIF
 
@@ -213,14 +225,14 @@ LIBC		= libcmt.lib
 .IF "$(CCTYPE)" == "MSVC20"
 OPTIMIZE	= -Od $(RUNTIME) -Z7 -D_DEBUG -DDEBUGGING
 .ELSE
-OPTIMIZE	= -Od $(RUNTIME)d -Z7 -D_DEBUG -DDEBUGGING
+OPTIMIZE	= -Od $(RUNTIME)d -Zi -D_DEBUG -DDEBUGGING
 .ENDIF
 LINK_DBG	= -debug -pdb:none
 .ELSE
 .IF "$(CCTYPE)" == "MSVC20"
-OPTIMIZE	= -Od $(RUNTIME) -DNDEBUG
+OPTIMIZE	= -O2 $(RUNTIME) -DNDEBUG
 .ELSE
-OPTIMIZE	= -Od $(RUNTIME) -DNDEBUG
+OPTIMIZE	= -O2 $(RUNTIME) -DNDEBUG
 .ENDIF
 LINK_DBG	= -release
 .ENDIF
@@ -236,6 +248,7 @@ CFLAGS		= -nologo -Gf -W3 $(INCLUDES) $(DEFINES) $(LOCDEFS) \
 LINK_FLAGS	= -nologo $(LINK_DBG) -machine:$(PROCESSOR_ARCHITECTURE)
 OBJOUT_FLAG	= -Fo
 EXEOUT_FLAG	= -Fe
+LIBOUT_FLAG	= /out:
 
 .ENDIF
 
@@ -292,9 +305,11 @@ EXTUTILSDIR	= $(LIBDIR)\extutils
 .IF "$(OBJECT)" == "-DPERL_OBJECT"
 PERLIMPLIB	= ..\perlcore.lib
 PERLDLL		= ..\perlcore.dll
+CAPILIB		= $(COREDIR)\PerlCAPI.lib
 .ELSE
 PERLIMPLIB	= ..\perl.lib
 PERLDLL		= ..\perl.dll
+CAPILIB		=
 .ENDIF
 
 MINIPERL	= ..\miniperl.exe
@@ -452,7 +467,7 @@ WIN32_OBJ	= $(WIN32_SRC:db:+$(o))
 MINICORE_OBJ	= $(MINIDIR)\{$(CORE_OBJ:f) miniperlmain$(o)}
 MINIWIN32_OBJ	= $(MINIDIR)\{$(WIN32_OBJ:f)}
 MINI_OBJ	= $(MINICORE_OBJ) $(MINIWIN32_OBJ)
-PERL95_OBJ	= $(PERL95_SRC:db:+$(o))
+PERL95_OBJ	= $(PERL95_SRC:db:+$(o)) DynaLoadmt$(o)
 DLL_OBJ		= $(DLL_SRC:db:+$(o))
 X2P_OBJ		= $(X2P_SRC:db:+$(o))
 
@@ -493,7 +508,7 @@ ATTRS_DLL	= $(AUTODIR)\attrs\attrs.dll
 THREAD_DLL	= $(AUTODIR)\Thread\Thread.dll
 B_DLL		= $(AUTODIR)\B\B.dll
 
-EXTENSION_C	= 		\
+EXTENSION_C	=		\
 		$(SOCKET).c	\
 		$(FCNTL).c	\
 		$(OPCODE).c	\
@@ -504,16 +519,20 @@ EXTENSION_C	= 		\
 		$(THREAD).c	\
 		$(B).c
 
-EXTENSION_DLL	= 		\
+EXTENSION_DLL	=		\
 		$(SOCKET_DLL)	\
 		$(FCNTL_DLL)	\
 		$(OPCODE_DLL)	\
 		$(SDBM_FILE_DLL)\
 		$(IO_DLL)	\
 		$(POSIX_DLL)	\
-		$(ATTRS_DLL)	\
+		$(ATTRS_DLL)
+
+.IF "$(OBJECT)" == ""
+EXTENSION_DLL	+=		\
 		$(THREAD_DLL)	\
 		$(B_DLL)
+.ENDIF
 
 POD2HTML	= $(PODDIR)\pod2html
 POD2MAN		= $(PODDIR)\pod2man
@@ -525,12 +544,13 @@ CFG_VARS	=					\
 		"INST_TOP=$(INST_TOP)"			\
 		"archname=$(ARCHNAME)"			\
 		"cc=$(CC)"				\
-		"ccflags=$(OPTIMIZE) $(DEFINES)"	\
+		"ccflags=$(OPTIMIZE) $(DEFINES) $(OBJECT)"	\
 		"cf_email=$(EMAIL)"			\
 		"d_crypt=$(D_CRYPT)"			\
 		"d_mymalloc=$(PERL_MALLOC)"		\
 		"libs=$(LIBFILES:f)"			\
 		"incpath=$(CCINCDIR)"			\
+		"libperl=$(PERLIMPLIB)"			\
 		"libpth=$(strip $(CCLIBDIR) $(LIBFILES:d))" \
 		"libc=$(LIBC)"				\
 		"make=dmake"				\
@@ -544,7 +564,7 @@ CFG_VARS	=					\
 # Top targets
 #
 
-all : $(GLOBEXE) $(MINIMOD) $(CONFIGPM) $(PERLEXE) $(PERL95EXE) $(X2P) \
+all : $(GLOBEXE) $(MINIMOD) $(CONFIGPM) $(PERLEXE) $(PERL95EXE) $(CAPILIB) $(X2P) \
 	$(EXTENSION_DLL)
 
 $(DYNALOADER)$(o) : $(DYNALOADER).c $(CORE_H) $(EXTDIR)\DynaLoader\dlutils.c
@@ -691,13 +711,13 @@ perlmain.c : runperl.c
 	copy runperl.c perlmain.c
 
 perlmain$(o) : perlmain.c
-	$(CC) $(CFLAGS_O) -UPERLDLL $(EXEOUT_FLAG)$@ -c perlmain.c
+	$(CC) $(CFLAGS_O) -UPERLDLL $(OBJOUT_FLAG)$@ -c perlmain.c
 
 $(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ)
 .IF "$(CCTYPE)" == "BORLAND"
 	$(LINK32) -Tpe -ap $(LINK_FLAGS) \
-	    @$(mktmp c0x32$(o) $(PERLEXE_OBJ)\n \
-	    $@,\n \
+	    @$(mktmp c0x32$(o) $(PERLEXE_OBJ:s,\,\\)\n \
+	    $(@:s,\,\\),\n \
 	    $(PERLIMPLIB) $(LIBFILES)\n)
 .ELIF "$(CCTYPE)" == "GCC"
 	$(LINK32) -o $@ $(LINK_FLAGS)  \
@@ -726,6 +746,10 @@ win32mt$(o) : win32.c
 	$(CC) $(CFLAGS_O) -MT -UPERLDLL -DWIN95FIX -c \
 	    $(OBJOUT_FLAG)win32mt$(o) win32.c
 
+DynaLoadmt$(o) : $(DYNALOADER).c
+	$(CC) $(CFLAGS_O) -MT -UPERLDLL -DWIN95FIX -c \
+	    $(OBJOUT_FLAG)DynaLoadmt$(o) $(DYNALOADER).c
+
 $(PERL95EXE): $(PERLDLL) $(CONFIGPM) $(PERL95_OBJ)
 	$(LINK32) -subsystem:console -nodefaultlib -out:$@ $(LINK_FLAGS) \
 	    $(LIBFILES) $(PERL95_OBJ) $(PERLIMPLIB) libcmt.lib
@@ -739,6 +763,30 @@ $(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
 	$(XCOPY) $(EXTDIR)\$(*B)\$(*B).pm $(LIBDIR)\$(NULL)
 	cd $(EXTDIR)\$(*B) && $(XSUBPP) dl_win32.xs > $(*B).c
 	$(XCOPY) $(EXTDIR)\$(*B)\dlutils.c .
+
+.IF "$(OBJECT)" == "-DPERL_OBJECT"
+
+PerlCAPI.cpp : $(MINIPERL)
+	$(MINIPERL) GenCAPI.pl $(COREDIR)
+
+PerlCAPI$(o) : PerlCAPI.cpp
+.IF "$(CCTYPE)" == "BORLAND"
+	$(CC) $(CFLAGS_O) -c $(OBJOUT_FLAG)PerlCAPI$(o) PerlCAPI.cpp
+.ELIF "$(CCTYPE)" == "GCC"
+	$(CC) $(CFLAGS_O) -c $(OBJOUT_FLAG)PerlCAPI$(o) PerlCAPI.cpp
+.ELSE
+	$(CC) $(CFLAGS_O) -MT -UPERLDLL -DWIN95FIX -c \
+	    $(OBJOUT_FLAG)PerlCAPI$(o) PerlCAPI.cpp
+.ENDIF
+
+$(CAPILIB) : PerlCAPI.cpp PerlCAPI$(o)
+.IF "$(CCTYPE)" == "BORLAND"
+	$(LIB32) $(LIBOUT_FLAG)$(CAPILIB) +PerlCAPI$(o)
+.ELSE
+	$(LIB32) $(LIBOUT_FLAG)$(CAPILIB) PerlCAPI$(o)
+.ENDIF
+
+.ENDIF
 
 $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 	copy dl_win32.xs $(EXTDIR)\DynaLoader\dl_win32.xs

@@ -235,6 +235,7 @@ sub full_setup {
 
     @Attrib_help = qw/
 
+    AUTHOR ABSTRACT ABSTRACT_FROM BINARY_LOCATION LICENSE_HREF CAPI
     C CCFLAGS CONFIG CONFIGURE DEFINE DIR DISTNAME DL_FUNCS DL_VARS
     EXE_FILES EXCLUDE_EXT INCLUDE_EXT NO_VC FIRST_MAKEFILE FULLPERL H
     INC INSTALLARCHLIB INSTALLBIN INSTALLDIRS INSTALLMAN1DIR
@@ -278,7 +279,7 @@ sub full_setup {
  c_o xs_c xs_o top_targets linkext dlsyms dynamic dynamic_bs
  dynamic_lib static static_lib manifypods processPL installbin subdirs
  clean realclean dist_basics dist_core dist_dir dist_test dist_ci
- install force perldepend makefile staticmake test
+ install force perldepend makefile staticmake test ppd
 
 	  ); # loses section ordering
 
@@ -307,7 +308,7 @@ sub full_setup {
     @Get_from_Config = 
 	qw(
 	   ar cc cccdlflags ccdlflags dlext dlsrc ld lddlflags ldflags libc
-	   lib_ext obj_ext ranlib sitelibexp sitearchexp so exe_ext
+	   lib_ext obj_ext osname osvers ranlib sitelibexp sitearchexp so exe_ext
 	  );
 
     my $item;
@@ -381,8 +382,9 @@ sub ExtUtils::MakeMaker::new {
 	eval $eval;
 	if ($@){
 	    warn "Warning: prerequisite $prereq $self->{PREREQ_PM}->{$prereq} not found";
-	} else {
-	    delete $self->{PREREQ_PM}{$prereq};
+# mjn
+#	} else {
+#	    delete $self->{PREREQ_PM}{$prereq};
 	}
     }
 #    if (@unsatisfied){

@@ -454,6 +454,3 @@ const static char reg_off_by_arg[] = {
 #define REG_SEEN_LOOKBEHIND	2
 #define REG_SEEN_GPOS		4
 
-#ifdef DEBUGGING
-EXT char *colors[4];  /* not dEXT since we do EXTERN/INTERN.h shuffle */
-#endif 

@@ -76,7 +76,7 @@ PerlIO_init()
  sfset(sfstdout,SF_SHARE,0);
 }
 
-#else
+#else /* USE_SFIO */
 
 /* Implement all the PerlIO interface using stdio. 
    - this should be only file to include <stdio.h>
@@ -445,22 +445,11 @@ PerlIO *f;
 
 #undef PerlIO_printf
 int      
-#ifdef I_STDARG
 PerlIO_printf(PerlIO *f,const char *fmt,...)
-#else
-PerlIO_printf(f,fmt,va_alist)
-PerlIO *f;
-const char *fmt;
-va_dcl
-#endif
 {
  va_list ap;
  int result;
-#ifdef I_STDARG
  va_start(ap,fmt);
-#else
- va_start(ap);
-#endif
  result = vfprintf(f,fmt,ap);
  va_end(ap);
  return result;
@@ -468,21 +457,11 @@ va_dcl
 
 #undef PerlIO_stdoutf
 int      
-#ifdef I_STDARG
 PerlIO_stdoutf(const char *fmt,...)
-#else
-PerlIO_stdoutf(fmt, va_alist)
-const char *fmt;
-va_dcl
-#endif
 {
  va_list ap;
  int result;
-#ifdef I_STDARG
  va_start(ap,fmt);
-#else
- va_start(ap);
-#endif
  result = PerlIO_vprintf(PerlIO_stdout(),fmt,ap);
  va_end(ap);
  return result;
@@ -627,23 +606,11 @@ PerlIO_vsprintf(char *s, int n, const char *fmt, va_list ap)
 
 #ifndef PerlIO_sprintf
 int      
-#ifdef I_STDARG
 PerlIO_sprintf(char *s, int n, const char *fmt,...)
-#else
-PerlIO_sprintf(s, n, fmt, va_alist)
-char *s;
-int n;
-const char *fmt;
-va_dcl
-#endif
 {
  va_list ap;
  int result;
-#ifdef I_STDARG
  va_start(ap,fmt);
-#else
- va_start(ap);
-#endif
  result = PerlIO_vsprintf(s, n, fmt, ap);
  va_end(ap);
  return result;

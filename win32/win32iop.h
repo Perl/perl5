@@ -171,6 +171,7 @@ END_EXTERN_C
 /*
  * redirect to our own version
  */
+#undef fprintf
 #define	fprintf			win32_fprintf
 #define	vfprintf		win32_vfprintf
 #define	printf			win32_printf
@@ -185,6 +186,7 @@ END_EXTERN_C
 #define fputs(s,f)		win32_fputs(s,f)
 #define fputc(c,f)		win32_fputc(c,f)
 #define ungetc(c,f)		win32_ungetc(c,f)
+#undef getc
 #define getc(f)			win32_getc(f)
 #define fileno(f)		win32_fileno(f)
 #define clearerr(f)		win32_clearerr(f)
@@ -226,9 +228,12 @@ END_EXTERN_C
 #define fgets			win32_fgets
 #define gets			win32_gets
 #define fgetc			win32_fgetc
+#undef putc
 #define putc			win32_putc
 #define puts			win32_puts
+#undef getchar
 #define getchar			win32_getchar
+#undef putchar
 #define putchar			win32_putchar
 
 #if !defined(MYMALLOC) || !defined(PERL_CORE)
