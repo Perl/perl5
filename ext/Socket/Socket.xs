@@ -323,8 +323,14 @@ constant(char *name, int arg)
     case 'L':
 	break;
     case 'M':
+	if (strEQ(name, "MSG_CTRUNC"))
+#if defined(MSG_CTRUNC) || defined(HAS_GNULIBC) /* XXX it's an enum */
+	    return MSG_CTRUNC;
+#else
+	    goto not_there;
+#endif
 	if (strEQ(name, "MSG_DONTROUTE"))
-#ifdef MSG_DONTROUTE
+#if defined(MSG_DONTROUTE) || defined(HAS_GNULIBC) /* XXX it's an enum */
 	    return MSG_DONTROUTE;
 #else
 	    goto not_there;
@@ -336,14 +342,20 @@ constant(char *name, int arg)
 	    goto not_there;
 #endif
 	if (strEQ(name, "MSG_OOB"))
-#ifdef MSG_OOB
+#if defined(MSG_OOB) || defined(HAS_GNULIBC) /* XXX it's an enum */
 	    return MSG_OOB;
 #else
 	    goto not_there;
 #endif
 	if (strEQ(name, "MSG_PEEK"))
-#ifdef MSG_PEEK
+#if defined(MSG_PEEK) || defined(HAS_GNULIBC) /* XXX it's an enum */
 	    return MSG_PEEK;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "MSG_PROXY"))
+#if defined(MSG_PROXY) || defined(HAS_GNULIBC) /* XXX it's an enum */
+	    return MSG_PROXY;
 #else
 	    goto not_there;
 #endif

@@ -39,4 +39,5 @@ Summary of my $package ($baserev patchlevel $PATCHLEVEL subversion $SUBVERSION) 
   Dynamic Linking:
     dlsrc=$dlsrc, dlext=$dlext, d_dlsymun=$d_dlsymun, ccdlflags='$ccdlflags'
     cccdlflags='$cccdlflags', lddlflags='$lddlflags'
+
 !GROK!THIS!
