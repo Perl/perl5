@@ -980,12 +980,17 @@ sub lineseq {
 		last;
 	    }
 	}
-	if (!is_state $ops[$i] and $ops[$i+1] and !null($ops[$i+1]) and
-	    $ops[$i+1]->name eq "leaveloop" and $self->{'expand'} < 3)
+	if (!is_state $ops[$i] and (my $ls = $ops[$i+1]) and
+	    !null($ops[$i+1]) and $ops[$i+1]->name eq "lineseq")
 	{
-	    push @exprs, $expr . $self->for_loop($ops[$i], 0);
-	    $i++;
-	    next;
+	    if ($ls->first && !null($ls->first) && is_state($ls->first)
+		&& (my $sib = $ls->first->sibling)) {
+		if (!null($sib) && $sib->name eq "leaveloop") {
+		    push @exprs, $expr . $self->for_loop($ops[$i], 0);
+		    $i++;
+		    next;
+		}
+	    }
 	}
 	$expr .= $self->deparse($ops[$i], 0, (@ops != 1));
 	$expr =~ s/;\n?\z//;
@@ -2082,6 +2087,8 @@ sub indirop {
 	$indir = $indir->first; # skip rv2gv
 	if (is_scope($indir)) {
 	    $indir = "{" . $self->deparse($indir, 0) . "}";
+	} elsif ($indir->name eq "const" && $indir->private & OPpCONST_BARE) {
+	    $indir = $self->const_sv($indir)->PV;
 	} else {
 	    $indir = $self->deparse($indir, 24);
 	}
@@ -2284,7 +2291,7 @@ sub loop_common {
     # block (or the last in a bare loop).
     my $cont_start = $enter->nextop;
     my $cont;
-    if ($$cont_start != $$op and $ {$cont_start->sibling} != $ {$body->last}) {
+    if ($$cont_start != $$op && ${$cont_start->sibling} != ${$body->last}) {
 	if ($bare) {
 	    $cont = $body->last;
 	} else {
@@ -2309,6 +2316,9 @@ sub loop_common {
 	}
     } else {
 	return "" if !defined $body;
+	if (length $init) {
+	    $head = "for ($init; $cond;) ";
+	}
 	$cont = "\cK";
 	$body = $self->deparse($body, 0);
     }
@@ -2327,7 +2337,7 @@ sub for_loop {
     my $self = shift;
     my($op, $cx) = @_;
     my $init = $self->deparse($op, 1);
-    return $self->loop_common($op->sibling, $cx, $init);
+    return $self->loop_common($op->sibling->first->sibling, $cx, $init);
 }
 
 sub pp_leavetry {
