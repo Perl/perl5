@@ -125,16 +125,16 @@ esac
 #   $bin $scriptdir $privlib $archlib 
 #	$man1dir $man3dir $html1dir $html3dir 
 #   $sitebin $sitescript $sitelib $sitearch 
-#	$siteman1 $siteman3 $sitehtml1 $sitehtml3
+#	$siteman1dir $siteman3dir $sitehtml1 $sitehtml3
 #   $vendorbin $vendorscript $vendorlib $vendorarch
-#	$vendorman1 $vendorman3 $vendorhtml1 $vendorhtml3
+#	$vendorman1dir $vendorman3dir $vendorhtml1 $vendorhtml3
 
 for var in \
 	bin scriptdir privlib archlib man1dir man3dir html1dir html3dir \
 	sitebin sitescript sitelib sitearch \
-		siteman1 siteman3 sitehtml1 sitehtml3 \
+		siteman1dir siteman3dir sitehtml1 sitehtml3 \
 	vendorbin vendorscript vendorlib vendorarch \
-		vendorman1 vendorman3 vendorhtml1 vendorhtml3
+		vendorman1dir vendorman3dir vendorhtml1 vendorhtml3
 do
 	
     case "$var" in
