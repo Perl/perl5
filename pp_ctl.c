@@ -1848,15 +1848,21 @@ PP(pp_return)
 			*++newsp = SvREFCNT_inc(*SP);
 			FREETMPS;
 			sv_2mortal(*newsp);
-		    } else {
-			FREETMPS;
-			*++newsp = sv_mortalcopy(*SP);
 		    }
-		} else
+		    else {
+			sv = SvREFCNT_inc(*SP);	/* FREETMPS could clobber it */
+			FREETMPS;
+			*++newsp = sv_mortalcopy(sv);
+			SvREFCNT_dec(sv);
+		    }
+		}
+		else
 		    *++newsp = (SvTEMP(*SP)) ? *SP : sv_mortalcopy(*SP);
-	    } else
+	    }
+	    else
 		*++newsp = sv_mortalcopy(*SP);
-	} else
+	}
+	else
 	    *++newsp = &PL_sv_undef;
     }
     else if (gimme == G_ARRAY) {

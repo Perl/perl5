@@ -2012,8 +2012,10 @@ PP(pp_leavesub)
 		    sv_2mortal(*MARK);
 		}
 		else {
+		    sv = SvREFCNT_inc(TOPs);	/* FREETMPS could clobber it */
 		    FREETMPS;
-		    *MARK = sv_mortalcopy(TOPs);
+		    *MARK = sv_mortalcopy(sv);
+		    SvREFCNT_dec(sv);
 		}
 	    }
 	    else
@@ -2161,8 +2163,10 @@ PP(pp_leavesublv)
 			sv_2mortal(*MARK);
 		    }
 		    else {
+			sv = SvREFCNT_inc(TOPs); /* FREETMPS could clobber it */
 			FREETMPS;
-			*MARK = sv_mortalcopy(TOPs);
+			*MARK = sv_mortalcopy(sv);
+			SvREFCNT_dec(sv);
 		    }
 		}
 		else
