@@ -612,7 +612,7 @@ PerlCAPI.cpp : $(MINIPERL)
 	$(MINIPERL) GenCAPI.pl $(COREDIR)
 
 PerlCAPI$(o) : PerlCAPI.cpp
-	$(CC) $(CFLAGS_O) -MT -UPERLDLL -DWIN95FIX -c \
+	$(CC) $(CFLAGS_O) $(RUNTIME) -UPERLDLL -c \
 	    $(OBJOUT_FLAG)PerlCAPI$(o) PerlCAPI.cpp
 
 $(CAPILIB) : PerlCAPI.cpp PerlCAPI$(o)

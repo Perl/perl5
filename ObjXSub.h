@@ -1,7 +1,6 @@
 #ifndef __ObjXSub_h__
 #define __ObjXSub_h__
 
-
 /* Varibles */ 
 #undef  Argv
 #define Argv			pPerl->Perl_Argv
@@ -41,6 +40,8 @@
 #define argvgv			pPerl->Perl_argvgv
 #undef  argvoutgv
 #define argvoutgv		pPerl->Perl_argvoutgv
+#undef  av_fetch_sv
+#define av_fetch_sv         pPerl->av_fetch_sv
 #undef  basetime
 #define basetime		pPerl->Perl_basetime
 #undef  beginav
@@ -177,6 +178,10 @@
 #define eval_start		pPerl->Perl_eval_start
 #undef  evalseq
 #define evalseq			pPerl->Perl_evalseq
+#undef  exitlist
+#define exitlist            pPerl->exitlist
+#undef  exitlistlen
+#define exitlistlen         pPerl->exitlistlen
 #undef  expect
 #define expect			pPerl->Perl_expect
 #undef  extralen
@@ -207,6 +212,10 @@
 #define hexdigit		pPerl->Perl_hexdigit
 #undef  hints
 #define hints			pPerl->Perl_hints
+#undef  hv_fetch_ent_mh
+#define hv_fetch_ent_mh     pPerl->hv_fetch_ent_mh
+#undef  hv_fetch_sv
+#define hv_fetch_sv         pPerl->hv_fetch_sv
 #undef  in_clean_all
 #define in_clean_all		pPerl->Perl_in_clean_all
 #undef  in_clean_objs
@@ -331,6 +340,8 @@
 #define minus_p			pPerl->Perl_minus_p
 #undef  modcount
 #define modcount		pPerl->Perl_modcount
+#undef  modglobal
+#define modglobal       pPerl->Perl_modglobal
 #undef  multi_close
 #define multi_close		pPerl->Perl_multi_close
 #undef  multi_end
@@ -605,6 +616,8 @@
 #define sv_undef		pPerl->Perl_sv_undef
 #undef  sv_yes
 #define sv_yes			pPerl->Perl_sv_yes
+#undef  svref_mutex
+#define svref_mutex         pPerl->svref_mutex
 #undef  sys_intern
 #define sys_intern		pPerl->Perl_sys_intern
 #undef  tainted
