@@ -10,7 +10,7 @@
 #include <sys/stat.h>
 #include "EXTERN.h"
 #include "perl.h"
-#include "perllio.h"
+#include "perliol.h"
 
 #define NO_XSLOCKS
 #include "XSUB.h"
@@ -131,7 +131,7 @@ PerlIOWin32_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers, IV n, const ch
     {
      mode++;
     }
-   if (*mode || oflags == -1)
+   if (*mode || create == -1)
     {
      SETERRNO(EINVAL,LIB$_INVARG);
      return NULL;
@@ -142,7 +142,7 @@ PerlIOWin32_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers, IV n, const ch
    if (h == INVALID_HANDLE_VALUE)
     {
      if (create == TRUNCATE_EXISTING)
-      h = CreateFile(path,access,share = OPEN_ALWAYS,NULL,create,attr,NULL);
+      h = CreateFile(path,access,share,NULL,(create = OPEN_ALWAYS),attr,NULL);
     }
   }
  else
@@ -160,32 +160,41 @@ PerlIOWin32_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers, IV n, const ch
        *f = &s->base;
        return f;
       }
-     if (*mode == 'I')
+    }
+   if (*mode == 'I')
+    {
+     mode++;
+     switch(fd)
       {
-       mode++;
-       switch(fd)
-        {
-         case 0:
-          h = GetStandardHandle(STD_INPUT_HANDLE);
-          break;
-         case 1:
-          h = GetStandardHandle(STD_OUTPUT_HANDLE);
-          break;
-         case 2:
-          h = GetStandardHandle(STD_ERROR_HANDLE);
-          break;
-        }
+       case 0:
+        h = GetStdHandle(STD_INPUT_HANDLE);
+        break;
+       case 1:
+        h = GetStdHandle(STD_OUTPUT_HANDLE);
+        break;
+       case 2:
+        h = GetStdHandle(STD_ERROR_HANDLE);
+        break;
       }
     }
   }
  if (h != INVALID_HANDLE_VALUE)
+  fd = win32_open_osfhandle((long) h, PerlIOUnix_oflags(tmode));
+ if (fd >= 0)
   {
    PerlIOWin32 *s;
    if (!f)
     f = PerlIO_allocate(aTHX);
    s = PerlIOSelf(PerlIO_push(aTHX_ f,self,tmode,PerlIOArg),PerlIOWin32);
-   s->ioh    = h;
+   s->h      = h;
+   s->fd     = fd;
    s->refcnt = 1;
+   if (fd >= 0) 
+    {
+     fdtable[fd] = s; 
+     if (fd > max_open_fd)
+      max_open_fd = fd;
+    } 
    return f;
   }
  if (f)
@@ -202,7 +211,7 @@ PerlIOWin32_read(PerlIO *f, void *vbuf, Size_t count)
  DWORD len;
  if (!(PerlIOBase(f)->flags & PERLIO_F_CANREAD))
   return 0;
- if (ReadFile(s->h,vbuf,count,&len,NULL)
+ if (ReadFile(s->h,vbuf,count,&len,NULL))
   {
    return len;
   }
@@ -227,7 +236,7 @@ PerlIOWin32_write(PerlIO *f, const void *vbuf, Size_t count)
 {
  PerlIOWin32 *s = PerlIOSelf(f,PerlIOWin32);
  DWORD len;
- if (WriteFile(s->h,vbuf,count,&len,NULL)
+ if (WriteFile(s->h,vbuf,count,&len,NULL))
   {
    return len;
   }
