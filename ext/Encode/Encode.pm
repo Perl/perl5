@@ -340,9 +340,9 @@ sub from_to
  return length($_[0] = $string);
 }
 
-my %encoding = ( Unicode      => bless({},'Encode::Unicode'),
-                 'iso10646-1' => bless({},'Encode::iso10646_1'),
-               );
+# The global hash is declared in XS code
+$encoding{Unicode}    = bless({},'Encode::Unicode');
+$encoding{iso10646-1} = bless({},'Encode::iso10646_1');
 
 sub encodings
 {
@@ -378,6 +378,7 @@ sub loadEncoding
      last unless $type eq '#';
     }
    $class .= ('::'.(($type eq 'E') ? 'Escape' : 'Table'));
+   warn "Loading $file";
    return $class->read($fh,$name,$type);
   }
  else
@@ -567,6 +568,7 @@ sub fromUnicode
  $_[1] = $uni if $chk;
  return $str;
 }
+
 
 package Encode::Escape;
 use Carp;

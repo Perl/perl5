@@ -1,0 +1,308 @@
+#!../../perl -w
+BEGIN { @INC = '../../lib' };
+use strict;
+
+sub encode_U
+{
+ my $uv = shift;
+ if ($uv < 0x80)
+  {
+   return chr($uv)
+  }
+ if ($uv < 0x800)
+  {
+   return chr(($uv >> 6)        | 0xC0).
+          chr(($uv & 0x3F)      | 0x80);
+  }
+ return chr(($uv >> 12)         | 0xE0).
+        chr((($uv >> 6) & 0x3F) | 0x80).
+        chr(($uv & 0x3F)        | 0x80);
+}
+
+sub encode_S
+{
+ my ($ch,$page) = @_;
+ return chr($ch);
+}
+
+sub encode_D
+{
+ my ($ch,$page) = @_;
+ return chr($page).chr($ch);
+}
+
+sub encode_M
+{
+ my ($ch,$page) = @_;
+ return &encode_D if $page;
+ return &encode_S;
+}
+
+my $cname = shift(@ARGV);
+chmod(0666,$cname) if -f $cname && !-w $cname;
+open(C,">$cname") || die "Cannot open $cname:$!";
+my $dname = $cname;
+$dname =~ s/(\.[^\.]*)?$/.def/;
+chmod(0666,$dname) if -f $cname && !-w $dname;
+open(D,">$dname") || die "Cannot open $dname:$!";
+my $hname = $cname;
+$hname =~ s/(\.[^\.]*)?$/.h/;
+chmod(0666,$hname) if -f $cname && !-w $hname;
+open(H,">$hname") || die "Cannot open $hname:$!";
+
+if ($cname =~ /(\w+)\.xs$/)
+ {
+  print C "#include <EXTERN.h>\n";
+  print C "#include <perl.h>\n";
+  print C "#include <XSUB.h>\n";
+  print C "#define U8 U8\n";
+ }
+print C "#include \"encode.h\"\n";
+
+my %encoding;
+my %strings;
+
+sub cmp_name
+{
+ if ($a =~ /^.*-(\d+)/)
+  {
+   my $an = $1;
+   if ($b =~ /^.*-(\d+)/)
+    {
+     my $r = $an <=> $1;
+     return $r if $r;
+    }
+  }
+ return $a cmp $b;
+}
+
+foreach my $enc (sort cmp_name @ARGV)
+ {
+  my ($name) = $enc =~ /^.*?([\w-]+)(\.enc)$/;
+  if (open(E,$enc))
+   {
+    compile(\*E,$name,\*C);
+   }
+  else
+   {
+    warn "Cannot open $enc for $name:$!";
+   }
+ }
+
+foreach my $enc (sort cmp_name keys %encoding)
+ {
+  my $sym = "${enc}_encoding";
+  $sym =~ s/\W+/_/g;
+  print C "encode_t $sym = \n";
+  print C " {",join(',',"\"$enc\"",@{$encoding{$enc}}),"};\n";
+ }
+
+foreach my $enc (sort cmp_name keys %encoding)
+ {
+  my $sym = "${enc}_encoding";
+  $sym =~ s/\W+/_/g;
+  print H "extern encode_t $sym;\n";
+  print D " Encode_Define(aTHX_ &$sym);\n";
+ }
+
+if ($cname =~ /(\w+)\.xs$/)
+ {
+  my $mod = $1;
+  print C "\nMODULE = Encode::$mod\tPACKAGE = Encode::$mod\n\n";
+  print C "BOOT:\n{\n";
+  print C "#include \"$dname\"\n";
+  print C "}\n";
+ }
+close(C);
+close(D);
+close(H);
+
+
+
+sub compile
+{
+ my ($fh,$name,$ch) = @_;
+ my $e2u = {};
+ my $u2e = {};
+
+ my $type;
+ while ($type = <$fh>)
+  {
+   last if $type !~ /^\s*#/;
+  }
+ chomp($type);
+ return if $type eq 'E';
+ my ($def,$sym,$pages) = split(/\s+/,scalar(<$fh>));
+ warn "t=$type s=$sym d=$def p=$pages $name\n";
+ my $rep = '';
+ {
+  my $v = hex($def);
+  no strict 'refs';
+  $rep = &{"encode_$type"}($v & 0xFF, ($v >> 8) & 0xffe);
+ }
+ while ($pages--)
+  {
+   my $line = <$fh>;
+   chomp($line);
+   my $page = hex($line);
+   my $ch = 0;
+   for (my $i = 0; $i < 16; $i++)
+    {
+     my $line = <$fh>;
+     for (my $j = 0; $j < 16; $j++)
+      {
+       no strict 'refs';
+       my $ech = &{"encode_$type"}($ch,$page);
+       my $val = hex(substr($line,0,4,''));
+       if ($val || (!$ch && !$page))
+        {
+         my $uch = encode_U($val);
+         enter($e2u,$ech,$uch,$e2u);
+         enter($u2e,$uch,$ech,$u2e);
+        }
+       else
+        {
+         # No character at this position
+         # enter($e2u,$ech,undef,$e2u);
+        }
+       $ch++;
+      }
+    }
+  }
+ output($ch,$name.'_utf8',$e2u);
+ output($ch,'utf8_'.$name,$u2e);
+ $encoding{$name} = [$e2u->{Cname},$u2e->{Cname},
+                     outstring($ch,$e2u->{Cname}.'_def',$rep),length($rep)];
+}
+
+sub enter
+{
+ my ($a,$s,$d,$t) = @_;
+ $t = $a if @_ < 4;
+ my $b = substr($s,0,1);
+ my $e = $a->{$b};
+ unless ($e)
+  {     # 0  1  2  3         4  5
+   $e = [$b,$b,'',{},length($s),0];
+   $a->{$b} = $e;
+  }
+ if (length($s) > 1)
+  {
+   enter($e->[3],substr($s,1),$d,$t);
+  }
+ else
+  {
+   $e->[2] = $d;
+   $e->[3] = $t;
+   $e->[5] = length($d);
+  }
+}
+
+
+sub outstring
+{
+ my ($fh,$name,$s) = @_;
+ my $sym = $strings{$s};
+ unless ($sym)
+  {
+   foreach my $o (keys %strings)
+    {
+     my $i = index($o,$s);
+     if ($i >= 0)
+      {
+       $sym = $strings{$o};
+       $sym .= sprintf("+0x%02x",$i) if ($i);
+       return $sym;
+      }
+    }
+   $strings{$s} = $sym = $name;
+   printf $fh "static const U8 %s[%d] =\n",$name,length($s);
+   # Do in chunks of 16 chars to constrain line length
+   # Assumes ANSI C adjacent string litteral concatenation
+   while (length($s))
+    {
+     my $c = substr($s,0,16,'');
+     print  $fh '"',join('',map(sprintf('\x%02x',ord($_)),split(//,$c))),'"';
+     print  $fh "\n" if length($s);
+    }
+   printf $fh ";\n\n";
+  }
+ return $sym;
+}
+
+
+
+sub output
+{
+ my ($fh,$name,$a) = @_;
+ $name =~ s/\W+/_/g;
+ $a->{Cname} = $name;
+ my @keys = grep(ref($a->{$_}),sort keys %$a);
+ print $fh "\nstatic encpage_t $name\[\];\n";
+ # Sub-tables
+ my %str;
+ my $l;
+ my @ent;
+ foreach my $b (@keys)
+  {
+   my ($s,$f,$out,$t,$end) = @{$a->{$b}};
+   if (defined($l) &&
+       ord($b) == ord($a->{$l}[1])+1 &&
+       $a->{$l}[3] == $a->{$b}[3] &&
+       $a->{$l}[4] == $a->{$b}[4] &&
+       $a->{$l}[5] == $a->{$b}[5]
+       # && length($a->{$l}[2]) < 16
+      )
+    {
+     my $i = ord($b)-ord($a->{$l}[0]);
+     $a->{$l}[1]  = $b;
+     $a->{$l}[2] .= $a->{$b}[2];
+    }
+   else
+    {
+     $l = $b;
+     push(@ent,$b);
+    }
+   unless (exists $t->{Cname})
+    {
+     output($fh,sprintf("%s_%02x",$name,ord($s)),$t);
+    }
+  }
+ if (ord($keys[-1]) < 255)
+  {
+   my $t = chr(ord($keys[-1])+1);
+   $a->{$t} = [$t,chr(255),undef,$a,0,0];
+   push(@ent,$t);
+  }
+ # String tables
+ foreach my $b (@ent)
+  {
+   next unless $a->{$b}[5];
+   my $s = ord($a->{$b}[0]);
+   my $e = ord($a->{$b}[1]);
+   outstring($fh,sprintf("%s__%02x_%02x",$name,$s,$e),$a->{$b}[2]);
+  }
+
+ print $fh "\n";
+ print $fh "static encpage_t $name\[",scalar(@ent),"] = {\n";
+ foreach my $b (@ent)
+  {
+   my ($s,$e,$out,$t,$end,$l) = @{$a->{$b}};
+   my $sc = ord($s);
+   my $ec = ord($e);
+   print  $fh "{";
+   if ($l)
+    {
+     printf $fh outstring($fh,'',$out);
+    }
+   else
+    {
+     print  $fh "0";
+    }
+   print  $fh ",",$t->{Cname};
+   printf $fh ",0x%02x,0x%02x,$l,$end},\n",$sc,$ec;
+  }
+ print $fh "};\n\n";
+}
+
+
