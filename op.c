@@ -1809,13 +1809,11 @@ Perl_scope(pTHX_ OP *o)
     return o;
 }
 
+/* XXX kept for BINCOMPAT only */
 void
 Perl_save_hints(pTHX)
 {
-    SAVEI32(PL_hints);
-    SAVESPTR(GvHV(PL_hintgv));
-    GvHV(PL_hintgv) = newHVhv(GvHV(PL_hintgv));
-    SAVEFREESV(GvHV(PL_hintgv));
+    Perl_croak(aTHX_ "internal error: obsolete function save_hints() called");
 }
 
 int

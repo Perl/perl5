@@ -3025,6 +3025,19 @@ PP(pp_substr)
 	if (utf8_curlen)
 	    sv_pos_u2b(sv, &pos, &rem);
 	tmps += pos;
+	/* we either return a PV or an LV. If the TARG hasn't been used
+	 * before, or is of that type, reuse it; otherwise use a mortal
+	 * instead. Note that LVs can have an extended lifetime, so also
+	 * dont reuse if refcount > 1 (bug #20933) */
+	if (SvTYPE(TARG) > SVt_NULL) {
+	    if ( (SvTYPE(TARG) == SVt_PVLV)
+		    ? (!lvalue || SvREFCNT(TARG) > 1)
+		    : lvalue)
+	    {
+		TARG = sv_newmortal();
+	    }
+	}
+
 	sv_setpvn(TARG, tmps, rem);
 #ifdef USE_LOCALE_COLLATE
 	sv_unmagic(TARG, PERL_MAGIC_collxfrm);
@@ -3061,8 +3074,6 @@ PP(pp_substr)
 		    sv_setpvn(sv,"",0);	/* avoid lexical reincarnation */
 	    }
 
-	    if (SvREFCNT(TARG) > 1)	/* don't share the TARG (#20933) */
-		TARG = sv_newmortal();
 	    if (SvTYPE(TARG) < SVt_PVLV) {
 		sv_upgrade(TARG, SVt_PVLV);
 		sv_magic(TARG, Nullsv, PERL_MAGIC_substr, Nullch, 0);

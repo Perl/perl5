@@ -403,6 +403,7 @@ do_clean_named_objs(pTHX_ SV *sv)
 	     (GvCV(sv) && SvOBJECT(GvCV(sv))) )
 	{
 	    DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning named glob object:\n "), sv_dump(sv)));
+	    SvFLAGS(sv) |= SVf_BREAK;
 	    SvREFCNT_dec(sv);
 	}
     }

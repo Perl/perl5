@@ -116,19 +116,17 @@ Perl_pv_display(pTHX_ SV *dsv, char *pv, STRLEN cur, STRLEN len, STRLEN pvlim)
             truncated++;
 	    break;
         }
-        if (isPRINT(*pv)) {
-            switch (*pv) {
-	    case '\t': sv_catpvn(dsv, "\\t", 2);  break;
-	    case '\n': sv_catpvn(dsv, "\\n", 2);  break;
-	    case '\r': sv_catpvn(dsv, "\\r", 2);  break;
-	    case '\f': sv_catpvn(dsv, "\\f", 2);  break;
-	    case '"':  sv_catpvn(dsv, "\\\"", 2); break;
-	    case '\\': sv_catpvn(dsv, "\\\\", 2); break;
-	    default:   sv_catpvn(dsv, pv, 1);     break;
-            }
-        }
-	else {
-	    if (cur && isDIGIT(*(pv+1)))
+	switch (*pv) {
+	case '\t': sv_catpvn(dsv, "\\t", 2);  break;
+	case '\n': sv_catpvn(dsv, "\\n", 2);  break;
+	case '\r': sv_catpvn(dsv, "\\r", 2);  break;
+	case '\f': sv_catpvn(dsv, "\\f", 2);  break;
+	case '"':  sv_catpvn(dsv, "\\\"", 2); break;
+	case '\\': sv_catpvn(dsv, "\\\\", 2); break;
+	default:
+	    if (isPRINT(*pv))
+		sv_catpvn(dsv, pv, 1);
+	    else if (cur && isDIGIT(*(pv+1)))
 		Perl_sv_catpvf(aTHX_ dsv, "\\%03o", (U8)*pv);
 	    else
 		Perl_sv_catpvf(aTHX_ dsv, "\\%o", (U8)*pv);
@@ -644,17 +642,19 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
 #ifdef USE_ITHREADS
 	Perl_dump_indent(aTHX_ level, file, "PADIX = %" IVdf "\n", (IV)cPADOPo->op_padix);
 #else
-	if (cSVOPo->op_sv) {
-	    SV *tmpsv = NEWSV(0,0);
-	    STRLEN n_a;
-	    ENTER;
-	    SAVEFREESV(tmpsv);
-	    gv_fullname3(tmpsv, (GV*)cSVOPo->op_sv, Nullch);
-	    Perl_dump_indent(aTHX_ level, file, "GV = %s\n", SvPV(tmpsv, n_a));
-	    LEAVE;
+	if ( ! PL_op->op_flags & OPf_SPECIAL) { /* not lexical */
+	    if (cSVOPo->op_sv) {
+		SV *tmpsv = NEWSV(0,0);
+		STRLEN n_a;
+		ENTER;
+		SAVEFREESV(tmpsv);
+		gv_fullname3(tmpsv, (GV*)cSVOPo->op_sv, Nullch);
+		Perl_dump_indent(aTHX_ level, file, "GV = %s\n", SvPV(tmpsv, n_a));
+		LEAVE;
+	    }
+	    else
+		Perl_dump_indent(aTHX_ level, file, "GV = NULL\n");
 	}
-	else
-	    Perl_dump_indent(aTHX_ level, file, "GV = NULL\n");
 #endif
 	break;
     case OP_CONST:
