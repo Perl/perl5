@@ -1,5 +1,9 @@
 #!./perl
 
+# ** DO NOT ADD ANY MORE TESTS HERE **
+# Instead, put the test in the appropriate test file and use the 
+# kill_perl() function in t/test.pl.
+
 # This is for tests that will normally cause segfaults, and other nasty
 # errors that might kill the interpreter and for some reason you can't
 # use an eval().
@@ -14,10 +18,6 @@
 # to test that the code "($a, b) = (1,2)" causes the appropriate syntax
 # error, rather than just segfaulting as reported in perlbug ID
 # 20020831.001
-#
-#
-# NOTE: Please don't add tests to this file unless they *need* to be
-# run in separate executable and can't simply use eval.
 
 BEGIN {
     chdir 't' if -d 't';
@@ -40,13 +40,8 @@ while(<DATA>) {
         $prgs[-1][0] .= $_;
     }
 }
-print "1..", scalar @prgs, "\n";
+plan tests => scalar @prgs;
 
-my $tmpfile = "misctmp000";
-1 while -f ++$tmpfile;
-END { while($tmpfile && unlink $tmpfile){} }
-
-my $test = 1;
 foreach my $prog (@prgs) {
     my($raw_prog, $name) = @$prog;
 
@@ -57,57 +52,7 @@ foreach my $prog (@prgs) {
 
     my($prog,$expected) = split(/\nEXPECT\n/, $raw_prog);
 
-    open TEST, ">$tmpfile" or die "Cannot open $tmpfile: $!";
-
-    # VMS adjustments
-    if( $^O eq 'VMS' ) {
-        $prog =~ s#/dev/null#NL:#;
-
-        # VMS file locking 
-        $prog =~ s{if \(-e _ and -f _ and -r _\)}
-                  {if (-e _ and -f _)}
-    }
-
-    print TEST $prog, "\n";
-    close TEST or die "Cannot close $tmpfile: $!";
-
-    my $results;
-    if ($^O eq 'MacOS') {
-        $results = `$Perl -I::lib -MMac::err=unix $switch $tmpfile`;
-    }
-    else {
-        $results = `$Perl "-I../lib" $switch $tmpfile 2>&1`;
-    }
-    my $status = $?;
-
-    # Clean up the results into something a bit more predictable.
-    $results =~ s/\n+$//;
-    $results =~ s/at\s+misctmp\d+\s+line/at - line/g;
-    $results =~ s/of\s+misctmp\d+\s+aborted/of - aborted/g;
-
-    # bison says 'parse error' instead of 'syntax error',
-    # various yaccs may or may not capitalize 'syntax'.
-    $results =~ s/^(syntax|parse) error/syntax error/mig;
-
-    if ($^O eq 'VMS') {
-        # some tests will trigger VMS messages that won't be expected
-        $results =~ s/\n?%[A-Z]+-[SIWEF]-[A-Z]+,.*//;
-
-        # pipes double these sometimes
-        $results =~ s/\n\n/\n/g;
-    }
-
-    $expected =~ s/\n+$//;
-    my $ok = $results eq $expected;
-
-    unless( $ok ) {
-        print STDERR "# PROG: $switch\n$prog\n";
-        print STDERR "# EXPECTED:\n$expected\n";
-        print STDERR "# GOT:\n$results\n";
-    }
-    printf "%sok %d%s\n", ($ok ? '' : "not "), $test, 
-                          length $name ? " - $name" : $name;
-    $test++;
+    kill_perl($prog, $expected, { switches => $switch }, $name);
 }
 
 __END__
