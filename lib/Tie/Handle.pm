@@ -1,5 +1,7 @@
 package Tie::Handle;
 
+$VERSION = '1.0';
+
 =head1 NAME
 
 Tie::Handle, Tie::StdHandle  - base class definitions for tied handles
