@@ -74,6 +74,7 @@ struct _PerlIO
 #define PERLIO_F_TEMP		0x00100000
 #define PERLIO_F_OPEN		0x00200000
 #define PERLIO_F_FASTGETS	0x00400000
+#define PERLIO_F_TTY		0x00800000
 
 #define PerlIOBase(f)      (*(f))
 #define PerlIOSelf(f,type) ((type *)PerlIOBase(f))
@@ -118,6 +119,7 @@ extern IV	PerlIOBase_flush     (PerlIO *f);
 extern IV	PerlIOBase_fill      (PerlIO *f);
 extern IV	PerlIOBase_close     (PerlIO *f);
 extern void	PerlIOBase_setlinebuf(PerlIO *f);
+extern void	PerlIOBase_flush_linebuf(void);
 
 extern IV	PerlIOBase_noop_ok   (PerlIO *f);
 extern IV	PerlIOBase_noop_fail (PerlIO *f);

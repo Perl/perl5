@@ -1140,6 +1140,25 @@ PerlIO_flush(PerlIO *f)
   }
 }
 
+void
+PerlIOBase_flush_linebuf()
+{
+ PerlIO **table = &_perlio;
+ PerlIO *f;
+ while ((f = *table))
+  {
+   int i;
+   table = (PerlIO **)(f++);
+   for (i=1; i < PERLIO_TABLE_SIZE; i++)
+    {
+     if (*f && (PerlIOBase(f)->flags & (PERLIO_F_LINEBUF|PERLIO_F_CANWRITE))
+                == (PERLIO_F_LINEBUF|PERLIO_F_CANWRITE))
+      PerlIO_flush(f);
+     f++;
+    }
+  }
+}
+
 #undef PerlIO_fill
 int
 PerlIO_fill(PerlIO *f)
@@ -2331,7 +2350,7 @@ PerlIOBuf_pushed(PerlIO *f, const char *mode, SV *arg)
  dTHX;
  if (fd >= 0 && PerlLIO_isatty(fd))
   {
-   PerlIOBase(f)->flags |= PERLIO_F_LINEBUF;
+   PerlIOBase(f)->flags |= PERLIO_F_LINEBUF|PERLIO_F_TTY;
   }
  posn = PerlIO_tell(PerlIONext(f));
  if (posn != (Off_t) -1)
@@ -2450,6 +2469,8 @@ PerlIOBuf_fill(PerlIO *f)
   */
  if (PerlIO_flush(f) != 0)
   return -1;
+ if (PerlIOBase(f)->flags & PERLIO_F_TTY)
+  PerlIOBase_flush_linebuf();
 
  if (!b->buf)
   PerlIO_get_base(f); /* allocate via vtable */
