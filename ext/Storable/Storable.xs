@@ -4962,7 +4962,7 @@ static SV *retrieve_code(stcxt_t *cxt, char *cname)
 	 */
 
 	sub = newSVpvn("sub ", 4);
-	sv_catpv(sub, SvPV(text, PL_na)); //XXX no sv_catsv!
+	sv_catpv(sub, SvPV(text, PL_na)); /* XXX no sv_catsv! */
 	SvREFCNT_dec(text);
 
 	/*
