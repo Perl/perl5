@@ -1784,6 +1784,7 @@ PP(pp_return)
     I32 cxix;
     register PERL_CONTEXT *cx;
     bool popsub2 = FALSE;
+    bool clear_errsv = FALSE;
     I32 gimme;
     SV **newsp;
     PMOP *newpm;
@@ -1814,6 +1815,8 @@ PP(pp_return)
 	popsub2 = TRUE;
 	break;
     case CXt_EVAL:
+	if (!(PL_in_eval & EVAL_KEEPERR))
+	    clear_errsv = TRUE;
 	POPEVAL(cx);
 	if (CxTRYBLOCK(cx))
 	    break;
@@ -1875,6 +1878,8 @@ PP(pp_return)
 
     LEAVE;
     LEAVESUB(sv);
+    if (clear_errsv)
+	sv_setpv(ERRSV,"");
     return pop_return();
 }
 
