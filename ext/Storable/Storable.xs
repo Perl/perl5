@@ -1889,8 +1889,10 @@ sortcmp(const void *a, const void *b)
  * Values are stored as <object>.
  * Keys are stored as <length> <data>, the <data> section being omitted
  * if length is 0.
-
- * Layout is SX_HASH <size> <hash flags> followed by each key/value pair,
+ *
+ * For a "fancy" hash (restricted or utf8 keys):
+ *
+ * Layout is SX_FLAG_HASH <size> <hash flags> followed by each key/value pair,
  * in random order.
  * Values are stored as <object>.
  * Keys are stored as <flags> <length> <data>, the <data> section being omitted
