@@ -883,9 +883,9 @@ character) to the escape sequences or codes necessary for conveying
 such sequences in the target output format.  A converter to *roff
 would, for example know that "\xE9" (whether conveyed literally, or via
 a EE<lt>...> sequence) is to be conveyed as "e\\*'".
-Similarly, a program rendering Pod in a MacOS application window, would
+Similarly, a program rendering Pod in a Mac OS application window, would
 presumably need to know that "\xE9" maps to codepoint 142 in MacRoman
-encoding that (at time of writing) is native for MacOS.  Such
+encoding that (at time of writing) is native for Mac OS.  Such
 Unicode2whatever mappings are presumably already widely available for
 common output formats.  (Such mappings may be incomplete!  Implementers
 are not expected to bend over backwards in an attempt to render

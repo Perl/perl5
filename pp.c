@@ -3849,7 +3849,7 @@ PP(pp_hslice)
 	while (++MARK <= SP) {
 	    SV *keysv = *MARK;
 	    SV **svp;
-	    I32 preeminent;
+	    bool preeminent = FALSE;
 
             if (localizing) {
                 preeminent = SvRMAGICAL(hv) && !other_magic ? 1 :

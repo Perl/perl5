@@ -104,7 +104,7 @@ newlines:
         #...
     }
 
-You can get away with this on Unix and MacOS (they have a single
+You can get away with this on Unix and Mac OS (they have a single
 character end-of-line), but the same program will break under DOSish
 perls because you're only chop()ing half the end-of-line.  Instead,
 chomp() should be used to trim newlines.  The Dunce::Files module can
@@ -373,7 +373,7 @@ Three-arg open can also help protect against this translation in cases
 where it is undesirable.
 
 Don't use C<:> as a part of a filename since many systems use that for
-their own semantics (MacOS Classic for separating pathname components,
+their own semantics (Mac OS Classic for separating pathname components,
 many networking schemes and utilities for separating the nodename and
 the pathname, and so on).  For the same reasons, avoid C<@>, C<;> and
 C<|>.
@@ -831,6 +831,9 @@ Win32::GetOSVersion().  For example:
         my @os_version_info = Win32::GetOSVersion();
         print +('3.1','95','NT')[$os_version_info[4]],"\n";
     }
+
+There are also Win32::IsWinNT()and Win32::IsWin95().,
+try C<perldoc Win32>.
 
 Also see:
 
@@ -2077,8 +2080,8 @@ available at http://www.cpan.org/src/index.html
         HP-UX
         IRIX
         Linux
-        MacOS Classic
-        Mac OS X        (Darwin)
+        Mac OS Classic
+        Mac OS X         (Darwin)
         MPE/iX
         NetBSD
         NetWare
@@ -2090,19 +2093,21 @@ available at http://www.cpan.org/src/index.html
         POSIX-BC        (BS2000)
         QNX
         Solaris
+        SUPER-UX
         Tru64 UNIX      (DEC OSF/1, Digital UNIX)
         UNICOS
         UNICOS/mk
         UTS
         VOS
-        Win32/NT/2K     2)
+        Win95/98/ME/2K/XP 2)
+        WinCE
         z/OS            (OS/390)
         VM/ESA
 
         1) in DOS mode either the DOS or OS/2 ports can be used
-        2) compilers: Borland, Cygwin, Mingw32 GCC, VC++
+        2) compilers: Borland, Cygwin (GCC), MinGW (GCC), VC6
 
-The following platforms worked for the previous releases (5.6 and
+The following platforms worked with the previous releases (5.6 and
 5.7), but we did not manage either to fix or to test these in time
 for the 5.8.0 release.  There is a very good chance that many of these
 will work fine with the 5.8.0.  The only one known for certain to be
@@ -2119,9 +2124,6 @@ broken for 5.8.0 is the AmigaOS.
         SVR4
         Unixware
         Windows 3.1
-        Windows 95
-        Windows 98
-        Windows Me
 
 The following platforms have been known to build Perl from source in
 the past (5.005_03 and earlier), but we haven't been able to verify
@@ -2164,7 +2166,6 @@ of any trouble.
         Ultrix
         Unisys Dynix
         Unixware
-        UTS
 
 The following platforms have their own source code distributions and
 binaries available via http://www.cpan.org/ports/

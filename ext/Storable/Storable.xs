@@ -351,14 +351,14 @@ typedef struct stcxt {
 
 #else /* !MULTIPLICITY && !PERL_OBJECT && !PERL_CAPI */
 
-static stcxt_t Context;
-static stcxt_t *Context_ptr = &Context;
+static stcxt_t *Context_ptr = NULL;
 #define dSTCXT			stcxt_t *cxt = Context_ptr
+#define SET_STCXT(x)		Context_ptr = x
 #define INIT_STCXT						\
 	dSTCXT;								\
-	NEW_STORABLE_CXT_OBJ(cxt)
+	NEW_STORABLE_CXT_OBJ(cxt);			\
+	SET_STCXT(cxt)
 
-#define SET_STCXT(x)		Context_ptr = x
 
 #endif /* MULTIPLICITY || PERL_OBJECT || PERL_CAPI */
 

@@ -2787,7 +2787,7 @@ If you're running Perl on a system that distinguishes between text
 files and binary files, then you should check out L</binmode> for tips
 for dealing with this.  The key distinction between systems that need
 C<binmode> and those that don't is their text file formats.  Systems
-like Unix, MacOS, and Plan9, which delimit lines with a single
+like Unix, Mac OS, and Plan 9, which delimit lines with a single
 character, and which encode that character in C as C<"\n">, do not
 need C<binmode>.  The rest need it.
 
@@ -5613,7 +5613,7 @@ package.
 =item time
 
 Returns the number of non-leap seconds since whatever time the system
-considers to be the epoch (that's 00:00:00, January 1, 1904 for MacOS,
+considers to be the epoch (that's 00:00:00, January 1, 1904 for Mac OS,
 and 00:00:00 UTC, January 1, 1970 for most other systems).
 Suitable for feeding to C<gmtime> and C<localtime>.
 

@@ -8,7 +8,7 @@
 
 # Package name      : perl5
 # Source directory  : .
-# Configuration time: Wed Jun  5 16:58:08 EET DST 2002
+# Configuration time: Thu Jun  6 22:13:01 EET DST 2002
 # Configured by     : jhi
 # Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
 
@@ -63,7 +63,7 @@ ccsymbols='__alpha=1 __LANGUAGE_C__=1 __osf__=1 __unix__=1 _LONGLONG=1 _SYSTYPE_
 ccversion='V5.6-082'
 cf_by='jhi'
 cf_email='yourname@yourhost.yourplace.com'
-cf_time='Wed Jun  5 16:58:08 EET DST 2002'
+cf_time='Thu Jun  6 22:13:01 EET DST 2002'
 charsize='1'
 chgrp=''
 chmod='chmod'
@@ -688,10 +688,10 @@ lib_ext='.a'
 libc='/usr/shlib/libc.so'
 libperl='libperl.so'
 libpth='/usr/shlib /usr/ccs/lib /usr/lib/cmplrs/cc /usr/lib /var/shlib'
-libs='-lgdbm -ldbm -ldb -lm -lutil'
-libsdirs=' /usr/shlib /usr/ccs/lib'
-libsfiles=' libgdbm.so libdbm.a libdb.so libm.so libutil.a'
-libsfound=' /usr/shlib/libgdbm.so /usr/ccs/lib/libdbm.a /usr/shlib/libdb.so /usr/shlib/libm.so /usr/ccs/lib/libutil.a'
+libs='-ldbm -ldb -lm -lutil'
+libsdirs=' /usr/ccs/lib /usr/shlib'
+libsfiles=' libdbm.a libdb.so libm.so libutil.a'
+libsfound=' /usr/ccs/lib/libdbm.a /usr/shlib/libdb.so /usr/shlib/libm.so /usr/ccs/lib/libutil.a'
 libspath=' /usr/shlib /usr/ccs/lib /usr/lib/cmplrs/cc /usr/lib /var/shlib'
 libswanted='sfio socket bind inet nsl nm gdbm dbm db malloc dld ld sun m cposix posix ndir dir crypt sec ucb BSD x util'
 libswanted_uselargefiles=''
@@ -770,7 +770,7 @@ patchlevel='8'
 path_sep=':'
 perl5='perl'
 perl=''
-perl_patchlevel='16967'
+perl_patchlevel='17013'
 perladmin='yourname@yourhost.yourplace.com'
 perllibs='-lm -lutil'
 perlpath='/opt/perl/bin/perl'
@@ -954,7 +954,7 @@ vendorlibexp=''
 vendorprefix=''
 vendorprefixexp=''
 version='5.8.0'
-version_patchlevel_string='version 8 subversion 0 patch 16967'
+version_patchlevel_string='version 8 subversion 0 patch 17013'
 versiononly='undef'
 vi=''
 voidflags='15'
@@ -983,7 +983,7 @@ PERL_SUBVERSION=0
 PERL_API_REVISION=5
 PERL_API_VERSION=8
 PERL_API_SUBVERSION=0
-PERL_PATCHLEVEL=16967
+PERL_PATCHLEVEL=17013
 PERL_CONFIG_SH=true
 # Variables propagated from previous config.sh file.
 pp_sys_cflags='ccflags="$ccflags -DNO_EFF_ONLY_OK"'

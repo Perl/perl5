@@ -669,7 +669,7 @@ need a thread library package installed. See README.hpux.
 
 =item *
 
-MacOS Classic (MacPerl has of course been available since
+Mac OS Classic (MacPerl has of course been available since
 perl 5.004 but now the source code bases of standard Perl
 and MacPerl have been synchronised)
 

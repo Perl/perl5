@@ -394,13 +394,13 @@ DYNIX/ptx platform (a.k.a. dynixptx) is supported at or near osvers 4.5.2.
 
 =item *
 
-Several MacOS (Classic) portability patches have been applied.  We
+Several Mac OS (Classic) portability patches have been applied.  We
 hope to get a fully working port by 5.8.0.  (The remaining problems
 relate to the changed IO model of Perl.)  See L<perlmacos>.
 
 =item *
 
-MacOS X (or Darwin) should now be able to build Perl even on HFS+
+Mac OS X (or Darwin) should now be able to build Perl even on HFS+
 filesystems.  (The case-insensitivity confused the Perl build process.)
 
 =item *
