@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq7 - General Perl Language Issues ($Revision: 1.21 $, $Date: 2005/01/21 12:10:22 $)
+perlfaq7 - General Perl Language Issues ($Revision: 1.22 $, $Date: 2005/03/27 07:19:01 $)
 
 =head1 DESCRIPTION
 
@@ -54,8 +54,8 @@ count as though they were quoted:
 
     This                    is like this
     ------------            ---------------
-    $foo{line}              $foo{"line"}
-    bar => stuff            "bar" => stuff
+    $foo{line}              $foo{'line'}
+    bar => stuff            'bar' => stuff
 
 The final semicolon in a block is optional, as is the final comma in a
 list.  Good style (see L<perlstyle>) says to put them in except for
@@ -896,6 +896,8 @@ you probably only want to use hard references.
 
 =head2 What does "bad interpreter" mean?
 
+(contributed by brian d foy)
+
 The "bad interpreter" message comes from the shell, not perl.  The
 actual message may vary depending on your platform, shell, and locale
 settings.
@@ -905,7 +907,10 @@ line in your perl script (the "shebang" line) does not contain the
 right path to perl (or any other program capable of running scripts). 
 Sometimes this happens when you move the script from one machine to
 another and each machine has a different path to perl---/usr/bin/perl
-versus /usr/local/bin/perl for instance.
+versus /usr/local/bin/perl for instance. It may also indicate
+that the source machine has CRLF line terminators and the 
+destination machine has LF only: the shell tries to find 
+/usr/bin/perl<CR>, but can't.
 
 If you see "bad interpreter: Permission denied", you need to make your
 script executable.

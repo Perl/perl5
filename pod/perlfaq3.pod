@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq3 - Programming Tools ($Revision: 1.46 $, $Date: 2005/02/13 02:36:09 $)
+perlfaq3 - Programming Tools ($Revision: 1.47 $, $Date: 2005/03/27 07:21:22 $)
 
 =head1 DESCRIPTION
 
@@ -471,11 +471,6 @@ Guide available at
 http://www.cpan.org/authors/Stephen_O_Lidie/ , and the
 online manpages at
 http://www-users.cs.umn.edu/%7Eamundson/perl/perltk/toc.html .
-
-=head2 How can I generate simple menus without using CGI or Tk?
-
-The http://www.cpan.org/authors/id/SKUNZ/perlmenu.v4.0.tar.gz
-module, which is curses-based, can help with this.
 
 =head2 How can I make my Perl program run faster?
 

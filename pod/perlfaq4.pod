@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq4 - Data Manipulation ($Revision: 1.60 $, $Date: 2005/02/14 18:24:01 $)
+perlfaq4 - Data Manipulation ($Revision: 1.61 $, $Date: 2005/03/11 16:27:53 $)
 
 =head1 DESCRIPTION
 
@@ -389,7 +389,7 @@ integers (inclusive), For example: C<random_int_in(50,120)>.
 
 =head2 How do I find the day or week of the year?
 
-The localtime function returns the day of the week.  Without an
+The localtime function returns the day of the year.  Without an
 argument localtime uses the current time.
 
     $day_of_year = (localtime)[7];
@@ -422,6 +422,7 @@ Use the following simple functions:
     sub get_century    {
 	return int((((localtime(shift || time))[5] + 1999))/100);
     }
+    
     sub get_millennium {
 	return 1+int((((localtime(shift || time))[5] + 1899))/1000);
     }

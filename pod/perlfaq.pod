@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq - frequently asked questions about Perl ($Date: 2005/01/31 15:52:15 $)
+perlfaq - frequently asked questions about Perl ($Date: 2005/03/27 07:21:21 $)
 
 =head1 DESCRIPTION
 
@@ -314,10 +314,6 @@ How can I use curses with Perl?
 =item *
 
 How can I use X or Tk with Perl?
-
-=item *
-
-How can I generate simple menus without using CGI or Tk?
 
 =item *
 
