@@ -1904,9 +1904,32 @@ some common testing and debugging tools with Perl.  This is
 meant as a guide to interfacing these tools with Perl, not
 as any kind of guide to the use of the tools themselves.
 
-Note that running under memory debuggers such as Purify, valgrind,
-or Third Degree greatly slows down the execution: seconds become minutes,
-minutes become hours.
+B<NOTE 1>: Running under memory debuggers such as Purify, valgrind, or
+Third Degree greatly slows down the execution: seconds become minutes,
+minutes become hours.  For example as of Perl 5.8.1, the
+ext/Encode/t/Unicode.t takes extraordinarily long to complete under
+e.g. Purify, Third Degree, and valgrind.  Under valgrind it takes more
+than six hours, even on a snappy computer-- the said test must be
+doing something that is quite unfriendly for memory debuggers.  If you
+don't feel like waiting, that you can simply kill away the perl
+process.
+
+B<NOTE 2>: To minimize the number of memory leak false alarms (see
+L</PERL_DESTRUCT_LEVEL> for more information), you have to have
+environment variable PERL_DESTRUCT_LEVEL set to 2.  The F<TEST>
+and harness scripts do that automatically.  But if you are running
+some of the tests manually-- for csh-like shells:
+
+    setenv PERL_DESTRUCT_LEVEL 2
+
+and for Bourne-type shells:
+
+    PERL_DESTRUCT_LEVEL=2
+    export PERL_DESTRUCT_LEVEL
+
+or in UNIXy environments you can also use the C<env> command:
+
+    env PERL_DESTRUCT_LEVEL=2 valgrind ./perl -Ilib ...
 
 =head2 Rational Software's Purify
 
@@ -1968,17 +1991,6 @@ can just:
 which creates a binary named 'pureperl' that has been Purify'ed.
 This binary is used in place of the standard 'perl' binary
 when you want to debug Perl memory problems.
-
-To minimize the number of memory leak false alarms
-(see L</PERL_DESTRUCT_LEVEL>), set environment variable
-PERL_DESTRUCT_LEVEL to 2.
-
-    setenv PERL_DESTRUCT_LEVEL 2
-
-In Bourne-type shells:
-
-    PERL_DESTRUCT_LEVEL=2
-    export PERL_DESTRUCT_LEVEL
 
 As an example, to show any memory leaks produced during the
 standard Perl testset you would create and run the Purify'ed
@@ -2062,14 +2074,6 @@ standard Perl testset you would create and run Purify as:
 which would instrument Perl in memory, run Perl on test.pl,
 then finally report any memory problems.
 
-B<NOTE>: as of Perl 5.8.0, the ext/Encode/t/Unicode.t takes
-extraordinarily long (hours?) to complete under Purify.  It has been
-theorized that it would eventually finish, but nobody has so far been
-patient enough :-) (This same extreme slowdown has been seen also with
-the Third Degree tool, so the said test must be doing something that
-is quite unfriendly for memory debuggers.)  It is suggested that you
-simply kill away that testing process.
-
 =head2 valgrind
 
 The excellent valgrind tool can be used to find out both memory leaks
@@ -2118,12 +2122,12 @@ aren't.  See L</PERL_DESTRUCT_LEVEL> for more information.
 
 =head2 PERL_DESTRUCT_LEVEL
 
-If you want to run any of the tests yourself manually using the
-pureperl or perl.third executables, please note that by default
-perl B<does not> explicitly cleanup all the memory it has allocated
-(such as global memory arenas) but instead lets the exit() of
-the whole program "take care" of such allocations, also known
-as "global destruction of objects".
+If you want to run any of the tests yourself manually using e.g.
+valgrind, or the pureperl or perl.third executables, please note that
+by default perl B<does not> explicitly cleanup all the memory it has
+allocated (such as global memory arenas) but instead lets the exit()
+of the whole program "take care" of such allocations, also known as
+"global destruction of objects".
 
 There is a way to tell perl to do complete cleanup: set the
 environment variable PERL_DESTRUCT_LEVEL to a non-zero value.
