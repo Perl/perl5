@@ -302,6 +302,13 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 #  endif
 #endif
 
+/* HP-UX 10.X CMA (Common Multithreaded Architecure) insists that
+   pthread.h must be included before all other header files.
+*/
+#if defined(USE_THREADS) && defined(PTHREAD_H_FIRST)
+#  include <pthread.h>
+#endif
+
 #ifndef _TYPES_		/* If types.h defines this it's easy. */
 #   ifndef major		/* Does everyone's types.h define this? */
 #	include <sys/types.h>

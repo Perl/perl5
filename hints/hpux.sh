@@ -128,6 +128,27 @@ else
 	selecttype='int *'
 fi
 
+# Under 10.X, a threaded perl can be built, but it needs
+# libcma and OLD_PTHREADS_API.  Also <pthread.h> needs to
+# be #included before any other includes (in perl.h)
+if [ "$xxOsRevMajor" -eq 10 -a "X$usethreads" = "X$define" ]; then
+
+    # HP-UX 10.X uses the old pthreads API
+    case "$d_oldpthreads" in
+    '') d_oldpthreads="$define" ;;
+    esac
+
+    # include libcma before all the others
+    libswanted="cma $libswanted"
+
+    # tell perl.h to include <pthread.h> before other include files
+    ccflags="$ccflags -DPTHREAD_H_FIRST"
+
+    # CMA redefines select to cma_select, and cma_select expects int *
+    # instead of fd_set * (just like 9.X)
+    selecttype='int *'
+fi
+
 
 # Remove bad libraries that will cause problems
 # (This doesn't remove libraries that don't actually exist)
