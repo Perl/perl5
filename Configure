@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat Dec 29 20:23:06 EET 2001 [metaconfig 3.0 PL70]
+# Generated on Sun Dec 30 19:31:52 EET 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1159,7 +1159,7 @@ if `$sh -c '#' >/dev/null 2>&1`; then
 	xcat=/bin/cat
 	test -f $xcat$_exe || xcat=/usr/bin/cat
 	if test ! -f $xcat$_exe; then
-		for p in $paths; do
+		for p in `echo $PATH | sed -e "s/$p_/ /g"` $paths; do
 			if test -f $p/cat$_exe; then
 				xcat=$p/cat
 				break
