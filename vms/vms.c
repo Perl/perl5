@@ -2,8 +2,8 @@
  *
  * VMS-specific routines for perl5
  *
- * Last revised: 11-Apr-1997 by Charles Bailey  bailey@genetics.upenn.edu
- * Version: 5.3.97c
+ * Last revised:  9-Nov-1997 by Charles Bailey  bailey@newman.upenn.edu
+ * Version: 5.4.53a
  */
 
 #include <acedef.h>
@@ -19,6 +19,7 @@
 #include <fscndef.h>
 #include <iodef.h>
 #include <jpidef.h>
+#include <kgbdef.h>
 #include <libdef.h>
 #include <lib$routines.h>
 #include <lnmdef.h>
@@ -113,37 +114,48 @@ my_trnlnm(char *lnm, char *eqv, unsigned long int idx)
  * domain (mostly - my_getenv() need not return a translation from
  * the process logical name table)
  *
- * Note: Uses static buffer -- not thread-safe!
+ * Note: Uses Perl temp to store result so char * can be returned to
+ * caller; this pointer will be invalidated at next Perl statement
+ * transition.
  */
 /*{{{ char *my_getenv(char *lnm)*/
 char *
 my_getenv(char *lnm)
 {
     static char __my_getenv_eqv[LNM$C_NAMLENGTH+1];
-    char uplnm[LNM$C_NAMLENGTH+1], *cp1, *cp2;
+    char uplnm[LNM$C_NAMLENGTH+1], *cp1, *cp2, *eqv;
     unsigned long int idx = 0;
     int trnsuccess;
+    SV *tmpsv;
 
+    if (curinterp) {  /* Perl interpreter running -- may be threaded */
+      /* Set up a temporary buffer for the return value; Perl will
+       * clean it up at the next statement transition */
+      tmpsv = sv_2mortal(newSVpv("",LNM$C_NAMLENGTH+1));
+      if (!tmpsv) return NULL;
+      eqv = SvPVX(tmpsv);
+    }
+    else eqv = __my_getenv_eqv;  /* Assume no interpreter ==> single thread */
     for (cp1 = lnm, cp2= uplnm; *cp1; cp1++, cp2++) *cp2 = _toupper(*cp1);
     *cp2 = '\0';
     if (cp1 - lnm == 7 && !strncmp(uplnm,"DEFAULT",7)) {
-      getcwd(__my_getenv_eqv,sizeof __my_getenv_eqv);
-      return __my_getenv_eqv;
+      getcwd(eqv,LNM$C_NAMLENGTH);
+      return eqv;
     }
     else {
       if ((cp2 = strchr(uplnm,';')) != NULL) {
         *cp2 = '\0';
         idx = strtoul(cp2+1,NULL,0);
       }
-      trnsuccess = my_trnlnm(uplnm,__my_getenv_eqv,idx);
+      trnsuccess = my_trnlnm(uplnm,eqv,idx);
       /* If we had a translation index, we're only interested in lnms */
       if (!trnsuccess && cp2 != NULL) return Nullch;
-      if (trnsuccess) return __my_getenv_eqv;
+      if (trnsuccess) return eqv;
       else {
         unsigned long int retsts;
         struct dsc$descriptor_s symdsc = {0,DSC$K_DTYPE_T,DSC$K_CLASS_S,0},
-                                valdsc = {sizeof __my_getenv_eqv,DSC$K_DTYPE_T,
-                                          DSC$K_CLASS_S, __my_getenv_eqv};
+                                valdsc = {LNM$C_NAMLENGTH,DSC$K_DTYPE_T,
+                                          DSC$K_CLASS_S, eqv};
         symdsc.dsc$w_length = cp1 - lnm;
         symdsc.dsc$a_pointer = uplnm;
         retsts = lib$get_symbol(&symdsc,&valdsc,&(valdsc.dsc$w_length),0);
@@ -171,14 +183,20 @@ prime_env_iter(void)
  * find, in preparation for iterating over it.
  */
 {
+  dTHR;
   static int primed = 0;  /* XXX Not thread-safe!!! */
   HV *envhv = GvHVn(envgv);
   FILE *sholog;
   char eqv[LNM$C_NAMLENGTH+1],*start,*end;
   STRLEN eqvlen;
   SV *oldrs, *linesv, *eqvsv;
+#ifdef USE_THREADS
+  static perl_mutex primenv_mutex = PTHREAD_MUTEX_INITIALIZER;
+#endif
 
   if (primed) return;
+  MUTEX_LOCK(&primenv_mutex);
+  if (primed) { MUTEX_UNLOCK(&primenv_mutex); return; }
   /* Perform a dummy fetch as an lval to insure that the hash table is
    * set up.  Otherwise, the hv_store() will turn into a nullop */
   (void) hv_fetch(envhv,"DEFAULT",7,TRUE);
@@ -190,8 +208,10 @@ prime_env_iter(void)
   (void) hv_fetch(envhv,"USER",4,TRUE);
 
   /* Now, go get the logical names */
-  if ((sholog = safe_popen("$ Show Logical *","r")) == Nullfp)
+  if ((sholog = safe_popen("$ Show Logical *","r")) == Nullfp) {
+    MUTEX_UNLOCK(&primenv_mutex);
     _ckvmssts(vaxc$errno);
+  }
   /* We use Perl's sv_gets to read from the pipe, since safe_popen is
    * tied to Perl's I/O layer, so it may not return a simple FILE * */
   oldrs = rs;
@@ -202,6 +222,7 @@ prime_env_iter(void)
       my_pclose(sholog);
       SvREFCNT_dec(linesv); SvREFCNT_dec(rs); rs = oldrs;
       primed = 1;
+      MUTEX_UNLOCK(&primenv_mutex);
       return;
     }
     while (*start != '"' && *start != '=' && *start) start++;
@@ -215,7 +236,7 @@ prime_env_iter(void)
           warn("Ill-formed logical name |%s| in prime_env_iter",start);
         continue;
       }
-      else _ckvmssts(vaxc$errno);
+      else { MUTEX_UNLOCK(&primenv_mutex); _ckvmssts(vaxc$errno); }
     }
     else {
       eqvsv = newSVpv(eqv,eqvlen);
@@ -335,7 +356,7 @@ do_rmdir(char *name)
 {
     char dirfile[NAM$C_MAXRSS+1];
     int retval;
-    struct mystat st;
+    Stat_t st;
 
     if (do_fileify_dirspec(name,dirfile,0) == NULL) return -1;
     if (flex_stat(dirfile,&st) || !S_ISDIR(st.st_mode)) retval = -1;
@@ -924,17 +945,20 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
     static char __fileify_retbuf[NAM$C_MAXRSS+1];
     unsigned long int dirlen, retlen, addmfd = 0, hasfilename = 0;
     char *retspec, *cp1, *cp2, *lastdir;
-    char trndir[NAM$C_MAXRSS+1], vmsdir[NAM$C_MAXRSS+1];
+    char trndir[NAM$C_MAXRSS+2], vmsdir[NAM$C_MAXRSS+1];
 
     if (!dir || !*dir) {
       set_errno(EINVAL); set_vaxc_errno(SS$_BADPARAM); return NULL;
     }
     dirlen = strlen(dir);
-    if (dir[dirlen-1] == '/') --dirlen;
-    if (!dirlen) {
-      set_errno(ENOTDIR);
-      set_vaxc_errno(RMS$_DIR);
-      return NULL;
+    while (dir[dirlen-1] == '/') --dirlen;
+    if (!dirlen) { /* We had Unixish '/' -- substitute top of current tree */
+      strcpy(trndir,"/sys$disk/000000");
+      dir = trndir;
+      dirlen = 16;
+    }
+    if (dirlen > NAM$C_MAXRSS) {
+      set_errno(ENAMETOOLONG); set_vaxc_errno(RMS$_SYN); return NULL;
     }
     if (!strpbrk(dir+1,"/]>:")) {
       strcpy(trndir,*dir == '/' ? dir + 1: dir);
@@ -1000,6 +1024,14 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
           }
           cp1++;
         } while ((cp1 = strstr(cp1,"/.")) != NULL);
+      }
+      else if (!strcmp(&dir[dirlen-7],"/000000")) {
+        /* Ditto for specs that end in an MFD -- let the VMS code
+         * figure out whether it's a real device or a rooted logical. */
+        dir[dirlen] = '/'; dir[dirlen+1] = '\0';
+        if (do_tovmsspec(dir,vmsdir,0) == NULL) return NULL;
+        if (do_fileify_dirspec(vmsdir,trndir,0) == NULL) return NULL;
+        return do_tounixspec(trndir,buf,ts);
       }
       else {
         if ( !(lastdir = cp1 = strrchr(dir,'/')) &&
@@ -1544,6 +1576,11 @@ static char *do_tovmsspec(char *path, char *buf, int ts) {
     STRLEN trnend;
 
     while (*(cp2+1) == '/') cp2++;  /* Skip multiple /s */
+    if (!*(cp2+1)) {
+      if (!buf & ts) Renew(rslt,18,char);
+      strcpy(rslt,"sys$disk:[000000]");
+      return rslt;
+    }
     while (*(++cp2) != '/' && *cp2) *(cp1++) = *cp2;
     *cp1 = '\0';
     islnm =  my_trnlnm(rslt,trndev,0);
@@ -2223,25 +2260,75 @@ unsigned long int flags = 17, one = 1, retsts;
 
 
 /* OS-specific initialization at image activation (not thread startup) */
+/* Older VAXC header files lack these constants */
+#ifndef JPI$_RIGHTS_SIZE
+#  define JPI$_RIGHTS_SIZE 817
+#endif
+#ifndef KGB$M_SUBSYSTEM
+#  define KGB$M_SUBSYSTEM 0x8
+#endif
+
 /*{{{void vms_image_init(int *, char ***)*/
 void
 vms_image_init(int *argcp, char ***argvp)
 {
-  unsigned long int *mask, iosb[2], i;
-  unsigned short int dummy;
-  union prvdef iprv;
-  struct itmlst_3 jpilist[2] = { {sizeof iprv, JPI$_IMAGPRIV, &iprv, &dummy},
-                                 {          0,             0,     0,      0} };
+  unsigned long int *mask, iosb[2], i, rlst[128], rsz, add_taint = FALSE;
+  unsigned long int iprv[(sizeof(union prvdef) + sizeof(unsigned long int) - 1) / sizeof(unsigned long int)];
+  unsigned short int dummy, rlen;
+  struct itmlst_3 jpilist[4] = { {sizeof iprv,    JPI$_IMAGPRIV, iprv, &dummy},
+                                 {sizeof rlst,  JPI$_RIGHTSLIST, rlst,  &rlen},
+                                 { sizeof rsz, JPI$_RIGHTS_SIZE, &rsz, &dummy},
+                                 {          0,                0,    0,      0} };
 
   _ckvmssts(sys$getjpiw(0,NULL,NULL,jpilist,iosb,NULL,NULL));
   _ckvmssts(iosb[0]);
-  mask = (unsigned long int *) &iprv;  /* Quick change of view */;
-  for (i = 0; i < (sizeof iprv + sizeof(unsigned long int) - 1) / sizeof(unsigned long int); i++) {
-    if (mask[i]) {           /* Running image installed with privs? */
-      _ckvmssts(sys$setprv(0,&iprv,0,NULL));       /* Turn 'em off. */
-      tainting = TRUE;
+  for (i = 0; i < sizeof iprv / sizeof(unsigned long int); i++) {
+    if (iprv[i]) {           /* Running image installed with privs? */
+      _ckvmssts(sys$setprv(0,iprv,0,NULL));       /* Turn 'em off. */
+      add_taint = TRUE;
       break;
     }
+  }
+  /* Rights identifiers might trigger tainting as well. */
+  if (!add_taint && (rlen || rsz)) {
+    while (rlen < rsz) {
+      /* We didn't get all the identifiers on the first pass.  Allocate a
+       * buffer much larger than $GETJPI wants (rsz is size in bytes that
+       * were needed to hold all identifiers at time of last call; we'll
+       * allocate that many unsigned long ints), and go back and get 'em.
+       */
+      if (jpilist[1].bufadr != rlst) Safefree(jpilist[1].bufadr);
+      jpilist[1].bufadr = New(1320,mask,rsz,unsigned long int);
+      jpilist[1].buflen = rsz * sizeof(unsigned long int);
+      _ckvmssts(sys$getjpiw(0,NULL,NULL,&jpilist[1],iosb,NULL,NULL));
+      _ckvmssts(iosb[0]);
+    }
+    mask = jpilist[1].bufadr;
+    /* Check attribute flags for each identifier (2nd longword); protected
+     * subsystem identifiers trigger tainting.
+     */
+    for (i = 1; i < (rlen + sizeof(unsigned long int) - 1) / sizeof(unsigned long int); i += 2) {
+      if (mask[i] & KGB$M_SUBSYSTEM) {
+        add_taint = TRUE;
+        break;
+      }
+    }
+    if (mask != rlst) Safefree(mask);
+  }
+  /* We need to use this hack to tell Perl it should run with tainting,
+   * since its tainting flag may be part of the curinterp struct, which
+   * hasn't been allocated when vms_image_init() is called.
+   */
+  if (add_taint) {
+    char ***newap;
+    New(1320,newap,*argcp+2,char **);
+    newap[0] = argvp[0];
+    *newap[1] = "-T";
+    Copy(argvp[1],newap[2],*argcp-1,char **);
+    /* We orphan the old argv, since we don't know where it's come from,
+     * so we don't know how to free it.
+     */
+    *argcp++; argvp = newap;
   }
   getredirection(argcp,argvp);
   return;
@@ -2429,13 +2516,22 @@ opendir(char *name)
 {
     DIR *dd;
     char dir[NAM$C_MAXRSS+1];
-      
+    Stat_t sb;
+
+    if (do_tovmspath(name,dir,0) == NULL) {
+      return NULL;
+    }
+    if (flex_stat(dir,&sb) == -1) return NULL;
+    if (!S_ISDIR(sb.st_mode)) {
+      set_errno(ENOTDIR);  set_vaxc_errno(RMS$_DIR);
+      return NULL;
+    }
+    if (!cando_by_name(S_IRUSR,0,dir)) {
+      set_errno(EACCES); set_vaxc_errno(RMS$_PRV);
+      return NULL;
+    }
     /* Get memory for the handle, and the pattern. */
     New(1306,dd,1,DIR);
-    if (do_tovmspath(name,dir,0) == NULL) {
-      Safefree((char *)dd);
-      return(NULL);
-    }
     New(1307,dd->pattern,strlen(dir)+sizeof "*.*" + 1,char);
 
     /* Fill in the fields; mainly playing with the descriptor. */
@@ -2791,6 +2887,7 @@ setup_cmddsc(char *cmd, int check_img)
 bool
 vms_do_aexec(SV *really,SV **mark,SV **sp)
 {
+  dTHR;
   if (sp > mark) {
     if (vfork_called) {           /* this follows a vfork - act Unixish */
       vfork_called--;
@@ -2845,11 +2942,12 @@ vms_do_exec(char *cmd)
 
 unsigned long int do_spawn(char *);
 
-/* {{{ unsigned long int do_aspawn(SV *really,SV **mark,SV **sp) */
+/* {{{ unsigned long int do_aspawn(void *really,void **mark,void **sp) */
 unsigned long int
-do_aspawn(SV *really,SV **mark,SV **sp)
+do_aspawn(void *really,void **mark,void **sp)
 {
-  if (sp > mark) return do_spawn(setup_argstr(really,mark,sp));
+  dTHR;
+  if (sp > mark) return do_spawn(setup_argstr((SV *)really,(SV **)mark,(SV **)sp));
 
   return SS$_ABORT;
 }  /* end of do_aspawn() */
@@ -2916,7 +3014,7 @@ my_flush(FILE *fp)
     int res;
     if ((res = fflush(fp)) == 0) {
 #ifdef VMS_DO_SOCKETS
-	struct mystat s;
+	Stat_t s;
 	if (Fstat(fileno(fp), &s) == 0 && !S_ISSOCK(s.st_mode))
 #endif
 	    res = fsync(fileno(fp));
@@ -3178,79 +3276,104 @@ void my_endpwent()
 }
 /*}}}*/
 
-#if __VMS_VER < 70000000 || __DECC_VER < 50200000
-/* Signal handling routines, pulled into the core from POSIX.xs.
- *
- * We need these for threads, so they've been rolled into the core,
- * rather than left in POSIX.xs.
- *
- * (DRS, Oct 23, 1997)
- */
+#ifdef HOMEGROWN_POSIX_SIGNALS
+  /* Signal handling routines, pulled into the core from POSIX.xs.
+   *
+   * We need these for threads, so they've been rolled into the core,
+   * rather than left in POSIX.xs.
+   *
+   * (DRS, Oct 23, 1997)
+   */
 
-/* sigset_t is atomic under VMS, so these routines are easy */
+  /* sigset_t is atomic under VMS, so these routines are easy */
+/*{{{int my_sigemptyset(sigset_t *) */
 int my_sigemptyset(sigset_t *set) {
-  if (!set) { SETERRNO(EFAULT,SS$_ACCVIO); return -1; }
-  *set = 0; return 0;
+    if (!set) { SETERRNO(EFAULT,SS$_ACCVIO); return -1; }
+    *set = 0; return 0;
 }
+/*}}}*/
+
+
+/*{{{int my_sigfillset(sigset_t *)*/
 int my_sigfillset(sigset_t *set) {
-  int i;
-  if (!set) { SETERRNO(EFAULT,SS$_ACCVIO); return -1; }
-  for (i = 0; i < NSIG; i++) *set |= (1 << i);
-  return 0;
+    int i;
+    if (!set) { SETERRNO(EFAULT,SS$_ACCVIO); return -1; }
+    for (i = 0; i < NSIG; i++) *set |= (1 << i);
+    return 0;
 }
+/*}}}*/
+
+
+/*{{{int my_sigaddset(sigset_t *set, int sig)*/
 int my_sigaddset(sigset_t *set, int sig) {
-  if (!set) { SETERRNO(EFAULT,SS$_ACCVIO); return -1; }
-  if (sig > NSIG) { SETERRNO(EINVAL,LIB$_INVARG); return -1; }
-  *set |= (1 << (sig - 1));
-  return 0;
+    if (!set) { SETERRNO(EFAULT,SS$_ACCVIO); return -1; }
+    if (sig > NSIG) { SETERRNO(EINVAL,LIB$_INVARG); return -1; }
+    *set |= (1 << (sig - 1));
+    return 0;
 }
+/*}}}*/
+
+
+/*{{{int my_sigdelset(sigset_t *set, int sig)*/
 int my_sigdelset(sigset_t *set, int sig) {
-  if (!set) { SETERRNO(EFAULT,SS$_ACCVIO); return -1; }
-  if (sig > NSIG) { SETERRNO(EINVAL,LIB$_INVARG); return -1; }
-  *set &= ~(1 << (sig - 1));
-  return 0;
+    if (!set) { SETERRNO(EFAULT,SS$_ACCVIO); return -1; }
+    if (sig > NSIG) { SETERRNO(EINVAL,LIB$_INVARG); return -1; }
+    *set &= ~(1 << (sig - 1));
+    return 0;
 }
+/*}}}*/
+
+
+/*{{{int my_sigismember(sigset_t *set, int sig)*/
 int my_sigismember(sigset_t *set, int sig) {
-  if (!set) { SETERRNO(EFAULT,SS$_ACCVIO); return -1; }
-  if (sig > NSIG) { SETERRNO(EINVAL,LIB$_INVARG); return -1; }
-  *set & (1 << (sig - 1));
+    if (!set) { SETERRNO(EFAULT,SS$_ACCVIO); return -1; }
+    if (sig > NSIG) { SETERRNO(EINVAL,LIB$_INVARG); return -1; }
+    *set & (1 << (sig - 1));
 }
+/*}}}*/
+
+
+/*{{{int my_sigprocmask(int how, sigset_t *set, sigset_t *oset)*/
 int my_sigprocmask(int how, sigset_t *set, sigset_t *oset) {
-  sigset_t tempmask;
+    sigset_t tempmask;
 
-  /* If set and oset are both null, then things are badky wrong. Bail */
-  if ((oset == NULL) && (set == NULL)) {
-    set_errno(EFAULT); set_vaxc_errno(SS$_ACCVIO);
-    return -1;
-  }
-
-  /* If set's null, then we're just handling a fetch. */
-  if (set == NULL) {
-    tempmask = sigblock(0);
-  } else {
-    switch (how) {
-    case SIG_SETMASK:
-      tempmask = sigsetmask(*set);
-      break;
-    case SIG_BLOCK:
-      tempmask = sigblock(*set);
-      break;
-    case SIG_UNBLOCK:
-      tempmask = sigblock(0);
-      sigsetmask(*oset & ~tempmask);
-      break;
-    default:
-      set_errno(EINVAL); set_vaxc_errno(LIB$_INVARG);
+    /* If set and oset are both null, then things are badly wrong. Bail out. */
+    if ((oset == NULL) && (set == NULL)) {
+      set_errno(EFAULT); set_vaxc_errno(SS$_ACCVIO);
       return -1;
     }
-  }
 
-  /* Did they pass us an oset? If so, stick our holding mask into it */
-  if (oset)
-    *oset = tempmask;
+    /* If set's null, then we're just handling a fetch. */
+    if (set == NULL) {
+        tempmask = sigblock(0);
+    }
+    else {
+      switch (how) {
+      case SIG_SETMASK:
+        tempmask = sigsetmask(*set);
+        break;
+      case SIG_BLOCK:
+        tempmask = sigblock(*set);
+        break;
+      case SIG_UNBLOCK:
+        tempmask = sigblock(0);
+        sigsetmask(*oset & ~tempmask);
+        break;
+      default:
+        set_errno(EINVAL); set_vaxc_errno(LIB$_INVARG);
+        return -1;
+      }
+    }
+
+    /* Did they pass us an oset? If so, stick our holding mask into it */
+    if (oset)
+      *oset = tempmask;
   
-  return 0;
+    return 0;
 }
+/*}}}*/
+#endif  /* HOMEGROWN_POSIX_SIGNALS */
+
 
 /* Used for UTC calculation in my_gmtime(), my_localtime(), my_time(),
  * my_utime(), and flex_stat(), all of which operate on UTC unless
@@ -3271,9 +3394,43 @@ static long int utc_offset_secs;
 #undef localtime
 #undef time
 
+#if defined(__VMS_VER) && __VMS_VER >= 70000000 && __DECC_VER >= 50200000
+#  define RTL_USES_UTC 1
+#endif
+
+static time_t toutc_dst(time_t loc) {
+  struct tm *rsltmp;
+
+  if ((rsltmp = localtime(&loc)) == NULL) return -1;
+  loc -= utc_offset_secs;
+  if (rsltmp->tm_isdst) loc -= 3600;
+  return loc;
+}
+#define _toutc(secs)  ((secs) == -1 ? -1 : \
+       ((gmtime_emulation_type || my_time(NULL)), \
+       (gmtime_emulation_type == 1 ? toutc_dst(secs) : \
+       ((secs) - utc_offset_secs))))
+
+static time_t toloc_dst(time_t utc) {
+  struct tm *rsltmp;
+
+  utc += utc_offset_secs;
+  if ((rsltmp = localtime(&utc)) == NULL) return -1;
+  if (rsltmp->tm_isdst) utc += 3600;
+  return utc;
+}
+#define _toloc(secs)  ((secs) == -1 ? -1 : \
+       ((gmtime_emulation_type || my_time(NULL)), \
+       (gmtime_emulation_type == 1 ? toloc_dst(secs) : \
+       ((secs) + utc_offset_secs))))
+
+
 /* my_time(), my_localtime(), my_gmtime()
- * By default traffic in UTC time values, suing CRTL gmtime() or
+ * By default traffic in UTC time values, using CRTL gmtime() or
  * SYS$TIMEZONE_DIFFERENTIAL to determine offset from local time zone.
+ * Note: We need to use these functions even when the CRTL has working
+ * UTC support, since they also handle C<use vmsish qw(times);>
+ *
  * Contributed by Chuck Lane  <lane@duphy4.physics.drexel.edu>
  * Modified by Charles Bailey <bailey@genetics.upenn.edu>
  */
@@ -3283,10 +3440,13 @@ time_t my_time(time_t *timep)
 {
   dTHR;
   time_t when;
+  struct tm *tm_p;
 
   if (gmtime_emulation_type == 0) {
-    struct tm *tm_p;
-    time_t base = 15 * 86400; /* 15jan71; to avoid month ends */
+    int dstnow;
+    time_t base = 15 * 86400; /* 15jan71; to avoid month/year ends between    */
+                              /* results of calls to gmtime() and localtime() */
+                              /* for same &base */
 
     gmtime_emulation_type++;
     if ((tm_p = gmtime(&base)) == NULL) { /* CRTL gmtime() is a fake */
@@ -3313,11 +3473,13 @@ time_t my_time(time_t *timep)
   }
 
   when = time(NULL);
-  if (
-#     ifdef VMSISH_TIME
-      !VMSISH_TIME &&
-#     endif
-                       when != -1) when -= utc_offset_secs;
+# ifdef VMSISH_TIME
+# ifdef RTL_USES_UTC
+  if (VMSISH_TIME) when = _toloc(when);
+# else
+  if (!VMSISH_TIME) when = _toutc(when);
+# endif
+# endif
   if (timep != NULL) *timep = when;
   return when;
 
@@ -3332,21 +3494,26 @@ my_gmtime(const time_t *timep)
   dTHR;
   char *p;
   time_t when;
+  struct tm *rsltmp;
 
   if (timep == NULL) {
     set_errno(EINVAL); set_vaxc_errno(LIB$_INVARG);
     return NULL;
   }
   if (*timep == 0) gmtime_emulation_type = 0;  /* possibly reset TZ */
-  if (gmtime_emulation_type == 0) (void) my_time(NULL); /* Init UTC */
 
   when = *timep;
 # ifdef VMSISH_TIME
-  if (VMSISH_TIME) when -= utc_offset_secs; /* Input was local time */
-# endif
+  if (VMSISH_TIME) when = _toutc(when); /* Input was local time */
+#  endif
+# ifdef RTL_USES_UTC  /* this implies that the CRTL has a working gmtime() */
+  return gmtime(&when);
+# else
   /* CRTL localtime() wants local time as input, so does no tz correction */
-  return localtime(&when);
-
+  rsltmp = localtime(&when);
+  if (rsltmp) rsltmp->tm_isdst = 0;  /* We already took DST into account */
+  return rsltmp;
+#endif
 }  /* end of my_gmtime() */
 /*}}}*/
 
@@ -3357,6 +3524,7 @@ my_localtime(const time_t *timep)
 {
   dTHR;
   time_t when;
+  struct tm *rsltmp;
 
   if (timep == NULL) {
     set_errno(EINVAL); set_vaxc_errno(LIB$_INVARG);
@@ -3366,11 +3534,21 @@ my_localtime(const time_t *timep)
   if (gmtime_emulation_type == 0) (void) my_time(NULL); /* Init UTC */
 
   when = *timep;
+# ifdef RTL_USES_UTC
 # ifdef VMSISH_TIME
-  if (!VMSISH_TIME) when += utc_offset_secs;  /*  Input was UTC */
+  if (VMSISH_TIME) when = _toutc(when);
+# endif
+  /* CRTL localtime() wants UTC as input, does tz correction itself */
+  return localtime(&when);
+# else
+# ifdef VMSISH_TIME
+  if (!VMSISH_TIME) when = _toloc(when);   /*  Input was UTC */
+# endif
 # endif
   /* CRTL localtime() wants local time as input, so does no tz correction */
-  return localtime(&when);
+  rsltmp = localtime(&when);
+  if (rsltmp && gmtime_emulation_type != 1) rsltmp->tm_isdst = -1;
+  return rsltmp;
 
 } /*  end of my_localtime() */
 /*}}}*/
@@ -3380,7 +3558,6 @@ my_localtime(const time_t *timep)
 #define localtime(t) my_localtime(t)
 #define time(t)      my_time(t)
 
-#endif /* VMS VER < 7.0 || Dec C < 5.2
 
 /* my_utime - update modification time of a file
  * calling sequence is identical to POSIX utime(), but under
@@ -3445,11 +3622,9 @@ int my_utime(char *file, struct utimbuf *utimes)
      */
     lowbit = (utimes->modtime & 1) ? secscale : 0;
     unixtime = (long int) utimes->modtime;
-#if defined(VMSISH_TIME) && (__VMS_VER < 70000000 || __DECC_VER < 50200000)
-    if (!VMSISH_TIME) {  /* Input was UTC; convert to local for sys svc */
-      if (!gmtime_emulation_type) (void) time(NULL);  /* Initialize UTC */
-      unixtime += utc_offset_secs;
-    }
+#   ifdef VMSISH_TIME
+    /* If input was UTC; convert to local for sys svc */
+    if (!VMSISH_TIME) unixtime = _toloc(unixtime);
 #   endif
     unixtime >> 1;  secscale << 1;
     retsts = lib$emul(&secscale, &unixtime, &lowbit, bintime);
@@ -3649,13 +3824,11 @@ is_null_device(name)
 
 /* Do the permissions allow some operation?  Assumes statcache already set. */
 /* Do this via $Check_Access on VMS, since the CRTL stat() returns only a
- * subset of the applicable information.  (We have to stick with struct
- * stat instead of struct mystat in the prototype since we have to match
- * the one in proto.h.)
+ * subset of the applicable information.
  */
 /*{{{I32 cando(I32 bit, I32 effective, struct stat *statbufp)*/
 I32
-cando(I32 bit, I32 effective, struct stat *statbufp)
+cando(I32 bit, I32 effective, Stat_t *statbufp)
 {
   if (statbufp == &statcache) return cando_by_name(bit,effective,namecache);
   else {
@@ -3666,12 +3839,12 @@ cando(I32 bit, I32 effective, struct stat *statbufp)
 
     /* If the struct mystat is stale, we're OOL; stat() overwrites the
        device name on successive calls */
-    devdsc.dsc$a_pointer = ((struct mystat *)statbufp)->st_devnam;
-    devdsc.dsc$w_length = strlen(((struct mystat *)statbufp)->st_devnam);
+    devdsc.dsc$a_pointer = ((Stat_t *)statbufp)->st_devnam;
+    devdsc.dsc$w_length = strlen(((Stat_t *)statbufp)->st_devnam);
     namdsc.dsc$a_pointer = fname;
     namdsc.dsc$w_length = sizeof fname - 1;
 
-    retsts = lib$fid_to_name(&devdsc,&(((struct mystat *)statbufp)->st_ino),
+    retsts = lib$fid_to_name(&devdsc,&(((Stat_t *)statbufp)->st_ino),
                              &namdsc,&namdsc.dsc$w_length,0,0);
     if (retsts & 1) {
       fname[namdsc.dsc$w_length] = '\0';
@@ -3754,7 +3927,7 @@ cando_by_name(I32 bit, I32 effective, char *fname)
 
   retsts = sys$check_access(&objtyp,&namdsc,&usrdsc,armlst);
   if (retsts == SS$_NOPRIV      || retsts == SS$_NOSUCHOBJECT ||
-      retsts == SS$_INVFILFOROP || retsts == RMS$_FNF    ||
+      retsts == SS$_INVFILFOROP || retsts == RMS$_FNF || retsts == RMS$_SYN ||
       retsts == RMS$_DIR        || retsts == RMS$_DEV) {
     set_vaxc_errno(retsts);
     if (retsts == SS$_NOPRIV) set_errno(EACCES);
@@ -3783,27 +3956,33 @@ cando_by_name(I32 bit, I32 effective, char *fname)
 /*}}}*/
 
 
-/*{{{ int flex_fstat(int fd, struct mystat *statbuf)*/
+/*{{{ int flex_fstat(int fd, Stat_t *statbuf)*/
 int
-flex_fstat(int fd, struct mystat *statbufp)
+flex_fstat(int fd, Stat_t *statbufp)
 {
   dTHR;
-
   if (!fstat(fd,(stat_t *) statbufp)) {
-    if (statbufp == (struct mystat *) &statcache) *namecache == '\0';
+    if (statbufp == (Stat_t *) &statcache) *namecache == '\0';
     statbufp->st_dev = encode_dev(statbufp->st_devnam);
+#   ifdef RTL_USES_UTC
+#   ifdef VMSISH_TIME
+    if (VMSISH_TIME) {
+      statbufp->st_mtime = _toloc(statbufp->st_mtime);
+      statbufp->st_atime = _toloc(statbufp->st_atime);
+      statbufp->st_ctime = _toloc(statbufp->st_ctime);
+    }
+#   endif
+#   else
 #   ifdef VMSISH_TIME
     if (!VMSISH_TIME) { /* Return UTC instead of local time */
 #   else
     if (1) {
 #   endif
-#if __VMS_VER < 70000000 || __DECC_VER < 50200000
-      if (!gmtime_emulation_type) (void)time(NULL);
-      statbufp->st_mtime -= utc_offset_secs;
-      statbufp->st_atime -= utc_offset_secs;
-      statbufp->st_ctime -= utc_offset_secs;
-#endif
+      statbufp->st_mtime = _toutc(statbufp->st_mtime);
+      statbufp->st_atime = _toutc(statbufp->st_atime);
+      statbufp->st_ctime = _toutc(statbufp->st_ctime);
     }
+#endif
     return 0;
   }
   return -1;
@@ -3811,15 +3990,15 @@ flex_fstat(int fd, struct mystat *statbufp)
 }  /* end of flex_fstat() */
 /*}}}*/
 
-/*{{{ int flex_stat(char *fspec, struct mystat *statbufp)*/
+/*{{{ int flex_stat(char *fspec, Stat_t *statbufp)*/
 int
-flex_stat(char *fspec, struct mystat *statbufp)
+flex_stat(char *fspec, Stat_t *statbufp)
 {
     dTHR;
     char fileified[NAM$C_MAXRSS+1];
     int retval = -1;
 
-    if (statbufp == (struct mystat *) &statcache)
+    if (statbufp == (Stat_t *) &statcache)
       do_tovmsspec(fspec,namecache,0);
     if (is_null_device(fspec)) { /* Fake a stat() for the null device */
       memset(statbufp,0,sizeof *statbufp);
@@ -3833,7 +4012,7 @@ flex_stat(char *fspec, struct mystat *statbufp)
     }
 
     /* Try for a directory name first.  If fspec contains a filename without
-     * a type (e.g. sea:[dark.dark]water), and both sea:[wine.dark]water.dir
+     * a type (e.g. sea:[wine.dark]water), and both sea:[wine.dark]water.dir
      * and sea:[wine.dark]water. exist, we prefer the directory here.
      * Similarly, sea:[wine.dark] returns the result for sea:[wine]dark.dir,
      * not sea:[wine.dark]., if the latter exists.  If the intended target is
@@ -3842,24 +4021,31 @@ flex_stat(char *fspec, struct mystat *statbufp)
      */
     if (do_fileify_dirspec(fspec,fileified,0) != NULL) {
       retval = stat(fileified,(stat_t *) statbufp);
-      if (!retval && statbufp == (struct mystat *) &statcache)
+      if (!retval && statbufp == (Stat_t *) &statcache)
         strcpy(namecache,fileified);
     }
     if (retval) retval = stat(fspec,(stat_t *) statbufp);
     if (!retval) {
       statbufp->st_dev = encode_dev(statbufp->st_devnam);
+#     ifdef RTL_USES_UTC
+#     ifdef VMSISH_TIME
+      if (VMSISH_TIME) {
+        statbufp->st_mtime = _toloc(statbufp->st_mtime);
+        statbufp->st_atime = _toloc(statbufp->st_atime);
+        statbufp->st_ctime = _toloc(statbufp->st_ctime);
+      }
+#     endif
+#     else
 #     ifdef VMSISH_TIME
       if (!VMSISH_TIME) { /* Return UTC instead of local time */
 #     else
       if (1) {
 #     endif
-#if __VMS_VER < 70000000 || __DECC_VER < 50200000
-        if (!gmtime_emulation_type) (void)time(NULL);
-        statbufp->st_mtime -= utc_offset_secs;
-        statbufp->st_atime -= utc_offset_secs;
-        statbufp->st_ctime -= utc_offset_secs;
-#endif
+        statbufp->st_mtime = _toutc(statbufp->st_mtime);
+        statbufp->st_atime = _toutc(statbufp->st_atime);
+        statbufp->st_ctime = _toutc(statbufp->st_ctime);
       }
+#     endif
     }
     return retval;
 

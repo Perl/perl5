@@ -48,7 +48,7 @@ I32	block_gimme _((void));
 int	block_start _((int full));
 void	boot_core_UNIVERSAL _((void));
 void	call_list _((I32 oldscope, AV* list));
-I32	cando _((I32 bit, I32 effective, struct stat* statbufp));
+I32	cando _((I32 bit, I32 effective, Stat_t* statbufp));
 #ifndef CASTNEGFLOAT
 U32	cast_ulong _((double f));
 #endif

@@ -2896,9 +2896,11 @@ localeconv()
 	    if (lcbuf->mon_decimal_point && *lcbuf->mon_decimal_point)
 		hv_store(RETVAL, "mon_decimal_point", 17,
 		    newSVpv(lcbuf->mon_decimal_point, 0), 0);
+#ifndef NO_LOCALECONV_MON_THOUSANDS_SEP
 	    if (lcbuf->mon_thousands_sep && *lcbuf->mon_thousands_sep)
 		hv_store(RETVAL, "mon_thousands_sep", 17,
 		    newSVpv(lcbuf->mon_thousands_sep, 0), 0);
+#endif                    
 	    if (lcbuf->mon_grouping && *lcbuf->mon_grouping)
 		hv_store(RETVAL, "mon_grouping", 12,
 		    newSVpv(lcbuf->mon_grouping, 0), 0);

@@ -1106,9 +1106,14 @@ do_readline(void)
 		sv_catsv(tmpcmd, tmpglob);
 		sv_catpv(tmpcmd, "; do echo \"$a\\0\\c\"; done |");
 #else
+#ifdef DJGPP
+		sv_setpv(tmpcmd, "/dev/dosglob/"); /* File System Extension */
+		sv_catsv(tmpcmd, tmpglob);
+#else
 		sv_setpv(tmpcmd, "perlglob ");
 		sv_catsv(tmpcmd, tmpglob);
 		sv_catpv(tmpcmd, " |");
+#endif /* !DJGPP */
 #endif /* !OS2 */
 #else /* !DOSISH */
 #if defined(CSH)

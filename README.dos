@@ -1,0 +1,164 @@
+This is a DOS/DJGPP port of Perl 5.004_5x
+
+1. Installation
+   ------------
+
+   - Unzip the binary package perl54b.zip preserving the directory
+     structure (-d switch to PKUNZIP) from the top DJGPP directory.
+     If you want to use perl with long file names (win0.95), then use a LFN
+     aware unzip and add
+
+              set LFN=y
+
+     to your autoexec.bat or DJGPP.ENV.
+
+   - Edit lib/perl5/Config.pm, and replace every 'c:/djgpp' with your
+     DJGPP root directory. This can be done with perl too:
+   
+              perl -i~ -pe "s!c:/djgpp!x:/djroot!i;" lib/perl5/Config.pm
+                                       ^^^^^^^^^
+                        Substitute this with your DJGPP root directory!
+
+   - This version of perl searches its library files in '../lib/perl5/',
+     which is relative to the path of perl.exe. If you don't like this,
+     you can use the PERL5LIB environment variable to tell perl where 
+     the library is. E.g:
+     
+              set PERL5LIB=c:/perl/lib
+              
+     Warning: if you set PERL5LIB and use tainting checks (-T command line 
+     option), perl ignores PERL5LIB, so you must use the -I command line
+     switch or the "use lib '...'"  construct. Or you can patch perl.exe :)
+
+   - Perl works best with a unixy shell, so you may want to download and
+     install bash (bshXXXXb.zip from the usual DJGPP sites). After installing
+     it make the 'SHELL' environment variable point to your bash.exe.
+     Finally create a `link' to your bash.exe in your %DJDIR%/bin directory:
+
+              ln -s bash.exe sh.exe
+     or
+              stubify -g sh.exe
+              stubedit sh.exe runfile=bash
+
+   - The documentation is in lib/perl5/pod. You can read the .pod files
+     with any editor, or you can use the `perldoc' utility. For more info:
+
+              perl -S perldoc -h
+
+     It tries to use less.exe or more.com, but you can set your pager with:
+     
+              SET PAGER=path_of_your_favourite_pager
+
+2. Building Perl
+   -------------
+
+   - In addition to the standard DJGPP tools, you will need sed, gawk, grep,
+     sh-utils, textutils, fileutils, bash, diffutils, make and findutils. :-)
+     You can find them on the usual DJGPP sites. If you want to build perl
+     under win0.95, then you MUST use fileutils 3.16+ (3.13 doesn't work).
+
+   - Unzip the source package perl54s.zip preserving the directory
+     structure (-d switch to PKUNZIP) from the top DJGPP directory.
+     Under plain DOS, use the -o switch too when unzipping.
+     This creates the directory gnu/perl5004.
+
+   - Create a symlink or copy your bash.exe to sh.exe in your DJGPP/bin
+     directory.
+
+              ln -s bash.exe sh.exe
+
+     And make the 'SHELL' environment variable point to this sh.exe:
+
+              set SHELL=c:/djgpp/bin/sh.exe (use full path name!)
+
+     You can do this in djgpp.env too. Add this line BEFORE any section
+     definition:
+
+              +SHELL=%DJDIR%/bin/sh.exe
+
+   - If you have split.exe and gsplit.exe in your path, then rename split.exe
+     to djsplit.exe, and gsplit.exe to split.exe.
+
+   - Copy or link gecho.exe to echo.exe if you don't have echo.exe.
+
+   - Copy or link gawk.exe to awk.exe if you don't have awk.exe.
+
+   - Chdir to the gnu/perl5004/djgpp directory and type the following
+     command:
+
+              configure.bat
+
+     This will do some preprocessing then run the Configure script.
+
+     The Configure script is interactive, but in most of the cases you
+     just need to press ENTER.
+
+     If the script says that your package is incomplete, and ask whether
+     to continue, just answer with Y (this can only happen if you don't use
+     long filenames).
+
+     When Configure asks about the extensions, I suggest IO and Fcntl,
+     and if you want database handling then SDBM_File or GDBM_File
+     (you need to install gdbm for this one). If you want to use the 
+     POSIX extension (this is the default), make sure that the stack 
+     size of your cc1.exe is at least 512kbyte (you can check this 
+     with: stubedit cc1.exe).
+     
+        You can use the Configure script in non-interactive mode too. 
+        When I've built my perl.exe, I used this:
+
+                 configure.bat -Uuseposix -dEs
+
+        then edited config.sh (set hostname & domainname), then
+
+                 sh Configure -S
+
+        You can find more info about Configure's command line switches in
+        the `INSTALL' file.
+
+   - When the script ends, and you want to change some values in the
+     generated config.sh file, then run
+
+              sh Configure -S
+
+     after you made your modifications.
+
+     IMPORTANT: if you use this -S switch, be sure to delete the CONFIG
+     environment variable before running the script:
+
+              set CONFIG=
+
+   - Now you can compile Perl. Type:
+
+              make
+
+   - Run the tests:
+
+              make test
+
+     You should see "All tests successful" if you configured a database
+     manager, and 1 failed test script if not (lib/anydbm.t). If you
+     configured POSIX you will see 4 failed subtests in lib/posix.t.
+
+   - If you want the documentation in HTML format, then read INSTALL in
+     the main perl5004 source directory.
+
+     WARNING: if you want to use absolute path names with `installhtml',
+     use something like this:
+
+             --htmldir=f:/html
+             --htmlroot='/f|/html'     # "|" instead of ":" !!!
+
+     or NETSCAPE does strange things.
+
+   - If you don't want to use the modules, then you are ready: copy perl.exe
+     into your bin directory.
+
+   - Else install the files with:
+
+              make install
+
+ Enjoy.
+
+                               Laszlo Molnar <molnarl@cdata.tvnet.hu>
+

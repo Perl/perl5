@@ -21,13 +21,14 @@ sub ok {
 
 $Is_MSWin32 = $^O eq 'MSWin32';
 $Is_VMS     = $^O eq 'VMS';
+$Is_Dos   = $^O eq 'dos';
 $PERL = ($Is_MSWin32 ? '.\perl' : './perl');
 
 print "1..30\n";
 
-eval '$ENV{"foo"} = "hi there";';	# check that ENV is inited inside eval
-if ($Is_MSWin32) { ok 1, `cmd /x /c set foo` eq "foo=hi there\n"; }
-else             { ok 1, `echo \$foo` eq "hi there\n"; }
+eval '$ENV{"FOO"} = "hi there";';	# check that ENV is inited inside eval
+if ($Is_MSWin32) { ok 1, `cmd /x /c set FOO` eq "FOO=hi there\n"; }
+else             { ok 1, `echo \$FOO` eq "hi there\n"; }
 
 unlink 'ajslkdfpqjsjfk';
 $! = 0;
@@ -35,7 +36,7 @@ open(FOO,'ajslkdfpqjsjfk');
 ok 2, $!, $!;
 close FOO; # just mention it, squelch used-only-once
 
-if ($Is_MSWin32) {
+if ($Is_MSWin32 || $Is_Dos) {
     ok 3,1;
     ok 4,1;
 }
@@ -148,10 +149,12 @@ EOF
     ok 21, close(SCRIPT), $!;
     ok 22, chmod(0755, $script), $!;
     $_ = `$script`;
+    s/.exe//i if $Is_Dos;
     s{\bminiperl\b}{perl}; # so that test doesn't fail with miniperl
     s{is perl}{is $perl}; # for systems where $^X is only a basename
     ok 23, ($Is_MSWin32 ? uc($_) eq uc($s2) : $_ eq $s2), ":$_:!=:$s2:";
     $_ = `$perl $script`;
+    s/.exe//i if $Is_Dos;
     ok 24, ($Is_MSWin32 ? uc($_) eq uc($s1) : $_ eq $s1), ":$_:!=:$s1: after `$perl $script`";
     ok 25, unlink($script), $!;
 }
@@ -161,7 +164,7 @@ ok 26, $] >= 5.00319, $];
 ok 27, $^O;
 ok 28, $^T > 850000000, $^T;
 
-if ($Is_VMS) {
+if ($Is_VMS || $Is_Dos) {
 	ok 29, 1;
 	ok 30, 1;
 }

@@ -18,6 +18,157 @@
 #include "EXTERN.h"
 #include "perl.h"
 
+#ifdef USE_THREADS
+
+typedef void (*emx_startroutine)(void *);
+typedef void* (*pthreads_startroutine)(void *);
+
+enum pthreads_state {
+    pthreads_st_none = 0, 
+    pthreads_st_run,
+    pthreads_st_exited, 
+    pthreads_st_detached, 
+    pthreads_st_waited,
+};
+const char *pthreads_states[] = {
+    "uninit",
+    "running",
+    "exited",
+    "detached",
+    "waited for",
+};
+
+typedef struct {
+    void *status;
+    pthread_cond_t cond;
+    enum pthreads_state state;
+} thread_join_t;
+
+thread_join_t *thread_join_data;
+int thread_join_count;
+pthread_mutex_t start_thread_mutex;
+
+int
+pthread_join(pthread_t tid, void **status)
+{
+    MUTEX_LOCK(&start_thread_mutex);
+    switch (thread_join_data[tid].state) {
+    case pthreads_st_exited:
+	thread_join_data[tid].state = pthreads_st_none;	/* Ready to reuse */
+	MUTEX_UNLOCK(&start_thread_mutex);
+	*status = thread_join_data[tid].status;
+	break;
+    case pthreads_st_waited:
+	MUTEX_UNLOCK(&start_thread_mutex);
+	croak("join with a thread with a waiter");
+	break;
+    case pthreads_st_run:
+	thread_join_data[tid].state = pthreads_st_waited;
+	COND_INIT(&thread_join_data[tid].cond);
+	MUTEX_UNLOCK(&start_thread_mutex);
+	COND_WAIT(&thread_join_data[tid].cond, NULL);    
+	COND_DESTROY(&thread_join_data[tid].cond);
+	thread_join_data[tid].state = pthreads_st_none;	/* Ready to reuse */
+	*status = thread_join_data[tid].status;
+	break;
+    default:
+	MUTEX_UNLOCK(&start_thread_mutex);
+	croak("join: unknown thread state: '%s'", 
+	      pthreads_states[thread_join_data[tid].state]);
+	break;
+    }
+    return 0;
+}
+
+void
+pthread_startit(void *arg)
+{
+    /* Thread is already started, we need to transfer control only */
+    pthreads_startroutine start_routine = *((pthreads_startroutine*)arg);
+    int tid = pthread_self();
+    void *retval;
+    
+    arg = ((void**)arg)[1];
+    if (tid >= thread_join_count) {
+	int oc = thread_join_count;
+	
+	thread_join_count = tid + 5 + tid/5;
+	if (thread_join_data) {
+	    Renew(thread_join_data, thread_join_count, thread_join_t);
+	    Zero(thread_join_data + oc, thread_join_count - oc, thread_join_t);
+	} else {
+	    Newz(1323, thread_join_data, thread_join_count, thread_join_t);
+	}
+    }
+    if (thread_join_data[tid].state != pthreads_st_none)
+	croak("attempt to reuse thread id %i", tid);
+    thread_join_data[tid].state = pthreads_st_run;
+    /* Now that we copied/updated the guys, we may release the caller... */
+    MUTEX_UNLOCK(&start_thread_mutex);
+    thread_join_data[tid].status = (*start_routine)(arg);
+    switch (thread_join_data[tid].state) {
+    case pthreads_st_waited:
+	COND_SIGNAL(&thread_join_data[tid].cond);    
+	break;
+    default:
+	thread_join_data[tid].state = pthreads_st_exited;
+	break;
+    }
+}
+
+int
+pthread_create(pthread_t *tid, const pthread_attr_t *attr, 
+	       void *(*start_routine)(void*), void *arg)
+{
+    void *args[2];
+
+    args[0] = (void*)start_routine;
+    args[1] = arg;
+
+    MUTEX_LOCK(&start_thread_mutex);
+    *tid = _beginthread(pthread_startit, /*stack*/ NULL, 
+			/*stacksize*/ 10*1024*1024, (void*)args);
+    MUTEX_LOCK(&start_thread_mutex);
+    MUTEX_UNLOCK(&start_thread_mutex);
+    return *tid ? 0 : EINVAL;
+}
+
+int 
+pthread_detach(pthread_t tid)
+{
+    MUTEX_LOCK(&start_thread_mutex);
+    switch (thread_join_data[tid].state) {
+    case pthreads_st_waited:
+	MUTEX_UNLOCK(&start_thread_mutex);
+	croak("detach on a thread with a waiter");
+	break;
+    case pthreads_st_run:
+	thread_join_data[tid].state = pthreads_st_detached;
+	MUTEX_UNLOCK(&start_thread_mutex);
+	break;
+    default:
+	MUTEX_UNLOCK(&start_thread_mutex);
+	croak("detach: unknown thread state: '%s'", 
+	      pthreads_states[thread_join_data[tid].state]);
+	break;
+    }
+    return 0;
+}
+
+/* This is a very bastardized version: */
+int
+os2_cond_wait(pthread_cond_t *c, pthread_mutex_t *m)
+{						
+    int rc;
+    if ((rc = DosResetEventSem(*c,&na)) && (rc != ERROR_ALREADY_RESET))
+	croak("panic: COND_WAIT-reset: rc=%i", rc);		
+    if (m) MUTEX_UNLOCK(m);					
+    if (CheckOSError(DosWaitEventSem(*c,SEM_INDEFINITE_WAIT)))
+	croak("panic: COND_WAIT: rc=%i", rc);		
+    if (m) MUTEX_LOCK(m);					
+} 
+#endif 
+
 /*****************************************************************************/
 /* 2.1 would not resolve symbols on demand, and has no ExtLIBPATH. */
 static PFN ExtFCN[2];			/* Labeled by ord below. */
@@ -202,6 +353,7 @@ SV *really;
 register SV **mark;
 register SV **sp;
 {
+    dTHR;
     register char **a;
     char *tmps = NULL;
     int rc;
@@ -1169,6 +1321,7 @@ Perl_OS2_init(char **env)
 	    if (sh_path[i] == '\\') sh_path[i] = '/';
 	}
     }
+    MUTEX_INIT(&start_thread_mutex);
 }
 
 #undef tmpnam
@@ -1206,7 +1359,7 @@ my_tmpfile ()
 
 /* This code was contributed by Rocco Caputo. */
 int 
-my_flock(int handle, int op)
+my_flock(int handle, int o)
 {
   FILELOCK      rNull, rFull;
   ULONG         timeout, handle_type, flag_word;
@@ -1222,7 +1375,7 @@ my_flock(int handle, int op)
 	use_my = 1;
   }
   if (!(_emx_env & 0x200) || !use_my) 
-    return flock(handle, op);	/* Delegate to EMX. */
+    return flock(handle, o);	/* Delegate to EMX. */
   
                                         // is this a file?
   if ((DosQueryHType(handle, &handle_type, &flag_word) != 0) ||
@@ -1235,11 +1388,11 @@ my_flock(int handle, int op)
   rNull.lOffset = rNull.lRange = rFull.lOffset = 0;
   rFull.lRange = 0x7FFFFFFF;
                                         // set timeout for blocking
-  timeout = ((blocking = !(op & LOCK_NB))) ? 100 : 1;
+  timeout = ((blocking = !(o & LOCK_NB))) ? 100 : 1;
                                         // shared or exclusive?
-  shared = (op & LOCK_SH) ? 1 : 0;
+  shared = (o & LOCK_SH) ? 1 : 0;
                                         // do not block the unlock
-  if (op & (LOCK_UN | LOCK_SH | LOCK_EX)) {
+  if (o & (LOCK_UN | LOCK_SH | LOCK_EX)) {
     rc = DosSetFileLocks(handle, &rFull, &rNull, timeout, shared);
     switch (rc) {
       case 0:
@@ -1267,7 +1420,7 @@ my_flock(int handle, int op)
     }
   }
                                         // lock may block
-  if (op & (LOCK_SH | LOCK_EX)) {
+  if (o & (LOCK_SH | LOCK_EX)) {
                                         // for blocking operations
     for (;;) {
       rc =

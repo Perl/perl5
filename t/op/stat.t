@@ -12,15 +12,16 @@ use Config;
 print "1..56\n";
 
 $Is_MSWin32 = $^O eq 'MSWin32';
+$Is_Dos = $^O eq 'dos';
 chop($cwd = ($Is_MSWin32 ? `cd` : `pwd`));
 
-$DEV = `ls -l /dev` unless $Is_MSWin32;
+$DEV = `ls -l /dev` unless ($Is_MSWin32 || $Is_Dos);
 
 unlink "Op.stat.tmp";
 open(FOO, ">Op.stat.tmp");
 
 # hack to make Apollo update link count:
-$junk = `ls Op.stat.tmp` unless $Is_MSWin32;
+$junk = `ls Op.stat.tmp` unless ($Is_MSWin32 || $Is_Dos);
 
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat(FOO);
@@ -33,7 +34,7 @@ close(FOO);
 
 sleep 2;
 
-if ($Is_MSWin32) { unlink "Op.stat.tmp2" }
+if ($Is_MSWin32 || $Is_Dos) { unlink "Op.stat.tmp2" }
 else {
     `rm -f Op.stat.tmp2;ln Op.stat.tmp Op.stat.tmp2; chmod 644 Op.stat.tmp`;
 }
@@ -41,10 +42,10 @@ else {
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat('Op.stat.tmp');
 
-if ($Is_MSWin32 || $Config{dont_use_nlink} || $nlink == 2)
+if ($Is_MSWin32 || $Is_Dos || $Config{dont_use_nlink} || $nlink == 2)
     {print "ok 3\n";} else {print "# \$nlink is |$nlink|\nnot ok 3\n";}
 
-if ($Is_MSWin32 || ($mtime && $mtime != $ctime) || $cwd =~ m#/afs/# || $^O eq 'amigaos') {
+if ($Is_MSWin32 || $Is_Dos || ($mtime && $mtime != $ctime) || $cwd =~ m#/afs/# || $^O eq 'amigaos') {
     print "ok 4\n";
 }
 else {
@@ -70,7 +71,7 @@ $olduid = $>;		# can't test -r if uid == 0
 $Is_MSWin32 ? `cmd /c echo hi > Op.stat.tmp` : `echo hi >Op.stat.tmp`;
 chmod 0,'Op.stat.tmp';
 eval '$> = 1;';		# so switch uid (may not be implemented)
-if (!$> || ! -r 'Op.stat.tmp') {print "ok 9\n";} else {print "not ok 9\n";}
+if (!$> || $Is_Dos || ! -r 'Op.stat.tmp') {print "ok 9\n";} else {print "not ok 9\n";}
 if (!$> || ! -w 'Op.stat.tmp') {print "ok 10\n";} else {print "not ok 10\n";}
 eval '$> = $olduid;';		# switch uid back (may not be implemented)
 print "# olduid=$olduid, newuid=$>\n" unless ($> == $olduid);
@@ -85,7 +86,7 @@ foreach ((12,13,14,15,16,17)) {
 chmod 0700,'Op.stat.tmp';
 if (-r 'Op.stat.tmp') {print "ok 18\n";} else {print "not ok 18\n";}
 if (-w 'Op.stat.tmp') {print "ok 19\n";} else {print "not ok 19\n";}
-if ($Is_MSWin32 or -x 'Op.stat.tmp') {print "ok 20\n";} else {print "not ok 20\n";}
+if ($Is_MSWin32 or $Is_Dos or -x 'Op.stat.tmp') {print "ok 20\n";} else {print "not ok 20\n";}
 
 if (-f 'Op.stat.tmp') {print "ok 21\n";} else {print "not ok 21\n";}
 if (! -d 'Op.stat.tmp') {print "ok 22\n";} else {print "not ok 22\n";}
@@ -93,7 +94,7 @@ if (! -d 'Op.stat.tmp') {print "ok 22\n";} else {print "not ok 22\n";}
 if (-d '.') {print "ok 23\n";} else {print "not ok 23\n";}
 if (! -f '.') {print "ok 24\n";} else {print "not ok 24\n";}
 
-if (!$Is_MSWin32 and `ls -l perl` =~ /^l.*->/) {
+if (!($Is_MSWin32 || $Is_Dos) and `ls -l perl` =~ /^l.*->/) {
     if (-l 'perl') {print "ok 25\n";} else {print "not ok 25\n";}
 }
 else {
@@ -106,7 +107,7 @@ if (-e 'Op.stat.tmp') {print "ok 27\n";} else {print "not ok 27\n";}
 unlink 'Op.stat.tmp', 'Op.stat.tmp2';
 if (! -e 'Op.stat.tmp') {print "ok 28\n";} else {print "not ok 28\n";}
 
-if ($Is_MSWin32)
+if ($Is_MSWin32 || $Is_Dos)
     {print "ok 29\n";}
 elsif ($DEV !~ /\nc.* (\S+)\n/)
     {print "ok 29\n";}
@@ -116,7 +117,7 @@ else
     {print "not ok 29\n";}
 if (! -c '.') {print "ok 30\n";} else {print "not ok 30\n";}
 
-if ($Is_MSWin32)
+if ($Is_MSWin32 || $Is_Dos)
     {print "ok 31\n";}
 elsif ($DEV !~ /\ns.* (\S+)\n/)
     {print "ok 31\n";}
@@ -126,7 +127,7 @@ else
     {print "not ok 31\n";}
 if (! -S '.') {print "ok 32\n";} else {print "not ok 32\n";}
 
-if ($Is_MSWin32)
+if ($Is_MSWin32 || $Is_Dos)
     {print "ok 33\n";}
 elsif ($DEV !~ /\nb.* (\S+)\n/)
     {print "ok 33\n";}
@@ -136,7 +137,7 @@ else
     {print "not ok 33\n";}
 if (! -b '.') {print "ok 34\n";} else {print "not ok 34\n";}
 
-if ($^O eq 'amigaos' or $Is_MSWin32) {print "ok 35\n"; goto tty_test;}
+if ($^O eq 'amigaos' or $Is_MSWin32 || $Is_Dos) {print "ok 35\n"; goto tty_test;}
 
 $cnt = $uid = 0;
 

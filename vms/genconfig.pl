@@ -6,7 +6,7 @@
 # that went into your perl binary.  In addition, values which change from run
 # to run may be supplied on the command line as key=val pairs.
 #
-# Rev.  3-Dec-1996  Charles Bailey  bailey@genetics.upenn.edu
+# Rev. 10-Nov-1997  Charles Bailey  bailey@newman.upenn.edu
 #
 
 #==== Locations of installed Perl components
@@ -78,10 +78,9 @@ ar=''
 eunicefix=':'
 hint='none'
 hintfile=''
-shrplib='define'
+useshrplib='define'
 usemymalloc='n'
 usevfork='true'
-useposix='false'
 spitshell='write sys\$output '
 dlsrc='dl_vms.c'
 binexp='$installbin'
@@ -146,7 +145,21 @@ foreach (@ARGV) {
       # object file suffix if it's not .obj.
       $ccflags =~ s#/obj(?:ect)?=[^/\s]+##i;
     }
+    $debug = $optimize = '';
+    while ( ($qual) = $ccflags =~ m|(/(No)?Deb[^/]*)|i ) {
+      $debug = $qual;
+      $ccflags =~ s/$qual//;
+    }
+    while ( ($qual) = $ccflags =~ m|(/(No)?Opt[^/]*)|i ) {
+      $optimize = $qual;
+      $ccflags =~ s/$qual//;
+    }
+    $optimize = "$debug$optimize";
     print OUT "ccflags='$ccflags'\n";
+    print OUT "optimize='$optimize'\n";
+    $usethreads = ($ccflags =~ m!/DEF[^/]+USE_THREADS!i and
+                   $ccflags !~ m!/UND[^/]+USE_THREADS!i);
+    print OUT "usethreads='$usethreads'\n";
     $dosock = ($ccflags =~ m!/DEF[^/]+VMS_DO_SOCKETS!i and
                $ccflags !~ m!/UND[^/]+VMS_DO_SOCKETS!i);
     print OUT "d_vms_do_sockets=",$dosock ? "'define'\n" : "'undef'\n";
@@ -156,9 +169,13 @@ foreach (@ARGV) {
     print OUT "d_select=",$dosock ? "'define'\n" : "'undef'\n";
     print OUT "i_niin=",$dosock ? "'define'\n" : "'undef'\n";
     print OUT "i_neterrno=",$dosock ? "'define'\n" : "'undef'\n";
+    if ($dosock and $cctype eq 'decc' and $ccflags =~ /DECCRTL_SOCKETS/) {
+      print OUT "selecttype=fd_set\n";
+    }
+    else { print OUT "selecttype=int\n"; }
 
-    if ($cctype eq 'decc') { $rtlhas  = 'define'; }
-    else                   { $rtlhas  = 'undef';  }
+    if ($cctype eq 'decc') { $rtlhas  = 'define'; print OUT "useposix='true'\n";  }
+    else                   { $rtlhas  = 'undef';  print OUT "useposix='false'\n"; }
     foreach (qw[ d_stdstdio d_stdio_ptr_lval d_stdio_cnt_lval d_stdiobase
                  d_locconv d_setlocale i_locale d_mbstowcs d_mbtowc
                  d_wcstombs d_wctomb d_mblen d_mktime d_strcoll d_strxfrm ]) {

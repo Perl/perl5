@@ -55,10 +55,12 @@ taint_env(void)
 	if (!svp || *svp == &sv_undef)
 	    break;
 	if (SvTAINTED(*svp)) {
+	    dTHR;
 	    TAINT;
 	    taint_proper("Insecure %s%s", "$ENV{DCL$PATH}");
 	}
 	if ((mg = mg_find(*svp, 'e')) && MgTAINTEDDIR(mg)) {
+	    dTHR;
 	    TAINT;
 	    taint_proper("Insecure directory in %s%s", "$ENV{DCL$PATH}");
 	}

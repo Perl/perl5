@@ -1,0 +1,16 @@
+ln='cp'
+pager='less'
+
+# This is because of the filename conversion under DOS
+repair()
+{
+    echo "$1" | tr '[a-z]' '[A-Z]' | sed -e 's/CNTL/cntl/'\
+         -e 's/_FIL/_File/g' -e 's/PCODE/pcode/' -e 's/OCKET/ocket/'\
+         -e 's/leE/le/g' -e 's/ATTRS/attrs/' -e 's/HREAD/hread/'
+}
+static_ext=$(repair "$static_ext")
+extensions=$(repair "$extensions")
+known_extensions=$(repair "$known_extensions")
+
+# I use Dos::UseLFN in AutoSplit.pm to override this under win0.95
+d_flexfnam='undef'

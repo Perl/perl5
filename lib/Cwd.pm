@@ -199,7 +199,7 @@ sub fastcwd {
 my $chdir_init = 0;
 
 sub chdir_init {
-    if ($ENV{'PWD'} and $^O ne 'os2' and $^O ne 'msdos') {
+    if ($ENV{'PWD'} and $^O ne 'os2' and $^O ne 'dos') {
 	my($dd,$di) = stat('.');
 	my($pd,$pi) = stat($ENV{'PWD'});
 	if (!defined $dd or !defined $pd or $di != $pi or $dd != $pd) {
@@ -349,10 +349,14 @@ sub _win32_cwd {
 
 *_NT_cwd = \&_os2_cwd unless defined &_NT_cwd;
 
-sub _msdos_cwd {
-    $ENV{'PWD'} = `command /c cd`;
-    chop $ENV{'PWD'};
-    $ENV{'PWD'} =~ s:\\:/:g ;
+sub _dos_cwd {
+    if (!defined &Dos::GetCwd) {
+        $ENV{'PWD'} = `command /c cd`;
+        chop $ENV{'PWD'};
+        $ENV{'PWD'} =~ s:\\:/:g ;
+    } else {
+        $ENV{'PWD'} = Dos::GetCwd();
+    }
     return $ENV{'PWD'};
 }
 
@@ -383,11 +387,11 @@ sub _msdos_cwd {
         *fastcwd	= \&cwd;
         *abs_path	= \&fast_abs_path;
     }
-    elsif ($^O eq 'msdos') {
-        *cwd		= \&_msdos_cwd;
-        *getcwd		= \&_msdos_cwd;
-        *fastgetcwd	= \&_msdos_cwd;
-        *fastcwd	= \&_msdos_cwd;
+    elsif ($^O eq 'dos') {
+        *cwd		= \&_dos_cwd;
+        *getcwd		= \&_dos_cwd;
+        *fastgetcwd	= \&_dos_cwd;
+        *fastcwd	= \&_dos_cwd;
         *abs_path	= \&fast_abs_path;
     }
 }

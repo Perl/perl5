@@ -199,6 +199,8 @@ my %pages = ();			# associative array used to find the location
 my %sections = ();		# sections within this page
 my %items = ();			# associative array used to find the location
 				#   of =item directives referenced by C<> links
+my $Is83;                       # is dos with short filenames (8.3)
+
 sub init_globals {
 $dircache = "pod2html-dircache";
 $itemcache = "pod2html-itemcache";
@@ -244,7 +246,7 @@ $paragraph = '';			# which paragraph we're processing (used
 				#   of pages referenced by L<> links.
 #%items = ();			# associative array used to find the location
 				#   of =item directives referenced by C<> links
-
+$Is83=$^O eq 'dos';
 }
 
 sub pod2html {
@@ -253,6 +255,8 @@ sub pod2html {
     local $_;
 
     init_globals();
+
+    $Is83 = 0 if (defined (&Dos::UseLFN) && Dos::UseLFN());
 
     # cache of %pages and %items from last time we ran pod2html
 
@@ -1063,6 +1067,8 @@ sub process_text {
 		  }{
 		    if (defined $pages{$2}) {	# is a link
 			qq($1<A HREF="$htmlroot/$pages{$2}">$2</A>);
+		    } elsif (defined $pages{dosify($2)}) {	# is a link
+			qq($1<A HREF="$htmlroot/$pages{dosify($2)}">$2</A>);
 		    } else {
 			"$1$2";
 		    }
@@ -1309,6 +1315,19 @@ sub pre_escape {
 }
 
 #
+# dosify - convert filenames to 8.3
+#
+sub dosify {
+    my($str) = @_;
+    if ($Is83) {
+        $str = lc $str;
+        $str =~ s/(\.\w+)/substr ($1,0,4)/ge;
+        $str =~ s/(\w+)/substr ($1,0,8)/ge;
+    }
+    return $str;
+}
+
+#
 # process_L - convert a pod L<> directive to a corresponding HTML link.
 #  most of the links made are inferred rather than known about directly
 #  (i.e it's not known whether the =head\d section exists in the target file,
@@ -1320,7 +1339,7 @@ sub pre_escape {
 #
 sub process_L {
     my($str) = @_;
-    my($s1, $s2, $linktext, $page, $section, $link);	# work strings
+    my($s1, $s2, $linktext, $page, $page83, $section, $link);	# work strings
 
     $str =~ s/\n/ /g;			# undo word-wrapped tags
     $s1 = $str;
@@ -1346,6 +1365,8 @@ sub process_L {
 	}
     }
 
+    $page83=dosify($page);
+    $page=$page83 if (defined $pages{$page83});
     if ($page eq "") {
 	$link = "#" . htmlify(0,$section);
 	$linktext = $section;

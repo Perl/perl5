@@ -5,7 +5,7 @@ use Config;
 use File::Basename qw(basename dirname fileparse);
 use DirHandle;
 use strict;
-use vars qw($VERSION $Is_Mac $Is_OS2 $Is_VMS $Is_Win32
+use vars qw($VERSION $Is_Mac $Is_OS2 $Is_VMS $Is_Win32 $Is_Dos
 	    $Verbose %pm %static $Xsubpp_Version);
 
 $VERSION = substr q$Revision: 1.118 $, 10;
@@ -17,6 +17,7 @@ Exporter::import('ExtUtils::MakeMaker',
 $Is_OS2 = $^O eq 'os2';
 $Is_Mac = $^O eq 'MacOS';
 $Is_Win32 = $^O eq 'MSWin32';
+$Is_Dos = $^O eq 'dos';
 
 if ($Is_VMS = $^O eq 'VMS') {
     require VMS::Filespec;
@@ -266,7 +267,7 @@ sub c_o {
     push @m, '
 .C$(OBJ_EXT):
 	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.C
-' if $^O ne 'os2' and $^O ne 'MSWin32';		# Case-specific
+' if $^O ne 'os2' and $^O ne 'MSWin32' and $^O ne 'dos'; #Case-specific
     push @m, '
 .cpp$(OBJ_EXT):
 	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.cpp
@@ -1049,7 +1050,12 @@ Takes as argument a path and returns true, if it is an absolute path.
 
 sub file_name_is_absolute {
     my($self,$file) = @_;
-    $file =~ m:^/: ;
+    if ($Is_Dos){
+        $file =~ m{^([a-z]:)?[\\/]}i ;
+    }
+    else {
+        $file =~ m:^/: ;
+    }
 }
 
 =item find_perl
@@ -2298,6 +2304,9 @@ $tmp/perlmain.c: $makefilename}, q{
 		-e "writemain(grep s#.*/auto/##, qw|$(MAP_STATIC)|)" > $@t && $(MV) $@t $@
 
 };
+    push @m, "\t",$self->{NOECHO}.q{$(PERL) $(INSTALLSCRIPT)/fixpmain
+} if (defined (&Dos::UseLFN) && Dos::UseLFN()==0);
+
 
     push @m, q{
 doc_inst_perl:
@@ -2575,7 +2584,7 @@ Takes no argument, returns the environment variable PATH as an array.
 
 sub path {
     my($self) = @_;
-    my $path_sep = $Is_OS2 ? ";" : ":";
+    my $path_sep = ($Is_OS2 || $Is_Dos) ? ";" : ":";
     my $path = $ENV{PATH};
     $path =~ s:\\:/:g if $Is_OS2;
     my @path = split $path_sep, $path;

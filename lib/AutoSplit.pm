@@ -105,6 +105,9 @@ $CheckModTime = 1;
 $IndexFile = "autosplit.ix";	# file also serves as timestamp
 $maxflen = 255;
 $maxflen = 14 if $Config{'d_flexfnam'} ne 'define';
+if (defined (&Dos::UseLFN)) {
+     $maxflen = Dos::UseLFN() ? 255 : 11;
+}
 $Is_VMS = ($^O eq 'VMS');
 
 
@@ -199,7 +202,7 @@ sub autosplit_file{
 
     die "Package $package ($modpname.pm) does not match filename $filename"
 	    unless ($filename =~ m/\Q$modpname.pm\E$/ or
-		    ($^O eq "msdos") or ($^O eq 'MSWin32') or
+		    ($^O eq 'dos') or ($^O eq 'MSWin32') or
 	            $Is_VMS && $filename =~ m/$modpname.pm/i);
 
     my($al_idx_file) = "$autodir/$modpname/$IndexFile";
@@ -247,6 +250,8 @@ sub autosplit_file{
     #
     # For now both of these produce warnings.
 
+    my $Is83 = $maxflen==11;  # plain, case INSENSITIVE dos filenames
+
     open(OUT,">/dev/null") || open(OUT,">nla0:"); # avoid 'not opened' warning
     my(@subnames, %proto);
     my @cache = ();
@@ -269,11 +274,10 @@ sub autosplit_file{
 	    my($spath) = "$autodir/$modpname/$sname.al";
 	    unless(open(OUT, ">$lpath")){
 		open(OUT, ">$spath") or die "Can't create $spath: $!\n";
-		push(@names, $sname);
-		print "  writing $spath (with truncated name)\n"
-			if ($Verbose>=1);
+		push(@names, $Is83 ? lc $sname : $sname);
+		print "  writing $spath (with truncated name)\n" if ($Verbose>=1);
 	    }else{
-		push(@names, $lname);
+		push(@names, $Is83 ? lc substr ($lname,0,8) : $lname);
 		print "  writing $lpath\n" if ($Verbose>=2);
 	    }
 	    print OUT "# NOTE: Derived from $filename.  ",
@@ -310,6 +314,7 @@ sub autosplit_file{
 	    next unless /\.al$/;
 	    my($subname) = m/(.*)\.al$/;
 	    next if $names{substr($subname,0,$maxflen-3)};
+            next if ($Is83 && $names{lc substr($subname,0,8)});
 	    my($file) = "$autodir/$modpname/$_";
 	    print "  deleting $file\n" if ($Verbose>=2);
 	    my($deleted,$thistime);  # catch all versions on VMS

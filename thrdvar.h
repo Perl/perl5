@@ -30,7 +30,7 @@ PERLVAR(Tmarkstack_max,	I32 *)
 
 PERLVAR(TSv,		SV *)		
 PERLVAR(TXpv,		XPV *)		
-PERLVAR(Tstatbuf,	struct stat)		
+PERLVAR(Tstatbuf,	Stat_t)		
 #ifdef HAS_TIMES
 PERLVAR(Ttimesbuf,	struct tms)		
 #endif
@@ -66,7 +66,7 @@ PERLVARI(Tcurcop,	COP * VOL,	&compiling)
 PERLVAR(Tin_eval,	VOL int)	/* trap "fatal" errors? */
 PERLVAR(Tdelaymagic,	int)		/* ($<,$>) = ... */
 PERLVAR(Tdirty,		bool)		/* In the middle of tearing things down? */
-PERLVAR(Tlocalizing,	U8)		/* are we processing a local() list? */
+PERLVAR(Tlocalizing,	int)		/* are we processing a local() list? */
 
 PERLVAR(Tcxstack,	PERL_CONTEXT *)		
 PERLVARI(Tcxstack_ix,	I32,	-1)	
