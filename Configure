@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Jun 15 04:00:58 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Sat Jun 16 17:56:14 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1033,6 +1033,7 @@ locincpth="$locincpth /opt/gnu/include /usr/GNU/include /opt/GNU/include"
 inclwanted=''
 
 groupstype=''
+libnames=''
 : change the next line if compiling for Xenix/286 on Xenix/386
 xlibpth='/usr/lib/386 /lib/386'
 : Possible local library directories to search.
@@ -5446,7 +5447,6 @@ case "$libc" in
 	esac
 	;;
 esac
-libnames='';
 case "$libs" in
 '') ;;
 *)  for thislib in $libs; do
