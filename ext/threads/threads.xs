@@ -72,7 +72,7 @@ ithread *threads;
 static perl_mutex create_mutex;  /* protects the creation of threads ??? */
 
 I32 tid_counter = 0;
-
+I32 active_threads = 0;
 perl_key self_key;
 
 /*
@@ -99,6 +99,7 @@ Perl_ithread_destruct (pTHX_ ithread* thread)
 		threads = thread->next;
 	    }
 	}
+	active_threads--;
 	MUTEX_UNLOCK(&create_mutex);
 	/* Thread is now disowned */
 #if 0
@@ -367,6 +368,7 @@ Perl_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* param
 #endif
 	}
 #endif
+	active_threads++;
 	MUTEX_UNLOCK(&create_mutex);
 	return ithread_to_SV(aTHX_ obj, thread, classname, FALSE);
 }
@@ -542,6 +544,7 @@ BOOT:
 	thread->interp = aTHX;
 	thread->count  = 1;  /* imortal */
 	thread->tid = tid_counter++;
+	active_threads++;
 	thread->detached = 1;
 #ifdef WIN32
 	thread->thr = GetCurrentThreadId();
