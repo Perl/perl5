@@ -2162,6 +2162,20 @@ S_regmatch(pTHX_ regnode *prog)
 		    PL_reg_maxiter = 0;
 
 		    if (regmatch(re->program + 1)) {
+			/* Even though we succeeded, we need to restore
+			   global variables, since we may be wrapped inside
+			   SUSPEND, thus the match may be not finished yet. */
+
+			/* XXXX Do this only if SUSPENDed? */
+			PL_reg_call_cc = state.prev;
+			PL_regcc = state.cc;
+			PL_reg_re = state.re;
+			cache_re(PL_reg_re);
+
+			/* XXXX This is too dramatic a measure... */
+			PL_reg_maxiter = 0;
+
+			/* These are needed even if not SUSPEND. */
 			ReREFCNT_dec(re);
 			regcpblow(cp);
 			sayYES;
