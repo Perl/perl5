@@ -663,7 +663,7 @@ MAGIC* mg;
 {
     I32 i;
     /* Are we fetching a signal entry? */
-    i = whichsig(mg->mg_ptr);
+    i = whichsig((mg->mg_len == HEf_SVKEY) ? SvPV((SV*)mg->mg_ptr, na) : mg->mg_ptr);
     if (i) {
     	if(psig_ptr[i])
     	    sv_setsv(sv,psig_ptr[i]);
@@ -693,7 +693,7 @@ MAGIC* mg;
 {
     I32 i;
     /* Are we clearing a signal entry? */
-    i = whichsig(mg->mg_ptr);
+    i = whichsig((mg->mg_len == HEf_SVKEY) ? SvPV((SV*)mg->mg_ptr, na) : mg->mg_ptr);
     if (i) {
     	if(psig_ptr[i]) {
     	    SvREFCNT_dec(psig_ptr[i]);
@@ -744,7 +744,7 @@ MAGIC* mg;
 	psig_ptr[i] = SvREFCNT_inc(sv);
 	if(psig_name[i])
 	    SvREFCNT_dec(psig_name[i]);
-	psig_name[i] = newSVpv(mg->mg_ptr,strlen(mg->mg_ptr));
+	psig_name[i] = newSVpv(s,strlen(s));
 	SvTEMP_off(sv); /* Make sure it doesn't go away on us */
 	SvREADONLY_on(psig_name[i]);
     }
@@ -1030,7 +1030,13 @@ magic_getglob(sv,mg)
 SV* sv;
 MAGIC* mg;
 {
-    gv_efullname(sv,((GV*)sv));/* a gv value, be nice */
+    if (SvFAKE(sv)) {			/* FAKE globs can get coerced */
+	SvFAKE_off(sv);
+	gv_efullname(sv,((GV*)sv), "*");
+	SvFAKE_on(sv);
+    }
+    else
+	gv_efullname(sv,((GV*)sv), "*");	/* a gv value, be nice */
     return 0;
 }
 
