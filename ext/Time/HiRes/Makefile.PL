@@ -444,6 +444,10 @@ sub main {
     unless ($ENV{PERL_CORE}) {
 	print  <<EOM;
 Now you may issue '$make'.  Do not forget also '$make test'.
+
+NOTE: if you get an error like this (line number may vary):
+Makefile:91: *** missing separator
+then set the environment variable LC_ALL to "C" and retry.
 EOM
     }
 }

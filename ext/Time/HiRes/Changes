@@ -1,5 +1,15 @@
 Revision history for Perl extension Time::HiRes.
 
+1.50
+	- add a message (for non-core builds) to Makefile.PL about
+	  the LC_ALL=C workaround
+	- &Time::HiRes::d_nanosleep was broken (perl change #20131)
+	- the nanosleep() probe was broken (perl change #20061)
+	- use existence instead of definedness for feature probes
+	  (perl change #20043)
+	- MPE/iX tweak (perl change #20042)
+	- do not use HAS_NANOSLEEP (perl change #19898)
+
 1.49
 	- UVuf for non-IVSIZE platforms (from Keiichiro Nagano)
 	- OS/2 can always mix subsecond sleeps with signals
