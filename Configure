@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Feb 29 05:06:33 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Tue Feb 29 17:34:18 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -4490,18 +4490,6 @@ esac
 set use64bitint
 eval $setvar
 
-case "$use64bitint" in
-"$define")	case "$longsize" in
-		8) dflt='y' ;;
-		*) dflt='n' ;;
-		esac
-		;;
-*)	case "$use64bitall" in
-	"$define"|true|[yY]*) dflt='y' ;;
-	*) dflt='n' ;;
-	esac
-	;;
-esac 
 cat <<EOM
 
 You may also choose to try maximal 64-bitness.  It means using as much
@@ -4512,6 +4500,14 @@ have any more 64-bitness available than what you already have chosen.
 If this doesn't make any sense to you, just accept the default '$dflt'.
 EOM
 rp='Try to use maximal 64-bit support, if available?'
+case "$use64bitall" in
+"$define"|true|[yY]*) dflt='y' ;;
+*) case "$longsize" in
+   8) dflt='y' ;;
+   *) dflt='n' ;;
+   esac
+   ;;
+esac	
 . ./myread
 case "$ans" in
 [yY]*) val="$define" ;;
@@ -4543,11 +4539,7 @@ case "$use64bitint" in
 		. ./use64bitint.cbu
 	fi
 	case "$longsize" in
-	4) case "$ccflags" in
-	   *-DUSE_64_BIT_INT*) ;;
-	   *) ccflags="$ccflags -DUSE_64_BIT_INT";;
-	   esac
-	   case "$archname64" in
+	4) case "$archname64" in
 	   '') archname64=64int ;;
 	   esac
 	   ;;
@@ -4565,11 +4557,7 @@ case "$use64bitall" in
 		. ./use64bitall.cbu
 	fi
 	case "$longsize" in
-	4) case "$ccflags" in
-	   *-DUSE_64_BIT_ALL*) ;;
-      	   *) ccflags="$ccflags -DUSE_64_BIT_ALL";;
-	   esac
-	   case "$archname64" in
+	4) ccase "$archname64" in
 	   ''|64int) archname64=64all ;;
 	   esac
 	   ;;
