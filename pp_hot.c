@@ -2447,7 +2447,9 @@ PP(pp_method)
 	    !(ob=(SV*)GvIO(iogv)))
 	{
 	    if (!packname || !isIDFIRST(*packname))
-  DIE("Can't call method \"%s\" without a package or object reference", name);
+		DIE("Can't call method \"%s\" %s", name,
+		    SvOK(sv)? "without a package or object reference"
+			    : "on an undefined value");
 	    stash = gv_stashpvn(packname, packlen, TRUE);
 	    goto fetch;
 	}

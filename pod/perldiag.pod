@@ -477,7 +477,17 @@ an object reference until it has been blessed.  See L<perlobj>.
 
 (F) You used the syntax of a method call, but the slot filled by the
 object reference or package name contains an expression that returns
-neither an object reference nor a package name.  (Perhaps it's null?)
+a defined value which is neither an object reference nor a package name.
+Something like this will reproduce the error:
+
+    $BADREF = 42;
+    process $BADREF 1,2,3;
+    $BADREF->process(1,2,3);
+
+=item Can't call method "%s" on an undefined value
+
+(F) You used the syntax of a method call, but the slot filled by the
+object reference or package name contains an undefined value.
 Something like this will reproduce the error:
 
     $BADREF = undef;
