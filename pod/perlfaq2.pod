@@ -41,7 +41,7 @@ get free compilers for, not for Unix systems.
 Some URLs that might help you are:
 
     http://www.cpan.org/ports/
-    http://language.perl.com/info/software.html
+    http://www.perl.com/pub/language/info/software.html
 
 Someone looking for a Perl for Win16 might look to Laszlo Molnar's djgpp
 port in http://www.cpan.org/ports/#msdos , which comes with clear
@@ -482,13 +482,8 @@ Read the perlbug(1) man page (perl5.004 or later) for more information.
 
 =head2 What is perl.com? Perl Mongers? pm.org? perl.org?
 
-The Perl Home Page at http://www.perl.com/ is currently hosted on a
-T3 line courtesy of The O'Reilly Network, a subsidiary of
-O'Reilly and Associates. Other starting points include
-
-    http://language.perl.com/
-    http://conference.perl.com/
-    http://reference.perl.com/
+The Perl Home Page at http://www.perl.com/ is currently hosted by
+The O'Reilly Network, a subsidiary of O'Reilly and Associates.
 
 Perl Mongers is an advocacy organization for the Perl language which
 maintains the web site http://www.perl.org/ as a general advocacy
