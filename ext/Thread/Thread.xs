@@ -81,15 +81,12 @@ threadstart(void *arg)
     return 0;
 #else
     Thread thr = (Thread) arg;
-    LOGOP myop;
     dSP;
     I32 oldmark = TOPMARK;
-    I32 oldscope = PL_scopestack_ix;
     I32 retval;
     SV *sv;
     AV *av;
-    int i, ret;
-    dJMPENV;
+    int i;
 
 #if defined(MULTIPLICITY)
     PERL_SET_INTERP(thr->interp);
@@ -150,7 +147,6 @@ threadstart(void *arg)
     FREETMPS;
     LEAVE;
 
-  finishoff:
 #if 0    
     /* removed for debug */
     SvREFCNT_dec(PL_curstack);
@@ -345,7 +341,6 @@ static Signal_t handle_thread_signal (int sig);
 static Signal_t
 handle_thread_signal(int sig)
 {
-    dTHXo;
     unsigned char c = (unsigned char) sig;
     /*
      * We're not really allowed to call fprintf in a signal handler
@@ -499,7 +494,7 @@ void
 DESTROY(t)
 	SV *	t
     PPCODE:
-	PUSHs(&PL_sv_yes);
+	PUSHs(t ? &PL_sv_yes : &PL_sv_no);
 
 void
 yield()
