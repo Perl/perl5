@@ -243,6 +243,7 @@ EOM
 use warnings 'io';
 my $x = "foo";
 open FOO, '>', \$x;
+open BAR, '>&', \*STDOUT; # should not warn
 no warnings 'io';
 open FOO, '>', \$x;
 EXPECT

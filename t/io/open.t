@@ -8,9 +8,10 @@ BEGIN {
 
 $|  = 1;
 use warnings;
+use Config;
 $Is_VMS = $^O eq 'VMS';
 
-plan tests => 91;
+plan tests => 94;
 
 my $Perl = which_perl();
 
@@ -223,3 +224,14 @@ like( $@, qr/Bad filehandle:\s+afile/,          '       right error' );
     ok( open(STDOUT,     ">&", $stdout),  'restore dupped STDOUT from lexical fh');
 }
 
+SKIP: {
+    skip "This perl uses perlio", 1 if $Config{useperlio};
+    skip "This system doesn't understand EINVAL", 1 unless exists $!{EINVAL};
+
+    ok( !open(F,'>',\my $s) && $!{EINVAL}, 'open(reference) raises EINVAL' );
+}
+
+{
+    ok( !eval { open F, "BAR", "QUUX" },       'Unknown open() mode' );
+    like( $@, qr/\QUnknown open() mode 'BAR'/, '       right error' );
+}
