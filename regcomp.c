@@ -2985,7 +2985,6 @@ tryagain:
 	    register char *p;
 	    char *oldp, *s;
 	    STRLEN numlen;
-	    STRLEN ulen;
 	    STRLEN foldlen;
 	    U8 tmpbuf[UTF8_MAXLEN_FOLD+1], *foldbuf;
 
