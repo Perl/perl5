@@ -71,7 +71,7 @@ If either I<follow> or I<follow_fast> is in effect:
 
 =item *
 
-It is guarantueed that an I<lstat> has been called before the user's
+It is guaranteed that an I<lstat> has been called before the user's
 I<wanted()> function is called. This enables fast file checks involving S< _>.
 
 =item *
@@ -83,11 +83,10 @@ pathname of the file with all symbolic links resolved
 
 =item C<follow_fast>
 
-This is similar to I<follow> except that it may report some files
-more than once. It does detect cycles however.
-Since only symbolic links have to be hashed, this is
-much cheaper both in space and time.
-If processing a file more than once (by the user's I<wanted()> function)
+This is similar to I<follow> except that it may report some files more
+than once.  It does detect cycles, however.  Since only symbolic links
+have to be hashed, this is much cheaper both in space and time.  If
+processing a file more than once (by the user's I<wanted()> function)
 is worse than just taking time, the option I<follow> should be used.
 
 =item C<follow_skip>
@@ -113,14 +112,14 @@ C<$_> will be the same as C<$File::Find::name>.
 If find is used in taint-mode (-T command line switch or if EUID != UID
 or if EGID != GID) then internally directory names have to be untainted
 before they can be cd'ed to. Therefore they are checked against a regular
-expression I<untaint_pattern>. Note, that all names passed to the
+expression I<untaint_pattern>.  Note that all names passed to the
 user's I<wanted()> function are still tainted. 
 
 =item C<untaint_pattern>
 
 See above. This should be set using the C<qr> quoting operator.
 The default is set to  C<qr|^([-+@\w./]+)$|>. 
-Note that the paranthesis which are vital.
+Note that the parantheses which are vital.
 
 =item C<untaint_skip>
 
@@ -132,15 +131,15 @@ are skipped. The default is to 'die' in such a case.
 The wanted() function does whatever verifications you want.
 C<$File::Find::dir> contains the current directory name, and C<$_> the
 current filename within that directory.  C<$File::Find::name> contains
-the complete pathname to the file. You are chdir()'d to C<$File::Find::dir> when
-the function is called, unless C<no_chdir> was specified.
-When <follow> or <follow_fast> are in effect there is also a
-C<$File::Find::fullname>.
-The function may set C<$File::Find::prune> to prune the tree
-unless C<bydepth> was specified.
-Unless C<follow> or C<follow_fast> is specified, for compatibility
-reasons (find.pl, find2perl) there are in addition the following globals
-available: C<$File::Find::topdir>, C<$File::Find::topdev>, C<$File::Find::topino>,
+the complete pathname to the file. You are chdir()'d to
+C<$File::Find::dir> when the function is called, unless C<no_chdir>
+was specified.  When <follow> or <follow_fast> are in effect, there is
+also a C<$File::Find::fullname>.  The function may set
+C<$File::Find::prune> to prune the tree unless C<bydepth> was
+specified.  Unless C<follow> or C<follow_fast> is specified, for
+compatibility reasons (find.pl, find2perl) there are in addition the
+following globals available: C<$File::Find::topdir>,
+C<$File::Find::topdev>, C<$File::Find::topino>,
 C<$File::Find::topmode> and C<$File::Find::topnlink>.
 
 This library is useful for the C<find2perl> tool, which when fed,
@@ -177,7 +176,7 @@ module.
 
 =head1 CAVEAT
 
-Be aware that the option to follow symblic links can be dangerous.
+Be aware that the option to follow symbolic links can be dangerous.
 Depending on the structure of the directory tree (including symbolic
 links to directories) you might traverse a given (physical) directory
 more than once (only if C<follow_fast> is in effect). 
