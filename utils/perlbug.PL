@@ -528,7 +528,7 @@ EOF
 Environment for perl $]:
 EOF
     for my $env (sort
-	(qw(PATH LD_LIBRARY_PATH LANG PERL_BADLANG SHELL HOME LOGDIR),
+	(qw(PATH LD_LIBRARY_PATH LANG PERL_BADLANG SHELL HOME LOGDIR LANGUAGE),
 	grep /^(?:PERL|LC_)/, keys %ENV)
     ) {
 	print OUT "    $env",

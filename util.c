@@ -621,6 +621,9 @@ perl_init_i18nl10n(int printwarn)
 #ifdef USE_LOCALE_NUMERIC
     char *curnum     = NULL;
 #endif /* USE_LOCALE_NUMERIC */
+#ifdef __GLIBC__
+    char *language   = PerlEnv_getenv("LANGUAGE");
+#endif
     char *lc_all     = PerlEnv_getenv("LC_ALL");
     char *lang       = PerlEnv_getenv("LANG");
     bool setlocale_failure = FALSE;
@@ -723,6 +726,14 @@ perl_init_i18nl10n(int printwarn)
 
 	    PerlIO_printf(PerlIO_stderr(),
 		"perl: warning: Please check that your locale settings:\n");
+
+#ifdef __GLIBC__
+	    PerlIO_printf(PerlIO_stderr(),
+			  "\tLANGUAGE = %c%s%c,\n",
+			  language ? '"' : '(',
+			  language ? language : "unset",
+			  language ? '"' : ')');
+#endif
 
 	    PerlIO_printf(PerlIO_stderr(),
 			  "\tLC_ALL = %c%s%c,\n",
