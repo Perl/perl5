@@ -196,11 +196,12 @@ Exporter has a special method, 'export_to_level' which is used in situations
 where you can't directly call Export's import method. The export_to_level
 method looks like:
 
-MyPackage->export_to_level($where_to_export, @what_to_export);
+MyPackage->export_to_level($where_to_export, $package, @what_to_export);
 
 where $where_to_export is an integer telling how far up the calling stack
 to export your symbols, and @what_to_export is an array telling what
-symbols *to* export (usually this is @_).
+symbols *to* export (usually this is @_).  The $package argument is
+currently unused.
 
 For example, suppose that you have a module, A, which already has an
 import function:
