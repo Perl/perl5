@@ -26,6 +26,8 @@
 #include "sockadapt.h"
 #endif
 
+#include <netinet/tcp.h>
+
 #ifdef I_SYSUIO
 # include <sys/uio.h>
 #endif
@@ -329,6 +331,12 @@ constant(char *name, int arg)
 	if (strEQ(name, "IOV_MAX"))
 #ifdef IOV_MAX
 	    return IOV_MAX;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "IPPROTO_TCP"))
+#ifdef IPPROTO_TCP
+	    return IPPROTO_TCP;
 #else
 	    goto not_there;
 #endif
@@ -804,6 +812,36 @@ constant(char *name, int arg)
 #endif
 	break;
     case 'T':
+	if (strEQ(name, "TCP_KEEPALIVE"))
+#ifdef TCP_KEEPALIVE
+	    return TCP_KEEPALIVE;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "TCP_MAXRT"))
+#ifdef TCP_MAXRT
+	    return TCP_MAXRT;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "TCP_MAXSEG"))
+#ifdef TCP_MAXSEG
+	    return TCP_MAXSEG;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "TCP_NODELAY"))
+#ifdef TCP_NODELAY
+	    return TCP_NODELAY;
+#else
+	    goto not_there;
+#endif
+	if (strEQ(name, "TCP_STDURG"))
+#ifdef TCP_STDURG
+	    return TCP_STDURG;
+#else
+	    goto not_there;
+#endif
 	break;
     case 'U':
 	if (strEQ(name, "UIO_MAXIOV"))
