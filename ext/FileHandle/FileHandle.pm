@@ -58,8 +58,17 @@ C<FileHandle::open> accepts one parameter or two.  With one parameter,
 it is just a front end for the built-in C<open> function.  With two
 parameters, the first parameter is a filename that may include
 whitespace or other special characters, and the second parameter is
-the open mode in either Perl form (">", "+<", etc.) or POSIX form
-("w", "r+", etc.).
+the open mode, optionally followed by a file permission value.
+
+If C<FileHandle::open> receives a Perl mode string (">", "+<", etc.)
+or a POSIX fopen() mode string ("w", "r+", etc.), it uses the basic
+Perl C<open> operator.
+
+If C<FileHandle::open> is given a numeric mode, it passes that mode
+and the optional permissions value to the Perl C<sysopen> operator.
+For convenience, C<FileHandle::import> tries to import the O_XXX
+constants from the Fcntl module.  If dynamic loading is not available,
+this may fail, but the rest of FileHandle will still work.
 
 C<FileHandle::fdopen> is like C<open> except that its first parameter
 is not a filename but rather a file handle name, a FileHandle object,
@@ -231,7 +240,8 @@ sub AUTOLOAD {
 ##
 
 sub new {
-    @_ >= 1 && @_ <= 3 or croak 'usage: new FileHandle [FILENAME [,MODE]]';
+    @_ >= 1 && @_ <= 4
+	or croak 'usage: new FileHandle [FILENAME [,MODE [,PERMS]]]';
     my $class = shift;
     my $fh = gensym;
     if (@_) {
