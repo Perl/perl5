@@ -31,6 +31,240 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 10055] By: jhi                                   on 2001/05/09  16:26:47
+        Log: Integrate perlio.
+     Branch: perl
+	  !> win32/config_H.bc win32/config_H.gc win32/config_H.vc
+____________________________________________________________________________
+[ 10054] By: jhi                                   on 2001/05/09  16:25:42
+        Log: Subject: Re: [PATCH] Test offset when reading from a PerlIO::Scalar
+             From: Benjamin Sugars <bsugars@canoe.ca>
+             Date: Wed, 9 May 2001 12:42:30 -0400 (EDT)
+             Message-ID: <Pine.LNX.4.21.0105091230110.1516-100000@marmot.rim.canoe.ca>
+     Branch: perl
+	   ! perlio.c
+____________________________________________________________________________
+[ 10053] By: jhi                                   on 2001/05/09  16:24:37
+        Log: Subject: [PATCH] Test offset when reading from a PerlIO::Scalar
+             From: Benjamin Sugars <bsugars@canoe.ca>
+             Date: Tue, 8 May 2001 17:09:44 -0400 (EDT)
+             Message-ID: <Pine.LNX.4.21.0105081654140.1212-100000@marmot.rim.canoe.ca>
+     Branch: perl
+	   ! ext/PerlIO/Scalar/Scalar.xs
+____________________________________________________________________________
+[ 10052] By: jhi                                   on 2001/05/09  16:19:04
+        Log: Subject: [PATCH] Pod::Html doesn't honor =begin ... =end properly
+             From: Jeff Pinyan <jeffp@crusoe.net>
+             Date: Wed, 9 May 2001 12:35:24 -0400 (EDT)
+             Message-ID: <Pine.GSO.4.21.0105091233430.357-100000@crusoe.crusoe.net>
+     Branch: perl
+	   ! lib/Pod/Html.pm
+____________________________________________________________________________
+[ 10051] By: jhi                                   on 2001/05/09  15:30:17
+        Log: EPOC tweak from Olaf Flebbe.
+     Branch: perl
+	   ! epoc/epocish.h
+____________________________________________________________________________
+[ 10050] By: nick                                  on 2001/05/09  14:37:57
+        Log: win32, regen_config_h
+     Branch: perlio
+	   ! win32/config_H.bc win32/config_H.gc win32/config_H.vc
+____________________________________________________________________________
+[ 10049] By: jhi                                   on 2001/05/09  12:33:39
+        Log: Integrate perlio.
+     Branch: perl
+	  !> pp_sys.c
+____________________________________________________________________________
+[ 10048] By: nick                                  on 2001/05/09  11:59:50
+        Log: If wait() or waitpid() ends due to EINTR despatch perl interrupt handler
+             and re-try. Fixes "perl 5.7.x prefers suicide over killing more than one child."
+     Branch: perlio
+	   ! pp_sys.c
+____________________________________________________________________________
+[ 10047] By: jhi                                   on 2001/05/09  10:50:12
+        Log: Integrate perlio.
+     Branch: perl
+	  !> run.c
+____________________________________________________________________________
+[ 10046] By: jhi                                   on 2001/05/09  10:49:34
+        Log: Subject: Re: Less warnings during configure
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Wed, 09 May 2001 13:12:49 +0200
+             Message-Id: <20010509125337.995D.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[ 10045] By: nick                                  on 2001/05/09  09:56:59
+        Log: MULTIPLICITY/DEBUGGING build fix.
+     Branch: perlio
+	   ! run.c
+____________________________________________________________________________
+[ 10044] By: nick                                  on 2001/05/09  09:46:37
+        Log: Merge of mainline (does not build MULTIPLICITY/DEBUGGING issue).
+     Branch: perlio
+	  +> hints/atheos.sh pod/perl572delta.pod t/pod/plainer.t
+	   - ext/SDBM_File/sdbm/dbm.c ext/SDBM_File/sdbm/dbm.h
+	  !> (integrate 65 files)
+____________________________________________________________________________
+[ 10043] By: jhi                                   on 2001/05/08  22:41:49
+        Log: Subject: [PATCH op.c] Deprecate %x->{'foo'}, @y->[23] etc
+             From: Robin Houston <robin@kitsite.com>
+             Date: Tue, 8 May 2001 19:38:00 +0100
+             Message-ID: <20010508193800.A4389@penderel>
+             
+             Subject: Re: [PATCH op.c] Deprecate %x->{'foo'}, @y->[23] etc
+             From: Robin Houston <robin@kitsite.com>
+             Date: Tue, 8 May 2001 20:03:57 +0100
+             Message-ID: <20010508200357.A4614@penderel>
+             
+             Subject: Re: [PATCH op.c] Deprecate %x->{'foo'}, @y->[23] etc
+             From: Robin Houston <robin@kitsite.com>
+             Date: Wed, 9 May 2001 00:12:05 +0100
+             Message-ID: <20010509001205.A18521@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! op.c pod/perldiag.pod t/pragma/overload.t t/pragma/warn/op
+____________________________________________________________________________
+[ 10042] By: jhi                                   on 2001/05/08  22:09:35
+        Log: Retract #10031.
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 10041] By: jhi                                   on 2001/05/08  18:27:34
+        Log: The metaconfig unit changes for #10040.
+     Branch: metaconfig/U/perl
+	   ! Checkcc.U d_dlsymun.U dlsrc.U
+____________________________________________________________________________
+[ 10040] By: jhi                                   on 2001/05/08  18:24:47
+        Log: The Configure half of
+             
+             Subject: Less warnings during configure
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Tue, 08 May 2001 08:44:02 +0200
+             Message-Id: <20010508084158.D793.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 10039] By: jhi                                   on 2001/05/08  16:48:31
+        Log: Subject: Less warnings during configure
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Tue, 08 May 2001 08:44:02 +0200
+             Message-Id: <20010508084158.D793.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[ 10038] By: jhi                                   on 2001/05/08  16:32:07
+        Log: Don't forget to whine about \d__\d.
+     Branch: perl
+	   ! t/pragma/warn/toke toke.c
+____________________________________________________________________________
+[ 10037] By: jhi                                   on 2001/05/08  16:07:05
+        Log: Allow underscores also in the exponent part.
+     Branch: perl
+	   ! t/pragma/warn/toke toke.c
+____________________________________________________________________________
+[ 10036] By: jhi                                   on 2001/05/08  13:33:55
+        Log: CodeMagicCD doesn't look like an *I*DE.
+     Branch: perl
+	   ! pod/perlfaq3.pod
+____________________________________________________________________________
+[ 10035] By: jhi                                   on 2001/05/08  13:27:48
+        Log: Add Open Perl IDE, remove Perl Code Magic (the site seems
+             to be consistently down).
+     Branch: perl
+	   ! pod/perlfaq3.pod
+____________________________________________________________________________
+[ 10034] By: jhi                                   on 2001/05/08  13:21:07
+        Log: Upgrade to Text::Balanced 1.84.
+     Branch: perl
+	   ! lib/Text/Balanced.pm t/lib/tb-xbrak.t
+____________________________________________________________________________
+[ 10033] By: jhi                                   on 2001/05/08  12:41:53
+        Log: Subject: Re: [PATCH] Find the last of the missing pad variables 
+             From: Benjamin Sugars <bsugars@canoe.ca>
+             Date: Tue, 8 May 2001 09:14:30 -0400 (EDT)
+             Message-ID: <Pine.LNX.4.21.0105080912370.1930-100000@marmot.rim.canoe.ca>
+     Branch: perl
+	   ! run.c
+____________________________________________________________________________
+[ 10032] By: jhi                                   on 2001/05/08  12:40:28
+        Log: Subject: [PATCH: perl@10022] cleaner cleanup for t/pod/plainer.t
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Mon, 7 May 2001 18:13:06 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10105071810100.317708-100000@aspara.forte.com>
+     Branch: perl
+	   ! t/pod/plainer.t
+____________________________________________________________________________
+[ 10031] By: jhi                                   on 2001/05/08  12:35:25
+        Log: (Retracted by #10042)
+             
+             Subject: Re: [ID 20010506.040] Infinite loop in lib/selfstubber.t under Cygwin
+             From: "Philip Newton" <pnewton@gmx.de>
+             Date: Tue, 8 May 2001 09:18:10 +0200
+             Message-ID: <3AF7B9D2.28861.603732@localhost>
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 10030] By: jhi                                   on 2001/05/08  12:32:23
+        Log: Subject: [PATCH B::Deparse] Document known bugs
+             From: Robin Houston <robin@kitsite.com>
+             Date: Tue, 8 May 2001 01:53:34 +0100
+             Message-ID: <20010508015334.A32394@penderel>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 10029] By: jhi                                   on 2001/05/08  12:28:28
+        Log: Subject: Re: Perl book, magazine and website updates.
+             From: "Philip Newton" <pnewton@gmx.de>
+             Date: Mon, 7 May 2001 17:03:58 +0200
+             Message-ID: <3AF6D57E.5387.1E29930@localhost>
+     Branch: perl
+	   ! pod/perlfaq2.pod
+____________________________________________________________________________
+[ 10028] By: jhi                                   on 2001/05/07  23:53:30
+        Log: Subject: [PATCH: perl@10022] YA tweak to avoid open file conflict in io/fflush.t
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Mon, 7 May 2001 17:50:48 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10105071746570.317708-100000@aspara.forte.com> 
+     Branch: perl
+	   ! t/io/fflush.t
+____________________________________________________________________________
+[ 10027] By: jhi                                   on 2001/05/07  23:22:48
+        Log: Subject: [PATCH B::Deparse] Give (?{...}) a taste of its own medicine
+             From: Robin Houston <robin@kitsite.com>
+             Date: Tue, 8 May 2001 01:14:55 +0100
+             Message-ID: <20010508011455.A32162@penderel>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 10026] By: jhi                                   on 2001/05/07  23:15:05
+        Log: Typo in #10025.
+     Branch: perl
+	   ! hints/uts.sh
+____________________________________________________________________________
+[ 10025] By: jhi                                   on 2001/05/07  21:15:35
+        Log: cc, cflags, and optimize tweaks for UTS from Hal Morris.
+     Branch: perl
+	   ! hints/uts.sh
+____________________________________________________________________________
+[ 10024] By: jhi                                   on 2001/05/07  20:58:40
+        Log: Subject: Re: [ID 20010506.045] question about hash syntax
+             From: Peter Scott <Peter@PSDT.com>
+             Date: Sun, 06 May 2001 13:10:40 -0700
+             Message-Id: <4.3.2.7.2.20010506113015.00b46100@psdt.com>
+     Branch: perl
+	   ! pod/perl56delta.pod
+____________________________________________________________________________
+[ 10023] By: jhi                                   on 2001/05/07  20:41:26
+        Log: Configure should figure out the list of dynamic extensions
+             just fine in UTS-- and in fact it does, as reported by Hal Morris.
+     Branch: perl
+	   ! hints/uts.sh
+____________________________________________________________________________
+[ 10022] By: jhi                                   on 2001/05/07  20:24:11
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 10021] By: jhi                                   on 2001/05/07  20:11:31
         Log: Subject: [PATCH regcomp.c] Insecure regexes
              From: Robin Houston <robin@kitsite.com>
