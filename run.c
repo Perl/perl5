@@ -108,7 +108,7 @@ Perl_debop(pTHX_ OP *o)
 }
 
 STATIC CV*
-S_deb_curcv(I32 ix)
+S_deb_curcv(pTHX_ I32 ix)
 {
 #ifdef DEBUGGING
     PERL_CONTEXT *cx = &cxstack[ix];
