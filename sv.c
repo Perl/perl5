@@ -10720,6 +10720,14 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    longval = (long)POPBOOL(ss,ix);
 	    TOPBOOL(nss,ix) = (bool)longval;
 	    break;
+	case SAVEt_SET_SVFLAGS:
+	    i = POPINT(ss,ix);
+	    TOPINT(nss,ix) = i;
+	    i = POPINT(ss,ix);
+	    TOPINT(nss,ix) = i;
+	    sv = (SV*)POPPTR(ss,ix);
+	    TOPPTR(nss,ix) = sv_dup(sv, param);
+	    break;
 	default:
 	    Perl_croak(aTHX_ "panic: ss_dup inconsistency");
 	}
