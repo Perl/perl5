@@ -254,9 +254,6 @@ S_cache_re(pTHX_ regexp *prog)
     PL_reg_re = prog;    
 }
 
-static char *find_byclass(regexp * prog, regnode *c, char *s, char *strend,
-			  char *startpos, I32 norun);
-
 /* 
  * Need to implement the following flags for reg_anch:
  *
