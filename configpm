@@ -451,8 +451,14 @@ EOF
      (?! e \. g \. )		# Not e.g.
      (?! \. \. \. )		# Not ...
      (?! \d )			# Not 5.004
-     ( [\w./]* [./] [\w./]* )	# Require . or / inside
-     (?<! \. (?= \s ) )		# Do not include trailing dot
+     (?! read/ )		# Not read/write
+     (?! etc\. )		# Not etc.
+     (?! I/O )			# Not I/O
+     (
+	\$ ?			# Allow leading $
+	[\w./]* [./] [\w./]*	# Require . or / inside
+     )
+     (?<! \. (?= [\s)] ) )	# Do not include trailing dot
      (?! [\w/] )		# Include all of it
    }
    (F<$1>)xg;			# /usr/local
