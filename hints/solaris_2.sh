@@ -342,9 +342,6 @@ cat > UU/usethreads.cbu <<'EOCBU'
 # after it has prompted the user for whether to use threads.
 case "$usethreads" in
 $define|true|[yY]*)
-    case "$ccflags" in
-    *_REENTRANT*) ;; # Already been here,  I presume.
-    *)
         ccflags="-D_REENTRANT $ccflags"
 
         # sched_yield is in -lposix4 up to Solaris 2.6, in -lrt starting with Solaris 2.7
@@ -388,9 +385,7 @@ for more information.
 
 EOM
         fi
-        ;;
-    esac 
-    ;;
+	;;
 esac
 EOCBU
 
