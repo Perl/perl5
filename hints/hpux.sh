@@ -483,6 +483,8 @@ EOM
 		    # tell perl.h to include <pthread.h> before other
 		    # include files
 		    ccflags="$ccflags -DPTHREAD_H_FIRST"
+# First column on purpose.
+pthread_h_first="$define"
 
 		    # CMA redefines select to cma_select, and cma_select
 		    # expects int * instead of fd_set * (just like 9.X)
