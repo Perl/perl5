@@ -73,6 +73,7 @@ sub runtests {
 	$fh->open($cmd) or print "can't run $test. $!\n";
 	$ok = $next = $max = 0;
 	@failed = ();
+	my $skipped = 0;
 	while (<$fh>) {
 	    if( $verbose ){
 		print $_;
@@ -87,10 +88,11 @@ sub runtests {
 		if (/^not ok\s*(\d*)/){
 		    $this = $1 if $1 > 0;
 		    push @failed, $this;
-		} elsif (/^ok\s*(\d*)/) {
+		} elsif (/^ok\s*(\d*)(\s*\#\s*[Ss]kip)?/) {
 		    $this = $1 if $1 > 0;
 		    $ok++;
 		    $totok++;
+		    $skipped++ if defined $2;
 		}
 		if ($this > $next) {
 		    # warn "Test output counter mismatch [test $this]\n";
@@ -142,7 +144,10 @@ sub runtests {
 				    estat => $estatus, wstat => $wstatus,
 				  };
 	} elsif ($ok == $max && $next == $max+1) {
-	    if ($max) {
+	    if ($max and $skipped) {
+	        my $ender = 's' x ($skipped > 1);
+		print "ok, $skipped subtest$ender skipped on this platform\n";
+	    } elsif ($max) {
 		print "ok\n";
 	    } else {
 		print "skipping test on this platform\n";
@@ -327,6 +332,11 @@ without altering the behavior otherwise.
 The global variable $Test::Harness::switches is exportable and can be
 used to set perl command line options used for running the test
 script(s). The default value is C<-w>.
+
+If the standard output line contains substring C< # Skip> (with
+variations in spacing and case) after C<ok> or C<ok NUMBER>, it is
+counted as a skipped test.  If the whole testscript succeeds, the
+count of skipped tests is included in the generated output.
 
 =head1 EXPORT
 
