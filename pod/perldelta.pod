@@ -4,8 +4,15 @@ perldelta - what's new for perl v5.6.x
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.005 release and the 5.6.1
+This document describes differences between the 5.005 release and the 5.6.2
 release.
+
+=head1 Summary of changes between 5.6.1 and 5.6.2
+
+The 5.6.2 release is aimed at providing only a minimal update to perl 5.6.1,
+which wasn't being compatible with some of the newest compilers (most
+notably gcc 3.x), libraries and operating systems that have appeared since
+5.6.1 was released.
 
 =head1 Summary of changes between 5.6.0 and 5.6.1
 
