@@ -31,6 +31,140 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[  9717] By: jhi                                   on 2001/04/16  03:06:28
+        Log: Regen toc.
+     Branch: perl
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[  9716] By: jhi                                   on 2001/04/16  02:58:42
+        Log: Subject: [PATCH: perl@9699] updates to apidoc in utf8.c
+             From: Prymmer/Kahn <pvhp@best.com>
+             Date: Sun, 15 Apr 2001 20:47:45 -0700 (PDT)
+             Message-ID: <Pine.BSF.4.21.0104152037470.8946-100000@shell8.ba.best.com>
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[  9715] By: jhi                                   on 2001/04/15  23:40:35
+        Log: Subject: Re: Net::Ping patch, adds stream protocol
+             From: bronson@rinspin.com (Scott Bronson)
+             Date: Tue, 10 Apr 2001 23:58:33 -0700
+             Message-ID: <20010410235833.N29719@rinspin.com>
+     Branch: perl
+	   ! lib/Net/Ping.pm
+____________________________________________________________________________
+[  9714] By: jhi                                   on 2001/04/15  23:31:46
+        Log: Printing out the ok messages helps successful testing.
+     Branch: perl
+	   ! t/lib/time-hires.t
+____________________________________________________________________________
+[  9713] By: jhi                                   on 2001/04/15  21:43:24
+        Log: Update Douglas Wegscheid's email.
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[  9712] By: jhi                                   on 2001/04/15  21:40:41
+        Log: Subject: [PATCH t/lib/exporter.t lib/Exporter/Heavy.pm] Testing Exporter
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sat, 14 Apr 2001 22:40:50 +0100
+             Message-ID: <20010414224050.A1872@blackrider.blackstar.co.uk>
+     Branch: perl
+	   + t/lib/exporter.t
+	   ! MANIFEST lib/Exporter/Heavy.pm
+____________________________________________________________________________
+[  9711] By: jhi                                   on 2001/04/15  21:39:21
+        Log: Subject: [PATCH t/op/loopctl.t] Exit via last, part 1
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sat, 14 Apr 2001 22:13:59 +0100
+             Message-ID: <20010414221359.A413@blackrider.blackstar.co.uk>
+     Branch: perl
+	   ! t/op/loopctl.t
+____________________________________________________________________________
+[  9710] By: jhi                                   on 2001/04/15  21:30:19
+        Log: Subject: [PATCH t/pragma/warnings.t] Doesn't skip RCS files
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sat, 14 Apr 2001 22:05:32 +0100
+             Message-ID: <20010414220531.A30178@blackrider.blackstar.co.uk>
+     Branch: perl
+	   ! t/pragma/warnings.t
+____________________________________________________________________________
+[  9709] By: jhi                                   on 2001/04/15  19:34:09
+        Log: Integrate changes #9706,9707 from maintperl into mainline.
+             
+             change#7210 broke .packlist generation
+             
+             ExtUtils::Installed doesn't quote regex metacharacters in paths
+             before using them in match; also make it work for dosish platforms
+     Branch: perl
+	  !> lib/ExtUtils/Install.pm lib/ExtUtils/Installed.pm
+____________________________________________________________________________
+[  9708] By: jhi                                   on 2001/04/15  19:31:01
+        Log: Test also the scalar aspect of getitimer().
+     Branch: perl
+	   ! t/lib/time-hires.t
+____________________________________________________________________________
+[  9707] By: gsar                                  on 2001/04/15  17:24:20
+        Log: ExtUtils::Installed doesn't quote regex metacharacters in paths
+             before using them in match; also make it work for dosish platforms
+     Branch: maint-5.6/perl
+	   ! lib/ExtUtils/Installed.pm
+____________________________________________________________________________
+[  9706] By: gsar                                  on 2001/04/15  17:21:59
+        Log: change#7210 broke .packlist generation (listed only filename
+             rather than fully qualified path name)
+     Branch: maint-5.6/perl
+	   ! lib/ExtUtils/Install.pm
+____________________________________________________________________________
+[  9705] By: jhi                                   on 2001/04/15  12:36:33
+        Log: Add interval timer (setitimer, getitimer) support to Time::HiRes.
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.pm ext/Time/HiRes/HiRes.xs
+	   ! t/lib/time-hires.t
+____________________________________________________________________________
+[  9704] By: jhi                                   on 2001/04/15  10:49:08
+        Log: Subject: [PATCH: perl@9622]update perlebcdic.pod with UTF tbl; tweak utf8.pm
+             From: Prymmer/Kahn <pvhp@best.com>
+             Date: Sat, 14 Apr 2001 21:36:24 -0700 (PDT)
+             Message-ID: <Pine.BSF.4.21.0104142127580.27582-100000@shell8.ba.best.com>
+     Branch: perl
+	   ! lib/utf8.pm pod/perlebcdic.pod
+____________________________________________________________________________
+[  9703] By: jhi                                   on 2001/04/15  02:26:26
+        Log: I keep forgetting to sort MANIFEST.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[  9702] By: jhi                                   on 2001/04/15  02:07:47
+        Log: Add Scalar-List-Utils 1.02, from Graham Barr.
+             Now we have blessed, reftype, tainted, first, reduce, ...
+     Branch: perl
+	   + ext/List/Util/ChangeLog ext/List/Util/Makefile.PL
+	   + ext/List/Util/README ext/List/Util/Util.xs
+	   + ext/List/Util/lib/List/Util.pm
+	   + ext/List/Util/lib/Scalar/Util.pm t/lib/u-blessed.t
+	   + t/lib/u-dualvar.t t/lib/u-first.t t/lib/u-max.t
+	   + t/lib/u-maxstr.t t/lib/u-min.t t/lib/u-minstr.t
+	   + t/lib/u-readonly.t t/lib/u-reduce.t t/lib/u-reftype.t
+	   + t/lib/u-sum.t t/lib/u-tainted.t t/lib/u-weak.t
+	   ! MANIFEST
+____________________________________________________________________________
+[  9701] By: jhi                                   on 2001/04/14  15:05:25
+        Log: Subject: RE: dprofpp.pl updates 
+             From: Carl Eklof <CEklof@endeca.com>
+             Date: Thu, 12 Apr 2001 18:45:46 -0400
+             Message-ID: <D99914D9109BD411823800508BD957180E1269@exch01.ops.endeca.com>
+     Branch: perl
+	   ! utils/dprofpp.PL
+____________________________________________________________________________
+[  9700] By: jhi                                   on 2001/04/14  14:44:55
+        Log: Do not just blindly add CR.
+     Branch: perl
+	   ! Porting/makerel
+____________________________________________________________________________
+[  9699] By: jhi                                   on 2001/04/13  13:17:01
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  9698] By: jhi                                   on 2001/04/13  12:44:48
         Log: Integrate perlio.
      Branch: perl
