@@ -311,6 +311,12 @@ UNIVERSAL::isa no longer caches methods incorrectly.
 
 The Emacs perl mode (emacs/cperl-mode.el) has been updated to version 4.31.
 
+=head2 perlbc "activated"
+
+The long-dormant perl bytecompiler has been added to the list of
+installed utilities since the bytecompiler backend has been improved.
+The bytecompiler is still very much experimental, though.
+
 =head2 perlbug
 
 Perlbug is now much more robust.  It also sends the bug report to perl.org,
