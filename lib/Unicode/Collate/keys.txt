@@ -1,5 +1,5 @@
 #### This file is generated from allkeys-3.0.1d9.txt (unicode.org)
-#### by deleting mamy many elements.
+#### by deleting many many elements.
 ####
 #### Remaining elements include LATIN, HANGUL, HIRAGANA, KATAKANA,
 #### BOPOMOFO, CJK UNIFIED IDEOGRAPHS.
