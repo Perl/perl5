@@ -43,7 +43,11 @@ $!
 $!  Pick up a copy of perl to use for the tests
 $   If F$Search("Perl.").nes."" Then Delete/Log/NoConfirm Perl.;*
 $   Copy/Log/NoConfirm [-]'ndbg'Perl'exe' []Perl.
-$
+$!
+$!  Pick up a copy of vmspipe.com to use for the tests
+$   If F$Search("VMSPIPE.COM").nes."" then Delete/Log/Noconfirm VMSPIPE.COM;*
+$   Copy/Log/NoConfirm [-]VMSPIPE.COM []
+$!
 $!  Make the environment look a little friendlier to tests which assume Unix
 $   cat == "Type"
 $   Macro/NoDebug/NoList/Object=Echo.Obj Sys$Input
@@ -86,6 +90,7 @@ $   Macro/NoDebug/NoList/Object=Echo.Obj Sys$Input
 		movl	#1,r0
 		ret	
 		.end echo
+$   If F$Search("Echo.Exe").nes."" Then Delete/Log/NoConfirm Echo.Exe;*
 $   Link/NoMap/NoTrace/Exe=Echo.Exe Echo.Obj;
 $   Delete/Log/NoConfirm Echo.Obj;*
 $   echo == "$" + F$Parse("Echo.Exe")
@@ -121,7 +126,7 @@ use Config;
 # insists on stat()ing a file descriptor before it'll use it.
 push(@libexcl,'io_xs.t') if $Config{'vms_cc_type'} ne 'decc';
 
-@opexcl=('die_exit.t','exec.t','fork.t','glob.t','groups.t','magic.t','misc.t','stat.t');
+@opexcl=('die_exit.t','exec.t','fork.t','glob.t','groups.t','magic.t','stat.t');
 @exclist=(@compexcl,@ioexcl,@libexcl,@opexcl);
 foreach $file (@exclist) { $skip{$file}++; }
 
@@ -242,7 +247,6 @@ $$END-OF-TEST$$
 $ wrapup:
 $   deassign 'dbg'Perlshr
 $   Show Process/Accounting
-$   If F$Search("Echo.Exe").nes."" Then Delete/Log/NoConfirm Echo.Exe;*
 $   Set Default &olddef
 $   Set Message 'oldmsg'
 $   Exit

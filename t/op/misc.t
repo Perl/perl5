@@ -15,7 +15,7 @@ print "1..", scalar @prgs, "\n";
 
 $tmpfile = "misctmp000";
 1 while -f ++$tmpfile;
-END { unlink $tmpfile if $tmpfile; }
+END { while($tmpfile && unlink $tmpfile){} }
 
 $CAT = (($^O eq 'MSWin32') ? '.\perl -e "print <>"' : 'cat');
 
@@ -26,6 +26,9 @@ for (@prgs){
     }
     my($prog,$expected) = split(/\nEXPECT\n/, $_);
     open TEST, ">$tmpfile" or die "Cannot open $tmpfile: $!";
+    $prog =~ s#/dev/null#NL:# if $^O eq 'VMS';     
+    $prog =~ s#if \(-e _ and -f _ and -r _\)#if (-e _ and -f _)# if $^O eq 'VMS';  # VMS file locking 
+
     print TEST $prog, "\n";
     close TEST or die "Cannot close $tmpfile: $!";
 

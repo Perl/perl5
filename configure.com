@@ -53,9 +53,19 @@ $ use_two_pot_malloc = "N"
 $ use_pack_malloc = "N"
 $ use_debugmalloc = "N"
 $ ccflags = ""
+$ static_ext = ""
 $ vms_default_directory_name = F$ENVIRONMENT("DEFAULT")
 $ max_allowed_dir_depth = 3  ! e.g. [A.B.PERLxxx] not [A.B.C.PERLxxx]
 $! max_allowed_dir_depth = 2 ! e.g. [A.PERLxxx] not [A.B.PERLxxx]
+$!
+$! Sebastian Bazley's request: close the CONFIG handle with /NOLOG
+$! qualifier "just in case" (configure.com is re @ed in a bad state).
+$! This construct was tested to be not a problem as far back as
+$! VMS V5.5-2, hopefully earlier versions are OK as well.
+$!
+$ CLOSE/NOLOG CONFIG
+$!
+$! Now keep track of open files
 $!
 $ vms_filcnt = F$GETJPI ("","FILCNT")
 $!
@@ -2068,6 +2078,10 @@ $   Has_socketshr = "F"
 $   ans = F$EDIT(ans,"TRIM,COMPRESS,LOWERCASE")
 $   IF ans.eqs."decc" then Has_Dec_C_Sockets = "T"
 $   IF ans.eqs."socketshr" then Has_socketshr = "T"
+$ ENDIF
+$ IF Has_Dec_C_Sockets .or. Has_socketshr
+$ THEN
+$   static_ext = f$edit(static_ext+" "+"Socket","trim,compress")
 $ ENDIF
 $!
 $!
@@ -4693,9 +4707,11 @@ $ ENDIF
 $ IF use_vmsdebug_perl
 $ THEN
 $   optimize="/Debug/NoOpt"
+$   ldflags="/Debug/Trace/Map"
 $   dbgprefix = "DBG"
 $ ELSE
 $   optimize= ""
+$   ldflags="/NoTrace/NoMap"
 $   dbgprefix = ""
 $ ENDIF
 $!
@@ -5180,7 +5196,7 @@ $ WC "ivtype='" + ivtype + "'"
 $ WC "known_extensions='" + known_extensions + "'"
 $ WC "ld='" + ld + "'"
 $ WC "lddlflags='/Share'"
-$ WC "ldflags='/NoTrace/NoMap'"
+$ WC "ldflags='" + ldflags + "'"
 $ WC "lib_ext='" + lib_ext + "'"
 $ WC "libc='" + libc + "'"
 $ WC "libpth='/sys$share /sys$library'"
@@ -5283,7 +5299,7 @@ $ WC "spitshell='write sys$output '"
 $ WC "src='" + src + "'"
 $ WC "ssizetype='int'"
 $ WC "startperl=" + startperl ! This one's special--no enclosing single quotes
-$ WC "static_ext='" + "'"
+$ WC "static_ext='" + static_ext + "'"
 $ WC "stdchar='" + stdchar + "'"
 $ WC "stdio_base='((*fp)->_base)'"
 $ WC "stdio_bufsiz='((*fp)->_cnt + (*fp)->_ptr - (*fp)->_base)'"
