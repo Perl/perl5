@@ -99,7 +99,7 @@ sub SWASHNEW {
 	while ($x =~ /^([^0-9a-fA-F\n])(.*)/mg) {
 	    my $char = $1;
 	    my $name = $2;
-#	    print STDERR "$1 => $2\n" if DEBUG;
+	    print STDERR "$1 => $2\n" if DEBUG;
 	    if ($char =~ /[-+!]/) {
 		my ($c,$t) = split(/::/, $name, 2);	# bogus use of ::, really
 		my $subobj = $c->SWASHNEW($t, "", 0, 0, 0);
@@ -147,7 +147,7 @@ sub SWASHGET {
 		my $max = (defined $2 ? hex $2 : $min);
 		my $val = hex $3;
 		next if $max < $start;
-#		print "$min $max $val\n";
+		print "$min $max $val\n" if DEBUG;
 		if ($none) {
 		    if ($min < $start) {
 			$val += $start - $min if $val < $none;
@@ -155,7 +155,7 @@ sub SWASHGET {
 		    }
 		    for ($key = $min; $key <= $max; $key++) {
 			last LINE if $key >= $end;
-#			print STDERR "$key => $val\n" if DEBUG;
+			print STDERR "$key => $val\n" if DEBUG;
 			vec($swatch, $key - $start, $bits) = $val;
 			++$val if $val < $none;
 		    }
@@ -167,7 +167,7 @@ sub SWASHGET {
 		    }
 		    for ($key = $min; $key <= $max; $key++, $val++) {
 			last LINE if $key >= $end;
-#			print STDERR "$key => $val\n" if DEBUG;
+			print STDERR "$key => $val\n" if DEBUG;
 			vec($swatch, $key - $start, $bits) = $val;
 		    }
 		}
@@ -184,7 +184,7 @@ sub SWASHGET {
 		}
 		for ($key = $min; $key <= $max; $key++) {
 		    last LINE if $key >= $end;
-#		    print STDERR "$key => 1\n" if DEBUG;
+		    print STDERR "$key => 1\n" if DEBUG;
 		    vec($swatch, $key - $start, 1) = 1;
 		}
 	    }
