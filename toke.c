@@ -682,7 +682,7 @@ S_check_uni(pTHX)
         char ch = *s;
         *s = '\0';
         Perl_warner(aTHX_ packWARN(WARN_AMBIGUOUS),
-		   "Warning: Use of \"%s\" without parens is ambiguous",
+		   "Warning: Use of \"%s\" without parentheses is ambiguous",
 		   PL_last_uni);
         *s = ch;
     }
