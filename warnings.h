@@ -65,12 +65,13 @@
 #define WARN_RESERVED		37
 #define WARN_SEMICOLON		38
 #define WARN_TAINT		39
-#define WARN_UNINITIALIZED	40
-#define WARN_UNPACK		41
-#define WARN_UNTIE		42
-#define WARN_UTF8		43
-#define WARN_VOID		44
-#define WARN_Y2K		45
+#define WARN_THREADS		40
+#define WARN_UNINITIALIZED	41
+#define WARN_UNPACK		42
+#define WARN_UNTIE		43
+#define WARN_UTF8		44
+#define WARN_VOID		45
+#define WARN_Y2K		46
 
 #define WARNsize		12
 #define WARN_ALLstring		"\125\125\125\125\125\125\125\125\125\125\125\125"

@@ -83,30 +83,28 @@ threads - Perl extension allowing use of interpreter based threads from perl
 
 =head1 SYNOPSIS
 
-use threads;
+    use threads;
 
-sub start_thread {
-    print "Thread started\n";
-}
+    sub start_thread {
+	print "Thread started\n";
+    }
 
-my $thread = threads->create("start_thread","argument");
+    my $thread  = threads->create("start_thread","argument");
+    my $thread2 = $thread->create(sub { print "I am a thread"},"argument");
+    my $thread3 = async { foreach (@files) { ... } };
 
-$thread->create(sub { print "I am a thread"},"argument");
+    $thread->join();
+    $thread->detach();
 
-$thread->join();
+    $thread = threads->self();
 
-$thread->detach();
+    $thread->tid();
+    threads->tid();
+    threads->self->tid();
 
-$thread = threads->self();
+    threads->yield();
 
-threads->tid();
-threads->self->tid();
-
-$thread->tid();
-
-threads->yield();
-
-threads->list();
+    threads->list();
 
 =head1 DESCRIPTION
 
@@ -123,7 +121,7 @@ important to note that variables are not shared between threads, all
 variables are per default thread local.  To use shared variables one
 must use threads::shared.
 
-It is also important to note that you preferably enable threads by
+It is also important to note that you must enable threads by
 doing C<use threads> as early as possible and that it is not possible
 to enable threading inside an eval "";  In particular, if you are
 intending to share variables with threads::shared, you must
@@ -136,32 +134,43 @@ a warning if you do it the other way around.
 
 This will create a new thread with the entry point function and give
 it LIST as parameters.  It will return the corresponding threads
-object.
+object. The new() method is an alias for create().
 
 =item $thread->join
 
-This will wait for the corresponding thread to join. When it finishes
-join will return the return values of the entry point function.  If a
-thread has been detached, an error will be thrown..
+This will wait for the corresponding thread to join. When the thread finishes,
+join() will return the return values of the entry point function. If the
+thread has been detached, an error will be thrown. If the program
+exits without all other threads having been either joined or detached,
+then a warning will be issued. (A program exits either because one of its
+threads explicitly calls exit(), or in the case of the main thread, reaches
+the end of the main program file.)
 
 =item $thread->detach
 
-Will throw away the return value from the thread and make it
-non-joinable.
+Will make the thread unjoinable, and cause any eventual return value to be
+discarded.
 
 =item threads->self
 
-This will return the object for the current thread.
+This will return the thread object for the current thread.
 
 =item $thread->tid
 
-This will return the id of the thread.  threads->tid() is a quick way 
-to get current thread id if you don't have your thread handy.
+This will return the id of the thread.  Thread IDs are integers, with the
+main thread in a program being 0.  Currently Perl assigns a unique tid to
+every thread ever created in your program, assigning the first thread to
+be created a tid of 1, and increasing the tid by 1 for each new thread
+that's created.
+
+NB the class method C<< threads->tid() >> is a quick way to get the
+current thread id if you don't have your thread object handy.
 
 =item threads->yield();
 
-This will tell the OS to let this thread yield CPU time to other threads.
-However this is highly depending on the underlying thread implementation.
+This is a suggestion to the OS to let this thread yield CPU time to other
+threads.  What actually happens is highly dependent upon the underlying
+thread implementation.
 
 You may do C<use threads qw(yield)> then use just a bare C<yield> in your
 code.
@@ -174,7 +183,7 @@ This will return a list of all non joined, non detached threads.
 
 C<async> creates a thread to execute the block immediately following
 it.  This block is treated as an anonymous sub, and so must have a
-semi-colon after the closing brace. Like C<threads-&gt;new>, C<async>
+semi-colon after the closing brace. Like C<< threads->new >>, C<async>
 returns a thread object.
 
 =back
@@ -194,11 +203,11 @@ exit from then main thread.
 
 =head1 BUGS / TODO
 
-The current implmentation of threads has been an attempt to get
+The current implementation of threads has been an attempt to get
 a correct threading system working that could be built on, 
 and optimized, in newer versions of perl.
 
-Current the overhead of creating a thread is rather large,
+Currently the overhead of creating a thread is rather large,
 also the cost of returning values can be large. These are areas
 were there most likely will be work done to optimize what data
 that needs to be cloned.
