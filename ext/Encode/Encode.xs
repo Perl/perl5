@@ -130,13 +130,13 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 				   &clen, UTF8_ALLOW_ANY|UTF8_CHECK_ONLY);
 		if (check & ENCODE_DIE_ON_ERR) {
 		    Perl_croak(
-			aTHX_ "\"\\N{U+%" UVxf "}\" does not map to %s",
+                       aTHX_ "\"\\x{%04" UVxf "}\" does not map to %s",
 			(UV)ch, enc->name[0]);
 		    return &PL_sv_undef; /* never reaches but be safe */
 		}
 		if (check & ENCODE_WARN_ON_ERR){
 		    Perl_warner(aTHX_ packWARN(WARN_UTF8),
-				"\"\\N{U+%" UVxf "}\" does not map to %s",
+                               "\"\\x{%" UVxf "}\" does not map to %s",
 				(UV)ch, enc->name[0]);
 		}
 		if (check & ENCODE_RETURN_ON_ERR){
