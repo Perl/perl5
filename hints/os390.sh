@@ -68,10 +68,17 @@ case "$usenm" in
 '') usenm='false' ;;
 esac
 
-# Dynamic loading doesn't work on OS/390 quite yet.
-# However the easiest way to experiment with dynamic loading is with:
-#  Configure -Dusedl
-# You can even override some of this with things like:
+# Setting ldflags='-Wl,EDIT=NO' will get rid of the symbol
+# information at the end of the executable (=> smaller binaries).
+# Override this option with -Dldflags='whatever else you wanted'.
+case "$ldflags" in
+'') ldflags='-Wl,EDIT=NO' ;;
+esac
+
+# In order to build with dynamic be sure to specify:
+#   Configure -Dusedl
+# Do not forget to add $archlibexp/CORE to your LIBPATH.
+# You might want to override some of this with things like:
 #  Configure -Dusedl -Ddlext=so -Ddlsrc=dl_dllload.xs.
 case "$usedl" in
 '')
@@ -105,12 +112,6 @@ define)
     libperl="libperl.$so"
     ccflags="$ccflags -D_SHR_ENVIRON -DPERL_EXTERNAL_GLOB -Wc,dll"
     cccdlflags='-c -Wc,dll,EXPORTALL'
-    # You might add '-Wl,EDIT=NO' to get rid of the symbol
-    # information at the end of the executable (=> smaller binaries).
-    # Do so with -Dldflags='-Wl,EDIT=NO'.
-    case "$ldflags" in
-    '') ldflags='' ;;
-    esac
     # The following will need to be modified for the installed libperl.x.
     # The modification to Config.pm is done by the installperl script after the build and test.
     ccdlflags="-W l,dll `pwd`/libperl.x"
