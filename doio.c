@@ -431,7 +431,7 @@ register GV *gv;
 #endif
 		}
 		else {
-#ifndef DOSISH
+#if !defined(DOSISH) && !defined(AMIGAOS)
 #  ifndef VMS  /* Don't delete; use automatic file versioning */
 		    if (UNLINK(oldname) < 0) {
 			warn("Can't rename %s to %s: %s, skipping file",
