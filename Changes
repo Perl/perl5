@@ -31,6 +31,307 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 11099] By: jhi                                   on 2001/07/02  17:46:31
+        Log: Retract #11055, didn't help much (2736 bytes vs 2725 bytes leaked).
+             The real fix must be more involved.  The line of code all the leaky
+             call stacks seem to go through is op.c:2949, the PmopSTASH_set()
+             line of Perl_newPMOP().
+     Branch: perl
+	   ! op.h
+____________________________________________________________________________
+[ 11098] By: jhi                                   on 2001/07/02  17:37:44
+        Log: Based on
+             
+             Subject: Re: sizeof(struct sembuf)
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sun, 1 Jul 2001 22:26:48 +0100
+             Message-ID: <20010701222648.W59620@plum.flirble.org>
+             
+             but do semop() always the slow way.
+     Branch: perl
+	   ! doio.c
+____________________________________________________________________________
+[ 11097] By: jhi                                   on 2001/07/02  17:22:14
+        Log: Subject: [PATCH] Encode/Tcl.t, for esc-seq encodings
+             From: SADAHIRO Tomoyuki <BQW10602@nifty.com>
+             Date: Tue, 03 Jul 2001 00:56:30 +0900
+             Message-Id: <20010703005600.2225.BQW10602@nifty.com>
+     Branch: perl
+	   ! ext/Encode/Encode/Tcl.t
+____________________________________________________________________________
+[ 11096] By: jhi                                   on 2001/07/02  17:11:24
+        Log: Subject: [PATCH] Encode/Tcl.pm, continuous sequences
+             From: SADAHIRO Tomoyuki <BQW10602@nifty.com>
+             Date: Tue, 03 Jul 2001 00:55:46 +0900
+             Message-Id: <20010703005516.2222.BQW10602@nifty.com>
+     Branch: perl
+	   ! ext/Encode/Encode/Tcl.pm
+____________________________________________________________________________
+[ 11095] By: jhi                                   on 2001/07/02  17:07:14
+        Log: Regen api and toc.
+     Branch: perl
+	   ! pod/perlapi.pod pod/perltoc.pod
+____________________________________________________________________________
+[ 11094] By: jhi                                   on 2001/07/02  16:29:42
+        Log: Metaconfig unit change for #11093.
+     Branch: metaconfig/U/perl
+	   ! d_fcntl_can_lock.U
+____________________________________________________________________________
+[ 11093] By: jhi                                   on 2001/07/02  16:28:56
+        Log: The fcntl locking test may hang if NFS locking messed up;
+             break out with alarm(10).
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 11092] By: jhi                                   on 2001/07/02  14:11:31
+        Log: Move the mdelete.bat from win32/bin to win32.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 11091] By: jhi                                   on 2001/07/02  14:10:01
+        Log: Typo in #11083.
+     Branch: perl
+	   ! ext/Time/Piece/Piece.t
+____________________________________________________________________________
+[ 11090] By: jhi                                   on 2001/07/02  13:36:58
+        Log: Netware tweaks from Guruprasad.
+     Branch: perl
+	   - NetWare/perlsdio.h
+	   ! MANIFEST NetWare/Makefile NetWare/interface.c
+	   ! NetWare/interface.h NetWare/iperlhost.h NetWare/nwtinfo.h
+	   ! perlsdio.h
+____________________________________________________________________________
+[ 11089] By: jhi                                   on 2001/07/02  13:25:40
+        Log: Subject: Re: [PATH] shared -> unique;
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Wed, 27 Jun 2001 03:51:27 +0530
+             Message-ID: <20010627035127.A17623@lustre.lustre.dyn.wiw.org>
+     Branch: perl
+	   ! dump.c gv.c gv.h op.c pp_sys.c sv.c toke.c xsutils.c
+____________________________________________________________________________
+[ 11088] By: jhi                                   on 2001/07/02  13:24:27
+        Log: Subject: Re: AIX / gcc-3.0
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Mon, 02 Jul 2001 15:20:21 +0200
+             Message-Id: <20010702151904.49BB.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! hints/aix.sh
+____________________________________________________________________________
+[ 11087] By: jhi                                   on 2001/07/02  13:23:21
+        Log: Subject: Re: Bug report: split splits on wrong pattern
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Message-ID: <20010702163133.A23186@lustre.dyn.wiw.org>
+             Date: Mon, 2 Jul 2001 16:31:33 +0530
+     Branch: perl
+	   ! pp_ctl.c
+____________________________________________________________________________
+[ 11086] By: jhi                                   on 2001/07/02  13:22:30
+        Log: Subject: [PATCH 5.6.1] test harness
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 2 Jul 2001 06:29:21 -0400
+             Message-ID: <20010702062921.A1810@math.ohio-state.edu>
+     Branch: perl
+	   ! lib/Test/Harness.pm
+____________________________________________________________________________
+[ 11085] By: jhi                                   on 2001/07/02  13:21:39
+        Log: Subject: [PATCH 5.6.1] debugger goof
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 2 Jul 2001 06:27:22 -0400
+             Message-ID: <20010702062722.A1746@math.ohio-state.edu>
+     Branch: perl
+	   ! lib/perl5db.pl
+____________________________________________________________________________
+[ 11084] By: jhi                                   on 2001/07/02  13:20:50
+        Log: Subject: [PATCH 5.6.1] OS/2 cwd
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 2 Jul 2001 06:21:17 -0400
+             Message-ID: <20010702062117.A1401@math.ohio-state.edu>
+     Branch: perl
+	   ! lib/Cwd.pm lib/File/Find/taint.t lib/FindBin.pm os2/os2.c
+____________________________________________________________________________
+[ 11083] By: jhi                                   on 2001/07/02  13:19:18
+        Log: Make #11082 more OS/2-specific.
+     Branch: perl
+	   ! ext/Time/Piece/Piece.t
+____________________________________________________________________________
+[ 11082] By: jhi                                   on 2001/07/02  13:14:36
+        Log: Subject: [PATCH 5.6.1] OS/2 gmtime()
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 2 Jul 2001 06:06:34 -0400
+             Message-ID: <20010702060634.A1356@math.ohio-state.edu>
+     Branch: perl
+	   ! ext/Time/Piece/Piece.t
+____________________________________________________________________________
+[ 11081] By: jhi                                   on 2001/07/02  13:13:08
+        Log: Subject: [PATCH B::Deparse] version number & changes
+             From: Robin Houston <robin@kitsite.com>  
+             Date: Sun, 1 Jul 2001 17:17:29 +0100
+             Message-ID: <20010701171729.A30678@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 11080] By: jhi                                   on 2001/07/02  13:11:48
+        Log: Subject: a small fix.
+             From: "Konovalov, Vadim Vladimirovich (Vadim)" <vkonovalov@lucent.com>
+             Date: Mon, 2 Jul 2001 12:17:53 +0200
+             Message-ID: <E3FB32585BF1D411B9E900805FF51A08074B35@RU0022EXCH001U>
+     Branch: perl
+	   ! ext/Thread/Thread.xs
+____________________________________________________________________________
+[ 11079] By: jhi                                   on 2001/07/02  13:10:39
+        Log: Subject: RE: perl@10907
+             From: "Konovalov, Vadim Vladimirovich (Vadim)" <vkonovalov@lucent.com>
+             Date: Mon, 2 Jul 2001 12:06:16 +0200
+             Message-ID: <E3FB32585BF1D411B9E900805FF51A08074B2C@RU0022EXCH001U>
+             
+             Borland C vs PerlIO.
+     Branch: perl
+	   ! win32/config.bc win32/config_H.bc
+____________________________________________________________________________
+[ 11078] By: jhi                                   on 2001/07/02  13:03:44
+        Log: Subject: [PATCH] Report /pro/3gl/CPAN/perl-5.7.1
+             From: "H.M. Brand" <merijn@l1.procura.nl>
+             Date: Mon, 02 Jul 2001 11:18:57 +0200
+             Message-Id: <20010702100811.4999.MERIJN@l1.procura.nl>
+     Branch: perl
+	   ! t/op/write.t
+____________________________________________________________________________
+[ 11077] By: jhi                                   on 2001/07/02  12:58:27
+        Log: Subject: [PATCH] Deleting ext/util/mkbootstrap
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 2 Jul 2001 00:26:24 -0400
+             Message-ID: <20010702002624.A18302@blackrider>
+     Branch: perl
+	   - ext/util/mkbootstrap
+____________________________________________________________________________
+[ 11076] By: jhi                                   on 2001/07/02  12:56:20
+        Log: Subject: [PATCH op.h] v minor comment tweak
+             From: Robin Houston <robin@puffinry.freeserve.co.uk>
+             Date: Mon, 2 Jul 2001 00:42:01 +0100
+             Message-Id: <E15GqxK-0006WZ-00.2001-07-02-00-48-46@mail18.svr.pol.co.uk>
+     Branch: perl
+	   ! op.h
+____________________________________________________________________________
+[ 11075] By: jhi                                   on 2001/07/02  12:53:48
+        Log: SysV IPC semops use native shorts, not forced-to-16-bit-shorts.
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 11074] By: jhi                                   on 2001/07/02  12:52:28
+        Log: Subject: Re: sizeof(struct sembuf)
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sun, 1 Jul 2001 19:23:16 +0100
+             Message-ID: <20010701192316.V59620@plum.flirble.org>
+             
+             s/signaling/signalling/
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 11073] By: jhi                                   on 2001/07/02  12:49:51
+        Log: Subject: [PATCH perlsnap] Suggestion for mnemonic for $^N
+             From: "Philip Newton" <Philip.Newton@gmx.net>
+             Date: Sun, 1 Jul 2001 09:37:56 +0200
+             Message-Id: <200107010733.KAA03920@taas.iki.fi>
+     Branch: perl
+	   ! pod/perlvar.pod
+____________________________________________________________________________
+[ 11072] By: jhi                                   on 2001/07/02  12:48:03
+        Log: Subject: [PATCH perlsnap] /^qnx|nto$/ --> /^(?:qnx|nto)$/
+             From: "Philip Newton" <Philip.Newton@gmx.net>
+             Date: Sun, 1 Jul 2001 09:37:56 +0200
+             Message-Id: <200107010733.KAA03925@taas.iki.fi>
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm lib/File/Spec/Unix.pm
+____________________________________________________________________________
+[ 11071] By: jhi                                   on 2001/07/02  12:45:12
+        Log: Metaconfig unit change for #11070.
+     Branch: metaconfig
+	   ! U/compline/randfunc.U
+____________________________________________________________________________
+[ 11070] By: jhi                                   on 2001/07/02  12:43:58
+        Log: Subject: [PATCH perlsnap] its --> it's --> its
+             From: "Philip Newton" <Philip.Newton@gmx.net>
+             Date: Sun, 1 Jul 2001 09:37:56 +0200
+             Message-Id: <200107010733.KAA03914@taas.iki.fi>
+     Branch: perl
+	   ! Porting/config_H
+____________________________________________________________________________
+[ 11069] By: jhi                                   on 2001/07/02  12:01:52
+        Log: Sync with Sarathy; integrate with perlio.
+     Branch: perl
+	  !> gv.c
+____________________________________________________________________________
+[ 11068] By: gsar                                  on 2001/07/02  08:07:54
+        Log: regenerate win32/config_H.?c files
+     Branch: perl
+	   ! win32/config_H.bc win32/config_H.gc win32/config_H.vc
+____________________________________________________________________________
+[ 11067] By: gsar                                  on 2001/07/02  08:03:55
+        Log: rename s/sv_getcwd/getcwd_sv/ for better conformance to existing
+             naming discipline
+             
+             win32 fix: enable getcwd_sv() to work on windows (POSIX.t was failing
+             because of this)
+             
+             fix a warning about "fd" being used without being set in Cwd.xs
+     Branch: perl
+	   ! embed.h embed.pl ext/Cwd/Cwd.xs ext/POSIX/POSIX.t
+	   ! ext/POSIX/POSIX.xs global.sym objXSUB.h perlapi.c
+	   ! pod/perlapi.pod proto.h util.c win32/config.bc win32/config.gc
+	   ! win32/config.vc
+____________________________________________________________________________
+[ 11066] By: gsar                                  on 2001/07/02  07:12:10
+        Log: win32 fixes: fix various syntax errors ("no preprocessor directives
+             within macro arguments") and warnings ("unary minus applied to
+             unsigned type", among others)
+     Branch: perl
+	   ! gv.c hv.c op.c pp.c sv.c toke.c
+____________________________________________________________________________
+[ 11065] By: gsar                                  on 2001/07/02  06:26:22
+        Log: win32 fixes: more spurious CRs
+     Branch: perl
+	   ! win32/mdelete.bat
+____________________________________________________________________________
+[ 11064] By: gsar                                  on 2001/07/02  06:25:22
+        Log: win32 tweaks: remove extra CRs from makefile.mk; move mdelete.bat
+             from win32/bin (or it gets deleted by distclean); don't delete
+             lib/Cwd.pm during distclean; mdelete.bat doesn't work properly on
+             NT (should be made Win9x specific, and added to makefile.mk)
+     Branch: perl
+	  +> win32/mdelete.bat
+	   - win32/bin/mdelete.bat
+	   ! win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[ 11063] By: nick                                  on 2001/07/01  18:54:09
+        Log: Quick for for #ifdef mess
+     Branch: perlio
+	   ! gv.c
+____________________________________________________________________________
+[ 11062] By: nick                                  on 2001/07/01  18:47:42
+        Log: Raw integrate - does not build #if mess in gv.c
+     Branch: perlio
+	  !> (integrate 29 files)
+____________________________________________________________________________
+[ 11061] By: jhi                                   on 2001/07/01  15:20:38
+        Log: Make 'compile' target a little less broken.
+             Still very broken, though: -Wall warnings from
+             the generated code, boot_Foo prototypes missing,
+             can't autoload Fcntl::SEEK_CUR et alia, ...
+     Branch: perl
+	   ! ext/B/B/C.pm pod/Makefile.SH t/TEST utils/Makefile
+	   ! utils/perlcc.PL x2p/Makefile.SH
+____________________________________________________________________________
+[ 11060] By: jhi                                   on 2001/07/01  14:04:20
+        Log: Upgrade to Storable 1.0.12, from Raphael Manfredi.
+     Branch: perl
+	   ! ext/Storable/ChangeLog ext/Storable/Storable.pm
+	   ! ext/Storable/Storable.xs ext/Storable/t/freeze.t
+____________________________________________________________________________
+[ 11059] By: jhi                                   on 2001/07/01  05:02:59
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 11058] By: jhi                                   on 2001/07/01  04:57:05
         Log: Still one typo, regen toc.
      Branch: perl
