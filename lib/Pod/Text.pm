@@ -1,5 +1,5 @@
 # Pod::Text -- Convert POD data to formatted ASCII text.
-# $Id: Text.pm,v 2.14 2001/11/15 08:03:18 eagle Exp $
+# $Id: Text.pm,v 2.15 2001/11/23 06:14:10 eagle Exp $
 #
 # Copyright 1999, 2000, 2001 by Russ Allbery <rra@stanford.edu>
 #
@@ -42,7 +42,7 @@ use vars qw(@ISA @EXPORT %ESCAPES $VERSION);
 # Don't use the CVS revision as the version, since this module is also in Perl
 # core and too many things could munge CVS magic revision strings.  This
 # number should ideally be the same as the CVS revision in podlators, however.
-$VERSION = 2.14;
+$VERSION = 2.15;
 
 
 ##############################################################################
@@ -217,7 +217,6 @@ sub command {
     my $command = shift;
     return if $command eq 'pod';
     return if ($$self{EXCLUDE} && $command ne 'end');
-    $self->item ("\n") if defined $$self{ITEM};
     if ($self->can ('cmd_' . $command)) {
         $command = 'cmd_' . $command;
         $self->$command (@_);
@@ -343,61 +342,33 @@ sub preprocess_paragraph {
 
 # First level heading.
 sub cmd_head1 {
-    my $self = shift;
-    local $_ = shift;
-    s/\s+$//;
-    $_ = $self->interpolate ($_, shift);
-    if ($$self{alt}) {
-        $self->output ("\n==== $_ ====\n\n");
-    } else {
-        $_ .= "\n" if $$self{loose};
-        $self->output ($_ . "\n");
-    }
+    my ($self, $text, $line) = @_;
+    $self->heading ($text, $line, 0, '====');
 }
 
 # Second level heading.
 sub cmd_head2 {
-    my $self = shift;
-    local $_ = shift;
-    s/\s+$//;
-    $_ = $self->interpolate ($_, shift);
-    if ($$self{alt}) {
-        $self->output ("\n==   $_   ==\n\n");
-    } else {
-        $self->output (' ' x ($$self{indent} / 2) . $_ . "\n\n");
-    }
+    my ($self, $text, $line) = @_;
+    $self->heading ($text, $line, $$self{indent} / 2, '==  ');
 }
 
 # Third level heading.
 sub cmd_head3 {
-    my $self = shift;
-    local $_ = shift;
-    s/\s+$//;
-    $_ = $self->interpolate ($_, shift);
-    if ($$self{alt}) {
-        $self->output ("\n=    $_    =\n\n");
-    } else {
-        $self->output (' ' x ($$self{indent} * 2 / 3 + 0.5) . $_ . "\n\n");
-    }
+    my ($self, $text, $line) = @_;
+    $self->heading ($text, $line, $$self{indent} * 2 / 3 + 0.5, '=   ');
 }
 
 # Third level heading.
 sub cmd_head4 {
-    my $self = shift;
-    local $_ = shift;
-    s/\s+$//;
-    $_ = $self->interpolate ($_, shift);
-    if ($$self{alt}) {
-        $self->output ("\n-    $_    -\n\n");
-    } else {
-        $self->output (' ' x ($$self{indent} * 3 / 4 + 0.5) . $_ . "\n\n");
-    }
+    my ($self, $text, $line) = @_;
+    $self->heading ($text, $line, $$self{indent} * 3 / 4 + 0.5, '-   ');
 }
 
 # Start a list.
 sub cmd_over {
     my $self = shift;
     local $_ = shift;
+    $self->item ("\n\n") if defined $$self{ITEM};
     unless (/^[-+]?\d+\s+$/) { $_ = $$self{indent} }
     push (@{ $$self{INDENTS} }, $$self{MARGIN});
     $$self{MARGIN} += ($_ + 0);
@@ -406,6 +377,7 @@ sub cmd_over {
 # End a list.
 sub cmd_back {
     my ($self, $text, $line, $paragraph) = @_;
+    $self->item ("\n\n") if defined $$self{ITEM};
     $$self{MARGIN} = pop @{ $$self{INDENTS} };
     unless (defined $$self{MARGIN}) {
         my $file;
@@ -421,7 +393,7 @@ sub cmd_item {
     if (defined $$self{ITEM}) { $self->item }
     local $_ = shift;
     s/\s+$//;
-    $$self{ITEM} = $self->interpolate ($_);
+    $$self{ITEM} = $_ ? $self->interpolate ($_) : '*';
 }
 
 # Begin a block for a particular translator.  Setting VERBATIM triggers
@@ -512,6 +484,28 @@ sub seq_l {
 
 
 ##############################################################################
+# Header handling
+##############################################################################
+
+# The common code for handling all headers.  Takes the interpolated header
+# text, the line number, the indentation, and the surrounding marker for the
+# alt formatting method.
+sub heading {
+    my ($self, $text, $line, $indent, $marker) = @_;
+    $self->item ("\n\n") if defined $$self{ITEM};
+    $text =~ s/\s+$//;
+    $text = $self->interpolate ($text, $line);
+    if ($$self{alt}) {
+        my $closemark = reverse (split (//, $marker));
+        $self->output ("\n" . "$marker $text $closemark" . "\n\n");
+    } else {
+        $text .= "\n" if $$self{loose};
+        $self->output (' ' x $indent . $text . "\n");
+    }
+}
+
+
+##############################################################################
 # List handling
 ##############################################################################
 
@@ -540,9 +534,16 @@ sub item {
         $$self{MARGIN} = $indent;
         my $output = $self->reformat ($tag);
         $output =~ s/\n*$/\n/;
+
+        # If the text is just whitespace, we have an empty item paragraph;
+        # this can result from =over/=item/=back without any intermixed
+        # paragraphs.  Insert some whitespace to keep the =item from merging
+        # into the next paragraph.
+        $output .= "\n" if $_ && $_ =~ /^\s*$/;
+
         $self->output ($output);
         $$self{MARGIN} = $margin;
-        $self->output ($self->reformat ($_)) if /\S/;
+        $self->output ($self->reformat ($_)) if $_ && /\S/;
     } else {
         $_ = $self->reformat ($_);
         s/^ /:/ if ($$self{alt} && $indent > 0);

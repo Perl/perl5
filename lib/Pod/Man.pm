@@ -1,5 +1,5 @@
 # Pod::Man -- Convert POD data to formatted *roff input.
-# $Id: Man.pm,v 1.26 2001/11/15 09:02:06 eagle Exp $
+# $Id: Man.pm,v 1.28 2001/11/23 08:13:16 eagle Exp $
 #
 # Copyright 1999, 2000, 2001 by Russ Allbery <rra@stanford.edu>
 #
@@ -38,7 +38,7 @@ use vars qw(@ISA %ESCAPES $PREAMBLE $VERSION);
 # Don't use the CVS revision as the version, since this module is also in Perl
 # core and too many things could munge CVS magic revision strings.  This
 # number should ideally be the same as the CVS revision in podlators, however.
-$VERSION = 1.26;
+$VERSION = 1.28;
 
 
 ##############################################################################
@@ -363,12 +363,6 @@ sub initialize {
     $$self{LQUOTE} =~ s/\"/\"\"/;
     $$self{RQUOTE} =~ s/\"/\"\"/;
 
-    $$self{INDENT}    = 0;      # Current indentation level.
-    $$self{INDENTS}   = [];     # Stack of indentations.
-    $$self{INDEX}     = [];     # Index keys waiting to be printed.
-    $$self{ITEMS}     = 0;      # The number of consecutive =items.
-    $$self{NEWINDENT} = 0;      # Whether we've seen =over without =item.
-
     $self->SUPER::initialize;
 }
 
@@ -420,7 +414,7 @@ sub begin_pod {
                 splice (@dirs, 0, $cut);
                 shift @dirs if ($dirs[0] =~ /^site(_perl)?$/);
                 shift @dirs if ($dirs[0] =~ /^[\d.]+$/);
-                shift @dirs if ($dirs[0] =~ /^(.*-$^O|$^O-.*)$/);
+                shift @dirs if ($dirs[0] =~ /^(.*-$^O|$^O-.*|$^O)$/);
             }
             shift @dirs if $dirs[0] eq 'lib';
             splice (@dirs, 0, 2) if ($dirs[0] eq 'blib' && $dirs[1] eq 'lib');
@@ -474,8 +468,12 @@ $_
 ----END OF HEADER----
 
     # Initialize a few per-file variables.
-    $$self{INDENT} = 0;
-    $$self{NEEDSPACE} = 0;
+    $$self{INDENT}    = 0;      # Current indentation level.
+    $$self{INDENTS}   = [];     # Stack of indentations.
+    $$self{INDEX}     = [];     # Index keys waiting to be printed.
+    $$self{ITEMS}     = 0;      # The number of consecutive =items.
+    $$self{SHIFTWAIT} = 0;      # Whether there is a shift waiting.
+    $$self{SHIFTS}    = [];     # Stack of .RS shifts.
 }
 
 
@@ -544,10 +542,10 @@ sub textblock {
     # handle creation of the indent here.  Set WEIRDINDENT so that it will be
     # cleaned up on =back.
     $self->makespace;
-    if ($$self{NEWINDENT}) {
+    if ($$self{SHIFTWAIT}) {
         $self->output (".RS $$self{INDENT}\n");
-        $$self{WEIRDINDENT} = 1;
-        $$self{NEWINDENT} = 0;
+        push (@{ $$self{SHIFTS} }, $$self{INDENT});
+        $$self{SHIFTWAIT} = 0;
     }
     $self->output (protect $self->textmapfonts ($text));
     $self->outindex;
@@ -689,7 +687,7 @@ sub cmd_head3 {
         $self->output (".PD\n");
     }
     $self->makespace;
-    $self->output ($self->switchquotes ('.I', $self->mapfonts ($_)));
+    $self->output ($self->textmapfonts ('\f(IS' . $_ . '\f(IE') . "\n");
     $self->outindex ('Subsection', $_);
     $$self{NEEDSPACE} = 1;
 }
@@ -716,12 +714,13 @@ sub cmd_over {
     my $self = shift;
     local $_ = shift;
     unless (/^[-+]?\d+\s+$/) { $_ = $$self{indent} }
-    if (@{ $$self{INDENTS} } > 0 && !$$self{WEIRDINDENT}) {
+    if (@{ $$self{SHIFTS} } < @{ $$self{INDENTS} }) {
         $self->output (".RS $$self{INDENT}\n");
+        push (@{ $$self{SHIFTS} }, $$self{INDENT});
     }
     push (@{ $$self{INDENTS} }, $$self{INDENT});
     $$self{INDENT} = ($_ + 0);
-    $$self{NEWINDENT} = 1;
+    $$self{SHIFTWAIT} = 1;
 }
 
 # End a list.  If we've closed an embedded indent, we've mangled the hanging
@@ -736,17 +735,16 @@ sub cmd_back {
         warn "$file:$line: Unmatched =back\n";
         $$self{INDENT} = 0;
     }
-    if ($$self{WEIRDINDENT}) {
+    if (@{ $$self{SHIFTS} } > @{ $$self{INDENTS} }) {
         $self->output (".RE\n");
-        $$self{WEIRDINDENT} = 0;
+        pop @{ $$self{SHIFTS} };
     }
     if (@{ $$self{INDENTS} } > 0) {
         $self->output (".RE\n");
         $self->output (".RS $$self{INDENT}\n");
-        $$self{WEIRDINDENT} = 1;
     }
     $$self{NEEDSPACE} = 1;
-    $$self{NEWINDENT} = 0;
+    $$self{SHIFTWAIT} = 0;
 }
 
 # An individual list item.  Emit an index entry for anything that's
@@ -766,9 +764,9 @@ sub cmd_item {
     }
     $_ = '*' unless $_;
     s/^\*(\s|\Z)/\\\(bu$1/;
-    if ($$self{WEIRDINDENT}) {
+    if (@{ $$self{SHIFTS} } == @{ $$self{INDENTS} }) {
         $self->output (".RE\n");
-        $$self{WEIRDINDENT} = 0;
+        pop @{ $$self{SHIFTS} };
     }
     $_ = $self->textmapfonts ($_);
     $self->output (".PD 0\n") if ($$self{ITEMS} == 1);
@@ -776,7 +774,7 @@ sub cmd_item {
     $self->outindex ($index ? ('Item', $index) : ());
     $$self{NEEDSPACE} = 0;
     $$self{ITEMS}++;
-    $$self{NEWINDENT} = 0;
+    $$self{SHIFTWAIT} = 0;
 }
 
 # Begin a block for a particular translator.  Setting VERBATIM triggers
@@ -1039,19 +1037,20 @@ sub outindex {
     my @entries = map { split m%\s*/\s*% } @{ $$self{INDEX} };
     return unless ($section || @entries);
     $$self{INDEX} = [];
-    my $output;
+    my @output;
     if (@entries) {
-        $output = '.IX Xref "'
-            . join (' ', map { s/\"/\"\"/; $_ } @entries)
-            . '"' . "\n";
+        push (@output, [ 'Xref', join (' ', @entries) ]);
     }
     if ($section) {
-        $index =~ s/\"/\"\"/;
         $index =~ s/\\-/-/g;
         $index =~ s/\\(?:s-?\d|.\(..|.)//g;
-        $output .= ".IX $section " . '"' . $index . '"' . "\n";
+        push (@output, [ $section, $index ]);
     }
-    $self->output ($output);
+    for (@output) {
+        my ($type, $entry) = @$_;
+        $entry =~ s/\"/\"\"/g;
+        $self->output (".IX $type " . '"' . $entry . '"' . "\n");
+    }
 }
 
 # Output text to the output device.
@@ -1073,12 +1072,14 @@ sub switchquotes {
 
     # We also have to deal with \*C` and \*C', which are used to add the
     # quotes around C<> text, since they may expand to " and if they do this
-    # confuses the .SH macros and the like no end.  Expand them ourselves.  If
-    # $extra is set, we're dealing with =item, which in most nroff macro sets
-    # requires an extra level of quoting of double quotes because it passes
-    # the argument off to .TP.
+    # confuses the .SH macros and the like no end.  Expand them ourselves.
+    # Also separate troff from nroff if there are any fixed-width fonts in use
+    # to work around problems with Solaris nroff.
     my $c_is_quote = ($$self{LQUOTE} =~ /\"/) || ($$self{RQUOTE} =~ /\"/);
-    if (/\"/ || /\\f\(CW/) {
+    my $fixedpat = join ('|', @{ $$self{FONTS} }{'100', '101', '110', '111'});
+    $fixedpat =~ s/\\/\\\\/g;
+    $fixedpat =~ s/\(/\\\(/g;
+    if (/\"/ || /$fixedpat/) {
         s/\"/\"\"/g;
         my $nroff = $_;
         my $troff = $_;
@@ -1094,10 +1095,11 @@ sub switchquotes {
         # Work around the Solaris nroff bug where \f(CW\fP leaves the font set
         # to Roman rather than the actual previous font when used in headings.
         # troff output may still be broken, but at least we can fix nroff by
-        # just stripping out the font changes since fixed-width fonts don't
-        # mean anything for nroff.  While we're at it, also remove the font
-        # changes for nroff in =item tags, since they're unnecessary.
-        $nroff =~ s/\\f\(CW(.*)\\f[PR]/$1/g;
+        # just switching the font changes to the non-fixed versions.
+        $nroff =~ s/\Q$$self{FONTS}{100}\E(.*)\\f[PR]/$1/g;
+        $nroff =~ s/\Q$$self{FONTS}{101}\E(.*)\\f([PR])/\\fI$1\\f$2/g;
+        $nroff =~ s/\Q$$self{FONTS}{110}\E(.*)\\f([PR])/\\fB$1\\f$2/g;
+        $nroff =~ s/\Q$$self{FONTS}{111}\E(.*)\\f([PR])/\\f\(BI$1\\f$2/g;
 
         # Now finally output the command.  Only bother with .ie if the nroff
         # and troff output isn't the same.

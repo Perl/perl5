@@ -139,17 +139,17 @@ ext/Devel/Peek/Makefile.PL	Data debugging tool, makefile writer
 ext/Devel/Peek/Peek.pm		Data debugging tool, module and pod
 ext/Devel/Peek/Peek.t		See if Devel::Peek works
 ext/Devel/Peek/Peek.xs		Data debugging tool, externals
-ext/Devel/PPPort/Makefile.PL	Devel::PPPort makefile writer
-ext/Devel/PPPort/PPPort.pm	Devel::PPPort
-ext/Devel/PPPort/README		Devel::PPPort Readme
-ext/Devel/PPPort/TODO		Devel::PPPort Todo
 ext/Devel/PPPort/harness/Harness.pm	Devel::PPPort test harness
 ext/Devel/PPPort/harness/Harness.xs	Devel::PPPort test harness
 ext/Devel/PPPort/harness/Makefile.PL	Devel::PPPort::harness makefile writer
 ext/Devel/PPPort/harness/module2.c	Devel::PPPort test file
 ext/Devel/PPPort/harness/module3.c	Devel::PPPort test file
 ext/Devel/PPPort/harness/t/test.t	See if Devel::PPPort works
+ext/Devel/PPPort/Makefile.PL	Devel::PPPort makefile writer
+ext/Devel/PPPort/PPPort.pm	Devel::PPPort
+ext/Devel/PPPort/README		Devel::PPPort Readme
 ext/Devel/PPPort/soak			Test Harness to run Devel::PPPort other Perls
+ext/Devel/PPPort/TODO		Devel::PPPort Todo
 ext/Digest/MD5/Changes		Digest::MD5 extension changes
 ext/Digest/MD5/hints/irix_6.pl	Hints for named architecture
 ext/Digest/MD5/Makefile.PL	Digest::MD5 extension makefile writer
@@ -1167,7 +1167,15 @@ lib/Pod/Parser.pm		Pod-Parser - define base class for parsing POD
 lib/Pod/ParseUtils.pm		Pod-Parser - pod utility functions
 lib/Pod/Plainer.pm		Pod migration utility module
 lib/Pod/Select.pm		Pod-Parser - select portions of POD docs
+lib/Pod/t/basic.cap		podlators test
+lib/Pod/t/basic.clr		podlators test
+lib/Pod/t/basic.man		podlators test
+lib/Pod/t/basic.ovr		podlators test
+lib/Pod/t/basic.pod		podlators test
+lib/Pod/t/basic.t		podlators test
+lib/Pod/t/basic.txt		podlators test
 lib/Pod/t/latex.t		Test for Pod::LaTeX
+lib/Pod/t/parselink.t		podlators test
 lib/Pod/t/utils.t		Test for Pod::ParseUtils
 lib/Pod/Text.pm			Pod-Parser - convert POD data to formatted ASCII text
 lib/Pod/Text/Color.pm		Convert POD data to color ASCII text
@@ -1958,8 +1966,8 @@ pp.sym				Push/Pop code symbols
 pp_ctl.c			Push/Pop code for control flow
 pp_hot.c			Push/Pop code for heavily used opcodes
 pp_pack.c			Push/Pop code for pack/unpack
-pp_sort.c			Push/Pop code for sort
 pp_proto.h			C++ definitions for Push/Pop code
+pp_sort.c			Push/Pop code for sort
 pp_sys.c			Push/Pop code for system interaction
 proto.h				Prototypes
 qnx/ar				QNX implementation of "ar" utility
@@ -2495,5 +2503,5 @@ x2p/str.h			Public declarations for the above
 x2p/util.c			Utility routines
 x2p/util.h			Public declarations for the above
 x2p/walk.c			Parse tree walker
-XSUB.h			Include file for extension subroutines
+XSUB.h				Include file for extension subroutines
 xsutils.c			Additional bundled package methods not in UNIVERSAL::
