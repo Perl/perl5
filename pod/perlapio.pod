@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlio - perl's IO abstraction interface.
+perlapio - perl's IO abstraction interface.
 
 =head1 SYNOPSIS
 
