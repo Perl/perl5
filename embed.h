@@ -69,6 +69,7 @@
 #define boot_core_UNIVERSAL	Perl_boot_core_UNIVERSAL
 #define bor_amg			Perl_bor_amg
 #define bxor_amg		Perl_bxor_amg
+#define byterun			Perl_byterun
 #define call_list		Perl_call_list
 #define cando			Perl_cando
 #define cast_ulong		Perl_cast_ulong

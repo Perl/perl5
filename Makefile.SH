@@ -404,6 +404,10 @@ perly.c: perly.y
 perly.h: perly.y
 	-@sh -c true
 
+SYM  = global.sym interp.sym compat3.sym
+
+SYMH = perlvars.h thrdvar.h
+
 # The following files are generated automatically
 #	keywords.h:	keywords.pl
 #	opcode.h:	opcode.pl
@@ -504,7 +508,8 @@ $(FIRSTMAKEFILE):	README $(MAKEDEPEND)
 config.h: config_h.SH config.sh
 	$(SHELL) config_h.SH
 
-perl.exp: perl_exp.SH config.sh
+# This is an AIXism.
+perl.exp: perl_exp.SH config.sh $(SYM) $(SYMH)
 	$(SHELL) perl_exp.SH
 
 # When done, touch perlmain.c so that it doesn't get remade each time.
