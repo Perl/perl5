@@ -31,6 +31,351 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 12695] By: gsar                                  on 2001/10/26  15:34:31
+        Log: Term/Cap.t attempts to access the floppy drive for no good reason
+             on dosish systems
+     Branch: perl
+	   ! lib/Term/Cap.t
+____________________________________________________________________________
+[ 12694] By: gsar                                  on 2001/10/26  15:15:16
+        Log: fix misleading comment on known inadequacy in B::Terse, and skip
+             it correctly
+     Branch: perl
+	   ! ext/B/t/terse.t
+____________________________________________________________________________
+[ 12693] By: gsar                                  on 2001/10/26  14:53:56
+        Log: fix spurious AutoSplit.t failure under windows
+     Branch: perl
+	   ! lib/AutoSplit.t
+____________________________________________________________________________
+[ 12692] By: gsar                                  on 2001/10/26  14:39:06
+        Log: Time::HiRes::alarm() ain't gonna work either if ualarm() ain't
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.t
+____________________________________________________________________________
+[ 12691] By: jhi                                   on 2001/10/26  14:34:15
+        Log: More logical to use %04"UVXf" than %"UVuf" since
+             the Unicode standard prefers hex.
+     Branch: perl
+	   ! lib/unicore/To/Fold.pl lib/unicore/To/Lower.pl
+	   ! lib/unicore/To/Title.pl lib/unicore/To/Upper.pl
+	   ! lib/unicore/mktables utf8.c
+____________________________________________________________________________
+[ 12690] By: gsar                                  on 2001/10/26  14:15:55
+        Log: change#12065 seems to have broken Encode build on windows; fix
+     Branch: perl
+	   ! ext/Encode/Encode.xs ext/Encode/Makefile.PL
+____________________________________________________________________________
+[ 12689] By: jhi                                   on 2001/10/26  14:12:04
+        Log: Unicode: add the case folding table.
+     Branch: perl
+	   + lib/unicore/To/Fold.pl
+	   ! MANIFEST lib/unicore/mktables
+____________________________________________________________________________
+[ 12688] By: sky                                   on 2001/10/26  13:51:29
+        Log: Get the new functions right, do not export lock since we use builtin lock.
+             TODO: fix xsubpp to support the new prototypes
+     Branch: perl
+	   ! ext/threads/shared/shared.pm ext/threads/shared/shared.xs
+____________________________________________________________________________
+[ 12687] By: jhi                                   on 2001/10/26  13:43:03
+        Log: USE_ENVIRON_ARRAY instead of !MACOS_TRADITIONAL,
+             as suggested by Sarathy.
+     Branch: perl
+	   ! mg.c
+____________________________________________________________________________
+[ 12686] By: gsar                                  on 2001/10/26  13:39:52
+        Log: avoid compiler warning
+     Branch: perl
+	   ! win32/win32.c
+____________________________________________________________________________
+[ 12685] By: jhi                                   on 2001/10/26  13:39:12
+        Log: WinCE update from Rainer Keuchel.
+     Branch: perl
+	   ! perl.h wince/Makefile.ce wince/config.ce wince/perldll.def
+	   ! wince/wince.c
+____________________________________________________________________________
+[ 12684] By: sky                                   on 2001/10/26  13:34:33
+        Log: And then finally cond_wait cond_signal and cond_broadcast are now implmented.
+     Branch: perl
+	   ! ext/threads/shared/shared.pm ext/threads/shared/shared.xs
+____________________________________________________________________________
+[ 12683] By: gbarr                                 on 2001/10/26  13:32:47
+        Log: More fixes that were made to the core and not in the libnet src
+     Branch: perl
+	   ! lib/Net/Domain.pm
+____________________________________________________________________________
+[ 12682] By: jhi                                   on 2001/10/26  13:31:10
+        Log: Subject: Re: DB_File-1.79 on Cygwin 1.3.3
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>    
+             Date: Fri, 26 Oct 2001 13:55:21 +0200
+             Message-Id: <20011026135017.F575.H.M.BRAND@hccnet.nl>
+             
+             (plus make the db-recno.t#59 accept both \n and \r\n)
+     Branch: perl
+	   ! ext/DB_File/t/db-btree.t ext/DB_File/t/db-hash.t
+	   ! ext/DB_File/t/db-recno.t
+____________________________________________________________________________
+[ 12681] By: gbarr                                 on 2001/10/26  13:22:38
+        Log: Fix tests to be able to run in the core and the CPAN dist
+     Branch: perl
+	   ! lib/Net/t/ftp.t lib/Net/t/hostname.t lib/Net/t/nntp.t
+	   ! lib/Net/t/require.t lib/Net/t/smtp.t
+____________________________________________________________________________
+[ 12680] By: jhi                                   on 2001/10/26  13:16:03
+        Log: Subject: Re: perl@12605 on VMS, [minor PATCH enclosed]
+             From: lane@DUPHY4.Physics.Drexel.Edu (Charles Lane)
+             Message-Id: <011026081912.dc29b@DUPHY4.Physics.Drexel.Edu>
+             Date: Fri, 26 Oct 2001 08:34:46 EDT
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.t
+____________________________________________________________________________
+[ 12679] By: gbarr                                 on 2001/10/26  13:11:00
+        Log: Sync libnet modules with what will be libnet-1.08
+     Branch: perl
+	   ! lib/Net/ChangeLog.libnet lib/Net/Cmd.pm lib/Net/Config.pm
+	   ! lib/Net/Domain.pm lib/Net/FTP.pm lib/Net/FTP/I.pm
+	   ! lib/Net/Netrc.pm lib/Net/SMTP.pm lib/Net/t/ftp.t
+	   ! lib/Net/t/hostname.t lib/Net/t/nntp.t lib/Net/t/smtp.t
+____________________________________________________________________________
+[ 12678] By: jhi                                   on 2001/10/26  13:03:01
+        Log: Integrate maintperl changes #12268 and #12669;
+             
+             final touches to the audit for statics and thread-unsafe code
+             * make DB_File, ODBM_File thread-safe 
+             * remove unnecessary/dangerous statics and protect others
+             from not getting accidentally enabled under threaded perls
+             
+             windows support functions get_childdir() et al aren't exported
+             correctly under vanilla build
+             
+             Testing under win32 appreciated since changes there had
+             to be manually merged and I cannot test how badly did I do.
+     Branch: perl
+	  !> ext/B/B.xs ext/DB_File/DB_File.xs ext/File/Glob/Glob.xs
+	  !> ext/ODBM_File/ODBM_File.xs ext/Opcode/Opcode.xs ext/re/re.xs
+	  !> gv.c iperlsys.h makedef.pl mg.c op.c scope.c toke.c util.c
+	  !> win32/vmem.h win32/win32.c win32/win32iop.h
+____________________________________________________________________________
+[ 12677] By: sky                                   on 2001/10/26  12:37:17
+        Log: More Config::threads to threads::threads changes
+     Branch: perl
+	   ! ext/threads/shared/shared.pm ext/threads/t/basic.t
+____________________________________________________________________________
+[ 12676] By: sky                                   on 2001/10/26  12:31:46
+        Log: Make new() work exactly like create(). Move from Config::threads to threads::threads
+     Branch: perl
+	   ! ext/threads/threads.pm ext/threads/threads.xs
+____________________________________________________________________________
+[ 12675] By: sky                                   on 2001/10/26  12:06:30
+        Log: Allocing a TLS in runtime is not too hot.
+     Branch: perl
+	   ! ext/threads/threads.xs
+____________________________________________________________________________
+[ 12674] By: sky                                   on 2001/10/26  11:59:09
+        Log: Don't display debug data.
+     Branch: perl
+	   ! ext/threads/threads.pm
+____________________________________________________________________________
+[ 12673] By: sky                                   on 2001/10/26  11:35:47
+        Log: Extend support of change #12672 to support arrays and hashes. Shared reference support is
+             complete bar support for blessed objects.
+             TODO: tests for shared arrays and more hv reference tests. Also a complex test testing all types intermixed.
+     Branch: perl
+	   ! ext/threads/shared/shared.xs ext/threads/shared/t/hv_refs.t
+____________________________________________________________________________
+[ 12672] By: sky                                   on 2001/10/26  11:15:28
+        Log: Fix case where shared reference does not exist in current thread.
+     Branch: perl
+	   ! ext/threads/shared/shared.xs ext/threads/shared/t/hv_refs.t
+____________________________________________________________________________
+[ 12671] By: sky                                   on 2001/10/26  08:48:52
+        Log: Support for references in shared arrays.
+     Branch: perl
+	   ! ext/threads/shared/shared.xs
+____________________________________________________________________________
+[ 12670] By: sky                                   on 2001/10/26  08:30:11
+        Log: Add tests for references in hashes.
+     Branch: perl
+	   + ext/threads/shared/t/hv_refs.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 12669] By: gsar                                  on 2001/10/26  06:07:10
+        Log: windows support functions get_childdir() et al aren't exported
+             correctly under vanilla build
+     Branch: maint-5.6/perl
+	   ! iperlsys.h makedef.pl mg.c win32/win32.c win32/win32iop.h
+____________________________________________________________________________
+[ 12668] By: gsar                                  on 2001/10/26  03:52:12
+        Log: final touches to the audit for statics and thread-unsafe code
+             * make DB_File, ODBM_File thread-safe 
+             * remove unnecessary/dangerous statics and protect others
+             from not getting accidentally enabled under threaded perls
+     Branch: maint-5.6/perl
+	   ! ext/B/B.xs ext/DB_File/DB_File.xs ext/File/Glob/Glob.xs
+	   ! ext/ODBM_File/ODBM_File.xs ext/Opcode/Opcode.xs ext/re/re.xs
+	   ! gv.c mg.c op.c scope.c toke.c util.c win32/vmem.h
+	   ! win32/win32.c
+____________________________________________________________________________
+[ 12667] By: ams                                   on 2001/10/26  03:48:36
+        Log: Subject: [PATCH] Fix sharedsv.c compile-time warnings.
+             From: "Richard Soderberg" <rs@crystalflame.net>
+             Date: Thu, 25 Oct 2001 23:42:50 -0400
+             Message-Id: <NAEKLNAAHLMBPMPNBMLEKEJCEAAA.rs@crystalflame.net>
+     Branch: perl
+	   ! sharedsv.c
+____________________________________________________________________________
+[ 12666] By: jhi                                   on 2001/10/26  02:07:17
+        Log: Integrate change #12664 from maintperl;
+             
+             the newest GCCs don't seem to like C<"string1"##STRING2>
+             so keep it as C<"string1" STRING2> (latter appears to
+             work everywhere)
+     Branch: perl
+	  !> ext/DynaLoader/dlutils.c
+____________________________________________________________________________
+[ 12665] By: jhi                                   on 2001/10/26  02:04:29
+        Log: Subject: [PATCH] perl.h for Mac OS (Classic)
+             From: Chris Nandor <pudge@pobox.com>
+             Date: Thu, 25 Oct 2001 22:15:03 -0400
+             Message-Id: <p0510030db7fe771a5a34@[10.0.1.177]>
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[ 12664] By: gsar                                  on 2001/10/26  00:22:35
+        Log: the newest GCCs don't seem to like C<"string1"##STRING2> so keep it as
+             C<"string1" STRING2> (latter appears to work everywhere)
+     Branch: maint-5.6/perl
+	   ! ext/DynaLoader/dlutils.c
+____________________________________________________________________________
+[ 12663] By: jhi                                   on 2001/10/25  22:59:44
+        Log: AUTHORS update.
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[ 12662] By: jhi                                   on 2001/10/25  22:50:41
+        Log: Integrate change #12660 from maintperl;
+             
+             make the dMY_CXT stuff available under all of
+             MULTIPLICITY/PERL_OBJECT/USE_ITHREADS
+     Branch: perl
+	  !> perl.h
+____________________________________________________________________________
+[ 12661] By: jhi                                   on 2001/10/25  22:47:28
+        Log: Subject: [PATCH] DB_File-1.79
+             From: "Paul Marquess" <paul.marquess@openwave.com>
+             Date: Fri, 26 Oct 2001 00:03:54 +0100
+             Message-ID: <AIEAJICLCBDNAAOLLOKLAEELDDAA.paul.marquess@openwave.com>
+     Branch: perl
+	   ! ext/DB_File/Changes ext/DB_File/DB_File.xs
+	   ! ext/DB_File/t/db-recno.t ext/DB_File/version.c
+____________________________________________________________________________
+[ 12660] By: gsar                                  on 2001/10/25  22:44:44
+        Log: make the dMY_CXT stuff available under all of
+             MULTIPLICITY/PERL_OBJECT/USE_ITHREADS
+     Branch: maint-5.6/perl
+	   ! perl.h
+____________________________________________________________________________
+[ 12659] By: jhi                                   on 2001/10/25  21:27:23
+        Log: Subject: [PATCH t/run/killperl.t] Re: [ID 20011025.054] Segmentation fault when using the function read not correctly
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Thu, 25 Oct 2001 18:28:12 -0400
+             Message-ID: <20011025182812.M4811@blackrider>
+     Branch: perl
+	   ! t/run/kill_perl.t
+____________________________________________________________________________
+[ 12658] By: jhi                                   on 2001/10/25  20:54:58
+        Log: STRLEN != int.
+     Branch: perl
+	   ! regcomp.c regexec.c
+____________________________________________________________________________
+[ 12657] By: jhi                                   on 2001/10/25  20:51:44
+        Log: Subject: [PATCH] remove small IVop redundancy
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Thu, 25 Oct 2001 22:48:28 +0100
+             Message-ID: <20011025224827.M66471@plum.flirble.org>
+     Branch: perl
+	   ! pp.c pp_hot.c
+____________________________________________________________________________
+[ 12656] By: jhi                                   on 2001/10/25  18:45:52
+        Log: Metaconfig unit change for #12655.
+     Branch: metaconfig/U/perl
+	   ! Extensions.U
+____________________________________________________________________________
+[ 12655] By: jhi                                   on 2001/10/25  18:45:18
+        Log: Subject: Re: Not OK @12650
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Thu, 25 Oct 2001 15:34:02 -0400 (EDT)
+             Message-ID: <Pine.SOL.4.10.10110251520300.22317-100000@maxwell.phys.lafayette.edu>
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 12654] By: jhi                                   on 2001/10/25  18:07:58
+        Log: Integrate changes #12652 and #12653 from maintperl;
+             
+             more tweaks to change#12626
+             * move the boilerplate code over to perl.h and make DynaLoader
+             use it
+             * make re, Opcode, File::Glob and B threadsafe
+             * re.xs needed s/deinstall/uninstall/ (guess nobody uses
+             C<no re;> anywhere)
+             
+             include XS_VERSION in MY_CXT_KEY (tweak for change#12652)
+             
+             File::Glob required a bit more work in bleadperl
+             because of ExtUtils::Constant (see the Makefile.PL change)
+     Branch: perl
+	   ! ext/File/Glob/Glob.pm ext/File/Glob/Makefile.PL
+	  !> ext/B/B.xs ext/DynaLoader/dlutils.c ext/File/Glob/Glob.xs
+	  !> ext/Opcode/Opcode.xs ext/re/re.xs perl.h
+____________________________________________________________________________
+[ 12653] By: gsar                                  on 2001/10/25  17:23:52
+        Log: include XS_VERSION in MY_CXT_KEY (tweak for change#12652)
+     Branch: maint-5.6/perl
+	   ! ext/B/B.xs ext/DynaLoader/dlutils.c ext/File/Glob/Glob.xs
+	   ! ext/Opcode/Opcode.xs ext/re/re.xs
+____________________________________________________________________________
+[ 12652] By: gsar                                  on 2001/10/25  16:46:44
+        Log: more tweaks to change#12626
+             * move the boilerplate code over to perl.h and make DynaLoader
+             use it
+             * make re, Opcode, File::Glob and B threadsafe
+             * re.xs needed s/deinstall/uninstall/ (guess nobody uses
+             C<no re;> anywhere)
+     Branch: maint-5.6/perl
+	   ! ext/B/B.xs ext/DynaLoader/dlutils.c ext/File/Glob/Glob.xs
+	   ! ext/Opcode/Opcode.xs ext/re/re.xs perl.h
+____________________________________________________________________________
+[ 12651] By: jhi                                   on 2001/10/25  16:35:51
+        Log: Metaconfig unit change for #12650.
+     Branch: metaconfig/U/perl
+	   ! Extensions.U
+____________________________________________________________________________
+[ 12650] By: jhi                                   on 2001/10/25  16:35:34
+        Log: Subject: Re: ithreads doesn't like usedl=n
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Thu, 25 Oct 2001 13:16:00 -0400 (EDT)
+             Message-ID: <Pine.SOL.4.10.10110251312200.22183-100000@maxwell.phys.lafayette.edu>
+             
+             Special-case threads::shared.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 12649] By: jhi                                   on 2001/10/25  16:21:35
+        Log: Getting fancier...
+     Branch: perl
+	   ! t/TEST
+____________________________________________________________________________
+[ 12648] By: jhi                                   on 2001/10/25  14:26:20
+        Log: csh - what a pain.
+     Branch: perl
+	   ! t/TEST
+____________________________________________________________________________
+[ 12647] By: jhi                                   on 2001/10/25  14:04:01
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 12646] By: jhi                                   on 2001/10/25  13:34:19
         Log: Allow resetting the locale system for the duration
              of the build (Mac OS X default setting LANG=En_US
