@@ -121,11 +121,20 @@ struct block_sub {
     PAD		*oldcomppad;
 };
 
-/* base for the next two macros. Don't use directly */
+/* base for the next two macros. Don't use directly.
+ * Note that the refcnt of the cv is incremented twice;  The CX one is
+ * decremented by LEAVESUB, the other by LEAVE. */
+
 #define PUSHSUB_BASE(cx)						\
 	cx->blk_sub.cv = cv;						\
 	cx->blk_sub.olddepth = CvDEPTH(cv);				\
-	cx->blk_sub.hasargs = hasargs;
+	cx->blk_sub.hasargs = hasargs;					\
+	if (!CvDEPTH(cv)) {						\
+	    (void)SvREFCNT_inc(cv);					\
+	    (void)SvREFCNT_inc(cv);					\
+	    SAVEFREESV(cv);						\
+	}
+
 
 #define PUSHSUB(cx)							\
 	PUSHSUB_BASE(cx)						\

@@ -2663,9 +2663,7 @@ PP(pp_entersub)
 	 * Owing the speed considerations, we choose instead to search for
 	 * the cv using find_runcv() when calling doeval().
 	 */
-	if (CvDEPTH(cv) < 2)
-	    (void)SvREFCNT_inc(cv);
-	else {
+	if (CvDEPTH(cv) >= 2) {
 	    PERL_STACK_OVERFLOW_CHECK();
 	    pad_push(padlist, CvDEPTH(cv), 1);
 	}

@@ -1524,8 +1524,6 @@ PP(pp_sort)
 		cx->cx_type = CXt_SUB;
 		cx->blk_gimme = G_SCALAR;
 		PUSHSUB(cx);
-		if (!CvDEPTH(cv))
-		    (void)SvREFCNT_inc(cv); /* in preparation for POPSUB */
 	    }
 	    PL_sortcxix = cxstack_ix;
 
