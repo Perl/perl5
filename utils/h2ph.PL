@@ -438,7 +438,7 @@ sub next_line
             } elsif ($in =~ s/^("(\\.|[^"\\])*")//) {       # "...
                 $out    .= $1;
             } elsif ($in =~ s/^\/\/.*//) {                  # //...
-                next READ;
+                # fall through
             } elsif ($in =~ m/^\/\*/) {                     # /*...
                 # C comment removal adapted from perlfaq6:
                 if ($in =~ s/^\/\*[^*]*\*+([^\/*][^*]*\*+)*\///) {
@@ -455,7 +455,7 @@ sub next_line
             }
         }
 
-        last READ;
+        last READ if $out =~ /\S/;
     }
 
     return $out;

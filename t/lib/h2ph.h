@@ -98,6 +98,13 @@ typedef enum _days_of_week { sun, mon, tue, wed, thu, fri, sat, Sun=0, Mon,
 ??= define SOMETHING_ELSE_TRIGRAPHIC_8 "??>"          /* | ??>|  }| */
 	??=endif
 
+// test C++-style comment
+
+#if 1
+typdef struct empty_struct {
+} // trailing C++-style comment should not force continuation
+#endif
+
 /* comments (that look like string) inside enums... */
 
 enum {
