@@ -98,12 +98,6 @@ extern int h_errno;
 #  endif
 #endif
 
-#ifdef I_SYS_UN
-#  ifdef  __linux__
-#    include <sys/un.h>
-#  endif
-#endif
-
 /* Put this after #includes because fork and vfork prototypes may conflict. */
 #ifndef HAS_VFORK
 #   define vfork fork
@@ -1577,13 +1571,6 @@ PP(pp_sysread)
 	if (!(IoFLAGS(io) & IOf_UNTAINT))
 	    SvTAINTED_on(bufsv);
 	SP = ORIGMARK;
-#if defined(I_SYS_UN) && defined(__linux__)
-	/* Linux returns the sum of actual pathname string length and the
-	   size of the other members of sockaddr_un members. It should
-	   return sizeof(struct sockaddr_un). */
-	if (((struct sockaddr *)namebuf)->sa_family == AF_UNIX)
-	    bufsize = sizeof(struct sockaddr_un);
-#endif
 	sv_setpvn(TARG, namebuf, bufsize);
 	PUSHs(TARG);
 	RETURN;
@@ -2464,12 +2451,6 @@ PP(pp_accept)
     setbuf( IoIFP(nstio), NULL); /* EPOC gets confused about sockets */
 #endif
 
-#if defined(I_SYS_UN) && defined(__linux__)
-    /* see the comment in pp_sysread */
-    if (saddr.sa_family == AF_UNIX)
-	len = sizeof(struct sockaddr_un);
-#endif
-
     PUSHp((char *)&saddr, len);
     RETURN;
 
@@ -2646,11 +2627,6 @@ PP(pp_getpeername)
       does not return valid namelen */
     if (len == BOGUS_GETNAME_RETURN)
 	len = sizeof(struct sockaddr);
-#endif
-#if defined(I_SYS_UN) && defined(__linux__)
-    /* see the comment in pp_sysread */
-    if (((struct sockaddr *)SvPVX(sv))->sa_family == AF_UNIX)
-	len = sizeof(struct sockaddr_un);
 #endif
     SvCUR_set(sv, len);
     *SvEND(sv) ='\0';
