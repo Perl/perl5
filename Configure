@@ -409,7 +409,6 @@ d_getsbyport=''
 d_gnulibc=''
 d_hasmntopt=''
 d_htonl=''
-d_iconv=''
 d_inetaton=''
 d_int64_t=''
 d_isascii=''
@@ -633,7 +632,6 @@ i_float=''
 i_gdbm=''
 d_grpasswd=''
 i_grp=''
-i_iconv=''
 i_ieeefp=''
 i_inttypes=''
 i_libutil=''
@@ -1033,7 +1031,7 @@ defvoidused=15
 libswanted='sfio socket bind inet nsl nm ndbm gdbm dbm db malloc dl'
 libswanted="$libswanted dld ld sun m c cposix posix"
 libswanted="$libswanted ndir dir crypt sec"
-libswanted="$libswanted ucb bsd BSD PW x iconv util"
+libswanted="$libswanted ucb bsd BSD PW x util"
 : We probably want to search /usr/shlib before most other libraries.
 : This is only used by the lib/ExtUtils/MakeMaker.pm routine extliblist.
 glibpth=`echo " $glibpth " | sed -e 's! /usr/shlib ! !'`
@@ -9784,10 +9782,6 @@ esac
 set d_htonl
 eval $setvar
 
-: see if iconv exists
-set iconv d_iconv
-eval $inlibc
-
 : index or strchr
 echo " "
 if set index val -f; eval $csym; $val; then
@@ -14763,10 +14757,6 @@ esac
 set i_fcntl
 eval $setvar
 
-: see if this is a iconv.h system
-set iconv.h i_iconv
-eval $inhdr
-
 : see if this is a ieeefp.h system
 set ieeefp.h i_ieeefp
 eval $inhdr
@@ -15858,7 +15848,6 @@ d_gnulibc='$d_gnulibc'
 d_grpasswd='$d_grpasswd'
 d_hasmntopt='$d_hasmntopt'
 d_htonl='$d_htonl'
-d_iconv='$d_iconv'
 d_index='$d_index'
 d_inetaton='$d_inetaton'
 d_int64_t='$d_int64_t'
@@ -16110,7 +16099,6 @@ i_fcntl='$i_fcntl'
 i_float='$i_float'
 i_gdbm='$i_gdbm'
 i_grp='$i_grp'
-i_iconv='$i_iconv'
 i_ieeefp='$i_ieeefp'
 i_inttypes='$i_inttypes'
 i_libutil='$i_libutil'

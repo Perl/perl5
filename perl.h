@@ -3451,9 +3451,6 @@ typedef struct am_table_short AMTS;
    
    NV_PRESERVES_UV
 
-   HAS_ICONV
-   I_ICONV
-
    HAS_MKSTEMP
    HAS_MKSTEMPS
    HAS_MKDTEMP
