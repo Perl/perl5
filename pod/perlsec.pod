@@ -65,12 +65,14 @@ in which case they are able to run arbitrary external code.
 
 =back
 
-The value of an expression containing tainted data will itself be
-tainted, even if it is logically impossible for the tainted data to
-affect the value.
+For efficiency reasons, Perl takes a conservative view of
+whether data is tainted.  If an expression contains tainted data,
+any subexpression may be considered tainted, even if the value
+of the subexpression is not itself affected by the tainted data.
 
 Because taintedness is associated with each scalar value, some
-elements of an array can be tainted and others not.
+elements of an array or hash can be tainted and others not.
+The keys of a hash are never tainted.
 
 For example:
 
@@ -133,7 +135,7 @@ To test whether a variable contains tainted data, and whose use would
 thus trigger an "Insecure dependency" message, you can use the
 tainted() function of the Scalar::Util module, available in your
 nearby CPAN mirror, and included in Perl starting from the release 5.8.0.
-Or you may be able to use the following I<is_tainted()> function.
+Or you may be able to use the following C<is_tainted()> function.
 
     sub is_tainted {
         return ! eval { eval("#" . substr(join("", @_), 0, 0)); 1 };
@@ -147,7 +149,8 @@ approach is used that if any tainted value has been accessed within the
 same expression, the whole expression is considered tainted.
 
 But testing for taintedness gets you only so far.  Sometimes you have just
-to clear your data's taintedness.  The only way to bypass the tainting
+to clear your data's taintedness.  Values may be untainted by using them
+as keys in a hash; otherwise the only way to bypass the tainting
 mechanism is by referencing subpatterns from a regular expression match.
 Perl presumes that if you reference a substring using $1, $2, etc., that
 you knew what you were doing when you wrote the pattern.  That means using
