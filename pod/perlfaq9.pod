@@ -224,13 +224,11 @@ available from CPAN.
 
 =head2 How do I redirect to another page?
 
-Instead of sending back a C<Content-Type> as the headers of your
-reply, send back a C<Location:> header.  Officially this should be a
-C<URI:> header, so the CGI.pm module (available from CPAN) sends back
-both:
+According to RFC 2616, "Hypertext Transfer Protocol -- HTTP/1.1", the
+preferred method is to send a C<Location:> header instead of a
+C<Content-Type:> header:
 
     Location: http://www.domain.com/newpage
-    URI: http://www.domain.com/newpage
 
 Note that relative URLs in these headers can cause strange effects
 because of "optimizations" that servers do.
