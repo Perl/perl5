@@ -116,7 +116,7 @@ struct utsname {
 /* Define USE_SOCKETS_AS_HANDLES to enable emulation of windows sockets as
  * real filehandles. XXX Should always be defined (the other version is untested) */
 
-/* #define USE_SOCKETS_AS_HANDLES */
+#define USE_SOCKETS_AS_HANDLES
 
 /* read() and write() aren't transparent for socket handles */
 #define PERL_SOCK_SYSREAD_IS_RECV
@@ -246,6 +246,7 @@ START_EXTERN_C
 #define  init_os_extras Perl_init_os_extras
 
 DllExport void		Perl_win32_init(int *argcp, char ***argvp);
+DllExport void		Perl_win32_term(void);
 DllExport void		Perl_init_os_extras();
 DllExport void		win32_str_os_error(void *sv, DWORD err);
 DllExport int		RunPerl(int argc, char **argv, char **env);
@@ -321,6 +322,11 @@ END_EXTERN_C
 #  define PERL_SCRIPT_MODE		"rb"
 #endif
 
+#ifndef Sighandler_t
+typedef Signal_t (*Sighandler_t) (int);
+#define Sighandler_t	Sighandler_t
+#endif
+
 /* 
  * Now Win32 specific per-thread data stuff 
  */
@@ -339,6 +345,8 @@ struct thread_intern {
 #    ifdef USE_RTL_THREAD_API
     void *		retv;	/* slot for thread return value */
 #    endif
+    BOOL               Wuse_showwindow;
+    WORD               Wshowwindow;
 };
 
 #define HAVE_INTERP_INTERN
@@ -360,9 +368,16 @@ struct interp_intern {
 #endif
     void *	internal_host;
     struct thread_intern	thr_intern;
+    UINT	timerid;
+    unsigned 	poll_count;
+    Sighandler_t sigtable[SIG_SIZE];
 };
 
+DllExport int win32_async_check(pTHX);
 
+#define WIN32_POLL_INTERVAL 32768
+#define PERL_ASYNC_CHECK() if (w32_do_async || PL_sig_pending) win32_async_check(aTHX)
+  
 #define w32_perlshell_tokens	(PL_sys_intern.perlshell_tokens)
 #define w32_perlshell_vec	(PL_sys_intern.perlshell_vec)
 #define w32_perlshell_items	(PL_sys_intern.perlshell_items)
@@ -377,23 +392,29 @@ struct interp_intern {
 #define w32_pseudo_child_pids		(w32_pseudo_children->pids)
 #define w32_pseudo_child_handles	(w32_pseudo_children->handles)
 #define w32_internal_host		(PL_sys_intern.internal_host)
+#define w32_timerid			(PL_sys_intern.timerid)
+#define w32_sighandler			(PL_sys_intern.sigtable)
+#define w32_poll_count			(PL_sys_intern.poll_count)
+#define w32_do_async			(w32_poll_count++ > WIN32_POLL_INTERVAL)
 #define w32_strerror_buffer	(PL_sys_intern.thr_intern.Wstrerror_buffer)
 #define w32_getlogin_buffer	(PL_sys_intern.thr_intern.Wgetlogin_buffer)
 #define w32_crypt_buffer	(PL_sys_intern.thr_intern.Wcrypt_buffer)
 #define w32_servent		(PL_sys_intern.thr_intern.Wservent)
 #define w32_init_socktype	(PL_sys_intern.thr_intern.Winit_socktype)
+#define w32_use_showwindow	(PL_sys_intern.thr_intern.Wuse_showwindow)
+#define w32_showwindow		(PL_sys_intern.thr_intern.Wshowwindow)
 
 /* UNICODE<>ANSI translation helpers */
 /* Use CP_ACP when mode is ANSI */
 /* Use CP_UTF8 when mode is UTF8 */
 
 #define A2WHELPER_LEN(lpa, alen, lpw, nBytes)\
-    (lpw[0] = 0, MultiByteToWideChar((IN_BYTE) ? CP_ACP : CP_UTF8, 0, \
+    (lpw[0] = 0, MultiByteToWideChar((IN_BYTES) ? CP_ACP : CP_UTF8, 0, \
 				    lpa, alen, lpw, (nBytes/sizeof(WCHAR))))
 #define A2WHELPER(lpa, lpw, nBytes)	A2WHELPER_LEN(lpa, -1, lpw, nBytes)
 
 #define W2AHELPER_LEN(lpw, wlen, lpa, nChars)\
-    (lpa[0] = '\0', WideCharToMultiByte((IN_BYTE) ? CP_ACP : CP_UTF8, 0, \
+    (lpa[0] = '\0', WideCharToMultiByte((IN_BYTES) ? CP_ACP : CP_UTF8, 0, \
 				       lpw, wlen, (LPSTR)lpa, nChars,NULL,NULL))
 #define W2AHELPER(lpw, lpa, nChars)	W2AHELPER_LEN(lpw, -1, lpa, nChars)
 
@@ -412,6 +433,64 @@ struct interp_intern {
 	}								\
     } STMT_END
 #endif
+
+#if defined(USE_FIXED_OSFHANDLE) || defined(PERL_MSVCRT_READFIX)
+#ifdef PERL_CORE
+
+/* C doesn't like repeat struct definitions */
+#ifndef _CRTIMP
+#define _CRTIMP __declspec(dllimport)
+#endif
+
+/*
+ * Control structure for lowio file handles
+ */
+typedef struct {
+    intptr_t osfhnd;/* underlying OS file HANDLE */
+    char osfile;    /* attributes of file (e.g., open in text mode?) */
+    char pipech;    /* one char buffer for handles opened on pipes */
+    int lockinitflag;
+    CRITICAL_SECTION lock;
+} ioinfo;
+
+
+/*
+ * Array of arrays of control structures for lowio files.
+ */
+EXTERN_C _CRTIMP ioinfo* __pioinfo[];
+
+/*
+ * Definition of IOINFO_L2E, the log base 2 of the number of elements in each
+ * array of ioinfo structs.
+ */
+#define IOINFO_L2E	    5
+
+/*
+ * Definition of IOINFO_ARRAY_ELTS, the number of elements in ioinfo array
+ */
+#define IOINFO_ARRAY_ELTS   (1 << IOINFO_L2E)
+
+/*
+ * Access macros for getting at an ioinfo struct and its fields from a
+ * file handle
+ */
+#define _pioinfo(i) (__pioinfo[(i) >> IOINFO_L2E] + ((i) & (IOINFO_ARRAY_ELTS - 1)))
+#define _osfhnd(i)  (_pioinfo(i)->osfhnd)
+#define _osfile(i)  (_pioinfo(i)->osfile)
+#define _pipech(i)  (_pioinfo(i)->pipech)
+
+/* since we are not doing a dup2(), this works fine */
+#define _set_osfhnd(fh, osfh) (void)(_osfhnd(fh) = (intptr_t)osfh)
+#endif
+#endif
+
+/* IO.xs and POSIX.xs define PERLIO_NOT_STDIO to 1 */
+#if defined(PERL_EXT_IO) || defined(PERL_EXT_POSIX)
+#undef  PERLIO_NOT_STDIO
+#endif
+#define PERLIO_NOT_STDIO 0
+
+#include "perlio.h"
 
 /*
  * This provides a layer of functions and macros to ensure extensions will

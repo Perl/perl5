@@ -9,6 +9,7 @@
 #define WIN32_LEAN_AND_MEAN
 #define WIN32IO_IS_STDIO
 #include <windows.h>
+#include <signal.h>
 
 #define PERLIO_NOT_STDIO 0 
 
@@ -341,6 +342,7 @@ Perl_do_exec(pTHX_ char *cmd)
 DllExport int
 win32_pipe(int *pfd, unsigned int size, int mode)
 {
+  dTHX;
   Perl_croak(aTHX_ PL_no_func, "pipe");
   return -1;
 }
@@ -348,17 +350,20 @@ win32_pipe(int *pfd, unsigned int size, int mode)
 DllExport int
 win32_times(struct tms *timebuf)
 {
+  dTHX;
   Perl_croak(aTHX_ PL_no_func, "times");
   return -1;
 }
 
 /* TODO */
-bool
-win32_signal()
+Sighandler_t
+win32_signal(int sig, Sighandler_t subcode)
 {
+  dTHX;
   Perl_croak_nocontext("signal() TBD on this platform");
   return FALSE;
 }
+
 DllExport void
 win32_clearenv()
 {
@@ -387,6 +392,7 @@ win32_readdir(DIR *dirp)
 DllExport long
 win32_telldir(DIR *dirp)
 {
+  dTHX;
   Perl_croak(aTHX_ PL_no_func, "telldir");
   return -1;
 }
@@ -394,12 +400,14 @@ win32_telldir(DIR *dirp)
 DllExport void
 win32_seekdir(DIR *dirp, long loc)
 {
+  dTHX;
   Perl_croak(aTHX_ PL_no_func, "seekdir");
 }
 
 DllExport void
 win32_rewinddir(DIR *dirp)
 {
+  dTHX;
   Perl_croak(aTHX_ PL_no_func, "rewinddir");
 }
 
@@ -413,6 +421,7 @@ win32_closedir(DIR *dirp)
 DllExport int
 win32_kill(int pid, int sig)
 {
+  dTHX;
   Perl_croak(aTHX_ PL_no_func, "kill");
   return -1;
 }
@@ -598,6 +607,152 @@ win32_uname(struct utsname *name)
     return 0;
 }
 
+void
+sig_terminate(pTHX_ int sig)
+{
+    Perl_warn(aTHX_ "Terminating on signal SIG%s(%d)\n",PL_sig_name[sig], sig);
+    /* exit() seems to be safe, my_exit() or die() is a problem in ^C 
+       thread 
+     */
+    exit(sig);
+}
+
+DllExport int
+win32_async_check(pTHX)
+{
+    MSG msg;
+    int ours = 1;
+    /* Passing PeekMessage -1 as HWND (2nd arg) only get PostThreadMessage() messages
+     * and ignores window messages - should co-exist better with windows apps e.g. Tk
+     */
+    while (PeekMessage(&msg, (HWND)-1, 0, 0, PM_REMOVE|PM_NOYIELD)) {
+	int sig;
+	switch(msg.message) {
+
+#if 0
+    /* Perhaps some other messages could map to signals ? ... */
+        case WM_CLOSE:
+        case WM_QUIT:
+	    /* Treat WM_QUIT like SIGHUP?  */
+	    sig = SIGHUP;
+	    goto Raise;
+	    break;
+#endif
+
+	/* We use WM_USER to fake kill() with other signals */
+	case WM_USER: {
+	    sig = msg.wParam;
+	Raise:
+	    if (do_raise(aTHX_ sig)) {
+		   sig_terminate(aTHX_ sig);
+	    }
+	    break;
+	}
+
+	case WM_TIMER: {
+	    /* alarm() is a one-shot but SetTimer() repeats so kill it */
+	    if (w32_timerid) {
+	    	KillTimer(NULL,w32_timerid);
+	    	w32_timerid=0;
+	    }
+	    /* Now fake a call to signal handler */
+	    if (do_raise(aTHX_ 14)) {
+	    	sig_terminate(aTHX_ 14);
+	    }
+	    break;
+	}
+
+	/* Otherwise do normal Win32 thing - in case it is useful */
+	default:
+	    TranslateMessage(&msg);
+	    DispatchMessage(&msg);
+	    ours = 0;
+	    break;
+	}
+    }
+    w32_poll_count = 0;
+
+    /* Above or other stuff may have set a signal flag */
+    if (PL_sig_pending) {
+	despatch_signals();
+    }
+    return ours;
+}
+
+/* This function will not return until the timeout has elapsed, or until
+ * one of the handles is ready. */
+DllExport DWORD
+win32_msgwait(pTHX_ DWORD count, LPHANDLE handles, DWORD timeout, LPDWORD resultp)
+{
+    /* We may need several goes at this - so compute when we stop */
+    DWORD ticks = 0;
+    if (timeout != INFINITE) {
+	ticks = GetTickCount();
+	timeout += ticks;
+    }
+    while (1) {
+	DWORD result = MsgWaitForMultipleObjects(count,handles,FALSE,timeout-ticks, QS_ALLEVENTS);
+	if (resultp)
+	   *resultp = result;
+	if (result == WAIT_TIMEOUT) {
+	    /* Ran out of time - explicit return of zero to avoid -ve if we
+	       have scheduling issues
+             */
+	    return 0;
+	}
+	if (timeout != INFINITE) {
+	    ticks = GetTickCount();
+        }
+	if (result == WAIT_OBJECT_0 + count) {
+	    /* Message has arrived - check it */
+	    (void)win32_async_check(aTHX);
+	}
+	else {
+	   /* Not timeout or message - one of handles is ready */
+	   break;
+	}
+    }
+    /* compute time left to wait */
+    ticks = timeout - ticks;
+    /* If we are past the end say zero */
+    return (ticks > 0) ? ticks : 0;
+}
+
+/* Timing related stuff */
+
+int
+do_raise(pTHX_ int sig) 
+{
+    if (sig < SIG_SIZE) {
+	Sighandler_t handler = w32_sighandler[sig];
+	if (handler == SIG_IGN) {
+	    return 0;
+	}
+	else if (handler != SIG_DFL) {
+	    (*handler)(sig);
+	    return 0;
+	}
+	else {
+	    /* Choose correct default behaviour */
+	    switch (sig) {
+#ifdef SIGCLD
+		case SIGCLD:
+#endif
+#ifdef SIGCHLD
+		case SIGCHLD:
+#endif
+		case 0:
+		    return 0;
+		case SIGTERM:
+		default:
+		    break;
+	    }
+	}
+    }
+    /* Tell caller to exit thread/process as approriate */
+    return 1;
+}
+
 static UINT timerid = 0;
 
 static VOID CALLBACK TimerProc(HWND win, UINT msg, UINT id, DWORD time)
@@ -718,6 +873,10 @@ DllExport FILE *
 win32_stderr(void)
 {
     return (stderr);
+}
+
+char *g_getlogin() {
+    return "no-getlogin";
 }
 
 DllExport FILE *
@@ -967,6 +1126,7 @@ win32_fstat(int fd, struct stat *sbufptr)
 DllExport int
 win32_link(const char *oldname, const char *newname)
 {
+  dTHX;
   Perl_croak(aTHX_ PL_no_func, "link");
 
   return -1;
@@ -986,6 +1146,12 @@ win32_setmode(int fd, int mode)
      */
     /* return xcesetmode(fd, mode); */
     return 0;
+}
+
+DllExport int
+win32_chsize(int fd, Off_t size)
+{
+    return chsize(fd, size);
 }
 
 DllExport long
@@ -1022,6 +1188,7 @@ win32_close(int fd)
 DllExport int
 win32_eof(int fd)
 {
+  dTHX;
   Perl_croak(aTHX_ PL_no_func, "eof");
   return -1;
 }
@@ -1029,14 +1196,12 @@ win32_eof(int fd)
 DllExport int
 win32_dup(int fd)
 {
-  //vv Perl_croak(aTHX_ PL_no_func, "dup");
-  return xcedup(fd); // from celib/ceio.c; requires some more work on it.
+  return xcedup(fd); /* from celib/ceio.c; requires some more work on it */
 }
 
 DllExport int
 win32_dup2(int fd1,int fd2)
 {
-  //Perl_croak(aTHX_ PL_no_func, "dup2");
   return xcedup2(fd1,fd2);
 }
 
@@ -1091,6 +1256,7 @@ win32_perror(const char *str)
 DllExport void
 win32_setbuf(FILE *pf, char *buf)
 {
+  dTHX;
   Perl_croak(aTHX_ PL_no_func, "setbuf");
 }
 
@@ -1257,9 +1423,452 @@ win32_free(void *block)
     free(block);
 }
 
+/* returns pointer to the next unquoted space or the end of the string */
+static char*
+find_next_space(const char *s)
+{
+    bool in_quotes = FALSE;
+    while (*s) {
+	/* ignore doubled backslashes, or backslash+quote */
+	if (*s == '\\' && (s[1] == '\\' || s[1] == '"')) {
+	    s += 2;
+	}
+	/* keep track of when we're within quotes */
+	else if (*s == '"') {
+	    s++;
+	    in_quotes = !in_quotes;
+	}
+	/* break it up only at spaces that aren't in quotes */
+	else if (!in_quotes && isSPACE(*s))
+	    return (char*)s;
+	else
+	    s++;
+    }
+    return (char*)s;
+}
+
+static char *
+create_command_line(char *cname, STRLEN clen, const char * const *args)
+{
+    dTHX;
+    int index, argc;
+    char *cmd, *ptr;
+    const char *arg;
+    STRLEN len = 0;
+    bool bat_file = FALSE;
+    bool cmd_shell = FALSE;
+    bool dumb_shell = FALSE;
+    bool extra_quotes = FALSE;
+    bool quote_next = FALSE;
+
+    if (!cname)
+	cname = (char*)args[0];
+
+    /* The NT cmd.exe shell has the following peculiarity that needs to be
+     * worked around.  It strips a leading and trailing dquote when any
+     * of the following is true:
+     *    1. the /S switch was used
+     *    2. there are more than two dquotes
+     *    3. there is a special character from this set: &<>()@^|
+     *    4. no whitespace characters within the two dquotes
+     *    5. string between two dquotes isn't an executable file
+     * To work around this, we always add a leading and trailing dquote
+     * to the string, if the first argument is either "cmd.exe" or "cmd",
+     * and there were at least two or more arguments passed to cmd.exe
+     * (not including switches).
+     * XXX the above rules (from "cmd /?") don't seem to be applied
+     * always, making for the convolutions below :-(
+     */
+    if (cname) {
+	if (!clen)
+	    clen = strlen(cname);
+
+	if (clen > 4
+	    && (stricmp(&cname[clen-4], ".bat") == 0
+		|| (IsWinNT() && stricmp(&cname[clen-4], ".cmd") == 0)))
+	{
+	    bat_file = TRUE;
+	    len += 3;
+	}
+	else {
+	    char *exe = strrchr(cname, '/');
+	    char *exe2 = strrchr(cname, '\\');
+	    if (exe2 > exe)
+		exe = exe2;
+	    if (exe)
+		++exe;
+	    else
+		exe = cname;
+	    if (stricmp(exe, "cmd.exe") == 0 || stricmp(exe, "cmd") == 0) {
+		cmd_shell = TRUE;
+		len += 3;
+	    }
+	    else if (stricmp(exe, "command.com") == 0
+		     || stricmp(exe, "command") == 0)
+	    {
+		dumb_shell = TRUE;
+	    }
+	}
+    }
+
+    DEBUG_p(PerlIO_printf(Perl_debug_log, "Args "));
+    for (index = 0; (arg = (char*)args[index]) != NULL; ++index) {
+	STRLEN curlen = strlen(arg);
+	if (!(arg[0] == '"' && arg[curlen-1] == '"'))
+	    len += 2;	/* assume quoting needed (worst case) */
+	len += curlen + 1;
+	DEBUG_p(PerlIO_printf(Perl_debug_log, "[%s]",arg));
+    }
+    DEBUG_p(PerlIO_printf(Perl_debug_log, "\n"));
+
+    argc = index;
+    New(1310, cmd, len, char);
+    ptr = cmd;
+
+    if (bat_file) {
+	*ptr++ = '"';
+	extra_quotes = TRUE;
+    }
+
+    for (index = 0; (arg = (char*)args[index]) != NULL; ++index) {
+	bool do_quote = 0;
+	STRLEN curlen = strlen(arg);
+
+	/* we want to protect empty arguments and ones with spaces with
+	 * dquotes, but only if they aren't already there */
+	if (!dumb_shell) {
+	    if (!curlen) {
+		do_quote = 1;
+	    }
+	    else if (quote_next) {
+		/* see if it really is multiple arguments pretending to
+		 * be one and force a set of quotes around it */
+		if (*find_next_space(arg))
+		    do_quote = 1;
+	    }
+	    else if (!(arg[0] == '"' && curlen > 1 && arg[curlen-1] == '"')) {
+		STRLEN i = 0;
+		while (i < curlen) {
+		    if (isSPACE(arg[i])) {
+			do_quote = 1;
+		    }
+		    else if (arg[i] == '"') {
+			do_quote = 0;
+			break;
+		    }
+		    i++;
+		}
+	    }
+	}
+
+	if (do_quote)
+	    *ptr++ = '"';
+
+	strcpy(ptr, arg);
+	ptr += curlen;
+
+	if (do_quote)
+	    *ptr++ = '"';
+
+	if (args[index+1])
+	    *ptr++ = ' ';
+
+    	if (!extra_quotes
+	    && cmd_shell
+	    && curlen >= 2
+	    && *arg  == '/'     /* see if arg is "/c", "/x/c", "/x/d/c" etc. */
+	    && stricmp(arg+curlen-2, "/c") == 0)
+	{
+	    /* is there a next argument? */
+	    if (args[index+1]) {
+		/* are there two or more next arguments? */
+		if (args[index+2]) {
+		    *ptr++ = '"';
+		    extra_quotes = TRUE;
+		}
+		else {
+		    /* single argument, force quoting if it has spaces */
+		    quote_next = TRUE;
+		}
+	    }
+	}
+    }
+
+    if (extra_quotes)
+	*ptr++ = '"';
+
+    *ptr = '\0';
+
+    return cmd;
+}
+
+static char *
+qualified_path(const char *cmd)
+{
+    dTHX;
+    char *pathstr;
+    char *fullcmd, *curfullcmd;
+    STRLEN cmdlen = 0;
+    int has_slash = 0;
+
+    if (!cmd)
+	return Nullch;
+    fullcmd = (char*)cmd;
+    while (*fullcmd) {
+	if (*fullcmd == '/' || *fullcmd == '\\')
+	    has_slash++;
+	fullcmd++;
+	cmdlen++;
+    }
+
+    /* look in PATH */
+    pathstr = PerlEnv_getenv("PATH");
+    New(0, fullcmd, MAX_PATH+1, char);
+    curfullcmd = fullcmd;
+
+    while (1) {
+	DWORD res;
+
+	/* start by appending the name to the current prefix */
+	strcpy(curfullcmd, cmd);
+	curfullcmd += cmdlen;
+
+	/* if it doesn't end with '.', or has no extension, try adding
+	 * a trailing .exe first */
+	if (cmd[cmdlen-1] != '.'
+	    && (cmdlen < 4 || cmd[cmdlen-4] != '.'))
+	{
+	    strcpy(curfullcmd, ".exe");
+	    res = GetFileAttributes(fullcmd);
+	    if (res != 0xFFFFFFFF && !(res & FILE_ATTRIBUTE_DIRECTORY))
+		return fullcmd;
+	    *curfullcmd = '\0';
+	}
+
+	/* that failed, try the bare name */
+	res = GetFileAttributes(fullcmd);
+	if (res != 0xFFFFFFFF && !(res & FILE_ATTRIBUTE_DIRECTORY))
+	    return fullcmd;
+
+	/* quit if no other path exists, or if cmd already has path */
+	if (!pathstr || !*pathstr || has_slash)
+	    break;
+
+	/* skip leading semis */
+	while (*pathstr == ';')
+	    pathstr++;
+
+	/* build a new prefix from scratch */
+	curfullcmd = fullcmd;
+	while (*pathstr && *pathstr != ';') {
+	    if (*pathstr == '"') {	/* foo;"baz;etc";bar */
+		pathstr++;		/* skip initial '"' */
+		while (*pathstr && *pathstr != '"') {
+		    if ((STRLEN)(curfullcmd-fullcmd) < MAX_PATH-cmdlen-5)
+			*curfullcmd++ = *pathstr;
+		    pathstr++;
+		}
+		if (*pathstr)
+		    pathstr++;		/* skip trailing '"' */
+	    }
+	    else {
+		if ((STRLEN)(curfullcmd-fullcmd) < MAX_PATH-cmdlen-5)
+		    *curfullcmd++ = *pathstr;
+		pathstr++;
+	    }
+	}
+	if (*pathstr)
+	    pathstr++;			/* skip trailing semi */
+	if (curfullcmd > fullcmd	/* append a dir separator */
+	    && curfullcmd[-1] != '/' && curfullcmd[-1] != '\\')
+	{
+	    *curfullcmd++ = '\\';
+	}
+    }
+
+    Safefree(fullcmd);
+    return Nullch;
+}
+
+/* XXX this needs to be made more compatible with the spawnvp()
+ * provided by the various RTLs.  In particular, searching for
+ * *.{com,bat,cmd} files (as done by the RTLs) is unimplemented.
+ * This doesn't significantly affect perl itself, because we
+ * always invoke things using PERL5SHELL if a direct attempt to
+ * spawn the executable fails.
+ *
+ * XXX splitting and rejoining the commandline between do_aspawn()
+ * and win32_spawnvp() could also be avoided.
+ */
+
+#define P_WAIT         0
+#define P_NOWAIT       1
+DllExport int
+win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
+{
+#ifdef USE_RTL_SPAWNVP
+    return spawnvp(mode, cmdname, (char * const *)argv);
+#else
+    dTHX;
+    int ret;
+    void* env;
+    char* dir;
+    child_IO_table tbl;
+    STARTUPINFO StartupInfo;
+    PROCESS_INFORMATION ProcessInformation;
+    DWORD create = 0;
+    char *cmd;
+    char *fullcmd = Nullch;
+    char *cname = (char *)cmdname;
+    STRLEN clen = 0;
+
+    if (cname) {
+	clen = strlen(cname);
+	/* if command name contains dquotes, must remove them */
+	if (strchr(cname, '"')) {
+	    cmd = cname;
+	    New(0,cname,clen+1,char);
+	    clen = 0;
+	    while (*cmd) {
+		if (*cmd != '"') {
+		    cname[clen] = *cmd;
+		    ++clen;
+		}
+		++cmd;
+	    }
+	    cname[clen] = '\0';
+	}
+    }
+
+    cmd = create_command_line(cname, clen, argv);
+
+    env = PerlEnv_get_childenv();
+    dir = PerlEnv_get_childdir();
+
+    switch(mode) {
+    case P_NOWAIT:	/* asynch + remember result */
+	if (w32_num_children >= MAXIMUM_WAIT_OBJECTS) {
+	    errno = EAGAIN;
+	    ret = -1;
+	    goto RETVAL;
+	}
+	/* Create a new process group so we can use GenerateConsoleCtrlEvent()
+	 * in win32_kill()
+	 */
+        /* not supported on CE create |= CREATE_NEW_PROCESS_GROUP; */
+	/* FALL THROUGH */
+
+    case P_WAIT:	/* synchronous execution */
+	break;
+    default:		/* invalid mode */
+	errno = EINVAL;
+	ret = -1;
+	goto RETVAL;
+    }
+    memset(&StartupInfo,0,sizeof(StartupInfo));
+    StartupInfo.cb = sizeof(StartupInfo);
+    memset(&tbl,0,sizeof(tbl));
+    PerlEnv_get_child_IO(&tbl);
+    StartupInfo.dwFlags		= tbl.dwFlags;
+    StartupInfo.dwX		= tbl.dwX;
+    StartupInfo.dwY		= tbl.dwY;
+    StartupInfo.dwXSize		= tbl.dwXSize;
+    StartupInfo.dwYSize		= tbl.dwYSize;
+    StartupInfo.dwXCountChars	= tbl.dwXCountChars;
+    StartupInfo.dwYCountChars	= tbl.dwYCountChars;
+    StartupInfo.dwFillAttribute	= tbl.dwFillAttribute;
+    StartupInfo.wShowWindow	= tbl.wShowWindow;
+    StartupInfo.hStdInput	= tbl.childStdIn;
+    StartupInfo.hStdOutput	= tbl.childStdOut;
+    StartupInfo.hStdError	= tbl.childStdErr;
+    if (StartupInfo.hStdInput == INVALID_HANDLE_VALUE &&
+	StartupInfo.hStdOutput == INVALID_HANDLE_VALUE &&
+	StartupInfo.hStdError == INVALID_HANDLE_VALUE)
+    {
+	create |= CREATE_NEW_CONSOLE;
+    }
+    else {
+	StartupInfo.dwFlags |= STARTF_USESTDHANDLES;
+    }
+    if (w32_use_showwindow) {
+        StartupInfo.dwFlags |= STARTF_USESHOWWINDOW;
+        StartupInfo.wShowWindow = w32_showwindow;
+    }
+
+    DEBUG_p(PerlIO_printf(Perl_debug_log, "Spawning [%s] with [%s]\n",
+			  cname,cmd));
+RETRY:
+    if (!CreateProcess(cname,		/* search PATH to find executable */
+		       cmd,		/* executable, and its arguments */
+		       NULL,		/* process attributes */
+		       NULL,		/* thread attributes */
+		       TRUE,		/* inherit handles */
+		       create,		/* creation flags */
+		       (LPVOID)env,	/* inherit environment */
+		       dir,		/* inherit cwd */
+		       &StartupInfo,
+		       &ProcessInformation))
+    {
+	/* initial NULL argument to CreateProcess() does a PATH
+	 * search, but it always first looks in the directory
+	 * where the current process was started, which behavior
+	 * is undesirable for backward compatibility.  So we
+	 * jump through our own hoops by picking out the path
+	 * we really want it to use. */
+	if (!fullcmd) {
+	    fullcmd = qualified_path(cname);
+	    if (fullcmd) {
+		if (cname != cmdname)
+		    Safefree(cname);
+		cname = fullcmd;
+		DEBUG_p(PerlIO_printf(Perl_debug_log,
+				      "Retrying [%s] with same args\n",
+				      cname));
+		goto RETRY;
+	    }
+	}
+	errno = ENOENT;
+	ret = -1;
+	goto RETVAL;
+    }
+
+    if (mode == P_NOWAIT) {
+	/* asynchronous spawn -- store handle, return PID */
+	ret = (int)ProcessInformation.dwProcessId;
+	if (IsWin95() && ret < 0)
+	    ret = -ret;
+
+	w32_child_handles[w32_num_children] = ProcessInformation.hProcess;
+	w32_child_pids[w32_num_children] = (DWORD)ret;
+	++w32_num_children;
+    }
+    else  {
+	DWORD status;
+	win32_msgwait(aTHX_ 1, &ProcessInformation.hProcess, INFINITE, NULL);
+	/* FIXME: if msgwait returned due to message perhaps forward the
+	   "signal" to the process
+         */
+	GetExitCodeProcess(ProcessInformation.hProcess, &status);
+	ret = (int)status;
+	CloseHandle(ProcessInformation.hProcess);
+    }
+
+    CloseHandle(ProcessInformation.hThread);
+
+RETVAL:
+    PerlEnv_free_childenv(env);
+    PerlEnv_free_childdir(dir);
+    Safefree(cmd);
+    if (cname != cmdname)
+	Safefree(cname);
+    return ret;
+#endif
+}
+
 DllExport int
 win32_execv(const char *cmdname, const char *const *argv)
 {
+  dTHX;
   Perl_croak(aTHX_ PL_no_func, "execv");
   return -1;
 }
@@ -1267,6 +1876,7 @@ win32_execv(const char *cmdname, const char *const *argv)
 DllExport int
 win32_execvp(const char *cmdname, const char *const *argv)
 {
+  dTHX;
   Perl_croak(aTHX_ PL_no_func, "execvp");
   return -1;
 }
@@ -1562,9 +2172,24 @@ Perl_win32_term(void)
     MALLOC_TERM;
 }
 
-DllExport int
+DllExport void
+Perl_win32_term(void)
+{
+    OP_REFCNT_TERM;
+    MALLOC_TERM;
+}
+
+void
+win32_get_child_IO(child_IO_table* ptbl)
+{
+    ptbl->childStdIn	= GetStdHandle(STD_INPUT_HANDLE);
+    ptbl->childStdOut	= GetStdHandle(STD_OUTPUT_HANDLE);
+    ptbl->childStdErr	= GetStdHandle(STD_ERROR_HANDLE);
+}
+
 win32_flock(int fd, int oper)
 {
+  dTHX;
   Perl_croak(aTHX_ PL_no_func, "flock");
   return -1;
 }
@@ -1572,6 +2197,7 @@ win32_flock(int fd, int oper)
 DllExport int
 win32_waitpid(int pid, int *status, int flags)
 {
+  dTHX;
   Perl_croak(aTHX_ PL_no_func, "waitpid");
   return -1;
 }
@@ -1579,6 +2205,7 @@ win32_waitpid(int pid, int *status, int flags)
 DllExport int
 win32_wait(int *status)
 {
+  dTHX;
   Perl_croak(aTHX_ PL_no_func, "wait");
   return -1;
 }
@@ -1590,7 +2217,13 @@ do_spawn(char *cmd)
 }
 
 int
-do_aspawn(void *vreally, void **vmark, void **vsp)
+Perl_do_spawn(pTHX_ char *cmd)
+{
+    return do_spawn(aTHX_ cmd);
+}
+
+int
+Perl_do_aspawn(pTHX_ SV *really, SV **mark, SV **sp)
 {
   Perl_croak(aTHX_ PL_no_func, "aspawn");
   return -1;
@@ -1618,46 +2251,6 @@ wce_hitreturn()
 
 /* //////////////////////////////////////////////////////////////////// */
 
-void
-win32_argv2utf8(int argc, char** argv)
-{
-  /* do nothing... */
-}
-
-void
-Perl_sys_intern_init(pTHX)
-{
-    w32_perlshell_tokens	= Nullch;
-    w32_perlshell_vec		= (char**)NULL;
-    w32_perlshell_items		= 0;
-    w32_fdpid			= newAV();
-    New(1313, w32_children, 1, child_tab);
-    w32_num_children		= 0;
-#  ifdef USE_ITHREADS
-    w32_pseudo_id		= 0;
-    New(1313, w32_pseudo_children, 1, child_tab);
-    w32_num_pseudo_children	= 0;
-#  endif
-
-#ifndef UNDER_CE
-    w32_init_socktype		= 0;
-#endif
-}
-
-void
-Perl_sys_intern_clear(pTHX)
-{
-    Safefree(w32_perlshell_tokens);
-    Safefree(w32_perlshell_vec);
-    /* NOTE: w32_fdpid is freed by sv_clean_all() */
-    Safefree(w32_children);
-#  ifdef USE_ITHREADS
-    Safefree(w32_pseudo_children);
-#  endif
-}
-
-/* //////////////////////////////////////////////////////////////////// */
-
 #undef getcwd
 
 char *
@@ -1678,18 +2271,16 @@ win32_open_osfhandle(intptr_t osfhandle, int flags)
     int fh;
     char fileflags=0;		/* _osfile flags */
 
-    XCEMessageBoxA(NULL, "NEED TO IMPLEMENT in wince/wince.c(win32_open_osfhandle)", "error", 0);
     Perl_croak_nocontext("win32_open_osfhandle() TBD on this platform");
     return 0;
 }
 
 int
-win32_get_osfhandle(intptr_t osfhandle, int flags)
+win32_get_osfhandle(int fd)
 {
     int fh;
     char fileflags=0;		/* _osfile flags */
 
-    XCEMessageBoxA(NULL, "NEED TO IMPLEMENT in wince/wince.c(win32_get_osfhandle)", "error", 0);
     Perl_croak_nocontext("win32_get_osfhandle() TBD on this platform");
     return 0;
 }
@@ -1703,8 +2294,15 @@ win32_get_osfhandle(intptr_t osfhandle, int flags)
 DllExport PerlIO*
 win32_popen(const char *command, const char *mode)
 {
-    XCEMessageBoxA(NULL, "NEED TO IMPLEMENT in wince/wince.c(win32_popen)", "error", 0);
     Perl_croak_nocontext("win32_popen() TBD on this platform");
+}
+
+DllExport PerlIO*
+win32_popenlist(const char *mode, IV narg, SV **args)
+{
+ dTHX;
+ Perl_croak(aTHX_ "List form of pipe open not implemented");
+ return NULL;
 }
 
 /*
@@ -1789,4 +2387,112 @@ win32_fdupopen(FILE *pf)
     }
 #endif
     return pfdup;
+}
+
+#ifdef HAVE_INTERP_INTERN
+
+
+static void
+win32_csighandler(int sig)
+{
+#if 0
+    dTHXa(PERL_GET_SIG_CONTEXT);
+    Perl_warn(aTHX_ "Got signal %d",sig);
+#endif
+    /* Does nothing */
+}
+
+void
+Perl_sys_intern_init(pTHX)
+{
+    int i;
+    w32_perlshell_tokens	= Nullch;
+    w32_perlshell_vec		= (char**)NULL;
+    w32_perlshell_items		= 0;
+    w32_fdpid			= newAV();
+    New(1313, w32_children, 1, child_tab);
+    w32_num_children		= 0;
+#  ifdef USE_ITHREADS
+    w32_pseudo_id		= 0;
+    New(1313, w32_pseudo_children, 1, child_tab);
+    w32_num_pseudo_children	= 0;
+#  endif
+    w32_init_socktype		= 0;
+    w32_timerid                 = 0;
+    w32_poll_count              = 0;
+}
+
+void
+Perl_sys_intern_clear(pTHX)
+{
+    Safefree(w32_perlshell_tokens);
+    Safefree(w32_perlshell_vec);
+    /* NOTE: w32_fdpid is freed by sv_clean_all() */
+    Safefree(w32_children);
+    if (w32_timerid) {
+    	KillTimer(NULL,w32_timerid);
+    	w32_timerid=0;
+    }
+#  ifdef USE_ITHREADS
+    Safefree(w32_pseudo_children);
+#  endif
+}
+
+#  ifdef USE_ITHREADS
+
+void
+Perl_sys_intern_dup(pTHX_ struct interp_intern *src, struct interp_intern *dst)
+{
+    dst->perlshell_tokens	= Nullch;
+    dst->perlshell_vec		= (char**)NULL;
+    dst->perlshell_items	= 0;
+    dst->fdpid			= newAV();
+    Newz(1313, dst->children, 1, child_tab);
+    dst->pseudo_id		= 0;
+    Newz(1313, dst->pseudo_children, 1, child_tab);
+    dst->thr_intern.Winit_socktype = 0;
+    dst->timerid                 = 0;
+    dst->poll_count              = 0;
+    Copy(src->sigtable,dst->sigtable,SIG_SIZE,Sighandler_t);
+}
+#  endif /* USE_ITHREADS */
+#endif /* HAVE_INTERP_INTERN */
+
+static void
+win32_free_argvw(pTHX_ void *ptr)
+{
+    char** argv = (char**)ptr;
+    while(*argv) {
+	Safefree(*argv);
+	*argv++ = Nullch;
+    }
+}
+
+void
+win32_argv2utf8(int argc, char** argv)
+{
+  /* do nothing, since we're not aware of command line arguments
+   * currently ...
+   */
+}
+
+#if 0
+void
+Perl_sys_intern_clear(pTHX)
+{
+    Safefree(w32_perlshell_tokens);
+    Safefree(w32_perlshell_vec);
+    /* NOTE: w32_fdpid is freed by sv_clean_all() */
+    Safefree(w32_children);
+#  ifdef USE_ITHREADS
+    Safefree(w32_pseudo_children);
+#  endif
+}
+
+#endif
+// added to remove undefied symbol error in CodeWarrior compilation
+int
+Perl_Ireentrant_buffer_ptr(aTHX)
+{
+	return 0;
 }

@@ -289,7 +289,9 @@ MCFLAGS    = -D MIPS -D mips -D _MIPS_ -D _mips_ -DPROCESSOR_MIPS \
 MACH       = -machine:mips
 SUBSYS     = -subsystem:windowsce,3.00
 CELIBPATH  = $(CELIBDLLDIR)\$(MACHINE)-release
+#STDLIBPATH = $(WCEROOT)\$(OSVERSION)\$(PLATFORM)\lib\$(CPU)
 LDLIBPATH  = -libpath:$(CELIBPATH)
+#"-libpath:$(STDLIBPATH)"
 STARTOBJS  = $(CECONSOLEDIR)/$(MACHINE)/wmain.obj \
              $(CECONSOLEDIR)/$(MACHINE)/w32console.obj
 !endif
@@ -457,7 +459,7 @@ RSC		= rc
 INCLUDES	= -I.\include -I. -I..
 DEFINES		= -DWIN32 -D_CONSOLE -DNO_STRICT $(CRYPT_FLAG) $(CECFLAGS)
 LOCDEFS		= -DPERLDLL -DPERL_CORE
-CXX_FLAG	= -TP -GX
+CXX_FLAG	= -TP
 
 PERLEXE_RES	= perl.res
 PERLDLL_RES	=
@@ -827,12 +829,28 @@ XDLLOBJS	= $(XDLLOBJS) $(DLLDIR)\malloc.obj
 !IF "$(CRYPT_SRC)" != ""
 XDLLOBJS	= $(XDLLOBJS) $(DLLDIR)\fcrypt.obj
 !ENDIF
+!IF "$(CRYPT_SRC)" != ""
+XDLLOBJS	= $(XDLLOBJS) $(DLLDIR)\fcrypt.obj
+!ENDIF
 
 {$(SRCDIR)}.c{$(DLLDIR)}.obj:
-    $(CC) -c $(CFLAGS) -DPERL_EXTERNAL_GLOB -Fo$(DLLDIR)\ $<
+    $(CC) -c $(CFLAGS_O) -DPERL_EXTERNAL_GLOB -Fo$(DLLDIR)\ $<
+
+# compiler explains that it will optimize toke.c if we'll give it an
+# option -QMOb<num> with num>=4178
+$(DLLDIR)\toke.obj:
+    $(CC) -c $(CFLAGS_O) -QMOb9000 -DPERL_EXTERNAL_GLOB -Fo$(DLLDIR)\ ..\toke.c
 
 {$(SRCDIR)/wince}.c{$(DLLDIR)}.obj:
-    $(CC) -c $(CFLAGS) -DPERL_EXTERNAL_GLOB -Fo$(DLLDIR)\ $<
+    $(CC) -c $(CFLAGS_O) -DPERL_EXTERNAL_GLOB -Fo$(DLLDIR)\ $<
+
+# -DPERL_IMPLICIT_SYS needs C++ for perllib.c
+# This is the only file that depends on perlhost.h, vmem.h, and vdir.h
+!IF "$(USE_IMP_SYS)" == "define"
+$(DLLDIR)\perllib$(o)	: perllib.c ..\win32\perlhost.h .\vdir.h .\vmem.h
+	$(CC) -c -I. $(CFLAGS_O) $(CXX_FLAG) $(OBJOUT_FLAG)$@ perllib.c
+	rem (frustrated) mv perllib.obj $(DLLDIR)
+!ENDIF
 
 perldll.def : $(HPERL) $(CONFIGPM) ..\global.sym ..\pp.sym ..\makedef.pl
 	$(HPERL) -w ..\makedef.pl PLATFORM=wince $(OPTIMIZE) $(DEFINES) $(BUILDOPT) \
@@ -848,7 +866,7 @@ $(DLLDIR) :
 	if not exist "$(DLLDIR)" mkdir "$(DLLDIR)"
 
 $(DLLDIR)\DynaLoader.obj: $(EXTDIR)\DynaLoader\DynaLoader.c
-    $(CC) -c $(CFLAGS) -DPERL_EXTERNAL_GLOB -Fo$(DLLDIR)\ \
+    $(CC) -c $(CFLAGS_O) -DPERL_EXTERNAL_GLOB -Fo$(DLLDIR)\ \
           $(EXTDIR)\DynaLoader\DynaLoader.c
 
 XPERLEXEOBJS = \
