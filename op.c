@@ -2740,7 +2740,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    r = t; rlen = tlen; rend = tend;
 	}
 	if (!squash) {
-		if (t == r ||
+		if ((!rlen && !del) || t == r ||
 		    (tlen == rlen && memEQ((char *)t, (char *)r, tlen)))
 		{
 		    o->op_private |= OPpTRANS_IDENTICAL;
@@ -2872,8 +2872,16 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 		}
 	    }
 	}
-	if (!del && rlen >= j) {
-	    cPVOPo->op_pv = (char*)Renew(tbl, 0x101+rlen-j, short);
+	if (!del) {
+	    if (!rlen) {
+		j = rlen;
+		if (!squash)
+		    o->op_private |= OPpTRANS_IDENTICAL;
+	    }
+	    else if (j >= rlen)
+		j = rlen - 1;
+	    else
+		cPVOPo->op_pv = (char*)Renew(tbl, 0x101+rlen-j, short);
 	    tbl[0x100] = rlen - j;
 	    for (i=0; i < rlen - j; i++)
 		tbl[0x101+i] = r[j+i];
