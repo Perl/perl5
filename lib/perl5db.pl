@@ -1431,7 +1431,7 @@ sub warnLevel {
     $prevwarn = $SIG{__WARN__} unless $warnLevel;
     $warnLevel = shift;
     if ($warnLevel) {
-      $SIG{__WARN__} = 'DB::dbwarn';
+      $SIG{__WARN__} = \&DB::dbwarn;
     } else {
       $SIG{__WARN__} = $prevwarn;
     }
@@ -1444,8 +1444,8 @@ sub dieLevel {
     $prevdie = $SIG{__DIE__} unless $dieLevel;
     $dieLevel = shift;
     if ($dieLevel) {
-      $SIG{__DIE__} = 'DB::dbdie'; # if $dieLevel < 2;
-      #$SIG{__DIE__} = 'DB::diehard' if $dieLevel >= 2;
+      $SIG{__DIE__} = \&DB::dbdie; # if $dieLevel < 2;
+      #$SIG{__DIE__} = \&DB::diehard if $dieLevel >= 2;
       print $OUT "Stack dump during die enabled", 
         ( $dieLevel == 1 ? " outside of evals" : ""), ".\n";
       print $OUT "Dump printed too.\n" if $dieLevel > 2;
