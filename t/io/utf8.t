@@ -11,7 +11,7 @@ BEGIN {
 }
 
 $| = 1;
-print "1..11\n";
+print "1..13\n";
 
 open(F,"+>:utf8",'a');
 print F chr(0x100).'£';
@@ -45,6 +45,13 @@ seek(F,0,0);
 binmode(F,":utf8");
 print "not " unless scalar(<F>) eq "\x{100}£\n";
 print "ok 11\n";
+seek(F,0,0);
+$buf = chr(0x200);
+$count = read(F,$buf,2,1);
+print "not " unless $count == 2;
+print "ok 12\n";
+print "not " unless $buf eq "\x{200}\x{100}£";
+print "ok 13\n";
 close(F);
 
 # unlink('a');
