@@ -215,10 +215,9 @@ do_trans_UU_count(SV *sv)
     send = s + len;
 
     while (s < send) {
-	if ((uv = swash_fetch(rv, s)) < none) {
-	    s += UTF8SKIP(s);
+	if ((uv = swash_fetch(rv, s)) < none)
 	    matches++;
-	}
+	s += UTF8SKIP(s);
     }
 
     return matches;

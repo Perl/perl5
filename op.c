@@ -120,7 +120,11 @@ pad_allocmy(char *name)
     PADOFFSET off;
     SV *sv;
 
-    if (!(isALPHA(name[1]) || name[1] == '_' && (int)strlen(name) > 2)) {
+    if (!(
+	isALPHA(name[1]) ||
+	(PL_hints & HINT_UTF8 && (name[1] & 0xc0) == 0xc0) ||
+	name[1] == '_' && (int)strlen(name) > 2))
+    {
 	if (!isPRINT(name[1])) {
 	    name[3] = '\0';
 	    name[2] = toCTRL(name[1]);
@@ -1687,7 +1691,7 @@ localize(OP *o, I32 lex)
 	dTHR;
 	if (ckWARN(WARN_PARENTHESIS) && PL_bufptr > PL_oldbufptr && PL_bufptr[-1] == ',') {
 	    char *s;
-	    for (s = PL_bufptr; *s && (isALNUM(*s) || strchr("@$%, ",*s)); s++) ;
+	    for (s = PL_bufptr; *s && (isALNUM(*s) || (*s & 0x80) || strchr("@$%, ",*s)); s++) ;
 	    if (*s == ';' || *s == '=')
 		warner(WARN_PARENTHESIS, "Parens missing around \"%s\" list",
 				lex ? "my" : "local");

@@ -2516,10 +2516,16 @@ PP(pp_method)
 	    !(iogv = gv_fetchpv(packname, FALSE, SVt_PVIO)) ||
 	    !(ob=(SV*)GvIO(iogv)))
 	{
-	    if (!packname || !isIDFIRST(*packname))
+	    if (!packname || 
+		((*(U8*)packname >= 0xc0 && IN_UTF8)
+		    ? !isIDFIRST_utf8(packname)
+		    : !isIDFIRST(*packname)
+		))
+	    {
 		DIE("Can't call method \"%s\" %s", name,
 		    SvOK(sv)? "without a package or object reference"
 			    : "on an undefined value");
+	    }
 	    stash = gv_stashpvn(packname, packlen, TRUE);
 	    goto fetch;
 	}
