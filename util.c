@@ -3407,6 +3407,7 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
     PL_screamnext = 0;
     PL_reg_start_tmp = 0;
     PL_reg_start_tmpl = 0;
+    PL_reg_poscache = Nullch;
 
     /* parent thread's data needs to be locked while we make copy */
     MUTEX_LOCK(&t->mutex);
