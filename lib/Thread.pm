@@ -52,14 +52,23 @@ In Perl 5.8 the ithreads model became available through the C<threads>
 module.
 
 Neither model is configured by default into Perl (except, as mentioned
-above, in Win32 ithreads are always available.)
+above, in Win32 ithreads are always available.)  You can see your
+Perl's threading configuration by running C<perl -V> and looking for
+the I<use...threads> variables, or inside script by C<use Config;>
+and testing for C<$Config{use5005threads}> and C<$Config{useithreads}>.
 
-For backwards compatibility, the Thread module has been reworked
-to function as a frontend for both 5005threads and ithreads.
+For old code and interim backwards compatibility, the Thread module
+has been reworked to function as a frontend for both 5005threads and
+ithreads.
+
 Note that the compatibility is not complete: because the data sharing
 models are directly opposed, anything to do with data sharing has to
 be thought differently.  With the ithreads you must explicitly share()
 variables between the threads.
+
+For new code the use of the C<Thread> module is discouraged and
+the direct use use of the C<threads> and C<threads::shared> modules
+is encouraged instead.
 
 Finally, note that there are many known serious problems with the
 5005threads, one of the least of which is that regular expression
