@@ -1735,10 +1735,6 @@ long doubles support in AIX should be better now.  See L<perlaix>.
 
 =item *
 
-After a long pause, AmigaOS has been verified to be happy with Perl.
-
-=item *
-
 AtheOS ( http://www.atheos.cx/ ) is a new platform.
 
 =item *
