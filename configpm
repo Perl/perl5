@@ -225,7 +225,7 @@ sub myconfig {
 	$summary;
 }
 
-our $Config_SH : shared = <<'!END!';
+our $Config_SH : unique = <<'!END!';
 EOT
 
 print CONFIG join("", @v_fast, sort @v_others);
