@@ -31,6 +31,304 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 12339] By: ams                                   on 2001/10/05  10:22:34
+        Log: Subject: [PATCH] perlfunc/select
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Fri, 5 Oct 2001 11:33:58 +0100
+             Message-Id: <20011005113358.Z38756@plum.flirble.org>
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 12338] By: jhi                                   on 2001/10/04  22:54:06
+        Log: Retract #12313 and #12249.
+     Branch: perl
+	   ! pod/perlboot.pod pod/perlbot.pod pod/perlcall.pod
+	   ! pod/perldata.pod pod/perldbmfilter.pod pod/perldsc.pod
+	   ! pod/perlebcdic.pod
+____________________________________________________________________________
+[ 12337] By: jhi                                   on 2001/10/04  17:17:03
+        Log: Subject: [PATCH] perlvms.pod update
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Thu, 04 Oct 2001 12:55:52 -0500
+             Message-Id: <5.1.0.14.0.20011004124831.01aa49c0@exchi01>
+     Branch: perl
+	   ! vms/perlvms.pod
+____________________________________________________________________________
+[ 12336] By: jhi                                   on 2001/10/04  14:02:17
+        Log: Subject: PATCH: Tie::SubstrHash
+             From: Hugo van der Sanden <hv@crypt.compulink.co.uk>
+             Date: Thu, 04 Oct 2001 12:12:41 +0100
+             Message-Id: <200110041112.f94BCfS17390@crypt.compulink.co.uk> 
+     Branch: perl
+	   ! lib/Tie/SubstrHash.pm
+____________________________________________________________________________
+[ 12335] By: jhi                                   on 2001/10/04  04:45:00
+        Log: Unicode properties saga continues.
+     Branch: perl
+	   ! lib/unicore/In.pl lib/unicore/In/136.pl lib/unicore/In/155.pl
+	   ! lib/unicore/mktables.PL lib/utf8_heavy.pl
+____________________________________________________________________________
+[ 12334] By: jhi                                   on 2001/10/04  03:42:04
+        Log: Yet more Unicode properties.
+     Branch: perl
+	   + lib/unicore/In/137.pl lib/unicore/In/138.pl
+	   + lib/unicore/In/139.pl lib/unicore/In/140.pl
+	   + lib/unicore/In/141.pl lib/unicore/In/142.pl
+	   + lib/unicore/In/143.pl lib/unicore/In/144.pl
+	   + lib/unicore/In/145.pl lib/unicore/In/146.pl
+	   + lib/unicore/In/147.pl lib/unicore/In/148.pl
+	   + lib/unicore/In/149.pl lib/unicore/In/150.pl
+	   + lib/unicore/In/151.pl lib/unicore/In/152.pl
+	   + lib/unicore/In/153.pl lib/unicore/In/154.pl
+	   + lib/unicore/In/155.pl lib/unicore/In/156.pl
+	   + lib/unicore/In/157.pl lib/unicore/In/158.pl
+	   + lib/unicore/In/159.pl lib/unicore/In/160.pl
+	   + lib/unicore/In/161.pl lib/unicore/In/162.pl
+	   ! MANIFEST lib/unicore/In.pl lib/unicore/In/136.pl
+	   ! lib/unicore/mktables.PL lib/utf8_heavy.pl pod/perltodo.pod
+	   ! pod/perlunicode.pod
+____________________________________________________________________________
+[ 12333] By: jhi                                   on 2001/10/04  03:02:19
+        Log: Subject: [PATCH perl@12307] 2 more VMS test tweaks
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Wed, 03 Oct 2001 17:45:25 -0500
+             Message-Id: <5.1.0.14.0.20011003154131.01bc8528@exchi01>
+             
+             (the lib/Term/Complete.t patched differently by #12332)
+     Branch: perl
+	   ! lib/ExtUtils/Command.t
+____________________________________________________________________________
+[ 12332] By: jhi                                   on 2001/10/04  03:00:03
+        Log: Restore only if something to restore.
+     Branch: perl
+	   ! lib/Term/Complete.t
+____________________________________________________________________________
+[ 12331] By: pudge                                 on 2001/10/03  19:30:48
+        Log: Update various resources for credits,
+             minor icons fixes, and versions.
+     Branch: maint-5.6/macperl
+	   ! macos/MPVersion.r macos/Perl.r macos/macperl/MPDroplet.r
+	   ! macos/macperl/MPExtension.rsrc macos/macperl/MPSave.c
+	   ! macos/macperl/MacPerl.r macos/macperl/MacPerl.rsrc
+____________________________________________________________________________
+[ 12330] By: pudge                                 on 2001/10/03  19:17:25
+        Log: Quiet the warnings about using undef value
+     Branch: maint-5.6/macperl
+	   ! lib/File/Temp.pm
+____________________________________________________________________________
+[ 12329] By: pudge                                 on 2001/10/03  19:14:59
+        Log: Fix up Ballon Help and Help menu docs (first pass);
+             remove balloon rez file, and autogenerate with
+             Balloon2Rez instead.
+     Branch: maint-5.6/macperl
+	   + macos/macperl/macscripts/Balloon2Rez
+	   - macos/macperl/MPBalloons.r
+	   ! macos/macperl/MPBalloons.ball macos/macperl/MacPerl.podhelp
+____________________________________________________________________________
+[ 12328] By: pudge                                 on 2001/10/03  19:11:15
+        Log: Allow overriding of defaults, for change #12327.
+     Branch: maint-5.6/macperl
+	   ! perl.h
+____________________________________________________________________________
+[ 12327] By: pudge                                 on 2001/10/03  19:10:26
+        Log: Override PerlProc_exit.
+     Branch: maint-5.6/macperl
+	   ! macos/macish.h
+____________________________________________________________________________
+[ 12326] By: pudge                                 on 2001/10/03  19:08:28
+        Log: Add in new macos/ modules, fix up BuildTools and Makefile.
+     Branch: maint-5.6/macperl
+	   + macos/bundled_lib/blib/lib/MD5.pm
+	   + macos/bundled_lib/t/MD5/md5.t macos/lib/Mac/AETE/App.pm
+	   + macos/lib/Mac/AETE/Dialect.pm
+	   + macos/lib/Mac/AETE/Format/Converter.pm
+	   + macos/lib/Mac/AETE/Format/Dictionary.pm
+	   + macos/lib/Mac/AETE/Format/Glue.pm macos/lib/Mac/AETE/Parser.pm
+	   + macos/lib/Mac/Glue.pm macos/lib/Mac/OSA/Simple.pm
+	   + macos/lib/Mac/Toolbox.pod
+	   ! macos/Makefile.mk macos/lib/Mac/BuildTools.pm
+____________________________________________________________________________
+[ 12325] By: pudge                                 on 2001/10/03  18:51:28
+        Log: Sync up silly CVS headers ... I should commit CVS
+             first to avoid this ...
+     Branch: maint-5.6/macperl
+	   ! macos/config.h macos/ext/Mac/ExtUtils/MakeToolboxModule
+	   ! macos/ext/Mac/Fonts/Fonts.xs macos/ext/MacPerl/MacPerl.xs
+	   ! macos/macperl/MPEditor.c macos/macperl/MPGlobals.h
+	   ! macos/macperl/MPScript.c macos/macperl/MPUtils.c
+____________________________________________________________________________
+[ 12324] By: pudge                                 on 2001/10/03  18:44:09
+        Log: Fix Matthias' address, and attributions.
+     Branch: maint-5.6/macperl
+	   ! AUTHORS README.macos ext/DynaLoader/dl_mac.xs perl.c
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[ 12323] By: pudge                                 on 2001/10/03  18:42:37
+        Log: Fix Matthias' address, and attributions.
+     Branch: maint-5.6/macperl
+	   ! macos/config.h macos/ext/Mac/AppleEvents/AppleEvents.pm
+	   ! macos/ext/Mac/Components/Components.pm
+	   ! macos/ext/Mac/Controls/Controls.pm macos/ext/Mac/DCon/DCon.pm
+	   ! macos/ext/Mac/Dialogs/Dialogs.pm
+	   ! macos/ext/Mac/Events/Events.pm
+	   ! macos/ext/Mac/ExtUtils/MakeToolboxModule
+	   ! macos/ext/Mac/Files/Files.pm macos/ext/Mac/Fonts/Fonts.pm
+	   ! macos/ext/Mac/Gestalt/Gestalt.pm
+	   ! macos/ext/Mac/ImageCompression/ImageCompression.pm
+	   ! macos/ext/Mac/Lists/Lists.pm macos/ext/Mac/Memory/Memory.pm
+	   ! macos/ext/Mac/Menus/Menus.pm
+	   ! macos/ext/Mac/MoreFiles/MoreFiles.pm
+	   ! macos/ext/Mac/Movies/Movies.pm
+	   ! macos/ext/Mac/Navigation/Navigation.pm
+	   ! macos/ext/Mac/Notification/Notification.pm
+	   ! macos/ext/Mac/OSA/OSA.pm macos/ext/Mac/Processes/Processes.pm
+	   ! macos/ext/Mac/QDOffscreen/QDOffscreen.pm
+	   ! macos/ext/Mac/QuickDraw/QuickDraw.pm
+	   ! macos/ext/Mac/QuickTimeVR/QuickTimeVR.pm
+	   ! macos/ext/Mac/Resources/Resources.pm macos/ext/Mac/SAT/SAT.pm
+	   ! macos/ext/Mac/Sound/Sound.pm macos/ext/Mac/Speech/Speech.pm
+	   ! macos/ext/Mac/SpeechRecognition/SpeechRecognition.pm
+	   ! macos/ext/Mac/StandardFile/StandardFile.pm
+	   ! macos/ext/Mac/TextEdit/TextEdit.pm
+	   ! macos/ext/Mac/Types/Types.pm macos/ext/Mac/Windows/Windows.pm
+	   ! macos/fcntl.h macos/lib/ExtUtils/MM_MacOS.pm
+	   ! macos/lib/Mac/LowMem.pm
+____________________________________________________________________________
+[ 12322] By: sky                                   on 2001/10/03  18:41:07
+        Log: Subject: [PATCH perl@12307] %ENV tainting for VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Wed, 03 Oct 2001 14:30:55 -0500
+             Message-Id: <5.1.0.14.0.20011003124800.01bd31c0@exchi01>
+     Branch: perl
+	   ! vms/vms.c
+____________________________________________________________________________
+[ 12321] By: jhi                                   on 2001/10/03  18:38:34
+        Log: Subject: [PATCH perl@12307] %ENV tainting for VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Wed, 03 Oct 2001 14:30:55 -0500
+             Message-Id: <5.1.0.14.0.20011003124800.01bd31c0@exchi01>
+     Branch: perl
+	   ! vms/vms.c
+____________________________________________________________________________
+[ 12320] By: jhi                                   on 2001/10/03  16:47:30
+        Log: Unicode properties: fix L& (the #12319 didn't allow L&,
+             only IsL&) and Inherited (negative lookahead good);
+             add tests for Common, Inherited, and L&.
+     Branch: perl
+	   ! lib/utf8_heavy.pl pod/perltodo.pod t/op/pat.t
+____________________________________________________________________________
+[ 12319] By: jhi                                   on 2001/10/03  16:12:53
+        Log: Unicode properties: support \p{(?:Is)?L&} as an alias for \pL.
+             (The Unicode standard uses L& quite often.)
+     Branch: perl
+	   ! lib/utf8_heavy.pl
+____________________________________________________________________________
+[ 12318] By: jhi                                   on 2001/10/03  15:57:34
+        Log: Add the 'Common' Unicode property (code points not
+             explicitly assigned to any other script).
+     Branch: perl
+	   + lib/unicore/In/136.pl
+	   ! MANIFEST lib/unicore/In.pl lib/unicore/mktables.PL
+____________________________________________________________________________
+[ 12317] By: jhi                                   on 2001/10/03  13:23:32
+        Log: Skip the RV printing test under threads until fixed.
+     Branch: perl
+	   ! ext/B/t/terse.t
+____________________________________________________________________________
+[ 12316] By: jhi                                   on 2001/10/03  12:57:05
+        Log: Subject: 12309 / cygwin / win2k
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Wed, 03 Oct 2001 15:25:15 +0200
+             Message-Id: <20011003152353.A479.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! makedef.pl
+____________________________________________________________________________
+[ 12315] By: jhi                                   on 2001/10/03  12:50:17
+        Log: Metaconfig unit change for #12314.
+     Branch: metaconfig
+	   ! U/modified/Head.U
+____________________________________________________________________________
+[ 12314] By: jhi                                   on 2001/10/03  12:49:26
+        Log: Subject: Both cygwin and djgpp on one machine
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Wed, 03 Oct 2001 15:02:59 +0200
+             Message-Id: <20011003150222.A474.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 12313] By: jhi                                   on 2001/10/03  12:04:49
+        Log: (retracted by #12338)
+             
+             Subject: [PATCH] Code clean up for perlboot.pod
+             From: Casey West <casey@geeknest.com>
+             Date: Tue, 2 Oct 2001 19:24:43 -0400
+             Message-ID: <20011002192443.B2163@stupid.geeknest.com>
+             
+             Subject: [PATCH] Code clean up for perlbot.diff
+             From: Casey West <casey@geeknest.com>
+             Date: Tue, 2 Oct 2001 19:25:22 -0400
+             Message-ID: <20011002192522.C2163@stupid.geeknest.com>
+             
+             Subject: [PATCH] Code clean up for perlcall.pod
+             From: Casey West <casey@geeknest.com>
+             Date: Tue, 2 Oct 2001 19:25:57 -0400
+             Message-ID: <20011002192557.D2163@stupid.geeknest.com>
+             
+             Subject: [PATCH] Code clean up for perldata.pod
+             From: Casey West <casey@geeknest.com>
+             Date: Tue, 2 Oct 2001 19:26:29 -0400
+             Message-ID: <20011002192629.E2163@stupid.geeknest.com>
+             
+             Subject: [PATCH] Code clean up for perldbmfilter.pod
+             From: Casey West <casey@geeknest.com>
+             Date: Tue, 2 Oct 2001 19:26:59 -0400
+             Message-ID: <20011002192659.F2163@stupid.geeknest.com>
+             
+             Subject: [PATCH] Code clean up for perlebcdic.pod
+             From: Casey West <casey@geeknest.com>
+             Date: Tue, 2 Oct 2001 19:27:37 -0400
+             Message-ID: <20011002192737.G2163@stupid.geeknest.com>
+     Branch: perl
+	   ! pod/perlboot.pod pod/perlbot.pod pod/perlcall.pod
+	   ! pod/perldata.pod pod/perldbmfilter.pod pod/perlebcdic.pod
+____________________________________________________________________________
+[ 12312] By: ams                                   on 2001/10/02  23:43:55
+        Log: Subject: [PATCH lib/ExtUtils/MakeMaker.pm] makemaker@perl.org
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Tue, 2 Oct 2001 17:00:49 -0400
+             Message-Id: <20011002170049.A9955@blackrider>
+     Branch: perl
+	   ! lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[ 12311] By: jhi                                   on 2001/10/02  23:24:07
+        Log: FAQ sync.
+     Branch: perl
+	   ! pod/perlfaq3.pod
+____________________________________________________________________________
+[ 12310] By: nick                                  on 2001/10/02  16:09:49
+        Log: Integrate mainline
+     Branch: perlio
+	  !> AUTHORS Changes ext/I18N/Langinfo/Langinfo.pm
+	  !> ext/I18N/Langinfo/Langinfo.t ext/I18N/Langinfo/Makefile.PL
+	  !> lib/Pod/Html.pm lib/unicore/In.pl lib/unicore/mktables.PL mg.c
+	  !> patchlevel.h t/op/pat.t
+____________________________________________________________________________
+[ 12309] By: jhi                                   on 2001/10/02  14:34:59
+        Log: Unicode properties: allow also intra(wordbreak)name whitespace,
+             not just one single space.
+     Branch: perl
+	   ! lib/unicore/In.pl lib/unicore/mktables.PL t/op/pat.t
+____________________________________________________________________________
+[ 12308] By: jhi                                   on 2001/10/02  12:49:41
+        Log: AUTHORS updates.
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[ 12307] By: jhi                                   on 2001/10/02  12:22:21
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 12306] By: jhi                                   on 2001/10/02  11:59:12
         Log: Work around old buggy glibcs for langinfo constants,
              from Nicholas Clark and David Dyck.
@@ -38,7 +336,7 @@ ____________________________________________________________________________
 	   ! ext/I18N/Langinfo/Langinfo.t ext/I18N/Langinfo/Makefile.PL
 ____________________________________________________________________________
 [ 12305] By: jhi                                   on 2001/10/02  11:45:55
-        Log: Eradicate Time:Piece; add an example.
+        Log: Eradicate Time::Piece; add an example.
      Branch: perl
 	   ! ext/I18N/Langinfo/Langinfo.pm
 ____________________________________________________________________________
