@@ -251,6 +251,7 @@ PP(pp_aelemfast)
     djSP;
     AV *av = GvAV((GV*)cSVOP->op_sv);
     SV** svp = av_fetch(av, op->op_private, op->op_flags & OPf_MOD);
+    EXTEND(SP, 1);
     PUSHs(svp ? *svp : &sv_undef);
     RETURN;
 }

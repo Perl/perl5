@@ -218,11 +218,14 @@ int	magic_get	_((SV* sv, MAGIC* mg));
 int	magic_getarylen	_((SV* sv, MAGIC* mg));
 int	magic_getdefelem _((SV* sv, MAGIC* mg));
 int	magic_getglob	_((SV* sv, MAGIC* mg));
+int	magic_getnkeys	_((SV* sv, MAGIC* mg));
 int	magic_getpack	_((SV* sv, MAGIC* mg));
 int	magic_getpos	_((SV* sv, MAGIC* mg));
 int	magic_getsig	_((SV* sv, MAGIC* mg));
+int	magic_getsubstr	_((SV* sv, MAGIC* mg));
 int	magic_gettaint	_((SV* sv, MAGIC* mg));
 int	magic_getuvar	_((SV* sv, MAGIC* mg));
+int	magic_getvec	_((SV* sv, MAGIC* mg));
 U32	magic_len	_((SV* sv, MAGIC* mg));
 #ifdef USE_THREADS
 int	magic_mutexfree	_((SV* sv, MAGIC* mg));

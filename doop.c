@@ -483,7 +483,11 @@ do_kv(ARGSproto)
 		sv_magic(TARG, Nullsv, 'k', Nullch, 0);
 	    }
 	    LvTYPE(TARG) = 'k';
-	    LvTARG(TARG) = (SV*)hv;
+	    if (LvTARG(TARG) != (SV*)hv) {
+		if (LvTARG(TARG))
+		    SvREFCNT_dec(LvTARG(TARG));
+		LvTARG(TARG) = SvREFCNT_inc(hv);
+	    }
 	    PUSHs(TARG);
 	    RETURN;
 	}

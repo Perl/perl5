@@ -1166,6 +1166,8 @@ perl_call_method(char *methname, I32 flags)
     XPUSHs(sv_2mortal(newSVpv(methname,0)));
     PUTBACK;
     pp_method(ARGS);
+	if(op == &myop)
+		op = Nullop;
     return perl_call_sv(*stack_sp--, flags);
 }
 
