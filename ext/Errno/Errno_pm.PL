@@ -2,7 +2,7 @@ use ExtUtils::MakeMaker;
 use Config;
 use strict;
 
-our $VERSION = "1.09_00";
+our $VERSION = "1.09_01";
 
 my %err = ();
 my %wsa = ();
@@ -19,6 +19,12 @@ unlink "errno.c" if -f "errno.c";
 
 sub process_file {
     my($file) = @_;
+
+    # for win32 perl under cygwin, we need to get a windows pathname
+    if ($^O eq 'MSWin32' && $Config{cc} =~ /\B-mno-cygwin\b/ &&
+        defined($file) && !-f $file) {
+        chomp($file = `cygpath -w "$file"`);
+    }
 
     return unless defined $file and -f $file;
 #   warn "Processing $file\n";
