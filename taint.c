@@ -39,7 +39,7 @@ taint_env()
 
 #ifdef VMS
     int i = 0;
-    char name[14] = "DCL$PATH";
+    char name[10 + TYPE_DIGITS(int)] = "DCL$PATH";
 
     while (1) {
 	if (i)
