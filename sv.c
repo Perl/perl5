@@ -2414,7 +2414,7 @@ Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
 
     if (hicount) {
 	STRLEN len = SvCUR(sv) + 1; /* Plus the \0 */
-	SvPVX(sv) = bytes_to_utf8(s, &len);
+	SvPVX(sv) = (char*)bytes_to_utf8((U8*)s, &len);
 	SvCUR(sv) = len - 1;
 	Safefree(s); /* No longer using what was there before */
 	SvUTF8_on(sv);
@@ -2438,7 +2438,7 @@ Perl_sv_utf8_downgrade(pTHX_ register SV* sv, bool fail_ok)
     if (SvPOK(sv) && SvUTF8(sv)) {
         char *c = SvPVX(sv);
 	STRLEN len = SvCUR(sv);
-        if (!utf8_to_bytes(c, &len)) {
+        if (!utf8_to_bytes((U8*)c, &len)) {
 	    if (fail_ok)
 		return FALSE;
 	    else
@@ -2478,7 +2478,7 @@ Perl_sv_utf8_decode(pTHX_ register SV *sv)
          * we want to make sure everything inside is valid utf8 first.
          */
         c = SvPVX(sv);
-	if (!is_utf8_string(c,SvCUR(c)+1))
+	if (!is_utf8_string((U8*)c, SvCUR(sv)+1))
 	    return FALSE;
 
         while (c < SvEND(sv)) {
