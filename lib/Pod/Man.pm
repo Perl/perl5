@@ -365,8 +365,8 @@ sub begin_pod {
     my $name = $$self{name};
     if (!defined $name) {
         $name = $self->input_file;
-        $section = 3 if (!$$self{section} && $name =~ /\.pm$/i);
-        $name =~ s/\.p(od|[lm])$//i;
+        $section = 3 if (!$$self{section} && $name =~ /\.pm\z/i);
+        $name =~ s/\.p(od|[lm])\z//i;
         if ($section =~ /^1/) {
             require File::Basename;
             $name = uc File::Basename::basename ($name);
@@ -378,11 +378,11 @@ sub begin_pod {
             # which works.  Should be fixed to use File::Spec.
             for ($name) {
                 s%//+%/%g;
-                if (     s%^.*?/lib/[^/]*perl[^/]*/%%i
-                      or s%^.*?/[^/]*perl[^/]*/(?:lib/)?%%i) {
-                    s%^site(_perl)?/%%;       # site and site_perl
-                    s%^(.*-$^O|$^O-.*)/%%o;   # arch
-                    s%^\d+\.\d+%%;            # version
+                if (     s%^.*?/lib/[^/]*perl[^/]*/%%is
+                      or s%^.*?/[^/]*perl[^/]*/(?:lib/)?%%is) {
+                    s%^site(_perl)?/%%s;       # site and site_perl
+                    s%^(.*-$^O|$^O-.*)/%%os;   # arch
+                    s%^\d+\.\d+%%s;            # version
                 }
                 s%/%::%g;
             }
