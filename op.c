@@ -5799,6 +5799,7 @@ Perl_ck_glob(pTHX_ OP *o)
     gv = newGVgen("main");
     gv_IOadd(gv);
     append_elem(OP_GLOB, o, newGVOP(OP_GV, 0, gv));
+    SvREFCNT_dec((SV*)gv); /* had excess refcnt */
     scalarkids(o);
     return o;
 }
