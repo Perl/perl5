@@ -108,3 +108,17 @@ problem.  Try
 
 EOM
 
+if [ "X$usethreads" != "X" ]; then
+    if [ ! -r /usr/lib/libc_r.a ]; then
+        cat <<'EOM'
+
+The re-entrant C library /usr/lib/libc_r.a does not exist; cannot build
+threaded Perl.  Consider upgrading to a newer FreeBSD snapshot or release:
+at least the FreeBSD 3.0-971225-SNAP is known to have the libc_r.a.
+
+EOM
+        exit 1
+    fi
+    libswanted="$libswanted c_r"
+    ccflags="-DUSE_THREADS $ccflags"
+fi

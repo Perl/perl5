@@ -1,23 +1,20 @@
 #
 # Complex numbers and associated mathematical functions
-# -- Raphael Manfredi	September 1996
-# -- Jarkko Hietaniemi	March-October 1997
-# -- Daniel S. Lewart	September-October 1997
+# -- Raphael Manfredi	Since Sep 1996
+# -- Jarkko Hietaniemi	Since Mar 1997
+# -- Daniel S. Lewart	Since Sep 1997
 #
 
 require Exporter;
 package Math::Complex;
 
-$VERSION = 1.05;
-
-# $Id: Complex.pm,v 1.2 1997/10/15 10:08:39 jhi Exp $
-
 use strict;
 
-use vars qw($VERSION @ISA
-	    @EXPORT %EXPORT_TAGS
-	    $package $display
-	    $i $ip2 $logn %logn);
+use vars qw($VERSION @ISA @EXPORT %EXPORT_TAGS);
+
+my ( $i, $ip2, %logn );
+
+$VERSION = sprintf("%s", q$Id: Complex.pm,v 1.25 1998/02/05 16:07:37 jhi Exp $ =~ /(\d+\.\d+)/);
 
 @ISA = qw(Exporter);
 
@@ -34,7 +31,7 @@ my @trig = qw(
 	     );
 
 @EXPORT = (qw(
-	     i Re Im arg
+	     i Re Im rho theta arg
 	     sqrt log ln
 	     log10 logn cbrt root
 	     cplx cplxe
@@ -65,11 +62,12 @@ use overload
 	qw("" stringify);
 
 #
-# Package globals
+# Package "privates"
 #
 
-$package = 'Math::Complex';		# Package name
-$display = 'cartesian';			# Default display format
+my $package = 'Math::Complex';		# Package name
+my $display = 'cartesian';		# Default display format
+my $eps     = 1e-14;			# Epsilon
 
 #
 # Object attributes (internal):
@@ -80,6 +78,12 @@ $display = 'cartesian';			# Default display format
 #	display		display format (package's global when not set)
 #
 
+# Die on bad *make() arguments.
+
+sub _cannot_make {
+    die "@{[(caller(1))[3]]}: Cannot take $_[0] of $_[1].\n";
+}
+
 #
 # ->make
 #
@@ -88,9 +92,26 @@ $display = 'cartesian';			# Default display format
 sub make {
 	my $self = bless {}, shift;
 	my ($re, $im) = @_;
-	$self->{'cartesian'} = [$re, $im];
+	my $rre = ref $re;
+	if ( $rre ) {
+	    if ( $rre eq ref $self ) {
+		$re = Re($re);
+	    } else {
+		_cannot_make("real part", $rre);
+	    }
+	}
+	my $rim = ref $im;
+	if ( $rim ) {
+	    if ( $rim eq ref $self ) {
+		$im = Im($im);
+	    } else {
+		_cannot_make("imaginary part", $rim);
+	    }
+	}
+	$self->{'cartesian'} = [ $re, $im ];
 	$self->{c_dirty} = 0;
 	$self->{p_dirty} = 1;
+	$self->display_format('cartesian');
 	return $self;
 }
 
@@ -102,6 +123,22 @@ sub make {
 sub emake {
 	my $self = bless {}, shift;
 	my ($rho, $theta) = @_;
+	my $rrh = ref $rho;
+	if ( $rrh ) {
+	    if ( $rrh eq ref $self ) {
+		$rho = rho($rho);
+	    } else {
+		_cannot_make("rho", $rrh);
+	    }
+	}
+	my $rth = ref $theta;
+	if ( $rth ) {
+	    if ( $rth eq ref $self ) {
+		$theta = theta($theta);
+	    } else {
+		_cannot_make("theta", $rth);
+	    }
+	}
 	if ($rho < 0) {
 	    $rho   = -$rho;
 	    $theta = ($theta <= 0) ? $theta + pi() : $theta - pi();
@@ -109,6 +146,7 @@ sub emake {
 	$self->{'polar'} = [$rho, $theta];
 	$self->{p_dirty} = 0;
 	$self->{c_dirty} = 1;
+	$self->display_format('polar');
 	return $self;
 }
 
@@ -438,26 +476,46 @@ sub conjugate {
 #
 # (abs)
 #
-# Compute complex's norm (rho).
+# Compute or set complex's norm (rho).
 #
 sub abs {
-	my ($z) = @_;
-	my ($r, $t) = @{$z->polar};
-	return $r;
+	my ($z, $rho) = @_;
+	return $z unless ref $z;
+	if (defined $rho) {
+	    $z->{'polar'} = [ $rho, ${$z->polar}[1] ];
+	    $z->{p_dirty} = 0;
+	    $z->{c_dirty} = 1;
+	    return $rho;
+	} else {
+	    return ${$z->polar}[0];
+	}
+}
+
+sub _theta {
+    my $theta = $_[0];
+
+    if    ($$theta >   pi()) { $$theta -= pit2 }
+    elsif ($$theta <= -pi()) { $$theta += pit2 }
 }
 
 #
 # arg
 #
-# Compute complex's argument (theta).
+# Compute or set complex's argument (theta).
 #
 sub arg {
-	my ($z) = @_;
-	return ($z < 0 ? pi : 0) unless ref $z;
-	my ($r, $t) = @{$z->polar};
-	if    ($t >   pi()) { $t -= pit2 }
-	elsif ($t <= -pi()) { $t += pit2 }
-	return $t;
+	my ($z, $theta) = @_;
+	return $z unless ref $z;
+	if (defined $theta) {
+	    _theta(\$theta);
+	    $z->{'polar'} = [ ${$z->polar}[0], $theta ];
+	    $z->{p_dirty} = 0;
+	    $z->{c_dirty} = 1;
+	} else {
+	    $theta = ${$z->polar}[1];
+	    _theta(\$theta);
+	}
+	return $theta;
 }
 
 #
@@ -465,11 +523,20 @@ sub arg {
 #
 # Compute sqrt(z).
 #
+# It is quite tempting to use wantarray here so that in list context
+# sqrt() would return the two solutions.  This, however, would
+# break things like
+#
+#	print "sqrt(z) = ", sqrt($z), "\n";
+#
+# The two values would be printed side by side without no intervening
+# whitespace, quite confusing.
+# Therefore if you want the two solutions use the root().
+#
 sub sqrt {
 	my ($z) = @_;
-	return $z >= 0 ? sqrt($z) : cplx(0, sqrt(-$z)) unless ref $z;
-	my ($re, $im) = @{$z->cartesian};
-	return cplx($re < 0 ? (0, sqrt(-$re)) : (sqrt($re), 0)) if $im == 0;
+	my ($re, $im) = ref $z ? @{$z->cartesian} : ($z, 0);
+	return $re < 0 ? cplx(0, sqrt(-$re)) : sqrt($re) if $im == 0;
 	my ($r, $t) = @{$z->polar};
 	return (ref $z)->emake(sqrt($r), $t/2);
 }
@@ -478,6 +545,8 @@ sub sqrt {
 # cbrt
 #
 # Compute cbrt(z) (cubic root).
+#
+# Why are we not returning three values?  The same answer as for sqrt().
 #
 sub cbrt {
 	my ($z) = @_;
@@ -531,25 +600,53 @@ sub root {
 #
 # Re
 #
-# Return Re(z).
+# Return or set Re(z).
 #
 sub Re {
-	my ($z) = @_;
+	my ($z, $Re) = @_;
 	return $z unless ref $z;
-	my ($re, $im) = @{$z->cartesian};
-	return $re;
+	if (defined $Re) {
+	    $z->{'cartesian'} = [ $Re, ${$z->cartesian}[1] ];
+	    $z->{c_dirty} = 0;
+	    $z->{p_dirty} = 1;
+	} else {
+	    return ${$z->cartesian}[0];
+	}
 }
 
 #
 # Im
 #
-# Return Im(z).
+# Return or set Im(z).
 #
 sub Im {
-	my ($z) = @_;
-	return 0 unless ref $z;
-	my ($re, $im) = @{$z->cartesian};
-	return $im;
+	my ($z, $Im) = @_;
+	return $z unless ref $z;
+	if (defined $Im) {
+	    $z->{'cartesian'} = [ ${$z->cartesian}[0], $Im ];
+	    $z->{c_dirty} = 0;
+	    $z->{p_dirty} = 1;
+	} else {
+	    return ${$z->cartesian}[1];
+	}
+}
+
+#
+# rho
+#
+# Return or set rho(w).
+#
+sub rho {
+    Math::Complex::abs(@_);
+}
+
+#
+# theta
+#
+# Return or set theta(w).
+#
+sub theta {
+    Math::Complex::arg(@_);
 }
 
 #
@@ -668,7 +765,7 @@ sub sin {
 sub tan {
 	my ($z) = @_;
 	my $cz = cos($z);
-	_divbyzero "tan($z)", "cos($z)" if ($cz == 0);
+	_divbyzero "tan($z)", "cos($z)" if (abs($cz) < $eps);
 	return sin($z) / $cz;
 }
 
@@ -817,9 +914,10 @@ sub acosec { Math::Complex::acsc(@_) }
 #
 sub acot {
 	my ($z) = @_;
+	_divbyzero "acot(0)"  if (abs($z)     < $eps);
 	return ($z >= 0) ? atan2(1, $z) : atan2(-1, -$z) unless ref $z;
-	_divbyzero "acot(i)", if ( $z == i);
-	_divbyzero "acot(-i)" if (-$z == i);
+	_divbyzero "acot(i)"  if (abs($z - i) < $eps);
+	_logofzero "acot(-i)" if (abs($z + i) < $eps);
 	return atan(1 / $z);
 }
 
@@ -1011,12 +1109,13 @@ sub acosech { Math::Complex::acsch(@_) }
 #
 sub acoth {
 	my ($z) = @_;
+	_divbyzero 'acoth(0)'            if (abs($z)     < $eps);
 	unless (ref $z) {
 	    return log(($z + 1)/($z - 1))/2 if abs($z) > 1;
 	    $z = cplx($z, 0);
 	}
-	_divbyzero 'acoth(1)', "$z - 1" if ($z ==  1);
-	_logofzero 'acoth(-1)'          if ($z == -1);
+	_divbyzero 'acoth(1)',  "$z - 1" if (abs($z - 1) < $eps);
+	_logofzero 'acoth(-1)', "1 / $z" if (abs($z + 1) < $eps);
 	return log((1 + $z) / ($z - 1)) / 2;
 }
 
@@ -1117,7 +1216,6 @@ sub stringify_cartesian {
 	my $z  = shift;
 	my ($x, $y) = @{$z->cartesian};
 	my ($re, $im);
-	my $eps = 1e-14;
 
 	$x = int($x + ($x < 0 ? -1 : 1) * $eps)
 		if int(abs($x)) != int(abs($x) + $eps);
@@ -1148,7 +1246,6 @@ sub stringify_polar {
 	my $z  = shift;
 	my ($r, $t) = @{$z->polar};
 	my $theta;
-	my $eps = 1e-14;
 
 	return '[0,0]' if $r <= $eps;
 
@@ -1323,6 +1420,8 @@ number) and the above definition states that
 	sqrt([x,pi]) = sqrt(x) * exp(i*pi/2) = [sqrt(x),pi/2] = sqrt(x)*i
 
 which is exactly what we had defined for negative real numbers above.
+The C<sqrt> returns only one of the solutions: if you want the both,
+use the C<root> function.
 
 All the common mathematical functions defined on real numbers that
 are extended to complex numbers share that same property of working
@@ -1375,13 +1474,13 @@ the following (overloaded) operations are supported on complex numbers:
 	z1 * z2 = (r1 * r2) * exp(i * (t1 + t2))
 	z1 / z2 = (r1 / r2) * exp(i * (t1 - t2))
 	z1 ** z2 = exp(z2 * log z1)
-	~z1 = a - bi
-	abs(z1) = r1 = sqrt(a*a + b*b)
-	sqrt(z1) = sqrt(r1) * exp(i * t1/2)
-	exp(z1) = exp(a) * exp(i * b)
-	log(z1) = log(r1) + i*t1
-	sin(z1) = 1/2i (exp(i * z1) - exp(-i * z1))
-	cos(z1) = 1/2 (exp(i * z1) + exp(-i * z1))
+	~z = a - bi
+	abs(z) = r1 = sqrt(a*a + b*b)
+	sqrt(z) = sqrt(r1) * exp(i * t/2)
+	exp(z) = exp(a) * exp(i * b)
+	log(z) = log(r1) + i*t
+	sin(z) = 1/2i (exp(i * z1) - exp(-i * z))
+	cos(z) = 1/2 (exp(i * z1) + exp(-i * z))
 	atan2(z1, z2) = atan(z1/z2)
 
 The following extra operations are supported on both real and complex
@@ -1390,6 +1489,7 @@ numbers:
 	Re(z) = a
 	Im(z) = b
 	arg(z) = t
+	abs(z) = r
 
 	cbrt(z) = z ** (1/3)
 	log10(z) = log(z) / log(10)
@@ -1425,10 +1525,13 @@ numbers:
 	asech(z) = acosh(1 / z)
 	acoth(z) = atanh(1 / z) = 1/2 * log((1+z) / (z-1))
 
-I<log>, I<csc>, I<cot>, I<acsc>, I<acot>, I<csch>, I<coth>,
-I<acosech>, I<acotanh>, have aliases I<ln>, I<cosec>, I<cotan>,
-I<acosec>, I<acotan>, I<cosech>, I<cotanh>, I<acosech>, I<acotanh>,
-respectively.
+I<arg>, I<abs>, I<log>, I<csc>, I<cot>, I<acsc>, I<acot>, I<csch>,
+I<coth>, I<acosech>, I<acotanh>, have aliases I<rho>, I<theta>, I<ln>,
+I<cosec>, I<cotan>, I<acosec>, I<acotan>, I<cosech>, I<cotanh>,
+I<acosech>, I<acotanh>, respectively.  C<Re>, C<Im>, C<arg>, C<abs>,
+C<rho>, and C<theta> can be used also also mutators.  The C<cbrt>
+returns only one of the solutions: if you want all three, use the
+C<root> function.
 
 The I<root> function is available to compute all the I<n>
 roots of some complex, where I<n> is a strictly positive integer.
@@ -1479,6 +1582,13 @@ but that will be silently converted into C<[3,-3pi/4]>, since the modulus
 must be non-negative (it represents the distance to the origin in the complex
 plane).
 
+It is also possible to have a complex number as either argument of
+either the C<make> or C<emake>: the appropriate component of
+the argument will be used.
+
+	$z1 = cplx(-2,  1);
+	$z2 = cplx($z1, 4);
+
 =head1 STRINGIFICATION
 
 When printed, a complex number is usually shown under its cartesian
@@ -1527,26 +1637,19 @@ Here are some examples:
 	$k = exp(i * 2*pi/3);
 	print "$j - $k = ", $j - $k, "\n";
 
-=head1 ERRORS DUE TO DIVISION BY ZERO
+	$z->Re(3);			# Re, Im, arg, abs,
+	$j->arg(2);			# (the last two aka rho, theta)
+					# can be used also as mutators.
+
+=head1 ERRORS DUE TO DIVISION BY ZERO OR LOGARITHM OF ZERO
 
 The division (/) and the following functions
 
-	tan
-	sec
-	csc
-	cot
-	asec
-	acsc
-	atan
-	acot
-	tanh
-	sech
-	csch
-	coth
-	atanh
-	asech
-	acsch
-	acoth
+	log	ln	log10	logn
+	tan	sec 	csc	cot
+	atan	asec	acsc	acot
+	tanh	sech	csch	coth
+	atanh	asech	acsch	acoth
 
 cannot be computed for all arguments because that would mean dividing
 by zero or taking logarithm of zero. These situations cause fatal
@@ -1562,13 +1665,30 @@ or
 	Died at...
 
 For the C<csc>, C<cot>, C<asec>, C<acsc>, C<acot>, C<csch>, C<coth>,
-C<asech>, C<acsch>, the argument cannot be C<0> (zero).  For the
-C<atanh>, C<acoth>, the argument cannot be C<1> (one).  For the
-C<atanh>, C<acoth>, the argument cannot be C<-1> (minus one).  For the
-C<atan>, C<acot>, the argument cannot be C<i> (the imaginary unit).
-For the C<atan>, C<acoth>, the argument cannot be C<-i> (the negative
-imaginary unit).  For the C<tan>, C<sec>, C<tanh>, C<sech>, the
-argument cannot be I<pi/2 + k * pi>, where I<k> is any integer.
+C<asech>, C<acsch>, the argument cannot be C<0> (zero).  For the the
+logarithmic functions and the C<atanh>, C<acoth>, the argument cannot
+be C<1> (one).  For the C<atanh>, C<acoth>, the argument cannot be
+C<-1> (minus one).  For the C<atan>, C<acot>, the argument cannot be
+C<i> (the imaginary unit).  For the C<atan>, C<acoth>, the argument
+cannot be C<-i> (the negative imaginary unit).  For the C<tan>,
+C<sec>, C<tanh>, the argument cannot be I<pi/2 + k * pi>, where I<k>
+is any integer.
+
+Note that because we are operating on approximations of real numbers,
+these errors can happen when merely `too close' to the singularities
+listed above.  For example C<tan(2*atan2(1,1)+1e-15)> will die of
+division by zero.
+
+=head1 ERRORS DUE TO INDIGESTIBLE ARGUMENTS
+
+The C<make> and C<emake> accept both real and complex arguments.
+When they cannot recognize the arguments they will die with error
+messages like the following
+
+    Math::Complex::make: Cannot take real part of ...
+    Math::Complex::make: Cannot take real part of ...
+    Math::Complex::emake: Cannot take rho of ...
+    Math::Complex::emake: Cannot take theta of ...
 
 =head1 BUGS
 
@@ -1588,5 +1708,7 @@ Jarkko Hietaniemi <F<jhi@iki.fi>>.
 Extensive patches by Daniel S. Lewart <F<d-lewart@uiuc.edu>>.
 
 =cut
+
+1;
 
 # eof
