@@ -1418,9 +1418,9 @@ Afnp	|int	|fprintf_nocontext|PerlIO* stream|const char* fmt|...
 #endif
 p	|void	|cv_ckproto	|CV* cv|GV* gv|char* p
 p	|CV*	|cv_clone	|CV* proto
-p	|SV*	|cv_const_sv	|CV* cv
+Ap	|SV*	|cv_const_sv	|CV* cv
 p	|SV*	|op_const_sv	|OP* o|CV* cv
-p	|void	|cv_undef	|CV* cv
+Ap	|void	|cv_undef	|CV* cv
 Ap	|void	|cx_dump	|PERL_CONTEXT* cs
 Ap	|SV*	|filter_add	|filter_t funcp|SV* datasv
 Ap	|void	|filter_del	|filter_t funcp
