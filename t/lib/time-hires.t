@@ -3,7 +3,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-BEGIN { $| = 1; print "1..17\n"; }
+BEGIN { $| = 1; print "1..19\n"; }
 
 END {print "not ok 1\n" unless $loaded;}
 
@@ -22,6 +22,8 @@ my $have_ualarm		= defined &Time::HiRes::ualarm;
 import Time::HiRes 'gettimeofday'	if $have_gettimeofday;
 import Time::HiRes 'usleep'		if $have_usleep;
 import Time::HiRes 'ualarm'		if $have_ualarm;
+
+use Config;
 
 sub skip {
     map { print "ok $_ (skipped)\n" } @_;
@@ -161,16 +163,47 @@ unless (defined &Time::HiRes::gettimeofday
     {
 	alarm(2.5);
 	select (undef, undef, undef, 10);
-	print "# Select returned! ", Time::HiRes::tv_interval ($r), "\n";
+	print "# Select returned! $i ", Time::HiRes::tv_interval ($r), "\n";
     }
 
     sub tick
     {
-	print "# Tick! ", Time::HiRes::tv_interval ($r), "\n";
 	$i--;
+	print "# Tick! $i ", Time::HiRes::tv_interval ($r), "\n";
     }
     $SIG{ALRM} = 'DEFAULT';
 
     print "ok 17\n";
+}
+
+unless (defined &Time::HiRes::setitimer
+	&& defined &Time::HiRes::getitimer
+	&& exists &Time::HiRes::ITIMER_VIRTUAL
+	&& $Config{d_select}) {
+    for (18..19) {
+	print "ok $_ # skipped\n";
+    }
+} else {
+    use Time::HiRes qw (setitimer getitimer ITIMER_VIRTUAL);
+
+    my $i = 3;
+    my $r = [Time::HiRes::gettimeofday];
+
+    $SIG{VTALRM} = sub {
+	$i ? $i-- : setitimer(ITIMER_VIRTUAL, 0);
+	print "# Tick! $i ", Time::HiRes::tv_interval($r), "\n";
+    };	
+
+    print "# setitimer: ", join(" ", setitimer(ITIMER_VIRTUAL, 3, 0.5)), "\n";
+
+    print "# getitimer: ", join(" ", getitimer(ITIMER_VIRTUAL)), "\n";
+
+    while ($i) {
+	my $j; $j++ for 1..1000;
+    }
+
+    print "# getitimer: ", join(" ", getitimer(ITIMER_VIRTUAL)), "\n";
+
+    $SIG{VTALRM} = 'DEFAULT';
 }
 
