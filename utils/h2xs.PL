@@ -594,6 +594,7 @@ my ($opt_A,
    );
 
 Getopt::Long::Configure('bundling');
+Getopt::Long::Configure('pass_through');
 
 my %options = (
                 'omit-autoload|A'    => \$opt_A,
@@ -707,9 +708,10 @@ my @path_h;
 
 while (my $arg = shift) {
     if ($arg =~ /^-l/i) {
-        $extralibs = "$arg @ARGV";
-        last;
+        $extralibs .= "$arg ";
+        next;
     }
+    last if $extralibs;
     push(@path_h, $arg);
 }
 
