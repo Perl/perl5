@@ -904,7 +904,7 @@ Free_t   Perl_mfree (Malloc_t where);
 typedef IVTYPE IV;
 typedef UVTYPE UV;
 
-#ifdef USE_64_BITS
+#if defined(USE_64_BITS) && defined(HAS_QUAD)
 #  if QUADCASE == 4 && defined(INT64_MAX) /* quad is int64_t */
 #    define IV_MAX INT64_MAX
 #    define IV_MIN INT64_MIN
@@ -943,9 +943,13 @@ typedef UVTYPE UV;
 #  if IVSIZE == 8
 #    define IV_IS_QUAD
 #    define UV_IS_QUAD
+#    ifndef HAS_QUAD
+#      define HAS_QUAD
+#    endif
 #  else
 #    undef IV_IS_QUAD
 #    undef UV_IS_QUAD
+#    undef HAS_QUAD
 #  endif
 #endif
 
