@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Feb 24 02:33:10 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Thu Feb 24 02:58:10 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -7164,10 +7164,12 @@ echo 'int main() { long double x = 7.0; }' > try.c
 set try
 if eval $compile; then
 	val="$define"
-	echo " Yes, it does."
+	echo " " >&4
+	echo "You have long double."
 else
 	val="$undef"
-	echo " No, it doesn't."
+	echo " " >&4
+	echo "You do not have long double."
 fi
 $rm try.*
 set d_longdbl
@@ -8820,7 +8822,7 @@ echo "Checking to see if your system supports off64_t..." >&4
 $cat >try.c <<EOCP
 #include <sys/types.h>
 #include <unistd.h>
-int main() { off64_t x = 7; }'
+int main() { off64_t x = 7; }
 EOCP
 set try
 if eval $compile; then
@@ -8841,8 +8843,8 @@ eval $setvar
 echo " "
 echo "Checking to see if your system supports fpos64_t..." >&4
 $cat >try.c <<EOCP
-#include <sys/stdio.h>
-int main() { fpos64_t x x = 7; }'
+#include <stdio.h>
+int main() { fpos64_t x x = 7; }
 EOCP
 set try
 if eval $compile; then
@@ -9307,13 +9309,15 @@ $cat >try.c <<EOCP
 #endif
 int main() { int64_t x = 7; }
 EOCP
+	echo " " >&4
 set try
 if eval $compile; then
 	val="$define"
-	echo " Yes, it does."
+	echo " " >&4
+	echo "You have int64_t."
 else
 	val="$undef"
-	echo " No, it doesn't."
+	echo "You do not have int64_t."
 fi
 $rm -f try try.*
 set d_int64_t
@@ -9426,10 +9430,12 @@ echo 'int main() { long long x = 7; return 0; }' > try.c
 set try
 if eval $compile; then
 	val="$define"
-	echo " Yes, it does."
+	echo " " >&4
+	echo "You have have long long."
 else
 	val="$undef"
-	echo " No, it doesn't."
+	echo " " >&4
+	echo "You do not have long long."
 fi
 $rm try.*
 set d_longlong
@@ -10957,10 +10963,12 @@ EOCP
 set try
 if eval $compile; then
 	val="$define"
-	echo " Yes, it does."
+	echo " " >&4
+	echo "You have socklen_t."
 else
 	val="$undef"
-	echo " No, it doesn't."
+	echo " " >&4
+	echo "You do not have socklen_t."
 fi
 $rm -f try try.*
 set d_socklen_t
