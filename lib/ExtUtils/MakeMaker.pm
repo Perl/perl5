@@ -452,7 +452,7 @@ sub ExtUtils::MakeMaker::new {
 	}
 	$self->{PARENT}->{CHILDREN}->{$newclass} = $self if $self->{PARENT};
     } else {
-	parse_args($self,split(' ', $ENV{MAKEMAKEROPT} || ''),@ARGV);
+	parse_args($self,split(' ', $ENV{PERL_MM_OPT} || ''),@ARGV);
     }
 
     $self->{NAME} ||= $self->guess_name;
@@ -1927,7 +1927,7 @@ different means on the current architecture).
 
 =over 8
 
-=item MAKEMAKEROPT
+=item PERL_MM_OPT
 
 Command line options used by C<MakeMaker-E<gt>new()>, and thus by
 C<WriteMakefile()>.  The string is split on whitespace, and the result
