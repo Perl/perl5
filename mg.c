@@ -684,7 +684,7 @@ magic_setenv(SV *sv, MAGIC *mg)
 		s++;
 		if (i >= sizeof tmpbuf   /* too long -- assume the worst */
 		      || *tmpbuf != '/'
-		      || (Stat(tmpbuf, &st) == 0 && (st.st_mode & 2)) ) {
+		      || (PerlLIO_stat(tmpbuf, &st) == 0 && (st.st_mode & 2)) ) {
 		    MgTAINTEDDIR_on(mg);
 		    return 0;
 		}

@@ -69,7 +69,11 @@ typedef unsigned UBW;
  * If they're not right on your machine, then pack() and unpack()
  * wouldn't work right anyway; you'll need to apply the Cray hack.
  * (I'd like to check them with #if, but you can't use sizeof() in
- * the preprocessor.)
+ * the preprocessor.)  --???
+ */
+/*
+    The appropriate SHORTSIZE, INTSIZE, LONGSIZE, and LONGLONGSIZE
+    defines are now in config.h.  --Andy Dougherty  April 1998
  */
 #define SIZE16 2
 #define SIZE32 4
@@ -1776,6 +1780,7 @@ PP(pp_substr)
 	len = POPi;
     pos = POPi;
     sv = POPs;
+    PUTBACK;
     tmps = SvPV(sv, curlen);
     if (pos >= arybase) {
 	pos -= arybase;
@@ -1842,6 +1847,7 @@ PP(pp_substr)
 	    LvTARGLEN(TARG) = rem;
 	}
     }
+    SPAGAIN;
     PUSHs(TARG);		/* avoid SvSETMAGIC here */
     RETURN;
 }
@@ -2483,7 +2489,7 @@ PP(pp_anonhash)
 	if (MARK < SP)
 	    sv_setsv(val, *++MARK);
 	else if (dowarn)
-	    warn("Odd number of elements in hash list");
+	    warn("Odd number of elements in hash assignment");
 	(void)hv_store_ent(hv,key,val,0);
     }
     SP = ORIGMARK;

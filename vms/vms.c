@@ -11,6 +11,7 @@
 #include <armdef.h>
 #include <atrdef.h>
 #include <chpdef.h>
+#include <clidef.h>
 #include <climsgdef.h>
 #include <descrip.h>
 #include <dvidef.h>
@@ -174,7 +175,9 @@ my_getenv(char *lnm)
 }  /* end of my_getenv() */
 /*}}}*/
 
-static FILE *safe_popen(char *, char *);
+static void create_mbx(unsigned short int *, struct dsc$descriptor_s *);
+
+static void riseandshine(unsigned long int dummy) { sys$wake(0,0); }
 
 /*{{{ void prime_env_iter() */
 void
@@ -184,12 +187,21 @@ prime_env_iter(void)
  */
 {
   dTHR;
-  static int primed = 0;  /* XXX Not thread-safe!!! */
+  static int primed = 0;
   HV *envhv = GvHVn(envgv);
-  FILE *sholog;
-  char eqv[LNM$C_NAMLENGTH+1],*start,*end;
+  PerlIO *sholog;
+  char eqv[LNM$C_NAMLENGTH+1],mbxnam[LNM$C_NAMLENGTH+1],*start,*end;
+  unsigned short int chan;
+#ifndef CLI$M_TRUSTED
+#  define CLI$M_TRUSTED 0x40  /* Missing from VAXC headers */
+#endif
+  unsigned long int flags = CLI$M_NOWAIT | CLI$M_NOCLISYM | CLI$M_NOKEYPAD | CLI$M_TRUSTED;
+  unsigned long int retsts, substs = 0, wakect = 0;
   STRLEN eqvlen;
   SV *oldrs, *linesv, *eqvsv;
+  $DESCRIPTOR(cmddsc,"Show Logical *"); $DESCRIPTOR(nldsc,"_NLA0:");
+  $DESCRIPTOR(clidsc,"DCL");            $DESCRIPTOR(tabdsc,"DCLTABLES");
+  $DESCRIPTOR(mbxdsc,mbxnam); 
 #ifdef USE_THREADS
   static perl_mutex primenv_mutex = PTHREAD_MUTEX_INITIALIZER;
 #endif
@@ -198,7 +210,7 @@ prime_env_iter(void)
   MUTEX_LOCK(&primenv_mutex);
   if (primed) { MUTEX_UNLOCK(&primenv_mutex); return; }
   /* Perform a dummy fetch as an lval to insure that the hash table is
-   * set up.  Otherwise, the hv_store() will turn into a nullop */
+   * set up.  Otherwise, the hv_store() will turn into a nullop. */
   (void) hv_fetch(envhv,"DEFAULT",7,TRUE);
   /* Also, set up the four "special" keys that the CRTL defines,
    * whether or not underlying logical names exist. */
@@ -208,20 +220,39 @@ prime_env_iter(void)
   (void) hv_fetch(envhv,"USER",4,TRUE);
 
   /* Now, go get the logical names */
-  if ((sholog = safe_popen("$ Show Logical *","r")) == Nullfp) {
-    MUTEX_UNLOCK(&primenv_mutex);
-    _ckvmssts(vaxc$errno);
+  create_mbx(&chan,&mbxdsc);
+  if ((sholog = PerlIO_open(mbxnam,"r")) != Nullfp) {
+    if ((retsts = sys$dassgn(chan)) & 1) {
+      /* Be certain that subprocess is using the CLI and command tables we
+       * expect, and don't pass symbols through so that we insure that
+       * "Show Logical" can't be subverted.
+       */
+      do {
+        retsts = lib$spawn(&cmddsc,&nldsc,&mbxdsc,&flags,0,0,&substs,
+                           0,&riseandshine,0,0,&clidsc,&tabdsc);
+        flags &= ~CLI$M_TRUSTED; /* Just in case we hit a really old version */
+      } while (retsts == LIB$_INVARG && (flags | CLI$M_TRUSTED));
+    }
   }
-  /* We use Perl's sv_gets to read from the pipe, since safe_popen is
+  if (sholog == Nullfp || !(retsts & 1)) {
+    if (sholog != Nullfp) PerlIO_close(sholog);
+    MUTEX_UNLOCK(&primenv_mutex);
+    _ckvmssts(sholog == Nullfp ? vaxc$errno : retsts);
+  }
+  /* We use Perl's sv_gets to read from the pipe, since PerlIO_open is
    * tied to Perl's I/O layer, so it may not return a simple FILE * */
   oldrs = rs;
   rs = newSVpv("\n",1);
   linesv = newSVpv("",0);
   while (1) {
     if ((start = sv_gets(linesv,sholog,0)) == Nullch) {
-      my_pclose(sholog);
+      PerlIO_close(sholog);
       SvREFCNT_dec(linesv); SvREFCNT_dec(rs); rs = oldrs;
       primed = 1;
+      /* Wait for subprocess to clean up (we know subproc won't return 0) */
+      while (substs == 0) { sys$hiber(); wakect++;}
+      if (wakect > 1) sys$wake(0,0);  /* Stole someone else's wake */
+      _ckvmssts(substs);
       MUTEX_UNLOCK(&primenv_mutex);
       return;
     }
@@ -578,7 +609,7 @@ popen_completion_ast(struct pipe_details *thispipe)
   }
 }
 
-static FILE *
+static PerlIO *
 safe_popen(char *cmd, char *mode)
 {
     static int handler_set_up = FALSE;
@@ -841,12 +872,14 @@ do_rmsexpand(char *filespec, char *outbuf, int ts, char *defspec, unsigned opts)
 
   retsts = sys$parse(&myfab,0,0);
   if (!(retsts & 1)) {
+    mynam.nam$b_nop |= NAM$M_SYNCHK;
     if (retsts == RMS$_DNF || retsts == RMS$_DIR ||
         retsts == RMS$_DEV || retsts == RMS$_DEV) {
-      mynam.nam$b_nop |= NAM$M_SYNCHK;
       retsts = sys$parse(&myfab,0,0);
       if (retsts & 1) goto expanded;
     }  
+    mynam.nam$l_rlf = NULL; myfab.fab$b_dns = 0;
+    (void) sys$parse(&myfab,0,0);  /* Free search context */
     if (out) Safefree(out);
     set_vaxc_errno(retsts);
     if      (retsts == RMS$_PRV) set_errno(EACCES);
@@ -857,6 +890,8 @@ do_rmsexpand(char *filespec, char *outbuf, int ts, char *defspec, unsigned opts)
   }
   retsts = sys$search(&myfab,0,0);
   if (!(retsts & 1) && retsts != RMS$_FNF) {
+    mynam.nam$b_nop |= NAM$M_SYNCHK; mynam.nam$l_rlf = NULL;
+    myfab.fab$b_dns = 0; (void) sys$parse(&myfab,0,0);  /* Free search context */
     if (out) Safefree(out);
     set_vaxc_errno(retsts);
     if      (retsts == RMS$_PRV) set_errno(EACCES);
@@ -874,6 +909,10 @@ do_rmsexpand(char *filespec, char *outbuf, int ts, char *defspec, unsigned opts)
   if (!(mynam.nam$l_fnb & NAM$M_EXP_VER) &&
       (!defspec || !*defspec || !strchr(myfab.fab$l_dna,';')))
     speclen = mynam.nam$l_ver - out;
+  if (!(mynam.nam$l_fnb & NAM$M_EXP_TYPE) &&
+      (!defspec || !*defspec || defspec[myfab.fab$b_dns-1] != '.' ||
+       defspec[myfab.fab$b_dns-2] == '.'))
+    speclen = mynam.nam$l_type - out;
   /* If we just had a directory spec on input, $PARSE "helpfully"
    * adds an empty name and type for us */
   if (mynam.nam$l_name == mynam.nam$l_type &&
@@ -895,6 +934,9 @@ do_rmsexpand(char *filespec, char *outbuf, int ts, char *defspec, unsigned opts)
     if (do_tounixspec(outbuf,tmpfspec,0) == NULL) return NULL;
     strcpy(outbuf,tmpfspec);
   }
+  mynam.nam$b_nop |= NAM$M_SYNCHK; mynam.nam$l_rlf = NULL;
+  mynam.nam$l_rsa = NULL; mynam.nam$b_rss = 0;
+  myfab.fab$b_dns = 0; (void) sys$parse(&myfab,0,0);  /* Free search context */
   return outbuf;
 }
 /*}}}*/
@@ -1032,6 +1074,7 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
           }
           cp1++;
         } while ((cp1 = strstr(cp1,"/.")) != NULL);
+        lastdir = strrchr(dir,'/');
       }
       else if (!strcmp(&dir[dirlen-7],"/000000")) {
         /* Ditto for specs that end in an MFD -- let the VMS code
@@ -2441,7 +2484,7 @@ trim_unixpath(char *fspec, char *wildspec, int opts)
       for (front = end ; front >= base; front--)
          if (*front == '/' && !dirs--) { front++; break; }
     }
-    for (cp1=template,cp2=lcres; *cp1 && cp2 <= lcend + sizeof lcend; 
+    for (cp1=template,cp2=lcres; *cp1 && cp2 <= lcres + sizeof lcres;
          cp1++,cp2++) *cp2 = _tolower(*cp1);  /* Make lc copy for match */
     if (cp1 != '\0') return 0;  /* Path too long. */
     lcend = cp2;
@@ -4119,11 +4162,11 @@ my_binmode(FILE *fp, char iotype)
     if (iotype != '-'&& (ret = fgetpos(fp, &pos)) == -1 && dirend) return NULL;
     switch (iotype) {
       case '<': case 'r':           acmode = "rb";                      break;
-      case '>': case 'w':
+      case '>': case 'w': case '|':
         /* use 'a' instead of 'w' to avoid creating new file;
            fsetpos below will take care of restoring file position */
       case 'a':                     acmode = "ab";                      break;
-      case '+': case '|': case 's': acmode = "rb+";                     break;
+      case '+':  case 's':          acmode = "rb+";                     break;
       case '-':                     acmode = fileno(fp) ? "ab" : "rb";  break;
       default:
         warn("Unrecognized iotype %c in my_binmode",iotype);
@@ -4538,6 +4581,11 @@ init_os_extras()
   newXSproto("VMS::Filespec::unixpath",unixpath_fromperl,file,"$");
   newXSproto("VMS::Filespec::candelete",candelete_fromperl,file,"$");
   newXS("File::Copy::rmscopy",rmscopy_fromperl,file);
+
+#ifdef PRIME_ENV_AT_STARTUP
+  prime_env_iter();
+#endif
+
   return;
 }
   

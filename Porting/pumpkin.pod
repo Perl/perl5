@@ -494,6 +494,20 @@ ought to go in the Changes file or whether they ought to be available
 separately in the patch file (or both).  There is no disagreement that
 detailed descriptions ought to be easily available somewhere.
 
+=head2 Todo
+
+The F<Todo> file contains a roughly-catgorized unordered list of
+aspects of Perl that could use enhancement, features that could be
+added, areas that could be cleaned up, and so on.  During your term as
+pumpkin-holder, you will probably address some of these issues, and
+perhaps identify others which, while you decide not to address them
+this time around, may be tackled in the future.  Update the file
+reflect the situation as it stands when you hand over the pumpkin.
+
+You might like, early in your pumpkin-holding career, to see if you
+can find champions for partiticular issues on the to-do list: an issue
+owned is an issue more likely to be resolved.
+
 =head2 OS/2-specific updates
 
 In the os2 directory is F<diff.configure>, a set of OS/2-specific

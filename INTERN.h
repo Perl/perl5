@@ -18,6 +18,10 @@
 #undef EXTCONST
 #undef dEXTCONST
 #if defined(VMS) && !defined(__GNUC__)
+    /* Suppress portability warnings from DECC for VMS-specific extensions */
+#  ifdef __DECC
+#    pragma message disable (GLOBALEXT,NOSHAREEXT,READONLYEXT)
+#  endif
 #  define EXT globaldef {"$GLOBAL_RW_VARS"} noshare
 #  define dEXT globaldef {"$GLOBAL_RW_VARS"} noshare
 #  define EXTCONST globaldef {"$GLOBAL_RO_VARS"} readonly

@@ -184,6 +184,11 @@ d_archlib (archlib.U):
 	of architecture-dependent library files for $package.  If
 	$archlib is the same as $privlib, then this is set to undef.
 
+d_attribut (d_attribut.U):
+	This variable conditionally defines HASATTRIBUTE, which
+	indicates the C compiler can check for function attributes,
+	such as printf formats.
+
 d_bcmp (d_bcmp.U):
 	This variable conditionally defines the HAS_BCMP symbol if
 	the bcmp() routine is available to compare strings.
@@ -199,6 +204,11 @@ d_bsd (Guess.U):
 d_bsdgetpgrp (d_getpgrp.U):
 	This variable conditionally defines USE_BSD_GETPGRP if
 	getpgrp needs one arguments whereas USG one needs none.
+
+d_bsdsetpgrp (d_setpgrp.U):
+	This variable conditionally defines USE_BSD_SETPGRP if
+	setpgrp needs two arguments whereas USG one needs none.
+	See also d_setpgid for a POSIX interface.
 
 d_bzero (d_bzero.U):
 	This variable conditionally defines the HAS_BZERO symbol if
@@ -384,6 +394,11 @@ d_gethbyaddr (d_gethbyad.U):
 	indicates to the C program that the gethostbyaddr() routine is available
 	to look up hosts by their IP addresses.
 
+d_gethbyname (d_gethbynm.U):
+	This variable conditionally defines the HAS_GETHOSTBYNAME symbol, which
+	indicates to the C program that the gethostbyname() routine is available
+	to look up host names in some data base or other.
+
 d_gethent (d_gethent.U):
 	This variable conditionally defines HAS_GETHOSTENT if gethostent() is
 	available to look up host names in some data base or another.
@@ -392,6 +407,12 @@ d_gethname (d_gethname.U):
 	This variable conditionally defines the HAS_GETHOSTNAME symbol, which
 	indicates to the C program that the gethostname() routine may be
 	used to derive the host name.
+
+d_gethostprotos (d_gethostprotos.U):
+	This variable conditionally defines the HAS_GETHOST_PROTOS symbol,
+	which indicates to the C program that <netdb.h> supplies
+	prototypes for the various gethost*() functions.  
+	See also netdbtype.U for probing for various netdb types.
 
 d_getlogin (d_getlogin.U):
 	This variable conditionally defines the HAS_GETLOGIN symbol, which
@@ -411,6 +432,12 @@ d_getnbyname (d_getnbynm.U):
 d_getnent (d_getnent.U):
 	This variable conditionally defines HAS_GETNETENT if getnetent() is
 	available to look up network names in some data base or another.
+
+d_getnetprotos (d_getnetprotos.U):
+	This variable conditionally defines the HAS_GETNET_PROTOS symbol,
+	which indicates to the C program that <netdb.h> supplies
+	prototypes for the various getnet*() functions.  
+	See also netdbtype.U for probing for various netdb types.
 
 d_getpbyname (d_getprotby.U):
 	This variable conditionally defines the HAS_GETPROTOBYNAME 
@@ -451,6 +478,12 @@ d_getprior (d_getprior.U):
 	This variable conditionally defines HAS_GETPRIORITY if getpriority()
 	is available to get a process's priority.
 
+d_getprotoprotos (d_getprotoprotos.U):
+	This variable conditionally defines the HAS_GETPROTO_PROTOS symbol,
+	which indicates to the C program that <netdb.h> supplies
+	prototypes for the various getproto*() functions.  
+	See also netdbtype.U for probing for various netdb types.
+
 d_getsbyname (d_getsrvby.U):
 	This variable conditionally defines the HAS_GETSERVBYNAME 
 	symbol, which indicates to the C program that the 
@@ -466,6 +499,12 @@ d_getsbyport (d_getsrvby.U):
 d_getsent (d_getsent.U):
 	This variable conditionally defines HAS_GETSERVENT if getservent() is
 	available to look up network services in some data base or another.
+
+d_getservprotos (d_getservprotos.U):
+	This variable conditionally defines the HAS_GETSERV_PROTOS symbol,
+	which indicates to the C program that <netdb.h> supplies
+	prototypes for the various getserv*() functions.  
+	See also netdbtype.U for probing for various netdb types.
 
 d_gettimeod (d_ftime.U):
 	This variable conditionally defines the HAS_GETTIMEOFDAY symbol, which
@@ -512,6 +551,10 @@ d_lockf (d_lockf.U):
 d_longdbl (d_longdbl.U):
 	This variable conditionally defines HAS_LONG_DOUBLE if 
 	the long double type is supported.
+
+d_longlong (d_longlong.U):
+	This variable conditionally defines HAS_LONG_LONG if 
+	the long long type is supported.
 
 d_lstat (d_lstat.U):
 	This variable conditionally defines HAS_LSTAT if lstat() is
@@ -1205,6 +1248,11 @@ i_db (i_db.U):
 	This variable conditionally defines the I_DB symbol, and indicates
 	whether a C program may include Berkeley's DB include file <db.h>.
 
+i_dbm (i_dbm.U):
+	This variable conditionally defines the I_DBM symbol, which
+	indicates to the C program that <dbm.h> exists and should
+	be included.
+
 i_dirent (i_dirent.U):
 	This variable conditionally defines I_DIRENT, which indicates
 	to the C program that it should include <dirent.h>.
@@ -1227,6 +1275,11 @@ i_float (i_float.U):
 	This variable conditionally defines the I_FLOAT symbol, and indicates
 	whether a C program may include <float.h> to get symbols like DBL_MAX
 	or DBL_MIN, i.e. machine dependent floating point values.
+
+i_gdbm (i_gdbm.U):
+	This variable conditionally defines the I_GDBM symbol, which
+	indicates to the C program that <gdbm.h> exists and should
+	be included.
 
 i_grp (i_grp.U):
 	This variable conditionally defines the I_GRP symbol, and indicates
@@ -1252,6 +1305,11 @@ i_math (i_math.U):
 i_memory (i_memory.U):
 	This variable conditionally defines the I_MEMORY symbol, and indicates
 	whether a C program should include <memory.h>.
+
+i_ndbm (i_ndbm.U):
+	This variable conditionally defines the I_NDBM symbol, which
+	indicates to the C program that <ndbm.h> exists and should
+	be included.
 
 i_netdb (i_netdb.U):
 	This variable conditionally defines the I_NETDB symbol, and indicates
@@ -1547,6 +1605,11 @@ longdblsize (d_longdbl.U):
 	indicates to the C program how many bytes there are in a long double,
 	if this system supports long doubles.
 
+longlongsize (d_longlong.U):
+	This variable contains the value of the LONGLONGSIZE symbol, which
+	indicates to the C program how many bytes there are in a long long,
+	if this system supports long long.
+
 longsize (intsize.U):
 	This variable contains the value of the LONGSIZE symbol, which
 	indicates to the C program how many bytes there are in a long.
@@ -1641,6 +1704,12 @@ mydomain (myhostname.U):
 	This variable contains the eventual value of the MYDOMAIN symbol,
 	which is the domain of the host the program is going to run on.
 	The domain must be appended to myhostname to form a complete host name.
+	The dot comes with mydomain, and need not be supplied by the program.
+
+myhostname (myhostname.U):
+	This variable contains the eventual value of the MYHOSTNAME symbol,
+	which is the name of the host the program is going to run on.
+	The domain is not kept with hostname, but must be gotten from mydomain.
 	The dot comes with mydomain, and need not be supplied by the program.
 
 myuname (Oldconfig.U):
@@ -1948,6 +2017,11 @@ split (models.U):
 	to produce a program that will run in separate I and D space, for those
 	machines that support separation of instruction and data space.  It is
 	up to the Makefile to use this.
+
+src (src.U):
+	This variable holds the path to the package source. It is up to
+	the Makefile to use this variable and set VPATH accordingly to
+	find the sources remotely.
 
 ssizetype (ssizetype.U):
 	This variable defines ssizetype to be something like ssize_t, 

@@ -23,6 +23,8 @@
 # Threaded by Jarkko Hietaniemi <jhi@iki.fi> on 11/18/97
 #    - POSIX threads knowledge by IRIX version
 
+# gcc-enabled by Kurt Starsinic <kstar@isinet.com> on 3/24/1998
+
 # Use   sh Configure -Dcc='cc -n32' to try compiling with -n32.
 #     or -Dcc='cc -n32 -mips3' (or -mips4) to force (non)portability
 # Don't bother with -n32 unless you have the 7.1 or later compilers.
@@ -75,6 +77,11 @@ case "$cc" in
 	plibpth='/usr/lib32 /lib32 /usr/ccs/lib'
 	nm_opt='-p'
 	nm_so_opt='-p'
+	;;
+*gcc*)
+	ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -D_POSIX_C_SOURCE"
+	optimize="-O3"
+	usenm='undef'
 	;;
 *)
 	# this is needed to force the old-32 paths

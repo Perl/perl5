@@ -644,8 +644,15 @@ PP(pp_aassign)
 		    }
 		    TAINT_NOT;
 		}
-		if (relem == lastrelem && dowarn)
-		    warn("Odd number of elements in hash list");
+		if (relem == lastrelem && dowarn) {
+		    if (relem == firstrelem &&
+			SvROK(*relem) &&
+			( SvTYPE(SvRV(*relem)) == SVt_PVAV ||
+			  SvTYPE(SvRV(*relem)) == SVt_PVHV ) )
+			warn("Reference found where even-sized list expected");
+		    else
+			warn("Odd number of elements in hash assignment");
+		}
 	    }
 	    break;
 	default:
@@ -1078,7 +1085,7 @@ do_readline(void)
 		    }
 		    if ((tmpfp = PerlIO_open(tmpfnam,"w+","fop=dlt")) != NULL) {
 		        Stat_t st;
-		        if (!Stat(SvPVX(tmpglob),&st) && S_ISDIR(st.st_mode))
+		        if (!PerlLIO_stat(SvPVX(tmpglob),&st) && S_ISDIR(st.st_mode))
 		          ok = ((wilddsc.dsc$a_pointer = tovmspath(SvPVX(tmpglob),vmsspec)) != NULL);
 		        else ok = ((wilddsc.dsc$a_pointer = tovmsspec(SvPVX(tmpglob),vmsspec)) != NULL);
 		        if (ok) wilddsc.dsc$w_length = (unsigned short int) strlen(wilddsc.dsc$a_pointer);
@@ -1227,7 +1234,7 @@ do_readline(void)
 		if (!isALPHA(*tmps) && !isDIGIT(*tmps) &&
 		    strchr("$&*(){}[]'\";\\|?<>~`", *tmps))
 			break;
-	    if (*tmps && Stat(SvPVX(sv), &statbuf) < 0) {
+	    if (*tmps && PerlLIO_stat(SvPVX(sv), &statbuf) < 0) {
 		(void)POPs;		/* Unmatched wildcard?  Chuck it... */
 		continue;
 	    }

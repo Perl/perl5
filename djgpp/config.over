@@ -14,9 +14,3 @@ known_extensions=$(repair "$known_extensions")
 
 # I use Dos::UseLFN in AutoSplit.pm to override this under win0.95
 d_flexfnam='undef'
-
-# I should explain here, why I added these lines ;-)
-castflags='0'
-d_casti32='undef'
-d_castneg='define'
-

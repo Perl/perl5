@@ -82,31 +82,27 @@
    expecting an int), but the disadvantage that an I32 is not 32 bits.
    Andy Dougherty	August 1996
 
-   In the future, we may perhaps want to think about something like
-    #if INTSIZE == 4
-	typedef I32 int;
-    #else
-    #  if LONGSIZE == 4
-	    typedef I32 long;
-    #  else
-    #    if SHORTSIZE == 4
-	    typedef I32 short;
-    #    else
-	    typedef I32 int;
-    #    endif
-    #  endif
-    #endif
+   There is no guarantee that there is *any* integral type with
+   exactly 32 bits.  It is perfectly legal for a system to have
+   sizeof(short) == sizeof(int) == sizeof(long) == 8.
 
-   except that still won't work if a system has no integral type
-   with a size that is 32 bytes.
+   Similarly, there is no guarantee that I16 and U16 have exactly 16
+   bits.
 
-   Further, we need to know about PTRSIZE == sizeof(void *) and
-   DOUBLESIZE == sizeof(double) if we really want to try to handle
-   32/64-bit combinations.  Finally, we might also need to know
-   HAS_LONG_DOUBLE and LONG_DOUBLESIZE.
-
-   For the moment, these are only mentioned here so metaconfig will
-   construct Configure to figure out the various sizes.
+   For dealing with issues that may arise from various 32/64-bit 
+   systems, we will ask Configure to check out 
+   	SHORTSIZE == sizeof(short)
+   	INTSIZE == sizeof(int)
+   	LONGSIZE == sizeof(long)
+	LONGLONGSIZE == sizeof(long long) (if HAS_LONG_LONG)
+   	PTRSIZE == sizeof(void *)
+	DOUBLESIZE == sizeof(double)
+	LONG_DOUBLESIZE == sizeof(long double) (if HAS_LONG_DOUBLE).
+    Most of these are currently unused, but they are mentioned here so
+    metaconfig will include the appropriate tests in Configure and
+    we can then start to consider how best to deal with long long
+    variables.
+   Andy Dougherty	April 1998
 */
 
 typedef char		I8;

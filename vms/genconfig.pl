@@ -180,6 +180,13 @@ foreach (@ARGV) {
     print OUT "d_getpbynumber=",$dosock ? "'define'\n" : "'undef'\n";
     print OUT "d_getsbyname=",$dosock ? "'define'\n" : "'undef'\n";
     print OUT "d_getsbyport=",$dosock ? "'define'\n" : "'undef'\n";
+    print OUT "d_endhent=",$dosock ? "'define'\n" : "'undef'\n";
+    print OUT "d_getpent=",$dosock ? "'define'\n" : "'undef'\n";
+    print OUT "d_setpent=",$dosock ? "'define'\n" : "'undef'\n";
+    print OUT "d_endpent=",$dosock ? "'define'\n" : "'undef'\n";
+    print OUT "d_getsent=",$dosock ? "'define'\n" : "'undef'\n";
+    print OUT "d_setsent=",$dosock ? "'define'\n" : "'undef'\n";
+    print OUT "d_endsent=",$dosock ? "'define'\n" : "'undef'\n";
     print OUT "netdb_name_type=",$dosock ? "'char *'\n" : "'undef'\n";
     print OUT "netdb_host_type=",$dosock ? "'char *'\n" : "'undef'\n";
     print OUT "netdb_hlen_type=",$dosock ? "'int'\n" : "'undef'\n";
@@ -188,12 +195,18 @@ foreach (@ARGV) {
       print OUT "selecttype='fd_set'\n";
       print OUT "d_getnbyaddr='define'\n";
       print OUT "d_getnbyname='define'\n";
+      print OUT "d_getnent='define'\n";
+      print OUT "d_setnent='define'\n";
+      print OUT "d_endnent='define'\n";
       print OUT "netdb_net_type='long'\n";
     }
     else {
       print OUT "selecttype='int'\n";
       print OUT "d_getnybname='undef'\n";
       print OUT "d_getnybaddr='undef'\n";
+      print OUT "d_getnent='undef'\n";
+      print OUT "d_setnent='undef'\n";
+      print OUT "d_endnent='undef'\n";
       print OUT "netdb_net_type='undef'\n";
     }
 

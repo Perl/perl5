@@ -10,7 +10,7 @@ foreach (<DATA>) {
   next if /^\s*$/;
   push(@tests,$_);
 }
-print '1..',scalar(@tests)+5,"\n";
+print '1..',scalar(@tests)+6,"\n";
 
 foreach $test (@tests) {
   ($arg,$func,$expect) = split(/\t+/,$test);
@@ -25,14 +25,17 @@ foreach $test (@tests) {
   }
 }
 
+$defwarn = <<'EOW';
+# Note: This failure may have occurred because your default device
+# was set using a non-concealed logical name.  If this is the case,
+# you will need to determine by inspection that the two resultant
+# file specifications shwn above are in fact equivalent.
+EOW
+
 if (rmsexpand('[]') eq "\U$ENV{DEFAULT}") { print 'ok ',++$idx,"\n"; }
 else {
   print 'not ok ', ++$idx, ": rmsexpand('[]') = |", rmsexpand('[]'),
-        "|, \$ENV{DEFAULT} = |\U$ENV{DEFAULT}|\n";
-  print "# Note: This failure may have occurred because your default device\n";
-  print "# was set using a non-concealed logical name.  If this is the case,\n";
-  print "# you will need to determine by inspection that the two resultant\n";
-  print "# file specifications shwn above are in fact equivalent.\n";
+        "|, \$ENV{DEFAULT} = |\U$ENV{DEFAULT}|\n$defwarn";
 }
 if (rmsexpand('from.here') eq "\L$ENV{DEFAULT}from.here") {
    print 'ok ', ++$idx, "\n";
@@ -40,11 +43,15 @@ if (rmsexpand('from.here') eq "\L$ENV{DEFAULT}from.here") {
 else {
   print 'not ok ', ++$idx, ": rmsexpand('from.here') = |",
         rmsexpand('from.here'),
-        "|, \$ENV{DEFAULT}from.here = |\L$ENV{DEFAULT}from.here|\n";
-  print "# Note: This failure may have occurred because your default device\n";
-  print "# was set using a non-concealed logical name.  If this is the case,\n";
-  print "# you will need to determine by inspection that the two resultant\n";
-  print "# file specifications shwn above are in fact equivalent.\n";
+        "|, \$ENV{DEFAULT}from.here = |\L$ENV{DEFAULT}from.here|\n$defwarn";
+}
+if (rmsexpand('from') eq "\L$ENV{DEFAULT}from") {
+   print 'ok ', ++$idx, "\n";
+}
+else {
+  print 'not ok ', ++$idx, ": rmsexpand('from') = |",
+        rmsexpand('from'),
+        "|, \$ENV{DEFAULT}from = |\L$ENV{DEFAULT}from|\n$defwarn";
 }
 if (rmsexpand('from.here','cant:[get.there];2') eq
     'cant:[get.there]from.here;2')                 { print 'ok ',++$idx,"\n"; }

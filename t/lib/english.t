@@ -5,7 +5,7 @@ print "1..16\n";
 BEGIN { @INC = '../lib' }
 use English;
 use Config;
-my $threads = $Config{archname} =~ /-thread$/;
+my $threads = $Config{'usethreads'} || 0;
 
 print $PID == $$ ? "ok 1\n" : "not ok 1\n";
 

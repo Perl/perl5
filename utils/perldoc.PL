@@ -206,7 +206,11 @@ sub minus_f_nocase {
 
 sub check_file {
     my($file) = @_;
-    return minus_f_nocase($file) && containspod($file) ? $file : "";
+    if ($opt_m) {
+	return minus_f_nocase($file) ? $file : "";
+    } else {
+	return minus_f_nocase($file) && containspod($file) ? $file : "";
+    }
 }
 
 
