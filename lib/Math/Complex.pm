@@ -1105,10 +1105,13 @@ sub acosh {
 	    return cplx(0, CORE::atan2(CORE::sqrt(1 - $re*$re), $re))
 		if CORE::abs($re) < 1;
 	}
-	my $s = &sqrt($z*$z - 1);
-	my $t = $z + $s;
-	$t = 1/(2*$s) if $t == 0 || $t && &abs(cosh(&log($t)) - $z) > $eps;
-	return &log($t);
+	my $t = &sqrt($z * $z - 1) + $z;
+	# Try MacLaurin if looking bad.
+	$t = 1/(2 * $z) - 1/(8 * $z**3) + 1/(16 * $z**5) - 5/(128 * $z**7)
+	    if $t == 0;
+	my $u = &log($t);
+	$u->Im(-$u->Im) if $im == 0;
+	return $re < 0 ? -$u : $u;
 }
 
 #
@@ -1122,10 +1125,10 @@ sub asinh {
 	    my $t = $z + CORE::sqrt($z*$z + 1);
 	    return CORE::log($t) if $t;
 	}
-	my $s = &sqrt($z*$z + 1);
-	my $t = $z + $s;
-	# Try Taylor series if looking bad.
-	$t = 1/(2*$s) if $t == 0 || $t && &abs(sinh(&log($t)) - $z) > $eps;
+	my $t = &sqrt($z * $z + 1) + $z;
+	# Try MacLaurin if looking bad.
+	$t = 1/(2 * $z) - 1/(8 * $z**3) + 1/(16 * $z**5) - 5/(128 * $z**7)
+	    if $t == 0;
 	return &log($t);
 }
 
@@ -1390,7 +1393,7 @@ sub stringify_polar {
 
 	if ($format{polar_pretty_print}) {
 	    my ($a, $b);
-	    for $a (2, 3, 4, 6, 8, 12, 16, 24, 30, 32, 36, 48, 60, 64, 72) {
+	    for $a (2..9) {
 		$b = $t * $a / pi;
 		if (int($b) == $b) {
 		    $b = $b < 0 ? "-" : "" if CORE::abs($b) == 1;
@@ -1734,7 +1737,7 @@ For instance:
 	print "j = $j\n";		# Prints "j = -0.5+0.866025403784439i"
 
 The polar style attempts to emphasize arguments like I<k*pi/n>
-(where I<n> is a positive integer and I<k> an integer within [-9,+9]),
+(where I<n> is a positive integer and I<k> an integer within [-9, +9]),
 this is called I<polar pretty-printing>.
 
 =head2 CHANGED IN PERL 5.6
