@@ -1193,7 +1193,7 @@ make your program I<appear> to run faster.
 
 When called in list context, returns a 2-element list consisting of the
 key and value for the next element of a hash, so that you can iterate over
-it.  When called in scalar context, returns the key for only the "next"
+it.  When called in scalar context, returns only the key for the next
 element in the hash.
 
 Entries are returned in an apparently random order.  The actual random
@@ -1208,7 +1208,14 @@ again.  There is a single iterator for each hash, shared by all C<each>,
 C<keys>, and C<values> function calls in the program; it can be reset by
 reading all the elements from the hash, or by evaluating C<keys HASH> or
 C<values HASH>.  If you add or delete elements of a hash while you're
-iterating over it, you may get entries skipped or duplicated, so don't.
+iterating over it, you may get entries skipped or duplicated, so
+don't.  Exception: It is always safe to delete the item most recently
+returned by C<each()>, which means that the following code will work:
+
+        while (($key, $value) = each %hash) {
+          print $key, "\n";
+          delete $hash{$key};   # This is safe
+        }
 
 The following prints out your environment like the printenv(1) program,
 only in a different order:
