@@ -257,9 +257,9 @@ END
 	    # (This may all depend on local configurations too.)
 
 	    # Recompute verbose with -Wl,-v to find GNU ld if present
-	    verbose=`${cc:-cc} -v -Wl,-v -o try try.c 2>&1 | grep ld 2>&1`
+	    verbose=`${cc:-cc} -Wl,-v -o try try.c 2>&1 | grep /ld 2>&1`
 
-	    myld=`echo $verbose| grep ld | awk '/\/ld/ {print $1}'`
+	    myld=`echo $verbose | awk '/\/ld/ {print $1}'`
 	    # This assumes that gcc's output will not change, and that
 	    # /full/path/to/ld will be the first word of the output.
 	    # Thus myld is something like /opt/gnu/sparc-sun-solaris2.5/bin/ld
