@@ -677,12 +677,10 @@ VIRTUAL int	yylex _((PERL_YYLEX_PARAM_DECL));
 VIRTUAL int	yyparse _((void));
 VIRTUAL int	yywarn _((char* s));
 
-#ifndef MYMALLOC
-VIRTUAL Malloc_t safemalloc _((MEM_SIZE nbytes));
-VIRTUAL Malloc_t safecalloc _((MEM_SIZE elements, MEM_SIZE size));
-VIRTUAL Malloc_t saferealloc _((Malloc_t where, MEM_SIZE nbytes));
-VIRTUAL Free_t   safefree _((Malloc_t where));
-#endif
+VIRTUAL Malloc_t safesysmalloc _((MEM_SIZE nbytes));
+VIRTUAL Malloc_t safesyscalloc _((MEM_SIZE elements, MEM_SIZE size));
+VIRTUAL Malloc_t safesysrealloc _((Malloc_t where, MEM_SIZE nbytes));
+VIRTUAL Free_t   safesysfree _((Malloc_t where));
 
 #ifdef LEAKTEST
 VIRTUAL Malloc_t safexmalloc _((I32 x, MEM_SIZE size));

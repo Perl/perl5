@@ -62,9 +62,7 @@ long lastxycount[MAXXCOUNT][MAXYCOUNT];
 
 #endif
 
-#ifndef MYMALLOC
-
-/* paranoid version of malloc */
+/* paranoid version of system's malloc() */
 
 /* NOTE:  Do not call the next three routines directly.  Use the macros
  * in handy.h, so that we can easily redefine everything to do tracking of
@@ -73,7 +71,7 @@ long lastxycount[MAXXCOUNT][MAXYCOUNT];
  */
 
 Malloc_t
-safemalloc(MEM_SIZE size)
+safesysmalloc(MEM_SIZE size)
 {
     Malloc_t ptr;
 #ifdef HAS_64K_LIMIT
@@ -104,10 +102,10 @@ safemalloc(MEM_SIZE size)
     /*NOTREACHED*/
 }
 
-/* paranoid version of realloc */
+/* paranoid version of system's realloc() */
 
 Malloc_t
-saferealloc(Malloc_t where,MEM_SIZE size)
+safesysrealloc(Malloc_t where,MEM_SIZE size)
 {
     Malloc_t ptr;
 #if !defined(STANDARD_C) && !defined(HAS_REALLOC_PROTOTYPE)
@@ -122,12 +120,12 @@ saferealloc(Malloc_t where,MEM_SIZE size)
     }
 #endif /* HAS_64K_LIMIT */
     if (!size) {
-	safefree(where);
+	safesysfree(where);
 	return NULL;
     }
 
     if (!where)
-	return safemalloc(size);
+	return safesysmalloc(size);
 #ifdef DEBUGGING
     if ((long)size < 0)
 	croak("panic: realloc");
@@ -158,10 +156,10 @@ saferealloc(Malloc_t where,MEM_SIZE size)
     /*NOTREACHED*/
 }
 
-/* safe version of free */
+/* safe version of system's free() */
 
 Free_t
-safefree(Malloc_t where)
+safesysfree(Malloc_t where)
 {
 #if !(defined(I286) || defined(atarist))
     DEBUG_m( PerlIO_printf(Perl_debug_log, "0x%x: (%05d) free\n",(char *) where,PL_an++));
@@ -174,10 +172,10 @@ safefree(Malloc_t where)
     }
 }
 
-/* safe version of calloc */
+/* safe version of system's calloc() */
 
 Malloc_t
-safecalloc(MEM_SIZE count, MEM_SIZE size)
+safesyscalloc(MEM_SIZE count, MEM_SIZE size)
 {
     Malloc_t ptr;
 
@@ -212,8 +210,6 @@ safecalloc(MEM_SIZE count, MEM_SIZE size)
     }
     /*NOTREACHED*/
 }
-
-#endif /* !MYMALLOC */
 
 #ifdef LEAKTEST
 
@@ -1504,6 +1500,8 @@ warner(U32  err, const char* pat,...)
 void
 my_setenv(char *nam, char *val)
 {
+#ifndef PERL_USE_SAFE_PUTENV
+    /* most putenv()s leak, so we manipulate environ directly */
     register I32 i=setenv_getix(nam);		/* where does it go? */
 
     if (environ == PL_origenviron) {	/* need we copy environment? */
@@ -1513,14 +1511,16 @@ my_setenv(char *nam, char *val)
 
 	/*SUPPRESS 530*/
 	for (max = i; environ[max]; max++) ;
-	New(901,tmpenv, max+2, char*);
-	for (j=0; j<max; j++)		/* copy environment */
-	    tmpenv[j] = savepv(environ[j]);
+	tmpenv = (char**)safesysmalloc((max+2) * sizeof(char*));
+	for (j=0; j<max; j++) {		/* copy environment */
+	    tmpenv[j] = (char*)safesysmalloc((strlen(environ[j])+1)*sizeof(char));
+	    strcpy(tmpenv[j], environ[j]);
+	}
 	tmpenv[max] = Nullch;
 	environ = tmpenv;		/* tell exec where it is now */
     }
     if (!val) {
-	Safefree(environ[i]);
+	safesysfree(environ[i]);
 	while (environ[i]) {
 	    environ[i] = environ[i+1];
 	    i++;
@@ -1528,12 +1528,13 @@ my_setenv(char *nam, char *val)
 	return;
     }
     if (!environ[i]) {			/* does not exist yet */
-	Renew(environ, i+2, char*);	/* just expand it a bit */
+	environ = (char**)safesysrealloc(environ, (i+2) * sizeof(char*));
 	environ[i+1] = Nullch;	/* make sure it's null terminated */
     }
     else
-	Safefree(environ[i]);
-    New(904, environ[i], strlen(nam) + strlen(val) + 2, char);
+	safesysfree(environ[i]);
+    environ[i] = (char*)safesysmalloc((strlen(nam)+strlen(val)+2) * sizeof(char));
+
 #ifndef MSDOS
     (void)sprintf(environ[i],"%s=%s",nam,val);/* all that work just for this */
 #else
@@ -1545,6 +1546,19 @@ my_setenv(char *nam, char *val)
     strcpy(environ[i],nam); strupr(environ[i]);
     (void)sprintf(environ[i] + strlen(nam),"=%s",val);
 #endif /* MSDOS */
+
+#else   /* PERL_USE_SAFE_PUTENV */
+    char *new_env;
+
+    new_env = (char*)safesysmalloc((strlen(nam) + strlen(val) + 2) * sizeof(char));
+#ifndef MSDOS
+    (void)sprintf(new_env,"%s=%s",nam,val);/* all that work just for this */
+#else
+    strcpy(new_env,nam); strupr(new_env);
+    (void)sprintf(new_env + strlen(nam),"=%s",val);
+#endif
+    (void)putenv(new_env);
+#endif  /* PERL_USE_SAFE_PUTENV */
 }
 
 #else /* if WIN32 */
@@ -1582,13 +1596,13 @@ my_setenv(char *nam,char *val)
     }
     else
 	vallen = strlen(val);
-    New(904, envstr, namlen + vallen + 3, char);
+    envstr = (char*)safesysmalloc((namlen + vallen + 3) * sizeof(char));
     (void)sprintf(envstr,"%s=%s",nam,val);
     (void)PerlEnv_putenv(envstr);
     if (oldstr)
-	Safefree(oldstr);
+	safesysfree(oldstr);
 #ifdef _MSC_VER
-    Safefree(envstr);		/* MSVCRT leaks without this */
+    safesysfree(envstr);	/* MSVCRT leaks without this */
 #endif
 
 #else /* !USE_WIN32_RTL_ENV */

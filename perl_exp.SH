@@ -100,29 +100,11 @@ perl_call_sv
 perl_eval_pv
 perl_eval_sv
 perl_require_pv
-END
-
-case "$ccflags" in
-*-DHIDEMYMALLOC*)
-  cat >>perl.exp <<END
-Mymalloc
-Mycalloc
-Myremalloc
-Myfree
-END
-  ;;
-esac
-
-case "$ccflags" in
-*-DEMBEDMYMALLOC*)
-  cat >>perl.exp <<END
 Perl_malloc
 Perl_calloc
 Perl_realloc
-Perl_free
+Perl_mfree
 END
-  ;;
-esac
 
 # The shebang line nicely sorts as the first one.
 sort -o perl.exp -u perl.exp

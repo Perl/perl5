@@ -400,14 +400,15 @@ Malloc_t Perl_realloc _((Malloc_t where, MEM_SIZE nbytes));
  * that causes clashes with case-insensitive linkers */
 Free_t   Perl_mfree _((Malloc_t where));
 
-#  undef safemalloc
-#  undef safecalloc
-#  undef saferealloc
-#  undef safefree
 #  define safemalloc  Perl_malloc
 #  define safecalloc  Perl_calloc
 #  define saferealloc Perl_realloc
 #  define safefree    Perl_mfree
+#else  /* MYMALLOC */
+#  define safemalloc  safesysmalloc
+#  define safecalloc  safesyscalloc
+#  define saferealloc safesysrealloc
+#  define safefree    safesysfree
 #endif /* MYMALLOC */
 
 #if defined(STANDARD_C) && defined(I_STDDEF)

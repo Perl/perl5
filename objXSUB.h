@@ -2705,14 +2705,14 @@
 #define rxres_restore		pPerl->Perl_rxres_restore
 #undef  rxres_save
 #define rxres_save		pPerl->Perl_rxres_save
-#undef  safecalloc
-#define safecalloc		pPerl->Perl_safecalloc
-#undef  safefree
-#define safefree		pPerl->Perl_safefree
-#undef  safemalloc
-#define safemalloc		pPerl->Perl_safemalloc
-#undef  saferealloc
-#define saferealloc		pPerl->Perl_saferealloc
+#undef  safesyscalloc
+#define safesyscalloc		pPerl->Perl_safesyscalloc
+#undef  safesysfree
+#define safesysfree		pPerl->Perl_safesysfree
+#undef  safesysmalloc
+#define safesysmalloc		pPerl->Perl_safesysmalloc
+#undef  safesysrealloc
+#define safesysrealloc		pPerl->Perl_safesysrealloc
 #undef  safexcalloc
 #define safexcalloc		pPerl->Perl_safexcalloc
 #undef  safexfree

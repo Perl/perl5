@@ -435,10 +435,10 @@ runops_standard
 rxres_free
 rxres_restore
 rxres_save
-safecalloc
-safefree
-safemalloc
-saferealloc
+safesyscalloc
+safesysfree
+safesysmalloc
+safesysrealloc
 safexcalloc
 safexfree
 safexmalloc
