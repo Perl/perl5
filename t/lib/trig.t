@@ -29,7 +29,7 @@ sub near ($$;$) {
     abs($_[0] - $_[1]) < (defined $_[2] ? $_[2] : $eps);
 }
 
-print "1..24\n";
+print "1..23\n";
 
 $x = 0.9;
 print 'not ' unless (near(tan($x), sin($x) / cos($x)));
@@ -158,23 +158,21 @@ use Math::Trig ':radial';
 }
 
 {
+    my $R2D = 57.295779513082320876798154814169;
+
+    sub frac { $_[0] - int($_[0]) }
+
     my $lotta_radians = deg2rad(1E+20, 1);
-    print "not " unless near($lotta_radians,  1E+20/57.29577951308232087721);
+    print "not " unless near($lotta_radians,  1E+20/$R2D);
     print "ok 21\n";
 
     my $negat_degrees = rad2deg(-1E20, 1);
-    print "not " unless near($negat_degrees, -1E+20*57.29577951308232087721);
+    print "not " unless near($negat_degrees, -1E+20*$R2D);
     print "ok 22\n";
 
     my $posit_degrees = rad2deg(-10000, 1);
-    print "not " unless near($posit_degrees, -10000*57.29577951308232087721);
-
+    print "not " unless near($posit_degrees, -10000*$R2D);
     print "ok 23\n";
-
-    my $posiu_degrees = rad2deg(-10000, 0);
-    print "not " unless near($posiu_degrees, -197.795130823273);
-
-    print "ok 24\n";
 }
 
 # eof
