@@ -3167,9 +3167,9 @@ Perl_sv_copypv(pTHX_ SV *dsv, register SV *ssv)
     SV *tmpsv = sv_newmortal();
 
     if ( SvTHINKFIRST(ssv) && SvROK(ssv) && SvAMAGIC(ssv) ) {
-	tmpsv=AMG_CALLun(ssv,string);
+	tmpsv = AMG_CALLun(ssv,string);
 	if (SvTYPE(tmpsv) != SVt_RV || (SvRV(tmpsv) != SvRV(ssv)))
-	    return SvSetSV(dsv,tmpsv);
+	    SvSetSV(dsv,tmpsv);
     }
     {
 	STRLEN len;
@@ -3180,7 +3180,7 @@ Perl_sv_copypv(pTHX_ SV *dsv, register SV *ssv)
 	    SvUTF8_on(tmpsv);
 	else
 	    SvUTF8_off(tmpsv);
-	return SvSetSV(dsv,tmpsv);
+	SvSetSV(dsv,tmpsv);
     }
 }
 
