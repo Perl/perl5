@@ -947,6 +947,7 @@ static	u_int goodsbrk;
 static void
 botch(char *diag, char *s)
 {
+	dTHXo;
 	PerlIO_printf(PerlIO_stderr(), "assertion botched (%s?): %s\n", diag, s);
 	PerlProc_abort();
 }
@@ -1030,9 +1031,11 @@ Perl_malloc(register size_t nbytes)
 
 	/* remove from linked list */
 #if defined(RCHECK)
-	if ((PTR2UV(p)) & (MEM_ALIGNBYTES - 1))
+	if ((PTR2UV(p)) & (MEM_ALIGNBYTES - 1)) {
+	    dTHXo;
 	    PerlIO_printf(PerlIO_stderr(), "Corrupt malloc ptr 0x%lx at 0x%lx\n",
 		(unsigned long)*((int*)p),(unsigned long)p);
+	}
 #endif
   	nextf[bucket] = p->ov_next;
 
@@ -1491,6 +1494,7 @@ Perl_mfree(void *mp)
 	    {
 		static int bad_free_warn = -1;
 		if (bad_free_warn == -1) {
+		    dTHXo;
 		    char *pbf = PerlEnv_getenv("PERL_BADFREE");
 		    bad_free_warn = (pbf) ? atoi(pbf) : 1;
 		}
@@ -1572,6 +1576,7 @@ Perl_realloc(void *mp, size_t nbytes)
 	    {
 		static int bad_free_warn = -1;
 		if (bad_free_warn == -1) {
+		    dTHXo;
 		    char *pbf = PerlEnv_getenv("PERL_BADFREE");
 		    bad_free_warn = (pbf) ? atoi(pbf) : 1;
 		}

@@ -215,6 +215,11 @@ Perl_my_memset
 PL_cshlen
 PL_cshname
 PL_opsave
+
+Perl_do_exec
+Perl_getenv_len
+Perl_my_pclose
+Perl_my_popen
 )];
 } elsif ($PLATFORM eq 'aix') {
     skip_symbols([qw(
