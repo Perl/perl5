@@ -1266,6 +1266,16 @@ argument more than once.
 =for hackers
 Found in file sv.h
 
+=item SvLOCK
+
+Arranges for a mutual exclusion lock to be obtained on sv if a suitable module
+has been loaded.
+
+	void	SvLOCK(SV* sv)
+
+=for hackers
+Found in file sv.h
+
 =item SvSETMAGIC
 
 Invokes C<mg_set> on an SV if it has 'set' magic.  This macro evaluates its
@@ -1281,6 +1291,15 @@ Found in file sv.h
 Like C<SvSetSV>, but does any set magic required afterwards.
 
 	void	SvSetMagicSV(SV* dsb, SV* ssv)
+
+=for hackers
+Found in file sv.h
+
+=item SvSetMagicSV_nosteal
+
+Like C<SvSetMagicSV>, but does any set magic required afterwards.
+
+	void	SvSetMagicSV_nosteal(SV* dsv, SV* ssv)
 
 =for hackers
 Found in file sv.h
@@ -1301,6 +1320,16 @@ Calls a non-destructive version of C<sv_setsv> if dsv is not the same as
 ssv. May evaluate arguments more than once.
 
 	void	SvSetSV_nosteal(SV* dsv, SV* ssv)
+
+=for hackers
+Found in file sv.h
+
+=item SvSHARE
+
+Arranges for sv to be shared between threads if a suitable module
+has been loaded.
+
+	void	SvSHARE(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -1417,9 +1446,20 @@ Found in file util.c
 =item savepvn
 
 Copy a string to a safe spot.  The C<len> indicates number of bytes to
-copy.  This does not use an SV.
+copy. If pointer is NULL allocate space for a string of size specified.
+This does not use an SV.
 
 	char*	savepvn(const char* sv, I32 len)
+
+=for hackers
+Found in file util.c
+
+=item savesharedpv
+
+Copy a string to a safe spot in memory shared between threads.
+This does not use an SV.
+
+	char*	savesharedpv(const char* sv)
 
 =for hackers
 Found in file util.c
@@ -1746,77 +1786,6 @@ Used by C<xsubpp> to hook up XSUBs as Perl subs.
 
 =for hackers
 Found in file op.c
-
-
-=back
-
-=head1 Shared SV Functions
-
-=over 8
-
-=item sharedsv_find
-
-Tries to find if a given SV has a shared backend, either by
-looking at magic, or by checking if it is tied again threads::shared.
-
-	shared_sv*	sharedsv_find(SV* sv)
-
-=for hackers
-Found in file sharedsv.c
-
-=item sharedsv_init
-
-Saves a space for keeping SVs wider than an interpreter,
-currently only stores a pointer to the first interpreter.
-
-	void	sharedsv_init()
-
-=for hackers
-Found in file sharedsv.c
-
-=item sharedsv_lock
-
-Recursive locks on a sharedsv.
-Locks are dynamically scoped at the level of the first lock.
-	void	sharedsv_lock(shared_sv* ssv)
-
-=for hackers
-Found in file sharedsv.c
-
-=item sharedsv_new
-
-Allocates a new shared sv struct, you must yourself create the SV/AV/HV.
-	shared_sv*	sharedsv_new()
-
-=for hackers
-Found in file sharedsv.c
-
-=item sharedsv_thrcnt_dec
-
-Decrements the threadcount of a shared sv. When a threads frontend is freed
-this function should be called.
-
-	void	sharedsv_thrcnt_dec(shared_sv* ssv)
-
-=for hackers
-Found in file sharedsv.c
-
-=item sharedsv_thrcnt_inc
-
-Increments the threadcount of a sharedsv.
-	void	sharedsv_thrcnt_inc(shared_sv* ssv)
-
-=for hackers
-Found in file sharedsv.c
-
-=item sharedsv_unlock
-
-Recursively unlocks a shared sv.
-
-	void	sharedsv_unlock(shared_sv* ssv)
-
-=for hackers
-Found in file sharedsv.c
 
 
 =back
@@ -2899,21 +2868,21 @@ Like C<SvPV_nolen>, but converts sv to utf8 first if necessary.
 =for hackers
 Found in file sv.h
 
+=item SvPVx
+
+A version of C<SvPV> which guarantees to evaluate sv only once.
+
+	char*	SvPVx(SV* sv, STRLEN len)
+
+=for hackers
+Found in file sv.h
+
 =item SvPVX
 
 Returns a pointer to the physical string in the SV.  The SV must contain a
 string.
 
 	char*	SvPVX(SV* sv)
-
-=for hackers
-Found in file sv.h
-
-=item SvPVx
-
-A version of C<SvPV> which guarantees to evaluate sv only once.
-
-	char*	SvPVx(SV* sv, STRLEN len)
 
 =for hackers
 Found in file sv.h
@@ -3011,16 +2980,6 @@ Dereferences an RV to return the SV.
 =for hackers
 Found in file sv.h
 
-=item SvSetMagicSV_nosteal
-
-Like C<SvSetMagicSV>, but does any set magic required afterwards.
-
-
-	void	SvSetMagicSV_nosteal(SV* dsv, SV* ssv)
-
-=for hackers
-Found in file sv.h
-
 =item SvSTASH
 
 Returns the stash of the SV.
@@ -3091,6 +3050,17 @@ Returns the type of the SV.  See C<svtype>.
 =for hackers
 Found in file sv.h
 
+=item SvUNLOCK
+
+Releases a mutual exclusion lock on sv if a suitable module
+has been loaded.
+
+
+	void	SvUNLOCK(SV* sv)
+
+=for hackers
+Found in file sv.h
+
 =item SvUOK
 
 Returns a boolean indicating whether the SV contains an unsigned integer.
@@ -3148,22 +3118,22 @@ for a version which guarantees to evaluate sv only once.
 =for hackers
 Found in file sv.h
 
-=item SvUVx
-
-Coerces the given SV to an unsigned integer and returns it. Guarantees to
-evaluate sv only once. Use the more efficient C<SvUV> otherwise.
-
-	UV	SvUVx(SV* sv)
-
-=for hackers
-Found in file sv.h
-
 =item SvUVX
 
 Returns the raw value in the SV's UV slot, without checks or conversions.
 Only use when you are sure SvIOK is true. See also C<SvUV()>.
 
 	UV	SvUVX(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvUVx
+
+Coerces the given SV to an unsigned integer and returns it. Guarantees to
+evaluate sv only once. Use the more efficient C<SvUV> otherwise.
+
+	UV	SvUVx(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -3674,9 +3644,28 @@ Found in file sv.c
 Adds magic to an SV. First upgrades C<sv> to type C<SVt_PVMG> if necessary,
 then adds a new magic item of type C<how> to the head of the magic list.
 
-C<name> is assumed to contain an C<SV*> if C<(name && namelen == HEf_SVKEY)>
-
 	void	sv_magic(SV* sv, SV* obj, int how, const char* name, I32 namlen)
+
+=for hackers
+Found in file sv.c
+
+=item sv_magicext
+
+Adds magic to an SV, upgrading it if necessary. Applies the
+supplied vtable and returns pointer to the magic added.
+
+Note that sv_magicext will allow things that sv_magic will not.
+In particular you can add magic to SvREADONLY SVs and and more than
+one instance of the same 'how'
+
+I C<namelen> is greater then zero then a savepvn() I<copy> of C<name> is stored,
+if C<namelen> is zero then C<name> is stored as-is and - as another special
+case - if C<(name && namelen == HEf_SVKEY)> then C<name> is assumed to contain
+an C<SV*> and has its REFCNT incremented
+
+(This is now used as a subroutine by sv_magic.)
+
+	MAGIC *	sv_magicext(SV* sv, SV* obj, int how, MGVTBL *vtbl, const char* name, I32 namlen	)
 
 =for hackers
 Found in file sv.c
@@ -3714,6 +3703,39 @@ instead.
 
 =for hackers
 Found in file sv.c
+
+=item sv_nolocking
+
+Dummy routine which "locks" an SV when there is no locking module present.
+Exists to avoid test for a NULL function pointer and because it could potentially warn under
+some level of strict-ness.
+
+	void	sv_nolocking(SV *)
+
+=for hackers
+Found in file util.c
+
+=item sv_nosharing
+
+Dummy routine which "shares" an SV when there is no sharing module present.
+Exists to avoid test for a NULL function pointer and because it could potentially warn under
+some level of strict-ness.
+
+	void	sv_nosharing(SV *)
+
+=for hackers
+Found in file util.c
+
+=item sv_nounlocking
+
+Dummy routine which "unlocks" an SV when there is no locking module present.
+Exists to avoid test for a NULL function pointer and because it could potentially warn under
+some level of strict-ness.
+
+	void	sv_nounlocking(SV *)
+
+=for hackers
+Found in file util.c
 
 =item sv_nv
 
@@ -4477,7 +4499,7 @@ length len, the displayable version being at most pvlim bytes long
 (if longer, the rest is truncated and "..." will be appended).
 
 The flags argument can have UNI_DISPLAY_ISPRINT set to display
-isprint()able characters as themselves, UNI_DISPLAY_BACKSLASH
+isPRINT()able characters as themselves, UNI_DISPLAY_BACKSLASH
 to display the \\[nrfta\\] as the backslashed versions (like '\n')
 (UNI_DISPLAY_BACKSLASH is preferred over UNI_DISPLAY_ISPRINT for \\).
 UNI_DISPLAY_QQ (and its alias UNI_DISPLAY_REGEX) have both
