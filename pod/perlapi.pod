@@ -2420,6 +2420,15 @@ Return C<&PL_sv_undef> from an XSUB immediately.  Uses C<XST_mUNDEF>.
 =for hackers
 Found in file XSUB.h
 
+=item XSRETURN_UV
+
+Return an integer from an XSUB immediately.  Uses C<XST_mUV>.
+
+	void	XSRETURN_UV(IV uv)
+
+=for hackers
+Found in file XSUB.h
+
 =item XSRETURN_YES
 
 Return C<&PL_sv_yes> from an XSUB immediately.  Uses C<XST_mYES>.
