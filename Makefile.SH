@@ -297,14 +297,14 @@ FORCE:
 	@sh -c true
 
 miniperlmain$(OBJ_EXT): $(src)/miniperlmain.c
-	$(CCCMD) $(PLDLFLAGS) $*.c
+	$(CCCMD) $(PLDLFLAGS) $<
 
 perlmain.c: $(src)/miniperlmain.c config.sh $(FIRSTMAKEFILE)
 	sh writemain $(DYNALOADER) $(static_ext) > writemain.tmp
 	sh $(src)/mv-if-diff writemain.tmp perlmain.c
 
 perlmain$(OBJ_EXT): perlmain.c
-	$(CCCMD) $(PLDLFLAGS) $*.c
+	$(CCCMD) $(PLDLFLAGS) $<
 
 # The file ext.libs is a list of libraries that must be linked in
 # for static extensions, e.g. -lm -lgdbm, etc.  The individual
@@ -490,7 +490,7 @@ pod:
 
 $(plextract):	pod miniperl lib/Config.pm lib/re.pm
 	$(LDLIBPTH) ./miniperl -Ilib -I$(src)/lib $(src)/$@.PL
-	
+
 install: all install.perl install.man
 
 install.perl:	all installperl
@@ -738,8 +738,8 @@ shlist: $(sh)
 pllist: $(pl)
 	echo $(pl) | tr ' ' $(TRNL) | sed -e "s@^$(srcqre)/@@" >.pllist
 
-Makefile: Makefile.SH ./config.sh
-	$(SHELL) Makefile.SH
+Makefile: $(src)/Makefile.SH ./config.sh
+	$(SHELL) $(src)/Makefile.SH
 
 distcheck: FORCE
 	perl '-MExtUtils::Manifest=&fullcheck' -e 'fullcheck()'
