@@ -2082,6 +2082,7 @@ PP(pp_goto)
     char *label;
     int do_dump = (PL_op->op_type == OP_DUMP);
     static char must_have_label[] = "goto must have label";
+    AV *oldav = Nullav;
 
     label = 0;
     if (PL_op->op_flags & OPf_STACKED) {
@@ -2144,7 +2145,7 @@ PP(pp_goto)
 #endif /* USE_5005THREADS */
 		/* abandon @_ if it got reified */
 		if (AvREAL(av)) {
-		    (void)sv_2mortal((SV*)av);	/* delay until return */
+		    oldav = av;	/* delay until return */
 		    av = newAV();
 		    av_extend(av, items-1);
 		    AvFLAGS(av) = AVf_REIFY;
@@ -2174,6 +2175,9 @@ PP(pp_goto)
 
 	    /* Now do some callish stuff. */
 	    SAVETMPS;
+	    /* For reified @_, delay freeing till return from new sub */
+	    if (oldav)
+		SAVEFREESV((SV*)oldav);
 	    SAVEFREESV(cv); /* later, undo the 'avoid premature free' hack */
 	    if (CvXSUB(cv)) {
 #ifdef PERL_XSUB_OLDSTYLE

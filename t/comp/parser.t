@@ -9,7 +9,7 @@ BEGIN {
 }
 
 require "./test.pl";
-plan( tests => 42 );
+plan( tests => 43 );
 
 eval '%@x=0;';
 like( $@, qr/^Can't modify hash dereference in repeat \(x\)/, '%@x=0' );
@@ -140,4 +140,13 @@ EOF
 {
     eval q{ *foo{CODE} ? 1 : 0 };
     is( $@, '', "glob subscript in conditional" );
+}
+
+# Bug #27024
+{
+    # this used to segfault (because $[=1 is optimized away to a null block)
+    my $x;
+    $[ = 1 while $x;
+    pass();
+    $[ = 0; # restore the original value for less side-effects
 }
