@@ -423,7 +423,7 @@ new_xiv(void)
 	 * See comment in more_xiv() -- RAM.
 	 */
 	xiv_root = *(IV**)xiv;
-	return (XPVIV*)((char*)xiv - sizeof(XPV));
+	return (XPVIV*)((char*)xiv - STRUCT_OFFSET(XPVIV, xiv_iv));
     }
     return more_xiv();
 }
@@ -431,7 +431,7 @@ new_xiv(void)
 STATIC void
 del_xiv(XPVIV *p)
 {
-    IV* xiv = (IV*)((char*)(p) + sizeof(XPV));
+    IV* xiv = (IV*)((char*)(p) + STRUCT_OFFSET(XPVIV, xiv_iv));
     *(IV**)xiv = xiv_root;
     xiv_root = xiv;
 }
@@ -465,7 +465,7 @@ new_xnv(void)
     if (xnv_root) {
 	xnv = xnv_root;
 	xnv_root = *(double**)xnv;
-	return (XPVNV*)((char*)xnv - sizeof(XPVIV));
+	return (XPVNV*)((char*)xnv - STRUCT_OFFSET(XPVNV, xnv_nv));
     }
     return more_xnv();
 }
@@ -473,7 +473,7 @@ new_xnv(void)
 STATIC void
 del_xnv(XPVNV *p)
 {
-    double* xnv = (double*)((char*)(p) + sizeof(XPVIV));
+    double* xnv = (double*)((char*)(p) + STRUCT_OFFSET(XPVNV, xnv_nv));
     *(double**)xnv = xnv_root;
     xnv_root = xnv;
 }
