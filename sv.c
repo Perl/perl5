@@ -9864,14 +9864,20 @@ Perl_rvpv_dup(pTHX_ SV *dstr, SV *sstr, CLONE_PARAMS* param)
 	    /* Special case - not normally malloced for some reason */
 	    if (SvREADONLY(sstr) && SvFAKE(sstr)) {
 		/* A "shared" PV - clone it as unshared string */
-                if(!SvPADTMP(sstr)) {
+                if(SvPADTMP(sstr)) {
                     /* However, some of them live in the pad
                        and they should not have these flags
                        turned off */
-	            SvFAKE_off(dstr);
-	            SvREADONLY_off(dstr);
+
+                    SvPVX(dstr) = sharepvn(SvPVX(sstr), SvCUR(sstr),
+                                           SvUVX(sstr));
+                    SvUVX(dstr) = SvUVX(sstr);
+                } else {
+
+                    SvPVX(dstr) = SAVEPVN(SvPVX(sstr), SvCUR(sstr));
+                    SvFAKE_off(dstr);
+                    SvREADONLY_off(dstr);
                 }
-		SvPVX(dstr) = SAVEPVN(SvPVX(sstr), SvCUR(sstr));
 	    }
 	    else {
 		/* Some other special case - random pointer */
