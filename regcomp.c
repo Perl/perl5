@@ -93,7 +93,7 @@
  * Flags to be passed up and down.
  */
 #define	WORST		0	/* Worst case. */
-#define	HASWIDTH	0x1	/* Known never to match null string. */
+#define	HASWIDTH	0x1	/* Known to match non-null strings. */
 #define	SIMPLE		0x2	/* Simple enough to be STAR/PLUS operand. */
 #define	SPSTART		0x4	/* Starts with * or +. */
 #define TRYAGAIN	0x8	/* Weeded out a declaration. */
@@ -425,7 +425,8 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 		if (!scan) 		/* It was not CURLYX, but CURLY. */
 		    scan = next;
 		if (dowarn && (minnext + deltanext == 0) 
-		    && !(data->flags & (SF_HAS_PAR|SF_IN_PAR))) 
+		    && !(data->flags & (SF_HAS_PAR|SF_IN_PAR))
+		    && maxcount <= 10000) /* Complement check for big count */
 		    warn("Strange *+?{} on zero-length expression");
 		min += minnext * mincount;
 		is_inf |= (maxcount == REG_INFTY && (minnext + deltanext) > 0
@@ -970,7 +971,7 @@ reg(I32 paren, I32 *flagp)
     I32 flags, oregflags = regflags, have_branch = 0, open = 0;
     char c;
 
-    *flagp = HASWIDTH;	/* Tentatively. */
+    *flagp = 0;				/* Tentatively. */
 
     /* Make an OPEN node, if parenthesized. */
     if (paren) {
@@ -1144,8 +1145,8 @@ reg(I32 paren, I32 *flagp)
 	regtail(ret, br);		/* OPEN -> first. */
     } else if (paren != '?')		/* Not Conditional */
 	ret = br;
-    if (!(flags&HASWIDTH))
-	*flagp &= ~HASWIDTH;
+    if (flags&HASWIDTH)
+	*flagp |= HASWIDTH;
     *flagp |= flags&SPSTART;
     lastbr = br;
     while (*regcomp_parse == '|') {
@@ -1161,8 +1162,8 @@ reg(I32 paren, I32 *flagp)
 	    return(NULL);
 	regtail(lastbr, br);		/* BRANCH -> BRANCH. */
 	lastbr = br;
-	if (!(flags&HASWIDTH))
-	    *flagp &= ~HASWIDTH;
+	if (flags&HASWIDTH)
+	    *flagp |= HASWIDTH;
 	*flagp |= flags&SPSTART;
     }
 
@@ -1176,12 +1177,13 @@ reg(I32 paren, I32 *flagp)
 	    ender = reganode(CLOSE, parno);
 	    break;
 	case '<':
-	case '>':
 	case ',':
 	case '=':
 	case '!':
-	    ender = reg_node(SUCCEED);
 	    *flagp &= ~HASWIDTH;
+	    /* FALL THROUGH */
+	case '>':
+	    ender = reg_node(SUCCEED);
 	    break;
 	case 0:
 	    ender = reg_node(END);
@@ -1372,7 +1374,9 @@ regpiece(I32 *flagp)
 	    ret->flags = 0;
 
 	    if (min > 0)
-		*flagp = (WORST|HASWIDTH);
+		*flagp = WORST;
+	    if (max > 0)
+		*flagp |= HASWIDTH;
 	    if (max && max < min)
 		FAIL("Can't do {n,m} with n > m");
 	    if (!SIZE_ONLY) {
@@ -1396,7 +1400,7 @@ regpiece(I32 *flagp)
 
     nextchar();
 
-    *flagp = (op != '+') ? (WORST|SPSTART) : (WORST|HASWIDTH);
+    *flagp = (op != '+') ? (WORST|SPSTART|HASWIDTH) : (WORST|HASWIDTH);
 
     if (op == '*' && (flags&SIMPLE)) {
 	reginsert(STAR, ret);
