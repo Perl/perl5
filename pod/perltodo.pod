@@ -36,17 +36,20 @@ not_a_number(), and so on.
 
 Requirements: should handle both byte and UTF8 strings.  isPRINT()
 characters printed as-is, character less than 256 as \xHH, Unicode
-characters as \x{HHH}.
+characters as \x{HHH}.  Don't assume ASCII-like, either, get somebody
+on EBCDIC to test the output.
 
 Possible options, controlled by the flags:
-- whitespace (other than ' ' of isPRINTF()) printed as-is
+- whitespace (other than ' ' of isPRINT()) printed as-is
 - use isPRINT_LC() instead of isPRINT()
 - print control characters like this: "\cA"
 - print control characters like this: "^A"
-- non-printables printed as '.' instead of \xHH
-- print the \OOO instead of \xHH
+- non-PRINTables printed as '.' instead of \xHH
+- use \OOO instead of \xHH
+- use the C/Perl-metacharacters like \n, \t
 - have a maximum length for the produced string (read it from *lenp)
 - append a "..." to the produced string if the maximum length is exceeded
+- really fancy: print unicode characters as \N{...}
 
 =head2 Autoload byte.pm
 
