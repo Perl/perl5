@@ -2149,6 +2149,10 @@ C<last> cannot be used to exit a block which returns a value such as
 C<eval {}>, C<sub {}> or C<do {}>, and should not be used to exit
 a grep() or map() operation.
 
+Note that a block by itself is semantically identical to a loop
+that executes once.  Thus C<last> can be used to effect an early
+exit out of such a block.
+
 See also L</continue> for an illustration of how C<last>, C<next>, and
 C<redo> work.
 
@@ -2393,6 +2397,9 @@ refers to the innermost enclosing loop.
 C<next> cannot be used to exit a block which returns a value such as
 C<eval {}>, C<sub {}> or C<do {}>, and should not be used to exit
 a grep() or map() operation.
+
+Note that a block by itself is semantically identical to a loop
+that executes once.  Thus C<next> will exit such a block early.
 
 See also L</continue> for an illustration of how C<last>, C<next>, and
 C<redo> work.
@@ -3284,6 +3291,10 @@ themselves about what was just input:
 C<redo> cannot be used to retry a block which returns a value such as
 C<eval {}>, C<sub {}> or C<do {}>, and should not be used to exit
 a grep() or map() operation.
+
+Note that a block by itself is semantically identical to a loop
+that executes once.  Thus C<redo> inside such a block will effectively
+turn it into a looping construct.
 
 See also L</continue> for an illustration of how C<last>, C<next>, and
 C<redo> work.
