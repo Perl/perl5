@@ -468,7 +468,7 @@ EOF
 	    $CC $CFLAGS $DEFINES
     and the resulting *.s groped for stab information.  If no files are
     supplied, then stdin is read directly with the assumption that it
-    contains stab information.  All other liens will be ignored.  At
+    contains stab information.  All other lines will be ignored.  At
     most one *.s file should be supplied.
 
 EOF
