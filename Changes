@@ -79,6 +79,171 @@ Version 5.005_62        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  4208] By: gsar                                  on 1999/09/20  18:28:44
+        Log: add README.Y2K (from Dominic Dunlop <domo@vo.lu>)
+     Branch: perl
+	   + README.Y2K
+	   ! MANIFEST
+____________________________________________________________________________
+[  4207] By: jhi                                   on 1999/09/20  11:06:13
+        Log: Document -Duselfs, -Duselongdouble, and -Dusemorebits.
+     Branch: cfgperl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  4206] By: jhi                                   on 1999/09/20  09:53:15
+        Log: Do not test for gccish things in non-gccish platforms.
+     Branch: cfgperl
+	   ! Configure config_h.SH
+     Branch: metaconfig
+	   ! U/compline/ccflags.U
+____________________________________________________________________________
+[  4205] By: jhi                                   on 1999/09/20  09:41:22
+        Log: Prompt for uselfs.
+     Branch: cfgperl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH
+     Branch: metaconfig
+	   ! U/mksample
+     Branch: metaconfig/U/perl
+	   ! use64bits.U uselfs.U
+____________________________________________________________________________
+[  4204] By: jhi                                   on 1999/09/20  09:09:29
+        Log: Add usemorebits and uselfs.
+     Branch: cfgperl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH doio.c perl.h
+     Branch: metaconfig/U/perl
+	   + uselfs.U usemorebits.U
+	   ! use64bits.U uselongdbl.U
+____________________________________________________________________________
+[  4203] By: jhi                                   on 1999/09/20  07:48:48
+        Log: Dethinko.
+     Branch: cfgperl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[  4202] By: jhi                                   on 1999/09/20  07:33:32
+        Log: Fix a bug in the description of endianness.  Reported in
+             From: "Konovalov, Vadim" <vkonovalov@lucent.com>
+             To: perl5-porters@perl.org
+             Subject: BUG: perldoc -f pack
+             Date: Mon, 20 Sep 1999 09:43:49 +0400
+             Message-ID: <402099F49BEED211999700805FC7359F20D3F5@ru0028exch01.spb.lucent.com>
+     Branch: cfgperl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[  4201] By: jhi                                   on 1999/09/20  07:01:26
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  +> t/op/args.t
+	  !> (integrate 31 files)
+____________________________________________________________________________
+[  4200] By: gsar                                  on 1999/09/20  03:45:06
+        Log: From: Russ Allbery <rra@stanford.edu>
+             Date: 19 Aug 1999 04:35:44 -0700
+             Message-Id: <yl7lms9f5b.fsf@windlord.stanford.edu>
+             Subject: [ID 19990819.002] File::Find error when pruning top-level directories
+     Branch: perl
+	   ! lib/File/Find.pm
+____________________________________________________________________________
+[  4199] By: gsar                                  on 1999/09/20  03:27:49
+        Log: suppress warning (from John Tobey <jtobey@epsilondev.com>)
+     Branch: perl
+	   ! ext/B/B/Terse.pm
+____________________________________________________________________________
+[  4198] By: gsar                                  on 1999/09/20  03:25:25
+        Log: add arenas for managing allocations of remaining xpv*v structures
+             From: Vishal Bhatia <vishal@gol.com>
+             Date: Wed, 25 Aug 1999 00:31:33 +0900 (JST)
+             Message-ID: <Pine.LNX.4.10.9908250031000.11727-100000@localhost.localdomain>
+             Subject: [PATCH 5.005_60] removing extra ref count (compiler) 
+     Branch: perl
+	   ! embed.h embed.pl embedvar.h ext/B/B/C.pm intrpvar.h objXSUB.h
+	   ! proto.h sv.c
+____________________________________________________________________________
+[  4197] By: gsar                                  on 1999/09/20  03:06:10
+        Log: queue errors due to strictures rather than printing them as
+             warnings; symbols that violate strictures do *not* end up in
+             the symbol table anyway, making multiple evals of the same piece
+             of code produce the same errors; errors indicate all locations
+             of a global symbol rather than just the first one; these
+             changes make compile-time failures within evals reliably
+             visible via the return value or contents of $@, and trappable
+             using __DIE__ hooks
+     Branch: perl
+	   ! embed.h embed.pl embedvar.h ext/DynaLoader/dlutils.c
+	   ! ext/Thread/Thread.xs global.sym gv.c objXSUB.h op.c perl.c
+	   ! perlapi.c pp_ctl.c proto.h regcomp.c t/pragma/strict-refs
+	   ! t/pragma/strict-vars thrdvar.h toke.c util.c
+____________________________________________________________________________
+[  4196] By: gsar                                  on 1999/09/19  22:14:29
+        Log: control change#1914 via hints (causes problems on some platforms)
+     Branch: perl
+	   ! ext/POSIX/POSIX.pod ext/POSIX/POSIX.xs
+	   ! ext/POSIX/hints/linux.pl
+____________________________________________________________________________
+[  4195] By: gsar                                  on 1999/09/19  21:30:18
+        Log: avoid clearing @_ at all for faster subroutine calls; fix bugs
+             in passing around references to @_, eg C<sub foo { \@_ }>; add
+             tests for the same
+     Branch: perl
+	   + t/op/args.t
+	   ! MANIFEST cop.h pp.c pp_ctl.c pp_hot.c
+____________________________________________________________________________
+[  4194] By: jhi                                   on 1999/09/18  18:57:45
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> opcode.h opcode.pl
+____________________________________________________________________________
+[  4193] By: nick                                  on 1999/09/18  15:24:56
+        Log: Re-integrate mainline
+             Basic SvUTF8 stuff in headers, no functional changes yet.
+     Branch: utfperl
+	   + lib/byte.pm lib/byte_heavy.pl
+	  +> ext/B/defsubs_h.PL ext/DB_File/version.c jpl/JNI/Closer.java
+	  +> jpl/JNI/JNIConfig jpl/JNI/JNIConfig.Win32
+	  +> jpl/JNI/JNIConfig.kaffe jpl/JNI/JNIConfig.noembed
+	  +> jpl/JNI/JNIConfig.standard jpl/JNI/typemap.gcc
+	  +> jpl/JNI/typemap.win32 jpl/SETVARS.PL lib/unicode/ArabShap.txt
+	  +> lib/unicode/Blocks.txt lib/unicode/CompExcl.txt
+	  +> lib/unicode/EAWidth.txt lib/unicode/Index.txt
+	  +> lib/unicode/Jamo-2.txt lib/unicode/LineBrk.txt
+	  +> lib/unicode/Names.txt lib/unicode/Props.txt
+	  +> lib/unicode/ReadMe.txt lib/unicode/SpecCase.txt
+	  +> t/lib/bigfltpm.t
+	   - ext/B/defsubs.h.PL lib/unicode/arabshp.txt
+	   - lib/unicode/blocks.txt lib/unicode/index2.txt
+	   - lib/unicode/jamo2.txt lib/unicode/names2.txt
+	   - lib/unicode/props2.txt lib/unicode/readme.txt
+	   - t/lib/bigfloatpm.t
+	   ! doop.c embed.h embed.pl gv.c mg.c objXSUB.h op.c op.h perl.h
+	   ! perlapi.c pp.c pp_ctl.c pp_hot.c proto.h regcomp.c regcomp.h
+	   ! regexec.c regexp.h regnodes.h sv.c sv.h toke.c utf8.c utf8.h
+	   ! warnings.h
+	  !> (integrate 142 files)
+____________________________________________________________________________
+[  4192] By: gsar                                  on 1999/09/18  15:11:47
+        Log: more op description tweaks
+     Branch: perl
+	   ! opcode.h opcode.pl
+____________________________________________________________________________
+[  4191] By: jhi                                   on 1999/09/18  07:47:16
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> Changes opcode.h opcode.pl t/io/open.t t/op/misc.t
+	  !> t/pragma/warn/op
+____________________________________________________________________________
+[  4190] By: jhi                                   on 1999/09/18  07:35:45
+        Log: Add description of the Unicode database files.
+     Branch: cfgperl
+	   + lib/unicode/Unicode.html
+____________________________________________________________________________
+[  4189] By: gsar                                  on 1999/09/18  03:14:58
+        Log: tweak some op names in change#4177 (will any of this break code that
+             gropes $@ ?)
+     Branch: perl
+	   ! Changes opcode.h opcode.pl t/io/open.t t/op/misc.t
+	   ! t/pragma/warn/op
+____________________________________________________________________________
 [  4188] By: jhi                                   on 1999/09/17  21:30:08
         Log: Pick up the typo fix.
      Branch: cfgperl
