@@ -135,7 +135,7 @@ Perl_is_utf8_char(pTHX_ U8 *s)
 }
 
 /*
-=for apidoc Am|bool_utf8_string|U8 *s|STRLEN len
+=for apidoc Am|is_utf8_string|U8 *s|STRLEN len
 
 Returns true if first C<len> bytes of the given string form valid a UTF8
 string, false otherwise.

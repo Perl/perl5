@@ -3148,7 +3148,7 @@ Found in file handy.h
 Returns true if first C<len> bytes of the given string form valid a UTF8
 string, false otherwise.
 
-	bool_utf8_string	U8 *s(STRLEN len)
+	is_utf8_string	U8 *s(STRLEN len)
 
 =for hackers
 Found in file utf8.c
