@@ -6050,8 +6050,9 @@ Perl_sv_dec(pTHX_ register SV *sv)
 =for apidoc sv_mortalcopy
 
 Creates a new SV which is a copy of the original SV (using C<sv_setsv>).
-The new SV is marked as mortal. It will be destroyed when the current
-context ends.  See also C<sv_newmortal> and C<sv_2mortal>.
+The new SV is marked as mortal. It will be destroyed "soon", either by an
+explicit call to FREETMPS, or by an implicit call at places such as
+statement boundaries.  See also C<sv_newmortal> and C<sv_2mortal>.
 
 =cut
 */
@@ -6078,8 +6079,9 @@ Perl_sv_mortalcopy(pTHX_ SV *oldstr)
 =for apidoc sv_newmortal
 
 Creates a new null SV which is mortal.  The reference count of the SV is
-set to 1. It will be destroyed when the current context ends.  See
-also C<sv_mortalcopy> and C<sv_2mortal>.
+set to 1. It will be destroyed "soon", either by an explicit call to
+FREETMPS, or by an implicit call at places such as statement boundaries.
+See also C<sv_mortalcopy> and C<sv_2mortal>.
 
 =cut
 */
@@ -6099,8 +6101,9 @@ Perl_sv_newmortal(pTHX)
 /*
 =for apidoc sv_2mortal
 
-Marks an existing SV as mortal.  The SV will be destroyed when the current
-context ends. See also C<sv_newmortal> and C<sv_mortalcopy>.
+Marks an existing SV as mortal.  The SV will be destroyed "soon", either
+by an explicit call to FREETMPS, or by an implicit call at places such as
+statement boundaries.  See also C<sv_newmortal> and C<sv_mortalcopy>.
 
 =cut
 */
