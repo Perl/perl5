@@ -2153,9 +2153,6 @@
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
 #endif
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
-#  if defined(PURIFY)
-#  else
-#  endif
 #  if defined(DEBUGGING)
 #  endif
 #endif

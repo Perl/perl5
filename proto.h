@@ -1154,12 +1154,7 @@ STATIC void	S_del_xrv(pTHX_ XRV* p);
 STATIC void	S_sv_unglob(pTHX_ SV* sv);
 STATIC void	S_not_a_number(pTHX_ SV *sv);
 STATIC void	S_visit(pTHX_ SVFUNC_t f);
-#  if defined(PURIFY)
-STATIC void	S_reg_add(pTHX_ SV *sv);
-STATIC void	S_reg_remove(pTHX_ SV *sv);
-#  else
 STATIC void*	S_my_safemalloc(MEM_SIZE size);
-#  endif
 STATIC void	S_sv_add_backref(pTHX_ SV *tsv, SV *sv);
 STATIC void	S_sv_del_backref(pTHX_ SV *sv);
 #  if defined(DEBUGGING)
