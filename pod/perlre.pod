@@ -83,8 +83,8 @@ modifier to C<{1,}>, and the "?" modifier to C<{0,1}>.  n and m are limited
 to integral values less than 65536.
 
 By default, a quantified subpattern is "greedy", that is, it will match as
-many times as possible without causing the rest pattern not to match.  The
-standard quantifiers are all "greedy", in that they match as many
+many times as possible without causing the rest of the pattern not to match.  
+The standard quantifiers are all "greedy", in that they match as many
 occurrences as possible (given a particular starting location) without
 causing the pattern to fail.  If you want it to match the minimum number
 of times possible, follow the quantifier with a "?" after any of them.
@@ -150,12 +150,12 @@ you can use C<\Z(?!\n)>.
 
 When the bracketing construct C<( ... )> is used, \<digit> matches the
 digit'th substring.  Outside of the pattern, always use "$" instead of "\"
-in front of the digit.  (The \<digit> notation can on rare occasion work
+in front of the digit.  (While the \<digit> notation can on rare occasion work
 outside the current pattern, this should not be relied upon.  See the
-WARNING below.) The scope of $<digit> (and C<$`>, C<$&>, and C<$')>
+WARNING below.) The scope of $<digit> (and C<$`>, C<$&>, and C<$'>)
 extends to the end of the enclosing BLOCK or eval string, or to the next
 successful pattern match, whichever comes first.  If you want to use
-parentheses to delimit subpattern (e.g. a set of alternatives) without
+parentheses to delimit a subpattern (e.g. a set of alternatives) without
 saving it as a subpattern, follow the ( with a ?.
 
 You may have as many parentheses as you wish.  If you have more
