@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..66\n";
+print "1..67\n";
 
 $_ = "abcdefghijklmnopqrstuvwxyz";
 
@@ -370,3 +370,9 @@ print "ok 65\n";
 $a = "\xfe\xff"; $a =~ tr/\xfe\xff/\x{1ff}\x{1fe}/;
 print "not " unless $a eq "\x{1ff}\x{1fe}";
 print "ok 66\n";
+
+# From David Dyck
+($a = "R0_001") =~ tr/R_//d;
+print "not " if hex($a) != 1;
+print "ok 67\n";
+

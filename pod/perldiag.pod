@@ -3910,7 +3910,7 @@ So put in parentheses to say what you really mean.
 
 =item Wide character in %s
 
-(F) Perl met a wide character (>255) when it wasn't expecting one.
+(W utf8) Perl met a wide character (>255) when it wasn't expecting one.
 
 =item write() on closed filehandle %s
 

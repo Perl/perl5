@@ -718,6 +718,11 @@ typedef struct perl_mstats perl_mstats_t;
 #  define WIN32SCK_IS_STDSCK		/* don't pull in custom wsock layer */
 #endif
 
+/* In Tru64 use the 4.4BSD struct msghdr, not the 4.3 one */
+#if defined(__osf__) && defined(__alpha) && !defined(_SOCKADDR_LEN)
+#  define _SOCKADDR_LEN
+#endif
+
 #if defined(HAS_SOCKET) && !defined(VMS) /* VMS handles sockets via vmsish.h */
 # include <sys/socket.h>
 # if defined(USE_SOCKS) && defined(I_SOCKS)
@@ -3625,6 +3630,20 @@ typedef struct am_table_short AMTS;
    NVef
    NVff
    NVgf
+
+   HAS_USLEEP
+   HAS_UALARM
+
+   HAS_SETITIMER
+   HAS_GETITIMER
+
+   HAS_SENDMSG
+   HAS_RECVMSG
+   HAS_READV
+   HAS_WRITEV
+   I_SYSUIO
+   HAS_STRUCT_MSGHDR
+   HAS_STRUCT_CMSGHDR
 
    so that Configure picks them up. */
 

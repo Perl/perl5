@@ -782,8 +782,9 @@ sub gv_name {
     } else {
 	$stash = $stash . "::";
     }
-    if ($name =~ /^([\cA-\cZ])$/) {
-	$name = "^" . chr(64 + ord($1));
+    if ($name =~ /^([\cA-\cZ])(.*)$/) {
+	$name = "^" . chr(64 + ord($1)) . $2;
+	$name = "{$name}" if length($2);	# ${^WARNING_BITS} etc
     }
     return $stash . $name;
 }
@@ -2418,7 +2419,7 @@ sub pp_const {
     my $sv = $self->const_sv($op);
 #    return const($sv);
     my $c = const $sv; 
-    return $c < 0 ? $self->maybe_parens($c, $cx, 21) : $c;
+    return $c =~ /^-\d/ ? $self->maybe_parens($c, $cx, 21) : $c;
 }
 
 sub dq {

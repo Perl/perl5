@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Apr  3 04:12:27 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Thu Apr  5 20:11:33 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -324,6 +324,7 @@ d_chroot=''
 d_chsize=''
 d_closedir=''
 d_void_closedir=''
+d_cmsghdr_s=''
 d_const=''
 cryptlib=''
 d_crypt=''
@@ -381,6 +382,7 @@ d_gethname=''
 d_phostname=''
 d_uname=''
 d_gethostprotos=''
+d_getitimer=''
 d_getlogin=''
 d_getmnt=''
 d_getmntent=''
@@ -449,6 +451,7 @@ d_mprotect=''
 d_msg=''
 d_msgctl=''
 d_msgget=''
+d_msghdr_s=''
 d_msgrcv=''
 d_msgsnd=''
 d_msync=''
@@ -473,6 +476,8 @@ d_rewinddir=''
 d_seekdir=''
 d_telldir=''
 d_readlink=''
+d_readv=''
+d_recvmsg=''
 d_rename=''
 d_rmdir=''
 d_safebcpy=''
@@ -484,11 +489,13 @@ d_sem=''
 d_semctl=''
 d_semget=''
 d_semop=''
+d_sendmsg=''
 d_setegid=''
 d_seteuid=''
 d_setgrent=''
 d_setgrps=''
 d_sethent=''
+d_setitimer=''
 d_setlinebuf=''
 d_setlocale=''
 d_setnent=''
@@ -582,10 +589,13 @@ clocktype=''
 d_times=''
 d_truncate=''
 d_tzname=''
+d_u32align=''
+d_ualarm=''
 d_umask=''
 d_semctl_semid_ds=''
 d_semctl_semun=''
 d_union_semun=''
+d_usleep=''
 d_ustat=''
 d_vfork=''
 usevfork=''
@@ -598,6 +608,7 @@ d_wait4=''
 d_waitpid=''
 d_wcstombs=''
 d_wctomb=''
+d_writev=''
 dlext=''
 cccdlflags=''
 ccdlflags=''
@@ -8712,6 +8723,144 @@ eval $inlibc
 set chsize d_chsize
 eval $inlibc
 
+hasstruct='varname=$1; struct=$2; shift; shift;
+while $test $# -ge 2; do
+	case "$1" in
+	$define) echo "#include <$2>";;
+	esac ;
+    shift 2;
+done > try.c;
+echo "int main () { struct $struct foo; }" >> try.c;
+set try;
+if eval $compile; then
+	val="$define";
+else
+	val="$undef";
+fi;
+set $varname;
+eval $setvar;
+$rm -f try.c try.o'
+
+: see if sys/types.h has to be included
+set sys/types.h i_systypes
+eval $inhdr
+
+hasfield='varname=$1; struct=$2; field=$3; shift; shift; shift;
+while $test $# -ge 2; do
+	case "$1" in
+	$define) echo "#include <$2>";;
+	esac ;
+    shift 2;
+done > try.c;
+echo "int main () { struct $struct foo; char* bar; bar = (char*)foo.$field; }" >> try.c;
+set try;
+if eval $compile; then
+	val="$define";
+else
+	val="$undef";
+fi;
+set $varname;
+eval $setvar;
+$rm -f try.c try.o'
+
+socketlib=''
+sockethdr=''
+: see whether socket exists
+echo " "
+$echo $n "Hmm... $c" >&4
+if set socket val -f d_socket; eval $csym; $val; then
+	echo "Looks like you have Berkeley networking support." >&4
+	d_socket="$define"
+	if set setsockopt val -f; eval $csym; $val; then
+		d_oldsock="$undef"
+	else
+		echo "...but it uses the old BSD 4.1c interface, rather than 4.2." >&4
+		d_oldsock="$define"
+	fi
+else
+	if $contains socklib libc.list >/dev/null 2>&1; then
+		echo "Looks like you have Berkeley networking support." >&4
+		d_socket="$define"
+		: we will have to assume that it supports the 4.2 BSD interface
+		d_oldsock="$undef"
+	else
+		echo "You don't have Berkeley networking in libc$_a..." >&4
+		if test "X$d_socket" = "X$define"; then
+		   echo "...but you seem to believe that you have sockets." >&4
+		else
+			for net in net socket
+			do
+				if test -f /usr/lib/lib$net$_a; then
+					( ($nm $nm_opt /usr/lib/lib$net$_a | eval $nm_extract) ||  \
+					$ar t /usr/lib/lib$net$_a) 2>/dev/null >> libc.list
+					if $contains socket libc.list >/dev/null 2>&1; then
+						d_socket="$define"
+						socketlib="-l$net"
+						case "$net" in
+						net)
+							echo "...but the Wollongong group seems to have hacked it in." >&4
+							sockethdr="-I/usr/netinclude"
+							;;
+						esac
+						echo "Found Berkeley sockets interface in lib$net." >& 4 
+						if $contains setsockopt libc.list >/dev/null 2>&1; then
+							d_oldsock="$undef"
+						else
+							echo "...using the old BSD 4.1c interface, rather than 4.2." >&4
+							d_oldsock="$define"
+						fi
+						break
+					fi
+				fi
+			done
+			if test "X$d_socket" != "X$define"; then
+			   echo "or anywhere else I see." >&4
+			   d_socket="$undef"
+			   d_oldsock="$undef"
+			fi
+		fi
+	fi
+fi
+
+: see if socketpair exists
+set socketpair d_sockpair
+eval $inlibc
+
+
+echo " "
+echo "Checking the availability of certain socket constants..." >& 4
+for ENUM in MSG_CTRUNC MSG_DONTROUTE MSG_OOB MSG_PEEK MSG_PROXY SCM_RIGHTS; do
+	enum=`$echo $ENUM|./tr '[A-Z]' '[a-z]'`
+	$cat >try.c <<EOF
+#include <sys/types.h>
+#include <sys/socket.h>
+int main() {
+    int i = $ENUM;
+}
+EOF
+	val="$undef"
+	set try; if eval $compile; then
+		val="$define"
+	fi
+	set d_${enum}; eval $setvar
+	$rm -f try.c try
+done
+
+: see if this is a sys/uio.h system
+set sys/uio.h i_sysuio
+eval $inhdr
+
+
+echo " "
+echo "Checking to see if your system supports struct cmsghdr..." >&4
+set d_cmsghdr_s cmsghdr $i_systypes sys/types.h $d_socket sys/socket.h $i_sysuio sys/uio.h
+eval $hasstruct
+case "$d_cmsghdr_s" in
+"$define")      echo "Yes, it does."   ;;
+*)              echo "No, it doesn't." ;;
+esac
+
+
 : check for const keyword
 echo " "
 echo 'Checking to see if your C compiler knows about "const"...' >&4
@@ -9388,107 +9537,6 @@ eval $setvar
 $rm -f try*
 
 
-hasfield='varname=$1; struct=$2; field=$3; shift; shift; shift;
-while $test $# -ge 2; do
-	case "$1" in
-	$define) echo "#include <$2>";;
-	esac ;
-    shift 2;
-done > try.c;
-echo "int main () { struct $struct foo; char* bar; bar = (char*)foo.$field; }" >> try.c;
-set try;
-if eval $compile; then
-	val="$define";
-else
-	val="$undef";
-fi;
-set $varname;
-eval $setvar;
-$rm -f try.c try.o'
-
-socketlib=''
-sockethdr=''
-: see whether socket exists
-echo " "
-$echo $n "Hmm... $c" >&4
-if set socket val -f d_socket; eval $csym; $val; then
-	echo "Looks like you have Berkeley networking support." >&4
-	d_socket="$define"
-	if set setsockopt val -f; eval $csym; $val; then
-		d_oldsock="$undef"
-	else
-		echo "...but it uses the old BSD 4.1c interface, rather than 4.2." >&4
-		d_oldsock="$define"
-	fi
-else
-	if $contains socklib libc.list >/dev/null 2>&1; then
-		echo "Looks like you have Berkeley networking support." >&4
-		d_socket="$define"
-		: we will have to assume that it supports the 4.2 BSD interface
-		d_oldsock="$undef"
-	else
-		echo "You don't have Berkeley networking in libc$_a..." >&4
-		if test "X$d_socket" = "X$define"; then
-		   echo "...but you seem to believe that you have sockets." >&4
-		else
-			for net in net socket
-			do
-				if test -f /usr/lib/lib$net$_a; then
-					( ($nm $nm_opt /usr/lib/lib$net$_a | eval $nm_extract) ||  \
-					$ar t /usr/lib/lib$net$_a) 2>/dev/null >> libc.list
-					if $contains socket libc.list >/dev/null 2>&1; then
-						d_socket="$define"
-						socketlib="-l$net"
-						case "$net" in
-						net)
-							echo "...but the Wollongong group seems to have hacked it in." >&4
-							sockethdr="-I/usr/netinclude"
-							;;
-						esac
-						echo "Found Berkeley sockets interface in lib$net." >& 4 
-						if $contains setsockopt libc.list >/dev/null 2>&1; then
-							d_oldsock="$undef"
-						else
-							echo "...using the old BSD 4.1c interface, rather than 4.2." >&4
-							d_oldsock="$define"
-						fi
-						break
-					fi
-				fi
-			done
-			if test "X$d_socket" != "X$define"; then
-			   echo "or anywhere else I see." >&4
-			   d_socket="$undef"
-			   d_oldsock="$undef"
-			fi
-		fi
-	fi
-fi
-
-: see if socketpair exists
-set socketpair d_sockpair
-eval $inlibc
-
-
-echo " "
-echo "Checking the availability of certain socket constants..." >& 4
-for ENUM in MSG_CTRUNC MSG_DONTROUTE MSG_OOB MSG_PEEK MSG_PROXY SCM_RIGHTS; do
-	enum=`$echo $ENUM|./tr '[A-Z]' '[a-z]'`
-	$cat >try.c <<EOF
-#include <sys/types.h>
-#include <sys/socket.h>
-int main() {
-    int i = $ENUM;
-}
-EOF
-	val="$undef"
-	set try; if eval $compile; then
-		val="$define"
-	fi
-	set d_${enum}; eval $setvar
-	$rm -f try.c try
-done
-
 : see if sys/select.h has to be included
 set sys/select.h i_sysselct
 eval $inhdr
@@ -9698,34 +9746,12 @@ eval $setvar
 set frexpl d_frexpl
 eval $inlibc
 
-hasstruct='varname=$1; struct=$2; shift; shift;
-while $test $# -ge 2; do
-	case "$1" in
-	$define) echo "#include <$2>";;
-	esac ;
-    shift 2;
-done > try.c;
-echo "int main () { struct $struct foo; }" >> try.c;
-set try;
-if eval $compile; then
-	val="$define";
-else
-	val="$undef";
-fi;
-set $varname;
-eval $setvar;
-$rm -f try.c try.o'
-
 : see if this is a sys/param system
 set sys/param.h i_sysparam
 eval $inhdr
 
 : see if this is a sys/mount.h system
 set sys/mount.h i_sysmount
-eval $inhdr
-
-: see if sys/types.h has to be included
-set sys/types.h i_systypes
 eval $inhdr
 
 
@@ -9897,6 +9923,10 @@ eval $inhdr
 echo " "
 set d_gethostprotos gethostent $i_netdb netdb.h
 eval $hasproto
+
+: see if getitimer exists
+set getitimer d_getitimer
+eval $inlibc
 
 : see if getlogin exists
 set getlogin d_getlogin
@@ -10393,6 +10423,17 @@ else
 fi
 set d_msg
 eval $setvar
+
+
+echo " "
+echo "Checking to see if your system supports struct msghdr..." >&4
+set d_msghdr_s msghdr $i_systypes sys/types.h $d_socket sys/socket.h $i_sysuio sys/uio.h
+eval $hasstruct
+case "$d_msghdr_s" in
+"$define")      echo "Yes, it does."   ;;
+*)              echo "No, it doesn't." ;;
+esac
+
 
 : see if msync exists
 set msync d_msync
@@ -10980,6 +11021,14 @@ eval $inlibc
 set readlink d_readlink
 eval $inlibc
 
+: see if readv exists
+set readv d_readv
+eval $inlibc
+
+: see if recvmsg exists
+set recvmsg d_recvmsg
+eval $inlibc
+
 : see if rename exists
 set rename d_rename
 eval $inlibc
@@ -11462,6 +11511,10 @@ END
     ;;
 esac
 
+: see if sendmsg exists
+set sendmsg d_sendmsg
+eval $inlibc
+
 : see if setegid exists
 set setegid d_setegid
 eval $inlibc
@@ -11476,6 +11529,10 @@ eval $inlibc
 
 : see if sethostent exists
 set sethostent d_sethent
+eval $inlibc
+
+: see if setitimer exists
+set setitimer d_setitimer
 eval $inlibc
 
 : see if setlinebuf exists
@@ -12501,8 +12558,183 @@ fi
 set d_tzname
 eval $setvar
 
+case "$crosscompile" in
+''|[nN]*) crosscompile="$undef" ;;
+esac
+
+case "$osname" in
+next|rhapsody|darwin) multiarch="$define" ;;
+esac
+case "$multiarch" in
+''|[nN]*) multiarch="$undef" ;;
+esac
+
+: check for ordering of bytes in a long
+echo " "
+case "$crosscompile$multiarch" in
+*$define*)
+	$cat <<EOM
+You seem to be either cross-compiling or doing a multiarchitecture build,
+skipping the byteorder check.
+
+EOM
+	byteorder='0xffff'
+	;;
+*)
+	case "$byteorder" in
+	'')
+		$cat <<'EOM'
+In the following, larger digits indicate more significance.  A big-endian
+machine like a Pyramid or a Motorola 680?0 chip will come out to 4321. A
+little-endian machine like a Vax or an Intel 80?86 chip would be 1234. Other
+machines may have weird orders like 3412.  A Cray will report 87654321,
+an Alpha will report 12345678. If the test program works the default is
+probably right.
+I'm now running the test program...
+EOM
+		$cat >try.c <<'EOCP'
+#include <stdio.h>
+int main()
+{
+	int i;
+	union {
+		unsigned long l;
+		char c[sizeof(long)];
+	} u;
+
+	if (sizeof(long) > 4)
+		u.l = (0x08070605L << 32) | 0x04030201L;
+	else
+		u.l = 0x04030201L;
+	for (i = 0; i < sizeof(long); i++)
+		printf("%c", u.c[i]+'0');
+	printf("\n");
+	exit(0);
+}
+EOCP
+		xxx_prompt=y
+		set try
+		if eval $compile && ./try > /dev/null; then
+			dflt=`./try`
+			case "$dflt" in
+			[1-4][1-4][1-4][1-4]|12345678|87654321)
+				echo "(The test program ran ok.)"
+				echo "byteorder=$dflt"
+				xxx_prompt=n
+			;;
+			????|????????) echo "(The test program ran ok.)" ;;
+			*) echo "(The test program didn't run right for some reason.)" ;;
+			esac
+		else
+			dflt='4321'
+			cat <<'EOM'
+(I can't seem to compile the test program.  Guessing big-endian...)
+EOM
+		fi
+		case "$xxx_prompt" in
+		y)
+			rp="What is the order of bytes in a long?"
+			. ./myread
+			byteorder="$ans"
+			;;
+		*)	byteorder=$dflt
+			;;
+		esac
+		;;
+	esac
+	$rm -f try.c try
+	;;
+esac
+
+
+$cat <<EOM
+
+Checking to see whether you can access character data unalignedly...
+EOM
+$cat >try.c <<EOCP
+#include <stdio.h>
+#define U32 $u32type
+#define BYTEORDER $byteorder
+int main() {
+#if BYTEORDER == 0x1234 || BYTEORDER == 0x4321
+    U8 buf[] = "\0\0\0\1\0\0\0\0";
+    U32 *up;
+    int i;
+
+    if (sizeof(U32) != 4) {
+	printf("sizeof(U32) is not 4, but %d\n", sizeof(U32));
+	exit(1);
+    }
+
+    fflush(stdout);
+
+    for (i = 0; i < 4; i++) {
+	up = (U32*)(buf + i);
+	if (! ((*up == 1 << (8*i)) ||   /* big-endian */
+	       (*up == 1 << (8*(3-i)))  /* little-endian */
+	      )
+	   )
+	{
+	    printf("read failed (%x)\n", *up);
+	    exit(2);
+	}
+    }
+
+    /* write test */
+    for (i = 0; i < 4; i++) {
+	up = (U32*)(buf + i);
+	*up = 0xBeef;
+	if (*up != 0xBeef) {
+	    printf("write failed (%x)\n", *up);
+	    exit(3);
+	}
+    }
+
+    exit(0);
+#else
+    printf("1\n");
+    exit(1);
+#endif
+    return 0;
+}
+EOCP
+set try
+if eval $compile_ok; then
+	echo "(This test may dump core.)" >&4
+	./try >&2 >/dev/null
+	case "$?" in
+	0)	cat >&4 <<EOM
+You can access character data pretty unalignedly.
+EOM
+		d_u32align="$undef"
+		;;
+	*)	cat >&4 <<EOM
+It seems that you must access character data in an aligned manner.
+EOM
+		d_u32align="$define"
+		;;
+	esac
+	$rm -f core core.try.* try.core
+else
+	rp='Can you access character data at unaligned addresses?'
+	dflt='n'
+	. ./myread
+	case "$ans" in
+	[yY]*)	d_u32align="$undef"  ;;
+	*)	d_u32align="$define" ;;
+	esac
+fi
+
+: see if ualarm exists
+set ualarm d_ualarm
+eval $inlibc
+
 : see if umask exists
 set umask d_umask
+eval $inlibc
+
+: see if usleep exists
+set usleep d_usleep
 eval $inlibc
 
 : see if ustat exists
@@ -12637,23 +12869,16 @@ eval $inlibc
 set wctomb d_wctomb
 eval $inlibc
 
+: see if writev exists
+set writev d_writev
+eval $inlibc
+
 : preserve RCS keywords in files with variable substitution, grrr
 Date='$Date'
 Id='$Id'
 Log='$Log'
 RCSfile='$RCSfile'
 Revision='$Revision'
-
-case "$crosscompile" in
-''|[nN]*) crosscompile="$undef" ;;
-esac
-
-case "$osname" in
-next|rhapsody|darwin) multiarch="$define" ;;
-esac
-case "$multiarch" in
-''|[nN]*) multiarch="$undef" ;;
-esac
 
 : check for alignment requirements
 echo " "
@@ -12713,84 +12938,6 @@ esac
 
 : set the base revision
 baserev=5.0
-
-: check for ordering of bytes in a long
-echo " "
-case "$crosscompile$multiarch" in
-*$define*)
-	$cat <<EOM
-You seem to be either cross-compiling or doing a multiarchitecture build,
-skipping the byteorder check.
-
-EOM
-	byteorder='0xffff'
-	;;
-*)
-	case "$byteorder" in
-	'')
-		$cat <<'EOM'
-In the following, larger digits indicate more significance.  A big-endian
-machine like a Pyramid or a Motorola 680?0 chip will come out to 4321. A
-little-endian machine like a Vax or an Intel 80?86 chip would be 1234. Other
-machines may have weird orders like 3412.  A Cray will report 87654321,
-an Alpha will report 12345678. If the test program works the default is
-probably right.
-I'm now running the test program...
-EOM
-		$cat >try.c <<'EOCP'
-#include <stdio.h>
-int main()
-{
-	int i;
-	union {
-		unsigned long l;
-		char c[sizeof(long)];
-	} u;
-
-	if (sizeof(long) > 4)
-		u.l = (0x08070605L << 32) | 0x04030201L;
-	else
-		u.l = 0x04030201L;
-	for (i = 0; i < sizeof(long); i++)
-		printf("%c", u.c[i]+'0');
-	printf("\n");
-	exit(0);
-}
-EOCP
-		xxx_prompt=y
-		set try
-		if eval $compile && ./try > /dev/null; then
-			dflt=`./try`
-			case "$dflt" in
-			[1-4][1-4][1-4][1-4]|12345678|87654321)
-				echo "(The test program ran ok.)"
-				echo "byteorder=$dflt"
-				xxx_prompt=n
-			;;
-			????|????????) echo "(The test program ran ok.)" ;;
-			*) echo "(The test program didn't run right for some reason.)" ;;
-			esac
-		else
-			dflt='4321'
-			cat <<'EOM'
-(I can't seem to compile the test program.  Guessing big-endian...)
-EOM
-		fi
-		case "$xxx_prompt" in
-		y)
-			rp="What is the order of bytes in a long?"
-			. ./myread
-			byteorder="$ans"
-			;;
-		*)	byteorder=$dflt
-			;;
-		esac
-		;;
-	esac
-	$rm -f try.c try
-	;;
-esac
-
 
 : how do we catenate cpp tokens here?
 echo " "
@@ -15514,10 +15661,6 @@ eval $inhdr
 set sys/statvfs.h i_sysstatvfs
 eval $inhdr
 
-: see if this is a sys/uio.h system
-set sys/uio.h i_sysuio
-eval $inhdr
-
 : see if this is a sys/un.h system
 set sys/un.h i_sysun
 eval $inhdr
@@ -16025,6 +16168,7 @@ d_chown='$d_chown'
 d_chroot='$d_chroot'
 d_chsize='$d_chsize'
 d_closedir='$d_closedir'
+d_cmsghdr_s='$d_cmsghdr_s'
 d_const='$d_const'
 d_crypt='$d_crypt'
 d_csh='$d_csh'
@@ -16079,6 +16223,7 @@ d_gethbyname='$d_gethbyname'
 d_gethent='$d_gethent'
 d_gethname='$d_gethname'
 d_gethostprotos='$d_gethostprotos'
+d_getitimer='$d_getitimer'
 d_getlogin='$d_getlogin'
 d_getmnt='$d_getmnt'
 d_getmntent='$d_getmntent'
@@ -16151,6 +16296,7 @@ d_msg_peek='$d_msg_peek'
 d_msg_proxy='$d_msg_proxy'
 d_msgctl='$d_msgctl'
 d_msgget='$d_msgget'
+d_msghdr_s='$d_msghdr_s'
 d_msgrcv='$d_msgrcv'
 d_msgsnd='$d_msgsnd'
 d_msync='$d_msync'
@@ -16184,6 +16330,8 @@ d_qgcvt='$d_qgcvt'
 d_quad='$d_quad'
 d_readdir='$d_readdir'
 d_readlink='$d_readlink'
+d_readv='$d_readv'
+d_recvmsg='$d_recvmsg'
 d_rename='$d_rename'
 d_rewinddir='$d_rewinddir'
 d_rmdir='$d_rmdir'
@@ -16201,11 +16349,13 @@ d_semctl_semid_ds='$d_semctl_semid_ds'
 d_semctl_semun='$d_semctl_semun'
 d_semget='$d_semget'
 d_semop='$d_semop'
+d_sendmsg='$d_sendmsg'
 d_setegid='$d_setegid'
 d_seteuid='$d_seteuid'
 d_setgrent='$d_setgrent'
 d_setgrps='$d_setgrps'
 d_sethent='$d_sethent'
+d_setitimer='$d_setitimer'
 d_setlinebuf='$d_setlinebuf'
 d_setlocale='$d_setlocale'
 d_setnent='$d_setnent'
@@ -16281,9 +16431,12 @@ d_time='$d_time'
 d_times='$d_times'
 d_truncate='$d_truncate'
 d_tzname='$d_tzname'
+d_u32align='$d_u32align'
+d_ualarm='$d_ualarm'
 d_umask='$d_umask'
 d_uname='$d_uname'
 d_union_semun='$d_union_semun'
+d_usleep='$d_usleep'
 d_ustat='$d_ustat'
 d_vendorarch='$d_vendorarch'
 d_vendorbin='$d_vendorbin'
@@ -16298,6 +16451,7 @@ d_wait4='$d_wait4'
 d_waitpid='$d_waitpid'
 d_wcstombs='$d_wcstombs'
 d_wctomb='$d_wctomb'
+d_writev='$d_writev'
 d_xenix='$d_xenix'
 date='$date'
 db_hashtype='$db_hashtype'

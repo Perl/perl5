@@ -41,6 +41,9 @@ optimize='-O3';
 # We have a prototype for telldir.
 ccflags="${ccflags} -pipe -fno-common -DHAS_TELLDIR_PROTOTYPE";
 
+# For Errno.
+cppflags='-traditional-cpp';
+
 # Shared library extension is .dylib.
 # Bundle extension is .bundle.
 ld='cc';
@@ -61,3 +64,4 @@ usevfork='true';
 
 # malloc works
 usemymalloc='n';
+

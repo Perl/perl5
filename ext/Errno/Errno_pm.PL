@@ -29,7 +29,7 @@ sub process_file {
 	}     
     } elsif ($Config{gccversion} ne '') { 
 	# With the -dM option, gcc outputs every #define it finds
-	unless(open(FH,"$Config{cc} -E -dM $file |")) {
+	unless(open(FH,"$Config{cc} -E -dM $Config{cppflags} $file |")) {
             warn "Cannot open '$file'";
             return;
 	}     

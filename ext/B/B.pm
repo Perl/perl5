@@ -365,7 +365,21 @@ C<REFCNT> (corresponding to the C function C<SvREFCNT>).
 
 =item PV
 
+This method is the one you usually want. It constructs a
+string using the length and offset information in the struct:
+for ordinary scalars it will return the string that you'd see
+from Perl, even if it contains null characters.
+
 =item PVX
+
+This method is less often useful. It assumes that the string
+stored in the struct is null-terminated, and disregards the
+length information.
+
+It is the appropriate method to use if you need to get the name
+of a lexical variable from a padname array. Lexical variable names
+are always stored with a null terminator, and the length field
+(SvCUR) is overloaded for other purposes and can't be relied on here.
 
 =back
 
