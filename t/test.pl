@@ -252,4 +252,11 @@ sub runperl {
     return $result;
 }
 
+
+sub BAILOUT {
+    print "Bail out! @_\n";
+    exit;
+}
+
+
 1;
