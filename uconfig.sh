@@ -560,6 +560,7 @@ uvsize='4'
 uvtype='unsigned long'
 uvuformat='"lu"'
 uvxformat='"lx"'
+uvXUformat='"lX"'
 versiononly='undef'
 voidflags=1
 xs_apiversion='5.005'

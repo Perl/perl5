@@ -2795,6 +2795,10 @@
  *	This symbol defines the format string used for printing a Perl UV
  *	as an unsigned hexadecimal integer in lowercase abcdef.
  */
+/* UVXf:
+ *     This symbol defines the format string used for printing a Perl UV
+ *     as an unsigned hexadecimal integer in uppercase ABCDEF.
+ */
 /* NVef:
  *	This symbol defines the format string used for printing a Perl NV
  *	using %e-ish floating point format.
@@ -2811,6 +2815,7 @@
 #define	UVuf		"u"		/**/
 #define	UVof		"o"		/**/
 #define	UVxf		"x"		/**/
+#define	UVXf		"X"		/**/
 #define	NVef		"e"		/**/
 #define	NVff		"f"		/**/
 #define	NVgf		"g"		/**/
