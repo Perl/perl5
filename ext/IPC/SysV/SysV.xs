@@ -7,12 +7,11 @@
 #   include <asm/page.h>
 #endif
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
+#ifndef HAS_SEM
 #   include <sys/ipc.h>
+#endif
 #   ifdef HAS_MSG
 #       include <sys/msg.h>
-#   endif
-#   ifdef HAS_SEM
-#       include <sys/sem.h>
 #   endif
 #   ifdef HAS_SHM
 #       if defined(PERL_SCO) || defined(PERL_ISC)
@@ -22,11 +21,16 @@
 #      ifndef HAS_SHMAT_PROTOTYPE
            extern Shmat_t shmat _((int, char *, int));
 #      endif
-#      if defined(__NetBSD__) && defined(__sparc__)
+#      if defined(__sparc__) && (defined(__NetBSD__) || defined(__OpenBSD__))
 #          undef  SHMLBA /* not static: determined at boot time */
 #          define SHMLBA getpagesize()
 #      endif
 #   endif
+#endif
+
+/* Required to get 'struct pte' for SHMLBA on ULTRIX. */
+#if defined(__ultrix) || defined(__ultrix__) || defined(ultrix)
+#include <machine/pte.h>
 #endif
 
 /* Required in BSDI to get PAGE_SIZE definition for SHMLBA.

@@ -2487,7 +2487,12 @@ cat <<EOM
 
 Perl can be built to take advantage of threads, on some systems.
 To do so, Configure must be run with -Dusethreads.
-(See README.threads for details.)
+
+Note that threading is a highly experimental feature, and
+some known race conditions still remain.  If you choose to try
+it, be very sure to not actually deploy it for production
+purposes.  README.threads has more details, and is required
+reading if you enable threads.
 EOM
 case "$usethreads" in
 $define|true|[yY]*)     dflt='y';;

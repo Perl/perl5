@@ -549,8 +549,9 @@ some of the main things you can change.
 
 =head2 Threads
 
-On some platforms, perl5.005 can be compiled to use threads.  To
-enable this, read the file README.threads, and then try
+On some platforms, perl5.005 can be compiled with experimental support
+for threads.  To enable this, read the file README.threads, and then
+try:
 
 	sh Configure -Dusethreads
 

@@ -18,12 +18,11 @@
 #include "perl.h"
 
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
+#ifndef HAS_SEM
 #include <sys/ipc.h>
+#endif
 #ifdef HAS_MSG
 #include <sys/msg.h>
-#endif
-#ifdef HAS_SEM
-#include <sys/sem.h>
 #endif
 #ifdef HAS_SHM
 #include <sys/shm.h>

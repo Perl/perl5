@@ -78,6 +78,10 @@ typedef unsigned UBW;
 #define SIZE16 2
 #define SIZE32 4
 
+#if SHORTSIZE != SIZE16 || LONGSIZE != SIZE32
+#   define PERL_NATINT_PACK
+#endif
+
 #if BYTEORDER > 0xFFFF && defined(_CRAY) && !defined(_CRAYMPP)
 #  if BYTEORDER == 0x12345678
 #    define OFF16(p)	(char*)(p)
@@ -3243,8 +3247,10 @@ PP(pp_unpack)
     register U32 culong;
     double cdouble;
     int commas = 0;
+#ifdef PERL_NATINT_PACK
     int natint;		/* native integer */
     int unatint;	/* unsigned native integer */
+#endif
 
     if (gimme != G_ARRAY) {		/* arrange to do first one only */
 	/*SUPPRESS 530*/
@@ -3260,14 +3266,18 @@ PP(pp_unpack)
     while (pat < patend) {
       reparse:
 	datumtype = *pat++ & 0xFF;
+#ifdef PERL_NATINT_PACK
 	natint = 0;
+#endif
 	if (isSPACE(datumtype))
 	    continue;
 	if (*pat == '_') {
 	    char *natstr = "sSiIlL";
 
 	    if (strchr(natstr, datumtype)) {
+#ifdef PERL_NATINT_PACK
 		natint = 1;
+#endif
 		pat++;
 	    }
 	    else
@@ -3517,10 +3527,15 @@ PP(pp_unpack)
 	    }
 	    break;
 	case 's':
+#if SHORTSIZE == SIZE16
+	    along = (strend - s) / SIZE16;
+#else
 	    along = (strend - s) / (natint ? sizeof(short) : SIZE16);
+#endif
 	    if (len > along)
 		len = along;
 	    if (checksum) {
+#if SHORTSIZE != SIZE16
 		if (natint) {
 		    while (len-- > 0) {
 			COPYNN(s, &ashort, sizeof(short));
@@ -3529,7 +3544,9 @@ PP(pp_unpack)
 
 		    }
 		}
-		else {
+		else
+#endif
+                {
 		    while (len-- > 0) {
 			COPY16(s, &ashort);
 			s += SIZE16;
@@ -3540,6 +3557,7 @@ PP(pp_unpack)
 	    else {
 		EXTEND(SP, len);
 		EXTEND_MORTAL(len);
+#if SHORTSIZE != SIZE16
 		if (natint) {
 		    while (len-- > 0) {
 			COPYNN(s, &ashort, sizeof(short));
@@ -3549,7 +3567,9 @@ PP(pp_unpack)
 			PUSHs(sv_2mortal(sv));
 		    }
 		}
-		else {
+		else
+#endif
+                {
 		    while (len-- > 0) {
 			COPY16(s, &ashort);
 			s += SIZE16;
@@ -3563,11 +3583,16 @@ PP(pp_unpack)
 	case 'v':
 	case 'n':
 	case 'S':
+#if SHORTSIZE == SIZE16
+	    along = (strend - s) / SIZE16;
+#else
 	    unatint = natint && datumtype == 'S';
 	    along = (strend - s) / (unatint ? sizeof(unsigned short) : SIZE16);
+#endif
 	    if (len > along)
 		len = along;
 	    if (checksum) {
+#if SHORTSIZE != SIZE16
 		if (unatint) {
 		    while (len-- > 0) {
 			COPYNN(s, &aushort, sizeof(unsigned short));
@@ -3575,7 +3600,9 @@ PP(pp_unpack)
 			culong += aushort;
 		    }
 		}
-		else {
+		else
+#endif
+                {
 		    while (len-- > 0) {
 			COPY16(s, &aushort);
 			s += SIZE16;
@@ -3594,16 +3621,19 @@ PP(pp_unpack)
 	    else {
 		EXTEND(SP, len);
 		EXTEND_MORTAL(len);
+#if SHORTSIZE != SIZE16
 		if (unatint) {
 		    while (len-- > 0) {
 			COPYNN(s, &aushort, sizeof(unsigned short));
 			s += sizeof(unsigned short);
 			sv = NEWSV(39, 0);
-			sv_setiv(sv, (IV)aushort);
+			sv_setiv(sv, (UV)aushort);
 			PUSHs(sv_2mortal(sv));
 		    }
 		}
-		else {
+		else
+#endif
+                {
 		    while (len-- > 0) {
 			COPY16(s, &aushort);
 			s += SIZE16;
@@ -3616,7 +3646,7 @@ PP(pp_unpack)
 			if (datumtype == 'v')
 			    aushort = vtohs(aushort);
 #endif
-			sv_setiv(sv, (IV)aushort);
+			sv_setiv(sv, (UV)aushort);
 			PUSHs(sv_2mortal(sv));
 		    }
 		}
@@ -3693,10 +3723,15 @@ PP(pp_unpack)
 	    }
 	    break;
 	case 'l':
+#if LONGSIZE == SIZE32
+	    along = (strend - s) / SIZE32;
+#else
 	    along = (strend - s) / (natint ? sizeof(long) : SIZE32);
+#endif
 	    if (len > along)
 		len = along;
 	    if (checksum) {
+#if LONGSIZE != SIZE32
 		if (natint) {
 		    while (len-- > 0) {
 			COPYNN(s, &along, sizeof(long));
@@ -3707,7 +3742,9 @@ PP(pp_unpack)
 			    culong += along;
 		    }
 		}
-		else {
+		else
+#endif
+                {
 		    while (len-- > 0) {
 			COPY32(s, &along);
 			s += SIZE32;
@@ -3721,6 +3758,7 @@ PP(pp_unpack)
 	    else {
 		EXTEND(SP, len);
 		EXTEND_MORTAL(len);
+#if LONGSIZE != SIZE32
 		if (natint) {
 		    while (len-- > 0) {
 			COPYNN(s, &along, sizeof(long));
@@ -3730,7 +3768,9 @@ PP(pp_unpack)
 			PUSHs(sv_2mortal(sv));
 		    }
 		}
-		else {
+		else
+#endif
+                {
 		    while (len-- > 0) {
 			COPY32(s, &along);
 			s += SIZE32;
@@ -3744,11 +3784,16 @@ PP(pp_unpack)
 	case 'V':
 	case 'N':
 	case 'L':
-	    unatint = natint && datumtype;
+#if LONGSIZE == SIZE32
+	    along = (strend - s) / SIZE32;
+#else
+	    unatint = natint && datumtype == 'L';
 	    along = (strend - s) / (unatint ? sizeof(unsigned long) : SIZE32);
+#endif
 	    if (len > along)
 		len = along;
 	    if (checksum) {
+#if LONGSIZE != SIZE32
 		if (unatint) {
 		    while (len-- > 0) {
 			COPYNN(s, &aulong, sizeof(unsigned long));
@@ -3759,7 +3804,9 @@ PP(pp_unpack)
 			    culong += aulong;
 		    }
 		}
-		else {
+		else
+#endif
+                {
 		    while (len-- > 0) {
 			COPY32(s, &aulong);
 			s += SIZE32;
@@ -3781,6 +3828,7 @@ PP(pp_unpack)
 	    else {
 		EXTEND(SP, len);
 		EXTEND_MORTAL(len);
+#if LONGSIZE != SIZE32
 		if (unatint) {
 		    while (len-- > 0) {
 			COPYNN(s, &aulong, sizeof(unsigned long));
@@ -3790,7 +3838,9 @@ PP(pp_unpack)
 			PUSHs(sv_2mortal(sv));
 		    }
 		}
-		else {
+		else
+#endif
+                {
 		    while (len-- > 0) {
 			COPY32(s, &aulong);
 			s += SIZE32;
@@ -4210,7 +4260,9 @@ PP(pp_pack)
     float afloat;
     double adouble;
     int commas = 0;
+#ifdef PERL_NATINT_PACK
     int natint;		/* native integer */
+#endif
 
     items = SP - MARK;
     MARK++;
@@ -4218,14 +4270,18 @@ PP(pp_pack)
     while (pat < patend) {
 #define NEXTFROM (items-- > 0 ? *MARK++ : &PL_sv_no)
 	datumtype = *pat++ & 0xFF;
+#ifdef PERL_NATINT_PACK
 	natint = 0;
+#endif
 	if (isSPACE(datumtype))
 	    continue;
         if (*pat == '_') {
 	    char *natstr = "sSiIlL";
 
 	    if (strchr(natstr, datumtype)) {
+#ifdef PERL_NATINT_PACK
 		natint = 1;
+#endif
 		pat++;
 	    }
 	    else
@@ -4475,6 +4531,7 @@ PP(pp_pack)
 	    }
 	    break;
 	case 'S':
+#if SHORTSIZE != SIZE16
 	    if (natint) {
 		unsigned short aushort;
 
@@ -4484,17 +4541,21 @@ PP(pp_pack)
 		    sv_catpvn(cat, (char *)&aushort, sizeof(unsigned short));
 		}
 	    }
-	    else {
+	    else
+#endif
+            {
 		U16 aushort;
 
 		while (len-- > 0) {
 		    fromstr = NEXTFROM;
-		    aushort = (U16)SvIV(fromstr);
+		    aushort = (U16)SvUV(fromstr);
 		    CAT16(cat, &aushort);
 		}
+
 	    }
 	    break;
 	case 's':
+#if SHORTSIZE != 2
 	    if (natint) {
 		while (len-- > 0) {
 		    fromstr = NEXTFROM;
@@ -4502,7 +4563,9 @@ PP(pp_pack)
 		    sv_catpvn(cat, (char *)&ashort, sizeof(short));
 		}
 	    }
-	    else {
+	    else
+#endif
+            {
 		while (len-- > 0) {
 		    fromstr = NEXTFROM;
 		    ashort = (I16)SvIV(fromstr);
@@ -4615,6 +4678,7 @@ PP(pp_pack)
 	    }
 	    break;
 	case 'L':
+#if LONGSIZE != SIZE32
 	    if (natint) {
 		while (len-- > 0) {
 		    fromstr = NEXTFROM;
@@ -4622,7 +4686,9 @@ PP(pp_pack)
 		    sv_catpvn(cat, (char *)&aulong, sizeof(unsigned long));
 		}
 	    }
-	    else {
+	    else
+#endif
+            {
 		while (len-- > 0) {
 		    fromstr = NEXTFROM;
 		    aulong = SvUV(fromstr);
@@ -4631,6 +4697,7 @@ PP(pp_pack)
 	    }
 	    break;
 	case 'l':
+#if LONGSIZE != SIZE32
 	    if (natint) {
 		while (len-- > 0) {
 		    fromstr = NEXTFROM;
@@ -4638,7 +4705,9 @@ PP(pp_pack)
 		    sv_catpvn(cat, (char *)&along, sizeof(long));
 		}
 	    }
-	    else {
+	    else
+#endif
+            {
 		while (len-- > 0) {
 		    fromstr = NEXTFROM;
 		    along = SvIV(fromstr);
