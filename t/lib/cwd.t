@@ -114,6 +114,9 @@ if ($Config{d_symlink}) {
 
     my $abs_path      = Cwd::abs_path($rel);
     my $fast_abs_path = Cwd::fast_abs_path($rel);
+    print "# abs_path      $abs_path\n";
+    print "# fast_abs_path $fast_abs_path\n";
+    print "# target        $target\n";
     print +($abs_path      eq $target ? "" : "not "), "ok 13\n";
     print +($fast_abs_path eq $target ? "" : "not "), "ok 14\n";
 
