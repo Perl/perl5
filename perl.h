@@ -1299,13 +1299,14 @@ typedef NVTYPE NV;
 #   else
 #       define Perl_frexp(x,y) ((long double)frexp((double)(x),y))
 #   endif
-#   ifdef HAS_ISNANL
-#       define Perl_isnan(x) isnanl(x)
-#   else
-#       ifdef HAS_ISNAN
-#           define Perl_isnan(x) isnan((double)(x))
-#       else
-#           define Perl_isnan(x) ((x)!=(x))
+#   ifndef Perl_isinf
+#       ifdef HAS_ISNANL
+#           define Perl_isnan(x) isnanl(x)
+#       endif
+#   endif
+#   ifndef Perl_isinf
+#       ifdef HAS_FINITEL
+#           define Perl_isinf(x) !(finitel(x)||Perl_isnan(x))
 #       endif
 #   endif
 #else
@@ -1332,10 +1333,139 @@ typedef NVTYPE NV;
 #   define Perl_fmod fmod
 #   define Perl_modf(x,y) modf(x,y)
 #   define Perl_frexp(x,y) frexp(x,y)
+#endif
+
+/* rumor has it that Win32 has _fpclass() */
+
+#if !defined(Perl_fp_class) && (defined(HAS_FPCLASS)||defined(HAS_FPCLASSL))
+#    ifdef I_IEEFP
+#        include <ieeefp.h>
+#    endif
+#    ifdef I_FP
+#        include <fp.h>
+#    endif
+#    if defined(USE_LONG_DOUBLE) && defined(HAS_FPCLASSL)
+#        define Perl_fp_class()		fpclassl(x)
+#    else
+#        define Perl_fp_class()		fpclass(x)
+#    endif
+#    define Perl_fp_class_snan(x)	(Perl_fp_class(x)==FP_CLASS_SNAN)
+#    define Perl_fp_class_qnan(x)	(Perl_fp_class(x)==FP_CLASS_QNAN)
+#    define Perl_fp_class_nan(x)	(Perl_fp_class(x)==FP_CLASS_SNAN||Perl_fp_class(x)==FP_CLASS_QNAN)
+#    define Perl_fp_class_ninf(x)	(Perl_fp_class(x)==FP_CLASS_NINF)
+#    define Perl_fp_class_pinf(x)	(Perl_fp_class(x)==FP_CLASS_PINF)
+#    define Perl_fp_class_inf(x)	(Perl_fp_class(x)==FP_CLASS_NINF||Perl_fp_class(x)==FP_CLASS_PINF)
+#    define Perl_fp_class_nnorm(x)	(Perl_fp_class(x)==FP_CLASS_NNORM)
+#    define Perl_fp_class_pnorm(x)	(Perl_fp_class(x)==FP_CLASS_PNORM)
+#    define Perl_fp_class_norm(x)	(Perl_fp_class(x)==FP_CLASS_NNORM||Perl_fp_class(x)==FP_CLASS_PNORM)
+#    define Perl_fp_class_ndenorm(x)	(Perl_fp_class(x)==FP_CLASS_NDENORM)
+#    define Perl_fp_class_pdenorm(x)	(Perl_fp_class(x)==FP_CLASS_PDENORM)
+#    define Perl_fp_class_denorm(x)	(Perl_fp_class(x)==FP_CLASS_NDENORM||Perl_fp_class(x)==FP_CLASS_PDENORM)
+#    define Perl_fp_class_nzero(x)	(Perl_fp_class(x)==FP_CLASS_NZERO)
+#    define Perl_fp_class_pzero(x)	(Perl_fp_class(x)==FP_CLASS_PZERO)
+#    define Perl_fp_class_zero(x)	(Perl_fp_class(x)==FP_CLASS_NZERO||Perl_fp_class(x)==FP_CLASS_PZERO)
+#endif
+
+#if !defined(Perl_fp_class) && defined(HAS_FP_CLASS)
+#    include <math.h>
+#    if !defined(FP_SNAN) && defined(I_FP_CLASS)
+#        include <fp_class.h>
+#    endif
+#    define Perl_fp_class(x)		fp_class(x)
+#    define Perl_fp_class_snan(x)	(fp_class(x)==FP_SNAN)
+#    define Perl_fp_class_qnan(x)	(fp_class(x)==FP_QNAN)
+#    define Perl_fp_class_nan(x)	(fp_class(x)==FP_SNAN||fp_class(x)==FP_QNAN)
+#    define Perl_fp_class_ninf(x)	(fp_class(x)==FP_NEG_INF)
+#    define Perl_fp_class_pinf(x)	(fp_class(x)==FP_POS_INF)
+#    define Perl_fp_class_inf(x)	(fp_class(x)==FP_NEG_INF||fp_class(x)==FP_POS_INF)
+#    define Perl_fp_class_nnorm(x)	(fp_class(x)==FP_NEG_NORM)
+#    define Perl_fp_class_pnorm(x)	(fp_class(x)==FP_POS_NORM)
+#    define Perl_fp_class_norm(x)	(fp_class(x)==FP_NEG_NORM||fp_class(x)==FP_POS_NORM)
+#    define Perl_fp_class_ndenorm(x)	(fp_class(x)==FP_NEG_DENORM)
+#    define Perl_fp_class_pdenorm(x)	(fp_class(x)==FP_POS_DENORM)
+#    define Perl_fp_class_denorm(x)	(fp_class(x)==FP_NEG_DENORM||fp_class(x)==FP_POS_DENORM)
+#    define Perl_fp_class_nzero(x)	(fp_class(x)==FP_NEG_ZERO)
+#    define Perl_fp_class_pzero(x)	(fp_class(x)==FP_POS_ZERO)
+#    define Perl_fp_class_zero(x)	(fp_class(x)==FP_NEG_ZERO||fp_class(x)==FP_POS_ZERO)
+#endif
+
+#if !defined(Perl_fp_class) && defined(HAS_FPCLASSIFY)
+#    include <math.h>
+#    define Perl_fp_class(x)		fpclassify(x)
+#    define Perl_fp_class_nan(x)	(fp_classify(x)==FP_SNAN|FP|_fp_classify(x)==QNAN)
+#    define Perl_fp_class_inf(x)	(fp_classify(x)==FP_INFINITE)
+#    define Perl_fp_class_norm(x)	(fp_classify(x)==FP_NORMAL)
+#    define Perl_fp_class_denorm(x)	(fp_classify(x)==FP_SUBNORMAL)
+#    define Perl_fp_class_zero(x)	(fp_classify(x)==FP_ZERO)
+#endif
+
+#if !defined(Perl_fp_class) && defined(HAS_CLASS)
+#    include <math.h>
+#    ifndef _cplusplus
+#        define Perl_fp_class(x)	class(x)
+#    else
+#        define Perl_fp_class(x)	_class(x)
+#    endif
+#    define Perl_fp_class_snan(x)	(Perl_fp_class(x)==FP_NANS)
+#    define Perl_fp_class_qnan(x)	(Perl_fp_class(x)==FP_NANQ)
+#    define Perl_fp_class_nan(x)	(Perl_fp_class(x)==FP_SNAN||Perl_fp_class(x)==FP_QNAN)
+#    define Perl_fp_class_ninf(x)	(Perl_fp_class(x)==FP_MINUS_INF)
+#    define Perl_fp_class_pinf(x)	(Perl_fp_class(x)==FP_PLUS_INF)
+#    define Perl_fp_class_inf(x)	(Perl_fp_class(x)==FP_MINUS_INF||Perl_fp_class(x)==FP_PLUS_INF)
+#    define Perl_fp_class_nnorm(x)	(Perl_fp_class(x)==FP_MINUS_NORM)
+#    define Perl_fp_class_pnorm(x)	(Perl_fp_class(x)==FP_PLUS_NORM)
+#    define Perl_fp_class_norm(x)	(Perl_fp_class(x)==FP_MINUS_NORM||Perl_fp_class(x)==FP_PLUS_NORM)
+#    define Perl_fp_class_ndenorm(x)	(Perl_fp_class(x)==FP_MINUS_DENORM)
+#    define Perl_fp_class_pdenorm(x)	(Perl_fp_class(x)==FP_PLUS_DENORM)
+#    define Perl_fp_class_denorm(x)	(Perl_fp_class(x)==FP_MINUS_DENORM||Perl_fp_class(x)==FP_PLUS_DENORM)
+#    define Perl_fp_class_nzero(x)	(Perl_fp_class(x)==FP_MINUS_ZERO)
+#    define Perl_fp_class_pzero(x)	(Perl_fp_class(x)==FP_PLUS_ZERO)
+#    define Perl_fp_class_zero(x)	(Perl_fp_class(x)==FP_MINUS_ZERO||Perl_fp_class(x)==FP_PLUS_ZERO)
+#endif
+
+/* rumor has it that Win32 has _isnan() */
+
+#ifndef Perl_isnan
 #   ifdef HAS_ISNAN
-#       define Perl_isnan(x) isnan(x)
+#       define Perl_isnan(x) isnan((NV)x)
 #   else
-#       define Perl_isnan(x) ((x)!=(x))
+#       ifdef Perl_fp_class_nan
+#           define Perl_isnan(x) Perl_fp_class_nan(x)
+#       else
+#           ifdef HAS_UNORDERED
+#               define Perl_isnan(x) unordered((x), 0.0)
+#           else
+#               define Perl_isnan(x) ((x)!=(x))
+#           endif
+#       endif
+#   endif
+#endif
+
+#ifndef Perl_isinf
+#   ifdef HAS_ISINF
+#       define Perl_isinf(x) isinf((NV)x)
+#   else
+#       ifdef Perl_fp_class_inf
+#           define Perl_isinf(x) Perl_fp_class_inf(x)
+#       else
+#           define Perl_isinf(x) ((x)==NV_INF)
+#       endif
+#   endif
+#endif
+
+#ifndef Perl_isfinite
+#   ifdef HAS_FINITE
+#       define Perl_isfinite(x) finite((NV)x)
+#   else
+#       ifdef HAS_ISFINITE
+#           define Perl_isfinite(x) isfinite(x)
+#       else
+#           ifdef Perl_fp_class_finite
+#               define Perl_isfinite(x) Perl_fp_class_finite(x)
+#           else
+#               define Perl_isfinite(x) !(Perl_is_inf(x)||Perl_is_nan(x))
+#           endif
+#       endif
 #   endif
 #endif
 

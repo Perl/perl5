@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Aug  1 02:58:53 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Thu Aug  9 16:34:00 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -328,6 +328,7 @@ d_castneg=''
 d_chown=''
 d_chroot=''
 d_chsize=''
+d_class=''
 d_closedir=''
 d_void_closedir=''
 d_cmsghdr_s=''
@@ -363,10 +364,16 @@ d_fd_macros=''
 d_fd_set=''
 d_fds_bits=''
 d_fgetpos=''
+d_finite=''
+d_finitel=''
 d_flexfnam=''
 d_flock=''
 d_flockproto=''
 d_fork=''
+d_fp_class=''
+d_fpclass=''
+d_fpclassify=''
+d_fpclassl=''
 d_fpos64_t=''
 d_frexpl=''
 d_fs_data_s=''
@@ -424,6 +431,8 @@ d_iconv=''
 d_inetaton=''
 d_int64_t=''
 d_isascii=''
+d_isfinite=''
+d_isinf=''
 d_isnan=''
 d_isnanl=''
 d_killpg=''
@@ -612,6 +621,7 @@ d_umask=''
 d_semctl_semid_ds=''
 d_semctl_semun=''
 d_union_semun=''
+d_unordered=''
 d_usleep=''
 d_usleepproto=''
 d_ustat=''
@@ -665,6 +675,8 @@ i_dld=''
 i_dlfcn=''
 i_fcntl=''
 i_float=''
+i_fp=''
+i_fp_class=''
 i_gdbm=''
 d_grpasswd=''
 i_grp=''
@@ -9106,6 +9118,10 @@ eval $inlibc
 set chsize d_chsize
 eval $inlibc
 
+: see if class exists
+set class d_class
+eval $inlibc
+
 hasstruct='varname=$1; struct=$2; shift; shift;
 while $test $# -ge 2; do
 	case "$1" in
@@ -10143,6 +10159,14 @@ $rm -f try try.*
 set fgetpos d_fgetpos
 eval $inlibc
 
+: see if finite exists
+set finite d_finite
+eval $inlibc
+
+: see if finitel exists
+set finitel d_finitel
+eval $inlibc
+
 : see if flock exists
 set flock d_flock
 eval $inlibc
@@ -10180,12 +10204,28 @@ eval $hasproto
 set fork d_fork
 eval $inlibc
 
+: see if fp_class exists
+set fp_class d_fp_class
+eval $inlibc
+
 : see if pathconf exists
 set pathconf d_pathconf
 eval $inlibc
 
 : see if fpathconf exists
 set fpathconf d_fpathconf
+eval $inlibc
+
+: see if fpclass exists
+set fpclass d_fpclass
+eval $inlibc
+
+: see if fpclassify exists
+set fpclassify d_fpclassify
+eval $inlibc
+
+: see if fpclassl exists
+set fpclassl d_fpclassl
 eval $inlibc
 
 
@@ -10653,6 +10693,14 @@ fi
 set d_isascii
 eval $setvar
 $rm -f isascii*
+
+: see if isfinite exists
+set isfinite d_isfinite
+eval $inlibc
+
+: see if isinf exists
+set isinf d_isinf
+eval $inlibc
 
 : see if isnan exists
 set isnan d_isnan
@@ -13292,6 +13340,10 @@ eval $inlibc
 set umask d_umask
 eval $inlibc
 
+: see if unordered exists
+set unordered d_unordered
+eval $inlibc
+
 : see if usleep exists
 set usleep d_usleep
 eval $inlibc
@@ -15767,6 +15819,14 @@ esac
 set i_fcntl
 eval $setvar
 
+: see if this is a fp.h system
+set fp.h i_fp
+eval $inhdr
+
+: see if this is a fp_class.h system
+set fp_class.h i_fp_class
+eval $inhdr
+
 : see if this is a iconv.h system
 set iconv.h i_iconv
 eval $inhdr
@@ -16703,6 +16763,7 @@ d_charvspr='$d_charvspr'
 d_chown='$d_chown'
 d_chroot='$d_chroot'
 d_chsize='$d_chsize'
+d_class='$d_class'
 d_closedir='$d_closedir'
 d_cmsghdr_s='$d_cmsghdr_s'
 d_const='$d_const'
@@ -16737,11 +16798,17 @@ d_fd_macros='$d_fd_macros'
 d_fd_set='$d_fd_set'
 d_fds_bits='$d_fds_bits'
 d_fgetpos='$d_fgetpos'
+d_finite='$d_finite'
+d_finitel='$d_finitel'
 d_flexfnam='$d_flexfnam'
 d_flock='$d_flock'
 d_flockproto='$d_flockproto'
 d_fork='$d_fork'
+d_fp_class='$d_fp_class'
 d_fpathconf='$d_fpathconf'
+d_fpclass='$d_fpclass'
+d_fpclassify='$d_fpclassify'
+d_fpclassl='$d_fpclassl'
 d_fpos64_t='$d_fpos64_t'
 d_frexpl='$d_frexpl'
 d_fs_data_s='$d_fs_data_s'
@@ -16797,6 +16864,8 @@ d_index='$d_index'
 d_inetaton='$d_inetaton'
 d_int64_t='$d_int64_t'
 d_isascii='$d_isascii'
+d_isfinite='$d_isfinite'
+d_isinf='$d_isinf'
 d_isnan='$d_isnan'
 d_isnanl='$d_isnanl'
 d_killpg='$d_killpg'
@@ -16983,6 +17052,7 @@ d_ualarm='$d_ualarm'
 d_umask='$d_umask'
 d_uname='$d_uname'
 d_union_semun='$d_union_semun'
+d_unordered='$d_unordered'
 d_usleep='$d_usleep'
 d_usleepproto='$d_usleepproto'
 d_ustat='$d_ustat'
@@ -17068,6 +17138,8 @@ i_dld='$i_dld'
 i_dlfcn='$i_dlfcn'
 i_fcntl='$i_fcntl'
 i_float='$i_float'
+i_fp='$i_fp'
+i_fp_class='$i_fp_class'
 i_gdbm='$i_gdbm'
 i_grp='$i_grp'
 i_iconv='$i_iconv'

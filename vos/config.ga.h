@@ -1206,6 +1206,24 @@
 #define	CASTNEGFLOAT		/**/
 #define CASTFLAGS 0		/**/
 
+/* HAS_CLASS:
+ *	This symbol, if defined, indicates that the class routine is
+ *	available to classify doubles.  Available for example in AIX.
+ *	The returned values are defined in <float.h> and are:
+ *
+ *	FP_PLUS_NORM	Positive normalized, nonzero
+ *	FP_MINUS_NORM	Negative normalized, nonzero
+ *	FP_PLUS_DENORM	Positive denormalized, nonzero
+ *	FP_MINUS_DENORM	Negative denormalized, nonzero
+ *	FP_PLUS_ZERO	+0.0
+ *	FP_MINUS_ZERO	-0.0
+ *	FP_PLUS_INF	+INF
+ *	FP_MINUS_INF	-INF
+ *	FP_NANS		Signaling Not a Number (NaNS)
+ *	FP_NANQ		Quiet Not a Number (NaNQ)
+ */
+/*#define HAS_CLASS		/**/
+
 /* VOID_CLOSEDIR:
  *	This symbol, if defined, indicates that the closedir() routine
  *	does not return a value.
@@ -1300,11 +1318,92 @@
  */
 /*#define HAS_FD_SET	/**/
 
+/* HAS_FINITE:
+ *	This symbol, if defined, indicates that the finite routine is
+ *	available to check whether a double is finite (non-infinity non-NaN).
+ */
+/*#define HAS_FINITE		/**/
+
+/* HAS_FINITEL:
+ *	This symbol, if defined, indicates that the finitel routine is
+ *	available to check whether a long double is finite
+ *	(non-infinity non-NaN).
+ */
+/*#define HAS_FINITEL		/**/
+
 /* FLEXFILENAMES:
  *	This symbol, if defined, indicates that the system supports filenames
  *	longer than 14 characters.
  */
 #define	FLEXFILENAMES		/**/
+
+/* HAS_FP_CLASS:
+ *	This symbol, if defined, indicates that the fp_class routine is
+ *	available to classify doubles.  Available for example in Digital UNIX.
+ *	The returned values are defined in <math.h> and are:
+ *
+ *	FP_SNAN           Signaling NaN (Not-a-Number)
+ *	FP_QNAN           Quiet NaN (Not-a-Number)
+ *	FP_POS_INF        +infinity
+ *	FP_NEG_INF        -infinity
+ *	FP_POS_NORM       Positive normalized
+ *	FP_NEG_NORM       Negative normalized
+ *	FP_POS_DENORM     Positive denormalized
+ *	FP_NEG_DENORM     Negative denormalized
+ *	FP_POS_ZERO       +0.0 (positive zero)
+ *	FP_NEG_ZERO       -0.0 (negative zero)
+ */
+/*#define HAS_FP_CLASS		/**/
+
+/* HAS_FPCLASS:
+ *	This symbol, if defined, indicates that the fpclass routine is
+ *	available to classify doubles.  Available for example in Solaris/SVR4.
+ *	The returned values are defined in <ieeefp.h> and are:
+ *
+ *	FP_SNAN		signaling NaN
+ *	FP_QNAN		quiet NaN
+ *	FP_NINF		negative infinity
+ *	FP_PINF		positive infinity
+ *	FP_NDENORM	negative denormalized non-zero
+ *	FP_PDENORM	positive denormalized non-zero
+ *	FP_NZERO	negative zero
+ *	FP_PZERO	positive zero
+ *	FP_NNORM	negative normalized non-zero
+ *	FP_PNORM	positive normalized non-zero
+ */
+/*#define HAS_FPCLASS		/**/
+
+/* HAS_FPCLASSIFY:
+ *	This symbol, if defined, indicates that the fpclassify routine is
+ *	available to classify doubles.  Available for example in HP-UX.
+ *	The returned values are defined in <math.h> and are
+ *
+ *           FP_NORMAL     Normalized
+ *           FP_ZERO       Zero
+ *           FP_INFINITE   Infinity
+ *           FP_SUBNORMAL  Denormalized
+ *           FP_NAN        NaN
+ *
+ */
+/*#define HAS_FPCLASSIFY		/**/
+
+/* HAS_FPCLASSL:
+ *	This symbol, if defined, indicates that the fpclassl routine is
+ *	available to classify long doubles.  Available for example in IRIX.
+ *	The returned values are defined in <ieeefp.h> and are:
+ *
+ *	FP_SNAN		signaling NaN
+ *	FP_QNAN		quiet NaN
+ *	FP_NINF		negative infinity
+ *	FP_PINF		positive infinity
+ *	FP_NDENORM	negative denormalized non-zero
+ *	FP_PDENORM	positive denormalized non-zero
+ *	FP_NZERO	negative zero
+ *	FP_PZERO	positive zero
+ *	FP_NNORM	negative normalized non-zero
+ *	FP_PNORM	positive normalized non-zero
+ */
+/*#define HAS_FPCLASSL		/**/
 
 /* HAS_FPOS64_T:
  *	This symbol will be defined if the C compiler supports fpos64_t.
@@ -1633,6 +1732,18 @@
  *	is available.
  */
 #define HAS_ISASCII		/**/
+
+/* HAS_ISFINITE:
+ *	This symbol, if defined, indicates that the isfinite routine is
+ *	available to check whether a double is finite (non-infinity non-NaN).
+ */
+/*#define HAS_ISFINITE		/**/
+
+/* HAS_ISINF:
+ *	This symbol, if defined, indicates that the isinf routine is
+ *	available to check whether a double is an infinity.
+ */
+/*#define HAS_ISINF		/**/
 
 /* HAS_ISNAN:
  *	This symbol, if defined, indicates that the isnan routine is
@@ -2258,6 +2369,13 @@
 /*#define USE_SEMCTL_SEMUN	/**/
 /*#define USE_SEMCTL_SEMID_DS	/**/
 
+/* HAS_UNORDERED:
+ *	This symbol, if defined, indicates that the unordered routine is
+ *	available to check whether two doubles are unordered
+ *	(effectively: whether either of them is NaN)
+ */
+/*#define HAS_UNORDERED		/**/
+
 /* HAS_USTAT:
  *	This symbol, if defined, indicates that the ustat system call is
  *	available to query file system statistics by dev_t.
@@ -2403,6 +2521,12 @@
 #define DB_VERSION_MAJOR_CFG	undef  	/**/
 #define DB_VERSION_MINOR_CFG	undef  	/**/
 #define DB_VERSION_PATCH_CFG	undef  	/**/
+
+/* I_FP_CLASS:
+ *	This symbol, if defined, indicates that <fp_class.h> exists and
+ *	should be included.
+ */
+/*#define	I_FP_CLASS		/**/
 
 /* I_GRP:
  *	This symbol, if defined, indicates to the C program that it should
@@ -3446,6 +3570,12 @@
  *		extern int usleep(useconds_t);
  */
 /*#define	HAS_USLEEP_PROTO	/**/
+
+/* I_FP:
+ *	This symbol, if defined, indicates that <fp.h> exists and
+ *	should be included.
+ */
+/*#define	I_FP		/**/
 
 /* I_LANGINFO:
  *	This symbol, if defined, indicates that <langinfo.h> exists and
