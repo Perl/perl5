@@ -25,7 +25,7 @@ $VERSION = '0.47';
              cmp_ok
              skip todo todo_skip
              pass fail
-             eq_array eq_hash eq_set
+             eq_array eq_hash eq_set eq_deeply
              $TODO
              plan
              can_ok  isa_ok
@@ -937,7 +937,7 @@ sub is_deeply {
     my($this, $that, $name) = @_;
 
     my $ok;
-    if( !ref $this || !ref $that ) {
+    if( !ref $this && !ref $that ) {
         $ok = $Test->is_eq($this, $that, $name);
     }
     else {
@@ -984,8 +984,9 @@ sub _format_stack {
     foreach my $idx (0..$#vals) {
         my $val = $vals[$idx];
         $vals[$idx] = !defined $val ? 'undef' : 
-                      $val eq $DNE  ? "Does not exist"
-                                    : "'$val'";
+                                    ref $val ? $val eq $DNE  ? "Does not exist"
+                                                             : $val
+                                             : "'$val'"
     }
 
     $out .= "$vars[0] = $vals[0]\n";
@@ -995,6 +996,12 @@ sub _format_stack {
     return $out;
 }
 
+sub eq_deeply {
+    my ($a1, $a2) = @_;
+
+    local @Data_Stack = ();
+    return _deep_check($a1, $a2);
+}
 
 =item B<eq_array>
 
@@ -1006,7 +1013,14 @@ multi-level structures are handled correctly.
 =cut
 
 #'#
-sub eq_array  {
+
+sub eq_array {
+    my ($a1, $a2) = @_;
+
+    return UNIVERSAL::isa($a2, "ARRAY") ? eq_deeply($a1, $a2) : 0;
+}
+
+sub _eq_array  {
     my($a1, $a2) = @_;
     return 1 if $a1 eq $a2;
 
@@ -1034,19 +1048,24 @@ sub _deep_check {
         # Quiet uninitialized value warnings when comparing undefs.
         local $^W = 0; 
 
-        if( $e1 eq $e2 ) {
+        if( ! (ref $e1 xor ref $e2) and $e1 eq $e2 ) {
             $ok = 1;
         }
         else {
-            if( UNIVERSAL::isa($e1, 'ARRAY') and
+            if ( (ref $e1 and $e1 eq $DNE) or
+            	(ref $e2 and $e2 eq $DNE) )
+            {
+            	$ok = 0;
+            }
+            elsif( UNIVERSAL::isa($e1, 'ARRAY') and
                 UNIVERSAL::isa($e2, 'ARRAY') )
             {
-                $ok = eq_array($e1, $e2);
+                $ok = _eq_array($e1, $e2);
             }
             elsif( UNIVERSAL::isa($e1, 'HASH') and
                    UNIVERSAL::isa($e2, 'HASH') )
             {
-                $ok = eq_hash($e1, $e2);
+                $ok = _eq_hash($e1, $e2);
             }
             elsif( UNIVERSAL::isa($e1, 'REF') and
                    UNIVERSAL::isa($e2, 'REF') )
@@ -1060,6 +1079,7 @@ sub _deep_check {
             {
                 push @Data_Stack, { type => 'REF', vals => [$e1, $e2] };
                 $ok = _deep_check($$e1, $$e2);
+                pop @Data_Stack if $ok;
             }
             else {
                 push @Data_Stack, { vals => [$e1, $e2] };
@@ -1082,6 +1102,12 @@ is a deep check.
 =cut
 
 sub eq_hash {
+    my ($a1, $a2) = @_;
+
+    return UNIVERSAL::isa($a2, "HASH") ? eq_deeply($a1, $a2) : 0;
+}
+
+sub _eq_hash {
     my($a1, $a2) = @_;
     return 1 if $a1 eq $a2;
 

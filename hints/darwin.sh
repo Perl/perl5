@@ -85,10 +85,10 @@ esac
 
 # -pipe: makes compilation go faster.
 # -fno-common because common symbols are not allowed in MH_DYLIB
-# -DDARWIN: apparently the __APPLE__ is not sanctioned by Apple
+# -DPERL_DARWIN: apparently the __APPLE__ is not sanctioned by Apple
 # as the way to differentiate Mac OS X.  (The official line is that
 # *no* cpp symbol does differentiate Mac OS X.)
-ccflags="${ccflags} -pipe -fno-common -DDARWIN"
+ccflags="${ccflags} -pipe -fno-common -DPERL_DARWIN"
 
 # At least on Darwin 1.3.x:
 #

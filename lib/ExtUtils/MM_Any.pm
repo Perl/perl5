@@ -2,7 +2,7 @@ package ExtUtils::MM_Any;
 
 use strict;
 use vars qw($VERSION @ISA);
-$VERSION = 0.06;
+$VERSION = 0.07;
 @ISA = qw(File::Spec);
 
 use Config;
@@ -326,17 +326,14 @@ put them into the INST_* directories.
 sub manifypods {
     my $self          = shift;
 
-    my $POD2MAN_EXE_macro = $self->POD2MAN_EXE_macro();
+    my $POD2MAN_macro = $self->POD2MAN_macro();
     my $manifypods_target = $self->manifypods_target();
 
     return <<END_OF_TARGET;
 
-# --- Begin manifypods section:
-$POD2MAN_EXE_macro
+$POD2MAN_macro
 
 $manifypods_target
-
-# --- End manifypods section --- #
 
 END_OF_TARGET
 
@@ -376,7 +373,7 @@ END
     foreach my $section (qw(1 3)) {
         my $pods = $self->{"MAN${section}PODS"};
         push @man_cmds, $self->split_command(<<CMD, %$pods);
-	\$(NOECHO) \$(POD2MAN_EXE) --section=$section --perm_rw=\$(PERM_RW)
+	\$(NOECHO) \$(POD2MAN) --section=$section --perm_rw=\$(PERM_RW)
 CMD
     }
 
@@ -432,27 +429,28 @@ MAKE_FRAG
     return $make_frag;
 }
 
-=item POD2MAN_EXE_macro
+=item POD2MAN_macro
 
-  my $pod2man_exe_macro = $self->POD2MAN_EXE_macro
+  my $pod2man_macro = $self->POD2MAN_macro
 
-Returns a definition for the POD2MAN_EXE macro.  This is a program
+Returns a definition for the POD2MAN macro.  This is a program
 which emulates the pod2man utility.  You can add more switches to the
 command by simply appending them on the macro.
 
 Typical usage:
 
-    $(POD2MAN_EXE) --section=3 --perm_rw=$(PERM_RW) podfile man_page
+    $(POD2MAN) --section=3 --perm_rw=$(PERM_RW) podfile1 man_page1 ...
 
 =cut
 
-sub POD2MAN_EXE_macro {
+sub POD2MAN_macro {
     my $self = shift;
 
 # Need the trailing '--' so perl stops gobbling arguments and - happens
 # to be an alternative end of line seperator on VMS so we quote it
     return <<'END_OF_DEF';
 POD2MAN_EXE = $(PERLRUN) "-MExtUtils::Command::MM" -e pod2man "--"
+POD2MAN = $(POD2MAN_EXE)
 END_OF_DEF
 }
 
@@ -588,6 +586,7 @@ MAKE_FRAG
     }
     
     my $meta = <<YAML;
+# http://module-build.sourceforge.net/META-spec.html
 #XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
 name:         $self->{DISTNAME}
 version:      $self->{VERSION}

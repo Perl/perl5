@@ -1,3 +1,17 @@
+6.15 Sun Aug  3 16:41:05 PDT 2003
+    - Make FIXIN on Win32 use the new pl2bat rather than an already
+      installed one when building the core (Mattia Barbon)
+
+6.14 Sun Aug  3 16:23:27 PDT 2003
+    - Adding a reference to the Module::Build META.yml spec in the META.yml
+      itself and the metafile documentation.
+    - Removed Begin/End comments from manifypods that were getting in the
+      way of users adding code to the manifypods target.
+    - Putting a POD2MAN macro back as an alias to POD2MAN_EXE and using
+      it instead of POD2MAN.  This allows people to generate their own man 
+      installation targets in a backwards compatible way.
+    * Adding reference to the Module::Build META file spec in the docs.
+
 6.13 Thu Jul 31 16:48:01 PDT 2003
     - Generated META.yml now has the prereqs in sorted order (Andy Lester)
     - Arguments to child Makefile.PLs were still having .. prepended.  This
@@ -24,7 +38,6 @@
     * Noting where to find make in the README
     * Noting that MakeMaker does not produce a GNU make compatible Makefile
       on Windows.
-    * 6.10_08 with a new version #.
 
 6.10_08 Mon Jul 21 18:17:06 PDT 2003
     * $Config{installvendorman*dir} was being ignored and our default

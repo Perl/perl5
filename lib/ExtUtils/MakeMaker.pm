@@ -2,8 +2,8 @@ package ExtUtils::MakeMaker;
 
 BEGIN {require 5.005_03;}
 
-$VERSION = '6.13';
-($Revision) = q$Revision: 1.127 $ =~ /Revision:\s+(\S+)/;
+$VERSION = '6.15';
+($Revision) = q$Revision: 1.130 $ =~ /Revision:\s+(\S+)/;
 
 require Exporter;
 use Config;
@@ -2038,7 +2038,7 @@ MakeMaker object. The following lines will be parsed o.k.:
 
     $VERSION = '1.00';
     *VERSION = \'1.01';
-    $VERSION = sprintf "%d.%03d", q$Revision: 1.127 $ =~ /(\d+)/g;
+    $VERSION = sprintf "%d.%03d", q$Revision: 1.130 $ =~ /(\d+)/g;
     $FOO::VERSION = '1.10';
     *FOO::VERSION = \'1.11';
     our $VERSION = 1.2.3;       # new for perl5.6.0 
@@ -2363,7 +2363,8 @@ meta-data file has been introduced, F<META.yml>.
 F<META.yml> is a YAML document (see http://www.yaml.org) containing
 basic information about the module (name, version, prerequisites...)
 in an easy to read format.  The format is developed and defined by the
-Module::Build developers.
+Module::Build developers (see 
+http://module-build.sourceforge.net/META-spec.html)
 
 MakeMaker will automatically generate a F<META.yml> file for you and
 add it to your F<MANIFEST> as part of the 'distdir' target (and thus

@@ -142,6 +142,25 @@ sub pod2man {
 	next if $mod =~ m:/t/:; # no pods from test directories 
 	next if ($manpage eq 'Pod/Functions.pm'); #### Used only by pod itself
 
+	# Skip files without pod docs
+	my $has_pod;
+	if (open T, $mod)
+	{
+	    local $_;
+	    while (<T>)
+	    {
+		++$has_pod and last if /^=(?:head\d+|item|pod)\b/;
+	    }
+
+	    close T;
+	}
+
+	unless ($has_pod)
+	{
+	    warn "no documentation in $mod\n";
+	    next;
+	}
+
 	# Convert name from  File/Basename.pm to File::Basename.3 format,
 	# if necessary.
 	$manpage =~ s#\.p(m|od)$##;
