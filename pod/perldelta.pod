@@ -2072,13 +2072,6 @@ The order of DESTROYs has been made more predictable.
 
 =item *
 
-Several debugger fixes: exit code now reflects the script exit code,
-condition C<"0"> now treated correctly, the C<d> command now checks
-line number, C<$.> no longer gets corrupted, and all debugger output
-now goes correctly to the socket if RemotePort is set. [561]
-
-=item *
-
 Perl 5.6.0 could emit spurious warnings about redefinition of
 dl_error() when statically building extensions into perl.
 This has been corrected. [561]
@@ -2775,6 +2768,13 @@ Two new debugging options have been added: if you have compiled your
 Perl with debugging, you can use the -DT [561] and -DR options to trace
 tokenising and to add reference counts to displaying variables,
 respectively.
+
+=item *
+
+Several debugger fixes: exit code now reflects the script exit code,
+condition C<"0"> now treated correctly, the C<d> command now checks
+line number, C<$.> no longer gets corrupted, and all debugger output
+now goes correctly to the socket if RemotePort is set. [561]
 
 =item *
 
