@@ -17,10 +17,6 @@ d_fork='undef'
 d_vfork='define'
 groupstype='int'
 
-# the following is needed to prevent pdksh from blowing up
-
-i_neterrno='undef'
-
 # libs
 
 libpth="$prefix/lib /local/lib"

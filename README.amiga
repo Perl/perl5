@@ -56,8 +56,8 @@ You need the Unix emulation for AmigaOS, whose most important part is
 B<ixemul.library>. For a minimum setup, get the following archives from
 ftp://ftp.ninemoons.com/pub/ade/current or a mirror:
 
-ixemul-45.1-bin.lha
-ixemul-45.1-env-bin.lha
+ixemul-46.0-bin.lha
+ixemul-46.0-env-bin.lha
 pdksh-4.9-bin.lha
 ADE-misc-bin.lha
 
