@@ -3922,7 +3922,7 @@ Perl_yylex(pTHX)
 		    /* If not a declared subroutine, it's an indirect object. */
 		    /* (But it's an indir obj regardless for sort.) */
 
-		    if ( !immediate_paren && (PL_last_lop_op == OP_SORT || 
+		    if ( !immediate_paren && (PL_last_lop_op == OP_SORT ||
                          ((!gv || !GvCVu(gv)) &&
                         (PL_last_lop_op != OP_MAPSTART &&
 			 PL_last_lop_op != OP_GREPSTART))))
