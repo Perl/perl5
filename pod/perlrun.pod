@@ -270,20 +270,25 @@ An alternate delimiter may be specified using B<-F>.
 The C<-C> flag controls some Unicode of the Perl Unicode features.
 
 As of 5.8.1, the C<-C> can be followed either by a number or a list
-of option letters.
+of option letters.  The letters and their numeric values are as follows;
+listing the letters is equal to summing the numbers.
 
-    I    0x0001    STDIN is assumed to be in UTF-8
-    O    0x0002    STDOUT will be in UTF-8
-    E    0x0004    STDERR will be in UTF-8
-    S    0x0007    I + O + E
-    i    0x0008    the default input layer expects UTF-8
-    o    0x0010    the default output layer enforces UTF-8
-    D    0x0018    i + o
-    A    0x0020    the @ARGV elements are supposed to be in UTF-8
-    L    0x0040    normally the IOEio (SD) are unconditional,
-                   the L makes them conditional on the locale environment
-                   variables (the LC_ALL, LC_TYPE, and LANG; in the order
-                   of decreasing precedence)
+    I     1    STDIN is assumed to be in UTF-8
+    O     2    STDOUT will be in UTF-8
+    E     4    STDERR will be in UTF-8
+    S     7    I + O + E
+    i     8    the default input layer expects UTF-8
+    o    16    the default output layer enforces UTF-8
+    D    24    i + o
+    A    32    the @ARGV elements are supposed to be in UTF-8
+    L    64    normally the IOEio (SD) are unconditional,
+               the L makes them conditional on the locale environment
+               variables (the LC_ALL, LC_TYPE, and LANG; in the order
+               of decreasing precedence)
+
+For example, C<-COE> and C<-C6> will both turn on UTF-8-ness on both
+STDOUT and STDERR.  Repeating letters is just redundant, not cumulative
+nor toggling.
 
 The C<-C> on its own (not followed by any number or option list) has
 the same effect as <-CSDL>.  In other words, the standard I/O handles
