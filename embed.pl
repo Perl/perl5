@@ -1511,7 +1511,7 @@ Ap	|char*	|vform		|const char* pat|va_list* args
 Ap	|void	|free_tmps
 p	|OP*	|gen_constant_list|OP* o
 #if !defined(HAS_GETENV_LEN)
-p	|char*	|getenv_len	|char* key|unsigned long *len
+p	|char*	|getenv_len	|const char* key|unsigned long *len
 #endif
 Ap	|void	|gp_free	|GV* gv
 Ap	|GP*	|gp_ref		|GP* gp
