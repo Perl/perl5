@@ -836,12 +836,6 @@ void *bset_obj_store _((void *obj, I32 ix));
 OP *new_logop _((I32 type, I32 flags, OP **firstp, OP **otherp));
 
 #define PPDEF(s) OP* CPerlObj::s _((ARGSproto));
-public:
-#ifdef INDIRECT_BGET_MACROS
-VIRTUAL void byterun _((struct bytestream bs));
-#else
-VIRTUAL void byterun _((PerlIO *fp));
-#endif /* INDIRECT_BGET_MACROS */
 
 PPDEF(pp_aassign)
 PPDEF(pp_abs)
@@ -1236,4 +1230,13 @@ VIRTUAL int&	ErrorNo _((void));
 #else	/* !PERL_OBJECT */
 END_EXTERN_C
 #endif	/* PERL_OBJECT */
+
+#ifdef PERL_OBJECT
+public:
+#endif
+#ifdef INDIRECT_BGET_MACROS
+VIRTUAL void byterun _((struct bytestream bs));
+#else
+VIRTUAL void byterun _((PerlIO *fp));
+#endif /* INDIRECT_BGET_MACROS */
 
