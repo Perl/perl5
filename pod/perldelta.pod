@@ -277,34 +277,6 @@ C<VERSION> form of C<use>.
     # implies:
     A->VERSION(1.2);
 
-=item class()
-
-C<class> returns the class name of its object.
-
-=item is_instance()
-
-C<is_instance> returns true if its object is an instance of some
-class, false if its object is the class (package) itself. Example
-
-    A->is_instance();       # False
-
-    $var = 'A';
-    $var->is_instance();    # False
-
-    $ref = bless [], 'A';
-    $ref->is_instance();    # True
-
-This can be useful for methods that wish to easily distinguish
-whether they were invoked as class or as instance methods.
-
-    sub some_meth {
-	my $classname = shift;
-	if ($classname->is_instance()) {
-	    die "unexpectedly called as instance not class method";
-	} 
-	.....
-    } 
-
 =back
 
 B<NOTE:> C<can> directly uses Perl's internal code for method lookup, and

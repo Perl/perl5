@@ -313,23 +313,6 @@ C<VERSION> form of C<use>.
     # implies:
     A->VERSION(1.2);
 
-=item class()
-
-C<class> returns the class name of its object.
-
-=item is_instance()
-
-C<is_instance> returns true if its object is an instance of some
-class, false if its object is the class (package) itself. Example
-
-    A->is_instance();       # False
-    
-    $var = 'A';
-    $var->is_instance();    # False
-    
-    $ref = bless [], 'A';
-    $ref->is_instance();    # True
-
 =back
 
 B<NOTE:> C<can> directly uses Perl's internal code for method lookup, and
