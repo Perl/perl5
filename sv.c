@@ -1505,7 +1505,7 @@ S_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
     int sawinf = 0;
     char* radix = ".";
     STRLEN radixlen = 1;
-	  
+    bool radixfound;
 
     while (isSPACE(*s))
 	s++;
@@ -1589,44 +1589,64 @@ S_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
 	    *valuep = value;
 
       skip_value:
-	if (s + radixlen <= send && memEQ(s, radix, radixlen)) {
+	if (s + radixlen <= send && memEQ(s, radix, radixlen))
+	    radixfound = TRUE;
+#ifdef USE_LOCALE_NUMERIC
+	/* if we did change the radix and the radix is not the "."
+	 * retry with the "." (in case of mixed data) */
+	else if (IN_LOCALE && !(*radix == '.' && radixlen == 1) && *s == '.') {
+	    radixlen = 1;
+	    radixfound = TRUE;
+	}
+#endif
+	if (radixfound) {
 	    s += radixlen;
 	    numtype |= IS_NUMBER_NOT_INT;
 	    while (isDIGIT(*s))  /* optional digits after the radix */
 	        s++;
 	}
     }
-    else if (s + radixlen <= send && memEQ(s, radix, radixlen)) {
-       s += radixlen;
-       numtype |= IS_NUMBER_NOT_INT;
-       /* no digits before the radix means we need digits after it */
-       if (isDIGIT(*s)) {
-	   do {
-	       s++;
-	   } while (isDIGIT(*s));
-	   numtype |= IS_NUMBER_IN_UV;
-	   if (valuep) {
-	       /* integer approximation is valid - it's 0.  */
-	       *valuep = 0;
-	   }
-       }
-       else
-	 return 0;
-    }
-    else if (*s == 'I' || *s == 'i') {
-	s++; if (*s != 'N' && *s != 'n') return 0;
-	s++; if (*s != 'F' && *s != 'f') return 0;
-	s++; if (*s == 'I' || *s == 'i') {
-	    s++; if (*s != 'N' && *s != 'n') return 0;
-	    s++; if (*s != 'I' && *s != 'i') return 0;
-	    s++; if (*s != 'T' && *s != 't') return 0;
-	    s++; if (*s != 'Y' && *s != 'y') return 0;
-	    s++;
+    else {
+        if (s + radixlen <= send && memEQ(s, radix, radixlen))
+	    radixfound = TRUE;
+#ifdef USE_LOCALE_NUMERIC
+	else if (IN_LOCALE && !(*radix == '.' && radixlen == 1) && *s == '.') {
+	    radixlen = 1;
+	    radixfound = TRUE;
 	}
-	sawinf = 1;
+#endif
+	if (radixfound) {
+	  s += radixlen;
+	  numtype |= IS_NUMBER_NOT_INT;
+	  /* no digits before the radix means we need digits after it */
+	  if (isDIGIT(*s)) {
+	      do {
+		  s++;
+	      } while (isDIGIT(*s));
+	      numtype |= IS_NUMBER_IN_UV;
+	      if (valuep) {
+		  /* integer approximation is valid - it's 0.  */
+		*valuep = 0;
+	      }
+	  }
+	  else
+	    return 0;
+	}
+	else if (*s == 'I' || *s == 'i') {
+	    s++; if (*s != 'N' && *s != 'n') return 0;
+	    s++; if (*s != 'F' && *s != 'f') return 0;
+	    s++; if (*s == 'I' || *s == 'i') {
+	        s++; if (*s != 'N' && *s != 'n') return 0;
+		s++; if (*s != 'I' && *s != 'i') return 0;
+		s++; if (*s != 'T' && *s != 't') return 0;
+		s++; if (*s != 'Y' && *s != 'y') return 0;
+		s++;
+	    }
+	    sawinf = 1;
+	}
+	else /* Add test for NaN here.  */
+	    return 0;
     }
-    else /* Add test for NaN here.  */
-        return 0;
 
     if (sawinf) {
 	numtype &= IS_NUMBER_NEG; /* Keep track of sign  */
@@ -2423,7 +2443,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	    sv_upgrade(sv, SVt_PVNV);
 	else
 	    sv_upgrade(sv, SVt_NV);
-#if defined(USE_LONG_DOUBLE)
+#ifdef USE_LONG_DOUBLE
 	DEBUG_c({
 	    STORE_NUMERIC_LOCAL_SET_STANDARD();
 	    PerlIO_printf(Perl_debug_log,
@@ -2445,9 +2465,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
     if (SvNOKp(sv) && !(SvIOK(sv) || SvPOK(sv))) {
 	SvNOK_on(sv);
     }
-    else if (SvIOKp(sv) &&
-	     (!SvPOKp(sv) || !grok_number(SvPVX(sv), SvCUR(sv),NULL)))
-    {
+    else if (SvIOKp(sv)) {
 	SvNVX(sv) = SvIsUV(sv) ? (NV)SvUVX(sv) : (NV)SvIVX(sv);
 #ifdef NV_PRESERVES_UV
 	SvNOK_on(sv);
