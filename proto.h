@@ -136,7 +136,7 @@ VIRTUAL void	dump_pm _((PMOP* pm));
 VIRTUAL void	dump_packsubs _((HV* stash));
 VIRTUAL void	dump_sub _((GV* gv));
 VIRTUAL void	fbm_compile _((SV* sv, U32 flags));
-VIRTUAL char*	fbm_instr _((unsigned char* big, unsigned char* bigend, SV* littlesv));
+VIRTUAL char*	fbm_instr _((unsigned char* big, unsigned char* bigend, SV* littlesv, U32 flags));
 VIRTUAL char*	find_script _((char *scriptname, bool dosearch, char **search_ext, I32 flags));
 #ifdef USE_THREADS
 VIRTUAL PADOFFSET	find_threadsv _((char *name));

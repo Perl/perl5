@@ -1996,7 +1996,7 @@ PP(pp_index)
     else if (offset > biglen)
 	offset = biglen;
     if (!(tmps2 = fbm_instr((unsigned char*)tmps + offset,
-      (unsigned char*)tmps + biglen, little)))
+      (unsigned char*)tmps + biglen, little, 0)))
 	retval = -1 + arybase;
     else
 	retval = tmps2 - tmps + arybase;
@@ -4327,7 +4327,7 @@ PP(pp_split)
 #ifndef lint
 	    while (s < strend && --limit &&
 	      (m=fbm_instr((unsigned char*)s, (unsigned char*)strend,
-		    rx->check_substr)) )
+		    rx->check_substr, 0)) )
 #endif
 	    {
 		dstr = NEWSV(31, m-s);

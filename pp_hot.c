@@ -872,7 +872,7 @@ play_it_again:
 	    }
 	    else if (!(s = fbm_instr((unsigned char*)s + rx->check_offset_min,
 				     (unsigned char*)strend, 
-				     rx->check_substr)))
+				     rx->check_substr, 0)))
 		goto nope;
 	    else if ((rx->reganch & ROPT_CHECK_ALL) && !sawampersand)
 		goto yup;
@@ -1562,7 +1562,7 @@ PP(pp_subst)
 	    }
 	    else if (!(s = fbm_instr((unsigned char*)s + rx->check_offset_min, 
 				     (unsigned char*)strend,
-				     rx->check_substr)))
+				     rx->check_substr, 0)))
 		goto nope;
 	    if (s && rx->check_offset_max < s - m) {
 		++BmUSEFUL(rx->check_substr);

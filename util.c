@@ -938,7 +938,7 @@ fbm_compile(SV *sv, U32 flags /* not used yet */)
 }
 
 char *
-fbm_instr(unsigned char *big, register unsigned char *bigend, SV *littlestr)
+fbm_instr(unsigned char *big, register unsigned char *bigend, SV *littlestr, U32 flags)
 {
     register unsigned char *s;
     register I32 tmp;

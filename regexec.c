@@ -258,7 +258,7 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend, cha
 	else
 	    s = fbm_instr((unsigned char*)s + start_shift,
 			  (unsigned char*)strend - end_shift,
-		prog->check_substr);
+		prog->check_substr, 0);
 	if (!s) {
 	    ++BmUSEFUL(prog->check_substr);	/* hooray */
 	    goto phooey;	/* not present */
@@ -359,7 +359,7 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend, cha
 		 ? (s = screaminstr(screamer, must, s + back_min - strbeg,
 				    end_shift, &scream_pos, 0))
 		 : (s = fbm_instr((unsigned char*)s + back_min,
-				  (unsigned char*)strend, must))) ) {
+				  (unsigned char*)strend, must, 0))) ) {
 	    if (s - back_max > last1) {
 		last1 = s - back_min;
 		s = s - back_max;
