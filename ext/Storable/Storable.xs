@@ -5808,14 +5808,14 @@ static SV *do_retrieve(
 			   of all scalars, so that any new string also has
 			   this.
 			*/
-			I32 len32 = length + 1;
+			STRLEN klen_tmp = length + 1;
 			bool is_utf8 = TRUE;
 
 			/* Just casting the &klen to (STRLEN) won't work
 			   well if STRLEN and I32 are of different widths.
 			   --jhi */
 			asbytes = (char*)bytes_from_utf8((U8*)orig,
-							 &len32,
+							 &klen_tmp,
 							 &is_utf8);
 			if (is_utf8) {
 				CROAK(("Frozen string corrupt - contains characters outside 0-255"));
@@ -5830,8 +5830,8 @@ static SV *do_retrieve(
 				SvUPGRADE(in, SVt_PV);
 				SvPOK_on(in);
 				SvPVX(in) = asbytes;
-				SvLEN(in) = len32;
-				SvCUR(in) = len32 - 1;
+				SvLEN(in) = klen_tmp;
+				SvCUR(in) = klen_tmp - 1;
 			}
 		}
 #endif
