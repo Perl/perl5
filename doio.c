@@ -667,7 +667,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    if (*s == 'I' || *s == '#')
 	     s++;
 	    *s = 'w';
-	    if (!(IoOFP(io) = PerlIO_openn(aTHX_ type,mode,fd,0,0,NULL,0,svp))) {
+	    if (!(IoOFP(io) = PerlIO_openn(aTHX_ type,s,fd,0,0,NULL,0,svp))) {
 		PerlIO_close(fp);
 		IoIFP(io) = Nullfp;
 		goto say_false;
