@@ -198,6 +198,7 @@ XS(XS_UNIVERSAL_VERSION)
     GV *gv;
     SV *sv;
     char *undef;
+    double req;
 
     if(SvROK(ST(0))) {
         sv = (SV*)SvRV(ST(0));
@@ -222,9 +223,9 @@ XS(XS_UNIVERSAL_VERSION)
         undef = "(undef)";
     }
 
-    if(items > 1 && (undef || SvNV(ST(1)) > SvNV(sv)))
+    if (items > 1 && (undef || (req = SvNV(ST(1)), req > SvNV(sv))))
 	croak("%s version %s required--this is only version %s",
-	    HvNAME(pkg),SvPV(ST(1),na),undef ? undef : SvPV(sv,na));
+	      HvNAME(pkg), SvPV(ST(1),na), undef ? undef : SvPV(sv,na));
 
     ST(0) = sv;
 

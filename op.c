@@ -186,7 +186,7 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix)
 	    if ((sv = svp[off]) &&
 		sv != &sv_undef &&
 		seq <= SvIVX(sv) &&
-		seq > (I32)SvNVX(sv) &&
+		seq > I_32(SvNVX(sv)) &&
 		strEQ(SvPVX(sv), name))
 	    {
 		I32 depth;
@@ -277,7 +277,7 @@ char *name;
 	if ((sv = svp[off]) &&
 	    sv != &sv_undef &&
 	    seq <= SvIVX(sv) &&
-	    seq > (I32)SvNVX(sv) &&
+	    seq > I_32(SvNVX(sv)) &&
 	    strEQ(SvPVX(sv), name))
 	{
 	    return (PADOFFSET)off;
