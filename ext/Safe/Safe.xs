@@ -19,7 +19,7 @@ safe_call_sv(package, mask, codesv)
 	save_hptr(&defstash);
 	save_aptr(&endav);
 	SAVEPPTR(op_mask);
-	Newz(666, op_mask, maxo, char);
+	Newz(666, op_mask, maxo+1, char);
 	SAVEFREEPV(op_mask);
 	str = SvPV(mask, len);
 	if (maxo != len)
@@ -63,7 +63,7 @@ ops_to_mask(...)
     CODE:
 	int i, j;
 	char *mask, *op;
-	Newz(666, mask, maxo, char);
+	Newz(666, mask, maxo+1, char);
 	for (i = 0; i < items; i++)
 	{
 	    op = SvPV(ST(i), na);
