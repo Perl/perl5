@@ -1108,6 +1108,23 @@ Undefines the hash.
 =for hackers
 Found in file hv.c
 
+=item ibcmp_utf8
+
+Return true if the strings s1 and s2 differ case-insensitively, false
+if not (if they are equal case-insensitively).  If u1 is true, the
+string s1 is assumed to be in UTF-8-encoded Unicode.  If u2 is true,
+the string s2 is assumed to be in UTF-8-encoded Unicode.  (If both u1
+and u2 are false, ibcmp() is called.)
+
+For case-insensitiveness, the "casefolding" of Unicode is used
+instead of upper/lowercasing both the characters, see
+http://www.unicode.org/unicode/reports/tr21/ (Case Mappings).
+
+	I32	ibcmp_utf8(const char* a, bool ua, const char* b, bool ub, I32 len)
+
+=for hackers
+Found in file utf8.c
+
 =item isALNUM
 
 Returns a boolean indicating whether the C C<char> is an ASCII alphanumeric
@@ -1404,6 +1421,17 @@ SV is B<not> incremented.
 =for hackers
 Found in file sv.c
 
+=item newSV
+
+Create a new null SV, or if len > 0, create a new empty SVt_PV type SV
+with an initial PV allocation of len+1. Normally accessed via the C<NEWSV>
+macro.
+
+	SV*	newSV(STRLEN len)
+
+=for hackers
+Found in file sv.c
+
 =item NEWSV
 
 Creates a new SV.  A non-zero C<len> parameter indicates the number of
@@ -1416,17 +1444,6 @@ C<id> is an integer id between 0 and 1299 (used to identify leaks).
 
 =for hackers
 Found in file handy.h
-
-=item newSV
-
-Create a new null SV, or if len > 0, create a new empty SVt_PV type SV
-with an initial PV allocation of len+1. Normally accessed via the C<NEWSV>
-macro.
-
-	SV*	newSV(STRLEN len)
-
-=for hackers
-Found in file sv.c
 
 =item newSViv
 
@@ -1867,6 +1884,19 @@ See C<PUSHMARK> and L<perlcall> for other uses.
 =for hackers
 Found in file pp.h
 
+=item pv_uni_display
+
+Build to the scalar dsv a displayable version of the string spv,
+length len, the displayable version being at most pvlim bytes long
+(if longer, the rest is truncated and "..." will be appended).
+The flags argument is currently unused but available for future extensions.
+The pointer to the PV of the dsv is returned.
+
+	char*	pv_uni_display(SV *dsv, U8 *spv, STRLEN len, STRLEN pvlim, UV flags)
+
+=for hackers
+Found in file utf8.c
+
 =item Renew
 
 The XSUB-writer's interface to the C C<realloc> function.
@@ -2299,22 +2329,22 @@ version which guarantees to evaluate sv only once.
 =for hackers
 Found in file sv.h
 
-=item SvIVX
-
-Returns the raw value in the SV's IV slot, without checks or conversions.
-Only use when you are sure SvIOK is true. See also C<SvIV()>.
-
-	IV	SvIVX(SV* sv)
-
-=for hackers
-Found in file sv.h
-
 =item SvIVx
 
 Coerces the given SV to an integer and returns it. Guarantees to evaluate
 sv only once. Use the more efficient C<SvIV> otherwise.
 
 	IV	SvIVx(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvIVX
+
+Returns the raw value in the SV's IV slot, without checks or conversions.
+Only use when you are sure SvIOK is true. See also C<SvIV()>.
+
+	IV	SvIVX(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -4034,6 +4064,19 @@ instead use an in-line version.
 
 =for hackers
 Found in file sv.c
+
+=item sv_uni_display
+
+Build to the scalar dsv a displayable version of the scalar sv,
+he displayable version being at most pvlim bytes long
+(if longer, the rest is truncated and "..." will be appended).
+The flags argument is currently unused but available for future extensions.
+The pointer to the PV of the dsv is returned.
+
+	char*	sv_uni_display(SV *dsv, SV *ssv, STRLEN pvlim, UV flags)
+
+=for hackers
+Found in file utf8.c
 
 =item sv_unmagic
 

@@ -1524,6 +1524,16 @@ Perl_utf8n_to_uvchr(pTHX_ U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
     return UNI_TO_NATIVE(uv);
 }
 
+/*
+=for apidoc A|char *|pv_uni_display|SV *dsv|U8 *spv|STRLEN len|STRLEN pvlim|UV flags
+
+Build to the scalar dsv a displayable version of the string spv,
+length len, the displayable version being at most pvlim bytes long
+(if longer, the rest is truncated and "..." will be appended).
+The flags argument is currently unused but available for future extensions.
+The pointer to the PV of the dsv is returned.
+
+=cut */
 char *
 Perl_pv_uni_display(pTHX_ SV *dsv, U8 *spv, STRLEN len, STRLEN pvlim, UV flags)
 {
@@ -1546,6 +1556,16 @@ Perl_pv_uni_display(pTHX_ SV *dsv, U8 *spv, STRLEN len, STRLEN pvlim, UV flags)
     return SvPVX(dsv);
 }
 
+/*
+=for apidoc A|char *|sv_uni_display|SV *dsv|SV *ssv|STRLEN pvlim|UV flags
+
+Build to the scalar dsv a displayable version of the scalar sv,
+he displayable version being at most pvlim bytes long
+(if longer, the rest is truncated and "..." will be appended).
+The flags argument is currently unused but available for future extensions.
+The pointer to the PV of the dsv is returned.
+
+=cut */
 char *
 Perl_sv_uni_display(pTHX_ SV *dsv, SV *ssv, STRLEN pvlim, UV flags)
 {
@@ -1553,47 +1573,65 @@ Perl_sv_uni_display(pTHX_ SV *dsv, SV *ssv, STRLEN pvlim, UV flags)
 				pvlim, flags);
 }
 
+/*
+=for apidoc A|I32|ibcmp_utf8|const char *s1|bool u1|const char *s2|bool u2|register I32 len
+
+Return true if the strings s1 and s2 differ case-insensitively, false
+if not (if they are equal case-insensitively).  If u1 is true, the
+string s1 is assumed to be in UTF-8-encoded Unicode.  If u2 is true,
+the string s2 is assumed to be in UTF-8-encoded Unicode.  (If both u1
+and u2 are false, ibcmp() is called.)
+
+For case-insensitiveness, the "casefolding" of Unicode is used
+instead of upper/lowercasing both the characters, see
+http://www.unicode.org/unicode/reports/tr21/ (Case Mappings).
+
+=cut */
 I32
 Perl_ibcmp_utf8(pTHX_ const char *s1, bool u1, const char *s2, bool u2, register I32 len)
 {
-     register U8 *a = (U8*)s1;
-     register U8 *b = (U8*)s2;
-     STRLEN la, lb;
-     UV ca, cb;
-     STRLEN ulen1, ulen2;
-     U8 tmpbuf1[UTF8_MAXLEN*3+1];
-     U8 tmpbuf2[UTF8_MAXLEN*3+1];
-
-     while (len) {
-	  if (u1)
-	       ca = utf8_to_uvchr((U8*)a, &la);
-	  else {
-	       ca = *a;
-	       la = 1;
-	  }
-	  if (u2)
-	       cb = utf8_to_uvchr((U8*)b, &lb);
-	  else {
-	       cb = *b;
-	       lb = 1;
-	  }
-	  if (ca != cb) {
+     if (u1 || u2) {
+	  register U8 *a = (U8*)s1;
+	  register U8 *b = (U8*)s2;
+	  STRLEN la, lb;
+	  UV ca, cb;
+	  STRLEN ulen1, ulen2;
+	  U8 tmpbuf1[UTF8_MAXLEN*3+1];
+	  U8 tmpbuf2[UTF8_MAXLEN*3+1];
+	  
+	  while (len) {
 	       if (u1)
-		    to_uni_fold(NATIVE_TO_UNI(ca), tmpbuf1, &ulen1);
-	       else
-		    ulen1 = 1;
+		    ca = utf8_to_uvchr((U8*)a, &la);
+	       else {
+		    ca = *a;
+		    la = 1;
+	       }
 	       if (u2)
-		    to_uni_fold(NATIVE_TO_UNI(cb), tmpbuf2, &ulen2);
-	       else
-		    ulen2 = 1;
-	       if (ulen1 != ulen2
-		   || (ulen1 == 1 && PL_fold[ca] != PL_fold[cb])
-		   || memNE((char *)tmpbuf1, (char *)tmpbuf2, ulen1))
-		    return 1;
+		    cb = utf8_to_uvchr((U8*)b, &lb);
+	       else {
+		    cb = *b;
+		    lb = 1;
+	       }
+	       if (ca != cb) {
+		    if (u1)
+			 to_uni_fold(NATIVE_TO_UNI(ca), tmpbuf1, &ulen1);
+		    else
+			 ulen1 = 1;
+		    if (u2)
+			 to_uni_fold(NATIVE_TO_UNI(cb), tmpbuf2, &ulen2);
+		    else
+			 ulen2 = 1;
+		    if (ulen1 != ulen2
+			|| (ulen1 == 1 && PL_fold[ca] != PL_fold[cb])
+			|| memNE((char *)tmpbuf1, (char *)tmpbuf2, ulen1))
+			 return 1;
+	       }
+	       a += la;
+	       b += lb;
 	  }
-	  a += la;
-	  b += lb;
-    }
-    return 0;
+	  return 0;
+     }
+     else
+         return ibcmp(s1, s2);
 }
 

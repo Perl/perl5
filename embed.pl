@@ -1333,7 +1333,7 @@ Apd	|HE*	|hv_store_ent	|HV* tb|SV* key|SV* val|U32 hash
 Apd	|void	|hv_undef	|HV* tb
 Ap	|I32	|ibcmp		|const char* a|const char* b|I32 len
 Ap	|I32	|ibcmp_locale	|const char* a|const char* b|I32 len
-Ap	|I32	|ibcmp_utf8	|const char* a|bool ua|const char* b|bool ub|I32 len
+Apd	|I32	|ibcmp_utf8	|const char* a|bool ua|const char* b|bool ub|I32 len
 p	|bool	|ingroup	|Gid_t testgid|Uid_t effective
 p	|void	|init_argv_symbols|int|char **
 p	|void	|init_debugger
@@ -1851,9 +1851,9 @@ Adp	|UV	|utf8n_to_uvchr	|U8 *s|STRLEN curlen|STRLEN* retlen|U32 flags
 Adp	|UV	|utf8n_to_uvuni	|U8 *s|STRLEN curlen|STRLEN* retlen|U32 flags
 Apd	|U8*	|uvchr_to_utf8	|U8 *d|UV uv
 Apd	|U8*	|uvuni_to_utf8	|U8 *d|UV uv
-Ap	|char*	|pv_uni_display	|SV *dsv|U8 *spv|STRLEN len \
+Apd	|char*	|pv_uni_display	|SV *dsv|U8 *spv|STRLEN len \
 				|STRLEN pvlim|UV flags
-Ap	|char*	|sv_uni_display	|SV *dsv|SV *ssv|STRLEN pvlim|UV flags
+Apd	|char*	|sv_uni_display	|SV *dsv|SV *ssv|STRLEN pvlim|UV flags
 p	|void	|vivify_defelem	|SV* sv
 p	|void	|vivify_ref	|SV* sv|U32 to_what
 p	|I32	|wait4pid	|Pid_t pid|int* statusp|int flags

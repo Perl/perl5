@@ -876,6 +876,19 @@ utf8_hop(s, off) will return a pointer to an UTF-8 encoded buffer that
 is C<off> (positive or negative) Unicode characters displaced from the
 UTF-8 buffer C<s>.
 
+=item *
+
+pv_uni_display(dsv, spv, len, pvlim, flags) and sv_uni_display(dsv,
+ssv, pvlim, flags) are useful for debug output of Unicode strings and
+scalars (only for debug: they display B<all> characters as hexadecimal
+code points).
+
+=item *
+
+ibcmp_utf8(s1, u1, s2, u2, len) can be used to compare two strings
+case-insensitively in Unicode.  (For case-sensitive comparisons you
+can just use memEQ() and memNE() as usual.)
+
 =back
 
 For more information, see L<perlapi>, and F<utf8.c> and F<utf8.h>
