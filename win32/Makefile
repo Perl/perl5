@@ -87,23 +87,26 @@ LIBFILES = oldnames.lib kernel32.lib user32.lib gdi32.lib \
 	oleaut32.lib netapi32.lib uuid.lib wsock32.lib mpr.lib winmm.lib \
 	version.lib odbc32.lib odbccp32.lib
 
-CFLAGS   = -nologo -W3 $(INCLUDES) $(DEFINES) $(LOCDEFS) $(PCHFLAGS) $(OPTIMIZE)
+CFLAGS   = -nologo -Gf -W3 $(INCLUDES) $(DEFINES) $(LOCDEFS) $(PCHFLAGS) $(OPTIMIZE)
 LINK_FLAGS  = -nologo $(LINK_DBG) -machine:$(PROCESSOR_ARCHITECTURE)
 OBJOUT_FLAG = -Fo
+EXEOUT_FLAG = -Fe
 
 #################### do not edit below this line #######################
 ############# NO USER-SERVICEABLE PARTS BEYOND THIS POINT ##############
 
+o = .obj
+
 #
 # Rules
 # 
-.SUFFIXES : 
-.SUFFIXES : .c .obj .dll .lib .exe
 
-.c.obj:
+.SUFFIXES : .c $(o) .dll .lib .exe
+
+.c$(o):
 	$(CC) -c $(CFLAGS) $(OBJOUT_FLAG)$@ $<
 
-.obj.dll:
+$(o).dll:
 	$(LINK32) -dll -subsystem:windows -implib:$(*B).lib -def:$(*B).def \
 	    -out:$@ $(LINK_FLAGS) $(LIBFILES) $< $(LIBPERL)  
 
@@ -171,48 +174,48 @@ CORE_C=	..\av.c		\
 	..\util.c	\
 	..\malloc.c
 
-CORE_OBJ= ..\av.obj	\
-	..\deb.obj	\
-	..\doio.obj	\
-	..\doop.obj	\
-	..\dump.obj	\
-	..\globals.obj	\
-	..\gv.obj	\
-	..\hv.obj	\
-	..\mg.obj	\
-	..\op.obj	\
-	..\perl.obj	\
-	..\perlio.obj	\
-	..\perly.obj	\
-	..\pp.obj	\
-	..\pp_ctl.obj	\
-	..\pp_hot.obj	\
-	..\pp_sys.obj	\
-	..\regcomp.obj	\
-	..\regexec.obj	\
-	..\run.obj	\
-	..\scope.obj	\
-	..\sv.obj	\
-	..\taint.obj	\
-	..\toke.obj	\
-	..\universal.obj\
-	..\util.obj	\
-	..\malloc.obj
+CORE_OBJ= ..\av$(o)	\
+	..\deb$(o)	\
+	..\doio$(o)	\
+	..\doop$(o)	\
+	..\dump$(o)	\
+	..\globals$(o)	\
+	..\gv$(o)	\
+	..\hv$(o)	\
+	..\mg$(o)	\
+	..\op$(o)	\
+	..\perl$(o)	\
+	..\perlio$(o)	\
+	..\perly$(o)	\
+	..\pp$(o)	\
+	..\pp_ctl$(o)	\
+	..\pp_hot$(o)	\
+	..\pp_sys$(o)	\
+	..\regcomp$(o)	\
+	..\regexec$(o)	\
+	..\run$(o)	\
+	..\scope$(o)	\
+	..\sv$(o)	\
+	..\taint$(o)	\
+	..\toke$(o)	\
+	..\universal$(o)\
+	..\util$(o)	\
+	..\malloc$(o)
 
 WIN32_C = perllib.c \
 	win32.c \
 	win32sck.c \
 	win32thread.c 
 
-WIN32_OBJ = win32.obj \
-	win32sck.obj \
-	win32thread.obj
+WIN32_OBJ = win32$(o) \
+	win32sck$(o) \
+	win32thread$(o)
 
-PERL95_OBJ = perl95.obj \
-	win32mt.obj \
-	win32sckmt.obj
+PERL95_OBJ = perl95$(o) \
+	win32mt$(o) \
+	win32sckmt$(o)
 
-DLL_OBJ = perllib.obj $(DYNALOADER).obj
+DLL_OBJ = perllib$(o) $(DYNALOADER)$(o)
 
 CORE_H = ..\av.h	\
 	..\cop.h	\
@@ -292,20 +295,20 @@ POD2TEXT=$(PODDIR)\pod2text
 
 all: $(PERLEXE) $(PERL95EXE) $(GLOBEXE) $(DYNALOADMODULES) $(MINIMOD) $(GLOBBAT)
 
-$(DYNALOADER).obj : $(DYNALOADER).c $(CORE_H) $(EXTDIR)\DynaLoader\dlutils.c
+$(DYNALOADER)$(o) : $(DYNALOADER).c $(CORE_H) $(EXTDIR)\DynaLoader\dlutils.c
 
 #------------------------------------------------------------
 
-$(GLOBEXE): perlglob.obj
+$(GLOBEXE): perlglob$(o)
 	$(LINK32) $(LINK_FLAGS) $(LIBFILES) -out:$@ -subsystem:$(SUBSYS) \
-	    perlglob.obj setargv.obj 
+	    perlglob$(o) setargv$(o) 
 
 $(GLOBBAT) : ..\lib\File\DosGlob.pm $(MINIPERL)
 	$(MINIPERL) $(PL2BAT) - < ..\lib\File\DosGlob.pm > $(GLOBBAT)
 
-perlglob.obj  : perlglob.c
+perlglob$(o)  : perlglob.c
 
-..\miniperlmain.obj : ..\miniperlmain.c $(CORE_H)
+..\miniperlmain$(o) : ..\miniperlmain.c $(CORE_H)
 
 config.w32 : $(CFGSH_TMPL)
 	copy $(CFGSH_TMPL) config.w32
@@ -340,9 +343,9 @@ $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
 	$(MINIPERL) -I..\lib config_h.PL || $(MAKE) CCTYPE=$(CCTYPE) \
 	    RUNTIME=$(RUNTIME) CFG=$(CFG) $(CONFIGPM)
 
-$(MINIPERL) : ..\miniperlmain.obj $(CORE_OBJ) $(WIN32_OBJ)
+$(MINIPERL) : ..\miniperlmain$(o) $(CORE_OBJ) $(WIN32_OBJ)
 	$(LINK32) -subsystem:console -out:$@ @<<
-	$(LINK_FLAGS) $(LIBFILES) ..\miniperlmain.obj $(CORE_OBJ) $(WIN32_OBJ)
+	$(LINK_FLAGS) $(LIBFILES) ..\miniperlmain$(o) $(CORE_OBJ) $(WIN32_OBJ)
 <<
 
 $(WIN32_OBJ)  : $(CORE_H)
@@ -369,12 +372,12 @@ $(MINIMOD) : $(MINIPERL) ..\minimod.pl
 perlmain.c : runperl.c 
 	copy runperl.c perlmain.c
 
-perlmain.obj : perlmain.c
+perlmain$(o) : perlmain.c
 	$(CC) $(CFLAGS) -UPERLDLL -c perlmain.c
 
-$(PERLEXE): $(PERLDLL) $(CONFIGPM) perlmain.obj  
+$(PERLEXE): $(PERLDLL) $(CONFIGPM) perlmain$(o)  
 	$(LINK32) -subsystem:console -out:perl.exe $(LINK_FLAGS) $(LIBFILES) \
-	    perlmain.obj $(WINIOMAYBE) $(PERLIMPLIB) 
+	    perlmain$(o) $(WINIOMAYBE) $(PERLIMPLIB) 
 	copy perl.exe $@
 	del perl.exe
 	copy splittree.pl .. 
@@ -383,14 +386,14 @@ $(PERLEXE): $(PERLDLL) $(CONFIGPM) perlmain.obj
 perl95.c : runperl.c 
 	copy runperl.c perl95.c
 
-perl95.obj : perl95.c
+perl95$(o) : perl95.c
 	$(CC) $(CFLAGS) -MT -UPERLDLL -DWIN95FIX -c perl95.c
 
-win32sckmt.obj : win32sck.c
-	$(CC) $(CFLAGS) -MT -UPERLDLL -DWIN95FIX -c $(OBJOUT_FLAG)win32sckmt.obj win32sck.c
+win32sckmt$(o) : win32sck.c
+	$(CC) $(CFLAGS) -MT -UPERLDLL -DWIN95FIX -c $(OBJOUT_FLAG)win32sckmt$(o) win32sck.c
 
-win32mt.obj : win32.c
-	$(CC) $(CFLAGS) -MT -UPERLDLL -DWIN95FIX -c $(OBJOUT_FLAG)win32mt.obj win32.c
+win32mt$(o) : win32.c
+	$(CC) $(CFLAGS) -MT -UPERLDLL -DWIN95FIX -c $(OBJOUT_FLAG)win32mt$(o) win32.c
 
 $(PERL95EXE): $(PERLDLL) $(CONFIGPM) $(PERL95_OBJ)
 	$(LINK32) -subsystem:console -out:perl95.exe $(LINK_FLAGS) $(LIBFILES) \
@@ -488,7 +491,7 @@ distclean: clean
 	-rmdir /s /q ..\lib\auto
 	-rmdir /s /q ..\lib\CORE
 	cd $(EXTDIR)
-	-del /s *.lib *.def *.map *.bs Makefile *.obj pm_to_blib
+	-del /s *.lib *.def *.map *.bs Makefile *$(o) pm_to_blib
 	cd ..\win32
 
 install : all doc utils
@@ -535,10 +538,10 @@ test-notty : test-prep
 	cd ..\win32
 
 clean : 
-	-@erase miniperlmain.obj
+	-@erase miniperlmain$(o)
 	-@erase $(MINIPERL)
-	-@erase perlglob.obj
-	-@erase perlmain.obj
+	-@erase perlglob$(o)
+	-@erase perlmain$(o)
 	-@erase config.w32
 	-@erase /f config.h
 	-@erase $(GLOBEXE)
@@ -547,7 +550,7 @@ clean :
 	-@erase $(CORE_OBJ)
 	-@erase $(WIN32_OBJ)
 	-@erase $(DLL_OBJ)
-	-@erase ..\*.obj ..\*.lib ..\*.exp *.obj *.lib *.exp
+	-@erase ..\*$(o) ..\*.lib ..\*.exp *$(o) *.lib *.exp
 	-@erase ..\t\*.exe ..\t\*.dll ..\t\*.bat
 	-@erase *.ilk
 	-@erase *.pdb
