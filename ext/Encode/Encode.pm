@@ -667,13 +667,13 @@ can be considered as being in this form without encoding. An encoding
 to transfer strings in this form (e.g. to write them to a file) would
 need to
 
-     pack('L',map(ord($_),split(//,$string)));   # native
+     pack('L*', unpack('U*', $string));  # native
   or
-     pack('V',map(ord($_),split(//,$string)));   # little-endian
+     pack('V*', unpack('U*', $string));  # little-endian
   or
-     pack('N',map(ord($_),split(//,$string)));   # big-endian
+     pack('N*', unpack('U*', $string));  # big-endian
 
-depending on the endian required.
+depending on the endianness required.
 
 No UTF-32 encodings are implemented yet.
 
