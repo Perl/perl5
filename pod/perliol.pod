@@ -26,13 +26,13 @@ C, with vtables" approach which may be applied to perl6.
 
 =head2 Basic Structure
 
-PerlIO is as a stack of layers.
+PerlIO is a stack of layers.
 
 The low levels of the stack work with the low-level operating system
 calls (file descriptors in C) getting bytes in and out, the higher
-layers of the stack buffer, filter, and otherwise manipulate the I/O.
-Terms I<above> and I<below> are used to refer to the relative
-positioning of the stack layers.
+layers of the stack buffer, filter, and otherwise manipulate the I/O,
+and return characters (or bytes) to Perl.  Terms I<above> and I<below>
+are used to refer to the relative positioning of the stack layers.
 
 A layer contains a "vtable", the table of I/O operations (at C level
 a table of function pointers), and status flags.  The functions in the
@@ -44,11 +44,17 @@ bottom the input is requested from the operating system services, then
 the result is returned up the stack, finally being interpreted as Perl
 data.
 
+The requests do not necessarily go always all the way down to the
+operating system: that's where PerlIO buffering comes into play.
+
 When you do an open() and specify extra PerlIO layers to be deployed,
 the layers you specify are "pushed" on top of the already existing
-default stack.  What exact layers are in this default stack depends on
-a lot of things: your operating system, Perl version, Perl compile
-time configuration, and Perl runtime configuration.  See L<PerlIO>,
+default stack.  One way to see it is that "operating system is
+on the left" and "Perl is on the right".
+
+What exact layers are in this default stack depends on a lot of
+things: your operating system, Perl version, Perl compile time
+configuration, and Perl runtime configuration.  See L<PerlIO>,
 L<perlrun/PERLIO>, and L<open> for more information.
 
 binmode() operates similarly to open(): by default the specified
