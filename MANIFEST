@@ -4,7 +4,6 @@ Changes5.000		Differences between 4.x and 5.000
 Changes5.001		Differences between 5.000 and 5.001
 Changes5.002		Differences between 5.001 and 5.002
 Changes5.003		Differences between 5.002 and 5.003
-configure.gnu		Crude emulation of GNU configure
 Configure		Portability tool
 Copying			The GNU General Public License
 EXTERN.h		Included before foreign .h files
@@ -12,9 +11,10 @@ INSTALL			Detailed installation instructions
 INTERN.h		Included before domestic .h files
 MANIFEST		This list of files
 Makefile.SH		A script that generates Makefile
+Policy_sh.SH		Hold site-wide preferences between Configure runs.
 Porting/Glossary	Glossary of config.sh variables
-Porting/config_H	Sample config.h
 Porting/config.sh	Sample config.sh
+Porting/config_H	Sample config.h
 Porting/makerel		Release making utility
 Porting/patchls		Flexible patch file listing utility
 Porting/pumpkin.pod	Guidelines and hints for Perl maintainers
@@ -42,6 +42,7 @@ cflags.SH		A script that emits C compilation flags per file
 compat3.sym		List of symbols for binary-compatibility with 5.003
 config_h.SH		Produces config.h
 configpm		Produces lib/Config.pm
+configure.gnu		Crude emulation of GNU configure
 cop.h			Control operator header
 cv.h			Code value header
 cygwin32/cw32imp.h	Cygwin32 port
@@ -261,11 +262,11 @@ ext/Socket/Socket.xs	Socket extension external subroutines
 ext/Thread/Makefile.PL	Thread extension makefile writer
 ext/Thread/Notes	Thread notes
 ext/Thread/README	Thread README
+ext/Thread/Thread.pm	Thread extension Perl module
+ext/Thread/Thread.xs	Thread extension external subroutines
 ext/Thread/Thread/Queue.pm	Thread synchronised queue objects
 ext/Thread/Thread/Semaphore.pm	Thread semaphore objects
 ext/Thread/Thread/Specific.pm	Thread specific data access
-ext/Thread/Thread.pm	Thread extension Perl module
-ext/Thread/Thread.xs	Thread extension external subroutines
 ext/Thread/create.t	Test thread creation
 ext/Thread/die.t	Test thread die()
 ext/Thread/die2.t	Test thread die() differently
@@ -588,10 +589,10 @@ os2/diff.configure	Patches to Configure
 os2/dl_os2.c		Addon for dl_open
 os2/dlfcn.h		Addon for dl_open
 os2/os2.c		Additional code for OS/2
-os2/os2ish.h		Header for OS/2
-os2/perl2cmd.pl		Corrects installed binaries under OS/2
-os2/os2thread.h		pthread-like typedefs
 os2/os2.sym		Additional symbols to export
+os2/os2ish.h		Header for OS/2
+os2/os2thread.h		pthread-like typedefs
+os2/perl2cmd.pl		Corrects installed binaries under OS/2
 patchlevel.h		The current patch level of perl
 perl.c			main()
 perl.h			Global declarations
@@ -964,8 +965,8 @@ win32/win32.c		Win32 port
 win32/win32.h		Win32 port
 win32/win32iop.h	Win32 port
 win32/win32sck.c	Win32 port
-win32/win32thread.h	Win32 port mapping to threads
 win32/win32thread.c	Win32 functions for threads 
+win32/win32thread.h	Win32 port mapping to threads
 writemain.SH		Generate perlmain.c from miniperlmain.c+extensions
 x2p/EXTERN.h		Same as above
 x2p/INTERN.h		Same as above

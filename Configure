@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Feb 24 12:36:41 EST 1998 [metaconfig 3.0 PL70]
+# Generated on Wed Feb 25 16:44:06 EST 1998 [metaconfig 3.0 PL70]
 
 cat >/tmp/c1$$ <<EOF
 ARGGGHHHH!!!!!
@@ -765,7 +765,7 @@ locincpth="$locincpth /opt/gnu/include /usr/GNU/include /opt/GNU/include"
 inclwanted=''
 
 : Trailing extension.  Override this in a hint file, if needed.
-_exe='' 
+_exe=''
 : Extra object files, if any, needed on this platform.
 archobjs=''
 groupstype=''
@@ -1431,7 +1431,7 @@ if $contains "^$user\$" ../.config/instruct >/dev/null 2>&1; then
 fi
 if $needman; then
 	cat <<EOH
- 
+
 This installation shell script will examine your system and ask you questions
 to determine how the perl5 package should be installed. If you get
 stuck on a question, you may use a ! shell escape to start a subshell or
@@ -1783,7 +1783,8 @@ fi
 if test ! -f config.sh; then
 	$cat <<EOM
 
-First time through, eh?  I have some defaults handy for the following systems:
+First time through, eh?  I have some defaults handy for some systems
+that need some extra help getting the Configure answers right:
 
 EOM
 	(cd $src/hints; ls -C *.sh) | $sed 's/\.sh/   /g' >&4
@@ -2056,23 +2057,44 @@ EOM
 			esac
 			;;
 		esac
+		if $test -f Policy.sh ; then
+			case "$dflt" in
+			*Policy*) ;;
+			none) dflt="Policy" ;;
+			*) dflt="Policy $dflt" ;;
+			esac
+		fi
 		;;
 	*)
 		dflt=`echo $hintfile | $sed 's/\.sh$//'`
 		;;
 	esac
 
+	if $test -f Policy.sh ; then
+		$cat <<EOM
+
+There's also a Policy hint file available, which should make the
+site-specific (policy) questions easier to answer.
+EOM
+
+	fi
+
 	$cat <<EOM
 
 You may give one or more space-separated answers, or "none" if appropriate.
-If your OS version has no hints, DO NOT give a wrong version -- say "none".
+A well-behaved OS will have no hints, so answering "none" or just "Policy"
+is a good thing.  DO NOT give a wrong version.
 
 EOM
+
 	rp="Which of these apply, if any?"
 	. UU/myread
 	tans=$ans
 	for file in $tans; do
-		if $test -f $src/hints/$file.sh; then
+		if $test X$file = XPolicy -a -f Policy.sh; then
+			. Policy.sh
+			$cat Policy.sh >> UU/config.sh
+		elif $test -f $src/hints/$file.sh; then
 			. $src/hints/$file.sh
 			$cat $src/hints/$file.sh >> UU/config.sh
 		elif $test X$tans = X -o X$tans = Xnone ; then
@@ -3025,6 +3047,393 @@ if $test -d "$sysman"; then
 	echo "System manual is in $sysman." >&4
 else
 	echo "Could not find manual pages in source form." >&4
+fi
+
+: determine where manual pages go
+set man1dir man1dir none
+eval $prefixit
+$cat <<EOM
+
+$spackage has manual pages available in source form.
+EOM
+case "$nroff" in
+nroff)
+	echo "However, you don't have nroff, so they're probably useless to you."
+	case "$man1dir" in
+	'') man1dir="none";;
+	esac;;
+esac
+echo "If you don't want the manual sources installed, answer 'none'."
+case "$man1dir" in
+' ') dflt=none
+	;;
+'')
+	lookpath="$prefixexp/man/man1 $prefixexp/man/l_man/man1"
+	lookpath="$lookpath $prefixexp/man/p_man/man1"
+	lookpath="$lookpath $prefixexp/man/u_man/man1"
+	lookpath="$lookpath $prefixexp/man/man.1"
+	case "$sysman" in
+	*/?_man*)	dflt=`./loc . $prefixexp/l_man/man1 $lookpath` ;;
+	*)	dflt=`./loc . $prefixexp/man/man1 $lookpath` ;;
+	esac
+	set dflt
+	eval $prefixup
+	;;
+*)  dflt="$man1dir"
+	;;
+esac
+echo " "
+fn=dn+~
+rp="Where do the main $spackage manual pages (source) go?"
+. ./getfile
+if $test "X$man1direxp" != "X$ansexp"; then
+	installman1dir=''
+fi
+man1dir="$ans"
+man1direxp="$ansexp"
+case "$man1dir" in
+'') man1dir=' '
+	installman1dir='';;
+esac
+if $afs; then
+	$cat <<EOM
+
+Since you are running AFS, I need to distinguish the directory in which
+manual pages reside from the directory in which they are installed (and from
+which they are presumably copied to the former directory by occult means).
+
+EOM
+	case "$installman1dir" in
+	'') dflt=`echo $man1direxp | sed 's#^/afs/#/afs/.#'`;;
+	*) dflt="$installman1dir";;
+	esac
+	fn=de~
+	rp='Where will man pages be installed?'
+	. ./getfile
+	installman1dir="$ans"
+else
+	installman1dir="$man1direxp"
+fi
+
+: What suffix to use on installed man pages
+
+case "$man1dir" in
+' ')
+	man1ext='0'
+	;;
+*)
+	rp="What suffix should be used for the main $spackage man pages?"
+	case "$man1ext" in
+	'')	case "$man1dir" in
+		*1)  dflt=1 ;;
+		*1p) dflt=1p ;;
+		*1pm) dflt=1pm ;;
+		*l) dflt=l;;
+		*n) dflt=n;;
+		*o) dflt=o;;
+		*p) dflt=p;;
+		*C) dflt=C;;
+		*L) dflt=L;;
+		*L1) dflt=L1;;
+		*) dflt=1;;
+		esac
+		;;
+	*)	dflt="$man1ext";;
+	esac
+	. ./myread
+	man1ext="$ans"
+	;;
+esac
+
+: see if we can have long filenames
+echo " "
+rmlist="$rmlist /tmp/cf$$"
+$test -d /tmp/cf$$ || mkdir /tmp/cf$$
+first=123456789abcdef
+second=/tmp/cf$$/$first
+$rm -f $first $second
+if (echo hi >$first) 2>/dev/null; then
+	if $test -f 123456789abcde; then
+		echo 'You cannot have filenames longer than 14 characters.  Sigh.' >&4
+		val="$undef"
+	else
+		if (echo hi >$second) 2>/dev/null; then
+			if $test -f /tmp/cf$$/123456789abcde; then
+				$cat <<'EOM'
+That's peculiar... You can have filenames longer than 14 characters, but only
+on some of the filesystems.  Maybe you are using NFS.  Anyway, to avoid problems
+I shall consider your system cannot support long filenames at all.
+EOM
+				val="$undef"
+			else
+				echo 'You can have filenames longer than 14 characters.' >&4
+				val="$define"
+			fi
+		else
+			$cat <<'EOM'
+How confusing! Some of your filesystems are sane enough to allow filenames
+longer than 14 characters but some others like /tmp can't even think about them.
+So, for now on, I shall assume your kernel does not allow them at all.
+EOM
+			val="$undef"
+		fi
+	fi
+else
+	$cat <<'EOM'
+You can't have filenames longer than 14 chars.  You can't even think about them!
+EOM
+	val="$undef"
+fi 
+set d_flexfnam
+eval $setvar
+$rm -rf /tmp/cf$$ 123456789abcde*
+
+: determine where library module manual pages go
+set man3dir man3dir none
+eval $prefixit
+$cat <<EOM
+
+$spackage has manual pages for many of the library modules.
+EOM
+
+case "$nroff" in
+nroff)
+	$cat <<'EOM'
+However, you don't have nroff, so they're probably useless to you.
+EOM
+	case "$man3dir" in
+	'') man3dir="none";;
+	esac;;
+esac
+
+case "$d_flexfnam" in
+undef)
+	$cat <<'EOM'
+However, your system can't handle the long file names like File::Basename.3. 
+EOM
+	case "$man3dir" in
+	'') man3dir="none";;
+	esac;;
+esac
+
+echo "If you don't want the manual sources installed, answer 'none'."
+prog=`echo $package | $sed 's/-*[0-9.]*$//'`
+case "$man3dir" in
+'')	case "$prefix" in 
+	*$prog*) dflt=`echo $man1dir | 
+			$sed -e 's/man1/man3/g' -e 's/man\.1/man\.3/g'` ;;
+	*)	dflt="$privlib/man/man3" ;;
+	esac
+	;;
+' ') dflt=none;;
+*)	dflt="$man3dir" ;;
+esac
+echo " "
+
+fn=dn+~
+rp="Where do the $package library man pages (source) go?"
+. ./getfile
+if test "X$man3direxp" != "X$ansexp"; then
+	installman3dir=''
+fi
+
+man3dir="$ans"
+man3direxp="$ansexp"
+case "$man3dir" in
+'') man3dir=' '
+	installman3dir='';;
+esac
+if $afs; then
+	$cat <<EOM
+
+Since you are running AFS, I need to distinguish the directory in which
+manual pages reside from the directory in which they are installed (and from
+which they are presumably copied to the former directory by occult means).
+
+EOM
+	case "$installman3dir" in
+	'') dflt=`echo $man3direxp | sed 's#^/afs/#/afs/.#'`;;
+	*) dflt="$installman3dir";;
+	esac
+	fn=de~
+	rp='Where will man pages be installed?'
+	. ./getfile
+	installman3dir="$ans"
+else
+	installman3dir="$man3direxp"
+fi
+
+: What suffix to use on installed man pages
+
+case "$man3dir" in
+' ')
+	man3ext='0'
+	;;
+*)
+	rp="What suffix should be used for the $package library man pages?"
+	case "$man3ext" in
+	'')	case "$man3dir" in
+		*3)  dflt=3 ;;
+		*3p) dflt=3p ;;
+		*3pm) dflt=3pm ;;
+		*l) dflt=l;;
+		*n) dflt=n;;
+		*o) dflt=o;;
+		*p) dflt=p;;
+		*C) dflt=C;;
+		*L) dflt=L;;
+		*L3) dflt=L3;;
+		*) dflt=3;;
+		esac
+		;;
+	*)	dflt="$man3ext";;
+	esac
+	. ./myread
+	man3ext="$ans"
+	;;
+esac
+
+: determine where public executable scripts go
+set scriptdir scriptdir
+eval $prefixit
+case "$scriptdir" in
+'')
+	dflt="$bin"
+	: guess some guesses
+	$test -d /usr/share/scripts && dflt=/usr/share/scripts
+	$test -d /usr/share/bin && dflt=/usr/share/bin
+	$test -d /usr/local/script && dflt=/usr/local/script
+	$test -d $prefixexp/script && dflt=$prefixexp/script
+	set dflt
+	eval $prefixup
+	;;
+*)  dflt="$scriptdir"
+	;;
+esac
+$cat <<EOM
+ 
+Some installations have a separate directory just for executable scripts so
+that they can mount it across multiple architectures but keep the scripts in
+one spot.  You might, for example, have a subdirectory of /usr/share for this.
+Or you might just lump your scripts in with all your other executables.
+ 
+EOM
+fn=d~
+rp='Where do you keep publicly executable scripts?'
+. ./getfile
+if $test "X$ansexp" != "X$scriptdirexp"; then
+	installscript=''
+fi
+scriptdir="$ans"
+scriptdirexp="$ansexp"
+if $afs; then
+	$cat <<EOM
+
+Since you are running AFS, I need to distinguish the directory in which
+scripts reside from the directory in which they are installed (and from
+which they are presumably copied to the former directory by occult means).
+
+EOM
+	case "$installscript" in
+	'') dflt=`echo $scriptdirexp | sed 's#^/afs/#/afs/.#'`;;
+	*) dflt="$installscript";;
+	esac
+	fn=de~
+	rp='Where will public scripts be installed?'
+	. ./getfile
+	installscript="$ans"
+else
+	installscript="$scriptdirexp"
+fi
+
+: determine where site specific libraries go.
+set sitelib sitelib
+eval $prefixit
+case "$sitelib" in
+'')
+	prog=`echo $package | $sed 's/-*[0-9.]*$//'`
+	dflt="$privlib/site_$prog" ;;
+*)	dflt="$sitelib" ;;
+esac
+$cat <<EOM
+
+The installation process will also create a directory for
+site-specific extensions and modules.  Some users find it convenient
+to place all local files in this directory rather than in the main
+distribution directory.
+
+EOM
+fn=d~+
+rp='Pathname for the site-specific library files?'
+. ./getfile
+if $test "X$sitelibexp" != "X$ansexp"; then
+	installsitelib=''
+fi
+sitelib="$ans"
+sitelibexp="$ansexp"
+if $afs; then
+	$cat <<EOM
+
+Since you are running AFS, I need to distinguish the directory in
+which site-specific files reside from the directory in which they are
+installed (and from which they are presumably copied to the former
+directory by occult means).
+
+EOM
+	case "$installsitelib" in
+	'') dflt=`echo $sitelibexp | sed 's#^/afs/#/afs/.#'`;;
+	*) dflt="$installsitelib";;
+	esac
+	fn=de~
+	rp='Where will site-specific files be installed?'
+	. ./getfile
+	installsitelib="$ans"
+else
+	installsitelib="$sitelibexp"
+fi
+
+: determine where site specific architecture-dependent libraries go.
+xxx=`echo $sitelib/$archname | sed 's!^$prefix!!'`
+: xxx is usuually lib/site_perl/archname.
+set sitearch sitearch none
+eval $prefixit
+case "$sitearch" in
+'')	dflt="$sitelib/$archname" ;;
+*)	dflt="$sitearch" ;;
+esac
+$cat <<EOM
+
+The installation process will also create a directory for
+architecture-dependent site-specific extensions and modules.
+
+EOM
+fn=nd~+
+rp='Pathname for the site-specific architecture-dependent library files?'
+. ./getfile
+if $test "X$sitearchexp" != "X$ansexp"; then
+	installsitearch=''
+fi
+sitearch="$ans"
+sitearchexp="$ansexp"
+if $afs; then
+	$cat <<EOM
+
+Since you are running AFS, I need to distinguish the directory in
+which site-specific architecture-dependent library files reside from
+the directory in which they are installed (and from which they are
+presumably copied to the former directory by occult means).
+
+EOM
+	case "$installsitearch" in
+	'') dflt=`echo $sitearchexp | sed 's#^/afs/#/afs/.#'`;;
+	*) dflt="$installsitearch";;
+	esac
+	fn=de~
+	rp='Where will site-specific architecture-dependent files be installed?'
+	. ./getfile
+	installsitearch="$ans"
+else
+	installsitearch="$sitearchexp"
 fi
 
 : see what memory models we can support
@@ -4867,250 +5276,6 @@ case "$shrpenv" in
 '') shrpenv="$tmp_shrpenv" ;;
 esac
 
-: determine where manual pages go
-set man1dir man1dir none
-eval $prefixit
-$cat <<EOM
-
-$spackage has manual pages available in source form.
-EOM
-case "$nroff" in
-nroff)
-	echo "However, you don't have nroff, so they're probably useless to you."
-	case "$man1dir" in
-	'') man1dir="none";;
-	esac;;
-esac
-echo "If you don't want the manual sources installed, answer 'none'."
-case "$man1dir" in
-' ') dflt=none
-	;;
-'')
-	lookpath="$prefixexp/man/man1 $prefixexp/man/l_man/man1"
-	lookpath="$lookpath $prefixexp/man/p_man/man1"
-	lookpath="$lookpath $prefixexp/man/u_man/man1"
-	lookpath="$lookpath $prefixexp/man/man.1"
-	case "$sysman" in
-	*/?_man*)	dflt=`./loc . $prefixexp/l_man/man1 $lookpath` ;;
-	*)	dflt=`./loc . $prefixexp/man/man1 $lookpath` ;;
-	esac
-	set dflt
-	eval $prefixup
-	;;
-*)  dflt="$man1dir"
-	;;
-esac
-echo " "
-fn=dn+~
-rp="Where do the main $spackage manual pages (source) go?"
-. ./getfile
-if $test "X$man1direxp" != "X$ansexp"; then
-	installman1dir=''
-fi
-man1dir="$ans"
-man1direxp="$ansexp"
-case "$man1dir" in
-'') man1dir=' '
-	installman1dir='';;
-esac
-if $afs; then
-	$cat <<EOM
-
-Since you are running AFS, I need to distinguish the directory in which
-manual pages reside from the directory in which they are installed (and from
-which they are presumably copied to the former directory by occult means).
-
-EOM
-	case "$installman1dir" in
-	'') dflt=`echo $man1direxp | sed 's#^/afs/#/afs/.#'`;;
-	*) dflt="$installman1dir";;
-	esac
-	fn=de~
-	rp='Where will man pages be installed?'
-	. ./getfile
-	installman1dir="$ans"
-else
-	installman1dir="$man1direxp"
-fi
-
-: What suffix to use on installed man pages
-
-case "$man1dir" in
-' ')
-	man1ext='0'
-	;;
-*)
-	rp="What suffix should be used for the main $spackage man pages?"
-	case "$man1ext" in
-	'')	case "$man1dir" in
-		*1)  dflt=1 ;;
-		*1p) dflt=1p ;;
-		*1pm) dflt=1pm ;;
-		*l) dflt=l;;
-		*n) dflt=n;;
-		*o) dflt=o;;
-		*p) dflt=p;;
-		*C) dflt=C;;
-		*L) dflt=L;;
-		*L1) dflt=L1;;
-		*) dflt=1;;
-		esac
-		;;
-	*)	dflt="$man1ext";;
-	esac
-	. ./myread
-	man1ext="$ans"
-	;;
-esac
-
-: see if we can have long filenames
-echo " "
-rmlist="$rmlist /tmp/cf$$"
-$test -d /tmp/cf$$ || mkdir /tmp/cf$$
-first=123456789abcdef
-second=/tmp/cf$$/$first
-$rm -f $first $second
-if (echo hi >$first) 2>/dev/null; then
-	if $test -f 123456789abcde; then
-		echo 'You cannot have filenames longer than 14 characters.  Sigh.' >&4
-		val="$undef"
-	else
-		if (echo hi >$second) 2>/dev/null; then
-			if $test -f /tmp/cf$$/123456789abcde; then
-				$cat <<'EOM'
-That's peculiar... You can have filenames longer than 14 characters, but only
-on some of the filesystems.  Maybe you are using NFS.  Anyway, to avoid problems
-I shall consider your system cannot support long filenames at all.
-EOM
-				val="$undef"
-			else
-				echo 'You can have filenames longer than 14 characters.' >&4
-				val="$define"
-			fi
-		else
-			$cat <<'EOM'
-How confusing! Some of your filesystems are sane enough to allow filenames
-longer than 14 characters but some others like /tmp can't even think about them.
-So, for now on, I shall assume your kernel does not allow them at all.
-EOM
-			val="$undef"
-		fi
-	fi
-else
-	$cat <<'EOM'
-You can't have filenames longer than 14 chars.  You can't even think about them!
-EOM
-	val="$undef"
-fi 
-set d_flexfnam
-eval $setvar
-$rm -rf /tmp/cf$$ 123456789abcde*
-
-: determine where library module manual pages go
-set man3dir man3dir none
-eval $prefixit
-$cat <<EOM
-
-$spackage has manual pages for many of the library modules.
-EOM
-
-case "$nroff" in
-nroff)
-	$cat <<'EOM'
-However, you don't have nroff, so they're probably useless to you.
-EOM
-	case "$man3dir" in
-	'') man3dir="none";;
-	esac;;
-esac
-
-case "$d_flexfnam" in
-undef)
-	$cat <<'EOM'
-However, your system can't handle the long file names like File::Basename.3. 
-EOM
-	case "$man3dir" in
-	'') man3dir="none";;
-	esac;;
-esac
-
-echo "If you don't want the manual sources installed, answer 'none'."
-prog=`echo $package | $sed 's/-*[0-9.]*$//'`
-case "$man3dir" in
-'')	case "$prefix" in 
-	*$prog*) dflt=`echo $man1dir | 
-			$sed -e 's/man1/man3/g' -e 's/man\.1/man\.3/g'` ;;
-	*)	dflt="$privlib/man/man3" ;;
-	esac
-	;;
-' ') dflt=none;;
-*)	dflt="$man3dir" ;;
-esac
-echo " "
-
-fn=dn+~
-rp="Where do the $package library man pages (source) go?"
-. ./getfile
-if test "X$man3direxp" != "X$ansexp"; then
-	installman3dir=''
-fi
-
-man3dir="$ans"
-man3direxp="$ansexp"
-case "$man3dir" in
-'') man3dir=' '
-	installman3dir='';;
-esac
-if $afs; then
-	$cat <<EOM
-
-Since you are running AFS, I need to distinguish the directory in which
-manual pages reside from the directory in which they are installed (and from
-which they are presumably copied to the former directory by occult means).
-
-EOM
-	case "$installman3dir" in
-	'') dflt=`echo $man3direxp | sed 's#^/afs/#/afs/.#'`;;
-	*) dflt="$installman3dir";;
-	esac
-	fn=de~
-	rp='Where will man pages be installed?'
-	. ./getfile
-	installman3dir="$ans"
-else
-	installman3dir="$man3direxp"
-fi
-
-: What suffix to use on installed man pages
-
-case "$man3dir" in
-' ')
-	man3ext='0'
-	;;
-*)
-	rp="What suffix should be used for the $package library man pages?"
-	case "$man3ext" in
-	'')	case "$man3dir" in
-		*3)  dflt=3 ;;
-		*3p) dflt=3p ;;
-		*3pm) dflt=3pm ;;
-		*l) dflt=l;;
-		*n) dflt=n;;
-		*o) dflt=o;;
-		*p) dflt=p;;
-		*C) dflt=C;;
-		*L) dflt=L;;
-		*L3) dflt=L3;;
-		*) dflt=3;;
-		esac
-		;;
-	*)	dflt="$man3ext";;
-	esac
-	. ./myread
-	man3ext="$ans"
-	;;
-esac
-
 : see if we have to deal with yellow pages, now NIS.
 if $test -d /usr/etc/yp || $test -d /etc/yp; then
 	if $test -f /usr/etc/nibindd; then
@@ -5472,149 +5637,6 @@ case "$startperl" in
 *!*)	;;
 *)	echo "I'll use $perlpath in \"eval 'exec'\"" ;;
 esac
-
-: determine where public executable scripts go
-set scriptdir scriptdir
-eval $prefixit
-case "$scriptdir" in
-'')
-	dflt="$bin"
-	: guess some guesses
-	$test -d /usr/share/scripts && dflt=/usr/share/scripts
-	$test -d /usr/share/bin && dflt=/usr/share/bin
-	$test -d /usr/local/script && dflt=/usr/local/script
-	$test -d $prefixexp/script && dflt=$prefixexp/script
-	set dflt
-	eval $prefixup
-	;;
-*)  dflt="$scriptdir"
-	;;
-esac
-$cat <<EOM
- 
-Some installations have a separate directory just for executable scripts so
-that they can mount it across multiple architectures but keep the scripts in
-one spot.  You might, for example, have a subdirectory of /usr/share for this.
-Or you might just lump your scripts in with all your other executables.
- 
-EOM
-fn=d~
-rp='Where do you keep publicly executable scripts?'
-. ./getfile
-if $test "X$ansexp" != "X$scriptdirexp"; then
-	installscript=''
-fi
-scriptdir="$ans"
-scriptdirexp="$ansexp"
-if $afs; then
-	$cat <<EOM
-
-Since you are running AFS, I need to distinguish the directory in which
-scripts reside from the directory in which they are installed (and from
-which they are presumably copied to the former directory by occult means).
-
-EOM
-	case "$installscript" in
-	'') dflt=`echo $scriptdirexp | sed 's#^/afs/#/afs/.#'`;;
-	*) dflt="$installscript";;
-	esac
-	fn=de~
-	rp='Where will public scripts be installed?'
-	. ./getfile
-	installscript="$ans"
-else
-	installscript="$scriptdirexp"
-fi
-
-: determine where site specific libraries go.
-set sitelib sitelib
-eval $prefixit
-case "$sitelib" in
-'')
-	prog=`echo $package | $sed 's/-*[0-9.]*$//'`
-	dflt="$privlib/site_$prog" ;;
-*)	dflt="$sitelib" ;;
-esac
-$cat <<EOM
-
-The installation process will also create a directory for
-site-specific extensions and modules.  Some users find it convenient
-to place all local files in this directory rather than in the main
-distribution directory.
-
-EOM
-fn=d~+
-rp='Pathname for the site-specific library files?'
-. ./getfile
-if $test "X$sitelibexp" != "X$ansexp"; then
-	installsitelib=''
-fi
-sitelib="$ans"
-sitelibexp="$ansexp"
-if $afs; then
-	$cat <<EOM
-
-Since you are running AFS, I need to distinguish the directory in
-which site-specific files reside from the directory in which they are
-installed (and from which they are presumably copied to the former
-directory by occult means).
-
-EOM
-	case "$installsitelib" in
-	'') dflt=`echo $sitelibexp | sed 's#^/afs/#/afs/.#'`;;
-	*) dflt="$installsitelib";;
-	esac
-	fn=de~
-	rp='Where will site-specific files be installed?'
-	. ./getfile
-	installsitelib="$ans"
-else
-	installsitelib="$sitelibexp"
-fi
-
-: determine where site specific architecture-dependent libraries go.
-xxx=`echo $sitelib/$archname | sed 's!^$prefix!!'`
-: xxx is usuually lib/site_perl/archname.
-set sitearch sitearch none
-eval $prefixit
-case "$sitearch" in
-'')	dflt="$sitelib/$archname" ;;
-*)	dflt="$sitearch" ;;
-esac
-$cat <<EOM
-
-The installation process will also create a directory for
-architecture-dependent site-specific extensions and modules.
-
-EOM
-fn=nd~+
-rp='Pathname for the site-specific architecture-dependent library files?'
-. ./getfile
-if $test "X$sitearchexp" != "X$ansexp"; then
-	installsitearch=''
-fi
-sitearch="$ans"
-sitearchexp="$ansexp"
-if $afs; then
-	$cat <<EOM
-
-Since you are running AFS, I need to distinguish the directory in
-which site-specific architecture-dependent library files reside from
-the directory in which they are installed (and from which they are
-presumably copied to the former directory by occult means).
-
-EOM
-	case "$installsitearch" in
-	'') dflt=`echo $sitearchexp | sed 's#^/afs/#/afs/.#'`;;
-	*) dflt="$installsitearch";;
-	esac
-	fn=de~
-	rp='Where will site-specific architecture-dependent files be installed?'
-	. ./getfile
-	installsitearch="$ans"
-else
-	installsitearch="$sitearchexp"
-fi
 
 cat <<EOM
 
@@ -9167,13 +9189,13 @@ $cc $ccflags -c foo.c >/dev/null 2>&1
 $ar rc bar$_a bar2$_o bar1$_o >/dev/null 2>&1
 if $cc $ccflags $ldflags -o foobar foo$_o bar$_a $libs > /dev/null 2>&1 &&
 	./foobar >/dev/null 2>&1; then
-	echo "ar appears to generate random libraries itself."
+	echo "$ar appears to generate random libraries itself."
 	orderlib=false
 	ranlib=":"
 elif $ar ts bar$_a >/dev/null 2>&1 &&
 	$cc $ccflags $ldflags -o foobar foo$_o bar$_a $libs > /dev/null 2>&1 &&
 	./foobar >/dev/null 2>&1; then
-		echo "a table of contents needs to be added with 'ar ts'."
+		echo "a table of contents needs to be added with '$ar ts'."
 		orderlib=false
 		ranlib="$ar ts"
 else
@@ -10998,6 +11020,17 @@ elif test -f [Mm]akefile; then
 	echo "Now you must run a make."
 else
 	echo "Done."
+fi
+
+if $test -f Policy.sh; then
+    $cat <<EOM
+
+If you compile $package on a different machine or from a different object
+directory, copy the Policy.sh file from this object directory to the
+new one before you run Configure -- this will help you with most of
+the policy defaults.
+
+EOM
 fi
 
 $rm -f kit*isdone ark*isdone

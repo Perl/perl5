@@ -448,10 +448,10 @@ s_dummy $(static_ext):	miniperl preplibrary $(DYNALOADER) FORCE
 clean:		_tidy _mopup
 
 realclean:	_cleaner _mopup
-	@echo "Note that make realclean does not delete config.sh"
+	@echo "Note that make realclean does not delete config.sh or Policy.sh"
 
 clobber:	_cleaner _mopup
-	rm -f config.sh cppstdin
+	rm -f config.sh cppstdin Policy.sh
 
 distclean:	clobber
 
