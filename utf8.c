@@ -227,6 +227,7 @@ Perl_utf8_hop(pTHX_ U8 *s, I32 off)
 
 Converts a string C<s> of length C<len> from UTF8 into ASCII encoding.
 Unlike C<bytes_to_utf8>, this over-writes the original string.
+Returns zero on failure after converting as much as possible.
 
 =cut
 */
@@ -247,6 +248,10 @@ Perl_utf8_to_bytes(pTHX_ U8* s, STRLEN len)
         else {
             I32 ulen;
             UV uv = utf8_to_uv(s, &ulen);
+            if (uv > 255) {
+                *d = '\0';
+                return 0;
+            }
             s += ulen;
             *d++ = (U8)uv;
         }
@@ -256,24 +261,25 @@ Perl_utf8_to_bytes(pTHX_ U8* s, STRLEN len)
 }
 
 /*
-=for apidoc Am|U8 *|bytes_to_utf8|U8 *s|STRLEN len
+=for apidoc Am|U8 *|bytes_to_utf8|U8 *s|STRLEN *len
 
 Converts a string C<s> of length C<len> from ASCII into UTF8 encoding.
-Returns a pointer to the newly-created string.
+Returns a pointer to the newly-created string, and sets C<len> to
+reflect the new length.
 
 =cut
 */
 
 U8*
-Perl_bytes_to_utf8(pTHX_ U8* s, STRLEN len)
+Perl_bytes_to_utf8(pTHX_ U8* s, STRLEN *len)
 {
     dTHR;
     U8 *send;
     U8 *d;
     U8 *dst;
-    send = s + len;
+    send = s + (*len);
 
-    Newz(801, d, len * 2 + 1, U8);
+    Newz(801, d, (*len) * 2 + 1, U8);
     dst = d;
 
     while (s < send) {
@@ -286,6 +292,7 @@ Perl_bytes_to_utf8(pTHX_ U8* s, STRLEN len)
         }
     }
     *d = '\0';
+    *len = d-dst;
     return dst;
 }
 

@@ -153,9 +153,10 @@ Found in file av.c
 =item bytes_to_utf8
 
 Converts a string C<s> of length C<len> from ASCII into UTF8 encoding.
-Returns a pointer to the newly-created string.
+Returns a pointer to the newly-created string, and sets C<len> to
+reflect the new length.
 
-	U8 *	bytes_to_utf8(U8 *s, STRLEN len)
+	U8 *	bytes_to_utf8(U8 *s, STRLEN *len)
 
 =for hackers
 Found in file utf8.c
@@ -2942,6 +2943,7 @@ Found in file handy.h
 
 Converts a string C<s> of length C<len> from UTF8 into ASCII encoding.
 Unlike C<bytes_to_utf8>, this over-writes the original string.
+Returns zero on failure after converting as much as possible.
 
 	U8 *	utf8_to_bytes(U8 *s, STRLEN len)
 
