@@ -187,6 +187,12 @@ hash_seed() returns the seed number used to randomise hash ordering.
 Zero means the "traditional" random hash ordering, non-zero means the
 new even more random hash ordering introduced in Perl 5.8.1.
 
+B<Note that the hash seed is sensitive information>: by knowing it one
+can craft a denial-of-service attack against Perl code, even remotely,
+see L<perlsec/"Algorithmic Complexity Attacks"> for more information.
+B<Do not disclose the hash seed> to people who don't need to know it.
+See also L<perlrun/PERL_HASH_SEED_DEBUG>.
+
 =cut
 
 sub hash_seed () {
