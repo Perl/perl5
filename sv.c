@@ -9389,7 +9389,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	CvFILE(dstr) = CvXSUB(sstr) ? CvFILE(sstr) : SAVEPV(CvFILE(sstr));
 	break;
     default:
-	Perl_croak(aTHX_ "Bizarre SvTYPE [%d]", SvTYPE(sstr));
+	Perl_croak(aTHX_ "Bizarre SvTYPE [%" IVdf "]", (IV)SvTYPE(sstr));
 	break;
     }
 
