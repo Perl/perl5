@@ -211,8 +211,11 @@ Perl_op_null
 Perl_load_module
 Perl_vload_module
 Perl_looks_like_number
+Perl_grok_bin
+Perl_grok_hex
 Perl_grok_number
 Perl_grok_numeric_radix
+Perl_grok_oct
 Perl_markstack_grow
 Perl_mess
 Perl_vmess
@@ -395,6 +398,7 @@ Perl_sv_2nv
 Perl_sv_2pv
 Perl_sv_2pvutf8
 Perl_sv_2pvbyte
+Perl_sv_pvn_nomg
 Perl_sv_2uv
 Perl_sv_iv
 Perl_sv_uv

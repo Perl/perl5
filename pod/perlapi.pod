@@ -559,6 +559,56 @@ respectively.
 =for hackers
 Found in file op.h
 
+=item grok_bin
+
+converts a string representing a binary number to numeric form.
+
+On entry I<start> and I<*len> give the string to scan, I<*flags> gives
+conversion flags, and I<result> should be NULL or a pointer to an NV.
+The scan stops at the end of the string, or the first invalid character.
+On return I<*len> is set to the length scanned string, and I<*flags> gives
+output flags.
+
+If the value is <= UV_MAX it is returned as a UV, the output flags are clear,
+and nothing is written to I<*result>. If the value is > UV_MAX C<grok_bin>
+returns UV_MAX, sets C<PERL_SCAN_GREATER_THAN_UV_MAX> in the output flags,
+and writes the value to I<*result> (or the value is discarded if I<result>
+is NULL).
+
+The hex number may optinally be prefixed with "0b" or "b". If
+C<PERL_SCAN_ALLOW_UNDERSCORES> is set in I<*flags> on entry then the binary
+number may use '_' characters to separate digits.
+
+	UV	grok_bin(char* start, STRLEN* len, I32* flags, NV *result)
+
+=for hackers
+Found in file numeric.c
+
+=item grok_hex
+
+converts a string representing a hex number to numeric form.
+
+On entry I<start> and I<*len> give the string to scan, I<*flags> gives
+conversion flags, and I<result> should be NULL or a pointer to an NV.
+The scan stops at the end of the string, or the first non-hex-digit character.
+On return I<*len> is set to the length scanned string, and I<*flags> gives
+output flags.
+
+If the value is <= UV_MAX it is returned as a UV, the output flags are clear,
+and nothing is written to I<*result>. If the value is > UV_MAX C<grok_hex>
+returns UV_MAX, sets C<PERL_SCAN_GREATER_THAN_UV_MAX> in the output flags,
+and writes the value to I<*result> (or the value is discarded if I<result>
+is NULL).
+
+The hex number may optinally be prefixed with "0x" or "x". If
+C<PERL_SCAN_ALLOW_UNDERSCORES> is set in I<*flags> on entry then the hex
+number may use '_' characters to separate digits.
+
+	UV	grok_hex(char* start, STRLEN* len, I32* flags, NV *result)
+
+=for hackers
+Found in file numeric.c
+
 =item grok_number
 
 Recognise (or not) a number.  The type of the number is returned
@@ -589,6 +639,14 @@ Found in file numeric.c
 Scan and skip for a numeric decimal separator (radix).
 
 	bool	grok_numeric_radix(const char **sp, const char *send)
+
+=for hackers
+Found in file numeric.c
+
+=item grok_oct
+
+
+	UV	grok_oct(char* start, STRLEN* len, I32* flags, NV *result)
 
 =for hackers
 Found in file numeric.c
@@ -1870,6 +1928,33 @@ L<perlcall>.
 =for hackers
 Found in file scope.h
 
+=item scan_bin
+
+For backwards compatibility. Use C<grok_bin> instead.
+
+	NV	scan_bin(char* start, STRLEN len, STRLEN* retlen)
+
+=for hackers
+Found in file numeric.c
+
+=item scan_hex
+
+For backwards compatibility. Use C<grok_hex> instead.
+
+	NV	scan_hex(char* start, STRLEN len, STRLEN* retlen)
+
+=for hackers
+Found in file numeric.c
+
+=item scan_oct
+
+For backwards compatibility. Use C<grok_oct> instead.
+
+	NV	scan_oct(char* start, STRLEN len, STRLEN* retlen)
+
+=for hackers
+Found in file numeric.c
+
 =item sharedsv_find
 
 Tries to find if a given SV has a shared backend, either by
@@ -2183,22 +2268,22 @@ version which guarantees to evaluate sv only once.
 =for hackers
 Found in file sv.h
 
-=item SvIVx
-
-Coerces the given SV to an integer and returns it. Guarantees to evaluate
-sv only once. Use the more efficent C<SvIV> otherwise.
-
-	IV	SvIVx(SV* sv)
-
-=for hackers
-Found in file sv.h
-
 =item SvIVX
 
 Returns the raw value in the SV's IV slot, without checks or conversions.
 Only use when you are sure SvIOK is true. See also C<SvIV()>.
 
 	IV	SvIVX(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvIVx
+
+Coerces the given SV to an integer and returns it. Guarantees to evaluate
+sv only once. Use the more efficent C<SvIV> otherwise.
+
+	IV	SvIVx(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -2507,21 +2592,21 @@ Like C<SvPV_nolen>, but converts sv to uft8 first if necessary.
 =for hackers
 Found in file sv.h
 
-=item SvPVx
-
-A version of C<SvPV> which guarantees to evaluate sv only once.
-
-	char*	SvPVx(SV* sv, STRLEN len)
-
-=for hackers
-Found in file sv.h
-
 =item SvPVX
 
 Returns a pointer to the physical string in the SV.  The SV must contain a
 string.
 
 	char*	SvPVX(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvPVx
+
+A version of C<SvPV> which guarantees to evaluate sv only once.
+
+	char*	SvPVx(SV* sv, STRLEN len)
 
 =for hackers
 Found in file sv.h

@@ -6721,6 +6721,19 @@ Perl_sv_pvn(pTHX_ SV *sv, STRLEN *lp)
     return sv_2pv(sv, lp);
 }
 
+/* For -DCRIPPLED_CC only. See also C<sv_2pv_flags()>.
+ */
+
+char *
+Perl_sv_pvn_nomg(pTHX_ register SV *sv, STRLEN *lp)
+{
+    if (SvPOK(sv)) {
+	*lp = SvCUR(sv);
+	return SvPVX(sv);
+    }
+    return sv_2pv_flags(sv, lp, 0);
+}
+
 /*
 =for apidoc sv_pvn_force
 

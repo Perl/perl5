@@ -706,6 +706,7 @@ PERL_CALLCONV NV	Perl_sv_2nv(pTHX_ SV* sv);
 PERL_CALLCONV char*	Perl_sv_2pv(pTHX_ SV* sv, STRLEN* lp);
 PERL_CALLCONV char*	Perl_sv_2pvutf8(pTHX_ SV* sv, STRLEN* lp);
 PERL_CALLCONV char*	Perl_sv_2pvbyte(pTHX_ SV* sv, STRLEN* lp);
+PERL_CALLCONV char*	Perl_sv_pvn_nomg(pTHX_ SV* sv, STRLEN* lp);
 PERL_CALLCONV UV	Perl_sv_2uv(pTHX_ SV* sv);
 PERL_CALLCONV IV	Perl_sv_iv(pTHX_ SV* sv);
 PERL_CALLCONV UV	Perl_sv_uv(pTHX_ SV* sv);
