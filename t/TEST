@@ -41,6 +41,8 @@ else {
 $bad = 0;
 $good = 0;
 $total = @ARGV;
+$files  = 0;
+$totmax = 0;
 while ($test = shift) {
     if ($test =~ /^$/) {
 	next;
@@ -67,8 +69,6 @@ while ($test = shift) {
     }
     $ok = 0;
     $next = 0;
-    $files  = 0;
-    $totmax = 0;
     while (<RESULTS>) {
 	if ($verbose) {
 	    print $_;
