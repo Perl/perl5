@@ -797,8 +797,8 @@ sub DB {
 			      unless $hist[$i] =~ /^.?$/;
 			};
 			next CMD; };
-		    $cmd =~ s/^p$/print \$DB::OUT \$_/;
-		    $cmd =~ s/^p\b/print \$DB::OUT /;
+		    $cmd =~ s/^p$/print {\$DB::OUT} \$_/;
+		    $cmd =~ s/^p\b/print {\$DB::OUT} /;
 		    $cmd =~ /^=/ && do {
 			if (local($k,$v) = ($cmd =~ /^=\s*(\S+)\s+(.*)/)) {
 			    $alias{$k}="s~$k~$v~";
@@ -1328,7 +1328,7 @@ $psh$psh cmd  	Run cmd in a subprocess (reads from DB::IN, writes to DB::OUT)"
 $psh [cmd] 	Run cmd in subshell (forces \"\$SHELL -c 'cmd'\")." ) . "
 		See 'O shellBang' too.
 H -number	Display last number commands (default all).
-p expr		Same as \"print DB::OUT expr\" in current package.
+p expr		Same as \"print {DB::OUT} expr\" in current package.
 |dbcmd		Run debugger command, piping DB::OUT to current pager.
 ||dbcmd		Same as |dbcmd but DB::OUT is temporarilly select()ed as well.
 \= [alias value]	Define a command alias, or list current aliases.
