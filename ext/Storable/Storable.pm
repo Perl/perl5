@@ -55,6 +55,9 @@ unless (defined @Log::Agent::EXPORT) {
 
 sub logcroak;
 
+# 8.3 limitation avoidance trickery.  --mjtguy
+sub retrieve_fd { goto &fdretrieve };
+
 bootstrap Storable;
 1;
 __END__
@@ -194,11 +197,11 @@ sub retrieve {
 }
 
 #
-# retrieve_fd
+# fdretrieve
 #
 # Same as retrieve, but perform from an already opened file descriptor instead.
 #
-sub retrieve_fd {
+sub fdretrieve {
 	my ($file) = @_;
 	my $fd = fileno($file);
 	logcroak "not a valid file descriptor" unless defined $fd;
