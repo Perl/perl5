@@ -3059,7 +3059,13 @@ sub const {
     } elsif ($sv->FLAGS & SVf_IOK) {
 	return $sv->int_value;
     } elsif ($sv->FLAGS & SVf_NOK) {
-	return $sv->NV;
+	# try the default stringification
+	my $r = "".$sv->NV;
+	if ($r =~ /e/) {
+	    # If it's in scientific notation, we might have lost information
+	    return sprintf("%.20e", $sv->NV);
+	}
+	return $r;
     } elsif ($sv->FLAGS & SVf_ROK && $sv->can("RV")) {
 	return "\\(" . const($sv->RV) . ")"; # constant folded
     } elsif ($sv->FLAGS & SVf_POK) {
