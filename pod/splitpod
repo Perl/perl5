@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 
-use PerlDoc::Functions;
+use lib '../lib';  # If you haven't installed perl yet.
+use Pod::Functions;
 
 local $/ = '';
 
