@@ -227,6 +227,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 #define SCF_DO_STCLASS_AND	0x0800
 #define SCF_DO_STCLASS_OR	0x1000
 #define SCF_DO_STCLASS		(SCF_DO_STCLASS_AND|SCF_DO_STCLASS_OR)
+#define SCF_WHILEM_VISITED_POS	0x2000
 
 #define RF_utf8		8
 #define UTF (PL_reg_flags & RF_utf8)
@@ -723,6 +724,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 			data_fake.start_class = &this_class;
 			f = SCF_DO_STCLASS_AND;
 		    }		    
+		    if (flags & SCF_WHILEM_VISITED_POS)
+			f |= SCF_WHILEM_VISITED_POS;
 		    /* we suppose the run is continuous, last=next...*/
 		    minnext = study_chunk(pRExC_state, &scan, &deltanext,
 					  next, &data_fake, f);
@@ -953,6 +956,14 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		    f |= SCF_DO_STCLASS_AND;
 		    f &= ~SCF_DO_STCLASS_OR;
 		}
+		/* These are the cases when once a subexpression
+		   fails at a particular position, it cannot succeed
+		   even after backtracking at the enclosing scope.
+		   
+		   XXXX what if minimal match and we are at the
+		        initial run of {n,m}? */
+		if ((mincount != maxcount - 1) && (maxcount != REG_INFTY))
+		    f &= ~SCF_WHILEM_VISITED_POS;
 
 		/* This will finish on WHILEM, setting scan, or on NULL: */
 		minnext = study_chunk(pRExC_state, &scan, &deltanext, last, data, 
@@ -1083,13 +1094,20 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 			}
 #endif
 			/* Optimize again: */
-			study_chunk(pRExC_state, &nxt1, &deltanext, nxt, NULL, 0);
+			study_chunk(pRExC_state, &nxt1, &deltanext, nxt, 
+				    NULL, 0);
 		    }
 		    else
 			oscan->flags = 0;
 		}
-		else if (OP(oscan) == CURLYX && data && ++data->whilem_c < 16) {
-		    /* This stays as CURLYX, and can put the count/of pair. */
+		else if ((OP(oscan) == CURLYX)
+			 && (flags & SCF_WHILEM_VISITED_POS)
+			 /* See the comment on a similar expression above.
+			    However, this time it not a subexpression
+			    we care about, but the expression itself. */
+			 && (maxcount == REG_INFTY)
+			 && data && ++data->whilem_c < 16) {
+		    /* This stays as CURLYX, we can put the count/of pair. */
 		    /* Find WHILEM (as in regexec.c) */
 		    regnode *nxt = oscan + NEXT_OFF(oscan);
 
@@ -1419,8 +1437,10 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		 && OP(scan) == IFMATCH ) { /* Lookahead */
 		cl_init(pRExC_state, &intrnl);
 		data_fake.start_class = &intrnl;
-		f = SCF_DO_STCLASS_AND;
+		f |= SCF_DO_STCLASS_AND;
 	    }
+	    if (flags & SCF_WHILEM_VISITED_POS)
+		f |= SCF_WHILEM_VISITED_POS;
 	    next = regnext(scan);
 	    nscan = NEXTOPER(NEXTOPER(scan));
 	    minnext = study_chunk(pRExC_state, &nscan, &deltanext, last, &data_fake, f);
@@ -1439,7 +1459,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		data->flags |= SF_HAS_EVAL;
 	    if (data)
 		data->whilem_c = data_fake.whilem_c;
-	    if (f) {
+	    if (f & SCF_DO_STCLASS_AND) {
 		int was = (data->start_class->flags & ANYOF_EOS);
 
 		cl_and(data->start_class, &intrnl);
@@ -1779,7 +1799,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	data.last_closep = &last_close;
 
 	minlen = study_chunk(pRExC_state, &first, &fake, scan + RExC_size, /* Up to end */
-			     &data, SCF_DO_SUBSTR | stclass_flag);
+			     &data, SCF_DO_SUBSTR | SCF_WHILEM_VISITED_POS | stclass_flag);
 	if ( RExC_npar == 1 && data.longest == &(data.longest_fixed)
 	     && data.last_start_min == 0 && data.last_end > 0 
 	     && !RExC_seen_zerolen
@@ -1888,7 +1908,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	cl_init(pRExC_state, &ch_class);
 	data.start_class = &ch_class;
 	data.last_closep = &last_close;
-	minlen = study_chunk(pRExC_state, &scan, &fake, scan + RExC_size, &data, SCF_DO_STCLASS_AND);
+	minlen = study_chunk(pRExC_state, &scan, &fake, scan + RExC_size, &data, SCF_DO_STCLASS_AND|SCF_WHILEM_VISITED_POS);
 	r->check_substr = r->anchored_substr = r->float_substr = Nullsv;
 	if (!(data.start_class->flags & ANYOF_EOS)
 	    && !cl_is_anything(data.start_class)) {
