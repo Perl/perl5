@@ -8,7 +8,7 @@ BEGIN {
 }
 
 $| = 1;
-print "1..12\n";
+print "1..13\n";
 
 use charnames ':full';
 
@@ -78,3 +78,15 @@ sub to_bytes {
     print "not " unless sprintf("%vx", "\x{ff}\N{WHITE SMILING FACE}") eq "ff.263a";
     print "ok 12\n";
 }
+
+{
+   use charnames qw(:full);
+   use utf8;
+   
+    my $x = "\x{221b}";
+    my $named = "\N{CUBE ROOT}";
+
+    print "not " unless ord($x) == ord($named);
+    print "ok 13\n";
+}
+
