@@ -2724,7 +2724,7 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 	if (sflags & SVp_IOK) {
 	    (void)SvIOK_on(dstr);
 	    SvIVX(dstr) = SvIVX(sstr);
-	    if (SvIsUV(sstr))
+	    if (sflags & SVf_IVisUV)
 		SvIsUV_on(dstr);
 	}
 	if (SvAMAGIC(sstr)) {
@@ -2762,7 +2762,7 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 		SvUTF8_off(dstr);
 
 	    SvTEMP_off(dstr);
-	    (void)SvOK_off(sstr);
+	    (void)SvOK_off(sstr);		/* NOTE: nukes most SvFLAGS on sstr */
 	    SvPV_set(sstr, Nullch);
 	    SvLEN_set(sstr, 0);
 	    SvCUR_set(sstr, 0);
@@ -2787,25 +2787,25 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 	if (sflags & SVp_IOK) {
 	    (void)SvIOK_on(dstr);
 	    SvIVX(dstr) = SvIVX(sstr);
-	    if (SvIsUV(sstr))
+	    if (sflags & SVf_IVisUV)
 		SvIsUV_on(dstr);
 	}
     }
     else if (sflags & SVp_NOK) {
 	SvNVX(dstr) = SvNVX(sstr);
 	(void)SvNOK_only(dstr);
-	if (SvIOK(sstr)) {
+	if (sflags & SVf_IOK) {
 	    (void)SvIOK_on(dstr);
 	    SvIVX(dstr) = SvIVX(sstr);
 	    /* XXXX Do we want to set IsUV for IV(ROK)?  Be extra safe... */
-	    if (SvIsUV(sstr))
+	    if (sflags & SVf_IVisUV)
 		SvIsUV_on(dstr);
 	}
     }
     else if (sflags & SVp_IOK) {
 	(void)SvIOK_only(dstr);
 	SvIVX(dstr) = SvIVX(sstr);
-	if (SvIsUV(sstr))
+	if (sflags & SVf_IVisUV)
 	    SvIsUV_on(dstr);
     }
     else {
