@@ -195,7 +195,7 @@ struct block {
 	cx->blk_oldretsp	= PL_retstack_ix,			\
 	cx->blk_oldpm		= PL_curpm,				\
 	cx->blk_gimme		= gimme;				\
-	DEBUG_l( PerlIO_printf(PerlIO_stderr(), "Entering block %ld, type %s\n",	\
+	DEBUG_l( PerlIO_printf(Perl_debug_log, "Entering block %ld, type %s\n",	\
 		    (long)cxstack_ix, PL_block_type[CxTYPE(cx)]); )
 
 /* Exit a block (RETURN and LAST). */
@@ -207,7 +207,7 @@ struct block {
 	PL_retstack_ix	 = cx->blk_oldretsp,				\
 	pm		 = cx->blk_oldpm,				\
 	gimme		 = cx->blk_gimme;				\
-	DEBUG_l( PerlIO_printf(PerlIO_stderr(), "Leaving block %ld, type %s\n",		\
+	DEBUG_l( PerlIO_printf(Perl_debug_log, "Leaving block %ld, type %s\n",		\
 		    (long)cxstack_ix+1,PL_block_type[CxTYPE(cx)]); )
 
 /* Continue a block elsewhere (NEXT and REDO). */
@@ -380,7 +380,7 @@ typedef struct stackinfo PERL_SI;
 	djSP;								\
 	PERL_SI *prev = PL_curstackinfo->si_prev;			\
 	if (!prev) {							\
-	    PerlIO_printf(PerlIO_stderr(), "panic: POPSTACK\n");	\
+	    PerlIO_printf(Perl_error_log, "panic: POPSTACK\n");		\
 	    my_exit(1);							\
 	}								\
 	SWITCHSTACK(PL_curstack,prev->si_stack);			\

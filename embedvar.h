@@ -377,6 +377,7 @@
 #define PL_srand_called		(PERL_GET_INTERP->Isrand_called)
 #define PL_statusvalue		(PERL_GET_INTERP->Istatusvalue)
 #define PL_statusvalue_vms	(PERL_GET_INTERP->Istatusvalue_vms)
+#define PL_stderrgv		(PERL_GET_INTERP->Istderrgv)
 #define PL_stdingv		(PERL_GET_INTERP->Istdingv)
 #define PL_strchop		(PERL_GET_INTERP->Istrchop)
 #define PL_strtab		(PERL_GET_INTERP->Istrtab)
@@ -653,6 +654,7 @@
 #define PL_srand_called		(vTHX->Isrand_called)
 #define PL_statusvalue		(vTHX->Istatusvalue)
 #define PL_statusvalue_vms	(vTHX->Istatusvalue_vms)
+#define PL_stderrgv		(vTHX->Istderrgv)
 #define PL_stdingv		(vTHX->Istdingv)
 #define PL_strchop		(vTHX->Istrchop)
 #define PL_strtab		(vTHX->Istrtab)
@@ -931,6 +933,7 @@
 #define PL_Isrand_called	PL_srand_called
 #define PL_Istatusvalue		PL_statusvalue
 #define PL_Istatusvalue_vms	PL_statusvalue_vms
+#define PL_Istderrgv		PL_stderrgv
 #define PL_Istdingv		PL_stdingv
 #define PL_Istrchop		PL_strchop
 #define PL_Istrtab		PL_strtab

@@ -64,6 +64,7 @@ PERLVAR(Istatusvalue_vms,U32)
 
 /* shortcuts to various I/O objects */
 PERLVAR(Istdingv,	GV *)
+PERLVAR(Istderrgv,	GV *)
 PERLVAR(Idefgv,		GV *)
 PERLVAR(Iargvgv,	GV *)
 PERLVAR(Iargvoutgv,	GV *)

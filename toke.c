@@ -2266,7 +2266,8 @@ Perl_yylex(pTHX)
     PL_oldoldbufptr = PL_oldbufptr;
     PL_oldbufptr = s;
     DEBUG_p( {
-	PerlIO_printf(PerlIO_stderr(), "### Tokener expecting %s at %s\n", exp_name[PL_expect], s);
+	PerlIO_printf(Perl_debug_log, "### Tokener expecting %s at %s\n",
+		      exp_name[PL_expect], s);
     } )
 
   retry:
@@ -3603,7 +3604,8 @@ Perl_yylex(pTHX)
 
 		if (PL_oldoldbufptr &&
 		    PL_oldoldbufptr < PL_bufptr &&
-		    (PL_oldoldbufptr == PL_last_lop || PL_oldoldbufptr == PL_last_uni) &&
+		    (PL_oldoldbufptr == PL_last_lop
+		     || PL_oldoldbufptr == PL_last_uni) &&
 		    /* NO SKIPSPACE BEFORE HERE! */
 		    (PL_expect == XREF ||
 		     ((PL_opargs[PL_last_lop_op] >> OASHIFT)& 7) == OA_FILEREF))
@@ -5436,7 +5438,8 @@ S_checkcomma(pTHX_ register char *s, char *name, char *what)
 	    if (*w)
 		for (; *w && isSPACE(*w); w++) ;
 	    if (!*w || !strchr(";|})]oaiuw!=", *w))	/* an advisory hack only... */
-		Perl_warner(aTHX_ WARN_SYNTAX, "%s (...) interpreted as function",name);
+		Perl_warner(aTHX_ WARN_SYNTAX,
+			    "%s (...) interpreted as function",name);
 	}
     }
     while (s < PL_bufend && isSPACE(*s))

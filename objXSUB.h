@@ -420,6 +420,8 @@
 #define PL_statusvalue		(*Perl_Istatusvalue_ptr(aTHXo))
 #undef  PL_statusvalue_vms
 #define PL_statusvalue_vms	(*Perl_Istatusvalue_vms_ptr(aTHXo))
+#undef  PL_stderrgv
+#define PL_stderrgv		(*Perl_Istderrgv_ptr(aTHXo))
 #undef  PL_stdingv
 #define PL_stdingv		(*Perl_Istdingv_ptr(aTHXo))
 #undef  PL_strchop

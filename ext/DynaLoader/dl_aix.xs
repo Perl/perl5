@@ -581,11 +581,11 @@ dl_load_file(filename, flags=0)
 	char *	filename
 	int	flags
 	CODE:
-	DLDEBUG(1,PerlIO_printf(PerlIO_stderr(), "dl_load_file(%s,%x):\n", filename,flags));
+	DLDEBUG(1,PerlIO_printf(Perl_debug_log, "dl_load_file(%s,%x):\n", filename,flags));
 	if (flags & 0x01)
 	    Perl_warn(aTHX_ "Can't make loaded symbols global on this platform while loading %s",filename);
 	RETVAL = dlopen(filename, 1) ;
-	DLDEBUG(2,PerlIO_printf(PerlIO_stderr(), " libref=%x\n", RETVAL));
+	DLDEBUG(2,PerlIO_printf(Perl_debug_log, " libref=%x\n", RETVAL));
 	ST(0) = sv_newmortal() ;
 	if (RETVAL == NULL)
 	    SaveError(aTHX_ "%s",dlerror()) ;
@@ -598,10 +598,10 @@ dl_find_symbol(libhandle, symbolname)
 	void *		libhandle
 	char *		symbolname
 	CODE:
-	DLDEBUG(2,PerlIO_printf(PerlIO_stderr(), "dl_find_symbol(handle=%x, symbol=%s)\n",
+	DLDEBUG(2,PerlIO_printf(Perl_debug_log, "dl_find_symbol(handle=%x, symbol=%s)\n",
 		libhandle, symbolname));
 	RETVAL = dlsym(libhandle, symbolname);
-	DLDEBUG(2,PerlIO_printf(PerlIO_stderr(), "  symbolref = %x\n", RETVAL));
+	DLDEBUG(2,PerlIO_printf(Perl_debug_log, "  symbolref = %x\n", RETVAL));
 	ST(0) = sv_newmortal() ;
 	if (RETVAL == NULL)
 	    SaveError(aTHX_ "%s",dlerror()) ;
@@ -623,7 +623,7 @@ dl_install_xsub(perl_name, symref, filename="$Package")
     void *	symref 
     char *	filename
     CODE:
-    DLDEBUG(2,PerlIO_printf(PerlIO_stderr(), "dl_install_xsub(name=%s, symref=%x)\n",
+    DLDEBUG(2,PerlIO_printf(Perl_debug_log, "dl_install_xsub(name=%s, symref=%x)\n",
 	perl_name, symref));
     ST(0) = sv_2mortal(newRV((SV*)newXS(perl_name,
 					(void(*)(pTHX_ CV *))symref,
