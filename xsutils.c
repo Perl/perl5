@@ -1,3 +1,12 @@
+/*    xsutils.c
+ *
+ *    Copyright (c) 1999-2002, Larry Wall
+ *
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
+ *
+ */
+
 #include "EXTERN.h"
 #define PERL_IN_XSUTILS_C
 #include "perl.h"

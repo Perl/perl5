@@ -1,3 +1,12 @@
+/*    sharedsv.h
+ *
+ *    Copyright (c) 2001-2002, Larry Wall
+ *
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
+ *
+ */
+
 #ifdef USE_ITHREADS
 
 typedef struct {

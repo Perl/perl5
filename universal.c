@@ -1,3 +1,12 @@
+/*    universal.c
+ *
+ *    Copyright (c) 1997-2002, Larry Wall
+ *
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
+ *
+ */
+
 #include "EXTERN.h"
 #define PERL_IN_UNIVERSAL_C
 #include "perl.h"

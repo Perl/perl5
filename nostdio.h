@@ -1,3 +1,12 @@
+/*    nostdio.h
+ *
+ *    Copyright (c) 1987-2002, Larry Wall
+ *
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
+ *
+ */
+
 /*
  * Strong denial of stdio - make all stdio calls (we can think of) errors
  */

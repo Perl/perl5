@@ -1,3 +1,12 @@
+/*    fakestdio.h
+ *
+ *    Copyright (c) 2000-2002, Larry Wall
+ *
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
+ *
+ */
+
 /*
  * This is "source level" stdio compatibility mode.
  * We try and #define stdio functions in terms of PerlIO.

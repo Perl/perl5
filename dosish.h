@@ -1,3 +1,12 @@
+/*    dosish.h
+ *
+ *    Copyright (c) 1997-2002, Larry Wall
+ *
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
+ *
+ */
+
 #define ABORT() abort();
 
 #ifndef SH_PATH
