@@ -168,8 +168,8 @@ words ignoring delimiters that appear inside quotes.  &quotewords()
 returns all of the tokens in a single long list, while &nested_quotewords()
 returns a list of token lists corresponding to the elements of @lines.
 &parse_line() does tokenizing on a single string.  The &*quotewords()
-functions simply call &parse_lines(), so if you're only splitting
-one line you can call &parse_lines() directly and save a function
+functions simply call &parse_line(), so if you're only splitting
+one line you can call &parse_line() directly and save a function
 call.
 
 The $keep argument is a boolean flag.  If true, then the tokens are

@@ -882,6 +882,8 @@ See L<perllexwarn>.
 Disables all warnings regardless of C<use warnings> or C<$^W>.
 See L<perllexwarn>.
 
+=item B<-x>
+
 =item B<-x> I<directory>
 
 tells Perl that the program is embedded in a larger chunk of unrelated
@@ -993,7 +995,7 @@ Use with the same care as is reserved for nitroglycerin.
 
 =item :raw
 
-A pseudolayer that manipulates other layers.  Applying the <:raw>
+A pseudolayer that manipulates other layers.  Applying the C<:raw>
 layer is equivalent to calling C<binmode($fh)>.  It makes the stream
 pass each byte as-is without any translation.  In particular CRLF
 translation, and/or :utf8 intuited from locale are disabled.

@@ -3075,7 +3075,8 @@ Found in file sv.h
 
 =item SvOK
 
-Returns a boolean indicating whether the value is an SV.
+Returns a boolean indicating whether the value is an SV. It also tells
+whether the value is defined or not.
 
 	bool	SvOK(SV* sv)
 

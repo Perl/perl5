@@ -2094,7 +2094,34 @@ IPs that the connection might have come in on.
 
 =item getsockopt SOCKET,LEVEL,OPTNAME
 
-Returns the socket option requested, or undef if there is an error.
+Queries the option named OPTNAME associated with SOCKET at a given LEVEL.
+Options may exist at multiple protocol levels depending on the socket
+type, but at least the uppermost socket level SOL_SOCKET (defined in the
+C<Socket> module) will exist. To query options at another level the
+protocol number of the appropriate protocol controlling the option
+should be supplied. For example, to indicate that an option is to be
+interpreted by the TCP protocol, LEVEL should be set to the protocol
+number of TCP, which you can get using getprotobyname.
+
+The call returns a packed string representing the requested socket option,
+or C<undef> if there is an error (the error reason will be in $!). What
+exactly is in the packed string depends in the LEVEL and OPTNAME, consult
+your system documentation for details. A very common case however is that
+the option is an integer, in which case the result will be an packed
+integer which you can decode using unpack with the C<i> (or C<I>) format.
+
+An example testing if Nagle's algorithm is turned on on a socket:
+
+    use Socket;
+
+    defined(my $tcp = getprotobyname("tcp"))
+	or die "Could not determine the protocol number for tcp";
+    # my $tcp = Socket::IPPROTO_TCP; # Alternative
+    my $packed = getsockopt($socket, $tcp, Socket::TCP_NODELAY)
+	or die "Could not query TCP_NODELAY SOCKEt option: $!";
+    my $nodelay = unpack("I", $packed);
+    print "Nagle's algorithm is turned ", $nodelay ? "off\n" : "on\n";
+
 
 =item glob EXPR
 

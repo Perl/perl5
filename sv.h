@@ -428,7 +428,8 @@ double.  Checks the B<private> setting.  Use C<SvNIOK>.
 Unsets the NV/IV status of an SV.
 
 =for apidoc Am|bool|SvOK|SV* sv
-Returns a boolean indicating whether the value is an SV.
+Returns a boolean indicating whether the value is an SV. It also tells
+whether the value is defined or not.
 
 =for apidoc Am|bool|SvIOKp|SV* sv
 Returns a boolean indicating whether the SV contains an integer.  Checks
