@@ -5553,9 +5553,10 @@ S_simplify_sort(pTHX_ OP *o)
 	o->op_private |= OPpSORT_NUMERIC;
     if (k->op_type == OP_I_NCMP)
 	o->op_private |= OPpSORT_NUMERIC | OPpSORT_INTEGER;
-    op_free(cLISTOPo->op_first->op_sibling);	/* delete comparison block */
-    cLISTOPo->op_first->op_sibling = cLISTOPo->op_last;
-    cLISTOPo->op_children = 1;
+    kid = cLISTOPo->op_first->op_sibling;
+    cLISTOPo->op_first->op_sibling = kid->op_sibling; /* bypass old block */
+    op_free(kid);				      /* then delete it */
+    cLISTOPo->op_children--;
 }
 
 OP *

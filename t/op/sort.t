@@ -4,7 +4,7 @@ BEGIN {
     chdir 't' if -d 't';
     unshift @INC, '../lib';
 }
-print "1..37\n";
+print "1..38\n";
 
 # XXX known to leak scalars
 $ENV{PERL_DESTRUCT_LEVEL} = 0 unless $ENV{PERL_DESTRUCT_LEVEL} > 3;
@@ -191,9 +191,15 @@ print "# x = '$x'; expected = '$expected'\n";
     print ($x eq $expected ? "ok 36\n" : "not ok 36\n");
     print "# x = '$x'; expected = '$expected'\n";
 }
+
+# test that an optimized-away comparison block doesn't take any other
+# arguments away with it
+$x = join('', sort { $a <=> $b } 3, 1, 2);
+print $x eq "123" ? "ok 37\n" : "not ok 37\n";
+
 # test sorting in non-main package
 package Foo;
 @a = ( 5, 19, 1996, 255, 90 );
 @b = sort { $b <=> $a } @a;
-print ("@b" eq '1996 255 90 19 5' ? "ok 37\n" : "not ok 37\n");
+print ("@b" eq '1996 255 90 19 5' ? "ok 38\n" : "not ok 38\n");
 print "# x = '@b'\n";
