@@ -16,7 +16,7 @@ use IO::Socket;
 use Net::Cmd;
 use Net::Config;
 
-$VERSION = "2.18"; # $Id: //depot/libnet/Net/SMTP.pm#19 $
+$VERSION = "2.19"; # $Id: //depot/libnet/Net/SMTP.pm#20 $
 
 @ISA = qw(Net::Cmd IO::Socket::INET);
 
@@ -120,12 +120,7 @@ sub auth { # auth(username, password) by mengwong 20011106.  the only supported 
 sub hello
 {
  my $me = shift;
- my $domain = shift ||
-	      eval {
-		    require Net::Domain;
-		    Net::Domain::hostfqdn();
-		   } ||
-		"";
+ my $domain = shift || "localhost.localdomain";
  my $ok = $me->_EHLO($domain);
  my @msg = $me->message;
 
@@ -641,6 +636,6 @@ it under the same terms as Perl itself.
 
 =for html <hr>
 
-I<$Id: //depot/libnet/Net/SMTP.pm#19 $>
+I<$Id: //depot/libnet/Net/SMTP.pm#20 $>
 
 =cut
