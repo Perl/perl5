@@ -2766,6 +2766,10 @@ static char *mp_do_fileify_dirspec(pTHX_ char *dir,char *buf,int ts)
       dir[--dirlen] = '\0';
       dir[dirlen-1] = ']';
     }
+    if (dirlen >= 2 && !strcmp(dir+dirlen-2,".>")) {
+      dir[--dirlen] = '\0';
+      dir[dirlen-1] = '>';
+    }
 
     if ((cp1 = strrchr(dir,']')) != NULL || (cp1 = strrchr(dir,'>')) != NULL) {
       /* If we've got an explicit filename, we can just shuffle the string. */
@@ -2988,6 +2992,7 @@ static char *mp_do_fileify_dirspec(pTHX_ char *dir,char *buf,int ts)
           else if (ts) New(1312,retspec,retlen+16,char);
           else retspec = __fileify_retbuf;
           cp1 = strstr(esa,"][");
+          if (!cp1) cp1 = strstr(esa,"]<");
           dirlen = cp1 - esa;
           memcpy(retspec,esa,dirlen);
           if (!strncmp(cp1+2,"000000]",7)) {
