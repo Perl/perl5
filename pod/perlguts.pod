@@ -39,7 +39,7 @@ The four routines are:
     SV*  newSVpv(char*, int);
     SV*  newSVsv(SV*);
 
-To change the value of an *already-existing* SV, there are five routines:
+To change the value of an I<already-existing> SV, there are five routines:
 
     void  sv_setiv(SV*, IV);
     void  sv_setnv(SV*, double);
