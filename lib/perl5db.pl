@@ -475,7 +475,7 @@ sub DB {
 					  }}
 			}
 			if (!defined $main::{'_<' . $file}) {
-			    print $OUT "There's no code here matching $file.\n";
+			    print $OUT "No file matching `$file' is loaded.\n";
 			    next CMD;
 			} elsif ($file ne $filename) {
 			    *dbline = "::_<$file";
@@ -1033,6 +1033,7 @@ sub DB {
 		$piped= "";
 	    }
 	}			# CMD:
+	$exiting = 1 unless defined $cmd;
         map {$evalarg = $_; &eval} @$post;
     }				# if ($single || $signal)
     ($@, $!, $,, $/, $\, $^W) = @saved;
@@ -1047,14 +1048,14 @@ sub sub {
     if ($sub =~ /::AUTOLOAD$/) {
       $al = " for $ {$` . '::AUTOLOAD'}";
     }
-    ($frame & 4 
-     ? ( (print $LINEINFO ' ' x $#stack, "in  "), 
-	 # Why -1? But it works! :-(
-	 print_trace($LINEINFO, -1, 1, 1, "$sub$al") )
-     : print $LINEINFO ' ' x $#stack, "entering $sub$al\n") if $frame;
     push(@stack, $single);
     $single &= 1;
     $single |= 4 if $#stack == $deep;
+    ($frame & 4 
+     ? ( (print $LINEINFO ' ' x ($#stack - 1), "in  "), 
+	 # Why -1? But it works! :-(
+	 print_trace($LINEINFO, -1, 1, 1, "$sub$al") )
+     : print $LINEINFO ' ' x ($#stack - 1), "entering $sub$al\n") if $frame;
     if (wantarray) {
 	@ret = &$sub;
 	$single |= pop(@stack);
@@ -1200,20 +1201,33 @@ sub dump_trace {
   $skip++;
   $count += $skip;
   my ($p,$file,$line,$sub,$h,$args,$e,$r,@a,@sub,$context);
+  my $nothard = not $frame & 8;
+  local $frame = 0;		# Do not want to trace this.
+  my $otrace = $trace;
+  $trace = 0;
   for ($i = $skip; 
        $i < $count and ($p,$file,$line,$sub,$h,$context,$e,$r) = caller($i); 
        $i++) {
     @a = ();
     for $arg (@args) {
-      $_ = "$arg";
-      s/([\'\\])/\\$1/g;
-      s/([^\0]*)/'$1'/
-	unless /^(?: -?[\d.]+ | \*[\w:]* )$/x;
-      s/([\200-\377])/sprintf("M-%c",ord($1)&0177)/eg;
-      s/([\0-\37\177])/sprintf("^%c",ord($1)^64)/eg;
-      push(@a, $_);
+      my $type;
+      if (not defined $arg) {
+	push @a, "undef";
+      } elsif ($nothard and tied $arg) {
+	push @a, "tied";
+      } elsif ($nothard and $type = ref $arg) {
+	push @a, "ref($type)";
+      } else {
+	local $_ = "$arg";	# Safe to stringify now - should not call f().
+	s/([\'\\])/\\$1/g;
+	s/(.*)/'$1'/s
+	  unless /^(?: -?[\d.]+ | \*[\w:]* )$/x;
+	s/([\200-\377])/sprintf("M-%c",ord($1)&0177)/eg;
+	s/([\0-\37\177])/sprintf("^%c",ord($1)^64)/eg;
+	push(@a, $_);
+      }
     }
-    $context = $context ? '@' : '$';
+    $context = $context ? '@' : "\$";
     $args = $h ? [@a] : undef;
     $e =~ s/\n\s*\;\s*\Z// if $e;
     $e =~ s/[\\\']/\\$1/g if $e;
@@ -1228,6 +1242,7 @@ sub dump_trace {
 		file => $file, line => $line});
     last if $signal;
   }
+  $trace = $otrace;
   @sub;
 }
 
@@ -1552,7 +1567,7 @@ l		List next window of lines.
 -		List previous window of lines.
 w [line]	List window around line.
 .		Return to the executed line.
-f filename	Switch to viewing filename.
+f filename	Switch to viewing filename. Must be loaded.
 /pattern/	Search forwards for pattern; final / is optional.
 ?pattern?	Search backwards for pattern; final ? is optional.
 L		List all breakpoints and actions.
