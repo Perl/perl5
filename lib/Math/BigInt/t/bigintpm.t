@@ -531,11 +531,15 @@ $x = Math::BigInt->new('+inf'); ok_inf ($x,$y);
 
 # libc are confused what to call Infinity
 
+sub fix_inf {
+    $_[0] =~ s/^(inf(?:inity)?|\+\+)$/Inf/i; # HP-UX calls it "++"
+}
+
 sub ok_inf {
     my ($x, $y) = @_;
 
-    $x =~ s/^inf(?:inity)?/Inf/i;
-    $y =~ s/^inf(?:inity)?/Inf/i;
+    fix_inf($x);
+    fix_inf($y);
 
     ok($x, $y);
 }
