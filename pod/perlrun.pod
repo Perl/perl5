@@ -600,13 +600,17 @@ The command used to load the debugger code.  The default is:
 =item PERL5SHELL (specific to WIN32 port)
 
 May be set to an alternative shell that perl must use internally for
-executing "backtick" commands or system().  Perl doesn't use COMSPEC
-for this purpose because COMSPEC has a high degree of variability
-among users, leading to portability concerns.  Besides, perl can use
-a shell that may not be fit for interactive use, and setting COMSPEC
-to such a shell may interfere with the proper functioning of other
-programs (which usually look in COMSPEC to find a shell fit for
-interactive use).
+executing "backtick" commands or system().  Default is C<cmd.exe /x/c>
+on WindowsNT and C<command.com /c> on Windows95.  The value is considered
+to be space delimited.  Precede any character that needs to be protected
+(like a space or backslash) with a backslash.
+
+Note that Perl doesn't use COMSPEC for this purpose because
+COMSPEC has a high degree of variability among users, leading to
+portability concerns.  Besides, perl can use a shell that may not be
+fit for interactive use, and setting COMSPEC to such a shell may
+interfere with the proper functioning of other programs (which usually
+look in COMSPEC to find a shell fit for interactive use).
 
 =item PERL_DEBUG_MSTATS
 

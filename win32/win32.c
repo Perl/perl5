@@ -48,14 +48,16 @@ int _CRT_glob = 0;
 #define EXECF_SPAWN_NOWAIT 3
 
 static DWORD		os_id(void);
-static char *		get_shell(void);
+static void		get_shell(void);
+static long		tokenize(char *str, char **dest, char ***destv);
 static int		do_spawn2(char *cmd, int exectype);
 static BOOL		has_redirection(char *ptr);
 static long		filetime_to_clock(PFILETIME ft);
 
-BOOL	w32_env_probed = FALSE;
+char *	w32_perlshell_tokens = Nullch;
+char **	w32_perlshell_vec;
+long	w32_perlshell_items = -1;
 DWORD	w32_platform = (DWORD)-1;
-char	w32_shellpath[MAX_PATH+1];
 char	w32_perllib_root[MAX_PATH+1];
 HANDLE	w32_perldll_handle = INVALID_HANDLE_VALUE;
 #ifndef __BORLANDC__
@@ -206,12 +208,62 @@ os_id(void)
     return (w32_platform);
 }
 
-/* XXX PERL5SHELL must be tokenized to allow switches to be passed */
-static char *
+/* Tokenize a string.  Words are null-separated, and the list
+ * ends with a doubled null.  Any character (except null and
+ * including backslash) may be escaped by preceding it with a
+ * backslash (the backslash will be stripped).
+ * Returns number of words in result buffer.
+ */
+static long
+tokenize(char *str, char **dest, char ***destv)
+{
+    char *retstart = Nullch;
+    char **retvstart = 0;
+    int items = -1;
+    if (str) {
+	int slen = strlen(str);
+	register char *ret;
+	register char **retv;
+	New(1307, ret, slen+2, char);
+	New(1308, retv, (slen+3)/2, char*);
+
+	retstart = ret;
+	retvstart = retv;
+	*retv = ret;
+	items = 0;
+	while (*str) {
+	    *ret = *str++;
+	    if (*ret == '\\' && *str)
+		*ret = *str++;
+	    else if (*ret == ' ') {
+		while (*str == ' ')
+		    str++;
+		if (ret == retstart)
+		    ret--;
+		else {
+		    *ret = '\0';
+		    ++items;
+		    if (*str)
+			*++retv = ret+1;
+		}
+	    }
+	    else if (!*str)
+		++items;
+	    ret++;
+	}
+	retvstart[items] = Nullch;
+	*ret++ = '\0';
+	*ret = '\0';
+    }
+    *dest = retstart;
+    *destv = retvstart;
+    return items;
+}
+
+static void
 get_shell(void)
 {
-    if (!w32_env_probed) {
-	char* defaultshell = (IsWinNT() ? "cmd.exe" : "command.com");
+    if (!w32_perlshell_tokens) {
 	/* we don't use COMSPEC here for two reasons:
 	 *  1. the same reason perl on UNIX doesn't use SHELL--rampant and
 	 *     uncontrolled unportability of the ensuing scripts.
@@ -219,12 +271,12 @@ get_shell(void)
 	 *     interactive use (which is what most programs look in COMSPEC
 	 *     for).
 	 */
-	char *usershell = getenv("PERL5SHELL");  
-
-	w32_env_probed = TRUE;
-	strcpy(w32_shellpath, usershell ? usershell : defaultshell);
+	char* defaultshell = (IsWinNT() ? "cmd.exe /x/c" : "command.com /c");
+	char *usershell = getenv("PERL5SHELL");
+	w32_perlshell_items = tokenize(usershell ? usershell : defaultshell,
+				       &w32_perlshell_tokens,
+				       &w32_perlshell_vec);
     }
-    return w32_shellpath;
 }
 
 int
@@ -242,7 +294,8 @@ do_aspawn(void *vreally, void **vmark, void **vsp)
     if (sp <= mark)
 	return -1;
 
-    New(1301, argv, (sp - mark) + 4, char*);
+    get_shell();
+    New(1306, argv, (sp - mark) + w32_perlshell_items + 2, char*);
 
     if (SvNIOKp(*(mark+1)) && !SvPOKp(*(mark+1))) {
 	++mark;
@@ -263,21 +316,18 @@ do_aspawn(void *vreally, void **vmark, void **vsp)
 
     if (status < 0 && errno == ENOEXEC) {
 	/* possible shell-builtin, invoke with shell */
-	int sh_items = 2;
+	int sh_items;
+	sh_items = w32_perlshell_items;
 	while (--index >= 0)
 	    argv[index+sh_items] = argv[index];
-	if (IsWinNT())
-	    argv[--sh_items] = "/x/c";   /* always enable command extensions */
-	else
-	    argv[--sh_items] = "/c";
-	argv[--sh_items] = get_shell();
+	while (--sh_items >= 0)
+	    argv[sh_items] = w32_perlshell_vec[sh_items];
    
 	status = win32_spawnvp(flag,
 			       (really ? SvPV(really,na) : argv[0]),
 			       (const char* const*)argv);
     }
 
-    Safefree(argv);
     if (status < 0) {
 	if (dowarn)
 	    warn("Can't spawn \"%s\": %s", argv[0], strerror(errno));
@@ -285,6 +335,7 @@ do_aspawn(void *vreally, void **vmark, void **vsp)
     }
     else if (flag != P_NOWAIT)
 	status *= 256;
+    Safefree(argv);
     return (statusvalue = status);
 }
 
@@ -316,7 +367,7 @@ do_spawn2(char *cmd, int exectype)
 		*s++ = '\0';
 	}
 	*a = Nullch;
-	if(argv[0]) {
+	if (argv[0]) {
 	    switch (exectype) {
 	    case EXECF_SPAWN:
 		status = win32_spawnvp(P_WAIT, argv[0],
@@ -337,13 +388,12 @@ do_spawn2(char *cmd, int exectype)
 	Safefree(cmd2);
     }
     if (needToTry) {
-	char *argv[4];
-	int i = 0;
-	argv[i++] = get_shell();
-	if (IsWinNT())
-	    argv[i++] = "/x/c";
-	else
-	    argv[i++] = "/c";
+	char **argv;
+	int i = -1;
+	get_shell();
+	New(1306, argv, w32_perlshell_items + 2, char*);
+	while (++i < w32_perlshell_items)
+	    argv[i] = w32_perlshell_vec[i];
 	argv[i++] = cmd;
 	argv[i] = Nullch;
 	switch (exectype) {
@@ -359,12 +409,14 @@ do_spawn2(char *cmd, int exectype)
 	    status = win32_execvp(argv[0], (const char* const*)argv);
 	    break;
 	}
+	cmd = argv[0];
+	Safefree(argv);
     }
     if (status < 0) {
 	if (dowarn)
 	    warn("Can't %s \"%s\": %s",
 		 (exectype == EXECF_EXEC ? "exec" : "spawn"),
-		 argv[0], strerror(errno));
+		 cmd, strerror(errno));
 	status = 255 * 256;
     }
     else if (exectype != EXECF_SPAWN_NOWAIT)
