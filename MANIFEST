@@ -111,6 +111,7 @@ ext/B/B/Bblock.pm	Compiler basic block analysis support
 ext/B/B/Bytecode.pm	Compiler Bytecode backend
 ext/B/B/C.pm		Compiler C backend
 ext/B/B/CC.pm		Compiler CC backend
+ext/B/B/Concise.pm	Compiler Concise backend
 ext/B/B/Debug.pm	Compiler Debug backend
 ext/B/B/Deparse.pm	Compiler Deparse backend
 ext/B/B/Disassembler.pm	Compiler Disassembler backend
