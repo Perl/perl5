@@ -136,8 +136,10 @@ Perl_safexmalloc
 Perl_safexfree
 Perl_safexrealloc
 Perl_my_memcmp
+Perl_my_memset
 Perl_cshlen
 Perl_cshname
+boot_DynaLoader
 !END!OF!SKIP!
 
 # All symbols have a Perl_ prefix because that's what embed.h

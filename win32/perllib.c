@@ -52,46 +52,6 @@ RunPerl(int argc, char **argv, char **env, void *iosubsystem)
     return (exitstatus);
 }
 
-/* Register any extra external extensions */
-
-char *staticlinkmodules[] = {
-    "DynaLoader",
-    NULL,
-};
-
-EXTERN_C void boot_DynaLoader _((CV* cv));
-
-static
-XS(w32_GetCurrentDirectory)
-{
- dXSARGS;
- SV *sv = sv_newmortal();
- /* Make one call with zero size - return value is required size */
- DWORD len = GetCurrentDirectory((DWORD)0,NULL);
- SvUPGRADE(sv,SVt_PV);
- SvGROW(sv,len);
- SvCUR(sv) = GetCurrentDirectory((DWORD) SvLEN(sv), SvPVX(sv));
- /* 
-  * If result != 0 
-  *   then it worked, set PV valid, 
-  *   else leave it 'undef' 
-  */
- if (SvCUR(sv))
-  SvPOK_on(sv);
- EXTEND(sp,1);
- ST(0) = sv;
- XSRETURN(1);
-}
-
-static void
-xs_init()
-{
-    char *file = __FILE__;
-    dXSUB_SYS;
-    newXS("DynaLoader::boot_DynaLoader", boot_DynaLoader, file);
-    newXS("Win32::GetCurrentDirectory", w32_GetCurrentDirectory, file);
-}
-
 extern HANDLE PerlDllHandle;
 
 BOOL APIENTRY
@@ -133,3 +93,66 @@ DllMain(HANDLE hModule,		/* DLL module handle */
     }
     return TRUE;
 }
+
+/* Register any extra external extensions */
+
+char *staticlinkmodules[] = {
+    "DynaLoader",
+    NULL,
+};
+
+EXTERN_C void boot_DynaLoader _((CV* cv));
+
+static
+XS(w32_GetCurrentDirectory)
+{
+    dXSARGS;
+    SV *sv = sv_newmortal();
+    /* Make one call with zero size - return value is required size */
+    DWORD len = GetCurrentDirectory((DWORD)0,NULL);
+    SvUPGRADE(sv,SVt_PV);
+    SvGROW(sv,len);
+    SvCUR(sv) = GetCurrentDirectory((DWORD) SvLEN(sv), SvPVX(sv));
+    /* 
+     * If result != 0 
+     *   then it worked, set PV valid, 
+     *   else leave it 'undef' 
+     */
+    if (SvCUR(sv))
+	SvPOK_on(sv);
+    EXTEND(sp,1);
+    ST(0) = sv;
+    XSRETURN(1);
+}
+
+static
+XS(w32_GetLastError)
+{
+	dXSARGS;
+	XSRETURN_IV(GetLastError());
+}
+
+XS(w32_IsWinNT)
+{
+	dXSARGS;
+	XSRETURN_IV(IsWinNT());
+}
+
+XS(w32_IsWin95)
+{
+	dXSARGS;
+	XSRETURN_IV(IsWin95());
+}
+
+static void
+xs_init()
+{
+    char *file = __FILE__;
+    dXSUB_SYS;
+    newXS("DynaLoader::boot_DynaLoader", boot_DynaLoader, file);
+    newXS("Win32::GetCurrentDirectory", w32_GetCurrentDirectory, file);
+    newXS("Win32::GetLastError", w32_GetLastError, file);
+    newXS("Win32::IsWinNT", w32_IsWinNT, file);
+    newXS("Win32::IsWin95", w32_IsWin95, file);
+}
+

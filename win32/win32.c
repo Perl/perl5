@@ -31,24 +31,26 @@
 #define CROAK croak
 #define WARN warn
 
+static DWORD IdOS(void);
+
 extern WIN32_IOSUBSYSTEM	win32stdio;
 __declspec(thread) PWIN32_IOSUBSYSTEM	pIOSubSystem = &win32stdio;
 /*__declspec(thread) PWIN32_IOSUBSYSTEM	pIOSubSystem = NULL;*/
 
 BOOL  ProbeEnv = FALSE;
-DWORD Win32System;
+DWORD Win32System = (DWORD)-1;
 char  szShellPath[MAX_PATH+1];
 char  szPerlLibRoot[MAX_PATH+1];
 HANDLE PerlDllHandle = INVALID_HANDLE_VALUE;
 
 int 
 IsWin95(void) {
-    return (Win32System == VER_PLATFORM_WIN32_WINDOWS);
+    return (IdOS() == VER_PLATFORM_WIN32_WINDOWS);
 }
 
 int
 IsWinNT(void) {
-    return (Win32System == VER_PLATFORM_WIN32_NT);
+    return (IdOS() == VER_PLATFORM_WIN32_NT);
 }
 
 void *
@@ -298,16 +300,18 @@ my_pclose(PerlIO *fp)
     return win32_pclose(fp);
 }
 
-static void
+static DWORD
 IdOS(void)
 {
-    OSVERSIONINFO osver;
+    static OSVERSIONINFO osver;
 
-    memset(&osver, 0, sizeof(OSVERSIONINFO));
-    osver.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-    GetVersionEx(&osver);
-    Win32System = osver.dwPlatformId;
-    return;
+    if (osver.dwPlatformId != Win32System) {
+	memset(&osver, 0, sizeof(OSVERSIONINFO));
+	osver.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+	GetVersionEx(&osver);
+	Win32System = osver.dwPlatformId;
+    }
+    return (Win32System);
 }
 
 static char *
@@ -318,7 +322,7 @@ GetShell(void)
     static char* szWinNTDefaultShell = "cmd.exe";
    
     if (!ProbeEnv) {
-	IdOS(), ProbeEnv = TRUE;
+	ProbeEnv = TRUE;
 	if (IsWin95()) {
 	    strcpy(szShellPath, szWin95DefaultShell);
 	}
