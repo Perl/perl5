@@ -53,6 +53,9 @@ PERLVAR(he_root,	HE *)		/* free he list--shared by interpreters */
 PERLVAR(nice_chunk,	char *)		/* a nice chunk of memory to reuse */
 PERLVAR(nice_chunk_size,	U32)		/* how nice the chunk of memory is */
 
+PERLVARI(runops,	runops_proc_t *,	RUNOPS_DEFAULT)	
+
+#ifndef USE_THREADS
 /* Stack for currently executing thread--context switch must handle this.     */
 PERLVAR(stack_base,	SV **)		/* stack->array_ary */
 PERLVAR(stack_sp,	SV **)		/* stack pointer now */
@@ -65,7 +68,7 @@ PERLVAR(opsave,	OP *)		/* save current op register across longjmps */
 #else
 PERLVAR(op,	OP *)		/* current op--when not in a global register */
 #endif
-PERLVARI(runops,	runops_proc_t *,	RUNOPS_DEFAULT)	
+
 PERLVAR(scopestack,	I32 *)		/* blocks we've entered */
 PERLVAR(scopestack_ix,	I32)		
 PERLVAR(scopestack_max,	I32)		
@@ -82,16 +85,22 @@ PERLVAR(markstack,	I32 *)		/* stackmarks we're remembering */
 PERLVAR(markstack_ptr,	I32 *)		/* stackmarks we're remembering */
 PERLVAR(markstack_max,	I32 *)		/* stackmarks we're remembering */
 
+
+
 PERLVAR(curpad,	SV **)		
 
 /* temp space */
 PERLVAR(Sv,	SV *)		
 PERLVAR(Xpv,	XPV *)		
-PERLVAR(tokenbuf[256],	char)		
+
 PERLVAR(statbuf,	struct stat)		
 #ifdef HAS_TIMES
 PERLVAR(timesbuf,	struct tms)		
 #endif
+
+#endif /* USE_THREADS */
+
+PERLVAR(tokenbuf[256],	char)		
 #if defined(WIN32) && defined(__GNUC__)
 PERLVAR(na,	static STRLEN)		
 #else
@@ -197,10 +206,3 @@ PERLVARI(numeric_local,	bool,	TRUE)	/* Assume local numerics */
 
 #endif /* !USE_LOCALE_NUMERIC */
 
-#ifndef MULTIPLICITY
-#define IEXT EXT
-#define IINIT(x) INIT(x)
-#include "intrpvar.h"
-#undef IEXT
-#undef IINIT
-#endif

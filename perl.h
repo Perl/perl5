@@ -1608,50 +1608,55 @@ typedef enum {
 #define HINT_STRICT_VARS	0x00000400
 #define HINT_LOCALE		0x00000800
 
-
-/***********************************************/
-/* Global only to current interpreter instance */
-/***********************************************/
+/* Various states of an input record separator SV (rs, nrs) */
+#define RsSNARF(sv)   (! SvOK(sv))
+#define RsSIMPLE(sv)  (SvOK(sv) && SvCUR(sv))
+#define RsPARA(sv)    (SvOK(sv) && ! SvCUR(sv))
 
 #ifdef MULTIPLICITY
-#define IEXT
-#define IINIT(x)
+/* If we have multiple interpreters define a struct 
+   holding variables which must be per-interpreter
+   If we don't have threads anything that would have 
+   be per-thread is per-interpreter.
+*/
+
+#define PERLVAR(var,type) type var;
+#define PERLVARI(var,type,init) type var;
+
 struct interpreter {
-#include "interpvar.h"
+#ifndef USE_THREADS
+#include "thrdvar.h"
+#endif
+#include "intrpvar.h"
 };
-#undef IEXT
-#undef IINIT
+
+#undef PERLVAR
+#undef PERLVARI
+
 #else
 struct interpreter {
     char broiled;
 };
 #endif
 
-
-/* Various states of an input record separator SV (rs, nrs) */
-#define RsSNARF(sv)   (! SvOK(sv))
-#define RsSIMPLE(sv)  (SvOK(sv) && SvCUR(sv))
-#define RsPARA(sv)    (SvOK(sv) && ! SvCUR(sv))
-
-/* perlvars needs to be before thread.h until we sort out
-   thread.h's #define stuff
+#ifdef USE_THREADS
+/* If we have threads define a struct with all the variables
+ * that have to be per-thread
  */
-#define PERLVAR(var,type) EXT type var;
-#define PERLVARI(var,type,init) EXT type var INIT(init);
-#include "perlvars.h"
+
+#define PERLVAR(var,type) type var;
+#define PERLVARI(var,type,init) type var;
+
+struct perl_thread {
+#include "thrdvar.h"
+};
+
 #undef PERLVAR
 #undef PERLVARI
+#endif
 
 typedef struct perl_thread *Thread;
 #include "thread.h"
-
-#ifdef USE_THREADS
-struct perl_thread {
-#define PERLVAR(var,type) type var;
-#include "thrdvar.h"
-#undef PERLVAR
-};
-#endif
 
 #include "pp.h"
 
@@ -1667,7 +1672,30 @@ END_EXTERN_C
 #define sv_setptrref(rv,ptr) sv_setref_iv(rv,Nullch,(IV)ptr)
 #endif
 
-/* The following must follow proto.h */
+/* The following must follow proto.h as #defines mess up syntax */
+
+#include "embedvar.h"
+
+/* Now include all the 'global' variables 
+ * If we don't have threads or multiple interpreters
+ * these include variables that would have been their struct-s 
+ */
+
+#define PERLVAR(var,type) EXT type var;
+#define PERLVARI(var,type,init) EXT type var INIT(init);
+
+#include "perlvars.h"
+
+#ifndef MULTIPLICITY
+#include "intrpvar.h"
+#endif
+
+#ifndef USE_THREADS
+#include "thrdvar.h"
+#endif
+
+#undef PERLVAR
+#undef PERLVARI
 
 #if defined(HASATTRIBUTE) && defined(WIN32)
 /*

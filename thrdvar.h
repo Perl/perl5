@@ -1,5 +1,6 @@
 /* Per-thread variables */
 /* Important ones in the first cache line (if alignment is done right) */
+
 PERLVAR(Tstack_sp,	SV **)		
 #ifdef OP_IN_REGISTER
 PERLVAR(Topsave,	OP *)		
@@ -7,8 +8,8 @@ PERLVAR(Topsave,	OP *)
 PERLVAR(Top,		OP *)		
 #endif
 PERLVAR(Tcurpad,	SV **)		
-PERLVAR(Tstack_base,	SV **)		
 
+PERLVAR(Tstack_base,	SV **)		
 PERLVAR(Tstack_max,	SV **)		
 
 PERLVAR(Tscopestack,	I32 *)		
@@ -27,58 +28,59 @@ PERLVAR(Tmarkstack,	I32 *)
 PERLVAR(Tmarkstack_ptr,	I32 *)		
 PERLVAR(Tmarkstack_max,	I32 *)		
 
-PERLVAR(TSv,	SV *)		
-PERLVAR(TXpv,	XPV *)		
+PERLVAR(TSv,		SV *)		
+PERLVAR(TXpv,		XPV *)		
 PERLVAR(Tstatbuf,	struct stat)		
 #ifdef HAS_TIMES
 PERLVAR(Ttimesbuf,	struct tms)		
 #endif
     
-/* XXX What about regexp stuff? */
-
 /* Now the fields that used to be "per interpreter" (even when global) */
 
 /* Fields used by magic variables such as $@, $/ and so on */
-PERLVAR(Ttainted,	bool)		
-PERLVAR(Tcurpm,		PMOP *)		
+PERLVAR(Ttainted,	bool)		/* using variables controlled by $< */
+PERLVAR(Tcurpm,		PMOP *)		/* what to do \ interps from */
 PERLVAR(Tnrs,		SV *)		
-PERLVAR(Trs,		SV *)		
+PERLVAR(Trs,		SV *)		/* $/ */
 PERLVAR(Tlast_in_gv,	GV *)		
-PERLVAR(Tofs,		char *)		
+PERLVAR(Tofs,		char *)		/* $, */
 PERLVAR(Tofslen,	STRLEN)		
 PERLVAR(Tdefoutgv,	GV *)		
-PERLVAR(Tchopset,	char *)		
+PERLVARI(Tchopset,	char *,	" \n-")	/* $: */
 PERLVAR(Tformtarget,	SV *)		
 PERLVAR(Tbodytarget,	SV *)		
 PERLVAR(Ttoptarget,	SV *)		
 
-    /* Stashes */
-PERLVAR(Tdefstash,	HV *)		
-PERLVAR(Tcurstash,	HV *)		
+/* Stashes */
+PERLVAR(Tdefstash,	HV *)		/* main symbol table */
+PERLVAR(Tcurstash,	HV *)		/* symbol table for current package */
 
-    /* Stacks */
+/* Stacks */
 PERLVAR(Ttmps_stack,	SV **)		
-PERLVAR(Ttmps_ix,	I32)		
-PERLVAR(Ttmps_floor,	I32)		
+PERLVARI(Ttmps_ix,	I32,	-1)	
+PERLVARI(Ttmps_floor,	I32,	-1)	
 PERLVAR(Ttmps_max,	I32)		
 
-PERLVAR(Tin_eval,	int)		
-PERLVAR(Trestartop,	OP *)		
-PERLVAR(Tdelaymagic,	int)		
-PERLVAR(Tdirty,		bool)		
-PERLVAR(Tlocalizing,	U8)		
-PERLVAR(Tcurcop,	COP *)		
+PERLVAR(Trestartop,	OP *)		/* Are we propagating an error from croak? */
+PERLVARI(Tcurcop,	COP * VOL,	&compiling)	
+PERLVAR(Tin_eval,	VOL int)	/* trap "fatal" errors? */
+PERLVAR(Tdelaymagic,	int)		/* ($<,$>) = ... */
+PERLVAR(Tdirty,		bool)		/* In the middle of tearing things down? */
+PERLVAR(Tlocalizing,	U8)		/* are we processing a local() list? */
 
 PERLVAR(Tcxstack,	PERL_CONTEXT *)		
-PERLVAR(Tcxstack_ix,	I32)		
-PERLVAR(Tcxstack_max,	I32)		
+PERLVARI(Tcxstack_ix,	I32,	-1)	
+PERLVARI(Tcxstack_max,	I32,	128)	
 
-PERLVAR(Tcurstack,	AV *)		
-PERLVAR(Tmainstack,	AV *)		
-PERLVAR(Ttop_env,	JMPENV *)		
-PERLVAR(Tstart_env,	JMPENV)			/* Top of top_env longjmp() chain */
+PERLVAR(Tcurstack,	AV *)			/* THE STACK */
+PERLVAR(Tmainstack,	AV *)			/* the stack when nothing funny is happening */
+PERLVAR(Ttop_env,	JMPENV *)		/* ptr. to current sigjmp() environment */
+PERLVAR(Tstart_env,	JMPENV)			/* empty startup sigjmp() environment */
 
 /* XXX Sort stuff, firstgv secongv and so on? */
+/* XXX What about regexp stuff? */
+
+#ifdef USE_THREADS
 
 PERLVAR(oursv,		SV *)		
 PERLVAR(cvcache,	HV *)		
@@ -99,3 +101,4 @@ PERLVAR(i,		struct thread_intern)	/* Platform-dependent internals */
 
 PERLVAR(trailing_nul,	char)			/* For the sake of thrsv and oursv */
 
+#endif /* USE_THREADS */

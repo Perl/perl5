@@ -12,6 +12,8 @@
 INST_DRV=c:
 INST_TOP=$(INST_DRV)\perl5004.5x
 BUILDOPT=-DUSE_THREADS
+#BUILDOPT=-DMULTIPLICITY 
+#BUILDOPT=-DMULTIPLICITY -DUSE_THREADS
 CORECCOPT=
 
 #
@@ -243,6 +245,7 @@ CORE_H = ..\av.h	\
 	..\EXTERN.h	\
 	..\perlvars.h	\
 	..\intrpvar.h	\
+	..\thrdvar.h	\
 	.\include\dirent.h	\
 	.\include\netdb.h	\
 	.\include\sys\socket.h	\

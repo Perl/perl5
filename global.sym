@@ -7,8 +7,6 @@ threads_mutex
 AMG_names
 Error
 No
-Sv
-Xpv
 Yes
 abs_amg
 add_amg
@@ -45,7 +43,6 @@ cryptseen
 cshlen
 cshname
 curinterp
-curpad
 dc
 debug
 dec_amg
@@ -103,9 +100,6 @@ log_amg
 lshift_amg
 lshift_ass_amg
 lt_amg
-markstack
-markstack_max
-markstack_ptr
 max_intro_pending
 maxo
 min_intro_pending
@@ -151,12 +145,10 @@ numeric_standard
 numer_amg
 oldbufptr
 oldoldbufptr
-op
 op_desc
 op_name
 op_seqmax
 opargs
-opsave
 origalen
 origenviron
 osname
@@ -180,9 +172,6 @@ regnext
 regprop
 repeat_amg
 repeat_ass_amg
-retstack
-retstack_ix
-retstack_max
 rsfp
 rsfp_filters
 rshift_amg
@@ -190,14 +179,8 @@ rshift_ass_amg
 runops
 runops_debug
 runops_standard
-savestack
-savestack_ix
-savestack_max
 saw_return
 scmp_amg
-scopestack
-scopestack_ix
-scopestack_max
 scrgv
 seq_amg
 sge_amg
@@ -211,10 +194,6 @@ sle_amg
 slt_amg
 sne_amg
 sqrt_amg
-stack_base
-stack_max
-stack_sp
-statbuf
 string_amg
 sub_generation
 subline
@@ -227,7 +206,6 @@ sv_yes
 thisexpr
 threadsv_names
 thr_key
-timesbuf
 tokenbuf
 uid
 varies
@@ -253,6 +231,7 @@ vtbl_nkeys
 vtbl_pack
 vtbl_packelem
 vtbl_pos
+vtbl_regexp
 vtbl_sig
 vtbl_sigelem
 vtbl_substr
@@ -427,6 +406,9 @@ dump_op
 dump_packsubs
 dump_pm
 dump_sub
+eval_cond
+eval_mutex
+eval_owner
 fbm_compile
 fbm_instr
 fetch_gv
@@ -1123,6 +1105,7 @@ sv_isobject
 sv_len
 sv_magic
 sv_mortalcopy
+sv_mutex
 sv_newmortal
 sv_newref
 sv_peek

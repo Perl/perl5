@@ -193,6 +193,9 @@ Perl_new_struct_thread
 Perl_nthreads
 Perl_nthreads_cond
 Perl_per_thread_magicals
+Perl_thread_create
+Perl_find_threadsv
+Perl_threadsv_names
 Perl_thrsv
 Perl_unlock_condpair
 Perl_vtbl_mutex
@@ -204,27 +207,34 @@ Perl_sv_uv
 Perl_sv_pvn
 Perl_newRV_noinc
 !END!OF!SKIP!
+
  }
 
-if ($define{'USE_THISPTR'} || $define{'USE_THREADS'})
+if ($define{'USE_THREADS'} || $define{'MULTIPLICITY'})
  {
-  open(THREAD,"<../thread.sym") || die "Cannot open thread.sym:$!";
+  open(THREAD,"<../thrdvar.h") || die "Cannot open ../thrdvar.h:$!";
   while (<THREAD>)
    {
-    next if (!/^[A-Za-z]/);
-    next if (/_amg[ \t]*$/);
-    $skip_sym .= "Perl_".$_;
+    if (/\bPERLVARI?\(T(\w+)/)
+     {
+      $skip_sym .= "Perl_".$1."\n";
+     } 
    } 
   close(THREAD); 
-  $skip_sym .= "Perl_op\n";
  } 
 
-unless ($define{'USE_THREADS'})
+if ($define{'MULTIPLICITY'})
  {
-  $skip_sym .= "Perl_thread_create\n";
-  $skip_sym .= "Perl_find_threadsv\n";
-  $skip_sym .= "Perl_threadsv_names\n";
- }
+  open(THREAD,"<../intrpvar.h") || die "Cannot open ../intrpvar.h:$!";
+  while (<THREAD>)
+   {
+    if (/\bPERLVARI?\(I(\w+)/)
+     {
+      $skip_sym .= "Perl_".$1."\n";
+     } 
+   } 
+  close(THREAD); 
+ } 
 
 # All symbols have a Perl_ prefix because that's what embed.h
 # sticks in front of them.
