@@ -8,7 +8,7 @@ require Exporter;
 use vars qw/@ISA $VERSION/;
 @ISA = qw(Exporter);
 
-$VERSION = '0.36';
+$VERSION = '0.37';
 
 # Package to store unsigned big integers in decimal and do math with them
 
@@ -226,6 +226,7 @@ sub _two
 
 sub _copy
   {
+  # make a true copy
   [ @{$_[1]} ];
   }
 
@@ -250,7 +251,7 @@ sub _str
   # leading zero parts in internal representation)
   $l --; $ret .= int($ar->[$l]); $l--;
   # Interestingly, the pre-padd method uses more time
-  # the old grep variant takes longer (14 to 10 sec)
+  # the old grep variant takes longer (14 vs. 10 sec)
   my $z = '0' x ($BASE_LEN-1);                            
   while ($l >= 0)
     {
@@ -296,8 +297,7 @@ sub _add
  
   # for each in Y, add Y to X and carry. If after that, something is left in
   # X, foreach in X add carry to X and then return X, carry
-  # Trades one "$j++" for having to shift arrays, $j could be made integer
-  # but this would impose a limit to number-length of 2**32.
+  # Trades one "$j++" for having to shift arrays
   my $i; my $car = 0; my $j = 0;
   for $i (@$y)
     {
@@ -314,8 +314,7 @@ sub _add
 sub _inc
   {
   # (ref to int_num_array, ref to int_num_array)
-  # routine to add 1 to a base 1eX numbers
-  # This routine modifies array x
+  # Add 1 to $x, modify $x in place
   my ($c,$x) = @_;
 
   for my $i (@$x)
@@ -330,17 +329,16 @@ sub _inc
 sub _dec
   {
   # (ref to int_num_array, ref to int_num_array)
-  # routine to add 1 to a base 1eX numbers
-  # This routine modifies array x
+  # Sub 1 from $x, modify $x in place
   my ($c,$x) = @_;
 
   my $MAX = $BASE-1;				# since MAX_VAL based on MBASE
   for my $i (@$x)
     {
     last if (($i -= 1) >= 0);			# early out
-    $i = $MAX;					# overflow, next
+    $i = $MAX;					# underflow, next
     }
-  pop @$x if $x->[-1] == 0 && @$x > 1;		# last overflowed (but leave 0)
+  pop @$x if $x->[-1] == 0 && @$x > 1;		# last underflowed (but leave 0)
   $x;
   }                                                                             
 
@@ -787,6 +785,7 @@ sub _div_use_div
       return $x;
       }
     # now calculate $x / $yorg
+
     if (length(int($yorg->[-1])) == length(int($x->[-1])))
       {
       # same length, so make full compare, and if equal, return 1
@@ -916,31 +915,28 @@ sub _acmp
   # internal absolute post-normalized compare (ignore signs)
   # ref to array, ref to array, return <0, 0, >0
   # arrays must have at least one entry; this is not checked for
-
   my ($c,$cx,$cy) = @_;
+ 
+  # shortcut for short numbers 
+  return (($cx->[0] <=> $cy->[0]) <=> 0) 
+   if scalar @$cx == scalar @$cy && scalar @$cx == 1;
 
   # fast comp based on number of array elements (aka pseudo-length)
-  my $lxy = scalar @$cx - scalar @$cy;
+  my $lxy = (scalar @$cx - scalar @$cy)
+  # or length of first element if same number of elements (aka difference 0)
+    ||
+  # need int() here because sometimes the last element is '00018' vs '18'
+   (length(int($cx->[-1])) - length(int($cy->[-1])));
   return -1 if $lxy < 0;				# already differs, ret
   return 1 if $lxy > 0;					# ditto
 
-  # now calculate length based on digits, not parts
-  # we need only the length of the last element, since both array have the
-  # same number of parts
-  $lxy = length(int($cx->[-1])) - length(int($cy->[-1]));
-  return -1 if $lxy < 0;
-  return 1 if $lxy > 0;
-
-  # hm, same lengths,  but same contents? So we need to check all parts:
-  my $a; my $j = scalar @$cx - 1;
   # manual way (abort if unequal, good for early ne)
-  while ($j >= 0)
+  my $a; my $j = scalar @$cx;
+  while (--$j >= 0)
     {
-    last if ($a = $cx->[$j] - $cy->[$j]); $j--;
+    last if ($a = $cx->[$j] - $cy->[$j]);
     }
-  return 1 if $a > 0;
-  return -1 if $a < 0;
-  0;						# numbers are equal
+  $a <=> 0;
   }
 
 sub _len
@@ -1149,7 +1145,7 @@ sub _mod
     $r = 0 if $r == $y;
     $x->[0] = $r;
     }
-  splice (@$x,1);
+  splice (@$x,1);		# keep one element of $x
   $x;
   }
 
@@ -1266,63 +1262,127 @@ sub _fac
 
   if ((@$cx == 1) && ($cx->[0] <= 2))
     {
-    $cx->[0] = 1 * ($cx->[0]||1); # 0,1 => 1, 2 => 2
+    $cx->[0] ||= 1;		# 0 => 1, 1 => 1, 2 => 2
     return $cx;
     }
 
   # go forward until $base is exceeded
-  # limit is either $x or $base (x == 100 means as result too high)
+  # limit is either $x steps (steps == 100 means a result always too high) or
+  # $base.
   my $steps = 100; $steps = $cx->[0] if @$cx == 1;
-  my $r = 2; my $cf = 3; my $step = 1; my $last = $r;
-  while ($r < $BASE && $step < $steps)
+  my $r = 2; my $cf = 3; my $step = 2; my $last = $r;
+  while ($r*$cf < $BASE && $step < $steps)
     {
     $last = $r; $r *= $cf++; $step++;
     }
-  if ((@$cx == 1) && ($step == $cx->[0]))
+  if ((@$cx == 1) && $step == $cx->[0])
     {
-    # completely done
-    $cx = [$last];
+    # completely done, so keep reference to $x and return
+    $cx->[0] = $r;
     return $cx;
     }
+  
   # now we must do the left over steps
-
-  # do so as long as n has more than one element
-  my $n = $cx->[0];
-  # as soon as the last element of $cx is 0, we split it up and remember how
-  # many zeors we got so far. The reason is that n! will accumulate zeros at
-  # the end rather fast.
-  my $zero_elements = 0;
-  $cx = [$last];
+  my $n;					# steps still to do
   if (scalar @$cx == 1)
     {
-    my $n = _copy($c,$cx);
-    # no need to test for $steps, since $steps is a scalar and we stop before
-    while (scalar @$n != 1)
+    $n = $cx->[0];
+    }
+  else
+    {
+    $n = _copy($c,$cx);
+    }
+
+  $cx->[0] = $last; splice (@$cx,1);		# keep ref to $x
+  my $zero_elements = 0;
+
+  # do left-over steps fit into a scalar?
+  if (ref $n eq 'ARRAY')
+    {
+    # No, so use slower inc() & cmp()
+    $step = [$step];
+    while (_acmp($step,$n) <= 0)
       {
+      # as soon as the last element of $cx is 0, we split it up and remember
+      # how many zeors we got so far. The reason is that n! will accumulate
+      # zeros at the end rather fast.
       if ($cx->[0] == 0)
         {
         $zero_elements ++; shift @$cx;
         }
-      _mul($c,$cx,$n); _dec($c,$n);
+      _mul($c,$cx,$step); _inc($c,$step);
       }
-    $n = $n->[0];		# "convert" to scalar
     }
-  
-  # the left over steps will fit into a scalar, so we can speed it up
-  while ($n != $step)
+  else
     {
-    if ($cx->[0] == 0)
+    # Yes, so we can speed it up slightly
+    while ($step <= $n)
       {
-      $zero_elements ++; shift @$cx;
+      # When the last element of $cx is 0, we split it up and remember
+      # how many we got so far. The reason is that n! will accumulate
+      # zeros at the end rather fast.
+      if ($cx->[0] == 0)
+        {
+        $zero_elements ++; shift @$cx;
+        }
+      _mul($c,$cx,[$step]); $step++;
       }
-    _mul($c,$cx,[$n]); $n--;
     }
   # multiply in the zeros again
   while ($zero_elements-- > 0)
     {
     unshift @$cx, 0; 
     }
-  $cx;
+  $cx;			# return result
+  }
+
+sub _log_int
+  {
+  # calculate integer log of $x to base $base
+  # ref to array, ref to array - return ref to array
+  my ($c,$x,$base) = @_;
+
+  # X == 0 => NaN
+  return if (scalar @$x == 1 && $x->[0] == 0);
+  # BASE 0 or 1 => NaN
+  return if (scalar @$base == 1 && $base->[0] < 2);
+  my $cmp = _acmp($c,$x,$base);
+  # X == BASE => 1
+  if ($cmp == 0)
+    {
+    splice (@$x,1); $x->[0] = 1;
+    return $x;
+    }
+  # X < BASE
+  if ($cmp < 0)
+    {
+    splice (@$x,1); $x->[0] = 0;
+    return $x;
+    }
+
+  # this trial multiplication is very fast, even for large counts (like for
+  # 2 ** 1024, since this still requires only 1024 very fast steps
+  # (multiplication of a large number by a very small number is very fast))
+  my $x_org = _copy($c,$x);		# preserve x
+  splice(@$x,1); $x->[0] = 0;		# keep ref to $x
+
+  # use a loop that keeps $x as scalar as long as possible (this is faster)
+  my $trial = _copy($c,$base); my $count = 0; my $a;
+  while (($a = _acmp($x,$trial,$x_org) <= 0) && $count < $BASE)
+    {
+    _mul($c,$trial,$base); $count++;
+    }
+  if ($a <= 0)
+    {
+    # not done yet?
+    $x->[0] = $count;
+    while (_acmp($x,$trial,$x_org) <= 0)
+      {
+      _mul($c,$trial,$base); _inc($c,$x);
+      }
+    }
+  
+  $x;				# return result
   }
 
 # for debugging:
@@ -1423,7 +1483,11 @@ sub _root
     else
       {
       # fit's into one Perl scalar, so result can be computed directly
-      $x->[0] = int( $x->[0] ** (1 / $n->[0]) );
+      # cannot use int() here, because it rounds wrongly (try 
+      # (81 ** 3) ** (1/3) to see what I mean)
+      #$x->[0] = int( $x->[0] ** (1 / $n->[0]) );
+      # round to 8 digits, then truncate result to integer
+      $x->[0] = int ( sprintf ("%.8f", $x->[0] ** (1 / $n->[0]) ) );
       }
     return $x;
     } 
@@ -1453,10 +1517,45 @@ sub _root
     } 
   else
     {
-    # Should compute a guess of the result (by rule of thumb), then improve it
-    # via Newton's method or something similiar.
-    # XXX TODO
-    warn ('_root() not fully implemented in Calc.');
+    # trial computation by starting with 2,4,8,16 etc until we overstep
+
+    my $step = _two();
+    my $trial = _two();
+
+    _mul($c, $trial, $step) 
+      while (_acmp($c, _pow($c, _copy($c, $trial), $n), $x) < 0);
+
+    # hit exactly?
+    if (_acmp($c, _pow($c, _copy($c, $trial), $n), $x) == 0)
+      {
+      @$x = @$trial;			# make copy while preserving ref to $x
+      return $x;
+      }
+    # overstepped, so go back on step
+    _div($c, $trial, $step);
+
+    # add two, because $trial cannot be exactly the result (otherwise we would
+    # alrady have found it)
+    _add($c, $trial, $step);
+ 
+    # and now add more and more (2,4,6,8, etc)
+    _add($c, $trial, $step) 
+      while (_acmp($c, _pow($c, _copy($c, $trial), $n), $x) < 0);
+
+    # hit not exactly? (overstepped)
+    # 80 too small, 81 slightly too big, 82 too big
+    if (_acmp($c, _pow($c, _copy($c, $trial), $n), $x) > 0)
+      {
+      _dec($c,$trial);
+      }
+    # 80 too small, 81 slightly too big
+    if (_acmp($c, _pow($c, _copy($c, $trial), $n), $x) > 0)
+      {
+      _dec($c,$trial);
+      }
+    
+    @$x = @$trial;			# make copy while preserving ref to $x
+    return $x;
     }
   $x; 
   }
@@ -1579,10 +1678,10 @@ sub _as_hex
   # convert a decimal number to hex (ref to array, return ref to string)
   my ($c,$x) = @_;
 
-  # fit's into one element
+  # fit's into one element (handle also 0x0 case)
   if (@$x == 1)
     {
-    my $t = '0x' . sprintf("%x",$x->[0]);
+    my $t = sprintf("0x%x",$x->[0]);
     return \$t;
     }
 
@@ -1598,10 +1697,11 @@ sub _as_hex
     {
     $x10000 = [ 0x1000 ]; $h = 'h3';
     }
-  while (! _is_zero($c,$x1))
+  # while (! _is_zero($c,$x1))
+  while (@$x1 != 1 || $x1->[0] != 0)		# _is_zero()
     {
     ($x1, $xr) = _div($c,$x1,$x10000);
-    $es .= unpack($h,pack('v',$xr->[0]));
+    $es .= unpack($h,pack('v',$xr->[0]));	# XXX TODO: why pack('v',...)?
     }
   $es = reverse $es;
   $es =~ s/^[0]+//;   # strip leading zeros
@@ -1614,10 +1714,15 @@ sub _as_bin
   # convert a decimal number to bin (ref to array, return ref to string)
   my ($c,$x) = @_;
 
-  # fit's into one element
-  if (@$x == 1)
+  # fit's into one element (and Perl recent enough), handle also 0b0 case
+  # handle zero case for older Perls
+  if ($] <= 5.005 && @$x == 1 && $x->[0] == 0)
     {
-    my $t = '0b' . sprintf("%b",$x->[0]);
+    my $t = '0b0'; return \$t;
+    }
+  if (@$x == 1 && $] >= 5.006)
+    {
+    my $t = sprintf("0b%b",$x->[0]);
     return \$t;
     }
   my $x1 = _copy($c,$x);
@@ -1632,10 +1737,12 @@ sub _as_bin
     {
     $x10000 = [ 0x1000 ]; $b = 'b12';
     }
-  while (! _is_zero($c,$x1))
+  # while (! _is_zero($c,$x1))
+  while (!(@$x1 == 1 && $x1->[0] == 0))		# _is_zero()
     {
     ($x1, $xr) = _div($c,$x1,$x10000);
-    $es .= unpack($b,pack('v',$xr->[0]));
+    $es .= unpack($b,pack('v',$xr->[0]));	# XXX TODO: why pack('v',...)?
+    # $es .= unpack($b,$xr->[0]);
     }
   $es = reverse $es;
   $es =~ s/^[0]+//;   # strip leading zeros
@@ -1672,7 +1779,7 @@ sub _from_bin
   # convert a hex number to decimal (ref to string, return ref to array)
   my ($c,$bs) = @_;
 
-  # instead of converting 8 bit at a time, it is faster to convert the
+  # instead of converting X (8) bit at a time, it is faster to "convert" the
   # number to hex, and then call _from_hex.
 
   my $hs = $$bs;
@@ -1680,27 +1787,8 @@ sub _from_bin
   my $l = length($hs);					# bits
   $hs = '0' x (8-($l % 8)) . $hs if ($l % 8) != 0;	# padd left side w/ 0
   my $h = unpack('H*', pack ('B*', $hs));		# repack as hex
-  return $c->_from_hex(\('0x'.$h));
- 
-  my $mul = _one();
-  my $m = [ 0x100 ];				# 8 bit at a time
-  my $x = _zero();
-
-  my $len = length($$bs)-2;
-  $len = int($len/8);				# 4-digit parts, w/o '0x'
-  my $val; my $i = -8;
-  while ($len >= 0)
-    {
-    $val = substr($$bs,$i,8);
-    $val =~ s/^[+-]?0b// if $len == 0;		# for last part only
-
-    $val = ord(pack('B8',substr('00000000'.$val,-8,8))); 
-
-    $i -= 8; $len --;
-    _add ($c, $x, _mul ($c, [ $val ], $mul ) ) if $val != 0;
-    _mul ($c, $mul, $m ) if $len >= 0; 		# skip last mul
-    }
-  $x;
+  
+  $c->_from_hex(\('0x'.$h));
   }
 
 ##############################################################################
@@ -1787,8 +1875,8 @@ Math::BigInt::Calc - Pure Perl module to support Math::BigInt
 =head1 SYNOPSIS
 
 Provides support for big integer calculations. Not intended to be used by other
-modules (except Math::BigInt::Cached). Other modules which sport the same
-functions can also be used to support Math::BigInt, like Math::BigInt::Pari.
+modules. Other modules which sport the same functions can also be used to support
+Math::BigInt, like Math::BigInt::GMP or Math::BigInt::Pari.
 
 =head1 DESCRIPTION
 
@@ -1874,6 +1962,10 @@ slow) fallback routines to emulate these:
 	_and(obj1,obj2)	AND (bit-wise) object 1 with object 2
 	_or(obj1,obj2)	OR (bit-wise) object 1 with object 2
 
+	_signed_or
+	_signed_and
+	_signed_xor
+
 	_mod(obj,obj)	Return remainder of div of the 1st by the 2nd object
 	_sqrt(obj)	return the square root of object (truncated to int)
 	_root(obj)	return the n'th (n >= 3) root of obj (truncated to int)
@@ -1884,6 +1976,8 @@ slow) fallback routines to emulate these:
 	_zeros(obj)	return number of trailing decimal zeros
 	_modinv		return inverse modulus
 	_modpow		return modulus of power ($x ** $y) % $z
+	_log_int(X,N)	calculate integer log() of X in base N
+			X >= 0, N >= 0 (return undef for NaN)
 
 Input strings come in as unsigned but with prefix (i.e. as '123', '0xabc'
 or '0b1101').
@@ -1931,7 +2025,7 @@ the same terms as Perl itself.
 Original math code by Mark Biggar, rewritten by Tels L<http://bloodgate.com/>
 in late 2000.
 Seperated from BigInt and shaped API with the help of John Peacock.
-Fixed/enhanced by Tels 2001-2002.
+Fixed, sped-up and enhanced by Tels http://bloodgate.com 2001-2003.
 
 =head1 SEE ALSO
 

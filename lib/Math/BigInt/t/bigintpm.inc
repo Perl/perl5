@@ -156,6 +156,8 @@ while (<DATA>)
           }
       }elsif ($f eq "broot"){
         $try .= "\$x->broot(\$y);";
+      }elsif ($f eq "blog"){
+        $try .= "\$x->blog(\$y);";
       }elsif ($f eq "band"){
         $try .= "\$x & \$y;";
       }elsif ($f eq "bior"){
@@ -693,6 +695,35 @@ __DATA__
 5:7:5
 &^=
 5:7:2
+&blog
+NaNlog:2:NaN
+122:NaNlog:NaN
+NaNlog1:NaNlog:NaN
+122:inf:NaN
+inf:122:NaN
+122:-inf:NaN
+-inf:122:NaN
+-inf:-inf:NaN
+inf:inf:NaN
+0:4:NaN
+-21:4:NaN
+21:-21:NaN
+# normal results
+1024:2:10
+81:3:4
+# 3.01.. truncate
+82:3:4
+# 3.9... truncate
+80:3:3
+15625:5:6
+15626:5:6
+15624:5:5
+# $x == $base => result 1
+3:3:1
+# $x < $base => result 0 ($base ** 0 <= $x)
+3:4:0
+# $x == 1 => result 0
+1:5:0
 &is_negative
 0:0
 -1:1
