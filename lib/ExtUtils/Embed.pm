@@ -1,4 +1,4 @@
-# $Id: Embed.pm,v 1.2501 $
+# $Id: Embed.pm,v 1.1.1.1 2002/01/16 19:27:19 schwern Exp $
 require 5.002;
 
 package ExtUtils::Embed;
@@ -18,7 +18,7 @@ use vars qw(@ISA @EXPORT $VERSION
 	    );
 use strict;
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.2506_00 $ =~ /(\d+)\.(\d+)/);
+$VERSION = 1.2506_01;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(&xsinit &ldopts 

@@ -1,10 +1,12 @@
-#!./perl -w
+#!/usr/bin/perl -w
 
 print "1..27\n";
 
 BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
+    if( $ENV{PERL_CORE} ) {
+        chdir 't' if -d 't';
+        @INC = '../lib';
+    }
 }
 
 # use warnings;
@@ -23,7 +25,7 @@ $perl = rel2abs( $^X ) unless $] < 5.006; # Hack. Until 5.00503 has rel2abs
 $^X = $perl;
 
 print "# perl=$perl\n";
-my $runperl = "$perl -x \"-I../../lib\"";
+my $runperl = "$perl \"-I../../lib\"";
 
 $| = 1;
 
@@ -447,15 +449,32 @@ if ($?) {
   print "not ok $test # $maketest failed: $?\n";
   print "# $_" foreach @makeout;
 } else {
-  print "ok $test\n";
+  print "ok $test - maketest\n";
 }
 $test++;
 
-my $regen = `$runperl $package.xs`;
+
+# -x is busted on Win32 < 5.6.1, so we emulate it.
+my $regen;
+if( $^O eq 'MSWin32' && $] <= 5.006001 ) {
+    open(REGENTMP, ">regentmp") or die $!;
+    open(XS, "$package.xs")     or die $!;
+    my $saw_shebang;
+    while(<XS>) {
+        $saw_shebang++ if /^#!.*/i ;
+        print REGENTMP $_ if $saw_shebang;
+    }
+    close XS;  close REGENTMP;
+    $regen = `$runperl regentmp`;
+    unlink 'regentmp';
+}
+else {
+    $regen = `$runperl -x $package.xs`;
+}
 if ($?) {
-  print "not ok $test # $runperl $package.xs failed: $?\n";
+  print "not ok $test # $runperl -x $package.xs failed: $?\n";
 } else {
-  print "ok $test\n";
+  print "ok $test - regen\n";
 }
 $test++;
 
@@ -463,9 +482,9 @@ my $expect = $constant_types . $C_constant .
   "\n#### XS Section:\n" . $XS_constant;
 
 if ($expect eq $regen) {
-  print "ok $test\n";
+  print "ok $test - regen worked\n";
 } else {
-  print "not ok $test\n";
+  print "not ok $test - regen worked\n";
   # open FOO, ">expect"; print FOO $expect;
   # open FOO, ">regen"; print FOO $regen; close FOO;
 }

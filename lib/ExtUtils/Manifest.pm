@@ -12,7 +12,7 @@ our ($VERSION,@ISA,@EXPORT_OK,
 	    $Is_MacOS,$Is_VMS,
 	    $Debug,$Verbose,$Quiet,$MANIFEST,$found,$DEFAULT_MSKIP);
 
-$VERSION = substr(q$Revision: 1.35 $, 10);
+$VERSION = 1.35_00;
 @ISA=('Exporter');
 @EXPORT_OK = ('mkmanifest', 'manicheck', 'fullcheck', 'filecheck', 
 	      'skipcheck', 'maniread', 'manicopy');

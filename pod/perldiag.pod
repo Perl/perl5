@@ -1804,13 +1804,14 @@ neither as a system call or an ioctl call (SIOCATMARK).
 
 =item `%s' is not a code reference
 
-(W) The second (fourth, sixth, ...) argument of overload::constant needs
-to be a code reference. Either an anonymous subroutine, or a reference
+(W overload) The second (fourth, sixth, ...) argument of overload::constant
+needs to be a code reference. Either an anonymous subroutine, or a reference
 to a subroutine.
 
 =item `%s' is not an overloadable type
 
-(W) You tried to overload a constant type the overload package is unaware of.
+(W overload) You tried to overload a constant type the overload package is
+unaware of.
 
 =item junk on end of regexp
 
@@ -2367,8 +2368,8 @@ See also L<perlport> for writing portable code.
 
 =item Odd number of arguments for overload::constant
 
-(W) The call to overload::constant contained an odd number of arguments.
-The arguments should come in pairs.
+(W overload) The call to overload::constant contained an odd number of
+arguments. The arguments should come in pairs.
 
 =item Odd number of elements in anonymous hash
 

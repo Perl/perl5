@@ -1,9 +1,12 @@
-#!./perl
+#!/usr/bin/perl
 
 BEGIN {
-	chdir 't' if -d 't';
-	@INC = '../lib';
+    if( $ENV{PERL_CORE} ) {
+        chdir 't' if -d 't';
+        @INC = '../lib';
+    }
 }
+chdir 't';
 
 use Test::More;
 
