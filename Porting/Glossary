@@ -4,6 +4,11 @@ programs (e.g. I_UNISTD) are already described in config_h.SH.  [`configpm'
 generates pod documentation for Config.pm from this file--please try to keep
 the formatting regular.]
 
+Mcc (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the Mcc program.  After Configure runs,
+	the value is reset to a plain "Mcc" and is not useful.
+
 _a (Unix.U):
 	This variable defines the extension used for ordinary libraries.
 	For unix, it is '.a'.  The '.' is included.  Other possible
@@ -46,6 +51,11 @@ apiversion (patchlevel.U):
 	from patchlevel.h.  For now, we'll guess maintenance subversions
 	will retain binary compatibility.
 
+ar (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the ar program.  After Configure runs,
+	the value is reset to a plain "ar" and is not useful.
+
 archlib (archlib.U):
 	This variable holds the name of the directory in which the user wants
 	to put architecture-dependent public library files for $package.
@@ -68,8 +78,17 @@ archobjs (Unix.U):
 	or other facilities.  For perl on OS/2, for example, this would
 	include os2/os2.obj.
 
+awk (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the awk program.  After Configure runs,
+	the value is reset to a plain "awk" and is not useful.
+
 baserev (baserev.U):
 	The base revision level of this package, from the .package file.
+
+bash (Loc.U):
+	This variable is defined but not used by Configure.
+	The value is a plain '' and is not useful.
 
 bin (bin.U):
 	This variable holds the name of the directory in which the user wants
@@ -80,6 +99,15 @@ bin (bin.U):
 binexp (bin.U):
 	This is the same as the bin variable, but is filename expanded at
 	configuration time, for use in your makefiles.
+
+bison (Loc.U):
+	This variable is defined but not used by Configure.
+	The value is a plain '' and is not useful.
+
+byacc (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the byacc program.  After Configure runs,
+	the value is reset to a plain "byacc" and is not useful.
 
 byteorder (byteorder.U):
 	This variable holds the byte order. In the following, larger digits
@@ -100,6 +128,11 @@ castflags (d_castneg.U):
 		2 = couldn't cast >= 0x80000000
 		4 = couldn't cast in argument expression list
 
+cat (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the cat program.  After Configure runs,
+	the value is reset to a plain "cat" and is not useful.
+
 cc (cc.U):
 	This variable holds the name of a command to execute a C compiler which
 	can resolve multiple global references that happen to have the same
@@ -108,12 +141,12 @@ cc (cc.U):
 cccdlflags (dlsrc.U):
 	This variable contains any special flags that might need to be
 	passed with cc -c to compile modules to be used to create a shared
-	library that will be used for dynamic loading.  For hpux, this 
+	library that will be used for dynamic loading.  For hpux, this
 	should be +z.  It is up to the makefile to use it.
 
 ccdlflags (dlsrc.U):
 	This variable contains any special flags that might need to be
-	passed to cc to link with a shared library for dynamic loading. 
+	passed to cc to link with a shared library for dynamic loading.
 	It is up to the makefile to use it.  For sunos 4.1, it should
 	be empty.
 
@@ -133,16 +166,51 @@ cf_time (cf_who.U):
 	Holds the output of the "date" command when the configuration file was
 	produced. This is used to tag both config.sh and config_h.SH.
 
+chgrp (Loc.U):
+	This variable is defined but not used by Configure.
+	The value is a plain '' and is not useful.
+
+chmod (Loc.U):
+	This variable is defined but not used by Configure.
+	The value is a plain '' and is not useful.
+
+chown (Loc.U):
+	This variable is defined but not used by Configure.
+	The value is a plain '' and is not useful.
+
 clocktype (d_times.U):
 	This variable holds the type returned by times(). It can be long,
 	or clock_t on BSD sites (in which case <sys/types.h> should be
 	included).
+
+comm (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the comm program.  After Configure runs,
+	the value is reset to a plain "comm" and is not useful.
+
+compress (Loc.U):
+	This variable is defined but not used by Configure.
+	The value is a plain '' and is not useful.
 
 contains (contains.U):
 	This variable holds the command to do a grep with a proper return
 	status.  On most sane systems it is simply "grep".  On insane systems
 	it is a grep followed by a cat followed by a test.  This variable
 	is primarily for the use of other Configure units.
+
+cp (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the cp program.  After Configure runs,
+	the value is reset to a plain "cp" and is not useful.
+
+cpio (Loc.U):
+	This variable is defined but not used by Configure.
+	The value is a plain '' and is not useful.
+
+cpp (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the cpp program.  After Configure runs,
+	the value is reset to a plain "cpp" and is not useful.
 
 cpp_stuff (cpp_stuff.U):
 	This variable contains an identification of the catenation mechanism
@@ -180,6 +248,11 @@ cryptlib (d_crypt.U):
 	This variable holds -lcrypt or the path to a libcrypt.a archive if
 	the crypt() function is not defined in the standard C library. It is
 	up to the Makefile to use this.
+
+csh (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the csh program.  After Configure runs,
+	the value is reset to a plain "csh" and is not useful.
 
 d_Gconvert (d_gconvert.U):
 	This variable holds what Gconvert is defined as to convert
@@ -1148,6 +1221,11 @@ d_xenix (Guess.U):
 	This variable conditionally defines the symbol XENIX, which alerts
 	the C program that it runs under Xenix.
 
+date (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the date program.  After Configure runs,
+	the value is reset to a plain "date" and is not useful.
+
 db_hashtype (i_db.U):
 	This variable contains the type of the hash structure element
 	in the <db.h> header file.  In older versions of DB, it was
@@ -1184,6 +1262,20 @@ eagain (nblock_io.U):
 	data is present on the file and non-blocking I/O was enabled (otherwise,
 	read() blocks naturally).
 
+echo (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the echo program.  After Configure runs,
+	the value is reset to a plain "echo" and is not useful.
+
+egrep (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the egrep program.  After Configure runs,
+	the value is reset to a plain "egrep" and is not useful.
+
+emacs (Loc.U):
+	This variable is defined but not used by Configure.
+	The value is a plain '' and is not useful.
+
 eunicefix (Init.U):
 	When running under Eunice this variable contains a command which will
 	convert a shell script to the proper form of text file for it to be
@@ -1192,17 +1284,31 @@ eunicefix (Init.U):
 exe_ext (Unix.U):
 	This is an old synonym for _exe.
 
+expr (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the expr program.  After Configure runs,
+	the value is reset to a plain "expr" and is not useful.
+
 extensions (Extensions.U):
 	This variable holds a list of all extension files (both XS and
 	non-xs linked into the package.  It is propagated to Config.pm
 	and is typically used to test whether a particular extesion 
 	is available.
 
+find (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the find program.  After Configure runs,
+	the value is reset to a plain "find" and is not useful.
+
 firstmakefile (Unix.U):
 	This variable defines the first file searched by make.  On unix,
 	it is makefile (then Makefile).  On case-insensitive systems,
 	it might be something else.  This is only used to deal with
 	convoluted make depend tricks.
+
+flex (Loc.U):
+	This variable is defined but not used by Configure.
+	The value is a plain '' and is not useful.
 
 fpostype (fpostype.U):
 	This variable defines Fpos_t to be something like fpost_t, long, 
@@ -1236,6 +1342,11 @@ gidtype (gidtype.U):
 	ushort, or whatever type is used to declare the return type
 	of getgid().  Typically, it is the type of group ids in the kernel.
 
+grep (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the grep program.  After Configure runs,
+	the value is reset to a plain "grep" and is not useful.
+
 groupcat (nis.U):
 	This variable contains a command that produces the text of the
 	/etc/group file.  This is normally "cat /etc/group", but can be
@@ -1246,6 +1357,11 @@ groupstype (groupstype.U):
 	ushort, or whatever type is used for the second argument to
 	getgroups() and setgroups().  Usually, this is the same as
 	gidtype (gid_t), but sometimes it isn't.
+
+gzip (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the gzip program.  After Configure runs,
+	the value is reset to a plain "gzip" and is not useful.
 
 h_fcntl (h_fcntl.U):
 	This is variable gets set in various places to tell i_fcntl that
@@ -1512,6 +1628,10 @@ incpath (usrinc.U):
 	right one, as in "$incpath/usr/include" or "$incpath/usr/lib".
 	Value can be "" or "/bsd43" on mips.
 
+inews (Loc.U):
+	This variable is defined but not used by Configure.
+	The value is a plain '' and is not useful.
+
 installarchlib (archlib.U):
 	This variable is really the same as archlibexp but may differ on
 	those systems using AFS. For extra portability, only this variable
@@ -1562,6 +1682,10 @@ known_extensions (Extensions.U):
 	This variable holds a list of all XS extensions included in 
 	the package.
 
+ksh (Loc.U):
+	This variable is defined but not used by Configure.
+	The value is a plain '' and is not useful.
+
 large (models.U):
 	This variable contains a flag which will tell the C compiler and loader
 	to produce a program running with a large memory model.  It is up to
@@ -1582,6 +1706,11 @@ lddlflags (dlsrc.U):
 ldflags (ccflags.U):
 	This variable contains any additional C loader flags desired by
 	the user.  It is up to the Makefile to use this.
+
+less (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the less program.  After Configure runs,
+	the value is reset to a plain "less" and is not useful.
 
 lib_ext (Unix.U):
 	This is an old synonym for _a.
@@ -1610,9 +1739,23 @@ libswanted (Myinit.U):
 	search.  The order is chosen to pick up the c library
 	ahead of ucb or bsd libraries for SVR4.
 
+line (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the line program.  After Configure runs,
+	the value is reset to a plain "line" and is not useful.
+
+lint (Loc.U):
+	This variable is defined but not used by Configure.
+	The value is a plain '' and is not useful.
+
 lkflags (ccflags.U):
 	This variable contains any additional C partial linker flags desired by
 	the user.  It is up to the Makefile to use this.
+
+ln (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the ln program.  After Configure runs,
+	the value is reset to a plain "ln" and is not useful.
 
 lns (lns.U):
 	This variable holds the name of the command to make 
@@ -1645,10 +1788,36 @@ longsize (intsize.U):
 	This variable contains the value of the LONGSIZE symbol, which
 	indicates to the C program how many bytes there are in a long.
 
+lp (Loc.U):
+	This variable is defined but not used by Configure.
+	The value is a plain '' and is not useful.
+
+lpr (Loc.U):
+	This variable is defined but not used by Configure.
+	The value is a plain '' and is not useful.
+
+ls (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the ls program.  After Configure runs,
+	the value is reset to a plain "ls" and is not useful.
+
 lseektype (lseektype.U):
 	This variable defines lseektype to be something like off_t, long, 
 	or whatever type is used to declare lseek offset's type in the
 	kernel (which also appears to be lseek's return type).
+
+mail (Loc.U):
+	This variable is defined but not used by Configure.
+	The value is a plain '' and is not useful.
+
+mailx (Loc.U):
+	This variable is defined but not used by Configure.
+	The value is a plain '' and is not useful.
+
+make (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the make program.  After Configure runs,
+	the value is reset to a plain "make" and is not useful.
 
 make_set_make (make.U):
 	Some versions of 'make' set the variable MAKE.  Others do not.
@@ -1716,6 +1885,11 @@ mips_type (usrinc.U):
 	This variable holds the environment type for the mips system.
 	Possible values are "BSD 4.3" and "System V".
 
+mkdir (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the mkdir program.  After Configure runs,
+	the value is reset to a plain "mkdir" and is not useful.
+
 models (models.U):
 	This variable contains the list of memory models supported by this
 	system.  Possible component values are none, split, unsplit, small,
@@ -1725,6 +1899,15 @@ modetype (modetype.U):
 	This variable defines modetype to be something like mode_t, 
 	int, unsigned short, or whatever type is used to declare file 
 	modes for system calls.
+
+more (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the more program.  After Configure runs,
+	the value is reset to a plain "more" and is not useful.
+
+mv (Loc.U):
+	This variable is defined but not used by Configure.
+	The value is a plain '' and is not useful.
 
 myarchname (archname.U):
 	This variable holds the architecture name computed by Configure in
@@ -1774,6 +1957,11 @@ netdb_net_type (netdbtype.U):
 	getnetbyaddr().  Usually, this is int or long.
 	This is only useful if you have getnetbyaddr(), naturally.
 
+nm (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the nm program.  After Configure runs,
+	the value is reset to a plain "nm" and is not useful.
+
 nm_opt (usenm.U):
 	This variable holds the options that may be necessary for nm.
 
@@ -1788,6 +1976,11 @@ nm_so_opt (usenm.U):
 nonxs_ext (Extensions.U):
 	This variable holds a list of all non-xs extensions included
 	in the package.  All of them will be built.
+
+nroff (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the nroff program.  After Configure runs,
+	the value is reset to a plain "nroff" and is not useful.
 
 o_nonblock (nblock_io.U):
 	This variable bears the symbol value to be used during open() or fcntl()
@@ -1844,6 +2037,11 @@ path_sep (Unix.U):
 	This is an old synonym for p_ in Head.U, the character
 	used to separate elements in the command shell search PATH.
 
+perl (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the perl program.  After Configure runs,
+	the value is reset to a plain "perl" and is not useful.
+
 perladmin (perladmin.U):
 	Electronic mail address of the perl5 administrator.
 
@@ -1851,6 +2049,11 @@ perlpath (perlpath.U):
 	This variable contains the eventual value of the PERLPATH symbol,
 	which contains the name of the perl interpreter to be used in
 	shell scripts and in the "eval 'exec'" idiom.
+
+pg (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the pg program.  After Configure runs,
+	the value is reset to a plain "pg" and is not useful.
 
 phostname (myhostname.U):
 	This variable contains the eventual value of the PHOSTNAME symbol,
@@ -1866,6 +2069,14 @@ plibpth (libpth.U):
 	Holds the private path used by Configure to find out the libraries.
 	Its value is prepend to libpth. This variable takes care of special
 	machines, like the mips.  Usually, it should be empty.
+
+pmake (Loc.U):
+	This variable is defined but not used by Configure.
+	The value is a plain '' and is not useful.
+
+pr (Loc.U):
+	This variable is defined but not used by Configure.
+	The value is a plain '' and is not useful.
 
 prefix (prefix.U):
 	This variable holds the name of the directory below which the
@@ -1912,6 +2123,15 @@ rd_nodata (nblock_io.U):
 	used, which is a shame because you cannot make the difference between
 	no data and an EOF.. Sigh!
 
+rm (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the rm program.  After Configure runs,
+	the value is reset to a plain "rm" and is not useful.
+
+rmail (Loc.U):
+	This variable is defined but not used by Configure.
+	The value is a plain '' and is not useful.
+
 runnm (usenm.U):
 	This variable contains 'true' or 'false' depending whether the
 	nm extraction should be performed or not, according to the value
@@ -1928,11 +2148,21 @@ scriptdirexp (scriptdir.U):
 	This variable is the same as scriptdir, but is filename expanded
 	at configuration time, for programs not wanting to bother with it.
 
+sed (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the sed program.  After Configure runs,
+	the value is reset to a plain "sed" and is not useful.
+
 selecttype (selecttype.U):
 	This variable holds the type used for the 2nd, 3rd, and 4th
 	arguments to select.  Usually, this is 'fd_set *', if HAS_FD_SET
 	is defined, and 'int *' otherwise.  This is only useful if you 
 	have select(), naturally.
+
+sendmail (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the sendmail program.  After Configure runs,
+	the value is reset to a plain "sendmail" and is not useful.
 
 sh (sh.U):
 	This variable contains the full pathname of the shell used
@@ -1943,6 +2173,10 @@ sh (sh.U):
 	This unit comes before Options.U, so you can't set sh with a -D
 	option, though you can override this (and startsh)
 	with -O -Dsh=/bin/whatever -Dstartsh=whatever
+
+shar (Loc.U):
+	This variable is defined but not used by Configure.
+	The value is a plain '' and is not useful.
 
 sharpbang (spitshell.U):
 	This variable contains the string #! if this system supports that
@@ -2023,6 +2257,14 @@ sizetype (sizetype.U):
 	unsigned long, or whatever type is used to declare length 
 	parameters for string functions.
 
+sleep (Loc.U):
+	This variable is defined but not used by Configure.
+	The value is a plain '' and is not useful.
+
+smail (Loc.U):
+	This variable is defined but not used by Configure.
+	The value is a plain '' and is not useful.
+
 small (models.U):
 	This variable contains a flag which will tell the C compiler and loader
 	to produce a program running with a small memory model.  It is up to
@@ -2037,6 +2279,11 @@ sockethdr (d_socket.U):
 
 socketlib (d_socket.U):
 	This variable has the names of any libraries needed for socket support.
+
+sort (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the sort program.  After Configure runs,
+	the value is reset to a plain "sort" and is not useful.
 
 spackage (package.U):
 	This variable contains the name of the package being constructed,
@@ -2117,6 +2364,10 @@ strings (i_string.U):
 	This variable holds the full path of the string header that will be
 	used. Typically /usr/include/string.h or /usr/include/strings.h.
 
+submit (Loc.U):
+	This variable is defined but not used by Configure.
+	The value is a plain '' and is not useful.
+
 subversion (patchlevel.U):
 	The subversion level of this package.
 	The value of subversion comes from the patchlevel.h file.
@@ -2128,6 +2379,28 @@ sysman (sysman.U):
 	pages. Rather it is the place where Configure may look to find manual
 	for unix commands (section 1 of the manual usually). See mansrc.
 
+tail (Loc.U):
+	This variable is defined but not used by Configure.
+	The value is a plain '' and is not useful.
+
+tar (Loc.U):
+	This variable is defined but not used by Configure.
+	The value is a plain '' and is not useful.
+
+tbl (Loc.U):
+	This variable is defined but not used by Configure.
+	The value is a plain '' and is not useful.
+
+tee (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the tee program.  After Configure runs,
+	the value is reset to a plain "tee" and is not useful.
+
+test (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the test program.  After Configure runs,
+	the value is reset to a plain "test" and is not useful.
+
 timeincl (i_time.U):
 	This variable holds the full path of the included time header(s).
 
@@ -2136,9 +2409,33 @@ timetype (d_time.U):
 	or time_t on BSD sites (in which case <sys/types.h> should be
 	included). Anyway, the type Time_t should be used.
 
+touch (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the touch program.  After Configure runs,
+	the value is reset to a plain "touch" and is not useful.
+
+tr (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the tr program.  After Configure runs,
+	the value is reset to a plain "tr" and is not useful.
+
+troff (Loc.U):
+	This variable is defined but not used by Configure.
+	The value is a plain '' and is not useful.
+
 uidtype (uidtype.U):
 	This variable defines Uid_t to be something like uid_t, int, 
 	ushort, or whatever type is used to declare user ids in the kernel.
+
+uname (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the uname program.  After Configure runs,
+	the value is reset to a plain "uname" and is not useful.
+
+uniq (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the uniq program.  After Configure runs,
+	the value is reset to a plain "uniq" and is not useful.
 
 usedl (dlsrc.U):
 	This variable indicates if the the system supports dynamic
@@ -2198,6 +2495,10 @@ usrinc (usrinc.U):
 	This variable holds the path of the include files, which is
 	usually /usr/include. It is mainly used by other Configure units.
 
+uuname (Loc.U):
+	This variable is defined but not used by Configure.
+	The value is a plain '' and is not useful.
+
 version (patchlevel.U):
 	The full version number of this package.  This combines
 	baserev, patchlevel, and subversion to get the full
@@ -2205,8 +2506,21 @@ version (patchlevel.U):
 	is taken to use the C locale in order to get something
 	like 5.004 instead of 5,004.  This is unique to perl.
 
+vi (Loc.U):
+	This variable is defined but not used by Configure.
+	The value is a plain '' and is not useful.
+
 voidflags (voidflags.U):
 	This variable contains the eventual value of the VOIDFLAGS symbol,
 	which indicates how much support of the void type is given by this
 	compiler.  See VOIDFLAGS for more info.
+
+zcat (Loc.U):
+	This variable is defined but not used by Configure.
+	The value is a plain '' and is not useful.
+
+zip (Loc.U):
+	This variable is be used internally by Configure to determine the
+	full pathname (if any) of the zip program.  After Configure runs,
+	the value is reset to a plain "zip" and is not useful.
 

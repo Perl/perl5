@@ -316,7 +316,7 @@ This should actually work if you have gdbm installed in any of
 =item gdbm in /usr/you
 
 Suppose you have gdbm installed in some place other than /usr/local/,
-but you still want Configure to find it.  To be specific, assume  you
+but you still want Configure to find it.  To be specific, assume you
 have /usr/you/include/gdbm.h and /usr/you/lib/libgdbm.a.  You
 still have to add -I/usr/you/include to cc flags, but you have to take
 an extra step to help Configure find libgdbm.a.  Specifically, when
@@ -355,19 +355,24 @@ everything where you want it.  At any point during the Configure
 process, you can answer a question with  &-d  and Configure
 will use the defaults from then on.
 
-By default, Configure will use the following directories for
-library files for 5.005 (archname is a string like sun4-sunos, determined
-by Configure).
+By default, Configure will use the following directories for library files
+for 5.005 (archname is a string like sun4-sunos, determined by Configure).
 
-	/usr/local/lib/perl5/5.005/archname
-	/usr/local/lib/perl5/5.005/share
-	/usr/local/lib/perl5/site_perl/5.005/archname
-	/usr/local/lib/perl5/site_perl/5.005/share
+    Configure variable		Default value
+	$archlib 	/usr/local/lib/perl5/5.005/archname
+	$privlib	/usr/local/lib/perl5/5.005
+	$sitearch	/usr/local/lib/perl5/site_perl/5.005/archname
+	$sitelib	/usr/local/lib/perl5/site_perl/5.005
 
-and the following directories for manual pages:
+Some users prefer to append a "/share" to $privlib and $sitelib
+to emphasize that those directories can be shared among different
+architectures.
 
-	/usr/local/man/man1
-	/usr/local/lib/perl5/man/man3
+By default, Configure will use the following directories for manual pages:
+
+    Configure variable		Default value
+	$man1dir	/usr/local/man/man1
+	$man3dir	/usr/local/lib/perl5/man/man3
 
 (Actually, Configure recognizes the SVR3-style
 /usr/local/man/l_man/man1 directories, if present, and uses those
@@ -393,18 +398,19 @@ If you specify a prefix that contains the string "perl", then the
 directory structure is simplified.  For example, if you Configure with
 -Dprefix=/opt/perl, then the defaults for 5.005 are
 
-	/opt/perl/lib/5.005/archname
-	/opt/perl/lib/5.005/share
-	/opt/perl/lib/site_perl/5.005/archname
-	/opt/perl/lib/site_perl/5.005/share
+    Configure variable		Default value
+	$archlib	/opt/perl/lib/5.005/archname
+	$privlib	/opt/perl/lib/5.005
+	$sitearch	/opt/perl/lib/site_perl/5.005/archname
+	$sitelib	/opt/perl/lib/site_perl/5.005
 
-	/opt/perl/man/man1
-	/opt/perl/man/man3
+	$man1dir	/opt/perl/man/man1
+	$man3dir	/opt/perl/man/man3
 
 The perl executable will search the libraries in the order given
 above.
 
-The  directories under site_perl are empty, but are intended to be used
+The directories under site_perl are empty, but are intended to be used
 for installing local or site-wide extensions.  Perl will automatically
 look in these directories.
 
@@ -958,7 +964,7 @@ for further tips and information.
 If you can successfully build miniperl, but the process crashes
 during the building of extensions, you should run
 
-    	make minitest
+	make minitest
 
 to test your version of miniperl.
 
@@ -1346,7 +1352,7 @@ make install will install the following:
 Installperl will also create the library directories $siteperl and
 $sitearch listed in config.sh.  Usually, these are something like
 
-	/usr/local/lib/perl5/site_perl/5.005/share
+	/usr/local/lib/perl5/site_perl/5.005
 	/usr/local/lib/perl5/site_perl/5.005/archname
 
 where archname is something like sun4-sunos.  These directories
@@ -1379,16 +1385,16 @@ The directories searched by version 5.005 will be
 
     Configure variable		Default value
 	$archlib 	/usr/local/lib/perl5/5.005/archname
-	$privlib	/usr/local/lib/perl5/5.005/share
+	$privlib	/usr/local/lib/perl5/5.005
 	$sitearch	/usr/local/lib/perl5/site_perl/5.005/archname
-	$sitelib	/usr/local/lib/perl5/site_perl/5.005/share
+	$sitelib	/usr/local/lib/perl5/site_perl/5.005
 
 while the directories searched by version 5.005_01 will be
 
 	$archlib 	/usr/local/lib/perl5/5.00501/archname
-	$privlib	/usr/local/lib/perl5/5.00501/share
+	$privlib	/usr/local/lib/perl5/5.00501
 	$sitearch	/usr/local/lib/perl5/site_perl/5.005/archname
-	$sitelib	/usr/local/lib/perl5/site_perl/5.005/share
+	$sitelib	/usr/local/lib/perl5/site_perl/5.005
 
 When you install an add-on extension, it gets installed into $sitelib (or
 $sitearch if it is architecture-specific).  This directory deliberately
@@ -1567,4 +1573,4 @@ the contact information to match your distribution.
 
 =head1 LAST MODIFIED
 
-$Id: INSTALL,v 1.39 1998/07/02 15:41:45 doughera Released $
+$Id: INSTALL,v 1.40 1998/07/06 14:49:02 doughera Released $

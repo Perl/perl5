@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Jul  1 12:16:14 EDT 1998 [metaconfig 3.0 PL70]
+# Generated on Mon Jul  6 11:11:11 EDT 1998 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by doughera@lafayette.edu)
 
 cat >/tmp/c1$$ <<EOF
@@ -2748,12 +2748,12 @@ else
 fi
 
 : determine where private library files go
-: Usual default is /usr/local/lib/perl5/$version/share.
-: Also allow things like /opt/perl/lib/$version/share, since 
+: Usual default is /usr/local/lib/perl5/$version.
+: Also allow things like /opt/perl/lib/$version, since 
 : /opt/perl/lib/perl5... would be redundant.
 case "$prefix" in
-*perl*) set dflt privlib lib/$version/share ;;
-*)	 set dflt privlib lib/$package/$version/share ;;
+*perl*) set dflt privlib lib/$version ;;
+*)	 set dflt privlib lib/$package/$version ;;
 esac
 eval $prefixit
 $cat <<EOM
@@ -2799,8 +2799,9 @@ esac'
 : determine where public architecture dependent libraries go
 set archlib archlib
 eval $prefixit
-: privlib default is /usr/local/lib/$package/$version/share
+: privlib default is /usr/local/lib/$package/$version
 : archlib default is /usr/local/lib/$package/$version/$archname
+: privlib may have an optional trailing /share.
 tdflt=`echo $privlib | $sed 's,/share$,,'`
 tdflt=$tdflt/$archname
 case "$archlib" in
@@ -4758,23 +4759,13 @@ EOM
 			hpux)	dflt='+z' ;;
 			next)	dflt='none' ;;
 			irix*)	dflt='-KPIC' ;;
-			svr4*|esix*|solaris)
-				case "$ccflags" in
-					*-DDEBUGGING*)	dflt='-KPIC' ;;
-					*)	dflt='-Kpic' ;;
-				esac 
-				;;
+			svr4*|esix*|solaris) dflt='-KPIC' ;;
 			sunos)	dflt='-pic' ;;
 			*)	dflt='none' ;;
 		    esac
 			;;
 		*)  case "$osname" in
-			svr4*|esix*|solaris)
-				case "$ccflags" in
-					*-DDEBUGGING*)	dflt='-fPIC' ;;
-					*)	dflt='-fpic' ;;
-				esac 
-				;;
+			svr4*|esix*|solaris) dflt='-fPIC' ;;
 			*)	dflt='-fpic' ;;
 		    esac ;;
 	    esac ;;
@@ -5781,11 +5772,11 @@ else
 fi
 
 : determine where site specific libraries go.
-: Usual default is /usr/local/lib/perl5/site_perl/$apiversion/share
+: Usual default is /usr/local/lib/perl5/site_perl/$apiversion
 prog=`echo $package | $sed 's/-*[0-9.]*$//'`
 case "$prefix" in
-*perl*) set dflt sitelib lib/site_$prog/$apiversion/share ;;
-*)	 set dflt sitelib lib/$package/site_$prog/$apiversion/share ;;
+*perl*) set dflt sitelib lib/site_$prog/$apiversion ;;
+*)	 set dflt sitelib lib/$package/site_$prog/$apiversion ;;
 esac
 eval $prefixit
 $cat <<EOM
@@ -5826,8 +5817,9 @@ else
 fi
 
 : determine where site specific architecture-dependent libraries go.
-: sitelib  default is /usr/local/lib/perl5/site_perl/$apiversion/share
+: sitelib  default is /usr/local/lib/perl5/site_perl/$apiversion
 : sitearch default is /usr/local/lib/perl5/site_perl/$apiversion/$archname
+: sitelib may have an optional trailing /share.
 tdflt=`echo $sitelib | $sed 's,/share$,,'`
 tdflt="$tdflt/$archname"
 set sitearch sitearch none

@@ -19,13 +19,6 @@ $startsh
 #  platform-specific hints file.
 #
 
-#Credits:
-#   The original design for this Policy.sh file came from Wayne Davison,
-#   maintainer of trn.
-#   This version for Perl5.004_61 originally written by
-#   Andy Dougherty <doughera@lafcol.lafayette.edu>.
-#   This file may be distributed under the same terms as Perl itself.
-
 #  Allow Configure command-line overrides; usually these won't be
 #  needed, but something like -Dprefix=/test/location can be quite
 #  useful for testing out new versions.
@@ -57,7 +50,7 @@ esac
 # out.  That way, if you override prefix, all of these will be
 # automatically adjusted.
 #
-# NOTE:  Be especially careful about architecture-dependent and
+# WARNING:  Be especially careful about architecture-dependent and
 # version-dependent names, particularly if you reuse this file for
 # different versions of perl.
 
@@ -81,8 +74,8 @@ for var in bin scriptdir privlib archlib \
 	;;
     privlib)
 	case "$prefix" in
-	*perl*)	dflt=$prefix/lib/$version/share ;;
-	*)	dflt=$prefix/lib/$package/$version/share ;;
+	*perl*)	dflt=$prefix/lib/$version ;;
+	*)	dflt=$prefix/lib/$package/$version ;;
 	esac
 	;;
     archlib)	
@@ -93,8 +86,8 @@ for var in bin scriptdir privlib archlib \
 	;;
     sitelib)
 	case "$prefix" in
-	*perl*)	dflt=$prefix/lib/site_perl/$apiversion/share ;;
-	*)	dflt=$prefix/lib/$package/site_perl/$apiversion/share ;;
+	*perl*)	dflt=$prefix/lib/site_perl/$apiversion ;;
+	*)	dflt=$prefix/lib/$package/site_perl/$apiversion ;;
 	esac
 	;;
     sitearch)	
@@ -150,3 +143,11 @@ $spitshell <<!GROK!THIS! >>Policy.sh
 #  Porting/Glossary.
 
 !GROK!THIS!
+
+#Credits:
+#   The original design for this Policy.sh file came from Wayne Davison,
+#   maintainer of trn.
+#   This version for Perl5.004_61 originally written by
+#   Andy Dougherty <doughera@lafcol.lafayette.edu>.
+#   This file may be distributed under the same terms as Perl itself.
+
