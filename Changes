@@ -31,6 +31,425 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 13745] By: jhi                                   on 2001/12/17  20:12:37
+        Log: New test warrants a MANIFEST entry.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 13744] By: jhi                                   on 2001/12/17  19:27:40
+        Log: Subject: Re: [PATCH] ...while $var = glob(...)
+             From: Robin Houston <robin@kitsite.com>
+             Date: Mon, 17 Dec 2001 20:27:30 +0000
+             Message-ID: <20011217202730.A17817@puffinry.freeserve.co.uk>
+             
+             Can't portably unlink open files.
+     Branch: perl
+	   ! t/op/glob.t
+____________________________________________________________________________
+[ 13743] By: jhi                                   on 2001/12/17  19:26:34
+        Log: perluniintro tweaks as suggested by Jeffrey Friedl.
+     Branch: perl
+	   ! pod/perluniintro.pod
+____________________________________________________________________________
+[ 13742] By: jhi                                   on 2001/12/17  19:18:52
+        Log: Move typeglob test from glob.t to gv.t.
+     Branch: perl
+	   ! t/op/glob.t t/op/gv.t
+____________________________________________________________________________
+[ 13741] By: jhi                                   on 2001/12/17  19:12:16
+        Log: Subject: Re: [PATCH] ...while $var = glob(...)                
+             From: Robin Houston <robin@kitsite.com> 
+             Date: Mon, 17 Dec 2001 20:07:02 +0000                 
+             Message-ID: <20011217200702.A17721@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! t/op/glob.t
+____________________________________________________________________________
+[ 13740] By: jhi                                   on 2001/12/17  19:11:29
+        Log: Demote the surrogate and non-character errors to warnings.
+     Branch: perl
+	   ! pod/perldiag.pod t/lib/warnings/utf8 t/op/ord.t utf8.c
+____________________________________________________________________________
+[ 13739] By: jhi                                   on 2001/12/17  18:47:41
+        Log: Subject: [PATCH] more POSIX tests, and more autoloading
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Mon, 17 Dec 2001 18:27:47 +0000
+             Message-ID: <20011217182747.D21702@plum.flirble.org>
+     Branch: perl
+	   ! ext/POSIX/POSIX.pm ext/POSIX/t/posix.t
+____________________________________________________________________________
+[ 13738] By: jhi                                   on 2001/12/17  18:43:55
+        Log: Subject: [PATCH] ...while $var = glob(...)
+             From: Robin Houston <robin@kitsite.com> 
+             Date: Mon, 17 Dec 2001 15:51:54 +0000
+             Message-ID: <20011217155153.A311@robin.kitsite.com>
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[ 13737] By: jhi                                   on 2001/12/17  18:38:33
+        Log: Subject: [PATCH] -t and the core tests; -t and PERL5OPT
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Mon, 17 Dec 2001 15:23:01 +0100
+             Message-ID: <20011217152301.A704@rafael>
+     Branch: perl
+	   ! perl.c pod/perldiag.pod pod/perlrun.pod t/run/runenv.t
+____________________________________________________________________________
+[ 13736] By: jhi                                   on 2001/12/17  18:36:20
+        Log: The system() vs $SIG{ARLM} is no more a todo.
+     Branch: perl
+	   ! t/op/alarm.t
+____________________________________________________________________________
+[ 13735] By: jhi                                   on 2001/12/17  18:34:43
+        Log: Subject: [PATCH t/op/alarm.t MANIFEST] alarm() test, take two
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sun, 16 Dec 2001 23:59:01 -0500
+             Message-ID: <20011217045901.GL17232@blackrider>
+     Branch: perl
+	   + t/op/alarm.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 13734] By: jhi                                   on 2001/12/17  17:54:19
+        Log: s/UNIX/Unix/
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 13733] By: jhi                                   on 2001/12/17  17:50:22
+        Log: Move ExtUtils tests to lib/ExtUtils/t.
+     Branch: perl
+	   + lib/ExtUtils/t/Command.t lib/ExtUtils/t/Embed.t
+	   + lib/ExtUtils/t/ExtUtils.t lib/ExtUtils/t/Installed.t
+	   + lib/ExtUtils/t/MM_Cygwin.t lib/ExtUtils/t/MM_Unix.t
+	   + lib/ExtUtils/t/MM_VMS.t lib/ExtUtils/t/Manifest.t
+	   + lib/ExtUtils/t/Mkbootstrap.t lib/ExtUtils/t/Packlist.t
+	   + lib/ExtUtils/t/testlib.t
+	   - lib/ExtUtils.t lib/ExtUtils/Command.t lib/ExtUtils/Embed.t
+	   - lib/ExtUtils/Installed.t lib/ExtUtils/MM_Cygwin.t
+	   - lib/ExtUtils/MM_Unix.t lib/ExtUtils/MM_VMS.t
+	   - lib/ExtUtils/Manifest.t lib/ExtUtils/Mkbootstrap.t
+	   - lib/ExtUtils/Packlist.t lib/ExtUtils/testlib.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 13732] By: jhi                                   on 2001/12/17  17:45:33
+        Log: Subject: [PATCH] MM_Unix tests, and some questions
+             From: Tels <perl_dummy@bloodgate.com>
+             Date: Sun, 16 Dec 2001 22:29:13 +0100 (CET)                
+             Message-Id: <200112162132.XAA12694@tiku.hut.fi>
+             
+             Subject: Re: [PATCH] MM_Unix tests, and some questions
+             From: Tels <perl_dummy@bloodgate.com>
+             Date: Mon, 17 Dec 2001 00:29:11 +0100 (CET)                
+             Message-Id: <200112162332.BAA25411@tiku.hut.fi>
+     Branch: perl
+	   + lib/ExtUtils/MM_Unix.t
+	   ! MANIFEST lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 13731] By: jhi                                   on 2001/12/17  17:31:35
+        Log: Subject: [PATCH lib/ExtUtils/MM_Unix.pm] miniperl found before perl
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sun, 16 Dec 2001 17:53:55 -0500
+             Message-ID: <20011216225354.GE8900@blackrider>
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 13730] By: jhi                                   on 2001/12/17  17:26:44
+        Log: Subject: [PATCH ext/B/B/Deparse.pm] Re: [ID 20011216.005] B::Deparse turns legal code into illegal ones.
+             From: Michael G Schwern <schwern@pobox.com>                
+             Date: Sun, 16 Dec 2001 16:12:55 -0500
+             Message-ID: <20011216211255.GV8900@blackrider>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 13729] By: jhi                                   on 2001/12/17  17:25:09
+        Log: Subject: [PATCH] Exporter.pm
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sun, 16 Dec 2001 19:24:25 +0000
+             Message-ID: <20011216192425.R21702@plum.flirble.org>
+     Branch: perl
+	   ! lib/Exporter.pm
+____________________________________________________________________________
+[ 13728] By: jhi                                   on 2001/12/17  17:20:51
+        Log: Subject: [PATCH] Exporter.t (and question)
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sun, 16 Dec 2001 17:24:55 +0000
+             Message-ID: <20011216172455.P21702@plum.flirble.org>
+     Branch: perl
+	   ! lib/Exporter.t
+____________________________________________________________________________
+[ 13727] By: jhi                                   on 2001/12/17  17:18:21
+        Log: Subject: Re: perl@13661
+             From: "John P. Linderman" <jpl@research.att.com>              
+             Date: Mon, 17 Dec 2001 07:11:27 -0500 (EST)           
+             Message-Id: <200112171211.HAA71597@raptor.research.att.com>
+     Branch: perl
+	   ! pp_sort.c
+____________________________________________________________________________
+[ 13726] By: jhi                                   on 2001/12/17  16:57:57
+        Log: Subject: Will the real Unicode encoding please stand up?
+             From: Jeffrey Friedl <jfriedl@yahoo.com>
+             Date: Sun, 16 Dec 2001 11:36:32 -0800 (PST)
+             Message-Id: <200112161936.fBGJaWe41263@ventrue.corp.yahoo.com>
+     Branch: perl
+	   ! pod/perluniintro.pod
+____________________________________________________________________________
+[ 13725] By: jhi                                   on 2001/12/17  16:43:09
+        Log: Integrate perlio; interruptable system().
+     Branch: perl
+	  !> util.c
+____________________________________________________________________________
+[ 13722] By: jhi                                   on 2001/12/16  16:12:57
+        Log: Disallow also Unicode ranges 0xFDD0..0xFDEF and
+             0xFFFE..0xFFFF.  Ranges 0x...FFFE..0x...FFFF in general,
+             and characters beyond 0x10FFF should be disallowed, too,
+             but some tests would need changing, but more importantly some
+             APIs would need remodeling since one can easily generate such
+             characters either by bitwise complements, tr complements, or
+             v-strings.
+     Branch: perl
+	   ! pod/perldiag.pod utf8.c
+____________________________________________________________________________
+[ 13721] By: jhi                                   on 2001/12/16  15:34:52
+        Log: Make surrogates illegal also on EBCDIC.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 13720] By: jhi                                   on 2001/12/16  14:49:18
+        Log: Subject: [patch @13687] Unicode::Collate 0.10
+             From: SADAHIRO Tomoyuki <bqw10602@nifty.com>               
+             Date: Sun, 16 Dec 2001 21:22:12 +0900
+             Message-Id: <20011216211615.8ED5.BQW10602@nifty.com>
+     Branch: perl
+	   ! lib/Unicode/Collate.pm lib/Unicode/Collate/Changes
+	   ! lib/Unicode/Collate/README lib/Unicode/Collate/t/test.t
+____________________________________________________________________________
+[ 13719] By: jhi                                   on 2001/12/16  14:39:34
+        Log: More documentation for the encoding pragma.
+     Branch: perl
+	   ! lib/encoding.pm
+____________________________________________________________________________
+[ 13718] By: jhi                                   on 2001/12/16  14:34:02
+        Log: Subject: [PATCH] lib/open.pm 
+             From: Jeffrey Friedl <jfriedl@yahoo.com>
+             Date: Sat, 15 Dec 2001 23:07:42 -0800 (PST)
+             Message-Id: <200112160707.fBG77g896350@ventrue.corp.yahoo.com>
+     Branch: perl
+	   ! lib/open.pm
+____________________________________________________________________________
+[ 13717] By: jhi                                   on 2001/12/16  14:18:49
+        Log: Subject: [PATCH MANIFEST, lib/ExtUtils/Installed.t] Add tests for ExtUtils::Installed
+             From: chromatic <chromatic@rmci.net>
+             Date: Sat, 15 Dec 2001 23:24:40 -0700
+             Message-ID: <20011216062507.71492.qmail@onion.perl.org>
+     Branch: perl
+	   + lib/ExtUtils/Installed.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 13716] By: jhi                                   on 2001/12/16  14:17:10
+        Log: Subject: [PATCH lib/diagnostics.pm] Little warning nit
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sun, 16 Dec 2001 01:14:00 -0500
+             Message-ID: <20011216061400.GC8900@blackrider>
+     Branch: perl
+	   ! lib/diagnostics.pm
+____________________________________________________________________________
+[ 13715] By: jhi                                   on 2001/12/16  14:16:17
+        Log: Subject: [PATCH] Re: [PATCH t/test.pl] diagnostics to STDERR
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sun, 16 Dec 2001 01:12:42 -0500
+             Message-ID: <20011216061242.GB8900@blackrider>
+     Branch: perl
+	   ! t/test.pl
+____________________________________________________________________________
+[ 13714] By: jhi                                   on 2001/12/16  04:21:53
+        Log: I sometimes outsmart myself.
+     Branch: perl
+	   ! lib/ExtUtils/MM_Cygwin.t lib/ExtUtils/MM_VMS.t
+____________________________________________________________________________
+[ 13713] By: jhi                                   on 2001/12/16  03:24:34
+        Log: Subject: [PATCH lib/AutoSplit.pm]  Fwd: [russell-belfast-pm@futureless.org: Re: This is the __END__] 
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sat, 15 Dec 2001 15:08:29 -0500
+             Message-ID: <20011215200829.GK1548@blackrider>
+     Branch: perl
+	   ! lib/AutoSplit.pm
+____________________________________________________________________________
+[ 13712] By: jhi                                   on 2001/12/16  03:22:39
+        Log: perlunicode enchancements suggested by Jeffrey Friedl.
+     Branch: perl
+	   ! pod/perlunicode.pod
+____________________________________________________________________________
+[ 13711] By: jhi                                   on 2001/12/16  03:00:44
+        Log: Subject: [PATCH] perlunicode.pod
+             From: Jeffrey Friedl <jfriedl@yahoo.com>
+             Date: Sat, 15 Dec 2001 19:17:09 -0800 (PST) 
+             Message-Id: <200112160317.fBG3H9M82618@ventrue.corp.yahoo.com>
+     Branch: perl
+	   ! pod/perlunicode.pod
+____________________________________________________________________________
+[ 13710] By: jhi                                   on 2001/12/16  02:57:09
+        Log: Subject: RESENT - [PATCH] utf8_heavy.pl 
+             From: Jeffrey Friedl <jfriedl@yahoo.com>
+             Date: Sat, 15 Dec 2001 19:55:01 -0800 (PST) 
+             Message-Id: <200112160355.fBG3t1t84835@ventrue.corp.yahoo.com>
+     Branch: perl
+	   ! lib/utf8_heavy.pl
+____________________________________________________________________________
+[ 13709] By: jhi                                   on 2001/12/16  02:47:36
+        Log: Can't create surrogates; so can't match them, either.
+     Branch: perl
+	   ! pod/perlunicode.pod
+____________________________________________________________________________
+[ 13708] By: jhi                                   on 2001/12/16  02:46:07
+        Log: Subject: [PATCH t/test.pl] diagnostics to STDERR
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sat, 15 Dec 2001 21:20:35 -0500
+             Message-ID: <20011216022035.GE5672@blackrider>
+     Branch: perl
+	   ! t/test.pl
+____________________________________________________________________________
+[ 13707] By: jhi                                   on 2001/12/16  02:45:06
+        Log: Make creating UTF-8 surrogates a punishable act.
+     Branch: perl
+	   ! pod/perldiag.pod pod/perlunicode.pod t/op/ord.t utf8.c
+____________________________________________________________________________
+[ 13706] By: jhi                                   on 2001/12/15  23:00:56
+        Log: Support \p{All}, \p{IsAssigned}, \p{IsUnassigned}.
+     Branch: perl
+	   + lib/unicore/In/172.pl lib/unicore/In/173.pl
+	   ! MANIFEST lib/unicore/In.pl lib/unicore/In/164.pl
+	   ! lib/unicore/In/165.pl lib/unicore/In/166.pl
+	   ! lib/unicore/In/167.pl lib/unicore/In/168.pl
+	   ! lib/unicore/In/169.pl lib/unicore/In/170.pl
+	   ! lib/unicore/In/171.pl lib/unicore/mktables lib/utf8_heavy.pl
+____________________________________________________________________________
+[ 13705] By: jhi                                   on 2001/12/15  22:17:10
+        Log: Subject: [PATCH B::Deparse] rcatline support ($_.=<ARGV>)
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Sat, 15 Dec 2001 23:21:43 +0100
+             Message-ID: <20011215232143.A11790@rafael>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm ext/B/t/deparse.t
+____________________________________________________________________________
+[ 13704] By: jhi                                   on 2001/12/15  22:09:20
+        Log: Make charnames more robust.
+     Branch: perl
+	   ! lib/charnames.pm
+____________________________________________________________________________
+[ 13703] By: jhi                                   on 2001/12/15  17:30:55
+        Log: The hoops one has to jump through.
+     Branch: perl
+	   ! ext/I18N/Langinfo/Langinfo.pm
+____________________________________________________________________________
+[ 13702] By: jhi                                   on 2001/12/15  17:18:49
+        Log: Subject: [PATCH] perlstyle.pod nit on warnings
+             From: Autrijus Tang <autrijus@egb.elixus.org>
+             Date: Sat, 15 Dec 2001 04:24:34 -0800
+             Message-ID: <20011215122434.GA1682@egb.elixus.org> 
+     Branch: perl
+	   ! pod/perlstyle.pod
+____________________________________________________________________________
+[ 13701] By: jhi                                   on 2001/12/15  17:17:47
+        Log: I don't think we are in FooOS, Toto.
+     Branch: perl
+	   ! lib/ExtUtils/MM_Cygwin.t lib/ExtUtils/MM_VMS.t
+____________________________________________________________________________
+[ 13700] By: jhi                                   on 2001/12/15  17:15:50
+        Log: Subject: Re: Untested modules update:  There's more than we thought
+             From: chromatic <chromatic@rmci.net>
+             Date: Fri, 14 Dec 2001 17:20:24 -0700
+             Message-ID: <20011215002049.37259.qmail@onion.perl.org>
+     Branch: perl
+	   + lib/ExtUtils/MM_Cygwin.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 13699] By: jhi                                   on 2001/12/15  17:14:26
+        Log: Subject: [PATCH t/TEST] -bytecompile & -compile for testing perlcc
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Fri, 14 Dec 2001 20:59:42 -0500
+             Message-ID: <20011215015942.GF28596@blackrider>
+     Branch: perl
+	   ! t/TEST
+____________________________________________________________________________
+[ 13698] By: jhi                                   on 2001/12/15  17:13:35
+        Log: Subject: [PATCH MANIFEST ext/B/t/bblock.t] Compile test
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Fri, 14 Dec 2001 20:03:46 -0500
+             Message-ID: <20011215010346.GD28596@blackrider>
+     Branch: perl
+	   + ext/B/t/bblock.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 13697] By: jhi                                   on 2001/12/15  17:12:32
+        Log: Subject: [PATCH ext/B/B/Bblock.pm] Some weak docs
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Fri, 14 Dec 2001 19:59:13 -0500
+             Message-ID: <20011215005913.GC28596@blackrider>
+     Branch: perl
+	   ! ext/B/B/Bblock.pm
+____________________________________________________________________________
+[ 13696] By: jhi                                   on 2001/12/15  17:11:32
+        Log: Subject: [PATCH MANIFEST ext/B/t/asmdata.t] B::Asmdata test 
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Fri, 14 Dec 2001 19:36:12 -0500
+             Message-ID: <20011215003611.GA28596@blackrider>
+     Branch: perl
+	   + ext/B/t/asmdata.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 13695] By: jhi                                   on 2001/12/15  17:10:05
+        Log: Subject: [PATCH bytecode.pl] Adding B::Asmdata docs
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Fri, 14 Dec 2001 19:14:14 -0500
+             Message-ID: <20011215001414.GA25077@blackrider>
+     Branch: perl
+	   ! bytecode.pl ext/B/B/Asmdata.pm
+____________________________________________________________________________
+[ 13694] By: jhi                                   on 2001/12/15  17:00:44
+        Log: Permissions.
+     Branch: perl
+	   ! ext/Devel/PPPort/PPPort.xs ext/Devel/PPPort/module2.c
+	   ! ext/Devel/PPPort/module3.c
+____________________________________________________________________________
+[ 13693] By: jhi                                   on 2001/12/14  23:48:59
+        Log: Benchmark test from Nicholas Clark.
+     Branch: perl
+	   + lib/Benchmark.t
+	   ! MANIFEST lib/Benchmark.pm
+____________________________________________________________________________
+[ 13692] By: jhi                                   on 2001/12/14  23:33:28
+        Log: Mithing.
+     Branch: perl
+	   + lib/Attribute/Handlers/demo/demo2.pl
+	   + lib/Attribute/Handlers/demo/demo3.pl
+	   + lib/Attribute/Handlers/demo/demo4.pl
+____________________________________________________________________________
+[ 13691] By: jhi                                   on 2001/12/14  21:26:08
+        Log: Silence compiler worries found by Schwern/Digital cc.
+     Branch: perl
+	   ! perlio.c sv.c x2p/str.c
+____________________________________________________________________________
+[ 13690] By: jhi                                   on 2001/12/14  20:26:51
+        Log: User may not have a valid home directory even if
+             getpwuid() succedds.
+     Branch: perl
+	   ! ext/File/Glob/t/basic.t
+____________________________________________________________________________
+[ 13689] By: jhi                                   on 2001/12/14  18:14:52
+        Log: Integrate with perlio.  (No changes, but that's okay.)
+     Branch: perl
+	  !> doio.c lib/Exporter.pm perlio.c perliol.h pod/perlmodlib.pod
+____________________________________________________________________________
+[ 13688] By: jhi                                   on 2001/12/14  18:06:18
+        Log: Add a Configure hints file for VOS: the POSIX support
+             of VOS is getting close to the point where it can run
+             Configure (some Configure tweaks will be required).
+     Branch: perl
+	   + hints/vos.sh
+	   ! MANIFEST
+____________________________________________________________________________
+[ 13687] By: jhi                                   on 2001/12/14  16:15:17
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 13686] By: jhi                                   on 2001/12/14  16:07:02
         Log: Reintroduce Attribute::Handlers with Spider's fixes.
      Branch: perl
