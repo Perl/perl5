@@ -55,9 +55,9 @@ BEGIN {
     }
 }
 
-# By now PW filehandle should be open and full of juicy password entries.
+# By now the PW filehandle should be open and full of juicy password entries.
 
-print "1..1\n";
+print "1..2\n";
 
 # Go through at most this many users.
 # (note that the first entry has been read away by now)
@@ -133,5 +133,30 @@ EOEX
 print "ok ", $tst++;
 print "\t# (not necessarily serious: run t/op/pwent.t by itself)" if $not;
 print "\n";
+
+# Test both the scalar and array contexts.
+
+my @pw1;
+
+endpwent();
+setpwent();
+for (1..$max) {
+    my $pw = scalar getpwent();
+    last unless defined $pw;
+    push @pw1, $pw;
+}
+
+my @pw2;
+
+endpwent();
+setpwent();
+for (1..$max) {
+    my ($pw) = (getpwent());
+    last unless defined $pw;
+    push @pw2, $pw;
+}
+
+print "not " unless "@pw1" eq "@pw2";
+print "ok ", $tst++, "\n";
 
 close(PW);
