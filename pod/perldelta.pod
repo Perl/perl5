@@ -879,7 +879,12 @@ C<sort> is a new pragma for controlling the behaviour of sort().
 
 C<Storable> gives persistence to Perl data structures by allowing the
 storage and retrieval of Perl data to and from files in a fast and
-compact binary format, from Raphael Manfredi.  See L<Storable>.
+compact binary format.  Because in effect Storable does serialisation
+of Perl data structues, with it you can also clone deep, hierarchical
+datastructures.  Storable was created by Raphael Manfredi but it is
+now maintained by the Perl development team.  Storable has been
+enhanced to understand the two new hash features, Unicode keys and
+restricted hashes.  See L<Storable>.
 
 =item *
 
