@@ -130,6 +130,8 @@ sub longmess_heavy {
 
 # ancestors() returns the complete set of ancestors of a module
 
+sub ancestors($$);
+
 sub ancestors($$){
     my( $pack, $href ) = @_;
     if( @{"${pack}::ISA"} ){
