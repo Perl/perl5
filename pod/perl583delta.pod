@@ -105,6 +105,11 @@ Using substr() on a UTF8 string could cause subsequent accesses on that
 string to return garbage. This was due to incorrect UTF8 offsets being
 cached, and is now fixed.
 
+join() could return garbage when the same join() statement was used to
+process 8 bit data having earlier processed UTF8 data, due to the flags
+on that statement's temporary workspace not being reset correctly. This
+is now fixed.
+
 C<$a .. $b> will now work as expected when either $a or $b is C<undef>
 
 Using Unicode keys with tied hashes should now work correctly.
