@@ -172,7 +172,7 @@ S_regcppush(pTHX_ I32 parenfloor)
 	Perl_croak(aTHX_ "panic: paren_elems_to_push < 0");
 
 #define REGCP_OTHER_ELEMS 6
-    SSCHECK(paren_elems_to_push + REGCP_OTHER_ELEMS);
+    SSGROW(paren_elems_to_push + REGCP_OTHER_ELEMS);
     for (p = PL_regsize; p > parenfloor; p--) {
 /* REGCP_PARENS_ELEMS are pushed per pairs of parentheses. */
 	SSPUSHINT(PL_regendp[p]);

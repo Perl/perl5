@@ -661,6 +661,7 @@ PERL_CALLCONV char*	Perl_savepv(pTHX_ const char* pv);
 PERL_CALLCONV char*	Perl_savesharedpv(pTHX_ const char* pv);
 PERL_CALLCONV char*	Perl_savepvn(pTHX_ const char* pv, I32 len);
 PERL_CALLCONV void	Perl_savestack_grow(pTHX);
+PERL_CALLCONV void	Perl_savestack_grow_cnt(pTHX_ I32 need);
 PERL_CALLCONV void	Perl_save_aelem(pTHX_ AV* av, I32 idx, SV **sptr);
 PERL_CALLCONV I32	Perl_save_alloc(pTHX_ I32 size, I32 pad);
 PERL_CALLCONV void	Perl_save_aptr(pTHX_ AV** aptr);

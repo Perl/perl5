@@ -630,6 +630,7 @@ Apd	|char*	|savepv		|const char* pv
 Apd	|char*	|savesharedpv	|const char* pv
 Apd	|char*	|savepvn	|const char* pv|I32 len
 Ap	|void	|savestack_grow
+Ap	|void	|savestack_grow_cnt	|I32 need
 Ap	|void	|save_aelem	|AV* av|I32 idx|SV **sptr
 Ap	|I32	|save_alloc	|I32 size|I32 pad
 Ap	|void	|save_aptr	|AV** aptr

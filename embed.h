@@ -876,6 +876,7 @@
 #define savesharedpv		Perl_savesharedpv
 #define savepvn			Perl_savepvn
 #define savestack_grow		Perl_savestack_grow
+#define savestack_grow_cnt	Perl_savestack_grow_cnt
 #define save_aelem		Perl_save_aelem
 #define save_alloc		Perl_save_alloc
 #define save_aptr		Perl_save_aptr
@@ -3356,6 +3357,7 @@
 #define savesharedpv(a)		Perl_savesharedpv(aTHX_ a)
 #define savepvn(a,b)		Perl_savepvn(aTHX_ a,b)
 #define savestack_grow()	Perl_savestack_grow(aTHX)
+#define savestack_grow_cnt(a)	Perl_savestack_grow_cnt(aTHX_ a)
 #define save_aelem(a,b,c)	Perl_save_aelem(aTHX_ a,b,c)
 #define save_alloc(a,b)		Perl_save_alloc(aTHX_ a,b)
 #define save_aptr(a)		Perl_save_aptr(aTHX_ a)
