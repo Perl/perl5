@@ -1,4 +1,4 @@
-#!./perl
+#!./perl -w
 
 BEGIN {
 	chdir 't' if -d 't';
@@ -9,7 +9,6 @@ use vars qw( $required );
 use Test::More tests => 18;
 
 use_ok( 'ExtUtils::Mkbootstrap' );
-
 
 # Mkbootstrap makes a backup copy of "$_[0].bs" if it exists and is non-zero
 my $file_is_ready;
@@ -44,7 +43,7 @@ my $out = tie *STDOUT, 'TieOut';
 
 # with $Verbose set, it should print status messages about libraries
 $ExtUtils::Mkbootstrap::Verbose = 1;
-Mkbootstrap();
+Mkbootstrap('');
 is( $out->read, "\tbsloadlibs=\n", 'should report libraries in Verbose mode' );
 
 Mkbootstrap('', 'foo');
@@ -119,6 +118,8 @@ SKIP: {
 	close OUT;
 
 	# if $DynaLoader::bscode is set, write its contents to the file
+	# localize the variable to prevent "used only once"
+	local $DynaLoader::bscode;
 	$DynaLoader::bscode = 'Wall';
 	$ExtUtils::Mkbootstrap::Verbose = 0;
 	
