@@ -53,16 +53,18 @@ for my $a (@action) {
   $tempdir ||= tempdir( "tmp-XXXX", CLEANUP => 1, TMPDIR => 1 );
   my($action,$file,$prefix) = @$a;
   my($path,$basename,$number) = $file =~ m|\Q$prefix\E/(.+/)?([^/]+)#(\d+)|;
+  my($prevfile) = $file =~ m|^(.+)#\d+\z|;
   die "Panic: Could not parse file[$file]" unless $number;
   $path = "" unless defined $path;
   my($d1,$d2,$prev);
   $prev = $number-1;
+  $prevfile .= "#$prev";
   if ($prev==0 or $action =~ /^(add|branch)$/) {
     $d1 = "/dev/null";
   } elsif ($action =~ /^(edit|integrate)$/) {
     $d1 = "$path$basename#$prev";
     warn "==> $d1 <==\n" if $OPT{v};
-    my $system = "p4 @P4opt print -o $tempdir/$d1 //depot/$path$basename#$prev";
+    my $system = "p4 @P4opt print -o $tempdir/$d1 $prevfile";
     my $status = `$system`;
     if ($?) {
       warn "$0: system[$system] failed, status[$?]\n";
