@@ -558,11 +558,15 @@ PPCODE:
   ithread *curr_thread;
   MUTEX_LOCK(&create_destruct_mutex);
   curr_thread = threads;
+  PUSHs( sv_2mortal(ithread_to_SV(aTHX_ NULL, curr_thread, classname, TRUE)));
   while(curr_thread) {
-    PUSHs( ithread_to_SV(aTHX_ NULL, curr_thread, classname, TRUE));
     curr_thread = curr_thread->next;
     if(curr_thread == threads)
       break;
+    if(curr_thread->state & PERL_ITHR_DETACHED ||
+       curr_thread->state & PERL_ITHR_JOINED) 
+      continue;
+    PUSHs( sv_2mortal(ithread_to_SV(aTHX_ NULL, curr_thread, classname, TRUE)));
   }	
   MUTEX_UNLOCK(&create_destruct_mutex);
 }
