@@ -32,9 +32,6 @@ our @ISA = qw(Exporter);
 our @EXPORT = qw(share cond_wait cond_broadcast cond_signal _refcnt _id _thrcnt);
 our $VERSION = '0.90';
 
-use Attribute::Handlers;
-
-
 if ($Config{'useithreads'}) {
 	*cond_wait = \&cond_wait_enabled;
 	*cond_signal = \&cond_signal_enabled;
@@ -62,11 +59,6 @@ sub _thrcnt { 42 }
 sub threads::shared::tie::SPLICE
 {
  die "Splice not implemented for shared arrays";
-}
-
-sub UNIVERSAL::shared : ATTR {
-    my ($package, $symbol, $referent, $attr, $data, $phase) = @_;
-    share($referent);
 }
 
 __END__

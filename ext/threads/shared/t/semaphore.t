@@ -1,3 +1,5 @@
+use warnings;
+
 BEGIN {
     chdir 't' if -d 't';
     push @INC ,'../lib';

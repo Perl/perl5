@@ -116,6 +116,14 @@ modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 	    switch ((int)len) {
 	    case 6:
 		switch (*name) {
+		case 's':
+		    if (strEQ(name, "shared")) {
+			if (negated)
+			    Perl_croak(aTHX_ "A variable may not be unshared");
+			SvSHARE(sv);
+                        continue;
+                    }
+		    break;
 		case 'u':
 		    if (strEQ(name, "unique")) {
 			if (SvTYPE(sv) == SVt_PVGV) {
