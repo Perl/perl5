@@ -515,12 +515,12 @@ to go back before the current one.
     ($package, $filename, $line, $subroutine, $hasargs,
     $wantarray, $evaltext, $is_require, $hints) = caller($i);
 
-Here $subroutine may be C<"(eval)"> if the frame is not a subroutine
+Here $subroutine may be C<(eval)> if the frame is not a subroutine
 call, but an C<eval>.  In such a case additional elements $evaltext and
 C<$is_require> are set: C<$is_require> is true if the frame is created by a
 C<require> or C<use> statement, $evaltext contains the text of the
 C<eval EXPR> statement.  In particular, for a C<eval BLOCK> statement,
-$filename is C<"(eval)">, but $evaltext is undefined.  (Note also that
+$filename is C<(eval)>, but $evaltext is undefined.  (Note also that
 each C<use> statement creates a C<require> frame inside an C<eval EXPR>)
 frame.  C<$hints> contains pragmatic hints that the caller was
 compiled with.  It currently only reflects the hint corresponding to
@@ -669,7 +669,7 @@ If NUMBER is omitted, uses C<$_>.
 
 This function works like the system call by the same name: it makes the
 named directory the new root directory for all further pathnames that
-begin with a C<"/"> by your process and all its children.  (It doesn't
+begin with a C</> by your process and all its children.  (It doesn't
 change your current working directory, which is unaffected.)  For security
 reasons, this call is restricted to the superuser.  If FILENAME is
 omitted, does a C<chroot> to C<$_>.
@@ -1462,8 +1462,8 @@ For example:
 	or die "can't fcntl F_GETFL: $!";
 
 You don't have to check for C<defined> on the return from C<fnctl>.
-Like C<ioctl>, it maps a C<0> return from the system call into C<"0
-but true"> in Perl.  This string is true in boolean context and C<0>
+Like C<ioctl>, it maps a C<0> return from the system call into
+C<"0 but true"> in Perl.  This string is true in boolean context and C<0>
 in numeric context.  It is also exempt from the normal B<-w> warnings
 on improper numeric conversions.
 
@@ -2356,8 +2356,8 @@ Calls the System V IPC function msgctl(2).  You'll probably have to say
 
 first to get the correct constant definitions.  If CMD is C<IPC_STAT>,
 then ARG must be a variable which will hold the returned C<msqid_ds>
-structure.  Returns like C<ioctl>: the undefined value for error, C<"0 but
-true"> for zero, or the actual return value otherwise.  See also
+structure.  Returns like C<ioctl>: the undefined value for error,
+C<"0 but true"> for zero, or the actual return value otherwise.  See also
 C<IPC::SysV> and C<IPC::Semaphore> documentation.
 
 =item msgget KEY,FLAGS
@@ -2821,45 +2821,45 @@ The following rules apply:
 =item *
 
 Each letter may optionally be followed by a number giving a repeat
-count.  With all types except C<"a">, C<"A">, C<"Z">, C<"b">, C<"B">, C<"h">,
-C<"H">, and C<"P"> the pack function will gobble up that many values from
+count.  With all types except C<a>, C<A>, C<Z>, C<b>, C<B>, C<h>,
+C<H>, and C<P> the pack function will gobble up that many values from
 the LIST.  A C<*> for the repeat count means to use however many items are
-left, except for C<"@">, C<"x">, C<"X">, where it is equivalent
-to C<"0">, and C<"u">, where it is equivalent to 1 (or 45, what is the
+left, except for C<@>, C<x>, C<X>, where it is equivalent
+to C<0>, and C<u>, where it is equivalent to 1 (or 45, what is the
 same).
 
-When used with C<"Z">, C<*> results in the addition of a trailing null
+When used with C<Z>, C<*> results in the addition of a trailing null
 byte (so the packed result will be one longer than the byte C<length>
 of the item).
 
-The repeat count for C<"u"> is interpreted as the maximal number of bytes
+The repeat count for C<u> is interpreted as the maximal number of bytes
 to encode per line of output, with 0 and 1 replaced by 45.
 
 =item *
 
-The C<"a">, C<"A">, and C<"Z"> types gobble just one value, but pack it as a
+The C<a>, C<A>, and C<Z> types gobble just one value, but pack it as a
 string of length count, padding with nulls or spaces as necessary.  When
-unpacking, C<"A"> strips trailing spaces and nulls, C<"Z"> strips everything
-after the first null, and C<"a"> returns data verbatim.  When packing,
-C<"a">, and C<"Z"> are equivalent.
+unpacking, C<A> strips trailing spaces and nulls, C<Z> strips everything
+after the first null, and C<a> returns data verbatim.  When packing,
+C<a>, and C<Z> are equivalent.
 
 If the value-to-pack is too long, it is truncated.  If too long and an
-explicit count is provided, C<"Z"> packs only C<$count-1> bytes, followed
-by a null byte.  Thus C<"Z"> always packs a trailing null byte under
+explicit count is provided, C<Z> packs only C<$count-1> bytes, followed
+by a null byte.  Thus C<Z> always packs a trailing null byte under
 all circumstances.
 
 =item *
 
-Likewise, the C<"b"> and C<"B"> fields pack a string that many bits long.
+Likewise, the C<b> and C<B> fields pack a string that many bits long.
 Each byte of the input field of pack() generates 1 bit of the result.
 Each result bit is based on the least-significant bit of the corresponding
 input byte, i.e., on C<ord($byte)%2>.  In particular, bytes C<"0"> and
 C<"1"> generate bits 0 and 1, as do bytes C<"\0"> and C<"\1">.
 
 Starting from the beginning of the input string of pack(), each 8-tuple
-of bytes is converted to 1 byte of output.  With format C<"b">
+of bytes is converted to 1 byte of output.  With format C<b>
 the first byte of the 8-tuple determines the least-significant bit of a
-byte, and with format C<"B"> it determines the most-significant bit of
+byte, and with format C<B> it determines the most-significant bit of
 a byte.
 
 If the length of the input string is not exactly divisible by 8, the
@@ -2873,7 +2873,7 @@ of C<"0">s and C<"1">s.
 
 =item *
 
-The C<"h"> and C<"H"> fields pack a string that many nybbles (4-bit groups,
+The C<h> and C<H> fields pack a string that many nybbles (4-bit groups,
 representable as hexadecimal digits, 0-9a-f) long.
 
 Each byte of the input field of pack() generates 4 bits of the result.
@@ -2886,9 +2886,9 @@ C<"A"> both generate the nybble C<0xa==10>.  The result for bytes
 C<"g".."z"> and C<"G".."Z"> is not well-defined.
 
 Starting from the beginning of the input string of pack(), each pair
-of bytes is converted to 1 byte of output.  With format C<"h"> the
+of bytes is converted to 1 byte of output.  With format C<h> the
 first byte of the pair determines the least-significant nybble of the
-output byte, and with format C<"H"> it determines the most-significant
+output byte, and with format C<H> it determines the most-significant
 nybble.
 
 If the length of the input string is not even, it behaves as if padded
@@ -2902,24 +2902,24 @@ of hexadecimal digits.
 
 =item *
 
-The C<"p"> type packs a pointer to a null-terminated string.  You are
+The C<p> type packs a pointer to a null-terminated string.  You are
 responsible for ensuring the string is not a temporary value (which can
 potentially get deallocated before you get around to using the packed result).
-The C<"P"> type packs a pointer to a structure of the size indicated by the
-length.  A NULL pointer is created if the corresponding value for C<"p"> or
-C<"P"> is C<undef>, similarly for unpack().
+The C<P> type packs a pointer to a structure of the size indicated by the
+length.  A NULL pointer is created if the corresponding value for C<p> or
+C<P> is C<undef>, similarly for unpack().
 
 =item *
 
-The C<"/"> character allows packing and unpacking of strings where the
-packed structure contains a byte count followed by the string itself.
+The C</> template character allows packing and unpacking of strings where
+the packed structure contains a byte count followed by the string itself.
 You write I<length-item>C</>I<string-item>.
 
 The I<length-item> can be any C<pack> template letter,
 and describes how the length value is packed.
 The ones likely to be of most use are integer-packing ones like
-C<"n"> (for Java strings), C<"w"> (for ASN.1 or SNMP)
-and C<"N"> (for Sun XDR).
+C<n> (for Java strings), C<w> (for ASN.1 or SNMP)
+and C<N> (for Sun XDR).
 
 The I<string-item> must, at present, be C<"A*">, C<"a*"> or C<"Z*">.
 For C<unpack> the length of the string is obtained from the I<length-item>,
@@ -2931,27 +2931,25 @@ but if you put in the '*' it will be ignored.
 
 The I<length-item> is not returned explicitly from C<unpack>.
 
-Adding a count to the I<length-item> letter
-is unlikely to do anything useful,
-unless that letter is C<"A">, C<"a"> or C<"Z">.
-Packing with a I<length-item> of C<"a"> or C<"Z">
-may introduce C<"\000"> characters,
+Adding a count to the I<length-item> letter is unlikely to do anything
+useful, unless that letter is C<A>, C<a> or C<Z>.  Packing with a
+I<length-item> of C<a> or C<Z> may introduce C<"\000"> characters,
 which Perl does not regard as legal in numeric strings.
 
 =item *
 
-The integer types C<"s">, C<"S">, C<"l">, and C<"L"> may be
-immediately followed by a C<"!"> suffix to signify native shorts or
-longs--as you can see from above for example a bare C<"l"> does mean
+The integer types C<s>, C<S>, C<l>, and C<L> may be
+immediately followed by a C<!> suffix to signify native shorts or
+longs--as you can see from above for example a bare C<l> does mean
 exactly 32 bits, the native C<long> (as seen by the local C compiler)
 may be larger.  This is an issue mainly in 64-bit platforms.  You can
-see whether using C<"!"> makes any difference by
+see whether using C<!> makes any difference by
 
 	print length(pack("s")), " ", length(pack("s!")), "\n";
 	print length(pack("l")), " ", length(pack("l!")), "\n";
 
-C<"i!"> and C<"I!"> also work but only because of completeness;
-they are identical to C<"i"> and C<"I">.
+C<i!> and C<I!> also work but only because of completeness;
+they are identical to C<i> and C<I>.
 
 The actual sizes (in bytes) of native shorts, ints, longs, and long
 longs on the platform where Perl was built are also available via
@@ -2968,7 +2966,7 @@ not support long longs.)
 
 =item *
 
-The integer formats C<"s">, C<"S">, C<"i">, C<"I">, C<"l">, and C<"L">
+The integer formats C<s>, C<S>, C<i>, C<I>, C<l>, and C<L>
 are inherently non-portable between processors and operating systems
 because they obey the native byteorder and endianness.  For example a
 4-byte integer 0x12345678 (305419896 decimal) be ordered natively
@@ -3006,8 +3004,8 @@ via L<Config>:
 Byteorders C<'1234'> and C<'12345678'> are little-endian, C<'4321'>
 and C<'87654321'> are big-endian.
 
-If you want portable packed integers use the formats C<"n">, C<"N">,
-C<"v">, and C<"V">, their byte endianness and size is known.
+If you want portable packed integers use the formats C<n>, C<N>,
+C<v>, and C<V>, their byte endianness and size is known.
 See also L<perlport>.
 
 =item *
@@ -4441,8 +4439,8 @@ before any line containing a certain pattern:
 	print;
     }
 
-In searching for C</\bfoo\b/>, only those locations in C<$_> that contain C<"f">
-will be looked at, because C<"f"> is rarer than C<"o">.  In general, this is
+In searching for C</\bfoo\b/>, only those locations in C<$_> that contain C<f>
+will be looked at, because C<f> is rarer than C<o>.  In general, this is
 a big win except in pathological cases.  The only question is whether
 it saves you more time than it took to build the linked list in the
 first place.
@@ -5007,7 +5005,7 @@ The following efficiently counts the number of set bits in a bit vector:
 
     $setbits = unpack("%32b*", $selectmask);
 
-The C<"p"> and C<"P"> formats should be used with care.  Since Perl
+The C<p> and C<P> formats should be used with care.  Since Perl
 has no way of checking whether the value passed to C<unpack()>
 corresponds to a valid memory location, passing a pointer value that's
 not known to be valid is likely to have disastrous consequences.
