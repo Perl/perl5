@@ -679,14 +679,17 @@ guaranteed is slowness.)  See the book "Mastering Regular Expressions"
 hope to know on these matters (a full citation appears in
 L<perlfaq2>).
 
-=head2 What's wrong with using grep or map in a void context?
+=head2 What's wrong with using grep in a void context?
 
-The problem is that both grep and map build a return list,
-regardless of the context.  This means you're making Perl go
-to the trouble of building a list that you then just throw away.
-If the list is large, you waste both time and space.  If your
-intent is to iterate over the list then use a for loop for this
+The problem is that grep builds a return list, regardless of the context.
+This means you're making Perl go to the trouble of building a list that
+you then just throw away. If the list is large, you waste both time and space.
+If your intent is to iterate over the list, then use a for loop for this
 purpose.
+
+In perls older than 5.8.1, map suffers from this problem as well.
+But since 5.8.1, this has been fixed, and map is context aware - in void
+context, no lists are constructed.
 
 =head2 How can I match strings with multibyte characters?
 

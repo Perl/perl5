@@ -329,6 +329,7 @@ PERL_CALLCONV bool	Perl_is_uni_punct_lc(pTHX_ UV c);
 PERL_CALLCONV bool	Perl_is_uni_xdigit_lc(pTHX_ UV c);
 PERL_CALLCONV STRLEN	Perl_is_utf8_char(pTHX_ U8 *p);
 PERL_CALLCONV bool	Perl_is_utf8_string(pTHX_ U8 *s, STRLEN len);
+PERL_CALLCONV bool	Perl_is_utf8_string_loc(pTHX_ U8 *s, STRLEN len, U8 **p);
 PERL_CALLCONV bool	Perl_is_utf8_alnum(pTHX_ U8 *p);
 PERL_CALLCONV bool	Perl_is_utf8_alnumc(pTHX_ U8 *p);
 PERL_CALLCONV bool	Perl_is_utf8_idfirst(pTHX_ U8 *p);

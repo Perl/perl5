@@ -1336,6 +1336,16 @@ define a C<$VERSION.>
 (F) You cannot put a repeat count of any kind right after the '/' code.
 See L<perlfunc/pack>.
 
+=item %s "\x%s" does not map to Unicode
+
+When reading in different encodings Perl tries to map everything
+into Unicode characters.  The bytes you read in are not legal in
+this encoding, for example
+
+    utf8 "\xE4" does not map to Unicode
+
+if you try to read in the a-diaereses Latin-1 as UTF-8.
+
 =item Don't know how to handle magic of type '%s'
 
 (P) The internal handling of magical variables has been cursed.

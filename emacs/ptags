@@ -27,10 +27,12 @@ if test ! -z "$OS2_SHELL"; then alias find=gnufind; fi
 case "$1" in
   fullpath)
     cwd=`pwd`
+    cperl_add_tags='cperl-add-tags-recurse-noxs-fullpath'
     echo "Building TAGS with full paths"
   ;;
   *)
-  cwd='.'
+    cperl_add_tags='cperl-add-tags-recurse-noxs'
+    cwd='.'
     echo "Building TAGS with relative paths"
 esac
 
@@ -167,7 +169,7 @@ fi
 # This should work with newer Emaxen
 
 cp TAGS.tmp TAGS
-if $emacs -batch -q -no-site-file -l emacs/cperl-mode.elc -f cperl-add-tags-recurse-noxs ; then
+if $emacs -batch -q -no-site-file -l emacs/cperl-mode.elc -f $cperl_add_tags ; then
     mv TAGS TAGS.tmp
 fi
 

@@ -13,7 +13,7 @@ no utf8; # needed for use utf8 not griping about the raw octets
 
 require "./test.pl";
 
-plan(tests => 51);
+plan(tests => 53);
 
 $| = 1;
 
@@ -306,15 +306,37 @@ ok( 1 );
     open F, ">a";
     binmode F, ":utf8";
     syswrite(F, $a = chr(0x100));
-    close A;
+    close F;
     is( ord($a), 0x100, '23428 syswrite should not downgrade scalar' );
     like( $a, qr/^\w+/, '23428 syswrite should not downgrade scalar' );
 }
 
 # sysread() and syswrite() tested in lib/open.t since Fcntl is used
 
+{
+    # <FH> on a :utf8 stream should complain immediately with -w
+    # if it finds bad UTF-8 (:encoding(utf8) works this way)
+    use warnings 'utf8';
+    undef $@;
+    local $SIG{__WARN__} = sub { $@ = shift };
+    open F, ">a";
+    binmode F;
+    print F "foo", chr(0xE4), "\n";
+    print F "foo", chr(0xF6), "\n";
+    close F;
+    open F, "<:utf8", "a";
+    undef $@;
+    my $line = <F>;
+    like( $@, qr/utf8 "\\xE4" does not map to Unicode .+ <F> line 1/,
+	  "<:utf8 readline must warn about bad utf8");
+    undef $@;
+    $line .= <F>;
+    like( $@, qr/utf8 "\\xF6" does not map to Unicode .+ <F> line 2/,
+	  "<:utf8 rcatline must warn about bad utf8");
+    close F;
+}
+
 END {
     1 while unlink "a";
     1 while unlink "b";
 }
-

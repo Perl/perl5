@@ -1134,6 +1134,10 @@
 ;;;				Now works for else/continue/sub blocks
 ;;;  (`cperl-short-docs'):	Minor edits; make messages fit 80-column screen
 
+;;;; After 4.37:
+;;;  `cperl-add-tags-recurse-noxs-fullpath'
+;;;    added (for -batch mode);
+
 ;;; Code:
 
 
@@ -6868,12 +6872,20 @@ Delay of auto-help controlled by `cperl-lazy-help-time'."
 	ret))))
 
 (defun cperl-add-tags-recurse-noxs ()
-  "Add to TAGS data for Perl and XSUB files in the current directory and kids.
-Use as
+  "Add to TAGS data for Perl (skipping XSUBs) in the current directory 
+and kids. Use as
   emacs -batch -q -no-site-file -l emacs/cperl-mode.el \
-        -f cperl-add-tags-recurse
+        -f cperl-add-tags-recurse-noxs
 "
   (cperl-write-tags nil nil t t nil t))
+
+(defun cperl-add-tags-recurse-noxs-fullpath ()
+  "Add to TAGS data for Perl (skipping XSUBs) in the current directory 
+and kids, using fullpath, so TAGS is relocatable. Use as
+  emacs -batch -q -no-site-file -l emacs/cperl-mode.el \
+        -f cperl-add-tags-recurse-noxs-fullpath
+"
+  (cperl-write-tags nil nil t t nil t ""))
 
 (defun cperl-add-tags-recurse ()
   "Add to TAGS file data for Perl files in the current directory and kids.
