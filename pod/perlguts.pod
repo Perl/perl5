@@ -609,8 +609,6 @@ Marks the variable as multiply defined, thus preventing the:
 
 warning.
 
-=over
-
 =item GV_ADDWARN
 
 Issues the warning:
