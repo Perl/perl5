@@ -16,6 +16,7 @@ use Config;
 WriteMakefile(
     'NAME'			=> 'Storable',
     'DISTNAME'		=> "Storable",
+    'MAN3PODS'		=> {},
     'VERSION_FROM'	=> 'Storable.pm',
     'dist'			=> { SUFFIX => 'gz', COMPRESS => 'gzip -f' },
     'clean'			=> {'FILES' => '*%'},

@@ -35,6 +35,7 @@ $!
 $! VMS-isms we will need:
 $ echo = "write sys$output "
 $ cat  = "type"
+$ delete := delete ! local symbol overrides globals with qualifiers
 $ gcc_symbol = "gcc"
 $ ld = "Link"
 $ ans = ""
@@ -398,7 +399,7 @@ $ echo ""
 $ echo4 "First let's make sure your kit is complete.  Checking..."
 $ manifestfound = "" 
 $ miss_list = "" 
-$! Here I assume we are in the [foo.PERL5xxx.VMS...] tree
+$! Here I assume we are in the [foo.PERLxxx...] tree
 $! because the search routine simply does set def [-] if necessary.
 $ file_2_find = "MANIFEST" !I hope this one is not in [foo.PERL5xxx.VMS...] 
 $Research_manifest:
@@ -580,13 +581,23 @@ $ If (fastread)
 $ Then
 $   echo4 "''rp'"
 $ Else
-$   If (silent)
-$   Then
+$   If (.NOT. silent) Then echo ""
+$   READ SYS$COMMAND/PROMPT="''rp'" ans
+$   IF (ans .EQS. "&-d")
+$   THEN
+$     echo4 "(OK, I will run with -d after this question.)"
+$     IF (.NOT. silent) THEN echo ""
 $     READ SYS$COMMAND/PROMPT="''rp'" ans
-$   Else
+$     fastread := yes
+$   ENDIF
+$   IF (ans .EQS. "&-s")
+$   THEN
+$     echo4 "(OK, I will run with -s after this question.)"
 $     echo ""
 $     READ SYS$COMMAND/PROMPT="''rp'" ans
-$   Endif
+$     silent := true
+$     GOSUB Shut_up
+$   ENDIF
 $ Endif
 $ RETURN
 $!
@@ -2141,7 +2152,7 @@ $ echo ""
 $ echo "If you have no idea what this means, and don't have
 $ echo "any program requiring anything, choose the default.
 $ dflt = be_case_sensitive
-$ rp = "Case-sensitive symbols [''dflt'] "
+$ rp = "Build with case-sensitive symbols? [''dflt'] "
 $ gosub myread
 $ if ans.eqs."" then ans="''dflt'"
 $ be_case_sensitive = "''ans'"
@@ -2152,7 +2163,7 @@ $ echo "Perl normally uses G_FLOAT format floating point numbers
 $ echo "internally, as do most things on VMS. You can, however, build
 $ echo "with IEEE floating point numbers instead if you need to.
 $ dflt = use_ieee_math
-$ rp = "Use IEEE math [''dflt'] "
+$ rp = "Use IEEE math? [''dflt'] "
 $ gosub myread
 $ if ans.eqs."" then ans="''dflt'"
 $ use_ieee_math = "''ans'"
@@ -2160,7 +2171,7 @@ $ endif
 $! CC Flags
 $ echo ""
 $ echo "You can, if you need to, pass extra flags on to the C
-$ echo "compiler. In general you should only do this if you really,
+$ echo "compiler.  In general you should only do this if you really,
 $ echo "really know what you're doing.
 $ dflt = user_c_flags
 $ rp = "Extra C flags [''dflt'] "
@@ -2269,7 +2280,7 @@ $ echo "break badly"
 $ echo "
 $ echo "Which modules do you want to build into perl?"
 $! dflt = "Fcntl Errno File::Glob IO Opcode Byteloader Devel::Peek Devel::DProf Data::Dumper attrs re VMS::Stdio VMS::DCLsym B SDBM_File"
-$ dflt = "re Fcntl Errno File::Glob IO Opcode Devel::Peek Devel::DProf Data::Dumper attrs VMS::Stdio VMS::DCLsym B SDBM_File Thread Sys::Hostname"
+$ dflt = "re Fcntl Errno File::Glob IO Opcode Devel::Peek Devel::DProf Data::Dumper attrs VMS::Stdio VMS::DCLsym B SDBM_File Storable Thread Sys::Hostname"
 $ if Using_Dec_C
 $ THEN
 $   dflt = dflt + " POSIX"
@@ -2372,7 +2383,7 @@ $ IF (ok_builders .NES. "")
 $ THEN
 $   echo "Here is the list of builders you can apparently use:"
 $   echo "(",ok_builders," )"
-$   rp = "Which """"make"""" utility do you wish to use [''dflt']? "
+$   rp = "Which """"make"""" utility do you wish to use? [''dflt'] "
 $   GOSUB myread
 $   ans = F$EDIT(ans,"TRIM, COMPRESS")
 $   ans = F$EXTRACT(0,F$LOCATE(" ",ans),ans) !throw out "-f Makefile." here
@@ -2426,7 +2437,8 @@ $ make = F$EDIT(build,"UPCASE")
 $!
 $!: locate the preferred pager for this system
 $!pagers = "most|more|less|type/page"
-$!rp='What pager is used on your system?'
+$!rp="What pager is used on your system? [''dflt'] "
+$ pager="most"
 $!
 $! update [.vms]config.vms here
 $!
@@ -2619,9 +2631,6 @@ $ ENDIF
 $!
 $ usedl="define"
 $ startperl="""$ perl 'f$env(\""procedure\"")' 'p1' 'p2' 'p3' 'p4' 'p5' 'p6' 'p7' 'p8'  !\n$ exit++ + ++$status != 0 and $exit = $status = undef;"""
-$!: locate the preferred pager for this system
-$! rp="What pager is used on your system?"
-$ pager="most"
 $!
 $ IF ((Use_Threads) .AND. (vms_ver .LES. "6.2"))
 $ THEN
@@ -5152,7 +5161,7 @@ If you'd like to make any changes to the config.sh file before I begin
 to configure things, answer yes to the following question.
 
 $   dflt="n"
-$   rp="Do you wish to edit ''basename_config_sh'? "
+$   rp="Do you wish to edit ''basename_config_sh'? [''dflt'] "
 $   GOSUB myread
 $   IF ans .EQS. "" then ans = dflt
 $   IF ans
