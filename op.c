@@ -2236,6 +2236,7 @@ Perl_gen_constant_list(pTHX_ register OP *o)
 
     PL_op = curop = LINKLIST(o);
     o->op_next = 0;
+    peep(curop);
     pp_pushmark();
     CALLRUNOPS(aTHX);
     PL_op = curop;

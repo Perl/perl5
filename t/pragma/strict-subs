@@ -33,6 +33,24 @@ Execution of - aborted due to compilation errors.
 ########
 
 # strict subs - error
+use strict 'subs' ;
+my @a = (A..Z);
+EXPECT
+Bareword "Z" not allowed while "strict subs" in use at - line 4.
+Bareword "A" not allowed while "strict subs" in use at - line 4.
+Execution of - aborted due to compilation errors.
+########
+
+# strict subs - error
+use strict 'subs' ;
+my $a = (B..Y);
+EXPECT
+Bareword "Y" not allowed while "strict subs" in use at - line 4.
+Bareword "B" not allowed while "strict subs" in use at - line 4.
+Execution of - aborted due to compilation errors.
+########
+
+# strict subs - error
 use strict ;
 Fred ;
 EXPECT
