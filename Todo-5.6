@@ -16,6 +16,7 @@ Unicode support
     autoload utf8_heavy.pl's swash routines in swash_init()
     autoload byte.pm when byte:: is seen by the parser
     check uv_to_utf8() calls for buffer overflow
+    (see also "Locales", "Regexen", and "Miscellaneous" )
 
 Multi-threading
     support "use Thread;" under useithreads
@@ -45,17 +46,29 @@ Configure
     make configuring+building away from source directory work (VPATH et al)
     _r support
     cross-compilation configuring
-    POSIX 1003.1 1996 Edition support
+    POSIX 1003.1 1996 Edition support--realtime stuff:
+	POSIX semaphores, message queues, shared memory, realtime clocks,
+	timers, signals (the metaconfig units mostly already exist for these)
+    UNIX98 support: reader-writer locks, realtime/asynchronous IO
 
 Locales
     deprecate traditional/legacy locales?
     figure out how to support Unicode locales
+	suggestion: integrate the IBM Classes for Unicode (ICU)
+	http://www10.software.ibm.com/developerworks/opensource/icu/index.html
+	and check out also the Locale Converter:
+	http://alphaworks.ibm.com/tech/localeconverter
     locales across packages?
 
 Regexen
    make RE engine thread-safe
    POSIX [=bar=] and [.zap.] would nice too but there's no API for them
-   (=bar= could be done with Unicode, though, see TR about normalization forms)
+   	=bar= could be done with Unicode, though, see the Unicode TR #15 about
+	normalization forms:
+	http://www.unicode.org/unicode/reports/tr15/
+	this is also a part of the Unicode 3.0:
+	http://www.unicode.org/unicode/uni2book/u2.html
+	executive summary: there are several different levels of 'equivalence'
    approximate matching
 
 Security
@@ -74,7 +87,7 @@ Win32 stuff
 
 Miscellaneous
     add new modules (Archive::Tar, Compress::Zlib, CPAN::FTP?)
-    sub-second sleep? (integrate Time::HiRes?)
+    sub-second sleep? alarm? time? (integrate Time::HiRes?)
     floating point handling: nans, infinities, fp exception masks, etc
     replace pod2html with new PodtoHtml? (requires other modules from CPAN)
     automate testing with large parts of CPAN
