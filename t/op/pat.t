@@ -4,7 +4,7 @@
 # the format supported by op/regexp.t.  If you want to add a test
 # that does fit that format, add it to op/re_tests, not here.
 
-print "1..236\n";
+print "1..238\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -1153,3 +1153,23 @@ EOT
 	print "ok " . $test++ . "\n";
     }
 }
+
+$_ = "foo";
+
+eval <<"EOT"; die if $@;
+  /f
+   o\r
+   o
+   \$
+  /x && print "ok $test\n";
+EOT
+$test++;
+
+eval <<"EOT"; die if $@;
+  /f
+   o
+   o
+   \$\r
+  /x && print "ok $test\n";
+EOT
+$test++;
