@@ -909,9 +909,12 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		keysv = sv_2mortal(newSVpvn(key,klen));
 		key = strupr(SvPVX(keysv));
 
+#if 0
+		/* keysave not in scope - don't understand - NI-S */
                 if (k_flags & HVhek_FREEKEY) {
                     Safefree(keysave);
 		}
+#endif
 
 		is_utf8 = 0;
 		k_flags = 0;
