@@ -709,8 +709,8 @@ $(DLL_OBJ)	: $(CORE_H)
 $(PERL95_OBJ)	: $(CORE_H)
 $(X2P_OBJ)	: $(CORE_H)
 
-perldll.def : $(MINIPERL) $(CONFIGPM) ..\global.sym ..\pp.sym makedef.pl
-	$(MINIPERL) -w makedef.pl $(OPTIMIZE) $(DEFINES) $(BUILDOPT) \
+perldll.def : $(MINIPERL) $(CONFIGPM) ..\global.sym ..\pp.sym ..\makedef.pl
+	$(MINIPERL) -w ..\makedef.pl PLATFORM=win32 $(OPTIMIZE) $(DEFINES) $(BUILDOPT) \
 	    CCTYPE=$(CCTYPE) > perldll.def
 
 $(PERLDLL): perldll.def $(PERLDLL_OBJ)

@@ -501,6 +501,13 @@ from the CRTL's internal environment array and discovered the array was
 missing.  You need to figure out where your CRTL misplaced its environ
 or define F<PERL_ENV_TABLES> (see L<perlvms>) so that environ is not searched.
 
+=item Can't read CRTL environ
+
+(S) A warning peculiar to VMS.  Perl tried to read an element of %ENV
+from the CRTL's internal environment array and discovered the array was
+missing.  You need to figure out where your CRTL misplaced its environ
+or define F<PERL_ENV_TABLES> (see L<perlvms>) so that environ is not searched.
+
 =item Can't "redo" outside a block
 
 (F) A "redo" statement was executed to restart the current block, but
@@ -1026,10 +1033,11 @@ package. If method name is C<???>, this is an internal error.
 =item Character class syntax [%s] belongs inside character classes
 
 (W) The character class constructs [: :], [= =], and [. .]  go
-I<inside> character classes, the [] are part of the construct.  For
-example: /[[:alpha:]]/
+I<inside> character classes, the [] are part of the construct,
+for example: /[012[:alpha:]345]/.  Note that the last two constructs
+are not currently implemented, they are placeholders for future extensions.
 
-=item Character class syntax [ .] is reserved for future extensions
+=item Character class syntax [. .] is reserved for future extensions
 
 (W) Within regular expression character classes ([]) the syntax beginning
 with "[." and ending with ".]" is reserved for future extensions.
@@ -1458,7 +1466,7 @@ Interpretation of the binary number stopped before the offending digit.
 (W) You may have tried to use an 8 or 9 in a octal number.  Interpretation
 of the octal number stopped before the 8 or 9.
 
-=item Illegal hex digit %s ignored
+=item Illegal hexadecimal digit %s ignored
 
 (W) You may have tried to use a character other than 0 - 9 or A - F in a
 hexadecimal number.  Interpretation of the hexadecimal number stopped
@@ -1505,8 +1513,8 @@ known value, using trustworthy data.  See L<perlsec>.
 
 =item Integer overflow in %s number
 
-(S) The literal hex, octal or binary number you have specified is
-too big for your architecture. On a 32-bit architecture the largest
+(S) The literal hexadecimal, octal or binary number you have specified
+is too big for your architecture. On a 32-bit architecture the largest
 literal hex, octal or binary number representable without overflow
 is 0xFFFFFFFF, 037777777777, or 0b11111111111111111111111111111111
 respectively.  Note that Perl transparently promotes decimal literals
@@ -1834,6 +1842,14 @@ Say C<kill -l> in your shell to see the valid signal names on your system.
 =item no UTC offset information; assuming local time is UTC
 
 (S) A warning peculiar to VMS.  Perl was unable to find the local
+timezone offset, so it's assuming that local system time is equivalent
+to UTC.  If it's not, define the logical name F<SYS$TIMEZONE_DIFFERENTIAL>
+to translate to the number of seconds which need to be added to UTC to
+get local time.
+
+=item no UTC offset information; assuming local time is UTC
+
+(S) A warning peculiar to VMS.  Per was unable to find the local
 timezone offset, so it's assuming that local system time is equivalent
 to UTC.  If it's not, define the logical name F<SYS$TIMEZONE_DIFFERENTIAL>
 to translate to the number of seconds which need to be added to UTC to
@@ -2709,6 +2725,17 @@ will deny it.
 (F) It makes no sense to test the current stat buffer for symbolic linkhood
 if the last stat that wrote to the stat buffer already went past
 the symlink to get to the real file.  Use an actual filename instead.
+
+=item This Perl can't reset CRTL eviron elements (%s)
+
+=item This Perl can't set CRTL environ elements (%s=%s)
+
+(W) Warnings peculiar to VMS.  You tried to change or delete an element
+of the CRTL's internal environ array, but your copy of Perl wasn't
+built with a CRTL that contained the setenv() function.  You'll need to
+rebuild Perl with a CRTL that does, or redefine F<PERL_ENV_TABLES> (see
+L<perlvms>) so that the environ array isn't the target of the change to
+%ENV which produced the warning.
 
 =item This Perl can't reset CRTL eviron elements (%s)
 

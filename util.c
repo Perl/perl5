@@ -2845,7 +2845,7 @@ Perl_scan_hex(pTHX_ char *start, I32 len, I32 *retlen)
 		dTHR;
 		--s;
 		if (ckWARN(WARN_UNSAFE))
-		    Perl_warner(aTHX_ WARN_UNSAFE,"Illegal hex digit '%c' ignored", *s);
+		    Perl_warner(aTHX_ WARN_UNSAFE,"Illegal hexadecimal digit '%c' ignored", *s);
 		break;
 	    }
 	}
@@ -2853,7 +2853,7 @@ Perl_scan_hex(pTHX_ char *start, I32 len, I32 *retlen)
 	if (!overflowed && (n >> 4) != retval) {
 	    dTHR;
 	    if (ckWARN_d(WARN_UNSAFE))
-		Perl_warner(aTHX_ WARN_UNSAFE, "Integer overflow in hex number");
+		Perl_warner(aTHX_ WARN_UNSAFE, "Integer overflow in hexadecimal number");
 	    overflowed = TRUE;
 	}
 	retval = n | ((tmp - PL_hexdigit) & 15);
