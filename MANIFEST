@@ -523,6 +523,7 @@ lib/CGI/Apache.pm	Support for Apache's Perl module
 lib/CGI/Carp.pm		Log server errors with helpful context
 lib/CGI/Cookie.pm	Interface to Netscape Cookies
 lib/CGI/Fast.pm		Support for FastCGI (persistent server process)
+lib/CGI/Pretty.pm	Output nicely formatted HTML
 lib/CGI/Push.pm		Support for server push
 lib/CGI/Switch.pm	Simple interface for multiple server types
 lib/CPAN.pm		Interface to Comprehensive Perl Archive Network
