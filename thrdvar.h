@@ -85,7 +85,7 @@ PERLVAR(Trestartop,	OP *)		/* propagating an error from croak? */
 PERLVARI(Tcurcop,	COP * VOL,	&PL_compiling)
 PERLVAR(Tin_eval,	VOL int)	/* trap "fatal" errors? */
 PERLVAR(Tdelaymagic,	int)		/* ($<,$>) = ... */
-PERLVAR(Tdirty,		bool)		/* in the middle of tearing things down? */
+PERLVARI(Tdirty,	bool, FALSE)	/* in the middle of tearing things down? */
 PERLVAR(Tlocalizing,	int)		/* are we processing a local() list? */
 
 PERLVAR(Tcurstack,	AV *)		/* THE STACK */

@@ -354,6 +354,7 @@ perl_destruct(register PerlInterpreter *sv_interp)
     PL_main_start = Nullop;
     SvREFCNT_dec(PL_main_cv);
     PL_main_cv = Nullcv;
+    PL_dirty = TRUE;
 
     if (PL_sv_objcount) {
 	/*
@@ -361,8 +362,6 @@ perl_destruct(register PerlInterpreter *sv_interp)
 	 * destructors and destructees still exist.  Some sv's might remain.
 	 * Non-referenced objects are on their own.
 	 */
-    
-	PL_dirty = TRUE;
 	sv_clean_objs();
     }
 
@@ -1872,6 +1871,7 @@ init_interp(void)
     PL_profiledata	= NULL;		\
     PL_rsfp		= Nullfp;	\
     PL_rsfp_filters	= Nullav;	\
+    PL_dirty		= FALSE;	\
   } STMT_END
     I_REINIT;
 #else
