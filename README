@@ -113,6 +113,7 @@ Installation
     A/UX may need -ZP -DPOSIX, and -g if big cc is used.
     FPS machines may need -J and -DBADSWITCH.
     UTS may need one or more of -DCRIPPLED_CC, -K or -g, and undef LSTAT.
+    Dnix (not dynix) may need to remove -O.
     If you get syntax errors on '(', try -DCRIPPLED_CC or -DBADSWITCH or both.
     Machines with half-implemented dbm routines will need to #undef ODBM & NDBM.
     C's that don't try to restore registers on longjmp() may need -DJMPCLOBBER.

@@ -1,6 +1,9 @@
-/* $Header: malloc.c,v 3.0.1.3 90/10/16 15:27:47 lwall Locked $
+/* $Header: malloc.c,v 3.0.1.4 90/11/13 15:23:45 lwall Locked $
  *
  * $Log:	malloc.c,v $
+ * Revision 3.0.1.4  90/11/13  15:23:45  lwall
+ * patch41: added hp malloc union overhead strut (that sounds very blue collar)
+ * 
  * Revision 3.0.1.3  90/10/16  15:27:47  lwall
  * patch29: various portability fixes
  * 
@@ -56,7 +59,7 @@ static findbucket(), morecore();
  */
 union	overhead {
 	union	overhead *ov_next;	/* when free */
-#if defined(mips) || defined(sparc) || defined(luna88k)
+#if defined(mips) || defined(sparc) || defined(luna88k) || defined(hp9000s800)
 	double  strut;			/* alignment problems */
 #endif
 	struct {

@@ -1,4 +1,4 @@
-/* $Header: str.c,v 3.0.1.10 90/11/10 02:06:29 lwall Locked $
+/* $Header: str.c,v 3.0.1.11 90/11/13 15:27:14 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	str.c,v $
+ * Revision 3.0.1.11  90/11/13  15:27:14  lwall
+ * patch41: fixed a couple of malloc/free problems
+ * 
  * Revision 3.0.1.10  90/11/10  02:06:29  lwall
  * patch38: temp string values are now copied less often
  * patch38: array slurps are now faster and take less memory
@@ -259,28 +262,41 @@ register STR *sstr;
 	/*
 	 * Check to see if we can just swipe the string.  If so, it's a
 	 * possible small lose on short strings, but a big win on long ones.
+	 * It might even be a win on short strings if dstr->str_ptr
+	 * has to be allocated and sstr->str_ptr has to be freed.
 	 */
 
 	if (sstr->str_pok & SP_TEMP) {		/* slated for free anyway? */
-	    if (dstr->str_ptr)
+	    if (dstr->str_ptr) {
+		if (dstr->str_state == SS_INCR)
+		    dstr->str_ptr -= dstr->str_u.str_useful;
 		Safefree(dstr->str_ptr);
-#ifdef STRUCTCOPY
-	    *dstr = *sstr;
-#else
-	    Copy(sstr, dstr, 1, STR);
-#endif
-	    Zero(sstr, 1, STR);			/* (probably overkill) */
-	    dstr->str_pok &= ~SP_TEMP;
-	}
-	else {					/* have to copy piecemeal */
-	    str_nset(dstr,sstr->str_ptr,sstr->str_cur);
-	    if (sstr->str_nok) {
-		dstr->str_u.str_nval = sstr->str_u.str_nval;
-		dstr->str_nok = 1;
-		dstr->str_state = SS_NORM;
 	    }
-	    else if (sstr->str_cur == sizeof(STBP)) {
-		char *tmps = sstr->str_ptr;
+	    dstr->str_ptr = sstr->str_ptr;
+	    dstr->str_len = sstr->str_len;
+	    dstr->str_cur = sstr->str_cur;
+	    dstr->str_state = sstr->str_state;
+	    dstr->str_pok = sstr->str_pok & ~SP_TEMP;
+#ifdef TAINT
+	    dstr->str_tainted = sstr->str_tainted;
+#endif
+	    sstr->str_ptr = Nullch;
+	    sstr->str_len = 0;
+	    sstr->str_pok = 0;			/* wipe out any weird flags */
+	    sstr->str_state = 0;		/* so sstr frees uneventfully */
+	}
+	else					/* have to copy actual string */
+	    str_nset(dstr,sstr->str_ptr,sstr->str_cur);
+	if (dstr->str_nok = sstr->str_nok)
+	    dstr->str_u.str_nval = sstr->str_u.str_nval;
+	else {
+#ifdef STRUCTCOPY
+	    dstr->str_u = sstr->str_u;
+#else
+	    dstr->str_u.str_nval = sstr->str_u.str_nval;
+#endif
+	    if (dstr->str_cur == sizeof(STBP)) {
+		char *tmps = dstr->str_ptr;
 
 		if (*tmps == 'S' && bcmp(tmps,"StB",4) == 0) {
 		    if (!dstr->str_magic) {
@@ -763,8 +779,8 @@ int append;
     str->str_pok = 1;			/* validate pointer */
     if (str->str_len <= cnt + 1) {	/* make sure we have the room */
 	if (cnt > 80 && str->str_len > 0) {
-	    shortbuffered = cnt - str->str_len;
-	    cnt = str->str_len;
+	    shortbuffered = cnt - str->str_len + 1;
+	    cnt = str->str_len - 1;
 	}
 	else {
 	    shortbuffered = 0;
