@@ -177,9 +177,12 @@ struct pmop {
     U16		op_pmflags;
     U16		op_pmpermflags;
     char	op_pmslen;
+    U8		op_pmdynflags;
 };
 
-#define PMf_USED	0x0001		/* pm has been used once already */
+#define PMdf_USED	0x01		/* pm has been used once already */
+
+#define PMf_TAINTMEM	0x0001		/* taint $1 etc. if target tainted */
 #define PMf_ONCE	0x0002		/* use pattern only once per reset */
 #define PMf_SCANFIRST	0x0004		/* initial constant not anchored */
 #define PMf_ALL		0x0008		/* initial constant is whole pat */

@@ -3742,7 +3742,7 @@ HV *stash;
 
     if (!*s) {		/* reset ?? searches */
 	for (pm = HvPMROOT(stash); pm; pm = pm->op_pmnext) {
-	    pm->op_pmflags &= ~PMf_USED;
+	    pm->op_pmdynflags &= ~PMdf_USED;
 	}
 	return;
     }

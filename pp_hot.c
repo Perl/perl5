@@ -746,7 +746,7 @@ PP(pp_match)
 	DIE("panic: do_match");
     TAINT_NOT;
 
-    if (pm->op_pmflags & PMf_USED) {
+    if (pm->op_pmdynflags & PMdf_USED) {
 	if (gimme == G_ARRAY)
 	    RETURN;
 	RETPUSHNO;
@@ -824,7 +824,7 @@ play_it_again:
     {
 	curpm = pm;
 	if (pm->op_pmflags & PMf_ONCE)
-	    pm->op_pmflags |= PMf_USED;
+	    pm->op_pmdynflags |= PMdf_USED;
 	goto gotcha;
     }
     else
@@ -887,7 +887,7 @@ yup:
     ++BmUSEFUL(pm->op_pmshort);
     curpm = pm;
     if (pm->op_pmflags & PMf_ONCE)
-	pm->op_pmflags |= PMf_USED;
+	pm->op_pmdynflags |= PMdf_USED;
     Safefree(rx->subbase);
     rx->subbase = Nullch;
     if (global) {

@@ -297,7 +297,7 @@ Sometimes it's still easier just to say:
 
     if (/bar/ && $` !~ /foo$/)
 
-=item (?imsx)
+=item (?imstx)
 
 One or more embedded pattern-match modifiers.  This is particularly
 useful for patterns that are specified in a table somewhere, some of
