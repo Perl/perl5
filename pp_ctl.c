@@ -1079,7 +1079,7 @@ PP(pp_flip)
  	if (PL_op->op_private & OPpFLIP_LINENUM) {
  	    struct io *gp_io;
  	    flip = PL_last_in_gv
- 		&& (gp_io = GvIOp(PL_last_in_gv))
+ 		&& (gp_io = GvIO(PL_last_in_gv))
  		&& SvIV(sv) == (IV)IoLINES(gp_io);
  	} else {
  	    flip = SvTRUE(sv);
@@ -1160,7 +1160,8 @@ PP(pp_flop)
 	SV *targ = PAD_SV(cUNOP->op_first->op_targ);
 	sv_inc(targ);
 	if ((PL_op->op_private & OPpFLIP_LINENUM)
-	  ? (PL_last_in_gv && SvIV(sv) == (IV)IoLINES(GvIOp(PL_last_in_gv)))
+	  ? (GvIO(PL_last_in_gv)
+	     && SvIV(sv) == (IV)IoLINES(GvIOp(PL_last_in_gv)))
 	  : SvTRUE(sv) ) {
 	    sv_setiv(PAD_SV(((UNOP*)cUNOP->op_first)->op_first->op_targ), 0);
 	    sv_catpv(targ, "E0");

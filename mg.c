@@ -674,7 +674,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '.':
 #ifndef lint
 	if (GvIO(PL_last_in_gv)) {
-	    sv_setiv(sv, (IV)IoLINES(GvIO(PL_last_in_gv)));
+	    sv_setiv(sv, (IV)IoLINES(GvIOp(PL_last_in_gv)));
 	}
 #endif
 	break;
