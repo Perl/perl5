@@ -10,7 +10,11 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    unshift (@INC, '../blib/lib');
+    if ($ENV{PERL_CORE}) {
+	@INC = '../lib';
+    } else {
+	unshift (@INC, '../blib/lib');
+    }
     $| = 1;
     print "1..11\n";
 }
@@ -42,6 +46,17 @@ my %translators = ('Pod::Man'              => 'man',
 # Set default options to match those of pod2man and pod2text.
 %options = (sentence => 0);
 
+sub basic {
+    my $basic = shift;
+    if ($ENV{PERL_CORE}) {
+	require File::Spec;
+	return File::Spec->catfile(File::Spec->catdir(File::Spec->updir,
+						      "lib", "Pod", "t"),
+				   $basic);
+    }
+    return $basic;
+}
+
 my $n = 2;
 for (sort keys %translators) {
     my $parser = $_->new (%options);
@@ -52,7 +67,7 @@ for (sort keys %translators) {
     # line.  That means that we don't check those things; oh well.  The header
     # changes with each version change or touch of the input file.
     if ($_ eq 'Pod::Man') {
-        $parser->parse_from_file ('basic.pod', 'out.tmp');
+        $parser->parse_from_file (basic("basic.pod"), 'out.tmp');
         open (TMP, 'out.tmp') or die "Cannot open out.tmp: $!\n";
         open (OUTPUT, "> out.$translators{$_}")
             or die "Cannot create out.$translators{$_}: $!\n";
@@ -63,11 +78,11 @@ for (sort keys %translators) {
         close TMP;
         unlink 'out.tmp';
     } else {
-        $parser->parse_from_file ('basic.pod', "out.$translators{$_}");
+        $parser->parse_from_file (basic("basic.pod"), "out.$translators{$_}");
     }
     {
         local $/;
-        open (MASTER, "basic.$translators{$_}")
+        open (MASTER, basic("basic.$translators{$_}"))
             or die "Cannot open basic.$translators{$_}: $!\n";
         open (OUTPUT, "out.$translators{$_}")
             or die "Cannot open out.$translators{$_}: $!\n";
