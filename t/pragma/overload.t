@@ -778,8 +778,8 @@ test($c, "bareword");	# 135
   test "@sorted", '22 11 5 2 1'; # 189
   # Scalar
   test $$deref, 123;		# 190
-  # Glob
-  @sorted = sort $deref 11, 2, 5, 1, 22;
+  # Code
+  @sorted = sort $srt 11, 2, 5, 1, 22;
   test "@sorted", '22 11 5 2 1'; # 191
   # Array
   test "@$deref", '11 12 13';	# 192
