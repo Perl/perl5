@@ -306,7 +306,7 @@ problems that went into the 5.004 release.  All releases prior to
 that, including perl4, are considered insecure and should be upgraded
 as soon as possible.
 
-In August 2001 in all Linux distributions a new security problem was
+In August 2000 in all Linux distributions a new security problem was
 found in the optional 'suidperl' (not built or installed by default)
 in all the Perl branches 5.6, 5.005, and 5.004, see
 http://www.cpan.org/src/5.0/sperl-2000-08-05/
