@@ -75,9 +75,9 @@ since it, in a way, falsely promised that the features could be used.
 
 =item *
 
-The (bogus) escape sequences \8, \9, and \_ now give an optional
-warning ("Unrecognized escape passed through").  There is no need
-to \-escape any C<\w> character.
+The (bogus) escape sequences \8 and \9 now give an optional warning
+("Unrecognized escape passed through").  There is no need to \-escape
+any C<\w> character.
 
 =item *
 
