@@ -556,7 +556,7 @@ Functions for dealing with RFC3066-style language tags
 
 =item I18N::LangTags::List
 
-List of tags for human languages
+Tags and names for human languages
 
 =item IO
 

@@ -3910,16 +3910,16 @@ strLE, strLT, strNE, strnEQ, strnNE, StructCopy, SvCUR, SvCUR_set, SvEND,
 SvGETMAGIC, SvGROW, SvIOK, SvIOKp, SvIOK_notUV, SvIOK_off, SvIOK_on,
 SvIOK_only, SvIOK_only_UV, SvIOK_UV, SvIV, SvIVX, SvIVx, SvLEN, SvNIOK,
 SvNIOKp, SvNIOK_off, SvNOK, SvNOKp, SvNOK_off, SvNOK_on, SvNOK_only, SvNV,
-SvNVx, SvNVX, SvOK, SvOOK, SvPOK, SvPOKp, SvPOK_off, SvPOK_on, SvPOK_only,
+SvNVX, SvNVx, SvOK, SvOOK, SvPOK, SvPOKp, SvPOK_off, SvPOK_on, SvPOK_only,
 SvPOK_only_UTF8, SvPV, SvPVbyte, SvPVbytex, SvPVbytex_force,
 SvPVbyte_force, SvPVbyte_nolen, SvPVutf8, SvPVutf8x, SvPVutf8x_force,
-SvPVutf8_force, SvPVutf8_nolen, SvPVx, SvPVX, SvPV_force, SvPV_force_nomg,
+SvPVutf8_force, SvPVutf8_nolen, SvPVX, SvPVx, SvPV_force, SvPV_force_nomg,
 SvPV_nolen, SvREFCNT, SvREFCNT_dec, SvREFCNT_inc, SvROK, SvROK_off,
 SvROK_on, SvRV, SvSETMAGIC, SvSetMagicSV, SvSetMagicSV_nosteal, SvSetSV,
 SvSetSV_nosteal, SvSTASH, SvTAINT, SvTAINTED, SvTAINTED_off, SvTAINTED_on,
-SvTRUE, svtype, SvTYPE, SVt_IV, SVt_NV, SVt_PV, SVt_PVAV, SVt_PVCV,
+SvTRUE, SvTYPE, svtype, SVt_IV, SVt_NV, SVt_PV, SVt_PVAV, SVt_PVCV,
 SVt_PVHV, SVt_PVMG, SvUOK, SvUPGRADE, SvUTF8, SvUTF8_off, SvUTF8_on, SvUV,
-SvUVx, SvUVX, sv_2bool, sv_2cv, sv_2io, sv_2iv, sv_2mortal, sv_2nv,
+SvUVX, SvUVx, sv_2bool, sv_2cv, sv_2io, sv_2iv, sv_2mortal, sv_2nv,
 sv_2pvbyte, sv_2pvbyte_nolen, sv_2pvutf8, sv_2pvutf8_nolen, sv_2pv_flags,
 sv_2pv_nolen, sv_2uv, sv_backoff, sv_bless, sv_catpv, sv_catpvf,
 sv_catpvf_mg, sv_catpvn, sv_catpvn_flags, sv_catpvn_mg, sv_catpv_mg,
@@ -3930,9 +3930,9 @@ sv_grow, sv_inc, sv_insert, sv_isa, sv_isobject, sv_iv, sv_len,
 sv_len_utf8, sv_magic, sv_mortalcopy, sv_newmortal, sv_newref, sv_nv,
 sv_pos_b2u, sv_pos_u2b, sv_pv, sv_pvbyte, sv_pvbyten, sv_pvbyten_force,
 sv_pvn, sv_pvn_force, sv_pvn_force_flags, sv_pvutf8, sv_pvutf8n,
-sv_pvutf8n_force, sv_realpath, sv_reftype, sv_replace, sv_report_used,
-sv_reset, sv_rvweaken, sv_setiv, sv_setiv_mg, sv_setnv, sv_setnv_mg,
-sv_setpv, sv_setpvf, sv_setpvf_mg, sv_setpviv, sv_setpviv_mg, sv_setpvn,
+sv_pvutf8n_force, sv_reftype, sv_replace, sv_report_used, sv_reset,
+sv_rvweaken, sv_setiv, sv_setiv_mg, sv_setnv, sv_setnv_mg, sv_setpv,
+sv_setpvf, sv_setpvf_mg, sv_setpviv, sv_setpviv_mg, sv_setpvn,
 sv_setpvn_mg, sv_setpv_mg, sv_setref_iv, sv_setref_nv, sv_setref_pv,
 sv_setref_pvn, sv_setref_uv, sv_setsv, sv_setsv_flags, sv_setsv_mg,
 sv_setuv, sv_setuv_mg, sv_taint, sv_tainted, sv_true, sv_unmagic, sv_unref,
@@ -8654,43 +8654,44 @@ C<d_csh>, C<d_cuserid>, C<d_dbl_dig>, C<d_dbminitproto>, C<d_difftime>,
 C<d_dirnamlen>, C<d_dlerror>, C<d_dlopen>, C<d_dlsymun>, C<d_dosuid>,
 C<d_drand48proto>, C<d_dup2>, C<d_eaccess>, C<d_endgrent>, C<d_endhent>,
 C<d_endnent>, C<d_endpent>, C<d_endpwent>, C<d_endsent>, C<d_eofnblk>,
-C<d_eunice>, C<d_fchmod>, C<d_fchown>, C<d_fcntl>, C<d_fcntl_can_lock>,
-C<d_fd_macros>, C<d_fd_set>, C<d_fds_bits>, C<d_fgetpos>, C<d_flexfnam>,
-C<d_flock>, C<d_flockproto>, C<d_fork>, C<d_fpathconf>, C<d_fpos64_t>,
-C<d_frexpl>, C<d_fs_data_s>, C<d_fseeko>, C<d_fsetpos>, C<d_fstatfs>,
-C<d_fstatvfs>, C<d_fsync>, C<d_ftello>, C<d_ftime>, C<d_Gconvert>,
-C<d_getcwd>, C<d_getespwnam>, C<d_getfsstat>, C<d_getgrent>, C<d_getgrps>,
-C<d_gethbyaddr>, C<d_gethbyname>, C<d_gethent>, C<d_gethname>,
-C<d_gethostprotos>, C<d_getitimer>, C<d_getlogin>, C<d_getmnt>,
-C<d_getmntent>, C<d_getnbyaddr>, C<d_getnbyname>, C<d_getnent>,
-C<d_getnetprotos>, C<d_getpagsz>, C<d_getpbyname>, C<d_getpbynumber>,
-C<d_getpent>, C<d_getpgid>, C<d_getpgrp2>, C<d_getpgrp>, C<d_getppid>,
-C<d_getprior>, C<d_getprotoprotos>, C<d_getprpwnam>, C<d_getpwent>,
-C<d_getsbyname>, C<d_getsbyport>, C<d_getsent>, C<d_getservprotos>,
-C<d_getspnam>, C<d_gettimeod>, C<d_gnulibc>, C<d_grpasswd>, C<d_hasmntopt>,
-C<d_htonl>, C<d_iconv>, C<d_index>, C<d_inetaton>, C<d_int64_t>,
-C<d_isascii>, C<d_isnan>, C<d_isnanl>, C<d_killpg>, C<d_lchown>,
-C<d_ldbl_dig>, C<d_link>, C<d_locconv>, C<d_lockf>, C<d_longdbl>,
-C<d_longlong>, C<d_lseekproto>, C<d_lstat>, C<d_madvise>, C<d_mblen>,
-C<d_mbstowcs>, C<d_mbtowc>, C<d_memchr>, C<d_memcmp>, C<d_memcpy>,
-C<d_memmove>, C<d_memset>, C<d_mkdir>, C<d_mkdtemp>, C<d_mkfifo>,
-C<d_mkstemp>, C<d_mkstemps>, C<d_mktime>, C<d_mmap>, C<d_modfl>,
-C<d_modfl_pow32_bug>, C<d_mprotect>, C<d_msg>, C<d_msg_ctrunc>,
-C<d_msg_dontroute>, C<d_msg_oob>, C<d_msg_peek>, C<d_msg_proxy>,
-C<d_msgctl>, C<d_msgget>, C<d_msghdr_s>, C<d_msgrcv>, C<d_msgsnd>,
-C<d_msync>, C<d_munmap>, C<d_mymalloc>, C<d_nice>, C<d_nv_preserves_uv>,
-C<d_nv_preserves_uv_bits>, C<d_off64_t>, C<d_old_pthread_create_joinable>,
-C<d_oldpthreads>, C<d_oldsock>, C<d_open3>, C<d_pathconf>, C<d_pause>,
-C<d_perl_otherlibdirs>, C<d_phostname>, C<d_pipe>, C<d_poll>,
-C<d_portable>, C<d_PRId64>, C<d_PRIeldbl>, C<d_PRIEUldbl>, C<d_PRIfldbl>,
-C<d_PRIFUldbl>, C<d_PRIgldbl>, C<d_PRIGUldbl>, C<d_PRIi64>, C<d_PRIo64>,
-C<d_PRIu64>, C<d_PRIx64>, C<d_PRIXU64>, C<d_pthread_yield>, C<d_pwage>,
-C<d_pwchange>, C<d_pwclass>, C<d_pwcomment>, C<d_pwexpire>, C<d_pwgecos>,
-C<d_pwpasswd>, C<d_pwquota>, C<d_qgcvt>, C<d_quad>, C<d_readdir>,
-C<d_readlink>, C<d_readv>, C<d_realpath>, C<d_recvmsg>, C<d_rename>,
-C<d_rewinddir>, C<d_rmdir>, C<d_safebcpy>, C<d_safemcpy>, C<d_sanemcmp>,
-C<d_sbrkproto>, C<d_sched_yield>, C<d_scm_rights>, C<d_SCNfldbl>,
-C<d_seekdir>, C<d_select>, C<d_sem>, C<d_semctl>, C<d_semctl_semid_ds>,
+C<d_eunice>, C<d_fchdir>, C<d_fchmod>, C<d_fchown>, C<d_fcntl>,
+C<d_fcntl_can_lock>, C<d_fd_macros>, C<d_fd_set>, C<d_fds_bits>,
+C<d_fgetpos>, C<d_flexfnam>, C<d_flock>, C<d_flockproto>, C<d_fork>,
+C<d_fpathconf>, C<d_fpos64_t>, C<d_frexpl>, C<d_fs_data_s>, C<d_fseeko>,
+C<d_fsetpos>, C<d_fstatfs>, C<d_fstatvfs>, C<d_fsync>, C<d_ftello>,
+C<d_ftime>, C<d_Gconvert>, C<d_getcwd>, C<d_getespwnam>, C<d_getfsstat>,
+C<d_getgrent>, C<d_getgrps>, C<d_gethbyaddr>, C<d_gethbyname>,
+C<d_gethent>, C<d_gethname>, C<d_gethostprotos>, C<d_getitimer>,
+C<d_getlogin>, C<d_getmnt>, C<d_getmntent>, C<d_getnbyaddr>,
+C<d_getnbyname>, C<d_getnent>, C<d_getnetprotos>, C<d_getpagsz>,
+C<d_getpbyname>, C<d_getpbynumber>, C<d_getpent>, C<d_getpgid>,
+C<d_getpgrp2>, C<d_getpgrp>, C<d_getppid>, C<d_getprior>,
+C<d_getprotoprotos>, C<d_getprpwnam>, C<d_getpwent>, C<d_getsbyname>,
+C<d_getsbyport>, C<d_getsent>, C<d_getservprotos>, C<d_getspnam>,
+C<d_gettimeod>, C<d_gnulibc>, C<d_grpasswd>, C<d_hasmntopt>, C<d_htonl>,
+C<d_iconv>, C<d_index>, C<d_inetaton>, C<d_int64_t>, C<d_isascii>,
+C<d_isnan>, C<d_isnanl>, C<d_killpg>, C<d_lchown>, C<d_ldbl_dig>,
+C<d_link>, C<d_locconv>, C<d_lockf>, C<d_longdbl>, C<d_longlong>,
+C<d_lseekproto>, C<d_lstat>, C<d_madvise>, C<d_mblen>, C<d_mbstowcs>,
+C<d_mbtowc>, C<d_memchr>, C<d_memcmp>, C<d_memcpy>, C<d_memmove>,
+C<d_memset>, C<d_mkdir>, C<d_mkdtemp>, C<d_mkfifo>, C<d_mkstemp>,
+C<d_mkstemps>, C<d_mktime>, C<d_mmap>, C<d_modfl>, C<d_modfl_pow32_bug>,
+C<d_mprotect>, C<d_msg>, C<d_msg_ctrunc>, C<d_msg_dontroute>, C<d_msg_oob>,
+C<d_msg_peek>, C<d_msg_proxy>, C<d_msgctl>, C<d_msgget>, C<d_msghdr_s>,
+C<d_msgrcv>, C<d_msgsnd>, C<d_msync>, C<d_munmap>, C<d_mymalloc>,
+C<d_nice>, C<d_nv_preserves_uv>, C<d_nv_preserves_uv_bits>, C<d_off64_t>,
+C<d_old_pthread_create_joinable>, C<d_oldpthreads>, C<d_oldsock>,
+C<d_open3>, C<d_pathconf>, C<d_pause>, C<d_perl_otherlibdirs>,
+C<d_phostname>, C<d_pipe>, C<d_poll>, C<d_portable>, C<d_PRId64>,
+C<d_PRIeldbl>, C<d_PRIEUldbl>, C<d_PRIfldbl>, C<d_PRIFUldbl>,
+C<d_PRIgldbl>, C<d_PRIGUldbl>, C<d_PRIi64>, C<d_PRIo64>, C<d_PRIu64>,
+C<d_PRIx64>, C<d_PRIXU64>, C<d_pthread_yield>, C<d_pwage>, C<d_pwchange>,
+C<d_pwclass>, C<d_pwcomment>, C<d_pwexpire>, C<d_pwgecos>, C<d_pwpasswd>,
+C<d_pwquota>, C<d_qgcvt>, C<d_quad>, C<d_readdir>, C<d_readlink>,
+C<d_readv>, C<d_recvmsg>, C<d_rename>, C<d_rewinddir>, C<d_rmdir>,
+C<d_safebcpy>, C<d_safemcpy>, C<d_sanemcmp>, C<d_sbrkproto>,
+C<d_sched_yield>, C<d_scm_rights>, C<d_SCNfldbl>, C<d_seekdir>,
+C<d_select>, C<d_sem>, C<d_semctl>, C<d_semctl_semid_ds>,
 C<d_semctl_semun>, C<d_semget>, C<d_semop>, C<d_sendmsg>, C<d_setegid>,
 C<d_seteuid>, C<d_setgrent>, C<d_setgrps>, C<d_sethent>, C<d_setitimer>,
 C<d_setlinebuf>, C<d_setlocale>, C<d_setnent>, C<d_setpent>, C<d_setpgid>,
@@ -9585,7 +9586,7 @@ memEQ_clause NAME, CHECKED_AT, INDENT
 
 assign INDENT, TYPE, PRE, POST, VALUE..
 
-return_clause VALUE, TYPE, INDENT, MACRO, DEFAULT, PRE, POST, PRE, POST
+return_clause
 
 switch_clause INDENT, NAMELEN, ITEMHASH, ITEM..
 
@@ -11127,6 +11128,8 @@ the function encode_language_tag($lang1)
 
 the function alternate_language_tags($lang1)
 
+the function @langs = panic_languages(@accept_languages)
+
 =over 4
 
 =item ABOUT LOWERCASING
@@ -11141,157 +11144,137 @@ the function alternate_language_tags($lang1)
 
 =back
 
-=head2 I18N::LangTags::List, I18n::LangTags::List -- list of tags for human
-languages
+=head2 I18N::LangTags::List -- tags and names for human languages
 
 =over 4
 
 =item SYNOPSIS
 
+=item DESCRIPTION
+
 =item ABOUT LANGUAGE TAGS
 
 =item LIST OF LANGUAGES
 
-I<{ab}> : Abkhazian, I<{ace}> : Achinese, I<{ach}> : Acoli, I<{ada}> :
-Adangme, I<{aa}> : Afar, I<{afh}> : Afrihili, I<{af}> : Afrikaans,
-[I<{afa}> : Afro-Asiatic (Other)], I<{aka}> : Akan, I<{akk}> : Akkadian,
-I<{sq}> : Albanian, I<{ale}> : Aleut, [I<{alg}> : Algonquian languages],
-[I<{tut}> : Altaic (Other)], I<{am}> : Amharic, I<{i-ami}> : Ami, [I<{apa}>
-: Apache languages], I<{ar}> : Arabic, I<{arc}> : Aramaic, I<{arp}> :
-Arapaho, I<{arn}> : Araucanian, I<{arw}> : Arawak, I<{hy}> : Armenian,
-[I<{art}> : Artificial (Other)], I<{as}> : Assamese, [I<{ath}> : Athapascan
-languages], [I<{aus}> : Australian languages], [I<{map}> : Austronesian
-(Other)], I<{ava}> : Avaric, I<{ae}> : Avestan, I<{awa}> : Awadhi, I<{ay}>
-: Aymara, I<{az}> : Azerbaijani, I<{ban}> : Balinese, [I<{bat}> : Baltic
-(Other)], I<{bal}> : Baluchi, I<{bam}> : Bambara, [I<{bai}> : Bamileke
-languages], I<{bad}> : Banda, [I<{bnt}> : Bantu (Other)], I<{bas}> : Basa,
-I<{ba}> : Bashkir, I<{eu}> : Basque, I<{btk}> : Batak (Indonesia), I<{bej}>
-: Beja, I<{be}> : Belarusian, I<{bem}> : Bemba, I<{bn}> : Bengali,
-[I<{ber}> : Berber (Other)], I<{bho}> : Bhojpuri, I<{bh}> : Bihari,
-I<{bik}> : Bikol, I<{bin}> : Bini, I<{bi}> : Bislama, I<{bs}> : Bosnian,
-I<{bra}> : Braj, I<{br}> : Breton, I<{bug}> : Buginese, I<{bg}> :
-Bulgarian, I<{i-bnn}> : Bunun, I<{bua}> : Buriat, I<{my}> : Burmese,
-I<{cad}> : Caddo, I<{car}> : Carib, I<{ca}> : Catalan, [I<{cau}> :
-Caucasian (Other)], I<{ceb}> : Cebuano, [I<{cel}> : Celtic (Other)],
-[I<{cai}> : Central American Indian (Other)], I<{chg}> : Chagatai,
-[I<{cmc}> : Chamic languages], I<{ch}> : Chamorro, I<{ce}> : Chechen,
-I<{chr}> : Cherokee, I<{chy}> : Cheyenne, I<{chb}> : Chibcha, I<{ny}> :
-Chichewa, I<{zh}> : Chinese, I<{chn}> : Chinook Jargon, I<{chp}> :
-Chipewyan, I<{cho}> : Choctaw, I<{cu}> : Church Slavic, I<{chk}> :
-Chuukese, I<{cv}> : Chuvash, I<{cop}> : Coptic, I<{kw}> : Cornish, I<{co}>
-: Corsican, I<{cre}> : Cree, I<{mus}> : Creek, [I<{cpe}> : English-based
-Creoles and pidgins (Other)], [I<{cpf}> : French-based Creoles and pidgins
-(Other)], [I<{cpp}> : Portuguese-based Creoles and pidgins (Other)],
-[I<{crp}> : Creoles and pidgins (Other)], I<{hr}> : Croatian, [I<{cus}> :
-Cushitic (Other)], I<{cs}> : Czech, I<{dak}> : Dakota, I<{da}> : Danish,
-I<{day}> : Dayak, I<{i-default}> : Default (Fallthru) Language, I<{del}> :
-Delaware, I<{din}> : Dinka, I<{div}> : Divehi, I<{doi}> : Dogri, I<{dgr}> :
-Dogrib, [I<{dra}> : Dravidian (Other)], I<{dua}> : Duala, I<{nl}> : Dutch,
-I<{dum}> : Middle Dutch (ca.1050-1350), I<{dyu}> : Dyula, I<{dz}> :
-Dzongkha, I<{efi}> : Efik, I<{egy}> : Ancient Egyptian, I<{eka}> : Ekajuk,
-I<{elx}> : Elamite, I<{en}> : English, I<{enm}> : Old English (1100-1500),
-I<{ang}> : Old English (ca.450-1100), I<{eo}> : Esperanto, I<{et}> :
-Estonian, I<{ewe}> : Ewe, I<{ewo}> : Ewondo, I<{fan}> : Fang, I<{fat}> :
-Fanti, I<{fo}> : Faroese, I<{fj}> : Fijian, I<{fi}> : Finnish, [I<{fiu}> :
-Finno-Ugrian (Other)], I<{fon}> : Fon, I<{fr}> : French, I<{frm}> : Middle
-French (ca.1400-1600), I<{fro}> : Old French (842-ca.1400), I<{fy}> :
-Frisian, I<{fur}> : Friulian, I<{ful}> : Fulah, I<{gaa}> : Ga, I<{gd}> :
-Scots Gaelic, I<{gl}> : Gallegan, I<{lug}> : Ganda, I<{gay}> : Gayo,
-I<{gba}> : Gbaya, I<{gez}> : Geez, I<{ka}> : Georgian, I<{de}> : German,
-I<{gmh}> : Middle High German (ca.1050-1500), I<{goh}> : Old High German
-(ca.750-1050), [I<{gem}> : Germanic (Other)], I<{gil}> : Gilbertese,
-I<{gon}> : Gondi, I<{gor}> : Gorontalo, I<{got}> : Gothic, I<{grb}> :
-Grebo, I<{grc}> : Ancient Greek (to 1453), I<{el}> : Modern Greek (1453-),
-I<{gn}> : Guarani, I<{gu}> : Gujarati, I<{gwi}> : Gwich'in, I<{hai}> :
-Haida, I<{ha}> : Hausa, I<{haw}> : Hawaiian, I<{he}> : Hebrew, I<{hz}> :
-Herero, I<{hil}> : Hiligaynon, I<{him}> : Himachali, I<{hi}> : Hindi,
-I<{ho}> : Hiri Motu, I<{hit}> : Hittite, I<{hmn}> : Hmong, I<{hu}> :
-Hungarian, I<{hup}> : Hupa, I<{iba}> : Iban, I<{is}> : Icelandic, I<{ibo}>
-: Igbo, I<{ijo}> : Ijo, I<{ilo}> : Iloko, [I<{inc}> : Indic (Other)],
-[I<{ine}> : Indo-European (Other)], I<{id}> : Indonesian, I<{ia}> :
-Interlingua (International Auxiliary Language Association), I<{ie}> :
-Interlingue, I<{iu}> : Inuktitut, I<{ik}> : Inupiaq, [I<{ira}> : Iranian
-(Other)], I<{ga}> : Irish, I<{mga}> : Middle Irish (900-1200), I<{sga}> :
-Old Irish (to 900), [I<{iro}> : Iroquoian languages], I<{it}> : Italian,
-I<{ja}> : Japanese, I<{jw}> : Javanese, I<{jrb}> : Judeo-Arabic, I<{jpr}> :
-Judeo-Persian, I<{kab}> : Kabyle, I<{kac}> : Kachin, I<{kl}> : Kalaallisut,
-I<{kam}> : Kamba, I<{kn}> : Kannada, I<{kau}> : Kanuri, I<{kaa}> :
-Kara-Kalpak, I<{kar}> : Karen, I<{ks}> : Kashmiri, I<{kaw}> : Kawi, I<{kk}>
-: Kazakh, I<{kha}> : Khasi, I<{km}> : Khmer, [I<{khi}> : Khoisan (Other)],
-I<{kho}> : Khotanese, I<{ki}> : Kikuyu, I<{kmb}> : Kimbundu, I<{rw}> :
-Kinyarwanda, I<{ky}> : Kirghiz, I<{i-klingon}> : Klingon, I<{kv}> : Komi,
-I<{kon}> : Kongo, I<{kok}> : Konkani, I<{ko}> : Korean, I<{kos}> :
-Kosraean, I<{kpe}> : Kpelle, I<{kro}> : Kru, I<{kj}> : Kuanyama, I<{kum}> :
-Kumyk, I<{ku}> : Kurdish, I<{kru}> : Kurukh, I<{kut}> : Kutenai, I<{lad}> :
-Ladino, I<{lah}> : Lahnda, I<{lam}> : Lamba, I<{lo}> : Lao, I<{la}> :
-Latin, I<{lv}> : Latvian, I<{lb}> : Letzeburgesch, I<{lez}> : Lezghian,
-I<{ln}> : Lingala, I<{lt}> : Lithuanian, I<{nds}> : Low German, I<{loz}> :
-Lozi, I<{lub}> : Luba-Katanga, I<{lua}> : Luba-Lulua, I<{lui}> : Luiseno,
-I<{lun}> : Lunda, I<{luo}> : Luo (Kenya and Tanzania), I<{lus}> : Lushai,
-I<{mk}> : Macedonian, I<{mad}> : Madurese, I<{mag}> : Magahi, I<{mai}> :
-Maithili, I<{mak}> : Makasar, I<{mg}> : Malagasy, I<{ms}> : Malay, I<{ml}>
-: Malayalam, I<{mt}> : Maltese, I<{mnc}> : Manchu, I<{mdr}> : Mandar,
-I<{man}> : Mandingo, I<{mni}> : Manipuri, [I<{mno}> : Manobo languages],
-I<{gv}> : Manx, I<{mi}> : Maori, I<{mr}> : Marathi, I<{chm}> : Mari,
-I<{mh}> : Marshall, I<{mwr}> : Marwari, I<{mas}> : Masai, [I<{myn}> : Mayan
-languages], I<{men}> : Mende, I<{mic}> : Micmac, I<{min}> : Minangkabau,
-I<{i-mingo}> : Mingo, [I<{mis}> : Miscellaneous languages], I<{moh}> :
-Mohawk, I<{mo}> : Moldavian, [I<{mkh}> : Mon-Khmer (Other)], I<{lol}> :
-Mongo, I<{mn}> : Mongolian, I<{mos}> : Mossi, [I<{mul}> : Multiple
-languages], [I<{mun}> : Munda languages], I<{nah}> : Nahuatl, I<{na}> :
-Nauru, I<{nv}> : Navajo, I<{nd}> : North Ndebele, I<{nr}> : South Ndebele,
-I<{ng}> : Ndonga, I<{ne}> : Nepali, I<{new}> : Newari, I<{nia}> : Nias,
-[I<{nic}> : Niger-Kordofanian (Other)], [I<{ssa}> : Nilo-Saharan (Other)],
-I<{niu}> : Niuean, I<{non}> : Old Norse, [I<{nai}> : North American
-Indian], I<{se}> : Northern Sami, I<{no}> : Norwegian, I<{nb}> : Norwegian
-BokmE<aring>l, I<{nn}> : Norwegian Nynorsk, [I<{nub}> : Nubian languages],
-I<{nym}> : Nyamwezi, I<{nyn}> : Nyankole, I<{nyo}> : Nyoro, I<{nzi}> :
-Nzima, I<{oc}> : Occitan (post 1500), I<{oji}> : Ojibwa, I<{or}> : Oriya,
-I<{om}> : Oromo, I<{osa}> : Osage, I<{os}> : Ossetian; Ossetic, [I<{oto}> :
-Otomian languages], I<{pal}> : Pahlavi, I<{i-pwn}> : Paiwan, I<{pau}> :
-Palauan, I<{pi}> : Pali, I<{pam}> : Pampanga, I<{pag}> : Pangasinan,
-I<{pa}> : Panjabi, I<{pap}> : Papiamento, [I<{paa}> : Papuan (Other)],
-I<{fa}> : Persian, I<{peo}> : Old Persian (ca.600-400 B.C.), [I<{phi}> :
-Philippine (Other)], I<{phn}> : Phoenician, I<{pon}> : Pohnpeian, I<{pl}> :
-Polish, I<{pt}> : Portuguese, [I<{pra}> : Prakrit languages], I<{pro}> :
-Old ProvenE<ccedil>al (to 1500), I<{ps}> : Pushto, I<{qu}> : Quechua,
-I<{rm}> : Raeto-Romance, I<{raj}> : Rajasthani, I<{rap}> : Rapanui,
-I<{rar}> : Rarotongan, [I<{qaa}>-I<qtz> : Reserved for local use.],
-[I<{roa}> : Romance (Other)], I<{ro}> : Romanian, I<{rom}> : Romany,
-I<{rn}> : Rundi, I<{ru}> : Russian, [I<{sal}> : Salishan languages],
-I<{sam}> : Samaritan Aramaic, [I<{smi}> : Sami languages (Other)], I<{sm}>
-: Samoan, I<{sad}> : Sandawe, I<{sg}> : Sango, I<{sa}> : Sanskrit, I<{sat}>
-: Santali, I<{sc}> : Sardinian, I<{sas}> : Sasak, I<{sco}> : Scots,
-I<{sel}> : Selkup, [I<{sem}> : Semitic (Other)], I<{sr}> : Serbian,
-I<{srr}> : Serer, I<{shn}> : Shan, I<{sn}> : Shona, I<{sid}> : Sidamo,
-I<{sgn-...}> : Sign Languages, I<{bla}> : Siksika, I<{sd}> : Sindhi,
-I<{si}> : Sinhalese, [I<{sit}> : Sino-Tibetan (Other)], [I<{sio}> : Siouan
-languages], I<{den}> : Slave (Athapascan), [I<{sla}> : Slavic (Other)],
-I<{sk}> : Slovak, I<{sl}> : Slovenian, I<{sog}> : Sogdian, I<{so}> :
-Somali, I<{son}> : Songhai, I<{snk}> : Soninke, I<{wen}> : Sorbian
-languages, I<{nso}> : Northern Sotho, I<{st}> : Southern Sotho, [I<{sai}> :
-South American Indian (Other)], I<{es}> : Spanish, I<{suk}> : Sukuma,
-I<{sux}> : Sumerian, I<{su}> : Sundanese, I<{sus}> : Susu, I<{sw}> :
-Swahili, I<{ss}> : Swati, I<{sv}> : Swedish, I<{syr}> : Syriac, I<{tl}> :
-Tagalog, I<{ty}> : Tahitian, [I<{tai}> : Tai (Other)], I<{tg}> : Tajik,
-I<{tmh}> : Tamashek, I<{ta}> : Tamil, I<{i-tao}> : Tao, I<{tt}> : Tatar,
-I<{i-tay}> : Tayal, I<{te}> : Telugu, I<{ter}> : Tereno, I<{tet}> : Tetum,
-I<{th}> : Thai, I<{bo}> : Tibetan, I<{tig}> : Tigre, I<{ti}> : Tigrinya,
-I<{tem}> : Timne, I<{tiv}> : Tiv, I<{tli}> : Tlingit, I<{tpi}> : Tok Pisin,
-I<{tkl}> : Tokelau, I<{tog}> : Tonga (Nyasa), I<{to}> : Tonga (Tonga
-Islands), I<{tsi}> : Tsimshian, I<{ts}> : Tsonga, I<{i-tsu}> : Tsou,
-I<{tn}> : Tswana, I<{tum}> : Tumbuka, I<{tr}> : Turkish, I<{ota}> : Ottoman
-Turkish (1500-1928), I<{tk}> : Turkmen, I<{tvl}> : Tuvalu, I<{tyv}> :
-Tuvinian, I<{tw}> : Twi, I<{uga}> : Ugaritic, I<{ug}> : Uighur, I<{uk}> :
-Ukrainian, I<{umb}> : Umbundu, I<{und}> : Undetermined, I<{ur}> : Urdu,
-I<{uz}> : Uzbek, I<{vai}> : Vai, I<{ven}> : Venda, I<{vi}> : Vietnamese,
-I<{vo}> : VolapE<uuml>k, I<{vot}> : Votic, [I<{wak}> : Wakashan languages],
-I<{wal}> : Walamo, I<{war}> : Waray, I<{was}> : Washo, I<{cy}> : Welsh,
-I<{wo}> : Wolof, I<{x-...}> : Unregistered (Private Use), I<{xh}> : Xhosa,
-I<{sah}> : Yakut, I<{yao}> : Yao, I<{yap}> : Yapese, I<{yi}> : Yiddish,
-I<{yo}> : Yoruba, [I<{ypk}> : Yupik languages], I<{znd}> : Zande, [I<{zap}>
-: Zapotec], I<{zen}> : Zenaga, I<{za}> : Zhuang, I<{zu}> : Zulu, I<{zun}> :
-Zuni
+{ab} : Abkhazian, {ace} : Achinese, {ach} : Acoli, {ada} : Adangme, {aa} :
+Afar, {afh} : Afrihili, {af} : Afrikaans, [{afa} : Afro-Asiatic (Other)],
+{aka} : Akan, {akk} : Akkadian, {sq} : Albanian, {ale} : Aleut, [{alg} :
+Algonquian languages], [{tut} : Altaic (Other)], {am} : Amharic, {i-ami} :
+Ami, [{apa} : Apache languages], {ar} : Arabic, {arc} : Aramaic, {arp} :
+Arapaho, {arn} : Araucanian, {arw} : Arawak, {hy} : Armenian, [{art} :
+Artificial (Other)], {as} : Assamese, [{ath} : Athapascan languages],
+[{aus} : Australian languages], [{map} : Austronesian (Other)], {ava} :
+Avaric, {ae} : Avestan, {awa} : Awadhi, {ay} : Aymara, {az} : Azerbaijani,
+{ban} : Balinese, [{bat} : Baltic (Other)], {bal} : Baluchi, {bam} :
+Bambara, [{bai} : Bamileke languages], {bad} : Banda, [{bnt} : Bantu
+(Other)], {bas} : Basa, {ba} : Bashkir, {eu} : Basque, {btk} : Batak
+(Indonesia), {bej} : Beja, {be} : Belarusian, {bem} : Bemba, {bn} :
+Bengali, [{ber} : Berber (Other)], {bho} : Bhojpuri, {bh} : Bihari, {bik} :
+Bikol, {bin} : Bini, {bi} : Bislama, {bs} : Bosnian, {bra} : Braj, {br} :
+Breton, {bug} : Buginese, {bg} : Bulgarian, {i-bnn} : Bunun, {bua} :
+Buriat, {my} : Burmese, {cad} : Caddo, {car} : Carib, {ca} : Catalan,
+[{cau} : Caucasian (Other)], {ceb} : Cebuano, [{cel} : Celtic (Other)],
+[{cai} : Central American Indian (Other)], {chg} : Chagatai, [{cmc} :
+Chamic languages], {ch} : Chamorro, {ce} : Chechen, {chr} : Cherokee, {chy}
+: Cheyenne, {chb} : Chibcha, {ny} : Chichewa, {zh} : Chinese, {chn} :
+Chinook Jargon, {chp} : Chipewyan, {cho} : Choctaw, {cu} : Church Slavic,
+{chk} : Chuukese, {cv} : Chuvash, {cop} : Coptic, {kw} : Cornish, {co} :
+Corsican, {cre} : Cree, {mus} : Creek, [{cpe} : English-based Creoles and
+pidgins (Other)], [{cpf} : French-based Creoles and pidgins (Other)],
+[{cpp} : Portuguese-based Creoles and pidgins (Other)], [{crp} : Creoles
+and pidgins (Other)], {hr} : Croatian, [{cus} : Cushitic (Other)], {cs} :
+Czech, {dak} : Dakota, {da} : Danish, {day} : Dayak, {i-default} : Default
+(Fallthru) Language, {del} : Delaware, {din} : Dinka, {div} : Divehi, {doi}
+: Dogri, {dgr} : Dogrib, [{dra} : Dravidian (Other)], {dua} : Duala, {nl} :
+Dutch, {dum} : Middle Dutch (ca.1050-1350), {dyu} : Dyula, {dz} : Dzongkha,
+{efi} : Efik, {egy} : Ancient Egyptian, {eka} : Ekajuk, {elx} : Elamite,
+{en} : English, {enm} : Old English (1100-1500), {ang} : Old English
+(ca.450-1100), {eo} : Esperanto, {et} : Estonian, {ewe} : Ewe, {ewo} :
+Ewondo, {fan} : Fang, {fat} : Fanti, {fo} : Faroese, {fj} : Fijian, {fi} :
+Finnish, [{fiu} : Finno-Ugrian (Other)], {fon} : Fon, {fr} : French, {frm}
+: Middle French (ca.1400-1600), {fro} : Old French (842-ca.1400), {fy} :
+Frisian, {fur} : Friulian, {ful} : Fulah, {gaa} : Ga, {gd} : Scots Gaelic,
+{gl} : Gallegan, {lug} : Ganda, {gay} : Gayo, {gba} : Gbaya, {gez} : Geez,
+{ka} : Georgian, {de} : German, {gmh} : Middle High German (ca.1050-1500),
+{goh} : Old High German (ca.750-1050), [{gem} : Germanic (Other)], {gil} :
+Gilbertese, {gon} : Gondi, {gor} : Gorontalo, {got} : Gothic, {grb} :
+Grebo, {grc} : Ancient Greek, {el} : Modern Greek, {gn} : Guarani, {gu} :
+Gujarati, {gwi} : Gwich'in, {hai} : Haida, {ha} : Hausa, {haw} : Hawaiian,
+{he} : Hebrew, {hz} : Herero, {hil} : Hiligaynon, {him} : Himachali, {hi} :
+Hindi, {ho} : Hiri Motu, {hit} : Hittite, {hmn} : Hmong, {hu} : Hungarian,
+{hup} : Hupa, {iba} : Iban, {is} : Icelandic, {ibo} : Igbo, {ijo} : Ijo,
+{ilo} : Iloko, [{inc} : Indic (Other)], [{ine} : Indo-European (Other)],
+{id} : Indonesian, {ia} : Interlingua (International Auxiliary Language
+Association), {ie} : Interlingue, {iu} : Inuktitut, {ik} : Inupiaq, [{ira}
+: Iranian (Other)], {ga} : Irish, {mga} : Middle Irish (900-1200), {sga} :
+Old Irish (to 900), [{iro} : Iroquoian languages], {it} : Italian, {ja} :
+Japanese, {jw} : Javanese, {jrb} : Judeo-Arabic, {jpr} : Judeo-Persian,
+{kab} : Kabyle, {kac} : Kachin, {kl} : Kalaallisut, {kam} : Kamba, {kn} :
+Kannada, {kau} : Kanuri, {kaa} : Kara-Kalpak, {kar} : Karen, {ks} :
+Kashmiri, {kaw} : Kawi, {kk} : Kazakh, {kha} : Khasi, {km} : Khmer, [{khi}
+: Khoisan (Other)], {kho} : Khotanese, {ki} : Kikuyu, {kmb} : Kimbundu,
+{rw} : Kinyarwanda, {ky} : Kirghiz, {i-klingon} : Klingon, {kv} : Komi,
+{kon} : Kongo, {kok} : Konkani, {ko} : Korean, {kos} : Kosraean, {kpe} :
+Kpelle, {kro} : Kru, {kj} : Kuanyama, {kum} : Kumyk, {ku} : Kurdish, {kru}
+: Kurukh, {kut} : Kutenai, {lad} : Ladino, {lah} : Lahnda, {lam} : Lamba,
+{lo} : Lao, {la} : Latin, {lv} : Latvian, {lb} : Letzeburgesch, {lez} :
+Lezghian, {ln} : Lingala, {lt} : Lithuanian, {nds} : Low German, {loz} :
+Lozi, {lub} : Luba-Katanga, {lua} : Luba-Lulua, {lui} : Luiseno, {lun} :
+Lunda, {luo} : Luo (Kenya and Tanzania), {lus} : Lushai, {mk} : Macedonian,
+{mad} : Madurese, {mag} : Magahi, {mai} : Maithili, {mak} : Makasar, {mg} :
+Malagasy, {ms} : Malay, {ml} : Malayalam, {mt} : Maltese, {mnc} : Manchu,
+{mdr} : Mandar, {man} : Mandingo, {mni} : Manipuri, [{mno} : Manobo
+languages], {gv} : Manx, {mi} : Maori, {mr} : Marathi, {chm} : Mari, {mh} :
+Marshall, {mwr} : Marwari, {mas} : Masai, [{myn} : Mayan languages], {men}
+: Mende, {mic} : Micmac, {min} : Minangkabau, {i-mingo} : Mingo, [{mis} :
+Miscellaneous languages], {moh} : Mohawk, {mo} : Moldavian, [{mkh} :
+Mon-Khmer (Other)], {lol} : Mongo, {mn} : Mongolian, {mos} : Mossi, [{mul}
+: Multiple languages], [{mun} : Munda languages], {nah} : Nahuatl, {na} :
+Nauru, {nv} : Navajo, {nd} : North Ndebele, {nr} : South Ndebele, {ng} :
+Ndonga, {ne} : Nepali, {new} : Newari, {nia} : Nias, [{nic} :
+Niger-Kordofanian (Other)], [{ssa} : Nilo-Saharan (Other)], {niu} : Niuean,
+{non} : Old Norse, [{nai} : North American Indian], {se} : Northern Sami,
+{no} : Norwegian, {nb} : Norwegian Bokmal, {nn} : Norwegian Nynorsk, [{nub}
+: Nubian languages], {nym} : Nyamwezi, {nyn} : Nyankole, {nyo} : Nyoro,
+{nzi} : Nzima, {oc} : Occitan (post 1500), {oji} : Ojibwa, {or} : Oriya,
+{om} : Oromo, {osa} : Osage, {os} : Ossetian; Ossetic, [{oto} : Otomian
+languages], {pal} : Pahlavi, {i-pwn} : Paiwan, {pau} : Palauan, {pi} :
+Pali, {pam} : Pampanga, {pag} : Pangasinan, {pa} : Panjabi, {pap} :
+Papiamento, [{paa} : Papuan (Other)], {fa} : Persian, {peo} : Old Persian
+(ca.600-400 B.C.), [{phi} : Philippine (Other)], {phn} : Phoenician, {pon}
+: Pohnpeian, {pl} : Polish, {pt} : Portuguese, [{pra} : Prakrit languages],
+{pro} : Old Provencal (to 1500), {ps} : Pushto, {qu} : Quechua, {rm} :
+Raeto-Romance, {raj} : Rajasthani, {rap} : Rapanui, {rar} : Rarotongan,
+[{qaa - qtz} : Reserved for local use.], [{roa} : Romance (Other)], {ro} :
+Romanian, {rom} : Romany, {rn} : Rundi, {ru} : Russian, [{sal} : Salishan
+languages], {sam} : Samaritan Aramaic, [{smi} : Sami languages (Other)],
+{sm} : Samoan, {sad} : Sandawe, {sg} : Sango, {sa} : Sanskrit, {sat} :
+Santali, {sc} : Sardinian, {sas} : Sasak, {sco} : Scots, {sel} : Selkup,
+[{sem} : Semitic (Other)], {sr} : Serbian, {srr} : Serer, {shn} : Shan,
+{sn} : Shona, {sid} : Sidamo, {sgn-...} : Sign Languages, {bla} : Siksika,
+{sd} : Sindhi, {si} : Sinhalese, [{sit} : Sino-Tibetan (Other)], [{sio} :
+Siouan languages], {den} : Slave (Athapascan), [{sla} : Slavic (Other)],
+{sk} : Slovak, {sl} : Slovenian, {sog} : Sogdian, {so} : Somali, {son} :
+Songhai, {snk} : Soninke, {wen} : Sorbian languages, {nso} : Northern
+Sotho, {st} : Southern Sotho, [{sai} : South American Indian (Other)], {es}
+: Spanish, {suk} : Sukuma, {sux} : Sumerian, {su} : Sundanese, {sus} :
+Susu, {sw} : Swahili, {ss} : Swati, {sv} : Swedish, {syr} : Syriac, {tl} :
+Tagalog, {ty} : Tahitian, [{tai} : Tai (Other)], {tg} : Tajik, {tmh} :
+Tamashek, {ta} : Tamil, {i-tao} : Tao, {tt} : Tatar, {i-tay} : Tayal, {te}
+: Telugu, {ter} : Tereno, {tet} : Tetum, {th} : Thai, {bo} : Tibetan, {tig}
+: Tigre, {ti} : Tigrinya, {tem} : Timne, {tiv} : Tiv, {tli} : Tlingit,
+{tpi} : Tok Pisin, {tkl} : Tokelau, {tog} : Tonga (Nyasa), {to} : Tonga
+(Tonga Islands), {tsi} : Tsimshian, {ts} : Tsonga, {i-tsu} : Tsou, {tn} :
+Tswana, {tum} : Tumbuka, {tr} : Turkish, {ota} : Ottoman Turkish
+(1500-1928), {tk} : Turkmen, {tvl} : Tuvalu, {tyv} : Tuvinian, {tw} : Twi,
+{uga} : Ugaritic, {ug} : Uighur, {uk} : Ukrainian, {umb} : Umbundu, {und} :
+Undetermined, {ur} : Urdu, {uz} : Uzbek, {vai} : Vai, {ven} : Venda, {vi} :
+Vietnamese, {vo} : Volapuk, {vot} : Votic, [{wak} : Wakashan languages],
+{wal} : Walamo, {war} : Waray, {was} : Washo, {cy} : Welsh, {wo} : Wolof,
+{x-...} : Unregistered (Semi-Private Use), {xh} : Xhosa, {sah} : Yakut,
+{yao} : Yao, {yap} : Yapese, {yi} : Yiddish, {yo} : Yoruba, [{ypk} : Yupik
+languages], {znd} : Zande, [{zap} : Zapotec], {zen} : Zenaga, {za} :
+Zhuang, {zu} : Zulu, {zun} : Zuni
 
 =item SEE ALSO
 
@@ -12174,10 +12157,6 @@ http://lcweb.loc.gov/standards/iso639-2/langhome.html
 
 =item Construction Methods
 
-$lh = YourProjClass::langname->new();, $lh->init();,
-YourProjClass->fallback_languages(),
-YourProjClass->fallback_language_classes()
-
 =item The "maketext" Method
 
 $lh->fail_with I<or> $lh->fail_with(I<PARAM>), $lh->failure_handler_auto
@@ -12321,14 +12300,8 @@ encode_qp($str), decode_qp($str);
 
 =item Rounding
 
-ffround ( +$scale ) rounds to the $scale'th place left from the '.',
-counting from the dot. The first digit is numbered 1, ffround ( -$scale )
-rounds to the $scale'th place right from the '.', counting from the dot,
-ffround ( 0 ) rounds to an integer, fround  ( +$scale ) preserves accuracy
-to $scale digits from the left (aka significant digits) and paddes the rest
-with zeros. If the number is between 1 and -1, the significant digits count
-from the first non-zero after the '.', fround  ( -$scale ) and fround ( 0 )
-are a no-ops
+ffround ( +$scale ), ffround ( -$scale ), ffround ( 0 ), fround  ( +$scale
+), fround  ( -$scale ) and fround ( 0 )
 
 =back
 
@@ -12381,11 +12354,7 @@ Canonical notation, Input, Output
 
 =item Rounding
 
-bfround ( +$scale ) rounds to the $scale'th place left from the '.', bround
- ( +$scale ) preserves accuracy to $scale sighnificant digits counted from
-the left and paddes the number with zeros, bround  ( -$scale ) preserves
-accuracy to $scale significant digits counted from the right and paddes the
-number with zeros
+bfround ( +$scale ), bround  ( +$scale ), bround  ( -$scale )
 
 =item Internals
 
