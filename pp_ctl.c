@@ -1460,7 +1460,7 @@ PP(pp_caller)
 	}
 	else {
 	    PUSHs(sv_2mortal(newSVpvn("(unknown)",9)));
-	    PUSHs(sv_2mortal(newSViv(0)));
+	    PUSHs(sv_2mortal(newSViv((I32)cx->blk_sub.hasargs)));
 	}
     }
     else {
