@@ -77,7 +77,7 @@ stamp prepended.
 =head2 How do I remove HTML from a string?
 
 The most correct way (albeit not the fastest) is to use HTML::Parser
-from CPAN (part of the HTML-Tree package on CPAN).  Another correct
+from CPAN.  Another mostly correct
 way is to use HTML::FormatText which not only removes HTML but also
 attempts to do a little simple formatting of the resulting plain text.
 
@@ -219,7 +219,7 @@ all the non-alphanumunder character (C<\W>) into their hex escapes.
 It's important that characters with special meaning like C</> and C<?>
 I<not> be translated.  Probably the easiest way to get this right is
 to avoid reinventing the wheel and just use the URI::Escape module,
-which is part of the libwww-perl package (LWP) available from CPAN.
+available from CPAN.
 
 =head2 How do I redirect to another page?
 

@@ -2108,6 +2108,10 @@ Ap	|char*	|sv_2pvbyte_nolen|SV* sv
 Ap	|char*	|sv_pv		|SV *sv
 Ap	|char*	|sv_pvutf8	|SV *sv
 Ap	|char*	|sv_pvbyte	|SV *sv
+Ap      |void   |sv_utf8_upgrade|SV *sv
+Ap      |bool   |sv_utf8_downgrade|SV *sv|bool fail_ok
+Ap      |void   |sv_utf8_encode |SV *sv
+Ap      |bool   |sv_utf8_decode |SV *sv
 Ap	|void	|sv_force_normal|SV *sv
 Ap	|void	|tmps_grow	|I32 n
 Ap	|SV*	|sv_rvweaken	|SV *sv

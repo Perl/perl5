@@ -97,6 +97,8 @@ sub import {
 	*WARNING
 	*EXECUTABLE_NAME
 	*OSNAME
+	*LAST_REGEXP_CODE_RESULT
+	*EXCEPTIONS_BEING_CAUGHT
 );
 
 # The ground of all being. @ARG is deprecated (5.005 makes @_ lexical)
@@ -173,6 +175,8 @@ sub import {
 	*SYSTEM_FD_MAX				= *^F	;
 	*INPLACE_EDIT				= *^I	;
 	*PERLDB					= *^P	;
+	*LAST_REGEXP_CODE_RESULT		= *^R	;
+	*EXCEPTIONS_BEING_CAUGHT		= *^S	;
 	*BASETIME				= *^T	;
 	*WARNING				= *^W	;
 	*EXECUTABLE_NAME			= *^X	;

@@ -2202,13 +2202,13 @@ PP(pp_chr)
     (void)SvUPGRADE(TARG,SVt_PV);
 
     if (value > 255 && !IN_BYTE) {
-	SvGROW(TARG,8);
+	SvGROW(TARG, UTF8_MAXLEN+1);
 	tmps = SvPVX(TARG);
 	tmps = (char*)uv_to_utf8((U8*)tmps, (UV)value);
 	SvCUR_set(TARG, tmps - SvPVX(TARG));
 	*tmps = '\0';
-	SvUTF8_on(TARG);
 	(void)SvPOK_only(TARG);
+	SvUTF8_on(TARG);
 	XPUSHs(TARG);
 	RETURN;
     }

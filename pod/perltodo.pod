@@ -30,21 +30,21 @@ several, like gnats and the Debian system, but at the time we
 investigated them, none met our needs.  Since then, Jitterbug has
 matured, and may be worth reinvestigation.
 
-The system we've developed will eventually be recipient of perlbug
-mail.  New bugs are entered into a mysql database, and sent on to
+The system we've developed is the recipient of perlbug mail, and any
+followups it generates from perl5-porters.  New bugs are entered
+into a mysql database, and sent on to
 perl5-porters with the subject line rewritten to include a "ticket
 number" (unique ID for the new bug).  If the incoming message already
 had a ticket number in the subject line, then the message is logged
 against that bug.  There is a separate email interface (not forwarding
 to p5p) that permits porters to claim, categorize, and close tickets.
 
-The next desire is a web interface.  It is hoped that code can be
-reused between the mail and the web interfaces.
+There is also a web interface to the system at http://bugs.perl.org.
 
 The current delay in implementation is caused by perl.org lockups.
 One suspect is the mail handling system, possibly going into loops.
 
-We're probably going to need a bugmaster, someone who will look at
+We still desperately need a bugmaster, someone who will look at
 every new "bug" and kill those that we already know about, those
 that are not bugs at all, etc.
 

@@ -68,9 +68,6 @@ ignore_versioned_solibs='y'
 #	9 April 1999  Andy Dougherty  <doughera@lafayette.edu>
 #
 
-# gcc-2.6.3 defines _G_HAVE_BOOL to 1, but doesn't actually supply bool.
-ccflags="-Dbool=char -DHAS_BOOL $ccflags"
-
 # BSD compatability library no longer needed
 # 'kaffe' has a /usr/lib/libnet.so which is not at all relevent for perl.
 set `echo X "$libswanted "| sed -e 's/ bsd / /' -e 's/ net / /'`

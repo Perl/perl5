@@ -112,12 +112,6 @@ extern int h_errno;
 #    include <utime.h>
 #  endif
 #endif
-#ifdef I_FCNTL
-#include <fcntl.h>
-#endif
-#ifdef I_SYS_FILE
-#include <sys/file.h>
-#endif
 
 /* Put this after #includes because fork and vfork prototypes may conflict. */
 #ifndef HAS_VFORK
@@ -2042,6 +2036,9 @@ PP(pp_socket)
 	if (!IoIFP(io) && !IoOFP(io)) PerlLIO_close(fd);
 	RETPUSHUNDEF;
     }
+#if defined(HAS_FCNTL) && defined(F_SETFD)
+    fcntl(fd, F_SETFD, fd > PL_maxsysfd);	/* ensure close-on-exec */
+#endif
 
     RETPUSHYES;
 #else
@@ -2092,6 +2089,10 @@ PP(pp_sockpair)
 	if (!IoIFP(io2) && !IoOFP(io2)) PerlLIO_close(fd[1]);
 	RETPUSHUNDEF;
     }
+#if defined(HAS_FCNTL) && defined(F_SETFD)
+    fcntl(fd[0],F_SETFD,fd[0] > PL_maxsysfd);	/* ensure close-on-exec */
+    fcntl(fd[1],F_SETFD,fd[1] > PL_maxsysfd);	/* ensure close-on-exec */
+#endif
 
     RETPUSHYES;
 #else
@@ -2254,6 +2255,9 @@ PP(pp_accept)
 	if (!IoIFP(nstio) && !IoOFP(nstio)) PerlLIO_close(fd);
 	goto badexit;
     }
+#if defined(HAS_FCNTL) && defined(F_SETFD)
+    fcntl(fd, F_SETFD, fd > PL_maxsysfd);	/* ensure close-on-exec */
+#endif
 
     PUSHp((char *)&saddr, len);
     RETURN;

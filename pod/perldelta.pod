@@ -81,13 +81,15 @@ Using the C<undef> operator on a readonly value (such as $1) has
 the same effect as assigning C<undef> to the readonly value--it
 throws an exception.
 
-=item Close-on-exec bit may be set on pipe() handles
+=item Close-on-exec bit may be set on pipe and socket handles
 
 On systems that support a close-on-exec flag on filehandles, the
-flag will be set for any handles created by pipe(), if that is
-warranted by the value of $^F that may be in effect.  Earlier
-versions neglected to set the flag for handles created with
-pipe().  See L<perlfunc/pipe> and L<perlvar/$^F>.
+flag will be set for any handles created by pipe(), socketpair(),
+socket(), and accept(), if that is warranted by the value of $^F
+that may be in effect.  Earlier versions neglected to set the flag
+for handles created with these operators.  See L<perlfunc/pipe>,
+L<perlfunc/socketpair>, L<perlfunc/socket>, L<perlfunc/accept>,
+and L<perlvar/$^F>.
 
 =item Writing C<"$$1"> to mean C<"${$}1"> is unsupported
 
@@ -380,8 +382,8 @@ building and installing from source, the defaults should be fine.
 =head2 Unicode and UTF-8 support
 
 Perl can optionally use UTF-8 as its internal representation for character
-strings.  The C<utf8> and C<byte> pragmas are used to control this support
-in the current lexical scope.  See L<perlunicode>, L<utf8> and L<byte> for
+strings.  The C<utf8> and C<bytes> pragmas are used to control this support
+in the current lexical scope.  See L<perlunicode>, L<utf8> and L<bytes> for
 more information.
 
 =head2 Interpreter cloning, threads, and concurrency
@@ -1906,6 +1908,22 @@ most likely an unexpected right brace '}'.
 malloc()ed in the first place. Mandatory, but can be disabled by
 setting environment variable C<PERL_BADFREE> to 1.
 
+=item Bareword found in conditional
+
+(W) The compiler found a bareword where it expected a conditional,
+which often indicates that an || or && was parsed as part of the
+last argument of the previous construct, for example:
+
+    open FOO || die;
+
+It may also indicate a misspelled constant that has been interpreted
+as a bareword:
+
+    use constant TYPO => 1;
+    if (TYOP) { print "foo" }
+
+The C<strict> pragma is useful in avoiding such errors.
+
 =item Binary number > 0b11111111111111111111111111111111 non-portable
 
 (W) The binary number you specified is larger than 2**32-1
@@ -2364,6 +2382,14 @@ names.  Because it cannot be translated normally, it is skipped, and will not
 appear in %ENV.  This may be a benign occurrence, as some software packages
 might directly modify logical name tables and introduce nonstandard names,
 or it may indicate that a logical name table has been corrupted.
+
+=item Probable precedence problem on %s
+
+(W) The compiler found a bareword where it expected a conditional,
+which often indicates that an || or && was parsed as part of the
+last argument of the previous construct, for example:
+
+    open FOO || die;
 
 =item regexp too big
 

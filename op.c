@@ -1412,18 +1412,19 @@ Perl_mod(pTHX_ OP *o, I32 type)
 		    if (kid->op_type == OP_METHOD_NAMED
 			|| kid->op_type == OP_METHOD)
 		    {
-			OP *newop;
+			UNOP *newop;
 
 			if (kid->op_sibling || kid->op_next != kid) {
 			    yyerror("panic: unexpected optree near method call");
 			    break;
 			}
 			
-			NewOp(1101, newop, 1, OP);
+			NewOp(1101, newop, 1, UNOP);
 			newop->op_type = OP_RV2CV;
 			newop->op_ppaddr = PL_ppaddr[OP_RV2CV];
-			newop->op_next = newop;
-			kid->op_sibling = newop;
+			newop->op_first = Nullop;
+                        newop->op_next = (OP*)newop;
+			kid->op_sibling = (OP*)newop;
 			newop->op_private |= OPpLVAL_INTRO;
 			break;
 		    }
@@ -3514,9 +3515,8 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 	}
     }
     if (first->op_type == OP_CONST) {
-	if (ckWARN(WARN_PRECEDENCE) && (first->op_private & OPpCONST_BARE))
-	    Perl_warner(aTHX_ WARN_PRECEDENCE, "Probable precedence problem on %s", 
-			PL_op_desc[type]);
+	if (ckWARN(WARN_BAREWORD) && (first->op_private & OPpCONST_BARE))
+	    Perl_warner(aTHX_ WARN_BAREWORD, "Bareword found in conditional");
 	if ((type == OP_AND) == (SvTRUE(((SVOP*)first)->op_sv))) {
 	    op_free(first);
 	    *firstp = Nullop;

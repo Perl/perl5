@@ -99,9 +99,9 @@ INST_ARCH	*= \$(ARCHNAME)
 # Visual C++ >= 6.x
 #CCTYPE		*= MSVC60
 # Borland 5.02 or later
-CCTYPE		*= BORLAND
-# mingw32/gcc-2.95.2 or better
-#CCTYPE		*= GCC
+#CCTYPE		*= BORLAND
+# mingw32+gcc-2.95.2 or better
+CCTYPE		*= GCC
 
 #
 # uncomment this if you are compiling under Windows 95/98 and command.com
@@ -165,9 +165,9 @@ CCTYPE		*= BORLAND
 # so you may have to set CCHOME explicitly (spaces in the path name should
 # not be quoted)
 #
-CCHOME		*= c:\bc5
+#CCHOME		*= c:\bc5
 #CCHOME		*= $(MSVCDIR)
-#CCHOME		*= D:\packages\mingw32
+CCHOME		*= c:\gcc-2.95.2-msvcrt
 CCINCDIR	*= $(CCHOME)\include
 CCLIBDIR	*= $(CCHOME)\lib
 
@@ -288,8 +288,8 @@ ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)-multi
 ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)
 .ENDIF
 
-.IF "$(USE_OBJECT)" == "define"
-ARCHNAME	= $(ARCHNAME)-thread
+.IF "$(USE_ITHREADS)" == "define"
+ARCHNAME	!:= $(ARCHNAME)-thread
 .ENDIF
 
 # Visual Studio 98 specific
@@ -408,6 +408,9 @@ LINK_FLAGS	= $(LINK_DBG) -L"$(INST_COREDIR)" -L"$(CCLIBDIR)"
 OBJOUT_FLAG	= -o
 EXEOUT_FLAG	= -o
 LIBOUT_FLAG	= 
+
+# NOTE: we assume that GCC uses MSVCRT.DLL
+BUILDOPT	+= -fno-strict-aliasing -DPERL_MSVCRT_READFIX
 
 .ELSE
 
@@ -591,11 +594,7 @@ CFGH_TMPL	= config_H.bc
 
 CFGSH_TMPL	= config.gc
 CFGH_TMPL	= config_H.gc
-.IF "$(USE_OBJECT)" == "define"
-PERLIMPLIB	= ..\libperlcore$(a)
-.ELSE
-PERLIMPLIB	= ..\libperl$(a)
-.ENDIF
+PERLIMPLIB	= ..\libperl56$(a)
 
 .ELSE
 

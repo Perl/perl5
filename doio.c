@@ -41,12 +41,6 @@
 #  endif
 #endif
 
-#ifdef I_FCNTL
-#include <fcntl.h>
-#endif
-#ifdef I_SYS_FILE
-#include <sys/file.h>
-#endif
 #ifdef O_EXCL
 #  define OPEN_EXCL O_EXCL
 #else

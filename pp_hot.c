@@ -22,13 +22,6 @@
 #ifdef I_UNISTD
 #include <unistd.h>
 #endif
-#ifdef I_FCNTL
-#include <fcntl.h>
-#endif
-#ifdef I_SYS_FILE
-#include <sys/file.h>
-#endif
-
 
 /* Hot code. */
 
@@ -184,7 +177,16 @@ PP(pp_concat)
 	    }
 	}
 #endif
+	if (DO_UTF8(right))
+	    sv_utf8_upgrade(TARG);
 	sv_catpvn(TARG,s,len);
+	if (!IN_BYTE) {
+	    if (SvUTF8(right))
+		SvUTF8_on(TARG);
+	}
+	else if (!SvUTF8(right)) {
+	    SvUTF8_off(TARG);
+	}
     }
     else
 	sv_setpvn(TARG,s,len);	/* suppress warning */

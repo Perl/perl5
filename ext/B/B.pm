@@ -420,6 +420,10 @@ C<REFCNT> (corresponding to the C function C<SvREFCNT>).
 
 =over 4
 
+=item is_empty
+
+This method returns TRUE if the GP field of the GV is NULL.
+
 =item NAME
 
 =item STASH
@@ -572,8 +576,8 @@ This returns the op name as a string (e.g. "add", "rv2av").
 
 =item ppaddr
 
-This returns the function name as a string (e.g. Perl_pp_add,
-Perl_pp_rv2av).
+This returns the function name as a string (e.g. "PL_ppaddr[OP_ADD]",
+"PL_ppaddr[OP_RV2AV]").
 
 =item desc
 

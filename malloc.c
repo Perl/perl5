@@ -1867,6 +1867,7 @@ Perl_get_mstats(pTHX_ perl_mstats_t *buf, int buflen, int level)
 	    }
 	}
 #endif	/* defined DEBUGGING_MSTATS */
+	return 0;		/* XXX unused */
 }
 /*
  * mstats - print out statistics about malloc

@@ -57,8 +57,6 @@ use FileHandle;
 use Carp;
 use strict;
 use Config;
-my $handle_VC_problem = "";
-$handle_VC_problem="{0}," if $^O eq 'MSWin32' and $Config{cc} =~ /^cl/i;
 
 my $hv_index = 0;
 my $gv_index = 0;
@@ -75,6 +73,7 @@ my %unused_sub_packages;
 my $nullop_count;
 my $pv_copy_on_grow = 0;
 my ($debug_cops, $debug_av, $debug_cv, $debug_mg);
+my $max_string_len;
 
 my @threadsv_names;
 BEGIN {
@@ -165,10 +164,12 @@ sub B::OP::save {
 	$init->add(sprintf("(void)find_threadsv(%s);",
 			   cstring($threadsv_names[$op->targ])));
     }
-    $opsect->add(sprintf("s\\_%x, s\\_%x, %s,$handle_VC_problem %u, %u, %u, 0x%x, 0x%x",
-			 ${$op->next}, ${$op->sibling}, $op->ppaddr, $op->targ,
+    $opsect->add(sprintf("s\\_%x, s\\_%x, NULL, %u, %u, %u, 0x%x, 0x%x",
+			 ${$op->next}, ${$op->sibling}, $op->targ,
 			 $type, $op_seq, $op->flags, $op->private));
-    savesym($op, sprintf("&op_list[%d]", $opsect->index));
+    my $ix = $opsect->index;
+    $init->add(sprintf("op_list[$ix].op_ppaddr = %s;", $op->ppaddr));
+    savesym($op, "&op_list[$ix]");
 }
 
 sub B::FAKEOP::new {
@@ -178,10 +179,12 @@ sub B::FAKEOP::new {
 
 sub B::FAKEOP::save {
     my ($op, $level) = @_;
-    $opsect->add(sprintf("%s, %s, %s,$handle_VC_problem %u, %u, %u, 0x%x, 0x%x",
-			 $op->next, $op->sibling, $op->ppaddr, $op->targ,
+    $opsect->add(sprintf("%s, %s, NULL, %u, %u, %u, 0x%x, 0x%x",
+			 $op->next, $op->sibling, $op->targ,
 			 $op->type, $op_seq, $op->flags, $op->private));
-    return sprintf("&op_list[%d]", $opsect->index);
+    my $ix = $opsect->index;
+    $init->add(sprintf("op_list[$ix].op_ppaddr = %s;", $op->ppaddr));
+    return "&op_list[$ix]";
 }
 
 sub B::FAKEOP::next { $_[0]->{"next"} || 0 }
@@ -196,45 +199,53 @@ sub B::UNOP::save {
     my ($op, $level) = @_;
     my $sym = objsym($op);
     return $sym if defined $sym;
-    $unopsect->add(sprintf("s\\_%x, s\\_%x, %s,$handle_VC_problem %u, %u, %u, 0x%x, 0x%x, s\\_%x",
-			   ${$op->next}, ${$op->sibling}, $op->ppaddr,
+    $unopsect->add(sprintf("s\\_%x, s\\_%x, NULL, %u, %u, %u, 0x%x, 0x%x, s\\_%x",
+			   ${$op->next}, ${$op->sibling},
 			   $op->targ, $op->type, $op_seq, $op->flags,
 			   $op->private, ${$op->first}));
-    savesym($op, sprintf("(OP*)&unop_list[%d]", $unopsect->index));
+    my $ix = $unopsect->index;
+    $init->add(sprintf("unop_list[$ix].op_ppaddr = %s;", $op->ppaddr));
+    savesym($op, "(OP*)&unop_list[$ix]");
 }
 
 sub B::BINOP::save {
     my ($op, $level) = @_;
     my $sym = objsym($op);
     return $sym if defined $sym;
-    $binopsect->add(sprintf("s\\_%x, s\\_%x, %s,$handle_VC_problem %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x",
-			    ${$op->next}, ${$op->sibling}, $op->ppaddr,
+    $binopsect->add(sprintf("s\\_%x, s\\_%x, NULL, %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x",
+			    ${$op->next}, ${$op->sibling},
 			    $op->targ, $op->type, $op_seq, $op->flags,
 			    $op->private, ${$op->first}, ${$op->last}));
-    savesym($op, sprintf("(OP*)&binop_list[%d]", $binopsect->index));
+    my $ix = $binopsect->index;
+    $init->add(sprintf("binop_list[$ix].op_ppaddr = %s;", $op->ppaddr));
+    savesym($op, "(OP*)&binop_list[$ix]");
 }
 
 sub B::LISTOP::save {
     my ($op, $level) = @_;
     my $sym = objsym($op);
     return $sym if defined $sym;
-    $listopsect->add(sprintf("s\\_%x, s\\_%x, %s,$handle_VC_problem %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x, %u",
-			     ${$op->next}, ${$op->sibling}, $op->ppaddr,
+    $listopsect->add(sprintf("s\\_%x, s\\_%x, NULL, %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x, %u",
+			     ${$op->next}, ${$op->sibling},
 			     $op->targ, $op->type, $op_seq, $op->flags,
 			     $op->private, ${$op->first}, ${$op->last},
 			     $op->children));
-    savesym($op, sprintf("(OP*)&listop_list[%d]", $listopsect->index));
+    my $ix = $listopsect->index;
+    $init->add(sprintf("listop_list[$ix].op_ppaddr = %s;", $op->ppaddr));
+    savesym($op, "(OP*)&listop_list[$ix]");
 }
 
 sub B::LOGOP::save {
     my ($op, $level) = @_;
     my $sym = objsym($op);
     return $sym if defined $sym;
-    $logopsect->add(sprintf("s\\_%x, s\\_%x, %s,$handle_VC_problem %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x",
-			    ${$op->next}, ${$op->sibling}, $op->ppaddr,
+    $logopsect->add(sprintf("s\\_%x, s\\_%x, NULL, %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x",
+			    ${$op->next}, ${$op->sibling},
 			    $op->targ, $op->type, $op_seq, $op->flags,
 			    $op->private, ${$op->first}, ${$op->other}));
-    savesym($op, sprintf("(OP*)&logop_list[%d]", $logopsect->index));
+    my $ix = $logopsect->index;
+    $init->add(sprintf("logop_list[$ix].op_ppaddr = %s;", $op->ppaddr));
+    savesym($op, "(OP*)&logop_list[$ix]");
 }
 
 sub B::LOOP::save {
@@ -244,24 +255,28 @@ sub B::LOOP::save {
     #warn sprintf("LOOP: redoop %s, nextop %s, lastop %s\n",
     #		 peekop($op->redoop), peekop($op->nextop),
     #		 peekop($op->lastop)); # debug
-    $loopsect->add(sprintf("s\\_%x, s\\_%x, %s,$handle_VC_problem %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x, %u, s\\_%x, s\\_%x, s\\_%x",
-			   ${$op->next}, ${$op->sibling}, $op->ppaddr,
+    $loopsect->add(sprintf("s\\_%x, s\\_%x, NULL, %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x, %u, s\\_%x, s\\_%x, s\\_%x",
+			   ${$op->next}, ${$op->sibling},
 			   $op->targ, $op->type, $op_seq, $op->flags,
 			   $op->private, ${$op->first}, ${$op->last},
 			   $op->children, ${$op->redoop}, ${$op->nextop},
 			   ${$op->lastop}));
-    savesym($op, sprintf("(OP*)&loop_list[%d]", $loopsect->index));
+    my $ix = $loopsect->index;
+    $init->add(sprintf("loop_list[$ix].op_ppaddr = %s;", $op->ppaddr));
+    savesym($op, "(OP*)&loop_list[$ix]");
 }
 
 sub B::PVOP::save {
     my ($op, $level) = @_;
     my $sym = objsym($op);
     return $sym if defined $sym;
-    $pvopsect->add(sprintf("s\\_%x, s\\_%x, %s, $handle_VC_problem %u, %u, %u, 0x%x, 0x%x, %s",
-			   ${$op->next}, ${$op->sibling}, $op->ppaddr,
+    $pvopsect->add(sprintf("s\\_%x, s\\_%x, NULL,  %u, %u, %u, 0x%x, 0x%x, %s",
+			   ${$op->next}, ${$op->sibling},
 			   $op->targ, $op->type, $op_seq, $op->flags,
 			   $op->private, cstring($op->pv)));
-    savesym($op, sprintf("(OP*)&pvop_list[%d]", $pvopsect->index));
+    my $ix = $pvopsect->index;
+    $init->add(sprintf("pvop_list[$ix].op_ppaddr = %s;", $op->ppaddr));
+    savesym($op, "(OP*)&pvop_list[$ix]");
 }
 
 sub B::SVOP::save {
@@ -269,25 +284,28 @@ sub B::SVOP::save {
     my $sym = objsym($op);
     return $sym if defined $sym;
     my $svsym = $op->sv->save;
-    $svopsect->add(sprintf("s\\_%x, s\\_%x, %s,$handle_VC_problem %u, %u, %u, 0x%x, 0x%x, Nullsv",
-			   ${$op->next}, ${$op->sibling}, $op->ppaddr,
+    $svopsect->add(sprintf("s\\_%x, s\\_%x, NULL, %u, %u, %u, 0x%x, 0x%x, Nullsv",
+			   ${$op->next}, ${$op->sibling},
 			   $op->targ, $op->type, $op_seq, $op->flags,
 			   $op->private));
-    $init->add(sprintf("svop_list[%d].op_sv = %s;", $svopsect->index, "(SV*)$svsym"));
-    savesym($op, sprintf("(OP*)&svop_list[%d]", $svopsect->index));
+    my $ix = $svopsect->index;
+    $init->add(sprintf("svop_list[$ix].op_ppaddr = %s;", $op->ppaddr));
+    $init->add("svop_list[$ix].op_sv = (SV*)$svsym;");
+    savesym($op, "(OP*)&svop_list[$ix]");
 }
 
 sub B::PADOP::save {
     my ($op, $level) = @_;
     my $sym = objsym($op);
     return $sym if defined $sym;
-    $padopsect->add(sprintf("s\\_%x, s\\_%x, %s,$handle_VC_problem %u, %u, %u, 0x%x, 0x%x, Nullgv",
-			   ${$op->next}, ${$op->sibling}, $op->ppaddr,
+    $padopsect->add(sprintf("s\\_%x, s\\_%x, NULL, %u, %u, %u, 0x%x, 0x%x, Nullgv",
+			   ${$op->next}, ${$op->sibling},
 			   $op->targ, $op->type, $op_seq, $op->flags,
 			   $op->private));
-    $init->add(sprintf("padop_list[%d].op_padix = %ld;",
-		       $padopsect->index, $op->padix));
-    savesym($op, sprintf("(OP*)&padop_list[%d]", $padopsect->index));
+    $init->add(sprintf("padop_list[%d].op_ppaddr = %s;", $padopsect->index, $op->ppaddr));
+    my $ix = $padopsect->index;
+    $init->add(sprintf("padop_list[$ix].op_padix = %ld;", $op->padix));
+    savesym($op, "(OP*)&padop_list[$ix]");
 }
 
 sub B::COP::save {
@@ -296,15 +314,16 @@ sub B::COP::save {
     return $sym if defined $sym;
     warn sprintf("COP: line %d file %s\n", $op->line, $op->file)
 	if $debug_cops;
-    $copsect->add(sprintf("s\\_%x, s\\_%x, %s,$handle_VC_problem %u, %u, %u, 0x%x, 0x%x, %s, Nullhv, Nullgv, %u, %d, %u",
-			  ${$op->next}, ${$op->sibling}, $op->ppaddr,
+    $copsect->add(sprintf("s\\_%x, s\\_%x, NULL, %u, %u, %u, 0x%x, 0x%x, %s, Nullhv, Nullgv, %u, %d, %u",
+			  ${$op->next}, ${$op->sibling},
 			  $op->targ, $op->type, $op_seq, $op->flags,
 			  $op->private, cstring($op->label), $op->cop_seq,
 			  $op->arybase, $op->line));
-    my $copix = $copsect->index;
-    $init->add(sprintf("CopFILE_set(&cop_list[%d], %s);", $copix, cstring($op->file)),
-	       sprintf("CopSTASHPV_set(&cop_list[%d], %s);", $copix, cstring($op->stashpv)));
-    savesym($op, "(OP*)&cop_list[$copix]");
+    my $ix = $copsect->index;
+    $init->add(sprintf("cop_list[$ix].op_ppaddr = %s;", $op->ppaddr));
+    $init->add(sprintf("CopFILE_set(&cop_list[$ix], %s);", cstring($op->file)),
+	       sprintf("CopSTASHPV_set(&cop_list[$ix], %s);", cstring($op->stashpv)));
+    savesym($op, "(OP*)&cop_list[$ix]");
 }
 
 sub B::PMOP::save {
@@ -332,13 +351,14 @@ sub B::PMOP::save {
     # pmnext handling is broken in perl itself, I think. Bad op_pmnext
     # fields aren't noticed in perl's runtime (unless you try reset) but we
     # segfault when trying to dereference it to find op->op_pmnext->op_type
-    $pmopsect->add(sprintf("s\\_%x, s\\_%x, %s,$handle_VC_problem %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x, %u, %s, %s, 0, 0, 0x%x, 0x%x",
-			   ${$op->next}, ${$op->sibling}, $ppaddr, $op->targ,
+    $pmopsect->add(sprintf("s\\_%x, s\\_%x, NULL, %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x, %u, %s, %s, 0, 0, 0x%x, 0x%x",
+			   ${$op->next}, ${$op->sibling}, $op->targ,
 			   $op->type, $op_seq, $op->flags, $op->private,
 			   ${$op->first}, ${$op->last}, $op->children,
 			   $replrootfield, $replstartfield,
 			   $op->pmflags, $op->pmpermflags,));
     my $pm = sprintf("pmop_list[%d]", $pmopsect->index);
+    $init->add(sprintf("$pm.op_ppaddr = %s;", $ppaddr));
     my $re = $op->precomp;
     if (defined($re)) {
 	my $resym = sprintf("re%d", $re_index++);
@@ -349,7 +369,7 @@ sub B::PMOP::save {
     if ($gvsym) {
 	$init->add("$pm.op_pmreplroot = (OP*)$gvsym;");
     }
-    savesym($op, sprintf("(OP*)&pmop_list[%d]", $pmopsect->index));
+    savesym($op, "(OP*)&$pm");
 }
 
 sub B::SPECIAL::save {
@@ -371,9 +391,10 @@ sub B::NULL::save {
     return $sym if defined $sym;
 #   warn "Saving SVt_NULL SV\n"; # debug
     # debug
-    #if ($$sv == 0) {
-    #	warn "NULL::save for sv = 0 called from @{[(caller(1))[3]]}\n";
-    #}
+    if ($$sv == 0) {
+    	warn "NULL::save for sv = 0 called from @{[(caller(1))[3]]}\n";
+	return savesym($sv, "Nullsv /* XXX */");
+    }
     $svsect->add(sprintf("0, %u, 0x%x", $sv->REFCNT , $sv->FLAGS));
     return savesym($sv, sprintf("&sv_list[%d]", $svsect->index));
 }
@@ -400,6 +421,27 @@ sub B::NV::save {
     return savesym($sv, sprintf("&sv_list[%d]", $svsect->index));
 }
 
+sub savepvn {
+    my ($dest,$pv) = @_;
+    my @res;
+    if (defined $max_string_len && length($pv) > $max_string_len) {
+	push @res, sprintf("New(0,%s,%u,char);", $dest, length($pv)+1);
+	my $offset = 0;
+	while (length $pv) {
+	    my $str = substr $pv, 0, $max_string_len, '';
+	    push @res, sprintf("Copy(%s,$dest+$offset,%u,char);",
+			       cstring($str), length($str));
+	    $offset += length $str;
+	}
+	push @res, sprintf("%s[%u] = '\\0';", $dest, $offset);
+    }
+    else {
+	push @res, sprintf("%s = savepvn(%s, %u);", $dest,
+			   cstring($pv), length($pv));
+    }
+    return @res;
+}
+
 sub B::PVLV::save {
     my ($sv) = @_;
     my $sym = objsym($sv);
@@ -414,8 +456,8 @@ sub B::PVLV::save {
     $svsect->add(sprintf("&xpvlv_list[%d], %lu, 0x%x",
 			 $xpvlvsect->index, $sv->REFCNT , $sv->FLAGS));
     if (!$pv_copy_on_grow) {
-	$init->add(sprintf("xpvlv_list[%d].xpv_pv = savepvn(%s, %u);",
-			   $xpvlvsect->index, cstring($pv), $len));
+	$init->add(savepvn(sprintf("xpvlv_list[%d].xpv_pv",
+				   $xpvlvsect->index), $pv));
     }
     $sv->save_magic;
     return savesym($sv, sprintf("&sv_list[%d]", $svsect->index));
@@ -432,8 +474,8 @@ sub B::PVIV::save {
     $svsect->add(sprintf("&xpviv_list[%d], %u, 0x%x",
 			 $xpvivsect->index, $sv->REFCNT , $sv->FLAGS));
     if (!$pv_copy_on_grow) {
-	$init->add(sprintf("xpviv_list[%d].xpv_pv = savepvn(%s, %u);",
-			   $xpvivsect->index, cstring($pv), $len));
+	$init->add(savepvn(sprintf("xpviv_list[%d].xpv_pv",
+				   $xpvivsect->index), $pv));
     }
     return savesym($sv, sprintf("&sv_list[%d]", $svsect->index));
 }
@@ -453,8 +495,8 @@ sub B::PVNV::save {
     $svsect->add(sprintf("&xpvnv_list[%d], %lu, 0x%x",
 			 $xpvnvsect->index, $sv->REFCNT , $sv->FLAGS));
     if (!$pv_copy_on_grow) {
-	$init->add(sprintf("xpvnv_list[%d].xpv_pv = savepvn(%s,%u);",
-			   $xpvnvsect->index, cstring($pv), $len));
+	$init->add(savepvn(sprintf("xpvnv_list[%d].xpv_pv",
+				   $xpvnvsect->index), $pv));
     }
     return savesym($sv, sprintf("&sv_list[%d]", $svsect->index));
 }
@@ -471,8 +513,8 @@ sub B::BM::save {
     $svsect->add(sprintf("&xpvbm_list[%d], %lu, 0x%x",
 			 $xpvbmsect->index, $sv->REFCNT , $sv->FLAGS));
     $sv->save_magic;
-    $init->add(sprintf("xpvbm_list[%d].xpv_pv = savepvn(%s, %u);",
-		       $xpvbmsect->index, cstring($pv), $len),
+    $init->add(savepvn(sprintf("xpvbm_list[%d].xpv_pv",
+			       $xpvbmsect->index), $pv),
 	       sprintf("xpvbm_list[%d].xpv_cur = %u;",
 		       $xpvbmsect->index, $len - 257));
     return savesym($sv, sprintf("&sv_list[%d]", $svsect->index));
@@ -489,8 +531,8 @@ sub B::PV::save {
     $svsect->add(sprintf("&xpv_list[%d], %lu, 0x%x",
 			 $xpvsect->index, $sv->REFCNT , $sv->FLAGS));
     if (!$pv_copy_on_grow) {
-	$init->add(sprintf("xpv_list[%d].xpv_pv = savepvn(%s, %u);",
-			   $xpvsect->index, cstring($pv), $len));
+	$init->add(savepvn(sprintf("xpv_list[%d].xpv_pv",
+				   $xpvsect->index), $pv));
     }
     return savesym($sv, sprintf("&sv_list[%d]", $svsect->index));
 }
@@ -507,8 +549,8 @@ sub B::PVMG::save {
     $svsect->add(sprintf("&xpvmg_list[%d], %lu, 0x%x",
 			 $xpvmgsect->index, $sv->REFCNT , $sv->FLAGS));
     if (!$pv_copy_on_grow) {
-	$init->add(sprintf("xpvmg_list[%d].xpv_pv = savepvn(%s, %u);",
-			   $xpvmgsect->index, cstring($pv), $len));
+	$init->add(savepvn(sprintf("xpvmg_list[%d].xpv_pv",
+				   $xpvmgsect->index), $pv));
     }
     $sym = savesym($sv, sprintf("&sv_list[%d]", $svsect->index));
     $sv->save_magic;
@@ -723,24 +765,31 @@ sub B::GV::save {
 	$sym = savesym($gv, "gv_list[$ix]");
 	#warn sprintf("Saving GV 0x%x as $sym\n", $$gv); # debug
     }
+    my $is_empty = $gv->is_empty;
     my $gvname = $gv->NAME;
     my $name = cstring($gv->STASH->NAME . "::" . $gvname);
     #warn "GV name is $name\n"; # debug
-    my $egv = $gv->EGV;
     my $egvsym;
-    if ($$gv != $$egv) {
-	#warn(sprintf("EGV name is %s, saving it now\n",
-	#	     $egv->STASH->NAME . "::" . $egv->NAME)); # debug
-	$egvsym = $egv->save;
+    unless ($is_empty) {
+	my $egv = $gv->EGV;
+	if ($$gv != $$egv) {
+	    #warn(sprintf("EGV name is %s, saving it now\n",
+	    #	     $egv->STASH->NAME . "::" . $egv->NAME)); # debug
+	    $egvsym = $egv->save;
+	}
     }
     $init->add(qq[$sym = gv_fetchpv($name, TRUE, SVt_PV);],
 	       sprintf("SvFLAGS($sym) = 0x%x;", $gv->FLAGS),
-	       sprintf("GvFLAGS($sym) = 0x%x;", $gv->GvFLAGS),
-	       sprintf("GvLINE($sym) = %u;", $gv->LINE));
+	       sprintf("GvFLAGS($sym) = 0x%x;", $gv->GvFLAGS));
+    $init->add(sprintf("GvLINE($sym) = %u;", $gv->LINE)) unless $is_empty;
+
     # Shouldn't need to do save_magic since gv_fetchpv handles that
     #$gv->save_magic;
     my $refcnt = $gv->REFCNT + 1;
     $init->add(sprintf("SvREFCNT($sym) += %u;", $refcnt - 1)) if $refcnt > 1;
+
+    return $sym if $is_empty;
+
     my $gvrefcnt = $gv->GvREFCNT;
     if ($gvrefcnt > 1) {
 	$init->add(sprintf("GvREFCNT($sym) += %u;", $gvrefcnt - 1));
@@ -1461,6 +1510,8 @@ sub compile {
 		# Optimisations for -O1
 		$pv_copy_on_grow = 1;
 	    }
+	} elsif ($opt eq "l") {
+	    $max_string_len = $arg;
 	}
     }
     init_sections();
@@ -1576,6 +1627,13 @@ No copy-on-grow.
 Optimisation level (n = 0, 1, 2, ...). B<-O> means B<-O1>.  Currently,
 B<-O1> and higher set B<-fcog>.
 
+=item B<-llimit>
+
+Some C compilers impose an arbitrary limit on the length of string
+constants (e.g. 2048 characters for Microsoft Visual C++).  The
+B<-llimit> options tells the C backend not to generate string literals
+exceeding that limit.
+
 =back
 
 =head1 EXAMPLES
@@ -1587,7 +1645,7 @@ Note that C<cc_harness> lives in the C<B> subdirectory of your perl
 library directory. The utility called C<perlcc> may also be used to
 help make use of this compiler.
 
-    perl -MO=C,-v,-DcA bar.pl > /dev/null
+    perl -MO=C,-v,-DcA,-l2048 bar.pl > /dev/null
 
 =head1 BUGS
 

@@ -4,7 +4,7 @@ Bugs
 
 Unicode support
     finish byte <-> utf8 and localencoding <-> utf8 conversions 
-    make "$bytestr$charstr" do the right conversion
+    make substr($bytestr,0,0, $charstr) do the right conversion
     add Unicode::Map equivivalent to core
     add support for I/O disciplines
         - open(F, "<!crlf!utf16", $file)
@@ -15,6 +15,7 @@ Unicode support
     support C<print v1.2.3>
     make C<v123> mean C<chr(123)> (if !exists(&v123))
     autoload utf8_heavy.pl's swash routines in swash_init()
+    check uv_to_utf8() calls for buffer overflow
 
 Multi-threading
     support "use Thread;" under useithreads

@@ -783,6 +783,10 @@
 #define sv_pv			Perl_sv_pv
 #define sv_pvutf8		Perl_sv_pvutf8
 #define sv_pvbyte		Perl_sv_pvbyte
+#define sv_utf8_upgrade		Perl_sv_utf8_upgrade
+#define sv_utf8_downgrade	Perl_sv_utf8_downgrade
+#define sv_utf8_encode		Perl_sv_utf8_encode
+#define sv_utf8_decode		Perl_sv_utf8_decode
 #define sv_force_normal		Perl_sv_force_normal
 #define tmps_grow		Perl_tmps_grow
 #define sv_rvweaken		Perl_sv_rvweaken
@@ -2191,6 +2195,10 @@
 #define sv_pv(a)		Perl_sv_pv(aTHX_ a)
 #define sv_pvutf8(a)		Perl_sv_pvutf8(aTHX_ a)
 #define sv_pvbyte(a)		Perl_sv_pvbyte(aTHX_ a)
+#define sv_utf8_upgrade(a)	Perl_sv_utf8_upgrade(aTHX_ a)
+#define sv_utf8_downgrade(a,b)	Perl_sv_utf8_downgrade(aTHX_ a,b)
+#define sv_utf8_encode(a)	Perl_sv_utf8_encode(aTHX_ a)
+#define sv_utf8_decode(a)	Perl_sv_utf8_decode(aTHX_ a)
 #define sv_force_normal(a)	Perl_sv_force_normal(aTHX_ a)
 #define tmps_grow(a)		Perl_tmps_grow(aTHX_ a)
 #define sv_rvweaken(a)		Perl_sv_rvweaken(aTHX_ a)
@@ -4299,6 +4307,14 @@
 #define sv_pvutf8		Perl_sv_pvutf8
 #define Perl_sv_pvbyte		CPerlObj::Perl_sv_pvbyte
 #define sv_pvbyte		Perl_sv_pvbyte
+#define Perl_sv_utf8_upgrade	CPerlObj::Perl_sv_utf8_upgrade
+#define sv_utf8_upgrade		Perl_sv_utf8_upgrade
+#define Perl_sv_utf8_downgrade	CPerlObj::Perl_sv_utf8_downgrade
+#define sv_utf8_downgrade	Perl_sv_utf8_downgrade
+#define Perl_sv_utf8_encode	CPerlObj::Perl_sv_utf8_encode
+#define sv_utf8_encode		Perl_sv_utf8_encode
+#define Perl_sv_utf8_decode	CPerlObj::Perl_sv_utf8_decode
+#define sv_utf8_decode		Perl_sv_utf8_decode
 #define Perl_sv_force_normal	CPerlObj::Perl_sv_force_normal
 #define sv_force_normal		Perl_sv_force_normal
 #define Perl_tmps_grow		CPerlObj::Perl_tmps_grow

@@ -1,4 +1,4 @@
-package byte;
+package bytes;
 
 sub import {
     $^H |= 0x00000008;
@@ -9,7 +9,7 @@ sub unimport {
 }
 
 sub AUTOLOAD {
-    require "byte_heavy.pl";
+    require "bytes_heavy.pl";
     goto &$AUTOLOAD;
 }
 
@@ -20,21 +20,21 @@ __END__
 
 =head1 NAME
 
-byte - Perl pragma to force byte semantics rather than character semantics
+bytes - Perl pragma to force byte semantics rather than character semantics
 
 =head1 SYNOPSIS
 
-    use byte;
-    no byte;
+    use bytes;
+    no bytes;
 
 =head1 DESCRIPTION
 
 WARNING: The implementation of Unicode support in Perl is incomplete.
 Expect sudden and unannounced changes!
 
-The C<use byte> pragma disables character semantics for the rest of the
-lexical scope in which it appears.  C<no byte> can be used to reverse
-the effect of C<use byte> within the current lexical scope.
+The C<use bytes> pragma disables character semantics for the rest of the
+lexical scope in which it appears.  C<no bytes> can be used to reverse
+the effect of C<use bytes> within the current lexical scope.
 
 Perl normally assumes character semantics in the presence of
 character data (i.e. data that has come from a source that has

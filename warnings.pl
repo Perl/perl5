@@ -27,7 +27,7 @@ my $tree = {
 			   },
        	 'syntax'	=> { 	'ambiguous'	=> DEFAULT_OFF,
 			     	'semicolon'	=> DEFAULT_OFF,
-			     	'precedence'	=> DEFAULT_OFF,
+			     	'bareword'	=> DEFAULT_OFF,
 			     	'reserved'	=> DEFAULT_OFF,
 				'octal'		=> DEFAULT_OFF,
 				'digit'		=> DEFAULT_OFF,

@@ -376,6 +376,10 @@ Accepts an incoming socket connect, just as the accept(2) system call
 does.  Returns the packed address if it succeeded, false otherwise.
 See the example in L<perlipc/"Sockets: Client/Server Communication">.
 
+On systems that support a close-on-exec flag on files, the flag will
+be set for the newly opened file descriptor, as determined by the
+value of $^F.  See L<perlvar/$^F>.
+
 =item alarm SECONDS
 
 =item alarm
@@ -1164,9 +1168,7 @@ make your program I<appear> to run faster.
 When called in list context, returns a 2-element list consisting of the
 key and value for the next element of a hash, so that you can iterate over
 it.  When called in scalar context, returns the key for only the "next"
-element in the hash.  (Note: Keys may be C<"0"> or C<"">, which are logically
-false; you may wish to avoid constructs like C<while ($k = each %foo) {}>
-for this reason.)
+element in the hash.
 
 Entries are returned in an apparently random order.  The actual random
 order is subject to change in future versions of perl, but it is guaranteed
@@ -4013,12 +4015,20 @@ the system call of the same name.  You should C<use Socket> first
 to get the proper definitions imported.  See the examples in
 L<perlipc/"Sockets: Client/Server Communication">.
 
+On systems that support a close-on-exec flag on files, the flag will
+be set for the newly opened file descriptor, as determined by the
+value of $^F.  See L<perlvar/$^F>.
+
 =item socketpair SOCKET1,SOCKET2,DOMAIN,TYPE,PROTOCOL
 
 Creates an unnamed pair of sockets in the specified domain, of the
 specified type.  DOMAIN, TYPE, and PROTOCOL are specified the same as
 for the system call of the same name.  If unimplemented, yields a fatal
 error.  Returns true if successful.
+
+On systems that support a close-on-exec flag on files, the flag will
+be set for the newly opened file descriptors, as determined by the value
+of $^F.  See L<perlvar/$^F>.
 
 Some systems defined C<pipe> in terms of C<socketpair>, in which a call
 to C<pipe(Rdr, Wtr)> is essentially:
@@ -4170,6 +4180,8 @@ well-defined.
 
 =item splice ARRAY,OFFSET
 
+=item splice ARRAY
+
 Removes the elements designated by OFFSET and LENGTH from an array, and
 replaces them with the elements of LIST, if any.  In list context,
 returns the elements removed from the array.  In scalar context,
@@ -4177,7 +4189,9 @@ returns the last element removed, or C<undef> if no elements are
 removed.  The array grows or shrinks as necessary.
 If OFFSET is negative then it starts that far from the end of the array.
 If LENGTH is omitted, removes everything from OFFSET onward.
-If LENGTH is negative, leave that many elements off the end of the array.
+If LENGTH is negative, leaves that many elements off the end of the array.
+If both OFFSET and LENGTH are omitted, removes everything.
+
 The following equivalences hold (assuming C<$[ == 0>):
 
     push(@a,$x,$y)	splice(@a,@a,0,$x,$y)
@@ -4364,8 +4378,8 @@ point in formatted real numbers is affected by the LC_NUMERIC locale.
 See L<perllocale>.
 
 If Perl understands "quads" (64-bit integers) (this requires
-either that the platform natively supports quads or that Perl
-has been specifically compiled to support quads), the characters
+either that the platform natively support quads or that Perl
+be specifically compiled to support quads), the characters
 
 	d u o x X b i D U O
 
@@ -4384,7 +4398,7 @@ You can find out whether your Perl supports quads via L<Config>:
 		print "quads\n";
 
 If Perl understands "long doubles" (this requires that the platform
-supports long doubles), the flags
+support long doubles), the flags
 
 	e f g E F G
 

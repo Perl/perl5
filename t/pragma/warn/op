@@ -58,7 +58,7 @@
      Parentheses missing around "local" list at -e line 1.
        local $a, $b = (1,2);
  
-     Probable precedence problem on logical or at -e line 1.
+     Bareword found in conditional at -e line 1.
        use warnings 'syntax'; my $x = print(ABC || 1);
  
      Value of %s may be \"0\"; use \"defined\" 
@@ -627,7 +627,7 @@ print (ABC || 1) ;
 no warnings 'syntax' ;
 print (ABC || 1) ;
 EXPECT
-Probable precedence problem on logical or (||) at - line 3.
+Bareword found in conditional at - line 3.
 ########
 --FILE-- abc
 
