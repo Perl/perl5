@@ -1,5 +1,11 @@
 Revision history for Perl extension Cwd.
 
+2.17  Wed Mar 10 07:55:36 CST 2004
+
+ - The change in 2.16 created a testing failure when tested from
+   within a path that contains symlinks (for instance, /tmp ->
+   /private/tmp).
+
 2.16  Sat Mar  6 17:56:31 CST 2004
 
  - For VMS compatibility (and to conform to Cwd's documented
