@@ -39,7 +39,8 @@ for (my $i = 0; $i < $count; $i++)
   # we create the numbers from "patterns", e.g. get a random number and a
   # random count and string them together. This means things like
   # "100000999999999999911122222222" are much more likely. If we just strung
-  # together digits, we would end up with "1272398823211223" etc.
+  # together digits, we would end up with "1272398823211223" etc. It also means
+  # that we get more frequently equal numbers or other special cases.
   while (length($As) < $la) { $As .= int(rand(100)) x int(rand(16)); }
   while (length($Bs) < $lb) { $Bs .= int(rand(100)) x int(rand(16)); }
 
@@ -63,7 +64,7 @@ for (my $i = 0; $i < $count; $i++)
   print "# seed $seed, ". join(' ',Math::BigInt::Calc->_base_len()),"\n".
         "# tried $ADB * $B + $two*$AMB - $AMB\n"
    unless ok ($ADB*$B+$two*$AMB-$AMB,$As);
-  print "\$ADB * \$B / \$B = ", $ADB * $B / $B, " != $ADB (\$B=$B)\n"
+  print "# seed: $seed, \$ADB * \$B / \$B = ", $ADB * $B / $B, " != $ADB (\$B=$B)\n"
    unless ok ($ADB*$B/$B,$ADB);
   # swap 'em and try this, too
   # $X = ($B/$A)*$A + $B % $A;
@@ -74,7 +75,7 @@ for (my $i = 0; $i < $count; $i++)
    unless ok ($ADB*$A+$two*$AMB-$AMB,$Bs);
 #  print " +$two * $AMB = ",$ADB * $A + $two * $AMB,"\n";
 #  print " -$AMB = ",$ADB * $A + $two * $AMB - $AMB,"\n";
-  print "\$ADB * \$A / \$A = ", $ADB * $A / $A, " != $ADB (\$A=$A)\n"
+  print "# seed $seed, \$ADB * \$A / \$A = ", $ADB * $A / $A, " != $ADB (\$A=$A)\n"
    unless ok ($ADB*$A/$A,$ADB);
   }
 

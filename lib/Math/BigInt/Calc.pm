@@ -125,30 +125,35 @@ BEGIN
   # determine how many digits fit into an integer and can be safely added 
   # together plus carry w/o causing an overflow
 
-  # this below detects 15 on a 64 bit system, because after that it becomes
-  # 1e16  and not 1000000 :/ I can make it detect 18, but then I get a lot of
-  # test failures. Ugh! (Tomake detect 18: uncomment lines marked with *)
   use integer;
-  my $bi = 5;			# approx. 16 bit
-  $num = int('9' x $bi);
-  # $num = 99999; # *
-  # while ( ($num+$num+1) eq '1' . '9' x $bi)	# *
-  while ( int($num+$num+1) eq '1' . '9' x $bi)
-    {
-    $bi++; $num = int('9' x $bi);
-    # $bi++; $num *= 10; $num += 9;	# *
-    }
-  $bi--;				# back off one step
+
+  ############################################################################
+  # the next block is no longer important
+
+  ## this below detects 15 on a 64 bit system, because after that it becomes
+  ## 1e16  and not 1000000 :/ I can make it detect 18, but then I get a lot of
+  ## test failures. Ugh! (Tomake detect 18: uncomment lines marked with *)
+
+  #my $bi = 5;			# approx. 16 bit
+  #$num = int('9' x $bi);
+  ## $num = 99999; # *
+  ## while ( ($num+$num+1) eq '1' . '9' x $bi)	# *
+  #while ( int($num+$num+1) eq '1' . '9' x $bi)
+  #  {
+  #  $bi++; $num = int('9' x $bi);
+  #  # $bi++; $num *= 10; $num += 9;	# *
+  #  }
+  #$bi--;				# back off one step
   # by setting them equal, we ignore the findings and use the default
   # one-size-fits-all approach from former versions
-  $bi = $e;				# XXX, this should work always
+  my $bi = $e;				# XXX, this should work always
 
   __PACKAGE__->_base_len($e,$bi);	# set and store
 
   # find out how many bits _and, _or and _xor can take (old default = 16)
   # I don't think anybody has yet 128 bit scalars, so let's play safe.
   local $^W = 0;	# don't warn about 'nonportable number'
-  $AND_BITS = 15; $XOR_BITS = 15; $OR_BITS  = 15;
+  $AND_BITS = 15; $XOR_BITS = 15; $OR_BITS = 15;
 
   # find max bits, we will not go higher than numberofbits that fit into $BASE
   # to make _and etc simpler (and faster for smaller, slower for large numbers)
@@ -1406,8 +1411,6 @@ sub _sqrt
 sub _root
   {
   # take n'th root of $x in place (n >= 3)
-  # Compute a guess of the result (by rule of thumb), then improve it via
-  # Newton's method.
   my ($c,$x,$n) = @_;
  
   if (scalar @$x == 1)
@@ -1425,8 +1428,36 @@ sub _root
     return $x;
     } 
 
-  # XXX TODO
-
+  # X is more than one element
+  # if $n is a power of two, we can repeatedly take sqrt($X) and find the
+  # proper result, because sqrt(sqrt($x)) == root($x,4)
+  my $b = _as_bin($c,$n);
+  if ($$b =~ /0b1(0+)/)
+    {
+    my $count = CORE::length($1);	# 0b100 => len('00') => 2
+    my $cnt = $count;			# counter for loop
+    unshift (@$x, 0);			# add one element, together with one
+					# more below in the loop this makes 2
+    while ($cnt-- > 0)
+      {
+      # 'inflate' $X by adding one element, basically computing
+      # $x * $BASE * $BASE. This gives us more $BASE_LEN digits for result
+      # since len(sqrt($X)) approx == len($x) / 2.
+      unshift (@$x, 0);
+      # calculate sqrt($x), $x is now one element to big, again. In the next
+      # round we make that two, again.
+      _sqrt($c,$x);
+      }
+    # $x is now one element to big, so truncate result by removing it
+    splice (@$x,0,1);
+    } 
+  else
+    {
+    # Should compute a guess of the result (by rule of thumb), then improve it
+    # via Newton's method or something similiar.
+    # XXX TODO
+    warn ('_root() not fully implemented in Calc.');
+    }
   $x; 
   }
 

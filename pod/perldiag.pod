@@ -4184,9 +4184,10 @@ modifier is not presently meaningful in substitutions.
 use the /g modifier.  Currently, /c is meaningful only when /g is
 used.  (This may change in the future.)
 
-=item Use of freed value in iteration (perhaps you modified the iterated array within the loop?)
+=item Use of freed value in iteration
 
-(F) This is typically caused by code like the following:
+(F) Perhaps you modified the iterated array within the loop?
+This error is typically caused by code like the following:
 
     @a = (3,4);
     @a = () for (1,2,@a);
