@@ -65,7 +65,7 @@ ok $!, $!;
 close FOO; # just mention it, squelch used-only-once
 
 if ($Is_MSWin32 || $Is_NetWare || $Is_Dos || $Is_MPE || $Is_MacOS) {
-    skip() for 1..2;
+    skip('SIGINT not safe on this platform') for 1..2;
 }
 else {
   # the next tests are embedded inside system simply because sh spits out
@@ -218,7 +218,7 @@ ok $^O;
 ok $^T > 850000000, $^T;
 
 if ($Is_VMS || $Is_Dos || $Is_MacOS) {
-    skip() for 1..2;
+    skip("cannot test on $^O") for 1..2;
 }
 else {
 	$PATH = $ENV{PATH};
