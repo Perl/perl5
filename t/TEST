@@ -300,35 +300,47 @@ EOT
 
         $ok = 0;
         $next = 0;
+        my $seen_leader = 0;
+        my $seen_ok = 0;
 	while (<RESULTS>) {
 	    next if /^\s*$/; # skip blank lines
 	    if ($verbose) {
 		print $_;
 	    }
-	    unless (/^#/) {
+	    unless (/^\#/) {
 		if (/^1\.\.([0-9]+)( todo ([\d ]+))?/) {
 		    $max = $1;
                     %todo = map { $_ => 1 } split / /, $3 if $3;
 		    $totmax += $max;
 		    $files += 1;
-		    $next = 1;
-		    $ok = 1;
+                    unless ($seen_ok) {
+                      $next = 1;
+                      $ok = 1;
+                    }
+                    $seen_leader = 1;
 		}
 		else {
-		    if (/^(not )?ok (\d+)[^#]*(\s*#.*)?/ &&
-			$2 == $next)
-		    {
-			my($not, $num, $extra) = ($1, $2, $3);
-			my($istodo) = $extra =~ /^\s*#\s*TODO/ if $extra;
-                        $istodo = 1 if $todo{$num};
-
-			if( $not && !$istodo ) {
-			    $ok = 0;
-			    $next = $num;
-			    last;
+		    if (/^(not )?ok (\d+)[^\#]*(\s*\#.*)?/) {
+			unless ($seen_leader) {
+			    unless ($seen_ok) {
+				$next = 1;
+				$ok = 1;
+			    }
 			}
-			else {
-			    $next = $next + 1;
+			$seen_ok = 1;
+			if ($2 == $next) {
+			    my($not, $num, $extra) = ($1, $2, $3);
+			    my($istodo) = $extra =~ /^\s*#\s*TODO/ if $extra;
+			    $istodo = 1 if $todo{$num};
+
+			    if( $not && !$istodo ) {
+				$ok = 0;
+				$next = $num;
+				last;
+			    }
+			    else {
+				$next = $next + 1;
+			    }
 			}
                     }
                     elsif (/^Bail out!\s*(.*)/i) { # magic words
