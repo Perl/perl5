@@ -2,8 +2,8 @@
  *
  * VMS-specific routines for perl5
  *
- * Last revised: 11-Apr-1997 by Charles Bailey  bailey@genetics.upenn.edu
- * Version: 5.3.97c
+ * Last revised: 23-Sep-1997 by Charles Bailey  bailey@newman.upenn.edu
+ * Version: 5.4.4
  */
 
 #include <acedef.h>
@@ -11,6 +11,7 @@
 #include <armdef.h>
 #include <atrdef.h>
 #include <chpdef.h>
+#include <clidef.h>
 #include <climsgdef.h>
 #include <descrip.h>
 #include <dvidef.h>
@@ -19,6 +20,7 @@
 #include <fscndef.h>
 #include <iodef.h>
 #include <jpidef.h>
+#include <kgbdef.h>
 #include <libdef.h>
 #include <lib$routines.h>
 #include <lnmdef.h>
@@ -162,7 +164,9 @@ my_getenv(char *lnm)
 }  /* end of my_getenv() */
 /*}}}*/
 
-static FILE *safe_popen(char *, char *);
+static void create_mbx(unsigned short int *, struct dsc$descriptor_s *);
+
+static void riseandshine(unsigned long int dummy) { sys$wake(0,0); }
 
 /*{{{ void prime_env_iter() */
 void
@@ -173,14 +177,23 @@ prime_env_iter(void)
 {
   static int primed = 0;  /* XXX Not thread-safe!!! */
   HV *envhv = GvHVn(envgv);
-  FILE *sholog;
-  char eqv[LNM$C_NAMLENGTH+1],*start,*end;
+  PerlIO *sholog;
+  char eqv[LNM$C_NAMLENGTH+1],mbxnam[LNM$C_NAMLENGTH+1],*start,*end;
+  unsigned short int chan;
+#ifndef CLI$M_TRUSTED
+#  define CLI$M_TRUSTED 0x40  /* Missing from VAXC headers */
+#endif
+  unsigned long int flags = CLI$M_NOWAIT | CLI$M_NOCLISYM | CLI$M_NOKEYPAD | CLI$M_TRUSTED;
+  unsigned long int retsts, substs = 0, wakect = 0;
   STRLEN eqvlen;
   SV *oldrs, *linesv, *eqvsv;
+  $DESCRIPTOR(cmddsc,"Show Logical *"); $DESCRIPTOR(nldsc,"_NLA0:");
+  $DESCRIPTOR(clidsc,"DCL");            $DESCRIPTOR(tabdsc,"DCLTABLES");
+  $DESCRIPTOR(mbxdsc,mbxnam);
 
   if (primed) return;
   /* Perform a dummy fetch as an lval to insure that the hash table is
-   * set up.  Otherwise, the hv_store() will turn into a nullop */
+   * set up.  Otherwise, the hv_store() will turn into a nullop. */
   (void) hv_fetch(envhv,"DEFAULT",7,TRUE);
   /* Also, set up the four "special" keys that the CRTL defines,
    * whether or not underlying logical names exist. */
@@ -190,18 +203,38 @@ prime_env_iter(void)
   (void) hv_fetch(envhv,"USER",4,TRUE);
 
   /* Now, go get the logical names */
-  if ((sholog = safe_popen("$ Show Logical *","r")) == Nullfp)
-    _ckvmssts(vaxc$errno);
-  /* We use Perl's sv_gets to read from the pipe, since safe_popen is
+  create_mbx(&chan,&mbxdsc);
+  if ((sholog = PerlIO_open(mbxnam,"r")) != Nullfp) {
+    if ((retsts = sys$dassgn(chan)) & 1) {
+      /* Be certain that subprocess is using the CLI and command tables we
+       * expect, and don't pass symbols through so that we insure that
+       * "Show Logical" can't be subverted.
+       */
+      do {
+        retsts = lib$spawn(&cmddsc,&nldsc,&mbxdsc,&flags,0,0,&substs,
+                           0,&riseandshine,0,0,&clidsc,&tabdsc);
+        flags &= ~CLI$M_TRUSTED; /* Just in case we hit a really old version */
+      } while (retsts == LIB$_INVARG && (flags | CLI$M_TRUSTED));
+    }  
+  }
+  if (sholog == Nullfp || !(retsts & 1)) {
+    if (sholog != Nullfp) PerlIO_close(sholog);
+    _ckvmssts(sholog == Nullfp ? vaxc$errno : retsts);
+  }
+  /* We use Perl's sv_gets to read from the pipe, since PerlIO_open is
    * tied to Perl's I/O layer, so it may not return a simple FILE * */
   oldrs = rs;
   rs = newSVpv("\n",1);
   linesv = newSVpv("",0);
   while (1) {
     if ((start = sv_gets(linesv,sholog,0)) == Nullch) {
-      my_pclose(sholog);
+      PerlIO_close(sholog);
       SvREFCNT_dec(linesv); SvREFCNT_dec(rs); rs = oldrs;
       primed = 1;
+      /* Wait for subprocess to clean up (we know subproc won't return 0) */
+      while (substs == 0) { sys$hiber(); wakect++;}
+      if (wakect > 1) sys$wake(0,0);  /* Stole someone else's wake */
+      _ckvmssts(substs);
       return;
     }
     while (*start != '"' && *start != '=' && *start) start++;
@@ -557,7 +590,7 @@ popen_completion_ast(struct pipe_details *thispipe)
   }
 }
 
-static FILE *
+static PerlIO *
 safe_popen(char *cmd, char *mode)
 {
     static int handler_set_up = FALSE;
@@ -924,17 +957,20 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
     static char __fileify_retbuf[NAM$C_MAXRSS+1];
     unsigned long int dirlen, retlen, addmfd = 0, hasfilename = 0;
     char *retspec, *cp1, *cp2, *lastdir;
-    char trndir[NAM$C_MAXRSS+1], vmsdir[NAM$C_MAXRSS+1];
+    char trndir[NAM$C_MAXRSS+2], vmsdir[NAM$C_MAXRSS+1];
 
     if (!dir || !*dir) {
       set_errno(EINVAL); set_vaxc_errno(SS$_BADPARAM); return NULL;
     }
     dirlen = strlen(dir);
-    if (dir[dirlen-1] == '/') --dirlen;
-    if (!dirlen) {
-      set_errno(ENOTDIR);
-      set_vaxc_errno(RMS$_DIR);
-      return NULL;
+    while (dir[dirlen-1] == '/') --dirlen;
+    if (!dirlen) { /* We had Unixish '/' -- substitute top of current tree */
+      strcpy(trndir,"/sys$disk/000000");
+      dir = trndir;
+      dirlen = 16;
+    }
+    if (dirlen > NAM$C_MAXRSS) {
+      set_errno(ENAMETOOLONG); set_vaxc_errno(RMS$_SYN); return NULL;
     }
     if (!strpbrk(dir+1,"/]>:")) {
       strcpy(trndir,*dir == '/' ? dir + 1: dir);
@@ -1008,6 +1044,14 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
           }
           cp1++;
         } while ((cp1 = strstr(cp1,"/.")) != NULL);
+      }
+      else if (!strcmp(&dir[dirlen-7],"/000000")) {
+        /* Ditto for specs that end in an MFD -- let the VMS code
+         * figure out whether it's a real device or a rooted logical. */
+        dir[dirlen] = '/'; dir[dirlen+1] = '\0';
+        if (do_tovmsspec(dir,vmsdir,0) == NULL) return NULL;
+        if (do_fileify_dirspec(vmsdir,trndir,0) == NULL) return NULL;
+        return do_tounixspec(trndir,buf,ts);
       }
       else {
         if ( !(lastdir = cp1 = strrchr(dir,'/')) &&
@@ -1552,6 +1596,11 @@ static char *do_tovmsspec(char *path, char *buf, int ts) {
     STRLEN trnend;
 
     while (*(cp2+1) == '/') cp2++;  /* Skip multiple /s */
+    if (!*(cp2+1)) {
+      if (!buf & ts) Renew(rslt,18,char);
+      strcpy(rslt,"sys$disk:[000000]");
+      return rslt;
+    }
     while (*(++cp2) != '/' && *cp2) *(cp1++) = *cp2;
     *cp1 = '\0';
     islnm =  my_trnlnm(rslt,trndev,0);
@@ -2231,25 +2280,60 @@ unsigned long int flags = 17, one = 1, retsts;
 
 
 /* OS-specific initialization at image activation (not thread startup) */
+/* Older VAXC header files lack these constants */
+#ifndef JPI$_RIGHTS_SIZE
+#  define JPI$_RIGHTS_SIZE 817
+#endif
+#ifndef KGB$M_SUBSYSTEM
+#  define KGB$M_SUBSYSTEM 0x8
+#endif
+
 /*{{{void vms_image_init(int *, char ***)*/
 void
 vms_image_init(int *argcp, char ***argvp)
 {
-  unsigned long int *mask, iosb[2], i;
-  unsigned short int dummy;
-  union prvdef iprv;
-  struct itmlst_3 jpilist[2] = { {sizeof iprv, JPI$_IMAGPRIV, &iprv, &dummy},
-                                 {          0,             0,     0,      0} };
+  unsigned long int *mask, iosb[2], i, rlst[128], rsz;
+  unsigned long int iprv[(sizeof(union prvdef) + sizeof(unsigned long int) - 1) / sizeof(unsigned long int)];
+  unsigned short int dummy, rlen;
+  struct itmlst_3 jpilist[4] = { {sizeof iprv,    JPI$_IMAGPRIV, iprv, &dummy},
+                                 {sizeof rlst,  JPI$_RIGHTSLIST, rlst,  &rlen},
+                                 { sizeof rsz, JPI$_RIGHTS_SIZE, &rsz, &dummy},
+                                 {          0,                0,    0,      0} };
 
   _ckvmssts(sys$getjpiw(0,NULL,NULL,jpilist,iosb,NULL,NULL));
   _ckvmssts(iosb[0]);
-  mask = (unsigned long int *) &iprv;  /* Quick change of view */;
-  for (i = 0; i < (sizeof iprv + sizeof(unsigned long int) - 1) / sizeof(unsigned long int); i++) {
-    if (mask[i]) {           /* Running image installed with privs? */
-      _ckvmssts(sys$setprv(0,&iprv,0,NULL));       /* Turn 'em off. */
+  for (i = 0; i < sizeof iprv / sizeof(unsigned long int); i++) {
+    if (iprv[i]) {           /* Running image installed with privs? */
+      _ckvmssts(sys$setprv(0,iprv,0,NULL));       /* Turn 'em off. */
       tainting = TRUE;
       break;
     }
+  }
+  /* Rights identifiers might trigger tainting as well. */
+  if (!tainting && (rlen || rsz)) {
+    while (rlen < rsz) {
+      /* We didn't get all the identifiers on the first pass.  Allocate a
+       * buffer much larger than $GETJPI wants (rsz is size in bytes that
+       * were needed to hold all identifiers at time of last call; we'll
+       * allocate that many unsigned long ints), and go back and get 'em.
+       */
+      if (jpilist[1].bufadr != rlst) Safefree(jpilist[1].bufadr);
+      jpilist[1].bufadr = New(1320,mask,rsz,unsigned long int);
+      jpilist[1].buflen = rsz * sizeof(unsigned long int);
+      _ckvmssts(sys$getjpiw(0,NULL,NULL,&jpilist[1],iosb,NULL,NULL));
+      _ckvmssts(iosb[0]);
+    }
+    mask = jpilist[1].bufadr;
+    /* Check attribute flags for each identifier (2nd longword); protected
+     * subsystem identifiers trigger tainting.
+     */
+    for (i = 1; i < (rlen + sizeof(unsigned long int) - 1) / sizeof(unsigned long int); i += 2) {
+      if (mask[i] & KGB$M_SUBSYSTEM) {
+        tainting = TRUE;
+        break;
+      }
+    }
+    if (mask != rlst) Safefree(mask);
   }
   getredirection(argcp,argvp);
   return;
@@ -3205,9 +3289,39 @@ static long int utc_offset_secs;
 #undef localtime
 #undef time
 
+static time_t toutc_dst(time_t loc) {
+  struct tm *rsltmp;
+
+  if ((rsltmp = localtime(&loc)) == NULL) return -1;
+  loc -= utc_offset_secs;
+  if (rsltmp->tm_isdst) loc -= 3600;
+  return loc;
+}
+#define _toutc(secs)  ((secs) == -1 ? -1 : \
+       ((gmtime_emulation_type || my_time(NULL)), \
+       (gmtime_emulation_type == 1 ? toutc_dst(secs) : \
+       ((secs) - utc_offset_secs))))
+
+static time_t toloc_dst(time_t utc) {
+  struct tm *rsltmp;
+
+  utc += utc_offset_secs;
+  if ((rsltmp = localtime(&utc)) == NULL) return -1;
+  if (rsltmp->tm_isdst) utc += 3600;
+  return utc;
+}
+#define _toloc(secs)  ((secs) == -1 ? -1 : \
+       ((gmtime_emulation_type || my_time(NULL)), \
+       (gmtime_emulation_type == 1 ? toloc_dst(secs) : \
+       ((secs) + utc_offset_secs))))
+
+
 /* my_time(), my_localtime(), my_gmtime()
- * By default traffic in UTC time values, suing CRTL gmtime() or
+ * By default traffic in UTC time values, using CRTL gmtime() or
  * SYS$TIMEZONE_DIFFERENTIAL to determine offset from local time zone.
+ * Note: We need to use these functions even when the CRTL has working
+ * UTC support, since they also handle C<use vmsish qw(times);>
+ *
  * Contributed by Chuck Lane  <lane@duphy4.physics.drexel.edu>
  * Modified by Charles Bailey <bailey@genetics.upenn.edu>
  */
@@ -3216,10 +3330,12 @@ static long int utc_offset_secs;
 time_t my_time(time_t *timep)
 {
   time_t when;
+  struct tm *tm_p;
 
   if (gmtime_emulation_type == 0) {
-    struct tm *tm_p;
-    time_t base = 15 * 86400; /* 15jan71; to avoid month ends */
+    time_t base = 15 * 86400; /* 15jan71; to avoid month/year ends between    */
+                              /* results of calls to gmtime() and localtime() */
+                              /* for same &base */
 
     gmtime_emulation_type++;
     if ((tm_p = gmtime(&base)) == NULL) { /* CRTL gmtime() is a fake */
@@ -3246,11 +3362,9 @@ time_t my_time(time_t *timep)
   }
 
   when = time(NULL);
-  if (
-#     ifdef VMSISH_TIME
-      !VMSISH_TIME &&
-#     endif
-                       when != -1) when -= utc_offset_secs;
+# ifdef VMSISH_TIME
+  if (!VMSISH_TIME) when = _toutc(when);
+# endif
   if (timep != NULL) *timep = when;
   return when;
 
@@ -3264,21 +3378,22 @@ my_gmtime(const time_t *timep)
 {
   char *p;
   time_t when;
+  struct tm *rsltmp;
 
   if (timep == NULL) {
     set_errno(EINVAL); set_vaxc_errno(LIB$_INVARG);
     return NULL;
   }
   if (*timep == 0) gmtime_emulation_type = 0;  /* possibly reset TZ */
-  if (gmtime_emulation_type == 0) (void) my_time(NULL); /* Init UTC */
 
   when = *timep;
 # ifdef VMSISH_TIME
-  if (VMSISH_TIME) when -= utc_offset_secs; /* Input was local time */
-# endif
+  if (VMSISH_TIME) when = _toutc(when); /* Input was local time */
+#  endif
   /* CRTL localtime() wants local time as input, so does no tz correction */
-  return localtime(&when);
-
+  rsltmp = localtime(&when);
+  if (rsltmp) rsltmp->tm_isdst = 0;  /* We already took DST into account */
+  return rsltmp;
 }  /* end of my_gmtime() */
 /*}}}*/
 
@@ -3288,6 +3403,7 @@ struct tm *
 my_localtime(const time_t *timep)
 {
   time_t when;
+  struct tm *rsltmp;
 
   if (timep == NULL) {
     set_errno(EINVAL); set_vaxc_errno(LIB$_INVARG);
@@ -3298,10 +3414,12 @@ my_localtime(const time_t *timep)
 
   when = *timep;
 # ifdef VMSISH_TIME
-  if (!VMSISH_TIME) when += utc_offset_secs;  /*  Input was UTC */
+  if (!VMSISH_TIME) when = _toloc(when);   /*  Input was UTC */
 # endif
   /* CRTL localtime() wants local time as input, so does no tz correction */
-  return localtime(&when);
+  rsltmp = localtime(&when);
+  if (rsltmp && gmtime_emulation_type != 1) rsltmp->tm_isdst = -1;
+  return rsltmp;
 
 } /*  end of my_localtime() */
 /*}}}*/
@@ -3376,10 +3494,8 @@ int my_utime(char *file, struct utimbuf *utimes)
     lowbit = (utimes->modtime & 1) ? secscale : 0;
     unixtime = (long int) utimes->modtime;
 #if defined(VMSISH_TIME) && (__VMS_VER < 70000000 || __DECC_VER < 50200000)
-    if (!VMSISH_TIME) {  /* Input was UTC; convert to local for sys svc */
-      if (!gmtime_emulation_type) (void) time(NULL);  /* Initialize UTC */
-      unixtime += utc_offset_secs;
-    }
+    /* If input was UTC; convert to local for sys svc */
+    if (!VMSISH_TIME) unixtime = _toloc(unixtime);
 #   endif
     unixtime >> 1;  secscale << 1;
     retsts = lib$emul(&secscale, &unixtime, &lowbit, bintime);
@@ -3726,10 +3842,9 @@ flex_fstat(int fd, struct mystat *statbufp)
     if (1) {
 #   endif
 #if __VMS_VER < 70000000 || __DECC_VER < 50200000
-      if (!gmtime_emulation_type) (void)time(NULL);
-      statbufp->st_mtime -= utc_offset_secs;
-      statbufp->st_atime -= utc_offset_secs;
-      statbufp->st_ctime -= utc_offset_secs;
+      statbufp->st_mtime = _toutc(statbufp->st_mtime);
+      statbufp->st_atime = _toutc(statbufp->st_atime);
+      statbufp->st_ctime = _toutc(statbufp->st_ctime);
 #endif
     }
     return 0;

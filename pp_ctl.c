@@ -1871,14 +1871,26 @@ PP(pp_goto)
 			mark++;
 		    }
 		}
-		if (PERLDB_SUB && curstash != debstash) {
+		if (PERLDB_SUB) {	/* Checking curstash breaks DProf. */
 		    /*
 		     * We do not care about using sv to call CV;
 		     * it's for informational purposes only.
 		     */
 		    SV *sv = GvSV(DBsub);
-		    save_item(sv);
-		    gv_efullname3(sv, CvGV(cv), Nullch);
+		    CV *gotocv;
+		    
+		    if (PERLDB_SUB_NN) {
+			SvIVX(sv) = (IV)cv; /* Already upgraded, saved */
+		    } else {
+			save_item(sv);
+			gv_efullname3(sv, CvGV(cv), Nullch);
+		    }
+		    if (  PERLDB_GOTO
+			  && (gotocv = perl_get_cv("DB::goto", FALSE)) ) {
+			PUSHMARK( stack_sp );
+			perl_call_sv((SV*)gotocv, G_SCALAR | G_NODEBUG);
+			stack_sp--;
+		    }
 		}
 		RETURNOP(CvSTART(cv));
 	    }

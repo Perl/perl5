@@ -46,6 +46,10 @@ static int dbmrefcnt;
 
 MODULE = ODBM_File	PACKAGE = ODBM_File	PREFIX = odbm_
 
+#ifndef NULL
+#  define NULL 0
+#endif
+
 ODBM_File
 odbm_TIEHASH(dbtype, filename, flags, mode)
 	char *		dbtype

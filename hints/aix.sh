@@ -34,6 +34,10 @@ case "$osvers" in
     ;;
 *)  # These hints at least work for 4.x, possibly other systems too.
     ccflags='-D_ALL_SOURCE -D_ANSI_C_SOURCE -D_POSIX_SOURCE'
+    case "$cc" in
+     *gcc*) ;;
+     *) ccflags="-qmaxmem=8192  $ccflags" ;;
+    esac
     nm_opt='-B'
     ;;
 esac

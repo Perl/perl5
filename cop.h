@@ -275,3 +275,4 @@ struct context {
 #define G_EVAL		4	/* Assume eval {} around subroutine call. */
 #define G_NOARGS	8	/* Don't construct a @_ array. */
 #define G_KEEPERR      16	/* Append errors to $@, don't overwrite it */
+#define G_NODEBUG      32	/* Disable debugging at toplevel.  */

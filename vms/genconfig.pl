@@ -156,6 +156,10 @@ foreach (@ARGV) {
     print OUT "d_select=",$dosock ? "'define'\n" : "'undef'\n";
     print OUT "i_niin=",$dosock ? "'define'\n" : "'undef'\n";
     print OUT "i_neterrno=",$dosock ? "'define'\n" : "'undef'\n";
+    if ($dosock and $cctype eq 'decc' and $ccflags =~ /DECCRTL_SOCKETS/) {
+      print OUT "selecttype=fd_set\n";
+    }
+    else { print OUT "selecttype=int\n"; }
 
     if ($cctype eq 'decc') { $rtlhas  = 'define'; }
     else                   { $rtlhas  = 'undef';  }
