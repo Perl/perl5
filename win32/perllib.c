@@ -9,7 +9,7 @@
 
 static void xs_init _((void));
 
-__declspec(dllexport) int
+DllExport int
 RunPerl(int argc, char **argv, char **env, void *iosubsystem)
 {
     int exitstatus;
