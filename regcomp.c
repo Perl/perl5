@@ -3876,6 +3876,9 @@ S_regclassutf8(pTHX_ RExC_state_t *pRExC_state)
 		case ANYOF_SPACE:
 		case ANYOF_PSXSPC:
 		case ANYOF_BLANK:
+		    /* Not very true for PSXSPC and BLANK
+		     * but not feeling like creating IsPOSIXSpace and
+		     * IsBlank right now. --jhi */
 		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsSpace\n");	break;
 		case ANYOF_NSPACE:
 		case ANYOF_NPSXSPC:
@@ -4374,26 +4377,31 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 	Perl_sv_catpvf(aTHX_ sv, "[%s", PL_colors[0]);
 	if (o->flags & ANYOF_INVERT)
 	    sv_catpv(sv, "^");
-	for (i = 0; i <= 256; i++) {
-	    if (i < 256 && ANYOF_BITMAP_TEST(o,i)) {
-		if (rangestart == -1)
-		    rangestart = i;
-	    } else if (rangestart != -1) {
-		if (i <= rangestart + 3)
-		    for (; rangestart < i; rangestart++)
+	if (OP(o) == ANYOF) {
+	    for (i = 0; i <= 256; i++) {
+		if (i < 256 && ANYOF_BITMAP_TEST(o,i)) {
+		    if (rangestart == -1)
+			rangestart = i;
+		} else if (rangestart != -1) {
+		    if (i <= rangestart + 3)
+			for (; rangestart < i; rangestart++)
+			    put_byte(sv, rangestart);
+		    else {
 			put_byte(sv, rangestart);
-		else {
-		    put_byte(sv, rangestart);
-		    sv_catpv(sv, "-");
-		    put_byte(sv, i - 1);
+			sv_catpv(sv, "-");
+			put_byte(sv, i - 1);
+		    }
+		    rangestart = -1;
 		}
-		rangestart = -1;
 	    }
+	    if (o->flags & ANYOF_CLASS)
+		for (i = 0; i < sizeof(out)/sizeof(char*); i++)
+		    if (ANYOF_CLASS_TEST(o,i))
+			sv_catpv(sv, out[i]);
 	}
-	if (o->flags & ANYOF_CLASS)
-	    for (i = 0; i < sizeof(out)/sizeof(char*); i++)
-		if (ANYOF_CLASS_TEST(o,i))
-		    sv_catpv(sv, out[i]);
+	else {
+	    sv_catpv(sv, "{ANYOFUTF8}"); /* TODO: full decode */
+	}
 	Perl_sv_catpvf(aTHX_ sv, "%s]", PL_colors[1]);
     }
     else if (k == BRANCHJ && (OP(o) == UNLESSM || OP(o) == IFMATCH))
