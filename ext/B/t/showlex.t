@@ -59,6 +59,10 @@ like ($out, qr/2: $nb/ms, 'found $b in "my ($a,$b)"');
 
 print $out if $verbose;
 
+SKIP: {
+    skip "no perlio in this build", 5
+    unless $Config::Config{useperlio};
+
 our $buf = 'arb startval';
 my $ak = B::Showlex::walk_output (\$buf);
 
@@ -105,3 +109,5 @@ $walker->();
 
 
 print $buf if $verbose;
+
+}
