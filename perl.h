@@ -2819,6 +2819,16 @@ typedef void *Thread;
 #define PERL_CKDEF(s)	OP *s (pTHX_ OP *o);
 #define PERL_PPDEF(s)	OP *s (pTHX);
 
+#ifdef SOCKS_64BIT_BUG
+typedef struct __s64_iobuffer {
+    struct __s64_iobuffer *next, *last;		/* Queue pointer */
+    PerlIO *fp;					/* Assigned file pointer */
+    int cnt;					/* Buffer counter */
+    int size;					/* Buffer size */
+    int *buffer;				/* The buffer */
+} S64_IOB;
+#endif
+
 #include "proto.h"
 
 #ifdef PERL_OBJECT
@@ -3441,16 +3451,6 @@ typedef struct am_table_short AMTS;
 
 #ifdef I_LIBUTIL
 #   include <libutil.h>		/* setproctitle() in some FreeBSDs */
-#endif
-
-#ifdef SOCKS_64BIT_BUG
-typedef struct __s64_iobuffer {
-    struct __s64_iobuffer *next, *last;		/* Queue pointer */
-    PerlIO *fp;					/* Assigned file pointer */
-    int cnt;					/* Buffer counter */
-    int size;					/* Buffer size */
-    int *buffer;				/* The buffer */
-} S64_IOB;
 #endif
 
 /* and finally... */
