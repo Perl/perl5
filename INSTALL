@@ -2281,7 +2281,7 @@ operating systems, or in really small filesystems).
 
 Leaving out as many extensions as possible is an obvious way:
 especially the Encode with its big conversion tables consumes a lot of
-space.  On the other hand, you cannot throw away everything, espcially
+space.  On the other hand, you cannot throw away everything, especially
 the Fcntl module is pretty essential.  If you need to do network
 programming, you'll appreciate the Socket module, and so forth: it all
 depends on what do you need to do.
