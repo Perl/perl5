@@ -340,7 +340,8 @@ XS(XS_UNIVERSAL_VERSION)
 	    req = new_version(req);
 
 	if ( vcmp( SvRV(req), SvRV(sv) ) > 0 )
-	    Perl_croak(aTHX_ "%s version %_ required--this is only version %_",
+	    Perl_croak(aTHX_
+		"%s version %"SVf" required--this is only version %"SVf,
 		HvNAME(pkg), req, sv);
     }
 
