@@ -490,7 +490,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	if (data)
 	    *data->scream_olds = s;
     }
-    else if (prog->reganch & ROPT_SANY_SEEN)
+    else if (prog->reganch & ROPT_CANY_SEEN)
 	s = fbm_instr((U8*)(s + start_shift),
 		      (U8*)(strend - end_shift),
 		      check, PL_multiline ? FBMrf_MULTILINE : 0);
@@ -776,7 +776,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	    PL_regdata = prog->data;
 	    PL_bostr = startpos;
 	}
-        s = find_byclass(prog, prog->regstclass, s, endpos, startpos, 1);
+	s = find_byclass(prog, prog->regstclass, s, endpos, startpos, 1);
 	if (!s) {
 #ifdef DEBUGGING
 	    char *what = 0;
@@ -893,6 +893,15 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 		else
 		    tmp = 1;
 		s += do_utf8 ? UTF8SKIP(s) : 1;
+	    }
+	    break;
+	case CANY:
+	    while (s < strend) {
+	        if (tmp && (norun || regtry(prog, s)))
+		    goto got_it;
+		else
+		    tmp = doevery;
+		s++;
 	    }
 	    break;
 	case EXACTF:
@@ -1440,12 +1449,11 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     }
 
     minlen = prog->minlen;
-    if (do_utf8) {
-      if (!(prog->reganch & ROPT_SANY_SEEN))
+    if (do_utf8 && !(prog->reganch & ROPT_CANY_SEEN)) {
         if (utf8_distance((U8*)strend, (U8*)startpos) < minlen) goto phooey;
     }
     else {
-      if (strend - startpos < minlen) goto phooey;
+        if (strend - startpos < minlen) goto phooey;
     }
 
     /* Check validity of program. */
@@ -1488,7 +1496,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 		  && mg->mg_len >= 0) {
 	    PL_reg_ganch = strbeg + mg->mg_len;	/* Defined pos() */
 	    if (prog->reganch & ROPT_ANCH_GPOS) {
-		if (s > PL_reg_ganch)
+	        if (s > PL_reg_ganch)
 		    goto phooey;
 		s = PL_reg_ganch;
 	    }
@@ -2105,6 +2113,18 @@ S_regmatch(pTHX_ regnode *prog)
 		sayNO;
 	    break;
 	case SANY:
+	    if (!nextchr && locinput >= PL_regeol)
+		sayNO;
+ 	    if (do_utf8) {
+	        locinput += PL_utf8skip[nextchr];
+		if (locinput > PL_regeol)
+ 		    sayNO;
+ 		nextchr = UCHARAT(locinput);
+ 	    }
+ 	    else
+ 		nextchr = UCHARAT(++locinput);
+	    break;
+	case CANY:
 	    if (!nextchr && locinput >= PL_regeol)
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
@@ -3584,6 +3604,9 @@ S_regrepeat(pTHX_ regnode *p, I32 max)
 	}
 	break;
     case SANY:
+	scan = loceol;
+	break;
+    case CANY:
 	scan = loceol;
 	break;
     case EXACT:		/* length of string is 1 */

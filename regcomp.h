@@ -310,6 +310,7 @@ struct regnode_charclass_class {	/* has [[:blah:]] classes */
 #define REG_SEEN_GPOS		 4
 #define REG_SEEN_EVAL		 8
 #define REG_SEEN_SANY		16
+#define REG_SEEN_CANY		32
 
 START_EXTERN_C
 
@@ -331,7 +332,7 @@ EXTCONST U8 PL_varies[] = {
 EXTCONST U8 PL_simple[];
 #else
 EXTCONST U8 PL_simple[] = {
-    REG_ANY,	SANY,
+    REG_ANY,	SANY,	CANY,
     ANYOF,
     ALNUM,	ALNUML,
     NALNUM,	NALNUML,

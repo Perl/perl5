@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..674\n";
+print "1..675\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -1928,7 +1928,6 @@ print "ok 671\n";
 print "not " unless chr(0x38c) =~ /\p{InGreek}/; # singleton
 print "ok 672\n";
 
-
 ##
 ## Test [:cntrl:]...
 ##
@@ -1943,3 +1942,13 @@ print "ok 673\n";
 ($x = $AllBytes) =~ s/[^[:cntrl:]]//g;
 if ($x ne join('', map { chr($_) } 0..0x1F, 0x7F)) { print "not " };
 print "ok 674\n";
+
+# With /s modifier UTF8 chars were interpreted as bytes
+{
+    my $a = "Hello \x{263A} World";
+    
+    my @a = ($a =~ /./gs);
+    
+    print "not " unless $#a == 12;
+    print "ok 675\n";
+}
