@@ -648,6 +648,7 @@ DOSish perls are as follows:
     Windows NT    MSWin32    MSWin32-x86
     Windows NT    MSWin32    MSWin32-ALPHA
     Windows NT    MSWin32    MSWin32-ppc
+    Cygwin        cygwin
 
 Also see:
 
@@ -663,8 +664,8 @@ C<ftp://hobbes.nmsu.edu/pub/os2/dev/emx>
 
 =item The ActiveState Pages, C<http://www.activestate.com/>
 
-=item The Cygwin environment for Win32; L<README.cygwin>,
-C<http://sourceware.cygnus.com/cygwin/>
+=item The Cygwin environment for Win32; F<README.cygwin> (installed 
+as L<perlcygwin>), C<http://sourceware.cygnus.com/cygwin/>
 
 =item The U/WIN environment for Win32,
 C<http://www.research.att.com/sw/tools/uwin/>
@@ -843,7 +844,7 @@ Also see:
 
 =over 4
 
-=item L<README.vms>, L<perlvms.pod>
+=item F<README.vms> (installed as L<README_vms>), L<perlvms>
 
 =item vmsperl list, C<majordomo@perl.org>
 
@@ -908,7 +909,7 @@ Also see:
 
 =over 4
 
-=item L<README.vos>
+=item F<README.vos>
 
 =item VOS mailing list
 
@@ -998,7 +999,7 @@ Also see:
 
 =over 4
 
-=item L<README.os390>, L<README.posix-bc>, L<README.vmesa>
+=item F<README.os390>, F<README.posix-bc>, F<README.vmesa>
 
 =item perl-mvs list
 
@@ -1137,14 +1138,14 @@ See also:
 
 =over 4
 
-=item Amiga, L<README.amiga>
+=item Amiga, F<README.amiga> (installed as L<perlamiga>).
 
-=item Atari, L<README.mint> and Guido Flohr's web page
+=item Atari, F<README.mint> and Guido Flohr's web page
 C<http://stud.uni-sb.de/~gufl0000/>
 
-=item Be OS, L<README.beos>
+=item Be OS, F<README.beos>
 
-=item HP 300 MPE/iX, L<README.mpeix> and Mark Bixby's web page
+=item HP 300 MPE/iX, F<README.mpeix> and Mark Bixby's web page
 C<http://www.cccd.edu/~markb/perlix.html>
 
 =item Novell Netware
@@ -1153,7 +1154,7 @@ A free perl5-based PERL.NLM for Novell Netware is available in
 precompiled binary and source code form from C<http://www.novell.com/>
 as well as from CPAN.
 
-=item Plan 9, L<README.plan9>
+=item Plan 9, F<README.plan9>
 
 =back
 

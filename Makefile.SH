@@ -527,11 +527,13 @@ $(plextract):	miniperl lib/Config.pm
 extra.pods: miniperl
 	-@test -f extra.pods && rm -f `cat extra.pods`
 	-@rm -f extra.pods
-	-@for x in `grep -l '^=[a-z]' README.*` ; do \
+	-@for x in `grep -l '^=[a-z]' README.* | grep -v README.vms` ; do \
 	    nx=`echo $$x | sed -e "s/README\.//"`; \
 	    $(LNS) ../$$x "pod/perl"$$nx".pod" ; \
 	    echo "pod/perl"$$nx".pod" >> extra.pods ; \
 	done
+	-@test -f README.vms && $(LNS) ../README.vms pod/README_vms.pod && echo "pod/README_vms.pod" >> extra.pods
+	-@test -f vms/perlvms.pod && $(LNS) ../vms/perlvms.pod pod/perlvms.pod && echo "pod/perlvms.pod" >> extra.pods
 
 install: all install.perl install.man
 
@@ -551,6 +553,9 @@ install.man:	all installman
 # XXX Experimental. Hardwired values, but useful for testing.
 # Eventually Configure could ask for some of these values.
 install.html: all installhtml
+	-@test -f pod/README_vms.pod && rm -f pod/README_vms.pod
+	-@test -f README.vms && $(LNS) ../README.vms vms/README_vms.pod
+	-@test -f pod/perlvms.pod && rm -f pod/perlvms.pod
 	$(LDLIBPTH) ./perl installhtml                   \
       --podroot=. --podpath=. --recurse  \
       --htmldir=$(privlib)/html     \
@@ -663,6 +668,7 @@ distclean:	clobber
 _mopup:
 	rm -f *$(OBJ_EXT) *$(LIB_EXT) all perlmain.c
 	-@test -f extra.pods && rm -f `cat extra.pods`
+	-@test -f vms/README_vms.pod && rm -f vms/README_vms.pod
 	-rm -f perl.exp ext.libs extra.pods
 	-rm -f perl.export perl.dll perl.libexp perl.map perl.def
 	-rm -f perl.loadmap miniperl.loadmap perl.prelmap miniperl.prelmap

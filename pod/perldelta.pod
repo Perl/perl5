@@ -861,7 +861,7 @@ it emits optional warnings when concatenating the number 19
 with another number.
 
 This behavior must be specifically enabled when running Configure.
-See L<INSTALL> and L<README.Y2K>.
+See F<INSTALL> and F<README.Y2K>.
 
 =head1 Significant bug fixes
 

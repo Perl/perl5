@@ -27,13 +27,13 @@ Starting with Perl 5.004_50 there were many deep and far-reaching changes
 to the language internals.  If you have dynamically loaded extensions
 that you built under perl 5.003 or 5.004, you can continue to use them
 with 5.004, but you will need to rebuild and reinstall those extensions
-to use them 5.005.  See L<INSTALL> for detailed instructions on how to
+to use them 5.005.  See F<INSTALL> for detailed instructions on how to
 upgrade.
 
 =head2 Default installation structure has changed
 
 The new Configure defaults are designed to allow a smooth upgrade from
-5.004 to 5.005, but you should read L<INSTALL> for a detailed
+5.004 to 5.005, but you should read F<INSTALL> for a detailed
 discussion of the changes in order to adapt them to your system.
 
 =head2 Perl Source Compatibility
@@ -151,7 +151,7 @@ WARNING: Threading is considered an B<experimental> feature.  Details of the
 implementation may change without notice.  There are known limitations
 and some bugs.  These are expected to be fixed in future versions.
 
-See L<README.threads>.
+See F<README.threads>.
 
 =head2 Compiler
 
@@ -496,17 +496,19 @@ the command-line arguments used in F<config.sh>.
 
 =head2 New Platforms
 
-BeOS is now supported.  See L<README.beos>.
+BeOS is now supported.  See F<README.beos>.
 
-DOS is now supported under the DJGPP tools.  See L<README.dos>.
+DOS is now supported under the DJGPP tools.  See F<README.dos> (installed 
+as L<perldos> on some systems).
 
-MiNT is now supported.  See L<README.mint>.
+MiNT is now supported.  See F<README.mint>.
 
-MPE/iX is now supported.  See L<README.mpeix>.
+MPE/iX is now supported.  See F<README.mpeix>.
 
-MVS (aka OS390, aka Open Edition) is now supported.  See L<README.os390>.
+MVS (aka OS390, aka Open Edition) is now supported.  See F<README.os390> 
+(installed as L<perlos390> on some systems).
 
-Stratus VOS is now supported.  See L<README.vos>.
+Stratus VOS is now supported.  See F<README.vos>.
 
 =head2 Changes in existing support
 
@@ -514,7 +516,8 @@ Win32 support has been vastly enhanced.  Support for Perl Object, a C++
 encapsulation of Perl.  GCC and EGCS are now supported on Win32.
 See F<README.win32>, aka L<perlwin32>.
 
-VMS configuration system has been rewritten.  See L<README.vms>.
+VMS configuration system has been rewritten.  See F<README.vms> (installed 
+as L<README_vms> on some systems).
 
 The hints files for most Unix platforms have seen incremental improvements.
 

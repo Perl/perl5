@@ -45,11 +45,11 @@ README.mpeix		Notes about MPE/iX port
 README.os2		Notes about OS/2 port
 README.os390		Notes about OS/390 (nee MVS) port
 README.plan9		Notes about Plan9 port
-README.posix-bc		Notes about BC2000 POSIX port
+README.posix-bc		Notes about BS2000 POSIX port
 README.qnx		Notes about QNX port
 README.threads		Notes about multithreading
 README.vmesa		Notes about VM/ESA port
-README.vms		Notes about VMS port
+README.vms		Notes about installing the VMS port
 README.vos		Notes about Stratus VOS port
 README.win32		Notes about Win32 port
 Todo			The Wishlist
