@@ -1065,7 +1065,7 @@ setuid perl scripts securely.\n");
 	 * the area we are able to modify is limited to the size of
 	 * the original argv[0].  (See below for 'contiguous', though.)
 	 * --jhi */
-	 char *s;
+	 char *s = NULL;
 	 int i;
 	 UV mask =
 	   ~(UV)(PTRSIZE == 4 ? 3 : PTRSIZE == 8 ? 7 : PTRSIZE == 16 ? 15 : 0);
