@@ -70,7 +70,7 @@
 #if !defined(PERL_PATCHLEVEL_H_IMPLICIT) && !defined(LOCAL_PATCH_COUNT)
 static	char	*local_patches[] = {
 	NULL
-	, "v5.6.1-TRIAL2"
+	, "v5.6.1-TRIAL3"
 	,NULL
 };
 
