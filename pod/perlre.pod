@@ -717,6 +717,11 @@ themselves.
 
 =head2 Backtracking
 
+NOTE: This section presents an abstract approximation of regular
+expression behavior.  For a more rigorous (and complicated) view of
+the rules involved in selecting a match among possible alternatives,
+see L<Combining pieces together>.
+
 A fundamental feature of regular expression matching involves the
 notion called I<backtracking>, which is currently used (when needed)
 by all regular expression quantifiers, namely C<*>, C<*?>, C<+>,
@@ -1084,6 +1089,107 @@ The additional state of being I<matched with zero-length> is associated with
 the matched string, and is reset by each assignment to pos().
 Zero-length matches at the end of the previous match are ignored
 during C<split>.
+
+=head2 Combining pieces together
+
+Each of the elementary pieces of regular expressions which were described
+before (such as C<ab> or C<\Z>) could match at most one substring
+at the given position of the input string.  However, in a typical regular
+expression these elementary pieces are combined into more complicated
+patterns using combining operators C<ST>, C<S|T>, C<S*> etc
+(in these examples C<S> and C<T> are regular subexpressions).
+
+Such combinations can include alternatives, leading to a problem of choice:
+if we match a regular expression C<a|ab> against C<"abc">, will it match
+substring C<"a"> or C<"ab">?  One way to describe which substring is
+actually matched is the concept of backtracking (see L<"Backtracking">).
+However, this description is too low-level and makes you think
+in terms of a particular implementation.
+
+Another description starts with notions of "better"/"worse".  All the
+substrings which may be matched by the given regular expression can be
+sorted from the "best" match to the "worst" match, and it is the "best"
+match which is chosen.  This substitutes the question of "what is chosen?"
+by the question of "which matches are better, and which are worse?".
+
+Again, for elementary pieces there is no such question, since at most
+one match at a given position is possible.  This section describes the
+notion of better/worse for combining operators.  In the description
+below C<S> and C<T> are regular subexpressions.
+
+=over
+
+=item C<ST>
+
+Consider two possible matches, C<AB> and C<A'B'>, C<A> and C<A'> are
+substrings which can be matched by C<S>, C<B> and C<B'> are substrings
+which can be matched by C<T>. 
+
+If C<A> is better match for C<S> than C<A'>, C<AB> is a better
+match than C<A'B'>.
+
+If C<A> and C<A'> coincide: C<AB> is a better match than C<AB'> if
+C<B> is better match for C<T> than C<B'>.
+
+=item C<S|T>
+
+When C<S> can match, it is a better match than when only C<T> can match.
+
+Ordering of two matches for C<S> is the same as for C<S>.  Similar for
+two matches for C<T>.
+
+=item C<S{REPEAT_COUNT}>
+
+Matches as C<SSS...S> (repeated as many times as necessary).
+
+=item C<S{min,max}>
+
+Matches as C<S{max}|S{max-1}|...|S{min+1}|S{min}>.
+
+=item C<S{min,max}?>
+
+Matches as C<S{min}|S{min+1}|...|S{max-1}|S{max}>.
+
+=item C<S?>, C<S*>, C<S+>
+
+Same as C<S{0,1}>, C<S{0,BIG_NUMBER}>, C<S{1,BIG_NUMBER}> respectively.
+
+=item C<S??>, C<S*?>, C<S+?>
+
+Same as C<S{0,1}?>, C<S{0,BIG_NUMBER}?>, C<S{1,BIG_NUMBER}?> respectively.
+
+=item C<(?E<gt>S)>
+
+Matches the best match for C<S> and only that.
+
+=item C<(?=S)>, C<(?<=S)>
+
+Only the best match for C<S> is considered.  (This is important only if
+C<S> has capturing parentheses, and backreferences are used somewhere
+else in the whole regular expression.)
+
+=item C<(?!S)>, C<(?<!S)>
+
+For this grouping operator there is no need to describe the ordering, since
+only whether or not C<S> can match is important.
+
+=item C<(?p{ EXPR })>
+
+The ordering is the same as for the regular expression which is
+the result of EXPR.
+
+=item C<(?(condition)yes-pattern|no-pattern)>
+
+Recall that which of C<yes-pattern> or C<no-pattern> actually matches is
+already determined.  The ordering of the matches is the same as for the
+chosen subexpression.
+
+=back
+
+The above recipes describe the ordering of matches I<at a given position>.
+One more rule is needed to understand how a match is determined for the
+whole regular expression: a match at an earlier position is always better
+than a match at a later position.
 
 =head2 Creating custom RE engines
 
