@@ -48,6 +48,7 @@ $ use_two_pot_malloc = "N"
 $ use_pack_malloc = "N"
 $ use_debugmalloc = "N"
 $ d_secintgenv = "N"
+$ cc_flags = ""
 $ use_multiplicity = "N"
 $ vms_default_directory_name = F$ENVIRONMENT("DEFAULT")
 $ max_allowed_dir_depth = 3  ! e.g. [A.B.PERL5_00n] not [A.B.C.PERL5_00n]
@@ -1152,12 +1153,12 @@ $ WRITE CONFIG "        exit(0);"
 $ WRITE CONFIG "}"
 $ CLOSE CONFIG
 $!
-$ DEFINE SYS$ERROR _NLA0:
-$ DEFINE SYS$OUTPUT _NLA0:
+$! DEFINE SYS$ERROR _NLA0:
+$! DEFINE SYS$OUTPUT _NLA0:
 $ cc/NoObj/list=ccvms.lis ccvms.c
 $ tmp = $status
-$ DEASSIGN SYS$OUTPUT
-$ DEASSIGN SYS$ERROR
+$! DEASSIGN SYS$OUTPUT
+$! DEASSIGN SYS$ERROR
 $ IF (silent) THEN GOSUB Shut_up
 $! echo "%Config-I-VMS, After cc compile $status = >''tmp'<" !diagnostic
 $!
@@ -1199,7 +1200,7 @@ $     echo "%Config-I-VMS, You also have: ''line' ''archsufx' ''F$GETSYI("VERSIO
 $     vms_cc_available = vms_cc_available + "cc/decc "
 $   ENDIF
 $ ELSE
-$   IF F$LOCATE("DEC",line).NE.F$LENGTH(line) 
+$   IF (F$LOCATE("DEC",line).NE.F$LENGTH(line)).or.(F$LOCATE("Compaq",line).NE.F$LENGTH(line))
 $   THEN 
 $     vms_cc_dflt = "/decc"
 $     vms_cc_available = vms_cc_available + "cc/decc "
@@ -1269,7 +1270,7 @@ $ IF ans.NES.""
 $ THEN
 $   ans = F$EDIT(ans,"TRIM, COMPRESS, LOWERCASE")
 $   Mcc = ans
-$   IF F$LOCATE("dec",ans).NE.F$LENGTH(ans)
+$   IF (F$LOCATE("dec",ans).NE.F$LENGTH(ans)).or.(F$LOCATE("compaq",ans).NE.F$LENGTH(ans))
 $   THEN
 $     Mcc = "cc/decc"
 $     Using_Dec_C = "Yes"
@@ -1283,7 +1284,7 @@ $     C_COMPILER_Replace = "CC=cc=''Mcc'"
 $   ENDIF
 $   IF Mcc.NES.dflt
 $   THEN
-$     IF F$LOCATE("dec",dflt).NE.F$LENGTH(dflt) 
+$     IF (F$LOCATE("dec",dflt).NE.F$LENGTH(dflt)).or(F$LOCATE("compaq",dflt).NE.F$LENGTH(dflt))
 $     THEN 
 $       C_COMPILER_Replace = "CC=cc=''Mcc'"
 $     ELSE
@@ -1367,6 +1368,8 @@ $   CLOSE CONFIG
 $!   DELETE/NOLOG/NOCONFIRM deccvers.*;
 $   echo "You are using Dec C ''line'"
 $   Dec_C_Version = line
+$   Dec_C_Version = Dec_C_Version + 0
+$   if Dec_C_Version.ge.60200000 THEN CC_FLAGS = CC_FLAGS + "/NOANSI_ALIAS"
 $ ENDIF
 $Vaxc_Invoke_check:
 $ IF "''Using_Vax_C'".EQS."Yes"

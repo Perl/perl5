@@ -37,19 +37,14 @@ $ Vms_Ver := "''f$extract(1,3, f$getsyi(""version""))'"
 $ perl_extensions := "''extensions'"
 $ if f$length(Mcc) .eq. 0 then Mcc := "cc"
 $ MCC = f$edit(mcc, "UPCASE")
-$ IF Mcc.eqs."CC
-$ THEN
-$   C_Compiler_Replace := "CC="
-$ ELSE
-$   C_Compiler_Replace := "CC=CC=''Mcc'"
-$ ENDIF
+$ C_Compiler_Replace := "CC=CC=''Mcc'''CC_flags'"
 $ if "''Using_Dec_C'" .eqs. "Yes"
 $ THEN
 $   Checkcc := "''Mcc'/prefix=all"
 $ ELSE
 $   Checkcc := "''Mcc'"
 $ ENDIF
-$ cc_flags = ""
+$! cc_flags = ""
 $ if use_multiplicity .eqs. "Y"
 $ THEN
 $   perl_usemultiplicity = "define"
@@ -75,6 +70,7 @@ $ perl_i_sysstatfs = "undef"
 $ perl_i_sysvfs = "undef"
 $ perl_i_ustat = "undef"
 $ perl_d_llseek="undef"
+$ perl_d_iconv="undef"
 $ perl_d_madvise="undef"
 $ perl_selectminbits=32
 $ perl_d_msync="undef"
@@ -1224,6 +1220,98 @@ $     ENDIF
 $   ENDIF
 $ WRITE_RESULT "i_sysfile is ''perl_i_sysfile'"
 $!
+$! Check for sys/utsname.h
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <stdio.h>
+$ WS "#include <unistd.h>
+$ WS "#include <sys/utsname.h>
+$ WS "int main()
+$ WS "{"
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   on error then continue
+$   on warning then continue
+$   'Checkcc' temp.c
+$   savedstatus = $status
+$   teststatus = f$extract(9,1,savedstatus)
+$   if (teststatus.nes."1")
+$   THEN
+$     perl_i_sysutsname="undef"
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$   ELSE
+$     If (Needs_Opt.eqs."Yes")
+$     THEN
+$       link temp.obj,temp.opt/opt
+$     else
+$       link temp.obj
+$     endif
+$     savedstatus = $status
+$     teststatus = f$extract(9,1,savedstatus)
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$     if (teststatus.nes."1")
+$     THEN
+$       perl_i_sysutsname="undef"
+$     ELSE
+$       perl_i_sysutsname="define"
+$     ENDIF
+$   ENDIF
+$ WRITE_RESULT "i_sysutsname is ''perl_i_sysutsname'"
+$!
+$! Check for syslog.h
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <stdio.h>
+$ WS "#include <unistd.h>
+$ WS "#include <syslog.h>
+$ WS "int main()
+$ WS "{"
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   on error then continue
+$   on warning then continue
+$   'Checkcc' temp.c
+$   savedstatus = $status
+$   teststatus = f$extract(9,1,savedstatus)
+$   if (teststatus.nes."1")
+$   THEN
+$     perl_i_syslog="undef"
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$   ELSE
+$     If (Needs_Opt.eqs."Yes")
+$     THEN
+$       link temp.obj,temp.opt/opt
+$     else
+$       link temp.obj
+$     endif
+$     savedstatus = $status
+$     teststatus = f$extract(9,1,savedstatus)
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$     if (teststatus.nes."1")
+$     THEN
+$       perl_i_syslog="undef"
+$     ELSE
+$       perl_i_syslog="define"
+$     ENDIF
+$   ENDIF
+$ WRITE_RESULT "i_syslog is ''perl_i_syslog'"
+$!
 $! Check for poll.h
 $!
 $ OS
@@ -1315,6 +1403,52 @@ $       perl_i_sysuio="define"
 $     ENDIF
 $   ENDIF
 $ WRITE_RESULT "i_sysuio is ''perl_i_sysuio'"
+$!
+$! Check for sys/mode.h
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <stdio.h>
+$ WS "#include <unistd.h>
+$ WS "#include <sys/mode.h>
+$ WS "int main()
+$ WS "{"
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   on error then continue
+$   on warning then continue
+$   'Checkcc' temp.c
+$   savedstatus = $status
+$   teststatus = f$extract(9,1,savedstatus)
+$   if (teststatus.nes."1")
+$   THEN
+$     perl_i_sysmode="undef"
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$   ELSE
+$     If (Needs_Opt.eqs."Yes")
+$     THEN
+$       link temp.obj,temp.opt/opt
+$     else
+$       link temp.obj
+$     endif
+$     savedstatus = $status
+$     teststatus = f$extract(9,1,savedstatus)
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$     if (teststatus.nes."1")
+$     THEN
+$       perl_i_sysmode="undef"
+$     ELSE
+$       perl_i_sysmode="define"
+$     ENDIF
+$   ENDIF
+$ WRITE_RESULT "i_sysmode is ''perl_i_sysmode'"
 $!
 $! Check for sys/access.h
 $!
@@ -2035,7 +2169,60 @@ $     perl_d_mkstemps="define"
 $   ENDIF
 $ WRITE_RESULT "d_mkstemps is ''perl_d_mkstemps'"
 $!
-$! Check for mkstemp
+$! Check for iconv
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <stdio.h>
+$ WS "#include <iconv.h>
+$ WS "int main()
+$ WS "{"
+$ WS "  iconv_t cd;"
+$ WS "  char *inbuf, *outbuf;"
+$ WS "  size_t inleft, outleft;"
+$ WS "  iconv(cd, &inbuf, &inleft, &outbuf, &outleft);"
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   on error then continue
+$   on warning then continue
+$   'Checkcc' temp.c
+$   savedstatus = $status
+$   teststatus = f$extract(9,1,savedstatus)
+$   if (teststatus.nes."1")
+$   THEN
+$     perl_d_iconv="undef"
+$     perl_i_iconv="undef"
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$   ELSE
+$     If (Needs_Opt.eqs."Yes")
+$     THEN
+$       link temp.obj,temp.opt/opt
+$     else
+$       link temp.obj
+$     endif
+$     savedstatus = $status
+$     teststatus = f$extract(9,1,savedstatus)
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$     if (teststatus.nes."1")
+$  THEN
+$       perl_d_iconv="undef"
+$       perl_i_iconv="undef"
+$     ELSE
+$       perl_d_iconv="define"
+$       perl_i_iconv="define"
+$     ENDIF
+$   ENDIF
+$ WRITE_RESULT "d_iconv is ''perl_d_iconv'"
+$ WRITE_RESULT "i_iconv is ''perl_i_iconv'"
+$!
+$! Check for mkdtemp
 $!
 $ OS
 $ WS "#ifdef __DECC
@@ -2990,6 +3177,7 @@ $ THEN
 $   perl_d_attribut="define"
 $   perl_vms_cc_type="gcc"
 $ ELSE
+$   perl_vms_cc_type="cc"
 $   perl_d_attribut="undef"
 $ ENDIF
 $
@@ -3774,6 +3962,9 @@ $ WC "fflushNULL='define'"
 $ WC "fflushall='undef'"
 $ WC "d_stdio_stream_array='undef'"
 $ WC "i_sysstatvfs='" + perl_i_sysstatvfs + "'"
+$ WC "i_syslog='" + perl_i_syslog + "'"
+$ WC "i_sysmode='" + perl_i_sysmode + "'"
+$ WC "i_sysutsname='" + perl_i_sysutsname + "'"
 $ WC "i_machcthreads='" + perl_i_machcthreads + "'"
 $ WC "i_pthread='" + perl_i_pthread + "'"
 $ WC "d_fstatvfs='" + perl_d_fstatvfs + "'"
@@ -3821,6 +4012,9 @@ $ WC "sPRIu64='" + perl_sPRIu64 + "'"
 $ WC "sPRIo64='" + perl_sPRIo64 + "'"
 $ WC "sPRIx64='" + perl_sPRIx64 + "'"
 $ WC "d_llseek='" + perl_d_llseek + "'"
+$ WC "d_iconv='" + perl_d_iconv +"'"
+$ WC "i_iconv='" + perl_i_iconv +"'"
+$ WC "inc_version_list_init='""""'"
 $ WC "uselargefiles='" + perl_uselargefiles + "'"
 $ WC "uselongdouble='" + perl_uselongdouble + "'"
 $ WC "usemorebits='" + perl_usemorebits + "'"
