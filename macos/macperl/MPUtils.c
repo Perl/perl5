@@ -9,6 +9,9 @@ Apple Developer Support UK
 Language	:	MPW C
 
 $Log: MPUtils.c,v $
+Revision 1.4  2002/03/01 04:50:28  pudge
+Update resources
+
 Revision 1.3  2002/01/04 03:34:45  pudge
 Modifications for universal headers 3.4
 
@@ -473,7 +476,7 @@ pascal void DoAbout(Boolean easter)
 	
 	SetCursor(&qd.arrow);
 	
-	dlg 	= GetNewAppDialog(AboutDialog+easter);
+	dlg 	= GetNewAppDialog(AboutDialog); // +easter);
 	sound 	= GetAppResource('snd ', AlertSoundID+easter);
 	hdl 	= GetAppResource('STR#', CreditID);
 	count	= **(short **) hdl;
