@@ -25,6 +25,7 @@ $| = 1;
 $SIG{PIPE} = 'IGNORE';
 
 my $perl = which_perl();
+$perl .= qq[ "-I../lib"];
 
 #
 # commands run 4 perl programs.  Two of these programs write a
@@ -33,22 +34,18 @@ my $perl = which_perl();
 # the other reader reads one line, waits a few seconds and then
 # exits to test the waitpid function.
 #
-@cmd1 = ($perl,'-I../lib','-e',
-	 q{$|=1; print qq[first process\n]; sleep 300;});
-@cmd2 = ($perl,'-I../lib','-e',
-	 q{$|=1; print qq[second process\n]; sleep 30;});
-@cmd3 = ($perl,'-I../lib','-e',
-	 "print <>;"); # hangs waiting for end of STDIN
-@cmd4 = ($perl,'-I../lib','-e',
-	 "print scalar <>;");
+$cmd1 = qq/$perl -e "\$|=1; print qq[first process\\n]; sleep 30;"/;
+$cmd2 = qq/$perl -e "\$|=1; print qq[second process\\n]; sleep 30;"/;
+$cmd3 = qq/$perl -e "print <>;"/; # hangs waiting for end of STDIN
+$cmd4 = qq/$perl -e "print scalar <>;"/;
 
 #warn "#$cmd1\n#$cmd2\n#$cmd3\n#$cmd4\n";
 
 # start the processes
-ok( $pid1 = open(FH1, "-|", @cmd1), 'first process started');
-ok( $pid2 = open(FH2, "-|", @cmd2), '    second' );
-ok( $pid3 = open(FH3, "|-", @cmd3), '    third'  );
-ok( $pid4 = open(FH4, "|-", @cmd4), '    fourth' );
+ok( $pid1 = open(FH1, "$cmd1 |"), 'first process started');
+ok( $pid2 = open(FH2, "$cmd2 |"), '    second' );
+ok( $pid3 = open(FH3, "| $cmd3"), '    third'  );
+ok( $pid4 = open(FH4, "| $cmd4"), '    fourth' );
 
 print "# pids were $pid1, $pid2, $pid3, $pid4\n";
 
