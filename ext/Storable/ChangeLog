@@ -1,3 +1,50 @@
+Fri May 17 22:48:59 BST 2002   Nicholas Clark <nick@ccl4.org>
+
+. Description:
+
+	Version 2.0, binary format 2.5 (but writes format 2.4 on pre 5.7.3)
+
+	The perl5 porters have decided to make sure that Storable still
+	builds on pre-5.8 perls, and make the 5.8 version available on CPAN.
+	The VERSION is now 2.0, and it passes all tests on 5.005_03, 5.6.1
+	and 5.6.1 with threads. On 5.6.0 t/downgrade.t fails tests 34 and 37,
+	due to a bug in 5.6.0 - upgrade to 5.6.1.
+
+	Jarkko and I have collated the list of changes the perl5 porters have
+	from the perl5 Changes file:
+
+	- data features of upcoming perl 5.8.0 are supported: Unicode hash
+	  keys (Unicode hash values have been supported since Storable 1.0.1)
+	  and "restricted hashes" (readonly hashes and hash entries)
+	- a newer version of perl can now be used to serialize data which is
+	  not supported in earlier perls: Storable will attempt to do the
+	  right thing for as long as possible, croaking only when safe data
+	  conversion simply isn't possible. Alternatively earlier perls can
+	  opt to have a lossy downgrade data instead of croaking
+	- when built with perls pre 5.7.3 this Storable writes out files
+	  with binary format 2.4, the same format as Storable 1.0.8 onwards.
+	  This should mean that this Storable will inter-operate seamlessly
+	  with any Storable 1.0.8 or newer on perls pre 5.7.3
+	- dclone() now works with empty string scalar objects
+	- retrieving of large hashes is now more efficient
+	- more routines autosplit out of the main module, so Storable should
+	  load slightly more quickly
+	- better documentation
+	- the internal context objects are now freed explicitly, rather than
+	  relying on thread or process exit
+	- bugs fixed in debugging trace code affecting builds made with 64 bit
+	  IVs
+	- code tidy-ups to allow clean compiles with more warning options
+	  turned on avoid problems with $@ getting corrupted on 5.005_03 if
+	  Carp wasn't already loaded
+	- added &show_file_magic, so you can add to /etc/magic and teach
+	  Unix's file command about Storable files
+
+	We plan to keep Storable on CPAN in sync with the Perl core, so
+	if you encounter bugs or other problems building or using Storable,
+	please let us know at perl5-porters@perl.org
+	Patches welcome!
+	
 Sat Dec  1 14:37:54 MET 2001   Raphael Manfredi <Raphael_Manfredi@pobox.com>
 
 . Description:
