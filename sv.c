@@ -2212,7 +2212,7 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
 	 * --jhi Sep 1999 */
 	if (SvTYPE(sv) < SVt_PVNV)
 	    sv_upgrade(sv, SVt_PVNV);
-	SvGROW(sv, NV_DIG + 1);
+	SvGROW(sv, NV_DIG + 10); /* sign, decimal separator, e+NNNNN, nul */
 	s = SvPVX(sv);
 	olderrno = errno;	/* some Xenix systems wipe out errno here */
 #ifdef apollo
