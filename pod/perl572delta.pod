@@ -83,8 +83,8 @@ B<between digits>.
 
 =item *
 
-GMAGIC (right-hand side magic) could in many cases such as concatenation
-of string be invoked too many times.
+GMAGIC (right-hand side magic) could in many cases such as string
+concatenation be invoked too many times.
 
 =item *
 
@@ -103,13 +103,12 @@ Lvalue subroutines can now return C<undef> in list context.
 
 =item *
 
-The MAGIC constants (e.g. C<'P'>) have been macrofied
-(e.g. C<PERL_MAGIC_TIED>) for better source code readability
-and maintainability.
+The C<op_clear> and C<op_null> are now exported.
 
 =item *
 
-The C<op_clear> and C<op_null> are now exported.
+A new special regular expression variable has been introduced:
+C<$^N>, which contains the most-recently closed group (submatch).
 
 =item *
 
@@ -308,11 +307,6 @@ Use of the F<gprof> tool to profile Perl has been documented in
 L<perlhack>.  There is a make target "perl.gprof" for generating a
 gprofiled Perl executable.
 
-=item *
-
-(Code documentation) F<perly.c> and F<sv.c> have now been extensively
-commented.
-
 =back
 
 =head1 Installation and Configuration Improvements
@@ -358,13 +352,6 @@ The Amdahl UTS UNIX mainframe platform is now supported.
 =head2 Generic Improvements
 
 =over 4
-
-=item *
-
-The C code has been made much more C<gcc -Wall> clean.  Some warning
-messages still remain, though, so if you are compiling with gcc you
-will see some warnings about dubious practices.  The warnings are
-being worked on.
 
 =item *
 
@@ -467,7 +454,17 @@ deprecated for a while.  Now you will get an optional warning.
 
 =back
 
-=head1 Changed Internals
+=head1 Source Code Enhancements
+
+=head2 MAGIC constants
+
+The MAGIC constants (e.g. C<'P'>) have been macrofied
+(e.g. C<PERL_MAGIC_TIED>) for better source code readability
+and maintainability.
+
+=head2 Better commented code
+
+F<perly.c>, F<sv.c>, and F<sv.h> have now been extensively commented.
 
 =head2 Regex pre-/post-compilation items matched up
 
@@ -476,6 +473,13 @@ the compiled bytecode with the corresponding syntactic features of the
 original regex expression.  The information is attached to the new
 C<offsets> member of the C<struct regexp>. See L<perldebguts> for more
 complete information.
+
+=head2 gcc -Wall
+
+The C code has been made much more C<gcc -Wall> clean.  Some warning
+messages still remain, though, so if you are compiling with gcc you
+will see some warnings about dubious practices.  The warnings are
+being worked on.
 
 =head1 New Tests
 
