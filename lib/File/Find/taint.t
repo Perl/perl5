@@ -17,6 +17,7 @@ BEGIN {
     }
 }
 
+
 if ( $symlink_exists ) { print "1..45\n"; }
 else                   { print "1..27\n";  }
 
@@ -76,12 +77,18 @@ sub Check($) {
     $case++;
     if ($_[0]) { print "ok $case\n"; }
     else       { print "not ok $case\n"; }
+
 }
 
 sub CheckDie($) {
     $case++;
     if ($_[0]) { print "ok $case\n"; }
-    else { print "not ok $case\n $!\n"; exit 0; }
+    else       { print "not ok $case\n"; exit 0; }
+}
+
+sub Skip($) {
+    $case++;
+    print "ok $case # skipped: ",$_[0],"\n"; 
 }
 
 sub touch {
@@ -305,14 +312,21 @@ chdir($cwd_untainted);
 
 
 # untaint pattern doesn't match, should die when we chdir to cwd   
-print "# check untaint_skip (no follow)\n";
+print "# check untaint_skip (No follow)\n";
 undef $@;
 
 eval {File::Find::find( {wanted => \&simple_wanted, untaint => 1,
                          untaint_skip => 1, untaint_pattern =>
                          qr|^(NO_MATCH)$|}, topdir('fa') );};
 
-Check( $@ =~ m|insecure cwd| );
+print "# $@" if $@;
+#$^D = 8;
+if ($^O eq 'MSWin32') {
+	Skip("$^O does not taint cwd");
+    } 
+else {
+	Check( $@ =~ m|insecure cwd| );
+}
 chdir($cwd_untainted);
 
 
@@ -374,15 +388,13 @@ if ( $symlink_exists ) {
     chdir($cwd_untainted);
 
     # untaint pattern doesn't match, should die when we chdir to cwd
-    print "# check untaint_skip (follow)\n";
+    print "# check untaint_skip (Follow)\n";
     undef $@;
 
     eval {File::Find::find( {wanted => \&simple_wanted, untaint => 1,
                              untaint_skip => 1, untaint_pattern =>
                              qr|^(NO_MATCH)$|}, topdir('fa') );};
-
     Check( $@ =~ m|insecure cwd| );
     chdir($cwd_untainted);
-
 } 
 
