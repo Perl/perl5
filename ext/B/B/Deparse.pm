@@ -2366,6 +2366,8 @@ sub mapop {
 
 sub pp_mapwhile { mapop(@_, "map") }
 sub pp_grepwhile { mapop(@_, "grep") }
+sub pp_mapstart { baseop(@_, "map") }
+sub pp_grepstart { baseop(@_, "grep") }
 
 sub pp_list {
     my $self = shift;
