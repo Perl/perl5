@@ -1,3 +1,14 @@
+Sat Mar 13 20:11:03 GMT 2004   Nicholas Clark <nick@ccl4.org>
+	
+    Version 2.11
+
+        1. Storing restricted hashes in canonical order would SEGV. Fixed.
+        2. It was impossible to retrieve references to PL_sv_no and and
+           PL_sv_undef from STORABLE_thaw hooks.
+        3. restrict.t was failing on 5.8.0, due to 5.8.0's unique
+           implementation of restricted hashes using PL_sv_undef
+        4. These changes allow a space optimisation for restricted hashes.
+
 Sat Jan 24 16:22:32 IST 2004   Abhijit Menon-Sen <ams@wiw.org>
 
     Version 2.10

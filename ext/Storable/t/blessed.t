@@ -25,7 +25,15 @@ sub ok;
 
 use Storable qw(freeze thaw);
 
-print "1..12\n";
+%::immortals
+  = (u => \undef,
+     'y' => \(1 == 1),
+     n => \(1 == 0)
+);
+
+my $test = 12;
+my $tests = $test + 2 * 6 * keys %::immortals;
+print "1..$tests\n";
 
 package SHORT_NAME;
 
@@ -105,4 +113,48 @@ ok 10, $good;
 	my $y = thaw $x;
 	ok 11, ref $y eq 'Foobar';
 	ok 12, $$$y->[0] == 1;
+}
+
+package RETURNS_IMMORTALS;
+
+sub make { my $self = shift; bless [@_], $self }
+
+sub STORABLE_freeze {
+  # Some reference some number of times.
+  my $self = shift;
+  my ($what, $times) = @$self;
+  return ("$what$times", ($::immortals{$what}) x $times);
+}
+
+sub STORABLE_thaw {
+	my $self = shift;
+	my $cloning = shift;
+	my ($x, @refs) = @_;
+	my ($what, $times) = $x =~ /(.)(\d+)/;
+	die "'$x' didn't match" unless defined $times;
+	main::ok ++$test, @refs == $times;
+	my $expect = $::immortals{$what};
+	die "'$x' did not give a reference" unless ref $expect;
+	my $fail;
+	foreach (@refs) {
+	  $fail++ if $_ != $expect;
+	}
+	main::ok ++$test, !$fail;
+}
+
+package main;
+
+# $Storable::DEBUGME = 1;
+my $count;
+foreach $count (1..3) {
+  my $immortal;
+  foreach $immortal (keys %::immortals) {
+    print "# $immortal x $count\n";
+    my $i =  RETURNS_IMMORTALS->make ($immortal, $count);
+
+    my $f = freeze ($i);
+    ok ++$test, $f;
+    my $t = thaw $f;
+    ok ++$test, 1;
+  }
 }

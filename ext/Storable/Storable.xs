@@ -288,6 +288,7 @@ typedef struct stcxt {
 	HV *hseen;			/* which objects have been seen, store time */
 	AV *hook_seen;		/* which SVs were returned by STORABLE_freeze() */
 	AV *aseen;			/* which objects have been seen, retrieve time */
+	IV where_is_undef;		/* index in aseen of PL_sv_undef */
 	HV *hclass;			/* which classnames have been seen, store time */
 	AV *aclass;			/* which classnames have been seen, retrieve time */
 	HV *hook;			/* cache for hook methods per class name */
@@ -944,12 +945,14 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
  * To achieve that, the class name of the last retrieved object is passed down
  * recursively, and the first SEEN() call for which the class name is not NULL
  * will bless the object.
+ *
+ * i should be true iff sv is immortal (ie PL_sv_yes, PL_sv_no or PL_sv_undef)
  */
-#define SEEN(y,c) 							\
+#define SEEN(y,c,i) 							\
   STMT_START {								\
 	if (!y)									\
 		return (SV *) 0;					\
-	if (av_store(cxt->aseen, cxt->tagnum++, SvREFCNT_inc(y)) == 0) \
+	if (av_store(cxt->aseen, cxt->tagnum++, i ? (SV*)(y) : SvREFCNT_inc(y)) == 0) \
 		return (SV *) 0;					\
 	TRACEME(("aseen(#%d) = 0x%"UVxf" (refcnt=%d)", cxt->tagnum-1, \
 		 PTR2UV(y), SvREFCNT(y)-1));		\
@@ -1337,6 +1340,7 @@ static void init_retrieve_context(stcxt_t *cxt, int optype, int is_tainted)
 		      ? newHV() : 0);
 
 	cxt->aseen = newAV();			/* Where retrieved objects are kept */
+	cxt->where_is_undef = -1;		/* Special case for PL_sv_undef */
 	cxt->aclass = newAV();			/* Where seen classnames are kept */
 	cxt->tagnum = 0;				/* Have to count objects... */
 	cxt->classnum = 0;				/* ...and class names as well */
@@ -1369,6 +1373,7 @@ static void clean_retrieve_context(stcxt_t *cxt)
 		av_undef(aseen);
 		sv_free((SV *) aseen);
 	}
+	cxt->where_is_undef = -1;
 
 	if (cxt->aclass) {
 		AV *aclass = cxt->aclass;
@@ -2186,15 +2191,44 @@ static int store_hash(stcxt_t *cxt, HV *hv)
 		qsort((char *) AvARRAY(av), len, sizeof(SV *), sortcmp);
 
 		for (i = 0; i < len; i++) {
-                        unsigned char flags;
+#ifdef HAS_RESTRICTED_HASHES
+			int placeholders = HvPLACEHOLDERS(hv);
+#endif
+                        unsigned char flags = 0;
 			char *keyval;
 			STRLEN keylen_tmp;
                         I32 keylen;
 			SV *key = av_shift(av);
+			/* This will fail if key is a placeholder.
+			   Track how many placeholders we have, and error if we
+			   "see" too many.  */
 			HE *he  = hv_fetch_ent(hv, key, 0, 0);
-			SV *val = HeVAL(he);
-			if (val == 0)
-				return 1;		/* Internal error, not I/O error */
+			SV *val;
+
+			if (he) {
+				if (!(val =  HeVAL(he))) {
+					/* Internal error, not I/O error */
+					return 1;
+				}
+			} else {
+#ifdef HAS_RESTRICTED_HASHES
+				/* Should be a placeholder.  */
+				if (placeholders-- < 0) {
+					/* This should not happen - number of
+					   retrieves should be identical to
+					   number of placeholders.  */
+			  		return 1;
+				}
+				/* Value is never needed, and PL_sv_undef is
+				   more space efficient to store.  */
+				val = &PL_sv_undef;
+				ASSERT (flags == 0,
+					("Flags not 0 but %d", flags));
+				flags = SHV_K_PLACEHOLDER;
+#else
+				return 1;
+#endif
+			}
 			
 			/*
 			 * Store value first.
@@ -2215,12 +2249,9 @@ static int store_hash(stcxt_t *cxt, HV *hv)
 			 
                         /* Implementation of restricted hashes isn't nicely
                            abstracted:  */
-                        flags
-                            = (((hash_flags & SHV_RESTRICTED)
-                                && SvREADONLY(val))
-                               ? SHV_K_LOCKED : 0);
-                        if (val == &PL_sv_placeholder)
-                            flags |= SHV_K_PLACEHOLDER;
+			if ((hash_flags & SHV_RESTRICTED) && SvREADONLY(val)) {
+				flags |= SHV_K_LOCKED;
+			}
 
 			keyval = SvPV(key, keylen_tmp);
                         keylen = keylen_tmp;
@@ -2306,6 +2337,18 @@ static int store_hash(stcxt_t *cxt, HV *hv)
 			if (val == 0)
 				return 1;		/* Internal error, not I/O error */
 
+                        /* Implementation of restricted hashes isn't nicely
+                           abstracted:  */
+                        flags
+                            = (((hash_flags & SHV_RESTRICTED)
+                                && SvREADONLY(val))
+                                             ? SHV_K_LOCKED : 0);
+
+                        if (val == &PL_sv_placeholder) {
+                            flags |= SHV_K_PLACEHOLDER;
+			    val = &PL_sv_undef;
+			}
+
 			/*
 			 * Store value first.
 			 */
@@ -2315,14 +2358,6 @@ static int store_hash(stcxt_t *cxt, HV *hv)
 			if ((ret = store(cxt, val)))	/* Extra () for -Wall, grr... */
 				goto out;
 
-                        /* Implementation of restricted hashes isn't nicely
-                           abstracted:  */
-                        flags
-                            = (((hash_flags & SHV_RESTRICTED)
-                                && SvREADONLY(val))
-                                             ? SHV_K_LOCKED : 0);
-                        if (val == &PL_sv_placeholder)
-                            flags |= SHV_K_PLACEHOLDER;
 
                         hek = HeKEY_hek(he);
                         len = HEK_LEN(hek);
@@ -3267,7 +3302,39 @@ static int store(stcxt_t *cxt, SV *sv)
 
 	svh = hv_fetch(hseen, (char *) &sv, sizeof(sv), FALSE);
 	if (svh) {
-		I32 tagval = htonl(LOW_32BITS(*svh));
+		I32 tagval;
+
+		if (sv == &PL_sv_undef) {
+			/* We have seen PL_sv_undef before, but fake it as
+			   if we have not.
+
+			   Not the simplest solution to making restricted
+			   hashes work on 5.8.0, but it does mean that
+			   repeated references to the one true undef will
+			   take up less space in the output file.
+			*/
+			/* Need to jump past the next hv_store, because on the
+			   second store of undef the old hash value will be
+			   SV_REFCNT_DEC()ed, and as Storable cheats horribly
+			   by storing non-SVs in the hash a SEGV will ensure.
+			   Need to increase the tag number so that the
+			   receiver has no idea what games we're up to.  This
+			   special casing doesn't affect hooks that store
+			   undef, as the hook routine does its own lookup into
+			   hseen.  Also this means that any references back
+			   to PL_sv_undef (from the pathological case of hooks
+			   storing references to it) will find the seen hash
+			   entry for the first time, as if we didn't have this
+			   hackery here. (That hseen lookup works even on 5.8.0
+			   because it's a key of &PL_sv_undef and a value
+			   which is a tag number, not a value which is
+			   PL_sv_undef.)  */
+			cxt->tagnum++;
+			type = svis_SCALAR;
+			goto undef_special_case;
+		}
+		
+		tagval = htonl(LOW_32BITS(*svh));
 
 		TRACEME(("object 0x%"UVxf" seen as #%d", PTR2UV(sv), ntohl(tagval)));
 
@@ -3299,6 +3366,7 @@ static int store(stcxt_t *cxt, SV *sv)
 
 	type = sv_type(sv);
 
+undef_special_case:
 	TRACEME(("storing 0x%"UVxf" tag #%d, type %d...",
 		 PTR2UV(sv), cxt->tagnum, type));
 
@@ -3824,7 +3892,7 @@ static SV *retrieve_hook(stcxt_t *cxt, char *cname)
 	default:
 		return retrieve_other(cxt, 0);		/* Let it croak */
 	}
-	SEEN(sv, 0);							/* Don't bless yet */
+	SEEN(sv, 0, 0);							/* Don't bless yet */
 
 	/*
 	 * Whilst flags tell us to recurse, do so.
@@ -3965,9 +4033,17 @@ static SV *retrieve_hook(stcxt_t *cxt, char *cname)
 			READ_I32(tag);
 			tag = ntohl(tag);
 			svh = av_fetch(cxt->aseen, tag, FALSE);
-			if (!svh)
-				CROAK(("Object #%"IVdf" should have been retrieved already",
-					(IV) tag));
+			if (!svh) {
+				if (tag == cxt->where_is_undef) {
+					/* av_fetch uses PL_sv_undef internally, hence this
+					   somewhat gruesome hack. */
+					xsv = &PL_sv_undef;
+					svh = &xsv;
+				} else {
+					CROAK(("Object #%"IVdf" should have been retrieved already",
+					       (IV) tag));
+				}
+			}
 			xsv = *svh;
 			ary[i] = SvREFCNT_inc(xsv);
 		}
@@ -4137,7 +4213,7 @@ static SV *retrieve_ref(stcxt_t *cxt, char *cname)
 	 */
 
 	rv = NEWSV(10002, 0);
-	SEEN(rv, cname);		/* Will return if rv is null */
+	SEEN(rv, cname, 0);		/* Will return if rv is null */
 	sv = retrieve(cxt, 0);	/* Retrieve <object> */
 	if (!sv)
 		return (SV *) 0;	/* Failed */
@@ -4194,7 +4270,7 @@ static SV *retrieve_overloaded(stcxt_t *cxt, char *cname)
 	 */
 
 	rv = NEWSV(10002, 0);
-	SEEN(rv, cname);		/* Will return if rv is null */
+	SEEN(rv, cname, 0);		/* Will return if rv is null */
 	sv = retrieve(cxt, 0);	/* Retrieve <object> */
 	if (!sv)
 		return (SV *) 0;	/* Failed */
@@ -4240,7 +4316,7 @@ static SV *retrieve_tied_array(stcxt_t *cxt, char *cname)
 	TRACEME(("retrieve_tied_array (#%d)", cxt->tagnum));
 
 	tv = NEWSV(10002, 0);
-	SEEN(tv, cname);			/* Will return if tv is null */
+	SEEN(tv, cname, 0);			/* Will return if tv is null */
 	sv = retrieve(cxt, 0);		/* Retrieve <object> */
 	if (!sv)
 		return (SV *) 0;		/* Failed */
@@ -4269,7 +4345,7 @@ static SV *retrieve_tied_hash(stcxt_t *cxt, char *cname)
 	TRACEME(("retrieve_tied_hash (#%d)", cxt->tagnum));
 
 	tv = NEWSV(10002, 0);
-	SEEN(tv, cname);			/* Will return if tv is null */
+	SEEN(tv, cname, 0);			/* Will return if tv is null */
 	sv = retrieve(cxt, 0);		/* Retrieve <object> */
 	if (!sv)
 		return (SV *) 0;		/* Failed */
@@ -4297,7 +4373,7 @@ static SV *retrieve_tied_scalar(stcxt_t *cxt, char *cname)
 	TRACEME(("retrieve_tied_scalar (#%d)", cxt->tagnum));
 
 	tv = NEWSV(10002, 0);
-	SEEN(tv, cname);			/* Will return if rv is null */
+	SEEN(tv, cname, 0);			/* Will return if rv is null */
 	sv = retrieve(cxt, 0);		/* Retrieve <object> */
 	if (!sv) {
 		return (SV *) 0;		/* Failed */
@@ -4334,7 +4410,7 @@ static SV *retrieve_tied_key(stcxt_t *cxt, char *cname)
 	TRACEME(("retrieve_tied_key (#%d)", cxt->tagnum));
 
 	tv = NEWSV(10002, 0);
-	SEEN(tv, cname);			/* Will return if tv is null */
+	SEEN(tv, cname, 0);			/* Will return if tv is null */
 	sv = retrieve(cxt, 0);		/* Retrieve <object> */
 	if (!sv)
 		return (SV *) 0;		/* Failed */
@@ -4366,7 +4442,7 @@ static SV *retrieve_tied_idx(stcxt_t *cxt, char *cname)
 	TRACEME(("retrieve_tied_idx (#%d)", cxt->tagnum));
 
 	tv = NEWSV(10002, 0);
-	SEEN(tv, cname);			/* Will return if tv is null */
+	SEEN(tv, cname, 0);			/* Will return if tv is null */
 	sv = retrieve(cxt, 0);		/* Retrieve <object> */
 	if (!sv)
 		return (SV *) 0;		/* Failed */
@@ -4403,7 +4479,7 @@ static SV *retrieve_lscalar(stcxt_t *cxt, char *cname)
 	 */
 
 	sv = NEWSV(10002, len);
-	SEEN(sv, cname);	/* Associate this new scalar with tag "tagnum" */
+	SEEN(sv, cname, 0);	/* Associate this new scalar with tag "tagnum" */
 
 	/*
 	 * WARNING: duplicates parts of sv_setpv and breaks SV data encapsulation.
@@ -4449,7 +4525,7 @@ static SV *retrieve_scalar(stcxt_t *cxt, char *cname)
 	 */
 
 	sv = NEWSV(10002, len);
-	SEEN(sv, cname);	/* Associate this new scalar with tag "tagnum" */
+	SEEN(sv, cname, 0);	/* Associate this new scalar with tag "tagnum" */
 
 	/*
 	 * WARNING: duplicates parts of sv_setpv and breaks SV data encapsulation.
@@ -4561,7 +4637,7 @@ static SV *retrieve_integer(stcxt_t *cxt, char *cname)
 
 	READ(&iv, sizeof(iv));
 	sv = newSViv(iv);
-	SEEN(sv, cname);	/* Associate this new scalar with tag "tagnum" */
+	SEEN(sv, cname, 0);	/* Associate this new scalar with tag "tagnum" */
 
 	TRACEME(("integer %"IVdf, iv));
 	TRACEME(("ok (retrieve_integer at 0x%"UVxf")", PTR2UV(sv)));
@@ -4590,7 +4666,7 @@ static SV *retrieve_netint(stcxt_t *cxt, char *cname)
 	sv = newSViv(iv);
 	TRACEME(("network integer (as-is) %d", iv));
 #endif
-	SEEN(sv, cname);	/* Associate this new scalar with tag "tagnum" */
+	SEEN(sv, cname, 0);	/* Associate this new scalar with tag "tagnum" */
 
 	TRACEME(("ok (retrieve_netint at 0x%"UVxf")", PTR2UV(sv)));
 
@@ -4612,7 +4688,7 @@ static SV *retrieve_double(stcxt_t *cxt, char *cname)
 
 	READ(&nv, sizeof(nv));
 	sv = newSVnv(nv);
-	SEEN(sv, cname);	/* Associate this new scalar with tag "tagnum" */
+	SEEN(sv, cname, 0);	/* Associate this new scalar with tag "tagnum" */
 
 	TRACEME(("double %"NVff, nv));
 	TRACEME(("ok (retrieve_double at 0x%"UVxf")", PTR2UV(sv)));
@@ -4638,7 +4714,7 @@ static SV *retrieve_byte(stcxt_t *cxt, char *cname)
 	TRACEME(("small integer read as %d", (unsigned char) siv));
 	tmp = (unsigned char) siv - 128;
 	sv = newSViv(tmp);
-	SEEN(sv, cname);	/* Associate this new scalar with tag "tagnum" */
+	SEEN(sv, cname, 0);	/* Associate this new scalar with tag "tagnum" */
 
 	TRACEME(("byte %d", tmp));
 	TRACEME(("ok (retrieve_byte at 0x%"UVxf")", PTR2UV(sv)));
@@ -4658,7 +4734,7 @@ static SV *retrieve_undef(stcxt_t *cxt, char *cname)
 	TRACEME(("retrieve_undef"));
 
 	sv = newSV(0);
-	SEEN(sv, cname);
+	SEEN(sv, cname, 0);
 
 	return sv;
 }
@@ -4674,7 +4750,13 @@ static SV *retrieve_sv_undef(stcxt_t *cxt, char *cname)
 
 	TRACEME(("retrieve_sv_undef"));
 
-	SEEN(sv, cname);
+	/* Special case PL_sv_undef, as av_fetch uses it internally to mark
+	   deleted elements, and will return NULL (fetch failed) whenever it
+	   is fetched.  */
+	if (cxt->where_is_undef == -1) {
+		cxt->where_is_undef = cxt->tagnum;
+	}
+	SEEN(sv, cname, 1);
 	return sv;
 }
 
@@ -4689,7 +4771,7 @@ static SV *retrieve_sv_yes(stcxt_t *cxt, char *cname)
 
 	TRACEME(("retrieve_sv_yes"));
 
-	SEEN(sv, cname);
+	SEEN(sv, cname, 1);
 	return sv;
 }
 
@@ -4704,8 +4786,7 @@ static SV *retrieve_sv_no(stcxt_t *cxt, char *cname)
 
 	TRACEME(("retrieve_sv_no"));
 
-	cxt->tagnum--; /* undo the tagnum increment in retrieve_l?scalar */
-	SEEN(sv, cname);
+	SEEN(sv, cname, 1);
 	return sv;
 }
 
@@ -4734,7 +4815,7 @@ static SV *retrieve_array(stcxt_t *cxt, char *cname)
 	RLEN(len);
 	TRACEME(("size = %d", len));
 	av = newAV();
-	SEEN(av, cname);			/* Will return if array not allocated nicely */
+	SEEN(av, cname, 0);			/* Will return if array not allocated nicely */
 	if (len)
 		av_extend(av, len);
 	else
@@ -4786,7 +4867,7 @@ static SV *retrieve_hash(stcxt_t *cxt, char *cname)
 	RLEN(len);
 	TRACEME(("size = %d", len));
 	hv = newHV();
-	SEEN(hv, cname);		/* Will return if table not allocated properly */
+	SEEN(hv, cname, 0);		/* Will return if table not allocated properly */
 	if (len == 0)
 		return (SV *) hv;	/* No data follow if table empty */
 	hv_ksplit(hv, len);		/* pre-extend hash to save multiple splits */
@@ -4872,7 +4953,7 @@ static SV *retrieve_flag_hash(stcxt_t *cxt, char *cname)
     RLEN(len);
     TRACEME(("size = %d, flags = %d", len, hash_flags));
     hv = newHV();
-    SEEN(hv, cname);		/* Will return if table not allocated properly */
+    SEEN(hv, cname, 0);		/* Will return if table not allocated properly */
     if (len == 0)
         return (SV *) hv;	/* No data follow if table empty */
     hv_ksplit(hv, len);		/* pre-extend hash to save multiple splits */
@@ -5000,7 +5081,7 @@ static SV *retrieve_code(stcxt_t *cxt, char *cname)
 	 */
 	tagnum = cxt->tagnum;
 	sv = newSViv(0);
-	SEEN(sv, cname);
+	SEEN(sv, cname, 0);
 
 	/*
 	 * Retrieve the source of the code reference
@@ -5117,7 +5198,7 @@ static SV *old_retrieve_array(stcxt_t *cxt, char *cname)
 	RLEN(len);
 	TRACEME(("size = %d", len));
 	av = newAV();
-	SEEN(av, 0);				/* Will return if array not allocated nicely */
+	SEEN(av, 0, 0);				/* Will return if array not allocated nicely */
 	if (len)
 		av_extend(av, len);
 	else
@@ -5179,7 +5260,7 @@ static SV *old_retrieve_hash(stcxt_t *cxt, char *cname)
 	RLEN(len);
 	TRACEME(("size = %d", len));
 	hv = newHV();
-	SEEN(hv, 0);			/* Will return if table not allocated properly */
+	SEEN(hv, 0, 0);			/* Will return if table not allocated properly */
 	if (len == 0)
 		return (SV *) hv;	/* No data follow if table empty */
 	hv_ksplit(hv, len);		/* pre-extend hash to save multiple splits */
