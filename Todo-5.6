@@ -130,6 +130,7 @@ Win32 stuff
     work out DLL versioning
 
 Miscellaneous
+    introduce @( and @) because group names can have spaces
     add new modules (Archive::Tar, Compress::Zlib, CPAN::FTP?)
     sub-second sleep()? alarm()? time()? (integrate Time::HiRes?
 	Configure doesn't yet probe for usleep/nanosleep/ualarm but
@@ -145,7 +146,9 @@ Miscellaneous
 	PREFERABLY AS AN EXTENSION.
 	As of 5.6.1 there is cpp macro Perl_isnan().
     fix the basic arithmetics (+ - * / %) to preserve IVness/UVness if
-	both arguments are IVs/UVs
+	both arguments are IVs/UVs: it sucks that one cannot see
+	the 'carry flag' (or equivalent) of the CPU from C,
+	C is too high-level...
     replace pod2html with new PodtoHtml? (requires other modules from CPAN)
     automate testing with large parts of CPAN
     Unicode collation? http://www.unicode.org/unicode/reports/tr10/
