@@ -139,7 +139,7 @@ __END__
 
 #define my_puts(a) if(puts(a) < 0) exit(666)
 
-char *cmds[] = { "perl","-e", "print qq[ok 5\\n]", NULL };
+static char *cmds[] = { "perl","-e", "print qq[ok 5\\n]", NULL };
 
 int main(int argc, char **argv, char **env)
 {

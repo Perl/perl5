@@ -790,6 +790,15 @@ C<Unicode::Map8>, and C<Unicode::Map>, available from CPAN.
 If you have the GNU recode installed, you can also use the
 Perl frontend C<Convert::Recode> for character conversions.
 
+The following are fast conversions from ISO 8859-1 (Latin-1) bytes
+to UTF-8 bytes, the code works even with older Perl 5 versions.
+
+    # ISO 8859-1 to UTF-8
+    s/([\x80-\xFF])/chr(0xC0|ord($1)>>6).chr(0x80|ord($1)&0x3F)/eg;
+
+    # UTF-8 to ISO 8859-1
+    s/([\xC2\xC3])([\x80-\xBF])/chr(ord($1)<<6&0xC0|ord($2)&0x3F)/eg;
+
 =head1 SEE ALSO
 
 L<perlunicode>, L<Encode>, L<encoding>, L<open>, L<utf8>, L<bytes>,

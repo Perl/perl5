@@ -11,7 +11,7 @@ rmdir 'foo';
 open TESTFILE, ">./foo" or die "error $! $^E opening";
 binmode TESTFILE;
 print TESTFILE $teststring;
-close TESTFILE;
+close TESTFILE or die "error $! $^E closing";
 
 open TESTFILE, "<./foo";
 binmode TESTFILE;

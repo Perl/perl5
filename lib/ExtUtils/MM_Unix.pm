@@ -1442,9 +1442,9 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
 	    if ($txt =~ /Extracting \S+ \(with variable substitutions/) {
 		($pl_files{$name} = $name) =~ s/[._]pl\z//i ;
 	    }
-	    else { $pm{$name} = File::Spec->catfile('$(INST_LIBDIR)',$name); }
+	    else { $pm{$name} = File::Spec->catfile($self->{INST_LIBDIR},$name); }
 	} elsif ($name =~ /\.(p[ml]|pod)\z/){
-	    $pm{$name} = File::Spec->catfile('$(INST_LIBDIR)',$name);
+	    $pm{$name} = File::Spec->catfile($self->{INST_LIBDIR},$name);
 	}
     }
 
@@ -1500,9 +1500,9 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
 		return;
 	    }
 	    return if /\#/;
-	    my($path, $prefix) = ($File::Find::name, '$(INST_LIBDIR)');
+	    my($path, $prefix) = ($File::Find::name, $self->{INST_LIBDIR});
 	    my($striplibpath,$striplibname);
-	    $prefix =  '$(INST_LIB)' if (($striplibpath = $path) =~ s:^(\W*)lib\W:$1:i);
+	    $prefix =  $self->{INST_LIB} if (($striplibpath = $path) =~ s:^(\W*)lib\W:$1:i);
 	    ($striplibname,$striplibpath) = fileparse($striplibpath);
 	    my($inst) = File::Spec->catfile($prefix,$striplibpath,$striplibname);
 	    local($_) = $inst; # for backwards compatibility
@@ -1791,10 +1791,10 @@ usually solves this kind of problem.
 
     # We need to set up INST_LIBDIR before init_libscan() for VMS
     my @parentdir = split(/::/, $self->{PARENT_NAME});
-    $self->{INST_LIBDIR} = File::Spec->catdir('$(INST_LIB)',@parentdir);
-    $self->{INST_ARCHLIBDIR} = File::Spec->catdir('$(INST_ARCHLIB)',@parentdir);
-    $self->{INST_AUTODIR} = File::Spec->catdir('$(INST_LIB)','auto','$(FULLEXT)');
-    $self->{INST_ARCHAUTODIR} = File::Spec->catdir('$(INST_ARCHLIB)','auto','$(FULLEXT)');
+    $self->{INST_LIBDIR} = File::Spec->catdir($self->{INST_LIB},@parentdir);
+    $self->{INST_ARCHLIBDIR} = File::Spec->catdir($self->{INST_ARCHLIB},@parentdir);
+    $self->{INST_AUTODIR} = File::Spec->catdir($self->{INST_LIB},'auto',$self->{FULLEXT});
+    $self->{INST_ARCHAUTODIR} = File::Spec->catdir($self->{INST_ARCHLIB},'auto',$self->{FULLEXT});
 
     # INST_EXE is deprecated, should go away March '97
     $self->{INST_EXE} ||= File::Spec->catdir(File::Spec->curdir,'blib','script');

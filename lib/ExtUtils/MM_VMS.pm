@@ -19,6 +19,7 @@ our($Revision, @ISA, $VERSION, $Verbose);
 # All on one line so MakeMaker can see it.
 ($VERSION) = ($Revision = '5.56 (27-Apr-1999)') =~ /^([\d.]+)/;
 
+@ISA = qw( File::Spec );
 unshift @MM::ISA, 'ExtUtils::MM_VMS';
 
 require ExtUtils::MakeMaker;
@@ -73,7 +74,7 @@ Returns a string representing of the root directory.
 =cut
 
 sub rootdir {
-    return File::Spec->rootdir();'
+    return File::Spec->rootdir();
 }
 
 package ExtUtils::MM_VMS;
@@ -803,7 +804,7 @@ command line to find args.
 sub pm_to_blib {
     my($self) = @_;
     my($line,$from,$to,@m);
-    my($autodir) = File::Spec->catdir('$(INST_LIB)','auto');
+    my($autodir) = File::Spec->catdir($self->{INST_LIB},'auto');
     my(@files) = @{$self->{PM_TO_BLIB}};
 
     push @m, q{

@@ -351,6 +351,20 @@ unsigned long strtoul (const char *, char **, int);
 #endif
 #endif
 
+/* Background: in most systems the low byte of the wait status
+ * is the signal (the lowest 7 bits) and the coredump flag is
+ * the eight bit, and the second lowest byte is the exit status.
+ * BeOS bucks the trend and has the bytes in different order.
+ * See beos/beos.c for how the reality is bent even in BeOS
+ * to follow the traditional.  However, to make the POSIX
+ * wait W*() macros to work in BeOS, we need to unbend the
+ * reality back in place. --jhi */
+#ifdef __BEOS__
+#    define WMUNGE(x) (((x) & 0xFF00) >> 8 | ((x) & 0x00FF) << 8)
+#else
+#    define WMUNGE(x) (x)
+#endif
+
 static int
 not_here(char *s)
 {
@@ -443,7 +457,7 @@ __END__
       if (memEQ(name, "WSTOPSIG", 8)) {
       /*                  ^          */
 #ifdef WSTOPSIG
-        *arg_result = WSTOPSIG(*arg_result);
+        *arg_result = WSTOPSIG(WMUNGE(*arg_result));
         return PERL_constant_ISIV;
 #else
         return PERL_constant_NOTDEF;
@@ -454,7 +468,7 @@ __END__
       if (memEQ(name, "WTERMSIG", 8)) {
       /*                  ^          */
 #ifdef WTERMSIG
-        *arg_result = WTERMSIG(*arg_result);
+        *arg_result = WTERMSIG(WMUNGE(*arg_result));
         return PERL_constant_ISIV;
 #else
         return PERL_constant_NOTDEF;
@@ -477,7 +491,7 @@ __END__
   case 9:
     if (memEQ(name, "WIFEXITED", 9)) {
 #ifdef WIFEXITED
-      *arg_result = WIFEXITED(*arg_result);
+      *arg_result = WIFEXITED(WMUNGE(*arg_result));
       return PERL_constant_ISIV;
 #else
       return PERL_constant_NOTDEF;
@@ -487,7 +501,7 @@ __END__
   case 10:
     if (memEQ(name, "WIFSTOPPED", 10)) {
 #ifdef WIFSTOPPED
-      *arg_result = WIFSTOPPED(*arg_result);
+      *arg_result = WIFSTOPPED(WMUNGE(*arg_result));
       return PERL_constant_ISIV;
 #else
       return PERL_constant_NOTDEF;
@@ -503,7 +517,7 @@ __END__
       if (memEQ(name, "WEXITSTATUS", 11)) {
       /*                ^                */
 #ifdef WEXITSTATUS
-        *arg_result = WEXITSTATUS(*arg_result);
+        *arg_result = WEXITSTATUS(WMUNGE(*arg_result));
         return PERL_constant_ISIV;
 #else
         return PERL_constant_NOTDEF;
@@ -514,7 +528,7 @@ __END__
       if (memEQ(name, "WIFSIGNALED", 11)) {
       /*                ^                */
 #ifdef WIFSIGNALED
-        *arg_result = WIFSIGNALED(*arg_result);
+        *arg_result = WIFSIGNALED(WMUNGE(*arg_result));
         return PERL_constant_ISIV;
 #else
         return PERL_constant_NOTDEF;
