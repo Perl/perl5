@@ -32,7 +32,7 @@ char **env;
 #include "perlvars.h"
 #undef PERLVAR
 #undef PERLVARI
-#undef PERLVARC
+#undef PERLVARIC
 #endif
 
     PERL_SYS_INIT(&argc,&argv);
