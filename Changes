@@ -31,6 +31,139 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 10175] By: jhi                                   on 2001/05/21  13:17:28
+        Log: Add a test of its very own for Fcntl.  Hopefully portable.
+     Branch: perl
+	   + t/lib/fcntl.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 10174] By: jhi                                   on 2001/05/21  12:45:41
+        Log: Must be trickier for 'minitest' not to die.
+     Branch: perl
+	   ! t/op/taint.t
+____________________________________________________________________________
+[ 10173] By: jhi                                   on 2001/05/21  11:24:43
+        Log: Can't declare other people's variables.
+     Branch: perl
+	   ! t/lib/b-stash.t
+____________________________________________________________________________
+[ 10172] By: jhi                                   on 2001/05/20  20:33:08
+        Log: Fix for ID 20010519.003: sysopen() wasn't tainting :-(
+     Branch: perl
+	   ! doio.c t/op/taint.t
+____________________________________________________________________________
+[ 10171] By: jhi                                   on 2001/05/20  20:18:45
+        Log: The OS/2 variable needs to be declared.
+     Branch: perl
+	   ! t/lib/b-stash.t
+____________________________________________________________________________
+[ 10170] By: nick                                  on 2001/05/20  16:48:29
+        Log: Integrate mainline
+     Branch: perlio
+	  !> (integrate 41 files)
+____________________________________________________________________________
+[ 10169] By: jhi                                   on 2001/05/20  11:50:20
+        Log: Small perlsec updates: clarify the taintedness of filename
+             globbing; suggest using Scalar::Util::tainted().
+     Branch: perl
+	   ! pod/perlsec.pod
+____________________________________________________________________________
+[ 10168] By: jhi                                   on 2001/05/20  11:24:11
+        Log: Subject: [PATCH 5.7.1@10135] [LARGE!] symbolic magic
+             From: Dave Mitchell <davem@fdgroup.co.uk>
+             Date: Sat, 19 May 2001 20:12:56 +0100 (BST)
+             Message-Id: <200105191912.UAA23925@gizmo.fdgroup.co.uk>
+     Branch: perl
+	   ! av.c cc_runtime.h doop.c dump.c gv.c hv.c mg.c op.c perl.c
+	   ! perl.h perlio.c pod/perlguts.pod pp.c pp_ctl.c pp_hot.c
+	   ! pp_sys.c regexec.c scope.c sv.c t/lib/peek.t taint.c util.c
+	   ! xsutils.c
+____________________________________________________________________________
+[ 10167] By: jhi                                   on 2001/05/20  11:12:14
+        Log: Subject: [PATCH 5.6.1] DLL descriptions on OS/2
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Sat, 19 May 2001 04:08:46 -0400
+             Message-ID: <20010519040846.A16969@math.ohio-state.edu>
+     Branch: perl
+	   ! lib/ExtUtils/Mksymlists.pm makedef.pl
+____________________________________________________________________________
+[ 10166] By: jhi                                   on 2001/05/20  11:08:27
+        Log: Subject: [PATCH 5.6.1] DLL name mangling on OS/2
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Sat, 19 May 2001 04:30:45 -0400
+             Message-ID: <20010519043045.A17033@math.ohio-state.edu>
+     Branch: perl
+	   ! os2/os2.c
+____________________________________________________________________________
+[ 10165] By: jhi                                   on 2001/05/20  11:07:06
+        Log: Subject: [PATCH 5.6.1] build bugs OS/2
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Sat, 19 May 2001 04:35:28 -0400
+             Message-ID: <20010519043528.A17363@math.ohio-state.edu>
+     Branch: perl
+	   ! os2/Makefile.SHs os2/os2.c
+____________________________________________________________________________
+[ 10164] By: jhi                                   on 2001/05/20  11:06:01
+        Log: Subject: [PATCH 5.6.1] Mis-Failing tests
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Sat, 19 May 2001 04:04:23 -0400
+             Message-ID: <20010519040423.A16861@math.ohio-state.edu>
+             
+             (In bleadperl patched b-stash.t instead of b.t)
+     Branch: perl
+	   ! t/lib/b-stash.t t/lib/bigfltpm.t
+____________________________________________________________________________
+[ 10163] By: jhi                                   on 2001/05/20  10:59:46
+        Log: Subject: [PATCH 5.6.1] perl5db
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Sat, 19 May 2001 03:49:09 -0400
+             Message-ID: <20010519034909.A14902@math.ohio-state.edu>
+     Branch: perl
+	   ! lib/perl5db.pl
+____________________________________________________________________________
+[ 10162] By: jhi                                   on 2001/05/20  10:58:18
+        Log: Subject: [PATCH] require $mod where $mod has touched numeric context
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 18 May 2001 14:24:51 -0700
+             Message-ID: <lr3da2cpuk.fsf@caliper.ActiveState.com>
+     Branch: perl
+	   ! pp_ctl.c
+____________________________________________________________________________
+[ 10161] By: jhi                                   on 2001/05/20  10:57:00
+        Log: Subject: [PATCH] Chomp should not always stringify
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 18 May 2001 07:55:25 -0700
+             Message-ID: <lrk83eogf6.fsf@caliper.ActiveState.com>
+     Branch: perl
+	   ! doop.c t/op/chop.t
+____________________________________________________________________________
+[ 10160] By: jhi                                   on 2001/05/20  10:49:40
+        Log: Integrate perlio.
+     Branch: perl
+	  !> pod/perlfunc.pod
+____________________________________________________________________________
+[ 10159] By: nick                                  on 2001/05/20  09:39:46
+        Log: Document some more of open's features.
+     Branch: perlio
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 10158] By: gsar                                  on 2001/05/18  18:43:38
+        Log: back out change#10153 (it has compatibility issues such as the
+             changed behavior of /[~%@+-]/, and after talking to Jarkko, the
+             benefit for 5.6.x doesn't seem worth the risk)
+     Branch: maint-5.6/perl
+	   ! toke.c
+____________________________________________________________________________
+[ 10157] By: jhi                                   on 2001/05/18  17:05:40
+        Log: \$escaping the $vars in !GROK!THIS! section is a good idea.
+     Branch: perl
+	   ! x2p/s2p.PL
+____________________________________________________________________________
+[ 10156] By: jhi                                   on 2001/05/18  12:06:40
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 10155] By: jhi                                   on 2001/05/18  11:58:57
         Log: Integrate change #10144 from maintperl.
              
