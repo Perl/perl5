@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Aug 29 23:13:26 EET DST 2000 [metaconfig 3.0 PL70]
+# Generated on Tue Aug 29 23:38:50 EET DST 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >/tmp/c1$$ <<EOF
@@ -1766,18 +1766,18 @@ persist across sessions for $package.
 You may safely delete it if you wish.
 EOF
 
-xpatchlevel=`awk '/define[ 	]+PERL_VERSION/ {print $3}' $rsrc/patchlevel.h`
+xversion=`awk '/define[ 	]+PERL_VERSION/ {print $3}' $rsrc/patchlevel.h`
 case "$usedevel" in
 $define|true|[yY]*) ;;
-*) case "$xpatchlevel" in
+*) case "$xversion" in
    *[13579])
 	cat >&4 <<EOH
 *** WHOA THERE!!! ***
 
     This is an UNSTABLE DEVELOPMENT release.
-    (The patchlevel, $xpatchlevel, is odd--as opposed to even,
-     and that signifies a development release.  If you want a
-     maintenance release, you want an even-numbered release.)
+    The version of this $package distribution is $xversion, that is, odd,
+    (as opposed to even) and that signifies a development release.
+    If you want a maintenance release, you want an even-numbered version.)
 
     Do ***NOT*** install this into production use.
     Data corruption and crashes are possible.
@@ -5495,10 +5495,7 @@ else
 	api_version=0
 	api_subversion=0
 fi
-$echo $n "(You have $package revision $revision" $c
-$echo $n " patchlevel $patchlevel" $c
-test 0 -eq "$subversion" || $echo $n " subversion $subversion" $c
-echo ".)"
+$echo "(You have $package version $patchlevel subversion $subversion.)"
 case "$osname" in
 dos|vms)
 	: XXX Should be a Configure test for double-dots in filenames.
