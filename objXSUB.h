@@ -2402,6 +2402,8 @@
 #endif
 #if defined(PERL_IN_UNIVERSAL_C) || defined(PERL_DECL_PROT)
 #endif
+#if defined(PERL_IN_LOCALE_C) || defined(PERL_DECL_PROT)
+#endif
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 #  if defined(LEAKTEST)
 #  endif

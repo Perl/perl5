@@ -561,7 +561,7 @@ of the number can fit an in UV, it is returned in the *valuep.
 	int	grok_number(const char *pv, STRLEN len, UV *valuep)
 
 =for hackers
-Found in file util.c
+Found in file numeric.c
 
 =item grok_numeric_radix
 
@@ -570,7 +570,7 @@ Scan and skip for a numeric decimal separator (radix).
 	bool	grok_numeric_radix(const char **sp, const char *send)
 
 =for hackers
-Found in file util.c
+Found in file numeric.c
 
 =item GvSV
 

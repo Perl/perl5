@@ -263,13 +263,13 @@ h = $(h1) $(h2) $(h3) $(h4) $(h5)
 c1 = $(mallocsrc) av.c scope.c op.c doop.c doio.c dump.c hv.c mg.c
 c2 = perl.c perly.c pp.c pp_hot.c pp_ctl.c pp_sys.c regcomp.c regexec.c utf8.c
 c3 = gv.c sv.c taint.c toke.c util.c deb.c run.c universal.c xsutils.c
-c4 = globals.c perlio.c perlapi.c
+c4 = globals.c perlio.c perlapi.c numeric.c locale.c
 
 c = $(c1) $(c2) $(c3) $(c4) miniperlmain.c perlmain.c
 
 obj1 = $(mallocobj) gv$(OBJ_EXT) toke$(OBJ_EXT) perly$(OBJ_EXT) op$(OBJ_EXT) regcomp$(OBJ_EXT) dump$(OBJ_EXT) util$(OBJ_EXT) mg$(OBJ_EXT)
 obj2 = hv$(OBJ_EXT) av$(OBJ_EXT) run$(OBJ_EXT) pp_hot$(OBJ_EXT) sv$(OBJ_EXT) pp$(OBJ_EXT) scope$(OBJ_EXT) pp_ctl$(OBJ_EXT) pp_sys$(OBJ_EXT)
-obj3 = doop$(OBJ_EXT) doio$(OBJ_EXT) regexec$(OBJ_EXT) utf8$(OBJ_EXT) taint$(OBJ_EXT) deb$(OBJ_EXT) universal$(OBJ_EXT) xsutils$(OBJ_EXT) globals$(OBJ_EXT) perlio$(OBJ_EXT) perlapi$(OBJ_EXT)
+obj3 = doop$(OBJ_EXT) doio$(OBJ_EXT) regexec$(OBJ_EXT) utf8$(OBJ_EXT) taint$(OBJ_EXT) deb$(OBJ_EXT) universal$(OBJ_EXT) xsutils$(OBJ_EXT) globals$(OBJ_EXT) perlio$(OBJ_EXT) perlapi$(OBJ_EXT) numeric$(OBJ_EXT) locale$(OBJ_EXT)
 
 obj = $(obj1) $(obj2) $(obj3) $(ARCHOBJS)
 

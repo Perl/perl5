@@ -1170,8 +1170,10 @@
 #if defined(PERL_IN_UNIVERSAL_C) || defined(PERL_DECL_PROT)
 #define isa_lookup		S_isa_lookup
 #endif
-#if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
+#if defined(PERL_IN_LOCALE_C) || defined(PERL_DECL_PROT)
 #define stdize_locale		S_stdize_locale
+#endif
+#if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 #define mess_alloc		S_mess_alloc
 #  if defined(LEAKTEST)
 #define xstat			S_xstat
@@ -2665,8 +2667,10 @@
 #if defined(PERL_IN_UNIVERSAL_C) || defined(PERL_DECL_PROT)
 #define isa_lookup(a,b,c,d)	S_isa_lookup(aTHX_ a,b,c,d)
 #endif
-#if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
+#if defined(PERL_IN_LOCALE_C) || defined(PERL_DECL_PROT)
 #define stdize_locale(a)	S_stdize_locale(aTHX_ a)
+#endif
+#if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 #define mess_alloc()		S_mess_alloc(aTHX)
 #  if defined(LEAKTEST)
 #define xstat(a)		S_xstat(aTHX_ a)
@@ -5182,9 +5186,11 @@
 #define S_isa_lookup		CPerlObj::S_isa_lookup
 #define isa_lookup		S_isa_lookup
 #endif
-#if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
+#if defined(PERL_IN_LOCALE_C) || defined(PERL_DECL_PROT)
 #define S_stdize_locale		CPerlObj::S_stdize_locale
 #define stdize_locale		S_stdize_locale
+#endif
+#if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 #define S_mess_alloc		CPerlObj::S_mess_alloc
 #define mess_alloc		S_mess_alloc
 #  if defined(LEAKTEST)

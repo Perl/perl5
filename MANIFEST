@@ -1193,6 +1193,7 @@ lib/validate.pl		Perl library supporting wholesale file mode validation
 lib/vars.pm		Declare pseudo-imported global variables
 lib/warnings.pm		For "use warnings"
 lib/warnings/register.pm	For "use warnings::register"
+locale.c		locale-specific utility functions
 makeaperl.SH		perl script that produces a new perl binary
 makedef.pl		Create symbol export lists for linking
 makedepend.SH		Precursor to makedepend
@@ -1215,6 +1216,7 @@ mpeix/relink		MPE/iX port
 mv-if-diff		Script to mv a file if it changed
 myconfig.SH		Prints summary of the current configuration
 nostdio.h		Cause compile error on stdio calls
+numeric.c		Miscellaneous numeric conversion routines
 objXSUB.h		Scoping macros for Perl Object in extensions
 op.c			Opcode syntax tree code
 op.h			Opcode syntax tree header
