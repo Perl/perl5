@@ -3776,8 +3776,7 @@ Perl_sv_catsv(pTHX_ SV *dsv, register SV *ssv)
 		if (!dutf8)
 		    sv_utf8_upgrade(dsv);
 		dpv = SvPV(dsv, dlen);
-		/* Overguestimate on the slen. */
-		SvGROW(dsv, dlen + (sutf8 ? 2 * slen : slen) + 1);
+		SvGROW(dsv, dlen + 2 * slen + 1);
 		if (dutf8) /* && !sutf8 */ {
 		    char *s = spv;
 		    char *e = s + slen;
