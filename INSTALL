@@ -64,6 +64,23 @@ In a related issue, old extensions may possibly be affected by the
 changes in the Perl language in the current release.  Please see
 pod/perldelta.pod for a description of what's changed.
 
+=head1 WARNING:  This version requires a compiler that supports ANSI C.
+
+If you find that your C compiler is not ANSI-capable, try obtaining
+GCC, available from GNU mirrors worldwide (e.g. ftp://ftp.gnu.org/pub/gnu).
+Another alternative may be to use a tool like C<ansi2knr> to convert the
+sources back to K&R style, but there is no guarantee this route will get
+you anywhere, since the prototypes are not the only ANSI features used
+in the Perl sources.  C<ansi2knr> is usually found as part of the freely
+available C<Ghostscript> distribution.  Another similar tool is
+C<unprotoize>, distributed with GCC.  Since C<unprotoize> requires GCC to
+run, you may have to run it on a platform where GCC is available, and move
+the sources back to the platform without GCC.
+
+If you succeed in automatically converting the sources to a K&R compatible
+form, be sure to email perlbug@perl.com to let us know the steps you
+followed.  This will enable us to officially support this option.
+
 =head1 Space Requirements
 
 The complete perl5 source tree takes up about 10 MB of disk space.  The
