@@ -14,13 +14,12 @@
 # Note that during the .obj compile you need to move the perl.dll file
 # to LIBPATH :-(
 
-# Should be done automatically by Configure now:
-bin_sh=`../UU/loc sh.exe /bin c:/bin d:/bin e:/bin f:/bin g:/bin h:/bin /bin`
-echo "####### Shell found at $bin_sh #############" >&4
-sh="$bin_sh"
-startsh="#!$bin_sh"
+path_sep=\;
 
-#osname="OS/2"
+if test -f $sh.exe; then sh=$sh.exe; fi
+
+startsh="#!$sh"
+
 sysman=`../UU/loc . /man/man1 c:/man/man1 c:/usr/man/man1 d:/man/man1 d:/usr/man/man1 e:/man/man1 e:/usr/man/man1 f:/man/man1 f:/usr/man/man1 g:/man/man1 g:/usr/man/man1 /usr/man/man1`
 cc='gcc'
 usrinc='/emx/include'
@@ -107,10 +106,7 @@ fi
 libs='-lsocket -lm'
 archobjs="os2$obj_ext dl_os2$obj_ext"
 
-# Run files without extension with sh - feature of patched ksh
-# [???]
-# NOHASHBANG=sh
-# Same with newer ksh
+# Run files without extension with sh:
 EXECSHELL=sh
 
 cccdlflags='-Zdll'
