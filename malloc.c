@@ -1035,6 +1035,16 @@ extern	Malloc_t sbrk(int);
 #ifndef NO_MALLOC_DYNAMIC_CFG
 #  define PERL_MALLOC_OPT_CHARS "FMfAPGdac"
 
+#  ifndef FILL_DEAD_DEFAULT
+#    define FILL_DEAD_DEFAULT	1
+#  endif
+#  ifndef FILL_ALIVE_DEFAULT
+#    define FILL_ALIVE_DEFAULT	1
+#  endif
+#  ifndef FILL_CHECK_DEFAULT
+#    define FILL_CHECK_DEFAULT	1
+#  endif
+
 static IV MallocCfg[MallocCfg_last] = {
   FIRST_SBRK,
   MIN_SBRK,
@@ -1042,9 +1052,9 @@ static IV MallocCfg[MallocCfg_last] = {
   SBRK_ALLOW_FAILURES,
   SBRK_FAILURE_PRICE,
   SBRK_ALLOW_FAILURES * SBRK_FAILURE_PRICE,	/* sbrk_goodness */
-  1,			/* FILL_DEAD */
-  1,			/* FILL_ALIVE */
-  1,			/* FILL_CHECK */
+  FILL_DEAD_DEFAULT,	/* FILL_DEAD */
+  FILL_ALIVE_DEFAULT,	/* FILL_ALIVE */
+  FILL_CHECK_DEFAULT,	/* FILL_CHECK */
   0,			/* MallocCfg_skip_cfg_env */
   0,			/* MallocCfg_cfg_env_read */
   0,			/* MallocCfg_emergency_buffer_size */
