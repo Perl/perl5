@@ -245,7 +245,7 @@ sub test_things {
   # local $Storable::DEBUGME = 1;
   # This is the delayed croak
   test_corrupt ($copy, $sub,
-                "/^Storable binary image v$header->{major}.$minor4 contains data of type 255. This Storable is v$header->{major}.$header->{minor} and can only handle data types up to 25/",
+                "/^Storable binary image v$header->{major}.$minor4 contains data of type 255. This Storable is v$header->{major}.$minor and can only handle data types up to 25/",
                 "bogus tag, minor plus 4");
   # And check again that this croak is not delayed:
   {

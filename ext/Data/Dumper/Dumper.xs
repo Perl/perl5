@@ -595,7 +595,7 @@ DD_dump(pTHX_ SV *val, char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		    keysv = svp ? *svp : sv_mortalcopy(&PL_sv_undef);
 		    key = SvPV(keysv, keylen);
 		    svp = hv_fetch((HV*)ival, key,
-                                   SvUTF8(keysv) ? -keylen : keylen, 0);
+                                   SvUTF8(keysv) ? -(I32)keylen : keylen, 0);
 		    hval = svp ? *svp : sv_mortalcopy(&PL_sv_undef);
 		}
 		else {

@@ -50,7 +50,7 @@ our %EXPORT_TAGS = ( all => [qw()]);
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
 our @EXPORT = qw(
-	
+async	
 );
 our $VERSION = '0.99';
 
@@ -58,6 +58,11 @@ our $VERSION = '0.99';
 sub equal {
     return 1 if($_[0]->tid() == $_[1]->tid());
     return 0;
+}
+
+sub async (&;@) {
+    my $cref = shift;
+    return threads->new($cref,@_);
 }
 
 $threads::threads = 1;
@@ -161,6 +166,13 @@ However this is highly depending on the underlying thread implmentation.
 =item threads->list();
 
 This will return a list of all non joined, non detached threads.
+
+=item async BLOCK;
+
+C<async> creates a thread to execute the block immediately following
+it.  This block is treated as an anonymous sub, and so must have a
+semi-colon after the closing brace. Like C<threads-&gt;new>, C<async>
+returns a thread object.
 
 =back
 

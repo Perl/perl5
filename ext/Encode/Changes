@@ -1,9 +1,20 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.70 2002/05/06 10:26:48 dankogai Exp dankogai $
+# $Id: Changes,v 1.71 2002/05/07 16:22:42 dankogai Exp dankogai $
 #
 
-$Revision: 1.70 $ $Date: 2002/05/06 10:26:48 $
+$Revision: 1.71 $ $Date: 2002/05/07 16:22:42 $
+! Encode.xs
+  even more typecasts by Robin
+  Message-Id: <200205071513.QAA05846@tempest.npl.co.uk>
+! bin/enc2xs
+  A very strange bug that was causing a bugus ucm -> C table
+  generation that was revealed by a UCM file that Andreas was
+  working.  This is the king of wierdest bug I've encountered
+  in the course of Encode maintainance.
+  Message-Id: <6C04F0FA-61D4-11D6-B164-00039301D480@dan.co.jp>
+
+1.70 2002/05/06 10:26:48
 ! encoding.pm
   Made more 'module-safe' with conjunction w/ 'no encoding'.
   Message-Id: <EAB48C16-60DA-11D6-9982-00039301D480@dan.co.jp>
@@ -618,7 +629,7 @@ $Revision: 1.70 $ $Date: 2002/05/06 10:26:48 $
   Typo fixes and improvements by jhi
   Message-Id: <200204010201.FAA03564@alpha.hut.fi>, et al.
 
-1.11  $Date: 2002/05/06 10:26:48 $
+1.11  $Date: 2002/05/07 16:22:42 $
 + t/encoding.t
 + t/jperl.t
 ! MANIFEST
@@ -1094,3 +1105,5 @@ $Revision: 1.70 $ $Date: 2002/05/06 10:26:48 $
     Autrijus, you may fix Encode::HanExtra.
 + t/CJKalias.t
   + to test encode aliases added
+
+ LocalWords:  maintainance

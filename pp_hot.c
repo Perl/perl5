@@ -1643,13 +1643,25 @@ PP(pp_helem)
     I32 preeminent = 0;
 
     if (SvTYPE(hv) == SVt_PVHV) {
-	if (PL_op->op_private & OPpLVAL_INTRO)
+	if (PL_op->op_private & OPpLVAL_INTRO) {
+	    MAGIC *mg;
+	    HV *stash;
+	    /* does the element we're localizing already exist? */
 	    preeminent =  
-		( SvRMAGICAL(hv)
-		  && !mg_find((SV*)hv, PERL_MAGIC_tied)
-		  && !mg_find((SV*)hv, PERL_MAGIC_env)
-		) ? 1 : hv_exists_ent(hv, keysv, 0);
+		/* can we determine whether it exists? */
+		(    !SvRMAGICAL(hv)
+		  || mg_find((SV*)hv, PERL_MAGIC_env)
+		  || (     (mg = mg_find((SV*)hv, PERL_MAGIC_tied))
+			/* Try to preserve the existenceness of a tied hash
+			 * element by using EXISTS and DELETE if possible.
+			 * Fallback to FETCH and STORE otherwise */
+			&& (stash = SvSTASH(SvRV(SvTIED_obj((SV*)hv, mg))))
+			&& gv_fetchmethod_autoload(stash, "EXISTS", TRUE)
+			&& gv_fetchmethod_autoload(stash, "DELETE", TRUE)
+		    )
+		) ? hv_exists_ent(hv, keysv, 0) : 1;
 
+	}
 	he = hv_fetch_ent(hv, keysv, lval && !defer, hash);
 	svp = he ? &HeVAL(he) : 0;
     }
@@ -1687,17 +1699,8 @@ PP(pp_helem)
 		    STRLEN keylen;
 		    char *key = SvPV(keysv, keylen);
 		    SAVEDELETE(hv, savepvn(key,keylen), keylen);
-		} else {
-		    SV *sv;
+		} else
 		    save_helem(hv, keysv, svp);
-		    sv = *svp;
-		    /* If we're localizing a tied hash element, this new
-		     * sv won't actually be stored in the hash - so it
-		     * won't get reaped when the localize ends. Ensure it
-		     * gets reaped by mortifying it instead. DAPM */
-		    if (SvTIED_mg(sv, PERL_MAGIC_tiedelem))
-			sv_2mortal(sv);
-		}
             }
 	}
 	else if (PL_op->op_private & OPpDEREF)
@@ -2952,17 +2955,8 @@ PP(pp_aelem)
 	    PUSHs(lv);
 	    RETURN;
 	}
-	if (PL_op->op_private & OPpLVAL_INTRO) {
-	    SV *sv;
+	if (PL_op->op_private & OPpLVAL_INTRO)
 	    save_aelem(av, elem, svp);
-	    sv = *svp;
-	    /* If we're localizing a tied array element, this new sv
-	     * won't actually be stored in the array - so it won't get
-	     * reaped when the localize ends. Ensure it gets reaped by
-	     * mortifying it instead. DAPM */
-	    if (SvTIED_mg(sv, PERL_MAGIC_tiedelem))
-		sv_2mortal(sv);
-	}
 	else if (PL_op->op_private & OPpDEREF)
 	    vivify_ref(*svp, PL_op->op_private & OPpDEREF);
     }

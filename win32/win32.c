@@ -4021,7 +4021,7 @@ win32_free(void *block)
 }
 
 
-int
+DllExport int
 win32_open_osfhandle(intptr_t handle, int flags)
 {
 #ifdef USE_FIXED_OSFHANDLE
@@ -4031,13 +4031,13 @@ win32_open_osfhandle(intptr_t handle, int flags)
     return _open_osfhandle(handle, flags);
 }
 
-intptr_t
+DllExport intptr_t
 win32_get_osfhandle(int fd)
 {
     return (intptr_t)_get_osfhandle(fd);
 }
 
-FILE *
+DllExport FILE *
 win32_fdupopen(FILE *pf)
 {
     FILE* pfdup;
@@ -4654,20 +4654,25 @@ Perl_init_os_extras(void)
      */
 }
 
-#ifdef MULTIPLICITY
-
-PerlInterpreter *
+void *
 win32_signal_context(void)
 {
     dTHX;
+#ifdef MULTIPLICITY
     if (!my_perl) {
 	my_perl = PL_curinterp;
 	PERL_SET_THX(my_perl);
     }
     return my_perl;
+#else
+#ifdef USE_5005THREADS
+    return aTHX;
+#else
+    return PL_curinterp;
+#endif
+#endif
 }
 
-#endif
 
 BOOL WINAPI
 win32_ctrlhandler(DWORD dwCtrlType)
@@ -4677,6 +4682,10 @@ win32_ctrlhandler(DWORD dwCtrlType)
 
     if (!my_perl)
 	return FALSE;
+#else
+#ifdef USE_5005THREADS
+    dTHX;
+#endif
 #endif
 
     switch(dwCtrlType) {
