@@ -8,7 +8,7 @@
 #
 # Consolidated by Andy Dougherty <doughera@lafcol.lafayette.edu>
 #
-# Updated Tue May 30 14:25:02 EDT 1995
+# Updated Thu Feb  8 11:56:10 EST 1996
 # Add ability to use command-line overrides for optinal settings.
 
 # perl goes into the /usr tree.  See the Filesystem Standard
@@ -27,11 +27,6 @@ ccflags="-D__USE_BSD_SIGNAL -Dbool=char -DHAS_BOOL $ccflags"
 # Configure may fail to find lstat() since it's a static/inline
 # function in <sys/stat.h>.
 d_lstat=define
-
-# Explanation?
-case "$d_dosuid" in
-'') d_dosuid='define' ;;
-esac
 
 # I think Configure gets this right now, but I'd appreciate reports.
 malloctype='void *'
@@ -112,6 +107,20 @@ fi
 # causes AnyDBM and NDBM_File to lock up. This is evidenced in the tests as
 # AnyDBM just freezing.  Currently we disable NDBM for all linux systems.
 # If someone can suggest a more robust test, that would be appreciated.
+#
+# More info:
+# Date: Wed, 7 Feb 1996 03:21:04 +0900
+# From: Jeffrey Friedl <jfriedl@nff.ncl.omron.co.jp>
+#
+# I tried compiling with DBM support and sure enough things locked up
+# just as advertised. Checking into it, I found that the lockup was
+# during the call to dbm_open. Not *in* dbm_open -- but between the call
+# to and the jump into.
+# 
+# To make a long story short, making sure that the *.a and *.sa pairs of
+#   /usr/lib/lib{m,db,gdbm}.{a,sa}
+# were perfectly in sync took care of it.
+#
 # This will generate a harmless message:
 # Hmm...You had some extra variables I don't know about...I'll try to keep 'em.
 #	Propagating recommended variable d_dbm_open
