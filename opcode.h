@@ -1482,7 +1482,7 @@ EXT OP * (CPERLscope(*PL_check)[]) _((OP *op)) = {
 	ck_null,	/* schop */
 	ck_spair,	/* chomp */
 	ck_null,	/* schomp */
-	ck_rfun,	/* defined */
+	ck_defined,	/* defined */
 	ck_lfun,	/* undef */
 	ck_fun,		/* study */
 	ck_lfun,	/* pos */
