@@ -121,6 +121,13 @@ case "$osvers" in
 	;;
 esac
 
+case "$osvers" in
+4.0*)
+	if /usr/bin/file /usr/lib/libc.so.3 | /usr/bin/grep -vq "not stripped" ; then
+	    usenm=false
+	fi
+esac
+
 cat <<'EOM' >&4
 
 Some users have reported that Configure halts when testing for
@@ -164,7 +171,7 @@ esac
 cat > UU/usethreads.cbu <<'EOCBU'
 case "$usethreads" in
 $define|true|[yY]*)
-        lc_r=`/sbin/ldconfig -r|grep ':-lc_r'|awk '{print $NF}'`
+        lc_r=`/sbin/ldconfig -r|grep ':-lc_r'|awk '{print $NF}'|tail -1`
         case "$osvers" in  
 	2.2.8*|3.*|4.*)
 	      if [ ! -r "$lc_r" ]; then
