@@ -6,7 +6,7 @@ use strict;
 
 use vars qw/$VERSION/;
 
-$VERSION = '0.41';
+$VERSION = '0.42';
 
 # Package to store unsigned big integers in decimal and do math with them
 
@@ -1151,7 +1151,7 @@ sub _rsft
   my $dst = 0;				# destination
   my $src = _num($c,$y);		# as normal int
   my $xlen = (@$x-1)*$BASE_LEN+length(int($x->[-1]));  # len of x in digits
-  if ($src > $xlen or ($src == $xlen and ! defined $x->[1]))
+  if ($src >= $xlen or ($src == $xlen and ! defined $x->[1]))
     {
     # 12345 67890 shifted right by more than 10 digits => 0
     splice (@$x,1);                    # leave only one element

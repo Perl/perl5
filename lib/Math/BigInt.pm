@@ -18,7 +18,7 @@ package Math::BigInt;
 my $class = "Math::BigInt";
 require 5.005;
 
-$VERSION = '1.71';
+$VERSION = '1.72';
 use Exporter;
 @ISA =       qw( Exporter );
 @EXPORT_OK = qw( objectify bgcd blcm); 

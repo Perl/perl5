@@ -12,7 +12,7 @@ package Math::BigFloat;
 #   _a	: accuracy
 #   _p	: precision
 
-$VERSION = '1.45';
+$VERSION = '1.46';
 require 5.005;
 
 require Exporter;
@@ -745,7 +745,16 @@ sub blog
     return $x->bnan() if $base->is_zero() || $base->is_one() ||
       $base->{sign} ne '+';
     # if $x == $base, we know the result must be 1.0
-    return $x->bone('+',@params) if $x->bcmp($base) == 0;
+    if ($x->bcmp($base) == 0)
+      {
+      $x->bone('+',@params);
+      if ($fallback)
+        {
+        # clear a/p after round, since user did not request it
+        delete $x->{_a}; delete $x->{_p};
+        }
+      return $x;
+      }
     }
 
   # when user set globals, they would interfere with our calculation, so
