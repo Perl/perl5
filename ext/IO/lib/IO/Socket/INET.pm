@@ -156,6 +156,11 @@ sub configure {
 		    return _error($sock, $!, "$!");
 	}
 
+	if ($arg->{ReusePort}) {
+	    $sock->sockopt(SO_REUSEPORT,1) or
+		    return _error($sock, $!, "$!");
+	}
+
 	if($lport || ($laddr ne INADDR_ANY) || exists $arg->{Listen}) {
 	    $sock->bind($lport || 0, $laddr) or
 		    return _error($sock, $!, "$!");
@@ -303,6 +308,7 @@ C<IO::Socket::INET> provides.
     Type	Socket type                  SOCK_STREAM | SOCK_DGRAM | ...
     Listen	Queue size for listen
     Reuse	Set SO_REUSEADDR before binding
+    ReusePort	Set SO_REUSEPORT before binding
     Timeout	Timeout	value for various operations
     MultiHomed  Try all adresses for multi-homed hosts
 
