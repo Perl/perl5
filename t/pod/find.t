@@ -49,8 +49,6 @@ my %pods = pod_find($lib_dir);
 my $result = join(',', sort values %pods);
 my $compare = join(',', sort qw(
     Pod::Stuff
-    Pod::Rhubarb
-    Like::And::Yeah
 ));
 if ($^O eq 'VMS') {
     $compare = lc($compare);
