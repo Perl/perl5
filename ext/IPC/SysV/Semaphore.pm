@@ -88,7 +88,7 @@ sub op {
     @_ >= 4 || croak '$sem->op( OPLIST )';
     my $self = shift;
     croak 'Bad arg count' if @_ % 3;
-    my $data = pack("s*",@_);
+    my $data = pack("s!*",@_);
     semop($$self,$data);
 }
 
@@ -126,12 +126,12 @@ sub getall {
     my $data = "";
     semctl($$self,0,GETALL,$data)
 	or return ();
-    (unpack("s*",$data));
+    (unpack("s!*",$data));
 }
 
 sub setall {
     my $self = shift;
-    my $data = pack("s*",@_);
+    my $data = pack("s!*",@_);
     semctl($$self,0,SETALL,$data);
 }
 
