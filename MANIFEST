@@ -2726,6 +2726,7 @@ t/op/subst_amp.t		See if $&-related substitution works
 t/op/subst_wamp.t		See if substitution works with $& present
 t/op/sub_lval.t			See if lvalue subroutines work
 t/op/sysio.t			See if sysread and syswrite work
+t/op/sysio-compat.t		See if sys*() are compatible on dosish systems
 t/op/taint.t			See if tainting works
 t/op/tie.t			See if tie/untie functions work
 t/op/tiearray.t			See if tie for arrays works
