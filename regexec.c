@@ -1881,7 +1881,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    }
 	    sayNO;
 	case SBOL:
-	    if (locinput == PL_regbol && PL_regprev == '\n')
+	    if (locinput == PL_bostr)
 		break;
 	    sayNO;
 	case GPOS:
