@@ -1,4 +1,4 @@
-/* $Id: Base64.xs,v 1.41 2004/01/08 14:07:26 gisle Exp $
+/* $Id: Base64.xs,v 3.0 2004/01/14 11:59:07 gisle Exp $
 
 Copyright 1997-2004 Gisle Aas
 
@@ -98,6 +98,10 @@ static unsigned char index_64[256] = {
 #   endif
 #else
 #   define SvPVbyte SvPV
+#endif
+
+#ifndef isXDIGIT
+#   define isXDIGIT isxdigit
 #endif
 
 #ifndef NATIVE_TO_ASCII
@@ -341,7 +345,7 @@ encode_qp(sv,...)
 	    }
 	    else {
 		/* output escaped char (with line breaks) */
-	        assert(p < end)
+	        assert(p < end);
 		if (eol_len && linelen > MAX_LINE - 4) {
 		    sv_catpvn(RETVAL, "=", 1);
 		    sv_catpvn(RETVAL, eol, eol_len);
