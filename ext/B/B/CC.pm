@@ -73,11 +73,6 @@ BEGIN {
     }
 }
 
-my @unused_sub_packages; # list of packages (given by -u options) to search
-			 # explicitly and save every sub we find there, even
-			 # if apparently unused (could be only referenced from
-			 # an eval "" or from a $SIG{FOO} = "bar").
-
 my ($module_name);
 my ($debug_op, $debug_stack, $debug_cxstack, $debug_pad, $debug_runtime,
     $debug_shadow, $debug_queue, $debug_lineno, $debug_timings);
@@ -200,7 +195,7 @@ sub top_int { @stack ? $stack[-1]->as_int : "TOPi" }
 sub top_double { @stack ? $stack[-1]->as_double : "TOPn" }
 sub top_numeric { @stack ? $stack[-1]->as_numeric : "TOPn" }
 sub top_sv { @stack ? $stack[-1]->as_sv : "TOPs" }
-sub top_bool { @stack ? $stack[-1]->as_numeric : "SvTRUE(TOPs)" }
+sub top_bool { @stack ? $stack[-1]->as_bool : "SvTRUE(TOPs)" }
 
 sub pop_int { @stack ? (pop @stack)->as_int : "POPi" }
 sub pop_double { @stack ? (pop @stack)->as_double : "POPn" }
@@ -208,7 +203,7 @@ sub pop_numeric { @stack ? (pop @stack)->as_numeric : "POPn" }
 sub pop_sv { @stack ? (pop @stack)->as_sv : "POPs" }
 sub pop_bool {
     if (@stack) {
-	return ((pop @stack)->as_numeric);
+	return ((pop @stack)->as_bool);
     } else {
 	# Careful: POPs has an auto-decrement and SvTRUE evaluates
 	# its argument more than once.
@@ -1494,7 +1489,7 @@ sub compile {
 	} elsif ($opt eq "m") {
 	    $arg ||= shift @options;
 	    $module = $arg;
-	    push(@unused_sub_packages, $arg);
+	    mark_unused($arg,undef);
 	} elsif ($opt eq "p") {
 	    $arg ||= shift @options;
 	    $patchlevel = $arg;
