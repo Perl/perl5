@@ -2609,7 +2609,7 @@ PerlIOStdio_mode(const char *mode, char *tmode)
     while (*mode) {
 	*tmode++ = *mode++;
     }
-#ifdef PERLIO_USING_CRLF
+#if defined(PERLIO_USING_CRLF) || defined(__CYGWIN__)
     *tmode++ = 'b';
 #endif
     *tmode = '\0';
@@ -2710,15 +2710,23 @@ PerlIOStdio_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 		fd = PerlLIO_open3(path, imode, perm);
 	    }
 	    else {
-		FILE *stdio = PerlSIO_fopen(path, mode);
+	        FILE *stdio;
+	        bool appended = FALSE;
+#ifdef __CYGWIN__
+		/* Cygwin wants its 'b' early. */
+		appended = TRUE;
+		mode = PerlIOStdio_mode(mode, tmode);
+#endif
+		stdio = PerlSIO_fopen(path, mode);
 		if (stdio) {
 		    PerlIOStdio *s;
 		    if (!f) {
 			f = PerlIO_allocate(aTHX);
 		    }
-		    if ((f = PerlIO_push(aTHX_ f, self,
-				    (mode = PerlIOStdio_mode(mode, tmode)),
-				    PerlIOArg))) {
+		    if (!appended)
+		        mode = PerlIOStdio_mode(mode, tmode);
+		    f = PerlIO_push(aTHX_ f, self, mode, PerlIOArg);
+		    if (f) {
 			s = PerlIOSelf(f, PerlIOStdio);
 			s->stdio = stdio;
 			PerlIOUnix_refcnt_inc(fileno(s->stdio));
