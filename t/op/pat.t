@@ -282,14 +282,7 @@ eval qq("${context}y" =~ /(?<=$context)y/);
 print "not " if $@ !~ m%^\Q/(?<=\Ex+/: lookbehind longer than 255 not%;
 print "ok 71\n";
 
-# This one will fail when POSIX character classes do get implemented
-{
-	my $w;
-	local $^W = 1;
-	local $SIG{__WARN__} = sub{$w = shift};
-	eval q('a' =~ /[[:alpha:]]/);
-	print "not " if $w !~ /^\QCharacter class syntax [: :] is reserved/;
-}
+# removed test
 print "ok 72\n";
 
 # Long Monsters

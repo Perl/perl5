@@ -163,6 +163,9 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 #define LOC (PL_regflags & PMf_LOCALE)
 #define FOLD (PL_regflags & PMf_FOLD)
 
+#define OOB_CHAR8		1234
+#define OOB_UTF8		123456
+
 #define CHR_SVLEN(sv) (UTF ? sv_len_utf8(sv) : SvCUR(sv))
 #define CHR_DIST(a,b) (UTF ? utf8_distance(a,b) : a - b)
 
@@ -2093,12 +2096,17 @@ S_regwhite(pTHX_ char *p, char *e)
     return p;
 }
 
-/* parse POSIX character classes like [[:foo:]] */
-STATIC char*
+/* Parse POSIX character classes: [[:foo:]], [[=foo=]], [[.foo.]].
+   Character classes ([:foo:]) can also be negated ([:^foo:]).
+   Returns a named class id (ANYOF_XXX) if successful, -1 otherwise.
+   Equivalence classes ([=foo=]) and composites ([.foo.]) are parsed,
+   but trigger warnings because they are currently unimplemented. */
+STATIC I32
 S_regpposixcc(pTHX_ I32 value)
 {
     dTHR;
     char *posixcc = 0;
+    I32 namedclass = -1;
 
     if (value == '[' && PL_regcomp_parse + 1 < PL_regxend &&
 	/* I smell either [: or [= or [. -- POSIX has been here, right? */
@@ -2114,26 +2122,120 @@ S_regpposixcc(pTHX_ I32 value)
 	    /* Grandfather lone [:, [=, [. */
 	    PL_regcomp_parse = s;
 	else {
-	    PL_regcomp_parse++; /* skip over the c */
-	    if (*PL_regcomp_parse == ']') {
-		/* Not Implemented Yet.
-		 * (POSIX Extended Character Classes, that is)
-		 * The text between e.g. [: and :] would start
-		 * at s + 1 and stop at regcomp_parse - 2. */
-		if (ckWARN(WARN_UNSAFE) && !SIZE_ONLY)
+	    char* t = PL_regcomp_parse++; /* skip over the c */
+
+  	    if (*PL_regcomp_parse == ']') {
+  		PL_regcomp_parse++; /* skip over the ending ] */
+  		posixcc = s + 1;
+		if (*s == ':') {
+		    I32 complement = *posixcc == '^' ? *posixcc++ : 0;
+		    I32 skip = 5; /* the most common skip */
+
+		    switch (*posixcc) {
+		    case 'a':
+			if (strnEQ(posixcc, "alnum", 5))
+			    namedclass =
+				complement ? ANYOF_NALNUMC : ANYOF_ALNUMC;
+			else if (strnEQ(posixcc, "alpha", 5))
+			    namedclass =
+				complement ? ANYOF_NALPHA : ANYOF_ALPHA;
+			else if (strnEQ(posixcc, "ascii", 5))
+			    namedclass =
+				complement ? ANYOF_NASCII : ANYOF_ASCII;
+			break;
+		    case 'c':
+			if (strnEQ(posixcc, "cntrl", 5))
+			    namedclass =
+				complement ? ANYOF_NCNTRL : ANYOF_CNTRL;
+			break;
+		    case 'd':
+			if (strnEQ(posixcc, "digit", 5))
+			    namedclass =
+				complement ? ANYOF_NDIGIT : ANYOF_DIGIT;
+			break;
+		    case 'g':
+			if (strnEQ(posixcc, "graph", 5))
+			    namedclass =
+				complement ? ANYOF_NGRAPH : ANYOF_GRAPH;
+			break;
+		    case 'l':
+			if (strnEQ(posixcc, "lower", 5))
+			    namedclass =
+				complement ? ANYOF_NLOWER : ANYOF_LOWER;
+			break;
+		    case 'p':
+			if (strnEQ(posixcc, "print", 5))
+			    namedclass =
+				complement ? ANYOF_NPRINT : ANYOF_PRINT;
+			else if (strnEQ(posixcc, "punct", 5))
+			    namedclass =
+				complement ? ANYOF_NPUNCT : ANYOF_PUNCT;
+			break;
+		    case 's':
+			if (strnEQ(posixcc, "space", 5))
+			    namedclass =
+				complement ? ANYOF_NSPACE : ANYOF_SPACE;
+		    case 'u':
+			if (strnEQ(posixcc, "upper", 5))
+			    namedclass =
+				complement ? ANYOF_NUPPER : ANYOF_UPPER;
+ 			break;
+		    case 'w': /* this is not POSIX, this is the Perl \w */
+			if (strnEQ(posixcc, "word", 4)) {
+			    namedclass =
+				complement ? ANYOF_NALNUM : ANYOF_ALNUM;
+			    skip = 4;
+			}
+			break;
+		    case 'x':
+			if (strnEQ(posixcc, "xdigit", 6)) {
+			    namedclass =
+				complement ? ANYOF_NXDIGIT : ANYOF_XDIGIT;
+			    skip = 6;
+			}
+			break;
+		    }
+		    if ((namedclass == -1 ||
+			 !(posixcc + skip + 2 < PL_regxend &&
+			   (posixcc[skip] == ':' &&
+			    posixcc[skip + 1] == ']'))))
+			Perl_croak(aTHX_ "Character class [:%.*s:] unknown",
+				   t - s - 1, s + 1); 
+		} else if (ckWARN(WARN_UNSAFE) && !SIZE_ONLY)
+		    /* [[=foo=]] and [[.foo.]] are still future. */
 		    Perl_warner(aTHX_ WARN_UNSAFE,
-			   "Character class syntax [%c %c] is reserved for future extensions", c, c);
-		PL_regcomp_parse++; /* skip over the ending ] */
-		posixcc = s + 1;
-	    }
-	    else {
-		/* maternal grandfather */
+				"Character class syntax [%c %c] is reserved for future extensions", c, c);
+	    } else {
+		/* Maternal grandfather:
+		 * "[:" ending in ":" but not in ":]" */
 		PL_regcomp_parse = s;
 	    }
 	}
     }
 
-    return posixcc;
+    return namedclass;
+}
+
+STATIC void
+S_checkposixcc(pTHX)
+{
+    if (ckWARN(WARN_UNSAFE) && !SIZE_ONLY &&
+	(*PL_regcomp_parse == ':' ||
+	 *PL_regcomp_parse == '=' ||
+	 *PL_regcomp_parse == '.')) {
+	char *s = PL_regcomp_parse;
+	char  c = *s++;
+
+	while(*s && isALNUM(*s))
+	    s++;
+	if (*s && c == *s && s[1] == ']') {
+	    Perl_warner(aTHX_ WARN_UNSAFE,
+			"Character class syntax [%c %c] belongs inside character classes", c, c);
+	    if (c == '=' || c == '.')
+		Perl_warner(aTHX_ WARN_UNSAFE,
+			    "Character class syntax [%c %c] is reserved for future extensions", c, c);
+	}
+    }
 }
 
 STATIC regnode *
@@ -2142,127 +2244,60 @@ S_regclass(pTHX)
     dTHR;
     register char *opnd, *s;
     register I32 value;
-    register I32 lastvalue = 1234;
+    register I32 lastvalue = OOB_CHAR8;
     register I32 range = 0;
     register regnode *ret;
     register I32 def;
     I32 numlen;
+    I32 namedclass;
 
     s = opnd = (char *) OPERAND(PL_regcode);
     ret = reg_node(ANYOF);
-    for (value = 0; value < 33; value++)
+    for (value = 0; value < ANYOF_SIZE; value++)
 	regc(0, s++);
     if (*PL_regcomp_parse == '^') {	/* Complement of range. */
 	PL_regnaughty++;
 	PL_regcomp_parse++;
 	if (!SIZE_ONLY)
-	    *opnd |= ANYOF_INVERT;
+	    ANYOF_FLAGS(opnd) |= ANYOF_INVERT;
     }
     if (!SIZE_ONLY) {
  	PL_regcode += ANY_SKIP;
 	if (FOLD)
-	    *opnd |= ANYOF_FOLD;
+	    ANYOF_FLAGS(opnd) |= ANYOF_FOLD;
 	if (LOC)
-	    *opnd |= ANYOF_LOCALE;
+	    ANYOF_FLAGS(opnd) |= ANYOF_LOCALE;
     }
     else {
 	PL_regsize += ANY_SKIP;
     }
+
+    checkposixcc();
+
     if (*PL_regcomp_parse == ']' || *PL_regcomp_parse == '-')
 	goto skipcond;		/* allow 1st char to be ] or - */
     while (PL_regcomp_parse < PL_regxend && *PL_regcomp_parse != ']') {
        skipcond:
+	namedclass = -1;
 	value = UCHARAT(PL_regcomp_parse++);
 	if (value == '[')
-	    (void)regpposixcc(value); /* ignore the return value for now */
+	    namedclass = regpposixcc(value);
 	else if (value == '\\') {
 	    value = UCHARAT(PL_regcomp_parse++);
 	    switch (value) {
-	    case 'w':
-		if (!SIZE_ONLY) {
-		    if (LOC)
-			*opnd |= ANYOF_ALNUML;
-		    else {
-			for (value = 0; value < 256; value++)
-			    if (isALNUM(value))
-				ANYOF_SET(opnd, value);
-		    }
-		}
-		lastvalue = 1234;
-		continue;
-	    case 'W':
-		if (!SIZE_ONLY) {
-		    if (LOC)
-			*opnd |= ANYOF_NALNUML;
-		    else {
-			for (value = 0; value < 256; value++)
-			    if (!isALNUM(value))
-				ANYOF_SET(opnd, value);
-		    }
-		}
-		lastvalue = 1234;
-		continue;
-	    case 's':
-		if (!SIZE_ONLY) {
-		    if (LOC)
-			*opnd |= ANYOF_SPACEL;
-		    else {
-			for (value = 0; value < 256; value++)
-			    if (isSPACE(value))
-				ANYOF_SET(opnd, value);
-		    }
-		}
-		lastvalue = 1234;
-		continue;
-	    case 'S':
-		if (!SIZE_ONLY) {
-		    if (LOC)
-			*opnd |= ANYOF_NSPACEL;
-		    else {
-			for (value = 0; value < 256; value++)
-			    if (!isSPACE(value))
-				ANYOF_SET(opnd, value);
-		    }
-		}
-		lastvalue = 1234;
-		continue;
-	    case 'd':
-		if (!SIZE_ONLY) {
-		    for (value = '0'; value <= '9'; value++)
-			ANYOF_SET(opnd, value);
-		}
-		lastvalue = 1234;
-		continue;
-	    case 'D':
-		if (!SIZE_ONLY) {
-		    for (value = 0; value < '0'; value++)
-			ANYOF_SET(opnd, value);
-		    for (value = '9' + 1; value < 256; value++)
-			ANYOF_SET(opnd, value);
-		}
-		lastvalue = 1234;
-		continue;
-	    case 'n':
-		value = '\n';
-		break;
-	    case 'r':
-		value = '\r';
-		break;
-	    case 't':
-		value = '\t';
-		break;
-	    case 'f':
-		value = '\f';
-		break;
-	    case 'b':
-		value = '\b';
-		break;
-	    case 'e':
-		value = '\033';
-		break;
-	    case 'a':
-		value = '\007';
-		break;
+	    case 'w':	namedclass = ANYOF_ALNUM;	break;
+	    case 'W':	namedclass = ANYOF_NALNUM;	break;
+	    case 's':	namedclass = ANYOF_SPACE;	break;
+	    case 'S':	namedclass = ANYOF_NSPACE;	break;
+	    case 'd':	namedclass = ANYOF_DIGIT;	break;
+	    case 'D':	namedclass = ANYOF_NDIGIT;	break;
+	    case 'n':	value = '\n';			break;
+	    case 'r':	value = '\r';			break;
+	    case 't':	value = '\t';			break;
+	    case 'f':	value = '\f';			break;
+	    case 'b':	value = '\b';			break;
+	    case 'e':	value = '\033';			break;
+	    case 'a':	value = '\007';			break;
 	    case 'x':
 		value = scan_hex(PL_regcomp_parse, 2, &numlen);
 		PL_regcomp_parse += numlen;
@@ -2278,6 +2313,250 @@ S_regclass(pTHX)
 		break;
 	    }
 	}
+	if (!SIZE_ONLY && namedclass > -1) {
+	    switch (namedclass) {
+	    case ANYOF_ALNUM:
+		if (LOC)
+		    ANYOF_CLASS_SET(opnd, ANYOF_ALNUM);
+		else {
+		    for (value = 0; value < 256; value++)
+			if (isALNUM(value))
+			    ANYOF_BITMAP_SET(opnd, value);
+		}
+		break;
+	    case ANYOF_NALNUM:
+		if (LOC)
+		    ANYOF_CLASS_SET(opnd, ANYOF_NALNUM);
+		else {
+		    for (value = 0; value < 256; value++)
+			if (!isALNUM(value))
+			    ANYOF_BITMAP_SET(opnd, value);
+		}
+		break;
+	    case ANYOF_SPACE:
+		if (LOC)
+		    ANYOF_CLASS_SET(opnd, ANYOF_SPACE);
+		else {
+		    for (value = 0; value < 256; value++)
+			if (isSPACE(value))
+			    ANYOF_BITMAP_SET(opnd, value);
+		}
+		break;
+	    case ANYOF_NSPACE:
+		if (LOC)
+		    ANYOF_CLASS_SET(opnd, ANYOF_NSPACE);
+		else {
+		    for (value = 0; value < 256; value++)
+			if (!isSPACE(value))
+			    ANYOF_BITMAP_SET(opnd, value);
+		}
+		break;
+	    case ANYOF_DIGIT:
+		if (LOC)
+		    ANYOF_CLASS_SET(opnd, ANYOF_DIGIT);
+		else {
+		    for (value = '0'; value <= '9'; value++)
+			ANYOF_BITMAP_SET(opnd, value);
+		}
+		break;
+	    case ANYOF_NDIGIT:
+		if (LOC)
+		    ANYOF_CLASS_SET(opnd, ANYOF_NDIGIT);
+		else {
+		    for (value = 0; value < '0'; value++)
+			ANYOF_BITMAP_SET(opnd, value);
+		    for (value = '9' + 1; value < 256; value++)
+			ANYOF_BITMAP_SET(opnd, value);
+		}
+		break;
+	    case ANYOF_NALNUMC:
+		if (LOC)
+		    ANYOF_CLASS_SET(opnd, ANYOF_NALNUMC);
+		else {
+		    for (value = 0; value < 256; value++)
+			if (!isALNUMC(value))
+			    ANYOF_BITMAP_SET(opnd, value);
+		}
+		break;
+	    case ANYOF_ALNUMC:
+		if (LOC)
+		    ANYOF_CLASS_SET(opnd, ANYOF_ALNUMC);
+		else {
+		    for (value = 0; value < 256; value++)
+			if (isALNUMC(value))
+			    ANYOF_BITMAP_SET(opnd, value);
+		}
+		break;
+	    case ANYOF_ALPHA:
+		if (LOC)
+		    ANYOF_CLASS_SET(opnd, ANYOF_ALPHA);
+		else {
+		    for (value = 0; value < 256; value++)
+			if (isALPHA(value))
+			    ANYOF_BITMAP_SET(opnd, value);
+		}
+		break;
+	    case ANYOF_NALPHA:
+		if (LOC)
+		    ANYOF_CLASS_SET(opnd, ANYOF_NALPHA);
+		else {
+		    for (value = 0; value < 256; value++)
+			if (!isALPHA(value))
+			    ANYOF_BITMAP_SET(opnd, value);
+		}
+		break;
+	    case ANYOF_ASCII:
+		if (LOC)
+		    ANYOF_CLASS_SET(opnd, ANYOF_ASCII);
+		else {
+		    for (value = 0; value < 128; value++)
+			ANYOF_BITMAP_SET(opnd, value);
+		}
+		break;
+	    case ANYOF_NASCII:
+		if (LOC)
+		    ANYOF_CLASS_SET(opnd, ANYOF_NASCII);
+		else {
+		    for (value = 128; value < 256; value++)
+			ANYOF_BITMAP_SET(opnd, value);
+		}
+		break;
+	    case ANYOF_CNTRL:
+		if (LOC)
+		    ANYOF_CLASS_SET(opnd, ANYOF_CNTRL);
+		else {
+		    for (value = 0; value < 256; value++)
+			if (isCNTRL(value))
+			    ANYOF_BITMAP_SET(opnd, value);
+		}
+		lastvalue = OOB_CHAR8;
+		break;
+	    case ANYOF_NCNTRL:
+		if (LOC)
+		    ANYOF_CLASS_SET(opnd, ANYOF_NCNTRL);
+		else {
+		    for (value = 0; value < 256; value++)
+			if (!isCNTRL(value))
+			    ANYOF_BITMAP_SET(opnd, value);
+		}
+		break;
+	    case ANYOF_GRAPH:
+		if (LOC)
+		    ANYOF_CLASS_SET(opnd, ANYOF_GRAPH);
+		else {
+		    for (value = 0; value < 256; value++)
+			if (isGRAPH(value))
+			    ANYOF_BITMAP_SET(opnd, value);
+		}
+		break;
+	    case ANYOF_NGRAPH:
+		if (LOC)
+		    ANYOF_CLASS_SET(opnd, ANYOF_NGRAPH);
+		else {
+		    for (value = 0; value < 256; value++)
+			if (!isGRAPH(value))
+			    ANYOF_BITMAP_SET(opnd, value);
+		}
+		break;
+	    case ANYOF_LOWER:
+		if (LOC)
+		    ANYOF_CLASS_SET(opnd, ANYOF_LOWER);
+		else {
+		    for (value = 0; value < 256; value++)
+			if (isLOWER(value))
+			    ANYOF_BITMAP_SET(opnd, value);
+		}
+		break;
+	    case ANYOF_NLOWER:
+		if (LOC)
+		    ANYOF_CLASS_SET(opnd, ANYOF_NLOWER);
+		else {
+		    for (value = 0; value < 256; value++)
+			if (!isLOWER(value))
+			    ANYOF_BITMAP_SET(opnd, value);
+		}
+		break;
+	    case ANYOF_PRINT:
+		if (LOC)
+		    ANYOF_CLASS_SET(opnd, ANYOF_PRINT);
+		else {
+		    for (value = 0; value < 256; value++)
+			if (isPRINT(value))
+			    ANYOF_BITMAP_SET(opnd, value);
+		}
+		break;
+	    case ANYOF_NPRINT:
+		if (LOC)
+		    ANYOF_CLASS_SET(opnd, ANYOF_NPRINT);
+		else {
+		    for (value = 0; value < 256; value++)
+			if (!isPRINT(value))
+			    ANYOF_BITMAP_SET(opnd, value);
+		}
+		break;
+	    case ANYOF_PUNCT:
+		if (LOC)
+		    ANYOF_CLASS_SET(opnd, ANYOF_PUNCT);
+		else {
+		    for (value = 0; value < 256; value++)
+			if (isPUNCT(value))
+			    ANYOF_BITMAP_SET(opnd, value);
+		}
+		break;
+	    case ANYOF_NPUNCT:
+		if (LOC)
+		    ANYOF_CLASS_SET(opnd, ANYOF_NPUNCT);
+		else {
+		    for (value = 0; value < 256; value++)
+			if (!isPUNCT(value))
+			    ANYOF_BITMAP_SET(opnd, value);
+		}
+		break;
+	    case ANYOF_UPPER:
+		if (LOC)
+		    ANYOF_CLASS_SET(opnd, ANYOF_UPPER);
+		else {
+		    for (value = 0; value < 256; value++)
+			if (isUPPER(value))
+			    ANYOF_BITMAP_SET(opnd, value);
+		}
+		break;
+	    case ANYOF_NUPPER:
+		if (LOC)
+		    ANYOF_CLASS_SET(opnd, ANYOF_NUPPER);
+		else {
+		    for (value = 0; value < 256; value++)
+			if (!isUPPER(value))
+			    ANYOF_BITMAP_SET(opnd, value);
+		}
+		break;
+	    case ANYOF_XDIGIT:
+		if (LOC)
+		    ANYOF_CLASS_SET(opnd, ANYOF_XDIGIT);
+		else {
+		    for (value = 0; value < 256; value++)
+			if (isXDIGIT(value))
+			    ANYOF_BITMAP_SET(opnd, value);
+		}
+		break;
+	    case ANYOF_NXDIGIT:
+		if (LOC)
+		    ANYOF_CLASS_SET(opnd, ANYOF_NXDIGIT);
+		else {
+		    for (value = 0; value < 256; value++)
+			if (!isXDIGIT(value))
+			    ANYOF_BITMAP_SET(opnd, value);
+		}
+		break;
+	    default:
+		FAIL("invalid [::] class in regexp");
+		break;
+	    }
+	    if (LOC)
+		ANYOF_FLAGS(opnd) |= ANYOF_CLASS;
+	    lastvalue = OOB_CHAR8;
+	}
+        else
 	if (range) {
 	    if (lastvalue > value)
 		FAIL("invalid [] range in regexp");
@@ -2301,35 +2580,36 @@ S_regclass(pTHX)
  		if (isLOWER(lastvalue)) {
  		    for (i = lastvalue; i <= value; i++)
 			if (isLOWER(i))
-			    ANYOF_SET(opnd, i);
+			    ANYOF_BITMAP_SET(opnd, i);
  		} else {
  		    for (i = lastvalue; i <= value; i++)
 			if (isUPPER(i))
-			    ANYOF_SET(opnd, i);
+			    ANYOF_BITMAP_SET(opnd, i);
 		}
 	    }
 	    else
 #endif
 		for ( ; lastvalue <= value; lastvalue++)
-		    ANYOF_SET(opnd, lastvalue);
+		    ANYOF_BITMAP_SET(opnd, lastvalue);
         }
 	lastvalue = value;
     }
     /* optimize case-insensitive simple patterns (e.g. /[a-z]/i) */
-    if (!SIZE_ONLY && (*opnd & (0xFF ^ ANYOF_INVERT)) == ANYOF_FOLD) {
+    if (!SIZE_ONLY &&
+	(ANYOF_FLAGS(opnd) & (ANYOF_FLAGS_ALL ^ ANYOF_INVERT)) == ANYOF_FOLD) {
 	for (value = 0; value < 256; ++value) {
-	    if (ANYOF_TEST(opnd, value)) {
+	    if (ANYOF_BITMAP_TEST(opnd, value)) {
 		I32 cf = PL_fold[value];
-		ANYOF_SET(opnd, cf);
+		ANYOF_BITMAP_SET(opnd, cf);
 	    }
 	}
-	*opnd &= ~ANYOF_FOLD;
+	ANYOF_FLAGS(opnd) &= ~ANYOF_FOLD;
     }
     /* optimize inverted simple patterns (e.g. [^a-z]) */
-    if (!SIZE_ONLY && (*opnd & 0xFF) == ANYOF_INVERT) {
-	for (value = 0; value < 32; ++value)
-	    opnd[1 + value] ^= 0xFF;
-	*opnd = 0;
+    if (!SIZE_ONLY && (ANYOF_FLAGS(opnd) & ANYOF_FLAGS_ALL) == ANYOF_INVERT) {
+	for (value = 0; value < ANYOF_BITMAP_SIZE; ++value)
+	    opnd[ANYOF_BITMAP_OFFSET + value] ^= ANYOF_FLAGS_ALL;
+	ANYOF_FLAGS(opnd) = 0;
     }
     return ret;
 }
@@ -2337,16 +2617,17 @@ S_regclass(pTHX)
 STATIC regnode *
 S_regclassutf8(pTHX)
 {
+    dTHR;
     register char *opnd, *e;
     register U32 value;
-    register U32 lastvalue = 123456;
+    register U32 lastvalue = OOB_UTF8;
     register I32 range = 0;
     register regnode *ret;
     I32 numlen;
     I32 n;
     SV *listsv;
     U8 flags = 0;
-    dTHR;
+    I32 namedclass;
 
     if (*PL_regcomp_parse == '^') {	/* Complement of range. */
 	PL_regnaughty++;
@@ -2362,75 +2643,29 @@ S_regclassutf8(pTHX)
 	listsv = newSVpvn("# comment\n",10);
     }
 
+    checkposixcc();
+
     if (*PL_regcomp_parse == ']' || *PL_regcomp_parse == '-')
 	goto skipcond;		/* allow 1st char to be ] or - */
 
     while (PL_regcomp_parse < PL_regxend && *PL_regcomp_parse != ']') {
        skipcond:
+	namedclass = -1;
 	value = utf8_to_uv((U8*)PL_regcomp_parse, &numlen);
 	PL_regcomp_parse += numlen;
 
 	if (value == '[')
-	    (void)regpposixcc(value); /* ignore the return value for now */
+	    namedclass = regpposixcc(value);
 	else if (value == '\\') {
 	    value = utf8_to_uv((U8*)PL_regcomp_parse, &numlen);
 	    PL_regcomp_parse += numlen;
 	    switch (value) {
-	    case 'w':
-		if (!SIZE_ONLY) {
-		    if (LOC)
-			flags |= ANYOF_ALNUML;
-
-		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsAlnum\n");
-		}
-		lastvalue = 123456;
-		continue;
-	    case 'W':
-		if (!SIZE_ONLY) {
-		    if (LOC)
-			flags |= ANYOF_NALNUML;
-
-		    Perl_sv_catpvf(aTHX_ listsv,
-			"-utf8::IsAlpha\n-utf8::IsDigit\n0000\t%04x\n%04x\tffff\n",
-			'_' - 1,
-			'_' + 1);
-		}
-		lastvalue = 123456;
-		continue;
-	    case 's':
-		if (!SIZE_ONLY) {
-		    if (LOC)
-			flags |= ANYOF_SPACEL;
-		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsSpace\n");
-		    if (!PL_utf8_space)
-			is_utf8_space((U8*)" ");
-		}
-		lastvalue = 123456;
-		continue;
-	    case 'S':
-		if (!SIZE_ONLY) {
-		    if (LOC)
-			flags |= ANYOF_NSPACEL;
-		    Perl_sv_catpvf(aTHX_ listsv,
-			"!utf8::IsSpace\n");
-		    if (!PL_utf8_space)
-			is_utf8_space((U8*)" ");
-		}
-		lastvalue = 123456;
-		continue;
-	    case 'd':
-		if (!SIZE_ONLY) {
-		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsDigit\n");
-		}
-		lastvalue = 123456;
-		continue;
-	    case 'D':
-		if (!SIZE_ONLY) {
-		    Perl_sv_catpvf(aTHX_ listsv,
-			"!utf8::IsDigit\n");
-		}
-		lastvalue = 123456;
-		continue;
+	    case 'w':		namedclass = ANYOF_ALNUM;		break;
+	    case 'W':		namedclass = ANYOF_NALNUM;		break;
+	    case 's':		namedclass = ANYOF_SPACE;		break;
+	    case 'S':		namedclass = ANYOF_NSPACE;		break;
+	    case 'd':		namedclass = ANYOF_DIGIT;		break;
+	    case 'D':		namedclass = ANYOF_NDIGIT;		break;
 	    case 'p':
 	    case 'P':
 		if (*PL_regcomp_parse == '{') {
@@ -2445,41 +2680,30 @@ S_regclassutf8(pTHX)
 		}
 		if (!SIZE_ONLY) {
 		    if (value == 'p')
-			Perl_sv_catpvf(aTHX_ listsv, "+utf8::%.*s\n", n, PL_regcomp_parse);
+			Perl_sv_catpvf(aTHX_ listsv,
+				       "+utf8::%.*s\n", n, PL_regcomp_parse);
 		    else
 			Perl_sv_catpvf(aTHX_ listsv,
-			    "!utf8::%.*s\n", n, PL_regcomp_parse);
+				       "!utf8::%.*s\n", n, PL_regcomp_parse);
 		}
 		PL_regcomp_parse = e + 1;
-		lastvalue = 123456;
+		lastvalue = OOB_UTF8;
 		continue;
-	    case 'n':
-		value = '\n';
-		break;
-	    case 'r':
-		value = '\r';
-		break;
-	    case 't':
-		value = '\t';
-		break;
-	    case 'f':
-		value = '\f';
-		break;
-	    case 'b':
-		value = '\b';
-		break;
-	    case 'e':
-		value = '\033';
-		break;
-	    case 'a':
-		value = '\007';
-		break;
+	    case 'n':		value = '\n';		break;
+	    case 'r':		value = '\r';		break;
+	    case 't':		value = '\t';		break;
+	    case 'f':		value = '\f';		break;
+	    case 'b':		value = '\b';		break;
+	    case 'e':		value = '\033';		break;
+	    case 'a':		value = '\007';		break;
 	    case 'x':
 		if (*PL_regcomp_parse == '{') {
 		    e = strchr(PL_regcomp_parse++, '}');
                     if (!e)
                         FAIL("Missing right brace on \\x{}");
-		    value = scan_hex(PL_regcomp_parse, e - PL_regcomp_parse, &numlen);
+		    value = scan_hex(PL_regcomp_parse,
+				     e - PL_regcomp_parse,
+				     &numlen);
 		    PL_regcomp_parse = e + 1;
 		}
 		else {
@@ -2498,7 +2722,64 @@ S_regclassutf8(pTHX)
 		break;
 	    }
 	}
-	if (range) {
+	if (!SIZE_ONLY && namedclass > -1) {
+	    switch (namedclass) {
+	    case ANYOF_ALNUM:
+		Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsWord\n");	break;
+	    case ANYOF_NALNUM:
+		Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsWord\n");	break;
+	    case ANYOF_ALNUMC:
+		Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsAlnum\n");	break;
+	    case ANYOF_NALNUMC:
+		Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsAlnum\n");	break;
+	    case ANYOF_ALPHA:
+		Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsAlpha\n");	break;
+	    case ANYOF_NALPHA:
+		Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsAlpha\n");	break;
+	    case ANYOF_ASCII:
+		Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsASCII\n");	break;
+	    case ANYOF_NASCII:
+		Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsASCII\n");	break;
+	    case ANYOF_CNTRL:
+		Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsCntrl\n");	break;
+	    case ANYOF_NCNTRL:
+		Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsCntrl\n");	break;
+	    case ANYOF_GRAPH:
+		Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsGraph\n");	break;
+	    case ANYOF_NGRAPH:
+		Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsGraph\n");	break;
+	    case ANYOF_DIGIT:
+		Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsDigit\n");	break;
+	    case ANYOF_NDIGIT:
+		Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsDigit\n");	break;
+	    case ANYOF_LOWER:
+		Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsLower\n");	break;
+	    case ANYOF_NLOWER:
+		Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsLower\n");	break;
+	    case ANYOF_PRINT:
+		Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsPrint\n");	break;
+	    case ANYOF_NPRINT:
+		Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsPrint\n");	break;
+	    case ANYOF_PUNCT:
+		Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsPunct\n");	break;
+	    case ANYOF_NPUNCT:
+		Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsPunct\n");	break;
+	    case ANYOF_SPACE:
+		Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsSpace\n");	break;
+	    case ANYOF_NSPACE:
+		Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsSpace\n");	break;
+	    case ANYOF_UPPER:
+		Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsUpper\n");	break;
+	    case ANYOF_NUPPER:
+		Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsUpper\n");	break;
+	    case ANYOF_XDIGIT:
+		Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsXDigit\n");	break;
+	    case ANYOF_NXDIGIT:
+		Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsXDigit\n");	break;
+	    }
+	}
+        else
+        if (range) {
 	    if (lastvalue > value)
 		FAIL("invalid [] range in regexp");
 	    if (!SIZE_ONLY)

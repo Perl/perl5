@@ -186,6 +186,100 @@ current locale.  See L<perllocale>.  You may use C<\w>, C<\W>, C<\s>, C<\S>,
 C<\d>, and C<\D> within character classes (though not as either end of
 a range).  See L<utf8> for details about C<\pP>, C<\PP>, and C<\X>.
 
+The POSIX character class syntax
+
+	[:class:]
+
+is also available.  The available classes and their \-equivalents
+(if any) are as follows:
+
+    alpha
+    alnum
+    ascii
+    cntrl
+    digit       \d
+    graph
+    lower
+    print
+    punct
+    space       \s
+    upper
+    word        \w
+    xdigit
+
+Note that the [] are part of the [::] construct, not part of the whole
+character class.  For example:
+
+	[01[:alpha:]%]
+
+matches one, zero, any alphabetic character, and the percentage sign.
+
+The exact meanings of the above classes depend from many things:
+if the C<utf8> pragma is used, the following equivalenced to Unicode
+\p{} constructs hold:
+
+    alpha       IsAlpha
+    alnum       IsAlnum
+    ascii       IsASCII
+    cntrl       IsCntrl
+    digit       IsDigit
+    graph       IsGraph
+    lower       IsLower
+    print       IsPrint
+    punct       IsPunct
+    space       IsSpace
+    upper       IsUpper
+    word        IsWord
+    xdigit      IsXDigit
+
+For example, [:lower:] and \p{IsLower} are equivalent.
+
+If the C<utf8> pragma is not used but the C<locale> pragma is, the
+classes correlate with the isalpha(3) interface (except for `word',
+which is a Perl extension).
+
+The assumedly non-obviously named classes are:
+
+=over 4
+
+=item cntrl
+
+        Any control character.  Usually characters that don't produce
+        output as such but instead control the terminal somehow:
+        for example newline and backspace are control characters.
+
+=item graph
+
+        Any alphanumeric or punctuation character.
+
+=item print
+
+        Any alphanumeric or punctuation character or space.
+
+=item punct
+
+        Any punctuation character.
+
+=item xdigit
+
+        Any hexadecimal digit.  Though this may feel silly
+        (/0-9a-f/i would work just fine) it is included
+        for completeness.
+
+=item 
+
+=back
+
+You can negate the [::] character classes by prefixing the class name
+with a '^'. This is a Perl extension.  For example:
+
+    ^digit      \D      \P{IsDigit}
+    ^space	\S	\P{IsSpace}
+    ^word	\W	\P{IsWord}
+
+The POSIX character classes [.cc.] and [=cc=] are B<not> supported
+and trying to use them will cause an error.
+
 Perl defines the following zero-width assertions:
 
     \b	Match a word boundary

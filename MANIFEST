@@ -826,6 +826,7 @@ lib/unicode/Is/So.pl				Unicode character database
 lib/unicode/Is/Space.pl				Unicode character database
 lib/unicode/Is/Syllable.pl			Unicode character database
 lib/unicode/Is/Upper.pl				Unicode character database
+lib/unicode/Is/Word.pl				Unicode character database
 lib/unicode/Is/Z.pl				Unicode character database
 lib/unicode/Is/Zl.pl				Unicode character database
 lib/unicode/Is/Zp.pl				Unicode character database

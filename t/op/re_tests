@@ -474,9 +474,37 @@ $(?<=^(a))	a	y	$1	a
 ([[=]+)	a=[b]=	y	$1	=[
 ([[.]+)	a.[b].	y	$1	.[
 [a[:xyz:	-	c	-	/[a[:xyz:/: unmatched [] in regexp
-[a[:xyz:]	-	c	-	/[a[:xyz:]/: unmatched [] in regexp
+[a[:xyz:]	-	c	-	Character class [:xyz:] unknown
 [a[:]b[:c]	abc	y	$&	abc
-([a[:xyz:]b]+)	pbaq	y	$1	ba
+([a[:xyz:]b]+)	pbaq	c	-	Character class [:xyz:] unknown
+[a[:]b[:c]	abc	y	$&	abc
+([[:alpha:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	ABcd
+([[:alnum:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	ABcd01Xy
+([[:ascii:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	ABcd01Xy__--  ${nulnul}
+([[:cntrl:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	${nulnul}
+([[:digit:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	01
+([[:graph:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	ABcd01Xy__--
+([[:lower:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	cd
+([[:print:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	ABcd01Xy__--  
+([[:punct:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	__--
+([[:space:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	  
+([[:word:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	ABcd01Xy__
+([[:upper:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	AB
+([[:xdigit:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	ABcd01
+([[:^alpha:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	01
+([[:^alnum:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	__--  ${nulnul}${ffff}
+([[:^ascii:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	${ffff}
+([[:^cntrl:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	ABcd01Xy__--  
+([[:^digit:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	ABcd
+([[:^lower:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	AB
+([[:^print:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	${nulnul}${ffff}
+([[:^punct:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	ABcd01Xy
+([[:^space:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	ABcd01Xy__--
+([[:^word:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	--  ${nulnul}${ffff}
+([[:^upper:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	cd01
+([[:^xdigit:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	Xy__--  ${nulnul}${ffff}
+[[:foo:]]	-	c	-	Character class [:foo:] unknown
+[[:^foo:]]	-	c	-	Character class [:^foo:] unknown
 ((?>a+)b)	aaab	y	$1	aaab
 (?>(a+))b	aaab	y	$1	aaa
 ((?>[^()]+)|\([^()]*\))+	((abc(ade)ufh()()x	y	$&	abc(ade)ufh()()x

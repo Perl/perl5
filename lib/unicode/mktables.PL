@@ -9,17 +9,23 @@ mkdir "To", 0777;
 @todo = (
 # typical
 
-    ['IsAlnum', '$cat =~ /^L[ulo]|^Nd/ or $code eq "005F"',	''],
-    ['IsAlpha', '$cat =~ /^L[ulo]/',	''],
-    ['IsSpace', '$cat =~ /^Z/ or $code lt "0020" and chr(hex $code) =~ /^\s/',	''],
-    ['IsDigit', '$cat =~ /^Nd$/',	''],
-    ['IsUpper', '$cat =~ /^Lu$/',	''],
-    ['IsLower', '$cat =~ /^Ll$/',	''],
-    ['IsPrint', '$cat =~ /^[^C]/',	''],
-    ['ToUpper', '$up',			'$up'],
-    ['ToLower', '$down',		'$down'],
-    ['ToTitle', '$title',		'$title'],
-    ['ToDigit', '$dec ne ""',		'$dec'],
+    ['IsWord',  '$cat =~ /^L[ulo]|^Nd/ or $code eq "005F"',	''],
+    ['IsAlnum', '$cat =~ /^L[ulo]|^Nd/',	''],
+    ['IsAlpha',  '$cat =~ /^L[ulo]/',	''],
+    ['IsSpace',  '$cat =~ /^Z/ or $code lt "0020" and chr(hex $code) =~ /^\s/',	''],
+    ['IsDigit',  '$cat =~ /^Nd$/',	''],
+    ['IsUpper',  '$cat =~ /^Lu$/',	''],
+    ['IsLower',  '$cat =~ /^Ll$/',	''],
+    ['IsASCII',  'hex $code <= 127',	''],
+    ['IsCntrl',  '$cat =~ /^C/',	''],
+    ['IsGraph',  '$cat =~ /^[^C]/ and $code ne "0020"',	''],
+    ['IsPrint',  '$cat =~ /^[^C]/',	''],
+    ['IsPunct',  '$cat =~ /^P/',	''],
+    ['IsXDigit', '$code =~ /^00(3[0-9]|[46][1-6])$/',	''],
+    ['ToUpper',  '$up',			'$up'],
+    ['ToLower',  '$down',		'$down'],
+    ['ToTitle',  '$title',		'$title'],
+    ['ToDigit',  '$dec ne ""',		'$dec'],
 
 # Name
 

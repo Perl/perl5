@@ -6,7 +6,7 @@ BEGIN {
     $ENV{PERL5LIB} = '../lib';
 }
 
-print "1..3\n";
+print "1..9\n";
 
 my $test = 1;
 
@@ -34,4 +34,37 @@ sub ok {
     s/([$rx])/"&#".ord($1).";"/eg; 
     ok $_, '>&#9786;<';
     $test++;
+
+    $_ = "alpha,numeric"; 
+    m/([[:alpha:]]+)/; 
+    ok $1, 'alpha';
+    $test++;
+
+    $_ = "alphaNUMERICstring";
+    m/([[:^lower:]]+)/; 
+    ok $1, 'NUMERIC';
+    $test++;
+
+    $_ = "alphaNUMERICstring";
+    m/(\p{Ll}+)/; 
+    ok $1, 'alpha';
+    $test++;
+
+    $_ = "alphaNUMERICstring"; 
+    m/(\p{Lu}+)/; 
+    ok $1, 'NUMERIC';
+    $test++;
+
+    $_ = "alpha,numeric"; 
+    m/([\p{IsAlpha}]+)/; 
+    ok $1, 'alpha';
+    $test++;
+
+    $_ = "alphaNUMERICstring";
+    m/([^\p{IsLower}]+)/; 
+    ok $1, 'NUMERIC';
+    $test++;
+
 }
+
+

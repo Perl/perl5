@@ -154,24 +154,76 @@ struct regnode_2 {
 
 #define SIZE_ONLY (PL_regcode == &PL_regdummy)
 
-/* Flags for first parameter byte of ANYOF */
-#define ANYOF_INVERT	0x40
-#define ANYOF_FOLD	0x20
-#define ANYOF_LOCALE	0x10
-#define ANYOF_ISA	0x0F
-#define ANYOF_ALNUML	 0x08
-#define ANYOF_NALNUML	 0x04
-#define ANYOF_SPACEL	 0x02
-#define ANYOF_NSPACEL	 0x01
+/* Flags for first parameter byte [0] of ANYOF */
 
-/* Utility macros for bitmap of ANYOF */
-#define ANYOF_BYTE(p,c)     (p)[1 + (((c) >> 3) & 31)]
-#define ANYOF_BIT(c)        (1 << ((c) & 7))
-#define ANYOF_SET(p,c)      (ANYOF_BYTE(p,c) |=  ANYOF_BIT(c))
-#define ANYOF_CLEAR(p,c)    (ANYOF_BYTE(p,c) &= ~ANYOF_BIT(c))
-#define ANYOF_TEST(p,c)     (ANYOF_BYTE(p,c) &   ANYOF_BIT(c))
+#define ANYOF_CLASS	0x08
+#define ANYOF_INVERT	0x04
+#define ANYOF_FOLD	0x02
+#define ANYOF_LOCALE	0x01
 
-#define ANY_SKIP ((33 - 1)/sizeof(regnode) + 1)
+/* Character classes for bytes [1..4] of ANYOF */
+
+#define ANYOF_ALNUM	 0	/* \w, utf8::IsWord, isALNUM() */
+#define ANYOF_NALNUM	 1
+#define ANYOF_SPACE	 2
+#define ANYOF_NSPACE	 3
+#define ANYOF_DIGIT	 4
+#define ANYOF_NDIGIT	 5
+#define ANYOF_ALNUMC	 6	/* isalnum(3), utf8::IsAlnum, isALNUMC() */
+#define ANYOF_NALNUMC	 7
+#define ANYOF_ALPHA	 8
+#define ANYOF_NALPHA	 9
+#define ANYOF_ASCII	10
+#define ANYOF_NASCII	11
+#define ANYOF_CNTRL	12
+#define ANYOF_NCNTRL	13
+#define ANYOF_GRAPH	14
+#define ANYOF_NGRAPH	15
+#define ANYOF_LOWER	16
+#define ANYOF_NLOWER	17
+#define ANYOF_PRINT	18
+#define ANYOF_NPRINT	19
+#define ANYOF_PUNCT	20
+#define ANYOF_NPUNCT	21
+#define ANYOF_UPPER	22
+#define ANYOF_NUPPER	23
+#define ANYOF_XDIGIT	24
+#define ANYOF_NXDIGIT	25
+
+#define ANYOF_MAX	31
+
+/* Backward source code compatibility. */
+
+#define ANYOF_ALNUML	 ANYOF_ALNUM
+#define ANYOF_NALNUML	 ANYOF_NALNUM
+#define ANYOF_SPACEL	 ANYOF_SPACE
+#define ANYOF_NSPACEL	 ANYOF_NSPACE
+
+/* Utility macros for the bitmap and classes of ANYOF */
+
+#define ANYOF_OPND_SIZE	  	 1
+#define ANYOF_CLASS_SIZE	 4
+#define ANYOF_BITMAP_SIZE	32	/* 256 b/(8 b/B) */
+#define ANYOF_SIZE	(ANYOF_OPND_SIZE+ANYOF_CLASS_SIZE+ANYOF_BITMAP_SIZE)
+
+#define ANYOF_FLAGS(p)		((p)[0])
+#define ANYOF_FLAGS_ALL		0xff
+
+#define ANYOF_BIT(c)		(1 << ((c) & 7))
+
+#define ANYOF_CLASS_OFFSET	ANYOF_OPND_SIZE
+#define ANYOF_CLASS_BYTE(p, c)	((p)[ANYOF_CLASS_OFFSET + (((c) >> 3) & 3)])
+#define ANYOF_CLASS_SET(p, c)	(ANYOF_CLASS_BYTE(p, c) |=  ANYOF_BIT(c))
+#define ANYOF_CLASS_CLEAR(p, c)	(ANYOF_CLASS_BYTE(p, c) &= ~ANYOF_BIT(c))
+#define ANYOF_CLASS_TEST(p, c)	(ANYOF_CLASS_BYTE(p, c) &   ANYOF_BIT(c))
+
+#define ANYOF_BITMAP_OFFSET	(ANYOF_CLASS_OFFSET+ANYOF_CLASS_SIZE)
+#define ANYOF_BITMAP_BYTE(p, c)	((p)[ANYOF_BITMAP_OFFSET + (((c) >> 3) & 31)])
+#define ANYOF_BITMAP_SET(p, c)	(ANYOF_BITMAP_BYTE(p, c) |=  ANYOF_BIT(c))
+#define ANYOF_BITMAP_CLEAR(p,c)	(ANYOF_BITMAP_BYTE(p, c) &= ~ANYOF_BIT(c))
+#define ANYOF_BITMAP_TEST(p, c)	(ANYOF_BITMAP_BYTE(p, c) &   ANYOF_BIT(c))
+
+#define ANY_SKIP ((ANYOF_SIZE - 1)/sizeof(regnode) + 1)
 
 /*
  * Utility definitions.

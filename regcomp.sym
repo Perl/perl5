@@ -50,8 +50,80 @@ NSPACEL		NSPACE, no	Match any non-whitespace char in locale
 NSPACELUTF8	NSPACE, no	Match any non-whitespace char in locale
 DIGIT		DIGIT,  no	Match any numeric character
 DIGITUTF8	DIGIT,  no	Match any numeric character
+DIGITL		DIGIT,  no	Match any numeric character in locale
+DIGITLUTF8	DIGIT,  no	Match any numeric character in locale
 NDIGIT		NDIGIT, no	Match any non-numeric character
 NDIGITUTF8	NDIGIT, no	Match any non-numeric character
+NDIGITL		NDIGIT, no	Match any non-numeric character in locale
+NDIGITLUTF8	NDIGIT, no	Match any non-numeric character in locale
+ALNUMC		ALNUMC,  no	Match any alphanumeric character
+ALNUMCUTF8	ALNUMC,  no	Match any alphanumeric character
+ALNUMCL		ALNUMC,  no	Match any alphanumeric character in locale
+ALNUMCLUTF8	ALNUMC,  no	Match any alphanumeric character in locale
+NALNUMC		NALNUMC, no	Match any non-alphanumeric character
+NALNUMCUTF8	NALNUMC, no	Match any non-alphanumeric character
+NALNUMCL	NALNUMC, no	Match any non-alphanumeric character in locale
+NALNUMCLUTF8	NALNUMC, no	Match any non-alphanumeric character in locale
+ALPHA		ALPHA,  no	Match any alphabetic character
+ALPHAUTF8	ALPHA,  no	Match any alphabetic character
+ALPHAL		ALPHA,  no	Match any alphabetic character in locale
+ALPHALUTF8	ALPHA,  no	Match any alphabetic character in locale
+NALPHA		NALPHA, no	Match any non-alphabetic character
+NALPHAUTF8	NALPHA, no	Match any non-alphabetic character
+NALPHAL		NALPHA, no	Match any non-alphabetic character in locale
+NALPHALUTF8	NALPHA, no	Match any non-alphabetic character in locale
+ASCII		ASCII,  no	Match any ASCII character
+NASCII		NASCII, no	Match any non-ASCII character
+CNTRL		CNTRL,  no	Match any control character
+CNTRLUTF8	CNTRL,  no	Match any control character
+CNTRLL		CNTRL,  no	Match any control character in locale
+CNTRLLUTF8	CNTRL,  no	Match any control character in locale
+NCNTRL		NCNTRL, no	Match any non-control character
+NCNTRLUTF8	NCNTRL, no	Match any non-control character
+NCNTRLL		NCNTRL, no	Match any non-control character in locale
+NCNTRLLUTF8	NCNTRL, no	Match any non-control character in locale
+GRAPH		GRAPH,  no	Match any graphical character
+GRAPHUTF8	GRAPH,  no	Match any graphical character
+GRAPHL		GRAPH,  no	Match any graphical character in locale
+GRAPHLUTF8	GRAPH,  no	Match any graphical character in locale
+NGRAPH		NGRAPH, no	Match any non-graphical character
+NGRAPHUTF8	NGRAPH, no	Match any non-graphical character
+NGRAPHL		NGRAPH, no	Match any non-graphical character in locale
+NGRAPHLUTF8	NGRAPH, no	Match any non-graphical character in locale
+LOWER		LOWER,  no	Match any lowercase character
+LOWERUTF8	LOWER,  no	Match any lowercase character
+LOWERL		LOWER,  no	Match any lowercase character in locale
+LOWERLUTF8	LOWER,  no	Match any lowercase character in locale
+NLOWER		NLOWER, no	Match any non-lowercase character
+NLOWERUTF8	NLOWER, no	Match any non-lowercase character
+NLOWERL		NLOWER, no	Match any non-lowercase character in locale
+NLOWERLUTF8	NLOWER, no	Match any non-lowercase character in locale
+PRINT		PRINT,  no	Match any printable character
+PRINTUTF8	PRINT,  no	Match any printable character
+PRINTL		PRINT,  no	Match any printable character in locale
+PRINTLUTF8	PRINT,  no	Match any printable character in locale
+NPRINT		NPRINT, no	Match any non-printable character
+NPRINTUTF8	NPRINT, no	Match any non-printable character
+NPRINTL		NPRINT, no	Match any non-printable character in locale
+NPRINTLUTF8	NPRINT, no	Match any non-printable character in locale
+PUNCT		PUNCT,  no	Match any punctuation character
+PUNCTUTF8	PUNCT,  no	Match any punctuation character
+PUNCTL		PUNCT,  no	Match any punctuation character in locale
+PUNCTLUTF8	PUNCT,  no	Match any punctuation character in locale
+NPUNCT		NPUNCT, no	Match any non-punctuation character
+NPUNCTUTF8	NPUNCT, no	Match any non-punctuation character
+NPUNCTL		NPUNCT, no	Match any non-punctuation character in locale
+NPUNCTLUTF8	NPUNCT, no	Match any non-punctuation character in locale
+UPPER		UPPER,  no	Match any uppercase character
+UPPERUTF8	UPPER,  no	Match any uppercase character
+UPPERL		UPPER,  no	Match any uppercase character in locale
+UPPERLUTF8	UPPER,  no	Match any uppercase character in locale
+NUPPER		NUPPER, no	Match any non-uppercase character
+NUPPERUTF8	NUPPER, no	Match any non-uppercase character
+NUPPERL		NUPPER, no	Match any non-uppercase character in locale
+NUPPERLUTF8	NUPPER, no	Match any non-uppercase character in locale
+XDIGIT		XDIGIT,  no	Match any hexdigit character
+NXDIGIT		NXDIGIT, no	Match any non-hexdigit character
 CLUMP		CLUMP,  no	Match any combining character sequence
 
 # BRANCH	The set of branches constituting a single choice are hooked

@@ -47,6 +47,8 @@ seek(TESTS,0,0);
 $. = 0;
 
 $bang = sprintf "\\%03o", ord "!"; # \41 would not be portable.
+$ffff  = chr(0xff) x 2;
+$nulnul = "\0" x 2;
 
 $| = 1;
 print "1..$numtests\n# $iters iterations\n";
@@ -59,12 +61,16 @@ while (<TESTS>) {
     infty_subst(\$pat);
     infty_subst(\$expect);
     $pat = "'$pat'" unless $pat =~ /^[:']/;
-    $pat =~ s/\\n/\n/g;
     $pat =~ s/(\$\{\w+\})/$1/eeg;
+    $pat =~ s/\\n/\n/g;
+    $subject =~ s/(\$\{\w+\})/$1/eeg;
     $subject =~ s/\\n/\n/g;
+    $expect =~ s/(\$\{\w+\})/$1/eeg;
     $expect =~ s/\\n/\n/g;
     $expect = $repl = '-' if $skip_amp and $input =~ /\$[&\`\']/;
     $skip = ($skip_amp ? ($result =~ s/B//i) : ($result =~ s/B//));
+    # Certain tests don't work with utf8 (the re_test should be in UTF8)
+    $skip = 1 if ($^H &= ~0x00000008) && $pat =~ /\[:\^(alnum|print|word):\]/;
     $result =~ s/B//i unless $skip;
     for $study ('', 'study \$subject') {
  	$c = $iters;
@@ -75,7 +81,7 @@ while (<TESTS>) {
 	    last;  # no need to study a syntax error
 	}
 	elsif ( $skip ) {
-	    print "ok $. # Skipped: not fixed yet\n"; next TEST;
+	    print "ok $. # skipped\n"; next TEST;
 	}
 	elsif ($@) {
 	    print "not ok $. $input => error `$err'\n"; next TEST;

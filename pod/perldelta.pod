@@ -121,6 +121,13 @@ Unix and UNICOS also have 64-bit support.
 
 =head2 Better syntax checks on parenthesized unary operators
 
+TODO
+
+=head2 POSIX character class syntax [: :] supported
+
+For example to match alphabetic characters use /[[:alpha:]]/.
+See L<perlre> for details.
+
 Expressions such as:
 
     print defined(&foo,&bar,&baz);
