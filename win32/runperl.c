@@ -23,13 +23,6 @@ CPerlObj *pPerl;
 #include <ipproc.h>
 #include <ipstdio.h>
 
-class IPerlStdIOWin : public IPerlStdIO
-{
-public:
-    virtual int OpenOSfhandle(long osfhandle, int flags) = 0;
-    virtual int GetOSfhandle(int filenum) = 0;
-};
-
 extern int g_closedir(DIR *dirp);
 extern DIR *g_opendir(char *filename);
 extern struct direct *g_readdir(DIR *dirp);
@@ -668,7 +661,7 @@ public:
 };
 
 
-class CPerlStdIO : public IPerlStdIOWin
+class CPerlStdIO : public IPerlStdIO
 {
 public:
     CPerlStdIO() {};
@@ -1001,7 +994,7 @@ char *staticlinkmodules[] = {
     NULL,
 };
 
-EXTERN_C void boot_DynaLoader _((CPERLarg_ CV* cv));
+EXTERN_C void boot_DynaLoader _((CV* cv _CPERLarg));
 
 static void
 xs_init(CPERLarg)

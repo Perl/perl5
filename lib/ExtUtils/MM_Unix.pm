@@ -368,6 +368,12 @@ sub cflags {
 	$self->{uc $_} ||= $cflags{$_}
     }
 
+    if ($self->{CAPI}) {
+        $self->{CCFLAGS} =~ s/-DPERL_OBJECT(\s|$)//;
+        $self->{CCFLAGS} =~ s/-TP(\s|$)//;
+        $self->{OPTIMIZE} =~ s/-TP(\s|$)//;
+        $self->{CCFLAGS} .= '-DPERL_CAPI';
+    }
     return $self->{CFLAGS} = qq{
 CCFLAGS = $self->{CCFLAGS}
 OPTIMIZE = $self->{OPTIMIZE}
@@ -3240,9 +3246,11 @@ sub tool_xsubpp {
 	}
     }
 
+    $xsubpp = $self->{CAPI} ? "xsubpp -perlobject" : "xsubpp";
+
     return qq{
 XSUBPPDIR = $xsdir
-XSUBPP = \$(XSUBPPDIR)/xsubpp
+XSUBPP = \$(XSUBPPDIR)/$xsubpp
 XSPROTOARG = $self->{XSPROTOARG}
 XSUBPPDEPS = @tmdeps
 XSUBPPARGS = @tmargs

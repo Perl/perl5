@@ -52,6 +52,10 @@ public:
     virtual int Setpos(PerlIO*, const Fpos_t *, int &err) = 0;
     virtual void Init(int &err) = 0;
     virtual void InitOSExtras(void* p) = 0;
+#ifdef WIN32
+    virtual int OpenOSfhandle(long osfhandle, int flags) = 0;
+    virtual int GetOSfhandle(int filenum) = 0;
+#endif
 };
 
 #endif	/* __Inc__IPerlStdIO___ */

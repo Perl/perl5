@@ -2,7 +2,7 @@
 
 #ifdef CAN_PROTOTYPE
 #ifdef PERL_OBJECT
-#define XS(name) void name(CPerlObj* pPerl, CV* cv)
+#define XS(name) void name(CV* cv, CPerlObj* pPerl)
 #else
 #define XS(name) void name(CV* cv)
 #endif
@@ -75,4 +75,8 @@
 #include "XSLock.h"
 #endif  /* WIN32 */
 #endif  /* NO_XSLOCKS */
+#else
+#ifdef PERL_CAPI
+#include "PerlCAPI.h"
+#endif
 #endif	/* PERL_OBJECT */

@@ -449,8 +449,14 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)\.exists 
 
 sub perl_archive
 {
+    my ($self) = @_;
     if($OBJ) {
-	return '$(PERL_INC)\perlcore$(LIB_EXT)';
+        if ($self->{CAPI} eq 'TRUE') {
+            return '$(PERL_INC)\PerlCAPI$(LIB_EXT)';
+        }
+        else {
+            return '$(PERL_INC)\perlcore$(LIB_EXT)';
+        }
     }
     return '$(PERL_INC)\perl$(LIB_EXT)';
 }

@@ -60,7 +60,7 @@ VIRTUAL OP*	block_end _((I32 floor, OP* seq));
 VIRTUAL I32	block_gimme _((void));
 VIRTUAL int	block_start _((int full));
 VIRTUAL void	boot_core_UNIVERSAL _((void));
-VIRTUAL void	call_list _((I32 oldscope, AV* list));
+VIRTUAL void	call_list _((I32 oldscope, AV* av_list));
 VIRTUAL I32	cando _((I32 bit, I32 effective, Stat_t* statbufp));
 #ifndef CASTNEGFLOAT
 VIRTUAL U32	cast_ulong _((double f));
@@ -276,7 +276,7 @@ VIRTUAL char*	mem_collxfrm _((const char* s, STRLEN len, STRLEN* xlen));
 #endif
 VIRTUAL char*	mess _((const char* pat, va_list* args));
 VIRTUAL int	mg_clear _((SV* sv));
-VIRTUAL int	mg_copy _((SV* , SV* , char* , I32));
+VIRTUAL int	mg_copy _((SV* sv, SV* nsv, char* key, I32 klen));
 VIRTUAL MAGIC*	mg_find _((SV* sv, int type));
 VIRTUAL int	mg_free _((SV* sv));
 VIRTUAL int	mg_get _((SV* sv));
@@ -321,7 +321,7 @@ VIRTUAL OP*	newASSIGNOP _((I32 flags, OP* left, I32 optype, OP* right));
 VIRTUAL OP*	newCONDOP _((I32 flags, OP* expr, OP* trueop, OP* falseop));
 VIRTUAL void	newCONSTSUB _((HV* stash, char* name, SV* sv));
 VIRTUAL void	newFORM _((I32 floor, OP* o, OP* block));
-VIRTUAL OP*	newFOROP _((I32 flags, char* label, line_t forline, OP* scalar, OP* expr, OP*block, OP*cont));
+VIRTUAL OP*	newFOROP _((I32 flags, char* label, line_t forline, OP* sclr, OP* expr, OP*block, OP*cont));
 VIRTUAL OP*	newLOGOP _((I32 optype, I32 flags, OP* left, OP* right));
 VIRTUAL OP*	newLOOPEX _((I32 type, OP* label));
 VIRTUAL OP*	newLOOPOP _((I32 flags, I32 debuggable, OP* expr, OP* block));
@@ -332,7 +332,7 @@ VIRTUAL OP*	newRANGE _((I32 flags, OP* left, OP* right));
 VIRTUAL OP*	newSLICEOP _((I32 flags, OP* subscript, OP* list));
 VIRTUAL OP*	newSTATEOP _((I32 flags, char* label, OP* o));
 VIRTUAL CV*	newSUB _((I32 floor, OP* o, OP* proto, OP* block));
-VIRTUAL CV*	newXS _((char* name, void (*subaddr)(CPERLproto_ CV* cv), char* filename));
+VIRTUAL CV*	newXS _((char* name, void (*subaddr)(CV* cv _CPERLproto), char* filename));
 VIRTUAL AV*	newAV _((void));
 VIRTUAL OP*	newAVREF _((OP* o));
 VIRTUAL OP*	newBINOP _((I32 type, I32 flags, OP* first, OP* last));
@@ -346,9 +346,9 @@ VIRTUAL IO*	newIO _((void));
 VIRTUAL OP*	newLISTOP _((I32 type, I32 flags, OP* first, OP* last));
 VIRTUAL OP*	newPMOP _((I32 type, I32 flags));
 VIRTUAL OP*	newPVOP _((I32 type, I32 flags, char* pv));
-VIRTUAL SV*	newRV _((SV* ref));
+VIRTUAL SV*	newRV _((SV* pref));
 #if !defined(__GNUC__) && (defined(CRIPPLED_CC) || defined(USE_THREADS) || defined(PERL_OBJECT))
-VIRTUAL SV*	newRV_noinc _((SV *));
+VIRTUAL SV*	newRV_noinc _((SV *sv));
 #endif
 #ifdef LEAKTEST
 VIRTUAL SV*	newSV _((I32 x, STRLEN len));
@@ -389,9 +389,9 @@ VIRTUAL void	peep _((OP* o));
 #ifndef PERL_OBJECT
 PerlInterpreter*	perl_alloc _((void));
 #endif
-VIRTUAL I32	perl_call_argv _((char* subname, I32 flags, char** argv));
+VIRTUAL I32	perl_call_argv _((char* sub_name, I32 flags, char** argv));
 VIRTUAL I32	perl_call_method _((char* methname, I32 flags));
-VIRTUAL I32	perl_call_pv _((char* subname, I32 flags));
+VIRTUAL I32	perl_call_pv _((char* sub_name, I32 flags));
 VIRTUAL I32	perl_call_sv _((SV* sv, I32 flags));
 #ifdef PERL_OBJECT
 VIRTUAL void	perl_construct _((void));
@@ -448,19 +448,19 @@ void	regdump _((regexp* r));
 VIRTUAL I32	pregexec _((regexp* prog, char* stringarg, char* strend, char* strbeg, I32 minend, SV* screamer, U32 nosave));
 VIRTUAL I32	regexec_flags _((regexp* prog, char* stringarg, char* strend, char* strbeg, I32 minend, SV* screamer, void* data, U32 flags));
 VIRTUAL void	pregfree _((struct regexp* r));
-VIRTUAL regnode*regnext _((regnode* p));
+VIRTUAL regnode* regnext _((regnode* p));
 #ifdef DEBUGGING
 void	regprop _((SV* sv, regnode* o));
 #endif
 VIRTUAL void	repeatcpy _((char* to, char* from, I32 len, I32 count));
 VIRTUAL char*	rninstr _((char* big, char* bigend, char* little, char* lend));
-VIRTUAL Sighandler_t rsignal _((int, Sighandler_t));
-VIRTUAL int	rsignal_restore _((int, Sigsave_t*));
-VIRTUAL int	rsignal_save _((int, Sighandler_t, Sigsave_t*));
-VIRTUAL Sighandler_t rsignal_state _((int));
+VIRTUAL Sighandler_t rsignal _((int i, Sighandler_t t));
+VIRTUAL int	rsignal_restore _((int i, Sigsave_t* t));
+VIRTUAL int	rsignal_save _((int i, Sighandler_t t1, Sigsave_t* t2));
+VIRTUAL Sighandler_t rsignal_state _((int i));
 VIRTUAL void	rxres_free _((void** rsp));
-VIRTUAL void	rxres_restore _((void** rsp, REGEXP* rx));
-VIRTUAL void	rxres_save _((void** rsp, REGEXP* rx));
+VIRTUAL void	rxres_restore _((void** rsp, REGEXP* prx));
+VIRTUAL void	rxres_save _((void** rsp, REGEXP* prx));
 #ifndef HAS_RENAME
 VIRTUAL I32	same_dirent _((char* a, char* b));
 #endif
@@ -532,8 +532,8 @@ VIRTUAL UV	sv_2uv _((SV* sv));
 VIRTUAL IV	sv_iv _((SV* sv));
 VIRTUAL UV	sv_uv _((SV* sv));
 VIRTUAL double	sv_nv _((SV* sv));
-VIRTUAL char *	sv_pvn _((SV *, STRLEN *));
-VIRTUAL I32	sv_true _((SV *));
+VIRTUAL char *	sv_pvn _((SV *sv, STRLEN *len));
+VIRTUAL I32	sv_true _((SV *sv));
 VIRTUAL void	sv_add_arena _((char* ptr, U32 size, U32 flags));
 VIRTUAL int	sv_backoff _((SV* sv));
 VIRTUAL SV*	sv_bless _((SV* sv, HV* stash));
@@ -1233,10 +1233,10 @@ void restore_rsfp _((void *f));
 void restore_expect _((void *e));
 void restore_lex_expect _((void *e));
 void yydestruct _((void *ptr));
-VIRTUAL int fprintf _((PerlIO *, const char *, ...));
+VIRTUAL int fprintf _((PerlIO *pf, const char *pat, ...));
 
 #ifdef WIN32
-VIRTUAL int&	ErrorNo();
+VIRTUAL int&	ErrorNo _((void));
 #endif	/* WIN32 */
 #else	/* !PERL_OBJECT */
 END_EXTERN_C

@@ -104,11 +104,12 @@ class CPerlObj;
 #define STATIC
 #define CPERLscope(x) CPerlObj::x
 #define CPERLproto CPerlObj *
-#define CPERLproto_ CPERLproto,
+#define _CPERLproto ,CPERLproto
 #define CPERLarg CPerlObj *pPerl
 #define CPERLarg_ CPERLarg,
+#define _CPERLarg ,CPERLarg
 #define THIS this
-#define THIS_ this,
+#define _THIS ,this
 #define CALLRUNOPS (this->*runops)
 
 #else /* !PERL_OBJECT */
@@ -116,10 +117,12 @@ class CPerlObj;
 #define STATIC static
 #define CPERLscope(x) x
 #define CPERLproto
-#define CPERLproto_ 
+#define _CPERLproto
 #define CPERLarg void
 #define CPERLarg_
+#define _CPERLarg
 #define THIS
+#define _THIS
 #define THIS_
 #define CALLRUNOPS runops
 
@@ -1195,6 +1198,10 @@ union any {
     IV		any_iv;
     long	any_long;
     void	(CPERLscope(*any_dptr)) _((void*));
+#if defined(WIN32) && !defined(PERL_OBJECT)
+	/* Visual C thinks that a pointer to a member variable is 16 bytes in size. */
+	char	handle_VC_problem[16];
+#endif
 };
 
 #ifdef USE_THREADS

@@ -2093,7 +2093,7 @@ PP(pp_entersub)
 		curcopdb = NULL;
 	    }
 	    /* Do we need to open block here? XXXX */
-	    (void)(*CvXSUB(cv))(THIS_ cv);
+	    (void)(*CvXSUB(cv))(cv _THIS);
 
 	    /* Enforce some sanity in scalar context. */
 	    if (gimme == G_SCALAR && ++markix != stack_sp - stack_base ) {

@@ -133,7 +133,7 @@ dl_install_xsub(perl_name, symref, filename="$Package")
     CODE:
     DLDEBUG(2,PerlIO_printf(PerlIO_stderr(),"dl_install_xsub(name=%s, symref=%x)\n",
 		      perl_name, symref));
-    ST(0)=sv_2mortal(newRV((SV*)newXS(perl_name, (void(*)(CPERLarg_ CV*))symref, filename)));
+    ST(0)=sv_2mortal(newRV((SV*)newXS(perl_name, (void(*)(CV* _CPERLarg))symref, filename)));
 
 
 char *

@@ -349,6 +349,7 @@ win32_get_sitelib(char *pl)
     char szPathStr[MAX_PATH];
     char *lpPath1;
     char *lpPath2;
+	int len, newSize;
 
     /* $HKCU{"sitelib-$]"} || $HKLM{"sitelib-$]"} . ---; */
     sprintf(szRegStr, "%s-%s", szSiteLib, pl);
@@ -363,8 +364,8 @@ win32_get_sitelib(char *pl)
     if (lpPath2 == NULL)
 	return lpPath1;
 
-    int len = strlen(lpPath1);
-    int newSize = len + strlen(lpPath2) + 2; /* plus one for ';' */
+    len = strlen(lpPath1);
+    newSize = len + strlen(lpPath2) + 2; /* plus one for ';' */
 
     lpPath1 = Renew(lpPath1, newSize, char);
     if (lpPath1 != NULL)
@@ -2908,13 +2909,14 @@ XS(w32_RegSetValue)
 
     unsigned int size;
     char *buffer;
+	DWORD type;
 
     if (items != 4) 
     {
 	croak("usage: Win32::RegSetValue($hkey, $subKey, $type, $data);\n");
     }
 
-    DWORD type = SvIV(ST(2));
+    type = SvIV(ST(2));
     if (type != REG_SZ && type != REG_EXPAND_SZ)
     {
 	croak("Win32::RegSetValue: Type was not REG_SZ or REG_EXPAND_SZ, cannot set %s\n", (char *)SvPV(ST(1), na));

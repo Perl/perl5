@@ -1762,7 +1762,7 @@ PP(pp_goto)
 		}
 		else {
 		    stack_sp--;		/* There is no cv arg. */
-		    (void)(*CvXSUB(cv))(THIS_ cv);
+		    (void)(*CvXSUB(cv))(cv _THIS);
 		}
 		LEAVE;
 		return pop_return();

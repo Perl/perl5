@@ -3550,7 +3550,7 @@ newCONSTSUB(HV *stash, char *name, SV *sv)
 }
 
 CV *
-newXS(char *name, void (*subaddr) (CPERLproto_ CV *), char *filename)
+newXS(char *name, void (*subaddr) (CV * _CPERLproto), char *filename)
 {
     dTHR;
     GV *gv = gv_fetchpv(name ? name : "__ANON__", GV_ADDMULTI, SVt_PVCV);

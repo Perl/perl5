@@ -141,7 +141,7 @@ LINK_DBG	= -debug -pdb:none
 !  IF "$(CCTYPE)" == "MSVC20"
 OPTIMIZE	= -Od $(RUNTIME) -DNDEBUG
 !  ELSE
-OPTIMIZE	= -Od $(RUNTIME) -DNDEBUG
+OPTIMIZE	= -O2 $(RUNTIME) -DNDEBUG
 !  ENDIF
 LINK_DBG	= -release
 !ENDIF
@@ -200,9 +200,11 @@ EXTUTILSDIR	= $(LIBDIR)\extutils
 !IF "$(OBJECT)" == "-DPERL_OBJECT"
 PERLIMPLIB	= ..\perlcore.lib
 PERLDLL		= ..\perlcore.dll
+CAPILIB		= $(COREDIR)\PerlCAPI.lib
 !ELSE
 PERLIMPLIB	= ..\perl.lib
 PERLDLL		= ..\perl.dll
+CAPILIB		=
 !ENDIF
 
 MINIPERL	= ..\miniperl.exe
@@ -430,7 +432,7 @@ CFG_VARS	=					\
 # Top targets
 #
 
-all : $(GLOBEXE) $(MINIMOD) $(CONFIGPM) $(PERLEXE) $(PERL95EXE) $(X2P) \
+all : $(GLOBEXE) $(MINIMOD) $(CONFIGPM) $(PERLEXE) $(PERL95EXE) $(CAPILIB) $(X2P) \
 	$(EXTENSION_DLL)
 
 $(DYNALOADER)$(o) : $(DYNALOADER).c $(CORE_H) $(EXTDIR)\DynaLoader\dlutils.c
@@ -575,6 +577,18 @@ $(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
 	$(XSUBPP) dl_win32.xs > $(*B).c
 	cd ..\..\win32
 
+!IF "$(OBJECT)" == "-DPERL_OBJECT"
+PerlCAPI.cpp : $(MINIPERL)
+	$(MINIPERL) GenCAPI.pl $(COREDIR)
+
+PerlCAPI$(o) : PerlCAPI.cpp
+	$(CC) $(CFLAGS_O) -MT -UPERLDLL -DWIN95FIX -c \
+	    $(OBJOUT_FLAG)PerlCAPI$(o) PerlCAPI.cpp
+
+$(CAPILIB) : PerlCAPI.cpp PerlCAPI$(o)
+	lib /OUT:$(CAPILIB) PerlCAPI$(o)
+!ENDIF
+
 $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 	copy dl_win32.xs $(EXTDIR)\DynaLoader\dl_win32.xs
 
@@ -647,7 +661,7 @@ utils: $(PERLEXE)
 	$(PERLEXE) -I..\lib $(PL2BAT) bin\network.pl bin\www.pl bin\runperl.pl \
 			bin\pl2bat.pl bin\perlglob.pl
 
-distclean: clean
+realclean: clean
 	-del /f $(MINIPERL) $(PERLEXE) $(PERL95EXE) $(PERLDLL) $(GLOBEXE) \
 		$(PERLIMPLIB) ..\miniperl.lib $(MINIMOD)
 	-del /f *.def *.map
@@ -655,13 +669,22 @@ distclean: clean
 	-del /f $(EXTENSION_C)
 	-del /f $(PODDIR)\*.html
 	-del /f $(PODDIR)\*.bat
+	-del /f ..\utils\h2ph ..\utils\splain ..\utils\perlbug ..\utils\pl2pm ..\utils\c2ph
+	-del /f ..\utils\h2xs ..\utils\perldoc ..\utils\pstruct ..\utils\*.bat
 	-del /f ..\config.sh ..\splittree.pl perlmain.c dlutils.c config.h.new
-	-del /f ..\lib\Config.pm
+	-del /f $(CONFIGPM)
 	-del /f perl95.c
 	-del /f bin\*.bat
 	cd $(EXTDIR)
 	-del /s *.lib *.def *.map *.bs Makefile *$(o) pm_to_blib
 	cd ..\win32
+	-del /f $(EXTDIR)\DynaLoader\dl_win32.xs
+	-del /f $(EXTDIR)\DynaLoader\DynaLoader.c
+	-del /f $(LIBDIR)\.exists $(LIBDIR)\attrs.pm $(LIBDIR)\Dynaloader.pm $(LIBDIR)\FCntl.pm
+	-del /f $(LIBDIR)\IO.pm $(LIBDIR)\Opcode.pm $(LIBDIR)\ops.pm $(LIBDIR)\Safe.pm
+	-del /f $(LIBDIR)\SDBM_File.pm $(LIBDIR)\Socket.pm
+	-del /f ..\x2p\find2perl ..\x2p\s2p
+	-rmdir /s /q $(LIBDIR)\IO || rmdir /s $(LIBDIR)\IO
 	-rmdir /s /q $(AUTODIR) || rmdir /s $(AUTODIR)
 	-rmdir /s /q $(COREDIR) || rmdir /s $(COREDIR)
 	-rmdir /s /q $(MINIDIR) || rmdir /s $(MINIDIR)
@@ -711,10 +734,12 @@ clean :
 	-@erase perlmain$(o)
 	-@erase config.w32
 	-@erase /f config.h
+	-@erase PerlCAPI.cpp
 	-@erase $(GLOBEXE)
 	-@erase $(PERLEXE)
 	-@erase $(PERLDLL)
 	-@erase $(CORE_OBJ)
+	-@erase $(CAPILIB)
 	-rmdir /s /q "$(MINIDIR)"
 	-@erase $(WIN32_OBJ)
 	-@erase $(DLL_OBJ)
