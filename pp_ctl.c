@@ -2828,8 +2828,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
     else
 	sv_setpv(ERRSV,"");
     if (yyparse() || PL_error_count || !PL_eval_root) {
-	SV **newsp;
-	I32 gimme;
+	SV **newsp;			/* Used by POPBLOCK. */
 	PERL_CONTEXT *cx;
 	I32 optype = 0;			/* Might be reset by POPEVAL. */
 	STRLEN n_a;
@@ -2873,7 +2872,16 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	*startop = PL_eval_root;
     } else
 	SAVEFREEOP(PL_eval_root);
-    if (gimme & G_VOID)
+
+    /* Set the context for this new optree.
+     * If the last op is an OP_REQUIRE, force scalar context.
+     * Otherwise, propagate the context from the eval(). */
+    if (PL_eval_root->op_type == OP_LEAVEEVAL
+	    && cUNOPx(PL_eval_root)->op_first->op_type == OP_LINESEQ
+	    && cLISTOPx(cUNOPx(PL_eval_root)->op_first)->op_last->op_type
+	    == OP_REQUIRE)
+	scalar(PL_eval_root);
+    else if (gimme & G_VOID)
 	scalarvoid(PL_eval_root);
     else if (gimme & G_ARRAY)
 	list(PL_eval_root);
