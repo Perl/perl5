@@ -3,4 +3,4 @@
 # (no null key support)
 # Jonathan Stowe <gellyfish@gellyfish.com>
 use Config;
-$self->{LIBS} = ['-lgdbm'] if $Config{libs} =~ /\b-lgdbm\b/;
+$self->{LIBS} = ['-lgdbm'] if $Config{libs} =~ /(?:^|\s)-lgdbm(?:\s|$)/;
