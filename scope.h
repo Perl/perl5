@@ -46,6 +46,24 @@
 #define SSPOPDPTR (PL_savestack[--PL_savestack_ix].any_dptr)
 #define SSPOPDXPTR (PL_savestack[--PL_savestack_ix].any_dxptr)
 
+/*
+=for apidoc Ams||SAVETMPS
+Opening bracket for temporaries on a callback.  See C<FREETMPS> and
+L<perlcall>.
+
+=for apidoc Ams||FREETMPS
+Closing bracket for temporaries on a callback.  See C<SAVETMPS> and
+L<perlcall>.
+
+=for apidoc Ams||ENTER
+Opening bracket on a callback.  See C<LEAVE> and L<perlcall>.
+
+=for apidoc Ams||LEAVE
+Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
+
+=cut
+*/
+
 #define SAVETMPS save_int((int*)&PL_tmps_floor), PL_tmps_floor = PL_tmps_ix
 #define FREETMPS if (PL_tmps_ix > PL_tmps_floor) free_tmps()
 

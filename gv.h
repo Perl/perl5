@@ -34,6 +34,14 @@ struct gp {
 #define GvSTASH(gv)	(GvXPVGV(gv)->xgv_stash)
 #define GvFLAGS(gv)	(GvXPVGV(gv)->xgv_flags)
 
+/*
+=for apidoc Am|SV*|GvSV|GV* gv
+
+Return the SV from the GV.
+
+=cut
+*/
+
 #define GvSV(gv)	(GvGP(gv)->gp_sv)
 #define GvREFCNT(gv)	(GvGP(gv)->gp_refcnt)
 #define GvIO(gv)	((gv) && SvTYPE((SV*)gv) == SVt_PVGV ? GvIOp(gv) : 0)

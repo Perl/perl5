@@ -45,6 +45,16 @@ struct xpvav {
 /* XXX this is not used anywhere */
 #define AVf_REUSED 4	/* got undeffed--don't turn old memory into SVs now */
 
+/*
+=for apidoc AmU||Nullav
+Null AV pointer.
+
+=for apidoc Am|int|AvFILL|AV* av
+Same as C<av_len()>.  Deprecated, use C<av_len()> instead.
+
+=cut
+*/
+
 #define Nullav Null(AV*)
 
 #define AvARRAY(av)	((SV**)((XPVAV*)  SvANY(av))->xav_array)

@@ -4601,6 +4601,15 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 }
 
 /* XXX unsafe for threads if eval_owner isn't held */
+/*
+=for apidoc newCONSTSUB
+
+Creates a constant sub equivalent to Perl C<sub FOO () { 123 }> which is
+eligible for inlining at compile-time.
+
+=cut
+*/
+
 void
 Perl_newCONSTSUB(pTHX_ HV *stash, char *name, SV *sv)
 {
@@ -4634,6 +4643,14 @@ Perl_newCONSTSUB(pTHX_ HV *stash, char *name, SV *sv)
 
     LEAVE;
 }
+
+/*
+=for apidoc U||newXS
+
+Used by C<xsubpp> to hook up XSUBs as Perl subs.
+
+=cut
+*/
 
 CV *
 Perl_newXS(pTHX_ char *name, XSUBADDR_t subaddr, char *filename)

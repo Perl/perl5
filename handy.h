@@ -19,6 +19,17 @@
 #endif
 
 #define Null(type) ((type)NULL)
+
+/*
+=for apidoc AmU||Nullch
+Null character pointer.
+
+=for apidoc AmU||Nullsv
+Null SV pointer.
+
+=cut
+*/
+
 #define Nullch Null(char*)
 #define Nullfp Null(PerlIO*)
 #define Nullsv Null(SV*)
@@ -173,6 +184,43 @@ typedef U64TYPE U64;
 
 #define Ctl(ch) ((ch) & 037)
 
+/*
+=for apidoc Am|bool|strNE|char* s1|char* s2
+Test two strings to see if they are different.  Returns true or
+false.
+
+=for apidoc Am|bool|strEQ|char* s1|char* s2
+Test two strings to see if they are equal.  Returns true or false.
+
+=for apidoc Am|bool|strLT|char* s1|char* s2
+Test two strings to see if the first, C<s1>, is less than the second,
+C<s2>.  Returns true or false.
+
+=for apidoc Am|bool|strLE|char* s1|char* s2
+Test two strings to see if the first, C<s1>, is less than or equal to the
+second, C<s2>.  Returns true or false.
+
+=for apidoc Am|bool|strGT|char* s1|char* s2
+Test two strings to see if the first, C<s1>, is greater than the second,
+C<s2>.  Returns true or false.
+
+=for apidoc Am|bool|strGE|char* s1|char* s2
+Test two strings to see if the first, C<s1>, is greater than or equal to
+the second, C<s2>.  Returns true or false.
+
+=for apidoc Am|bool|strnNE|char* s1|char* s2|STRLEN len
+Test two strings to see if they are different.  The C<len> parameter
+indicates the number of bytes to compare.  Returns true or false. (A
+wrapper for C<strncmp>).
+
+=for apidoc Am|bool|strnEQ|char* s1|char* s2|STRLEN len
+Test two strings to see if they are equal.  The C<len> parameter indicates
+the number of bytes to compare.  Returns true or false. (A wrapper for
+C<strncmp>).
+
+=cut
+*/
+
 #define strNE(s1,s2) (strcmp(s1,s2))
 #define strEQ(s1,s2) (!strcmp(s1,s2))
 #define strLT(s1,s2) (strcmp(s1,s2) < 0)
@@ -208,6 +256,39 @@ typedef U64TYPE U64;
 #    define CTYPE256
 #  endif
 #endif
+
+/*
+=for apidoc Am|bool|isALNUM|char ch
+Returns a boolean indicating whether the C C<char> is an ascii alphanumeric
+character or digit.
+
+=for apidoc Am|bool|isALPHA|char ch
+Returns a boolean indicating whether the C C<char> is an ascii alphabetic
+character.
+
+=for apidoc Am|bool|isSPACE|char ch
+Returns a boolean indicating whether the C C<char> is whitespace.
+
+=for apidoc Am|bool|isDIGIT|char ch
+Returns a boolean indicating whether the C C<char> is an ascii
+digit.
+
+=for apidoc Am|bool|isUPPER|char ch
+Returns a boolean indicating whether the C C<char> is an uppercase
+character.
+
+=for apidoc Am|bool|isLOWER|char ch
+Returns a boolean indicating whether the C C<char> is a lowercase
+character.
+
+=for apidoc Am|char|toUPPER|char ch
+Converts the specified character to uppercase.
+
+=for apidoc Am|char|toLOWER|char ch
+Converts the specified character to lowercase.
+
+=cut
+*/
 
 #define isALNUM(c)	(isALPHA(c) || isDIGIT(c) || (c) == '_')
 #define isIDFIRST(c)	(isALPHA(c) || (c) == '_')
@@ -395,6 +476,56 @@ typedef U16 line_t;
    is interested, is to ensure that all calls go through the New and
    Renew macros.
 	--Andy Dougherty		August 1996
+*/
+
+/*
+=for apidoc Am|SV*|NEWSV|int id|STRLEN len
+Creates a new SV.  A non-zero C<len> parameter indicates the number of
+bytes of preallocated string space the SV should have.  An extra byte for a
+tailing NUL is also reserved.  (SvPOK is not set for the SV even if string
+space is allocated.)  The reference count for the new SV is set to 1. 
+C<id> is an integer id between 0 and 1299 (used to identify leaks).
+
+=for apidoc Am|void|New|int id|void* ptr|int nitems|type
+The XSUB-writer's interface to the C C<malloc> function.
+
+=for apidoc Am|void|Newc|int id|void* ptr|int nitems|type|cast
+The XSUB-writer's interface to the C C<malloc> function, with
+cast.
+
+=for apidoc Am|void|Newz|int id|void* ptr|int nitems|type
+The XSUB-writer's interface to the C C<malloc> function.  The allocated
+memory is zeroed with C<memzero>.
+
+=for apidoc Am|void|Renew|void* ptr|int nitems|type
+The XSUB-writer's interface to the C C<realloc> function.
+
+=for apidoc Am|void|Renewc|void* ptr|int nitems|type|cast
+The XSUB-writer's interface to the C C<realloc> function, with
+cast.
+
+=for apidoc Am|void|Safefree|void* src|void* dest|int nitems|type
+The XSUB-writer's interface to the C C<free> function.
+
+=for apidoc Am|void|Move|void* src|void* dest|int nitems|type
+The XSUB-writer's interface to the C C<memmove> function.  The C<src> is the
+source, C<dest> is the destination, C<nitems> is the number of items, and C<type> is
+the type.  Can do overlapping moves.  See also C<Copy>.
+
+=for apidoc Am|void|Copy|void* src|void* dest|int nitems|type
+The XSUB-writer's interface to the C C<memcpy> function.  The C<src> is the
+source, C<dest> is the destination, C<nitems> is the number of items, and C<type> is
+the type.  May fail on overlapping copies.  See also C<Move>.
+
+=for apidoc Am|void|Zero|void* dest|int nitems|type
+
+The XSUB-writer's interface to the C C<memzero> function.  The C<dest> is the
+destination, C<nitems> is the number of items, and C<type> is the type.
+
+=for apidoc Am|void|StructCopy|type src|type dest|type
+This is an architecture-independant macro to copy one structure to another.
+
+=cut
 */
 
 #ifndef lint

@@ -46,6 +46,15 @@ Perl_av_reify(pTHX_ AV *av)
     AvREAL_on(av);
 }
 
+/*
+=for apidoc av_extend
+
+Pre-extend an array.  The C<key> is the index to which the array should be
+extended.
+
+=cut
+*/
+
 void
 Perl_av_extend(pTHX_ AV *av, I32 key)
 {
@@ -151,6 +160,19 @@ Perl_av_extend(pTHX_ AV *av, I32 key)
     }
 }
 
+/*
+=for apidoc av_fetch
+
+Returns the SV at the specified index in the array.  The C<key> is the
+index.  If C<lval> is set then the fetch will be part of a store.  Check
+that the return value is non-null before dereferencing it to a C<SV*>.
+
+See L<Understanding the Magic of Tied Hashes and Arrays> for more information
+on how to use this function on tied arrays. 
+
+=cut
+*/
+
 SV**
 Perl_av_fetch(pTHX_ register AV *av, I32 key, I32 lval)
 {
@@ -197,6 +219,23 @@ Perl_av_fetch(pTHX_ register AV *av, I32 key, I32 lval)
     }
     return &AvARRAY(av)[key];
 }
+
+/*
+=for apidoc av_store
+
+Stores an SV in an array.  The array index is specified as C<key>.  The
+return value will be NULL if the operation failed or if the value did not
+need to be actually stored within the array (as in the case of tied
+arrays). Otherwise it can be dereferenced to get the original C<SV*>.  Note
+that the caller is responsible for suitably incrementing the reference
+count of C<val> before the call, and decrementing it if the function
+returned NULL.
+
+See L<Understanding the Magic of Tied Hashes and Arrays> for
+more information on how to use this function on tied arrays.
+
+=cut
+*/
 
 SV**
 Perl_av_store(pTHX_ register AV *av, I32 key, SV *val)
@@ -257,6 +296,14 @@ Perl_av_store(pTHX_ register AV *av, I32 key, SV *val)
     return &ary[key];
 }
 
+/*
+=for apidoc newAV
+
+Creates a new AV.  The reference count is set to 1.
+
+=cut
+*/
+
 AV *
 Perl_newAV(pTHX)
 {
@@ -270,6 +317,16 @@ Perl_newAV(pTHX)
     AvMAX(av) = AvFILLp(av) = -1;
     return av;
 }
+
+/*
+=for apidoc av_make
+
+Creates a new AV and populates it with a list of SVs.  The SVs are copied
+into the array, so they may be freed after the call to av_make.  The new AV
+will have a reference count of 1.
+
+=cut
+*/
 
 AV *
 Perl_av_make(pTHX_ register I32 size, register SV **strp)
@@ -320,6 +377,15 @@ Perl_av_fake(pTHX_ register I32 size, register SV **strp)
     return av;
 }
 
+/*
+=for apidoc av_clear
+
+Clears an array, making it empty.  Does not free the memory used by the
+array itself.
+
+=cut
+*/
+
 void
 Perl_av_clear(pTHX_ register AV *av)
 {
@@ -361,6 +427,14 @@ Perl_av_clear(pTHX_ register AV *av)
 
 }
 
+/*
+=for apidoc av_undef
+
+Undefines the array.  Frees the memory used by the array itself.
+
+=cut
+*/
+
 void
 Perl_av_undef(pTHX_ register AV *av)
 {
@@ -389,6 +463,15 @@ Perl_av_undef(pTHX_ register AV *av)
     }
 }
 
+/*
+=for apidoc av_push
+
+Pushes an SV onto the end of the array.  The array will grow automatically
+to accommodate the addition.
+
+=cut
+*/
+
 void
 Perl_av_push(pTHX_ register AV *av, SV *val)
 {             
@@ -414,6 +497,15 @@ Perl_av_push(pTHX_ register AV *av, SV *val)
     }
     av_store(av,AvFILLp(av)+1,val);
 }
+
+/*
+=for apidoc av_pop
+
+Pops an SV off the end of the array.  Returns C<&PL_sv_undef> if the array
+is empty.
+
+=cut
+*/
 
 SV *
 Perl_av_pop(pTHX_ register AV *av)
@@ -447,6 +539,16 @@ Perl_av_pop(pTHX_ register AV *av)
 	mg_set((SV*)av);
     return retval;
 }
+
+/*
+=for apidoc av_unshift
+
+Unshift the given number of C<undef> values onto the beginning of the
+array.  The array will grow automatically to accommodate the addition.  You
+must then use C<av_store> to assign values to these new elements.
+
+=cut
+*/
 
 void
 Perl_av_unshift(pTHX_ register AV *av, register I32 num)
@@ -501,6 +603,14 @@ Perl_av_unshift(pTHX_ register AV *av, register I32 num)
     }
 }
 
+/*
+=for apidoc av_shift
+
+Shifts an SV off the beginning of the array.
+
+=cut
+*/
+
 SV *
 Perl_av_shift(pTHX_ register AV *av)
 {
@@ -537,6 +647,15 @@ Perl_av_shift(pTHX_ register AV *av)
 	mg_set((SV*)av);
     return retval;
 }
+
+/*
+=for apidoc av_len
+
+Returns the highest index in the array.  Returns -1 if the array is
+empty.
+
+=cut
+*/
 
 I32
 Perl_av_len(pTHX_ register AV *av)

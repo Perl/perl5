@@ -56,6 +56,18 @@ PERLVAR(Tretstack_max,	I32)
 
 PERLVAR(TSv,		SV *)		/* used to hold temporary values */
 PERLVAR(TXpv,		XPV *)		/* used to hold temporary values */
+
+/*
+=for apidoc Amn|STRLEN|PL_na
+
+A convenience variable which is typically used with C<SvPV> when one
+doesn't care about the length of the string.  It is usually more efficient
+to either declare a local variable and use that instead or to use the
+C<SvPV_nolen> macro.
+
+=cut
+*/
+
 PERLVAR(Tna,		STRLEN)		/* for use in SvPV when length is
 					   Not Applicable */
 

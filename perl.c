@@ -86,6 +86,15 @@ perl_alloc_using(struct IPerlMem* ipM, struct IPerlMem* ipMS,
     return my_perl;
 }
 #else
+
+/*
+=for apidoc perl_alloc
+
+Allocates a new Perl interpreter.  See L<perlembed>.
+
+=cut
+*/
+
 PerlInterpreter *
 perl_alloc(void)
 {
@@ -98,6 +107,14 @@ perl_alloc(void)
     return my_perl;
 }
 #endif /* PERL_IMPLICIT_SYS */
+
+/*
+=for apidoc perl_construct
+
+Initializes a new Perl interpreter.  See L<perlembed>.
+
+=cut
+*/
 
 void
 perl_construct(pTHXx)
@@ -238,6 +255,14 @@ perl_construct(pTHXx)
 
     ENTER;
 }
+
+/*
+=for apidoc perl_destruct
+
+Shuts down a Perl interpreter.  See L<perlembed>.
+
+=cut
+*/
 
 void
 perl_destruct(pTHXx)
@@ -664,6 +689,14 @@ perl_destruct(pTHXx)
     }
 }
 
+/*
+=for apidoc perl_free
+
+Releases a Perl interpreter.  See L<perlembed>.
+
+=cut
+*/
+
 void
 perl_free(pTHXx)
 {
@@ -682,6 +715,14 @@ Perl_call_atexit(pTHX_ ATEXIT_t fn, void *ptr)
     PL_exitlist[PL_exitlistlen].ptr = ptr;
     ++PL_exitlistlen;
 }
+
+/*
+=for apidoc perl_parse
+
+Tells a Perl interpreter to parse a Perl script.  See L<perlembed>.
+
+=cut
+*/
 
 int
 perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
@@ -1152,6 +1193,14 @@ print \"  \\@INC:\\n    @INC\\n\";");
     return NULL;
 }
 
+/*
+=for apidoc perl_run
+
+Tells a Perl interpreter to run.  See L<perlembed>.
+
+=cut
+*/
+
 int
 perl_run(pTHXx)
 {
@@ -1241,6 +1290,16 @@ S_run_body(pTHX_ va_list args)
     return NULL;
 }
 
+/*
+=for apidoc p||get_sv
+
+Returns the SV of the specified Perl scalar.  If C<create> is set and the
+Perl variable does not exist then it will be created.  If C<create> is not
+set and the variable does not exist then NULL is returned.
+
+=cut
+*/
+
 SV*
 Perl_get_sv(pTHX_ const char *name, I32 create)
 {
@@ -1260,6 +1319,16 @@ Perl_get_sv(pTHX_ const char *name, I32 create)
     return Nullsv;
 }
 
+/*
+=for apidoc p||get_av
+
+Returns the AV of the specified Perl array.  If C<create> is set and the
+Perl variable does not exist then it will be created.  If C<create> is not
+set and the variable does not exist then NULL is returned.
+
+=cut
+*/
+
 AV*
 Perl_get_av(pTHX_ const char *name, I32 create)
 {
@@ -1271,6 +1340,16 @@ Perl_get_av(pTHX_ const char *name, I32 create)
     return Nullav;
 }
 
+/*
+=for apidoc p||get_hv
+
+Returns the HV of the specified Perl hash.  If C<create> is set and the
+Perl variable does not exist then it will be created.  If C<create> is not
+set and the variable does not exist then NULL is returned.
+
+=cut
+*/
+
 HV*
 Perl_get_hv(pTHX_ const char *name, I32 create)
 {
@@ -1281,6 +1360,17 @@ Perl_get_hv(pTHX_ const char *name, I32 create)
 	return GvHV(gv);
     return Nullhv;
 }
+
+/*
+=for apidoc p||get_cv
+
+Returns the CV of the specified Perl subroutine.  If C<create> is set and
+the Perl subroutine does not exist then it will be declared (which has the
+same effect as saying C<sub name;>).  If C<create> is not set and the
+subroutine does not exist then NULL is returned.
+
+=cut
+*/
 
 CV*
 Perl_get_cv(pTHX_ const char *name, I32 create)
@@ -1302,6 +1392,14 @@ Perl_get_cv(pTHX_ const char *name, I32 create)
 
 /* Be sure to refetch the stack pointer after calling these routines. */
 
+/*
+=for apidoc p||call_argv
+
+Performs a callback to the specified Perl sub.  See L<perlcall>.
+
+=cut
+*/
+
 I32
 Perl_call_argv(pTHX_ const char *sub_name, I32 flags, register char **argv)
               
@@ -1321,6 +1419,14 @@ Perl_call_argv(pTHX_ const char *sub_name, I32 flags, register char **argv)
     return call_pv(sub_name, flags);
 }
 
+/*
+=for apidoc p||call_pv
+
+Performs a callback to the specified Perl sub.  See L<perlcall>.
+
+=cut
+*/
+
 I32
 Perl_call_pv(pTHX_ const char *sub_name, I32 flags)
               		/* name of the subroutine */
@@ -1328,6 +1434,15 @@ Perl_call_pv(pTHX_ const char *sub_name, I32 flags)
 {
     return call_sv((SV*)get_cv(sub_name, TRUE), flags);
 }
+
+/*
+=for apidoc p||call_method
+
+Performs a callback to the specified Perl method.  The blessed object must
+be on the stack.  See L<perlcall>.
+
+=cut
+*/
 
 I32
 Perl_call_method(pTHX_ const char *methname, I32 flags)
@@ -1347,6 +1462,15 @@ Perl_call_method(pTHX_ const char *methname, I32 flags)
 }
 
 /* May be called with any of a CV, a GV, or an SV containing the name. */
+/*
+=for apidoc p||call_sv
+
+Performs a callback to the Perl sub whose name is in the SV.  See
+L<perlcall>.
+
+=cut
+*/
+
 I32
 Perl_call_sv(pTHX_ SV *sv, I32 flags)
        
@@ -1509,6 +1633,14 @@ S_call_xbody(pTHX_ OP *myop, int is_eval)
 
 /* Eval a string. The G_EVAL flag is always assumed. */
 
+/*
+=for apidoc p||eval_sv
+
+Tells Perl to C<eval> the string in the SV.
+
+=cut
+*/
+
 I32
 Perl_eval_sv(pTHX_ SV *sv, I32 flags)
        
@@ -1591,6 +1723,14 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
     return retval;
 }
 
+/*
+=for apidoc p||eval_pv
+
+Tells Perl to C<eval> the given string and return an SV* result.
+
+=cut
+*/
+
 SV*
 Perl_eval_pv(pTHX_ const char *p, I32 croak_on_error)
 {
@@ -1614,6 +1754,14 @@ Perl_eval_pv(pTHX_ const char *p, I32 croak_on_error)
 }
 
 /* Require a module. */
+
+/*
+=for apidoc p||require_pv
+
+Tells Perl to C<require> a module.
+
+=cut
+*/
 
 void
 Perl_require_pv(pTHX_ const char *pv)

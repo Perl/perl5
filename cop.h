@@ -373,6 +373,36 @@ struct context {
 #define CXINC (cxstack_ix < cxstack_max ? ++cxstack_ix : (cxstack_ix = cxinc()))
 
 /* "gimme" values */
+
+/*
+=for apidoc AmU||G_SCALAR
+Used to indicate scalar context.  See C<GIMME_V>, C<GIMME>, and
+L<perlcall>.
+
+=for apidoc AmU||G_ARRAY
+Used to indicate array context.  See C<GIMME_V>, C<GIMME> and
+L<perlcall>.
+
+=for apidoc AmU||G_VOID
+Used to indicate void context.  See C<GIMME_V> and L<perlcall>.
+
+=for apidoc AmU||G_DISCARD
+Indicates that arguments returned from a callback should be discarded.  See
+L<perlcall>.
+
+=for apidoc AmU||G_EVAL
+
+Used to force a Perl C<eval> wrapper around a callback.  See
+L<perlcall>.
+
+=for apidoc AmU||G_NOARGS
+
+Indicates that no arguments are being sent to a callback.  See
+L<perlcall>.
+
+=cut
+*/
+
 #define G_SCALAR	0
 #define G_ARRAY		1
 #define G_VOID		128	/* skip this bit when adding flags below */

@@ -36,6 +36,16 @@ struct xpvcv {
     cv_flags_t	xcv_flags;
 };
 
+/*
+=for apidoc AmU||Nullcv
+Null CV pointer.
+
+=for apidoc Am|HV*|CvSTASH|CV* cv
+Returns the stash of the CV.
+
+=cut
+*/
+
 #define Nullcv Null(CV*)
 
 #define CvSTASH(sv)	((XPVCV*)SvANY(sv))->xcv_stash

@@ -1523,6 +1523,10 @@ change#4232
 
 =over 4
 
+=item perlapi.pod
+
+The official list of public Perl API functions.
+
 =item perlcompile.pod
 
 An introduction to using the Perl Compiler suite.
@@ -1534,6 +1538,11 @@ An introduction to writing Perl source filters.
 =item perlhack.pod
 
 Some guidelines for hacking the Perl source code.
+
+=item perlintern.pod
+
+A list of internal functions in the Perl source code.
+(List is currently empty.)
 
 =item perlopentut.pod
 

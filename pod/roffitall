@@ -71,6 +71,8 @@ toroff=`
     $mandir/perlcall.1	\
     $mandir/perlcompile.1	\
     $mandir/perltodo.1	\
+    $mandir/perlapi.1	\
+    $mandir/perlintern.1	\
     $mandir/perlhack.1	\
     $mandir/perlhist.1	\
     $mandir/perldelta.1	\

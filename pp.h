@@ -17,6 +17,38 @@
 
 #define PP(s) OP * Perl_##s(pTHX)
 
+/*
+=for apidoc AmU||SP
+Stack pointer.  This is usually handled by C<xsubpp>.  See C<dSP> and
+C<SPAGAIN>.
+
+=for apidoc AmU||MARK
+Stack marker variable for the XSUB.  See C<dMARK>.
+
+=for apidoc Ams||PUSHMARK
+Opening bracket for arguments on a callback.  See C<PUTBACK> and
+L<perlcall>.
+
+=for apidoc Ams||dSP
+Declares a local copy of perl's stack pointer for the XSUB, available via
+the C<SP> macro.  See C<SP>.
+
+=for apidoc Ams||dMARK
+Declare a stack marker variable, C<mark>, for the XSUB.  See C<MARK> and
+C<dORIGMARK>.
+
+=for apidoc Ams||dORIGMARK
+Saves the original stack mark for the XSUB.  See C<ORIGMARK>.
+
+=for apidoc AmU||ORIGMARK
+The original stack mark for the XSUB.  See C<dORIGMARK>.
+
+=for apidoc Ams||SPAGAIN
+Refetch the stack pointer.  Used after a callback.  See L<perlcall>.
+
+=cut
+*/
+
 #define SP sp
 #define MARK mark
 #define TARG targ
@@ -52,6 +84,29 @@
 #define NORMAL PL_op->op_next
 #define DIE return Perl_die
 
+/*
+=for apidoc Ams||PUTBACK
+Closing bracket for XSUB arguments.  This is usually handled by C<xsubpp>.
+See C<PUSHMARK> and L<perlcall> for other uses.
+
+=for apidoc Amn|SV*|POPs
+Pops an SV off the stack.
+
+=for apidoc Amn|char*|POPp
+Pops a string off the stack.
+
+=for apidoc Amn|NV|POPn
+Pops a double off the stack.
+
+=for apidoc Amn|IV|POPi
+Pops an integer off the stack.
+
+=for apidoc Amn|long|POPl
+Pops a long off the stack.
+
+=cut
+*/
+
 #define PUTBACK		PL_stack_sp = sp
 #define RETURN		return PUTBACK, NORMAL
 #define RETURNOP(o)	return PUTBACK, o
@@ -84,6 +139,58 @@
 #endif
 
 /* Go to some pains in the rare event that we must extend the stack. */
+
+/*
+=for apidoc Am|void|EXTEND|SP|int nitems
+Used to extend the argument stack for an XSUB's return values. Once
+used, guarrantees that there is room for at least C<nitems> to be pushed
+onto the stack.
+
+=for apidoc Am|void|PUSHs|SV* sv
+Push an SV onto the stack.  The stack must have room for this element. 
+Does not handle 'set' magic.  See C<XPUSHs>.
+
+=for apidoc Am|void|PUSHp|char* str|STRLEN len
+Push a string onto the stack.  The stack must have room for this element.
+The C<len> indicates the length of the string.  Handles 'set' magic.  See
+C<XPUSHp>.
+
+=for apidoc Am|void|PUSHn|NV nv
+Push a double onto the stack.  The stack must have room for this element.
+Handles 'set' magic.  See C<XPUSHn>.
+
+=for apidoc Am|void|PUSHi|IV iv
+Push an integer onto the stack.  The stack must have room for this element.
+Handles 'set' magic.  See C<XPUSHi>.
+
+=for apidoc Am|void|PUSHu|UV uv
+Push an unsigned integer onto the stack.  The stack must have room for this
+element.  See C<XPUSHu>.
+
+=for apidoc Am|void|XPUSHs|SV* sv
+Push an SV onto the stack, extending the stack if necessary.  Does not
+handle 'set' magic.  See C<PUSHs>.
+
+=for apidoc Am|void|XPUSHp|char* str|STRLEN len
+Push a string onto the stack, extending the stack if necessary.  The C<len>
+indicates the length of the string.  Handles 'set' magic.  See
+C<PUSHp>.
+
+=for apidoc Am|void|XPUSHn|NV nv
+Push a double onto the stack, extending the stack if necessary.  Handles
+'set' magic.  See C<PUSHn>.
+
+=for apidoc Am|void|XPUSHi|IV iv
+Push an integer onto the stack, extending the stack if necessary.  Handles
+'set' magic. See C<PUSHi>.
+
+=for apidoc Am|void|XPUSHu|UV uv
+Push an unsigned integer onto the stack, extending the stack if necessary. 
+See C<PUSHu>.
+
+=cut
+*/
+
 #define EXTEND(p,n)	STMT_START { if (PL_stack_max - p < (n)) {		\
 			    sp = stack_grow(sp,p, (int) (n));		\
 			} } STMT_END

@@ -14,7 +14,7 @@ sub output ($);
 	   perldbmfilter perldebug
 	   perldiag perlsec perltrap perlport perlstyle perlpod perlbook
 	   perlembed perlapio perlxs perlxstut perlguts perlcall perlcompile
-	   perlhist
+	   perlapi perlintern perlhist
 	  );
 
 for (@pods) { s/$/.pod/ }

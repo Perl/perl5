@@ -52,6 +52,20 @@ typedef U32 PADOFFSET;
 	 ((op)->op_flags & OPf_WANT) == OPf_WANT_LIST   ? G_ARRAY   : \
 	 dfl)
 
+/*
+=for apidoc Amn|U32|GIMME_V
+The XSUB-writer's equivalent to Perl's C<wantarray>.  Returns C<G_VOID>,
+C<G_SCALAR> or C<G_ARRAY> for void, scalar or array context,
+respectively.
+
+=for apidoc Amn|U32|GIMME
+A backward-compatible version of C<GIMME_V> which can only return
+C<G_SCALAR> or C<G_ARRAY>; in a void context, it returns C<G_SCALAR>.
+Deprecated.  Use C<GIMME_V> instead.
+
+=cut
+*/
+
 #define GIMME_V		OP_GIMME(PL_op, block_gimme())
 
 /* Public flags */
@@ -85,6 +99,7 @@ typedef U32 PADOFFSET;
 /* old names; don't use in new code, but don't break them, either */
 #define OPf_LIST	OPf_WANT_LIST
 #define OPf_KNOW	OPf_WANT
+
 #define GIMME \
 	  (PL_op->op_flags & OPf_WANT					\
 	   ? ((PL_op->op_flags & OPf_WANT) == OPf_WANT_LIST		\

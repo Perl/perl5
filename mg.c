@@ -60,6 +60,14 @@ S_save_magic(pTHX_ I32 mgs_ix, SV *sv)
     SvFLAGS(sv) |= (SvFLAGS(sv) & (SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
 }
 
+/*
+=for apidoc mg_magical
+
+Turns on the magical status of an SV.  See C<sv_magic>.
+
+=cut
+*/
+
 void
 Perl_mg_magical(pTHX_ SV *sv)
 {
@@ -76,6 +84,14 @@ Perl_mg_magical(pTHX_ SV *sv)
 	}
     }
 }
+
+/*
+=for apidoc mg_get
+
+Do magic after a value is retrieved from the SV.  See C<sv_magic>.
+
+=cut
+*/
 
 int
 Perl_mg_get(pTHX_ SV *sv)
@@ -112,6 +128,14 @@ Perl_mg_get(pTHX_ SV *sv)
     return 0;
 }
 
+/*
+=for apidoc mg_set
+
+Do magic after a value is assigned to the SV.  See C<sv_magic>.
+
+=cut
+*/
+
 int
 Perl_mg_set(pTHX_ SV *sv)
 {
@@ -137,6 +161,14 @@ Perl_mg_set(pTHX_ SV *sv)
     restore_magic(aTHXo_ (void*)mgs_ix);
     return 0;
 }
+
+/*
+=for apidoc mg_length
+
+Report on the SV's length.  See C<sv_magic>.
+
+=cut
+*/
 
 U32
 Perl_mg_length(pTHX_ SV *sv)
@@ -196,6 +228,14 @@ Perl_mg_size(pTHX_ SV *sv)
     return 0;
 }
 
+/*
+=for apidoc mg_clear
+
+Clear something magical that the SV represents.  See C<sv_magic>.
+
+=cut
+*/
+
 int
 Perl_mg_clear(pTHX_ SV *sv)
 {
@@ -217,6 +257,14 @@ Perl_mg_clear(pTHX_ SV *sv)
     return 0;
 }
 
+/*
+=for apidoc mg_find
+
+Finds the magic pointer for type matching the SV.  See C<sv_magic>.
+
+=cut
+*/
+
 MAGIC*
 Perl_mg_find(pTHX_ SV *sv, int type)
 {
@@ -227,6 +275,14 @@ Perl_mg_find(pTHX_ SV *sv, int type)
     }
     return 0;
 }
+
+/*
+=for apidoc mg_copy
+
+Copies the magic from one SV to another.  See C<sv_magic>.
+
+=cut
+*/
 
 int
 Perl_mg_copy(pTHX_ SV *sv, SV *nsv, const char *key, I32 klen)
@@ -243,6 +299,14 @@ Perl_mg_copy(pTHX_ SV *sv, SV *nsv, const char *key, I32 klen)
     }
     return count;
 }
+
+/*
+=for apidoc mg_free
+
+Free any magic storage used by the SV.  See C<sv_magic>.
+
+=cut
+*/
 
 int
 Perl_mg_free(pTHX_ SV *sv)

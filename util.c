@@ -912,6 +912,15 @@ Perl_mem_collxfrm(pTHX_ const char *s, STRLEN len, STRLEN *xlen)
 
    If FBMcf_TAIL, the table is created as if the string has a trailing \n. */
 
+/*
+=for apidoc fbm_compile
+
+Analyses the string in order to make fast searches on it using fbm_instr()
+-- the Boyer-Moore algorithm.
+
+=cut
+*/
+
 void
 Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 {
@@ -971,6 +980,17 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 /* If SvTAIL(littlestr), it has a fake '\n' at end. */
 /* If SvTAIL is actually due to \Z or \z, this gives false positives
    if multiline */
+
+/*
+=for apidoc fbm_instr
+
+Returns the location of the SV in the string delimited by C<str> and
+C<strend>.  It returns C<Nullch> if the string can't be found.  The C<sv>
+does not have to be fbm_compiled, but the search will not be as fast
+then.
+
+=cut
+*/
 
 char *
 Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *littlestr, U32 flags)
@@ -1304,6 +1324,14 @@ Perl_ibcmp_locale(pTHX_ const char *s1, const char *s2, register I32 len)
 
 /* copy a string to a safe spot */
 
+/*
+=for apidoc savepv
+
+Copy a string to a safe spot.  This does not use an SV.
+
+=cut
+*/
+
 char *
 Perl_savepv(pTHX_ const char *sv)
 {
@@ -1315,6 +1343,15 @@ Perl_savepv(pTHX_ const char *sv)
 }
 
 /* same thing but with a known length */
+
+/*
+=for apidoc savepvn
+
+Copy a string to a safe spot.  The C<len> indicates number of bytes to
+copy.  This does not use an SV.
+
+=cut
+*/
 
 char *
 Perl_savepvn(pTHX_ const char *sv, register I32 len)
@@ -1620,6 +1657,16 @@ Perl_croak_nocontext(const char *pat, ...)
 }
 #endif /* PERL_IMPLICIT_CONTEXT */
 
+/*
+=for apidoc croak
+
+This is the XSUB-writer's interface to Perl's C<die> function.  Use this
+function the same way you use the C C<printf> function.  See
+C<warn>.
+
+=cut
+*/
+
 void
 Perl_croak(pTHX_ const char *pat, ...)
 {
@@ -1698,6 +1745,16 @@ Perl_warn_nocontext(const char *pat, ...)
     va_end(args);
 }
 #endif /* PERL_IMPLICIT_CONTEXT */
+
+/*
+=for apidoc warn
+
+This is the XSUB-writer's interface to Perl's C<warn> function.  Use this
+function the same way you use the C C<printf> function.  See
+C<croak>.
+
+=cut
+*/
 
 void
 Perl_warn(pTHX_ const char *pat, ...)
