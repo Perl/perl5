@@ -133,16 +133,15 @@ else {
 if (!$have_time) {
     skip 14
 } else {
- my ($t1, $tf, $t2);
- for my $i (1 .. 20) {
-     $t1 = time();
-     $tf = Time::HiRes::time();
-     $t2 = 1 + time();
-     last if (($t2 - $t1) <= 1) && $t1 <= $tf;
+ my ($s, $n);
+ for my $i (1 .. 100) {
+     $s += Time::HiRes::time() - time();
+     $n++;
  }
- ok 14, (($t1 <= $tf) && ($tf <= $t2)),
-      "Time::HiRes::time $tf not bracketed by [$t1, $t2]";
-
+ # $s should be, at worst, equal to $n
+ # (time() may be rounding down, up, or closest)
+ ok 14, abs($s) / $n <= 1.0, "Time::HiRes::time() not close to time()";
+ print "# s = $s, n = $n, s/n = ", $s/$n, "\n";
 }
 
 unless (defined &Time::HiRes::gettimeofday
