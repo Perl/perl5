@@ -1244,7 +1244,7 @@ do_readline(void)
 		IoFLAGS(io) |= IOf_START;
 	    }
 	    else if (type == OP_GLOB) {
-		if (do_close(PL_last_in_gv, FALSE) & ~0xFF)
+		if (!do_close(PL_last_in_gv, FALSE))
 		    warn("internal error: glob failed");
 	    }
 	    if (gimme == G_SCALAR) {
