@@ -3033,7 +3033,7 @@ PP(pp_require)
 
     sv = POPs;
     if (SvNIOKp(sv)) {
-	if (SvPOK(sv) && SvNOK(sv)) {		/* require v5.6.1 */
+	if (SvPOK(sv) && SvNOK(sv) && SvNV(sv)) {		/* require v5.6.1 */
 	    UV rev = 0, ver = 0, sver = 0;
 	    STRLEN len;
 	    U8 *s = (U8*)SvPVX(sv);
