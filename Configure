@@ -8,7 +8,7 @@
 # and edit it to reflect your system.  Some packages may include samples
 # of config.h for certain machines, so you might look for one of those.)
 #
-# $Header: Configure,v 1.0.1.1 88/01/21 21:21:47 root Exp $
+# $Header: Configure,v 1.0.1.2 88/01/24 03:51:55 root Exp $
 #
 # Yes, you may rip this off to use in other distribution packages.
 # (Note: this Configure script was generated automatically.  Rather than
@@ -68,10 +68,13 @@ cc=''
 contains=''
 cpp=''
 cppminus=''
+d_bcopy=''
 d_charsprf=''
 d_index=''
+d_statblks=''
 d_stdstdio=''
 d_strctcpy=''
+d_tminsys=''
 d_vfork=''
 d_voidsig=''
 libc=''
@@ -638,6 +641,16 @@ else
 fi
 rm -f testcpp.c testcpp.out
 
+: see if bcopy exists
+echo " "
+if $contains bcopy libc.list >/dev/null 2>&1; then
+    echo 'bcopy() found.'
+    d_bcopy="$define"
+else
+    echo 'bcopy() not found.'
+    d_bcopy="$undef"
+fi
+
 : see if sprintf is declared as int or pointer to char
 echo " "
 if $contains 'char.*sprintf' /usr/include/stdio.h >/dev/null 2>&1 ; then
@@ -669,6 +682,21 @@ else
 	n*|f*) d_index="$undef" ;;
 	*)     d_index="$define" ;;
     esac
+fi
+
+: see if stat knows about block sizes
+echo " "
+if $contains 'st_blocks;' /usr/include/sys/stat.h >/dev/null 2>&1 ; then
+    if $contains 'st_blksize;' /usr/include/sys/stat.h >/dev/null 2>&1 ; then
+	echo "Your stat knows about block sizes."
+	d_statblks="$define"
+    else
+	echo "Your stat doesn't know about block sizes."
+	d_statblks="$undef"
+    fi
+else
+    echo "Your stat doesn't know about block sizes."
+    d_statblks="$undef"
 fi
 
 : see if stdio is really std
@@ -707,6 +735,16 @@ else
     echo "Nope, it can't."
 fi
 $rm -f try.*
+
+: see if struct tm is defined in sys/time.h
+echo " "
+if $contains 'struct tm' /usr/include/time.h >/dev/null 2>&1 ; then
+    echo "You have struct tm defined in <time.h> rather than <sys/time.h>."
+    d_tminsys="$undef"
+else
+    echo "You have struct tm defined in <sys/time.h> rather than <time.h>."
+    d_tminsys="$define"
+fi
 
 : see if there is a vfork
 echo " "
@@ -1260,10 +1298,13 @@ cc='$cc'
 contains='$contains'
 cpp='$cpp'
 cppminus='$cppminus'
+d_bcopy='$d_bcopy'
 d_charsprf='$d_charsprf'
 d_index='$d_index'
+d_statblks='$d_statblks'
 d_stdstdio='$d_stdstdio'
 d_strctcpy='$d_strctcpy'
+d_tminsys='$d_tminsys'
 d_vfork='$d_vfork'
 d_voidsig='$d_voidsig'
 libc='$libc'

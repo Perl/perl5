@@ -1,6 +1,9 @@
-/* $Header: malloc.c,v 1.0 87/12/18 13:05:35 root Exp $
+/* $Header: malloc.c,v 1.0.1.1 88/01/24 03:53:23 root Exp $
  *
  * $Log:	malloc.c,v $
+ * Revision 1.0.1.1  88/01/24  03:53:23  root
+ * patch 2: made depend on perl.h.
+ * 
  * Revision 1.0  87/12/18  13:05:35  root
  * Initial revision
  * 
@@ -24,7 +27,16 @@ static char sccsid[] = "@(#)malloc.c	4.3 (Berkeley) 9/16/83";
  * but bombs when it runs out. 
  */
 
-#include <sys/types.h>
+#include "EXTERN.h"
+#include "handy.h"
+#include "search.h"
+#include "perl.h"
+
+/* I don't much care whether these are defined in sys/types.h--LAW */
+
+#define u_char unsigned char
+#define u_int unsigned int
+#define u_short unsigned short
 
 #define	NULL 0
 

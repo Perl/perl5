@@ -1,6 +1,9 @@
-char rcsid[] = "$Header: perly.c,v 1.0.1.1 88/01/21 21:25:57 root Exp $";
+char rcsid[] = "$Header: perly.c,v 1.0.1.2 88/01/24 00:06:03 root Exp $";
 /*
  * $Log:	perly.c,v $
+ * Revision 1.0.1.2  88/01/24  00:06:03  root
+ * patch 2: s/(abc)/\1/ grandfathering didn't work right.
+ * 
  * Revision 1.0.1.1  88/01/21  21:25:57  root
  * Now uses CPP and CPPMINUS symbols from config.h.
  * 
@@ -1646,7 +1649,7 @@ register char *s;
 			    *d <<= 3;
 			    *d += *s++ - '0';
 			}
-			else if (!index('`"',term)) {	/* oops, a subpattern */
+			else if (!index("`\"",term)) {	/* oops, a subpattern */
 			    s--;
 			    goto defchar;
 			}

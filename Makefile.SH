@@ -14,15 +14,14 @@ case "$0" in
 esac
 echo "Extracting Makefile (with variable substitutions)"
 cat >Makefile <<!GROK!THIS!
-# $Header: Makefile.SH,v 1.0 87/12/18 16:11:50 root Exp $
+# $Header: Makefile.SH,v 1.0.1.1 88/01/24 03:55:18 root Exp $
 #
 # $Log:	Makefile.SH,v $
+# Revision 1.0.1.1  88/01/24  03:55:18  root
+# patch 2: remove extra Log lines.
+# 
 # Revision 1.0  87/12/18  16:11:50  root
 # Initial revision
-# 
-# Revision 1.0  87/12/18  16:01:07  root
-# Initial revision
-# 
 # 
 
 CC = $cc

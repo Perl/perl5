@@ -1,6 +1,9 @@
-/* $Header: arg.c,v 1.0.1.1 88/01/21 21:27:10 root Exp $
+/* $Header: arg.c,v 1.0.1.2 88/01/24 03:52:34 root Exp $
  *
  * $Log:	arg.c,v $
+ * Revision 1.0.1.2  88/01/24  03:52:34  root
+ * patch 2: added STATBLKS dependencies.
+ * 
  * Revision 1.0.1.1  88/01/21  21:27:10  root
  * Now defines signal return values correctly using VOIDSIG.
  * 
@@ -542,8 +545,13 @@ STR ***retary;
 	    apush(ary,str_nmake((double)statbuf.st_atime));
 	    apush(ary,str_nmake((double)statbuf.st_mtime));
 	    apush(ary,str_nmake((double)statbuf.st_ctime));
+#ifdef STATBLOCKS
 	    apush(ary,str_nmake((double)statbuf.st_blksize));
 	    apush(ary,str_nmake((double)statbuf.st_blocks));
+#else
+	    apush(ary,str_make("");
+	    apush(ary,str_make("");
+#endif
 	}
 	sarg = (STR**)safemalloc((max+2)*sizeof(STR*));
 	sarg[0] = Nullstr;

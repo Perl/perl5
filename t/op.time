@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: op.time,v 1.0 87/12/18 13:14:33 root Exp $
+# $Header: op.time,v 1.0.1.1 88/01/24 03:56:09 root Exp $
 
 print "1..5\n";
 
@@ -24,7 +24,7 @@ if ($i >= 200000) {print "ok 2\n";} else {print "not ok 2\n";}
 ($xsec,$foo) = localtime($now);
 $localyday = $yday;
 
-if ($sec != $xsec && $yday && $wday && $year)
+if ($sec != $xsec && $mday && $year)
     {print "ok 3\n";}
 else
     {print "not ok 3\n";}
@@ -32,7 +32,7 @@ else
 ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = gmtime($beg);
 ($xsec,$foo) = localtime($now);
 
-if ($sec != $xsec && $yday && $wday && $year)
+if ($sec != $xsec && $mday && $year)
     {print "ok 4\n";}
 else
     {print "not ok 4\n";}

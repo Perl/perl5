@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: TEST,v 1.0 87/12/18 13:11:34 root Exp $
+# $Header: TEST,v 1.0.1.1 88/01/24 03:55:39 root Exp $
 
 # This is written in a peculiar style, since we're trying to avoid
 # most of the constructs we'll be testing for.
@@ -14,10 +14,29 @@ if ($ARGV[0] eq '') {
     @ARGV = split(/[ \n]/,`echo base.* comp.* cmd.* io.* op.*`);
 }
 
+open(config,"../config.sh");
+while (<config>) {
+    if (/sharpbang='(.*)'/) {
+	$sharpbang = ($1 eq '#!');
+	last;
+    }
+}
 $bad = 0;
 while ($test = shift) {
     print "$test...";
-    open(results,"$test|") || (print "can't run.\n");
+    if ($sharpbang) {
+	open(results,"$test|") || (print "can't run.\n");
+    } else {
+	open(script,"$test") || die "Can't run $test";
+	$_ = <script>;
+	close(script);
+	if (/#!..perl(.*)/) {
+	    $switch = $1;
+	} else {
+	    $switch = '';
+	}
+	open(results,"./perl$switch $test|") || (print "can't run.\n");
+    }
     $ok = 0;
     while (<results>) {
 	if ($verbose) {

@@ -1,6 +1,9 @@
-/* $Header: perl.h,v 1.0.1.1 88/01/21 21:29:23 root Exp $
+/* $Header: perl.h,v 1.0.1.2 88/01/24 03:53:47 root Exp $
  *
  * $Log:	perl.h,v $
+ * Revision 1.0.1.2  88/01/24  03:53:47  root
+ * patch 2: hid str_peek() in #ifdef DEBUGGING.
+ * 
  * Revision 1.0.1.1  88/01/21  21:29:23  root
  * No longer defines STDSTDIO--gets it from config.h now.
  * 
@@ -24,7 +27,13 @@
 #include <setjmp.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+
+#ifdef TMINSYS
+#include <sys/time.h>
+#else
 #include <time.h>
+#endif
+
 #include <sys/times.h>
 
 typedef struct arg ARG;
@@ -46,6 +55,12 @@ typedef struct htbl HASH;
 #include "array.h"
 #include "hash.h"
 
+#ifdef CHARSPRINTF
+    char *sprintf();
+#else
+    int sprintf();
+#endif
+
 /* A string is TRUE if not "" or "0". */
 #define True(val) (tmps = (val), (*tmps && !(*tmps == '0' && !tmps[1])))
 EXT char *Yes INIT("1");
@@ -53,7 +68,10 @@ EXT char *No INIT("");
 
 #define str_true(str) (Str = (str), (Str->str_pok ? True(Str->str_ptr) : (Str->str_nok ? (Str->str_nval != 0.0) : 0 )))
 
+#ifdef DEBUGGING
 #define str_peek(str) (Str = (str), (Str->str_pok ? Str->str_ptr : (Str->str_nok ? (sprintf(buf,"num(%g)",Str->str_nval),buf) : "" )))
+#endif
+
 #define str_get(str) (Str = (str), (Str->str_pok ? Str->str_ptr : str_2ptr(Str)))
 #define str_gnum(str) (Str = (str), (Str->str_nok ? Str->str_nval : str_2num(Str)))
 EXT STR *Str;
@@ -184,12 +202,6 @@ EXT char *goto_targ INIT(Nullch);	/* cmd_exec gets strange when set */
 double atof();
 long time();
 struct tm *gmtime(), *localtime();
-
-#ifdef CHARSPRINTF
-    char *sprintf();
-#else
-    int sprintf();
-#endif
 
 #ifdef EUNICE
 #define UNLINK(f) while (unlink(f) >= 0)
