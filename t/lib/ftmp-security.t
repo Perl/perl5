@@ -1,14 +1,18 @@
-#!/usr/local/bin/perl -w
+#!/usr/bin/perl -w
 # Test for File::Temp - Security levels
 
 # Some of the security checking will not work on all platforms
 # Test a simple open in the cwd and tmpdir foreach of the
 # security levels
 
-use strict;
-use Test;
-BEGIN { plan tests => 13}
+BEGIN {
+	chdir 't' if -d 't';
+	unshift @INC, '../lib';
+	require Test; import Test;
+	plan(tests => 13);
+}
 
+use strict;
 use File::Spec;
 
 # Set up END block - this needs to happen before we load
