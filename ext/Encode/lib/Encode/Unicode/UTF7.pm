@@ -15,13 +15,13 @@ use Encode;
 #
 
 our $OPTIONAL_DIRECT_CHARS = 1;
-my $specials =   quotemeta "\'(),-.:?";
+my $specials =   quotemeta "\'(),-./:?";
 $OPTIONAL_DIRECT_CHARS and
     $specials .= quotemeta "!\"#$%&*;<=>@[]^_`{|}";
 # \s will not work because it matches U+3000 DEOGRAPHIC SPACE
-# We use \x00-\x20 instead (controls + space)
-my $re_asis =     qr/(?:[\x00-\x20A-Za-z0-9$specials])/;
-my $re_encoded = qr/(?:[^\x00-\x20A-Za-z0-9$specials])/;
+# We use qr/[\n\r\t\ ] instead
+my $re_asis =     qr/(?:[\n\r\t\ A-Za-z0-9$specials])/;
+my $re_encoded = qr/(?:[^\n\r\t\ A-Za-z0-9$specials])/;
 my $e_utf16 = find_encoding("UTF-16BE");
 
 sub needs_lines { 1 };
