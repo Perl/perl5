@@ -2138,6 +2138,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 		    ENTER;
 		    Perl_save_re_context(aTHX);
 		    rop = sv_compile_2op(sv, &sop, "re", &av);
+		    sop->op_private |= OPpREFCOUNTED;
+		    /* re_dup will OpREFCNT_inc */
+		    OpREFCNT_set(sop, 1);
 		    LEAVE;
 
 		    n = add_data(pRExC_state, 3, "nop");
@@ -4609,7 +4612,11 @@ Perl_pregfree(pTHX_ struct regexp *r)
 		}
 		else
 		    PL_curpad = NULL;
-		op_free((OP_4tree*)r->data->data[n]);
+
+		if (!OpREFCNT_dec((OP_4tree*)r->data->data[n])) {
+                    op_free((OP_4tree*)r->data->data[n]);
+		}
+
 		PL_comppad = old_comppad;
 		PL_curpad = old_curpad;
 		SvREFCNT_dec((SV*)new_comppad);

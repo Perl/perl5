@@ -8403,6 +8403,9 @@ Perl_re_dup(pTHX_ REGEXP *r, clone_params *param)
 		ret->regstclass = (regnode*)d->data[i];
 		break;
 	    case 'o':
+		/* XXX: can this really be shared? */
+		d->data[i] = (void*)OpREFCNT_inc((OP*)r->data->data[i]);
+		break;
 	    case 'n':
 		d->data[i] = r->data->data[i];
 		break;
