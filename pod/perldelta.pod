@@ -2425,14 +2425,18 @@ the printf format "%.0f", most often they produce "0" and "-0".)
 
 =head2  Failure of Thread tests
 
-B<Note that support for 5.005-style threading remains experimental.>
+B<Note that support for 5.005-style threading remains experimental
+and practically unsupported.>
 
 The following tests are known to fail due to fundamental problems in
 the 5.005 threading implementation. These are not new failures--Perl
 5.005_0x has the same bugs, but didn't have these tests.
 
-  lib/autouse.t                 4
-  t/lib/thr5005.t               19-20
+  ext/List/Util/t/first         2
+  lib/autouse                   4
+  ext/Thread/thr5005            19-20
+
+These failures are unlikely to get fixed.
 
 =head2 UNICOS
 
