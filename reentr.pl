@@ -668,6 +668,7 @@ print <<EOF;
 @define
 typedef struct {
 @struct
+    int dummy; /* just in case */
 } REENTR;
 
 /* The wrappers. */
