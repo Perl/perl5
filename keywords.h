@@ -12,10 +12,10 @@
 #define KEY_EQ			11
 #define KEY_GE			12
 #define KEY_GT			13
-#define KEY_LE			14
-#define KEY_LT			15
-#define KEY_NE			16
-#define KEY_RESTART		17
+#define KEY_INIT		14
+#define KEY_LE			15
+#define KEY_LT			16
+#define KEY_NE			17
 #define KEY_abs			18
 #define KEY_accept		19
 #define KEY_alarm		20

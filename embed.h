@@ -1264,6 +1264,7 @@
 #define gensym			(curinterp->Igensym)
 #define in_eval			(curinterp->Iin_eval)
 #define incgv			(curinterp->Iincgv)
+#define initav			(curinterp->Iinitav)
 #define inplace			(curinterp->Iinplace)
 #define last_in_gv		(curinterp->Ilast_in_gv)
 #define lastfd			(curinterp->Ilastfd)
@@ -1315,7 +1316,6 @@
 #define preambleav		(curinterp->Ipreambleav)
 #define preambled		(curinterp->Ipreambled)
 #define preprocess		(curinterp->Ipreprocess)
-#define restartav		(curinterp->Irestartav)
 #define restartop		(curinterp->Irestartop)
 #define rightgv			(curinterp->Irightgv)
 #define rs			(curinterp->Irs)
@@ -1419,6 +1419,7 @@
 #define Igensym			gensym
 #define Iin_eval		in_eval
 #define Iincgv			incgv
+#define Iinitav			initav
 #define Iinplace		inplace
 #define Ilast_in_gv		last_in_gv
 #define Ilastfd			lastfd
@@ -1470,7 +1471,6 @@
 #define Ipreambleav		preambleav
 #define Ipreambled		preambled
 #define Ipreprocess		preprocess
-#define Irestartav		restartav
 #define Irestartop		restartop
 #define Irightgv		rightgv
 #define Irs			rs
@@ -1583,6 +1583,7 @@
 #define gensym			Perl_gensym
 #define in_eval			Perl_in_eval
 #define incgv			Perl_incgv
+#define initav			Perl_initav
 #define inplace			Perl_inplace
 #define last_in_gv		Perl_last_in_gv
 #define lastfd			Perl_lastfd
@@ -1634,7 +1635,6 @@
 #define preambleav		Perl_preambleav
 #define preambled		Perl_preambled
 #define preprocess		Perl_preprocess
-#define restartav		Perl_restartav
 #define restartop		Perl_restartop
 #define rightgv			Perl_rightgv
 #define rs			Perl_rs
