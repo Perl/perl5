@@ -73,9 +73,8 @@ while (@tests) {
 		print "ok $tn\n";
 	} elsif ($rerun) {
 		my $oi = $in;
-		require File::Slurp;
-		File::Slurp::write_file("#o", $back);
-		File::Slurp::write_file("#e", $out);
+		open(F,">#o") and do { print F $back; close(F) };
+		open(F,">#e") and do { print F $out;  close(F) };
 		foreach ($in, $back, $out) {
 			s/\t/^I\t/gs;
 			s/\n/\$\n/gs;
