@@ -292,22 +292,29 @@ by the Perl Development Team.  Another big sell for Perl5 is the large
 number of modules and extensions which greatly reduce development time
 for any given task.  Also mention that the difference between version
 4 and version 5 of Perl is like the difference between awk and C++.
-(Well, OK, maybe it's not quite that distinct, but you get the idea.)  If you
-want support and a reasonable guarantee that what you're developing
-will continue to work in the future, then you have to run the supported
-version.  That probably means running the 5.005 release, although 5.004
-isn't that bad.  Several important bugs were fixed from the 5.000 through
-5.003 versions, though, so try upgrading past them if possible.
+(Well, OK, maybe it's not quite that distinct, but you get the idea.)
+If you want support and a reasonable guarantee that what you're
+developing will continue to work in the future, then you have to run
+the supported version.  As of early March 2001 that probably means
+running either of the releases 5.6.0 (released in March 2000) or
+5.005_03 (released in March 1999), although 5.004_05 isn't that bad
+if you B<absolutely> need such an old version (released in April 1999)
+for stability reasons.  Anything older than 5.004_05 shouldn't be used.
 
 Of particular note is the massive bug hunt for buffer overflow
 problems that went into the 5.004 release.  All releases prior to
 that, including perl4, are considered insecure and should be upgraded
 as soon as possible.
 
+In August 2001 in all Linux distributions a new security problem was
+found in the optional 'suidperl' (not built or installed by default)
+in all the Perl branches 5.6, 5.005, and 5.004, see
+http://www.cpan.org/src/5.0/sperl-2000-08-05/
+
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997, 1998, 1999 Tom Christiansen and Nathan Torkington.
-All rights reserved.
+Copyright (c) 1997, 1998, 1999, 2000, 2001 Tom Christiansen and Nathan
+Torkington.  All rights reserved.
 
 When included as an integrated part of the Standard Distribution
 of Perl or of its documentation (printed or otherwise), this works is
