@@ -224,30 +224,34 @@ of real-world examples, mini-tutorials, and complete programs is:
 	ISBN 1-56592-243-3 [1st Edition August 1998]
 	http://perl.oreilly.com/cookbook/
 
-If you're already a hard-core systems programmer, then the Camel Book
-might suffice for you to learn Perl from.  If you're not, check out
+If you're already a seasoned programmer, then the Camel Book might
+suffice for you to learn Perl from.  If you're not, check out the
+Llama book:
 
-    Learning Perl (the "Llama Book"):
-	by Randal Schwartz and Tom Christiansen
-	    with Foreword by Larry Wall
-	ISBN 1-56592-284-0 [2nd Edition July 1997]
-	http://www.oreilly.com/catalog/lperl2/
+    Learning Perl (the "Llama Book")
+	by Randal L. Schwartz and Tom Phoenix
+	ISBN 0-596-00132-0 [3rd edition July 2001]
+	http://www.oreilly.com/catalog/lperl3/
 
-Despite the picture at the URL above, the second edition of "Llama
-Book" really has a blue cover and was updated for the 5.004 release
-of Perl.  Various foreign language editions are available, including
-I<Learning Perl on Win32 Systems> (the "Gecko Book").
+If you're not an accidental programmer, but a more serious and
+possibly even degreed computer scientist who doesn't need as much
+hand-holding as we try to provide in the Llama, please check out the
+delightful book, I<Perl: The Programmer's Companion>, written by Nigel
+Chapman.
 
-If you're not an accidental programmer, but a more serious and possibly
-even degreed computer scientist who doesn't need as much hand-holding as
-we try to provide in the Llama or its defurred cousin the Gecko, please
-check out the delightful book, I<Perl: The Programmer's Companion>,
-written by Nigel Chapman.
+If you are more at home in Windows, I<Learning Perl on Win32 Systems>
+(the "Gecko Book") is available (unfortunately rather dated).
+
+    Learning Perl on Win32 Systems
+	by Randal L. Schwartz, Erik Olson, and Tom Christiansen,
+	    with foreword by Larry Wall
+	ISBN 1-56592-324-3 [1st edition August 1997]
+	http://www.oreilly.com/catalog/lperlwin/
 
 Addison-Wesley (http://www.awlonline.com/) and Manning
 (http://www.manning.com/) are also publishers of some fine Perl books
-such as Object Oriented Programming with Perl by Damian Conway and
-Network Programming with Perl by Lincoln Stein.
+such as I<Object Oriented Programming with Perl> by Damian Conway and
+I<Network Programming with Perl> by Lincoln Stein.
 
 An excellent technical book discounter is Bookpool at
 http://www.bookpool.com/ where a 30% discount or more is not unusual.
@@ -284,10 +288,9 @@ Recommended books on (or mostly on) Perl follow.
 	http://www.manning.com/Johnson/
 
     Learning Perl
-	by Randal L. Schwartz and Tom Christiansen
-	    with foreword by Larry Wall
-	ISBN 1-56592-284-0 [2nd edition July 1997]
-	http://www.oreilly.com/catalog/lperl2/
+	by Randal L. Schwartz and Tom Phoenix
+	ISBN 0-596-00132-0 [3rd edition July 2001]
+	http://www.oreilly.com/catalog/lperl3/
 
     Learning Perl on Win32 Systems
 	by Randal L. Schwartz, Erik Olson, and Tom Christiansen,
