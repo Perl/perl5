@@ -1000,6 +1000,7 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 	goto do_op2;
 
 
+    case OP_RV2SV:
     case OP_CUSTOM:
     case OP_ENTERSUB:
 	match = 1; /* XS or custom code could trigger random warnings */
