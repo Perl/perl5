@@ -63,11 +63,12 @@ in MANIFEST.
 
 Installation
 
-1)  Run Configure.  This will figure out various things about your system.
-    Some things Configure will figure out for itself, other things it
-    will ask you about.  It will then proceed to make config.h,
-    config.sh, and Makefile. You may have to explicitly say   
-        sh Configure    to ensure that Configure is run under sh.
+1)  Run Configure.  This will figure out various things about your
+    system.  Some things Configure will figure out for itself, other
+    things it will ask you about.  If the test scripts and programs
+    run ok, the defaults will usually be right.  It will then proceed to
+    make config.h, config.sh, and Makefile.  You may have to explicitly
+    say     sh Configure    to ensure that Configure is run under sh.
     If you're a hotshot, run Configure -d to take all the defaults and
     then edit config.sh to patch up any flaws and run Configure -S.
 
@@ -136,7 +137,6 @@ Installation
     MIPS machines may need to undef d_volatile.
     MIPS machines may need to turn off -O on some files.
     Some MIPS machines may need to undefine CASTNEGFLOAT.
-    Xenix 386 may need -UM_I86.  See also README.xenix.
     Genix may need to use libc rather than libc_s, or #undef VARARGS.
     NCR Tower 32 (OS 2.01.01) may need -W2,-Sl,2000 and #undef MKDIR.
     A/UX may appear to work with -O -B/usr/lib/big/ optimizer flags.

@@ -25,18 +25,21 @@
 ?S:	search.  The order is chosen to pick up the c library
 ?S:	ahead of ucb or bsd libraries for SVR4.
 ?S:.
-?LINT:extern usevfork glibpth
-?LINT:change usevfork glibpth
+?LINT:extern usevfork glibpth d_portable
+?LINT:change usevfork glibpth d_portable
 : List of libraries we want.
 ?X: Put crypt here, even though I should really fix d_crypt.U to look
 ?X: for it correctly, including possible shared library versions.
 libswanted='net socket inet nsl nm ndbm gdbm dbm db malloc dl'
 libswanted="$libswanted dld ld sun m c cposix posix ndir dir crypt"
 libswanted="$libswanted ucb bsd BSD PW x"
-: We want to search /usr/shlib before most other libraries.
+: We probably want to search /usr/shlib before most other libraries.
 : This is only used by ext/util/extliblist
 glibpth=`echo " $glibpth " | sed -e 's! /usr/shlib ! !'`
 glibpth="/usr/shlib $glibpth"
 : Do not use vfork unless overridden by a hint file.
 usevfork=false
+: We might as well always be portable.  It makes no difference for
+: perl5, and makes people happy.
+d_portable=define
 

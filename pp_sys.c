@@ -2933,7 +2933,6 @@ PP(pp_alarm)
     RETURN;
 #else
     DIE(no_func, "Unsupported function alarm");
-    break;
 #endif
 }
 

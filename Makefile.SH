@@ -41,11 +41,6 @@ case "$d_shrplib" in
     pldlflags="";;
 esac
 
-: Configure sets byacc=byacc if byacc is not found.  We reset it to ''
-case "$byacc" in
-'byacc') byacc='';;
-esac
-
 : Prepare dependency lists for Makefile.
 dynamic_list=' '
 for f in $dynamic_ext; do
@@ -277,12 +272,12 @@ install: all
 : Only print out the rules for running byacc if the user _has_ byacc.
 : Otherwise, comment them out.  Users who really know what they are
 : doing can uncomment them and run yacc or bison or whatever.
-case "$byacc" in
-'')
-	comment1='#' 
-	comment2='' ;;
-*)	comment1=''
+case "$d_byacc" in
+'define')
+	comment1='' 
 	comment2='#' ;;
+*)	comment1='#'
+	comment2='' ;;
 esac
 
 $spitshell >>Makefile <<!GROK!THIS!
@@ -366,7 +361,7 @@ lint: perly.c $(c)
 	lint $(lintflags) $(defs) perly.c $(c) > perl.fuzz
 
 makefile:	Makefile
-	make depend
+	$(MAKE) depend
 
 config.h: config.sh
 	/bin/sh config_h.SH
@@ -404,5 +399,3 @@ case `pwd` in
     ;;
 esac
 rm -f makefile
-
-

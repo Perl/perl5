@@ -1,4 +1,3 @@
-
 /*
  * The following symbols are defined if your operating system supports
  * functions by that name.  All Unixes I know of support them, thus they
@@ -18,20 +17,22 @@
  */
 #define HAS_UTIME		/**/
 
-#define HAS_KILL
-#define HAS_LINK
-#define HAS_WAIT
-/*
- * The following symbols are defined if your operating system supports
- * password and group functions in general.  All Unix systems do.
+/* HAS_GROUP
+ *	This symbol, if defined, indicates that the getgrnam(),
+ *	getgrgid(), and getgrent() routines are available to 
+ *	get group entries.
  */
-#ifdef I_GRP
-#define HAS_GROUP
-#endif
-#ifdef I_PWD
-#define HAS_PASSWD
-#endif
+#define HAS_GROUP		/**/
 
+/* HAS_PASSWD
+ *	This symbol, if defined, indicates that the getpwnam(),
+ *	getpwuid(), and getpwent() routines are available to 
+ *	get password entries.
+ */
+#define HAS_PASSWD		/**/
+
+#define HAS_KILL
+#define HAS_WAIT
 
 #if !defined(NSIG) || defined(M_UNIX) || defined(M_XENIX)
 # include <signal.h>
@@ -57,3 +58,4 @@
 #define Fstat(fd,bufptr)   fstat((fd),(bufptr))
 
 #define my_getenv(var) getenv(var)
+

@@ -3481,7 +3481,7 @@ OP *op;
 	    for (s = SvPVX(kid->op_sv); *s; s++) {
 		if (*s == ':' && s[1] == ':') {
 		    *s = '/';
-		    strcpy(s+1,s+2);	/* known to be okay here */
+		    Move(s+2, s+1, strlen(s+2)+1, char);
 		    --SvCUR(kid->op_sv);
 		}
 	    }

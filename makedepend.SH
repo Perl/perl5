@@ -20,10 +20,12 @@ echo "Extracting makedepend (with variable substitutions)"
 rm -f makedepend
 $spitshell >makedepend <<!GROK!THIS!
 $startsh
-!GROK!THIS!
-$spitshell >>makedepend <<'!NO!SUBS!'
 # makedepend.SH
 #
+## To use an alternate make, set \$altmake in config.sh.
+MAKE=${altmake-make}
+!GROK!THIS!
+$spitshell >>makedepend <<'!NO!SUBS!'
 
 export PATH || (echo "OOPS, this isn't sh.  Desperation time.  I will feed myself to sh."; sh \$0; kill \$\$)
 
@@ -73,7 +75,7 @@ esac
 : might be identical
 $test -d UU || mkdir UU
 
-make clist || ($echo "Searching for .c files..."; \
+$MAKE clist || ($echo "Searching for .c files..."; \
 	$echo *.c | $tr ' ' '\012' | $egrep -v '\*' >.clist)
 for file in `$cat .clist`; do
 # for file in `cat /dev/null`; do
@@ -110,7 +112,7 @@ done
 
 $sed <$mf >$mf.new -e '1,/^# AUTOMATICALLY/!d'
 
-make shlist || ($echo "Searching for .SH files..."; \
+$MAKE shlist || ($echo "Searching for .SH files..."; \
 	$echo *.SH | $tr ' ' '\012' | $egrep -v '\*' >.shlist)
 if $test -s .deptmp; then
     for file in `cat .shlist`; do
@@ -123,7 +125,7 @@ if $test -s .deptmp; then
     $sed 's|^\(.*\.o:\) *\(.*/.*\.c\) *$|\1 \2; '"$defrule \2|" .deptmp \
        >>$mf.new
 else
-    make hlist || ($echo "Searching for .h files..."; \
+    $MAKE hlist || ($echo "Searching for .h files..."; \
 	$echo *.h | $tr ' ' '\012' | $egrep -v '\*' >.hlist)
     $echo "You don't seem to have a proper C preprocessor.  Using grep instead."
     $egrep '^#include ' `cat .clist` `cat .hlist`  >.deptmp

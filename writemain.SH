@@ -40,6 +40,8 @@ for file in `echo $orig | sed 's/\.a//g'` ; do
 	case "$file" in
 	ext/*)	file=`echo $file | sed 's:ext/\(.*\)/[^/]*:\1:'`
 		;;
+	lib/auto/*)	file=`echo $file | sed 's:lib/auto/\(.*\)/[^/]*:\1:'`
+		;;
 	*/*)
 		file=`expr X$file : 'X.*/\(.*\)'`
 		;;

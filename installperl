@@ -1,6 +1,5 @@
 #!./perl
 BEGIN { @INC=('./lib', '../lib') }
-use Config;
 use File::Find;
 
 $mainperldir = "/usr/bin";
@@ -139,15 +138,18 @@ else {
     warn "Can't cd to lib to install lib files: $!\n";
 }
 
-# Install header files and libraries
+# Install header files and libraries.
 makedir("$installarchlib/CORE");
 foreach $file (<*.h libperl*.*>) {
     cp_if_diff($file,"$installarchlib/CORE/$file");
-    if ($file =~ /\.a$/ && $Config{'osname'} eq 'next') { 
+    if ($file =~ /\.a$/ && $osname eq 'next') { 
        #on NeXTs we have to rerun ranlib after copying libraries
-       &cmd("$Config{'ranlib'} $installarchlib/CORE/$file");
+       &cmd("$ranlib $installarchlib/CORE/$file");
     }
 }
+# AIX needs perl.exp installed as well.
+cp_if_diff("perl.exp" ,"$installarchlib/CORE/perl.exp") if ($osname eq 'aix');
+
 
 # Offer to install perl in a "standard" location
 
@@ -310,9 +312,9 @@ sub installlib {
 	    &unlink("$installlib/$name");
 	    &makedir("$installlib/$dir");
 	    &cmd("cp $_ $installlib/$dir");
-	    if (/\.a$/ && $Config{'osname'} eq 'next') { 
+	    if (/\.a$/ && $osname eq 'next') { 
 		#on NeXTs we have to rerun ranlib after copying libraries
-		&cmd("$Config{'ranlib'} $installlib/$dir/$_");
+		&cmd("$ranlib $installlib/$dir/$_");
 	    }
 	    # HP-UX (at least) needs to maintain execute permissions
 	    # on dynamically-loaded libraries.

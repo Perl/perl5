@@ -38,4 +38,7 @@ perl_call_pv
 perl_call_method
 perl_call_sv
 perl_requirepv
+safemalloc
+saferealloc
+safefree
 END

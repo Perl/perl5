@@ -8,13 +8,13 @@
  * running Configure.
  *
  * Feel free to modify any of this as the need arises.  Note, however,
- * that running config.h.SH again will wipe out any changes you've made.
- * For a more permanent change edit config.sh and rerun config.h.SH.
+ * that running config_h.SH again will wipe out any changes you've made.
+ * For a more permanent change edit config.sh and rerun config_h.SH.
  *
- * $Id: Config_h.U,v 3.0.1.2 1993/08/24 12:13:20 ram Exp $
+ * $Id: Config_h.U,v 3.0.1.3 1995/01/30 14:25:39 ram Exp $
  */
 
-/* Configuration time: Mon Dec 19 13:04:26 EST 1994
+/* Configuration time: Sat Feb  4 14:42:43 EST 1995
  * Configured by: andy
  * Target system: crystal crystal 3.2 2 i386 
  */
@@ -165,7 +165,7 @@
  *	This symbol, if defined, indicates that the chsize routine is available
  *	to truncate files.  You might need a -lx to get this routine.
  */
-/*#define	HAS_CHSIZE		/**/
+#define	HAS_CHSIZE		/**/
 
 /* VOID_CLOSEDIR:
  *	This symbol, if defined, indicates that the closedir() routine
@@ -189,12 +189,6 @@
  *	to encrypt passwords and the like.
  */
 #define HAS_CRYPT		/**/
-
-/* CSH:
- *	This symbol, if defined, indicates that the C-shell exists.
- *	If defined, contains the full pathname of csh.
- */
-#define CSH "/bin/csh"		/**/
 
 /* HAS_CUSERID:
  *	This symbol, if defined, indicates that the cuserid routine is
@@ -373,12 +367,6 @@
  */
 /*#define HAS_GETPRIORITY		/**/
 
-/* HAS_GROUP:
- *	This symbol, if defined, indicates that the group routine is
- *	available.
- */
-/*#define HAS_GROUP		/**/
-
 /* HAS_HTONL:
  *	This symbol, if defined, indicates that the htonl() routine (and
  *	friends htons() ntohl() ntohs()) are available to do network
@@ -529,12 +517,6 @@
  *	argument form of open(2) is available.
  */
 #define HAS_OPEN3		/**/
-
-/* HAS_PASSWD:
- *	This symbol, if defined, indicates that the passwd routine is
- *	available.
- */
-/*#define HAS_PASSWD		/**/
 
 /* HAS_PATHCONF:
  *	This symbol, if defined, indicates that pathconf() is available
@@ -900,19 +882,12 @@
  */
 /*#define HAS_VFORK	/**/
 
-/* VOIDSIG:
- *	This symbol is defined if this system declares "void (*signal(...))()" in
- *	signal.h.  The old way was to declare it as "int (*signal(...))()".  It
- *	is up to the package author to declare things correctly based on the
- *	symbol.
- */
 /* Signal_t:
  *	This symbol's value is either "void" or "int", corresponding to the
  *	appropriate return type of a signal handler.  Thus, you can declare
  *	a signal handler using "Signal_t (*handler)()", and define the
  *	handler using "Signal_t handler(sig)".
  */
-#define VOIDSIG 	/**/
 #define Signal_t void	/* Signal handler's return type */
 
 /* HASVOLATILE:
@@ -1379,6 +1354,12 @@
  */
 #define LOC_SED 	"/bin/sed"	/**/
 
+/* CSH:
+ *	This symbol, if defined, indicates that the C-shell exists.
+ *	If defined, contains the full pathname of csh.
+ */
+#define CSH "/bin/csh"		/**/
+
 /* DLSYM_NEEDS_UNDERSCORE:
  *	This symbol, if defined, indicates that we need to prepend an
  *	underscore to the symbol name before calling dlsym().  This only
@@ -1411,6 +1392,12 @@
  *	be included.
  */
 #define I_NDBM	/**/
+
+/* I_SYS_STAT:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <sys/stat.h>.
+ */
+#define	I_SYS_STAT		/**/
 
 /* Malloc_t:
  *	This symbol is the type of pointer returned by malloc and realloc.

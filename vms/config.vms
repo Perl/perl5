@@ -965,12 +965,11 @@
  */
 #undef HAS_GETPPID		/**/
 
-/* HAS_GROUP:
- *	This symbol, if defined, indicates that the group routine is
+/* HAS_GETGRENT:
+ *	This symbol, if defined, indicates that the getgrent routine is
  *	available.
  */
-#undef HAS_GROUP		/**/
-
+#undef HAS_GETGRENT		/**/
 
 /* HAS_HTONL:
  *	This symbol, if defined, indicates that the htonl() routine (and
@@ -1016,8 +1015,9 @@
 #define HAS_NICE		/**/
 
 /* HAS_PASSWD:
- *	This symbol, if defined, indicates that the passwd routine is
- *	available.
+ *	This symbol, if defined, indicates that the getpwnam(),
+ *	getpwuid(), and getpwent() routines are available to 
+ *	get password entries.
  */
 #undef HAS_PASSWD		/**/
 

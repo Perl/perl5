@@ -23,11 +23,14 @@
 #define Nullfp Null(FILE*)
 #define Nullsv Null(SV*)
 
+/* bool is built-in for g++-2.6.3, which might be used for an extension. */
+#if !defined(HAS_BOOL) && !defined(_G_HAVE_BOOL)
 #ifdef UTS
 #define bool int
 #else
 #define bool char
 #endif
+#endif /* !defined(HAS_BOOL) && !defined(_G_HAVE_BOOL) */
 
 #ifdef TRUE
 #undef TRUE

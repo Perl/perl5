@@ -205,7 +205,9 @@ EXT char Error[1];
 #   include <netinet/in.h>
 #endif
 
+#ifdef I_SYS_STAT
 #include <sys/stat.h>
+#endif
 
 /* The stat macros for Amdahl UTS, Unisoft System V/88 (and derivatives
    like UTekV) are broken, sometimes giving false positives.  Undefine
@@ -462,12 +464,6 @@ EXT char Error[1];
 #   endif
 #endif
 
-#ifdef VOIDSIG
-#   define VOIDRET void
-#else
-#   define VOIDRET int
-#endif
-
 #ifdef DOSISH
 #   include "dosish.h"
 #else
@@ -509,7 +505,6 @@ typedef struct cvop CVOP;
 typedef struct loop LOOP;
 
 typedef struct Outrec Outrec;
-typedef struct lstring Lstring;
 typedef struct interpreter PerlInterpreter;
 typedef struct ff FF;
 typedef struct sv SV;

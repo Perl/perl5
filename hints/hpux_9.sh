@@ -13,10 +13,17 @@ case "$cc" in
     optimize='+O1'
     ;;
 esac
-libswanted='ndbm m dld'
+libswanted='m dld'
 # ldflags="-Wl,-E -Wl,-a,shared"  # Force all shared?
 ldflags="-Wl,-E"
 usemymalloc='y'
 alignbytes=8
 selecttype='int *' 
 POSIX_cflags='ccflags="$ccflags -DFLT_MIN=1.17549435E-38"'
+
+case "$prefix" in
+'') prefix='/opt/perl5' ;;
+esac
+case "$archname" in
+'') archname='hpux' ;;
+esac

@@ -12,7 +12,6 @@
 #include "../patchlevel.h"
 #endif
 #include "util.h"
-char *strchr();
 
 char *filename;
 char *myname;

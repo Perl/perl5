@@ -445,12 +445,12 @@ SV *littlestr;
 	}
 	else {
 	    s = bigend - littlelen;
-	    if (*s == *little && bcmp((char*)s,little,littlelen)==0)
+	    if (*s == *little && bcmp((char*)s,(char*)little,littlelen)==0)
 		return (char*)s;		/* how sweet it is */
 	    else if (bigend[-1] == '\n' && little[littlelen-1] != '\n'
 	      && s > big) {
 		    s--;
-		if (*s == *little && bcmp((char*)s,little,littlelen)==0)
+		if (*s == *little && bcmp((char*)s,(char*)little,littlelen)==0)
 		    return (char*)s;
 	    }
 	    return Nullch;

@@ -226,7 +226,7 @@ OP*	newANONLIST _((OP* op));
 OP*	newANONHASH _((OP* op));
 OP*	newANONSUB _((I32 floor, OP* block));
 OP*	newASSIGNOP _((I32 flags, OP* left, I32 optype, OP* right));
-OP*	newCONDOP _((I32 flags, OP* expr, OP* true, OP* false));
+OP*	newCONDOP _((I32 flags, OP* expr, OP* trueop, OP* falseop));
 void	newFORM _((I32 floor, OP* op, OP* block));
 OP*	newFOROP _((I32 flags, char* label, line_t forline, OP* scalar, OP* expr, OP*block, OP*cont));
 OP*	newLOGOP _((I32 optype, I32 flags, OP* left, OP* right));

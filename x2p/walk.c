@@ -56,7 +56,6 @@ int minprec;			/* minimum precedence without parens */
     int numeric = FALSE;
     STR *fstr;
     int prec = P_MAX;		/* assume no parens needed */
-    char *strchr();
 
     if (!node) {
 	*numericptr = 0;

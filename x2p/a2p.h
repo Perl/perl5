@@ -11,6 +11,10 @@
 #define VOIDUSED 1
 #include "../config.h"
 
+#if defined(__STDC__) || defined(vax11c) || defined(_AIX) || defined(__stdc__) || defined(__cplusplus)
+# define STANDARD_C 1
+#endif
+
 /* Use all the "standard" definitions? */
 #if defined(STANDARD_C) && defined(I_STDLIB)
 #   include <stdlib.h>
@@ -46,6 +50,35 @@
 #define strchr index
 #define strrchr rindex
 #endif
+
+
+#ifdef I_TIME
+#   include <time.h>
+#endif
+
+#ifdef I_SYS_TIME
+#   ifdef I_SYS_TIME_KERNEL
+#	define KERNEL
+#   endif
+#   include <sys/time.h>
+#   ifdef I_SYS_TIME_KERNEL
+#	undef KERNEL
+#   endif
+#endif
+
+#ifndef MSDOS
+#  if defined(HAS_TIMES) && defined(I_SYS_TIMES)
+#    include <sys/times.h>
+#  endif
+#endif
+
+#ifndef STANDARD_C
+/* All of these are in stdlib.h or time.h for ANSI C */
+Time_t time();
+struct tm *gmtime(), *localtime();
+char *strchr(), *strrchr();
+char *strcpy(), *strcat();
+#endif /* ! STANDARD_C */
 
 #include "handy.h"
 #define Nullop 0

@@ -1,6 +1,5 @@
 usevfork=false
 d_suidsafe=define
-ccflags="$ccflags"
 set `echo $glibpth | sed -e 's@/usr/ucblib@@'`
 glibpth="$*"
 set `echo " $libswanted " | sed -e 's@ ld @ @' -e 's@ ucb @ @'`

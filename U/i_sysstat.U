@@ -1,0 +1,21 @@
+?RCS: $Id: i_sysstat.U,v $
+?RCS:
+?RCS: $Log: i_sysstat.U,v $
+?RCS:
+?MAKE:i_sysstat: Inhdr
+?MAKE:	-pick add $@ %<
+?S:i_sysstat:
+?S:	This variable conditionally defines the I_SYS_STAT symbol,
+?S:	and indicates whether a C program should include <sys/stat.h>.
+?S:.
+?C:I_SYS_STAT (I_SYSSTAT):
+?C:	This symbol, if defined, indicates to the C program that it should
+?C:	include <sys/stat.h>.
+?C:.
+?H:#$i_sysstat	I_SYS_STAT		/**/
+?H:.
+?LINT:set i_sysstat
+: see if sys/stat.h is available
+set sys/stat.h i_sysstat
+eval $inhdr
+

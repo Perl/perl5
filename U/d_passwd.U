@@ -1,0 +1,3 @@
+?X: Deliberately empty file to fool metaconfig.  I don't want
+?X: the standard d_passwd since it's useless.  (I wrote it, so I know :-).
+?X:?RCS: $Id: d_passwd.U,v 3.0.1.1 1994/08/29 16:09:51 ram Exp $
