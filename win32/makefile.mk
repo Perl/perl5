@@ -68,7 +68,7 @@ USE_ITHREADS	*= define
 USE_IMP_SYS	*= define
 
 #
-# uncomment to enable the experimental PerlIO I/O subsystem.
+# Comment to disable I/O subsystem and use compiler's stdio for IO 
 USE_PERLIO	= define
 
 #
@@ -701,9 +701,11 @@ WIN32_SRC	=		\
 		.\win32sck.c	\
 		.\win32thread.c
 
-.IF "$(USE_PERLIO)" == "define"
+# We need this for miniperl build unless we override canned 
+# config.h #define building mini\*
+#.IF "$(USE_PERLIO)" == "define"
 WIN32_SRC	+= .\win32io.c
-.ENDIF
+#.ENDIF
 
 .IF "$(CRYPT_SRC)" != ""
 WIN32_SRC	+= .\$(CRYPT_SRC)
