@@ -1,5 +1,5 @@
 # -*- Mode: cperl; cperl-indent-level: 4 -*-
-# $Id: Harness.pm,v 1.45 2003/04/13 03:34:09 andy Exp $
+# $Id: Harness.pm,v 1.47 2003/04/24 19:33:05 andy Exp $
 
 package Test::Harness;
 
@@ -22,7 +22,7 @@ use vars qw($VERSION $Verbose $Switches $Have_Devel_Corestack $Curtest
 
 $Have_Devel_Corestack = 0;
 
-$VERSION = '2.27_04';
+$VERSION = '2.28';
 
 $ENV{HARNESS_ACTIVE} = 1;
 
@@ -943,7 +943,7 @@ __END__
 
 =head1 EXPORT
 
-C<&runtests> is exported by Test::Harness per default.
+C<&runtests> is exported by Test::Harness by default.
 
 C<$verbose> and C<$switches> are exported upon request.
 

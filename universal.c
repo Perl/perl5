@@ -182,6 +182,7 @@ XS(XS_Internals_SvREADONLY);
 XS(XS_Internals_SvREFCNT);
 XS(XS_Internals_hv_clear_placehold);
 XS(XS_PerlIO_get_layers);
+XS(XS_Regexp_DESTROY);
 
 void
 Perl_boot_core_UNIVERSAL(pTHX)
@@ -222,6 +223,7 @@ Perl_boot_core_UNIVERSAL(pTHX)
                XS_Internals_hv_clear_placehold, file, "\\%");
     newXSproto("PerlIO::get_layers",
                XS_PerlIO_get_layers, file, "*;@");
+    newXS("Regexp::DESTROY", XS_Regexp_DESTROY, file);
 }
 
 
@@ -723,6 +725,11 @@ XS(XS_Internals_hv_clear_placehold)
     XSRETURN(0);
 }
 
+XS(XS_Regexp_DESTROY)
+{
+
+}
+
 XS(XS_PerlIO_get_layers)
 {
     dXSARGS;
@@ -737,7 +744,6 @@ XS(XS_PerlIO_get_layers)
 	bool	details = FALSE;
 
 	if (items > 1) {
-	     SV **popuntil = MARK + 1;
 	     SV **svp;
 	     
 	     for (svp = MARK + 2; svp <= SP; svp += 2) {

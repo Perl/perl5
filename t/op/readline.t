@@ -20,21 +20,23 @@ like($@, 'Modification of a read-only value attempted', '[perl #19566]');
 }
 
 # 82 is chosen to exceed the length for sv_grow in do_readline (80)
-foreach my $k ('k', 'k'x82) {
+foreach my $k (1, 82) {
   my $result
     = runperl (switches => '-l', stdin => '', stderr => 1,
-	       prog => "%a = qw($k v); \$_ = <> foreach keys %a; print qw(end)",
+              prog => "\$x = q(k) x $k; \$a{\$x} = qw(v); \$_ = <> foreach keys %a; print qw(end)",
 	      );
-  is ($result, "end", '[perl #21614] for length ' . length $k);
+  $result =~ s/\n\z// if $^O eq 'VMS';
+  is ($result, "end", '[perl #21614] for length ' . length('k' x $k));
 }
 
 
-foreach my $k ('perl', 'perl'x21) {
+foreach my $k (1, 21) {
   my $result
     = runperl (switches => '-l', stdin => ' rules', stderr => 1,
-	       prog => "%a = qw($k v); foreach (keys %a) {\$_ .= <>; print}",
+              prog => "\$x = q(perl) x $k; \$a{\$x} = q(v); foreach (keys %a) {\$_ .= <>; print}",
 	      );
-  is ($result, "$k rules", 'rcatline to shared sv for length ' . length $k);
+  $result =~ s/\n\z// if $^O eq 'VMS';
+  is ($result, ('perl' x $k) . " rules", 'rcatline to shared sv for length ' . length('perl' x $k));
 }
 
 foreach my $l (1, 82) {

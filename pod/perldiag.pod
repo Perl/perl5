@@ -200,12 +200,6 @@ know which context to supply to the right side.
 (F) The failing code has attempted to get or set a key which is not in
 the current set of allowed keys of a restricted hash.
 
-=item Attempt to clear a restricted hash
-
-(F) It is currently not allowed to clear a restricted hash, even if the
-new hash would contain the same keys as before.  This may change in
-the future.
-
 =item Attempt to delete readonly key '%s' from a restricted hash
 
 (F) The failing code attempted to delete a key whose value has been
@@ -4224,6 +4218,18 @@ defined B<awk> feature.  Use an explicit printf() or sprintf() instead.
 (D deprecated) The construct indicated is no longer recommended for use,
 generally because there's a better way to do it, and also because the
 old way has bad side effects.
+
+=item Use of freed value in iteration (perhaps you modified the iterated array within the loop?)
+
+(F) This is typically caused by code like the following:
+
+    @a = (3,4);
+    @a = () for (1,2,@a);
+
+You are not supposed to modify arrays while they are being iterated over.
+For speed and efficiency reasons, Perl internally does not do full
+reference-counting of iterated items, hence deleting such an item in the
+middle of an iteration causes Perl to see a freed value.
 
 =item Use of reference "%s" as array index
 

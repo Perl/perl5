@@ -5,7 +5,7 @@ BEGIN {
     @INC = qw(. ../lib);
 }
 
-print "1..65\n";
+print "1..67\n";
 
 require 'test.pl';
 
@@ -339,6 +339,16 @@ if ($result eq $expect) {
   }
   print "# expected \"$expect\", got \"$result\"\n";
 }
+
+# bug #21347
+
+runperl(prog => 'sub UNIVERSAL::AUTOLOAD { qr// } a->p' );
+if ($? != 0) { print "not " };
+print "ok ",++$test," - UNIVERSAL::AUTOLOAD called when freeing qr//\n";
+
+runperl(prog => 'sub UNIVERSAL::DESTROY { warn } bless \$a, A', stderr => 1);
+if ($? != 0) { print "not " };
+print "ok ",++$test," - warn called inside UNIVERSAL::DESTROY\n";
 
 # test global destruction
 

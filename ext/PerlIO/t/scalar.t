@@ -10,7 +10,7 @@ BEGIN {
 }
 
 $| = 1;
-print "1..23\n";
+print "1..24\n";
 
 my $fh;
 my $var = "ok 2\n";
@@ -120,3 +120,9 @@ close($dup);
 open $fh, '<', \42;
 print <$fh> eq "42" ? "ok 23\n" : "not ok 23\n";
 close $fh;
+
+# reading from magic scalars
+
+{ package P; sub TIESCALAR {bless{}} sub FETCH {"ok 24\n"} }
+tie $p, P; open $fh, '<', \$p;
+print <$fh>;

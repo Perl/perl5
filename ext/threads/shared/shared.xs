@@ -965,6 +965,8 @@ SV*
 share(SV *ref)
 	PROTOTYPE: \[$@%]
 	CODE:
+	if(!SvROK(ref))
+            Perl_croak(aTHX_ "Argument to share needs to be passed as ref");
 	ref = SvRV(ref);
 	if(SvROK(ref))
 	    ref = SvRV(ref);
@@ -978,6 +980,8 @@ lock_enabled(SV *ref)
 	PROTOTYPE: \[$@%]
 	CODE:
 	shared_sv* shared;
+	if(!SvROK(ref))
+            Perl_croak(aTHX_ "Argument to lock needs to be passed as ref");
 	ref = SvRV(ref);
 	if(SvROK(ref))
 	    ref = SvRV(ref);
@@ -992,6 +996,8 @@ cond_wait_enabled(SV *ref)
 	CODE:
 	shared_sv* shared;
 	int locks;
+	if(!SvROK(ref))
+            Perl_croak(aTHX_ "Argument to cond_wait needs to be passed as ref");
 	ref = SvRV(ref);
 	if(SvROK(ref))
 	    ref = SvRV(ref);
@@ -1022,6 +1028,8 @@ cond_signal_enabled(SV *ref)
 	PROTOTYPE: \[$@%]
 	CODE:
 	shared_sv* shared;
+	if(!SvROK(ref))
+            Perl_croak(aTHX_ "Argument to cond_signal needs to be passed as ref");
 	ref = SvRV(ref);
 	if(SvROK(ref))
 	    ref = SvRV(ref);
@@ -1038,6 +1046,8 @@ cond_broadcast_enabled(SV *ref)
 	PROTOTYPE: \[$@%]
 	CODE:
 	shared_sv* shared;
+	if(!SvROK(ref))
+            Perl_croak(aTHX_ "Argument to cond_broadcast needs to be passed as ref");
 	ref = SvRV(ref);
 	if(SvROK(ref))
 	    ref = SvRV(ref);

@@ -131,6 +131,9 @@ esac
 case "$i_systime" in
 '') i_systime='define' ;;
 esac
+case "$d_pthread_atfork" in                                                  
+'') d_pthread_atfork='undef' ;;                                              
+esac                                                                         
 
 # (from aix.sh)
 # uname -m output is too specific and not appropriate here

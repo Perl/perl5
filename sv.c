@@ -3069,7 +3069,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 				    s = "REF";
 				else
 				    s = "SCALAR";		break;
-		case SVt_PVLV:	s = "LVALUE";			break;
+		case SVt_PVLV:	s = SvROK(sv) ? "REF":"LVALUE";	break;
 		case SVt_PVAV:	s = "ARRAY";			break;
 		case SVt_PVHV:	s = "HASH";			break;
 		case SVt_PVCV:	s = "CODE";			break;
@@ -5309,34 +5309,37 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	if (PL_defstash) {		/* Still have a symbol table? */
 	    dSP;
 	    CV* destructor;
-	    SV tmpref;
 
-	    Zero(&tmpref, 1, SV);
-	    sv_upgrade(&tmpref, SVt_RV);
-	    SvROK_on(&tmpref);
-	    SvREADONLY_on(&tmpref);	/* DESTROY() could be naughty */
-	    SvREFCNT(&tmpref) = 1;
+
 
 	    do {	
 		stash = SvSTASH(sv);
 		destructor = StashHANDLER(stash,DESTROY);
 		if (destructor) {
+		    SV* tmpref = newRV(sv);
+	            SvREADONLY_on(tmpref);   /* DESTROY() could be naughty */
 		    ENTER;
 		    PUSHSTACKi(PERLSI_DESTROY);
-		    SvRV(&tmpref) = SvREFCNT_inc(sv);
 		    EXTEND(SP, 2);
 		    PUSHMARK(SP);
-		    PUSHs(&tmpref);
+		    PUSHs(tmpref);
 		    PUTBACK;
 		    call_sv((SV*)destructor, G_DISCARD|G_EVAL|G_KEEPERR|G_VOID);
-		    SvREFCNT(sv)--;
+		   
+		    
 		    POPSTACK;
 		    SPAGAIN;
 		    LEAVE;
+		    if(SvREFCNT(tmpref) < 2) {
+		        /* tmpref is not kept alive! */
+		        SvREFCNT(sv)--;
+			SvRV(tmpref) = 0;
+			SvROK_off(tmpref);
+		    }
+		    SvREFCNT_dec(tmpref);
 		}
 	    } while (SvOBJECT(sv) && SvSTASH(sv) != stash);
 
-	    del_XRV(SvANY(&tmpref));
 
 	    if (SvREFCNT(sv)) {
 		if (PL_in_clean_objs)
@@ -5390,7 +5393,13 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	av_undef((AV*)sv);
 	break;
     case SVt_PVLV:
-	SvREFCNT_dec(LvTARG(sv));
+	if (LvTYPE(sv) == 'T') { /* for tie: return HE to pool */
+	    SvREFCNT_dec(HeKEY_sv((HE*)LvTARG(sv)));
+	    HeNEXT((HE*)LvTARG(sv)) = PL_hv_fetch_ent_mh;
+	    PL_hv_fetch_ent_mh = (HE*)LvTARG(sv);
+	}
+	else if (LvTYPE(sv) != 't') /* unless tie: unrefcnted fake SV**  */
+	    SvREFCNT_dec(LvTARG(sv));
 	goto freescalar;
     case SVt_PVGV:
 	gp_free((GV*)sv);
@@ -6370,6 +6379,8 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
 #else
       bytesread = PerlIO_read(fp, buffer, recsize);
 #endif
+      if (bytesread < 0)
+	  bytesread = 0;
       SvCUR_set(sv, bytesread += append);
       buffer[bytesread] = '\0';
       goto return_string_or_null;
@@ -7781,7 +7792,7 @@ Perl_sv_reftype(pTHX_ SV *sv, int ob)
 				    return "REF";
 				else
 				    return "SCALAR";
-	case SVt_PVLV:		return "LVALUE";
+	case SVt_PVLV:		return SvROK(sv) ? "REF" : "LVALUE";
 	case SVt_PVAV:		return "ARRAY";
 	case SVt_PVHV:		return "HASH";
 	case SVt_PVCV:		return "CODE";
@@ -9864,9 +9875,20 @@ Perl_rvpv_dup(pTHX_ SV *dstr, SV *sstr, CLONE_PARAMS* param)
 	    /* Special case - not normally malloced for some reason */
 	    if (SvREADONLY(sstr) && SvFAKE(sstr)) {
 		/* A "shared" PV - clone it as unshared string */
-		SvFAKE_off(dstr);
-		SvREADONLY_off(dstr);
-		SvPVX(dstr) = SAVEPVN(SvPVX(sstr), SvCUR(sstr));
+                if(SvPADTMP(sstr)) {
+                    /* However, some of them live in the pad
+                       and they should not have these flags
+                       turned off */
+
+                    SvPVX(dstr) = sharepvn(SvPVX(sstr), SvCUR(sstr),
+                                           SvUVX(sstr));
+                    SvUVX(dstr) = SvUVX(sstr);
+                } else {
+
+                    SvPVX(dstr) = SAVEPVN(SvPVX(sstr), SvCUR(sstr));
+                    SvFAKE_off(dstr);
+                    SvREADONLY_off(dstr);
+                }
 	    }
 	    else {
 		/* Some other special case - random pointer */
@@ -9990,7 +10012,12 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
 	LvTARGOFF(dstr)	= LvTARGOFF(sstr);	/* XXX sometimes holds PMOP* when DEBUGGING */
 	LvTARGLEN(dstr)	= LvTARGLEN(sstr);
-	LvTARG(dstr)	= sv_dup_inc(LvTARG(sstr), param);
+	if (LvTYPE(sstr) == 't') /* for tie: unrefcnted fake (SV**) */
+	    LvTARG(dstr) = dstr;
+	else if (LvTYPE(sstr) == 'T') /* for tie: fake HE */
+	    LvTARG(dstr) = (SV*)he_dup((HE*)LvTARG(sstr), 0, param);
+	else
+	    LvTARG(dstr) = sv_dup_inc(LvTARG(sstr), param);
 	LvTYPE(dstr)	= LvTYPE(sstr);
 	break;
     case SVt_PVGV:
@@ -10045,12 +10072,21 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	IoPAGE(dstr)		= IoPAGE(sstr);
 	IoPAGE_LEN(dstr)	= IoPAGE_LEN(sstr);
 	IoLINES_LEFT(dstr)	= IoLINES_LEFT(sstr);
+        if(IoFLAGS(sstr) & IOf_FAKE_DIRP) { 
+            /* I have no idea why fake dirp (rsfps)
+               should be treaded differently but otherwise
+               we end up with leaks -- sky*/
+            IoTOP_GV(dstr)      = gv_dup_inc(IoTOP_GV(sstr), param);
+            IoFMT_GV(dstr)      = gv_dup_inc(IoFMT_GV(sstr), param);
+            IoBOTTOM_GV(dstr)   = gv_dup_inc(IoBOTTOM_GV(sstr), param);
+        } else {
+            IoTOP_GV(dstr)      = gv_dup(IoTOP_GV(sstr), param);
+            IoFMT_GV(dstr)      = gv_dup(IoFMT_GV(sstr), param);
+            IoBOTTOM_GV(dstr)   = gv_dup(IoBOTTOM_GV(sstr), param);
+        }
 	IoTOP_NAME(dstr)	= SAVEPV(IoTOP_NAME(sstr));
-	IoTOP_GV(dstr)		= gv_dup(IoTOP_GV(sstr), param);
 	IoFMT_NAME(dstr)	= SAVEPV(IoFMT_NAME(sstr));
-	IoFMT_GV(dstr)		= gv_dup(IoFMT_GV(sstr), param);
 	IoBOTTOM_NAME(dstr)	= SAVEPV(IoBOTTOM_NAME(sstr));
-	IoBOTTOM_GV(dstr)	= gv_dup(IoBOTTOM_GV(sstr), param);
 	IoSUBPROCESS(dstr)	= IoSUBPROCESS(sstr);
 	IoTYPE(dstr)		= IoTYPE(sstr);
 	IoFLAGS(dstr)		= IoFLAGS(sstr);
@@ -11318,9 +11354,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_protect		= proto_perl->Tprotect;
 #endif
     PL_errors		= sv_dup_inc(proto_perl->Terrors, param);
-    PL_av_fetch_sv	= Nullsv;
-    PL_hv_fetch_sv	= Nullsv;
-    Zero(&PL_hv_fetch_ent_mh, 1, HE);			/* XXX */
+    PL_hv_fetch_ent_mh	= Nullhe;
     PL_modcount		= proto_perl->Tmodcount;
     PL_lastgotoprobe	= Nullop;
     PL_dumpindent	= proto_perl->Tdumpindent;

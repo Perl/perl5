@@ -1,0 +1,22 @@
+--- ../installperl	2002-07-16 18:57:32.000000000 +0000
++++ installperl	2003-04-15 01:55:54.000000000 +0000
+@@ -3,8 +3,8 @@
+ BEGIN {
+     require 5.004;
+     chdir '..' if !-d 'lib' and -d '..\lib';
+-    @INC = 'lib';
+-    $ENV{PERL5LIB} = 'lib';
++#    @INC = 'lib';
++#    $ENV{PERL5LIB} = 'lib';
+ }
+ 
+ use strict;
+@@ -876,7 +876,7 @@
+                print " " if (@opts);
+                print "$file\n";
+            }
+-            system("strip", @opts, $file);
++            system("XXSTRIPXX-strip", @opts, $file);
+         } else {
+             print "# file '$file' skipped\n" if $verbose;
+         }

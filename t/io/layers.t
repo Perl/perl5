@@ -25,12 +25,8 @@ plan tests => 43;
 use Config;
 
 my $DOSISH    = $^O =~ /^(?:MSWin32|cygwin|os2|dos|NetWare|mint)$/ ? 1 : 0;
-my $NONSTDIO  = exists $ENV{PERLIO} && $ENV{PERLIO} ne 'stdio' ? 1 : 0;
-my $FASTSTDIO =
-    $Config{d_stdstdio} &&
-    $Config{d_stdio_ptr_lval} &&
-    ($Config{d_stdio_cnt_lval} ||
-     $Config{d_stdio_ptr_lval_sets_cnt}) ? 1 : 0;
+my $NONSTDIO  = exists $ENV{PERLIO} && $ENV{PERLIO} ne 'stdio'     ? 1 : 0;
+my $FASTSTDIO = $Config{d_faststdio} && $Config{usefaststdio}      ? 1 : 0;
 
 print <<__EOH__;
 # PERLIO    = $PERLIO
@@ -48,15 +44,15 @@ SKIP: {
 	# An interesting dance follows where we try to make the following
 	# IO layer stack setups to compare equal:
 	#
-	# PERLIO     UNIX-like       DOS-like
+	# PERLIO     UNIX-like                   DOS-like
 	#
-	# none or "" stdio [1]       unix crlf
-	# stdio      stdio [1]       stdio
-	# perlio     unix perlio     unix perlio
-	# mmap       unix mmap       unix mmap
+	# unset / "" unix perlio / stdio [1]     unix crlf
+	# stdio      unix perlio / stdio [1]     stdio
+	# perlio     unix perlio                 unix perlio
+	# mmap       unix mmap                   unix mmap
 	#
-	# [1] If Configure found how to do "fast stdio",
-	# otherwise it will be "unix perlio".
+	# [1] "stdio" if Configure found out how to do "fast stdio" (depends
+	# on the stdio implementation) and in Perl 5.8, otherwise "unix perlio"
 	#
 	if ($NONSTDIO) {
 	    # Get rid of "unix".
@@ -67,7 +63,7 @@ SKIP: {
 	    } else {
 		$expected->[0] = $ENV{PERLIO} if $expected->[0] eq "stdio";
 	    }
-	} elsif (!$FASTSTDIO) {
+	} elsif (!$FASTSTDIO && !$DOSISH) {
 	    splice(@$result, 0, 2, "stdio")
 		if @$result >= 2 &&
 		   $result->[0] eq "unix" &&

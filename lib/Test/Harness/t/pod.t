@@ -1,4 +1,10 @@
-use Test::More;
+BEGIN {
+    eval "use Test::More";
+    if ($@) {
+	print "1..0 # SKIPPED: Test::More not installed.\n";
+	exit;
+    }
+}
 
 use File::Spec;
 use File::Find;

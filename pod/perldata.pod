@@ -644,7 +644,7 @@ values of the array or hash.
 
     foreach (@array[ 4 .. 10 ]) { s/peter/paul/ } 
 
-    foreach (@hash{keys %hash}) {
+    foreach (@hash{qw[key1 key2]}) {
         s/^\s+//;           # trim leading whitespace
         s/\s+$//;           # trim trailing whitespace
         s/(\w+)/\u\L$1/g;   # "titlecase" words

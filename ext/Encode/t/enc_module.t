@@ -1,4 +1,4 @@
-# $Id: enc_module.t,v 1.4 2003/03/31 03:27:27 dankogai Exp $
+# $Id: enc_module.t,v 1.5 2003/04/24 17:43:16 dankogai Exp $
 # This file is in euc-jp
 BEGIN {
     require Config; import Config;
@@ -27,18 +27,24 @@ use File::Basename;
 use File::Spec;
 use File::Compare qw(compare_text);
 
+my $DEBUG = shift || 0;
 my $dir = dirname(__FILE__);
 my $file0 = File::Spec->catfile($dir,"enc_module.enc");
 my $file1 = File::Spec->catfile($dir,"$$.enc");
 
 my $obj = Mod_EUCJP->new;
-local $SIG{__WARN__} = sub{}; # to silence reopening STD(IN|OUT) w/o closing
+local $SIG{__WARN__} = sub{ $DEBUG and print STDERR @_ };
+# to silence reopening STD(IN|OUT) w/o closing unless $DEBUG
 
 open STDOUT, ">", $file1 or die "$file1:$!";
 print $obj->str, "\n";
 $obj->set("テスト文字列");
 print $obj->str, "\n";
-close STDOUT;
+
+# I have tested and found "unless $^O eq 'freebsd'" is not
+# necessary but I will leave it for the sake of Enache -- dankogai
+# Please do not move this to a point after the comparison -- Craig Berry
+close STDOUT unless $^O eq 'freebsd';
 
 my $cmp = compare_text($file0, $file1);
 is($cmp, 0, "encoding vs. STDOUT");

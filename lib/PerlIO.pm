@@ -233,23 +233,21 @@ The following returns the B<names> of the PerlIO layers on a filehandle.
    my @layers = PerlIO::get_layers($fh); # Or FH, *FH, "FH".
 
 The layers are returned in the order an open() or binmode() call would
-use them.  Note that the stack begins (normally) from C<stdio> or from
-C<perlio>.  Under C<stdio> the platform specific low-level I/O (like
-C<unix>) is not part of the stack, but under C<perlio> (and the
-experimental C<mmap>) it is.
+use them.  Note that the "default stack" depends on the operating
+system and on the perl version.
 
 The following table summarizes the default layers on UNIX-like and
 DOS-like platforms and depending on the setting of the C<$ENV{PERLIO}>:
 
- PERLIO     UNIX-like       DOS-like
+ PERLIO     UNIX-like                   DOS-like
  
- none or "" stdio [1]       unix crlf
- stdio      stdio [1]       stdio
- perlio     unix perlio     unix perlio
- mmap       unix mmap       unix mmap
+ unset / "" unix perlio / stdio [1]     unix crlf
+ stdio      unix perlio / stdio [1]     stdio
+ perlio     unix perlio                 unix perlio
+ mmap       unix mmap                   unix mmap
 
- # [1] If Configure found how to do "fast stdio",
- # otherwise it will be "unix perlio".
+ # [1] "stdio" if Configure found out how to do "fast stdio" (depends
+ # on the stdio implementation) and in Perl 5.8, otherwise "unix perlio"
 
 By default the layers from the input side of the filehandle is
 returned, to get the output side use the optional C<output> argument:

@@ -2360,6 +2360,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_dlsymun 	DLSYM_NEEDS_UNDERSCORE 	/**/
 
+/* HAS_FAST_STDIO:
+ *	This symbol, if defined, indicates that the "fast stdio"
+ *	is available to manipulate the stdio buffers directly.
+ */
+#$d_faststdio HAS_FAST_STDIO		/**/
+
 /* HAS_FCHDIR:
  *	This symbol, if defined, indicates that the fchdir routine is
  *	available to change directory using a file descriptor.
@@ -3314,6 +3320,15 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 
 #ifndef USE_64_BIT_ALL
 #$use64bitall	USE_64_BIT_ALL		/**/
+#endif
+
+/* USE_FAST_STDIO:
+ *	This symbol, if defined, indicates that Perl should
+ *	be built to use 'fast stdio'.
+ *	Defaults to define in Perls 5.8 and earlier, to undef later.
+ */
+#ifndef USE_FAST_STDIO
+#$usefaststdio	USE_FAST_STDIO		/**/
 #endif
 
 /* USE_LARGE_FILES:

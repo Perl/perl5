@@ -37,7 +37,7 @@ PerlIOScalar_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg,
     else {
 	s->var = newSVpvn("", 0);
     }
-    sv_upgrade(s->var, SVt_PV);
+    SvUPGRADE(s->var, SVt_PV);
     code = PerlIOBase_pushed(aTHX_ f, mode, Nullsv, tab);
     if ((PerlIOBase(f)->flags) & PERLIO_F_TRUNCATE)
 	SvCUR(s->var) = 0;

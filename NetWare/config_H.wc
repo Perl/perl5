@@ -26,6 +26,12 @@
  */
 #define LOC_SED 	""	/**/
 
+/* HAS_AINTL:
+ *	This symbol, if defined, indicates that the aintl routine is
+ *	available.  If copysignl is also present we can emulate modfl.
+ */
+/*#define HAS_AINTL		/ **/
+
 /* HAS_ALARM:
  *	This symbol, if defined, indicates that the alarm routine is
  *	available.
@@ -129,6 +135,12 @@
  *	available to duplicate file descriptors.
  */
 #define HAS_DUP2	/**/
+
+/* HAS_FAST_STDIO:
+ *	This symbol, if defined, indicates that the "fast stdio"
+ *	is available to manipulate the stdio buffers directly.
+ */
+/*#define HAS_FAST_STDIO		/**/
 
 /* HAS_FCHDIR:
  *	This symbol, if defined, indicates that the fchdir routine is
@@ -1605,6 +1617,12 @@
 #define HAS_NTOHL		/**/
 #define HAS_NTOHS		/**/
 
+/* HAS_ILOGBL:
+ *	This symbol, if defined, indicates that the ilogbl routine is
+ *	available.  If scalbnl is also present we can emulate frexpl.
+ */
+/*#define HAS_ILOGBL		/**/
+
 /* HAS_INT64_T:
  *     This symbol will defined if the C compiler supports int64_t.
  *     Usually the <inttypes.h> needs to be included, but sometimes
@@ -1847,6 +1865,12 @@
  *	supported.
  */
 /*#define HAS_SEM		/**/
+
+/* HAS_SCALBNL:
+ *	This symbol, if defined, indicates that the scalbnl routine is
+ *	available.  If ilogbl is also present we can emulate frexpl.
+ */
+/*#define HAS_SCALBNL		/**/
 
 /* HAS_SENDMSG:
  *	This symbol, if defined, indicates that the sendmsg routine is
@@ -3135,6 +3159,15 @@
 /*#define	USE_64_BIT_ALL		/**/
 #endif
 
+/* USE_FAST_STDIO:
+ *	This symbol, if defined, indicates that Perl should
+ *	be built to use 'fast stdio'.
+ *	Defaults to define in Perls 5.8 and earlier, to undef later.
+ */
+#ifndef USE_FAST_STDIO
+/*#define	USE_FAST_STDIO		/ **/
+#endif
+
 /* USE_LARGE_FILES:
  *	This symbol, if defined, indicates that large file support
  *	should be used when available.
@@ -3333,6 +3366,12 @@
 /*#define	USE_CROSS_COMPILE	/**/
 #define	PERL_TARGETARCH	"undef"	/**/
 #endif
+
+/* HAS_COPYSIGNL:
+ *	This symbol, if defined, indicates that the copysignl routine is
+ *	available.  If aintl is also present we can emulate modfl.
+ */
+/*#define HAS_COPYSIGNL		/**/
 
 /* HAS_DBMINIT_PROTO:
  *	This symbol, if defined, indicates that the system provides

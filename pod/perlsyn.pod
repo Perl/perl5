@@ -315,6 +315,14 @@ hang.
 	# do something
     }
 
+Using C<readline> (or the operator form, C<< <EXPR> >>) as the
+conditional of a C<for> loop is shorthand for the following.  This
+behaviour is the same as a C<while> loop conditional.
+
+    for ( prompt(); defined( $_ = <STDIN> ); prompt() ) {
+        # do something
+    }
+
 =head2 Foreach Loops
 
 The C<foreach> loop iterates over a normal list value and sets the

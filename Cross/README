@@ -1,4 +1,53 @@
-If Perl is built using a cross-compilation environment the Cross
-directory will contain temporary helper scripts for the duration
-of the build, see INSTALL/Cross-compilation for more information.
+Summary
+-------
 
+This is a patch set which adds cross-compilation to the perl
+buildsystem.  It was built as a part of the Open Zaurus
+(http://www.openzaurus.com/) distribution.  Most / All of the
+optimisations are "borrowed" from this excellent project.
+
+The main target is arm-linux but I have also managed to
+successfully cross-compile perl for solaris x86 using the same
+buildsystem.
+
+We are currently dependent on an existing working local copy of
+perl which is available as /usr/bin/perl.  This could be migrated
+to using native miniperl with some additional effort.
+
+Obviously you need a working and tested cross-compiler for your
+build and target combination.  The binary directory must be in
+your path.
+
+1)	You should be reading me (README) in perl-5.x.x/Cross
+
+2)	Make sure you are in the Cross directory.
+
+3)	Edit the file 'config' to contain your target platform information.
+
+4)	make patch	## This will patch the existing source-tree.
+5)	make perl	## Will make perl
+
+The Obvious Ommissions
+----------------------
+
+This does NOT perform any installation as site installation method will
+be dependant on the target arch and OS. 
+
+make test will NOT work as the binaries and libraries will not execute.
+
+Due to space limitations on the Zaurus (it's a PDA) we do not provide
+documentation in the core - Therefore man pages are not even generated.
+
+	Note that the Cross/ directory is also used by a different
+	cross-compilation setup described in the INSTALL file, and
+	executed by Configure.  There should be no conflicts since
+	it is unlikely both that cross-compilation setups are used
+	simultaneously.
+
+Enjoy!
+
+References
+-------
+Redvers Davies <red@criticalintegration.com>
+Open Zaurus http://www.openzaurus.org/
+Perl OZ Packages http://www.openzaurus.org/official/testing/feed/

@@ -1,4 +1,4 @@
-# Testing tcp_service_check method using tcp and syn protocols.
+# Testing service_check method using tcp and syn protocols.
 
 BEGIN {
   unless (eval "require IO::Socket") {
@@ -68,7 +68,7 @@ my $p = new Net::Ping "tcp", 2;
 ok !!$p;
 
 # Disable service checking
-$p->tcp_service_check(0);
+$p->service_check(0);
 
 # Try on the first port
 $p->{port_num} = $port1;
@@ -85,7 +85,7 @@ ok $p -> ping("127.0.0.1");
 
 
 # Enable service checking
-$p->tcp_service_check(1);
+$p->service_check(1);
 
 # Try on the first port
 $p->{port_num} = $port1;
@@ -109,7 +109,7 @@ $p = new Net::Ping "syn", 2;
 ok !!$p;
 
 # Disable service checking
-$p->tcp_service_check(0);
+$p->service_check(0);
 
 # Try on the first port
 $p->{port_num} = $port1;
@@ -130,7 +130,7 @@ $p = new Net::Ping "syn", 2;
 ok !!$p;
 
 # Disable service checking
-$p->tcp_service_check(0);
+$p->service_check(0);
 
 # Try on the other port
 $p->{port_num} = $port2;
@@ -152,7 +152,7 @@ $p = new Net::Ping "syn", 2;
 ok !!$p;
 
 # Enable service checking
-$p->tcp_service_check(1);
+$p->service_check(1);
 
 # Try on the first port
 $p->{port_num} = $port1;
@@ -174,7 +174,7 @@ $p = new Net::Ping "syn", 2;
 ok !!$p;
 
 # Enable service checking
-$p->tcp_service_check(1);
+$p->service_check(1);
 
 # Try on the other port
 $p->{port_num} = $port2;

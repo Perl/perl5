@@ -178,6 +178,15 @@ sub unlock_hash (\%) {
 
 =back
 
+=head1 CAVEATS
+
+Note that the trapping of the restricted operations is not atomic:
+for example
+
+    eval { %hash = (illegal_key => 1) }
+
+leaves the C<%hash> empty rather than with its original contents.
+
 =head1 AUTHOR
 
 Michael G Schwern <schwern@pobox.com> on top of code by Nick

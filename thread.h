@@ -273,7 +273,11 @@
 #ifdef HAS_PTHREAD_UNCHECKED_GETSPECIFIC_NP
 #  define PTHREAD_GETSPECIFIC(key) pthread_unchecked_getspecific_np(key)
 #else
-#  define PTHREAD_GETSPECIFIC(key) pthread_getspecific(key)
+#  ifdef OEMVS
+#    define PTHREAD_GETSPECIFIC(key) pthread_getspecific_d8_np(key)
+#  else
+#    define PTHREAD_GETSPECIFIC(key) pthread_getspecific(key)
+#  endif
 #endif
 
 #ifndef PERL_GET_CONTEXT

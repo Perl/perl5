@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..997\n";
+print "1..998\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3166,4 +3166,10 @@ ok("bbbbac" =~ /$pattern/ && $1 eq 'a', "[perl #3547]");
        "[perl #17757] Parse::RecDescent triggers infinite loop");
 }
 
-# last test 997
+{
+    my $re = qq/^([^X]*)X/;
+    utf8::upgrade($re);
+    ok("\x{100}X" =~ /$re/, "S_cl_and ANYOF_UNICODE & ANYOF_INVERTED");
+}
+
+# last test 998

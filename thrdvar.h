@@ -140,9 +140,9 @@ PERLVARI(Tprotect,	protect_proc_t,	MEMBER_TO_FPTR(Perl_default_protect))
 PERLVARI(Terrors,	SV *, Nullsv)	/* outstanding queued errors */
 
 /* statics "owned" by various functions */
-PERLVAR(Tav_fetch_sv,	SV *)		/* owned by av_fetch() */
-PERLVAR(Thv_fetch_sv,	SV *)		/* owned by hv_fetch() */
-PERLVAR(Thv_fetch_ent_mh, HE)		/* owned by hv_fetch_ent() */
+PERLVAR(Tav_fetch_sv,	SV *)		/* unused as of change #19268 */
+PERLVAR(Thv_fetch_sv,	SV *)		/* unused as of change #19268 */
+PERLVAR(Thv_fetch_ent_mh, HE*)		/* owned by hv_fetch_ent() */
 
 PERLVAR(Tmodcount,	I32)		/* how much mod()ification in assignment? */
 

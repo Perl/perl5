@@ -1247,7 +1247,7 @@ Perl_vwarn(pTHX_ const char* pat, va_list *args)
     }
 
     /* if STDERR is tied, use it instead */
-    if (PL_stderrgv && (io = GvIOp(PL_stderrgv))
+    if (PL_stderrgv && SvREFCNT(PL_stderrgv) && (io = GvIO(PL_stderrgv))
 	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar))) {
 	dSP; ENTER;
 	PUSHMARK(SP);
@@ -3683,7 +3683,7 @@ Perl_scan_vstring(pTHX_ char *s, SV *sv)
 	    }
 #ifdef EBCDIC
 	    if (rev > 0x7FFFFFFF)
-		 Perl_croak(aTHX "In EBCDIC the v-string components cannot exceed 2147483647");
+		 Perl_croak(aTHX_ "In EBCDIC the v-string components cannot exceed 2147483647");
 #endif
 	    /* Append native character for the rev point */
 	    tmpend = uvchr_to_utf8(tmpbuf, rev);

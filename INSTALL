@@ -990,6 +990,16 @@ from the linker for malloc et al.  In such cases, the system probably
 does not allow its malloc functions to be fully replaced with custom
 versions.
 
+=item -DPERL_DEBUGGING_MSTATS
+
+This flag enables debugging mstats, which is required to use the
+Devel::Peek::mstat() function. You cannot enable this unless you are
+using Perl's malloc, so a typical Configure command would be
+
+       sh Configure -DPERL_DEBUGGING_MSTATS -Dusemymalloc='y'
+
+to enable this option.
+
 =back
 
 =head2 Building a debugging perl
@@ -1049,8 +1059,20 @@ Even if you do not have dynamic loading, you must still build the
 DynaLoader extension; you should just build the stub dl_none.xs
 version.  (Configure will suggest this as the default.)
 
-In summary, here are the Configure command-line variables you can set
-to turn off various extensions.  All others are included by default.
+To disable certain extensions so that they are not built, use
+the -Dnoextensions=... and -Donlyextensions=... options.  They both
+accept a space-separated list of extensions.  The extensions listed
+in C<noextensions> are removed from the list of extensions to build,
+while the C<onlyextensions> is rather more severe and builds only
+the listed extensions.  The latter should be used with extreme caution
+since certain extensions are used by many other extensions and modules:
+such modules include Fcntl and IO.  The order of processing these
+options is first C<only> (if present), then C<no> (if present).
+
+Another, older way to turn off various extensions (which is still good
+to know if you have to work with older Perl) exists.  Here are the
+Configure command-line variables you can set to turn off various
+extensions.  All others are included by default.
 
     DB_File		i_db
     DynaLoader		(Must always be included as a static extension)
@@ -1750,14 +1772,17 @@ line invocation (detailed shortly) is required to access the
 functionality.
 
     NOTE: Perl is routinely built using cross-compilation
-    in the EPOC environment but the solutions from there
-    can't directly be used elsewhere.
+    in the EPOC environment, in the WinCE, and in the OpenZaurus
+    project, but all those use something slightly different setup
+    than what described here.  For the WinCE setup, read the
+    wince/README.compile.  For the OpenZaurus setup, read the
+    Cross/README.
 
-The one environment where cross-compilation has successfully been used
-as of this writing is the Compaq iPAQ running ARM Linux.  The build
-host was Intel Linux, the networking setup was PPP + SSH.  The exact
-setup details are beyond the scope of this document, see
-http://www.handhelds.org/ for more information.
+The one environment where this cross-compilation setup has
+successfully been used as of this writing is the Compaq iPAQ running
+ARM Linux.  The build host was Intel Linux, the networking setup was
+PPP + SSH.  The exact setup details are beyond the scope of this
+document, see http://www.handhelds.org/ for more information.
 
 To run Configure in cross-compilation mode the basic switch is
 C<-Dusecrosscompile>.
