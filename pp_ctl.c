@@ -2004,11 +2004,15 @@ S_dofindlabel(pTHX_ OP *o, char *label, OP **opstack, OP **oplimit)
 	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling) {
 	    if (kid == PL_lastgotoprobe)
 		continue;
-	    if ((kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE) &&
-		(ops == opstack ||
-		 (ops[-1]->op_type != OP_NEXTSTATE &&
-		  ops[-1]->op_type != OP_DBSTATE)))
-		*ops++ = kid;
+	    if (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE) {
+	        if (ops == opstack)
+		    *ops++ = kid;
+		else if (ops[-1]->op_type == OP_NEXTSTATE ||
+		         ops[-1]->op_type == OP_DBSTATE)
+		    ops[-1] = kid;
+		else
+		    *ops++ = kid;
+	    }
 	    if ((o = dofindlabel(kid, label, ops, oplimit)))
 		return o;
 	}

@@ -3765,7 +3765,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		switch (SvTYPE(sref)) {
 		case SVt_PVAV:
 		    if (intro)
-			SAVESPTR(GvAV(dstr));
+			SAVEGENERICSV(GvAV(dstr));
 		    else
 			dref = (SV*)GvAV(dstr);
 		    GvAV(dstr) = (AV*)sref;
@@ -3777,7 +3777,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		    break;
 		case SVt_PVHV:
 		    if (intro)
-			SAVESPTR(GvHV(dstr));
+			SAVEGENERICSV(GvHV(dstr));
 		    else
 			dref = (SV*)GvHV(dstr);
 		    GvHV(dstr) = (HV*)sref;
@@ -3795,7 +3795,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 			    GvCVGEN(dstr) = 0; /* Switch off cacheness. */
 			    PL_sub_generation++;
 			}
-			SAVESPTR(GvCV(dstr));
+			SAVEGENERICSV(GvCV(dstr));
 		    }
 		    else
 			dref = (SV*)GvCV(dstr);
@@ -3845,21 +3845,21 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		    break;
 		case SVt_PVIO:
 		    if (intro)
-			SAVESPTR(GvIOp(dstr));
+			SAVEGENERICSV(GvIOp(dstr));
 		    else
 			dref = (SV*)GvIOp(dstr);
 		    GvIOp(dstr) = (IO*)sref;
 		    break;
 		case SVt_PVFM:
 		    if (intro)
-			SAVESPTR(GvFORM(dstr));
+			SAVEGENERICSV(GvFORM(dstr));
 		    else
 			dref = (SV*)GvFORM(dstr);
 		    GvFORM(dstr) = (CV*)sref;
 		    break;
 		default:
 		    if (intro)
-			SAVESPTR(GvSV(dstr));
+			SAVEGENERICSV(GvSV(dstr));
 		    else
 			dref = (SV*)GvSV(dstr);
 		    GvSV(dstr) = sref;
@@ -3872,8 +3872,6 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		}
 		if (dref)
 		    SvREFCNT_dec(dref);
-		if (intro)
-		    SAVEFREESV(sref);
 		if (SvTAINTED(sstr))
 		    SvTAINT(dstr);
 		return;

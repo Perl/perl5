@@ -147,7 +147,10 @@ firstmakefile=GNUmakefile;
 #
 case "$usethreads$useithreads$use5005threads" in
   *define*)
-    cat <<EOM >&4
+  case "$osvers" in
+    [12345].*)     cat <<EOM >&4
+
+
 
 *** Warning, there might be problems with your libraries with
 *** regards to threading.  The test ext/threads/t/libc.t is likely
@@ -155,4 +158,7 @@ case "$usethreads$useithreads$use5005threads" in
 
 EOM
     ;;
+    *) usereentrant='define';;
+  esac
+
 esac
