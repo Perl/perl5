@@ -254,9 +254,9 @@ else {
 mkpath("$installarchlib/CORE", 1, 0777);
 my @corefiles;
 if ($Is_VMS) {  # We did core file selection during build
-    my $coredir = "lib/$Config{'arch'}/$ver";
+    my $coredir = "lib/$Config{archname}/$ver/CORE";
     $coredir =~ tr/./_/;
-    @corefiles = map { s|^$coredir/||i; } <$coredir/*.*>;
+    map { s|^$coredir/||i; } @corefiles = <$coredir/*.*>;
 }
 else {
     # [als] hard-coded 'libperl' name... not good!

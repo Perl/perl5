@@ -1803,7 +1803,7 @@ cause silent failures.  This has been fixed.
 Prior versions used to run BEGIN B<and> END blocks when Perl was
 run in compile-only mode.  Since this is typically not the expected
 behavior, END blocks are not executed anymore when the C<-c> switch
-is used.
+is used, or if compilation fails.
 
 See L<CHECK blocks> for how to run things when the compile phase ends.
 

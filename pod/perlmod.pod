@@ -233,7 +233,7 @@ being blown out of the water by a signal--you have to trap that yourself
 (if you can).)  You may have multiple C<END> blocks within a file--they
 will execute in reverse order of definition; that is: last in, first
 out (LIFO).  C<END> blocks are not executed when you run perl with the
-C<-c> switch.
+C<-c> switch, or if compilation fails.
 
 Inside an C<END> subroutine, C<$?> contains the value that the program is
 going to pass to C<exit()>.  You can modify C<$?> to change the exit
