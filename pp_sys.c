@@ -3975,6 +3975,8 @@ PP(pp_system)
     I32 value;
     STRLEN n_a;
     int result;
+    int pp[2];
+    I32 did_pipes = 0;
 
     if (SP - MARK == 1) {
 	if (PL_tainting) {
@@ -3989,8 +3991,6 @@ PP(pp_system)
     Pid_t childpid;
     int status;
     Sigsave_t ihand,qhand;     /* place to save signals during system() */
-    I32 did_pipes = 0;
-    int pp[2];
 
     if (PerlProc_pipe(pp) >= 0)
 	did_pipes = 1;
