@@ -1874,10 +1874,21 @@ PP(pp_goto)
 	    I32 items = 0;
 	    I32 oldsave;
 
+	retry:
 	    if (!CvROOT(cv) && !CvXSUB(cv)) {
-		if (CvGV(cv)) {
-		    SV *tmpstr = sv_newmortal();
-		    gv_efullname3(tmpstr, CvGV(cv), Nullch);
+		GV *gv = CvGV(cv);
+		GV *autogv;
+		if (gv) {
+		    SV *tmpstr;
+		    /* autoloaded stub? */
+		    if (cv != GvCV(gv) && (cv = GvCV(gv)))
+			goto retry;
+		    autogv = gv_autoload4(GvSTASH(gv), GvNAME(gv),
+					  GvNAMELEN(gv), FALSE);
+		    if (autogv && (cv = GvCV(autogv)))
+			goto retry;
+		    tmpstr = sv_newmortal();
+		    gv_efullname3(tmpstr, gv, Nullch);
 		    DIE("Goto undefined subroutine &%s",SvPVX(tmpstr));
 		}
 		DIE("Goto undefined subroutine");
