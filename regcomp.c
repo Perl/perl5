@@ -493,7 +493,7 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 		    scan = next;
 		if (ckWARN(WARN_UNSAFE) && (minnext + deltanext == 0) 
 		    && !(data->flags & (SF_HAS_PAR|SF_IN_PAR))
-		    && maxcount <= 10000) /* Complement check for big count */
+		    && maxcount <= REG_INFTY/3) /* Complement check for big count */
 		    warner(WARN_UNSAFE, "Strange *+?{} on zero-length expression");
 		min += minnext * mincount;
 		is_inf_internal |= (maxcount == REG_INFTY 
@@ -1586,7 +1586,7 @@ regpiece(I32 *flagp)
 	goto do_curly;
     }
   nest_check:
-    if (ckWARN(WARN_UNSAFE) && !SIZE_ONLY && !(flags&HASWIDTH) && max > 10000) {
+    if (ckWARN(WARN_UNSAFE) && !SIZE_ONLY && !(flags&HASWIDTH) && max > REG_INFTY/3) {
 	warner(WARN_UNSAFE, "%.*s matches null string many times",
 	    PL_regcomp_parse - origparse, origparse);
     }

@@ -2422,6 +2422,14 @@ there was a failure.  You probably wanted to use system() instead,
 which does return.  To suppress this warning, put the exec() in a block
 by itself.
 
+=item Strange *+?{} on zero-length expression
+
+(W) You applied a regular expression quantifier in a place where it
+makes no sense, such as on a zero-width assertion.
+Try putting the quantifier inside the assertion instead.  For example,
+the way to match "abc" provided that it is followed by three
+repetitions of "xyz" is C</abc(?=(?:xyz){3})/>, not C</abc(?=xyz){3}/>.
+
 =item Stub found while resolving method `%s' overloading `%s' in package `%s'
 
 (P) Overloading resolution over @ISA tree may be broken by importation stubs.
