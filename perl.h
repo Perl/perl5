@@ -1106,7 +1106,11 @@ typedef I32 (*filter_t) _((int, SV *, int));
 #   if defined(PLAN9)
 #     include "./plan9/plan9ish.h"
 #   else
-#     include "unixish.h"
+#     if defined(MPE)
+#       include "mpeix/mpeixish.h"
+#     else
+#       include "unixish.h"
+#     endif
 #   endif
 # endif
 #endif         

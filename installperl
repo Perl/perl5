@@ -163,7 +163,18 @@ elsif ($^O ne 'dos') {
     safe_unlink("$installbin/$perl$ver$exe_ext");
     copy("perl$exe_ext", "$installbin/$perl$ver$exe_ext");
     chmod(0755, "$installbin/$perl$ver$exe_ext");
-} else {
+}
+elsif ($^O eq 'mpeix') {
+    # MPE lacks hard links and requires that executables with special
+    # capabilities reside in the MPE namespace.
+    safe_unlink("$installbin/perl$ver$exe_ext", $Config{perlpath});
+    # Install the primary executable into the MPE namespace as perlpath.
+    copy("perl$exe_ext", $Config{perlpath});
+    chmod(0755, $Config{perlpath});
+    # Create a backup copy with the version number.
+    link($Config{perlpath}, "$installbin/perl$ver$exe_ext");
+}
+else {
     safe_unlink("$installbin/$perl.exe");
     copy("perl.exe", "$installbin/$perl.exe");
 }
@@ -225,7 +236,13 @@ foreach my $file (@corefiles) {
 
 if (! $versiononly && ! samepath($installbin, '.') && ($^O ne 'dos') && ! $Is_VMS) {
     safe_unlink("$installbin/$perl$exe_ext", "$installbin/suid$perl$exe_ext");
-    link("$installbin/$perl$ver$exe_ext", "$installbin/$perl$exe_ext");
+    if ($^O eq 'mpeix') {
+	# MPE doesn't support hard links, so use a symlink.
+	# We don't want another cloned copy.
+        symlink($Config{perlpath}, "$installbin/perl$exe_ext");
+    } else {
+	link("$installbin/$perl$ver$exe_ext", "$installbin/$perl$exe_ext");
+    }
     link("$installbin/s$perl$ver$exe_ext", "$installbin/suid$perl$exe_ext") 
       if $d_dosuid;
 }
@@ -256,11 +273,13 @@ if (!$versiononly && !$nonono && !$Is_W32 && !$Is_VMS && -t STDIN && -t STDERR
 	(yn("Many scripts expect perl to be installed as $usrbinperl.\n" . 
 	     "Do you wish to have $usrbinperl be the same as\n" .
 	     "$expinstperl? [y] ")))
-    {	
+    {
 	unlink($usrbinperl);
-	eval { CORE::link $instperl, $usrbinperl } ||
-	    eval { symlink $expinstperl, $usrbinperl } ||
-		copy($instperl, $usrbinperl);
+	( $Config{'d_link'} eq 'define' &&
+	  eval { CORE::link $instperl, $usrbinperl } )	||
+	eval { symlink $expinstperl, $usrbinperl }	||
+	copy($instperl, $usrbinperl);
+
 	$mainperl_is_instperl = 1;
     }
 }

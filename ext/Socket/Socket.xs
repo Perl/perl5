@@ -7,6 +7,11 @@
 #  include <sys/types.h>
 # endif
 #include <sys/socket.h>
+#ifdef MPE
+# define PF_INET AF_INET
+# define PF_UNIX AF_UNIX
+# define SOCK_RAW 3
+#endif
 #ifdef I_SYS_UN
 #include <sys/un.h>
 #endif

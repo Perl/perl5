@@ -279,6 +279,8 @@ BeOS is now supported.  See L<README.beos>.
 
 DOS is now supported under the DJGPP tools.  See L<README.dos>.
 
+MPE/iX is now supported.  See L<README.mpeix>.
+
 =head2 Changes in existing support
 
 Win32 support has been vastly enhanced.  Support for Perl Object, a C++

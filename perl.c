@@ -1721,6 +1721,9 @@ moreswitches(char *s)
 #ifdef __BEOS__
 	printf("BeOS port Copyright Tom Spindler, 1997-1998\n");
 #endif
+#ifdef MPE
+	printf("MPE/iX port Copyright by Mark Klein and Mark Bixby, 1996-1998\n");
+#endif
 #ifdef BINARY_BUILD_NOTICE
 	BINARY_BUILD_NOTICE;
 #endif
