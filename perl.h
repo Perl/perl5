@@ -1003,6 +1003,9 @@ Free_t   Perl_mfree (Malloc_t where);
 #    define IV_MAX INT64_MAX
 #    define IV_MIN INT64_MIN
 #    define UV_MAX UINT64_MAX
+#    ifndef UINT64_MIN
+#      define UINT64_MIN 0
+#    endif
 #    define UV_MIN UINT64_MIN
 #  else
 #    define IV_MAX PERL_QUAD_MAX
@@ -1021,6 +1024,9 @@ Free_t   Perl_mfree (Malloc_t where);
 #    define IV_MAX INT32_MAX
 #    define IV_MIN INT32_MIN
 #    define UV_MAX UINT32_MAX
+#    ifndef UINT32_MIN
+#      define UINT32_MIN 0
+#    endif
 #    define UV_MIN UINT32_MIN
 #  else
 #    define IV_MAX PERL_LONG_MAX
@@ -1038,8 +1044,8 @@ Free_t   Perl_mfree (Malloc_t where);
 #  define UVSIZE LONGSIZE
 #  define IVSIZE LONGSIZE
 #endif
-#define IV_DIG (BIT_DIGITS(IVSIZE * 8) + 1)
-#define UV_DIG (BIT_DIGITS(IVSIZE * 8) + 1)
+#define IV_DIG (BIT_DIGITS(IVSIZE * 8))
+#define UV_DIG (BIT_DIGITS(IVSIZE * 8))
 
 #ifdef USE_LONG_DOUBLE
 #  if defined(HAS_LONG_DOUBLE) && (LONG_DOUBLESIZE > DOUBLESIZE)
@@ -1881,10 +1887,10 @@ typedef I32 CHECKPOINT;
 #define IV_FITS_IN_NV
 /* Doubt. */
 #if defined(USE_LONG_DOUBLE) && \
-	defined(LDBL_MANT_DIG) && IVSIZE*8 >= LDBL_MANT_DIG
+	defined(LDBL_MANT_DIG) && IV_DIG >= LDBL_MANT_DIG
 #   undef IV_FITS_IN_NV
 #else
-#   if defined(DBL_MANT_DIG) && IVSIZE*8 >= DBL_MANT_DIG
+#   if defined(DBL_MANT_DIG) && IV_DIG >= DBL_MANT_DIG
 #       undef IV_FITS_IN_NV
 #   else
 #       if IV_DIG >= NV_DIG
