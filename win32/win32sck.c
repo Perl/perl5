@@ -8,14 +8,16 @@
  *    License or the Artistic License, as specified in the README file.
  */
 
-#include <windows.h>
+#define WIN32IO_IS_STDIO
 #define WIN32_LEAN_AND_MEAN
+#include <windows.h>
 #include "EXTERN.h"
 #include "perl.h"
 #include <sys/socket.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <assert.h>
+#include <io.h>
 
 #undef htonl
 #undef htons
@@ -601,17 +603,6 @@ win32_setservent(int stayopen)
 {
     croak("setservent not implemented!\n");
 }
-
-#define WIN32IO_IS_STDIO
-#include <io.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-#include "win32iop.h"
-#ifdef __cplusplus
-}
-#endif
 
 static struct servent*
 win32_savecopyservent(struct servent*d, struct servent*s, const char *proto)

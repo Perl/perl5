@@ -397,8 +397,5 @@ win32_realloc
 win32_free
 win32_open_osfhandle
 win32_get_osfhandle
-win32stdio
 Perl_win32_init
 RunPerl
-SetIOSubSystem
-GetIOSubSystem

@@ -22,6 +22,28 @@
 #include <process.h>
 #include <stdio.h>
 #include <direct.h>
+#include <stdlib.h>
+#ifndef EXT
+#include "EXTERN.h"
+#endif
+
+#ifndef START_EXTERN_C
+#ifdef __cplusplus
+#  define START_EXTERN_C extern "C" {
+#  define END_EXTERN_C }
+#  define EXTERN_C extern "C"
+#else
+#  define START_EXTERN_C 
+#  define END_EXTERN_C 
+#  define EXTERN_C
+#endif
+#endif
+
+#define  STANDARD_C	1
+#define  DOSISH		1		/* no escaping our roots */
+#define  OP_BINARY	O_BINARY	/* mistake in in pp_sys.c? */
+#define USE_SOCKETS_AS_HANDLES		/* we wanna pretend sockets are FDs */
+/*#define USE_WIN32_RTL_ENV */		/* see note below */
 
 /* For UNIX compatibility. */
 
@@ -52,75 +74,53 @@ typedef long		gid_t;
 
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
+START_EXTERN_C
 extern  uid_t	getuid(void);
 extern  gid_t	getgid(void);
 extern  uid_t	geteuid(void);
 extern  gid_t	getegid(void);
 extern  int	setuid(uid_t uid);
 extern  int	setgid(gid_t gid);
-
 extern  int	kill(int pid, int sig);
-
-#ifdef __cplusplus
-}
-#endif
-
+END_EXTERN_C
 
 extern  char	*staticlinkmodules[];
+
+START_EXTERN_C
 
 /* if USE_WIN32_RTL_ENV is not defined, Perl uses direct Win32 calls
  * to read the environment, bypassing the runtime's (usually broken)
  * facilities for accessing the same.  See note in util.c/my_setenv().
  */
-/*#define USE_WIN32_RTL_ENV */
 
 #ifndef USE_WIN32_RTL_ENV
-#include <stdlib.h>
-#ifndef EXT
-#include "EXTERN.h"
-#endif
+EXT char *win32_getenv(const char *name);
 #undef getenv
 #define getenv win32_getenv
-EXT char *win32_getenv(const char *name);
 #endif
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 
 EXT void Perl_win32_init(int *argcp, char ***argvp);
 
-#define USE_SOCKETS_AS_HANDLES
 #ifndef USE_SOCKETS_AS_HANDLES
-
-extern FILE *myfdopen(int, char *);
-
+extern FILE *my_fdopen(int, char *);
 #undef fdopen
-#define fdopen myfdopen
+#define fdopen my_fdopen
 #endif	/* USE_SOCKETS_AS_HANDLES */
 
-#define  STANDARD_C	1		/* Perl5 likes standard C. */
-#define  DOSISH		1		/* Take advantage of DOSish code in Perl5. */
+#undef fclose
+#define fclose my_fclose
 
-#define  OP_BINARY	O_BINARY	/* Mistake in in pp_sys.c. */
-
-#undef	 pipe
-#define  pipe(fd)	win32_pipe((fd), 512, O_BINARY) /* the pipe call is a bit different */
+#undef	 pipe		/* win32_pipe() itself calls _pipe() */
+#define  pipe(fd)	win32_pipe((fd), 512, O_BINARY)
 
 #undef	 pause
 #define  pause()	sleep((32767L << 16) + 32767)
 
-
 #undef	 times
-#define  times	mytimes
+#define  times	my_times
 
 #undef	 alarm
-#define  alarm	myalarm
+#define  alarm	my_alarm
 
 struct tms {
 	long	tms_utime;
@@ -129,19 +129,21 @@ struct tms {
 	long	tms_cstime;
 };
 
-unsigned int sleep(unsigned int);
-char *win32PerlLibPath(void);
-char *win32SiteLibPath(void);
-int mytimes(struct tms *timebuf);
-unsigned int myalarm(unsigned int sec);
-int do_aspawn(void* really, void ** mark, void ** arglast);
-int do_spawn(char *cmd);
-char do_exec(char *cmd);
-void init_os_extras(void);
+extern unsigned int sleep(unsigned int);
+extern char *win32PerlLibPath(void);
+extern char *win32SiteLibPath(void);
+extern int my_times(struct tms *timebuf);
+extern unsigned int my_alarm(unsigned int sec);
+extern int my_flock(int fd, int oper);
+extern int do_aspawn(void* really, void ** mark, void ** arglast);
+extern int do_spawn(char *cmd);
+extern char do_exec(char *cmd);
+extern void init_os_extras(void);
+extern int my_fclose(FILE *);
+extern int IsWin95(void);
+extern int IsWinNT(void);
 
-#ifdef __cplusplus
-}
-#endif
+END_EXTERN_C
 
 typedef  char *		caddr_t;	/* In malloc.c (core address). */
 
@@ -162,18 +164,6 @@ typedef  char *		caddr_t;	/* In malloc.c (core address). */
 #ifdef _MSC_VER
 #pragma  warning(disable: 4018 4035 4101 4102 4244 4245 4761)
 #endif
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-int IsWin95(void);
-int IsWinNT(void);
-
-#ifdef __cplusplus
-}
-#endif
-
 
 #ifndef VER_PLATFORM_WIN32_WINDOWS	/* VC-2.0 headers dont have this */
 #define VER_PLATFORM_WIN32_WINDOWS	1

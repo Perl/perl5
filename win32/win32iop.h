@@ -21,8 +21,6 @@
 #define LOCK_NB 4
 #define LOCK_UN 8
 
-#include <win32io.h>	/* pull in the io sub system structure */
-
 /*
  * Make this as close to original stdio as possible.
  */
@@ -111,9 +109,6 @@ EXT int		win32_open_osfhandle(long handle, int flags);
 EXT long	win32_get_osfhandle(int fd);
 
 
-EXT PWIN32_IOSUBSYSTEM	SetIOSubSystem(void	*piosubsystem);
-EXT PWIN32_IOSUBSYSTEM	GetIOSubSystem(void);
-
 END_EXTERN_C
 
 /*
@@ -127,6 +122,7 @@ END_EXTERN_C
 #undef stdout
 #undef ferror
 #undef feof
+#undef fclose
 
 #ifdef __BORLANDC__
 #undef ungetc
@@ -205,8 +201,6 @@ END_EXTERN_C
 #define puts			win32_puts
 #define getchar			win32_getchar
 #define putchar			win32_putchar
-#define fscanf			(GetIOSubSystem()->pfnfscanf)
-#define scanf			(GetIOSubSystem()->pfnscanf)
 #define malloc			win32_malloc
 #define calloc			win32_calloc
 #define realloc			win32_realloc

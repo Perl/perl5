@@ -105,7 +105,7 @@ LIBC = msvcrt.lib
 WINIOMAYBE =
 .ELSE
 LIBC = libcmt.lib
-WINIOMAYBE = win32io.obj
+WINIOMAYBE =
 .ENDIF
 
 .IF  "$(CFG)" == "Debug"
@@ -265,18 +265,15 @@ CORE_OBJ= ..\av.obj	\
 
 WIN32_C = perllib.c \
 	win32.c \
-	win32io.c \
 	win32sck.c \
 	win32thread.c 
 
 WIN32_OBJ = win32.obj \
-	win32io.obj \
 	win32sck.obj \
 	win32thread.obj
 
 PERL95_OBJ = perl95.obj \
 	win32mt.obj \
-	win32iomt.obj \
 	win32sckmt.obj
 
 DLL_OBJ = perllib.obj $(DYNALOADER).obj
@@ -460,8 +457,6 @@ $(PERLEXE): $(PERLDLL) $(CONFIGPM) perlmain.obj
 .ENDIF
 	copy splittree.pl .. 
 	$(MINIPERL) -I..\lib ..\splittree.pl "../LIB" "../LIB/auto"
-#	attrib -r ..\t\*.*
-#	copy test ..\t
 
 .IF "$(CCTYPE)" != "BORLAND"
 
@@ -470,9 +465,6 @@ perl95.c : runperl.c
 
 perl95.obj : perl95.c
 	$(CC) $(CFLAGS) -MT -UPERLDLL -c perl95.c
-
-win32iomt.obj : win32io.c
-	$(CC) $(CFLAGS) -MT -c $(OBJOUT_FLAG)win32iomt.obj win32io.c
 
 win32sckmt.obj : win32sck.c
 	$(CC) $(CFLAGS) -MT -c $(OBJOUT_FLAG)win32sckmt.obj win32sck.c
