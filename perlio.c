@@ -3421,8 +3421,10 @@ PerlIOBuf_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 	     * mode++;
 	     */
 	}
-	f = (*tab->Open) (aTHX_ tab, layers, n - 1, mode, fd, imode, perm,
-			  f, narg, args);
+	f = tab && tab->Open ?
+	  (*tab->Open) (aTHX_ tab, layers, n - 1, mode, fd, imode, perm,
+			f, narg, args)
+	  : Nullfp;
 	if (f) {
 	    if (PerlIO_push(aTHX_ f, self, mode, PerlIOArg) == 0) {
 		/*
@@ -3451,6 +3453,8 @@ PerlIOBuf_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 #endif
 	    }
 	}
+	else
+	    SETERRNO(EINVAL, SS_IVCHAN);
     }
     return f;
 }
