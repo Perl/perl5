@@ -2029,13 +2029,42 @@ Perl_do_semop(pTHX_ SV **mark, SV **sp)
     id = SvIVx(*++mark);
     opstr = *++mark;
     opbuf = SvPV(opstr, opsize);
-    if (opsize < sizeof(struct sembuf)
-	|| (opsize % sizeof(struct sembuf)) != 0) {
+    if (opsize < 3 * SHORTSIZE
+	|| (opsize % (3 * SHORTSIZE))) {
 	SETERRNO(EINVAL,LIB$_INVARG);
 	return -1;
     }
     SETERRNO(0,0);
-    return semop(id, (struct sembuf *)opbuf, opsize/sizeof(struct sembuf));
+    /* We can't assume that sizeof(struct sembuf) == 3 * sizeof(short). */
+    {
+        int nsops  = opsize / (3 * sizeof (short));
+        int i      = nsops;
+        short *ops = (short *) opbuf;
+        short *o   = ops;
+        struct sembuf *temps, *t;
+        I32 result;
+
+        New (0, temps, nsops, struct sembuf);
+        t = temps;
+        while (i--) {
+            t->sem_num = *o++;
+            t->sem_op  = *o++;
+            t->sem_flg = *o++;
+            t++;
+        }
+        result = semop(id, temps, nsops);
+        t = temps;
+        o = ops;
+        i = nsops;
+        while (i--) {
+            *o++ = t->sem_num;
+            *o++ = t->sem_op;
+            *o++ = t->sem_flg;
+            t++;
+        }
+        Safefree(temps);
+        return result;
+    }
 #else
     Perl_croak(aTHX_ "semop not implemented");
 #endif
