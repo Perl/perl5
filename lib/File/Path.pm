@@ -105,8 +105,8 @@ my $Is_VMS = $^O eq 'VMS';
 
 # These OSes complain if you want to remove a file that you have no
 # write permission to:
-my $force_writeable = ($^O eq 'os2' || $^O eq 'dos' || $^O eq 'MSWin32'
-		       || $^O eq 'amigaos');
+my $force_writeable = ($^O eq 'os2' || $^O eq 'dos' || $^O eq 'MSWin32' ||
+		       $^O eq 'amigaos' || $^O eq 'MacOS');
 
 sub mkpath {
     my($paths, $verbose, $mode) = @_;
