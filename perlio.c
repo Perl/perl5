@@ -145,7 +145,7 @@ PerlIO_set_cnt(f,cnt)
 PerlIO *f;
 int cnt;
 {
- if (cnt < 0)
+ if (cnt < -1)
   warn("Setting cnt to %d\n",cnt);
 #if defined(USE_STDIO_PTR) && defined(STDIO_CNT_LVALUE)
  FILE_cnt(f) = cnt;
@@ -164,8 +164,8 @@ int cnt;
 #ifdef FILE_bufsiz
  char *e = (char *)(FILE_base(f) + FILE_bufsiz(f));
  int ec  = e - ptr;
- if (ptr > e)
-  warn("Setting ptr %p > base %p\n",ptr, FILE_base(f)+FILE_bufsiz(f));
+ if (ptr > e + 1)
+  warn("Setting ptr %p > end+1 %p\n", ptr, e + 1);
  if (cnt != ec)
   warn("Setting cnt to %d, ptr implies %d\n",cnt,ec);
 #endif
