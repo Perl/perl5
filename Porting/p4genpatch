@@ -95,7 +95,7 @@ for my $a (@action) {
   } else {
     die "Unknown action[$action]";
   }
-  $d2 = "$path$basename";
+  $d2 = File::Spec->catfile($path, $basename);
   $t2 = File::Spec->catfile($tempdir, $d2);
   warn "==> $d2#$number <==\n" if $OPT{v};
   my $system = qq[p4 @P4opt print -o "$t2" "$file"];
@@ -113,7 +113,7 @@ for my $a (@action) {
     unless ($type =~ /text/) {
       next;
     }
-    print "Index: $path$basename\n";
+    print "Index: $d2\n";
     correctmtime($prevfile,$prev,$t1) unless $doadd;
     correctmtime($file,$number,$t2);
     chdir $tempdir or warn "Could not chdir '$tempdir': $!";
