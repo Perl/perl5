@@ -235,14 +235,18 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix, I32 s
 			    CV *bcv;
 			    for (bcv = startcv;
 				 bcv && bcv != cv && !CvCLONE(bcv);
-				 bcv = CvOUTSIDE(bcv)) {
+				 bcv = CvOUTSIDE(bcv))
+			    {
 				if (CvANON(bcv))
 				    CvCLONE_on(bcv);
 				else {
-				    if (PL_dowarn && !CvUNIQUE(cv))
+				    if (PL_dowarn
+					&& !CvUNIQUE(bcv) && !CvUNIQUE(cv))
+				    {
 					warn(
 					  "Variable \"%s\" may be unavailable",
 					     name);
+				    }
 				    break;
 				}
 			    }
@@ -266,7 +270,7 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix, I32 s
 
     for (i = cx_ix; i >= 0; i--) {
 	cx = &cxstack[i];
-	switch (cx->cx_type) {
+	switch (CxTYPE(cx)) {
 	default:
 	    if (i == 0 && saweval) {
 		seq = cxstack[saweval].blk_oldcop->cop_seq;
@@ -276,7 +280,8 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix, I32 s
 	case CXt_EVAL:
 	    switch (cx->blk_eval.old_op_type) {
 	    case OP_ENTEREVAL:
-		saweval = i;
+		if (CxREALEVAL(cx))
+		    saweval = i;
 		break;
 	    case OP_REQUIRE:
 		/* require must have its own scope */
@@ -308,6 +313,8 @@ pad_findmy(char *name)
     SV *sv;
     SV **svp = AvARRAY(PL_comppad_name);
     U32 seq = PL_cop_seqmax;
+    PERL_CONTEXT *cx;
+    CV *outside;
 
 #ifdef USE_THREADS
     /*
@@ -337,8 +344,20 @@ pad_findmy(char *name)
 	}
     }
 
+    outside = CvOUTSIDE(PL_compcv);
+
+    /* Check if if we're compiling an eval'', and adjust seq to be the
+     * eval's seq number.  This depends on eval'' having a non-null
+     * CvOUTSIDE() while it is being compiled.  The eval'' itself is
+     * identified by CvUNIQUE being set and CvGV being null. */
+    if (outside && CvUNIQUE(PL_compcv) && !CvGV(PL_compcv) && cxstack_ix >= 0) {
+	cx = &cxstack[cxstack_ix];
+	if (CxREALEVAL(cx))
+	    seq = cx->blk_oldcop->cop_seq;
+    }
+
     /* See if it's in a nested scope */
-    off = pad_findlex(name, 0, seq, CvOUTSIDE(PL_compcv), cxstack_ix, 0);
+    off = pad_findlex(name, 0, seq, outside, cxstack_ix, 0);
     if (off) {
 	/* If there is a pending local definition, this new alias must die */
 	if (pendoff)
@@ -3218,7 +3237,7 @@ CV* cv;
 		  cv,
 		  (CvANON(cv) ? "ANON"
 		   : (cv == PL_main_cv) ? "MAIN"
-		   : CvUNIQUE(outside) ? "UNIQUE"
+		   : CvUNIQUE(cv) ? "UNIQUE"
 		   : CvGV(cv) ? GvNAME(CvGV(cv)) : "UNDEFINED"),
 		  outside,
 		  (!outside ? "null"
