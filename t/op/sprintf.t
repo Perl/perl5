@@ -43,6 +43,9 @@ if ($^O eq 'VMS') {
     $Is_VMS_VAX = $hw_model < 1024 ? 1 : 0;
 }
 
+# No %Config.
+my $Is_Ultrix_VAX = $^O eq 'ultrix' && `uname -m` =~ /^VAX$/;
+
 for ($i = 1; @tests; $i++) {
     ($template, $data, $result, $comment) = @{shift @tests};
     if ($^O eq 'os390' || $^O eq 's390') { # non-IEEE (s390 is UTS)
@@ -51,9 +54,10 @@ for ($i = 1; @tests; $i++) {
         $data   =~ s/([eE])\-101$/${1}-56/;  # larger exponents
         $result =~ s/([eE])\-102$/${1}-57/;  #  "       "
     }
-    if ($Is_VMS_VAX) { # VAX DEC C 5.3 at least since there is no 
-                       # ccflags =~ /float=ieee/ on VAX.
-                       # AXP is unaffected whether or not it's using ieee.
+    if ($Is_VMS_VAX || $Is_Ultrix_VAX) {
+	# VAX DEC C 5.3 at least since there is no 
+	# ccflags =~ /float=ieee/ on VAX.
+	# AXP is unaffected whether or not it's using ieee.
         $data   =~ s/([eE])96$/${1}26/;      # smaller exponents
         $result =~ s/([eE]\+)102$/${1}32/;   #  "       "
         $data   =~ s/([eE])\-101$/${1}-24/;  # larger exponents
