@@ -1417,6 +1417,12 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 
 	    LEAVE;
 
+	    /* LEAVE could clobber PL_curcop (see save_re_context())
+	     * XXX it might be better to find a way to avoid messing with
+	     * PL_curcop in save_re_context() instead, but this is a more
+	     * minimal fix --GSAR */
+	    PL_curcop = cx->blk_oldcop;
+
 	    if (optype == OP_REQUIRE) {
 		char* msg = SvPVx(ERRSV, n_a);
 		DIE(aTHX_ "%sCompilation failed in require",
