@@ -1,7 +1,7 @@
 # Pod::Text -- Convert POD data to formatted ASCII text.
-# $Id: Text.pm,v 2.3 1999/10/07 09:41:57 eagle Exp $
+# $Id: Text.pm,v 2.4 2000/03/17 00:17:08 eagle Exp $
 #
-# Copyright 1999 by Russ Allbery <rra@stanford.edu>
+# Copyright 1999, 2000 by Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -33,7 +33,11 @@ use vars qw(@ISA @EXPORT %ESCAPES $VERSION);
 # We have to export pod2text for backward compatibility.
 @EXPORT = qw(pod2text);
 
-($VERSION = (split (' ', q$Revision: 2.3 $ ))[1]) =~ s/\.(\d)$/.0$1/;
+# Don't use the CVS revision as the version, since this module is also in
+# Perl core and too many things could munge CVS magic revision strings.
+# This number should ideally be the same as the CVS revision in podlators,
+# however.
+$VERSION = 2.04;
 
 
 ############################################################################
@@ -43,7 +47,7 @@ use vars qw(@ISA @EXPORT %ESCAPES $VERSION);
 # This table is taken near verbatim from Pod::PlainText in Pod::Parser,
 # which got it near verbatim from the original Pod::Text.  It is therefore
 # credited to Tom Christiansen, and I'm glad I didn't have to write it.  :)
-# "iexcl" to "divide" added by Tim Jenness
+# "iexcl" to "divide" added by Tim Jenness.
 %ESCAPES = (
     'amp'       =>    '&',      # ampersand
     'lt'        =>    '<',      # left chevron, less-than
@@ -113,42 +117,42 @@ use vars qw(@ISA @EXPORT %ESCAPES $VERSION);
     "yacute"    =>    "\xFD",   # small y, acute accent
     "yuml"      =>    "\xFF",   # small y, dieresis or umlaut mark
                                   
-    "lchevron"  =>    "\xAB",   # left chevron (double less than) laquo
-    "rchevron"  =>    "\xBB",   # right chevron (double greater than) raquo
+    "laquo"     =>    "\xAB",   # left pointing double angle quotation mark
+    "lchevron"  =>    "\xAB",   #  synonym (backwards compatibility)
+    "raquo"     =>    "\xBB",   # right pointing double angle quotation mark
+    "rchevron"  =>    "\xBB",   #  synonym (backwards compatibility)
 
-    "iexcl"  =>   "\xA1",   # inverted exclamation mark
-    "cent"   =>   "\xA2",   # cent sign
-    "pound"  =>   "\xA3",   # (UK) pound sign
-    "curren" =>   "\xA4",   # currency sign
-    "yen"    =>   "\xA5",   # yen sign
-    "brvbar" =>   "\xA6",   # broken vertical bar
-    "sect"   =>   "\xA7",   # section sign
-    "uml"    =>   "\xA8",   # diaresis
-    "copy"   =>   "\xA9",   # Copyright symbol
-    "ordf"   =>   "\xAA",   # feminine ordinal indicator
-    "laquo"  =>   "\xAB",   # left pointing double angle quotation mark
-    "not"    =>   "\xAC",   # not sign
-    "shy"    =>   "\xAD",   # soft hyphen
-    "reg"    =>   "\xAE",   # registered trademark
-    "macr"   =>   "\xAF",   # macron, overline
-    "deg"    =>   "\xB0",   # degree sign
-    "plusmn" =>   "\xB1",   # plus-minus sign
-    "sup2"   =>   "\xB2",   # superscript 2
-    "sup3"   =>   "\xB3",   # superscript 3
-    "acute"  =>   "\xB4",   # acute accent
-    "micro"  =>   "\xB5",   # micro sign
-    "para"   =>   "\xB6",   # pilcrow sign = paragraph sign
-    "middot" =>   "\xB7",   # middle dot = Georgian comma
-    "cedil"  =>   "\xB8",   # cedilla
-    "sup1"   =>   "\xB9",   # superscript 1
-    "ordm"   =>   "\xBA",   # masculine ordinal indicator
-    "raquo"  =>   "\xBB",   # right pointing double angle quotation mark
-    "frac14" =>   "\xBC",   # vulgar fraction one quarter
-    "frac12" =>   "\xBD",   # vulgar fraction one half
-    "frac34" =>   "\xBE",   # vulgar fraction three quarters
-    "iquest" =>   "\xBF",   # inverted question mark
-    "times"  =>   "\xD7",   # multiplication sign
-    "divide" =>   "\xF7",   # division sign
+    "iexcl"     =>    "\xA1",   # inverted exclamation mark
+    "cent"      =>    "\xA2",   # cent sign
+    "pound"     =>    "\xA3",   # (UK) pound sign
+    "curren"    =>    "\xA4",   # currency sign
+    "yen"       =>    "\xA5",   # yen sign
+    "brvbar"    =>    "\xA6",   # broken vertical bar
+    "sect"      =>    "\xA7",   # section sign
+    "uml"       =>    "\xA8",   # diaresis
+    "copy"      =>    "\xA9",   # Copyright symbol
+    "ordf"      =>    "\xAA",   # feminine ordinal indicator
+    "not"       =>    "\xAC",   # not sign
+    "shy"       =>    "\xAD",   # soft hyphen
+    "reg"       =>    "\xAE",   # registered trademark
+    "macr"      =>    "\xAF",   # macron, overline
+    "deg"       =>    "\xB0",   # degree sign
+    "plusmn"    =>    "\xB1",   # plus-minus sign
+    "sup2"      =>    "\xB2",   # superscript 2
+    "sup3"      =>    "\xB3",   # superscript 3
+    "acute"     =>    "\xB4",   # acute accent
+    "micro"     =>    "\xB5",   # micro sign
+    "para"      =>    "\xB6",   # pilcrow sign = paragraph sign
+    "middot"    =>    "\xB7",   # middle dot = Georgian comma
+    "cedil"     =>    "\xB8",   # cedilla
+    "sup1"      =>    "\xB9",   # superscript 1
+    "ordm"      =>    "\xBA",   # masculine ordinal indicator
+    "frac14"    =>    "\xBC",   # vulgar fraction one quarter
+    "frac12"    =>    "\xBD",   # vulgar fraction one half
+    "frac34"    =>    "\xBE",   # vulgar fraction three quarters
+    "iquest"    =>    "\xBF",   # inverted question mark
+    "times"     =>    "\xD7",   # multiplication sign
+    "divide"    =>    "\xF7",   # division sign
 );
 
 

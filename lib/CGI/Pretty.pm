@@ -10,7 +10,7 @@ package CGI::Pretty;
 use strict;
 use CGI ();
 
-$CGI::Pretty::VERSION = '1.03';
+$CGI::Pretty::VERSION = '1.04';
 $CGI::DefaultClass = __PACKAGE__;
 $CGI::Pretty::AutoloadClass = 'CGI';
 @CGI::Pretty::ISA = qw( CGI );
@@ -62,15 +62,13 @@ sub _make_tag_func {
 	sub $tagname { 
 	    # handle various cases in which we're called
 	    # most of this bizarre stuff is to avoid -w errors
-	    shift if \$_[0] && 
-		(!ref(\$_[0]) && \$_[0] eq \$CGI::DefaultClass) ||
-		    (ref(\$_[0]) &&
-		     (substr(ref(\$_[0]),0,3) eq 'CGI' ||
-		    UNIVERSAL::isa(\$_[0],'CGI')));
-	    
+            shift if \$_[0] && 
+                    (ref(\$_[0]) &&
+                     (substr(ref(\$_[0]),0,3) eq 'CGI' ||
+                    UNIVERSAL::isa(\$_[0],'CGI')));
 	    my(\$attr) = '';
 	    if (ref(\$_[0]) && ref(\$_[0]) eq 'HASH') {
-		my(\@attr) = make_attributes('',shift);
+		my(\@attr) = make_attributes(shift);
 		\$attr = " \@attr" if \@attr;
 	    }
 
