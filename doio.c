@@ -53,6 +53,9 @@
 #  define OPEN_EXCL 0
 #endif
 
+#define PERL_MODE_MAX 8
+#define PERL_FLAGS_MAX 10
+
 #include <signal.h>
 
 bool
@@ -89,7 +92,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
     bool was_fdopen = FALSE;
     bool in_raw = 0, in_crlf = 0, out_raw = 0, out_crlf = 0;
     char *type  = NULL;
-    char mode[8];		/* stdio file mode ("r\0", "rb\0", "r+b\0" etc.) */
+    char mode[PERL_MODE_MAX];	/* stdio file mode ("r\0", "rb\0", "r+b\0" etc.) */
     SV *namesv;
 
     Zero(mode,sizeof(mode),char);
@@ -275,10 +278,17 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    }
 	    mode[0] = 'w';
 	    writing = 1;
+#ifdef HAS_STRLCAT
+            if (out_raw)
+                strlcat(mode, "b", PERL_MODE_MAX);
+            else if (out_crlf)
+                strlcat(mode, "t", PERL_MODE_MAX); 
+#else
 	    if (out_raw)
 		strcat(mode, "b");
 	    else if (out_crlf)
 		strcat(mode, "t");
+#endif
 	    if (num_svs > 1) {
 		fp = PerlProc_popen_list(mode, num_svs, svp);
 	    }
@@ -306,11 +316,17 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    }
 	    writing = 1;
 
+#ifdef HAS_STRLCAT
+            if (out_raw)
+                strlcat(mode, "b", PERL_MODE_MAX);
+            else if (out_crlf)
+                strlcat(mode, "t", PERL_MODE_MAX);
+#else
 	    if (out_raw)
 		strcat(mode, "b");
 	    else if (out_crlf)
 		strcat(mode, "t");
-
+#endif
 	    if (*type == '&') {
 	      duplicity:
 		dodup = PERLIO_DUP_FD;
@@ -432,11 +448,17 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    /*SUPPRESS 530*/
 	    for (type++; isSPACE(*type); type++) ;
 	    mode[0] = 'r';
+#ifdef HAS_STRLCAT
+            if (in_raw)
+                strlcat(mode, "b", PERL_MODE_MAX);
+            else if (in_crlf)
+                strlcat(mode, "t", PERL_MODE_MAX);
+#else
 	    if (in_raw)
 		strcat(mode, "b");
 	    else if (in_crlf)
 		strcat(mode, "t");
-
+#endif
 	    if (*type == '&') {
 		goto duplicity;
 	    }
@@ -487,10 +509,19 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		TAINT_ENV();
 	    TAINT_PROPER("piped open");
 	    mode[0] = 'r';
+
+#ifdef HAS_STRLCAT
+            if (in_raw)
+                strlcat(mode, "b", PERL_MODE_MAX);
+            else if (in_crlf)
+                strlcat(mode, "t", PERL_MODE_MAX);
+#else
 	    if (in_raw)
 		strcat(mode, "b");
 	    else if (in_crlf)
 		strcat(mode, "t");
+#endif
+
 	    if (num_svs > 1) {
 		fp = PerlProc_popen_list(mode,num_svs,svp);
 	    }
@@ -515,10 +546,19 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    /*SUPPRESS 530*/
 	    for (; isSPACE(*name); name++) ;
 	    mode[0] = 'r';
+
+#ifdef HAS_STRLCAT
+            if (in_raw)
+                strlcat(mode, "b", PERL_MODE_MAX);
+            else if (in_crlf)
+                strlcat(mode, "t", PERL_MODE_MAX);
+#else
 	    if (in_raw)
 		strcat(mode, "b");
 	    else if (in_crlf)
 		strcat(mode, "t");
+#endif
+
 	    if (*name == '-' && name[1] == '\0') {
 		fp = PerlIO_stdin();
 		IoTYPE(io) = IoTYPE_STD;
@@ -1503,14 +1543,22 @@ Perl_do_exec3(pTHX_ char *cmd, int fd, int do_report)
 
 #ifdef CSH
     {
-        char flags[10];
+        char flags[PERL_FLAGS_MAX];
 	if (strnEQ(cmd,PL_cshname,PL_cshlen) &&
 	    strnEQ(cmd+PL_cshlen," -c",3)) {
+#ifdef HAS_STRLCPY
+          strlcpy(flags, "-c", PERL_FLAGS_MAX);
+#else
 	  strcpy(flags,"-c");
+#endif
 	  s = cmd+PL_cshlen+3;
 	  if (*s == 'f') {
 	      s++;
+#ifdef HAS_STRLCPY
+              strlcat(flags, "f", PERL_FLAGS_MAX);
+#else
 	      strcat(flags,"f");
+#endif
 	  }
 	  if (*s == ' ')
 	      s++;
