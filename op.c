@@ -850,12 +850,10 @@ Perl_scalar(pTHX_ OP *o)
     /* assumes no premature commitment */
     if (!o || (o->op_flags & OPf_WANT) || PL_error_count
 	 || o->op_type == OP_RETURN)
+    {
 	return o;
+    }
 
-    if ((o->op_private & OPpTARGET_MY)
-	&& (PL_opargs[o->op_type] & OA_TARGLEX)) /* OPp share the meaning */
-	return scalar(o);			/* As if inside SASSIGN */
-    
     o->op_flags = (o->op_flags & ~OPf_WANT) | OPf_WANT_SCALAR;
 
     switch (o->op_type) {
@@ -936,11 +934,15 @@ Perl_scalarvoid(pTHX_ OP *o)
     want = o->op_flags & OPf_WANT;
     if ((want && want != OPf_WANT_SCALAR) || PL_error_count
 	 || o->op_type == OP_RETURN)
+    {
 	return o;
+    }
 
     if ((o->op_private & OPpTARGET_MY)
-	&& (PL_opargs[o->op_type] & OA_TARGLEX)) /* OPp share the meaning */
+	&& (PL_opargs[o->op_type] & OA_TARGLEX))/* OPp share the meaning */
+    {
 	return scalar(o);			/* As if inside SASSIGN */
+    }
     
     o->op_flags = (o->op_flags & ~OPf_WANT) | OPf_WANT_VOID;
 
@@ -1138,11 +1140,15 @@ Perl_list(pTHX_ OP *o)
     /* assumes no premature commitment */
     if (!o || (o->op_flags & OPf_WANT) || PL_error_count
 	 || o->op_type == OP_RETURN)
+    {
 	return o;
+    }
 
     if ((o->op_private & OPpTARGET_MY)
-	&& (PL_opargs[o->op_type] & OA_TARGLEX)) /* OPp share the meaning */
+	&& (PL_opargs[o->op_type] & OA_TARGLEX))/* OPp share the meaning */
+    {
 	return o;				/* As if inside SASSIGN */
+    }
     
     o->op_flags = (o->op_flags & ~OPf_WANT) | OPf_WANT_LIST;
 
@@ -1252,8 +1258,10 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	return o;
 
     if ((o->op_private & OPpTARGET_MY)
-	&& (PL_opargs[o->op_type] & OA_TARGLEX)) /* OPp share the meaning */
+	&& (PL_opargs[o->op_type] & OA_TARGLEX))/* OPp share the meaning */
+    {
 	return o;
+    }
     
     switch (o->op_type) {
     case OP_UNDEF:
