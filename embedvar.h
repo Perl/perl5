@@ -849,3 +849,26 @@
 #endif /* EMBED */
 #endif /* PERL_GLOBAL_STRUCT */
 
+
+#ifndef MIN_PERL_DEFINE  
+
+#define DBsingle		PL_DBsingle
+#define DBsub			PL_DBsub
+#define compiling		PL_compiling
+#define curcop			PL_curcop
+#define curstash		PL_curstash
+#define debstash		PL_debstash
+#define dowarn			PL_dowarn
+#define na			PL_na
+#define rsfp			PL_rsfp
+#define stack_base		PL_stack_base
+#define stack_sp		PL_stack_sp
+#define stdingv			PL_stdingv
+#define sv_arenaroot		PL_sv_arenaroot
+#define sv_no			PL_sv_no
+#define sv_undef		PL_sv_undef
+#define sv_yes			PL_sv_yes
+#define tainted			PL_tainted
+#define tainting		PL_tainting
+
+#endif /* MIN_PERL_DEFINE */
