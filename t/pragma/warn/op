@@ -278,7 +278,7 @@ Useless use of hash element in void context at - line 29.
 Useless use of hash slice in void context at - line 30.
 Useless use of unpack in void context at - line 31.
 Useless use of pack in void context at - line 32.
-Useless use of join in void context at - line 33.
+Useless use of join or string in void context at - line 33.
 Useless use of list slice in void context at - line 34.
 Useless use of sort in void context at - line 37.
 Useless use of reverse in void context at - line 38.
