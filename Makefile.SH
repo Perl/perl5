@@ -545,7 +545,7 @@ minitest: miniperl
 # installed perlbug. We don't re-run the tests here - we trust the user.
 # Please *don't* use this unless all tests pass.
 # If you want to report test failures, just use "perlbug -Ilib".
-ok:
+ok:	utilities
 	./perl -Ilib utils/perlbug -ok -s '(UNINSTALLED)'
 
 clist:	$(c)
