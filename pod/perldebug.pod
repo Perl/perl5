@@ -921,12 +921,12 @@ interpret the information in that profile.
 
 =head1 Debugging regular expressions
 
-C<use re 'debug'> enables you to see the gory details of how the
-Perl regular expression engine works.  In order to understand this
-typically voluminous output, one must not only have some idea about
-about how regular expression matching works in general, but also
-know how Perl's regular expressions are internally compiled into
-an automaton.  These matters are explored in some detail in
+C<use re 'debug'> enables you to see the gory details of how the Perl
+regular expression engine works. In order to understand this typically
+voluminous output, one must not only have some idea about how regular
+expression matching works in general, but also know how Perl's regular
+expressions are internally compiled into an automaton. These matters
+are explored in some detail in
 L<perldebguts/"Debugging regular expressions">.
 
 =head1 Debugging memory usage
