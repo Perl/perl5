@@ -7,11 +7,12 @@ BEGIN {
 
 umask 0;
 $xref = \ "";
+$runme = ($^O eq 'VMS' ? 'MCR ' : '') . $^X;
 @a = (1..5);
 %h = (1..6);
 $aref = \@a;
 $href = \%h;
-open OP, qq{$^X -le "print 'aaa Ok ok' for 1..100"|};
+open OP, qq{$runme -le "print 'aaa Ok ok' for 1..100"|};
 $chopit = 'aaaaaa';
 @chopar = (113 .. 119);
 $posstr = '123456';
@@ -62,7 +63,7 @@ EOE
 __END__
 ref $xref			# ref
 ref $cstr			# ref nonref
-`ls`				# backtick skip(MSWin32)
+`$runme -e "print qq[1\n]"`				# backtick skip(MSWin32)
 `$undefed`			# backtick undef skip(MSWin32)
 <*>				# glob
 <OP>				# readline
@@ -187,7 +188,7 @@ readlink 'non-existent', 'non-existent1' # readlink
 '???'				# fork
 '???'				# wait
 '???'				# waitpid
-system "$^X -e 0"		# system
+system "$runme -e 0"		# system skip(VMS)
 '???'				# exec
 '???'				# kill
 getppid				# getppid

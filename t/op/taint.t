@@ -35,7 +35,7 @@ if ($Is_VMS) {
 	END {
 	    \$ENV{PATH} = '';
 	    warn "# Note: logical name 'PATH' may have been deleted\n";
-	    @ENV{keys %old} = values %old;
+	    \@ENV{keys %old} = values %old;
 	}
 EndOfCleanup
 }

@@ -326,7 +326,7 @@ foreach (@pages) {
 	unless ($opt_m) { 
 	    if ($Is_VMS) {
 		my($i,$trn);
-		for ($i = 0; $trn = $ENV{'DCL$PATH'.$i}; $i++) {
+		for ($i = 0; $trn = $ENV{'DCL$PATH;'.$i}; $i++) {
 		    push(@searchdirs,$trn);
 		}
 		push(@searchdirs,'perl_root:[lib.pod]')  # installed pods
