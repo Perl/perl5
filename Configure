@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sun Nov 22 19:12:18 EET 1998 [metaconfig 3.0 PL70]
+# Generated on Sun Nov 29 18:15:39 EET 1998 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by jhi@iki.fi)
 
 cat >/tmp/c1$$ <<EOF
@@ -580,6 +580,7 @@ i_netdb=''
 i_neterrno=''
 i_niin=''
 i_sysin=''
+i_poll=''
 d_pwage=''
 d_pwchange=''
 d_pwclass=''
@@ -6843,6 +6844,7 @@ set socketpair d_sockpair
 eval $inlibc
 
 
+echo " "
 echo "Checking the availability of certain socket constants..." >& 4
 for ENUM in MSG_CTRUNC MSG_DONTROUTE MSG_OOB MSG_PEEK MSG_PROXY SCM_RIGHTS; do
 	enum=`$echo $ENUM|./tr '[A-Z]' '[a-z]'`
@@ -11648,6 +11650,10 @@ esac
 set i_neterrno
 eval $setvar
 
+: see if this is a poll.h system
+set poll.h i_poll
+eval $inhdr
+
 : get C preprocessor symbols handy
 echo " "
 $echo $n "Hmm... $c"
@@ -12692,6 +12698,7 @@ i_ndbm='$i_ndbm'
 i_netdb='$i_netdb'
 i_neterrno='$i_neterrno'
 i_niin='$i_niin'
+i_poll='$i_poll'
 i_pwd='$i_pwd'
 i_rpcsvcdbm='$i_rpcsvcdbm'
 i_sfio='$i_sfio'
