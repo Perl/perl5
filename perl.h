@@ -1131,6 +1131,11 @@ typedef UVTYPE UV;
 #  endif
 #endif
 
+#if defined(uts) || defined(UTS)
+#   undef UV_MAX
+#   define UV_MAX (4294967295u)
+#endif
+
 /*
   I've tracked down a weird bug in Perl5.6.1 to the UTS compiler's
   mishandling of MY_UV_MAX in util.c.  It is defined as
