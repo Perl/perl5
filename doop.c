@@ -36,7 +36,7 @@ S_do_trans_simple(pTHX_ SV *sv)
 
     tbl = (short*)cPVOP->op_pv;
     if (!tbl)
-	Perl_croak(aTHX_ "panic: do_trans_simple");
+	Perl_croak(aTHX_ "panic: do_trans_simple line %d",__LINE__);
 
     s = (U8*)SvPV(sv, len);
     send = s + len;
@@ -103,7 +103,7 @@ S_do_trans_count(pTHX_ SV *sv)/* SPC - OK */
 
     tbl = (short*)cPVOP->op_pv;
     if (!tbl)
-	Perl_croak(aTHX_ "panic: do_trans_count");
+	Perl_croak(aTHX_ "panic: do_trans_count line %d",__LINE__);
 
     s = (U8*)SvPV(sv, len);
     send = s + len;
@@ -147,7 +147,7 @@ S_do_trans_complex(pTHX_ SV *sv)/* SPC - NOT OK */
 
     tbl = (short*)cPVOP->op_pv;
     if (!tbl)
-	Perl_croak(aTHX_ "panic: do_trans_complex");
+	Perl_croak(aTHX_ "panic: do_trans_complex line %d",__LINE__);
 
     s = (U8*)SvPV(sv, len);
     isutf8 = SvUTF8(sv);
@@ -346,7 +346,7 @@ S_do_trans_simple_utf8(pTHX_ SV *sv)/* SPC - OK */
 	if ((uv = swash_fetch(rv, s)) < none) {
 	    s += UTF8SKIP(s);
 	    matches++;
-	    d = uvchr_to_utf8(d, uv);
+	    d = uvuni_to_utf8(d, uv);
 	}
 	else if (uv == none) {
 	    int i = UTF8SKIP(s);
@@ -358,7 +358,7 @@ S_do_trans_simple_utf8(pTHX_ SV *sv)/* SPC - OK */
 	    int i = UTF8SKIP(s);
 	    s += i;
 	    matches++;
-	    d = uvchr_to_utf8(d, final);
+	    d = uvuni_to_utf8(d, final);
 	}
 	else
 	    s += UTF8SKIP(s);
@@ -367,7 +367,7 @@ S_do_trans_simple_utf8(pTHX_ SV *sv)/* SPC - OK */
 	    STRLEN clen = d - dstart;
 	    STRLEN nlen = dend - dstart + len + UTF8_MAXLEN;
 	    if (!grows)
-		Perl_croak(aTHX_ "panic: do_trans_complex_utf8");
+		Perl_croak(aTHX_ "panic: do_trans_simple_utf8 line %d",__LINE__);
 	    Renew(dstart, nlen+UTF8_MAXLEN, U8);
 	    d = dstart + clen;
 	    dend = dstart + nlen;
@@ -496,7 +496,7 @@ S_do_trans_complex_utf8(pTHX_ SV *sv) /* SPC - NOT OK */
 	        STRLEN clen = d - dstart;
 		STRLEN nlen = dend - dstart + len + UTF8_MAXLEN;
 		if (!grows)
-		    Perl_croak(aTHX_ "panic: do_trans_complex_utf8");
+		    Perl_croak(aTHX_ "panic: do_trans_complex_utf8 line %d",__LINE__);
 		Renew(dstart, nlen+UTF8_MAXLEN, U8);
 		d = dstart + clen;
 		dend = dstart + nlen;
@@ -505,7 +505,7 @@ S_do_trans_complex_utf8(pTHX_ SV *sv) /* SPC - NOT OK */
 		matches++;
 		s += UTF8SKIP(s);
 		if (uv != puv) {
-		    d = uvchr_to_utf8(d, uv);
+		    d = uvuni_to_utf8(d, uv);
 		    puv = uv;
 		}
 		continue;
@@ -523,13 +523,13 @@ S_do_trans_complex_utf8(pTHX_ SV *sv) /* SPC - NOT OK */
 		if (havefinal) {
 		    s += UTF8SKIP(s);
 		    if (puv != final) {
-			d = uvchr_to_utf8(d, final);
+			d = uvuni_to_utf8(d, final);
 			puv = final;
 		    }
 		}
 		else {
 		    STRLEN len;
-		    uv = utf8_to_uvchr(s, &len);
+		    uv = utf8_to_uvuni(s, &len);
 		    if (uv != puv) {
 			Copy(s, d, len, U8);
 			d += len;
@@ -550,7 +550,7 @@ S_do_trans_complex_utf8(pTHX_ SV *sv) /* SPC - NOT OK */
 	        STRLEN clen = d - dstart;
 		STRLEN nlen = dend - dstart + len + UTF8_MAXLEN;
 		if (!grows)
-		    Perl_croak(aTHX_ "panic: do_trans_complex_utf8");
+		    Perl_croak(aTHX_ "panic: do_trans_complex_utf8 line %d",__LINE__);
 		Renew(dstart, nlen+UTF8_MAXLEN, U8);
 		d = dstart + clen;
 		dend = dstart + nlen;
@@ -558,7 +558,7 @@ S_do_trans_complex_utf8(pTHX_ SV *sv) /* SPC - NOT OK */
 	    if (uv < none) {
 		matches++;
 		s += UTF8SKIP(s);
-		d = uvchr_to_utf8(d, uv);
+		d = uvuni_to_utf8(d, uv);
 		continue;
 	    }
 	    else if (uv == none) {	/* "none" is unmapped character */
@@ -571,7 +571,7 @@ S_do_trans_complex_utf8(pTHX_ SV *sv) /* SPC - NOT OK */
 	    else if (uv == extra && !del) {
 		matches++;
 		s += UTF8SKIP(s);
-		d = uvchr_to_utf8(d, final);
+		d = uvuni_to_utf8(d, final);
 		continue;
 	    }
 	    matches++;			/* "none+1" is delete character */

@@ -60,6 +60,7 @@ sub findAlias
      my $alias = $alias[$i];
      my $val   = $alias[$i+1];
      my $new;
+
      if (ref($alias) eq 'Regexp' && $_ =~ $alias)
       {
        $new = eval $val;
@@ -68,7 +69,7 @@ sub findAlias
       {
        $new = &{$alias}($val)
       }
-     elsif (lc($_) eq $alias)
+     elsif (lc($_) eq lc($alias))
       {
        $new = $val;
       }
@@ -222,13 +223,15 @@ sub new_sequence { return $_[0] }
 package Encode::XS;
 use base 'Encode::Encoding';
 
-package Encode::Unicode;
+package Encode::Internal;
 use base 'Encode::Encoding';
 
 # Dummy package that provides the encode interface but leaves data
 # as UTF-X encoded. It is here so that from_to() works.
 
-__PACKAGE__->Define('Unicode');
+__PACKAGE__->Define('Internal');
+
+Encode::define_alias( 'Unicode' => 'Internal' ) if ord('A') == 65;
 
 sub decode
 {
@@ -239,6 +242,36 @@ sub decode
 }
 
 *encode = \&decode;
+
+package Encoding::Unicode;
+use base 'Encode::Encoding';
+
+__PACKAGE__->Define('Unicode') unless ord('A') == 65;
+
+sub decode
+{
+ my ($obj,$str,$chk) = @_;
+ my $res = '';
+ for (my $i = 0; $i < length($str); $i++)
+  {
+   $res .= chr(utf8::unicode_to_native(ord(substr($str,$i,1))));
+  }
+ $_[1] = '' if $chk;
+ return $res;
+}
+
+sub encode
+{
+ my ($obj,$str,$chk) = @_;
+ my $res = '';
+ for (my $i = 0; $i < length($str); $i++)
+  {
+   $res .= chr(utf8::native_to_unicode(ord(substr($str,$i,1))));
+  }
+ $_[1] = '' if $chk;
+ return $res;
+}
+
 
 package Encode::utf8;
 use base 'Encode::Encoding';

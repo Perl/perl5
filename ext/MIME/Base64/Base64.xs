@@ -11,15 +11,15 @@ metamail, which comes with this message:
 
   Copyright (c) 1991 Bell Communications Research, Inc. (Bellcore)
 
-  Permission to use, copy, modify, and distribute this material 
-  for any purpose and without fee is hereby granted, provided 
-  that the above copyright notice and this permission notice 
-  appear in all copies, and that the name of Bellcore not be 
-  used in advertising or publicity pertaining to this 
-  material without the specific, prior written permission 
-  of an authorized representative of Bellcore.	BELLCORE 
-  MAKES NO REPRESENTATIONS ABOUT THE ACCURACY OR SUITABILITY 
-  OF THIS MATERIAL FOR ANY PURPOSE.  IT IS PROVIDED "AS IS", 
+  Permission to use, copy, modify, and distribute this material
+  for any purpose and without fee is hereby granted, provided
+  that the above copyright notice and this permission notice
+  appear in all copies, and that the name of Bellcore not be
+  used in advertising or publicity pertaining to this
+  material without the specific, prior written permission
+  of an authorized representative of Bellcore.	BELLCORE
+  MAKES NO REPRESENTATIONS ABOUT THE ACCURACY OR SUITABILITY
+  OF THIS MATERIAL FOR ANY PURPOSE.  IT IS PROVIDED "AS IS",
   WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES.
 
 */
@@ -160,7 +160,7 @@ decode_base64(sv)
 
 	PREINIT:
 	STRLEN len;
-	register unsigned char *str = (unsigned char*)SvPV(sv, len);
+	register unsigned char *str = (unsigned char*)SvPVbyte(sv, len);
 	unsigned char const* end = str + len;
 	char *r;
 	unsigned char c[4];
@@ -177,7 +177,7 @@ decode_base64(sv)
 	while (str < end) {
 	    int i = 0;
             do {
-		unsigned char uc = index_64[*str++];
+		unsigned char uc = index_64[NATIVE_TO_ASCII(*str++)];
 		if (uc != INVALID)
 		    c[i++] = uc;
 
@@ -192,7 +192,7 @@ decode_base64(sv)
 		    break;
 		}
             } while (i < 4);
-	    
+	
 	    if (c[0] == EQ || c[1] == EQ) {
 		if (PL_dowarn) warn("Premature padding of base64 data");
 		break;
