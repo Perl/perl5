@@ -140,30 +140,31 @@ PP(pp_concat)
   djSP; dATARGET; tryAMAGICbin(concat,opASSIGN);
   {
     dPOPTOPssrl;
-    STRLEN len;
-    U8 *s;
+    STRLEN len, llen, rlen;
+    U8 *s, *l, *r;
     bool left_utf8;
     bool right_utf8;
 
-    if (TARG == right && SvGMAGICAL(right))
-        mg_get(right);
-    if (SvGMAGICAL(left))
+    r = (U8*)SvPV(right,rlen);
+
+    if (TARG != left)
+        l = (U8*)SvPV(left,llen);
+    else if (SvGMAGICAL(left))
         mg_get(left);
 
     left_utf8  = DO_UTF8(left);
     right_utf8 = DO_UTF8(right);
 
-    if (left_utf8 != right_utf8) {
+    if (left_utf8 != right_utf8 && !IN_BYTE) {
         if (TARG == right && !right_utf8) {
             sv_utf8_upgrade(TARG); /* Now straight binary copy */
             SvUTF8_on(TARG);
         }
         else {
             /* Set TARG to PV(left), then add right */
-            U8 *l, *c, *olds = NULL;
+            U8 *c, *olds = NULL;
             STRLEN targlen;
-	    s = (U8*)SvPV(right,len);
-	    right_utf8 |= DO_UTF8(right);
+	    s = r; len = rlen;
             if (TARG == right) {
 		/* Take a copy since we're about to overwrite TARG */
 		olds = s = (U8*)savepvn((char*)s, len);
@@ -174,12 +175,12 @@ PP(pp_concat)
 		else
 		    sv_setpv(left, "");	/* Suppress warning. */
 	    }
-            l = (U8*)SvPV(left, targlen);
-	    left_utf8 |= DO_UTF8(left);
             if (TARG != left)
-                sv_setpvn(TARG, (char*)l, targlen);
-            if (!left_utf8)
-                sv_utf8_upgrade(TARG);
+                sv_setpvn(TARG, (char*)l, llen);
+            if (!left_utf8) {
+		SvUTF8_off(TARG);
+		sv_utf8_upgrade(TARG);
+	    }
             /* Extend TARG to length of right (s) */
             targlen = SvCUR(TARG) + len;
             if (!right_utf8) {
@@ -207,17 +208,16 @@ PP(pp_concat)
     }
 
     if (TARG != left) {
-	s = (U8*)SvPV(left,len);
 	if (TARG == right) {
-	    sv_insert(TARG, 0, 0, (char*)s, len);
+	    sv_insert(TARG, 0, 0, (char*)l, llen);
 	    SETs(TARG);
 	    RETURN;
 	}
-	sv_setpvn(TARG, (char *)s, len);
+	sv_setpvn(TARG, (char *)l, llen);
     }
     else if (!SvOK(TARG) && SvTYPE(TARG) <= SVt_PVMG)
 	sv_setpv(TARG, "");	/* Suppress warning. */
-    s = (U8*)SvPV(right,len);
+    s = r; len = rlen;
     if (SvOK(TARG)) {
 #if defined(PERL_Y2KWARN)
 	if ((SvIOK(right) || SvNOK(right)) && ckWARN(WARN_Y2K)) {
@@ -235,7 +235,7 @@ PP(pp_concat)
     }
     else
 	sv_setpvn(TARG, (char *)s, len);	/* suppress warning */
-    if (left_utf8)
+    if (left_utf8 && !IN_BYTE)
 	SvUTF8_on(TARG);
     SETTARG;
     RETURN;
@@ -1240,7 +1240,8 @@ play_it_again:
 	if (update_minmatch++)
 	    minmatch = had_zerolen;
     }
-    if (rx->reganch & RE_USE_INTUIT) {
+    if (rx->reganch & RE_USE_INTUIT &&
+	DO_UTF8(TARG) == ((rx->reganch & ROPT_UTF8) != 0)) {
 	s = CALLREG_INTUIT_START(aTHX_ rx, TARG, s, strend, r_flags, NULL);
 
 	if (!s)
@@ -1337,7 +1338,13 @@ yup:					/* Confirmed by INTUIT */
     if (global) {
 	rx->subbeg = truebase;
 	rx->startp[0] = s - truebase;
-	rx->endp[0] = s - truebase + rx->minlen;
+	if (DO_UTF8(PL_reg_sv)) {
+	    char *t = (char*)utf8_hop((U8*)s, rx->minlen);
+	    rx->endp[0] = t - truebase;
+	}
+	else {
+	    rx->endp[0] = s - truebase + rx->minlen;
+	}
 	rx->sublen = strend - truebase;
 	goto gotcha;
     }
@@ -2000,6 +2007,8 @@ PP(pp_subst)
     if (CALLREGEXEC(aTHX_ rx, s, strend, orig, 0, TARG, NULL,
 		    r_flags | REXEC_CHECKED))
     {
+	bool isutf8;
+
 	if (force_on_match) {
 	    force_on_match = 0;
 	    s = SvPV_force(TARG, len);
@@ -2045,6 +2054,7 @@ PP(pp_subst)
 	SvPVX(TARG) = SvPVX(dstr);
 	SvCUR_set(TARG, SvCUR(dstr));
 	SvLEN_set(TARG, SvLEN(dstr));
+	isutf8 = DO_UTF8(dstr);
 	SvPVX(dstr) = 0;
 	sv_free(dstr);
 
@@ -2053,6 +2063,8 @@ PP(pp_subst)
 	PUSHs(sv_2mortal(newSViv((I32)iters)));
 
 	(void)SvPOK_only(TARG);
+	if (isutf8)
+	    SvUTF8_on(TARG);
 	TAINT_IF(rxtainted);
 	SvSETMAGIC(TARG);
 	SvTAINT(TARG);

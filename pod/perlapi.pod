@@ -2582,8 +2582,9 @@ Found in file sv.c
 
 =item sv_catsv
 
-Concatenates the string from SV C<ssv> onto the end of the string in SV
-C<dsv>.  Handles 'get' magic, but not 'set' magic.  See C<sv_catsv_mg>.
+Concatenates the string from SV C<ssv> onto the end of the string in
+SV C<dsv>.  Modifies C<dsv> but not C<ssv>.  Handles 'get' magic, but
+not 'set' magic.  See C<sv_catsv_mg>.
 
 	void	sv_catsv(SV* dsv, SV* ssv)
 
@@ -3283,8 +3284,7 @@ Found in file utf8.c
 
 Returns the character value of the first character in the string C<s>
 which is assumed to be in UTF8 encoding and no longer than C<curlen>;
-C<retlen> will be set to the length, in bytes, of that character,
-and the pointer C<s> will be advanced to the end of the character.
+C<retlen> will be set to the length, in bytes, of that character.
 
 If C<s> does not point to a well-formed UTF8 character, the behaviour
 is dependent on the value of C<flags>: if it contains UTF8_CHECK_ONLY,
@@ -3306,8 +3306,7 @@ Found in file utf8.c
 
 Returns the character value of the first character in the string C<s>
 which is assumed to be in UTF8 encoding; C<retlen> will be set to the
-length, in bytes, of that character, and the pointer C<s> will be
-advanced to the end of the character.
+length, in bytes, of that character.
 
 If C<s> does not point to a well-formed UTF8 character, zero is
 returned and retlen is set, if possible, to -1.

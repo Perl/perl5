@@ -1030,7 +1030,9 @@
 #define regcp_set_to		S_regcp_set_to
 #define cache_re		S_cache_re
 #define reghop			S_reghop
+#define reghop3			S_reghop3
 #define reghopmaybe		S_reghopmaybe
+#define reghopmaybe3		S_reghopmaybe3
 #define find_byclass		S_find_byclass
 #endif
 #if defined(PERL_IN_RUN_C) || defined(PERL_DECL_PROT)
@@ -2492,7 +2494,9 @@
 #define regcp_set_to(a)		S_regcp_set_to(aTHX_ a)
 #define cache_re(a)		S_cache_re(aTHX_ a)
 #define reghop(a,b)		S_reghop(aTHX_ a,b)
+#define reghop3(a,b,c)		S_reghop3(aTHX_ a,b,c)
 #define reghopmaybe(a,b)	S_reghopmaybe(aTHX_ a,b)
+#define reghopmaybe3(a,b,c)	S_reghopmaybe3(aTHX_ a,b,c)
 #define find_byclass(a,b,c,d,e,f)	S_find_byclass(aTHX_ a,b,c,d,e,f)
 #endif
 #if defined(PERL_IN_RUN_C) || defined(PERL_DECL_PROT)
@@ -4853,8 +4857,12 @@
 #define cache_re		S_cache_re
 #define S_reghop		CPerlObj::S_reghop
 #define reghop			S_reghop
+#define S_reghop3		CPerlObj::S_reghop3
+#define reghop3			S_reghop3
 #define S_reghopmaybe		CPerlObj::S_reghopmaybe
 #define reghopmaybe		S_reghopmaybe
+#define S_reghopmaybe3		CPerlObj::S_reghopmaybe3
+#define reghopmaybe3		S_reghopmaybe3
 #define S_find_byclass		CPerlObj::S_find_byclass
 #define find_byclass		S_find_byclass
 #endif

@@ -1072,6 +1072,7 @@ lib/unicode/To/Upper.pl				Unicode character database
 lib/unicode/UCD301.html				Unicode character database
 lib/unicode/UCDFF301.html			Unicode character database
 lib/unicode/Unicode.301				Unicode character database
+lib/unicode/distinct.pm		Perl pragma to strictly distinguish UTF8 data and non-UTF data
 lib/unicode/mktables.PL				Unicode character database generator
 lib/unicode/syllables.txt			Unicode character database
 lib/utf8.pm					Pragma to control Unicode support

@@ -3517,7 +3517,7 @@ Perl_sv_setpvn(pTHX_ register SV *sv, register const char *ptr, register STRLEN 
     Move(ptr,dptr,len,char);
     dptr[len] = '\0';
     SvCUR_set(sv, len);
-    (void)SvPOK_only(sv);		/* validate pointer */
+    (void)SvPOK_only_UTF8(sv);		/* validate pointer */
     SvTAINT(sv);
 }
 
@@ -3561,7 +3561,7 @@ Perl_sv_setpv(pTHX_ register SV *sv, register const char *ptr)
     SvGROW(sv, len + 1);
     Move(ptr,SvPVX(sv),len+1,char);
     SvCUR_set(sv, len);
-    (void)SvPOK_only(sv);		/* validate pointer */
+    (void)SvPOK_only_UTF8(sv);		/* validate pointer */
     SvTAINT(sv);
 }
 
@@ -3611,7 +3611,7 @@ Perl_sv_usepvn(pTHX_ register SV *sv, register char *ptr, register STRLEN len)
     SvCUR_set(sv, len);
     SvLEN_set(sv, len+1);
     *SvEND(sv) = '\0';
-    (void)SvPOK_only(sv);		/* validate pointer */
+    (void)SvPOK_only_UTF8(sv);		/* validate pointer */
     SvTAINT(sv);
 }
 
@@ -4658,13 +4658,24 @@ Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
 
     /* do not utf8ize the comparands as a side-effect */
     if (cur1 && cur2 && SvUTF8(sv1) != SvUTF8(sv2) && !IN_BYTE) {
+	if (PL_hints & HINT_UTF8_DISTINCT)
+	    return FALSE;
+
 	if (SvUTF8(sv1)) {
-	    pv2 = (char*)bytes_to_utf8((U8*)pv2, &cur2);
-	    pv2tmp = TRUE;
+	    (void)utf8_to_bytes((U8*)(pv1 = savepvn(pv1, cur1)), &cur1);
+	    if (cur1 < 0) {
+		Safefree(pv1);
+		return 0;
+	    }
+	    pv1tmp = TRUE;
 	}
 	else {
-	    pv1 = (char*)bytes_to_utf8((U8*)pv1, &cur1);
-	    pv1tmp = TRUE;
+	    (void)utf8_to_bytes((U8*)(pv2 = savepvn(pv2, cur2)), &cur2);
+	    if (cur2 < 0) {
+		Safefree(pv2);
+		return 0;
+	    }
+	    pv2tmp = TRUE;
 	}
     }
 
@@ -4714,6 +4725,9 @@ Perl_sv_cmp(pTHX_ register SV *sv1, register SV *sv2)
 
     /* do not utf8ize the comparands as a side-effect */
     if (cur1 && cur2 && SvUTF8(sv1) != SvUTF8(sv2) && !IN_BYTE) {
+	if (PL_hints & HINT_UTF8_DISTINCT)
+	    return SvUTF8(sv1) ? 1 : -1;
+
 	if (SvUTF8(sv1)) {
 	    pv2 = (char*)bytes_to_utf8((U8*)pv2, &cur2);
 	    pv2tmp = TRUE;

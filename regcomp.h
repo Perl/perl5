@@ -192,6 +192,7 @@ struct regnode_charclass_class {
 
 /* There is a character or a range past 0xff */
 #define ANYOF_UNICODE		0x20
+#define ANYOF_UNICODE_ALL	0x40	/* Can match any char past 0xff */
 
 /* Are there any runtime flags on in this node? */
 #define ANYOF_RUNTIME(s)	(ANYOF_FLAGS(s) & 0x0f)

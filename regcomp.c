@@ -127,6 +127,7 @@ typedef struct RExC_state_t {
     I32		extralen;
     I32		seen_zerolen;
     I32		seen_evals;
+    I32		utf8;
 #if ADD_TO_REGEXEC
     char 	*starttry;		/* -Dr: where regtry was called. */
 #define RExC_starttry	(pRExC_state->starttry)
@@ -148,6 +149,7 @@ typedef struct RExC_state_t {
 #define RExC_extralen	(pRExC_state->extralen)
 #define RExC_seen_zerolen	(pRExC_state->seen_zerolen)
 #define RExC_seen_evals	(pRExC_state->seen_evals)
+#define RExC_utf8	(pRExC_state->utf8)
 
 #define	ISMULT1(c)	((c) == '*' || (c) == '+' || (c) == '?')
 #define	ISMULT2(s)	((*s) == '*' || (*s) == '+' || (*s) == '?' || \
@@ -229,8 +231,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 #define SCF_DO_STCLASS		(SCF_DO_STCLASS_AND|SCF_DO_STCLASS_OR)
 #define SCF_WHILEM_VISITED_POS	0x2000
 
-#define RF_utf8		8
-#define UTF (PL_reg_flags & RF_utf8)
+#define UTF RExC_utf8
 #define LOC (RExC_flags16 & PMf_LOCALE)
 #define FOLD (RExC_flags16 & PMf_FOLD)
 
@@ -469,7 +470,7 @@ S_cl_anything(pTHX_ RExC_state_t *pRExC_state, struct regnode_charclass_class *c
     ANYOF_CLASS_ZERO(cl);
     for (value = 0; value < 256; ++value)
 	ANYOF_BITMAP_SET(cl, value);
-    cl->flags = ANYOF_EOS;
+    cl->flags = ANYOF_EOS|ANYOF_UNICODE_ALL;
     if (LOC)
 	cl->flags |= ANYOF_LOCALE;
 }
@@ -483,6 +484,8 @@ S_cl_is_anything(pTHX_ struct regnode_charclass_class *cl)
     for (value = 0; value <= ANYOF_MAX; value += 2)
 	if (ANYOF_CLASS_TEST(cl, value) && ANYOF_CLASS_TEST(cl, value + 1))
 	    return 1;
+    if (!(cl->flags & ANYOF_UNICODE_ALL))
+	return 0;
     for (value = 0; value < 256; ++value)
 	if (!ANYOF_BITMAP_TEST(cl, value))
 	    return 0;
@@ -530,6 +533,16 @@ S_cl_and(pTHX_ struct regnode_charclass_class *cl,
     } /* XXXX: logic is complicated otherwise, leave it along for a moment. */
     if (!(and_with->flags & ANYOF_EOS))
 	cl->flags &= ~ANYOF_EOS;
+
+    if (cl->flags & ANYOF_UNICODE_ALL && and_with->flags & ANYOF_UNICODE) {
+	cl->flags &= ~ANYOF_UNICODE_ALL;
+	cl->flags |= ANYOF_UNICODE;
+	ARG_SET(cl, ARG(and_with));
+    }
+    if (!(and_with->flags & ANYOF_UNICODE_ALL))
+	cl->flags &= ~ANYOF_UNICODE_ALL;
+    if (!(and_with->flags & (ANYOF_UNICODE|ANYOF_UNICODE_ALL)))
+	cl->flags &= ~ANYOF_UNICODE;
 }
 
 /* 'OR' a given class with another one.  Can create false positives */
@@ -580,6 +593,16 @@ S_cl_or(pTHX_ RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, str
     }
     if (or_with->flags & ANYOF_EOS)
 	cl->flags |= ANYOF_EOS;
+
+    if (cl->flags & ANYOF_UNICODE && or_with->flags & ANYOF_UNICODE &&
+	ARG(cl) != ARG(or_with)) {
+	cl->flags |= ANYOF_UNICODE_ALL;
+	cl->flags &= ~ANYOF_UNICODE;
+    }
+    if (or_with->flags & ANYOF_UNICODE_ALL) {
+	cl->flags |= ANYOF_UNICODE_ALL;
+	cl->flags &= ~ANYOF_UNICODE;
+    }
 }
 
 /* REx optimizer.  Converts nodes into quickier variants "in place".
@@ -787,15 +810,11 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 	}
 	else if (OP(scan) == EXACT) {
 	    I32 l = STR_LEN(scan);
+	    UV uc = *((U8*)STRING(scan));
 	    if (UTF) {
-		unsigned char *s = (unsigned char *)STRING(scan);
-		unsigned char *e = s + l;
-		I32 newl = 0;
-		while (s < e) {
-		    newl++;
-		    s += UTF8SKIP(s);
-		}
-		l = newl;
+		U8 *s = (U8*)STRING(scan);
+		l = utf8_length(s, s + l);
+		uc = utf8_to_uv_simple(s, NULL);
 	    }
 	    min += l;
 	    if (flags & SCF_DO_SUBSTR) { /* Update longest substr. */
@@ -815,21 +834,22 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		/* Check whether it is compatible with what we know already! */
 		int compat = 1;
 
-		if (!(data->start_class->flags & (ANYOF_CLASS | ANYOF_LOCALE)) 
-		    && !ANYOF_BITMAP_TEST(data->start_class, *STRING(scan))
+		if (uc >= 0x100 ||
+		    !(data->start_class->flags & (ANYOF_CLASS | ANYOF_LOCALE)) 
+		    && !ANYOF_BITMAP_TEST(data->start_class, uc)
 		    && (!(data->start_class->flags & ANYOF_FOLD)
-			|| !ANYOF_BITMAP_TEST(data->start_class,
-					      PL_fold[*(U8*)STRING(scan)])))
+			|| !ANYOF_BITMAP_TEST(data->start_class, PL_fold[uc])))
 		    compat = 0;
 		ANYOF_CLASS_ZERO(data->start_class);
 		ANYOF_BITMAP_ZERO(data->start_class);
 		if (compat)
-		    ANYOF_BITMAP_SET(data->start_class, *STRING(scan));
+		    ANYOF_BITMAP_SET(data->start_class, uc);
 		data->start_class->flags &= ~ANYOF_EOS;
 	    }
 	    else if (flags & SCF_DO_STCLASS_OR) {
 		/* false positive possible if the class is case-folded */
-		ANYOF_BITMAP_SET(data->start_class, *STRING(scan));	
+		if (uc < 0x100)
+		    ANYOF_BITMAP_SET(data->start_class, uc);	
 		data->start_class->flags &= ~ANYOF_EOS;
 		cl_and(data->start_class, &and_with);
 	    }
@@ -837,19 +857,15 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 	}
 	else if (PL_regkind[(U8)OP(scan)] == EXACT) { /* But OP != EXACT! */
 	    I32 l = STR_LEN(scan);
+	    UV uc = *((U8*)STRING(scan));
 
 	    /* Search for fixed substrings supports EXACT only. */
 	    if (flags & SCF_DO_SUBSTR) 
 		scan_commit(pRExC_state, data);
 	    if (UTF) {
-		unsigned char *s = (unsigned char *)STRING(scan);
-		unsigned char *e = s + l;
-		I32 newl = 0;
-		while (s < e) {
-		    newl++;
-		    s += UTF8SKIP(s);
-		}
-		l = newl;
+		U8 *s = (U8 *)STRING(scan);
+		l = utf8_length(s, s + l);
+		uc = utf8_to_uv_simple(s, NULL);
 	    }
 	    min += l;
 	    if (data && (flags & SCF_DO_SUBSTR))
@@ -858,15 +874,15 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		/* Check whether it is compatible with what we know already! */
 		int compat = 1;
 
-		if (!(data->start_class->flags & (ANYOF_CLASS | ANYOF_LOCALE)) 
-		    && !ANYOF_BITMAP_TEST(data->start_class, *STRING(scan))
-		    && !ANYOF_BITMAP_TEST(data->start_class, 
-					  PL_fold[*(U8*)STRING(scan)]))
+		if (uc >= 0x100 ||
+		    !(data->start_class->flags & (ANYOF_CLASS | ANYOF_LOCALE)) 
+		    && !ANYOF_BITMAP_TEST(data->start_class, uc)
+		    && !ANYOF_BITMAP_TEST(data->start_class, PL_fold[uc]))
 		    compat = 0;
 		ANYOF_CLASS_ZERO(data->start_class);
 		ANYOF_BITMAP_ZERO(data->start_class);
 		if (compat) {
-		    ANYOF_BITMAP_SET(data->start_class, *STRING(scan));
+		    ANYOF_BITMAP_SET(data->start_class, uc);
 		    data->start_class->flags &= ~ANYOF_EOS;
 		    data->start_class->flags |= ANYOF_FOLD;
 		    if (OP(scan) == EXACTFL)
@@ -877,7 +893,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		if (data->start_class->flags & ANYOF_FOLD) {
 		    /* false positive possible if the class is case-folded.
 		       Assume that the locale settings are the same... */
-		    ANYOF_BITMAP_SET(data->start_class, *STRING(scan));	
+		    if (uc < 0x100)
+			ANYOF_BITMAP_SET(data->start_class, uc);
 		    data->start_class->flags &= ~ANYOF_EOS;
 		}
 		cl_and(data->start_class, &and_with);
@@ -1580,11 +1597,10 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	FAIL("NULL regexp argument");
 
     /* XXXX This looks very suspicious... */
-    if (pm->op_pmdynflags & PMdf_UTF8) {
-	PL_reg_flags |= RF_utf8;
-    }
+    if (pm->op_pmdynflags & PMdf_CMP_UTF8)
+        RExC_utf8 = 1;
     else
-	PL_reg_flags = 0;
+        RExC_utf8 = 0;
 
     RExC_precomp = savepvn(exp, xend - exp);
     DEBUG_r(if (!PL_colorset) reginitcolors());
@@ -1705,9 +1721,9 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	/* Starting-point info. */
       again:
 	if (PL_regkind[(U8)OP(first)] == EXACT) {
-	    if (OP(first) == EXACT);	/* Empty, get anchored substr later. */
-	    else if ((OP(first) == EXACTF || OP(first) == EXACTFL)
-		     && !UTF)
+	    if (OP(first) == EXACT)
+	        ;	/* Empty, get anchored substr later. */
+	    else if ((OP(first) == EXACTF || OP(first) == EXACTFL))
 		r->regstclass = first;
 	}
 	else if (strchr((char*)PL_simple,OP(first)))
@@ -3164,6 +3180,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
     SV *listsv;
     register char *e;
     UV n;
+    bool dont_optimize_invert = FALSE;
 
     ret = reganode(pRExC_state, ANYOF, 0);
 
@@ -3350,6 +3367,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isALNUM(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsWord\n");	
 		    break;
 		case ANYOF_NALNUM:
@@ -3360,6 +3378,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isALNUM(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsWord\n");
 		    break;
 		case ANYOF_ALNUMC:
@@ -3370,6 +3389,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isALNUMC(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsAlnum\n");
 		    break;
 		case ANYOF_NALNUMC:
@@ -3380,6 +3400,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isALNUMC(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsAlnum\n");
 		    break;
 		case ANYOF_ALPHA:
@@ -3390,6 +3411,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isALPHA(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsAlpha\n");
 		    break;
 		case ANYOF_NALPHA:
@@ -3400,6 +3422,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isALPHA(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsAlpha\n");
 		    break;
 		case ANYOF_ASCII:
@@ -3415,6 +3438,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 				ANYOF_BITMAP_SET(ret, value);
 #endif /* EBCDIC */
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsASCII\n");
 		    break;
 		case ANYOF_NASCII:
@@ -3430,6 +3454,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 				ANYOF_BITMAP_SET(ret, value);
 #endif /* EBCDIC */
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsASCII\n");
 		    break;
 		case ANYOF_BLANK:
@@ -3440,6 +3465,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isBLANK(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsBlank\n");
 		    break;
 		case ANYOF_NBLANK:
@@ -3450,6 +3476,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isBLANK(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsBlank\n");
 		    break;
 		case ANYOF_CNTRL:
@@ -3460,6 +3487,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isCNTRL(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsCntrl\n");
 		    break;
 		case ANYOF_NCNTRL:
@@ -3470,6 +3498,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isCNTRL(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsCntrl\n");
 		    break;
 		case ANYOF_DIGIT:
@@ -3480,6 +3509,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			for (value = '0'; value <= '9'; value++)
 			    ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsDigit\n");
 		    break;
 		case ANYOF_NDIGIT:
@@ -3492,6 +3522,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			for (value = '9' + 1; value < 256; value++)
 			    ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsDigit\n");
 		    break;
 		case ANYOF_GRAPH:
@@ -3502,6 +3533,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isGRAPH(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsGraph\n");
 		    break;
 		case ANYOF_NGRAPH:
@@ -3512,6 +3544,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isGRAPH(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsGraph\n");
 		    break;
 		case ANYOF_LOWER:
@@ -3522,6 +3555,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isLOWER(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsLower\n");
 		    break;
 		case ANYOF_NLOWER:
@@ -3532,6 +3566,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isLOWER(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsLower\n");
 		    break;
 		case ANYOF_PRINT:
@@ -3542,6 +3577,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isPRINT(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsPrint\n");
 		    break;
 		case ANYOF_NPRINT:
@@ -3552,6 +3588,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isPRINT(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsPrint\n");
 		    break;
 		case ANYOF_PSXSPC:
@@ -3562,6 +3599,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isPSXSPC(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsSpace\n");
 		    break;
 		case ANYOF_NPSXSPC:
@@ -3572,6 +3610,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isPSXSPC(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsSpace\n");
 		    break;
 		case ANYOF_PUNCT:
@@ -3582,6 +3621,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isPUNCT(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsPunct\n");
 		    break;
 		case ANYOF_NPUNCT:
@@ -3592,6 +3632,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isPUNCT(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsPunct\n");
 		    break;
 		case ANYOF_SPACE:
@@ -3602,6 +3643,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isSPACE(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsSpacePerl\n");
 		    break;
 		case ANYOF_NSPACE:
@@ -3612,6 +3654,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isSPACE(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsSpacePerl\n");
 		    break;
 		case ANYOF_UPPER:
@@ -3622,6 +3665,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isUPPER(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsUpper\n");
 		    break;
 		case ANYOF_NUPPER:
@@ -3632,6 +3676,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isUPPER(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsUpper\n");
 		    break;
 		case ANYOF_XDIGIT:
@@ -3642,6 +3687,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (isXDIGIT(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsXDigit\n");
 		    break;
 		case ANYOF_NXDIGIT:
@@ -3652,6 +3698,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    if (!isXDIGIT(value))
 				ANYOF_BITMAP_SET(ret, value);
 		    }
+		    dont_optimize_invert = TRUE;
 		    Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsXDigit\n");
 		    break;
 		default:
@@ -3755,12 +3802,12 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
     }
 
     /* optimize inverted simple patterns (e.g. [^a-z]) */
-    if (!SIZE_ONLY &&
+    if (!SIZE_ONLY && !dont_optimize_invert &&
 	/* If the only flag is inversion. */
 	(ANYOF_FLAGS(ret) & ANYOF_FLAGS_ALL) ==	ANYOF_INVERT) {
 	for (value = 0; value < ANYOF_BITMAP_SIZE; ++value)
 	    ANYOF_BITMAP(ret)[value] ^= ANYOF_FLAGS_ALL;
-	ANYOF_FLAGS(ret) = 0;
+	ANYOF_FLAGS(ret) = ANYOF_UNICODE_ALL;
     }
 
     if (!SIZE_ONLY) { 
@@ -4218,6 +4265,8 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 
 	if (flags & ANYOF_UNICODE)
 	    sv_catpv(sv, "{unicode}");
+	else if (flags & ANYOF_UNICODE_ALL)
+	    sv_catpv(sv, "{all-unicode}");
 
 	{
 	    SV *lv;
