@@ -15,8 +15,59 @@ AutoLoader - load functions only on demand
 
 =head1 DESCRIPTION
 
-This module tells its users that functions in the FOOBAR package are to be
-autoloaded from F<auto/$AUTOLOAD.al>.  See L<perlsub/"Autoloading">.
+This module tells its users that functions in the FOOBAR package are
+to be autoloaded from F<auto/$AUTOLOAD.al>.  See
+L<perlsub/"Autoloading"> and L<AutoSplit>.
+
+=head2 __END__
+
+The module using the autoloader should have the special marker C<__END__>
+prior to the actual subroutine declarations. All code that is before the
+marker will be loaded and compiled when the module is used. At the marker,
+perl will cease reading and parsing. See also the B<AutoSplit> module, a
+utility that automatically splits a module into a collection of files for
+autoloading.
+
+When a subroutine not yet in memory is called, the C<AUTOLOAD> function
+attempts to locate it in a directory relative to the location of the module
+file itself. As an example, assume F<POSIX.pm> is located in 
+F</usr/local/lib/perl5/POSIX.pm>. The autoloader will look for perl
+subroutines for this package in F</usr/local/lib/perl5/auto/POSIX/*.al>.
+The C<.al> file is named using the subroutine name, sans package.
+
+=head2 Package Lexicals
+
+Package lexicals declared with C<my> in the main block of a package using
+the B<AutoLoader> will not be visible to auto-loaded functions, due to the
+fact that the given scope ends at the C<__END__> marker. A module using such
+variables as package globals will not work properly under the B<AutoLoader>.
+
+The C<vars> pragma (see L<perlmod/"vars">) may be used in such situations
+as an alternative to explicitly qualifying all globals with the package
+namespace. Variables pre-declared with this pragma will be visible to any
+autoloaded routines (but will not be invisible outside the package,
+unfortunately).
+
+=head2 AutoLoader vs. SelfLoader
+
+The B<AutoLoader> is a counterpart to the B<SelfLoader> module. Both delay
+the loading of subroutines, but the B<SelfLoader> accomplishes the goal via
+the C<__DATA__> marker rather than C<__END__>. While this avoids the use of
+a hierarchy of disk files and the associated open/close for each routine
+loaded, the B<SelfLoader> suffers a disadvantage in the one-time parsing of
+the lines after C<__DATA__>, after which routines are cached. B<SelfLoader>
+can also handle multiple packages in a file.
+
+B<AutoLoader> only reads code as it is requested, and in many cases should be
+faster, but requires a machanism like B<AutoSplit> be used to create the
+individual files.
+
+=head1 CAVEAT
+
+On systems with restrictions on file name length, the file corresponding to a
+subroutine may have a shorter name that the routine itself. This can lead to
+conflicting file names. The I<AutoSplit> package warns of these potential
+conflicts when used to split a module.
 
 =cut
 

@@ -16,14 +16,81 @@ AutoSplit - split a package for autoloading
 
 =head1 SYNOPSIS
 
- perl -e 'use AutoSplit; autosplit_modules(@ARGV)'  ...
+ perl -e 'use AutoSplit; autosplit_lib_modules(@ARGV)' ...
+
+ use AutoSplit; autosplit($file, $dir, $keep, $check, $modtime);
+
+for perl versions 5.002 and later:
+ 
+ perl -MAutoSplit -e 'autosplit($ARGV[0], $ARGV[1], $k, $chk, $modtime)' ...
 
 =head1 DESCRIPTION
 
 This function will split up your program into files that the AutoLoader
-module can handle.  Normally only used to build autoloading Perl library
-modules, especially extensions (like POSIX).  You should look at how
-they're built out for details.
+module can handle. It is used by both the standard perl libraries and by
+the MakeMaker utility, to automatically configure libraries for autoloading.
+
+The C<autosplit> interface splits the specified file into a hierarchy 
+rooted at the directory C<$dir>. It creates directories as needed to reflect
+class hierarchy, and creates the file F<autosplit.ix>. This file acts as
+both forward declaration of all package routines, and as timestamp for the
+last update of the hierarchy.
+
+The remaining three arguments to C<autosplit> govern other options to the
+autosplitter. If the third argument, I<$keep>, is false, then any pre-existing
+C<.al> files in the autoload directory are removed if they are no longer
+part of the module (obsoleted functions). The fourth argument, I<$check>,
+instructs C<autosplit> to check the module currently being split to ensure
+that it does include a C<use> specification for the AutoLoader module, and
+skips the module if AutoLoader is not detected. Lastly, the I<$modtime>
+argument specifies that C<autosplit> is to check the modification time of the
+module against that of the C<autosplit.ix> file, and only split the module
+if it is newer.
+
+Typical use of AutoSplit in the perl MakeMaker utility is via the command-line
+with:
+
+ perl -e 'use AutoSplit; autosplit($ARGV[0], $ARGV[1], 0, 1, 1)'
+
+Defined as a Make macro, it is invoked with file and directory arguments;
+C<autosplit> will split the specified file into the specified directory and
+delete obsolete C<.al> files, after checking first that the module does use
+the AutoLoader, and ensuring that the module is not already currently split
+in its current form (the modtime test).
+
+The C<autosplit_lib_modules> form is used in the building of perl. It takes
+as input a list of files (modules) that are assumed to reside in a directory
+B<lib> relative to the current directory. Each file is sent to the 
+autosplitter one at a time, to be split into the directory B<lib/auto>.
+
+In both usages of the autosplitter, only subroutines defined following the
+perl special marker I<__END__> are split out into separate files. Some
+routines may be placed prior to this marker to force their immediate loading
+and parsing.
+
+=head1 CAVEATS
+
+Currently, C<AutoSplit> cannot handle multiple package specifications
+within one file.
+
+=head1 DIAGNOSTICS
+
+C<AutoSplit> will inform the user if it is necessary to create the top-level
+directory specified in the invocation. It is preferred that the script or
+installation process that invokes C<AutoSplit> have created the full directory
+path ahead of time. This warning may indicate that the module is being split
+into an incorrect path.
+
+C<AutoSplit> will warn the user of all subroutines whose name causes potential
+file naming conflicts on machines with drastically limited (8 characters or
+less) file name length. Since the subroutine name is used as the file name,
+these warnings can aid in portability to such systems.
+
+Warnings are issued and the file skipped if C<AutoSplit> cannot locate either
+the I<__END__> marker or a "package Name;"-style specification.
+
+C<AutoSplit> will also emit general diagnostics for inability to create
+directories or files.
 
 =cut
 
@@ -53,7 +120,7 @@ sub autosplit{
 
 
 # This function is used during perl building/installation
-# ./miniperl -e 'use AutoSplit; autosplit_modules(@ARGV)' ...
+# ./miniperl -e 'use AutoSplit; autosplit_lib_modules(@ARGV)' ...
 
 sub autosplit_lib_modules{
     my(@modules) = @_; # list of Module names
