@@ -34,6 +34,10 @@ static I32 amagic_cmp_locale(pTHX_ SV *a, SV *b);
       (hintsvp = hv_fetch(GvHV(PL_hintgv), "SORT", 4, FALSE))) ? \
 	  (I32)SvIV(*hintsvp) : 0)
 
+#ifndef SMALLSORT
+#define	SMALLSORT (200)
+#endif
+
 /*
  * The mergesort implementation is by Peter M. Mcilroy <pmcilroy@lucent.com>.
  *
@@ -281,9 +285,11 @@ S_mergesortsv(pTHX_ gptr *list1, size_t nmemb, SVCOMPARE_t cmp)
     gptr *aux, *list2, *p2, *last;
     gptr *base = list1;
     gptr *p1;
+    gptr small[SMALLSORT];
 
     if (nmemb <= 1) return;	/* sorted trivially */
-    New(799,list2,nmemb,gptr);	/* allocate auxilliary array */
+    if (nmemb <= SMALLSORT) list2 = small;	/* use stack for aux array */
+    else { New(799,list2,nmemb,gptr); }		/* allocate auxilliary array */
     aux = list2;
     dynprep(aTHX_ list1, list2, nmemb, cmp);
     last = PINDEX(list2, nmemb);
@@ -395,7 +401,7 @@ S_mergesortsv(pTHX_ gptr *list1, size_t nmemb, SVCOMPARE_t cmp)
 	last = PINDEX(list1, nmemb);
 	FROMTOUPTO(list1, list2, last);
     }
-    Safefree(aux);
+    if (aux != small) Safefree(aux);	/* free iff allocated */
     return;
 }
 
@@ -1101,10 +1107,6 @@ S_qsortsvu(pTHX_ SV ** array, size_t num_elts, SVCOMPARE_t compare)
    /* Believe it or not, the array is sorted at this point! */
 }
 
-#ifndef SMALLSORT
-#define	SMALLSORT (200)
-#endif
-
 /* Stabilize what is, presumably, an otherwise unstable sort method.
  * We do that by allocating (or having on hand) an array of pointers
  * that is the same size as the original array of elements to be sorted.
@@ -1175,9 +1177,7 @@ S_qsortsv(pTHX_ gptr *list1, size_t nmemb, SVCOMPARE_t cmp)
 {
     SV **hintsvp;
 
-    if (SORTHINTS(hintsvp) & HINT_SORT_FAST)
-	 S_qsortsvu(aTHX_ list1, nmemb, cmp);
-    else {
+    if (SORTHINTS(hintsvp) & HINT_SORT_STABLE) {
 	 register gptr **pp, *q;
 	 register size_t n, j, i;
 	 gptr *small[SMALLSORT], **indir, tmp;
@@ -1238,6 +1238,8 @@ S_qsortsv(pTHX_ gptr *list1, size_t nmemb, SVCOMPARE_t cmp)
 	 if (indir != small) { Safefree(indir); }
 	 /* restore prevailing comparison routine */
 	 RealCmp = savecmp;
+    } else {
+	 S_qsortsvu(aTHX_ list1, nmemb, cmp);
     }
 }
 

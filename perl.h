@@ -3103,10 +3103,7 @@ enum {		/* pass one of these to get_vtbl */
 #define HINT_SORT_SORT_BITS	0x000000FF /* allow 256 different ones */
 #define HINT_SORT_QUICKSORT	0x00000001
 #define HINT_SORT_MERGESORT	0x00000002
-#define HINT_SORT_STABLE	0x00000100 /* sort styles */
-#define HINT_SORT_INSENSITIVE	0x00000200
-#define HINT_SORT_SAFE		0x00000300 /* stable and insensitive */
-#define HINT_SORT_FAST		0x00000400 /* damn the icebergs */
+#define HINT_SORT_STABLE	0x00000100 /* sort styles (currently one) */
 
 /* Various states of the input record separator SV (rs) */
 #define RsSNARF(sv)   (! SvOK(sv))

@@ -12,6 +12,6 @@ BEGIN {
     ok(sort::current() eq 'mergesort');
 }
 
-use sort 'fast';
-ok(sort::current() eq 'quicksort fast');
+use sort qw( stable _qsort );
+ok(sort::current() eq 'quicksort stable');
 
