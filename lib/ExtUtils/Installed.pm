@@ -85,7 +85,7 @@ if ($DOSISH)
 
 # Read the core packlist
 $self->{Perl}{packlist} =
-   ExtUtils::Packlist->new("$installarchlib/.packlist");
+   ExtUtils::Packlist->new( File::Spec->catfile($installarchlib, '.packlist') );
 $self->{Perl}{version} = $Config{version};
 
 # Read the module packlists

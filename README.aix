@@ -57,17 +57,22 @@ show the base, but is not always complete:
 
 =head2 Building Dynamic Extensions on AIX
 
-AIX supports dynamically loadable libraries (shared libraries).
-Shared libraries end with the suffix .a, which is a bit misleading,
-because *all* libraries are shared ;-).
+AIX supports dynamically loadable objects as well as shared libraries.
+Shared libraries by convention end with the suffix .a, which is a bit
+misleading, as an archive can contain static as well as dynamic members.
+For perl dynamically loaded objects we use the .so suffix also used on
+many other platforms.
 
-Note that starting from Perl 5.7.2 (and consequently 5.8.0) and AIX
-4.3 or newer Perl uses the AIX native dynamic loading interface
-instead of the emulated interface that was used in Perl releases 5.6.1
-and earlier or, for AIX releases 4.2 and earlier.  This change will
-probably break backward compatibility with compiled modules.
-The change was made to make Perl more compliant with other applications
-like modperl which are using the AIX native interface.
+Note that starting from Perl 5.7.2 (and consequently 5.8.0) and AIX 4.3
+or newer Perl uses the AIX native dynamic loading interface in the so
+called runtime linking mode instead of the emulated interface that was
+used in Perl releases 5.6.1 and earlier or, for AIX releases 4.2 and
+earlier.  This change does break backward compatibility with compiled
+modules from earlier perl releases.  The change was made to make Perl
+more compliant with other applications like Apache/modperl which are
+using the AIX native interface. This change also enables the use of C++
+code with static constructors and destructors in perl extensions, which
+was not possible using the emulated interface.
 
 =head2 The IBM ANSI C Compiler
 

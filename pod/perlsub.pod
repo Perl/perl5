@@ -1194,6 +1194,30 @@ a properly written override.  For a fully functional example of overriding
 C<glob>, study the implementation of C<File::DosGlob> in the standard
 library.
 
+When you override a built-in, your replacement should be consistent (if
+possible) with the built-in native syntax.  You can achieve this by using
+a suitable prototype.  To get the prototype of an overridable built-in,
+use the C<prototype> function with an argument of C<"CORE::builtin_name">
+(see L<perlfunc/prototype>).
+
+Note however that some built-ins can't have their syntax expressed by a
+prototype (such as C<system> or C<chomp>).  If you override them you won't
+be able to fully mimic their original syntax.
+
+The built-ins C<do>, C<require> and C<glob> can also be overriden, but due
+to special magic, their original syntax is preserved, and you don't have
+to define a prototype for their replacements.  (You can't override the
+C<do BLOCK> syntax, though).
+
+C<require> has special additional dark magic: if you invoke your
+C<require> replacement as C<require Foo::Bar>, it will actually receive
+the argument C<"Foo/Bar.pm"> in @_.  See L<perlfunc/require>.
+
+And, as you'll have noticed from the previous example, if you override
+C<glob>, the C<E<lt>*E<gt>> glob operator is overriden as well.
+
+Finally, some built-ins (e.g. C<exists> or C<grep>) can't be overriden.
+
 =head2 Autoloading
 
 If you call a subroutine that is undefined, you would ordinarily

@@ -1297,7 +1297,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
 		d = s;
 		if (!*s)
 		    break;
-		if (!strchr("DIMUdmw", *s))
+		if (!strchr("DIMUdmtw", *s))
 		    Perl_croak(aTHX_ "Illegal switch in PERL5OPT: -%c", *s);
 		while (++s && *s) {
 		    if (isSPACE(*s)) {
@@ -1310,7 +1310,12 @@ print \"  \\@INC:\\n    @INC\\n\";");
 			break;
 		    }
 		}
-		moreswitches(d);
+		if (*d == 't') {
+		    PL_tainting = TRUE;
+		    PL_taint_warn = TRUE;
+		} else {
+		    moreswitches(d);
+		}
 	    }
 	}
     }

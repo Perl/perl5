@@ -2,11 +2,11 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '.';
+    @INC = qw(.);
     require "test.pl";
 }
 
-print "1..8\n";
+plan tests => 7;
 
 # compile time evaluation
 
@@ -32,11 +32,4 @@ is(ord("\x{1234}"), 0x1234, 'compile time ord \x{....}');
 
 $x = "\x{1234}";
 is(ord($x), 0x1234, 'runtime ord \x{....}');
-
-{
-    eval 'my $surrogate = chr(0xD800)';
-
-    like($@, qr/^UTF-16 surrogate 0xd800 /, "surrogates bad");
-}
-
 

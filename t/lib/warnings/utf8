@@ -33,3 +33,16 @@ EXPECT
 Malformed UTF-8 character (unexpected non-continuation byte 0x73 after start byte 0xf8) at - line 9.
 Malformed UTF-8 character (unexpected non-continuation byte 0x73 after start byte 0xf8) at - line 14.
 ########
+use warnings 'utf8';
+my $surr = chr(0xD800);
+my $fff3 = chr(0xFFFE);
+my $ffff = chr(0xFFFF);
+no warnings 'utf8';
+$surr = chr(0xD800);
+$fffe = chr(0xFFFE);
+$ffff = chr(0xFFFF);
+EXPECT
+UTF-16 surrogate 0xd800 at - line 2.
+Unicode character 0xfffe is illegal at - line 3.
+Unicode character 0xffff is illegal at - line 4.
+########

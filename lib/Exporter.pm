@@ -1,6 +1,6 @@
 package Exporter;
 
-require 5.001;
+require 5.006;
 
 use strict;
 no strict 'refs';
@@ -8,7 +8,7 @@ no strict 'refs';
 our $Debug = 0;
 our $ExportLevel = 0;
 our $Verbose ||= 0;
-our $VERSION = '5.564';
+our $VERSION = '5.565';
 $Carp::Internal{Exporter} = 1;
 
 sub export_to_level {
@@ -35,33 +35,34 @@ sub import {
   my $pkg = shift;
   my $callpkg = caller($ExportLevel);
 
-  my($exports, $export_cache) = (\@{"$pkg\::EXPORT"},
-                                 \%{"$pkg\::EXPORT"});
   # We *need* to treat @{"$pkg\::EXPORT_FAIL"} since Carp uses it :-(
-  my($fail) = \@{"$pkg\::EXPORT_FAIL"};
+  my($exports, $export_cache, $fail)
+    = (\@{"$pkg\::EXPORT"}, \%{"$pkg\::EXPORT"}, \@{"$pkg\::EXPORT_FAIL"});
   return export $pkg, $callpkg, @_
     if $Verbose or $Debug or @$fail > 1;
   my $args = @_ or @_ = @$exports;
-  
+
+  local $_;
   if ($args and not %$export_cache) {
-    foreach my $sym (@$exports, @{"$pkg\::EXPORT_OK"}) {
-      $sym =~ s/^&//;
-      $export_cache->{$sym} = 1;
-    }
+    s/^&//, $export_cache->{$_} = 1
+      foreach (@$exports, @{"$pkg\::EXPORT_OK"});
   }
-  if ($Verbose or $Debug 
-      or grep {/\W/ or $args and not exists $export_cache->{$_}
-	       or @$fail and $_ eq $fail->[0]
-	       or (@{"$pkg\::EXPORT_OK"} 
-		   and $_ eq ${"$pkg\::EXPORT_OK"}[0])} @_) {
-    return export $pkg, $callpkg, ($args ? @_ : ());
+  my $heavy;
+  # Try very hard not to use {} and hence have to  enter scope on the foreach
+  # We bomb out of the loop with last as soon as heavy is set.
+  if ($args or $fail) {
+    ($heavy = (/\W/ or $args and not exists $export_cache->{$_}
+               or @$fail and $_ eq $fail->[0])) and last
+                 foreach (@_);
+  } else {
+    ($heavy = /\W/) and last
+      foreach (@_);
   }
+  return export $pkg, $callpkg, ($args ? @_ : ()) if $heavy;
   local $SIG{__WARN__} = 
 	sub {require Carp; &Carp::carp};
-  foreach my $sym (@_) {
-    # shortcut for the common case of no type character
-    *{"$callpkg\::$sym"} = \&{"$pkg\::$sym"};
-  }
+  # shortcut for the common case of no type character
+  *{"$callpkg\::$_"} = \&{"$pkg\::$_"} foreach @_;
 }
 
 
@@ -80,7 +81,7 @@ sub require_version {
 
 
 1;
-
+__END__
 
 =head1 NAME
 

@@ -1145,8 +1145,8 @@ Carp::confess() if $gv->isa("B::CV");
     } else {
 	$stash = $stash . "::";
     }
-    if ($name =~ /^\^../) {
-        $name = "{$name}";       # ${^WARNING_BITS} etc
+    if ($name =~ /^(\^..|{)/) {
+        $name = "{$name}";       # ${^WARNING_BITS}, etc and ${
     }
     return $stash . $name;
 }

@@ -139,9 +139,33 @@ that Perl tries to keep its data as eight-bit bytes for as long as
 possible, but as soon as Unicodeness cannot be avoided, the data is
 transparently upgraded to Unicode.
 
-The internal encoding of Unicode in Perl is UTF-8.  The internal
-encoding is normally hidden, however, and one need not and should not
-worry about the internal encoding at all: it is all just characters.
+Internally, Perl currently uses either whatever the native eight-bit
+character set of the platform (for example Latin-1) or UTF-8 to encode
+Unicode strings. Specifically, if all code points in the string are
+0xFF or less, Perl uses Latin-1.  Otherwise, it uses UTF-8.
+
+A user of Perl does not normally need to know nor care how Perl happens
+to encodes its internal strings, but it becomes relevant when outputting
+Unicode strings to a stream without a discipline (one with the "default
+default").  In such a case, the raw bytes used internally (the native
+character set or UTF-8, as appropriate for each string) will be used,
+and if warnings are turned on, a "Wide character" warning will be issued
+if those strings contain a character beyond 0x00FF.
+
+For example,
+
+      perl -w -e 'print "\x{DF}\n", "\x{0100}\x{DF}\n"'              
+
+produces a fairly useless mixture of native bytes and UTF-8, as well
+as a warning.
+
+To output UTF-8 always, use the ":utf8" output discipline.  Prepending
+
+      binmode(STDOUT, ":utf8");
+
+to this sample program ensures the output is completely UTF-8, and      
+of course, removes the warning.  Another way to achieve this is the
+L<encoding> pragma, discussed later in L</Legacy Encodings>.
 
 Perl 5.8.0 will also support Unicode on EBCDIC platforms.  There the
 support is somewhat harder to implement since additional conversions
@@ -149,12 +173,14 @@ are needed at every step.  Because of these difficulties the Unicode
 support won't be quite as full as in other, mainly ASCII-based,
 platforms (the Unicode support will be better than in the 5.6 series,
 which didn't work much at all for EBCDIC platform).  On EBCDIC
-platforms the internal encoding form used is UTF-EBCDIC.
+platforms the internal encoding form used is UTF-EBCDIC instead
+of UTF-8 (the difference is that as UTF-8 is "ASCII-safe" in that
+ASCII characters encode to UTF-8 as-is, UTF-EBCDIC is "EBCDIC-safe").
 
 =head2 Creating Unicode
 
-To create Unicode literals, use the C<\x{...}> notation in
-doublequoted strings:
+To create Unicode literals for code points above 0xFF, use the
+C<\x{...}> notation in doublequoted strings:
 
     my $smiley = "\x{263a}";
 
@@ -358,18 +384,23 @@ its argument so that Unicode characters with code points greater than
 255 are displayed as "\x{...}", control characters (like "\n") are
 displayed as "\x..", and the rest of the characters as themselves.
 
-sub nice_string {
-   join("",
-	map { $_ > 255 ?			# if wide character...
-	          sprintf("\\x{%x}", $_) :	# \x{...}
-	          chr($_) =~ /[[:cntrl:]]/ ?	# else if control character ...
-	              sprintf("\\x%02x", $_) :	# \x..
-                      chr($_) }			# else as themselves
-            unpack("U*", $_[0]));		# unpack Unicode characters
-}
+   sub nice_string {
+       join("",
+         map { $_ > 255 ?                  # if wide character...
+               sprintf("\\x{%x}", $_) :    # \x{...}
+               chr($_) =~ /[[:cntrl:]]/ ?  # else if control character ...
+               sprintf("\\x%02x", $_) :    # \x..
+               chr($_)                     # else as themselves
+         } unpack("U*", $_[0]));           # unpack Unicode characters
+   }
 
-For example, C<nice_string("foo\x{100}bar\n")> will return
-C<"foo\x{100}bar\x0a">.
+For example,
+
+   nice_string("foo\x{100}bar\n")
+
+will return:
+
+   "foo\x{100}bar\x0a"
 
 =head2 Special Cases
 
@@ -423,7 +454,7 @@ C<LATIN CAPITAL LETTER A>?)
 
 The short answer is that by default Perl compares equivalence
 (C<eq>, C<ne>) based only on code points of the characters.
-In the above case, no (because 0x00C1 != 0x0041).  But sometimes any
+In the above case, the answer is no (because 0x00C1 != 0x0041).  But sometimes any
 CAPITAL LETTER As being considered equal, or even any As of any case,
 would be desirable.
 
@@ -433,7 +464,7 @@ Reports #15 and #21, I<Unicode Normalization Forms> and I<Case
 Mappings>, http://www.unicode.org/unicode/reports/tr15/
 http://www.unicode.org/unicode/reports/tr21/
 
-As of Perl 5.8.0, the's regular expression case-ignoring matching
+As of Perl 5.8.0, regular expression case-ignoring matching
 implements only 1:1 semantics: one character matches one character.
 In I<Case Mappings> both 1:N and N:1 matches are defined.
 
@@ -447,9 +478,9 @@ parlance goes, collated.  But again, what do you mean by collate?
 (Does C<LATIN CAPITAL LETTER A WITH ACUTE> come before or after
 C<LATIN CAPITAL LETTER A WITH GRAVE>?)
 
-The short answer is that by default Perl compares strings (C<lt>,
+The short answer is that by default, Perl compares strings (C<lt>,
 C<le>, C<cmp>, C<ge>, C<gt>) based only on the code points of the
-characters.  In the above case, after, since 0x00C1 > 0x00C0.
+characters.  In the above case, the answer is "after", since 0x00C1 > 0x00C0.
 
 The long answer is that "it depends", and a good answer cannot be
 given without knowing (at the very least) the language context.
@@ -468,12 +499,12 @@ Character Ranges
 
 Character ranges in regular expression character classes (C</[a-z]/>)
 and in the C<tr///> (also known as C<y///>) operator are not magically
-Unicode-aware.  What this means that C<[a-z]> will not magically start
+Unicode-aware.  What this means that C<[A-Za-z]> will not magically start
 to mean "all alphabetic letters" (not that it does mean that even for
 8-bit characters, you should be using C</[[:alpha]]/> for that).
 
-For specifying things like that in regular expressions you can use the
-various Unicode properties, C<\pL> in this particular case.  You can
+For specifying things like that in regular expressions, you can use the
+various Unicode properties, C<\pL> or perhaps C<\p{Alphabetic}>, in this particular case.  You can
 use Unicode code points as the end points of character ranges, but
 that means that particular code point range, nothing more.  For
 further information, see L<perlunicode>.
@@ -485,7 +516,7 @@ String-To-Number Conversions
 Unicode does define several other decimal (and numeric) characters
 than just the familiar 0 to 9, such as the Arabic and Indic digits.
 Perl does not support string-to-number conversion for digits other
-than the 0 to 9 (and a to f for hexadecimal).
+than ASCII 0 to 9 (and ASCII a to f for hexadecimal).
 
 =back
 

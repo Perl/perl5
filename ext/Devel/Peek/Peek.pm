@@ -111,7 +111,7 @@ When perl is compiled with support for memory footprint debugging
 
 Use mstat() function to emit a memory state statistic to the terminal.
 For more information on the format of output of mstat() see
-L<perldebug/Using C<$ENV{PERL_DEBUG_MSTATS}>>.
+L<perldebguts/Using C<$ENV{PERL_DEBUG_MSTATS}>>.
 
 Three additional functions allow access to this statistic from Perl.
 First, use C<mstats_fillhash(%hash)> to get the information contained
@@ -124,7 +124,7 @@ Two additional fields C<free>, C<used> contain array references which
 provide per-bucket count of free and used chunks.  Two other fields
 C<mem_size>, C<available_size> contain array references which provide
 the information about the allocated size and usable size of chunks in
-each bucket.  Again, see L<perldebug/Using C<$ENV{PERL_DEBUG_MSTATS}>>
+each bucket.  Again, see L<perldebguts/Using C<$ENV{PERL_DEBUG_MSTATS}>>
 for details.
 
 Keep in mind that only the first several "odd-numbered" buckets are

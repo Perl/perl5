@@ -16,7 +16,7 @@ BEGIN {
 
 use Test;
 
-plan tests => 10;
+plan tests => 11;
 
 my $STDOUT = './results-0';
 my $STDERR = './results-1';
@@ -24,7 +24,7 @@ my $PERL = './perl';
 my $FAILURE_CODE = 119;
 
 # Run perl with specified environment and arguments returns a list.
-# First element is true iff Perl's stdout and stderr match the
+# First element is true if Perl's stdout and stderr match the
 # supplied $stdout and $stderr argument strings exactly.
 # second element is an explanation of the failure
 sub runperl {
@@ -79,7 +79,7 @@ sub try {
 
 #  PERL5OPT    Command-line options (switches).  Switches in
 #                    this variable are taken as if they were on
-#                    every Perl command line.  Only the -[DIMUdmw]
+#                    every Perl command line.  Only the -[DIMUdmtw]
 #                    switches are allowed.  When running taint
 #                    checks (because the program was running setuid
 #                    or setgid, or the -T switch was used), this
@@ -138,6 +138,11 @@ try({PERL5OPT => '-Mstrict -Mwarnings'},
 try({PERL5OPT => '-w -w'},
     ['-e', 'print $ENV{PERL5OPT}'],
     '-w -w',
+    '');
+
+try({PERL5OPT => '-t'},
+    ['-e', 'print ${^TAINT}'],
+    '1',
     '');
 
 END {

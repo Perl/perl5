@@ -245,164 +245,9 @@ dynprep(pTHX_ gptr *list1, gptr *list2, size_t nmemb, SVCOMPARE_t cmp)
 }
 
 
-/* Overview of bmerge variables:
-**
-** list1 and list2 address the main and auxiliary arrays.
-** They swap identities after each merge pass.
-** Base points to the original list1, so we can tell if
-** the pointers ended up where they belonged (or must be copied).
-**
-** When we are merging two lists, f1 and f2 are the next elements
-** on the respective lists.  l1 and l2 mark the end of the lists.
-** tp2 is the current location in the merged list.
-**
-** p1 records where f1 started.
-** After the merge, a new descriptor is built there.
-**
-** p2 is a ``parallel'' pointer in (what starts as) descriptor space.
-** It is used to identify and delimit the runs.
-**
-** In the heat of determining where q, the greater of the f1/f2 elements,
-** belongs in the other list, b, t and p, represent bottom, top and probe
-** locations, respectively, in the other list.
-** They make convenient temporary pointers in other places.
-*/
-
-STATIC void
-S_mergesortsv(pTHX_ gptr *list1, size_t nmemb, SVCOMPARE_t cmp)
-{
-    int i, run;
-    int sense;
-    register gptr *f1, *f2, *t, *b, *p, *tp2, *l1, *l2, *q;
-    gptr *aux, *list2, *p2, *last;
-    gptr *base = list1;
-    gptr *p1;
-    gptr small[SMALLSORT];
-
-    if (nmemb <= 1) return;	/* sorted trivially */
-    if (nmemb <= SMALLSORT) list2 = small;	/* use stack for aux array */
-    else { New(799,list2,nmemb,gptr); }		/* allocate auxilliary array */
-    aux = list2;
-    dynprep(aTHX_ list1, list2, nmemb, cmp);
-    last = PINDEX(list2, nmemb);
-    while (NEXT(list2) != last) {
-	/* More than one run remains.  Do some merging to reduce runs. */
-	l2 = p1 = list1;
-	for (tp2 = p2 = list2; p2 != last;) {
-	    /* The new first run begins where the old second list ended.
-	    ** Use the p2 ``parallel'' pointer to identify the end of the run.
-	    */
-	    f1 = l2;
-	    t = NEXT(p2);
-	    f2 = l1 = POTHER(t, list2, list1);
-	    if (t != last) t = NEXT(t);
-	    l2 = POTHER(t, list2, list1);
-	    p2 = t;
-	    while (f1 < l1 && f2 < l2) {
-		/* If head 1 is larger than head 2, find ALL the elements
-		** in list 2 strictly less than head1, write them all,
-		** then head 1.  Then compare the new heads, and repeat,
-		** until one or both lists are exhausted.
-		**
-		** In all comparisons (after establishing
-		** which head to merge) the item to merge
-		** (at pointer q) is the first operand of
-		** the comparison.  When we want to know
-		** if ``q is strictly less than the other'',
-		** we can't just do
-		**    cmp(q, other) < 0
-		** because stability demands that we treat equality
-		** as high when q comes from l2, and as low when
-		** q was from l1.  So we ask the question by doing
-		**    cmp(q, other) <= sense
-		** and make sense == 0 when equality should look low,
-		** and -1 when equality should look high.
-		*/
-
-
-		if (cmp(aTHX_ *f1, *f2) <= 0) {
-		    q = f2; b = f1; t = l1;
-		    sense = -1;
-		} else {
-		    q = f1; b = f2; t = l2;
-		    sense = 0;
-		}
-
-
-		/* ramp up
-		**
-		** Leave t at something strictly
-		** greater than q (or at the end of the list),
-		** and b at something strictly less than q.
-		*/
-		for (i = 1, run = 0 ;;) {
-		    if ((p = PINDEX(b, i)) >= t) {
-			/* off the end */
-			if (((p = PINDEX(t, -1)) > b) &&
-			    (cmp(aTHX_ *q, *p) <= sense))
-			     t = p;
-			else b = p;
-			break;
-		    } else if (cmp(aTHX_ *q, *p) <= sense) {
-			t = p;
-			break;
-		    } else b = p;
-		    if (++run >= RTHRESH) i += i;
-		}
-
-
-		/* q is known to follow b and must be inserted before t.
-		** Increment b, so the range of possibilities is [b,t).
-		** Round binary split down, to favor early appearance.
-		** Adjust b and t until q belongs just before t.
-		*/
-
-		b++;
-		while (b < t) {
-		    p = PINDEX(b, (PNELEM(b, t) - 1) / 2);
-		    if (cmp(aTHX_ *q, *p) <= sense) {
-			t = p;
-		    } else b = p + 1;
-		}
-
-
-		/* Copy all the strictly low elements */
-
-		if (q == f1) {
-		    FROMTOUPTO(f2, tp2, t);
-		    *tp2++ = *f1++;
-		} else {
-		    FROMTOUPTO(f1, tp2, t);
-		    *tp2++ = *f2++;
-		}
-	    }
-
-
-	    /* Run out remaining list */
-	    if (f1 == l1) {
-		   if (f2 < l2) FROMTOUPTO(f2, tp2, l2);
-	    } else              FROMTOUPTO(f1, tp2, l1);
-	    p1 = NEXT(p1) = POTHER(tp2, list2, list1);
-	}
-	t = list1;
-	list1 = list2;
-	list2 = t;
-	last = PINDEX(list2, nmemb);
-    }
-    if (base == list2) {
-	last = PINDEX(list1, nmemb);
-	FROMTOUPTO(list1, list2, last);
-    }
-    if (aux != small) Safefree(aux);	/* free iff allocated */
-    return;
-}
-
-
-/* What perl needs (least) is another sort implementation in the core.
- * So what's the story?  The short (by jpl's standards) story is that
- * the merge sort above, in use since 5.7, is as fast as, or faster than,
+/* The original merge sort, in use since 5.7, was as fast as, or faster than,
  * qsort on many platforms, but slower than qsort, conspicuously so,
- * on others.  The most likely explanation is platform-specific
+ * on others.  The most likely explanation was platform-specific
  * differences in cache sizes and relative speeds.
  *
  * The quicksort divide-and-conquer algorithm guarantees that, as the
@@ -411,7 +256,7 @@ S_mergesortsv(pTHX_ gptr *list1, size_t nmemb, SVCOMPARE_t cmp)
  * many levels of cache exist, quicksort will "find" them, and,
  * as long as smaller is faster, take advanatge of them.
  *
- * By contrast, consider how the quicksort algorithm above works.
+ * By contrast, consider how the original mergesort algorithm worked.
  * Suppose we have five runs (each typically of length 2 after dynprep).
  * 
  * pass               base                        aux
@@ -478,9 +323,6 @@ S_mergesortsv(pTHX_ gptr *list1, size_t nmemb, SVCOMPARE_t cmp)
  * The actual cache-friendly implementation will use a pseudo-stack
  * to avoid recursion, and will unroll processing of runs of length 2,
  * but it is otherwise similar to the recursive implementation.
- * If it's as good as the original mergesort implementation on all
- * platforms, it should replace that implementation.  For benchmarking,
- * though, it is convenient to have both implementations available.
  */
 
 typedef struct {
@@ -489,7 +331,7 @@ typedef struct {
 } off_runs;		/* pseudo-stack element */
 
 STATIC void
-S_cfmergesortsv(pTHX_ gptr *base, size_t nmemb, SVCOMPARE_t cmp)
+S_mergesortsv(pTHX_ gptr *base, size_t nmemb, SVCOMPARE_t cmp)
 {
     IV i, run, runs, offset;
     I32 sense, level;
@@ -1548,7 +1390,7 @@ Perl_sortsv(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp)
 	      sortsvp = S_qsortsv;
 	 else {
 	      if (hints & HINT_SORT_MERGESORT)
-		   sortsvp = S_cfmergesortsv;
+		   sortsvp = S_mergesortsv;
 	      else
 		   sortsvp = S_mergesortsv;
 	 }

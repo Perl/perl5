@@ -837,7 +837,7 @@ The program should instead say:
 =item PERL5OPT
 
 Command-line options (switches).  Switches in this variable are taken
-as if they were on every Perl command line.  Only the B<-[DIMUdmw]>
+as if they were on every Perl command line.  Only the B<-[DIMUdmtw]>
 switches are allowed.  When running taint checks (because the program
 was running setuid or setgid, or the B<-T> switch was used), this
 variable is ignored.  If PERL5OPT begins with B<-T>, tainting will be
