@@ -1351,14 +1351,13 @@ lib/Locale/Maketext/Guts.pm	Locale::Maketext
 lib/Locale/Maketext.pm		Locale::Maketext
 lib/Locale/Maketext.pod		Locale::Maketext documentation
 lib/Locale/Maketext/README	Locale::Maketext
-lib/Locale/Maketext/t/00about.t	See if Locale::Maketext works
-lib/Locale/Maketext/t/01make.t	See if Locale::Maketext works
-lib/Locale/Maketext/t/02get.t	See if Locale::Maketext works
-lib/Locale/Maketext/t/03http.t	See if Locale::Maketext works
-lib/Locale/Maketext/t/04super.t	See if Locale::Maketext works
-lib/Locale/Maketext/t/05super.t	See if Locale::Maketext works
-lib/Locale/Maketext/t/06super.t	See if Locale::Maketext works
-lib/Locale/Maketext/t/90utf8.t	Locale::Maketext
+lib/Locale/Maketext/t/01_about_verbose.t	See if Locale::Maketext works
+lib/Locale/Maketext/t/10_make.t	See if Locale::Maketext works
+lib/Locale/Maketext/t/20_get.t	See if Locale::Maketext works
+lib/Locale/Maketext/t/40_super.t	See if Locale::Maketext works
+lib/Locale/Maketext/t/50_super.t	See if Locale::Maketext works
+lib/Locale/Maketext/t/60_super.t	See if Locale::Maketext works
+lib/Locale/Maketext/t/90_utf8.t	See if Locale::Maketext works
 lib/Locale/Maketext/TPJ13.pod	Locale::Maketext documentation article
 lib/locale.pm			For "use locale"
 lib/Locale/Script.pm		Locale::Codes

@@ -43,7 +43,10 @@ ok $ENV{'SWUZ'}, 'KLORTHO HOOBOY';
 delete $ENV{'MYORP'};
 delete $ENV{'SWUZ'};
 
+
 print "# Test LANG...\n";
+$ENV{'LC_ALL'} = '';
+$ENV{'LC_MESSAGES'} = '';
 $ENV{'REQUEST_METHOD'} = '';
 $ENV{'LANG'}     = 'Eu_MT';
 $ENV{'LANGUAGE'} = '';
