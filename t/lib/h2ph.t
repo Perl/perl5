@@ -22,7 +22,12 @@ unless(-e '../utils/h2ph') {
     # i'll probably get in trouble for this :)
 } else {
     # does it run?
-    $ok = system("./perl -I../lib ../utils/h2ph -d. lib/h2ph.h");
+    if ($^O ne 'dos') {
+        $ok = system("./perl -I../lib ../utils/h2ph -d. lib/h2ph.h");
+    } else {
+    # h2ph prints some info which confuses t/TEST on dos/djgpp
+        $ok = system("./perl -I../lib ../utils/h2ph -d. lib/h2ph.h >nul");
+    }
     print(($ok == 0 ? "" : "not "), "ok 1\n");
     
     # does it work? well, does it do what we expect? :-)
