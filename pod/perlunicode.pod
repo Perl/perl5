@@ -639,8 +639,12 @@ Level 1 - Basic Unicode Support
         [ 5] have negation
         [ 6] can use look-ahead to emulate subtraction (*)
         [ 7] include Letters in word characters
-        [ 8] some cases of "ss"/"SS" matching U+00DF in a character
-	     class are missing, but that is allowed according to the TR18.
+        [ 8] note that perl does Full casefolding in matching, not Simple:
+             for example U+1F88 is equivalent with U+1F000 U+03B9,
+             not with 1F80.  This difference matters for certain Greek
+             capital letters with certain modifiers: the Full casefolding
+             decomposes the letter, while the Simple casefolding would map
+             it to a single character.
         [ 9] see UTR#13 Unicode Newline Guidelines
         [10] should do ^ and $ also on \x{85}, \x{2028} and \x{2029})
              (should also affect <>, $., and script line numbers)

@@ -916,15 +916,19 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	switch (OP(c)) {
 	case ANYOF:
 	    while (s < strend) {
-		if (reginclass(c, (U8*)s, do_utf8)) {
+	        STRLEN skip = do_utf8 ? UTF8SKIP(s) : 1;
+
+		if (reginclass(c, (U8*)s, do_utf8) ||
+		    (ANYOF_UNICODE_FOLD_SHARP_S(c, s, strend) &&
+		     (skip = 2))) {
 		    if (tmp && (norun || regtry(prog, s)))
 			goto got_it;
 		    else
 			tmp = doevery;
 		}
-		else
-		    tmp = 1;
-		s += do_utf8 ? UTF8SKIP(s) : 1;
+		else 
+		     tmp = 1;
+		s += skip;
 	    }
 	    break;
 	case CANY:
@@ -2108,6 +2112,7 @@ typedef union re_unwind_t {
 
 #define sayYES goto yes
 #define sayNO goto no
+#define sayNO_ANYOF goto no_anyof
 #define sayYES_FINAL goto yes_final
 #define sayYES_LOUD  goto yes_loud
 #define sayNO_FINAL  goto no_final
@@ -2396,21 +2401,33 @@ S_regmatch(pTHX_ regnode *prog)
 	        STRLEN inclasslen = PL_regeol - locinput;
 
 	        if (!reginclasslen(scan, (U8*)locinput, &inclasslen, do_utf8))
-		    sayNO;
+		    sayNO_ANYOF;
 		if (locinput >= PL_regeol)
 		    sayNO;
 		locinput += inclasslen;
 		nextchr = UCHARAT(locinput);
+		break;
 	    }
 	    else {
 		if (nextchr < 0)
 		    nextchr = UCHARAT(locinput);
 		if (!reginclass(scan, (U8*)locinput, do_utf8))
-		    sayNO;
+		    sayNO_ANYOF;
 		if (!nextchr && locinput >= PL_regeol)
 		    sayNO;
 		nextchr = UCHARAT(++locinput);
+		break;
 	    }
+	no_anyof:
+	    /* If we might have the case of the German sharp s
+	     * in a casefolding Unicode character class. */
+
+	    if (ANYOF_UNICODE_FOLD_SHARP_S(scan, locinput, PL_regeol)) {
+		 locinput += 2;
+		 nextchr = UCHARAT(locinput);
+	    }
+	    else
+		 sayNO;
 	    break;
 	case ALNUML:
 	    PL_reg_flags |= RF_tainted;
