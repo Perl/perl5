@@ -3618,11 +3618,6 @@ Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP *loop, I32 whileline, OP *
 	if (!next)
 	    next = unstack;
 	cont = append_elem(OP_LINESEQ, cont, unstack);
-	if ((line_t)whileline != NOLINE) {
-	    PL_copline = (line_t)whileline;
-	    cont = append_elem(OP_LINESEQ, cont,
-			       newSTATEOP(0, Nullch, Nullop));
-	}
     }
 
     listop = append_list(OP_LINESEQ, (LISTOP*)block, (LISTOP*)cont);
@@ -3675,13 +3670,16 @@ Perl_newFOROP(pTHX_ I32 flags,char *label,line_t forline,OP *sv,OP *expr,OP *blo
     OP *wop;
     PADOFFSET padoff = 0;
     I32 iterflags = 0;
+    I32 iterpflags = 0;
 
     if (sv) {
 	if (sv->op_type == OP_RV2SV) {	/* symbol table variable */
+	    iterpflags = sv->op_private & OPpOUR_INTRO; /* for our $x () */
 	    sv->op_type = OP_RV2GV;
 	    sv->op_ppaddr = PL_ppaddr[OP_RV2GV];
 	}
 	else if (sv->op_type == OP_PADSV) { /* private variable */
+	    iterpflags = sv->op_private & OPpLVAL_INTRO; /* for my $x () */
 	    padoff = sv->op_targ;
 	    sv->op_targ = 0;
 	    op_free(sv);
@@ -3740,6 +3738,9 @@ Perl_newFOROP(pTHX_ I32 flags,char *label,line_t forline,OP *sv,OP *expr,OP *blo
     loop = (LOOP*)list(convert(OP_ENTERITER, iterflags,
 			       append_elem(OP_LIST, expr, scalar(sv))));
     assert(!loop->op_next);
+    /* for my  $x () sets OPpLVAL_INTRO;
+     * for our $x () sets OPpOUR_INTRO; both only used by Deparse.pm */
+    loop->op_private = iterpflags;
 #ifdef PL_OP_SLAB_ALLOC
     {
 	LOOP *tmp;

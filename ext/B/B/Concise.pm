@@ -326,7 +326,7 @@ my %priv;
 $priv{$_}{128} = "LVINTRO"
   for ("pos", "substr", "vec", "threadsv", "gvsv", "rv2sv", "rv2hv", "rv2gv",
        "rv2av", "rv2arylen", "aelem", "helem", "aslice", "hslice", "padsv",
-       "padav", "padhv");
+       "padav", "padhv", "enteriter");
 $priv{$_}{64} = "REFC" for ("leave", "leavesub", "leavesublv", "leavewrite");
 $priv{"aassign"}{64} = "COMMON";
 $priv{"sassign"}{64} = "BKWARD";
@@ -342,7 +342,8 @@ $priv{"entersub"}{32} = "TARG";
 @{$priv{$_}}{4,8,128} = ("INARGS","AMPER","NO()") for ("entersub", "rv2cv");
 $priv{"gv"}{32} = "EARLYCV";
 $priv{"aelem"}{16} = $priv{"helem"}{16} = "LVDEFER";
-$priv{$_}{16} = "OURINTR" for ("gvsv", "rv2sv", "rv2av", "rv2hv", "r2gv");
+$priv{$_}{16} = "OURINTR" for ("gvsv", "rv2sv", "rv2av", "rv2hv", "r2gv",
+	"enteriter");
 $priv{$_}{16} = "TARGMY"
   for (map(($_,"s$_"),"chop", "chomp"),
        map(($_,"i_$_"), "postinc", "postdec", "multiply", "divide", "modulo",

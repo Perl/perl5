@@ -2,7 +2,7 @@
 
 # "This IS structured code.  It's just randomly structured."
 
-print "1..28\n";
+print "1..29\n";
 
 while ($?) {
     $foo = 1;
@@ -184,6 +184,17 @@ sub f1 {
     goto sub { $x; print "ok 28 - don't prematurely free CV\n" }
 }
 f1();
+
+# bug #22181 - this used to coredump or make $x undefined, due to
+# erroneous popping of the inner BLOCK context
+
+for ($i=0; $i<2; $i++) {
+    my $x = 1;
+    goto LABEL29;
+    LABEL29:
+    print "not " if !defined $x || $x != 1;
+}
+print "ok 29 - goto in for(;;) with continuation\n";
 
 exit;
 

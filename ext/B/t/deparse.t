@@ -15,7 +15,7 @@ use warnings;
 use strict;
 use Config;
 
-print "1..18\n";
+print "1..31\n";
 
 use B::Deparse;
 my $deparse = B::Deparse->new() or print "not ";
@@ -196,3 +196,70 @@ my $foo = "Ab\x{100}\200\x{200}\377Cd\000Ef\x{1000}\cA\x{2000}\cZ";
 ####
 # 15
 s/x/'y';/e;
+####
+# 16 - various lypes of loop
+{ my $x; }
+####
+# 17
+while (1) { my $k; }
+####
+# 18
+my ($x,@a);
+$x=1 for @a;
+>>>>
+my($x, @a);
+foreach $_ (@a) {
+    $x = 1;
+}
+####
+# 19
+for (my $i = 0; $i < 2;) {
+    my $z = 1;
+}
+####
+# 20
+for (my $i = 0; $i < 2; ++$i) {
+    my $z = 1;
+}
+####
+# 21
+for (my $i = 0; $i < 2; ++$i) {
+    my $z = 1;
+}
+####
+# 22
+my $i;
+while ($i) { my $z = 1; } continue { $i = 99; }
+####
+# 23
+foreach $i (1, 2) {
+    my $z = 1;
+}
+####
+# 24
+my $i;
+foreach $i (1, 2) {
+    my $z = 1;
+}
+####
+# 25
+my $i;
+foreach my $i (1, 2) {
+    my $z = 1;
+}
+####
+# 26
+foreach my $i (1, 2) {
+    my $z = 1;
+}
+####
+# 27
+foreach our $i (1, 2) {
+    my $z = 1;
+}
+####
+# 28
+my $i;
+foreach our $i (1, 2) {
+    my $z = 1;
+}
