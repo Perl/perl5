@@ -623,10 +623,9 @@ sub AUTOLOAD {
     die "&Config::AUTOLOAD failed on $Config::AUTOLOAD";
 }
 
+# tie returns the object, so the value returned to require will be true.
 tie %%Config, 'Config', {
 %s};
-
-1;
 ENDOFTIE
 
 
