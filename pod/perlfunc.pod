@@ -5993,7 +5993,7 @@ string of octal digits.  See also L</oct>, if all you have is a string.
 
 Undefines the value of EXPR, which must be an lvalue.  Use only on a
 scalar value, an array (using C<@>), a hash (using C<%>), a subroutine
-(using C<&>), or a typeglob (using <*>).  (Saying C<undef $hash{$key}>
+(using C<&>), or a typeglob (using C<*>).  (Saying C<undef $hash{$key}>
 will probably not do what you expect on most predefined variables or
 DBM list values, so don't do that; see L<delete>.)  Always returns the
 undefined value.  You can omit the EXPR, in which case nothing is
