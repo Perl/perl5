@@ -369,16 +369,17 @@ sub ping_udp
         elsif ($nfound)         # A packet is waiting
         {
             $from_msg = "";
-            $from_saddr = recv($self->{"fh"}, $from_msg, 1500, $flags);
-            ($from_port, $from_ip) = sockaddr_in($from_saddr);
-            if (($from_ip eq $ip) &&        # Does the packet check out?
-                ($from_port == $self->{"port_num"}) &&
-                ($from_msg eq $msg))
-            {
-                $ret = 1;       # It's a winner
-                $done = 1;
-            }
-        }
+            $from_saddr = recv($self->{"fh"}, $from_msg, 1500, $flags)
+		or last; # For example an unreachable host will make recv() fail.
+	    ($from_port, $from_ip) = sockaddr_in($from_saddr);
+	    if (($from_ip eq $ip) &&        # Does the packet check out?
+		($from_port == $self->{"port_num"}) &&
+		($from_msg eq $msg))
+	    {
+		$ret = 1;       # It's a winner
+		$done = 1;
+	    }
+	}
         else                    # Oops, timed out
         {
             $done = 1;
