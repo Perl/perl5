@@ -46,7 +46,7 @@ true)
 	rhapsody*)
 		ldlibpth="DYLD_LIBRARY_PATH=`pwd`/Perl:$DYLD_LIBRARY_PATH"
 		;;
-	cygwin*)	ldlibpth="PATH=`pwd`:$PATH"
+	cygwin*)	ldlibpth="PATH='`pwd`:$PATH'"
 		linklibperl="-lperl"
 		;;
 	os2*)	# OS/2 doesn't need anything special for LD_LIBRARY_PATH.

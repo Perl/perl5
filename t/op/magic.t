@@ -22,6 +22,7 @@ sub ok {
 $Is_MSWin32 = $^O eq 'MSWin32';
 $Is_VMS     = $^O eq 'VMS';
 $Is_Dos   = $^O eq 'dos';
+$Is_Cygwin   = $^O =~ /cygwin/;
 $PERL = ($Is_MSWin32 ? '.\perl' : './perl');
 
 print "1..35\n";
@@ -111,6 +112,11 @@ ok 18, $$ > 0, $$;
     if ($^O eq 'qnx') {
 	chomp($wd = `/usr/bin/fullpath -t`);
     }
+    elsif($Is_Cygwin) {
+       # Cygwin turns the symlink into the real file
+       chomp($wd = `pwd`);
+       $wd =~ s#/t$##;
+    }
     else {
 	$wd = '.';
     }
@@ -152,7 +158,7 @@ EOF
     ok 21, close(SCRIPT), $!;
     ok 22, chmod(0755, $script), $!;
     $_ = `$script`;
-    s/\.exe//i if $Is_Dos;
+    s/\.exe//i if $Is_Dos or $Is_Cygwin;
     s{\bminiperl\b}{perl}; # so that test doesn't fail with miniperl
     s{is perl}{is $perl}; # for systems where $^X is only a basename
     s{\\}{/}g;

@@ -1,32 +1,66 @@
-DATE: 2 April 99
+This document is obsolete. Refer to README.cygwin32.
+
+DATE: 13 May 99
 
 Here are a few hints for building perl with cygwin:
 
-(1) There have been some problems compiling with the default compiler installed with cygwin-b20.1. Some of the patches in perl5.005_03.patch attempt to correct this, but it would probably be a good idea to upgrade your compiler to egcs-1.1.1 (or better) from Mumit Khan's website -- http://www.xraylith.wisc.edu/~khan/software/gnu-win32/
+(1) There have been some problems compiling with the default compiler 
+installed with cygwin-b20.1. If you're reading this file, then you've
+already applied perl5.005_03-static-patch. Some of the patches in 
+perl5.005_03-static-patch attempt to correct these problems, but it 
+would probably be a good idea to upgrade your compiler to egcs-1.1.1
+(or better) from Mumit Khan's website -- 
+http://www.xraylith.wisc.edu/~khan/software/gnu-win32/
 
-(2) To avoid some failures when doing a "make test", use CYGWIN=ntea while testing. However, see the Cygwin FAQ concerning the use of ntea with FAT partitions. The tests that fail are those that deal with file ownership and access.
+(2) To avoid some failures when doing a "make test", use CYGWIN=ntea 
+while testing. However, see the Cygwin FAQ concerning the use of ntea 
+with FAT partitions. The tests that fail are those that deal with file 
+ownership and access.
 
-(3) Perl should build without trouble under text mounts or binary mounts. However, some tests ("make test") may fail when using text mounts. The tests that fail are those that involve using tie() to attach a hashtable variable to a file.
+(3) Perl should build without trouble under text mounts or binary 
+mounts. However, some tests ("make test") may fail when using text 
+mounts. The tests that fail are those that involve using tie() to 
+attach a hashtable variable to a file.
 
-(4) As of 3/8/98, building and linking new modules into the perl executable rus into problems when using binary mounts. We're still tracking this one down.
+(4) There have been a few hints that some tests may also fail depending 
+on whether you're building, testing, and/or installing as a normal 
+user, or as a member of the Administrators group (NT only). However, 
+we're not sure about this one yet.
 
-(5) There have been a few hints that some tests may also fail depending on whether you're building, testing, and/or installing as a normal user, or as a member of the Administrators group (NT only). However, we're not sure about this one yet.
+(5) When compiling static modules for perl, don't mix modules compiled 
+under text mounts and modules compiled under binary mounts.
 
-(6) When compiling static modules for perl, don't mix modules compiled under text mounts and modules compiled under binary mounts.
+(6) The sourcefiles in the tarball extract as "-r--r--r--" by default.
+This may or may not cause problems, depending on your setup. To be safe,
+I executed "chmod -R +w *". 
 
-(7) The sourcefiles in the tarball extract as "-r--r--r--" by default, so you need to "chmod -R +w *' in order to patch successfully.
+(7) To make life easier, you should download install-cygwin-b20.sh from 
+ftp://ftp.franken.de/pub/win32/develop/gnuwin32/cygwin/
+  porters/Humblet_Pierre_A/
+and use it as your install "executable."  Just follow the instructions
+that are embedded as comments in that shell script.
 
-(8) To make life easier, you should download ftp://ftp.franken.de/pub/win32/develop/gnuwin32/cygwin/porters/Humblet_Pierre_A/install-cygwin-b20.sh, and use it as your install "executable." Just follow the instructions that are embedding as comments in the .sh file.
-
-(9) There were a number of failed operations when installing. These were
-        (a) trying to create man pages whose names had ":" in them -- i.e. man/man3/Tie::Array.3
-        (b) for some reason, the installer had difficulty copying the SRCDIR/pod/*.pod files to /usr/local/lib/perl5/perl5.00503/pod/ directory. I did it by hand. It's not really that important - the pod files are converted to man pages, and the man pages are installed successfully. So you don't really need to keep the pod's around.
-
+(8) There were a number of failed operations when installing. These
+occurred in two cases: first, when trying to create man pages whose
+names had ":" in them -- i.e. man/man3/Tie::Array.3, and second,
+when copying the pod files from SRCDIR/pod/*.pod to 
+/usr/local/lib/perl5/perl5.00503/pod/. I'm not sure why, but I just
+completed that operation by hand afterwards. 
 
 RESULTS:
 ****************************************************
 
-I built and tested as a normal user (not Administrator and not a member of the Administrators group). However, I had to switch to Administrator to install because the permissions on my /usr/local/bin were wrong.
+I built and tested as a normal user (not Administrator and not a member 
+of the Administrators group). However, I had to 
+'chown -R cwilson /usr/local/*' in order to avoid various NTisms.
+(Previously, my /usr/local tree was owned by the Administrators GROUP,
+and since I was building as a normal user, I couldn't install 
+completely. Why didn't I just switch to the Administrator account to
+install? Well, that has its own share of problems: basically, the 
+Administrator couldn't write to those directories either - they were
+owned by the Admin group, not the Admin user. And the permissions were
+-rw-r--r-- (or -r--r--r--), so group members weren't allowed write 
+access. Blame MS.)
 
 RESULTS: make test
 ------------------
@@ -42,18 +76,24 @@ most things were "foo/bar............ok" with the following exceptions:
 base/rs.............ok, 4/14 subtests skipped
 op/groups...........skipping test on this platform
 op/magic............FAILED test 23
-        Failed 1/35 tests, 97.14% okay (-4 skipped tests: 30 okay, 85.71%)
+        Failed 1/35 tests, 97.14% okay (-4 skipped tests: 30 okay, 
+85.71%)
 op/stat.............ls: /dev: No such file or directory
 FAILED tests 4, 35
         Failed 2/58 tests, 96.55% okay
 op/taint............FAILED tests 1, 3, 31
-        Failed 3/149 tests, 97.99% okay (-12 skipped tests: 134 okay, 89.93%)
-        (Also got the following popup message four times - "The dynamic link 
+        Failed 3/149 tests, 97.99% okay (-12 skipped tests: 134 okay, 
+89.93%)
+        (Also got the following popup message four times - "The dynamic 
+link 
         library cygwin1.dll could not be found in the specified path 
         F:\cygnus\cygwin-b20\usr\local\src\perl5.005_03\t;.;
         E:\WINNT\System32;E:\WINNT\system;E:\WINNT;..")
 lib/findbin.........FAILED test 1
         Failed 1/1 tests, 0.00% okay
+lib/db-btree........skipping test on this platform
+lib/db-hash.........skipping test on this platform
+lib/db-recno........skipping test on this platform
 lib/gdbm............skipping test on this platform
 lib/ipc_sysv........skipping test on this platform
 lib/ndbm............skipping test on this platform
@@ -62,10 +102,12 @@ lib/posix...........skipping test on this platform
 lib/thread..........skipping test on this platform
 
 Failed Test  Status Wstat Total Fail  Failed  List of failed
--------------------------------------------------------------------------------
+------------------------------------------------------------------------
+-------
 lib/findbin.t                 1    1 100.00%  1
 op/magic.t                   35    1   2.86%  23
 op/stat.t                    58    2   3.45%  4, 35
 op/taint.t                  149    3   2.01%  1, 3, 31
 10 tests skipped, plus 20 subtests skipped.
-Failed 4/190 test scripts, 97.89% okay. 7/6430 subtests failed, 99.89% okay.
+Failed 4/190 test scripts, 97.89% okay. 7/6430 subtests failed, 99.89% 
+okay.

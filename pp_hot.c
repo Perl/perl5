@@ -1265,15 +1265,9 @@ Perl_do_readline(pTHX)
 		sv_setpv(tmpcmd, "/dev/dosglob/"); /* File System Extension */
 		sv_catsv(tmpcmd, tmpglob);
 #else
-#ifdef CYGWIN32
-		sv_setpv(tmpcmd, "for a in ");
-		sv_catsv(tmpcmd, tmpglob);
-		sv_catpv(tmpcmd, "; do echo -e \"$a\\0\\c\"; done |");
-#else
 		sv_setpv(tmpcmd, "perlglob ");
 		sv_catsv(tmpcmd, tmpglob);
 		sv_catpv(tmpcmd, " |");
-#endif /* !CYGWIN */
 #endif /* !DJGPP */
 #endif /* !OS2 */
 #else /* !DOSISH */

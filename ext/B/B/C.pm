@@ -1262,7 +1262,7 @@ sub delete_unsaved_hashINC{
 	my $packname=shift;
 	$packname =~ s/\:\:/\//g;
 	$packname .= '.pm';
-	warn "deleting $packname" if $INC{$packname} ;# debug
+#	warn "deleting $packname" if $INC{$packname} ;# debug
 	delete $INC{$packname};
 }
 sub walkpackages 

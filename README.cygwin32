@@ -12,17 +12,16 @@ README.cygwin32 - notes about porting Perl to Cygwin32
 
 =item Cygwin32
 
-   The Cygwin tools are ports of the popular GNU development tools for
+The Cygwin tools are ports of the popular GNU development tools for
 Windows NT, 95, and 98.  They run thanks to the Cygwin library which
 provides the UNIX system calls and environment these programs expect.
-More info about this project can be found at it's home page
+More info about this project can be found at its home page
 http://sourceware.cygnus.com/cygwin/
 
 =item libperl.dll
 
-These instructions and the default cygwin32 hints build a a shared
+These instructions and the default cygwin32 hints build a shared
 libperl.dll Perl library and enables dynamically loaded extensions.
-
 
 =back
 
@@ -48,7 +47,109 @@ ftp://ftp.xraylith.wisc.edu/pub/khan/gnu-win32/cygwin/egcs-1.1.2/
 To make life easier, you should download
 ftp://ftp.franken.de/pub/win32/develop/gnuwin32/cygwin/porters/Humblet_Pierre_A/install-cygwin-b20.sh,
 and use it as your install "executable." Just follow the instructions
-that are embedding as comments in the .sh file.
+that are embedded as comments in the .sh file.
+
+=item Windows NT notes
+
+You should execute a 'chmod -R +w *' on the entire perl source directory. 
+The configuration process creates new files (and thus needs write access
+to the directory) and sometimes, especially if you make repeated builds
+in the same directory, overwrites old files. If you do not enable write
+access, you're just asking for trouble. Reminder for B20.1: unless 'ntea' 
+is included in the CYGWIN environment variable settings, chmod has no 
+effect. See "environment," below.
+
+It is best if you build, test, and install as a normal user, not as
+Administrator or as any member of the Administrators group. There is
+a well-known NT-ism that affects Cygwin: all files that are created
+by any member of the Administrators B<group> are B<NOT> owned by 
+that member. The ownership of those files is assigned to the 
+Administrators group, instead. If the default access mode for new files
+is -rw-r--r--, then the original creator of the file cannot overwrite 
+it: he no longer owns the file, no B<user> does. It is owned by the 
+group, but group members don't have write access to it. This causes 
+any number of problems, including make test / perl harness failures, 
+installation failures, etc.
+
+In some cases, however, it is necessary to install as Administrator. For 
+instance, if normal users are not allowed write access to the install 
+directory. My solution, in this case, was to transfer ownership of the 
+install directory tree (/usr/local) to a single, normal user, and 
+set permissions to -rw-r--r-- (drwxr-xr-x for directories, of course). 
+If you read the preceeding paragraph carefully, you might suspect that 
+changing the permissions on the entire tree to -rw-rw-r--, but allowing 
+the Administrators group to keep ownership should solve the problem. 
+However, newly created directories (and the perl install creates a lot 
+of them) will not allow group write access. Setting umask will not 
+fix this problem, because umask is a B<negation> operator; it only 
+specifies the types of accesses that will NOT be allowed on new files. 
+For instance, umask u=rwx,g=rwx,o=rx means that world ('B<o>thers') will 
+never be allowed write access, but owner ('B<u>ser') and B<g>roup B<might> 
+be allowed write access. Everybody (u, g, and o) B<might>be allowed 
+read access.
+
+In any case, Corinna Vinschen's ntsec patches B<may> eventually 
+alleviate this whole mess, and are included in the development 
+snapshots as of 24 May 1999. You will need to include 'ntsec' as 
+one of the items in the CYGWIN variable setting. However, initial 
+tests indicate some incompatibility the 0524 snapshot and this perl
+build.
+
+=item environment
+
+I (csw) found the following steps necessary for a successful build:
+
+=over
+
+=item path
+
+I set my path so that none of the windows directories showed up -
+otherwise Configure found the wrong executables (find, grep, etc).
+It is, however, important that '.' be in the path, because otherwise
+the build process can't execute the ld2 script that is created.
+
+=item mounts
+
+I had to unmount my f: drive. I have cygwin installed under 
+F:\cygnus\cygwin-b20\, which is mounted as \. I also ordinarily 
+have F:\ mounted as /f (i.e. mounted onto the empty directory 
+F:\cygnus\cygwin-b20\f\ ). However, this causes Configure to 
+"locate" the awk, tr, sed, etc. programs at 
+/f/cygnus/cygwin-b20/usr/bin instead of /usr/bin. 
+This ended up causing problems.
+
+I built and tested perl using all binary mounts. However, Eric Fifer 
+has built and tested it using text mounts, but reported more failures
+during make test and perl harness. Based on his findings, and experiments
+performed by Sebastien Barre with the static build of perl, I can 
+report that these test failures are B<not> due to any differences in
+the perl executable. Most of the failures encountered during a make test
+on text mounts can be eliminated by remounting as binary, and re-running
+the tests using the same executable. These test failures are due to 
+problems in the test scripts, not the executable. See Appendix.
+
+One observation from experience with the static build of perl is that
+it's a bad idea to a mix a perl executable that was compiled using binary
+mounts with modules compiled using text mounts, and vice versa. Make
+sure your mount environment matches. This observation has not been
+confirmed with respect to the dynamically linked build of perl. 
+
+=item environment variables
+
+For NT users, the CYGWIN variable should include the 'ntea' setting. 
+However, if you have FAT drives on your system, as opposed to NTFS, 
+please read the Cygwin FAQ concerning ntea before including it in 
+your system settings. If you do not use ntea, you will encounter a 
+few extra make test and/or perl harness failures. These are not 
+indicative of a faulty perl executable, but only that your system 
+settings do not allow the types of file access and ownership checking 
+that the test scripts are attempting to verify. See Appendix.
+
+I unset INCLUDE and LIB (these two variables are set by MSVC5, and 
+inherited from my Windows environment by cygwin). I'm not sure this made 
+a difference, but it has caused problems in the past...
+
+=back
 
 =item crypt library
 
@@ -57,13 +158,60 @@ libraries ported to cygwin.  This has been tested with the libcrypt.tgz
 by Andy Piper. His home page can be found at
 http://www.xemacs.freeserve.co.uk/
 
+=item hacks that should be revisited after the next cygwin release
+
+Some of the failures we encountered when running make test and/or perl harness
+are due to bugs in the cygwin b20.1 distribution. We sometimes found it
+necessary to use dirty little hacks to persuade make test and perl harness
+to play nicely. Since cygwin is in active development, many of these hacks 
+may not be necessary in the future. These include:
+
+=over
+
+=item fix for pragma/locale
+
+the line '#undef MB_CUR_MAX' was added to ex/POSIX/POSIX.xs. This fixes
+a failure in the pragma/locale.t test, which before this fix resulted in a 
+coredump. It appears that MB_CUR_MAX is #defined __mb_cur_max, and __mb_cur_max
+is declared 'extern' in Cygwin b20.1's stdlib.c, but is never defined. Thus,
+the error.
+
+=item fix for lib/io_sock
+
+there is a rather extensive patch to t/lib/io_sock.t which works around
+a failure related to fork() in the cygwin environment. Cygwin b20.1 does not 
+properly remap manually loaded DLLs in the child after a fork.
+
+=item fix for lib/filehand
+
+during the make test/perl harness steps, a win32 popup complains about 
+a "perl.exe Application Error - illegal memory access." This is due to to
+a test in t/lib/filehand.t, and is related to the fork + dll problem.
+
+=item fix for environ
+
+there are a number of changes to miniperlmain.c, util.c, and mg.c that
+are there to work around a Cygwin problem relating to environ.
+
+=item fix for lib/posix
+
+the following line was added to t/lib/posix.t to work around a Cygwin bug.
+
+=begin text
+
+kill 'CONT', $$ if($^O =~ /cygwin/); # XXX: Cygwin bug INT signal gets stuck
+
+=end text
+
+=back
+
 =back
 
 =head2 Configure
 
 Check hints/cygwin32.sh for any system specific settings.  In
-particular change libpth if Cygwin is installed somewhere other
-than /cygnus.
+particular change libpth to point to the correct location of
+...../i586-cygwin32/lib.
 
 run "sh Configure".  
 
@@ -87,32 +235,99 @@ collides with some cygwin startup routines.
 
 =head2 make
 
-Run "make".  After that, run "make test" to see how stable your system is.
-For me, at io/taint.t you may see several Win32 "Unable To Locate DLL"
-messages (just click Ok) that requires cygwin1.dll to be present in the
-build directory or somewhere in system path (/WINNT, /WINNT/System,
-/WINNT/System32).  And, at lib/io_sock.t you may see several Win32
-"Application Error" messages (just click Ok) and the test waits for a
-died child that has to be killed manually.  Other test scripts seem to
-be more or less harmless.  The result of ./perl harness reads:
+Run "make". If you're really feeling adventurous, type 
+"make 2>&1 | tee make-log.txt".
 
-=begin text
+=over
 
-Failed Test  Status Wstat Total Fail  Failed  List of failed
--------------------------------------------------------------------------------
-lib/anydbm.t      2   512    12    8  66.67%  5-12
-lib/findbin.t                 1    1 100.00%  1
-lib/io_sock.t     9  2304     5    4  80.00%  2-5
-lib/sdbm.t        2   512    18   15  83.33%  2, 5-18
-op/magic.t                   35    2   5.71%  23, 29
-op/split.t                   25    1   4.00%  11
-op/stat.t                    58    2   3.45%  9, 26
-op/taint.t                  149    3   2.01%  1, 3, 31
-pragma/locale.t  11  2816   102    4   3.92%  99-102
-9 tests skipped, plus 35 subtests skipped.
-Failed 9/190 test scripts, 95.26% okay. 40/6452 subtests failed, 99.38% okay.
+=item ld2
 
-=end text
+The make script will install ld2 into your $installbin directory (i.e.
+wherever you said to put the perl.exe) during the *make* process. It 
+does not wait until the *make install* process to install the ld2 script.
+This is because the remainder of the make refers to ld2 without fully
+specifying its path, and does this from multiple subdirectories (so ./ld2
+won't work.) The assumption here is that $installbin is in your current
+$PATH. If this is not the case, or if you do not have an install 
+executable, the make will fail at some point. Don't panic. Just manually
+copy ld2 from the source directory to someplace in your path.
+
+This cannot be done prior to make, because ld2 is created during the
+make process.
+
+=back
+
+=head2 make test
+
+Run "make test" to see how stable your system is. I (csw) got the 
+following errors/warnings:
+
+=over
+
+=item op/taint
+
+Got two "missing cygwin1.dll" warning popups. This is because
+op/taint wants cygwin1.dll to be somewhere in the system path 
+(\WINDOWS\SYSTEM, etc) or in the build directory. Can be ignored.
+
+=item lib/filehand
+
+Got an "Application Error - memory could not be read" popup. While 
+this looks alarming, it can be ignored - just click OK. It is 
+because Cygwin B20.1 doesn't properly remap manually loaded DLLs 
+in the child after a fork.
+
+=item lib/io_sock
+
+Got an "Application Error - memory could not be read" popup. Again,
+just click OK and ignore it.
+
+=back
+
+=head2 perl harness
+
+Once you've run make test, then cd into the t/ subdirectory and
+execute './perl harness'. I (csw) got the following results:
+
+=over
+
+=item op/taint
+
+Got four "missing cygwin1.dll" warning popups. Click OK and
+ignore.
+
+=item lib/filehand
+
+Got an "Application Error - memory could not be read" popup. Again,
+click OK and ignore.
+
+=item lib/io_sock
+
+Got an "Application Error - memory could not be read" popup. Again,
+clock OK and ignore.
+
+=item final results
+
+After the ./perl harness, I got the following results summary.
+
+ Failed Test  Status Wstat Total Fail  Failed  List of failed
+ -------------------------------------------------------------------------------
+ op/taint.t                  149    3   2.01%  1, 3, 31
+ 9 tests skipped, plus 35 subtests skipped.
+ Failed 1/190 test scripts, 99.47% okay. 3/6452 subtests failed, 99.95% okay.
+
+=back
+
+=head2 make install
+
+Finally, run "make install". In my case, the install process was unable
+to copy the files from <SRCDIR>/pod/* to /usr/local/lib/perl5/5.00503/pod/.
+I (csw) just copied them by hand after the install finished. I believe
+this is because I'm using Sergey Okhapkin's coolview version of the
+cygwin1.dll, which provides case sensitivity. The directory is created
+as "/usr/local/lib/perl5/5.00503/Pod" but the copy is done into
+"/usr/local/lib/perl5/5.00503/pod". This fails -- but probably won't 
+fail if you're using the default cygwin1.dll.
 
 =head1 BUGS
 
@@ -121,11 +336,8 @@ lacking a cast.  This is because of __declspec(dllimport).
 
 Upon each start, make warns that a rule for perlmain.o is overrided.
 Yes, it is.  In order to use libperl.dll, perlmain needs to import
-symbols from there.  I saw no better solution than adding an explicit
-define to the rule.
-
-The lib/io_sock.t failure seems to be a problem with a forked child
-not having its DLLs remapped.
+symbols from there.  According to alex smishlajev, there seems to be 
+no better solution than adding an explicit define to the rule.
 
 make clean does not remove library .def and .exe.core files.
 
@@ -140,17 +352,154 @@ alexander smishlajev <als@turnhere.com>
 
 =head1 DISCLAIMER
 
-I am not going to maintain this document or this port.  I only wanted
+I (alex) am not going to maintain this document or this port.  I only wanted
 to make perl porting a bit easier.  If failed, I can't be helpful for you.
+Contact one of the others listed in the history section.
 
 =head1 HISTORY
 
-17..25-apr-1999.  perl 5.005_03.  cygwin b20.1  egcs 1.1.2.
-                  far 1.60.  nescafe classic.
+=over
 
-efifer@sanwaint.com - Wed May 12 17:22:42 BST 1999
+=item Release 1.4.1: 28-May-1999
 
-    Removed all references to the impure_ptr hack since it is no longer
-    needed.  Some minor cleanup of Alexander's work and a few bug fixes.
+Charles Wilson  -  cwilson@ece.gatech.edu
+
+   Configure               minor fix for spaces in $PATH
+   documentation updates
+
+=item Release 1.4: 26-May-1999
+
+Charles Wilson  -  cwilson@ece.gatech.edu
+
+ From Eric Fifer:
+   hints/cygwin32.sh       -L. and --export-dynamic not needed
+   cygwin32/Makefile.SHs   no value needed for -DUSEIMPORTLIB
+   t/lib/io_sock.t         -I../lib so "make test" works
+   t/lib/posix.t           workaround a Cygwin bug so test works
+   doio.c/perl.h           cleanup gcc warning "doio.c:789: warning:
+                                pointer/integer type mismatch in 
+                                conditional expression"
+ From Charles Wilson:
+   Configure               changes to findhdr script
+   documentation updates
+   built binary kit for release
+
+=item Release 1.3: 26-May-1999
+
+Charles Wilson  -  cwilson@ece.gatech.edu
+
+ Changes to Cwd.pm to correct lib/findbin.t test failure from Eric Fifer
+ Changes to t/op/magic.t to correct a test failure from Eric Fifer
+ Changes to miniperlmain.c, util.c, and mg.c to correct t/op/magic.t #29
+    test failure, from Eric Fifer
+ more documentatino updates, patch merging, and a change to 
+    cygwin/Makefile.SHs -- cw.
+ 99.95% okay!!!
+
+=item Release 1.2: 25-May-1999
+
+Charles Wilson  -  cwilson@ece.gatech.edu
+
+ fixes for lib/io_sock and pragma/locale from Eric Fifer
+ fixes for Configure, Makefile.SH, and cygwin32/Makefile.SHs from
+    alex smishlajev
+ documentation updates, and other fixes to the fixes from cw.
+ 99.91% okay!!!
+
+=item Release 1.1: 21-May-1999
+
+Charles Wilson  -  cwilson@ece.gatech.edu
+
+minor change to Configure script, reversed a few changes made by
+alexander's patch (made DOSISH #undefined again) and moved code
+by alexander from dosish.h to perl.h. Reversed a change in 
+pp_hot.c
+
+=item Release 1.0: 16-May-1999
+
+Charles Wilson  -  cwilson@ece.gatech.edu
+
+Merged alexander's patch and Eric's patch into a single
+monolithic patch. Minor cleanup. Built binary for distribution.
+perl5.005_03-dynamic-patch-v1.0
+
+=item Pre-release 3: 12-May-1999 
+
+Eric Fifer  -  efifer@sanwaint.com
+
+Removed all references to the impure_ptr hack since it is no longer
+needed.  Some minor cleanup of alexander smishlajev's work and a few
+bug fixes.
+
+=item Pre-release 2 (initial dynamic build): 17..25-apr-1999
+
+alexander smishlajev  -  als@turnher.com
+
+perl 5.005_03.  cygwin b20.1  egcs 1.1.2.  far 1.60.  nescafe classic.
+
+=item Pre-release 1 (static build): 5-Mar-1999
+
+Charles Wilson  -  cwilson@ece.gatech.edu
+
+Collected various patches that had been floating around the net, along
+with build instructions.  Original authorship credit for those patches
+goes to:
+
+ Steven Morlock  -  newspost@morlock.net
+ Sebastien Barre -  Sebastien.Barre@utc.fr
+ Teun Burgers    -  burgers@ecn.nl
+
+Created a monolithic patchkit (perl5.005_03-static-patch) and build
+instructions for cygwin (beta 20.1). Also created a binary distribution
+of the resulting static perl build.
+
+=back
+
+=head1 APPENDIX
+
+Perl harness results from Eric Fifer, under various environments. The same
+executable was used in all cases. The last item is a different executable
+on a different machine, built by Charles Wilson.
+
+There are a number of very good questions one could ask about anomalies 
+in the test results presented below. "Why do the last two show different
+results?" "Why did op/stat.t #18 pass in the first two tests and fail in
+the third?" Short answer: I don't know. Long answer: I really have no
+idea.
+
+=over
+
+=item text mounts, no 'ntea'
+
+ Failed Test  Status Wstat Total Fail  Failed  List of failed
+ ------------------------------------------------------------
+ lib/anydbm.t      2   512    12    8  66.67%  5-12
+ lib/sdbm.t        2   512    18   15  83.33%  2, 5-18
+ op/split.t                   25    1   4.00%  11
+ op/stat.t                    58    3   5.17%  9, 19, 26
+ op/taint.t                  149    3   2.01%  1, 3, 31
+
+=item binary mounts, no 'ntea'
+
+ Failed Test  Status Wstat Total Fail  Failed  List of failed
+ ------------------------------------------------------------
+ lib/sdbm.t                   18    1   5.56%  2
+ op/stat.t                    58    3   5.17%  9, 19, 26
+ op/taint.t                  149    3   2.01%  1, 3, 31
+
+=item binary mounts, 'ntea'
+
+ Failed Test  Status Wstat Total Fail  Failed  List of failed
+ ------------------------------------------------------------
+ op/stat.t                    58    3   5.17%  18-19, 26
+ op/taint.t                  149    3   2.01%  1, 3, 31
+
+=item binary mounts, ntea (csw build)
+
+ Failed Test  Status Wstat Total Fail  Failed  List of failed
+ -------------------------------------------------------------------------------
+ op/taint.t                  149    3   2.01%  1, 3, 31
+
+=back
 
 =cut

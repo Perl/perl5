@@ -1,3 +1,8 @@
+This document is obsolete. Refer to README.cygwin32. However, if you want
+to build a statically linked perl binary, then you applied the wrong patch.
+You want perl5.005_03-static-patch, which will build "Pre-release 1"
+according to the nomenclature in README.cygwin32.
+
 The perl source distribution is available from 
    http://www.cpan.org/src/index.html
 
@@ -13,17 +18,21 @@ For the easiest build of perl under Cygwin, do the following:
 
 (2) prepare the source
         (a) unpack perl source distribution in /usr/local/src
-        (b) copy perl5.005_03.patch into /usr/local/src/perl5.005_03/
+        (b) copy perl5.005_03-static-patch into /usr/local/src/perl5.005_03/
         (c) cd /usr/local/src/perl5.005_03
         (d) chmod -R +w *
-        (e) patch -p1 < perl5.005_03.patch
+        (e) patch -p1 < perl5.005_03-static-patch
 
 (3) get ready to build
-        (a) cp cygwin32/* .
-        (b) cp gcc2 /usr/local/bin
-        (c) cp ld2 /usr/local/bin
-        (d) cp hints/cygwin32.sh config.sh
-        (e) sh Configure -d 
+        (a) cp cygwin32/cw32imp.h .
+        (b) cp cygwin32/gcc2 .
+        (c) cp cygwin32/ld2 .
+        (d) cp cygwin32/perlgcc .
+        (e) cp cygwin32/perlld .
+        (f) cp gcc2 /usr/local/bin
+        (g) cp ld2 /usr/local/bin
+        (h) cp hints/cygwin32.sh config.sh
+        (i) sh Configure -d 
                 (automatically does a make depend)
 
 (4) build and install
@@ -31,7 +40,10 @@ For the easiest build of perl under Cygwin, do the following:
         (c) make test
         (d) make install
 
-To customize, look around in the patchfile or ignore the patch and follow the build-instructions.* directly. If you want to edit the paths in the patchfile to reflect your system, search for "/usr/" within the patchfile.
+To customize, look around in the patchfile or ignore the patch and 
+follow the build-instructions.* directly. If you want to edit the paths 
+in the patchfile to reflect your system, search for "/usr/" within the 
+patchfile.
 
 * MUST read.
 

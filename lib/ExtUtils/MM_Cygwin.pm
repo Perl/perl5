@@ -115,3 +115,8 @@ replaces strings '::' with '.' in man page names
 =item perl_archive
 
 points to libperl.a
+
+=back
+
+=cut
+

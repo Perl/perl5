@@ -104,6 +104,7 @@
 #else
 #if defined (CYGWIN32)
 #    define tzname _tzname
+#    undef MB_CUR_MAX          /* XXX: bug in b20.1 */
 #endif
 #if defined (WIN32)
 #  undef mkfifo
