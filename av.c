@@ -765,6 +765,7 @@ Perl_av_delete(pTHX_ AV *av, I32 key, I32 flags)
     else {
 	sv = AvARRAY(av)[key];
 	if (key == AvFILLp(av)) {
+	    AvARRAY(av)[key] = &PL_sv_undef;
 	    do {
 		AvFILLp(av)--;
 	    } while (--key >= 0 && AvARRAY(av)[key] == &PL_sv_undef);
