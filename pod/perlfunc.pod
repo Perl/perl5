@@ -863,7 +863,9 @@ is just like
 except that it's more efficient, more concise, keeps track of the
 current filename for error messages, and searches all the B<-I>
 libraries if the file isn't in the current directory (see also the @INC
-array in L<perlvar/Predefined Names>).  It's the same, however, in that it does
+array in L<perlvar/Predefined Names>).  It is also different in how
+code evaluated with C<do FILENAME> doesn't see lexicals in the enclosing
+scope like C<eval STRING> does.  It's the same, however, in that it does
 reparse the file every time you call it, so you probably don't want to
 do this inside a loop.
 
