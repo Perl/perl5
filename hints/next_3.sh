@@ -7,7 +7,6 @@
 #
 
 ccflags='-DUSE_NEXT_CTYPE -DUSE_PERL_SBRK -DHIDEMYMALLOC'
-POSIX_cflags='ccflags="-posix $ccflags"'
 ldflags='-u libsys_s'
 libswanted='dbm gdbm db'
 
@@ -64,7 +63,11 @@ d_strcoll='undef'
 usemymalloc='y'
 
 d_uname='define'
-d_setpgid='define'
+# setpgid() is in the posix library, but we don't use -posix, so
+# we don't see it.  ext/POSIX/POSIX.xs  *does* use -posix, so
+# setpgid is still available as POSIX::setpgid.
+# See ext/POSIX/POSIX/hints/next.pl.
+d_setpgid='undef'
 d_setsid='define'
 d_tcgetpgrp='define'
 d_tcsetpgrp='define'
@@ -79,4 +82,7 @@ ranlib='sleep 5; /bin/ranlib'
 #
 # There where reports that the compiler on HPPA machines
 # fails with the -O flag on pp.c.
-pp_cflags='optimize="-g"'
+# Compiling pp.c with -O for HPPA machines results in a broken perl.
+# This is true whether we're on an HPPA machine or cross-compiling
+# for one.
+pp_cflags='optimize=""'
