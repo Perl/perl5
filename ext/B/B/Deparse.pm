@@ -2869,8 +2869,8 @@ B::Deparse - Perl compiler backend to produce perl code
 
 =head1 SYNOPSIS
 
-B<perl> B<-MO=Deparse>[B<,-u>I<PACKAGE>][B<,-p>][B<,-q>][B<,-l>][B<,-s>I<LETTERS>]
-     I<prog.pl>
+B<perl> B<-MO=Deparse>[B<,-u>I<PACKAGE>][B<,-p>][B<,-q>][B<,-l>]
+        [B<,-s>I<LETTERS>][B<,-x>I<LEVEL>] I<prog.pl>
 
 =head1 DESCRIPTION
 
@@ -3023,7 +3023,7 @@ meaning more expansion. As with B<-q>, this actually involves turning off
 special cases in B::Deparse's normal operations.
 
 If I<LEVEL> is at least 3, for loops will be translated into equivalent
-while loops with a continue block; for instance
+while loops with continue blocks; for instance
 
     for ($i = 0; $i < 10; ++$i) {
         print $i;
@@ -3039,7 +3039,7 @@ turns into
     }
 
 Note that in a few cases this translation can't be perfectly carried back
-into the source code -- if the loop'd initializer declares a my variable,
+into the source code -- if the loop's initializer declares a my variable,
 for instance, it won't have the correct scope outside of the loop.
 
 If I<LEVEL> is at least 7, if statements will be translated into equivalent
