@@ -124,7 +124,7 @@ my $echo = "$Invoke_Perl $ECHO";
 
 my $TEST = catfile(curdir(), 'TEST');
 
-print "1..208\n";
+print "1..220\n";
 
 # First, let's make sure that Perl is checking the dangerous
 # environment variables. Maybe they aren't set yet, so we'll
@@ -992,4 +992,36 @@ else
     local *ENV = *nonmagicalenv;
     eval { system("lskdfj"); };
     test 208, $@ =~ /^%ENV is aliased to %nonmagicalenv while running with -T switch/;
+}
+{
+    # [perl #24248]
+    $TAINT =~ /(.*)/;
+    test 209, !tainted($1);
+    my $notaint = $1;
+    test 210, !tainted($notaint);
+
+    my $l;
+    $notaint =~ /($notaint)/;
+    $l = $1;
+    test 211, !tainted($1);
+    test 212, !tainted($l);
+    $notaint =~ /($TAINT)/;
+    $l = $1;
+    test 213, tainted($1);
+    test 214, tainted($l);
+
+    $TAINT =~ /($notaint)/;
+    $l = $1;
+    test 215, !tainted($1);
+    test 216, !tainted($l);
+    $TAINT =~ /($TAINT)/;
+    $l = $1;
+    test 217, tainted($1);
+    test 218, tainted($l);
+
+    my $r;
+    ($r = $TAINT) =~ /($notaint)/;
+    test 219, !tainted($1);
+    ($r = $TAINT) =~ /($TAINT)/;
+    test 220, tainted($1);
 }
