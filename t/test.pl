@@ -23,7 +23,7 @@ sub plan {
 END {
     my $ran = $test - 1;
     if (!$NO_ENDING && defined $planned && $planned != $ran) {
-        print STDOUT "# Looks like you planned $planned tests but ran $ran.\n";
+        print STDERR "# Looks like you planned $planned tests but ran $ran.\n";
     }
 }
 
@@ -53,11 +53,11 @@ sub _ok {
     print STDOUT "$out\n";
 
     unless ($pass) {
-	print STDOUT "# Failed $where\n";
+	print STDERR "# Failed $where\n";
     }
 
     # Ensure that the message is properly escaped.
-    print STDOUT map { /^#/ ? "$_\n" : "# $_\n" } 
+    print STDERR map { /^#/ ? "$_\n" : "# $_\n" } 
                  map { split /\n/ } @mess if @mess;
 
     $test++;
@@ -206,12 +206,13 @@ sub eq_hash {
     $key = "" . $key;
     if (exists $orig->{$key}) {
       if ($orig->{$key} ne $value) {
-        print "# key ", _qq($key), " was ", _qq($orig->{$key}),
+        print STDERR "# key ", _qq($key), " was ", _qq($orig->{$key}),
           " now ", _qq($value), "\n";
         $fail = 1;
       }
     } else {
-      print "# key ", _qq($key), " is ", _qq($value), ", not in original.\n";
+      print STDERR "# key ", _qq($key), " is ", _qq($value), 
+                   ", not in original.\n";
       $fail = 1;
     }
   }
@@ -219,7 +220,7 @@ sub eq_hash {
     # Force a hash recompute if this perl's internals can cache the hash key.
     $_ = "" . $_;
     next if (exists $suspect->{$_});
-    print "# key ", _qq($_), " was ", _qq($orig->{$_}), " now missing.\n";
+    print STDERR "# key ", _qq($_), " was ", _qq($orig->{$_}), " now missing.\n";
     $fail = 1;
   }
   !$fail;
@@ -317,7 +318,7 @@ sub runperl {
     if ($args{verbose}) {
 	my $runperldisplay = $runperl;
 	$runperldisplay =~ s/\n/\n\#/g;
-	print STDOUT "# $runperldisplay\n";
+	print STDERR "# $runperldisplay\n";
     }
     my $result = `$runperl`;
     $result =~ s/\n\n/\n/ if $is_vms; # XXX pipes sometimes double these
@@ -326,7 +327,7 @@ sub runperl {
 
 
 sub DIE {
-    print STDOUT "# @_\n";
+    print STDERR "# @_\n";
     exit 1;
 }
 
@@ -377,7 +378,7 @@ sub which_perl {
 sub unlink_all {
     foreach my $file (@_) {
         1 while unlink $file;
-        print "# Couldn't unlink '$file': $!\n" if -f $file;
+        print STDERR "# Couldn't unlink '$file': $!\n" if -f $file;
     }
 }
 1;
