@@ -3073,6 +3073,10 @@ Perl_yylex(pTHX)
 			CvLOCKED_on(PL_compcv);
 		    else if (!PL_in_my && len == 6 && strnEQ(s, "method", len))
 			CvMETHOD_on(PL_compcv);
+#ifdef USE_ITHREADS
+		    else if (PL_in_my == KEY_our && len == 6 && strnEQ(s, "shared", len))
+			GvSHARED_on(cGVOPx_gv(yylval.opval));
+#endif
 		    /* After we've set the flags, it could be argued that
 		       we don't need to do the attributes.pm-based setting
 		       process, and shouldn't bother appending recognized
