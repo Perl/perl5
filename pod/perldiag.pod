@@ -1055,13 +1055,6 @@ indicates that such a conversion was attempted.
 upgradability.  Upgrading to undef indicates an error in the code
 calling sv_upgrade.
 
-=item Can't use '%c' in a group with different byte-order in %s
-
-(F) You attempted to force a different byte-order on a type
-that is already inside a group with a byte-order modifier.
-For example you cannot force little-endianness on a type that
-is inside a big-endian group.
-
 =item Can't use anonymous symbol table for method lookup
 
 (F) The internal routine that does method lookup was handed a symbol
@@ -1102,6 +1095,13 @@ is not allowed, because the magic can be tied to only one location
 (namely the global variable) and it would be incredibly confusing to
 have variables in your program that looked like magical variables but
 weren't.
+
+=item Can't use '%c' in a group with different byte-order in %s
+
+(F) You attempted to force a different byte-order on a type
+that is already inside a group with a byte-order modifier.
+For example you cannot force little-endianness on a type that
+is inside a big-endian group.
 
 =item Can't use "my %s" in sort comparison
 
@@ -1324,6 +1324,22 @@ there are neither package declarations nor a C<$VERSION>.
 (F) In a here document construct like C<<<FOO>, the label C<FOO> is too
 long for Perl to handle.  You have to be seriously twisted to write code
 that triggers this error.
+
+=item Deprecated use of my() in false conditional
+
+(D deprecated) You used a declaration similar to C<my $x if 0>.
+There has been a long-standing bug in Perl that causes a lexical variable
+not to be cleared at scope exit when its declaration includes a false
+conditional. Some people have exploited this bug to achieve a kind of
+static variable. Since we intend to fix this bug, we don't want people
+relying on this behavior. You can achieve a similar static effect by
+declaring the variable in a separate block outside the function, eg
+    
+    sub f { my $x if 0; return $x++ }
+
+becomes
+
+    { my $x; sub f { return $x++ } }
 
 =item DESTROY created new reference to dead object '%s'
 
@@ -2660,17 +2676,17 @@ C<limit datasize n> (where C<n> is the number of kilobytes) to check
 the current limits and change them, and in ksh/bash/zsh use C<ulimit -a>
 and C<ulimit -d n>, respectively.
 
+=item Out of memory during %s extend
+
+(X) An attempt was made to extend an array, a list, or a string beyond
+the largest possible memory allocation.
+
 =item Out of memory during "large" request for %s
 
 (F) The malloc() function returned 0, indicating there was insufficient
 remaining memory (or virtual memory) to satisfy the request. However,
 the request was judged large enough (compile-time default is 64K), so a
 possibility to shut down by trapping this error is granted.
-
-=item Out of memory during %s extend
-
-(X) An attempt was made to extend an array, a list, or a string beyond
-the largest possible memory allocation.
 
 =item Out of memory during request for %s
 
@@ -2925,18 +2941,18 @@ redirected it with select().)
 "Can't locate object method \"%s\" via package \"%s\"".  It often means
 that a method requires a package that has not been loaded.
 
-=item Perl %s required--this is only version %s, stopped
-
-(F) The module in question uses features of a version of Perl more
-recent than the currently running version.  How long has it been since
-you upgraded, anyway?  See L<perlfunc/require>.
-
 =item Perl_my_%s() not available
 
 (F) Your platform has very uncommon byte-order and integer size,
 so it was not possible to set up some or all fixed-width byte-order
 conversion functions.  This is only a problem when you're using the
 '<' or '>' modifiers in (un)pack templates.  See L<perlfunc/pack>.
+
+=item Perl %s required--this is only version %s, stopped
+
+(F) The module in question uses features of a version of Perl more
+recent than the currently running version.  How long has it been since
+you upgraded, anyway?  See L<perlfunc/require>.
 
 =item PERL_SH_DIR too long
 
@@ -3694,22 +3710,6 @@ before now.  Check your control flow.
 (F) Perl can't peek at the stdio buffer of filehandles when it doesn't
 know about your kind of stdio.  You'll have to use a filename instead.
 
-=item "-T" is on the #! line, it must also be used on the command line
-
-(X) The #! line (or local equivalent) in a Perl script contains the
-B<-T> option, but Perl was not invoked with B<-T> in its command line.
-This is an error because, by the time Perl discovers a B<-T> in a
-script, it's too late to properly taint everything from the environment.
-So Perl gives up.
-
-If the Perl script is being executed as a command using the #!
-mechanism (or its local equivalent), this error can usually be fixed by
-editing the #! line so that the B<-T> option is a part of Perl's first
-argument: e.g. change C<perl -n -T> to C<perl -T -n>.
-
-If the Perl script is being executed as C<perl scriptname>, then the
-B<-T> option must appear on the command line: C<perl -T scriptname>.
-
 =item Target of goto is too deeply nested
 
 (F) You tried to use C<goto> to reach a label that was too deeply nested
@@ -3780,6 +3780,22 @@ target of the change to
 
 (F) Your version of the C library apparently doesn't do times().  I
 suspect you're not running on Unix.
+
+=item "-T" is on the #! line, it must also be used on the command line
+
+(X) The #! line (or local equivalent) in a Perl script contains the
+B<-T> option, but Perl was not invoked with B<-T> in its command line.
+This is an error because, by the time Perl discovers a B<-T> in a
+script, it's too late to properly taint everything from the environment.
+So Perl gives up.
+
+If the Perl script is being executed as a command using the #!
+mechanism (or its local equivalent), this error can usually be fixed by
+editing the #! line so that the B<-T> option is a part of Perl's first
+argument: e.g. change C<perl -n -T> to C<perl -T -n>.
+
+If the Perl script is being executed as C<perl scriptname>, then the
+B<-T> option must appear on the command line: C<perl -T scriptname>.
 
 =item To%s: illegal mapping '%s'
 
@@ -4346,22 +4362,6 @@ old way has bad side effects.
 (W io) A filehandle represents an opened file, and when you opened the file
 it already went past any symlink you are presumably trying to look for.
 The operation returned C<undef>.  Use a filename instead.
-
-=item Deprecated use of my() in false conditional
-
-(D deprecated) You used a declaration similar to C<my $x if 0>.
-There has been a long-standing bug in Perl that causes a lexical variable
-not to be cleared at scope exit when its declaration includes a false
-conditional. Some people have exploited this bug to achieve a kind of
-static variable. Since we intend to fix this bug, we don't want people
-relying on this behavior. You can achieve a similar static effect by
-declaring the variable in a separate block outside the function, eg
-    
-    sub f { my $x if 0; return $x++ }
-
-becomes
-
-    { my $x; sub f { return $x++ } }
 
 =item Use of "package" with no arguments is deprecated
 
