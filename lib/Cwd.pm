@@ -188,8 +188,9 @@ $pwd_cmd ||= 'pwd';
 # The 'natural and safe form' for UNIX (pwd may be setuid root)
 sub _backtick_pwd {
     my $cwd = `$pwd_cmd`;
-    # `pwd` may fail e.g. if the disk is full
+    # Belt-and-suspenders in case someone said "undef $/".
     local $/ = "\n";
+    # `pwd` may fail e.g. if the disk is full
     chomp($cwd) if defined $cwd;
     $cwd;
 }
