@@ -1848,7 +1848,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	    first = NEXTOPER(first);
 	    goto again;
 	}
-	else if ((OP(first) == STAR &&
+	else if (!sawopen && (OP(first) == STAR &&
 	    PL_regkind[(U8)OP(NEXTOPER(first))] == REG_ANY) &&
 	    !(r->reganch & ROPT_ANCH) )
 	{
