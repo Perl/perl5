@@ -3860,7 +3860,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 
     while (AvFILL(paramList) >= 0) {
 	cv = (CV*)av_shift(paramList);
-	if ((PL_minus_c & 0x10) && (paramList == PL_beginav)) {
+	if (PL_savebegin && (paramList == PL_beginav)) {
 		/* save PL_beginav for compiler */
 	    if (! PL_beginav_save)
 		PL_beginav_save = newAV();

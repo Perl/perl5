@@ -368,6 +368,7 @@
 #define PL_rsfp			(PERL_GET_INTERP->Irsfp)
 #define PL_rsfp_filters		(PERL_GET_INTERP->Irsfp_filters)
 #define PL_runops		(PERL_GET_INTERP->Irunops)
+#define PL_savebegin		(PERL_GET_INTERP->Isavebegin)
 #define PL_sawampersand		(PERL_GET_INTERP->Isawampersand)
 #define PL_sh_path		(PERL_GET_INTERP->Ish_path)
 #define PL_sig_pending		(PERL_GET_INTERP->Isig_pending)
@@ -653,6 +654,7 @@
 #define PL_rsfp			(vTHX->Irsfp)
 #define PL_rsfp_filters		(vTHX->Irsfp_filters)
 #define PL_runops		(vTHX->Irunops)
+#define PL_savebegin		(vTHX->Isavebegin)
 #define PL_sawampersand		(vTHX->Isawampersand)
 #define PL_sh_path		(vTHX->Ish_path)
 #define PL_sig_pending		(vTHX->Isig_pending)
@@ -1076,6 +1078,7 @@
 #define PL_rsfp			(aTHXo->interp.Irsfp)
 #define PL_rsfp_filters		(aTHXo->interp.Irsfp_filters)
 #define PL_runops		(aTHXo->interp.Irunops)
+#define PL_savebegin		(aTHXo->interp.Isavebegin)
 #define PL_sawampersand		(aTHXo->interp.Isawampersand)
 #define PL_sh_path		(aTHXo->interp.Ish_path)
 #define PL_sig_pending		(aTHXo->interp.Isig_pending)
@@ -1362,6 +1365,7 @@
 #define PL_Irsfp		PL_rsfp
 #define PL_Irsfp_filters	PL_rsfp_filters
 #define PL_Irunops		PL_runops
+#define PL_Isavebegin		PL_savebegin
 #define PL_Isawampersand	PL_sawampersand
 #define PL_Ish_path		PL_sh_path
 #define PL_Isig_pending		PL_sig_pending
