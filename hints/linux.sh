@@ -29,14 +29,6 @@ esac
 # gcc-2.6.3 defines _G_HAVE_BOOL to 1, but doesn't actually supply bool.
 ccflags="-Dbool=char -DHAS_BOOL $ccflags"
 
-# libc6, aka glibc2, seems to need STRUCT_TM_HASZONE defined.
-# Thanks to Bart Schuller <schuller@Lunatech.com>
-# See Message-ID: <19971009002636.50729@tanglefoot>
-# This is currently commented out for maintenance releases
-# but should probably be uncommented for 5.005 or after
-# more widespread testing.
-#POSIX_cflags='ccflags="$ccflags -DSTRUCT_TM_HASZONE"'
-
 # BSD compatability library no longer needed
 set `echo X "$libswanted "| sed -e 's/ bsd / /'`
 shift
