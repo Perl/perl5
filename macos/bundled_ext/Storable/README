@@ -1,0 +1,73 @@
+                         Storable 1.0
+               Copyright (c) 1995-2000, Raphael Manfredi
+
+------------------------------------------------------------------------
+    This program is free software; you can redistribute it and/or modify
+    it under the same terms as Perl 5 itself.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    Perl 5 License schemes for more details.
+------------------------------------------------------------------------
+
++=======================================================================
+| Storable is distributed as a module, but is also part of the official
+| Perl core distribution.  Maintenance is still done by the Author,
+| whilst the perl5-porters ensure that no change to the Perl internals
+| can break the version of Storable distributed with it.
++=======================================================================
+
+The Storable extension brings persistency to your data.
+
+You may recursively store to disk any data structure, no matter how
+complex and circular it is, provided it contains only SCALAR, ARRAY,
+HASH (possibly tied) and references (possibly blessed) to those items.
+
+At a later stage, or in another program, you may retrieve data from
+the stored file and recreate the same hiearchy in memory. If you
+had blessed references, the retrieved references are blessed into
+the same package, so you must make sure you have access to the
+same perl class as the one used to create the relevant objects.
+
+There is also a dclone() routine which performs an optimized mirroring
+of any data structure, preserving its topology.
+
+Objects (blessed references) may also redefine the way storage and
+retrieval is performed, and/or what deep cloning should do on those
+objects.
+
+To compile this extension, run:
+
+    perl Makefile.PL [PERL_SRC=...where you put perl sources...]
+    make
+    make install
+
+There is an embeded POD manual page in Storable.pm.
+
+Raphael Manfredi <Raphael_Manfredi@pobox.com>
+
+------------------------------------------------------------------------
+Thanks to (in chronological order):
+
+    Jarkko Hietaniemi <jhi@iki.fi>
+    Ulrich Pfeifer <pfeifer@charly.informatik.uni-dortmund.de>
+    Benjamin A. Holzman <bah@ecnvantage.com>
+    Andrew Ford <A.Ford@ford-mason.co.uk>
+    Gisle Aas <gisle@aas.no>
+    Jeff Gresham <gresham_jeffrey@jpmorgan.com>
+    Murray Nesbitt <murray@activestate.com>
+    Albert N. Micheev <Albert.N.Micheev@f80.n5049.z2.fidonet.org>
+    Marc Lehmann <pcg@opengroup.org>
+	Justin Banks <justinb@wamnet.com>
+	Jarkko Hietaniemi <jhi@iki.fi> (AGAIN, as perl 5.7.0 Pumpking!)
+	Salvador Ortiz Garcia <sog@msg.com.mx>
+	Dominic Dunlop <domo@computer.org>
+	Erik Haugan <erik@solbors.no>
+
+for their contributions.
+
+There is a Japanese translation of this man page available at
+http://member.nifty.ne.jp/hippo2000/perltips/storable.htm,
+courtesy of Kawai, Takanori <kawai@nippon-rad.co.jp>.
+------------------------------------------------------------------------

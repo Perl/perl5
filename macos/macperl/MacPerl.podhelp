@@ -1,0 +1,272 @@
+@menu
+pod:pod/perl.pod		MacPerl Overview
+pod:pod/perltoc.pod		Table of contents
+pod:pod/macperl.pod		Macintosh specific features	
+pod:pod/macperlbook.pod	MacPerl book information
+@sub Macintosh Toolbox Modules
+pod:lib/Mac/Toolbox.pod			Overview
+@sep
+pod:lib/Mac/Types.pm			MacOS Types
+pod:lib/Mac/Events.pm			Event Manager
+pod:lib/Mac/Windows.pm			Window Manager
+pod:lib/Mac/QuickDraw.pm		QuickDraw
+pod:lib/Mac/QDOffscreen.pm		Offscreen QuickDraw
+pod:lib/Mac/Fonts.pm			Font Manager
+pod:lib/Mac/Controls.pm			Control Manager
+pod:lib/Mac/Menus.pm			Menu Manager
+pod:lib/Mac/Dialogs.pm			Dialog Manager
+pod:lib/Mac/Movies.pm			QuickTime Movie Manager
+pod:lib/Mac/Lists.pm			List Manager
+pod:lib/Mac/StandardFile.pm		Standard File Dialogs
+pod:lib/Mac/Files.pm			File Manager
+pod:lib/Mac/MoreFiles.pm		More File Routines
+pod:lib/Mac/Memory.pm			Memory Manager
+pod:lib/Mac/Resources.pm		Resource Manager
+pod:lib/Mac/Gestalt.pm			Gestalt Manager
+pod:lib/Mac/AppleEvents.pm		AppleEvents
+pod:lib/Mac/Processes.pm		Process Manager
+pod:lib/Mac/OSA.pm				Open Scripting Architecture
+pod:lib/Mac/Components.pm		QuickTime Components
+pod:lib/Mac/Speech.pm			Speech Synthesis Manager
+pod:lib/Mac/SpeechRecognition.pm	Speech Recognition Manager
+@sep
+pod:lib/Mac/InternetConfig.pm	Internet Config 
+@sep
+pod:pod/macperlcat.pod			Chris' AppleEvents Tutorial
+@end
+@sub Perl FAQ
+pod:pod/perlfaq.pod				Overview
+@sep
+pod:pod/perlfaq1.pod			General Questions About Perl
+pod:pod/perlfaq2.pod			Obtaining and Learning about Perl
+pod:pod/perlfaq3.pod			Programming Tools
+pod:pod/perlfaq4.pod			Data Manipulation
+pod:pod/perlfaq5.pod			Files and Formats
+pod:pod/perlfaq6.pod			Regexps
+pod:pod/perlfaq7.pod			General Perl Language Issues
+pod:pod/perlfaq8.pod			System Interaction
+pod:pod/perlfaq9.pod			Networking
+@end
+@sep
+pod:pod/perldata.pod	Data structures
+pod:pod/perlsyn.pod		Syntax
+pod:pod/perlop.pod		Operators and precedence
+pod:pod/perlre.pod		Regular expressions
+pod:pod/perlfunc.pod	Builtin functions
+pod:pod/perlvar.pod		Predefined variables
+@sep
+@sub Advanced Topics
+pod:pod/perlsub.pod		Subroutines
+pod:pod/perlmod.pod		Modules
+pod:pod/perlmodlib.pod	Creating new Modules
+pod:pod/perlref.pod		References
+pod:pod/perldsc.pod		Data structures intro
+pod:pod/perllol.pod		Lists of lists
+pod:pod/perlobj.pod		Objects
+pod:pod/perltie.pod		Tied Objects
+pod:pod/perlbot.pod		OO tricks and examples
+pod:pod/perltoot.pod	OO tutorial
+pod:pod/perlform.pod	Formats
+pod:pod/perlipc.pod		Interprocess communication
+@sub Interfacing to C
+pod:pod/perlxs.pod			XS API
+pod:pod/perlxstut.pod		XS tutorial
+pod:pod/perlguts.pod		Internal functions
+pod:pod/perlapio.pod		Internal I/O Interface
+pod:pod/perlcall.pod		Calling from C
+pod:pod/perlembed.pod		Embedding Perl
+@end
+@end
+@sub Troubleshooting
+pod:pod/perldebug.pod	Debugging
+pod:pod/perldiag.pod	Diagnostic messages
+pod:pod/perltrap.pod	Traps for the unwary
+@end
+@sub Various
+pod:pod/perlstyle.pod	Style guide
+pod:pod/perlpod.pod		Documentation format
+pod:pod/perlbook.pod	Book information
+pod:pod/perldelta.pod	News for Perl 5.004
+@end
+@sep
+http://www.iis.ee.ethz.ch/~neeri/macintosh/perl.html	MacPerl Homepage
+http://www.ptf.com/macperl/								The MacPerl Pages (PTF)
+@end
+
+@index :pod:perlop.pod
+@delete	name
+@alias ->	The Arrow Operator
+@alias	++	Auto-increment and Auto-decrement
+@alias	--	Auto-increment and Auto-decrement
+@alias	**	Exponentiation
+@alias 	!	Symbolic Unary Operators
+@alias	~	Symbolic Unary Operators
+@alias	\	Symbolic Unary Operators
+@alias	=~	Binding Operators
+@alias	*	Multiplicative Operators
+@alias	/	Multiplicative Operators
+@alias	%	Multiplicative Operators
+@alias	x	Multiplicative Operators
+@alias	+	Additive Operators
+@alias	-	Additive Operators
+@alias	.	Additive Operators
+@alias	<<	Shift Operators
+@alias	>>	Shift Operators
+@alias	<	Relational Operators
+@alias	>	Relational Operators
+@alias	<=	Relational Operators
+@alias	>=	Relational Operators
+@alias	lt	Relational Operators
+@alias	le	Relational Operators
+@alias	gt	Relational Operators
+@alias	ge	Relational Operators
+@alias  ==	Equality Operators
+@alias	!=	Equality Operators
+@alias	eq	Equality Operators
+@alias	ne	Equality Operators
+@alias	cmp	Equality Operators
+@alias	&	Bitwise And
+@alias	|	Bitwise Or and Exclusive Or
+@alias	^	Bitwise Or and Exclusive Or
+@alias 	&&	C-style Logical And
+@alias	||	C-style Logical Or
+@alias 	..	Range Operator
+@alias 	?	Conditional Operator
+@alias	:	Conditional Operator
+@alias	=	Assignment Operators
+@alias	**=	Assignment Operators
+@alias	+=	Assignment Operators
+@alias	*=	Assignment Operators
+@alias	&=	Assignment Operators
+@alias	<<=	Assignment Operators
+@alias	&&=	Assignment Operators
+@alias	-=	Assignment Operators
+@alias	/= 	Assignment Operators
+@alias	|=	Assignment Operators
+@alias	>>=	Assignment Operators
+@alias	||=	Assignment Operators
+@alias	.= 	Assignment Operators
+@alias	%=	Assignment Operators
+@alias	^=	Assignment Operators
+@alias	x=	Assignment Operators
+@alias	,	Comma Operator
+@alias	not	Logical Not
+@alias	and	Logical And
+@alias	or	Logical or and Exclusive Or
+@alias	xor	Logical or and Exclusive Or
+@alias	'	Quote and Quote-like Operators
+@alias	"	Quote and Quote-like Operators
+@alias	`	Quote and Quote-like Operators
+@alias	\t	Quote and Quote-like Operators
+@alias	\n	Quote and Quote-like Operators
+@alias	\r	Quote and Quote-like Operators
+@alias	\f	Quote and Quote-like Operators
+@alias	\v	Quote and Quote-like Operators
+@alias	\b	Quote and Quote-like Operators
+@alias	\a	Quote and Quote-like Operators
+@alias	\e	Quote and Quote-like Operators
+@alias	\0	Quote and Quote-like Operators
+@alias	\x	Quote and Quote-like Operators
+@alias	\c	Quote and Quote-like Operators
+@alias	\l	Quote and Quote-like Operators
+@alias	\u	Quote and Quote-like Operators
+@alias	\L	Quote and Quote-like Operators
+@alias	\U	Quote and Quote-like Operators
+@alias	\E	Quote and Quote-like Operators
+@alias	\Q	Quote and Quote-like Operators
+@alias	<>	I/O Operators
+@alias	STDIN	I/O Operators
+@alias	STDOUT	I/O Operators
+@alias	STDERR	I/O Operators
+@end
+@index :pod:perlfunc.pod
+@delete	name
+@alias	-w  -X
+@alias	-x  -X
+@alias	-o  -X
+@alias	-R  -X
+@alias	-W  -X
+@alias	-O  -X
+@alias	-e  -X
+@alias	-z  -X
+@alias	-s  -X
+@alias	-f  -X
+@alias	-d  -X
+@alias	-l  -X
+@alias	-p  -X
+@alias	-S  -X
+@alias	-b  -X
+@alias	-c  -X
+@alias	-t  -X
+@alias	-u  -X
+@alias	-g  -X
+@alias	-k  -X
+@alias	-T  -X
+@alias	-B  -X
+@alias	-M	-X
+@alias	-A  -X
+@alias	-C  -X
+@end
+@index	:pod:perlvar.pod
+@end
+@index	:pod:perlsub.pod
+@rename	sub	NAME
+@end
+@index	:pod:perlsyn.pod
+@alias	if			Compound statements
+@alias	unless		Compound statements
+@alias	while		Compound statements
+@alias	do			Compound statements
+@alias	for			Compound statements
+@alias	foreach		Compound statements
+@alias	next		Compound statements
+@alias	last		Compound statements
+@alias	redo		Compound statements
+@alias	continue	Compound statements
+@alias	until		Simple statements
+@end
+
+@file perl pod:pod/perl.pod
+@file perltoc pod:pod/perltoc.pod
+@file macperl pod:pod/macperl.pod
+@file perlfaq pod:pod/perlfaq.pod
+@file perlfaq1 pod:pod/perlfaq1.pod
+@file perlfaq2 pod:pod/perlfaq2.pod
+@file perlfaq3 pod:pod/perlfaq3.pod
+@file perlfaq4 pod:pod/perlfaq4.pod
+@file perlfaq5 pod:pod/perlfaq5.pod
+@file perlfaq6 pod:pod/perlfaq6.pod
+@file perlfaq7 pod:pod/perlfaq7.pod
+@file perlfaq8 pod:pod/perlfaq8.pod
+@file perlfaq9 pod:pod/perlfaq9.pod
+@file perldata pod:pod/perldata.pod
+@file perlsyn pod:pod/perlsyn.pod
+@file perlop pod:pod/perlop.pod
+@file perlre pod:pod/perlre.pod
+@file perlfunc pod:pod/perlfunc.pod
+@file perlvar pod:pod/perlvar.pod
+@file perlsub pod:pod/perlsub.pod
+@file perlmod pod:pod/perlmod.pod
+@file perlmodlib pod:pod/perlmodlib.pod
+@file perlref pod:pod/perlref.pod
+@file perldsc pod:pod/perldsc.pod
+@file perllol pod:pod/perllol.pod
+@file perlobj pod:pod/perlobj.pod
+@file perltie pod:pod/perltie.pod
+@file perlbot pod:pod/perlbot.pod
+@file perltoot pod:pod/perltoot.pod
+@file perlform pod:pod/perlform.pod
+@file perlipc pod:pod/perlipc.pod
+@file perlxs pod:pod/perlxs.pod
+@file perlxstut pod:pod/perlxstut.pod
+@file perlguts pod:pod/perlguts.pod
+@file perlapio pod:pod/perlapio.pod
+@file perlcall pod:pod/perlcall.pod
+@file perlembed pod:pod/perlembed.pod
+@file perldebug pod:pod/perldebug.pod
+@file perldiag pod:pod/perldiag.pod
+@file perltrap pod:pod/perltrap.pod
+@file perlstyle pod:pod/perlstyle.pod
+@file perlpod pod:pod/perlpod.pod
+@file perlbook pod:pod/perlbook.pod
+@file perldelta pod:pod/perldelta.pod

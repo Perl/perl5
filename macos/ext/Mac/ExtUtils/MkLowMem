@@ -1,0 +1,61 @@
+perl -Sx "{0}" {"Parameters"}; Exit {Status}
+#!perl
+
+if ($ARGV[0] eq "-v") {
+	$v = 1;
+	shift @ARGV;
+}
+
+%Types = (
+	AuxWinHandle	=> [4, "L", "AuxWinHandle"],
+	Boolean			=> [1, "c"],
+	GDHandle		=> [4, "L", "GDHandle"],
+	GrafPtr			=> [4, "L", "GrafPtr"],
+	Handle			=> [4, "L", "Handle"],
+	MCTableHandle	=> [4, "L", "MCTableHandle"],
+	PixPatHandle	=> [4, "L", "PixPatHandle"],
+	Point			=> [8, "-", "Point"],
+	Ptr				=> [4, "L"],
+	RgnHandle		=> [4, "L", "RgnHandle"],
+	SInt16			=> [2, "s"],
+	SInt32			=> [4, "l"],
+	THz				=> [4, "L", "THz"],
+	UInt16			=> [2, "S"],
+	UInt32			=> [4, "L"],
+	UInt8			=> [1, "C"],
+	WindowPtr		=> [4, "L", "GrafPtr"],
+	short			=> [2, "s"],
+	SInt8 			=> [1, "c"],
+);
+
+while (<>) {
+	my($t1, $n1, $n2, $t2, $i, $a) = /\(\s*(\S+)\s*\)\s*(LM[GS]et)(\w+)\s*\(\s*(\S+)[^)]+\).*\((\S+),\s+(\S+)\);/;
+	next unless $t1;
+	my ($t) = ($t1 eq "void") ? $t2 : $t1;
+	unless ($Types{$t}) {
+		printf("%-25s %s\n", "$n1$n2", $t) if ($v);
+		++$Undef{$t};
+		next;
+	}
+	my (@t) = @{$Types{$t}};
+	$Map{$n2} = sprintf("%-25s %s %s %s %s\n", $n2, $a, $t[0], $t[1], $t[2]);
+	if ($n1 eq "LMGet") {
+		$Getters .= "\t\t$n1$n2\n";
+	} else {
+		$Setters .= "\t\t$n1$n2\n";
+	}
+}
+
+exit if $v;
+
+print "Undefined Types:\n";
+
+for (sort keys %Undef) {
+	print "$_\n";
+}
+
+print $Getters, "\n", $Setters, "\n\n";
+
+for (sort keys %Map) {
+	print $Map{$_};
+}

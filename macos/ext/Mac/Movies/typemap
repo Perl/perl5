@@ -1,0 +1,23 @@
+TYPEMAP
+Movie			T_PTROBJ
+Media			T_PTROBJ
+Track			T_PTROBJ
+TimeBase		T_PTROBJ
+UserData		T_PTROBJ
+SampleDescriptionHandle	T_PTROBJ
+MovieEditState		T_PTROBJ
+TrackEditState		T_PTROBJ
+QTAtomContainer		T_PTROBJ
+QTAtom			T_PTROBJ
+MatrixRecord		T_RECORDOBJ
+TimeRecord		T_RECORDOBJ
+Fix16			T_FIX16
+
+INPUT
+T_FIX16
+	$var = (short)(32767.0*SvNV($arg));
+
+OUTPUT
+T_FIX16
+	sv_setnv($arg, ((double)$var/32767.0));
+

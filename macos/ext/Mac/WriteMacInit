@@ -1,0 +1,23 @@
+#!perl
+
+print <<HEADER;
+/* Generated automatically by WriteMacInit */
+
+#include "INTERN.h"
+#include "perl.h"
+
+void boot_Mac()
+{
+    dXSUB_SYS;
+    char *file = __FILE__;
+HEADER
+
+foreach $mod (@ARGV) {
+	print <<END_MOD;
+    {   extern void boot_Mac__$mod _((CV* cv));
+        newXS("Mac::${mod}::bootstrap", boot_Mac__$mod, file);
+    }
+END_MOD
+}
+
+print "}\n";

@@ -1,0 +1,90 @@
+Thursday, July 8, 1999
+
+This archive can always be obtained from:
+
+    http://www.perl.com/CPAN/authors/id/CNANDOR/
+    http://www.perl.com/CPAN/modules/by-module/Mac/
+
+The file is a tarred, gzipped file.  Use Stuffit Expander or a
+similar program (like my untargzipme, in the cpan-mac distribution)
+to get at the archive.
+
+Please let me know how well it does(n't) work, and any changes you'd 
+like to see.
+
+#============================================================================
+
+NAME
+    Mac::Apps::Launch - MacPerl module to launch applications
+
+SYNOPSIS
+        use Mac::Apps::Launch;
+        my @apps = qw(R*ch Arch MPGP);
+        my $path = "HD:System Folder:Finder";
+        LaunchApps([@apps], 1) or warn $^E; # launch and switch to front
+        LaunchApps([@apps])    or warn $^E; # launch and don't switch 
+        LaunchApps($app, 1)    or warn $^E; # launch and switch to front
+        LaunchSpecs($path, 1)  or warn $^E; # use path instead of app ID
+        QuitApps(@apps)        or warn $^E; # quit all @apps
+        QuitAllApps(@apps)     or warn $^E; # quit all except @apps
+        IsRunning('MACS');                  # returns boolean for whether
+                                            # given app ID is running
+        SetFront('MACS')       or warn $^E; # set Finder to front
+        Hide('MACS')           or warn $^E; # hide Finder
+        Show('Finder', 1)      or warn $^E; # show Finder (1 == use name)
+
+DESCRIPTION
+    Simply launch or quit applications by their creator ID. The Finder can
+    be quit in this way, though it cannot be launched in this way.
+
+    This module is used by many other modules.
+
+    This module as written does not work with MacPerls prior to 5.1.4r4.
+
+EXPORT
+    Exports functions `QuitApps', `QuitAllApps', and `LaunchApps',
+    `IsRunning', `LaunchSpecs', `SetFront', `Hide', `Show'.
+
+HISTORY
+    v.1.70, June 4, 1999
+        Cleaned up stuff. Added `SetFront', `Show', `Hide'. Fixed setting
+        of `$^E'. Improved QuitAllApps to not quit only normal apps by
+        checking `processType' for "APPL".
+
+    v.1.60, September 28, 1998
+        Added `LaunchSpecs'. Use this when the app does not have a unique
+        app ID, the app is not really an app (like the Finder), or you
+        have more than one instance of the app, and want to launch a
+        particular one.
+
+    v.1.50, September 16, 1998
+        Added `IsRunning'.
+
+    v.1.40, August 3, 1998
+        Only launches application if not already open; e.g., won't launch
+        newer version it finds if older version is open.
+
+    v.1.31, May 18, 1998
+        Added `AEDisposeDesc' call (D'oh!). Dunno why I forgot this.
+
+    v.1.3, January 3, 1998
+        General cleanup, rewrite of method implementation, no longer
+        support versions prior to 5.1.4r4, addition of Quit methods,
+        methods return undef on failure (most recent error in `$^E', but
+        could be multiple errors; oh well).
+
+AUTHOR
+    Chris Nandor <pudge@pobox.com>, http://pudge.net/
+
+    Copyright (c) 1999 Chris Nandor. All rights reserved. This program is
+    free software; you can redistribute it and/or modify it under the
+    terms of the Artistic License, distributed with Perl.
+
+VERSION
+    Version 1.70 (June 4, 1999)
+
+#============================================================================
+
+-- 
+Chris Nandor          mailto:pudge@pobox.com         http://pudge.net/
+%PGPKey = ('B76E72AD', [1024, '0824090B CE73CA10  1FF77F13 8180B6B6'])

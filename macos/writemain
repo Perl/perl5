@@ -1,0 +1,125 @@
+#!perl
+# This script takes the plain miniperlmain.c and writes out perlmain.c
+# which includes all the extensions.
+# The command line arguments name extensions to be used.
+#  E.g.:  miniperl writemain SDBM_File POSIX > perlmain.c
+#
+
+if ($ARGV[0] eq "-runperl") {
+    $runperl = shift @ARGV;
+} elsif ($ARGV[0] eq "-leakperl") {
+    $leakperl = $runperl = shift @ARGV;
+}
+
+foreach (@ARGV) {
+	if (/:/) {
+		s/\b(\w+):\1\b/$1/;
+		s/(\w):(\w)/${1}::${2}/g;
+	}
+#    s/\.o$//; s/\.o\.PPC$//; s/\.o\.68K$//; 
+#    s/ext:(.*):[^:]*/$1/ && next;
+#    s/.*:(.*)/$1/;
+}
+
+open(MAIN, "::miniperlmain.c") || die "Couldn't open ::miniperlmain.c: $!";
+
+while (<MAIN>) {
+    s/\bperl_destruct\b/PL_perl_destruct_level = 2;\n\n    perl_destruct/ if $runperl;
+    s|^main\(|#define exit(x) /*Null*/\n\nrun_perl\(| if $runperl;
+    last if /Do not delete this line--writemain depends on it/;
+    print;
+}
+
+print <<EOP;
+
+static void
+xs_init()
+{
+EOP
+
+if ($#ARGV > -1) {
+    print "    char *file = __FILE__;\n";
+	print "    dXSUB_SYS;\n";
+    $ai = "";
+	
+    foreach $ext (@ARGV) {
+	($mname = $ext) =~ s!/!::!g;
+	($cname = $mname) =~ s!:!_!g;
+		
+	print "    {   extern void boot_${cname}(pTHX_ CV* cv);\n";
+		
+	if ($ext eq "DynaLoader") {
+	    # Must NOT install 'DynaLoader::boot_DynaLoader' as 'bootstrap'!
+	    # boot_DynaLoader is called directly in DynaLoader.pm
+	    print "        newXS(\"${mname}::boot_${ext}\", boot_${cname}, file);\n";
+	} else {
+	    print "        newXS(\"${mname}::bootstrap\", boot_${cname}, file);\n";
+	}
+		
+	if (opendir(AUTOINIT, ":ext:$ext:") || opendir(AUTOINIT, "::ext:$ext:")) {
+	    while ($auto = readdir(AUTOINIT)) {
+		next unless ($auto =~ /^AutoInit\./i);
+		open(AI, ":ext:$ext:$auto");
+		if ($auto =~ /\.c$/) {
+		    print "    /* autoinit code from $aifile follows: */\n";
+		    print "    {\n";
+		    while (<AI>) {
+			print;
+		    }
+		    print "    }\n";
+		} elsif ($auto =~ /\.pl$/) {
+		    while (<AI>) {
+			chop;
+			$ai .= $_ . " ";
+		    }
+		}
+	    }
+	}
+	print "    }\n";
+    }
+    if ($ai ne "") {
+	print <<END_AUTOBOOT;
+    if (!PL_preambleav)
+	PL_preambleav = newAV();
+    av_push(PL_preambleav, newSVpv("BEGIN { $ai }",0));
+END_AUTOBOOT
+    }
+    print "    av_push(GvAVn(PL_incgv), newSVpv(\"Dev:Pseudo:\", 0));\n" if ($runperl);
+}
+print "}\n";
+
+
+if ($leakperl) {
+	print <<'END_MAIN';
+jmp_buf gExitPerl;
+
+void leakexit(int status)
+{
+	longjmp(gExitPerl, -status-1);
+}
+
+void xstat();
+
+char * gArgv[3] = {"leakperl", "xxx"};
+
+int main(int argc, char ** argv, char ** env)
+{
+	int 	i;
+	char ** arg;
+	
+	gExit = leakexit;
+	for (i=0; i<2; ++i) {
+#ifdef MALLOC_LOG
+		MallocLog("Starting Run %d\n", i);
+#endif
+		for (arg = argv+1; *arg; ++arg) {
+			gArgv[1] = *arg;
+			fprintf(stderr, "------ %s\n", *arg);
+			if (!setjmp(gExitPerl))
+				run_perl(2, gArgv, env);
+			xstat();
+		}
+	}
+}
+END_MAIN
+} 

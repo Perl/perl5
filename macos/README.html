@@ -1,0 +1,62 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+	<TITLE>MacPerl 5.6 - Read Me</TITLE>
+	<META NAME="generator" CONTENT="BBEdit 5.1.1">
+</HEAD>
+<BODY>
+<H1>MacPerl 5.6 - Read Me</H1>
+
+This is still very a work in progress, but there *has* been progress. Please
+report your success or failure back to macperl-porters@macperl.org, but don't expect me to act too quickly 
+on the latter.
+
+<H2>Ingredients</H2>
+
+In addition to this distribution, you need:
+
+<UL>
+	<LI>The <A HREF="ftp://sunsite.cnlab-switch.ch//software/platform/macos/src/mpw_c/dmake_40m2.sit.bin">dmake</A> MPW tool</LI>
+	<LI>The <A HREF="ftp://sunsite.cnlab-switch.ch/software/platform/macos/src/mpw_c/Patch_21.sit.bin">Patch</A> MPW tool</LI>
+	<LI>The latest version of a number of <A HREF="ftp://sunsite.cnlab-switch.ch//software/platform/macos/src/mw_c/">packages:</A>
+		<UL>
+			<LI>GUSI 2 (GUSI_206 or later)</LI>
+			<LI>sfio (sfio_04Aug99 or later)</LI>
+			<LI>(Berekeley) db (db_186 or later)</LI>
+			<LI>XL (XL_15 or later)</LI>
+		</UL>
+	<LI>A complete installation of <A HREF="http://developer.apple.com/tools/mpw-tools/">MPW</A>. You'll
+		probably want to increase the memory partition for it.</LI>
+	<LI>A reasonably recent version of the Metrowerks CodeWarrior compilers for MPW (Pro 5 recommended) 
+		<EMPH>or</EMPH>	of the MPW C/C++ compilers (I used SC 8.8.4f1 and MrC 4.1.0f1c1).
+	</LI>
+	<LI>And, of course, a <A HREF="http://www.perl.com/CPAN-local/src/index.html">Perl</A>
+		distribution (5.6 or later).</LI>
+</UL>
+
+<H2>Recipe</H2>
+
+<UL>
+	<LI>Install the patch and dmake MPW tools (including the BuildCommands and BuildProgram scripts
+	    in the dmake distribution).
+	<LI>Create a folder "MacPerl".</LI>
+	<LI>Unpack the perl distribution and put it into that folder.</LI>
+	<LI>Put either the db and XL distributions or aliases to them into that folder. The top level
+		links or folders <EMPH>must</EMPH> be named "db" and "XL", respectively.</LI>
+	<LI>Unpack the GUSI and sfio distributions and run their installation scripts
+		GUSI_Install.MPW and sfio_Install.MPW (Currently, you have to "directory" to the folder
+		where these scripts are before executing them).</LI>
+	<LI>Put the the MacPerl distribution (the "macos" folder) inside the perl distribution 
+		(perl-5.6.0).</LI>
+	<LI>Change your directory to the macos folder.</LI>
+	<LI>Apply the patch by executing the command "patch <MacPerl-patch-5.6.0"
+	<LI>Edit the MacPerlConfig.mk file to specify your preferred compilers.</LI>
+	<LI>Build the "all" target. It will fail at the "x2p" point.</LI>
+</UL>
+
+Good luck, and have fun<P>
+
+Matthias Neeracher 26Apr00
+
+</BODY>
+</HTML>

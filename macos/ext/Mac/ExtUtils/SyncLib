@@ -1,0 +1,17 @@
+perl -Sx "{0}" {"Parameters"}; Exit {Status}
+#!perl
+
+$ROOT = $ARGV[0];
+$LIB  = $ROOT . "lib:Mac:";
+$EXT  = $ROOT . "ext:Mac:";
+opendir(MAC, $LIB) or die;
+
+while ($_ = readdir(MAC)) {
+	/(\w+)\./;
+	push @{$Dir{$1}}, $_ if -d "$EXT$1";
+}
+
+for (keys %Dir) {
+	print qq|Backup -to "$EXT$_" @{[map {"$LIB$_"} @{$Dir{$_}}]}\n|;
+}
+

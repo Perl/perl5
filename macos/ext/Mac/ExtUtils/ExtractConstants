@@ -1,0 +1,31 @@
+Perl -Sx "{0}" {"Parameters"} ; Exit {Status}
+#!perl
+
+sub DoConstant {
+	my($name, $value) = @_;
+
+	return unless $name;
+	
+	$value =~ s/FOUR_CHAR_CODE\((.*)\)/$1/;
+	$names .= "\t\t$name\n";
+	$subs  .= sprintf "sub %-30s { %10s; }\n", "$name ()", $value;
+}
+
+while (<>) {
+	if (@match = /#define\s+(\w+)\s+(\S+)/) {
+		DoConstant @match;
+	}
+	if (/enum.*\{/) {
+		$extract = 1;
+	}
+	if (/\}/) {
+		$extract = 0;
+	}
+	next unless $extract;
+	$_ = $` if m(/\*|//);
+	if (@match = /(\w+)\s*=\s*(\S.*?),?\s*$/) {
+		DoConstant @match;
+	}
+}
+
+print $names, "\n", $subs;

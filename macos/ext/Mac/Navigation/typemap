@@ -1,0 +1,10 @@
+TYPEMAP
+NavFileInfo			T_PTROBJ
+NavFolderInfo		T_PTROBJ
+NavFileOrFolderInfo	T_PTROBJ
+NavCBRec			T_PTROBJ
+NavTypeListHandle	T_PTROBJ
+NavReplyRecord		T_PTROBJ
+NavDialogOptions	T_RECORDOBJ
+FileTranslationSpec	T_RECORDOBJ
+

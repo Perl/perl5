@@ -1,0 +1,35 @@
+Perl -Sx "{0}" {"Parameters"}>InstallBLIB.cmd && InstallBLIB.cmd && delete InstallBLIB.cmd
+Exit "{Status}"
+
+#!perl
+
+$name = shift;
+if (($prefix) = $name =~ /(.*::)/) {
+	$prefix =~ s/::/:/;
+}
+
+$mkpath = shift;
+
+FILE:
+for $file (@ARGV) {
+	$file =~ s|/|:|g;
+	$file = ":$file" unless $file =~ /^:/;
+        (my $new = $file) =~ s/^:(lib:|$prefix)?/':blib:lib:' .
+            ($1 eq 'lib:' ? '' : $prefix)/e;
+	next unless -f $file;
+XSCHECK: {
+		if ($file =~ /\.xs$/) {
+			open(F, $file) || die;
+			while (<F>) {
+				last XSCHECK if /^=/; 
+			}
+			print STDERR "Skipping $file, which doesn't contain any pod.\n";
+			next FILE;
+		}
+	}
+	$dup .= "Entab -t 0 $file>$new\n";
+	$new =~ /^(.*:)/; 
+	$mkpath{$1} = 1;
+}
+
+print "$mkpath ", join(" ", sort keys %mkpath), "\n$dup";

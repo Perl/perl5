@@ -1,0 +1,32 @@
+TYPEMAP
+GrafPtr		T_PTROBJ
+Pattern		T_RECORDOBJ
+Cursor		T_RECORDOBJ
+PenState	T_RECORDOBJ
+Rect		T_RECORDOBJ
+Point		T_RECORDOBJ
+BitMap		T_RECORDOBJ
+RGBColor	T_RECORDOBJ
+PixMap		T_RECORDOBJ
+PicHandle	T_PTROBJ
+RgnHandle	T_PTROBJ
+PolyHandle	T_PTROBJ
+PixMapHandle	T_PTROBJ
+PixPatHandle	T_PTROBJ
+CTabHandle	T_PTROBJ
+CCrsrHandle	T_PTROBJ
+CIconHandle	T_PTROBJ
+GDHandle	T_PTROBJ
+JustStyleCode	T_IV
+Fixed412	T_FIXED412
+Fixed016	T_FIXED016
+INPUT
+T_FIXED412
+	$var = (short)(SvNV($arg)*4096.0);
+T_FIXED016
+	$var = (U16)(SvNV($arg)*65536.0);
+OUTPUT
+T_FIXED412
+	sv_setnv($arg, (double)$var/4096.0);
+T_FIXED016
+	sv_setnv($arg, (double)(U16)$var/65536.0);

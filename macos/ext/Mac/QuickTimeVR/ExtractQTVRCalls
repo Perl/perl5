@@ -1,0 +1,34 @@
+Perl -Sx "{0}" {"Parameters"}; Exit {Status}
+#!perl
+
+$RetSubst{OSErr} = "MacOSRet";
+
+$Subst{WindowPtr} = "GrafPtr";
+$Subst{WindowRef} = "GrafPtr";
+$Subst{DialogRef} = "GrafPtr";
+$Subst{ControlRef} = "ControlHandle";
+$Subst{SInt16} = "short";
+$Subst{SInt32} = "long";
+$Subst{ConstStr255Param} = "Str255";
+
+while (<>) {
+	next unless /^\w+\s+QTVR/;
+	unless (/\)/) {
+		chomp;
+		$_ .= <>;
+	}
+	($ret,$name,$par) = m/(\w+)\s+(\w+)\s*\((.*)\)/;
+	$ret = $RetSubst{$ret} || $Subst{$ret} || $ret;
+	for (split(/,/, $par)) {
+		next if /^\s*$/;
+		($type,$var) = m/(\S.*\W)(\w+)\s*$/;
+		$type =~ s/\s+$//;
+		$type =~ s/\s+/ /;
+		$type = $Subst{$type} || $type;
+		$decls .= "\t$type\t$var\n";
+		push @vars, $var;
+	}
+	print $ret, "\n$name(", join(", ", @vars), ")\n$decls\n";
+	@vars = ();
+	$decls= "";
+}

@@ -1,0 +1,112 @@
+@TITLE 		"MacPerl Suite"
+@VERSION 	1.0
+
+@SUITE 		"Required Suite",			"Events that every application should support",	'reqd'
+	@EVENT "Open", "Open documents",    'McPL', 'odoc'
+		@REPLY 	'null', "", 										OPT, SINGLE, NOENUM
+		@DIRECT	'alis', "List of documents to open",		REQ, LIST,   NOENUM, CHANGE
+		
+	@EVENT "Quit",	"Quit application",	'aevt', 'quit'
+		@REPLY 	'null', "", 										OPT, SINGLE, NOENUM
+		@DIRECT	'null', "No direct parameter required", 	OPT, SINGLE, NOENUM, CHANGE
+		@PARAM	"save", 'savo', 'savo', "if true, save all windows without asking user, if false, don't save.", OPT, SINGLE, ENUM
+
+@SUITE 		"Core Suite",				"Suite that applies to all applications",			'core'
+	@CLASS "Application", 'capp', "An application program"
+		@PROPERTY	"Clipboard",		'pcli', '****', "contents of the clipboard",			SINGLE, NOENUM, RDONLY
+		@PROPERTY	"Frontmost",		'pisf', 'bool', "Is frontmost application?",			SINGLE, NOENUM, RDONLY
+		@PROPERTY	"Name",				'pnam', 'TEXT', "the name",								SINGLE, NOENUM, RDONLY
+		@PROPERTY	"Version",			'vers', 'TEXT', "version",									SINGLE, NOENUM, RDONLY
+
+		@ELEMENT		'cwin',	ABSOLUTE, NAME
+		
+	@CLASS "Window", 'cwin', "A window"	
+		@PROPERTY	"Name",				'pnam', 'TEXT', "the name",								SINGLE, NOENUM, RDWR
+		@PROPERTY 	"Position",			'ppos', 'QDpt', "The Position of the window", 		SINGLE, NOENUM, RDWR
+		@PROPERTY 	"Page Setup",		'PSET', 'TPNT', "The Page Setup of the window", 	SINGLE, NOENUM, RDWR
+		@PROPERTY 	"Visible", 			'pvis', 'bool', "Is window visible?", 					SINGLE, NOENUM, RDWR
+		@PROPERTY 	"Show Borders", 	'PBOR', 'bool', "The Show Borders of the window", 	SINGLE, NOENUM, RDWR
+		@PROPERTY 	"Font",				'font', 'TEXT', "Font of the text", 					SINGLE, NOENUM, RDWR
+		@PROPERTY 	"Size",				'ptsz', 'cf16', "Size of the text",						SINGLE, NOENUM, RDWR
+		@PROPERTY 	"Script Number", 	'psct', 'cint', "Script system of the text",			SINGLE, NOENUM, RDONLY
+			
+		@ELEMENT		'ctxt',	RANGE
+		@ELEMENT		'cha ',	ABSOLUTE
+		@ELEMENT		'cwor',	ABSOLUTE
+		@ELEMENT		'clin',	ABSOLUTE
+	
+	@CLASS "Character", 'cha ', "A Character"	
+		@ELEMENT		'ctxt',	RANGE
+		@ELEMENT		'cha ',	ABSOLUTE
+		@ELEMENT		'cwor',	ABSOLUTE
+		@ELEMENT		'clin',	ABSOLUTE
+	
+	@CLASS "Word", 'cwor', "A Word"	
+		@ELEMENT		'ctxt',	RANGE
+		@ELEMENT		'cha ',	ABSOLUTE
+		@ELEMENT		'cwor',	ABSOLUTE
+		@ELEMENT		'clin',	ABSOLUTE
+
+	@CLASS "Line", 'clin', "A Line"	
+		@ELEMENT		'ctxt',	RANGE
+		@ELEMENT		'cha ',	ABSOLUTE
+		@ELEMENT		'cwor',	ABSOLUTE
+		@ELEMENT		'clin',	ABSOLUTE
+
+	@CLASS "Text", 'ctxt', "A Text"	
+		@ELEMENT		'ctxt',	RANGE
+		@ELEMENT		'cha ',	ABSOLUTE
+		@ELEMENT		'cwor',	ABSOLUTE
+		@ELEMENT		'clin',	ABSOLUTE
+
+	@CLASS "Spot", 'cspt', "A Spot"
+		@PROPERTY 	"Class",				'pcls', 'cnum', "The class", 			SINGLE, NOENUM, RDWR
+		
+@SUITE		"Misc Standard Suite",	"",															'misc'
+	@EVENT "Select", "Select some text", 'misc', 'slct'
+		@REPLY 	'null', "", REQ, SINGLE, NOENUM
+		@DIRECT	'obj ', "", OPT, SINGLE, NOENUM, CHANGE
+		
+	@EVENT "Show", "Bring an object into view", 'misc', 'mvis'
+		@REPLY 	'null', "", REQ, SINGLE, NOENUM
+		@DIRECT	'obj ', "", OPT, SINGLE, NOENUM, CHANGE
+
+@SUITE		"Text Suite",				"A set of basic classes for text processing",	'TEXT',
+	@EVENT "Close",	"Close an object", 'core', 'clos'
+		@REPLY 	'null', "", 							OPT, SINGLE, NOENUM
+		@DIRECT	'obj ', "The object to close", 	REQ, SINGLE, NOENUM, CHANGE
+		@PARAM	"Save", 'savo', 'savo', "Specifies whether or not changes should be saved before closing", OPT, SINGLE, ENUM
+
+@SUITE		"MacPerl Suite",			"Our custom events",	'McPL',
+	@EVENT "Save", "Save Window",    'core', 'save'
+		@REPLY 	'null', "", 										OPT, SINGLE, NOENUM
+		@DIRECT	'cwin', "Window to save",						REQ, SINGLE, NOENUM, CHANGE
+		@PARAM	"in", 'dest', 'alis', "Where to save the file.", OPT, SINGLE, ENUM
+		@PARAM	"as", 'fltp', 'svas', "How to save the file.", OPT, SINGLE, ENUM
+		
+	@EVENT "Do Script", "Execute a Perl script", 'misc', 'dosc'
+		@REPLY 	'TEXT', "Result", 				OPT, SINGLE, NOENUM
+		@DIRECT	'TEXT', "Script to execute", 	REQ, SINGLE, NOENUM, CHANGE
+		@PARAM	"extract", 		'EXTR', 'bool', "if false, don't search for the #!perl line.", 	OPT, SINGLE, NOENUM
+		@PARAM	"debug", 		'DEBG', 'bool', "if true, start the Perl debugger.", 					OPT, SINGLE, NOENUM
+		@PARAM	"taint", 		'TAIN', 'bool', "if true, enable taint checks.", 					OPT, SINGLE, NOENUM
+		@PARAM	"preprocess", 	'PREP', 'bool', "if true, send script through C preprocessor.", 	OPT, SINGLE, NOENUM
+		@PARAM	"mode", 			'MODE', 'MODE', "mode (local, batch, remote, duplex).", 				OPT, SINGLE, ENUM
+		@PARAM	"environment", 'ENVT', 'TEXT', "environment variables.", 								OPT, LIST,   NOENUM
+		@PARAM	"directory",   'DIRE', 'alis', "working directory.", 										OPT, SINGLE, NOENUM
+	
+	@EVENT "Send Data", "Send data to a remote controlled Perl script", 'McPL', 'DATA'
+		@REPLY 	'TEXT', "Standard Output", 	OPT, SINGLE, NOENUM
+		@DIRECT	'TEXT', "Standard Input", 		OPT, SINGLE, NOENUM, CHANGE
+		@PARAM	"input", 		'INPT', 'reco', "further input streams.", 	OPT, SINGLE, NOENUM
+		
+	@ENUMERATION 'svas'
+		@ENUM "Text",		'TEXT',	"Plain Text File"
+		@ENUM "Droplet",	'SCPT',	"Small delegation application"
+		@ENUM "Runtime",	'MrP7',	"Runtime application (large)"
+			
+	@ENUMERATION 'MODE'
+		@ENUM "Local",		'LOCL',	"No special redirections"
+		@ENUM "Batch",		'BATC',	"Redirect standard output to apple event"
+		@ENUM "Remote",	'RCTL',	"Redirect all standard I/O to apple events"
+		@ENUM "Duplex",	'DPLX',	"Exchange all I/O via apple events"

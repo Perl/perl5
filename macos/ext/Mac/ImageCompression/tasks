@@ -1,0 +1,7 @@
+Open ImageCompression.pm
+Open ImageCompression.xs
+Open Makefile.PL
+New typemap
+::ExtUtils:ExtractCalls {MWCIncludes}ImageCompression.h
+::ExtUtils:ExtractConstants {MWCIncludes}ImageCompression.h
+::ExtUtils:ExtractFunctions ImageCompression.xs

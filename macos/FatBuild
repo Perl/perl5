@@ -1,0 +1,23 @@
+#
+# FatBuild <Name> <PPC> <68K> - Build a fat binary from a PowerPC and a 68K build
+#
+# $Log: FatBuild,v $
+# Revision 1.1  2001/01/23 07:42:15  neeri
+# Support fat builds involving SC (Task 24871)
+#
+
+Set Name 		"{1}"
+Set SuffPPC	 	{2}
+Set Suff68K	 	{3}
+
+Duplicate -y "{Name}".{SuffPPC} "{Name}"
+If {Suff68K} == 68K
+	Begin
+		Echo 'Include "'"{Name}"'.68K" '¶''CODE'¶'';'
+		Echo 'Include "'"{Name}"'.68K" '¶''DATA'¶'';'
+	End | Rez -a -o "{Name}"
+Else
+	Begin
+		Echo 'Include "'"{Name}"'.SC" '¶''CODE'¶'';'
+	End | Rez -a -o "{Name}"
+End

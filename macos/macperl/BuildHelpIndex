@@ -1,0 +1,195 @@
+Perl -Sx "{0}" {"Parameters"}
+Exit 0
+
+#!perl -s
+
+($index = shift @ARGV) || die "No help index specified";
+
+dbmopen(%INDEX, $index, 0666) || die "Couldn't open index file \"$index\"";
+
+for (keys %INDEX) {
+	delete $INDEX{$_};
+}
+
+while (<>) {
+	if (/\@menu/) {
+		&DoMenu();
+	} elsif (/\@index\s+(\S+\.pod)/) {
+		&DoPodIndex($1, $');
+	} elsif (/\@index\s+(\S+)/) {
+		&DoIndex($1, $');
+	} elsif (/\@file\s+(\S+)\s+(\S+)/) {
+		$INDEX{$1} = $2;
+	} elsif (/\S+/) {
+		die "Don't understand \"$&\"";
+	}
+}
+
+if ($v) {
+	print "-----\n";
+	print $MENU;
+	print "-----\n";
+
+	for (sort keys %INDEX) {
+		printf("%-20s %s\n", $_, $INDEX{$_});
+	}
+}
+
+$INDEX{" MENU"} = $MENU;
+MacPerl::SetFileInfo('McPL', 'HELP', $index);
+
+dbmclose %INDEX;
+
+sub DoMenu {
+	$submenu = 0;
+	while (<>) {
+		if (/\@sep/) {
+			$MENU .= "-(\t\n";
+		} elsif (/\@sub\s+(\S.*\S)/) {
+			$MENU .= "$1\t!\n";
+			++$submenu;
+		} elsif (/\@end/) {
+			$MENU .= "\n";
+			if (!$submenu--) {
+				return;
+			}
+		} elsif (/(\S+)\s+(\S.*\S)/) {
+			$MENU .= "$2\t$1\n";
+		} elsif (/\S+/) {
+			die "Don't understand \"$&\"";
+		}
+	}
+	die "End of file while processing \@menu";
+}
+
+sub DoIndex {
+	local($file, $var) = @_;
+	local(%rename, %alias);
+	
+	$url = $file;
+	if ($url =~ /^:/) {
+		$url = $';
+		$url =~ s|:|/|g;
+		$url = "file:$url";
+	} else {
+		$url =~ s|:|/|g;		
+		$url = "file://$url";
+	}
+	open(INDEX, $file) ||Êdie "Can't open index file \"$file\"";
+	$var = ($var =~ /\@var/);
+	while (<>) {
+		if (/\@end/) {
+			goto startindex;
+		} elsif (/\@index/) {
+			die "Forgot \@end";
+		} elsif (/\@rename\s+(\S+)\s+(\S+)/) {
+			warn "\"$2\" renamed both to \"$rename{$2}\" and \"$1\"" if $rename{$2};
+			$rename{$2} = $1;
+		} elsif (/\@alias\s+(\S+)\s+(\S+)/) {
+			warn "\"$1\" already aliased to \"$alias{$1}\"" if $alias{$1};
+			$alias{$1} = $2;
+		} elsif (/\@delete\s+(\S+)/) {
+			warn "\"$1\" both renamed to \"$rename{$1}\" and deleted" if $rename{$1};
+			$rename{$1} = "";
+		}
+	}
+	die "End of file while processing \@index";
+startindex:
+	while (<INDEX>) {
+		next unless /NAME\s*=\s*\"([^"]+)\"/;
+		($name,$_) = ($1, $');
+		$key = $name;
+		$key =~ s/^perl[a-z]*_//;
+		if ($key =~ /_(\d+)/) {
+			redo unless !$1;	# Ignore all except _0
+			$key = $`;
+		}
+		$key = "\$\U$key\E" if $var;
+		$key = $rename{$key} if defined $rename{$key};
+		next unless $key;
+		warn "\"$key\" already defined as \"$INDEX{$key}\", redefined as \"$url#$name\""
+			if ($INDEX{$key} && $INDEX{$key} ne "$url#$name");
+		$INDEX{$key} = "$url#$name";
+	}
+	while (($key,$value) = each(%alias)) {
+		warn "\"$key\" already defined as \"$INDEX{$key}\", redefined as \"$INDEX{$value}\""
+			if ($INDEX{$key} && $INDEX{$key} ne $INDEX{$value});
+		warn "\"$value\" undefined" unless $INDEX{$value};
+		$INDEX{$key} = $INDEX{$value};
+	}
+}
+
+sub DoPodIndex {
+	local($file, $var) = @_;
+	local(%rename, %alias);
+	
+	$url = $file;
+	if ($url =~ /^:/) {
+		$url = $';
+		$url =~ s|:|/|g;
+		$url = "pod:$url";
+	} else {
+		$url =~ s|:|/|g;		
+		$url = "pod://$url";
+	}
+	open(INDEX, "::perl$file") ||Êdie "Can't open index file \"$file\"";
+	while (<>) {
+		if (/\@end/) {
+			goto startindex;
+		} elsif (/\@index/) {
+			die "Forgot \@end";
+		} elsif (/\@rename\s+(\S+)\s+(.*\S)/) {
+			warn "\"$2\" renamed both to \"$rename{$2}\" and \"$1\"" if $rename{$2};
+			$rename{$2} = $1;
+		} elsif (/\@alias\s+(\S+)\s+(.*\S)/) {
+			warn "\"$1\" already aliased to \"$alias{$1}\"" if $alias{$1};
+			$alias{$1} = $2;
+		} elsif (/\@delete\s+(.*\S)/) {
+			warn "\"$1\" both renamed to \"$rename{$1}\" and deleted" if $rename{$1};
+			$rename{$1} = "";
+		}
+	}
+	die "End of file while processing \@index";
+startindex:
+	while (<INDEX>) {
+		if (/^=item\s+(.*\S)\s*$/) {
+			$name = $1;
+			next if ($name eq "*");
+			if ($name =~ /^\$([A-Za-z_]+|\^[A-Z]|<I<digit>>|.)(.?)/) {
+				if ($2 eq "{") {
+					$key = "\%$1";
+				} elsif ($2 eq "[") {
+					$key = "\@$1";
+				} else {
+					$key = "\$$1";
+				}
+			} elsif ($name =~ /^([$@%](?:[A-Za-z_]+|\^[A-Z]|<I<digit>>|.))/) {
+				$key = $1;
+			} elsif ($name =~ /^([A-Za-z0-9_:]+|(?:-[A-Za-z]))/) {
+				$key = $1;
+			}Êelsif ($name =~ /^([^( ]+)/) {
+				$key = $1;
+			} else {
+				next;
+			}
+		} elsif (/^=head\d\s+(.*\S)\s*$/) {
+			$name = $1;
+			next if $name =~ /^[A-Z]+$/ && !defined $rename{$name}; # Skip NAME etc.
+			$key = $name;
+		} else {
+			next;
+		}
+		$name =~ s/([^a-zA-Z0-9_])/sprintf("%%%02X",unpack("c",$1))/ge;
+		$key = $rename{$key} if defined $rename{$key};
+		next unless $key;
+		warn "\"$key\" already defined as \"$INDEX{$key}\", trying to redefine as \"$url#$name\""
+			if ($INDEX{$key} && $key ne $lastkey && $INDEX{$key} ne "$url#$name");
+		$INDEX{$lastkey = $key} ||= "$url#$name";
+	}
+	while (($key,$value) = each(%alias)) {
+		warn "\"$key\" already defined as \"$INDEX{$key}\", trying to redefine as \"$INDEX{$value}\""
+			if ($INDEX{$key} && $key ne $lastkey && $INDEX{$key} ne $INDEX{$value});
+		warn "\"$value\" undefined" unless $INDEX{$value};
+		$INDEX{$lastkey = $key} ||= $INDEX{$value};
+	}
+}

@@ -1,0 +1,42 @@
+Perl -Sx "{0}" ; Exit {Status}
+#!perl
+
+if (open(OLDSYM, "<macperl.sym")) {
+	while (<OLDSYM>) {
+		++$OldSym{$1} if /^\s*(\w+)/;
+	}
+	close(OLDSYM);
+}
+if (open(NOSYM, "<macperl.nosym")) {
+	while (<NOSYM>) {
+		++$NoSym{$1} if /^\s*(\w+)/;
+	}
+	close(NOSYM);
+}
+
+$time = localtime;
+print <<END;
+catenate >>macperl.sym
+# Symbols added $time
+END
+
+open(MAP, "<perl.map") or die "Can't open perl.map: $!";
+while (<MAP>) {
+	($offset, $code, $name) = split;
+	if ($code eq "PR") {							# Code
+		$name =~ s/^\.//;
+		
+		next if $OldSym{$name} || $NoSym{$name};	# Already exported or explicitly prohibited
+		next if $name =~ /__/;						# Never export C++ symbols: Compilers are not binary compatible
+		next if $name =~ /^_/ or $name =~ /\./;						# Don't export internal symbols
+		next if $name =~ /^(Perl|PL)/i;				# Perl takes care if its own
+		next if $name =~ /[A-Z]/ && $name !~ /^(GUSI|MacPerl)/;	
+													# Skip all procedures with uppercase letters except GUSI/MacPerl procedures
+		
+		print $name, "\n";							# Export the rest
+	} elsif ($code eq "RW") {						# Data
+		next if $OldSym{$name} || $NoSym{$name};	# Already exported or explicitly prohibited
+		next unless $name =~ /^(gMacPerl|u[A-Z])/;	# Export only explicit macperl globals and UPPs
+		print $name, "\n";	
+	}
+}

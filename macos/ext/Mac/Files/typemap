@@ -1,0 +1,14 @@
+TYPEMAP
+CatInfo			T_PTROBJ
+FInfo			T_RECORDOBJ
+DInfo			T_RECORDOBJ
+FXInfo			T_RECORDOBJ
+DXInfo			T_RECORDOBJ
+RealFSSpec		T_REALFSSPEC
+
+INPUT
+T_REALFSSPEC
+	GUSIPath2FSp((char *) SvPV_nolen($arg), &$var);
+OUTPUT
+T_REALFSSPEC
+	sv_setpv($arg, GUSIFSp2Encoding(&$var));

@@ -1,0 +1,19 @@
+:miniperl -Sx "{0}" {"Parameters"}; Exit {Status}
+
+#!perl
+
+while ($ARGV[0] =~ /^-/) {
+	$arg = shift @ARGV;
+	if ($arg eq "-x") {
+		$exclude = shift @ARGV;
+		open(EXCLUDE, $exclude) or die "Can't open exclude file `$exclude': $!";
+		while (<EXCLUDE>) {
+			$Exclude{$_}++;
+		}
+		close EXCLUDE;
+	}
+}
+
+while (<>) {
+	print if !$Exclude{$_} && /^[^# \t\n]/;
+}

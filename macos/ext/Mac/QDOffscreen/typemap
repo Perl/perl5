@@ -1,0 +1,2 @@
+TYPEMAP
+GWorldPtr	T_PTROBJ

@@ -1,0 +1,61 @@
+Perl -Sx "{0}" {"Parameters"}; Exit {Status}
+#!perl
+
+%Encode = (
+	"short"				=> "newSViv(%s)",
+	"long"				=> "newSViv(%s)",
+	"unsigned short"	=> "newSViv(%s)",
+	"unsigned long"		=> "newSViv((long)%s)",
+	"SInt8"				=> "newSViv(%s)",
+	"OSType"			=> "newSViv(%s)",
+	"StringPtr"			=> "newSVpv((char *) %s+1, *%s)",
+);
+
+%Decode = (
+	"short"				=> "(short) SvIV(value)",
+	"long"				=> "(long) SvIV(value)",
+	"unsigned short"	=> "(unsigned short) SvIV(value)",
+	"unsigned long"		=> "(unsigned long)	SvIV(value)",
+	"SInt8"				=> "(SInt8) SvIV(value)",
+	"OSType"			=> "(OSType) SvIV(value)",
+);
+
+while (<>) {
+	next unless /(\S.*\S)\s+(\S+);/;
+	($type, $name) = ($1,$2);
+	next if $name =~ /^filler/;
+	$E{$name} = Encode($name, $type);
+	$D{$name} = Decode($name, $type);
+}
+
+print "FETCH\n", join("", @E{sort keys %E});
+print "STORE\n", join("", @D{sort keys %D});
+
+sub Encode {
+	my($name, $type) = @_;
+	my($code) = "\t} else if (!strcmp(field, \"$name\")) {\n";
+	
+	unless ($Encode{$type}) {
+		$code .= "\t\t/* Can't handle \"$type\" automatically */\n";
+	} else {
+		$name = "my->$name";
+		$code .= "\t\tRETVAL = " . sprintf($Encode{$type}, $name, $name) . ";\n";
+	}
+	
+	return $code;
+}
+
+sub Decode {
+	my($name, $type) = @_;
+	my($code) = "\t} else if (!strcmp(field, \"$name\")) {\n";
+	
+	unless ($Decode{$type}) {
+		$code .= "\t\t/* Can't handle \"$type\" automatically */\n";
+	} else {
+		$name = "my->$name";
+		$code .= "\t\t$name = $Decode{$type};\n";
+	}
+	
+	return $code;
+}
+

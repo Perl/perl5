@@ -1,0 +1,34 @@
+Perl -Sx "{0}" {"Parameters"}
+Exit 0
+#!perl
+
+print <<'END_HEADER';
+tell application "MacPerl"
+	with timeout of 300 seconds
+		activate
+		set m to Do Script "MacPerl::Reply(\"$ENV{MACPERL}\")"
+		set p to Do Script "MacPerl::Reply(\"$ENV{MACPERL}t\")"
+END_HEADER
+
+while ($script = shift) {
+	$script =~ s/.*:t:/:/;
+	
+	print "\t\tDo Script \"print \\\"----- $script" . '.' x (20 - length($script)) . "\\\\n\\\"\"\n";
+	
+	print "\t\ttry\n";
+	if ($script =~ /cpp/) {
+		print "\t\t\tDo Script (p & \"$script\") directory p with preprocess\n";
+	} else {
+		print "\t\t\tDo Script (p & \"$script\") directory p\n";
+	}
+	print "\t\ton error\n\t\t\t-- ignore\n\t\tend try\n";
+}
+
+print <<END_FOOTER;
+		Save front Window in file (m & ":MacPerlTest.Out")
+		delete text in front Window
+		Do Script {(p & ":TEST"), "evaluate", (m & ":MacPerlTest.Out")}
+		Save front Window in file (m & ":MacPerlTest.Result")
+	end timeout
+end tell
+END_FOOTER

@@ -1,0 +1,2 @@
+TYPEMAP
+ListHandle			T_PTROBJ

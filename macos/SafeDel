@@ -1,0 +1,17 @@
+# Delete all filename matches without generating errors
+# patterns must, of course, be quoted
+
+Set OldEcho {Echo}
+Set Echo 0
+
+Echo Set Exit 0> "{TempFolder}"ToDelete
+Loop
+	Break If `Evaluate {#} == "0"`
+	Echo Delete -y "{1}"'>Dev:Null³Dev:Null' >>"{TempFolder}"ToDelete 
+	Shift
+End
+Echo Exit 0 >>"{TempFolder}"ToDelete
+
+Set Echo {OldEcho}
+"{TempFolder}"ToDelete
+Delete "{TempFolder}"ToDelete

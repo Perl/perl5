@@ -1,0 +1,17 @@
+Compress::Zlib::gzFile		T_PTROBJ
+Compress::Zlib::deflateStream	T_PTROBJ
+Compress::Zlib::inflateStream	T_PTROBJ
+Bytef *				T_PV
+uInt				T_UV
+#uLongf				T_IV
+const char *			T_PV
+uLong				T_UV
+
+#############################################################################
+INPUT
+T_UV
+	$var = (unsigned long)SvUV($arg)
+#############################################################################
+OUTPUT
+T_UV
+	sv_setuv($arg, (IV)$var);

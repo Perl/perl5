@@ -1,0 +1,39 @@
+use ExtUtils::MakeMaker;
+#$Verbose = 1;
+WriteMakefile(
+	'NAME'      => 'zlib',
+        'CAPI' 	    => 'TRUE',
+        'LINKTYPE'  => 'static',
+        'SKIP'      => [qw(dynamic test)],
+	'H'         => [qw(deflate.h infcodes.h inftrees.h zconf.h zutil.h
+			   infblock.h inffast.h infutil.h zlib.h)],
+        'C'         => [qw(adler32.c compress.c crc32.c gzio.c uncompr.c
+			   deflate.c trees.c zutil.c inflate.c infblock.c
+			   inftrees.c infcodes.c infutil.c inffast.c)],
+        'OBJECT'    => q[$(O_FILES)],
+        'clean'     =>  {'FILES' => 'libz$(LIB_EXT)'}
+);
+
+sub MY::post_constants {
+    <<'END'
+INST_STATIC = libz$(LIB_EXT)
+END
+    ;
+}
+
+sub MY::top_targets {
+    my $top_targets =<<'END';
+all    ::    static
+
+static ::    libz$(LIB_EXT)
+
+config ::
+
+test :	
+
+END
+    ;
+    $top_targets;
+}
+
+

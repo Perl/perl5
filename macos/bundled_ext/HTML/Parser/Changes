@@ -1,0 +1,959 @@
+2001-05-11   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.25
+
+     Minor tweaks for build failures on perl5.004_04, perl-5.6.0,
+     and for macro clash under Windows.
+
+     Improved parsing of <plaintext>...  :-)
+
+
+
+2001-05-09   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.24
+
+     $p->parse(CODE)
+
+     New events: start_document, end_document
+
+     New argspecs: skipped_text, offset_end
+
+     The offset/line/column counters was not properly reset
+     after eof.
+
+
+
+2001-05-01   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.23
+
+     If the $p->ignore_elements filter did not work as it should if
+     handlers for start/end events was not registered.
+
+
+
+2001-04-17   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.22
+
+     The <textarea> element is now parsed in literal mode, i.e. no other tags
+     recognized until the </textarea> tag is seen.  Unlike other literal elements,
+     the text content is not 'cdata'.
+
+     The XML &apos; entity is decoded.  It apos-char itself is still encoded as
+     &#39; as &apos; is not really an HTML tag, and not recognized by many HTML
+     browsers.
+
+
+
+2001-04-10   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.21
+
+     Fix a memory leak which occured when using filter methods.
+
+     Avoid a few compiler warnings (DEC C):
+        - Trailing comma found in enumerator list
+        - "unsigned char" is not compatible with "const char".
+
+     Doc update.
+
+
+
+2001-04-02   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.20
+
+     Some minor documentation updates.
+
+
+
+2001-03-30   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.19_94
+
+     Implemented 'tag', 'line', 'column' argspecs.
+
+     HTML::PullParser doc update.
+     eg/hform is an example of HTML::PullParser usage.
+
+
+
+2001-03-27   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.19_93
+
+     Shorten 'report_only_tags' to 'report_tags'.
+     I think it reads better.
+
+     Bleadperl portability fixes.
+
+
+
+2001-03-25   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.19_92
+
+     HTML::HeadParser made more efficient by using 'ignore_elements'.
+
+     HTML::LinkExtor made more efficient by using 'report_only_tags'.
+
+     HTML::TokeParser generalized into HTML::PullParser.  HTML::PullParser
+     only support the get_token/unget_token interface of HTML::TokeParser,
+     but is more flexible because the information that make up an token
+     is customisable.  HTML::TokeParser is made into an HTML::PullParser
+     subclass.
+
+
+
+2001-03-19   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.19_91
+
+     Array references can be passed to the filter methods.  Makes it easier
+     to use them as constructor options.
+
+     Example programs updated to use filters.
+
+     Reset ignored_element state on EOF.
+
+     Documentation updates.
+
+     The netscape_buggy_comment() method now generates mandatory warning
+     about its deprecation.
+
+
+
+2001-03-13   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.19_90
+
+     This is an developer only release.  It contains some new
+     experimental features.  The interface to these might still change.
+
+     Implemented filters to reduce the numbers of callbacks generated:
+        - $p->ignore_tags()
+        - $p->report_only_tags()
+        - $p->ignore_elements()
+
+     New @attr argspec.  Less overhead than 'attr' and allow
+     compatibility with XML::Parser style start events.
+
+     The whole argspec can be wrapped up in @{...} to signal
+     flattening.  Only makes a difference when the target is an
+     array.
+
+
+
+2001-03-09   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.19
+
+     Avoid the entity2char global.  That should make the module
+     more thread safe.   Patch by Gurusamy Sarathy <gsar@ActiveState.com>.
+
+
+
+2001-02-24   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.18
+
+     There was a C++ style comment left in util.c.  Strict C
+     compilers do not like that kind of stuff.
+
+
+
+2001-02-23   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.17
+
+     The 3.16 release broke MULTIPLICITY builds.  Fixed.
+
+
+
+2001-02-22   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.16
+
+     The unbroken_text option now works across ignored tags.
+
+     Fix casting of pointers on some 64 bit platforms.
+
+     Fix decoding of Unicode entities.  Only optionally available for
+     perl-5.7.0 or better.
+
+     Expose internal decode_entities() function at the Perl level.
+
+     Reindented some code.
+
+
+
+2000-12-26   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.15
+
+     HTML::TokeParser's get_tag() method now takes multiple
+     tags to match.  Hopefully the documentation is also a bit clearer.
+
+     #define PERL_NO_GET_CONTEXT: Should speed up things for thread
+     enabled versions of perl.
+
+     Quote some more entities that also happens to be perl keywords.
+     This avoids warnings on perl-5.004.
+
+     Unicode entities only triggered for perl-5.7.0 or higher.
+
+
+
+2000-12-03   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.14
+
+     If a handler triggered by flushing text at eof called the
+     eof method then infinite recursion occurred.  Fixed.
+     Bug discovered by Jonathan Stowe <gellyfish@gellyfish.com>.
+
+     Allow <!doctype ...> to be parsed as declaration.
+
+
+
+2000-09-17   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.13
+
+     Experimental support for decoding of Unicode entities.
+
+
+
+2000-09-14   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.12
+
+     Some tweaks to get it to compile with "Optimierender Microsoft (R)
+     32-Bit C/C++-Compiler, Version 12.00.8168, fuer x86."
+     Patch by Matthias Waldorf <matthias.waldorf@zoom.de>.
+
+     HTML::Entities documentation spelling patch by
+     David Dyck <dcd@tc.fluke.com>.
+
+
+
+2000-08-22   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.11
+
+     HTML::LinkExtor and eg/hrefsub now obtain %linkElements from
+     the HTML::Tagset module.
+
+
+
+2000-06-29   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.10
+
+     Avoid core dump when stack gets relocated as the result of
+     text handler invocation while $p->unbroken_text is enabled.
+     Needed to refresh the stack pointer.
+
+
+
+2000-06-28   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.09
+
+     Avoid core dump if somebody clobbers the aliased $self argument of
+     a handler.
+
+     HTML::TokeParser documentation update suggested by
+     Paul Makepeace <Paul.Makepeace@realprogrammers.com>.
+
+
+
+2000-05-23   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.08
+
+     Fix core dump for large start tags.
+     Bug spotted by Alexander Fraser <green795@hotmail.com>
+
+     Added yet another example program: eg/hanchors
+
+     Typo fix by Jamie McCarthy <jamie@mccarthy.org>
+
+
+
+2000-03-20   Gisle Aas <gisle@aas.no>
+
+     Release 3.07
+
+     Fix perl5.004 builds (was broken in 3.06)
+
+     Declaration parsing mode now only triggers for <!DOCTYPE ...> and
+     <!ENTITY ...>.  Based on patch by la mouton <kero@3sheep.com>.
+
+
+
+2000-03-06   Gisle Aas <gisle@aas.no>
+
+     Release 3.06
+
+     Multi-threading/MULTIPLICITY compilation fix.
+     Both Doug MacEachern <dougm@pobox.com> and
+     Matthias Urlichs <smurf@noris.net> provided a patch.
+
+     Avoid some "statement not reached" warnings from picky
+     compilers.
+
+     Remove final commas in enums as ANSI C does not allow
+     them and some compilers actually care.
+     Patch by James Walden <jamesw@ichips.intel.com>
+
+     Added eg/htextsub example program.
+
+
+
+2000-01-22   Gisle Aas <gisle@aas.no>
+
+     Release 3.05
+
+     Implemented $p->unbroken_text option
+
+     Don't parse content of certain HTML elements as CDATA when
+     xml_mode is enabled.
+
+     Offset was reported with wrong sign for text at end of chunk.
+
+
+
+2000-01-15   Gisle Aas <gisle@aas.no>
+
+    Release 3.04
+
+    Backed out 3.03-patch that checked for legal handler and attribute
+    names in the HTML::Parser constructor.
+
+    Documentation typo fixed by Michael.
+
+
+
+2000-01-14   Gisle Aas <gisle@aas.no>
+
+    Release 3.03
+
+    We did not get out of comment mode for comments ending with an
+    odd number of "-" before ">".  Patch by la mouton <kero@3sheep.com>
+
+    Documentation patch by Michael.
+
+
+
+1999-12-21   Gisle Aas <gisle@aas.no>
+
+    Release 3.02
+
+    Hide ~-magic IV-pointer to 'struct p_state' behind a reference.
+    This allow copying of the internal _hparser_xs_state element, and
+    will make HTML-Tree-0.61 work again.
+
+    Introduced $p->init() which might be useful for subclasses that
+    only want the initialization part of the constructor.
+
+    Filled out DIAGNOSTICS section of the HTML::Parser POD.
+
+
+
+1999-12-19   Gisle Aas <gisle@aas.no>
+
+    Release 3.01
+
+    Rely on ~-magic instead of a DESTROY method to deallocate
+    the internal 'struct p_state'.  This avoid memory leaks
+    when people simply wipe of the content of the object hash.
+
+    One of the assertion in hparser.c had opposite logic.  This made
+    the parser fail when compiled with a -DDEBUGGING perl.
+
+    Don't assume any specific order of hash keys in the t/cases.t.
+    This test failed with some newer development releases of perl.
+
+
+
+1999-12-14   Gisle Aas <gisle@aas.no>
+
+    Release 3.00
+
+    Documentation update (most of it from Michael)
+
+    Minor patch to eg/hstrip so that it use a "" handler
+    instead of &ignore.
+
+    Test suite patches from Michael
+
+
+
+1999-12-13   Gisle Aas <gisle@aas.no>
+
+    Release 2.99_96
+
+    Patches from Michael:
+
+       - A handler of "" means that the event will be ignored.
+         More efficient than using 'sub {}' as handler.
+
+       - Don't use a perl hash for looking up argspec keywords.
+
+       - Documentation tweaks.
+
+
+
+1999-12-09   Gisle Aas <gisle@aas.no>
+
+    Release 2.99_95 (this is a 3.00 candidate)
+
+    Fixed core dump when "<" was followed by an 8-bit character.
+    Spotted and test case provided by Doug MacEachern.  Doug had
+    been running HTML-Parser-XS through more that 1 million urls that
+    had been downloaded via LWP.
+
+    Handlers can now invoke $p->eof to request the parsing to terminate.
+    HTML::HeadParser has been simplified by taking advantage of this.
+    Also added a title-extraction example that uses this.
+
+    Michael once again fixed my bad English in the HTML::Parser
+    documentation.
+
+    netscape_buggy_comment will carp instead of warn
+
+    updated TODO/README
+
+    Documented that HTML::Filter is depreciated.
+
+    Made backslash reserved in literal argspec strings.
+
+    Added several new test scripts.
+
+
+
+1999-12-08   Gisle Aas <gisle@aas.no>
+
+    Release 2.99_94 (should almost be a 3.00 candidate)
+
+    Renamed 'cdata_flag' as 'is_cdata'.
+
+    Dropped support for wrapping callback handler and argspec
+    in an array and passing a reference to $p->handler.  It
+    created ambiguities when you want to pass a array as
+    handler destination and not update argspec.  The wrapping
+    for constructor arguments are unchanged.
+
+    Reworked the documentation after updates from Michael.
+
+    Simplified internal check_handler().  It should probably simply
+    be inlined in handler() again.
+
+    Added argspec 'length' and 'undef'
+
+    Fix statement-less label.  Fix suggested by Matthew Langford
+    <langfml@Eng.Auburn.EDU>.
+
+    Added two more example programs: eg/hstrip and eg/htext.
+
+    Various minor patches from Michael.
+
+
+
+1999-12-07   Gisle Aas <gisle@aas.no>
+
+    Release 2.99_93
+
+    Documentation update
+
+    $p->bool_attr_value renamed as $p->boolean_attribute_value
+
+    Internal renaming: attrspec --> argspec
+
+    Introduced internal 'enum argcode' in hparser.c
+
+    Added eg/hrefsub
+
+
+
+1999-12-05   Gisle Aas <gisle@aas.no>
+
+    Release 2.99_92
+
+    More documentation patches from Michael
+
+    Renamed 'token1' as 'token0' as suggested by Michael
+
+    For artificial end tags we now report 'tokens', but not 'tokenpos'.
+
+    Boolean attribute values show up as (0, 0) in 'tokenpos' now.
+
+    If $p->bool_attr_value is set it will influence 'tokens'
+
+    Fix for core dump when parsing <a "> when $p->strict_names(0).
+    Based on fix by Michael.
+
+    Will av_extend() the tokens/tokenspos arrays.
+
+    New test suite script by Michael: t/attrspec.t
+
+
+
+1999-12-04   Gisle Aas <gisle@aas.no>
+
+    Release 2.99_91
+
+    Implemented attrspec 'offset'
+
+    Documentation patch from Michael
+
+    Some more cleanup/updated TODO
+
+
+
+1999-12-03   Gisle Aas <gisle@aas.no>
+
+    Release 2.99_90 (first beta for 3.00)
+
+    Using "realloc" as a parameter name in grow_tokens created
+    problems for some people.  Fix by Paul Schinder <schinder@pobox.com>
+
+    Patch by Michael that makes array handler destinations really work.
+
+    Patch by Michael that make HTML::TokeParser use this.  This gave a
+    a speedup of about 80%.
+
+    Patch by Michael that makes t/cases into a real test.
+
+    Small HTML::Parser documentation patch by Michael.
+
+    Renamed attrspec 'origtext' to 'text' and 'decoded_text' to 'dtext'
+
+    Split up Parser.xs.  Moved stuff into hparser.c and util.c
+
+    Dropped html_ prefix from internal parser functions.
+
+    Renamed internal function html_handle() as report_event().
+
+
+
+1999-12-02   Gisle Aas <gisle@aas.no>
+
+   Release 2.99_17
+
+   HTML::Parser documentation patch from Michael.
+
+   Fix memory leaks in html_handler()
+
+   Patch that makes an array legal as handler destination.
+   Also from Michael.
+
+   The end of marked sections does not eat successive newline
+   any more.
+
+   The artificial end event for empty tag in xml_mode did not
+   report an empty origtext.
+
+   New constructor option: 'api_version'
+
+
+
+1999-12-01   Gisle Aas <gisle@aas.no>
+
+   Release 2.99_16
+
+   Support "event" in argspec.  It expands to the name of the
+   handler (minus "default").
+
+   Fix core dump for large start tags.  The tokens_grow() routine
+   needed an adjustment.  Added test for this; t/largstags.t.
+
+
+
+1999-11-30   Gisle Aas <gisle@aas.no>
+
+   Release 2.99_15
+
+   Major restructuring/simplification of callback interface based on
+   initial work by Michael.  The main news is that you now need to
+   tell what arguments you want to be provided to your callbacks.
+
+   The following parser options has been eliminated:
+
+       $p->decode_text_entities
+       $p->keep_case
+       $p->v2_compat
+       $p->pass_self
+       $p->attr_pos
+
+
+
+1999-11-26   Gisle Aas <gisle@aas.no>
+
+   Release 2.99_14
+
+   Documentation update by Michael A. Chase.
+
+   Fix for declaration parsing by Michael A. Chase.
+
+   Workaround for perl5.004_05 bug. Can't return &PL_sv_undef.
+
+
+
+1999-11-22   Gisle Aas <gisle@aas.no>
+
+   Release 2.99_13
+
+   New Parser.pm POD based on initial work by Michael A. Chase.
+   All new features should now be described.
+
+   $p->callback(start => undef) will not reset the callback.
+
+   $p->xml_mode() did not parse attributes correct because
+   HCTYPE_NOT_SPACE_EQ_SLASH_GT flag was never set.
+
+   A few more tests.
+
+
+
+1999-11-18   Gisle Aas <gisle@aas.no>
+
+   Release 2.99_12
+
+   Implemented $p->attr_pos attribute.  This causes attr positions
+   within $origtext of the start tag to be reported instead of the
+   attribute values.  The positions are reported as 4 numbers; end of
+   previous attr, start of this attr, start of attr value, and end of
+   attr.  This should make substr() manipulations of $origtext easy.
+
+   Implemented $p->unbroken_text attribute.  This makes sure that
+   text segments are never broken and given back as separate text
+   callbacks.  It delays text callbacks until some other markup
+   has been recognized.
+
+   More English corrections by Michael A. Chase.
+
+   HTML::LinkExtor now recognizes even more URI attributes as
+   suggested by Sean M. Burke <sburke@netadventure.net>
+
+   Completed marked sections support.  It is also now a compile
+   time decision if you want this supported or not.  The only
+   drawback of enabling it should be a possible parsing speed
+   reduction.  I have not measured this yet.
+
+   The keys for callbacks initialized in the constructor are now
+   suffixed with "_cb".
+
+   Renamed $p->pass_cbdata to $p->pass_self.
+
+   Added magic number to the p_state struct.
+
+
+
+1999-11-17   Gisle Aas <gisle@aas.no>
+
+   Release 2.99_11
+
+   Don't leak $@ modifications from HTML::Parser constructor.
+
+   Included HTML::Parser POD.
+
+   Marked sections almost work.  CDATA and RCDATA should work.
+
+   For tags that take us into literal_mode; <script>, <style>,
+   <xmp>, we did not recognize the end tag unless it was written
+   in all lower case.
+
+
+
+1999-11-16   Gisle Aas <gisle@aas.no>
+
+   Release 2.99_10
+
+   The mkhctype and mkpfunc scripts were using \z inside RE.  This
+   did not work for perl5.004.  Replaced them with plain old
+   dollar signs.
+
+
+
+1999-11-15   Gisle Aas <gisle@aas.no>
+
+   Release 2.99_09
+
+   Grammar fixes by Michael A. Chase <mchase@ix.netcom.com>
+
+   Some more test suite patches for Win32 by Michael A. Chase
+   <mchase@ix.netcom.com>
+
+   Implemented $p->strict_names attribute.  By default we now
+   allow almost anything in tag and attribute names.  This is much
+   closer to the behaviour of some popular browsers.  This allows us
+   to parse broken tags like this example from the LWP mailing list:
+   <IMG ALIGN=MIDDLE SRC=newprevlstGr.gif ALT=[PREV LIST] BORDER=0>
+
+   Introduced some tables in "hctype.h" and "pfunc.h".  These
+   are built by the corresponding "mk..." script.
+
+
+
+1999-11-10   Gisle Aas <gisle@aas.no>
+
+   Release 2.99_08
+
+   Make Parser.xs compile on perl5.004_05 too.
+
+   New callback called 'default'.  This will be called for any
+   document text no other callback shows an interest in.
+
+   Patch by Michael A. Chase <mchase@ix.netcom.com> that should
+   help clean up files for the test suite on Win32.
+
+   Can now set up various attributes with key/value pairs passed to
+   the constructor.
+
+   $p->parse_file() will open the file in binmode()
+
+   Pass complete processing instruction tag as second argument
+   to process callback.
+
+   New boolean attribute v2_compat.  This influences how attributes
+   are reported for start tags.
+
+   HTML::Filter now filters process instructions too.
+
+   Faster HTML::LinkExtor by taking advantage of the new
+   callback interface.  The module now also uses URI.pm (instead
+   of the old URI::URL) to do URI-absolutations.
+
+   Faster HTML::TokeParser by taking advantage of new
+   accum interface.
+
+
+
+1999-11-09   Gisle Aas <gisle@aas.no>
+
+   Release 2.99_07
+
+   Entities in attribute values are now always expanded.
+
+   If you set the $p->decode_text_entities to a true value, then
+   you don't have to decode the text yourself.
+
+   In xml_mode we don't report empty element tags as a start tag
+   with an extra parameter any more.  Instead we generate an artificial
+   end tag.
+
+   'xml_mode' now implies 'keep_case'.
+
+   The parser now keeps its own copy of the bool_attr_value value.
+
+   Avoid memory leak for text callbacks
+
+   Avoid using ERROR as a goto label.
+
+   Introduced common internal accessor function for all boolean parser
+   attributes.
+
+   Tweaks to make Parser.xs compile under perl5.004.
+
+
+
+1999-11-08   Gisle Aas <gisle@aas.no>
+
+   Release 2.99_06
+
+   Internal fast decode_entities().   By using it we are able to make
+   the HTML::Entities::decode function 6 times faster than the old one
+   implemented in pure Perl.
+
+   $p->bool_attr_value() can be set to influence the value that
+   boolean attributes will be assigned.  The default is to assign
+   a value identical to the attribute name.
+
+   Process instructions are reported as "PI" in @accum
+   
+   $p->xml_mode(1) modifies how processing instructions are terminated
+   and allows "/>" at the end of start tags.
+
+   Turn off optimizations when compiling with gcc on Solaris.  Avoids
+   what we believe to be a compiler bug.  Should probably figure out
+   which versions of gcc have this bug.
+
+
+
+1999-11-05   Gisle Aas <gisle@aas.no>
+
+   Release 2.99_05
+
+   The previous release did not even compile.  I forgot to try 'make test'
+   before uploading.
+
+
+
+1999-11-05   Gisle Aas <gisle@aas.no>
+
+   Release 2.99_04
+
+   Generalized <XMP>-support to cover all literal parsing.  Currently
+   activated for <script>, <style>, <xmp> and <plaintext>.
+
+
+
+1999-11-05   Gisle Aas <gisle@aas.no>
+
+   Release 2.99_03
+
+   <XMP>-support.
+
+   Allow ":" in tag and attribute names
+
+   Include rest of the HTML::* files from the old HTML::Parser
+   package.  This should make testing easier.
+
+
+
+1999-11-04   Gisle Aas <gisle@aas.no>
+
+   Release 2.99_02
+
+   Implemented keep_case() option.  If this attribute is true, then
+   we don't lowercase tag and attribute names.
+
+   Implemented accum() that takes an array reference.  Tokens are
+   pushed onto this array instead of sent to callbacks.
+
+   Implemented strict_comment().
+
+
+
+1999-11-03   Gisle Aas <gisle@aas.no>
+
+   Release 2.99_01
+
+   Baseline of XS implementation
+
+
+
+1999-11-05   Gisle Aas <gisle@aas.no>
+
+   Release 2.25
+
+   Allow ":" in attribute names as a workaround for Microsoft Excel
+   2000 which generates such files.
+
+   Make deprecate warning if netscape_buggy_comment() method is
+   used.  The method is used in strict_comment().
+
+   Avoid duplication of parse_file() method in HTML::HeadParser.
+
+
+
+1999-10-29   Gisle Aas <gisle@aas.no>
+
+   Release 2.24
+
+   $p->parse_file() will not close a handle passed to it any more.
+   If passed a filename that can't be opened it will return undef
+   instead of raising an exception, and strings like "*STDIN" are not
+   treated as globs any more.
+
+   HTML::LinkExtor knowns about background attribute of <tables>.
+   Patch by Clinton Wong <clintdw@netcom.com>
+
+   HTML::TokeParser will parse large inline strings much faster now.
+   The string holding the document must not be changed during parsing.
+
+
+
+1999-06-09   Gisle Aas <gisle@aas.no>
+
+   Release 2.23
+
+   Documentation updates.
+
+
+
+1998-12-18   Gisle Aas <aas@sn.no>
+
+   Release 2.22
+
+   Protect HTML::HeadParser from evil $SIG{__DIE__} hooks.
+
+
+
+1998-11-13   Gisle Aas <aas@sn.no>
+
+   Release 2.21
+
+   HTML::TokeParser can now parse strings directly and does the
+   right thing if you pass it a GLOB.  Based on patch by
+   Sami Itkonen <si@iki.fi>.
+
+   HTML::Parser now allows space before and after "--" in Netscape
+   comments.  Patch by Peter Orbaek <poe@daimi.au.dk>.
+
+
+
+1998-07-08   Gisle Aas <aas@sn.no>
+
+   Release 2.20
+
+   Added HTML::TokeParser.  Check it out!
+
+
+
+1998-07-07   Gisle Aas <aas@sn.no>
+
+   Release 2.19
+
+   Don't end a text chunk with space when we try to avoid breaking up
+   words.
+
+
+
+1998-06-22   Gisle Aas <aas@sn.no>
+
+   Release 2.18
+
+   HTML::HeadParser->parse_file will now stop parsing when the
+   <body> starts as it should.
+
+   HTML::LinkExtor more easily subclassable by introducing the
+   $self->_found_link method.
+
+
+
+1998-04-28   Gisle Aas <aas@sn.no>
+
+   Release 2.17
+
+   Never split words (a sequence of non-space) between two invocations
+   of $self->text.  This is just a simplification of the code that tried
+   not to break entities.
+   
+   HTML::Parser->parse_file now use smaller chunks as already
+   suggested by the HTML::Parser documentation.
+
+
+
+1998-04-02   Gisle Aas <aas@sn.no>
+
+   Release 2.16
+   
+   The HTML::Parser could some times break hex entites (like &#xFFFF;)
+   in the middle.
+
+   Removed remaining forced dependencies on libwww-perl modules.  It
+   means that all tests should now pass, even if libwww-perl was not
+   installed previously.
+
+   More tests.
+
+
+
+1998-04-01   Gisle Aas <aas@sn.no>
+
+   Release 2.14, HTML::* modules unbundled from libwww-perl-5.22.

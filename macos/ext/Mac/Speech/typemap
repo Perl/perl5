@@ -1,0 +1,8 @@
+TYPEMAP
+VoiceSpec		T_RECORDOBJ
+VoiceDescription	T_RECORDOBJ
+SpeechChannel		T_IV
+
+INPUT
+
+OUTPUT

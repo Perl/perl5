@@ -1,0 +1,24 @@
+#!/usr/bin/perl -w
+
+use strict;
+my $code = shift || usage();
+$code = 'sub edit_print { local $_ = shift; ' . $code . '; print }';
+#print $code;
+eval $code;
+die $@ if $@;
+
+use HTML::Parser 3.05;
+my $p = HTML::Parser->new(unbroken_text => 1,
+			  default_h => [ sub { print @_; }, "text" ],
+                	  text_h    => [ \&edit_print,      "text" ],
+        	         );
+
+my $file = shift || usage();
+$p->parse_file($file) || die "Can't open file $file: $!\n";
+
+sub usage
+{
+    my $progname = $0;
+    $progname =~ s,^.*/,,;
+    die "Usage: $progname <perlexpr> <filename>\n";
+}

@@ -1,0 +1,41 @@
+# Filename:	config.in
+#
+# written by Paul Marquess <Paul.Marquess@btinternet.com>
+# last modified 17th February 2001
+# version 1.11
+
+# 1. Do you want to build zlib as well?
+#
+#    If not, set the BUILD_ZLIB variable to False.
+#
+#    If you want to build the zlib library along with Compress::Zlib, first
+#    fetch a copy of the zlib source distribution. The address ig given
+#    in the README file. Unpack the zlib source distribution into the
+#    Compress::Zlib source directory. If you have fetched zlib 1.1.3, it will
+#    create a directory called zlib-1.1.3. 
+#    Set the BUILD_ZLIB variable below to True. 
+
+BUILD_ZLIB	= False
+#BUILD_ZLIB	= True
+
+# 2. Where are the files zlib.h and zconf.h?
+#
+#    Change the path below to point to the directory where zlib.h 
+#    and zconf.h are installed on your system. 
+#    If you have set BUILD_ZLIB above to True, the path should point to the
+#    zlib source directory. A relative path is sufficient.
+
+INCLUDE 	= /usr/local/include
+#INCLUDE 	= ./zlib-1.1.3
+
+# 3. Where is libz?
+#
+#    Change the path below to point to the directory where libz is
+#    installed on your system.
+#    If you have set BUILD_ZLIB above to True, the path should point to the
+#    zlib source directory. A relative path is sufficient.
+
+LIB	= /usr/local/lib
+#LIB	= ./zlib-1.1.3
+
+# end of file config.in

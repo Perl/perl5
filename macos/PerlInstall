@@ -1,0 +1,59 @@
+Set Exit 0
+# bigperl is preferable as dynaperl can't overwrite the MoreFiles shlb.
+# if "`Which bigperl³Dev:Null`" != "" 
+# 	Bigperl -Sx "{0}" {"Parameters"}; Exit {Status}
+# Else
+	Perl -Sx "{0}" {"Parameters"}; Exit {Status}
+# End
+#!perl
+
+# use some of Mac::BuildTools
+use File::Find;
+use File::Path;
+use File::Copy;
+use AutoSplit;
+
+if ($ARGV[0] eq "-l") {
+	shift;
+	$dirs{lib} = MacPerl::MakePath(MacPerl::MakeFSSpec(shift));
+	$dirs{lib} =~ s/:$//;
+}
+
+if ($#ARGV == -1) {
+	chomp($dir = `pwd`);
+	unshift(@ARGV, $dir);
+} 
+
+if ($MacPerl::Version =~ /MPW/) {
+	$dirs{lib} ||= "$ENV{MPW}Libraries:Perl";
+} else {
+	$dirs{lib} ||= "$ENV{MACPERL}lib";
+}
+
+foreach $dir (@ARGV) {
+	$dir .= ":" unless ($dir =~ /:$/);
+	$dir .= "blib";
+
+	opendir(DIR, $dir);
+	while ($d = readdir(DIR)) {
+		next unless -d "$dir:$d";
+		$fromdir = "$dir:$d";
+		$todir   = $dirs{$d};
+		find(\&copyit, $fromdir);
+	}
+	closedir(DIR);
+}
+
+sub copyit {
+	local($_) = $_;
+	my($newdir,$auto,$name) = ($File::Find::dir, $File::Find::dir, $File::Find::name);
+	$newdir =~ s/\Q$fromdir\E/$todir/;
+	$auto   =~ s/.*\Q$fromdir\E.*$/$todir:auto/;
+	$name   =~ s/.*\Q$fromdir\E//;
+	return if -d $_;
+	$newdir =~ s/:$//;
+	printf("\t%-20s -> %s\n", $name, $newdir);
+	mkpath($newdir, 1);
+	copy($_, "$newdir:$_") ||Êdie $^E;
+	autosplit("$newdir:$_", $auto) if /\.pm$/;
+}

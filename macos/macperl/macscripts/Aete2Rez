@@ -1,0 +1,281 @@
+Perl -Sx "{0}" {"Parameters"} ; Exit
+#!perl
+
+while(<>) {
+	next if /^\s+$/;
+	next if /^\s*#/;
+	
+	if (/\@TITLE\s+\"([^"]*)\"/) {
+		print "resource \'aete\' (0, \"$1\") {\n";
+	} elsif (/\@VERSION\s+(\d+)\.(\d+)/) {
+		printf("\t0x%02d, 0x%02d, english, roman,\n", $1, $2);
+	} elsif (/\@SUITE\s+\"([^"]*)\"\s*,\s*\"([^"]*)\"\s*,\s*\'([^']*)\'/) {
+		if ($suites++) {
+			&finishsuite();
+			
+			print "\n";
+		} else {
+			print "\t{\n";
+		}
+		
+		($events, $classes, $comparisons, $enumerations) = (0, 0, 0, 0);
+		
+		print "\t\t\"$1\", \"$2\", \'$3\', 1, 1,\n";
+	} elsif (/\@EVENT\s+\"([^"]*)\"\s*,\s*\"([^"]*)\"\s*,\s*\'([^']*)\'\s*,\s*\'([^']*)\'/) {
+		if ($events++) {
+			&finishevent();
+			print "\n";
+		} else {
+			print "\t\t{\n";
+		}
+
+		print "\t\t\t\"$1\", \"$2\", \'$3\', \'$4\',\n";
+		
+		$params = 0;
+	} elsif (/\@REPLY\s+\'([^']*)\'\s*,\s*\"([^"]*)\"\s*,\s*(\w+)\s*,\s*(\w+)\s*,\s*(\w+)/) {
+		
+		print "\t\t\t\'$1\', \"$2\", ";
+		
+		if ($3 eq "REQ") {
+			print "replyRequired, ";
+		} elsif ($3 eq "OPT") {
+			print "replyOptional, ";
+		} else {
+			die;
+		}
+		
+		if ($4 eq "SINGLE") {
+			print "singleItem, ";
+		} elsif ($4 eq "LIST") {
+			print "listOfItems, ";
+		} else {
+			die;
+		}
+		
+		if ($5 eq "ENUM") {
+			print "enumerated, ";
+		} elsif ($5 eq "NOENUM") {
+			print "notEnumerated, ";
+		} else { 
+			die;
+		}
+		
+		print "reserved, " x 13, "\n";
+	} elsif (/\@DIRECT\s+\'([^']*)\'\s*,\s*\"([^"]*)\"\s*,\s*(\w+)\s*,\s*(\w+)\s*,\s*(\w+)s*,\s*(\w+)/) {
+		
+		print "\t\t\t\'$1\', \"$2\", ";
+		
+		if ($3 eq "REQ") {
+			print "directParamRequired, ";
+		} elsif ($3 eq "OPT") {
+			print "directParamOptional, ";
+		} else {
+			die;
+		}
+		
+		if ($4 eq "SINGLE") {
+			print "singleItem, ";
+		} elsif ($4 eq "LIST") {
+			print "listOfItems, ";
+		} else { 
+			die;
+		}
+		
+		if ($5 eq "ENUM") {
+			print "enumerated,\n";
+		} elsif ($5 eq "NOENUM") {
+			print "notEnumerated,\n";
+		} else {
+			die;
+		}
+		
+		if ($6 eq "CHANGE") {
+			print "\t\t\tchangesState, ";
+		} elsif ($6 eq "NOCHANGE") {
+			print "\t\t\tdoesntChangeState, ";
+		} else { 
+			die;
+		}
+		
+		print "reserved, " x 12, "\n";		
+	} elsif (/\@PARAM\s+\"([^"]*)\"\s*,\s*\'([^']*)\'\s*,\s*\'([^']*)\'\s*,\s*\"([^"]*)\"\s*,\s*(\w+)\s*,\s*(\w+)\s*,\s*(\w+)s*/) {
+		
+		print "\t\t\t{\n" unless $params++;
+		
+		print "\t\t\t\t\"$1\", \'$2\', \'$3\', \"$4\", ";
+		
+		if ($5 eq "REQ") {
+			print "required, ";
+		} elsif ($5 eq "OPT") {
+			print "optional, ";
+		} else {
+			die;
+		}
+		
+		if ($6 eq "SINGLE") {
+			print "singleItem, ";
+		} elsif ($6 eq "LIST") {
+			print "listOfItems, ";
+		} else { 
+			die;
+		}
+		
+		if ($7 eq "ENUM") {
+			print "enumerated, ";
+		} elsif ($7 eq "NOENUM") {
+			print "notEnumerated, ";
+		} else { 
+			die;
+		}
+		
+		print "reserved, " x 13, "\n";				
+	} elsif (/\@CLASS\s+\"([^"]*)\"\s*,\s*\'([^']*)\'\s*,\s*\"([^"]*)\"/) {
+		if ($classes++) {
+			&finishclass();
+		} else {		
+			if ($events) {
+				&finishevent();
+				
+				print "\t\t},\n";
+			} else {
+				print "\t\t{},\n";
+			}
+			
+			print "\t\t{\n";
+		}
+		
+		print "\t\t\t\"$1\", \'$2\', \"$3\",\n";
+		
+		($properties,$elements) = (0, 0);
+	} elsif (/\@PROPERTY\s+\"([^"]*)\"\s*,\s*\'([^']*)\'\s*,\s*\'([^']*)\'\s*,\s*\"([^"]*)\"\s*,\s*(\w+)\s*,\s*(\w+)\s*,\s*(\w+)/) {
+		print "\t\t\t{\n" unless ($properties++);
+		
+		print "\t\t\t\t\"$1\", \'$2\', \'$3\', \"$4\", reserved, ";
+		
+		if ($5 eq "SINGLE") {
+			print "singleItem, ";
+		} elsif ($5 eq "LIST") {
+			print "listOfItems, ";
+		} else { 
+			die;
+		}
+		
+		if ($6 eq "ENUM") {
+			print "enumerated, ";
+		} elsif ($6 eq "NOENUM") {
+			print "notEnumerated, ";
+		} else { 
+			die;
+		}
+		
+		if ($7 eq "RDWR") {
+			print "readWrite, ";
+		} elsif ($7 eq "RDONLY") {
+			print "readOnly, ";
+		} else {
+			die;
+		}
+		
+		print "reserved, " x 12, "\n";		
+	} elsif (/\@ELEMENT\s+\'([^']*)\'\s*,\s*(.*)/) {
+		unless ($elements++) {
+			if ($properties++) {
+				print "\t\t\t},\n";
+			} else {
+				print "\t\t\t{},\n";
+			}
+				
+			print "\t\t\t{\n";
+		}
+		
+		($class, $forms) = ($1, $2);
+		$forms =~ s/ABSOLUTE/formAbsolutePosition/;
+		$forms =~ s/RELATIVE/formRelativePosition/;
+		$forms =~ s/RANGE/formRange/;
+		$forms =~ s/NAME/formName/;
+		$forms =~ s/ID/formUniqueID/;
+		
+		print "\t\t\t\t\'$class\', { $forms },\n";
+	} elsif (/\@ENUMERATION\s+\'([^']*)\'/) {
+		if ($enumerations++) {
+			&finishenumeration();
+		} else {
+			if ($comparisons) {
+				&finishcomparison();
+						
+				print "\t\t},\n";
+			} elsif ($classes) {
+				&finishclass();
+				print "\t\t},\n\t\t{},\n";
+			} elsif ($events) {
+				&finishevent();
+						
+				print "\t\t},\n\t\t{},\n\t\t{},\n";
+			} else {
+				print "\t\t{},\n\t\t{},\n\t\t{},\n";
+			}
+					
+			print "\t\t{\n";
+		}
+		
+		print "\t\t\t\'$1\',\n";
+		
+		$elements = 0;
+	} elsif (/\@ENUM\s+\"([^"]*)\"\s*,\s*\'([^']*)\'\s*,\s*\"([^"]*)\"/) {
+		if (!$elements++) {
+			print "\t\t\t{\n";
+		} 
+		
+		print "\t\t\t\t\"$1\", \'$2\', \"$3\",\n";
+	} else {
+		die "Syntax error";
+	}
+}
+
+&finishsuite() if $suites;
+
+print "\t}\n";
+print "};\n";
+
+sub finishsuite {
+	if ($enumerations) {
+		&finishenumeration();
+		print "\t\t},\n";
+	} elsif ($comparisons) {
+		print "\t\t},\n\t\t{},\n";
+	} elsif ($classes) {
+		&finishclass();
+		print "\t\t},\n\t\t{},\n\t\t{},\n";
+	} elsif ($events) {
+		&finishevent();
+		print "\t\t},\n\t\t{},\n\t\t{},\n\t\t{},\n";
+	} else {
+		print "\t\t{},\n\t\t{},\n\t\t{},\n\t\t{},\n";
+	}
+}
+
+sub finishevent {
+	if ($params) {
+		print "\t\t\t},\n";
+	} else {
+		print"\t\t\t{},\n";
+	}
+}
+
+sub finishclass {
+	if ($elements) {
+		print "\t\t\t},\n";
+	} elsif ($properties) {
+		print "\t\t\t},\n\t\t\t{},\n";
+	} else {
+		print "\t\t\t{},\n\t\t\t{},\n";
+	}
+}
+
+sub finishenumeration {
+	if ($elements) {
+		print "\t\t\t},\n";
+	} else {
+		print "\t\t\t{},\n";
+	}
+}

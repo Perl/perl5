@@ -1,0 +1,22 @@
+TYPEMAP
+LaunchParam		T_PTROBJ
+ProcessInfo		T_PTROBJ
+ProcessSerialNumber	T_PSN
+FSSpecPtr		T_FSSPECPTR
+
+INPUT
+T_PSN
+	{
+		double psn = SvNV($arg);
+		double low = fmod(psn, 4294967296.0);
+
+		$var.lowLongOfPSN = (long) low;
+		$var.highLongOfPSN = (long) ((psn - low)/4294967296.0);
+	}
+T_FSSPECPTR
+	GUSIPath2FSp((char *) SvPV($arg,na), $var)
+OUTPUT
+T_PSN
+	$arg = newSVnv($var.highLongOfPSN * 4294967296.0 + $var.lowLongOfPSN);	
+T_FSSPECPTR
+	sv_setpv($arg, GUSIFSp2FullPath($var));

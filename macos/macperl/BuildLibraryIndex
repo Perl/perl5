@@ -1,0 +1,33 @@
+Perl -Sx "{0}" {"Parameters"}
+Exit 0
+
+#!perl -s
+
+use File::Find;
+
+($index = shift @ARGV) || die "No help index specified";
+
+dbmopen(%INDEX, $index, 0666) || die "Couldn't open index file \"$index\"";
+
+for $currentlibrary (@ARGV) {
+	($currentroot = $currentlibrary) =~ s/\blib:?//;
+	find(\&wanted, $currentlibrary);
+}
+
+dbmclose %INDEX;
+
+sub wanted {
+	return unless -f && /\.(pod|pm)/;
+	return if $1 eq "pm" && -e "$`.pod";
+	
+	my ($url) = $File::Find::name;
+	$url =~ s/$currentroot:?//;
+	my ($key) = $url;
+	$url =~ s|:|/|g;
+	$url = "pod:$url";
+	$key =~ s|(?:lib:?)?(.*)\.\w+$|$1|;
+	$key =~ s|:|::|g;
+	warn "\"$key\" already defined as \"$INDEX{$key}\", trying to redefine as \"$url\""
+		if ($INDEX{$key} && $INDEX{$key} ne $url);
+	$INDEX{$key} ||= $url;
+}

@@ -1,0 +1,9 @@
+Perl -Sx "{0}" {"Parameters"}; Exit {Status}
+#!perl
+
+while (<>) {
+	if (/^=/) {
+		$_ = <> until /^=cut/;
+	}
+	print "\t\t$1\n" if /^([A-Za-z0-9_]+)\(/;
+}

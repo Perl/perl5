@@ -1,0 +1,128 @@
+Perl -Sx "{0}" {"Parameters"}; Exit {Status}
+
+#!perl
+
+$module = shift or die "Usage: $0 ModuleName";
+
+mkdir($module, 0777) or die "Couldn't create directory: $!";
+
+open(PM, ">:$module:$module.pm") or die "Can't open $module.pm: $!";
+open(XS, ">:$module:$module.xs") or die "Can't open $module.xs: $!";
+open(PL, ">:$module:Makefile.PL") or die "Can't open Makefile.PL: $!";
+
+($manager = $module) =~ s/s$//;
+
+print PM<<END_PM;
+=head1 NAME
+
+Mac::$module - Macintosh Toolbox Interface to $manager Manager
+
+=head1 SYNOPSIS
+
+
+=head1 DESCRIPTION
+
+Access to Inside Macintosh is essential for proper use of these functions.
+Explanations of terms, processes and procedures are provided there.
+Any attempt to use these functions without guidance can cause severe errors in 
+your machine, including corruption of data. B<You have been warned.>
+
+=cut
+
+use strict;
+
+package Mac::$module;
+
+BEGIN {
+	use Exporter   ();
+	use DynaLoader ();
+	
+	use vars qw(\@ISA \@EXPORT);
+	
+	\@ISA = qw(Exporter DynaLoader);
+	\@EXPORT = qw(
+	);
+}
+
+bootstrap Mac::$module;
+
+=include $module.xs
+
+=head1 BUGS/LIMITATIONS
+
+=head1 FILES
+
+=head1 AUTHOR(S)
+
+Matthias Ulrich Neeracher <neeri\@iis.ee.ethz.ch> 
+
+=cut
+
+1;
+
+__END__
+END_PM
+
+print XS<<END_XS;
+/* \$Header: /cvsroot/macperl/perl/macos/ext/Mac/ExtUtils/MakeToolboxModule,v 1.1 2000/08/14 03:39:30 neeri Exp $
+ *
+ *    Copyright (c) 1997 Matthias Neeracher
+ *
+ *    You may distribute under the terms of the Perl Artistic License,
+ *    as specified in the README file.
+ *
+ * \$Log: MakeToolboxModule,v $
+ * \Revision 1.1  2000/08/14 03:39:30  neeri
+ * \Checked into Sourceforge
+ * \
+ * \Revision 1.3  1998/11/22 21:21:06  neeri
+ * \All packed up and no place to go
+ * \
+ * \Revision 1.2  1997/11/18 00:52:19  neeri
+ * \MacPerl 5.1.5
+ * \
+ * \Revision 1.1  1997/04/07 20:49:35  neeri
+ * \Synchronized with MacPerl 5.1.4a1
+ * \
+ */
+
+#define MAC_CONTEXT
+
+#include "EXTERN.h"
+#include "perl.h"
+#include "XSUB.h"
+#include <Types.h>
+#include <$module.h>
+
+MODULE = Mac::$module	PACKAGE = Mac::$module
+
+=head2 Functions
+
+=over 4
+
+=back
+
+=cut
+END_XS
+
+print PL<<END_PL;
+use ExtUtils::MakeMaker;
+
+WriteMakefile(
+    'LINKTYPE'	=> 'static dynamic',
+    XSPROTOARG => '-noprototypes', 		# XXX remove later?
+);
+END_PL
+
+print <<END;
+# Looks ok, go ahead
+Directory $module
+::::perl Makefile.PL
+Open $module.pm
+Open $module.xs
+Open Makefile.PL
+New typemap
+::ExtUtils:ExtractCalls {CIncludes}$module.h
+::ExtUtils:ExtractConstants {CIncludes}$module.h
+::ExtUtils:ExtractFunctions $module.xs
+END

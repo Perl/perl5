@@ -1,0 +1,83 @@
+#!/usr/bin/perl -w
+
+# See also HTML::Form module
+
+use HTML::PullParser ();
+use HTML::Entities qw(decode_entities);
+use Data::Dump qw(dump);
+
+my @FORM_TAGS = qw(form input textarea button select option);
+
+my $p = HTML::PullParser->new(file => shift || "xxx.html",
+			      start => 'tag, attr',
+			      end   => 'tag',
+			      text  => '@{text}',
+			      report_tags => \@FORM_TAGS,
+			     ) || die "$!";
+
+# a little helper function
+sub get_text {
+    my($p, $stop) = @_;
+    my $text;
+    while (defined(my $t = $p->get_token)) {
+	if (ref $t) {
+	    $p->unget_token($t) unless $t->[0] eq $stop;
+	    last;
+	}
+	else {
+	    $text .= $t;
+	}
+    }
+    return $text;
+}
+
+my @forms;
+while (defined(my $t = $p->get_token)) {
+    next unless ref $t; # skip text
+    if ($t->[0] eq "form") {
+	shift @$t;
+	push(@forms, $t);
+	while (defined(my $t = $p->get_token)) {
+	    next unless ref $t;  # skip text
+	    last if $t->[0] eq "/form";
+	    if ($t->[0] eq "select") {
+		my $sel = $t;
+		push(@{$forms[-1]}, $t);
+		while (defined(my $t = $p->get_token)) {
+		    next unless ref $t; # skip text
+		    last if $t->[0] eq "/select";
+		    #print "select ", dump($t), "\n";
+		    if ($t->[0] eq "option") {
+			my $value = $t->[1]->{value};
+			my $text = get_text($p, "/option");
+			unless (defined $value) {
+			    $value = decode_entities($text);
+			}
+			push(@$sel, $value);
+		    }
+		    else {
+			warn "$t->[0] inside select";
+		    }
+		}
+	    }
+	    elsif ($t->[0] =~ /^\/?option$/) {
+		warn "option tag outside select";
+	    }
+	    elsif ($t->[0] eq "textarea") {
+		push(@{$forms[-1]}, $t);
+		$t->[1]{value} = get_text($p, "/textarea");
+	    }
+	    elsif ($t->[0] =~ m,^/,) {
+		warn "stray $t->[0] tag";
+	    }
+	    else {
+		push(@{$forms[-1]}, $t);
+	    }
+	}
+    }
+    else {
+	warn "form tag $t->[0] outside form";
+    }
+}
+
+print dump(\@forms), "\n";

@@ -1,0 +1,127 @@
+perl -Sx "{0}" prepare {"Parameters"} > MacPerlTest.Run
+:MacPerlTest.Run · MacPerlTest.Out
+perl -Sx "{0}" evaluate {"Parameters"} MacPerlTest.Out
+# Delete MacPerlTest.Out MacPerlTest.Run
+Exit 0
+
+#!./perl
+	
+# $RCSfile: TEST,v $$Revision: 1.1 $$Date: 2000/08/14 01:48:17 $
+
+# Last change: Fri Jan 10 09:57:03 WET 1997
+
+# This is written in a peculiar style, since we're trying to avoid
+# most of the constructs we'll be testing for.
+
+$| = 1;
+
+$operation = shift;
+
+if ($ARGV[0] =~ /^(68K|PPC)$/) {
+    $suff = ".$ARGV[0]";
+    shift;
+}
+
+if ($#ARGV >= 0 && $ARGV[0] eq '-v') {
+    $verbose = 1;
+    shift;
+}
+
+die "Run me from the :t directory" if (-f ':t:TEST');
+
+if ($operation eq "prepare") {
+	print "Set Exit 0\n";
+	print 'Set -e PERL5LIB "`directory`:lib,`directory`:macos:lib"', "\n";
+	
+	if ($ARGV[0] eq '') {
+	    @ARGV = split(/[ \n]/,
+	     `echo :base:Å.t :comp:Å.t :cmd:Å.t :io:Å.t; echo :op:Å.t :lib:Å.t :pod:Å.t :pragma:Å.t`);
+	}
+	
+	$bad = 0;
+	$good = 0;
+	$total = @ARGV;
+	while ($test = shift) {
+	    if ($test =~ /^$/) {
+		next;
+	    }
+	    $te = $test;
+	    chop($te);
+	    print "echo \'----- $te" . '.' x (20 - length($te)) . "\'\n";
+	    open(script,"$test") || die "Can't run $test.\n";
+	    $_ = <script>;
+	    close(script);
+	    if (/#!..perl(.*)/) {
+		$switch = $1;
+	    } else {
+		$switch = '';
+	    }
+	    print "::macos:perl$suff $switch $test\n";
+	}
+} elsif ($operation eq "evaluate") { 
+	$_ = "";
+	
+tests: 	while (1)	{
+	    while (1) {
+	    	last if /^-----/;
+	    	last tests unless ($_ = <>);
+	    } 
+
+	    $_ =~ /----- (.*)/;
+		
+	    print $1;
+	    $ok = 0;
+	    $next = 0;
+	    ++$total;
+	    
+	    while (<>) {
+		last if (/^-----/);
+		
+		if ($verbose) {
+		    print "\t$_";
+		}
+		unless (/^#/) {
+		    if (/^1\.\.([0-9]+)/) {
+			$max = $1;
+			$totmax += $max;
+			$files += 1;
+			$next = 1;
+			$ok = 1;
+		    } else {
+			$next = $1, $ok = 0, last if /^not ok ([0-9]*)/;
+			if (/^ok (.*)/ && $1 == $next) {
+			    $next = $next + 1;
+			} else {
+			    $ok = 0;
+			}
+		    }
+		}
+	    }
+	    $next = $next - 1;
+	    if ($ok && $next == $max) {
+		print "ok\n";
+		$good = $good + 1;
+	    } else {
+		$next += 1;
+		print "FAILED on test $next\n";
+		$bad = $bad + 1;
+		$_ = $test;
+	    }
+	    last if eof;
+	}
+	
+	if ($bad == 0) {
+	    if ($ok) {
+		print "All tests successful.\n";
+	    } else {
+		die "FAILED--no tests were run for some reason.\n";
+	    }
+	} else {
+	    $pct = sprintf("%.2f", $good / $total * 100);
+	    if ($bad == 1) {
+		warn "Failed 1 test, $pct% okay.\n";
+	    } else {
+		warn "Failed $bad/$total tests, $pct% okay.\n";
+	    }
+	}
+}

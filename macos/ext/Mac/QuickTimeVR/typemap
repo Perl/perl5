@@ -1,0 +1,12 @@
+TYPEMAP
+QTVRInstance				T_PTROBJ
+QTVRInterceptRecord			T_PTROBJ
+QTVRFloatPoint				T_RECORDOBJ
+QTVRCursorRecord			T_RECORDOBJ
+QTVRNudgeControl			T_IV
+QTVRViewStateType			T_IV
+QTVRObjectAnimationSetting	T_IV
+QTVRControlSetting			T_IV
+QTVRImagingMode				T_IV
+QTVRAngularUnits			T_IV
+float						T_FLOAT

@@ -1,0 +1,48 @@
+Perl -Sx "{0}" {"Parameters"}; Exit {Status}
+#!perl
+
+$^I = ".bak" unless $ARGV[0] =~ /¤/;
+
+@output = ();
+
+while (<>) {
+	if (/^=/) {
+		do {
+			push @output, $_;
+			$_ = <>;
+		} until /^=cut/;
+	}
+	if (/^sub\s+([A-Za-z][A-Za-z0-9_]*)\s+\(\)\s+\{.*\}/) {
+		if ($was_sub) {
+			splice(@output, $was_sub++, 0, "=item $1\n\n");
+		} else {
+			push @output, "\n=item $1\n\n";
+			push @output, "=cut\n";
+			$was_sub = $#output;
+		}
+	} elsif (/^([A-Za-z][A-Za-z0-9_]*)\((.*)\)/) {
+		$doc = "\n=item $1";
+		$end = " ";
+		$comma = "";
+		@P = split(/,\s*/, $2);
+		for $p (@P) {
+			if ($p =~ /\s*=/) {
+				$p = " [$comma $`";
+				$end .= "]";
+			} else {
+				$p = "$comma $p";
+			}
+			$comma = ",";
+		}
+		$doc .= uc join("", @P);
+		$doc .= "$end\n\n=cut\n";
+		splice(@output, $#output, 0, $doc);
+	} else {
+		$was_sub = 0;
+	}
+	push @output, $_;
+	if (eof) {
+		print join("", @output);
+		@output = ();
+	}
+}

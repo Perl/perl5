@@ -1,0 +1,27 @@
+TODO
+
+ - remove 255 char limit on literal argspec strings
+ - implement backslash escapes in literal argspec string
+ - <![%app1;[...]]> (parameter entities)
+ - limit the length of markup elements that never end.   Perhaps by
+   configurable limits on the length that markup can have and still
+   be recongnized.
+ - pic attribute (">" or "?>" are defaults)  useful where you want to
+   have "?>" as pic, but don't want the rest of xml_mode. For instance
+   to parse PHP files.
+
+
+SGML FEATURES WE WILL PROBABLY IGNORE FOREVER
+ - Empty tags: <> </>  (repeat previous start tag)
+ - <foo<bar>  (same as <foo><bar>)
+ - NET tags <name/.../
+ 
+
+POSSIBLE OPTIMIZATIONS
+ - none that I can think of right now
+ - run the profiler
+
+
+MINOR "BUGS" (alias FEATURES)
+ - no way to clear "boolean_attribute_value".
+ - <style> and <script> do not end with the first "</".

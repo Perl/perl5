@@ -1,0 +1,5 @@
+TYPEMAP
+TEHandle		T_PTROBJ
+TEStyleHandle	T_PTROBJ
+TextStyle		T_RECORDOBJ
+StScrpHandle	T_PTROBJ

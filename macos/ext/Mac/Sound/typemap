@@ -1,0 +1,22 @@
+TYPEMAP
+SndChannel		T_PTROBJ
+AudioSelection	T_RECORDOBJ
+SCStatus		T_RECORDOBJ
+SMStatus		T_RECORDOBJ
+SndCommand		T_RECORDOBJ
+StateBlock		T_RECORDOBJ
+CompressionInfo	T_RECORDOBJ
+SPB				T_RECORDOBJ
+UnsignedFixed	T_UNSIGNEDFIXED
+INPUT
+T_UNSIGNEDFIXED
+	{
+		double num = SvNV($arg);
+		if (num >= 32768.0)
+			$var = X2Fix(num-32768.0) | 0x80000000UL;
+		else
+			$var = X2Fix(num);
+	}
+OUTPUT
+T_UNSIGNEDFIXED
+	sv_setnv($arg, ($var & 0x80000000UL) ? Fix2X($var)+32768.0 : Fix2X($var));

@@ -1,0 +1,40 @@
+Perl -Sx "{0}" {"Parameters"}; Exit {Status}
+#!perl
+#
+# Check that all parameters in XS functions are defined
+#
+while (<>) {
+	if (eof) {
+		close ARGV;
+		$module = 0;
+	}
+	$module++ if /MODULE/;
+	next unless $module;
+	if (/^=/) {
+		until (/^=cut/) {
+			$_ = <>;
+			if (eof) {
+				close ARGV;
+				$module = 0;
+			}
+		}
+		next;
+	}
+	$skip = 1 if /^\s*[A-Z]+:/;
+	$skip = 0 if /^\s*$/;
+	next if $skip;
+	if (/^([A-Za-z0-9_]+)\((.*)\)/) {
+		print "File \"$file\"; Line $line # $function: undefined parameters: ", 
+			join(", ", keys %param), "\n"
+		  if (scalar(keys %param));
+		($function,$p,$file,$line,%param) = ($1, $2,$ARGV,$.);
+		while ($p =~ /(\w+)\s*=?[^,]*,?/g) {
+			$param{$1} = 1;
+		}
+	} elsif (/^[^=]*\W(\w+)\s*=?/) {
+		delete $param{$1};
+	}
+}
+print "Function $function: undefined parameters: ", 
+	join(", ", keys %param), "\n"
+  if (scalar(keys %param));

@@ -1,0 +1,286 @@
+                                 Compress::Zlib
+
+                                  Version 1.13
+
+                                 28th April 2001 
+
+             Copyright (c) 1995-2001 Paul Marquess. All rights reserved.
+         This program is free software; you can redistribute it and/or
+                modify it under the same terms as Perl itself.
+
+
+
+DESCRIPTION
+-----------
+
+This module provides a Perl interface to part of the info-zip zlib
+compression library.  For more details see the pod documentation
+embedded in the file Zlib.pm.
+
+If you have downloaded this module in the expectation of manipulating the
+contents of .zip files, you will need to fetch and build the Archive::Zip
+module below as well.
+
+    http://www.cpan.org/modules/by-module/Archive/Archive-Zip-*.tar.gz
+
+
+PREREQUISITES
+-------------
+
+Before you can build Compress::Zlib you need to have the following
+installed on your system:
+
+    * Perl 5.004 or better. 
+    * Info-zip zlib 1.0.2 or better (note that this module is NOT
+      compatible with versions of zlib <= 1.0.1).
+
+      The zlib compression library is available at
+      http://www.info-zip.org/pub/infozip/zlib/
+
+
+When building Compress::Zlib, you can optionally build the zlib
+library at the same time. If you are running Windows 95/98/NT, this
+seems to be the most straightforward option.
+
+If you want Compress::Zlib to build zlib, fetch a copy of the zlib
+distribution from the site mentioned above and unpack it into the
+Compress::Zlib source directory. If you have fetched zlib 1.1.3, it will
+create a directory called zlib-1.1.3.
+
+Now, whether you are building zlib or not, edit the file config.in
+and follow the instructions given in it.
+
+BUILDING THE MODULE
+-------------------
+
+Assuming you have met all the prerequisites, building the module should
+be relatively straightforward.  
+
+Assuming you have met all the prerequisites, the module can now be built
+using this sequence of commands:
+
+Step 1 :  Edit the file config.in to suit you local installation.
+          Instructions are given in the file. 
+
+Step 2 :  Build and test the module using this sequence of commands:
+
+              perl Makefile.PL
+              make
+              make test
+
+INSTALLATION
+------------
+
+To install Compress::Zlib, run the command below:
+
+    make install
+
+TROUBLESHOOTING
+---------------
+
+HP-UX
+-----
+
+I've had a report that when building Compress::Zlib under HP-UX that it is
+necessary to have first built the zlib library with the -fpic option.
+
+FEEDBACK
+--------
+
+How to report a problem with Compress::Zlib.
+
+To help me help you, I need of the following information:
+
+ 1. The version of Perl and the operating system name and version you
+    are running. The full output from running "perl -V" will tell me all
+    I need to know. If your perl doesn't understand the -V flag, then it's
+    too old to build this module -- you need to have Perl 5.004 or better.
+
+ 2. The version of Compress::Zlib you have. 
+    If you have successfully installed Compress::Zlib, this one-liner
+    will tell you:
+
+       perl -e 'use Compress::Zlib; print "ver $Compress::Zlib::VERSION\n"'
+
+    If you haven't installed Compress::Zlib then search Compress::Zlib.pm
+    for a line like this:
+
+      $VERSION = "1.05" ;
+
+ 3. The version of zlib you have installed.
+    If you don't know look at the beginning of the file zlib.h. 
+
+ 4. If you are having problems building Compress::Zlib, send me a
+    complete log of what happened.
+
+
+CHANGES
+-------
+
+  0.1 - first alpha release. 2nd October 1995
+  0.2 - Fixed a minor allocation problem in Zlib.xs
+  0.3 - Added prototype specification.
+  0.4 - Upgrade to support zlib 0.99 
+
+	Added dictionary interface.
+
+	Fixed bug in gzreadline - previously it would keep returning
+	the same buffer. This bug was reported by Helmut Jarausch
+
+	Removed dependency to zutil.h and so dropped support for 
+	
+	    DEF_MEM_LEVEL (use MAX_MEM_LEVEL instead)
+	    DEF_WBITS     (use MAX_WBITS instead)
+
+  0.5 - Confirmed that no changes were necessary for zlib 1.0.3, or 1.0.4.
+
+	The optional parameters for deflateInit and inflateInit can now
+	be specified as an associative array in addition to a reference
+	to an associative array. They can also accept the -Name
+	syntax.
+
+	gzopen can now optionally take a reference to an open
+	filehandle in place of a filename. In this case it will call
+	gzdopen.
+
+	Added gzstream example script.
+ 
+  1.00 - 14 Nov 1997
+
+      * Fixed crc32 & adler32. They were very broken. 
+
+      * The following functions can now take a scalar reference in
+	place of a scalar for their buffer parameters:
+
+    	    compress
+    	    uncompress
+    	    deflate
+    	    inflate
+    	    crc32
+    	    adler32
+ 
+	This should mean applications that make use of the module don't
+	have to copy large buffers around.
+
+ 
+      * Normally the inflate method consumes I<all> of the input buffer
+	before returning. The exception to this is when inflate detects
+	the end of the stream (Z_STREAM_END). In this case the input
+	buffer need not be completely consumed. To allow processing of
+	file formats that embed a deflation stream (e.g. zip, gzip),
+	the inflate method now sets the buffer parameter to be what
+	remains after inflation.
+
+	When the return status is Z_STREAM_END, it will be what remains
+	of the buffer (if any) after deflation. When the status is Z_OK
+	it will be an empty string.
+
+	This change means that the buffer parameter must be a lvalue.
+ 
+      * Fixed crc32 and adler32. They were both very broken.
+
+      * Added the Compress::Zlib::memGzip function.
+
+  1.01 - 23 Nov 1997
+
+      * A number of fixes to the test suite and the example scripts to
+	allow them to work under win32. All courtesy of Gurusamy
+	Sarathy.
+
+  1.02 - 31 Jan 1999
+
+      * The return codes for gzread, gzreadline and gzwrite were
+        documented incorrectly as returning a status code.
+
+      * The test harness was missing a "gzclose". This caused problem
+        showed up on an amiga. Thanks to Erik van Roode for reporting
+        this one.
+
+      * Patched zlib.t for OS/2. Thanks to Ilya Zakharevich for the patch.
+
+  1.03 - 17 Mar 1999
+
+      * Updated to use the new PL_ symbols. 
+        Means the module can be built with Perl 5.005_5*
+
+  1.04 - 27 May 1999
+
+      * Bug 19990527.001: compress(undef) core dumps -- Fixed.	
+
+  1.05 - 3 June 1999
+
+      * Previous release used newSVpvn, which doesn't exist in 5.004_04
+        or earlier. Changed to use newSVpv instead.
+
+      * The module needs Perl 5.004 or better, so updated the version
+        checking in Zlib.pm and Makefile.PL
+
+  1.06 - 20 Sep 1999
+
+      * Fixed a nasty problem where inflate could truncate the data
+        returned. Thanks to Douglas Thomson <dougt@mugc.cc.monash.edu.au>
+        for both spotting the problem and fixing the bug.
+
+      * Added a note about the undocumented features in zlib that are
+        required when accessing zip files.
+
+      * gzclose will now get called automatically when the gzip object is
+        destroyed.
+
+  1.07 - 27 Nov 1999
+
+      * ANSI-ified the static functions in Zlib.xs
+
+      * Added the ability to build zlib along with the module.
+        This feature is 90% based on a Makefile provided by Gurusamy
+        Sarathy.
+
+  1.08 - 6 Jan 2000
+
+      * uncompress was clobbering its input parameter. Now it doesn't.
+        This bug was spotted by Deven T. Corzine.
+ 
+      * If a variable that only ever contained a number was given
+        to compress or deflate, it would not be compressed properly. Now
+        it will be coerced to a string and then compressed. This bug
+        was spotted by Deven T. Corzine.
+
+  1.09 - 15th January 2001
+
+      * Silenced a few compiler warnings.
+
+      * Updated zlib home site in README & Zlib.pm to www.info-zip.org
+
+      * Minor typo in Zlib.pm - a link used AUTHORS instead of AUTHOR
+        -- spotted by Frank Martini.
+
+      * Mention Archive::Zip
+
+      * added memGunzip. This is largely based on code provided by Jim Leonard.
+
+      * $deflate->flush can now take an optional parameter. Valid
+        values are Z_NO_FLUSH, Z_PARTIAL_FLUSH, Z_SYNC_FLUSH, Z_FULL_FLUSH
+        and Z_FINISH. The default is Z_FINISH.
+
+  1.10 - 5th February 2001
+
+      * fixed a bug in memGunzip. Used Z_ERR instead of Z_DATA_ERROR.
+
+  1.11 - 17th February 2001
+
+      * Added logic in Makefile.PL to toggle between using $^W and
+        the warnings pragma in the module.
+
+      * The module, the examples & the test harness are now all strict
+        & warnings clean.
+
+  1.12 - 28th April 2001
+
+      * Modified Makefile.PL to only enable the warnings pragma if
+        using perl 5.6.1 or better.
+
+  1.13 - 
+
+      * 
+
+Paul Marquess <Paul.Marquess@btinternet.com>
