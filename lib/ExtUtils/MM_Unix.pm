@@ -3111,10 +3111,9 @@ sub pasthru {
     $sep .= "\\\n\t";
 
     foreach $key (qw(LIB LIBPERL_A LINKTYPE PREFIX OPTIMIZE INC DEFINE)) {
-	if ($key eq 'INC') {
+	if ($key eq 'INC' && defined(my $inc = $self->{INC})) {
 	    # For INC we need to prepend parent directory but
 	    # only iff the parent directory is not absolute.
-	    my $inc = $self->{INC};
 	    my ($o, $i) = $Is_VMS ? ('/Include=', 'i') : ('-I', '');
 	    $inc =~ s!(?$i)$o(.+?)!$o.($self->file_name_is_absolute($1)?$1:$self->catdir($self->updir,$1))!eg;
 	    push @pasthru, "INC=\"$inc\"";
