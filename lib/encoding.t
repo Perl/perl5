@@ -1,4 +1,4 @@
-print "1..9\n";
+print "1..10\n";
 
 use encoding "latin1"; # ignored (overwritten by the next line)
 use encoding "greek";  # iso 8859-7 (no "latin" alias, surprise...)
@@ -43,3 +43,9 @@ print "ok 8\n";
 # the first octet of UTF-8 encoded 0x3af 
 print "not " unless unpack("C", chr(0xdf)) == 0xce;
 print "ok 9\n";
+
+# charnames must still work
+use charnames ':full';
+print "not " unless ord("\N{LATIN SMALL LETTER SHARP S}") == 0xdf;
+print "ok 10\n";
+

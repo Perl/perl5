@@ -66,9 +66,6 @@ If no encoding can be found, C<Unknown encoding '...'> error will be thrown.
 The C<\x..> and C<\0...> in regular expressions are not affected by
 this pragma.  They very probably should.
 
-The charnames pragma ("\N{LATIN SMALL SHARP LETTER S}") does not work
-with this pragma.
-
 =head1 SEE ALSO
 
 L<perlunicode>, L<Encode>
