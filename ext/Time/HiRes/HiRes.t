@@ -128,14 +128,24 @@ else {
     my $tick = 0;
     local $SIG{ALRM} = sub { $tick++ };
 
-    my $one = time; $tick = 0; ualarm(10_000); sleep until $tick;
-    my $two = time; $tick = 0; ualarm(10_000); sleep until $tick;
+    # This was previously written sleep 3 until $tick;
+    # But there is a small race condition here: the alarm may go off
+    # until ($tick) { Here!; sleep }
+    # In which case the sleep is forever.
+    # sleeping for 3 seconds will cause the test to fail but it's better than
+    # infinite hang. [Until someone produces a platform where sleep interferes
+    # with ualarm, in which case a more sophisticated self destruct will need
+    # to be written (eg fork, child sleeps for a long time, child kills parent
+    # if parent doesn't finish first (killing child))]
+        
+    my $one = time; $tick = 0; ualarm(10_000); sleep 3 until $tick;
+    my $two = time; $tick = 0; ualarm(10_000); sleep 3 until $tick;
     my $three = time;
     ok 12, $one == $two || $two == $three, "slept too long, $one $two $three";
 
     $tick = 0;
     ualarm(10_000, 10_000);
-    sleep until $tick >= 3;
+    sleep 3 until $tick >= 3;
     ok 13, 1;
     ualarm(0);
 }
