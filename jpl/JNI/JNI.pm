@@ -229,7 +229,7 @@ if (not $JPL::_env_) {
     $ENV{THREADS_TYPE} ||= "green_threads";
 
     $JAVALIB = "$ENV{JAVA_HOME}/lib/$arch/$ENV{THREADS_TYPE}";
-    $ENV{$Config{ldlibpthname}":$JAVALIB";
+    $ENV{$Config{ldlibpthname}} .= ":$JAVALIB";
 
     $JVM = GetJavaVM("$JAVALIB/libjava.so",@JVM_ARGS);
 }
