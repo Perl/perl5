@@ -1080,7 +1080,8 @@ sub gv_name {
 Carp::confess() if $gv->isa("B::CV");
     my $stash = $gv->STASH->NAME;
     my $name = $gv->SAFENAME;
-    if ($stash eq $self->{'curstash'} or $globalnames{$name}
+    if (($stash eq 'main' && $globalnames{$name})
+	or ($stash eq $self->{'curstash'} && !$globalnames{$name})
 	or $name =~ /^[^A-Za-z_]/)
     {
 	$stash = "";
