@@ -919,14 +919,21 @@ test $bar->[3], 13;		# 206
 my $aaa;
 { my $bbbb = 0; $aaa = bless \$bbbb, B }
 
-test !$aaa, 1;
+test !$aaa, 1;			# 207
 
 unless ($aaa) {
-  test 'ok', 'ok';
+  test 'ok', 'ok';		# 208
 } else {
-  test 'is not', 'ok';
+  test 'is not', 'ok';		# 208
 }
 
+# check that overload isn't done twice by join
+{ my $c = 0;
+  package Join;
+  use overload '""' => sub { $c++ };
+  my $x = join '', bless([]), 'pq', bless([]);
+  main::test $x, '0pq1';		# 209
+};
 
 # Last test is:
-sub last {208}
+sub last {209}

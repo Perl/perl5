@@ -612,6 +612,8 @@ Set the length of the string which is in the SV.  See C<SvCUR>.
 #define SvAMAGIC_on(sv)		(SvFLAGS(sv) |= SVf_AMAGIC)
 #define SvAMAGIC_off(sv)	(SvFLAGS(sv) &= ~SVf_AMAGIC)
 
+#define SvGAMAGIC(sv)           (SvFLAGS(sv) & (SVs_GMG|SVf_AMAGIC)) 
+
 /*
 #define Gv_AMG(stash) \
         (HV_AMAGICmb(stash) && \
