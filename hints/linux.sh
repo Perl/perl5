@@ -18,10 +18,6 @@
 # No version of Linux supports setuid scripts.
 d_suidsafe='undef'
 
-# Linux, perhaps unique among all operatings systems, doesn't know
-# that `libfoo.so.2' is version 2 of `libfoo.so'.
-ignore_versioned_libs='y'
-
 # Debian and Red Hat, and perhaps other vendors, provide both runtime and
 # development packages for some libraries.  The runtime packages contain shared
 # libraries with version information in their names (e.g., libgdbm.so.1.7.3);
