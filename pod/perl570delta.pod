@@ -589,12 +589,12 @@ Long doubles should now work (see INSTALL).
 
 =item *
 
-MacOS Classic
+Mac OS Classic
 
-Compilation of the standard Perl distribution in MacOS Classic should
-now work if you have the Metrowerks development environment and
-the missing Mac-specific toolkit bits.  Contact the macperl mailing
-list for details.
+Compilation of the standard Perl distribution in Mac OS Classic should
+now work if you have the Metrowerks development environment and the
+missing Mac-specific toolkit bits.  Contact the macperl mailing list
+for details.
 
 =item *
 

@@ -1836,13 +1836,13 @@ need a thread library package installed. See README.hpux.
 
 =item *
 
-MacOS Classic (MacPerl has of course been available since
+Mac OS Classic (MacPerl has of course been available since
 perl 5.004 but now the source code bases of standard Perl
 and MacPerl have been synchronised)
 
 =item *
 
-MacOS X (or Darwin) should now be able to build Perl even on HFS+
+Mac OS X (or Darwin) should now be able to build Perl even on HFS+
 filesystems.  (The case-insensitivity used to confuse the Perl build
 process.)
 
@@ -2369,12 +2369,12 @@ getsockname().
 
 =item *
 
-MacOS Classic
+Mac OS Classic
 
-Compilation of the standard Perl distribution in MacOS Classic should
-now work if you have the Metrowerks development environment and
-the missing Mac-specific toolkit bits.  Contact the macperl mailing
-list for details.
+Compilation of the standard Perl distribution in Mac OS Classic should
+now work if you have the Metrowerks development environment and the
+missing Mac-specific toolkit bits.  Contact the macperl mailing list
+for details.
 
 =item *
 

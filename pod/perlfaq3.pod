@@ -247,10 +247,10 @@ specifically for programming, such as Textpad
 ( http://www.textpad.com/ ) and UltraEdit
 ( http://www.ultraedit.com/ ), among others.
 
-If you are using MacOS, the same concerns apply.  MacPerl
+If you are using Mac OS, the same concerns apply.  MacPerl
 (for Classic environments) comes with a simple editor.
 Popular external editors are BBEdit ( http://www.bbedit.com/ )
-or Alpha ( http://www.kelehers.org/alpha/ ). MacOS X users can
+or Alpha ( http://www.kelehers.org/alpha/ ). Mac OS X users can
 use Unix editors as well.
 
 =over 4

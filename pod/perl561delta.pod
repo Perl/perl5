@@ -343,9 +343,10 @@ C<Configure -S> can be run non-interactively.
 
 =head2 Documentation
 
-README.aix, README.solaris and README.macos have been added.  README.posix-bc
-has been renamed to README.bs2000.  These are installed as L<perlaix>,
-L<perlsolaris>, L<perlmacos>, and L<perlbs2000> respectively.
+README.aix, README.solaris and README.macos have been added.
+README.posix-bc has been renamed to README.bs2000.  These are
+installed as L<perlaix>, L<perlsolaris>, L<perlmacos>, and
+L<perlbs2000> respectively.
 
 The following pod documents are brand new:
 
@@ -502,7 +503,7 @@ You will need a thread library package installed.  See README.hpux.
 
 Long doubles should now work under Linux.
 
-MacOS Classic is now supported in the mainstream source package.
+Mac OS Classic is now supported in the mainstream source package.
 See README.macos.
 
 Support for MPE/iX has been updated.  See README.mpeix.
