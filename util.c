@@ -2397,9 +2397,9 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
 	PerlLIO_close(p[This]);
 	p[This] = p[that];
     }
-    FDPID_LOCK;
+    MUTEX_LOCK(&PL_fdpid_mutex);
     sv = *av_fetch(PL_fdpid,p[This],TRUE);
-    FDPID_UNLOCK;
+    MUTEX_UNLOCK(&PL_fdpid_mutex);
     (void)SvUPGRADE(sv,SVt_IV);
     SvIVX(sv) = pid;
     PL_forkprocess = pid;
@@ -2616,9 +2616,9 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
     int saved_win32_errno;
 #endif
 
-    FDPID_LOCK;
+    MUTEX_LOCK(&PL_fdpid_mutex);
     svp = av_fetch(PL_fdpid,PerlIO_fileno(ptr),TRUE);
-    FDPID_UNLOCK;
+    MUTEX_UNLOCK(&PL_fdpid_mutex);
     pid = SvIVX(*svp);
     SvREFCNT_dec(*svp);
     *svp = &PL_sv_undef;
