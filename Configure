@@ -9815,7 +9815,7 @@ echo " "
 echo "Checking whether your compiler can handle __attribute__ ..." >&4
 $cat >attrib.c <<'EOCP'
 #include <stdio.h>
-void croak (char* pat,...) __attribute__((format(printf,1,2),noreturn));
+void croak (char* pat,...) __attribute__((__format__(__printf__,1,2),noreturn));
 EOCP
 if $cc $ccflags -c attrib.c >attrib.out 2>&1 ; then
 	if $contains 'warning' attrib.out >/dev/null 2>&1; then
