@@ -189,7 +189,7 @@ sub list_eq ($$) {
 	   ||
 	   ($^O eq 'ultrix')
 	   ||
-	   ($^O eq 'svr4' && -f "/etc/issue" && -f "/etc/.relid") # NCR MP-RAS
+	   ($^O =~ /^svr4/ && -f "/etc/issue" && -f "/etc/.relid") # NCR MP-RAS
 	   );
 
     my $inf = eval '2**10000';
