@@ -69,11 +69,11 @@ case `$cc -v 2>&1`"" in
 		fi
 	    case "`getconf KERNEL_BITS 2>/dev/null`" in
 		*64*)
+		    echo "main(){}">try.c
 		    case "$gccversion" in
 			3*) ccflags="$ccflags -mpa-risc-2-0"
 			    ;;
-			*)  echo "main(){}">try.c
-			    # gcc with gas will not accept +DA2.0
+			*)  # gcc with gas will not accept +DA2.0
 			    case "`$cc -c -Wa,+DA2.0 try.c 2>&1`" in
 				*"+DA2.0"*)		# gas
 				    gnu_as=yes
@@ -98,6 +98,7 @@ case `$cc -v 2>&1`"" in
                                esac
 			    ;;
 			esac
+		    rm -f try.c
 		    ;;
 		esac
 	    ;;
@@ -125,7 +126,7 @@ toke_cflags='ccflags="$ccflags -DARG_ZERO_IS_SCRIPT"'
     gcc_64native=no
 case "$ccisgcc" in
     $define|true|[Yy])
-       echo 'int main(){long l;printf("%d\\n",sizeof(l));}'>try.c
+	echo 'int main(){long l;printf("%d\\n",sizeof(l));}'>try.c
 	$cc -o try $ccflags $ldflags try.c
 	if [ "`try`" = "8" ]; then
 	    cat <<EOM >&4
@@ -455,4 +456,3 @@ EOCBU
 
 # fpclassify() is a macro, the library call is Fpclassify
 d_fpclassify='define'
-
