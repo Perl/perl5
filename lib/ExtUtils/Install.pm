@@ -1,7 +1,7 @@
 package ExtUtils::Install;
 
-$VERSION = substr q$Revision: 1.16 $, 10;
-# $Date: 1996/12/17 00:31:26 $
+$VERSION = substr q$Revision: 1.19 $, 10;
+# $Date: 1997/08/01 08:39:37 $
 
 use Exporter;
 use Carp ();

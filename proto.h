@@ -489,6 +489,7 @@ void	sv_report_used _((void));
 void	sv_reset _((char* s, HV* stash));
 void	sv_setpvf _((SV* sv, const char* pat, ...));
 void	sv_setiv _((SV* sv, IV num));
+void	sv_setpviv _((SV* sv, IV num));
 void	sv_setuv _((SV* sv, UV num));
 void	sv_setnv _((SV* sv, double num));
 SV*	sv_setref_iv _((SV* rv, char* classname, IV iv));

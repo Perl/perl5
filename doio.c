@@ -1366,17 +1366,17 @@ SV **sp;
 	{
 	    struct semid_ds semds;
 #ifdef __linux__	/* XXX Need metaconfig test */
-/* linux uses :
-   int semctl (int semid, int semnun, int cmd, union semun arg)
-
+/* linux (and Solaris2?) uses :
+   int semctl (int semid, int semnum, int cmd, union semun arg)
        union semun {
             int val;
             struct semid_ds *buf;
             ushort *array;
        };
 */
-	    unsemds.buf = &semds;
-	    if (semctl(id, 0, IPC_STAT, unsemds) == -1)
+            union semun semun;
+            semun.buf = &semds;
+	    if (semctl(id, 0, IPC_STAT, semun) == -1)
 #else
 	    if (semctl(id, 0, IPC_STAT, &semds) == -1)
 #endif

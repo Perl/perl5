@@ -39,8 +39,7 @@ sub hostname {
   if ($^O eq 'VMS') {
 
     # method 2 - no sockets ==> return DECnet node name
-    eval {local $SIG{'__DIE__'};
-          ($host) = gethostbyname('me')}; # returns 'me' on most systems
+    eval { local $SIG{__DIE__}; $host = (gethostbyname('me'))[0] };
     if ($@) { return $host = $ENV{'SYS$NODE'}; }
 
     # method 3 - has someone else done the job already?  It's common for the
@@ -70,7 +69,7 @@ sub hostname {
 
     # method 2 - syscall is preferred since it avoids tainting problems
     eval {
-        local $SIG{'__DIE__'};
+	local $SIG{__DIE__};
 	{
 	    package main;
 	    require "syscall.ph";
@@ -81,19 +80,19 @@ sub hostname {
 
     # method 3 - trusty old hostname command
     || eval {
-        local $SIG{'__DIE__'};
+	local $SIG{__DIE__};
 	$host = `(hostname) 2>/dev/null`; # bsdish
     }
 
     # method 4 - sysV uname command (may truncate)
     || eval {
-        local $SIG{'__DIE__'};
+	local $SIG{__DIE__};
 	$host = `uname -n 2>/dev/null`; ## sysVish
     }
 
     # method 5 - Apollo pre-SR10
     || eval {
-        local $SIG{'__DIE__'};
+	local $SIG{__DIE__};
 	($host,$a,$b,$c,$d)=split(/[:\. ]/,`/com/host`,6);
     }
 

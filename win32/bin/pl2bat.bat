@@ -50,4 +50,54 @@ sub process {
     }
 }
 __END__
+
+=head1 NAME
+
+pl2bat.bat - a batch file to wrap perl code into a batch file
+
+=head1 SYNOPSIS
+
+	C:\> pl2bat foo.pl bar 
+	[..creates foo.bat, bar.bat..]
+	
+	C:\> pl2bat < somefile > another.bat
+	
+	C:\> pl2bat > another.bat
+	print scalar reverse "rekcah lrep rehtona tsuj\n";
+	^Z
+	[..another.bat is now a certified japh application..]
+
+=head1 DESCRIPTION
+
+This utility converts a perl script into a batch file that can be
+executed on DOS-like operating systems.
+
+Note that the ".pl" suffix will be stripped before adding a
+".bat" suffix to the supplied file names.
+
+The batch file created makes use of the C<%*> construct to refer
+to all the command line arguments that were given to the batch file,
+so you'll need to make sure that works on your variant of the
+command shell.  It is known to work in the cmd.exe shell under
+WindowsNT.  4DOS/NT users will want to put a C<ParameterChar = *>
+line in their initialization file, or execute C<setdos /p*> in
+the shell startup file.
+
+=head1 BUGS
+
+C<$0> will contain the full name, including the ".bat" suffix.
+If you don't like this, see runperl.bat for an alternative way to
+invoke perl scripts.
+
+Perl is invoked with the -S flag, so it will search the PATH to find
+the script.  This may have undesirable effects.
+
+=head1 SEE ALSO
+
+perl, perlwin32, runperl.bat
+
+=cut
+
+__END__
 :endofperl
+

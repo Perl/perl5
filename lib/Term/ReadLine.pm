@@ -240,7 +240,7 @@ sub OUT { shift->[1] }
 sub MinLine { undef }
 sub Attribs { {} }
 
-my %features = (tkRunning => 1, ornaments => 1, newTTY => 1);
+my %features = (tkRunning => 1, ornaments => 1, 'newTTY' => 1);
 sub Features { \%features }
 
 package Term::ReadLine;		# So late to allow the above code be defined?

@@ -94,9 +94,9 @@ sub pipe {
 }
 
 # Rebless standard file handles
-bless *STDIN{IO},  "FileHandle";
-bless *STDOUT{IO}, "FileHandle";
-bless *STDERR{IO}, "FileHandle";
+bless *STDIN{IO},  "FileHandle" if ref *STDIN{IO}  eq "IO::Handle";
+bless *STDOUT{IO}, "FileHandle" if ref *STDOUT{IO} eq "IO::Handle";
+bless *STDERR{IO}, "FileHandle" if ref *STDERR{IO} eq "IO::Handle";
 
 1;
 

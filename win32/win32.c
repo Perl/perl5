@@ -60,7 +60,7 @@ IsWinNT(void) {
     return (IdOS() == VER_PLATFORM_WIN32_NT);
 }
 
-void *
+DllExport PWIN32_IOSUBSYSTEM
 SetIOSubSystem(void *p)
 {
     PWIN32_IOSUBSYSTEM old = pIOSubSystem;
@@ -75,6 +75,12 @@ SetIOSubSystem(void *p)
 	pIOSubSystem = &win32stdio;
     }
     return old;
+}
+
+DllExport PWIN32_IOSUBSYSTEM
+GetIOSubSystem(void)
+{
+    return pIOSubSystem;
 }
 
 char *
@@ -1202,6 +1208,102 @@ DllExport int
 win32_execvp(const char *cmdname, const char *const *argv)
 {
     return pIOSubSystem->pfnexecvp(cmdname, argv);
+}
+
+DllExport void
+win32_perror(const char *str)
+{
+    pIOSubSystem->pfnperror(str);
+}
+
+DllExport void
+win32_setbuf(FILE *pf, char *buf)
+{
+    pIOSubSystem->pfnsetbuf(pf, buf);
+}
+
+DllExport int
+win32_setvbuf(FILE *pf, char *buf, int type, size_t size)
+{
+    return pIOSubSystem->pfnsetvbuf(pf, buf, type, size);
+}
+
+DllExport int
+win32_flushall(void)
+{
+    return pIOSubSystem->pfnflushall();
+}
+
+DllExport int
+win32_fcloseall(void)
+{
+    return pIOSubSystem->pfnfcloseall();
+}
+
+DllExport char*
+win32_fgets(char *s, int n, FILE *pf)
+{
+    return pIOSubSystem->pfnfgets(s, n, pf);
+}
+
+DllExport char*
+win32_gets(char *s)
+{
+    return pIOSubSystem->pfngets(s);
+}
+
+DllExport int
+win32_fgetc(FILE *pf)
+{
+    return pIOSubSystem->pfnfgetc(pf);
+}
+
+DllExport int
+win32_putc(int c, FILE *pf)
+{
+    return pIOSubSystem->pfnputc(c,pf);
+}
+
+DllExport int
+win32_puts(const char *s)
+{
+    return pIOSubSystem->pfnputs(s);
+}
+
+DllExport int
+win32_getchar(void)
+{
+    return pIOSubSystem->pfngetchar();
+}
+
+DllExport int
+win32_putchar(int c)
+{
+    return pIOSubSystem->pfnputchar(c);
+}
+
+DllExport void*
+win32_malloc(size_t size)
+{
+    return pIOSubSystem->pfnmalloc(size);
+}
+
+DllExport void*
+win32_calloc(size_t numitems, size_t size)
+{
+    return pIOSubSystem->pfncalloc(numitems,size);
+}
+
+DllExport void*
+win32_realloc(void *block, size_t size)
+{
+    return pIOSubSystem->pfnrealloc(block,size);
+}
+
+DllExport void
+win32_free(void *block)
+{
+    pIOSubSystem->pfnfree(block);
 }
 
 int

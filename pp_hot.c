@@ -1913,7 +1913,7 @@ PP(pp_entersub)
 	    (void)SvREFCNT_inc(cv);
 	else {	/* save temporaries on recursion? */
 	    if (CvDEPTH(cv) == 100 && dowarn 
-		  && !(perldb && cv == GvCV(DBsub)))
+		  && !(PERLDB_SUB && cv == GvCV(DBsub)))
 		sub_crush_depth(cv);
 	    if (CvDEPTH(cv) > AvFILL(padlist)) {
 		AV *av;

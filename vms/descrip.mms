@@ -167,7 +167,7 @@ DBGLINKFLAGS = /Trace/Debug/Map/Full/Cross
 DBG = DBG
 .else
 DBGCCFLAGS = /NoList
-DBGLINKFLAGS = /NoMap
+DBGLINKFLAGS = /NoTrace/NoMap
 DBG = 
 .endif
 
@@ -365,7 +365,7 @@ $(DBG)perl$(E) : perlmain$(O), $(DBG)perlshr$(E), $(MINIPERL_EXE)
 .endif
 
 $(DBG)perlshr$(E) : $(DBG)libperl$(OLB) $(extobj) $(DBG)perlshr_xtras.ts
-	Link /NoTrace$(LINKFLAGS)/Share=$(MMS$TARGET) $(extobj) []$(DBG)perlshr_bld.opt/Option, perlshr_attr.opt/Option
+	Link $(LINKFLAGS)/Share=$(MMS$TARGET) $(extobj) []$(DBG)perlshr_bld.opt/Option, perlshr_attr.opt/Option
 
 # The following files are built in one go by gen_shrfls.pl:
 #  perlshr_attr.opt, $(DBG)perlshr_bld.opt - VAX and AXP

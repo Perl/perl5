@@ -43,7 +43,7 @@ print "not " unless ($fh->open("< TEST") && <$fh> eq $buffer);
 print "ok 5\n";
 
 $fh->seek(0,0);
-print "not " unless (<$fh> eq $buffer);
+print "#possible mixed CRLF/LF in t/TEST\nnot " unless (<$fh> eq $buffer);
 print "ok 6\n";
 
 $fh->seek(0,2);

@@ -29,18 +29,25 @@
 #  define __sockadapt_my_name_t   char *
 #endif
 
+/* We have these on VMS 7.0 and above, or on Dec C 5.6 if it's providing */
+/* the 7.0 DECC RTL */
+#if ((((__VMS_VER >= 70000000) && (__DECC_VER >= 50200000)) || (__CRTL_VER >= 70000000)) && defined(DECCRTL_SOCKETS))
+#else
 void setnetent(int stayopen) {
   croak("Function \"setnetent\" not implemented in this version of perl");
 }
 void endnetent() {
   croak("Function \"endnetent\" not implemented in this version of perl");
 }
+#endif
 
 #if defined(DECCRTL_SOCKETS)
    /* Use builtin socket interface in DECCRTL and
     * UCX emulation in whatever TCP/IP stack is present.
     */
 
+#if ((__VMS_VER >= 70000000) && (__DECC_VER >= 50200000)) || (__CRTL_VER >= 70000000)
+#else
   void sethostent(int stayopen) {
     croak("Function \"sethostent\" not implemented in this version of perl");
   }
@@ -67,6 +74,7 @@ void endnetent() {
     croak("Function \"getservent\" not implemented in this version of perl");
     return (__sockadapt_my_servent_t )NULL; /* Avoid MISSINGRETURN warning, not reached */
   }
+#endif
 
 #else
     /* Work around things missing/broken in SOCKETSHR. */

@@ -1401,7 +1401,7 @@ scope(o)
 OP *o;
 {
     if (o) {
-	if (o->op_flags & OPf_PARENS || perldb || tainting) {
+	if (o->op_flags & OPf_PARENS || PERLDB_NOOPT || tainting) {
 	    o = prepend_elem(OP_LINESEQ, newOP(OP_ENTER, 0), o);
 	    o->op_type = OP_LEAVE;
 	    o->op_ppaddr = ppaddr[OP_LEAVE];
@@ -1485,7 +1485,7 @@ OP *op;
 	compcv = 0;
 
 	/* Register with debugger */
-	if (perldb) {
+	if (PERLDB_INTER) {
 	    CV *cv = perl_get_cv("DB::postponed", FALSE);
 	    if (cv) {
 		dSP;
@@ -2483,7 +2483,7 @@ OP *op;
     register COP *cop;
 
     Newz(1101, cop, 1, COP);
-    if (perldb && curcop->cop_line && curstash != debstash) {
+    if (PERLDB_LINE && curcop->cop_line && curstash != debstash) {
 	cop->op_type = OP_DBSTATE;
 	cop->op_ppaddr = ppaddr[ OP_DBSTATE ];
     }
@@ -2514,7 +2514,7 @@ OP *op;
     cop->cop_filegv = (GV*)SvREFCNT_inc(curcop->cop_filegv);
     cop->cop_stash = curstash;
 
-    if (perldb && curstash != debstash) {
+    if (PERLDB_LINE && curstash != debstash) {
 	SV **svp = av_fetch(GvAV(curcop->cop_filegv),(I32)cop->cop_line, FALSE);
 	if (svp && *svp != &sv_undef && !SvIOK(*svp)) {
 	    (void)SvIOK_on(*svp);
@@ -3366,7 +3366,7 @@ OP *block;
     if (name) {
 	char *s;
 
-	if (perldb && curstash != debstash) {
+	if (PERLDB_SUBLINE && curstash != debstash) {
 	    SV *sv = NEWSV(0,0);
 	    SV *tmpstr = sv_newmortal();
 	    static GV *db_postponed;
@@ -4527,7 +4527,7 @@ OP *op;
 	}
     }
     op->op_private |= (hints & HINT_STRICT_REFS);
-    if (perldb && curstash != debstash)
+    if (PERLDB_SUB && curstash != debstash)
 	op->op_private |= OPpENTERSUB_DB;
     while (o != cvop) {
 	if (proto) {

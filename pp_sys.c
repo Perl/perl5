@@ -535,7 +535,7 @@ PP(pp_tie)
     ENTER;
     SAVESPTR(op);
     op = (OP *) &myop;
-    if (perldb && curstash != debstash)
+    if (PERLDB_SUB && curstash != debstash)
 	op->op_private |= OPpENTERSUB_DB;
 
     XPUSHs((SV*)GvCV(gv));
@@ -646,7 +646,7 @@ PP(pp_dbmopen)
     ENTER;
     SAVESPTR(op);
     op = (OP *) &myop;
-    if (perldb && curstash != debstash)
+    if (PERLDB_SUB && curstash != debstash)
 	op->op_private |= OPpENTERSUB_DB;
     PUTBACK;
     pp_pushmark();
@@ -4374,6 +4374,16 @@ int fd;
 int operation;
 {
     int i;
+    int save_errno;
+    Off_t pos;
+
+    /* flock locks entire file so for lockf we need to do the same	*/
+    save_errno = errno;
+    pos = lseek(fd, (Off_t)0, SEEK_CUR);    /* get pos to restore later */
+    if (pos > 0)	/* is seekable and needs to be repositioned	*/
+	lseek(fd, (Off_t)0, SEEK_SET);
+    errno = save_errno;
+
     switch (operation) {
 
 	/* LOCK_SH - get a shared lock */
@@ -4405,6 +4415,11 @@ int operation;
 	    errno = EINVAL;
 	    break;
     }
+
+    if (pos > 0)      /* need to restore position of the handle	*/
+	if (lseek(fd, pos, SEEK_SET) == -1)
+	    i = -1;
+
     return (i);
 }
 

@@ -456,9 +456,9 @@ kill_file(char *name)
 /*}}}*/
 
 
-/*{{{int my_mkdir(char *,mode_t)*/
+/*{{{int my_mkdir(char *,Mode_t)*/
 int
-my_mkdir(char *dir, mode_t mode)
+my_mkdir(char *dir, Mode_t mode)
 {
   STRLEN dirlen = strlen(dir);
 
@@ -1759,7 +1759,7 @@ static int background_process(int argc, char **argv);
 static void pipe_and_fork(char **cmargv);
 
 /*{{{ void getredirection(int *ac, char ***av)*/
-void
+static void
 getredirection(int *ac, char ***av)
 /*
  * Process vms redirection arg's.  Exit if any error is seen.
@@ -2220,6 +2220,34 @@ unsigned long int flags = 17, one = 1, retsts;
 }
 /*}}}*/
 /***** End of code taken from Mark Pizzolato's argproc.c package *****/
+
+
+/* OS-specific initialization at image activation (not thread startup) */
+/*{{{void vms_image_init(int *, char ***)*/
+void
+vms_image_init(int *argcp, char ***argvp)
+{
+  unsigned long int *mask, iosb[2], i;
+  unsigned short int dummy;
+  union prvdef iprv;
+  struct itmlst_3 jpilist[2] = { {sizeof iprv, JPI$_IMAGPRIV, &iprv, &dummy},
+                                 {          0,             0,     0,      0} };
+
+  _ckvmssts(sys$getjpiw(0,NULL,NULL,jpilist,iosb,NULL,NULL));
+  _ckvmssts(iosb[0]);
+  mask = (unsigned long int *) &iprv;  /* Quick change of view */;
+  for (i = 0; i < (sizeof iprv + sizeof(unsigned long int) - 1) / sizeof(unsigned long int); i++) {
+    if (mask[i]) {           /* Running image installed with privs? */
+      _ckvmssts(sys$setprv(0,&iprv,0,NULL));       /* Turn 'em off. */
+      tainting = TRUE;
+      break;
+    }
+  }
+  getredirection(argcp,argvp);
+  return;
+}
+/*}}}*/
+
 
 /* trim_unixpath()
  * Trim Unix-style prefix off filespec, so it looks like what a shell

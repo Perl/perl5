@@ -123,6 +123,10 @@ are simplified.  For example, if you use prefix=/opt/perl,
 then Configure will suggest /opt/perl/lib instead of
 /opt/perl/lib/perl5/.
 
+NOTE:  You must not specify an installation directory that is below
+your perl source directory.  If you do, installperl will attempt
+infinite recursion.
+
 By default, Configure will compile perl to use dynamic loading if
 your system supports it.  If you want to force perl to be compiled
 statically, you can either choose this when Configure prompts you or
@@ -661,20 +665,9 @@ In a future version of perl, these might be enabled by default.
 
 =over 4
 
-=item -DDEBUGGING_MSTATS
+=item -DPERL_EMERGENCY_SBRK
 
-If DEBUGGING_MSTATS is defined, you can extract malloc
-statistics from the Perl interpreter.  The overhead this imposes is not
-large (perl just twiddles integers at malloc/free/sbrk time).  When you
-run perl with the environment variable PERL_DEBUG_MSTATS set to
-either 1 or 2, the interpreter will dump statistics to stderr at exit
-time and (with a value of 2) after compilation.  If you install the
-Devel::Peek module you can get the statistics whenever you like by
-invoking its mstat() function.
-
-=item -DEMERGENCY_SBRK
-
-If EMERGENCY_SBRK is defined, running out of memory need not be a
+If PERL_EMERGENCY_SBRK is defined, running out of memory need not be a
 fatal error: a memory pool can allocated by assigning to the special
 variable $^M.  See perlvar(1) for more details.
 
@@ -986,6 +979,10 @@ invoke Configure with
 for Solaris systems.  For a SunOS system, you must use -B/bin/
 instead.
 
+Alternatively, recent versions of GNU ld reportedly work if you
+include C<-Wl,-export-dynamic> in the ccdlflags variable in
+config.sh.
+
 =item ld.so.1: ./perl: fatal: relocation error:
 
 If you get this message on SunOS or Solaris, and you're using gcc,
@@ -1044,6 +1041,18 @@ If you run into problems relating to do_aspawn or do_spawn, the
 problem is probably that Configure failed to detect your system's
 fork() function.  Follow the procedure in the previous items
 on L<"vsprintf"> and L<"nm extraction">.
+
+=item __inet_* errors
+
+If you receive unresolved symbol errors during Perl build and/or test
+referring to __inet_* symbols, check to see whether BIND 8.1 is
+installed.  It installs a /usr/local/include/arpa/inet.h that refers to
+these symbols.  Versions of BIND later than 8.1 do not install inet.h
+in that location and avoid the errors.  You should probably update to a
+newer version of BIND.  If you can't, you can either link with the
+updated resolver library provided with BIND 8.1 or rename
+/usr/local/bin/arpa/inet.h during the Perl build and test process to
+avoid the problem.
 
 =item Optimizer
 
@@ -1145,10 +1154,14 @@ Machines with half-implemented dbm routines will need to #undef I_ODBM
 
 =head1 make test
 
-This will run the regression tests on the perl you just made.  If it
-doesn't say "All tests successful" then something went wrong.  See the
-file t/README in the t subdirectory.  Note that you can't run the
-tests in background if this disables opening of /dev/tty.
+This will run the regression tests on the perl you just made (you
+should run plain 'make' before 'make test' otherwise you won't have a
+complete build).  If 'make test' doesn't say "All tests successful"
+then something went wrong.  See the file t/README in the t subdirectory.
+
+If you want to run make test in the background you should 
+Note that you can't run the tests in background if this disables
+opening of /dev/tty.
 
 If make test bombs out, just cd to the t directory and run ./TEST
 by hand to see if it makes any difference.  If individual tests
@@ -1410,4 +1423,4 @@ feedback from the perl5-porters@perl.org folks.
 
 =head1 LAST MODIFIED
 
-$Id: INSTALL,v 1.18 1997/05/29 18:24:10 doughera Exp $
+$Id: INSTALL,v 1.22 1997/08/01 15:39:14 doughera Released $

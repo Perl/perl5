@@ -294,7 +294,7 @@ This pipes "foo" to the pager and writes "bar" in the file "blurch":
     perl -e "print 'foo'; print STDERR 'bar'" 2> blurch | less
 
 
-Discovering the usefullness of the "command.com" shell on Windows95
+Discovering the usefulness of the "command.com" shell on Windows95
 is left as an exercise to the reader :)
 
 =item Building Extensions

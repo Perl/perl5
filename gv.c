@@ -79,7 +79,7 @@ char *name;
     sv_setpv(GvSV(gv), name);
     if (*name == '/' && (instr(name, "/lib/") || instr(name, ".pm")))
 	GvMULTI_on(gv);
-    if (perldb)
+    if (PERLDB_LINE)
 	hv_magic(GvHVn(gv_AVadd(gv)), gv, 'L');
     return gv;
 }
@@ -1341,7 +1341,7 @@ int flags;
     ENTER;
     SAVESPTR(op);
     op = (OP *) &myop;
-    if (perldb && curstash != debstash)
+    if (PERLDB_SUB && curstash != debstash)
 	op->op_private |= OPpENTERSUB_DB;
     PUTBACK;
     pp_pushmark();

@@ -88,15 +88,9 @@
 # Initial revision
 #
 
-eval { require 'chat2.pl' };
-die qq{$@
-The obsolete and problematic chat2.pl library has been removed from the
-Perl distribution at the request of it's author. You can either get a
-copy yourself or, preferably, fetch the new and much better Net::FTP
-package from a CPAN ftp site.
-} if $@ && $@ =~ /locate chat2.pl/;
-die $@ if $@;
-eval "require 'socket.ph'" || eval "require 'sys/socket.ph'" || die "socket.ph missing: $!\n";
+require 'chat2.pl';	# into main
+eval "require 'socket.ph'" || eval "require 'sys/socket.ph'"
+	|| die "socket.ph missing: $!\n";
 
 
 package ftp;

@@ -1118,6 +1118,7 @@ sv_setiv
 sv_setnv
 sv_setptrobj
 sv_setpv
+sv_setpviv
 sv_setpvn
 sv_setref_iv
 sv_setref_nv

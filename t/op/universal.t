@@ -8,7 +8,7 @@ BEGIN {
     @INC = '../lib' if -d '../lib';
 }
 
-print "1..70\n";
+print "1..72\n";
 
 $a = {};
 bless $a, "Bob";
@@ -65,6 +65,7 @@ test ! UNIVERSAL::can(23, "can");
 test $a->can("VERSION");
 
 test $a->can("can");
+test ! $a->can("export_tags");	# a method in Exporter
 
 test (eval { $a->VERSION }) == 2.718;
 
@@ -78,14 +79,18 @@ test $subs eq "VERSION can isa";
 
 test $a->isa("UNIVERSAL");
 
+# now use UNIVERSAL.pm and see what changes
 eval "use UNIVERSAL";
 
 test $a->isa("UNIVERSAL");
 
 my $sub2 = join ' ', sort grep { defined &{"UNIVERSAL::$_"} } keys %UNIVERSAL::; 
+# XXX import being here is really a bug
 test $sub2 eq "VERSION can import isa";
 
 eval 'sub UNIVERSAL::sleep {}';
 test $a->can("sleep");
 
 test ! UNIVERSAL::can($b, "can");
+
+test ! $a->can("export_tags");	# a method in Exporter

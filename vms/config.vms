@@ -112,7 +112,11 @@
  *	This symbol is defined if the bcmp() routine is available to
  *	compare blocks of memory.
  */
-#undef HAS_BCMP	/**/
+#if ((__VMS_VER >= 70000000) && (__DECC_VER >= 50200000)) || (__CRTL_VER >= 70000000)
+#define HAS_BCMP /**/
+#else
+#undef HAS_BCMP	/*config-skip*/
+#endif
 
 #include <string.h> /* Check whether new DECC has #defined bcopy and bzero */
 /* HAS_BCOPY:
@@ -233,7 +237,11 @@
  *	<sys/resource.h> needs to be included (see I_SYS_RESOURCE).
  *	The type "Timeval" should be used to refer to "struct timeval".    
  */
-#undef HAS_GETTIMEOFDAY /**/
+#if ((__VMS_VER >= 70000000) && (__DECC_VER >= 50200000)) || (__CRTL_VER >= 70000000)
+#define HAS_GETTIMEOFDAY /**/
+#else
+#undef HAS_GETTIMEOFDAY /*config-skip*/
+#endif
 #ifdef HAS_GETTIMEOFDAY
 #  define Timeval struct timeval /*config-skip*/
 #endif
@@ -256,7 +264,11 @@
  *	uname() routine to derive the host name.  See also HAS_GETHOSTNAME
  *	and PHOSTNAME.
  */
-#undef HAS_UNAME		/**/
+#if ((__VMS_VER >= 70000000) && (__DECC_VER >= 50200000)) || (__CRTL_VER >= 70000000)
+#define HAS_UNAME /**/
+#else
+#undef HAS_UNAME		/*config-skip*/
+#endif
 
 /* HAS_GETPRIORITY:
  *	This symbol, if defined, indicates that the getpriority routine is
@@ -492,7 +504,11 @@
  *	This symbol, if defined, indicates that Vr4's sigaction() routine
  *	is available.
  */
-#undef HAS_SIGACTION	/**/
+#if ((__VMS_VER >= 70000000) && (__DECC_VER >= 50200000)) || (__CRTL_VER >= 70000000)
+#define HAS_SIGACTION /**/
+#else
+#undef HAS_SIGACTION	/*config-skip*/
+#endif
 
 /* USE_STAT_BLOCKS:
  *	This symbol is defined if this system has a stat structure declaring
@@ -622,7 +638,11 @@
  *	This symbol, if defined, indicates that the truncate routine is
  *	available to truncate files.
  */
-#undef HAS_TRUNCATE	/**/
+#if ((__VMS_VER >= 70000000) && (__DECC_VER >= 50200000)) || (__CRTL_VER >= 70000000)
+#define HAS_TRUNCATE /**/
+#else
+#undef HAS_TRUNCATE	/*config-skip*/
+#endif
 
 
 /* HAS_VFORK:
@@ -664,7 +684,11 @@
 /* HAS_WAIT4:
  *	This symbol, if defined, indicates that wait4() exists.
  */
-#undef HAS_WAIT4	/**/
+#if ((__VMS_VER >= 70000000) && (__DECC_VER >= 50200000)) || (__CRTL_VER >= 70000000)
+#define HAS_WAIT4 /**/
+#else
+#undef HAS_WAIT4	/*config-skip*/
+#endif
 
 /* HAS_WAITPID:
  *	This symbol, if defined, indicates that the waitpid routine is
@@ -962,10 +986,10 @@
  *	is defined, and 'int *' otherwise.  This is only useful if you 
  *	have select(), of course.
  */
-#if defined(__DECC) && defined(__DECC_VER) && (__DECC_VER >= 50200000)
-#define Select_fd_set_t		fd_set *	/* config-skip */
+#if defined(__DECC) && defined(__DECC_VER) && (__DECC_VER >= 50200000) && defined(DECCRTL_SOCKETS)
+#define Select_fd_set_t		fd_set *	/**/
 #else
-#define Select_fd_set_t		int *		/**/
+#define Select_fd_set_t		int *		/* config-skip */
 #endif
 
 /* STDCHAR:
@@ -1161,7 +1185,11 @@
  *	functions are available for string searching.
  */
 #define HAS_STRCHR	/**/
-#undef HAS_INDEX	/**/
+#if ((__VMS_VER >= 70000000) && (__DECC_VER >= 50200000)) || (__CRTL_VER >= 70000000)
+#define HAS_INDEX /**/
+#else
+#undef HAS_INDEX	/*config-skip*/
+#endif
 
 /* HAS_STRCOLL:
  *	This symbol, if defined, indicates that the strcoll routine is
@@ -1347,9 +1375,17 @@
  *	corresponds to the 0 at the end of the sig_num list.
  *	See SIG_NUM and SIG_MAX.
  */
+#if ((__VMS_VER >= 70000000) && (__DECC_VER >= 50200000)) || (__CRTL_VER >= 70000000)
 #define SIG_NAME "ZERO","HUP","INT","QUIT","ILL","TRAP","IOT","EMT","FPE",\
                  "KILL","BUS","SEGV","SYS","PIPE","ALRM","TERM",\
-                 "ABRT","USR1","USR2",0
+                 "ABRT","USR1","USR2","SPARE18","SPARE19","CHLD","CONT",\
+                 "STOP","TSTP","TTIN","TTOU","DEBUG","SPARE27","SPARE28",\
+                 "SPARE29","SPARE30","SPARE31","SPARE32","RTMIN","RTMAX",0 /**/
+#else
+#define SIG_NAME "ZERO","HUP","INT","QUIT","ILL","TRAP","IOT","EMT","FPE",\
+                 "KILL","BUS","SEGV","SYS","PIPE","ALRM","TERM",\
+                 "ABRT","USR1","USR2",0 /*config-skip*/
+#endif
 
 /* SIG_NUM:
  *	This symbol contains a list of signal number, in the same order as the
@@ -1364,7 +1400,11 @@
  * The last element is 0, corresponding to the 0 at the end of
  * the sig_name list.
  */
-#define SIG_NUM 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,6,16,17,0	/**/
+#if ((__VMS_VER >= 70000000) && (__DECC_VER >= 50200000)) || (__CRTL_VER >= 70000000)
+#define SIG_NUM 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,6,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,64,0	/**/
+#else
+#define SIG_NUM 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,6,16,17,0	/*config-skip*/
+#endif
 
 /* Mode_t:
  *	This symbol holds the type used to declare file modes 
@@ -1598,8 +1638,13 @@
  *	to determine file-system related limits and options associated
  *	with a given open file descriptor.
  */
-#undef HAS_PATHCONF       /**/
-#undef HAS_FPATHCONF     /**/
+#if ((__VMS_VER >= 70000000) && (__DECC_VER >= 50200000)) || (__CRTL_VER >= 70000000)
+#define HAS_PATHCONF /**/
+#define HAS_FPATHCONF /**/
+#else
+#undef HAS_PATHCONF       /*config-skip*/
+#undef HAS_FPATHCONF     /*config-skip*/
+#endif
 
 /* HAS_SAFE_BCOPY:
  *	This symbol, if defined, indicates that the bcopy routine is available
@@ -1658,7 +1703,11 @@
  *	This symbol, if defined, indicates that sysconf() is available
  *	to determine system related limits and options.
  */
-#undef HAS_SYSCONF     /**/
+#if ((__VMS_VER >= 70000000) && (__DECC_VER >= 50200000)) || (__CRTL_VER >= 70000000)
+#define HAS_SYSCONF /**/
+#else
+#undef HAS_SYSCONF     /*config-skip*/
+#endif
 
 /* Gconvert:
  *	This preprocessor macro is defined to convert a floating point
@@ -1718,7 +1767,11 @@
  * This macro is used in the same way as siglongjmp(), but will invoke
  * traditional longjmp() if siglongjmp isn't available.
  */
-#undef HAS_SIGSETJMP	/**/
+#if ((__VMS_VER >= 70000000) && (__DECC_VER >= 50200000)) || (__CRTL_VER >= 70000000)
+#define HAS_SIGSETJMP /**/
+#else
+#undef HAS_SIGSETJMP	/*config-skip*/
+#endif
 #ifdef HAS_SIGSETJMP
 #define Sigjmp_buf sigjmp_buf	/* config-skip */
 #define Sigsetjmp(buf,save_mask) sigsetjmp(buf,save_mask)	/* config-skip */

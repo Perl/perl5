@@ -527,6 +527,7 @@ setuid perl scripts securely.\n");
 	/* my_exit() was called */
 	while (scopestack_ix > oldscope)
 	    LEAVE;
+	FREETMPS;
 	curstash = defstash;
 	if (endav)
 	    call_list(oldscope, endav);
@@ -848,10 +849,10 @@ PerlInterpreter *sv_interp;
 	/* my_exit() was called */
 	while (scopestack_ix > oldscope)
 	    LEAVE;
+	FREETMPS;
 	curstash = defstash;
 	if (endav)
 	    call_list(oldscope, endav);
-	FREETMPS;
 #ifdef MYMALLOC
 	if (getenv("PERL_DEBUG_MSTATS"))
 	    dump_mstats("after execution:  ");
@@ -883,7 +884,7 @@ PerlInterpreter *sv_interp;
 	    PerlIO_printf(PerlIO_stderr(), "%s syntax OK\n", origfilename);
 	    my_exit(0);
 	}
-	if (perldb && DBsingle)
+	if (PERLDB_SINGLE && DBsingle)
 	   sv_setiv(DBsingle, 1); 
     }
 
@@ -1039,7 +1040,7 @@ I32 flags;		/* See G_* flags in cop.h */
     oldmark = TOPMARK;
     oldscope = scopestack_ix;
 
-    if (perldb && curstash != debstash
+    if (PERLDB_SUB && curstash != debstash
 	   /* Handle first BEGIN of -d. */
 	  && (DBcv || (DBcv = GvCV(DBsub)))
 	   /* Try harder, since this may have been a sighandler, thus
@@ -1158,7 +1159,8 @@ I32 flags;		/* See G_* flags in cop.h */
     I32 oldscope;
     dJMPENV;
     int ret;
-    
+    OP* oldop = op;
+
     if (flags & G_DISCARD) {
 	ENTER;
 	SAVETMPS;
@@ -1229,6 +1231,7 @@ I32 flags;		/* See G_* flags in cop.h */
 	FREETMPS;
 	LEAVE;
     }
+    op = oldop;
     return retval;
 }
 
@@ -1354,7 +1357,7 @@ char *s;
 	    s += strlen(s);
 	}
 	if (!perldb) {
-	    perldb = TRUE;
+	    perldb = PERLDB_ALL;
 	    init_debugger();
 	}
 	return s;
@@ -1597,6 +1600,8 @@ init_main_stash()
     defgv = gv_fetchpv("_",TRUE, SVt_PVAV);
     errgv = gv_HVadd(gv_fetchpv("@", TRUE, SVt_PV));
     GvMULTI_on(errgv);
+    (void)form("%240s","");	/* Preallocate temp - for immediate signals. */
+    sv_grow(GvSV(errgv), 240);	/* Preallocate - for immediate signals. */
     sv_setpvn(GvSV(errgv), "", 0);
     curstash = defstash;
     compiling.cop_stash = defstash;
@@ -1683,7 +1688,7 @@ SV *sv;
 
 #ifdef DOSISH
     if (strEQ(scriptname, "-"))
-	dosearch = 0;
+ 	dosearch = 0;
     if (dosearch) {		/* Look in '.' first. */
 	char *cur = scriptname;
 #ifdef SEARCH_EXTS
@@ -1700,7 +1705,9 @@ SV *sv;
 	    if (Stat(cur,&statbuf) >= 0) {
 		dosearch = 0;
 		scriptname = cur;
+#ifdef SEARCH_EXTS
 		break;
+#endif
 	    }
 #ifdef SEARCH_EXTS
 	    if (cur == scriptname) {
@@ -1714,13 +1721,14 @@ SV *sv;
 #endif
     }
 #endif
+
     if (dosearch && !strchr(scriptname, '/')
 #ifdef DOSISH
 		 && !strchr(scriptname, '\\')
 #endif
 		 && (s = getenv("PATH"))) {
 	bool seen_dot = 0;
-
+	
 	bufend = s + strlen(s);
 	while (s < bufend) {
 #if defined(atarist) || defined(DOSISH)
@@ -1734,11 +1742,11 @@ SV *sv;
 	    }
 	    if (len < sizeof tokenbuf)
 		tokenbuf[len] = '\0';
-#else	/* ! (atarist || DOSISH) */
-	    s = delimcpy(tokenbuf, tokenbuf + sizeof tokenbuf, s, bufend
-			 ':',
-			 &len);
-#endif	/* ! (atarist || DOSISH) */
+#else  /* ! (atarist || DOSISH) */
+	    s = delimcpy(tokenbuf, tokenbuf + sizeof tokenbuf, s, bufend,
+			':',
+			&len);
+#endif /* ! (atarist || DOSISH) */
 	    if (s < bufend)
 		s++;
 	    if (len + 1 + strlen(scriptname) + MAX_EXT_LEN >= sizeof tokenbuf)
@@ -1750,7 +1758,7 @@ SV *sv;
 #endif
 	       )
 		tokenbuf[len++] = '/';
-	    if (len == 2 && tokenbuf[0] == '.') 
+	    if (len == 2 && tokenbuf[0] == '.')
 		seen_dot = 1;
 	    (void)strcpy(tokenbuf + len, scriptname);
 #endif  /* !VMS */
@@ -1786,10 +1794,10 @@ SV *sv;
 	}
 #ifndef DOSISH
 	if (!xfound && !seen_dot && !xfailed && (Stat(scriptname,&statbuf) < 0))
-#endif 
-	    seen_dot = 1;		/* Disable message. */
+#endif
+	    seen_dot = 1;			/* Disable message. */
 	if (!xfound)
-	    croak("Can't %s %s%s%s", 
+	    croak("Can't %s %s%s%s",
 		  (xfailed ? "execute" : "find"),
 		  (xfailed ? xfailed : scriptname),
 		  (xfailed ? "" : " on PATH"),
@@ -2647,10 +2655,10 @@ AV* list;
 	    /* my_exit() was called */
 	    while (scopestack_ix > oldscope)
 		LEAVE;
+	    FREETMPS;
 	    curstash = defstash;
 	    if (endav)
 		call_list(oldscope, endav);
-	    FREETMPS;
 	    JMPENV_POP;
 	    curcop = &compiling;
 	    curcop->cop_line = oldline;

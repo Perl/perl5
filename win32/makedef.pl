@@ -12,7 +12,7 @@
 
 # There is some symbol defined in global.sym and interp.sym
 # that does not present in the WIN32 port but there is no easy
-# way to find them so I just put a exeception list here
+# way to find them so I just put a exception list here
 
 my $CCTYPE = shift || "MSVC";
 
@@ -191,12 +191,17 @@ sub emit_symbol {
 	chomp $symbol;
 	if ($CCTYPE eq "BORLAND") {
 		# workaround Borland quirk by exporting both the straight
-		# name and a name with leading underscore
-		#print "\t$symbol = _$symbol\n";
+		# name and a name with leading underscore.  Note the
+		# alias *must* come after the symbol itself, if both
+		# are to be exported. (Linker bug?)
 		print "\t_$symbol\n";
+		print "\t$symbol = _$symbol\n";
 	}
 	else {
+		# for binary coexistence, export both the symbol and
+		# alias with leading underscore
 		print "\t$symbol\n";
+		print "\t_$symbol = $symbol\n";
 	}
 }
 
@@ -319,5 +324,24 @@ win32_setnetent
 win32_setprotoent
 win32_setservent
 win32_getenv
-win32_stdio
+win32_perror
+win32_setbuf
+win32_setvbuf
+win32_flushall
+win32_fcloseall
+win32_fgets
+win32_gets
+win32_fgetc
+win32_putc
+win32_puts
+win32_getchar
+win32_putchar
+win32_malloc
+win32_calloc
+win32_realloc
+win32_free
+win32stdio
 Perl_win32_init
+RunPerl
+SetIOSubSystem
+GetIOSubSystem

@@ -96,7 +96,7 @@ sub fixpath {
     }
     my($fixedpath,$prefix,$name);
 
-    if ($path =~ m#^\$\(.+\)$# || $path =~ m#[/:>\]]#) { 
+    if ($path =~ m#^\$\([^\)]+\)$# || $path =~ m#[/:>\]]#) { 
         if ($force_path or $path =~ /(?:DIR\)|\])$/) {
             $fixedpath = vmspath($self->eliminate_macros($path));
         }
@@ -105,7 +105,9 @@ sub fixpath {
         }
     }
     elsif ((($prefix,$name) = ($path =~ m#^\$\(([^\)]+)\)(.+)#)) && $self->{$prefix}) {
-        my($vmspre) = vmspath($self->eliminate_macros("\$($prefix)")) || ''; # is it a dir or just a name?
+        my($vmspre) = $self->eliminate_macros("\$($prefix)");
+        # is it a dir or just a name?
+        $vmspre = ($vmspre =~ m|/| or $prefix =~ /DIR$/) ? vmspath($vmspre) : '';
         $fixedpath = ($vmspre ? $vmspre : $self->{$prefix}) . $name;
         $fixedpath = vmspath($fixedpath) if $force_path;
     }

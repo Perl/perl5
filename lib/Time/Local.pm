@@ -59,9 +59,17 @@ sub timegm {
 
 sub timelocal {
     my $t = &timegm;
+    my $tt = $t;
 
     my (@lt) = localtime($t);
     my (@gt) = gmtime($t);
+    if ($t < $DAY and ($lt[5] >= 70 or $gt[5] >= 70 )) {
+      # Wrap error, too early a date
+      # Try a safer date
+      $tt = $DAY;
+      @lt = localtime($tt);
+      @gt = gmtime($tt);
+    }
 
     my $tzsec = ($gt[1] - $lt[1]) * $MIN + ($gt[2] - $lt[2]) * $HR;
 
@@ -80,7 +88,7 @@ sub timelocal {
     
     $time = $t + $tzsec;
     return -1 if $cheat<0 and $^O ne 'VMS';
-    @test = localtime($time);
+    @test = localtime($time + ($tt - $t));
     $time -= $HR if $test[2] != $_[2];
     $time;
 }

@@ -31,6 +31,10 @@
 #define _chdir chdir
 #include <sys/types.h>
 
+#ifndef DllMain
+#define DllMain DllEntryPoint
+#endif
+
 #pragma warn -ccc
 #pragma warn -rch
 #pragma warn -sig
@@ -74,6 +78,8 @@ extern  char	*staticlinkmodules[];
 #define getenv win32_getenv
 EXT char *win32_getenv(const char *name);
 #endif
+
+EXT void Perl_win32_init(int *argcp, char ***argvp);
 
 #define USE_SOCKETS_AS_HANDLES
 #ifndef USE_SOCKETS_AS_HANDLES

@@ -307,8 +307,8 @@
 #define lshift_amg		Perl_lshift_amg
 #define lshift_ass_amg		Perl_lshift_ass_amg
 #define lt_amg			Perl_lt_amg
-#define magic_clearenv		Perl_magic_clearenv
 #define magic_clear_all_env	Perl_magic_clear_all_env
+#define magic_clearenv		Perl_magic_clearenv
 #define magic_clearpack		Perl_magic_clearpack
 #define magic_clearsig		Perl_magic_clearsig
 #define magic_existspack	Perl_magic_existspack
@@ -1046,6 +1046,7 @@
 #define sv_setptrobj		Perl_sv_setptrobj
 #define sv_setpv		Perl_sv_setpv
 #define sv_setpvf		Perl_sv_setpvf
+#define sv_setpviv		Perl_sv_setpviv
 #define sv_setpvn		Perl_sv_setpvn
 #define sv_setref_iv		Perl_sv_setref_iv
 #define sv_setref_nv		Perl_sv_setref_nv

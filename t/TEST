@@ -101,7 +101,7 @@ while ($test = shift) {
 	}
     } else {
 	$next += 1;
-	print "FAILED on test $next\n";
+	print "FAILED at test $next\n";
 	$bad = $bad + 1;
 	$_ = $test;
 	if (/^base/) {
@@ -113,6 +113,7 @@ while ($test = shift) {
 if ($bad == 0) {
     if ($ok) {
 	print "All tests successful.\n";
+	# XXX add mention of 'perlbug -ok' ?
     } else {
 	die "FAILED--no tests were run for some reason.\n";
     }

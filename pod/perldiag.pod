@@ -277,6 +277,15 @@ could indicate that SvREFCNT_dec() was called too many times, or that
 SvREFCNT_inc() was called too few times, or that the SV was mortalized
 when it shouldn't have been, or that memory has been corrupted.
 
+=item Attempt to pack pointer to temporary value
+
+(W) You tried to pass a temporary value (like the result of a
+function, or a computed expression) to the "p" pack() template.  This
+means the result contains a pointer to a location that could become
+invalid anytime, even before the end of the current statement.  Use
+literals or global values as arguments to the "p" pack() template to
+avoid this warning.
+
 =item Attempt to use reference as lvalue in substr
 
 (W) You supplied a reference as the first argument to substr() used
@@ -385,6 +394,11 @@ exited by calling exit.
 like a block, except that it isn't a proper block.  This usually
 occurs if you tried to jump out of a sort() block or subroutine, which
 is a no-no.  See L<perlfunc/goto>.
+
+=item Can't "goto" into the middle of a foreach loop
+
+(F) A "goto" statement was executed to jump into the middle of a
+foreach loop.  You can't get there from here.  See L<perlfunc/goto>.
 
 =item Can't "last" outside a block
 

@@ -619,9 +619,39 @@ is identical to C<$Config{'osname'}>.
 
 =item $^P
 
-The internal flag that the debugger clears so that it doesn't debug
-itself.  You could conceivably disable debugging yourself by clearing
-it.
+The internal variable for debugging support.  Different bits mean the
+following (subject to change): 
+
+=over 6
+
+=item 0x01
+
+Debug subroutine enter/exit.
+
+=item 0x02
+
+Line-by-line debugging.
+
+=item 0x04
+
+Switch off optimizations.
+
+=item 0x08
+
+Preserve more data for future interactive inspections.
+
+=item 0x10
+
+Keep info about source lines on which a subroutine is defined.
+
+=item 0x20
+
+Start with single-step on.
+
+=back
+
+Note that some bits may be relevent at compile-time only, some at
+run-time only. This is a new mechanism and the details may change.
 
 =item $BASETIME
 
@@ -753,7 +783,7 @@ L<perlfunc/die>, L<perlfunc/warn> and L<perlfunc/eval>.
 By default, running out of memory it is not trappable.  However, if
 compiled for this, Perl may use the contents of C<$^M> as an emergency
 pool after die()ing with this message.  Suppose that your Perl were
-compiled with -DEMERGENCY_SBRK and used Perl's malloc.  Then
+compiled with -DPERL_EMERGENCY_SBRK and used Perl's malloc.  Then
 
     $^M = 'a' x (1<<16);
 

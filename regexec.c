@@ -134,21 +134,25 @@ regcppop()
     return input;
 }
 
+/* After a successful match in WHILEM, we want to restore paren matches
+ * that have been overwritten by a failed match attempt in the process
+ * of reaching this success. We do this by restoring regstartp[i]
+ * wherever regendp[i] has not changed; if OPEN is changed to modify
+ * regendp[], the '== endp' test below should be changed to match.
+ * This corrects the error of:
+ *	0 > length [ "foobar" =~ / ( (foo) | (bar) )* /x ]->[1]
+ */
 static void
 regcppartblow()
 {
     I32 i = SSPOPINT;
-    U32 paren = 0;
-    char *input;
+    U32 paren;
     char *startp;
     char *endp;
-    int lastparen;
-    int size;
     assert(i == SAVEt_REGCONTEXT);
     i = SSPOPINT;
-    input = (char *) SSPOPPTR;
-    lastparen = SSPOPINT;
-    size = SSPOPINT;
+    /* input, lastparen, size */
+    SSPOPPTR; SSPOPINT; SSPOPINT;
     for (i -= 3; i > 0; i -= 3) {
 	paren = (U32)SSPOPINT;
 	startp = (char *) SSPOPPTR;
@@ -888,7 +892,6 @@ char *prog;
 	case OPEN:
 	    n = ARG1(scan);  /* which paren pair */
 	    regstartp[n] = locinput;
-	    regendp[n] = 0;
 	    if (n > regsize)
 		regsize = n;
 	    break;

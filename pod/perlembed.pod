@@ -1010,7 +1010,7 @@ Dov Grobgeld, and Ilya Zakharevich.
 Check out Doug's article on embedding in Volume 1, Issue 4 of The Perl
 Journal.  Info about TPJ is available from http://tpj.com.
 
-April 14, 1997
+July 17, 1997
 
 Some of this material is excerpted from Jon Orwant's book: I<Perl 5
 Interactive>, Waite Group Press, 1996 (ISBN 1-57169-064-6) and appears

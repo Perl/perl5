@@ -157,3 +157,4 @@ before 5.004_02:
 		perl -S mycmd
 	will work.  Perl will also look in the current directory first.
 	Moreover, a bug with \; in PATH being non-separator is fixed.
+

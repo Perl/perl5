@@ -9,6 +9,7 @@ use File::Basename qw(&basename &dirname);
 # %Config entries.  Thus you write
 #  $startperl
 # to ensure Configure will look for $Config{startperl}.
+#  $perlpath
 
 # This forces PL files to create target in same directory as PL file.
 # This is so that make depend always knows where to find PL derivatives.
@@ -17,6 +18,29 @@ $file = basename($0, '.PL');
 $file .= '.com' if $^O eq 'VMS';
 
 open OUT,">$file" or die "Can't create $file: $!";
+
+# extract patchlevel.h information
+
+open PATCH_LEVEL, "<../patchlevel.h" or die "Can't open patchlevel.h: $!";
+
+my $patchlevel_date = (stat PATCH_LEVEL)[9];
+
+while (<PATCH_LEVEL>) {
+    last if index($_, "static\tchar\t*local_patches[] = {") >= 0;
+};
+
+my $patches;
+while (<PATCH_LEVEL>) {
+    last if /^}/;
+    chomp;
+    s/^\s+,?"?//;
+    s/"?,?$//;
+    s/(['\\])/\\$1/g;
+    $patches .= "'$_',\n" unless $_ eq 'NULL';
+};
+
+close PATCH_LEVEL;
+
 
 print "Extracting $file (with variable substitutions)\n";
 
@@ -27,6 +51,9 @@ print OUT <<"!GROK!THIS!";
 $Config{startperl}
     eval 'exec $Config{perlpath} -S \$0 \${1+"\$@"}'
 	if \$running_under_some_shell;
+
+my \$patchlevel_date = $patchlevel_date;
+my \@patches = ( $patches );
 !GROK!THIS!
 
 # In the following, perl variables are not expanded during extraction.
@@ -49,7 +76,7 @@ use strict;
 sub paraprint;
 
 
-my($Version) = "1.18";
+my($Version) = "1.19";
 
 # Changed in 1.06 to skip Mail::Send and Mail::Util if not available.
 # Changed in 1.07 to see more sendmail execs, and added pipe output.
@@ -70,6 +97,9 @@ my($Version) = "1.18";
 # Changed in 1.16 to include @INC, and allow user to re-edit if no changes.
 # Changed in 1.17 Win32 support added.  GSAR 97-04-12
 # Changed in 1.18 add '-ok' option for reporting build success. CFR 97-06-18
+# Changed in 1.19 '-ok' default not '-v'
+#                 add local patch information
+#                 warn on '-ok' if this is an old system; add '-okay'
 
 # TODO: - Allow the user to re-name the file on mail failure, and
 #       make sure failure (transmission-wise) of Mail::Send is 
@@ -153,15 +183,25 @@ sub Init {
         # OK - send "OK" report for build on this system
         $ok = 0;
 	if ( $::opt_o ) {
-	    if ( $::opt_o eq 'k' ) {
+	    if ( $::opt_o eq 'k' or $::opt_o eq 'kay' ) {
+                my $age = time - $patchlevel_date;
+                if ( $::opt_o eq 'k' and $age > 60 * 24 * 60 * 60 ) {
+                    my $date = localtime $patchlevel_date;
+                    print <<"EOF";
+\"perlbug -ok\" does not report on Perl versions which are more than
+60 days old.  This Perl version was constructed on $date.
+If you really want to report this, use \"perlbug -okay\".
+EOF
+                    exit();
+                };
 		# force these options
 		$::opt_S = 1; # don't prompt for send
 		$::opt_C = 1; # don't send a copy to the local admin
-		$::opt_v = 1; $verbose = 1;
-		$::opt_s = 1; $subject = "OK: perl $] on "
-                                         . $::Config{'osname'} . ' '
-                                         . $::Config{'osvers'};
-		$::opt_b = 1; $body    = "Perl reported to build OK on this system\n";
+		$::opt_s = 1;
+		$subject = "OK: perl $] on"
+			  ." $::Config{'osname'} $::Config{'osvers'} $subject";
+		$::opt_b = 1;
+		$body    = "Perl reported to build OK on this system.\n";
 		$ok = 1;
 	    }
 	    else {
@@ -390,7 +430,7 @@ EOF
 	
 	{
 	my($dir) = ($Is_VMS ? 'sys$scratch:' :
-		    ($Is_MSWin32 && $ENV{'TEMP'} ? $ENV{'TEMP'} : '/tmp/'));
+		    (($Is_MSWin32 && $ENV{'TEMP'}) ? $ENV{'TEMP'} : '/tmp/'));
 	$filename = "bugrep0$$";
 	$dir .= "\\" if $Is_MSWin32 and $dir !~ m|[\\/]$|;
 	$filename++ while -e "$dir$filename";
@@ -441,8 +481,10 @@ EOF
 
 	open(REP,">$filename");
 
+	my $reptype = $ok ? "success" : "bug";
+
 	print REP <<EOF;
-This is a bug report for perl from $from,
+This is a $reptype report for perl from $from,
 generated with the help of perlbug $Version running under perl $].
 
 EOF
@@ -499,15 +541,11 @@ EOF
 
 	print OUT Config::myconfig;
 
-	if($verbose) {
-		print OUT "\nComplete configuration data for perl $]:\n\n";
-		my($value);
-		foreach (sort keys %::Config) {
-			$value = $::Config{$_};
-			$value =~ s/'/\\'/g;
-			print OUT "$_='$value'\n";
-		}
-	}
+	if (@patches) {
+		print OUT join "\n\t", "\nLocally applied patches:", @patches;
+                print OUT "\n";
+        };
+
 	print OUT <<EOF;
 
 ---
@@ -530,6 +568,15 @@ EOF
 	    print OUT "    $env",
                       exists $ENV{$env} ? "=$ENV{$env}" : ' (unset)',
 	              "\n";
+	}
+	if($verbose) {
+		print OUT "\nComplete configuration data for perl $]:\n\n";
+		my($value);
+		foreach (sort keys %::Config) {
+			$value = $::Config{$_};
+			$value =~ s/'/\\'/g;
+			print OUT "$_='$value'\n";
+		}
 	}
 }
 
@@ -757,7 +804,7 @@ sub Send {
 			  }
 			}
 			
-			paraprint <<"EOF", die "\n" if $sendmail eq "";
+			paraprint(<<"EOF"), die "\n" if $sendmail eq "";
 			
 I am terribly sorry, but I cannot find sendmail, or a close equivalent, and
 the perl package Mail::Send has not been installed, so I can't send your bug
@@ -768,7 +815,7 @@ been left in the file `$filename'.
 
 EOF
 			
-			open(SENDMAIL,"|$sendmail -t");
+			open(SENDMAIL,"|$sendmail -t") || die "'|$sendmail -t' failed: $|";
 			print SENDMAIL "To: $address\n";
 			print SENDMAIL "Subject: $subject\n";
 			print SENDMAIL "Cc: $cc\n" if $cc;
@@ -824,7 +871,9 @@ Options:
   -d	Data mode (the default if you redirect or pipe output.) 
         This prints out your configuration data, without mailing
         anything. You can use this with -v to get more complete data.
-  -ok   Report successful build on this sytem to perl porters (use alone).
+  -ok   Report successful build on this system to perl porters
+        (use alone or with -v).
+  -okay As -ok but also report on older systems.
   -h    Print this help message. 
   
 EOF
@@ -860,7 +909,7 @@ S<[ B<-b> I<body> | B<-f> I<file> ]> S<[ B<-r> I<returnaddress> ]>
 S<[ B<-e> I<editor> ]> S<[ B<-c> I<adminaddress> | B<-C> ]>
 S<[ B<-S> ]> S<[ B<-t> ]>  S<[ B<-d> ]>  S<[ B<-h> ]>
 
-B<perlbug> S<[ B<-r> I<returnaddress> ]> B<-ok>
+B<perlbug> S<[ B<-v> ]> S<[ B<-r> I<returnaddress> ]> S<[ B<-ok> | B<okay> ]>
 
 =head1 DESCRIPTION
 
@@ -966,8 +1015,8 @@ produced by running C<perl -V> (note the uppercase V).
 
 Having done your bit, please be prepared to wait, to be told the bug
 is in your code, or even to get no reply at all.  The perl maintainers
-are busy folks, so if your problem is a small one or if it is
-difficult to understand, they may not respond with a personal reply.
+are busy folks, so if your problem is a small one or if it is difficult
+to understand or already known, they may not respond with a personal reply.
 If it is important to you that your bug be fixed, do monitor the
 C<Changes> file in any development releases since the time you submitted
 the bug, and encourage the maintainers with kind words (but never any
@@ -1017,10 +1066,16 @@ Prints a brief summary of the options.
 
 =item B<-ok>
 
-Report successful build on this system to perl porters. Forces B<-S>,
-B<-C>, and B<-v>. Forces and supplies values for B<-s> and B<-b>. Only
+Report successful build on this system to perl porters. Forces B<-S>
+and B<-C>. Forces and supplies values for B<-s> and B<-b>. Only
 prompts for a return address if it cannot guess it (for use with
-B<make>). Honors return address specified with B<-r>.
+B<make>). Honors return address specified with B<-r>.  You can use this
+with B<-v> to get more complete data.   Only makes a report if this
+system is less than 60 days old.
+
+=item B<-okay>
+
+As B<-ok> except it will report on older systems.
 
 =item B<-r>
 
@@ -1051,7 +1106,8 @@ Include verbose configuration data in the report.
 Kenneth Albanowski (E<lt>kjahds@kjahds.comE<gt>), subsequently I<doc>tored
 by Gurusamy Sarathy (E<lt>gsar@umich.eduE<gt>), Tom Christiansen
 (E<lt>tchrist@perl.comE<gt>), Nathan Torkington (E<lt>gnat@frii.comE<gt>),
-and Charles F. Randall (E<lt>cfr@pobox.comE<gt>).
+Charles F. Randall (E<lt>cfr@pobox.comE<gt>) and
+Mike Guy (E<lt>mjtg@cam.a.ukE<gt>).
 
 =head1 SEE ALSO
 

@@ -200,6 +200,6 @@ EOM
     main::ok(17, $@ eq "") ;
     main::ok(18, $ret eq "[[5]]") ;
 
-    unlink "SubDB.pm", "dbhash.tmp" ;
+    unlink "SubDB.pm", <dbhash.tmp*> ;
 
 }

@@ -392,7 +392,7 @@ register char *s;
 	bufend = s + SvCUR(linestr);
 	s = bufptr;
 	incline(s);
-	if (perldb && curstash != debstash) {
+	if (PERLDB_LINE && curstash != debstash) {
 	    SV *sv = NEWSV(85,0);
 
 	    sv_upgrade(sv, SVt_PVMG);
@@ -1526,7 +1526,7 @@ yylex()
 	    sv_catpv(linestr, "\n");
 	    oldoldbufptr = oldbufptr = s = linestart = SvPVX(linestr);
 	    bufend = SvPVX(linestr) + SvCUR(linestr);
-	    if (perldb && curstash != debstash) {
+	    if (PERLDB_LINE && curstash != debstash) {
 		SV *sv = NEWSV(85,0);
 
 		sv_upgrade(sv, SVt_PVMG);
@@ -1574,7 +1574,7 @@ yylex()
 	    incline(s);
 	} while (doextract);
 	oldoldbufptr = oldbufptr = bufptr = linestart = s;
-	if (perldb && curstash != debstash) {
+	if (PERLDB_LINE && curstash != debstash) {
 	    SV *sv = NEWSV(85,0);
 
 	    sv_upgrade(sv, SVt_PVMG);
@@ -1699,7 +1699,7 @@ yylex()
 			    }
 			    d = moreswitches(d);
 			} while (d);
-			if (perldb && !oldpdb ||
+			if (PERLDB_LINE && !oldpdb ||
 			    ( minus_n || minus_p ) && !(oldn || oldp) )
 			      /* if we have already added "LINE: while (<>) {",
 			         we must not do it again */
@@ -1708,7 +1708,7 @@ yylex()
 			    oldoldbufptr = oldbufptr = s = linestart = SvPVX(linestr);
 			    bufend = SvPVX(linestr) + SvCUR(linestr);
 			    preambled = FALSE;
-			    if (perldb)
+			    if (PERLDB_LINE)
 				(void)gv_fetchfile(origfilename);
 			    goto retry;
 			}
@@ -2316,8 +2316,23 @@ yylex()
 	    else if (isIDFIRST(*s)) {
 		char tmpbuf[sizeof tokenbuf];
 		scan_word(s, tmpbuf, sizeof tmpbuf, TRUE, &len);
-		if (keyword(tmpbuf, len))
-		    expect = XTERM;	/* e.g. print $fh length() */
+		if (tmp = keyword(tmpbuf, len)) {
+		    /* binary operators exclude handle interpretations */
+		    switch (tmp) {
+		    case -KEY_x:
+		    case -KEY_eq:
+		    case -KEY_ne:
+		    case -KEY_gt:
+		    case -KEY_lt:
+		    case -KEY_ge:
+		    case -KEY_le:
+		    case -KEY_cmp:
+			break;
+		    default:
+			expect = XTERM;	/* e.g. print $fh length() */
+			break;
+		    }
+		}
 		else {
 		    GV *gv = gv_fetchpv(tmpbuf, FALSE, SVt_PVCV);
 		    if (gv && GvCVu(gv))
@@ -4515,7 +4530,7 @@ I32 ck_uni;
 		lex_state = LEX_INTERPEND;
 	    if (funny == '#')
 		funny = '@';
-	    if (dowarn &&
+	    if (dowarn && lex_state == LEX_NORMAL &&
 	      (keyword(dest, d - dest) || perl_get_cv(dest, FALSE)))
 		warn("Ambiguous use of %c{%s} resolved to %c%s",
 		    funny, dest, funny, dest);
@@ -4831,7 +4846,7 @@ register char *s;
 	    missingterm(tokenbuf);
 	}
 	curcop->cop_line++;
-	if (perldb && curstash != debstash) {
+	if (PERLDB_LINE && curstash != debstash) {
 	    SV *sv = NEWSV(88,0);
 
 	    sv_upgrade(sv, SVt_PVMG);
@@ -4931,8 +4946,13 @@ char *start;
     register char *to;
     I32 brackets = 1;
 
-    if (isSPACE(*s))
-	s = skipspace(s);
+    if (isSPACE(*s)) {
+	/* "#" is allowed as delimiter if on same line */
+	while (*s == ' ' || *s == '\t')
+	    s++;
+	if (isSPACE(*s))
+	    s = skipspace(s);
+    }
     CLINE;
     term = *s;
     multi_start = curcop->cop_line;
@@ -4953,8 +4973,8 @@ char *start;
 	    for (; s < bufend; s++,to++) {
 		if (*s == '\n' && !rsfp)
 		    curcop->cop_line++;
-		if (*s == '\\' && s+1 < bufend) {
-		    if ((s[1] == multi_open) || (s[1] == term))
+		if (*s == '\\' && s+1 < bufend && term != '\\') {
+		    if (s[1] == term)
 			s++;
 		    else
 			*to++ = *s++;
@@ -4993,7 +5013,7 @@ char *start;
 	    return Nullch;
 	}
 	curcop->cop_line++;
-	if (perldb && curstash != debstash) {
+	if (PERLDB_LINE && curstash != debstash) {
 	    SV *sv = NEWSV(88,0);
 
 	    sv_upgrade(sv, SVt_PVMG);

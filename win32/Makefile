@@ -403,6 +403,11 @@ $(SOCKET_DLL): $(SOCKET).xs $(PERLEXE)
 	cd ..\..\win32
 
 doc: $(PERLEXE)
+	cd ..\pod
+	$(MAKE) -f ..\win32\pod.mak checkpods pod2html pod2latex \
+		pod2man pod2text
+	$(XCOPY) *.bat ..\win32\bin\*.*
+	cd ..\win32
 	copy ..\README.win32 ..\pod\perlwin32.pod
 	$(PERLEXE) ..\installhtml --podroot=.. --htmldir=./html \
 	    --podpath=pod:lib:ext:utils --htmlroot="//$(INST_HTML::=|)" \

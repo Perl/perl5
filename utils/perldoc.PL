@@ -134,21 +134,16 @@ sub containspod {
 	return 0;
 }
 
- sub minus_f_nocase {
+sub minus_f_nocase {
      my($file) = @_;
+     # on a case-forgiving file system we can simply use -f $file
+     if ($Is_VMS or $Is_MSWin32 or $^O eq 'os2') {
+        return ( -f $file ) ? $file : '';
+     }
      local *DIR;
      local($")="/";
      my(@p,$p,$cip);
-     $file =~ tr|\\|/| if $Is_MSWin32 or $^O eq 'os2';
-     if ( $Is_MSWin32 and $file =~ s|^(//[^/]+)/|| ) {	# UNC path?
-         push(@p,$1);
-     }
      foreach $p (split(/\//, $file)){
-	if (($Is_VMS or $Is_MSWin32 or $^O eq 'os2') and not scalar @p) {
-	    # VMSish filesystems don't begin at '/'
-	    push(@p,$p);
-	    next;
-	}
  	if (-d ("@p/$p")){
  	    push @p, $p;
  	} elsif (-f ("@p/$p")) {
@@ -158,7 +153,6 @@ sub containspod {
  	    my $lcp = lc $p;
  	    opendir DIR, "@p";
  	    while ($cip=readdir(DIR)) {
-		$cip =~ s/\.dir$// if $Is_VMS;
  		if (lc $cip eq $lcp){
  		    $found++;
  		    last;
