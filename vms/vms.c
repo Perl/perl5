@@ -788,7 +788,7 @@ Perl_my_setenv(pTHX_ char *lnm,char *eqv)
 }
 /*}}}*/
 
-/*{{{static void vmssetuserlnm(char *name, char *eqv);
+/*{{{static void vmssetuserlnm(char *name, char *eqv); */
 /*  vmssetuserlnm
  *  sets a user-mode logical in the process logical name table
  *  used for redirection of sys$error

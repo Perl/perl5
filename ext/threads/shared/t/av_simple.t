@@ -1,3 +1,5 @@
+use warnings;
+
 BEGIN {
 #    chdir 't' if -d 't';
 #    push @INC ,'../lib';
@@ -12,6 +14,7 @@ BEGIN {
 sub ok {
     my ($id, $ok, $name) = @_;
 
+    $name = '' unless defined $name;
     # You have to do it this way or VMS will get confused.
     print $ok ? "ok $id - $name\n" : "not ok $id - $name\n";
 
@@ -35,10 +38,10 @@ $foo[0] = "hi";
 ok(3, $foo[0] eq 'hi', "Check assignment works");
 $foo[0] = "bar";
 ok(4, $foo[0] eq 'bar', "Check overwriting works");
-ok(5, $foo[1] == undef, "Check undef value");
+ok(5, !defined $foo[1], "Check undef value");
 $foo[2] = "test";
 ok(6, $foo[2] eq "test", "Check extending the array works");
-ok(7, $foo[1] == undef, "Check undef value again");
+ok(7, !defined $foo[1], "Check undef value again");
 ok(8, scalar(@foo) == 3, "Check the length of the array");
 ok(9,$#foo == 2, "Check last element of array");
 threads->create(sub { $foo[0] = "thread1" })->join;
@@ -74,9 +77,9 @@ ok(26, $var == 2, "Check shift after thread");
     my @foo2;
     share @foo2;
     my $empty = shift @foo2;
-    ok(27, $empty == undef , "Check shift on empty array");
+    ok(27, !defined $empty, "Check shift on empty array");
     $empty = pop @foo2;
-    ok(28, $empty == undef , "Check pop on empty array");
+    ok(28, !defined $empty, "Check pop on empty array");
 }
 my $i = 0;
 foreach my $var (@foo) {
@@ -99,7 +102,7 @@ $foo[20] = "sky";
 ok(36, delete($foo[20]) eq "sky", "Check delete works");
 
 threads->create(sub { delete($foo[0])})->join();
-ok(37, delete($foo[0]) == undef, "Check that delete works from a thread");
+ok(37, !defined delete($foo[0]), "Check that delete works from a thread");
 
 @foo = (1,2,3,4,5);
 

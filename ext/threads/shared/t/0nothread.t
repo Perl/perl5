@@ -1,4 +1,5 @@
 use strict;
+use warnings;
 use Config;
 BEGIN {
     require Test::More;

@@ -1,3 +1,5 @@
+use warnings;
+
 BEGIN {
 #    chdir 't' if -d 't';
 #    push @INC ,'../lib';
@@ -13,6 +15,7 @@ BEGIN {
 sub ok {
     my ($id, $ok, $name) = @_;
 
+    $name = '' unless defined $name;
     # You have to do it this way or VMS will get confused.
     print $ok ? "ok $id - $name\n" : "not ok $id - $name\n";
 
