@@ -30,7 +30,7 @@ if ($#ARGV == -1) {
       `echo base/*.t comp/*.t cmd/*.t run/*.t io/*.t; echo op/*.t pragma/*.t lib/*.t pod/*.t`);
 }
 
-%infinite = ( 'comp/require.t', 1, 'op/bop.t', 1, 'lib/hostname.t', 1 ); 
+# %infinite = ( 'comp/require.t', 1, 'op/bop.t', 1, 'lib/hostname.t', 1 ); 
 
 _testprogs('perl', @ARGV);
 _testprogs('compile', @ARGV) if (-e "../testcompile"); 
