@@ -7857,17 +7857,10 @@ set mach/cthreads.h i_machcthreads
 eval $inhdr
 
 : test whether pthreads are created in joinable -- aka undetached -- state
-if test "X$usethreads" = "X$define"; then
+if test "X$usethreads" = "X$define" -a "X$i_pthread" = "X$define"; then
 	echo $n "Checking whether pthreads are created joinable. $c" >&4 
-	$cat >try.c <<'EOCP'
-#$i_pthread I_PTHREAD
-#$i_machcthreads I_MACH_CTHREADS
-#ifdef I_PTHREAD
+	$cat >try.c <<EOCP
 #include <pthread.h>
-#endif
-#ifdef I_MACH_CTHREADS
-#include <mach/cthreads.h>
-#endif
 #include <stdio.h>
 int main() {
     pthread_attr_t attr;
