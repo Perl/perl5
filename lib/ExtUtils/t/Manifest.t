@@ -189,19 +189,15 @@ $files = maniread;
 is( $files->{wibble}, '',    'maniadd() with undef comment' );
 is( $files->{yarrow}, 'hock','          with comment' );
 is( $files->{foobar}, '',    '          preserved old entries' );
-
+maniadd({ foo  => 'bar' });
 add_file('MANIFEST'   => 'Makefile.PL');
-maniadd({ 'META.yml'  => 'Module meta-data (added by MakeMaker)' });
+
 $files = maniread;
 # VMS downcases the MANIFEST.  We normalize it here to match.
 %$files = map { (lc $_ => $files->{$_}) } keys %$files;
 my %expect = ( 'makefile.pl' => '',
-               'meta.yml'    => 'Module meta-data (added by MakeMaker)' 
-             );
+               'foo'         => 'bar' );
 is_deeply( $files, \%expect, 'maniadd() vs MANIFEST without trailing newline');
-
-add_file('MANIFEST'   => 'Makefile.PL');
-maniadd({ foo => 'bar' });
 
 SKIP: {
     chmod( 0400, 'MANIFEST' );
