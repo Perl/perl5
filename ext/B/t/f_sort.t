@@ -3,6 +3,11 @@
 BEGIN {
     chdir q(t);
     @INC = qw(../lib ../ext/B/t);
+    require Config;
+    if (($Config::Config{'extensions'} !~ /\bB\b/) ){
+        print "1..0 # Skip -- Perl configured without B module\n";
+        exit 0;
+    }
     require q(./test.pl);
 }
 use OptreeCheck;
