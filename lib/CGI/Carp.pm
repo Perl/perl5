@@ -466,7 +466,7 @@ END
 
   if ($mod_perl) {
     my $r;
-    if ($ENV{MOD_PERL_API_VERSION}) {
+    if ($ENV{MOD_PERL_API_VERSION} && $ENV{MOD_PERL_API_VERSION} == 2) {
       $mod_perl = 2;
       require Apache2::RequestRec;
       require Apache2::RequestIO;
