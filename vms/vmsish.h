@@ -16,15 +16,6 @@
 
 /* Suppress compiler warnings from DECC for VMS-specific extensions:
  * GLOBALEXT, NOSHAREEXT: global[dr]ef declarations
- * ADDRCONSTEXT: initialization of data with non-constant values
- *               (e.g. pointer fields of descriptors)
- */
-#ifdef __DECC
-#  pragma message disable (GLOBALEXT,NOSHAREEXT,ADDRCONSTEXT)
-#endif
-
-/* Suppress compiler warnings from DECC for VMS-specific extensions:
- * GLOBALEXT, NOSHAREEXT: global[dr]ef declarations
  * ADDRCONSTEXT,NEEDCONSTEXT: initialization of data with non-constant values
  *                            (e.g. pointer fields of descriptors)
  */
@@ -96,11 +87,13 @@
 #  define flex_fstat		Perl_flex_fstat
 #  define flex_stat		Perl_flex_stat
 #  define trim_unixpath		Perl_trim_unixpath
+#  define my_vfork		Perl_my_vfork
 #  define vms_do_aexec		Perl_vms_do_aexec
 #  define vms_do_exec		Perl_vms_do_exec
 #  define do_aspawn		Perl_do_aspawn
 #  define do_spawn		Perl_do_spawn
 #  define my_fwrite		Perl_my_fwrite
+#  define my_binmode		Perl_my_binmode
 #  define my_getpwnam		Perl_my_getpwnam
 #  define my_getpwuid		Perl_my_getpwuid
 #  define my_getpwent		Perl_my_getpwent
@@ -113,12 +106,35 @@
 /* Delete if at all possible, changing protections if necessary. */
 #define unlink kill_file
 
-/*  The VMS C RTL has vfork() but not fork().  Both actually work in a way
- *  that's somewhere between Unix vfork() and VMS lib$spawn(), so it's
- *  probably not a good idea to use them much.  That said, we'll try to
- *  use vfork() in either case.
+/* 
+ * Intercept calls to fork, so we know whether subsequent calls to
+ * exec should be handled in VMSish or Unixish style.
  */
-#define fork vfork
+#define fork my_vfork
+#ifndef __DONT_MASK_VFORK  /* #defined in vms.c so we see real vfork */
+#  ifdef vfork
+#    undef vfork
+#  endif
+#  define vfork my_vfork
+#endif
+
+/* BIG_TIME:
+ *	This symbol is defined if Time_t is an unsigned type on this system.
+ */
+#define BIG_TIME
+
+/* USE_STAT_RDEV:
+ *	This symbol is defined if this system has a stat structure declaring
+ *	st_rdev
+ */
+#define USE_STAT_RDEV 	/**/
+
+/* ACME_MESS:
+ *	This symbol, if defined, indicates that error messages should be 
+ *	should be generated in a format that allows the use of the Acme
+ *	GUI/editor's autofind feature.
+ */
+#undef ACME_MESS	/**/
 
 /* Macros to set errno using the VAX thread-safe calls, if present */
 #if (defined(__DECC) || defined(__DECCXX)) && !defined(__ALPHA)
@@ -135,6 +151,14 @@
   set_errno(EVMSERR); set_vaxc_errno(__ckvms_sts); \
   croak("Fatal VMS error (status=%d) at %s, line %d", \
   __ckvms_sts,__FILE__,__LINE__); } } STMT_END
+
+/* Same thing, but don't call back to Perl's croak(); useful for errors
+ * occurring during startup, before Perl's state is initialized */
+#define _ckvmssts_noperl(call) STMT_START { register unsigned long int __ckvms_sts; \
+  if (!((__ckvms_sts=(call))&1)) { \
+  set_errno(EVMSERR); set_vaxc_errno(__ckvms_sts); \
+  fprintf(Perl_debug_log,"Fatal VMS error (status=%d) at %s, line %d", \
+  __ckvms_sts,__FILE__,__LINE__); lib$signal(__ckvms_sts); } } STMT_END
 
 #ifdef VMS_DO_SOCKETS
 #include "sockadapt.h"
@@ -184,6 +208,14 @@
 #define HAS_KILL
 #define HAS_WAIT
   
+/* USEMYBINMODE
+ *	This symbol, if defined, indicates that the program should
+ *	use the routine my_binmode(FILE *fp, char iotype) to insure
+ *	that a file is in "binary" mode -- that is, that no translation
+ *	of bytes occurs on read or write operations.
+ */
+#define USEMYBINMODE
+
 /*
  * fwrite1() should be a routine with the same calling sequence as fwrite(),
  * but which outputs all of the bytes requested as a single stream (unlike
@@ -206,14 +238,20 @@ struct utimbuf {
 };
 #define utime my_utime
 
-/* This is what times() returns, but <times.h> calls it tbuffer_t on VMS */
+/* This is what times() returns, but <times.h> calls it tbuffer_t on VMS
+ * prior to v7.0.  We check the DECC manifest to see whether it's already
+ * done this for us, relying on the fact that perl.h #includes <time.h>
+ * before it #includes "vmsish.h".
+ */
 
-struct tms {
-  clock_t tms_utime;    /* user time */
-  clock_t tms_stime;    /* system time - always 0 on VMS */
-  clock_t tms_cutime;   /* user time, children */
-  clock_t tms_cstime;   /* system time, children - always 0 on VMS */
-};
+#ifndef __TMS
+  struct tms {
+    clock_t tms_utime;    /* user time */
+    clock_t tms_stime;    /* system time - always 0 on VMS */
+    clock_t tms_cutime;   /* user time, children */
+    clock_t tms_cstime;   /* system time, children - always 0 on VMS */
+  };
+#endif
 
 /* Prior to VMS 7.0, the CRTL gmtime() routine was a stub which always
  * returned NULL.  Substitute our own routine, which uses the logical
@@ -394,11 +432,13 @@ I32	cando_by_name _((I32, I32, char *));
 int	flex_fstat _((int, struct stat *));
 int	flex_stat _((char *, struct stat *));
 int	trim_unixpath _((char *, char*));
+int	my_vfork _(());
 bool	vms_do_aexec _((SV *, SV **, SV **));
 bool	vms_do_exec _((char *));
 unsigned long int	do_aspawn _((SV *, SV **, SV **));
 unsigned long int	do_spawn _((char *));
 int	my_fwrite _((void *, size_t, size_t, FILE *));
+FILE *	my_binmode _((FILE *, char));
 struct passwd *	my_getpwnam _((char *name));
 struct passwd *	my_getpwuid _((Uid_t uid));
 struct passwd *	my_getpwent _(());
