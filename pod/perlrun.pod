@@ -1116,13 +1116,13 @@ order as 5.8.0).  "Pre-5.8.1" means, among other things, that hash
 keys will be ordered the same between different runs of Perl.
 
 The default behaviour is to randomise unless the PERL_HASH_SEED is set.
-If Perl has been compiled with the -DUSE_HASH_SEED_EXPLICIT the default
+If Perl has been compiled with C<-DUSE_HASH_SEED_EXPLICIT>, the default
 behaviour is B<not> to randomise unless the PERL_HASH_SEED is set.
 
 If PERL_HASH_SEED is unset or set to a non-numeric string, Perl uses
 the pseudorandom seed supplied by the operating system and libraries.
 If unset, each different run of Perl will have different ordering of
-the outputs of keys(), values, and each().
+the outputs of keys(), values(), and each().
 
 See L<perlsec/"Algorithmic Complexity Attacks"> for more information.
 
