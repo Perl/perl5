@@ -289,7 +289,7 @@ command and arguments as a list, which prevents shell globbing.
 =head2 How do I parse a mail header?
 
 For a quick-and-dirty solution, try this solution derived
-from page 222 of the 2nd edition of "Programming Perl":
+from L<perlfunc/split>:
 
     $/ = '';
     $header = <MSG>;

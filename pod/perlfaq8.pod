@@ -217,7 +217,7 @@ FAQ for that.)
 There's an example of this in L<perlfunc/crypt>).  First, you put the
 terminal into "no echo" mode, then just read the password normally.
 You may do this with an old-style ioctl() function, POSIX terminal
-control (see L<POSIX> and Chapter 7 of the Camel, 2nd ed.), or a call
+control (see L<POSIX> or its documentation the Camel Book), or a call
 to the B<stty> program, with varying degrees of portability.
 
 You can also do this for most systems using the Term::ReadKey module
@@ -389,7 +389,8 @@ Zombies are not an issue with C<system("prog &")>.
 You don't actually "trap" a control character.  Instead, that character
 generates a signal which is sent to your terminal's currently
 foregrounded process group, which you then trap in your process.
-Signals are documented in L<perlipc/"Signals"> and chapter 6 of the Camel.
+Signals are documented in L<perlipc/"Signals"> and the
+section on ``Signals'' in the Camel.
 
 Be warned that very few C libraries are re-entrant.  Therefore, if you
 attempt to print() in a handler that got invoked during another stdio
@@ -414,7 +415,8 @@ However, because syscalls restart by default, you'll find that if
 you're in a "slow" call, such as <FH>, read(), connect(), or
 wait(), that the only way to terminate them is by "longjumping" out;
 that is, by raising an exception.  See the time-out handler for a
-blocking flock() in L<perlipc/"Signals"> or chapter 6 of the Camel, 2nd ed.
+blocking flock() in L<perlipc/"Signals"> or the section on ``Signals''
+in the Camel book.
 
 =head2 How do I modify the shadow password file on a Unix system?
 
@@ -503,7 +505,8 @@ though, so if you use END blocks you should also use
 Perl's exception-handling mechanism is its eval() operator.  You can
 use eval() as setjmp and die() as longjmp.  For details of this, see
 the section on signals, especially the time-out handler for a blocking
-flock() in L<perlipc/"Signals"> and chapter 6 of the Camel 2nd ed.
+flock() in L<perlipc/"Signals"> or the section on ``Signals'' in
+the Camel Book.
 
 If exception handling is all you're interested in, try the
 exceptions.pl library (part of the standard perl distribution).
@@ -931,9 +934,9 @@ the current process group of your controlling terminal as follows:
 =head2 How do I timeout a slow event?
 
 Use the alarm() function, probably in conjunction with a signal
-handler, as documented in L<perlipc/"Signals"> and chapter 6 of the
-Camel.  You may instead use the more flexible Sys::AlarmCall module
-available from CPAN.
+handler, as documented in L<perlipc/"Signals"> and the section on
+``Signals'' in the Camel.  You may instead use the more flexible
+Sys::AlarmCall module available from CPAN.
 
 =head2 How do I set CPU limits?
 

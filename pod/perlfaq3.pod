@@ -244,8 +244,7 @@ See the next question on ``How can I make my Perl program run faster?''
 =head2 How can I make my Perl program run faster?
 
 The best way to do this is to come up with a better algorithm.  This
-can often make a dramatic difference.  Chapter 8 in the Camel has some
-efficiency tips in it you might want to look at.  Jon Bentley's book
+can often make a dramatic difference.  Jon Bentley's book
 ``Programming Pearls'' (that's not a misspelling!)  has some good tips
 on optimization, too.  Advice on benchmarking boils down to: benchmark
 and profile to make sure you're optimizing the right part, look for
