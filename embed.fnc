@@ -6,18 +6,22 @@
 :
 : flags are single letters with following meanings:
 :	A		member of public API
-:	m		Implemented as a macro - no export, no proto, no #define
+:	m		Implemented as a macro - no export, no
+:			proto, no #define
 :	d		function has documentation with its source
-:	s		static function, should have an S_ prefix in source
-:				file
+:	s		static function, should have an S_ prefix in
+:			source file
 :	n		has no implicit interpreter/thread context argument
 :	p		function has a Perl_ prefix
 :	f		function takes printf style format string, varargs
 :	r		function never returns
 :       o		has no compatibility macro (#define foo Perl_foo)
 :       x		not exported
+:       X		explicitly exported
 :       M		may change
 :       E		visible to Perl core extensions
+:       b		binary backward compatibility; function is a macro
+:			but has also Perl_ implementation (which is exported)
 :
 : Individual flags may be separated by whitespace.
 :
@@ -704,7 +708,7 @@ Apd	|IO*	|sv_2io		|SV* sv
 Apd	|IV	|sv_2iv		|SV* sv
 Apd	|SV*	|sv_2mortal	|SV* sv
 Apd	|NV	|sv_2nv		|SV* sv
-Am	|char*	|sv_2pv		|SV* sv|STRLEN* lp
+Amb	|char*	|sv_2pv		|SV* sv|STRLEN* lp
 Apd	|char*	|sv_2pvutf8	|SV* sv|STRLEN* lp
 Apd	|char*	|sv_2pvbyte	|SV* sv|STRLEN* lp
 Ap	|char*	|sv_pvn_nomg	|SV* sv|STRLEN* lp
@@ -722,8 +726,8 @@ Apd	|SV*	|sv_bless	|SV* sv|HV* stash
 Afpd	|void	|sv_catpvf	|SV* sv|const char* pat|...
 Ap	|void	|sv_vcatpvf	|SV* sv|const char* pat|va_list* args
 Apd	|void	|sv_catpv	|SV* sv|const char* ptr
-Amd	|void	|sv_catpvn	|SV* sv|const char* ptr|STRLEN len
-Amd	|void	|sv_catsv	|SV* dsv|SV* ssv
+Amdb	|void	|sv_catpvn	|SV* sv|const char* ptr|STRLEN len
+Amdb	|void	|sv_catsv	|SV* dsv|SV* ssv
 Apd	|void	|sv_chop	|SV* sv|char* ptr
 pd	|I32	|sv_clean_all
 pd	|void	|sv_clean_objs
@@ -760,7 +764,7 @@ Apd	|SV*	|sv_newref	|SV* sv
 Ap	|char*	|sv_peek	|SV* sv
 Apd	|void	|sv_pos_u2b	|SV* sv|I32* offsetp|I32* lenp
 Apd	|void	|sv_pos_b2u	|SV* sv|I32* offsetp
-Amd	|char*	|sv_pvn_force	|SV* sv|STRLEN* lp
+Amdb	|char*	|sv_pvn_force	|SV* sv|STRLEN* lp
 Apd	|char*	|sv_pvutf8n_force|SV* sv|STRLEN* lp
 Apd	|char*	|sv_pvbyten_force|SV* sv|STRLEN* lp
 Apd	|char*	|sv_recode_to_utf8	|SV* sv|SV *encoding
@@ -773,6 +777,7 @@ Apd	|void	|sv_reset	|char* s|HV* stash
 Afpd	|void	|sv_setpvf	|SV* sv|const char* pat|...
 Ap	|void	|sv_vsetpvf	|SV* sv|const char* pat|va_list* args
 Apd	|void	|sv_setiv	|SV* sv|IV num
+Apdb	|void	|sv_setpviv	|SV* sv|IV num
 Apd	|void	|sv_setuv	|SV* sv|UV num
 Apd	|void	|sv_setnv	|SV* sv|NV num
 Apd	|SV*	|sv_setref_iv	|SV* rv|const char* classname|IV iv
@@ -783,7 +788,7 @@ Apd	|SV*	|sv_setref_pvn	|SV* rv|const char* classname|char* pv \
 				|STRLEN n
 Apd	|void	|sv_setpv	|SV* sv|const char* ptr
 Apd	|void	|sv_setpvn	|SV* sv|const char* ptr|STRLEN len
-Amd	|void	|sv_setsv	|SV* dsv|SV* ssv
+Amdb	|void	|sv_setsv	|SV* dsv|SV* ssv
 Apd	|void	|sv_taint	|SV* sv
 Apd	|bool	|sv_tainted	|SV* sv
 Apd	|int	|sv_unmagic	|SV* sv|int type
@@ -882,6 +887,7 @@ Apd	|void	|sv_catsv_mg	|SV *dstr|SV *sstr
 Afpd	|void	|sv_setpvf_mg	|SV *sv|const char* pat|...
 Ap	|void	|sv_vsetpvf_mg	|SV* sv|const char* pat|va_list* args
 Apd	|void	|sv_setiv_mg	|SV *sv|IV i
+Apdb	|void	|sv_setpviv_mg	|SV *sv|IV iv
 Apd	|void	|sv_setuv_mg	|SV *sv|UV u
 Apd	|void	|sv_setnv_mg	|SV *sv|NV num
 Apd	|void	|sv_setpv_mg	|SV *sv|const char *ptr
@@ -914,10 +920,10 @@ Ap	|void	|reginitcolors
 Apd	|char*	|sv_2pv_nolen	|SV* sv
 Apd	|char*	|sv_2pvutf8_nolen|SV* sv
 Apd	|char*	|sv_2pvbyte_nolen|SV* sv
-Amd	|char*	|sv_pv		|SV *sv
-Amd	|char*	|sv_pvutf8	|SV *sv
-Amd	|char*	|sv_pvbyte	|SV *sv
-Amd	|STRLEN	|sv_utf8_upgrade|SV *sv
+Amdb	|char*	|sv_pv		|SV *sv
+Amdb	|char*	|sv_pvutf8	|SV *sv
+Amdb	|char*	|sv_pvbyte	|SV *sv
+Amdb	|STRLEN	|sv_utf8_upgrade|SV *sv
 ApdM	|bool	|sv_utf8_downgrade|SV *sv|bool fail_ok
 Apd	|void	|sv_utf8_encode |SV *sv
 ApdM	|bool	|sv_utf8_decode |SV *sv

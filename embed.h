@@ -1051,6 +1051,7 @@
 #define sv_setpvf		Perl_sv_setpvf
 #define sv_vsetpvf		Perl_sv_vsetpvf
 #define sv_setiv		Perl_sv_setiv
+#define sv_setpviv		Perl_sv_setpviv
 #define sv_setuv		Perl_sv_setuv
 #define sv_setnv		Perl_sv_setnv
 #define sv_setref_iv		Perl_sv_setref_iv
@@ -1179,6 +1180,7 @@
 #define sv_setpvf_mg		Perl_sv_setpvf_mg
 #define sv_vsetpvf_mg		Perl_sv_vsetpvf_mg
 #define sv_setiv_mg		Perl_sv_setiv_mg
+#define sv_setpviv_mg		Perl_sv_setpviv_mg
 #define sv_setuv_mg		Perl_sv_setuv_mg
 #define sv_setnv_mg		Perl_sv_setnv_mg
 #define sv_setpv_mg		Perl_sv_setpv_mg
@@ -3533,6 +3535,7 @@
 #define sv_reset(a,b)		Perl_sv_reset(aTHX_ a,b)
 #define sv_vsetpvf(a,b,c)	Perl_sv_vsetpvf(aTHX_ a,b,c)
 #define sv_setiv(a,b)		Perl_sv_setiv(aTHX_ a,b)
+#define sv_setpviv(a,b)		Perl_sv_setpviv(aTHX_ a,b)
 #define sv_setuv(a,b)		Perl_sv_setuv(aTHX_ a,b)
 #define sv_setnv(a,b)		Perl_sv_setnv(aTHX_ a,b)
 #define sv_setref_iv(a,b,c)	Perl_sv_setref_iv(aTHX_ a,b,c)
@@ -3657,6 +3660,7 @@
 #define sv_catsv_mg(a,b)	Perl_sv_catsv_mg(aTHX_ a,b)
 #define sv_vsetpvf_mg(a,b,c)	Perl_sv_vsetpvf_mg(aTHX_ a,b,c)
 #define sv_setiv_mg(a,b)	Perl_sv_setiv_mg(aTHX_ a,b)
+#define sv_setpviv_mg(a,b)	Perl_sv_setpviv_mg(aTHX_ a,b)
 #define sv_setuv_mg(a,b)	Perl_sv_setuv_mg(aTHX_ a,b)
 #define sv_setnv_mg(a,b)	Perl_sv_setnv_mg(aTHX_ a,b)
 #define sv_setpv_mg(a,b)	Perl_sv_setpv_mg(aTHX_ a,b)

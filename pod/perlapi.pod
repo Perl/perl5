@@ -4188,6 +4188,25 @@ Like C<sv_setpvf>, but also handles 'set' magic.
 =for hackers
 Found in file sv.c
 
+=item sv_setpviv
+
+Copies an integer into the given SV, also updating its string value.
+Does not handle 'set' magic.  See C<sv_setpviv_mg>.
+
+	void	sv_setpviv(SV* sv, IV num)
+
+=for hackers
+Found in file sv.c
+
+=item sv_setpviv_mg
+
+Like C<sv_setpviv>, but also handles 'set' magic.
+
+	void	sv_setpviv_mg(SV *sv, IV iv)
+
+=for hackers
+Found in file sv.c
+
 =item sv_setpvn
 
 Copies a string into an SV.  The C<len> parameter indicates the number of
