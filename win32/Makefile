@@ -186,7 +186,6 @@ X2P=..\x2p\a2p.exe
 PL2BAT=bin\pl2bat.pl
 GLOBBAT = bin\perlglob.bat
 
-MAKE=nmake -nologo
 CFGSH_TMPL = config.vc
 CFGH_TMPL = config_H.vc
 PERL95EXE=..\perl95.exe
@@ -421,8 +420,7 @@ $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
 	$(XCOPY) ..\*.h $(COREDIR)\*.*
 	$(XCOPY) *.h $(COREDIR)\*.*
 	$(RCOPY) include $(COREDIR)\*.*
-	$(MINIPERL) -I..\lib config_h.PL || $(MAKE) CCTYPE=$(CCTYPE) \
-	    RUNTIME=$(RUNTIME) CFG=$(CFG) $(CONFIGPM)
+	$(MINIPERL) -I..\lib config_h.PL || $(MAKE) $(MAKEFLAGS) $(CONFIGPM)
 
 $(MINIPERL) : ..\miniperlmain$(o) $(CORE_OBJ) $(WIN32_OBJ)
 	$(LINK32) -subsystem:console -out:$@ @<<

@@ -1910,31 +1910,21 @@ static
 XS(w32_DomainName)
 {
     dXSARGS;
-#if 0
-    /* doesn't do the right thing if current user is a local account */
-    char name[256];
-    DWORD size = sizeof(name);
-    if (GetUserName(name,&size)) {
-	char sid[1024];
-	DWORD sidlen = sizeof(sid);
-	char dname[256];
-	DWORD dnamelen = sizeof(dname);
-	SID_NAME_USE snu;
-	if (LookupAccountName(NULL, name, &sid, &sidlen,
-			      dname, &dnamelen, &snu)) {
-	    XSRETURN_PV(dname);		/* all that for this */
-	}
-    }
-#else
     char dname[256];
     DWORD dnamelen = sizeof(dname);
-    WKSTA_INFO_100 wi;
-    if (NERR_Success == NetWkstaGetInfo(NULL, 100, (LPBYTE*)&wi)) {
-	WideCharToMultiByte(CP_ACP, NULL, wi.wki100_langroup, -1,
-			    (LPSTR)dname, dnamelen, NULL, NULL);
+    PWKSTA_INFO_100 pwi;
+    if (NERR_Success == NetWkstaGetInfo(NULL, 100, (LPBYTE*)&pwi)) {
+	if (pwi->wki100_langroup && *(pwi->wki100_langroup)) {
+	    WideCharToMultiByte(CP_ACP, NULL, pwi->wki100_langroup,
+				-1, (LPSTR)dname, dnamelen, NULL, NULL);
+	}
+	else {
+	    WideCharToMultiByte(CP_ACP, NULL, pwi->wki100_computername,
+				-1, (LPSTR)dname, dnamelen, NULL, NULL);
+	}
+	NetApiBufferFree(pwi);
 	XSRETURN_PV(dname);
     }
-#endif
     XSRETURN_UNDEF;
 }
 
