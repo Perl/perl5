@@ -220,6 +220,9 @@ after 5.005_53:
 		pre-fixpak22 configuration (calling getpriority() on 
 		non-existing process triggers a system-wide bug).
 
+
+	PrfDB was using a bug in processing XSUBs returning U32.
+
 	Variable $OS2::emx_rev implemented (string and numberic values
 		are the same as C variables _emx_rev and _emx_vprt).
 	Variable $OS2::emx_env implemented (same as C variable _emx_env).
@@ -287,3 +290,9 @@ after 5.005_53:
 		it is incremented by the number of messages retrieved.
 	Dies with "QUITing..." if WM_QUIT message is obtained.
 
+after 5.005_54:
+ 	Opening pipes from/to processes could fail if (un)appropriate
+ 	combination of STDIN/STDOUT was closed.
+ 
+ 	If the only shell-metachars of a command are ' 2>&1' at the
+ 	end of a command, it is executed without calling the external shell.

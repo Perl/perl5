@@ -35,7 +35,7 @@ and a carp as a cluck across I<all> modules. In other words, force a
 detailed stack trace to be given.  This can be very helpful when trying
 to understand why, or from where, a warning or error is being generated.
 
-This feature is enabled by 'importing' the non-existant symbol
+This feature is enabled by 'importing' the non-existent symbol
 'verbose'. You would typically enable it by saying
 
     perl -MCarp=verbose script.pl

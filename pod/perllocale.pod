@@ -215,6 +215,8 @@ I<SEE ALSO> section).  If that fails, try the following command lines:
 
         ls /usr/lib/nls
 
+	ls /usr/share/locale
+
 and see whether they list something resembling these
 
         en_US.ISO8859-1     de_DE.ISO8859-1     ru_RU.ISO8859-5
@@ -225,18 +227,18 @@ and see whether they list something resembling these
         english.iso88591    german.iso88591     russian.iso88595
         english.roman8                          russian.koi8r
 
-Sadly, even though the calling interface for setlocale() has
-been standardized, names of locales and the directories where the
+Sadly, even though the calling interface for setlocale() has been
+standardized, names of locales and the directories where the
 configuration resides have not been.  The basic form of the name is
-I<language_country/territory>B<.>I<codeset>, but the latter parts after
-I<language> are not always present.  The I<language> and I<country> are
-usually from the standards B<ISO 3166> and B<ISO 639>, the two-letter
-abbreviations for the countries and the languages of the world,
-respectively.  The I<codeset> part often mentions some B<ISO 8859>
-character set, the Latin codesets.  For example, C<ISO 8859-1> is the
-so-called "Western codeset" that can be used to encode most Western
-European languages.  Again, there are several ways to write even the
-name of that one standard.  Lamentably.
+I<language_territory>B<.>I<codeset>, but the latter parts after
+I<language> are not always present.  The I<language> and I<country>
+are usually from the standards B<ISO 3166> and B<ISO 639>, the
+two-letter abbreviations for the countries and the languages of the
+world, respectively.  The I<codeset> part often mentions some B<ISO
+8859> character set, the Latin codesets.  For example, C<ISO 8859-1>
+is the so-called "Western European codeset" that can be used to encode
+most Western European languages adequately.  Again, there are several
+ways to write even the name of that one standard.  Lamentably.
 
 Two special locales are worth particular mention: "C" and "POSIX".
 Currently these are effectively the same locale: the difference is
@@ -806,6 +808,20 @@ for controlling an application's opinion on data.
 
 C<LC_ALL> is the "override-all" locale environment variable. If
 set, it overrides all the rest of the locale environment variables.
+
+=item LANGUAGE
+
+B<NOTE>: C<LANGUAGE> is a GNU extension, it affects you only if you
+are using the GNU libc.  This is the case if you are using e.g. Linux.
+If you are using "commercial" UNIXes you are most probably I<not>
+using GNU libc and you can ignore C<LANGUAGE>.
+
+However, in the case you are using C<LANGUAGE>: it affects the
+language of informational, warning, and error messages output by
+commands (in other words, it's like C<LC_MESSAGES>) but it has higher
+priority than L<LC_ALL>.  Moreover, it's not a single value but
+instead a "path" (":"-separated list) of I<languages> (not locales).
+See the GNU C<gettext> library documentation for more information.
 
 =item LC_CTYPE
 

@@ -45,7 +45,7 @@ Porting/genlog
 Porting/makerel	
 Porting/p4d2p	
 Porting/p4desc	
-Porting/patching.pod	
+Porting/patching.pod		dgris
 Porting/patchls	
 Porting/pumpkin.pod	
 README	

@@ -87,7 +87,16 @@ sub get_files {
 	    $pat = '^#(?:line)?\s*\d+\s+"([^"]+)"';
 	}
 	while(<CPPO>) {
-	    $file{$1} = 1 if /$pat/o;
+	    if ($^O eq 'os2') {
+		if (/$pat/o) {
+		   my $f = $1;
+		   $f =~ s,\\\\,/,g;
+		   $file{$f} = 1;
+		}
+	    }
+	    else {
+		$file{$1} = 1 if /$pat/o;
+	    }
 	}
 	close(CPPO);
     }

@@ -4,32 +4,36 @@
 
 #include <sys/types.h>
 #ifdef __linux__
-#include <asm/page.h>
+#   include <asm/page.h>
 #endif
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
-#include <sys/ipc.h>
-#ifdef HAS_MSG
-#include <sys/msg.h>
-#endif
-#ifdef HAS_SEM
-#include <sys/sem.h>
-#endif
-#ifdef HAS_SHM
-#if defined(PERL_SCO5) || defined(PERL_ISC)
-#include <sys/sysmacros.h>
-#endif
-#include <sys/shm.h>
-# ifndef HAS_SHMAT_PROTOTYPE
-    extern Shmat_t shmat _((int, char *, int));
-# endif
-#endif
+#   include <sys/ipc.h>
+#   ifdef HAS_MSG
+#       include <sys/msg.h>
+#   endif
+#   ifdef HAS_SEM
+#       include <sys/sem.h>
+#   endif
+#   ifdef HAS_SHM
+#       if defined(PERL_SCO5) || defined(PERL_ISC)
+#           include <sys/sysmacros.h>	/* SHMLBA */
+#       endif
+#      include <sys/shm.h>
+#      ifndef HAS_SHMAT_PROTOTYPE
+           extern Shmat_t shmat _((int, char *, int));
+#      endif
+#      if defined(__NetBSD__) && defined(__sparc__)
+#          undef  SHMLBA /* not static: determined at boot time */
+#          define SHMLBA getpagesize()
+#      endif
+#   endif
 #endif
 
 /* Required in BSDI to get PAGE_SIZE definition for SHMLBA.
  * Ugly.  More beautiful solutions welcome.
  * Shouting at BSDI sounds quite beautiful. */
 #ifdef __bsdi__
-#   include <vm/vm_param.h>
+#   include <vm/vm_param.h>	/* move upwards under HAS_SHM? */
 #endif
 
 #ifndef S_IRWXU

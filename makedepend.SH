@@ -67,6 +67,7 @@ if test -f Makefile; then
     # to be out of date.  I don't know if OS/2 has touch, so do this:
     case "$osname" in
     os2) ;;
+    netbsd) ;;
     *) $touch $firstmakefile ;;
     esac
 fi
@@ -101,7 +102,11 @@ for file in `$cat .clist`; do
 	if [ "$osname" = uwin ]; then
 		uwinfix="-e s,\\\\\\\\,/,g -e s,\\([a-zA-Z]\\):/,/\\1/,g"
 	else
-		uwinfix=
+		if [ "$osname" = os2 ]; then
+			uwinfix="-e s,\\\\\\\\,/,g"
+		else
+			uwinfix=
+		fi
 	fi
     case "$file" in
     *.c) filebase=`basename $file .c` ;;

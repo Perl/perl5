@@ -216,3 +216,15 @@ fi
 # it should be:
 # ccdlflags='-Wl,-E'
 
+# This script UU/usethreads.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to use threads.
+cat > UU/usethreads.cbu <<'EOCBU'
+case "$usethreads" in
+$define|true|[yY]*)
+        ccflags="-D_REENTRANT $ccflags"
+        set `echo X "$libswanted "| sed -e 's/ c / pthread c /'`
+        shift
+        libswanted="$*"
+	;;
+esac
+EOCBU

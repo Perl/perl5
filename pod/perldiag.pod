@@ -517,6 +517,10 @@ Something like this will reproduce the error:
 (F) You called C<perl -x/foo/bar>, but C</foo/bar> is not a directory
 that you can chdir to, possibly because it doesn't exist.
 
+=item Can't check filesystem of script "%s"
+
+(P) For some reason you can't check the filesystem of the script for nosuid.
+
 =item Can't coerce %s to integer in %s
 
 (F) Certain types of SVs, in particular real symbol table entries
@@ -895,6 +899,12 @@ You mentioned $a or $b in the same line as the E<lt>=E<gt> or cmp operator,
 and the variable had earlier been declared as a lexical variable.
 Either qualify the sort variable with the package name, or rename the
 lexical variable.
+
+=item Bad evalled substitution pattern
+
+(F) You've used the /e switch to evaluate the replacement for a
+substitution, but perl found a syntax error in the code to evaluate,
+most likely an unexpected right brace '}'.
 
 =item Can't use %s for loop variable
 

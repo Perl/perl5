@@ -6,7 +6,7 @@ BEGIN {
     require Config; import Config;
 }
 
-print "1..91\n";
+print "1..93\n";
 
 $x = 'foo';
 $_ = "x";
@@ -450,4 +450,10 @@ pos ($a) = 1;
 $a =~ s/\Ga(?{push @res, $_, $`})/x1/e;
 print "#'$a' '@res'\nnot " unless "$a @res" eq 'axa aaa a';
 print "ok 91\n";
+
+eval q% s/a/"b"}/e %;
+print ($@ =~ /Bad evalled substitution/ ? "ok 92\n" : "not ok 92\n");
+eval q% ($_ = "x") =~ s/(.)/"$1 "/e %;
+print +($_ eq "x " and !length $@) ? "ok 93\n" : "not ok 93\n# \$_ eq $_, $@\n";
+
 

@@ -2051,6 +2051,26 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_sfio	USE_SFIO		/**/
 
+/* HAS_FSTATFS:
+ *	This symbol, if defined, indicates that the fstatfs routine is
+ *	available to do stat filesystems of file descriptors.
+ */
+/* HAS_STRUCT_STATFS_FLAGS:
+ *	This symbol, if defined, indicates that the struct statfs
+ *	does have the f_flags member containing the mount flags of
+ *	the filesystem holding the file.
+ *	This kind of struct statfs is coming from sys/mount.h (BSD)
+ *	and not from sys/statfs.h (SYSV).
+ */
+#$d_fstatfs HAS_FSTATFS		/**/
+#$d_statfsflags HAS_STRUCT_STATFS_FLAGS		/**/
+
+/* HAS_FSTATVFS:
+ *	This symbol, if defined, indicates that the fstatvfs routine is
+ *	available to do stat filesystems of file descriptors.
+ */
+#$d_fstatvfs HAS_FSTATVFS		/**/
+
 /* HAS_WRITEV:
  *	This symbol, if defined, indicates that the writev routine is
  *	available to do scatter writes.
@@ -2124,11 +2144,35 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$i_inttypes   I_INTTYPES                /**/
 #$d_int64t     HAS_INT64_T               /**/
 
+/* I_MNTENT:
+ *	This symbol, if defined, indicates that <mntent.h> exists and
+ *	should be included.
+ */
+#$i_mntent	I_MNTENT		/**/
+
 /* I_POLL:
  *	This symbol, if defined, indicates that <poll.h> exists and
  *	should be included.
  */
 #$i_poll	I_POLL		/**/
+
+/* I_SYS_MOUNT:
+ *	This symbol, if defined, indicates that <sys/mount.h> exists and
+ *	should be included.
+ */
+#$i_sysmount	I_SYS_MOUNT		/**/
+
+/* I_SYS_STATVFS:
+ *	This symbol, if defined, indicates that <sys/statvfs.h> exists and
+ *	should be included.
+ */
+#$i_sysstatvfs	I_SYS_STATVFS		/**/
+
+/* INSTALL_USR_BIN_PERL:
+ *	This symbol, if defined, indicates that Perl is to be installed
+ * 	also as /usr/bin/perl.
+ */
+#$installusrbinperl INSTALL_USR_BIN_PERL	/**/
 
 /* HAS_FSTAT64:
  *	This symbol, if defined, indicates that the fstat64 routine is
@@ -2308,6 +2352,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$use64bits	USE_64_BITS		/**/
 
+/* MULTIPLICITY:
+ *	This symbol, if defined, indicates that Perl should
+ *	be built to use multiplicity.
+ */
+#$usemultiplicity	MULTIPLICITY		/**/
+
 /* USE_PERLIO:
  *	This symbol, if defined, indicates that the PerlIO abstraction should
  *	be used throughout.  If not defined, stdio should be
@@ -2397,7 +2447,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	in joinable (aka undetached) state.  NOTE: not defined
  *	if pthread.h already has defined PTHREAD_CREATE_JOINABLE
  *	(the new version of the constant).
- *	If defined, possible values are PTHREAD_CREATE_UNDETACHED
+ *	If defined, known values are PTHREAD_CREATE_UNDETACHED
  *	and __UNDETACHED.
  */
 #$d_old_pthread_create_joinable OLD_PTHREAD_CREATE_JOINABLE $old_pthread_create_joinable /**/
@@ -2426,12 +2476,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *     include <mach/cthreads.h>.
  */
 #$i_machcthr   I_MACH_CTHREADS	/**/
-
-/* MULTIPLICITY:
- *	This symbol, if defined, indicates that Perl should
- *	be built to use multiplicity.
- */
-#$usemultiplicity	MULTIPLICITY		/**/
 
 /* USE_THREADS:
  *	This symbol, if defined, indicates that Perl should

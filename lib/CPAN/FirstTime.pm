@@ -16,7 +16,7 @@ use FileHandle ();
 use File::Basename ();
 use File::Path ();
 use vars qw($VERSION);
-$VERSION = substr q$Revision: 1.30 $, 10;
+$VERSION = substr q$Revision: 1.33 $, 10;
 
 =head1 NAME
 
@@ -37,7 +37,9 @@ file. Nothing special.
 sub init {
     my($configpm) = @_;
     use Config;
-    require CPAN::Nox;
+    unless ($CPAN::VERSION) {
+	require CPAN::Nox;
+    }
     eval {require CPAN::Config;};
     $CPAN::Config ||= {};
     local($/) = "\n";
@@ -45,7 +47,7 @@ sub init {
     local($|) = 1;
 
     my($ans,$default,$local,$cont,$url,$expected_size);
-    
+
     #
     # Files, directories
     #
@@ -120,7 +122,7 @@ First of all, I\'d like to create this directory. Where?
 	}
     }
     $CPAN::Config->{cpan_home} = $ans;
-    
+
     print qq{
 
 If you want, I can keep the source files after a build in the cpan
@@ -150,6 +152,40 @@ with all the intermediate files?
 
     # XXX This the time when we refetch the index files (in days)
     $CPAN::Config->{'index_expire'} = 1;
+
+    print qq{
+
+By default, each time the CPAN module is started, cache scanning
+is performed to keep the cache size in sync. To prevent from this,
+disable the cache scanning with 'never'.
+
+};
+
+    $default = $CPAN::Config->{scan_cache} || 'atstart';
+    do {
+        $ans = prompt("Perform cache scanning (atstart or never)?", $default);
+    } while ($ans ne 'atstart' && $ans ne 'never');
+    $CPAN::Config->{scan_cache} = $ans;
+
+    #
+    # prerequisites_policy
+    # Do we follow PREREQ_PM?
+    #
+    print qq{
+
+The CPAN module can detect when a module that which you are trying to
+build depends on prerequisites. If this happens, it can build the
+prerequisites for you automatically ('follow'), ask you for
+confirmation ('ask'), or just ignore them ('ignore'). Please set your
+policy to one of the three values.
+
+};
+
+    $default = $CPAN::Config->{prerequisites_policy} || 'follow';
+    do {
+        $ans = prompt("Perform cache scanning (follow, ask or ignore)?", $default);
+    } while ($ans ne 'follow' && $ans ne 'ask' && $ans ne 'ignore');
+    $CPAN::Config->{prerequisites_policy} = $ans;
 
     #
     # External programs
@@ -329,6 +365,32 @@ sub find_exe {
     }
 }
 
+sub picklist {
+    my($items,$prompt,$default,$require_nonempty,$empty_warning)=@_;
+    $default ||= '';
+
+    my ($item, $i);
+    for $item (@$items) {
+	printf "(%d) %s\n", ++$i, $item;
+    }
+
+    my @nums;
+    while (1) {
+	my $num = prompt($prompt,$default);
+	@nums = split (' ', $num);
+	(warn "invalid items entered, try again\n"), next
+	    if grep (/\D/ || $_ < 1 || $_ > $i, @nums);
+	if ($require_nonempty) {
+	    (warn "$empty_warning\n"), next
+		unless @nums;
+	}
+	last;
+    }
+    print "\n";
+    for (@nums) { $_-- }
+    @{$items}[@nums];
+}
+
 sub read_mirrored_by {
     my($local) = @_;
     my(%all,$url,$expected_size,$default,$ans,$host,$dst,$country,$continent,@location);
@@ -341,6 +403,7 @@ sub read_mirrored_by {
 	/location\s+=\s+\"([^\"]+)/ and @location = (split /\s*,\s*/, $1) and
 	    ($continent, $country) = @location[-1,-2];
 	$continent =~ s/\s\(.*//;
+	$continent =~ s/\W+$//; # if Jarkko doesn't know latitude/longitude
 	/dst_dst\s+=\s+\"([^\"]+)/  and $dst = $1;
 	next unless $host && $dst && $continent && $country;
 	$all{$continent}{$country}{$dst} = CPAN::Mirrored::By->new($continent,$country,$dst);
@@ -349,93 +412,97 @@ sub read_mirrored_by {
     }
     $fh->close;
     $CPAN::Config->{urllist} ||= [];
-    if ($expected_size = @{$CPAN::Config->{urllist}}) {
-	for $url (@{$CPAN::Config->{urllist}}) {
-	    # sanity check, scheme+colon, not "q" there:
-	    next unless $url =~ /^\w+:\/./;
-	    $all{"[From previous setup]"}{"found URL"}{$url}=CPAN::Mirrored::By->new('[From previous setup]','found URL',$url);
-	}
+    my(@previous_urls);
+    if (@previous_urls = @{$CPAN::Config->{urllist}}) {
 	$CPAN::Config->{urllist} = [];
-    } else {
-	$expected_size = 6;
     }
-    
+
     print qq{
 
-Now we need to know, where your favorite CPAN sites are located. Push
+Now we need to know where your favorite CPAN sites are located. Push
 a few sites onto the array (just in case the first on the array won\'t
 work). If you are mirroring CPAN to your local workstation, specify a
 file: URL.
 
-You can enter the number in front of the URL on the next screen, a
-file:, ftp: or http: URL, or "q" to finish selecting.
+First, pick a nearby continent and country (you can pick several of
+each, separated by spaces, or none if you just want to keep your
+existing selections). Then, you will be presented with a list of URLs
+of CPAN mirrors in the countries you selected, along with previously
+selected URLs. Select some of those URLs, or just keep the old list.
+Finally, you will be prompted for any extra URLs -- file:, ftp:, or
+http: -- that host a CPAN mirror.
 
 };
 
-    $ans = prompt("Press RETURN to continue");
-    my $other;
-    $ans = $other = "";
-    my(%seen);
-    
-    my $pipe = -t *STDIN ? "| $CPAN::Config->{'pager'}" : ">/dev/null";
-    while () {
-	my(@valid,$previous_best);
-	my $fh = FileHandle->new;
-	$fh->open($pipe);
-	{
-	    my($cont,$country,$url,$item);
-	    my(@cont) = sort keys %all;
-	    for $cont (@cont) {
-		$fh->print("  $cont\n");
-		for $country (sort {lc $a cmp lc $b} keys %{$all{$cont}}) {
-		    for $url (sort {lc $a cmp lc $b} keys %{$all{$cont}{$country}}) {
-			my $t = sprintf(
-					"    %-16s (%2d) %s\n",
-					$country,
-					++$item,
-					$url
-				       );
-			if ($cont =~ /^\[/) {
-			    $previous_best ||= $item;
-			}
-			push @valid, $all{$cont}{$country}{$url};
-			$fh->print($t);
-		    }
-		}
-	    }
-	}
-	$fh->close;
-	$previous_best ||= "";
-	$default =
-	    @{$CPAN::Config->{urllist}} >=
-		$expected_size ? "q" : $previous_best;
-	$ans = prompt(
-		      "\nSelect an$other ftp or file URL or a number (q to finish)",
-		      $default
-		     );
-	my $sel;
-	if ($ans =~ /^\d/) {
-	    my $this = $valid[$ans-1];
-	    my($con,$cou,$url) = ($this->continent,$this->country,$this->url);
-	    push @{$CPAN::Config->{urllist}}, $url unless $seen{$url}++;
-	    delete $all{$con}{$cou}{$url};
-	    #	    print "Was a number [$ans] con[$con] cou[$cou] url[$url]\n";
-	} elsif ($ans =~ /^q/i) {
-	    last;
-	} else {
-	    $ans =~ s|/?$|/|; # has to end with one slash
-	    $ans = "file:$ans" unless $ans =~ /:/; # without a scheme is a file:
-	    if ($ans =~ /^\w+:\/./) {
-		push @{$CPAN::Config->{urllist}}, $ans unless $seen{$ans}++;
-	    } else {
-		print qq{"$ans" doesn\'t look like an URL at first sight.
-I\'ll ignore it for now. You can add it to lib/CPAN/Config.pm
-later and report a bug in my Makefile.PL to me (andreas koenig).
-Thanks.\n};
-	    }
-	}
-	$other ||= "other";
+    my (@cont, $cont, %cont, @countries, @urls, %seen);
+    my $no_previous_warn = 
+       "Sorry! since you don't have any existing picks, you must make a\n" .
+       "geographic selection.";
+    @cont = picklist([sort keys %all],
+                     "Select your continent (or several nearby continents)",
+                     '',
+                     ! @previous_urls,
+                     $no_previous_warn);
+
+
+    foreach $cont (@cont) {
+        my @c = sort keys %{$all{$cont}};
+        @cont{@c} = map ($cont, 0..$#c);
+        @c = map ("$_ ($cont)", @c) if @cont > 1;
+        push (@countries, @c);
     }
+
+    if (@countries) {
+        @countries = picklist (\@countries,
+                               "Select your country (or several nearby countries)",
+                               '',
+                               ! @previous_urls,
+                               $no_previous_warn);
+        %seen = map (($_ => 1), @previous_urls);
+        # hmmm, should take list of defaults from CPAN::Config->{'urllist'}...
+        foreach $country (@countries) {
+            (my $bare_country = $country) =~ s/ \(.*\)//;
+            my @u = sort keys %{$all{$cont{$bare_country}}{$bare_country}};
+            @u = grep (! $seen{$_}, @u);
+            @u = map ("$_ ($bare_country)", @u)
+               if @countries > 1;
+            push (@urls, @u);
+        }
+    }
+    push (@urls, map ("$_ (previous pick)", @previous_urls));
+    my $prompt = "Select as many URLs as you like";
+    if (@previous_urls) {
+       $default = join (' ', ((scalar @urls) - (scalar @previous_urls) + 1) ..
+                             (scalar @urls));
+       $prompt .= "\n(or just hit RETURN to keep your previous picks)";
+    }
+
+    @urls = picklist (\@urls, $prompt, $default);
+    foreach (@urls) { s/ \(.*\)//; }
+    %seen = map (($_ => 1), @urls);
+
+    do {
+        $ans = prompt ("Enter another URL or RETURN to quit:", "");
+
+        if ($ans) {
+            $ans =~ s|/?$|/|; # has to end with one slash
+            $ans = "file:$ans" unless $ans =~ /:/; # without a scheme is a file:
+            if ($ans =~ /^\w+:\/./) {
+               push @urls, $ans 
+                  unless $seen{$ans};
+            }
+            else {
+                print qq{"$ans" doesn\'t look like an URL at first sight.
+I\'ll ignore it for now.  You can add it to $INC{'CPAN/MyConfig.pm'}
+later if you\'re sure it\'s right.\n};
+            }
+        }
+    } while $ans;
+
+    push @{$CPAN::Config->{urllist}}, @urls;
+    # xxx delete or comment these out when you're happy that it works
+    print "New set of picks:\n";
+    map { print "  $_\n" } @{$CPAN::Config->{urllist}};
 }
 
 1;

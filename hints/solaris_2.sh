@@ -261,6 +261,77 @@ rm -f core
 # XXX
 EOSH
 
+# This script UU/usethreads.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to use threads.
+cat > UU/usethreads.cbu <<'EOCBU'
+case "$usethreads" in
+$define|true|[yY]*)
+        ccflags="-D_REENTRANT $ccflags"
+
+        # sched_yield is in -lposix4
+        set `echo X "$libswanted "| sed -e 's/ c / posix4 pthread c /'`
+        shift
+        libswanted="$*"
+
+        # On Solaris 2.6 x86 there is a bug with sigsetjmp() and siglongjmp()
+        # when linked with the threads library, such that whatever positive
+        # value you pass to siglongjmp(), sigsetjmp() returns 1.
+        # Thanks to Simon Parsons <S.Parsons@ftel.co.uk> for this report.
+        # Sun BugID is 4117946, "sigsetjmp always returns 1 when called by
+        # siglongjmp in a MT program". As of 19980622, there is no patch
+        # available.
+        cat >try.c <<'EOM'
+	/* Test for sig(set|long)jmp bug. */
+	#include <setjmp.h>
+	 
+	main()
+	{
+	    sigjmp_buf env;
+	    int ret;
+	
+	    ret = sigsetjmp(env, 1);
+	    if (ret) { return ret == 2; }
+	    siglongjmp(env, 2);
+	}
+EOM
+        if test "`arch`" = i86pc -a "$osvers" = 2.6 && \
+           ${cc:-cc} try.c -lpthread >/dev/null 2>&1 && ./a.out; then
+ 	    d_sigsetjmp=$undef
+	    cat << 'EOM' >&2
+
+You will see a *** WHOA THERE!!! ***  message from Configure for
+d_sigsetjmp.  Keep the recommended value.  See hints/solaris_2.sh
+for more information.
+
+EOM
+        fi
+	;;
+esac
+EOCBU
+
+# This script UU/use64bits.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to use 64 bits.
+cat > UU/use64bits.cbu <<'EOCBU'
+case "$use64bits" in
+$define|true|[yY]*)
+	    case "`uname -r`" in
+	    2.[1-5])
+		cat >&4 <<EOM
+Solaris `uname -r` does not support 64-bit interfaces.
+You should upgrade to at least Solaris 2.6.
+EOM
+		exit 1
+		;;
+	    esac
+	    ccflags="$ccflags `getconf LFS_CFLAGS` -DUSE_LONG_LONG"
+	    ldflags="$ldflags `getconf LFS_LDFLAGS`"
+	    libswanted="$libswanted `getconf LFS_LIBS`"
+	    # When a 64-bit cc becomes available $archname64
+	    # may need setting so that $archname gets it attached.
+	    ;;
+esac
+EOCBU
+
 # This is just a trick to include some useful notes.
 cat > /dev/null <<'End_of_Solaris_Notes'
 

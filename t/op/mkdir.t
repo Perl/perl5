@@ -8,6 +8,7 @@ $^O eq 'MSWin32' ? `del /s /q blurfl 2>&1` : `rm -rf blurfl`;
 
 # tests 3 and 7 rather naughtily expect English error messages
 $ENV{'LC_ALL'} = 'C';
+$ENV{LANGUAGE} = 'C'; # GNU locale extension
 
 print (mkdir('blurfl',0777) ? "ok 1\n" : "not ok 1\n");
 print (mkdir('blurfl',0777) ? "not ok 2\n" : "ok 2\n");

@@ -822,10 +822,15 @@ sublex_done(void)
 	if (SvCOMPILED(PL_lex_repl)) {
 	    PL_lex_state = LEX_INTERPNORMAL;
 	    PL_lex_starts++;
+	    /*	we don't clear PL_lex_repl here, so that we can check later
+		whether this is an evalled subst; that means we rely on the
+		logic to ensure sublex_done() is called again only via the
+		branch (in yylex()) that clears PL_lex_repl, else we'll loop */
 	}
-	else
+	else {
 	    PL_lex_state = LEX_INTERPCONCAT;
-	PL_lex_repl = Nullsv;
+	    PL_lex_repl = Nullsv;
+	}
 	return ',';
     }
     else {
@@ -1844,6 +1849,11 @@ int yylex(PERL_YYLEX_PARAM_DECL)
 	    PL_lex_dojoin = FALSE;
 	    PL_lex_state = LEX_INTERPCONCAT;
 	    return ')';
+	}
+	if (PL_lex_inwhat == OP_SUBST && PL_lex_repl && SvCOMPILED(PL_lex_repl)) {
+	    if (PL_bufptr != PL_bufend)
+		croak("Bad evalled substitution pattern");
+	    PL_lex_repl = Nullsv;
 	}
 	/* FALLTHROUGH */
     case LEX_INTERPCONCAT:

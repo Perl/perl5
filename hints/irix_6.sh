@@ -161,3 +161,88 @@ set `echo X "$libswanted "|sed -e 's/ sun / /' -e 's/ crypt / /' -e 's/ bsd / /'
 shift
 libswanted="$*"
 
+# This script UU/usethreads.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to use threads.
+cat > UU/usethreads.cbu <<'EOCBU'
+case "$usethreads" in
+$define|true|[yY]*)
+        if test ! -f ${TOOLROOT}/usr/include/pthread.h -o ! -f /usr/lib/libpthread.so; then
+            case "`uname -r`" in
+            [1-5].*|6.[01])
+ 	        cat >&4 <<EOM
+IRIX `uname -r` does not support POSIX threads.
+You should upgrade to at least IRIX 6.2 with pthread patches.
+EOM
+	        ;;
+	    6.2)
+ 	        cat >&4 <<EOM
+IRIX 6.2 can have the POSIX threads.
+However,the following IRIX patches (or their replacements) MUST be installed:
+        1404 Irix 6.2 Posix 1003.1b man pages
+        1645 IRIX 6.2 & 6.3 POSIX header file updates
+        2000 Irix 6.2 Posix 1003.1b support modules
+        2254 Pthread library fixes
+	2401 6.2 all platform kernel rollup
+IMPORTANT:
+	Without patch 2401, a kernel bug in IRIX 6.2 will
+	cause your machine to panic and crash when running
+	threaded perl. IRIX 6.3 and up should be OK.
+EOM
+	        ;;
+  	    [67].*)
+	        cat >&4 <<EOM
+IRIX `uname -r` should have the POSIX threads.
+But, somehow, you do not seem to have them installed.
+EOM
+	        ;;
+	    esac
+            cat >&4 <<EOM
+Cannot continue, aborting.
+EOM
+            exit 1
+        fi
+        set `echo X "$libswanted "| sed -e 's/ c / pthread /'`
+        ld="${cc:-cc}"
+        shift
+        libswanted="$*"
+
+        usemymalloc='n'
+	;;
+esac
+EOCBU
+
+# This script UU/use64bits.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to use 64 bits.
+cat > UU/use64bits.cbu <<'EOCBU'
+case "$use64bits" in
+$define|true|[yY]*)
+	    case "`uname -r`" in
+	    [1-5]*|6.[01])
+		cat >&4 <<EOM
+IRIX `uname -r` does not support 64-bit types.
+You should upgrade to at least IRIX 6.2.
+Cannot continue, aborting.
+EOM
+		exit 1
+		;;
+	    esac
+	    case "$ccflags" in
+	    *-n32*)
+		ccflags="$ccflags -DUSE_LONG_LONG"
+		archname64="-n32"
+		d_open64="$undef"
+		# In -n32 mode (ILP32LL64) we use the standard open().
+		# In -64 we will use the open64().
+		cat << 'EOM' >&2
+
+You will see a *** WHOA THERE!!! ***  message from Configure for
+d_open64.  Keep the recommended value.  See hints/irix6.sh
+for more information.
+
+EOM
+		;;
+	    esac
+	    ccflags="$ccflags -DUSE_64_BIT_FILES"
+	    ;;
+esac
+EOCBU

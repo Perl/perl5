@@ -4,7 +4,7 @@
 # the format supported by op/regexp.t.  If you want to add a test
 # that does fit that format, add it to op/re_tests, not here.
 
-print "1..178\n";
+print "1..184\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -800,6 +800,46 @@ print "#'@res' '$_'\nnot "
   "'abcd' 'e|' 'abcde' " .
   "'abcde|' 'ab' 'cde' " .
   "'abcde|' 'abc' 'de'" ;
+print "ok $test\n";
+$test++;
+
+#Some more \G anchor checks
+$foo='aabbccddeeffgg';
+
+pos($foo)=1;
+
+$foo=~/.\G(..)/g;
+print "not " unless($1 eq 'ab');
+print "ok $test\n";
+$test++;
+
+pos($foo) += 1;
+$foo=~/.\G(..)/g;
+print "not " unless($1 eq 'cc');
+print "ok $test\n";
+$test++;
+
+pos($foo) += 1;
+$foo=~/.\G(..)/g;
+print "not " unless($1 eq 'de');
+print "ok $test\n";
+$test++;
+
+undef pos $foo;
+
+$foo=~/\G(..)/g;
+print "not " unless($1  eq 'aa');
+print "ok $test\n";
+$test++;
+
+$foo=~/\G(..)/g;
+print "not " unless($1  eq 'bb');
+print "ok $test\n";
+$test++;
+
+pos($foo)=5;
+$foo=~/\G(..)/g;
+print "not " unless($1  eq 'cd');
 print "ok $test\n";
 $test++;
 
