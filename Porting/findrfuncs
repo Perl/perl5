@@ -26,6 +26,7 @@ if (open(CONFIG, "config.sh")) {
     my $CONFIG = <CONFIG>;
     $SO  = $1 if $CONFIG =~ /^so='(\w+)'/m;
     $EXE = $1 if $CONFIG =~ /^_exe='\.(\w+)'/m;
+    close(CONFIG);
 }
 
 push @EXES, "perl$EXE";
@@ -36,6 +37,8 @@ push @EXES, @ARGV;
 
 if ($^O eq 'dec_osf') {
     $NMU = 'nm -Bu';
+} elsif ($^O eq 'irix') {
+    $NMU = 'nm -pu';
 }
 
 my %rfuncs;
@@ -48,7 +51,7 @@ find(sub {
 	while (defined ($line = <$F>)) {
 	    if ($line =~ /\b(\w+_r)\b/) {
 		#warn "$1 => $File::Find::name\n";
-	        $rfuncs{$1} = $File::Find::name;
+		$rfuncs{$1}->{$File::Find::name}++;
 	    }
 	}
 	close $F;
@@ -60,10 +63,11 @@ delete $rfuncs{setlocale_r} if $^O eq 'linux';
 my %syms;
 
 for my $exe (@EXES) {
+    # warn "#--- $exe\n";
     for my $sym (`$NMU $exe`) {
         chomp $sym;
-	$sym =~ s/^\s+[Uu]\s+//;
         $sym =~ s/^\s+//;
+        $sym =~ s/^([0-9A-Fa-f]+\s+)?[Uu]\s+//;
         next if /\s/;
         $sym =~ s/\@.*\z//;	# remove @@GLIBC_2.0 etc
         # warn "#### $sym\n";
@@ -75,7 +79,8 @@ for my $exe (@EXES) {
     if (@syms) {
         print "\nFollowing symbols in $exe have reentrant versions:\n";
         for my $sym (@syms) {
-    	    print "$sym => $sym" . "_r (in file " . $rfuncs{"${sym}_r"} . ")\n";
+	    my @f = sort keys %{$rfuncs{$sym . '_r'}};
+    	    print "$sym => $sym" . "_r (@f)\n";
         }
     }
     @syms = ();
