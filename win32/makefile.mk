@@ -460,8 +460,8 @@ $(PERLEXE): $(PERLDLL) $(CONFIGPM) perlmain.obj
 .ENDIF
 	copy splittree.pl .. 
 	$(MINIPERL) -I..\lib ..\splittree.pl "../LIB" "../LIB/auto"
-	attrib -r ..\t\*.*
-	copy test ..\t
+#	attrib -r ..\t\*.*
+#	copy test ..\t
 
 .IF "$(CCTYPE)" != "BORLAND"
 
