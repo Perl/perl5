@@ -26,7 +26,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => (4 * 4 * 4) * (3); # (@char ** 3) * (keys %mbchars)
+use Test::More;
 
 # %mbchars = (encoding => { bytes => utf8, ... }, ...);
 # * pack('C*') is expected to return bytes even if ${^ENCODING} is true.
@@ -45,6 +45,10 @@ our %mbchars = (
     },
 );
 
+# 4 == @char; paired tests inside 3 nested loops,
+# plus extra pair of tests in a loop, plus extra pair of tests.
+plan tests => 2 * (4 ** 3 + 4 + 1) * (keys %mbchars);
+
 for my $enc (sort keys %mbchars) {
     local ${^ENCODING} = find_encoding($enc);
     my @char = (sort(keys   %{ $mbchars{$enc} }),
@@ -55,10 +59,30 @@ for my $enc (sort keys %mbchars) {
 	for my $start (@char) {
 	    for my $end (@char) {
 		my $string = $start.$end;
-		my $expect = $end eq $rs ? $start : $string;
-		chomp $string;
-		is($string, $expect);
+		my ($expect, $return);
+		if ($end eq $rs) {
+		    $expect = $start;
+		    # The answer will always be a length in utf8, even if the
+		    # scalar was encoded with a different length
+		    $return = length ($end . "\x{100}") - 1;
+		} else {
+		    $expect = $string;
+		    $return = 0;
+		}
+		is (chomp ($string), $return);
+		is ($string, $expect); # "$enc \$/=$rs $start $end"
 	    }
 	}
+	# chomp should not stringify references unless it decides to modify
+	# them
+	$_ = [];
+	my $got = chomp();
+	is ($got, 0);
+	is (ref($_), "ARRAY", "chomp ref (no modify)");
     }
+
+    $/ = ")";  # the last char of something like "ARRAY(0x80ff6e4)"
+    my $got = chomp();
+    is ($got, 1);
+    ok (!ref($_), "chomp ref (modify)");
 }
