@@ -1,5 +1,6 @@
 #define INCL_DOS
 #define INCL_NOPM
+#define INCL_DOSFILEMGR
 #ifndef NO_SYS_ALLOC 
 #  define INCL_DOSMEMMGR
 #  define INCL_DOSERRORS
@@ -269,39 +270,50 @@ os2_stat(char *name, struct stat *st)
 
 #ifndef NO_SYS_ALLOC
 
-static char *old2K;
+static char *oldchunk;
+static long oldsize;
 
-#define ONE_K (1<<10)
-#define TWO_K (1<<11)
-#define FOUR_K (1<<12)
-#define FOUR_K_FLAG (FOUR_K - 1)
+#define _32_K (1<<15)
+#define _64_K (1<<16)
 
+/* The real problem is that DosAllocMem will grant memory on 64K-chunks
+ * boundaries only. Note that addressable space for application memory
+ * is around 240M, thus we will run out of addressable space if we
+ * allocate around 14M worth of 4K segments.
+ * Thus we allocate memory in 64K chunks, and abandon the rest of the old
+ * chunk if the new is bigger than that rest. Also, we just allocate
+ * whatever is requested if the size is bigger that 32K. With this strategy
+ * we cannot lose more than 1/2 of addressable space. */
 
 void *
 sbrk(int size)
 {
     char *got;
     APIRET rc;
-    int is2K = 0;
+    int small, reqsize;
 
     if (!size) return 0;
-    else if (size == TWO_K) {
-	is2K = 1;
-	if (old2K) {
-	    char *ret = old2K;
-
-	    old2K = 0;
-	    return (void *)ret;
-	}
-	size = FOUR_K;
-    } else if (size & FOUR_K_FLAG) {
-	croak("Memory allocation in units %li not multiple to 4K", size);
+    else if (size <= oldsize) {
+	got = oldchunk;
+	oldchunk += size;
+	oldsize -= size;
+	return (void *)got;
+    } else if (size >= _32_K) {
+	small = 0;
+    } else {
+	reqsize = size;
+	size = _64_K;
+	small = 1;
     }
     rc = DosAllocMem((void **)&got, size, PAG_COMMIT | PAG_WRITE);
     if (rc == ERROR_NOT_ENOUGH_MEMORY) {
 	return (void *) -1;
     } else if ( rc ) die("Got an error from DosAllocMem: %li", (long)rc);
-    if (is2K) old2K = got + TWO_K;
+    if (small) {
+	/* Chunk is small, register the rest for future allocs. */
+	oldchunk = got + reqsize;
+	oldsize = size - reqsize;
+    }
     return (void *)got;
 }
 #endif /* ! defined NO_SYS_ALLOC */
@@ -324,4 +336,49 @@ settmppath()
     tpath[len] = '/';
     strcpy(tpath + len + 1, TMPPATH1);
     tmppath = tpath;
+}
+
+#include "XSUB.h"
+
+XS(XS_File__Copy_syscopy)
+{
+    dXSARGS;
+    if (items < 2 || items > 3)
+	croak("Usage: File::Copy::syscopy(src,dst,flag=0)");
+    {
+	char *	src = (char *)SvPV(ST(0),na);
+	char *	dst = (char *)SvPV(ST(1),na);
+	U32	flag;
+	int	RETVAL, rc;
+
+	if (items < 3)
+	    flag = 0;
+	else {
+	    flag = (unsigned long)SvIV(ST(2));
+	}
+
+	errno = DosCopy(src, dst, flag);
+	RETVAL = !errno;
+	ST(0) = sv_newmortal();
+	sv_setiv(ST(0), (IV)RETVAL);
+    }
+    XSRETURN(1);
+}
+
+OS2_Perl_data_t OS2_Perl_data;
+
+int
+Xs_OS2_init()
+{
+    char *file = __FILE__;
+    {
+        newXS("File::Copy::syscopy", XS_File__Copy_syscopy, file);
+    }
+}
+
+void
+Perl_OS2_init()
+{
+    settmppath();
+    OS2_Perl_data.xs_init = &Xs_OS2_init;
 }
