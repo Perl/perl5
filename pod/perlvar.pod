@@ -674,6 +674,15 @@ of perl in the right bracket?)  Example:
 See also the documentation of C<use VERSION> and C<require VERSION>
 for a convenient way to fail if the Perl interpreter is too old.
 
+=item $COMPILING
+
+=item $^C
+
+The current value of the flag associated with the B<-c> switch. Mainly
+of use with B<-MO=...> to allow code to alter its behaviour when being compiled.
+(For example to automatically AUTOLOADing at compile time rather than normal
+deferred loading.)  Setting C<$^C = 1> is similar to calling C<B::minus_c>.
+
 =item $DEBUGGING
 
 =item $^D
