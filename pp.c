@@ -5010,7 +5010,7 @@ PP(pp_split)
     else if (rx->prelen == 1 && *rx->precomp == '^') {
 	if (!(pm->op_pmflags & PMf_MULTILINE)
 	    && !(pm->op_pmregexp->reganch & ROPT_WARNED)) {
-	    if (ckWARN_d(WARN_DEPRECATED))
+	    if (ckWARN(WARN_DEPRECATED))
 		Perl_warner(aTHX_ WARN_DEPRECATED,
 			    "split /^/ better written as split /^/m");
 	    pm->op_pmregexp->reganch |= ROPT_WARNED;
