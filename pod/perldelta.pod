@@ -2740,6 +2740,14 @@ This is caused by the characters \xFF (y with diaeresis) and \xBE
 (Y with diaeresis) not behaving correctly when being matched
 case-insensitively.
 
+=head2 Modifying $_ Inside for(..)
+
+   for (1..5) { $_++ }
+
+works without complaint.  It shouldn't.  (You should be able to
+modify only lvalue elements inside the loops.)  You can see the
+correct behaviour by replacing the 1..5 with 1, 2, 3, 4, 5.
+
 =head2 mod_perl 1.26 Doesn't Build With Threaded Perl
 
 Use mod_perl 1.27 or higher.
@@ -2748,7 +2756,7 @@ Use mod_perl 1.27 or higher.
 
 Don't panic.  Read INSTALL 'make test' section instead.
 
-=head2  HP-UX lib/posix Subtest 9 Fails When LP64-Configured
+=head2 HP-UX lib/posix Subtest 9 Fails When LP64-Configured
 
 If perl is configured with -Duse64bitall, the successful result of the
 subtest 10 of lib/posix may arrive before the successful result of the
