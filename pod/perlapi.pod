@@ -1036,7 +1036,7 @@ Found in file handy.h
 =item is_utf8_char
 
 Tests if some arbitrary number of bytes begins in a valid UTF-8
-character.  Note that an ASCII character is a valid UTF-8 character.
+character.  Note that an INVARIANT (i.e. ASCII) character is a valid UTF-8 character.
 The actual number of bytes in the UTF-8 character will be returned if
 it is valid, otherwise 0.
 

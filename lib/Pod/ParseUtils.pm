@@ -289,9 +289,8 @@ sub parse {
     $self->{_warnings} = [];
 
     # collapse newlines with whitespace
-    if(s/\s*\n+\s*/ /g) {
-        $self->warning("collapsing newlines to blanks");
-    }
+    s/\s*\n+\s*/ /g;
+
     # strip leading/trailing whitespace
     if(s/^[\s\n]+//) {
         $self->warning("ignoring leading whitespace in link");

@@ -1,11 +1,8 @@
 #! /bin/sh
 case $CONFIGDOTSH in
 '')
-	if test -f config.sh; then TOP=.;
-	elif test -f ../config.sh; then TOP=..;
-	elif test -f ../../config.sh; then TOP=../..;
-	elif test -f ../../../config.sh; then TOP=../../..;
-	elif test -f ../../../../config.sh; then TOP=../../../..;
+	if test -f config.sh
+		then TOP=.
 	else
 		echo "Can't find config.sh."; exit 1
 	fi
@@ -496,6 +493,8 @@ miniperl: $& miniperlmain$(OBJ_EXT) $(LIBPERL) opmini$(OBJ_EXT)
 perl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs $(PERLEXPORT)
 	$(SHRPENV) $(LDLIBPTH) $(CC) -o perl $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
+# Purify/Quantify Perls.
+
 pureperl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs $(PERLEXPORT)
 	$(SHRPENV) $(LDLIBPTH) purify $(CC) -o pureperl $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
@@ -505,13 +504,41 @@ purecovperl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.li
 quantperl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs $(PERLEXPORT)
 	$(SHRPENV) $(LDLIBPTH) quantify $(CC) -o quantperl $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
+# Third Degree Perl (Tru64 only)
+
+perl.config.-g:
+	@echo "Checking optimize='-g'..."
+	@grep "^optimize=" config.sh
+	@grep -q "^optimize='-g'" config.sh || exit 1
+
 perl.third.config: config.sh
 	@echo "To build perl.third you must Configure -Doptimize=-g -Uusemymalloc, checking..."
-	@grep "^optimize='-g'" config.sh || exit 1
-	@grep "^config_args='.*-Uusemymalloc.*'" config.sh || exit 1
+	$(MAKE) perl.config.-g
+	@echo "Checking usemymalloc='n'..."
+	@grep "^usemymalloc=" config.sh
+	@grep -q "^usemymalloc='n'" config.sh || exit 1
 
-perl.third: perl.third.config perl
+perl.third: /usr/bin/atom perl.third.config perl
 	atom -tool third -L. -all -gp -toolargs="-quiet -invalid -uninit heap+stack+partword+copy -min 0" perl
+
+# Pixie Perls (Tru64 and IRIX only)
+
+perl.pixie.atom.config: config.sh
+	@echo "To build perl.pixie you must Configure -Doptimize=-g, checking..."
+	$(MAKE) perl.config.-g
+
+perl.pixie.atom: /usr/bin/atom perl.pixie.atom.config perl
+	atom -tool pixie -L. -all -toolargs="-quiet" perl
+
+perl.pixie.irix: perl
+	pixie perl
+
+perl.pixie: perl
+	if test -x /usr/bin/atom; then \
+	  $(MAKE) perl.pixie.atom; \
+	else \
+	  $(MAKE) perl.pixie.irix; \
+	fi
 
 # This version, if specified in Configure, does ONLY those scripts which need
 # set-id emulation.  Suidperl must be setuid root.  It contains the "taint"
@@ -763,6 +790,8 @@ _mopup:
 	-rm -f perl.exp ext.libs extra.pods opmini.o
 	-rm -f perl.export perl.dll perl.libexp perl.map perl.def
 	-rm -f perl.loadmap miniperl.loadmap perl.prelmap miniperl.prelmap
+	-rm -f perl.third lib*.so.perl.third perl.3log t/perl.3log
+	-rm -f perl.Addrs perl.Counts t/perl.Addrs t/perl.Counts
 	rm -f perl suidperl miniperl $(LIBPERL) libperl.* microperl
 
 # Do not 'make _tidy' directly.
@@ -835,31 +864,55 @@ depend: makedepend
 makedepend: makedepend.SH config.sh
 	sh ./makedepend.SH
 
-# Cannot delegate rebuilding of t/perl to make to allow interlaced
-# test and minitest
-test-prep: miniperl perl preplibrary utilities $(dynamic_ext) $(nonxs_ext) $(TEST_PERL_DLL)
-	cd t && (rm -f perl$(EXE_EXT); $(LNS) ../perl$(EXE_EXT) perl$(EXE_EXT))
+# Cannot delegate rebuilding of t/perl to make
+# to allow interlaced test and minitest
 
-# Second branch is for testing without a tty or controling terminal.
-# See t/op/stat.t
-test check: test-prep
+_test-prep: miniperl $(PERL)$(EXE_EXT) preplibrary utilities $(dynamic_ext) $(nonxs_ext) $(TEST_PERL_DLL)
+	cd t && (rm -f $(PERL)$(EXE_EXT); $(LNS) ../$(PERL)$(EXE_EXT) $(PERL)$(EXE_EXT))
+
+test-prep: 
+	PERL=./perl $(MAKE) _test-prep
+
+_test-tty:
+	cd t && $(LDLIBPTH) $(PERL_DEBUG) $(PERL) TEST $(UTF8) </dev/tty
+
+_test-notty:
+	cd t && $(LDLIBPTH) $(PERL_DEBUG) PERL_SKIP_TTY_TEST=1 $(PERL) TEST $(UTF8)
+
+# The second branch is for testing without a tty or controlling terminal,
+# see t/op/stat.t
+_test:
 	if (true </dev/tty) >/dev/null 2>&1; then \
-	  cd t && $(LDLIBPTH) ./perl TEST </dev/tty; \
+	  $(MAKE) _test-tty; \
 	else \
-	  cd t && PERL_SKIP_TTY_TEST=1 $(LDLIBPTH) ./perl TEST; \
+	  $(MAKE) _test-notty; \
 	fi
-	@echo "Ran tests" > t/rantests
+
+test check: test-prep
+	PERL=./perl $(MAKE) _test
+
+test-tty: test-prep
+	PERL=./perl $(MAKE) _test-tty
+
+test-notty: test-prep
+	PERL=./perl $(MAKE) _test-notty
 
 utest ucheck: test-prep
-	if (true </dev/tty) >/dev/null 2>&1; then \
-	  cd t && $(LDLIBPTH) ./perl TEST -utf8 </dev/tty; \
-	else \
-	  cd t && PERL_SKIP_TTY_TEST=1 $(LDLIBPTH) ./perl TEST -utf8; \
-	fi
+	PERL=./perl UTF8=-utf8 $(MAKE) _test
 
-# For testing without a tty or controling terminal. See t/op/stat.t
-test-notty: test-prep
-	cd t && PERL_SKIP_TTY_TEST=1 $(LDLIBPTH) ./perl TEST
+# Targets for Third Degree testing.
+
+test-prep.third:
+	PERL=./perl.third $(MAKE) _test-prep
+
+test.third check.third:	test-prep.third perl.third
+	PERL=./perl.third PERL_DEBUG=PERL_3LOG=1 $(MAKE) _test
+
+utest.third ucheck.third: test-prep.third perl.third
+	PERL=./perl.third PERL_DEBUG=PERL_3LOG=1UTF=-utf8 $(MAKE) _test
+
+test-notty.third: test-prep.third perl.third
+	PERL=./perl.third $(MAKE) PERL_DEBUG=PERL_3LOG=1 _test-notty
 
 # Can't depend on lib/Config.pm because that might be where miniperl
 # is crashing.

@@ -830,7 +830,7 @@ after compilation.
 
 Relevant only if your perl executable was built with B<-DDEBUGGING>,
 this controls the behavior of global destruction of objects and other
-references.
+references.  See L<perlhack/PERL_DESTRUCT_LEVEL> for more information.
 
 =item PERL_ROOT (specific to the VMS port)
 

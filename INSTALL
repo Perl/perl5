@@ -264,6 +264,28 @@ For more help on Configure switches, run:
 
 	sh Configure -h
 
+=head2 Building Perl outside of the source directory
+
+Sometimes it is desirable to build Perl in a directory different from
+where the sources are, for example if you want to keep your sources
+read-only, or if you want to share the sources between different binary
+architectures.
+
+Starting from Perl 5.6.1 you can do this (if your file system supports
+symbolic links) by
+	
+	mkdir /tmp/perl/build/directory
+	cd /tmp/perl/build/directory
+	sh /path/to/perl/source/Configure -Dmksymlinks ...
+
+This will create in /tmp/perl/build/directory a tree of symbolic links
+pointing to files in /path/to/perl/source.  The original files are left
+unaffected.  After Configure has finished you can just say
+
+	make all test
+
+and Perl will be built and tested, all in /tmp/perl/build/directory.
+
 =head2 Common Configure options
 
 Configure supports a number of useful options.  Run B<Configure -h> to

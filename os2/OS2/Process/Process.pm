@@ -128,14 +128,14 @@ C<file_type(file)>, get_title() and C<set_title(newtitle)> are implemented.
 my_type() returns the type of the current process (one of 
 "FS", "DOS", "VIO", "PM", "DETACH" and "UNKNOWN"), or C<undef> on error.
 
-=over 4
+=over
 
 =item C<file_type(file)> 
 
 returns the type of the executable file C<file>, or
 dies on error.  The bits 0-2 of the result contain one of the values
 
-=over 4
+=over
 
 =item C<T_NOTSPEC> (0)
 
@@ -158,7 +158,7 @@ Application type is window-API.
 The remaining bits should be masked with the following values to
 determine the type of the executable:
 
-=over 4
+=over
 
 =item C<T_BOUND> (8)
 
@@ -204,46 +204,46 @@ to suppress).
 
 returns a list of the following data:
 
-=over 4
+=over
 
-=item *
+=item 
 
 Title of the process (in the C<Ctrl-Esc> list);
 
-=item *
+=item 
 
 window handle of switch entry of the process (in the C<Ctrl-Esc> list);
 
-=item *
+=item 
 
 window handle of the icon of the process;
 
-=item *
+=item 
 
 process handle of the owner of the entry in C<Ctrl-Esc> list;
 
-=item *
+=item 
 
 process id of the owner of the entry in C<Ctrl-Esc> list;
 
-=item *
+=item 
 
 session id of the owner of the entry in C<Ctrl-Esc> list;
 
-=item *
+=item 
 
 whether visible in C<Ctrl-Esc> list;
 
-=item *
+=item
 
 whether item cannot be switched to (note that it is not actually
 grayed in the C<Ctrl-Esc> list));
 
-=item *
+=item 
 
 whether participates in jump sequence;
 
-=item *
+=item 
 
 program type.  Possible values are: 
 
@@ -262,6 +262,7 @@ the WIN-OS/2 programs run in DOS sessions. For example, if a program
 is a windowed WIN-OS/2 program, it runs in a PROG_WINDOWEDVDM
 session. Likewise, if it's a full-screen WIN-OS/2 program, it runs in
 a PROG_VDM session.
+
 
 =back
 

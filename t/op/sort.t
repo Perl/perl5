@@ -7,12 +7,6 @@ BEGIN {
 use warnings;
 print "1..58\n";
 
-# XXX known to leak scalars
-{
-  no warnings 'uninitialized';
-  $ENV{PERL_DESTRUCT_LEVEL} = 0 unless $ENV{PERL_DESTRUCT_LEVEL} > 3;
-}
-
 # these shouldn't hang
 {
     no warnings;
