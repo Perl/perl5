@@ -121,6 +121,8 @@ if ($Maintainer) {
 } elsif (@Files) {
     my %ModuleByFile;
 
+    for (@Files) { s:^\./:: }
+
     @ModuleByFile{@Files} = ();
 
     # First try fast match.
