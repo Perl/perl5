@@ -2796,6 +2796,10 @@ as of 5.7.3:
  -------------------------------------------------------------------------
   ..\ext/threads/t/end.t                6    4  66.67%  3-6
 
+=head2 XML::Parser not working
+
+Use XML::Parser 2.31 or later.
+
 =head2 Localising a Tied Variable Leaks Memory
 
     use Tie::Hash;
