@@ -556,10 +556,10 @@ PERLVARI(Irunops_dbg,	runops_proc_t,	MEMBER_TO_FPTR(Perl_runops_debug))
 PERLVARI(Ippid,		IV,		0)
 #endif
 
-/* Don't forget to add your variable also to perl_clone()! */
-
 /* New variables must be added to the very end, before this comment,
  * for binary compatibility (the offsets of the old members must not change).
+ * (Don't forget to add your variable also to perl_clone()!)
  * XSUB.h provides wrapper functions via perlapi.h that make this
- * irrelevant, but not all code may be expected to #include XSUB.h. */
+ * irrelevant, but not all code may be expected to #include XSUB.h.
+ */
 

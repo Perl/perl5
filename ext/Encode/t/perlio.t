@@ -146,7 +146,7 @@ SKIP:{
     # reading
     for my $utf (sort keys %bom){
 	my $bomed = $bom{$utf} . encode($utf, $str);
-	my $sfile = File::Spec->catfile($dir,".$utf.$seq.$$");
+	my $sfile = File::Spec->catfile($dir,".${utf}_${seq}_$$");
 	dump2file($sfile, $bomed);
 	my $utf_nobom = $utf; $utf_nobom =~ s/(LE|BE)$//o;
 	# reading
@@ -159,7 +159,7 @@ SKIP:{
     # writing
     for my $utf_nobom (qw/UTF-16 UTF-32/){
 	my $utf = $utf_nobom . 'BE';
-	my $sfile = File::Spec->catfile($dir,".$utf_nobom.$seq.$$");
+	my $sfile = File::Spec->catfile($dir,".${utf_nobom}_${seq}_$$");
 	my $bomed = $bom{$utf} . encode($utf, $str);
 	open  $fh, ">:encoding($utf_nobom)", $sfile or die "$sfile : $!";
 	print $fh $str;

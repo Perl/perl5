@@ -765,8 +765,8 @@ sub installlib {
     }
 
     # ignore patch backups, RCS files, emacs backup & temp files and the
-    # .exists files, .PL files, and .t files.
-    return if $name =~ m{\.orig$|\.rej$|~$|^#.+#$|,v$|^\.exists|\.PL$|\.t$} ||
+    # .exists files, .PL files, and test files.
+    return if $name =~ m{\.orig$|\.rej$|~$|^#.+#$|,v$|^\.exists|\.PL$|\.t$|^test\.pl$} ||
 	      $dir  =~ m{/t(?:/|$)};
     # ignore the cpan script in lib/CPAN/bin (installed later with other utils)
     return if $name eq 'cpan';

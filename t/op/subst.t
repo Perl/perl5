@@ -7,7 +7,7 @@ BEGIN {
 }
 
 require './test.pl';
-plan( tests => 129 );
+plan( tests => 130 );
 
 $x = 'foo';
 $_ = "x";
@@ -531,3 +531,11 @@ is($_, "3 (0 0 1 2)", '#20682 @- not visible in replacement');
 $_ = "abc";
 /(a)/; s/(b)|(c)/-$^N/g;
 is($_,'a-b-c','#20682 $^N not visible in replacement');
+
+# [perl #22351] perl bug with 'e' substitution modifier
+my $name = "chris";
+{
+    no warnings 'uninitialized';
+    $name =~ s/hr//e;
+}
+is($name, "cis", q[#22351 bug with 'e' substitution modifier]);
