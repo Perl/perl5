@@ -334,6 +334,8 @@
 #define leave_scope		Perl_leave_scope
 #define lex_end			Perl_lex_end
 #define lex_start		Perl_lex_start
+#define op_null			Perl_op_null
+#define op_clear		Perl_op_clear
 #define linklist		Perl_linklist
 #define list			Perl_list
 #define listkids		Perl_listkids
@@ -913,8 +915,6 @@
 #define scalarboolean		S_scalarboolean
 #define too_few_arguments	S_too_few_arguments
 #define too_many_arguments	S_too_many_arguments
-#define op_clear		S_op_clear
-#define null			S_null
 #define pad_addlex		S_pad_addlex
 #define pad_findlex		S_pad_findlex
 #define newDEFSVOP		S_newDEFSVOP
@@ -1833,6 +1833,8 @@
 #define leave_scope(a)		Perl_leave_scope(aTHX_ a)
 #define lex_end()		Perl_lex_end(aTHX)
 #define lex_start(a)		Perl_lex_start(aTHX_ a)
+#define op_null(a)		Perl_op_null(aTHX_ a)
+#define op_clear(a)		Perl_op_clear(aTHX_ a)
 #define linklist(a)		Perl_linklist(aTHX_ a)
 #define list(a)			Perl_list(aTHX_ a)
 #define listkids(a)		Perl_listkids(aTHX_ a)
@@ -2401,8 +2403,6 @@
 #define scalarboolean(a)	S_scalarboolean(aTHX_ a)
 #define too_few_arguments(a,b)	S_too_few_arguments(aTHX_ a,b)
 #define too_many_arguments(a,b)	S_too_many_arguments(aTHX_ a,b)
-#define op_clear(a)		S_op_clear(aTHX_ a)
-#define null(a)			S_null(aTHX_ a)
 #define pad_addlex(a)		S_pad_addlex(aTHX_ a)
 #define pad_findlex(a,b,c,d,e,f,g)	S_pad_findlex(aTHX_ a,b,c,d,e,f,g)
 #define newDEFSVOP()		S_newDEFSVOP(aTHX)
@@ -3596,6 +3596,10 @@
 #define lex_end			Perl_lex_end
 #define Perl_lex_start		CPerlObj::Perl_lex_start
 #define lex_start		Perl_lex_start
+#define Perl_op_null		CPerlObj::Perl_op_null
+#define op_null			Perl_op_null
+#define Perl_op_clear		CPerlObj::Perl_op_clear
+#define op_clear		Perl_op_clear
 #define Perl_linklist		CPerlObj::Perl_linklist
 #define linklist		Perl_linklist
 #define Perl_list		CPerlObj::Perl_list
@@ -4697,10 +4701,6 @@
 #define too_few_arguments	S_too_few_arguments
 #define S_too_many_arguments	CPerlObj::S_too_many_arguments
 #define too_many_arguments	S_too_many_arguments
-#define S_op_clear		CPerlObj::S_op_clear
-#define op_clear		S_op_clear
-#define S_null			CPerlObj::S_null
-#define null			S_null
 #define S_pad_addlex		CPerlObj::S_pad_addlex
 #define pad_addlex		S_pad_addlex
 #define S_pad_findlex		CPerlObj::S_pad_findlex
