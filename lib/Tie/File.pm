@@ -7,7 +7,7 @@ use Fcntl 'O_CREAT', 'O_RDWR', 'LOCK_EX', 'LOCK_SH', 'O_WRONLY', 'O_RDONLY';
 sub O_ACCMODE () { O_RDONLY | O_RDWR | O_WRONLY }
 
 
-$VERSION = "0.95";
+$VERSION = "0.96";
 my $DEFAULT_MEMORY_SIZE = 1<<21;    # 2 megabytes
 my $DEFAULT_AUTODEFER_THRESHHOLD = 3; # 3 records
 my $DEFAULT_AUTODEFER_FILELEN_THRESHHOLD = 65536; # 16 disk blocksful
@@ -901,8 +901,7 @@ sub _read_record {
     $rec = <$fh>;
   }
   return unless defined $rec;
-  if (! $self->{sawlastrec} && 
-      substr($rec, -$self->{recseplen}) ne $self->{recsep}) {
+  if (substr($rec, -$self->{recseplen}) ne $self->{recsep}) {
     # improperly terminated final record --- quietly fix it.
 #    my $ac = substr($rec, -$self->{recseplen});
 #    $ac =~ s/\n/\\n/g;
@@ -1994,7 +1993,7 @@ Tie::File - Access the lines of a disk file via a Perl array
 
 =head1 SYNOPSIS
 
-	# This file documents Tie::File version 0.95
+	# This file documents Tie::File version 0.96
 	use Tie::File;
 
 	tie @array, 'Tie::File', filename or die ...;
@@ -2304,6 +2303,11 @@ internally.  If you passed it a filehandle as above, you "own" the
 filehandle, and are responsible for closing it after you have untied
 the @array.
 
+Note that Tie::File will only close any filehandles that it opened
+internally.  If you passed it a filehandle as above, you "own" the
+filehandle, and are responsible for closing it after you have untied
+the @array.
+
 =head1 Deferred Writing
 
 (This is an advanced feature.  Skip this section on first reading.)
@@ -2517,7 +2521,7 @@ any news of importance, will be available at
 
 =head1 LICENSE
 
-C<Tie::File> version 0.95 is copyright (C) 2002 Mark Jason Dominus.
+C<Tie::File> version 0.96 is copyright (C) 2002 Mark Jason Dominus.
 
 This library is free software; you may redistribute it and/or modify
 it under the same terms as Perl itself.
@@ -2545,7 +2549,7 @@ For licensing inquiries, contact the author at:
 
 =head1 WARRANTY
 
-C<Tie::File> version 0.95 comes with ABSOLUTELY NO WARRANTY.
+C<Tie::File> version 0.96 comes with ABSOLUTELY NO WARRANTY.
 For details, see the license.
 
 =head1 THANKS
@@ -2567,7 +2571,9 @@ optimizations.
 Additional thanks to:
 Edward Avis /
 Mattia Barbon /
+Tom Christiansen /
 Gerrit Haase /
+Gurusamy Sarathy /
 Jarkko Hietaniemi (again) /
 Nikola Knezevic /
 John Kominetz /
