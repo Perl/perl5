@@ -4479,6 +4479,15 @@ Perl_sv_magicext(pTHX_ SV* sv, SV* obj, int how, MGVTBL *vtable,
     else {
 	mg->mg_obj = SvREFCNT_inc(obj);
 	mg->mg_flags |= MGf_REFCOUNTED;
+
+	/* Break self-tie loops */
+	if (how == PERL_MAGIC_tiedscalar && SvROK(obj) &&
+	   (SvRV(obj) == sv || GvIO(SvRV(obj)) == (IO *) sv)) {
+	    /* We have to have a REFCNT to obj, so drop REFCNT
+	       of what if references instead
+	     */
+	    SvREFCNT_dec(SvRV(obj));
+	}
     }
     mg->mg_type = how;
     mg->mg_len = namlen;
@@ -5172,20 +5181,9 @@ Perl_sv_free(pTHX_ SV *sv)
     }
     ATOMIC_DEC_AND_TEST(refcount_is_zero, SvREFCNT(sv));
     if (!refcount_is_zero) {
-	if (SvREFCNT(sv) == 1) {
-	    /* Break self-tie loops */
-	    MAGIC *mg = 0;
-	    SV *obj;
-	    if (SvTYPE(sv) == SVt_PVGV)
-		sv = (SV *)GvIO(sv);
-	    if (!sv || !SvMAGICAL(sv) || SvTYPE(sv) < SVt_PVMG)
-		return;
-            mg = SvTIED_mg(sv, PERL_MAGIC_tiedscalar);
-	    if (mg && (obj = mg->mg_obj) && SvROK(obj) &&
-	        (SvRV(obj) == sv || GvIO(SvRV(obj)) == (IO *) sv)) {
-		sv_unmagic(sv, PERL_MAGIC_tiedscalar);
-	    }
-	}
+	/* Do not be tempted to test SvMAGIC here till scope.c
+	   stops sharing MAGIC * between SVs
+	 */
 	return;
     }
 #ifdef DEBUGGING
