@@ -14,7 +14,7 @@ require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(struct);
 
-$VERSION = '0.58';
+$VERSION = '0.59';
 
 ## Tested on 5.002 and 5.003 without class membership tests:
 my $CHECK_CLASS_MEMBERSHIP = ($] >= 5.003_95);
@@ -49,6 +49,16 @@ sub printem {
     }
 
     sub DESTROY { }
+}
+
+sub import {
+    my $self = shift;
+
+    if ( @_ ) {
+      &struct;
+    } else {
+      $self->export_to_level( 1, $self, @EXPORT );
+    }
 }
 
 sub struct {
@@ -242,6 +252,10 @@ Class::Struct - declare struct-like datatypes as Perl classes
             # declare struct, based on array, implicit class name:
     struct( ELEMENT_NAME => ELEMENT_TYPE, ... );
 
+    # Declare struct at compile time
+    use Class::Struct CLASS_NAME => [ ELEMENT_NAME => ELEMENT_TYPE, ... ];
+    use Class::Struct CLASS_NAME => { ELEMENT_NAME => ELEMENT_TYPE, ... };
+
 
     package Myobj;
     use Class::Struct;
@@ -326,6 +340,15 @@ element name will be defined as an accessor method unless a
 method by that name is explicitly defined; in the latter case, a
 warning is issued if the warning flag (B<-w>) is set.
 
+=head2 Class Creation at Compile Time
+
+C<Class::Struct> can create your class at compile time.  The main reason
+for doing this is obvious, so your class acts like every other class in
+Perl.  Creating your class at compile time will make the order of events
+similar to using any other class ( or Perl module ).
+
+There is no significant speed gain between compile time and run time
+class creation, there is just a new, more standard order of events.
 
 =head2 Element Types and Accessor Methods
 
@@ -524,6 +547,10 @@ struct's constructor.
 
 =head1 Author and Modification History
 
+
+Modified by Casey Tweten, 2000-11-08, v0.59.
+
+    Added the ability for compile time class creation.
 
 Modified by Damian Conway, 1999-03-05, v0.58.
 
