@@ -664,11 +664,11 @@ else {
 if( $nested ){
 	my $modpath = "";
 	foreach (@modparts){
-		mkdir("$modpath$_", 0777);
+		-d "$modpath$_" || mkdir("$modpath$_", 0777);
 		$modpath .= "$_/";
 	}
 }
-mkdir($modpname, 0777);
+-d "$modpname"   || mkdir($modpname, 0777);
 chdir($modpname) || die "Can't chdir $ext$modpname: $!\n";
 
 my %types_seen;
@@ -1844,7 +1844,9 @@ close(RM) || die "Can't close $ext$modpname/README: $!\n";
 
 my $testdir  = "t";
 my $testfile = "$testdir/1.t";
-mkdir "$testdir" or die "Cannot mkdir $testdir: $!\n";
+unless (-d "$testdir") {
+  mkdir "$testdir" or die "Cannot mkdir $testdir: $!\n";
+}
 warn "Writing $ext$modpname/$testfile\n";
 open EX, ">$testfile" or die "Can't create $ext$modpname/$testfile: $!\n";
 print EX <<'_END_';
