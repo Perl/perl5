@@ -1082,11 +1082,13 @@ STATIC void	S_cl_init(pTHX_ struct RExC_state_t*, struct regnode_charclass_class
 STATIC void	S_cl_init_zero(pTHX_ struct RExC_state_t*, struct regnode_charclass_class *cl);
 STATIC void	S_cl_and(pTHX_ struct regnode_charclass_class *cl, struct regnode_charclass_class *and_with);
 STATIC void	S_cl_or(pTHX_ struct RExC_state_t*, struct regnode_charclass_class *cl, struct regnode_charclass_class *or_with);
-STATIC I32	S_study_chunk(pTHX_ struct RExC_state_t*, regnode **scanp, I32 *deltap, regnode *last, struct scan_data_t *data, U32 flags);
+STATIC I32	S_study_chunk(pTHX_ struct RExC_state_t*, regnode **scanp, I32 *deltap, regnode *last, struct scan_data_t *data, U32 flags, U32 depth);
 STATIC I32	S_add_data(pTHX_ struct RExC_state_t*, I32 n, char *s);
 STATIC void	S_re_croak2(pTHX_ const char* pat1, const char* pat2, ...) __attribute__((noreturn));
 STATIC I32	S_regpposixcc(pTHX_ struct RExC_state_t*, I32 value);
 STATIC void	S_checkposixcc(pTHX_ struct RExC_state_t*);
+
+STATIC I32	S_make_trie(pTHX_ struct RExC_state_t*, regnode *startbranch, regnode *first, regnode *last, regnode *tail, U32 flags);
 #endif
 
 #if defined(PERL_IN_REGEXEC_C) || defined(PERL_DECL_PROT)

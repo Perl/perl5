@@ -929,6 +929,21 @@ The current value of the debugging flags.  (Mnemonic: value of B<-D>
 switch.) May be read or set. Like its command-line equivalent, you can use
 numeric or symbolic values, eg C<$^D = 10> or C<$^D = "st">.
 
+=item ${^RE_DEBUG_FLAGS}
+
+The current value of the regex debugging flags. Set to 0 for no debug output
+even when the re 'debug' module is loaded. See L<re> for details.
+
+=item ${^RE_TRIE_MAXBUFF}
+
+Controls how certain regex optimisations are applied and how much memory they
+utilize. This value by default is 65536 which corresponds to a 512kB temporary
+cache. Set this to a higher value to trade memory for speed when matching
+large alternations. Set it to a lower value if you want the optimisations to
+be as conservative of memory as possible but still occur, and set it to a
+negative value to prevent the optimisation and conserve the most memory.
+Under normal situations this variable should be of no interest to you.
+
 =item $SYSTEM_FD_MAX
 
 =item $^F

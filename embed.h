@@ -1630,6 +1630,9 @@
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define checkposixcc		S_checkposixcc
 #endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
+#define make_trie		S_make_trie
+#endif
 #endif
 #if defined(PERL_IN_REGEXEC_C) || defined(PERL_DECL_PROT)
 #if defined(PERL_CORE) || defined(PERL_EXT)
@@ -4213,7 +4216,7 @@
 #define cl_or(a,b,c)		S_cl_or(aTHX_ a,b,c)
 #endif
 #if defined(PERL_CORE) || defined(PERL_EXT)
-#define study_chunk(a,b,c,d,e,f)	S_study_chunk(aTHX_ a,b,c,d,e,f)
+#define study_chunk(a,b,c,d,e,f,g)	S_study_chunk(aTHX_ a,b,c,d,e,f,g)
 #endif
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define add_data(a,b,c)		S_add_data(aTHX_ a,b,c)
@@ -4225,6 +4228,9 @@
 #endif
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define checkposixcc(a)		S_checkposixcc(aTHX_ a)
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
+#define make_trie(a,b,c,d,e,f)	S_make_trie(aTHX_ a,b,c,d,e,f)
 #endif
 #endif
 #if defined(PERL_IN_REGEXEC_C) || defined(PERL_DECL_PROT)

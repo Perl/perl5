@@ -10238,6 +10238,8 @@ Perl_re_dup(pTHX_ REGEXP *r, CLONE_PARAMS *param)
 	for (i = 0; i < count; i++) {
 	    d->what[i] = r->data->what[i];
 	    switch (d->what[i]) {
+	        /* legal options are one of: sfpont
+	           see also regcomp.h and pregfree() */
 	    case 's':
 		d->data[i] = sv_dup_inc((SV *)r->data->data[i], param);
 		break;
@@ -10261,6 +10263,14 @@ Perl_re_dup(pTHX_ REGEXP *r, CLONE_PARAMS *param)
 	    case 'n':
 		d->data[i] = r->data->data[i];
 		break;
+	    case 't':
+		d->data[i] = r->data->data[i];
+		OP_REFCNT_LOCK;
+		((reg_trie_data*)d->data[i])->refcount++;
+		OP_REFCNT_UNLOCK;
+		break;
+            default:
+		Perl_croak(aTHX_ "panic: re_dup unknown data code '%c'", r->data->what[i]);
 	    }
 	}
 

@@ -1,6 +1,6 @@
 package re;
 
-our $VERSION = 0.04;
+our $VERSION = 0.05;
 
 =head1 NAME
 
@@ -29,6 +29,10 @@ re - Perl pragma to alter regular expression behaviour
 
     use re 'debugcolor';	   # same as 'debug', but with colored output
     ...
+
+    use re qw(Debug All);          # Finer tuned debugging options.
+    use re qw(Debug More);         # Similarly not lexically scoped.
+    no re qw(Debug ALL);           # Turn of all re dugging and unload the module.
 
 (We use $^X in these examples because it's tainted by default.)
 
@@ -67,8 +71,29 @@ comma-separated list of C<termcap> properties to use for highlighting
 strings on/off, pre-point part on/off.
 See L<perldebug/"Debugging regular expressions"> for additional info.
 
-The directive C<use re 'debug'> is I<not lexically scoped>, as the
-other directives are.  It has both compile-time and run-time effects.
+Similarly C<use re 'Debug'> produces debugging output, the difference
+being that it allows the fine tuning of what debugging output will be
+emitted. Following the 'Debug' keyword one of several options may be
+provided: COMPILE, EXECUTE, TRIE_COMPILE, TRIE_EXECUTE, TRIE_MORE,
+OPTIMISE, OFFSETS and ALL. Additionally the special keywords 'All' and
+'More' may be provided. 'All' represents everything but OPTIMISE and
+OFFSETS and TRIE_MORE, and 'More' is similar but include TRIE_MORE.
+Saying C<< no re Debug => 'EXECUTE' >> will disable executing debug
+statements and saying C<< use re Debug => 'EXECUTE' >> will turn it on. Note
+that these flags can be set directly via ${^RE_DEBUG_FLAGS} by using the
+following flag values:
+
+    RE_DEBUG_COMPILE       1
+    RE_DEBUG_EXECUTE       2
+    RE_DEBUG_TRIE_COMPILE  4
+    RE_DEBUG_TRIE_EXECUTE  8
+    RE_DEBUG_TRIE_MORE    16
+    RE_DEBUG_OPTIMISE     32
+    RE_DEBUG_OFFSETS      64
+
+The directive C<use re 'debug'> and its equivalents are I<not> lexically
+scoped, as the other directives are.  They have both compile-time and run-time
+effects.
 
 See L<perlmodlib/Pragmatic Modules>.
 
@@ -95,6 +120,22 @@ sub setcolor {
  };
 }
 
+my %flags = (
+    COMPILE      => 1,
+    EXECUTE      => 2,
+    TRIE_COMPILE => 4,
+    TRIE_EXECUTE => 8,
+    TRIE_MORE    => 16,
+    OPTIMISE     => 32,
+    OPTIMIZE     => 32, # alias
+    OFFSETS      => 64,
+    ALL          => 127,
+    All          => 15,
+    More         => 31,
+);
+
+my $installed = 0;
+
 sub bits {
     my $on = shift;
     my $bits = 0;
@@ -102,21 +143,53 @@ sub bits {
 	require Carp;
 	Carp::carp("Useless use of \"re\" pragma");
     }
-    foreach my $s (@_){
-      if ($s eq 'debug' or $s eq 'debugcolor') {
- 	  setcolor() if $s eq 'debugcolor';
-	  require XSLoader;
-	  XSLoader::load('re');
-	  install() if $on;
-	  uninstall() unless $on;
-	  next;
-      }
-      if (exists $bitmask{$s}) {
-	  $bits |= $bitmask{$s};
-      } else {
-	  require Carp;
-	  Carp::carp("Unknown \"re\" subpragma '$s' (known ones are: @{[join(', ', map {qq('$_')} 'debug', 'debugcolor', sort keys %bitmask)]})");
-      }
+    foreach my $idx (0..$#_){
+        my $s=$_[$idx];
+        if ($s eq 'Debug' or $s eq 'Debugcolor') {
+            setcolor() if $s eq 'Debugcolor';
+            ${^RE_DEBUG_FLAGS} = 0 unless defined ${^RE_DEBUG_FLAGS};
+            require XSLoader;
+            XSLoader::load('re');
+            for my $idx ($idx+1..$#_) {
+                if ($flags{$_[$idx]}) {
+                    if ($on) {
+                        ${^RE_DEBUG_FLAGS} |= $flags{$_[$idx]};
+                    } else {
+                        ${^RE_DEBUG_FLAGS} &= ~ $flags{$_[$idx]};
+                    }
+                } else {
+                    require Carp;
+                    Carp::carp("Unknown \"re\" Debug flag '$_[$idx]', possible flags: ",
+                               join(", ",sort { $flags{$a} <=> $flags{$b} } keys %flags ) );
+                }
+            }
+            if ($on) {
+                install() unless $installed;
+                $installed = 1;
+            } elsif (!${^RE_DEBUG_FLAGS}) {
+                uninstall() if $installed;
+                $installed = 0;
+            }
+            last;
+        } elsif ($s eq 'debug' or $s eq 'debugcolor') {
+	    setcolor() if $s eq 'debugcolor';
+	    require XSLoader;
+	    XSLoader::load('re');
+	    if ($on) {
+		install() unless $installed;
+		$installed=1;
+	    } else {
+		uninstall() if $installed;
+		$installed=0;
+	    }
+        } elsif (exists $bitmask{$s}) {
+	    $bits |= $bitmask{$s};
+	} else {
+	    require Carp;
+	    Carp::carp("Unknown \"re\" subpragma '$s' (known ones are: ",
+                       join(', ', map {qq('$_')} 'debug', 'debugcolor', sort keys %bitmask),
+                       ")");
+	}
     }
     $bits;
 }

@@ -53,7 +53,8 @@ typedef OP OP_4tree;			/* Will be redefined later. */
  * a literal string; for others, it is a node leading into a sub-FSM.  In
  * particular, the operand of a BRANCH node is the first node of the branch.
  * (NB this is *not* a tree structure:  the tail of the branch connects
- * to the thing following the set of BRANCHes.)  The opcodes are:
+ * to the thing following the set of BRANCHes.)  The opcodes are defined
+ * in regnodes.h which is generated from regcomp.sym by regcomp.pl.
  */
 
 /*
@@ -375,6 +376,7 @@ typedef struct re_scream_pos_data_s
  *   s - swash for unicode-style character class, and the multicharacter
  *       strings resulting from casefolding the single-character entries
  *       in the character class
+ *   t - trie struct
  * 20010712 mjd@plover.com
  * (Remember to update re_dup() and pregfree() if you add any items.)
  */
@@ -406,3 +408,129 @@ struct reg_substr_data {
 #define check_utf8 substrs->data[2].utf8_substr
 #define check_offset_min substrs->data[2].min_offset
 #define check_offset_max substrs->data[2].max_offset
+
+
+
+/* trie related stuff */
+/* an accepting state/position*/
+struct _reg_trie_accepted {
+    U8   *endpos;
+    U16  wordnum;
+};
+/* a transition record for the state machine. the
+   check field determines which state "owns" the
+   transition. the char the transition is for is
+   determined by offset from the owning states base
+   field.  the next field determines which state
+   is to be transitioned to if any.
+*/
+struct _reg_trie_trans {
+  U32 next;
+  U32 check;
+};
+
+/* a transition list element for the list based representation */
+struct _reg_trie_trans_list_elem {
+    U16 forid;
+    U32 newstate;
+};
+typedef struct _reg_trie_trans_list_elem reg_trie_trans_le;
+
+/* a state for compressed nodes. base is an offset
+  into an array of reg_trie_trans array. If wordnum is
+  nonzero the state is accepting. if base is zero then
+  the state has no children (and will be accepting)
+*/
+struct _reg_trie_state {
+  U16 wordnum;
+  union {
+    U32                base;
+    reg_trie_trans_le* list;
+  } trans;
+};
+
+
+
+typedef struct _reg_trie_accepted reg_trie_accepted;
+typedef struct _reg_trie_state    reg_trie_state;
+typedef struct _reg_trie_trans    reg_trie_trans;
+
+
+/* anything in here that needs to be freed later
+should be dealt with in pregfree */
+struct _reg_trie_data {
+    U16              uniquecharcount;
+    U16              wordcount;
+    STRLEN           charcount;
+    U32              laststate;
+    U16              *charmap;
+    HV               *widecharmap;
+    reg_trie_state   *states;
+    reg_trie_trans   *trans;
+    U32              refcount;
+#ifdef DEBUGGING
+    AV               *words;
+    AV               *revcharmap;
+#endif
+};
+
+typedef struct _reg_trie_data reg_trie_data;
+
+/* these defines assume uniquecharcount is the correct variable, and state may be evaluated twice */
+#define TRIE_NODENUM(state) (((state)-1)/(trie->uniquecharcount)+1)
+#define SAFE_TRIE_NODENUM(state) ((state) ? (((state)-1)/(trie->uniquecharcount)+1) : (state))
+#define TRIE_NODEIDX(state) ((state) ? (((state)-1)*(trie->uniquecharcount)+1) : (state))
+
+#define DO_TRIE 1
+#define TRIE_DEBUG 1
+
+
+#define TRIE_SIMPLE_MAX_BUFF 65536
+#define RE_TRIE_MAXBUFF "\022E_TRIE_MAXBUFF"
+#define RE_DEBUG_FLAGS "\022E_DEBUG_FLAGS"
+
+/* If you change these be sure to update ext/re/re.pm as well */
+#define RE_DEBUG_COMPILE       1
+#define RE_DEBUG_EXECUTE       2
+#define RE_DEBUG_TRIE_COMPILE  4
+#define RE_DEBUG_TRIE_EXECUTE  8
+#define RE_DEBUG_TRIE_MORE    16
+#define RE_DEBUG_OPTIMISE     32
+#define RE_DEBUG_OFFSETS      64
+
+#define DEBUG_OPTIMISE_r(x) DEBUG_r( if (SvIV(re_debug_flags) & RE_DEBUG_OPTIMISE) x  )
+#define DEBUG_EXECUTE_r(x) DEBUG_r( if (SvIV(re_debug_flags) & RE_DEBUG_EXECUTE) x  )
+#define DEBUG_COMPILE_r(x) DEBUG_r( if (SvIV(re_debug_flags) & RE_DEBUG_COMPILE) x  )
+#define DEBUG_OFFSETS_r(x) DEBUG_r( if (SvIV(re_debug_flags) & RE_DEBUG_OFFSETS) x  )
+#define DEBUG_TRIE_r(x) DEBUG_r( \
+   if (SvIV(re_debug_flags) & RE_DEBUG_TRIE_COMPILE       \
+       || SvIV(re_debug_flags) & RE_DEBUG_TRIE_EXECUTE )  \
+   x  \
+)
+#define DEBUG_TRIE_EXECUTE_r(x) \
+    DEBUG_r( if (SvIV(re_debug_flags) & RE_DEBUG_TRIE_EXECUTE) x )
+
+#define DEBUG_TRIE_COMPILE_r(x) \
+    DEBUG_r( if (SvIV(re_debug_flags) & RE_DEBUG_TRIE_COMPILE) x )
+
+#define DEBUG_TRIE_EXECUTE_MORE_r(x) \
+    DEBUG_TRIE_EXECUTE_r( if (SvIV(re_debug_flags) & RE_DEBUG_TRIE_MORE) x )
+
+#define DEBUG_TRIE_COMPILE_MORE_r(x) \
+    DEBUG_TRIE_COMPILE_r( if (SvIV(re_debug_flags) & RE_DEBUG_TRIE_MORE) x )
+
+#define GET_RE_DEBUG_FLAGS DEBUG_r( \
+        re_debug_flags=get_sv(RE_DEBUG_FLAGS, 1); \
+        if (!SvIOK(re_debug_flags)) { \
+            sv_setiv(re_debug_flags, RE_DEBUG_COMPILE | RE_DEBUG_EXECUTE | RE_DEBUG_OFFSETS); \
+        } \
+    )
+
+
+#ifdef DEBUGGING
+#define GET_RE_DEBUG_FLAGS_DECL SV *re_debug_flags; GET_RE_DEBUG_FLAGS;
+#else
+#define GET_RE_DEBUG_FLAGS_DECL
+#endif
+
+

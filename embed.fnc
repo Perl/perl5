@@ -1128,11 +1128,15 @@ Es	|void	|cl_or		|struct RExC_state_t*|struct regnode_charclass_class *cl \
 				|struct regnode_charclass_class *or_with
 Es	|I32	|study_chunk	|struct RExC_state_t*|regnode **scanp|I32 *deltap \
 				|regnode *last|struct scan_data_t *data \
-				|U32 flags
+				|U32 flags|U32 depth
 Es	|I32	|add_data	|struct RExC_state_t*|I32 n|char *s
 rs	|void|re_croak2	|const char* pat1|const char* pat2|...
 Es	|I32	|regpposixcc	|struct RExC_state_t*|I32 value
 Es	|void	|checkposixcc	|struct RExC_state_t*
+
+Es	|I32	|make_trie	|struct RExC_state_t*|regnode *startbranch \
+				|regnode *first|regnode *last|regnode *tail \
+				|U32 flags
 #endif
 
 #if defined(PERL_IN_REGEXEC_C) || defined(PERL_DECL_PROT)
