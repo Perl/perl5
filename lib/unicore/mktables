@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+require 5.008;	# Needs pack "U". Probably safest to run on 5.8.x
 use strict;
 use Carp;
 
