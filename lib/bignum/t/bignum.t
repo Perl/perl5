@@ -35,8 +35,6 @@ ok (2/3,"0.6666666666666666666666666666666666666667");
 
 #ok (2 ** 0.5, 'NaN');	# should be sqrt(2);
 
-print "huh\n";
-
 ok (12->bfac(),479001600);
 
 # see if Math::BigFloat constant works
