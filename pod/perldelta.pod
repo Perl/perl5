@@ -1133,6 +1133,12 @@ Unicode normalization forms.  See L<Unicode::Normalize>.
 
 =item *
 
+C<XS::APItest>, by Tim Jenness, is a test extension that exercises XS
+APIs.  Currently only C<printf()> is tested: how to output various
+basic data types from XS.
+
+=item *
+
 C<XS::Typemap>, by Tim Jenness, is a test extension that exercises
 XS typemaps.  Nothing gets installed, but the code is worth studying
 for extension writers.
