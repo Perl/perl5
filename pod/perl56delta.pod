@@ -790,8 +790,8 @@ already.  The fatal error has been downgraded to an optional warning:
 This warns you that C<"fred@example.com"> is going to turn into
 C<fred.com> if you don't backslash the C<@>.
 
-See L<http://www.plover.com/~mjd/perl/at-error.html> for more details
-about the history here.
+See L<http://www.plover.com/~mjd/perl/at-error.html|http://www.plover.com/~mjd/perl/at-error.html>
+for more details about the history here.
 
 =head1 Modules and Pragmata
 
