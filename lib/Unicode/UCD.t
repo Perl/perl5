@@ -12,7 +12,7 @@ use strict;
 use Unicode::UCD;
 use Test::More;
 
-BEGIN { plan tests => 162 };
+BEGIN { plan tests => 164 };
 
 use Unicode::UCD 'charinfo';
 
@@ -279,3 +279,13 @@ ok($casespec->{az}->{code} eq '0307' &&
    $casespec->{az}->{upper} eq '0307' &&
    $casespec->{az}->{condition} eq 'az After_I',
    'casespec 0x307');
+
+# perl #7305 UnicodeCD::compexcl is weird
+
+for (1) {$a=compexcl $_}
+ok(1, 'compexcl read-only $_: perl #7305');
+grep {compexcl $_} %{{1=>2}};
+ok(1, 'compexcl read-only hash: perl #7305');
+
+
+ 
