@@ -2723,6 +2723,7 @@ int yylex(PERL_YYLEX_PARAM_DECL)
 	}
 
 	d = s;
+	tmp = (I32)*s;
 	if (PL_lex_state == LEX_NORMAL)
 	    s = skipspace(s);
 
@@ -2764,7 +2765,7 @@ int yylex(PERL_YYLEX_PARAM_DECL)
 	}
 
 	PL_expect = XOPERATOR;
-	if (PL_lex_state == LEX_NORMAL && isSPACE(*d)) {
+	if (PL_lex_state == LEX_NORMAL && isSPACE((char)tmp)) {
 	    bool islop = (PL_last_lop == PL_oldoldbufptr);
 	    if (!islop || PL_last_lop_op == OP_GREPSTART)
 		PL_expect = XOPERATOR;
