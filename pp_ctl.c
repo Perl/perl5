@@ -792,7 +792,7 @@ PP(pp_sort)
 	    kid = kUNOP->op_first;			/* pass rv2gv */
 	    kid = kUNOP->op_first;			/* pass leave */
 	    PL_sortcop = kid->op_next;
-	    stash = PL_curcop->cop_stash;
+	    stash = CopSTASH(PL_curcop);
 	}
 	else {
 	    cv = sv_2cv(*++MARK, &stash, &gv, 0);
@@ -822,7 +822,7 @@ PP(pp_sort)
     }
     else {
 	PL_sortcop = Nullop;
-	stash = PL_curcop->cop_stash;
+	stash = CopSTASH(PL_curcop);
     }
 
     up = myorigmark + 1;
@@ -1428,8 +1428,8 @@ PP(pp_caller)
 	    cx = &ccstack[dbcxix];
     }
 
+    hv = CopSTASH(cx->blk_oldcop);
     if (GIMME != G_ARRAY) {
-	hv = cx->blk_oldcop->cop_stash;
 	if (!hv)
 	    PUSHs(&PL_sv_undef);
 	else {
@@ -1440,7 +1440,6 @@ PP(pp_caller)
 	RETURN;
     }
 
-    hv = cx->blk_oldcop->cop_stash;
     if (!hv)
 	PUSHs(&PL_sv_undef);
     else
@@ -1480,7 +1479,7 @@ PP(pp_caller)
 	PUSHs(&PL_sv_undef);
     }
     if (CxTYPE(cx) == CXt_SUB && cx->blk_sub.hasargs
-	&& PL_curcop->cop_stash == PL_debstash)
+	&& CopSTASH(PL_curcop) == PL_debstash)
     {
 	AV *ary = cx->blk_sub.argarray;
 	int off = AvARRAY(ary) - AvALLOC(ary);
@@ -1516,7 +1515,7 @@ PP(pp_reset)
 	tmps = "";
     else
 	tmps = POPpx;
-    sv_reset(tmps, PL_curcop->cop_stash);
+    sv_reset(tmps, CopSTASH(PL_curcop));
     PUSHs(&PL_sv_yes);
     RETURN;
 }
@@ -2488,8 +2487,8 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, AV** avp)
     /* switch to eval mode */
 
     if (PL_curcop == &PL_compiling) {
-	SAVESPTR(PL_compiling.cop_stash);
-	PL_compiling.cop_stash = PL_curstash;
+	SAVECOPSTASH(&PL_compiling);
+	CopSTASH_set(&PL_compiling, PL_curstash);
     }
     SAVECOPFILE(&PL_compiling);
     SAVECOPLINE(&PL_compiling);
@@ -2605,7 +2604,7 @@ S_doeval(pTHX_ int gimme, OP** startop)
 
     /* make sure we compile in the right package */
 
-    newstash = PL_curcop->cop_stash;
+    newstash = CopSTASH(PL_curcop);
     if (PL_curstash != newstash) {
 	SAVESPTR(PL_curstash);
 	PL_curstash = newstash;

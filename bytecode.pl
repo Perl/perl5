@@ -400,7 +400,7 @@ op_redoop	cLOOP->op_redoop			opindex
 op_nextop	cLOOP->op_nextop			opindex
 op_lastop	cLOOP->op_lastop			opindex
 cop_label	cCOP->cop_label				pvcontents
-cop_stash	*(SV**)&cCOP->cop_stash			svindex
+cop_stashpv	cCOP					pvcontents	x
 cop_file	cCOP					pvcontents	x
 cop_seq		cCOP->cop_seq				U32
 cop_arybase	cCOP->cop_arybase			I32

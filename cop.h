@@ -10,10 +10,11 @@
 struct cop {
     BASEOP
     char *	cop_label;	/* label for this construct */
-    HV *	cop_stash;	/* package line was compiled in */
 #ifdef USE_ITHREADS
+    char *	cop_stashpv;	/* package line was compiled in */
     char *	cop_file;	/* file name the following line # is from */
 #else
+    HV *	cop_stash;	/* package line was compiled in */
     GV *	cop_filegv;	/* file the following line # is from */
 #endif
     U32		cop_seq;	/* parse sequence number */
@@ -33,11 +34,11 @@ struct cop {
 				 ? GvSV(gv_fetchfile(CopFILE(c))) : Nullsv)
 #  define CopFILEAV(c)		(CopFILE(c) \
 				 ? GvAV(gv_fetchfile(CopFILE(c))) : Nullav)
-#  define CopSTASH(c)		(CopSTASHPV(c) \
-				 ? gv_fetchstash(CopSTASHPV(c)) : Nullhv)
-#  define CopSTASH_set(c,hv)	((c)->cop_stashpv = HvNAME(hv))	/* XXX */
-#  define CopSTASHPV_set(c,pv)	((c)->cop_stashpv = pv)
 #  define CopSTASHPV(c)		((c)->cop_stashpv)
+#  define CopSTASHPV_set(c,pv)	((c)->cop_stashpv = savepv(pv))	/* XXX */
+#  define CopSTASH(c)		(CopSTASHPV(c) \
+				 ? gv_stashpv(CopSTASHPV(c),GV_ADD) : Nullhv)
+#  define CopSTASH_set(c,hv)	CopSTASHPV_set(c, HvNAME(hv))
 #else
 #  define CopFILEGV(c)		((c)->cop_filegv)
 #  define CopFILEGV_set(c,gv)	((c)->cop_filegv = gv)
@@ -48,6 +49,7 @@ struct cop {
 #  define CopSTASH(c)		((c)->cop_stash)
 #  define CopSTASH_set(c,hv)	((c)->cop_stash = hv)
 #  define CopSTASHPV(c)		(CopSTASH(c) ? HvNAME(CopSTASH(c)) : Nullch)
+#  define CopSTASHPV_set(c,pv)	CopSTASH_set(c, gv_stashpv(pv,GV_ADD))
 #endif /* USE_ITHREADS */
 
 #define CopLINE(c)		((c)->cop_line)

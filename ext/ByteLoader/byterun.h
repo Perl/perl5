@@ -125,7 +125,7 @@ enum {
     INSN_OP_NEXTOP,			/* 106 */
     INSN_OP_LASTOP,			/* 107 */
     INSN_COP_LABEL,			/* 108 */
-    INSN_COP_STASH,			/* 109 */
+    INSN_COP_STASHPV,			/* 109 */
     INSN_COP_FILE,			/* 110 */
     INSN_COP_SEQ,			/* 111 */
     INSN_COP_ARYBASE,			/* 112 */

@@ -2084,7 +2084,7 @@ S_init_main_stash(pTHX)
     sv_grow(ERRSV, 240);	/* Preallocate - for immediate signals. */
     sv_setpvn(ERRSV, "", 0);
     PL_curstash = PL_defstash;
-    PL_compiling.cop_stash = PL_defstash;
+    CopSTASH_set(&PL_compiling, PL_defstash);
     PL_globalstash = GvHV(gv_fetchpv("CORE::GLOBAL::", GV_ADDMULTI, SVt_PVHV));
     /* We must init $/ before switches are processed. */
     sv_setpvn(get_sv("/", TRUE), "\n", 1);

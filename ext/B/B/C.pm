@@ -293,7 +293,6 @@ sub B::COP::save {
     my ($op, $level) = @_;
     my $sym = objsym($op);
     return $sym if defined $sym;
-    my $stashsym = $op->stash->save;
     warn sprintf("COP: line %d file %s\n", $op->line, $op->file)
 	if $debug_cops;
     $copsect->add(sprintf("s\\_%x, s\\_%x, %s,$handle_VC_problem %u, %u, %u, 0x%x, 0x%x, %s, Nullhv, Nullgv, %u, %d, %u",
@@ -303,7 +302,7 @@ sub B::COP::save {
 			  $op->arybase, $op->line));
     my $copix = $copsect->index;
     $init->add(sprintf("CopFILE_set(&cop_list[%d], %s);", $copix, cstring($op->file)),
-	       sprintf("cop_list[%d].cop_stash = %s;", $copix, $stashsym));
+	       sprintf("CopSTASHPV_set(&cop_list[%d], %s);", $copix, cstring($op->stashpv));
     savesym($op, "(OP*)&cop_list[$copix]");
 }
 

@@ -278,8 +278,7 @@ sub B::LOOP::bytecode {
 
 sub B::COP::bytecode {
     my $op = shift;
-    my $stash = $op->stash;
-    my $stashix = $stash->objix;
+    my $stashpv = $op->stashpv;
     my $file = $op->file;
     my $line = $op->line;
     my $warnings = $op->warnings;
@@ -288,10 +287,11 @@ sub B::COP::bytecode {
 	printf "# line %s:%d\n", $file, $line;
     }
     $op->B::OP::bytecode;
-    printf <<"EOT", pvstring($op->label), $op->cop_seq, pvstring($file), $op->arybase;
+    printf <<"EOT", pvstring($op->label), pvstring($stashpv), $op->cop_seq, pvstring($file), $op->arybase;
 newpv %s
 cop_label
-cop_stash $stashix
+newpv %s
+cop_stashpv
 cop_seq %d
 newpv %s
 cop_file

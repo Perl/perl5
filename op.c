@@ -776,7 +776,9 @@ S_cop_free(pTHX_ COP* cop)
     Safefree(cop->cop_label);
 #ifdef USE_ITHREADS
     Safefree(CopFILE(cop));		/* XXXXX share in a pvtable? */
+    Safefree(CopSTASHPV(cop));		/* XXXXX share in a pvtable? */
 #else
+    /* NOTE: COP.cop_stash is not refcounted */
     SvREFCNT_dec(CopFILEGV(cop));
 #endif
     if (! specialWARN(cop->cop_warnings))
@@ -3330,7 +3332,7 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
 #else
     CopFILEGV_set(cop, (GV*)SvREFCNT_inc(CopFILEGV(PL_curcop)));
 #endif
-    cop->cop_stash = PL_curstash;
+    CopSTASH_set(cop, PL_curstash);
 
     if (PERLDB_LINE && PL_curstash != PL_debstash) {
 	SV **svp = av_fetch(CopFILEAV(PL_curcop), (I32)CopLINE(cop), FALSE);
@@ -4496,15 +4498,24 @@ void
 Perl_newCONSTSUB(pTHX_ HV *stash, char *name, SV *sv)
 {
     dTHR;
-    U32 oldhints = PL_hints;
-    HV *old_cop_stash = PL_curcop->cop_stash;
-    HV *old_curstash = PL_curstash;
-    line_t oldline = CopLINE(PL_curcop);
-    CopLINE_set(PL_curcop, PL_copline);
 
+    ENTER;
+    SAVECOPLINE(PL_curcop);
+    SAVEHINTS();
+
+    CopLINE_set(PL_curcop, PL_copline);
     PL_hints &= ~HINT_BLOCK_SCOPE;
-    if(stash)
-	PL_curstash = PL_curcop->cop_stash = stash;
+
+    if (stash) {
+	SAVESPTR(PL_curstash);
+	SAVECOPSTASH(PL_curcop);
+	PL_curstash = stash;
+#ifdef USE_ITHREADS
+	CopSTASHPV(PL_curcop) = stash ? HvNAME(stash) : Nullch;
+#else
+	CopSTASH(PL_curcop) = stash;
+#endif
+    }
 
     newATTRSUB(
 	start_subparse(FALSE, 0),
@@ -4514,10 +4525,7 @@ Perl_newCONSTSUB(pTHX_ HV *stash, char *name, SV *sv)
 	newSTATEOP(0, Nullch, newSVOP(OP_CONST, 0, sv))
     );
 
-    PL_hints = oldhints;
-    PL_curcop->cop_stash = old_cop_stash;
-    PL_curstash = old_curstash;
-    CopLINE_set(PL_curcop, oldline);
+    LEAVE;
 }
 
 CV *

@@ -254,7 +254,7 @@ PP(pp_rv2gv)
 			    }
 			}
 		    }
-		    gv_init(gv, PL_curcop->cop_stash, name, len, 0);
+		    gv_init(gv, CopSTASH(PL_curcop), name, len, 0);
 		    sv_upgrade(sv, SVt_RV);
 		    SvRV(sv) = (SV *) gv;
 		    SvROK_on(sv);
@@ -581,7 +581,7 @@ PP(pp_bless)
     HV *stash;
 
     if (MAXARG == 1)
-	stash = PL_curcop->cop_stash;
+	stash = CopSTASH(PL_curcop);
     else {
 	SV *ssv = POPs;
 	STRLEN len;

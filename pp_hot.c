@@ -2778,7 +2778,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 		sep = p, leaf = p + 2;
 	}
 	if (!sep || ((sep - name) == 5 && strnEQ(name, "SUPER", 5))) {
-	    packname = HvNAME(sep ? PL_curcop->cop_stash : stash);
+	    packname = sep ? CopSTASHPV(PL_curcop) : HvNAME(stash);
 	    packlen = strlen(packname);
 	}
 	else {

@@ -828,11 +828,11 @@ byterun(pTHXo_ struct bytestream bs)
 		cCOP->cop_label = arg;
 		break;
 	    }
-	  case INSN_COP_STASH:		/* 109 */
+	  case INSN_COP_STASHPV:		/* 109 */
 	    {
-		svindex arg;
-		BGET_svindex(arg);
-		*(SV**)&cCOP->cop_stash = arg;
+		pvcontents arg;
+		BGET_pvcontents(arg);
+		BSET_cop_stashpv(cCOP, arg);
 		break;
 	    }
 	  case INSN_COP_FILE:		/* 110 */

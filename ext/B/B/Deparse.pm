@@ -770,7 +770,7 @@ sub pp_nextstate {
 	   and $seq > $self->{'subs_todo'}[0][0]) {
 	push @text, $self->next_todo;
     }
-    my $stash = $op->stash->NAME;
+    my $stash = $op->stashpv;
     if ($stash ne $self->{'curstash'}) {
 	push @text, "package $stash;\n";
 	$self->{'curstash'} = $stash;

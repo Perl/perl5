@@ -111,8 +111,10 @@
     } STMT_END
 
 #ifdef USE_ITHREADS
+#  define SAVECOPSTASH(cop)	SAVEPPTR(CopSTASHPV(cop))
 #  define SAVECOPFILE(cop)	SAVEPPTR(CopFILE(cop))
 #else
+#  define SAVECOPSTASH(cop)	SAVESPTR(CopSTASH(cop))
 #  define SAVECOPFILE(cop)	SAVESPTR(CopFILEGV(cop))
 #endif
 

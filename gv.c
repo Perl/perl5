@@ -300,7 +300,7 @@ Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
 	if ((nsplit - origname) == 5 && strnEQ(origname, "SUPER", 5)) {
 	    /* ->SUPER::method should really be looked up in original stash */
 	    SV *tmpstr = sv_2mortal(Perl_newSVpvf(aTHX_ "%s::SUPER",
-					     HvNAME(PL_curcop->cop_stash)));
+						  CopSTASHPV(PL_curcop)));
 	    stash = gv_stashpvn(SvPVX(tmpstr), SvCUR(tmpstr), TRUE);
 	    DEBUG_o( Perl_deb(aTHX_ "Treating %s as %s::%s\n",
 			 origname, HvNAME(stash), name) );
@@ -559,7 +559,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 		}
 	    }
 	    else
-		stash = PL_curcop->cop_stash;
+		stash = CopSTASH(PL_curcop);
 	}
 	else
 	    stash = PL_defstash;

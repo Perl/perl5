@@ -2369,8 +2369,11 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 		 SvTYPE(SvRV(sstr)) == SVt_PVGV) {
 	    sstr = SvRV(sstr);
 	    if (sstr == dstr) {
-		if (PL_curcop->cop_stash != GvSTASH(dstr))
+		if (GvIMPORTED(dstr) != GVf_IMPORTED
+		    && CopSTASH(PL_curcop) != GvSTASH(dstr))
+		{
 		    GvIMPORTED_on(dstr);
+		}
 		GvMULTI_on(dstr);
 		return;
 	    }
@@ -2424,8 +2427,11 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 	    gp_free((GV*)dstr);
 	    GvGP(dstr) = gp_ref(GvGP(sstr));
 	    SvTAINT(dstr);
-	    if (PL_curcop->cop_stash != GvSTASH(dstr))
+	    if (GvIMPORTED(dstr) != GVf_IMPORTED
+		&& CopSTASH(PL_curcop) != GvSTASH(dstr))
+	    {
 		GvIMPORTED_on(dstr);
+	    }
 	    GvMULTI_on(dstr);
 	    return;
 	}
@@ -2473,8 +2479,11 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 		    else
 			dref = (SV*)GvAV(dstr);
 		    GvAV(dstr) = (AV*)sref;
-		    if (PL_curcop->cop_stash != GvSTASH(dstr))
+		    if (GvIMPORTED_AV_off(dstr)
+			&& CopSTASH(PL_curcop) != GvSTASH(dstr))
+		    {
 			GvIMPORTED_AV_on(dstr);
+		    }
 		    break;
 		case SVt_PVHV:
 		    if (intro)
@@ -2482,8 +2491,11 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 		    else
 			dref = (SV*)GvHV(dstr);
 		    GvHV(dstr) = (HV*)sref;
-		    if (PL_curcop->cop_stash != GvSTASH(dstr))
+		    if (GvIMPORTED_HV_off(dstr)
+			&& CopSTASH(PL_curcop) != GvSTASH(dstr))
+		    {
 			GvIMPORTED_HV_on(dstr);
+		    }
 		    break;
 		case SVt_PVCV:
 		    if (intro) {
@@ -2535,8 +2547,11 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 			GvASSUMECV_on(dstr);
 			PL_sub_generation++;
 		    }
-		    if (PL_curcop->cop_stash != GvSTASH(dstr))
+		    if (GvIMPORTED_CV_off(dstr)
+			&& CopSTASH(PL_curcop) != GvSTASH(dstr))
+		    {
 			GvIMPORTED_CV_on(dstr);
+		    }
 		    break;
 		case SVt_PVIO:
 		    if (intro)
@@ -2551,8 +2566,11 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 		    else
 			dref = (SV*)GvSV(dstr);
 		    GvSV(dstr) = sref;
-		    if (PL_curcop->cop_stash != GvSTASH(dstr))
+		    if (GvIMPORTED_SV_off(dstr)
+			&& CopSTASH(PL_curcop) != GvSTASH(dstr))
+		    {
 			GvIMPORTED_SV_on(dstr);
+		    }
 		    break;
 		}
 		if (dref)
@@ -6175,7 +6193,7 @@ perl_clone_using(PerlInterpreter *proto_perl, IV flags,
     sv_table_store(PL_sv_table, (SV*)proto_perl->Istrtab, (SV*)PL_strtab);
 
     PL_compiling		= proto_perl->Icompiling;
-    PL_compiling.cop_stash	= hv_dup(PL_compiling.cop_stash);
+    PL_compiling.cop_stashpv	= SAVEPV(PL_compiling.cop_stashpv);
     PL_compiling.cop_file	= SAVEPV(PL_compiling.cop_file);
     PL_compiling.cop_warnings	= sv_dup_inc(PL_compiling.cop_warnings);
     if (proto_perl->Tcurcop == &proto_perl->Icompiling)
