@@ -373,11 +373,17 @@ Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
 		    i = t;
 		else			/* @- */
 		    i = s;
-                SvREADONLY_on(sv);
 		sv_setiv(sv,i);
 	    }
     }
     return 0;
+}
+
+int
+Perl_magic_regdatum_set(pTHX_ SV *sv, MAGIC *mg)
+{
+    dTHR;
+    Perl_croak(aTHX_ PL_no_modify);
 }
 
 U32

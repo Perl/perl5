@@ -2852,7 +2852,8 @@ EXT MGVTBL PL_vtbl_defelem = {MEMBER_TO_FPTR(Perl_magic_getdefelem),MEMBER_TO_FP
 
 EXT MGVTBL PL_vtbl_regexp = {0,0,0,0, MEMBER_TO_FPTR(Perl_magic_freeregexp)};
 EXT MGVTBL PL_vtbl_regdata = {0, 0, MEMBER_TO_FPTR(Perl_magic_regdata_cnt), 0, 0};
-EXT MGVTBL PL_vtbl_regdatum = {MEMBER_TO_FPTR(Perl_magic_regdatum_get), 0, 0, 0, 0};
+EXT MGVTBL PL_vtbl_regdatum = {MEMBER_TO_FPTR(Perl_magic_regdatum_get),
+			       MEMBER_TO_FPTR(Perl_magic_regdatum_set), 0, 0, 0};
 
 #ifdef USE_LOCALE_COLLATE
 EXT MGVTBL PL_vtbl_collxfrm = {0,

@@ -1680,6 +1680,7 @@ p	|int	|magic_mutexfree|SV* sv|MAGIC* mg
 p	|int	|magic_nextpack	|SV* sv|MAGIC* mg|SV* key
 p	|U32	|magic_regdata_cnt|SV* sv|MAGIC* mg
 p	|int	|magic_regdatum_get|SV* sv|MAGIC* mg
+p	|int	|magic_regdatum_set|SV* sv|MAGIC* mg
 p	|int	|magic_set	|SV* sv|MAGIC* mg
 p	|int	|magic_setamagic|SV* sv|MAGIC* mg
 p	|int	|magic_setarylen|SV* sv|MAGIC* mg

@@ -361,6 +361,7 @@
 #define magic_nextpack		Perl_magic_nextpack
 #define magic_regdata_cnt	Perl_magic_regdata_cnt
 #define magic_regdatum_get	Perl_magic_regdatum_get
+#define magic_regdatum_set	Perl_magic_regdatum_set
 #define magic_set		Perl_magic_set
 #define magic_setamagic		Perl_magic_setamagic
 #define magic_setarylen		Perl_magic_setarylen
@@ -1820,6 +1821,7 @@
 #define magic_nextpack(a,b,c)	Perl_magic_nextpack(aTHX_ a,b,c)
 #define magic_regdata_cnt(a,b)	Perl_magic_regdata_cnt(aTHX_ a,b)
 #define magic_regdatum_get(a,b)	Perl_magic_regdatum_get(aTHX_ a,b)
+#define magic_regdatum_set(a,b)	Perl_magic_regdatum_set(aTHX_ a,b)
 #define magic_set(a,b)		Perl_magic_set(aTHX_ a,b)
 #define magic_setamagic(a,b)	Perl_magic_setamagic(aTHX_ a,b)
 #define magic_setarylen(a,b)	Perl_magic_setarylen(aTHX_ a,b)
@@ -3569,6 +3571,8 @@
 #define magic_regdata_cnt	Perl_magic_regdata_cnt
 #define Perl_magic_regdatum_get	CPerlObj::Perl_magic_regdatum_get
 #define magic_regdatum_get	Perl_magic_regdatum_get
+#define Perl_magic_regdatum_set	CPerlObj::Perl_magic_regdatum_set
+#define magic_regdatum_set	Perl_magic_regdatum_set
 #define Perl_magic_set		CPerlObj::Perl_magic_set
 #define magic_set		Perl_magic_set
 #define Perl_magic_setamagic	CPerlObj::Perl_magic_setamagic
