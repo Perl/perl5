@@ -13,25 +13,25 @@ BEGIN failed--compilation aborted at - line 3.
 ########
 
 # Check compile time scope of pragma
-use warnings 'syntax' ;
+use warnings 'deprecated' ;
 {
     no warnings ;
-    my $a =+ 1 ;
+    1 if $a EQ $b ;
 }
-my $a =+ 1 ;
+1 if $a EQ $b ;
 EXPECT
-Reversed += operator at - line 8.
+Use of EQ is deprecated at - line 8.
 ########
 
 # Check compile time scope of pragma
 no warnings;
 {
-    use warnings 'syntax' ;
-    my $a =+ 1 ;
+    use warnings 'deprecated' ;
+    1 if $a EQ $b ;
 }
-my $a =+ 1 ;
+1 if $a EQ $b ;
 EXPECT
-Reversed += operator at - line 6.
+Use of EQ is deprecated at - line 6.
 ########
 
 # Check runtime scope of pragma
@@ -67,55 +67,55 @@ EXPECT
 Use of uninitialized value in scalar chop at - line 6.
 ########
 
-use warnings 'syntax' ;
-my $a =+ 1 ;
+use warnings 'deprecated' ;
+1 if $a EQ $b ;
 EXPECT
-Reversed += operator at - line 3.
+Use of EQ is deprecated at - line 3.
 ########
 
 --FILE-- abc
-my $a =+ 1 ;
+1 if $a EQ $b ;
 1;
 --FILE-- 
-use warnings 'syntax' ;
+use warnings 'deprecated' ;
 require "./abc";
 EXPECT
 
 ########
 
 --FILE-- abc
-use warnings 'syntax' ;
+use warnings 'deprecated' ;
 1;
 --FILE-- 
 require "./abc";
-my $a =+ 1 ;
+1 if $a EQ $b ;
 EXPECT
 
 ########
 
 --FILE-- abc
-use warnings 'syntax' ;
-my $a =+ 1 ;
+use warnings 'deprecated' ;
+1 if $a EQ $b ;
 1;
 --FILE-- 
 use warnings 'uninitialized' ;
 require "./abc";
 my $a ; chop $a ;
 EXPECT
-Reversed += operator at ./abc line 2.
+Use of EQ is deprecated at ./abc line 2.
 Use of uninitialized value in scalar chop at - line 3.
 ########
 
 --FILE-- abc.pm
-use warnings 'syntax' ;
-my $a =+ 1 ;
+use warnings 'deprecated' ;
+1 if $a EQ $b ;
 1;
 --FILE-- 
 use warnings 'uninitialized' ;
 use abc;
 my $a ; chop $a ;
 EXPECT
-Reversed += operator at abc.pm line 2.
+Use of EQ is deprecated at abc.pm line 2.
 Use of uninitialized value in scalar chop at - line 3.
 ########
 

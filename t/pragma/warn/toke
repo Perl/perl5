@@ -3,6 +3,12 @@ toke.c	AOK
     we seem to have lost a few ambiguous warnings!!
 
  
+             	1 if $a EQ $b ;
+             	1 if $a NE $b ;
+             	1 if $a LT $b ;
+             	1 if $a GT $b ;
+             	1 if $a GE $b ;
+             	1 if $a LE $b ;
  		$a = <<;
  		Use of comma-less variable list is deprecated 
 		(called 3 times via depcom)
@@ -125,6 +131,27 @@ toke.c	AOK
 
 __END__
 # toke.c 
+use warnings 'deprecated' ;
+1 if $a EQ $b ;
+1 if $a NE $b ;
+1 if $a GT $b ;
+1 if $a LT $b ;
+1 if $a GE $b ;
+1 if $a LE $b ;
+no warnings 'deprecated' ;
+1 if $a EQ $b ;
+1 if $a NE $b ;
+1 if $a GT $b ;
+1 if $a LT $b ;
+1 if $a GE $b ;
+1 if $a LE $b ;
+EXPECT
+Use of EQ is deprecated at - line 3.
+Use of NE is deprecated at - line 4.
+Use of GT is deprecated at - line 5.
+Use of LT is deprecated at - line 6.
+Use of GE is deprecated at - line 7.
+Use of LE is deprecated at - line 8.
 ########
 # toke.c
 use warnings 'deprecated' ;

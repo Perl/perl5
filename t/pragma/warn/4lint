@@ -4,11 +4,11 @@ __END__
 -W
 # lint: check compile time $^W is zapped
 BEGIN { $^W = 0 ;}
-$a = 1 ;
-$a =+ 1 ;
+$a = $b = 1 ;
+$a = 1 if $a EQ $b ;
 close STDIN ; print STDIN "abc" ;
 EXPECT
-Reversed += operator at - line 5.
+Use of EQ is deprecated at - line 5.
 print() on closed filehandle main::STDIN at - line 6.
 ########
 -W
@@ -30,11 +30,11 @@ print() on closed filehandle main::STDIN at - line 5.
 -W
 # lint: check "no warnings" is zapped
 no warnings ;
-$a = 1 ;
-$a =+ 1 ;
+$a = $b = 1 ;
+$a = 1 if $a EQ $b ;
 close STDIN ; print STDIN "abc" ;
 EXPECT
-Reversed += operator at - line 5.
+Use of EQ is deprecated at - line 5.
 print() on closed filehandle main::STDIN at - line 6.
 ########
 -W
@@ -57,58 +57,58 @@ print() on closed filehandle main::STDIN at - line 5.
 ########
 -W
 --FILE-- abc.pm
-no warnings 'syntax' ;
-my $a = 0;
-$a =+ 1 ;
+no warnings 'deprecated' ;
+my ($a, $b) = (0,0);
+1 if $a EQ $b ;
 1;
 --FILE-- 
 no warnings 'uninitialized' ;
 use abc;
 my $a ; chop $a ;
 EXPECT
-Reversed += operator at abc.pm line 3.
+Use of EQ is deprecated at abc.pm line 3.
 Use of uninitialized value in scalar chop at - line 3.
 ########
 -W
 --FILE-- abc
-no warnings 'syntax' ;
-my $a = 0;
-$a =+ 1 ;
+no warnings 'deprecated' ;
+my ($a, $b) = (0,0);
+1 if $a EQ $b ;
 1;
 --FILE-- 
 no warnings 'uninitialized' ;
 require "./abc";
 my $a ; chop $a ;
 EXPECT
-Reversed += operator at ./abc line 3.
+Use of EQ is deprecated at ./abc line 3.
 Use of uninitialized value in scalar chop at - line 3.
 ########
 -W
 --FILE-- abc.pm
 BEGIN {$^W = 0}
-my $a = 0 ;
-$a =+ 1 ;
+my ($a, $b) = (0,0);
+1 if $a EQ $b ;
 1;
 --FILE-- 
 $^W = 0 ;
 use abc;
 my $a ; chop $a ;
 EXPECT
-Reversed += operator at abc.pm line 3.
+Use of EQ is deprecated at abc.pm line 3.
 Use of uninitialized value in scalar chop at - line 3.
 ########
 -W
 --FILE-- abc
 BEGIN {$^W = 0}
-my $a = 0 ;
-$a =+ 1 ;
+my ($a, $b) = (0,0);
+1 if $a EQ $b ;
 1;
 --FILE-- 
 $^W = 0 ;
 require "./abc";
 my $a ; chop $a ;
 EXPECT
-Reversed += operator at ./abc line 3.
+Use of EQ is deprecated at ./abc line 3.
 Use of uninitialized value in scalar chop at - line 3.
 ########
 -W
