@@ -68,10 +68,10 @@ sub main'open3 {
         die "open2: fork failed: $!";
     } elsif ($kidpid == 0) {
 	if ($dup_wtr) {
-	    open(STDIN,  ">&$dad_wtr") if (fileno(STDIN) != fileno($dad_wtr));
+	    open(STDIN,  "<&$dad_wtr") if (fileno(STDIN) != fileno($dad_wtr));
 	} else {
 	    close($dad_wtr);
-	    open(STDIN,  ">&$kid_rdr");
+	    open(STDIN,  "<&$kid_rdr");
 	}
 	if ($dup_rdr) {
 	    open(STDOUT, ">&$dad_rdr") if (fileno(STDOUT) != fileno($dad_rdr));
