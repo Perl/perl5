@@ -1106,16 +1106,6 @@ and so on) and not for Unicode characters, so Perl behaved as if you meant
 If you actually want to pack Unicode codepoints, use the C<"U"> format
 instead.
 
-=item chmod() mode argument is missing initial 0
-
-(W chmod) A novice will sometimes say
-
-    chmod 777, $filename
-
-not realizing that 777 will be interpreted as a decimal number,
-equivalent to 01411.  Octal constants are introduced with a leading 0 in
-Perl, as in C.
-
 =item close() on unopened filehandle %s
 
 (W unopened) You tried to close a filehandle that was never opened.
@@ -3496,11 +3486,6 @@ Configure knows about.
 certain type.  Arrays must be @NAME or C<@{EXPR}>.  Hashes must be
 %NAME or C<%{EXPR}>.  No implicit dereferencing is allowed--use the
 {EXPR} forms as an explicit dereference.  See L<perlref>.
-
-=item umask: argument is missing initial 0
-
-(W umask) A umask of 222 is incorrect.  It should be 0222, because octal
-literals always start with 0 in Perl, as in C.
 
 =item umask not implemented
 
