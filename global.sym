@@ -1082,6 +1082,7 @@ setenv_getix
 share_hek
 sharepvn
 sighandler
+sighandlerp
 skipspace
 stack_grow
 start_subparse

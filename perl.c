@@ -164,6 +164,7 @@ register PerlInterpreter *sv_interp;
 	nrs = newSVpv("\n", 1);
 	rs = SvREFCNT_inc(nrs);
 
+	sighandlerp = sighandler;
 	MUTEX_INIT(&malloc_mutex);
 	MUTEX_INIT(&sv_mutex);
 	MUTEX_INIT(&eval_mutex);

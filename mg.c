@@ -784,7 +784,7 @@ MAGIC* mg;
     }
     if (SvTYPE(sv) == SVt_PVGV || SvROK(sv)) {
 	if (i)
-	    (void)rsignal(i, sighandler);
+	    (void)rsignal(i, sighandlerp);
 	else
 	    *svp = SvREFCNT_inc(sv);
 	return 0;
@@ -811,7 +811,7 @@ MAGIC* mg;
 	if (!strchr(s,':') && !strchr(s,'\''))
 	    sv_setpv(sv, form("main::%s", s));
 	if (i)
-	    (void)rsignal(i, sighandler);
+	    (void)rsignal(i, sighandlerp);
 	else
 	    *svp = SvREFCNT_inc(sv);
     }

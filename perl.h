@@ -1384,6 +1384,7 @@ EXT U32 *	profiledata;
 EXT int		maxo INIT(MAXO);/* Number of ops */
 EXT char *	osname;		/* operating system */
 EXT char *	sh_path INIT(SH_PATH); /* full path of shell */
+EXT Sighandler_t	sighandlerp;
 
 EXT XPV*	xiv_arenaroot;	/* list of allocated xiv areas */
 EXT IV **	xiv_root;	/* free xiv list--shared by interpreters */
