@@ -560,6 +560,7 @@ sub qquote {
     # no need for 3 digits in escape for these
     s/([\0-\037])(?!\d)/'\\'.sprintf('%o',ord($1))/eg;
     s/([\0-\037\177])/'\\'.sprintf('%03o',ord($1))/eg;
+    # all but last branch below not supported --BEHAVIOR SUBJECT TO CHANGE--
     if ($high eq "iso8859") {
       s/([\200-\240])/'\\'.sprintf('%o',ord($1))/eg;
     } elsif ($high eq "utf8") {
@@ -572,7 +573,10 @@ sub qquote {
     }
   }
   else { # ebcdic
-      s/([^ !"\#\$%&'()*+,\-.\/0-9:;<=>?\@A-Z[\\\]^_`a-z{|}~])/'\\'.sprintf('%03o',ord($1))/eg;
+      s{([^ !"\#\$%&'()*+,\-.\/0-9:;<=>?\@A-Z[\\\]^_`a-z{|}~])(?!\d)}
+       {my $v = ord($1); '\\'.sprintf(($v <= 037 ? '%o' : '%03o'), $v)}eg;
+      s{([^ !"\#\$%&'()*+,\-.\/0-9:;<=>?\@A-Z[\\\]^_`a-z{|}~])}
+       {'\\'.sprintf('%03o',ord($1))}eg;
   }
 
   return qq("$_");
