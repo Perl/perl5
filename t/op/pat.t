@@ -1422,16 +1422,21 @@ print "ok 247\n";
 	    print "ok $test\n"; $test++;
 	}
 	print "# IsASCII\n";
-	if ($code le '00007f') {
-	    print "not " unless $char =~ /\p{IsASCII}/;
-	    print "ok $test\n"; $test++;
-	    print "not " if     $char =~ /\P{IsASCII}/;
-	    print "ok $test\n"; $test++;
+	if (ord("A") == 193) {
+	    print "ok $test # Skip: in EBCDIC\n"; $test++;
+	    print "ok $test # Skip: in EBCDIC\n"; $test++;
 	} else {
-	    print "not " if     $char =~ /\p{IsASCII}/;
-	    print "ok $test\n"; $test++;
-	    print "not " unless $char =~ /\P{IsASCII}/;
-	    print "ok $test\n"; $test++;
+	    if ($code le '00007f') {
+		print "not " unless $char =~ /\p{IsASCII}/;
+		print "ok $test\n"; $test++;
+		print "not " if     $char =~ /\P{IsASCII}/;
+		print "ok $test\n"; $test++;
+	    } else {
+		print "not " if     $char =~ /\p{IsASCII}/;
+		print "ok $test\n"; $test++;
+		print "not " unless $char =~ /\P{IsASCII}/;
+		print "ok $test\n"; $test++;
+	    }
 	}
 	print "# IsCntrl\n";
 	if ($class =~ /^C/) {
