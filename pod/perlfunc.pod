@@ -5257,7 +5257,7 @@ You can import symbolic mode constants (C<S_IF*>) and functions
     $group_read    = ($mode & S_IRGRP) >> 3;
     $other_execute =  $mode & S_IXOTH;
 
-    printf "Permissions are %04o\n", S_ISMODE($mode), "\n";
+    printf "Permissions are %04o\n", S_IMODE($mode), "\n";
 
     $is_setuid     =  $mode & S_ISUID;
     $is_setgid     =  S_ISDIR($mode);
@@ -5285,7 +5285,7 @@ The commonly available S_IF* constants are
 
 and the S_IF* functions are
 
-    S_IFMODE($mode)	the part of $mode containing the permission bits
+    S_IMODE($mode)	the part of $mode containing the permission bits
 			and the setuid/setgid/sticky bits
 
     S_IFMT($mode)	the part of $mode containing the file type
