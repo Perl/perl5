@@ -7,6 +7,10 @@ BEGIN {
 	print "1..0 # Skip: not perlio\n";
 	exit 0;
     }
+    if ($ENV{PERL_CORE_MINITEST}) {
+	print "1..0 # Skip: no dynamic loading on miniperl, no threads\n";
+	exit 0;
+    }
 }
 
 require "./test.pl";

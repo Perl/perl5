@@ -3,8 +3,7 @@ package Encode::CN::HZ;
 use strict;
 
 use vars qw($VERSION);
-#$VERSION = do { my @r = (q$Revision: 1.5 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-$VERSION = 1.05_01;
+$VERSION = do { my @r = (q$Revision: 2.1 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode qw(:fallbacks);
 
@@ -152,7 +151,8 @@ sub encode($$;$)
 	    $ret .= pack 'a*', $tmp; # remove UTF8 flag.
 	}
 	elsif ($str =~ s/(.)//) {
-	    my $tmp = $GB->encode($1, $chk);
+	    my $s = $1;
+	    my $tmp = $GB->encode($s, $chk);
 	    last if !defined $tmp;
 	    if (length $tmp == 2) { # maybe a valid GB char (XXX)
 		if ($in_ascii) {
