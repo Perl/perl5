@@ -110,7 +110,9 @@ These are to do with constructing a language handle:
 
 =over
 
-=item $lh = YourProjClass->get_handle( ...langtags... ) || die "lg-handle?";
+=item *
+
+$lh = YourProjClass->get_handle( ...langtags... ) || die "lg-handle?";
 
 This tries loading classes based on the language-tags you give (like
 C<("en-US", "sk", "kon", "es-MX", "ja", "i-klingon")>, and for the first class
@@ -131,7 +133,9 @@ then if nothing comes of that, we use classes named by
 YourProjClass->fallback_language_classes().  Then in the (probably
 quite unlikely) event that that fails, we just return undef.
 
-=item $lh = YourProjClass->get_handleB<()> || die "lg-handle?";
+=item * 
+
+$lh = YourProjClass->get_handleB<()> || die "lg-handle?";
 
 When C<get_handle> is called with an empty parameter list, magic happens:
 

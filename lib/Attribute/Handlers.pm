@@ -596,27 +596,35 @@ Let's you write:
 
 =over
 
-=item C<Bad attribute type: ATTR(%s)>
+=item *
+
+C<Bad attribute type: ATTR(%s)>
 
 An attribute handler was specified with an C<:ATTR(I<ref_type>)>, but the
 type of referent it was defined to handle wasn't one of the five permitted:
 C<SCALAR>, C<ARRAY>, C<HASH>, C<CODE>, or C<ANY>.
 
-=item C<Attribute handler %s doesn't handle %s attributes>
+=item *
+
+ C<Attribute handler %s doesn't handle %s attributes>
 
 A handler for attributes of the specified name I<was> defined, but not
 for the specified type of declaration. Typically encountered whe trying
 to apply a C<VAR> attribute handler to a subroutine, or a C<SCALAR>
 attribute handler to some other type of variable.
 
-=item C<Declaration of %s attribute in package %s may clash with future reserved word>
+=item *
+
+C<Declaration of %s attribute in package %s may clash with future reserved word>
 
 A handler for an attributes with an all-lowercase name was declared. An
 attribute with an all-lowercase name might have a meaning to Perl
 itself some day, even though most don't yet. Use a mixed-case attribute
 name, instead.
 
-=item C<Internal error: %s symbol went missing>
+=item *
+
+C<Internal error: %s symbol went missing>
 
 Something is rotten in the state of the program. An attributed
 subroutine ceased to exist between the point it was declared and the end
