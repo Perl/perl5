@@ -99,7 +99,9 @@ for my $charset (sort keys %Charset) {
 
     open $dst,">$dst_enc" or die "$dst_utf : $!";
     binmode($dst);
-    binmode($dst, ":bytes"); # in case LC_ALL is UTF8ish
+    if (PerlIO::Layer->find('perlio')) {
+	binmode($dst, ":bytes"); # in case LC_ALL is UTF8ish
+    }
     print $dst $txt;
     close($dst); 
     is(compare_text($src_enc, $dst_enc), 0 => "$dst_enc eq $src_enc")
