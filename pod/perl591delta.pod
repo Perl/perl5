@@ -4,8 +4,8 @@ perldelta - what is new for perl v5.9.1
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.9.0 release and
-the 5.9.1 release. See L<perl590delta> for the differences between
+This document describes differences between the 5.9.0 and the 5.9.1
+developement releases. See L<perl590delta> for the differences between
 5.8.0 and 5.9.0.
 
 =head1 Incompatible Changes
@@ -232,7 +232,7 @@ they are called for. Previously callbacks were only invoked in the
 C<case $variable $define)> branch. This change should only affect platform
 maintainers writing configuration hints files.
 
-The portability and clealiness of the Win32 makefiles has been improved.
+The portability and cleanliness of the Win32 makefiles has been improved.
 
 =head1 Known Problems
 
@@ -258,19 +258,18 @@ list of things to do (or nice to have) for perl 5.10.0 :
 Clean up and finish support for assertions. See L<assertions>.
 
 Reimplement the mechanism of lexical pragmas to be more extensible. Fix
-current pragmas that don't work well with lexical scopes or in
-eval(STRING) (C<sort>, C<re> for example). MJD has ideas on this.
+current pragmas that don't work well (or at all) with lexical scopes or in
+run-time eval(STRING) (C<sort>, C<re>, C<encoding> for example). MJD has a
+preliminary patch that implements this.
 
 Fix (or rewrite) the implementation of the C</(?{...})/> closures.
 
 Conversions from byte strings to UTF-8 currently map high bit characters
 to Unicode without translation (or, depending on how you look at it, by
-implicitly assuming the byte strings are in Latin-1). This is wrong,
-because perl assumes the C locale by default. Thus upgrading a string to
-UTF-8 (esp. in place) may change the meaning of its contents regarding
-character classes, case mapping, etc. Try to find a way to fix it without
-breaking all the legacy code out there (and without making the life of the
-XS coders miserable.)
+implicitly assuming that the byte strings are in Latin-1). As perl assumes
+the C locale by default, upgrading a string to UTF-8 may change the
+meaning of its contents regarding character classes, case mapping, etc.
+This should probably emit a warning (at least).
 
 Introduce a new special block, UNITCHECK, which is run at the end of a
 compilation unit (module, file, eval(STRING) block). This will correspond to
@@ -300,7 +299,7 @@ A ponie.
 If you find what you think is a bug, you might check the articles
 recently posted to the comp.lang.perl.misc newsgroup and the perl
 bug database at http://bugs.perl.org/ .  There may also be
-information at http://www.perl.com/ , the Perl Home Page.
+information at http://www.perl.org/ , the Perl Home Page.
 
 If you believe you have an unreported bug, please run the B<perlbug>
 program included with your release.  Be sure to trim your bug down
