@@ -264,7 +264,6 @@ PLib:
 
 dupfiles:
 	Duplicate -y xsubpp ::lib:ExtUtils:xsubpp
-	Duplicate -y :bundled_ext:Digest:MD5:Makefile.mk ::ext:Digest:MD5:Makefile.mk
 
 translators:	miniperl :lib:Config.pm
 .IF "68K" == "$(MACPERL_INST_TOOL_68K)"

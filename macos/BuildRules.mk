@@ -18,7 +18,7 @@ MAKE	 	= BuildProgram
 # We try to support both CodeWarrior MPW Include models
 #
 MWCOptimize    *= 
-MWCPPCOptimize *= ${MWCOptimize}
+MWC68KOptimize *= ${MWCOptimize}
 MWCPPCOptimize *= ${MWCOptimize}
 MPWOptimize    *= 
 MRCOptimize    *= ${MPWOptimize}
