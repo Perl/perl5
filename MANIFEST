@@ -2405,8 +2405,12 @@ t/run/switchx.t                 Test the -x switch
 t/TEST				The regression tester
 t/test.pl			Simple testing library
 t/TestInit.pm			Preamble library for core tests
+t/uni/case.pl			See if Unicode casing works
 t/uni/fold.t			See if Unicode folding works
+t/uni/lower.t			See if Unicode casing works
 t/uni/sprintf.t			See if Unicode sprintf works
+t/uni/title.t			See if Unicode casing works
+t/uni/upper.t			See if Unicode casing works
 taint.c				Tainting code
 thrdvar.h			Per-thread variables
 thread.h			Threading header
