@@ -981,6 +981,52 @@ Perl_vmess(pTHX_ const char *pat, va_list *args)
     return sv;
 }
 
+void
+Perl_write_to_stderr(pTHX_ const char* message, int msglen)
+{
+    IO *io;
+    MAGIC *mg;
+
+    if (PL_stderrgv && SvREFCNT(PL_stderrgv) 
+	&& (io = GvIO(PL_stderrgv))
+	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar))) 
+    {
+	dSP;
+	ENTER;
+	SAVETMPS;
+
+	save_re_context();
+	SAVESPTR(PL_stderrgv);
+	PL_stderrgv = Nullgv;
+
+	PUSHSTACKi(PERLSI_MAGIC);
+
+	PUSHMARK(SP);
+	EXTEND(SP,2);
+	PUSHs(SvTIED_obj((SV*)io, mg));
+	PUSHs(sv_2mortal(newSVpvn(message, msglen)));
+	PUTBACK;
+	call_method("PRINT", G_SCALAR);
+
+	POPSTACK;
+	FREETMPS;
+	LEAVE;
+    }
+    else {
+#ifdef USE_SFIO
+	/* SFIO can really mess with your errno */
+	int e = errno;
+#endif
+	PerlIO *serr = Perl_error_log;
+
+	PERL_WRITE_MSG_TO_CONSOLE(serr, message, msglen);
+	(void)PerlIO_flush(serr);
+#ifdef USE_SFIO
+	errno = e;
+#endif
+    }
+}
+
 OP *
 Perl_vdie(pTHX_ const char* pat, va_list *args)
 {
@@ -1148,19 +1194,7 @@ Perl_vcroak(pTHX_ const char* pat, va_list *args)
     else if (!message)
 	message = SvPVx(ERRSV, msglen);
 
-    {
-#ifdef USE_SFIO
-	/* SFIO can really mess with your errno */
-	int e = errno;
-#endif
-	PerlIO *serr = Perl_error_log;
-
-	PERL_WRITE_MSG_TO_CONSOLE(serr, message, msglen);
-	(void)PerlIO_flush(serr);
-#ifdef USE_SFIO
-	errno = e;
-#endif
-    }
+    write_to_stderr(message, msglen);
     my_failure_exit();
 }
 
@@ -1215,8 +1249,6 @@ Perl_vwarn(pTHX_ const char* pat, va_list *args)
     CV *cv;
     SV *msv;
     STRLEN msglen;
-    IO *io;
-    MAGIC *mg;
 
     msv = vmess(pat, args);
     message = SvPV(msv, msglen);
@@ -1250,25 +1282,7 @@ Perl_vwarn(pTHX_ const char* pat, va_list *args)
 	}
     }
 
-    /* if STDERR is tied, use it instead */
-    if (PL_stderrgv && (io = GvIOp(PL_stderrgv))
-	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar))) {
-	dSP; ENTER;
-	PUSHMARK(SP);
-	XPUSHs(SvTIED_obj((SV*)io, mg));
-	XPUSHs(sv_2mortal(newSVpvn(message, msglen)));
-	PUTBACK;
-	call_method("PRINT", G_SCALAR);
-	LEAVE;
-	return;
-    }
-
-    {
-	PerlIO *serr = Perl_error_log;
-
-	PERL_WRITE_MSG_TO_CONSOLE(serr, message, msglen);
-	(void)PerlIO_flush(serr);
-    }
+    write_to_stderr(message, msglen);
 }
 
 #if defined(PERL_IMPLICIT_CONTEXT)
@@ -1371,11 +1385,7 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 	    PL_restartop = die_where(message, msglen);
 	    JMPENV_JUMP(3);
 	}
-	{
-	    PerlIO *serr = Perl_error_log;
-	    PERL_WRITE_MSG_TO_CONSOLE(serr, message, msglen);
-	    (void)PerlIO_flush(serr);
-	}
+	write_to_stderr(message, msglen);
 	my_failure_exit();
     }
     else {
@@ -1407,11 +1417,7 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 		return;
 	    }
 	}
-	{
-	    PerlIO *serr = Perl_error_log;
-	    PERL_WRITE_MSG_TO_CONSOLE(serr, message, msglen);
-	    (void)PerlIO_flush(serr);
-	}
+	write_to_stderr(message, msglen);
     }
 }
 

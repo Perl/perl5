@@ -490,7 +490,7 @@ installation.
 sub libscan {
     my($self,$path) = @_;
     my($dirs,$file) = ($self->splitpath($path))[1,2];
-    return '' if grep /^RCS|CVS|SCCS|\.svn$/, 
+    return '' if grep /^(?:RCS|CVS|SCCS|\.svn)$/, 
                      $self->splitdir($dirs), $file;
 
     return $path;

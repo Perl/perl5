@@ -794,9 +794,16 @@ READ, and possibly CLOSE, UNTIE and DESTROY.  The class can also provide: BINMOD
 OPEN, EOF, FILENO, SEEK, TELL - if the corresponding perl operators are
 used on the handle.
 
-It is especially useful when perl is embedded in some other program,
-where output to STDOUT and STDERR may have to be redirected in some
-special way. See nvi and the Apache module for examples.
+When STDERR is tied, its PRINT method will be called to issue warnings
+and error messages.  This feature is temporarily disabled during the call, 
+which means you can use C<warn()> inside PRINT without starting a recursive
+loop.  And just like C<__WARN__> and C<__DIE__> handlers, STDERR's PRINT
+method may be called to report parser errors, so the caveats mentioned under 
+L<perlvar/%SIG> apply.
+
+All of this is especially useful when perl is embedded in some other 
+program, where output to STDOUT and STDERR may have to be redirected 
+in some special way.  See nvi and the Apache module for examples.
 
 In our example we're going to create a shouting handle.
 

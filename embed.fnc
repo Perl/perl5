@@ -859,6 +859,7 @@ Afp	|void	|warner		|U32 err|const char* pat|...
 Ap	|void	|vwarner	|U32 err|const char* pat|va_list* args
 p	|void	|watch		|char** addr
 Ap	|I32	|whichsig	|char* sig
+p	|void	|write_to_stderr|const char* message|int msglen
 p	|int	|yyerror	|char* s
 #ifdef USE_PURE_BISON
 p	|int	|yylex_r	|YYSTYPE *lvalp|int *lcharp

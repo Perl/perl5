@@ -280,7 +280,7 @@ threads is released under the same license as Perl.
 
 Thanks to
 
-Richard Soderberg E<lt>rs at crystalflame.netE<gt>
+Richard Soderberg E<lt>perl at crystalflame.netE<gt>
 Helping me out tons, trying to find reasons for races and other weird bugs!
 
 Simon Cozens E<lt>simon at brecon.co.ukE<gt>
