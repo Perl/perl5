@@ -2033,8 +2033,11 @@ PerlIOBase_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 {
     STDCHAR *buf = (STDCHAR *) vbuf;
     if (f) {
-	if (!(PerlIOBase(f)->flags & PERLIO_F_CANREAD))
+        if (!(PerlIOBase(f)->flags & PERLIO_F_CANREAD)) {
+	    PerlIOBase(f)->flags |= PERLIO_F_ERROR;
+	    SETERRNO(EBADF, SS_IVCHAN);
 	    return 0;
+	}
 	while (count > 0) {
 	    SSize_t avail = PerlIO_get_cnt(f);
 	    SSize_t take = 0;
