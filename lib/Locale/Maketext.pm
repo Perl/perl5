@@ -1,11 +1,11 @@
 
-# Time-stamp: "2003-06-21 23:41:57 AHDT"
+# Time-stamp: "2004-01-11 19:02:37 AST"
 
 require 5;
 package Locale::Maketext;
 use strict;
 use vars qw( @ISA $VERSION $MATCH_SUPERS $USING_LANGUAGE_TAGS
-             $USE_LITERALS);
+             $USE_LITERALS $MATCH_SUPERS_TIGHTLY);
 use Carp ();
 use I18N::LangTags 0.21 ();
 
@@ -14,11 +14,12 @@ use I18N::LangTags 0.21 ();
 BEGIN { unless(defined &DEBUG) { *DEBUG = sub () {0} } }
  # define the constant 'DEBUG' at compile-time
 
-$VERSION = "1.06";
+$VERSION = "1.07";
 @ISA = ();
 
 $MATCH_SUPERS = 1;
-$USING_LANGUAGE_TAGS = 1;
+$MATCH_SUPERS_TIGHTLY = 1;
+$USING_LANGUAGE_TAGS  = 1;
  # Turning this off is somewhat of a security risk in that little or no
  # checking will be done on the legality of tokens passed to the
  # eval("use $module_name") in _try_use.  If you turn this off, you have
@@ -246,36 +247,31 @@ sub maketext {
 sub get_handle {  # This is a constructor and, yes, it CAN FAIL.
   # Its class argument has to be the base class for the current
   # application's l10n files.
+
   my($base_class, @languages) = @_;
   $base_class = ref($base_class) || $base_class;
    # Complain if they use __PACKAGE__ as a project base class?
 
-  unless(@languages) {  # Calling with no args is magical!  wooo, magic!
-    if(length( $ENV{'REQUEST_METHOD'} || '' )) { # I'm a CGI
-      @languages = $base_class->_http_accept_langs;
-         # it's off in its own routine because it's complicated
-      
-    } else { # Not running as a CGI: try to puzzle out from the environment
-      if(length( $ENV{'LANG'} || '' )) {
-	push @languages, split m/[,:]/, $ENV{'LANG'};
-         # LANG can be only /one/ locale as far as I know, but what the hey.
-      }
-      if(length( $ENV{'LANGUAGE'} || '' )) {
-	push @languages, split m/[,:]/, $ENV{'LANGUAGE'};
-      }
-      print "Noting ENV LANG ", join(',', @languages),"\n" if DEBUG;
-      # Those are really locale IDs, but they get xlated a few lines down.
-      
-      if(&_try_use('Win32::Locale')) {
-        # If we have that module installed...
-        push @languages, Win32::Locale::get_language()
-         if defined &Win32::Locale::get_language;
-      }
-    }
+  @languages = $base_class->_ambient_langprefs() unless @languages;
+  @languages = $base_class->_langtag_munging(@languages);
+
+  my %seen;
+  foreach my $module_name ( map { $base_class . "::" . $_ }  @languages ) {
+    next unless length $module_name; # sanity
+    next if $seen{$module_name}++        # Already been here, and it was no-go
+            || !&_try_use($module_name); # Try to use() it, but can't it.
+    return($module_name->new); # Make it!
   }
 
-  #------------------------------------------------------------------------
-  print "Lgs1: ", map("<$_>", @languages), "\n" if DEBUG;
+  return undef; # Fail!
+}
+
+###########################################################################
+
+sub _langtag_munging {
+  my($base_class, @languages) = @_;
+
+  DEBUG and print "Lgs1: ", map("<$_>", @languages), "\n";
 
   if($USING_LANGUAGE_TAGS) {
     @languages = map &I18N::LangTags::locale2language_tag($_), @languages;
@@ -283,17 +279,21 @@ sub get_handle {  # This is a constructor and, yes, it CAN FAIL.
      # if it's a locale ID, try converting to a lg tag (untainted),
      # otherwise nix it.
 
-    push @languages, map I18N::LangTags::super_languages($_), @languages
-     if $MATCH_SUPERS;
-
-    @languages =  map { $_, I18N::LangTags::alternate_language_tags($_) }
+    @languages = map {; $_, I18N::LangTags::alternate_language_tags($_) }
                       @languages;    # catch alternation
+    DEBUG and print "Lgs\@", __LINE__, ": ", map("<$_>", @languages), "\n";
 
-    push @languages, I18N::LangTags::panic_languages(@languages)
-      if defined &I18N::LangTags::panic_languages;
+    if( defined &I18N::LangTags::panic_languages ) {
+      push @languages, I18N::LangTags::panic_languages(@languages);
+      DEBUG and print "After adding panic languages:\n", 
+        " Lgs\@", __LINE__, ": ", map("<$_>", @languages), "\n";
+    }
+
+    @languages     = $base_class->_add_supers( @languages );
     
     push @languages, $base_class->fallback_languages;
      # You are free to override fallback_languages to return empty-list!
+    DEBUG and print "Lgs\@", __LINE__, ": ", map("<$_>", @languages), "\n";
 
     @languages =  # final bit of processing:
       map {
@@ -303,23 +303,99 @@ sub get_handle {  # This is a constructor and, yes, it CAN FAIL.
         $it;
       } @languages
     ;
+    DEBUG and print "Nearing end of munging:\n", 
+      " Lgs\@", __LINE__, ": ", map("<$_>", @languages), "\n";
+  } else {
+    DEBUG and print "Bypassing language-tags.\n", 
+      " Lgs\@", __LINE__, ": ", map("<$_>", @languages), "\n";
   }
-  print "Lgs2: ", map("<$_>", @languages), "\n" if DEBUG > 1;
+
+  DEBUG and print "Before adding fallback classes:\n", 
+    " Lgs\@", __LINE__, ": ", map("<$_>", @languages), "\n";
 
   push @languages, $base_class->fallback_language_classes;
    # You are free to override that to return whatever.
 
+  DEBUG and print "Finally:\n", 
+    " Lgs\@", __LINE__, ": ", map("<$_>", @languages), "\n";
 
-  my %seen = ();
-  foreach my $module_name ( map { $base_class . "::" . $_ }  @languages )
-  {
-    next unless length $module_name; # sanity
-    next if $seen{$module_name}++        # Already been here, and it was no-go
-            || !&_try_use($module_name); # Try to use() it, but can't it.
-    return($module_name->new); # Make it!
+  return @languages;
+}
+
+###########################################################################
+
+sub _ambient_langprefs {
+  my $base_class = $_[0];
+  
+  return $base_class->_http_accept_langs
+   if length( $ENV{'REQUEST_METHOD'} || '' ); # I'm a CGI
+       # it's off in its own routine because it's complicated
+
+  # Not running as a CGI: try to puzzle out from the environment
+  my @languages;
+
+  if(length( $ENV{'LANG'} || '' )) {
+    push @languages, split m/[,:]/, $ENV{'LANG'};
+     # LANG can be only /one/ locale as far as I know, but what the hey.
   }
 
-  return undef; # Fail!
+  if(length( $ENV{'LANGUAGE'} || '' )) {
+    push @languages, split m/[,:]/, $ENV{'LANGUAGE'};
+  }
+
+  print "Noting ENV LANG ", join(',', @languages),"\n" if DEBUG;
+  # Those are really locale IDs, but they get xlated a few lines down.
+  
+  if(&_try_use('Win32::Locale')) {
+    # If we have that module installed...
+    push @languages, Win32::Locale::get_language() || ''
+     if defined &Win32::Locale::get_language;
+  }
+
+  return @languages;
+}
+
+###########################################################################
+
+sub _add_supers {
+  my($base_class, @languages) = @_;
+
+  if(!$MATCH_SUPERS) {
+    # Nothing
+    DEBUG and print "Bypassing any super-matching.\n", 
+      " Lgs\@", __LINE__, ": ", map("<$_>", @languages), "\n";
+
+  } elsif( $MATCH_SUPERS_TIGHTLY ) {
+    DEBUG and print "Before adding new supers tightly:\n", 
+      " Lgs\@", __LINE__, ": ", map("<$_>", @languages), "\n";
+
+    my %seen_encoded;
+    foreach my $lang (@languages) {
+      $seen_encoded{ I18N::LangTags::encode_language_tag($lang) } = 1
+    }
+
+    my(@output_languages);
+    foreach my $lang (@languages) {
+      push @output_languages, $lang;
+      foreach my $s ( I18N::LangTags::super_languages($lang) ) {
+        # Note that super_languages returns the longest first.
+        last if $seen_encoded{ I18N::LangTags::encode_language_tag($s) };
+        push @output_languages, $s;
+      }
+    }
+    @languages = @output_languages;
+
+    DEBUG and print "After adding new supers tightly:\n", 
+      " Lgs\@", __LINE__, ": ", map("<$_>", @languages), "\n";
+
+  } else {
+
+    push @languages,  map I18N::LangTags::super_languages($_), @languages;
+    DEBUG and print "After adding supers to end:\n", 
+      " Lgs\@", __LINE__, ": ", map("<$_>", @languages), "\n";
+  }
+  
+  return @languages;
 }
 
 ###########################################################################
