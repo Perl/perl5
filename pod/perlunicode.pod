@@ -368,7 +368,7 @@ and further derived properties:
     Common          Any character (or unassigned code point)
                     not explicitly assigned to a script
 
-For backward compatability, all properties mentioned so far may have C<Is>
+For backward compatibility, all properties mentioned so far may have C<Is>
 prepended to their name (e.g. C<\P{IsLu}> is equal to C<\P{Lu}>).
 
 =head2 Blocks
@@ -393,7 +393,7 @@ For more about blocks, see:
 
 Blocks names are given with the C<In> prefix. For example, the
 Katakana block is referenced via C<\p{InKatakana}>. The C<In>
-prefix may be omitted if there is no nameing conflict with a script
+prefix may be omitted if there is no naming conflict with a script
 or any other property, but it is recommended that C<In> always be used
 to avoid confusion.
 
@@ -879,8 +879,8 @@ characters that are letters as C<\w>.  For example: your locale might
 not think that LATIN SMALL LETTER ETH is a letter (unless you happen
 to speak Icelandic), but Unicode does.
 
-As discussed elswhere, Perl tries to stand one leg (two legs, being
-a quadruped camel?) in two worlds: the old worlds of byte and the new
+As discussed elsewhere, Perl tries to stand one leg (two legs, being
+a quadrupled camel?) in two worlds: the old world of byte and the new
 world of characters, upgrading from bytes to characters when necessary.
 If your legacy code is not explicitly using Unicode, no automatic
 switchover to characters should happen, and characters shouldn't get
@@ -1027,11 +1027,78 @@ in the Perl source code distribution.
 
 =head1 BUGS
 
+=head2 Interaction with locales
+
 Use of locales with Unicode data may lead to odd results.  Currently
 there is some attempt to apply 8-bit locale info to characters in the
 range 0..255, but this is demonstrably incorrect for locales that use
 characters above that range when mapped into Unicode.  It will also
 tend to run slower.  Use of locales with Unicode is discouraged.
+
+=head2 Interaction with extensions
+
+When perl exchanges data with an extension, the extension should be
+able to understand the UTF-8 flag and act accordingly. If the
+extension doesn't know about the flag, the risk is high that it will
+return data that are incorrectly flagged.
+
+So if you're working with Unicode data, consult the documentation of
+every module you're using if there are any issues with Unicode data
+exchange. If the documentation does not talk about Unicode at all,
+suspect the worst and probably look at the source how the module is
+implemented. Modules written completely in perl shouldn't cause
+problems. Modules that directly or indirectly access code written in
+other programming languages are at risk.
+
+For affected functions the simple strategy to avoid data corruption is
+to always make the encoding of the exchanged data explicit. Choose an
+encoding you know the extension can handle. Convert arguments passed
+to the extensions to that encoding and convert results back from that
+encoding. Write wrapper functions that do the conversions for you, so
+you can later change the functions when the extension catches up.
+
+To provide an example let's say the popular Foo::Bar::escape_html
+function doesn't deal with Unicode data yet. The wrapper function
+would convert the argument to raw UTF-8 and convert the result back to
+perl's internal representation like so:
+
+    sub my_escape_html ($) {
+      my($what) = shift;
+      return unless defined $what;
+      Encode::decode_utf8(Foo::Bar::escape_html(Encode::encode_utf8($what)));
+    }
+
+Sometimes, when the extension does not convert data but just stores
+and retrieves them, you will be in a position to use the otherwise
+dangerous Encode::_utf8_on() function. Let's say the popular
+<Foo::Bar> extension, written in C, provides a C<param> method that
+lets you store and retrieve data according to these prototypes:
+
+    $self->param($name, $value);            # set a scalar
+    $value = $self->param($name);           # retrieve a scalar
+
+If it does not yet provide support for any encoding, one could write a
+derived class with such a C<param> method:
+
+    sub param {
+      my($self,$name,$value) = @_;
+      utf8::upgrade($name);     # make sure it is UTF-8 encoded
+      if (defined $value)
+        utf8::upgrade($value);  # make sure it is UTF-8 encoded
+        return $self->SUPER::param($name,$value);
+      } else {
+        my $ret = $self->SUPER::param($name);
+        Encode::_utf8_on($ret); # we know, it is UTF-8 encoded
+        return $ret;
+      }
+    }
+
+Some extensions provide filters on data entry/exit points, as e.g.
+DB_File::filter_store_key and family. Watch out for such filters in
+the documentations of your extensions, they can make the transition to
+Unicode data much easier.
+
+=head2 speed
 
 Some functions are slower when working on UTF-8 encoded strings than
 on byte encoded strings.  All functions that need to hop over
