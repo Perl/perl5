@@ -246,12 +246,11 @@ void
 save_item(item)
 register SV *item;
 {
-    register SV *sv;
+    register SV *sv = NEWSV(0,0);
 
+    sv_setsv(sv,item);
     SSCHECK(3);
     SSPUSHPTR(item);		/* remember the pointer */
-    sv = NEWSV(0,0);
-    sv_setsv(sv,item);
     SSPUSHPTR(sv);		/* remember the value */
     SSPUSHINT(SAVEt_ITEM);
 }
@@ -415,11 +414,11 @@ I32 maxsarg;
     register SV *sv;
     register I32 i;
 
-    SSCHECK(3 * maxsarg);
     for (i = 1; i <= maxsarg; i++) {
-	SSPUSHPTR(sarg[i]);		/* remember the pointer */
 	sv = NEWSV(0,0);
 	sv_setsv(sv,sarg[i]);
+	SSCHECK(3);
+	SSPUSHPTR(sarg[i]);		/* remember the pointer */
 	SSPUSHPTR(sv);			/* remember the value */
 	SSPUSHINT(SAVEt_ITEM);
     }
@@ -600,14 +599,14 @@ I32 base;
 	case SAVEt_GP:				/* scalar reference */
 	    ptr = SSPOPPTR;
 	    gv = (GV*)SSPOPPTR;
-            gp_free(gv);
-            GvGP(gv) = (GP*)ptr;
             if (SvPOK(gv) && SvLEN(gv) > 0) {
                 Safefree(SvPVX(gv));
             }
             SvPVX(gv) = (char *)SSPOPPTR;
             SvCUR(gv) = (STRLEN)SSPOPIV;
             SvLEN(gv) = (STRLEN)SSPOPIV;
+            gp_free(gv);
+            GvGP(gv) = (GP*)ptr;
 	    SvREFCNT_dec(gv);
             break;
 	case SAVEt_FREESV:
