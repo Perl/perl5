@@ -2228,7 +2228,7 @@ s	|void*	|Slab_Alloc	|int m|size_t sz
 #if defined(PERL_IN_PERL_C) || defined(PERL_DECL_PROT)
 s	|void	|find_beginning
 s	|void	|forbid_setid	|char *
-s	|void	|incpush	|char *|int
+s	|void	|incpush	|char *|int|int
 s	|void	|init_interp
 s	|void	|init_ids
 s	|void	|init_lexer

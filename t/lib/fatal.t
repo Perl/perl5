@@ -31,6 +31,6 @@ eval { opendir FOO, 'lkjqweriuapofukndajsdlfjnvcvn' };
 print "not " unless $@ =~ /^Can't open/;
 print "ok $i\n"; ++$i;
 
-eval { $a = opendir FOO, 'lkjqweriuapofukndajsdlfjnvcvn' };
+eval { my $a = opendir FOO, 'lkjqweriuapofukndajsdlfjnvcvn' };
 print "not " if $@ =~ /^Can't open/;
 print "ok $i\n"; ++$i;
