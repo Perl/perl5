@@ -12,13 +12,14 @@ BEGIN {
     }
 }
 
-print "1..13\n";
+print "1..14\n";
 
 my $grk = "grk$$";
 my $utf = "utf$$";
 my $fail1 = "fa$$";
 my $fail2 = "fb$$";
 my $russki = "koi8r$$";
+my $threebyte = "3byte$$";
 
 if (open(GRK, ">$grk")) {
     binmode(GRK, ":bytes");
@@ -131,6 +132,21 @@ if (!defined $warn) {
     print "$warn";
 }
 
+# Create a string of chars that are 3 bytes in UTF-8 
+my $str = "\x{1f80}" x 2048;
+
+# Write them to a file
+open(F,'>:utf8',$threebyte) || die "Cannot open $threebyte:$!";
+print F $str;
+close(F);
+
+# Read file back as UTF-8 
+open(F,'<:encoding(utf-8)',$threebyte) || die "Cannot open $threebyte:$!";
+my $dstr = <F>;
+close(F);
+print "not " unless ($dstr eq $str);
+print "ok 14\n";
+
 END {
-    unlink($grk, $utf, $fail1, $fail2, $russki);
+    unlink($grk, $utf, $fail1, $fail2, $russki, $threebyte);
 }

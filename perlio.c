@@ -3839,13 +3839,16 @@ PerlIOCrlf_get_cnt(pTHX_ PerlIO *f)
 			b->ptr++;       /* say we have read it as far as
 					 * flush() is concerned */
 			b->buf++;       /* Leave space in front of buffer */
+			/* Note as we have moved buf up flush's
+			   posn += ptr-buf
+			   will naturally make posn point at CR
+			 */
 			b->bufsiz--;    /* Buffer is thus smaller */
 			code = PerlIO_fill(f);  /* Fetch some more */
 			b->bufsiz++;    /* Restore size for next time */
 			b->buf--;       /* Point at space */
 			b->ptr = nl = b->buf;   /* Which is what we hand
 						 * off */
-			b->posn--;      /* Buffer starts here */
 			*nl = 0xd;      /* Fill in the CR */
 			if (code == 0)
 			    goto test;  /* fill() call worked */

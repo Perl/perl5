@@ -161,6 +161,9 @@ PerlIOVia_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg,
 		    else if (SvIV(result) != 0)
 			return SvIV(result);
 		}
+		else {
+		    goto push_failed;
+		}
 		if (PerlIOVia_fetchmethod(aTHX_ s, MYMethod(FILL)) ==
 		    (CV *) - 1)
 		    PerlIOBase(f)->flags &= ~PERLIO_F_FASTGETS;
@@ -172,6 +175,7 @@ PerlIOVia_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg,
 		    Perl_warner(aTHX_ packWARN(WARN_LAYER),
 				"Cannot find package '%.*s'", (int) pkglen,
 				pkg);
+push_failed:
 #ifdef ENOSYS
 		errno = ENOSYS;
 #else
