@@ -635,7 +635,7 @@ Perl_OS2_init()
     }
 }
 
-char sh_path[STATIC_FILE_LENGTH+1] = BIN_SH;
+char sh_path[STATIC_FILE_LENGTH+1] = SH_PATH_INI;
 
 char *
 perllib_mangle(char *s, unsigned int l)
@@ -648,7 +648,7 @@ perllib_mangle(char *s, unsigned int l)
 	newp = getenv("PERLLIB_PREFIX");
 	if (newp) {
 	    oldp = newp;
-	    while (*newp && !isSPACE(*newp)) {
+	    while (*newp && !isSPACE(*newp) && *newp != ';') {
 		newp++; oldl++;		/* Skip digits. */
 	    }
 	    while (*newp && (isSPACE(*newp) || *newp == ';')) {
@@ -675,7 +675,7 @@ perllib_mangle(char *s, unsigned int l)
 	die("Malformed PERLLIB_PREFIX");
     }
     strncpy(ret, newp, newl);
-    strncpy(ret + newl, s + oldl, l - oldl);
+    strcpy(ret + newl, s + oldl);
     return ret;
 }
 
