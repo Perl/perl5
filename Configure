@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat Dec 22 19:52:24 EET 2001 [metaconfig 3.0 PL70]
+# Generated on Mon Dec 24 02:45:06 EET 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1052,6 +1052,7 @@ useopcode=true
 : Trailing extension.  Override this in a hint file, if needed.
 : Extra object files, if any, needed on this platform.
 archobjs=''
+_exe="$_exe"
 archname=''
 : Possible local include directories to search.
 : Set locincpth to "" in a hint file to defeat local include searches.
@@ -1162,12 +1163,12 @@ if `$sh -c '#' >/dev/null 2>&1`; then
 	if test ! -f $xcat$_exe; then
 		for p in $paths; do
 			if test -f $p/cat$_exe; then
-				xcat=$p/cat$_exe
+				xcat=$p/cat
 				break
 			fi
 		done
-		if test ! -f $xcat; then
-			echo "Can't find cat anywhere!" >&4
+		if test ! -f $xcat$_exe; then
+			echo "Can't find cat anywhere!"
 			exit 1
 		fi
 	fi
@@ -9988,6 +9989,10 @@ case "$eagain" in
 #include <signal.h>
 #include <stdio.h> 
 #include <stdlib.h> 
+#$i_fcntl I_FCNTL
+#ifdef I_FCNTL
+#include <fcntl.h>
+#endif
 #define MY_O_NONBLOCK $o_nonblock
 #ifndef errno  /* XXX need better Configure test */
 extern int errno;
