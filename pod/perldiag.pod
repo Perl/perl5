@@ -257,7 +257,13 @@ did it in another package.
 =item Bad free() ignored
 
 (S) An internal routine called free() on something that had never been
-malloc()ed in the first place.
+malloc()ed in the first place. Mandatory, but can be disabled by
+setting environment variable C<PERL_BADFREE> to 1.
+
+This message can be quite often seen with DB_File on systems with
+"hard" dynamic linking, like C<AIX> and C<OS/2>. It is a bug of
+C<Berkeley DB> which is left unnoticed if C<DB> uses I<forgiving>
+system malloc().
 
 =item Bad name after %s::
 
@@ -501,6 +507,14 @@ levels, the following is missing its final parenthesis:
 =item Can't fork
 
 (F) A fatal error occurred while trying to fork while opening a pipeline.
+
+=item Unsupported function fork
+
+(F) Your version of executable does not support forking.
+
+Note that under some systems, like OS/2, there may be different flavors of
+Perl executables, some of which may support fork, some not. Try changing
+the name you call Perl by to C<perl_>, C<perl__>, and so on.
 
 =item Can't get filespec - stale stat buffer?
 
@@ -2360,6 +2374,37 @@ streams, such as
         print OUT;
     }
     close OUT;
+
+=item Got an error from DosAllocMem:
+
+(P) An error peculiar to OS/2. Most probably you use an obsolete version
+of perl, and should not happen anyway.
+
+=item Malformed PERLLIB_PREFIX
+
+(F) An error peculiar to OS/2. PERLLIB_PREFIX should be of the form
+
+    prefix1;prefix2
+
+or
+
+    prefix1 prefix2
+
+with non-empty prefix1 and prefix2. If C<prefix1> is indeed a prefix of 
+a builtin library search path, prefix2 is substituted. The error may appear
+if components are not found, or are too long. See L<perlos2/"PERLLIB_PREFIX">.
+
+=item PERL_SH_DIR too long
+
+(F) An error peculiar to OS/2. PERL_SH_DIR is the directory to find the 
+C<sh>-shell in. See L<perlos2/"PERL_SH_DIR">.
+
+=item Process terminated by SIG%s
+
+(W) This is a standard message issued by OS/2 applications, while *nix
+applications die in silence. It is considered a feature of the OS/2
+port. One can easily disable this by appropriate sighandlers, see
+L<perlipc/"Signals">.  See L<perlos2/"Process terminated by SIGTERM/SIGINT">.
 
 =back
 
