@@ -3673,7 +3673,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	if (dtype < SVt_RV)
 	    sv_upgrade(dstr, SVt_RV);
 	else if (dtype == SVt_PVGV &&
-		 SvTYPE(SvRV(sstr)) == SVt_PVGV) {
+		 SvROK(sstr) && SvTYPE(SvRV(sstr)) == SVt_PVGV) {
 	    sstr = SvRV(sstr);
 	    if (sstr == dstr) {
 		if (GvIMPORTED(dstr) != GVf_IMPORTED
