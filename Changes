@@ -29,3 +29,19 @@ Version v5.8.3		Maintenance release working toward v5.8.3
 --------------
 ____________________________________________________________________________
 ____________________________________________________________________________
+[ 21701] By: nicholas                              on 2003/11/11  20:08:50
+        Log: Remove carriage returns (which had slipped in)
+     Branch: maint-5.8/perl
+	   ! win32/Makefile win32/makefile.mk wince/compile-all.bat
+	   ! wince/registry.bat
+____________________________________________________________________________
+[ 21700] By: nicholas                              on 2003/11/11  19:28:07
+        Log: perldelta changeover
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 21699] By: nicholas                              on 2003/11/11  19:21:20
+        Log: Disarm the maint branch
+     Branch: maint-5.8/perl
+	  +> Changes5.8.2 pod/perl582delta.pod
+	   ! Changes MANIFEST patchlevel.h
