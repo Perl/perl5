@@ -29,6 +29,10 @@
 #  endif
 #endif
 
+#ifdef __hpux
+#  include <sys/pstat.h>
+#endif
+
 /* if you only have signal() and it resets on each signal, FAKE_PERSISTENT_SIGNAL_HANDLERS fixes */
 #if !defined(HAS_SIGACTION) && defined(VMS)
 #  define  FAKE_PERSISTENT_SIGNAL_HANDLERS
@@ -2230,6 +2234,14 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	     * --jhi */
 	    setproctitle("%s", s);
 #   endif
+	}
+#endif
+#if defined(__hpux) && defined(PSTAT_SETCMD)
+	{
+	     union pstun un;
+	     s = SvPV(sv, len);
+	     un.pst_command = s;
+	     pstat(PSTAT_SETCMD, un, len, 0, 0);
 	}
 #endif
 	if (!PL_origalen) {
