@@ -1,12 +1,14 @@
 package ExtUtils::MM_Unix;
 
-$VERSION = substr q$Revision: 1.105 $, 10;
-# $Id: MM_Unix.pm,v 1.105 1996/07/08 20:51:18 k Exp k $
-
-require Exporter;
+use Exporter ();
 use Config;
 use File::Basename qw(basename dirname fileparse);
 use DirHandle;
+use strict;
+use vars qw($VERSION $Is_Mac $Is_OS2 $Is_VMS);
+
+$VERSION = substr q$Revision: 1.107 $, 10;
+# $Id: MM_Unix.pm,v 1.107 1996/09/03 20:53:39 k Exp $
 
 Exporter::import('ExtUtils::MakeMaker',
 	qw( $Verbose &neatvalue));
@@ -567,13 +569,16 @@ makemakerdflt: all
 
 # Where is the Config information that we are using/depend on
 CONFIGDEP = \$(PERL_ARCHLIB)/Config.pm \$(PERL_INC)/config.h
+};
 
+    my @parentdir = split(/::/, $self->{PARENT_NAME});
+    push @m, q{
 # Where to put things:
-INST_LIBDIR      = $self->{INST_LIBDIR}
-INST_ARCHLIBDIR  = $self->{INST_ARCHLIBDIR}
+INST_LIBDIR      = }. $self->catdir('$(INST_LIB)',@parentdir)        .q{
+INST_ARCHLIBDIR  = }. $self->catdir('$(INST_ARCHLIB)',@parentdir)    .q{
 
-INST_AUTODIR     = $self->{INST_AUTODIR}
-INST_ARCHAUTODIR = $self->{INST_ARCHAUTODIR}
+INST_AUTODIR     = }. $self->catdir('$(INST_LIB)','auto','$(FULLEXT)')       .q{
+INST_ARCHAUTODIR = }. $self->catdir('$(INST_ARCHLIB)','auto','$(FULLEXT)')   .q{
 };
 
     if ($self->has_link_code()) {
@@ -1766,7 +1771,7 @@ pure_site_install ::
 
 doc_perl_install ::
 	}.$self->{NOECHO}.q{$(DOC_INSTALL) \
-		"$(NAME)" \
+		"Module" "$(NAME)" \
 		"installed into" "$(INSTALLPRIVLIB)" \
 		LINKTYPE "$(LINKTYPE)" \
 		VERSION "$(VERSION)" \
@@ -1775,7 +1780,7 @@ doc_perl_install ::
 
 doc_site_install ::
 	}.$self->{NOECHO}.q{$(DOC_INSTALL) \
-		"Module $(NAME)" \
+		"Module" "$(NAME)" \
 		"installed into" "$(INSTALLSITELIB)" \
 		LINKTYPE "$(LINKTYPE)" \
 		VERSION "$(VERSION)" \
@@ -2106,7 +2111,7 @@ $tmp/perlmain.c: $makefilename}, q{
 doc_inst_perl:
 	}.$self->{NOECHO}.q{echo Appending installation info to $(INSTALLARCHLIB)/perllocal.pod
 	}.$self->{NOECHO}.q{$(DOC_INSTALL) \
-		"Perl binary $(MAP_TARGET)" \
+		"Perl binary" "$(MAP_TARGET)" \
 		MAP_STATIC "$(MAP_STATIC)" \
 		MAP_EXTRA "`cat $(INST_ARCHAUTODIR)/extralibs.all`" \
 		MAP_LIBPERL "$(MAP_LIBPERL)" \
@@ -2325,13 +2330,15 @@ sub parse_version {
 	next if $inpod;
 	chop;
 	next unless /\$(([\w\:\']*)\bVERSION)\b.*\=/;
-	local $ExtUtils::MakeMaker::module_version_variable = $1;
-	my($thispackage) = $2 || $current_package;
-	$thispackage =~ s/:+$//;
-	my($eval) = "$_;";
-	eval $eval;
+	my $eval = qq{
+	    package ExtUtils::MakeMaker::_version;
+	    \$$1=undef; do { 
+		$_ 
+	    }; \$$1
+	};
+	local($^W) = 0;
+	$result = eval($eval) || 0;
 	die "Could not eval '$eval' in $parsefile: $@" if $@;
-	$result = $ {$ExtUtils::MakeMaker::module_version_variable} || 0;
 	last;
     }
     close FH;
@@ -2868,7 +2875,8 @@ VERBINST=1
 MOD_INSTALL = $(PERL) -I$(INST_LIB) -I$(PERL_LIB) -MExtUtils::Install \
 -e 'install({@ARGV},"$(VERBINST)",0,"$(UNINST)");'
 
-DOC_INSTALL = $(PERL) -e '$$\="\n\n";print "=head3 ", scalar(localtime), ": C<", shift, ">";' \
+DOC_INSTALL = $(PERL) -e '$$\="\n\n";' \
+-e 'print "=head2 ", scalar(localtime), ": C<", shift, ">", " L<", shift, ">";' \
 -e 'print "=over 4";' \
 -e 'while (defined($$key = shift) and defined($$val = shift)){print "=item *";print "C<$$key: $$val>";}' \
 -e 'print "=back";'
