@@ -3839,8 +3839,9 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
  				{
  				    Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
  					CvCONST(cv)
- 					? "Constant subroutine %s redefined"
- 					: "Subroutine %s redefined",
+ 					? "Constant subroutine %s::%s redefined"
+ 					: "Subroutine %s::%s redefined",
+					HvNAME(GvSTASH((GV*)dstr)),
  					GvENAME((GV*)dstr));
  				}
 			    }

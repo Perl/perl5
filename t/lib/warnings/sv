@@ -262,7 +262,7 @@ no warnings 'redefine' ;
 sub jim {} 
 *jim = \&joe ;
 EXPECT
-Subroutine fred redefined at - line 5.
+Subroutine main::fred redefined at - line 5.
 ########
 # sv.c
 use warnings 'printf' ;

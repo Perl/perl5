@@ -775,7 +775,7 @@ no warnings 'redefine' ;
 sub fred () { 1 }
 *fred = sub () { 2 };
 EXPECT
-Constant subroutine fred redefined at - line 4.
+Constant subroutine main::fred redefined at - line 4.
 ########
 # op.c
 use warnings 'redefine' ;
