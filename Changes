@@ -93,6 +93,17 @@ Version v5.6.0
 --------------
 
 ____________________________________________________________________________
+[  5899] By: gsar                                  on 2000/03/23  05:39:11
+        Log: update patchlevel.h, Changes; regen perltoc.pod
+     Branch: perl
+	   ! Changes patchlevel.h pod/perlhist.pod pod/perltoc.pod
+____________________________________________________________________________
+[  5898] By: jhi                                   on 2000/03/23  05:36:47
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> README.machten Todo Todo-5.6 pod/perldebug.pod
+	  !> pod/perldelta.pod pod/perldiag.pod pod/perlport.pod sv.c
+____________________________________________________________________________
 [  5897] By: gsar                                  on 2000/03/23  05:31:12
         Log: revise perldelta for more optimal ordering, minor Todo
              rearrangments
