@@ -1,4 +1,4 @@
-.=head1 NAME
+=head1 NAME
 
 perldelta - what is new for perl v5.8.0
 
@@ -2817,6 +2817,12 @@ be even better.  (RedHat Linux/alpha with gcc 3.1 reported no problems,
 as did Linux 2.4.18 with gcc 2.95.4.)  (In Tru64, it is preferable to
 use the bundled C compiler.)
 
+=head2 AmigaOS
+
+Perl 5.8.0 doesn't build in AmigaOS.  It broke at some point
+during the ithreads work and we could not find Amiga experts
+to unbreak the problems.
+
 =head2 BeOS
 
 The following tests fail on 5.8.0 Perl in BeOS Personal 5.03:
@@ -2827,6 +2833,13 @@ The following tests fail on 5.8.0 Perl in BeOS Personal 5.03:
  ext/POSIX/t/waitpid.................FAILED at test 1
 
 See L<perlbeos> (README.beos) for more details.
+
+=head2 Cygwin "unable to remap"
+
+For example when building the Tk extension for Cygwin,
+you may get an error message saying "unable to remap".
+This is known problem with Cygwin, and a workaround is
+detailed in here: http://sources.redhat.com/ml/cygwin/2001-12/msg00894.html
 
 =head2 ext/threads/t/libc
 

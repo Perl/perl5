@@ -3047,8 +3047,8 @@ my C program; what am I doing wrong?
 
 =back
 
-=head2 perlfaq4 - Data Manipulation ($Revision: 1.24 $, $Date: 2002/05/20
-16:50:08 $)
+=head2 perlfaq4 - Data Manipulation ($Revision: 1.25 $, $Date: 2002/05/30
+07:04:25 $)
 
 =over 4
 
@@ -3264,8 +3264,8 @@ array of hashes or arrays?
 
 =back
 
-=head2 perlfaq5 - Files and Formats ($Revision: 1.17 $, $Date: 2002/05/23
-19:33:50 $)
+=head2 perlfaq5 - Files and Formats ($Revision: 1.18 $, $Date: 2002/05/30
+07:04:25 $)
 
 =over 4
 
@@ -5230,6 +5230,8 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =back
 
+=head2 perldelta - what is new for perl v5.8.0
+
 =over 4
 
 =item DESCRIPTION
@@ -5330,7 +5332,11 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item Alpha systems with old gccs fail several tests
 
+=item AmigaOS
+
 =item BeOS
+
+=item Cygwin "unable to remap"
 
 =item ext/threads/t/libc
 
