@@ -196,7 +196,7 @@ hrt_ualarm(int usec, int interval)
 
 #ifdef HAS_GETTIMEOFDAY
 
-static void
+static int
 myU2time(UV *ret)
 {
   struct timeval Tp;
@@ -204,6 +204,7 @@ myU2time(UV *ret)
   status = gettimeofday (&Tp, NULL);
   ret[0] = Tp.tv_sec;
   ret[1] = Tp.tv_usec;
+  return status;
 }
 
 static NV
@@ -212,7 +213,7 @@ myNVtime()
   struct timeval Tp;
   int status;
   status = gettimeofday (&Tp, NULL);
-  return Tp.tv_sec + (Tp.tv_usec / 1000000.);
+  return status == 0 ? Tp.tv_sec + (Tp.tv_usec / 1000000.) : -1.0;
 }
 
 #endif
@@ -223,8 +224,12 @@ PROTOTYPES: ENABLE
 
 BOOT:
 #ifdef HAS_GETTIMEOFDAY
-  hv_store(PL_modglobal, "Time::NVtime", 12, newSViv((IV) myNVtime ()), 0);
-  hv_store(PL_modglobal, "Time::U2time", 12, newSViv((IV) myU2time ()), 0);
+{
+  UV auv[2];
+  hv_store(PL_modglobal, "Time::NVtime", 12, newSViv((IV) myNVtime()), 0);
+  if (myU2time(auv) == 0)
+    hv_store(PL_modglobal, "Time::U2time", 12, newSViv((IV) auv[0]), 0);
+}
 #endif
 
 IV
