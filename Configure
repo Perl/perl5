@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Feb 24 17:45:39 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Thu Feb 24 20:37:06 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -354,6 +354,7 @@ d_fgetpos=''
 d_flexfnam=''
 d_flock=''
 d_fork=''
+d_fpos64_t=''
 d_fs_data_s=''
 d_fseeko=''
 d_fsetpos=''
@@ -440,6 +441,7 @@ d_msgsnd=''
 d_msync=''
 d_munmap=''
 d_nice=''
+d_off64_t=''
 d_open3=''
 d_fpathconf=''
 d_pathconf=''
@@ -695,8 +697,6 @@ installusrbinperl=''
 intsize=''
 longsize=''
 shortsize=''
-d_fpos64_t=''
-d_off64_t=''
 libc=''
 ldlibpthname=''
 libperl=''
@@ -7159,16 +7159,14 @@ $rm -f try.c try
 
 : check for long doubles
 echo " "
-$echo $n "Checking to see if your system supports long double..." $c >&4
+echo "Checking to see if you have long double..." >&4
 echo 'int main() { long double x = 7.0; }' > try.c
 set try
 if eval $compile; then
 	val="$define"
-	echo " " >&4
 	echo "You have long double."
 else
 	val="$undef"
-	echo " " >&4
 	echo "You do not have long double."
 fi
 $rm try.*
@@ -8816,32 +8814,9 @@ set fpathconf d_fpathconf
 eval $inlibc
 
 
-: check for off64_t
-echo " "
-echo "Checking to see if your system supports off64_t..." >&4
-$cat >try.c <<EOCP
-#include <sys/types.h>
-#include <unistd.h>
-int main() { off64_t x = 7; }
-EOCP
-set try
-if eval $compile; then
-	val="$define"
-	echo "Yes, it does."
-else
-	val="$undef"
-	echo "No, it doesn't."
-	case "$lseeksize" in
-	8) echo "(Your off_t is 64 bits, so you could use that.)" ;;
-	esac
-fi
-$rm -f try.* try
-set d_off64_t
-eval $setvar
-
 : check for fpos64_t
 echo " "
-echo "Checking to see if your system supports fpos64_t..." >&4
+echo "Checking to see if you have fpos64_t..." >&4
 $cat >try.c <<EOCP
 #include <stdio.h>
 int main() { fpos64_t x = 7; }
@@ -8849,10 +8824,10 @@ EOCP
 set try
 if eval $compile; then
 	val="$define"
-	echo "Yes, it does."
+	echo "You have fpos64_t."
 else
 	val="$undef"
-	echo "No, it doesn't."
+	echo "You do not have fpos64_t."
 	case "$fpossize" in
 	8) echo "(Your fpos_t is 64 bits, so you could use that.)" ;;
 	esac
@@ -9300,7 +9275,7 @@ eval $setvar
 
 : check for int64_t
 echo " "
-$echo $n "Checking to see if your system supports int64_t...$c" >&4
+echo "Checking to see if you have int64_t..." >&4
 $cat >try.c <<EOCP
 #include <sys/types.h>
 #$i_inttypes I_INTTYPES
@@ -9312,11 +9287,9 @@ EOCP
 set try
 if eval $compile; then
 	val="$define"
-	echo " " >&4
 	echo "You have int64_t."
 else
 	val="$undef"
-	echo " " >&4
 	echo "You do not have int64_t."
 fi
 $rm -f try try.*
@@ -9425,16 +9398,14 @@ eval $inlibc
 
 : check for long long
 echo " "
-$echo $n "Checking to see if your system supports long long..." $c >&4
+echo "Checking to see if you have long long..." >&4
 echo 'int main() { long long x = 7; return 0; }' > try.c
 set try
 if eval $compile; then
 	val="$define"
-	echo " " >&4
 	echo "You have have long long."
 else
 	val="$undef"
-	echo " " >&4
 	echo "You do not have long long."
 fi
 $rm try.*
@@ -9928,6 +9899,30 @@ $define) $echo "Yes, they can."  2>&1 ;;
 esac
 
 $rm -f try.* try
+
+
+: check for off64_t
+echo " "
+echo "Checking to see if you have off64_t..." >&4
+$cat >try.c <<EOCP
+#include <sys/types.h>
+#include <unistd.h>
+int main() { off64_t x = 7; }
+EOCP
+set try
+if eval $compile; then
+	val="$define"
+	echo "You have off64_t."
+else
+	val="$undef"
+	echo "You do not have off64_t."
+	case "$lseeksize" in
+	8) echo "(Your off_t is 64 bits, so you could use that.)" ;;
+	esac
+fi
+$rm -f try.* try
+set d_off64_t
+eval $setvar
 
 : see if POSIX threads are available
 set pthread.h i_pthread
@@ -10949,9 +10944,14 @@ set d_sigsetjmp
 eval $setvar
 $rm -f try.c try
 
+: see what type is used for size_t
+rp="What is the type used for the length parameter for string functions?"
+set size_t sizetype 'unsigned int' stdio.h sys/types.h
+eval $typedef_ask
+
 : check for socklen_t
 echo " "
-$echo $n "Checking to see if your system supports socklen_t...$c" >&4
+echo "Checking to see if you have socklen_t..." >&4
 $cat >try.c <<EOCP
 #include <sys/types.h>
 #$d_socket HAS_SOCKET
@@ -10963,12 +10963,13 @@ EOCP
 set try
 if eval $compile; then
 	val="$define"
-	echo " " >&4
 	echo "You have socklen_t."
 else
 	val="$undef"
-	echo " " >&4
 	echo "You do not have socklen_t."
+	case "$sizetype" in
+	size_t) echo "(You do have size_t, that might work.)" ;;
+	esac
 fi
 $rm -f try try.*
 set d_socklen_t
@@ -12744,11 +12745,6 @@ exit $status
 EOSH
 chmod +x protochk
 $eunicefix protochk
-
-: see what type is used for size_t
-rp="What is the type used for the length parameter for string functions?"
-set size_t sizetype 'unsigned int' stdio.h sys/types.h
-eval $typedef_ask
 
 : check for type of arguments to gethostbyaddr. 
 if test "X$netdb_host_type" = X -o "X$netdb_hlen_type" = X; then

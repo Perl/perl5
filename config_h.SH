@@ -1356,6 +1356,11 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_fd_set HAS_FD_SET	/**/
 
+/* HAS_FPOS64_T:
+ *	This symbol will be defined if the C compiler supports fpos64_t.
+ */
+#$d_fpos64_t	HAS_FPOS64_T    	/**/
+
 /* HAS_STRUCT_FS_DATA:
  *	This symbol, if defined, indicates that the struct fs_data
  *	to do statfs() is supported.
@@ -1719,6 +1724,11 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	supported (IPC mechanism based on message queues).
  */
 #$d_msg HAS_MSG		/**/
+
+/* HAS_OFF64_T:
+ *	This symbol will be defined if the C compiler supports off64_t.
+ */
+#$d_off64_t	HAS_OFF64_T    		/**/
 
 /* HAS_OPEN3:
  *	This manifest constant lets the C program know that the three
@@ -2442,15 +2452,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  * 	also as /usr/bin/perl.
  */
 #$installusrbinperl INSTALL_USR_BIN_PERL	/**/
-
-/* HAS_OFF64_T:
- *	This symbol will be defined if the C compiler supports off64_t.
- */
-/* HAS_FPOS64_T:
- *	This symbol will be defined if the C compiler supports fpos64_t.
- */
-#$d_off64_t	HAS_OFF64_T    		/**/
-#$d_fpos64_t	HAS_FPOS64_T    	/**/
 
 /* PERL_PRIfldbl:
  *	This symbol, if defined, contains the string used by stdio to
