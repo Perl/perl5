@@ -469,8 +469,8 @@ LIBC	= msvcrt.lib
 LIBC	= PerlCRT.lib
 .ENDIF
 
-PERLEXE_ICO	= perlexe.ico
-PERLEXE_RES	= perlexe.res
+PERLEXE_ICO	= .\perlexe.ico
+PERLEXE_RES	= .\perlexe.res
 PERLDLL_RES	=
 
 .IF  "$(CFG)" == "Debug"
@@ -1047,10 +1047,10 @@ $(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES)
 .ENDIF
 	$(XCOPY) $(PERLIMPLIB) $(COREDIR)
 
-.\$(PERLEXE_ICO): $(MINIPERL) makeico.pl
+$(PERLEXE_ICO): $(MINIPERL) makeico.pl
 	$(MINIPERL) makeico.pl > $@
 
-.\$(PERLEXE_RES): perlexe.rc $(PERLEXE_ICO)
+$(PERLEXE_RES): perlexe.rc $(PERLEXE_ICO)
 
 $(MINIMOD) : $(MINIPERL) ..\minimod.pl
 	cd .. && miniperl minimod.pl > lib\ExtUtils\Miniperl.pm
@@ -1216,8 +1216,6 @@ distclean: clean
 	-if exist $(LIBDIR)\Data rmdir /s $(LIBDIR)\Data
 	-if exist $(LIBDIR)\Filter\Util rmdir /s /q $(LIBDIR)\Filter\Util
 	-if exist $(LIBDIR)\Filter\Util rmdir /s $(LIBDIR)\Filter\Util
-	-if exist $(LIBDIR)\Digest rmdir /s /q $(LIBDIR)\Digest
-	-if exist $(LIBDIR)\Digest rmdir /s $(LIBDIR)\Digest
 	-if exist $(LIBDIR)\MIME rmdir /s /q $(LIBDIR)\MIME
 	-if exist $(LIBDIR)\MIME rmdir /s $(LIBDIR)\MIME
 	-if exist $(LIBDIR)\List rmdir /s /q $(LIBDIR)\List
