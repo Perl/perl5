@@ -182,10 +182,10 @@ spots.  This is now heavily deprecated.
 must either both be scalars or both be lists.  Otherwise Perl won't
 know which context to supply to the right side.
 
-=item Assigning to negative offset in vec
+=item Negative offset to vec in lvalue context
 
-(F) The second argument to vec() must refer to an actual element of
-the string if you wish to assign to it.
+(F) When vec is called in an lvalue context, the second argument must be
+greater than or equal to zero.
 
 =item Attempt to bless into a reference
 
