@@ -4709,7 +4709,7 @@ my_fwrite(void *src, size_t itmsz, size_t nitm, FILE *dest)
     src = cp + 1;
   }
 
-  return 1;
+  return nitm;
 
 }  /* end of my_fwrite() */
 /*}}}*/
