@@ -415,6 +415,8 @@ sub compile_enc
   }
  chomp($type);
  return if $type eq 'E';
+ # Do the hash lookup once, rather than once per function call. 4% speedup.
+ my $type_func = $encode_types{$type};
  my ($def,$sym,$pages) = split(/\s+/,scalar(<$fh>));
  warn "$type encoded $name\n";
  my $rep = '';
@@ -423,44 +425,55 @@ sub compile_enc
  my $max_el = 0;  # Anything must be longer than 0
  {
   my $v = hex($def);
-  $rep = &{$encode_types{$type}}($v & 0xFF, ($v >> 8) & 0xffe);
+  $rep = &$type_func($v & 0xFF, ($v >> 8) & 0xffe);
  }
  my %seen;
- while ($pages--)
+ do
   {
    my $line = <$fh>;
    chomp($line);
    my $page = hex($line);
    my $ch = 0;
-   for (0..15)
+   my $i = 16;
+   do
     {
+     # So why is it 1% faster to leave the my here?
      my $line = <$fh>;
      die "Line should be exactly 65 characters long including newline"
        unless length ($line) == 65;
      # Split line into groups of 4 hex digits, convert groups to ints
-     for my $val (map {hex $_} $line =~ /(....)/g)
+     # This takes 65.35		
+     # map {hex $_} $line =~ /(....)/g
+     # This takes 63.75 (2.5% less time)
+     # unpack "n*", pack "H*", $line
+     # There's an implicit loop in map. Loops are bad, m'kay. Ops are bad, m'kay
+     # Doing it as while ($line =~ /(....)/g) took 74.63
+     foreach my $val (unpack "n*", pack "H*", $line)
       {
        next if $val == 0xFFFD;
-       my $ech = &{$encode_types{$type}}($ch,$page);
+       my $ech = &$type_func($ch,$page);
        if ($val || (!$ch && !$page))
         {
          my $el  = length($ech);
          $max_el = $el if $el > $max_el;
          $min_el = $el if $el < $min_el;
          my $uch = encode_U($val);
+         # We don't need to read this quickly, so storing it as a scalar,
+         # rather than 3 (anon array, plus the 2 scalars it holds) saves
+         # RAM and may make us faster on low RAM systems. [see __END__]
          if (exists $seen{$uch})
           {
-           warn sprintf("U%04X is %02X%02X and %02X%02X\n",
-                        $val,$page,$ch,@{$seen{$uch}});
+           warn sprintf("U%04X is %02X%02X and %04X\n",
+                        $val,$page,$ch,$seen{$uch});
           }
          else
           {
-           $seen{$uch} = [$page,$ch];
+           $seen{$uch} = $page << 16 | $ch;
           }
          # Passing 2 extra args each time is 3.6% slower!
-         # Even with having to add $fallback ||= 0 in &process
-         enter($e2u,$ech,$uch);
-         enter($u2e,$uch,$ech);
+         # Even with having to add $fallback ||= 0 later
+         enter_fb0($e2u,$ech,$uch);
+         enter_fb0($u2e,$uch,$ech);
         }
        else
         {
@@ -469,8 +482,8 @@ sub compile_enc
         }
        $ch++;
       }
-    }
-  }
+    } while --$i;
+  } while --$pages;
  die "\$min_el=$min_el, \$max_el=$max_el - seems we read no lines"
    if $min_el > $max_el;
  $encoding{$name} = [$e2u,$u2e,$rep,$min_el,$max_el];
@@ -484,7 +497,7 @@ sub enter {
   $next ||= $current;
   # Making sure it is defined seems to be faster than {no warnings;} in
   # &process, or passing it in as 0 explicity.
-  $fallback ||= 0;
+  # XXX $fallback ||= 0;
 
   # Start at the beginning and work forwards through the string to zero.
   # effectively we are removing 1 character from the front each time
@@ -517,6 +530,24 @@ sub enter {
   }
 }
 
+# This is purely for optimistation. It's just &enter hard coded for $fallback
+# of 0, using only a 3 entry array ref to save memory for every entry.
+sub enter_fb0 {
+  my ($current,$inbytes,$outbytes,$next) = @_;
+  $next ||= $current;
+
+  my $pos = -length $inbytes;
+  while (1) {
+    my $byte = substr $inbytes, $pos, 1;
+    my $do_now = $current->{Raw}{$byte} ||= [{},-$pos,''];
+    unless (++$pos) {
+      $do_now->[RAW_OUT_BYTES] = $outbytes;
+      $do_now->[RAW_NEXT] = $next;
+      return;
+    }
+    $current = $do_now->[RAW_NEXT];
+  }
+}
 
 
 sub outstring
@@ -532,16 +563,12 @@ sub outstring
    if ($opt{'O'}) {
        foreach my $o (keys %strings)
         {
-         my $i = index($o,$s);
-         if ($i >= 0)
-          {
-           $sym = $strings{$o};
-           $sym .= sprintf("+0x%02x",$i) if ($i);
-           $subsave += length($s);
-           $strings{$s} = $sym;
-           return $sym;
-          }
-        }
+         next unless (my $i = index($o,$s)) >= 0;
+         $sym = $strings{$o};
+         $sym .= sprintf("+0x%02x",$i) if ($i);
+         $subsave += length($s);
+         return $strings{$s} = $sym;
+       }
    }
    $strings{$s} = $sym = $name;
    $strings += length($s);
@@ -560,18 +587,20 @@ sub process
   my ($name,$a) = @_;
   $name =~ s/\W+/_/g;
   $a->{Cname} = $name;
-  my @raw = sort keys %{$a->{Raw}};
+  my $raw = $a->{Raw};
   my ($l, $agg_max_in, $agg_next, $agg_in_len, $agg_out_len, $agg_fallback);
   my @ent;
-  foreach my $key (@raw) {
+  $agg_max_in = 0;
+  foreach my $key (sort keys %$raw) {
     #  RAW_NEXT => 0,
     #  RAW_IN_LEN => 1,
     #  RAW_OUT_BYTES => 2,
     #  RAW_FALLBACK => 3,
-    my ($next, $in_len, $out_bytes, $fallback) = @{$a->{Raw}{$key}};
+    my ($next, $in_len, $out_bytes, $fallback) = @{$raw->{$key}};
     # Now we are converting from raw to aggregate, switch from 1 byte strings
     # to numbers
     my $b = ord $key;
+    $fallback ||= 0;
     if ($l &&
         # If this == fails, we're going to reset $agg_max_in below anyway.
         $b == ++$agg_max_in &&
@@ -607,8 +636,8 @@ sub process
     }
   }
   # encengine.c rules say that last entry must be for 255
-  if (ord $raw[-1] < 255) {
-    push @ent, [1+ord $raw[-1], 255,undef,$a,0,0];
+  if ($agg_max_in < 255) {
+    push @ent, [1+$agg_max_in, 255,undef,$a,0,0];
   }
   $a->{'Entries'} = \@ent;
 }
@@ -766,3 +795,29 @@ sub output_ucm
  print $fh "END CHARMAP\n";
 }
 
+
+__END__
+With %seen holding array refs:
+
+      865.66 real        28.80 user         8.79 sys
+      7904  maximum resident set size
+      1356  average shared memory size
+     18566  average unshared data size
+       229  average unshared stack size
+     46080  page reclaims
+     33373  page faults
+
+With %seen holding simple scalars:
+
+      342.16 real        27.11 user         3.54 sys
+      8388  maximum resident set size
+      1394  average shared memory size
+     14969  average unshared data size
+       236  average unshared stack size
+     28159  page reclaims
+      9839  page faults
+
+Yes, 5 minutes is faster than 15. Above is for CP936 in CN. Only difference is
+how %seen is storing things its seen. So it is pathalogically bad on a 16M
+RAM machine, but it's going to help even on modern machines.
+Swapping is bad, m'kay :-)
