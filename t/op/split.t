@@ -193,12 +193,13 @@ print "ok 32\n";
 }
 
 {
+    my $s = "\x20\x40\x{80}\x{100}\x{80}\x40\x20";
+
     if (ord('A') == 193) {
 	print "ok 36 # Skip: EBCDIC\n";
     } else {
 	# bug id 20000426.003
 
-	my $s = "\x20\x40\x{80}\x{100}\x{80}\x40\x20";
 
 	my ($a, $b, $c) = split(/\x40/, $s);
 	print "not "
