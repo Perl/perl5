@@ -2301,42 +2301,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_writev HAS_WRITEV		/**/
 
-/* HAS_DBMINIT64:
- *	This symbol, if defined, indicates that the dbminit64 routine is
- *	available to open dbm files larger than 2 gigabytes.
- */
-/* HAS_DBMCLOSE64:
- *	This symbol, if defined, indicates that the dbmclose64 routine is
- *	available to close dbm files larger than 2 gigabytes.
- */
-/* HAS_FETCH64:
- *	This symbol, if defined, indicates that the fetch64 routine is
- *	available to fetch from dbm files larger than 2 gigabytes.
- */
-/* HAS_STORE64:
- *	This symbol, if defined, indicates that the store64 routine is
- *	available to store to dbm files larger than 2 gigabytes.
- */
-/* HAS_DELETE64:
- *	This symbol, if defined, indicates that the delete64 routine is
- *	available to delete from dbm files larger than 2 gigabytes.
- */
-/* HAS_FIRSTKEY64:
- *	This symbol, if defined, indicates that the firstkey64 routine is
- *	available to firstkey in dbm files larger than 2 gigabytes.
- */
-/* HAS_NEXTKEY64:
- *	This symbol, if defined, indicates that the nextkey64 routine is
- *	available to nextkey in dbm files larger than 2 gigabytes.
- */
-#$d_dbminit64   HAS_DBMINIT64	/**/
-#$d_dbmclose64  HAS_DBMCLOSE64	/**/
-#$d_fetch64     HAS_FETCH64		/**/
-#$d_store64     HAS_STORE64		/**/
-#$d_delete64    HAS_DELETE64		/**/
-#$d_firstkey64  HAS_FIRSTKEY64	/**/
-#$d_nextkey64   HAS_NEXTKEY64	/**/
-
 /* USE_DYNAMIC_LOADING:
  *	This symbol, if defined, indicates that dynamic loading of
  *	some sort is available.
@@ -2486,52 +2450,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	some shell.
  */
 #define STARTPERL "$startperl"		/**/
-
-/* HAS_FGETPOS64:
- *	This symbol, if defined, indicates that the fgetpos64 routine is
- *	available to getpos files larger than 2 gigabytes.
- */
-/* HAS_FOPEN64:
- *	This symbol, if defined, indicates that the fopen64 routine is
- *	available to open files larger than 2 gigabytes.
- */
-/* HAS_FREOPEN64:
- *	This symbol, if defined, indicates that the freopen64 routine is
- *	available to reopen files larger than 2 gigabytes.
- */
-/* HAS_FSEEK64:
- *	This symbol, if defined, indicates that the fseek64 routine is
- *	available to seek files larger than 2 gigabytes.
- */
-/* HAS_FSEEKO64:
- *	This symbol, if defined, indicates that the fseeko64 routine is
- *	available to seek files larger than 2 gigabytes.
- */
-/* HAS_FSETPOS64:
- *	This symbol, if defined, indicates that the fsetpos64 routine is
- *	available to setpos files larger than 2 gigabytes.
- */
-/* HAS_FTELL64:
- *	This symbol, if defined, indicates that the ftell64 routine is
- *	available to tell files larger than 2 gigabytes.
- */
-/* HAS_FTELLO64:
- *	This symbol, if defined, indicates that the ftello64 routine is
- *	available to tell files larger than 2 gigabytes.
- */
-/* HAS_TMPFILE64:
- *	This symbol, if defined, indicates that the tmpfile64 routine is
- *	available to tmpfile files larger than 2 gigabytes.
- */
-#$d_fgetpos64   HAS_FGETPOS64	/**/
-#$d_fopen64     HAS_FOPEN64		/**/
-#$d_freopen64   HAS_FREOPEN64	/**/
-#$d_fseek64     HAS_FSEEK64		/**/
-#$d_fseeko64    HAS_FSEEKO64		/**/
-#$d_fsetpos64   HAS_FSETPOS64	/**/
-#$d_ftell64     HAS_FTELL64		/**/
-#$d_ftello64    HAS_FTELLO64		/**/
-#$d_tmpfile64   HAS_TMPFILE64	/**/
 
 /* HAS_STDIO_STREAM_ARRAY:
  *	This symbol, if defined, tells that there is an array

@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Sep 14 23:12:10 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Tue Sep 14 23:20:30 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -566,13 +566,6 @@ d_waitpid=''
 d_wcstombs=''
 d_wctomb=''
 d_writev=''
-d_dbmclose64=''
-d_dbminit64=''
-d_delete64=''
-d_fetch64=''
-d_firstkey64=''
-d_nextkey64=''
-d_store64=''
 dlext=''
 cccdlflags=''
 ccdlflags=''
@@ -816,15 +809,6 @@ ssizetype=''
 startperl=''
 startsh=''
 stdchar=''
-d_fgetpos64=''
-d_fopen64=''
-d_freopen64=''
-d_fseek64=''
-d_fseeko64=''
-d_fsetpos64=''
-d_ftell64=''
-d_ftello64=''
-d_tmpfile64=''
 d_stdio_stream_array=''
 stdio_stream_array=''
 d_strtoull=''
@@ -7888,44 +7872,6 @@ $rm -f dbl_dig.?
 set d_dbl_dig
 eval $setvar
 
-
-if $test X"$use64bits" = X"$define"; then
-	: see if dbminit64 exists
-	set dbminit64 d_dbminit64
-	eval $inlibc
-
-	: see if dbmclose64 exists
-	set dbmclose64 d_dbmclose64
-	eval $inlibc
-
-	: see if fetch64 exists
-	set fetch64 d_fetch64
-	eval $inlibc
-
-	: see if store64 exists
-	set store64 d_store64
-	eval $inlibc
-
-	: see if delete64 exists
-	set delete64 d_delete64
-	eval $inlibc
-
-	: see if firstkey64 exists
-	set firstkey64 d_firstkey64
-	eval $inlibc
-
-	: see if nextkey64 exists
-	set nextkey64 d_nextkey64
-	eval $inlibc
-else
-	val="$undef"
-	for xxx in d_dbminit64 d_dbmclose64 d_fetch64 d_store64 d_delete64 d_firstkey64 d_nextkey64
-	do
-		set $xxx
-		eval $setvar
-	done
-fi
-
 : see if difftime exists
 set difftime d_difftime
 eval $inlibc
@@ -8579,52 +8525,6 @@ $rm -f fd_set*
 : see if fgetpos exists
 set fgetpos d_fgetpos
 eval $inlibc
-
-
-if $test X"$use64bits" = X"$define"; then
-	: see if fgetpos64 exists
-	set fgetpos64 d_fgetpos64
-	eval $inlibc
-
-	: see if fopen64 exists
-	set freopen64 d_fopen64
-	eval $inlibc
-
-	: see if freopen64 exists
-	set freopen64 d_freopen64
-	eval $inlibc
-
-	: see if fseek64 exists
-	set fseek64 d_fseek64
-	eval $inlibc
-
-	: see if fseeko64 exists
-	set fseeko64 d_fseeko64
-	eval $inlibc
-
-	: see if fsetpos64 exists
-	set fsetpos64 d_fsetpos64
-	eval $inlibc
-
-	: see if ftell64 exists
-	set ftell64 d_ftell64
-	eval $inlibc
-
-	: see if ftello64 exists
-	set ftello64 d_ftello64
-	eval $inlibc
-
-	: see if tmpfile64 exists
-	set tmpfile64 d_tmpfile64
-	eval $inlibc
-else
-	val="$undef"
-	for xxx in d_fgetpos64 d_fopen64 d_freopen64 d_fseek64 d_fseeko64 d_fsetpos64 d_ftell64 d_ftello64 d_tmpfile64
-	do
-		set $xxx
-		eval $setvar
-	done
-fi
 
 : see if flock exists
 set flock d_flock
@@ -13520,9 +13420,6 @@ d_crypt='$d_crypt'
 d_csh='$d_csh'
 d_cuserid='$d_cuserid'
 d_dbl_dig='$d_dbl_dig'
-d_dbmclose64='$d_dbmclose64'
-d_dbminit64='$d_dbminit64'
-d_delete64='$d_delete64'
 d_difftime='$d_difftime'
 d_dirnamlen='$d_dirnamlen'
 d_dlerror='$d_dlerror'
@@ -13547,26 +13444,16 @@ d_fcntl='$d_fcntl'
 d_fd_macros='$d_fd_macros'
 d_fd_set='$d_fd_set'
 d_fds_bits='$d_fds_bits'
-d_fetch64='$d_fetch64'
-d_fgetpos64='$d_fgetpos64'
 d_fgetpos='$d_fgetpos'
-d_firstkey64='$d_firstkey64'
 d_flexfnam='$d_flexfnam'
 d_flock='$d_flock'
-d_fopen64='$d_fopen64'
 d_fork='$d_fork'
 d_fpathconf='$d_fpathconf'
 d_fpos64_t='$d_fpos64_t'
-d_freopen64='$d_freopen64'
-d_fseek64='$d_fseek64'
-d_fseeko64='$d_fseeko64'
 d_fseeko='$d_fseeko'
-d_fsetpos64='$d_fsetpos64'
 d_fsetpos='$d_fsetpos'
 d_fstatfs='$d_fstatfs'
 d_fstatvfs='$d_fstatvfs'
-d_ftell64='$d_ftell64'
-d_ftello64='$d_ftello64'
 d_ftello='$d_ftello'
 d_ftime='$d_ftime'
 d_getgrent='$d_getgrent'
@@ -13646,7 +13533,6 @@ d_msgsnd='$d_msgsnd'
 d_msync='$d_msync'
 d_munmap='$d_munmap'
 d_mymalloc='$d_mymalloc'
-d_nextkey64='$d_nextkey64'
 d_nice='$d_nice'
 d_off64_t='$d_off64_t'
 d_old_pthread_create_joinable='$d_old_pthread_create_joinable'
@@ -13733,7 +13619,6 @@ d_stdio_ptr_lval='$d_stdio_ptr_lval'
 d_stdio_stream_array='$d_stdio_stream_array'
 d_stdiobase='$d_stdiobase'
 d_stdstdio='$d_stdstdio'
-d_store64='$d_store64'
 d_strchr='$d_strchr'
 d_strcoll='$d_strcoll'
 d_strctcpy='$d_strctcpy'
@@ -13757,7 +13642,6 @@ d_telldir='$d_telldir'
 d_telldirproto='$d_telldirproto'
 d_time='$d_time'
 d_times='$d_times'
-d_tmpfile64='$d_tmpfile64'
 d_truncate='$d_truncate'
 d_tzname='$d_tzname'
 d_umask='$d_umask'
