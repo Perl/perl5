@@ -8,9 +8,9 @@ BEGIN
   $| = 1;
   # chdir 't' if -d 't';
   unshift @INC, '../lib'; # for running manually
-  plan tests => 1447;
+  plan tests => 1457;
   }
-my $version = '1.42';	# for $VERSION tests, match current release (by hand!)
+my $version = '1.43';	# for $VERSION tests, match current release (by hand!)
 
 ##############################################################################
 # for testing inheritance of _swap
@@ -72,25 +72,25 @@ while (<DATA>)
     $ans = pop(@args);
     $try = "\$x = Math::BigInt->new(\"$args[0]\");";
     if ($f eq "bnorm"){
-      # $try .= '$x+0;';
+      $try = "\$x = Math::BigInt::bnorm(\"$args[0]\");";
     } elsif ($f eq "is_zero") {
-      $try .= '$x->is_zero()+0;';
+      $try .= '$x->is_zero();';
     } elsif ($f eq "is_one") {
-      $try .= '$x->is_one()+0;';
+      $try .= '$x->is_one();';
     } elsif ($f eq "is_odd") {
-      $try .= '$x->is_odd()+0;';
+      $try .= '$x->is_odd();';
     } elsif ($f eq "is_even") {
-      $try .= '$x->is_even()+0;';
+      $try .= '$x->is_even();';
     } elsif ($f eq "is_negative") {
-      $try .= '$x->is_negative()+0;';
+      $try .= '$x->is_negative();';
     } elsif ($f eq "is_positive") {
-      $try .= '$x->is_positive()+0;';
+      $try .= '$x->is_positive();';
     } elsif ($f eq "as_hex") {
       $try .= '$x->as_hex();';
     } elsif ($f eq "as_bin") {
       $try .= '$x->as_bin();';
     } elsif ($f eq "is_inf") {
-      $try .= "\$x->is_inf('$args[1]')+0;";
+      $try .= "\$x->is_inf('$args[1]');";
     } elsif ($f eq "binf") {
       $try .= "\$x->binf('$args[1]');";
     } elsif ($f eq "bone") {
@@ -116,13 +116,16 @@ while (<DATA>)
     }elsif ($f eq "bsqrt") {
       $try .= '$x->bsqrt();';
     }elsif ($f eq "length") {
-      $try .= "\$x->length();";
+      $try .= '$x->length();';
     }elsif ($f eq "exponent"){
+      # ->bstr() to see if a BigInt is returned
       $try .= '$x = $x->exponent()->bstr();';
     }elsif ($f eq "mantissa"){
+      # ->bstr() to see if a BigInt is returned
       $try .= '$x = $x->mantissa()->bstr();';
     }elsif ($f eq "parts"){
-      $try .= "(\$m,\$e) = \$x->parts();"; 
+      $try .= '($m,$e) = $x->parts();'; 
+      # ->bstr() to see if a BigInt is returned
       $try .= '$m = $m->bstr(); $m = "NaN" if !defined $m;';
       $try .= '$e = $e->bstr(); $e = "NaN" if !defined $e;';
       $try .= '"$m,$e";';
@@ -133,19 +136,19 @@ while (<DATA>)
       }elsif ($f eq "bround") {
       $try .= "$round_mode; \$x->bround(\$y);";
       }elsif ($f eq "bacmp"){
-        $try .= "\$x->bacmp(\$y);";
+        $try .= '$x->bacmp($y);';
       }elsif ($f eq "badd"){
-        $try .= "\$x + \$y;";
+        $try .= '$x + $y;';
       }elsif ($f eq "bsub"){
-        $try .= "\$x - \$y;";
+        $try .= '$x - $y;';
       }elsif ($f eq "bmul"){
-        $try .= "\$x * \$y;";
+        $try .= '$x * $y;';
       }elsif ($f eq "bdiv"){
-        $try .= "\$x / \$y;";
+        $try .= '$x / $y;';
       }elsif ($f eq "bdiv-list"){
         $try .= 'join (",",$x->bdiv($y));';
       }elsif ($f eq "bmod"){
-        $try .= "\$x % \$y;";
+        $try .= '$x % $y;';
       }elsif ($f eq "bgcd")
         {
         if (defined $args[2])
@@ -204,7 +207,7 @@ while (<DATA>)
       }
     else
       {
-      #print "try: $try ans: $ans1 $ans\n";
+      # print "try: $try ans: $ans1 $ans\n";
       print "# Tried: '$try'\n" if !ok ($ans1, $ans);
       }
     # check internal state of number objects
@@ -483,9 +486,11 @@ ok ($args[4],7); ok (ref($args[4]),'');
 # test for floating-point input (other tests in bnorm() below)
 
 $z = 1050000000000000;          # may be int on systems with 64bit?
-$x = Math::BigInt->new($z); ok ($x->bsstr(),'105e+13');	# not 1.03e+15
+$x = Math::BigInt->new($z); ok ($x->bsstr(),'105e+13');	# not 1.05e+15
 $z = 1e+129;			# definitely a float (may fail on UTS)
-$x = Math::BigInt->new($z); ok ($x->bsstr(),$z);
+# don't compare to $z, since some Perl versions stringify $z into something
+# like '1.e+129' or something equally ugly
+$x = Math::BigInt->new($z); ok ($x->bsstr(),'1e+129');
 
 ###############################################################################
 # prime number tests, also test for **= and length()
@@ -534,11 +539,10 @@ ok (ref($x),'Math::Foo');
 # Test whether +inf eq inf
 # This tried to test whether BigInt inf equals Perl inf. Unfortunately, Perl
 # hasn't (before 5.7.3 at least) a consistent way to say inf, and some things
-# like 1e100000 crash on some platforms. So simple test for 'inf'
+# like 1e100000 crash on some platforms. So simple test for the string 'inf'
 $x = Math::BigInt->new('+inf'); ok ($x,'inf');
 
-###############################################################################
-# all tests done
+### all tests done ############################################################
 
 ###############################################################################
 # Perl 5.005 does not like ok ($x,undef)
@@ -667,6 +671,7 @@ NaN:-inf:
 0x1_2_3_4_56_78:305419896
 0x_123:NaN
 # inf input
+inf:inf
 +inf:inf
 -inf:-inf
 0inf:NaN
@@ -1047,6 +1052,7 @@ abc:+1:abc:NaN
 4:-3:-2
 123:+inf:0
 123:-inf:0
+10000000000000000000000000000000000000000000000000000000000000000000000000000000000:10000000375084540248994272022843165711074:999999962491547381984643365663244474111576
 &bmod
 abc:abc:NaN
 abc:+1:abc:NaN
@@ -1204,6 +1210,8 @@ abc:NaN
 123:123
 -1:-1
 -2:-2
++inf:inf
+-inf:-inf
 &exponent
 abc:NaN
 1e4:4
@@ -1212,6 +1220,8 @@ abc:NaN
 -1:0
 -2:0
 0:1
++inf:inf
+-inf:inf
 &parts
 abc:NaN,NaN
 1e4:1,4
@@ -1220,6 +1230,8 @@ abc:NaN,NaN
 -1:-1,0
 -2:-2,0
 0:0,1
++inf:inf,inf
+-inf:-inf,inf
 &bpow
 abc:12:NaN
 12:abc:NaN

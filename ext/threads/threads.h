@@ -9,8 +9,8 @@
 #include <windows.h>
 #include <win32thread.h>
 #define PERL_THREAD_DETACH(t) 
-#define PERL_THREAD_SET_SPECIFIC(k,v) TlsSetValue(k,v)
-#define PERL_THREAD_GET_SPECIFIC(k)   TlsGetValue(k)
+#define PERL_THREAD_SETSPECIFIC(k,v) TlsSetValue(k,v)
+#define PERL_THREAD_GETSPECIFIC(k,v) v = TlsGetValue(k)
 #define PERL_THREAD_ALLOC_SPECIFIC(k) \
 STMT_START {\
   if((k = TlsAlloc()) == TLS_OUT_OF_INDEXES) {\
@@ -22,18 +22,25 @@ STMT_START {\
 #include <pthread.h>
 #include <thread.h>
 
-#define PERL_THREAD_SET_SPECIFIC(k,v) pthread_setspecific(k,v)
-#define PERL_THREAD_GET_SPECIFIC(k)   pthread_getspecific(k)
+#define PERL_THREAD_SETSPECIFIC(k,v) pthread_setspecific(k,v)
+#ifdef OLD_PTHREADS_API
+#define PERL_THREAD_DETACH(t) pthread_detach(&(t))
+#define PERL_THREAD_GETSPECIFIC(k,v) pthread_getspecific(k,&v)
+#define PERL_THREAD_ALLOC_SPECIFIC(k) STMT_START {\
+  if(pthread_keycreate(&(k),0)) {\
+    PerlIO_printf(PerlIO_stderr(), "panic threads.h: pthread_key_create");\
+    exit(1);\
+  }\
+} STMT_END
+#else
+#define PERL_THREAD_DETACH(t) pthread_detach((t))
+#define PERL_THREAD_GETSPECIFIC(k,v) v = pthread_getspecific(k)
 #define PERL_THREAD_ALLOC_SPECIFIC(k) STMT_START {\
   if(pthread_key_create(&(k),0)) {\
     PerlIO_printf(PerlIO_stderr(), "panic threads.h: pthread_key_create");\
     exit(1);\
   }\
 } STMT_END
-#ifdef OLD_PTHREADS_API
-#define PERL_THREAD_DETACH(t) pthread_detach(&(t))
-#else
-#define PERL_THREAD_DETACH(t) pthread_detach((t))
 #endif
 #endif
 

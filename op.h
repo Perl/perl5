@@ -469,7 +469,7 @@ typedef struct {
 #define localtime(a)       (localtime_r((a),PL_reentrant_buffer->tmbuff) ? PL_reentrant_buffer->tmbuff : NULL)
 #define gmtime(a)          (gmtime_r((a),PL_reentrant_buffer->tmbuff) ?  PL_reentrant_buffer->tmbuff : NULL)
 
-#if defined(__hpux) && defined(__ux_version) && __ux_version <= 1020
+#ifdef OLD_PTHREADS_API
 
 /* HP-UX 10.20 returns 0 on success, what it returns on failure is hidden
    in the fog somewhere, possibly -1 which means the following should do 

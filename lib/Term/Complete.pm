@@ -5,7 +5,7 @@ require Exporter;
 use strict;
 our @ISA = qw(Exporter);
 our @EXPORT = qw(Complete);
-our $VERSION = '1.3';
+our $VERSION = '1.4';
 
 #      @(#)complete.pl,v1.2            (me@anywhere.EBay.Sun.COM) 09/23/91
 
@@ -24,8 +24,7 @@ This routine provides word completion on the list of words in
 the array (or array ref).
 
 The tty driver is put into raw mode and restored using an operating
-system specific command, in UNIX-like environments C<stty raw -echo>
-and C<stty -raw echo>.
+system specific command, in UNIX-like environments C<stty>.
 
 The following command characters are defined:
 
@@ -67,16 +66,18 @@ Wayne Thompson
 
 =cut
 
-our($complete, $kill, $erase1, $erase2, $tty_raw_noecho, $tty_restore);
+our($complete, $kill, $erase1, $erase2, $tty_raw_noecho, $tty_restore, $stty);
+our($tty_saved_state) = '';
 CONFIG: {
     $complete = "\004";
     $kill     = "\025";
     $erase1 =   "\177";
     $erase2 =   "\010";
-    foreach my $stty (qw(/bin/stty /usr/bin/stty)) {
-	if (-x $stty) {
-	    $tty_raw_noecho = "$stty raw -echo";
-	    $tty_restore    = "$stty -raw echo";
+    foreach my $s (qw(/bin/stty /usr/bin/stty)) {
+	if (-x $s) {
+	    $tty_raw_noecho = "$s raw -echo";
+	    $tty_restore    = "$s -raw echo";
+	    $stty = $s;
 	    last;
 	}
     }
@@ -97,6 +98,17 @@ sub Complete {
 	@cmp_lst = sort(@_);
     }
 
+    # Attempt to save the current stty state, to be restored later
+    if (defined $stty && defined $tty_saved_state && $tty_saved_state eq '') {
+	$tty_saved_state = qx($stty -g 2>/dev/null);
+	if ($?) {
+	    # stty -g not supported
+	    $tty_saved_state = undef;
+	}
+	else {
+	    $tty_restore = qq($stty "$tty_saved_state");
+	}
+    }
     system $tty_raw_noecho if defined $tty_raw_noecho;
     LOOP: {
         print($prompt, $return);

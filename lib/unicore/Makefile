@@ -1,5 +1,5 @@
 all:
-	../../miniperl -I../../lib ./mktables.PL
+	../../miniperl -I../../lib ./mktables
 
 clean:
 	rm -f *.pl */*.pl

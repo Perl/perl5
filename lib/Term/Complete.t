@@ -7,69 +7,66 @@ BEGIN {
 
 use warnings;
 use Test::More tests => 8;
-use vars qw( $Term::Complete::complete $complete );
-my $restore;
+use vars qw( $Term::Complete::complete $complete $Term::Complete::stty );
 
 SKIP: {
-    skip('PERL_SKIP_TTY_TEST', 8) if $ENV{PERL_SKIP_TTY_TEST} or !(-t STDIN);
+    skip('PERL_SKIP_TTY_TEST', 8) if $ENV{PERL_SKIP_TTY_TEST};
     
-    my $TTY;
-    if ($^O eq 'rhapsody' && -c "/dev/ttyp0") { $TTY = "/dev/ttyp0" }
-    elsif (-c "/dev/tty")                     { $TTY = "/dev/tty"   }
-    if (defined $TTY) {
-	open(TTY, $TTY)               or die "open $TTY failed: $!";
-	skip("$TTY not a tty", 8)     if defined $TTY && ! -t TTY;
-	$restore = `stty -g`;
-	skip("Can't reliably restore $TTY", 8) if $?;
-    }
+    use_ok( 'Term::Complete' );
+  
+    # this skips tests AND prevents the "used only once" warning
+    skip('No stty, Term::Complete will not run here', 8)
+	unless defined $Term::Complete::tty_raw_noecho &&
+	       defined $Term::Complete::tty_restore;
 
-use_ok( 'Term::Complete' );
+    # also prevent Term::Complete from running stty and messing up the terminal
+    undef $Term::Complete::tty_restore;
+    undef $Term::Complete::tty_raw_noecho;
+    undef $Term::Complete::stty;
 
-*complete = \$Term::Complete::complete;
+    *complete = \$Term::Complete::complete;
 
-my $in = tie *STDIN, 'FakeIn', "fro\t";
-my $out = tie *STDOUT, 'FakeOut';
-my @words = ( 'frobnitz', 'frobozz', 'frostychocolatemilkshakes' );
+    my $in = tie *STDIN, 'FakeIn', "fro\t";
+    my $out = tie *STDOUT, 'FakeOut';
+    my @words = ( 'frobnitz', 'frobozz', 'frostychocolatemilkshakes' );
 
-Complete('', \@words);
-my $data = get_expected('fro', @words);
+    Complete('', \@words);
+    my $data = get_expected('fro', @words);
+    
+    # there should be an \a after our word
+    like( $$out, qr/fro\a/, 'found bell character' );
 
-# there should be an \a after our word
-like( $$out, qr/fro\a/, 'found bell character' );
+    # now remove the \a -- there should be only one
+    is( $out->scrub(), 1, '(single) bell removed');
 
-# now remove the \a -- there should be only one
-is( $out->scrub(), 1, '(single) bell removed');
+    # 'fro' should match all three words
+    like( $$out, qr/$data/, 'all three words possible' );
+    $out->clear();
 
-# 'fro' should match all three words
-like( $$out, qr/$data/, 'all three words possible' );
-$out->clear();
+    # should only find 'frobnitz' and 'frobozz'
+    $in->add('frob');
+    Complete('', @words);
+    $out->scrub();
+    is( $$out, get_expected('frob', 'frobnitz', 'frobozz'), 'expected frob*' );
+    $out->clear();
 
-# should only find 'frobnitz' and 'frobozz'
-$in->add('frob');
-Complete('', @words);
-$out->scrub();
-is( $$out, get_expected('frob', 'frobnitz', 'frobozz'), 'expected frob*' );
-$out->clear();
+    # should only do 'frobozz'
+    $in->add('frobo');
+    Complete('', @words);
+    $out->scrub();
+    is( $$out, get_expected( 'frobo', 'frobozz' ), 'only frobozz possible' );
+    $out->clear();
 
-# should only do 'frobozz'
-$in->add('frobo');
-Complete('', @words);
-$out->scrub();
-is( $$out, get_expected( 'frobo', 'frobozz' ), 'only frobozz possible' );
-$out->clear();
+    # change the completion character
+    $complete = "!";
+    $in->add('frobn');
+    Complete('prompt:', @words);
+    $out->scrub();
+    like( $$out, qr/prompt:frobn/, 'prompt is okay' );
 
-# change the completion character
-$complete = "!";
-$in->add('frobn');
-Complete('prompt:', @words);
-$out->scrub();
-like( $$out, qr/prompt:frobn/, 'prompt is okay' );
-
-# now remove the prompt and we should be okay
-$$out =~ s/prompt://g;
-is( $$out, get_expected('frobn', 'frobnitz' ), 'works with new $complete' );
-
-`stty $restore` if defined $restore;
+    # now remove the prompt and we should be okay
+    $$out =~ s/prompt://g;
+    is( $$out, get_expected('frobn', 'frobnitz' ), 'works with new $complete' );
 
 } # end of SKIP, end of tests
 

@@ -852,8 +852,8 @@ lib/constant.t			See if compile-time constants work
 lib/CPAN.pm			Interface to Comprehensive Perl Archive Network
 lib/CPAN/FirstTime.pm		Utility for creating CPAN config files
 lib/CPAN/Nox.pm			Runs CPAN while avoiding compiled extensions
-lib/CPAN/t/Nox.t		See if CPAN::Nox works
 lib/CPAN/t/loadme.t		See if CPAN the module works
+lib/CPAN/t/Nox.t		See if CPAN::Nox works
 lib/CPAN/t/vcmp.t		See if CPAN the module works
 lib/ctime.pl			A ctime workalike
 lib/Cwd.pm			Various cwd routines (getcwd, fastcwd, chdir)
@@ -1019,10 +1019,14 @@ lib/look.pl			A "look" equivalent
 lib/Math/BigFloat.pm		An arbitrary precision floating-point arithmetic package
 lib/Math/BigInt.pm		An arbitrary precision integer arithmetic package
 lib/Math/BigInt/Calc.pm		Pure Perl module to support Math::BigInt
+lib/Math/BigInt/t/bigfltpm.inc	Shared tests for bigfltpm.t and subclass.t
 lib/Math/BigInt/t/bigfltpm.t	See if BigFloat.pm works
 lib/Math/BigInt/t/bigintc.t	See if BigInt/Calc.pm works
 lib/Math/BigInt/t/bigintpm.t	See if BigInt.pm works
+lib/Math/BigInt/t/calling.t	Test calling conventions
+lib/Math/BigInt/t/Math/Subclass.pm	Empty subclass of BigFloat for test
 lib/Math/BigInt/t/mbimbf.t	BigInt/BigFloat accuracy, precicion and fallback, round_mode
+lib/Math/BigInt/t/subclass.t	Empty subclass test of BigFloat
 lib/Math/Complex.pm		A Complex package
 lib/Math/Complex.t		See if Math::Complex works
 lib/Math/Trig.pm		A simple interface to complex trigonometry
@@ -1341,7 +1345,16 @@ lib/unicore/In/16.pl		Unicode character database
 lib/unicore/In/160.pl		Unicode character database
 lib/unicore/In/161.pl		Unicode character database
 lib/unicore/In/162.pl		Unicode character database
+lib/unicore/In/163.pl		Unicode character database
+lib/unicore/In/164.pl		Unicode character database
+lib/unicore/In/165.pl		Unicode character database
+lib/unicore/In/166.pl		Unicode character database
+lib/unicore/In/167.pl		Unicode character database
+lib/unicore/In/168.pl		Unicode character database
+lib/unicore/In/169.pl		Unicode character database
 lib/unicore/In/17.pl		Unicode character database
+lib/unicore/In/170.pl		Unicode character database
+lib/unicore/In/171.pl		Unicode character database
 lib/unicore/In/18.pl		Unicode character database
 lib/unicore/In/19.pl		Unicode character database
 lib/unicore/In/2.pl		Unicode character database
@@ -1433,6 +1446,7 @@ lib/unicore/In/97.pl		Unicode character database
 lib/unicore/In/98.pl		Unicode character database
 lib/unicore/In/99.pl		Unicode character database
 lib/unicore/Index.txt		Unicode character database
+lib/unicore/Is.pl		Unicode character database
 lib/unicore/Is/Alnum.pl		Unicode character database
 lib/unicore/Is/Alpha.pl		Unicode character database
 lib/unicore/Is/ASCII.pl		Unicode character database
@@ -1545,32 +1559,7 @@ lib/unicore/Is/Sm.pl		Unicode character database
 lib/unicore/Is/So.pl		Unicode character database
 lib/unicore/Is/Space.pl		Unicode character database
 lib/unicore/Is/SpacePerl.pl	Unicode character database
-lib/unicore/Is/SylA.pl		Unicode character database
-lib/unicore/Is/SylAA.pl		Unicode character database
-lib/unicore/Is/SylAAI.pl	Unicode character database
-lib/unicore/Is/SylAI.pl		Unicode character database
-lib/unicore/Is/SylC.pl		Unicode character database
-lib/unicore/Is/SylE.pl		Unicode character database
-lib/unicore/Is/SylEE.pl		Unicode character database
-lib/unicore/Is/SylI.pl		Unicode character database
-lib/unicore/Is/SylII.pl		Unicode character database
-lib/unicore/Is/Syllable.pl	Unicode character database
-lib/unicore/Is/SylN.pl		Unicode character database
-lib/unicore/Is/SylO.pl		Unicode character database
-lib/unicore/Is/SylOO.pl		Unicode character database
-lib/unicore/Is/SylU.pl		Unicode character database
-lib/unicore/Is/SylV.pl		Unicode character database
-lib/unicore/Is/SylWA.pl		Unicode character database
-lib/unicore/Is/SylWAA.pl	Unicode character database
-lib/unicore/Is/SylWC.pl		Unicode character database
-lib/unicore/Is/SylWE.pl		Unicode character database
-lib/unicore/Is/SylWEE.pl	Unicode character database
-lib/unicore/Is/SylWI.pl		Unicode character database
-lib/unicore/Is/SylWII.pl	Unicode character database
-lib/unicore/Is/SylWO.pl		Unicode character database
-lib/unicore/Is/SylWOO.pl	Unicode character database
-lib/unicore/Is/SylWU.pl		Unicode character database
-lib/unicore/Is/SylWV.pl		Unicode character database
+lib/unicore/Is/Title.pl		Unicode character database
 lib/unicore/Is/Upper.pl		Unicode character database
 lib/unicore/Is/Word.pl		Unicode character database
 lib/unicore/Is/XDigit.pl	Unicode character database
@@ -1580,9 +1569,10 @@ lib/unicore/Is/Zp.pl		Unicode character database
 lib/unicore/Is/Zs.pl		Unicode character database
 lib/unicore/Jamo.txt		Unicode character database
 lib/unicore/JamoShort.pl	Unicode character database
+lib/unicore/Lbrk.pl		Unicode character database
 lib/unicore/LineBrk.txt		Unicode character database
 lib/unicore/Makefile		Unicode character database
-lib/unicore/mktables.PL		Unicode character database generator
+lib/unicore/mktables		Unicode character database generator
 lib/unicore/Name.pl		Unicode character database
 lib/unicore/NamesList.html	Unicode character database
 lib/unicore/NamesList.txt	Unicode character database
@@ -1595,7 +1585,6 @@ lib/unicore/rename		Filename mappings used
 lib/unicore/Scripts.pl		Unicode character database
 lib/unicore/Scripts.txt		Unicode character database
 lib/unicore/SpecCase.txt	Unicode character database
-lib/unicore/syllables.txt	Unicode character database
 lib/unicore/To/Digit.pl		Unicode character database
 lib/unicore/To/Lower.pl		Unicode character database
 lib/unicore/To/Title.pl		Unicode character database

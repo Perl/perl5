@@ -24,8 +24,8 @@ void* Perl_thread_run(void * arg) {
 	SHAREDSvLOCK(threads);
 	SHAREDSvEDIT(threads);
 	PERL_THREAD_ALLOC_SPECIFIC(self_key);
-	PERL_THREAD_SET_SPECIFIC(self_key,INT2PTR(void*,thread->tid));
-	thread_tid_ptr = Perl_newSVuv(PL_sharedsv_space, PTR2UV(PERL_THREAD_GET_SPECIFIC(self_key)));	
+	PERL_THREAD_SETSPECIFIC(self_key,INT2PTR(void*,thread->tid));
+	thread_tid_ptr = Perl_newSVuv(PL_sharedsv_space, thread->tid);	
 	thread_ptr = Perl_newSVuv(PL_sharedsv_space, PTR2UV(thread));
 	hv_store_ent((HV*)SHAREDSvGET(threads), thread_tid_ptr, thread_ptr,0);
    	SvREFCNT_dec(thread_tid_ptr);
@@ -156,11 +156,29 @@ SV* Perl_thread_create(char* class, SV* init_function, SV* params) {
 
 
 #else
+	{
+	  static pthread_attr_t attr;
+	  static int attr_inited = 0;
+	  sigset_t fullmask, oldmask;
+	  static int attr_joinable = PTHREAD_CREATE_JOINABLE;
+	  if (!attr_inited) {
+	    attr_inited = 1;
+	    pthread_attr_init(&attr);
+	  }
+#  ifdef PTHREAD_ATTR_SETDETACHSTATE
+            PTHREAD_ATTR_SETDETACHSTATE(&attr, attr_joinable);
+#  endif
+#  ifdef THREAD_CREATE_NEEDS_STACK
+	    if(pthread_attr_setstacksize(&attr, THREAD_CREATE_NEEDS_STACK))
+	      croak("panic: pthread_attr_setstacksize failed");
+#  endif
+
 #ifdef OLD_PTHREADS_API
-	pthread_create( &thread->thr, (pthread_attr_t)NULL, Perl_thread_run, (void *)thread);
+	  pthread_create( &thread->thr, attr, Perl_thread_run, (void *)thread);
 #else
-	pthread_create( &thread->thr, (pthread_attr_t*)NULL, Perl_thread_run, (void *)thread);
+	  pthread_create( &thread->thr, &attr, Perl_thread_run, (void *)thread);
 #endif
+	}
 #endif
 	MUTEX_UNLOCK(&create_mutex);	
 
@@ -189,11 +207,12 @@ SV* Perl_thread_self (char* class) {
 	SV*	thread_tid_ptr;
 	SV*	thread_ptr;
 	HE*	thread_entry;
-	
+	void*   id;
+	PERL_THREAD_GETSPECIFIC(self_key,id);
 	SHAREDSvLOCK(threads);
 	SHAREDSvEDIT(threads);
-
-	thread_tid_ptr = Perl_newSVuv(PL_sharedsv_space, PTR2UV(PERL_THREAD_GET_SPECIFIC(self_key)));	
+	
+	thread_tid_ptr = Perl_newSVuv(PL_sharedsv_space, PTR2UV(id));	
 
 	thread_entry = Perl_hv_fetch_ent(PL_sharedsv_space,
 					 (HV*) SHAREDSvGET(threads),
@@ -285,8 +304,8 @@ BOOT:
 #endif
 		SHAREDSvEDIT(threads);
 		PERL_THREAD_ALLOC_SPECIFIC(self_key);
-		PERL_THREAD_SET_SPECIFIC(self_key,0);
-		thread_tid_ptr = Perl_newSVuv(PL_sharedsv_space, PTR2UV(PERL_THREAD_GET_SPECIFIC(self_key)));
+		PERL_THREAD_SETSPECIFIC(self_key,0);
+		thread_tid_ptr = Perl_newSVuv(PL_sharedsv_space, 0);
 		thread_ptr = Perl_newSVuv(PL_sharedsv_space, PTR2UV(thread));
 		hv_store_ent((HV*) SHAREDSvGET(threads), thread_tid_ptr, thread_ptr,0);
 	   	SvREFCNT_dec(thread_tid_ptr);

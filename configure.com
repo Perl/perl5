@@ -2709,27 +2709,26 @@ $ ENDIF
 $!
 $! PerlIO abstraction
 $!
-$ dflt = "n"
+$ dflt = "y"
 $ IF F$TYPE(useperlio) .NES. ""
 $ THEN
-$   IF useperlio THEN dflt = "y"
-$   IF useperlio .EQS. "define" THEN dflt = "y"
+$   IF useperlio .EQS. "undef" THEN dflt = "n"
 $ ENDIF
 $ IF .NOT. silent
 $ THEN
-$   echo "Previous version of ''package' used the standard IO mechanisms as"
+$   echo "Previous versions of ''package' used the standard IO mechanisms as"
 $   TYPE SYS$INPUT:
 $   DECK
 defined in <stdio.h>.  Versions 5.003_02 and later of perl allow
 alternate IO mechanisms via the PerlIO abstraction layer, but the
-stdio mechanism is still the default.  This abstraction layer can
-use AT&T's sfio (if you already have sfio installed) or regular stdio.
+stdio mechanism is still available if needed.  The abstraction layer
+can use AT&T's sfio (if you already have sfio installed) or regular stdio.
 Using PerlIO with sfio may cause problems with some extension modules.
 
 $   EOD
 $   echo "If this does not make any sense to you, just accept the default '" + dflt + "'."
 $ ENDIF
-$ rp = "Use the experimental PerlIO abstraction layer? [''dflt'] "
+$ rp = "Use the PerlIO abstraction layer? [''dflt'] "
 $ GOSUB myread
 $ IF ans .EQS. "" THEN ans = dflt
 $ IF ans

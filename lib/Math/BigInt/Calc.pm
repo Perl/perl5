@@ -8,7 +8,7 @@ require Exporter;
 use vars qw/@ISA $VERSION/;
 @ISA = qw(Exporter);
 
-$VERSION = '0.10';
+$VERSION = '0.12';
 
 # Package to store unsigned big integers in decimal and do math with them
 
@@ -19,7 +19,8 @@ $VERSION = '0.10';
 # - fully remove funky $# stuff (maybe)
 
 # USE_MUL: due to problems on certain os (os390, posix-bc) "* 1e-5" is used
-# instead of "/ 1e5" at some places, (marked with USE_MUL).
+# instead of "/ 1e5" at some places, (marked with USE_MUL). Other platforms
+# BS2000, some Crays need USE_DIV instead.
 # The BEGIN block is used to determine which of the two variants gives the
 # correct result.
 
@@ -29,9 +30,36 @@ $VERSION = '0.10';
 # constants for easier life
 my $nan = 'NaN';
 
-my $BASE_LEN = 7;
-my $BASE = int("1e".$BASE_LEN);		# var for trying to change it to 1e7
-my $RBASE = abs('1e-'.$BASE_LEN);	# see USE_MUL
+my ($BASE,$RBASE,$BASE_LEN,$MAX_VAL);
+
+sub _base_len 
+  {
+  my $b = shift;
+  if (defined $b)
+    {
+    $BASE_LEN = $b;
+    $BASE = int("1e".$BASE_LEN);
+    $RBASE = abs('1e-'.$BASE_LEN);	# see USE_MUL
+    $MAX_VAL = $BASE-1;
+    # print "BASE_LEN: $BASE_LEN MAX_VAL: $MAX_VAL\n";
+    # print "int: ",int($BASE * $RBASE),"\n";
+    if (int($BASE * $RBASE) == 0)		# should be 1
+      {
+      # must USE_MUL
+     # print "use mul\n";
+      *{_mul} = \&_mul_use_mul;
+      *{_div} = \&_div_use_mul;
+      }
+    else
+      {
+    #  print "use div\n";
+      # can USE_DIV instead
+      *{_mul} = \&_mul_use_div;
+      *{_div} = \&_div_use_div;
+      }
+    }
+  $BASE_LEN-1;
+  }
 
 BEGIN
   {
@@ -43,23 +71,10 @@ BEGIN
     $num = ('9' x ++$e) + 0;
     $num *= $num + 1;
     } until ($num == $num - 1 or $num - 1 == $num - 2);
-  $BASE_LEN = $e-1;
-  $BASE = int("1e".$BASE_LEN);
-  $RBASE = abs('1e-'.$BASE_LEN);	# see USE_MUL
+  _base_len($e-1);
   }
 
 # for quering and setting, to debug/benchmark things
-sub _base_len 
-  {
-  my $b = shift;
-  if (defined $b)
-    {
-    $BASE_LEN = $b;
-    $BASE = int("1e".$BASE_LEN);
-    $RBASE = abs('1e-'.$BASE_LEN);	# see USE_MUL
-    }
-  $BASE_LEN;
-  }
 
 ##############################################################################
 # create objects from various representations
@@ -208,7 +223,7 @@ sub _sub
     }
   }                                                                             
 
-sub _mul
+sub _mul_use_mul
   {
   # (BINT, BINT) return nothing
   # multiply two numbers in internal representation
@@ -252,7 +267,37 @@ sub _mul
   return $xv;
   }                                                                             
 
-sub _div
+sub _mul_use_div
+  {
+  # (BINT, BINT) return nothing
+  # multiply two numbers in internal representation
+  # modifies first arg, second need not be different from first
+  my ($c,$xv,$yv) = @_;
+ 
+  my @prod = (); my ($prod,$car,$cty,$xi,$yi);
+  # since multiplying $x with $x fails, make copy in this case
+  $yv = [@$xv] if "$xv" eq "$yv";	# same references?
+  for $xi (@$xv)
+    {
+    $car = 0; $cty = 0;
+    # looping through this if $xi == 0 is silly - so optimize it away!
+    $xi = (shift @prod || 0), next if $xi == 0;
+    for $yi (@$yv)
+      {
+      $prod = $xi * $yi + ($prod[$cty] || 0) + $car;
+      $prod[$cty++] =
+       $prod - ($car = int($prod / $BASE)) * $BASE;
+      }
+    $prod[$cty] += $car if $car; # need really to check for 0?
+    $xi = shift @prod;
+    }
+  push @$xv, @prod;
+  __strip_zeros($xv);
+  # normalize (handled last to save check for $y->is_zero()
+  return $xv;
+  }                                                                             
+
+sub _div_use_mul
   {
   # ref to array, ref to array, modify first array and return remainder if 
   # in list context
@@ -291,7 +336,8 @@ sub _div
     $u2 = 0 unless $u2;
     #warn "oups v1 is 0, u0: $u0 $y->[-2] $y->[-1] l ",scalar @$y,"\n"
     # if $v1 == 0;
-    $q = (($u0 == $v1) ? 99999 : int(($u0*$BASE+$u1)/$v1));
+    # $q = (($u0 == $v1) ? 99999 : int(($u0*$BASE+$u1)/$v1));
+     $q = (($u0 == $v1) ? $MAX_VAL : int(($u0*$BASE+$u1)/$v1));
     --$q while ($v2*$q > ($u0*$BASE+$u1-$q*$v1)*$BASE+$u2);
     if ($q)
       {
@@ -324,6 +370,96 @@ sub _div
         {
         $prd = $car * $BASE + $xi;
         $car = $prd - ($tmp = int($prd / $dd)) * $dd; # see USE_MUL
+        unshift(@d, $tmp);
+        }
+      }
+    else 
+      {
+      @d = @$x;
+      }
+    @$x = @q;
+    __strip_zeros($x); 
+    __strip_zeros(\@d);
+    return ($x,\@d);
+    }
+  @$x = @q;
+  __strip_zeros($x); 
+  return $x;
+  }
+
+sub _div_use_div
+  {
+  # ref to array, ref to array, modify first array and return remainder if 
+  # in list context
+  # no longer handles sign
+  my ($c,$x,$yorg) = @_;
+  my ($car,$bar,$prd,$dd,$xi,$yi,@q,$v2,$v1);
+
+  my (@d,$tmp,$q,$u2,$u1,$u0);
+
+  $car = $bar = $prd = 0;
+  
+  my $y = [ @$yorg ];
+  if (($dd = int($BASE/($y->[-1]+1))) != 1) 
+    {
+    for $xi (@$x) 
+      {
+      $xi = $xi * $dd + $car;
+      $xi -= ($car = int($xi / $BASE)) * $BASE;
+      }
+    push(@$x, $car); $car = 0;
+    for $yi (@$y) 
+      {
+      $yi = $yi * $dd + $car;
+      $yi -= ($car = int($yi / $BASE)) * $BASE;
+      }
+    }
+  else 
+    {
+    push(@$x, 0);
+    }
+  @q = (); ($v2,$v1) = @$y[-2,-1];
+  $v2 = 0 unless $v2;
+  while ($#$x > $#$y) 
+    {
+    ($u2,$u1,$u0) = @$x[-3..-1];
+    $u2 = 0 unless $u2;
+    #warn "oups v1 is 0, u0: $u0 $y->[-2] $y->[-1] l ",scalar @$y,"\n"
+    # if $v1 == 0;
+    # $q = (($u0 == $v1) ? 99999 : int(($u0*$BASE+$u1)/$v1));
+     $q = (($u0 == $v1) ? $MAX_VAL : int(($u0*$BASE+$u1)/$v1));
+    --$q while ($v2*$q > ($u0*$BASE+$u1-$q*$v1)*$BASE+$u2);
+    if ($q)
+      {
+      ($car, $bar) = (0,0);
+      for ($yi = 0, $xi = $#$x-$#$y-1; $yi <= $#$y; ++$yi,++$xi) 
+        {
+        $prd = $q * $y->[$yi] + $car;
+        $prd -= ($car = int($prd / $BASE)) * $BASE;
+	$x->[$xi] += $BASE if ($bar = (($x->[$xi] -= $prd + $bar) < 0));
+	}
+      if ($x->[-1] < $car + $bar) 
+        {
+        $car = 0; --$q;
+	for ($yi = 0, $xi = $#$x-$#$y-1; $yi <= $#$y; ++$yi,++$xi) 
+          {
+	  $x->[$xi] -= $BASE
+	   if ($car = (($x->[$xi] += $y->[$yi] + $car) > $BASE));
+	  }
+	}   
+      }
+      pop(@$x); unshift(@q, $q);
+    }
+  if (wantarray) 
+    {
+    @d = ();
+    if ($dd != 1)  
+      {
+      $car = 0; 
+      for $xi (reverse @$x) 
+        {
+        $prd = $car * $BASE + $xi;
+        $car = $prd - ($tmp = int($prd / $dd)) * $dd;
         unshift(@d, $tmp);
         }
       }
@@ -614,9 +750,9 @@ Math::BigInt::Calc - Pure Perl module to support Math::BigInt
 
 =head1 SYNOPSIS
 
-Provides support for big integer calculations. Not intended
-to be used by other modules. Other modules which export the
-same functions can also be used to support Math::Bigint
+Provides support for big integer calculations. Not intended to be used by other
+modules (except Math::BigInt::Cached). Other modules which sport the same
+functions can also be used to support Math::Bigint, like Math::BigInt::Pari.
 
 =head1 DESCRIPTION
 
@@ -625,7 +761,7 @@ was rewritten to use library modules for core math routines. Any
 module which follows the same API as this can be used instead by
 using the following call:
 
-	use Math::BigInt lib => BigNum;
+	use Math::BigInt lib => 'libname';
 
 =head1 EXPORT
 
@@ -670,11 +806,18 @@ the use by Math::BigInt:
 			return 0 for ok, otherwise error message as string
 
 The following functions are optional, and can be defined if the underlying lib
-has a fast way to do them. If not defined, Math::BigInt will use a pure, but
+has a fast way to do them. If undefined, Math::BigInt will use a pure, but
 slow, Perl way as fallback to emulate these:
 
 	_from_hex(str)	return ref to new object from ref to hexadecimal string
 	_from_bin(str)	return ref to new object from ref to binary string
+	
+	_as_hex(str)	return ref to scalar string containing the value as
+			unsigned hex string, with the '0x' prepended.
+			Leading zeros must be stripped.
+	_as_bin(str)	Like as_hex, only as binary string containing only
+			zeros and ones. Leading zeros must be stripped and a
+			'0b' must be prepended.
 	
 	_rsft(obj,N,B)	shift object in base B by N 'digits' right
 	_lsft(obj,N,B)	shift object in base B by N 'digits' left
@@ -737,7 +880,7 @@ Seperated from BigInt and shaped API with the help of John Peacock.
 
 =head1 SEE ALSO
 
-L<Math::BigInt>, L<Math::BigFloat>, L<Math::BigInt::BitVect> and
-L<Math::BigInt::Pari>.
+L<Math::BigInt>, L<Math::BigFloat>, L<Math::BigInt::BitVect>,
+L<Math::BigInt::GMP>, L<Math::BigInt::Cached> and L<Math::BigInt::Pari>.
 
 =cut

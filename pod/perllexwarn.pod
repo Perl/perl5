@@ -342,6 +342,12 @@ The scope where C<length> is used has escalated the C<void> warnings
 category into a fatal error, so the program terminates immediately it
 encounters the warning.
 
+To explicitly disable a "FATAL" warning you just disable the warning it is
+associated with.  So, for example, to disable the "void" warning in the
+example above, either of these will do the trick:
+
+    no warnings qw(void);
+    no warnings FATAL => qw(void);
 
 =head2 Reporting Warnings from a Module
 

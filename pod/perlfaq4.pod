@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq4 - Data Manipulation ($Revision: 1.3 $, $Date: 2001/10/03 23:08:02 $)
+perlfaq4 - Data Manipulation ($Revision: 1.5 $, $Date: 2001/10/12 15:20:13 $)
 
 =head1 DESCRIPTION
 
@@ -1216,18 +1216,27 @@ Scalar-List-Utils 1.03 or later installed, you can say:
 
 If not, you can use this:
 
-    # fisher_yates_shuffle( \@array ) : 
-    # generate a random permutation of @array in place
+    # fisher_yates_shuffle
+    # generate a random permutation of an array in place
+    # As in shuffling a deck of cards
+    #
     sub fisher_yates_shuffle {
-        my $array = shift;
-        my $i = @$array;
+        my $deck = shift;  # $deck is a reference to an array
+        my $i = @$deck;
         while (--$i) {
             my $j = int rand ($i+1);
-            @$array[$i,$j] = @$array[$j,$i];
+            @$deck[$i,$j] = @$deck[$j,$i];
         }
     }
 
-    fisher_yates_shuffle( \@array );    # permutes @array in place
+And here is an example of using it:
+
+    #
+    # shuffle my mpeg collection
+    #
+    my @mpeg = <audio/*/*.mp3>;
+    fisher_yates_shuffle( \@mpeg );    # randomize @mpeg in place
+    print @mpeg;
 
 Note that the above implementation shuffles an array in place,
 unlike the List::Util::shuffle() which takes a list and returns
@@ -1372,7 +1381,7 @@ For example, this sets $vec to have bit N set if $ints[N] was set:
     $vec = '';
     foreach(@ints) { vec($vec,$_,1) = 1 }
 
-And here's how, given a vector in $vec, you can
+Here's how, given a vector in $vec, you can
 get those bits into your @ints array:
 
     sub bitvec_to_list {
@@ -1407,7 +1416,16 @@ get those bits into your @ints array:
 This method gets faster the more sparse the bit vector is.
 (Courtesy of Tim Bunce and Winfried Koenig.)
 
-Here's a demo on how to use vec():
+Or use the CPAN module Bit::Vector:
+
+    $vector = Bit::Vector->new($num_of_bits);
+    $vector->Index_List_Store(@ints);
+    @ints = $vector->Index_List_Read();
+
+Bit::Vector provides efficient methods for bit vector, sets of small integers
+and "big int" math. 
+
+Here's a more extensive illustration using vec():
 
     # vec demo
     $vector = "\xff\x0f\xef\xfe";

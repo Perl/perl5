@@ -59,7 +59,7 @@ File::Spec. Since some modules (like VMS) make use of facilities available
 only under that OS, it may not be possible to load all modules under all
 operating systems.
 
-Since File::Spec is object oriented, subroutines should not called directly,
+Since File::Spec is object oriented, subroutines should not be called directly,
 as in:
 
 	File::Spec::catfile('a','b');
@@ -75,14 +75,14 @@ forms of these methods.
 
 =over 2
 
-=item canonpath
+=item canonpath()
 
 No physical check on the filesystem, but a logical cleanup of a
 path.
 
     $cpath = File::Spec->canonpath( $path ) ;
 
-=item catdir
+=item catdir()
 
 Concatenate two or more directory names to form a complete path ending
 with a directory. But remove the trailing slash from the resulting
@@ -153,10 +153,9 @@ Takes as argument a path and returns true if it is an absolute path.
 
     $is_absolute = File::Spec->file_name_is_absolute( $path );
 
-This does not consult the local filesystem on Unix, Win32, or OS/2.  It
-does sometimes on MacOS (see L<File::Spec::MacOS/file_name_is_absolute>).
-It does consult the working environment for VMS (see
-L<File::Spec::VMS/file_name_is_absolute>).
+This does not consult the local filesystem on Unix, Win32, OS/2, or
+Mac OS (Classic).  It does consult the working environment for VMS
+(see L<File::Spec::VMS/file_name_is_absolute>).
 
 =item path
 
@@ -198,9 +197,9 @@ files from directories.
 
 Unlike just splitting the directories on the separator, empty
 directory names (C<''>) can be returned, because these are significant
-on some OSs (e.g. MacOS).
+on some OSs.
 
-=item catpath
+=item catpath()
 
 Takes volume, directory and file portions and returns an entire path. Under
 Unix, $volume is ignored, and directory and file are catenated.  A '/' is
@@ -216,9 +215,9 @@ from the base path to the destination path:
     $rel_path = File::Spec->abs2rel( $path ) ;
     $rel_path = File::Spec->abs2rel( $path, $base ) ;
 
-If $base is not present or '', then L<cwd()> is used. If $base is relative, 
+If $base is not present or '', then L<cwd()|Cwd> is used. If $base is relative, 
 then it is converted to absolute form using L</rel2abs()>. This means that it
-is taken to be relative to L<cwd()>.
+is taken to be relative to L<cwd()|Cwd>.
 
 On systems with the concept of a volume, this assumes that both paths 
 are on the $destination volume, and ignores the $base volume. 
@@ -228,26 +227,24 @@ $base filename as well. Otherwise all path components are assumed to be
 directories.
 
 If $path is relative, it is converted to absolute form using L</rel2abs()>.
-This means that it is taken to be relative to L<cwd()>.
+This means that it is taken to be relative to L<cwd()|Cwd>.
 
-No checks against the filesystem are made on most systems.  On MacOS,
-the filesystem may be consulted (see
-L<File::Spec::MacOS/file_name_is_absolute>).  On VMS, there is
+No checks against the filesystem are made.  On VMS, there is
 interaction with the working environment, as logicals and
 macros are expanded.
 
 Based on code written by Shigio Yamaguchi.
 
-=item rel2abs
+=item rel2abs()
 
 Converts a relative path to an absolute path. 
 
     $abs_path = File::Spec->rel2abs( $path ) ;
     $abs_path = File::Spec->rel2abs( $path, $base ) ;
 
-If $base is not present or '', then L<cwd()> is used. If $base is relative, 
+If $base is not present or '', then L<cwd()|Cwd> is used. If $base is relative, 
 then it is converted to absolute form using L</rel2abs()>. This means that it
-is taken to be relative to L<cwd()>.
+is taken to be relative to L<cwd()|Cwd>.
 
 On systems with the concept of a volume, this assumes that both paths 
 are on the $base volume, and ignores the $path volume. 
@@ -258,9 +255,7 @@ directories.
 
 If $path is absolute, it is cleaned up and returned using L</canonpath()>.
 
-No checks against the filesystem are made on most systems.  On MacOS,
-the filesystem may be consulted (see
-L<File::Spec::MacOS/file_name_is_absolute>).  On VMS, there is
+No checks against the filesystem are made.  On VMS, there is
 interaction with the working environment, as logicals and
 macros are expanded.
 
@@ -282,10 +277,11 @@ L<ExtUtils::MakeMaker>
 
 Kenneth Albanowski <kjahds@kjahds.com>, Andy Dougherty
 <doughera@lafcol.lafayette.edu>, Andreas KE<ouml>nig
-<A.Koenig@franz.ww.TU-Berlin.DE>, Tim Bunce <Tim.Bunce@ig.co.uk. VMS
-support by Charles Bailey <bailey@newman.upenn.edu>.  OS/2 support by
-Ilya Zakharevich <ilya@math.ohio-state.edu>. Mac support by Paul Schinder
-<schinder@pobox.com>.  abs2rel() and rel2abs() written by
-Shigio Yamaguchi <shigio@tamacom.com>, modified by Barrie Slaymaker
-<barries@slaysys.com>.  splitpath(), splitdir(), catpath() and catdir()
-by Barrie Slaymaker.
+<A.Koenig@franz.ww.TU-Berlin.DE>, Tim Bunce <Tim.Bunce@ig.co.uk.
+VMS support by Charles Bailey <bailey@newman.upenn.edu>.
+OS/2 support by Ilya Zakharevich <ilya@math.ohio-state.edu>.
+Mac support by Paul Schinder <schinder@pobox.com>, and Thomas Wegner
+<wegner_thomas@yahoo.com>.  abs2rel() and rel2abs() written by Shigio
+Yamaguchi <shigio@tamacom.com>, modified by Barrie Slaymaker
+<barries@slaysys.com>.  splitpath(), splitdir(), catpath() and
+catdir() by Barrie Slaymaker.
