@@ -381,6 +381,8 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	return 0;
 
     if (keysv) {
+	if (flags & HVhek_FREEKEY)
+	    Safefree(key);
 	key = SvPV(keysv, klen);
 	flags = 0;
 	is_utf8 = (SvUTF8(keysv) != 0);
@@ -873,6 +875,8 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	return Nullsv;
 
     if (keysv) {
+	if (k_flags & HVhek_FREEKEY)
+	    Safefree(key);
 	key = SvPV(keysv, klen);
 	k_flags = 0;
 	is_utf8 = (SvUTF8(keysv) != 0);
