@@ -34,7 +34,7 @@ of sections:
     perlform	Perl formats
     perllocale	Perl locale support
 
-    perlref	Perl references 
+    perlref	Perl references
     perldsc	Perl data structures intro
     perllol	Perl data structures: lists of lists
     perltoot	Perl OO tutorial
@@ -52,27 +52,38 @@ of sections:
     perlpod	Perl plain old documentation
     perlbook	Perl book information
 
-    perlembed	Perl how to embed perl in your C or C++ app
+    perlembed	Perl ways to embed perl in your C or C++ application
     perlapio	Perl internal IO abstraction interface
     perlxs	Perl XS application programming interface
     perlxstut	Perl XS tutorial
-    perlguts	Perl internal functions for those doing extensions 
+    perlguts	Perl internal functions for those doing extensions
     perlcall	Perl calling conventions from C
 
 (If you're intending to read these straight through for the first time,
 the suggested order will tend to reduce the number of forward references.)
 
-Additional documentation for Perl modules is available in the
-F</usr/local/man/> directory.  Some of this is distributed standard with
-Perl, but you'll also find third-party modules there.  You should be able
-to view this with your man(1) program by including the proper directories
-in the appropriate start-up files.  To find out where these are, type:
+By default, all of the above manpages are installed in the 
+F</usr/local/man/> directory.  
+
+Extensive additional documentation for Perl modules is available.  The
+default configuration for perl will place this additional documentation
+in the F</usr/local/lib/perl5/man> directory (or else in the F<man>
+subdirectory of the Perl library directory).  Some of this additional
+documentation is distributed standard with Perl, but you'll also find
+documentation for third-party modules there.
+
+You should be able to view Perl's documentation with your man(1)
+program by including the proper directories in the appropriate start-up
+files, or in the MANPATH environment variable.  To find out where the
+configuration has installed the manpages, type:
 
     perl -V:man.dir
 
-If the directories were F</usr/local/man/man1> and F</usr/local/man/man3>,
-you would need to add only F</usr/local/man> to your MANPATH.  If 
-they are different, you'll have to add both stems.
+If the directories have a common stem, such as F</usr/local/man/man1>
+and F</usr/local/man/man3>, you need only to add that stem
+(F</usr/local/man>) to your man(1) configuration files or your MANPATH
+environment variable.  If they do not share a stem, you'll have to add
+both stems.
 
 If that doesn't work for some reason, you can still use the
 supplied F<perldoc> script to view module information.  You might
@@ -142,7 +153,7 @@ will continue to work unchanged.
 
 Perl variables may now be declared within a lexical scope, like "auto"
 variables in C.  Not only is this more efficient, but it contributes
-to better privacy for "programming in the large".  Anonymous 
+to better privacy for "programming in the large".  Anonymous
 subroutines exhibit deep binding of lexical variables (closures).
 
 =item * Arbitrarily nested data structures
@@ -200,7 +211,7 @@ semantics for undefined subroutine calls.  It's not for just autoloading.
 
 =item * Regular expression enhancements
 
-You can now specify non-greedy quantifiers.  You can now do grouping
+You can now specify nongreedy quantifiers.  You can now do grouping
 without creating a backreference.  You can now write regular expressions
 with embedded whitespace and comments for readability.  A consistent
 extensibility mechanism has been added that is upwardly compatible with
@@ -215,7 +226,7 @@ code.  See F<http://www.perl.com/CPAN> for a site near you.
 =item * Compilability
 
 While not yet in full production mode, a working perl-to-C compiler
-does exist.  It can generate portable bytecode, simple C, or
+does exist.  It can generate portable byte code, simple C, or
 optimized C code.
 
 =back
