@@ -215,6 +215,7 @@ while (@ARGV) {
         my $prog = shift;
         $prog =~ s/'/\\'/g;
         $out .= tab . "eval {$prog}";
+	$print_needed = 0;
     } elsif ($_ eq 'depth') {
         $find = 'finddepth';
         next;
@@ -265,7 +266,9 @@ while (@ARGV) {
 }
 
 if ($print_needed) {
-    $out .= "\n" . tab . '&& print("$name\n")';
+    my $t = tab;
+    if ($t !~ /&&\s*$/) { $t .= '&& ' }
+    $out .= "\n" . $t . 'print("$name\n")';
 }
 
 

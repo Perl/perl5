@@ -981,6 +981,8 @@ if( ! $opt_X ){  # use XS, unless it was disabled
 	'add_cppflags' => $addflags, 'c_styles' => \@styles;
       $c->set('includeDirs' => ["$Config::Config{archlib}/CORE", $cwd]);
 
+      $c->get('keywords')->{'__restrict'} = 1;
+
       push @$fdecls_parsed, @{ $c->get('parsed_fdecls') };
       push(@$fdecls, @{$c->get('fdecls')});
 

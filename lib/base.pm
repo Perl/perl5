@@ -2,7 +2,7 @@ package base;
 
 use strict 'vars';
 use vars qw($VERSION);
-$VERSION = '2.05';
+$VERSION = '2.06';
 
 # constant.pm is slow
 sub SUCCESS () { 1 }
@@ -197,6 +197,17 @@ Multiple inheritence of fields is B<NOT> supported, if two or more
 base classes each have inheritable fields the 'base' pragma will
 croak.  See L<fields>, L<public> and L<protected> for a description of
 this feature.
+
+=head1 DIAGNOSTICS
+
+=over 4
+
+=item Base class package "%s" is empty.
+
+base.pm was unable to require the base package, because it was not
+found in your path.
+
+=back
 
 =head1 HISTORY
 

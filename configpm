@@ -435,8 +435,8 @@ Config - access Perl configuration information
 =head1 SYNOPSIS
 
     use Config;
-    if ($Config{'cc'} =~ /gcc/) {
-	print "built by gcc\n";
+    if ($Config{usethreads}) {
+	print "has thread support\n"
     } 
 
     use Config qw(myconfig config_sh config_vars config_re);
