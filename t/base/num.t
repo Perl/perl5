@@ -174,8 +174,11 @@ $a = 0.00049999999999999999999999999999999999999;
 $b = 0.0005000000000000000104;
 print $a <= $b ? "ok 46\n" : "not ok 46\n";
 
-if ($^O eq 'ultrix') {
-  # Ultrix enters looong nirvana over this.
+if ($^O eq 'ultrix' || $^O eq 'VMS') {
+  # Ultrix enters looong nirvana over this. VMS blows up when configured with
+  # D_FLOAT (but with G_FLOAT or IEEE works fine).  The test should probably
+  # make the number of 0's a function of NV_DIG, but that's not in Config and 
+  # we probably don't want to suck Config into a base test anyway.
   print "ok 47\n";
 } else {
   $a = 0.00000000000000000000000000000000000000000000000000000000000000000001;
