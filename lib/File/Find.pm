@@ -135,7 +135,7 @@ not in taint-mode, C<untaint> is a no-op.
 
 See above. This should be set using the C<qr> quoting operator.
 The default is set to  C<qr|^([-+@\w./]+)$|>. 
-Note that the parantheses are vital.
+Note that the parentheses are vital.
 
 =item C<untaint_skip>
 
@@ -180,8 +180,8 @@ Set the variable C<$File::Find::dont_use_nlink> if you're using AFS,
 since AFS cheats.
 
 
-Here's another interesting wanted function.  It will find all symlinks
-that don't resolve:
+Here's another interesting wanted function.  It will find all symbolic
+links that don't resolve:
 
     sub wanted {
          -l && !-e && print "bogus link: $File::Find::name\n";
@@ -244,7 +244,7 @@ directories (requires Mac::Files):
  use Mac::Files;
 
  # invisible() --  returns 1 if file/directory is invisible,  
- # 0 if it's visible or undef if an error occured
+ # 0 if it's visible or undef if an error occurred
 
  sub invisible($) { 
    my $file = shift;
@@ -488,7 +488,7 @@ sub _find_opt {
     $untaint_skip      = $wanted->{untaint_skip};
     $dangling_symlinks = $wanted->{dangling_symlinks};
 
-    # for compatability reasons (find.pl, find2perl)
+    # for compatibility reasons (find.pl, find2perl)
     local our ($topdir, $topdev, $topino, $topmode, $topnlink);
 
     # a symbolic link to a directory doesn't increase the link count
