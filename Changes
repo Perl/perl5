@@ -78,6 +78,15 @@ Version 5.004_76        5.005 Public Beta, Issue 2
 ----------------
 
 ____________________________________________________________________________
+[  1613] By: gsar                                  on 1998/07/21  10:26:01
+        Log: final tweaks before beta2
+     Branch: perl
+           + Porting/findvars
+          +> Porting/fixvars
+           - fixvars
+	   ! Changes MANIFEST intrpvar.h iperlsys.h
+           ! lib/ExtUtils/MM_Win32.pm win32/perlhost.h
+____________________________________________________________________________
 [  1612] By: gsar                                  on 1998/07/21  07:15:54
         Log: fixes to enable PERL_OBJECT build with mingw32/egcs-1.0.2
      Branch: perl

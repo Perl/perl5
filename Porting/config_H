@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Tue Jul 14 13:02:14 EDT 1998
+ * Configuration time: Tue Jul 21 10:03:27 EDT 1998
  * Configured by     : doughera
  * Target system     : linux fractal 2.0.34 #1 tue jun 23 10:09:17 edt 1998 i686 unknown 
  */
@@ -1839,8 +1839,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define ARCHLIB "/opt/perl/lib/5.00474/i686-linux-thread"		/**/
-#define ARCHLIB_EXP "/opt/perl/lib/5.00474/i686-linux-thread"		/**/
+#define ARCHLIB "/opt/perl/lib/5.005/i686-linux-thread"		/**/
+#define ARCHLIB_EXP "/opt/perl/lib/5.005/i686-linux-thread"		/**/
 
 /* DLSYM_NEEDS_UNDERSCORE:
  *	This symbol, if defined, indicates that we need to prepend an
@@ -1885,8 +1885,8 @@
  *	This symbol contains the ~name expanded version of PRIVLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define PRIVLIB "/opt/perl/lib/5.00474"		/**/
-#define PRIVLIB_EXP "/opt/perl/lib/5.00474"		/**/
+#define PRIVLIB "/opt/perl/lib/5.005"		/**/
+#define PRIVLIB_EXP "/opt/perl/lib/5.005"		/**/
 
 /* SITEARCH:
  *	This symbol contains the name of the private library for this package.
@@ -1901,8 +1901,8 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITEARCH "/opt/perl/lib/site_perl/5.00474/i686-linux-thread"		/**/
-#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.00474/i686-linux-thread"		/**/
+#define SITEARCH "/opt/perl/lib/site_perl/5.005/i686-linux-thread"		/**/
+#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.005/i686-linux-thread"		/**/
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.
@@ -1917,8 +1917,8 @@
  *	This symbol contains the ~name expanded version of SITELIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITELIB "/opt/perl/lib/site_perl/5.00474"		/**/
-#define SITELIB_EXP "/opt/perl/lib/site_perl/5.00474"		/**/
+#define SITELIB "/opt/perl/lib/site_perl/5.005"		/**/
+#define SITELIB_EXP "/opt/perl/lib/site_perl/5.005"		/**/
 
 /* STARTPERL:
  *	This variable contains the string to put in front of a perl
