@@ -51,7 +51,8 @@ esac
 # Intuiting the existence of system calls under AIX is difficult,
 # at best; the safest technique is to find them empirically.
 
-# AIX 4.3.* and above default to using nm for symbol extraction
+# AIX 4.3.* and above default to letting Configure test if nm
+# extraction will work.
 case "$osvers" in
    3.*|4.1.*|4.2.*)
       case "$usenm" in
@@ -62,9 +63,6 @@ case "$osvers" in
 	  esac
       ;;
    *)
-      case "$usenm" in
-	  '') usenm='true'
-	  esac
       case "$usenativedlopen" in
 	  '') usenativedlopen='true'
 	  esac
