@@ -691,6 +691,9 @@ the malloc function on your system.
 The perl source is shipped with a version of malloc that is very fast
 but somewhat wasteful of space.  On the other hand, your system's
 malloc() function may be a bit slower but also a bit more frugal.
+However, note that space efficiency also contributes to speed efficiency,
+so there's a chance that perl's malloc may be more efficient both
+space and speed wise.
 
 For many uses, speed is probably the most important consideration, so
 the default behavior (for most systems) is to use the malloc supplied
@@ -698,8 +701,8 @@ with perl.  However, if you will be running very large applications
 (e.g. Tk or PDL) or if your system already has an excellent malloc, or
 if you are experiencing difficulties with extensions that use
 third-party libraries that call malloc, then you might wish to use
-your system's malloc.  (Or, you might wish to explore the experimental
-malloc flags discussed below.)
+your system's malloc.  (Or, you might wish to explore the malloc flags
+discussed below.)
 
 To build without perl's malloc, you can use the Configure command
 
@@ -709,43 +712,30 @@ or you can answer 'n' at the appropriate interactive Configure prompt.
 
 =head2 Malloc Performance Flags
 
-If you are using Perl's malloc, you may add one or
-more of the following items to your cflags config.sh variable
-to change its behavior in potentially useful ways.  You can find out
-more about these flags by reading the malloc.c source.
-In a future version of perl, these might be enabled by default.
+If you are using Perl's malloc, you may add one or more of the following
+items to your cflags config.sh variable to change its behavior.  You can
+find out more about these and other flags by reading the commentary near
+the top of the malloc.c source.
 
 =over 4
 
-=item -DPERL_EMERGENCY_SBRK
+=item -DNO_FANCY_MALLOC
 
-If PERL_EMERGENCY_SBRK is defined, running out of memory need not be a
-fatal error: a memory pool can allocated by assigning to the special
-variable $^M.  See perlvar(1) for more details.
+Undefined by default.  Defining it returns malloc to the state it was at
+in Perl version 5.004.
 
-=item -DPACK_MALLOC
+If left undefined, it enables -DBUCKETS_ROOT2, -DIGNORE_SMALL_BAD_FREE,
+and -DSMALL_BUCKET_VIA_VTABLE.  See the commentary in malloc.c for more
+details.
 
-If PACK_MALLOC is defined, malloc.c uses a slightly different
-algorithm for small allocations (up to 64 bytes long).  Such small
-allocations are quite common in typical Perl scripts.
+=item -DPLAIN_MALLOC
 
-The expected memory savings (with 8-byte alignment in $alignbytes) is
-about 20% for typical Perl usage.  The expected slowdown due to the
-additional malloc overhead is in fractions of a percent.  (It is hard
-to measure because of the effect of the saved memory on speed).
+Undefined by default.  Defining it in addition to NO_FANCY_MALLOC returns
+malloc to the state it was at in Perl version 5.000.
 
-=item -DTWO_POT_OPTIMIZE
-
-If TWO_POT_OPTIMIZE is defined, malloc.c uses a slightly different
-algorithm for large allocations that are close to a power of two
-(starting with 16K).  Such allocations are typical for big hashes and
-special-purpose scripts, especially image processing.  If you will be
-manipulating very large blocks with sizes close to powers of two, it
-might be wise to define this macro.
-
-The expected saving of memory is 0-100% (100% in applications which
-require most memory in such 2**n chunks).  The expected slowdown is
-negligible.
+If left undefined, it enables -DPERL_EMERGENCY_SBRK, -DPACK_MALLOC,
+-DTWO_POT_OPTIMIZE, and -DDEBUGGING_MSTATS.  See the commentary in
+malloc.c for more details.
 
 =back
 

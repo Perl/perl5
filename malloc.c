@@ -2,6 +2,106 @@
  *
  */
 
+/*
+  Here are some notes on configuring Perl's malloc.
+ 
+  There are two macros which serve as bulk disablers of advanced
+  features of this malloc: NO_FANCY_MALLOC, PLAIN_MALLOC (undef by
+  default).  Look in the list of default values below to understand
+  their exact effect.  Defining NO_FANCY_MALLOC returns malloc.c to the
+  state of the malloc in Perl 5.004.  Additionally defining PLAIN_MALLOC
+  returns it to the state as of Perl 5.000.
+
+  Note that some of the settings below may be ignored in the code based
+  on values of other macros.  The PERL_CORE symbol is only defined when
+  perl itself is being compiled (so malloc can make some assumptions
+  about perl's facilities being available to it).
+
+  Each config option has a short description, followed by its name,
+  default value, and a comment about the default (if applicable).  Some
+  options take a precise value, while the others are just boolean.
+  The boolean ones are listed first.
+
+    # Enable code for an emergency memory pool in $^M.  See perlvar.pod
+    # for a description of $^M.
+    PERL_EMERGENCY_SBRK		(!PLAIN_MALLOC && PERL_CORE)
+
+    # Enable code for printing memory statistics.
+    DEBUGGING_MSTATS		(!PLAIN_MALLOC && PERL_CORE)
+
+    # Move allocation info for small buckets into separate areas.
+    # Memory optimization (especially for small allocations, of the
+    # less than 64 bytes).  Since perl usually makes a large number
+    # of small allocations, this is usually a win.
+    PACK_MALLOC			(!PLAIN_MALLOC && !RCHECK)
+
+    # Add one page to big powers of two when calculating bucket size.
+    # This is targeted at big allocations, as are common in image
+    # processing.
+    TWO_POT_OPTIMIZE		!PLAIN_MALLOC
+ 
+    # Use intermediate bucket sizes between powers-of-two.  This is
+    # generally a memory optimization, and a (small) speed pessimization.
+    BUCKETS_ROOT2		!NO_FANCY_MALLOC
+
+    # Do not check small deallocations for bad free().  Memory
+    # and speed optimization, error reporting pessimization.
+    IGNORE_SMALL_BAD_FREE	(!NO_FANCY_MALLOC && !RCHECK)
+
+    # Use table lookup to decide in which bucket a given allocation will go.
+    SMALL_BUCKET_VIA_TABLE	!NO_FANCY_MALLOC
+
+    # Use system-malloc() to emulate sbrk(). Normally only used with broken
+    # sbrk()s.
+    PERL_SBRK_VIA_MALLOC	undef
+
+    # Disable memory overwrite checking with DEBUGGING.  Memory and speed
+    # optimization, error reporting pessimization.
+    NO_RCHECK			undef
+
+    # Enable memory overwrite checking with DEBUGGING.  Memory and speed
+    # pessimization, error reporting optimization
+    RCHECK			(DEBUGGING && !NO_RCHECK)
+
+    # Failed allocations bigger than this size croak (if
+    # PERL_EMERGENCY_SBRK is enabled) without touching $^M.  See
+    # perlvar.pod for a description of $^M.
+    BIG_SIZE			 (1<<16)	# 64K
+
+    # Starting from this power of two, add an extra page to the
+    # size of the bucket. This enables optimized allocations of sizes
+    # close to powers of 2.  Note that the value is indexed at 0.
+    FIRST_BIG_POW2 		15		# 32K, 16K is used too often
+
+    # Estimate of minimal memory footprint.  malloc uses this value to
+    # request the most reasonable largest blocks of memory from the system.
+    FIRST_SBRK 			(48*1024)
+
+    # Round up sbrk()s to multiples of this.
+    MIN_SBRK 			2048
+
+    # Round up sbrk()s to multiples of this percent of footprint.
+    MIN_SBRK_FRAC 		3
+
+    # Add this much memory to big powers of two to get the bucket size.
+    PERL_PAGESIZE 		4096
+
+    # This many sbrk() discontinuities should be tolerated even
+    # from the start without deciding that sbrk() is usually
+    # discontinuous.
+    SBRK_ALLOW_FAILURES		3
+
+    # This many continuous sbrk()s compensate for one discontinuous one.
+    SBRK_FAILURE_PRICE		50
+
+    # Which allocator to use if PERL_SBRK_VIA_MALLOC
+    SYSTEM_ALLOC(a) 		malloc(a)
+
+  This implementation assumes that calling PerlIO_printf() does not
+  result in any memory allocation calls (used during a panic).
+
+ */
+
 #ifndef NO_FANCY_MALLOC
 #  ifndef SMALL_BUCKET_VIA_TABLE
 #    define SMALL_BUCKET_VIA_TABLE
