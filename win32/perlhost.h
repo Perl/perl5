@@ -940,7 +940,7 @@ PerlLIOFlock(struct IPerlLIO* piPerl, int fd, int oper)
 int
 PerlLIOFileStat(struct IPerlLIO* piPerl, int handle, struct stat *buffer)
 {
-    return fstat(handle, buffer);
+    return win32_fstat(handle, buffer);
 }
 
 int
