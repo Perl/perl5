@@ -167,7 +167,7 @@ been fixed.
 
 The internals of the ithreads implementation were not checking if OS-level
 thread creation had failed. threads->create() now returns C<undef> in if
-thead creation fails instead of crashing perl.
+thread creation fails instead of crashing perl.
 
 =back
 
