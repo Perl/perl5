@@ -32,14 +32,14 @@ Edit those files and run 'make regen_headers' to effect changes.
 EOW
 
     if ($file =~ m:\.[ch]$:) {
-$warning =~ s:^: * :gm;
-$warning =~ s: +$::gm;
-$warning =~ s: :/:;
-$warning =~ s:$:/:;
+	$warning =~ s:^: * :gm;
+	$warning =~ s: +$::gm;
+	$warning =~ s: :/:;
+	$warning =~ s:$:/:;
     }
     else {
-$warning =~ s:^:# :gm;
-$warning =~ s: +$::gm;
+	$warning =~ s:^:# :gm;
+	$warning =~ s: +$::gm;
     }
     $warning;
 } # do_not_edit
@@ -51,7 +51,8 @@ open IN, "embed.fnc" or die $!;
 sub walk_table (&@) {
     my $function = shift;
     my $filename = shift || '-';
-    my $leader = shift || do_not_edit ($filename);
+    my $leader = shift;
+    defined $leader or $leader = do_not_edit ($filename);
     my $trailer = shift;
     my $F;
     local *F;
@@ -96,7 +97,7 @@ sub munge_c_files () {
 	if (@_ > 1) {
 	    $functions->{$_[2]} = \@_ if $_[@_-1] =~ /\.\.\./;
 	}
-    } '/dev/null';
+    } '/dev/null', '';
     local $^I = '.bak';
     while (<>) {
 #	if (/^#\s*include\s+"perl.h"/) {
@@ -200,8 +201,8 @@ sub write_global_sym {
     $ret;
 }
 
-walk_table(\&write_protos,     "proto.h");
-walk_table(\&write_global_sym, "global.sym");
+walk_table(\&write_protos,     "proto.h", "");
+walk_table(\&write_global_sym, "global.sym", "");
 
 # XXX others that may need adding
 #       warnhook
@@ -334,7 +335,7 @@ walk_table {
 	}
     }
     $ret;
-} \*EM;
+} \*EM, "";
 
 for $sym (sort keys %ppsym) {
     $sym =~ s/^Perl_//;
@@ -387,7 +388,7 @@ walk_table {
 	}
     }
     $ret;
-} \*EM;
+} \*EM, "";
 
 for $sym (sort keys %ppsym) {
     $sym =~ s/^Perl_//;
