@@ -31,7 +31,7 @@ sub filefound {
 open OUT,">perl.pkg";
 
 print OUT "#{\"perl$VERSION\"},(0x100051d8),$PATCH,$EPOC_VERSION,0\n";
-
+print OUT "\"$CROSSREPLACEPATH\\Artistic\"-\"\",FT,TA\n";
 print OUT "\"$CROSSREPLACEPATH\\perlmain.exe\"-\"!:\\system\\programs\\perl.exe\"\n";
 
 find(\&filefound, cwd.'/lib');
