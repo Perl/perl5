@@ -153,6 +153,9 @@ sideff	:	error
 			{ $$ = newLOOPOP(OPf_PARENS, 1, scalar($3), $1); }
 	|	expr UNTIL iexpr
 			{ $$ = newLOOPOP(OPf_PARENS, 1, $3, $1);}
+	|	expr FOR expr
+			{ $$ = newFOROP(0, Nullch, $2,
+					Nullop, $3, $1, Nullop); }
 	;
 
 else	:	/* NULL */
