@@ -123,7 +123,9 @@ Todo.
 
 =head1 Documentation Changes
 
-Todo.
+perlopentut, tutorial on opening things in Perl, was added.
+
+perlreftut, tutorial on references, was added.
 
 =head1 New Diagnostics
 
