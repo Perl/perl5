@@ -888,7 +888,7 @@ PP(pp_getc)
     if (!gv)
 	gv = argvgv;
 
-    if (SvMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q'))) {
+    if (SvRMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q'))) {
 	I32 gimme = GIMME_V;
 	PUSHMARK(SP);
 	XPUSHs(mg->mg_obj);
@@ -1108,7 +1108,7 @@ PP(pp_prtf)
     else
 	gv = defoutgv;
 
-    if (SvMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q'))) {
+    if (SvRMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q'))) {
 	if (MARK == ORIGMARK) {
 	    EXTEND(SP, 1);
 	    ++MARK;
@@ -1218,7 +1218,7 @@ PP(pp_sysread)
 
     gv = (GV*)*++MARK;
     if ((op->op_type == OP_READ || op->op_type == OP_SYSREAD) &&
-	SvMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q')))
+	SvRMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q')))
     {
 	SV *sv;
 	
