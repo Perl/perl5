@@ -873,6 +873,7 @@ CHECKPOINT regcppush _((I32 parenfloor));
 char * regcppop _((void));
 char * regcp_set_to _((I32 ss));
 void cache_re _((regexp *prog));
+void restore_pos _((void *arg));
 U8 * reghop _((U8 *pos, I32 off));
 U8 * reghopmaybe _((U8 *pos, I32 off));
 void dump _((char *pat,...));

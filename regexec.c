@@ -108,6 +108,7 @@ static CHECKPOINT regcppush _((I32 parenfloor));
 static char * regcppop _((void));
 static char * regcp_set_to _((I32 ss));
 static void cache_re _((regexp *prog));
+static void restore_pos _((void *arg));
 #endif
 
 #define REGINCLASS(p,c)  (*(p) ? reginclass(p,c) : ANYOF_TEST(p,c))
@@ -260,6 +261,16 @@ cache_re(regexp *prog)
     PL_reg_re = prog;    
 }
 
+STATIC void
+restore_pos(void *arg)
+{	
+    if (PL_reg_eval_set) {    
+	PL_reg_magic->mg_len = PL_reg_oldpos;
+	PL_reg_eval_set = 0;
+    }	
+}
+
+
 /*
  - regexec_flags - match a regexp against a string
  */
@@ -327,6 +338,7 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
     /* Mark beginning of line for ^ and lookbehind. */
     PL_regbol = startpos;
     PL_bostr  = strbeg;
+    PL_reg_sv = sv;
 
     /* Mark end of line for $ (and such) */
     PL_regeol = strend;
@@ -1002,9 +1014,13 @@ got_it:
 					   restored, the value remains
 					   the same. */
     }
+    if (PL_reg_eval_set)
+	restore_pos(0);
     return 1;
 
 phooey:
+    if (PL_reg_eval_set)
+	restore_pos(0);
     return 0;
 }
 
@@ -1021,6 +1037,8 @@ regtry(regexp *prog, char *startpos)
     CHECKPOINT lastcp;
 
     if ((prog->reganch & ROPT_EVAL_SEEN) && !PL_reg_eval_set) {
+	MAGIC *mg;
+
 	PL_reg_eval_set = RS_init;
 	DEBUG_r(DEBUG_s(
 	    PerlIO_printf(Perl_debug_log, "  setting stack tmpbase at %i\n",
@@ -1033,6 +1051,25 @@ regtry(regexp *prog, char *startpos)
 	/* Apparently this is not needed, judging by wantarray. */
 	/* SAVEINT(cxstack[cxstack_ix].blk_gimme);
 	   cxstack[cxstack_ix].blk_gimme = G_SCALAR; */
+
+	if (PL_reg_sv) {
+	    /* Make $_ available to executed code. */
+	    if (PL_reg_sv != GvSV(PL_defgv)) {
+		SAVESPTR(GvSV(PL_defgv));
+		GvSV(PL_defgv) = PL_reg_sv;
+	    }
+	
+	    if (!(SvTYPE(PL_reg_sv) >= SVt_PVMG && SvMAGIC(PL_reg_sv) 
+		  && (mg = mg_find(PL_reg_sv, 'g')))) {
+		/* prepare for quick setting of pos */
+		sv_magic(PL_reg_sv, (SV*)0, 'g', Nullch, 0);
+		mg = mg_find(PL_reg_sv, 'g');
+		mg->mg_len = -1;
+	    }
+	    PL_reg_magic    = mg;
+	    PL_reg_oldpos   = mg->mg_len;
+	    SAVEDESTRUCTOR(restore_pos, 0);
+        }
     }
     PL_reginput = startpos;
     PL_regstartp = prog->startp;
@@ -1604,6 +1641,7 @@ regmatch(regnode *prog)
 	    PL_op = (OP_4tree*)PL_regdata->data[n];
 	    DEBUG_r( PerlIO_printf(Perl_debug_log, "  re_eval 0x%x\n", PL_op) );
 	    PL_curpad = AvARRAY((AV*)PL_regdata->data[n + 1]);
+	    PL_reg_magic->mg_len = locinput - PL_bostr;
 
 	    CALLRUNOPS();			/* Scalar context. */
 	    SPAGAIN;

@@ -158,6 +158,8 @@ PERLVAR(Treg_call_cc,	struct re_cc_state *)	/* from regexec.c */
 PERLVAR(Treg_re,	regexp *)	/* from regexec.c */
 PERLVAR(Treg_ganch,	char *)		/* position of \G */
 PERLVAR(Treg_sv,	SV *)		/* what we match against */
+PERLVAR(Treg_magic,	MAGIC *)	/* pos-magic of what we match */
+PERLVAR(Treg_oldpos,	I32)		/* old pos of what we match */
 
 PERLVARI(Tregcompp,	regcomp_t, FUNC_NAME_TO_PTR(pregcomp))
 					/* Pointer to RE compiler */

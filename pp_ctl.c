@@ -164,7 +164,7 @@ PP(pp_substcont)
 
 	/* Are we done */
 	if (cx->sb_once || !CALLREGEXEC(rx, s, cx->sb_strend, orig,
-				     s == m, Nullsv, cx->sb_targ,
+				     s == m, cx->sb_targ, NULL,
 				     ((cx->sb_rflags & REXEC_COPY_STR)
 				      ? 0 : REXEC_COPY_STR)))
 	{

@@ -1926,6 +1926,7 @@
 #define restore_expect		CPerlObj::Perl_restore_expect
 #define restore_lex_expect	CPerlObj::Perl_restore_lex_expect
 #define restore_magic		CPerlObj::Perl_restore_magic
+#define restore_pos		CPerlObj::Perl_restore_pos
 #define restore_rsfp		CPerlObj::Perl_restore_rsfp
 #define rninstr			CPerlObj::Perl_rninstr
 #define rsignal			CPerlObj::Perl_rsignal

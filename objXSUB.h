@@ -500,6 +500,10 @@
 #define PL_reg_flags		pPerl->PL_reg_flags
 #undef  PL_reg_ganch
 #define PL_reg_ganch		pPerl->PL_reg_ganch
+#undef  PL_reg_magic
+#define PL_reg_magic		pPerl->PL_reg_magic
+#undef  PL_reg_oldpos
+#define PL_reg_oldpos		pPerl->PL_reg_oldpos
 #undef  PL_reg_re
 #define PL_reg_re		pPerl->PL_reg_re
 #undef  PL_reg_start_tmp
@@ -2643,6 +2647,8 @@
 #define restore_lex_expect	pPerl->Perl_restore_lex_expect
 #undef  restore_magic
 #define restore_magic		pPerl->Perl_restore_magic
+#undef  restore_pos
+#define restore_pos		pPerl->Perl_restore_pos
 #undef  restore_rsfp
 #define restore_rsfp		pPerl->Perl_restore_rsfp
 #undef  rninstr

@@ -4,7 +4,7 @@
 # the format supported by op/regexp.t.  If you want to add a test
 # that does fit that format, add it to op/re_tests, not here.
 
-print "1..168\n";
+print "1..174\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -716,6 +716,53 @@ print "ok $test\n";
 $test++;
 
 print "not " unless $str =~ /\G../ and $& eq 'cd';
+print "ok $test\n";
+$test++;
+
+undef $foo; undef $bar;
+print "#'$str','$foo','$bar'\nnot "
+    unless $str =~ /b(?{$foo = $_; $bar = pos})c/ 
+	and $foo eq 'abcde' and $bar eq 2;
+print "ok $test\n";
+$test++;
+
+undef $foo; undef $bar;
+pos $str = undef;
+print "#'$str','$foo','$bar'\nnot "
+    unless $str =~ /b(?{$foo = $_; $bar = pos})c/g 
+	and $foo eq 'abcde' and $bar eq 2 and pos $str eq 3;
+print "ok $test\n";
+$test++;
+
+$_ = $str;
+
+undef $foo; undef $bar;
+print "#'$str','$foo','$bar'\nnot "
+    unless /b(?{$foo = $_; $bar = pos})c/ 
+	and $foo eq 'abcde' and $bar eq 2;
+print "ok $test\n";
+$test++;
+
+undef $foo; undef $bar;
+print "#'$str','$foo','$bar'\nnot "
+    unless /b(?{$foo = $_; $bar = pos})c/g 
+	and $foo eq 'abcde' and $bar eq 2 and pos eq 3;
+print "ok $test\n";
+$test++;
+
+undef $foo; undef $bar;
+pos = undef;
+1 while /b(?{$foo = $_; $bar = pos})c/g;
+print "#'$str','$foo','$bar'\nnot "
+    unless $foo eq 'abcde' and $bar eq 2 and not defined pos;
+print "ok $test\n";
+$test++;
+
+undef $foo; undef $bar;
+$_ = 'abcde|abcde';
+print "#'$str','$foo','$bar','$_'\nnot "
+    unless s/b(?{$foo = $_; $bar = pos})c/x/g and $foo eq 'abcde|abcde' 
+	and $bar eq 8 and $_ eq 'axde|axde';
 print "ok $test\n";
 $test++;
 
