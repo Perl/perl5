@@ -84,20 +84,6 @@ long	w32_num_children = 0;
 HANDLE	w32_child_pids[MAXIMUM_WAIT_OBJECTS];
 #endif
 
-#ifndef FOPEN_MAX
-#  if defined(_NSTREAM_)
-#    define FOPEN_MAX _NSTREAM_
-#  elsif defined(_NFILE_)
-#    define FOPEN_MAX _NFILE_
-#  elsif defined(_NFILE)
-#    define FOPEN_MAX _NFILE
-#  endif
-#endif
-
-#ifndef USE_CRT_POPEN
-int	w32_popen_pids[FOPEN_MAX];
-#endif
-
 #ifdef USE_THREADS
 #  ifdef USE_DECLSPEC_THREAD
 __declspec(thread) char	strerror_buffer[512];
@@ -1466,8 +1452,7 @@ win32_popen(const char *command, const char *mode)
 
     /* close saved handle */
     win32_close(oldfd);
-
-    w32_popen_pids[p[parent]] = childpid;
+    sv_setiv(*av_fetch(fdpid, p[parent], TRUE), childpid);
 
     /* we have an fd, return a file stream */
     return (win32_fdopen(p[parent], (char *)mode));
@@ -1495,10 +1480,19 @@ win32_pclose(FILE *pf)
 #ifdef USE_CRT_POPEN
     return _pclose(pf);
 #else
-    int fd, childpid, status;
 
-    fd = win32_fileno(pf);
-    childpid = w32_popen_pids[fd];
+#ifndef __BORLANDC__
+    int child;
+#endif
+
+    int childpid, status;
+    SV *sv;
+
+    sv = *av_fetch(fdpid, win32_fileno(pf), TRUE);
+    if (SvIOK(sv))
+	childpid = SvIVX(sv);
+    else
+	childpid = 0;
 
     if (!childpid) {
 	errno = EBADF;
@@ -1506,7 +1500,18 @@ win32_pclose(FILE *pf)
     }
 
     win32_fclose(pf);
-    w32_popen_pids[fd] = 0;
+    SvIVX(sv) = 0;
+
+#ifndef __BORLANDC__
+    for (child = 0 ; child < w32_num_children ; ++child) {
+	if (w32_child_pids[child] == (HANDLE)childpid) {
+	    Copy(&w32_child_pids[child+1], &w32_child_pids[child],
+		 (w32_num_children-child-1), HANDLE);
+	    w32_num_children--;
+	    break;
+	}
+    }
+#endif
 
     /* wait for the child */
     if (cwait(&status, childpid, WAIT_CHILD) == -1)
@@ -1612,6 +1617,11 @@ DllExport int
 win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
 {
     int status;
+
+#ifndef __BORLANDC__
+    if (mode == P_NOWAIT && w32_num_children >= MAXIMUM_WAIT_OBJECTS)
+	return -1;
+#endif
 
     status = spawnvp(mode, cmdname, (char * const *) argv);
 #ifndef __BORLANDC__
