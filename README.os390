@@ -110,48 +110,12 @@ is nothing to worry about at all.
 Some of the parser default template files in /samples are needed in /etc.
 In particular be sure that you at least copy /samples/yyparse.c to /etc
 before running Perl's Configure.  This step ensures successful extraction
-of EBCDIC versions of parser files such as perly.c.  This has to be done
-before running Configure the first time.  If you failed to do so then the
-easiest way to re-Configure Perl is to delete your misconfigured build root
-and re extract the source from the tar ball.  If for some reason you do not
-want to do that then, after ensuring that /etc/yyparse.c is properly in place 
-run the following commands from within the Perl build directory:
-
-    rm -f y.tab.c y.tab.h
-    yacc -d perly.y 
-    mv -f y.tab.c perly.c
-    chmod u+w perly.c
-    sed -e '/^#include "perl\.h"/a\
- \
- #define yydebug    PL_yydebug\
- #define yynerrs    PL_yynerrs\
- #define yyerrflag  PL_yyerrflag\
- #define yychar     PL_yychar\
- #define yyval      PL_yyval\
- #define yylval     PL_yylval'                           \
-            -e '/YYSTYPE *yyval;/D'                     \
-            -e '/YYSTYPE *yylval;/D'                    \
-            -e '/int  yychar,/,/yynerrs;/D'             \
-            -e 's/int yydebug = 0;/yydebug = 0;/'       \
-            -e 's/[^_]realloc(/PerlMem_realloc(/g'      \
-            -e 's/fprintf *( *stderr *,/PerlIO_printf(Perl_debug_log,/g' \
-            -e 's/y\.tab/perly/g' perly.c >perly.tmp
-    mv -f perly.tmp perly.c
-    mv -f y.tab.h perly.h
-    cd x2p
-    rm -f y.tab.c y.tab.h
-    yacc  a2p.y
-    mv -f y.tab.c a2p.c
-    chmod u+w a2p.c
-    sed -e 's/fprintf *( *stderr *,/PerlIO_printf(Perl_debug_log,/g' \
-                -e 's/y\.tab/a2p/g' a2p.c >a2p.tmp
-    mv -f a2p.tmp a2p.c
-    mv -f y.tab.h a2p.h
-    cd ..
-
-There, easy huh?  If you find typing all that in difficult then perhaps
-you should reconsider the rm -rf of the perl build directory and 
-re extraction of the source tar ball.
+of EBCDIC versions of parser files such as perly.c, perly.h, and x2p/a2p.c.  
+This has to be done before running Configure the first time.  If you failed 
+to do so then the easiest way to re-Configure Perl is to delete your 
+misconfigured build root and re-extract the source from the tar ball.  
+Then you must ensure that /etc/yyparse.c is properly in place before 
+attempting to re-run Configure.
 
 =item *
 
@@ -162,6 +126,14 @@ See the comments in hints/os390.sh for more information on dynamic loading.
 If you build with dynamic loading then you will need to add the
 $archlibexp/CORE directory to your LIBPATH environment variable in order
 for perl to work.  See the config.sh file for the value of $archlibexp.
+If in trying to use Perl you see an error message similar to:
+
+ CEE3501S The module libperl.dll was not found.
+         From entry point __dllstaticinit at compile unit offset +00000194 at
+
+then your LIBPATH does not have the location of libperl.x and either 
+libperl.dll or libperl.so in it.  Add that directory to your LIBPATH and
+proceed.
 
 =item *
 
@@ -178,6 +150,9 @@ an /etc/resolv.conf or an /etc/hosts, so that
 gethostbyname() works, and make sure that the file
 /etc/proto has been renamed to /etc/protocol (NOT
 /etc/protocols, as used by other Unix systems).
+You may have to look for things like HOSTNAME and DOMAINORIGIN
+in the "//'SYS1.TCPPARMS(TCPDATA)'" PDS member in order to 
+properly set up your /etc networking files.
 
 =back
 
@@ -299,6 +274,10 @@ If you are running V2R6 or earlier then see:
 for an example of how to use the "eval exec" trick to ask the shell to
 have Perl run your scripts on those older releases of Unix System Services.
 
+If you are having trouble with square brackets then consider switching your
+rlogin or telnet client.  Try to avoid older 3270 emulators and ISHELL for 
+working with Perl on USS.
+
 =head2 Floating point anomalies
 
 There appears to be a bug in the floating point implementation on S/390 
@@ -345,9 +324,9 @@ Pure pure (that is non xs) modules may be installed via the usual:
 If you built perl with dynamic loading capability then that would also
 be the way to build xs based extensions.  However, if you built perl with
 the default static linking you can still build xs based extensions for OS/390 
-but you will need to follow the instructions in ExtUtils::MakeMaker for building 
-statically linked perl binaries.  In the simplest configurations building
-a static perl + xs extension boils down to:
+but you will need to follow the instructions in ExtUtils::MakeMaker for 
+building statically linked perl binaries.  In the simplest configurations 
+building a static perl + xs extension boils down to:
 
     perl Makefile.PL
     make
@@ -420,6 +399,8 @@ Updated 12 November 2000 for the 5.7.1 release of Perl.
 Updated 15 January 2001 for the 5.7.1 release of Perl.
 
 Updated 24 January 2001 to mention dynamic loading.
+
+Updated 12 March 2001 to mention //'SYS1.TCPPARMS(TCPDATA)'.
 
 =cut
 
