@@ -304,7 +304,7 @@ EOM
         ldflags="`echo $ldflags | sed -e 's@ -q[^ ]*@ @g' -e 's@^-q[^ ]* @@g'`"
         # Move xld-spefific -bflags.
         ccflags="`echo $ccflags | sed -e 's@ -b@ -Wl,-b@g'`"
-        ldflags="`echo $ldflags | sed -e 's@ -b@ -Wl,-b@g'`"
+        ldflags="`echo ' '$ldflags | sed -e 's@ -b@ -Wl,-b@g'`"
         ld='gcc'
         lddlflags="`echo $lddlflags | sed -e 's@ -b@ -Wl,-b@g'`"
         echo >&4 "(using ccflags   $ccflags)"
