@@ -103,3 +103,6 @@ get_sv
 grok_hex
 grok_oct
 grok_bin
+
+grok_number
+grok_numeric_radix

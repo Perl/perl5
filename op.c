@@ -3890,8 +3890,6 @@ Perl_newLOOPEX(pTHX_ I32 type, OP *label)
     return o;
 }
 
-static void const_sv_xsub(pTHX_ CV* cv);
-
 /*
 =for apidoc cv_undef
 
@@ -3915,9 +3913,8 @@ Perl_cv_undef(pTHX_ CV *cv)
 #endif /* USE_5005THREADS */
 
 #ifdef USE_ITHREADS
-    if (CvFILE(cv) && (!CvXSUB(cv) || CvXSUB(cv) == const_sv_xsub)) {
-	/* for XSUBs CvFILE point directly to static memory; __FILE__ 
-	 * except when XSUB was constructed via newCONSTSUB() */
+    if (CvFILE(cv) && !CvXSUB(cv)) {
+	/* for XSUBs CvFILE point directly to static memory; __FILE__ */
 	Safefree(CvFILE(cv));
     }
     CvFILE(cv) = 0;
@@ -3983,6 +3980,8 @@ Perl_cv_ckproto(pTHX_ CV *cv, GV *gv, char *p)
 	Perl_warner(aTHX_ packWARN(WARN_PROTOTYPE), "%"SVf, msg);
     }
 }
+
+static void const_sv_xsub(pTHX_ CV* cv);
 
 /*
 
@@ -4447,9 +4446,6 @@ Perl_newCONSTSUB(pTHX_ HV *stash, char *name, SV *sv)
     CvXSUBANY(cv).any_ptr = sv;
     CvCONST_on(cv);
     sv_setpv((SV*)cv, "");  /* prototype is "" */
-
-    if (stash)
-	CopSTASH_free(PL_curcop);
 
     LEAVE;
 

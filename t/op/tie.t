@@ -367,3 +367,41 @@ my $var;
 tie $var, 'main', \$var;
 untie $var;
 EXPECT
+########
+# Test case from perlmonks by runrig
+# http://www.perlmonks.org/index.pl?node_id=273490
+# "Here is what I tried. I think its similar to what you've tried
+#  above. Its odd but convienient that after untie'ing you are left with
+#  a variable that has the same value as was last returned from
+#  FETCH. (At least on my perl v5.6.1). So you don't need to pass a
+#  reference to the variable in order to set it after the untie (here it
+#  is accessed through a closure)."
+use strict;
+use warnings;
+package MyTied;
+sub TIESCALAR {
+    my ($class,$code) = @_;
+    bless $code, $class;
+}
+sub FETCH {
+    my $self = shift;
+    print "Untie\n";
+    $self->();
+}
+package main;
+my $var;
+tie $var, 'MyTied', sub { untie $var; 4 };
+print "One\n";
+print "$var\n";
+print "Two\n";
+print "$var\n";
+print "Three\n";
+print "$var\n";
+EXPECT
+One
+Untie
+4
+Two
+4
+Three
+4

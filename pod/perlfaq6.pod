@@ -292,14 +292,26 @@ a double-quoted string (see L<perlop> for more details).  Remember
 also that any regex special characters will be acted on unless you
 precede the substitution with \Q.  Here's an example:
 
-    $string = "to die?";
-    $lhs = "die?";
-    $rhs = "sleep, no more";
+    $string = "Placido P. Octopus";
+    $regex  = "P.";
 
-    $string =~ s/\Q$lhs/$rhs/;
-    # $string is now "to sleep no more"
+    $string =~ s/$regex/Polyp/;
+    # $string is now "Polypacido P. Octopus"
 
-Without the \Q, the regex would also spuriously match "di".
+Because C<.> is special in regular expressions, and can match any
+single character, the regex C<P.> here has matched the <Pl> in the
+original string.
+
+To escape the special meaning of C<.>, we use C<\Q>:
+
+    $string = "Placido P. Octopus";
+    $regex  = "P.";
+
+    $string =~ s/\Q$regex/Polyp/;
+    # $string is now "Placido Polyp Octopus"
+
+The use of C<\Q> causes the <.> in the regex to be treated as a
+regular character, so that C<P.> matches a C<P> followed by a dot.
 
 =head2 What is C</o> really for?
 
