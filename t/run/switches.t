@@ -231,7 +231,7 @@ SWTESTPM
     local $TODO = '';   # these ones should work on VMS
 
     like( runperl( switches => ['-h'] ),
-	  qr/Usage: .+perl.+switches.+programfile.+arguments/,
+	  qr/Usage: .+(?i:perl(\.exe)?).+switches.+programfile.+arguments/,
           '-h looks okay' );
 
 }
