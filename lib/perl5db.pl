@@ -2,8 +2,8 @@ package DB;
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 
-$VERSION = 0.9911;
-$header = "perl5db.pl patch level $VERSION";
+$VERSION = 1.00;
+$header = "perl5db.pl version $VERSION";
 
 # Enhanced by ilya@math.ohio-state.edu (Ilya Zakharevich)
 # Latest version available: ftp://ftp.math.ohio-state.edu/pub/users/ilya/perl
@@ -273,6 +273,10 @@ if (exists $ENV{PERLDB_RESTART}) {
   }
   @INC = get_list("PERLDB_INC");
   @ini_INC = @INC;
+  $pretype = [get_list("PERLDB_PRETYPE")];
+  $pre = [get_list("PERLDB_PRE")];
+  $post = [get_list("PERLDB_POST")];
+  @typeahead = get_list("PERLDB_TYPEAHEAD", @typeahead);
 }
 
 if ($notty) {
@@ -340,6 +344,8 @@ for (@args) {
 if (defined &afterinit) {	# May be defined in $rcfile
   &afterinit();
 }
+
+$I_m_init = 1;
 
 ############################################################ Subroutines
 
@@ -900,6 +906,10 @@ sub DB {
 			  }
 			}
 			set_list("PERLDB_POSTPONE", %postponed);
+			set_list("PERLDB_PRETYPE", @$pretype);
+			set_list("PERLDB_PRE", @$pre);
+			set_list("PERLDB_POST", @$post);
+			set_list("PERLDB_TYPEAHEAD", @typeahead);
 			$ENV{PERLDB_RESTART} = 1;
 			#print "$^X, '-d', @flags, @script, ($emacs ? '-emacs' : ()), @ARGS";
 			exec $^X, '-d', @flags, @script, ($emacs ? '-emacs' : ()), @ARGS;
@@ -1502,28 +1512,25 @@ sub warn {
 
 sub TTY {
     if ($term) {
-	&warn("Too late to set TTY!\n") if @_;
-    } else {
-	$tty = shift if @_;
-    }
+	&warn("Too late to set TTY, enabled on next `R'!\n") if @_;
+    } 
+    $tty = shift if @_;
     $tty or $console;
 }
 
 sub noTTY {
     if ($term) {
-	&warn("Too late to set noTTY!\n") if @_;
-    } else {
-	$notty = shift if @_;
+	&warn("Too late to set noTTY, enabled on next `R'!\n") if @_;
     }
+    $notty = shift if @_;
     $notty;
 }
 
 sub ReadLine {
     if ($term) {
-	&warn("Too late to set ReadLine!\n") if @_;
-    } else {
-	$rl = shift if @_;
+	&warn("Too late to set ReadLine, enabled on next `R'!\n") if @_;
     }
+    $rl = shift if @_;
     $rl;
 }
 
@@ -1538,10 +1545,9 @@ sub tkRunning {
 
 sub NonStop {
     if ($term) {
-	&warn("Too late to set up NonStop mode!\n") if @_;
-    } else {
-	$runnonstop = shift if @_;
+	&warn("Too late to set up NonStop mode, enabled on next `R'!\n") if @_;
     }
+    $runnonstop = shift if @_;
     $runnonstop;
 }
 
@@ -1694,7 +1700,7 @@ O [opt[=val]] [opt\"val\"] [opt?]...
 	 ornaments affects screen appearance of the command line.
 		During startup options are initialized from \$ENV{PERLDB_OPTS}.
 		You can put additional initialization options TTY, noTTY,
-		ReadLine, and NonStop there.
+		ReadLine, and NonStop there (or use `R' after you set them).
 < command	Define Perl command to run before each prompt.
 << command	Add to the list of Perl commands to run before each prompt.
 > command	Define Perl command to run after each prompt.
@@ -1841,7 +1847,8 @@ sub dieLevel {
       $SIG{__DIE__} = \&DB::dbdie; # if $dieLevel < 2;
       #$SIG{__DIE__} = \&DB::diehard if $dieLevel >= 2;
       print $OUT "Stack dump during die enabled", 
-        ( $dieLevel == 1 ? " outside of evals" : ""), ".\n";
+        ( $dieLevel == 1 ? " outside of evals" : ""), ".\n"
+	  if $I_m_init;
       print $OUT "Dump printed too.\n" if $dieLevel > 2;
     } else {
       $SIG{__DIE__} = $prevdie;
@@ -2019,7 +2026,9 @@ sub db_complete {
   return $term->filename_list($text); # filenames
 }
 
-sub end_report { print $OUT "Use `q' to quit and `R' to restart. `h q' for details.\n" }
+sub end_report {
+  print $OUT "Use `q' to quit or `R' to restart.  `h q' for details.\n"
+}
 
 END {
   $finished = $inhibit_exit;	# So that some keys may be disabled.
@@ -2031,7 +2040,7 @@ END {
 package DB::fake;
 
 sub at_exit {
-  "Debuggee terminated. Use `q' to quit and `R' to restart.";
+  "Debugged program terminated.  Use `q' to quit or `R' to restart.";
 }
 
 package DB;			# Do not trace this 1; below!
