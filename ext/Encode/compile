@@ -468,7 +468,7 @@ sub compile_enc
           }
          else
           {
-           $seen{$uch} = $page << 16 | $ch;
+           $seen{$uch} = $page << 8 | $ch;
           }
          # Passing 2 extra args each time is 3.6% slower!
          # Even with having to add $fallback ||= 0 later
@@ -729,35 +729,34 @@ sub char_names
 
 sub output_ucm_page
 {
- my ($cmap,$a,$t,$pre) = @_;
- # warn sprintf("Page %x\n",$pre);
- foreach my $b (sort keys %$t)
-  {
-    die "Changed - fix me for new structure";
-   my ($s,$e,$out,$n,$end,$l,$fb) = @{$t->{$b}};
-   die "oops $s $e" unless $s eq $e;
-   my $u = ord($s);
-   if ($n != $a && $n != $t)
-    {
-     output_ucm_page($cmap,$a,$n,(($pre|($u &0x3F)) << 6)&0xFFFF);
-    }
-   elsif (length($out))
-    {
-     if ($pre)
-      {
-       $u = $pre|($u &0x3f);
+  my ($cmap,$a,$t,$pre) = @_;
+  # warn sprintf("Page %x\n",$pre);
+  my $raw = $t->{Raw};
+  foreach my $key (sort keys %$raw) {
+    #  RAW_NEXT => 0,
+    #  RAW_IN_LEN => 1,
+    #  RAW_OUT_BYTES => 2,
+    #  RAW_FALLBACK => 3,
+    my ($next, $in_len, $out_bytes, $fallback) = @{$raw->{$key}};
+    my $u = ord $key;
+    $fallback ||= 0;
+
+    if ($next != $a && $next != $t) {
+      output_ucm_page($cmap,$a,$next,(($pre|($u &0x3F)) << 6)&0xFFFF);
+    } elsif (length $out_bytes) {
+      if ($pre) {
+        $u = $pre|($u &0x3f);
       }
-     my $s = sprintf "<U%04X> ",$u;
-     foreach my $c (split(//,$out))
-      {
-       $s .= sprintf "\\x%02X",ord($c);
-      }
-     $s .= sprintf " |%d # %s\n",($fb ? 1 : 0),$uname[$u];
-     push(@$cmap,$s);
-    }
-   else
-    {
-     warn join(',',@{$t->{$b}},$a,$t);
+      my $s = sprintf "<U%04X> ",$u;
+      #foreach my $c (split(//,$out_bytes)) {
+      #  $s .= sprintf "\\x%02X",ord($c);
+      #}
+      # 9.5% faster changing that lloop to this:
+      $s .= sprintf +("\\x%02X" x length $out_bytes), unpack "C*", $out_bytes;
+      $s .= sprintf " |%d # %s\n",($fallback ? 1 : 0),$uname[$u];
+      push(@$cmap,$s);
+    } else {
+      warn join(',',$u, @{$raw->{$key}},$a,$t);
     }
   }
 }
