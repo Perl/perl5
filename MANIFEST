@@ -2421,8 +2421,9 @@ Porting/patchls		Flexible patch file listing utility
 Porting/pumpkin.pod	Guidelines and hints for Perl maintainers
 Porting/repository.pod	How to use the Perl repository
 Porting/sort_perldiag.pl	Keep our diagnostics orderly
-Porting/testall.atom	Cumulative profile of the test suite with Third Degree
-Porting/thirdclean	Cleanup Third Degree reports
+Porting/testall.atom		Cumulative profile with Third Degree
+Porting/thirdclean		Cleanup Third Degree reports
+Porting/valgrindpp.pl		Summarize valgrind reports
 pp.c				Push/Pop code
 pp_ctl.c			Push/Pop code for control flow
 pp.h				Push/Pop code defs

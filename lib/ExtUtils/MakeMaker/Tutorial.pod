@@ -172,7 +172,7 @@ L<perlmodstyle> gives stylistic help writing a module.
 L<perlnewmod> gives more information about how to write a module.
 
 There are modules to help you through the process of writing a module:
-L<ExtUtils::ModuleMaker>, L<Module::Setup>, L<CPAN::MakeMaker>
+L<ExtUtils::ModuleMaker>, L<Module::Install>, L<PAR>
 
 =cut
 

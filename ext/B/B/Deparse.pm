@@ -2141,7 +2141,7 @@ sub listop {
     $first = "+$first" if not $parens and substr($first, 0, 1) eq "(";
     push @exprs, $first;
     $kid = $kid->sibling;
-    if ($proto =~ /^\*\*/ && $kid->name eq "rv2gv") {
+    if (defined $proto && $proto =~ /^\*\*/ && $kid->name eq "rv2gv") {
 	push @exprs, $self->deparse($kid->first, 6);
 	$kid = $kid->sibling;
     }
