@@ -5,7 +5,7 @@ BEGIN {
     unshift @INC, '../lib';
 }
 use warnings;
-print "1..49\n";
+print "1..55\n";
 
 # XXX known to leak scalars
 {
@@ -270,3 +270,36 @@ print "# x = '@b'\n";
 @b = sort main::Backwards_stacked @a;
 print ("@b" eq '90 5 255 1996 19' ? "ok 49\n" : "not ok 49\n");
 print "# x = '@b'\n";
+
+# check if context for sort arguments is handled right
+
+$test = 49;
+sub test_if_list {
+    my $gimme = wantarray;
+    print "not " unless $gimme;
+    ++$test;
+    print "ok $test\n";
+}
+my $m = sub { $a <=> $b };
+
+sub cxt_one { sort $m test_if_list() }
+cxt_one();
+sub cxt_two { sort { $a <=> $b } test_if_list() }
+cxt_two();
+sub cxt_three { sort &test_if_list() }
+cxt_three();
+
+sub test_if_scalar {
+    my $gimme = wantarray;
+    print "not " if $gimme or !defined($gimme);
+    ++$test;
+    print "ok $test\n";
+}
+
+$m = \&test_if_scalar;
+sub cxt_four { sort $m 1,2 }
+@x = cxt_four();
+sub cxt_five { sort { test_if_scalar($a,$b); } 1,2 }
+@x = cxt_five();
+sub cxt_six { sort test_if_scalar 1,2 }
+@x = cxt_six();
