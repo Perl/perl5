@@ -328,8 +328,12 @@ case "$usethreads" in
 $define|true|[yY]*)
         ccflags="-D_REENTRANT $ccflags"
 
-        # sched_yield is in -lposix4
-        set `echo X "$libswanted "| sed -e 's/ c / posix4 pthread c /'`
+        # sched_yield is in -lposix4 up to Solaris 2.6, in -lrt starting with Solaris 7
+	case `uname -r` in
+	5.[0-6] | 5.5.1) sched_yield_lib="posix4" ;;
+	*) sched_yield_lib="rt";
+	esac
+        set `echo X "$libswanted "| sed -e "s/ c / $sched_yield_lib pthread c /"`
         shift
         libswanted="$*"
 
@@ -354,7 +358,7 @@ $define|true|[yY]*)
 	    siglongjmp(env, 2);
 	}
 EOM
-        if test "`arch`" = i86pc -a "$osvers" = 2.6 && \
+        if test "`arch`" = i86pc -a `uname -r` = 5.6 && \
            ${cc:-cc} try.c -lpthread >/dev/null 2>&1 && ./a.out; then
  	    d_sigsetjmp=$undef
 	    cat << 'EOM' >&2
