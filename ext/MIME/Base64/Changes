@@ -1,4 +1,50 @@
-2002-02-27   Gisle Aas <gisle@ActiveState.com>
+2003-01-05   Gisle Aas <gisle@ActiveState.com>
+
+   Release 2.16
+
+   Fixed the encode_qp() line breaking code.  It sometimes
+   made lines longer than 76 chars and it could even get into
+   an infinite loop on certain inputs.
+
+
+
+2003-01-03   Gisle Aas <gisle@ActiveState.com>
+
+   Release 2.15
+
+   Fixed the XS based decode_qp() for strings where a =XX
+   sequence was followed by digits.
+
+   Faster encode_qp() for long strings with lots of chars
+   that need escaping.
+
+   The old_decode_base64() function introduced in 2.13
+   was returning undef for empty input on olders perls.
+   This problem has been fixed.
+
+
+
+2003-01-01   Gisle Aas <gisle@ActiveState.com>
+
+   Release 2.14
+
+   MIME::QuotedPrint functions now also implemented using XS
+   which make them faster.  2-3 times faster when encoding line by
+   line and as much as 200 times faster on long binary input.  There
+   is probably some breakage on non-ASCII systems from this.
+
+   The encode_qp() function now takes an $eol argument in the
+   same way as encode_base64() does.
+
+   Slight change in behaviour: the decode_qp() function now turns
+   \r\n terminated lines into \n terminated lines.  This makes is
+   more likely that encode_qp(decode_qp()) round-trip properly.
+
+   Included {en,de}code-{base64,qp} utility scripts.
+
+
+
+2002-12-27   Gisle Aas <gisle@ActiveState.com>
 
    Release 2.13
 

@@ -506,6 +506,10 @@ ext/MIME/Base64/Base64.xs	MIME::Base64 extension
 ext/MIME/Base64/Changes		MIME::Base64 extension
 ext/MIME/Base64/Makefile.PL	MIME::Base64 extension
 ext/MIME/Base64/QuotedPrint.pm	MIME::Base64 extension
+ext/MIME/Base64/encode-qp     	MIME::Base64 utility
+ext/MIME/Base64/decode-qp     	MIME::Base64 utility
+ext/MIME/Base64/encode-base64 	MIME::Base64 utility
+ext/MIME/Base64/decode-base64 	MIME::Base64 utility
 ext/MIME/Base64/t/base64.t	See whether MIME::Base64 works
 ext/MIME/Base64/t/quoted-print.t	See whether MIME::QuotedPrint works
 ext/MIME/Base64/t/unicode.t	See whether MIME::Base64 works

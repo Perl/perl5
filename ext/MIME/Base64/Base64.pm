@@ -1,5 +1,5 @@
 #
-# $Id: Base64.pm,v 2.19 2002/12/28 06:32:37 gisle Exp $
+# $Id: Base64.pm,v 2.25 2003/01/05 08:01:33 gisle Exp $
 
 package MIME::Base64;
 
@@ -27,7 +27,9 @@ The following functions are provided:
 
 =over 4
 
-=item encode_base64($str, [$eol])
+=item encode_base64($str)
+
+=item encode_base64($str, $eol);
 
 Encode data by calling the encode_base64() function.  The first
 argument is the string to encode.  The second argument is the line
@@ -112,7 +114,7 @@ of 4 base64 chars:
 
 =head1 COPYRIGHT
 
-Copyright 1995-1999, 2001 Gisle Aas.
+Copyright 1995-1999, 2001-2003 Gisle Aas.
 
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
@@ -135,7 +137,7 @@ require DynaLoader;
 @ISA = qw(Exporter DynaLoader);
 @EXPORT = qw(encode_base64 decode_base64);
 
-$VERSION = '2.13';
+$VERSION = '2.16';
 
 eval { bootstrap MIME::Base64 $VERSION; };
 if ($@) {
@@ -187,6 +189,7 @@ sub old_decode_base64 ($)
     }
     $str =~ s/=+$//;                        # remove padding
     $str =~ tr|A-Za-z0-9+/| -_|;            # convert to uuencoded format
+    return "" unless length $str;
 
     ## I guess this could be written as
     #return unpack("u", join('', map( chr(32 + length($_)*3/4) . $_,
