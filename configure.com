@@ -1,23 +1,16 @@
 $ sav_ver = 'F$VERIFY(0)'
 $! SET VERIFY
 $!
-$! Installation and usage: COPY this file into you perl source tree - at or 
-$! below where the main MANIFEST. file is located.
-$!
 $! For example, if you unpacked perl into: [USER.PERL5_00n...] then you will 
-$! want to:
-$!
-$! $ COPY Configure.com [USER.PERL5_00n.VMS] 
-$!
-$! Now cd into the tree and execute Configure:
+$! want to cd into the tree and execute Configure:
 $!
 $! $ SET DEFAULT [USER.PERL5_00n]
-$! $ @[.vms]Configure 
+$! $ @Configure 
 $!
 $! or
 $!
 $! $ SET DEFAULT [USER.PERL5_00n]
-$! $ @[.vms]Configure "-des"
+$! $ @Configure "-des"
 $!
 $! That's it. If you get into a bind trying to build perl on VMS then 
 $! definitely read through the README.VMS file.
@@ -388,6 +381,8 @@ $   ENDIF
 $ ELSE
 $! MANIFEST. has been found and we have set def'ed there - 
 $! time to bail out before it's too late.
+$ tmp = f$extract(1,3,f$edit(f$getsyi("VERSION"),"TRIM,COLLAPSE"))
+$ IF tmp .GES. "7.2" THEN GOTO Beyond_depth_check
 $   IF (F$ELEMENT(max_allowed_dir_depth,".",F$ENVIRONMENT("Default")).nes.".")
 $   THEN
 $     TYPE SYS$INPUT:
@@ -400,6 +395,7 @@ $     SET DEFAULT 'vms_default_directory_name' !be kind rewind
 $     STOP
 $     EXIT !2 !$STATUS = "%X00000002" (error)
 $   ENDIF
+$Beyond_depth_check:
 $!
 $! after finding MANIFEST let's create (but not yet enter) the UU subdirectory
 $!
@@ -874,7 +870,7 @@ $   ENDIF
 $ ENDIF
 $ IF (archname.EQS."VMS_AXP")
 $ THEN
-$   dflt = "N"
+$   dflt = "n"
 $   rp = "Are you sharing your PERL_ROOT with a VAX? [''dflt'] "
 $   GOSUB myread
 $   if ans.NES.""
@@ -1657,7 +1653,7 @@ $   if "''has_dec_c_sockets'".eqs."T"
 $   THEN
 $     dflt = "DECC"
 $   else
-$     dlft = "SOCKETSHR"
+$     dflt = "SOCKETSHR"
 $   endif
 $   rp = "Choose socket stack (NONE"
 $   if "''has_socketshr'".eqs."T" THEN rp = rp + ",SOCKETSHR"
@@ -1700,7 +1696,7 @@ $       echo "machine. Unfortunately this feature isn't safe on an
 $       echo "unpatched 7.1 system. (Several OS patches were required when
 $       echo "this procedure was written)
 $       echo ""
-$       dflt = "N"
+$       dflt = "n"
 $       rp = "Enable multiple kernel threads and upcalls? [''dflt'] "
 $       gosub myread
 $       if ans.eqs."" then ans="''dflt'"
@@ -1727,7 +1723,7 @@ $ echo "This will exact both a memory penalty (to store the keys) and
 $ echo "a time penalty (to spawn the subprocess) every time you invoke
 $ echo "perl. Depending on your system, this might not be a big deal.
 $ echo ""
-$ dflt = "N"
+$ dflt = "n"
 $ rp = "Populate %ENV at startup time? [''dflt'] "
 $ GOSUB myread
 $ if ans.eqs."" then ans="''dflt'"
@@ -1740,7 +1736,7 @@ $ echo "normal memory usage. It's oftentimes better than the standard
 $ echo "system memory allocator. It also has the advantage of providing
 $ echo "memory allocation statistics, if you choose to enable them.
 $ echo ""
-$ dflt = "N"
+$ dflt = "n"
 $ rp = "Build with perl's memory allocator? [''dflt'] "
 $ GOSUB myread
 $ if ans.eqs."" then ans="''dflt'"
@@ -1754,7 +1750,7 @@ $     echo "Perl can keep statistics on memory usage if you choose to use
 $     echo "them. This is useful for debugging, but does have some
 $     echo "performance overhead.
 $     echo ""
-$     dflt = "N"
+$     dflt = "n"
 $     rp = "Do you want the debugging memory allocator? [''dflt'] "
 $     gosub myread
 $     if ans.eqs."" then ans="''dflt'"
@@ -1935,7 +1931,7 @@ $!
 $! Invoke the subconfig piece
 $!
 $ echo ""
-$ echo4 "Generating config.h"
+$ echo4 "Checking the C Run time library"
 $ dflt = F$ENVIRONMENT("DEFAULT")
 $ SET DEFAULT [-.vms]
 $ @subconfigure

@@ -862,6 +862,145 @@ $   perl_selecttype = "int *"
 $ ENDIF
 $ WRITE_RESULT "selectype is ''perl_selecttype'"
 $!
+$! Check for sys/file.h
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <stdio.h>
+$ WS "#include <unistd.h>
+$ WS "#include <sys/file.h>
+$ WS "int main()
+$ WS "{"
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   on error then continue
+$   on warning then continue
+$   'Checkcc' temp.c
+$   savedstatus = $status
+$   teststatus = f$extract(9,1,savedstatus)
+$   if (teststatus.nes."1")
+$   THEN
+$     perl_i_sysfile="undef"
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$   ELSE
+$     If (Needs_Opt.eqs."Yes")
+$     THEN
+$       link temp.obj,temp.opt/opt
+$     else
+$       link temp.obj
+$     endif
+$     savedstatus = $status
+$     teststatus = f$extract(9,1,savedstatus)
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$     if (teststatus.nes."1")
+$     THEN
+$       perl_i_sysfile="undef"
+$     ELSE
+$       perl_i_sysfile="define"
+$     ENDIF
+$   ENDIF
+$ WRITE_RESULT "i_sysfile is ''perl_i_sysfile'"
+$!
+$! Check for fcntl.h
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <stdio.h>
+$ WS "#include <unistd.h>
+$ WS "#include <fcntl.h>
+$ WS "int main()
+$ WS "{"
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   on error then continue
+$   on warning then continue
+$   'Checkcc' temp.c
+$   savedstatus = $status
+$   teststatus = f$extract(9,1,savedstatus)
+$   if (teststatus.nes."1")
+$   THEN
+$     perl_i_fcntl="undef"
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$   ELSE
+$     If (Needs_Opt.eqs."Yes")
+$     THEN
+$       link temp.obj,temp.opt/opt
+$     else
+$       link temp.obj
+$     endif
+$     savedstatus = $status
+$     teststatus = f$extract(9,1,savedstatus)
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$     if (teststatus.nes."1")
+$     THEN
+$       perl_i_fcntl="undef"
+$     ELSE
+$       perl_i_fcntl="define"
+$     ENDIF
+$   ENDIF
+$ WRITE_RESULT "i_fcntl is ''perl_i_fcntl'"
+$!
+$! Check for fcntl
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <stdio.h>
+$ WS "#include <unistd.h>
+$ WS "#include <fcntl.h>
+$ WS "int main()
+$ WS "{"
+$ WS "fcntl(1,2,3);
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   on error then continue
+$   on warning then continue
+$   'Checkcc' temp.c
+$   savedstatus = $status
+$   teststatus = f$extract(9,1,savedstatus)
+$   if (teststatus.nes."1")
+$   THEN
+$     perl_d_fcntl="undef"
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$   ELSE
+$     If (Needs_Opt.eqs."Yes")
+$     THEN
+$       link temp.obj,temp.opt/opt
+$     else
+$       link temp.obj
+$     endif
+$     savedstatus = $status
+$     teststatus = f$extract(9,1,savedstatus)
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$     if (teststatus.nes."1")
+$     THEN
+$       perl_d_fcntl="undef"
+$     ELSE
+$       perl_d_fcntl="define"
+$     ENDIF
+$   ENDIF
+$ WRITE_RESULT "d_fcntl is ''perl_d_fcntl'"
+$!
 $! Check for bzero
 $!
 $ OS
@@ -2429,7 +2568,7 @@ $   SOCKET_REPLACE = "SOCKET=DECC_SOCKETS=1"
 $ ELSE
 $   if "''Has_Socketshr'" .eqs."T"
 $   THEN
-$     SOCKET_REPLACE = "SOCKET=SOCKETSHRSOCKETS=1"
+$     SOCKET_REPLACE = "SOCKET=SOCKETSHR_SOCKETS=1"
 $   ELSE
 $     SOCKET_REPLACE = "SOCKET="
 $   ENDIF
