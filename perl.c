@@ -509,6 +509,7 @@ setuid perl scripts securely.\n");
 	    calllist(endav);
 	return STATUS_NATIVE_EXPORT;
     case 3:
+	mustcatch = FALSE;
 	PerlIO_printf(PerlIO_stderr(), "panic: top_env\n");
 	return 1;
     }
@@ -800,6 +801,7 @@ PerlInterpreter *sv_interp;
 #endif
 	return STATUS_NATIVE_EXPORT;
     case 3:
+	mustcatch = FALSE;
 	if (!restartop) {
 	    PerlIO_printf(PerlIO_stderr(), "panic: restartop\n");
 	    FREETMPS;
@@ -1030,6 +1032,7 @@ I32 flags;		/* See G_* flags in cop.h */
 	    my_exit_jump();
 	    /* NOTREACHED */
 	case 3:
+	    mustcatch = FALSE;
 	    if (restartop) {
 		op = restartop;
 		restartop = 0;
@@ -1140,6 +1143,7 @@ restart:
 	my_exit_jump();
 	/* NOTREACHED */
     case 3:
+	mustcatch = FALSE;
 	if (restartop) {
 	    op = restartop;
 	    restartop = 0;

@@ -1968,6 +1968,7 @@ OP *o;
 	    PerlIO_printf(PerlIO_stderr(), "panic: restartop\n");
 	    break;
 	}
+	mustcatch = FALSE;
 	op = restartop;
 	restartop = 0;
 	/* FALL THROUGH */
