@@ -483,7 +483,7 @@ Converts the specified character to lowercase.
 #define isBLANK_LC_utf8(c)	isBLANK(c) /* could be wrong */
 
 #ifdef EBCDIC
-#  define toCTRL(c)	ebcdic_control(c)
+#  define toCTRL(c)	Perl_ebcdic_control(c)
 #else
   /* This conversion works both ways, strangely enough. */
 #  define toCTRL(c)    (toUPPER(c) ^ 64)
