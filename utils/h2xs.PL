@@ -15,8 +15,7 @@ use File::Basename qw(&basename &dirname);
 chdir(dirname($0));
 ($file = basename($0)) =~ s/\.PL$//;
 $file =~ s/\.pl$//
-	if ($Config{'osname'} eq 'VMS' or
-	    $Config{'osname'} eq 'OS2');  # "case-forgiving"
+	if ($^O eq 'VMS' or $^O eq 'os2');  # "case-forgiving"
 
 open OUT,">$file" or die "Can't create $file: $!";
 
@@ -576,7 +575,7 @@ print EX <<'_END_';
 # Change 1..1 below to 1..last_test_to_print .
 # (It may become useful if the test is moved to ./t subdirectory.)
 
-BEGIN {print "1..1\n";}
+BEGIN { $| = 1; print "1..1\n"; }
 END {print "not ok 1\n" unless $loaded;}
 _END_
 print EX <<_END_;
@@ -603,7 +602,15 @@ print EX "\t- original version; created by h2xs $H2XS_VERSION\n\n";
 close(EX) || die "Can't close $ext$modpname/Changes: $!\n";
 
 warn "Writing $ext$modpname/MANIFEST\n";
-system '/bin/ls > MANIFEST' or system 'ls > MANIFEST';
+open(MANI,'>MANIFEST') or die "Can't create MANIFEST: $!";
+@files = <*>;
+if (!@files) {
+  eval {opendir(D,'.');};
+  unless ($@) { @files = readdir(D); closedir(D); }
+}
+if (!@files) { @files = map {chomp && $_} `ls`; }
+print MANI join("\n",@files);
+close MANI;
 !NO!SUBS!
 
 close OUT or die "Can't close $file: $!";
