@@ -22,7 +22,11 @@ Perl_runops_standard(pTHX)
 {
     dTHR;
 
-    while ( PL_op = CALL_FPTR(PL_op->op_ppaddr)(aTHX) ) ;
+    while ( PL_op = CALL_FPTR(PL_op->op_ppaddr)(aTHX) ) {
+#ifdef MACOS_TRADITIONAL
+	MACPERL_DO_ASYNC_TASKS();
+#endif	
+    }
 
     TAINT_NOT;
     return 0;
@@ -40,6 +44,9 @@ Perl_runops_debug(pTHX)
     }
 
     do {
+#ifdef MACOS_TRADITIONAL
+	MACPERL_DO_ASYNC_TASKS();
+#endif	
 	if (PL_debug) {
 	    if (PL_watchaddr != 0 && *PL_watchaddr != PL_watchok)
 		PerlIO_printf(Perl_debug_log,

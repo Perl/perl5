@@ -1458,7 +1458,11 @@ typedef union any ANY;
 #         if defined(EPOC)
 #           include "epocish.h"
 #         else
-#           include "unixish.h"
+#           if defined(MACOS_TRADITIONAL)
+#             include "macos/macish.h"
+#           else
+#             include "unixish.h"
+#           endif
 #         endif
 #       endif
 #     endif

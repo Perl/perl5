@@ -220,6 +220,12 @@ perl_construct(pTHXx)
     PL_fdpid = newAV();			/* for remembering popen pids by fd */
     PL_modglobal = newHV();		/* pointers to per-interpreter module globals */
 
+#ifdef MACOS_TRADITIONAL
+    /* In MacOS time() already returns values in excess of 2**31-1,
+     * therefore we patch the integerness away. */
+    PL_opargs[OP_TIME] &= ~OA_RETINTEGER;
+#endif
+
     ENTER;
 }
 
@@ -749,6 +755,11 @@ S_parse_body(pTHX_ va_list args)
 	    goto reswitch;
 
 	case 'e':
+#ifdef MACOS_TRADITIONAL
+	    /* ignore -e for Dev:Pseudo argument */
+	    if (argv[1] && !strcmp(argv[1], "Dev:Pseudo"))
+	    	break; 
+#endif
 	    if (PL_euid != PL_uid || PL_egid != PL_gid)
 		Perl_croak(aTHX_ "No -e allowed in setuid scripts");
 	    if (!PL_e_script) {
@@ -951,11 +962,14 @@ print \"  \\@INC:\\n    @INC\\n\";");
     }
 #endif
 
+#ifdef MACOS_TRADITIONAL
+    if (PL_doextract || gAlwaysExtract)
+#else
     if (PL_doextract) {
+#endif
 	find_beginning();
 	if (cddir && PerlDir_chdir(cddir) < 0)
 	    Perl_croak(aTHX_ "Can't chdir to %s",cddir);
-
     }
 
     PL_main_cv = PL_compcv = (CV*)NEWSV(1104,0);
@@ -1010,6 +1024,16 @@ print \"  \\@INC:\\n    @INC\\n\";");
 
     SETERRNO(0,SS$_NORMAL);
     PL_error_count = 0;
+#ifdef MACOS_TRADITIONAL
+    if (gSyntaxError = (yyparse() || PL_error_count)) {
+	if (PL_minus_c)
+	    Perl_croak(aTHX_ "%s had compilation errors.\n", MPWFileName(PL_origfilename));
+	else {
+	    Perl_croak(aTHX_ "Execution of %s aborted due to compilation errors.\n",
+		       MPWFileName(PL_origfilename));
+	}
+    }
+#else
     if (yyparse() || PL_error_count) {
 	if (PL_minus_c)
 	    Perl_croak(aTHX_ "%s had compilation errors.\n", PL_origfilename);
@@ -1018,6 +1042,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
 		       PL_origfilename);
 	}
     }
+#endif
     PL_curcop->cop_line = 0;
     PL_curstash = PL_defstash;
     PL_preprocess = FALSE;
@@ -1111,8 +1136,12 @@ S_run_body(pTHX_ va_list args)
 			      PTR2UV(thr)));
 
 	if (PL_minus_c) {
+#ifdef MACOS_TRADITIONAL
+	    PerlIO_printf(PerlIO_stderr(), "# %s syntax OK\n", MPWFileName(PL_origfilename));
+#else
 	    PerlIO_printf(Perl_error_log, "%s syntax OK\n", PL_origfilename);
-	    my_exit(0);
+#endif	    
+my_exit(0);
 	}
 	if (PERLDB_SINGLE && PL_DBsingle)
 	    sv_setiv(PL_DBsingle, 1); 
@@ -1760,6 +1789,9 @@ Perl_moreswitches(pTHX_ char *s)
 	s++;
 	return s;
     case 'u':
+#ifdef MACOS_TRADITIONAL
+	Perl_croak(aTHX_ "Believe me, you don't want to use \"-u\" on a Macintosh");
+#endif
 	PL_do_undump = TRUE;
 	s++;
 	return s;
@@ -1782,6 +1814,9 @@ Perl_moreswitches(pTHX_ char *s)
 #endif
 
 	printf("\n\nCopyright 1987-1999, Larry Wall\n");
+#ifdef MACOS_TRADITIONAL
+        fputs("Macintosh port Copyright 1991-1999, Matthias Neeracher\n", stdout);
+#endif
 #ifdef MSDOS
 	printf("\nMS-DOS port Copyright (c) 1989, 1990, Diomidis Spinellis\n");
 #endif
@@ -2528,11 +2563,32 @@ S_find_beginning(pTHX)
     /* skip forward in input to the real script? */
 
     forbid_setid("-x");
+#ifdef MACOS_TRADITIONAL
+    /* Since the Mac OS does not honor !# arguments for us,
+     * we do it ourselves. */
+    while (PL_doextract || gAlwaysExtract) {
+	if ((s = sv_gets(PL_linestr, PL_rsfp, 0)) == Nullch) {
+	    if (!gAlwaysExtract)
+		Perl_croak(aTHX_ "No Perl script found in input\n");
+		
+	    if (PL_doextract)		/* require explicit override ? */
+		if (!OverrideExtract(PL_origfilename))
+		    Perl_croak(aTHX_ "User aborted script\n");
+		else
+		    PL_doextract = FALSE;
+		
+	    /* Pater peccavi, file does not have #! */
+	    PerlIO_rewind(PL_rsfp);
+	    
+	    break;
+	}
+#else
     while (PL_doextract) {
 	if ((s = sv_gets(PL_linestr, PL_rsfp, 0)) == Nullch)
 	    Perl_croak(aTHX_ "No Perl script found in input\n");
+#endif
 	if (*s == '#' && s[1] == '!' && (s = instr(s,"perl"))) {
-	    PerlIO_ungetc(PL_rsfp, '\n');		/* to keep line count right */
+	    PerlIO_ungetc(PL_rsfp, '\n');	/* to keep line count right */
 	    PL_doextract = FALSE;
 	    while (*s && !(isSPACE (*s) || *s == '#')) s++;
 	    s2 = s;
@@ -2712,8 +2768,9 @@ S_init_predump_symbols(pTHX)
 
     PL_statname = NEWSV(66,0);		/* last filename we did stat on */
 
-    if (!PL_osname)
-	PL_osname = savepv(OSNAME);
+    if (PL_osname)
+    	Safefree(PL_osname);
+    PL_osname = savepv(OSNAME);
 }
 
 STATIC void
@@ -2751,8 +2808,13 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 
     TAINT;
     if (tmpgv = gv_fetchpv("0",TRUE, SVt_PV)) {
+#ifdef MACOS_TRADITIONAL
+	sv_setpv(GvSV(tmpgv),MPWFileName(PL_origfilename));
+	/* $0 is not majick on a Mac */
+#else
 	sv_setpv(GvSV(tmpgv),PL_origfilename);
 	magicname("0", "0", 1);
+#endif
     }
     if (tmpgv = gv_fetchpv("\030",TRUE, SVt_PV))
 #ifdef OS2
@@ -2843,6 +2905,24 @@ S_init_perllib(pTHX)
 #ifdef ARCHLIB_EXP
     incpush(ARCHLIB_EXP, FALSE);
 #endif
+#ifdef MACOS_TRADITIONAL
+    {
+	struct stat tmpstatbuf;
+    	SV * privdir = NEWSV(55, 0);
+	char * macperl = getenv("MACPERL") || "";
+	
+	Perl_sv_setpvf(privdir, "%slib:", macperl);
+	if (PerlLIO_stat(SvPVX(privdir), &tmpstatbuf) >= 0 && S_ISDIR(tmpstatbuf.st_mode))
+	    incpush(SvPVX(privdir), TRUE);
+	Perl_sv_setpvf(privdir, "%ssite_perl:", macperl);
+	if (PerlLIO_stat(SvPVX(privdir), &tmpstatbuf) >= 0 && S_ISDIR(tmpstatbuf.st_mode))
+	    incpush(SvPVX(privdir), TRUE);
+	    
+   	SvREFCNT_dec(privdir);
+    }
+    if (!PL_tainting)
+	incpush(":", FALSE);
+#else
 #ifndef PRIVLIB_EXP
 #define PRIVLIB_EXP "/usr/local/lib/perl5:/usr/local/lib/perl"
 #endif
@@ -2871,19 +2951,24 @@ S_init_perllib(pTHX)
 #endif
     if (!PL_tainting)
 	incpush(".", FALSE);
+#endif /* MACOS_TRADITIONAL */
 }
 
-#if defined(DOSISH)
-#    define PERLLIB_SEP ';'
+#if defined(MACOS_TRADITIONAL)
+#      define PERLLIB_SEP ','
 #else
-#  if defined(VMS)
-#    define PERLLIB_SEP '|'
+#  if defined(DOSISH)
+#      define PERLLIB_SEP ';'
 #  else
-#    define PERLLIB_SEP ':'
+#    if defined(VMS)
+#      define PERLLIB_SEP '|'
+#    else
+#      define PERLLIB_SEP ':'
+#    endif
 #  endif
-#endif
+#endif 
 #ifndef PERLLIB_MANGLE
-#  define PERLLIB_MANGLE(s,n) (s)
+#    define PERLLIB_MANGLE(s,n) (s)
 #endif 
 
 STATIC void
@@ -2900,7 +2985,11 @@ S_incpush(pTHX_ char *p, int addsubdirs)
 	    STRLEN len = (sizeof(ARCHNAME) + strlen(PL_patchlevel)
 			  + sizeof("//auto"));
 	    New(55, PL_archpat_auto, len, char);
-	    sprintf(PL_archpat_auto, "/%s/%s/auto", ARCHNAME, PL_patchlevel);
+#ifdef MACOS_TRADITIONAL
+	    sprintf(PL_archpat_auto, "%s:%s:auto:", ARCHNAME, PL_patchlevel);
+#else
+  	    sprintf(PL_archpat_auto, "/%s/%s/auto", ARCHNAME, PL_patchlevel);
+#endif
 #ifdef VMS
 	for (len = sizeof(ARCHNAME) + 2;
 	     PL_archpat_auto[len] != '\0' && PL_archpat_auto[len] != '/'; len++)
@@ -2930,6 +3019,12 @@ S_incpush(pTHX_ char *p, int addsubdirs)
 	    sv_setpv(libdir, PERLLIB_MANGLE(p, 0));
 	    p = Nullch;	/* break out */
 	}
+#ifdef MACOS_TRADITIONAL
+	if (!strchr(SvPVX(libdir), ':'))
+	    sv_insert(libdir, 0, 0, ":", 1);
+	if (SvPVX(libdir)[SvCUR(libdir)-1] != ':')
+	    sv_catpv(libdir, ":");
+#endif
 
 	/*
 	 * BEFORE pushing libdir onto @INC we may first push version- and

@@ -1190,6 +1190,11 @@ Perl_do_readline(pTHX)
 		    }
 		}
 #else /* !VMS */
+#ifdef MACOS_TRADITIONAL
+		sv_setpv(tmpcmd, "glob ");
+		sv_catsv(tmpcmd, tmpglob);
+		sv_catpv(tmpcmd, " |");
+#else
 #ifdef DOSISH
 #ifdef OS2
 		sv_setpv(tmpcmd, "for a in ");
@@ -1221,6 +1226,7 @@ Perl_do_readline(pTHX)
 #endif
 #endif /* !CSH */
 #endif /* !DOSISH */
+#endif /* MACOS_TRADITIONAL */
 		(void)do_open(PL_last_in_gv, SvPVX(tmpcmd), SvCUR(tmpcmd),
 			      FALSE, O_RDONLY, 0, Nullfp);
 		fp = IoIFP(io);
@@ -2471,6 +2477,9 @@ try_autoload:
 	if (CvDEPTH(cv) < 2)
 	    (void)SvREFCNT_inc(cv);
 	else {	/* save temporaries on recursion? */
+#ifdef MACOS_TRADITIONAL
+	    MacStackAttack();
+#endif
 	    if (CvDEPTH(cv) > AvFILLp(padlist)) {
 		AV *av;
 		AV *newpad = newAV();

@@ -49,6 +49,13 @@ static void restore_lex_expect(pTHXo_ void *e);
  * 1999-02-27 mjd-perl-patch@plover.com */
 #define isCONTROLVAR(x) (isUPPER(x) || strchr("[\\]^_?", (x)))
 
+/* On MacOS, respect nonbreaking spaces */
+#ifdef MACOS_TRADITIONAL
+#define SPACE_OR_TAB(c) ((c)==' '||(c)=='\312'||(c)=='\t')
+#else
+#define SPACE_OR_TAB(c) ((c)==' '||(c)=='\t')
+#endif
+
 /* LEX_* are values for PL_lex_state, the state of the lexer.
  * They are arranged oddly so that the guard on the switch statement
  * can get by with a single comparison (if the compiler is smart enough).
@@ -449,10 +456,13 @@ S_incline(pTHX_ char *s)
     char ch;
     int sawline = 0;
 
+#ifdef MACOS_TRADITIONAL
+    MACPERL_DO_ASYNC_TASKS();
+#endif	
     PL_curcop->cop_line++;
     if (*s++ != '#')
 	return;
-    while (*s == ' ' || *s == '\t') s++;
+    while (SPACE_OR_TAB(*s)) s++;
     if (strnEQ(s, "line ", 5)) {
 	s += 5;
 	sawline = 1;
@@ -462,7 +472,7 @@ S_incline(pTHX_ char *s)
     n = s;
     while (isDIGIT(*s))
 	s++;
-    while (*s == ' ' || *s == '\t')
+    while (SPACE_OR_TAB(*s))
 	s++;
     if (*s == '"' && (t = strchr(s+1, '"')))
 	s++;
@@ -492,7 +502,7 @@ S_skipspace(pTHX_ register char *s)
 {
     dTHR;
     if (PL_lex_formbrack && PL_lex_brackets <= PL_lex_formbrack) {
-	while (s < PL_bufend && (*s == ' ' || *s == '\t'))
+	while (s < PL_bufend && SPACE_OR_TAB(*s))
 	    s++;
 	return s;
     }
@@ -2470,6 +2480,7 @@ Perl_yylex(pTHX)
 			*s = '#';	/* Don't try to parse shebang line */
 		}
 #endif /* ALTERNATE_SHEBANG */
+#ifndef MACOS_TRADITIONAL
 		if (!d &&
 		    *s == '#' &&
 		    ipathend > ipath &&
@@ -2497,13 +2508,14 @@ Perl_yylex(pTHX)
 		    PerlProc_execv(ipath, newargv);
 		    Perl_croak(aTHX_ "Can't exec %s", ipath);
 		}
+#endif
 		if (d) {
 		    U32 oldpdb = PL_perldb;
 		    bool oldn = PL_minus_n;
 		    bool oldp = PL_minus_p;
 
 		    while (*d && !isSPACE(*d)) d++;
-		    while (*d == ' ' || *d == '\t') d++;
+		    while (SPACE_OR_TAB(*d)) d++;
 
 		    if (*d++ == '-') {
 			do {
@@ -2545,6 +2557,9 @@ Perl_yylex(pTHX)
       "(Maybe you didn't strip carriage returns after a network transfer?)\n");
 #endif
     case ' ': case '\t': case '\f': case 013:
+#ifdef MACOS_TRADITIONAL
+    case '\312':
+#endif
 	s++;
 	goto retry;
     case '#':
@@ -2573,7 +2588,7 @@ Perl_yylex(pTHX)
 	    PL_bufptr = s;
 	    tmp = *s++;
 
-	    while (s < PL_bufend && (*s == ' ' || *s == '\t'))
+	    while (s < PL_bufend && SPACE_OR_TAB(*s))
 		s++;
 
 	    if (strnEQ(s,"=>",2)) {
@@ -2839,20 +2854,20 @@ Perl_yylex(pTHX)
 		PL_lex_brackstack[PL_lex_brackets++] = XOPERATOR;
 	    OPERATOR(HASHBRACK);
 	case XOPERATOR:
-	    while (s < PL_bufend && (*s == ' ' || *s == '\t'))
+	    while (s < PL_bufend && SPACE_OR_TAB(*s))
 		s++;
 	    d = s;
 	    PL_tokenbuf[0] = '\0';
 	    if (d < PL_bufend && *d == '-') {
 		PL_tokenbuf[0] = '-';
 		d++;
-		while (d < PL_bufend && (*d == ' ' || *d == '\t'))
+		while (d < PL_bufend && SPACE_OR_TAB(*d))
 		    d++;
 	    }
 	    if (d < PL_bufend && isIDFIRST_lazy(d)) {
 		d = scan_word(d, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1,
 			      FALSE, &len);
-		while (d < PL_bufend && (*d == ' ' || *d == '\t'))
+		while (d < PL_bufend && SPACE_OR_TAB(*d))
 		    d++;
 		if (*d == '}') {
 		    char minus = (PL_tokenbuf[0] == '-');
@@ -3063,9 +3078,9 @@ Perl_yylex(pTHX)
 	if (PL_lex_brackets < PL_lex_formbrack) {
 	    char *t;
 #ifdef PERL_STRICT_CR
-	    for (t = s; *t == ' ' || *t == '\t'; t++) ;
+	    for (t = s; SPACE_OR_TAB(*t); t++) ;
 #else
-	    for (t = s; *t == ' ' || *t == '\t' || *t == '\r'; t++) ;
+	    for (t = s; SPACE_OR_TAB(*t) || *t == '\r'; t++) ;
 #endif
 	    if (*t == '\n' || *t == '#') {
 		s--;
@@ -3625,7 +3640,7 @@ Perl_yylex(pTHX)
 		if (*s == '(') {
 		    CLINE;
 		    if (gv && GvCVu(gv)) {
-			for (d = s + 1; *d == ' ' || *d == '\t'; d++) ;
+			for (d = s + 1; SPACE_OR_TAB(*d); d++) ;
 			if (*d == ')' && (sv = cv_const_sv(GvCV(gv)))) {
 			    s = d + 1;
 			    goto its_constant;
@@ -5666,7 +5681,7 @@ S_scan_ident(pTHX_ register char *s, register char *send, char *dest, STRLEN des
 	if (isSPACE(s[-1])) {
 	    while (s < send) {
 		char ch = *s++;
-		if (ch != ' ' && ch != '\t') {
+		if (!SPACE_OR_TAB(ch)) {
 		    *d = ch;
 		    break;
 		}
@@ -5692,7 +5707,7 @@ S_scan_ident(pTHX_ register char *s, register char *send, char *dest, STRLEN des
 		    Perl_croak(aTHX_ ident_too_long);
 	    }
 	    *d = '\0';
-	    while (s < send && (*s == ' ' || *s == '\t')) s++;
+	    while (s < send && SPACE_OR_TAB(*s)) s++;
 	    if ((*s == '[' || (*s == '{' && strNE(dest, "sub")))) {
 		dTHR;			/* only for ckWARN */
 		if (ckWARN(WARN_AMBIGUOUS) && keyword(dest, d - dest)) {
@@ -5967,7 +5982,7 @@ S_scan_heredoc(pTHX_ register char *s)
     e = PL_tokenbuf + sizeof PL_tokenbuf - 1;
     if (!outer)
 	*d++ = '\n';
-    for (peek = s; *peek == ' ' || *peek == '\t'; peek++) ;
+    for (peek = s; SPACE_OR_TAB(*peek); peek++) ;
     if (*peek && strchr("`'\"",*peek)) {
 	s = peek;
 	term = *s++;
@@ -6798,9 +6813,9 @@ S_scan_formline(pTHX_ register char *s)
 	if (*s == '.' || *s == '}') {
 	    /*SUPPRESS 530*/
 #ifdef PERL_STRICT_CR
-	    for (t = s+1;*t == ' ' || *t == '\t'; t++) ;
+	    for (t = s+1;SPACE_OR_TAB(*t); t++) ;
 #else
-	    for (t = s+1;*t == ' ' || *t == '\t' || *t == '\r'; t++) ;
+	    for (t = s+1;SPACE_OR_TAB(*t) || *t == '\r'; t++) ;
 #endif
 	    if (*t == '\n' || t == PL_bufend)
 		break;
@@ -6981,19 +6996,35 @@ Perl_yyerror(pTHX_ char *s)
 	    Perl_sv_catpvf(aTHX_ where_sv, "\\%03o", yychar & 255);
 	where = SvPVX(where_sv);
     }
+#ifdef MACOS_TRADITIONAL
+    msg = sv_2mortal(newSVpv("# ", 0));
+    sv_catpvf(msg, "%s, ", s);
+#else
     msg = sv_2mortal(newSVpv(s, 0));
     Perl_sv_catpvf(aTHX_ msg, " at %_ line %"IVdf", ",
               GvSV(PL_curcop->cop_filegv), (IV)PL_curcop->cop_line);
+#endif
     if (context)
 	Perl_sv_catpvf(aTHX_ msg, "near \"%.*s\"\n", contlen, context);
     else
 	Perl_sv_catpvf(aTHX_ msg, "%s\n", where);
-    if (PL_multi_start < PL_multi_end && (U32)(PL_curcop->cop_line - PL_multi_end) <= 1) {
+    if (PL_multi_start < PL_multi_end &&
+	(U32)(PL_curcop->cop_line - PL_multi_end) <= 1) {
+#ifdef MACOS_TRADITIONAL
         Perl_sv_catpvf(aTHX_ msg,
-        "  (Might be a runaway multi-line %c%c string starting on line %"IVdf")\n",
+        "#   (Might be a runaway multi-line %c%c string starting on line %"IVdf")\n",
                 (int)PL_multi_open,(int)PL_multi_close,(IV)PL_multi_start);
+#else
+        Perl_sv_catpvf(aTHX_ msg,
+        "   (Might be a runaway multi-line %c%c string starting on line %"IVdf")\n",
+                (int)PL_multi_open,(int)PL_multi_close,(IV)PL_multi_start);
+#endif
         PL_multi_end = 0;
     }
+#ifdef MACOS_TRADITIONAL
+    MacPosIndication(msg, SvPVX(GvSV(PL_curcop->cop_filegv)), PL_curcop->cop_line);
+    sv_catpvn(msg, "\n", 1);
+#endif
     if (PL_in_eval & EVAL_WARNONLY)
 	Perl_warn(aTHX_ "%_", msg);
     else

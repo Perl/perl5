@@ -2112,6 +2112,9 @@ PP(pp_goto)
 		if (CvDEPTH(cv) < 2)
 		    (void)SvREFCNT_inc(cv);
 		else {	/* save temporaries on recursion? */
+#ifdef MACOS_TRADITIONAL
+		    MacStackAttack();
+#endif
 		    if (CvDEPTH(cv) == 100 && ckWARN(WARN_RECURSION))
 			sub_crush_depth(cv);
 		    if (CvDEPTH(cv) > AvFILLp(padlist)) {
@@ -2780,6 +2783,9 @@ PP(pp_require)
 
     /* prepare to compile file */
 
+#ifdef MACOS_TRADITIONAL
+    if (strchr(name, ':')
+#else
     if (*name == '/' ||
 	(*name == '.' && 
 	    (name[1] == '/' ||
@@ -2794,12 +2800,25 @@ PP(pp_require)
 	|| (strchr(name,':')  || ((*name == '[' || *name == '<') &&
 	    (isALNUM(name[1]) || strchr("$-_]>",name[1]))))
 #endif
+#endif
     )
     {
 	tryname = name;
 	tryrsfp = doopen_pmc(name,PERL_SCRIPT_MODE);
+#ifdef MACOS_TRADITIONAL
+	/* We consider paths of the form :a:b ambiguous and interpret them first
+	   as global then as local
+	*/
+    if (name[0] == ':' && !tryrsfp && name[1] != ':' && strchr(name+2, ':'))
+	goto trylocal;
+#endif
     }
+#ifdef MACOS_TRADITIONAL
+    else 
+trylocal: {
+#else
     else {
+#endif
 	AV *ar = GvAVn(PL_incgv);
 	I32 i;
 #ifdef VMS
@@ -2917,6 +2936,24 @@ PP(pp_require)
 		}
 		else {
 		    char *dir = SvPVx(dirsv, n_a);
+#ifdef MACOS_TRADITIONAL
+		    /* We have ensured in incpush that library ends with ':' */
+		    int   dirlen = strlen(dir);
+	    	    char *colon  = strchr(dir, ':') ? "" : ":";
+	    	    int   colons = (dir[dirlen-1] == ':') + (*name == ':');
+		
+	    	    switch (colons) {
+	    	    case 2:
+		    	sv_setpvfaTHX_ (namesv, "%s%s%s", colon, dir, name+1);
+		    	break;
+	    	    case 1:
+		    	sv_setpvf(aTHX_ namesv, "%s%s%s", colon, dir, name);
+		    	break;
+	            case 0: 
+		    	sv_setpvf(aTHX_ namesv, "%s%s:%s", colon, dir, name);
+		    	break;
+	            }
+#else
 #ifdef VMS
 		    char *unixdir;
 		    if ((unixdir = tounixpath(dir, Nullch)) == Nullch)
@@ -2926,8 +2963,13 @@ PP(pp_require)
 #else
 		    Perl_sv_setpvf(aTHX_ namesv, "%s/%s", dir, name);
 #endif
+#endif
 		    TAINT_PROPER("require");
 		    tryname = SvPVX(namesv);
+#ifdef MACOS_TRADITIONAL
+		for (colon = tryname+dirlen; colon = strchr(colon, '/'); )
+		    *colon++ = ':';
+#endif
 		    tryrsfp = doopen_pmc(tryname, PERL_SCRIPT_MODE);
 		    if (tryrsfp) {
 			if (tryname[0] == '.' && tryname[1] == '/')

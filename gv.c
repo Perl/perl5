@@ -71,7 +71,11 @@ Perl_gv_fetchfile(pTHX_ const char *name)
     if (!isGV(gv)) {
 	gv_init(gv, PL_defstash, tmpbuf, tmplen, FALSE);
 	sv_setpv(GvSV(gv), name);
+#ifdef MACOS_TRADITIONAL
+	if (strchr(name, ':') && instr(name,".pm"))
+#else
 	if (*name == '/' && (instr(name, "/lib/") || instr(name, ".pm")))
+#endif
 	    GvMULTI_on(gv);
 	if (PERLDB_LINE)
 	    hv_magic(GvHVn(gv_AVadd(gv)), gv, 'L');

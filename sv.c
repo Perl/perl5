@@ -5203,6 +5203,11 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    if (args) {
 		eptr = va_arg(*args, char*);
 		if (eptr)
+#ifdef MACOS_TRADITIONAL
+		  if (alt)
+		    elen = *eptr++;
+		  else
+#endif
 		    elen = strlen(eptr);
 		else {
 		    eptr = nullstr;

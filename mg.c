@@ -408,6 +408,14 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	sv_setiv(sv, (IV)(PL_debug & 32767));
 	break;
     case '\005':  /* ^E */
+#ifdef MACOS_TRADITIONAL
+	{
+	    char msg[256];
+	    
+	    sv_setnv(sv,(double)gLastMacOSErr);
+	    sv_setpv(sv, gLastMacOSErr ? GetSysErrText(gLastMacOSErr, msg) : "");	
+	}
+#else	
 #ifdef VMS
 	{
 #	    include <descrip.h>
@@ -450,6 +458,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 #else
 	sv_setnv(sv, (NV)errno);
 	sv_setpv(sv, errno ? Strerror(errno) : "");
+#endif
 #endif
 #endif
 #endif
@@ -674,8 +683,10 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	break;
     case '*':
 	break;
+#ifndef MACOS_TRADITIONAL
     case '0':
 	break;
+#endif
 #ifdef USE_THREADS
     case '@':
 	sv_setsv(sv, thr->errsv);
@@ -1568,15 +1579,19 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	DEBUG_x(dump_all());
 	break;
     case '\005':  /* ^E */
-#ifdef VMS
-	set_vaxc_errno(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
+#ifdef MACOS_TRADITIONAL
+	gLastMacOSErr = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
 #else
-#  ifdef WIN32
-	SetLastError( SvIV(sv) );
+#  ifdef VMS
+	set_vaxc_errno(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 #  else
-#    ifndef OS2
+#    ifdef WIN32
+	SetLastError( SvIV(sv) );
+#    else
+#      ifndef OS2
 	/* will anyone ever use this? */
 	SETERRNO(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv), 4);
+#      endif
 #    endif
 #  endif
 #endif
@@ -1871,6 +1886,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
     case ':':
 	PL_chopset = SvPV_force(sv,len);
 	break;
+#ifndef MACOS_TRADITIONAL
     case '0':
 	if (!PL_origalen) {
 	    s = PL_origargv[0];
@@ -1928,6 +1944,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 		PL_origargv[i] = Nullch;
 	}
 	break;
+#endif
 #ifdef USE_THREADS
     case '@':
 	sv_setsv(thr->errsv, sv);

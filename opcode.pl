@@ -735,6 +735,10 @@ setpriority	setpriority		ck_fun		isT@	S S S
 
 # Time calls.
 
+# NOTE: MacOS patches the 'i' of time() away later when the interpreter
+# is created because in MacOS time() is already returning times > 2**31-1,
+# that is, non-integers.
+
 time		time			ck_null		isT0	
 tms		times			ck_null		0	
 localtime	localtime		ck_fun		t%	S?
