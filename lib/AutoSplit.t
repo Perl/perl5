@@ -146,6 +146,23 @@ foreach (@tests) {
       defined eval $code or fail(), print "# Code:  $code\n# Error: $@";
     }
   }
+  if (my $sleepfor = $args{Sleep}) {
+    # We need to sleep for a while
+    # Need the sleep hack else the next test is so fast that the timestamp
+    # compare routine in AutoSplit thinks that it shouldn't split the files.
+    my $time = time;
+    my $until = $time + $sleepfor;
+    my $attempts = 3;
+    do {
+      sleep ($sleepfor)
+    } while (time < $until && --$attempts > 0);
+    if ($attempts == 0) {
+      printf << "EOM", time;
+# Attempted to sleep for $sleepfor second(s), started at $time, now %d.
+# sleep attempt ppears to have failed; some tests may fail as a result.
+EOM
+    }
+  }
   unless ($args{SameAgain}) {
     $i++;
     rmtree($dir);
@@ -265,12 +282,10 @@ AutoSplitting *INC*/*MOD*.pm (*DIR*/*MOD*)
 ## Tests
 is (&*MOD*::obsolete, 0);
 is (&*MOD*::obsolete, 1);
-{my $time = time; print "# time is $time\n"; sleep (2); sleep (2) unless time > $time + 1}
-printf "# time is %d (hopefully >=2 seconds later)\n", time;
+## Sleep
+2
 ## SameAgain
 True, so don't scrub this directory.
-Need the sleep hack else the next test is so fast that the timestamp compare
-routine in AutoSplit thinks that it shouldn't split the files.
 IIRC DOS FAT filesystems have only 2 second granularity.
 ################################################################
 ## Name
@@ -298,8 +313,8 @@ AutoSplitting *INC*/*MOD*.pm (*DIR*/*MOD*)
 ## Tests
 is (&*MOD*::skeleton, "bones", "skeleton");
 eval {&*MOD*::gonner}; ok ($@ =~ m!^Can't locate auto/*MOD*/gonner.al in \@INC!, "Check &*MOD*::gonner is now a gonner") or print "# \$\@='$@'\n";
-{my $time = time; print "# time is $time\n"; sleep (2); sleep (2) unless time > $time + 1}
-printf "# time is %d (hopefully >=2 seconds later)\n", time;
+## Sleep
+2
 ## SameAgain
 True, so don't scrub this directory.
 ################################################################
@@ -328,8 +343,8 @@ AutoSplitting *INC*/*MOD*.pm (*DIR*/*MOD*)
 ## Tests
 is (&*MOD*::ghost, "bump");
 is (&*MOD*::zombie, "You didn't use fire.", "Are our zombies undead?");
-{my $time = time; print "# time is $time\n"; sleep (2); sleep (2) unless time > $time + 1}
-printf "# time is %d (hopefully >=2 seconds later)\n", time;
+## Sleep
+2
 ## SameAgain
 True, so don't scrub this directory.
 ################################################################
@@ -350,8 +365,8 @@ Without the the timestamp check make sure that nothing happens
 ## Tests
 is (&*MOD*::ghoul, "wail", "still haunted");
 is (&*MOD*::zombie, "You didn't use fire.", "Are our zombies still undead?");
-{my $time = time; print "# time is $time\n"; sleep (2); sleep (2) unless time > $time + 1}
-printf "# time is %d (hopefully >=2 seconds later)\n", time;
+## Sleep
+2
 ## SameAgain
 True, so don't scrub this directory.
 ################################################################
