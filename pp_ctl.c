@@ -3684,6 +3684,22 @@ typedef	void SV;
 typedef int  (*SVCOMPARE_t) (pTHXo_ SV*, SV*);
 #endif	/* TESTHARNESS */
 
+/* 
+ * The original author of the mergesort implementation included here
+ * is Peter M. McIlroy <pmcilroy@lucent.com>,  and the integrator of
+ * it to the Perl source code is John Lindermann <jpl@research.att.com>.
+ *
+ * Both Peter and John agree with the inclusion of their code in here
+ * and with their code being distributed under the same terms as Perl.
+ *
+ * Peter is the original copyright holder, UCB was just granted the
+ * right to redistribute the code and has no rights to the original code.
+ * Inclusion of the BSD copyright is just simple courtesy and no
+ * indication of intellectual property.  Keith Bostic <bostic@bostic.com>
+ * agrees with this interpretation.
+ *
+ * --jhi */
+
 typedef char * aptr;		/* pointer for arithmetic on sizes */
 typedef SV * gptr;		/* pointers in our lists */
 
@@ -3691,6 +3707,12 @@ typedef SV * gptr;		/* pointers in our lists */
 ** which has been modified heavily.  Good ideas are Peter's
 ** bugs are jpl's
 */
+
+/* The below advertising clause is ineffective as of July 22, 1999:
+ *
+ *  ftp://ftp.cs.berkeley.edu/pub/4bsd/README.Impt.License.Change
+ *
+ */
 
 /* Much of this code is original source code from BSD4.4, and is 
  * copyright (c) 1991 The Regents of the University of California.
