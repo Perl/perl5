@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Jan 26 09:47:49 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Wed Jan 26 09:59:39 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -761,7 +761,7 @@ subversion=''
 version=''
 perladmin=''
 perlpath=''
-d_nvpresuv=''
+d_nv_preserves_uv=''
 i16size=''
 i16type=''
 i32size=''
@@ -9887,13 +9887,13 @@ EOP
 set try
 if eval $compile; then
 	case "`./try$exe_ext`" in
-	preserve) d_nvpresuv="$define" ;;
+	preserve) d_nv_preserves_uv="$define" ;;
 	esac
 fi	
-case "$d_nvpresuv" in
+case "$d_nv_preserves_uv" in
 $define) $echo "Yes, they can."  2>&1 ;;
 *)	 $echo "No, they can't." 2>&1
-	 d_nvpresuv="$undef"
+	 d_nv_preserves_uv="$undef"
 	 ;;
 esac
 
@@ -13695,7 +13695,7 @@ eval $inhdr
 
 : get C preprocessor symbols handy
 echo " "
-$echo $n "Guessing which symbols your C compiler and preprocessor define... $c" >&4 
+$echo "Guessing which symbols your C compiler and preprocessor define..." >&4 
 echo $al $osname | $tr ' ' $trnl >Cppsym.know
 ./tr '[a-z]' '[A-Z]' < Cppsym.know > Cppsym.a
 ./tr '[A-Z]' '[a-z]' < Cppsym.know > Cppsym.b
@@ -14602,7 +14602,7 @@ d_msgrcv='$d_msgrcv'
 d_msgsnd='$d_msgsnd'
 d_mymalloc='$d_mymalloc'
 d_nice='$d_nice'
-d_nvpresuv='$d_nvpresuv'
+d_nv_preserves_uv='$d_nv_preserves_uv'
 d_off64_t='$d_off64_t'
 d_old_pthread_create_joinable='$d_old_pthread_create_joinable'
 d_oldpthreads='$d_oldpthreads'

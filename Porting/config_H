@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Thu Jan 20 00:43:41 EET 2000
+ * Configuration time: Wed Jan 26 09:55:17 EET 2000
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -1212,9 +1212,14 @@
  *	available directly to the user. Note that it may well be different from
  *	the preprocessor used to compile the C program.
  */
+/* CPPLAST:
+ *	This symbol is intended to be used along with CPPRUN in the same manner
+ *	symbol CPPMINUS is used with CPPSTDIN. It contains either "-" or "".
+ */
 #define CPPSTDIN "cppstdin"
 #define CPPMINUS ""
 #define CPPRUN "/usr/bin/cpp"
+#define CPPLAST ""
 
 /* HAS_ACCESS:
  *	This manifest constant lets the C program know that the access()
@@ -1405,6 +1410,11 @@
  *	and HAS_UNAME.	Note that the command uses a fully qualified path,
  *	so that it is safe even if used by a process with super-user
  *	privileges.
+ */
+/* HAS_PHOSTNAME:
+ *	This symbol, if defined, indicates that the C program may use the
+ *	contents of PHOSTNAME as a command to feed to the popen() routine
+ *	to derive the host name.
  */
 #define HAS_GETHOSTNAME	/**/
 #define HAS_UNAME		/**/
@@ -2759,6 +2769,10 @@
 /*#define	USE_LONG_LONG		/ **/
 #endif
 
+/* USE_MORE_BITS:
+ *	This symbol, if defined, indicates that 64-bit interfaces and
+ *	long doubles should be used when available.
+ */
 #ifndef USE_MORE_BITS
 /*#define	USE_MORE_BITS		/ **/
 #endif
