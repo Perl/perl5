@@ -495,6 +495,8 @@ UTILS		=			\
 		..\utils\enc2xs		\
 		..\utils\piconv		\
 		..\utils\cpan		\
+		..\utils\xsubpp		\
+		..\utils\instmodsh	\
 		..\pod\checkpods	\
 		..\pod\pod2html		\
 		..\pod\pod2latex	\
@@ -506,7 +508,6 @@ UTILS		=			\
 		..\x2p\find2perl	\
 		..\x2p\psed		\
 		..\x2p\s2p		\
-		..\lib\ExtUtils\xsubpp	\
 		bin\exetype.pl		\
 		bin\runperl.pl		\
 		bin\pl2bat.pl		\
@@ -1100,7 +1101,7 @@ distclean: clean
 	    podchecker podselect
 	cd ..\utils
 	-del /f h2ph splain perlbug pl2pm c2ph pstruct h2xs perldoc perlivp \
-	    dprofpp perlcc libnetcfg enc2xs piconv cpan
+	    dprofpp perlcc libnetcfg enc2xs piconv cpan xsubpp instmodsh
 	-del /f *.bat
 	cd ..\win32
 	cd ..\x2p
