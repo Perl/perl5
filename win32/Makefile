@@ -29,7 +29,7 @@ INST_TOP	= $(INST_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-INST_VER	= \5.6.0
+#INST_VER = \5.6.0
 
 #
 # Comment this out if you DON'T want your perl installation to have
@@ -40,27 +40,27 @@ INST_VER	= \5.6.0
 # the same location.  Commenting it out gives you a simpler
 # installation that is easier to understand for beginners.
 #
-INST_ARCH	= \$(ARCHNAME)
+#INST_ARCH = \$(ARCHNAME)
 
 #
 # uncomment to enable multiple interpreters.  This is need for fork()
 # emulation.
 #
-#USE_MULTI	= define
+USE_MULTI = define
 
 #
 # Beginnings of interpreter cloning/threads; still very incomplete.
 # This should be enabled to get the fork() emulation.  This needs
 # USE_MULTI as well.
 #
-#USE_ITHREADS	= define
+USE_ITHREADS = define
 
 #
 # uncomment to enable the implicit "host" layer for all system calls
 # made by perl.  This needs USE_MULTI above.  This is also needed to
 # get fork().
 #
-#USE_IMP_SYS	= define
+USE_IMP_SYS = define
 
 #
 # WARNING! This option is deprecated and will eventually go away (enable
@@ -89,6 +89,12 @@ INST_ARCH	= \$(ARCHNAME)
 #
 #CCTYPE		= MSVC20
 #CCTYPE		= MSVC60
+#
+# uncomment the following line if you are using
+# Visual C++ 5.x (aka Visual Studio 97) _without_ service pack 3 applied or MSVC4x
+# If you have applied service pack 3 then no change is required
+#
+#CCTYPE  = MSVC50_NO_SP
 
 #
 # uncomment next line if you want debug version of perl (big,slow)
@@ -284,17 +290,11 @@ ARCHNAME	= $(ARCHNAME)-thread
 
 # Visual Studio 98 specific
 !IF "$(CCTYPE)" == "MSVC60"
-
 # VC 6.0 can load the socket dll on demand.  Makes the test suite
 # run in about 10% less time.
 DELAYLOAD	= -DELAYLOAD:wsock32.dll -DELAYLOAD:shell32.dll delayimp.lib 
+!ENDIF
 
-# VC 6.0 seems capable of compiling perl correctly with optimizations
-# enabled.  Anything earlier fails tests.
-!IF "$(CFG)" == ""
-CFG		= Optimize
-!ENDIF
-!ENDIF
 
 ARCHDIR		= ..\lib\$(ARCHNAME)
 COREDIR		= ..\lib\CORE
@@ -350,15 +350,16 @@ OPTIMIZE	= -Od -MD -Zi -DDEBUGGING
 !  ENDIF
 LINK_DBG	= -debug -pdb:none
 !ELSE
-!  IF  "$(CFG)" == "Optimize"
 # -O1 yields smaller code, which turns out to be faster than -O2
-#OPTIMIZE	= -O2 -MD -DNDEBUG
 OPTIMIZE	= -O1 -MD -DNDEBUG
-!  ELSE
+# VC 6.0 seems capable of compiling perl correctly with optimizations
+# enabled.  Anything earlier fails tests.
+!  IF "$(CCTYPE)" == "MSVC20" || "$(CCTYPE)" == "MSVC50_NO_SP"
 OPTIMIZE	= -Od -MD -DNDEBUG
 !  ENDIF
 LINK_DBG	= -release
 !ENDIF
+
 
 !IF "$(USE_OBJECT)" == "define"
 OPTIMIZE	= $(OPTIMIZE) $(CXX_FLAG)
