@@ -271,7 +271,7 @@ PerlIO_pop(PerlIO *f)
  PerlIOl *l = *f;
  if (l)
   {
-   PerlIO_debug(__FUNCTION__ " f=%p %s\n",f,l->tab->name);
+   PerlIO_debug("PerlIO_pop f=%p %s\n",f,l->tab->name);
    (*l->tab->Popped)(f);
    *f = l->next;
    Safefree(l);
@@ -518,7 +518,7 @@ PerlIO_push(PerlIO *f,PerlIO_funcs *tab,const char *mode)
    l->next = *f;
    l->tab  = tab;
    *f      = l;
-   PerlIO_debug(__FUNCTION__ " f=%p %s %s\n",f,tab->name,(mode) ? mode : "(Null)"); 
+   PerlIO_debug("PerlIO_push f=%p %s %s\n",f,tab->name,(mode) ? mode : "(Null)"); 
    if ((*l->tab->Pushed)(f,mode) != 0)
     {
      PerlIO_pop(f);
@@ -591,7 +591,7 @@ PerlIO_apply_layers(pTHX_ PerlIO *f, const char *mode, const char *names)
 int
 PerlIO_binmode(pTHX_ PerlIO *f, int iotype, int mode, const char *names)
 {
- PerlIO_debug(__FUNCTION__ " f=%p %s %c %x %s\n",
+ PerlIO_debug("PerlIO_binmode f=%p %s %c %x %s\n",
               f,PerlIOBase(f)->tab->name,iotype,mode, (names) ? names : "(Null)"); 
  if (!names || (O_TEXT != O_BINARY && mode & O_BINARY))
   {
@@ -950,7 +950,7 @@ PerlIOBase_pushed(PerlIO *f, const char *mode)
                  (PERLIO_F_CANREAD|PERLIO_F_CANWRITE|PERLIO_F_TRUNCATE|PERLIO_F_APPEND);
     }
   }
- PerlIO_debug(__FUNCTION__ " f=%p %s %s fl=%08x (%s)\n",
+ PerlIO_debug("PerlIOBase_pushed f=%p %s %s fl=%08x (%s)\n",
               f,PerlIOBase(f)->tab->name,(omode) ? omode : "(Null)",
               l->flags,PerlIO_modestr(f,temp)); 
  return 0;
@@ -1678,7 +1678,7 @@ PerlIOBuf_fdopen(PerlIO_funcs *self, int fd, const char *mode)
  if (O_BINARY != O_TEXT)
   {
    int code = PerlLIO_setmode(fd, O_BINARY);
-   PerlIO_debug(__FUNCTION__ " %s fd=%d m=%s c=%d\n",tab->name,fd,mode,code); 
+   PerlIO_debug("PerlIOBuf_fdopen %s fd=%d m=%s c=%d\n",tab->name,fd,mode,code); 
   }
  f = (*tab->Fdopen)(tab,fd,mode);
  if (f)
@@ -1690,7 +1690,7 @@ PerlIOBuf_fdopen(PerlIO_funcs *self, int fd, const char *mode)
      /* Initial stderr is unbuffered */
      PerlIOBase(f)->flags |= PERLIO_F_UNBUF;
     } 
-   PerlIO_debug(__FUNCTION__ " %s f=%p fd=%d m=%s fl=%08x\n",
+   PerlIO_debug("PerlIOBuf_fdopen %s f=%p fd=%d m=%s fl=%08x\n",
                 self->name,f,fd,mode,PerlIOBase(f)->flags);
   }
  return f;
@@ -2130,7 +2130,7 @@ PerlIOCrlf_pushed(PerlIO *f, const char *mode)
  IV code;
  PerlIOBase(f)->flags |= PERLIO_F_CRLF;
  code = PerlIOBase_pushed(f,mode);
- PerlIO_debug(__FUNCTION__ " f=%p %s %s fl=%08x\n",
+ PerlIO_debug("PerlIOCrlf_pushed f=%p %s %s fl=%08x\n",
               f,PerlIOBase(f)->tab->name,(mode) ? mode : "(Null)",
               PerlIOBase(f)->flags); 
  return code;
