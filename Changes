@@ -28,6 +28,115 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.2		Maintenance release working toward v5.8.2
 --------------
 ____________________________________________________________________________
+____________________________________________________________________________
+[ 21558] By: nicholas                              on 2003/10/27  17:29:16
+        Log: Forgot to submit the updated table of contents
+     Branch: maint-5.8/perl
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[ 21557] By: nicholas                              on 2003/10/27  17:24:06
+        Log: run pod/buildtoc
+     Branch: maint-5.8/perl
+	   ! MANIFEST win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[ 21556] By: nicholas                              on 2003/10/27  17:16:57
+        Log: Cargo cult change of 5.8.1 to 5.8.2
+     Branch: maint-5.8/perl
+	   ! Cross/README NetWare/Makefile Porting/config.sh
+	   ! Porting/config_H cygwin/perlld.in epoc/createpkg.pl
+	   ! patchlevel.h plan9/config.plan9 vos/build.cm
+	   ! vos/config.alpha.def vos/config.alpha.h vos/config.ga.def
+	   ! vos/config.ga.h vos/install_perl.cm win32/Makefile
+	   ! win32/config_H.bc win32/config_H.gc win32/config_H.vc
+	   ! win32/config_H.vc64 win32/makefile.mk wince/Makefile.ce
+____________________________________________________________________________
+[ 21555] By: nicholas                              on 2003/10/27  16:28:54
+        Log: Integrate:
+             [ 21554]
+             Subject: Re: DBD::Sybase and Sybase::CTlib build problems w/ 5.8.1, Solaris, gcc
+             From: Alan Burlison <Alan.Burlison@sun.com>
+             Date: Tue, 21 Oct 2003 15:00:58 +0100
+             Message-ID: <3F953C1A.3060800@sun.com>
+     Branch: maint-5.8/perl
+	  !> hints/solaris_2.sh
+____________________________________________________________________________
+[ 21553] By: nicholas                              on 2003/10/27  14:09:05
+        Log: Update Changes
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
+[ 21558] By: nicholas                              on 2003/10/27  17:29:16
+        Log: Forgot to submit the updated table of contents
+     Branch: maint-5.8/perl
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[ 21557] By: nicholas                              on 2003/10/27  17:24:06
+        Log: run pod/buildtoc
+     Branch: maint-5.8/perl
+	   ! MANIFEST win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[ 21556] By: nicholas                              on 2003/10/27  17:16:57
+        Log: Cargo cult change of 5.8.1 to 5.8.2
+     Branch: maint-5.8/perl
+	   ! Cross/README NetWare/Makefile Porting/config.sh
+	   ! Porting/config_H cygwin/perlld.in epoc/createpkg.pl
+	   ! patchlevel.h plan9/config.plan9 vos/build.cm
+	   ! vos/config.alpha.def vos/config.alpha.h vos/config.ga.def
+	   ! vos/config.ga.h vos/install_perl.cm win32/Makefile
+	   ! win32/config_H.bc win32/config_H.gc win32/config_H.vc
+	   ! win32/config_H.vc64 win32/makefile.mk wince/Makefile.ce
+____________________________________________________________________________
+[ 21555] By: nicholas                              on 2003/10/27  16:28:54
+        Log: Integrate:
+             [ 21554]
+             Subject: Re: DBD::Sybase and Sybase::CTlib build problems w/ 5.8.1, Solaris, gcc
+             From: Alan Burlison <Alan.Burlison@sun.com>
+             Date: Tue, 21 Oct 2003 15:00:58 +0100
+             Message-ID: <3F953C1A.3060800@sun.com>
+     Branch: maint-5.8/perl
+	  !> hints/solaris_2.sh
+____________________________________________________________________________
+[ 21553] By: nicholas                              on 2003/10/27  14:09:05
+        Log: Update Changes
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
+[ 21558] By: nicholas                              on 2003/10/27  17:29:16
+        Log: Forgot to submit the updated table of contents
+     Branch: maint-5.8/perl
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[ 21557] By: nicholas                              on 2003/10/27  17:24:06
+        Log: run pod/buildtoc
+     Branch: maint-5.8/perl
+	   ! MANIFEST win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[ 21556] By: nicholas                              on 2003/10/27  17:16:57
+        Log: Cargo cult change of 5.8.1 to 5.8.2
+     Branch: maint-5.8/perl
+	   ! Cross/README NetWare/Makefile Porting/config.sh
+	   ! Porting/config_H cygwin/perlld.in epoc/createpkg.pl
+	   ! patchlevel.h plan9/config.plan9 vos/build.cm
+	   ! vos/config.alpha.def vos/config.alpha.h vos/config.ga.def
+	   ! vos/config.ga.h vos/install_perl.cm win32/Makefile
+	   ! win32/config_H.bc win32/config_H.gc win32/config_H.vc
+	   ! win32/config_H.vc64 win32/makefile.mk wince/Makefile.ce
+____________________________________________________________________________
+[ 21555] By: nicholas                              on 2003/10/27  16:28:54
+        Log: Integrate:
+             [ 21554]
+             Subject: Re: DBD::Sybase and Sybase::CTlib build problems w/ 5.8.1, Solaris, gcc
+             From: Alan Burlison <Alan.Burlison@sun.com>
+             Date: Tue, 21 Oct 2003 15:00:58 +0100
+             Message-ID: <3F953C1A.3060800@sun.com>
+     Branch: maint-5.8/perl
+	  !> hints/solaris_2.sh
+____________________________________________________________________________
+[ 21553] By: nicholas                              on 2003/10/27  14:09:05
+        Log: Update Changes
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 21552] By: nicholas                              on 2003/10/27  14:07:08
         Log: Changes file was in the wrong order (as noticed by Chip)
      Branch: maint-5.8/perl
