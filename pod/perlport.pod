@@ -149,6 +149,32 @@ platforms, because now any C<\015>'s (C<\cM>'s) are stripped out
 (and there was much rejoicing).
 
 
+=head2 Numbers endianness and Width
+
+Different CPUs store integers and floating point numbers in different
+orders (called I<endianness>) and widths (32-bit and 64-bit being the
+most common).  This affects your programs if they attempt to transfer
+numbers in binary format from a CPU architecture to another over some
+channel: either 'live' via network connections or storing the numbers
+to secondary storage such as a disk file.
+
+Conflicting storage orders make utter mess out of the numbers: if a
+little-endian host (Intel, Alpha) stores 0x12345678 (305419896 in
+decimal), a big-endian host (Motorola, MIPS, Sparc, PA) reads it as
+0x78563412 (2018915346 in decimal).  To avoid this problem in network
+(socket) connections use the C<pack()> and C<unpack()> formats C<"n">
+and C<"N">, the "network" orders, they are guaranteed to be portable.
+
+Different widths can cause truncation even between platforms of equal
+endianness: the platform of shorter width loses the upper parts of the
+number.  There is no good solution for this problem except to avoid
+transferring or storing raw binary numbers.
+
+One can circumnavigate both these problems in two ways: either
+transfer and store numbers always in text format, instead of raw
+binary, or consider using modules like C<Data::Dumper> (included in
+the standard distribution as of Perl 5.005) and C<Storable>.
+
 =head2 Files
 
 Most platforms these days structure files in a hierarchical fashion.
@@ -157,13 +183,20 @@ notion of a "path" to uniquely identify a file on the system.  Just
 how that path is actually written, differs.
 
 While they are similar, file path specifications differ between Unix,
-Windows, S<Mac OS>, OS/2, VMS, S<RISC OS> and probably others.  Unix, for
-example, is one of the few OSes that has the idea of a root directory.
-S<Mac OS> uses C<:> as a path separator instead of C</>.  VMS, Windows,
-and OS/2 can work similarly to Unix with C</> as path separator, or in
-their own idiosyncratic ways.  C<RISC OS> perl can emulate Unix filenames
-with C</> as path separator, or go native and use C<.> for path separator
-and C<:> to signal filing systems and disc names.
+Windows, S<Mac OS>, OS/2, VMS, S<RISC OS> and probably others.  Unix,
+for example, is one of the few OSes that has the idea of a single root
+directory.
+
+VMS, Windows, and OS/2 can work similarly to Unix with C</> as path
+separator, or in their own idiosyncratic ways (such as having several
+root directories and various "unrooted" device files such NIL: and
+LPT:).
+
+S<Mac OS> uses C<:> as a path separator instead of C</>.
+
+C<RISC OS> perl can emulate Unix filenames with C</> as path
+separator, or go native and use C<.> for path separator and C<:> to
+signal filing systems and disc names.
 
 As with the newline problem above, there are modules that can help.  The
 C<File::Spec> modules provide methods to do the Right Thing on whatever
@@ -191,10 +224,16 @@ Also of use is C<File::Basename>, from the standard distribution, which
 splits a pathname into pieces (base filename, full path to directory,
 and file suffix).
 
-Remember not to count on the existence of system-specific files, like
-F</etc/resolv.conf>.  If code does need to rely on such a file, include a
-description of the file and its format in the code's documentation, and
-make it easy for the user to override the default location of the file.
+Even when on a single platform (if you can call UNIX a single
+platform), remember not to count on the existence or the contents of
+system-specific files, like F</etc/passwd>, F</etc/sendmail.conf>, or
+F</etc/resolv.conf>.  For example the F</etc/passwd> may exist but it
+may not contain the encrypted passwords because the system is using
+some form of enhanced security-- or it may not contain all the
+accounts because the system is using NIS.  If code does need to rely
+on such a file, include a description of the file and its format in
+the code's documentation, and make it easy for the user to override
+the default location of the file.
 
 Do not have two files of the same name with different case, like
 F<test.pl> and <Test.pl>, as many platforms have case-insensitive
@@ -274,6 +313,8 @@ The rule of thumb for portable code is: Do it all in portable Perl, or
 use a module (that may internally implement it with platform-specific
 code, but expose a common interface).
 
+The UNIX System V IPC (C<msg*(), sem*(), shm*()>) is not available
+even in all UNIX platforms.
 
 =head2 External Subroutines (XS)
 
@@ -315,12 +356,37 @@ widely different ways. Don't assume the timezone is stored in C<$ENV{TZ}>,
 and even if it is, don't assume that you can control the timezone through
 that variable.
 
-Don't assume that the epoch starts at January 1, 1970, because that is
-OS-specific.  Better to store a date in an unambiguous representation.
-A text representation (like C<1 Jan 1970>) can be easily converted into an
-OS-specific value using a module like C<Date::Parse>.  An array of values,
-such as those returned by C<localtime>, can be converted to an OS-specific
-representation using C<Time::Local>.
+Don't assume that the epoch starts at 00:00:00, January 1, 1970,
+because that is OS-specific.  Better to store a date in an unambiguous
+representation.  The ISO 8601 standard defines YYYY-MM-DD as the date
+format.  A text representation (like C<1 Jan 1970>) can be easily
+converted into an OS-specific value using a module like
+C<Date::Parse>.  An array of values, such as those returned by
+C<localtime>, can be converted to an OS-specific representation using
+C<Time::Local>.
+
+
+=head2 Character sets and character encoding
+
+Assume very little about character sets.  Do not assume anything about
+the numerical values (C<ord()>, C<chr()>) of characters.  Do not
+assume that the alphabetic characters are encoded contiguously (in
+numerical sense).  Do no assume anything about the ordering of the
+characters.  The lowercase letters may come before or after the
+uppercase letters, the lowercase and uppercase may be interlaced so
+that both 'a' and 'A* come before the 'b', the accented and other
+international characters may be interlaced so that E<auml> comes
+before the 'b'.
+
+
+=head2 Internationalisation
+
+If you may assume POSIX (a rather large assumption, that: in practise
+that means UNIX) you may read more about the POSIX locale system from
+L<perllocale>.  The locale system at least attempts to make things a
+little bit more portable or at least more convenient and
+native-friendly for non-English users.  The system affects character
+sets and encoding, and date and time formatting, among other things.
 
 
 =head2 System Resources
@@ -406,15 +472,18 @@ Unix flavors:
 
     uname        $^O        $Config{'archname'}
     -------------------------------------------
-    AIX          aix
-    FreeBSD      freebsd
-    Linux        linux
-    HP-UX        hpux
-    OSF1         dec_osf
+    AIX          aix        aix
+    FreeBSD      freebsd    freebsd-i386    
+    Linux        linux      i386-linux
+    HP-UX        hpux       PA-RISC1.1
+    IRIX	 irix       irix
+    OSF1         dec_osf    alpha-dec_osf
     SunOS        solaris    sun4-solaris
     SunOS        solaris    i86pc-solaris
-    SunOS4       sunos
+    SunOS4       sunos      sun4-sunos
 
+Note that because the C<$Config{'archname'}> may depend on the hardware
+architecture it may vary quite a lot, much more than the C<$^O>.
 
 =head2 DOS and Derivatives
 
@@ -1266,8 +1335,9 @@ Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>)
 =item sysopen FILEHANDLE,FILENAME,MODE,PERMS
 
 The traditional "0", "1", and "2" MODEs are implemented with different
-numeric values on some systems.  The flags exported by C<Fcntl> should
-work everywhere though.  (S<Mac OS>, OS/390)
+numeric values on some systems.  The flags exported by C<Fcntl>
+(O_RDONLY, O_WRONLY, O_RDWR) should work everywhere though.  (S<Mac
+OS>, OS/390)
 
 =item system LIST
 
@@ -1315,7 +1385,11 @@ Returns undef where unavailable, as of version 5.005.
 
 Only the modification time is updated. (S<Mac OS>, VMS, S<RISC OS>)
 
-May not behave as expected. (Win32)
+May not behave as expected.  Behavior depends on the C runtime
+library's implementation of utime(), and the filesystem being
+used.  The FAT filesystem typically does not support an "access
+time" field, and it may limit timestamps to a granularity of
+two seconds. (Win32)
 
 =item wait
 
@@ -1364,15 +1438,15 @@ Dominic Dunlop E<lt>domo@vo.luE<gt>,
 M.J.T. Guy E<lt>mjtg@cus.cam.ac.ukE<gt>,
 Luther Huffman E<lt>lutherh@stratcom.comE<gt>,
 Nick Ing-Simmons E<lt>nick@ni-s.u-net.comE<gt>,
-Andreas J. Koenig E<lt>koenig@kulturbox.deE<gt>,
+Andreas J. KE<ouml>nig E<lt>koenig@kulturbox.deE<gt>,
 Andrew M. Langmead E<lt>aml@world.std.comE<gt>,
 Paul Moore E<lt>Paul.Moore@uk.origin-it.comE<gt>,
 Chris Nandor E<lt>pudge@pobox.comE<gt>,
-Matthias Neercher E<lt>neeri@iis.ee.ethz.chE<gt>,
+Matthias Neeracher E<lt>neeri@iis.ee.ethz.chE<gt>,
 Gary Ng E<lt>71564.1743@CompuServe.COME<gt>,
 Tom Phoenix E<lt>rootbeer@teleport.comE<gt>,
 Peter Prymmer E<lt>pvhp@forte.comE<gt>,
-Hugo van der Sanden E<lt>h.sanden@elsevier.nlE<gt>,
+Hugo van der Sanden E<lt>hv@crypt0.demon.co.ukE<gt>,
 Gurusamy Sarathy E<lt>gsar@umich.eduE<gt>,
 Paul J. Schinder E<lt>schinder@pobox.comE<gt>,
 Dan Sugalski E<lt>sugalskd@ous.eduE<gt>,
@@ -1382,6 +1456,6 @@ This document is maintained by Chris Nandor.
 
 =head1 VERSION
 
-Version 1.33, last modified 06 August 1998.
+Version 1.34, last modified 07 August 1998.
 
 
