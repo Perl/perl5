@@ -102,10 +102,10 @@ print "not " unless sprintf("%vX", 1.22.333.4444) eq '1.16.14D.115C';
 print "ok $test\n";  ++$test;
 
 if (ord("\t") == 9) { # ASCII
-    print "not " unless sprintf("%*v#o", ":", "Perl") eq '0120:0145:0162:0154';
+    print "not " unless sprintf("%#*vo", ":", "Perl") eq '0120:0145:0162:0154';
 }
 else {
-    print "not " unless sprintf("%*v#o", ":", "Perl") eq '0327:0205:0231:0223';
+    print "not " unless sprintf("%#*vo", ":", "Perl") eq '0327:0205:0231:0223';
 }
 print "ok $test\n";  ++$test;
 
@@ -144,10 +144,10 @@ print "ok $test\n";  ++$test;
     print "ok $test\n";  ++$test;
 
     if (ord("\t") == 9) { # ASCII
-        print "not " unless sprintf("%*v#o", ":", "Perl") eq '0120:0145:0162:0154';
+        print "not " unless sprintf("%#*vo", ":", "Perl") eq '0120:0145:0162:0154';
     }
     else {
-        print "not " unless sprintf("%*v#o", ":", "Perl") eq '0327:0205:0231:0223';
+        print "not " unless sprintf("%#*vo", ":", "Perl") eq '0327:0205:0231:0223';
     }
     print "ok $test\n";  ++$test;
 
