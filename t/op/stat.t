@@ -233,8 +233,6 @@ ok(! -c $Curdir,    '!-c cwd');
 ok(! -S $Curdir,    '!-S cwd');
 
 SKIP: {
-    skip "No setuid", 3 if $Is_MPE or $Is_Amiga or $Is_Dosish or $Is_Cygwin;
-
     my($cnt, $uid);
     $cnt = $uid = 0;
 
@@ -254,17 +252,11 @@ SKIP: {
     }
     closedir BIN;
 
-    if( !isnt($cnt, 0,    'found some programs') ||
-        !isnt($uid, 0,    'found some setuid programs') ||
-        !ok($uid < $cnt,  "  they're not all setuid") )
-    {
-        print <<DIAG;
-# The above two tests assume that at least one of these directories
-# are readable, executable and contain at least one setuid file
-# (but aren't all setuid).
-#   @bin
-DIAG
-    }
+    skip "No setuid programs", 3 if $uid == 0;
+
+    isnt($cnt, 0,    'found some programs');
+    isnt($uid, 0,    '  found some setuid programs');
+    ok($uid < $cnt,  "    they're not all setuid");
 }
 
 
