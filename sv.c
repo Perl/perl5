@@ -1585,15 +1585,8 @@ Perl_sv_grow(pTHX_ register SV *sv, register STRLEN newlen)
 	    newlen = 0xFFFF;
 #endif
     }
-    else {
-	/* This is annoying, because sv_force_normal_flags will fix the flags,
-	   recurse into sv_grow to malloc a buffer of SvCUR(sv) + 1, then
-	   return back to us, only for us to potentially realloc the buffer.
-	*/
-	if (SvIsCOW(sv))
-	    sv_force_normal_flags(sv, 0);
+    else
 	s = SvPVX(sv);
-    }
 
     if (newlen > SvLEN(sv)) {		/* need more room? */
 	if (SvLEN(sv) && s) {
@@ -6296,7 +6289,8 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
     I32 rspara = 0;
     I32 recsize;
 
-    SV_CHECK_THINKFIRST_COW_DROP(sv);
+    if (SvTHINKFIRST(sv))
+	sv_force_normal_flags(sv, append ? 0 : SV_COW_DROP_PV);
     /* XXX. If you make this PVIV, then copy on write can copy scalars read
        from <>.
        However, perlbench says it's slower, because the existing swipe code

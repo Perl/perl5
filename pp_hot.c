@@ -1509,7 +1509,7 @@ Perl_do_readline(pTHX)
 	    sv_unref(sv);
 	(void)SvUPGRADE(sv, SVt_PV);
 	tmplen = SvLEN(sv);	/* remember if already alloced */
-	if (!tmplen)
+	if (!tmplen && !SvREADONLY(sv))
 	    Sv_Grow(sv, 80);	/* try short-buffering it */
 	offset = 0;
 	if (type == OP_RCATLINE && SvOK(sv)) {
