@@ -297,6 +297,9 @@ PP(pp_print)
 	gv = defoutgv;
     if (SvRMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q'))) {
 	if (MARK == ORIGMARK) {
+	    /* If using default handle then we need to make space to 
+	     * pass object as 1st arg, so move other args up ...
+	     */
 	    MEXTEND(SP, 1);
 	    ++MARK;
 	    Move(MARK, MARK + 1, (SP - MARK) + 1, SV*);

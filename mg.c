@@ -1009,8 +1009,10 @@ magic_getpack(SV *sv, MAGIC *mg)
 
 int
 magic_setpack(SV *sv, MAGIC *mg)
-{
+{   
+    ENTER;
     magic_methcall(mg, "STORE", G_SCALAR|G_DISCARD, 3, sv);
+    LEAVE;
     return 0;
 }
 
@@ -1031,7 +1033,7 @@ magic_sizepack(SV *sv, MAGIC *mg)
     SAVETMPS;
     if (magic_methcall(mg, "FETCHSIZE", G_SCALAR, 2, NULL)) {
 	sv = *stack_sp--;
-	retval = (U32) SvIV(sv);
+	retval = (U32) SvIV(sv)-1;
     }
     FREETMPS;
     LEAVE;
@@ -1045,9 +1047,9 @@ int magic_wipepack(SV *sv, MAGIC *mg)
     PUSHMARK(sp);
     XPUSHs(mg->mg_obj);
     PUTBACK;
-
+    ENTER;
     perl_call_method("CLEAR", G_SCALAR|G_DISCARD);
-
+    LEAVE;
     return 0;
 }
 

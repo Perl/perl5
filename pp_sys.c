@@ -590,7 +590,8 @@ PP(pp_untie)
     djSP;
     SV * sv ;
 
-    sv = POPs;
+    sv = POPs;          
+
 
     if (dowarn) {
         MAGIC * mg ;

@@ -1,5 +1,6 @@
 #!./perl
 
+
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
@@ -20,7 +21,7 @@ sub STORESIZE
 {        
  $seen{'STORESIZE'}++;
  my ($ob,$sz) = @_; 
- return @$ob = $sz;
+ return $#{$ob} = $sz-1;
 }
 
 sub EXTEND
@@ -33,8 +34,7 @@ sub EXTEND
 sub FETCHSIZE
 {        
  $seen{'FETCHSIZE'}++;
- my ($ob) = @_; 
- return @$ob-1;
+ return scalar(@{$_[0]});
 }
 
 sub FETCH
@@ -54,7 +54,7 @@ sub STORE
 sub UNSHIFT
 {
  $seen{'UNSHIFT'}++;
- $ob = shift;
+ my $ob = shift;
  unshift(@$ob,@_);
 }                 
 
@@ -68,6 +68,12 @@ sub PUSH
 sub CLEAR
 {
  $seen{'CLEAR'}++;
+ @{$_[0]} = ();
+}
+
+sub DESTROY
+{
+ $seen{'DESTROY'}++;
 }
 
 sub POP
@@ -95,7 +101,7 @@ sub SPLICE
 
 package main;
 
-print "1..23\n";                   
+print "1..29\n";                   
 my $test = 1;
 
 {my @ary;
@@ -154,8 +160,6 @@ print "ok ", $test++,"\n";
 print "not " unless join(':',@ary) eq '1:7:4';
 print "ok ", $test++,"\n";             
 
-
-
 print "not " unless shift(@ary) == 1;
 print "ok ", $test++,"\n";
 print "not " unless $seen{'SHIFT'} == 1;
@@ -163,21 +167,35 @@ print "ok ", $test++,"\n";
 print "not " unless join(':',@ary) eq '7:4';
 print "ok ", $test++,"\n";             
 
-
-unshift(@ary,5);
+my $n = unshift(@ary,5,6);
 print "not " unless $seen{'UNSHIFT'} == 1;
 print "ok ", $test++,"\n";
-print "not " unless join(':',@ary) eq '5:7:4';
+print "not " unless $n == 4;
+print "ok ", $test++,"\n";
+print "not " unless join(':',@ary) eq '5:6:7:4';
 print "ok ", $test++,"\n";
 
 @ary = split(/:/,'1:2:3');
 print "not " unless join(':',@ary) eq '1:2:3';
 print "ok ", $test++,"\n";         
+  
+my $t = 0;
+foreach $n (@ary)
+ {
+  print "not " unless $n == ++$t;
+  print "ok ", $test++,"\n";         
+ }
 
-# untie @ary;   
+@ary = qw(3 2 1);
+print "not " unless join(':',@ary) eq '3:2:1';
+print "ok ", $test++,"\n";         
+
+untie @ary;   
 
 }
-
+                           
+print "not " unless $seen{'DESTROY'} == 1;
+print "ok ", $test++,"\n";         
 
 
 

@@ -56,7 +56,7 @@ av_extend(AV *av, I32 key)
 	PUSHMARK(sp);
 	EXTEND(sp,2);
 	PUSHs(mg->mg_obj);
-	PUSHs(sv_2mortal(newSViv(key)));
+	PUSHs(sv_2mortal(newSViv(key+1)));
         PUTBACK;
 	perl_call_method("EXTEND", G_SCALAR|G_DISCARD);
 	FREETMPS;
@@ -321,13 +321,16 @@ av_clear(register AV *av)
 	warn("Attempt to clear deleted array");
     }
 #endif
-    if (!av || AvMAX(av) < 0)
+    if (!av)
 	return;
     /*SUPPRESS 560*/
 
     /* Give any tie a chance to cleanup first */
     if (SvRMAGICAL(av))
 	mg_clear((SV*)av); 
+
+    if (AvMAX(av) < 0)
+	return;
 
     if (AvREAL(av)) {
 	ary = AvARRAY(av);
@@ -389,8 +392,10 @@ av_push(register AV *av, SV *val)
 	EXTEND(sp,2);
 	PUSHs(mg->mg_obj);
 	PUSHs(val);
-        PUTBACK;
+	PUTBACK;
+	ENTER;
 	perl_call_method("PUSH", G_SCALAR|G_DISCARD);
+	LEAVE;
 	return;
     }
     av_store(av,AvFILLp(av)+1,val);
@@ -410,12 +415,14 @@ av_pop(register AV *av)
 	dSP;    
 	PUSHMARK(sp);
 	XPUSHs(mg->mg_obj);
-        PUTBACK;
+	PUTBACK;
+	ENTER;
 	if (perl_call_method("POP", G_SCALAR)) {
 	    retval = newSVsv(*stack_sp--);    
 	} else {    
 	    retval = &sv_undef;
 	}
+	LEAVE;
 	return retval;
     }
     retval = AvARRAY(av)[AvFILLp(av)];
@@ -446,7 +453,9 @@ av_unshift(register AV *av, register I32 num)
 	    PUSHs(&sv_undef);
 	}
 	PUTBACK;
+	ENTER;
 	perl_call_method("UNSHIFT", G_SCALAR|G_DISCARD);
+	LEAVE;
 	return;
     }
 
@@ -495,12 +504,14 @@ av_shift(register AV *av)
 	dSP;
 	PUSHMARK(sp);
 	XPUSHs(mg->mg_obj);
-        PUTBACK;
+	PUTBACK;
+	ENTER;
 	if (perl_call_method("SHIFT", G_SCALAR)) {
 	    retval = newSVsv(*stack_sp--);            
 	} else {    
 	    retval = &sv_undef;
-	}
+	}     
+	LEAVE;
 	return retval;
     }
     retval = *AvARRAY(av);
@@ -535,7 +546,7 @@ av_fill(register AV *av, I32 fill)
 	PUSHMARK(sp);
 	EXTEND(sp,2);
 	PUSHs(mg->mg_obj);
-	PUSHs(sv_2mortal(newSViv(fill)));
+	PUSHs(sv_2mortal(newSViv(fill+1)));
 	PUTBACK;
 	perl_call_method("STORESIZE", G_SCALAR|G_DISCARD);
 	FREETMPS;

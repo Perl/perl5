@@ -191,11 +191,7 @@ require DynaLoader;
 
 );  
 
-sub FETCHSIZE
-{ 
-    my $self = shift ;
-    return $self->length - 1;
-}
+*FETCHSIZE = \&length;
 
 sub AUTOLOAD {
     my($constname);

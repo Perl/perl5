@@ -2460,8 +2460,10 @@ PP(pp_splice)
     if (SvRMAGICAL(ary) && (mg = mg_find((SV*)ary,'P'))) {
 	*MARK-- = mg->mg_obj;
 	PUSHMARK(MARK);
-	PUTBACK;
+	PUTBACK;       
+	ENTER;
 	perl_call_method("SPLICE",GIMME_V);
+	LEAVE;
 	SPAGAIN;
 	RETURN;
     }
@@ -2658,17 +2660,19 @@ PP(pp_push)
 	*MARK-- = mg->mg_obj;
 	PUSHMARK(MARK);
 	PUTBACK;
-	perl_call_method("PUSH",GIMME_V);
+	ENTER;
+	perl_call_method("PUSH",G_SCALAR|G_DISCARD);
+	LEAVE;
 	SPAGAIN;
-	RETURN;
     }
-
-    /* Why no pre-extend of ary here ? */
-    for (++MARK; MARK <= SP; MARK++) {
-	sv = NEWSV(51, 0);
-	if (*MARK)
-	    sv_setsv(sv, *MARK);
-	av_push(ary, sv);
+    else {
+	/* Why no pre-extend of ary here ? */
+	for (++MARK; MARK <= SP; MARK++) {
+	    sv = NEWSV(51, 0);
+	    if (*MARK)
+		sv_setsv(sv, *MARK);
+	    av_push(ary, sv);
+	}
     }
     SP = ORIGMARK;
     PUSHi( AvFILL(ary) + 1 );
@@ -2708,20 +2712,23 @@ PP(pp_unshift)
     register I32 i = 0;
     MAGIC *mg;
 
-    if (SvRMAGICAL(ary) && (mg = mg_find((SV*)ary,'P'))) {
+    if (SvRMAGICAL(ary) && (mg = mg_find((SV*)ary,'P'))) {            
+
+
 	*MARK-- = mg->mg_obj;
-	PUSHMARK(MARK);
 	PUTBACK;
-	perl_call_method("UNSHIFT",GIMME_V);
+	ENTER;
+	perl_call_method("UNSHIFT",G_SCALAR|G_DISCARD);
+	LEAVE;
 	SPAGAIN;
-	RETURN;
     }
-    
-    av_unshift(ary, SP - MARK);
-    while (MARK < SP) {
-	sv = NEWSV(27, 0);
-	sv_setsv(sv, *++MARK);
-	(void)av_store(ary, i++, sv);
+    else {
+	av_unshift(ary, SP - MARK);
+	while (MARK < SP) {
+	    sv = NEWSV(27, 0);
+	    sv_setsv(sv, *++MARK);
+	    (void)av_store(ary, i++, sv);
+	}
     }
     SP = ORIGMARK;
     PUSHi( AvFILL(ary) + 1 );

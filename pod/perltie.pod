@@ -180,17 +180,26 @@ TIESCALAR classes are certainly possible.
 =head2 Tying Arrays
 
 A class implementing a tied ordinary array should define the following
-methods: TIEARRAY, FETCH, STORE, and perhaps DESTROY.
+methods: TIEARRAY, FETCH, STORE, FETCHSIZE, STORESIZE and perhaps DESTROY. 
 
-B<WARNING>: Tied arrays are I<incomplete>.  They are also distinctly lacking
-something for the C<$#ARRAY> access (which is hard, as it's an lvalue), as
-well as the other obvious array functions, like push(), pop(), shift(),
-unshift(), and splice().
+FETCHSIZE and STORESIZE are used to provide C<$#array> and
+equivalent C<scalar(@array)> access.
+    
+The methods POP, PUSH, SHIFT, UNSHIFT, SPLICE are required if the perl
+operator with the corresponding (but lowercase) name is to operate on the
+tied array. The B<Tie::Array> class can be used as a base class to implement
+these in terms of the basic five methods above.  
+
+In addition EXTEND will be called when perl would have pre-extended 
+allocation in a real array.
+
+This means that tied arrays are now I<complete>. The example below needs
+upgrading to illustrate this. (The documentation in B<Tie::Array> is more
+complete.)
 
 For this discussion, we'll implement an array whose indices are fixed at
 its creation.  If you try to access anything beyond those bounds, you'll
-take an exception.  (Well, if you access an individual element; an
-aggregate assignment would be missed.) For example:
+take an exception.  For example:
 
     require Bounded_Array;
     tie @ary, 'Bounded_Array', 2;

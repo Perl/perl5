@@ -47,6 +47,5 @@ struct xpvav {
 #define AvREALISH(av)	(AvFLAGS(av) & (AVf_REAL|AVf_REIFY))
                                           
 #define AvFILL(av)	((SvRMAGICAL((SV *) (av))) \
-			    ? mg_size((SV *) av) \
-			    : AvFILLp(av))
+			  ? mg_size((SV *) av) : AvFILLp(av))
 
