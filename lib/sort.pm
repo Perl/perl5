@@ -22,6 +22,7 @@ sub import {
     }
     $^H |= $sort::hint_bits;
     local $_;
+    no warnings 'uninitialized';	# $^H{SORT} bitops would warn
     while ($_ = shift(@_)) {
 	if (/^q(?:uick)?sort$/) {
 	    $^H{SORT} &= ~$sort::sort_bits;
@@ -74,7 +75,7 @@ sort - perl pragma to control sort() behaviour
 
     use sort 'qsort';		# alias for quicksort
 
-    # alias for mergesort: insenstive and stable
+    # alias for mergesort: insensitive and stable
     use sort 'safe';		
 
     # alias for raw quicksort: sensitive and nonstable
