@@ -1,3 +1,25 @@
+Changes in version 2.34
+-----------------------
+
+* Auto-vivification of array and hash refs
+
+  If an option is specified to require an array or hash ref, and a
+  scalar reference is passed, this is auto-vivified to array or hash
+  ref. 
+
+  Example:
+
+	@ARGV = qw(--foo=xx);
+	GetOptions("foo=s@", \$var);
+	# Now $var->[0] eq "xx"
+
+* Auto-supplied verbose and help options are no longer taken into
+  account when determining option ambiguity. This eliminates the
+  common problem that you suddenly get an ambiguous option warning
+  when you have an option "verbose" and run your program with "-v".
+
+* Cosmetic changes in some error messages.
+
 Changes in version 2.33
 -----------------------
 
@@ -78,9 +100,9 @@ Changes in version 2.31
 -----------------------
 
 * Fix a bug where calling the configure method on a
-Getopt::Long::Parser object would bail out with 
-Undefined subroutine &Getopt::Long::Parser::Configure called at
-Getopt/Long.pm line 186.
+  Getopt::Long::Parser object would bail out with 
+  Undefined subroutine &Getopt::Long::Parser::Configure called at
+  Getopt/Long.pm line 186.
 
 Changes in version 2.30
 -----------------------
