@@ -365,6 +365,11 @@ exact version of Perl, so better not to overwrite it.
 One can now specify installation directories for site and vendor man
 and HTML pages, and site and vendor scripts.  See F<INSTALL>.
 
+One can now specify a destination directory for Perl installation
+by specifying the DESTDIR variable for C<make install>.  (This feature
+is slightly different from the previous C<Configure -Dinstallprefix=...>.)
+See F<INSTALL>.
+
 gcc versions 3.x introduced a new warning that caused a lot of noise
 during Perl compilation: C<gcc -Ialreadyknowndirectory (warning:
 changing search order)>.  This warning has now been avoided by
