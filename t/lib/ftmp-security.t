@@ -9,7 +9,7 @@ BEGIN {
 	chdir 't' if -d 't';
 	@INC = '../lib';
 	require Test; import Test;
-	plan(tests => 12);
+	plan(tests => 13);
 }
 
 use strict;
@@ -103,10 +103,12 @@ sub test_security {
 
   # Explicitly 
 # Disabled temporarily since people seem to have funky owner/permissions setups
-# (if and when re-enabling this, remember to bump the number of tests, too)
 # --jhi 2000-08-29
 #  my ($fh2, $fname2) = tempfile ($template,  UNLINK => 1 );
-#  ok( (-e $fname2) );
+  my($fname2) = "foobar$$";
+  my $fh2;
+  open($fh2, ">$fname2") || warn "$0: failed to create '$fname2': $!\n";
+  ok( (-e $fname2) );
   close($fh2);
 
   # Store filenames for the end block
