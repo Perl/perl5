@@ -171,6 +171,7 @@ FindBin
 GDBM_File
 Getopt::Long
 Getopt::Std
+I18N::Langinfo
 I18N::LangTags
 I18N::Collate
 IO::Dir
@@ -247,6 +248,7 @@ Time::Piece
 Time::gmtime
 Time::localtime
 Time::tm
+Unicode::UCD
 UNIVERSAL
 User::grent
 User::pwent
