@@ -3324,6 +3324,10 @@ S_init_perllib(pTHX)
     incpush(PERL_VENDORLIB_STEM, FALSE, TRUE);
 #endif
 
+#ifdef PERL_OTHERLIBDIRS
+    incpush(PERL_OTHERLIBDIRS, TRUE, TRUE);
+#endif
+
     if (!PL_tainting)
 	incpush(".", FALSE, FALSE);
 }

@@ -497,9 +497,9 @@ network.  One way to do that would be something like
 
 As a final catch-all, Configure also offers an $otherlibdirs
 variable.  This variable contains a colon-separated list of additional
-directories to add to @INC.  By default, it will be set to
-$prefix/site_perl if Configure detects that you have 5.004-era modules
-installed there.  However, you can set it to anything you like.
+directories to add to @INC.  By default, it will be empty.
+Perl will search these directories (including architecture and
+version-specific subdirectories) for add-on modules and extensions.
 
 =item Man Pages
 

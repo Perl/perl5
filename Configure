@@ -779,6 +779,8 @@ hostcat=''
 passcat=''
 orderlib=''
 ranlib=''
+d_perl_otherlibdirs=''
+otherlibdirs=''
 package=''
 spackage=''
 pager=''
@@ -5369,6 +5371,41 @@ if $test X"$prefix" != X"$installprefix"; then
 else
 	installvendorarch="$vendorarchexp"
 fi
+
+: Final catch-all directories to search
+$cat <<EOM
+
+Lastly, you can have perl look in other directories for extensions and
+modules in addition to those already specified.
+These directories will be searched after 
+	$sitearch 
+	$sitelib 
+EOM
+test X"$vendorlib" != "X" && echo '	' $vendorlib
+test X"$vendorarch" != "X" && echo '	' $vendorarch
+echo ' '
+case "$otherlibdirs" in
+''|' ') dflt='none' ;;
+*)	dflt="$otherlibdirs" ;;
+esac
+$cat <<EOM
+Enter a colon-separated set of extra paths to include in perl's @INC
+search path, or enter 'none' for no extra paths.
+
+EOM
+
+rp='Colon-separated list of additional directories for perl to search?'
+. ./myread
+case "$ans" in
+' '|''|none)	otherlibdirs=' ' ;;     
+*)	otherlibdirs="$ans" ;;
+esac
+case "$otherlibdirs" in
+' ') val=$undef ;;
+*)	val=$define ;;
+esac
+set d_perl_otherlibdirs
+eval $setvar
 
 : Cruising for prototypes
 echo " "
@@ -15303,6 +15340,7 @@ d_oldsock='$d_oldsock'
 d_open3='$d_open3'
 d_pathconf='$d_pathconf'
 d_pause='$d_pause'
+d_perl_otherlibdirs='$d_perl_otherlibdirs'
 d_phostname='$d_phostname'
 d_pipe='$d_pipe'
 d_poll='$d_poll'
@@ -15661,6 +15699,7 @@ optimize='$optimize'
 orderlib='$orderlib'
 osname='$osname'
 osvers='$osvers'
+otherlibdirs='$otherlibdirs'
 package='$package'
 pager='$pager'
 passcat='$passcat'
