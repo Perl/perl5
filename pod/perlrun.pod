@@ -853,6 +853,48 @@ was running setuid or setgid, or the B<-T> switch was used), this
 variable is ignored.  If PERL5OPT begins with B<-T>, tainting will be
 enabled, and any subsequent options ignored.
 
+=item PERLIO
+
+A space-separated list of PerlIO layers.
+
+=over 8
+
+=item :bytes
+
+XXX
+
+=item :crlf
+
+XXX
+
+=item mmap
+
+XXX
+
+=item perlio
+
+XXX
+
+=item raw
+
+XXX
+
+=item stdio
+
+XXX
+
+=item unix
+
+XXX
+
+=item :utf8
+
+XXX
+
+=back
+
+For example, XXX ... for Unicode XXXX ... for Win32 XXX
+
 =item PERLLIB
 
 A colon-separated list of directories in which to look for Perl library
