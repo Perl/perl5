@@ -26,6 +26,10 @@ if (socket(T,PF_INET,SOCK_STREAM,6)) {
 
 	syswrite(T,"hello",5);
 	$read = sysread(T,$buff,10);	# Connection may be granted, then closed!
+	while ($read > 0 && length($buff) < 5) {
+	    # adjust for fact that TCP doesn't guarantee size of reads/writes
+	    $read = sysread(T,$buff,10,length($buff));
+	}
 	print(($read == 0 || $buff eq "hello") ? "ok 3\n" : "not ok 3\n");
   }
   else {
@@ -52,6 +56,10 @@ if( socket(S,PF_INET,SOCK_STREAM,6) ){
 
 	syswrite(S,"olleh",5);
 	$read = sysread(S,$buff,10);	# Connection may be granted, then closed!
+	while ($read > 0 && length($buff) < 5) {
+	    # adjust for fact that TCP doesn't guarantee size of reads/writes
+	    $read = sysread(S,$buff,10,length($buff));
+	}
 	print(($read == 0 || $buff eq "olleh") ? "ok 6\n" : "not ok 6\n");
   }
   else {
