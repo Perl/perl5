@@ -50,7 +50,7 @@ EXPECT
 Unrecognized escape \m passed through before HERE mark in regex m/a\m << HERE / at - line 4.
 ########
 # regcomp.c [S_regpposixcc S_checkposixcc]
-BEGIN { $ENV{PERL_DESTRUCT_LEVEL} = 0 unless $ENV{PERL_DESTRUCT_LEVEL} > 3 }
+#
 use warnings 'regexp' ;
 $_ = "" ;
 /[:alpha:]/;
@@ -66,7 +66,7 @@ POSIX syntax [: :] belongs inside character classes before HERE mark in regex m/
 POSIX class [:zog:] unknown before HERE mark in regex m/[[:zog:] << HERE ]/
 ########
 # regcomp.c [S_checkposixcc]
-BEGIN { $ENV{PERL_DESTRUCT_LEVEL} = 0 unless $ENV{PERL_DESTRUCT_LEVEL} > 3 }
+#
 use warnings 'regexp' ;
 $_ = "" ;
 /[.zog.]/;
@@ -77,7 +77,7 @@ POSIX syntax [. .] belongs inside character classes before HERE mark in regex m/
 POSIX syntax [. .] is reserved for future extensions before HERE mark in regex m/[.zog.] << HERE /
 ########
 # regcomp.c [S_checkposixcc]
-BEGIN { $ENV{PERL_DESTRUCT_LEVEL} = 0 unless $ENV{PERL_DESTRUCT_LEVEL} > 3 }
+#
 use warnings 'regexp' ;
 $_ = "" ;
 /[[.zog.]]/;
