@@ -4,18 +4,28 @@ use Carp;
 
 sub import {
     my ($class, $backend, @options) = @_;
-    eval "use B::$backend ()";
-    if ($@) {
-	croak "use of backend $backend failed: $@";
-    }
-    my $compilesub = &{"B::${backend}::compile"}(@options);
-    if (ref($compilesub) eq "CODE") {
-	minus_c;
-	save_BEGINs;
-	eval 'CHECK { &$compilesub() }';
-    } else {
-	die $compilesub;
-    }
+    eval q[
+	BEGIN {
+	    minus_c;
+	    save_BEGINs;
+	}
+
+	CHECK {
+	    use B::].$backend.q[ ();
+	    if ($@) {
+		croak "use of backend $backend failed: $@";
+	    }
+
+
+	    my $compilesub = &{"B::${backend}::compile"}(@options);
+	    if (ref($compilesub) ne "CODE") {
+		die $compilesub;
+	    }
+
+	    &$compilesub();
+	}
+    ];
+    die $@ if $@;
 }
 
 1;

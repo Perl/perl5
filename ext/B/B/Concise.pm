@@ -283,7 +283,7 @@ $priv{$_}{16} = "TARGMY"
        "link", "symlink", "mkdir", "rmdir", "wait", "waitpid", "system",
        "exec", "kill", "getppid", "getpgrp", "setpgrp", "getpriority",
        "setpriority", "time", "sleep");
-@{$priv{"const"}}{8,16,32,64,128} = ("STRICT","ENTERED", "$[", "BARE", "WARN");
+@{$priv{"const"}}{8,16,32,64,128} = ("STRICT","ENTERED", '$[', "BARE", "WARN");
 $priv{"flip"}{64} = $priv{"flop"}{64} = "LINENUM";
 $priv{"list"}{64} = "GUESSED";
 $priv{"delete"}{64} = "SLICE";
@@ -339,7 +339,16 @@ sub concise_op {
     $h{svclass} = $h{svaddr} = $h{svval} = "";
     if ($h{class} eq "PMOP") {
 	my $precomp = $op->precomp;
-	$precomp = defined($precomp) ? "/$precomp/" : "";
+	if (defined $precomp) {
+	    # Escape literal control sequences
+	    for ($precomp) {
+		s/\t/\\t/g; s/\n/\\n/g; s/\r/\\r/g;
+		# How can we do the below portably?
+		#s/([\0-\037\177-\377])/"\\".sprintf("%03o", ord($1))/eg;
+	    }
+	    $precomp = "/$precomp/";
+	}
+	else { $precomp = ""; }
 	my $pmreplroot = $op->pmreplroot;
 	my ($pmreplroot, $pmreplstart);
 	if ($ {$pmreplroot = $op->pmreplroot} && $pmreplroot->isa("B::GV")) {

@@ -66,7 +66,12 @@ sub B::GV::SAFENAME {
   # The regex below corresponds to the isCONTROLVAR macro
   # from toke.c
 
-  $name =~ s/^([\cA-\cZ\c\\c[\c]\c?\c_\c^])/"^".chr(64 ^ ord($1))/e;
+  $name =~ s/^([\cA-\cZ\c\\c[\c]\c?\c_\c^])/"^".
+	chr( utf8::unicode_to_native( 64 ^ ord($1) ))/e;
+
+  # When we say unicode_to_native we really mean ascii_to_native,
+  # which matters iff this is a non-ASCII platform (EBCDIC).
+
   return $name;
 }
 
