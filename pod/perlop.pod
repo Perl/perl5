@@ -186,6 +186,11 @@ C<$a>.  If C<$b> is negative, then C<$a % $b> is C<$a> minus the
 smallest multiple of C<$b> that is not less than C<$a> (i.e. the
 result will be less than or equal to zero).
 
+Note than when C<use integer> is in scope "%" give you direct access
+to the modulus operator as implemented by your C compiler.  This
+operator is not as well defined for negative operands, but it will
+execute faster.
+
 Binary "x" is the repetition operator.  In a scalar context, it
 returns a string consisting of the left operand repeated the number of
 times specified by the right operand.  In a list context, if the left
@@ -569,7 +574,7 @@ the same character fore and aft, but the 4 sorts of brackets
 
 Note that there can be whitespace between the operator and the quoting
 characters, except when C<#> is being used as the quoting character.
-C<q#foo#> is parsed as being the string C<foo>, which C<q #foo#> is the
+C<q#foo#> is parsed as being the string C<foo>, while C<q #foo#> is the
 operator C<q> followed by a comment. Its argument will be taken from the
 next line. This allows you to write:
 
@@ -599,7 +604,7 @@ a transliteration, the first ten of these sequences may be used.
     \Q		quote regexp metacharacters till \E
 
 If C<use locale> is in effect, the case map used by C<\l>, C<\L>, C<\u>
-and <\U> is taken from the current locale.  See L<perllocale>.
+and C<\U> is taken from the current locale.  See L<perllocale>.
 
 Patterns are subject to an additional level of interpretation as a
 regular expression.  This is done as a second pass, after variables are
@@ -651,6 +656,7 @@ Options are:
     m	Treat string as multiple lines.
     o	Compile pattern only once.
     s	Treat string as single line.
+    t	Taint $1 etc. if target string is tainted.
     x	Use extended regular expressions.
 
 If "/" is the delimiter then the initial C<m> is optional.  With the C<m>
@@ -670,7 +676,7 @@ C</o> constitutes a promise that you won't change the variables in the pattern.
 If you change them, Perl won't even notice.
 
 If the PATTERN evaluates to a null string, the last
-successfully executed regular expression is used instead.
+successfully matched regular expression is used instead.
 
 If used in a context that requires a list value, a pattern match returns a
 list consisting of the subexpressions matched by the parentheses in the
@@ -897,7 +903,7 @@ text is not evaluated as a command.  If the
 PATTERN is delimited by bracketing quotes, the REPLACEMENT has its own
 pair of quotes, which may or may not be bracketing quotes, e.g.,
 C<s(foo)(bar)> or C<sE<lt>fooE<gt>/bar/>.  A C</e> will cause the
-replacement portion to be interpreter as a full-fledged Perl expression
+replacement portion to be interpreted as a full-fledged Perl expression
 and eval()ed right then and there.  It is, however, syntax checked at
 compile-time.
 
@@ -1031,7 +1037,7 @@ an eval():
 =head2 I/O Operators
 
 There are several I/O operators you should know about.
-A string is enclosed by backticks (grave accents) first undergoes
+A string enclosed by backticks (grave accents) first undergoes
 variable substitution just like a double quoted string.  It is then
 interpreted as a command, and the output of that command is the value
 of the pseudo-literal, like in a shell.  In a scalar context, a single
@@ -1073,6 +1079,15 @@ lines are equivalent to each other:
 and this also behaves similarly, but avoids the use of $_ :
 
     while (my $line = <STDIN>) { print $line }    
+
+If you really mean such values to terminate the loop they should be 
+tested for explcitly:
+
+    while (($_ = <STDIN>) ne '0') { ... }
+    while (<STDIN>) { last unless $_; ... }
+
+In other boolean contexts C<E<lt>I<filehandle>E<gt>> without explcit C<defined>
+test or comparison will solicit a warning if C<-w> is in effect.
 
 If you really mean such values to terminate the loop they should be 
 tested for explcitly:

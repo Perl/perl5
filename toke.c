@@ -766,6 +766,12 @@ sublex_done(void)
   processing a pattern (lex_inpat is true), a transliteration
   (lex_inwhat & OP_TRANS is true), or a double-quoted string.
 
+  Returns a pointer to the character scanned up to. Iff this is
+  advanced from the start pointer supplied (ie if anything was
+  successfully parsed), will leave an OP for the substring scanned
+  in yylval. Caller must intuit reason for not parsing further
+  by looking at the next characters herself.
+
   In patterns:
     backslashes:
       double-quoted style: \r and \n
@@ -833,17 +839,11 @@ scan_const(char *start)
     bool dorange = FALSE;			/* are we in a translit range? */
     I32 len;					/* ? */
 
-    /*
-      leave is the set of acceptably-backslashed characters.
-
-      I do *not* understand why there's the double hook here.
-    */
+    /* leaveit is the set of acceptably-backslashed characters */
     char *leaveit =
 	lex_inpat
 	    ? "\\.^$@AGZdDwWsSbB+*?|()-nrtfeaxc0123456789[{]} \t\n\r\f\v#"
-	    : (lex_inwhat & OP_TRANS)
-		? ""
-		: "";
+	    : "";
 
     while (s < send || dorange) {
         /* get transliterations out of the way (they're most literal) */
@@ -1030,7 +1030,7 @@ scan_const(char *start)
 	Renew(SvPVX(sv), SvLEN(sv), char);
     }
 
-    /* ??? */
+    /* return the substring (via yylval) only if we parsed anything */
     if (s > bufptr)
 	yylval.opval = (OP*)newSVOP(OP_CONST, 0, sv);
     else
@@ -4856,6 +4856,8 @@ void pmflag(U16 *pmfl, int ch)
 	*pmfl |= PMf_MULTILINE;
     else if (ch == 's')
 	*pmfl |= PMf_SINGLELINE;
+    else if (ch == 't')
+	*pmfl |= PMf_TAINTMEM;
     else if (ch == 'x')
 	*pmfl |= PMf_EXTENDED;
 }
@@ -4877,7 +4879,7 @@ scan_pat(char *start)
     pm = (PMOP*)newPMOP(OP_MATCH, 0);
     if (multi_open == '?')
 	pm->op_pmflags |= PMf_ONCE;
-    while (*s && strchr("iogcmsx", *s))
+    while (*s && strchr("iogcmstx", *s))
 	pmflag(&pm->op_pmflags,*s++);
     pm->op_pmpermflags = pm->op_pmflags;
 
@@ -4922,13 +4924,15 @@ scan_subst(char *start)
     multi_start = first_start;	/* so whole substitution is taken together */
 
     pm = (PMOP*)newPMOP(OP_SUBST, 0);
-    while (*s && strchr("iogcmsex", *s)) {
+    while (*s) {
 	if (*s == 'e') {
 	    s++;
 	    es++;
 	}
-	else
+	else if (strchr("iogcmstx", *s))
 	    pmflag(&pm->op_pmflags,*s++);
+	else
+	    break;
     }
 
     if (es) {

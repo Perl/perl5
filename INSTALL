@@ -125,7 +125,7 @@ L<"Site-wide Policy settings"> below.
 Configure will figure out various things about your system.  Some
 things Configure will figure out for itself, other things it will ask
 you about.  To accept the default, just press RETURN.   The default
-is almost always ok.  At any Configure prompt, you can type  &-d
+is almost always okay.  At any Configure prompt, you can type  &-d
 and Configure will use the defaults from then on.
 
 After it runs, Configure will perform variable substitution on all the
@@ -161,6 +161,22 @@ then Configure will suggest /opt/perl/lib instead of
 NOTE:  You must not specify an installation directory that is below
 your perl source directory.  If you do, installperl will attempt
 infinite recursion.
+
+It may seem obvious to say, but Perl is useful only when users can
+easily find it. When possible, it's good for both /usr/bin/perl and
+/usr/local/bin/perl to be symlinks to the actual binary. If that can't
+be done, system administrators are strongly encouraged to put
+(symlinks to) perl and its accompanying utilities, such as perldoc,
+into a directory typically found along a user's PATH, or in another
+obvious and convenient place.
+
+It may seem obvious to say, but Perl is useful only when users can
+easily find it. When possible, it's good for both /usr/bin/perl and
+/usr/local/bin/perl to be symlinks to the actual binary. If that can't
+be done, system administrators are strongly encouraged to put
+(symlinks to) perl and its accompanying utilities, such as perldoc,
+into a directory typically found along a user's PATH, or in another
+obvious and convenient place.
 
 By default, Configure will compile perl to use dynamic loading if
 your system supports it.  If you want to force perl to be compiled
@@ -499,6 +515,14 @@ system.  For most users, the defaults are sensible and will work.
 Some users, however, may wish to further customize perl.  Here are
 some of the main things you can change.
 
+=head2 Installing perl under different names
+
+If you want to install perl under a name other than "perl" (for example,
+when installing perl with special features enabled, such as debugging),
+indicate the alternate name on the "make install" line, such as:
+
+    make install PERLNAME=myperl
+
 =head2 Threads
 
 On some platforms, perl5.005 can be compiled to use threads.  To
@@ -751,7 +775,7 @@ you probably want to do
 This will do two independent things:  First, it will force compilation
 to use cc -g so that you can use your system's debugger on the
 executable.  (Note:  Your system may actually require something like
-cc -g2.  Check you man pages for cc(1) and also any hint file for your
+cc -g2.  Check your man pages for cc(1) and also any hint file for your
 system.)  Second, it will add -DDEBUGGING to your ccflags variable in
 config.sh so that you can use B<perl -D> to access perl's internal
 state.  (Note: Configure will only add -DDEBUGGING by
@@ -1217,6 +1241,8 @@ Note that you can't run the tests in background if this disables
 opening of /dev/tty. You can use 'make test-notty' in that case but
 a few tty tests will be skipped.
 
+=head2 What if make test doesn't work?
+
 If make test bombs out, just cd to the t directory and run ./TEST
 by hand to see if it makes any difference.  If individual tests
 bomb, you can run them by hand, e.g.,
@@ -1233,6 +1259,10 @@ complicated constructs).
 
 You should also read the individual tests to see if there are any helpful
 comments that apply to your system.
+
+=over 4
+
+=item locale
 
 Note:  One possible reason for errors is that some external programs
 may be broken due to the combination of your environment and the way
@@ -1256,6 +1286,29 @@ shown above and see whether you can locate the program.  Look for
 things like:  exec, `backquoted command`, system, open("|...") or
 open("...|").  All these mean that Perl is trying to run some
 external program.
+
+=item Out of memory
+
+On some systems, particularly those with smaller amounts of RAM, some
+of the tests in t/op/pat.t may fail with an "Out of memory" message.
+Specifically, in perl5.004_64, tests 74 and 78 have been reported to
+fail on some systems.  On my SparcStation IPC with 8 MB of RAM, test 78
+will fail if the system is running any other significant tasks at the
+same time.
+
+Try stopping other jobs on the system and then running the test by itself:
+
+	cd t; ./perl op/pat.t
+
+to see if you have any better luck.  If your perl still fails this
+test, it does not necessarily mean you have a broken perl.  This test
+tries to exercise the regular expression subsystem quite thoroughly,
+and may well be far more demanding than your normal usage.
+
+You may also be able to reduce perl's memory usage by using some of
+the ideas described above in L<"Malloc Performance Flags">.
+
+=back
 
 =head1 make install
 
@@ -1535,4 +1588,4 @@ above.
 
 =head1 LAST MODIFIED
 
-$Id: INSTALL,v 1.32 1998/03/20 19:20:08 doughera Released $
+$Id: INSTALL,v 1.34 1998/04/23 18:19:41 doughera Released $

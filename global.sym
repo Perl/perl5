@@ -24,6 +24,7 @@ dec_amg
 di
 div_amg
 div_ass_amg
+do_binmode
 ds
 eq_amg
 exp_amg
@@ -308,6 +309,7 @@ fetch_io
 filter_add
 filter_del
 filter_read
+find_script
 find_threadsv
 fold_constants
 force_ident
@@ -387,11 +389,14 @@ magic_get
 magic_getarylen
 magic_getdefelem
 magic_getglob
+magic_getnkeys
 magic_getpack
 magic_getpos
 magic_getsig
+magic_getsubstr
 magic_gettaint
 magic_getuvar
+magic_getvec
 magic_len
 magic_mutexfree
 magic_nextpack

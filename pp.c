@@ -46,7 +46,7 @@ typedef unsigned UBW;
  * have an integral type (except char) small enough to be represented
  * in a double without loss; that is, it has no 32-bit type.
  */
-#if BYTEORDER > 0xFFFF && defined(_CRAY) && !defined(_CRAYMPP)
+#if LONGSIZE > 4  && defined(_CRAY) && !defined(_CRAYMPP)
 #  define BW_BITS  32
 #  define BW_MASK  ((1 << BW_BITS) - 1)
 #  define BW_SIGN  (1 << (BW_BITS - 1))
@@ -322,7 +322,11 @@ PP(pp_pos)
 	}
 
 	LvTYPE(TARG) = '.';
-	LvTARG(TARG) = sv;
+	if (LvTARG(TARG) != sv) {
+	    if (LvTARG(TARG))
+		SvREFCNT_dec(LvTARG(TARG));
+	    LvTARG(TARG) = SvREFCNT_inc(sv);
+	}
 	PUSHs(TARG);	/* no SvSETMAGIC */
 	RETURN;
     }
@@ -507,8 +511,14 @@ PP(pp_bless)
 
     if (MAXARG == 1)
 	stash = curcop->cop_stash;
-    else
-	stash = gv_stashsv(POPs, TRUE);
+    else {
+	SV *ssv = POPs;
+	STRLEN len;
+	char *ptr = SvPV(ssv,len);
+	if (dowarn && len == 0)
+	    warn("Explicit blessing to '' (assuming package main)");
+	stash = gv_stashpvn(ptr, len, TRUE);
+    }
 
     (void)sv_bless(TOPs, stash);
     RETURN;
@@ -774,7 +784,17 @@ PP(pp_undef)
 	break;
     case SVt_PVGV:
 	if (SvFAKE(sv))
-	    sv_setsv(sv, &sv_undef);
+	    SvSetMagicSV(sv, &sv_undef);
+	else {
+	    GP *gp;
+	    gp_free((GV*)sv);
+	    Newz(602, gp, 1, GP);
+	    GvGP(sv) = gp_ref(gp);
+	    GvSV(sv) = NEWSV(72,0);
+	    GvLINE(sv) = curcop->cop_line;
+	    GvEGV(sv) = (GV*)sv;
+	    GvMULTI_on(sv);
+	}
 	break;
     default:
 	if (SvTYPE(sv) >= SVt_PV && SvPVX(sv) && SvLEN(sv)) {
@@ -1773,6 +1793,7 @@ PP(pp_substr)
     djSP; dTARGET;
     SV *sv;
     I32 len;
+    I32 len_ok = 0;
     STRLEN curlen;
     I32 pos;
     I32 rem;
@@ -1780,9 +1801,25 @@ PP(pp_substr)
     I32 lvalue = op->op_flags & OPf_MOD;
     char *tmps;
     I32 arybase = curcop->cop_arybase;
+    char *repl = 0;
+    STRLEN repl_len;
 
-    if (MAXARG > 2)
+    SvTAINTED_off(TARG);			/* decontaminate */
+    if (MAXARG > 3) {
+	/* pop off replacement string */
+	sv = POPs;
+	repl = SvPV(sv, repl_len);
+	/* pop off length */
+	sv = POPs;
+	if (SvOK(sv)) {
+	    len = SvIV(sv);
+	    len_ok++;
+	}
+    } else if (MAXARG == 3) {
 	len = POPi;
+	len_ok++;
+    }  
+
     pos = POPi;
     sv = POPs;
     PUTBACK;
@@ -1791,7 +1828,7 @@ PP(pp_substr)
 	pos -= arybase;
 	rem = curlen-pos;
 	fail = rem;
-        if (MAXARG > 2) {
+        if (len_ok) {
             if (len < 0) {
 	        rem += len;
                 if (rem < 0)
@@ -1803,7 +1840,7 @@ PP(pp_substr)
     }
     else {
         pos += curlen;
-        if (MAXARG < 3)
+        if (!len_ok)
             rem = curlen;
         else if (len >= 0) {
             rem = pos+len;
@@ -1821,7 +1858,7 @@ PP(pp_substr)
         rem -= pos;
     }
     if (fail < 0) {
-	if (dowarn || lvalue)
+	if (dowarn || lvalue || repl)
 	    warn("substr outside of string");
 	RETPUSHUNDEF;
     }
@@ -1847,10 +1884,16 @@ PP(pp_substr)
 	    }
 
 	    LvTYPE(TARG) = 'x';
-	    LvTARG(TARG) = sv;
+	    if (LvTARG(TARG) != sv) {
+		if (LvTARG(TARG))
+		    SvREFCNT_dec(LvTARG(TARG));
+		LvTARG(TARG) = SvREFCNT_inc(sv);
+	    }
 	    LvTARGOFF(TARG) = pos;
 	    LvTARGLEN(TARG) = rem;
 	}
+        else if (repl)
+	    sv_insert(sv, pos, rem, repl, repl_len);
     }
     SPAGAIN;
     PUSHs(TARG);		/* avoid SvSETMAGIC here */
@@ -1869,6 +1912,7 @@ PP(pp_vec)
     unsigned long retnum;
     I32 len;
 
+    SvTAINTED_off(TARG);			/* decontaminate */
     offset *= size;		/* turn into bit offset */
     len = (offset + size + 7) / 8;
     if (offset < 0 || size < 1)
@@ -1881,7 +1925,11 @@ PP(pp_vec)
 	    }
 
 	    LvTYPE(TARG) = 'v';
-	    LvTARG(TARG) = src;
+	    if (LvTARG(TARG) != src) {
+		if (LvTARG(TARG))
+		    SvREFCNT_dec(LvTARG(TARG));
+		LvTARG(TARG) = SvREFCNT_inc(src);
+	    }
 	    LvTARGOFF(TARG) = offset;
 	    LvTARGLEN(TARG) = size;
 	}
@@ -3216,6 +3264,13 @@ PP(pp_unpack)
 		    Copy(s, &aint, 1, int);
 		    s += sizeof(int);
 		    sv = NEWSV(40, 0);
+#ifdef __osf__
+                    /* Without the dummy below unpack("i", pack("i",-1))
+                     * return 0xFFffFFff instead of -1 for Digital Unix V4.0
+                     * cc with optimization turned on */
+                    (aint) ?
+		    	sv_setiv(sv, (IV)aint) :
+#endif
 		    sv_setiv(sv, (IV)aint);
 		    PUSHs(sv_2mortal(sv));
 		}

@@ -166,3 +166,7 @@ after 5.004_03:
 
 after 5.004_53:
 	Minimal thread support added.  One needs to manually move pthread.h
+
+after 5.004_64:
+	Make DLL names different if thread-enabled.
+	Emit more informative internal DLL descriptions.

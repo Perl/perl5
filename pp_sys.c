@@ -464,7 +464,7 @@ PP(pp_umask)
     TAINT_PROPER("umask");
     XPUSHi(anum);
 #else
-    DIE(no_func, "Unsupported function umask");
+    XPUSHs(&sv_undef)
 #endif
     RETURN;
 }
@@ -485,40 +485,10 @@ PP(pp_binmode)
     if (!(io = GvIO(gv)) || !(fp = IoIFP(io)))
 	RETPUSHUNDEF;
 
-#ifdef DOSISH
-#ifdef atarist
-    if (!PerlIO_flush(fp) && (fp->_flag |= _IOBIN))
+    if (do_binmode(fp,IoTYPE(io),TRUE)) 
 	RETPUSHYES;
     else
 	RETPUSHUNDEF;
-#else
-    if (PerlLIO_setmode(PerlIO_fileno(fp), OP_BINARY) != -1) {
-#if defined(WIN32) && defined(__BORLANDC__)
-	/* The translation mode of the stream is maintained independent
-	 * of the translation mode of the fd in the Borland RTL (heavy
-	 * digging through their runtime sources reveal).  User has to
-	 * set the mode explicitly for the stream (though they don't
-	 * document this anywhere). GSAR 97-5-24
-	 */
-	PerlIO_seek(fp,0L,0);
-	fp->flags |= _F_BIN;
-#endif
-	RETPUSHYES;
-    }
-    else
-	RETPUSHUNDEF;
-#endif
-#else
-#if defined(USEMYBINMODE)
-    if (my_binmode(fp,IoTYPE(io)) != NULL)
-	RETPUSHYES;
-	else
-	RETPUSHUNDEF;
-#else
-    RETPUSHYES;
-#endif
-#endif
-
 }
 
 
@@ -2603,6 +2573,13 @@ PP(pp_chdir)
 	if (svp)
 	    tmps = SvPV(*svp, na);
     }
+#ifdef VMS
+    if (!tmps || !*tmps) {
+       svp = hv_fetch(GvHVn(envgv), "SYS$LOGIN", 9, FALSE);
+       if (svp)
+           tmps = SvPV(*svp, na);
+    }
+#endif
     TAINT_PROPER("chdir");
     PUSHi( PerlDir_chdir(tmps) >= 0 );
 #ifdef VMS
@@ -4124,41 +4101,55 @@ PP(pp_gpwent)
     if (pwent) {
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	sv_setpv(sv, pwent->pw_name);
+
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	sv_setpv(sv, pwent->pw_passwd);
+
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	sv_setiv(sv, (IV)pwent->pw_uid);
+
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	sv_setiv(sv, (IV)pwent->pw_gid);
+
+	/* pw_change, pw_quota, and pw_age are mutually exclusive. */
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 #ifdef PWCHANGE
 	sv_setiv(sv, (IV)pwent->pw_change);
 #else
-#ifdef PWQUOTA
+#   ifdef PWQUOTA
 	sv_setiv(sv, (IV)pwent->pw_quota);
-#else
-#ifdef PWAGE
+#   else
+#       ifdef PWAGE
 	sv_setpv(sv, pwent->pw_age);
+#       endif
+#   endif
 #endif
-#endif
-#endif
+
+	/* pw_class and pw_comment are mutually exclusive. */
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 #ifdef PWCLASS
 	sv_setpv(sv, pwent->pw_class);
 #else
-#ifdef PWCOMMENT
+#   ifdef PWCOMMENT
 	sv_setpv(sv, pwent->pw_comment);
+#   endif
 #endif
-#endif
+
 	PUSHs(sv = sv_mortalcopy(&sv_no));
+#ifdef PWGECOS
 	sv_setpv(sv, pwent->pw_gecos);
+#endif
 #ifndef INCOMPLETE_TAINTS
+	/* pw_gecos is tainted. */
 	SvTAINTED_on(sv);
 #endif
+
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	sv_setpv(sv, pwent->pw_dir);
+
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	sv_setpv(sv, pwent->pw_shell);
+
 #ifdef PWEXPIRE
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	sv_setiv(sv, (IV)pwent->pw_expire);

@@ -12,7 +12,7 @@ Do you want to:
 
 =item B<Use C from Perl?>
 
-Read L<perlcall> and L<perlxs>.
+Read L<perlxs>, L<perlxstut> and L<h2xs>.
 
 =item B<Use a Unix program from Perl?>
 
@@ -20,8 +20,7 @@ Read about back-quotes and about C<system> and C<exec> in L<perlfunc>.
 
 =item B<Use Perl from Perl?>
 
-Read about L<perlfunc/do> and L<perlfunc/eval> and L<perlfunc/require>
-and L<perlfunc/use>.
+Read about do(), eval(), require(), and use() in L<perlfunc>.
 
 =item B<Use C from C?>
 
@@ -35,27 +34,49 @@ Read on...
 
 =head2 ROADMAP
 
-L<Compiling your C program>
+Compiling your C program
 
 There's one example in each of the nine sections:
 
-L<Adding a Perl interpreter to your C program>
+=over 4
 
-L<Calling a Perl subroutine from your C program>
+=item *
 
-L<Evaluating a Perl statement from your C program>
+Adding a Perl interpreter to your C program
 
-L<Performing Perl pattern matches and substitutions from your C program>
+=item *
 
-L<Fiddling with the Perl stack from your C program>
+Calling a Perl subroutine from your C program
 
-L<Maintaining a persistent interpreter>
+=item *
 
-L<Maintaining multiple interpreter instances>
+Evaluating a Perl statement from your C program
 
-L<Using Perl modules, which themselves use C libraries, from your C program>
+=item *
 
-L<Embedding Perl under Win32>
+Performing Perl pattern matches and substitutions from your C program
+
+=item *
+
+Fiddling with the Perl stack from your C program
+
+=item *
+
+Maintaining a persistent interpreter
+
+=item *
+
+Maintaining multiple interpreter instances
+
+=item *
+
+Using Perl modules, which themselves use C libraries, from your C program
+
+=item *
+
+Embedding Perl under Win32
+
+=back
 
 =head2 Compiling your C program
 
@@ -96,7 +117,7 @@ Execute this statement for a hint about where to find CORE:
     perl -MConfig -e 'print $Config{archlib}'
 
 Here's how you'd compile the example in the next section,
-L<Adding a Perl interpreter to your C program>, on my Linux box:
+Adding a Perl interpreter to your C program, on my Linux box:
 
     % gcc -O2 -Dbool=char -DHAS_BOOL -I/usr/local/include
     -I/usr/local/lib/perl5/i586-linux/5.003/CORE
@@ -199,8 +220,8 @@ calling I<perl_run()>.
 =head2 Calling a Perl subroutine from your C program
 
 To call individual Perl subroutines, you can use any of the B<perl_call_*>
-functions documented in the L<perlcall> manpage.
-In this example we'll use I<perl_call_argv>.
+functions documented in L<perlcall>.
+In this example we'll use perl_call_argv().
 
 That's shown below, in a program I'll call I<showtime.c>.
 
@@ -257,21 +278,20 @@ If you want to pass arguments to the Perl subroutine, you can add
 strings to the C<NULL>-terminated C<args> list passed to
 I<perl_call_argv>.  For other data types, or to examine return values,
 you'll need to manipulate the Perl stack.  That's demonstrated in the
-last section of this document: L<Fiddling with the Perl stack from
-your C program>.
+last section of this document: Fiddling with the Perl stack from
+your C program.
 
 =head2 Evaluating a Perl statement from your C program
 
 Perl provides two API functions to evaluate pieces of Perl code.
-These are L<perlguts/perl_eval_sv()> and L<perlguts/perl_eval_pv()>.
+These are perl_eval_sv() and perl_eval_pv().
 
 Arguably, these are the only routines you'll ever need to execute
 snippets of Perl code from within your C program.  Your code can be
 as long as you wish; it can contain multiple statements; it can employ
-L<perlfunc/use>, L<perlfunc/require> and L<perlfunc/do> to include
-external Perl files.
+use(), require(), and do() to include external Perl files.
 
-I<perl_eval_pv()> lets us evaluate individual Perl strings, and then
+perl_eval_pv() lets us evaluate individual Perl strings, and then
 extract variables for coercion into C types.  The following program,
 I<string.c>, executes three Perl strings, extracting an C<int> from
 the first, a C<float> from the second, and a C<char *> from the third.
@@ -320,7 +340,7 @@ I<SvPV()> to create a string:
 In the example above, we've created a global variable to temporarily
 store the computed value of our eval'd expression.  It is also
 possible and in most cases a better strategy to fetch the return value
-from L<perl_eval_pv> instead.  Example:
+from perl_eval_pv() instead.  Example:
 
    ...
    SV *val = perl_eval_pv("reverse 'rekcaH lreP rehtonA tsuJ'", TRUE);
@@ -626,10 +646,10 @@ troubles.
 
 One way to avoid namespace collisions in this scenario is to translate
 the filename into a guaranteed-unique package name, and then compile
-the code into that package using L<perlfunc/eval>.  In the example
+the code into that package using eval().  In the example
 below, each file will only be compiled once.  Or, the application
 might choose to clean out the symbol table associated with the file
-after it's no longer needed.  Using L<perlcall/perl_call_argv>, We'll
+after it's no longer needed.  Using perl_call_argv(), We'll
 call the subroutine C<Embed::Persistent::eval_file> which lives in the
 file C<persistent.pl> and pass the filename and boolean cleanup/cache
 flag as arguments.
@@ -640,7 +660,7 @@ conditions that cause Perl's symbol table to grow.  You might want to
 add some logic that keeps track of the process size, or restarts
 itself after a certain number of requests, to ensure that memory
 consumption is minimized.  You'll also want to scope your variables
-with L<perlfunc/my> whenever possible.
+with my() whenever possible.
 
 
  package Embed::Persistent;

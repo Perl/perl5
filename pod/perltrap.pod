@@ -757,15 +757,11 @@ variable is localized subsequent to the assignment
     # perl4 prints: This is Perl 4
     # perl5 prints:
 
-    # Another example
+=item * (Globs)
 
-    *fred = *barney; # fred is aliased to barney
-    @barney = (1, 2, 4);
-    # @fred;
-    print "@fred";  # should print "1, 2, 4"
-
-    # perl4 prints: 1 2 4
-    # perl5 prints: In string, @fred now must be written as \@fred
+Assigning C<undef> to a glob has no effect in Perl 5.   In Perl 4
+it undefines the associated scalar (but may have other side effects
+including SEGVs).
 
 =item * (Scalar String)
 

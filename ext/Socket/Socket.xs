@@ -757,7 +757,10 @@ pack_sockaddr_un(pathname)
 	STRLEN len;
 	Zero( &sun_ad, sizeof sun_ad, char );
 	sun_ad.sun_family = AF_UNIX;
-	strncpy(sun_ad.sun_path, pathname, sizeof sun_ad.sun_path);
+	len = strlen(pathname);
+	if (len > sizeof(sun_ad.sun_path))
+	    len = sizeof(sun_ad.sun_path);
+	Copy( pathname, sun_ad.sun_path, len, char );
 	ST(0) = sv_2mortal(newSVpv((char *)&sun_ad, sizeof sun_ad));
 #else
 	ST(0) = (SV *) not_here("pack_sockaddr_un");

@@ -196,7 +196,7 @@ prime_env_iter(void)
 #  define CLI$M_TRUSTED 0x40  /* Missing from VAXC headers */
 #endif
   unsigned long int flags = CLI$M_NOWAIT | CLI$M_NOCLISYM | CLI$M_NOKEYPAD | CLI$M_TRUSTED;
-  unsigned long int retsts, substs = 0, wakect = 0;
+  unsigned long int i, retsts, substs = 0, wakect = 0;
   STRLEN eqvlen;
   SV *oldrs, *linesv, *eqvsv;
   $DESCRIPTOR(cmddsc,"Show Logical *"); $DESCRIPTOR(nldsc,"_NLA0:");
@@ -212,12 +212,18 @@ prime_env_iter(void)
   /* Perform a dummy fetch as an lval to insure that the hash table is
    * set up.  Otherwise, the hv_store() will turn into a nullop. */
   (void) hv_fetch(envhv,"DEFAULT",7,TRUE);
-  /* Also, set up the four "special" keys that the CRTL defines,
-   * whether or not underlying logical names exist. */
-  (void) hv_fetch(envhv,"HOME",4,TRUE);
-  (void) hv_fetch(envhv,"TERM",4,TRUE);
-  (void) hv_fetch(envhv,"PATH",4,TRUE);
-  (void) hv_fetch(envhv,"USER",4,TRUE);
+  /* Also, set up any "special" keys that the CRTL defines,
+   * either by itself or becasue we were called from a C program
+   * using exec[lv]e() */
+  for (i = 0; environ[i]; i++) { 
+    if (!(start = strchr(environ[i],'='))) {
+      warn("Ill-formed CRTL environ value \"%s\"\n",environ[i]);
+    }
+    else {
+      start++;
+      (void) hv_store(envhv,environ[i],start - environ[i] - 1,newSVpv(start,0),0);
+    }
+  }
 
   /* Now, go get the logical names */
   create_mbx(&chan,&mbxdsc);

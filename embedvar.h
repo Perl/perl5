@@ -45,6 +45,7 @@
 #define markstack		(curinterp->Tmarkstack)
 #define markstack_max		(curinterp->Tmarkstack_max)
 #define markstack_ptr		(curinterp->Tmarkstack_ptr)
+#define modcount		(curinterp->Tmodcount)
 #define nrs			(curinterp->Tnrs)
 #define ofs			(curinterp->Tofs)
 #define ofslen			(curinterp->Tofslen)
@@ -127,7 +128,6 @@
 #define incgv			(curinterp->Iincgv)
 #define initav			(curinterp->Iinitav)
 #define inplace			(curinterp->Iinplace)
-#define sys_intern		(curinterp->Isys_intern)
 #define lastfd			(curinterp->Ilastfd)
 #define lastscream		(curinterp->Ilastscream)
 #define lastsize		(curinterp->Ilastsize)
@@ -191,6 +191,7 @@
 #define sv_count		(curinterp->Isv_count)
 #define sv_objcount		(curinterp->Isv_objcount)
 #define sv_root			(curinterp->Isv_root)
+#define sys_intern		(curinterp->Isys_intern)
 #define tainting		(curinterp->Itainting)
 #define threadnum		(curinterp->Ithreadnum)
 #define thrsv			(curinterp->Ithrsv)
@@ -247,7 +248,6 @@
 #define Iincgv			incgv
 #define Iinitav			initav
 #define Iinplace		inplace
-#define Isys_intern		sys_intern
 #define Ilastfd			lastfd
 #define Ilastscream		lastscream
 #define Ilastsize		lastsize
@@ -311,6 +311,7 @@
 #define Isv_count		sv_count
 #define Isv_objcount		sv_objcount
 #define Isv_root		sv_root
+#define Isys_intern		sys_intern
 #define Itainting		tainting
 #define Ithreadnum		threadnum
 #define Ithrsv			thrsv
@@ -344,6 +345,7 @@
 #define Tmarkstack		markstack
 #define Tmarkstack_max		markstack_max
 #define Tmarkstack_ptr		markstack_ptr
+#define Tmodcount		modcount
 #define Tnrs			nrs
 #define Tofs			ofs
 #define Tofslen			ofslen
@@ -428,7 +430,6 @@
 #define incgv			Perl_incgv
 #define initav			Perl_initav
 #define inplace			Perl_inplace
-#define sys_intern		Perl_sys_intern
 #define lastfd			Perl_lastfd
 #define lastscream		Perl_lastscream
 #define lastsize		Perl_lastsize
@@ -492,6 +493,7 @@
 #define sv_count		Perl_sv_count
 #define sv_objcount		Perl_sv_objcount
 #define sv_root			Perl_sv_root
+#define sys_intern		Perl_sys_intern
 #define tainting		Perl_tainting
 #define threadnum		Perl_threadnum
 #define thrsv			Perl_thrsv
@@ -525,6 +527,7 @@
 #define markstack		Perl_markstack
 #define markstack_max		Perl_markstack_max
 #define markstack_ptr		Perl_markstack_ptr
+#define modcount		Perl_modcount
 #define nrs			Perl_nrs
 #define ofs			Perl_ofs
 #define ofslen			Perl_ofslen
@@ -588,6 +591,7 @@
 #define markstack		(thr->Tmarkstack)
 #define markstack_max		(thr->Tmarkstack_max)
 #define markstack_ptr		(thr->Tmarkstack_ptr)
+#define modcount		(thr->Tmodcount)
 #define nrs			(thr->Tnrs)
 #define ofs			(thr->Tofs)
 #define ofslen			(thr->Tofslen)

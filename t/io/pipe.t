@@ -74,10 +74,11 @@ if ($^O eq 'VMS') {
     exit;
 }
 
-if ($Config{d_sfio} || $^O eq machten) {
+if ($Config{d_sfio} || $^O eq machten || $^O eq beos) {
     # Sfio doesn't report failure when closing a broken pipe
     # that has pending output.  Go figure.  MachTen doesn't either,
     # but won't write to broken pipes, so nothing's pending at close.
+    # BeOS will not write to broken pipes, either.
     print "ok 9\n";
 }
 else {

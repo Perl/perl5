@@ -90,6 +90,7 @@ OP*	die _((const char* pat,...));
 OP*	die_where _((char* message));
 void	dounwind _((I32 cxix));
 bool	do_aexec _((SV* really, SV** mark, SV** sp));
+int	do_binmode _((PerlIO *fp, int iotype, int flag));
 void    do_chop _((SV* asv, SV* sv));
 bool	do_close _((GV* gv, bool not_implicit));
 bool	do_eof _((GV* gv));
@@ -139,6 +140,7 @@ void	dump_packsubs _((HV* stash));
 void	dump_sub _((GV* gv));
 void	fbm_compile _((SV* sv, U32 flags));
 char*	fbm_instr _((unsigned char* big, unsigned char* bigend, SV* littlesv));
+char*	find_script _((char *scriptname, bool dosearch, char **search_ext, I32 flags));
 #ifdef USE_THREADS
 PADOFFSET	find_threadsv _((char *name));
 #endif
@@ -216,11 +218,14 @@ int	magic_get	_((SV* sv, MAGIC* mg));
 int	magic_getarylen	_((SV* sv, MAGIC* mg));
 int	magic_getdefelem _((SV* sv, MAGIC* mg));
 int	magic_getglob	_((SV* sv, MAGIC* mg));
+int	magic_getnkeys	_((SV* sv, MAGIC* mg));
 int	magic_getpack	_((SV* sv, MAGIC* mg));
 int	magic_getpos	_((SV* sv, MAGIC* mg));
 int	magic_getsig	_((SV* sv, MAGIC* mg));
+int	magic_getsubstr	_((SV* sv, MAGIC* mg));
 int	magic_gettaint	_((SV* sv, MAGIC* mg));
 int	magic_getuvar	_((SV* sv, MAGIC* mg));
+int	magic_getvec	_((SV* sv, MAGIC* mg));
 U32	magic_len	_((SV* sv, MAGIC* mg));
 #ifdef USE_THREADS
 int	magic_mutexfree	_((SV* sv, MAGIC* mg));
@@ -333,11 +338,7 @@ SV*	newRV _((SV* ref));
 #if !defined(__GNUC__) && (defined(CRIPPLED_CC) || defined(USE_THREADS))
 SV*	newRV_noinc _((SV *));
 #endif
-#ifdef LEAKTEST
-SV*	newSV _((I32 x, STRLEN len));
-#else
 SV*	newSV _((STRLEN len));
-#endif
 OP*	newSVREF _((OP* o));
 OP*	newSVOP _((I32 type, I32 flags, SV* sv));
 SV*	newSViv _((IV i));

@@ -178,7 +178,8 @@ $inhibit_exit = $option{PrintRet} = 1;
 		  globPrint PrintRet UsageOnly frame AutoTrace
 		  TTY noTTY ReadLine NonStop LineInfo maxTraceLen
 		  recallCommand ShellBang pager tkRunning ornaments
-		  signalLevel warnLevel dieLevel inhibit_exit);
+		  signalLevel warnLevel dieLevel inhibit_exit
+		  ImmediateStop);
 
 %optionVars    = (
 		 hashDepth	=> \$dumpvar::hashDepth,
@@ -194,6 +195,7 @@ $inhibit_exit = $option{PrintRet} = 1;
 		 AutoTrace      => \$trace,
 		 inhibit_exit   => \$inhibit_exit,
 		 maxTraceLen	=> \$maxtrace,
+		 ImmediateStop	=> \$ImmediateStop,
 );
 
 %optionAction  = (
@@ -363,6 +365,9 @@ sub DB {
 	}
 	$single = 0;
 	# return;			# Would not print trace!
+      } elsif ($ImmediateStop) {
+	$ImmediateStop = 0;
+	$signal = 1;
       }
     }
     $runnonstop = 0 if $single or $signal; # Disable it if interactive.
@@ -1255,6 +1260,10 @@ sub postponed_sub {
 }
 
 sub postponed {
+  if ($ImmediateStop) {
+    $ImmediateStop = 0;
+    $signal = 1;
+  }
   return &postponed_sub
     unless ref \$_[0] eq 'GLOB'; # A subroutine is compiled.
   # Cannot be done before the file is compiled
@@ -1795,6 +1804,7 @@ B<O> [I<opt>[B<=>I<val>]] [I<opt>B<\">I<val>B<\">] [I<opt>B<?>]...
     I<tkRunning>:			run Tk while prompting (with ReadLine);
     I<signalLevel> I<warnLevel> I<dieLevel>:	level of verbosity;
     I<inhibit_exit>		Allows stepping off the end of the script.
+    I<ImmediateStop>		Debugger should stop as early as possible.
   The following options affect what happens with B<V>, B<X>, and B<x> commands:
     I<arrayDepth>, I<hashDepth>:	print only first N elements ('' for all);
     I<compactDump>, I<veryCompact>:	change style of array and hash dump;

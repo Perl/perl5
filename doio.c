@@ -171,8 +171,11 @@ do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawpe
 	    if (strNE(name,"-"))
 		TAINT_ENV();
 	    TAINT_PROPER("piped open");
-	    if (dowarn && name[strlen(name)-1] == '|')
-		warn("Can't do bidirectional pipe");
+	    if (name[strlen(name)-1] == '|') {
+		name[strlen(name)-1] = '\0' ;
+		if (dowarn)
+		    warn("Can't do bidirectional pipe");
+	    }
 	    fp = PerlProc_popen(name,"w");
 	    writing = 1;
 	}
@@ -583,6 +586,7 @@ do_close(GV *gv, bool not_implicit)
     if (!io) {		/* never opened */
 	if (dowarn && not_implicit)
 	    warn("Close on unopened file <%s>",GvENAME(gv));
+	SETERRNO(EBADF,SS$_IVCHAN);
 	return FALSE;
     }
     retval = io_close(io);
@@ -618,6 +622,9 @@ io_close(IO *io)
 		retval = (PerlIO_close(IoIFP(io)) != EOF);
 	}
 	IoOFP(io) = IoIFP(io) = Nullfp;
+    }
+    else {
+	SETERRNO(EBADF,SS$_IVCHAN);
     }
 
     return retval;
@@ -711,6 +718,46 @@ do_sysseek(GV *gv, long int pos, int whence)
 	warn("sysseek() on unopened file");
     SETERRNO(EBADF,RMS$_IFI);
     return -1L;
+}
+
+int
+do_binmode(PerlIO *fp, int iotype, int flag)
+{
+    if (flag != TRUE)
+	croak("panic: unsetting binmode"); /* Not implemented yet */
+#ifdef DOSISH
+#ifdef atarist
+    if (!PerlIO_flush(fp) && (fp->_flag |= _IOBIN))
+	return 1;
+    else
+	return 0;
+#else
+    if (PerlLIO_setmode(PerlIO_fileno(fp), OP_BINARY) != -1) {
+#if defined(WIN32) && defined(__BORLANDC__)
+	/* The translation mode of the stream is maintained independent
+	 * of the translation mode of the fd in the Borland RTL (heavy
+	 * digging through their runtime sources reveal).  User has to
+	 * set the mode explicitly for the stream (though they don't
+	 * document this anywhere). GSAR 97-5-24
+	 */
+	PerlIO_seek(fp,0L,0);
+	fp->flags |= _F_BIN;
+#endif
+	return 1;
+    }
+    else
+	return 0;
+#endif
+#else
+#if defined(USEMYBINMODE)
+    if (my_binmode(fp,iotype) != NULL)
+	return 1;
+    else
+	return 0;
+#else
+    return 1;
+#endif
+#endif
 }
 
 #if !defined(HAS_TRUNCATE) && !defined(HAS_CHSIZE) && defined(F_FREESP)
@@ -1033,9 +1080,14 @@ apply(I32 type, register SV **mark, register SV **sp)
     register I32 val;
     register I32 val2;
     register I32 tot = 0;
+    char *what;
     char *s;
     SV **oldmark = mark;
 
+#define APPLY_TAINT_PROPER() \
+    if (!(tainting && tainted)) {} else { goto taint_proper; }
+
+    /* This is a first heuristic; it doesn't catch tainting magic. */
     if (tainting) {
 	while (++mark <= sp) {
 	    if (SvTAINTED(*mark)) {
@@ -1047,25 +1099,33 @@ apply(I32 type, register SV **mark, register SV **sp)
     }
     switch (type) {
     case OP_CHMOD:
-	TAINT_PROPER("chmod");
+	what = "chmod";
+	APPLY_TAINT_PROPER();
 	if (++mark <= sp) {
-	    tot = sp - mark;
 	    val = SvIVx(*mark);
+	    APPLY_TAINT_PROPER();
+	    tot = sp - mark;
 	    while (++mark <= sp) {
-		if (PerlLIO_chmod(SvPVx(*mark, na),val))
+		char *name = SvPVx(*mark, na);
+		APPLY_TAINT_PROPER();
+		if (PerlLIO_chmod(name, val))
 		    tot--;
 	    }
 	}
 	break;
 #ifdef HAS_CHOWN
     case OP_CHOWN:
-	TAINT_PROPER("chown");
+	what = "chown";
+	APPLY_TAINT_PROPER();
 	if (sp - mark > 2) {
 	    val = SvIVx(*++mark);
 	    val2 = SvIVx(*++mark);
+	    APPLY_TAINT_PROPER();
 	    tot = sp - mark;
 	    while (++mark <= sp) {
-		if (chown(SvPVx(*mark, na),val,val2))
+		char *name = SvPVx(*mark, na);
+		APPLY_TAINT_PROPER();
+		if (chown(name, val, val2))
 		    tot--;
 	    }
 	}
@@ -1073,11 +1133,11 @@ apply(I32 type, register SV **mark, register SV **sp)
 #endif
 #ifdef HAS_KILL
     case OP_KILL:
-	TAINT_PROPER("kill");
+	what = "kill";
+	APPLY_TAINT_PROPER();
 	if (mark == sp)
 	    break;
 	s = SvPVx(*++mark, na);
-	tot = sp - mark;
 	if (isUPPER(*s)) {
 	    if (*s == 'S' && s[1] == 'I' && s[2] == 'G')
 		s += 3;
@@ -1086,6 +1146,8 @@ apply(I32 type, register SV **mark, register SV **sp)
 	}
 	else
 	    val = SvIVx(*mark);
+	APPLY_TAINT_PROPER();
+	tot = sp - mark;
 #ifdef VMS
 	/* kill() doesn't do process groups (job trees?) under VMS */
 	if (val < 0) val = -val;
@@ -1098,6 +1160,7 @@ apply(I32 type, register SV **mark, register SV **sp)
 	    while (++mark <= sp) {
 		I32 proc = SvIVx(*mark);
 		register unsigned long int __vmssts;
+		APPLY_TAINT_PROPER();
 		if (!((__vmssts = sys$delprc(&proc,0)) & 1)) {
 		    tot--;
 		    switch (__vmssts) {
@@ -1120,6 +1183,7 @@ apply(I32 type, register SV **mark, register SV **sp)
 	    val = -val;
 	    while (++mark <= sp) {
 		I32 proc = SvIVx(*mark);
+		APPLY_TAINT_PROPER();
 #ifdef HAS_KILLPG
 		if (PerlProc_killpg(proc,val))	/* BSD */
 #else
@@ -1130,17 +1194,21 @@ apply(I32 type, register SV **mark, register SV **sp)
 	}
 	else {
 	    while (++mark <= sp) {
-		if (PerlProc_kill(SvIVx(*mark),val))
+		I32 proc = SvIVx(*mark);
+		APPLY_TAINT_PROPER();
+		if (PerlProc_kill(proc, val))
 		    tot--;
 	    }
 	}
 	break;
 #endif
     case OP_UNLINK:
-	TAINT_PROPER("unlink");
+	what = "unlink";
+	APPLY_TAINT_PROPER();
 	tot = sp - mark;
 	while (++mark <= sp) {
 	    s = SvPVx(*mark, na);
+	    APPLY_TAINT_PROPER();
 	    if (euid || unsafe) {
 		if (UNLINK(s))
 		    tot--;
@@ -1161,7 +1229,8 @@ apply(I32 type, register SV **mark, register SV **sp)
 	break;
 #ifdef HAS_UTIME
     case OP_UTIME:
-	TAINT_PROPER("utime");
+	what = "utime";
+	APPLY_TAINT_PROPER();
 	if (sp - mark > 2) {
 #if defined(I_UTIME) || defined(VMS)
 	    struct utimbuf utbuf;
@@ -1180,9 +1249,12 @@ apply(I32 type, register SV **mark, register SV **sp)
 	    utbuf.actime = SvIVx(*++mark);    /* time accessed */
 	    utbuf.modtime = SvIVx(*++mark);    /* time modified */
 #endif
+	    APPLY_TAINT_PROPER();
 	    tot = sp - mark;
 	    while (++mark <= sp) {
-		if (PerlLIO_utime(SvPVx(*mark, na),&utbuf))
+		char *name = SvPVx(*mark, na);
+		APPLY_TAINT_PROPER();
+		if (PerlLIO_utime(name, &utbuf))
 		    tot--;
 	    }
 	}
@@ -1192,6 +1264,12 @@ apply(I32 type, register SV **mark, register SV **sp)
 #endif
     }
     return tot;
+
+  taint_proper:
+    TAINT_PROPER(what);
+    return 0;	/* this should never happen */
+
+#undef APPLY_TAINT_PROPER
 }
 
 /* Do the permissions allow some operation?  Assumes statcache already set. */
@@ -1305,6 +1383,18 @@ do_ipcget(I32 optype, SV **mark, SV **sp)
     return -1;			/* should never happen */
 }
 
+#if defined(__sun) && defined(__svr4__) /* XXX Need metaconfig test */
+/* Solaris manpage says that it uses (like linux)
+   int semctl (int semid, int semnum, int cmd, union semun arg)
+   but the system include files do not define union semun !!!!
+*/
+union semun {
+     int val;
+     struct semid_ds *buf;
+     ushort *array;
+};
+#endif
+
 I32
 do_ipcctl(I32 optype, SV **mark, SV **sp)
 {
@@ -1313,7 +1403,8 @@ do_ipcctl(I32 optype, SV **mark, SV **sp)
     char *a;
     I32 id, n, cmd, infosize, getinfo;
     I32 ret = -1;
-#ifdef __linux__	/* XXX Need metaconfig test */
+#if defined(__linux__) || (defined(__sun) && defined(__svr4__))
+/* XXX Need metaconfig test */
     union semun unsemds;
 #endif
 
@@ -1345,8 +1436,9 @@ do_ipcctl(I32 optype, SV **mark, SV **sp)
 	else if (cmd == GETALL || cmd == SETALL)
 	{
 	    struct semid_ds semds;
-#ifdef __linux__	/* XXX Need metaconfig test */
-/* linux (and Solaris2?) uses :
+#if defined(__linux__) || (defined(__sun) && defined(__svr4__))
+	/* XXX Need metaconfig test */
+/* linux and Solaris2 uses :
    int semctl (int semid, int semnum, int cmd, union semun arg)
        union semun {
             int val;
@@ -1405,7 +1497,8 @@ do_ipcctl(I32 optype, SV **mark, SV **sp)
 #endif
 #ifdef HAS_SEM
     case OP_SEMCTL:
-#ifdef __linux__	/* XXX Need metaconfig test */
+#if defined(__linux__) || (defined(__sun) && defined(__svr4__))
+	/* XXX Need metaconfig test */
         unsemds.buf = (struct semid_ds *)a;
 	ret = semctl(id, n, cmd, unsemds);
 #else

@@ -21,8 +21,17 @@ $       EndIf
 $   EndIf
 $   Set Message /Facility/Severity/Identification/Text
 $
-$  exe = ".Exe"
-$  If p1.nes."" Then exe = p1
+$   exe = ".Exe"
+$   If p1.nes."" Then exe = p1
+$   If F$Extract(0,1,exe) .nes. "."
+$   Then
+$     Write Sys$Error ""
+$     Write Sys$Error "The first parameter passed to Test.Com must be the file type used for the"
+$     Write Sys$Error "images produced when you built Perl (i.e. "".Exe"", unless you edited"
+$     Write Sys$Error "Descrip.MMS or used the AXE=1 macro in the MM[SK] command line."
+$     Write Sys$Error ""
+$     Exit 44
+$   EndIf
 $!  Pick up a copy of perl to use for the tests
 $   Delete/Log/NoConfirm Perl.;*
 $   Copy/Log/NoConfirm [-]Perl'exe' []Perl.
@@ -103,7 +112,7 @@ use Config;
 # insists on stat()ing a file descriptor before it'll use it.
 push(@libexcl,'io_xs.t') if $Config{'vms_cc_type'} ne 'decc';
 
-@opexcl=('exec.t','fork.t','glob.t','groups.t','magic.t','misc.t','stat.t');
+@opexcl=('die_exit.t','exec.t','fork.t','glob.t','groups.t','magic.t','misc.t','stat.t');
 @exclist=(@compexcl,@ioexcl,@libexcl,@opexcl);
 foreach $file (@exclist) { $skip{$file}++; }
 

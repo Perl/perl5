@@ -559,7 +559,7 @@ quite a lot of space by using bit strings instead:
 
     @articles = ( 1..10, 150..2000, 2017 );
     undef $read;
-    grep (vec($read,$_,1) = 1, @articles);
+    for (@articles) { vec($read,$_,1) = 1 }
 
 Now check whether C<vec($read,$n,1)> is true for some C<$n>.
 

@@ -981,9 +981,6 @@ The C<kill> function in the parent's C<if> block is there to send a
 signal to our child process (current running in the C<else> block)
 as soon as the remote server has closed its end of the connection.
 
-The C<kill> at the end of the parent's block is there to eliminate the
-child process as soon as the server we connect to closes its end.
-
 If the remote server sends data a byte at time, and you need that
 data immediately without waiting for a newline (which might not happen),
 you may wish to replace the C<while> loop in the parent with the
@@ -1054,7 +1051,7 @@ you'll have to use the C<sysread> variant of the interactive client above.
 This server accepts one of five different commands, sending output
 back to the client.  Note that unlike most network servers, this one
 only handles one incoming client at a time.  Multithreaded servers are
-covered in Chapter 6 of the Camel or in the perlipc(1) manpage.
+covered in Chapter 6 of the Camel as well as later in this manpage.
 
 Here's the code.  We'll
 

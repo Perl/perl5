@@ -1906,8 +1906,11 @@ sv_setsv(SV *dstr, register SV *sstr)
 
     switch (stype) {
     case SVt_NULL:
-	(void)SvOK_off(dstr);
-	return;
+	if (dtype != SVt_PVGV) {
+	    (void)SvOK_off(dstr);
+	    return;
+	}
+	break;
     case SVt_IV:
 	if (dtype != SVt_IV && dtype < SVt_PVIV) {
 	    if (dtype < SVt_IV)
@@ -2209,7 +2212,12 @@ sv_setsv(SV *dstr, register SV *sstr)
 	SvIVX(dstr) = SvIVX(sstr);
     }
     else {
-	(void)SvOK_off(dstr);
+	if (dtype == SVt_PVGV) {
+	    if (dowarn)
+		warn("Undefined value assigned to typeglob");
+	}
+	else
+	    (void)SvOK_off(dstr);
     }
     SvTAINT(dstr);
 }
@@ -2421,11 +2429,7 @@ sv_catpv_mg(register SV *sv, register char *ptr)
 }
 
 SV *
-#ifdef LEAKTEST
-newSV(I32 x, STRLEN len)
-#else
 newSV(STRLEN len)
-#endif
 {
     register SV *sv;
     
@@ -2634,10 +2638,17 @@ sv_insert(SV *bigstr, STRLEN offset, STRLEN len, char *little, STRLEN littlelen)
     register char *midend;
     register char *bigend;
     register I32 i;
+    STRLEN curlen;
+    
 
     if (!bigstr)
 	croak("Can't modify non-existent substring");
-    SvPV_force(bigstr, na);
+    SvPV_force(bigstr, curlen);
+    if (offset + len > curlen) {
+	SvGROW(bigstr, offset+len+1);
+	Zero(SvPVX(bigstr)+curlen, offset+len-curlen, char);
+	SvCUR_set(bigstr, offset+len);
+    }
 
     i = littlelen - len;
     if (i > 0) {			/* string might grow */
@@ -3697,7 +3708,7 @@ sv_reset(register char *s, HV *stash)
 
     if (!*s) {		/* reset ?? searches */
 	for (pm = HvPMROOT(stash); pm; pm = pm->op_pmnext) {
-	    pm->op_pmflags &= ~PMf_USED;
+	    pm->op_pmdynflags &= ~PMdf_USED;
 	}
 	return;
     }

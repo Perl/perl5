@@ -199,3 +199,4 @@ eval $run $toroff
 rm -f $tmp/PerlTOC.tmp.man $tmp/PerlTOC.$ext.raw
 echo "$me: leaving you with $tmp/PerlDoc.$ext and $tmp/PerlTOC.$ext"
 
+

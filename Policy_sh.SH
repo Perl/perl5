@@ -46,7 +46,7 @@ esac
 # Installation directives.  Note that each one comes in three flavors.
 # For example, we have privlib, privlibexp, and installprivlib.
 # privlib is for private (to perl) library files.
-# privlibexp is the same, expcept any '~' the user gave to Configure
+# privlibexp is the same, except any '~' the user gave to Configure
 #     is expanded to the user's home directory.  This is figured
 #     out automatically by Configure, so you don't have to include it here.
 # installprivlib is for systems (such as those running AFS) that
@@ -82,7 +82,13 @@ for var in bin scriptdir privlib archlib \
     case "$var" in
     bin)	dflt=$prefix/bin ;;
     # The scriptdir test is more complex, but this is probably usually ok.
-    scriptdir)	dflt=$prefix/script ;;
+    scriptdir)
+	if $test -d $prefix/script; then
+	    dflt=$prefix/script
+	else
+	    dflt=$bin
+	fi
+	;;
     privlib)
 	case "$prefix" in
 	*perl*)	dflt=$prefix/lib ;;
@@ -97,7 +103,7 @@ for var in bin scriptdir privlib archlib \
 	case "$prefix" in
 	*perl*) dflt=`echo $man1dir |
 		    sed -e 's/man1/man3/g' -e 's/man\.1/man\.3/g'` ;;
-	*)	dflt=$privlib/man3 ;;
+	*)	dflt=$privlib/man/man3 ;;
 	esac
 	;;
 
@@ -122,7 +128,6 @@ for var in bin scriptdir privlib archlib \
 	echo "# $var='$dflt'"
     else
 	echo "# Preserving custom $var"
-	eval val=$var
 	echo "$var='$val'"
     fi
 

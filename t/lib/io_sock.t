@@ -55,11 +55,14 @@ if($pid = fork()) {
     # This can fail if localhost is undefined or the
     # special 'loopback' address 127.0.0.1 is not configured
     # on your system. (/etc/rc.config.d/netconfig on HP-UX.)
+    # As a shortcut (not recommended) you could change 'localhost'
+    # here to be the name of this machine eg 'myhost.mycompany.com'.
 
     $sock = IO::Socket::INET->new(PeerPort => $port,
 				  Proto => 'tcp',
 				  PeerAddr => 'localhost'
-				 ) or die "$!";
+				 )
+	    or die "$! (maybe your system does not have the 'localhost' address defined)";
 
     $sock->autoflush(1);
 

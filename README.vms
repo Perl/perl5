@@ -203,9 +203,18 @@ your DCL$PATH (if you're using VMS 6.2 or higher).
 
 6) Optionally define the command PERLDOC as 
 PERLDOC :== $PERL_ROOT:[000000]PERL PERL_ROOT:[LIB.POD]PERLDOC.COM -T
+Note that if you wish to use most as a pager please see
+ftp://space.mit.edu/pub/davis/ for both most and slang.
 
 7) Optionally define the command PERLBUG (the Perl bug report generator) as
 PERLBUG :== $PERL_ROOT:[000000]PERL PERL_ROOT:[LIB]PERLBUG.COM"
+
+8) Optionally define the command POD2MAN (Converts POD files to nroff
+source suitable for converting to man pages. Also quiets complaints during
+module builds) as
+
+DEFINE/NOLOG POD2MAN PERL_ROOT:[LIB.POD]POD2MAN.COM
+POD2MAN :== $PERL_ROOT:[000000]PERL POD2MAN
 
 8) Optionally define the command POD2MAN (Converts POD files to nroff
 source suitable for converting to man pages. Also quiets complaints during

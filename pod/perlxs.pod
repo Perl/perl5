@@ -25,6 +25,11 @@ linked.
 
 See L<perlxstut> for a tutorial on the whole extension creation process.
 
+Note: For many extensions, Dave Beazley's SWIG system provides a
+significantly more convenient mechanism for creating the XS glue
+code. See L<http://www.cs.utah.edu/~beazley/SWIG> for more 
+information.
+
 =head2 On The Road
 
 Many of the examples which follow will concentrate on creating an interface
@@ -598,7 +603,7 @@ of $timep will either be undef or it will be a valid time.
 
      $timep = rpcb_gettime( "localhost" );
 
-The following XSUB uses the C<SV *> return type as a mneumonic only,
+The following XSUB uses the C<SV *> return type as a mnemonic only,
 and uses a CODE: block to indicate to the compiler
 that the programmer has supplied all the necessary code.  The
 sv_newmortal() call will initialize the return value to undef, making that

@@ -23,6 +23,14 @@ if test -f $sh.exe; then sh=$sh.exe; fi
 startsh="#!$sh"
 cc='gcc'
 
+# Make denser object files and DLL
+case "X$optimize" in
+  X)
+	optimize="-O2 -fomit-frame-pointer -malign-loops=2 -malign-jumps=2 -malign-functions=2 -s"
+	ld_dll_optimize="-s"
+	;;
+esac
+
 # Get some standard things (indented to avoid putting in config.sh):
  oifs="$IFS"
  IFS=" ;"
@@ -104,11 +112,11 @@ aout_obj_ext='.o'
 aout_lib_ext='.a'
 aout_ar='ar'
 aout_plibext='.a'
-aout_lddlflags='-Zdll'
+aout_lddlflags="-Zdll $ld_dll_optimize"
 if [ $emxcrtrev -ge 50 ]; then 
-    aout_ldflags='-Zexe -Zsmall-conv'
+    aout_ldflags='-Zexe -Zsmall-conv -Zstack 32000'
 else
-    aout_ldflags='-Zexe'
+    aout_ldflags='-Zexe -Zstack 32000'
 fi
 
 # To get into config.sh:
@@ -152,7 +160,7 @@ else
     else
 	d_fork='undef'
     fi
-    lddlflags='-Zdll -Zomf -Zmt -Zcrtdll'
+    lddlflags="-Zdll -Zomf -Zmt -Zcrtdll $ld_dll_optimize"
     # Recursive regmatch may eat 2.5M of stack alone.
     ldflags='-Zexe -Zomf -Zmt -Zcrtdll -Zstack 32000'
     if [ $emxcrtrev -ge 50 ]; then 
@@ -240,13 +248,6 @@ nm_opt='-p'
 
 d_getprior='define'
 d_setprior='define'
-
-# Make denser object files and DLL
-case "X$optimize" in
-  X)
-	optimize="-O2 -fomit-frame-pointer -malign-loops=2 -malign-jumps=2 -malign-functions=2 -s"
-	;;
-esac
 
 if [ "X$usethreads" = "X$define" ]; then
     ccflags="-Zmt $ccflags"

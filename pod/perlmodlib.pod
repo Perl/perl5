@@ -998,8 +998,8 @@ Please remember to send me an updated entry for the Module list!
 
 =item Take care when changing a released module.
 
-Always strive to remain compatible with previous released versions
-(see 2.2 above) Otherwise try to add a mechanism to revert to the
+Always strive to remain compatible with previous released versions.
+Otherwise try to add a mechanism to revert to the
 old behaviour if people rely on it. Document incompatible changes.
 
 =back

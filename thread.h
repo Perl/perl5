@@ -36,10 +36,12 @@
 #endif
 
 #ifndef YIELD
-#  ifdef HAS_PTHREAD_YIELD
-#    define YIELD pthread_yield()
-#  else
+#  ifdef HAS_SCHED_YIELD
 #    define YIELD sched_yield()
+#  else
+#    ifdef HAS_PTHREAD_YIELD
+#      define YIELD pthread_yield()
+#    endif
 #  endif
 #endif
 

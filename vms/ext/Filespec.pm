@@ -266,6 +266,7 @@ sub fileify ($) {
   my($path) = @_;
 
   if (!$path) { return undef }
+  if ($path eq '/') { return 'sys$disk:[000000]'; }
   if ($path =~ /(.+)\.([^:>\]]*)$/) {
     $path = $1;
     if ($2 !~ /^dir(?:;1)?$/i) { return undef }

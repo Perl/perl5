@@ -9,6 +9,7 @@ POD2HTML = pod2html \
 all: $(CONVERTERS) man
 
 PERL = ../miniperl
+REALPERL = ../perl
 
 POD = \
 	perl.pod	\
@@ -238,9 +239,11 @@ toc:
 	$(PERL) -I../lib pod2latex $*.pod
 
 clean:
-	rm -f $(MAN) $(HTML) $(TEX)
+	rm -f $(MAN)
+	rm -f $(HTML)
+	rm -f $(TEX)
 	rm -f pod2html-*cache
-	rm -f *.aux *.log
+	rm -f *.aux *.log *.exe
 
 realclean:	clean
 	rm -f $(CONVERTERS)
@@ -267,4 +270,7 @@ pod2text:	pod2text.PL ../lib/Config.pm
 checkpods:	checkpods.PL ../lib/Config.pm
 	$(PERL) -I ../lib checkpods.PL
 
+compile: all
+	$(REALPERL) -I../lib ../utils/perlcc -regex 's/$$/.exe/' pod2latex pod2man pod2text checkpods -prog -verbose dcf -log ../compilelog;
 
+	

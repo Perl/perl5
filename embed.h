@@ -141,6 +141,7 @@
 #define div_amg			Perl_div_amg
 #define div_ass_amg		Perl_div_ass_amg
 #define do_aexec		Perl_do_aexec
+#define do_binmode		Perl_do_binmode
 #define do_chomp		Perl_do_chomp
 #define do_chop			Perl_do_chop
 #define do_close		Perl_do_close
@@ -192,6 +193,7 @@
 #define filter_add		Perl_filter_add
 #define filter_del		Perl_filter_del
 #define filter_read		Perl_filter_read
+#define find_script		Perl_find_script
 #define find_threadsv		Perl_find_threadsv
 #define fold			Perl_fold
 #define fold_constants		Perl_fold_constants
@@ -287,11 +289,14 @@
 #define magic_getarylen		Perl_magic_getarylen
 #define magic_getdefelem	Perl_magic_getdefelem
 #define magic_getglob		Perl_magic_getglob
+#define magic_getnkeys		Perl_magic_getnkeys
 #define magic_getpack		Perl_magic_getpack
 #define magic_getpos		Perl_magic_getpos
 #define magic_getsig		Perl_magic_getsig
+#define magic_getsubstr		Perl_magic_getsubstr
 #define magic_gettaint		Perl_magic_gettaint
 #define magic_getuvar		Perl_magic_getuvar
+#define magic_getvec		Perl_magic_getvec
 #define magic_len		Perl_magic_len
 #define magic_mutexfree		Perl_magic_mutexfree
 #define magic_nextpack		Perl_magic_nextpack

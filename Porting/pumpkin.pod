@@ -508,6 +508,9 @@ You might like, early in your pumpkin-holding career, to see if you
 can find champions for partiticular issues on the to-do list: an issue
 owned is an issue more likely to be resolved.
 
+There are also some more porting-specific L<Todo> items later in this
+file.
+
 =head2 OS/2-specific updates
 
 In the os2 directory is F<diff.configure>, a set of OS/2-specific
@@ -1071,6 +1074,62 @@ distribution modules.  If you do
 
 then perl.c will put /my/override ahead of ARCHLIB and PRIVLIB.
 
+=head2 Shared libperl.so location
+
+Why isn't the shared libperl.so installed in /usr/lib/ along
+with "all the other" shared libraries?  Instead, it is installed
+in $archlib, which is typically something like
+
+	/usr/local/lib/perl5/archname/5.00404
+
+and is architecture- and version-specific.
+
+The basic reason why a shared libperl.so gets put in $archlib is so that
+you can have more than one version of perl on the system at the same time,
+and have each refer to its own libperl.so.
+
+Three examples might help.  All of these work now; none would work if you
+put libperl.so in /usr/lib.
+
+=over
+
+=item 1.
+
+Suppose you want to have both threaded and non-threaded perl versions
+around.  Configure will name both perl libraries "libperl.so" (so that
+you can link to them with -lperl).  The perl binaries tell them apart
+by having looking in the appropriate $archlib directories.
+
+=item 2.
+
+Suppose you have perl5.004_04 installed and you want to try to compile
+it again, perhaps with different options or after applying a patch.
+If you already have libperl.so installed in /usr/lib/, then it may be
+either difficult or impossible to get ld.so to find the new libperl.so
+that you're trying to build.  If, instead, libperl.so is tucked away in
+$archlib, then you can always just change $archlib in the current perl
+you're trying to build so that ld.so won't find your old libperl.so.
+(The INSTALL file suggests you do this when building a debugging perl.)
+
+=item 3.
+
+The shared perl library is not a "well-behaved" shared library with
+proper major and minor version numbers, so you can't necessarily
+have perl5.004_04 and perl5.004_05 installed simultaneously.  Suppose
+perl5.004_04 were to install /usr/lib/libperl.so.4.4, and perl5.004_05
+were to install /usr/lib/libperl.so.4.5.  Now, when you try to run
+perl5.004_04, ld.so might try to load libperl.so.4.5, since it has
+the right "major version" number.  If this works at all, it almost
+certainly defeats the reason for keeping perl5.004_04 around.  Worse,
+with development subversions, you certaily can't guarantee that
+libperl.so.4.4 and libperl.so.4.55 will be compatible.
+
+Anyway, all this leads to quite obscure failures that are sure to drive
+casual users crazy.  Even experienced users will get confused :-).  Upon
+reflection, I'd say leave libperl.so in $archlib.
+
+=back
+
 =head1 Upload Your Work to CPAN
 
 You can upload your work to CPAN if you have a CPAN id.  Check out
@@ -1114,12 +1173,13 @@ described in F<INSTALL>.  AFS users also are treated specially.
 We should probably duplicate the metaconfig prefix stuff for an
 install prefix.
 
-=item Configure -Dsrcdir=/blah/blah
+=item Configure -Dsrc=/blah/blah
 
 We should be able to emulate B<configure --srcdir>.  Tom Tromey
 tromey@creche.cygnus.com has submitted some patches to
-the dist-users mailing list along these lines.  Eventually, they ought
-to get folded back into the main distribution.
+the dist-users mailing list along these lines.  They have been folded
+back into the main distribution, but various parts of the perl
+Configure/build/install process still assume src='.'.
 
 =item Hint file fixes
 
@@ -1130,6 +1190,47 @@ Configure so that most of them aren't needed.
 
 Some of the hint file information (particularly dynamic loading stuff)
 ought to be fed back into the main metaconfig distribution.
+
+=item Catch GNU Libc "Stub" functions
+
+Some functions (such as lchown()) are present in libc, but are
+unimplmented.  That is, they always fail and set errno=ENOSYS.
+
+Thomas Bushnell provided the following sample code and the explanation
+that follows:
+
+    /* System header to define __stub macros and hopefully few prototypes,
+	which can conflict with char FOO(); below.  */
+    #include <assert.h>
+    /* Override any gcc2 internal prototype to avoid an error.  */
+    /* We use char because int might match the return type of a gcc2
+	builtin and then its argument prototype would still apply.  */
+    char FOO();
+
+    int main() {
+
+    /* The GNU C library defines this for functions which it implements
+	to always fail with ENOSYS.  Some functions are actually named
+	something starting with __ and the normal name is an alias.  */
+    #if defined (__stub_FOO) || defined (__stub___FOO)
+    choke me
+    #else
+    FOO();
+    #endif
+
+    ; return 0; }
+
+The choice of <assert.h> is essentially arbitrary.  The GNU libc
+macros are found in <gnu/stubs.h>.  You can include that file instead
+of <assert.h> (which itself includes <gnu/stubs.h>) if you test for
+its existence first.  <assert.h> is assumed to exist on every system,
+which is why it's used here.  Any GNU libc header file will include
+the stubs macros.  If either __stub_NAME or __stub___NAME is defined,
+then the function doesn't actually exist.  Tests using <assert.h> work
+on every system around.
+
+The declaration of FOO is there to override builtin prototypes for
+ANSI C functions.
 
 =back
 
@@ -1176,12 +1277,6 @@ Get some of the Macintosh stuff folded back into the main distribution.
 Maybe include a replacement function that doesn't lose data in rare
 cases of coercion between string and numerical values.
 
-=item long long
-
-Can we support C<long long> on systems where C<long long> is larger
-than what we've been using for C<IV>?  What if you can't C<sprintf>
-a C<long long>?
-
 =item Improve makedepend
 
 The current makedepend process is clunky and annoyingly slow, but it
@@ -1218,4 +1313,4 @@ All opinions expressed herein are those of the authorZ<>(s).
 
 =head1 LAST MODIFIED
 
-$Id: pumpkin.pod,v 1.14 1998/03/03 17:14:47 doughera Released $
+$Id: pumpkin.pod,v 1.15 1998/04/23 17:03:48 doughera Released $

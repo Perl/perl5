@@ -171,7 +171,7 @@ sub add { #(int_num_array, int_num_array) return int_num_array
     $car = 0;
     for $x (@x) {
 	last unless @y || $car;
-	$x -= 1e5 if $car = (($x += shift(@y) + $car) >= 1e5) ? 1 : 0;
+	$x -= 1e5 if $car = (($x += (@y ? shift(@y) : 0) + $car) >= 1e5) ? 1 : 0;
     }
     for $y (@y) {
 	last unless $car;
@@ -185,8 +185,8 @@ sub sub { #(int_num_array, int_num_array) return int_num_array
     local(*sx, *sy) = @_;
     $bar = 0;
     for $sx (@sx) {
-	last unless @y || $bar;
-	$sx += 1e5 if $bar = (($sx -= shift(@sy) + $bar) < 0);
+	last unless @sy || $bar;
+	$sx += 1e5 if $bar = (($sx -= (@sy ? shift(@sy) : 0) + $bar) < 0);
     }
     @sx;
 }
