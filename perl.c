@@ -284,7 +284,7 @@ perl_construct(pTHXx)
        if (s)
            while (isSPACE(*s)) s++;
        if (s && isDIGIT(*s))
-           PL_hash_seed = (UV)atoi(s);
+           PL_hash_seed = (UV)Atoul(s);
 #ifndef USE_HASH_SEED_EXPLICIT
        else {
            /* Compute a random seed */
