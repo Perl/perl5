@@ -31,6 +31,313 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 11978] By: jhi                                   on 2001/09/10  12:59:40
+        Log: Revert #11973, the dTHX seems to be needed in there
+             for threaded builds.
+     Branch: perl
+	   ! perlio.c
+____________________________________________________________________________
+[ 11977] By: jhi                                   on 2001/09/10  12:55:47
+        Log: Detypo.
+     Branch: perl
+	   ! pod/perlguts.pod
+____________________________________________________________________________
+[ 11976] By: jhi                                   on 2001/09/10  12:46:34
+        Log: Further Class::Struct patching from Damian.
+             
+             The new new semantics are:
+             
+             * If you pass an initializer for a nested object, it has to be:
+             a) a reference to an object of that class, or	
+             b) a reference to an object of a subclass of that class, or
+             c) a reference to a hash of arguments to be passed to the
+             class's constructor
+             * If you pass no initializer for a nested object, the attribute
+             is initialized to C<undef>
+     Branch: perl
+	   ! lib/Class/Struct.pm
+____________________________________________________________________________
+[ 11975] By: jhi                                   on 2001/09/10  12:42:24
+        Log: Skip the crypt test if no crypt.
+     Branch: perl
+	   ! t/op/crypt.t
+____________________________________________________________________________
+[ 11974] By: jhi                                   on 2001/09/10  12:39:25
+        Log: Warn against using bare v-strings as IP addresses
+             (okay if using the wrappers from Socket)
+     Branch: perl
+	   ! pod/perldata.pod pod/perlport.pod
+____________________________________________________________________________
+[ 11973] By: sky                                   on 2001/09/10  11:57:58
+        Log: Remove unused dTHX. Silenced another warning.
+     Branch: perl
+	   ! perlio.c
+____________________________________________________________________________
+[ 11972] By: sky                                   on 2001/09/10  11:54:25
+        Log: Silence some more warnings INT2PTR.
+     Branch: perl
+	   ! pp.c pp_ctl.c sharedsv.c sv.c taint.c
+____________________________________________________________________________
+[ 11971] By: sky                                   on 2001/09/10  11:21:50
+        Log: Silence another ITHREAD 64bit INT/32bit PTR warning.
+     Branch: perl
+	   ! cop.h
+____________________________________________________________________________
+[ 11970] By: sky                                   on 2001/09/10  11:17:25
+        Log: Apply INT2PTR with force to silence warnings from
+             PM_GETRE and friends. No more warnings with 64bit 
+             IVs and 32bit pointers.	
+     Branch: perl
+	   ! op.c op.h perl.c
+____________________________________________________________________________
+[ 11969] By: sky                                   on 2001/09/10  10:13:02
+        Log: Removed reference of -DPERL_CUSTOM_OPS in the documentation.
+     Branch: perl
+	   ! pod/perlguts.pod
+____________________________________________________________________________
+[ 11968] By: sky                                   on 2001/09/10  10:02:51
+        Log: Remove #ifdef PERL_CUSTOM_OPS, always build with PERL_CUSTOM_OPS
+             Rename to custop_op_name to Perl_custom_op_name to match perlapi
+             Clone the hashtable PL_custom_op_names and PL_custop_op_descs in 
+             perl_clone.
+     Branch: perl
+	   ! embed.pl intrpvar.h makedef.pl op.c opcode.pl sv.c
+____________________________________________________________________________
+[ 11967] By: jhi                                   on 2001/09/10  03:14:35
+        Log: Using strlen() not good on embedded nul bytes.
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[ 11966] By: ams                                   on 2001/09/09  21:06:13
+        Log: Subject: Re: [ID 20010810.011] 'use v2b' not allowed with strict
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Mon, 13 Aug 2001 22:51:59 +0200
+             Message-ID: <20010813225159.C6681@rafael>
+             (Applied with several tweaks.)
+     Branch: perl
+	   ! embed.h embed.pl proto.h toke.c
+____________________________________________________________________________
+[ 11965] By: jhi                                   on 2001/09/09  14:40:39
+        Log: The exact error message is system-dependent.
+     Branch: perl
+	   ! lib/ExtUtils/Manifest.t
+____________________________________________________________________________
+[ 11964] By: jhi                                   on 2001/09/09  14:38:05
+        Log: Add Windows and Mac Sami support to Encode
+             (http://www.egt.ie/standards/se/sami-teastabaiki.html)
+     Branch: perl
+	   + ext/Encode/Encode/isoir-197.enc ext/Encode/Encode/macSami.enc
+	   ! MANIFEST
+____________________________________________________________________________
+[ 11963] By: jhi                                   on 2001/09/09  13:54:07
+        Log: Use the tried method.
+     Branch: perl
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[ 11962] By: jhi                                   on 2001/09/09  13:46:59
+        Log: Can't count parentheses.
+     Branch: perl
+	   ! ext/IO/lib/IO/Socket/INET.pm
+____________________________________________________________________________
+[ 11961] By: jhi                                   on 2001/09/09  13:34:12
+        Log: perlport additions: 1 while unlink, add/delete directory
+             entries and permissions, cygwin stat funkiness (from Michael
+             Schwern and Nicholas Clark)
+     Branch: perl
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[ 11960] By: jhi                                   on 2001/09/09  13:19:12
+        Log: blib does have a detectable test.
+     Branch: perl
+	   ! t/lib/1_compile.t
+____________________________________________________________________________
+[ 11959] By: jhi                                   on 2001/09/09  13:16:43
+        Log: Subject: [PATCH MANIFEST, lib/Term/Complete.t] Add Test for Term::Complete
+             From: "chromatic" <chromatic@rmci.net>
+             Date: Sat, 08 Sep 2001 19:33:42 -0600
+             Message-ID: <20010909013810.11522.qmail@onion.perl.org>
+     Branch: perl
+	   + lib/Term/Complete.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 11958] By: jhi                                   on 2001/09/09  13:09:02
+        Log: Subject: [PATCH MANIFEST lib/Test/Tutorial.pod] Test::Tutorial?
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Sat, 8 Sep 2001 02:40:26 -0400
+             Message-ID: <20010908024026.A26283@blackrider>
+     Branch: perl
+	   + lib/Test/Tutorial.pod
+	   ! MANIFEST
+____________________________________________________________________________
+[ 11957] By: jhi                                   on 2001/09/09  13:03:33
+        Log: Try to look up protocol (by name) only iff it has non-numbers:
+             nice if the server is in a chrooted environment (no /etc/protocols,
+             server code using hardcorded protocol numbers like 6 for tcp),
+             suggested by John Holdsworth <coldwave@bigfoot.com>.
+             In other words, if we are given a number, why look it up again
+             (by number)?
+     Branch: perl
+	   ! ext/IO/lib/IO/Socket/INET.pm
+____________________________________________________________________________
+[ 11956] By: jhi                                   on 2001/09/09  12:53:12
+        Log: Subject: [PATCH regcomp.c] zero-width assertions CAN be ?'d
+             From: "Jeff 'japhy/Marillion' Pinyan" <jeffp@crusoe.net>
+             Date: Sat, 8 Sep 2001 15:42:30 -0400 (EDT) 
+             Message-ID: <Pine.GSO.4.21.0109081535480.24489-100000@crusoe.crusoe.net>
+             
+             Subject: Re: [PATCH t/op/misc.t] regcomp.c patch broke test 
+             From: "Jeff 'japhy/Marillion' Pinyan" <jeffp@crusoe.net>
+             Date: Sat, 8 Sep 2001 18:33:12 -0400 (EDT)
+             Message-ID: <Pine.GSO.4.21.0109081832030.24489-100000@crusoe.crusoe.net>
+             Subject: [PATCH t/lib/warnings/regcomp] (?=...)? gives no warning now
+             From: "Jeff 'japhy/Marillion' Pinyan" <jeffp@crusoe.net>
+             Date: Sat, 8 Sep 2001 18:37:22 -0400 (EDT)
+             Message-ID: <Pine.GSO.4.21.0109081835340.24489-100000@crusoe.crusoe.net>
+     Branch: perl
+	   ! regcomp.c t/lib/warnings/regcomp t/run/kill_perl.t
+____________________________________________________________________________
+[ 11955] By: ams                                   on 2001/09/09  02:54:21
+        Log: Subject: Re: [PATCH perl@11938] slash slashes in lib/CGI/Carp.pm
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Sat, 08 Sep 2001 19:02:16 -0500
+             Message-Id: <5.1.0.14.0.20010908185936.01aadcc0@mail.mac.com>
+     Branch: perl
+	   ! lib/CGI/t/carp.t
+____________________________________________________________________________
+[ 11954] By: jhi                                   on 2001/09/09  02:30:39
+        Log: Documentation tweaks; think the IP address as an opaque string.
+     Branch: perl
+	   ! ext/Socket/Socket.pm
+____________________________________________________________________________
+[ 11953] By: jhi                                   on 2001/09/09  00:32:05
+        Log: Subject: [REPATCH] Re: [PATCH] new test lib/blib.t
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sat, 8 Sep 2001 19:45:46 -0400
+             Message-ID: <20010908194546.C9193@blackrider>
+     Branch: perl
+	   + lib/blib.t
+	   ! MANIFEST lib/blib.pm t/lib/1_compile.t
+____________________________________________________________________________
+[ 11952] By: jhi                                   on 2001/09/09  00:27:15
+        Log: Subject: [PATCH MANIFEST, lib/CGI/t/fast.t] Added Test for CGI::Fast
+             From: "chromatic" <chromatic@rmci.net>
+             Date: Sat, 08 Sep 2001 12:31:44 -0600
+             Message-ID: <20010908183612.49960.qmail@onion.perl.org>
+     Branch: perl
+	   + lib/CGI/t/fast.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 11951] By: jhi                                   on 2001/09/09  00:24:07
+        Log: The Socket tests were wrong: they were assuming too much.
+     Branch: perl
+	   ! ext/Socket/Socket.pm ext/Socket/Socket.t ext/Socket/Socket.xs
+____________________________________________________________________________
+[ 11950] By: jhi                                   on 2001/09/08  20:09:07
+        Log: Retract the portability changes since they
+             seem to have opened a can of worms... will
+             go back to UNICOS/mk and do the bare minimum
+             required to get the tests working.
+     Branch: perl
+	   ! ext/Socket/Socket.xs
+____________________________________________________________________________
+[ 11949] By: jhi                                   on 2001/09/08  19:48:20
+        Log: PADOFFSET is used to cast pointers into integers,
+             if pointers are 64 bits and U32 32 bits,
+             bad things may happen, or at least warnings issued.
+     Branch: perl
+	   ! op.h
+____________________________________________________________________________
+[ 11948] By: jhi                                   on 2001/09/08  18:50:07
+        Log: Still more Socket portability tweaking.
+             Now Socket.t seems to be happy in all of
+             Linux/x86, Tru64/alpha, Solaris/sparc,
+             IRIX/MIPS (both 32-bit and 64-bit), and UNICOS/mk/alpha.
+             
+             Addendum: it seems that io_multihomed, io_sock, and hostent
+             were broken in little-endians (linux/x86 and tru64/alpha)
+             because of this change.  Argh.
+     Branch: perl
+	   ! ext/Socket/Socket.xs
+____________________________________________________________________________
+[ 11947] By: jhi                                   on 2001/09/08  17:23:23
+        Log: More portability kicking on inet_ntoa().
+     Branch: perl
+	   ! ext/Socket/Socket.xs
+____________________________________________________________________________
+[ 11946] By: jhi                                   on 2001/09/08  15:09:58
+        Log: Subject: [REPATCH] Re: [PATCH MANIFEST, lib/ExtUtils/Manifest.t] Another New Test
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Fri, 7 Sep 2001 23:06:51 -0400
+             Message-ID: <20010907230651.R606@blackrider>
+     Branch: perl
+	   + lib/ExtUtils/Manifest.t
+	   ! MANIFEST lib/ExtUtils/MM_Unix.pm lib/ExtUtils/Manifest.pm
+____________________________________________________________________________
+[ 11945] By: jhi                                   on 2001/09/08  14:49:15
+        Log: Subject: Re: [PATCH MANIFEST, lib/ExtUtils/testlib.t] More Tests
+             From: "chromatic" <chromatic@rmci.net>
+             Date: Fri, 07 Sep 2001 17:53:15 -0600      
+             Message-ID: <20010907235740.80566.qmail@onion.perl.org>              
+     Branch: perl
+	   + lib/ExtUtils/testlib.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 11944] By: jhi                                   on 2001/09/07  22:57:00
+        Log: Thinko.
+     Branch: perl
+	   ! lib/integer.t
+____________________________________________________________________________
+[ 11943] By: jhi                                   on 2001/09/07  20:34:55
+        Log: Subject: [PATCH perl@11938] slash slashes in lib/CGI/Carp.pm
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Fri, 07 Sep 2001 15:30:03 -0500
+             Message-Id: <5.1.0.14.0.20010907142644.03700c38@exchi01>
+     Branch: perl
+	   ! lib/CGI/Carp.pm
+____________________________________________________________________________
+[ 11942] By: jhi                                   on 2001/09/07  20:30:43
+        Log: Subject: [PATCH lib/ExtUtils/MM_Unix.pm] (was Re: MakeMaker: MM_Unix rule excluding pods)
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Fri, 7 Sep 2001 15:38:13 -0400
+             Message-ID: <20010907153813.K606@blackrider>
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 11941] By: jhi                                   on 2001/09/07  20:28:24
+        Log: Subject: [PATCH perl.h mg.c pp_sys.c] Silence the remaing format warning
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Fri, 7 Sep 2001 18:28:23 +0100 (BST)
+             Message-Id: <200109071728.SAA13569@tempest.npl.co.uk>
+     Branch: perl
+	   ! Porting/pumpkin.pod mg.c perl.h pp_sys.c
+____________________________________________________________________________
+[ 11940] By: jhi                                   on 2001/09/07  20:26:29
+        Log: Clean up 1_compile.t; move tests to more consistent
+             places (t/ subdirectories); add integer.t (much of
+             the pragma is tested elsewhere but there is no one
+             centralized place)
+     Branch: perl
+	   + ext/Fcntl/t/fcntl.t ext/Fcntl/t/syslfs.t ext/POSIX/t/posix.t
+	   + ext/POSIX/t/sigaction.t lib/Env/t/array.t lib/Env/t/env.t
+	   + lib/File/Find/t/find.t lib/File/Find/t/taint.t lib/integer.t
+	   - ext/Fcntl/Fcntl.t ext/Fcntl/syslfs.t ext/POSIX/POSIX.t
+	   - ext/POSIX/sigaction.t lib/Env/array.t lib/Env/env.t
+	   - lib/File/Find/find.t lib/File/Find/taint.t
+	   ! MANIFEST t/lib/1_compile.t t/op/lfs.t
+____________________________________________________________________________
+[ 11939] By: jhi                                   on 2001/09/07  17:25:32
+        Log: Subject: Re: [PATCH lib/File/Find/taint.t] Use Test::More
+             From: "chromatic" <chromatic@rmci.net>
+             Date: Fri, 07 Sep 2001 10:17:40 -0600
+             Message-ID: <20010907162205.84723.qmail@onion.perl.org>
+     Branch: perl
+	   ! lib/File/Find/taint.t
+____________________________________________________________________________
+[ 11938] By: jhi                                   on 2001/09/07  14:04:43
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 11937] By: jhi                                   on 2001/09/07  13:52:03
         Log: Rename the old threading tutorial, start a new one,
              regen toc.
