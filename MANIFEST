@@ -2385,7 +2385,6 @@ pod/perlunicode.pod		Perl Unicode support
 pod/perluniintro.pod		Perl Unicode introduction
 pod/perlutil.pod		utilities packaged with the Perl distribution
 pod/perlvar.pod			Perl predefined variables
-pod/perlvms.pod			VMS-specific additions to Perl documentation
 pod/perlxs.pod			Perl XS application programming interface
 pod/perlxstut.pod		Perl XS tutorial
 pod/pod2html.PL			Precursor for translator to turn pod into HTML
@@ -2919,6 +2918,7 @@ vms/make_command.com		record MM[SK] command used to build Perl
 vms/mms2make.pl			convert descrip.mms to make syntax
 vms/munchconfig.c		performs shell $var substitution for VMS
 vms/myconfig.com		record local configuration info for bug report
+vms/perlvms.pod			VMS-specific additions to Perl documentation
 vms/perly_c.vms			perly.c with fixed declarations for global syms
 vms/perly_h.vms			perly.h with fixed declarations for global syms
 vms/sockadapt.c			glue for SockshShr socket support
