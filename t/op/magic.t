@@ -125,7 +125,8 @@ END
 END
     close CMDPIPE;
     $? >>= 8 if $^O eq 'VMS'; # POSIX status hiding in 2nd byte
-    print $? & 0xFF ? "ok 6\n" : "not ok 6\n";
+    my $todo = ($^O eq 'os2' ? ' # TODO: EMX v0.9d_fix4 bug: wrong nibble? ' : '');
+    print $? & 0xFF ? "ok 6$todo\n" : "not ok 6$todo\n";
 
     $test += 4;
 }
