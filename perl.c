@@ -567,6 +567,17 @@ perl_destruct(register PerlInterpreter *sv_interp)
     /* As the absolutely last thing, free the non-arena SV for mess() */
 
     if (PL_mess_sv) {
+	/* it could have accumulated taint magic */
+	if (SvTYPE(PL_mess_sv) >= SVt_PVMG) {
+	    MAGIC* mg;
+	    MAGIC* moremagic;
+	    for (mg = SvMAGIC(PL_mess_sv); mg; mg = moremagic) {
+		moremagic = mg->mg_moremagic;
+		if (mg->mg_ptr && mg->mg_type != 'g' && mg->mg_len >= 0)
+		    Safefree(mg->mg_ptr);
+		Safefree(mg);
+	    }
+	}
 	/* we know that type >= SVt_PV */
 	SvOOK_off(PL_mess_sv);
 	Safefree(SvPVX(PL_mess_sv));

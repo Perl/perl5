@@ -8,7 +8,9 @@ BEGIN {
 	print "1..0\n";
 	exit 0;
     }
-    $ENV{PERL_DESTRUCT_LEVEL} = 0;	# XXX known trouble with global destruction
+
+    # XXX known trouble with global destruction
+    $ENV{PERL_DESTRUCT_LEVEL} = 0 unless $ENV{PERL_DESTRUCT_LEVEL} > 3;
 }
 $| = 1;
 print "1..14\n";

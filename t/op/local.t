@@ -4,7 +4,8 @@
 
 print "1..58\n";
 
-$ENV{PERL_DESTRUCT_LEVEL} = 0; # XXX known to leaks scalars
+# XXX known to leak scalars
+$ENV{PERL_DESTRUCT_LEVEL} = 0 unless $ENV{PERL_DESTRUCT_LEVEL} > 3;
 
 sub foo {
     local($a, $b) = @_;

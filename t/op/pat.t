@@ -12,7 +12,8 @@ BEGIN {
 }
 eval 'use Config';          #  Defaults assumed if this fails
 
-$ENV{PERL_DESTRUCT_LEVEL} = 0; # XXX known to leaks scalars
+# XXX known to leak scalars
+$ENV{PERL_DESTRUCT_LEVEL} = 0 unless $ENV{PERL_DESTRUCT_LEVEL} > 3;
 
 $x = "abc\ndef\n";
 
