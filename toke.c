@@ -1385,13 +1385,13 @@ S_scan_const(pTHX_ char *start)
  		    char *why = Nullch;
  
  		    if (!e) {
-			yyerror("Missing right brace on \\C{}");
+			yyerror("Missing right brace on \\N{}");
 			e = s - 1;
 			goto cont_scan;
 		    }
 		    res = newSVpvn(s + 1, e - s - 1);
 		    res = new_constant( Nullch, 0, "charnames", 
-					res, Nullsv, "\\C{...}" );
+					res, Nullsv, "\\N{...}" );
 		    str = SvPV(res,len);
 		    if (len > e - s + 4) {
 			char *odest = SvPVX(sv);
@@ -1406,7 +1406,7 @@ S_scan_const(pTHX_ char *start)
 		    s = e + 1;
 		}
 		else
-		    yyerror("Missing braces on \\C{}");
+		    yyerror("Missing braces on \\N{}");
 		continue;
 
 	    /* \c is a control character */
