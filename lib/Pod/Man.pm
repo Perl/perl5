@@ -110,7 +110,7 @@ $PREAMBLE = <<'----END OF PREAMBLE----';
 .if \nF \{\
 .    de IX
 .    tm Index:\\$1\t\\n%\t"\\$2"
-.    .
+..
 .    nr % 0
 .    rr F
 .\}
