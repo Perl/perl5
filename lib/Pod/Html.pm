@@ -712,6 +712,10 @@ sub scan_headings {
     my($sections, @data) = @_;
     my($tag, $which_head, $title, $listdepth, $index);
 
+    # here we need	local $ignore = 0;
+    #  unfortunately, we can't have it, because $ignore is lexical
+    $ignore = 0;
+
     $listdepth = 0;
     $index = "";
 
@@ -732,7 +736,8 @@ sub scan_headings {
 	    $listdepth = $which_head;
 
 	    $index .= "\n" . ("\t" x $listdepth) . "<LI>" .
-	              "<A HREF=\"#" . htmlify(0,$title) . "\">$title</A>";
+	              "<A HREF=\"#" . htmlify(0,$title) . "\">" .
+		      process_text(\$title, 0) . "</A>";
 	}
     }
 
@@ -743,6 +748,8 @@ sub scan_headings {
 
     # get rid of bogus lists
     $index =~ s,\t*<UL>\s*</UL>\n,,g;
+
+    $ignore = 1;	# retore old value;
 
     return $index;
 }
@@ -803,7 +810,7 @@ sub process_head {
     print HTML "<HR>\n" unless $listlevel || $top;
     print HTML "<H$level>"; # unless $listlevel;
     #print HTML "<H$level>" unless $listlevel;
-    my $convert = $heading; process_text(\$convert);
+    my $convert = $heading; process_text(\$convert, 0);
     print HTML '<A NAME="' . htmlify(0,$heading) . "\">$convert</A>";
     print HTML "</H$level>"; # unless $listlevel;
     print HTML "\n";
@@ -998,7 +1005,12 @@ sub process_text {
     $rest = $$text;
 
     if ($rest =~ /^\s+/) {	# preformatted text, no pod directives
-	$rest   =~ s/\n+\Z//;
+	$rest =~ s/\n+\Z//;
+	$rest =~ s#.*#
+	    my $line = $&;
+	    1 while $line =~ s/\t+/' ' x (length($&) * 8 - length($`) % 8)/e;
+	    $line;
+	#eg;
 
 	$rest   =~ s/&/&amp;/g;
 	$rest   =~ s/</&lt;/g;
@@ -1364,7 +1376,7 @@ sub process_C {
 
     $s1 = $str;
     $s1 =~ s/\([^()]*\)//g;	# delete parentheses
-    $str = $s2 = $s1;
+    $s2 = $s1;
     $s1 =~ s/\W//g;		# delete bogus characters
 
     # if there was a pod file that we found earlier with an appropriate
