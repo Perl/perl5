@@ -34,8 +34,6 @@ sub loadopts {
     }
 }
 
-FindExt::scan_ext("../ext");
-
 my %opt;
 
 my $optref = loadopts();
@@ -44,18 +42,14 @@ while (@{$optref} && $optref->[0] =~ /^([\w_]+)=(.*)$/) {
     shift(@{$optref});
 }
 
-my @dynamic = FindExt::dynamic_extensions();
-my @noxs    = FindExt::noxs_extensions();
-my @known   = sort(@dynamic,split(/\s+/,$opt{'staticext'}),@noxs);
-$opt{'known_extensions'} = join(' ',@known);
+FindExt::scan_ext("../ext");
+FindExt::set_static_extensions(split ' ', $opt{'static_ext'});
 
-@dynamic = grep(!/Thread/,@dynamic);
-@known   = grep(!/Thread/,@dynamic);
-
-$opt{'dynamic_ext'} = join(' ',@dynamic);
-$opt{'nonxs_ext'}   = join(' ',@noxs);
-
-$opt{'extensions'} = join(' ',@known);
+$opt{'nonxs_ext'}        = join(' ',FindExt::nonxs_ext()) || ' ';
+$opt{'static_ext'}       = join(' ',FindExt::static_ext()) || ' ';
+$opt{'dynamic_ext'}      = join(' ',FindExt::dynamic_ext()) || ' ';
+$opt{'extensions'}       = join(' ',FindExt::extensions()) || ' ';
+$opt{'known_extensions'} = join(' ',FindExt::known_extensions()) || ' ';
 
 my $pl_h = '../patchlevel.h';
 
