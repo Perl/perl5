@@ -443,6 +443,8 @@
 #ifdef PERL_CORE
 #define op_clear		Perl_op_clear
 #endif
+#define op_refcnt_lock		Perl_op_refcnt_lock
+#define op_refcnt_unlock	Perl_op_refcnt_unlock
 #ifdef PERL_CORE
 #define linklist		Perl_linklist
 #endif
@@ -3067,6 +3069,8 @@
 #ifdef PERL_CORE
 #define op_clear(a)		Perl_op_clear(aTHX_ a)
 #endif
+#define op_refcnt_lock()	Perl_op_refcnt_lock(aTHX)
+#define op_refcnt_unlock()	Perl_op_refcnt_unlock(aTHX)
 #ifdef PERL_CORE
 #define linklist(a)		Perl_linklist(aTHX_ a)
 #endif

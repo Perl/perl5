@@ -481,8 +481,13 @@ struct loop {
 
 #ifdef USE_ITHREADS
 #  define OP_REFCNT_INIT		MUTEX_INIT(&PL_op_mutex)
-#  define OP_REFCNT_LOCK		MUTEX_LOCK(&PL_op_mutex)
-#  define OP_REFCNT_UNLOCK		MUTEX_UNLOCK(&PL_op_mutex)
+#  ifdef PERL_CORE
+#    define OP_REFCNT_LOCK		MUTEX_LOCK(&PL_op_mutex)
+#    define OP_REFCNT_UNLOCK		MUTEX_UNLOCK(&PL_op_mutex)
+#  else
+#    define OP_REFCNT_LOCK		op_refcnt_lock()
+#    define OP_REFCNT_UNLOCK		op_refcnt_unlock()
+#  endif
 #  define OP_REFCNT_TERM		MUTEX_DESTROY(&PL_op_mutex)
 #else
 #  define OP_REFCNT_INIT		NOOP

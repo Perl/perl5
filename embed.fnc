@@ -361,8 +361,10 @@ p	|I32	|keyword	|char* d|I32 len
 Ap	|void	|leave_scope	|I32 base
 p	|void	|lex_end
 p	|void	|lex_start	|SV* line
-Ap |void   |op_null    |OP* o
+Ap	|void	|op_null	|OP* o
 p	|void	|op_clear	|OP* o
+Ap	|void	|op_refcnt_lock
+Ap	|void	|op_refcnt_unlock
 p	|OP*	|linklist	|OP* o
 p	|OP*	|list		|OP* o
 p	|OP*	|listkids	|OP* o

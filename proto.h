@@ -340,6 +340,8 @@ PERL_CALLCONV void	Perl_lex_end(pTHX);
 PERL_CALLCONV void	Perl_lex_start(pTHX_ SV* line);
 PERL_CALLCONV void	Perl_op_null(pTHX_ OP* o);
 PERL_CALLCONV void	Perl_op_clear(pTHX_ OP* o);
+PERL_CALLCONV void	Perl_op_refcnt_lock(pTHX);
+PERL_CALLCONV void	Perl_op_refcnt_unlock(pTHX);
 PERL_CALLCONV OP*	Perl_linklist(pTHX_ OP* o);
 PERL_CALLCONV OP*	Perl_list(pTHX_ OP* o);
 PERL_CALLCONV OP*	Perl_listkids(pTHX_ OP* o);
