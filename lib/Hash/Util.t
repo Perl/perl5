@@ -14,7 +14,6 @@ BEGIN {
     @Exported_Funcs = qw(lock_keys   unlock_keys
                          lock_value  unlock_value
                          lock_hash   unlock_hash
-			 hash_seed
                         );
     use_ok 'Hash::Util', @Exported_Funcs;
 }
