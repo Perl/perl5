@@ -7,7 +7,7 @@ BEGIN {
 
 use File::Basename qw(fileparse basename dirname);
 
-print "1..34\n";
+print "1..36\n";
 
 # import correctly?
 print +(defined(&basename) && !defined(&fileparse_set_fstype) ?
