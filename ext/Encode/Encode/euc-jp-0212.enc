@@ -1,0 +1,7 @@
+# Encoding file: euc-jp-0212, extended
+X
+name		euc-jp-0212
+ascii		{}
+jis0208		>{}
+7bit-kana	>\x8e
+jis0212		>\x8f
