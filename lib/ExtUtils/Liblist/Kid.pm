@@ -132,7 +132,6 @@ sub _unix_os2_ext {
 		 && ($thislib .= "_s") ){ # we must explicitly use _s version
 	    } elsif (-f ($fullname="$thispth/lib$thislib$Config_libext")){
 	    } elsif (-f ($fullname="$thispth/$thislib$Config_libext")){
-            } elsif (-f ($fullname="$thispth/lib$thislib.dll$Config_libext")){
 	    } elsif (-f ($fullname="$thispth/Slib$thislib$Config_libext")){
 	    } elsif ($^O eq 'dgux'
 		 && -l ($fullname="$thispth/lib$thislib$Config_libext")

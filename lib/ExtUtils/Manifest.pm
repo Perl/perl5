@@ -12,7 +12,7 @@ use vars qw($VERSION @ISA @EXPORT_OK
           $Is_MacOS $Is_VMS 
           $Debug $Verbose $Quiet $MANIFEST $DEFAULT_MSKIP);
 
-$VERSION = 1.43;
+$VERSION = 1.42;
 @ISA=('Exporter');
 @EXPORT_OK = qw(mkmanifest
                 manicheck  filecheck  fullcheck  skipcheck
@@ -367,21 +367,17 @@ sub _maniskip {
 
 =item manicopy
 
-    manicopy(\%src, $dest_dir);
-    manicopy(\%src, $dest_dir, $how);
+    manicopy($src, $dest_dir);
+    manicopy($src, $dest_dir, $how);
 
-Copies the files that are the keys in %src to the $dest_dir.  %src is
-typically returned by the maniread() function.
-
-    manicopy( maniread(), $dest_dir );
-
-This function is useful for producing a directory tree identical to the 
-intended distribution tree. 
-
-$how can be used to specify a different methods of "copying".  Valid
+copies the files that are the keys in the HASH I<%$src> to the
+$dest_dir. The HASH reference $read is typically returned by the
+maniread() function. This function is useful for producing a directory
+tree identical to the intended distribution tree. The third parameter
+$how can be used to specify a different methods of "copying". Valid
 values are C<cp>, which actually copies the files, C<ln> which creates
 hard links, and C<best> which mostly links the files but copies any
-symbolic link to make a tree without any symbolic link.  C<cp> is the 
+symbolic link to make a tree without any symbolic link. Best is the
 default.
 
 =cut
@@ -446,39 +442,43 @@ sub cp_if_diff {
 
 sub cp {
     my ($srcFile, $dstFile) = @_;
-    my ($access,$mod) = (stat $srcFile)[8,9];
-
+    my ($perm,$access,$mod) = (stat $srcFile)[2,8,9];
     copy($srcFile,$dstFile);
     utime $access, $mod + ($Is_VMS ? 1 : 0), $dstFile;
-    _manicopy_chmod($dstFile);
+    # chmod a+rX-w,go-w
+    chmod(  0444 | ( $perm & 0111 ? 0111 : 0 ),  $dstFile ) 
+      unless ($^O eq 'MacOS');
 }
-
 
 sub ln {
     my ($srcFile, $dstFile) = @_;
     return &cp if $Is_VMS or ($^O eq 'MSWin32' and Win32::IsWin95());
     link($srcFile, $dstFile);
 
-    unless( _manicopy_chmod($dstFile) ) {
+    # chmod a+r,go-w+X (except "X" only applies to u=x)
+    local($_) = $dstFile;
+    my $mode= 0444 | (stat)[2] & 0700;
+    if (! chmod(  $mode | ( $mode & 0100 ? 0111 : 0 ),  $_  )) {
         unlink $dstFile;
         return;
     }
     1;
 }
 
-# 1) Strip off all group and world permissions.
-# 2) Let everyone read it.
-# 3) If the owner can execute it, everyone can.
-sub _manicopy_chmod {
-    my($file) = shift;
-
-    my $perm = 0444 | (stat $file)[2] & 0700;
-    chmod( $perm | ( $perm & 0100 ? 0111 : 0 ), $file );
+unless (defined $Config{d_link}) {
+    # Really cool fix from Ilya :)
+    local $SIG{__WARN__} = sub { 
+        warn @_ unless $_[0] =~ /^Subroutine .* redefined/;
+    };
+    *ln = \&cp;
 }
+
+
+
 
 sub best {
     my ($srcFile, $dstFile) = @_;
-    if (!$Config{d_link} or -l $srcFile) {
+    if (-l $srcFile) {
 	cp($srcFile, $dstFile);
     } else {
 	ln($srcFile, $dstFile) or cp($srcFile, $dstFile);
@@ -489,21 +489,21 @@ sub _macify {
     my($file) = @_;
 
     return $file unless $Is_MacOS;
-
+    
     $file =~ s|^\./||;
     if ($file =~ m|/|) {
 	$file =~ s|/+|:|g;
 	$file = ":$file";
     }
-
+    
     $file;
 }
 
 sub _maccat {
     my($f1, $f2) = @_;
-
+    
     return "$f1/$f2" unless $Is_MacOS;
-
+    
     $f1 .= ":$f2";
     $f1 =~ s/([^:]:):/$1/g;
     return $f1;
@@ -686,9 +686,7 @@ L<ExtUtils::MakeMaker> which has handy targets for most of the functionality.
 
 =head1 AUTHOR
 
-Andreas Koenig C<andreas.koenig@anima.de>
-
-Currently maintained by Michael G Schwern C<schwern@pobox.com>
+Andreas Koenig <F<andreas.koenig@anima.de>>
 
 =cut
 

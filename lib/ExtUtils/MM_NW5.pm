@@ -23,7 +23,7 @@ use Config;
 use File::Basename;
 
 use vars qw(@ISA $VERSION);
-$VERSION = '2.07';
+$VERSION = '2.06';
 
 require ExtUtils::MM_Win32;
 @ISA = qw(ExtUtils::MM_Win32);
@@ -152,7 +152,7 @@ sub static_lib {
     return '' unless $self->has_link_code;
 
     my $m = <<'END';
-$(INST_STATIC): $(OBJECT) $(MYEXTLIB) blibdirs
+$(INST_STATIC): $(OBJECT) $(MYEXTLIB) $(INST_ARCHAUTODIR)$(DIRFILESEP).exists
 	$(RM_RF) $@
 END
 
@@ -181,9 +181,10 @@ END
 
     $m .= <<'END' if $self->{PERL_SRC};
 	$(NOECHO) $(ECHO) "$(EXTRALIBS)" >> $(PERL_SRC)\ext.libs
-
-
+    
+    
 END
+    $m .= $self->dir_target('$(INST_ARCHAUTODIR)');
     return $m;
 }
 
@@ -256,6 +257,8 @@ MAKE_FRAG
 
 	$(CHMOD) 755 $@
 MAKE_FRAG
+
+    $m .= $self->dir_target('$(INST_ARCHAUTODIR)');
 
     return $m;
 }

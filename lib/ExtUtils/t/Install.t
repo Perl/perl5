@@ -17,9 +17,7 @@ use TieOut;
 use File::Path;
 use File::Spec;
 
-use Test::More tests => 32;
-
-use MakeMaker::Test::Setup::BFD;
+use Test::More tests => 29;
 
 BEGIN { use_ok('ExtUtils::Install') }
 
@@ -28,12 +26,6 @@ foreach my $func (qw(install uninstall pm_to_blib install_default)) {
     can_ok(__PACKAGE__, $func);
 }
 
-
-ok( setup_recurs(), 'setup' );
-END {
-    ok( chdir File::Spec->updir );
-    ok( teardown_recurs(), 'teardown' );
-}
 
 chdir 'Big-Dummy';
 

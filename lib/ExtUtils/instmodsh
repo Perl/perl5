@@ -7,22 +7,7 @@ use ExtUtils::Installed;
 
 use vars qw($Inst @Modules);
 
-
-=head1 NAME
-
-instmodsh - A shell to examine installed modules
-
-=head1 SYNOPSIS
-
-    instmodsh
-
-=head1 DESCRIPTION
-
-A little interface to ExtUtils::Installed to examine installed modules,
-validate your packlists and even create a tarball from an installed module.
-
-=cut
-
+################################################################################
 
 sub do_module($)
 {

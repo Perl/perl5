@@ -16,9 +16,8 @@ BEGIN {
 use strict;
 use Config;
 
-use Test::More tests => 79;
+use Test::More tests => 73;
 use MakeMaker::Test::Utils;
-use MakeMaker::Test::Setup::BFD;
 use File::Find;
 use File::Spec;
 use File::Path;
@@ -38,12 +37,6 @@ perl_lib;
 my $Touch_Time = calibrate_mtime();
 
 $| = 1;
-
-ok( setup_recurs(), 'setup' );
-END {
-    ok( chdir File::Spec->updir );
-    ok( teardown_recurs(), 'teardown' );
-}
 
 ok( chdir('Big-Dummy'), "chdir'd to Big-Dummy" ) ||
   diag("chdir failed: $!");
@@ -233,20 +226,13 @@ my $manifest = maniread();
 # look like. :(
 _normalize($manifest);
 is( $manifest->{'meta.yml'}, 'Module meta-data (added by MakeMaker)' );
-my $meta_mtime = (stat('META.yml'))[9];
-
-sleep 1;
-my $metafile_out = run("$make metafile");
-is( $?, 0, 'metafile' ) || diag($metafile_out);
-is( (stat('META.yml'))[9], $meta_mtime, 'META.yml untouched if not changed' );
-ok( !-e 'META_new.yml', 'temp META.yml file not left around' );
 
 # Test NO_META META.yml suppression
 unlink 'META.yml';
 ok( !-f 'META.yml',   'META.yml deleted' );
 @mpl_out = run(qq{$perl Makefile.PL "NO_META=1"});
 cmp_ok( $?, '==', 0, 'Makefile.PL exited with zero' ) || diag(@mpl_out);
-$metafile_out = run("$make metafile");
+my $metafile_out = run("$make metafile");
 is( $?, 0, 'metafile' ) || diag($metafile_out);
 ok( !-f 'META.yml',   'META.yml generation suppressed by NO_META' );
 

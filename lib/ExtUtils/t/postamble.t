@@ -13,9 +13,8 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 8;
+use Test::More tests => 5;
 use MakeMaker::Test::Utils;
-use MakeMaker::Test::Setup::BFD;
 use ExtUtils::MakeMaker;
 use TieOut;
 
@@ -24,12 +23,6 @@ perl_lib;
 $| = 1;
 
 my $Makefile = makefile_name;
-
-ok( setup_recurs(), 'setup' );
-END {
-    ok( chdir File::Spec->updir );
-    ok( teardown_recurs(), 'teardown' );
-}
 
 ok( chdir 'Big-Dummy', q{chdir'd to Big-Dummy} ) ||
         diag("chdir failed: $!");
@@ -70,4 +63,3 @@ ok( open(MAKEFILE, $Makefile) ) or diag "Can't open $Makefile: $!";
   like( <MAKEFILE>, qr/^\# This makes sure the postamble gets written\n/m,
         'postamble added to the Makefile' );
 }
-close MAKEFILE;
