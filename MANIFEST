@@ -4,6 +4,8 @@ INTERN.h                10  Included before domestic .h files
 MANIFEST                 8  This list of files
 Makefile.SH              4  Precursor to Makefile
 README                   1  The Instructions
+README.hpux
+README.aix
 Wishlist                10  Some things that may or may not happen
 arg.c                    3  Expression evaluation
 arg.h                    8  Public declarations for the above
