@@ -1,5 +1,5 @@
 # Pod::Man -- Convert POD data to formatted *roff input.
-# $Id: Man.pm,v 1.15 2001/02/10 06:50:22 eagle Exp $
+# $Id: Man.pm,v 1.16 2001/04/09 13:06:02 eagle Exp $
 #
 # Copyright 1999, 2000, 2001 by Russ Allbery <rra@stanford.edu>
 #
@@ -38,7 +38,7 @@ use vars qw(@ISA %ESCAPES $PREAMBLE $VERSION);
 # Perl core and too many things could munge CVS magic revision strings.
 # This number should ideally be the same as the CVS revision in podlators,
 # however.
-$VERSION = 1.15;
+$VERSION = 1.16;
 
 
 ############################################################################
@@ -971,7 +971,7 @@ sub guesswork {
     s{
         ( ^ | [\s\(\"\'\`\[\{<>] )
         ( [A-Z] [A-Z] [/A-Z+:\d_\$&-]* )
-        (?: (?= [\s>\}\]\)\'\".?!,;:] | -- ) | $ )
+        (?: (?= [\s>\}\]\(\)\'\".?!,;] | -- ) | $ )
     } { $1 . '\s-1' . $2 . '\s0' }egx;
 
     # Turn PI into a pretty pi.
@@ -979,20 +979,20 @@ sub guesswork {
 
     # Italize functions in the form func().
     s{
-        \b
+        ( \b | \\s-1 )
         (
-            [:\w]+ (?:\\s-1)? \(\)
+            [A-Za-z_] ([:\w]|\\s-?[01])+ \(\)
         )
-    } { '\f(IS' . $1 . '\f(IE' }egx;
+    } { $1 . '\f(IS' . $2 . '\f(IE' }egx;
 
     # func(n) is a reference to a manual page.  Make it \fIfunc\fR\|(n).
     s{
-        \b
-        (\w[-:.\w]+ (?:\\s-1)?)
+        ( \b | \\s-1 )
+        ( [A-Za-z_] (?:[-:.\w]|\\s-?[01])+ )
         (
-            \( [^\)] \)
+            \( \d [a-z]* \)
         )
-    } { '\f(IS' . $1 . '\f(IE\|' . $2 }egx;
+    } { $1 . '\f(IS' . $2 . '\f(IE\|' . $3 }egx;
 
     # Convert simple Perl variable references to a fixed-width font.
     s{
