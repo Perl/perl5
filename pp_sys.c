@@ -1518,8 +1518,8 @@ PP(pp_sysread)
     Size_t got = 0;
     Size_t wanted;
     bool charstart = FALSE;
-    STRLEN skip;
-    STRLEN charskip;
+    STRLEN charskip = 0;
+    STRLEN skip = 0;
 
     gv = (GV*)*++MARK;
     if ((PL_op->op_type == OP_READ || PL_op->op_type == OP_SYSREAD)
@@ -1568,6 +1568,7 @@ PP(pp_sysread)
 
     charstart = TRUE;
     charskip  = 0;
+    skip = 0;
 
 #ifdef HAS_SOCKET
     if (PL_op->op_type == OP_RECV) {
