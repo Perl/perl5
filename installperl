@@ -349,7 +349,9 @@ sub link {
     eval {
 	CORE::link($from, $to)
 	    ? $success++
-	    : warn "Couldn't link $from to $to: $!\n"
+	    : ($from =~ m#^/afs/# || $to =~ m#^/afs/#)
+	      ? die "AFS"  # okay inside eval {}
+	      : warn "Couldn't link $from to $to: $!\n"
 	  unless $nonono;
     };
     if ($@) {

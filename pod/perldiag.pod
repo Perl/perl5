@@ -688,6 +688,13 @@ couldn't open the pipe into which to send data destined for stdout.
 
 (F) The script you specified can't be opened for the indicated reason.
 
+=item Can't redefine active sort subroutine %s
+
+(F) Perl optimizes the internal handling of sort subroutines and keeps
+pointers into them.  You tried to redefine one such sort subroutine when it
+was currently active, which is not allowed.  If you really want to do
+this, you should write C<sort { &func } @x> instead of C<sort func @x>.
+
 =item Can't rename %s to %s: %s, skipping file
 
 (S) The rename done by the B<-i> switch failed for some reason, probably because

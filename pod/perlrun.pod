@@ -591,7 +591,10 @@ processes.  However, scripts running setuid would do well to execute
 the following lines before doing anything else, just to keep people
 honest:
 
-    $ENV{'PATH'} = '/bin:/usr/bin';    # or whatever you need
-    $ENV{'SHELL'} = '/bin/sh' if defined $ENV{'SHELL'};
-    $ENV{'IFS'} = ''          if defined $ENV{'IFS'};
+    $ENV{PATH} = '/bin:/usr/bin';    # or whatever you need
+    $ENV{SHELL} = '/bin/sh' if exists $ENV{SHELL};
+    delete $ENV{IFS};
+    delete $ENV{ENV};
+    delete $ENV{CDPATH};
+    $ENV{TERM} = 'dumb'     if exists $ENV{TERM};
 

@@ -60,6 +60,11 @@ sub hostname {
     Carp::croak "Cannot get host name of local machine";  
 
   }
+  elsif ($^O eq 'MSWin32') {
+    ($host) = gethostbyname('localhost');
+    chomp($host = `hostname 2> NUL`) unless defined $host;
+    return $host;
+  }
   else {  # Unix
 
     # method 2 - syscall is preferred since it avoids tainting problems

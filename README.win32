@@ -8,7 +8,7 @@ perlwin32 - Perl under Win32
 
 =head1 SYNOPSIS
 
-These are instructions for building Perl under WindowsNT (versions
+These are instructions for building Perl under Windows NT (versions
 3.51 or 4.0), using Visual C++ (versions 2.0 through 5.0).  Currently,
 this port may also build under Windows95, but you can expect problems
 stemming from the unmentionable command shell that infests that
@@ -31,22 +31,25 @@ only relevant to people building Perl on Unix-like systems.  In
 particular, you can safely ignore any information that talks about
 "Configure".
 
-You should probably also read the README.os2 file, which gives a
-different set of rules to build a Perl that will work on Win32
-platforms.  That method will probably enable you to build a more
-Unix-compatible perl, but you will also need to download and use
-various other support software described in that file.
+You may also want to look at two other options for building
+a perl that will work on Windows NT:  the README.cygwin32 and
+README.os2 files, which give a different set of rules to build a
+Perl that will work on Win32 platforms.  Those two methods will
+probably enable you to build a more Unix-compatible perl, but you
+will also need to download and use various other build-time and
+run-time support software described in those files.
 
 This set of instructions is meant to describe a so-called "native"
 port of Perl to Win32 platforms.  The resulting Perl requires no
 additional software to run (other than what came with your operating
 system).  Currently, this port is only capable of using Microsoft's
 Visual C++ compiler.  The ultimate goal is to support the other major
-compilers that can be used to build Win32 applications.
+compilers that can generally be used to build Win32 applications.
 
 This port currently supports MakeMaker (the set of modules that
 is used to build extensions to perl).  Therefore, you should be
 able to build and install most extensions found in the CPAN sites.
+See the L<Usage Hints> section for general hints about this.
 
 =head2 Setting Up
 
@@ -61,13 +64,15 @@ muster the temerity to attempt this with Windows95.
 
 =item *
 
-Run the VCVARS32.BAT file usually found somewhere like C:\MSDEV4.2\BIN.
-This will set your build environment.
+If you did not choose to always initialize the Visual C++ compilation
+environment variables when you installed Visual C++ on your system, you
+will need to run the VCVARS32.BAT file usually found somewhere like
+C:\MSDEV4.2\BIN.  This will set your build environment.
 
 =item *
 
 Depending on how you extracted the distribution, you have to make sure
-all the files are writable by you.  The easiest way to make sure of
+some of the files are writable by you.  The easiest way to make sure of
 this is to execute:
 
 	attrib -R *.* /S
@@ -100,7 +105,7 @@ If you are using a Visual C++ ver. 2.0: type "nmake CCTYPE=MSVC20".
 
 This should build everything.  Specifically, it will create perl.exe,
 perl.dll, and perlglob.exe at the perl toplevel, and various other
-extension dll's under the lib\auto directory.  If the make fails for
+extension dll's under the lib\auto directory.  If the build fails for
 any reason, make sure you have done the previous steps correctly.
 
 =back
@@ -118,23 +123,172 @@ Please report any failures as described under L<BUGS AND CAVEATS>.
 =head2 Installation
 
 Type "nmake install".  This will put the newly built perl and the
-libraries under "C:\PERL" (actually whatever you set INST_TOP to
-in the Makefile).  To use the Perl you just installed, set your
-PATH environment variable to "C:\PERL\BIN" (or $(INST_TOP)\BIN, if you
+libraries under "C:\perl" (actually whatever you set C<INST_TOP> to
+in the Makefile).  It will also install the pod documentation under
+C<$INST_TOP\lib\pod> and HTML versions of the same under
+C<$INST_TOP\lib\pod\html>.  To use the Perl you just installed, set your
+PATH environment variable to "C:\perl\bin" (or C<$INST_TOP\bin>, if you
 changed the default as above).
+
+=head2 Usage Hints
+
+=over 4
+
+=item Environment Variables
+
+The installation paths that you set during the build get compiled
+into perl, so you don't have to do anything additional to start
+using that perl (except add its location to your PATH variable).
+
+If you put extensions in unusual places, you can set PERL5LIB
+to a list of paths separated by semicolons where you want perl
+to look for libraries.  Look for descriptions of other environment
+variables you can set in the perlrun podpage.
+
+Sometime in the future, some of the configuration information
+for perl will be moved into the Windows registry.
+
+=item Using perl from the command line
+
+If you are accustomed to using perl from various command-line
+shells found in UNIX environments, you will be less than pleased
+with what Windows NT offers by way of a command shell.
+
+The crucial thing to understand about the "cmd" shell (which is
+the default on Windows NT) is that it does not do any wildcard
+expansions of command-line arguments (so wildcards need not be
+quoted).  It also provides only rudimentary quoting.  The only
+(useful) quote character is the double quote (").  It can be used to
+protect spaces in arguments and other special characters.  The
+Windows NT documentation has almost no description of how the
+quoting rules are implemented, but here are some general observations
+based on experiments:  The shell breaks arguments at spaces and
+passes them to programs in argc/argv.  Doublequotes can be used
+to prevent arguments with spaces in them from being split up.
+You can put a double quote in an argument by escaping it with
+a backslash and enclosing the whole argument within double quotes.
+The backslash and the pair of double quotes surrounding the
+argument will be stripped by the shell.
+
+The file redirection characters "<", ">", and "|" cannot be quoted
+by double quotes (there are probably more such).  Single quotes
+will protect those three file redirection characters, but the
+single quotes don't get stripped by the shell (just to make this
+type of quoting completely useless).  The caret "^" has also
+been observed to behave as a quoting character (and doesn't get
+stripped by the shell also).
+
+Here are some examples of usage of the "cmd" shell:
+
+This prints two doublequotes:
+
+    perl -e "print '\"\"' "
+
+This does the same:
+
+    perl -e "print \"\\\"\\\"\" "
+
+This prints "bar" and writes "foo" to the file "blurch":
+
+    perl -e "print 'foo'; print STDERR 'bar'" > blurch
+
+This prints "foo" ("bar" disappears into nowhereland):
+
+    perl -e "print 'foo'; print STDERR 'bar'" 2> nul
+
+This prints "bar" and writes "foo" into the file "blurch":
+
+    perl -e "print 'foo'; print STDERR 'bar'" 1> blurch
+
+This prints "foo" and writes "bar" to the file "blurch":
+
+    perl -e "print 'foo'; print STDERR 'bar'" 2> blurch
+
+This pipes "foo" to the "less" pager and prints "bar" on the console:
+
+    perl -e "print 'foo'; print STDERR 'bar'" | less
+
+This pipes "foo\nbar\n" to the less pager:
+
+    perl -le "print 'foo'; print STDERR 'bar'" |& less
+
+This does the same thing as the above:
+
+    perl -le "print 'foo'; print STDERR 'bar'" 2>&1 | less
+
+This pipes "foo" to the pager and writes "bar" in the file "blurch":
+
+    perl -e "print 'foo'; print STDERR 'bar'" 2> blurch | less
+
+
+Discovering the usage of the "command.com" shell on Windows 95
+is left as an exercise to the reader :)
+
+=item Building Extensions
+
+The Comprehensive Perl Archive Network (CPAN) offers a wealth
+of extensions, some of which require a C compiler to build.
+Look in http://www.perl.com/ for more information on CPAN.
+
+Most extensions (whether they require a C compiler or not) can
+be built, tested and installed with the standard mantra:
+
+    perl Makefile.PL
+    nmake
+    nmake test
+    nmake install
+
+Note the NMAKE that comes with Visual C++ is required.  Some
+extensions may not provide a testsuite (so "nmake test"
+may not do anything, or fail), but most serious ones do.
+
+If a module implements XSUBs, you will need a C compiler (Visual C++
+versions 2.0 and above are currently supported).  You must make sure
+you have set up the environment for the compiler for command-line
+compilation.
+
+If a module does not build for some reason, carefully look at
+why it failed, and report problems to the module author.  If
+it looks like the extension building support is at fault, report
+that with full details of how the build failed using the perlbug
+utility.
+
+=item Miscellaneous Things
+
+A full set of HTML documentation is installed, so you should be
+able to use it if you have a web browser installed on your
+system.
+
+C<perldoc> is also a useful tool for browsing information contained
+in the documentation, especially in conjunction with a pager
+like C<less> (recent versions of which have Win32 support).  You may
+have to set the PAGER environment variable to use a specific pager.
+"perldoc -f foo" will print information about the perl operator
+"foo".
+
+If you find bugs in perl, you can run C<perlbug> to create a
+bug report (you may have to send it manually if C<perlbug> cannot
+find a mailer on your system).
+
+=back
 
 =head1 BUGS AND CAVEATS
 
-This is still very much an experimental port, and should be considered
-alpha quality software.  You can expect changes in virtually all of
-these areas: build process, installation structure, supported
-utilities/modules, and supported perl functionality.  Specifically,
-functionality specific to the Win32 environment may ultimately
-be supported as either core modules or extensions.
+This port has not been tested as extensively as we'd like, and
+therefore should be considered beta quality software.  You should
+expect changes in virtually all of these areas: build process,
+installation structure, supported utilities/modules, and supported
+perl functionality.  In particular, functionality specific to the
+Win32 environment may ultimately be supported as either core modules
+or extensions.  This means that you should be prepared to recompile
+extensions when binary incompatibilites arise due to changes in the
+internal structure of the code.
 
 If you have had prior exposure to Perl on Unix platforms, you will notice
 this port exhibits behavior different from what is documented.  Most of the
-differences fall under one of these categories.
+differences fall under one of these categories.  We do not consider
+any of them to be serious limitations (especially when compared to the
+limited nature of some of the Win32 OSes themselves :)
 
 =over 8
 
@@ -142,7 +296,8 @@ differences fall under one of these categories.
 
 C<stat()> and C<lstat()> functions may not behave as documented.  They
 may return values that bear no resemblance to those reported on Unix
-platforms, and some fields may be completely bogus.
+platforms, and some fields (like the the one for inode) may be completely
+bogus.
 
 =item *
 
@@ -160,11 +315,6 @@ behave as on Unix platforms.
 =item *
 
 The four-argument C<select()> call is only supported on sockets.
-
-=item *
-
-The behavior of C<system()> or the C<qx[]> operator (a.k.a. "backticks"),
-when used to call interactive commands, is ill-defined.
 
 =item *
 
@@ -191,12 +341,12 @@ Signal handling may not behave as on Unix platforms.
 
 =item *
 
-File globbing may not behave as on Unix platforms.
-
-=item *
-
-Not all of the utilities that come with the Perl distribution
-are supported yet.
+File globbing may not behave as on Unix platforms.  In particular,
+globbing does not understand wildcards in the pathname component,
+but only in the filename component.  In other words, something like
+"print <*/*.pl>" will not print all the perl scripts in all the
+subdirectories one level under the current one (like it does on
+UNIX platforms).
 
 =back
 

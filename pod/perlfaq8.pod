@@ -1183,6 +1183,3 @@ CPAN).  No ONC::RPC module is known.
 Copyright (c) 1997 Tom Christiansen and Nathan Torkington.
 All rights reserved.  See L<perlfaq> for distribution information.
 
-END-of-perlfaq9.pod
-exit
-

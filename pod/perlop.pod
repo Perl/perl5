@@ -644,7 +644,8 @@ Options are:
 If "/" is the delimiter then the initial C<m> is optional.  With the C<m>
 you can use any pair of non-alphanumeric, non-whitespace characters as
 delimiters.  This is particularly useful for matching Unix path names
-that contain "/", to avoid LTS (leaning toothpick syndrome).
+that contain "/", to avoid LTS (leaning toothpick syndrome).  If "?" is
+the delimiter, then the match-only-once rule of C<?PATTERN?> applies.
 
 PATTERN may contain variables, which will be interpolated (and the
 pattern recompiled) every time the pattern search is evaluated.  (Note
@@ -816,6 +817,11 @@ Some frequently seen examples:
 
     use POSIX qw( setlocale localeconv )
     @EXPORT = qw( foo bar baz );
+
+A common mistake is to try to separate the words with comma or to put
+comments into a multi-line qw-string.  For this reason the C<-w>
+switch produce warnings if the STRING contains the "," or the "#"
+character.
 
 =item s/PATTERN/REPLACEMENT/egimosx
 

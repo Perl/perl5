@@ -961,6 +961,20 @@ LIST, READLINE this, GETC this, DESTROY this
 
 =back
 
+=item Support for More Operating Systems
+
+=over
+
+=item Win32
+
+=item Plan 9
+
+=item QNX
+
+=item AmigaOS
+
+=back
+
 =item Pragmata
 
 use autouse MODULE => qw(sub1 sub2 sub3), use blib, use blib 'dir', use
@@ -996,6 +1010,10 @@ constant NAME => VALUE, use locale, use ops, use vmsish
 
 =over
 
+=item pod2html
+
+Sends converted HTML to standard output
+
 =item xsubpp
 
 C<void> XSUBs now default to returning nothing
@@ -1018,26 +1036,27 @@ L<perlsec>
 not a HASH element or slice, Allocation too large: %lx, Allocation too
 large, Applying %s to %s will act on scalar(%s), Attempt to free
 nonexistent shared string, Attempt to use reference as lvalue in substr,
-Can't use bareword ("%s") as %s ref while "strict refs" in use, Cannot
-resolve method `%s' overloading `%s' in package `%s', Constant subroutine
-%s redefined, Constant subroutine %s undefined, Copy method did not return
-a reference, Died, Exiting pseudo-block via %s, Identifier too long,
-Illegal character %s (carriage return), Illegal switch in PERL5OPT: %s,
-Integer overflow in hex number, Integer overflow in octal number, internal
-error: glob failed, Invalid conversion in %s: "%s", Invalid type in pack:
-'%s', Invalid type in unpack: '%s', Name "%s::%s" used only once: possible
-typo, Null picture in formline, Offset outside string, Out of memory!, Out
-of memory during request for %s, panic: frexp, Possible attempt to put
-comments in qw() list, Possible attempt to separate words with commas,
-Scalar value @%s{%s} better written as $%s{%s}, Stub found while resolving
-method `%s' overloading `%s' in package `%s', Too late for "B<-T>" option,
-untie attempted while %d inner references still exist, Unrecognized
-character %s, Unsupported function fork, Use of "$$<digit>" to mean
-"${$}<digit>" is deprecated, Value of %s can be "0"; test with defined(),
-Variable "%s" may be unavailable, Variable "%s" will not stay shared,
-Warning: something's wrong, Ill-formed logical name |%s| in prime_env_iter,
-Got an error from DosAllocMem, Malformed PERLLIB_PREFIX, PERL_SH_DIR too
-long, Process terminated by SIG%s
+Can't redefine active sort subroutine %s, Can't use bareword ("%s") as %s
+ref while "strict refs" in use, Cannot resolve method `%s' overloading `%s'
+in package `%s', Constant subroutine %s redefined, Constant subroutine %s
+undefined, Copy method did not return a reference, Died, Exiting
+pseudo-block via %s, Identifier too long, Illegal character %s (carriage
+return), Illegal switch in PERL5OPT: %s, Integer overflow in hex number,
+Integer overflow in octal number, internal error: glob failed, Invalid
+conversion in %s: "%s", Invalid type in pack: '%s', Invalid type in unpack:
+'%s', Name "%s::%s" used only once: possible typo, Null picture in
+formline, Offset outside string, Out of memory!, Out of memory during
+request for %s, panic: frexp, Possible attempt to put comments in qw()
+list, Possible attempt to separate words with commas, Scalar value @%s{%s}
+better written as $%s{%s}, Stub found while resolving method `%s'
+overloading `%s' in package `%s', Too late for "B<-T>" option, untie
+attempted while %d inner references still exist, Unrecognized character %s,
+Unsupported function fork, Use of "$$<digit>" to mean "${$}<digit>" is
+deprecated, Value of %s can be "0"; test with defined(), Variable "%s" may
+be unavailable, Variable "%s" will not stay shared, Warning: something's
+wrong, Ill-formed logical name |%s| in prime_env_iter, Got an error from
+DosAllocMem, Malformed PERLLIB_PREFIX, PERL_SH_DIR too long, Process
+terminated by SIG%s
 
 =item BUGS
 
@@ -1189,6 +1208,8 @@ i, m, s, x
 =item Version 8 Regular Expressions
 
 =item WARNING on \1 vs $1
+
+=item SEE ALSO
 
 =back
 
@@ -1966,13 +1987,13 @@ t, t expr, b [line] [condition], b subname [condition], b postpone subname
 command, A, O [opt[=val]] [opt"val"] [opt?].., C<recallCommand>,
 C<ShellBang>, C<pager>, C<tkRunning>, C<signalLevel>, C<warnLevel>,
 C<dieLevel>, C<AutoTrace>, C<LineInfo>, C<inhibit_exit>, C<PrintRet>,
-C<frame>, C<maxTraceLen>, C<arrayDepth>, C<hashDepth>, C<compactDump>,
-C<veryCompact>, C<globPrint>, C<DumpDBFiles>, C<DumpPackages>, C<quote>,
-C<HighBit>, C<undefPrint>, C<UsageOnly>, C<TTY>, C<noTTY>, C<ReadLine>,
-C<NonStop>, E<lt> [ command ], E<lt>E<lt> command, E<gt> command,
-E<gt>E<gt> command, { [ command ], {{ command, ! number, ! -number, !
-pattern, !! cmd, H -number, q or ^D, R, |dbcmd, ||dbcmd, = [alias value],
-command, m expr, m package
+C<ornaments>, C<frame>, C<maxTraceLen>, C<arrayDepth>, C<hashDepth>,
+C<compactDump>, C<veryCompact>, C<globPrint>, C<DumpDBFiles>,
+C<DumpPackages>, C<quote>, C<HighBit>, C<undefPrint>, C<UsageOnly>, C<TTY>,
+C<noTTY>, C<ReadLine>, C<NonStop>, E<lt> [ command ], E<lt>E<lt> command,
+E<gt> command, E<gt>E<gt> command, { [ command ], {{ command, ! number, !
+-number, ! pattern, !! cmd, H -number, q or ^D, R, |dbcmd, ||dbcmd, =
+[alias value], command, m expr, m package
 
 =item Debugger input/output
 

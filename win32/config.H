@@ -40,8 +40,8 @@
  *	This symbol is the filename expanded version of the BIN symbol, for
  *	programs that do not want to deal with that at run-time.
  */
-#define BIN "C:\\perl\\bin"	/**/
-#define BIN_EXP "C:\\perl\\bin"	/**/
+#define BIN "c:\\perl\\bin"	/**/
+#define BIN_EXP "c:\\perl\\bin"	/**/
 
 /* CAT2:
  *	This macro catenates 2 tokens together.
@@ -92,7 +92,7 @@
  *	This symbol, if defined, indicates that the alarm routine is
  *	available.
  */
-#define HAS_ALARM		/**/
+/*#define HAS_ALARM		/**/
 
 /* HASATTRIBUTE:
  *	This symbol indicates the C compiler can check for function attributes,
@@ -250,7 +250,7 @@
  *	This symbol, if defined, indicates that the flock routine is
  *	available to do file locking.
  */
-/*#define HAS_FLOCK		/**/
+#define HAS_FLOCK		/**/
 
 /* HAS_FORK:
  *	This symbol, if defined, indicates that the fork routine is
@@ -1068,7 +1068,7 @@
  *	This symbol, if defined, indicates that <ndbm.h> exists and should
  *	be included.
  */
-#define I_NDBM	/**/
+/*#define I_NDBM	/**/
 
 /* I_NET_ERRNO:
  *	This symbol, if defined, indicates that <net/errno.h> exists and 
@@ -1413,8 +1413,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define ARCHLIB "C:\\perl\\lib"		/**/
-#define ARCHLIB_EXP "C:\\perl\\lib"		/**/
+#define ARCHLIB "c:\\perl\\lib"		/**/
+#define ARCHLIB_EXP "c:\\perl\\lib"		/**/
 
 /* BINCOMPAT3:
  *	This symbol, if defined, indicates that Perl 5.004 should be
@@ -1660,8 +1660,8 @@
  *	This symbol contains the ~name expanded version of PRIVLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define PRIVLIB "C:\\perl\\lib"		/**/
-#define PRIVLIB_EXP "C:\\perl\\lib"		/**/
+#define PRIVLIB "c:\\perl\\lib"		/**/
+#define PRIVLIB_EXP "c:\\perl\\lib"		/**/
 
 /* SH_PATH:
  *	This symbol contains the full pathname to the shell used on this
@@ -1670,7 +1670,7 @@
  *	/bin/pdksh, /bin/ash, /bin/bash, or even something such as
  *	D:/bin/sh.exe.
  */
-#define SH_PATH "cmd /c"  /**/
+#define SH_PATH "cmd /x /c"  /**/
 
 /* SIG_NAME:
  *	This symbol contains a list of signal names in order of
@@ -1716,8 +1716,8 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITEARCH "C:\\perl\\lib\\site"		/**/
-#define SITEARCH_EXP "C:\\perl\\lib\\site"		/**/
+#define SITEARCH "c:\\perl\\lib\\site"		/**/
+#define SITEARCH_EXP "c:\\perl\\lib\\site"		/**/
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.
@@ -1732,8 +1732,8 @@
  *	This symbol contains the ~name expanded version of SITELIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITELIB "C:\\perl\\lib\\site"		/**/
-#define SITELIB_EXP "C:\\perl\\lib\\site"		/**/
+#define SITELIB "c:\\perl\\lib\\site"		/**/
+#define SITELIB_EXP "c:\\perl\\lib\\site"		/**/
 
 /* STARTPERL:
  *	This variable contains the string to put in front of a perl
@@ -1778,4 +1778,3 @@
 #include <win32.h>
 #define ARCHLIBEXP (win32PerlLibPath())
 #define DEBUGGING
-#define MULTIPLCITY

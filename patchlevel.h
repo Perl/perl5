@@ -38,6 +38,7 @@
  */
 static	char	*local_patches[] = {
 	NULL
+	,"Dev99A - First post-gamma development patch"
 	,NULL
 };
 

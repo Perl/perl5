@@ -3,12 +3,12 @@
 // djl
 // Provide UNIX compatibility
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 #ifndef  _INC_SYS_SOCKET
 #define  _INC_SYS_SOCKET
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #ifndef  _WINDOWS_
 #define  _WINDOWS_

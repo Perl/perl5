@@ -2,7 +2,7 @@
 
 # $RCSfile: sort.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:24 $
 
-print "1..14\n";
+print "1..19\n";
 
 sub backwards { $a lt $b ? 1 : $a gt $b ? -1 : 0 }
 
@@ -66,3 +66,28 @@ print "# x = '@b'\n";
 @b = sort reverse (4,1,3,2);
 print ("@b" eq '1 2 3 4' ? "ok 14\n" : "not ok 14\n");
 print "# x = '@b'\n";
+
+$^W = 0;
+# redefining sort sub inside the sort sub should fail
+sub twoface { *twoface = sub { $a <=> $b }; &twoface }
+eval { @b = sort twoface 4,1,3,2 };
+print ($@ =~ /redefine active sort/ ? "ok 15\n" : "not ok 15\n");
+
+# redefining sort subs outside the sort should not fail
+eval { *twoface = sub { &backwards } };
+print $@ ? "not ok 16\n" : "ok 16\n";
+
+eval { @b = sort twoface 4,1,3,2 };
+print ("@b" eq '4 3 2 1' ? "ok 17\n" : "not ok 17 |@b|\n");
+
+*twoface = sub { *twoface = *backwards; $a <=> $b };
+eval { @b = sort twoface 4,1 };
+print ($@ =~ /redefine active sort/ ? "ok 18\n" : "not ok 18\n");
+
+*twoface = sub {
+                 eval 'sub twoface { $a <=> $b }';
+		 die($@ =~ /redefine active sort/ ? "ok 19\n" : "not ok 19\n");
+		 $a <=> $b;
+	       };
+eval { @b = sort twoface 4,1 };
+print $@ ? "$@" : "not ok 19\n";

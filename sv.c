@@ -1928,6 +1928,11 @@ register SV *sstr;
 		GvNAMELEN(dstr) = len;
 		SvFAKE_on(dstr);	/* can coerce to non-glob */
 	    }
+	    /* ahem, death to those who redefine active sort subs */
+	    else if (curstack == sortstack
+		     && GvCV(dstr) && sortcop == CvSTART(GvCV(dstr)))
+		croak("Can't redefine active sort subroutine %s",
+		      GvNAME(dstr));
 	    (void)SvOK_off(dstr);
 	    GvINTRO_off(dstr);		/* one-shot flag */
 	    gp_free((GV*)dstr);
@@ -2010,6 +2015,13 @@ register SV *sstr;
 			    if (!GvCVGEN((GV*)dstr) &&
 				(CvROOT(cv) || CvXSUB(cv)))
 			    {
+				/* ahem, death to those who redefine
+				 * active sort subs */
+				if (curstack == sortstack &&
+				      sortcop == CvSTART(cv))
+				    croak(
+				    "Can't redefine active sort subroutine %s",
+					  GvENAME((GV*)dstr));
 				if (cv_const_sv(cv))
 				    warn("Constant subroutine %s redefined",
 					 GvENAME((GV*)dstr));

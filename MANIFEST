@@ -227,7 +227,6 @@ h2pl/tcbreak2		cbreak test routine using .pl
 handy.h			Handy definitions
 hints/3b1.sh		Hints for named architecture
 hints/3b1cc		Hints for named architecture
-hints/README.NeXT	Notes about NeXT hints
 hints/README.hints	Notes about hints
 hints/aix.sh		Hints for named architecture
 hints/altos486.sh	Hints for named architecture

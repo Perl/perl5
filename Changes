@@ -45,6 +45,161 @@ And the Keepers of the Patch Pumpkin:
     Chip Salzenberg     <chip@perl.com>
 
 
+-----------------
+Version 5.003_99a
+-----------------
+
+Herein we find the fruits of the gamma.
+
+ CORE LANGUAGE CHANGES
+
+  Title:  "SECURITY: Forbid glob() when tainting (-T or setuid)"
+   From:  Chip Salzenberg
+  Files:  pod/perlrun.pod pod/perlsec.pod pp_sys.c
+
+  Title:  "SECURITY: Forbid exec() if $ENV{TERM} or $ENV{ENV} is tainted"
+   From:  Chip Salzenberg
+  Files:  pod/perlrun.pod pod/perlsec.pod t/op/taint.t taint.c
+
+ CORE PORTABILITY
+
+  Title:  "(NeXT|Open)Step update"
+   From:  Gerd Knops <gerti@BITart.com>
+ Msg-ID:  <9705072247.AA18882@BITart.com>
+   Date:  Wed,  7 May 97 17:47:02 -0500
+  Files:  Configure MANIFEST config_h.SH hints/next_3.sh hints/next_4.sh
+
+  Title:  "NetBSD hint update"
+   From:  Giles Lean <giles@nemeton.com.au>
+ Msg-ID:  <199705051346.XAA13584@topaz.nemeton.com.au>
+   Date:  Mon, 5 May 1997 23:46:37 +1000 (EST)
+  Files:  hints/netbsd.sh
+
+  Title:  "Irix hint update"
+   From:  Scott Henry <scotth@sgi.com>
+ Msg-ID:  <yd83es0fp57.fsf@hoshi.engr.sgi.com>
+   Date:  06 May 1997 11:09:56 -0700
+  Files:  hints/irix_6.sh
+
+  Title:  "HPUX: patch for ext/DynaLoader/dl_hpux.xs"
+   From:  Chuck D. Phillips <cdp@hpescdp.fc.hp.com>
+ Msg-ID:  <199705050548.WAA21260@palrel1.hp.com>
+   Date:  Sun, 4 May 1997 23:48:39 -0600
+  Files:  ext/DynaLoader/dl_hpux.xs
+
+  Title:  "Win32 update (consolidated patch plus three followups)"
+   From:  Gurusamy Sarathy
+  Files:  EXTERN.h README.win32 lib/Sys/Hostname.pm pod/perldelta.pod
+          win32/config.H win32/config.w32 win32/config_sh.PL win32/perllib.c
+          win32/win32.c win32/win32.h win32/include/sys/socket.h
+
+  Title:  "Win32 boot_DynaLoader problem in 99"
+   From:  Gary Clark <GaryC@mail.jeld-wen.com>
+ Msg-ID:  <1997May05.105000.1708.84476@mail.jeld-wen.com>
+   Date:  Mon, 05 May 1997 10:49:03 -0700
+  Files:  win32/makedef.pl
+
+ OTHER CORE CHANGES
+
+  Title:  "Fix wantarray() in sort subs [fixes metaconfig]"
+   From:  Chip Salzenberg
+  Files:  pp_ctl.c
+
+  Title:  "Fix for redefined sort subs nastiness"
+   From:  Gurusamy Sarathy
+ Msg-ID:  <199705090004.UAA15032@aatma.engin.umich.edu>
+   Date:  Thu, 08 May 1997 20:04:18 -0400
+  Files:  op.c pod/perldelta.pod pod/perldiag.pod sv.c t/op/sort.t
+
+ BUILD PROCESS
+
+  Title:  "AFS patches"
+   From:  Chip Salzenberg, Larry Schwimmer <rosebud@cyclone.Stanford.EDU>
+  Files:  Configure installperl
+
+ LIBRARY AND EXTENSIONS
+
+  Title:  "Another blank line patch to Pod::Text"
+   From:  Russ Allbery <rra@stanford.edu>
+ Msg-ID:  <m3afm5g6ar.fsf@windlord.Stanford.EDU>
+   Date:  08 May 1997 11:36:12 -0700
+  Files:  lib/Pod/Text.pm
+
+ TESTS
+
+   (no other changes)
+
+ UTILITIES
+
+  Title:  "Three bugs in pod2html"
+   From:  hansm@euronet.nl
+ Msg-ID:  <199705052228.AAA25351@mail.euronet.nl>
+   Date:  Tue, 6 May 97 00:28:06 +0200
+  Files:  lib/Pod/Html.pm
+
+  Title:  "Trivial bugfix for pod of xsubpp"
+   From:  Ralf S. Engelschall <rse@engelschall.com>
+ Msg-ID:  <199705051447.QAA09995@en1.engelschall.com>
+   Date:  Mon, 5 May 1997 16:47:03 +0200
+  Files:  lib/ExtUtils/xsubpp
+
+  Title:  "Newer CPerl mode"
+   From:  Ilya Zakharevich
+ Msg-ID:  <199705080032.UAA22532@monk.mps.ohio-state.edu>
+   Date:  Wed, 7 May 1997 20:32:46 -0400 (EDT)
+  Files:  emacs/cperl-mode.el
+
+ DOCUMENTATION
+
+  Title:  "Updates to perldelta"
+   From:  Chip Salzenberg and Dominic Dunlop
+  Files:  pod/perldelta.pod
+
+  Title:  "More explicit Solaris instructions"
+   From:  Andy Dougherty
+ Msg-ID:  <Pine.SOL.3.95q.970508171206.438A-100000@fractal.lafayette.ed
+   Date:  Thu, 08 May 1997 17:14:54 -0400 (EDT)
+  Files:  INSTALL hints/solaris_2.sh
+
+  Title:  "Document 'Possible attempt to separate words with commas'"
+   From:  Gisle Aas
+ Msg-ID:  <hyb9snvdw.fsf@bergen.sn.no>
+   Date:  06 May 1997 23:27:55 +0200
+  Files:  pod/perlop.pod
+
+  Title:  "perlfaq9, hostname"
+   From:  John D Groenveld <groenvel@cse.psu.edu>
+ Msg-ID:  <199705061741.NAA22777@cse.psu.edu>
+   Date:  Tue, 06 May 1997 13:41:12 EDT
+  Files:  pod/perlfaq9.pod
+
+  Title:  "Debugger docs patch"
+   From:  Ilya Zakharevich
+ Msg-ID:  <199705080107.VAA24317@monk.mps.ohio-state.edu>
+   Date:  Wed, 7 May 1997 21:07:14 -0400 (EDT)
+  Files:  pod/perldebug.pod
+
+  Title:  "Document that C<m?x?> is just like C<?x?>"
+   From:  Chip Salzenberg
+  Files:  pod/perlop.pod
+
+  Title:  "Refresh description of sprintf()"
+   From:  Chip Salzenberg
+  Files:  pod/perl.pod pod/perlfunc.pod
+
+  Title:  "Mention the Regular Expressions book"
+   From:  Stephen Potter <spp@psa.pencom.com>
+ Msg-ID:  <199705071737.MAA18799@psa.pencom.com>
+   Date:  Wed, 07 May 1997 12:37:37 -0500
+  Files:  pod/perlbook.pod pod/perlre.pod
+
+  Title:  "OS/2 doc patch for _99"
+   From:  Ilya Zakharevich
+ Msg-ID:  <199705080046.UAA23466@monk.mps.ohio-state.edu>
+   Date:  Wed, 7 May 1997 20:46:45 -0400 (EDT)
+  Files:  README.os2
+
+
 ----------------
 Version 5.003_99
 ----------------

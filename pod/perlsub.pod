@@ -320,8 +320,9 @@ otherwise.  An inner block may countermand this with S<"no strict 'vars'">.
 
 A my() has both a compile-time and a run-time effect.  At compile time,
 the compiler takes notice of it; the principle usefulness of this is to
-quiet C<use strict 'vars'>.  The actual initialization doesn't happen
-until run time, so gets executed every time through a loop.
+quiet C<use strict 'vars'>.  The actual initialization is delayed until
+run time, so it gets executed appropriately; every time through a loop,
+for example.
 
 Variables declared with "my" are not part of any package and are therefore
 never fully qualified with the package name.  In particular, you're not

@@ -10,9 +10,9 @@ this one.
 
 =head1 Supported Environments
 
-Perl5.004 builds out of the box on Unix, Plan9, LynxOS, VMS, OS/2,
-QNX, AmigaOS, and Windows NT; once built on Windows NT, Perl runs
-on Windows 95 as well.
+Perl5.004 builds out of the box on Unix, Plan 9, LynxOS, VMS, OS/2,
+QNX, AmigaOS, and Windows NT.  Perl runs on Windows 95 as well, but it
+cannot be built there, for lack of a reasonable command interpreter.
 
 =head1 Core Changes
 
@@ -72,7 +72,7 @@ your scripts.
 Before Perl 5.004, C<AUTOLOAD> functions were looked up as methods
 (using the C<@ISA> hierarchy), even when the function to be autoloaded
 was called as a plain function (e.g. C<Foo::bar()>), not a method
-(e.g. C<Foo->bar()> or C<$obj->bar()>).
+(e.g. C<Foo-E<gt>bar()> or C<$obj-E<gt>bar()>).
 
 Perl 5.005 will use method lookup only for methods' C<AUTOLOAD>s.
 However, there is a significant base of existing code that may be using
@@ -92,9 +92,9 @@ assigned to (via C<@_>).
 
 Earlier versions of Perl vary in their handling of such arguments.
 Perl versions 5.002 and 5.003 always brought them into existence.
-Perl versions 5.000, 5.001, and 5.002 brought them into existence only
-if they were not the first argument (which was almost certainly a
-bug).  Earlier versions of Perl never brought them into existence.
+Perl versions 5.000 and 5.001 brought them into existence only if
+they were not the first argument (which was almost certainly a bug).
+Earlier versions of Perl never brought them into existence.
 
 For example, given this code:
 
@@ -280,8 +280,8 @@ The new conversions in Perl's sprintf() are:
 
    %i	a synonym for %d
    %p	a pointer (the address of the Perl value, in hexadecimal)
-   %n	special: B<stores> into the next variable in the parameter
-        list the number of characters printed so far
+   %n	special: *stores* the number of characters output so far
+        into the next variable in the parameter list 
 
 The new flags that go between the C<%> and the conversion are:
 
@@ -665,6 +665,43 @@ Each unique hash key is only allocated once, no matter how many hashes
 have an entry with that key.  So even if you have 100 copies of the
 same hash, the hash keys never have to be reallocated.
 
+=head1 Support for More Operating Systems
+
+Support for the following operating systems is new in Perl 5.004.
+
+=head2 Win32
+
+Perl 5.004 now includes support for building a "native" perl under
+Windows NT, using the Microsoft Visual C++ compiler (versions 2.0
+and above).  The resulting perl can be used under Windows 95 (if it
+is installed in the same directory locations as it got installed
+in Windows NT).  This port includes support for perl extension
+building tools like L<MakeMaker> and L<h2xs>, so that many extensions
+available on the Comprehensive Perl Archive Network (CPAN) can now be
+readily built under Windows NT.  See http://www.perl.com/ for more
+information on CPAN, and L<README.win32> for more details on how to
+get started with building this port.
+
+There is also support for building perl under the Cygwin32 environment.
+Cygwin32 is a set of GNU tools that make it possible to compile and run
+many UNIX programs under Windows NT by providing a mostly UNIX-like 
+interface for compilation and execution.  See L<README.cygwin32> for
+more details on this port, and how to obtain the Cygwin32 toolkit.
+This port has not been as well tested as the "native" port described
+above (which is not as well tested as we'd like either :)
+
+=head2 Plan 9
+
+See L<README.plan9>.
+
+=head2 QNX
+
+See L<README.qnx>.
+
+=head2 AmigaOS
+
+See L<README.amigaos>.
+
 =head1 Pragmata
 
 Six new pragmatic modules exist:
@@ -933,6 +970,19 @@ For example, you can now say
 
 =head1 Utility Changes
 
+=head2 pod2html
+
+=over
+
+=item Sends converted HTML to standard output
+
+The I<pod2html> utility included with Perl 5.004 is entirely new.
+By default, it sends the converted HTML to its standard output,
+instead of writing it to a file like Perl 5.003's I<pod2html> did.
+Use the B<--outfile=FILENAME> option to write to a file.
+
+=back
+
 =head2 xsubpp
 
 =over
@@ -1096,6 +1146,13 @@ that can no longer be found in the table.
 (W) You supplied a reference as the first argument to substr() used
 as an lvalue, which is pretty strange.  Perhaps you forgot to
 dereference it first.  See L<perlfunc/substr>.
+
+=item Can't redefine active sort subroutine %s
+
+(F) Perl optimizes the internal handling of sort subroutines and keeps
+pointers into them.  You tried to redefine one such sort subroutine when it
+was currently active, which is not allowed.  If you really want to do
+this, you should write C<sort { &func } @x> instead of C<sort func @x>.
 
 =item Can't use bareword ("%s") as %s ref while "strict refs" in use
 

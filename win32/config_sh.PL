@@ -4,6 +4,8 @@ while (@ARGV && $ARGV[0] =~ /^([\w_]+)=(.*)$/)
   $opt{$1}=$2;
   shift(@ARGV);
  }
+
+@opt{'PATCHLEVEL','SUBVERSION'} = ($] =~ /\.0*([1-9]+)(\d\d)$/);
 while (<>)
  {
   s/~([\w_]+)~/$opt{$1}/g;

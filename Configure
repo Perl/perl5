@@ -1360,7 +1360,7 @@ If you are in a hurry, you may run 'Configure -d'.  This will bypass nearly all
 the questions and use the computed defaults (or the previous answers if there
 was already a config.sh file). Type 'Configure -h' for a list of options.
 You may also start interactively and then answer '& -d' at any prompt to turn
-on the non-interactive behaviour for the remaining of the execution.
+on the non-interactive behavior for the remainder of the execution.
 
 EOH
 	. ./myread
@@ -2527,9 +2527,10 @@ archlibexp="$ansexp"
 if $afs; then
 	$cat <<EOM
 
-Since you are running AFS, I need to distinguish the directory in which
-private files reside from the directory in which they are installed (and from
-which they are presumably copied to the former directory by occult means).
+Since you are running AFS, I need to distinguish the directory in
+which architecture-dependent library files reside from the directory
+in which they are installed (and from which they are presumably copied
+to the former directory by occult means).
 
 EOM
 	case "$installarchlib" in
@@ -2828,9 +2829,10 @@ sitelibexp="$ansexp"
 if $afs; then
 	$cat <<EOM
 
-Since you are running AFS, I need to distinguish the directory in which
-private files reside from the directory in which they are installed (and from
-which they are presumably copied to the former directory by occult means).
+Since you are running AFS, I need to distinguish the directory in
+which site-specific files reside from the directory in which they are
+installed (and from which they are presumably copied to the former
+directory by occult means).
 
 EOM
 	case "$installsitelib" in
@@ -2838,7 +2840,7 @@ EOM
 	*) dflt="$installsitelib";;
 	esac
 	fn=de~
-	rp='Where will private files be installed?'
+	rp='Where will site-specific files be installed?'
 	. ./getfile
 	installsitelib="$ans"
 else
@@ -2871,9 +2873,10 @@ sitearchexp="$ansexp"
 if $afs; then
 	$cat <<EOM
 
-Since you are running AFS, I need to distinguish the directory in which
-private files reside from the directory in which they are installed (and from
-which they are presumably copied to the former directory by occult means).
+Since you are running AFS, I need to distinguish the directory in
+which site-specific architecture-dependent library files reside from
+the directory in which they are installed (and from which they are
+presumably copied to the former directory by occult means).
 
 EOM
 	case "$installsitearch" in
@@ -2881,7 +2884,7 @@ EOM
 	*) dflt="$installsitearch";;
 	esac
 	fn=de~
-	rp='Where will private files be installed?'
+	rp='Where will site-specific architecture-dependent files be installed?'
 	. ./getfile
 	installsitearch="$ans"
 else
@@ -3697,7 +3700,7 @@ EOM
 		-*) ftry="$flag";;
 		*) ftry="$previous $flag";;
 		esac
-		if $cppstdin -DLFRULB=bar $ftry $cppminus <cpp.c \
+		if $cppstdin -DLFRULB=bar $cppflags $ftry $cppminus <cpp.c \
 			>cpp1.out 2>/dev/null && \
 			$cpprun -DLFRULB=bar $ftry $cpplast <cpp.c \
 			>cpp2.out 2>/dev/null && \
@@ -4740,6 +4743,9 @@ if "$useshrplib"; then
 		;;
 	linux|irix*|dec_osf)
 		xxx="-Wl,-rpath,$shrpdir"
+		;;
+	next)
+		# next doesn't like the default...
 		;;
 	*)
 		tmp_shrpenv="env LD_RUN_PATH=$shrpdir"

@@ -62,25 +62,50 @@ lddlflags='-nostdlib -r'
 # using GNU cc and try to specify -fpic for cccdlflags.
 cccdlflags=' '
 
+######################################################################
+# MAB support
+######################################################################
+# By default we will build for all architectures your development
+# environment supports. If you only want to build for the platform
+# you are on, simply comment or remove the line below.
 #
-# Change the line below if you do not want to build 'quad-fat'
-# binaries
+# If you want to build for specific architectures, change the line
+# below to something like
+#
+#	archs=(m68k i386)
 #
 archs=`/bin/lipo -info /usr/lib/libm.a | sed 's/^[^:]*:[^:]*: //'`
-for d in  $archs
-do
-       mab="$mab -arch $d"
-done
 
-archname='next-fat'
+#
+# leave the following part alone
+#
+archcount=`echo $archs |wc -w`
+if [ $archcount -gt 1 ]
+then
+	for d in $archs
+	do
+			mabflags="$mabflags -arch $d"
+	done
+	ccflags="$ccflags $mabflags"
+	ldflags="$ldflags $mabflags"
+	lddlflags="$lddlflags $mabflags"
+	archname='next-fat'
+fi
+######################################################################
+# END MAB support
+######################################################################
 ld='cc'
 
 i_utime='undef'
 groupstype='int'
 direntrytype='struct direct'
 d_strcoll='undef'
-
 d_uname='define'
+#
+# At least on m68k there are situations when memcmp doesn't behave
+# as expected.  So we'll use perl's memcmp.
+#
+d_sanemcmp='undef'
 # setpgid() is in the posix library, but we don't use -posix, so
 # we don't see it.  ext/POSIX/POSIX.xs  *does* use -posix, so
 # setpgid is still available as POSIX::setpgid.

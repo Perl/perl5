@@ -35,7 +35,15 @@ void
 taint_env()
 {
     SV** svp;
-    MAGIC *mg;
+    MAGIC* mg;
+    char** e;
+    static char* misc_env[] = {
+	"IFS",		/* most shells' inter-field separators */
+	"ENV",		/* ksh dain bramage #1 */
+	"CDPATH",	/* ksh dain bramage #2 */
+	"TERM",		/* some termcap libraries' dain bramage */
+	NULL
+    };
 
 #ifdef VMS
     int i = 0;
@@ -71,9 +79,11 @@ taint_env()
 	}
     }
 
-    svp = hv_fetch(GvHVn(envgv),"IFS",3,FALSE);
-    if (svp && *svp != &sv_undef && SvTAINTED(*svp)) {
-	TAINT;
-	taint_proper("Insecure %s%s", "$ENV{IFS}");
+    for (e = misc_env; *e; e++) {
+	svp = hv_fetch(GvHVn(envgv), *e, strlen(*e), FALSE);
+	if (svp && *svp != &sv_undef && SvTAINTED(*svp)) {
+	    TAINT;
+	    taint_proper("Insecure $ENV{%s}%s", *e);
+	}
     }
 }

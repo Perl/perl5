@@ -58,7 +58,10 @@ For example:
     $path = $ENV{'PATH'};	# $path now tainted
 
     $ENV{'PATH'} = '/bin:/usr/bin';
-    $ENV{'IFS'} = '' if $ENV{'IFS'} ne '';
+    delete $ENV{'IFS'};
+    delete $ENV{'CDPATH'};
+    delete $ENV{'ENV'};
+    $ENV{'TERM'} = 'dumb';
 
     $path = $ENV{'PATH'};	# $path now NOT tainted
     system "echo $data";	# Is secure now!
@@ -78,6 +81,9 @@ For example:
     exec "echo $arg";		# Insecure
     exec "echo", $arg;		# Secure (doesn't use the shell)
     exec "sh", '-c', $arg;	# Considered secure, alas!
+
+    @files = <*.c>;		# Always insecure (uses csh)
+    @files = glob('*.c');	# Always insecure (uses csh)
 
 If you try to do something insecure, you will get a fatal error saying
 something like "Insecure dependency" or "Insecure PATH".  Note that you

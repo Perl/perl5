@@ -224,6 +224,15 @@ PP(pp_glob)
     OP *result;
     ENTER;
 
+    if (tainting) {
+	/*
+	 * The external globbing program may use things we can't control,
+	 * so for security reasons we must assume the worst.
+	 */
+	TAINT;
+	taint_proper(no_security, "glob");
+    }
+
     SAVESPTR(last_in_gv);	/* We don't want this to be permanent. */
     last_in_gv = (GV*)*stack_sp--;
 
