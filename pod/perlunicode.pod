@@ -792,7 +792,7 @@ are the range 0xDC00..0xDFFFF.  The surrogate encoding is
 
 and the decoding is
 
-	$uni = 0x10000 + ($hi - 0xD8000) * 0x400 + ($lo - 0xDC00);
+	$uni = 0x10000 + ($hi - 0xD800) * 0x400 + ($lo - 0xDC00);
 
 If you try to generate surrogates (for example by using chr()), you
 will get a warning if warnings are turned on (C<-w> or C<use
