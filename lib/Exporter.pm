@@ -91,6 +91,12 @@ sub export {
 			@imports = @exports;
 			last;
 		    }
+		    # We need a way to emulate 'use Foo ()' but still
+		    # allow an easy version check: "use Foo 1.23, ''";
+		    if (@imports == 2 and !$imports[1]) {
+			@imports = ();
+			last;
+		    }
 		} elsif ($sym !~ s/^&// || !$exports{$sym}) {
 		    warn qq["$sym" is not exported by the $pkg module];
 		    $oops++;
@@ -176,9 +182,13 @@ sub export_fail {
 sub require_version {
     my($self, $wanted) = @_;
     my $pkg = ref $self || $self;
-    my $version = ${"${pkg}::VERSION"} || "(undef)";
-    Carp::croak("$pkg $wanted required--this is only version $version")
-		if $version < $wanted;
+    my $version = ${"${pkg}::VERSION"};
+    if (!$version or $version < $wanted) {
+	$version ||= "(undef)";
+	my $file = $INC{"$pkg.pm"};
+	$file &&= " ($file)";
+	Carp::croak("$pkg $wanted required--this is only version $version$file")
+    }
     $version;
 }
 
