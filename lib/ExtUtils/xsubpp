@@ -1548,13 +1548,13 @@ sub generate_init {
     $tk = $type_kind{$type};
     $tk =~ s/OBJ$/REF/ if $func_name =~ /DESTROY$/;
     $type =~ tr/:/_/;
-    blurt("Error: No INPUT definition for type '$type' found"), return
+    blurt("Error: No INPUT definition for type '$type', typekind '$type_kind{$type}' found"), return
         unless defined $input_expr{$tk} ;
     $expr = $input_expr{$tk};
     if ($expr =~ /DO_ARRAY_ELEM/) {
         blurt("Error: '$subtype' not in typemap"), return 
 	    unless defined($type_kind{$subtype});
-        blurt("Error: No INPUT definition for type '$subtype' found"), return
+        blurt("Error: No INPUT definition for type '$subtype', typekind '$type_kind{$subtype}' found"), return
             unless defined $input_expr{$type_kind{$subtype}} ;
 	$subexpr = $input_expr{$type_kind{$subtype}};
 	$subexpr =~ s/ntype/subtype/g;
@@ -1612,7 +1612,7 @@ sub generate_output {
     } else {
 	    blurt("Error: '$type' not in typemap"), return
 		unless defined($type_kind{$type});
-            blurt("Error: No OUTPUT definition for type '$type' found"), return
+            blurt("Error: No OUTPUT definition for type '$type', typekind '$type_kind{$type}' found"), return
                 unless defined $output_expr{$type_kind{$type}} ;
 	    ($ntype = $type) =~ s/\s*\*/Ptr/g;
 	    $ntype =~ s/\(\)//g;
@@ -1621,7 +1621,7 @@ sub generate_output {
 	    if ($expr =~ /DO_ARRAY_ELEM/) {
 	        blurt("Error: '$subtype' not in typemap"), return
 		    unless defined($type_kind{$subtype});
-                blurt("Error: No OUTPUT definition for type '$subtype' found"), return
+                blurt("Error: No OUTPUT definition for type '$subtype', typekind '$type_kind{$subtype}' found"), return
                     unless defined $output_expr{$type_kind{$subtype}} ;
 		$subexpr = $output_expr{$type_kind{$subtype}};
 		$subexpr =~ s/ntype/subtype/g;
