@@ -18,8 +18,8 @@ use Carp 'croak';
 # The most recent version and complete docs are available at:
 #   http://stein.cshl.org/WWW/software/CGI/
 
-$CGI::revision = '$Id: CGI.pm,v 1.151 2004/01/13 16:28:35 lstein Exp $';
-$CGI::VERSION=3.04;
+$CGI::revision = '$Id: CGI.pm,v 1.165 2004/04/12 20:37:26 lstein Exp $';
+$CGI::VERSION=3.05;
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -37,9 +37,8 @@ use constant XHTML_DTD => ['-//W3C//DTD XHTML 1.0 Transitional//EN',
   $TAINTED = substr("$0$^X",0,0);
 }
 
-my @SAVED_SYMBOLS;
-
 $MOD_PERL = 0; # no mod_perl by default
+@SAVED_SYMBOLS = ();
 
 # >>>>> Here are some globals that you might want to adjust <<<<<<
 sub initialize_globals {
@@ -111,6 +110,7 @@ sub initialize_globals {
     # Other globals that you shouldn't worry about.
     undef $Q;
     $BEEN_THERE = 0;
+    $DTD_PUBLIC_IDENTIFIER = "";
     undef @QUERY_PARAM;
     undef %EXPORT;
     undef $QUERY_CHARSET;
@@ -121,6 +121,8 @@ sub initialize_globals {
 }
 
 # ------------------ START OF THE LIBRARY ------------
+
+*end_form = \&endform;
 
 # make mod_perlhappy
 initialize_globals();
@@ -819,7 +821,7 @@ sub _setup_symbols {
 	$XHTML=0,                next if /^[:-]no_?xhtml$/;
 	$USE_PARAM_SEMICOLONS=0, next if /^[:-]oldstyle_urls$/;
 	$PRIVATE_TEMPFILES++,    next if /^[:-]private_tempfiles$/;
-    $CLOSE_UPLOAD_FILES++,   next if /^[:-]close_upload_files$/;
+	$CLOSE_UPLOAD_FILES++,   next if /^[:-]close_upload_files$/;
 	$EXPORT{$_}++,           next if /^[:-]any$/;
 	$compile++,              next if /^[:-]compile$/;
 	$NO_UNDEF_PARAMS++,      next if /^[:-]no_undef_params$/;
@@ -905,7 +907,7 @@ sub delete {
         $to_delete{$name}++;
     }
     @{$self->{'.parameters'}}=grep { !exists($to_delete{$_}) } $self->param();
-    return wantarray ? () : undef;
+    return;
 }
 END_OF_FUNC
 
@@ -1279,7 +1281,7 @@ sub multipart_init {
     $self->{'final_separator'} = "$CRLF--$boundary--$CRLF";
     $type = SERVER_PUSH($boundary);
     return $self->header(
-	-nph => 1,
+	-nph => 0,
 	-type => $type,
 	(map { split "=", $_, 2 } @other),
     ) . "WARNING: YOUR BROWSER DOESN'T SUPPORT THIS SERVER-PUSH TECHNOLOGY." . $self->multipart_end;
@@ -1439,12 +1441,14 @@ END_OF_FUNC
 'redirect' => <<'END_OF_FUNC',
 sub redirect {
     my($self,@p) = self_or_default(@_);
-    my($url,$target,$cookie,$nph,@other) = rearrange([[LOCATION,URI,URL],TARGET,['COOKIE','COOKIES'],NPH],@p);
+    my($url,$target,$status,$cookie,$nph,@other) = 
+         rearrange([[LOCATION,URI,URL],TARGET,STATUS,['COOKIE','COOKIES'],NPH],@p);
+    $status = '302 Moved' unless defined $status;
     $url ||= $self->self_url;
     my(@o);
     foreach (@other) { tr/\"//d; push(@o,split("=",$_,2)); }
     unshift(@o,
-	 '-Status'  => '302 Moved',
+	 '-Status'  => $status,
 	 '-Location'=> $url,
 	 '-nph'     => $nph);
     unshift(@o,'-Target'=>$target) if $target;
@@ -1484,11 +1488,7 @@ sub start_html {
 
     $encoding = 'iso-8859-1' unless defined $encoding;
 
-    # strangely enough, the title needs to be escaped as HTML
-    # while the author needs to be escaped as a URL
-    $title = $self->escapeHTML($title || 'Untitled Document');
-    $author = $self->escape($author);
-    $lang = 'en-US' unless defined $lang;
+    # Need to sort out the DTD before it's okay to call escapeHTML().
     my(@result,$xml_dtd);
     if ($dtd) {
         if (defined(ref($dtd)) and (ref($dtd) eq 'ARRAY')) {
@@ -1506,9 +1506,26 @@ sub start_html {
 
     if (ref($dtd) && ref($dtd) eq 'ARRAY') {
         push(@result,qq(<!DOCTYPE html\n\tPUBLIC "$dtd->[0]"\n\t "$dtd->[1]">));
+	$DTD_PUBLIC_IDENTIFIER = $dtd->[0];
     } else {
         push(@result,qq(<!DOCTYPE html\n\tPUBLIC "$dtd">));
+	$DTD_PUBLIC_IDENTIFIER = $dtd;
     }
+
+    # Now that we know whether we're using the HTML 3.2 DTD or not, it's okay to
+    # call escapeHTML().  Strangely enough, the title needs to be escaped as
+    # HTML while the author needs to be escaped as a URL.
+    $title = $self->escapeHTML($title || 'Untitled Document');
+    $author = $self->escape($author);
+
+    if ($DTD_PUBLIC_IDENTIFIER =~ /[^X]HTML (2\.0|3\.2)/i) {
+	$lang = "" unless defined $lang;
+	$XHTML = 0;
+    }
+    else {
+	$lang = 'en-US' unless defined $lang;
+    }
+
     push(@result,$XHTML ? qq(<html xmlns="http://www.w3.org/1999/xhtml" lang="$lang" xml:lang="$lang"><head><title>$title</title>)
                         : ($lang ? qq(<html lang="$lang">) : "<html>") 
 	                  . "<head><title>$title</title>");
@@ -1531,7 +1548,7 @@ sub start_html {
     push(@result,ref($head) ? @$head : $head) if $head;
 
     # handle the infrequently-used -style and -script parameters
-    push(@result,$self->_style($style)) if defined $style;
+    push(@result,$self->_style($style))   if defined $style;
     push(@result,$self->_script($script)) if defined $script;
 
     # handle -noscript parameter
@@ -1559,36 +1576,43 @@ sub _style {
     my $cdata_start = $XHTML ? "\n<!--/* <![CDATA[ */" : "\n<!-- ";
     my $cdata_end   = $XHTML ? "\n/* ]]> */-->\n" : " -->\n";
 
-    if (ref($style)) {
-     my($src,$code,$verbatim,$stype,$foo,@other) =
-         rearrange([SRC,CODE,VERBATIM,TYPE],
-                    '-foo'=>'bar',    # trick to allow dash to be omitted
-                    ref($style) eq 'ARRAY' ? @$style : %$style);
-     $type  = $stype if $stype;
-     my $other = @other ? join ' ',@other : '';
+    my @s = ref($style) eq 'ARRAY' ? @$style : $style;
 
-     if (ref($src) eq "ARRAY") # Check to see if the $src variable is an array reference
-     { # If it is, push a LINK tag for each one
-         foreach $src (@$src)
-       {
-         push(@result,$XHTML ? qq(<link rel="stylesheet" type="$type" href="$src" $other/>)
+    for my $s (@s) {
+      if (ref($s)) {
+       my($src,$code,$verbatim,$stype,$foo,@other) =
+           rearrange([qw(SRC CODE VERBATIM TYPE FOO)],
+                      ('-foo'=>'bar',
+                       ref($s) eq 'ARRAY' ? @$s : %$s));
+       $type  = $stype if $stype;
+       my $other = @other ? join ' ',@other : '';
+
+       if (ref($src) eq "ARRAY") # Check to see if the $src variable is an array reference
+       { # If it is, push a LINK tag for each one
+           foreach $src (@$src)
+         {
+           push(@result,$XHTML ? qq(<link rel="stylesheet" type="$type" href="$src" $other/>)
                              : qq(<link rel="stylesheet" type="$type" href="$src"$other>)) if $src;
+         }
        }
-     }
-     else
-     { # Otherwise, push the single -src, if it exists.
-       push(@result,$XHTML ? qq(<link rel="stylesheet" type="$type" href="$src" $other/>)
-                           : qq(<link rel="stylesheet" type="$type" href="$src"$other>)
-            ) if $src;
-      }
-   if ($verbatim) {
-         push(@result, "<style type=\"text/css\">\n$verbatim\n</style>");
-    }
-      push(@result,style({'type'=>$type},"$cdata_start\n$code\n$cdata_end")) if $code;
-    } else {
-         my $src = $style;
+       else
+       { # Otherwise, push the single -src, if it exists.
          push(@result,$XHTML ? qq(<link rel="stylesheet" type="$type" href="$src" $other/>)
-                             : qq(<link rel="stylesheet" type="$type" href="$src"$other>));
+                             : qq(<link rel="stylesheet" type="$type" href="$src"$other>)
+              ) if $src;
+        }
+     if ($verbatim) {
+           my @v = ref($verbatim) eq 'ARRAY' ? @$verbatim : $verbatim;
+           push(@result, "<style type=\"text/css\">\n$_\n</style>") foreach @v;
+      }
+      my @c = ref($code) eq 'ARRAY' ? @$code : $code if $code;
+      push(@result,style({'type'=>$type},"$cdata_start\n$_\n$cdata_end")) foreach @c;
+
+      } else {
+           my $src = $s;
+           push(@result,$XHTML ? qq(<link rel="stylesheet" type="$type" href="$src" $other/>)
+                               : qq(<link rel="stylesheet" type="$type" href="$src"$other>));
+      }
     }
     @result;
 }
@@ -1687,12 +1711,14 @@ sub startform {
     my($method,$action,$enctype,@other) = 
 	rearrange([METHOD,ACTION,ENCTYPE],@p);
 
-    $method = lc($method) || 'post';
-    $enctype = $enctype || &URL_ENCODED;
-    unless (defined $action) {
-
+    $method  = $self->escapeHTML(lc($method) || 'post');
+    $enctype = $self->escapeHTML($enctype || &URL_ENCODED);
+    if (defined $action) {
+       $action = $self->escapeHTML($action);
+    }
+    else {
        $action = $self->escapeHTML($self->url(-absolute=>1,-path=>1));
-       if (length($ENV{QUERY_STRING})>0) {
+       if (exists $ENV{QUERY_STRING} && length($ENV{QUERY_STRING})>0) {
            $action .= "?".$self->escapeHTML($ENV{QUERY_STRING},1);
        }
     }
@@ -1747,15 +1773,6 @@ sub endform {
     return wantarray ? ("<div>",$self->get_fields,"</div>","</form>") : 
                         "<div>".$self->get_fields ."</div>\n</form>";
     }
-}
-END_OF_FUNC
-
-
-#### Method: end_form
-# synonym for endform
-'end_form' => <<'END_OF_FUNC',
-sub end_form {
-    &endform;
 }
 END_OF_FUNC
 
@@ -2093,7 +2110,7 @@ sub checkbox_group {
                               : qq/<input type="checkbox" name="$name" value="$_"$checked$other$attribs>${label}${break}/);
     }
     $self->register_parameter($name);
-    return wantarray ? @elements : join(' ',@elements)            
+    return wantarray ? @elements : join(' ',@elements)
         unless defined($columns) || defined($rows);
     $rows = 1 if $rows && $rows < 1;
     $cols = 1 if $cols && $cols < 1;
@@ -2112,7 +2129,15 @@ sub escapeHTML {
          $toencode =~ s{&}{&amp;}gso;
          $toencode =~ s{<}{&lt;}gso;
          $toencode =~ s{>}{&gt;}gso;
-         $toencode =~ s{"}{&quot;}gso;
+	 if ($DTD_PUBLIC_IDENTIFIER =~ /[^X]HTML 3\.2/i) {
+	     # $quot; was accidentally omitted from the HTML 3.2 DTD -- see
+	     # <http://validator.w3.org/docs/errors.html#bad-entity> /
+	     # <http://lists.w3.org/Archives/Public/www-html/1997Mar/0003.html>.
+	     $toencode =~ s{"}{&#34;}gso;
+         }
+         else {
+	     $toencode =~ s{"}{&quot;}gso;
+         }
          my $latin = uc $self->{'.charset'} eq 'ISO-8859-1' ||
                      uc $self->{'.charset'} eq 'WINDOWS-1252';
          if ($latin) {  # bug in some browsers
@@ -2471,8 +2496,8 @@ sub hidden {
     $name=$self->escapeHTML($name);
     foreach (@value) {
 	$_ = defined($_) ? $self->escapeHTML($_,1) : '';
-	push @result,$XHTML ? qq(<input type="hidden" name="$name" value="$_" />)
-                            : qq(<input type="hidden" name="$name" value="$_">);
+	push @result,$XHTML ? qq(<input type="hidden" name="$name" value="$_" @other />)
+                            : qq(<input type="hidden" name="$name" value="$_" @other>);
     }
     return wantarray ? @result : join('',@result);
 }
@@ -2545,7 +2570,7 @@ sub url {
     if (exists($ENV{REQUEST_URI})) {
         my $index;
 	$script_name = unescape($ENV{REQUEST_URI});
-        $script_name =~ s/\?.+$//;   # strip query string
+        $script_name =~ s/\?.+$//s;   # strip query string
         # and path
         if (exists($ENV{PATH_INFO})) {
            my $encoded_path = unescape($ENV{PATH_INFO});
@@ -2556,7 +2581,7 @@ sub url {
     if ($full) {
 	my $protocol = $self->protocol();
 	$url = "$protocol://";
-	my $vh = http('host');
+	my $vh = http('x_forwarded_host') || http('host');
 	if ($vh) {
 	    $url .= $vh;
 	} else {
@@ -2828,7 +2853,7 @@ END_OF_FUNC
 ######
 'virtual_host' => <<'END_OF_FUNC',
 sub virtual_host {
-    my $vh = http('host') || server_name();
+    my $vh = http('x_forwarded_host') || http('host') || server_name();
     $vh =~ s/:\d+$//;		# get rid of port number
     return $vh;
 }
@@ -2910,7 +2935,7 @@ END_OF_FUNC
 'virtual_port' => <<'END_OF_FUNC',
 sub virtual_port {
     my($self) = self_or_default(@_);
-    my $vh = $self->http('host');
+    my $vh = $self->http('x_forwarded_host') || $self->http('host');
     if ($vh) {
         return ($vh =~ /:(\d+)$/)[0] || '80';
     } else {
@@ -3183,11 +3208,11 @@ sub read_multipart {
 	    return;
 	}
 
-	my($param)= $header{'Content-Disposition'}=~/ name="?([^\";]*)"?/;
+	my($param)= $header{'Content-Disposition'}=~/ name="([^;]*)"/;
         $param .= $TAINTED;
 
 	# Bug:  Netscape doesn't escape quotation marks in file names!!!
-	my($filename) = $header{'Content-Disposition'}=~/ filename="?([^\"]*)"?/;
+	my($filename) = $header{'Content-Disposition'}=~/ filename="([^;]*)"/;
 	# Test for Opera's multiple upload feature
 	my($multipart) = ( defined( $header{'Content-Type'} ) &&
 		$header{'Content-Type'} =~ /multipart\/mixed/ ) ?
@@ -3324,8 +3349,8 @@ sub _set_attributes {
     return '' unless defined($attributes->{$element});
     $attribs = ' ';
     foreach my $attrib (keys %{$attributes->{$element}}) {
-        $attrib =~ s/^-//;
-        $attribs .= "@{[lc($attrib)]}=\"$attributes->{$element}{$attrib}\" ";
+        (my $clean_attrib = $attrib) =~ s/^-//;
+        $attribs .= "@{[lc($clean_attrib)]}=\"$attributes->{$element}{$attrib}\" ";
     }
     $attribs =~ s/ $//;
     return $attribs;
@@ -4485,6 +4510,10 @@ By default, CGI.pm versions 2.69 and higher emit XHTML
 feature.  Thanks to Michalis Kabrianis <kabrianis@hellug.gr> for this
 feature.
 
+If start_html()'s -dtd parameter specifies an HTML 2.0 or 3.2 DTD, 
+XHTML will automatically be disabled without needing to use this 
+pragma.
+
 =item -nph
 
 This makes CGI.pm produce a header appropriate for an NPH (no
@@ -4741,12 +4770,25 @@ redirection requests.  Relative URLs will not work correctly.
 You can also use named arguments:
 
     print $query->redirect(-uri=>'http://somewhere.else/in/movie/land',
-			   -nph=>1);
+			   -nph=>1,
+                           -status=>301);
 
 The B<-nph> parameter, if set to a true value, will issue the correct
 headers to work with a NPH (no-parse-header) script.  This is important
 to use with certain servers, such as Microsoft IIS, which
 expect all their scripts to be NPH.
+
+The B<-status> parameter will set the status of the redirect.  HTTP
+defines three different possible redirection status codes:
+
+     301 Moved Permanently
+     302 Found
+     303 See Other
+
+The default if not specified is 302, which means "moved temporarily."
+You may change the status to another status code if you wish.  Be
+advised that changing the status to anything other than 301, 302 or
+303 will probably break redirection.
 
 =head2 CREATING THE HTML DOCUMENT HEADER
 
@@ -4804,13 +4846,14 @@ into your code.  See the section on CASCADING STYLESHEETS for more
 information.
 
 The B<-lang> argument is used to incorporate a language attribute into
-the <html> tag.  The default if not specified is "en-US" for US
-English.  For example:
+the <html> tag.  For example:
 
     print $q->start_html(-lang=>'fr-CA');
 
-To leave off the lang attribute, as you must do if you want to generate
-legal HTML 3.2 or earlier, pass the empty string (-lang=>'').
+The default if not specified is "en-US" for US English, unless the 
+-dtd parameter specifies an HTML 2.0 or 3.2 DTD, in which case the
+lang attribute is left off.  You can force the lang attribute to left
+off in other cases by passing an empty string (-lang=>'').
 
 The B<-encoding> argument can be used to specify the character set for
 XHTML.  It defaults to iso-8859-1 if not specified.
@@ -5319,6 +5362,21 @@ autoEscape() method with a false value immediately after creating the CGI object
    $query = new CGI;
    $query->autoEscape(undef);
 
+I<A Lurking Trap!> Some of the form-element generating methods return
+multiple tags.  In a scalar context, the tags will be concatenated
+together with spaces, or whatever is the current value of the $"
+global.  In a list context, the methods will return a list of
+elements, allowing you to modify them if you wish.  Usually you will
+not notice this behavior, but beware of this:
+
+    printf("%s\n",$query->end_form())
+
+end_form() produces several tags, and only the first of them will be
+printed because the format only expects one value.
+
+<p>
+
+
 =head2 CREATING AN ISINDEX TAG
 
    print $query->isindex(-action=>$action);
@@ -5601,7 +5659,7 @@ filehandle, or undef if the parameter is not a valid filehandle.
 	   print;
      }
 
-In an array context, upload() will return an array of filehandles.
+In an list context, upload() will return an array of filehandles.
 This makes it possible to create forms that use the same name for
 multiple upload fields.
 
@@ -6174,14 +6232,19 @@ should have one of these.
 
 The first argument (-name) is optional.  You can give the button a
 name if you have several submission buttons in your form and you want
-to distinguish between them.  The name will also be used as the
-user-visible label.  Be aware that a few older browsers don't deal with this correctly and
-B<never> send back a value from a button.
+to distinguish between them.  
 
 =item 2.
 
 The second argument (-value) is also optional.  This gives the button
-a value that will be passed to your script in the query string.
+a value that will be passed to your script in the query string. The
+name will also be used as the user-visible label.
+
+=item 3.
+
+You can use -label as an alias for -value.  I always get confused
+about which of -name and -value changes the user-visible label on the
+button.
 
 =back
 
@@ -6580,8 +6643,8 @@ http://www.w3.org/pub/WWW/TR/Wd-css-1.html for more information.
 	       );
     print end_html;
 
-Pass an array reference to B<-style> in order to incorporate multiple
-stylesheets into your document.
+Pass an array reference to B<-code> or B<-src> in order to incorporate
+multiple stylesheets into your document.
 
 Should you wish to incorporate a verbatim stylesheet that includes
 arbitrary formatting in the header, you may pass a -verbatim tag to
@@ -7072,7 +7135,7 @@ OLD VERSION
 
 NEW VERSION
     use CGI;
-    CGI::ReadParse
+    CGI::ReadParse;
     print "The value of the antique is $in{antique}.\n";
 
 CGI.pm's ReadParse() routine creates a tied variable named %in,

@@ -1541,6 +1541,7 @@ lib/Pod/ParseUtils.pm		Pod-Parser - pod utility functions
 lib/Pod/Perldoc/BaseTo.pm	utility module for perldoc
 lib/Pod/Perldoc/GetOptsOO.pm	options parsing for perldoc
 lib/Pod/Perldoc.pm		guts of the 'perldoc' utility
+lib/Pod/Perldoc/t/01_about_verbose.t	test Pod::Perldoc
 lib/Pod/Perldoc/t/checkerbasic.t	test Pod::Perldoc::ToChecker
 lib/Pod/Perldoc/ToChecker.pm	let perldoc check POD for errors
 lib/Pod/Perldoc/ToMan.pm	render POD as man pages
@@ -1582,6 +1583,7 @@ lib/Pod/t/text-errors.t		podlators test
 lib/Pod/t/text-options.t		podlators test
 lib/Pod/t/text.t		podlators test
 lib/Pod/t/Usage.t		See if Pod::Usage works
+lib/Pod/t/user.t		See if Pod::LaTeX works
 lib/Pod/t/utils.t		Test for Pod::ParseUtils
 lib/Pod/Usage.pm		Pod-Parser - print usage messages
 lib/pwd.pl			Routines to keep track of PWD environment variable
