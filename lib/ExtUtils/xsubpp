@@ -300,7 +300,7 @@ sub check_keyword {
 	s/^(\s*)($_[0])\s*:\s*(?:#.*)?/$1/s && $2;
 }
 
-our ($C_group_rex, $C_arg);
+my ($C_group_rex, $C_arg);
 # Group in C (no support for comments or literals)
 $C_group_rex = qr/ [({\[]
 		   (?: (?> [^()\[\]{}]+ ) | (??{ $C_group_rex }) )*
