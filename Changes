@@ -96,6 +96,91 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6866] By: jhi                                   on 2000/08/28  21:33:49
+        Log: Subject: hv.h Doc Patch
+             From: Fisher Mark <fisherm@tce.com>
+             Date: Mon, 28 Aug 2000 16:24:59 -0500
+             Message-ID: <B9B6874277EED211B1890008C707AF5302881C77@indyexch3.indy.tce.com>
+     Branch: perl
+	   ! hv.h
+____________________________________________________________________________
+[  6865] By: jhi                                   on 2000/08/28  21:02:15
+        Log: Add -ld to archname on long tr...double platforms.
+     Branch: metaconfig
+	   ! U/threads/archname.U
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[  6864] By: jhi                                   on 2000/08/28  20:38:59
+        Log: An attempt to fix the problem reported in
+             
+             Subject: Building perl@6856 using gcc/AIX 4.3.3 
+             From: Daniel Muino <dmuino@afip.gov.ar> 
+             Date: Mon, 28 Aug 2000 15:50:01 -0300   
+             Message-ID: <20000828155001.A14403@con2-dgi>
+             
+             I can't test this properly since the gcc installation I have
+             access to seems to be botched (gcc is calling the AIX cpp,
+             a losing proposition...)
+     Branch: perl
+	   ! hints/aix.sh
+____________________________________________________________________________
+[  6863] By: jhi                                   on 2000/08/28  18:57:52
+        Log: Fix for ID 20000828.001, long doubles were not formatted
+             correctly (showed up in $], which stopped installing perl).
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  6862] By: jhi                                   on 2000/08/28  18:07:15
+        Log: Typo in #6858.
+     Branch: perl
+	   ! lib/Cwd.pm
+____________________________________________________________________________
+[  6861] By: jhi                                   on 2000/08/28  17:57:27
+        Log: opmini.o may be left around if a build is interrupted.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  6860] By: jhi                                   on 2000/08/28  16:52:50
+        Log: Subject: [PATCH@6855] _Minor_ change to overload.pm pod
+             From: Daniel Chetlin <daniel@chetlin.com>
+             Date: Mon, 28 Aug 2000 01:14:18 -0700
+             Message-ID: <20000828011418.J769@ilmd.chetlin.org>
+     Branch: perl
+	   ! lib/overload.pm
+____________________________________________________________________________
+[  6859] By: jhi                                   on 2000/08/28  16:08:46
+        Log: Subject: [ID 20000828.009] Not OK: perl v5.7.0 +SUIDMAIL +DEVEL6855 on i586-linux 2.2.12 (UNINSTALLED)
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Mon, 28 Aug 2000 16:03:27 +0100
+             Message-Id: <20000828160327.C49785@plum.flirble.org>
+     Branch: perl
+	   ! ext/ByteLoader/bytecode.h
+____________________________________________________________________________
+[  6858] By: jhi                                   on 2000/08/28  16:02:10
+        Log: Subject: [ID 20000828.006] dir name "0" not safe with Cwd.pm
+             From: Wolfgang Laun <wolfgang.laun@alcatel.at>
+             Date: Mon, 28 Aug 2000 13:08:30 +0200
+             Message-Id: <200008281108.NAA00782@localhost.aut.alcatel.at>
+     Branch: perl
+	   ! lib/Cwd.pm
+____________________________________________________________________________
+[  6857] By: jhi                                   on 2000/08/28  15:42:47
+        Log: display_format used as a class method without arguments was broken,
+             reported in
+             
+             Subject: Math::Complex->display_format() sets style to 'Math::Complex'
+             From: Yasushi Nakajima <sey@san.p.kyoto.jkc.co.jp>
+             Date: Mon, 28 Aug 2000 16:38:08 +0900 (JST)
+             Message-Id: <200008280738.QAA00215@san.p.kyoto.jkc.co.jp>
+     Branch: perl
+	   ! lib/Math/Complex.pm t/lib/complex.t
+____________________________________________________________________________
+[  6856] By: jhi                                   on 2000/08/27  22:09:48
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  6855] By: jhi                                   on 2000/08/27  21:59:21
         Log: Retract #6853 (false alarm).
      Branch: perl
@@ -113,44 +198,6 @@ ____________________________________________________________________________
              Message-Id: <200008272130.WAA10083@crypt.compulink.co.uk>
      Branch: perl
 	   ! lib/ExtUtils/xsubpp
-____________________________________________________________________________
-[  6852] By: jhi                                   on 2000/08/27  21:33:58
-        Log: Big-endian 64-bit patch from Raphael Manfredi.
-     Branch: perl
-	   ! ext/Storable/Storable.xs
-____________________________________________________________________________
-[  6851] By: jhi                                   on 2000/08/27  21:22:21
-        Log: More ruthless editing from Hugo van der Sanden.
-     Branch: perl
-	   ! pod/perldelta.pod
-____________________________________________________________________________
-[  6850] By: jhi                                   on 2000/08/27  16:11:46
-        Log: Update Changes.
-     Branch: perl
-	   ! Changes patchlevel.h
-____________________________________________________________________________
-[  6853] By: jhi                                   on 2000/08/27  21:37:16
-        Log: Subject: [PATCH perl@6850] workaround for xsubpp
-             From: Hugo <hv@crypt.compulink.co.uk>
-             Date: Sun, 27 Aug 2000 22:30:25 +0100
-             Message-Id: <200008272130.WAA10083@crypt.compulink.co.uk>
-     Branch: perl
-	   ! lib/ExtUtils/xsubpp
-____________________________________________________________________________
-[  6852] By: jhi                                   on 2000/08/27  21:33:58
-        Log: Big-endian 64-bit patch from Raphael Manfredi.
-     Branch: perl
-	   ! ext/Storable/Storable.xs
-____________________________________________________________________________
-[  6851] By: jhi                                   on 2000/08/27  21:22:21
-        Log: More ruthless editing from Hugo van der Sanden.
-     Branch: perl
-	   ! pod/perldelta.pod
-____________________________________________________________________________
-[  6850] By: jhi                                   on 2000/08/27  16:11:46
-        Log: Update Changes.
-     Branch: perl
-	   ! Changes patchlevel.h
 ____________________________________________________________________________
 [  6852] By: jhi                                   on 2000/08/27  21:33:58
         Log: Big-endian 64-bit patch from Raphael Manfredi.
