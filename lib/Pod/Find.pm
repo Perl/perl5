@@ -145,7 +145,7 @@ sub pod_find
         # * remove e.g. 5.00503
         # * remove pod/ if followed by *.pod (e.g. in pod/perlfunc.pod)
         $SIMPLIFY_RX =
-          qq!^(?i:site_perl/|\Q$Config::Config{archname}\E/|\\d+\\.\\d+([_.]?\\d+)?/|pod/(?=.*?\\.pod\\z))*!;
+          qq!^(?i:site(_perl)?/|\Q$Config::Config{archname}\E/|\\d+\\.\\d+([_.]?\\d+)?/|pod/(?=.*?\\.pod\\z))*!;
 
     }
 
@@ -262,7 +262,7 @@ sub _simplify {
     # strip Perl's own extensions
     $_[0] =~ s/\.(pod|pm|plx?)\z//i;
     # strip meaningless extensions on Win32 and OS/2
-    $_[0] =~ s/\.(bat|exe|cmd)\z//i if($^O =~ /win|os2/i);
+    $_[0] =~ s/\.(bat|exe|cmd)\z//i if($^O =~ /mswin|os2/i);
     # strip meaningless extensions on VMS
     $_[0] =~ s/\.(com)\z//i if($^O eq 'VMS');
 }
