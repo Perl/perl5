@@ -1103,6 +1103,7 @@ Like C<sv_catsv> but doesn't process magic.
 #define SV_GMAGIC		2
 #define SV_COW_DROP_PV		4
 #define SV_UTF8_NO_ENCODING	8
+#define SV_NOSTEAL		16
 
 /* We are about to replace the SV's current value. So if it's copy on write
    we need to normalise it. Use the SV_COW_DROP_PV flag hint to say that
@@ -1242,10 +1243,7 @@ Returns a pointer to the character buffer.
 #define SvSetSV_nosteal_and(dst,src,finally) \
 	STMT_START {					\
 	    if ((dst) != (src)) {			\
-		U32 tMpF = SvFLAGS(src) & SVs_TEMP;	\
-		SvTEMP_off(src);			\
-		sv_setsv(dst, src);			\
-		SvFLAGS(src) |= tMpF;			\
+		sv_setsv_flags(dst, src, SV_GMAGIC | SV_NOSTEAL);	\
 		finally;				\
 	    }						\
 	} STMT_END
