@@ -1,11 +1,7 @@
 # hints/netbsd.sh
 #
-# talk to packages@netbsd.org if you want to change this file.
-#
-# netbsd keeps dynamic loading dl*() functions in /usr/lib/crt0.o,
-# so Configure doesn't find them (unless you abandon the nm scan).
-# this should be *just* 0.9 below as netbsd 0.9a was the first to
-# introduce shared libraries.
+# Please check with packages@netbsd.org before making modifications
+# to this file.
 
 case "$archname" in
 '')
@@ -13,37 +9,54 @@ case "$archname" in
     ;;
 esac
 
+# NetBSD keeps dynamic loading dl*() functions in /usr/lib/crt0.o,
+# so Configure doesn't find them (unless you abandon the nm scan).
+# Also, NetBSD 0.9a was the first release to introduce shared
+# libraries.
+#
 case "$osvers" in
 0.9|0.8*)
 	usedl="$undef"
 	;;
 *)
-	if test -f /usr/libexec/ld.elf_so; then
-		d_dlopen=$define
-		d_dlerror=$define
-		# Include the whole libgcc.a, required for Xerces-P, which
-		# needs __eh_alloc, __pure_virtual, and others.
-		# XXX This should be obsoleted by gcc-3.0.
-		ccdlflags="-Wl,-whole-archive -lgcc -Wl,-no-whole-archive \
-			-Wl,-E $ccdlflags"
-		cccdlflags="-DPIC -fPIC $cccdlflags"
-		lddlflags="--whole-archive -shared $lddlflags"
-	elif test "`uname -m`" = "pmax"; then
-# NetBSD 1.3 and 1.3.1 on pmax shipped an `old' ld.so, which will not work.
+	case `uname -m` in
+	pmax)
+		# NetBSD 1.3 and 1.3.1 on pmax shipped an `old' ld.so,
+		# which will not work.
 		case "$osvers" in
 		1.3|1.3.1)
 			d_dlopen=$undef
 			;;
 		esac
-	elif test -f /usr/libexec/ld.so; then
+		;;
+	esac
+	if test -f /usr/libexec/ld.elf_so; then
+		# ELF
 		d_dlopen=$define
 		d_dlerror=$define
-# we use -fPIC here because -fpic is *NOT* enough for some of the
-# extensions like Tk on some netbsd platforms (the sparc is one)
+		cccdlflags="-DPIC -fPIC $cccdlflags"
+		lddlflags="--whole-archive -shared $lddlflags"
+		rpathflag="-Wl,-rpath,"
+		#
+		# Include the whole libgcc.a into the perl executable so
+		# that certain symbols needed by loadable modules built as
+		# C++ objects (__eh_alloc, __pure_virtual, etc.) will always
+		# be defined.
+		#
+		# XXX This should be obsoleted by gcc-3.0.
+		#
+		ccdlflags="-Wl,-whole-archive -lgcc -Wl,-no-whole-archive \
+			-Wl,-E $ccdlflags"
+	elif test -f /usr/libexec/ld.so; then
+		# a.out
+		d_dlopen=$define
+		d_dlerror=$define
 		cccdlflags="-DPIC -fPIC $cccdlflags"
 		lddlflags="-Bshareable $lddlflags"
+		rpathflag="-R"
 	else
 		d_dlopen=$undef
+		rpathflag=
 	fi
 	;;
 esac
@@ -77,21 +90,21 @@ cat > UU/usethreads.cbu <<'EOCBU'
 case "$usethreads" in 
 $define|true|[yY]*) 
 	lpthread=
-	for thislib in pthread; do
-		for thisdir in $loclibpth $plibpth $glibpth dummy; do
-			xxx=$thisdir/lib$thislib.a
-			if test -f "$xxx"; then
-				lpthread=$thislib
+	for xxx in pthread; do
+		for yyy in $loclibpth $plibpth $glibpth dummy; do
+			zzz=$yyy/lib$xxx.a
+			if test -f "$zzz"; then
+				lpthread=$xxx
 				break;
 			fi
-			xxx=$thisdir/lib$thislib.so
-			if test -f "$xxx"; then
-				lpthread=$thislib
+			zzz=$yyy/lib$xxx.so
+			if test -f "$zzz"; then
+				lpthread=$xxx
 				break;
 			fi
-			xxx=`ls $thisdir/lib$thislib.so.* 2>/dev/null`
-			if test "X$xxx" != X; then
-				lpthread=$thislib
+			zzz=`ls $yyy/lib$xxx.so.* 2>/dev/null`
+			if test "X$zzz" != X; then
+				lpthread=$xxx
 				break;
 			fi
 		done
@@ -110,21 +123,24 @@ $define|true|[yY]*)
 		     "You may want to install GNU pth.  Aborting." >&4 
 		exit 1 
         fi
-	unset thisdir
-	unset thislib
 	unset lpthread
         ;; 
 esac 
 EOCBU
 
-# Recognize the NetBSD packages collection.
-# GDBM might be here, GNU pth might be there.
-if test -d /usr/pkg/lib; then
-	loclibpth="$loclibpth /usr/pkg/lib"
-	if test -f /usr/libexec/ld.elf_so; then
-		ldflags="$ldflags -Wl,-R/usr/pkg/lib"
-	else
-		ldflags="$ldflags -R/usr/pkg/lib"
-	fi
-fi
-test -d /usr/pkg/include && locincpth="$locincpth /usr/pkg/include"
+# Set sensible defaults for NetBSD: look for local software in
+# /usr/pkg (NetBSD Packages Collection) and in /usr/local.
+#
+loclibpth="/usr/pkg/lib /usr/local/lib"
+locincpth="/usr/pkg/include /usr/local/include"
+case "$rpathflag" in
+'')
+	ldflags=
+	;;
+*)
+	ldflags=
+	for yyy in $loclibpth; do
+		ldflags="$ldflags $rpathflag$yyy"
+	done
+	;;
+esac

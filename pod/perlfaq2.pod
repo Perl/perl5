@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.12 $, $Date: 2002/04/09 17:16:05 $)
+perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.13 $, $Date: 2002/04/26 16:56:35 $)
 
 =head1 DESCRIPTION
 
@@ -278,12 +278,12 @@ Recommended books on (or mostly on) Perl follow.
 	http://www.oreilly.com/catalog/pperl3/
 
     Perl 5 Pocket Reference
-        by Johan Vromans
+    by Johan Vromans
 	ISBN 0-596-00032-4 [3rd edition May 2000]
 	http://www.oreilly.com/catalog/perlpr3/
 
     Perl in a Nutshell
-        by Ellen Siever, Stephan Spainhour, and Nathan Patwardhan
+    by Ellen Siever, Stephan Spainhour, and Nathan Patwardhan
 	ISBN 1-56592-286-7 [1st edition December 1998]
 	http://www.oreilly.com/catalog/perlnut/
 
@@ -291,7 +291,7 @@ Recommended books on (or mostly on) Perl follow.
 
     Elements of Programming with Perl
 	by Andrew L. Johnson
-	ISBN 1884777805 [1st edition October 1999]
+	ISBN 1-884777-80-5 [1st edition October 1999]
 	http://www.manning.com/Johnson/
 
     Learning Perl
@@ -308,8 +308,8 @@ Recommended books on (or mostly on) Perl follow.
     Perl: The Programmer's Companion
 	by Nigel Chapman
 	ISBN 0-471-97563-X [1997, 3rd printing Spring 1998]
-        http://www.wiley.com/compbooks/catalog/97563-X.htm
-        http://www.wiley.com/compbooks/chapman/perl/perltpc.html (errata etc)
+    http://www.wiley.com/compbooks/catalog/97563-X.htm
+    http://www.wiley.com/compbooks/chapman/perl/perltpc.html (errata etc)
 
     Cross-Platform Perl
 	by Eric Foster-Johnson
@@ -351,18 +351,18 @@ Recommended books on (or mostly on) Perl follow.
     Object Oriented Perl
 	Damian Conway
 	    with foreword by Randal L. Schwartz
-	ISBN 1884777791 [1st edition August 1999]
+	ISBN 1-884777-79-1 [1st edition August 1999]
 	http://www.manning.com/Conway/
 
     Data Munging with Perl
-        Dave Cross
-        ISBN 1930110006 [1st edition 2001]
-        http://www.manning.com/cross
+	Dave Cross
+	ISBN 1-930110-00-6 [1st edition 2001]
+	http://www.manning.com/cross
 
-    Learning Perl/Tk
-        by Nancy Walsh
-	ISBN 1-56592-314-6 [1st edition January 1999]
-	http://www.oreilly.com/catalog/lperltk/
+	Mastering Perl/Tk
+	by Steve Lidie and Nancy Walsh
+	ISBN 1-56592-716-8 [1st edition January 2002]
+	http://www.oreilly.com/catalog/mastperltk/
 
 =back
 
@@ -379,7 +379,7 @@ magazine ( http://www.sysadminmag.com/ ) For more details on TPJ,
 see http://www.tpj.com/
 
 Beyond this, magazines that frequently carry quality articles on
-Perl are I<Web Techniques> ( http://www.webtechniques.com/ ),
+Perl are I<The Perl Review> ( http://www.theperlreview.com ),
 I<Unix Review> ( http://www.unixreview.com/ ),
 I<Linux Magazine> ( http://www.linuxmagazine.com/ ),
 and Usenix's newsletter/magazine to its members, I<login:>
