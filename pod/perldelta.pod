@@ -765,10 +765,34 @@ one can (or, if one can, whether it's a good idea) link together at
 all binaries with different ideas about file offsets, all this is
 platform-dependent.
 
-=head2 Storable test st-06compat Fails in UNICOS and UNICOS/mk
+=head2 ftmp-posix subtest 6 fails in VMS
+
+The test exposed a flushing bug in VMS, this failure can be ignored.
+
+=head2 Storable tests fail in some platforms
+
+=over 4
+
+=item *
+
+Many Storable tests fail on AIX configured with 64 bit integers.
+
+So far unidentified problems break Storable in AIX if Perl is
+configured to use 64 bit integers.  AIX in 32-bit mode works and
+other 64-bit platforms work with Storable.
+
+=item *
+
+DOS DJGPP may hang when testing Storable.
+
+=item *
+
+st-06compat fails in UNICOS and UNICOS/mk.
 
 This means that you cannot read old (pre-Storable-0.7) Storable images
 made in other platforms.
+
+=back
 
 =head1 Reporting Bugs
 
