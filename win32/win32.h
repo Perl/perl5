@@ -18,6 +18,9 @@ typedef long long __int64;
 #define __declspec(x)
 #define PERL_GLOBAL_STRUCT
 #define MULTIPLICITY
+#ifndef TLS_OUT_OF_INDEXES
+#define TLS_OUT_OF_INDEXES (DWORD)0xFFFFFFFF
+#endif
 #endif
 
 /* Define DllExport akin to perl's EXT, 

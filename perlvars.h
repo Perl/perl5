@@ -157,3 +157,9 @@ PERLVARI(Gnumeric_local,	bool,	TRUE)	/* Assume local numerics */
 
 #endif /* !USE_LOCALE_NUMERIC */
 
+/* constants (these are not literals to facilitate pointer comparisons) */
+PERLVARIC(GYes,		char *, "1");
+PERLVARIC(GNo,		char *, "");
+PERLVARIC(Ghexdigit,	char *, "0123456789abcdef0123456789ABCDEFx");
+PERLVARIC(Gpatleave,	char *, "\\.^$@dDwWsSbB+*?|()-nrtfeaxc0123456789[{]}");
+

@@ -1394,12 +1394,6 @@ EXT short *	ds;
 EXT char *	dc;
 
 /* handy constants */
-#define	Perl_Yes	"1"
-#define Perl_No		""
-#define Perl_hexdigit	"0123456789abcdef0123456789ABCDEFx"
-#define Perl_patleave	"\\.^$@dDwWsSbB+*?|()-nrtfeaxc0123456789[{]}"
-#define Perl_vert 	"|"
-
 EXTCONST char warn_uninit[]
   INIT("Use of uninitialized value");
 EXTCONST char warn_nosemi[]
@@ -1616,6 +1610,7 @@ typedef enum {
 /* Set up PERLVAR macros for populating structs */
 #define PERLVAR(var,type) type var;
 #define PERLVARI(var,type,init) type var;
+#define PERLVARIC(var,type,init) type var;
 
 #ifdef PERL_GLOBAL_STRUCT
 struct perl_vars {
@@ -1669,6 +1664,7 @@ struct perl_thread {
 /* Done with PERLVAR macros for now ... */
 #undef PERLVAR
 #undef PERLVARI
+#undef PERLVARIC
 
 typedef struct perl_thread *Thread;
 
@@ -1695,6 +1691,7 @@ typedef struct perl_thread *Thread;
 
 #define PERLVAR(var,type) EXT type var;
 #define PERLVARI(var,type,init) EXT type var INIT(init);
+#define PERLVARIC(var,type,init) EXTCONST type var INIT(init);
 
 #ifndef PERL_GLOBAL_STRUCT
 #include "perlvars.h"

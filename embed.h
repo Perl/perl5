@@ -22,8 +22,6 @@
 #define AMG_names		Perl_AMG_names
 #define Error			Perl_Error
 #define Gv_AMupdate		Perl_Gv_AMupdate
-#define No			Perl_No
-#define Yes			Perl_Yes
 #define abs_amg			Perl_abs_amg
 #define add_amg			Perl_add_amg
 #define add_ass_amg		Perl_add_ass_amg
@@ -228,7 +226,6 @@
 #define gv_stashpv		Perl_gv_stashpv
 #define gv_stashpvn		Perl_gv_stashpvn
 #define gv_stashsv		Perl_gv_stashsv
-#define hexdigit		Perl_hexdigit
 #define hv_clear		Perl_hv_clear
 #define hv_delayfree_ent	Perl_hv_delayfree_ent
 #define hv_delete		Perl_hv_delete
@@ -441,7 +438,6 @@
 #define pad_reset		Perl_pad_reset
 #define pad_sv			Perl_pad_sv
 #define pad_swipe		Perl_pad_swipe
-#define patleave		Perl_patleave
 #define peep			Perl_peep
 #define pidgone			Perl_pidgone
 #define pmflag			Perl_pmflag
@@ -1001,7 +997,6 @@
 #define unsharepvn		Perl_unsharepvn
 #define utilize			Perl_utilize
 #define varies			Perl_varies
-#define vert			Perl_vert
 #define vivify_defelem		Perl_vivify_defelem
 #define vivify_ref		Perl_vivify_ref
 #define vtbl_amagic		Perl_vtbl_amagic

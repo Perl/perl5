@@ -28,7 +28,7 @@ sub readvars(\%$$) {
 	or die "embed.pl: Can't open $file: $!\n";
     while (<FILE>) {
 	s/[ \t]*#.*//;		# Delete comments.
-	if (/PERLVARI?\($pre(\w+)/) {
+	if (/PERLVARI?C?\($pre(\w+)/) {
 	    $$syms{$1} = 1;
 	}
     }

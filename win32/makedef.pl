@@ -14,10 +14,13 @@
 # that does not present in the WIN32 port but there is no easy
 # way to find them so I just put a exception list here
 
-while (@ARGV && $ARGV[0] =~ /^-/)
+my $CCTYPE = "MSVC";	# default
+
+while (@ARGV)
  {
   my $flag = shift;
   $define{$1} = 1 if ($flag =~ /^-D(\w+)$/);
+  $CCTYPE = $1 if ($flag =~ /^CCTYPE=(\w+)$/);
  } 
 
 open(CFG,'config.h') || die "Cannot open config.h:$!";
@@ -28,8 +31,6 @@ while (<CFG>)
 close(CFG);
 
 warn join(' ',keys %define)."\n";
-
-my $CCTYPE = shift || "MSVC";
 
 if ($CCTYPE ne 'GCC') 
  {
@@ -167,11 +168,6 @@ Perl_wait4pid
 Perl_watch
 Perl_yyname
 Perl_yyrule
-Perl_Yes
-Perl_No
-Perl_hexdigit
-Perl_patleave
-Perl_vert
 allgvs
 curblock
 curcsv
@@ -235,7 +231,11 @@ Perl_sv_true
 Perl_sv_uv
 Perl_sv_pvn
 Perl_newRV_noinc)];
+ }
 
+unless ($define{'FAKE_THREADS'})
+ {
+  skip_symbols [qw(Perl_curthr)];
  }
 
 sub readvar
