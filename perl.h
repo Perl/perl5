@@ -43,10 +43,6 @@
 #  endif
 #endif
 
-#if defined(USE_ITHREADS) && !defined(MULTIPLICITY)
-#  include "error: USE_ITHREADS must be built with MULTIPLICITY"
-#endif
-
 #if defined(MULTIPLICITY)
 #  ifndef PERL_IMPLICIT_CONTEXT
 #    define PERL_IMPLICIT_CONTEXT
@@ -55,6 +51,9 @@
 
 #ifdef PERL_CAPI
 #  undef PERL_OBJECT
+#  ifndef MULTIPLICITY
+#    define MULTIPLICITY
+#  endif
 #  ifndef PERL_IMPLICIT_CONTEXT
 #    define PERL_IMPLICIT_CONTEXT
 #  endif
@@ -70,6 +69,10 @@
 #  ifndef PERL_IMPLICIT_SYS
 #    define PERL_IMPLICIT_SYS
 #  endif
+#endif
+
+#if defined(USE_ITHREADS) && !defined(MULTIPLICITY) && !defined(PERL_OBJECT)
+#  include "error: USE_ITHREADS must be built with MULTIPLICITY"
 #endif
 
 #ifdef PERL_OBJECT
