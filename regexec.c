@@ -3605,14 +3605,14 @@ S_regmatch(pTHX_ regnode *prog)
 			else {
 			    STRLEN len;
 			    if (c1 == c2) {
-				/* count initialised to 0 or 1 */
+				/* count initialised to utf8_distance(old, locinput) */
 				while (locinput <= e &&
 				       utf8_to_uvchr((U8*)locinput, &len) != c1) {
 				    locinput += len;
 				    count++;
 				}
 			    } else {
-				/* count initialised to 0 or 1 */
+				/* count initialised to utf8_distance(old, locinput) */
 				while (locinput <= e) {
 				    UV c = utf8_to_uvchr((U8*)locinput, &len);
 				    if (c == c1 || c == c2)
