@@ -27,7 +27,7 @@
 
 static OP *docatch _((OP *o));
 static OP *doeval _((int gimme));
-static OP *dofindlabel _((OP *op, char *label, OP **opstack, OP **oplimit));
+static OP *dofindlabel _((OP *o, char *label, OP **opstack, OP **oplimit));
 static void doparseform _((SV *sv));
 static I32 dopoptoeval _((I32 startingblock));
 static I32 dopoptolabel _((char *label));
@@ -1654,8 +1654,8 @@ PP(pp_redo)
 static OP* lastgotoprobe;
 
 static OP *
-dofindlabel(op,label,opstack,oplimit)
-OP *op;
+dofindlabel(o,label,opstack,oplimit)
+OP *o;
 char *label;
 OP **opstack;
 OP **oplimit;
@@ -1666,24 +1666,24 @@ OP **oplimit;
 
     if (ops >= oplimit)
 	croak(too_deep);
-    if (op->op_type == OP_LEAVE ||
-	op->op_type == OP_SCOPE ||
-	op->op_type == OP_LEAVELOOP ||
-	op->op_type == OP_LEAVETRY)
+    if (o->op_type == OP_LEAVE ||
+	o->op_type == OP_SCOPE ||
+	o->op_type == OP_LEAVELOOP ||
+	o->op_type == OP_LEAVETRY)
     {
-	*ops++ = cUNOP->op_first;
+	*ops++ = cUNOPo->op_first;
 	if (ops >= oplimit)
 	    croak(too_deep);
     }
     *ops = 0;
-    if (op->op_flags & OPf_KIDS) {
+    if (o->op_flags & OPf_KIDS) {
 	/* First try all the kids at this level, since that's likeliest. */
-	for (kid = cUNOP->op_first; kid; kid = kid->op_sibling) {
+	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling) {
 	    if ((kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE) &&
 		    kCOP->cop_label && strEQ(kCOP->cop_label, label))
 		return kid;
 	}
-	for (kid = cUNOP->op_first; kid; kid = kid->op_sibling) {
+	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling) {
 	    if (kid == lastgotoprobe)
 		continue;
 	    if ((kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE) &&
@@ -1691,8 +1691,8 @@ OP **oplimit;
 		 (ops[-1]->op_type != OP_NEXTSTATE &&
 		  ops[-1]->op_type != OP_DBSTATE)))
 		*ops++ = kid;
-	    if (op = dofindlabel(kid, label, ops, oplimit))
-		return op;
+	    if (o = dofindlabel(kid, label, ops, oplimit))
+		return o;
 	}
     }
     *ops = 0;

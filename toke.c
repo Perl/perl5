@@ -556,11 +556,11 @@ register char *s;
 int kind;
 {
     if (s && *s) {
-	OP* op = (OP*)newSVOP(OP_CONST, 0, newSVpv(s,0));
-	nextval[nexttoke].opval = op;
+	OP* o = (OP*)newSVOP(OP_CONST, 0, newSVpv(s,0));
+	nextval[nexttoke].opval = o;
 	force_next(WORD);
 	if (kind) {
-	    op->op_private = OPpCONST_ENTERED;
+	    o->op_private = OPpCONST_ENTERED;
 	    /* XXX see note in pp_entereval() for why we forgo typo
 	       warnings if the symbol must be introduced in an eval.
 	       GSAR 96-10-12 */
@@ -4941,7 +4941,7 @@ scan_trans(start)
 char *start;
 {
     register char* s;
-    OP *op;
+    OP *o;
     short *tbl;
     I32 squash;
     I32 delete;
@@ -4971,7 +4971,7 @@ char *start;
     }
 
     New(803,tbl,256,short);
-    op = newPVOP(OP_TRANS, 0, (char*)tbl);
+    o = newPVOP(OP_TRANS, 0, (char*)tbl);
 
     complement = delete = squash = 0;
     while (*s == 'c' || *s == 'd' || *s == 's') {
@@ -4983,9 +4983,9 @@ char *start;
 	    squash = OPpTRANS_SQUASH;
 	s++;
     }
-    op->op_private = delete|squash|complement;
+    o->op_private = delete|squash|complement;
 
-    lex_op = op;
+    lex_op = o;
     yylval.ival = OP_TRANS;
     return s;
 }
@@ -5202,9 +5202,9 @@ char *start;
 	       add symbol table ops
 	    */
 	    if (tmp = pad_findmy(d)) {
-		OP *op = newOP(OP_PADSV, 0);
-		op->op_targ = tmp;
-		lex_op = (OP*)newUNOP(OP_READLINE, 0, newUNOP(OP_RV2GV, 0, op));
+		OP *o = newOP(OP_PADSV, 0);
+		o->op_targ = tmp;
+		lex_op = (OP*)newUNOP(OP_READLINE, 0, newUNOP(OP_RV2GV, 0, o));
 	    }
 	    else {
 		GV *gv = gv_fetchpv(d+1,TRUE, SVt_PV);

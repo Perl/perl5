@@ -1055,38 +1055,38 @@ EXT char *op_desc[] = {
 };
 #endif
 
-OP *	ck_anoncode	_((OP* op));
-OP *	ck_bitop	_((OP* op));
-OP *	ck_concat	_((OP* op));
-OP *	ck_delete	_((OP* op));
-OP *	ck_eof		_((OP* op));
-OP *	ck_eval		_((OP* op));
-OP *	ck_exec		_((OP* op));
-OP *	ck_exists	_((OP* op));
-OP *	ck_ftst		_((OP* op));
-OP *	ck_fun		_((OP* op));
-OP *	ck_fun_locale	_((OP* op));
-OP *	ck_glob		_((OP* op));
-OP *	ck_grep		_((OP* op));
-OP *	ck_index	_((OP* op));
-OP *	ck_lengthconst	_((OP* op));
-OP *	ck_lfun		_((OP* op));
-OP *	ck_listiob	_((OP* op));
-OP *	ck_match	_((OP* op));
-OP *	ck_null		_((OP* op));
-OP *	ck_repeat	_((OP* op));
-OP *	ck_require	_((OP* op));
-OP *	ck_rfun		_((OP* op));
-OP *	ck_rvconst	_((OP* op));
-OP *	ck_scmp		_((OP* op));
-OP *	ck_select	_((OP* op));
-OP *	ck_shift	_((OP* op));
-OP *	ck_sort		_((OP* op));
-OP *	ck_spair	_((OP* op));
-OP *	ck_split	_((OP* op));
-OP *	ck_subr		_((OP* op));
-OP *	ck_svconst	_((OP* op));
-OP *	ck_trunc	_((OP* op));
+OP *	ck_anoncode	_((OP* o));
+OP *	ck_bitop	_((OP* o));
+OP *	ck_concat	_((OP* o));
+OP *	ck_delete	_((OP* o));
+OP *	ck_eof		_((OP* o));
+OP *	ck_eval		_((OP* o));
+OP *	ck_exec		_((OP* o));
+OP *	ck_exists	_((OP* o));
+OP *	ck_ftst		_((OP* o));
+OP *	ck_fun		_((OP* o));
+OP *	ck_fun_locale	_((OP* o));
+OP *	ck_glob		_((OP* o));
+OP *	ck_grep		_((OP* o));
+OP *	ck_index	_((OP* o));
+OP *	ck_lengthconst	_((OP* o));
+OP *	ck_lfun		_((OP* o));
+OP *	ck_listiob	_((OP* o));
+OP *	ck_match	_((OP* o));
+OP *	ck_null		_((OP* o));
+OP *	ck_repeat	_((OP* o));
+OP *	ck_require	_((OP* o));
+OP *	ck_rfun		_((OP* o));
+OP *	ck_rvconst	_((OP* o));
+OP *	ck_scmp		_((OP* o));
+OP *	ck_select	_((OP* o));
+OP *	ck_shift	_((OP* o));
+OP *	ck_sort		_((OP* o));
+OP *	ck_spair	_((OP* o));
+OP *	ck_split	_((OP* o));
+OP *	ck_subr		_((OP* o));
+OP *	ck_svconst	_((OP* o));
+OP *	ck_trunc	_((OP* o));
 
 OP *	pp_null		_((void));
 OP *	pp_stub		_((void));
@@ -1785,9 +1785,9 @@ EXT OP * (*ppaddr[])() = {
 #endif
 
 #ifndef DOINIT
-EXT OP * (*check[]) _((OP *op));
+EXT OP * (*check[]) _((OP *o));
 #else
-EXT OP * (*check[]) _((OP *op)) = {
+EXT OP * (*check[]) _((OP *o)) = {
 	ck_null,	/* null */
 	ck_null,	/* stub */
 	ck_fun,		/* scalar */

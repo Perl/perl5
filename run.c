@@ -34,7 +34,7 @@ runops() {
 
 #else
 
-static void debprof _((OP*op));
+static void debprof _((OP*o));
 
 int
 runops() {
@@ -62,20 +62,20 @@ runops() {
 }
 
 I32
-debop(op)
-OP *op;
+debop(o)
+OP *o;
 {
     SV *sv;
-    deb("%s", op_name[op->op_type]);
-    switch (op->op_type) {
+    deb("%s", op_name[o->op_type]);
+    switch (o->op_type) {
     case OP_CONST:
-	PerlIO_printf(Perl_debug_log, "(%s)", SvPEEK(cSVOP->op_sv));
+	PerlIO_printf(Perl_debug_log, "(%s)", SvPEEK(cSVOPo->op_sv));
 	break;
     case OP_GVSV:
     case OP_GV:
-	if (cGVOP->op_gv) {
+	if (cGVOPo->op_gv) {
 	    sv = NEWSV(0,0);
-	    gv_fullname3(sv, cGVOP->op_gv, Nullch);
+	    gv_fullname3(sv, cGVOPo->op_gv, Nullch);
 	    PerlIO_printf(Perl_debug_log, "(%s)", SvPV(sv, na));
 	    SvREFCNT_dec(sv);
 	}
@@ -100,12 +100,12 @@ char **addr;
 }
 
 static void
-debprof(op)
-OP* op;
+debprof(o)
+OP* o;
 {
     if (!profiledata)
 	New(000, profiledata, MAXO, U32);
-    ++profiledata[op->op_type];
+    ++profiledata[o->op_type];
 }
 
 void
