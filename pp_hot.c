@@ -602,8 +602,10 @@ PP(pp_aassign)
     if (op->op_private & OPpASSIGN_COMMON) {
         for (relem = firstrelem; relem <= lastrelem; relem++) {
             /*SUPPRESS 560*/
-            if (sv = *relem)
+            if (sv = *relem) {
+		TAINT_NOT;	/* Each item is independent */
                 *relem = sv_mortalcopy(sv);
+	    }
         }
     }
 
@@ -1313,6 +1315,7 @@ PP(pp_leave)
 	    gimme = G_SCALAR;
     }
 
+    TAINT_NOT;
     if (gimme == G_VOID)
 	SP = newsp;
     else if (gimme == G_SCALAR) {
@@ -1329,10 +1332,13 @@ PP(pp_leave)
 	SP = MARK;
     }
     else if (gimme == G_ARRAY) {
-	for (mark = newsp + 1; mark <= SP; mark++)
-	    if (!(SvFLAGS(*mark) & (SVs_PADTMP|SVs_TEMP)))
+	/* in case LEAVE wipes old return values */
+	for (mark = newsp + 1; mark <= SP; mark++) {
+	    if (!(SvFLAGS(*mark) & (SVs_PADTMP|SVs_TEMP))) {
 		*mark = sv_mortalcopy(*mark);
-		/* in case LEAVE wipes old return values */
+		TAINT_NOT;	/* Each item is independent */
+	    }
+	}
     }
     curpm = newpm;	/* Don't pop $1 et al till now */
 
@@ -1693,6 +1699,7 @@ PP(pp_leavesub)
     POPBLOCK(cx,newpm);
     POPSUB1(cx);	/* Delay POPSUB2 until stack values are safe */
  
+    TAINT_NOT;
     if (gimme == G_SCALAR) {
 	MARK = newsp + 1;
 	if (MARK <= SP)
@@ -1705,8 +1712,10 @@ PP(pp_leavesub)
     }
     else if (gimme == G_ARRAY) {
 	for (MARK = newsp + 1; MARK <= SP; MARK++) {
-	    if (!SvTEMP(*MARK))
+	    if (!SvTEMP(*MARK)) {
 		*MARK = sv_mortalcopy(*MARK);
+		TAINT_NOT;	/* Each item is independent */
+	    }
 	}
     }
     PUTBACK;

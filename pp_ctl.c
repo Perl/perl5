@@ -1316,6 +1316,7 @@ PP(pp_leaveloop)
     mark = newsp;
     POPLOOP1(cx);	/* Delay POPLOOP2 until stack values are safe */
 
+    TAINT_NOT;
     if (gimme == G_VOID)
 	; /* do nothing */
     else if (gimme == G_SCALAR) {
@@ -1325,8 +1326,10 @@ PP(pp_leaveloop)
 	    *++newsp = &sv_undef;
     }
     else {
-	while (mark < SP)
+	while (mark < SP) {
 	    *++newsp = sv_mortalcopy(*++mark);
+	    TAINT_NOT;		/* Each item is independent */
+	}
     }
     SP = newsp;
     PUTBACK;
@@ -1389,6 +1392,7 @@ PP(pp_return)
 	DIE("panic: return");
     }
 
+    TAINT_NOT;
     if (gimme == G_SCALAR) {
 	if (MARK < SP)
 	    *++newsp = (popsub2 && SvTEMP(*SP))
@@ -1397,9 +1401,11 @@ PP(pp_return)
 	    *++newsp = &sv_undef;
     }
     else if (gimme == G_ARRAY) {
-	while (++MARK <= SP)
+	while (++MARK <= SP) {
 	    *++newsp = (popsub2 && SvTEMP(*MARK))
 			? *MARK : sv_mortalcopy(*MARK);
+	    TAINT_NOT;		/* Each item is independent */
+	}
     }
     stack_sp = newsp;
 
@@ -1461,6 +1467,7 @@ PP(pp_last)
 	DIE("panic: last");
     }
 
+    TAINT_NOT;
     if (gimme == G_SCALAR) {
 	if (MARK < SP)
 	    *++newsp = ((pop2 == CXt_SUB) && SvTEMP(*SP))
@@ -1469,9 +1476,11 @@ PP(pp_last)
 	    *++newsp = &sv_undef;
     }
     else if (gimme == G_ARRAY) {
-	while (++MARK <= SP)
+	while (++MARK <= SP) {
 	    *++newsp = ((pop2 == CXt_SUB) && SvTEMP(*MARK))
 			? *MARK : sv_mortalcopy(*MARK);
+	    TAINT_NOT;		/* Each item is independent */
+	}
     }
     SP = newsp;
     PUTBACK;
@@ -2326,6 +2335,7 @@ PP(pp_leaveeval)
     POPEVAL(cx);
     retop = pop_return();
 
+    TAINT_NOT;
     if (gimme == G_VOID)
 	MARK = newsp;
     else if (gimme == G_SCALAR) {
@@ -2342,10 +2352,13 @@ PP(pp_leaveeval)
 	}
     }
     else {
-	for (mark = newsp + 1; mark <= SP; mark++)
-	    if (!(SvFLAGS(*mark) & SVs_TEMP))
+	/* in case LEAVE wipes old return values */
+	for (mark = newsp + 1; mark <= SP; mark++) {
+	    if (!(SvFLAGS(*mark) & SVs_TEMP)) {
 		*mark = sv_mortalcopy(*mark);
-		/* in case LEAVE wipes old return values */
+		TAINT_NOT;	/* Each item is independent */
+	    }
+	}
     }
     curpm = newpm;	/* Don't pop $1 et al till now */
 
@@ -2406,6 +2419,7 @@ PP(pp_leavetry)
     POPEVAL(cx);
     pop_return();
 
+    TAINT_NOT;
     if (gimme == G_VOID)
 	SP = newsp;
     else if (gimme == G_SCALAR) {
@@ -2423,10 +2437,13 @@ PP(pp_leavetry)
 	SP = MARK;
     }
     else {
-	for (mark = newsp + 1; mark <= SP; mark++)
-	    if (!(SvFLAGS(*mark) & (SVs_PADTMP|SVs_TEMP)))
+	/* in case LEAVE wipes old return values */
+	for (mark = newsp + 1; mark <= SP; mark++) {
+	    if (!(SvFLAGS(*mark) & (SVs_PADTMP|SVs_TEMP))) {
 		*mark = sv_mortalcopy(*mark);
-		/* in case LEAVE wipes old return values */
+		TAINT_NOT;	/* Each item is independent */
+	    }
+	}
     }
     curpm = newpm;	/* Don't pop $1 et al till now */
 

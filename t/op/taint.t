@@ -79,7 +79,7 @@ print PROG 'print "@ARGV\n"', "\n";
 close PROG;
 my $echo = "$Invoke_Perl $ECHO";
 
-print "1..112\n";
+print "1..136\n";
 
 # First, let's make sure that Perl is checking the dangerous
 # environment variables. Maybe they aren't set yet, so we'll
@@ -468,4 +468,40 @@ print "1..112\n";
     test 110, tainted($bar /= 1);
     test 111, tainted($bar--);
     test 112, $bar == 0;
+}
+
+# Test assignment and return of lists
+{
+    my @foo = ("A", "tainted" . $TAINT, "B");
+    test 113, not tainted $foo[0];
+    test 114,     tainted $foo[1];
+    test 115, not tainted $foo[2];
+    my @bar = @foo;
+    test 116, not tainted $bar[0];
+    test 117,     tainted $bar[1];
+    test 118, not tainted $bar[2];
+    my @baz = eval { "A", "tainted" . $TAINT, "B" };
+    test 119, not tainted $baz[0];
+    test 120,     tainted $baz[1];
+    test 121, not tainted $baz[2];
+    my @plugh = eval q[ "A", "tainted" . $TAINT, "B" ];
+    test 122, not tainted $plugh[0];
+    test 123,     tainted $plugh[1];
+    test 124, not tainted $plugh[2];
+    my $nautilus = sub { "A", "tainted" . $TAINT, "B" };
+    test 125, not tainted ((&$nautilus)[0]);
+    test 126,     tainted ((&$nautilus)[1]);
+    test 127, not tainted ((&$nautilus)[2]);
+    my @xyzzy = &$nautilus;
+    test 128, not tainted $xyzzy[0];
+    test 129,     tainted $xyzzy[1];
+    test 130, not tainted $xyzzy[2];
+    my $red_october = sub { return "A", "tainted" . $TAINT, "B" };
+    test 131, not tainted ((&$red_october)[0]);
+    test 132,     tainted ((&$red_october)[1]);
+    test 133, not tainted ((&$red_october)[2]);
+    my @corge = &$red_october;
+    test 134, not tainted $corge[0];
+    test 135,     tainted $corge[1];
+    test 136, not tainted $corge[2];
 }
