@@ -1,16 +1,16 @@
-#!./perl
-
-BEGIN {
-    chdir 't' if -d 't';
-    unshift @INC, '../lib';
-}
+#!/usr/bin/perl -w
 
 # Test for mktemp family of commands in File::Temp
 # Use STANDARD safe level for these tests
 
+BEGIN {
+	chdir 't' if -d 't';
+	unshift @INC, '../lib';
+	require Test; import Test;
+	plan(tests => 9);
+}
+
 use strict;
-use Test;
-BEGIN { plan tests => 9 }
 
 use File::Spec;
 use File::Path;
@@ -50,6 +50,7 @@ ok($string, $line);
 # stat(filehandle) does not always equal the size of the stat(filename)
 # This must be due to caching. In particular this test writes 7 bytes
 # to the file which are not recognised by stat(filename)
+# Simply waiting 3 seconds seems to be enough for the system to update
 
 if ($^O eq 'MSWin32') {
   sleep 3;
@@ -69,8 +70,15 @@ print "# MKSTEMPS: File is $template -> $fname fileno=".fileno($fh)."\n";
 # Check if the file exists
 ok( (-e $fname) );
 
-ok( unlink0($fh, $fname) ); 
+# This fails if you are running on NFS
+# If this test fails simply skip it rather than doing a hard failure
+my $status = unlink0($fh, $fname);
 
+if ($status) {
+  ok($status);
+} else {
+  skip("Skip test failed probably due to NFS",1)
+}
 
 # MKDTEMP
 # Temp directory

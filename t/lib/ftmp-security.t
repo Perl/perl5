@@ -1,21 +1,26 @@
-#!./perl
-
-BEGIN {
-    chdir 't' if -d 't';
-    unshift @INC, '../lib';
-}
-
+#!/usr/bin/perl -w
 # Test for File::Temp - Security levels
 
 # Some of the security checking will not work on all platforms
 # Test a simple open in the cwd and tmpdir foreach of the
 # security levels
 
-use strict;
-use Test;
-BEGIN { plan tests => 13}
+BEGIN {
+	chdir 't' if -d 't';
+	unshift @INC, '../lib';
+	require Test; import Test;
+	plan(tests => 13);
+}
 
+use strict;
 use File::Spec;
+
+# Set up END block - this needs to happen before we load
+# File::Temp since this END block must be evaluated after the
+# END block configured by File::Temp
+my @files; # list of files to remove
+END { foreach (@files) { ok( !(-e $_) )} }
+
 use File::Temp qw/ tempfile unlink0 /;
 ok(1);
 
@@ -87,17 +92,7 @@ sub test_security {
     return;
   }
 
-
-  # End blocks are evaluated in reverse order
-  # If I want to check that the file was unlinked by the autmoatic
-  # feature of the module I have to set up the end block before 
-  # creating the file.
-  # Use quoted end block to retain access to lexicals
-  my @files;
-
-  eval q{ END { foreach (@files) { ok( !(-e $_) )} } 1; } || die; 
-
-
+  # Create the tempfile
   my $template = "temptestXXXXXXXX";
   my ($fh1, $fname1) = tempfile ( $template, 
 				  DIR => File::Spec->curdir,

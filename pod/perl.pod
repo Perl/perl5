@@ -34,6 +34,8 @@ sections:
     perlmod		Perl modules: how they work
     perlmodlib		Perl modules: how to write and use
     perlmodinstall	Perl modules: how to install from CPAN
+    perlnewpod		Perl modules: preparing a new module for distribution
+
     perlform		Perl formats
     perlunicode		Perl unicode support
     perllocale		Perl locale support
