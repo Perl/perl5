@@ -225,8 +225,14 @@ struct perl_thread;
 #  define CALLPROTECT CALL_FPTR(PL_protect)
 #endif
 
+#ifdef HASATTRIBUTE
+#  define PERL_UNUSED_DECL __attribute__((unused))
+#else
+#  define PERL_UNUSED_DECL
+#endif
+
 #define NOOP (void)0
-#define dNOOP extern int Perl___notused __attribute__ ((unused))
+#define dNOOP extern int Perl___notused PERL_UNUSED_DECL
 
 #ifndef pTHX
 #  define pTHX		void

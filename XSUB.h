@@ -69,7 +69,7 @@ handled automatically by C<xsubpp>.
 /* gcc -Wall: if an xsub has no arguments and PPCODE is used
  * and none of ST, XSRETURN or XSprePUSH macros are used
  * then `ax' (setup by dXSARGS) is unused. */
-#define dAX I32 ax __attribute__((unused)) = MARK - PL_stack_base + 1
+#define dAX I32 ax PERL_UNUSED_DECL = MARK - PL_stack_base + 1
 
 #define dITEMS I32 items = SP - MARK
 
