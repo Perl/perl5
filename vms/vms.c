@@ -5108,12 +5108,6 @@ Perl_do_spawn(pTHX_ char *cmd)
   if (!cmd || !*cmd) {
     hadcmd = 0;
     sts = lib$spawn(0,0,0,0,0,0,&substs,0,0,0,0,0,0);
-  }
-  else {
-    (void) safe_popen(cmd, "nW", (int *)&sts);
-    substs = sts;
-  }
-  
   if (!(sts & 1)) {
     switch (sts) {
       case RMS$_FNF:  case RMS$_DNF:
@@ -5140,8 +5134,13 @@ Perl_do_spawn(pTHX_ char *cmd)
              Strerror(errno));
     }
   }
+  }
+  else {
+    (void) safe_popen(cmd, "nW", (int *)&sts);
+  }
+  
   vms_execfree(aTHX);
-  return substs;
+  return sts;
 
 }  /* end of do_spawn() */
 /*}}}*/
