@@ -338,9 +338,10 @@ from the base path to the destination path:
     $rel_path = File::Spec->abs2rel( $path ) ;
     $rel_path = File::Spec->abs2rel( $path, $base ) ;
 
-If $base is not present or '', then L<cwd()|Cwd> is used. If $base is relative, 
-then it is converted to absolute form using L</rel2abs()>. This means that it
-is taken to be relative to L<cwd()|Cwd>.
+If $base is not present or '', then L<cwd()|Cwd> is used. If $base is
+relative, then it is converted to absolute form using
+L</rel2abs()>. This means that it is taken to be relative to
+L<cwd()|Cwd>.
 
 On systems with the concept of a volume, this assumes that both paths 
 are on the $destination volume, and ignores the $base volume. 
@@ -373,8 +374,7 @@ sub abs2rel {
 
     # Figure out the effective $base and clean it up.
     if ( !defined( $base ) || $base eq '' ) {
-        require Cwd;
-        $base = Cwd::cwd() ;
+        $base = $self->cwd();
     }
     elsif ( ! $self->file_name_is_absolute( $base ) ) {
         $base = $self->rel2abs( $base ) ;
@@ -463,7 +463,6 @@ sub rel2abs {
     return $self->canonpath( $path ) ;
 }
 
-
 =back
 
 =head1 SEE ALSO
@@ -471,5 +470,13 @@ sub rel2abs {
 L<File::Spec>
 
 =cut
+
+# Internal routine to File::Spec, no point in publicly documenting
+# this interface since it's the standard Cwd interface.  Some of the
+# platform-specific File::Spec subclasses use this.
+sub cwd {
+    require Cwd;
+    Cwd::cwd();
+}
 
 1;
