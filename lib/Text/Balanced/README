@@ -1,5 +1,5 @@
 ==============================================================================
-                  Release of version 1.86 of Text::Balanced
+                  Release of version 1.89 of Text::Balanced
 ==============================================================================
 
 
@@ -66,14 +66,10 @@ COPYRIGHT
 
 ==============================================================================
 
-CHANGES IN VERSION 1.86
+CHANGES IN VERSION 1.89
 
 
-	- Revised licence for inclusion in core distribution
-
-	- Consolidated POD in .pm file
-
-	- renamed tests to let DOS cope with them
+	- Fixed extvar.t tests
 
 
 ==============================================================================

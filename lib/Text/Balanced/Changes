@@ -246,3 +246,18 @@ Revision history for Perl extension Text::Balanced.
 	- Consolidated POD in .pm file
 
 	- renamed tests to let DOS cope with them
+
+
+1.87	Thu Nov 15 21:25:35 2001
+
+	- Made extract_multiple aware of skipped prefixes returned
+	  by subroutine extractors (such as extract_quotelike, etc.)
+
+	- Made extract_variable aware of punctuation variables
+
+	- Corified tests
+
+
+1.89	Sun Nov 18 22:49:50 2001
+
+	- Fixed extvar.t tests
