@@ -685,16 +685,23 @@ d_ftime (d_ftime.U):
 
 d_Gconvert (d_gconvert.U):
 	This variable holds what Gconvert is defined as to convert
-	floating point numbers into strings. It could be 'gconvert'
-	or a more complex macro emulating gconvert with gcvt() or sprintf.
-	Possible values are:
-	d_Gconvert='gconvert((x),(n),(t),(b))'
-	d_Gconvert='gcvt((x),(n),(b))'
-	d_Gconvert='sprintf((b),"%.*g",(n),(x))'
-	If you are not content with these choices, use gconvert_preference
-	and gconvert_ld_preference, which if present are space-separated
-	lists of functions to try with calling convention of gcvt,
-	respectively for doubles and long doubles.
+	floating point numbers into strings.  By default, Configure
+	sets this macro to use the first of gconvert, gcvt, or sprintf
+	that pass sprintf-%g-like behaviour tests.  If perl is using
+	long doubles, the macro uses the first of the following
+	functions that pass Configure's tests: qgcvt, sprintf (if
+	Configure knows how to make sprintf format long doubles--see
+	sPRIgldbl), gconvert, gcvt, and sprintf (casting to double).  
+	The gconvert_preference and gconvert_ld_preference variables   
+	can be used to alter Configure's preferences, for doubles and
+	long doubles, respectively.  If present, they contain a       
+	space-separated list of one or more of the above function       
+	names in the order they should be tried.
+		d_Gconvert may be set to override Configure with a platform-
+	specific function.  If this function expects a double, a
+	different value may need to be set by the uselongdouble.cbu
+	call-back unit so that long doubles can be formatted without
+	loss of precision.
 
 d_getcwd (d_getcwd.U):
 	This variable conditionally defines the HAS_GETCWD symbol, which
