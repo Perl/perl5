@@ -1541,6 +1541,8 @@ struct _sublex_info {
     I32 super_state;	/* lexer state to save */
     I32 sub_inwhat;	/* "lex_inwhat" to use */
     OP *sub_op;		/* "lex_op" to use */
+    char *super_bufptr;	/* PL_bufptr that was */
+    char *super_bufend;	/* PL_bufend that was */
 };
 
 typedef struct magic_state MGS;	/* struct magic_state defined in mg.c */

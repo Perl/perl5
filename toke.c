@@ -5352,6 +5352,9 @@ scan_subst(char *start)
 
     if (es) {
 	SV *repl;
+	PL_sublex_info.super_bufptr = s;
+	PL_sublex_info.super_bufend = PL_bufend;
+	PL_multi_end = 0;
 	pm->op_pmflags |= PMf_EVAL;
 	repl = newSVpv("",0);
 	while (es-- > 0)
@@ -5541,7 +5544,33 @@ scan_heredoc(register char *s)
     PL_multi_start = PL_curcop->cop_line;
     PL_multi_open = PL_multi_close = '<';
     term = *PL_tokenbuf;
-    if (!outer) {
+    if (PL_lex_inwhat == OP_SUBST && PL_in_eval && !PL_rsfp) {
+	char *bufptr = PL_sublex_info.super_bufptr;
+	char *bufend = PL_sublex_info.super_bufend;
+	char *olds = s - SvCUR(herewas);
+	s = strchr(bufptr, '\n');
+	if (!s)
+	    s = bufend;
+	d = s;
+	while (s < bufend &&
+	  (*s != term || memNE(s,PL_tokenbuf,len)) ) {
+	    if (*s++ == '\n')
+		PL_curcop->cop_line++;
+	}
+	if (s >= bufend) {
+	    PL_curcop->cop_line = PL_multi_start;
+	    missingterm(PL_tokenbuf);
+	}
+	sv_setpvn(herewas,bufptr,d-bufptr+1);
+	sv_setpvn(tmpstr,d+1,s-d);
+	s += len - 1;
+	sv_catpvn(herewas,s,bufend-s);
+	(void)strcpy(bufptr,SvPVX(herewas));
+
+	s = olds;
+	goto retval;
+    }
+    else if (!outer) {
 	d = s;
 	while (s < PL_bufend &&
 	  (*s != term || memNE(s,PL_tokenbuf,len)) ) {
@@ -5605,8 +5634,9 @@ scan_heredoc(register char *s)
 	    sv_catsv(tmpstr,PL_linestr);
 	}
     }
-    PL_multi_end = PL_curcop->cop_line;
     s++;
+retval:
+    PL_multi_end = PL_curcop->cop_line;
     if (SvCUR(tmpstr) + 5 < SvLEN(tmpstr)) {
 	SvLEN_set(tmpstr, SvCUR(tmpstr) + 1);
 	Renew(SvPVX(tmpstr), SvLEN(tmpstr), char);

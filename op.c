@@ -2506,8 +2506,11 @@ pmruntime(OP *o, OP *expr, OP *repl)
 
     if (repl) {
 	OP *curop;
-	if (pm->op_pmflags & PMf_EVAL)
+	if (pm->op_pmflags & PMf_EVAL) {
 	    curop = 0;
+	    if (PL_curcop->cop_line < PL_multi_end)
+		PL_curcop->cop_line = PL_multi_end;
+	}
 #ifdef USE_THREADS
 	else if (repl->op_type == OP_THREADSV
 		 && strchr("&`'123456789+",
