@@ -442,7 +442,8 @@ perl_destruct(pTHXx)
 
     /* Destroy the main CV and syntax tree */
     if (PL_main_root) {
-	PL_curpad = AvARRAY(PL_comppad);
+        /* If running under -d may not have PL_comppad. */
+        PL_curpad = PL_comppad ? AvARRAY(PL_comppad) : NULL;
 	op_free(PL_main_root);
 	PL_main_root = Nullop;
     }
