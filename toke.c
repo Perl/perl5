@@ -318,16 +318,14 @@ restore_rsfp(void *f)
 }
 
 static void
-restore_expect(e)
-void *e;
+restore_expect(void *e)
 {
     /* a safe way to store a small integer in a pointer */
     expect = (expectation)((char *)e - tokenbuf);
 }
 
 static void
-restore_lex_expect(e)
-void *e;
+restore_lex_expect(void *e)
 {
     /* a safe way to store a small integer in a pointer */
     lex_expect = (expectation)((char *)e - tokenbuf);
