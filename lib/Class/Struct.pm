@@ -101,6 +101,7 @@ sub struct {
 
     $out = "{\n  package $class;\n  use Carp;\n  sub new {\n";
     $out .= "    my (\$class, \%init) = \@_;\n";
+    $out .= "    \$class = __PACKAGE__ unless \@_;\n";
 
     my $cnt = 0;
     my $idx = 0;
