@@ -34,6 +34,213 @@ Version v5.6.2
 --------------
 
 ____________________________________________________________________________
+[ 21255] By: rgs                                   on 2003/09/16  20:16:03
+        Log: Hints updates from bleadperl
+     Branch: maint-5.6
+	   ! perl-5.6.2/hints/svr4.sh
+____________________________________________________________________________
+[ 21254] By: rgs                                   on 2003/09/16  20:11:16
+        Log: Subject: [PATCH] 5.6.2/MSWin32: Integrate fcrypt.c
+             From: "Marcus Holland-Moritz" <mhx-perl@gmx.net>
+             Date: Sun, 14 Sep 2003 12:13:30 +0200
+             Message-ID: <00df01c37aa8$d9d7aa70$4200a8c0@R2D2>
+     Branch: maint-5.6
+	   + perl-5.6.2/win32/fcrypt.c
+	   - perl-5.6.2/win32/des_fcrypt.patch
+	   ! perl-5.6.2/MANIFEST perl-5.6.2/README.win32
+	   ! perl-5.6.2/win32/Makefile perl-5.6.2/win32/makefile.mk
+____________________________________________________________________________
+[ 21252] By: rgs                                   on 2003/09/16  19:43:40
+        Log: Subject: [PATCH: win32/Makefile] Make 5.6.2 fly again on MSWin32 (was: Re: perl562@20985)
+             From: "Marcus Holland-Moritz" <mhx-perl@gmx.net>
+             Date: Sun, 14 Sep 2003 12:11:22 +0200
+             Message-ID: <00db01c37aa8$8d0e87e0$4200a8c0@R2D2>
+     Branch: maint-5.6
+	   ! perl-5.6.2/win32/Makefile
+____________________________________________________________________________
+[ 21248] By: rgs                                   on 2003/09/16  19:08:16
+        Log: Upgrade to ExtUtils::MakeMaker 6.17.
+     Branch: maint-5.6
+	   ! perl-5.6.2/lib/ExtUtils/Changes
+	   ! perl-5.6.2/lib/ExtUtils/Install.pm
+	   ! perl-5.6.2/lib/ExtUtils/META.yml
+	   ! perl-5.6.2/lib/ExtUtils/MM_Unix.pm
+	   ! perl-5.6.2/lib/ExtUtils/MM_VMS.pm
+	   ! perl-5.6.2/lib/ExtUtils/MM_Win32.pm
+	   ! perl-5.6.2/lib/ExtUtils/MakeMaker.pm
+	   ! perl-5.6.2/lib/ExtUtils/MakeMaker/Tutorial.pod
+	   ! perl-5.6.2/lib/ExtUtils/Manifest.pm
+	   ! perl-5.6.2/lib/ExtUtils/t/Manifest.t
+____________________________________________________________________________
+[ 21216] By: rgs                                   on 2003/09/13  20:22:36
+        Log: Hintfile updates.
+     Branch: maint-5.6
+	   + perl-5.6.2/ext/NDBM_File/hints/linux.pl
+	   ! perl-5.6.2/MANIFEST perl-5.6.2/ext/DynaLoader/hints/linux.pl
+	   ! perl-5.6.2/ext/POSIX/hints/svr4.pl perl-5.6.2/hints/freebsd.sh
+____________________________________________________________________________
+[ 21215] By: rgs                                   on 2003/09/13  19:57:14
+        Log: More trivial documentation updates
+     Branch: maint-5.6
+	   ! perl-5.6.2/pod/perl5004delta.pod
+	   ! perl-5.6.2/pod/perl5005delta.pod perl-5.6.2/pod/perlbook.pod
+	   ! perl-5.6.2/pod/perldsc.pod perl-5.6.2/pod/perlfilter.pod
+	   ! perl-5.6.2/pod/perlnewmod.pod perl-5.6.2/pod/perlrequick.pod
+	   ! perl-5.6.2/pod/perlretut.pod perl-5.6.2/pod/perlstyle.pod
+____________________________________________________________________________
+[ 21190] By: rgs                                   on 2003/09/11  21:35:24
+        Log: INSTALL nits ; get perlmodinstall and perlreftut from bleadperl
+     Branch: maint-5.6
+	   ! perl-5.6.2/INSTALL perl-5.6.2/pod/perlmodinstall.pod
+	   ! perl-5.6.2/pod/perlreftut.pod
+____________________________________________________________________________
+[ 21185] By: rgs                                   on 2003/09/11  19:15:49
+        Log: Integrate the recent hintfile changes from bleadperl
+     Branch: maint-5.6
+	   ! perl-5.6.2/hints/aix.sh perl-5.6.2/hints/freebsd.sh
+____________________________________________________________________________
+[ 21150] By: rgs                                   on 2003/09/09  20:59:37
+        Log: Subject: Re: perl562@20985
+             From: Yitzchak Scott-Thoennes <sthoenna@efn.org>
+             Date: Tue, 9 Sep 2003 01:42:28 -0700
+             Message-ID: <20030909084228.GA2380@efn.org>
+             
+             Copies the cygwin module hint files from bleadperl, plus
+             other changes suitably taken from maint-5.8.
+     Branch: maint-5.6
+	   ! perl-5.6.2/Makefile.SH
+	   ! perl-5.6.2/ext/NDBM_File/hints/cygwin.pl
+	   ! perl-5.6.2/ext/ODBM_File/hints/cygwin.pl
+	   ! perl-5.6.2/t/op/taint.t
+____________________________________________________________________________
+[ 21059] By: rgs                                   on 2003/09/06  20:21:43
+        Log: Copy the Configure hint files from bleadperl.
+     Branch: maint-5.6
+	   + perl-5.6.2/hints/atheos.sh perl-5.6.2/hints/os400.sh
+	   + perl-5.6.2/hints/super-ux.sh perl-5.6.2/hints/t001.c
+	   + perl-5.6.2/hints/vos.sh
+	   ! perl-5.6.2/MANIFEST perl-5.6.2/hints/README.hints
+	   ! perl-5.6.2/hints/aix.sh perl-5.6.2/hints/amigaos.sh
+	   ! perl-5.6.2/hints/apollo.sh perl-5.6.2/hints/beos.sh
+	   ! perl-5.6.2/hints/bsdos.sh perl-5.6.2/hints/cygwin.sh
+	   ! perl-5.6.2/hints/darwin.sh perl-5.6.2/hints/dec_osf.sh
+	   ! perl-5.6.2/hints/dgux.sh perl-5.6.2/hints/dos_djgpp.sh
+	   ! perl-5.6.2/hints/dynixptx.sh perl-5.6.2/hints/epix.sh
+	   ! perl-5.6.2/hints/freebsd.sh perl-5.6.2/hints/hpux.sh
+	   ! perl-5.6.2/hints/irix_5.sh perl-5.6.2/hints/irix_6.sh
+	   ! perl-5.6.2/hints/isc.sh perl-5.6.2/hints/isc_2.sh
+	   ! perl-5.6.2/hints/linux.sh perl-5.6.2/hints/machten.sh
+	   ! perl-5.6.2/hints/machten_2.sh perl-5.6.2/hints/mpeix.sh
+	   ! perl-5.6.2/hints/netbsd.sh perl-5.6.2/hints/newsos4.sh
+	   ! perl-5.6.2/hints/next_3.sh perl-5.6.2/hints/nonstopux.sh
+	   ! perl-5.6.2/hints/openbsd.sh perl-5.6.2/hints/os2.sh
+	   ! perl-5.6.2/hints/os390.sh perl-5.6.2/hints/posix-bc.sh
+	   ! perl-5.6.2/hints/powerux.sh perl-5.6.2/hints/qnx.sh
+	   ! perl-5.6.2/hints/rhapsody.sh perl-5.6.2/hints/sco.sh
+	   ! perl-5.6.2/hints/solaris_2.sh perl-5.6.2/hints/sunos_4_1.sh
+	   ! perl-5.6.2/hints/svr4.sh perl-5.6.2/hints/svr5.sh
+	   ! perl-5.6.2/hints/titanos.sh perl-5.6.2/hints/ultrix_4.sh
+	   ! perl-5.6.2/hints/umips.sh perl-5.6.2/hints/unicos.sh
+	   ! perl-5.6.2/hints/unicosmk.sh perl-5.6.2/hints/utekv.sh
+	   ! perl-5.6.2/hints/uts.sh perl-5.6.2/hints/uwin.sh
+	   ! perl-5.6.2/hints/vmesa.sh
+____________________________________________________________________________
+[ 21055] By: rgs                                   on 2003/09/06  18:42:56
+        Log: Integrate changes #9813 and #21045 from the main branch.
+             
+             [9813]
+             Prevent path disclosure (probing for existence of filenames)
+             using suidperl; bug id 20010322.218.
+             
+             [21045]
+             More suidperl path disclosure plugging:
+             the #9813 didn't do enough.  See either of
+             http://rt.perl.org/rt2/Ticket/Display.html?id=6511
+             http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=203426
+     Branch: maint-5.6
+	   ! perl-5.6.2/perl.c perl-5.6.2/pod/perldiag.pod
+____________________________________________________________________________
+[ 21038] By: rgs                                   on 2003/09/04  19:44:26
+        Log: Subject: [PATCH 5.6.2] make -Dusedevel imply -Dversiononly -Uinstallusrbinperl
+             From: Yitzchak Scott-Thoennes <sthoenna@efn.org>
+             Date: Wed, 3 Sep 2003 12:03:30 -0700
+             Message-ID: <20030903190330.GA3652@efn.org>
+     Branch: maint-5.6
+	   ! perl-5.6.2/Configure
+____________________________________________________________________________
+[ 21037] By: rgs                                   on 2003/09/04  19:36:57
+        Log: Upgrade to Data::Dumper 2.121, by Ilya Martynov
+     Branch: maint-5.6
+	   + perl-5.6.2/ext/Data/Dumper/t/dumper.t
+	   + perl-5.6.2/ext/Data/Dumper/t/overload.t
+	   + perl-5.6.2/ext/Data/Dumper/t/pair.t
+	   - perl-5.6.2/t/lib/dumper-ovl.t perl-5.6.2/t/lib/dumper.t
+	   ! perl-5.6.2/MANIFEST perl-5.6.2/ext/Data/Dumper/Changes
+	   ! perl-5.6.2/ext/Data/Dumper/Dumper.pm
+	   ! perl-5.6.2/ext/Data/Dumper/Dumper.xs
+____________________________________________________________________________
+[ 21024] By: rgs                                   on 2003/09/03  18:46:51
+        Log: Add a test_prep make target, equivalent to test-prep (for smokes)
+     Branch: maint-5.6
+	   ! perl-5.6.2/Makefile.SH
+____________________________________________________________________________
+[ 21006] By: rgs                                   on 2003/09/02  21:06:49
+        Log: Upgrade to File::Spec 0.85, grabbed from CPAN.
+             Get t/rel2abs2rel.t from bleadperl, because t/TEST was
+             unhappy with its unstandard test output.
+             Remove the old t/lib/filespec.t.
+     Branch: maint-5.6
+	   + perl-5.6.2/lib/File/Spec/Cygwin.pm
+	   + perl-5.6.2/lib/File/Spec/t/Functions.t
+	   + perl-5.6.2/lib/File/Spec/t/Spec.t
+	   + perl-5.6.2/lib/File/Spec/t/rel2abs2rel.t
+	   - perl-5.6.2/t/lib/filespec.t
+	   ! perl-5.6.2/MANIFEST perl-5.6.2/lib/File/Spec.pm
+	   ! perl-5.6.2/lib/File/Spec/Epoc.pm
+	   ! perl-5.6.2/lib/File/Spec/Functions.pm
+	   ! perl-5.6.2/lib/File/Spec/Mac.pm
+	   ! perl-5.6.2/lib/File/Spec/OS2.pm
+	   ! perl-5.6.2/lib/File/Spec/Unix.pm
+	   ! perl-5.6.2/lib/File/Spec/VMS.pm
+	   ! perl-5.6.2/lib/File/Spec/Win32.pm
+____________________________________________________________________________
+[ 21005] By: rgs                                   on 2003/09/02  19:36:59
+        Log: Remove the configure probes for iconv, and any iconv
+             reference, since it's not used anywhere. (See change
+             #12095 in the main branch.) This was known to freeze
+             the configuration process on HP-UX.
+     Branch: maint-5.6
+	   ! perl-5.6.2/Configure perl-5.6.2/Porting/Glossary
+	   ! perl-5.6.2/config_h.SH perl-5.6.2/configure.com
+	   ! perl-5.6.2/epoc/config.sh perl-5.6.2/perl.h
+	   ! perl-5.6.2/vos/config.alpha.def perl-5.6.2/vos/config.alpha.h
+	   ! perl-5.6.2/vos/config.ga.def perl-5.6.2/vos/config.ga.h
+	   ! perl-5.6.2/win32/config.bc perl-5.6.2/win32/config.gc
+	   ! perl-5.6.2/win32/config.vc perl-5.6.2/win32/config_H.bc
+	   ! perl-5.6.2/win32/config_H.gc perl-5.6.2/win32/config_H.vc
+____________________________________________________________________________
+[ 20988] By: rgs                                   on 2003/09/01  21:40:00
+        Log: README.dos update :
+             Subject: Re: Perl 5.6.1 and DJGPP: some build fixes, some bug fixes
+             From: Richard Dawe <rich@phekda.freeserve.co.uk>
+             Date: Sat, 23 Aug 2003 23:17:19 +0100
+             Message-ID: <3F47E7EF.834E9F31@phekda.freeserve.co.uk>
+     Branch: maint-5.6
+	   ! perl-5.6.2/README.dos
+____________________________________________________________________________
+[ 20987] By: rgs                                   on 2003/09/01  21:19:37
+        Log: Add Changes5.6 in the MANIFEST
+     Branch: maint-5.6
+	   ! perl-5.6.2/MANIFEST
+____________________________________________________________________________
+[ 20986] By: rgs                                   on 2003/09/01  21:11:09
+        Log: Update Changes : move the 5.6.[01] changes to Changes5.6,
+             while the changes in this new branch //depot/maint-5.6/perl-5.6.2
+             go in a new Changes file. Upgrade patchlevel.h.
+     Branch: maint-5.6
+	  +> perl-5.6.2/Changes5.6
+	   ! perl-5.6.2/Changes perl-5.6.2/patchlevel.h
+____________________________________________________________________________
 [ 20985] By: rgs                                   on 2003/09/01  20:38:12
         Log: Tabify and sort MANIFEST
      Branch: maint-5.6
