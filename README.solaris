@@ -153,13 +153,30 @@ your Solaris release.
 
 =head3 GNU as and GNU ld
 
+The following information applies to gcc version 2.  Volunteers to
+update it as appropropriate for gcc version 3 would be appreciated.
+
 The versions of as and ld supplied with Solaris work fine for building
-perl.  There is normally no need to install the GNU versions.
+perl.  There is normally no need to install the GNU versions to
+compile perl.
 
 If you decide to ignore this advice and use the GNU versions anyway,
 then be sure that they are relatively recent.  Versions newer than 2.7
 are apparently new enough.  Older versions may have trouble with
 dynamic loading.
+
+If you wish to use GNU ld, then you need to pass it the -Wl,-E flag.
+The hints/solaris_2.sh file tries to do this automatically by executing
+the following commands:
+
+	ccdlflags="$ccdlflags -Wl,-E"
+	lddlflags="$lddlflags -Wl,-E -G"
+
+However, over the years, changes in gcc, GNU ld, and Solaris ld have made
+it difficult to automatically detect which ld ultimately gets called.
+You may have to manually edit config.sh and add the -Wl,-E flags
+yourself, or else run Configure interactively and add the flags at the
+appropriate prompts.
 
 If your gcc is configured to use GNU as and ld but you want to use the
 Solaris ones instead to build perl, then you'll need to add
