@@ -24,6 +24,16 @@ This document describes differences between the 5.6 release and this one.
 
 =head1 New or Changed Diagnostics
 
+=over 4
+
+=item (perhaps you forgot to load "%s"?)
+
+(F) This is an educated guess made in conjunction with the message
+"Can't locate object method \"%s\" via package \"%s\"".  It often means
+that a method requires a package that has not been loaded.
+
+=back
+
 =head1 New tests
 
 =head1 Incompatible Changes
