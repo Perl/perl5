@@ -199,7 +199,7 @@ sub viacode
 
     if ($code > 0x10FFFF) {
 	carp "Unicode characters only allocated up to 0x10FFFF (you asked for $hex)";
-	return "\x{FFFD}";
+	return;
     }
 
     return $viacode{$hex} if exists $viacode{$hex};
@@ -209,8 +209,7 @@ sub viacode
     if ($txt =~ m/^$hex\t\t(.+)/m) {
         return $viacode{$hex} = $1;
     } else {
-	carp "Unknown charcode '$hex'";
-        return "\x{FFFD}";
+        return;
     }
 }
 
