@@ -2758,6 +2758,11 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 	    SvPV_set(dstr, SvPVX(sstr));
 	    SvLEN_set(dstr, SvLEN(sstr));
 	    SvCUR_set(dstr, SvCUR(sstr));
+	    if (SvUTF8(sstr))
+		SvUTF8_on(dstr);
+	    else
+		SvUTF8_off(dstr);
+
 	    SvTEMP_off(dstr);
 	    (void)SvOK_off(sstr);
 	    SvPV_set(sstr, Nullch);
