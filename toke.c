@@ -2303,7 +2303,7 @@ S_find_in_my_stash(pTHX_ char *pkgname, I32 len)
 int
 Perl_yylex(pTHX)
 {
-    register char *s;
+    register char *s = PL_bufptr;
     register char *d;
     register I32 tmp;
     STRLEN len;
