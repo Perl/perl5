@@ -9,7 +9,7 @@ use Math::BigInt;
 
 $test = 0;
 $| = 1;
-print "1..276\n";
+print "1..278\n";
 while (<DATA>) {
        chop;
        if (s/^&//) {
@@ -64,7 +64,24 @@ while (<DATA>) {
                        print "# '$try' expected: '$ans' got: '$ans1'\n";
                }
        }
-} 
+}
+
+{
+  use Math::BigInt ':constant';
+
+  $test++;
+  print "not " 
+    unless 2**150 eq "+1427247692705959881058285969449495136382746624";
+  print "ok $test\n";
+  $test++;
+  @a = ();
+  for ($i = 1; $i < 10; $i++) {
+    push @a, $i;
+  }
+  print "not " unless "@a" eq "+1 +2 +3 +4 +5 +6 +7 +8 +9";
+  print "ok $test\n";
+}
+ 
 __END__
 &bnorm
 abc:NaN
