@@ -1472,6 +1472,7 @@ p	|char*	|mem_collxfrm	|const char* s|STRLEN len|STRLEN* xlen
 Afp	|SV*	|mess		|const char* pat|...
 Ap	|SV*	|vmess		|const char* pat|va_list* args
 p	|void	|qerror		|SV* err
+Apd    |void   |sortsv         |SV ** array|size_t num_elts|SVCOMPARE_t f
 Apd	|int	|mg_clear	|SV* sv
 Apd	|int	|mg_copy	|SV* sv|SV* nsv|const char* key|I32 klen
 Apd	|MAGIC*	|mg_find	|SV* sv|int type
@@ -2107,7 +2108,6 @@ s	|I32	|dopoptosub_at	|PERL_CONTEXT* cxstk|I32 startingblock
 s	|void	|save_lines	|AV *array|SV *sv
 s	|OP*	|doeval		|int gimme|OP** startop
 s	|PerlIO *|doopen_pmc	|const char *name|const char *mode
-s	|void	|qsortsv	|SV ** array|size_t num_elts|SVCOMPARE_t f
 #endif
 
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)

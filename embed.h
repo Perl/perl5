@@ -401,6 +401,7 @@
 #define mess			Perl_mess
 #define vmess			Perl_vmess
 #define qerror			Perl_qerror
+#define sortsv			Perl_sortsv
 #define mg_clear		Perl_mg_clear
 #define mg_copy			Perl_mg_copy
 #define mg_find			Perl_mg_find
@@ -1006,7 +1007,6 @@
 #define save_lines		S_save_lines
 #define doeval			S_doeval
 #define doopen_pmc		S_doopen_pmc
-#define qsortsv			S_qsortsv
 #endif
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
 #define do_maybe_phash		S_do_maybe_phash
@@ -1936,6 +1936,7 @@
 #endif
 #define vmess(a,b)		Perl_vmess(aTHX_ a,b)
 #define qerror(a)		Perl_qerror(aTHX_ a)
+#define sortsv(a,b,c)		Perl_sortsv(aTHX_ a,b,c)
 #define mg_clear(a)		Perl_mg_clear(aTHX_ a)
 #define mg_copy(a,b,c,d)	Perl_mg_copy(aTHX_ a,b,c,d)
 #define mg_find(a,b)		Perl_mg_find(aTHX_ a,b)
@@ -2518,7 +2519,6 @@
 #define save_lines(a,b)		S_save_lines(aTHX_ a,b)
 #define doeval(a,b)		S_doeval(aTHX_ a,b)
 #define doopen_pmc(a,b)		S_doopen_pmc(aTHX_ a,b)
-#define qsortsv(a,b,c)		S_qsortsv(aTHX_ a,b,c)
 #endif
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
 #define do_maybe_phash(a,b,c,d,e)	S_do_maybe_phash(aTHX_ a,b,c,d,e)
