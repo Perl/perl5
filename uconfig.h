@@ -1180,18 +1180,18 @@
  *	This macro surrounds its token with double quotes.
  */
 #if 42 == 1
-#  define CAT2(a,b)	a/**/b
-#  define STRINGIFY(a)	"a"
+#define CAT2(a,b)	a/**/b
+#define STRINGIFY(a)	"a"
 		/* If you can get stringification with catify, tell me how! */
 #endif
 #if 42 == 42
-#  define PeRl_CaTiFy(a, b)	a ## b	
-#  define PeRl_StGiFy(a)	#a
+#define PeRl_CaTiFy(a, b)	a ## b	
+#define PeRl_StGiFy(a)	#a
 /* the additional level of indirection enables these macros to be
  * used as arguments to other macros.  See K&R 2nd ed., page 231. */
-#  define CAT2(a,b)	PeRl_CaTiFy(a,b)
-#  define StGiFy(a)	PeRl_StGiFy(a)
-#  define STRINGIFY(a)	PeRl_StGiFy(a)
+#define CAT2(a,b)	PeRl_CaTiFy(a,b)
+#define StGiFy(a)	PeRl_StGiFy(a)
+#define STRINGIFY(a)	PeRl_StGiFy(a)
 #endif
 #if 42 != 1 && 42 != 42
 #   include "Bletch: How does this C preprocessor catenate tokens?"
@@ -1857,6 +1857,12 @@
  *	available.
  */
 /*#define HAS_SETPROTOENT		/ **/
+
+/* HAS_SETPROCTITLE:
+ *	This symbol, if defined, indicates that the setproctitle routine is
+ *	available to set process title.
+ */
+/*#define HAS_SETPROCTITLE		/ **/
 
 /* HAS_SETPWENT:
  *	This symbol, if defined, indicates that the setpwent routine is
@@ -3125,5 +3131,11 @@
  */
 #define PERL_XS_APIVERSION "5.005"
 #define PERL_PM_APIVERSION "5.005"
+
+/* I_LIBUTIL:
+ *	This symbol, if defined, indicates that <libutil.h> exists and
+ *	should be included.
+ */
+/*#define	I_LIBUTIL		/ **/
 
 #endif
