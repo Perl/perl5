@@ -4085,10 +4085,10 @@ Note that under some systems, like OS/2, there may be different flavors
 of Perl executables, some of which may support fork, some not. Try
 changing the name you call Perl by to C<perl_>, C<perl__>, and so on.
 
-=item Unsupported script encoding
+=item Unsupported script encoding %s
 
 (F) Your program file begins with a Unicode Byte Order Mark (BOM) which
-declares it to be in a Unicode encoding that Perl cannot yet read.
+declares it to be in a Unicode encoding that Perl cannot read.
 
 =item Unsupported socket function "%s" called
 

@@ -2705,6 +2705,7 @@ t/comp/require.t		See if require works
 t/comp/script.t			See if script invocation works
 t/comp/term.t			See if more terms work
 t/comp/use.t			See if pragmata work
+t/comp/utf.t			See if UTFs work
 t/harness			Finer diagnostics from test suite
 thrdvar.h			Per-thread variables
 thread.h			Threading header
