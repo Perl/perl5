@@ -528,7 +528,7 @@ a given module works on a given platform.
 
 =item Mailing list: cpan-testers@perl.org
 
-=item Testing results: C<http://www.perl.org/cpan-testers/>
+=item Testing results: C<http://testers.cpan.org/>
 
 =back
 

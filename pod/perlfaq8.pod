@@ -952,10 +952,9 @@ in L<perlfunc/fork>.
 =head2 How do I use an SQL database?
 
 There are a number of excellent interfaces to SQL databases.  See the
-DBD::* modules available from
-http://www.perl.com/CPAN/modules/dbperl/DBD .
+DBD::* modules available from http://www.perl.com/CPAN/modules/DBD .
 A lot of information on this can be found at 
-http://www.hermetica.com/technologia/perl/DBI/index.html .
+http://www.symbolstone.org/technology/perl/DBI/
 
 =head2 How do I make a system() exit on control-C?
 

@@ -20,7 +20,7 @@ may not be so well received.
 The useful FAQs and related documents are:
 
     CGI FAQ
-        http://www.webthing.com/page.cgi/cgifaq
+        http://www.webthing.com/tutorials/cgifaq.html
 
     Web FAQ
         http://www.boutell.com/faq/
@@ -170,7 +170,7 @@ through proxies:
 
     # or print HTML from a URL
     use LWP::Simple;
-    getprint "http://www.sn.no/libwww-perl/";
+    getprint "http://www.linpro.no/lwp/";
 
     # or print ASCII from HTML from a URL
     # also need HTML-Tree package from CPAN

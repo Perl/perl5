@@ -4,10 +4,11 @@ perldelta - what's new for perl v5.6 (as of v5.005_64)
 
 =head1 DESCRIPTION
 
-This is an unsupported alpha release, meant for intrepid Perl developers
-only.  The included sources may not even build correctly on some platforms.
-Subscribing to perl5-porters is the best way to monitor and contribute
-to the progress of development releases (see www.perl.org for info).
+This is an unsupported alpha release, meant for intrepid Perl
+developers only.  The included sources may not even build correctly on
+some platforms.  Subscribing to perl5-porters is the best way to
+monitor and contribute to the progress of development releases (see
+http://www.hut.fi/~jhi/perl5-porters.html for info).
 
 This document describes differences between the 5.005 release and this one.
 
