@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu May 27 19:42:20 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Fri May 28 10:41:29 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -2103,7 +2103,7 @@ EOM
 				osvers=$tmp
 			elif $test -f /etc/kconfig; then
 				osname=isc
-				if test "$lns" = "ln -s"; then
+				if test "$lns" = "$ln -s"; then
 					osvers=4
 				elif $contains _SYSV3 /usr/include/stdio.h > /dev/null 2>&1 ; then
 					osvers=3
@@ -11630,6 +11630,10 @@ EOM
 #$i_sysselct I_SYS_SELECT
 #ifdef I_SYS_SELECT
 #include <sys/select.h>
+#endif
+#$d_socket HAS_SOCKET
+#ifdef HAS_SOCKET
+#   include <sys/socket.h> /* Might include <sys/bsdtypes.h> */
 #endif
 #include <stdio.h>
 $selecttype b;
