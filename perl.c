@@ -395,10 +395,14 @@ setuid perl scripts securely.\n");
 		if (!e_fp)
 		    croak("Cannot open temporary file");
 	    }
-	    if (argv[1]) {
+	    if (*++s)
+		PerlIO_puts(e_fp,s);
+	    else if (argv[1]) {
 		PerlIO_puts(e_fp,argv[1]);
 		argc--,argv++;
 	    }
+	    else
+		croak("No code specified for -e");
 	    (void)PerlIO_putc(e_fp,'\n');
 	    break;
 	case 'I':
@@ -1380,6 +1384,7 @@ init_main_stash()
     defgv = gv_fetchpv("_",TRUE, SVt_PVAV);
     errgv = gv_HVadd(gv_fetchpv("@", TRUE, SVt_PV));
     GvMULTI_on(errgv);
+    sv_setpvn(GvSV(errgv), "", 0);
     curstash = defstash;
     compiling.cop_stash = defstash;
     debstash = GvHV(gv_fetchpv("DB::", GV_ADDMULTI, SVt_PVHV));
@@ -2113,11 +2118,24 @@ init_perllib()
 {
     char *s;
     if (!tainting) {
+#ifndef VMS
 	s = getenv("PERL5LIB");
 	if (s)
 	    incpush(s);
 	else
 	    incpush(getenv("PERLLIB"));
+#else /* VMS */
+	/* Treat PERL5?LIB as a possible search list logical name -- the
+	 * "natural" VMS idiom for a Unix path string.  We allow each
+	 * element to be a set of |-separated directories for compatibility.
+	 */
+	char buf[256];
+	int idx = 0;
+	if (my_trnlnm("PERL5LIB",buf,0))
+	    do { incpush(buf); } while (my_trnlnm("PERL5LIB",buf,++idx));
+	else
+	    while (my_trnlnm("PERLLIB",buf,idx++)) incpush(buf);
+#endif /* VMS */
     }
 
 /* Use the ~-expanded versions of APPLIB (undocumented),
