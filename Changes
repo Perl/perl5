@@ -95,6 +95,112 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6689] By: jhi                                   on 2000/08/18  04:12:30
+        Log: Fix the lib/complex failure of
+             
+             From: abigail@foad.org
+             Subject: [ID 20000814.005] Not OK: perl v5.6.0 on i686-linux-64int 2.2.13       
+             Date: 15 Aug 2000 04:06:38 -0000
+             Message-Id: <20000815040638.8524.qmail@foad.org> 
+             
+             Linux long double accuracy issue: something that
+             when printed with %g looks like "2" but int() of it is 1.
+     Branch: perl
+	   ! lib/Math/Complex.pm
+____________________________________________________________________________
+[  6688] By: jhi                                   on 2000/08/18  03:15:35
+        Log: The byteorder code in #6671 was wrong.
+     Branch: perl
+	   ! configpm
+____________________________________________________________________________
+[  6687] By: jhi                                   on 2000/08/18  02:08:42
+        Log: Subject: [PATCH 5.6.0+] newSVrv() memory leak
+             From: Jan Dubois <jand@ActiveState.com>
+             Date: Thu, 17 Aug 2000 18:31:55 -0700
+             Message-ID: <l64ppsggaiuc4t6msm45iqohmhpjblb4qf@4ax.com>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  6686] By: jhi                                   on 2000/08/18  02:04:15
+        Log: Use NVs in POSIX math, not doubles.
+             
+             From: abigail@foad.org
+             Subject: [ID 20000817.014] POSIX & modfl
+             Date: 17 Aug 2000 20:49:18 -0000
+             Message-Id: <20000817204918.23123.qmail@foad.org>
+     Branch: perl
+	   ! ext/POSIX/POSIX.xs ext/POSIX/typemap
+____________________________________________________________________________
+[  6685] By: jhi                                   on 2000/08/18  02:02:12
+        Log: Introduce NVef, NVff, and NVgf, use the middle one.
+             (helps for lib/peek + Linux + long doubles)  Reported in
+             
+             From: abigail@foad.org
+             Subject: [ID 20000814.005] Not OK: perl v5.6.0 on i686-linux-64int 2.2.13       
+             Date: 15 Aug 2000 04:06:38 -0000
+             Message-Id: <20000815040638.8524.qmail@foad.org> 
+             
+             (note: the lib/complex failure has not yet been addressed)
+     Branch: metaconfig/U/perl
+	   ! perlxvf.U
+     Branch: perl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH dump.c perl.h pod/perlguts.pod
+____________________________________________________________________________
+[  6684] By: jhi                                   on 2000/08/17  23:22:19
+        Log: Add byteorder to the myconfig output.
+     Branch: perl
+	   ! myconfig.SH
+____________________________________________________________________________
+[  6683] By: jhi                                   on 2000/08/17  23:20:19
+        Log: The image doth not exist, spotted by Johan Vromans.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[  6682] By: jhi                                   on 2000/08/17  22:38:16
+        Log: Document what the backtick returns if the command fails.
+     Branch: perl
+	   ! pod/perlop.pod
+____________________________________________________________________________
+[  6681] By: jhi                                   on 2000/08/17  22:33:12
+        Log: Do not use prototyping here.
+             
+             Subject: [ID 20000817.016] [PATCH] Peek.xs
+             From: abigail@foad.org
+             Date: 17 Aug 2000 20:55:56 -0000
+             Message-Id: <20000817205556.24270.qmail@foad.org>
+     Branch: perl
+	   ! ext/Devel/Peek/Makefile.PL
+____________________________________________________________________________
+[  6680] By: jhi                                   on 2000/08/17  19:46:43
+        Log: Don't propose using modules built for 5.005 if no binary
+             compatibility with 5.005 is attempted.
+             
+             From: Jeff Okamoto <okamoto@xfiles.intercon.hp.com>
+             Subject: Minor nit with 5.7.0 (6655)
+             Date: Wed, 16 Aug 2000 15:56:14 -0700 (PDT)
+             Message-Id: <200008162256.PAA06964@xfiles.intercon.hp.com>
+     Branch: metaconfig
+	   ! U/installdirs/inc_version_list.U
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[  6679] By: jhi                                   on 2000/08/17  19:16:39
+        Log: Microperl config update.
+     Branch: perl
+	   ! uconfig.h uconfig.sh
+____________________________________________________________________________
+[  6678] By: jhi                                   on 2000/08/17  19:16:13
+        Log: The #6648 wasn't protective enough for limited platforms
+             (like microperl).
+     Branch: perl
+	   ! dump.c sv.c
+____________________________________________________________________________
+[  6677] By: jhi                                   on 2000/08/17  14:46:35
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  6676] By: jhi                                   on 2000/08/17  14:44:02
         Log: Add perlebcdic from Peter Prymmer, regen toc.
      Branch: perl
