@@ -401,6 +401,9 @@ if (-x "/usr/bin/locale" && open(LOCALES, "/usr/bin/locale -a|")) {
 
 setlocale(LC_ALL, "C");
 
+# UTF-8 and locales simply do not work yet. --jhi
+@Locale = grep {!/utf-?8/i} @Locale;
+
 @Locale = sort @Locale;
 
 debug "# Locales = @Locale\n";
