@@ -96,7 +96,7 @@ my $pat;
 if ($Is_MacOS) {
     $pat = qr/:t:$/;
 } else {
-    $pat = qr#/t$#;
+    $pat = qr#[\\/]t$#i;
 }
 print getcwd() =~ $pat ? "ok 13\n" : "not ok 13\n";
 
