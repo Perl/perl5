@@ -104,7 +104,6 @@ if (setup_badly_terminated_file(3)) {
   $N++;
   push @a, "next";
   check_contents($badrec, "next");
-  undef $o; untie @a;
 }
 # (51-52)
 if (setup_badly_terminated_file(2)) {
@@ -113,7 +112,6 @@ if (setup_badly_terminated_file(2)) {
     or die "Couldn't tie file: $!";
   splice @a, 1, 0, "x", "y";
   check_contents($badrec, "x", "y");
-  undef $o; untie @a;
 }
 # (53-56)
 if (setup_badly_terminated_file(4)) {
@@ -128,7 +126,6 @@ if (setup_badly_terminated_file(4)) {
     : "not ok $N \# expected <$badrec>, got <$r[0]>\n";
   $N++;
   check_contents("x", "y");
-  undef $o; untie @a;
 }
 
 # (57-58) 20020402 The modifiaction would have failed if $\ were set wrong.
@@ -141,7 +138,6 @@ if (setup_badly_terminated_file(2)) {
     my $z = $a[0];
   }
   check_contents($badrec);
-  undef $o; untie @a;
 }
 
 sub setup_badly_terminated_file {
