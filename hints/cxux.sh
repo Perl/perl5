@@ -72,7 +72,7 @@ glibpth="/usr/sde/elf/usr/lib $glibpth"
 cc='/bin/cc -Xa'
 cccdlflags='-Zelf -Zpic'
 ccdlflags='-Zelf -Zlink=dynamic -Wl,-Bexport -u sigaction'
-lddlflags='-G'
+lddlflags='-Zlink=so'
 
 # Configure imagines that stdio.h is "standard", but it really isn't.
 # Things like the -T and -B file test operators (on file handles) fail when

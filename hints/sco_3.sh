@@ -22,9 +22,20 @@ gcc)
 	ccflags="$ccflags -U M_XENIX"
 	optimize="$optimize -O2"
 	;;
+scocc)	;;
+
 *)
 	ccflags="$ccflags -W0 -U M_XENIX"
 	;;
 esac
 i_varargs=undef
+
+# I have received one report that nm extraction doesn't work if you're
+# using the scocc compiler.  This system had the following 'myconfig'
+# uname='xxx xxx 3.2 2 i386 '
+# cc='scocc', optimize='-O'
+usenm='false'
+
+# If you want to use nm, you'll probably have to use nm -p.  The
+# following does that for you:
 nm_opt='-p'

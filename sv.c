@@ -1038,7 +1038,7 @@ register SV *sv;
 	    if (SvNVX(sv) < 0.0)
 		return I_V(SvNVX(sv));
 	    else
-		return (IV)(UV)SvNVX(sv);
+		return (IV) U_V(SvNVX(sv));
 	}
 	if (SvPOKp(sv) && SvLEN(sv)) {
 	    if (dowarn && !looks_like_number(sv))
@@ -1061,7 +1061,7 @@ register SV *sv;
 		if (SvNVX(sv) < 0.0)
 		    return I_V(SvNVX(sv));
 		else
-		    return (IV)(UV)SvNVX(sv);
+		    return (IV) U_V(SvNVX(sv));
 	    }
 	    if (SvPOKp(sv) && SvLEN(sv)) {
 		if (dowarn && !looks_like_number(sv))
@@ -1088,7 +1088,7 @@ register SV *sv;
 	if (SvNVX(sv) < 0.0)
 	    SvIVX(sv) = I_V(SvNVX(sv));
 	else
-	    SvIVX(sv) = (IV)(UV)SvNVX(sv);
+	    SvIVX(sv) = (IV) U_V(SvNVX(sv));
     }
     else if (SvPOKp(sv) && SvLEN(sv)) {
 	if (dowarn && !looks_like_number(sv))

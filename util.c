@@ -29,6 +29,10 @@
 #  include <vfork.h>
 #endif
 
+#ifdef I_LIMITS  /* Needed for cast_xxx() functions below. */
+#  include <limits.h>
+#endif
+
 /* Put this after #includes because fork and vfork prototypes may
    conflict.
 */
@@ -1575,36 +1579,75 @@ double f;
 #endif
 
 #ifndef CASTI32
+
+/* Look for MAX and MIN integral values.  If we can't find them,
+   we'll use 32-bit two's complement defaults.
+*/
+#ifndef LONG_MAX
+#  ifdef MAXLONG    /* Often used in <values.h> */
+#    define LONG_MAX MAXLONG
+#  else
+#    define LONG_MAX        2147483647L
+#  endif
+#endif
+
+#ifndef LONG_MIN
+#    define LONG_MIN        (-LONG_MAX - 1)
+#endif
+
+#ifndef ULONG_MAX
+#  ifdef MAXULONG 
+#    define LONG_MAX MAXULONG
+#  else
+#    define ULONG_MAX       4294967295L
+#  endif
+#endif
+
+/* Unfortunately, on some systems the cast_uv() function doesn't
+   work with the system-supplied definition of ULONG_MAX.  The
+   comparison  (f >= ULONG_MAX) always comes out true.  It must be a
+   problem with the compiler constant folding.
+
+   In any case, this workaround should be fine on any two's complement
+   system.  If it's not, supply a '-DMY_ULONG_MAX=whatever' in your
+   ccflags.
+	       --Andy Dougherty      <doughera@lafcol.lafayette.edu>
+*/
+#ifndef MY_ULONG_MAX
+#  define MY_ULONG_MAX ((UV)LONG_MAX * (UV)2 + (UV)1)
+#endif
+
 I32
 cast_i32(f)
 double f;
 {
-#   define BIGDOUBLE 2147483647.0        /* Assume 32 bit int's ! */
-#   define BIGNEGDOUBLE (-2147483648.0)
-    if (f >= BIGDOUBLE)
-	return (I32) BIGDOUBLE;
-    if (f <= BIGNEGDOUBLE)
-	return (I32) BIGNEGDOUBLE;
+    if (f >= LONG_MAX)
+	return (I32) LONG_MAX;
+    if (f <= LONG_MIN)
+	return (I32) LONG_MIN;
     return (I32) f;
 }
-# undef BIGDOUBLE
-# undef BIGNEGDOUBLE
 
 IV
 cast_iv(f)
 double f;
 {
-    /* XXX  This should be fixed.  It assumes 32 bit IV's. */
-#   define BIGDOUBLE 2147483647.0        /* Assume 32 bit IV's ! */
-#   define BIGNEGDOUBLE (-2147483648.0)
-    if (f >= BIGDOUBLE)
-	return (IV) BIGDOUBLE;
-    if (f <= BIGNEGDOUBLE)
-	return (IV) BIGNEGDOUBLE;
+    if (f >= LONG_MAX)
+	return (IV) LONG_MAX;
+    if (f <= LONG_MIN)
+	return (IV) LONG_MIN;
     return (IV) f;
 }
-# undef BIGDOUBLE
-# undef BIGNEGDOUBLE
+
+UV
+cast_uv(f)
+double f;
+{
+    if (f >= MY_ULONG_MAX)
+	return (UV) MY_ULONG_MAX;
+    return (UV) f;
+}
+
 #endif
 
 #ifndef HAS_RENAME

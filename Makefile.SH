@@ -227,6 +227,7 @@ $spitshell >>Makefile <<'!NO!SUBS!'
 ;;
 *)
 $spitshell >>Makefile <<'!NO!SUBS!'
+	rm -f $(perllib)
 	ar rcu $(perllib) perl.o $(obj)
 	@$(ranlib) $(perllib)
 !NO!SUBS!
@@ -329,6 +330,7 @@ clean:
 
 realclean: clean
 	-cd x2p; $(MAKE) realclean
+	-cd pod; $(MAKE) realclean
 	@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) ; do \
 	sh ext/util/make_ext realclean $$x ; \
 	done

@@ -1,9 +1,8 @@
 package ExtUtils::MakeMaker;
 
-$Version = 4.091; # Last edited 31 Mar 1995 by Andreas Koenig
+$Version = 4.093; # Last edited 12 Apr 1995 by Andy Dougherty
 
 use Config;
-check_hints();
 use Carp;
 use Cwd;
 
@@ -48,11 +47,11 @@ Config.pm. In addition the extension may contribute to the C<%Config>
 hash table of Config.pm by supplying hints files in a C<hints/>
 directory. The hints files are expected to be named like their
 counterparts in C<PERL_SRC/hints>, but with an C<.pl> file name
-extension (eg. C<next_3_2.sh>). They are simply C<eval>ed by MakeMaker
-and can be used to execute commands as well as to include special
-variables. If there is no hintsfile for the actual system, but for
-some previous releases of the same operating system, the latest one of
-those is used.
+extension (eg. C<next_3_2.pl>). They are simply C<eval>ed by MakeMaker
+within the WriteMakefile() subroutine, and can be used to execute
+commands as well as to include special variables. If there is no
+hintsfile for the actual system, but for some previous releases of the
+same operating system, the latest one of those is used.
 
 =head2 Default Makefile Behaviour
 
@@ -80,7 +79,7 @@ Other interesting targets in the generated Makefile are
   make config     # to check if the Makefile is up-to-date
   make clean      # delete local temporary files (Makefile gets renamed)
   make realclean  # delete all derived files (including installed files)
-  make distclean  # produce a gzipped file ready for shipping
+  make dist       # produce a gzipped file ready for shipping
 
 The macros in the produced Makefile may be overridden on the command
 line to the make call as in the following example:
@@ -276,8 +275,7 @@ F<perl5-porters@nicoh.com> or F<comp.lang.perl> as appropriate.
 =cut
 
 sub check_hints {
-    # We allow extension-specific hints files. If we find one we act as if Config.pm
-    # had read the contents
+    # We allow extension-specific hints files.
 
     # First we look for the best hintsfile we have
     my(@goodhints);
@@ -300,13 +298,15 @@ sub check_hints {
     closedir DIR;
     return unless @goodhints; # There was no hintsfile
     # the last one in lexical ordering is our choice:
-    $hint=(reverse sort @goodhints)[0];
+    $hint=(sort @goodhints)[-1];
 
     # execute the hintsfile:
     open HINTS, "hints/$hint.pl";
     @goodhints = <HINTS>;
     close HINTS;
+    print STDOUT "Processing hints file hints/$hint.pl";
     eval join('',@goodhints);
+    print STDOUT $@ if $@;
 }
 
 # Setup dummy package:
@@ -444,7 +444,7 @@ normally required:
  dynamic_lib:	{ARMAYBE => 'ar', OTHERLDFLAGS => '...'}
  clean:		{FILES => "*.xyz foo"}
  realclean:	{FILES => '$(INST_ARCHAUTODIR)/*.xyz'}
- distclean:	{TARNAME=>'MyTarFile', TARFLAGS=>'cvfF', COMPRESS=>'gzip'}
+ dist:		{TARNAME=>'MyTarFile', TARFLAGS=>'cvfF', COMPRESS=>'gzip'}
  tool_autosplit:	{MAXLEN => 8}
 END
 
@@ -478,7 +478,7 @@ sub help {print $Attrib_Help;}
     'subdirs'		=> {},
     'clean'		=> {},
     'realclean'		=> {},
-    'distclean'		=> {},
+    'dist'		=> {},
     'test'		=> {},
     'install'		=> {},
     'force'		=> {},
@@ -534,6 +534,9 @@ sub WriteMakefile {
 
     parse_args(\%att, @ARGV);
     my(%initial_att) = %att; # record initial attributes
+
+    check_hints();
+
     my($key);
 
     MY->init_main();
@@ -570,7 +573,7 @@ sub WriteMakefile {
 	} else {
 	    my(%a) = %{$att{$section} || {}};
 	    print MAKE "\n# --- MakeMaker $section section:";
-	    print MAKE "# ",%a if $Verbose;
+	    print MAKE "# ", join ", ", %a if $Verbose;
 	    print(MAKE MY->nicetext(MY->$section( %a )));
 	}
     }
@@ -1003,7 +1006,7 @@ sub lsdir{
 sub find_perl{
     my($self, $ver, $names, $dirs, $trace) = @_;
     my($name, $dir);
-    if ($trace){
+    if ($trace >= 2){
 	print "Looking for perl $ver by these names: ";
 	print "@$names, ";
 	print "in these dirs:";
@@ -1017,7 +1020,7 @@ sub find_perl{
 	      $name .= ".exe" unless -x "$dir/$name";
 	    }
 	    next unless -x "$dir/$name";
-	    print "Executing $dir/$name" if ($trace);
+	    print "Executing $dir/$name" if ($trace >= 2);
 	    my($out);
 	    if ($Is_VMS) {
 	      my($vmscmd) = 'MCR ' . vmsify("$dir/$name");
@@ -1025,7 +1028,10 @@ sub find_perl{
 	    } else {
 	      $out = `$dir/$name -e 'require $ver; print "VER_OK\n" ' 2>&1`;
 	    }
-	    return "$dir/$name" if $out =~ /VER_OK/;
+	    if ($out =~ /VER_OK/) {
+		print "Using $dir/$name" if $trace;
+		return "$dir/$name";
+	    }
 	}
     }
     print STDOUT "Unable to find a perl $ver (by these names: @$names, in these dirs: @$dirs)\n";
@@ -1223,6 +1229,7 @@ sub const_cccmd{
 	."Please notify perl5-porters\@nicoh.com\n";
     }
     my($cccmd)=($old) ? $old : $new;
+    $cccmd =~ s/\b\Q$Config{'cc'}\E\b/\$(CC)/;
     "CCCMD = $cccmd\n";
 }
 
@@ -1617,8 +1624,9 @@ sub subdirs {
     # This method provides a mechanism to automatically deal with
     # subdirectories containing further Makefile.PL scripts.
     # It calls the subdir_x() method for each subdirectory.
-    foreach(<*/Makefile.PL>){
-	s:/Makefile\.PL$:: ;
+    foreach(grep -d, &lsdir()){
+	next if /^\./;
+	next unless -f "$_/Makefile\.PL" ;
 	print "Including $_ subdirectory" if ($Verbose);
 	push(@m, MY->subdir_x($_));
     }
@@ -1718,7 +1726,7 @@ realclean purge ::  clean
 }
 
 
-sub distclean {
+sub dist {
     my($self, %attribs) = @_;
     # VERSION should be sanitised before use as a file name
     my($tarname)  = $attribs{TARNAME}  || '$(DISTNAME)-$(VERSION)';
@@ -1728,7 +1736,7 @@ sub distclean {
     my($postop)   = $attribs{POSTOP} || '@:';
     my($mkfiles)  = join(' ', map("$_/$att{MAKEFILE} $_/$att{MAKEFILE}.old", ".", @{$att{DIR}}));
     "
-distclean:     clean
+dist:     clean
 	$preop
 	$att{RM_F} $mkfiles
 	cd .. && tar $tarflags $tarname.tar \$(BASEEXT)
@@ -1913,7 +1921,7 @@ sub makeaperl {
     $cccmd .= " $Config{'cccdlflags'}" if ($Config{'d_shrplib'});
 
     # The front matter of the linkcommand...
-    $linkcmd = join ' ', $Config{'cc'},
+    $linkcmd = join ' ', "\$(CC)",
 	    grep($_, @Config{qw(large split ldflags ccdlflags)});
     $linkcmd =~ s/\s+/ /g;
 
@@ -1935,7 +1943,7 @@ sub makeaperl {
     for (sort keys %static) {
 	next unless /\.a$/;
 	$_ = dirname($_) . "/extralibs.ld";
-	push @$extra, "`cat $_`";
+	push @$extra, $_;
     }
 
     grep(s/^/-I/, @$perlinc);
@@ -1951,7 +1959,6 @@ MAP_LINKCMD   = $linkcmd
 MAP_PERLINC   = @{$perlinc}
 MAP_STATIC    = ",
 join(" ", sort keys %static), "
-MAP_EXTRA     = @{$extra}
 MAP_PRELIBS   = $Config{'libs'} $Config{'cryptlib'}
 ";
 
@@ -1969,8 +1976,18 @@ MAP_LIBPERL = $libperl
 ";
 
     push @m, "
-\$(MAP_TARGET): $tmp/perlmain.o \$(MAP_LIBPERL) \$(MAP_STATIC)
-	\$(MAP_LINKCMD) -o \$\@ $tmp/perlmain.o \$(MAP_LIBPERL) \$(MAP_STATIC) \$(MAP_EXTRA) \$(MAP_PRELIBS)
+extralibs.ld: @$extra
+	\@ $att{RM_F} \$\@
+	\@ \$(TOUCH) \$\@
+";
+
+    foreach (@$extra){
+	push @m, "\tcat $_ >> \$\@\n";
+    }
+
+    push @m, "
+\$(MAP_TARGET): $tmp/perlmain.o \$(MAP_LIBPERL) \$(MAP_STATIC) extralibs.ld
+	\$(MAP_LINKCMD) -o \$\@ $tmp/perlmain.o \$(MAP_LIBPERL) \$(MAP_STATIC) `cat extralibs.ld` \$(MAP_PRELIBS)
 	@ echo 'To install the new \"\$(MAP_TARGET)\" binary, call'
 	@ echo '    make -f $makefilename inst_perl MAP_TARGET=\$(MAP_TARGET)'
 	@ echo 'To remove the intermediate files say'
@@ -1988,12 +2005,12 @@ $tmp/perlmain.c: $makefilename}, q{
 
 };
 
-# We write MAP_EXTRA outside the perl program to have it eval'd by the shell
+# We write EXTRA outside the perl program to have it eval'd by the shell
     push @m, q{
 doc_inst_perl:
 	@ $(FULLPERL) -e 'use ExtUtils::MakeMaker; MM->writedoc("Perl binary",' \\
 		-e '"$(MAP_TARGET)", "MAP_STATIC=$(MAP_STATIC)",' \\
-		-e '"MAP_EXTRA=@ARGV", "MAP_LIBPERL=$(MAP_LIBPERL)")' -- $(MAP_EXTRA)
+		-e '"MAP_EXTRA=@ARGV", "MAP_LIBPERL=$(MAP_LIBPERL)")' -- `cat extralibs.ld`
 };
 
     push @m, qq{
@@ -2003,6 +2020,8 @@ pure_inst_perl: \$(MAP_TARGET)
 	$att{CP} \$(MAP_TARGET) $Config{'installbin'}/\$(MAP_TARGET)
 
 realclean :: map_clean
+
+distclean :: realclean
 
 map_clean :
 	$att{RM_F} $tmp/perlmain.o $tmp/perlmain.c $makefilename
@@ -2068,12 +2087,34 @@ sub extliblist{
 		# For gcc-2.6.2 on linux (March 1995), DLD can not load
 		# .sa libraries, with the exception of libm.sa, so we
 		# deliberately skip them.
-	    if (@fullname=<${thispth}/lib${thislib}.${so}.[0-9]*>){
-		$fullname=$fullname[-1]; #ATTN: 10 looses against 9!
+	    if (@fullname = lsdir($thispth,"^lib$thislib\.$so\.[0-9]+")){
+		# Take care that libfoo.so.10 wins against libfoo.so.9.
+		# Compare two libraries to find the most recent version
+		# number.  E.g.  if you have libfoo.so.9.0.7 and
+		# libfoo.so.10.1, first convert all digits into two
+		# decimal places.  Then we'll add ".00" to the shorter
+		# strings so that we're comparing strings of equal length
+		# Thus we'll compare libfoo.so.09.07.00 with
+		# libfoo.so.10.01.00.  Some libraries might have letters
+		# in the version.  We don't know what they mean, but will
+		# try to skip them gracefully -- we'll set any letter to
+		# '0'.  Finally, sort in reverse so we can take the
+		# first element.
+		$fullname = "$thispth/" .
+		(sort { my($ma) = $a;
+			my($mb) = $b;
+			$ma =~ tr/A-Za-z/0/s;
+			$ma =~ s/\b(\d)\b/0$1/g;
+			$mb =~ tr/A-Za-z/0/s;
+			$mb =~ s/\b(\d)\b/0$1/g;
+			while (length($ma) < length($mb)) { $ma .= ".00"; }
+			while (length($mb) < length($ma)) { $mb .= ".00"; }
+			# Comparison deliberately backwards
+			$mb cmp $ma;} @fullname)[0];
 	    } elsif (-f ($fullname="$thispth/lib$thislib.$so")
-		     && (($Config{'dlsrc'} ne "dl_dld.xs") || ($thislib eq "m"))){
+		 && (($Config{'dlsrc'} ne "dl_dld.xs") || ($thislib eq "m"))){
 	    } elsif (-f ($fullname="$thispth/lib${thislib}_s.a")
-		     && ($thislib .= "_s") ){ # we must explicitly ask for _s version
+		 && ($thislib .= "_s") ){ # we must explicitly use _s version
 	    } elsif (-f ($fullname="$thispth/lib$thislib.a")){
 	    } elsif (-f ($fullname="$thispth/Slib$thislib.a")){
 	    } else {
@@ -2092,11 +2133,12 @@ sub extliblist{
 
 	    # Do not add it into the list if it is already linked in
 	    # with the main perl executable.
-	    # We have to special-case the NeXT, because all the math is also in libsys_s
-	    unless ( $in_perl || ($Config{'osname'} eq 'next' && $thislib eq 'm') ){
+	    # We have to special-case the NeXT, because all the math 
+	    # is also in libsys_s
+	    unless ($in_perl || 
+		    ($Config{'osname'} eq 'next' && $thislib eq 'm') ){
 		push(@extralibs, "-l$thislib");
 	    }
-
 
 	    # We might be able to load this archive file dynamically
 	    if ( $Config{'dlsrc'} =~ /dl_next|dl_dld/){
@@ -2120,7 +2162,8 @@ sub extliblist{
 	    }
 	    last;	# found one here so don't bother looking further
 	}
-	print STDOUT "Warning (non-fatal): No library found for -l$thislib" unless $found_lib>0;
+	print STDOUT "Warning (non-fatal): No library found for -l$thislib" 
+	    unless $found_lib>0;
     }
     return ('','','') unless $found;
     ("@extralibs", "@bsloadlibs", "@ldloadlibs");
@@ -2393,6 +2436,41 @@ v4.091 April 3 1995 by Andy Dougherty
 
 Another attempt to fix writedoc() from Dean Roehrich.
 
+
+v4.092 April 11 1994 by Andreas Koenig
+
+Fixed a docu bug in hint file description. Added printing of a warning
+from eval in the hintfile section if the eval has errors.  Moved
+check_hints() into the WriteMakefile() subroutine to avoid evaling
+hintsfiles for other uses of the module (mkbootstrap, mksymlists).
+
+Eliminated csh globbing to work around buggy Linux csh.
+
+In extliblist() libfoo.so.10 now wins against libfoo.so.9.
+
+Use $(CC) instead of $Config{'cc'} everywhere to allow overriding
+according to a patch by Dean Roehrich.
+
+Introduce a ./extralibs.ld file that contains the contents of all
+relevant extralibs.ld files for a static build to shorten the command
+line for the linking of a new static perl.
+
+Minor cosmetics.
+
+v4.093 April 12 1994 by Andy Dougherty
+
+Rename distclean target to plain dist.  Insert a dummy distclean
+target that's the same as realclean.  This is more consistent with the
+main perl makefile.
+
+Fix up extliblist() so even bizarre names like libfoo.so.10.0.1
+are handled.
+
+Include Tim's suggestions about $verbose and more careful substitution
+of $(CC) for $Config{'cc'}.
+
+Minor cosmetic fixes for my 80-character wide terminal.
+
 =head1 NOTES
 
 MakeMaker development work still to be done:
@@ -2401,6 +2479,11 @@ Needs more complete documentation.
 
 Add a html: target when there has been found a general solution to
 installing html files.
+
+Add an uninstall target.
+
+Add a FLAVOR variable that makes it easier to build debugging,
+embedded or multiplicity perls.
 
 =cut
 

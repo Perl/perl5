@@ -1116,7 +1116,7 @@ PP(pp_truncate)
     GV *tmpgv;
 
     SETERRNO(0,0);
-#if defined(HAS_TRUNCATE) || defined(HAS_CHSIZE)
+#if defined(HAS_TRUNCATE) || defined(HAS_CHSIZE) || defined(F_FREESP)
 #ifdef HAS_TRUNCATE
     if (op->op_flags & OPf_SPECIAL) {
 	tmpgv = gv_fetchpv(POPp,FALSE, SVt_PVIO);
@@ -2321,7 +2321,8 @@ char *cmd;
 char *filename;
 {
     char mybuf[8192];
-    char *s, *tmps;
+    char *s, 
+	 *save_filename = filename;
     int anum = 1;
     FILE *myfp;
 
@@ -2373,7 +2374,7 @@ char *filename;
 	    return 0;
 	}
 	else {	/* some mkdirs return no failure indication */
-	    anum = (Stat(filename, &statbuf) >= 0);
+	    anum = (Stat(save_filename, &statbuf) >= 0);
 	    if (op->op_type == OP_RMDIR)
 		anum = !anum;
 	    if (anum)

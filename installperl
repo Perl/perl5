@@ -146,8 +146,9 @@ else {
 makedir("$installarchlib/CORE");
 foreach $file (<*.h libperl*.*>) {
     cp_if_diff($file,"$installarchlib/CORE/$file");
-    if ($file =~ /\.a$/ && $osname eq 'next') { 
-       #on NeXTs we have to rerun ranlib after copying libraries
+    if ($file =~ /\.a$/ && $osname =~ /^(next|sunos)$/) { 
+       # on NeXTs and Suns we have to rerun ranlib after copying libraries
+	   # (maybe on all platforms which have ranlib ?)
        &cmd("$ranlib $installarchlib/CORE/$file");
     }
 }
@@ -342,6 +343,7 @@ sub cp_if_diff {
     -f $from || die "$0: $from not found";
     system "cmp", "-s", $from, $to;
     if ($?) {
+	unlink($to);   # In case we don't have write permissions.
 	cmd("cp $from $to");
     }
 }

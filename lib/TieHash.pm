@@ -10,8 +10,8 @@ sub new {
 
 sub TIEHASH {
     my $pack = shift;
-    if (defined &{"{$pack}::new"}) {
-	carp "WARNING: calling ${pack}->new since ${pack}->TIEHASH is missing"
+    if (defined &{"$pack\::new"}) {
+	carp "WARNING: calling $pack\->new since $pack\->TIEHASH is missing"
 	    if $^W;
 	$pack->new(@_);
     }

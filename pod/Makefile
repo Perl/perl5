@@ -1,5 +1,7 @@
 all: man
 
+PERL = ../miniperl
+
 POD = \
 	perl.pod	\
 	perlapi.pod	\
@@ -89,19 +91,35 @@ HTML = \
 
 man: $(MAN)
 
-html: $(HTML)
+# pod2html runs on all the pods at once in order to build up
+# cross-references.
+html:
+	$(PERL) pod2html *.pod
 
 .SUFFIXES: .pod .man
 
 .pod.man:
-	../miniperl pod2man $*.pod >$*.man
+	$(PERL) pod2man $*.pod >$*.man
 
 .SUFFIXES: .pod .html
 
 .pod.html:
-	../miniperl pod2html $*.pod >$*.html
+	$(PERL) pod2html $*.pod
 
 clean:
 	rm -f $(MAN) $(HTML)
 
 realclean:	clean
+	rm -f pod2man pod2latex pod2html
+
+distclean:	realclean
+
+# Dependencies.
+pod2latex:	pod2latex.SH ../config.sh
+	sh pod2latex.SH
+
+pod2html:	pod2html.SH ../config.sh
+	sh pod2html.SH
+
+pod2man:	pod2man.SH ../config.sh
+	sh pod2man.SH

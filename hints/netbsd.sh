@@ -1,5 +1,5 @@
 # hints/netbsd.sh
-# netbsd keeps  dynamic loading dl*() functions in /lib/crt0.o,
+# netbsd keeps  dynamic loading dl*() functions in /usr/lib/crt0.o,
 # so Configure doesn't find them (unless you abandon the nm scan).
 case "$osvers" in
 0.9*|0.8*)

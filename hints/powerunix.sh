@@ -49,7 +49,7 @@ d_csh='undef'
 cc='/bin/cc'
 cccdlflags='-Zpic'
 ccdlflags='-Zlink=dynamic -Wl,-Bexport'
-lddlflags='-G'
+lddlflags='-Zlink=so'
 
 # Configure imagines that stdio.h is "standard", but it really isn't.
 # Things like the -T and -B file test operators (on file handles) fail when

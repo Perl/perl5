@@ -6,9 +6,19 @@
 #
 # Use Configure -Dcc=gcc to use gcc
 #
-set `echo X "$libswanted "| sed -e 's/ c / /'`
+
+# We don't want to explicitly mention -lc (since we're using POSIX mode.)
+# We also don't want -lx (the Xenix compatability libraries.) The only
+# thing that it seems to pick up is chsize(), which has been reported to
+# not work.  chsize() can also be implemented via fcntl() in perl (if you
+# define -D_SYSV3).  We'll leave in -lPW since it's harmless.  Some
+# extension might eventually need it for alloca, though perl doesn't use
+# it. 
+
+set `echo X "$libswanted "| sed -e 's/ c / /' -e 's/ x / /'`
 shift
 libswanted="$*"
+
 case "$cc" in
 *gcc*)	ccflags="$ccflags -posix"
 	ldflags="$ldflags -posix"
@@ -17,5 +27,11 @@ case "$cc" in
 	ldflags="$ldflags -Xp"
     	;;
 esac
+
+# You can also include -D_SYSV3 to pick up "traditionally visible"
+# symbols hidden by name-space pollution rules.  This raises some
+# compilation "redefinition" warnings, but they appear harmless.
+# ccflags="$ccflags -D_SYSV3"
+
 # Pick up dbm.h in <rpcsvc/dbm.h>
 ccflags="$ccflags -I/usr/include/rpcsvc"

@@ -1,4 +1,28 @@
-#!/usr/bin/perl
+case $CONFIG in
+'')
+	if test -f config.sh; then TOP=.;
+	elif test -f ../config.sh; then TOP=..;
+	elif test -f ../../config.sh; then TOP=../..;
+	elif test -f ../../../config.sh; then TOP=../../..;
+	elif test -f ../../../../config.sh; then TOP=../../../..;
+	else
+		echo "Can't find config.sh."; exit 1
+	fi
+	. $TOP/config.sh
+	;;
+esac
+case "$0" in
+*/*) cd `expr X$0 : 'X\(.*\)/'` ;;
+esac
+echo "Extracting pod/pod2man (with variable substitutions)"
+rm -f pod2man
+$spitshell >pod2man <<!GROK!THIS!
+#!$bin/perl
+eval 'exec $bin/perl -S \$0 \${1+"\$@"}'
+	if \$running_under_some_shell;
+!GROK!THIS!
+
+$spitshell >>pod2man <<'!NO!SUBS!'
 
 $/ = "";
 $cutting = 1;
@@ -623,3 +647,6 @@ BEGIN {
     "yuml"	=>	"y\\*:",	#   small y, dieresis or umlaut mark
 );
 }
+!NO!SUBS!
+chmod 755 pod2man
+$eunicefix pod2man

@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.7 1995/03/21 08:46:15 ram Exp $
 #
-# Generated on Thu Apr  6 11:09:32 EDT 1995 [metaconfig 3.0 PL53]
+# Generated on Fri Apr 14 15:43:12 EDT 1995 [metaconfig 3.0 PL53]
 
 cat >/tmp/c1$$ <<EOF
 ARGGGHHHH!!!!!
@@ -4241,7 +4241,7 @@ EOM
     rp="Any special flags to pass to $cc -c to compile shared library modules?"
     . ./myread
     case "$ans" in
-    none) cccdlflags='' ;;
+    none) cccdlflags=' ' ;;
     *) cccdlflags="$ans" ;;
     esac
 
@@ -4278,11 +4278,11 @@ EOM
 		fi
 		rm -f try.c a.out
 		;;
-	*)	dflt=ld
+	*)	dflt="$ld"
 		;;
 	esac
 
-    rp="What comnmand should be used to create dynamic libraries?"
+    rp="What command should be used to create dynamic libraries?"
     . ./myread
 	ld="$ans"
 
@@ -4311,7 +4311,7 @@ EOM
     rp="Any special flags to pass to $ld to create a dynamically loaded library?"
     . ./myread
     case "$ans" in
-    none) lddlflags='' ;;
+    none) lddlflags=' ' ;;
     *) lddlflags="$ans" ;;
     esac
 
@@ -4335,7 +4335,7 @@ EOM
     rp="Any special flags to pass to $cc to use dynamic loading?"
     . ./myread
     case "$ans" in
-    none) ccdlflags='' ;;
+    none) ccdlflags=' ' ;;
     *) ccdlflags="$ans" ;;
     esac
     ;;
@@ -6438,7 +6438,7 @@ them at all.  Answer "none" to include no extensions.
 
 EOM
 	case "$dynamic_ext" in
-	''|' ') dflt="$avail_ext" ;;
+	'') dflt="$avail_ext" ;;
 	*)	dflt="$dynamic_ext" ;;
 	esac
 	case "$dflt" in
@@ -6447,12 +6447,12 @@ EOM
 	rp="What extensions do you wish to load dynamically?"
 	. ./myread
 	case "$ans" in
-	none) dynamic_ext='' ;;
+	none) dynamic_ext=' ' ;;
 	*) dynamic_ext="$ans" ;;
 	esac
 
 	case "$static_ext" in
-	''|' ')
+	'')
 		: Exclude those already listed in dynamic linking
 		dflt=''
 		for xxx in $avail_ext; do
@@ -6475,7 +6475,7 @@ EOM
 	rp="What extensions do you wish to load statically?"
 	. ./myread
 	case "$ans" in
-	none) static_ext='' ;;
+	none) static_ext=' ' ;;
 	*) static_ext="$ans" ;;
 	esac
 	;;
@@ -6486,7 +6486,7 @@ to include no extensions.
 
 EOM
 	case "$static_ext" in
-	''|' ') dflt="$avail_ext" ;;
+	'') dflt="$avail_ext" ;;
 	*)	dflt="$static_ext" ;;
 	esac
 
@@ -6496,7 +6496,7 @@ EOM
 	rp="What extensions do you wish to include?"
 	. ./myread
 	case "$ans" in
-	none) static_ext='' ;;
+	none) static_ext=' ' ;;
 	*) static_ext="$ans" ;;
 	esac
 	;;

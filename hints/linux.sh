@@ -24,9 +24,10 @@ case "$prefix" in
 esac
 
 # Perl expects BSD style signal handling.
-ccflags="-D__USE_BSD_SIGNAL $ccflags"
+# gcc defines _G_HAVE_BOOL to 1, but doesn't actually supply bool.
+ccflags="-D__USE_BSD_SIGNAL -Dbool=char -DHAS_BOOL $ccflags"
 
-# The following functions are gcc built-ins, but the Configure test
+# The following functions are gcc built-ins, but the Configure tests
 # may fail because it doesn't supply a proper prototype.
 d_memcmp=define
 d_memcpy=define
@@ -68,17 +69,15 @@ if gcc try.c >/dev/null 2>&1 && ./a.out; then
 
 You appear to have ELF support.  I'll try to use it for dynamic loading.
 EOM
-    # Be careful not to overwrite lddlflags, since the user might
-    # have specified some -L/path options on the Configure command line.
-    lddlflags="-shared $lddlflags"
-    ccdlflags='-rdynamic'
-    so='so'
-    dlext='so'
-    ld=gcc
+    # Configure now handles these automatically.
 else
     echo "You don't have an ELF gcc, using dld if available."
     # We might possibly have a version of DLD around.
     lddlflags="-r $lddlflags"
+    # These empty values are so that Configure doesn't put in the
+    # Linux ELF values.
+    ccdlflags=' '
+    cccdlflags=' '
     so='sa'
     dlext='o'
     ## If you are using DLD 3.2.4 which does not support shared libs,

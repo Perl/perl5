@@ -402,9 +402,9 @@ pod/perlsub.pod		Subroutine info
 pod/perlsyn.pod		Syntax info
 pod/perltrap.pod	Trap info
 pod/perlvar.pod		Variable info
-pod/pod2html		Translator to turn pod into HTML
-pod/pod2latex		Translator to turn pod into LaTeX
-pod/pod2man		Translator to turn pod into manpage
+pod/pod2html.SH		Precursor for translator to turn pod into HTML
+pod/pod2latex.SH	Precursor for translator to turn pod into LaTeX
+pod/pod2man.SH		Precursor for translator to turn pod into manpage
 pod/splitman		Splits perlfunc into multiple man pages
 pp.c			Push/Pop code
 pp.h			Push/Pop code defs

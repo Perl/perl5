@@ -21,7 +21,12 @@ POSIX_cflags='ccflags="-posix $ccflags"'
 useposix='undef'
 ldflags='-u libsys_s'
 libswanted='dbm gdbm db'
+#
 lddlflags='-r'
+# Give cccdlflags an empty value since Configure will detect we are
+# using GNU cc and try to specify -fpic for cccdlflags.
+cccdlflags=' '
+#
 i_utime='undef'
 groupstype='int'
 direntrytype='struct direct'

@@ -1,4 +1,28 @@
-#!/usr/bin/perl 
+case $CONFIG in
+'')
+	if test -f config.sh; then TOP=.;
+	elif test -f ../config.sh; then TOP=..;
+	elif test -f ../../config.sh; then TOP=../..;
+	elif test -f ../../../config.sh; then TOP=../../..;
+	elif test -f ../../../../config.sh; then TOP=../../../..;
+	else
+		echo "Can't find config.sh."; exit 1
+	fi
+	. $TOP/config.sh
+	;;
+esac
+case "$0" in
+*/*) cd `expr X$0 : 'X\(.*\)/'` ;;
+esac
+echo "Extracting pod/pod2html (with variable substitutions)"
+rm -f pod2html
+$spitshell >pod2html <<!GROK!THIS!
+#!$bin/perl
+eval 'exec $bin/perl -S \$0 \${1+"\$@"}'
+	if \$running_under_some_shell;
+!GROK!THIS!
+
+$spitshell >>pod2html <<'!NO!SUBS!'
 #
 # pod2html - convert pod format to html
 # 
@@ -46,9 +70,11 @@ unless(@Pods){
 
 # loop twice through the pods, first to learn the links, then to produce html
 for $count (0,1){
+    (print "Scanning pods...\n") unless $count;
     foreach $podfh ( @Pods ) {
 	($pod = $podfh) =~ s/\.pod$//;
 	Debug("files", "opening 2 $podfh" );
+	(print "Creating $pod.html from $podfh\n") if $count;
 	$RS = "\n=";
 	open($podfh,"<".$podfh)  || die "can't open $podfh: $ERRNO";
 	@all=<$podfh>;
@@ -60,11 +86,10 @@ for $count (0,1){
 	$in_list=0;
 	$html=$pod.".html";
 	if($count){
-            #open(HTML,">&STDOUT") || die "can't create $html: $ERRNO";
 	    open(HTML,">$html") || die "can't create $html: $ERRNO";
 	    print HTML <<'HTML__EOQ', <<"HTML__EOQQ";
-	    <!-- $RCSfile$$Date$ -->
-	    <!-- $Log$  -->
+	    <!-- \$RCSfile\$\$Revision\$\$Date\$ -->
+	    <!-- \$Log\$ -->
 	    <HTML>
 HTML__EOQ
 	    <TITLE> \U$pod\E </TITLE>
@@ -77,44 +102,45 @@ HTML__EOQQ
 	    ($cmd, $title, $rest) = ($1,$2,$3);
 	    if ($cmd eq "item") {
 		if($count ){
-		    ($depth) or &do_list("over",$all[$i],\$in_list,\$depth);
-		    &do_item($title,$rest,$in_list);
+		    ($depth) or do_list("over",$all[$i],\$in_list,\$depth);
+		    do_item($title,$rest,$in_list);
 		}
 		else{
 		    # scan item
-		    &scan_thing("item",$title,$pod);
+		    scan_thing("item",$title,$pod);
 		}
 	    }
 	    elsif ($cmd =~ /^head([12])/){
 		$num=$1;
 		if($count){
-		    &do_hdr($num,$title,$rest,$depth);
+		    do_hdr($num,$title,$rest,$depth);
 		}
 		else{
 		    # header scan
-		    &scan_thing($cmd,$title,$pod); # skip head1
+		    scan_thing($cmd,$title,$pod); # skip head1
 		}
 	    }
 	    elsif ($cmd =~ /^over/) {
-		$depth and &do_list("over",$all[$i+1],\$in_list,\$depth);
+		$count and $depth and do_list("over",$all[$i+1],\$in_list,\$depth);
 	    }
 	    elsif ($cmd =~ /^back/) {
 		if($count){
 		    ($depth) or next; # just skip it
-		    &do_list("back",$all[$i+1],\$in_list,\$depth);
-		    &do_rest("$title.$rest");
+		    do_list("back",$all[$i+1],\$in_list,\$depth);
+		    do_rest("$title.$rest");
 		}
 	    }
 	    elsif ($cmd =~ /^cut/) {
-		&do_rest($rest);
+		next;
 	    }
-	    else {
-		warn "unrecognized header: $cmd";
+	    elsif($Debug){
+		(warn "unrecognized header: $cmd") if $Debug;
 	    }
 	}
+        # close open lists without '=back' stmts
 	if($count){
 	    while($depth){
-		 &do_list("back",$all[$i+1],\$in_list,\$depth);
+		 do_list("back",$all[$i+1],\$in_list,\$depth);
 	    }
 	    print HTML "\n</HTML>\n";
 	}
@@ -125,7 +151,7 @@ sub do_list{
     my($which,$next_one,$list_type,$depth)=@_;
     my($key);
     if($which eq "over"){
-	($next_one =~ /^item\s+(.*)/ ) or warn "Bad list, $1\n";
+	($next_one =~ /^item\s+(.*)/ ) or (warn "Bad list, $1\n") if $Debug;
 	$key=$1;
 	if($key =~ /^1\.?/){
 	$$list_type = "OL";
@@ -137,7 +163,7 @@ sub do_list{
 	$$list_type="DL";
 	}
 	else{
-	warn "unknown list type for item $key";
+	(warn "unknown list type for item $key") if $Debug;
 	}
 	print HTML qq{\n};
 	print HTML qq{<$$list_type>};
@@ -152,16 +178,16 @@ sub do_list{
 sub do_hdr{
     my($num,$title,$rest,$depth)=@_;
     ($num == 1) and print HTML qq{<p><hr>\n};
-    &process_thing(\$title,"NAME");
+    process_thing(\$title,"NAME");
     print HTML qq{\n<H$num> };
     print HTML $title; 
     print HTML qq{</H$num>\n};
-    &do_rest($rest);
+    do_rest($rest);
 }
 
 sub do_item{
     my($title,$rest,$list_type)=@_;
-    &process_thing(\$title,"NAME");
+    process_thing(\$title,"NAME");
     if($list_type eq "DL"){
 	print HTML qq{\n<DT><STRONG>\n};
 	print HTML $title; 
@@ -172,13 +198,13 @@ sub do_item{
 	print HTML qq{\n<LI>};
 	($list_type ne "OL") && (print HTML $title,"\n");
     }
-    &do_rest($rest);
+    do_rest($rest);
     print HTML ($list_type eq "DL" )? qq{</DD>} : qq{</LI>};
 }
 
 sub do_rest{
     my($rest)=@_;
-    my(@lines,$p,$q,$line,@paras,$inpre);
+    my(@lines,$p,$q,$line,,@paras,$inpre);
     @paras=split(/\n\n+/,$rest);
     for($p=0;$p<=$#paras;$p++){
 	@lines=split(/\n/,$paras[$p]);
@@ -207,13 +233,13 @@ inner:
 		foreach $q (@lines){
 		    if($paras[$p]=~/>>|<</){
 			if($inpre){
-			    &process_thing(\$q,"HTML");
+			    process_thing(\$q,"HTML");
 			}
 			else {
 			    print HTML qq{\n</XMP>\n};
 			    print HTML qq{<PRE>\n};
 			    $inpre=1;
-			    &process_thing(\$q,"HTML");
+			    process_thing(\$q,"HTML");
 			}
 		    }
 		    while($q =~  s/\t+/' 'x (length($&) * 8 - length($`) % 8)/e){
@@ -229,7 +255,7 @@ inner:
 	else{                             # other text
 	    @lines=split(/\n/,$paras[$p]);
 	    foreach $line (@lines){
-                &process_thing(\$line,"HTML");
+                process_thing(\$line,"HTML");
 		print HTML qq{$line\n};
 	    }
 	}
@@ -239,9 +265,9 @@ inner:
 
 sub process_thing{
     my($thing,$htype)=@_;
-    &pre_escapes($thing);
-    &find_refs($thing,$htype);
-    &post_escapes($thing);
+    pre_escapes($thing);
+    find_refs($thing,$htype);
+    post_escapes($thing);
 }
 
 sub scan_thing{
@@ -284,7 +310,7 @@ sub scan_thing{
         Debug("headers", "header $_");
     } 
     else {
-        warn "unrecognized header: $cmd";
+        (warn "unrecognized header: $cmd") if $Debug;
     } 
 }
 
@@ -316,9 +342,11 @@ sub picrefs {
     }
     if ($char =~ /[IF]/) {
 	return "<EM> $bigkey </EM>";
+    } elsif($char =~ /C/) {
+	return "<CODE> $bigkey </CODE>";
     } else {
 	return "<STRONG> $bigkey </STRONG>";
-    } 
+    }
 } 
 
 sub find_refs { 
@@ -329,7 +357,7 @@ sub find_refs {
     $$thing=~s/L<([^>]*)>/lrefs($1,$htype)/ge;
     $$thing=~s/([CIBF])<(\W*?(-?\w*).*?)>/picrefs($1, $2, $3, $htype)/ge;
     $$thing=~s/((\w+)\(\))/picrefs("I", $1, $2,$htype)/ge;
-    $$thing=~s/([\$\@%]([\w:]+|\W\b))/varrefs($1,$htype)/ge;
+    $$thing=~s/([\$\@%](?!&[gl]t)([\w:]+|\W\b))/varrefs($1,$htype)/ge;
     (($$thing eq $orig) && ($htype eq "NAME")) && 
 	($$thing=picrefs("I", $$thing, "", $htype));
 }
@@ -354,7 +382,7 @@ sub lrefs {
     	if (!defined $section && defined $Podnames{$page}) {
 	    return "\n$type$page.html\">\nthe <EM> $page </EM> manpage<\/A>\n";
 	} else {
-	    warn "Bizarre entry $page/$item";
+	    (warn "Bizarre entry $page/$item") if $Debug;
 	    return "the <EM> $_[0] </EM>  manpage\n";
 	} 
     } 
@@ -385,7 +413,7 @@ sub lrefs {
             }
 	}
     }
-    warn "No $ref reference for $item (@_)";
+    (warn "No $ref reference for $item (@_)") if $Debug;
     return $text;
 } 
 
@@ -433,7 +461,7 @@ sub noremap {
 sub post_escapes {
     my($thing)=@_;
     $$thing=~s/[^GM]>>/\&gt\;\&gt\;/g;
-    $$thing=~s/([^"MGA])>/$1\&gt\;/g;
+    $$thing=~s/([^"MGAE])>/$1\&gt\;/g;
     $$thing=~tr/\200-\377/\000-\177/;
 }
 
@@ -457,3 +485,6 @@ sub trim {
 }
 
 
+!NO!SUBS!
+chmod 755 pod2html
+$eunicefix pod2html

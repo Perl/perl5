@@ -647,11 +647,14 @@ U32 cast_ulong _((double));
 #ifdef CASTI32
 #define I_32(what) ((I32)(what))
 #define I_V(what) ((IV)(what))
+#define U_V(what) ((UV)(what))
 #else
 I32 cast_i32 _((double));
 #define I_32(what) (cast_i32((double)(what)))
 IV cast_iv _((double));
 #define I_V(what) (cast_iv((double)(what)))
+UV cast_uv _((double));
+#define U_V(what) (cast_uv((double)(what)))
 #endif
 
 struct Outrec {

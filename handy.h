@@ -24,15 +24,26 @@
 #define Nullsv Null(SV*)
 
 /* bool is built-in for g++-2.6.3, which might be used for an extension.
-   gcc-2.6.2 under Linux defines _G_HAVE_BOOL to 0, and does not
-   define bool. */
-#if !defined(HAS_BOOL) && !(_G_HAVE_BOOL)
-#ifdef UTS
-#define bool int
-#else
-#define bool char
+   If the extension includes <_G_config.h> before this file then
+   _G_HAVE_BOOL will be properly set.  If, however, the extension includes
+   this file first, then you will have to manually set -DHAS_BOOL in 
+   your command line to avoid a conflict.
+*/
+#ifdef _G_HAVE_BOOL
+# if _G_HAVE_BOOL
+#  ifndef HAS_BOOL
+#   define HAS_BOOL 1
+#  endif
+# endif
 #endif
-#endif /* !defined(HAS_BOOL) && !(_G_HAVE_BOOL) */
+
+#ifndef HAS_BOOL
+# ifdef UTS
+#  define bool int
+# else
+#  define bool char
+# endif
+#endif
 
 #ifdef TRUE
 #undef TRUE

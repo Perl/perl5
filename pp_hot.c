@@ -1560,6 +1560,7 @@ PP(pp_entersub)
     HV *stash;
     register CV *cv;
     register CONTEXT *cx;
+    I32 gimme;
 
     if (!sv)
 	DIE("Not a CODE reference");
@@ -1632,6 +1633,8 @@ PP(pp_entersub)
 	    DIE("No DBsub routine");
     }
 
+    gimme = GIMME;
+
     if (CvXSUB(cv)) {
 	if (CvOLDSTYLE(cv)) {
 	    I32 (*fp3)_((int,int,int));
@@ -1655,7 +1658,7 @@ PP(pp_entersub)
 	    (void)(*CvXSUB(cv))(cv);
 
 	    /* Enforce some sanity in scalar context. */
-	    if (GIMME == G_SCALAR && ++markix != stack_sp - stack_base ) {
+	    if (gimme == G_SCALAR && ++markix != stack_sp - stack_base ) {
 		if (markix > stack_sp - stack_base)
 		    *(stack_base + markix) = &sv_undef;
 		else
@@ -1670,7 +1673,6 @@ PP(pp_entersub)
 	dMARK;
 	register I32 items = SP - MARK;
 	I32 hasargs = (op->op_flags & OPf_STACKED) != 0;
-	I32 gimme = GIMME;
 	AV* padlist = CvPADLIST(cv);
 	SV** svp = AvARRAY(padlist);
 	push_return(op->op_next);
