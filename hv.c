@@ -133,7 +133,7 @@ Perl_he_dup(pTHX_ HE *e, bool shared, CLONE_PARAMS* param)
 
 static void
 Perl_hv_notallowed(pTHX_ bool is_utf8, const char *key, I32 klen,
-		   const char *keysave)
+		   const char *keysave, const char *msg)
 {
     SV *sv = sv_newmortal();
     if (key == keysave) {
@@ -147,7 +147,7 @@ Perl_hv_notallowed(pTHX_ bool is_utf8, const char *key, I32 klen,
     if (is_utf8) {
 	SvUTF8_on(sv);
     }
-    Perl_croak(aTHX_ "Attempt to access key '%"SVf"' in fixed hash",sv);
+    Perl_croak(aTHX_ msg, sv);
 }
 
 /* (klen == HEf_SVKEY) is special for MAGICAL hv entries, meaning key slot
@@ -266,7 +266,9 @@ Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen, I32 lval)
     }
 #endif
     if (!entry && SvREADONLY(hv)) {
-	Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave);
+	Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave,
+                 "Attempt to access disallowed key '%"SVf"' in a fixed hash"
+                           );
     }
     if (lval) {		/* gonna assign to this, so it better be there */
 	sv = NEWSV(61,0);
@@ -400,7 +402,9 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
     }
 #endif
     if (!entry && SvREADONLY(hv)) {
-	Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave);
+	Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave,
+                 "Attempt to access disallowed key '%"SVf"' in a fixed hash"
+                           );
     }
     if (key != keysave)
 	Safefree(key);
@@ -523,7 +527,9 @@ Perl_hv_store(pTHX_ HV *hv, const char *key, I32 klen, SV *val, register U32 has
     }
 
     if (SvREADONLY(hv)) {
-	Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave);
+	Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave,
+                 "Attempt to access disallowed key '%"SVf"' to a fixed hash"
+                           );
     }
 
     entry = new_HE();
@@ -644,7 +650,9 @@ Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, register U32 hash)
     }
 
     if (SvREADONLY(hv)) {
-	Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave);
+	Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave,
+                 "Attempt to access disallowed key '%"SVf"' to a fixed hash"
+                           );
     }
 
     entry = new_HE();
@@ -770,7 +778,9 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen, I32 flags)
 	    }
 	}
 	else if (SvREADONLY(hv) && HeVAL(entry) && SvREADONLY(HeVAL(entry))) {
-	    Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave);
+	    Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave,
+                   "Attempt to delete readonly key '%"SVf"' from a fixed hash"
+                               );
 	}
 
 	if (flags & G_DISCARD)
@@ -804,7 +814,9 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen, I32 flags)
 	return sv;
     }
     if (SvREADONLY(hv)) {
-	Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave);
+	Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave,
+               "Attempt to access disallowed key '%"SVf"' from a fixed hash"
+                           );
     }
 
     if (key != keysave)
@@ -912,7 +924,9 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
            return Nullsv;
 	}
 	else if (SvREADONLY(hv) && HeVAL(entry) && SvREADONLY(HeVAL(entry))) {
-	    Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave);
+	    Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave,
+                   "Attempt to delete readonly key '%"SVf"' from a fixed hash"
+                               );
 	}
 
 	if (flags & G_DISCARD)
@@ -946,7 +960,9 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
 	return sv;
     }
     if (SvREADONLY(hv)) {
-	Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave);
+        Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave,
+            "Attempt to delete disallowed key '%"SVf"' from a fixed hash"
+           );
     }
 
     if (key != keysave)
@@ -1446,6 +1462,11 @@ Perl_hv_clear(pTHX_ HV *hv)
     register XPVHV* xhv;
     if (!hv)
 	return;
+
+    if(SvREADONLY(hv)) {
+        Perl_croak(aTHX_ "Attempt to clear a fixed hash");
+    }
+
     xhv = (XPVHV*)SvANY(hv);
     hfreeentries(hv);
     xhv->xhv_fill = 0; /* HvFILL(hv) = 0 */

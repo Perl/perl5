@@ -127,6 +127,13 @@ ext/Data/Dumper/Makefile.PL	Data pretty printer, makefile writer
 ext/Data/Dumper/t/dumper.t	See if Data::Dumper works
 ext/Data/Dumper/t/overload.t	See if Data::Dumper works for overloaded data
 ext/Data/Dumper/Todo		Data pretty printer, futures
+ext/Data/Util/Changes           Data/Hash::Util, Change log
+ext/Data/Util/Makefile.PL       Data/Hash::Util, Makefile.PL
+ext/Data/Util/Util.xs           Data/Hash::Util, Data::Util XS code
+ext/Data/Util/lib/Data/Util.pm  Data/Hash::Util, Data::Util
+ext/Data/Util/lib/Hash/Util.pm  Data/Hash::Util, Hash::Util
+ext/Data/Util/t/Data.t          Data/Hash::Util, Data::Util test
+ext/Data/Util/t/Hash.t          Data/Hash::Util, Hash::Util test
 ext/DB_File/Changes	Berkeley DB extension change log
 ext/DB_File/dbinfo	Berkeley DB database version checker
 ext/DB_File/DB_File.pm	Berkeley DB extension Perl module
@@ -2171,7 +2178,6 @@ t/io/read.t			See if read works
 t/io/tell.t			See if file seeking works
 t/io/utf8.t			See if file seeking works
 t/lib/1_compile.t		See if the various libraries and extensions compile
-t/lib/access.t			See if access::readonly and readonly hashes work
 t/lib/commonsense.t		See if configuration meets basic needs
 t/lib/compmod.pl		Helper for 1_compile.t
 t/lib/dprof/test1_t		Perl code profiler tests

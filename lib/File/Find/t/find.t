@@ -51,10 +51,10 @@ BEGIN {
 
 cleanup();
 
-find({wanted => sub { print "ok 1\n" if $_ eq 'access.t'; } },
+find({wanted => sub { print "ok 1\n" if $_ eq '1_compile.t'; } },
    File::Spec->curdir);
 
-finddepth({wanted => sub { print "ok 2\n" if $_ eq 'access.t'; } },
+finddepth({wanted => sub { print "ok 2\n" if $_ eq '1_compile.t'; } },
 	File::Spec->curdir);
 
 
