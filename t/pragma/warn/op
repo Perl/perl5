@@ -84,16 +84,16 @@
 	keys joe ;
  
      Statement unlikely to be reached
-     (Maybe you meant system() when you said exec()?
+     	(Maybe you meant system() when you said exec()?
  	exec "true" ; my $a
 
      defined(@array) is deprecated
-     (Maybe you should just omit the defined()?)
+     	(Maybe you should just omit the defined()?)
 	my @a ; defined @a ;
 	defined (@a = (1,2,3)) ;
 
      defined(%hash) is deprecated
-     (Maybe you should just omit the defined()?)
+     	(Maybe you should just omit the defined()?)
 	my %h ; defined %h ;
     
      /---/ should probably be written as "---"
@@ -738,28 +738,28 @@ exec "$^X -e 1" ;
 my $a
 EXPECT
 Statement unlikely to be reached at - line 4.
-(Maybe you meant system() when you said exec()?)
+	(Maybe you meant system() when you said exec()?)
 ########
 # op.c
 use warnings 'deprecated' ;
 my @a; defined(@a);
 EXPECT
 defined(@array) is deprecated at - line 3.
-(Maybe you should just omit the defined()?)
+	(Maybe you should just omit the defined()?)
 ########
 # op.c
 use warnings 'deprecated' ;
 defined(@a = (1,2,3));
 EXPECT
 defined(@array) is deprecated at - line 3.
-(Maybe you should just omit the defined()?)
+	(Maybe you should just omit the defined()?)
 ########
 # op.c
 use warnings 'deprecated' ;
 my %h; defined(%h);
 EXPECT
 defined(%hash) is deprecated at - line 3.
-(Maybe you should just omit the defined()?)
+	(Maybe you should just omit the defined()?)
 ########
 # op.c
 no warnings 'syntax' ;

@@ -3817,6 +3817,6 @@ Perl_report_closed_fh(pTHX_ GV *gv, IO *io, const char *func, const char *obj)
 
     if (io && IoDIRP(io))
 	Perl_warner(aTHX_ WARN_CLOSED,
-		    "(Are you trying to call %s() on dirhandle %s?)\n",
+		    "\t(Are you trying to call %s() on dirhandle %s?)\n",
 		    func, name);
 }
