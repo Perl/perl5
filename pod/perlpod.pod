@@ -36,16 +36,16 @@ use however it pleases.  Currently recognized commands are
     =end X
 
 The "=pod" directive does nothing beyond telling the compiler to lay
-off of through the next "=cut".  It's useful for adding another 
-paragraph to the doc if you're mixing up code and pod a lot.  
+off parsing code through the next "=cut".  It's useful for adding
+another paragraph to the doc if you're mixing up code and pod a lot.
 
-Head1 and head2 produce first and second level headings, with the text on
-the same paragraph as "=headn" forming the heading description.
+Head1 and head2 produce first and second level headings, with the text in
+the same paragraph as the "=headn" directive forming the heading description.
 
-Item, over, and back require a little more explanation: Over starts a
-section specifically for the generation of a list using =item commands. At
-the end of your list, use =back to end it. You will probably want to give
-"4" as the number to =over, as some formatters will use this for indentation.
+Item, over, and back require a little more explanation: "=over" starts a
+section specifically for the generation of a list using "=item" commands. At
+the end of your list, use "=back" to end it. You will probably want to give
+"4" as the number to "=over", as some formatters will use this for indentation.
 This should probably be a default. Note also that there are some basic rules
 to using =item: don't use them outside of an =over/=back block, use at least
 one inside an =over/=back block, you don't _have_ to include the =back if
@@ -54,20 +54,21 @@ items consistent: either use "=item *" for all of them, to produce bullets,
 or use "=item 1.", "=item 2.", etc., to produce numbered lists, or use
 "=item foo", "=item bar", etc., i.e., things that looks nothing like bullets
 or numbers. If you start with bullets or numbers, stick with them, as many
-formatters use the first =item type to decide how to format the list.  
+formatters use the first "=item" type to decide how to format the list.  
 
-For and begin/end let you include sections that are not interpreted as pod
-text, but in a format that a particular formatter is looking for. A
-formatter that can utilize that format will use the section, otherwise it
-will be completely ignored.  "=for" specifies that the entire paragraph
-should is in the format indicated by the first word after "=for", like this:
+For, begin, and end let you include sections that are not interpreted
+as pod text, but passed directly to particular formatters. A formatter
+that can utilize that format will use the section, otherwise it will be
+completely ignored.  The directive "=for" specifies that the entire next
+paragraph is in the format indicated by the first word after
+"=for", like this:
 
  =for html <br> 
   <p> This is a raw HTML paragraph </p>
 
-The paired commands "=begin" and "=end" work very similarly to =for, but
-instead of only accepting a single paragraph, all text from =begin to a
-paragraph with a matching =end are treated as a particular format. 
+The paired commands "=begin" and "=end" work very similarly to "=for", but
+instead of only accepting a single paragraph, all text from "=begin" to a
+paragraph with a matching "=end" are treated as a particular format. 
 
 Here are some examples of how to use these:
 
@@ -92,7 +93,7 @@ Some format names that formatters currently are known to accept include
 "roff", "man", "latex", "tex", "text", and "html". (Some formatters will
 treat some of these as synonyms.)
 
-And don't forget, when using any command, that that command lasts up until
+And don't forget, when using any command, that the command lasts up until
 the end of the B<paragraph>, not the line. Hence in the examples below, you
 can see the blank lines after each command to end its paragraph.
 
@@ -141,7 +142,7 @@ here and in commands:
 		    L</"sec">		ditto
     F<file>	Used for filenames
     X<index>	An index entry
-    Z<>         A zero-width character
+    ZE<lt>E<gt>	A zero-width character
     E<escape>   A named character (very similar to HTML escapes)
 		    E<lt>		A literal <
 		    E<gt>		A literal >
@@ -183,14 +184,15 @@ B<pod2html>, B<pod2latex>, and B<pod2fm>.
 =head1 Embedding Pods in Perl Modules
 
 You can embed pod documentation in your Perl scripts.  Start your
-documentation with a =head1 command at the beg, and end it with 
-an =cut command.  Perl will ignore the pod text.  See any of the
-supplied library modules for examples.  If you're going to put
-your pods at the end of the file, and you're using an __END__
-or __DATA__ cut mark, make sure to put a blank line there before
-the first pod directive.
+documentation with a "=head1" command at the beginning, and end it
+with a "=cut" command.  Perl will ignore the pod text.  See any of the
+supplied library modules for examples.  If you're going to put your
+pods at the end of the file, and you're using an __END__ or __DATA__
+cut mark, make sure to put a blank line there before the first pod
+directive.
 
     __END__
+
 
     =head1 NAME
 
