@@ -115,6 +115,12 @@
 #  define my_gmtime		Perl_my_gmtime
 #  define my_localtime		Perl_my_localtime
 #  define my_time		Perl_my_time
+#  define my_sigemptyset        Perl_my_sigemptyset
+#  define my_sigfillset         Perl_my_sigfillset
+#  define my_sigaddset          Perl_my_sigaddset
+#  define my_sigdelset          Perl_my_sigdelset
+#  define my_sigismember        Perl_my_sigismember
+#  define my_sigprocmask        Perl_my_sigprocmask
 #endif
 #  define cando_by_name		Perl_cando_by_name
 #  define flex_fstat		Perl_flex_fstat
@@ -336,6 +342,29 @@ struct utimbuf {
 #define gmtime(t) my_gmtime(t)
 #define localtime(t) my_localtime(t)
 #define time(t) my_time(t)
+#define sigemptyset(t) my_sigemptyset(t)
+#define sigfillset(t) my_sigfillset(t)
+#define sigaddset(t, u) my_sigaddset(t, u)
+#define sigdelset(t, u) my_sigdelset(t, u)
+#define sigismember(t, u) my_sigismember(t, u)
+#define sigprocmask(t, u, v) my_sigprocmask(t, u, v)
+typedef int sigset_t;
+/* The tools for sigprocmask() are there, just not the routine itself */
+#    ifndef SIG_UNBLOCK
+#      define SIG_UNBLOCK 1
+#    endif
+#    ifndef SIG_BLOCK
+#      define SIG_BLOCK 2
+#    endif
+#    ifndef SIG_SETMASK
+#      define SIG_SETMASK 3
+#    endif
+#    define sigaction sigvec
+#    define sa_flags sv_onstack
+#    define sa_handler sv_handler
+#    define sa_mask sv_mask
+#    define sigsuspend(set) sigpause(*set)
+#    define sigpending(a) (not_here("sigpending"),0)
 #endif
 
 /* VMS doesn't use a real sys_nerr, but we need this when scanning for error
@@ -541,6 +570,16 @@ struct tm *	my_gmtime _((const time_t *));
 struct tm *	my_localtime _((const time_t *));
 time_t	my_time _((time_t *));
 #endif /* We're assuming these three come as a package */
+/* We're just gonna assume that if we've got an antique here that we */
+/* need the signal functions */
+#if __VMS_VER < 70000000 || __DECC_VER < 50200000
+int     my_sigemptyset _((sigset_t *));
+int     my_sigfillset  _((sigset_t *));
+int     my_sigaddset   _((sigset_t *, int));
+int     my_sigdelset   _((sigset_t *, int));
+int     my_sigismember _((sigset_t *, int));
+int     my_sigprocmask _((int, sigset_t *, sigset_t *));
+#endif
 I32	cando_by_name _((I32, I32, char *));
 int	flex_fstat _((int, struct mystat *));
 int	flex_stat _((char *, struct mystat *));

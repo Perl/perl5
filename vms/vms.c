@@ -3179,6 +3179,79 @@ void my_endpwent()
 /*}}}*/
 
 #if __VMS_VER < 70000000 || __DECC_VER < 50200000
+/* Signal handling routines, pulled into the core from POSIX.xs.
+ *
+ * We need these for threads, so they've been rolled into the core,
+ * rather than left in POSIX.xs.
+ *
+ * (DRS, Oct 23, 1997)
+ */
+
+/* sigset_t is atomic under VMS, so these routines are easy */
+int my_sigemptyset(sigset_t *set) {
+  if (!set) { SETERRNO(EFAULT,SS$_ACCVIO); return -1; }
+  *set = 0; return 0;
+}
+int my_sigfillset(sigset_t *set) {
+  int i;
+  if (!set) { SETERRNO(EFAULT,SS$_ACCVIO); return -1; }
+  for (i = 0; i < NSIG; i++) *set |= (1 << i);
+  return 0;
+}
+int my_sigaddset(sigset_t *set, int sig) {
+  if (!set) { SETERRNO(EFAULT,SS$_ACCVIO); return -1; }
+  if (sig > NSIG) { SETERRNO(EINVAL,LIB$_INVARG); return -1; }
+  *set |= (1 << (sig - 1));
+  return 0;
+}
+int my_sigdelset(sigset_t *set, int sig) {
+  if (!set) { SETERRNO(EFAULT,SS$_ACCVIO); return -1; }
+  if (sig > NSIG) { SETERRNO(EINVAL,LIB$_INVARG); return -1; }
+  *set &= ~(1 << (sig - 1));
+  return 0;
+}
+int my_sigismember(sigset_t *set, int sig) {
+  if (!set) { SETERRNO(EFAULT,SS$_ACCVIO); return -1; }
+  if (sig > NSIG) { SETERRNO(EINVAL,LIB$_INVARG); return -1; }
+  *set & (1 << (sig - 1));
+}
+int my_sigprocmask(int how, sigset_t *set, sigset_t *oset) {
+  sigset_t tempmask;
+
+  /* If set and oset are both null, then things are badky wrong. Bail */
+  if ((oset == NULL) && (set == NULL)) {
+    set_errno(EFAULT); set_vaxc_errno(SS$_ACCVIO);
+    return -1;
+  }
+
+  /* If set's null, then we're just handling a fetch. */
+  if (set == NULL) {
+    tempmask = sigblock(0);
+  } else {
+    switch (how) {
+    case SIG_SETMASK:
+      tempmask = sigsetmask(*set);
+      break;
+    case SIG_BLOCK:
+      tempmask = sigblock(*set);
+      break;
+    case SIG_UNBLOCK:
+      tempmask = sigblock(0);
+      sigsetmask(*oset & ~tempmask);
+      break;
+    default:
+      set_errno(EINVAL); set_vaxc_errno(LIB$_INVARG);
+      return -1;
+    }
+  }
+
+  /* Did they pass us an oset? If so, stick our holding mask into it */
+  if (oset)
+    *oset = tempmask;
+  
+  return 0;
+}
+
 /* Used for UTC calculation in my_gmtime(), my_localtime(), my_time(),
  * my_utime(), and flex_stat(), all of which operate on UTC unless
  * VMSISH_TIMES is true.

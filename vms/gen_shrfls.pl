@@ -150,6 +150,7 @@ sub scan_var {
   $line =~ s/\[.*//;
   $line =~ s/=.*//;
   $line =~ s/\W*;?\s*$//;
+  $line =~ s/\(void//;
   print "\tfiltered to \\$line\\\n" if $debug > 1;
   if ($line =~ /(\w+)$/) {
     print "\tvar name is \\$1\\" . ($const ? ' (const)' : '') . "\n" if $debug > 1;
