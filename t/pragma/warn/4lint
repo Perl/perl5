@@ -4,11 +4,11 @@ __END__
 -W
 # lint: check compile time $^W is zapped
 BEGIN { $^W = 0 ;}
-$a = $b = 1 ;
-$a = 1 if $a EQ $b ;
+$a = 1 ;
+$a =+ 1 ;
 close STDIN ; print STDIN "abc" ;
 EXPECT
-Use of EQ is deprecated at - line 5.
+Reversed += operator at - line 5.
 print() on closed filehandle main::STDIN at - line 6.
 ########
 -W
@@ -30,11 +30,11 @@ print() on closed filehandle main::STDIN at - line 5.
 -W
 # lint: check "no warnings" is zapped
 no warnings ;
-$a = $b = 1 ;
-$a = 1 if $a EQ $b ;
+$a = 1 ;
+$a =+ 1 ;
 close STDIN ; print STDIN "abc" ;
 EXPECT
-Use of EQ is deprecated at - line 5.
+Reversed += operator at - line 5.
 print() on closed filehandle main::STDIN at - line 6.
 ########
 -W
@@ -57,58 +57,58 @@ print() on closed filehandle main::STDIN at - line 5.
 ########
 -W
 --FILE-- abc.pm
-no warnings 'deprecated' ;
-my ($a, $b) = (0,0);
-1 if $a EQ $b ;
+no warnings 'syntax' ;
+my $a = 0;
+$a =+ 1 ;
 1;
 --FILE-- 
 no warnings 'uninitialized' ;
 use abc;
 my $a ; chop $a ;
 EXPECT
-Use of EQ is deprecated at abc.pm line 3.
+Reversed += operator at abc.pm line 3.
 Use of uninitialized value in scalar chop at - line 3.
 ########
 -W
 --FILE-- abc
-no warnings 'deprecated' ;
-my ($a, $b) = (0,0);
-1 if $a EQ $b ;
+no warnings 'syntax' ;
+my $a = 0;
+$a =+ 1 ;
 1;
 --FILE-- 
 no warnings 'uninitialized' ;
 require "./abc";
 my $a ; chop $a ;
 EXPECT
-Use of EQ is deprecated at ./abc line 3.
+Reversed += operator at ./abc line 3.
 Use of uninitialized value in scalar chop at - line 3.
 ########
 -W
 --FILE-- abc.pm
 BEGIN {$^W = 0}
-my ($a, $b) = (0,0);
-1 if $a EQ $b ;
+my $a = 0 ;
+$a =+ 1 ;
 1;
 --FILE-- 
 $^W = 0 ;
 use abc;
 my $a ; chop $a ;
 EXPECT
-Use of EQ is deprecated at abc.pm line 3.
+Reversed += operator at abc.pm line 3.
 Use of uninitialized value in scalar chop at - line 3.
 ########
 -W
 --FILE-- abc
 BEGIN {$^W = 0}
-my ($a, $b) = (0,0);
-1 if $a EQ $b ;
+my $a = 0 ;
+$a =+ 1 ;
 1;
 --FILE-- 
 $^W = 0 ;
 require "./abc";
 my $a ; chop $a ;
 EXPECT
-Use of EQ is deprecated at ./abc line 3.
+Reversed += operator at ./abc line 3.
 Use of uninitialized value in scalar chop at - line 3.
 ########
 -W
@@ -175,42 +175,42 @@ use warnings;
     my $a = "1"; my $b = "2";
     no warnings ;
     eval q[ 
-        use warnings 'deprecated' ;
-        1 if $a EQ $b ;
+        use warnings 'syntax' ;
+        $a =+ 1 ;
     ]; print STDERR $@;
-    1 if $a EQ $b ;
+    $a =+ 1 ;
 }
 EXPECT
-Use of EQ is deprecated at - line 11.
-Use of EQ is deprecated at (eval 1) line 3.
+Reversed += operator at - line 11.
+Reversed += operator at (eval 1) line 3.
 ########
 -W
 # Check scope of pragma with eval
 no warnings;
 {
     my $a = "1"; my $b = "2";
-    use warnings 'deprecated' ;
+    use warnings 'syntax' ;
     eval '
-        1 if $a EQ $b ;
+        $a =+ 1 ;
     '; print STDERR $@;
-    1 if $a EQ $b ;
+    $a =+ 1 ;
 }
 EXPECT
-Use of EQ is deprecated at - line 10.
-Use of EQ is deprecated at (eval 1) line 2.
+Reversed += operator at - line 10.
+Reversed += operator at (eval 1) line 2.
 ########
 -W
 # Check scope of pragma with eval
 no warnings;
 {
     my $a = "1"; my $b = "2";
-    use warnings 'deprecated' ;
+    use warnings 'syntax' ;
     eval '
         no warnings ;
-        1 if $a EQ $b ;
+        $a =+ 1 ;
     '; print STDERR $@;
-    1 if $a EQ $b ;
+    $a =+ 1 ;
 }
 EXPECT
-Use of EQ is deprecated at - line 11.
-Use of EQ is deprecated at (eval 1) line 3.
+Reversed += operator at - line 11.
+Reversed += operator at (eval 1) line 3.

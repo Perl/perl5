@@ -258,9 +258,9 @@ BEGIN {  $^W = 1 }
 {
     no warnings ;
     eval '
-        1 if $a EQ $b ;
+        my $a =+ 1 ;
     '; print STDERR $@ ;
-    1 if $a EQ $b ;
+    my $a =+ 1 ;
 }
 EXPECT
 
