@@ -1,4 +1,4 @@
-# Net::Cmd.pm $Id: //depot/libnet/Net/Cmd.pm#28 $
+# Net::Cmd.pm $Id: //depot/libnet/Net/Cmd.pm#30 $
 #
 # Copyright (c) 1995-1997 Graham Barr <gbarr@pobox.com>. All rights reserved.
 # This program is free software; you can redistribute it and/or
@@ -21,7 +21,7 @@ BEGIN {
   }
 }
 
-$VERSION = "2.21";
+$VERSION = "2.23";
 @ISA     = qw(Exporter);
 @EXPORT  = qw(CMD_INFO CMD_OK CMD_MORE CMD_REJECT CMD_ERROR CMD_PENDING);
 
@@ -73,7 +73,6 @@ sub _print_isa
  my @do   = ($pkg);
  my %spc = ( $pkg , "");
 
- print STDERR "\n";
  while ($pkg = shift @do)
   {
    next if defined $done{$pkg};
@@ -85,7 +84,7 @@ sub _print_isa
                 : "";
 
    my $spc = $spc{$pkg};
-   print STDERR "$cmd: ${spc}${pkg}${v}\n";
+   $cmd->debug_print(1,"${spc}${pkg}${v}\n");
 
    if(@{"${pkg}::ISA"})
     {
@@ -93,8 +92,6 @@ sub _print_isa
      unshift(@do, @{"${pkg}::ISA"});
     }
   }
-
- print STDERR "\n";
 }
 
 sub debug
@@ -398,10 +395,10 @@ sub datasend
  return 1
     unless length($line);
 
- if($cmd->debug)
-  {
-   my $b = "$cmd>>> ";
-   print STDERR $b,join("\n$b",split(/\n/,$line)),"\n";
+ if($cmd->debug) {
+   foreach my $b (split(/\n/,$line)) {
+     $cmd->debug_print(1, "$b\n");
+   }
   }
 
  # Translate LF => CRLF, but not if the LF is
@@ -457,17 +454,13 @@ sub dataend
  if(${*$cmd}{'net_cmd_lastch'} eq "\015")
   {
    syswrite($cmd,"\012",1);
-   print STDERR "\n"
-    if($cmd->debug);
   }
  elsif(${*$cmd}{'net_cmd_lastch'} ne "\012")
   {
    syswrite($cmd,"\015\012",2);
-   print STDERR "\n"
-    if($cmd->debug);
   }
 
- print STDERR "$cmd>>> .\n"
+ $cmd->debug_print(1, ".\n")
     if($cmd->debug);
 
  syswrite($cmd,".\015\012",3);
@@ -497,7 +490,7 @@ sub TIEHANDLE {
 # end-of-file when the dot is encountered.
 sub READ {
   my $cmd = shift;
-  my (undef,$len,$offset) = @_;
+  my ($len,$offset) = @_[1,2];
   return unless exists ${*$cmd}{'net_cmd_readbuf'};
   my $done = 0;
   while (!$done and length(${*$cmd}{'net_cmd_readbuf'}) < $len) {
@@ -714,6 +707,6 @@ it under the same terms as Perl itself.
 
 =for html <hr>
 
-I<$Id: //depot/libnet/Net/Cmd.pm#28 $>
+I<$Id: //depot/libnet/Net/Cmd.pm#30 $>
 
 =cut

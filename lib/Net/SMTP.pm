@@ -16,7 +16,7 @@ use IO::Socket;
 use Net::Cmd;
 use Net::Config;
 
-$VERSION = "2.24"; # $Id: //depot/libnet/Net/SMTP.pm#25 $
+$VERSION = "2.25"; # $Id: //depot/libnet/Net/SMTP.pm#26 $
 
 @ISA = qw(Net::Cmd IO::Socket::INET);
 
@@ -126,8 +126,11 @@ sub auth {
     # todo that we would really need to change the ISA hierarchy
     # so we dont inherit from IO::Socket, but instead hold it in an attribute
 
-    my @cmd = ("AUTH", $client->mechanism, MIME::Base64::encode_base64($str,''));
+    my @cmd = ("AUTH", $client->mechanism);
     my $code;
+
+    push @cmd, MIME::Base64::encode_base64($str,'')
+      if defined $str and length $str;
 
     while (($code = $self->command(@cmd)->response()) == CMD_MORE) {
       @cmd = (MIME::Base64::encode_base64(
@@ -670,6 +673,6 @@ it under the same terms as Perl itself.
 
 =for html <hr>
 
-I<$Id: //depot/libnet/Net/SMTP.pm#25 $>
+I<$Id: //depot/libnet/Net/SMTP.pm#26 $>
 
 =cut

@@ -13,7 +13,7 @@ use Net::Cmd;
 use Carp;
 use Net::Config;
 
-$VERSION = "2.23"; # $Id: //depot/libnet/Net/POP3.pm#22 $
+$VERSION = "2.24"; # $Id: //depot/libnet/Net/POP3.pm#23 $
 
 @ISA = qw(Net::Cmd IO::Socket::INET);
 
@@ -342,13 +342,13 @@ sub response
  $cmd->debug_print(0,$str)
    if ($cmd->debug);
 
- if($str =~ s/^\+OK\s+//io)
+ if($str =~ s/^\+OK\s*//io)
   {
    $code = "200"
   }
  else
   {
-   $str =~ s/^-ERR\s+//io;
+   $str =~ s/^-ERR\s*//io;
   }
 
  ${*$cmd}{'net_cmd_resp'} = [ $str ];
@@ -540,6 +540,6 @@ it under the same terms as Perl itself.
 
 =for html <hr>
 
-I<$Id: //depot/libnet/Net/POP3.pm#22 $>
+I<$Id: //depot/libnet/Net/POP3.pm#23 $>
 
 =cut
