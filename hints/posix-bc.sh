@@ -21,10 +21,7 @@ esac
 # -D_XOPEN_SOURCE_EXTENDED alters system headers.
 # -DPERL_IGNORE_FPUSIG=SIGFPE
 # Prepend your favorites with Configure -Dccflags=your_favorites
-case "$ccflags" in
-'') ccflags='-K enum_long,llm_case_lower,llm_keep,no_integer_overflow -DPOSIX_BC -DUSE_PURE_BISON -D_XOPEN_SOURCE -D_XOPEN_SOURCE_EXTENDED -DPERL_IGNORE_FPUSIG=SIGFPE' ;;
-*) ccflags='$ccflags -Kenum_long,llm_case_lower,llm_keep,no_integer_overflow -DPOSIX_BC -DUSE_PURE_BISON -D_XOPEN_SOURCE -D_XOPEN_SOURCE_EXTENDED -DPERL_IGNORE_FPUSIG=SIGFPE' ;;
-esac
+ccflags="$ccflags -Kenum_long,llm_case_lower,llm_keep,no_integer_overflow -DPOSIX_BC -DUSE_PURE_BISON -D_XOPEN_SOURCE_EXTENDED -DPERL_IGNORE_FPUSIG=SIGFPE"
 
 # ccdlflags have yet to be determined.
 #case "$ccdlflags" in
