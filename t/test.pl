@@ -270,44 +270,39 @@ sub display {
 
 
 # A somewhat safer version of the sometimes wrong $^X.
-BEGIN: {
-    my $exe;
-    eval {
-        require Config;
-        Config->import;
-    };
-    if ($@) {
-	warn "test.pl had problems loading Config: $@";
-	$exe = '';
-    } else {
-	$exe = $Config{_exe};
-    }
-
-    my $Perl = $^X;
-
-    # This doesn't absolutize the path: beware of future chdirs().
-    # We could do File::Spec->abs2rel() but that does getcwd()s,
-    # which is a bit heavyweight to do here.
-
-    if ($Perl =~ /^perl\Q$exe\E$/i) {
-        eval {
-	    require File::Spec;
-	};
+my $Perl;
+sub which_perl {
+    unless (defined $Perl) {
+	$Perl = $^X;
+	
+	my $exe;
+	eval "require Config; Config->import";
 	if ($@) {
-	    warn "test.pl had problems loading File::Spec: $@";
+	    warn "test.pl had problems loading Config: $@";
+	    $exe = '';
 	} else {
-	    $Perl = File::Spec->catfile(File::Spec->curdir(), "perl$exe");
+	    $exe = $Config{_exe};
 	}
+	
+	# This doesn't absolutize the path: beware of future chdirs().
+	# We could do File::Spec->abs2rel() but that does getcwd()s,
+	# which is a bit heavyweight to do here.
+	
+	if ($Perl =~ /^perl\Q$exe\E$/i) {
+	    eval "require File::Spec";
+	    if ($@) {
+		warn "test.pl had problems loading File::Spec: $@";
+	    } else {
+		$Perl = File::Spec->catfile(File::Spec->curdir(), "perl$exe");
+	    }
+	}
+	
+	warn "which_perl: cannot find perl from $^X" unless -f $Perl;
+	
+	# For subcommands to use.
+	$ENV{PERLEXE} = $Perl;
     }
-
-    warn "Can't generate which_perl from $^X" unless -f $Perl;
-
-    # For subcommands to use.
-    $ENV{PERLEXE} = $Perl;
-
-    sub which_perl {
-	return $Perl;
-    }
+    return $Perl;
 }
 
 1;
