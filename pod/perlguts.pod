@@ -77,7 +77,7 @@ care what the length of the data is, use the global variable C<na>.  Remember,
 however, that Perl allows arbitrary strings of data that may both contain
 NUL's and might not be terminated by a NUL.
 
-If you want to know simply if the scalar value is TRUE, you can use:
+If you want to know if the scalar value is TRUE, you can use:
 
     SvTRUE(SV*)
 
@@ -180,12 +180,12 @@ pointer in an SV, you can use the following three macros instead:
 These will tell you if you truly have an integer, double, or string pointer
 stored in your SV.  The "p" stands for private.
 
-In general, though, it's best just to use the C<Sv*V> macros.
+In general, though, it's best to use the C<Sv*V> macros.
 
 =head2 Working with AV's
 
-There are two ways to create and load an AV.  The first method creates just
-an empty AV:
+There are two ways to create and load an AV.  The first method creates an
+empty AV:
 
     AV*  newAV();
 
@@ -325,17 +325,18 @@ The hash algorithm is defined in the PERL_HASH(hash, key, klen) macro:
 References are a special type of scalar that point to other data types
 (including references).
 
-To create a reference, use the following functions:
+To create a reference, use either of the following functions:
 
     SV* newRV_inc((SV*) thing);
     SV* newRV_noinc((SV*) thing);
 
 The C<thing> argument can be any of an C<SV*>, C<AV*>, or C<HV*>.  The
-functions are identical except that C<newRV_inc> increments the
-reference count of C<thing>, while C<newRV_noinc> does not.  (For
-historical reasons, "newRV" is a synonym for "newRV_inc".)  Once you
-have a reference, you can use the following macro to dereference the
-reference:
+functions are identical except that C<newRV_inc> increments the reference
+count of the C<thing>, while C<newRV_noinc> does not.  For historical
+reasons, C<newRV> is a synonym for C<newRV_inc>.
+
+Once you have a reference, you can use the following macro to dereference
+the reference:
 
     SvRV(SV*)
 
@@ -346,8 +347,8 @@ To determine if an SV is a reference, you can use the following macro:
 
     SvROK(SV*)
 
-To discover what type of value the reference refers to, you must use the
-following macro and then check the value returned.
+To discover what type of value the reference refers to, use the following
+macro and then check the return value.
 
     SvTYPE(SvRV(SV*))
 
@@ -426,20 +427,18 @@ C<TRUE> argument to enable certain extra features.  Those bits are:
 
     GV_ADDMULTI	Marks the variable as multiply defined, thus preventing the
 		"Indentifier <varname> used only once: possible typo" warning.
-    GV_ADDWARN	Issues a "Had to create <varname> unexpectedly" warning if
-		the variable didn't actually exist.  This is useful if
-		you expected the variable to exist already and want to
-		propagate this warning back to the user.
+    GV_ADDWARN	Issues the warning "Had to create <varname> unexpectedly" if
+		the variable did not exist before the function was called.
 
-If the C<varname> argument does not contain a package specifier, it is
-created in the current package.
+If you do not specify a package name, the variable is created in the current
+package.
 
 =head2 Reference Counts and Mortality
 
 Perl uses an reference count-driven garbage collection mechanism. SV's,
 AV's, or HV's (xV for short in the following) start their life with a
 reference count of 1.  If the reference count of an xV ever drops to 0,
-then they will be destroyed and their memory made available for reuse.
+then it will be destroyed and its memory made available for reuse.
 
 This normally doesn't happen at the Perl level unless a variable is
 undef'ed or the last variable holding a reference to it is changed or
@@ -451,36 +450,35 @@ manipulated with the following macros:
     void SvREFCNT_dec(SV* sv);
 
 However, there is one other function which manipulates the reference
-count of its argument.  The C<newRV_inc> function, as you should
-recall, creates a reference to the specified argument.  As a side
-effect, it increments the argument's reference count.  If this is not
-what you want, use C<newRV_noinc> instead.
+count of its argument.  The C<newRV_inc> function, you will recall,
+creates a reference to the specified argument.  As a side effect,
+it increments the argument's reference count.  If this is not what
+you want, use C<newRV_noinc> instead.
 
-For example, imagine you want to return a reference from an XSUB
-function.  You create a new SV which initially has a reference count
-of one.  Then you call C<newRV_inc>, passing the just-created SV.
+For example, imagine you want to return a reference from an XSUB function.
+Inside the XSUB routine, you create an SV which initially has a reference
+count of one.  Then you call C<newRV_inc>, passing it the just-created SV.
 This returns the reference as a new SV, but the reference count of the
 SV you passed to C<newRV_inc> has been incremented to two.  Now you
-return the reference and forget about the SV.  But Perl hasn't!
-Whenever the returned reference is destroyed, the reference count of
-the original SV is decreased to one and nothing happens.  The SV will
-hang around without any way to access it until Perl itself terminates.
-This is a memory leak.
+return the reference from the XSUB routine and forget about the SV.
+But Perl hasn't!  Whenever the returned reference is destroyed, the
+reference count of the original SV is decreased to one and nothing happens.
+The SV will hang around without any way to access it until Perl itself
+terminates.  This is a memory leak.
 
 The correct procedure, then, is to use C<newRV_noinc> instead of
 C<newRV_inc>.  Then, if and when the last reference is destroyed, the
-reference count of the SV will go to 0 and also be destroyed, stopping
-any memory leak.
+reference count of the SV will go to zero and it will be destroyed,
+stopping any memory leak.
 
 There are some convenience functions available that can help with the
-destruction of old xV objects.  These functions introduce the concept
-of "mortality".  An xV that is mortal has had its reference count
-marked to be decremented, but not actually decremented, until "a short
-time later".  Generally the term "short time later" means a single
-Perl statement, such as a call to an XSUB function.  The actual
-determinant for when mortal xV's have their reference count
-decremented depends on two macros, SAVETMPS and FREETMPS.  Take a look
-at L<perlcall> and L<perlxs> for more details on these macros.
+destruction of xV's.  These functions introduce the concept of "mortality".
+An xV that is mortal has had its reference count marked to be decremented,
+but not actually decremented, until "a short time later".  Generally the
+term "short time later" means a single Perl statement, such as a call to
+an XSUB function.  The actual determinant for when mortal xV's have their
+reference count decremented depends on two macros, SAVETMPS and FREETMPS.
+See L<perlcall> and L<perlxs> for more details on these macros.
 
 "Mortalization" then is at its simplest a deferred C<SvREFCNT_dec>.
 However, if you mortalize a variable twice, the reference count will
@@ -500,9 +498,9 @@ The first call creates a mortal SV, the second converts an existing
 SV to a mortal SV (and thus defers a call to C<SvREFCNT_dec>), and the
 third creates a mortal copy of an existing SV.
 
-The mortal routines are not for just SV's -- AV's and HV's can be made
-mortal by passing their address (casted to C<SV*>) to the C<sv_2mortal> or
-C<sv_mortalcopy> routines.
+The mortal routines are not just for SV's -- AV's and HV's can be made
+mortal by passing their addresses (type-casted to C<SV*>) to the
+C<sv_2mortal> or C<sv_mortalcopy> routines.
 
 =head2 Stashes and Globs
 
@@ -667,7 +665,7 @@ the various routines for the various magical types begin with C<magic_>.
 
 The current kinds of Magic Virtual Tables are:
 
-    mg_type  MGVTBL              Type of magic
+    mg_type  MGVTBL              Type of magical
     -------  ------              ----------------------------
     \0       vtbl_sv             Regexp???
     A        vtbl_amagic         Operator Overloading
@@ -690,6 +688,7 @@ The current kinds of Magic Virtual Tables are:
     U        vtbl_uvar	         ???
     v        vtbl_vec	         Vector
     x        vtbl_substr         Substring???
+    y        vtbl_vivary         Shadow variable in foreach loop
     *        vtbl_glob           GV???
     #        vtbl_arylen         Array Length
     .        vtbl_pos	         $. scalar variable
@@ -859,19 +858,19 @@ consult L<perlcall>.
 
 It is suggested that you use the version of malloc that is distributed
 with Perl.  It keeps pools of various sizes of unallocated memory in
-satisfy allocation requests more quickly.  However, on some platforms, it
-may cause spurious malloc or free errors.
+order to satisfy allocation requests more quickly.  However, on some
+platforms, it may cause spurious malloc or free errors.
 
     New(x, pointer, number, type);
     Newc(x, pointer, number, type, cast);
     Newz(x, pointer, number, type);
 
-These three macros are used to allocate memory.
+These three macros are used to initially allocate memory.
 
 The first argument C<x> was a "magic cookie" that was used to keep track
 of who called the macro, to help when debugging memory problems.  However,
-the current code makes no use of this feature (Larry has switched to using
-a run-time memory checker), so this argument can be any number.
+the current code makes no use of this feature (most Perl developers now
+use run-time memory checkers), so this argument can be any number.
 
 The second argument C<pointer> should be the name of a variable that will
 point to the newly allocated memory.
@@ -1466,34 +1465,34 @@ For historical reasons, "newRV" is a synonym for "newRV_inc".
 Creates an RV wrapper for an SV.  The reference count for the original
 SV is B<not> incremented.
 
-	SV*	newRV_noinc _((SV* ref));
+	SV*     newRV_noinc _((SV* ref));
 
 =item newSV
 
 Creates a new SV.  The C<len> parameter indicates the number of bytes of
-pre-allocated string space the SV should have.  The reference count for the new SV
-is set to 1.
+pre-allocated string space the SV should have.  The reference count for the
+new SV is set to 1.
 
 	SV*	newSV _((STRLEN len));
 
 =item newSViv
 
-Creates a new SV and copies an integer into it.  The reference count for the SV is
-set to 1.
+Creates a new SV and copies an integer into it.  The reference count for the
+SV is set to 1.
 
 	SV*	newSViv _((IV i));
 
 =item newSVnv
 
-Creates a new SV and copies a double into it.  The reference count for the SV is
-set to 1.
+Creates a new SV and copies a double into it.  The reference count for the
+SV is set to 1.
 
 	SV*	newSVnv _((NV i));
 
 =item newSVpv
 
-Creates a new SV and copies a string into it.  The reference count for the SV is
-set to 1.  If C<len> is zero then Perl will compute the length.
+Creates a new SV and copies a string into it.  The reference count for the
+SV is set to 1.  If C<len> is zero then Perl will compute the length.
 
 	SV*	newSVpv _((char* s, STRLEN len));
 
@@ -1503,7 +1502,6 @@ Creates a new SV for the RV, C<rv>, to point to.  If C<rv> is not an RV then
 it will be upgraded to one.  If C<classname> is non-null then the new SV will
 be blessed in the specified package.  The new SV is returned and its
 reference count is 1.
-
 	SV*	newSVrv _((SV* rv, char* classname));
 
 =item newSVsv
@@ -1841,8 +1839,8 @@ ends.
 =item sv_bless
 
 Blesses an SV into a specified package.  The SV must be an RV.  The package
-must be designated by its stash (see C<gv_stashpv()>).  The reference count of the
-SV is unaffected.
+must be designated by its stash (see C<gv_stashpv()>).  The reference count
+of the SV is unaffected.
 
 	SV*	sv_bless _((SV* sv, HV* stash));
 
@@ -1935,7 +1933,7 @@ Use C<SvGROW>.
 
 =item sv_inc
 
-Auto increment of the value in the SV.
+Auto-increment of the value in the SV.
 
 	void	sv_inc _((SV* sv));
 
@@ -2363,9 +2361,9 @@ This is the C<undef> SV.  Always refer to this as C<&sv_undef>.
 
 =item sv_unref
 
-Unsets the RV status of the SV, and decrements the reference count of whatever was
-being referenced by the RV.  This can almost be thought of as a reversal of
-C<newSVrv>.  See C<SvROK_off>.
+Unsets the RV status of the SV, and decrements the reference count of
+whatever was being referenced by the RV.  This can almost be thought of
+as a reversal of C<newSVrv>.  See C<SvROK_off>.
 
 	void    sv_unref _((SV* sv));
 
@@ -2559,4 +2557,4 @@ API Listing by Dean Roehrich <roehrich@cray.com>.
 
 =head1 DATE
 
-Version 25.2: 1996/12/16
+Version 26.1: 1996/12/20
