@@ -1777,7 +1777,7 @@ case 57:
 { STRLEN n_a; char *name = SvPV(((SVOP*)yyvsp[0].opval)->op_sv, n_a);
 			  if (strEQ(name, "BEGIN") || strEQ(name, "END")
 			      || strEQ(name, "INIT"))
-			      CvUNIQUE_on(PL_compcv);
+			      CvSPECIAL_on(PL_compcv);
 			  yyval.opval = yyvsp[0].opval; }
 break;
 case 58:
@@ -1802,7 +1802,7 @@ case 63:
 break;
 case 64:
 #line 325 "perly.y"
-{ CvUNIQUE_on(PL_compcv); /* It's a BEGIN {} */ }
+{ CvSPECIAL_on(PL_compcv); /* It's a BEGIN {} */ }
 break;
 case 65:
 #line 327 "perly.y"

@@ -432,3 +432,17 @@ EXPECT
 foo
 bar
 BEGIN failed--compilation aborted at - line 8.
+########
+use strict;
+my $foo = "ZZZ\n";
+END { print $foo }
+EXPECT
+ZZZ
+########
+eval '
+use strict;
+my $foo = "ZZZ\n";
+END { print $foo }
+';
+EXPECT
+ZZZ

@@ -94,3 +94,12 @@ struct xpvcv {
 #define CvLOCKED(cv)		(CvFLAGS(cv) & CVf_LOCKED)
 #define CvLOCKED_on(cv)		(CvFLAGS(cv) |= CVf_LOCKED)
 #define CvLOCKED_off(cv)	(CvFLAGS(cv) &= ~CVf_LOCKED)
+
+#define CvEVAL(cv)		(CvUNIQUE(cv) && !SvFAKE(cv))
+#define CvEVAL_on(cv)		(CvUNIQUE_on(cv),SvFAKE_off(cv))
+#define CvEVAL_off(cv)		CvUNIQUE_off(cv)
+
+/* BEGIN|INIT|END */
+#define CvSPECIAL(cv)		(CvUNIQUE(cv) && SvFAKE(cv))
+#define CvSPECIAL_on(cv)	(CvUNIQUE_on(cv),SvFAKE_on(cv))
+#define CvSPECIAL_off(cv)	(CvUNIQUE_off(cv),SvFAKE_off(cv))
