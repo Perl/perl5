@@ -233,6 +233,16 @@ You may have to manually edit config.sh and add the -Wl,-E flags
 yourself, or else run Configure interactively and add the flags at the
 appropriate prompts.
 
+In SunOS 4.x you most probably want to use the SunOS ld, /usr/bin/ld,
+since the more recent versions of GNU ld (like 2.13) do not seem to
+work for building Perl anymore.  When linking the extensions, the
+GNU ld gets very unhappy and spews a lot of errors like this
+
+  ... relocation truncated to fit: BASE13 ...
+
+and dies.  Therefore the SunOS 4.1 hints file explicitly sets the
+ld to be /usr/bin/ld.
+
 If your gcc is configured to use GNU as and ld but you want to use the
 Solaris ones instead to build perl, then you'll need to add
 -B/usr/ccs/bin/ to the gcc command line.  One convenient way to do

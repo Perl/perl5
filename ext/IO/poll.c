@@ -135,3 +135,12 @@ again:
 }
 
 #endif /* EMULATE_POLL_WITH_SELECT */
+
+/* gcc for SunOS 4 produces code from an empty (code/symbolwise)
+ * source code file that makes the SunOS 4.x /usr/bin/ld fail with
+ * ld: poll.o: premature EOF
+ * To avoid this, have at least something in here.  */
+#if defined(__sun) && !defined(__SVR4) && defined(__GNUC__)
+static int dummy;
+#endif
+
