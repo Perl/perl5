@@ -93,6 +93,27 @@ Version v5.6.0
 --------------
 
 ____________________________________________________________________________
+[  5855] By: gsar                                  on 2000/03/21  10:05:42
+        Log: clone awareness for change#5847
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  5854] By: gsar                                  on 2000/03/21  09:30:50
+        Log: regen win32/config*
+     Branch: perl
+	   ! win32/config_H.bc win32/config_H.gc win32/config_H.vc
+____________________________________________________________________________
+[  5853] By: gsar                                  on 2000/03/21  08:56:58
+        Log: integrate cfgperl and vmsperl contents into mainline
+     Branch: perl
+	  !> Configure Todo Todo-5.6 config_h.SH lib/File/Spec/VMS.pm
+	  !> pod/perldelta.pod t/op/taint.t
+____________________________________________________________________________
+[  5852] By: gsar                                  on 2000/03/21  06:08:20
+        Log: README.mint tweaks (from Guido Flohr <gufl0000@stud.uni-sb.de>)
+     Branch: perl
+	   ! Changes README.mint
+____________________________________________________________________________
 [  5851] By: gsar                                  on 2000/03/21  06:06:44
         Log: make parenthetic warnings look consistent; make diagnostic on
              "use 5.6" et al mention the alternate form; pod fixups
