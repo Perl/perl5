@@ -2,6 +2,11 @@
 
 # $RCSfile: tell.t,v $$Revision$$Date$
 
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
+
 print "1..23\n";
 
 $TST = 'tst';
