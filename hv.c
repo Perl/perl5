@@ -146,7 +146,7 @@ Perl_hv_notallowed(pTHX_ bool is_utf8, const char *key, I32 klen,
     if (is_utf8) {
 	SvUTF8_on(sv);
     }
-    Perl_croak(aTHX_ "Attempt to access to key '%"SVf"' in fixed hash",sv);
+    Perl_croak(aTHX_ "Attempt to access key '%"SVf"' in fixed hash",sv);
 }
 
 /* (klen == HEf_SVKEY) is special for MAGICAL hv entries, meaning key slot

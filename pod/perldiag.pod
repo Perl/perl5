@@ -187,7 +187,7 @@ know which context to supply to the right side.
 (F) When C<vec> is called in an lvalue context, the second argument must be
 greater than or equal to zero.
 
-=item Attempt to access to key '%_' in fixed hash
+=item Attempt to access key '%_' in fixed hash
 
 (F) A hash has been marked as READONLY at the C level to turn it
 into a "record" with a fixed set of keys. The failing code
