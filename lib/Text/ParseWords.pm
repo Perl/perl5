@@ -1,7 +1,7 @@
 package Text::ParseWords;
 
-use vars qw($VERSION @ISA @EXPORT);
-$VERSION = "3.0";
+use vars qw($VERSION @ISA @EXPORT $PERL_SINGLE_QUOTE);
+$VERSION = "3.1";
 
 require 5.000;
 
@@ -48,22 +48,28 @@ sub nested_quotewords {
 
 
 sub parse_line {
+	# We will be testing undef strings
+	local($^W) = 0;
+
     my($delimiter, $keep, $line) = @_;
     my($quote, $quoted, $unquoted, $delim, $word, @pieces);
 
     while (length($line)) {
-	($quote, $quoted, $unquoted, $delim) =
+
+	($quote, $quoted, undef, $unquoted, $delim, undef) =
 	    $line =~ m/^(["'])                 # a $quote
-                        ((?:\\.|[^\1\\])*?)    # and $quoted text
-                        \1                     # followed by the same quote
+                        ((?:\\.|(?!\1)[^\\])*)    # and $quoted text
+                        \1 		       # followed by the same quote
+                        ([\000-\377]*)	       # and the rest
 		       |                       # --OR--
                        ^((?:\\.|[^\\"'])*?)    # an $unquoted text
-                        (\Z(?!\n)|$delimiter|(?!^)(?=["']))  
+		      (\Z(?!\n)|$delimiter|(?!^)(?=["']))  
                                                # plus EOL, delimiter, or quote
-                      /x;                      # extended layout
+                      ([\000-\377]*)	       # the rest
+		      /x;		       # extended layout
+	return() unless( $quote || length($unquoted) || length($delim));
 
-        return() unless(length($&));
-        $line = $';
+	$line = $+;
 
         if ($keep) {
 	    $quoted = "$quote$quoted$quote";
@@ -71,6 +77,7 @@ sub parse_line {
         else {
 	    $unquoted =~ s/\\(.)/$1/g;
 	    $quoted =~ s/\\(.)/$1/g if ($quote eq '"');
+	    $quoted =~ s/\\([\\'])/$1/g if ( $PERL_SINGLE_QUOTE && $quote eq "'");
 	}
         $word .= ($quote) ? $quoted : $unquoted;
  
