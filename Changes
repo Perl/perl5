@@ -31,6 +31,250 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 11596] By: jhi                                   on 2001/08/06  13:24:28
+        Log: Advertise File::Temp, don't advertise POSIX::tmpnam().
+     Branch: perl
+	   ! pod/perlfaq5.pod
+____________________________________________________________________________
+[ 11595] By: jhi                                   on 2001/08/06  12:51:38
+        Log: The #11593 wasn't right.
+     Branch: perl
+	   ! lib/Math/BigInt/t/bigintpm.t
+____________________________________________________________________________
+[ 11594] By: jhi                                   on 2001/08/06  12:34:15
+        Log: Subject: [PATCH: perl@11564] introducing perlivp
+             From: Prymmer/Kahn <pvhp@best.com>
+             Date: Sun, 5 Aug 2001 22:00:14 -0700 (PDT)
+             Message-ID: <Pine.BSF.4.21.0108052155110.7110-100000@shell8.ba.best.com>
+             
+             Subject: Re: [PATCH: perl@11564] introducing perlivp
+             From: Prymmer/Kahn <pvhp@best.com>
+             Date: Sun, 5 Aug 2001 22:32:59 -0700 (PDT)
+             Message-ID: <Pine.BSF.4.21.0108052229470.9059-100000@shell8.ba.best.com>
+     Branch: perl
+	   + utils/perlivp.PL
+	   ! MANIFEST utils.lst utils/Makefile vms/descrip_mms.template
+	   ! win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[ 11593] By: jhi                                   on 2001/08/05  23:10:52
+        Log: libcs are confused what to call Infinity.
+     Branch: perl
+	   ! lib/Math/BigInt/t/bigintpm.t
+____________________________________________________________________________
+[ 11592] By: jhi                                   on 2001/08/05  23:07:50
+        Log: Avoid SIGFPE in Tru64.
+     Branch: perl
+	   ! numeric.c
+____________________________________________________________________________
+[ 11591] By: jhi                                   on 2001/08/05  22:46:10
+        Log: Upgrade to Math::BigInt 1.40.
+             
+             NOTE: this patch necessitates doing something about
+             infinity handling since the new bigintpm.t tests use
+             infinity, which causes SIGFPEs at least in Tru64.
+     Branch: perl
+	   ! lib/Math/BigFloat.pm lib/Math/BigInt.pm
+	   ! lib/Math/BigInt/Calc.pm lib/Math/BigInt/t/bigfltpm.t
+	   ! lib/Math/BigInt/t/bigintc.t lib/Math/BigInt/t/bigintpm.t
+	   ! lib/Math/BigInt/t/mbimbf.t
+____________________________________________________________________________
+[ 11590] By: gsar                                  on 2001/08/05  21:57:43
+        Log: remove hardcoded cmd shell in testsuite
+     Branch: perl
+	   ! t/op/glob.t t/op/magic.t t/op/stat.t
+____________________________________________________________________________
+[ 11589] By: gsar                                  on 2001/08/05  21:35:50
+        Log: 4-arg select() was busted on windows because change#8178 didn't
+             make it into mainline
+     Branch: perl
+	   ! perl.h win32/include/sys/socket.h
+____________________________________________________________________________
+[ 11588] By: jhi                                   on 2001/08/05  19:40:31
+        Log: Rename the Getopt::Long tests to be as they are
+             in the Getopt::Long official distribution.
+     Branch: perl
+	   + lib/Getopt/Long/t/gol-basic.t lib/Getopt/Long/t/gol-compat.t
+	   + lib/Getopt/Long/t/gol-linkage.t lib/Getopt/Long/t/gol-oo.t
+	   - lib/Getopt/Long/t/basic.t lib/Getopt/Long/t/compat.t
+	   - lib/Getopt/Long/t/linkage.t lib/Getopt/Long/t/oo.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 11587] By: jhi                                   on 2001/08/05  19:38:07
+        Log: Upgrade to Getopt::Long 2.26.
+     Branch: perl
+	   + lib/Getopt/Long/CHANGES lib/Getopt/Long/README
+	   ! MANIFEST lib/Getopt/Long.pm
+____________________________________________________________________________
+[ 11586] By: jhi                                   on 2001/08/05  19:26:50
+        Log: Retract #10874 (the hack should be unnecessary by now)
+     Branch: perl
+	   ! lib/Test/Harness.pm
+____________________________________________________________________________
+[ 11585] By: gsar                                  on 2001/08/05  16:45:54
+        Log: avoid temp file littering in tests
+     Branch: perl
+	   ! ext/PerlIO/t/encoding.t lib/Memoize/t/errors.t
+____________________________________________________________________________
+[ 11584] By: jhi                                   on 2001/08/05  16:42:50
+        Log: Subject: warning in sv.c: double format, NV arg
+             From: "Philip Newton" <Philip.Newton@gmx.net>
+             Date: Sun, 5 Aug 2001 19:41:07 +0200
+             Message-Id: <200108051735.f75HZ1L18235@chaos.wustl.edu>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 11583] By: gsar                                  on 2001/08/05  16:28:22
+        Log: fix POSIX.t#13 for windos
+     Branch: perl
+	   ! ext/POSIX/POSIX.t
+____________________________________________________________________________
+[ 11582] By: jhi                                   on 2001/08/05  16:10:59
+        Log: Add a test for PerlIO::Via.
+     Branch: perl
+	   + ext/PerlIO/t/via.t
+	   ! MANIFEST ext/PerlIO/Via/Via.pm
+____________________________________________________________________________
+[ 11581] By: gsar                                  on 2001/08/05  15:00:26
+        Log: flock() and link() are not available on Windows 9x
+     Branch: perl
+	   ! win32/config_sh.PL
+____________________________________________________________________________
+[ 11580] By: jhi                                   on 2001/08/05  13:56:46
+        Log: Some Tru64 C compilers have C++ components that confuse
+             the ccversion parsing.
+     Branch: perl
+	   ! hints/dec_osf.sh
+____________________________________________________________________________
+[ 11579] By: jhi                                   on 2001/08/05  13:31:07
+        Log: (Reintroduce #11125)
+             
+             Subject: MakeMaker should pass through DEFINE and INC to subdirs 
+             From: Alan Burlison <Alan.Burlison@sun.com> 
+             Date: Tue, 03 Jul 2001 15:20:13 +0100   
+             Message-ID: <3B41D49D.A923D4F9@sun.com> 
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 11578] By: jhi                                   on 2001/08/05  03:17:20
+        Log: Little pointer juggling for HP-UX cc to avoid
+             "warning 524: Cast (non-lvalue) appears on left-hand side of assignment."
+             followed by
+             "error 1549: Modifiable lvalue required for assignment operator."
+     Branch: perl
+	   ! hv.c
+____________________________________________________________________________
+[ 11577] By: jhi                                   on 2001/08/04  18:09:38
+        Log: Continuation of #11575: SANY_SEEN completely deprecated,
+             plus more tests that unearthed a bug in @a = ($utf8 =~ /\C/g),
+             plus a fix for the bug.
+     Branch: perl
+	   ! pp_hot.c regcomp.c regcomp.h regexec.c regexp.h t/op/pat.t
+____________________________________________________________________________
+[ 11576] By: jhi                                   on 2001/08/04  17:31:06
+        Log: Subject: Re: [patch] rid "Scalars leaked" from perl_clone
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Sat, 4 Aug 2001 11:09:37 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0108041102390.23972-100000@mako.covalent.net>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 11575] By: jhi                                   on 2001/08/04  17:28:55
+        Log: Decouple SANY into SANY and CANY: the new SANY is /./s,
+             the new CANY is the \C.  The problem reported and the
+             test case supplied in
+             
+             Subject: UTF-8 bugs in string length & single line regex matches
+             From: "Daniel P. Berrange" <dan@berrange.com>
+             Date: Fri, 3 Aug 2001 11:39:33 +0100
+             Message-ID: <20010803113932.A19318@berrange.com>
+     Branch: perl
+	   ! regcomp.c regcomp.h regcomp.sym regexec.c regexp.h regnodes.h
+	   ! t/op/pat.t
+____________________________________________________________________________
+[ 11574] By: jhi                                   on 2001/08/04  15:42:34
+        Log: Subject: Re: [patch] ignore PL_curpm in PL_regex_padav cleanup
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Sat, 4 Aug 2001 09:43:02 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0108040939050.23972-100000@mako.covalent.net>
+     Branch: perl
+	   ! perl.c regexec.c
+____________________________________________________________________________
+[ 11573] By: jhi                                   on 2001/08/04  14:20:26
+        Log: The #11572 didn't up the test count.
+     Branch: perl
+	   ! t/op/length.t
+____________________________________________________________________________
+[ 11572] By: jhi                                   on 2001/08/04  14:12:45
+        Log: Subject: UTF-8 bugs in string length & single line regex matches
+             From: "Daniel P. Berrange" <dan@berrange.com>
+             Date: Fri, 3 Aug 2001 11:39:33 +0100         
+             Message-ID: <20010803113932.A19318@berrange.com>
+             
+             (the mg_length() fix)
+     Branch: perl
+	   ! mg.c t/op/length.t
+____________________________________________________________________________
+[ 11571] By: jhi                                   on 2001/08/04  14:10:39
+        Log: Subject: Re: [PATCH hv.c] newHVhv shouldn't reset xhv_max so often
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Sat, 4 Aug 2001 16:56:35 +0530
+             Message-ID: <20010804165635.E526@lustre.dyn.wiw.org>
+     Branch: perl
+	   ! hv.c
+____________________________________________________________________________
+[ 11570] By: jhi                                   on 2001/08/04  14:09:59
+        Log: Subject: Re: [PATCH hv.c] newHVhv shouldn't reset xhv_max so often
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Sat, 4 Aug 2001 16:16:03 +0530
+             Message-ID: <20010804161603.C526@lustre.dyn.wiw.org>
+     Branch: perl
+	   ! hv.c
+____________________________________________________________________________
+[ 11569] By: jhi                                   on 2001/08/04  14:09:09
+        Log: Subject: Re: [patch] refcount re ops
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Sat, 4 Aug 2001 08:54:55 +0530
+             Message-ID: <20010804085455.B526@lustre.dyn.wiw.org>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 11568] By: jhi                                   on 2001/08/04  14:08:19
+        Log: Subject: [patch] refcount re ops
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Fri, 3 Aug 2001 18:17:41 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0108031814240.23972-100000@mako.covalent.net>
+     Branch: perl
+	   ! regcomp.c sv.c
+____________________________________________________________________________
+[ 11567] By: jhi                                   on 2001/08/03  23:52:56
+        Log: Subject: [patch] ignore PL_curpm in PL_regex_padav cleanup
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Fri, 3 Aug 2001 17:37:53 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0108031730040.23972-100000@mako.covalent.net>
+     Branch: perl
+	   ! perl.c regexec.c
+____________________________________________________________________________
+[ 11566] By: jhi                                   on 2001/08/03  20:45:10
+        Log: Subject: [PATCH perl@11564] fix t/op/misc.t for VMS
+             From: "Craig A. Berry" <craigberry@mac.com> 
+             Date: Fri, 03 Aug 2001 16:16:16 -0500
+             Message-Id: <5.1.0.14.0.20010803161026.03530e58@exchi01> 
+     Branch: perl
+	   ! t/op/misc.t
+____________________________________________________________________________
+[ 11565] By: jhi                                   on 2001/08/03  13:46:40
+        Log: Subject: Re: [ID 20010731.105] MinGW can't compile win32.c on Windows 2000
+             From: John Kristian <jmk2001@engineer.com>
+             Date: Fri, 03 Aug 2001 00:59:08 -0700
+             Message-id: <03a101c11bf2$2c9b5ee0$0100a8c0@JOHNKRISTIAN>
+     Branch: perl
+	   ! win32/win32.c
+____________________________________________________________________________
+[ 11564] By: jhi                                   on 2001/08/03  13:25:39
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 11563] By: jhi                                   on 2001/08/03  12:13:17
         Log: Subject: [PATCH perl@11523] fix Stash.t for VMS
              From: "Craig A. Berry" <craigberry@mac.com>
