@@ -152,8 +152,6 @@ PERLVAR(Iors,		char *)		/* $\ */
 PERLVAR(Iorslen,	STRLEN)		
 PERLVAR(Iofmt,		char *)		/* $# */
 
-PERLVAR(Itryblock_function,	tryblock_f)	/* see scope.h */
-
 /* interpreter atexit processing */
 PERLVARI(Iexitlist,	PerlExitListEntry *, NULL)	/* list of exit functions */
 PERLVARI(Iexitlistlen,	I32, 0)				/* length of same */

@@ -650,8 +650,6 @@
 #define top_env			pPerl->Perl_top_env
 #undef  toptarget
 #define toptarget		pPerl->Perl_toptarget
-#undef  tryblock_function
-#define tryblock_function	pPerl->Perl_tryblock_function
 #undef  uid
 #define uid			pPerl->Perl_uid
 #undef  unsafe
@@ -1067,8 +1065,6 @@
 #define ingroup             pPerl->Perl_ingroup
 #undef  init_stacks
 #define init_stacks         pPerl->Perl_init_stacks
-#undef  install_tryblock_method
-#define install_tryblock_method	pPerl->Perl_install_tryblock_method
 #undef  instr
 #define instr               pPerl->Perl_instr
 #undef  intro_my

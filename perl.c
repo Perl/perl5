@@ -214,8 +214,10 @@ perl_construct(register PerlInterpreter *sv_interp)
     init_ids();
     lex_state = LEX_NOTPARSING;
 
-    install_tryblock_method(0);     /* default to set/longjmp style tryblock */
-    JMPENV_TOPINIT(start_env);
+    start_env.je_prev = NULL;
+    start_env.je_ret = -1;
+    start_env.je_mustcatch = TRUE;
+    top_env     = &start_env;
     STATUS_ALL_SUCCESS;
 
     SET_NUMERIC_STANDARD();
@@ -608,17 +610,6 @@ perl_atexit(void (*fn) (void *), void *ptr)
     ++exitlistlen;
 }
 
-struct try_parse_locals {
-    void (*xsinit)();
-    int argc;
-    char **argv;
-    char **env;
-    I32 oldscope;
-    int ret;
-};
-typedef struct try_parse_locals TRY_PARSE_LOCALS;
-static TRYVTBL PerlParseVtbl;
-
 int
 #ifdef PERL_OBJECT
 CPerlObj::perl_parse(void (*xsinit) (CPerlObj*), int argc, char **argv, char **env)
@@ -627,11 +618,16 @@ perl_parse(PerlInterpreter *sv_interp, void (*xsinit) (void), int argc, char **a
 #endif
 {
     dTHR;
-    TRY_PARSE_LOCALS locals;
-    locals.xsinit = xsinit;
-    locals.argc = argc;
-    locals.argv = argv;
-    locals.env = env;
+    register SV *sv;
+    register char *s;
+    char *scriptname = NULL;
+    VOL bool dosearch = FALSE;
+    char *validarg = "";
+    I32 oldscope;
+    AV* comppadlist;
+    dJMPENV;
+    int ret;
+    int fdscript = -1;
 
 #ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
 #ifdef IAMSUID
@@ -679,18 +675,333 @@ setuid perl scripts securely.\n");
     main_cv = Nullcv;
 
     time(&basetime);
-    locals.oldscope = scopestack_ix;
+    oldscope = scopestack_ix;
 
-    TRYBLOCK(PerlParseVtbl, locals);
-    return locals.ret;
+    JMPENV_PUSH(ret);
+    switch (ret) {
+    case 1:
+	STATUS_ALL_FAILURE;
+	/* FALL THROUGH */
+    case 2:
+	/* my_exit() was called */
+	while (scopestack_ix > oldscope)
+	    LEAVE;
+	FREETMPS;
+	curstash = defstash;
+	if (endav)
+	    call_list(oldscope, endav);
+	JMPENV_POP;
+	return STATUS_NATIVE_EXPORT;
+    case 3:
+	JMPENV_POP;
+	PerlIO_printf(PerlIO_stderr(), "panic: top_env\n");
+	return 1;
+    }
+
+    sv_setpvn(linestr,"",0);
+    sv = newSVpv("",0);		/* first used for -I flags */
+    SAVEFREESV(sv);
+    init_main_stash();
+
+    for (argc--,argv++; argc > 0; argc--,argv++) {
+	if (argv[0][0] != '-' || !argv[0][1])
+	    break;
+#ifdef DOSUID
+    if (*validarg)
+	validarg = " PHOOEY ";
+    else
+	validarg = argv[0];
+#endif
+	s = argv[0]+1;
+      reswitch:
+	switch (*s) {
+	case ' ':
+	case '0':
+	case 'F':
+	case 'a':
+	case 'c':
+	case 'd':
+	case 'D':
+	case 'h':
+	case 'i':
+	case 'l':
+	case 'M':
+	case 'm':
+	case 'n':
+	case 'p':
+	case 's':
+	case 'u':
+	case 'U':
+	case 'v':
+	case 'w':
+	    if (s = moreswitches(s))
+		goto reswitch;
+	    break;
+
+	case 'T':
+	    tainting = TRUE;
+	    s++;
+	    goto reswitch;
+
+	case 'e':
+	    if (euid != uid || egid != gid)
+		croak("No -e allowed in setuid scripts");
+	    if (!e_script) {
+		e_script = newSVpv("",0);
+		filter_add(read_e_script, NULL);
+	    }
+	    if (*++s)
+		sv_catpv(e_script, s);
+	    else if (argv[1]) {
+		sv_catpv(e_script, argv[1]);
+		argc--,argv++;
+	    }
+	    else
+		croak("No code specified for -e");
+	    sv_catpv(e_script, "\n");
+	    break;
+
+	case 'I':	/* -I handled both here and in moreswitches() */
+	    forbid_setid("-I");
+	    if (!*++s && (s=argv[1]) != Nullch) {
+		argc--,argv++;
+	    }
+	    while (s && isSPACE(*s))
+		++s;
+	    if (s && *s) {
+		char *e, *p;
+		for (e = s; *e && !isSPACE(*e); e++) ;
+		p = savepvn(s, e-s);
+		incpush(p, TRUE);
+		sv_catpv(sv,"-I");
+		sv_catpv(sv,p);
+		sv_catpv(sv," ");
+		Safefree(p);
+	    }	/* XXX else croak? */
+	    break;
+	case 'P':
+	    forbid_setid("-P");
+	    preprocess = TRUE;
+	    s++;
+	    goto reswitch;
+	case 'S':
+	    forbid_setid("-S");
+	    dosearch = TRUE;
+	    s++;
+	    goto reswitch;
+	case 'V':
+	    if (!preambleav)
+		preambleav = newAV();
+	    av_push(preambleav, newSVpv("use Config qw(myconfig config_vars)",0));
+	    if (*++s != ':')  {
+		Sv = newSVpv("print myconfig();",0);
+#ifdef VMS
+		sv_catpv(Sv,"print \"\\nCharacteristics of this PERLSHR image: \\n\",");
+#else
+		sv_catpv(Sv,"print \"\\nCharacteristics of this binary (from libperl): \\n\",");
+#endif
+#if defined(DEBUGGING) || defined(NO_EMBED) || defined(MULTIPLICITY)
+		sv_catpv(Sv,"\"  Compile-time options:");
+#  ifdef DEBUGGING
+		sv_catpv(Sv," DEBUGGING");
+#  endif
+#  ifdef NO_EMBED
+		sv_catpv(Sv," NO_EMBED");
+#  endif
+#  ifdef MULTIPLICITY
+		sv_catpv(Sv," MULTIPLICITY");
+#  endif
+		sv_catpv(Sv,"\\n\",");
+#endif
+#if defined(LOCAL_PATCH_COUNT)
+		if (LOCAL_PATCH_COUNT > 0) {
+		    int i;
+		    sv_catpv(Sv,"\"  Locally applied patches:\\n\",");
+		    for (i = 1; i <= LOCAL_PATCH_COUNT; i++) {
+			if (localpatches[i])
+			    sv_catpvf(Sv,"\"  \\t%s\\n\",",localpatches[i]);
+		    }
+		}
+#endif
+		sv_catpvf(Sv,"\"  Built under %s\\n\"",OSNAME);
+#ifdef __DATE__
+#  ifdef __TIME__
+		sv_catpvf(Sv,",\"  Compiled at %s %s\\n\"",__DATE__,__TIME__);
+#  else
+		sv_catpvf(Sv,",\"  Compiled on %s\\n\"",__DATE__);
+#  endif
+#endif
+		sv_catpv(Sv, "; \
+$\"=\"\\n    \"; \
+@env = map { \"$_=\\\"$ENV{$_}\\\"\" } sort grep {/^PERL/} keys %ENV; \
+print \"  \\%ENV:\\n    @env\\n\" if @env; \
+print \"  \\@INC:\\n    @INC\\n\";");
+	    }
+	    else {
+		Sv = newSVpv("config_vars(qw(",0);
+		sv_catpv(Sv, ++s);
+		sv_catpv(Sv, "))");
+		s += strlen(s);
+	    }
+	    av_push(preambleav, Sv);
+	    scriptname = BIT_BUCKET;	/* don't look for script or read stdin */
+	    goto reswitch;
+	case 'x':
+	    doextract = TRUE;
+	    s++;
+	    if (*s)
+		cddir = savepv(s);
+	    break;
+	case 0:
+	    break;
+	case '-':
+	    if (!*++s || isSPACE(*s)) {
+		argc--,argv++;
+		goto switch_end;
+	    }
+	    /* catch use of gnu style long options */
+	    if (strEQ(s, "version")) {
+		s = "v";
+		goto reswitch;
+	    }
+	    if (strEQ(s, "help")) {
+		s = "h";
+		goto reswitch;
+	    }
+	    s--;
+	    /* FALL THROUGH */
+	default:
+	    croak("Unrecognized switch: -%s  (-h will show valid options)",s);
+	}
+    }
+  switch_end:
+
+    if (!tainting && (s = PerlEnv_getenv("PERL5OPT"))) {
+	while (s && *s) {
+	    while (isSPACE(*s))
+		s++;
+	    if (*s == '-') {
+		s++;
+		if (isSPACE(*s))
+		    continue;
+	    }
+	    if (!*s)
+		break;
+	    if (!strchr("DIMUdmw", *s))
+		croak("Illegal switch in PERL5OPT: -%c", *s);
+	    s = moreswitches(s);
+	}
+    }
+
+    if (!scriptname)
+	scriptname = argv[0];
+    if (e_script) {
+	argc++,argv--;
+	scriptname = BIT_BUCKET;	/* don't look for script or read stdin */
+    }
+    else if (scriptname == Nullch) {
+#ifdef MSDOS
+	if ( PerlLIO_isatty(PerlIO_fileno(PerlIO_stdin())) )
+	    moreswitches("h");
+#endif
+	scriptname = "-";
+    }
+
+    init_perllib();
+
+    open_script(scriptname,dosearch,sv,&fdscript);
+
+    validate_suid(validarg, scriptname,fdscript);
+
+    if (doextract)
+	find_beginning();
+
+    main_cv = compcv = (CV*)NEWSV(1104,0);
+    sv_upgrade((SV *)compcv, SVt_PVCV);
+    CvUNIQUE_on(compcv);
+
+    comppad = newAV();
+    av_push(comppad, Nullsv);
+    curpad = AvARRAY(comppad);
+    comppad_name = newAV();
+    comppad_name_fill = 0;
+    min_intro_pending = 0;
+    padix = 0;
+#ifdef USE_THREADS
+    av_store(comppad_name, 0, newSVpv("@_", 2));
+    curpad[0] = (SV*)newAV();
+    SvPADMY_on(curpad[0]);	/* XXX Needed? */
+    CvOWNER(compcv) = 0;
+    New(666, CvMUTEXP(compcv), 1, perl_mutex);
+    MUTEX_INIT(CvMUTEXP(compcv));
+#endif /* USE_THREADS */
+
+    comppadlist = newAV();
+    AvREAL_off(comppadlist);
+    av_store(comppadlist, 0, (SV*)comppad_name);
+    av_store(comppadlist, 1, (SV*)comppad);
+    CvPADLIST(compcv) = comppadlist;
+
+    boot_core_UNIVERSAL();
+
+    if (xsinit)
+	(*xsinit)(PERL_OBJECT_THIS);	/* in case linked C routines want magical variables */
+#if defined(VMS) || defined(WIN32) || defined(DJGPP)
+    init_os_extras();
+#endif
+
+    init_predump_symbols();
+    /* init_postdump_symbols not currently designed to be called */
+    /* more than once (ENV isn't cleared first, for example)	 */
+    /* But running with -u leaves %ENV & @ARGV undefined!    XXX */
+    if (!do_undump)
+	init_postdump_symbols(argc,argv,env);
+
+    init_lexer();
+
+    /* now parse the script */
+
+    SETERRNO(0,SS$_NORMAL);
+    error_count = 0;
+    if (yyparse() || error_count) {
+	if (minus_c)
+	    croak("%s had compilation errors.\n", origfilename);
+	else {
+	    croak("Execution of %s aborted due to compilation errors.\n",
+		origfilename);
+	}
+    }
+    curcop->cop_line = 0;
+    curstash = defstash;
+    preprocess = FALSE;
+    if (e_script) {
+	SvREFCNT_dec(e_script);
+	e_script = Nullsv;
+    }
+
+    /* now that script is parsed, we can modify record separator */
+    SvREFCNT_dec(rs);
+    rs = SvREFCNT_inc(nrs);
+    sv_setsv(perl_get_sv("/", TRUE), rs);
+    if (do_undump)
+	my_unexec();
+
+    if (dowarn)
+	gv_check(defstash);
+
+    LEAVE;
+    FREETMPS;
+
+#ifdef MYMALLOC
+    if ((s=PerlEnv_getenv("PERL_DEBUG_MSTATS")) && atoi(s) >= 2)
+	dump_mstats("after compilation:");
+#endif
+
+    ENTER;
+    restartop = 0;
+    JMPENV_POP;
+    return 0;
 }
-
-struct try_run_locals {
-    I32 oldscope;
-    int ret;
-};
-typedef struct try_run_locals TRY_RUN_LOCALS;
-static TRYVTBL PerlRunVtbl;
 
 int
 #ifdef PERL_OBJECT
@@ -699,17 +1010,85 @@ CPerlObj::perl_run(void)
 perl_run(PerlInterpreter *sv_interp)
 #endif
 {
-    dTHR;
-    TRY_RUN_LOCALS locals;
+    dSP;
+    I32 oldscope;
+    dJMPENV;
+    int ret;
 
 #ifndef PERL_OBJECT
     if (!(curinterp = sv_interp))
 	return 255;
 #endif
 
-    locals.oldscope = scopestack_ix;
-    TRYBLOCK(PerlRunVtbl, locals);
-    return locals.ret;
+    oldscope = scopestack_ix;
+
+    JMPENV_PUSH(ret);
+    switch (ret) {
+    case 1:
+	cxstack_ix = -1;		/* start context stack again */
+	break;
+    case 2:
+	/* my_exit() was called */
+	while (scopestack_ix > oldscope)
+	    LEAVE;
+	FREETMPS;
+	curstash = defstash;
+	if (endav)
+	    call_list(oldscope, endav);
+#ifdef MYMALLOC
+	if (PerlEnv_getenv("PERL_DEBUG_MSTATS"))
+	    dump_mstats("after execution:  ");
+#endif
+	JMPENV_POP;
+	return STATUS_NATIVE_EXPORT;
+    case 3:
+	if (!restartop) {
+	    PerlIO_printf(PerlIO_stderr(), "panic: restartop\n");
+	    FREETMPS;
+	    JMPENV_POP;
+	    return 1;
+	}
+	POPSTACK_TO(mainstack);
+	break;
+    }
+
+    DEBUG_r(PerlIO_printf(Perl_debug_log, "%s $` $& $' support.\n",
+                    sawampersand ? "Enabling" : "Omitting"));
+
+    if (!restartop) {
+	DEBUG_x(dump_all());
+	DEBUG(PerlIO_printf(Perl_debug_log, "\nEXECUTING...\n\n"));
+#ifdef USE_THREADS
+	DEBUG_L(PerlIO_printf(Perl_debug_log, "main thread is 0x%lx\n",
+			      (unsigned long) thr));
+#endif /* USE_THREADS */	
+
+	if (minus_c) {
+	    PerlIO_printf(PerlIO_stderr(), "%s syntax OK\n", origfilename);
+	    my_exit(0);
+	}
+	if (PERLDB_SINGLE && DBsingle)
+	   sv_setiv(DBsingle, 1); 
+	if (initav)
+	    call_list(oldscope, initav);
+    }
+
+    /* do it */
+
+    if (restartop) {
+	op = restartop;
+	restartop = 0;
+	CALLRUNOPS();
+    }
+    else if (main_start) {
+	CvDEPTH(main_cv) = 1;
+	op = main_start;
+	CALLRUNOPS();
+    }
+
+    my_exit(0);
+    /* NOTREACHED */
+    return 0;
 }
 
 SV*
@@ -826,7 +1205,7 @@ perl_call_sv(SV *sv, I32 flags)
     I32 oldscope;
     bool oldcatch = CATCH_GET;
     dJMPENV;
-    int jmpstat;
+    int ret;
     OP* oldop = op;
 
     if (flags & G_DISCARD) {
@@ -882,14 +1261,14 @@ perl_call_sv(SV *sv, I32 flags)
 	}
 	markstack_ptr++;
 
-	JMPENV_PUSH(jmpstat);
-	switch (jmpstat) {
-	case JMP_NORMAL:
+	JMPENV_PUSH(ret);
+	switch (ret) {
+	case 0:
 	    break;
-	case JMP_ABNORMAL:
+	case 1:
 	    STATUS_ALL_FAILURE;
 	    /* FALL THROUGH */
-	case JMP_MYEXIT:
+	case 2:
 	    /* my_exit() was called */
 	    curstash = defstash;
 	    FREETMPS;
@@ -898,7 +1277,7 @@ perl_call_sv(SV *sv, I32 flags)
 		croak("Callback called exit");
 	    my_exit_jump();
 	    /* NOTREACHED */
-	case JMP_EXCEPTION:
+	case 3:
 	    if (restartop) {
 		op = restartop;
 		restartop = 0;
@@ -968,7 +1347,7 @@ perl_eval_sv(SV *sv, I32 flags)
     I32 retval;
     I32 oldscope;
     dJMPENV;
-    int jmpstat;
+    int ret;
     OP* oldop = op;
 
     if (flags & G_DISCARD) {
@@ -993,14 +1372,14 @@ perl_eval_sv(SV *sv, I32 flags)
     if (flags & G_KEEPERR)
 	myop.op_flags |= OPf_SPECIAL;
 
-    JMPENV_PUSH(jmpstat);
-    switch (jmpstat) {
-    case JMP_NORMAL:
+    JMPENV_PUSH(ret);
+    switch (ret) {
+    case 0:
 	break;
-    case JMP_ABNORMAL:
+    case 1:
 	STATUS_ALL_FAILURE;
 	/* FALL THROUGH */
-    case JMP_MYEXIT:
+    case 2:
 	/* my_exit() was called */
 	curstash = defstash;
 	FREETMPS;
@@ -1009,7 +1388,7 @@ perl_eval_sv(SV *sv, I32 flags)
 	    croak("Callback called exit");
 	my_exit_jump();
 	/* NOTREACHED */
-    case JMP_EXCEPTION:
+    case 3:
 	if (restartop) {
 	    op = restartop;
 	    restartop = 0;
@@ -2350,16 +2729,16 @@ call_list(I32 oldscope, AV *paramList)
     line_t oldline = curcop->cop_line;
     STRLEN len;
     dJMPENV;
-    int jmpstat;
+    int ret;
 
     while (AvFILL(paramList) >= 0) {
 	CV *cv = (CV*)av_shift(paramList);
 
 	SAVEFREESV(cv);
 
-	JMPENV_PUSH(jmpstat);
-	switch (jmpstat) {
-	case JMP_NORMAL: {
+	JMPENV_PUSH(ret);
+	switch (ret) {
+	case 0: {
 		SV* atsv = ERRSV;
 		PUSHMARK(stack_sp);
 		perl_call_sv((SV*)cv, G_EVAL|G_DISCARD);
@@ -2378,10 +2757,10 @@ call_list(I32 oldscope, AV *paramList)
 		}
 	    }
 	    break;
-	case JMP_ABNORMAL:
+	case 1:
 	    STATUS_ALL_FAILURE;
 	    /* FALL THROUGH */
-	case JMP_MYEXIT:
+	case 2:
 	    /* my_exit() was called */
 	    while (scopestack_ix > oldscope)
 		LEAVE;
@@ -2400,7 +2779,7 @@ call_list(I32 oldscope, AV *paramList)
 	    }
 	    my_exit_jump();
 	    /* NOTREACHED */
-	case JMP_EXCEPTION:
+	case 3:
 	    if (!restartop) {
 		PerlIO_printf(PerlIO_stderr(), "panic: restartop\n");
 		FREETMPS;
@@ -2409,7 +2788,7 @@ call_list(I32 oldscope, AV *paramList)
 	    JMPENV_POP;
 	    curcop = &compiling;
 	    curcop->cop_line = oldline;
-	    JMPENV_JUMP(JMP_EXCEPTION);
+	    JMPENV_JUMP(3);
 	}
 	JMPENV_POP;
     }
@@ -2488,14 +2867,18 @@ my_exit_jump(void)
 	LEAVE;
     }
 
-    JMPENV_JUMP(JMP_MYEXIT);
+    JMPENV_JUMP(2);
 }
 
 
 #include "XSUB.h"
 
 static I32
-read_e_script(CPERLarg_ int idx, SV *buf_sv, int maxlen)
+#ifdef PERL_OBJECT
+read_e_script(CPerlObj *pPerl, int idx, SV *buf_sv, int maxlen)
+#else
+read_e_script(int idx, SV *buf_sv, int maxlen)
+#endif
 {
     char *p, *nl;
     p  = SvPVX(e_script);
@@ -2508,461 +2891,4 @@ read_e_script(CPERLarg_ int idx, SV *buf_sv, int maxlen)
     return 1;
 }
 
-/******************************************* perl_parse TRYBLOCK branches */
 
-#define TRY_LOCAL(name) ((TRY_PARSE_LOCALS*)locals)->name
-
-static void
-try_parse_normal0(CPERLarg_ void *locals)
-{
-    dTHR;
-    register SV *sv;
-    register char *s;
-    char *scriptname = NULL;
-    VOL bool dosearch = FALSE;
-    char *validarg = "";
-    AV* comppadlist;
-    int fdscript = -1;
-
-    void (*xsinit)() = TRY_LOCAL(xsinit);
-    int argc = TRY_LOCAL(argc);
-    char **argv = TRY_LOCAL(argv);
-    char **env = TRY_LOCAL(env);
-
-    sv_setpvn(linestr,"",0);
-    sv = newSVpv("",0);		/* first used for -I flags */
-    SAVEFREESV(sv);
-    init_main_stash();
-
-    for (argc--,argv++; argc > 0; argc--,argv++) {
-	if (argv[0][0] != '-' || !argv[0][1])
-	    break;
-#ifdef DOSUID
-    if (*validarg)
-	validarg = " PHOOEY ";
-    else
-	validarg = argv[0];
-#endif
-	s = argv[0]+1;
-      reswitch:
-	switch (*s) {
-	case ' ':
-	case '0':
-	case 'F':
-	case 'a':
-	case 'c':
-	case 'd':
-	case 'D':
-	case 'h':
-	case 'i':
-	case 'l':
-	case 'M':
-	case 'm':
-	case 'n':
-	case 'p':
-	case 's':
-	case 'u':
-	case 'U':
-	case 'v':
-	case 'w':
-	    if (s = moreswitches(s))
-		goto reswitch;
-	    break;
-
-	case 'T':
-	    tainting = TRUE;
-	    s++;
-	    goto reswitch;
-
-	case 'e':
-	    if (euid != uid || egid != gid)
-		croak("No -e allowed in setuid scripts");
-	    if (!e_script) {
-		e_script = newSVpv("",0);
-		filter_add(read_e_script, NULL);
-	    }
-	    if (*++s)
-		sv_catpv(e_script, s);
-	    else if (argv[1]) {
-		sv_catpv(e_script, argv[1]);
-		argc--,argv++;
-	    }
-	    else
-		croak("No code specified for -e");
-	    sv_catpv(e_script, "\n");
-	    break;
-
-	case 'I':	/* -I handled both here and in moreswitches() */
-	    forbid_setid("-I");
-	    if (!*++s && (s=argv[1]) != Nullch) {
-		argc--,argv++;
-	    }
-	    while (s && isSPACE(*s))
-		++s;
-	    if (s && *s) {
-		char *e, *p;
-		for (e = s; *e && !isSPACE(*e); e++) ;
-		p = savepvn(s, e-s);
-		incpush(p, TRUE);
-		sv_catpv(sv,"-I");
-		sv_catpv(sv,p);
-		sv_catpv(sv," ");
-		Safefree(p);
-	    }	/* XXX else croak? */
-	    break;
-	case 'P':
-	    forbid_setid("-P");
-	    preprocess = TRUE;
-	    s++;
-	    goto reswitch;
-	case 'S':
-	    forbid_setid("-S");
-	    dosearch = TRUE;
-	    s++;
-	    goto reswitch;
-	case 'V':
-	    if (!preambleav)
-		preambleav = newAV();
-	    av_push(preambleav, newSVpv("use Config qw(myconfig config_vars)",0));
-	    if (*++s != ':')  {
-		Sv = newSVpv("print myconfig();",0);
-#ifdef VMS
-		sv_catpv(Sv,"print \"\\nCharacteristics of this PERLSHR image: \\n\",");
-#else
-		sv_catpv(Sv,"print \"\\nCharacteristics of this binary (from libperl): \\n\",");
-#endif
-#if defined(DEBUGGING) || defined(NO_EMBED) || defined(MULTIPLICITY)
-		sv_catpv(Sv,"\"  Compile-time options:");
-#  ifdef DEBUGGING
-		sv_catpv(Sv," DEBUGGING");
-#  endif
-#  ifdef NO_EMBED
-		sv_catpv(Sv," NO_EMBED");
-#  endif
-#  ifdef MULTIPLICITY
-		sv_catpv(Sv," MULTIPLICITY");
-#  endif
-		sv_catpv(Sv,"\\n\",");
-#endif
-#if defined(LOCAL_PATCH_COUNT)
-		if (LOCAL_PATCH_COUNT > 0) {
-		    int i;
-		    sv_catpv(Sv,"\"  Locally applied patches:\\n\",");
-		    for (i = 1; i <= LOCAL_PATCH_COUNT; i++) {
-			if (localpatches[i])
-			    sv_catpvf(Sv,"\"  \\t%s\\n\",",localpatches[i]);
-		    }
-		}
-#endif
-		sv_catpvf(Sv,"\"  Built under %s\\n\"",OSNAME);
-#ifdef __DATE__
-#  ifdef __TIME__
-		sv_catpvf(Sv,",\"  Compiled at %s %s\\n\"",__DATE__,__TIME__);
-#  else
-		sv_catpvf(Sv,",\"  Compiled on %s\\n\"",__DATE__);
-#  endif
-#endif
-		sv_catpv(Sv, "; \
-$\"=\"\\n    \"; \
-@env = map { \"$_=\\\"$ENV{$_}\\\"\" } sort grep {/^PERL/} keys %ENV; \
-print \"  \\%ENV:\\n    @env\\n\" if @env; \
-print \"  \\@INC:\\n    @INC\\n\";");
-	    }
-	    else {
-		Sv = newSVpv("config_vars(qw(",0);
-		sv_catpv(Sv, ++s);
-		sv_catpv(Sv, "))");
-		s += strlen(s);
-	    }
-	    av_push(preambleav, Sv);
-	    scriptname = BIT_BUCKET;	/* don't look for script or read stdin */
-	    goto reswitch;
-	case 'x':
-	    doextract = TRUE;
-	    s++;
-	    if (*s)
-		cddir = savepv(s);
-	    break;
-	case 0:
-	    break;
-	case '-':
-	    if (!*++s || isSPACE(*s)) {
-		argc--,argv++;
-		goto switch_end;
-	    }
-	    /* catch use of gnu style long options */
-	    if (strEQ(s, "version")) {
-		s = "v";
-		goto reswitch;
-	    }
-	    if (strEQ(s, "help")) {
-		s = "h";
-		goto reswitch;
-	    }
-	    s--;
-	    /* FALL THROUGH */
-	default:
-	    croak("Unrecognized switch: -%s  (-h will show valid options)",s);
-	}
-    }
-  switch_end:
-
-    if (!tainting && (s = PerlEnv_getenv("PERL5OPT"))) {
-	while (s && *s) {
-	    while (isSPACE(*s))
-		s++;
-	    if (*s == '-') {
-		s++;
-		if (isSPACE(*s))
-		    continue;
-	    }
-	    if (!*s)
-		break;
-	    if (!strchr("DIMUdmw", *s))
-		croak("Illegal switch in PERL5OPT: -%c", *s);
-	    s = moreswitches(s);
-	}
-    }
-
-    if (!scriptname)
-	scriptname = argv[0];
-    if (e_script) {
-	argc++,argv--;
-	scriptname = BIT_BUCKET;	/* don't look for script or read stdin */
-    }
-    else if (scriptname == Nullch) {
-#ifdef MSDOS
-	if ( PerlLIO_isatty(PerlIO_fileno(PerlIO_stdin())) )
-	    moreswitches("h");
-#endif
-	scriptname = "-";
-    }
-
-    init_perllib();
-
-    open_script(scriptname,dosearch,sv,&fdscript);
-
-    validate_suid(validarg, scriptname,fdscript);
-
-    if (doextract)
-	find_beginning();
-
-    main_cv = compcv = (CV*)NEWSV(1104,0);
-    sv_upgrade((SV *)compcv, SVt_PVCV);
-    CvUNIQUE_on(compcv);
-
-    comppad = newAV();
-    av_push(comppad, Nullsv);
-    curpad = AvARRAY(comppad);
-    comppad_name = newAV();
-    comppad_name_fill = 0;
-    min_intro_pending = 0;
-    padix = 0;
-#ifdef USE_THREADS
-    av_store(comppad_name, 0, newSVpv("@_", 2));
-    curpad[0] = (SV*)newAV();
-    SvPADMY_on(curpad[0]);	/* XXX Needed? */
-    CvOWNER(compcv) = 0;
-    New(666, CvMUTEXP(compcv), 1, perl_mutex);
-    MUTEX_INIT(CvMUTEXP(compcv));
-#endif /* USE_THREADS */
-
-    comppadlist = newAV();
-    AvREAL_off(comppadlist);
-    av_store(comppadlist, 0, (SV*)comppad_name);
-    av_store(comppadlist, 1, (SV*)comppad);
-    CvPADLIST(compcv) = comppadlist;
-
-    boot_core_UNIVERSAL();
-
-    if (xsinit)
-	(*xsinit)(PERL_OBJECT_THIS);	/* in case linked C routines want magical variables */
-#if defined(VMS) || defined(WIN32) || defined(DJGPP)
-    init_os_extras();
-#endif
-
-    init_predump_symbols();
-    /* init_postdump_symbols not currently designed to be called */
-    /* more than once (ENV isn't cleared first, for example)	 */
-    /* But running with -u leaves %ENV & @ARGV undefined!    XXX */
-    if (!do_undump)
-	init_postdump_symbols(argc,argv,env);
-
-    init_lexer();
-
-    /* now parse the script */
-
-    SETERRNO(0,SS$_NORMAL);
-    error_count = 0;
-    if (yyparse() || error_count) {
-	if (minus_c)
-	    croak("%s had compilation errors.\n", origfilename);
-	else {
-	    croak("Execution of %s aborted due to compilation errors.\n",
-		origfilename);
-	}
-    }
-    curcop->cop_line = 0;
-    curstash = defstash;
-    preprocess = FALSE;
-    if (e_script) {
-	SvREFCNT_dec(e_script);
-	e_script = Nullsv;
-    }
-
-    /* now that script is parsed, we can modify record separator */
-    SvREFCNT_dec(rs);
-    rs = SvREFCNT_inc(nrs);
-    sv_setsv(perl_get_sv("/", TRUE), rs);
-    if (do_undump)
-	my_unexec();
-
-    if (dowarn)
-	gv_check(defstash);
-
-    LEAVE;
-    FREETMPS;
-
-#ifdef MYMALLOC
-    if ((s=PerlEnv_getenv("PERL_DEBUG_MSTATS")) && atoi(s) >= 2)
-	dump_mstats("after compilation:");
-#endif
-
-    ENTER;
-    restartop = 0;
-    TRY_LOCAL(ret) = 0;
-}
-
-static void
-try_parse_exception1(CPERLarg_ void *locals)
-{
-    PerlIO_printf(PerlIO_stderr(), no_top_env);
-    TRY_LOCAL(ret) = 1;
-}
-
-static void
-try_parse_myexit0(CPERLarg_ void *locals)
-{
-    dTHR;
-    I32 oldscope = TRY_LOCAL(oldscope);
-    while (scopestack_ix > oldscope)
-	LEAVE;
-    FREETMPS;
-    curstash = defstash;
-    if (endav)
-	call_list(oldscope, endav);
-    TRY_LOCAL(ret) = STATUS_NATIVE_EXPORT;
-}
-
-static void
-try_parse_abnormal0(CPERLarg_ void *locals)
-{
-    STATUS_ALL_FAILURE;
-    try_parse_myexit0(locals);
-}
-
-#undef TRY_LOCAL
-static TRYVTBL PerlParseVtbl = {
-    "perl_parse",
-    try_parse_normal0,		0,
-    try_parse_abnormal0,	0,
-    0,				try_parse_exception1,
-    try_parse_myexit0,		0,
-};
-
-/******************************************* perl_run TRYBLOCK branches */
-
-#define TRY_LOCAL(name) ((TRY_RUN_LOCALS*)locals)->name
-
-static void
-try_run_normal0(CPERLarg_ void *locals)
-{
-    dTHR;
-    I32 oldscope = TRY_LOCAL(oldscope);
-
-    DEBUG_r(PerlIO_printf(Perl_debug_log, "%s $` $& $' support.\n",
-                    sawampersand ? "Enabling" : "Omitting"));
-
-    if (!restartop) {
-	DEBUG_x(dump_all());
-	DEBUG(PerlIO_printf(Perl_debug_log, "\nEXECUTING...\n\n"));
-#ifdef USE_THREADS
-	DEBUG_L(PerlIO_printf(Perl_debug_log, "main thread is 0x%lx\n",
-			      (unsigned long) thr));
-#endif /* USE_THREADS */	
-
-	if (minus_c) {
-	    PerlIO_printf(PerlIO_stderr(), "%s syntax OK\n", origfilename);
-	    my_exit(0);
-	}
-	if (PERLDB_SINGLE && DBsingle)
-	   sv_setiv(DBsingle, 1); 
-	if (initav)
-	    call_list(oldscope, initav);
-    }
-
-    /* do it */
-
-    if (restartop) {
-	op = restartop;
-	restartop = 0;
-	CALLRUNOPS();
-    }
-    else if (main_start) {
-	CvDEPTH(main_cv) = 1;
-	op = main_start;
-	CALLRUNOPS();
-    }
-
-    my_exit(0);
-}
-
-static void
-try_run_abnormal0(CPERLarg_ void *locals)
-{
-    dTHR;
-    cxstack_ix = -1;		/* start context stack again */
-    try_run_normal0(locals);
-}
-
-static void
-try_run_exception0(CPERLarg_ void *locals)
-{
-    dSP;
-    if (!restartop) {
-	PerlIO_printf(PerlIO_stderr(), no_restartop);
-	FREETMPS;
-	TRY_LOCAL(ret) = 1;
-    } else {
-	POPSTACK_TO(mainstack);
-	try_run_normal0(locals);
-    }
-}
-
-static void
-try_run_myexit0(CPERLarg_ void *locals)
-{
-    dTHR;
-    I32 oldscope = TRY_LOCAL(oldscope);
-
-    while (scopestack_ix > oldscope)
-	LEAVE;
-    FREETMPS;
-    curstash = defstash;
-    if (endav)
-	call_list(oldscope, endav);
-#ifdef MYMALLOC
-    if (PerlEnv_getenv("PERL_DEBUG_MSTATS"))
-	dump_mstats("after execution:  ");
-#endif
-    TRY_LOCAL(ret) = STATUS_NATIVE_EXPORT;
-}
-
-#undef TRY_LOCAL
-static TRYVTBL PerlRunVtbl = {
-    "perl_run",
-    try_run_normal0,	0,
-    try_run_abnormal0,	0,
-    try_run_exception0,	0,
-    try_run_myexit0,	0
-};

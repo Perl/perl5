@@ -38,22 +38,22 @@
 /* Anyone using eval "" deserves this mess */
 #define PP_EVAL(ppaddr, nxt) do {		\
 	dJMPENV;				\
-	int jmpstat;				\
+	int ret;				\
 	PUTBACK;				\
-	JMPENV_PUSH(jmpstat);			\
-	switch (jmpstat) {			\
-	case JMP_NORMAL:			\
+	JMPENV_PUSH(ret);			\
+	switch (ret) {				\
+	case 0:					\
 	    op = ppaddr(ARGS);			\
 	    retstack[retstack_ix - 1] = Nullop;	\
 	    if (op != nxt) runops();		\
 	    JMPENV_POP;				\
 	    break;				\
-	case JMP_ABNORMAL: JMPENV_POP; JMPENV_JUMP(JMP_ABNORMAL);	\
-	case JMP_MYEXIT: JMPENV_POP; JMPENV_JUMP(JMP_MYEXIT);	\
-	case JMP_EXCEPTION:					\
+	case 1: JMPENV_POP; JMPENV_JUMP(1);	\
+	case 2: JMPENV_POP; JMPENV_JUMP(2);	\
+	case 3:					\
 	    JMPENV_POP;				\
 	    if (restartop != nxt)		\
-		JMPENV_JUMP(JMP_EXCEPTION);			\
+		JMPENV_JUMP(3);			\
 	}					\
 	op = nxt;				\
 	SPAGAIN;				\
@@ -64,8 +64,8 @@
 	int ret;				\
 	JMPENV_PUSH(ret);			\
 	switch (ret) {				\
-	case JMP_ABNORMAL: JMPENV_POP; JMPENV_JUMP(JMP_ABNORMAL);	\
-	case JMP_MYEXIT: JMPENV_POP; JMPENV_JUMP(JMP_MYEXIT);	\
-	case JMP_EXCEPTION: JMPENV_POP; SPAGAIN; goto label;\
+	case 1: JMPENV_POP; JMPENV_JUMP(1);	\
+	case 2: JMPENV_POP; JMPENV_JUMP(2);	\
+	case 3: JMPENV_POP; SPAGAIN; goto label;\
 	}					\
     } while (0)

@@ -186,6 +186,5 @@ tmps_max
 tmps_stack
 top_env
 toptarget
-tryblock_function
 unsafe
 warnhook

@@ -367,7 +367,6 @@ ibcmp
 ibcmp_locale
 ingroup
 init_stacks
-install_tryblock_method
 instr
 intro_my
 intuit_more

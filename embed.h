@@ -260,7 +260,6 @@
 #define ingroup			Perl_ingroup
 #define init_stacks		Perl_init_stacks
 #define init_thread_intern	Perl_init_thread_intern
-#define install_tryblock_method	Perl_install_tryblock_method
 #define instr			Perl_instr
 #define intro_my		Perl_intro_my
 #define intuit_more		Perl_intuit_more
