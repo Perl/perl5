@@ -37,7 +37,7 @@ require Exporter;
 @EXPORT = qw(confess croak carp);
 
 sub longmess {
-    my $error = shift;
+    my $error = join '', @_;
     my $mess = "";
     my $i = 1 + $CarpLevel;
     my ($pack,$file,$line,$sub,$hargs,$eval,$require);
@@ -85,7 +85,7 @@ sub longmess {
 }
 
 sub shortmess {	# Short-circuit &longmess if called via multiple packages
-    my $error = $_[0];	# Instead of "shift"
+    my $error = join '', @_;
     my ($prevpack) = caller(1);
     my $extra = $CarpLevel;
     my $i = 2;
