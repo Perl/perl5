@@ -2440,7 +2440,7 @@ scan_bin(char *start, I32 len, I32 *retlen)
       retval = n | (*s++ - '0');
       len--;
     }
-    if (len && (*s >= '2' || *s <= '9')) {
+    if (len && (*s >= '2' && *s <= '9')) {
       dTHR;
       if (ckWARN(WARN_UNSAFE))
           warner(WARN_UNSAFE, "Illegal binary digit '%c' ignored", *s);
