@@ -70,13 +70,14 @@ gettimeofday (struct timeval *tp, int nothing)
  time_t tt;
  struct tm tmtm;
  /* mktime converts local to UTC */
- GetSystemTime (&st);
+ GetLocalTime (&st);
  tmtm.tm_sec = st.wSecond;
  tmtm.tm_min = st.wMinute;
  tmtm.tm_hour = st.wHour;
  tmtm.tm_mday = st.wDay;
  tmtm.tm_mon = st.wMonth - 1;
  tmtm.tm_year = st.wYear - 1900;
+ tmtm.tm_wday = st.wDayOfWeek;
  tmtm.tm_isdst = -1;
  tt = mktime (&tmtm);
  tp->tv_sec = tt;
