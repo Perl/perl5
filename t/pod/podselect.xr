@@ -13,7 +13,7 @@ OPTIONS AND ARGUMENTS
 
     -section *section-spec*
             Specify a section to include in the output. See "SECTION
-            SPECIFICATIONS" in Pod::Parser for the format to use for
+            SPECIFICATIONS" in Pod::Select for the format to use for
             *section-spec*. This option may be given multiple times on the
             command line.
 
