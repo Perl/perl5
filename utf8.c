@@ -210,7 +210,7 @@ Perl_utf8_to_uv(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
 	goto malformed;
     }
 
-    if ((uv >= 0xc0 && uv <= 0xfd && s[1] < 0x80) &&
+    if ((uv >= 0xc0 && uv <= 0xfd && curlen >1 && s[1] < 0x80) &&
 	!(flags & UTF8_ALLOW_NON_CONTINUATION)) {
 	if (dowarn)
 	    Perl_warner(aTHX_ WARN_UTF8,
