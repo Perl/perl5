@@ -31,6 +31,192 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 14309] By: jhi                                   on 2002/01/17  14:39:20
+        Log: Rename kill_perl to fresh_perl; replace fresh_perl()
+             with fresh_perl_is() and fresh_perl_like().
+     Branch: perl
+	   + t/run/fresh_perl.t
+	   - t/run/kill_perl.t
+	   ! MANIFEST t/test.pl
+____________________________________________________________________________
+[ 14308] By: jhi                                   on 2002/01/17  14:06:46
+        Log: Subject: Re: [Patch @14129] fixes Unicode::Normalize
+             From: Benjamin Goldberg <goldbb2@earthlink.net>
+             Date: Wed, 09 Jan 2002 21:03:16 -0500
+             Message-ID: <3C3CF664.A2BF3AC2@earthlink.net>
+     Branch: perl
+	   ! ext/Unicode/Normalize/Normalize.pm
+____________________________________________________________________________
+[ 14307] By: jhi                                   on 2002/01/17  14:04:06
+        Log: Retract #14144 as Hugo isn't happy with it.
+     Branch: perl
+	   ! scope.c t/run/kill_perl.t
+____________________________________________________________________________
+[ 14306] By: jhi                                   on 2002/01/17  13:57:53
+        Log: Subject: [REPATCH] Attribute::Handlers lexical refcount circus
+             From: Richard Clamp <richardc@unixbeard.net>
+             Date: Wed, 16 Jan 2002 17:34:31 +0000
+             Message-ID: <20020116173431.GA28924@mirth.demon.co.uk>
+     Branch: perl
+	   ! lib/Attribute/Handlers.pm lib/Attribute/Handlers/t/multi.t
+____________________________________________________________________________
+[ 14305] By: jhi                                   on 2002/01/17  13:32:56
+        Log: Subject: [PATCH bleadperl] No more warnings from Opcode.c
+             From: Nikola Knezevic <indy@tesla.rcub.bg.ac.yu>
+             Date: Tue, 15 Jan 2002 21:23:30 +0100
+             Message-ID: <595405346.20020115212330@tesla.rcub.bg.ac.yu>
+     Branch: perl
+	   ! ext/Opcode/Opcode.xs
+____________________________________________________________________________
+[ 14304] By: jhi                                   on 2002/01/16  16:55:52
+        Log: Subject: [PATCH] Fix crypt.t and fs.t tests
+             From: Paul_GreenVOS@vos.stratus.com
+             Date: Wed, 16 Jan 02 6:42 est
+             Message-Id: <200201161143.GAA02292@mailhub1.stratus.com>
+     Branch: perl
+	   ! t/io/fs.t t/op/crypt.t
+____________________________________________________________________________
+[ 14303] By: jhi                                   on 2002/01/16  14:55:57
+        Log: Subject: Re: [PATCH] length of undefined $(digit) should warn    
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Wed, 16 Jan 2002 13:43:39 +0100
+             Message-ID: <20020116134339.A704@rafael>
+             
+             (replaces #14302)
+     Branch: perl
+	   ! mg.c t/lib/warnings/mg
+____________________________________________________________________________
+[ 14302] By: jhi                                   on 2002/01/16  13:47:58
+        Log: (replaced by #14303)
+             Subject: [PATCH] length of undefined $(digit) should warn
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Tue, 15 Jan 2002 23:02:44 +0100            
+             Message-ID: <20020115230244.A31786@rafael>     
+     Branch: perl
+	   ! mg.c t/lib/warnings/mg
+____________________________________________________________________________
+[ 14301] By: jhi                                   on 2002/01/16  13:45:20
+        Log: The non-MakeMaker.pm parts of
+             
+             Subject: [PATCH] Re: MM_Beos.pm?
+             From: Tels <perl_dummy@bloodgate.com>
+             Date: Mon, 14 Jan 2002 21:00:31 +0100 (CET)  
+             Message-Id: <200201142006.WAA29544@taas.iki.fi>
+     Branch: perl
+	   ! ext/SDBM_File/sdbm/Makefile.PL lib/ExtUtils/MM_Unix.pm
+	   ! lib/ExtUtils/t/MM_Unix.t
+____________________________________________________________________________
+[ 14300] By: jhi                                   on 2002/01/16  13:40:53
+        Log: Subject: [PATCH] Re: [PATCH] strictifying ExtUtils::MakeMaker, take 3
+             From: Michael G Schwern <schwern@pobox.com>    
+             Date: Tue, 15 Jan 2002 20:07:50 -0500            
+             Message-ID: <20020116010750.GH625@blackrider>  
+     Branch: perl
+	   ! lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[ 14299] By: jhi                                   on 2002/01/16  13:37:41
+        Log: Subject: [PATCH] lib/Text/Tabs.pm doc format touchup
+             From: Jeffrey Friedl <jfriedl@yahoo.com>       
+             Date: Tue, 15 Jan 2002 15:30:22 -0800 (PST)      
+             Message-Id: <200201152330.g0FNUM784820@ventrue.corp.yahoo.com>
+     Branch: perl
+	   ! lib/Text/Tabs.pm
+____________________________________________________________________________
+[ 14298] By: jhi                                   on 2002/01/16  13:34:29
+        Log: Subject: [PATCH] Tidy up EXE_EXT patches to MM_Unix.pm
+             From: "Green, Paul" <Paul.Green@stratus.com>
+             Date: Tue, 15 Jan 2002 22:28:10 -0500
+             Message-ID: <95AE3CDB3543D511883A0020485B38B9023534F0@exna3.stratus.com>
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 14297] By: jhi                                   on 2002/01/16  13:21:26
+        Log: Integrate perlio; offsetof() is in <stddef.h>
+     Branch: perl
+	  !> ext/Socket/Socket.xs
+____________________________________________________________________________
+[ 14294] By: jhi                                   on 2002/01/16  05:37:29
+        Log: Jeffrey's Unicode adventure continues: unify the In/*.pl
+             and Is/*.pl to lib/*.pl, remove In.pl and Is.pl, introduce
+             Canonical.pl and Exact.pl.
+     Branch: perl
+	   + (add 259 files)
+	   - (delete 288 files)
+	   ! MANIFEST lib/unicore/Makefile lib/unicore/Properties
+	   ! lib/unicore/To/Digit.pl lib/unicore/To/Fold.pl
+	   ! lib/unicore/To/Lower.pl lib/unicore/To/Title.pl
+	   ! lib/unicore/To/Upper.pl lib/unicore/mktables lib/utf8_heavy.pl
+____________________________________________________________________________
+[ 14293] By: jhi                                   on 2002/01/16  00:32:27
+        Log: s/SvPV/SvPVbyte/g, as suggested by Gisle Aas.
+     Branch: perl
+	   ! ext/Socket/Socket.xs
+____________________________________________________________________________
+[ 14292] By: jhi                                   on 2002/01/15  20:06:49
+        Log: Subject: [PATCH] Add Slab_Free to embed.fnc
+             From: "Mattia Barbon" <mbarbon@dsi.unive.it>
+             Date: Tue, 15 Jan 2002 21:59:19 +0100
+             Message-ID: <3C44A637.16602.25EB208@localhost>
+     Branch: perl
+	   ! embed.fnc embed.h proto.h
+____________________________________________________________________________
+[ 14291] By: jhi                                   on 2002/01/15  20:00:02
+        Log: Duh.  The updated In/*.pl weren't checked in.
+     Branch: perl
+	   ! lib/unicore/In/Alphabet.pl lib/unicore/In/Arabic.pl
+	   ! lib/unicore/In/ArabicP2.pl lib/unicore/In/ArabicPr.pl
+	   ! lib/unicore/In/Armenian.pl lib/unicore/In/Arrows.pl
+	   ! lib/unicore/In/BasicLat.pl lib/unicore/In/Bengali.pl
+	   ! lib/unicore/In/BlockEle.pl lib/unicore/In/Bopomof2.pl
+	   ! lib/unicore/In/Bopomofo.pl lib/unicore/In/BoxDrawi.pl
+	   ! lib/unicore/In/BrailleP.pl lib/unicore/In/Byzantin.pl
+	   ! lib/unicore/In/Cherokee.pl lib/unicore/In/CjkComp2.pl
+	   ! lib/unicore/In/CjkComp3.pl lib/unicore/In/CjkComp4.pl
+	   ! lib/unicore/In/CjkCompa.pl lib/unicore/In/CjkRadic.pl
+	   ! lib/unicore/In/CjkSymbo.pl lib/unicore/In/CjkUnif2.pl
+	   ! lib/unicore/In/CjkUnif3.pl lib/unicore/In/CjkUnifi.pl
+	   ! lib/unicore/In/Combini2.pl lib/unicore/In/Combini3.pl
+	   ! lib/unicore/In/Combinin.pl lib/unicore/In/ControlP.pl
+	   ! lib/unicore/In/Currency.pl lib/unicore/In/Cyrillic.pl
+	   ! lib/unicore/In/Deseret.pl lib/unicore/In/Devanaga.pl
+	   ! lib/unicore/In/Dingbats.pl lib/unicore/In/Enclose2.pl
+	   ! lib/unicore/In/Enclosed.pl lib/unicore/In/Ethiopic.pl
+	   ! lib/unicore/In/GeneralP.pl lib/unicore/In/Geometri.pl
+	   ! lib/unicore/In/Georgian.pl lib/unicore/In/Gothic.pl
+	   ! lib/unicore/In/Greek.pl lib/unicore/In/GreekExt.pl
+	   ! lib/unicore/In/Gujarati.pl lib/unicore/In/Gurmukhi.pl
+	   ! lib/unicore/In/Halfwidt.pl lib/unicore/In/HangulCo.pl
+	   ! lib/unicore/In/HangulJa.pl lib/unicore/In/HangulSy.pl
+	   ! lib/unicore/In/Hebrew.pl lib/unicore/In/HighPriv.pl
+	   ! lib/unicore/In/HighSurr.pl lib/unicore/In/Hiragana.pl
+	   ! lib/unicore/In/Ideograp.pl lib/unicore/In/IpaExten.pl
+	   ! lib/unicore/In/Kanbun.pl lib/unicore/In/KangxiRa.pl
+	   ! lib/unicore/In/Kannada.pl lib/unicore/In/Katakana.pl
+	   ! lib/unicore/In/Khmer.pl lib/unicore/In/Lao.pl
+	   ! lib/unicore/In/Latin1Su.pl lib/unicore/In/LatinEx2.pl
+	   ! lib/unicore/In/LatinEx3.pl lib/unicore/In/LatinExt.pl
+	   ! lib/unicore/In/Letterli.pl lib/unicore/In/LowSurro.pl
+	   ! lib/unicore/In/Malayala.pl lib/unicore/In/Mathema2.pl
+	   ! lib/unicore/In/Mathemat.pl lib/unicore/In/Miscell2.pl
+	   ! lib/unicore/In/Miscella.pl lib/unicore/In/Mongolia.pl
+	   ! lib/unicore/In/MusicalS.pl lib/unicore/In/Myanmar.pl
+	   ! lib/unicore/In/NumberFo.pl lib/unicore/In/Ogham.pl
+	   ! lib/unicore/In/OldItali.pl lib/unicore/In/OpticalC.pl
+	   ! lib/unicore/In/Oriya.pl lib/unicore/In/PrivateU.pl
+	   ! lib/unicore/In/Runic.pl lib/unicore/In/Sinhala.pl
+	   ! lib/unicore/In/SmallFor.pl lib/unicore/In/SpacingM.pl
+	   ! lib/unicore/In/Specials.pl lib/unicore/In/Superscr.pl
+	   ! lib/unicore/In/Syriac.pl lib/unicore/In/Tags.pl
+	   ! lib/unicore/In/Tamil.pl lib/unicore/In/Telugu.pl
+	   ! lib/unicore/In/Thaana.pl lib/unicore/In/Thai.pl
+	   ! lib/unicore/In/Tibetan.pl lib/unicore/In/UnifiedC.pl
+	   ! lib/unicore/In/YiRadica.pl lib/unicore/In/YiSyllab.pl
+____________________________________________________________________________
+[ 14290] By: jhi                                   on 2002/01/15  18:39:54
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 14289] By: jhi                                   on 2002/01/15  18:38:03
         Log: Jeffrey is trying very hard to avoid working on his
              book, it would seem :-) (better naming, better comments
