@@ -5868,7 +5868,7 @@ Perl_sv_inc(pTHX_ register SV *sv)
 #endif
 	if (SvIsUV(sv)) {
 	    if (SvUVX(sv) == UV_MAX)
-		sv_setnv(sv, (NV)UV_MAX + 1.0);
+		sv_setnv(sv, UV_MAX_P1);
 	    else
 		(void)SvIOK_only_UV(sv);
 		++SvUVX(sv);
