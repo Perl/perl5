@@ -400,7 +400,7 @@ containing a stack frame as it happens on an Intel 8086:
 
 First, we note that this time-honored 16-bit CPU uses little-endian order,
 and that's why the low order byte is stored at the lower address. To
-unpack such a (signed) short we'll have to use code C<v>. A repeat
+unpack such a (unsigned) short we'll have to use code C<v>. A repeat
 count unpacks all 12 shorts:
 
    my( $ip, $cs, $flags, $ax, $bx, $cd, $dx, $si, $di, $bp, $ds, $es ) =
