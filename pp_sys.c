@@ -2525,7 +2525,7 @@ PP(pp_stat)
     STRLEN n_a;
 
     if (PL_op->op_flags & OPf_REF) {
-	tmpgv = cGVOP_gv;
+	gv = cGVOP_gv;
       do_fstat:
 	if (gv != PL_defgv) {
 	    PL_laststype = OP_STAT;

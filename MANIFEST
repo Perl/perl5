@@ -647,7 +647,6 @@ lib/Pod/LaTeX.pm	Convert POD data to LaTeX
 lib/Pod/Man.pm		Convert POD data to *roff
 lib/Pod/ParseUtils.pm	Pod-Parser - pod utility functions
 lib/Pod/Parser.pm	Pod-Parser - define base class for parsing POD
-lib/Pod/PlainText.pm	Convert POD data to formatted ASCII text
 lib/Pod/Plainer.pm	Pod migration utility module
 lib/Pod/Select.pm	Pod-Parser - select portions of POD docs
 lib/Pod/Text.pm		Pod-Parser - convert POD data to formatted ASCII text
@@ -1517,7 +1516,7 @@ t/pod/podselect.xr	Expected results for podselect.t
 t/pod/special_seqs.t	Test "special" interior sequences
 t/pod/special_seqs.xr	Expected results for emptycmd.t
 t/pod/testcmp.pl	Module to compare output against expected results
-t/pod/testp2pt.pl	Module to test Pod::PlainText for a given file
+t/pod/testp2pt.pl	Module to test Pod::Text for a given file
 t/pod/testpchk.pl	Module to test Pod::Checker for a given file
 t/pragma/constant.t	See if compile-time constants work
 t/pragma/diagnostics.t	See if diagnostics.pm works
