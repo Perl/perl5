@@ -45,9 +45,10 @@ true)
 		;;
 	rhapsody*|darwin*)
 		shrpldflags="${ldflags} -dynamiclib \
-			     -compatibility_version 1 \
+                            -compatibility_version \
+				${api_revision}.${api_version}.${api_subversion} \
 			     -current_version \
-				${api_version}.${api_subversion} \
+				${revision}.${patchlevel}.${subversion} \
 			     -install_name \$(shrpdir)/\$@"
 		;;
 	cygwin*)
