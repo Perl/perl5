@@ -114,6 +114,7 @@ PP(pp_substcont)
 	    SV *targ = cx->sb_targ;
 	    sv_catpvn(dstr, s, cx->sb_strend - s);
 
+	    Safefree(SvPVX(targ));
 	    SvPVX(targ) = SvPVX(dstr);
 	    SvCUR_set(targ, SvCUR(dstr));
 	    SvLEN_set(targ, SvLEN(dstr));

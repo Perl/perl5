@@ -1451,6 +1451,7 @@ PP(pp_subst)
 	    safebase));
 	sv_catpvn(dstr, s, strend - s);
 
+	Safefree(SvPVX(TARG));
 	SvPVX(TARG) = SvPVX(dstr);
 	SvCUR_set(TARG, SvCUR(dstr));
 	SvLEN_set(TARG, SvLEN(dstr));
