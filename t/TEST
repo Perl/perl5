@@ -316,14 +316,25 @@ SHRDLU
    ### in the 't' directory since most (>=80%) of the tests succeeded.
 SHRDLU
 	use Config;
-	if ($Config{ldlibpthname}) {
+	if (my $p = $Config{ldlibpthname}) {
 	    warn <<SHRDLU;
    ### You may have to set your dynamic library search path,
-   ### $Config{ldlibpthname}, to point to the build directory
-   ### before running the harness-- depending on your shell style:
-   ###     setenv $Config{ldlibpthname} `pwd`:\${?$Config{ldlibpthname}}; cd t; ./perl harness
-   ###     $Config{ldlibpthname}=`pwd`:\$$Config{ldlibpthname}; export $Config{ldlibpthname}; cd t; ./perl harness
-   ###     export $Config{ldlibpthname}=`pwd`:\$$Config{ldlibpthname}; cd t; ./perl harness
+   ### $p, to point to the build directory:
+SHRDLU
+           if (exists $ENV{$p}) {
+	       warn <<SHRDLU;
+   ###     setenv $p `pwd`:\$$p; cd t; ./perl harness
+   ###     $p=`pwd`:\$$p; export $p; cd t; ./perl harness
+   ###     export $p=`pwd`:\$$p; cd t; ./perl harness
+SHRDLU
+            } else {
+		warn <<SHRDLU;
+   ###     setenv $p `pwd`; cd t; ./perl harness
+   ###     $p=`pwd`; export $p; cd t; ./perl harness
+   ###     export $p=`pwd`; cd t; ./perl harness
+SHRDLU
+            }    
+	    warn <<SHRDLU;
    ### for csh-style shells, like tcsh; or for traditional/modern
    ### Bourne-style shells, like bash, ksh, and zsh, respectively.
 SHRDLU
