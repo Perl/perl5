@@ -569,7 +569,7 @@ fix the problem can be found in L<perllocale> section B<LOCALE PROBLEMS>.
 =head1 Obsolete Diagnostics
 
 =over
- 
+
 =item Can't mktemp()
 
 (F) The mktemp() routine failed for some reason while trying to process

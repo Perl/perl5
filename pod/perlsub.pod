@@ -252,7 +252,7 @@ this is used to name the parameters to a subroutine.  Examples:
 
 The "my" is simply a modifier on something you might assign to.  So when
 you do assign to the variables in its argument list, the "my" doesn't
-change whether those variables is viewed as a scalar or an array.  So
+change whether those variables are viewed as a scalar or an array.  So
 
     my ($foo) = <STDIN>;		# WRONG?
     my @FOO = <STDIN>;

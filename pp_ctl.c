@@ -3183,7 +3183,7 @@ doqsort_all_asserts(
 
 /* ****************************************************************** qsort */
 
-void
+STATIC void
 #ifdef PERL_OBJECT
 qsortsv(SV ** array, size_t num_elts, SVCOMPARE compare)
 #else
