@@ -121,7 +121,7 @@ static void
 reg_add(sv)
 SV* sv;
 {
-    if (sv_count >= (registry_size >> 1))
+    if (PL_sv_count >= (registry_size >> 1))
     {
 	SV **oldreg = registry;
 	I32 oldsize = registry_size;
@@ -142,7 +142,7 @@ SV* sv;
     }
 
     REG_ADD(sv);
-    ++sv_count;
+    ++PL_sv_count;
 }
 
 static void
@@ -150,7 +150,7 @@ reg_remove(sv)
 SV* sv;
 {
     REG_REMOVE(sv);
-    --sv_count;
+    --PL_sv_count;
 }
 
 static void
@@ -184,23 +184,23 @@ U32 flags;
 
 #define plant_SV(p)			\
     do {				\
-	SvANY(p) = (void *)sv_root;	\
+	SvANY(p) = (void *)PL_sv_root;	\
 	SvFLAGS(p) = SVTYPEMASK;	\
-	sv_root = (p);			\
-	--sv_count;			\
+	PL_sv_root = (p);			\
+	--PL_sv_count;			\
     } while (0)
 
 /* sv_mutex must be held while calling uproot_SV() */
 #define uproot_SV(p)			\
     do {				\
-	(p) = sv_root;			\
-	sv_root = (SV*)SvANY(p);	\
-	++sv_count;			\
+	(p) = PL_sv_root;			\
+	PL_sv_root = (SV*)SvANY(p);	\
+	++PL_sv_count;			\
     } while (0)
 
 #define new_SV(p)	do {	\
 	LOCK_SV_MUTEX;		\
-	if (sv_root)		\
+	if (PL_sv_root)		\
 	    uproot_SV(p);	\
 	else			\
 	    (p) = more_sv();	\
@@ -211,7 +211,7 @@ U32 flags;
 
 #define del_SV(p)	do {	\
 	LOCK_SV_MUTEX;		\
-	if (debug & 32768)	\
+	if (PL_debug & 32768)	\
 	    del_sv(p);		\
 	else			\
 	    plant_SV(p);	\
@@ -221,12 +221,12 @@ U32 flags;
 STATIC void
 del_sv(SV *p)
 {
-    if (debug & 32768) {
+    if (PL_debug & 32768) {
 	SV* sva;
 	SV* sv;
 	SV* svend;
 	int ok = 0;
-	for (sva = sv_arenaroot; sva; sva = (SV *) SvANY(sva)) {
+	for (sva = PL_sv_arenaroot; sva; sva = (SV *) SvANY(sva)) {
 	    sv = sva + 1;
 	    svend = &sva[SvREFCNT(sva)];
 	    if (p >= sv && p < svend)
@@ -255,12 +255,12 @@ sv_add_arena(char *ptr, U32 size, U32 flags)
     Zero(sva, size, char);
 
     /* The first SV in an arena isn't an SV. */
-    SvANY(sva) = (void *) sv_arenaroot;		/* ptr to next arena */
+    SvANY(sva) = (void *) PL_sv_arenaroot;		/* ptr to next arena */
     SvREFCNT(sva) = size / sizeof(SV);		/* number of SV slots */
     SvFLAGS(sva) = flags;			/* FAKE if not to be freed */
 
-    sv_arenaroot = sva;
-    sv_root = sva + 1;
+    PL_sv_arenaroot = sva;
+    PL_sv_root = sva + 1;
 
     svend = &sva[SvREFCNT(sva) - 1];
     sv = sva + 1;
@@ -279,9 +279,9 @@ more_sv(void)
 {
     register SV* sv;
 
-    if (nice_chunk) {
-	sv_add_arena(nice_chunk, nice_chunk_size, 0);
-	nice_chunk = Nullch;
+    if (PL_nice_chunk) {
+	sv_add_arena(PL_nice_chunk, PL_nice_chunk_size, 0);
+	PL_nice_chunk = Nullch;
     }
     else {
 	char *chunk;                /* must use New here to match call to */
@@ -299,7 +299,7 @@ visit(SVFUNC f)
     SV* sv;
     register SV* svend;
 
-    for (sva = sv_arenaroot; sva; sva = (SV*)SvANY(sva)) {
+    for (sva = PL_sv_arenaroot; sva; sva = (SV*)SvANY(sva)) {
 	svend = &sva[SvREFCNT(sva)];
 	for (sv = sva + 1; sv < svend; ++sv) {
 	    if (SvTYPE(sv) != SVTYPEMASK)
@@ -362,13 +362,13 @@ do_clean_named_objs(SV *sv)
 void
 sv_clean_objs(void)
 {
-    in_clean_objs = TRUE;
+    PL_in_clean_objs = TRUE;
     visit(FUNC_NAME_TO_PTR(do_clean_objs));
 #ifndef DISABLE_DESTRUCTOR_KLUDGE
     /* some barnacles may yet remain, clinging to typeglobs */
     visit(FUNC_NAME_TO_PTR(do_clean_named_objs));
 #endif
-    in_clean_objs = FALSE;
+    PL_in_clean_objs = FALSE;
 }
 
 STATIC void
@@ -382,9 +382,9 @@ do_clean_all(SV *sv)
 void
 sv_clean_all(void)
 {
-    in_clean_all = TRUE;
+    PL_in_clean_all = TRUE;
     visit(FUNC_NAME_TO_PTR(do_clean_all));
-    in_clean_all = FALSE;
+    PL_in_clean_all = FALSE;
 }
 
 void
@@ -396,7 +396,7 @@ sv_free_arenas(void)
     /* Free arenas here, but be careful about fake ones.  (We assume
        contiguity of the fake ones with the corresponding real ones.) */
 
-    for (sva = sv_arenaroot; sva; sva = svanext) {
+    for (sva = PL_sv_arenaroot; sva; sva = svanext) {
 	svanext = (SV*) SvANY(sva);
 	while (svanext && SvFAKE(svanext))
 	    svanext = (SV*) SvANY(svanext);
@@ -405,24 +405,24 @@ sv_free_arenas(void)
 	    Safefree((void *)sva);
     }
 
-    if (nice_chunk)
-	Safefree(nice_chunk);
-    nice_chunk = Nullch;
-    nice_chunk_size = 0;
-    sv_arenaroot = 0;
-    sv_root = 0;
+    if (PL_nice_chunk)
+	Safefree(PL_nice_chunk);
+    PL_nice_chunk = Nullch;
+    PL_nice_chunk_size = 0;
+    PL_sv_arenaroot = 0;
+    PL_sv_root = 0;
 }
 
 STATIC XPVIV*
 new_xiv(void)
 {
     IV* xiv;
-    if (xiv_root) {
-	xiv = xiv_root;
+    if (PL_xiv_root) {
+	xiv = PL_xiv_root;
 	/*
 	 * See comment in more_xiv() -- RAM.
 	 */
-	xiv_root = *(IV**)xiv;
+	PL_xiv_root = *(IV**)xiv;
 	return (XPVIV*)((char*)xiv - STRUCT_OFFSET(XPVIV, xiv_iv));
     }
     return more_xiv();
@@ -432,8 +432,8 @@ STATIC void
 del_xiv(XPVIV *p)
 {
     IV* xiv = (IV*)((char*)(p) + STRUCT_OFFSET(XPVIV, xiv_iv));
-    *(IV**)xiv = xiv_root;
-    xiv_root = xiv;
+    *(IV**)xiv = PL_xiv_root;
+    PL_xiv_root = xiv;
 }
 
 STATIC XPVIV*
@@ -443,13 +443,13 @@ more_xiv(void)
     register IV* xivend;
     XPV* ptr;
     New(705, ptr, 1008/sizeof(XPV), XPV);
-    ptr->xpv_pv = (char*)xiv_arenaroot;		/* linked list of xiv arenas */
-    xiv_arenaroot = ptr;			/* to keep Purify happy */
+    ptr->xpv_pv = (char*)PL_xiv_arenaroot;		/* linked list of xiv arenas */
+    PL_xiv_arenaroot = ptr;			/* to keep Purify happy */
 
     xiv = (IV*) ptr;
     xivend = &xiv[1008 / sizeof(IV) - 1];
     xiv += (sizeof(XPV) - 1) / sizeof(IV) + 1;   /* fudge by size of XPV */
-    xiv_root = xiv;
+    PL_xiv_root = xiv;
     while (xiv < xivend) {
 	*(IV**)xiv = (IV *)(xiv + 1);
 	xiv++;
@@ -462,9 +462,9 @@ STATIC XPVNV*
 new_xnv(void)
 {
     double* xnv;
-    if (xnv_root) {
-	xnv = xnv_root;
-	xnv_root = *(double**)xnv;
+    if (PL_xnv_root) {
+	xnv = PL_xnv_root;
+	PL_xnv_root = *(double**)xnv;
 	return (XPVNV*)((char*)xnv - STRUCT_OFFSET(XPVNV, xnv_nv));
     }
     return more_xnv();
@@ -474,8 +474,8 @@ STATIC void
 del_xnv(XPVNV *p)
 {
     double* xnv = (double*)((char*)(p) + STRUCT_OFFSET(XPVNV, xnv_nv));
-    *(double**)xnv = xnv_root;
-    xnv_root = xnv;
+    *(double**)xnv = PL_xnv_root;
+    PL_xnv_root = xnv;
 }
 
 STATIC XPVNV*
@@ -486,7 +486,7 @@ more_xnv(void)
     New(711, xnv, 1008/sizeof(double), double);
     xnvend = &xnv[1008 / sizeof(double) - 1];
     xnv += (sizeof(XPVIV) - 1) / sizeof(double) + 1; /* fudge by sizeof XPVIV */
-    xnv_root = xnv;
+    PL_xnv_root = xnv;
     while (xnv < xnvend) {
 	*(double**)xnv = (double*)(xnv + 1);
 	xnv++;
@@ -499,9 +499,9 @@ STATIC XRV*
 new_xrv(void)
 {
     XRV* xrv;
-    if (xrv_root) {
-	xrv = xrv_root;
-	xrv_root = (XRV*)xrv->xrv_rv;
+    if (PL_xrv_root) {
+	xrv = PL_xrv_root;
+	PL_xrv_root = (XRV*)xrv->xrv_rv;
 	return xrv;
     }
     return more_xrv();
@@ -510,8 +510,8 @@ new_xrv(void)
 STATIC void
 del_xrv(XRV *p)
 {
-    p->xrv_rv = (SV*)xrv_root;
-    xrv_root = p;
+    p->xrv_rv = (SV*)PL_xrv_root;
+    PL_xrv_root = p;
 }
 
 STATIC XRV*
@@ -519,8 +519,8 @@ more_xrv(void)
 {
     register XRV* xrv;
     register XRV* xrvend;
-    New(712, xrv_root, 1008/sizeof(XRV), XRV);
-    xrv = xrv_root;
+    New(712, PL_xrv_root, 1008/sizeof(XRV), XRV);
+    xrv = PL_xrv_root;
     xrvend = &xrv[1008 / sizeof(XRV) - 1];
     while (xrv < xrvend) {
 	xrv->xrv_rv = (SV*)(xrv + 1);
@@ -534,9 +534,9 @@ STATIC XPV*
 new_xpv(void)
 {
     XPV* xpv;
-    if (xpv_root) {
-	xpv = xpv_root;
-	xpv_root = (XPV*)xpv->xpv_pv;
+    if (PL_xpv_root) {
+	xpv = PL_xpv_root;
+	PL_xpv_root = (XPV*)xpv->xpv_pv;
 	return xpv;
     }
     return more_xpv();
@@ -545,8 +545,8 @@ new_xpv(void)
 STATIC void
 del_xpv(XPV *p)
 {
-    p->xpv_pv = (char*)xpv_root;
-    xpv_root = p;
+    p->xpv_pv = (char*)PL_xpv_root;
+    PL_xpv_root = p;
 }
 
 STATIC XPV*
@@ -554,8 +554,8 @@ more_xpv(void)
 {
     register XPV* xpv;
     register XPV* xpvend;
-    New(713, xpv_root, 1008/sizeof(XPV), XPV);
-    xpv = xpv_root;
+    New(713, PL_xpv_root, 1008/sizeof(XPV), XPV);
+    xpv = PL_xpv_root;
     xpvend = &xpv[1008 / sizeof(XPV) - 1];
     while (xpv < xpvend) {
 	xpv->xpv_pv = (char*)(xpv + 1);
@@ -936,15 +936,15 @@ sv_peek(SV *sv)
 	sv_catpv(t, "WILD");
 	goto finish;
     }
-    else if (sv == &sv_undef || sv == &sv_no || sv == &sv_yes) {
-	if (sv == &sv_undef) {
+    else if (sv == &PL_sv_undef || sv == &PL_sv_no || sv == &PL_sv_yes) {
+	if (sv == &PL_sv_undef) {
 	    sv_catpv(t, "SV_UNDEF");
 	    if (!(SvFLAGS(sv) & (SVf_OK|SVf_OOK|SVs_OBJECT|
 				 SVs_GMG|SVs_SMG|SVs_RMG)) &&
 		SvREADONLY(sv))
 		goto finish;
 	}
-	else if (sv == &sv_no) {
+	else if (sv == &PL_sv_no) {
 	    sv_catpv(t, "SV_NO");
 	    if (!(SvFLAGS(sv) & (SVf_ROK|SVf_OOK|SVs_OBJECT|
 				 SVs_GMG|SVs_SMG|SVs_RMG)) &&
@@ -1062,7 +1062,7 @@ sv_peek(SV *sv)
 	while (unref--)
 	    sv_catpv(t, ")");
     }
-    return SvPV(t, na);
+    return SvPV(t, PL_na);
 #else	/* DEBUGGING */
     return "";
 #endif	/* DEBUGGING */
@@ -1165,7 +1165,7 @@ sv_setiv(register SV *sv, IV i)
 	{
 	    dTHR;
 	    croak("Can't coerce %s to integer in %s", sv_reftype(sv,0),
-		  op_desc[op->op_type]);
+		  op_desc[PL_op->op_type]);
 	}
     }
     (void)SvIOK_only(sv);			/* validate number */
@@ -1225,7 +1225,7 @@ sv_setnv(register SV *sv, double num)
 	{
 	    dTHR;
 	    croak("Can't coerce %s to number in %s", sv_reftype(sv,0),
-		  op_name[op->op_type]);
+		  op_name[PL_op->op_type]);
 	}
     }
     SvNVX(sv) = num;
@@ -1288,9 +1288,9 @@ not_a_number(SV *sv)
     }
     *d = '\0';
 
-    if (op)
+    if (PL_op)
 	warn("Argument \"%s\" isn't numeric in %s", tmpbuf,
-		op_name[op->op_type]);
+		op_name[PL_op->op_type]);
     else
 	warn("Argument \"%s\" isn't numeric", tmpbuf);
 }
@@ -1313,9 +1313,9 @@ sv_2iv(register SV *sv)
 	if (SvPOKp(sv) && SvLEN(sv))
 	    return asIV(sv);
 	if (!SvROK(sv)) {
-	    if (dowarn && !(SvFLAGS(sv) & SVs_PADTMP)) {
+	    if (PL_dowarn && !(SvFLAGS(sv) & SVs_PADTMP)) {
 		dTHR;
-		if (!localizing)
+		if (!PL_localizing)
 		    warn(warn_uninit);
 	    }
 	    return 0;
@@ -1339,7 +1339,7 @@ sv_2iv(register SV *sv)
 	    }
 	    if (SvPOKp(sv) && SvLEN(sv))
 		return asIV(sv);
-	    if (dowarn)
+	    if (PL_dowarn)
 		warn(warn_uninit);
 	    return 0;
 	}
@@ -1368,7 +1368,7 @@ sv_2iv(register SV *sv)
     }
     else  {
 	dTHR;
-	if (dowarn && !localizing && !(SvFLAGS(sv) & SVs_PADTMP))
+	if (PL_dowarn && !PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP))
 	    warn(warn_uninit);
 	return 0;
     }
@@ -1391,9 +1391,9 @@ sv_2uv(register SV *sv)
 	if (SvPOKp(sv) && SvLEN(sv))
 	    return asUV(sv);
 	if (!SvROK(sv)) {
-	    if (dowarn && !(SvFLAGS(sv) & SVs_PADTMP)) {
+	    if (PL_dowarn && !(SvFLAGS(sv) & SVs_PADTMP)) {
 		dTHR;
-		if (!localizing)
+		if (!PL_localizing)
 		    warn(warn_uninit);
 	    }
 	    return 0;
@@ -1414,7 +1414,7 @@ sv_2uv(register SV *sv)
 	    }
 	    if (SvPOKp(sv) && SvLEN(sv))
 		return asUV(sv);
-	    if (dowarn)
+	    if (PL_dowarn)
 		warn(warn_uninit);
 	    return 0;
 	}
@@ -1439,9 +1439,9 @@ sv_2uv(register SV *sv)
 	SvUVX(sv) = asUV(sv);
     }
     else  {
-	if (dowarn && !(SvFLAGS(sv) & SVs_PADTMP)) {
+	if (PL_dowarn && !(SvFLAGS(sv) & SVs_PADTMP)) {
 	    dTHR;
-	    if (!localizing)
+	    if (!PL_localizing)
 		warn(warn_uninit);
 	}
 	return 0;
@@ -1461,7 +1461,7 @@ sv_2nv(register SV *sv)
 	if (SvNOKp(sv))
 	    return SvNVX(sv);
 	if (SvPOKp(sv) && SvLEN(sv)) {
-	    if (dowarn && !SvIOKp(sv) && !looks_like_number(sv))
+	    if (PL_dowarn && !SvIOKp(sv) && !looks_like_number(sv))
 		not_a_number(sv);
 	    SET_NUMERIC_STANDARD();
 	    return atof(SvPVX(sv));
@@ -1469,9 +1469,9 @@ sv_2nv(register SV *sv)
 	if (SvIOKp(sv))
 	    return (double)SvIVX(sv);
         if (!SvROK(sv)) {
-	    if (dowarn && !(SvFLAGS(sv) & SVs_PADTMP)) {
+	    if (PL_dowarn && !(SvFLAGS(sv) & SVs_PADTMP)) {
 		dTHR;
-		if (!localizing)
+		if (!PL_localizing)
 		    warn(warn_uninit);
 	    }
             return 0;
@@ -1488,14 +1488,14 @@ sv_2nv(register SV *sv)
 	}
 	if (SvREADONLY(sv)) {
 	    if (SvPOKp(sv) && SvLEN(sv)) {
-		if (dowarn && !SvIOKp(sv) && !looks_like_number(sv))
+		if (PL_dowarn && !SvIOKp(sv) && !looks_like_number(sv))
 		    not_a_number(sv);
 		SET_NUMERIC_STANDARD();
 		return atof(SvPVX(sv));
 	    }
 	    if (SvIOKp(sv))
 		return (double)SvIVX(sv);
-	    if (dowarn)
+	    if (PL_dowarn)
 		warn(warn_uninit);
 	    return 0.0;
 	}
@@ -1517,14 +1517,14 @@ sv_2nv(register SV *sv)
 	SvNVX(sv) = (double)SvIVX(sv);
     }
     else if (SvPOKp(sv) && SvLEN(sv)) {
-	if (dowarn && !SvIOKp(sv) && !looks_like_number(sv))
+	if (PL_dowarn && !SvIOKp(sv) && !looks_like_number(sv))
 	    not_a_number(sv);
 	SET_NUMERIC_STANDARD();
 	SvNVX(sv) = atof(SvPVX(sv));
     }
     else  {
 	dTHR;
-	if (dowarn && !localizing && !(SvFLAGS(sv) & SVs_PADTMP))
+	if (PL_dowarn && !PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP))
 	    warn(warn_uninit);
 	return 0.0;
     }
@@ -1543,7 +1543,7 @@ asIV(SV *sv)
 
     if (numtype == 1)
 	return atol(SvPVX(sv));
-    if (!numtype && dowarn)
+    if (!numtype && PL_dowarn)
 	not_a_number(sv);
     SET_NUMERIC_STANDARD();
     d = atof(SvPVX(sv));
@@ -1562,7 +1562,7 @@ asUV(SV *sv)
     if (numtype == 1)
 	return strtoul(SvPVX(sv), Null(char**), 10);
 #endif
-    if (!numtype && dowarn)
+    if (!numtype && PL_dowarn)
 	not_a_number(sv);
     SET_NUMERIC_STANDARD();
     return U_V(atof(SvPVX(sv)));
@@ -1677,9 +1677,9 @@ sv_2pv(register SV *sv, STRLEN *lp)
 	    goto tokensave;
 	}
         if (!SvROK(sv)) {
-	    if (dowarn && !(SvFLAGS(sv) & SVs_PADTMP)) {
+	    if (PL_dowarn && !(SvFLAGS(sv) & SVs_PADTMP)) {
 		dTHR;
-		if (!localizing)
+		if (!PL_localizing)
 		    warn(warn_uninit);
 	    }
             *lp = 0;
@@ -1740,7 +1740,7 @@ sv_2pv(register SV *sv, STRLEN *lp)
 			    mg->mg_ptr[mg->mg_len - 1] = ')';
 			    mg->mg_ptr[mg->mg_len] = 0;
 			}
-			reginterp_cnt += re->program[0].next_off;
+			PL_reginterp_cnt += re->program[0].next_off;
 			*lp = mg->mg_len;
 			return mg->mg_ptr;
 		    }
@@ -1785,7 +1785,7 @@ sv_2pv(register SV *sv, STRLEN *lp)
 		tsv = Nullsv;
 		goto tokensave;
 	    }
-	    if (dowarn)
+	    if (PL_dowarn)
 		warn(warn_uninit);
 	    *lp = 0;
 	    return "";
@@ -1833,7 +1833,7 @@ sv_2pv(register SV *sv, STRLEN *lp)
     }
     else {
 	dTHR;
-	if (dowarn && !localizing && !(SvFLAGS(sv) & SVs_PADTMP))
+	if (PL_dowarn && !PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP))
 	    warn(warn_uninit);
 	*lp = 0;
 	return "";
@@ -1943,7 +1943,7 @@ sv_setsv(SV *dstr, register SV *sstr)
 	return;
     SV_CHECK_THINKFIRST(dstr);
     if (!sstr)
-	sstr = &sv_undef;
+	sstr = &PL_sv_undef;
     stype = SvTYPE(sstr);
     dtype = SvTYPE(dstr);
 
@@ -2015,7 +2015,7 @@ sv_setsv(SV *dstr, register SV *sstr)
 		 SvTYPE(SvRV(sstr)) == SVt_PVGV) {
 	    sstr = SvRV(sstr);
 	    if (sstr == dstr) {
-		if (curcop->cop_stash != GvSTASH(dstr))
+		if (PL_curcop->cop_stash != GvSTASH(dstr))
 		    GvIMPORTED_on(dstr);
 		GvMULTI_on(dstr);
 		return;
@@ -2040,9 +2040,9 @@ sv_setsv(SV *dstr, register SV *sstr)
     case SVt_PVHV:
     case SVt_PVCV:
     case SVt_PVIO:
-	if (op)
+	if (PL_op)
 	    croak("Bizarre copy of %s in %s", sv_reftype(sstr, 0),
-		op_name[op->op_type]);
+		op_name[PL_op->op_type]);
 	else
 	    croak("Bizarre copy of %s", sv_reftype(sstr, 0));
 	break;
@@ -2061,8 +2061,8 @@ sv_setsv(SV *dstr, register SV *sstr)
 		SvFAKE_on(dstr);	/* can coerce to non-glob */
 	    }
 	    /* ahem, death to those who redefine active sort subs */
-	    else if (curstackinfo->si_type == PERLSI_SORT
-		     && GvCV(dstr) && sortcop == CvSTART(GvCV(dstr)))
+	    else if (PL_curstackinfo->si_type == PERLSI_SORT
+		     && GvCV(dstr) && PL_sortcop == CvSTART(GvCV(dstr)))
 		croak("Can't redefine active sort subroutine %s",
 		      GvNAME(dstr));
 	    (void)SvOK_off(dstr);
@@ -2070,7 +2070,7 @@ sv_setsv(SV *dstr, register SV *sstr)
 	    gp_free((GV*)dstr);
 	    GvGP(dstr) = gp_ref(GvGP(sstr));
 	    SvTAINT(dstr);
-	    if (curcop->cop_stash != GvSTASH(dstr))
+	    if (PL_curcop->cop_stash != GvSTASH(dstr))
 		GvIMPORTED_on(dstr);
 	    GvMULTI_on(dstr);
 	    return;
@@ -2109,7 +2109,7 @@ sv_setsv(SV *dstr, register SV *sstr)
 		    Newz(602,gp, 1, GP);
 		    GvGP(dstr) = gp_ref(gp);
 		    GvSV(dstr) = NEWSV(72,0);
-		    GvLINE(dstr) = curcop->cop_line;
+		    GvLINE(dstr) = PL_curcop->cop_line;
 		    GvEGV(dstr) = (GV*)dstr;
 		}
 		GvMULTI_on(dstr);
@@ -2120,7 +2120,7 @@ sv_setsv(SV *dstr, register SV *sstr)
 		    else
 			dref = (SV*)GvAV(dstr);
 		    GvAV(dstr) = (AV*)sref;
-		    if (curcop->cop_stash != GvSTASH(dstr))
+		    if (PL_curcop->cop_stash != GvSTASH(dstr))
 			GvIMPORTED_AV_on(dstr);
 		    break;
 		case SVt_PVHV:
@@ -2129,7 +2129,7 @@ sv_setsv(SV *dstr, register SV *sstr)
 		    else
 			dref = (SV*)GvHV(dstr);
 		    GvHV(dstr) = (HV*)sref;
-		    if (curcop->cop_stash != GvSTASH(dstr))
+		    if (PL_curcop->cop_stash != GvSTASH(dstr))
 			GvIMPORTED_HV_on(dstr);
 		    break;
 		case SVt_PVCV:
@@ -2138,7 +2138,7 @@ sv_setsv(SV *dstr, register SV *sstr)
 			    SvREFCNT_dec(GvCV(dstr));
 			    GvCV(dstr) = Nullcv;
 			    GvCVGEN(dstr) = 0; /* Switch off cacheness. */
-			    sub_generation++;
+			    PL_sub_generation++;
 			}
 			SAVESPTR(GvCV(dstr));
 		    }
@@ -2158,12 +2158,12 @@ sv_setsv(SV *dstr, register SV *sstr)
 						       Nullcv));
 				/* ahem, death to those who redefine
 				 * active sort subs */
-				if (curstackinfo->si_type == PERLSI_SORT &&
-				      sortcop == CvSTART(cv))
+				if (PL_curstackinfo->si_type == PERLSI_SORT &&
+				      PL_sortcop == CvSTART(cv))
 				    croak(
 				    "Can't redefine active sort subroutine %s",
 					  GvENAME((GV*)dstr));
-				if (dowarn || (const_changed && const_sv)) {
+				if (PL_dowarn || (const_changed && const_sv)) {
 				    if (!(CvGV(cv) && GvSTASH(CvGV(cv))
 					  && HvNAME(GvSTASH(CvGV(cv)))
 					  && strEQ(HvNAME(GvSTASH(CvGV(cv))),
@@ -2180,9 +2180,9 @@ sv_setsv(SV *dstr, register SV *sstr)
 			GvCV(dstr) = (CV*)sref;
 			GvCVGEN(dstr) = 0; /* Switch off cacheness. */
 			GvASSUMECV_on(dstr);
-			sub_generation++;
+			PL_sub_generation++;
 		    }
-		    if (curcop->cop_stash != GvSTASH(dstr))
+		    if (PL_curcop->cop_stash != GvSTASH(dstr))
 			GvIMPORTED_CV_on(dstr);
 		    break;
 		case SVt_PVIO:
@@ -2198,7 +2198,7 @@ sv_setsv(SV *dstr, register SV *sstr)
 		    else
 			dref = (SV*)GvSV(dstr);
 		    GvSV(dstr) = sref;
-		    if (curcop->cop_stash != GvSTASH(dstr))
+		    if (PL_curcop->cop_stash != GvSTASH(dstr))
 			GvIMPORTED_SV_on(dstr);
 		    break;
 		}
@@ -2297,7 +2297,7 @@ sv_setsv(SV *dstr, register SV *sstr)
     }
     else {
 	if (dtype == SVt_PVGV) {
-	    if (dowarn)
+	    if (PL_dowarn)
 		warn("Undefined value assigned to typeglob");
 	}
 	else
@@ -2411,7 +2411,7 @@ sv_check_thinkfirst(register SV *sv)
 {
     if (SvREADONLY(sv)) {
 	dTHR;
-	if (curcop != &compiling)
+	if (PL_curcop != &PL_compiling)
 	    croak(no_modify);
     }
     if (SvROK(sv))
@@ -2537,7 +2537,7 @@ sv_magic(register SV *sv, SV *obj, int how, char *name, I32 namlen)
     
     if (SvREADONLY(sv)) {
 	dTHR;
-	if (curcop != &compiling && !strchr("gBf", how))
+	if (PL_curcop != &PL_compiling && !strchr("gBf", how))
 	    croak(no_modify);
     }
     if (SvMAGICAL(sv) || (how == 't' && SvTYPE(sv) >= SVt_PVMG)) {
@@ -2834,7 +2834,7 @@ sv_clear(register SV *sv)
 
     if (SvOBJECT(sv)) {
 	dTHR;
-	if (defstash) {		/* Still have a symbol table? */
+	if (PL_defstash) {		/* Still have a symbol table? */
 	    djSP;
 	    GV* destructor;
 	    SV tmpref;
@@ -2871,10 +2871,10 @@ sv_clear(register SV *sv)
 	    SvREFCNT_dec(SvSTASH(sv));	/* possibly of changed persuasion */
 	    SvOBJECT_off(sv);	/* Curse the object. */
 	    if (SvTYPE(sv) != SVt_PVIO)
-		--sv_objcount;	/* XXX Might want something more general */
+		--PL_sv_objcount;	/* XXX Might want something more general */
 	}
 	if (SvREFCNT(sv)) {
-		if (in_clean_objs)
+		if (PL_in_clean_objs)
 		    croak("DESTROY created new reference to dead object");
 		/* DESTROY gave object new lease on life */
 		return;
@@ -3015,7 +3015,7 @@ sv_free(SV *sv)
     if (SvREFCNT(sv) == 0) {
 	if (SvFLAGS(sv) & SVf_BREAK)
 	    return;
-	if (in_clean_all) /* All is fair */
+	if (PL_in_clean_all) /* All is fair */
 	    return;
 	if (SvREADONLY(sv) && SvIMMORTAL(sv)) {
 	    /* make sure SvREFCNT(sv)==0 happens very seldom */
@@ -3121,7 +3121,7 @@ sv_cmp_locale(register SV *sv1, register SV *sv2)
     STRLEN len1, len2;
     I32 retval;
 
-    if (collation_standard)
+    if (PL_collation_standard)
 	goto raw_compare;
 
     len1 = 0;
@@ -3173,7 +3173,7 @@ sv_collxfrm(SV *sv, STRLEN *nxp)
     MAGIC *mg;
 
     mg = SvMAGICAL(sv) ? mg_find(sv, 'o') : (MAGIC *) NULL;
-    if (!mg || !mg->mg_ptr || *(U32*)mg->mg_ptr != collation_ix) {
+    if (!mg || !mg->mg_ptr || *(U32*)mg->mg_ptr != PL_collation_ix) {
 	char *s, *xf;
 	STRLEN len, xlen;
 
@@ -3184,7 +3184,7 @@ sv_collxfrm(SV *sv, STRLEN *nxp)
 	    if (SvREADONLY(sv)) {
 		SAVEFREEPV(xf);
 		*nxp = xlen;
-		return xf + sizeof(collation_ix);
+		return xf + sizeof(PL_collation_ix);
 	    }
 	    if (! mg) {
 		sv_magic(sv, 0, 'o', 0, 0);
@@ -3203,7 +3203,7 @@ sv_collxfrm(SV *sv, STRLEN *nxp)
     }
     if (mg && mg->mg_ptr) {
 	*nxp = mg->mg_len;
-	return mg->mg_ptr + sizeof(collation_ix);
+	return mg->mg_ptr + sizeof(PL_collation_ix);
     }
     else {
 	*nxp = 0;
@@ -3228,16 +3228,16 @@ sv_gets(register SV *sv, register PerlIO *fp, I32 append)
     (void)SvUPGRADE(sv, SVt_PV);
     SvSCREAM_off(sv);
 
-    if (RsSNARF(rs)) {
+    if (RsSNARF(PL_rs)) {
 	rsptr = NULL;
 	rslen = 0;
     }
-    else if (RsRECORD(rs)) {
+    else if (RsRECORD(PL_rs)) {
       I32 recsize, bytesread;
       char *buffer;
 
       /* Grab the size of the record we're getting */
-      recsize = SvIV(SvRV(rs));
+      recsize = SvIV(SvRV(PL_rs));
       (void)SvPOK_only(sv);    /* Validate pointer */
       buffer = SvGROW(sv, recsize + 1);
       /* Go yank in */
@@ -3253,15 +3253,15 @@ sv_gets(register SV *sv, register PerlIO *fp, I32 append)
       buffer[bytesread] = '\0';
       return(SvCUR(sv) ? SvPVX(sv) : Nullch);
     }
-    else if (RsPARA(rs)) {
+    else if (RsPARA(PL_rs)) {
 	rsptr = "\n\n";
 	rslen = 2;
     }
     else
-	rsptr = SvPV(rs, rslen);
+	rsptr = SvPV(PL_rs, rslen);
     rslast = rslen ? rsptr[rslen - 1] : '\0';
 
-    if (RsPARA(rs)) {		/* have to do this both before and after */
+    if (RsPARA(PL_rs)) {		/* have to do this both before and after */
 	do {			/* to make sure file boundaries work right */
 	    if (PerlIO_eof(fp))
 		return 0;
@@ -3458,7 +3458,7 @@ screamer2:
 	}
     }
 
-    if (RsPARA(rs)) {		/* have to do this both before and after */  
+    if (RsPARA(PL_rs)) {		/* have to do this both before and after */  
         while (i != EOF) {	/* to make sure file boundaries work right */
 	    i = PerlIO_getc(fp);
 	    if (i != '\n') {
@@ -3487,7 +3487,7 @@ sv_inc(register SV *sv)
     if (SvTHINKFIRST(sv)) {
 	if (SvREADONLY(sv)) {
 	    dTHR;
-	    if (curcop != &compiling)
+	    if (PL_curcop != &PL_compiling)
 		croak(no_modify);
 	}
 	if (SvROK(sv)) {
@@ -3567,7 +3567,7 @@ sv_dec(register SV *sv)
     if (SvTHINKFIRST(sv)) {
 	if (SvREADONLY(sv)) {
 	    dTHR;
-	    if (curcop != &compiling)
+	    if (PL_curcop != &PL_compiling)
 		croak(no_modify);
 	}
 	if (SvROK(sv)) {
@@ -3617,8 +3617,8 @@ STATIC void
 sv_mortalgrow(void)
 {
     dTHR;
-    tmps_max += (tmps_max < 512) ? 128 : 512;
-    Renew(tmps_stack, tmps_max, SV*);
+    PL_tmps_max += (PL_tmps_max < 512) ? 128 : 512;
+    Renew(PL_tmps_stack, PL_tmps_max, SV*);
 }
 
 SV *
@@ -3632,9 +3632,9 @@ sv_mortalcopy(SV *oldstr)
     SvREFCNT(sv) = 1;
     SvFLAGS(sv) = 0;
     sv_setsv(sv,oldstr);
-    if (++tmps_ix >= tmps_max)
+    if (++PL_tmps_ix >= PL_tmps_max)
 	sv_mortalgrow();
-    tmps_stack[tmps_ix] = sv;
+    PL_tmps_stack[PL_tmps_ix] = sv;
     SvTEMP_on(sv);
     return sv;
 }
@@ -3649,9 +3649,9 @@ sv_newmortal(void)
     SvANY(sv) = 0;
     SvREFCNT(sv) = 1;
     SvFLAGS(sv) = SVs_TEMP;
-    if (++tmps_ix >= tmps_max)
+    if (++PL_tmps_ix >= PL_tmps_max)
 	sv_mortalgrow();
-    tmps_stack[tmps_ix] = sv;
+    PL_tmps_stack[PL_tmps_ix] = sv;
     return sv;
 }
 
@@ -3665,9 +3665,9 @@ sv_2mortal(register SV *sv)
 	return sv;
     if (SvREADONLY(sv) && SvIMMORTAL(sv))
 	return sv;
-    if (++tmps_ix >= tmps_max)
+    if (++PL_tmps_ix >= PL_tmps_max)
 	sv_mortalgrow();
-    tmps_stack[tmps_ix] = sv;
+    PL_tmps_stack[PL_tmps_ix] = sv;
     SvTEMP_on(sv);
     return sv;
 }
@@ -3850,7 +3850,7 @@ sv_reset(register char *s, HV *stash)
 		if (GvHV(gv) && !HvNAME(GvHV(gv))) {
 		    hv_clear(GvHV(gv));
 #ifndef VMS  /* VMS has no environ array */
-		    if (gv == envgv)
+		    if (gv == PL_envgv)
 			environ[0] = Nullch;
 #endif
 		}
@@ -3880,13 +3880,13 @@ sv_2io(SV *sv)
 	    croak(no_usym, "filehandle");
 	if (SvROK(sv))
 	    return sv_2io(SvRV(sv));
-	gv = gv_fetchpv(SvPV(sv,na), FALSE, SVt_PVIO);
+	gv = gv_fetchpv(SvPV(sv,PL_na), FALSE, SVt_PVIO);
 	if (gv)
 	    io = GvIO(gv);
 	else
 	    io = 0;
 	if (!io)
-	    croak("Bad filehandle: %s", SvPV(sv,na));
+	    croak("Bad filehandle: %s", SvPV(sv,PL_na));
 	break;
     }
     return io;
@@ -3929,7 +3929,7 @@ sv_2cv(SV *sv, HV **st, GV **gvp, I32 lref)
 	if (isGV(sv))
 	    gv = (GV*)sv;
 	else
-	    gv = gv_fetchpv(SvPV(sv, na), lref, SVt_PVCV);
+	    gv = gv_fetchpv(SvPV(sv, PL_na), lref, SVt_PVCV);
 	*gvp = gv;
 	if (!gv)
 	    return Nullcv;
@@ -3946,7 +3946,7 @@ sv_2cv(SV *sv, HV **st, GV **gvp, I32 lref)
 		   Nullop);
 	    LEAVE;
 	    if (!GvCVu(gv))
-		croak("Unable to create sub named \"%s\"", SvPV(sv,na));
+		croak("Unable to create sub named \"%s\"", SvPV(sv,PL_na));
 	}
 	return GvCVu(gv);
     }
@@ -4021,7 +4021,7 @@ sv_pvn_force(SV *sv, STRLEN *lp)
 
     if (SvREADONLY(sv)) {
 	dTHR;
-	if (curcop != &compiling)
+	if (PL_curcop != &PL_compiling)
 	    croak(no_modify);
     }
     
@@ -4038,7 +4038,7 @@ sv_pvn_force(SV *sv, STRLEN *lp)
 	    else {
 		dTHR;
 		croak("Can't coerce %s to string in %s", sv_reftype(sv,0),
-		    op_name[op->op_type]);
+		    op_name[PL_op->op_type]);
 	    }
 	}
 	else
@@ -4160,7 +4160,7 @@ SV*
 sv_setref_pv(SV *rv, char *classname, void *pv)
 {
     if (!pv) {
-	sv_setsv(rv, &sv_undef);
+	sv_setsv(rv, &PL_sv_undef);
 	SvSETMAGIC(rv);
     }
     else
@@ -4202,13 +4202,13 @@ sv_bless(SV *sv, HV *stash)
 	    croak(no_modify);
 	if (SvOBJECT(tmpRef)) {
 	    if (SvTYPE(tmpRef) != SVt_PVIO)
-		--sv_objcount;
+		--PL_sv_objcount;
 	    SvREFCNT_dec(SvSTASH(tmpRef));
 	}
     }
     SvOBJECT_on(tmpRef);
     if (SvTYPE(tmpRef) != SVt_PVIO)
-	++sv_objcount;
+	++PL_sv_objcount;
     (void)SvUPGRADE(tmpRef, SVt_PVMG);
     SvSTASH(tmpRef) = (HV*)SvREFCNT_inc(stash);
 
@@ -4799,11 +4799,11 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
 
 	default:
       unknown:
-	    if (!args && dowarn &&
-		  (op->op_type == OP_PRTF || op->op_type == OP_SPRINTF)) {
+	    if (!args && PL_dowarn &&
+		  (PL_op->op_type == OP_PRTF || PL_op->op_type == OP_SPRINTF)) {
 		SV *msg = sv_newmortal();
 		sv_setpvf(msg, "Invalid conversion in %s: ",
-			  (op->op_type == OP_PRTF) ? "printf" : "sprintf");
+			  (PL_op->op_type == OP_PRTF) ? "printf" : "sprintf");
 		if (c)
 		    sv_catpvf(msg, isPRINT(c) ? "\"%%%c\"" : "\"%%\\%03o\"",
 			      c & 0xFF);
@@ -5065,7 +5065,7 @@ sv_dump(SV *sv)
 	break;
     case SVt_PVCV:
 	if (SvPOK(sv))
-	    PerlIO_printf(Perl_debug_log, "  PROTOTYPE = \"%s\"\n", SvPV(sv,na));
+	    PerlIO_printf(Perl_debug_log, "  PROTOTYPE = \"%s\"\n", SvPV(sv,PL_na));
 	/* FALL THROUGH */
     case SVt_PVFM:
 	PerlIO_printf(Perl_debug_log, "  STASH = 0x%lx\n", (long)CvSTASH(sv));

@@ -45,7 +45,7 @@ struct block_sub {
 	cx->blk_sub.cv = cv;						\
 	cx->blk_sub.gv = gv;						\
 	cx->blk_sub.hasargs = 0;					\
-	cx->blk_sub.dfoutgv = defoutgv;					\
+	cx->blk_sub.dfoutgv = PL_defoutgv;				\
 	(void)SvREFCNT_inc(cx->blk_sub.dfoutgv)
 
 #define POPSUB(cx)							\
@@ -61,8 +61,8 @@ struct block_sub {
 #else
 #define POPSAVEARRAY()							\
     STMT_START {							\
-	SvREFCNT_dec(GvAV(defgv));					\
-	GvAV(defgv) = cxsub.savearray;					\
+	SvREFCNT_dec(GvAV(PL_defgv));					\
+	GvAV(PL_defgv) = cxsub.savearray;					\
     } STMT_END
 #endif /* USE_THREADS */
 
@@ -92,16 +92,16 @@ struct block_eval {
 };
 
 #define PUSHEVAL(cx,n,fgv)						\
-	cx->blk_eval.old_in_eval = in_eval;				\
-	cx->blk_eval.old_op_type = op->op_type;				\
+	cx->blk_eval.old_in_eval = PL_in_eval;				\
+	cx->blk_eval.old_op_type = PL_op->op_type;				\
 	cx->blk_eval.old_name = n;					\
-	cx->blk_eval.old_eval_root = eval_root;				\
-	cx->blk_eval.cur_text = linestr;
+	cx->blk_eval.old_eval_root = PL_eval_root;				\
+	cx->blk_eval.cur_text = PL_linestr;
 
 #define POPEVAL(cx)							\
-	in_eval = cx->blk_eval.old_in_eval;				\
+	PL_in_eval = cx->blk_eval.old_in_eval;				\
 	optype = cx->blk_eval.old_op_type;				\
-	eval_root = cx->blk_eval.old_eval_root;
+	PL_eval_root = cx->blk_eval.old_eval_root;
 
 /* loop context */
 struct block_loop {
@@ -119,8 +119,8 @@ struct block_loop {
 };
 
 #define PUSHLOOP(cx, ivar, s)						\
-	cx->blk_loop.label = curcop->cop_label;				\
-	cx->blk_loop.resetsp = s - stack_base;				\
+	cx->blk_loop.label = PL_curcop->cop_label;				\
+	cx->blk_loop.resetsp = s - PL_stack_base;				\
 	cx->blk_loop.redo_op = cLOOP->op_redoop;			\
 	cx->blk_loop.next_op = cLOOP->op_nextop;			\
 	cx->blk_loop.last_op = cLOOP->op_lastop;			\
@@ -137,7 +137,7 @@ struct block_loop {
 
 #define POPLOOP1(cx)							\
 	cxloop = cx->blk_loop;	/* because DESTROY may clobber *cx */	\
-	newsp = stack_base + cxloop.resetsp;
+	newsp = PL_stack_base + cxloop.resetsp;
 
 #define POPLOOP2()							\
 	SvREFCNT_dec(cxloop.iterlval);					\
@@ -145,7 +145,7 @@ struct block_loop {
 	    SvREFCNT_dec(*cxloop.itervar);				\
 	    *cxloop.itervar = cxloop.itersave;				\
 	}								\
-	if (cxloop.iterary && cxloop.iterary != curstack)		\
+	if (cxloop.iterary && cxloop.iterary != PL_curstack)		\
 	    SvREFCNT_dec(cxloop.iterary);
 
 /* context common to subroutines, evals and loops */
@@ -178,34 +178,34 @@ struct block {
 /* Enter a block. */
 #define PUSHBLOCK(cx,t,sp) CXINC, cx = &cxstack[cxstack_ix],		\
 	cx->cx_type		= t,					\
-	cx->blk_oldsp		= sp - stack_base,			\
-	cx->blk_oldcop		= curcop,				\
-	cx->blk_oldmarksp	= markstack_ptr - markstack,		\
-	cx->blk_oldscopesp	= scopestack_ix,			\
-	cx->blk_oldretsp	= retstack_ix,				\
-	cx->blk_oldpm		= curpm,				\
+	cx->blk_oldsp		= sp - PL_stack_base,			\
+	cx->blk_oldcop		= PL_curcop,				\
+	cx->blk_oldmarksp	= PL_markstack_ptr - PL_markstack,		\
+	cx->blk_oldscopesp	= PL_scopestack_ix,			\
+	cx->blk_oldretsp	= PL_retstack_ix,				\
+	cx->blk_oldpm		= PL_curpm,				\
 	cx->blk_gimme		= gimme;				\
 	DEBUG_l( PerlIO_printf(PerlIO_stderr(), "Entering block %ld, type %s\n",	\
 		    (long)cxstack_ix, block_type[t]); )
 
 /* Exit a block (RETURN and LAST). */
 #define POPBLOCK(cx,pm) cx = &cxstack[cxstack_ix--],			\
-	newsp		= stack_base + cx->blk_oldsp,			\
-	curcop		= cx->blk_oldcop,				\
-	markstack_ptr	= markstack + cx->blk_oldmarksp,		\
-	scopestack_ix	= cx->blk_oldscopesp,				\
-	retstack_ix	= cx->blk_oldretsp,				\
-	pm		= cx->blk_oldpm,				\
-	gimme		= cx->blk_gimme;				\
+	newsp		 = PL_stack_base + cx->blk_oldsp,			\
+	PL_curcop	 = cx->blk_oldcop,				\
+	PL_markstack_ptr = PL_markstack + cx->blk_oldmarksp,		\
+	PL_scopestack_ix = cx->blk_oldscopesp,				\
+	PL_retstack_ix	 = cx->blk_oldretsp,				\
+	pm		 = cx->blk_oldpm,				\
+	gimme		 = cx->blk_gimme;				\
 	DEBUG_l( PerlIO_printf(PerlIO_stderr(), "Leaving block %ld, type %s\n",		\
 		    (long)cxstack_ix+1,block_type[cx->cx_type]); )
 
 /* Continue a block elsewhere (NEXT and REDO). */
-#define TOPBLOCK(cx) cx = &cxstack[cxstack_ix],				\
-	stack_sp	= stack_base + cx->blk_oldsp,			\
-	markstack_ptr	= markstack + cx->blk_oldmarksp,		\
-	scopestack_ix	= cx->blk_oldscopesp,				\
-	retstack_ix	= cx->blk_oldretsp
+#define TOPBLOCK(cx) cx  = &cxstack[cxstack_ix],			\
+	PL_stack_sp	 = PL_stack_base + cx->blk_oldsp,			\
+	PL_markstack_ptr = PL_markstack + cx->blk_oldmarksp,		\
+	PL_scopestack_ix = cx->blk_oldscopesp,				\
+	PL_retstack_ix	 = cx->blk_oldretsp
 
 /* substitution context */
 struct subst {
@@ -319,29 +319,29 @@ struct stackinfo {
 
 typedef struct stackinfo PERL_SI;
 
-#define cxstack		(curstackinfo->si_cxstack)
-#define cxstack_ix	(curstackinfo->si_cxix)
-#define cxstack_max	(curstackinfo->si_cxmax)
+#define cxstack		(PL_curstackinfo->si_cxstack)
+#define cxstack_ix	(PL_curstackinfo->si_cxix)
+#define cxstack_max	(PL_curstackinfo->si_cxmax)
 
 #ifdef DEBUGGING
-#  define	SET_MARKBASE curstackinfo->si_markbase = markstack_ptr
+#  define	SET_MARKBASE PL_curstackinfo->si_markbase = PL_markstack_ptr
 #else
 #  define	SET_MARKBASE NOOP
 #endif
 
 #define PUSHSTACKi(type) \
     STMT_START {							\
-	PERL_SI *next = curstackinfo->si_next;				\
+	PERL_SI *next = PL_curstackinfo->si_next;			\
 	if (!next) {							\
 	    next = new_stackinfo(32, 2048/sizeof(PERL_CONTEXT) - 1);	\
-	    next->si_prev = curstackinfo;				\
-	    curstackinfo->si_next = next;				\
+	    next->si_prev = PL_curstackinfo;				\
+	    PL_curstackinfo->si_next = next;				\
 	}								\
 	next->si_type = type;						\
 	next->si_cxix = -1;						\
 	AvFILLp(next->si_stack) = 0;					\
-	SWITCHSTACK(curstack,next->si_stack);				\
-	curstackinfo = next;						\
+	SWITCHSTACK(PL_curstack,next->si_stack);			\
+	PL_curstackinfo = next;						\
 	SET_MARKBASE;							\
     } STMT_END
 
@@ -349,19 +349,19 @@ typedef struct stackinfo PERL_SI;
 
 #define POPSTACK \
     STMT_START {							\
-	PERL_SI *prev = curstackinfo->si_prev;				\
+	PERL_SI *prev = PL_curstackinfo->si_prev;			\
 	if (!prev) {							\
 	    PerlIO_printf(PerlIO_stderr(), "panic: POPSTACK\n");	\
 	    my_exit(1);							\
 	}								\
-	SWITCHSTACK(curstack,prev->si_stack);				\
+	SWITCHSTACK(PL_curstack,prev->si_stack);			\
 	/* don't free prev here, free them all at the END{} */		\
-	curstackinfo = prev;						\
+	PL_curstackinfo = prev;						\
     } STMT_END
 
 #define POPSTACK_TO(s) \
     STMT_START {							\
-	while (curstack != s) {						\
+	while (PL_curstack != s) {					\
 	    dounwind(-1);						\
 	    POPSTACK;							\
 	}								\

@@ -63,7 +63,7 @@ void byterun(PerlIO *fp)
 	    {
 		opindex arg;
 		BGET_opindex(arg);
-		op = arg;
+		PL_op = arg;
 		break;
 	    }
 	  case INSN_STSV:		/* 3 */
@@ -77,7 +77,7 @@ void byterun(PerlIO *fp)
 	    {
 		U32 arg;
 		BGET_U32(arg);
-		BSET_OBJ_STORE(op, arg);
+		BSET_OBJ_STORE(PL_op, arg);
 		break;
 	    }
 	  case INSN_LDSPECSV:		/* 5 */
@@ -98,14 +98,14 @@ void byterun(PerlIO *fp)
 	    {
 		U8 arg;
 		BGET_U8(arg);
-		BSET_newop(op, arg);
+		BSET_newop(PL_op, arg);
 		break;
 	    }
 	  case INSN_NEWOPN:		/* 8 */
 	    {
 		U8 arg;
 		BGET_U8(arg);
-		BSET_newopn(op, arg);
+		BSET_newopn(PL_op, arg);
 		break;
 	    }
 	  case INSN_NEWPV:		/* 9 */
@@ -604,14 +604,14 @@ void byterun(PerlIO *fp)
 	    {
 		opindex arg;
 		BGET_opindex(arg);
-		op->op_next = arg;
+		PL_op->op_next = arg;
 		break;
 	    }
 	  case INSN_OP_SIBLING:		/* 83 */
 	    {
 		opindex arg;
 		BGET_opindex(arg);
-		op->op_sibling = arg;
+		PL_op->op_sibling = arg;
 		break;
 	    }
 	  case INSN_OP_PPADDR:		/* 84 */
@@ -625,35 +625,35 @@ void byterun(PerlIO *fp)
 	    {
 		PADOFFSET arg;
 		BGET_U32(arg);
-		op->op_targ = arg;
+		PL_op->op_targ = arg;
 		break;
 	    }
 	  case INSN_OP_TYPE:		/* 86 */
 	    {
 		OPCODE arg;
 		BGET_U16(arg);
-		BSET_op_type(op, arg);
+		BSET_op_type(PL_op, arg);
 		break;
 	    }
 	  case INSN_OP_SEQ:		/* 87 */
 	    {
 		U16 arg;
 		BGET_U16(arg);
-		op->op_seq = arg;
+		PL_op->op_seq = arg;
 		break;
 	    }
 	  case INSN_OP_FLAGS:		/* 88 */
 	    {
 		U8 arg;
 		BGET_U8(arg);
-		op->op_flags = arg;
+		PL_op->op_flags = arg;
 		break;
 	    }
 	  case INSN_OP_PRIVATE:		/* 89 */
 	    {
 		U8 arg;
 		BGET_U8(arg);
-		op->op_private = arg;
+		PL_op->op_private = arg;
 		break;
 	    }
 	  case INSN_OP_FIRST:		/* 90 */
@@ -730,7 +730,7 @@ void byterun(PerlIO *fp)
 	    {
 		pvcontents arg;
 		BGET_pvcontents(arg);
-		BSET_pregcomp(op, arg);
+		BSET_pregcomp(PL_op, arg);
 		break;
 	    }
 	  case INSN_OP_PMFLAGS:		/* 101 */
@@ -842,21 +842,21 @@ void byterun(PerlIO *fp)
 	    {
 		opindex arg;
 		BGET_opindex(arg);
-		main_start = arg;
+		PL_main_start = arg;
 		break;
 	    }
 	  case INSN_MAIN_ROOT:		/* 117 */
 	    {
 		opindex arg;
 		BGET_opindex(arg);
-		main_root = arg;
+		PL_main_root = arg;
 		break;
 	    }
 	  case INSN_CURPAD:		/* 118 */
 	    {
 		svindex arg;
 		BGET_svindex(arg);
-		BSET_curpad(curpad, arg);
+		BSET_curpad(PL_curpad, arg);
 		break;
 	    }
 	  default:

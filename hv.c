@@ -32,9 +32,9 @@ STATIC HE*
 new_he(void)
 {
     HE* he;
-    if (he_root) {
-        he = he_root;
-        he_root = HeNEXT(he);
+    if (PL_he_root) {
+        he = PL_he_root;
+        PL_he_root = HeNEXT(he);
         return he;
     }
     return more_he();
@@ -43,8 +43,8 @@ new_he(void)
 STATIC void
 del_he(HE *p)
 {
-    HeNEXT(p) = (HE*)he_root;
-    he_root = p;
+    HeNEXT(p) = (HE*)PL_he_root;
+    PL_he_root = p;
 }
 
 STATIC HE*
@@ -52,8 +52,8 @@ more_he(void)
 {
     register HE* he;
     register HE* heend;
-    New(54, he_root, 1008/sizeof(HE), HE);
-    he = he_root;
+    New(54, PL_he_root, 1008/sizeof(HE), HE);
+    he = PL_he_root;
     heend = &he[1008 / sizeof(HE) - 1];
     while (he < heend) {
         HeNEXT(he) = (HE*)(he + 1);
@@ -103,8 +103,8 @@ hv_fetch(HV *hv, char *key, U32 klen, I32 lval)
 	    dTHR;
 	    sv = sv_newmortal();
 	    mg_copy((SV*)hv, sv, key, klen);
-	    hv_fetch_sv = sv;
-	    return &hv_fetch_sv;
+	    PL_hv_fetch_sv = sv;
+	    return &PL_hv_fetch_sv;
 	}
 #ifdef ENV_IS_CASELESS
 	else if (mg_find((SV*)hv,'E')) {
@@ -183,14 +183,14 @@ hv_fetch_ent(HV *hv, SV *keysv, I32 lval, register U32 hash)
 	    sv = sv_newmortal();
 	    keysv = sv_2mortal(newSVsv(keysv));
 	    mg_copy((SV*)hv, sv, (char*)keysv, HEf_SVKEY);
-	    if (!HeKEY_hek(&hv_fetch_ent_mh)) {
+	    if (!HeKEY_hek(&PL_hv_fetch_ent_mh)) {
 		char *k;
 		New(54, k, HEK_BASESIZE + sizeof(SV*), char);
-		HeKEY_hek(&hv_fetch_ent_mh) = (HEK*)k;
+		HeKEY_hek(&PL_hv_fetch_ent_mh) = (HEK*)k;
 	    }
-	    HeSVKEY_set(&hv_fetch_ent_mh, keysv);
-	    HeVAL(&hv_fetch_ent_mh) = sv;
-	    return &hv_fetch_ent_mh;
+	    HeSVKEY_set(&PL_hv_fetch_ent_mh, keysv);
+	    HeVAL(&PL_hv_fetch_ent_mh) = sv;
+	    return &PL_hv_fetch_ent_mh;
 	}
 #ifdef ENV_IS_CASELESS
 	else if (mg_find((SV*)hv,'E')) {
@@ -362,9 +362,9 @@ hv_store_ent(HV *hv, SV *keysv, SV *val, register U32 hash)
  	bool needs_store;
  	hv_magic_check (hv, &needs_copy, &needs_store);
  	if (needs_copy) {
- 	    bool save_taint = tainted;
- 	    if (tainting)
- 		tainted = SvTAINTED(keysv);
+ 	    bool save_taint = PL_tainted;
+ 	    if (PL_tainting)
+ 		PL_tainted = SvTAINTED(keysv);
  	    keysv = sv_2mortal(newSVsv(keysv));
  	    mg_copy((SV*)hv, val, (char*)keysv, HEf_SVKEY);
  	    TAINT_IF(save_taint);
@@ -678,18 +678,18 @@ hsplit(HV *hv)
     register HE *entry;
     register HE **oentry;
 
-    nomemok = TRUE;
+    PL_nomemok = TRUE;
 #if defined(STRANGE_MALLOC) || defined(MYMALLOC)
     Renew(a, ARRAY_ALLOC_BYTES(newsize), char);
     if (!a) {
-      nomemok = FALSE;
+      PL_nomemok = FALSE;
       return;
     }
 #else
 #define MALLOC_OVERHEAD 16
     New(2, a, ARRAY_ALLOC_BYTES(newsize), char);
     if (!a) {
-      nomemok = FALSE;
+      PL_nomemok = FALSE;
       return;
     }
     Copy(xhv->xhv_array, a, oldsize * sizeof(HE*), char);
@@ -700,7 +700,7 @@ hsplit(HV *hv)
 	Safefree(xhv->xhv_array);
 #endif
 
-    nomemok = FALSE;
+    PL_nomemok = FALSE;
     Zero(&a[oldsize * sizeof(HE*)], (newsize-oldsize) * sizeof(HE*), char);	/* zero 2nd half*/
     xhv->xhv_max = --newsize;
     xhv->xhv_array = a;
@@ -753,17 +753,17 @@ hv_ksplit(HV *hv, IV newmax)
 
     a = xhv->xhv_array;
     if (a) {
-	nomemok = TRUE;
+	PL_nomemok = TRUE;
 #if defined(STRANGE_MALLOC) || defined(MYMALLOC)
 	Renew(a, ARRAY_ALLOC_BYTES(newsize), char);
         if (!a) {
-	  nomemok = FALSE;
+	  PL_nomemok = FALSE;
 	  return;
 	}
 #else
 	New(2, a, ARRAY_ALLOC_BYTES(newsize), char);
         if (!a) {
-	  nomemok = FALSE;
+	  PL_nomemok = FALSE;
 	  return;
 	}
 	Copy(xhv->xhv_array, a, oldsize * sizeof(HE*), char);
@@ -773,7 +773,7 @@ hv_ksplit(HV *hv, IV newmax)
 	else
 	    Safefree(xhv->xhv_array);
 #endif
-	nomemok = FALSE;
+	PL_nomemok = FALSE;
 	Zero(&a[oldsize * sizeof(HE*)], (newsize-oldsize) * sizeof(HE*), char); /* zero 2nd half*/
     }
     else {
@@ -874,7 +874,7 @@ hv_free_ent(HV *hv, register HE *entry)
 	return;
     val = HeVAL(entry);
     if (val && isGV(val) && GvCVu(val) && HvNAME(hv))
-	sub_generation++;	/* may be deletion of method from stash */
+	PL_sub_generation++;	/* may be deletion of method from stash */
     SvREFCNT_dec(val);
     if (HeKLEN(entry) == HEf_SVKEY) {
 	SvREFCNT_dec(HeKEY_sv(entry));
@@ -893,7 +893,7 @@ hv_delayfree_ent(HV *hv, register HE *entry)
     if (!entry)
 	return;
     if (isGV(HeVAL(entry)) && GvCVu(HeVAL(entry)) && HvNAME(hv))
-	sub_generation++;	/* may be deletion of method from stash */
+	PL_sub_generation++;	/* may be deletion of method from stash */
     sv_2mortal(HeVAL(entry));	/* free between statements */
     if (HeKLEN(entry) == HEf_SVKEY) {
 	sv_2mortal(HeKEY_sv(entry));
@@ -1147,7 +1147,7 @@ unsharepvn(char *str, I32 len, U32 hash)
 	if (--*Svp == Nullsv)
 	    hv_delete(strtab, str, len, G_DISCARD, hash);
     } */
-    xhv = (XPVHV*)SvANY(strtab);
+    xhv = (XPVHV*)SvANY(PL_strtab);
     /* assert(xhv_array != 0) */
     oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
     for (entry = *oentry; entry; i=0, oentry = &HeNEXT(entry), entry = *oentry) {
@@ -1191,7 +1191,7 @@ share_hek(char *str, I32 len, register U32 hash)
     if (!(Svp = hv_fetch(strtab, str, len, FALSE)))
     	hv_store(strtab, str, len, Nullsv, hash);
     */
-    xhv = (XPVHV*)SvANY(strtab);
+    xhv = (XPVHV*)SvANY(PL_strtab);
     /* assert(xhv_array != 0) */
     oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
     for (entry = *oentry; entry; i=0, entry = HeNEXT(entry)) {
@@ -1214,7 +1214,7 @@ share_hek(char *str, I32 len, register U32 hash)
 	if (i) {				/* initial entry? */
 	    ++xhv->xhv_fill;
 	    if (xhv->xhv_keys > xhv->xhv_max)
-		hsplit(strtab);
+		hsplit(PL_strtab);
 	}
     }
 

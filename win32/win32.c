@@ -501,13 +501,13 @@ do_aspawn(void *vreally, void **vmark, void **vsp)
 
     if (flag != P_NOWAIT) {
 	if (status < 0) {
-	    if (dowarn)
+	    if (PL_dowarn)
 		warn("Can't spawn \"%s\": %s", argv[0], strerror(errno));
 	    status = 255 * 256;
 	}
 	else
 	    status *= 256;
-	statusvalue = status;
+	PL_statusvalue = status;
     }
     Safefree(argv);
     return (status);
@@ -588,7 +588,7 @@ do_spawn2(char *cmd, int exectype)
     }
     if (exectype != EXECF_SPAWN_NOWAIT) {
 	if (status < 0) {
-	    if (dowarn)
+	    if (PL_dowarn)
 		warn("Can't %s \"%s\": %s",
 		     (exectype == EXECF_EXEC ? "exec" : "spawn"),
 		     cmd, strerror(errno));
@@ -596,7 +596,7 @@ do_spawn2(char *cmd, int exectype)
 	}
 	else
 	    status *= 256;
-	statusvalue = status;
+	PL_statusvalue = status;
     }
     return (status);
 }

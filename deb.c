@@ -22,20 +22,20 @@ deb(const char *pat, ...)
     dTHR;
     va_list args;
     register I32 i;
-    GV* gv = curcop->cop_filegv;
+    GV* gv = PL_curcop->cop_filegv;
 
 #ifdef USE_THREADS
     PerlIO_printf(Perl_debug_log, "0x%lx (%s:%ld)\t",
 		  (unsigned long) thr,
 		  SvTYPE(gv) == SVt_PVGV ? SvPVX(GvSV(gv)) : "<free>",
-		  (long)curcop->cop_line);
+		  (long)PL_curcop->cop_line);
 #else
     PerlIO_printf(Perl_debug_log, "(%s:%ld)\t",
 	SvTYPE(gv) == SVt_PVGV ? SvPVX(GvSV(gv)) : "<free>",
-	(long)curcop->cop_line);
+	(long)PL_curcop->cop_line);
 #endif /* USE_THREADS */
-    for (i=0; i<dlevel; i++)
-	PerlIO_printf(Perl_debug_log, "%c%c ",debname[i],debdelim[i]);
+    for (i=0; i<PL_dlevel; i++)
+	PerlIO_printf(Perl_debug_log, "%c%c ",PL_debname[i],PL_debdelim[i]);
 
     va_start(args, pat);
     (void) PerlIO_vprintf(Perl_debug_log,pat,args);
@@ -47,9 +47,9 @@ void
 deb_growlevel(void)
 {
 #ifdef DEBUGGING
-    dlmax += 128;
-    Renew(debname, dlmax, char);
-    Renew(debdelim, dlmax, char);
+    PL_dlmax += 128;
+    Renew(PL_debname, PL_dlmax, char);
+    Renew(PL_debdelim, PL_dlmax, char);
 #endif /* DEBUGGING */
 }
 
@@ -59,12 +59,12 @@ debstackptrs(void)
 #ifdef DEBUGGING
     dTHR;
     PerlIO_printf(Perl_debug_log, "%8lx %8lx %8ld %8ld %8ld\n",
-	(unsigned long)curstack, (unsigned long)stack_base,
-	(long)*markstack_ptr, (long)(stack_sp-stack_base),
-	(long)(stack_max-stack_base));
+	(unsigned long)PL_curstack, (unsigned long)PL_stack_base,
+	(long)*PL_markstack_ptr, (long)(PL_stack_sp-PL_stack_base),
+	(long)(PL_stack_max-PL_stack_base));
     PerlIO_printf(Perl_debug_log, "%8lx %8lx %8ld %8ld %8ld\n",
-	(unsigned long)mainstack, (unsigned long)AvARRAY(curstack),
-	(long)mainstack, (long)AvFILLp(curstack), (long)AvMAX(curstack));
+	(unsigned long)PL_mainstack, (unsigned long)AvARRAY(PL_curstack),
+	(long)PL_mainstack, (long)AvFILLp(PL_curstack), (long)AvMAX(PL_curstack));
 #endif /* DEBUGGING */
     return 0;
 }
@@ -74,14 +74,14 @@ debstack(void)
 {
 #ifdef DEBUGGING
     dTHR;
-    I32 top = stack_sp - stack_base;
+    I32 top = PL_stack_sp - PL_stack_base;
     register I32 i = top - 30;
-    I32 *markscan = curstackinfo->si_markbase;
+    I32 *markscan = PL_curstackinfo->si_markbase;
 
     if (i < 0)
 	i = 0;
     
-    while (++markscan <= markstack_ptr)
+    while (++markscan <= PL_markstack_ptr)
 	if (*markscan >= i)
 	    break;
 
@@ -91,21 +91,21 @@ debstack(void)
 #else
     PerlIO_printf(Perl_debug_log, i ? "    =>  ...  " : "    =>  ");
 #endif /* USE_THREADS */
-    if (stack_base[0] != &sv_undef || stack_sp < stack_base)
+    if (PL_stack_base[0] != &PL_sv_undef || PL_stack_sp < PL_stack_base)
 	PerlIO_printf(Perl_debug_log, " [STACK UNDERFLOW!!!]\n");
     do {
 	++i;
-	if (markscan <= markstack_ptr && *markscan < i) {
+	if (markscan <= PL_markstack_ptr && *markscan < i) {
 	    do {
 		++markscan;
 		PerlIO_putc(Perl_debug_log, '*');
 	    }
-	    while (markscan <= markstack_ptr && *markscan < i);
+	    while (markscan <= PL_markstack_ptr && *markscan < i);
 	    PerlIO_printf(Perl_debug_log, "  ");
 	}
 	if (i > top)
 	    break;
-	PerlIO_printf(Perl_debug_log, "%-4s  ", SvPEEK(stack_base[i]));
+	PerlIO_printf(Perl_debug_log, "%-4s  ", SvPEEK(PL_stack_base[i]));
     }
     while (1);
     PerlIO_printf(Perl_debug_log, "\n");

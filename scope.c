@@ -24,16 +24,16 @@ stack_grow(SV **sp, SV **p, int n)
     if (growing++)
       abort();
 #endif
-    stack_sp = sp;
+    PL_stack_sp = sp;
 #ifndef STRESS_REALLOC
-    av_extend(curstack, (p - stack_base) + (n) + 128);
+    av_extend(PL_curstack, (p - PL_stack_base) + (n) + 128);
 #else
     av_extend(curstack, (p - stack_base) + (n) + 1);
 #endif
 #if defined(DEBUGGING) && !defined(USE_THREADS)
     growing--;
 #endif
-    return stack_sp;
+    return PL_stack_sp;
 }
 
 #ifndef STRESS_REALLOC
@@ -51,7 +51,7 @@ new_stackinfo(I32 stitems, I32 cxitems)
     si->si_stack = newAV();
     AvREAL_off(si->si_stack);
     av_extend(si->si_stack, stitems > 0 ? stitems-1 : 0);
-    AvALLOC(si->si_stack)[0] = &sv_undef;
+    AvALLOC(si->si_stack)[0] = &PL_sv_undef;
     AvFILLp(si->si_stack) = 0;
     si->si_prev = 0;
     si->si_next = 0;
@@ -75,19 +75,19 @@ void
 push_return(OP *retop)
 {
     dTHR;
-    if (retstack_ix == retstack_max) {
-	retstack_max = GROW(retstack_max);
-	Renew(retstack, retstack_max, OP*);
+    if (PL_retstack_ix == PL_retstack_max) {
+	PL_retstack_max = GROW(PL_retstack_max);
+	Renew(PL_retstack, PL_retstack_max, OP*);
     }
-    retstack[retstack_ix++] = retop;
+    PL_retstack[PL_retstack_ix++] = retop;
 }
 
 OP *
 pop_return(void)
 {
     dTHR;
-    if (retstack_ix > 0)
-	return retstack[--retstack_ix];
+    if (PL_retstack_ix > 0)
+	return PL_retstack[--PL_retstack_ix];
     else
 	return Nullop;
 }
@@ -96,11 +96,11 @@ void
 push_scope(void)
 {
     dTHR;
-    if (scopestack_ix == scopestack_max) {
-	scopestack_max = GROW(scopestack_max);
-	Renew(scopestack, scopestack_max, I32);
+    if (PL_scopestack_ix == PL_scopestack_max) {
+	PL_scopestack_max = GROW(PL_scopestack_max);
+	Renew(PL_scopestack, PL_scopestack_max, I32);
     }
-    scopestack[scopestack_ix++] = savestack_ix;
+    PL_scopestack[PL_scopestack_ix++] = PL_savestack_ix;
 
 }
 
@@ -108,7 +108,7 @@ void
 pop_scope(void)
 {
     dTHR;
-    I32 oldsave = scopestack[--scopestack_ix];
+    I32 oldsave = PL_scopestack[--PL_scopestack_ix];
     LEAVE_SCOPE(oldsave);
 }
 
@@ -116,20 +116,20 @@ void
 markstack_grow(void)
 {
     dTHR;
-    I32 oldmax = markstack_max - markstack;
+    I32 oldmax = PL_markstack_max - PL_markstack;
     I32 newmax = GROW(oldmax);
 
-    Renew(markstack, newmax, I32);
-    markstack_ptr = markstack + oldmax;
-    markstack_max = markstack + newmax;
+    Renew(PL_markstack, newmax, I32);
+    PL_markstack_ptr = PL_markstack + oldmax;
+    PL_markstack_max = PL_markstack + newmax;
 }
 
 void
 savestack_grow(void)
 {
     dTHR;
-    savestack_max = GROW(savestack_max) + 4; 
-    Renew(savestack, savestack_max, ANY);
+    PL_savestack_max = GROW(PL_savestack_max) + 4; 
+    Renew(PL_savestack, PL_savestack_max, ANY);
 }
 
 #undef GROW
@@ -139,10 +139,10 @@ free_tmps(void)
 {
     dTHR;
     /* XXX should tmps_floor live in cxstack? */
-    I32 myfloor = tmps_floor;
-    while (tmps_ix > myfloor) {      /* clean up after last statement */
-	SV* sv = tmps_stack[tmps_ix];
-	tmps_stack[tmps_ix--] = Nullsv;
+    I32 myfloor = PL_tmps_floor;
+    while (PL_tmps_ix > myfloor) {      /* clean up after last statement */
+	SV* sv = PL_tmps_stack[PL_tmps_ix];
+	PL_tmps_stack[PL_tmps_ix--] = Nullsv;
 	if (sv) {
 #ifdef DEBUGGING
 	    SvTEMP_off(sv);
@@ -164,21 +164,21 @@ save_scalar_at(SV **sptr)
 	sv_upgrade(sv, SvTYPE(osv));
 	if (SvGMAGICAL(osv)) {
 	    MAGIC* mg;
-	    bool oldtainted = tainted;
+	    bool oldtainted = PL_tainted;
 	    mg_get(osv);
-	    if (tainting && tainted && (mg = mg_find(osv, 't'))) {
+	    if (PL_tainting && PL_tainted && (mg = mg_find(osv, 't'))) {
 		SAVESPTR(mg->mg_obj);
 		mg->mg_obj = osv;
 	    }
 	    SvFLAGS(osv) |= (SvFLAGS(osv) &
 		(SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
-	    tainted = oldtainted;
+	    PL_tainted = oldtainted;
 	}
 	SvMAGIC(sv) = SvMAGIC(osv);
 	SvFLAGS(sv) |= SvMAGICAL(osv);
-	localizing = 1;
+	PL_localizing = 1;
 	SvSETMAGIC(sv);
-	localizing = 0;
+	PL_localizing = 0;
     }
     return sv;
 }
@@ -224,11 +224,11 @@ save_gp(GV *gv, I32 empty)
 	register GP *gp;
 
 	if (GvCVu(gv))
-	    sub_generation++;	/* taking a method out of circulation */
+	    PL_sub_generation++;	/* taking a method out of circulation */
 	Newz(602, gp, 1, GP);
 	GvGP(gv) = gp_ref(gp);
 	GvSV(gv) = NEWSV(72,0);
-	GvLINE(gv) = curcop->cop_line;
+	GvLINE(gv) = PL_curcop->cop_line;
 	GvEGV(gv) = gv;
     }
     else {
@@ -258,9 +258,9 @@ save_ary(GV *gv)
 	SvFLAGS(av) |= SvMAGICAL(oav);
 	SvMAGICAL_off(oav);
 	SvMAGIC(oav) = 0;
-	localizing = 1;
+	PL_localizing = 1;
 	SvSETMAGIC((SV*)av);
-	localizing = 0;
+	PL_localizing = 0;
     }
     return av;
 }
@@ -283,9 +283,9 @@ save_hash(GV *gv)
 	SvFLAGS(hv) |= SvMAGICAL(ohv);
 	SvMAGICAL_off(ohv);
 	SvMAGIC(ohv) = 0;
-	localizing = 1;
+	PL_localizing = 1;
 	SvSETMAGIC((SV*)hv);
-	localizing = 0;
+	PL_localizing = 0;
     }
     return hv;
 }
@@ -453,7 +453,7 @@ save_clearsv(SV **svp)
 {
     dTHR;
     SSCHECK(2);
-    SSPUSHLONG((long)(svp-curpad));
+    SSPUSHLONG((long)(svp-PL_curpad));
     SSPUSHINT(SAVEt_CLEARSV);
 }
 
@@ -528,7 +528,7 @@ save_op(void)
 {
     dTHR;
     SSCHECK(2);
-    SSPUSHPTR(op);
+    SSPUSHPTR(PL_op);
     SSPUSHINT(SAVEt_OP);
 }
 
@@ -546,15 +546,15 @@ leave_scope(I32 base)
 
     if (base < -1)
 	croak("panic: corrupt saved stack index");
-    while (savestack_ix > base) {
+    while (PL_savestack_ix > base) {
 	switch (SSPOPINT) {
 	case SAVEt_ITEM:			/* normal string */
 	    value = (SV*)SSPOPPTR;
 	    sv = (SV*)SSPOPPTR;
 	    sv_replace(sv,value);
-	    localizing = 2;
+	    PL_localizing = 2;
 	    SvSETMAGIC(sv);
-	    localizing = 0;
+	    PL_localizing = 0;
 	    break;
         case SAVEt_SV:				/* scalar reference */
 	    value = (SV*)SSPOPPTR;
@@ -589,9 +589,9 @@ leave_scope(I32 base)
 	    }
             SvREFCNT_dec(sv);
 	    *(SV**)ptr = value;
-	    localizing = 2;
+	    PL_localizing = 2;
 	    SvSETMAGIC(value);
-	    localizing = 0;
+	    PL_localizing = 0;
 	    SvREFCNT_dec(value);
             break;
         case SAVEt_AV:				/* array reference */
@@ -607,9 +607,9 @@ leave_scope(I32 base)
 	    }
             GvAV(gv) = av;
 	    if (SvMAGICAL(av)) {
-		localizing = 2;
+		PL_localizing = 2;
 		SvSETMAGIC((SV*)av);
-		localizing = 0;
+		PL_localizing = 0;
 	    }
             break;
         case SAVEt_HV:				/* hash reference */
@@ -625,9 +625,9 @@ leave_scope(I32 base)
 	    }
             GvHV(gv) = hv;
 	    if (SvMAGICAL(hv)) {
-		localizing = 2;
+		PL_localizing = 2;
 		SvSETMAGIC((SV*)hv);
-		localizing = 0;
+		PL_localizing = 0;
 	    }
             break;
 	case SAVEt_INT:				/* int reference */
@@ -682,7 +682,7 @@ leave_scope(I32 base)
             gp_free(gv);
             GvGP(gv) = (GP*)ptr;
 	    if (GvCVu(gv))
-		sub_generation++;  /* putting a method back into circulation */
+		PL_sub_generation++;  /* putting a method back into circulation */
 	    SvREFCNT_dec(gv);
             break;
 	case SAVEt_FREESV:
@@ -691,8 +691,8 @@ leave_scope(I32 base)
 	    break;
 	case SAVEt_FREEOP:
 	    ptr = SSPOPPTR;
-	    if (comppad)
-		curpad = AvARRAY(comppad);
+	    if (PL_comppad)
+		PL_curpad = AvARRAY(PL_comppad);
 	    op_free((OP*)ptr);
 	    break;
 	case SAVEt_FREEPV:
@@ -700,7 +700,7 @@ leave_scope(I32 base)
 	    Safefree((char*)ptr);
 	    break;
 	case SAVEt_CLEARSV:
-	    ptr = (void*)&curpad[SSPOPLONG];
+	    ptr = (void*)&PL_curpad[SSPOPLONG];
 	    sv = *(SV**)ptr;
 	    /* Can clear pad variable in place? */
 	    if (SvREFCNT(sv) <= 1 && !SvOBJECT(sv)) {
@@ -760,11 +760,11 @@ leave_scope(I32 base)
 	    break;
 	case SAVEt_REGCONTEXT:
 	    i = SSPOPINT;
-	    savestack_ix -= i;  	/* regexp must have croaked */
+	    PL_savestack_ix -= i;  	/* regexp must have croaked */
 	    break;
 	case SAVEt_STACK_POS:		/* Position on Perl stack */
 	    i = SSPOPINT;
-	    stack_sp = stack_base + i;
+	    PL_stack_sp = PL_stack_base + i;
 	    break;
 	case SAVEt_AELEM:		/* array element */
 	    value = (SV*)SSPOPPTR;
@@ -773,7 +773,7 @@ leave_scope(I32 base)
 	    ptr = av_fetch(av,i,1);
 	    if (ptr) {
 		sv = *(SV**)ptr;
-		if (sv && sv != &sv_undef) {
+		if (sv && sv != &PL_sv_undef) {
 		    if (SvRMAGICAL(av) && mg_find((SV*)av, 'P'))
 			(void)SvREFCNT_inc(sv);
 		    SvREFCNT_dec(av);
@@ -790,7 +790,7 @@ leave_scope(I32 base)
 	    ptr = hv_fetch_ent(hv, sv, 1, 0);
 	    if (ptr) {
 		SV *oval = HeVAL((HE*)ptr);
-		if (oval && oval != &sv_undef) {
+		if (oval && oval != &PL_sv_undef) {
 		    ptr = &HeVAL((HE*)ptr);
 		    if (SvRMAGICAL(hv) && mg_find((SV*)hv, 'P'))
 			(void)SvREFCNT_inc(*(SV**)ptr);
@@ -804,14 +804,14 @@ leave_scope(I32 base)
 	    SvREFCNT_dec(value);
 	    break;
 	case SAVEt_OP:
-	    op = (OP*)SSPOPPTR;
+	    PL_op = (OP*)SSPOPPTR;
 	    break;
 	case SAVEt_HINTS:
-	    if (GvHV(hintgv)) {
-		SvREFCNT_dec((SV*)GvHV(hintgv));
-		GvHV(hintgv) = NULL;
+	    if (GvHV(PL_hintgv)) {
+		SvREFCNT_dec((SV*)GvHV(PL_hintgv));
+		GvHV(PL_hintgv) = NULL;
 	    }
-	    *(I32*)&hints = (I32)SSPOPINT;
+	    *(I32*)&PL_hints = (I32)SSPOPINT;
 	    break;
 	default:
 	    croak("panic: leave_scope inconsistency");

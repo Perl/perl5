@@ -242,7 +242,7 @@ PP(pp_glob)
     ENTER;
 
 #ifndef VMS
-    if (tainting) {
+    if (PL_tainting) {
 	/*
 	 * The external globbing program may use things we can't control,
 	 * so for security reasons we must assume the worst.
@@ -252,11 +252,11 @@ PP(pp_glob)
     }
 #endif /* !VMS */
 
-    SAVESPTR(last_in_gv);	/* We don't want this to be permanent. */
-    last_in_gv = (GV*)*stack_sp--;
+    SAVESPTR(PL_last_in_gv);	/* We don't want this to be permanent. */
+    PL_last_in_gv = (GV*)*PL_stack_sp--;
 
-    SAVESPTR(rs);		/* This is not permanent, either. */
-    rs = sv_2mortal(newSVpv("", 1));
+    SAVESPTR(PL_rs);		/* This is not permanent, either. */
+    PL_rs = sv_2mortal(newSVpv("", 1));
 #ifndef DOSISH
 #ifndef CSH
     *SvPVX(rs) = '\n';
@@ -271,14 +271,14 @@ PP(pp_glob)
 #if 0		/* XXX never used! */
 PP(pp_indread)
 {
-    last_in_gv = gv_fetchpv(SvPVx(GvSV((GV*)(*stack_sp--)), na), TRUE,SVt_PVIO);
+    last_in_gv = gv_fetchpv(SvPVx(GvSV((GV*)(*stack_sp--)), PL_na), TRUE,SVt_PVIO);
     return do_readline();
 }
 #endif
 
 PP(pp_rcatline)
 {
-    last_in_gv = cGVOP->op_gv;
+    PL_last_in_gv = cGVOP->op_gv;
     return do_readline();
 }
 
@@ -288,19 +288,19 @@ PP(pp_warn)
     char *tmps;
     if (SP - MARK != 1) {
 	dTARGET;
-	do_join(TARG, &sv_no, MARK, SP);
-	tmps = SvPV(TARG, na);
+	do_join(TARG, &PL_sv_no, MARK, SP);
+	tmps = SvPV(TARG, PL_na);
 	SP = MARK + 1;
     }
     else {
-	tmps = SvPV(TOPs, na);
+	tmps = SvPV(TOPs, PL_na);
     }
     if (!tmps || !*tmps) {
   	SV *error = ERRSV;
 	(void)SvUPGRADE(error, SVt_PV);
 	if (SvPOK(error) && SvCUR(error))
 	    sv_catpv(error, "\t...caught");
-	tmps = SvPV(error, na);
+	tmps = SvPV(error, PL_na);
     }
     if (!tmps || !*tmps)
 	tmps = "Warning: something's wrong";
@@ -316,13 +316,13 @@ PP(pp_die)
     char *pat = "%s";
     if (SP - MARK != 1) {
 	dTARGET;
-	do_join(TARG, &sv_no, MARK, SP);
-	tmps = SvPV(TARG, na);
+	do_join(TARG, &PL_sv_no, MARK, SP);
+	tmps = SvPV(TARG, PL_na);
 	SP = MARK + 1;
     }
     else {
 	tmpsv = TOPs;
-	tmps = SvROK(tmpsv) ? Nullch : SvPV(tmpsv, na);
+	tmps = SvROK(tmpsv) ? Nullch : SvPV(tmpsv, PL_na);
     }
     if (!tmps || !*tmps) {
   	SV *error = ERRSV;
@@ -334,8 +334,8 @@ PP(pp_die)
 		HV *stash = SvSTASH(SvRV(error));
 		GV *gv = gv_fetchmethod(stash, "PROPAGATE");
 		if (gv) {
-		    SV *file = sv_2mortal(newSVsv(GvSV(curcop->cop_filegv)));
-		    SV *line = sv_2mortal(newSViv(curcop->cop_line));
+		    SV *file = sv_2mortal(newSVsv(GvSV(PL_curcop->cop_filegv)));
+		    SV *line = sv_2mortal(newSViv(PL_curcop->cop_line));
 		    EXTEND(SP, 3);
 		    PUSHMARK(SP);
 		    PUSHs(error);
@@ -344,7 +344,7 @@ PP(pp_die)
 		    PUTBACK;
 		    perl_call_sv((SV*)GvCV(gv),
 				 G_SCALAR|G_EVAL|G_KEEPERR);
-		    sv_setsv(error,*stack_sp--);
+		    sv_setsv(error,*PL_stack_sp--);
 		}
 	    }
 	    pat = Nullch;
@@ -352,7 +352,7 @@ PP(pp_die)
 	else {
 	    if (SvPOK(error) && SvCUR(error))
 		sv_catpv(error, "\t...propagated");
-	    tmps = SvPV(error, na);
+	    tmps = SvPV(error, PL_na);
 	}
     }
     if (!tmps || !*tmps)
@@ -383,8 +383,8 @@ PP(pp_open)
 	IoFLAGS(GvIOp(gv)) &= ~IOf_UNTAINT;
     tmps = SvPV(sv, len);
     if (do_open(gv, tmps, len, FALSE, 0, 0, Nullfp))
-	PUSHi( (I32)forkprocess );
-    else if (forkprocess == 0)		/* we are a new child */
+	PUSHi( (I32)PL_forkprocess );
+    else if (PL_forkprocess == 0)		/* we are a new child */
 	PUSHi(0);
     else
 	RETPUSHUNDEF;
@@ -398,7 +398,7 @@ PP(pp_close)
     MAGIC *mg;
 
     if (MAXARG == 0)
-	gv = defoutgv;
+	gv = PL_defoutgv;
     else
 	gv = (GV*)POPs;
 
@@ -540,7 +540,7 @@ PP(pp_tie)
     HV* stash;
     GV *gv;
     SV *sv;
-    I32 markoff = MARK - stack_base;
+    I32 markoff = MARK - PL_stack_base;
     char *methname;
     int how = 'P';
     U32 items;
@@ -580,7 +580,7 @@ PP(pp_tie)
 	stash = gv_stashsv(*MARK, FALSE);
 	if (!stash || !(gv = gv_fetchmethod(stash, methname))) {
 	    DIE("Can't locate object method \"%s\" via package \"%s\"",
-		 methname, SvPV(*MARK,na));                   
+		 methname, SvPV(*MARK,PL_na));                   
 	}
 	ENTER;
 	PUSHSTACKi(PERLSI_MAGIC);
@@ -600,7 +600,7 @@ PP(pp_tie)
 	sv_magic(varsv, sv, how, Nullch, 0);
     }
     LEAVE;
-    SP = stack_base + markoff;
+    SP = PL_stack_base + markoff;
     PUSHs(sv);
     RETURN;
 }
@@ -612,7 +612,7 @@ PP(pp_untie)
 
     sv = POPs;
 
-    if (dowarn) {
+    if (PL_dowarn) {
         MAGIC * mg ;
         if (SvMAGICAL(sv)) {
             if (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV)
@@ -665,7 +665,7 @@ PP(pp_dbmopen)
 
     hv = (HV*)POPs;
 
-    sv = sv_mortalcopy(&sv_no);
+    sv = sv_mortalcopy(&PL_sv_no);
     sv_setpv(sv, "AnyDBM_File");
     stash = gv_stashsv(sv, FALSE);
     if (!stash || !(gv = gv_fetchmethod(stash, "TIEHASH"))) {
@@ -793,7 +793,7 @@ PP(pp_sselect)
 	    continue;
 	}
 	else if (!SvPOK(sv))
-	    SvPV_force(sv,na);	/* force string conversion */
+	    SvPV_force(sv,PL_na);	/* force string conversion */
 	j = SvLEN(sv);
 	if (j < growsize) {
 	    Sv_Grow(sv, growsize);
@@ -841,7 +841,7 @@ PP(pp_sselect)
     if (GIMME == G_ARRAY && tbuf) {
 	value = (double)(timebuf.tv_sec) +
 		(double)(timebuf.tv_usec) / 1000000.0;
-	PUSHs(sv = sv_mortalcopy(&sv_no));
+	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setnv(sv, value);
     }
     RETURN;
@@ -856,9 +856,9 @@ setdefout(GV *gv)
     dTHR;
     if (gv)
 	(void)SvREFCNT_inc(gv);
-    if (defoutgv)
-	SvREFCNT_dec(defoutgv);
-    defoutgv = gv;
+    if (PL_defoutgv)
+	SvREFCNT_dec(PL_defoutgv);
+    PL_defoutgv = gv;
 }
 
 PP(pp_select)
@@ -867,18 +867,18 @@ PP(pp_select)
     GV *newdefout, *egv;
     HV *hv;
 
-    newdefout = (op->op_private > 0) ? ((GV *) POPs) : (GV *) NULL;
+    newdefout = (PL_op->op_private > 0) ? ((GV *) POPs) : (GV *) NULL;
 
-    egv = GvEGV(defoutgv);
+    egv = GvEGV(PL_defoutgv);
     if (!egv)
-	egv = defoutgv;
+	egv = PL_defoutgv;
     hv = GvSTASH(egv);
     if (! hv)
-	XPUSHs(&sv_undef);
+	XPUSHs(&PL_sv_undef);
     else {
 	GV **gvp = (GV**)hv_fetch(hv, GvNAME(egv), GvNAMELEN(egv), FALSE);
 	if (gvp && *gvp == egv) {
-	    gv_efullname3(TARG, defoutgv, Nullch);
+	    gv_efullname3(TARG, PL_defoutgv, Nullch);
 	    XPUSHTARG;
 	}
 	else {
@@ -902,11 +902,11 @@ PP(pp_getc)
     MAGIC *mg;
 
     if (MAXARG <= 0)
-	gv = stdingv;
+	gv = PL_stdingv;
     else
 	gv = (GV*)POPs;
     if (!gv)
-	gv = argvgv;
+	gv = PL_argvgv;
 
     if (SvRMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q'))) {
 	I32 gimme = GIMME_V;
@@ -948,10 +948,10 @@ doform(CV *cv, GV *gv, OP *retop)
     SAVETMPS;
 
     push_return(retop);
-    PUSHBLOCK(cx, CXt_SUB, stack_sp);
+    PUSHBLOCK(cx, CXt_SUB, PL_stack_sp);
     PUSHFORMAT(cx);
-    SAVESPTR(curpad);
-    curpad = AvARRAY((AV*)svp[1]);
+    SAVESPTR(PL_curpad);
+    PL_curpad = AvARRAY((AV*)svp[1]);
 
     setdefout(gv);	    /* locally select filehandle so $% et al work */
     return CvSTART(cv);
@@ -966,11 +966,11 @@ PP(pp_enterwrite)
     CV *cv;
 
     if (MAXARG == 0)
-	gv = defoutgv;
+	gv = PL_defoutgv;
     else {
 	gv = (GV*)POPs;
 	if (!gv)
-	    gv = defoutgv;
+	    gv = PL_defoutgv;
     }
     EXTEND(SP, 1);
     io = GvIO(gv);
@@ -995,7 +995,7 @@ PP(pp_enterwrite)
 	cv = (CV*)sv_2mortal((SV*)cv_clone(cv));
 
     IoFLAGS(io) &= ~IOf_DIDTOP;
-    return doform(cv,gv,op->op_next);
+    return doform(cv,gv,PL_op->op_next);
 }
 
 PP(pp_leavewrite)
@@ -1010,9 +1010,9 @@ PP(pp_leavewrite)
     register PERL_CONTEXT *cx;
 
     DEBUG_f(PerlIO_printf(Perl_debug_log, "left=%ld, todo=%ld\n",
-	  (long)IoLINES_LEFT(io), (long)FmLINES(formtarget)));
-    if (IoLINES_LEFT(io) < FmLINES(formtarget) &&
-	formtarget != toptarget)
+	  (long)IoLINES_LEFT(io), (long)FmLINES(PL_formtarget)));
+    if (IoLINES_LEFT(io) < FmLINES(PL_formtarget) &&
+	PL_formtarget != PL_toptarget)
     {
 	GV *fgv;
 	CV *cv;
@@ -1040,7 +1040,7 @@ PP(pp_leavewrite)
 	}
 	if (IoFLAGS(io) & IOf_DIDTOP) {	/* Oh dear.  It still doesn't fit. */
 	    I32 lines = IoLINES_LEFT(io);
-	    char *s = SvPVX(formtarget);
+	    char *s = SvPVX(PL_formtarget);
 	    if (lines <= 0)		/* Yow, header didn't even fit!!! */
 		goto forget_top;
 	    while (lines-- > 0) {
@@ -1050,16 +1050,16 @@ PP(pp_leavewrite)
 		s++;
 	    }
 	    if (s) {
-		PerlIO_write(ofp, SvPVX(formtarget), s - SvPVX(formtarget));
-		sv_chop(formtarget, s);
-		FmLINES(formtarget) -= IoLINES_LEFT(io);
+		PerlIO_write(ofp, SvPVX(PL_formtarget), s - SvPVX(PL_formtarget));
+		sv_chop(PL_formtarget, s);
+		FmLINES(PL_formtarget) -= IoLINES_LEFT(io);
 	    }
 	}
 	if (IoLINES_LEFT(io) >= 0 && IoPAGE(io) > 0)
-	    PerlIO_write(ofp, SvPVX(formfeed), SvCUR(formfeed));
+	    PerlIO_write(ofp, SvPVX(PL_formfeed), SvCUR(PL_formfeed));
 	IoLINES_LEFT(io) = IoPAGE_LEN(io);
 	IoPAGE(io)++;
-	formtarget = toptarget;
+	PL_formtarget = PL_toptarget;
 	IoFLAGS(io) |= IOf_DIDTOP;
 	fgv = IoTOP_GV(io);
 	if (!fgv)
@@ -1072,42 +1072,42 @@ PP(pp_leavewrite)
 	}
 	if (CvCLONE(cv))
 	    cv = (CV*)sv_2mortal((SV*)cv_clone(cv));
-	return doform(cv,gv,op);
+	return doform(cv,gv,PL_op);
     }
 
   forget_top:
-    POPBLOCK(cx,curpm);
+    POPBLOCK(cx,PL_curpm);
     POPFORMAT(cx);
     LEAVE;
 
     fp = IoOFP(io);
     if (!fp) {
-	if (dowarn) {
+	if (PL_dowarn) {
 	    if (IoIFP(io))
 		warn("Filehandle only opened for input");
 	    else
 		warn("Write on closed filehandle");
 	}
-	PUSHs(&sv_no);
+	PUSHs(&PL_sv_no);
     }
     else {
-	if ((IoLINES_LEFT(io) -= FmLINES(formtarget)) < 0) {
-	    if (dowarn)
+	if ((IoLINES_LEFT(io) -= FmLINES(PL_formtarget)) < 0) {
+	    if (PL_dowarn)
 		warn("page overflow");
 	}
-	if (!PerlIO_write(ofp, SvPVX(formtarget), SvCUR(formtarget)) ||
+	if (!PerlIO_write(ofp, SvPVX(PL_formtarget), SvCUR(PL_formtarget)) ||
 		PerlIO_error(fp))
-	    PUSHs(&sv_no);
+	    PUSHs(&PL_sv_no);
 	else {
-	    FmLINES(formtarget) = 0;
-	    SvCUR_set(formtarget, 0);
-	    *SvEND(formtarget) = '\0';
+	    FmLINES(PL_formtarget) = 0;
+	    SvCUR_set(PL_formtarget, 0);
+	    *SvEND(PL_formtarget) = '\0';
 	    if (IoFLAGS(io) & IOf_FLUSH)
 		(void)PerlIO_flush(fp);
-	    PUSHs(&sv_yes);
+	    PUSHs(&PL_sv_yes);
 	}
     }
-    formtarget = bodytarget;
+    PL_formtarget = PL_bodytarget;
     PUTBACK;
     return pop_return();
 }
@@ -1121,10 +1121,10 @@ PP(pp_prtf)
     SV *sv;
     MAGIC *mg;
 
-    if (op->op_flags & OPf_STACKED)
+    if (PL_op->op_flags & OPf_STACKED)
 	gv = (GV*)*++MARK;
     else
-	gv = defoutgv;
+	gv = PL_defoutgv;
 
     if (SvRMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q'))) {
 	if (MARK == ORIGMARK) {
@@ -1148,27 +1148,27 @@ PP(pp_prtf)
 
     sv = NEWSV(0,0);
     if (!(io = GvIO(gv))) {
-	if (dowarn) {
+	if (PL_dowarn) {
 	    gv_fullname3(sv, gv, Nullch);
-	    warn("Filehandle %s never opened", SvPV(sv,na));
+	    warn("Filehandle %s never opened", SvPV(sv,PL_na));
 	}
 	SETERRNO(EBADF,RMS$_IFI);
 	goto just_say_no;
     }
     else if (!(fp = IoOFP(io))) {
-	if (dowarn)  {
+	if (PL_dowarn)  {
 	    gv_fullname3(sv, gv, Nullch);
 	    if (IoIFP(io))
-		warn("Filehandle %s opened only for input", SvPV(sv,na));
+		warn("Filehandle %s opened only for input", SvPV(sv,PL_na));
 	    else
-		warn("printf on closed filehandle %s", SvPV(sv,na));
+		warn("printf on closed filehandle %s", SvPV(sv,PL_na));
 	}
 	SETERRNO(EBADF,IoIFP(io)?RMS$_FAC:RMS$_IFI);
 	goto just_say_no;
     }
     else {
 #ifdef USE_LOCALE_NUMERIC
-	if (op->op_private & OPpLOCALE)
+	if (PL_op->op_private & OPpLOCALE)
 	    SET_NUMERIC_LOCAL();
 	else
 	    SET_NUMERIC_STANDARD();
@@ -1183,13 +1183,13 @@ PP(pp_prtf)
     }
     SvREFCNT_dec(sv);
     SP = ORIGMARK;
-    PUSHs(&sv_yes);
+    PUSHs(&PL_sv_yes);
     RETURN;
 
   just_say_no:
     SvREFCNT_dec(sv);
     SP = ORIGMARK;
-    PUSHs(&sv_undef);
+    PUSHs(&PL_sv_undef);
     RETURN;
 }
 
@@ -1213,10 +1213,10 @@ PP(pp_sysopen)
     tmps = SvPV(sv, len);
     if (do_open(gv, tmps, len, TRUE, mode, perm, Nullfp)) {
 	IoLINES(GvIOp(gv)) = 0;
-	PUSHs(&sv_yes);
+	PUSHs(&PL_sv_yes);
     }
     else {
-	PUSHs(&sv_undef);
+	PUSHs(&PL_sv_undef);
     }
     RETURN;
 }
@@ -1235,7 +1235,7 @@ PP(pp_sysread)
     MAGIC *mg;
 
     gv = (GV*)*++MARK;
-    if ((op->op_type == OP_READ || op->op_type == OP_SYSREAD) &&
+    if ((PL_op->op_type == OP_READ || PL_op->op_type == OP_SYSREAD) &&
 	SvRMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q')))
     {
 	SV *sv;
@@ -1270,7 +1270,7 @@ PP(pp_sysread)
     if (!io || !IoIFP(io))
 	goto say_undef;
 #ifdef HAS_SOCKET
-    if (op->op_type == OP_RECV) {
+    if (PL_op->op_type == OP_RECV) {
 	char namebuf[MAXPATHLEN];
 #if (defined(VMS_DO_SOCKETS) && defined(DECCRTL_SOCKETS)) || defined(MPE)
 	bufsize = sizeof (struct sockaddr_in);
@@ -1296,7 +1296,7 @@ PP(pp_sysread)
 	RETURN;
     }
 #else
-    if (op->op_type == OP_RECV)
+    if (PL_op->op_type == OP_RECV)
 	DIE(no_sock_func, "recv");
 #endif
     if (offset < 0) {
@@ -1309,7 +1309,7 @@ PP(pp_sysread)
     if (offset > bufsize) { /* Zero any newly allocated space */
     	Zero(buffer+bufsize, offset-bufsize, char);
     }
-    if (op->op_type == OP_SYSREAD) {
+    if (PL_op->op_type == OP_SYSREAD) {
 	length = PerlLIO_read(PerlIO_fileno(IoIFP(io)), buffer+offset, length);
     }
     else
@@ -1368,7 +1368,7 @@ PP(pp_send)
     MAGIC *mg;
 
     gv = (GV*)*++MARK;
-    if (op->op_type == OP_SYSWRITE &&
+    if (PL_op->op_type == OP_SYSWRITE &&
 	SvRMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q')))
     {
 	SV *sv;
@@ -1395,14 +1395,14 @@ PP(pp_send)
     io = GvIO(gv);
     if (!io || !IoIFP(io)) {
 	length = -1;
-	if (dowarn) {
-	    if (op->op_type == OP_SYSWRITE)
+	if (PL_dowarn) {
+	    if (PL_op->op_type == OP_SYSWRITE)
 		warn("Syswrite on closed filehandle");
 	    else
 		warn("Send on closed socket");
 	}
     }
-    else if (op->op_type == OP_SYSWRITE) {
+    else if (PL_op->op_type == OP_SYSWRITE) {
 	if (MARK < SP) {
 	    offset = SvIVx(*++MARK);
 	    if (offset < 0) {
@@ -1454,9 +1454,9 @@ PP(pp_eof)
     GV *gv;
 
     if (MAXARG <= 0)
-	gv = last_in_gv;
+	gv = PL_last_in_gv;
     else
-	gv = last_in_gv = (GV*)POPs;
+	gv = PL_last_in_gv = (GV*)POPs;
     PUSHs(boolSV(!gv || do_eof(gv)));
     RETURN;
 }
@@ -1467,9 +1467,9 @@ PP(pp_tell)
     GV *gv;
 
     if (MAXARG <= 0)
-	gv = last_in_gv;
+	gv = PL_last_in_gv;
     else
-	gv = last_in_gv = (GV*)POPs;
+	gv = PL_last_in_gv = (GV*)POPs;
     PUSHi( do_tell(gv) );
     RETURN;
 }
@@ -1486,12 +1486,12 @@ PP(pp_sysseek)
     int whence = POPi;
     long offset = POPl;
 
-    gv = last_in_gv = (GV*)POPs;
-    if (op->op_type == OP_SEEK)
+    gv = PL_last_in_gv = (GV*)POPs;
+    if (PL_op->op_type == OP_SEEK)
 	PUSHs(boolSV(do_seek(gv, offset, whence)));
     else {
 	long n = do_sysseek(gv, offset, whence);
-	PUSHs((n < 0) ? &sv_undef
+	PUSHs((n < 0) ? &PL_sv_undef
 	      : sv_2mortal(n ? newSViv((IV)n)
 			   : newSVpv(zero_but_true, ZBTLEN)));
     }
@@ -1507,7 +1507,7 @@ PP(pp_truncate)
 
     SETERRNO(0,0);
 #if defined(HAS_TRUNCATE) || defined(HAS_CHSIZE) || defined(F_FREESP)
-    if (op->op_flags & OPf_SPECIAL) {
+    if (PL_op->op_flags & OPf_SPECIAL) {
 	tmpgv = gv_fetchpv(POPp, FALSE, SVt_PVIO);
     do_ftruncate:
 	TAINT_PROPER("truncate");
@@ -1532,7 +1532,7 @@ PP(pp_truncate)
 	    goto do_ftruncate;
 	}
 
-	name = SvPV(sv, na);
+	name = SvPV(sv, PL_na);
 	TAINT_PROPER("truncate");
 #ifdef HAS_TRUNCATE
 	if (truncate(name, len) < 0)
@@ -1571,7 +1571,7 @@ PP(pp_ioctl)
     djSP; dTARGET;
     SV *argsv = POPs;
     unsigned int func = U_I(POPn);
-    int optype = op->op_type;
+    int optype = PL_op->op_type;
     char *s;
     IV retval;
     GV *gv = (GV*)POPs;
@@ -1648,7 +1648,7 @@ PP(pp_flock)
 #ifdef FLOCK
     argtype = POPi;
     if (MAXARG <= 0)
-	gv = last_in_gv;
+	gv = PL_last_in_gv;
     else
 	gv = (GV*)POPs;
     if (gv && GvIO(gv))
@@ -1812,7 +1812,7 @@ PP(pp_bind)
 	RETPUSHUNDEF;
 
 nuts:
-    if (dowarn)
+    if (PL_dowarn)
 	warn("bind() on closed fd");
     SETERRNO(EBADF,SS$_IVCHAN);
     RETPUSHUNDEF;
@@ -1842,7 +1842,7 @@ PP(pp_connect)
 	RETPUSHUNDEF;
 
 nuts:
-    if (dowarn)
+    if (PL_dowarn)
 	warn("connect() on closed fd");
     SETERRNO(EBADF,SS$_IVCHAN);
     RETPUSHUNDEF;
@@ -1868,7 +1868,7 @@ PP(pp_listen)
 	RETPUSHUNDEF;
 
 nuts:
-    if (dowarn)
+    if (PL_dowarn)
 	warn("listen() on closed fd");
     SETERRNO(EBADF,SS$_IVCHAN);
     RETPUSHUNDEF;
@@ -1922,7 +1922,7 @@ PP(pp_accept)
     RETURN;
 
 nuts:
-    if (dowarn)
+    if (PL_dowarn)
 	warn("accept() on closed fd");
     SETERRNO(EBADF,SS$_IVCHAN);
 
@@ -1949,7 +1949,7 @@ PP(pp_shutdown)
     RETURN;
 
 nuts:
-    if (dowarn)
+    if (PL_dowarn)
 	warn("shutdown() on closed fd");
     SETERRNO(EBADF,SS$_IVCHAN);
     RETPUSHUNDEF;
@@ -1971,7 +1971,7 @@ PP(pp_ssockopt)
 {
     djSP;
 #ifdef HAS_SOCKET
-    int optype = op->op_type;
+    int optype = PL_op->op_type;
     SV *sv;
     int fd;
     unsigned int optname;
@@ -2010,8 +2010,8 @@ PP(pp_ssockopt)
 	    char *buf;
 	    int aint;
 	    if (SvPOKp(sv)) {
-		buf = SvPV(sv, na);
-		len = na;
+		buf = SvPV(sv, PL_na);
+		len = PL_na;
 	    }
 	    else {
 		aint = (int)SvIV(sv);
@@ -2020,14 +2020,14 @@ PP(pp_ssockopt)
 	    }
 	    if (PerlSock_setsockopt(fd, lvl, optname, buf, len) < 0)
 		goto nuts2;
-	    PUSHs(&sv_yes);
+	    PUSHs(&PL_sv_yes);
 	}
 	break;
     }
     RETURN;
 
 nuts:
-    if (dowarn)
+    if (PL_dowarn)
 	warn("[gs]etsockopt() on closed fd");
     SETERRNO(EBADF,SS$_IVCHAN);
 nuts2:
@@ -2051,7 +2051,7 @@ PP(pp_getpeername)
 {
     djSP;
 #ifdef HAS_SOCKET
-    int optype = op->op_type;
+    int optype = PL_op->op_type;
     SV *sv;
     int fd;
     GV *gv = (GV*)POPs;
@@ -2100,7 +2100,7 @@ PP(pp_getpeername)
     RETURN;
 
 nuts:
-    if (dowarn)
+    if (PL_dowarn)
 	warn("get{sock, peer}name() on closed fd");
     SETERRNO(EBADF,SS$_IVCHAN);
 nuts2:
@@ -2125,17 +2125,17 @@ PP(pp_stat)
     I32 gimme;
     I32 max = 13;
 
-    if (op->op_flags & OPf_REF) {
+    if (PL_op->op_flags & OPf_REF) {
 	tmpgv = cGVOP->op_gv;
       do_fstat:
-	if (tmpgv != defgv) {
-	    laststype = OP_STAT;
-	    statgv = tmpgv;
-	    sv_setpv(statname, "");
-	    laststatval = (GvIO(tmpgv) && IoIFP(GvIOp(tmpgv))
-		? PerlLIO_fstat(PerlIO_fileno(IoIFP(GvIOn(tmpgv))), &statcache) : -1);
+	if (tmpgv != PL_defgv) {
+	    PL_laststype = OP_STAT;
+	    PL_statgv = tmpgv;
+	    sv_setpv(PL_statname, "");
+	    PL_laststatval = (GvIO(tmpgv) && IoIFP(GvIOp(tmpgv))
+		? PerlLIO_fstat(PerlIO_fileno(IoIFP(GvIOn(tmpgv))), &PL_statcache) : -1);
 	}
-	if (laststatval < 0)
+	if (PL_laststatval < 0)
 	    max = 0;
     }
     else {
@@ -2148,17 +2148,17 @@ PP(pp_stat)
 	    tmpgv = (GV*)SvRV(sv);
 	    goto do_fstat;
 	}
-	sv_setpv(statname, SvPV(sv,na));
-	statgv = Nullgv;
+	sv_setpv(PL_statname, SvPV(sv,PL_na));
+	PL_statgv = Nullgv;
 #ifdef HAS_LSTAT
-	laststype = op->op_type;
-	if (op->op_type == OP_LSTAT)
-	    laststatval = PerlLIO_lstat(SvPV(statname, na), &statcache);
+	PL_laststype = PL_op->op_type;
+	if (PL_op->op_type == OP_LSTAT)
+	    PL_laststatval = PerlLIO_lstat(SvPV(PL_statname, PL_na), &PL_statcache);
 	else
 #endif
-	    laststatval = PerlLIO_stat(SvPV(statname, na), &statcache);
-	if (laststatval < 0) {
-	    if (dowarn && strchr(SvPV(statname, na), '\n'))
+	    PL_laststatval = PerlLIO_stat(SvPV(PL_statname, PL_na), &PL_statcache);
+	if (PL_laststatval < 0) {
+	    if (PL_dowarn && strchr(SvPV(PL_statname, PL_na), '\n'))
 		warn(warn_nl, "stat");
 	    max = 0;
 	}
@@ -2173,30 +2173,30 @@ PP(pp_stat)
     if (max) {
 	EXTEND(SP, max);
 	EXTEND_MORTAL(max);
-	PUSHs(sv_2mortal(newSViv((I32)statcache.st_dev)));
-	PUSHs(sv_2mortal(newSViv((I32)statcache.st_ino)));
-	PUSHs(sv_2mortal(newSViv((I32)statcache.st_mode)));
-	PUSHs(sv_2mortal(newSViv((I32)statcache.st_nlink)));
-	PUSHs(sv_2mortal(newSViv((I32)statcache.st_uid)));
-	PUSHs(sv_2mortal(newSViv((I32)statcache.st_gid)));
+	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_dev)));
+	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_ino)));
+	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_mode)));
+	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_nlink)));
+	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_uid)));
+	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_gid)));
 #ifdef USE_STAT_RDEV
-	PUSHs(sv_2mortal(newSViv((I32)statcache.st_rdev)));
+	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_rdev)));
 #else
 	PUSHs(sv_2mortal(newSVpv("", 0)));
 #endif
-	PUSHs(sv_2mortal(newSViv((I32)statcache.st_size)));
+	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_size)));
 #ifdef BIG_TIME
 	PUSHs(sv_2mortal(newSVnv((U32)statcache.st_atime)));
 	PUSHs(sv_2mortal(newSVnv((U32)statcache.st_mtime)));
 	PUSHs(sv_2mortal(newSVnv((U32)statcache.st_ctime)));
 #else
-	PUSHs(sv_2mortal(newSViv((I32)statcache.st_atime)));
-	PUSHs(sv_2mortal(newSViv((I32)statcache.st_mtime)));
-	PUSHs(sv_2mortal(newSViv((I32)statcache.st_ctime)));
+	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_atime)));
+	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_mtime)));
+	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_ctime)));
 #endif
 #ifdef USE_STAT_BLOCKS
-	PUSHs(sv_2mortal(newSViv((I32)statcache.st_blksize)));
-	PUSHs(sv_2mortal(newSViv((I32)statcache.st_blocks)));
+	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_blksize)));
+	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_blocks)));
 #else
 	PUSHs(sv_2mortal(newSVpv("", 0)));
 	PUSHs(sv_2mortal(newSVpv("", 0)));
@@ -2211,7 +2211,7 @@ PP(pp_ftrread)
     djSP;
     if (result < 0)
 	RETPUSHUNDEF;
-    if (cando(S_IRUSR, 0, &statcache))
+    if (cando(S_IRUSR, 0, &PL_statcache))
 	RETPUSHYES;
     RETPUSHNO;
 }
@@ -2222,7 +2222,7 @@ PP(pp_ftrwrite)
     djSP;
     if (result < 0)
 	RETPUSHUNDEF;
-    if (cando(S_IWUSR, 0, &statcache))
+    if (cando(S_IWUSR, 0, &PL_statcache))
 	RETPUSHYES;
     RETPUSHNO;
 }
@@ -2233,7 +2233,7 @@ PP(pp_ftrexec)
     djSP;
     if (result < 0)
 	RETPUSHUNDEF;
-    if (cando(S_IXUSR, 0, &statcache))
+    if (cando(S_IXUSR, 0, &PL_statcache))
 	RETPUSHYES;
     RETPUSHNO;
 }
@@ -2244,7 +2244,7 @@ PP(pp_fteread)
     djSP;
     if (result < 0)
 	RETPUSHUNDEF;
-    if (cando(S_IRUSR, 1, &statcache))
+    if (cando(S_IRUSR, 1, &PL_statcache))
 	RETPUSHYES;
     RETPUSHNO;
 }
@@ -2255,7 +2255,7 @@ PP(pp_ftewrite)
     djSP;
     if (result < 0)
 	RETPUSHUNDEF;
-    if (cando(S_IWUSR, 1, &statcache))
+    if (cando(S_IWUSR, 1, &PL_statcache))
 	RETPUSHYES;
     RETPUSHNO;
 }
@@ -2266,7 +2266,7 @@ PP(pp_fteexec)
     djSP;
     if (result < 0)
 	RETPUSHUNDEF;
-    if (cando(S_IXUSR, 1, &statcache))
+    if (cando(S_IXUSR, 1, &PL_statcache))
 	RETPUSHYES;
     RETPUSHNO;
 }
@@ -2291,7 +2291,7 @@ PP(pp_ftrowned)
     djSP;
     if (result < 0)
 	RETPUSHUNDEF;
-    if (statcache.st_uid == (op->op_type == OP_FTEOWNED ? euid : uid) )
+    if (PL_statcache.st_uid == (PL_op->op_type == OP_FTEOWNED ? PL_euid : PL_uid) )
 	RETPUSHYES;
     RETPUSHNO;
 }
@@ -2302,7 +2302,7 @@ PP(pp_ftzero)
     djSP;
     if (result < 0)
 	RETPUSHUNDEF;
-    if (!statcache.st_size)
+    if (!PL_statcache.st_size)
 	RETPUSHYES;
     RETPUSHNO;
 }
@@ -2313,7 +2313,7 @@ PP(pp_ftsize)
     djSP; dTARGET;
     if (result < 0)
 	RETPUSHUNDEF;
-    PUSHi(statcache.st_size);
+    PUSHi(PL_statcache.st_size);
     RETURN;
 }
 
@@ -2323,7 +2323,7 @@ PP(pp_ftmtime)
     djSP; dTARGET;
     if (result < 0)
 	RETPUSHUNDEF;
-    PUSHn( ((I32)basetime - (I32)statcache.st_mtime) / 86400.0 );
+    PUSHn( ((I32)PL_basetime - (I32)PL_statcache.st_mtime) / 86400.0 );
     RETURN;
 }
 
@@ -2333,7 +2333,7 @@ PP(pp_ftatime)
     djSP; dTARGET;
     if (result < 0)
 	RETPUSHUNDEF;
-    PUSHn( ((I32)basetime - (I32)statcache.st_atime) / 86400.0 );
+    PUSHn( ((I32)PL_basetime - (I32)PL_statcache.st_atime) / 86400.0 );
     RETURN;
 }
 
@@ -2343,7 +2343,7 @@ PP(pp_ftctime)
     djSP; dTARGET;
     if (result < 0)
 	RETPUSHUNDEF;
-    PUSHn( ((I32)basetime - (I32)statcache.st_ctime) / 86400.0 );
+    PUSHn( ((I32)PL_basetime - (I32)PL_statcache.st_ctime) / 86400.0 );
     RETURN;
 }
 
@@ -2353,7 +2353,7 @@ PP(pp_ftsock)
     djSP;
     if (result < 0)
 	RETPUSHUNDEF;
-    if (S_ISSOCK(statcache.st_mode))
+    if (S_ISSOCK(PL_statcache.st_mode))
 	RETPUSHYES;
     RETPUSHNO;
 }
@@ -2364,7 +2364,7 @@ PP(pp_ftchr)
     djSP;
     if (result < 0)
 	RETPUSHUNDEF;
-    if (S_ISCHR(statcache.st_mode))
+    if (S_ISCHR(PL_statcache.st_mode))
 	RETPUSHYES;
     RETPUSHNO;
 }
@@ -2375,7 +2375,7 @@ PP(pp_ftblk)
     djSP;
     if (result < 0)
 	RETPUSHUNDEF;
-    if (S_ISBLK(statcache.st_mode))
+    if (S_ISBLK(PL_statcache.st_mode))
 	RETPUSHYES;
     RETPUSHNO;
 }
@@ -2386,7 +2386,7 @@ PP(pp_ftfile)
     djSP;
     if (result < 0)
 	RETPUSHUNDEF;
-    if (S_ISREG(statcache.st_mode))
+    if (S_ISREG(PL_statcache.st_mode))
 	RETPUSHYES;
     RETPUSHNO;
 }
@@ -2397,7 +2397,7 @@ PP(pp_ftdir)
     djSP;
     if (result < 0)
 	RETPUSHUNDEF;
-    if (S_ISDIR(statcache.st_mode))
+    if (S_ISDIR(PL_statcache.st_mode))
 	RETPUSHYES;
     RETPUSHNO;
 }
@@ -2408,7 +2408,7 @@ PP(pp_ftpipe)
     djSP;
     if (result < 0)
 	RETPUSHUNDEF;
-    if (S_ISFIFO(statcache.st_mode))
+    if (S_ISFIFO(PL_statcache.st_mode))
 	RETPUSHYES;
     RETPUSHNO;
 }
@@ -2419,7 +2419,7 @@ PP(pp_ftlink)
     djSP;
     if (result < 0)
 	RETPUSHUNDEF;
-    if (S_ISLNK(statcache.st_mode))
+    if (S_ISLNK(PL_statcache.st_mode))
 	RETPUSHYES;
     RETPUSHNO;
 }
@@ -2432,7 +2432,7 @@ PP(pp_ftsuid)
     SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
-    if (statcache.st_mode & S_ISUID)
+    if (PL_statcache.st_mode & S_ISUID)
 	RETPUSHYES;
 #endif
     RETPUSHNO;
@@ -2446,7 +2446,7 @@ PP(pp_ftsgid)
     SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
-    if (statcache.st_mode & S_ISGID)
+    if (PL_statcache.st_mode & S_ISGID)
 	RETPUSHYES;
 #endif
     RETPUSHNO;
@@ -2460,7 +2460,7 @@ PP(pp_ftsvtx)
     SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
-    if (statcache.st_mode & S_ISVTX)
+    if (PL_statcache.st_mode & S_ISVTX)
 	RETPUSHYES;
 #endif
     RETPUSHNO;
@@ -2473,7 +2473,7 @@ PP(pp_fttty)
     GV *gv;
     char *tmps = Nullch;
 
-    if (op->op_flags & OPf_REF)
+    if (PL_op->op_flags & OPf_REF)
 	gv = cGVOP->op_gv;
     else if (isGV(TOPs))
 	gv = (GV*)POPs;
@@ -2513,7 +2513,7 @@ PP(pp_fttext)
     register SV *sv;
     GV *gv;
 
-    if (op->op_flags & OPf_REF)
+    if (PL_op->op_flags & OPf_REF)
 	gv = cGVOP->op_gv;
     else if (isGV(TOPs))
 	gv = (GV*)POPs;
@@ -2524,28 +2524,28 @@ PP(pp_fttext)
 
     if (gv) {
 	EXTEND(SP, 1);
-	if (gv == defgv) {
-	    if (statgv)
-		io = GvIO(statgv);
+	if (gv == PL_defgv) {
+	    if (PL_statgv)
+		io = GvIO(PL_statgv);
 	    else {
-		sv = statname;
+		sv = PL_statname;
 		goto really_filename;
 	    }
 	}
 	else {
-	    statgv = gv;
-	    laststatval = -1;
-	    sv_setpv(statname, "");
-	    io = GvIO(statgv);
+	    PL_statgv = gv;
+	    PL_laststatval = -1;
+	    sv_setpv(PL_statname, "");
+	    io = GvIO(PL_statgv);
 	}
 	if (io && IoIFP(io)) {
 	    if (! PerlIO_has_base(IoIFP(io)))
 		DIE("-T and -B not implemented on filehandles");
-	    laststatval = PerlLIO_fstat(PerlIO_fileno(IoIFP(io)), &statcache);
-	    if (laststatval < 0)
+	    PL_laststatval = PerlLIO_fstat(PerlIO_fileno(IoIFP(io)), &PL_statcache);
+	    if (PL_laststatval < 0)
 		RETPUSHUNDEF;
-	    if (S_ISDIR(statcache.st_mode))	/* handle NFS glitch */
-		if (op->op_type == OP_FTTEXT)
+	    if (S_ISDIR(PL_statcache.st_mode))	/* handle NFS glitch */
+		if (PL_op->op_type == OP_FTTEXT)
 		    RETPUSHNO;
 		else
 		    RETPUSHYES;
@@ -2563,7 +2563,7 @@ PP(pp_fttext)
 		len = 512;
 	}
 	else {
-	    if (dowarn)
+	    if (PL_dowarn)
 		warn("Test on unopened file <%s>",
 		  GvENAME(cGVOP->op_gv));
 	    SETERRNO(EBADF,RMS$_IFI);
@@ -2573,26 +2573,26 @@ PP(pp_fttext)
     else {
 	sv = POPs;
       really_filename:
-	statgv = Nullgv;
-	laststatval = -1;
-	sv_setpv(statname, SvPV(sv, na));
+	PL_statgv = Nullgv;
+	PL_laststatval = -1;
+	sv_setpv(PL_statname, SvPV(sv, PL_na));
 #ifdef HAS_OPEN3
-	i = PerlLIO_open3(SvPV(sv, na), O_RDONLY, 0);
+	i = PerlLIO_open3(SvPV(sv, PL_na), O_RDONLY, 0);
 #else
-	i = PerlLIO_open(SvPV(sv, na), 0);
+	i = PerlLIO_open(SvPV(sv, PL_na), 0);
 #endif
 	if (i < 0) {
-	    if (dowarn && strchr(SvPV(sv, na), '\n'))
+	    if (PL_dowarn && strchr(SvPV(sv, PL_na), '\n'))
 		warn(warn_nl, "open");
 	    RETPUSHUNDEF;
 	}
-	laststatval = PerlLIO_fstat(i, &statcache);
-	if (laststatval < 0)
+	PL_laststatval = PerlLIO_fstat(i, &PL_statcache);
+	if (PL_laststatval < 0)
 	    RETPUSHUNDEF;
 	len = PerlLIO_read(i, tbuf, 512);
 	(void)PerlLIO_close(i);
 	if (len <= 0) {
-	    if (S_ISDIR(statcache.st_mode) && op->op_type == OP_FTTEXT)
+	    if (S_ISDIR(PL_statcache.st_mode) && PL_op->op_type == OP_FTTEXT)
 		RETPUSHNO;		/* special case NFS directories */
 	    RETPUSHYES;		/* null file is anything */
 	}
@@ -2615,7 +2615,7 @@ PP(pp_fttext)
 	    odd++;
     }
 
-    if ((odd * 3 > len) == (op->op_type == OP_FTTEXT)) /* allow 1/3 odd */
+    if ((odd * 3 > len) == (PL_op->op_type == OP_FTTEXT)) /* allow 1/3 odd */
 	RETPUSHNO;
     else
 	RETPUSHYES;
@@ -2639,20 +2639,20 @@ PP(pp_chdir)
     else
 	tmps = POPp;
     if (!tmps || !*tmps) {
-	svp = hv_fetch(GvHVn(envgv), "HOME", 4, FALSE);
+	svp = hv_fetch(GvHVn(PL_envgv), "HOME", 4, FALSE);
 	if (svp)
-	    tmps = SvPV(*svp, na);
+	    tmps = SvPV(*svp, PL_na);
     }
     if (!tmps || !*tmps) {
-	svp = hv_fetch(GvHVn(envgv), "LOGDIR", 6, FALSE);
+	svp = hv_fetch(GvHVn(PL_envgv), "LOGDIR", 6, FALSE);
 	if (svp)
-	    tmps = SvPV(*svp, na);
+	    tmps = SvPV(*svp, PL_na);
     }
 #ifdef VMS
     if (!tmps || !*tmps) {
        svp = hv_fetch(GvHVn(envgv), "SYS$LOGIN", 9, FALSE);
        if (svp)
-           tmps = SvPV(*svp, na);
+           tmps = SvPV(*svp, PL_na);
     }
 #endif
     TAINT_PROPER("chdir");
@@ -2670,7 +2670,7 @@ PP(pp_chown)
     djSP; dMARK; dTARGET;
     I32 value;
 #ifdef HAS_CHOWN
-    value = (I32)apply(op->op_type, MARK, SP);
+    value = (I32)apply(PL_op->op_type, MARK, SP);
     SP = MARK;
     PUSHi(value);
     RETURN;
@@ -2697,7 +2697,7 @@ PP(pp_unlink)
 {
     djSP; dMARK; dTARGET;
     I32 value;
-    value = (I32)apply(op->op_type, MARK, SP);
+    value = (I32)apply(PL_op->op_type, MARK, SP);
     SP = MARK;
     PUSHi(value);
     RETURN;
@@ -2707,7 +2707,7 @@ PP(pp_chmod)
 {
     djSP; dMARK; dTARGET;
     I32 value;
-    value = (I32)apply(op->op_type, MARK, SP);
+    value = (I32)apply(PL_op->op_type, MARK, SP);
     SP = MARK;
     PUSHi(value);
     RETURN;
@@ -2717,7 +2717,7 @@ PP(pp_utime)
 {
     djSP; dMARK; dTARGET;
     I32 value;
-    value = (I32)apply(op->op_type, MARK, SP);
+    value = (I32)apply(PL_op->op_type, MARK, SP);
     SP = MARK;
     PUSHi(value);
     RETURN;
@@ -2729,7 +2729,7 @@ PP(pp_rename)
     int anum;
 
     char *tmps2 = POPp;
-    char *tmps = SvPV(TOPs, na);
+    char *tmps = SvPV(TOPs, PL_na);
     TAINT_PROPER("rename");
 #ifdef HAS_RENAME
     anum = PerlLIO_rename(tmps, tmps2);
@@ -2754,7 +2754,7 @@ PP(pp_link)
     djSP; dTARGET;
 #ifdef HAS_LINK
     char *tmps2 = POPp;
-    char *tmps = SvPV(TOPs, na);
+    char *tmps = SvPV(TOPs, PL_na);
     TAINT_PROPER("link");
     SETi( link(tmps, tmps2) >= 0 );
 #else
@@ -2768,7 +2768,7 @@ PP(pp_symlink)
     djSP; dTARGET;
 #ifdef HAS_SYMLINK
     char *tmps2 = POPp;
-    char *tmps = SvPV(TOPs, na);
+    char *tmps = SvPV(TOPs, PL_na);
     TAINT_PROPER("symlink");
     SETi( symlink(tmps, tmps2) >= 0 );
     RETURN;
@@ -2876,7 +2876,7 @@ char *filename;
 	}
 	else {	/* some mkdirs return no failure indication */
 	    anum = (PerlLIO_stat(save_filename, &statbuf) >= 0);
-	    if (op->op_type == OP_RMDIR)
+	    if (PL_op->op_type == OP_RMDIR)
 		anum = !anum;
 	    if (anum)
 		SETERRNO(0,0);
@@ -2897,7 +2897,7 @@ PP(pp_mkdir)
 #ifndef HAS_MKDIR
     int oldumask;
 #endif
-    char *tmps = SvPV(TOPs, na);
+    char *tmps = SvPV(TOPs, PL_na);
 
     TAINT_PROPER("mkdir");
 #ifdef HAS_MKDIR
@@ -3125,7 +3125,7 @@ PP(pp_fork)
 	/*SUPPRESS 560*/
 	if (tmpgv = gv_fetchpv("$", TRUE, SVt_PV))
 	    sv_setiv(GvSV(tmpgv), (IV)getpid());
-	hv_clear(pidstatus);	/* no kids, so don't wait for 'em */
+	hv_clear(PL_pidstatus);	/* no kids, so don't wait for 'em */
     }
     PUSHi(childpid);
     RETURN;
@@ -3179,8 +3179,8 @@ PP(pp_system)
     Sigsave_t ihand,qhand;     /* place to save signals during system() */
 
     if (SP - MARK == 1) {
-	if (tainting) {
-	    char *junk = SvPV(TOPs, na);
+	if (PL_tainting) {
+	    char *junk = SvPV(TOPs, PL_na);
 	    TAINT_ENV();
 	    TAINT_PROPER("system");
 	}
@@ -3209,25 +3209,25 @@ PP(pp_system)
 	PUSHi(STATUS_CURRENT);
 	RETURN;
     }
-    if (op->op_flags & OPf_STACKED) {
+    if (PL_op->op_flags & OPf_STACKED) {
 	SV *really = *++MARK;
 	value = (I32)do_aexec(really, MARK, SP);
     }
     else if (SP - MARK != 1)
 	value = (I32)do_aexec(Nullsv, MARK, SP);
     else {
-	value = (I32)do_exec(SvPVx(sv_mortalcopy(*SP), na));
+	value = (I32)do_exec(SvPVx(sv_mortalcopy(*SP), PL_na));
     }
     PerlProc__exit(-1);
 #else /* ! FORK or VMS or OS/2 */
-    if (op->op_flags & OPf_STACKED) {
+    if (PL_op->op_flags & OPf_STACKED) {
 	SV *really = *++MARK;
 	value = (I32)do_aspawn(really, (void **)MARK, (void **)SP);
     }
     else if (SP - MARK != 1)
 	value = (I32)do_aspawn(Nullsv, (void **)MARK, (void **)SP);
     else {
-	value = (I32)do_spawn(SvPVx(sv_mortalcopy(*SP), na));
+	value = (I32)do_spawn(SvPVx(sv_mortalcopy(*SP), PL_na));
     }
     STATUS_NATIVE_SET(value);
     do_execfree();
@@ -3242,7 +3242,7 @@ PP(pp_exec)
     djSP; dMARK; dORIGMARK; dTARGET;
     I32 value;
 
-    if (op->op_flags & OPf_STACKED) {
+    if (PL_op->op_flags & OPf_STACKED) {
 	SV *really = *++MARK;
 	value = (I32)do_aexec(really, MARK, SP);
     }
@@ -3253,15 +3253,15 @@ PP(pp_exec)
 	value = (I32)do_aexec(Nullsv, MARK, SP);
 #endif
     else {
-	if (tainting) {
-	    char *junk = SvPV(*SP, na);
+	if (PL_tainting) {
+	    char *junk = SvPV(*SP, PL_na);
 	    TAINT_ENV();
 	    TAINT_PROPER("exec");
 	}
 #ifdef VMS
-	value = (I32)vms_do_exec(SvPVx(sv_mortalcopy(*SP), na));
+	value = (I32)vms_do_exec(SvPVx(sv_mortalcopy(*SP), PL_na));
 #else
-	value = (I32)do_exec(SvPVx(sv_mortalcopy(*SP), na));
+	value = (I32)do_exec(SvPVx(sv_mortalcopy(*SP), PL_na));
 #endif
     }
     SP = ORIGMARK;
@@ -3274,7 +3274,7 @@ PP(pp_kill)
     djSP; dMARK; dTARGET;
     I32 value;
 #ifdef HAS_KILL
-    value = (I32)apply(op->op_type, MARK, SP);
+    value = (I32)apply(PL_op->op_type, MARK, SP);
     SP = MARK;
     PUSHi(value);
     RETURN;
@@ -3420,18 +3420,18 @@ PP(pp_tms)
     EXTEND(SP, 4);
 
 #ifndef VMS
-    (void)PerlProc_times(&timesbuf);
+    (void)PerlProc_times(&PL_timesbuf);
 #else
     (void)PerlProc_times((tbuffer_t *)&timesbuf);  /* time.h uses different name for */
                                                    /* struct tms, though same data   */
                                                    /* is returned.                   */
 #endif
 
-    PUSHs(sv_2mortal(newSVnv(((double)timesbuf.tms_utime)/HZ)));
+    PUSHs(sv_2mortal(newSVnv(((double)PL_timesbuf.tms_utime)/HZ)));
     if (GIMME == G_ARRAY) {
-	PUSHs(sv_2mortal(newSVnv(((double)timesbuf.tms_stime)/HZ)));
-	PUSHs(sv_2mortal(newSVnv(((double)timesbuf.tms_cutime)/HZ)));
-	PUSHs(sv_2mortal(newSVnv(((double)timesbuf.tms_cstime)/HZ)));
+	PUSHs(sv_2mortal(newSVnv(((double)PL_timesbuf.tms_stime)/HZ)));
+	PUSHs(sv_2mortal(newSVnv(((double)PL_timesbuf.tms_cutime)/HZ)));
+	PUSHs(sv_2mortal(newSVnv(((double)PL_timesbuf.tms_cstime)/HZ)));
     }
     RETURN;
 #endif /* HAS_TIMES */
@@ -3460,7 +3460,7 @@ PP(pp_gmtime)
 	when = (Time_t)SvIVx(POPs);
 #endif
 
-    if (op->op_type == OP_LOCALTIME)
+    if (PL_op->op_type == OP_LOCALTIME)
 	tmbuf = localtime(&when);
     else
 	tmbuf = gmtime(&when);
@@ -3553,7 +3553,7 @@ PP(pp_shmwrite)
 {
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
     djSP; dMARK; dTARGET;
-    I32 value = (I32)(do_shmio(op->op_type, MARK, SP) >= 0);
+    I32 value = (I32)(do_shmio(PL_op->op_type, MARK, SP) >= 0);
     SP = MARK;
     PUSHi(value);
     RETURN;
@@ -3606,7 +3606,7 @@ PP(pp_semget)
 {
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
     djSP; dMARK; dTARGET;
-    int anum = do_ipcget(op->op_type, MARK, SP);
+    int anum = do_ipcget(PL_op->op_type, MARK, SP);
     SP = MARK;
     if (anum == -1)
 	RETPUSHUNDEF;
@@ -3621,7 +3621,7 @@ PP(pp_semctl)
 {
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
     djSP; dMARK; dTARGET;
-    int anum = do_ipcctl(op->op_type, MARK, SP);
+    int anum = do_ipcctl(PL_op->op_type, MARK, SP);
     SP = MARK;
     if (anum == -1)
 	RETSETUNDEF;
@@ -3674,7 +3674,7 @@ PP(pp_ghostent)
 {
     djSP;
 #if defined(HAS_GETHOSTBYNAME) || defined(HAS_GETHOSTBYADDR) || defined(HAS_GETHOSTENT)
-    I32 which = op->op_type;
+    I32 which = PL_op->op_type;
     register char **elem;
     register SV *sv;
 #ifndef HAS_GETHOST_PROTOS /* XXX Do we need individual probes? */
@@ -3730,22 +3730,22 @@ PP(pp_ghostent)
     }
 
     if (hent) {
-	PUSHs(sv = sv_mortalcopy(&sv_no));
+	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setpv(sv, (char*)hent->h_name);
-	PUSHs(sv = sv_mortalcopy(&sv_no));
+	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	for (elem = hent->h_aliases; elem && *elem; elem++) {
 	    sv_catpv(sv, *elem);
 	    if (elem[1])
 		sv_catpvn(sv, " ", 1);
 	}
-	PUSHs(sv = sv_mortalcopy(&sv_no));
+	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setiv(sv, (IV)hent->h_addrtype);
-	PUSHs(sv = sv_mortalcopy(&sv_no));
+	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	len = hent->h_length;
 	sv_setiv(sv, (IV)len);
 #ifdef h_addr
 	for (elem = hent->h_addr_list; elem && *elem; elem++) {
-	    XPUSHs(sv = sv_mortalcopy(&sv_no));
+	    XPUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	    sv_setpvn(sv, *elem, len);
 	}
 #else
@@ -3782,7 +3782,7 @@ PP(pp_gnetent)
 {
     djSP;
 #if defined(HAS_GETNETBYNAME) || defined(HAS_GETNETBYADDR) || defined(HAS_GETNETENT)
-    I32 which = op->op_type;
+    I32 which = PL_op->op_type;
     register char **elem;
     register SV *sv;
 #ifndef HAS_GETNET_PROTOS /* XXX Do we need individual probes? */
@@ -3827,17 +3827,17 @@ PP(pp_gnetent)
     }
 
     if (nent) {
-	PUSHs(sv = sv_mortalcopy(&sv_no));
+	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setpv(sv, nent->n_name);
-	PUSHs(sv = sv_mortalcopy(&sv_no));
+	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	for (elem = nent->n_aliases; elem && *elem; elem++) {
 	    sv_catpv(sv, *elem);
 	    if (elem[1])
 		sv_catpvn(sv, " ", 1);
 	}
-	PUSHs(sv = sv_mortalcopy(&sv_no));
+	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setiv(sv, (IV)nent->n_addrtype);
-	PUSHs(sv = sv_mortalcopy(&sv_no));
+	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setiv(sv, (IV)nent->n_net);
     }
 
@@ -3869,7 +3869,7 @@ PP(pp_gprotoent)
 {
     djSP;
 #if defined(HAS_GETPROTOBYNAME) || defined(HAS_GETPROTOBYNUMBER) || defined(HAS_GETPROTOENT)
-    I32 which = op->op_type;
+    I32 which = PL_op->op_type;
     register char **elem;
     register SV *sv;  
 #ifndef HAS_GETPROTO_PROTOS /* XXX Do we need individual probes? */
@@ -3911,15 +3911,15 @@ PP(pp_gprotoent)
     }
 
     if (pent) {
-	PUSHs(sv = sv_mortalcopy(&sv_no));
+	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setpv(sv, pent->p_name);
-	PUSHs(sv = sv_mortalcopy(&sv_no));
+	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	for (elem = pent->p_aliases; elem && *elem; elem++) {
 	    sv_catpv(sv, *elem);
 	    if (elem[1])
 		sv_catpvn(sv, " ", 1);
 	}
-	PUSHs(sv = sv_mortalcopy(&sv_no));
+	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setiv(sv, (IV)pent->p_proto);
     }
 
@@ -3951,7 +3951,7 @@ PP(pp_gservent)
 {
     djSP;
 #if defined(HAS_GETSERVBYNAME) || defined(HAS_GETSERVBYPORT) || defined(HAS_GETSERVENT)
-    I32 which = op->op_type;
+    I32 which = PL_op->op_type;
     register char **elem;
     register SV *sv;
 #ifndef HAS_GETSERV_PROTOS /* XXX Do we need individual probes? */
@@ -4012,21 +4012,21 @@ PP(pp_gservent)
     }
 
     if (sent) {
-	PUSHs(sv = sv_mortalcopy(&sv_no));
+	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setpv(sv, sent->s_name);
-	PUSHs(sv = sv_mortalcopy(&sv_no));
+	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	for (elem = sent->s_aliases; elem && *elem; elem++) {
 	    sv_catpv(sv, *elem);
 	    if (elem[1])
 		sv_catpvn(sv, " ", 1);
 	}
-	PUSHs(sv = sv_mortalcopy(&sv_no));
+	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 #ifdef HAS_NTOHS
 	sv_setiv(sv, (IV)PerlSock_ntohs(sent->s_port));
 #else
 	sv_setiv(sv, (IV)(sent->s_port));
 #endif
-	PUSHs(sv = sv_mortalcopy(&sv_no));
+	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setpv(sv, sent->s_proto);
     }
 
@@ -4150,7 +4150,7 @@ PP(pp_gpwent)
 {
     djSP;
 #if defined(HAS_PASSWD) && defined(HAS_GETPWENT)
-    I32 which = op->op_type;
+    I32 which = PL_op->op_type;
     register SV *sv;
     struct passwd *pwent;
 
@@ -4174,22 +4174,22 @@ PP(pp_gpwent)
     }
 
     if (pwent) {
-	PUSHs(sv = sv_mortalcopy(&sv_no));
+	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setpv(sv, pwent->pw_name);
 
-	PUSHs(sv = sv_mortalcopy(&sv_no));
+	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 #ifdef PWPASSWD
 	sv_setpv(sv, pwent->pw_passwd);
 #endif
 
-	PUSHs(sv = sv_mortalcopy(&sv_no));
+	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setiv(sv, (IV)pwent->pw_uid);
 
-	PUSHs(sv = sv_mortalcopy(&sv_no));
+	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setiv(sv, (IV)pwent->pw_gid);
 
 	/* pw_change, pw_quota, and pw_age are mutually exclusive. */
-	PUSHs(sv = sv_mortalcopy(&sv_no));
+	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 #ifdef PWCHANGE
 	sv_setiv(sv, (IV)pwent->pw_change);
 #else
@@ -4203,7 +4203,7 @@ PP(pp_gpwent)
 #endif
 
 	/* pw_class and pw_comment are mutually exclusive. */
-	PUSHs(sv = sv_mortalcopy(&sv_no));
+	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 #ifdef PWCLASS
 	sv_setpv(sv, pwent->pw_class);
 #else
@@ -4212,7 +4212,7 @@ PP(pp_gpwent)
 #   endif
 #endif
 
-	PUSHs(sv = sv_mortalcopy(&sv_no));
+	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 #ifdef PWGECOS
 	sv_setpv(sv, pwent->pw_gecos);
 #endif
@@ -4221,10 +4221,10 @@ PP(pp_gpwent)
 	SvTAINTED_on(sv);
 #endif
 
-	PUSHs(sv = sv_mortalcopy(&sv_no));
+	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setpv(sv, pwent->pw_dir);
 
-	PUSHs(sv = sv_mortalcopy(&sv_no));
+	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setpv(sv, pwent->pw_shell);
 
 #ifdef PWEXPIRE
@@ -4282,7 +4282,7 @@ PP(pp_ggrent)
 {
     djSP;
 #if defined(HAS_GROUP) && defined(HAS_GETGRENT)
-    I32 which = op->op_type;
+    I32 which = PL_op->op_type;
     register char **elem;
     register SV *sv;
     struct group *grent;
@@ -4307,18 +4307,18 @@ PP(pp_ggrent)
     }
 
     if (grent) {
-	PUSHs(sv = sv_mortalcopy(&sv_no));
+	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setpv(sv, grent->gr_name);
 
-	PUSHs(sv = sv_mortalcopy(&sv_no));
+	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 #ifdef GRPASSWD
 	sv_setpv(sv, grent->gr_passwd);
 #endif
 
-	PUSHs(sv = sv_mortalcopy(&sv_no));
+	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setiv(sv, (IV)grent->gr_gid);
 
-	PUSHs(sv = sv_mortalcopy(&sv_no));
+	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	for (elem = grent->gr_mem; elem && *elem; elem++) {
 	    sv_catpv(sv, *elem);
 	    if (elem[1])
@@ -4381,7 +4381,7 @@ PP(pp_syscall)
     I32 retval = -1;
     MAGIC *mg;
 
-    if (tainting) {
+    if (PL_tainting) {
 	while (++MARK <= SP) {
 	    if (SvTAINTED(*MARK)) {
 		TAINT;
@@ -4399,10 +4399,10 @@ PP(pp_syscall)
     while (++MARK <= SP) {
 	if (SvNIOK(*MARK) || !i)
 	    a[i++] = SvIV(*MARK);
-	else if (*MARK == &sv_undef)
+	else if (*MARK == &PL_sv_undef)
 	    a[i++] = 0;
 	else 
-	    a[i++] = (unsigned long)SvPV_force(*MARK, na);
+	    a[i++] = (unsigned long)SvPV_force(*MARK, PL_na);
 	if (i > 15)
 	    break;
     }

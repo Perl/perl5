@@ -94,13 +94,13 @@ do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawpe
     int result;
     bool was_fdopen = FALSE;
 
-    forkprocess = 1;		/* assume true if no fork */
+    PL_forkprocess = 1;		/* assume true if no fork */
 
     if (IoIFP(io)) {
 	fd = PerlIO_fileno(IoIFP(io));
 	if (IoTYPE(io) == '-')
 	    result = 0;
-	else if (fd <= maxsysfd) {
+	else if (fd <= PL_maxsysfd) {
 	    saveifp = IoIFP(io);
 	    saveofp = IoOFP(io);
 	    savetype = IoTYPE(io);
@@ -118,7 +118,7 @@ do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawpe
 	}
 	else
 	    result = PerlIO_close(IoIFP(io));
-	if (result == EOF && fd > maxsysfd)
+	if (result == EOF && fd > PL_maxsysfd)
 	    PerlIO_printf(PerlIO_stderr(), "Warning: unable to close filehandle %s properly.\n",
 	      GvENAME(gv));
 	IoOFP(io) = IoIFP(io) = Nullfp;
@@ -173,7 +173,7 @@ do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawpe
 	    TAINT_PROPER("piped open");
 	    if (name[strlen(name)-1] == '|') {
 		name[strlen(name)-1] = '\0' ;
-		if (dowarn)
+		if (PL_dowarn)
 		    warn("Can't do bidirectional pipe");
 	    }
 	    fp = PerlProc_popen(name,"w");
@@ -283,25 +283,25 @@ do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawpe
 	}
     }
     if (!fp) {
-	if (dowarn && IoTYPE(io) == '<' && strchr(name, '\n'))
+	if (PL_dowarn && IoTYPE(io) == '<' && strchr(name, '\n'))
 	    warn(warn_nl, "open");
 	goto say_false;
     }
     if (IoTYPE(io) &&
       IoTYPE(io) != '|' && IoTYPE(io) != '-') {
 	dTHR;
-	if (PerlLIO_fstat(PerlIO_fileno(fp),&statbuf) < 0) {
+	if (PerlLIO_fstat(PerlIO_fileno(fp),&PL_statbuf) < 0) {
 	    (void)PerlIO_close(fp);
 	    goto say_false;
 	}
-	if (S_ISSOCK(statbuf.st_mode))
+	if (S_ISSOCK(PL_statbuf.st_mode))
 	    IoTYPE(io) = 's';	/* in case a socket was passed in to us */
 #ifdef HAS_SOCKET
 	else if (
 #ifdef S_IFMT
-	    !(statbuf.st_mode & S_IFMT)
+	    !(PL_statbuf.st_mode & S_IFMT)
 #else
-	    !statbuf.st_mode
+	    !PL_statbuf.st_mode
 #endif
 	) {
 	    char tmpbuf[256];
@@ -329,11 +329,11 @@ do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawpe
 	    SV *sv;
 
 	    PerlLIO_dup2(PerlIO_fileno(fp), fd);
-	    sv = *av_fetch(fdpid,PerlIO_fileno(fp),TRUE);
+	    sv = *av_fetch(PL_fdpid,PerlIO_fileno(fp),TRUE);
 	    (void)SvUPGRADE(sv, SVt_IV);
 	    pid = SvIVX(sv);
 	    SvIVX(sv) = 0;
-	    sv = *av_fetch(fdpid,fd,TRUE);
+	    sv = *av_fetch(PL_fdpid,fd,TRUE);
 	    (void)SvUPGRADE(sv, SVt_IV);
 	    SvIVX(sv) = pid;
 	    if (!was_fdopen)
@@ -345,13 +345,13 @@ do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawpe
     }
 #if defined(HAS_FCNTL) && defined(F_SETFD)
     fd = PerlIO_fileno(fp);
-    fcntl(fd,F_SETFD,fd > maxsysfd);
+    fcntl(fd,F_SETFD,fd > PL_maxsysfd);
 #endif
     IoIFP(io) = fp;
     if (writing) {
 	dTHR;
 	if (IoTYPE(io) == 's'
-	  || (IoTYPE(io) == '>' && S_ISCHR(statbuf.st_mode)) ) {
+	  || (IoTYPE(io) == '>' && S_ISCHR(PL_statbuf.st_mode)) ) {
 	    if (!(IoOFP(io) = PerlIO_fdopen(PerlIO_fileno(fp),"w"))) {
 		PerlIO_close(fp);
 		IoIFP(io) = Nullfp;
@@ -381,17 +381,17 @@ nextargv(register GV *gv)
     int fileuid;
     int filegid;
 
-    if (!argvoutgv)
-	argvoutgv = gv_fetchpv("ARGVOUT",TRUE,SVt_PVIO);
-    if (filemode & (S_ISUID|S_ISGID)) {
-	PerlIO_flush(IoIFP(GvIOn(argvoutgv)));  /* chmod must follow last write */
+    if (!PL_argvoutgv)
+	PL_argvoutgv = gv_fetchpv("ARGVOUT",TRUE,SVt_PVIO);
+    if (PL_filemode & (S_ISUID|S_ISGID)) {
+	PerlIO_flush(IoIFP(GvIOn(PL_argvoutgv)));  /* chmod must follow last write */
 #ifdef HAS_FCHMOD
-	(void)fchmod(lastfd,filemode);
+	(void)fchmod(PL_lastfd,PL_filemode);
 #else
-	(void)PerlLIO_chmod(oldname,filemode);
+	(void)PerlLIO_chmod(PL_oldname,PL_filemode);
 #endif
     }
-    filemode = 0;
+    PL_filemode = 0;
     while (av_len(GvAV(gv)) >= 0) {
 	dTHR;
 	STRLEN oldlen;
@@ -399,47 +399,47 @@ nextargv(register GV *gv)
 	SAVEFREESV(sv);
 	sv_setsv(GvSV(gv),sv);
 	SvSETMAGIC(GvSV(gv));
-	oldname = SvPVx(GvSV(gv), oldlen);
-	if (do_open(gv,oldname,oldlen,inplace!=0,0,0,Nullfp)) {
-	    if (inplace) {
+	PL_oldname = SvPVx(GvSV(gv), oldlen);
+	if (do_open(gv,PL_oldname,oldlen,PL_inplace!=0,0,0,Nullfp)) {
+	    if (PL_inplace) {
 		TAINT_PROPER("inplace open");
-		if (oldlen == 1 && *oldname == '-') {
+		if (oldlen == 1 && *PL_oldname == '-') {
 		    setdefout(gv_fetchpv("STDOUT",TRUE,SVt_PVIO));
 		    return IoIFP(GvIOp(gv));
 		}
 #ifndef FLEXFILENAMES
-		filedev = statbuf.st_dev;
-		fileino = statbuf.st_ino;
+		filedev = PL_statbuf.st_dev;
+		fileino = PL_statbuf.st_ino;
 #endif
-		filemode = statbuf.st_mode;
-		fileuid = statbuf.st_uid;
-		filegid = statbuf.st_gid;
-		if (!S_ISREG(filemode)) {
+		PL_filemode = PL_statbuf.st_mode;
+		fileuid = PL_statbuf.st_uid;
+		filegid = PL_statbuf.st_gid;
+		if (!S_ISREG(PL_filemode)) {
 		    warn("Can't do inplace edit: %s is not a regular file",
-		      oldname );
+		      PL_oldname );
 		    do_close(gv,FALSE);
 		    continue;
 		}
-		if (*inplace) {
-		    char *star = strchr(inplace, '*');
+		if (*PL_inplace) {
+		    char *star = strchr(PL_inplace, '*');
 		    if (star) {
-			char *begin = inplace;
+			char *begin = PL_inplace;
 			sv_setpvn(sv, "", 0);
 			do {
 			    sv_catpvn(sv, begin, star - begin);
-			    sv_catpvn(sv, oldname, oldlen);
+			    sv_catpvn(sv, PL_oldname, oldlen);
 			    begin = ++star;
 			} while ((star = strchr(begin, '*')));
 			if (*begin)
 			    sv_catpv(sv,begin);
 		    }
 		    else {
-			sv_catpv(sv,inplace);
+			sv_catpv(sv,PL_inplace);
 		    }
 #ifndef FLEXFILENAMES
-		    if (PerlLIO_stat(SvPVX(sv),&statbuf) >= 0
-		      && statbuf.st_dev == filedev
-		      && statbuf.st_ino == fileino
+		    if (PerlLIO_stat(SvPVX(sv),&PL_statbuf) >= 0
+		      && PL_statbuf.st_dev == filedev
+		      && PL_statbuf.st_ino == fileino
 #ifdef DJGPP
                       || (_djstat_fail_bits & _STFAIL_TRUENAME)!=0
 #endif
@@ -452,35 +452,35 @@ nextargv(register GV *gv)
 #endif
 #ifdef HAS_RENAME
 #ifndef DOSISH
-		    if (PerlLIO_rename(oldname,SvPVX(sv)) < 0) {
+		    if (PerlLIO_rename(PL_oldname,SvPVX(sv)) < 0) {
 			warn("Can't rename %s to %s: %s, skipping file",
-			  oldname, SvPVX(sv), Strerror(errno) );
+			  PL_oldname, SvPVX(sv), Strerror(errno) );
 			do_close(gv,FALSE);
 			continue;
 		    }
 #else
 		    do_close(gv,FALSE);
 		    (void)PerlLIO_unlink(SvPVX(sv));
-		    (void)PerlLIO_rename(oldname,SvPVX(sv));
-		    do_open(gv,SvPVX(sv),SvCUR(sv),inplace!=0,0,0,Nullfp);
+		    (void)PerlLIO_rename(PL_oldname,SvPVX(sv));
+		    do_open(gv,SvPVX(sv),SvCUR(sv),PL_inplace!=0,0,0,Nullfp);
 #endif /* DOSISH */
 #else
 		    (void)UNLINK(SvPVX(sv));
-		    if (link(oldname,SvPVX(sv)) < 0) {
+		    if (link(PL_oldname,SvPVX(sv)) < 0) {
 			warn("Can't rename %s to %s: %s, skipping file",
-			  oldname, SvPVX(sv), Strerror(errno) );
+			  PL_oldname, SvPVX(sv), Strerror(errno) );
 			do_close(gv,FALSE);
 			continue;
 		    }
-		    (void)UNLINK(oldname);
+		    (void)UNLINK(PL_oldname);
 #endif
 		}
 		else {
 #if !defined(DOSISH) && !defined(AMIGAOS)
 #  ifndef VMS  /* Don't delete; use automatic file versioning */
-		    if (UNLINK(oldname) < 0) {
+		    if (UNLINK(PL_oldname) < 0) {
 			warn("Can't remove %s: %s, skipping file",
-			  oldname, Strerror(errno) );
+			  PL_oldname, Strerror(errno) );
 			do_close(gv,FALSE);
 			continue;
 		    }
@@ -490,33 +490,33 @@ nextargv(register GV *gv)
 #endif
 		}
 
-		sv_setpvn(sv,">",!inplace);
-		sv_catpvn(sv,oldname,oldlen);
+		sv_setpvn(sv,">",!PL_inplace);
+		sv_catpvn(sv,PL_oldname,oldlen);
 		SETERRNO(0,0);		/* in case sprintf set errno */
-		if (!do_open(argvoutgv,SvPVX(sv),SvCUR(sv),inplace!=0,
+		if (!do_open(PL_argvoutgv,SvPVX(sv),SvCUR(sv),PL_inplace!=0,
 			     O_WRONLY|O_CREAT|OPEN_EXCL,0666,Nullfp)) {
 		    warn("Can't do inplace edit on %s: %s",
-		      oldname, Strerror(errno) );
+		      PL_oldname, Strerror(errno) );
 		    do_close(gv,FALSE);
 		    continue;
 		}
-		setdefout(argvoutgv);
-		lastfd = PerlIO_fileno(IoIFP(GvIOp(argvoutgv)));
-		(void)PerlLIO_fstat(lastfd,&statbuf);
+		setdefout(PL_argvoutgv);
+		PL_lastfd = PerlIO_fileno(IoIFP(GvIOp(PL_argvoutgv)));
+		(void)PerlLIO_fstat(PL_lastfd,&PL_statbuf);
 #ifdef HAS_FCHMOD
-		(void)fchmod(lastfd,filemode);
+		(void)fchmod(PL_lastfd,PL_filemode);
 #else
 #  if !(defined(WIN32) && defined(__BORLANDC__))
 		/* Borland runtime creates a readonly file! */
-		(void)PerlLIO_chmod(oldname,filemode);
+		(void)PerlLIO_chmod(PL_oldname,PL_filemode);
 #  endif
 #endif
-		if (fileuid != statbuf.st_uid || filegid != statbuf.st_gid) {
+		if (fileuid != PL_statbuf.st_uid || filegid != PL_statbuf.st_gid) {
 #ifdef HAS_FCHOWN
-		    (void)fchown(lastfd,fileuid,filegid);
+		    (void)fchown(PL_lastfd,fileuid,filegid);
 #else
 #ifdef HAS_CHOWN
-		    (void)PerlLIO_chown(oldname,fileuid,filegid);
+		    (void)PerlLIO_chown(PL_oldname,fileuid,filegid);
 #endif
 #endif
 		}
@@ -525,10 +525,10 @@ nextargv(register GV *gv)
 	}
 	else
 	    PerlIO_printf(PerlIO_stderr(), "Can't open %s: %s\n",
-	      SvPV(sv, na), Strerror(errno));
+	      SvPV(sv, PL_na), Strerror(errno));
     }
-    if (inplace) {
-	(void)do_close(argvoutgv,FALSE);
+    if (PL_inplace) {
+	(void)do_close(PL_argvoutgv,FALSE);
 	setdefout(gv_fetchpv("STDOUT",TRUE,SVt_PVIO));
     }
     return Nullfp;
@@ -570,11 +570,11 @@ do_pipe(SV *sv, GV *rgv, GV *wgv)
 	goto badexit;
     }
 
-    sv_setsv(sv,&sv_yes);
+    sv_setsv(sv,&PL_sv_yes);
     return;
 
 badexit:
-    sv_setsv(sv,&sv_undef);
+    sv_setsv(sv,&PL_sv_undef);
     return;
 }
 #endif
@@ -587,7 +587,7 @@ do_close(GV *gv, bool not_implicit)
     IO *io;
 
     if (!gv)
-	gv = argvgv;
+	gv = PL_argvgv;
     if (!gv || SvTYPE(gv) != SVt_PVGV) {
 	if (not_implicit)
 	    SETERRNO(EBADF,SS$_IVCHAN);
@@ -596,7 +596,7 @@ do_close(GV *gv, bool not_implicit)
     io = GvIO(gv);
     if (!io) {		/* never opened */
 	if (not_implicit) {
-	    if (dowarn)
+	    if (PL_dowarn)
 		warn("Close on unopened file <%s>",GvENAME(gv));
 	    SETERRNO(EBADF,SS$_IVCHAN);
 	}
@@ -671,8 +671,8 @@ do_eof(GV *gv)
 	    if (PerlIO_get_cnt(IoIFP(io)) < -1)
 		PerlIO_set_cnt(IoIFP(io),-1);
 	}
-	if (op->op_flags & OPf_SPECIAL) { /* not necessarily a real EOF yet? */
-	    if (!nextargv(argvgv))	/* get another fp handy */
+	if (PL_op->op_flags & OPf_SPECIAL) { /* not necessarily a real EOF yet? */
+	    if (!nextargv(PL_argvgv))	/* get another fp handy */
 		return TRUE;
 	}
 	else
@@ -694,7 +694,7 @@ do_tell(GV *gv)
 #endif
 	return PerlIO_tell(fp);
     }
-    if (dowarn)
+    if (PL_dowarn)
 	warn("tell() on unopened file");
     SETERRNO(EBADF,RMS$_IFI);
     return -1L;
@@ -713,7 +713,7 @@ do_seek(GV *gv, long int pos, int whence)
 #endif
 	return PerlIO_seek(fp, pos, whence) >= 0;
     }
-    if (dowarn)
+    if (PL_dowarn)
 	warn("seek() on unopened file");
     SETERRNO(EBADF,RMS$_IFI);
     return FALSE;
@@ -727,7 +727,7 @@ do_sysseek(GV *gv, long int pos, int whence)
 
     if (gv && (io = GvIO(gv)) && (fp = IoIFP(io)))
 	return PerlLIO_lseek(PerlIO_fileno(fp), pos, whence);
-    if (dowarn)
+    if (PL_dowarn)
 	warn("sysseek() on unopened file");
     SETERRNO(EBADF,RMS$_IFI);
     return -1L;
@@ -833,22 +833,22 @@ do_print(register SV *sv, PerlIO *fp)
     /* assuming fp is checked earlier */
     if (!sv)
 	return TRUE;
-    if (ofmt) {
+    if (PL_ofmt) {
 	if (SvGMAGICAL(sv))
 	    mg_get(sv);
         if (SvIOK(sv) && SvIVX(sv) != 0) {
-	    PerlIO_printf(fp, ofmt, (double)SvIVX(sv));
+	    PerlIO_printf(fp, PL_ofmt, (double)SvIVX(sv));
 	    return !PerlIO_error(fp);
 	}
 	if (  (SvNOK(sv) && SvNVX(sv) != 0.0)
 	   || (looks_like_number(sv) && sv_2nv(sv) != 0.0) ) {
-	    PerlIO_printf(fp, ofmt, SvNVX(sv));
+	    PerlIO_printf(fp, PL_ofmt, SvNVX(sv));
 	    return !PerlIO_error(fp);
 	}
     }
     switch (SvTYPE(sv)) {
     case SVt_NULL:
-	if (dowarn)
+	if (PL_dowarn)
 	    warn(warn_uninit);
 	return TRUE;
     case SVt_IV:
@@ -875,26 +875,26 @@ my_stat(ARGSproto)
     IO *io;
     GV* tmpgv;
 
-    if (op->op_flags & OPf_REF) {
+    if (PL_op->op_flags & OPf_REF) {
 	EXTEND(SP,1);
 	tmpgv = cGVOP->op_gv;
       do_fstat:
 	io = GvIO(tmpgv);
 	if (io && IoIFP(io)) {
-	    statgv = tmpgv;
-	    sv_setpv(statname,"");
-	    laststype = OP_STAT;
-	    return (laststatval = PerlLIO_fstat(PerlIO_fileno(IoIFP(io)), &statcache));
+	    PL_statgv = tmpgv;
+	    sv_setpv(PL_statname,"");
+	    PL_laststype = OP_STAT;
+	    return (PL_laststatval = PerlLIO_fstat(PerlIO_fileno(IoIFP(io)), &PL_statcache));
 	}
 	else {
-	    if (tmpgv == defgv)
-		return laststatval;
-	    if (dowarn)
+	    if (tmpgv == PL_defgv)
+		return PL_laststatval;
+	    if (PL_dowarn)
 		warn("Stat on unopened file <%s>",
 		  GvENAME(tmpgv));
-	    statgv = Nullgv;
-	    sv_setpv(statname,"");
-	    return (laststatval = -1);
+	    PL_statgv = Nullgv;
+	    sv_setpv(PL_statname,"");
+	    return (PL_laststatval = -1);
 	}
     }
     else {
@@ -910,14 +910,14 @@ my_stat(ARGSproto)
 	    goto do_fstat;
 	}
 
-	s = SvPV(sv, na);
-	statgv = Nullgv;
-	sv_setpv(statname, s);
-	laststype = OP_STAT;
-	laststatval = PerlLIO_stat(s, &statcache);
-	if (laststatval < 0 && dowarn && strchr(s, '\n'))
+	s = SvPV(sv, PL_na);
+	PL_statgv = Nullgv;
+	sv_setpv(PL_statname, s);
+	PL_laststype = OP_STAT;
+	PL_laststatval = PerlLIO_stat(s, &PL_statcache);
+	if (PL_laststatval < 0 && PL_dowarn && strchr(s, '\n'))
 	    warn(warn_nl, "stat");
-	return laststatval;
+	return PL_laststatval;
     }
 }
 
@@ -926,29 +926,29 @@ my_lstat(ARGSproto)
 {
     djSP;
     SV *sv;
-    if (op->op_flags & OPf_REF) {
+    if (PL_op->op_flags & OPf_REF) {
 	EXTEND(SP,1);
-	if (cGVOP->op_gv == defgv) {
-	    if (laststype != OP_LSTAT)
+	if (cGVOP->op_gv == PL_defgv) {
+	    if (PL_laststype != OP_LSTAT)
 		croak("The stat preceding -l _ wasn't an lstat");
-	    return laststatval;
+	    return PL_laststatval;
 	}
 	croak("You can't use -l on a filehandle");
     }
 
-    laststype = OP_LSTAT;
-    statgv = Nullgv;
+    PL_laststype = OP_LSTAT;
+    PL_statgv = Nullgv;
     sv = POPs;
     PUTBACK;
-    sv_setpv(statname,SvPV(sv, na));
+    sv_setpv(PL_statname,SvPV(sv, PL_na));
 #ifdef HAS_LSTAT
-    laststatval = PerlLIO_lstat(SvPV(sv, na),&statcache);
+    PL_laststatval = PerlLIO_lstat(SvPV(sv, PL_na),&PL_statcache);
 #else
-    laststatval = PerlLIO_stat(SvPV(sv, na),&statcache);
+    PL_laststatval = PerlLIO_stat(SvPV(sv, PL_na),&PL_statcache);
 #endif
-    if (laststatval < 0 && dowarn && strchr(SvPV(sv, na), '\n'))
+    if (PL_laststatval < 0 && PL_dowarn && strchr(SvPV(sv, PL_na), '\n'))
 	warn(warn_nl, "lstat");
-    return laststatval;
+    return PL_laststatval;
 }
 
 bool
@@ -959,23 +959,23 @@ do_aexec(SV *really, register SV **mark, register SV **sp)
 
     if (sp > mark) {
 	dTHR;
-	New(401,Argv, sp - mark + 1, char*);
-	a = Argv;
+	New(401,PL_Argv, sp - mark + 1, char*);
+	a = PL_Argv;
 	while (++mark <= sp) {
 	    if (*mark)
-		*a++ = SvPVx(*mark, na);
+		*a++ = SvPVx(*mark, PL_na);
 	    else
 		*a++ = "";
 	}
 	*a = Nullch;
-	if (*Argv[0] != '/')	/* will execvp use PATH? */
+	if (*PL_Argv[0] != '/')	/* will execvp use PATH? */
 	    TAINT_ENV();		/* testing IFS here is overkill, probably */
-	if (really && *(tmps = SvPV(really, na)))
-	    PerlProc_execvp(tmps,Argv);
+	if (really && *(tmps = SvPV(really, PL_na)))
+	    PerlProc_execvp(tmps,PL_Argv);
 	else
-	    PerlProc_execvp(Argv[0],Argv);
-	if (dowarn)
-	    warn("Can't exec \"%s\": %s", Argv[0], Strerror(errno));
+	    PerlProc_execvp(PL_Argv[0],PL_Argv);
+	if (PL_dowarn)
+	    warn("Can't exec \"%s\": %s", PL_Argv[0], Strerror(errno));
     }
     do_execfree();
     return FALSE;
@@ -984,13 +984,13 @@ do_aexec(SV *really, register SV **mark, register SV **sp)
 void
 do_execfree(void)
 {
-    if (Argv) {
-	Safefree(Argv);
-	Argv = Null(char **);
+    if (PL_Argv) {
+	Safefree(PL_Argv);
+	PL_Argv = Null(char **);
     }
-    if (Cmd) {
-	Safefree(Cmd);
-	Cmd = Nullch;
+    if (PL_Cmd) {
+	Safefree(PL_Cmd);
+	PL_Cmd = Nullch;
     }
 }
 
@@ -1009,9 +1009,9 @@ do_exec(char *cmd)
     /* save an extra exec if possible */
 
 #ifdef CSH
-    if (strnEQ(cmd,cshname,cshlen) && strnEQ(cmd+cshlen," -c",3)) {
+    if (strnEQ(cmd,PL_cshname,PL_cshlen) && strnEQ(cmd+PL_cshlen," -c",3)) {
 	strcpy(flags,"-c");
-	s = cmd+cshlen+3;
+	s = cmd+PL_cshlen+3;
 	if (*s == 'f') {
 	    s++;
 	    strcat(flags,"f");
@@ -1027,7 +1027,7 @@ do_exec(char *cmd)
 		*--s = '\0';
 	    if (s[-1] == '\'') {
 		*--s = '\0';
-		PerlProc_execl(cshname,"csh", flags,ncmd,(char*)0);
+		PerlProc_execl(PL_cshname,"csh", flags,ncmd,(char*)0);
 		*s = '\'';
 		return FALSE;
 	    }
@@ -1054,15 +1054,15 @@ do_exec(char *cmd)
 		break;
 	    }
 	  doshell:
-	    PerlProc_execl(sh_path, "sh", "-c", cmd, (char*)0);
+	    PerlProc_execl(PL_sh_path, "sh", "-c", cmd, (char*)0);
 	    return FALSE;
 	}
     }
 
-    New(402,Argv, (s - cmd) / 2 + 2, char*);
-    Cmd = savepvn(cmd, s-cmd);
-    a = Argv;
-    for (s = Cmd; *s;) {
+    New(402,PL_Argv, (s - cmd) / 2 + 2, char*);
+    PL_Cmd = savepvn(cmd, s-cmd);
+    a = PL_Argv;
+    for (s = PL_Cmd; *s;) {
 	while (*s && isSPACE(*s)) s++;
 	if (*s)
 	    *(a++) = s;
@@ -1071,14 +1071,14 @@ do_exec(char *cmd)
 	    *s++ = '\0';
     }
     *a = Nullch;
-    if (Argv[0]) {
-	PerlProc_execvp(Argv[0],Argv);
+    if (PL_Argv[0]) {
+	PerlProc_execvp(PL_Argv[0],PL_Argv);
 	if (errno == ENOEXEC) {		/* for system V NIH syndrome */
 	    do_execfree();
 	    goto doshell;
 	}
-	if (dowarn)
-	    warn("Can't exec \"%s\": %s", Argv[0], Strerror(errno));
+	if (PL_dowarn)
+	    warn("Can't exec \"%s\": %s", PL_Argv[0], Strerror(errno));
     }
     do_execfree();
     return FALSE;
@@ -1098,12 +1098,12 @@ apply(I32 type, register SV **mark, register SV **sp)
     SV **oldmark = mark;
 
 #define APPLY_TAINT_PROPER() \
-    STMT_START {						\
-	if (tainting && tainted) { goto taint_proper_label; }	\
+    STMT_START {							\
+	if (PL_tainting && PL_tainted) { goto taint_proper_label; }	\
     } STMT_END
 
     /* This is a first heuristic; it doesn't catch tainting magic. */
-    if (tainting) {
+    if (PL_tainting) {
 	while (++mark <= sp) {
 	    if (SvTAINTED(*mark)) {
 		TAINT;
@@ -1121,7 +1121,7 @@ apply(I32 type, register SV **mark, register SV **sp)
 	    APPLY_TAINT_PROPER();
 	    tot = sp - mark;
 	    while (++mark <= sp) {
-		char *name = SvPVx(*mark, na);
+		char *name = SvPVx(*mark, PL_na);
 		APPLY_TAINT_PROPER();
 		if (PerlLIO_chmod(name, val))
 		    tot--;
@@ -1138,7 +1138,7 @@ apply(I32 type, register SV **mark, register SV **sp)
 	    APPLY_TAINT_PROPER();
 	    tot = sp - mark;
 	    while (++mark <= sp) {
-		char *name = SvPVx(*mark, na);
+		char *name = SvPVx(*mark, PL_na);
 		APPLY_TAINT_PROPER();
 		if (PerlLIO_chown(name, val, val2))
 		    tot--;
@@ -1158,7 +1158,7 @@ nothing in the core.
 	APPLY_TAINT_PROPER();
 	if (mark == sp)
 	    break;
-	s = SvPVx(*++mark, na);
+	s = SvPVx(*++mark, PL_na);
 	if (isUPPER(*s)) {
 	    if (*s == 'S' && s[1] == 'I' && s[2] == 'G')
 		s += 3;
@@ -1228,17 +1228,17 @@ nothing in the core.
 	APPLY_TAINT_PROPER();
 	tot = sp - mark;
 	while (++mark <= sp) {
-	    s = SvPVx(*mark, na);
+	    s = SvPVx(*mark, PL_na);
 	    APPLY_TAINT_PROPER();
-	    if (euid || unsafe) {
+	    if (PL_euid || PL_unsafe) {
 		if (UNLINK(s))
 		    tot--;
 	    }
 	    else {	/* don't let root wipe out directories without -U */
 #ifdef HAS_LSTAT
-		if (PerlLIO_lstat(s,&statbuf) < 0 || S_ISDIR(statbuf.st_mode))
+		if (PerlLIO_lstat(s,&PL_statbuf) < 0 || S_ISDIR(PL_statbuf.st_mode))
 #else
-		if (PerlLIO_stat(s,&statbuf) < 0 || S_ISDIR(statbuf.st_mode))
+		if (PerlLIO_stat(s,&PL_statbuf) < 0 || S_ISDIR(PL_statbuf.st_mode))
 #endif
 		    tot--;
 		else {
@@ -1273,7 +1273,7 @@ nothing in the core.
 	    APPLY_TAINT_PROPER();
 	    tot = sp - mark;
 	    while (++mark <= sp) {
-		char *name = SvPVx(*mark, na);
+		char *name = SvPVx(*mark, PL_na);
 		APPLY_TAINT_PROPER();
 		if (PerlLIO_utime(name, &utbuf))
 		    tot--;
@@ -1323,7 +1323,7 @@ cando(I32 bit, I32 effective, register struct stat *statbufp)
      return (bit & statbufp->st_mode) ? TRUE : FALSE;
 
 #else /* ! DOSISH */
-    if ((effective ? euid : uid) == 0) {	/* root is special */
+    if ((effective ? PL_euid : PL_uid) == 0) {	/* root is special */
 	if (bit == S_IXUSR) {
 	    if (statbufp->st_mode & 0111 || S_ISDIR(statbufp->st_mode))
 		return TRUE;
@@ -1332,7 +1332,7 @@ cando(I32 bit, I32 effective, register struct stat *statbufp)
 	    return TRUE;		/* root reads and writes anything */
 	return FALSE;
     }
-    if (statbufp->st_uid == (effective ? euid : uid) ) {
+    if (statbufp->st_uid == (effective ? PL_euid : PL_uid) ) {
 	if (statbufp->st_mode & bit)
 	    return TRUE;	/* ok as "user" */
     }
@@ -1350,7 +1350,7 @@ cando(I32 bit, I32 effective, register struct stat *statbufp)
 I32
 ingroup(I32 testgid, I32 effective)
 {
-    if (testgid == (effective ? egid : gid))
+    if (testgid == (effective ? PL_egid : PL_gid))
 	return TRUE;
 #ifdef HAS_GETGROUPS
 #ifndef NGROUPS

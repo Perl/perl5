@@ -127,9 +127,9 @@ class CPerlObj;
 #define PERL_OBJECT_THIS
 #define _PERL_OBJECT_THIS
 #define PERL_OBJECT_THIS_
-#define CALLRUNOPS runops
-#define CALLREGCOMP (*regcompp)
-#define CALLREGEXEC (*regexecp)
+#define CALLRUNOPS PL_runops
+#define CALLREGCOMP (*PL_regcompp)
+#define CALLREGEXEC (*PL_regexecp)
 
 #endif /* PERL_OBJECT */
 
@@ -240,11 +240,11 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 #   define VOL
 #endif
 
-#define TAINT		(tainted = TRUE)
-#define TAINT_NOT	(tainted = FALSE)
-#define TAINT_IF(c)	if (c) { tainted = TRUE; }
-#define TAINT_ENV()	if (tainting) { taint_env(); }
-#define TAINT_PROPER(s)	if (tainting) { taint_proper(no_security, s); }
+#define TAINT		(PL_tainted = TRUE)
+#define TAINT_NOT	(PL_tainted = FALSE)
+#define TAINT_IF(c)	if (c) { PL_tainted = TRUE; }
+#define TAINT_ENV()	if (PL_tainting) { taint_env(); }
+#define TAINT_PROPER(s)	if (PL_tainting) { taint_proper(no_security, s); }
 
 /* XXX All process group stuff is handled in pp_sys.c.  Should these 
    defines move there?  If so, I could simplify this a lot. --AD  9/96.
@@ -594,10 +594,10 @@ Free_t   Perl_free _((Malloc_t where));
 #  define DEFSV THREADSV(0)
 #  define SAVE_DEFSV save_threadsv(0)
 #else
-#  define ERRSV GvSV(errgv)
-#  define ERRHV GvHV(errgv)
-#  define DEFSV GvSV(defgv)
-#  define SAVE_DEFSV SAVESPTR(GvSV(defgv))
+#  define ERRSV GvSV(PL_errgv)
+#  define ERRHV GvHV(PL_errgv)
+#  define DEFSV GvSV(PL_defgv)
+#  define SAVE_DEFSV SAVESPTR(GvSV(PL_defgv))
 #endif /* USE_THREADS */
 
 #ifndef errno
@@ -1090,8 +1090,8 @@ typedef I32 (*filter_t) _((int, SV *, int));
 #endif
 
 #define FILTER_READ(idx, sv, len)  filter_read(idx, sv, len)
-#define FILTER_DATA(idx)	   (AvARRAY(rsfp_filters)[idx])
-#define FILTER_ISREADER(idx)	   (idx >= AvFILLp(rsfp_filters))
+#define FILTER_DATA(idx)	   (AvARRAY(PL_rsfp_filters)[idx])
+#define FILTER_ISREADER(idx)	   (idx >= AvFILLp(PL_rsfp_filters))
 
 #ifdef DOSISH
 # if defined(OS2)
@@ -1160,15 +1160,15 @@ typedef pthread_key_t perl_key;
 	STMT_START {							\
 	    statusvalue_vms = (n);					\
 	    if ((I32)statusvalue_vms == -1)				\
-		statusvalue = -1;					\
+		PL_statusvalue = -1;					\
 	    else if (statusvalue_vms & STS$M_SUCCESS)			\
-		statusvalue = 0;					\
+		PL_statusvalue = 0;					\
 	    else if ((statusvalue_vms & STS$M_SEVERITY) == 0)		\
-		statusvalue = 1 << 8;					\
+		PL_statusvalue = 1 << 8;					\
 	    else							\
-		statusvalue = (statusvalue_vms & STS$M_SEVERITY) << 8;	\
+		PL_statusvalue = (statusvalue_vms & STS$M_SEVERITY) << 8;	\
 	} STMT_END
-#   define STATUS_POSIX	statusvalue
+#   define STATUS_POSIX	PL_statusvalue
 #   ifdef VMSISH_STATUS
 #	define STATUS_CURRENT	(VMSISH_STATUS ? STATUS_NATIVE : STATUS_POSIX)
 #   else
@@ -1176,29 +1176,29 @@ typedef pthread_key_t perl_key;
 #   endif
 #   define STATUS_POSIX_SET(n)				\
 	STMT_START {					\
-	    statusvalue = (n);				\
-	    if (statusvalue != -1) {			\
-		statusvalue &= 0xFFFF;			\
-		statusvalue_vms = statusvalue ? 44 : 1;	\
+	    PL_statusvalue = (n);				\
+	    if (PL_statusvalue != -1) {			\
+		PL_statusvalue &= 0xFFFF;			\
+		statusvalue_vms = PL_statusvalue ? 44 : 1;	\
 	    }						\
 	    else statusvalue_vms = -1;			\
 	} STMT_END
-#   define STATUS_ALL_SUCCESS	(statusvalue = 0, statusvalue_vms = 1)
-#   define STATUS_ALL_FAILURE	(statusvalue = 1, statusvalue_vms = 44)
+#   define STATUS_ALL_SUCCESS	(PL_statusvalue = 0, statusvalue_vms = 1)
+#   define STATUS_ALL_FAILURE	(PL_statusvalue = 1, statusvalue_vms = 44)
 #else
 #   define STATUS_NATIVE	STATUS_POSIX
 #   define STATUS_NATIVE_EXPORT	STATUS_POSIX
 #   define STATUS_NATIVE_SET	STATUS_POSIX_SET
-#   define STATUS_POSIX		statusvalue
+#   define STATUS_POSIX		PL_statusvalue
 #   define STATUS_POSIX_SET(n)		\
 	STMT_START {			\
-	    statusvalue = (n);		\
-	    if (statusvalue != -1)	\
-		statusvalue &= 0xFFFF;	\
+	    PL_statusvalue = (n);		\
+	    if (PL_statusvalue != -1)	\
+		PL_statusvalue &= 0xFFFF;	\
 	} STMT_END
 #   define STATUS_CURRENT STATUS_POSIX
-#   define STATUS_ALL_SUCCESS	(statusvalue = 0)
-#   define STATUS_ALL_FAILURE	(statusvalue = 1)
+#   define STATUS_ALL_SUCCESS	(PL_statusvalue = 0)
+#   define STATUS_ALL_FAILURE	(PL_statusvalue = 1)
 #endif
 
 /* Some unistd.h's give a prototype for pause() even though
@@ -1425,23 +1425,23 @@ Gid_t getegid _((void));
 #endif
 #define YYDEBUG 1
 #define DEB(a)     			a
-#define DEBUG(a)   if (debug)		a
-#define DEBUG_p(a) if (debug & 1)	a
-#define DEBUG_s(a) if (debug & 2)	a
-#define DEBUG_l(a) if (debug & 4)	a
-#define DEBUG_t(a) if (debug & 8)	a
-#define DEBUG_o(a) if (debug & 16)	a
-#define DEBUG_c(a) if (debug & 32)	a
-#define DEBUG_P(a) if (debug & 64)	a
-#define DEBUG_m(a) if (curinterp && debug & 128)	a
-#define DEBUG_f(a) if (debug & 256)	a
-#define DEBUG_r(a) if (debug & 512)	a
-#define DEBUG_x(a) if (debug & 1024)	a
-#define DEBUG_u(a) if (debug & 2048)	a
-#define DEBUG_L(a) if (debug & 4096)	a
-#define DEBUG_H(a) if (debug & 8192)	a
-#define DEBUG_X(a) if (debug & 16384)	a
-#define DEBUG_D(a) if (debug & 32768)	a
+#define DEBUG(a)   if (PL_debug)		a
+#define DEBUG_p(a) if (PL_debug & 1)	a
+#define DEBUG_s(a) if (PL_debug & 2)	a
+#define DEBUG_l(a) if (PL_debug & 4)	a
+#define DEBUG_t(a) if (PL_debug & 8)	a
+#define DEBUG_o(a) if (PL_debug & 16)	a
+#define DEBUG_c(a) if (PL_debug & 32)	a
+#define DEBUG_P(a) if (PL_debug & 64)	a
+#define DEBUG_m(a) if (PL_curinterp && PL_debug & 128)	a
+#define DEBUG_f(a) if (PL_debug & 256)	a
+#define DEBUG_r(a) if (PL_debug & 512)	a
+#define DEBUG_x(a) if (PL_debug & 1024)	a
+#define DEBUG_u(a) if (PL_debug & 2048)	a
+#define DEBUG_L(a) if (PL_debug & 4096)	a
+#define DEBUG_H(a) if (PL_debug & 8192)	a
+#define DEBUG_X(a) if (PL_debug & 16384)	a
+#define DEBUG_D(a) if (PL_debug & 32768)	a
 #else
 #define DEB(a)
 #define DEBUG(a)
@@ -1573,8 +1573,8 @@ typedef Sighandler_t Sigsave_t;
 #endif
 
 #ifdef MYMALLOC
-#  define MALLOC_INIT MUTEX_INIT(&malloc_mutex)
-#  define MALLOC_TERM MUTEX_DESTROY(&malloc_mutex)
+#  define MALLOC_INIT MUTEX_INIT(&PL_malloc_mutex)
+#  define MALLOC_TERM MUTEX_DESTROY(&PL_malloc_mutex)
 #else
 #  define MALLOC_INIT
 #  define MALLOC_TERM
@@ -1898,15 +1898,15 @@ struct perl_vars {
 };
 
 #ifdef PERL_CORE
-EXT struct perl_vars Perl_Vars;
-EXT struct perl_vars *Perl_VarsPtr INIT(&Perl_Vars);
-#else
+EXT struct perl_vars PL_Vars;
+EXT struct perl_vars *PL_VarsPtr INIT(&PL_Vars);
+#else /* PERL_CORE */
 #if !defined(__GNUC__) || !defined(WIN32)
 EXT
-#endif
-struct perl_vars *Perl_VarsPtr;
-#define Perl_Vars (*((Perl_VarsPtr) ? Perl_VarsPtr : (Perl_VarsPtr =  Perl_GetVars())))
-#endif
+#endif /* WIN32 */
+struct perl_vars *PL_VarsPtr;
+#define PL_Vars (*((PL_VarsPtr) ? PL_VarsPtr : (PL_VarsPtr =  Perl_GetVars())))
+#endif /* PERL_CORE */
 #endif /* PERL_GLOBAL_STRUCT */
 
 #ifdef MULTIPLICITY
@@ -1970,10 +1970,10 @@ typedef void *Thread;
  * If we don't have threads or multiple interpreters
  * these include variables that would have been their struct-s 
  */
-
-#define PERLVAR(var,type) EXT type var;
-#define PERLVARI(var,type,init) EXT type var INIT(init);
-#define PERLVARIC(var,type,init) EXTCONST type var INIT(init);
+                         
+#define PERLVAR(var,type) EXT type PL_##var;
+#define PERLVARI(var,type,init) EXT type  PL_##var INIT(init);
+#define PERLVARIC(var,type,init) EXTCONST type PL_##var INIT(init);
 
 #ifndef PERL_GLOBAL_STRUCT
 #include "perlvars.h"
@@ -2276,27 +2276,27 @@ enum {
 #define PERLDBf_NONAME	0x40		/* For _SUB: no name of the subr. */
 #define PERLDBf_GOTO	0x80		/* Report goto: call DB::goto. */
 
-#define PERLDB_SUB	(perldb && (perldb & PERLDBf_SUB))
-#define PERLDB_LINE	(perldb && (perldb & PERLDBf_LINE))
-#define PERLDB_NOOPT	(perldb && (perldb & PERLDBf_NOOPT))
-#define PERLDB_INTER	(perldb && (perldb & PERLDBf_INTER))
-#define PERLDB_SUBLINE	(perldb && (perldb & PERLDBf_SUBLINE))
-#define PERLDB_SINGLE	(perldb && (perldb & PERLDBf_SINGLE))
-#define PERLDB_SUB_NN	(perldb && (perldb & (PERLDBf_NONAME)))
-#define PERLDB_GOTO	(perldb && (perldb & PERLDBf_GOTO))
+#define PERLDB_SUB	(PL_perldb && (PL_perldb & PERLDBf_SUB))
+#define PERLDB_LINE	(PL_perldb && (PL_perldb & PERLDBf_LINE))
+#define PERLDB_NOOPT	(PL_perldb && (PL_perldb & PERLDBf_NOOPT))
+#define PERLDB_INTER	(PL_perldb && (PL_perldb & PERLDBf_INTER))
+#define PERLDB_SUBLINE	(PL_perldb && (PL_perldb & PERLDBf_SUBLINE))
+#define PERLDB_SINGLE	(PL_perldb && (PL_perldb & PERLDBf_SINGLE))
+#define PERLDB_SUB_NN	(PL_perldb && (PL_perldb & (PERLDBf_NONAME)))
+#define PERLDB_GOTO	(PL_perldb && (PL_perldb & PERLDBf_GOTO))
 
 
 #ifdef USE_LOCALE_NUMERIC
 
 #define SET_NUMERIC_STANDARD() \
     STMT_START {				\
-	if (! numeric_standard)			\
+	if (! PL_numeric_standard)			\
 	    perl_set_numeric_standard();	\
     } STMT_END
 
 #define SET_NUMERIC_LOCAL() \
     STMT_START {				\
-	if (! numeric_local)			\
+	if (! PL_numeric_local)			\
 	    perl_set_numeric_local();		\
     } STMT_END
 
@@ -2325,9 +2325,9 @@ enum {
  */
 #define offer_nice_chunk(chunk, chunk_size) do {	\
 	LOCK_SV_MUTEX;					\
-	if (!nice_chunk) {				\
-	    nice_chunk = (char*)(chunk);		\
-	    nice_chunk_size = (chunk_size);		\
+	if (!PL_nice_chunk) {				\
+	    PL_nice_chunk = (char*)(chunk);		\
+	    PL_nice_chunk_size = (chunk_size);		\
 	}						\
 	else {						\
 	    Safefree(chunk);				\

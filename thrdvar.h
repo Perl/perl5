@@ -82,7 +82,7 @@ PERLVAR(Tdefstash,	HV *)		/* main symbol table */
 PERLVAR(Tcurstash,	HV *)		/* symbol table for current package */
 
 PERLVAR(Trestartop,	OP *)		/* propagating an error from croak? */
-PERLVARI(Tcurcop,	COP * VOL,	&compiling)
+PERLVARI(Tcurcop,	COP * VOL,	&PL_compiling)
 PERLVAR(Tin_eval,	VOL int)	/* trap "fatal" errors? */
 PERLVAR(Tdelaymagic,	int)		/* ($<,$>) = ... */
 PERLVAR(Tdirty,		bool)		/* in the middle of tearing things down? */

@@ -25,13 +25,13 @@ remove_thread(struct perl_thread *t)
 #ifdef USE_THREADS
     DEBUG_L(WITH_THR(PerlIO_printf(PerlIO_stderr(),
 				   "%p: remove_thread %p\n", thr, t)));
-    MUTEX_LOCK(&threads_mutex);
+    MUTEX_LOCK(&PL_threads_mutex);
     MUTEX_DESTROY(&t->mutex);
-    nthreads--;
+    PL_nthreads--;
     t->prev->next = t->next;
     t->next->prev = t->prev;
-    COND_BROADCAST(&nthreads_cond);
-    MUTEX_UNLOCK(&threads_mutex);
+    COND_BROADCAST(&PL_nthreads_cond);
+    MUTEX_UNLOCK(&PL_threads_mutex);
 #endif
 }
 
@@ -82,7 +82,7 @@ threadstart(void *arg)
     LOGOP myop;
     djSP;
     I32 oldmark = TOPMARK;
-    I32 oldscope = scopestack_ix;
+    I32 oldscope = PL_scopestack_ix;
     I32 retval;
     SV *sv;
     AV *av = newAV();
@@ -117,8 +117,8 @@ threadstart(void *arg)
     PUTBACK;
     perl_call_sv(sv, G_ARRAY|G_EVAL);
     SPAGAIN;
-    retval = SP - (stack_base + oldmark);
-    SP = stack_base + oldmark + 1;
+    retval = SP - (PL_stack_base + oldmark);
+    SP = PL_stack_base + oldmark + 1;
     if (SvCUR(thr->errsv)) {
 	MUTEX_LOCK(&thr->mutex);
 	thr->flags |= THRf_DID_DIE;
@@ -151,29 +151,29 @@ threadstart(void *arg)
     SvREFCNT_dec(thr->errhv);
 
     /*Safefree(cxstack);*/
-    while (curstackinfo->si_next)
-	curstackinfo = curstackinfo->si_next;
-    while (curstackinfo) {
-	PERL_SI *p = curstackinfo->si_prev;
-	SvREFCNT_dec(curstackinfo->si_stack);
-	Safefree(curstackinfo->si_cxstack);
-	Safefree(curstackinfo);
-	curstackinfo = p;
+    while (PL_curstackinfo->si_next)
+	PL_curstackinfo = PL_curstackinfo->si_next;
+    while (PL_curstackinfo) {
+	PERL_SI *p = PL_curstackinfo->si_prev;
+	SvREFCNT_dec(PL_curstackinfo->si_stack);
+	Safefree(PL_curstackinfo->si_cxstack);
+	Safefree(PL_curstackinfo);
+	PL_curstackinfo = p;
     }    
-    Safefree(markstack);
-    Safefree(scopestack);
-    Safefree(savestack);
-    Safefree(retstack);
-    Safefree(tmps_stack);
-    Safefree(ofs);
+    Safefree(PL_markstack);
+    Safefree(PL_scopestack);
+    Safefree(PL_savestack);
+    Safefree(PL_retstack);
+    Safefree(PL_tmps_stack);
+    Safefree(PL_ofs);
 
-    SvREFCNT_dec(rs);
-    SvREFCNT_dec(nrs);
-    SvREFCNT_dec(statname);
-    Safefree(screamfirst);
-    Safefree(screamnext);
-    Safefree(reg_start_tmp);
-    SvREFCNT_dec(lastscream);
+    SvREFCNT_dec(PL_rs);
+    SvREFCNT_dec(PL_nrs);
+    SvREFCNT_dec(PL_statname);
+    Safefree(PL_screamfirst);
+    Safefree(PL_screamnext);
+    Safefree(PL_reg_start_tmp);
+    SvREFCNT_dec(PL_lastscream);
     /*SvREFCNT_dec(defoutgv);*/
 
     MUTEX_LOCK(&thr->mutex);
@@ -529,10 +529,10 @@ list(classname)
 	 * Iterate until we have enough dynamic storage for all threads.
 	 * We mustn't do any allocation while holding threads_mutex though.
 	 */
-	MUTEX_LOCK(&threads_mutex);
+	MUTEX_LOCK(&PL_threads_mutex);
 	do {
-	    n = nthreads;
-	    MUTEX_UNLOCK(&threads_mutex);
+	    n = PL_nthreads;
+	    MUTEX_UNLOCK(&PL_threads_mutex);
 	    if (AvFILL(av) < n - 1) {
 		int i = AvFILL(av);
 		for (i = AvFILL(av); i < n - 1; i++) {
@@ -543,9 +543,9 @@ list(classname)
 	
 		}
 	    }
-	    MUTEX_LOCK(&threads_mutex);
-	} while (n < nthreads);
-	n = nthreads;	/* Get the final correct value */
+	    MUTEX_LOCK(&PL_threads_mutex);
+	} while (n < PL_nthreads);
+	n = PL_nthreads;	/* Get the final correct value */
 
 	/*
 	 * At this point, there's enough room to fill in av.
@@ -565,7 +565,7 @@ list(classname)
 	    svp++;
 	} while (t != thr);
 	/*  */
-	MUTEX_UNLOCK(&threads_mutex);
+	MUTEX_UNLOCK(&PL_threads_mutex);
 	/* Truncate any unneeded slots in av */
 	av_fill(av, n - 1);
 	/* Finally, push all the new objects onto the stack and drop av */
@@ -587,7 +587,7 @@ kill_sighandler_thread()
 void
 init_thread_signals()
     PPCODE:
-	sighandlerp = handle_thread_signal;
+	PL_sighandlerp = handle_thread_signal;
 	if (pipe(sig_pipe) == -1)
 	    XSRETURN_UNDEF;
 	PUSHs(&sv_yes);

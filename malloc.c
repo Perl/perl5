@@ -225,7 +225,7 @@
 
 #ifdef DEBUGGING
 #  undef DEBUG_m
-#  define DEBUG_m(a)  if (debug & 128)   a
+#  define DEBUG_m(a)  if (PL_debug & 128)   a
 #endif
 
 /* I don't much care whether these are defined in sys/types.h--LAW */
@@ -573,7 +573,7 @@ emergency_sbrk(size)
 {
     if (size >= BIG_SIZE) {
 	/* Give the possibility to recover: */
-	MUTEX_UNLOCK(&malloc_mutex);
+	MUTEX_UNLOCK(&PL_malloc_mutex);
 	croak("Out of memory during \"large\" request for %i bytes", size);
     }
 
@@ -581,11 +581,11 @@ emergency_sbrk(size)
 	dTHR;
 	/* First offense, give a possibility to recover by dieing. */
 	/* No malloc involved here: */
-	GV **gvp = (GV**)hv_fetch(defstash, "^M", 2, 0);
+	GV **gvp = (GV**)hv_fetch(PL_defstash, "^M", 2, 0);
 	SV *sv;
 	char *pv;
 
-	if (!gvp) gvp = (GV**)hv_fetch(defstash, "\015", 1, 0);
+	if (!gvp) gvp = (GV**)hv_fetch(PL_defstash, "\015", 1, 0);
 	if (!gvp || !(sv = GvSV(*gvp)) || !SvPOK(sv) 
 	    || (SvLEN(sv) < (1<<LOG_OF_MIN_ARENA) - M_OVERHEAD)) 
 	    return (char *)-1;		/* Now die die die... */
@@ -602,7 +602,7 @@ emergency_sbrk(size)
 	emergency_buffer_size = SvLEN(sv) + M_OVERHEAD;
 	SvPOK_off(sv);
 	SvREADONLY_on(sv);
-	MUTEX_UNLOCK(&malloc_mutex);
+	MUTEX_UNLOCK(&PL_malloc_mutex);
 	croak("Out of memory during request for %i bytes", size);
     }
     else if (emergency_buffer_size >= size) {
@@ -679,7 +679,7 @@ malloc(register size_t nbytes)
 		croak("%s", "panic: malloc");
 #endif
 
-	MUTEX_LOCK(&malloc_mutex);
+	MUTEX_LOCK(&PL_malloc_mutex);
 	/*
 	 * Convert amount of memory requested into
 	 * closest block size stored in hash buckets
@@ -718,9 +718,9 @@ malloc(register size_t nbytes)
   	if (nextf[bucket] == NULL)    
   		morecore(bucket);
   	if ((p = nextf[bucket]) == NULL) {
-		MUTEX_UNLOCK(&malloc_mutex);
+		MUTEX_UNLOCK(&PL_malloc_mutex);
 #ifdef PERL_CORE
-		if (!nomemok) {
+		if (!PL_nomemok) {
 		    PerlIO_puts(PerlIO_stderr(),"Out of memory!\n");
 		    my_exit(1);
 		}
@@ -731,7 +731,7 @@ malloc(register size_t nbytes)
 
 	DEBUG_m(PerlIO_printf(Perl_debug_log,
 			      "0x%lx: (%05lu) malloc %ld bytes\n",
-			      (unsigned long)(p+1), (unsigned long)(an++),
+			      (unsigned long)(p+1), (unsigned long)(PL_an++),
 			      (long)size));
 
 	/* remove from linked list */
@@ -768,7 +768,7 @@ malloc(register size_t nbytes)
 	    *((u_int *)((caddr_t)p + nbytes - RSLOP)) = RMAGIC;
 	}
 #endif
-	MUTEX_UNLOCK(&malloc_mutex);
+	MUTEX_UNLOCK(&PL_malloc_mutex);
   	return ((Malloc_t)(p + CHUNK_SHIFT));
 }
 
@@ -953,7 +953,7 @@ getpages(int needed, int *nblksp, int bucket)
 				      "failed to fix bad sbrk()\n"));
 #ifdef PACK_MALLOC
 		if (slack) {
-		    MUTEX_UNLOCK(&malloc_mutex);
+		    MUTEX_UNLOCK(&PL_malloc_mutex);
 		    croak("%s", "panic: Off-page sbrk");
 		}
 #endif
@@ -1063,7 +1063,7 @@ morecore(register int bucket)
   	if (nextf[bucket])
   		return;
 	if (bucket == sizeof(MEM_SIZE)*8*BUCKETS_PER_POW2) {
-	    MUTEX_UNLOCK(&malloc_mutex);
+	    MUTEX_UNLOCK(&PL_malloc_mutex);
 	    croak("%s", "Out of memory during ridiculously large request");
 	}
 	if (bucket > max_bucket)
@@ -1161,7 +1161,7 @@ free(void *mp)
 
 	DEBUG_m(PerlIO_printf(Perl_debug_log, 
 			      "0x%lx: (%05lu) free\n",
-			      (unsigned long)cp, (unsigned long)(an++)));
+			      (unsigned long)cp, (unsigned long)(PL_an++)));
 
 	if (cp == NULL)
 		return;
@@ -1192,7 +1192,7 @@ free(void *mp)
 #endif
 		return;				/* sanity */
 	    }
-	MUTEX_LOCK(&malloc_mutex);
+	MUTEX_LOCK(&PL_malloc_mutex);
 #ifdef RCHECK
   	ASSERT(ovp->ov_rmagic == RMAGIC, "chunk's head overwrite");
 	if (OV_INDEX(ovp) <= MAX_SHORT_BUCKET) {
@@ -1215,7 +1215,7 @@ free(void *mp)
   	size = OV_INDEX(ovp);
 	ovp->ov_next = nextf[size];
   	nextf[size] = ovp;
-	MUTEX_UNLOCK(&malloc_mutex);
+	MUTEX_UNLOCK(&PL_malloc_mutex);
 }
 
 /*
@@ -1253,7 +1253,7 @@ realloc(void *mp, size_t nbytes)
 	if (!cp)
 		return malloc(nbytes);
 
-	MUTEX_LOCK(&malloc_mutex);
+	MUTEX_LOCK(&PL_malloc_mutex);
 	ovp = (union overhead *)((caddr_t)cp 
 				- sizeof (union overhead) * CHUNK_SHIFT);
 	bucket = OV_INDEX(ovp);
@@ -1351,7 +1351,7 @@ realloc(void *mp, size_t nbytes)
 		}
 #endif
 		res = cp;
-		MUTEX_UNLOCK(&malloc_mutex);
+		MUTEX_UNLOCK(&PL_malloc_mutex);
 	} else if (incr == 1 && (cp - M_OVERHEAD == last_op) 
 		   && (onb > (1 << LOG_OF_MIN_ARENA))) {
 	    MEM_SIZE require, newarena = nbytes, pow;
@@ -1379,7 +1379,7 @@ realloc(void *mp, size_t nbytes)
 		goto hard_way;
 	} else {
 	  hard_way:
-	    MUTEX_UNLOCK(&malloc_mutex);
+	    MUTEX_UNLOCK(&PL_malloc_mutex);
 	    if ((res = (char*)malloc(nbytes)) == NULL)
 		return (NULL);
 	    if (cp != res)			/* common optimization */
@@ -1389,10 +1389,10 @@ realloc(void *mp, size_t nbytes)
 	}
 
 	DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%lu: (%05lu) rfree\n",
-			      (unsigned long)res,(unsigned long)(an++)));
+			      (unsigned long)res,(unsigned long)(PL_an++)));
 	DEBUG_m(PerlIO_printf(Perl_debug_log, 
 			      "0x%lx: (%05lu) realloc %ld bytes\n",
-			      (unsigned long)res,(unsigned long)(an++),
+			      (unsigned long)res,(unsigned long)(PL_an++),
 			      (long)size));
   	return ((Malloc_t)res);
 }

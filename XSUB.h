@@ -1,4 +1,4 @@
-#define ST(off) stack_base[ax + (off)]
+#define ST(off) PL_stack_base[ax + (off)]
 
 #ifdef CAN_PROTOTYPE
 #ifdef PERL_OBJECT
@@ -10,9 +10,14 @@
 #define XS(name) void name(cv) CV* cv;
 #endif
 
+#define na		PL_na
+#define sv_undef	PL_sv_undef
+#define sv_yes		PL_sv_yes
+#define sv_no		PL_sv_no
+
 #define dXSARGS				\
 	dSP; dMARK;			\
-	I32 ax = mark - stack_base + 1;	\
+	I32 ax = mark - PL_stack_base + 1;	\
 	I32 items = sp - mark
 
 #define XSANY CvXSUBANY(cv)
@@ -31,7 +36,7 @@
 
 #define XSRETURN(off)					\
     STMT_START {					\
-	stack_sp = stack_base + ax + ((off) - 1);	\
+	PL_stack_sp = PL_stack_base + ax + ((off) - 1);	\
 	return;						\
     } STMT_END
 
@@ -40,9 +45,9 @@
 #define XST_mIV(i,v)  (ST(i) = sv_2mortal(newSViv(v))  )
 #define XST_mNV(i,v)  (ST(i) = sv_2mortal(newSVnv(v))  )
 #define XST_mPV(i,v)  (ST(i) = sv_2mortal(newSVpv(v,0)))
-#define XST_mNO(i)    (ST(i) = &sv_no   )
-#define XST_mYES(i)   (ST(i) = &sv_yes  )
-#define XST_mUNDEF(i) (ST(i) = &sv_undef)
+#define XST_mNO(i)    (ST(i) = &PL_sv_no   )
+#define XST_mYES(i)   (ST(i) = &PL_sv_yes  )
+#define XST_mUNDEF(i) (ST(i) = &PL_sv_undef)
  
 #define XSRETURN_IV(v) STMT_START { XST_mIV(0,v);  XSRETURN(1); } STMT_END
 #define XSRETURN_NV(v) STMT_START { XST_mNV(0,v);  XSRETURN(1); } STMT_END
@@ -57,6 +62,7 @@
 #ifdef XS_VERSION
 # define XS_VERSION_BOOTCHECK \
     STMT_START {							\
+	SV *Sv;								\
 	char *vn = Nullch, *module = SvPV(ST(0),na);			\
 	if (items >= 2)	 /* version supplied as bootstrap arg */	\
 	    Sv = ST(1);							\

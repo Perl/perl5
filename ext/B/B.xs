@@ -189,8 +189,8 @@ make_sv_object(SV *arg, SV *sv)
     char *type = 0;
     IV iv;
     
-    for (iv = 0; iv < sizeof(specialsv_list)/sizeof(SV*); iv++) {
-	if (sv == specialsv_list[iv]) {
+    for (iv = 0; iv < sizeof(PL_specialsv_list)/sizeof(SV*); iv++) {
+	if (sv == PL_specialsv_list[iv]) {
 	    type = "B::SPECIAL";
 	    break;
 	}
@@ -436,13 +436,13 @@ PROTOTYPES: DISABLE
 BOOT:
     INIT_SPECIALSV_LIST;
 
-#define B_main_cv()	main_cv
-#define B_main_root()	main_root
-#define B_main_start()	main_start
-#define B_comppadlist()	(main_cv ? CvPADLIST(main_cv) : CvPADLIST(compcv))
-#define B_sv_undef()	&sv_undef
-#define B_sv_yes()	&sv_yes
-#define B_sv_no()	&sv_no
+#define B_main_cv()	PL_main_cv
+#define B_main_root()	PL_main_root
+#define B_main_start()	PL_main_start
+#define B_comppadlist()	(PL_main_cv ? CvPADLIST(PL_main_cv) : CvPADLIST(PL_compcv))
+#define B_sv_undef()	&PL_sv_undef
+#define B_sv_yes()	&PL_sv_yes
+#define B_sv_no()	&PL_sv_no
 
 B::CV
 B_main_cv()
@@ -516,7 +516,7 @@ ppname(opnum)
 	int	opnum
     CODE:
 	ST(0) = sv_newmortal();
-	if (opnum >= 0 && opnum < maxo) {
+	if (opnum >= 0 && opnum < PL_maxo) {
 	    sv_setpvn(ST(0), "pp_", 3);
 	    sv_catpv(ST(0), op_name[opnum]);
 	}
@@ -543,7 +543,7 @@ cast_I32(i)
 void
 minus_c()
     CODE:
-	minus_c = TRUE;
+	PL_minus_c = TRUE;
 
 SV *
 cstring(sv)
@@ -558,11 +558,11 @@ threadsv_names()
     PPCODE:
 #ifdef USE_THREADS
 	int i;
-	STRLEN len = strlen(threadsv_names);
+	STRLEN len = strlen(PL_threadsv_names);
 
 	EXTEND(sp, len);
 	for (i = 0; i < len; i++)
-	    PUSHs(sv_2mortal(newSVpv(&threadsv_names[i], 1)));
+	    PUSHs(sv_2mortal(newSVpv(&PL_threadsv_names[i], 1)));
 #endif
 
 

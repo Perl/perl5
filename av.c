@@ -29,18 +29,18 @@ av_reify(AV *av)
 #endif
     key = AvMAX(av) + 1;
     while (key > AvFILLp(av) + 1)
-	AvARRAY(av)[--key] = &sv_undef;
+	AvARRAY(av)[--key] = &PL_sv_undef;
     while (key) {
 	sv = AvARRAY(av)[--key];
 	assert(sv);
-	if (sv != &sv_undef) {
+	if (sv != &PL_sv_undef) {
 	    dTHR;
 	    (void)SvREFCNT_inc(sv);
 	}
     }
     key = AvARRAY(av) - AvALLOC(av);
     while (key)
-	AvALLOC(av)[--key] = &sv_undef;
+	AvALLOC(av)[--key] = &PL_sv_undef;
     AvREAL_on(av);
 }
 
@@ -78,7 +78,7 @@ av_extend(AV *av, I32 key)
 	    SvPVX(av) = (char*)AvALLOC(av);
 	    if (AvREAL(av)) {
 		while (tmp)
-		    ary[--tmp] = &sv_undef;
+		    ary[--tmp] = &PL_sv_undef;
 	    }
 	    
 	    if (key > AvMAX(av) - 10) {
@@ -123,10 +123,10 @@ av_extend(AV *av, I32 key)
 	      resized:
 		ary = AvALLOC(av) + AvMAX(av) + 1;
 		tmp = newmax - AvMAX(av);
-		if (av == curstack) {	/* Oops, grew stack (via av_store()?) */
-		    stack_sp = AvALLOC(av) + (stack_sp - stack_base);
-		    stack_base = AvALLOC(av);
-		    stack_max = stack_base + newmax;
+		if (av == PL_curstack) {	/* Oops, grew stack (via av_store()?) */
+		    PL_stack_sp = AvALLOC(av) + (PL_stack_sp - PL_stack_base);
+		    PL_stack_base = AvALLOC(av);
+		    PL_stack_max = PL_stack_base + newmax;
 		}
 	    }
 	    else {
@@ -134,11 +134,11 @@ av_extend(AV *av, I32 key)
 		New(2,AvALLOC(av), newmax+1, SV*);
 		ary = AvALLOC(av) + 1;
 		tmp = newmax;
-		AvALLOC(av)[0] = &sv_undef;	/* For the stacks */
+		AvALLOC(av)[0] = &PL_sv_undef;	/* For the stacks */
 	    }
 	    if (AvREAL(av)) {
 		while (tmp)
-		    ary[--tmp] = &sv_undef;
+		    ary[--tmp] = &PL_sv_undef;
 	    }
 	    
 	    SvPVX(av) = (char*)AvALLOC(av);
@@ -166,8 +166,8 @@ av_fetch(register AV *av, I32 key, I32 lval)
 	    dTHR;
 	    sv = sv_newmortal();
 	    mg_copy((SV*)av, sv, 0, key);
-	    av_fetch_sv = sv;
-	    return &av_fetch_sv;
+	    PL_av_fetch_sv = sv;
+	    return &PL_av_fetch_sv;
 	}
     }
 
@@ -180,7 +180,7 @@ av_fetch(register AV *av, I32 key, I32 lval)
 	    sv = sv_newmortal();
 	return av_store(av,key,sv);
     }
-    if (AvARRAY(av)[key] == &sv_undef) {
+    if (AvARRAY(av)[key] == &PL_sv_undef) {
     emptyness:
 	if (lval) {
 	    sv = NEWSV(6,0);
@@ -191,7 +191,7 @@ av_fetch(register AV *av, I32 key, I32 lval)
     else if (AvREIFY(av)
 	     && (!AvARRAY(av)[key]	/* eg. @_ could have freed elts */
 		 || SvTYPE(AvARRAY(av)[key]) == SVTYPEMASK)) {
-	AvARRAY(av)[key] = &sv_undef;	/* 1/2 reify */
+	AvARRAY(av)[key] = &PL_sv_undef;	/* 1/2 reify */
 	goto emptyness;
     }
     return &AvARRAY(av)[key];
@@ -207,7 +207,7 @@ av_store(register AV *av, I32 key, SV *val)
     if (!av)
 	return 0;
     if (!val)
-	val = &sv_undef;
+	val = &PL_sv_undef;
 
     if (key < 0) {
 	key += AvFILL(av) + 1;
@@ -220,7 +220,7 @@ av_store(register AV *av, I32 key, SV *val)
 
     if (SvRMAGICAL(av)) {
 	if (mg_find((SV*)av,'P')) {
-	    if (val != &sv_undef) {
+	    if (val != &PL_sv_undef) {
 		mg_copy((SV*)av, val, 0, key);
 	    }
 	    return 0;
@@ -235,10 +235,10 @@ av_store(register AV *av, I32 key, SV *val)
     if (AvFILLp(av) < key) {
 	if (!AvREAL(av)) {
 	    dTHR;
-	    if (av == curstack && key > stack_sp - stack_base)
-		stack_sp = stack_base + key;	/* XPUSH in disguise */
+	    if (av == PL_curstack && key > PL_stack_sp - PL_stack_base)
+		PL_stack_sp = PL_stack_base + key;	/* XPUSH in disguise */
 	    do
-		ary[++AvFILLp(av)] = &sv_undef;
+		ary[++AvFILLp(av)] = &PL_sv_undef;
 	    while (AvFILLp(av) < key);
 	}
 	AvFILLp(av) = key;
@@ -247,7 +247,7 @@ av_store(register AV *av, I32 key, SV *val)
 	SvREFCNT_dec(ary[key]);
     ary[key] = val;
     if (SvSMAGICAL(av)) {
-	if (val != &sv_undef) {
+	if (val != &PL_sv_undef) {
 	    MAGIC* mg = SvMAGIC(av);
 	    sv_magic(val, (SV*)av, toLOWER(mg->mg_type), 0, key);
 	}
@@ -349,7 +349,7 @@ av_clear(register AV *av)
 	key = AvFILLp(av) + 1;
 	while (key) {
 	    SvREFCNT_dec(ary[--key]);
-	    ary[key] = &sv_undef;
+	    ary[key] = &PL_sv_undef;
 	}
     }
     if (key = AvARRAY(av) - AvALLOC(av)) {
@@ -421,7 +421,7 @@ av_pop(register AV *av)
     MAGIC* mg;
 
     if (!av || AvFILL(av) < 0)
-	return &sv_undef;
+	return &PL_sv_undef;
     if (SvREADONLY(av))
 	croak(no_modify);
     if (SvRMAGICAL(av) && (mg = mg_find((SV*)av,'P'))) {
@@ -432,16 +432,16 @@ av_pop(register AV *av)
 	PUTBACK;
 	ENTER;
 	if (perl_call_method("POP", G_SCALAR)) {
-	    retval = newSVsv(*stack_sp--);    
+	    retval = newSVsv(*PL_stack_sp--);    
 	} else {    
-	    retval = &sv_undef;
+	    retval = &PL_sv_undef;
 	}
 	LEAVE;
 	POPSTACK;
 	return retval;
     }
     retval = AvARRAY(av)[AvFILLp(av)];
-    AvARRAY(av)[AvFILLp(av)--] = &sv_undef;
+    AvARRAY(av)[AvFILLp(av)--] = &PL_sv_undef;
     if (SvSMAGICAL(av))
 	mg_set((SV*)av);
     return retval;
@@ -466,7 +466,7 @@ av_unshift(register AV *av, register I32 num)
 	EXTEND(SP,1+num);
 	PUSHs(mg->mg_obj);
 	while (num-- > 0) {
-	    PUSHs(&sv_undef);
+	    PUSHs(&PL_sv_undef);
 	}
 	PUTBACK;
 	ENTER;
@@ -495,7 +495,7 @@ av_unshift(register AV *av, register I32 num)
 	ary = AvARRAY(av);
 	Move(ary, ary + num, i + 1, SV*);
 	do {
-	    ary[--num] = &sv_undef;
+	    ary[--num] = &PL_sv_undef;
 	} while (num);
     }
 }
@@ -507,7 +507,7 @@ av_shift(register AV *av)
     MAGIC* mg;
 
     if (!av || AvFILL(av) < 0)
-	return &sv_undef;
+	return &PL_sv_undef;
     if (SvREADONLY(av))
 	croak(no_modify);
     if (SvRMAGICAL(av) && (mg = mg_find((SV*)av,'P'))) {
@@ -518,9 +518,9 @@ av_shift(register AV *av)
 	PUTBACK;
 	ENTER;
 	if (perl_call_method("SHIFT", G_SCALAR)) {
-	    retval = newSVsv(*stack_sp--);            
+	    retval = newSVsv(*PL_stack_sp--);            
 	} else {    
-	    retval = &sv_undef;
+	    retval = &PL_sv_undef;
 	}     
 	LEAVE;
 	POPSTACK;
@@ -528,7 +528,7 @@ av_shift(register AV *av)
     }
     retval = *AvARRAY(av);
     if (AvREAL(av))
-	*AvARRAY(av) = &sv_undef;
+	*AvARRAY(av) = &PL_sv_undef;
     SvPVX(av) = (char*)(AvARRAY(av) + 1);
     AvMAX(av)--;
     AvFILLp(av)--;
@@ -574,12 +574,12 @@ av_fill(register AV *av, I32 fill)
 	if (AvREAL(av)) {
 	    while (key > fill) {
 		SvREFCNT_dec(ary[key]);
-		ary[key--] = &sv_undef;
+		ary[key--] = &PL_sv_undef;
 	    }
 	}
 	else {
 	    while (key < fill)
-		ary[++key] = &sv_undef;
+		ary[++key] = &PL_sv_undef;
 	}
 	    
 	AvFILLp(av) = fill;
@@ -587,7 +587,7 @@ av_fill(register AV *av, I32 fill)
 	    mg_set((SV*)av);
     }
     else
-	(void)av_store(av,fill,&sv_undef);
+	(void)av_store(av,fill,&PL_sv_undef);
 }
 
 

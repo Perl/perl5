@@ -52,7 +52,7 @@ typedef U32 PADOFFSET;
 	 ((op)->op_flags & OPf_WANT) == OPf_WANT_LIST   ? G_ARRAY   : \
 	 dfl)
 
-#define GIMME_V		OP_GIMME(op, block_gimme())
+#define GIMME_V		OP_GIMME(PL_op, block_gimme())
 
 /* Public flags */
 
@@ -84,8 +84,8 @@ typedef U32 PADOFFSET;
 #define OPf_LIST	OPf_WANT_LIST
 #define OPf_KNOW	OPf_WANT
 #define GIMME \
-	  (op->op_flags & OPf_WANT					\
-	   ? ((op->op_flags & OPf_WANT) == OPf_WANT_LIST		\
+	  (PL_op->op_flags & OPf_WANT					\
+	   ? ((PL_op->op_flags & OPf_WANT) == OPf_WANT_LIST		\
 	      ? G_ARRAY							\
 	      : G_SCALAR)						\
 	   : dowantarray())
@@ -240,17 +240,17 @@ struct loop {
     OP *	op_lastop;
 };
 
-#define cUNOP ((UNOP*)op)
-#define cBINOP ((BINOP*)op)
-#define cLISTOP ((LISTOP*)op)
-#define cLOGOP ((LOGOP*)op)
-#define cCONDOP ((CONDOP*)op)
-#define cPMOP ((PMOP*)op)
-#define cSVOP ((SVOP*)op)
-#define cGVOP ((GVOP*)op)
-#define cPVOP ((PVOP*)op)
-#define cCOP ((COP*)op)
-#define cLOOP ((LOOP*)op)
+#define cUNOP ((UNOP*)PL_op)
+#define cBINOP ((BINOP*)PL_op)
+#define cLISTOP ((LISTOP*)PL_op)
+#define cLOGOP ((LOGOP*)PL_op)
+#define cCONDOP ((CONDOP*)PL_op)
+#define cPMOP ((PMOP*)PL_op)
+#define cSVOP ((SVOP*)PL_op)
+#define cGVOP ((GVOP*)PL_op)
+#define cPVOP ((PVOP*)PL_op)
+#define cCOP ((COP*)PL_op)
+#define cLOOP ((LOOP*)PL_op)
 
 #define cUNOPo ((UNOP*)o)
 #define cBINOPo ((BINOP*)o)

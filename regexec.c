@@ -108,20 +108,20 @@ STATIC CHECKPOINT
 regcppush(I32 parenfloor)
 {
     dTHR;
-    int retval = savestack_ix;
-    int i = (regsize - parenfloor) * 4;
+    int retval = PL_savestack_ix;
+    int i = (PL_regsize - parenfloor) * 4;
     int p;
 
     SSCHECK(i + 5);
-    for (p = regsize; p > parenfloor; p--) {
-	SSPUSHPTR(regendp[p]);
-	SSPUSHPTR(regstartp[p]);
-	SSPUSHPTR(reg_start_tmp[p]);
+    for (p = PL_regsize; p > parenfloor; p--) {
+	SSPUSHPTR(PL_regendp[p]);
+	SSPUSHPTR(PL_regstartp[p]);
+	SSPUSHPTR(PL_reg_start_tmp[p]);
 	SSPUSHINT(p);
     }
-    SSPUSHINT(regsize);
-    SSPUSHINT(*reglastparen);
-    SSPUSHPTR(reginput);
+    SSPUSHINT(PL_regsize);
+    SSPUSHINT(*PL_reglastparen);
+    SSPUSHPTR(PL_reginput);
     SSPUSHINT(i + 3);
     SSPUSHINT(SAVEt_REGCONTEXT);
     return retval;
@@ -130,12 +130,12 @@ regcppush(I32 parenfloor)
 /* These are needed since we do not localize EVAL nodes: */
 #  define REGCP_SET  DEBUG_r(PerlIO_printf(Perl_debug_log,		\
 			     "  Setting an EVAL scope, savestack=%i\n",	\
-			     savestack_ix)); lastcp = savestack_ix
+			     PL_savestack_ix)); lastcp = PL_savestack_ix
 
-#  define REGCP_UNWIND  DEBUG_r(lastcp != savestack_ix ?		\
+#  define REGCP_UNWIND  DEBUG_r(lastcp != PL_savestack_ix ?		\
 				PerlIO_printf(Perl_debug_log,		\
 				"  Clearing an EVAL scope, savestack=%i..%i\n", \
-				lastcp, savestack_ix) : 0); regcpblow(lastcp)
+				lastcp, PL_savestack_ix) : 0); regcpblow(lastcp)
 
 STATIC char *
 regcppop(void)
@@ -148,35 +148,35 @@ regcppop(void)
     assert(i == SAVEt_REGCONTEXT);
     i = SSPOPINT;
     input = (char *) SSPOPPTR;
-    *reglastparen = SSPOPINT;
-    regsize = SSPOPINT;
+    *PL_reglastparen = SSPOPINT;
+    PL_regsize = SSPOPINT;
     for (i -= 3; i > 0; i -= 4) {
 	paren = (U32)SSPOPINT;
-	reg_start_tmp[paren] = (char *) SSPOPPTR;
-	regstartp[paren] = (char *) SSPOPPTR;
+	PL_reg_start_tmp[paren] = (char *) SSPOPPTR;
+	PL_regstartp[paren] = (char *) SSPOPPTR;
 	tmps = (char*)SSPOPPTR;
-	if (paren <= *reglastparen)
-	    regendp[paren] = tmps;
+	if (paren <= *PL_reglastparen)
+	    PL_regendp[paren] = tmps;
 	DEBUG_r(
 	    PerlIO_printf(Perl_debug_log,
 			  "     restoring \\%d to %d(%d)..%d%s\n",
-			  paren, regstartp[paren] - regbol, 
-			  reg_start_tmp[paren] - regbol,
-			  regendp[paren] - regbol, 
-			  (paren > *reglastparen ? "(no)" : ""));
+			  paren, PL_regstartp[paren] - PL_regbol, 
+			  PL_reg_start_tmp[paren] - PL_regbol,
+			  PL_regendp[paren] - PL_regbol, 
+			  (paren > *PL_reglastparen ? "(no)" : ""));
 	);
     }
     DEBUG_r(
-	if (*reglastparen + 1 <= regnpar) {
+	if (*PL_reglastparen + 1 <= PL_regnpar) {
 	    PerlIO_printf(Perl_debug_log,
 			  "     restoring \\%d..\\%d to undef\n",
-			  *reglastparen + 1, regnpar);
+			  *PL_reglastparen + 1, PL_regnpar);
 	}
     );
-    for (paren = *reglastparen + 1; paren <= regnpar; paren++) {
-	if (paren > regsize)
-	    regstartp[paren] = Nullch;
-	regendp[paren] = Nullch;
+    for (paren = *PL_reglastparen + 1; paren <= PL_regnpar; paren++) {
+	if (paren > PL_regsize)
+	    PL_regstartp[paren] = Nullch;
+	PL_regendp[paren] = Nullch;
     }
     return input;
 }
@@ -228,16 +228,16 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
     I32 end_shift = 0;			/* Same for the end. */
     I32 scream_pos = -1;		/* Internal iterator of scream. */
     char *scream_olds;
-    SV* oreplsv = GvSV(replgv);
+    SV* oreplsv = GvSV(PL_replgv);
 
     cc.cur = 0;
     cc.oldcc = 0;
-    regcc = &cc;
+    PL_regcc = &cc;
 
-    regprecomp = prog->precomp;		/* Needed for error messages. */
+    PL_regprecomp = prog->precomp;		/* Needed for error messages. */
 #ifdef DEBUGGING
-    regnarrate = debug & 512;
-    regprogram = prog->program;
+    PL_regnarrate = PL_debug & 512;
+    PL_regprogram = prog->program;
 #endif
 
     /* Be paranoid... */
@@ -250,11 +250,11 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
     if (strend - startpos < minlen) goto phooey;
 
     if (startpos == strbeg)	/* is ^ valid at stringarg? */
-	regprev = '\n';
+	PL_regprev = '\n';
     else {
-	regprev = stringarg[-1];
-	if (!multiline && regprev == '\n')
-	    regprev = '\0';		/* force ^ to NOT match */
+	PL_regprev = stringarg[-1];
+	if (!PL_multiline && PL_regprev == '\n')
+	    PL_regprev = '\0';		/* force ^ to NOT match */
     }
 
     /* Check validity of program. */
@@ -262,9 +262,9 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 	FAIL("corrupted regexp program");
     }
 
-    regnpar = prog->nparens;
-    reg_flags = 0;
-    reg_eval_set = 0;
+    PL_regnpar = prog->nparens;
+    PL_reg_flags = 0;
+    PL_reg_eval_set = 0;
 
     /* If there is a "must appear" string, look for it. */
     s = startpos;
@@ -272,13 +272,13 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 	&& prog->check_substr != Nullsv &&
 	!(prog->reganch & ROPT_ANCH_GPOS) &&
 	(!(prog->reganch & (ROPT_ANCH_BOL | ROPT_ANCH_MBOL))
-	 || (multiline && prog->check_substr == prog->anchored_substr)) )
+	 || (PL_multiline && prog->check_substr == prog->anchored_substr)) )
     {
 	start_shift = prog->check_offset_min;
 	/* Should be nonnegative! */
 	end_shift = minlen - start_shift - SvCUR(prog->check_substr);
 	if (screamer) {
-	    if (screamfirst[BmRARE(prog->check_substr)] >= 0)
+	    if (PL_screamfirst[BmRARE(prog->check_substr)] >= 0)
 		    s = screaminstr(screamer, prog->check_substr, 
 				    start_shift + (stringarg - strbeg),
 				    end_shift, &scream_pos, 0);
@@ -307,14 +307,14 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
     }
 
     /* Mark beginning of line for ^ and lookbehind. */
-    regbol = startpos;
-    bostr  = strbeg;
+    PL_regbol = startpos;
+    PL_bostr  = strbeg;
 
     /* Mark end of line for $ (and such) */
-    regeol = strend;
+    PL_regeol = strend;
 
     /* see how far we have to get to not match where we matched before */
-    regtill = startpos+minend;
+    PL_regtill = startpos+minend;
 
     DEBUG_r(
 	PerlIO_printf(Perl_debug_log, 
@@ -332,7 +332,7 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 	if (regtry(prog, startpos))
 	    goto got_it;
 	else if (!(prog->reganch & ROPT_ANCH_GPOS) &&
-		 (multiline || (prog->reganch & ROPT_IMPLICIT)
+		 (PL_multiline || (prog->reganch & ROPT_IMPLICIT)
 		  || (prog->reganch & ROPT_ANCH_MBOL)))
 	{
 	    if (minlen)
@@ -432,12 +432,12 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 	    }
 	    break;
 	case BOUNDL:
-	    reg_flags |= RF_tainted;
+	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case BOUND:
 	    if (minlen)
 		dontbother++,strend--;
-	    tmp = (s != startpos) ? UCHARAT(s - 1) : regprev;
+	    tmp = (s != startpos) ? UCHARAT(s - 1) : PL_regprev;
 	    tmp = ((OP(c) == BOUND ? isALNUM(tmp) : isALNUM_LC(tmp)) != 0);
 	    while (s < strend) {
 		if (tmp == !(OP(c) == BOUND ? isALNUM(*s) : isALNUM_LC(*s))) {
@@ -451,12 +451,12 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 		goto got_it;
 	    break;
 	case NBOUNDL:
-	    reg_flags |= RF_tainted;
+	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case NBOUND:
 	    if (minlen)
 		dontbother++,strend--;
-	    tmp = (s != startpos) ? UCHARAT(s - 1) : regprev;
+	    tmp = (s != startpos) ? UCHARAT(s - 1) : PL_regprev;
 	    tmp = ((OP(c) == NBOUND ? isALNUM(tmp) : isALNUM_LC(tmp)) != 0);
 	    while (s < strend) {
 		if (tmp == !(OP(c) == NBOUND ? isALNUM(*s) : isALNUM_LC(*s)))
@@ -482,7 +482,7 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 	    }
 	    break;
 	case ALNUML:
-	    reg_flags |= RF_tainted;
+	    PL_reg_flags |= RF_tainted;
 	    while (s < strend) {
 		if (isALNUM_LC(*s)) {
 		    if (tmp && regtry(prog, s))
@@ -509,7 +509,7 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 	    }
 	    break;
 	case NALNUML:
-	    reg_flags |= RF_tainted;
+	    PL_reg_flags |= RF_tainted;
 	    while (s < strend) {
 		if (!isALNUM_LC(*s)) {
 		    if (tmp && regtry(prog, s))
@@ -536,7 +536,7 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 	    }
 	    break;
 	case SPACEL:
-	    reg_flags |= RF_tainted;
+	    PL_reg_flags |= RF_tainted;
 	    while (s < strend) {
 		if (isSPACE_LC(*s)) {
 		    if (tmp && regtry(prog, s))
@@ -563,7 +563,7 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
 	    }
 	    break;
 	case NSPACEL:
-	    reg_flags |= RF_tainted;
+	    PL_reg_flags |= RF_tainted;
 	    while (s < strend) {
 		if (!isSPACE_LC(*s)) {
 		    if (tmp && regtry(prog, s))
@@ -641,7 +641,7 @@ got_it:
     strend += dontbother;	/* uncheat */
     prog->subbeg = strbeg;
     prog->subend = strend;
-    RX_MATCH_TAINTED_set(prog, reg_flags & RF_tainted);
+    RX_MATCH_TAINTED_set(prog, PL_reg_flags & RF_tainted);
 
     /* make sure $`, $&, $', and $digit will work later */
     if (strbeg != prog->subbase) {	/* second+ //g match.  */
@@ -668,8 +668,8 @@ got_it:
 	}
     }
     /* Preserve the current value of $^R */
-    if (oreplsv != GvSV(replgv)) {
-	sv_setsv(oreplsv, GvSV(replgv));/* So that when GvSV(replgv) is
+    if (oreplsv != GvSV(PL_replgv)) {
+	sv_setsv(oreplsv, GvSV(PL_replgv));/* So that when GvSV(replgv) is
 					   restored, the value remains
 					   the same. */
     }
@@ -691,37 +691,37 @@ regtry(regexp *prog, char *startpos)
     register char **ep;
     CHECKPOINT lastcp;
 
-    if ((prog->reganch & ROPT_EVAL_SEEN) && !reg_eval_set) {
-	reg_eval_set = RS_init;
+    if ((prog->reganch & ROPT_EVAL_SEEN) && !PL_reg_eval_set) {
+	PL_reg_eval_set = RS_init;
 	DEBUG_r(DEBUG_s(
 	    PerlIO_printf(Perl_debug_log, "  setting stack tmpbase at %i\n",
-			  stack_sp - stack_base);
+			  PL_stack_sp - PL_stack_base);
 	    ));
 	SAVEINT(cxstack[cxstack_ix].blk_oldsp);
-	cxstack[cxstack_ix].blk_oldsp = stack_sp - stack_base;
+	cxstack[cxstack_ix].blk_oldsp = PL_stack_sp - PL_stack_base;
 	/* Otherwise OP_NEXTSTATE will free whatever on stack now.  */
 	SAVETMPS;
 	/* Apparently this is not needed, judging by wantarray. */
 	/* SAVEINT(cxstack[cxstack_ix].blk_gimme);
 	   cxstack[cxstack_ix].blk_gimme = G_SCALAR; */
     }
-    reginput = startpos;
-    regstartp = prog->startp;
-    regendp = prog->endp;
-    reglastparen = &prog->lastparen;
+    PL_reginput = startpos;
+    PL_regstartp = prog->startp;
+    PL_regendp = prog->endp;
+    PL_reglastparen = &prog->lastparen;
     prog->lastparen = 0;
-    regsize = 0;
-    if (reg_start_tmpl <= prog->nparens) {
-	reg_start_tmpl = prog->nparens*3/2 + 3;
-        if(reg_start_tmp)
-            Renew(reg_start_tmp, reg_start_tmpl, char*);
+    PL_regsize = 0;
+    if (PL_reg_start_tmpl <= prog->nparens) {
+	PL_reg_start_tmpl = prog->nparens*3/2 + 3;
+        if(PL_reg_start_tmp)
+            Renew(PL_reg_start_tmp, PL_reg_start_tmpl, char*);
         else
-            New(22,reg_start_tmp, reg_start_tmpl, char*);
+            New(22,PL_reg_start_tmp, PL_reg_start_tmpl, char*);
     }
 
     sp = prog->startp;
     ep = prog->endp;
-    regdata = prog->data;
+    PL_regdata = prog->data;
     if (prog->nparens) {
 	for (i = prog->nparens; i >= 0; i--) {
 	    *sp++ = NULL;
@@ -731,7 +731,7 @@ regtry(regexp *prog, char *startpos)
     REGCP_SET;
     if (regmatch(prog->program + 1)) {
 	prog->startp[0] = startpos;
-	prog->endp[0] = reginput;
+	prog->endp[0] = PL_reginput;
 	return 1;
     }
     REGCP_UNWIND;
@@ -764,11 +764,11 @@ regmatch(regnode *prog)
     register I32 n;		/* no or next */
     register I32 ln;		/* len or last */
     register char *s;		/* operand or save */
-    register char *locinput = reginput;
+    register char *locinput = PL_reginput;
     register I32 c1, c2, paren;	/* case fold search, parenth */
     int minmod = 0, sw = 0, logical = 0;
 #ifdef DEBUGGING
-    regindent++;
+    PL_regindent++;
 #endif
 
     nextchr = UCHARAT(locinput);
@@ -787,25 +787,25 @@ regmatch(regnode *prog)
 #endif
 	DEBUG_r( {
 	    SV *prop = sv_newmortal();
-	    int docolor = *colors[0];
+	    int docolor = *PL_colors[0];
 	    int taill = (docolor ? 10 : 7); /* 3 chars for "> <" */
-	    int l = (regeol - locinput > taill ? taill : regeol - locinput);
-	    int pref_len = (locinput - bostr > (5 + taill) - l 
-			    ? (5 + taill) - l : locinput - bostr);
+	    int l = (PL_regeol - locinput > taill ? taill : PL_regeol - locinput);
+	    int pref_len = (locinput - PL_bostr > (5 + taill) - l 
+			    ? (5 + taill) - l : locinput - PL_bostr);
 
-	    if (l + pref_len < (5 + taill) && l < regeol - locinput)
-		l = ( regeol - locinput > (5 + taill) - pref_len 
-		      ? (5 + taill) - pref_len : regeol - locinput);
+	    if (l + pref_len < (5 + taill) && l < PL_regeol - locinput)
+		l = ( PL_regeol - locinput > (5 + taill) - pref_len 
+		      ? (5 + taill) - pref_len : PL_regeol - locinput);
 	    regprop(prop, scan);
 	    PerlIO_printf(Perl_debug_log, 
 			  "%4i <%s%.*s%s%s%s%.*s%s>%*s|%3d:%*s%s\n",
-			  locinput - bostr, 
-			  colors[2], pref_len, locinput - pref_len, colors[3],
+			  locinput - PL_bostr, 
+			  PL_colors[2], pref_len, locinput - pref_len, PL_colors[3],
 			  (docolor ? "" : "> <"),
-			  colors[0], l, locinput, colors[1],
+			  PL_colors[0], l, locinput, PL_colors[1],
 			  15 - l - pref_len + 1,
 			  "",
-			  scan - regprogram, regindent*2, "",
+			  scan - PL_regprogram, PL_regindent*2, "",
 			  SvPVX(prop));
 	} );
 
@@ -815,59 +815,59 @@ regmatch(regnode *prog)
 
 	switch (OP(scan)) {
 	case BOL:
-	    if (locinput == bostr
-		? regprev == '\n'
-		: (multiline && 
-		   (nextchr || locinput < regeol) && locinput[-1] == '\n') )
+	    if (locinput == PL_bostr
+		? PL_regprev == '\n'
+		: (PL_multiline && 
+		   (nextchr || locinput < PL_regeol) && locinput[-1] == '\n') )
 	    {
 		/* regtill = regbol; */
 		break;
 	    }
 	    sayNO;
 	case MBOL:
-	    if (locinput == bostr
-		? regprev == '\n'
-		: ((nextchr || locinput < regeol) && locinput[-1] == '\n') )
+	    if (locinput == PL_bostr
+		? PL_regprev == '\n'
+		: ((nextchr || locinput < PL_regeol) && locinput[-1] == '\n') )
 	    {
 		break;
 	    }
 	    sayNO;
 	case SBOL:
-	    if (locinput == regbol && regprev == '\n')
+	    if (locinput == PL_regbol && PL_regprev == '\n')
 		break;
 	    sayNO;
 	case GPOS:
-	    if (locinput == regbol)
+	    if (locinput == PL_regbol)
 		break;
 	    sayNO;
 	case EOL:
-	    if (multiline)
+	    if (PL_multiline)
 		goto meol;
 	    else
 		goto seol;
 	case MEOL:
 	  meol:
-	    if ((nextchr || locinput < regeol) && nextchr != '\n')
+	    if ((nextchr || locinput < PL_regeol) && nextchr != '\n')
 		sayNO;
 	    break;
 	case SEOL:
 	  seol:
-	    if ((nextchr || locinput < regeol) && nextchr != '\n')
+	    if ((nextchr || locinput < PL_regeol) && nextchr != '\n')
 		sayNO;
-	    if (regeol - locinput > 1)
+	    if (PL_regeol - locinput > 1)
 		sayNO;
 	    break;
 	case EOS:
-	    if (regeol != locinput)
+	    if (PL_regeol != locinput)
 		sayNO;
 	    break;
 	case SANY:
-	    if (!nextchr && locinput >= regeol)
+	    if (!nextchr && locinput >= PL_regeol)
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
 	    break;
 	case ANY:
-	    if (!nextchr && locinput >= regeol || nextchr == '\n')
+	    if (!nextchr && locinput >= PL_regeol || nextchr == '\n')
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
 	    break;
@@ -877,7 +877,7 @@ regmatch(regnode *prog)
 	    /* Inline the first character, for speed. */
 	    if (UCHARAT(s) != nextchr)
 		sayNO;
-	    if (regeol - locinput < ln)
+	    if (PL_regeol - locinput < ln)
 		sayNO;
 	    if (ln > 1 && memNE(s, locinput, ln))
 		sayNO;
@@ -885,7 +885,7 @@ regmatch(regnode *prog)
 	    nextchr = UCHARAT(locinput);
 	    break;
 	case EXACTFL:
-	    reg_flags |= RF_tainted;
+	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case EXACTF:
 	    s = (char *) OPERAND(scan);
@@ -895,7 +895,7 @@ regmatch(regnode *prog)
 		UCHARAT(s) != ((OP(scan) == EXACTF)
 			       ? fold : fold_locale)[nextchr])
 		sayNO;
-	    if (regeol - locinput < ln)
+	    if (PL_regeol - locinput < ln)
 		sayNO;
 	    if (ln > 1 && (OP(scan) == EXACTF
 			   ? ibcmp(s, locinput, ln)
@@ -910,12 +910,12 @@ regmatch(regnode *prog)
 		nextchr = UCHARAT(locinput);
 	    if (!REGINCLASS(s, nextchr))
 		sayNO;
-	    if (!nextchr && locinput >= regeol)
+	    if (!nextchr && locinput >= PL_regeol)
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
 	    break;
 	case ALNUML:
-	    reg_flags |= RF_tainted;
+	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case ALNUM:
 	    if (!nextchr)
@@ -926,10 +926,10 @@ regmatch(regnode *prog)
 	    nextchr = UCHARAT(++locinput);
 	    break;
 	case NALNUML:
-	    reg_flags |= RF_tainted;
+	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case NALNUM:
-	    if (!nextchr && locinput >= regeol)
+	    if (!nextchr && locinput >= PL_regeol)
 		sayNO;
 	    if (OP(scan) == NALNUM
 		? isALNUM(nextchr) : isALNUM_LC(nextchr))
@@ -938,12 +938,12 @@ regmatch(regnode *prog)
 	    break;
 	case BOUNDL:
 	case NBOUNDL:
-	    reg_flags |= RF_tainted;
+	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case BOUND:
 	case NBOUND:
 	    /* was last char in word? */
-	    ln = (locinput != regbol) ? UCHARAT(locinput - 1) : regprev;
+	    ln = (locinput != PL_regbol) ? UCHARAT(locinput - 1) : PL_regprev;
 	    if (OP(scan) == BOUND || OP(scan) == NBOUND) {
 		ln = isALNUM(ln);
 		n = isALNUM(nextchr);
@@ -956,10 +956,10 @@ regmatch(regnode *prog)
 		sayNO;
 	    break;
 	case SPACEL:
-	    reg_flags |= RF_tainted;
+	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case SPACE:
-	    if (!nextchr && locinput >= regeol)
+	    if (!nextchr && locinput >= PL_regeol)
 		sayNO;
 	    if (!(OP(scan) == SPACE
 		  ? isSPACE(nextchr) : isSPACE_LC(nextchr)))
@@ -967,7 +967,7 @@ regmatch(regnode *prog)
 	    nextchr = UCHARAT(++locinput);
 	    break;
 	case NSPACEL:
-	    reg_flags |= RF_tainted;
+	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case NSPACE:
 	    if (!nextchr)
@@ -983,22 +983,22 @@ regmatch(regnode *prog)
 	    nextchr = UCHARAT(++locinput);
 	    break;
 	case NDIGIT:
-	    if (!nextchr && locinput >= regeol)
+	    if (!nextchr && locinput >= PL_regeol)
 		sayNO;
 	    if (isDIGIT(nextchr))
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
 	    break;
 	case REFFL:
-	    reg_flags |= RF_tainted;
+	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
         case REF:
 	case REFF:
 	    n = ARG(scan);  /* which paren pair */
-	    s = regstartp[n];
-	    if (*reglastparen < n || !s)
+	    s = PL_regstartp[n];
+	    if (*PL_reglastparen < n || !s)
 		sayNO;			/* Do not match unless seen CLOSEn. */
-	    if (s == regendp[n])
+	    if (s == PL_regendp[n])
 		break;
 	    /* Inline the first character, for speed. */
 	    if (UCHARAT(s) != nextchr &&
@@ -1006,8 +1006,8 @@ regmatch(regnode *prog)
 		 (UCHARAT(s) != ((OP(scan) == REFF
 				  ? fold : fold_locale)[nextchr]))))
 		sayNO;
-	    ln = regendp[n] - s;
-	    if (locinput + ln > regeol)
+	    ln = PL_regendp[n] - s;
+	    if (locinput + ln > PL_regeol)
 		sayNO;
 	    if (ln > 1 && (OP(scan) == REF
 			   ? memNE(s, locinput, ln)
@@ -1027,15 +1027,15 @@ regmatch(regnode *prog)
 	case EVAL:
 	{
 	    dSP;
-	    OP_4tree *oop = op;
-	    COP *ocurcop = curcop;
-	    SV **ocurpad = curpad;
+	    OP_4tree *oop = PL_op;
+	    COP *ocurcop = PL_curcop;
+	    SV **ocurpad = PL_curpad;
 	    SV *ret;
 	    
 	    n = ARG(scan);
-	    op = (OP_4tree*)regdata->data[n];
-	    DEBUG_r( PerlIO_printf(Perl_debug_log, "  re_eval 0x%x\n", op) );
-	    curpad = AvARRAY((AV*)regdata->data[n + 1]);
+	    PL_op = (OP_4tree*)PL_regdata->data[n];
+	    DEBUG_r( PerlIO_printf(Perl_debug_log, "  re_eval 0x%x\n", PL_op) );
+	    PL_curpad = AvARRAY((AV*)PL_regdata->data[n + 1]);
 
 	    CALLRUNOPS();			/* Scalar context. */
 	    SPAGAIN;
@@ -1046,28 +1046,28 @@ regmatch(regnode *prog)
 		logical = 0;
 		sw = SvTRUE(ret);
 	    } else
-		sv_setsv(save_scalar(replgv), ret);
-	    op = oop;
-	    curpad = ocurpad;
-	    curcop = ocurcop;
+		sv_setsv(save_scalar(PL_replgv), ret);
+	    PL_op = oop;
+	    PL_curpad = ocurpad;
+	    PL_curcop = ocurcop;
 	    break;
 	}
 	case OPEN:
 	    n = ARG(scan);  /* which paren pair */
-	    reg_start_tmp[n] = locinput;
-	    if (n > regsize)
-		regsize = n;
+	    PL_reg_start_tmp[n] = locinput;
+	    if (n > PL_regsize)
+		PL_regsize = n;
 	    break;
 	case CLOSE:
 	    n = ARG(scan);  /* which paren pair */
-	    regstartp[n] = reg_start_tmp[n];
-	    regendp[n] = locinput;
-	    if (n > *reglastparen)
-		*reglastparen = n;
+	    PL_regstartp[n] = PL_reg_start_tmp[n];
+	    PL_regendp[n] = locinput;
+	    if (n > *PL_reglastparen)
+		*PL_reglastparen = n;
 	    break;
 	case GROUPP:
 	    n = ARG(scan);  /* which paren pair */
-	    sw = (*reglastparen >= n && regendp[n] != NULL);
+	    sw = (*PL_reglastparen >= n && PL_regendp[n] != NULL);
 	    break;
 	case IFTHEN:
 	    if (sw)
@@ -1083,13 +1083,13 @@ regmatch(regnode *prog)
 	    break;
 	case CURLYX: {
 		CURCUR cc;
-		CHECKPOINT cp = savestack_ix;
+		CHECKPOINT cp = PL_savestack_ix;
 
 		if (OP(PREVOPER(next)) == NOTHING) /* LONGJMP */
 		    next += ARG(next);
-		cc.oldcc = regcc;
-		regcc = &cc;
-		cc.parenfloor = *reglastparen;
+		cc.oldcc = PL_regcc;
+		PL_regcc = &cc;
+		cc.parenfloor = *PL_reglastparen;
 		cc.cur = -1;
 		cc.min = ARG1(scan);
 		cc.max  = ARG2(scan);
@@ -1097,10 +1097,10 @@ regmatch(regnode *prog)
 		cc.next = next;
 		cc.minmod = minmod;
 		cc.lastloc = 0;
-		reginput = locinput;
+		PL_reginput = locinput;
 		n = regmatch(PREVOPER(next));	/* start on the WHILEM */
 		regcpblow(cp);
-		regcc = cc.oldcc;
+		PL_regcc = cc.oldcc;
 		saySAME(n);
 	    }
 	    /* NOT REACHED */
@@ -1115,16 +1115,16 @@ regmatch(regnode *prog)
 		 */
 
 		CHECKPOINT cp, lastcp;
-		CURCUR* cc = regcc;
+		CURCUR* cc = PL_regcc;
 		char *lastloc = cc->lastloc; /* Detection of 0-len. */
 		
 		n = cc->cur + 1;	/* how many we know we matched */
-		reginput = locinput;
+		PL_reginput = locinput;
 
 		DEBUG_r(
 		    PerlIO_printf(Perl_debug_log, 
 				  "%*s  %ld out of %ld..%ld  cc=%lx\n", 
-				  REPORT_CODE_OFF+regindent*2, "",
+				  REPORT_CODE_OFF+PL_regindent*2, "",
 				  (long)n, (long)cc->min, 
 				  (long)cc->max, (long)cc)
 		    );
@@ -1132,22 +1132,22 @@ regmatch(regnode *prog)
 		/* If degenerate scan matches "", assume scan done. */
 
 		if (locinput == cc->lastloc && n >= cc->min) {
-		    regcc = cc->oldcc;
-		    ln = regcc->cur;
+		    PL_regcc = cc->oldcc;
+		    ln = PL_regcc->cur;
 		    DEBUG_r(
 			PerlIO_printf(Perl_debug_log,
 			   "%*s  empty match detected, try continuation...\n",
-			   REPORT_CODE_OFF+regindent*2, "")
+			   REPORT_CODE_OFF+PL_regindent*2, "")
 			);
 		    if (regmatch(cc->next))
 			sayYES;
 		    DEBUG_r(
 			PerlIO_printf(Perl_debug_log,
 				      "%*s  failed...\n",
-				      REPORT_CODE_OFF+regindent*2, "")
+				      REPORT_CODE_OFF+PL_regindent*2, "")
 			);
-		    regcc->cur = ln;
-		    regcc = cc;
+		    PL_regcc->cur = ln;
+		    PL_regcc = cc;
 		    sayNO;
 		}
 
@@ -1163,7 +1163,7 @@ regmatch(regnode *prog)
 		    DEBUG_r(
 			PerlIO_printf(Perl_debug_log,
 				      "%*s  failed...\n",
-				      REPORT_CODE_OFF+regindent*2, "")
+				      REPORT_CODE_OFF+PL_regindent*2, "")
 			);
 		    sayNO;
 		}
@@ -1171,8 +1171,8 @@ regmatch(regnode *prog)
 		/* Prefer next over scan for minimal matching. */
 
 		if (cc->minmod) {
-		    regcc = cc->oldcc;
-		    ln = regcc->cur;
+		    PL_regcc = cc->oldcc;
+		    ln = PL_regcc->cur;
 		    cp = regcppush(cc->parenfloor);
 		    REGCP_SET;
 		    if (regmatch(cc->next)) {
@@ -1181,13 +1181,13 @@ regmatch(regnode *prog)
 		    }
 		    REGCP_UNWIND;
 		    regcppop();
-		    regcc->cur = ln;
-		    regcc = cc;
+		    PL_regcc->cur = ln;
+		    PL_regcc = cc;
 
 		    if (n >= cc->max) {	/* Maximum greed exceeded? */
-			if (dowarn && n >= REG_INFTY 
-			    && !(reg_flags & RF_warned)) {
-			    reg_flags |= RF_warned;
+			if (PL_dowarn && n >= REG_INFTY 
+			    && !(PL_reg_flags & RF_warned)) {
+			    PL_reg_flags |= RF_warned;
 			    warn("Complex regular subexpression recursion "
 				 "limit (%d) exceeded", REG_INFTY - 1);
 			}
@@ -1197,10 +1197,10 @@ regmatch(regnode *prog)
 		    DEBUG_r(
 			PerlIO_printf(Perl_debug_log,
 				      "%*s  trying longer...\n",
-				      REPORT_CODE_OFF+regindent*2, "")
+				      REPORT_CODE_OFF+PL_regindent*2, "")
 			);
 		    /* Try scanning more and see if it helps. */
-		    reginput = locinput;
+		    PL_reginput = locinput;
 		    cc->cur = n;
 		    cc->lastloc = locinput;
 		    cp = regcppush(cc->parenfloor);
@@ -1212,7 +1212,7 @@ regmatch(regnode *prog)
 		    DEBUG_r(
 			PerlIO_printf(Perl_debug_log,
 				      "%*s  failed...\n",
-				      REPORT_CODE_OFF+regindent*2, "")
+				      REPORT_CODE_OFF+PL_regindent*2, "")
 			);
 		    REGCP_UNWIND;
 		    regcppop();
@@ -1234,29 +1234,29 @@ regmatch(regnode *prog)
 		    }
 		    REGCP_UNWIND;
 		    regcppop();		/* Restore some previous $<digit>s? */
-		    reginput = locinput;
+		    PL_reginput = locinput;
 		    DEBUG_r(
 			PerlIO_printf(Perl_debug_log,
 				      "%*s  failed, try continuation...\n",
-				      REPORT_CODE_OFF+regindent*2, "")
+				      REPORT_CODE_OFF+PL_regindent*2, "")
 			);
 		}
-		if (dowarn && n >= REG_INFTY && !(reg_flags & RF_warned)) {
-		    reg_flags |= RF_warned;
+		if (PL_dowarn && n >= REG_INFTY && !(PL_reg_flags & RF_warned)) {
+		    PL_reg_flags |= RF_warned;
 		    warn("count exceeded %d", REG_INFTY - 1);
 		}
 
 		/* Failed deeper matches of scan, so see if this one works. */
-		regcc = cc->oldcc;
-		ln = regcc->cur;
+		PL_regcc = cc->oldcc;
+		ln = PL_regcc->cur;
 		if (regmatch(cc->next))
 		    sayYES;
 		DEBUG_r(
 		    PerlIO_printf(Perl_debug_log, "%*s  failed...\n",
-				  REPORT_CODE_OFF+regindent*2, "")
+				  REPORT_CODE_OFF+PL_regindent*2, "")
 		    );
-		regcc->cur = ln;
-		regcc = cc;
+		PL_regcc->cur = ln;
+		PL_regcc = cc;
 		cc->cur = n - 1;
 		cc->lastloc = lastloc;
 		sayNO;
@@ -1277,17 +1277,17 @@ regmatch(regnode *prog)
 		if (OP(next) != c1)	/* No choice. */
 		    next = inner;	/* Avoid recursion. */
 		else {
-		    int lastparen = *reglastparen;
+		    int lastparen = *PL_reglastparen;
 
 		    REGCP_SET;
 		    do {
-			reginput = locinput;
+			PL_reginput = locinput;
 			if (regmatch(inner))
 			    sayYES;
 			REGCP_UNWIND;
-			for (n = *reglastparen; n > lastparen; n--)
-			    regendp[n] = 0;
-			*reglastparen = n;
+			for (n = *PL_reglastparen; n > lastparen; n--)
+			    PL_regendp[n] = 0;
+			*PL_reglastparen = n;
 			scan = next;
 			/*SUPPRESS 560*/
 			if (n = (c1 == BRANCH ? NEXT_OFF(next) : ARG(next)))
@@ -1319,15 +1319,15 @@ regmatch(regnode *prog)
 	    n  = ARG2(scan);  /* max to match */
 	    paren = scan->flags;
 	    if (paren) {
-		if (paren > regsize)
-		    regsize = paren;
-		if (paren > *reglastparen)
-		    *reglastparen = paren;
+		if (paren > PL_regsize)
+		    PL_regsize = paren;
+		if (paren > *PL_reglastparen)
+		    *PL_reglastparen = paren;
 	    }
 	    scan = NEXTOPER(scan) + NODE_STEP_REGNODE;
 	    if (paren)
 		scan += NEXT_OFF(scan); /* Skip former OPEN. */
-	    reginput = locinput;
+	    PL_reginput = locinput;
 	    if (minmod) {
 		minmod = 0;
 		if (ln && regrepeat_hard(scan, ln, &l) < ln)
@@ -1338,7 +1338,7 @@ regmatch(regnode *prog)
 		       future execution. */
 		    && !(paren && ln == 0))
 		    ln = n;
-		locinput = reginput;
+		locinput = PL_reginput;
 		if (regkind[(U8)OP(next)] == EXACT) {
 		    c1 = UCHARAT(OPERAND(next) + 1);
 		    if (OP(next) == EXACTF)
@@ -1354,25 +1354,25 @@ regmatch(regnode *prog)
 		while (n >= ln || (n == REG_INFTY && ln > 0 && l)) { /* ln overflow ? */
 		    /* If it could work, try it. */
 		    if (c1 == -1000 ||
-			UCHARAT(reginput) == c1 ||
-			UCHARAT(reginput) == c2)
+			UCHARAT(PL_reginput) == c1 ||
+			UCHARAT(PL_reginput) == c2)
 		    {
 			if (paren) {
 			    if (n) {
-				regstartp[paren] = reginput - l;
-				regendp[paren] = reginput;
+				PL_regstartp[paren] = PL_reginput - l;
+				PL_regendp[paren] = PL_reginput;
 			    } else
-				regendp[paren] = NULL;
+				PL_regendp[paren] = NULL;
 			}
 			if (regmatch(next))
 			    sayYES;
 			REGCP_UNWIND;
 		    }
 		    /* Couldn't or didn't -- move forward. */
-		    reginput = locinput;
+		    PL_reginput = locinput;
 		    if (regrepeat_hard(scan, 1, &l)) {
 			ln++;
-			locinput = reginput;
+			locinput = PL_reginput;
 		    }
 		    else
 			sayNO;
@@ -1385,11 +1385,11 @@ regmatch(regnode *prog)
 		       future execution. */
 		    && !(paren && ln == 0))
 		    ln = n;
-		locinput = reginput;
+		locinput = PL_reginput;
 		DEBUG_r(
 		    PerlIO_printf(Perl_debug_log,
 				  "%*s  matched %ld times, len=%ld...\n",
-				  REPORT_CODE_OFF+regindent*2, "", n, l)
+				  REPORT_CODE_OFF+PL_regindent*2, "", n, l)
 		    );
 		if (n >= ln) {
 		    if (regkind[(U8)OP(next)] == EXACT) {
@@ -1407,20 +1407,20 @@ regmatch(regnode *prog)
 		while (n >= ln) {
 		    /* If it could work, try it. */
 		    if (c1 == -1000 ||
-			UCHARAT(reginput) == c1 ||
-			UCHARAT(reginput) == c2)
+			UCHARAT(PL_reginput) == c1 ||
+			UCHARAT(PL_reginput) == c2)
 			{
 			    DEBUG_r(
 				PerlIO_printf(Perl_debug_log,
 					      "%*s  trying tail with n=%ld...\n",
-					      REPORT_CODE_OFF+regindent*2, "", n)
+					      REPORT_CODE_OFF+PL_regindent*2, "", n)
 				);
 			    if (paren) {
 				if (n) {
-				    regstartp[paren] = reginput - l;
-				    regendp[paren] = reginput;
+				    PL_regstartp[paren] = PL_reginput - l;
+				    PL_regendp[paren] = PL_reginput;
 				} else
-				    regendp[paren] = NULL;
+				    PL_regendp[paren] = NULL;
 			    }
 			    if (regmatch(next))
 				sayYES;
@@ -1429,7 +1429,7 @@ regmatch(regnode *prog)
 		    /* Couldn't or didn't -- back up. */
 		    n--;
 		    locinput -= l;
-		    reginput = locinput;
+		    PL_reginput = locinput;
 		}
 	    }
 	    sayNO;
@@ -1437,10 +1437,10 @@ regmatch(regnode *prog)
 	}
 	case CURLYN:
 	    paren = scan->flags;	/* Which paren to set */
-	    if (paren > regsize)
-		regsize = paren;
-	    if (paren > *reglastparen)
-		*reglastparen = paren;
+	    if (paren > PL_regsize)
+		PL_regsize = paren;
+	    if (paren > *PL_reglastparen)
+		*PL_reglastparen = paren;
 	    ln = ARG1(scan);  /* min to match */
 	    n  = ARG2(scan);  /* max to match */
             scan = regnext(NEXTOPER(scan) + NODE_STEP_REGNODE);
@@ -1478,7 +1478,7 @@ regmatch(regnode *prog)
 	    }
 	    else
 		c1 = c2 = -1000;
-	    reginput = locinput;
+	    PL_reginput = locinput;
 	    if (minmod) {
 		CHECKPOINT lastcp;
 		minmod = 0;
@@ -1488,25 +1488,25 @@ regmatch(regnode *prog)
 		while (n >= ln || (n == REG_INFTY && ln > 0)) { /* ln overflow ? */
 		    /* If it could work, try it. */
 		    if (c1 == -1000 ||
-			UCHARAT(reginput) == c1 ||
-			UCHARAT(reginput) == c2)
+			UCHARAT(PL_reginput) == c1 ||
+			UCHARAT(PL_reginput) == c2)
 		    {
 			if (paren) {
 			    if (n) {
-				regstartp[paren] = reginput - 1;
-				regendp[paren] = reginput;
+				PL_regstartp[paren] = PL_reginput - 1;
+				PL_regendp[paren] = PL_reginput;
 			    } else
-				regendp[paren] = NULL;
+				PL_regendp[paren] = NULL;
 			}
 			if (regmatch(next))
 			    sayYES;
 			REGCP_UNWIND;
 		    }
 		    /* Couldn't or didn't -- move forward. */
-		    reginput = locinput + ln;
+		    PL_reginput = locinput + ln;
 		    if (regrepeat(scan, 1)) {
 			ln++;
-			reginput = locinput + ln;
+			PL_reginput = locinput + ln;
 		    } else
 			sayNO;
 		}
@@ -1515,22 +1515,22 @@ regmatch(regnode *prog)
 		CHECKPOINT lastcp;
 		n = regrepeat(scan, n);
 		if (ln < n && regkind[(U8)OP(next)] == EOL &&
-		    (!multiline  || OP(next) == SEOL))
+		    (!PL_multiline  || OP(next) == SEOL))
 		    ln = n;			/* why back off? */
 		REGCP_SET;
 		if (paren) {
 		    while (n >= ln) {
 			/* If it could work, try it. */
 			if (c1 == -1000 ||
-			    UCHARAT(reginput) == c1 ||
-			    UCHARAT(reginput) == c2)
+			    UCHARAT(PL_reginput) == c1 ||
+			    UCHARAT(PL_reginput) == c2)
 			    {
 				if (paren && n) {
 				    if (n) {
-					regstartp[paren] = reginput - 1;
-					regendp[paren] = reginput;
+					PL_regstartp[paren] = PL_reginput - 1;
+					PL_regendp[paren] = PL_reginput;
 				    } else
-					regendp[paren] = NULL;
+					PL_regendp[paren] = NULL;
 				}
 				if (regmatch(next))
 				    sayYES;
@@ -1538,14 +1538,14 @@ regmatch(regnode *prog)
 			    }
 			/* Couldn't or didn't -- back up. */
 			n--;
-			reginput = locinput + n;
+			PL_reginput = locinput + n;
 		    }
 		} else {
 		    while (n >= ln) {
 			/* If it could work, try it. */
 			if (c1 == -1000 ||
-			    UCHARAT(reginput) == c1 ||
-			    UCHARAT(reginput) == c2)
+			    UCHARAT(PL_reginput) == c1 ||
+			    UCHARAT(PL_reginput) == c2)
 			    {
 				if (regmatch(next))
 				    sayYES;
@@ -1553,33 +1553,33 @@ regmatch(regnode *prog)
 			    }
 			/* Couldn't or didn't -- back up. */
 			n--;
-			reginput = locinput + n;
+			PL_reginput = locinput + n;
 		    }
 		}
 	    }
 	    sayNO;
 	    break;
 	case END:
-	    if (locinput < regtill)
+	    if (locinput < PL_regtill)
 		sayNO;			/* Cannot match: too short. */
 	    /* Fall through */
 	case SUCCEED:
-	    reginput = locinput;	/* put where regtry can find it */
+	    PL_reginput = locinput;	/* put where regtry can find it */
 	    sayYES;			/* Success! */
 	case SUSPEND:
 	    n = 1;
 	    goto do_ifmatch;	    
 	case UNLESSM:
 	    n = 0;
-	    if (locinput < bostr + scan->flags) 
+	    if (locinput < PL_bostr + scan->flags) 
 		goto say_yes;
 	    goto do_ifmatch;
 	case IFMATCH:
 	    n = 1;
-	    if (locinput < bostr + scan->flags) 
+	    if (locinput < PL_bostr + scan->flags) 
 		goto say_no;
 	  do_ifmatch:
-	    reginput = locinput - scan->flags;
+	    PL_reginput = locinput - scan->flags;
 	    inner = NEXTOPER(NEXTOPER(scan));
 	    if (regmatch(inner) != n) {
 	      say_no:
@@ -1596,7 +1596,7 @@ regmatch(regnode *prog)
 		sw = 1;
 	    }
 	    if (OP(scan) == SUSPEND) {
-		locinput = reginput;
+		locinput = PL_reginput;
 		nextchr = UCHARAT(locinput);
 	    }
 	    /* FALL THROUGH. */
@@ -1624,13 +1624,13 @@ regmatch(regnode *prog)
 
 yes:
 #ifdef DEBUGGING
-    regindent--;
+    PL_regindent--;
 #endif
     return 1;
 
 no:
 #ifdef DEBUGGING
-    regindent--;
+    PL_regindent--;
 #endif
     return 0;
 }
@@ -1650,9 +1650,9 @@ regrepeat(regnode *p, I32 max)
     register char *scan;
     register char *opnd;
     register I32 c;
-    register char *loceol = regeol;
+    register char *loceol = PL_regeol;
 
-    scan = reginput;
+    scan = PL_reginput;
     if (max != REG_INFTY && max < loceol - scan)
       loceol = scan + max;
     opnd = (char *) OPERAND(p);
@@ -1676,7 +1676,7 @@ regrepeat(regnode *p, I32 max)
 	    scan++;
 	break;
     case EXACTFL:	/* length of string is 1 */
-	reg_flags |= RF_tainted;
+	PL_reg_flags |= RF_tainted;
 	c = UCHARAT(++opnd);
 	while (scan < loceol &&
 	       (UCHARAT(scan) == c || UCHARAT(scan) == fold_locale[c]))
@@ -1691,7 +1691,7 @@ regrepeat(regnode *p, I32 max)
 	    scan++;
 	break;
     case ALNUML:
-	reg_flags |= RF_tainted;
+	PL_reg_flags |= RF_tainted;
 	while (scan < loceol && isALNUM_LC(*scan))
 	    scan++;
 	break;
@@ -1700,7 +1700,7 @@ regrepeat(regnode *p, I32 max)
 	    scan++;
 	break;
     case NALNUML:
-	reg_flags |= RF_tainted;
+	PL_reg_flags |= RF_tainted;
 	while (scan < loceol && !isALNUM_LC(*scan))
 	    scan++;
 	break;
@@ -1709,7 +1709,7 @@ regrepeat(regnode *p, I32 max)
 	    scan++;
 	break;
     case SPACEL:
-	reg_flags |= RF_tainted;
+	PL_reg_flags |= RF_tainted;
 	while (scan < loceol && isSPACE_LC(*scan))
 	    scan++;
 	break;
@@ -1718,7 +1718,7 @@ regrepeat(regnode *p, I32 max)
 	    scan++;
 	break;
     case NSPACEL:
-	reg_flags |= RF_tainted;
+	PL_reg_flags |= RF_tainted;
 	while (scan < loceol && !isSPACE_LC(*scan))
 	    scan++;
 	break;
@@ -1734,8 +1734,8 @@ regrepeat(regnode *p, I32 max)
 	break;		/* So match right here or not at all. */
     }
 
-    c = scan - reginput;
-    reginput = scan;
+    c = scan - PL_reginput;
+    PL_reginput = scan;
 
     DEBUG_r( 
 	{
@@ -1762,13 +1762,13 @@ regrepeat_hard(regnode *p, I32 max, I32 *lp)
     dTHR;
     register char *scan;
     register char *start;
-    register char *loceol = regeol;
+    register char *loceol = PL_regeol;
     I32 l = -1;
 
-    start = reginput;
-    while (reginput < loceol && (scan = reginput, regmatch(p))) {
+    start = PL_reginput;
+    while (PL_reginput < loceol && (scan = PL_reginput, regmatch(p))) {
 	if (l == -1) {
-	    *lp = l = reginput - start;
+	    *lp = l = PL_reginput - start;
 	    if (max != REG_INFTY && l*max < loceol - scan)
 		loceol = scan + l*max;
 	    if (l == 0) {
@@ -1776,10 +1776,10 @@ regrepeat_hard(regnode *p, I32 max, I32 *lp)
 	    }
 	}
     }
-    if (reginput < loceol)
-	reginput = scan;
+    if (PL_reginput < loceol)
+	PL_reginput = scan;
     else
-	scan = reginput;
+	scan = PL_reginput;
     
     return (scan - start)/l;
 }
@@ -1801,7 +1801,7 @@ reginclass(register char *p, register I32 c)
     else if (flags & ANYOF_FOLD) {
 	I32 cf;
 	if (flags & ANYOF_LOCALE) {
-	    reg_flags |= RF_tainted;
+	    PL_reg_flags |= RF_tainted;
 	    cf = fold_locale[c];
 	}
 	else
@@ -1811,7 +1811,7 @@ reginclass(register char *p, register I32 c)
     }
 
     if (!match && (flags & ANYOF_ISA)) {
-	reg_flags |= RF_tainted;
+	PL_reg_flags |= RF_tainted;
 
 	if (((flags & ANYOF_ALNUML)  && isALNUM_LC(c))  ||
 	    ((flags & ANYOF_NALNUML) && !isALNUM_LC(c)) ||

@@ -76,14 +76,14 @@ struct io {
 
 #  ifdef EMULATE_ATOMIC_REFCOUNTS
 #    define ATOMIC_INC(count) STMT_START {	\
-	MUTEX_LOCK(&svref_mutex);		\
+	MUTEX_LOCK(&PL_svref_mutex);		\
 	++count;				\
-	MUTEX_UNLOCK(&svref_mutex);		\
+	MUTEX_UNLOCK(&PL_svref_mutex);		\
      } STMT_END
 #    define ATOMIC_DEC_AND_TEST(res,count) STMT_START {	\
-	MUTEX_LOCK(&svref_mutex);			\
+	MUTEX_LOCK(&PL_svref_mutex);			\
 	res = (--count == 0);				\
-	MUTEX_UNLOCK(&svref_mutex);			\
+	MUTEX_UNLOCK(&PL_svref_mutex);			\
      } STMT_END
 #  else
 #    define ATOMIC_INC(count) atomic_inc(&count)
@@ -394,7 +394,7 @@ struct xpvio {
         (HV_AMAGICmb(stash) && \
          ((!HV_AMAGICbad(stash) && HV_AMAGIC(stash)) || Gv_AMupdate(stash)))
 */
-#define Gv_AMG(stash)           (amagic_generation && Gv_AMupdate(stash))
+#define Gv_AMG(stash)           (PL_amagic_generation && Gv_AMupdate(stash))
 #endif /* OVERLOAD */
 
 #define SvTHINKFIRST(sv)	(SvFLAGS(sv) & SVf_THINKFIRST)
@@ -503,14 +503,14 @@ struct xpvio {
 #define IoFLAGS(sv)	((XPVIO*)  SvANY(sv))->xio_flags
 
 #define SvTAINTED(sv)	  (SvMAGICAL(sv) && sv_tainted(sv))
-#define SvTAINTED_on(sv)  STMT_START{ if(tainting){sv_taint(sv);}   }STMT_END
-#define SvTAINTED_off(sv) STMT_START{ if(tainting){sv_untaint(sv);} }STMT_END
+#define SvTAINTED_on(sv)  STMT_START{ if(PL_tainting){sv_taint(sv);}   }STMT_END
+#define SvTAINTED_off(sv) STMT_START{ if(PL_tainting){sv_untaint(sv);} }STMT_END
 
 #define SvTAINT(sv)			\
     STMT_START {			\
-	if (tainting) {			\
+	if (PL_tainting) {		\
 	    dTHR;			\
-	    if (tainted)		\
+	    if (PL_tainted)		\
 		SvTAINTED_on(sv);	\
 	}				\
     } STMT_END
@@ -652,9 +652,9 @@ struct xpvio {
 
 #define SvPEEK(sv) sv_peek(sv)
 
-#define SvIMMORTAL(sv) ((sv)==&sv_undef || (sv)==&sv_yes || (sv)==&sv_no)
+#define SvIMMORTAL(sv) ((sv)==&PL_sv_undef || (sv)==&PL_sv_yes || (sv)==&PL_sv_no)
 
-#define boolSV(b) ((b) ? &sv_yes : &sv_no)
+#define boolSV(b) ((b) ? &PL_sv_yes : &PL_sv_no)
 
 #define isGV(sv) (SvTYPE(sv) == SVt_PVGV)
 

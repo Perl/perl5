@@ -152,7 +152,7 @@ struct regnode_2 {
 
 #define MAGIC 0234
 
-#define SIZE_ONLY (regcode == &regdummy)
+#define SIZE_ONLY (PL_regcode == &PL_regdummy)
 
 /* Flags for first parameter byte of ANYOF */
 #define ANYOF_INVERT	0x40
@@ -186,8 +186,8 @@ struct regnode_2 {
 #define UCHARAT(p)	regdummy
 #endif /* lint */
 
-#define	FAIL(m)		croak    ("/%.127s/: %s",  regprecomp,m)
-#define	FAIL2(pat,m)	re_croak2("/%.127s/: ",pat,regprecomp,m)
+#define	FAIL(m)		croak    ("/%.127s/: %s",  PL_regprecomp,m)
+#define	FAIL2(pat,m)	re_croak2("/%.127s/: ",pat,PL_regprecomp,m)
 
 #define EXTRA_SIZE(guy) ((sizeof(guy)-1)/sizeof(struct regnode))
 

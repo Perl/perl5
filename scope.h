@@ -27,39 +27,39 @@
 #define SAVEt_OP	26
 #define SAVEt_HINTS	27
 
-#define SSCHECK(need) if (savestack_ix + need > savestack_max) savestack_grow()
-#define SSPUSHINT(i) (savestack[savestack_ix++].any_i32 = (I32)(i))
-#define SSPUSHLONG(i) (savestack[savestack_ix++].any_long = (long)(i))
-#define SSPUSHIV(i) (savestack[savestack_ix++].any_iv = (IV)(i))
-#define SSPUSHPTR(p) (savestack[savestack_ix++].any_ptr = (void*)(p))
-#define SSPUSHDPTR(p) (savestack[savestack_ix++].any_dptr = (p))
-#define SSPOPINT (savestack[--savestack_ix].any_i32)
-#define SSPOPLONG (savestack[--savestack_ix].any_long)
-#define SSPOPIV (savestack[--savestack_ix].any_iv)
-#define SSPOPPTR (savestack[--savestack_ix].any_ptr)
-#define SSPOPDPTR (savestack[--savestack_ix].any_dptr)
+#define SSCHECK(need) if (PL_savestack_ix + need > PL_savestack_max) savestack_grow()
+#define SSPUSHINT(i) (PL_savestack[PL_savestack_ix++].any_i32 = (I32)(i))
+#define SSPUSHLONG(i) (PL_savestack[PL_savestack_ix++].any_long = (long)(i))
+#define SSPUSHIV(i) (PL_savestack[PL_savestack_ix++].any_iv = (IV)(i))
+#define SSPUSHPTR(p) (PL_savestack[PL_savestack_ix++].any_ptr = (void*)(p))
+#define SSPUSHDPTR(p) (PL_savestack[PL_savestack_ix++].any_dptr = (p))
+#define SSPOPINT (PL_savestack[--PL_savestack_ix].any_i32)
+#define SSPOPLONG (PL_savestack[--PL_savestack_ix].any_long)
+#define SSPOPIV (PL_savestack[--PL_savestack_ix].any_iv)
+#define SSPOPPTR (PL_savestack[--PL_savestack_ix].any_ptr)
+#define SSPOPDPTR (PL_savestack[--PL_savestack_ix].any_dptr)
 
-#define SAVETMPS save_int((int*)&tmps_floor), tmps_floor = tmps_ix
-#define FREETMPS if (tmps_ix > tmps_floor) free_tmps()
+#define SAVETMPS save_int((int*)&PL_tmps_floor), PL_tmps_floor = PL_tmps_ix
+#define FREETMPS if (PL_tmps_ix > PL_tmps_floor) free_tmps()
 
 #ifdef DEBUGGING
 #define ENTER							\
     STMT_START {						\
 	push_scope();						\
 	DEBUG_l(WITH_THR(deb("ENTER scope %ld at %s:%d\n",	\
-		    scopestack_ix, __FILE__, __LINE__)));	\
+		    PL_scopestack_ix, __FILE__, __LINE__)));	\
     } STMT_END
 #define LEAVE							\
     STMT_START {						\
 	DEBUG_l(WITH_THR(deb("LEAVE scope %ld at %s:%d\n",	\
-		    scopestack_ix, __FILE__, __LINE__)));	\
+		    PL_scopestack_ix, __FILE__, __LINE__)));	\
 	pop_scope();						\
     } STMT_END
 #else
 #define ENTER push_scope()
 #define LEAVE pop_scope()
 #endif
-#define LEAVE_SCOPE(old) if (savestack_ix > old) leave_scope(old)
+#define LEAVE_SCOPE(old) if (PL_savestack_ix > old) leave_scope(old)
 
 /*
  * Not using SOFT_CAST on SAVEFREESV and SAVEFREESV
@@ -93,7 +93,7 @@
 #define SAVESTACK_POS() \
     STMT_START {				\
 	SSCHECK(2);				\
-	SSPUSHINT(stack_sp - stack_base);	\
+	SSPUSHINT(PL_stack_sp - PL_stack_base);	\
 	SSPUSHINT(SAVEt_STACK_POS);		\
     } STMT_END
 
@@ -101,11 +101,11 @@
 
 #define SAVEHINTS() \
     STMT_START {				\
-	if (hints & HINT_LOCALIZE_HH)		\
+	if (PL_hints & HINT_LOCALIZE_HH)	\
 	    save_hints();			\
 	else {					\
 	    SSCHECK(2);				\
-	    SSPUSHINT(hints);			\
+	    SSPUSHINT(PL_hints);		\
 	    SSPUSHINT(SAVEt_HINTS);		\
 	}					\
     } STMT_END
@@ -145,27 +145,27 @@ typedef struct jmpenv JMPENV;
 #define dJMPENV		JMPENV cur_env
 #define JMPENV_PUSH(v) \
     STMT_START {					\
-	cur_env.je_prev = top_env;			\
+	cur_env.je_prev = PL_top_env;			\
 	OP_REG_TO_MEM;					\
 	cur_env.je_ret = PerlProc_setjmp(cur_env.je_buf, 1);	\
 	OP_MEM_TO_REG;					\
-	top_env = &cur_env;				\
+	PL_top_env = &cur_env;				\
 	cur_env.je_mustcatch = FALSE;			\
 	(v) = cur_env.je_ret;				\
     } STMT_END
 #define JMPENV_POP \
-    STMT_START { top_env = cur_env.je_prev; } STMT_END
+    STMT_START { PL_top_env = cur_env.je_prev; } STMT_END
 #define JMPENV_JUMP(v) \
     STMT_START {						\
 	OP_REG_TO_MEM;						\
-	if (top_env->je_prev)					\
-	    PerlProc_longjmp(top_env->je_buf, (v));			\
+	if (PL_top_env->je_prev)					\
+	    PerlProc_longjmp(PL_top_env->je_buf, (v));			\
 	if ((v) == 2)						\
 	    PerlProc_exit(STATUS_NATIVE_EXPORT);				\
 	PerlIO_printf(PerlIO_stderr(), "panic: top_env\n");	\
 	PerlProc_exit(1);						\
     } STMT_END
    
-#define CATCH_GET	(top_env->je_mustcatch)
-#define CATCH_SET(v)	(top_env->je_mustcatch = (v))
+#define CATCH_GET	(PL_top_env->je_mustcatch)
+#define CATCH_SET(v)	(PL_top_env->je_mustcatch = (v))
    

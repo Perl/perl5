@@ -2,7 +2,7 @@
 #include "perl.h"
 #include "XSUB.h"
 
-/* maxo shouldn't differ from MAXO but leave room anyway (see BOOT:)	*/
+/* PL_maxo shouldn't differ from MAXO but leave room anyway (see BOOT:)	*/
 #define OP_MASK_BUF_SIZE (MAXO + 100)
 
 /* XXX op_named_bits and opset_all are never freed */
@@ -36,7 +36,7 @@ op_names_init(void)
 
     op_named_bits = newHV();
     op_names = get_op_names();
-    for(i=0; i < maxo; ++i) {
+    for(i=0; i < PL_maxo; ++i) {
 	SV *sv;
 	sv = newSViv(i);
 	SvREADONLY_on(sv);
@@ -51,7 +51,7 @@ op_names_init(void)
     while(i-- > 0)
 	bitmap[i] = 0xFF;
     /* Take care to set the right number of bits in the last byte */
-    bitmap[len-1] = (maxo & 0x07) ? ~(0xFF << (maxo & 0x07)) : 0xFF;
+    bitmap[len-1] = (PL_maxo & 0x07) ? ~(0xFF << (PL_maxo & 0x07)) : 0xFF;
     put_op_bitspec(":all",0, opset_all); /* don't mortalise */
 }
 
@@ -145,7 +145,7 @@ set_opset_bits(char *bitmap, SV *bitspec, int on, char *opname)
 	int myopcode = SvIV(bitspec);
 	int offset = myopcode >> 3;
 	int bit    = myopcode & 0x07;
-	if (myopcode >= maxo || myopcode < 0)
+	if (myopcode >= PL_maxo || myopcode < 0)
 	    croak("panic: opcode \"%s\" value %d is invalid", opname, myopcode);
 	if (opcode_debug >= 2)
 	    warn("set_opset_bits bit %2d (off=%d, bit=%d) %s %s\n",
@@ -173,7 +173,7 @@ set_opset_bits(char *bitmap, SV *bitspec, int on, char *opname)
 
 
 static void
-opmask_add(SV *opset)	/* THE ONLY FUNCTION TO EDIT op_mask ITSELF	*/
+opmask_add(SV *opset)	/* THE ONLY FUNCTION TO EDIT PL_op_mask ITSELF	*/
 {
     int i,j;
     char *bitmask;
@@ -182,8 +182,8 @@ opmask_add(SV *opset)	/* THE ONLY FUNCTION TO EDIT op_mask ITSELF	*/
 
     verify_opset(opset,1);			/* croaks on bad opset	*/
 
-    if (!op_mask)		/* caller must ensure op_mask exists	*/
-	croak("Can't add to uninitialised op_mask");
+    if (!PL_op_mask)		/* caller must ensure PL_op_mask exists	*/
+	croak("Can't add to uninitialised PL_op_mask");
 
     /* OPCODES ALREADY MASKED ARE NEVER UNMASKED. See opmask_addlocal()	*/
 
@@ -194,28 +194,28 @@ opmask_add(SV *opset)	/* THE ONLY FUNCTION TO EDIT op_mask ITSELF	*/
 	    myopcode += 8;
 	    continue;
 	}
-	for (j=0; j < 8 && myopcode < maxo; )
-	    op_mask[myopcode++] |= bits & (1 << j++);
+	for (j=0; j < 8 && myopcode < PL_maxo; )
+	    PL_op_mask[myopcode++] |= bits & (1 << j++);
     }
 }
 
 static void
-opmask_addlocal(SV *opset, char *op_mask_buf) /* Localise op_mask then opmask_add() */
+opmask_addlocal(SV *opset, char *op_mask_buf) /* Localise PL_op_mask then opmask_add() */
 {
-    char *orig_op_mask = op_mask;
-    SAVEPPTR(op_mask);
+    char *orig_op_mask = PL_op_mask;
+    SAVEPPTR(PL_op_mask);
 #if !(defined(PERL_OBJECT) && defined(__BORLANDC__))
     /* XXX casting to an ordinary function ptr from a member function ptr
      * is disallowed by Borland
      */
     if (opcode_debug >= 2)
-	SAVEDESTRUCTOR((void(CPERLscope(*))_((void*)))warn,"op_mask restored");
+	SAVEDESTRUCTOR((void(CPERLscope(*))_((void*)))warn,"PL_op_mask restored");
 #endif
-    op_mask = &op_mask_buf[0];
+    PL_op_mask = &op_mask_buf[0];
     if (orig_op_mask)
-	Copy(orig_op_mask, op_mask, maxo, char);
+	Copy(orig_op_mask, PL_op_mask, PL_maxo, char);
     else
-	Zero(op_mask, maxo, char);
+	Zero(PL_op_mask, PL_maxo, char);
     opmask_add(opset);
 }
 
@@ -226,8 +226,8 @@ MODULE = Opcode	PACKAGE = Opcode
 PROTOTYPES: ENABLE
 
 BOOT:
-    assert(maxo < OP_MASK_BUF_SIZE);
-    opset_len = (maxo + 7) / 8;
+    assert(PL_maxo < OP_MASK_BUF_SIZE);
+    opset_len = (PL_maxo + 7) / 8;
     if (opcode_debug >= 1)
 	warn("opset_len %ld\n", (long)opset_len);
     op_names_init();
@@ -246,19 +246,19 @@ PPCODE:
 
     opmask_addlocal(mask, op_mask_buf);
 
-    save_aptr(&endav);
-    endav = (AV*)sv_2mortal((SV*)newAV()); /* ignore END blocks for now	*/
+    save_aptr(&PL_endav);
+    PL_endav = (AV*)sv_2mortal((SV*)newAV()); /* ignore END blocks for now	*/
 
-    save_hptr(&defstash);		/* save current default stack	*/
+    save_hptr(&PL_defstash);		/* save current default stack	*/
     /* the assignment to global defstash changes our sense of 'main'	*/
-    defstash = gv_stashpv(Package, GV_ADDWARN); /* should exist already	*/
+    PL_defstash = gv_stashpv(Package, GV_ADDWARN); /* should exist already	*/
 
     /* defstash must itself contain a main:: so we'll add that now	*/
     /* take care with the ref counts (was cause of long standing bug)	*/
     /* XXX I'm still not sure if this is right, GV_ADDWARN should warn!	*/
     gv = gv_fetchpv("main::", GV_ADDWARN, SVt_PVHV);
     sv_free((SV*)GvHV(gv));
-    GvHV(gv) = (HV*)SvREFCNT_inc(defstash);
+    GvHV(gv) = (HV*)SvREFCNT_inc(PL_defstash);
 
     PUSHMARK(SP);
     perl_call_sv(codesv, GIMME|G_EVAL|G_KEEPERR); /* use callers context */
@@ -283,9 +283,9 @@ CODE:
     bitmap = SvPVX(opset);
     while(len-- > 0)
 	bitmap[len] = ~bitmap[len];
-    /* take care of extra bits beyond maxo in last byte	*/
-    if (maxo & 07)
-	bitmap[opset_len-1] &= ~(0xFF << (maxo & 0x07));
+    /* take care of extra bits beyond PL_maxo in last byte	*/
+    if (PL_maxo & 07)
+	bitmap[opset_len-1] &= ~(0xFF << (PL_maxo & 0x07));
     }
     ST(0) = opset;
 
@@ -303,7 +303,7 @@ PPCODE:
     verify_opset(opset,1);
     for (myopcode=0, i=0; i < opset_len; i++) {
 	U16 bits = bitmap[i];
-	for (j=0; j < 8 && myopcode < maxo; j++, myopcode++) {
+	for (j=0; j < 8 && myopcode < PL_maxo; j++, myopcode++) {
 	    if ( bits & (1 << j) )
 		XPUSHs(sv_2mortal(newSVpv(names[myopcode], 0)));
 	}
@@ -394,7 +394,7 @@ PPCODE:
 	SV *bitspec = get_op_bitspec(opname, len, 1);
 	if (SvIOK(bitspec)) {
 	    myopcode = SvIV(bitspec);
-	    if (myopcode < 0 || myopcode >= maxo)
+	    if (myopcode < 0 || myopcode >= PL_maxo)
 		croak("panic: opcode %d (%s) out of range",myopcode,opname);
 	    XPUSHs(sv_2mortal(newSVpv(op_desc[myopcode], 0)));
 	}
@@ -404,7 +404,7 @@ PPCODE:
 	    myopcode = 0;
 	    for (b=0; b < opset_len; b++) {
 		U16 bits = bitmap[b];
-		for (j=0; j < 8 && myopcode < maxo; j++, myopcode++)
+		for (j=0; j < 8 && myopcode < PL_maxo; j++, myopcode++)
 		    if (bits & (1 << j))
 			XPUSHs(sv_2mortal(newSVpv(op_desc[myopcode], 0)));
 	    }
@@ -440,8 +440,8 @@ void
 opmask_add(opset)
     SV *opset
 PREINIT:
-    if (!op_mask)
-	Newz(0, op_mask, maxo, char);
+    if (!PL_op_mask)
+	Newz(0, PL_op_mask, PL_maxo, char);
 
 void
 opcodes()
@@ -450,18 +450,18 @@ PPCODE:
 	croak("opcodes in list context not yet implemented"); /* XXX */
     }
     else {
-	XPUSHs(sv_2mortal(newSViv(maxo)));
+	XPUSHs(sv_2mortal(newSViv(PL_maxo)));
     }
 
 void
 opmask()
 CODE:
     ST(0) = sv_2mortal(new_opset(Nullsv));
-    if (op_mask) {
+    if (PL_op_mask) {
 	char *bitmap = SvPVX(ST(0));
 	int myopcode;
-	for(myopcode=0; myopcode < maxo; ++myopcode) {
-	    if (op_mask[myopcode])
+	for(myopcode=0; myopcode < PL_maxo; ++myopcode) {
+	    if (PL_op_mask[myopcode])
 		bitmap[myopcode >> 3] |= 1 << (myopcode & 0x07);
 	}
     }

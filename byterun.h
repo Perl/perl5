@@ -177,8 +177,8 @@ EXT int optype_size[]
 ;
 
 #define INIT_SPECIALSV_LIST STMT_START { \
-	specialsv_list[0] = Nullsv; \
-	specialsv_list[1] = &sv_undef; \
-	specialsv_list[2] = &sv_yes; \
-	specialsv_list[3] = &sv_no; \
+	PL_specialsv_list[0] = Nullsv; \
+	PL_specialsv_list[1] = &PL_sv_undef; \
+	PL_specialsv_list[2] = &PL_sv_yes; \
+	PL_specialsv_list[3] = &PL_sv_no; \
     } STMT_END

@@ -68,9 +68,9 @@ gv_fetchfile(char *name)
     tmpbuf[0] = '_';
     tmpbuf[1] = '<';
     strcpy(tmpbuf + 2, name);
-    gv = *(GV**)hv_fetch(defstash, tmpbuf, tmplen, TRUE);
+    gv = *(GV**)hv_fetch(PL_defstash, tmpbuf, tmplen, TRUE);
     if (!isGV(gv))
-	gv_init(gv, defstash, tmpbuf, tmplen, FALSE);
+	gv_init(gv, PL_defstash, tmpbuf, tmplen, FALSE);
     if (tmpbuf != smallbuf)
 	Safefree(tmpbuf);
     sv_setpv(GvSV(gv), name);
@@ -101,8 +101,8 @@ gv_init(GV *gv, HV *stash, char *name, STRLEN len, int multi)
     Newz(602, gp, 1, GP);
     GvGP(gv) = gp_ref(gp);
     GvSV(gv) = NEWSV(72,0);
-    GvLINE(gv) = curcop->cop_line;
-    GvFILEGV(gv) = curcop->cop_filegv;
+    GvLINE(gv) = PL_curcop->cop_line;
+    GvFILEGV(gv) = PL_curcop->cop_filegv;
     GvCVGEN(gv) = 0;
     GvEGV(gv) = gv;
     sv_magic((SV*)gv, (SV*)gv, '*', name, len);
@@ -115,13 +115,13 @@ gv_init(GV *gv, HV *stash, char *name, STRLEN len, int multi)
 	SvIOK_off(gv);
 	ENTER;
 	start_subparse(0,0);		/* Create CV in compcv. */
-	GvCV(gv) = compcv;
+	GvCV(gv) = PL_compcv;
 	LEAVE;
 
-	sub_generation++;
+	PL_sub_generation++;
 	CvGV(GvCV(gv)) = (GV*)SvREFCNT_inc(gv);
-	CvFILEGV(GvCV(gv)) = curcop->cop_filegv;
-	CvSTASH(GvCV(gv)) = curstash;
+	CvFILEGV(GvCV(gv)) = PL_curcop->cop_filegv;
+	CvSTASH(GvCV(gv)) = PL_curstash;
 #ifdef USE_THREADS
 	CvOWNER(GvCV(gv)) = 0;
 	if (!CvMUTEXP(GvCV(gv)))
@@ -177,19 +177,19 @@ gv_fetchmeth(HV *stash, char *name, STRLEN len, I32 level)
 	    gv_init(topgv, stash, name, len, TRUE);
 	if (cv = GvCV(topgv)) {
 	    /* If genuine method or valid cache entry, use it */
-	    if (!GvCVGEN(topgv) || GvCVGEN(topgv) == sub_generation)
+	    if (!GvCVGEN(topgv) || GvCVGEN(topgv) == PL_sub_generation)
 		return topgv;
 	    /* Stale cached entry: junk it */
 	    SvREFCNT_dec(cv);
 	    GvCV(topgv) = cv = Nullcv;
 	    GvCVGEN(topgv) = 0;
 	}
-	else if (GvCVGEN(topgv) == sub_generation)
+	else if (GvCVGEN(topgv) == PL_sub_generation)
 	    return 0;  /* cache indicates sub doesn't exist */
     }
 
     gvp = (GV**)hv_fetch(stash, "ISA", 3, FALSE);
-    av = (gvp && (gv = *gvp) && gv != (GV*)&sv_undef) ? GvAV(gv) : Nullav;
+    av = (gvp && (gv = *gvp) && gv != (GV*)&PL_sv_undef) ? GvAV(gv) : Nullav;
 
     /* create and re-create @.*::SUPER::ISA on demand */
     if (!av || !SvMAGIC(av)) {
@@ -202,7 +202,7 @@ gv_fetchmeth(HV *stash, char *name, STRLEN len, I32 level)
 	    packlen -= 7;
 	    basestash = gv_stashpvn(packname, packlen, TRUE);
 	    gvp = (GV**)hv_fetch(basestash, "ISA", 3, FALSE);
-	    if (gvp && (gv = *gvp) != (GV*)&sv_undef && (av = GvAV(gv))) {
+	    if (gvp && (gv = *gvp) != (GV*)&PL_sv_undef && (av = GvAV(gv))) {
 		dTHR;		/* just for SvREFCNT_dec */
 		gvp = (GV**)hv_fetch(stash, "ISA", 3, TRUE);
 		if (!gvp || !(gv = *gvp))
@@ -223,7 +223,7 @@ gv_fetchmeth(HV *stash, char *name, STRLEN len, I32 level)
 	    SV* sv = *svp++;
 	    HV* basestash = gv_stashsv(sv, FALSE);
 	    if (!basestash) {
-		if (dowarn)
+		if (PL_dowarn)
 		    warn("Can't locate package %s for @%s::ISA",
 			SvPVX(sv), HvNAME(stash));
 		continue;
@@ -257,13 +257,13 @@ gv_fetchmeth(HV *stash, char *name, STRLEN len, I32 level)
 		    if (cv = GvCV(topgv))
 			SvREFCNT_dec(cv);
 		    GvCV(topgv) = (CV*)SvREFCNT_inc(GvCV(gv));
-		    GvCVGEN(topgv) = sub_generation;
+		    GvCVGEN(topgv) = PL_sub_generation;
 		}
 		return gv;
 	    }
 	    else if (topgv && GvREFCNT(topgv) == 1) {
 		/* cache the fact that the method is not defined */
-		GvCVGEN(topgv) = sub_generation;
+		GvCVGEN(topgv) = PL_sub_generation;
 	    }
 	}
     }
@@ -299,7 +299,7 @@ gv_fetchmethod_autoload(HV *stash, char *name, I32 autoload)
 	if ((nsplit - origname) == 5 && strnEQ(origname, "SUPER", 5)) {
 	    /* ->SUPER::method should really be looked up in original stash */
 	    SV *tmpstr = sv_2mortal(newSVpvf("%s::SUPER",
-					     HvNAME(curcop->cop_stash)));
+					     HvNAME(PL_curcop->cop_stash)));
 	    stash = gv_stashpvn(SvPVX(tmpstr), SvCUR(tmpstr), TRUE);
 	    DEBUG_o( deb("Treating %s as %s::%s\n",
 			 origname, HvNAME(stash), name) );
@@ -311,7 +311,7 @@ gv_fetchmethod_autoload(HV *stash, char *name, I32 autoload)
     gv = gv_fetchmeth(stash, name, nend - name, 0);
     if (!gv) {
 	if (strEQ(name,"import"))
-	    gv = (GV*)&sv_yes;
+	    gv = (GV*)&PL_sv_yes;
 	else if (autoload)
 	    gv = gv_autoload4(stash, name, nend - name, TRUE);
     }
@@ -358,7 +358,7 @@ gv_autoload4(HV *stash, char *name, STRLEN len, I32 method)
     /*
      * Inheriting AUTOLOAD for non-methods works ... for now.
      */
-    if (dowarn && !method && (GvCVGEN(gv) || GvSTASH(gv) != stash))
+    if (PL_dowarn && !method && (GvCVGEN(gv) || GvSTASH(gv) != stash))
 	warn(
 	  "Use of inherited AUTOLOAD for non-method %s::%.*s() is deprecated",
 	     HvNAME(stash), (int)len, name);
@@ -446,7 +446,7 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 	    (*namend == ':' && namend[1] == ':'))
 	{
 	    if (!stash)
-		stash = defstash;
+		stash = PL_defstash;
 	    if (!stash || !SvREFCNT(stash)) /* symbol table under destruction */
 		return Nullgv;
 
@@ -465,7 +465,7 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 		tmpbuf[len] = '\0';
 		gvp = (GV**)hv_fetch(stash,tmpbuf,len,add);
 		gv = gvp ? *gvp : Nullgv;
-		if (gv && gv != (GV*)&sv_undef) {
+		if (gv && gv != (GV*)&PL_sv_undef) {
 		    if (SvTYPE(gv) != SVt_PVGV)
 			gv_init(gv, stash, tmpbuf, len, (add & GV_ADDMULTI));
 		    else
@@ -473,7 +473,7 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 		}
 		if (tmpbuf != smallbuf)
 		    Safefree(tmpbuf);
-		if (!gv || gv == (GV*)&sv_undef)
+		if (!gv || gv == (GV*)&PL_sv_undef)
 		    return Nullgv;
 
 		if (!(stash = GvHV(gv)))
@@ -488,7 +488,7 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 	    namend++;
 	    name = namend;
 	    if (!*name)
-		return gv ? gv : (GV*)*hv_fetch(defstash, "main::", 6, TRUE);
+		return gv ? gv : (GV*)*hv_fetch(PL_defstash, "main::", 6, TRUE);
 	}
     }
     len = namend - name;
@@ -527,10 +527,10 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 		global = TRUE;
 
 	    if (global)
-		stash = defstash;
-	    else if ((COP*)curcop == &compiling) {
-		stash = curstash;
-		if (add && (hints & HINT_STRICT_VARS) &&
+		stash = PL_defstash;
+	    else if ((COP*)PL_curcop == &PL_compiling) {
+		stash = PL_curstash;
+		if (add && (PL_hints & HINT_STRICT_VARS) &&
 		    sv_type != SVt_PVCV &&
 		    sv_type != SVt_PVGV &&
 		    sv_type != SVt_PVFM &&
@@ -539,7 +539,7 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 		{
 		    gvp = (GV**)hv_fetch(stash,name,len,0);
 		    if (!gvp ||
-			*gvp == (GV*)&sv_undef ||
+			*gvp == (GV*)&PL_sv_undef ||
 			SvTYPE(*gvp) != SVt_PVGV)
 		    {
 			stash = 0;
@@ -559,10 +559,10 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 		}
 	    }
 	    else
-		stash = curcop->cop_stash;
+		stash = PL_curcop->cop_stash;
 	}
 	else
-	    stash = defstash;
+	    stash = PL_defstash;
     }
 
     /* By this point we should have a stash and a name */
@@ -582,8 +582,8 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 		warn("Global symbol \"%s\" requires explicit package name",
 		     name);
 	}
-	++error_count;
-	stash = curstash ? curstash : defstash;	/* avoid core dumps */
+	++PL_error_count;
+	stash = PL_curstash ? PL_curstash : PL_defstash;	/* avoid core dumps */
 	add_gvflags = ((sv_type == SVt_PV) ? GVf_IMPORTED_SV
 		       : (sv_type == SVt_PVAV) ? GVf_IMPORTED_AV
 		       : (sv_type == SVt_PVHV) ? GVf_IMPORTED_HV
@@ -594,7 +594,7 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 	return Nullgv;
 
     gvp = (GV**)hv_fetch(stash,name,len,add);
-    if (!gvp || *gvp == (GV*)&sv_undef)
+    if (!gvp || *gvp == (GV*)&PL_sv_undef)
 	return Nullgv;
     gv = *gvp;
     if (SvTYPE(gv) == SVt_PVGV) {
@@ -668,15 +668,15 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 	if (strEQ(name, "SIG")) {
 	    HV *hv;
 	    I32 i;
-	    siggv = gv;
-	    GvMULTI_on(siggv);
-	    hv = GvHVn(siggv);
-	    hv_magic(hv, siggv, 'S');
+	    PL_siggv = gv;
+	    GvMULTI_on(PL_siggv);
+	    hv = GvHVn(PL_siggv);
+	    hv_magic(hv, PL_siggv, 'S');
 	    for(i=1;sig_name[i];i++) {
 	    	SV ** init;
 	    	init=hv_fetch(hv,sig_name[i],strlen(sig_name[i]),1);
 	    	if(init)
-	    		sv_setsv(*init,&sv_undef);
+	    		sv_setsv(*init,&PL_sv_undef);
 	    	psig_ptr[i] = 0;
 	    	psig_name[i] = 0;
 	    }
@@ -686,28 +686,28 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
     case '&':
 	if (len > 1)
 	    break;
-	ampergv = gv;
-	sawampersand = TRUE;
+	PL_ampergv = gv;
+	PL_sawampersand = TRUE;
 	goto ro_magicalize;
 
     case '`':
 	if (len > 1)
 	    break;
-	leftgv = gv;
-	sawampersand = TRUE;
+	PL_leftgv = gv;
+	PL_sawampersand = TRUE;
 	goto ro_magicalize;
 
     case '\'':
 	if (len > 1)
 	    break;
-	rightgv = gv;
-	sawampersand = TRUE;
+	PL_rightgv = gv;
+	PL_sawampersand = TRUE;
 	goto ro_magicalize;
 
     case ':':
 	if (len > 1)
 	    break;
-	sv_setpv(GvSV(gv),chopset);
+	sv_setpv(GvSV(gv),PL_chopset);
 	goto magicalize;
 
     case '?':
@@ -721,7 +721,7 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
     case '!':
 	if (len > 1)
 	    break;
-	if (sv_type > SVt_PV && curcop != &compiling) {
+	if (sv_type > SVt_PV && PL_curcop != &PL_compiling) {
 	    HV* stash = gv_stashpvn("Errno",5,FALSE);
 	    if(!stash || !(gv_fetchmethod(stash, "TIEHASH"))) {
 		dSP;
@@ -736,7 +736,7 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 	goto magicalize;
     case '#':
     case '*':
-	if (dowarn && len == 1 && sv_type == SVt_PV)
+	if (PL_dowarn && len == 1 && sv_type == SVt_PV)
 	    warn("Use of $%s is deprecated", name);
 	/* FALL THROUGH */
     case '[':
@@ -789,7 +789,7 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 	if (len > 1)
 	    break;
 	sv_setpv(GvSV(gv),"\f");
-	formfeed = GvSV(gv);
+	PL_formfeed = GvSV(gv);
 	break;
     case ';':
 	if (len > 1)
@@ -800,7 +800,7 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 	if (len == 1) {
 	    SV *sv = GvSV(gv);
 	    sv_upgrade(sv, SVt_PVNV);
-	    sv_setpv(sv, patchlevel);
+	    sv_setpv(sv, PL_patchlevel);
 	    (void)sv_2nv(sv);
 	    SvREADONLY_on(sv);
 	}
@@ -881,16 +881,16 @@ gv_check(HV *stash)
 	    if (HeKEY(entry)[HeKLEN(entry)-1] == ':' &&
 		(gv = (GV*)HeVAL(entry)) && (hv = GvHV(gv)) && HvNAME(hv))
 	    {
-		if (hv != defstash)
+		if (hv != PL_defstash)
 		     gv_check(hv);              /* nested package */
 	    }
 	    else if (isALPHA(*HeKEY(entry))) {
 		gv = (GV*)HeVAL(entry);
 		if (SvTYPE(gv) != SVt_PVGV || GvMULTI(gv))
 		    continue;
-		curcop->cop_line = GvLINE(gv);
+		PL_curcop->cop_line = GvLINE(gv);
 		filegv = GvFILEGV(gv);
-		curcop->cop_filegv = filegv;
+		PL_curcop->cop_filegv = filegv;
 		if (filegv && GvMULTI(filegv))	/* Filename began with slash */
 		    continue;
 		warn("Name \"%s::%s\" used only once: possible typo",
@@ -903,7 +903,7 @@ gv_check(HV *stash)
 GV *
 newGVgen(char *pack)
 {
-    return gv_fetchpv(form("%s::_GEN_%ld", pack, (long)gensym++),
+    return gv_fetchpv(form("%s::_GEN_%ld", pack, (long)PL_gensym++),
 		      TRUE, SVt_PVGV);
 }
 
@@ -922,7 +922,7 @@ gp_ref(GP *gp)
 	}
 	else {
 	    /* Adding a new name to a subroutine invalidates method cache */
-	    sub_generation++;
+	    PL_sub_generation++;
 	}
     }
     return gp;
@@ -942,7 +942,7 @@ gp_free(GV *gv)
     }
     if (gp->gp_cv) {
 	/* Deleting the name of a subroutine invalidates method cache */
-	sub_generation++;
+	PL_sub_generation++;
     }
     if (--gp->gp_refcnt > 0) {
 	if (gp->gp_egv == gv)
@@ -1000,8 +1000,8 @@ Gv_AMupdate(HV *stash)
   AMT *amtp = (mg) ? (AMT*)mg->mg_ptr: (AMT *) NULL;
   AMT amt;
 
-  if (mg && amtp->was_ok_am == amagic_generation
-      && amtp->was_ok_sub == sub_generation)
+  if (mg && amtp->was_ok_am == PL_amagic_generation
+      && amtp->was_ok_sub == PL_sub_generation)
       return AMT_AMAGIC(amtp);
   if (amtp && AMT_AMAGIC(amtp)) {	/* Have table. */
     int i;
@@ -1015,14 +1015,14 @@ Gv_AMupdate(HV *stash)
 
   DEBUG_o( deb("Recalcing overload magic in package %s\n",HvNAME(stash)) );
 
-  amt.was_ok_am = amagic_generation;
-  amt.was_ok_sub = sub_generation;
+  amt.was_ok_am = PL_amagic_generation;
+  amt.was_ok_sub = PL_sub_generation;
   amt.fallback = AMGfallNO;
   amt.flags = 0;
 
 #ifdef OVERLOAD_VIA_HASH
   gvp=(GV**)hv_fetch(stash,"OVERLOAD",8,FALSE);	/* A shortcut */
-  if (gvp && ((gv = *gvp) != (GV*)&sv_undef && (hv = GvHV(gv)))) {
+  if (gvp && ((gv = *gvp) != (GV*)&PL_sv_undef && (hv = GvHV(gv)))) {
     int filled=0;
     int i;
     char *cp;
@@ -1041,7 +1041,7 @@ Gv_AMupdate(HV *stash)
       cp = (char *)AMG_names[i];
       
         svp = (SV**)hv_fetch(hv, cp, strlen(cp), FALSE);
-        if (svp && ((sv = *svp) != &sv_undef)) {
+        if (svp && ((sv = *svp) != &PL_sv_undef)) {
           switch (SvTYPE(sv)) {
             default:
               if (!SvROK(sv)) {
@@ -1107,7 +1107,7 @@ Gv_AMupdate(HV *stash)
 		GV *ngv;
 		
 		DEBUG_o( deb("Resolving method `%.256s' for overloaded `%s' in package `%.256s'\n", 
-			     SvPV(GvSV(gv), na), cp, HvNAME(stash)) );
+			     SvPV(GvSV(gv), PL_na), cp, HvNAME(stash)) );
 		if (!SvPOK(GvSV(gv)) 
 		    || !(ngv = gv_fetchmethod_autoload(stash, SvPVX(GvSV(gv)),
 						       FALSE)))
@@ -1175,13 +1175,13 @@ amagic_call(SV *left, SV *right, int method, int flags)
 	 case inc_amg:
 	   if (((cv = cvp[off=add_ass_amg]) && (inc_dec_ass=1))
 	       || ((cv = cvp[off=add_amg]) && (postpr=1))) {
-	     right = &sv_yes; lr = -1; assign = 1;
+	     right = &PL_sv_yes; lr = -1; assign = 1;
 	   }
 	   break;
 	 case dec_amg:
 	   if (((cv = cvp[off=subtr_ass_amg])  && (inc_dec_ass=1))
 	       || ((cv = cvp[off=subtr_amg]) && (postpr=1))) {
-	     right = &sv_yes; lr = -1; assign = 1;
+	     right = &PL_sv_yes; lr = -1; assign = 1;
 	   }
 	   break;
 	 case bool__amg:
@@ -1366,23 +1366,23 @@ amagic_call(SV *left, SV *right, int method, int flags)
     PUSHSTACKi(PERLSI_OVERLOAD);
     ENTER;
     SAVEOP();
-    op = (OP *) &myop;
-    if (PERLDB_SUB && curstash != debstash)
-	op->op_private |= OPpENTERSUB_DB;
+    PL_op = (OP *) &myop;
+    if (PERLDB_SUB && PL_curstash != PL_debstash)
+	PL_op->op_private |= OPpENTERSUB_DB;
     PUTBACK;
     pp_pushmark(ARGS);
 
     EXTEND(SP, notfound + 5);
     PUSHs(lr>0? right: left);
     PUSHs(lr>0? left: right);
-    PUSHs( lr > 0 ? &sv_yes : ( assign ? &sv_undef : &sv_no ));
+    PUSHs( lr > 0 ? &PL_sv_yes : ( assign ? &PL_sv_undef : &PL_sv_no ));
     if (notfound) {
       PUSHs( sv_2mortal(newSVpv((char *)AMG_names[method + assignshift],0)) );
     }
     PUSHs((SV*)cv);
     PUTBACK;
 
-    if (op = pp_entersub(ARGS))
+    if (PL_op = pp_entersub(ARGS))
       CALLRUNOPS();
     LEAVE;
     SPAGAIN;

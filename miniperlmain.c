@@ -20,8 +20,8 @@ main(int argc, char **argv, char **env)
 
 #ifdef PERL_GLOBAL_STRUCT
 #define PERLVAR(var,type) /**/
-#define PERLVARI(var,type,init) Perl_Vars.var = init;
-#define PERLVARIC(var,type,init) Perl_Vars.var = init;
+#define PERLVARI(var,type,init) PL_Vars.var = init;
+#define PERLVARIC(var,type,init) PL_Vars.var = init;
 #include "perlvars.h"
 #undef PERLVAR
 #undef PERLVARI
@@ -32,12 +32,12 @@ main(int argc, char **argv, char **env)
 
     perl_init_i18nl10n(1);
 
-    if (!do_undump) {
+    if (!PL_do_undump) {
 	my_perl = perl_alloc();
 	if (!my_perl)
 	    exit(1);
 	perl_construct( my_perl );
-	perl_destruct_level = 0;
+	PL_perl_destruct_level = 0;
     }
 
     exitstatus = perl_parse( my_perl, xs_init, argc, argv, (char **) NULL );

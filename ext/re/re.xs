@@ -20,20 +20,20 @@ static void
 deinstall(void)
 {
     dTHR;
-    regexecp = &regexec_flags;
-    regcompp = &pregcomp;
+    PL_regexecp = &regexec_flags;
+    PL_regcompp = &pregcomp;
     if (!oldfl)
-	debug &= ~R_DB;
+	PL_debug &= ~R_DB;
 }
 
 static void
 install(void)
 {
     dTHR;
-    regexecp = &my_regexec;
-    regcompp = &my_regcomp;
-    oldfl = debug & R_DB;
-    debug |= R_DB;
+    PL_regexecp = &my_regexec;
+    PL_regcompp = &my_regcomp;
+    oldfl = PL_debug & R_DB;
+    PL_debug |= R_DB;
 }
 
 MODULE = re	PACKAGE = re

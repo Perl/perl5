@@ -3167,7 +3167,7 @@ sigaction(sig, action, oldaction = 0)
 # This code is really grody because we're trying to make the signal
 # interface look beautiful, which is hard.
 
-	if (!siggv)
+	if (!PL_siggv)
 	    gv_fetchpv("SIG", TRUE, SVt_PVHV);
 
 	{
@@ -3175,7 +3175,7 @@ sigaction(sig, action, oldaction = 0)
 	    struct sigaction oact;
 	    POSIX__SigSet sigset;
 	    SV** svp;
-	    SV** sigsvp = hv_fetch(GvHVn(siggv),
+	    SV** sigsvp = hv_fetch(GvHVn(PL_siggv),
 				 sig_name[sig],
 				 strlen(sig_name[sig]),
 				 TRUE);
