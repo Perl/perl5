@@ -31,6 +31,142 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 10438] By: jhi                                   on 2001/06/04  17:10:16
+        Log: Test case for 'eval "a.b.c.d.e.f;sub"' save stack imbalance
+             bug found by Ilmari Karonen; the bug fixed by Sarathy's lexical
+             leakage patch.
+     Branch: perl
+	   ! t/op/misc.t
+____________________________________________________________________________
+[ 10437] By: jhi                                   on 2001/06/04  17:01:06
+        Log: Test case for #10433/#10424.
+     Branch: perl
+	   ! t/op/misc.t
+____________________________________________________________________________
+[ 10436] By: jhi                                   on 2001/06/04  16:54:21
+        Log: Subject: One fix for strtoul not setting errno
+             From: hom00@utsglobal.com (Hal Morris)
+             Date: Sat, 2 Jun 2001 09:23:11 -0700 (PDT)
+             Message-Id: <200106021623.JAA06906@cepheus.utsglobal.com>
+     Branch: perl
+	   + uts/strtol_wrap.c
+	   ! MANIFEST hints/uts.sh
+____________________________________________________________________________
+[ 10435] By: jhi                                   on 2001/06/04  16:54:01
+        Log: Metaconfig units changes for #10434.
+     Branch: metaconfig
+	   ! U/modified/Cppsym.U
+     Branch: metaconfig/U/perl
+	   + d_dbminitproto.U d_flockproto.U d_sockatmarkproto.U
+	   + d_syscallproto.U d_usleepproto.U
+	   ! longdblfio.U quadfio.U
+____________________________________________________________________________
+[ 10434] By: jhi                                   on 2001/06/04  16:48:33
+        Log: Configure tweaks; add prototype probes, make the cpp symbols
+             probe to cast, not whine; test for %Ld and %Lf before %lld and
+             %llf because the L is the ANSI way.
+     Branch: perl
+	   ! Configure config_h.SH configure.com epoc/config.sh
+	   ! ext/ODBM_File/ODBM_File.xs perl.h pod/perltoc.pod uconfig.h
+	   ! uconfig.sh vos/config.alpha.def vos/config.ga.def
+	   ! win32/config.bc win32/config.gc win32/config.vc x2p/str.c
+____________________________________________________________________________
+[ 10433] By: jhi                                   on 2001/06/04  16:45:23
+        Log: Sigh.  This is what #10424 was supposed to check in.
+     Branch: perl
+	   ! op.c sv.c sv.h
+____________________________________________________________________________
+[ 10432] By: jhi                                   on 2001/06/04  16:29:40
+        Log: More verbose failure.
+     Branch: perl
+	   ! t/op/ver.t
+____________________________________________________________________________
+[ 10431] By: jhi                                   on 2001/06/04  16:21:55
+        Log: The .pm changes to go with #10428.
+     Branch: perl
+	   ! ext/Fcntl/Fcntl.pm ext/Socket/Socket.pm
+	   ! ext/Sys/Syslog/Syslog.pm
+____________________________________________________________________________
+[ 10430] By: jhi                                   on 2001/06/04  16:05:20
+        Log: On second thoughts show to utf8 skippage message only
+             on failures, it's too confusing otherwise,
+     Branch: perl
+	   ! t/pragma/locale.t
+____________________________________________________________________________
+[ 10429] By: jhi                                   on 2001/06/04  14:47:50
+        Log: Do not import anything from Encode.
+     Branch: perl
+	   ! ext/MIME/Base64/QuotedPrint.pm
+____________________________________________________________________________
+[ 10428] By: jhi                                   on 2001/06/04  14:45:47
+        Log: The #10402 didn't take.  Weird.
+     Branch: perl
+	   ! ext/Fcntl/Fcntl.xs ext/Socket/Socket.xs
+	   ! ext/Sys/Syslog/Syslog.xs
+____________________________________________________________________________
+[ 10427] By: jhi                                   on 2001/06/04  12:55:39
+        Log: Eradicate traces of 'asciirange' re subpragma.
+     Branch: perl
+	   ! ext/B/B/Deparse.pm ext/MIME/Base64/QuotedPrint.pm ext/re/re.pm
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[ 10426] By: jhi                                   on 2001/06/04  12:44:05
+        Log: use is a compile-time thing.
+     Branch: perl
+	   ! ext/MIME/Base64/QuotedPrint.pm
+____________________________________________________________________________
+[ 10425] By: jhi                                   on 2001/06/04  12:39:44
+        Log: Subject: [PATCH perl@10419] -Wall casting patch
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Mon, 4 Jun 2001 14:27:28 +0100 (BST)
+             Message-Id: <200106041327.OAA15338@tempest.npl.co.uk>
+     Branch: perl
+	   ! ext/Devel/DProf/DProf.xs mg.c
+____________________________________________________________________________
+[ 10424] By: jhi                                   on 2001/06/04  12:23:30
+        Log: Subject: [PATCH #2] introducing SVpad_TYPED
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Mon, 4 Jun 2001 12:26:02 +0530
+             Message-ID: <20010604122602.A5775@lustre.linux.in>
+     Branch: perl
+	   ! op.c sv.c sv.h
+____________________________________________________________________________
+[ 10423] By: gsar                                  on 2001/06/04  05:12:18
+        Log: testsuite for change#10192 (from Gisle Aas)
+     Branch: perl
+	   + t/op/override.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 10422] By: gsar                                  on 2001/06/04  02:32:03
+        Log: integrate changes#10414-10416 from mainline
+             
+             Potential buffer overrun if the radix separator is more than
+             one byte.  Also, under locales, prefer the locale-specific
+             separator over the old boring ".".
+             
+             "10.", that is, decimal numbers can have no decimal part at all.
+             
+             The non-locale places need love, too.
+     Branch: maint-5.6/perl
+	  !> perl.h sv.c
+____________________________________________________________________________
+[ 10421] By: jhi                                   on 2001/06/04  02:25:53
+        Log: Missed from #10420.
+     Branch: perl
+	   ! epoc/config.sh
+____________________________________________________________________________
+[ 10420] By: jhi                                   on 2001/06/04  02:19:58
+        Log: Missed HAS_SETRESGID_PROTO.  No serious harm done since
+             often this prototype goes with HAS_SETRESUID_PROTO.
+     Branch: perl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH configure.com perl.h uconfig.h
+____________________________________________________________________________
+[ 10419] By: jhi                                   on 2001/06/04  00:24:55
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 10418] By: jhi                                   on 2001/06/03  23:58:04
         Log: -Wall "subscript has type `char'" cleanup.
      Branch: perl
