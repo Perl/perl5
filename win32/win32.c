@@ -4677,8 +4677,13 @@ XS(w32_GetFullPathName)
     if (len) {
 	if (GIMME_V == G_ARRAY) {
 	    EXTEND(SP,1);
-	    XST_mPV(1,filepart);
-	    len = filepart - SvPVX(fullpath);
+	    if (filepart) {
+		XST_mPV(1,filepart);
+		len = filepart - SvPVX(fullpath);
+	    }
+	    else {
+		XST_mPVN(1,"",0);
+	    }
 	    items = 2;
 	}
 	SvCUR_set(fullpath,len);
