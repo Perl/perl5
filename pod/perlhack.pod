@@ -1767,23 +1767,23 @@ In Tru64 the following options are available:
 
 =over 4
 
-=item -p
+=item -p[rodecures]
 
 Procecures sorted in descending order by the number of cycles executed
 in each procedure.  Useful for finding the hotspot procedures.
 (This is the default option.)
 
-=item -h
+=item -h[eavy]
 
 Lines sorted in descending order by the number of cycles executed in
 each line.  Useful for finding the hotspot lines.
 
-=item -i
+=item -i[nvocations]
 
 The called procedures are sorted in descending order by number of calls
 made to the procedures.  Useful for finding the most used procedures.
 
-=item -l
+=item -l[ines]
 
 Grouped by procedure, sorted by cycles executed per procedure.
 Useful for finding the hotspots of procedures.
@@ -1792,7 +1792,7 @@ Useful for finding the hotspots of procedures.
 
 The compiler emitted code for these lines, but the code was unexecuted.
 
-=item -zero
+=item -z[ero]
 
 Unexecuted procedures.
 
