@@ -3,7 +3,7 @@ use 5.006;
 use strict;
 use warnings;
 use warnings::register;
-our $VERSION = '1.07';
+our $VERSION = '1.08';
 require Exporter;
 require Cwd;
 
@@ -126,7 +126,8 @@ C<wanted()> function is called. This enables fast file checks involving S< _>.
 =item *
 
 There is a variable C<$File::Find::fullname> which holds the absolute
-pathname of the file with all symbolic links resolved
+pathname of the file with all symbolic links resolved.  If the link is
+a dangling symbolic link, then fullname will be set to C<undef>.
 
 =back
 
@@ -1101,7 +1102,21 @@ sub _find_dir_symlnk($$$) {
 	    $new_loc = Follow_SymLink($loc_pref.$FN);
 
 	    # ignore if invalid symlink
-	    next unless defined $new_loc;
+            unless (defined $new_loc) {
+	        if ($dangling_symlinks) {
+	            if (ref $dangling_symlinks eq 'CODE') {
+	                $dangling_symlinks->($FN, $dir_pref);
+	            } else {
+	                warnings::warnif "$dir_pref$FN is a dangling symbolic link\n";
+	            }
+	        }
+
+	        $fullname = undef;
+	        $name = $dir_pref . $FN;
+	        $_ = ($no_chdir ? $name : $FN);
+	        { $wanted_callback->() };
+	        next;
+	    }
 
 	    if (-d _) {
 		push @Stack,[$new_loc,$updir_loc,$dir_name,$FN,1];
