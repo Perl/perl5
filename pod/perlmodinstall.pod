@@ -24,8 +24,11 @@ take:
 =over 5
 
 =item B<DECOMPRESS> the file
+
 =item B<UNPACK> the file into a directory
+
 =item B<BUILD> the module (sometimes unnecessary)
+
 =item B<INSTALL> the module.
 
 =back
