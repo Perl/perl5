@@ -282,8 +282,8 @@ If the Time::HiRes module has been installed, you can specify the
 special tag C<:hireswallclock> for Benchmark (if Time::HiRes is not
 available, the tag will be silently ignored).  This tag will cause the
 wallclock time to be measured in microseconds, instead of integer
-seconds.  Note though that since the speed computations are conducted
-still in CPU seconds.
+seconds.  Note though that the speed computations are still conducted
+in CPU time, not wallclock time.
 
 =head1 NOTES
 
