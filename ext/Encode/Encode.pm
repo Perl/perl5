@@ -509,7 +509,7 @@ sub fromUnicode
  while (length($uni))
   {
    my $ch = substr($uni,0,1,'');
-   my $x  = $fmuni->{$ch};
+   my $x  = $fmuni->{chr(ord($ch))};
    unless (defined $x)
     {
      last if ($chk);
