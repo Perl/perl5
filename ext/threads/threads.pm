@@ -128,6 +128,18 @@ quick way to get current thread id.
 
 =back
 
+=head1 WARNINGS
+
+=over 4
+
+=item Cleanup skipped %d active threads
+
+The main thread exited while there were still other threads running.
+This is not a good sign: you should either explicitly join the
+threads, or let the threads detach themselves, or somehow be certain
+that all the non-main threads have finished.
+
+=back
 
 =head1 TODO
 
