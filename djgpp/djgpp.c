@@ -366,6 +366,24 @@ XS(dos_UseLFN)
     XSRETURN_IV (_USE_LFN);
 }
 
+XS(XS_Cwd_sys_cwd)
+{
+    dXSARGS;
+    if (items != 0)
+	Perl_croak_nocontext("Usage: Cwd::sys_cwd()");
+    {
+	char p[MAXPATHLEN];
+	char *	RETVAL;
+	RETVAL = getcwd(p, MAXPATHLEN);
+	ST(0) = sv_newmortal();
+	sv_setpv((SV*)ST(0), RETVAL);
+#ifndef INCOMPLETE_TAINTS
+	SvTAINTED_on(ST(0));
+#endif
+    }
+    XSRETURN(1);
+}
+
 void
 Perl_init_os_extras(pTHX)
 {
@@ -375,6 +393,7 @@ Perl_init_os_extras(pTHX)
     
     newXS ("Dos::GetCwd",dos_GetCwd,file);
     newXS ("Dos::UseLFN",dos_UseLFN,file);
+    newXS ("Cwd::sys_cwd",XS_Cwd_sys_cwd,file);
 
     /* install my File System Extension for globbing */
     __FSEXT_add_open_handler (glob_handler);
