@@ -18,7 +18,7 @@ package Math::BigInt;
 my $class = "Math::BigInt";
 require 5.005;
 
-$VERSION = '1.57';
+$VERSION = '1.58';
 use Exporter;
 @ISA =       qw( Exporter );
 @EXPORT_OK = qw( objectify _swap bgcd blcm); 
@@ -1381,7 +1381,12 @@ sub bmod
       {
       my $xsign = $x->{sign};
       $x->{sign} = $y->{sign};
-      $x = $y-$x if $xsign ne $y->{sign};	# one of them '-'
+      if ($xsign ne $y->{sign})
+        {
+        my $t = [ @{$x->{value}} ];			# copy $x
+        $x->{value} = [ @{$y->{value}} ];		# copy $y to $x
+        $x->{value} = $CALC->_sub($y->{value},$t,1); 	# $y-$x
+        }
       }
     else
       {
@@ -1398,7 +1403,7 @@ sub bmod
   $x;
   }
 
-sub bmodinv_not_yet_implemented
+sub bmodinv
   {
   # modular inverse.  given a number which is (hopefully) relatively
   # prime to the modulus, calculate its inverse using Euclid's
@@ -1414,8 +1419,14 @@ sub bmodinv_not_yet_implemented
          || $num->is_zero()				# or num == 0
 	 || $num->{sign} !~ /^[+-]$/			# or num NaN, inf, -inf
         );
-#  return $num                        # i.e., NaN or some kind of infinity,
-#      if ($num->{sign} =~ /\w/);
+  return $num                        # i.e., NaN or some kind of infinity,
+      if ($num->{sign} !~ /^[+-]$/);
+
+  if ($CALC->can('_modinv'))
+    {
+    $num->{value} = $CALC->_modinv($mod->{value});
+    return $num;
+    }
 
   # the remaining case, nonpositive case, $num < 0, is addressed below.
 
@@ -1423,24 +1434,27 @@ sub bmodinv_not_yet_implemented
   my ($a, $b) = ($mod->copy(), $num->copy());
 
   # put least residue into $b if $num was negative
-  $b %= $mod if $b->{sign} eq '-';
+  $b->bmod($mod) if $b->{sign} eq '-';
 
-    # Euclid's Algorithm
-    while( ! $b->is_zero()) {
-      ($a, my $q, $b) = ($b, $self->bdiv( $a->copy(), $b));
-      ($u, $u1) = ($u1, $u - $u1 * $q);
+  # Euclid's Algorithm
+  while (!$b->is_zero())
+    {
+    ($a, my $q, $b) = ($b, $a->copy()->bdiv($b));
+    ($u, $u1) = ($u1, $u - $u1 * $q);
     }
 
-    # if the gcd is not 1, then return NaN!  It would be pointless to
-    # have called bgcd first, because we would then be performing the
-    # same Euclidean Algorithm *twice*
-    return $self->bnan() unless $a->is_one();
+  # if the gcd is not 1, then return NaN!  It would be pointless to
+  # have called bgcd first, because we would then be performing the
+  # same Euclidean Algorithm *twice*
+  return $num->bnan() unless $a->is_one();
 
-    $u %= $mod;
-    return $u;
+  $u->bmod($mod);
+  $num->{value} = $u->{value};
+  $num->{sign} = $u->{sign};
+  $num;
   }
 
-sub bmodpow_not_yet_implemented
+sub bmodpow
   {
   # takes a very large number to a very large exponent in a given very
   # large modulus, quickly, thanks to binary exponentation.  supports
@@ -1459,32 +1473,42 @@ sub bmodpow_not_yet_implemented
     # i.e., if it's NaN, +inf, or -inf...
     return $num->bnan();
     }
-  elsif ($exp->{sign} eq '-')
+
+ my $exp1 = $exp->copy();
+ if ($exp->{sign} eq '-')
     {
-    $exp->babs();
+    $exp1->babs();
     $num->bmodinv ($mod);
-    return $num if $num->{sign} !~ /^[+-]/; 	# i.e. if there was no inverse
+    # return $num if $num->{sign} !~ /^[+-]/; 	# see next check
     }
 
-    # check num for valid values
-    return $num->bnan() if $num->{sign} !~ /^[+-]$/;
+  # check num for valid values (also NaN if there was no inverse)
+  return $num->bnan() if $num->{sign} !~ /^[+-]$/;
 
-    # in the trivial case,
-    return $num->bzero() if $mod->is_one();
-    return $num->bone() if $num->is_zero() or $num->is_one();
+  if ($CALC->can('_modpow'))
+    {
+    # $exp and $mod are positive, result is also positive
+    $num->{value} = $CALC->_modpow($num->{value},$exp->{value},$mod->{value});
+    return $num;
+    }
 
-    my $acc = $num->copy(); $num->bone();	# keep ref to $num
+  # in the trivial case,
+  return $num->bzero() if $mod->is_one();
+  return $num->bone() if $num->is_zero() or $num->is_one();
 
-      print "$num $acc $exp\n";	
-    while( !$exp->is_zero() ) {
-      if( $exp->is_odd() ) {
-       $num->bmul($acc)->bmod($mod);
+  $num->bmod($mod);		# if $x is large, make it smaller first
+  my $acc = $num->copy(); $num->bone();	# keep ref to $num
+
+  while( !$exp1->is_zero() )
+    {
+    if( $exp1->is_odd() )
+      {
+      $num->bmul($acc)->bmod($mod);
       }
-      $acc->bmul($acc)->bmod($mod);
-      $exp->brsft( 1, 2);      		# remove last (binary) digit
-      print "$num $acc $exp\n";	
+    $acc->bmul($acc)->bmod($mod);
+    $exp1->brsft( 1, 2);      		# remove last (binary) digit
     }
-  return $num;
+  $num;
   }
 
 ###############################################################################
@@ -2277,15 +2301,18 @@ sub import
   $CALC = '';					# signal error
   foreach my $lib (@c)
     {
+    next if ($lib || '') eq '';
     $lib = 'Math::BigInt::'.$lib if $lib !~ /^Math::BigInt/i;
     $lib =~ s/\.pm$//;
     if ($] < 5.006)
       {
       # Perl < 5.6.0 dies with "out of memory!" when eval() and ':constant' is
       # used in the same script, or eval inside import().
-      (my $mod = $lib . '.pm') =~ s!::!/!g;
-      # require does not automatically :: => /, so portability problems arise
-      eval { require $mod; $lib->import( @c ); }
+      my @parts = split /::/, $lib;             # Math::BigInt => Math BigInt
+      my $file = pop @parts; $file .= '.pm';    # BigInt => BigInt.pm
+      require File::Spec;
+      $file = File::Spec->catfile (@parts, $file);
+      eval { require "$file"; $lib->import( @c ); }
       }
     else
       {
@@ -2425,7 +2452,8 @@ sub _split
     $es = $1; $ev = $2;
     # valid mantissa?
     return if $m eq '.' || $m eq '';
-    my ($mi,$mf) = split /\./,$m;
+    my ($mi,$mf,$last) = split /\./,$m;
+    return if defined $last;		# last defined => 1.2.3 or others
     $mi = '0' if !defined $mi;
     $mi .= '0' if $mi =~ /^[\-\+]?$/;
     $mf = '0' if !defined $mf || $mf eq '';
@@ -2609,6 +2637,8 @@ Math::BigInt - Arbitrary size integer math package
 				# return (quo,rem) or quo if scalar
 
   $x->bmod($y);			# modulus (x % y)
+  $x->bmodpow($exp,$mod);	# modular exponentation (($num**$exp) % $mod))
+  $x->bmodinv($mod);		# the inverse of $x in the given modulus $mod
 
   $x->bpow($y);			# power of arguments (x ** y)
   $x->blsft($y);		# left shift
@@ -2932,8 +2962,6 @@ numbers.
 
 =head2 bmodinv
 
-Not yet implemented.
-
   bmodinv($num,$mod);          # modular inverse (no OO style)
 
 Returns the inverse of C<$num> in the given modulus C<$mod>.  'C<NaN>' is
@@ -2941,8 +2969,6 @@ returned unless C<$num> is relatively prime to C<$mod>, i.e. unless
 C<bgcd($num, $mod)==1>.
 
 =head2 bmodpow
-
-Not yet implemented.
 
   bmodpow($num,$exp,$mod);     # modular exponentation ($num**$exp % $mod)
 

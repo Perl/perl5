@@ -8,7 +8,7 @@ require Exporter;
 use vars qw/@ISA $VERSION/;
 @ISA = qw(Exporter);
 
-$VERSION = '0.28';
+$VERSION = '0.29';
 
 # Package to store unsigned big integers in decimal and do math with them
 
@@ -108,6 +108,7 @@ BEGIN
   $e = 5 if $^O =~ /^uts/;	# UTS get's some special treatment
   $e = 5 if $^O =~ /^unicos/;	# unicos is also problematic (6 seems to work
 				# there, but we play safe)
+  $e = 5 if $] < 5.006;		# cap, for older Perls
   $e = 7 if $e > 7;		# cap, for VMS, OS/390 and other 64 bit systems
 				# 8 fails inside random testsuite, so take 7
 
@@ -413,7 +414,7 @@ sub _sub
   #print "case 1 (swap)\n";
   for $i (@$sx)
     {
-    # we can't do an early out if $x is than $y, since we
+    # we can't do an early out if $x is < than $y, since we
     # need to copy the high chunks from $y. Found by Bob Mathews.
     #last unless defined $sy->[$j] || $car;
     $sy->[$j] += $BASE
@@ -1576,7 +1577,10 @@ sub _from_bin
   $x;
   }
 
-sub _modinv
+##############################################################################
+# special modulus functions
+
+sub _modinv1
   {
   # inverse modulus
   }
@@ -1584,6 +1588,43 @@ sub _modinv
 sub _modpow
   {
   # modulus of power ($x ** $y) % $z
+  my ($c,$num,$exp,$mod) = @_;
+
+  # in the trivial case,
+  if (_is_one($c,$mod))
+    {
+    splice @$num,0,1; $num->[0] = 0;
+    return $num;
+    }
+  if ((scalar @$num == 1) && (($num->[0] == 0) || ($num->[0] == 1)))
+    {
+    $num->[0] = 1;
+    return $num;
+    }
+      
+#  $num = _mod($c,$num,$mod);
+
+  my $acc = _copy($c,$num); my $t = _one();
+
+  my $two = _two();
+  my $exp1 = _copy($c,$exp);		# keep arguments
+  while (!_is_zero($c,$exp1))
+    {
+    if (_is_odd($c,$exp1))
+      {
+      _mul($c,$t,$acc);
+      $t = _mod($c,$t,$mod);
+      }
+    _mul($c,$acc,$acc);
+    $acc = _mod($c,$acc,$mod);
+    _div($c,$exp1,$two);
+#    print "exp ",${_str($c,$exp1)},"\n";
+#    print "acc ",${_str($c,$acc)},"\n";
+#    print "num ",${_str($c,$num)},"\n";
+#    print "mod ",${_str($c,$mod)},"\n";
+    }
+  @$num = @$t;
+  $num;
   }
 
 ##############################################################################

@@ -31,6 +31,11 @@ BEGIN
     }
   print "# INC = @INC\n";
   plan tests => 141;
+  if ($] < 5.006)
+    {
+    for (1..141) { skip (1,'Not supported on older Perls'); }
+    exit;
+    }
   }
 
 package Math::BigInt::Test;
