@@ -107,17 +107,17 @@
  */
 
 #define CHR_SVLEN(sv) (UTF ? sv_len_utf8(sv) : SvCUR(sv))
-#define CHR_DIST(a,b) (DO_UTF8(PL_reg_sv) ? utf8_distance(a,b) : a - b)
+#define CHR_DIST(a,b) (PL_reg_sv_utf8 ? utf8_distance(a,b) : a - b)
 
 #define reghop_c(pos,off) ((char*)reghop((U8*)pos, off))
 #define reghopmaybe_c(pos,off) ((char*)reghopmaybe((U8*)pos, off))
-#define HOP(pos,off) (DO_UTF8(PL_reg_sv) ? reghop((U8*)pos, off) : (U8*)(pos + off))
-#define HOPMAYBE(pos,off) (DO_UTF8(PL_reg_sv) ? reghopmaybe((U8*)pos, off) : (U8*)(pos + off))
+#define HOP(pos,off) (PL_reg_sv_utf8 ? reghop((U8*)pos, off) : (U8*)(pos + off))
+#define HOPMAYBE(pos,off) (PL_reg_sv_utf8 ? reghopmaybe((U8*)pos, off) : (U8*)(pos + off))
 #define HOPc(pos,off) ((char*)HOP(pos,off))
 #define HOPMAYBEc(pos,off) ((char*)HOPMAYBE(pos,off))
 
 #define HOPBACK(pos, off) (		\
-    (UTF && DO_UTF8(PL_reg_sv))		\
+    (UTF && PL_reg_sv_utf8)		\
 	? reghopmaybe((U8*)pos, -off)	\
     : (pos - off >= PL_bostr)		\
 	? (U8*)(pos - off)		\
@@ -127,8 +127,8 @@
 
 #define reghop3_c(pos,off,lim) ((char*)reghop3((U8*)pos, off, (U8*)lim))
 #define reghopmaybe3_c(pos,off,lim) ((char*)reghopmaybe3((U8*)pos, off, (U8*)lim))
-#define HOP3(pos,off,lim) (DO_UTF8(PL_reg_sv) ? reghop3((U8*)pos, off, (U8*)lim) : (U8*)(pos + off))
-#define HOPMAYBE3(pos,off,lim) (DO_UTF8(PL_reg_sv) ? reghopmaybe3((U8*)pos, off, (U8*)lim) : (U8*)(pos + off))
+#define HOP3(pos,off,lim) (PL_reg_sv_utf8 ? reghop3((U8*)pos, off, (U8*)lim) : (U8*)(pos + off))
+#define HOPMAYBE3(pos,off,lim) (PL_reg_sv_utf8 ? reghopmaybe3((U8*)pos, off, (U8*)lim) : (U8*)(pos + off))
 #define HOP3c(pos,off,lim) ((char*)HOP3(pos,off,lim))
 #define HOPMAYBE3c(pos,off,lim) ((char*)HOPMAYBE3(pos,off,lim))
 
@@ -878,7 +878,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	unsigned int c2;
 	char *e;
 	register I32 tmp = 1;	/* Scratch variable? */
-	register bool do_utf8 = DO_UTF8(PL_reg_sv);
+	register bool do_utf8 = PL_reg_sv_utf8;
 
 	/* We know what class it must start with. */
 	switch (OP(c)) {
@@ -2009,7 +2009,7 @@ S_regmatch(pTHX_ regnode *prog)
 #if 0
     I32 firstcp = PL_savestack_ix;
 #endif
-    register bool do_utf8 = DO_UTF8(PL_reg_sv);
+    register bool do_utf8 = PL_reg_sv_utf8;
 
 #ifdef DEBUGGING
     PL_regindent++;
@@ -3590,7 +3590,7 @@ S_regrepeat(pTHX_ regnode *p, I32 max)
     register I32 c;
     register char *loceol = PL_regeol;
     register I32 hardcount = 0;
-    register bool do_utf8 = DO_UTF8(PL_reg_sv);
+    register bool do_utf8 = PL_reg_sv_utf8;
 
     scan = PL_reginput;
     if (max != REG_INFTY && max < loceol - scan)
@@ -3829,7 +3829,7 @@ S_regrepeat_hard(pTHX_ regnode *p, I32 max, I32 *lp)
 	return 0;
 
     start = PL_reginput;
-    if (DO_UTF8(PL_reg_sv)) {
+    if (PL_reg_sv_utf8) {
 	while (PL_reginput < loceol && (scan = PL_reginput, res = regmatch(p))) {
 	    if (!count++) {
 		l = 0;

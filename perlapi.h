@@ -772,6 +772,8 @@ START_EXTERN_C
 #define PL_reg_starttry		(*Perl_Treg_starttry_ptr(aTHXo))
 #undef  PL_reg_sv
 #define PL_reg_sv		(*Perl_Treg_sv_ptr(aTHXo))
+#undef  PL_reg_sv_utf8
+#define PL_reg_sv_utf8		(*Perl_Treg_sv_utf8_ptr(aTHXo))
 #undef  PL_reg_whilem_seen
 #define PL_reg_whilem_seen	(*Perl_Treg_whilem_seen_ptr(aTHXo))
 #undef  PL_regbol

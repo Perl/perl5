@@ -94,6 +94,7 @@
 #define PL_reg_start_tmpl	(vTHX->Treg_start_tmpl)
 #define PL_reg_starttry		(vTHX->Treg_starttry)
 #define PL_reg_sv		(vTHX->Treg_sv)
+#define PL_reg_sv_utf8		(vTHX->Treg_sv_utf8)
 #define PL_reg_whilem_seen	(vTHX->Treg_whilem_seen)
 #define PL_regbol		(vTHX->Tregbol)
 #define PL_regcc		(vTHX->Tregcc)
@@ -812,6 +813,7 @@
 #define PL_reg_start_tmpl	(aTHXo->interp.Treg_start_tmpl)
 #define PL_reg_starttry		(aTHXo->interp.Treg_starttry)
 #define PL_reg_sv		(aTHXo->interp.Treg_sv)
+#define PL_reg_sv_utf8		(aTHXo->interp.Treg_sv_utf8)
 #define PL_reg_whilem_seen	(aTHXo->interp.Treg_whilem_seen)
 #define PL_regbol		(aTHXo->interp.Tregbol)
 #define PL_regcc		(aTHXo->interp.Tregcc)
@@ -1519,6 +1521,7 @@
 #define PL_reg_start_tmpl	(aTHX->Treg_start_tmpl)
 #define PL_reg_starttry		(aTHX->Treg_starttry)
 #define PL_reg_sv		(aTHX->Treg_sv)
+#define PL_reg_sv_utf8		(aTHX->Treg_sv_utf8)
 #define PL_reg_whilem_seen	(aTHX->Treg_whilem_seen)
 #define PL_regbol		(aTHX->Tregbol)
 #define PL_regcc		(aTHX->Tregcc)
@@ -1657,6 +1660,7 @@
 #define PL_Treg_start_tmpl	PL_reg_start_tmpl
 #define PL_Treg_starttry	PL_reg_starttry
 #define PL_Treg_sv		PL_reg_sv
+#define PL_Treg_sv_utf8		PL_reg_sv_utf8
 #define PL_Treg_whilem_seen	PL_reg_whilem_seen
 #define PL_Tregbol		PL_regbol
 #define PL_Tregcc		PL_regcc

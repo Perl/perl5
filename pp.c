@@ -4055,6 +4055,8 @@ PP(pp_split)
     TAINT_IF((pm->op_pmflags & PMf_LOCALE) &&
 	     (pm->op_pmflags & (PMf_WHITE | PMf_SKIPWHITE)));
 
+    PL_reg_sv_utf8 = do_utf8;
+
     if (pm->op_pmreplroot) {
 #ifdef USE_ITHREADS
 	ary = GvAVn((GV*)PL_curpad[(PADOFFSET)pm->op_pmreplroot]);
