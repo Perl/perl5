@@ -27,6 +27,7 @@ sub do_test {
 	if (open(IN, "peek$$")) {
 	    local $/;
 	    $pattern =~ s/\$ADDR/0x[[:xdigit:]]+/g;
+	    $pattern =~ s/\$FLOAT/(?:\\d*\\.\\d+(?:e[-+]\\d+)?|\\d+)/g;
 	    print $pattern, "\n" if $DEBUG;
 	    my $dump = <IN>;
 	    print $dump, "\n"    if $DEBUG;
@@ -187,7 +188,7 @@ do_test(12,
     REFCNT = 2
     FLAGS = \\(SHAREKEYS\\)
     IV = 1
-    NV = 0
+    NV = $FLOAT
     ARRAY = $ADDR  \\(0:7, 1:1\\)
     hash quality = 100.0%
     KEYS = 1
@@ -348,7 +349,7 @@ do_test(19,
     REFCNT = 2
     FLAGS = \\(SHAREKEYS\\)
     IV = 1
-    NV = 0
+    NV = $FLOAT
     ARRAY = $ADDR  \\(0:7, 1:1\\)
     hash quality = 100.0%
     KEYS = 1

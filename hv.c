@@ -21,7 +21,7 @@ S_new_he(pTHX)
     HE* he;
     LOCK_SV_MUTEX;
     if (!PL_he_root)
-        more_he();
+	more_he();
     he = PL_he_root;
     PL_he_root = HeNEXT(he);
     UNLOCK_SV_MUTEX;
@@ -51,8 +51,8 @@ S_more_he(pTHX)
     heend = &he[1008 / sizeof(HE) - 1];
     PL_he_root = ++he;
     while (he < heend) {
-        HeNEXT(he) = (HE*)(he + 1);
-        he++;
+	HeNEXT(he) = (HE*)(he + 1);
+	he++;
     }
     HeNEXT(he) = 0;
 }
@@ -208,9 +208,9 @@ Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen, I32 lval)
     if (!xhv->xhv_array /* !HvARRAY(hv) */) {
 	if (lval
 #ifdef DYNAMIC_ENV_FETCH  /* if it's an %ENV lookup, we may get it on the fly */
-	         || (SvRMAGICAL((SV*)hv) && mg_find((SV*)hv, PERL_MAGIC_env))
+		 || (SvRMAGICAL((SV*)hv) && mg_find((SV*)hv, PERL_MAGIC_env))
 #endif
-	                                                          )
+								  )
 	    Newz(503, xhv->xhv_array /* HvARRAY(hv) */,
 		 PERL_HV_ARRAY_ALLOC_BYTES(xhv->xhv_max+1 /* HvMAX(hv)+1 */),
 		 char);
@@ -241,7 +241,11 @@ Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen, I32 lval)
 	    continue;
 	if (key != keysave)
 	    Safefree(key);
+	/* if we find a placeholder, we pretend we haven't found anything */
+	if (HeVAL(entry) == &PL_sv_undef)
+	    break;
 	return &HeVAL(entry);
+
     }
 #ifdef DYNAMIC_ENV_FETCH  /* %ENV lookup?  If so, try to fetch the value now */
     if (SvRMAGICAL((SV*)hv) && mg_find((SV*)hv, PERL_MAGIC_env)) {
@@ -256,7 +260,7 @@ Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen, I32 lval)
 	}
     }
 #endif
-    if (SvREADONLY(hv)) {
+    if (!entry && SvREADONLY(hv)) {
 	Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave);
     }
     if (lval) {		/* gonna assign to this, so it better be there */
@@ -342,9 +346,9 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
     if (!xhv->xhv_array /* !HvARRAY(hv) */) {
 	if (lval
 #ifdef DYNAMIC_ENV_FETCH  /* if it's an %ENV lookup, we may get it on the fly */
-	         || (SvRMAGICAL((SV*)hv) && mg_find((SV*)hv, PERL_MAGIC_env))
+		 || (SvRMAGICAL((SV*)hv) && mg_find((SV*)hv, PERL_MAGIC_env))
 #endif
-	                                                          )
+								  )
 	    Newz(503, xhv->xhv_array /* HvARRAY(hv) */,
 		 PERL_HV_ARRAY_ALLOC_BYTES(xhv->xhv_max+1 /* HvMAX(hv)+1 */),
 		 char);
@@ -374,6 +378,9 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
 	    continue;
 	if (key != keysave)
 	    Safefree(key);
+	/* if we find a placeholder, we pretend we haven't found anything */
+	if (HeVAL(entry) == &PL_sv_undef)
+	    break;
 	return entry;
     }
 #ifdef DYNAMIC_ENV_FETCH  /* %ENV lookup?  If so, try to fetch the value now */
@@ -387,7 +394,7 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
 	}
     }
 #endif
-    if (SvREADONLY(hv)) {
+    if (!entry && SvREADONLY(hv)) {
 	Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave);
     }
     if (key != keysave)
@@ -465,7 +472,7 @@ Perl_hv_store(pTHX_ HV *hv, const char *key, I32 klen, SV *val, register U32 has
 		return 0;
 #ifdef ENV_IS_CASELESS
 	    else if (mg_find((SV*)hv, PERL_MAGIC_env)) {
-                key = savepvn(key,klen);
+		key = savepvn(key,klen);
 		key = (const char*)strupr((char*)key);
 		hash = 0;
 	    }
@@ -500,7 +507,10 @@ Perl_hv_store(pTHX_ HV *hv, const char *key, I32 klen, SV *val, register U32 has
 	    continue;
 	if (HeKUTF8(entry) != (char)is_utf8)
 	    continue;
-	SvREFCNT_dec(HeVAL(entry));
+	if (HeVAL(entry) == &PL_sv_undef)
+	    xhv->xhv_placeholders--; /* yes, can store into placeholder slot */
+	else
+	    SvREFCNT_dec(HeVAL(entry));
 	HeVAL(entry) = val;
 	if (key != keysave)
 	    Safefree(key);
@@ -568,18 +578,18 @@ Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, register U32 hash)
 
     xhv = (XPVHV*)SvANY(hv);
     if (SvMAGICAL(hv)) {
- 	bool needs_copy;
- 	bool needs_store;
- 	hv_magic_check (hv, &needs_copy, &needs_store);
- 	if (needs_copy) {
- 	    bool save_taint = PL_tainted;
- 	    if (PL_tainting)
- 		PL_tainted = SvTAINTED(keysv);
- 	    keysv = sv_2mortal(newSVsv(keysv));
- 	    mg_copy((SV*)hv, val, (char*)keysv, HEf_SVKEY);
- 	    TAINT_IF(save_taint);
- 	    if (!xhv->xhv_array /* !HvARRAY(hv) */ && !needs_store)
- 		return Nullhe;
+	bool needs_copy;
+	bool needs_store;
+	hv_magic_check (hv, &needs_copy, &needs_store);
+	if (needs_copy) {
+	    bool save_taint = PL_tainted;
+	    if (PL_tainting)
+		PL_tainted = SvTAINTED(keysv);
+	    keysv = sv_2mortal(newSVsv(keysv));
+	    mg_copy((SV*)hv, val, (char*)keysv, HEf_SVKEY);
+	    TAINT_IF(save_taint);
+	    if (!xhv->xhv_array /* !HvARRAY(hv) */ && !needs_store)
+		return Nullhe;
 #ifdef ENV_IS_CASELESS
 	    else if (mg_find((SV*)hv, PERL_MAGIC_env)) {
 		key = SvPV(keysv, klen);
@@ -618,7 +628,10 @@ Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, register U32 hash)
 	    continue;
 	if (HeKUTF8(entry) != (char)is_utf8)
 	    continue;
-	SvREFCNT_dec(HeVAL(entry));
+	if (HeVAL(entry) == &PL_sv_undef)
+	    xhv->xhv_placeholders--; /* yes, can store into placeholder slot */
+	else
+	    SvREFCNT_dec(HeVAL(entry));
 	HeVAL(entry) = val;
 	if (key != keysave)
 	    Safefree(key);
@@ -702,7 +715,7 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen, I32 flags)
 		key = strupr(SvPVX(sv));
 	    }
 #endif
-        }
+	}
     }
     xhv = (XPVHV*)SvANY(hv);
     if (!xhv->xhv_array /* !HvARRAY(hv) */)
@@ -713,10 +726,6 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen, I32 flags)
 	/* See the note in hv_fetch(). --jhi */
 	key = (char*)bytes_from_utf8((U8*)key, &tmplen, &is_utf8);
 	klen = tmplen;
-    }
-
-    if (SvREADONLY(hv)) {
-	Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave);
     }
 
     PERL_HASH(hash, key, klen);
@@ -736,6 +745,29 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen, I32 flags)
 	    continue;
 	if (key != keysave)
 	    Safefree(key);
+	/* if placeholder is here, it's already been deleted.... */
+	if (HeVAL(entry) == &PL_sv_undef)
+	{
+	    if (SvREADONLY(hv))
+		return Nullsv;  /* if still SvREADONLY, leave it deleted. */
+	    else {
+		/* okay, really delete the placeholder... */
+		*oentry = HeNEXT(entry);
+		if (i && !*oentry)
+		    xhv->xhv_fill--; /* HvFILL(hv)-- */
+		if (entry == xhv->xhv_eiter /* HvEITER(hv) */)
+		    HvLAZYDEL_on(hv);
+		else
+		    hv_free_ent(hv, entry);
+		xhv->xhv_keys--; /* HvKEYS(hv)-- */
+		xhv->xhv_placeholders--;
+		return Nullsv;
+	    }
+	}
+	else if (SvREADONLY(hv) && HeVAL(entry) && SvREADONLY(HeVAL(entry))) {
+	    Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave);
+	}
+
 	*oentry = HeNEXT(entry);
 	if (i && !*oentry)
 	    xhv->xhv_fill--; /* HvFILL(hv)-- */
@@ -745,13 +777,31 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen, I32 flags)
 	    sv = sv_2mortal(HeVAL(entry));
 	    HeVAL(entry) = &PL_sv_undef;
 	}
-	if (entry == xhv->xhv_eiter /* HvEITER(hv) */)
-	    HvLAZYDEL_on(hv);
-	else
-	    hv_free_ent(hv, entry);
-	xhv->xhv_keys--; /* HvKEYS(hv)-- */
+
+	/*
+	 * If a restricted hash, rather than really deleting the entry, put
+	 * a placeholder there. This marks the key as being "approved", so
+	 * we can still access via not-really-existing key without raising
+	 * an error.
+	 */
+	if (SvREADONLY(hv)) {
+	    HeVAL(entry) = &PL_sv_undef;
+	    /* We'll be saving this slot, so the number of allocated keys
+	     * doesn't go down, but the number placeholders goes up */
+	    xhv->xhv_placeholders++; /* HvPLACEHOLDERS(hv)++ */
+	} else {
+	    if (entry == xhv->xhv_eiter /* HvEITER(hv) */)
+		HvLAZYDEL_on(hv);
+	    else
+		hv_free_ent(hv, entry);
+	    xhv->xhv_keys--; /* HvKEYS(hv)-- */
+	}
 	return sv;
     }
+    if (SvREADONLY(hv)) {
+	Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave);
+    }
+
     if (key != keysave)
 	Safefree(key);
     return Nullsv;
@@ -819,10 +869,6 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
     if (is_utf8)
 	key = (char*)bytes_from_utf8((U8*)key, &klen, &is_utf8);
 
-    if (SvREADONLY(hv)) {
-	Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave);
-    }
-
     if (!hash)
 	PERL_HASH(hash, key, klen);
 
@@ -841,6 +887,30 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
 	    continue;
 	if (key != keysave)
 	    Safefree(key);
+
+	/* if placeholder is here, it's already been deleted.... */
+	if (HeVAL(entry) == &PL_sv_undef)
+	{
+	    if (SvREADONLY(hv))
+		return Nullsv; /* if still SvREADONLY, leave it deleted. */
+	    else {
+		// okay, really delete the placeholder.
+		*oentry = HeNEXT(entry);
+		if (i && !*oentry)
+		    xhv->xhv_fill--; /* HvFILL(hv)-- */
+		if (entry == xhv->xhv_eiter /* HvEITER(hv) */)
+		    HvLAZYDEL_on(hv);
+		else
+		    hv_free_ent(hv, entry);
+		xhv->xhv_keys--; /* HvKEYS(hv)-- */
+		xhv->xhv_placeholders--;
+		return Nullsv;
+	    }
+	}
+	else if (SvREADONLY(hv) && HeVAL(entry) && SvREADONLY(HeVAL(entry))) {
+	    Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave);
+	}
+
 	*oentry = HeNEXT(entry);
 	if (i && !*oentry)
 	    xhv->xhv_fill--; /* HvFILL(hv)-- */
@@ -850,13 +920,31 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
 	    sv = sv_2mortal(HeVAL(entry));
 	    HeVAL(entry) = &PL_sv_undef;
 	}
-	if (entry == xhv->xhv_eiter /* HvEITER(hv) */)
-	    HvLAZYDEL_on(hv);
-	else
-	    hv_free_ent(hv, entry);
-	xhv->xhv_keys--; /* HvKEYS(hv)-- */
+
+	/*
+	 * If a restricted hash, rather than really deleting the entry, put
+	 * a placeholder there. This marks the key as being "approved", so
+	 * we can still access via not-really-existing key without raising
+	 * an error.
+	 */
+	if (SvREADONLY(hv)) {
+	    HeVAL(entry) = &PL_sv_undef;
+	    /* We'll be saving this slot, so the number of allocated keys
+	     * doesn't go down, but the number placeholders goes up */
+	    xhv->xhv_placeholders++; /* HvPLACEHOLDERS(hv)++ */
+	} else {
+	    if (entry == xhv->xhv_eiter /* HvEITER(hv) */)
+		HvLAZYDEL_on(hv);
+	    else
+		hv_free_ent(hv, entry);
+	    xhv->xhv_keys--; /* HvKEYS(hv)-- */
+	}
 	return sv;
     }
+    if (SvREADONLY(hv)) {
+	Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave);
+    }
+
     if (key != keysave)
 	Safefree(key);
     return Nullsv;
@@ -936,6 +1024,10 @@ Perl_hv_exists(pTHX_ HV *hv, const char *key, I32 klen)
 	    continue;
 	if (key != keysave)
 	    Safefree(key);
+	/* If we find the key, but the value is a placeholder, return false. */
+	if (HeVAL(entry) == &PL_sv_undef)
+	    return FALSE;
+
 	return TRUE;
     }
 #ifdef DYNAMIC_ENV_FETCH  /* is it out there? */
@@ -982,12 +1074,12 @@ Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
 
     if (SvRMAGICAL(hv)) {
 	if (mg_find((SV*)hv, PERL_MAGIC_tied) || SvGMAGICAL((SV*)hv)) {
-           SV* svret = sv_newmortal();
+	   SV* svret = sv_newmortal();
 	    sv = sv_newmortal();
 	    keysv = sv_2mortal(newSVsv(keysv));
 	    mg_copy((SV*)hv, sv, (char*)keysv, HEf_SVKEY);
-           magic_existspack(svret, mg_find(sv, PERL_MAGIC_tiedelem));
-           return SvTRUE(svret);
+	   magic_existspack(svret, mg_find(sv, PERL_MAGIC_tiedelem));
+	   return SvTRUE(svret);
 	}
 #ifdef ENV_IS_CASELESS
 	else if (mg_find((SV*)hv, PERL_MAGIC_env)) {
@@ -1029,6 +1121,9 @@ Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
 	    continue;
 	if (key != keysave)
 	    Safefree(key);
+	/* If we find the key, but the value is a placeholder, return false. */
+	if (HeVAL(entry) == &PL_sv_undef)
+	    return FALSE;
 	return TRUE;
     }
 #ifdef DYNAMIC_ENV_FETCH  /* is it out there? */
@@ -1139,13 +1234,13 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
 	PL_nomemok = TRUE;
 #if defined(STRANGE_MALLOC) || defined(MYMALLOC)
 	Renew(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize), char);
-        if (!a) {
+	if (!a) {
 	  PL_nomemok = FALSE;
 	  return;
 	}
 #else
 	New(2, a, PERL_HV_ARRAY_ALLOC_BYTES(newsize), char);
-        if (!a) {
+	if (!a) {
 	  PL_nomemok = FALSE;
 	  return;
 	}
@@ -1266,7 +1361,7 @@ Perl_newHVhv(pTHX_ HV *ohv)
 
 	HvMAX(hv)   = hv_max;
 	HvFILL(hv)  = hv_fill;
-	HvKEYS(hv)  = HvKEYS(ohv);
+	HvTOTALKEYS(hv)  = HvTOTALKEYS(ohv);
 	HvARRAY(hv) = ents;
     }
     else {
@@ -1305,7 +1400,7 @@ Perl_hv_free_ent(pTHX_ HV *hv, register HE *entry)
     SvREFCNT_dec(val);
     if (HeKLEN(entry) == HEf_SVKEY) {
 	SvREFCNT_dec(HeKEY_sv(entry));
-        Safefree(HeKEY_hek(entry));
+	Safefree(HeKEY_hek(entry));
     }
     else if (HvSHAREKEYS(hv))
 	unshare_hek(HeKEY_hek(entry));
@@ -1351,6 +1446,7 @@ Perl_hv_clear(pTHX_ HV *hv)
     hfreeentries(hv);
     xhv->xhv_fill = 0; /* HvFILL(hv) = 0 */
     xhv->xhv_keys = 0; /* HvKEYS(hv) = 0 */
+    xhv->xhv_placeholders = 0; /* HvPLACEHOLDERS(hv) = 0 */
     if (xhv->xhv_array /* HvARRAY(hv) */)
 	(void)memzero(xhv->xhv_array /* HvARRAY(hv) */,
 		      (xhv->xhv_max+1 /* HvMAX(hv)+1 */) * sizeof(HE*));
@@ -1417,6 +1513,7 @@ Perl_hv_undef(pTHX_ HV *hv)
     xhv->xhv_array = 0;	/* HvARRAY(hv) = 0 */
     xhv->xhv_fill  = 0;	/* HvFILL(hv) = 0 */
     xhv->xhv_keys  = 0;	/* HvKEYS(hv) = 0 */
+    xhv->xhv_placeholders = 0; /* HvPLACEHOLDERS(hv) = 0 */
 
     if (SvRMAGICAL(hv))
 	mg_clear((SV*)hv);
@@ -1453,7 +1550,7 @@ Perl_hv_iterinit(pTHX_ HV *hv)
     xhv->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
     xhv->xhv_eiter = Null(HE*); /* HvEITER(hv) = Null(HE*) */
     /* used to be xhv->xhv_fill before 5.004_65 */
-    return xhv->xhv_keys; /* HvKEYS(hv) */
+    return XHvTOTALKEYS(xhv);
 }
 
 /*
@@ -1496,11 +1593,11 @@ Perl_hv_iternext(pTHX_ HV *hv)
 	    HeKLEN(entry) = HEf_SVKEY;
 	}
 	magic_nextpack((SV*) hv,mg,key);
-        if (SvOK(key)) {
+	if (SvOK(key)) {
 	    /* force key to stay around until next time */
 	    HeSVKEY_set(entry, SvREFCNT_inc(key));
 	    return entry;		/* beware, hent_val is not set */
-        }
+	}
 	if (HeVAL(entry))
 	    SvREFCNT_dec(HeVAL(entry));
 	Safefree(HeKEY_hek(entry));
@@ -1518,7 +1615,16 @@ Perl_hv_iternext(pTHX_ HV *hv)
 	     PERL_HV_ARRAY_ALLOC_BYTES(xhv->xhv_max+1 /* HvMAX(hv)+1 */),
 	     char);
     if (entry)
+    {
 	entry = HeNEXT(entry);
+	/*
+	 * Skip past any placeholders -- don't want to include them in
+	 * any iteration.
+	 */
+	while (entry && HeVAL(entry) == &PL_sv_undef) {
+	    entry = HeNEXT(entry);
+	}
+    }
     while (!entry) {
 	xhv->xhv_riter++; /* HvRITER(hv)++ */
 	if (xhv->xhv_riter > xhv->xhv_max /* HvRITER(hv) > HvMAX(hv) */) {
@@ -1527,6 +1633,11 @@ Perl_hv_iternext(pTHX_ HV *hv)
 	}
 	/* entry = (HvARRAY(hv))[HvRITER(hv)]; */
 	entry = ((HE**)xhv->xhv_array)[xhv->xhv_riter];
+
+	/* if we have an entry, but it's a placeholder, don't count it */
+	if (entry && HeVAL(entry) == &PL_sv_undef)
+	    entry = 0;
+
     }
 
     if (oldentry && HvLAZYDEL(hv)) {		/* was deleted earlier? */
@@ -1735,7 +1846,7 @@ Perl_share_hek(pTHX_ const char *str, I32 len, register U32 hash)
     /* what follows is the moral equivalent of:
 
     if (!(Svp = hv_fetch(PL_strtab, str, len, FALSE)))
-    	hv_store(PL_strtab, str, len, Nullsv, hash);
+	hv_store(PL_strtab, str, len, Nullsv, hash);
     */
     xhv = (XPVHV*)SvANY(PL_strtab);
     /* assert(xhv_array != 0) */

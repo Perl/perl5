@@ -6,7 +6,7 @@ BEGIN {
 }
 
 $| = 1;
-print "1..15\n";
+print "1..19\n";
 
 my $t = 1;
 
@@ -30,6 +30,8 @@ ok(!access::readonly(%hash));
 
 ok(!access::readonly(%hash,1));
 
+ok(!access::readonly($hash{two},1));
+
 eval { $hash{'three'} = 3 };
 #warn "$@";
 ok($@ =~ /^Attempt to access to key 'three' in fixed hash/);
@@ -43,11 +45,20 @@ eval { $hash{"\x{2323}"} = 3 };
 ok($@ =~ /^Attempt to access to key '(.*)' in fixed hash/);
 #ok(ord($1) == 0x2323);
 
-eval { delete $hash{'one'}};
+eval { delete $hash{'two'}};
 #warn "$@";
-ok($@ =~ /^Attempt to access to key 'one' in fixed hash/);
+ok($@);
 
-ok(exists $hash{'one'});
+eval { delete $hash{'one'}};
+ok(not $@);
+
+ok($hash{two} == 2);
+
+eval { delete $hash{'four'}};
+#warn "$@";
+ok($@ =~ /^Attempt to access to key 'four' in fixed hash/);
+
+ok(not exists $hash{'one'});
 
 ok(!exists $hash{'three'});
 
