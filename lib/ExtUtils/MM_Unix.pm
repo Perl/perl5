@@ -5,7 +5,8 @@ use Config;
 use File::Basename qw(basename dirname fileparse);
 use DirHandle;
 use strict;
-use vars qw($VERSION $Is_Mac $Is_OS2 $Is_VMS);
+use vars qw($VERSION $Is_Mac $Is_OS2 $Is_VMS 
+	    $Verbose %pm %static $Xsubpp_Version);
 
 $VERSION = substr q$Revision: 1.107 $, 10;
 # $Id: MM_Unix.pm,v 1.107 1996/09/03 20:53:39 k Exp $
@@ -1059,7 +1060,7 @@ in these dirs:
     foreach $dir (@$dirs){
 	next unless defined $dir; # $self->{PERL_SRC} may be undefined
 	foreach $name (@$names){
-	    my $abs;
+	    my ($abs, $val);
 	    if ($self->file_name_is_absolute($name)) { # /foo/bar
 		$abs = $name;
 	    } elsif ($self->canonpath($name) eq $self->canonpath(basename($name))) { # foo
@@ -1070,9 +1071,12 @@ in these dirs:
 	    print "Checking $abs\n" if ($trace >= 2);
 	    next unless $self->maybe_command($abs);
 	    print "Executing $abs\n" if ($trace >= 2);
-	    if (`$abs -e 'require $ver; print "VER_OK\n" ' 2>&1` =~ /VER_OK/) {
+	    $val = `$abs -e 'require $ver; print "VER_OK\n" ' 2>&1`;
+	    if ($val =~ /VER_OK/) {
 	        print "Using PERL=$abs\n" if $trace;
 	        return $abs;
+	    } elsif ($trace >= 2) {
+		print "Result: `$val'\n";
 	    }
 	}
     }
@@ -1661,7 +1665,7 @@ sub init_others {	# --- Initialize Other Attributes
     # May check $Config{libs} too, thus not empty.
     $self->{LIBS}=[''] unless $self->{LIBS};
 
-    $self->{LIBS}=[$self->{LIBS}] if ref \$self->{LIBS} eq SCALAR;
+    $self->{LIBS}=[$self->{LIBS}] if ref \$self->{LIBS} eq 'SCALAR';
     $self->{LD_RUN_PATH} = "";
     my($libs);
     foreach $libs ( @{$self->{LIBS}} ){
@@ -2332,6 +2336,8 @@ sub parse_version {
 	next unless /\$(([\w\:\']*)\bVERSION)\b.*\=/;
 	my $eval = qq{
 	    package ExtUtils::MakeMaker::_version;
+	    no strict;
+	    
 	    \$$1=undef; do { 
 		$_ 
 	    }; \$$1
