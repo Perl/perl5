@@ -544,8 +544,6 @@ Perl_set_numeric_radix(pTHX)
     else
 	PL_numeric_radix = 0;
 # endif /* HAS_LOCALECONV */
-#else
-    PL_numeric_radix = 0;
 #endif /* USE_LOCALE_NUMERIC */
 }
 
