@@ -6276,8 +6276,10 @@ S_scan_ident(pTHX_ register char *s, register char *send, char *dest, STRLEN des
 	}
 	if (*s == '}') {
 	    s++;
-	    if (PL_lex_state == LEX_INTERPNORMAL && !PL_lex_brackets)
+	    if (PL_lex_state == LEX_INTERPNORMAL && !PL_lex_brackets) {
 		PL_lex_state = LEX_INTERPEND;
+		PL_expect = XREF;
+	    }
 	    if (funny == '#')
 		funny = '@';
 	    if (PL_lex_state == LEX_NORMAL) {
@@ -6289,8 +6291,6 @@ S_scan_ident(pTHX_ register char *s, register char *send, char *dest, STRLEN des
 			funny, dest, funny, dest);
 		}
 	    }
-	    if (PL_lex_inwhat == OP_STRINGIFY)
-		PL_expect = XREF;
 	}
 	else {
 	    s = bracket;		/* let the parser handle it */

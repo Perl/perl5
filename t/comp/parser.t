@@ -9,7 +9,7 @@ BEGIN {
 }
 
 require "./test.pl";
-plan( tests => 15 );
+plan( tests => 20 );
 
 eval '%@x=0;';
 like( $@, qr/^Can't modify hash dereference in repeat \(x\)/, '%@x=0' );
@@ -68,9 +68,23 @@ eval {
 is( $@, '', 'PL_lex_brackstack' );
 
 {
-     undef $a;
-     undef @b;
-     my $a="a"; is("${a}{", "a{", "scope error #20716");
-     my $a="a"; is("${a}[", "a[", "scope error #20716");
-     my @b=("b"); is("@{b}{", "b{", "scope error #20716");
+    # tests for bug #20716
+    undef $a;
+    undef @b;
+    my $a="A";
+    is("${a}{", "A{", "interpolation, qq//");
+    is("${a}[", "A[", "interpolation, qq//");
+    my @b=("B");
+    is("@{b}{", "B{", "interpolation, qq//");
+    is(qr/${a}{/, '(?-xism:A{)', "interpolation, qr//");
+    my $c = "A{";
+    $c =~ /${a}{/;
+    is($&, 'A{', "interpolation, m//");
+    $c =~ s/${a}{/foo/;
+    is($c, 'foo', "interpolation, s/...//");
+    $c =~ s/foo/${a}{/;
+    is($c, 'A{', "interpolation, s//.../");
+    is(<<"${a}{", "A{ A[ B{\n", "interpolation, here doc");
+${a}{ ${a}[ @{b}{
+${a}{
 }
