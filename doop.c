@@ -1318,7 +1318,7 @@ Perl_do_kv(pTHX)
 	}
 
 	if (! SvTIED_mg((SV*)keys, PERL_MAGIC_tied))
-	    i = HvKEYS(keys);
+	    i = (IV)HvKEYS(keys);
 	else {
 	    i = 0;
 	    /*SUPPRESS 560*/
