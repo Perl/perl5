@@ -107,9 +107,10 @@ Also remember that C doesn't allow you to safely say C<foo(SvPV(s, len),
 len);>. It might work with your compiler, but it won't work for everyone.
 Break this sort of statement up into separate assignments:
 
+	SV *s;
 	STRLEN len;
 	char * ptr;
-	ptr = SvPV(len);
+	ptr = SvPV(s, len);
 	foo(ptr, len);
 
 If you want to know if the scalar value is TRUE, you can use:
