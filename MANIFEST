@@ -931,10 +931,11 @@ lib/exceptions.pl		catch and throw routines
 lib/Exporter.pm			Exporter base class
 lib/Exporter.t			See if Exporter works
 lib/Exporter/Heavy.pm		Complicated routines for Exporter
+lib/ExtUtils/Changes            MakeMaker change log
 lib/ExtUtils/Command.pm		Utilities for Make on non-UNIX platforms
 lib/ExtUtils/Constant.pm	generate XS code to import C header constants
 lib/ExtUtils/Embed.pm		Utilities for embedding Perl in C programs
-lib/ExtUtils/inst		Give information about installed extensions
+lib/ExtUtils/instmodsh		Give information about installed extensions
 lib/ExtUtils/Install.pm		Handles 'make install' on extensions
 lib/ExtUtils/Installed.pm	Information on installed extensions
 lib/ExtUtils/Liblist.pm		Locates libraries
@@ -2154,6 +2155,7 @@ t/lib/Test/Simple/sample_tests/require.plx              for exit.t
 t/lib/Test/Simple/sample_tests/success.plx              for exit.t
 t/lib/Test/Simple/sample_tests/too_few.plx              for exit.t
 t/lib/Test/Simple/sample_tests/two_fail.plx             for exit.t
+t/lib/TieOut.pm                 Testing library to capture prints
 t/lib/warnings/1global		Tests of global warnings for warnings.t
 t/lib/warnings/2use		Tests for "use warnings" for warnings.t
 t/lib/warnings/3both		Tests for interaction of $^W and "use warnings"

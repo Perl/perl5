@@ -1,11 +1,14 @@
-#!./perl -w
+#!/usr/bin/perl -w
 
 use strict;
 
 BEGIN {
-	chdir 't' if -d 't';
-	@INC = '../lib';
+    if( $ENV{PERL_CORE} ) {
+        chdir 't' if -d 't';
+        @INC = '../lib';
+    }
 }
+chdir 't';
 
 use Test::More;
 if ($^O =~ /os2/i) {

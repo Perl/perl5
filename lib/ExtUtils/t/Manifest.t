@@ -1,9 +1,12 @@
-#!./perl 
+#!/usr/bin/perl 
 
 BEGIN {
-    chdir 't' if -d 't';
-    unshift @INC, '../lib';
+    if( $ENV{PERL_CORE} ) {
+        chdir 't' if -d 't';
+        unshift @INC, '../lib';
+    }
 }
+chdir 't';
 
 # these files help the test run
 use Test::More tests => 31;
@@ -41,8 +44,8 @@ sub remove_dir {
 }
 
 # use module, import functions
-use_ok( 'ExtUtils::Manifest', 
-	qw( mkmanifest manicheck filecheck fullcheck maniread manicopy) );
+BEGIN { use_ok( 'ExtUtils::Manifest', 
+        qw( mkmanifest manicheck filecheck fullcheck maniread manicopy) ); }
 
 my $cwd = Cwd::getcwd();
 
@@ -78,8 +81,7 @@ like( $warn, qr/^Not in MANIFEST: bar/, 'warning that bar has been added' );
 is( $res, 'bar', 'bar reported as new' );
 
 # now quiet the warning that bar was added and test again
-use vars qw($ExtUtils::Manifest::Quiet);
-$ExtUtils::Manifest::Quiet = 1;
+{ package ExtUtils::Manifest;  use vars qw($Quiet); $Quiet = 1; }
 ($res, $warn) = catch_warning( \&ExtUtils::Manifest::skipcheck );
 cmp_ok( $warn, ,'eq', '', 'disabled warnings' );
 
@@ -135,8 +137,10 @@ like( $@, qr/^Can't read none: /,
                                                'carped about none' );
 
 # tell ExtUtils::Manifest to use a different file
-use vars qw($ExtUtils::Manifest::MANIFEST);
-$ExtUtils::Manifest::MANIFEST = 'albatross';
+{ package ExtUtils::Manifest; 
+  use vars qw($MANIFEST); 
+  $MANIFEST = 'albatross'; 
+}
 
 ($res, $warn) = catch_warning( \&mkmanifest );
 like( $warn, qr/Added to albatross: /, 'using a new manifest file' );

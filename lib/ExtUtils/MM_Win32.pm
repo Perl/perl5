@@ -1,6 +1,6 @@
 package ExtUtils::MM_Win32;
 
-our $VERSION = '1.00';
+our $VERSION = '1.00_02';
 
 =head1 NAME
 
@@ -144,6 +144,8 @@ sub file_name_is_absolute {
 
 sub find_perl {
     my($self, $ver, $names, $dirs, $trace) = @_;
+    $trace ||= 0;
+
     my($name, $dir);
     if ($trace >= 2){
 	print "Looking for perl $ver by these names:
@@ -263,7 +265,7 @@ XS_DEFINE_VERSION = -D\$(XS_VERSION_MACRO)=\\\"\$(XS_VERSION)\\\"
 };
 
     push @m, qq{
-MAKEMAKER = $INC{'ExtUtils\MakeMaker.pm'}
+MAKEMAKER = $INC{'ExtUtils/MakeMaker.pm'}
 MM_VERSION = $ExtUtils::MakeMaker::VERSION
 };
 
@@ -322,10 +324,10 @@ makemakerdflt: all
 
 .SUFFIXES: .xs .c .C .cpp .cxx .cc \$(OBJ_EXT)
 
-# Nick wanted to get rid of .PRECIOUS. I don't remember why. I seem to recall, that
-# some make implementations will delete the Makefile when we rebuild it. Because
-# we call false(1) when we rebuild it. So make(1) is not completely wrong when it
-# does so. Our milage may vary.
+# Nick wanted to get rid of .PRECIOUS. I don't remember why. I seem to 
+# recall, that some make implementations will delete the Makefile when we 
+# rebuild it. Because we call false(1) when we rebuild it. So make(1) is 
+# not completely wrong when it does so. Our milage may vary.
 # .PRECIOUS: Makefile    # seems to be not necessary anymore
 
 .PHONY: all config static dynamic test linkext manifest

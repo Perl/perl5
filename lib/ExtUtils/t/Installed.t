@@ -1,4 +1,13 @@
-#!./perl
+#!/usr/bin/perl -w
+
+BEGIN {
+    if( $ENV{PERL_CORE} ) {
+        chdir 't' if -d 't';
+        @INC = '../lib';
+    }
+}
+chdir 't';
+
 
 use strict;
 use warnings;
@@ -13,14 +22,9 @@ use File::Path;
 # for directories() tests
 use File::Basename;
 
-BEGIN {
-	chdir 't' if -d 't';
-	@INC = '../lib';
-}
-
 use Test::More tests => 43;
 
-use_ok( 'ExtUtils::Installed' );
+BEGIN { use_ok( 'ExtUtils::Installed' ) }
 
 # saves having to qualify package name for class methods
 my $ei = bless( {}, 'ExtUtils::Installed' );
@@ -56,7 +60,15 @@ is( $ei->_is_under('foo', @under), 0, '... should find no file not under dirs');
 is( $ei->_is_under('baz', @under), 1, '... should find file under dir' );
 
 # new
-my $realei = ExtUtils::Installed->new();
+my $realei;
+{
+    # We're going to get warnings about not being able to find install
+    # directories if we're not installed.
+    local $SIG{__WARN__} = sub {
+        warn @_ unless $ENV{PERL_CORE} && $_[0] =~ /^Can't stat/;
+    };
+    $realei = ExtUtils::Installed->new();
+}
 
 isa_ok( $realei, 'ExtUtils::Installed' );
 isa_ok( $realei->{Perl}{packlist}, 'ExtUtils::Packlist' );

@@ -2,10 +2,10 @@ BEGIN {require 5.002;} # MakeMaker 5.17 was the last MakeMaker that was compatib
 
 package ExtUtils::MakeMaker;
 
-$VERSION = "5.48";
+$VERSION = "5.48_03";
 $Version_OK = "5.17";	# Makefiles older than $Version_OK will die
 			# (Will be checked from MakeMaker version 4.13 onwards)
-($Revision = substr(q$Revision: 1.222 $, 10)) =~ s/\s+$//;
+($Revision = substr(q$Revision: 1.4 $, 10)) =~ s/\s+$//;
 
 
 
@@ -349,7 +349,7 @@ sub ExtUtils::MakeMaker::new {
 	    warn "Warning: prerequisite $prereq $self->{PREREQ_PM}->{$prereq} not found.\n" unless $self->{PREREQ_FATAL};
 	    $unsatisfied{$prereq} = 'not installed';
 	} elsif ($prereq->VERSION < $self->{PREREQ_PM}->{$prereq} ){
-	    warn "Warning: prerequisite $prereq $self->{PREREQ_PM}->{$prereq} not found. We have"
+	    warn "Warning: prerequisite $prereq $self->{PREREQ_PM}->{$prereq} not found. We have "
                . ($prereq->VERSION || 'unknown version') unless $self->{PREREQ_FATAL};
 	    $unsatisfied{$prereq} = $self->{PREREQ_PM}->{$prereq} ? $self->{PREREQ_PM}->{$prereq} : 'unknown version' ;
 	}
@@ -681,14 +681,14 @@ sub check_hints {
     return unless -f $hint_file;    # really there
 
     # execute the hintsfile:
-    print STDOUT "Processing hints file $hint_file\n";
+    print STDERR "Processing hints file $hint_file\n";
     {
         local *HINT;
         open(HINT, $hint_file) || die "Can't open $hint_file: $!";
         eval join '', <HINT>;
         close HINT;
     }
-    print STDOUT $@ if $@;
+    print STDERR $@ if $@;
 }
 
 sub mv_all_methods {
@@ -1857,7 +1857,7 @@ MakeMaker object. The following lines will be parsed o.k.:
 
     $VERSION = '1.00';
     *VERSION = \'1.01';
-    ( $VERSION ) = '$Revision: 1.222 $ ' =~ /\$Revision:\s+([^\s]+)/;
+    ( $VERSION ) = '$Revision: 1.4 $ ' =~ /\$Revision:\s+([^\s]+)/;
     $FOO::VERSION = '1.10';
     *FOO::VERSION = \'1.11';
     our $VERSION = 1.2.3;	# new for perl5.6.0 

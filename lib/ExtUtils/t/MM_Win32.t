@@ -1,9 +1,12 @@
-#!perl
+#!/usr/bin/perl
 
 BEGIN {
-	chdir 't' if -d 't';
-	@INC = '../lib';
+    if( $ENV{PERL_CORE} ) {
+        chdir 't' if -d 't';
+        @INC = '../lib';
+    }
 }
+chdir 't';
 
 use Test::More;
 
@@ -18,23 +21,14 @@ BEGIN {
 use Config;
 use File::Spec;
 use File::Basename;
-
-# Does this mimic ExtUtils::MakeMaker ok?
-{
-    @MM::ISA = qw(
-        ExtUtils::MM_Unix 
-        ExtUtils::Liblist::Kid 
-        ExtUtils::MakeMaker
-    );
-    # MM package faked up by messy MI entanglement
-    package MM;
-    sub DESTROY {}
-}
+use ExtUtils::MakeMaker;
 
 require_ok( 'ExtUtils::MM_Win32' );
 
 # test import of $Verbose and &neatvalue
 can_ok( 'MM', 'neatvalue' );
+() = $ExtUtils::MM_Win32::Verbose;
+() = $ExtUtils::MakeMaker::Verbose;
 is( $ExtUtils::MM_Win32::Verbose, $ExtUtils::MakeMaker::Verbose, 
 	'ExtUtils::MM_Win32 should import $Verbose from ExtUtils::MakeMaker' );
 
@@ -126,12 +120,19 @@ SKIP: {
         VERSION_FROM => 'TestMM_Win32',
         PM           => { 'MM_Win32.pm' => 1 },
     }, 'MM';
+
+    # XXX Hack until we have a proper init method.
+    # Flesh out some necessary keys in the MM object.
+    foreach my $key (qw(XS C O_FILES H HTMLLIBPODS HTMLSCRIPTPODS
+                        MAN1PODS MAN3PODS PARENT_NAME)) {
+        $mm_w32{$key} = '';
+    }
     my $s_PM = join( " \\\n\t", sort keys %{$mm_w32->{PM}} );
     my $k_PM = join( " \\\n\t", %{$mm_w32->{PM}} );
 
     like( $mm_w32->constants(),
           qr/^NAME\ =\ TestMM_Win32\s+VERSION\ =\ 1\.00.+
-             MAKEMAKER\ =\ $INC{'ExtUtils\MakeMaker.pm'}\s+
+             MAKEMAKER\ =\ $INC{'ExtUtils/MakeMaker.pm'}\s+
              MM_VERSION\ =\ $ExtUtils::MakeMaker::VERSION.+
              VERSION_FROM\ =\ TestMM_Win32.+
              TO_INST_PM\ =\ \Q$s_PM\E\s+

@@ -1,14 +1,20 @@
-#!./perl -w
+#!/usr/bin/perl -w
 
 BEGIN {
-	chdir 't' if -d 't';
-	@INC = '../lib';
+    if( $ENV{PERL_CORE} ) {
+        chdir 't';
+        @INC = ('../lib', 'lib/');
+    }
+    else {
+        unshift @INC, 't/lib/';
+    }
 }
+chdir 't';
 
 use vars qw( $required );
 use Test::More tests => 18;
 
-use_ok( 'ExtUtils::Mkbootstrap' );
+BEGIN { use_ok( 'ExtUtils::Mkbootstrap' ) }
 
 # Mkbootstrap makes a backup copy of "$_[0].bs" if it exists and is non-zero
 my $file_is_ready;
@@ -38,7 +44,7 @@ SKIP: {
 Mkbootstrap('fakeboot');
 ok( !( -f 'fakeboot.bso' ), 'Mkbootstrap should not backup an empty file' );
 
-
+use TieOut;
 my $out = tie *STDOUT, 'TieOut';
 
 # with $Verbose set, it should print status messages about libraries
@@ -118,8 +124,7 @@ SKIP: {
 	close OUT;
 
 	# if $DynaLoader::bscode is set, write its contents to the file
-	# localize the variable to prevent "used only once"
-	local $DynaLoader::bscode;
+    local $DynaLoader::bscode;
 	$DynaLoader::bscode = 'Wall';
 	$ExtUtils::Mkbootstrap::Verbose = 0;
 	
@@ -147,20 +152,4 @@ close OUT;
 END {
 	# clean things up, even on VMS
 	1 while unlink(qw( mkboot.bso boot_BS dasboot.bs .bs ));
-}
-
-package TieOut;
-
-sub TIEHANDLE {
-	bless( \(my $scalar), $_[0]);
-}
-
-sub PRINT {
-	my $self = shift;
-	$$self .= join('', @_);
-}
-
-sub read {
-	my $self = shift;
-	return substr($$self, 0, length($$self), '');
 }

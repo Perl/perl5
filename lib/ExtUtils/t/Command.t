@@ -1,9 +1,15 @@
-#!./perl -Tw
+#!/usr/bin/perl -w
 
 BEGIN {
-	chdir 't' if -d 't';
-	@INC = '../lib';
+    if( $ENV{PERL_CORE} ) {
+        chdir 't';
+        @INC = ('../lib', 'lib/');
+    }
+    else {
+        unshift @INC, 't/lib/';
+    }
 }
+chdir 't';
 
 BEGIN {
 	1 while unlink 'ecmdfile';
@@ -18,9 +24,8 @@ BEGIN {
 }
 
 {
-	use vars qw( *CORE::GLOBAL::exit );
-
 	# bad neighbor, but test_f() uses exit()
+    *CORE::GLOBAL::exit = '';   # quiet 'only once' warning.
 	*CORE::GLOBAL::exit = sub { return @_ };
 
 	use_ok( 'ExtUtils::Command' );
@@ -51,6 +56,7 @@ BEGIN {
 
 	# concatenate this file with itself
 	# be extra careful the regex doesn't match itself
+    use TieOut;
 	my $out = tie *STDOUT, 'TieOut';
 	my $self = $0;
 	unless (-f $self) {
@@ -148,14 +154,4 @@ BEGIN {
 END {
 	1 while unlink 'ecmdfile';
 	File::Path::rmtree( 'ecmddir' );
-}
-
-package TieOut;
-
-sub TIEHANDLE {
-	bless( \(my $text), $_[0] );
-}
-
-sub PRINT {
-	${ $_[0] } .= join($/, @_);
 }
