@@ -11115,7 +11115,7 @@ $eunicefix Cppsym
 : now check the C compiler for additional symbols
 postprocess_cc_v=''
 case "$osname" in
-aix) postprocess_cc_v="|$tr , \' \'" ;;
+aix) postprocess_cc_v="|$tr , ' '" ;;
 esac
 $cat >ccsym <<EOS
 $startsh
