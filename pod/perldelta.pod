@@ -532,10 +532,10 @@ C<oct()>:
 
 Perl now allows the arrow to be omitted in many constructs
 involving subroutine calls through references.  For example,
-C<$foo[10]->('foo')> may now be written C<$foo[10]('foo')>.
+C<$foo[10]-E<gt>('foo')> may now be written C<$foo[10]('foo')>.
 This is rather similar to how the arrow may be omitted from
-C<$foo[10]->{'foo'}>.  Note however, that the arrow is still
-required for C<foo(10)->('bar')>.
+C<$foo[10]-E<gt>{'foo'}>.  Note however, that the arrow is still
+required for C<foo(10)-E<gt>('bar')>.
 
 =head2 exists() is supported on subroutine names
 
@@ -549,15 +549,17 @@ The exists() and delete() builtins now work on simple arrays as well.
 The behavior is similar to that on hash elements.
 
 exists() can be used to check whether an array element has been
-initialized without autovivifying it.  If the array is tied, the
-EXISTS() method in the corresponding tied package will be invoked.
+initialized.  This avoids autovivifying array elements that don't exist.
+If the array is tied, the EXISTS() method in the corresponding tied
+package will be invoked.
 
 delete() may be used to remove an element from the array and return
 it.  The array element at that position returns to its unintialized
 state, so that testing for the same element with exists() will return
 false.  If the element happens to be the one at the end, the size of
-the array also shrinks by one.  If the array is tied, the DELETE() method
-in the corresponding tied package will be invoked.
+the array also shrinks up to the highest element that tests true for
+exists(), or 0 if none such is found.  If the array is tied, the DELETE() 
+method in the corresponding tied package will be invoked.
 
 See L<perlfunc/exists> and L<perlfunc/delete> for examples.
 
@@ -567,7 +569,7 @@ The length argument of C<syswrite()> has become optional.
 
 =head2 File and directory handles can be autovivified
 
-Similar to how constructs such as C<$x->[0]> autovivify a reference,
+Similar to how constructs such as C<$x-E<gt>[0]> autovivify a reference,
 handle constructors (open(), opendir(), pipe(), socketpair(), sysopen(),
 socket(), and accept()) now autovivify a file or directory handle
 if the handle passed to them is an uninitialized scalar variable.  This
@@ -964,7 +966,7 @@ array element in that slot.
 =head2 Pseudo-hashes work better
 
 Dereferencing some types of reference values in a pseudo-hash,
-such as C<$ph->{foo}[1]>, was accidentally disallowed.  This has
+such as C<$ph-E<gt>{foo}[1]>, was accidentally disallowed.  This has
 been corrected.
 
 When applied to a pseudo-hash element, exists() now reports whether
@@ -1624,6 +1626,11 @@ fixed.
 
 Sys::Syslog now uses XSUBs to access facilities from syslog.h so it
 no longer requires syslog.ph to exist. 
+
+=item Sys::Hostname
+
+Sys::Hostname now uses XSUBs to call the C library's gethostname() or
+uname() if they exist.
 
 =item Time::Local
 

@@ -5719,7 +5719,9 @@ Perl_ck_sassign(pTHX_ OP *o)
     OP *kid = cLISTOPo->op_first;
     /* has a disposable target? */
     if ((PL_opargs[kid->op_type] & OA_TARGLEX)
-	&& !(kid->op_flags & OPf_STACKED))
+	&& !(kid->op_flags & OPf_STACKED)
+	/* Cannot steal the second time! */
+	&& !(kid->op_private & OPpTARGET_MY))
     {
 	OP *kkid = kid->op_sibling;
 
@@ -6456,11 +6458,12 @@ Perl_peep(pTHX_ register OP *o)
 	    UNOP *rop;
 	    SV *lexname;
 	    GV **fields;
-	    SV **svp, **indsvp;
+	    SV **svp, **indsvp, *sv;
 	    I32 ind;
 	    char *key;
 	    STRLEN keylen;
 	
+	    o->op_seq = PL_op_seqmax++;
 	    if ((o->op_private & (OPpLVAL_INTRO))
 		|| ((BINOP*)o)->op_last->op_type != OP_CONST)
 		break;
@@ -6487,8 +6490,76 @@ Perl_peep(pTHX_ register OP *o)
 	    rop->op_ppaddr = PL_ppaddr[OP_RV2AV];
 	    o->op_type = OP_AELEM;
 	    o->op_ppaddr = PL_ppaddr[OP_AELEM];
+	    sv = newSViv(ind);
+	    if (SvREADONLY(*svp))
+		SvREADONLY_on(sv);
+	    SvFLAGS(sv) |= (SvFLAGS(*svp)
+			    & (SVs_PADBUSY|SVs_PADTMP|SVs_PADMY));
 	    SvREFCNT_dec(*svp);
-	    *svp = newSViv(ind);
+	    *svp = sv;
+	    break;
+	}
+	
+	case OP_HSLICE: {
+	    UNOP *rop;
+	    SV *lexname;
+	    GV **fields;
+	    SV **svp, **indsvp, *sv;
+	    I32 ind;
+	    char *key;
+	    STRLEN keylen;
+	    SVOP *first_key_op, *key_op;
+
+	    o->op_seq = PL_op_seqmax++;
+	    if ((o->op_private & (OPpLVAL_INTRO))
+		/* I bet there's always a pushmark... */
+		|| ((LISTOP*)o)->op_first->op_sibling->op_type != OP_LIST)
+		/* hmmm, no optimization if list contains only one key. */
+		break;
+	    rop = (UNOP*)((LISTOP*)o)->op_last;
+	    if (rop->op_type != OP_RV2HV || rop->op_first->op_type != OP_PADSV)
+		break;
+	    lexname = *av_fetch(PL_comppad_name, rop->op_first->op_targ, TRUE);
+	    if (!SvOBJECT(lexname))
+		break;
+	    fields = (GV**)hv_fetch(SvSTASH(lexname), "FIELDS", 6, FALSE);
+	    if (!fields || !GvHV(*fields))
+		break;
+	    /* Again guessing that the pushmark can be jumped over.... */
+	    first_key_op = (SVOP*)((LISTOP*)((LISTOP*)o)->op_first->op_sibling)
+		->op_first->op_sibling;
+	    /* Check that the key list contains only constants. */
+	    for (key_op = first_key_op; key_op;
+		 key_op = (SVOP*)key_op->op_sibling)
+		if (key_op->op_type != OP_CONST)
+		    break;
+	    if (key_op)
+		break;
+	    rop->op_type = OP_RV2AV;
+	    rop->op_ppaddr = PL_ppaddr[OP_RV2AV];
+	    o->op_type = OP_ASLICE;
+	    o->op_ppaddr = PL_ppaddr[OP_ASLICE];
+	    for (key_op = first_key_op; key_op;
+		 key_op = (SVOP*)key_op->op_sibling) {
+		svp = cSVOPx_svp(key_op);
+		key = SvPV(*svp, keylen);
+		indsvp = hv_fetch(GvHV(*fields), key, keylen, FALSE);
+		if (!indsvp) {
+		    Perl_croak(aTHX_ "No such pseudo-hash field \"%s\" "
+			       "in variable %s of type %s",
+			  key, SvPV(lexname, n_a), HvNAME(SvSTASH(lexname)));
+		}
+		ind = SvIV(*indsvp);
+		if (ind < 1)
+		    Perl_croak(aTHX_ "Bad index while coercing array into hash");
+		sv = newSViv(ind);
+		if (SvREADONLY(*svp))
+		    SvREADONLY_on(sv);
+		SvFLAGS(sv) |= (SvFLAGS(*svp)
+				& (SVs_PADBUSY|SVs_PADTMP|SVs_PADMY));
+		SvREFCNT_dec(*svp);
+		*svp = sv;
+	    }
 	    break;
 	}
 

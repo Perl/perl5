@@ -452,6 +452,7 @@ Perl_vwarn
 Perl_warner
 Perl_vwarner
 Perl_dump_mstats
+Perl_get_mstats
 Perl_safesysmalloc
 Perl_safesyscalloc
 Perl_safesysrealloc

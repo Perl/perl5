@@ -730,6 +730,7 @@
 #define yywarn			Perl_yywarn
 #if defined(MYMALLOC)
 #define dump_mstats		Perl_dump_mstats
+#define get_mstats		Perl_get_mstats
 #endif
 #define safesysmalloc		Perl_safesysmalloc
 #define safesyscalloc		Perl_safesyscalloc
@@ -2141,6 +2142,7 @@
 #define yywarn(a)		Perl_yywarn(aTHX_ a)
 #if defined(MYMALLOC)
 #define dump_mstats(a)		Perl_dump_mstats(aTHX_ a)
+#define get_mstats(a,b,c)	Perl_get_mstats(aTHX_ a,b,c)
 #endif
 #define safesysmalloc		Perl_safesysmalloc
 #define safesyscalloc		Perl_safesyscalloc
@@ -4196,6 +4198,8 @@
 #if defined(MYMALLOC)
 #define Perl_dump_mstats	CPerlObj::Perl_dump_mstats
 #define dump_mstats		Perl_dump_mstats
+#define Perl_get_mstats		CPerlObj::Perl_get_mstats
+#define get_mstats		Perl_get_mstats
 #endif
 #define Perl_safesysmalloc	CPerlObj::Perl_safesysmalloc
 #define safesysmalloc		Perl_safesysmalloc

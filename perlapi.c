@@ -3301,6 +3301,13 @@ Perl_dump_mstats(pTHXo_ char* s)
 {
     ((CPerlObj*)pPerl)->Perl_dump_mstats(s);
 }
+
+#undef  Perl_get_mstats
+int
+Perl_get_mstats(pTHXo_ perl_mstats_t *buf, int buflen, int level)
+{
+    return ((CPerlObj*)pPerl)->Perl_get_mstats(buf, buflen, level);
+}
 #endif
 
 #undef  Perl_safesysmalloc

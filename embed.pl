@@ -2049,6 +2049,7 @@ p	|int	|yyparse
 p	|int	|yywarn		|char* s
 #if defined(MYMALLOC)
 Ap	|void	|dump_mstats	|char* s
+Ap	|int	|get_mstats	|perl_mstats_t *buf|int buflen|int level
 #endif
 Anp	|Malloc_t|safesysmalloc	|MEM_SIZE nbytes
 Anp	|Malloc_t|safesyscalloc	|MEM_SIZE elements|MEM_SIZE size

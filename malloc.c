@@ -1818,6 +1818,56 @@ Perl_malloced_size(void *p)
 #  else
 #    define MIN_EVEN_REPORT MIN_BUCKET
 #  endif 
+
+int
+Perl_get_mstats(pTHX_ perl_mstats_t *buf, int buflen, int level)
+{
+#ifdef DEBUGGING_MSTATS
+  	register int i, j;
+  	register union overhead *p;
+	struct chunk_chain_s* nextchain;
+
+  	buf->topbucket = buf->topbucket_ev = buf->topbucket_odd 
+	    = buf->totfree = buf->total = buf->total_chain = 0;
+
+	buf->minbucket = MIN_BUCKET;
+	MALLOC_LOCK;
+  	for (i = MIN_BUCKET ; i < NBUCKETS; i++) {
+  		for (j = 0, p = nextf[i]; p; p = p->ov_next, j++)
+  			;
+		if (i < buflen) {
+		    buf->nfree[i] = j;
+		    buf->ntotal[i] = nmalloc[i];
+		}		
+  		buf->totfree += j * BUCKET_SIZE_REAL(i);
+  		buf->total += nmalloc[i] * BUCKET_SIZE_REAL(i);
+		if (nmalloc[i]) {
+		    i % 2 ? (buf->topbucket_odd = i) : (buf->topbucket_ev = i);
+		    buf->topbucket = i;
+		}
+  	}
+	nextchain = chunk_chain;
+	while (nextchain) {
+	    buf->total_chain += nextchain->size;
+	    nextchain = nextchain->next;
+	}
+	buf->total_sbrk = goodsbrk + sbrk_slack;
+	buf->sbrks = sbrks;
+	buf->sbrk_good = sbrk_good;
+	buf->sbrk_slack = sbrk_slack;
+	buf->start_slack = start_slack;
+	buf->sbrked_remains = sbrked_remains;
+	MALLOC_UNLOCK;
+	if (level) {
+	    for (i = MIN_BUCKET ; i < NBUCKETS; i++) {
+		if (i >= buflen)
+		    break;
+		buf->bucket_mem_size[i] = BUCKET_SIZE(i);
+		buf->bucket_available_size[i] = BUCKET_SIZE_REAL(i);
+	    }
+	}
+#endif	/* defined DEBUGGING_MSTATS */
+}
 /*
  * mstats - print out statistics about malloc
  * 
@@ -1831,75 +1881,63 @@ Perl_dump_mstats(pTHX_ char *s)
 #ifdef DEBUGGING_MSTATS
   	register int i, j;
   	register union overhead *p;
-  	int topbucket=0, topbucket_ev=0, topbucket_odd=0, totfree=0, total=0;
-	u_int nfree[NBUCKETS];
-	int total_chain = 0;
+	perl_mstats_t buffer;
+	unsigned long nf[NBUCKETS];
+	unsigned long nt[NBUCKETS];
 	struct chunk_chain_s* nextchain;
 
-	MALLOC_LOCK;
-  	for (i = MIN_BUCKET ; i < NBUCKETS; i++) {
-  		for (j = 0, p = nextf[i]; p; p = p->ov_next, j++)
-  			;
-		nfree[i] = j;
-  		totfree += nfree[i] * BUCKET_SIZE_REAL(i);
-  		total += nmalloc[i] * BUCKET_SIZE_REAL(i);
-		if (nmalloc[i]) {
-		    i % 2 ? (topbucket_odd = i) : (topbucket_ev = i);
-		    topbucket = i;
-		}
-  	}
-	nextchain = chunk_chain;
-	while (nextchain) {
-	    total_chain += nextchain->size;
-	    nextchain = nextchain->next;
-	}
-	MALLOC_UNLOCK;
+	buffer.nfree  = nf;
+	buffer.ntotal = nt;
+	get_mstats(&buffer, NBUCKETS, 0);
+
   	if (s)
 	    PerlIO_printf(Perl_error_log,
 			  "Memory allocation statistics %s (buckets %ld(%ld)..%ld(%ld)\n",
 			  s, 
 			  (long)BUCKET_SIZE_REAL(MIN_BUCKET), 
 			  (long)BUCKET_SIZE(MIN_BUCKET),
-			  (long)BUCKET_SIZE_REAL(topbucket), (long)BUCKET_SIZE(topbucket));
-  	PerlIO_printf(Perl_error_log, "%8d free:", totfree);
-  	for (i = MIN_EVEN_REPORT; i <= topbucket; i += BUCKETS_PER_POW2) {
+			  (long)BUCKET_SIZE_REAL(buffer.topbucket), 
+			  (long)BUCKET_SIZE(buffer.topbucket));
+  	PerlIO_printf(Perl_error_log, "%8d free:", buffer.totfree);
+  	for (i = MIN_EVEN_REPORT; i <= buffer.topbucket; i += BUCKETS_PER_POW2) {
   		PerlIO_printf(Perl_error_log, 
 			      ((i < 8*BUCKETS_PER_POW2 || i == 10*BUCKETS_PER_POW2)
 			       ? " %5d" 
 			       : ((i < 12*BUCKETS_PER_POW2) ? " %3d" : " %d")),
-			      nfree[i]);
+			      buffer.nfree[i]);
   	}
 #ifdef BUCKETS_ROOT2
 	PerlIO_printf(Perl_error_log, "\n\t   ");
-  	for (i = MIN_BUCKET + 1; i <= topbucket_odd; i += BUCKETS_PER_POW2) {
+  	for (i = MIN_BUCKET + 1; i <= buffer.topbucket_odd; i += BUCKETS_PER_POW2) {
   		PerlIO_printf(Perl_error_log, 
 			      ((i < 8*BUCKETS_PER_POW2 || i == 10*BUCKETS_PER_POW2)
 			       ? " %5d" 
 			       : ((i < 12*BUCKETS_PER_POW2) ? " %3d" : " %d")),
-			      nfree[i]);
+			      buffer.nfree[i]);
   	}
 #endif 
-  	PerlIO_printf(Perl_error_log, "\n%8d used:", total - totfree);
-  	for (i = MIN_EVEN_REPORT; i <= topbucket; i += BUCKETS_PER_POW2) {
+  	PerlIO_printf(Perl_error_log, "\n%8d used:", buffer.total - buffer.totfree);
+  	for (i = MIN_EVEN_REPORT; i <= buffer.topbucket; i += BUCKETS_PER_POW2) {
   		PerlIO_printf(Perl_error_log, 
 			      ((i < 8*BUCKETS_PER_POW2 || i == 10*BUCKETS_PER_POW2)
 			       ? " %5d" 
 			       : ((i < 12*BUCKETS_PER_POW2) ? " %3d" : " %d")), 
-			      nmalloc[i] - nfree[i]);
+			      buffer.ntotal[i] - buffer.nfree[i]);
   	}
 #ifdef BUCKETS_ROOT2
 	PerlIO_printf(Perl_error_log, "\n\t   ");
-  	for (i = MIN_BUCKET + 1; i <= topbucket_odd; i += BUCKETS_PER_POW2) {
+  	for (i = MIN_BUCKET + 1; i <= buffer.topbucket_odd; i += BUCKETS_PER_POW2) {
   		PerlIO_printf(Perl_error_log, 
 			      ((i < 8*BUCKETS_PER_POW2 || i == 10*BUCKETS_PER_POW2)
 			       ? " %5d" 
 			       : ((i < 12*BUCKETS_PER_POW2) ? " %3d" : " %d")),
-			      nmalloc[i] - nfree[i]);
+			      buffer.ntotal[i] - buffer.nfree[i]);
   	}
 #endif 
 	PerlIO_printf(Perl_error_log, "\nTotal sbrk(): %d/%d:%d. Odd ends: pad+heads+chain+tail: %d+%d+%d+%d.\n",
-		      goodsbrk + sbrk_slack, sbrks, sbrk_good, sbrk_slack,
-		      start_slack, total_chain, sbrked_remains);
+		      buffer.total_sbrk, buffer.sbrks, buffer.sbrk_good,
+		      buffer.sbrk_slack, buffer.start_slack,
+		      buffer.total_chain, buffer.sbrked_remains);
 #endif /* DEBUGGING_MSTATS */
 }
 #endif /* lint */

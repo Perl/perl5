@@ -464,17 +464,22 @@ S_incline(pTHX_ char *s)
     dTHR;
     char *t;
     char *n;
+    char *e;
     char ch;
-    int sawline = 0;
 
     CopLINE_inc(PL_curcop);
     if (*s++ != '#')
 	return;
     while (*s == ' ' || *s == '\t') s++;
-    if (strnEQ(s, "line ", 5)) {
-	s += 5;
-	sawline = 1;
-    }
+    if (strnEQ(s, "line", 4))
+	s += 4;
+    else
+	return;
+    if (*s == ' ' || *s == '\t')
+	s++;
+    else 
+	return;
+    while (*s == ' ' || *s == '\t') s++;
     if (!isDIGIT(*s))
 	return;
     n = s;
@@ -482,13 +487,19 @@ S_incline(pTHX_ char *s)
 	s++;
     while (*s == ' ' || *s == '\t')
 	s++;
-    if (*s == '"' && (t = strchr(s+1, '"')))
+    if (*s == '"' && (t = strchr(s+1, '"'))) {
 	s++;
-    else {
-	if (!sawline)
-	    return;		/* false alarm */
-	for (t = s; !isSPACE(*t); t++) ;
+	e = t + 1;
     }
+    else {
+	for (t = s; !isSPACE(*t); t++) ;
+	e = t;
+    }
+    while (*e == ' ' || *e == '\t' || *e == '\r' || *e == '\f')
+	e++;
+    if (*e != '\n' && *e != '\0')
+	return;		/* false alarm */
+
     ch = *t;
     *t = '\0';
     if (t - s > 0)
@@ -7141,7 +7152,12 @@ Perl_yyerror(pTHX_ char *s)
     }
     else if (yychar > 255)
 	where = "next token ???";
+#ifdef USE_PURE_BISON
+/*  GNU Bison sets the value -2 */
+    else if (yychar == -2) {
+#else
     else if ((yychar & 127) == 127) {
+#endif
 	if (PL_lex_state == LEX_NORMAL ||
 	   (PL_lex_state == LEX_KNOWNEXT && PL_lex_defer == LEX_NORMAL))
 	    where = "at end of line";

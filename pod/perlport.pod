@@ -90,7 +90,7 @@ Perl uses C<\n> to represent the "logical" newline, where what is
 logical may depend on the platform in use.  In MacPerl, C<\n> always
 means C<\015>.  In DOSish perls, C<\n> usually means C<\012>, but
 when accessing a file in "text" mode, STDIO translates it to (or
-from) C<\015\012>, depending on whether your reading or writing.
+from) C<\015\012>, depending on whether you're reading or writing.
 Unix does the same thing on ttys in canonical mode.  C<\015\012>
 is commonly referred to as CRLF.
 
@@ -1675,6 +1675,10 @@ Not useful. (S<RISC OS>)
 
 =over 4
 
+=item v1.46, 12 February 2000
+
+Updates for VOS and MPE/iX. (Peter Prymmer)  Other small changes.
+
 =item v1.45, 20 December 1999
 
 Small changes from 5.005_63 distribution, more changes to EBCDIC info.
@@ -1786,4 +1790,4 @@ E<lt>pudge@pobox.comE<gt>.
 
 =head1 VERSION
 
-Version 1.45, last modified 20 December 1999
+Version 1.46, last modified 12 February 2000

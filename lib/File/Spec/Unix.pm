@@ -26,28 +26,15 @@ No physical check on the filesystem, but a logical cleanup of a
 path. On UNIX eliminated successive slashes and successive "/.".
 
     $cpath = File::Spec->canonpath( $path ) ;
-    $cpath = File::Spec->canonpath( $path, $reduce_ricochet ) ;
-
-If $reduce_ricochet is present and true, then "dirname/.." 
-constructs are eliminated from the path. Without $reduce_ricochet,
-if dirname is a symbolic link, then "a/dirname/../b" will often 
-take you to someplace other than "a/b". This is sometimes desirable.
-If it's not, setting $reduce_ricochet causes the "dirname/.." to
-be removed from this path, resulting in "a/b".  This may make
-your perl more portable and robust, unless you want to
-ricochet (some scripts depend on it).
 
 =cut
 
 sub canonpath {
-    my ($self,$path,$reduce_ricochet) = @_;
+    my ($self,$path) = @_;
     $path =~ s|/+|/|g unless($^O eq 'cygwin');     # xx////xx  -> xx/xx
     $path =~ s|(/\.)+/|/|g;                        # xx/././xx -> xx/xx
     $path =~ s|^(\./)+|| unless $path eq "./";     # ./xx      -> xx
     $path =~ s|^/(\.\./)+|/|;                      # /../../xx -> xx
-    if ( $reduce_ricochet ) {
-        while ( $path =~ s@[^/]+/\.\.(?:/|$)@@ ) {}# xx/..     -> xx
-    }
     $path =~ s|/$|| unless $path eq "/";           # xx/       -> xx
     return $path;
 }
@@ -281,8 +268,8 @@ sub splitdir {
 =item catpath
 
 Takes volume, directory and file portions and returns an entire path. Under
-Unix, $volume is ignored, and this is just like catfile(). On other OSs,
-the $volume become significant.
+Unix, $volume is ignored, and directory and file are catenated.  A '/' is
+inserted if need be.  On other OSs, $volume is significant.
 
 =cut
 

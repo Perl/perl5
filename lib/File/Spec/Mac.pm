@@ -218,6 +218,174 @@ sub path {
     return split(/,/, $ENV{Commands});
 }
 
+=item splitpath
+
+=cut
+
+sub splitpath {
+    my ($self,$path, $nofile) = @_;
+
+    my ($volume,$directory,$file) = ('','','');
+
+    if ( $nofile ) {
+        ( $volume, $directory ) = $path =~ m@((?:[^:]+(?::|$))?)(.*)@;
+    }
+    else {
+        $path =~ 
+            m@^( (?: [^:]+: )? ) 
+                ( (?: .*: )? )
+                ( .* )
+             @x;
+        $volume    = $1;
+        $directory = $2;
+        $file      = $3;
+    }
+
+    # Make sure non-empty volumes and directories end in ':'
+    $volume    .= ':' if $volume    =~ m@[^:]$@ ;
+    $directory .= ':' if $directory =~ m@[^:]$@ ;
+    return ($volume,$directory,$file);
+}
+
+
+=item splitdir
+
+=cut
+
+sub splitdir {
+    my ($self,$directories) = @_ ;
+    #
+    # split() likes to forget about trailing null fields, so here we
+    # check to be sure that there will not be any before handling the
+    # simple case.
+    #
+    if ( $directories !~ m@:$@ ) {
+        return split( m@:@, $directories );
+    }
+    else {
+        #
+        # since there was a trailing separator, add a file name to the end, 
+        # then do the split, then replace it with ''.
+        #
+        my( @directories )= split( m@:@, "${directories}dummy" ) ;
+        $directories[ $#directories ]= '' ;
+        return @directories ;
+    }
+}
+
+
+=item catpath
+
+=cut
+
+sub catpath {
+    my $self = shift ;
+
+    my $result = shift ;
+    $result =~ s@^([^/])@/$1@ ;
+
+    my $segment ;
+    for $segment ( @_ ) {
+        if ( $result =~ m@[^/]$@ && $segment =~ m@^[^/]@ ) {
+            $result .= "/$segment" ;
+        }
+        elsif ( $result =~ m@/$@ && $segment =~ m@^/@ ) {
+            $result  =~ s@/+$@/@;
+            $segment =~ s@^/+@@;
+            $result  .= "$segment" ;
+        }
+        else {
+            $result  .= $segment ;
+        }
+    }
+
+    return $result ;
+}
+
+=item abs2rel
+
+=cut
+
+sub abs2rel {
+    my($self,$path,$base) = @_;
+
+    # Clean up $path
+    if ( ! $self->file_name_is_absolute( $path ) ) {
+        $path = $self->rel2abs( $path ) ;
+    }
+
+    # Figure out the effective $base and clean it up.
+    if ( !defined( $base ) || $base eq '' ) {
+        $base = cwd() ;
+    }
+    elsif ( ! $self->file_name_is_absolute( $base ) ) {
+        $base = $self->rel2abs( $base ) ;
+    }
+
+    # Now, remove all leading components that are the same
+    my @pathchunks = $self->splitdir( $path );
+    my @basechunks = $self->splitdir( $base );
+
+    while (@pathchunks && @basechunks && $pathchunks[0] eq $basechunks[0]) {
+        shift @pathchunks ;
+        shift @basechunks ;
+    }
+
+    $path = join( ':', @pathchunks );
+
+    # @basechunks now contains the number of directories to climb out of.
+    $base = ':' x @basechunks ;
+
+    return "$base:$path" ;
+}
+
+=item rel2abs
+
+Converts a relative path to an absolute path. 
+
+    $abs_path = $File::Spec->rel2abs( $destination ) ;
+    $abs_path = $File::Spec->rel2abs( $destination, $base ) ;
+
+If $base is not present or '', then L<cwd()> is used. If $base is relative, 
+then it is converted to absolute form using L</rel2abs()>. This means that it
+is taken to be relative to L<cwd()>.
+
+On systems with the concept of a volume, this assumes that both paths 
+are on the $base volume, and ignores the $destination volume. 
+
+On systems that have a grammar that indicates filenames, this ignores the 
+$base filename as well. Otherwise all path components are assumed to be
+directories.
+
+If $path is absolute, it is cleaned up and returned using L</canonpath()>.
+
+Based on code written by Shigio Yamaguchi.
+
+No checks against the filesystem are made. 
+
+=cut
+
+sub rel2abs($;$;) {
+    my ($self,$path,$base ) = @_;
+
+    if ( ! $self->file_name_is_absolute( $path ) ) {
+        if ( !defined( $base ) || $base eq '' ) {
+            $base = cwd() ;
+        }
+        elsif ( ! $self->file_name_is_absolute( $base ) ) {
+            $base = $self->rel2abs( $base ) ;
+        }
+        else {
+            $base = $self->canonpath( $base ) ;
+        }
+
+        $path = $self->canonpath("$base$path") ;
+    }
+
+    return $path ;
+}
+
+
 =back
 
 =head1 SEE ALSO

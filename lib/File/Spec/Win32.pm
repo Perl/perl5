@@ -95,7 +95,7 @@ path. On UNIX eliminated successive slashes and successive "/.".
 =cut
 
 sub canonpath {
-    my ($self,$path,$reduce_ricochet) = @_;
+    my ($self,$path) = @_;
     $path =~ s/^([a-z]:)/\u$1/;
     $path =~ s|/|\\|g;
     $path =~ s|([^\\])\\+|$1\\|g;                  # xx////xx  -> xx/xx
@@ -120,7 +120,7 @@ Separators accepted are \ and /.
 
 Volumes can be drive letters or UNC sharenames (\\server\share).
 
-The results can be passed to L</catpath()> to get back a path equivalent to
+The results can be passed to L</catpath> to get back a path equivalent to
 (usually identical to) the original path.
 
 =cut
@@ -130,21 +130,21 @@ sub splitpath {
     my ($volume,$directory,$file) = ('','','');
     if ( $nofile ) {
         $path =~ 
-            m@^( (?:[a-zA-Z]:|(?:\\\\\\\\|//)[^\\\\/]+[\\\\/][^\\\\/]+)? ) 
+            m{^( (?:[a-zA-Z]:|(?:\\\\|//)[^\\/]+[\\/][^\\/]+)? ) 
                  (.*)
-             @x;
+             }x;
         $volume    = $1;
         $directory = $2;
     }
     else {
         $path =~ 
-            m@^ ( (?: [a-zA-Z]: |
-                      (?:\\\\\\\\|//)[^\\\\/]+[\\\\/][^\\\\/]+
+            m{^ ( (?: [a-zA-Z]: |
+                      (?:\\\\|//)[^\\/]+[\\/][^\\/]+
                   )?
                 )
                 ( (?:.*[\\\\/](?:\.\.?$)?)? )
                 (.*)
-             @x;
+             }x;
         $volume    = $1;
         $directory = $2;
         $file      = $3;
@@ -221,8 +221,8 @@ sub catpath {
     # If the volume is not just A:, make sure the glue separator is 
     # there, reusing whatever separator is first in the $volume if possible.
     if ( $volume !~ m@^[a-zA-Z]:$@ &&
-         $volume !~ m@[\\/]$@      &&
-         $file   !~ m@^[\\/]@
+         $volume =~ m@[^\\/]$@      &&
+         $file   =~ m@[^\\/]@
        ) {
         $volume =~ m@([\\/])@ ;
         my $sep = $1 ? $1 : '\\' ;
@@ -248,7 +248,7 @@ then it is converted to absolute form using L</rel2abs()>. This means that it
 is taken to be relative to L<cwd()>.
 
 On systems with the concept of a volume, this assumes that both paths 
-are on the $destination volume, and ignores the $base volume. 
+are on the $destination volume, and ignores the $base volume.
 
 On systems that have a grammar that indicates filenames, this ignores the 
 $base filename as well. Otherwise all path components are assumed to be
@@ -325,8 +325,11 @@ sub abs2rel {
         $path_directories = "$base_directories$path_directories" ;
     }
 
+    # It makes no sense to add a relative path to a UNC volume
+    $path_volume = '' unless $path_volume =~ m{^[A-Z]:}i ;
+
     return $self->canonpath( 
-        $self->catpath( $path_volume, $path_directories, $path_file )
+        $self->catpath($path_volume, $path_directories, $path_file ) 
     ) ;
 }
 
@@ -359,10 +362,8 @@ No checks against the filesystem are made.
 sub rel2abs($;$;) {
     my ($self,$path,$base ) = @_;
 
-    # Clean up and split up $path
     if ( ! $self->file_name_is_absolute( $path ) ) {
 
-        # Figure out the effective $base and clean it up.
         if ( ! $self->file_name_is_absolute( $base ) ) {
             $base = $self->rel2abs( $base ) ;
         }
@@ -373,7 +374,6 @@ sub rel2abs($;$;) {
             $base = $self->canonpath( $base ) ;
         }
 
-        # Split up paths
         my ( undef, $path_directories, $path_file ) =
             $self->splitpath( $path, 1 ) ;
 

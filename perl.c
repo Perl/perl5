@@ -523,11 +523,15 @@ perl_destruct(pTHXx)
     PL_formtarget = Nullsv;
 
     /* free locale stuff */
+#ifdef USE_LOCALE_COLLATE
     Safefree(PL_collation_name);
     PL_collation_name = Nullch;
+#endif
 
+#ifdef USE_LOCALE_NUMERIC
     Safefree(PL_numeric_name);
     PL_numeric_name = Nullch;
+#endif
 
     /* clear utf8 character classes */
     SvREFCNT_dec(PL_utf8_alnum);

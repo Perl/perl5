@@ -929,8 +929,9 @@ See also L</undef>, L</exists>, L</ref>.
 
 Given an expression that specifies a hash element, array element, hash slice,
 or array slice, deletes the specified element(s) from the hash or array.
-If the array elements happen to be at the end of the array, the size
-of the array will shrink by that number of elements.
+In the case of an array, if the array elements happen to be at the end,
+the size of the array will shrink to the highest element that tests 
+true for exists() (or 0 if no such element exists).
 
 Returns each element so deleted or the undefined value if there was no such
 element.  Deleting from C<$ENV{}> modifies the environment.  Deleting from
@@ -939,7 +940,9 @@ from a C<tie>d hash or array may not necessarily return anything.
 
 Deleting an array element effectively returns that position of the array
 to its initial, uninitialized state.  Subsequently testing for the same
-element with exists() will return false.  See L</exists>.
+element with exists() will return false.  Note that deleting array
+elements in the middle of an array will not shift the index of the ones
+after them down--use splice() for that.  See L</exists>.
 
 The following (inefficiently) deletes all the values of %HASH and @ARRAY:
 

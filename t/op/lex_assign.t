@@ -24,7 +24,7 @@ sub subb {"in s"}
 
 @INPUT = <DATA>;
 @simple_input = grep /^\s*\w+\s*\$\w+\s*[#\n]/, @INPUT;
-print "1..", (9 + @INPUT + @simple_input), "\n";
+print "1..", (10 + @INPUT + @simple_input), "\n";
 $ord = 0;
 
 sub wrn {"@_"}
@@ -95,6 +95,18 @@ print "ok $ord\n";
   print "ok $ord\n";
 
 }
+
+# Chains of assignments
+
+my ($l1, $l2, $l3, $l4);
+my $zzzz = 12;
+$zzz1 = $l1 = $l2 = $zzz2 = $l3 = $l4 = 1 + $zzzz;
+
+$ord++;
+print "# $zzz1 = $l1 = $l2 = $zzz2 = $l3 = $l4 = 13\nnot "
+  unless $zzz1 == 13 and $zzz2 == 13 and $l1 == 13
+  and $l2 == 13 and $l3 == 13 and $l4 == 13;
+print "ok $ord\n";
 
 for (@INPUT) {
   $ord++;

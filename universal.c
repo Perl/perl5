@@ -140,6 +140,10 @@ XS(XS_UNIVERSAL_isa)
 	Perl_croak(aTHX_ "Usage: UNIVERSAL::isa(reference, kind)");
 
     sv = ST(0);
+
+    if (!SvOK(sv) || !(SvROK(sv) || SvCUR(sv)))
+	XSRETURN_UNDEF;
+
     name = (char *)SvPV(ST(1),n_a);
 
     ST(0) = boolSV(sv_derived_from(sv, name));
@@ -159,6 +163,10 @@ XS(XS_UNIVERSAL_can)
 	Perl_croak(aTHX_ "Usage: UNIVERSAL::can(object-ref, method)");
 
     sv = ST(0);
+
+    if (!SvOK(sv) || !(SvROK(sv) || SvCUR(sv)))
+	XSRETURN_UNDEF;
+
     name = (char *)SvPV(ST(1),n_a);
     rv = &PL_sv_undef;
 
