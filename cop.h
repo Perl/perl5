@@ -85,7 +85,7 @@ struct block_sub {
 
 #define PUSHSUB(cx)							\
 	cx->blk_sub.cv = cv;						\
-	cx->blk_sub.olddepth = CvDEPTH(cv);				\
+	cx->blk_sub.olddepth = (U16)CvDEPTH(cv);			\
 	cx->blk_sub.hasargs = hasargs;					\
 	cx->blk_sub.lval = PL_op->op_private &                          \
 	                      (OPpLVAL_INTRO|OPpENTERSUB_INARGS);
@@ -272,7 +272,7 @@ struct block {
 	cx->blk_oldscopesp	= PL_scopestack_ix,			\
 	cx->blk_oldretsp	= PL_retstack_ix,			\
 	cx->blk_oldpm		= PL_curpm,				\
-	cx->blk_gimme		= gimme;				\
+	cx->blk_gimme		= (U8)gimme;				\
 	DEBUG_l( PerlIO_printf(Perl_debug_log, "Entering block %ld, type %s\n",	\
 		    (long)cxstack_ix, PL_block_type[CxTYPE(cx)]); )
 

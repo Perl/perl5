@@ -115,7 +115,7 @@ Perl_av_extend(pTHX_ AV *av, I32 key)
 		bytes = (newmax + 1) * sizeof(SV*);
 #define MALLOC_OVERHEAD 16
 		itmp = MALLOC_OVERHEAD;
-		while (itmp - MALLOC_OVERHEAD < bytes)
+		while ((MEM_SIZE)(itmp - MALLOC_OVERHEAD) < bytes)
 		    itmp += itmp;
 		itmp -= MALLOC_OVERHEAD;
 		itmp /= sizeof(SV*);

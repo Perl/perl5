@@ -295,7 +295,7 @@ win32_select(int nfds, Perl_fd_set* rd, Perl_fd_set* wr, Perl_fd_set* ex, const 
     int r;
 #ifdef USE_SOCKETS_AS_HANDLES
     Perl_fd_set dummy;
-    int i, fd, bit, offset;
+    int i, fd;
     FD_SET nrd, nwr, nex, *prd, *pwr, *pex;
 
     /* winsock seems incapable of dealing with all three null fd_sets,

@@ -1016,7 +1016,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 
 	    PerlIO_printf(file, "  (");
 	    Zero(freq, FREQ_MAX + 1, int);
-	    for (i = 0; i <= HvMAX(sv); i++) {
+	    for (i = 0; (STRLEN)i <= HvMAX(sv); i++) {
 		HE* h; int count = 0;
                 for (h = HvARRAY(sv)[i]; h; h = HeNEXT(h))
 		    count++;

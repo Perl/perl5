@@ -204,7 +204,8 @@ struct utsname {
 typedef long		uid_t;
 typedef long		gid_t;
 typedef unsigned short	mode_t;
-#pragma  warning(disable: 4018 4035 4101 4102 4244 4245 4761)
+
+#pragma  warning(disable: 4102)	/* "unreferenced label" */
 
 /* Visual C thinks that a pointer to a member variable is 16 bytes in size. */
 #define PERL_MEMBER_PTR_SIZE	16

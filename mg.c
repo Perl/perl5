@@ -356,7 +356,7 @@ Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
 	paren = mg->mg_len;
 	if (paren < 0)
 	    return 0;
-	if (paren <= rx->nparens &&
+	if (paren <= (I32)rx->nparens &&
 	    (s = rx->startp[paren]) != -1 &&
 	    (t = rx->endp[paren]) != -1)
 	    {
@@ -393,7 +393,7 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
 
 	    paren = atoi(mg->mg_ptr);
 	  getparen:
-	    if (paren <= rx->nparens &&
+	    if (paren <= (I32)rx->nparens &&
 		(s1 = rx->startp[paren]) != -1 &&
 		(t1 = rx->endp[paren]) != -1)
 	    {
@@ -602,7 +602,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	     */
 	    paren = atoi(mg->mg_ptr);
 	  getparen:
-	    if (paren <= rx->nparens &&
+	    if (paren <= (I32)rx->nparens &&
 		(s1 = rx->startp[paren]) != -1 &&
 		(t1 = rx->endp[paren]) != -1)
 	    {
@@ -797,7 +797,6 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
     register char *s;
     char *ptr;
     STRLEN len, klen;
-    I32 i;
 
     s = SvPV(sv,len);
     ptr = MgPV(mg,klen);
@@ -850,6 +849,7 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
 	    while (s < strend) {
 		char tmpbuf[256];
 		struct stat st;
+		I32 i;
 		s = delimcpy(tmpbuf, tmpbuf + sizeof tmpbuf,
 			     s, strend, ':', &i);
 		s++;
@@ -1261,7 +1261,7 @@ Perl_magic_setdbline(pTHX_ SV *sv, MAGIC *mg)
     svp = av_fetch(GvAV(gv),
 		     atoi(MgPV(mg,n_a)), FALSE);
     if (svp && SvIOKp(*svp) && (o = INT2PTR(OP*,SvIVX(*svp))))
-	o->op_private = i;
+	o->op_private = (U8)i;
     return 0;
 }
 
@@ -1335,7 +1335,7 @@ Perl_magic_setpos(pTHX_ SV *sv, MAGIC *mg)
 	if (pos < 0)
 	    pos = 0;
     }
-    else if (pos > len)
+    else if (pos > (SSize_t)len)
 	pos = len;
 
     if (ulen) {
@@ -1395,9 +1395,9 @@ Perl_magic_getsubstr(pTHX_ SV *sv, MAGIC *mg)
 
     if (SvUTF8(lsv))
 	sv_pos_u2b(lsv, &offs, &rem);
-    if (offs > len)
+    if (offs > (I32)len)
 	offs = len;
-    if (rem + offs > len)
+    if (rem + offs > (I32)len)
 	rem = len - offs;
     sv_setpvn(sv, tmps + offs, (STRLEN)rem);
     if (SvUTF8(lsv))
@@ -1662,7 +1662,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	sv_setsv(PL_bodytarget, sv);
 	break;
     case '\003':	/* ^C */
-	PL_minus_c = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
+	PL_minus_c = (bool)(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 	break;
 
     case '\004':	/* ^D */
@@ -2060,7 +2060,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	}
 	s = SvPV_force(sv,len);
 	i = len;
-	if (i >= PL_origalen) {
+	if (i >= (I32)PL_origalen) {
 	    i = PL_origalen;
 	    /* don't allow system to limit $0 seen by script */
 	    /* SvCUR_set(sv, i); *SvEND(sv) = '\0'; */
@@ -2072,7 +2072,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    Copy(s, PL_origargv[0], i, char);
 	    s = PL_origargv[0]+i;
 	    *s++ = '\0';
-	    while (++i < PL_origalen)
+	    while (++i < (I32)PL_origalen)
 		*s++ = ' ';
 	    s = PL_origargv[0]+i;
 	    for (i = 1; i < PL_origargc; i++)

@@ -332,7 +332,8 @@ PPCODE:
     SV *dumpop = perl_get_sv("Devel::Peek::dump_ops", FALSE);
     I32 save_dumpindent = PL_dumpindent;
     PL_dumpindent = 2;
-    do_sv_dump(0, Perl_debug_log, sv, 0, lim, dumpop && SvTRUE(dumpop), pv_lim);
+    do_sv_dump(0, Perl_debug_log, sv, 0, lim,
+	       (bool)(dumpop && SvTRUE(dumpop)), pv_lim);
     PL_dumpindent = save_dumpindent;
 }
 
@@ -350,7 +351,8 @@ PPCODE:
 
     for (i=1; i<items; i++) {
 	PerlIO_printf(Perl_debug_log, "Elt No. %ld  0x%"UVxf"\n", i - 1, PTR2UV(ST(i)));
-	do_sv_dump(0, Perl_debug_log, ST(i), 0, lim, dumpop && SvTRUE(dumpop), pv_lim);
+	do_sv_dump(0, Perl_debug_log, ST(i), 0, lim,
+		   (bool)(dumpop && SvTRUE(dumpop)), pv_lim);
     }
     PL_dumpindent = save_dumpindent;
 }

@@ -200,7 +200,7 @@ S_regcppop(pTHX)
 	);
     }
     DEBUG_r(
-	if (*PL_reglastparen + 1 <= PL_regnpar) {
+	if ((I32)(*PL_reglastparen + 1) <= PL_regnpar) {
 	    PerlIO_printf(Perl_debug_log,
 			  "     restoring \\%"IVdf"..\\%"IVdf" to undef\n",
 			  (IV)(*PL_reglastparen + 1), (IV)PL_regnpar);
@@ -217,8 +217,8 @@ S_regcppop(pTHX)
      * building DynaLoader will fail:
      * "Error: '*' not in typemap in DynaLoader.xs, line 164"
      * --jhi */
-    for (paren = *PL_reglastparen + 1; paren <= PL_regnpar; paren++) {
-	if (paren > PL_regsize)
+    for (paren = *PL_reglastparen + 1; (I32)paren <= PL_regnpar; paren++) {
+	if ((I32)paren > PL_regsize)
 	    PL_regstartp[paren] = -1;
 	PL_regendp[paren] = -1;
     }
@@ -1383,7 +1383,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     if (startpos == strbeg)	/* is ^ valid at stringarg? */
 	PL_regprev = '\n';
     else {
-	PL_regprev = (U32)stringarg[-1];
+	PL_regprev = (char)stringarg[-1];
 	if (!PL_multiline && PL_regprev == '\n')
 	    PL_regprev = '\0';		/* force ^ to NOT match */
     }
@@ -1830,7 +1830,7 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
     sp = prog->startp;
     ep = prog->endp;
     if (prog->nparens) {
-	for (i = prog->nparens; i > *PL_reglastparen; i--) {
+	for (i = prog->nparens; i > (I32)*PL_reglastparen; i--) {
 	    *++sp = -1;
 	    *++ep = -1;
 	}
@@ -2390,7 +2390,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    n = ARG(scan);  /* which paren pair */
 	    ln = PL_regstartp[n];
 	    PL_reg_leftiter = PL_reg_maxiter;		/* Void cache */
-	    if (*PL_reglastparen < n || ln == -1)
+	    if ((I32)*PL_reglastparen < n || ln == -1)
 		sayNO;			/* Do not match unless seen CLOSEn. */
 	    if (ln == PL_regendp[n])
 		break;
@@ -2585,12 +2585,12 @@ S_regmatch(pTHX_ regnode *prog)
 	    n = ARG(scan);  /* which paren pair */
 	    PL_regstartp[n] = PL_reg_start_tmp[n] - PL_bostr;
 	    PL_regendp[n] = locinput - PL_bostr;
-	    if (n > *PL_reglastparen)
+	    if (n > (I32)*PL_reglastparen)
 		*PL_reglastparen = n;
 	    break;
 	case GROUPP:
 	    n = ARG(scan);  /* which paren pair */
-	    sw = (*PL_reglastparen >= n && PL_regendp[n] != -1);
+	    sw = ((I32)*PL_reglastparen >= n && PL_regendp[n] != -1);
 	    break;
 	case IFTHEN:
 	    PL_reg_leftiter = PL_reg_maxiter;		/* Void cache */
@@ -2692,7 +2692,7 @@ S_regmatch(pTHX_ regnode *prog)
 		PL_regcc = &cc;
 		/* XXXX Probably it is better to teach regpush to support
 		   parenfloor > PL_regsize... */
-		if (parenfloor > *PL_reglastparen)
+		if (parenfloor > (I32)*PL_reglastparen)
 		    parenfloor = *PL_reglastparen; /* Pessimization... */
 		cc.parenfloor = parenfloor;
 		cc.cur = -1;
@@ -2776,7 +2776,7 @@ S_regmatch(pTHX_ regnode *prog)
 		if (PL_reg_leftiter-- == 0) {
 		    I32 size = (PL_reg_maxiter + 7)/8;
 		    if (PL_reg_poscache) {
-			if (PL_reg_poscache_size < size) {
+			if ((I32)PL_reg_poscache_size < size) {
 			    Renew(PL_reg_poscache, size, char);
 			    PL_reg_poscache_size = size;
 			}
@@ -2913,7 +2913,6 @@ S_regmatch(pTHX_ regnode *prog)
 	    inner = NEXTOPER(scan);
 	  do_branch:
 	    {
-		CHECKPOINT lastcp;
 		c1 = OP(scan);
 		if (OP(next) != c1)	/* No choice. */
 		    next = inner;	/* Avoid recursion. */
@@ -2962,7 +2961,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    if (paren) {
 		if (paren > PL_regsize)
 		    PL_regsize = paren;
-		if (paren > *PL_reglastparen)
+		if (paren > (I32)*PL_reglastparen)
 		    *PL_reglastparen = paren;
 	    }
 	    scan = NEXTOPER(scan) + NODE_STEP_REGNODE;
@@ -3087,7 +3086,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    paren = scan->flags;	/* Which paren to set */
 	    if (paren > PL_regsize)
 		PL_regsize = paren;
-	    if (paren > *PL_reglastparen)
+	    if (paren > (I32)*PL_reglastparen)
 		*PL_reglastparen = paren;
 	    ln = ARG1(scan);  /* min to match */
 	    n  = ARG2(scan);  /* max to match */
@@ -3795,7 +3794,7 @@ S_reginclass(pTHX_ register regnode *p, register I32 c)
 STATIC bool
 S_reginclassutf8(pTHX_ regnode *f, U8 *p)
 {                                           
-    char flags = ARG1(f);
+    char flags = (char)ARG1(f);
     bool match = FALSE;
 #ifdef DEBUGGING
     SV *rv = (SV*)PL_regdata->data[ARG2(f)];
