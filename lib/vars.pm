@@ -20,8 +20,11 @@ sub import {
 		Carp::croak("Can't declare individual elements of hash or array");
 	    } elsif (warnings::enabled() and length($sym) == 1 and $sym !~ tr/a-zA-Z//) {
 		warnings::warn("No need to declare built-in vars");
-            } elsif  ( $^H &= strict::bits('vars') ) {
-              Carp::croak("'$_' is not a valid variable name under strict vars");
+            } elsif  ( $^H &= strict::bits('vars') &&
+		       # Either no 'use utf8' or if utf8, no non-word
+		       ($^H & $utf8::hint_bits == 0 ||
+			$sym =~ /\W/) ) {
+		  Carp::croak("'$_' is not a valid variable name under strict vars");
 	    }
 	}
 	$sym = "${callpack}::$sym" unless $sym =~ /::/;
