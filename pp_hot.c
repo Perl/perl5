@@ -1041,6 +1041,7 @@ yup:					/* Confirmed by INTUIT */
 	rx->startp[0] = s - truebase;
 	rx->endp[0] = s - truebase + rx->minlen;
     }
+    rx->nparens = rx->lastparen = 0;	/* used by @- and @+ */
     LEAVE_SCOPE(oldsave);
     RETPUSHYES;
 
