@@ -3507,7 +3507,7 @@ mp_getredirection(pTHX_ int *ac, char ***av)
 	    {
 	    if (j+1 >= argc)
 		{
-		PerlIO_printf(Perl_debug_log,"No input file after < on command line");
+		fprintf(stderr,"No input file after < on command line");
 		exit(LIB$_WRONUMARG);
 		}
 	    in = argv[++j];
@@ -3522,7 +3522,7 @@ mp_getredirection(pTHX_ int *ac, char ***av)
 	    {
 	    if (j+1 >= argc)
 		{
-		PerlIO_printf(Perl_debug_log,"No output file after > on command line");
+		fprintf(stderr,"No output file after > on command line");
 		exit(LIB$_WRONUMARG);
 		}
 	    out = argv[++j];
@@ -3542,7 +3542,7 @@ mp_getredirection(pTHX_ int *ac, char ***av)
 		out = 1 + ap;
 	    if (j >= argc)
 		{
-		PerlIO_printf(Perl_debug_log,"No output file after > or >> on command line");
+		fprintf(stderr,"No output file after > or >> on command line");
 		exit(LIB$_WRONUMARG);
 		}
 	    continue;
@@ -3564,7 +3564,7 @@ mp_getredirection(pTHX_ int *ac, char ***av)
 		    err = 2 + ap;
 	    if (j >= argc)
 		{
-		PerlIO_printf(Perl_debug_log,"No output file after 2> or 2>> on command line");
+		fprintf(stderr,"No output file after 2> or 2>> on command line");
 		exit(LIB$_WRONUMARG);
 		}
 	    continue;
@@ -3573,7 +3573,7 @@ mp_getredirection(pTHX_ int *ac, char ***av)
 	    {
 	    if (j+1 >= argc)
 		{
-		PerlIO_printf(Perl_debug_log,"No command into which to pipe on command line");
+		fprintf(stderr,"No command into which to pipe on command line");
 		exit(LIB$_WRONUMARG);
 		}
 	    cmargc = argc-(j+1);
@@ -3604,7 +3604,7 @@ mp_getredirection(pTHX_ int *ac, char ***av)
 	{
 	if (out != NULL)
 	    {
-	    PerlIO_printf(Perl_debug_log,"'|' and '>' may not both be specified on command line");
+	    fprintf(stderr,"'|' and '>' may not both be specified on command line");
 	    exit(LIB$_INVARGORD);
 	    }
 	pipe_and_fork(aTHX_ cmargv);
@@ -3623,7 +3623,7 @@ mp_getredirection(pTHX_ int *ac, char ***av)
 	/* Input from a pipe, reopen it in binary mode to disable	*/
 	/* carriage control processing.	 				*/
 
-       fgetname(stdin, mbxname);
+	fgetname(stdin, mbxname);
 	mbxnam.dsc$a_pointer = mbxname;
 	mbxnam.dsc$w_length = strlen(mbxnam.dsc$a_pointer);	
 	lib$getdvi(&dvi_item, 0, &mbxnam, &bufsize, 0, 0);
@@ -3637,18 +3637,18 @@ mp_getredirection(pTHX_ int *ac, char ***av)
 	freopen(mbxname, "rb", stdin);
 	if (errno != 0)
 	    {
-	    PerlIO_printf(Perl_debug_log,"Can't reopen input pipe (name: %s) in binary mode",mbxname);
+	    fprintf(stderr,"Can't reopen input pipe (name: %s) in binary mode",mbxname);
 	    exit(vaxc$errno);
 	    }
 	}
     if ((in != NULL) && (NULL == freopen(in, "r", stdin, "mbc=32", "mbf=2")))
 	{
-	PerlIO_printf(Perl_debug_log,"Can't open input file %s as stdin",in);
+	fprintf(stderr,"Can't open input file %s as stdin",in);
 	exit(vaxc$errno);
 	}
     if ((out != NULL) && (NULL == freopen(out, outmode, stdout, "mbc=32", "mbf=2")))
 	{	
-	PerlIO_printf(Perl_debug_log,"Can't open output file %s as stdout",out);
+	fprintf(stderr,"Can't open output file %s as stdout",out);
 	exit(vaxc$errno);
 	}
 	if (out != NULL) Perl_vmssetuserlnm(aTHX_ "SYS$OUTPUT",out);
@@ -3661,7 +3661,7 @@ mp_getredirection(pTHX_ int *ac, char ***av)
 	FILE *tmperr;
 	if (NULL == (tmperr = fopen(err, errmode, "mbc=32", "mbf=2")))
 	    {
-	    PerlIO_printf(Perl_debug_log,"Can't open error file %s as stderr",err);
+	    fprintf(stderr,"Can't open error file %s as stderr",err);
 	    exit(vaxc$errno);
 	    }
 	    fclose(tmperr);
