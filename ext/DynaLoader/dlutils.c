@@ -45,7 +45,7 @@ dl_unload_all_files(pTHXo_ void *unused)
            PUSHMARK(SP);
            XPUSHs(sv_2mortal(dl_libref));
            PUTBACK;
-           call_sv(sub, G_DISCARD);
+           call_sv((SV*)sub, G_DISCARD);
            FREETMPS;
            LEAVE;
         }
