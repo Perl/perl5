@@ -477,6 +477,10 @@ magic_get(SV *sv, MAGIC *mg)
 	    /* printf("some %s\n", printW(PL_curcop->cop_warnings)), */
 	    sv_setsv(sv, PL_curcop->cop_warnings);
 	break;
+    case '\003':		/* ^C */
+	sv_setiv(sv, (IV)PL_minus_c);
+	break;
+
     case '\004':		/* ^D */
 	sv_setiv(sv, (IV)(PL_debug & 32767));
 	break;
@@ -1655,6 +1659,11 @@ magic_set(SV *sv, MAGIC *mg)
 	    }
 	}
 	break;
+
+    case '\003':	/* ^C */
+	PL_minus_c = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
+	break;
+
     case '\004':	/* ^D */
 	PL_debug = (SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv)) | 0x80000000;
 	DEBUG_x(dump_all());
