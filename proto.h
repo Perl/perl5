@@ -302,6 +302,7 @@ OP*	newANONHASH _((OP* o));
 OP*	newANONSUB _((I32 floor, OP* proto, OP* block));
 OP*	newASSIGNOP _((I32 flags, OP* left, I32 optype, OP* right));
 OP*	newCONDOP _((I32 flags, OP* expr, OP* trueop, OP* falseop));
+void	newCONSTSUB _((HV* stash, char* name, SV* sv));
 void	newFORM _((I32 floor, OP* o, OP* block));
 OP*	newFOROP _((I32 flags, char* label, line_t forline, OP* scalar, OP* expr, OP*block, OP*cont));
 OP*	newLOGOP _((I32 optype, I32 flags, OP* left, OP* right));

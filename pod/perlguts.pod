@@ -2121,6 +2121,13 @@ The XSUB-writer's interface to the C C<malloc> function, with cast.
 
 	void*	Newc( x, void *ptr, int size, type, cast )
 
+=item newCONSTSUB
+
+Creates a constant sub equivalent to Perl C<sub FOO () { 123 }>
+which is eligible for inlining at compile-time.
+
+	void	newCONSTSUB(HV* stash, char* name, SV* sv)
+
 =item newHV
 
 Creates a new HV.  The reference count is set to 1.
