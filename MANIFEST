@@ -60,8 +60,6 @@ README.vmesa		Notes about VM/ESA port
 README.vms		Notes about installing the VMS port
 README.vos		Notes about Stratus VOS port
 README.win32		Notes about Win32 port
-Todo			The Wishlist
-Todo-5.6		What needs doing before/during the 5.6.x release cycle
 Todo.micro		The Wishlist for microperl
 XSUB.h			Include file for extension subroutines
 apollo/netinet/in.h	Apollo DomainOS port: C header file frontend
