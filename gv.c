@@ -75,7 +75,7 @@ Perl_gv_fetchfile(pTHX_ const char *name)
 	gv_init(gv, PL_defstash, tmpbuf, tmplen, FALSE);
 	sv_setpv(GvSV(gv), name);
 	if (PERLDB_LINE)
-	    hv_magic(GvHVn(gv_AVadd(gv)), gv, 'L');
+	    hv_magic(GvHVn(gv_AVadd(gv)), Nullgv, 'L');
     }
     if (tmpbuf != smallbuf)
 	Safefree(tmpbuf);
@@ -735,7 +735,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
         if (strEQ(name, "OVERLOAD")) {
             HV* hv = GvHVn(gv);
             GvMULTI_on(gv);
-            hv_magic(hv, gv, 'A');
+            hv_magic(hv, Nullgv, 'A');
         }
         break;
     case 'S':
@@ -749,7 +749,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	    }
 	    GvMULTI_on(gv);
 	    hv = GvHVn(gv);
-	    hv_magic(hv, gv, 'S');
+	    hv_magic(hv, Nullgv, 'S');
 	    for (i = 1; PL_sig_name[i]; i++) {
 	    	SV ** init;
 	    	init = hv_fetch(hv, PL_sig_name[i], strlen(PL_sig_name[i]), 1);
