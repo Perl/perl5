@@ -796,6 +796,35 @@ made in other platforms.
 
 st-store.t and st-retrieve may fail with Compaq C 6.2 on OpenVMS Alpha 7.2.
 
+=head2 Threads Are Still Experimental
+
+Multithreading is still an experimental feature.  Some platforms
+emit the following message for lib/thr5005
+
+    #
+    # This is a KNOWN FAILURE, and one of the reasons why threading
+    # is still an experimental feature.  It is here to stop people
+    # from deploying threads in production. ;-)
+    #
+ 
+and another known warning is
+
+   pragma/overload......Unbalanced saves: 3 more saves than restores
+   panic: magic_mutexfree during global destruction.
+   ok
+   lib/selfloader.......Unbalanced saves: 3 more saves than restores
+   panic: magic_mutexfree during global destruction.
+   ok
+   lib/st-dclone........Unbalanced saves: 3 more saves than restores
+   panic: magic_mutexfree during global destruction.
+   ok
+
+=head2 The Compiler Suite Is Still Experimental
+
+The compiler suite is slowly getting better but is nowhere near yet.
+The backend part that has seen perhaps the most progress is the
+bytecode compiler.
+
 =back
 
 =head1 Reporting Bugs
