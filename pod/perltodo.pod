@@ -225,7 +225,7 @@ Currently perl from p4/rsync ships with a patchlevel.h file that usually
 defines one local patch, of the form "MAINT12345" or "RC1". The output of
 perl -v doesn't report that a perl isn't an official release, and this
 information can get lost in bugs reports. Because of this, the minor version
-isn't bumped up util RC time, to minimise the possibility of versions of perl
+isn't bumped up until RC time, to minimise the possibility of versions of perl
 escaping that believe themselves to be newer than they actually are.
 
 It would be useful to find an elegant way to have the "this is an interim
