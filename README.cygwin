@@ -403,7 +403,7 @@ access by native Win32 programs).
 
 Inplace editing C<perl -i> of files doesn't work without doing a backup 
 of the file being edited C<perl -i.bak> because of windowish restrictions,
-so Perl does this automagically if you just use C<perl -i>.
+so Perl adds the C<.bak> automatically if you just use C<perl -i>.
 
 =back
 
