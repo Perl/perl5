@@ -2376,6 +2376,7 @@ find_script(char *scriptname, bool dosearch, char **search_ext, I32 flags)
     dTHR;
     char *xfound = Nullch;
     char *xfailed = Nullch;
+    char tmpbuf[512];
     register char *s;
     I32 len;
     int retval;
@@ -2419,6 +2420,7 @@ find_script(char *scriptname, bool dosearch, char **search_ext, I32 flags)
      *     + look *only* in the PATH for scriptname{,.foo,.bar} (note
      *       this will not look in '.' if it's not in the PATH)
      */
+    tmpbuf[0] = '\0';
 
 #ifdef VMS
 #  ifdef ALWAYS_DEFTYPES
@@ -2438,16 +2440,16 @@ find_script(char *scriptname, bool dosearch, char **search_ext, I32 flags)
 	/* The first time through, just add SEARCH_EXTS to whatever we
 	 * already have, so we can check for default file types. */
 	while (deftypes ||
-	       (!hasdir && my_trnlnm("DCL$PATH",tokenbuf,idx++)) )
+	       (!hasdir && my_trnlnm("DCL$PATH",tmpbuf,idx++)) )
 	{
 	    if (deftypes) {
 		deftypes = 0;
-		*tokenbuf = '\0';
+		*tmpbuf = '\0';
 	    }
-	    if ((strlen(tokenbuf) + strlen(scriptname)
-		 + MAX_EXT_LEN) >= sizeof tokenbuf)
+	    if ((strlen(tmpbuf) + strlen(scriptname)
+		 + MAX_EXT_LEN) >= sizeof tmpbuf)
 		continue;	/* don't search dir with too-long name */
-	    strcat(tokenbuf, scriptname);
+	    strcat(tmpbuf, scriptname);
 #else  /* !VMS */
 
 #ifdef DOSISH
@@ -2476,12 +2478,12 @@ find_script(char *scriptname, bool dosearch, char **search_ext, I32 flags)
 #ifdef SEARCH_EXTS
 	    if (cur == scriptname) {
 		len = strlen(scriptname);
-		if (len+MAX_EXT_LEN+1 >= sizeof(tokenbuf))
+		if (len+MAX_EXT_LEN+1 >= sizeof(tmpbuf))
 		    break;
-		cur = strcpy(tokenbuf, scriptname);
+		cur = strcpy(tmpbuf, scriptname);
 	    }
 	} while (extidx >= 0 && ext[extidx]	/* try an extension? */
-		 && strcpy(tokenbuf+len, ext[extidx++]));
+		 && strcpy(tmpbuf+len, ext[extidx++]));
 #endif
     }
 #endif
@@ -2501,44 +2503,44 @@ find_script(char *scriptname, bool dosearch, char **search_ext, I32 flags)
 		    && *s != ','
 #  endif
 		    && *s != ';'; len++, s++) {
-		if (len < sizeof tokenbuf)
-		    tokenbuf[len] = *s;
+		if (len < sizeof tmpbuf)
+		    tmpbuf[len] = *s;
 	    }
-	    if (len < sizeof tokenbuf)
-		tokenbuf[len] = '\0';
+	    if (len < sizeof tmpbuf)
+		tmpbuf[len] = '\0';
 #else  /* ! (atarist || DOSISH) */
-	    s = delimcpy(tokenbuf, tokenbuf + sizeof tokenbuf, s, bufend,
+	    s = delimcpy(tmpbuf, tmpbuf + sizeof tmpbuf, s, bufend,
 			':',
 			&len);
 #endif /* ! (atarist || DOSISH) */
 	    if (s < bufend)
 		s++;
-	    if (len + 1 + strlen(scriptname) + MAX_EXT_LEN >= sizeof tokenbuf)
+	    if (len + 1 + strlen(scriptname) + MAX_EXT_LEN >= sizeof tmpbuf)
 		continue;	/* don't search dir with too-long name */
 	    if (len
 #if defined(atarist) || defined(DOSISH)
-		&& tokenbuf[len - 1] != '/'
-		&& tokenbuf[len - 1] != '\\'
+		&& tmpbuf[len - 1] != '/'
+		&& tmpbuf[len - 1] != '\\'
 #endif
 	       )
-		tokenbuf[len++] = '/';
-	    if (len == 2 && tokenbuf[0] == '.')
+		tmpbuf[len++] = '/';
+	    if (len == 2 && tmpbuf[0] == '.')
 		seen_dot = 1;
-	    (void)strcpy(tokenbuf + len, scriptname);
+	    (void)strcpy(tmpbuf + len, scriptname);
 #endif  /* !VMS */
 
 #ifdef SEARCH_EXTS
-	    len = strlen(tokenbuf);
+	    len = strlen(tmpbuf);
 	    if (extidx > 0)	/* reset after previous loop */
 		extidx = 0;
 	    do {
 #endif
-	    	DEBUG_p(PerlIO_printf(Perl_debug_log, "Looking for %s\n",tokenbuf));
-		retval = PerlLIO_stat(tokenbuf,&statbuf);
+	    	DEBUG_p(PerlIO_printf(Perl_debug_log, "Looking for %s\n",tmpbuf));
+		retval = PerlLIO_stat(tmpbuf,&statbuf);
 #ifdef SEARCH_EXTS
 	    } while (  retval < 0		/* not there */
 		    && extidx>=0 && ext[extidx]	/* try an extension? */
-		    && strcpy(tokenbuf+len, ext[extidx++])
+		    && strcpy(tmpbuf+len, ext[extidx++])
 		);
 #endif
 	    if (retval < 0)
@@ -2550,11 +2552,11 @@ find_script(char *scriptname, bool dosearch, char **search_ext, I32 flags)
 #endif
 		)
 	    {
-		xfound = tokenbuf;              /* bingo! */
+		xfound = tmpbuf;              /* bingo! */
 		break;
 	    }
 	    if (!xfailed)
-		xfailed = savepv(tokenbuf);
+		xfailed = savepv(tmpbuf);
 	}
 #ifndef DOSISH
 	if (!xfound && !seen_dot && !xfailed && (PerlLIO_stat(scriptname,&statbuf) < 0))
