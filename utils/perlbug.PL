@@ -292,12 +292,9 @@ EOF
 			$domain = Mail::Util::maildomain();
 		} elsif ($Is_MSWin32) {
 			$domain = $ENV{'USERDOMAIN'};
-		} elsif ($Is_VMS) {
+		} else {
 			require Sys::Hostname;
 			$domain = Sys::Hostname::hostname();
-		} else {
-			$domain = `hostname`.".".`domainname`;
-			$domain =~ s/[\r\n]+//g;
 		}
 	    
 	    my($guess);
