@@ -10,7 +10,7 @@ BEGIN {
     }
 }
 $| = 1;
-print "1..9\n";
+print "1..12\n";
 use Thread;
 print "ok 1\n";
 
@@ -36,19 +36,20 @@ sub islocked
  use attrs 'locked';
  my $val = shift;
  my $ret;
+ print $val;
  if (@_)
   {
-   $ret = new Thread \&islocked,shift;
-   sleep 2;
+   $ret = Thread->new(\&islocked, @_);
+   join $ret;
   }
- print $val;
 }
 
-$t = islocked("ok 6\n","ok 7\n");
+$t = new Thread \&islocked, map { "ok $_\n" } 6..10;
+sleep 2;
 join $t;
 
 # test that sleep lets other thread run
-$t = new Thread \&islocked,"ok 8\n";
+$t = new Thread \&islocked,"ok 11\n";
 sleep 6;
-print "ok 9\n";
+print "ok 12\n";
 join $t;
