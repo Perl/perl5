@@ -1784,7 +1784,7 @@ sub pp_leaveloop {
 	   if (is_state $state) {
 	       $expr = $self->deparse($state, 0);
 	       $state = $state->sibling;
-	       last if null $kid;
+              last if null $state;
 	   }
 	   $expr .= $self->deparse($state, 0);
 	   push @exprs, $expr if $expr;
