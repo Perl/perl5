@@ -606,23 +606,23 @@ gethostbyname() or gethostbyaddr() using DEC or Compaq C with a
 Multinet TCP/IP stack.  The problem was noted in Multinet 4.3A
 using either Compaq C 6.5 or DEC C 6.0, and with Multinet 4.2A
 using DEC C 5.2, but could easily affect other versions of Multinet.
-A representative of Process Software Inc. has acknowledged a
-bug in the Multinet version of UCX$IPC_SHR for which there is
-an ECO forthcoming.  If you see one or more tests in lib/Net/hostent
-fail we recommend that you apply the Multinet ECO when it becomes
-available from:
+Process Software Inc. has acknowledged a bug in the Multinet version 
+of UCX$IPC_SHR and has provided an ECO for it. The ECO is called
+UCX_LIBRARY_EMULATION-010_A044 and is available from:
 
     http://www.multinet.process.com/eco.html
 
-You may determine the version of Multinet that you are running using
-the command:
+As of this writing, the ECO is only available for Multinet versions 
+4.3A and later.  You may determine the version of Multinet that you 
+are running using the command:
 
     multinet show /version
 
 from the DCL command prompt.
 
-If you cannot wait for the ECO from Process you might try using
-Perl programming constructs such as:
+If the ECO is unavailable for your version of Multinet and you are 
+unable to upgrade, you might try using Perl programming constructs 
+such as:
 
     $address = substr($gethostbyname_addr,0,4);
 
