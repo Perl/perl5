@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 11;
+plan tests => 13;
 
 eval { for (\2) { $_ = <FH> } };
 like($@, 'Modification of a read-only value attempted', '[perl #19566]');
@@ -55,6 +55,30 @@ foreach my $l (1, 21) {
   $k .= <DATA>;
   is ($k, "$perl rules\n", 'rcatline to COW sv for length ' . length $perl);
 }
+
+use strict;
+use File::Spec;
+
+open F, File::Spec->curdir and sysread F, $_, 1;
+my $err = $! + 0;
+close F;
+
+SKIP: {
+  skip 2 => "you can read directories as plain files" unless( $err );
+
+  $!=0;
+  open F, File::Spec->curdir and $_=<F>;
+  ok( $!==$err && !defined($_) => 'readline( DIRECTORY )' );
+  close F;
+
+  $!=0;
+  { local $/;
+    open F, File::Spec->curdir and $_=<F>;
+    ok( $!==$err && !defined($_) => 'readline( DIRECTORY ) slurp mode' );
+    close F;
+  }
+}
+
 __DATA__
 moo
 moo

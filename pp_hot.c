@@ -1567,7 +1567,9 @@ Perl_do_readline(pTHX)
     for (;;) {
 	PUTBACK;
 	if (!sv_gets(sv, fp, offset)
-	    && (type == OP_GLOB || SNARF_EOF(gimme, PL_rs, io, sv)))
+	    && (type == OP_GLOB
+		|| SNARF_EOF(gimme, PL_rs, io, sv)
+		|| PerlIO_error(fp)))
 	{
 	    PerlIO_clearerr(fp);
 	    if (IoFLAGS(io) & IOf_ARGV) {
