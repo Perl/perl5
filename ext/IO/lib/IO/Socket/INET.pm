@@ -52,8 +52,7 @@ sub _sock_info {
   }
 
   if(defined $port) {
-
-    my $defport = ($port =~ s,\((\d+)\)$,,)[0];
+    my $defport = ($port =~ s,\((\d+)\)$,,) ? $1 : undef;
     my $pnum = ($port =~ m,^(\d+)$,)[0];
 
     @serv = getservbyname($port, $proto[0] || "")
