@@ -450,6 +450,7 @@ Perl_sv_dump
 Perl_sv_derived_from
 Perl_sv_eq
 Perl_sv_free
+Perl_sv_free2
 Perl_sv_gets
 Perl_sv_grow
 Perl_sv_inc

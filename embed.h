@@ -3464,8 +3464,6 @@
 #define sv_eq(a,b)		Perl_sv_eq(aTHX_ a,b)
 #define sv_free(a)		Perl_sv_free(aTHX_ a)
 #ifdef PERL_CORE
-#endif
-#ifdef PERL_CORE
 #define sv_free_arenas()	Perl_sv_free_arenas(aTHX)
 #endif
 #define sv_gets(a,b,c)		Perl_sv_gets(aTHX_ a,b,c)
