@@ -241,7 +241,7 @@ typedef unsigned short	U16;
 #ifdef USE_NEXT_CTYPE
 
 #  define isALNUM_LC(c) \
-	(NXIsAlnum((unsigned int)(c)) || (char)(c) == '_')
+	(NXIsAlNum((unsigned int)(c)) || (char)(c) == '_')
 #  define isIDFIRST_LC(c) \
 	(NXIsAlpha((unsigned int)(c)) || (char)(c) == '_')
 #  define isALPHA_LC(c)		NXIsAlpha((unsigned int)(c))
@@ -249,7 +249,7 @@ typedef unsigned short	U16;
 #  define isDIGIT_LC(c)		NXIsDigit((unsigned int)(c))
 #  define isUPPER_LC(c)		NXIsUpper((unsigned int)(c))
 #  define isLOWER_LC(c)		NXIsLower((unsigned int)(c))
-#  define isALNUMC_LC(c)	NXIsAlnum((unsigned int)(c))
+#  define isALNUMC_LC(c)	NXIsAlNum((unsigned int)(c))
 #  define isCNTRL_LC(c)		NXIsCntrl((unsigned int)(c))
 #  define isGRAPH_LC(c)		NXIsGraph((unsigned int)(c))
 #  define isPRINT_LC(c)		NXIsPrint((unsigned int)(c))
