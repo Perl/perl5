@@ -816,4 +816,22 @@ eval q/5 6/;
 EXPECT
 Number found where operator expected at (eval 1) line 1, near "5 6"
 	(Missing operator before  6?)
-
+########
+# toke.c
+use warnings "syntax";
+$_ = $a = 1;
+$a !=~  /1/;
+$a !=~ m#1#;
+$a !=~/1/;
+$a !=~ ?/?;
+$a != ~/1/;
+no warnings "syntax";
+$a !=~  /1/;
+$a !=~ m#1#;
+$a !=~/1/;
+$a !=~ ?/?;
+EXPECT
+!=~ should be !~ at - line 4.
+!=~ should be !~ at - line 5.
+!=~ should be !~ at - line 6.
+!=~ should be !~ at - line 7.

@@ -3382,8 +3382,20 @@ Perl_yylex(pTHX)
     case '!':
 	s++;
 	tmp = *s++;
-	if (tmp == '=')
+	if (tmp == '=') {
+            /* was this !=~ where !~ was meant? */
+            if (*s == '~' && ckWARN(WARN_SYNTAX)) {
+                char *t = s+1;
+
+                while (t < PL_bufend && isSPACE(*t))
+                    ++t;
+
+                if (*t == '/' || (*t == 'm' && !isALNUM(t[1])) || *t == '?')
+                    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+                                "!=~ should be !~");
+            }
 	    Eop(OP_NE);
+        }
 	if (tmp == '~')
 	    PMop(OP_NOT);
 	s--;

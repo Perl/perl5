@@ -3444,6 +3444,12 @@ world, because the world might have written on it already.
 
 (F) You don't have System V shared memory IPC on your system.
 
+=item !=~ should be !~
+
+(W syntax) The non-matching operator is !~, not !=~.  !=~ will be
+interpreted as the != (numeric not equal) and ~ (1's complement)
+operators: probably not what you intended.
+
 =item <> should be quotes
 
 (F) You wrote C<< require <file> >> when you should have written
