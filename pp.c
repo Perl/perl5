@@ -2701,6 +2701,7 @@ PP(pp_substr)
     char *repl = 0;
     STRLEN repl_len;
     int num_args = PL_op->op_private & 7;
+    bool utfrepllen = FALSE;
 
     SvTAINTED_off(TARG);			/* decontaminate */
     SvUTF8_off(TARG);				/* decontaminate */
@@ -2708,6 +2709,7 @@ PP(pp_substr)
 	if (num_args > 3) {
 	    sv = POPs;
 	    repl = SvPV(sv, repl_len);
+	    utfrepllen = DO_UTF8(sv) && SvCUR(sv);
 	}
 	len = POPi;
     }
@@ -2774,8 +2776,11 @@ PP(pp_substr)
 	sv_setpvn(TARG, tmps, rem);
 	if (utfcurlen)
 	    SvUTF8_on(TARG);
-	if (repl)
+	if (repl) {
 	    sv_insert(sv, pos, rem, repl, repl_len);
+	    if (utfrepllen)
+		SvUTF8_on(sv);
+	}
 	else if (lvalue) {		/* it's an lvalue! */
 	    if (!SvGMAGICAL(sv)) {
 		if (SvROK(sv)) {

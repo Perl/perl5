@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..162\n";
+print "1..168\n";
 
 #P = start of string  Q = start of substr  R = end of substr  S = end of string
 
@@ -548,3 +548,22 @@ ok 162, length($x) == 5 &&
         substr($x, 2, 1) eq "\x{100}" &&
         substr($x, 3, 1) eq "\x{FF}" &&
         substr($x, 4, 1) eq "\x{F3}";
+
+substr($x = "ab", 0, 0, "\x{100}\x{200}");
+ok 163, $x eq "\x{100}\x{200}ab";
+
+substr($x = "\x{100}\x{200}", 0, 0, "ab");
+ok 164, $x eq "ab\x{100}\x{200}";
+
+substr($x = "ab", 1, 0, "\x{100}\x{200}");
+ok 165, $x eq "a\x{100}\x{200}b";
+
+substr($x = "\x{100}\x{200}", 1, 0, "ab");
+ok 166, $x eq "\x{100}ab\x{200}";
+
+substr($x = "ab", 2, 0, "\x{100}\x{200}");
+ok 167, $x eq "ab\x{100}\x{200}";
+
+substr($x = "\x{100}\x{200}", 2, 0, "ab");
+ok 168, $x eq "\x{100}\x{200}ab";
+
