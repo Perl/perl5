@@ -185,8 +185,8 @@ cannot be compiled, or that does not function as expected.
 
 =head2 Threaded Perl
 
-It is impossible to compile a version of threaded Perl on any version of
-HP-UX before 10.30, and it is strongly suggested that you be running on
+It is possible to compile a version of threaded Perl on any version of
+HP-UX before 10.30, but it is strongly suggested that you be running on
 HP-UX 11.00 at least.
 
 To compile Perl with threads, add -Dusethreads to the arguments of
@@ -196,6 +196,13 @@ is listed before -lc in the list of libraries to link Perl with.
 
 As of the date of this document, Perl threads are not fully supported on
 HP-UX.
+
+HP-UX versions before 10.30 require a seperate installation of a POSIX
+threads library package. Two examples are the HP DCE package, available
+on "HP-UX Hardware Extensions 3.0, Install and Core OS, Release 10.20,
+April 1999 (B3920-13941)" or the Freely available PTH package, available
+though worldwide HP-UX mirrors of precompiled packages
+(e.g. http://hpux.tn.tudelft.nl/hppd/hpux/alpha.html)
 
 =head2 64-bit Perl
 
@@ -268,6 +275,6 @@ With much assistance regarding shared libraries from Marc Sabatella.
 
 =head1 DATE
 
-Version 0.6.1: 2000/06/20
+Version 0.6.2: 2001-02-02
 
 =cut
