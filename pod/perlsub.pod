@@ -608,7 +608,10 @@ that parse almost exactly like the corresponding builtins.
     sub mytime ()		mytime
 
 Any backslashed prototype character represents an actual argument
-that absolutely must start with that character.
+that absolutely must start with that character.  The value passed
+to the subroutine (as part of C<@_>) will be a reference to the
+actual argument given in the subroutine call, obtained by applying
+C<\> to that argument.
 
 Unbackslashed prototype characters have special meanings.  Any
 unbackslashed @ or % eats all the rest of the arguments, and forces
@@ -662,7 +665,7 @@ And here's a reimplementation of grep:
 	my $code = shift;
 	my @result;
 	foreach $_ (@_) {
-	    push(@result, $_) if &$ref;
+	    push(@result, $_) if &$code;
 	}
 	@result;
     }
