@@ -31,6 +31,408 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 13599] By: jhi                                   on 2001/12/10  13:35:57
+        Log: Subject: [PATCH lib/ExtUtils/Command.t] Bad touch
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 10 Dec 2001 01:21:03 -0500
+             Message-ID: <20011210062103.GC1770@blackrider>
+     Branch: perl
+	   ! lib/ExtUtils/Command.t
+____________________________________________________________________________
+[ 13598] By: jhi                                   on 2001/12/10  13:35:20
+        Log: Subject: [PATCH t/op/groups.t] Need @INC = '../lib' mantra
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 10 Dec 2001 01:10:57 -0500
+             Message-ID: <20011210061057.GB1770@blackrider>
+     Branch: perl
+	   ! t/op/groups.t
+____________________________________________________________________________
+[ 13597] By: jhi                                   on 2001/12/10  13:33:51
+        Log: Retract #13596, #13593 should do the trick.
+     Branch: perl
+	   ! t/op/stat.t
+____________________________________________________________________________
+[ 13596] By: jhi                                   on 2001/12/10  13:31:38
+        Log: (retracted by #13597, #13593 does the job better)
+             
+             Subject: [PATCH t/op/stat.t] -B/-T Cygwin fix
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 10 Dec 2001 00:53:16 -0500
+             Message-ID: <20011210055316.GA1770@blackrider>
+     Branch: perl
+	   ! t/op/stat.t
+____________________________________________________________________________
+[ 13595] By: jhi                                   on 2001/12/10  13:28:30
+        Log: Subject: [PATCH lib/AutoSplit.t] Too fast for FAT filesystems
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Mon, 10 Dec 2001 02:19:14 -0500
+             Message-ID: <20011210071914.GF1770@blackrider>
+     Branch: perl
+	   ! lib/AutoSplit.t
+____________________________________________________________________________
+[ 13594] By: jhi                                   on 2001/12/10  13:26:24
+        Log: Subject: [PATCH] Re: [PATCH t/op/pack.t] Cleanup
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 10 Dec 2001 02:47:40 -0500
+             Message-ID: <20011210074739.GH1770@blackrider>
+     Branch: perl
+	   ! t/op/pack.t
+____________________________________________________________________________
+[ 13593] By: jhi                                   on 2001/12/10  13:22:49
+        Log: Subject: [PATCH t/test.pl] Moving Cygwin .exe logic into which_perl
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 10 Dec 2001 02:54:22 -0500
+             Message-ID: <20011210075422.GI1770@blackrider>
+     Branch: perl
+	   ! t/test.pl
+____________________________________________________________________________
+[ 13592] By: jhi                                   on 2001/12/10  13:21:06
+        Log: Subject: Re: [ID 20011209.005] perl "u2" eats RAM
+             From: Wolfgang Laun <Wolfgang.Laun@alcatel.at>
+             Date: Mon, 10 Dec 2001 08:45:20 +0100
+             Message-ID: <3C146810.60B5B7C0@alcatel.at>
+     Branch: perl
+	   ! pp_pack.c
+____________________________________________________________________________
+[ 13591] By: jhi                                   on 2001/12/10  13:18:17
+        Log: Subject: [PATCH] Re: [PATCH t/io/openpid.t] Cleanup
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 10 Dec 2001 03:27:02 -0500
+             Message-ID: <20011210082702.GN1770@blackrider>
+     Branch: perl
+	   ! t/io/openpid.t
+____________________________________________________________________________
+[ 13590] By: jhi                                   on 2001/12/10  13:17:08
+        Log: More chmod +w.
+     Branch: perl
+	   ! Porting/makerel
+____________________________________________________________________________
+[ 13589] By: jhi                                   on 2001/12/10  04:21:59
+        Log: Just skip the readability test if running as root.
+     Branch: perl
+	   ! lib/Net/t/netrc.t
+____________________________________________________________________________
+[ 13588] By: jhi                                   on 2001/12/10  04:03:10
+        Log: Tell about the downside of safe signals.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 13587] By: jhi                                   on 2001/12/10  03:38:20
+        Log: Make the whole -lperl thing NetBSD only until we
+             find some other platform that needs the same.
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 13586] By: jhi                                   on 2001/12/10  03:13:59
+        Log: Subject: [PATCH t/op/pack.t] Cleanup
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Sun, 9 Dec 2001 23:08:26 -0500
+             Message-ID: <20011210040826.GD660@blackrider>
+     Branch: perl
+	   ! t/op/pack.t
+____________________________________________________________________________
+[ 13585] By: jhi                                   on 2001/12/10  02:47:01
+        Log: Add threads support for NetBSD.
+             
+             This is also the first (I think) Perl threads build with
+             the GNU pth ( http://www.gnu.org/software/pth/pth.html ).
+             NetBSD does not as of yet have true kernel POSIX threads,
+             but the user-level pth seems to be doing pretty well--
+             the only failure is that threads/t/basic okays 6 and 7
+             consistently seem be arriving in the reverse order.
+             Well, gdbm.t is also failing: 'Undefined PLT symbol
+             "gdbm_open" (reloc type = 7, symnum = 28)', but I'm
+             guessing that GDBM would need a threaded rebuild.
+     Branch: perl
+	   ! hints/netbsd.sh
+____________________________________________________________________________
+[ 13582] By: jhi                                   on 2001/12/10  02:01:26
+        Log: Update the ithreads selection info in Configure,
+             as suggested by Michael Schwern.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 13581] By: jhi                                   on 2001/12/10  01:56:14
+        Log: Clearing locale environment simply doesn't seem to
+             guarantee that (nl_)langinfo(CODESET) would return nil.
+             (I for example get "ISO8859-1", so <guess>maybe there can
+             be per-system default settings at work</guess>.)
+     Branch: perl
+	   ! lib/open.t
+____________________________________________________________________________
+[ 13580] By: jhi                                   on 2001/12/10  01:53:11
+        Log: Subject: RE: Exporter fixes reversed in 13540?
+             From: "Benjamin J. Tilly" <ben_tilly@operamail.com>                
+             Date: Sun, 9 Dec 2001 12:55:15 -0500
+             Message-ID: <3C13F455@operamail.com>
+     Branch: perl
+	   ! lib/open.pm
+____________________________________________________________________________
+[ 13579] By: jhi                                   on 2001/12/10  01:26:53
+        Log: Root is the lizard king.
+     Branch: perl
+	   ! lib/Net/t/netrc.t
+____________________________________________________________________________
+[ 13578] By: jhi                                   on 2001/12/10  01:01:24
+        Log: Telling how many tests we are expecting helps.
+     Branch: perl
+	   ! ext/POSIX/t/waitpid.t
+____________________________________________________________________________
+[ 13577] By: jhi                                   on 2001/12/10  00:38:09
+        Log: Add a test case for waitpid(): from Rocco Caputo.
+     Branch: perl
+	   + ext/POSIX/t/waitpid.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 13576] By: jhi                                   on 2001/12/10  00:15:19
+        Log: Subject: [PATCH] Term::ReadLine tweaks and test
+             From: Richard Clamp <richardc@unixbeard.net>
+             Date: Mon, 10 Dec 2001 00:51:47 +0000
+             Message-ID: <20011210005147.GA1073@mirth.demon.co.uk>
+     Branch: perl
+	   + lib/Term/ReadLine.t
+	   ! MANIFEST lib/Term/ReadLine.pm
+____________________________________________________________________________
+[ 13575] By: jhi                                   on 2001/12/10  00:04:56
+        Log: Subject: [patch] non-blocking waitpid(-1,WNOHANG) for MSWin32
+             From: Rocco Caputo <troc@netrus.net>
+             Date: Sun, 9 Dec 2001 18:12:38 -0500
+             Message-ID: <20011209181238.A803@eyrie.homenet>
+     Branch: perl
+	   ! win32/win32.c
+____________________________________________________________________________
+[ 13574] By: jhi                                   on 2001/12/09  23:49:19
+        Log: make sure that va_start() has matching va_end();
+             from OpenBSD 3.0.
+     Branch: perl
+	   ! x2p/util.c
+____________________________________________________________________________
+[ 13573] By: jhi                                   on 2001/12/09  23:45:57
+        Log: h2ph updates from OpenBSD 3.0.
+     Branch: perl
+	   ! utils/h2ph.PL
+____________________________________________________________________________
+[ 13572] By: jhi                                   on 2001/12/09  23:44:25
+        Log: OpenBSD hints update from OpenBSD 3.0.
+     Branch: perl
+	   ! hints/openbsd.sh
+____________________________________________________________________________
+[ 13571] By: jhi                                   on 2001/12/09  23:32:08
+        Log: DJGPP tweaks from Laszlo Molnar.
+     Branch: perl
+	   ! djgpp/config.over lib/File/Find/t/find.t
+	   ! lib/File/Find/t/taint.t t/pod/find.t
+____________________________________________________________________________
+[ 13570] By: jhi                                   on 2001/12/09  23:28:55
+        Log: Subject: [PATCH README.cygwin] 64bit ints & Cygwin98 ok
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Sun, 9 Dec 2001 19:28:12 -0500
+             Message-ID: <20011210002812.GF13586@blackrider>
+     Branch: perl
+	   ! README.cygwin
+____________________________________________________________________________
+[ 13569] By: jhi                                   on 2001/12/09  21:51:37
+        Log: README.cygwin update from Gerrit P. Haase.
+     Branch: perl
+	   ! README.cygwin
+____________________________________________________________________________
+[ 13568] By: jhi                                   on 2001/12/09  21:49:06
+        Log: Apply NetBSD patch-ag: shared/static linking,
+             but make the change less intrusive on non-NetBSD.
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 13567] By: jhi                                   on 2001/12/09  21:09:10
+        Log: Apply NetBSD patch-af: handle both -[LR] and -Wl,-R linker paths.
+     Branch: perl
+	   ! lib/ExtUtils/Liblist.pm
+____________________________________________________________________________
+[ 13566] By: jhi                                   on 2001/12/09  20:55:32
+        Log: Apply NetBSD patch-ae: another gcc sparc64 bug.
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[ 13565] By: jhi                                   on 2001/12/09  20:50:57
+        Log: Apply NetBSD patch-ad: a gcc sparc64 code generation bug.
+     Branch: perl
+	   ! pp.c
+____________________________________________________________________________
+[ 13564] By: jhi                                   on 2001/12/09  20:38:48
+        Log: Apply NetBSD patch-ac.
+             (the fix has already been done: change #9706, fully qualified
+             pathnames in packlists)
+     Branch: perl
+	   ! lib/ExtUtils/Install.pm
+____________________________________________________________________________
+[ 13563] By: jhi                                   on 2001/12/09  20:32:52
+        Log: Apply NetBSD patch-ab: NetBSD hints update.
+     Branch: perl
+	   ! hints/netbsd.sh
+____________________________________________________________________________
+[ 13561] By: jhi                                   on 2001/12/09  20:31:14
+        Log: NetBSD has <ieeefp.h> but hidden.
+     Branch: perl
+	   ! hints/netbsd.sh
+____________________________________________________________________________
+[ 13560] By: jhi                                   on 2001/12/09  20:29:35
+        Log: Implement NetBSD patch-aa.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 13559] By: jhi                                   on 2001/12/09  19:21:45
+        Log: Subject: Re: [ID 20011206.006] File::Find calls lstat on wrong object before wanted()
+             From: "Wolfgang Laun" <wolfgang.laun@chello.at>             
+             Date: Sun, 09 Dec 2001 13:40:58 +0100
+             Message-ID: <200112091340580550.008ED513@smtp.chello.at>
+             
+             (The lstat()s were there in 5.6.1: what happened to them?)
+     Branch: perl
+	   ! lib/File/Find.pm
+____________________________________________________________________________
+[ 13558] By: jhi                                   on 2001/12/09  19:04:23
+        Log: Quickie documentation of the C UTF-8 API.
+     Branch: perl
+	   ! pod/perlunicode.pod
+____________________________________________________________________________
+[ 13557] By: jhi                                   on 2001/12/09  18:36:20
+        Log: Subject: bleadperl on cygwin weirdness...
+             From: "Gerrit P. Haase" <gp@familiehaase.de>
+             Date: Sun, 9 Dec 2001 20:31:28 +0100
+             Message-ID: <13779422183.20011209203128@familiehaase.de>          
+             
+             (plus libperl*.dll version portability tweaks)
+     Branch: perl
+	   ! lib/ExtUtils/Embed.t
+____________________________________________________________________________
+[ 13556] By: jhi                                   on 2001/12/09  18:21:46
+        Log: Instead of muting symbol export error if under eval,
+             delay the errors until the croak().
+             
+             (replaces #13408)
+     Branch: perl
+	   ! lib/Exporter/Heavy.pm
+____________________________________________________________________________
+[ 13555] By: jhi                                   on 2001/12/09  18:09:12
+        Log: Basegroup 0 is a cygwin_nt thing.
+     Branch: perl
+	   ! t/op/groups.t
+____________________________________________________________________________
+[ 13554] By: jhi                                   on 2001/12/09  17:57:44
+        Log: Also WinME is LoseLink.
+     Branch: perl
+	   ! t/op/stat.t
+____________________________________________________________________________
+[ 13553] By: jhi                                   on 2001/12/09  16:25:52
+        Log: Forgotten checkin.
+     Branch: perl
+	   ! lib/User/grent.t
+____________________________________________________________________________
+[ 13552] By: jhi                                   on 2001/12/09  16:23:14
+        Log: Subject: [PATCH] ID 20011206.007 File::Find:name set to empty string for "/"
+             From: "Wolfgang Laun" <wolfgang.laun@chello.at>
+             Date: Sun, 09 Dec 2001 13:45:06 +0100
+             Message-ID: <200112091345060760.00929EA9@smtp.chello.at>
+     Branch: perl
+	   ! lib/File/Find.pm
+____________________________________________________________________________
+[ 13551] By: jhi                                   on 2001/12/09  16:18:20
+        Log: Tweakback.
+     Branch: perl
+	   ! lib/Net/hostent.t
+____________________________________________________________________________
+[ 13550] By: jhi                                   on 2001/12/09  16:01:55
+        Log: Subject: [PATCH lib/User/grent.t] More Cygwin98 group oddities
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sat, 8 Dec 2001 14:48:38 -0500
+             Message-ID: <20011208194838.GA8650@blackrider>
+     Branch: perl
+	   ! t/op/grent.t
+____________________________________________________________________________
+[ 13549] By: jhi                                   on 2001/12/09  15:40:28
+        Log: Subject: [README.cygwin] Removing old expected test failures
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sat, 8 Dec 2001 15:38:28 -0500
+             Message-ID: <20011208203828.GB9017@blackrider>
+     Branch: perl
+	   ! README.cygwin
+____________________________________________________________________________
+[ 13548] By: jhi                                   on 2001/12/09  15:37:48
+        Log: Subject: [PATCH lib/Net/hostent.t] Cleanup and Cygwin98 oddity
+             From: Michael G Schwern <schwern@pobox.com>                
+             Date: Sat, 8 Dec 2001 15:26:59 -0500
+             Message-ID: <20011208202659.GA9017@blackrider> 
+     Branch: perl
+	   ! lib/Net/hostent.t
+____________________________________________________________________________
+[ 13547] By: jhi                                   on 2001/12/09  15:33:43
+        Log: Subject: [PATCH t/op/stat.t] Cygwin98 fakes hard links
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Sat, 8 Dec 2001 15:06:16 -0500
+             Message-ID: <20011208200616.GA8915@blackrider>
+     Branch: perl
+	   ! t/op/stat.t
+____________________________________________________________________________
+[ 13546] By: jhi                                   on 2001/12/09  15:31:19
+        Log: Developer deprecations and an incompatibility.
+     Branch: perl
+	   ! pod/perldelta.pod pod/perlmodlib.pod pod/perltoc.pod
+____________________________________________________________________________
+[ 13545] By: jhi                                   on 2001/12/09  15:27:14
+        Log: Shoo.
+     Branch: perl
+	   - lib/Attribute/Handlers.pm
+____________________________________________________________________________
+[ 13544] By: jhi                                   on 2001/12/09  15:20:08
+        Log: Remove Attribute::Handlers, as per Damian's request.
+             (Because of fixing the my variables to be now handled
+             in run-time, the whole internals of the A::H needs to
+             be rewritten and Damian will not have time for that
+             for months.)
+     Branch: perl
+	   - lib/Attribute/Handlers/Changes lib/Attribute/Handlers/README
+	   - lib/Attribute/Handlers/demo/Demo.pm
+	   - lib/Attribute/Handlers/demo/Descriptions.pm
+	   - lib/Attribute/Handlers/demo/MyClass.pm
+	   - lib/Attribute/Handlers/demo/demo.pl
+	   - lib/Attribute/Handlers/demo/demo2.pl
+	   - lib/Attribute/Handlers/demo/demo3.pl
+	   - lib/Attribute/Handlers/demo/demo4.pl
+	   - lib/Attribute/Handlers/demo/demo_call.pl
+	   - lib/Attribute/Handlers/demo/demo_chain.pl
+	   - lib/Attribute/Handlers/demo/demo_cycle.pl
+	   - lib/Attribute/Handlers/demo/demo_hashdir.pl
+	   - lib/Attribute/Handlers/demo/demo_phases.pl
+	   - lib/Attribute/Handlers/demo/demo_range.pl
+	   - lib/Attribute/Handlers/demo/demo_rawdata.pl
+	   - lib/Attribute/Handlers/t/multi.t
+	   ! MANIFEST lib/Attribute/Handlers.pm pod/perldelta.pod
+	   ! pod/perlmodlib.pod pod/perltoc.pod
+____________________________________________________________________________
+[ 13543] By: jhi                                   on 2001/12/09  15:00:50
+        Log: Subject: Re: attributes are broken
+             From: Spider Boardman <spider@Orb.Nashua.NH.US>
+             Date: Sun, 09 Dec 2001 00:09:23 -0500
+             Message-Id: <200112090509.AAA02053@Orb.Nashua.NH.US>              
+     Branch: perl
+	   ! dump.c embed.h embed.pl lib/attributes.pm op.c op.h
+	   ! pod/perldelta.pod pod/perltoc.pod proto.h t/op/attrs.t
+	   ! xsutils.c
+____________________________________________________________________________
+[ 13542] By: jhi                                   on 2001/12/09  14:49:46
+        Log: Forgotten checkin.
+     Branch: perl
+	   ! lib/Pod/Text.pm
+____________________________________________________________________________
+[ 13541] By: jhi                                   on 2001/12/09  14:48:15
+        Log: uconfig.h update.
+     Branch: perl
+	   ! uconfig.h
+____________________________________________________________________________
+[ 13540] By: jhi                                   on 2001/12/08  18:39:51
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 13539] By: jhi                                   on 2001/12/08  18:28:02
         Log: Note that some of the Unicode features are
              dependent on perlio.
