@@ -543,6 +543,7 @@
 #define ref			Perl_ref
 #define refkids			Perl_refkids
 #define regdump			Perl_regdump
+#define regclass_swash		Perl_regclass_swash
 #define pregexec		Perl_pregexec
 #define pregfree		Perl_pregfree
 #define pregcomp		Perl_pregcomp
@@ -995,7 +996,6 @@
 #define regbranch		S_regbranch
 #define reguni			S_reguni
 #define regclass		S_regclass
-#define regclassutf8		S_regclassutf8
 #define regcurly		S_regcurly
 #define reg_node		S_reg_node
 #define regpiece		S_regpiece
@@ -1025,7 +1025,6 @@
 #define regrepeat_hard		S_regrepeat_hard
 #define regtry			S_regtry
 #define reginclass		S_reginclass
-#define reginclassutf8		S_reginclassutf8
 #define regcppush		S_regcppush
 #define regcppop		S_regcppop
 #define regcp_set_to		S_regcp_set_to
@@ -2015,6 +2014,7 @@
 #define ref(a,b)		Perl_ref(aTHX_ a,b)
 #define refkids(a,b)		Perl_refkids(aTHX_ a,b)
 #define regdump(a)		Perl_regdump(aTHX_ a)
+#define regclass_swash(a,b,c)	Perl_regclass_swash(aTHX_ a,b,c)
 #define pregexec(a,b,c,d,e,f,g)	Perl_pregexec(aTHX_ a,b,c,d,e,f,g)
 #define pregfree(a)		Perl_pregfree(aTHX_ a)
 #define pregcomp(a,b,c)		Perl_pregcomp(aTHX_ a,b,c)
@@ -2459,7 +2459,6 @@
 #define regbranch(a,b,c)	S_regbranch(aTHX_ a,b,c)
 #define reguni(a,b,c,d)		S_reguni(aTHX_ a,b,c,d)
 #define regclass(a)		S_regclass(aTHX_ a)
-#define regclassutf8(a)		S_regclassutf8(aTHX_ a)
 #define regcurly(a)		S_regcurly(aTHX_ a)
 #define reg_node(a,b)		S_reg_node(aTHX_ a,b)
 #define regpiece(a,b)		S_regpiece(aTHX_ a,b)
@@ -2487,8 +2486,7 @@
 #define regrepeat(a,b)		S_regrepeat(aTHX_ a,b)
 #define regrepeat_hard(a,b,c)	S_regrepeat_hard(aTHX_ a,b,c)
 #define regtry(a,b)		S_regtry(aTHX_ a,b)
-#define reginclass(a,b)		S_reginclass(aTHX_ a,b)
-#define reginclassutf8(a,b)	S_reginclassutf8(aTHX_ a,b)
+#define reginclass(a,b,c)	S_reginclass(aTHX_ a,b,c)
 #define regcppush(a)		S_regcppush(aTHX_ a)
 #define regcppop()		S_regcppop(aTHX)
 #define regcp_set_to(a)		S_regcp_set_to(aTHX_ a)
@@ -3950,6 +3948,8 @@
 #define refkids			Perl_refkids
 #define Perl_regdump		CPerlObj::Perl_regdump
 #define regdump			Perl_regdump
+#define Perl_regclass_swash	CPerlObj::Perl_regclass_swash
+#define regclass_swash		Perl_regclass_swash
 #define Perl_pregexec		CPerlObj::Perl_pregexec
 #define pregexec		Perl_pregexec
 #define Perl_pregfree		CPerlObj::Perl_pregfree
@@ -4787,8 +4787,6 @@
 #define reguni			S_reguni
 #define S_regclass		CPerlObj::S_regclass
 #define regclass		S_regclass
-#define S_regclassutf8		CPerlObj::S_regclassutf8
-#define regclassutf8		S_regclassutf8
 #define S_regcurly		CPerlObj::S_regcurly
 #define regcurly		S_regcurly
 #define S_reg_node		CPerlObj::S_reg_node
@@ -4845,8 +4843,6 @@
 #define regtry			S_regtry
 #define S_reginclass		CPerlObj::S_reginclass
 #define reginclass		S_reginclass
-#define S_reginclassutf8	CPerlObj::S_reginclassutf8
-#define reginclassutf8		S_reginclassutf8
 #define S_regcppush		CPerlObj::S_regcppush
 #define regcppush		S_regcppush
 #define S_regcppop		CPerlObj::S_regcppop

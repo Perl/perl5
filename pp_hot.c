@@ -1179,6 +1179,7 @@ PP(pp_match)
 	TARG = DEFSV;
 	EXTEND(SP,1);
     }
+    PL_reg_sv = TARG;
     PUTBACK;				/* EVAL blocks need stack_sp. */
     s = SvPV(TARG, len);
     strend = s + len;
@@ -1268,27 +1269,25 @@ play_it_again:
 	RX_MATCH_TAINTED_on(rx);
     TAINT_IF(RX_MATCH_TAINTED(rx));
     if (gimme == G_ARRAY) {
-	I32 iters, i, len;
+	I32 nparens, i, len;
 
-	iters = rx->nparens;
-	if (global && !iters)
+	nparens = rx->nparens;
+	if (global && !nparens)
 	    i = 1;
 	else
 	    i = 0;
 	SPAGAIN;			/* EVAL blocks could move the stack. */
-	EXTEND(SP, iters + i);
-	EXTEND_MORTAL(iters + i);
-	for (i = !i; i <= iters; i++) {
+	EXTEND(SP, nparens + i);
+	EXTEND_MORTAL(nparens + i);
+	for (i = !i; i <= nparens; i++) {
 	    PUSHs(sv_newmortal());
 	    /*SUPPRESS 560*/
 	    if ((rx->startp[i] != -1) && rx->endp[i] != -1 ) {
 		len = rx->endp[i] - rx->startp[i];
 		s = rx->startp[i] + truebase;
 		sv_setpvn(*SP, s, len);
-		if ((pm->op_pmdynflags & PMdf_UTF8) && !IN_BYTE) {
+		if (DO_UTF8(TARG))
 		    SvUTF8_on(*SP);
-		    sv_utf8_downgrade(*SP, TRUE);
-		}
 	    }
 	}
 	if (global) {
@@ -1298,7 +1297,7 @@ play_it_again:
 	    r_flags |= REXEC_IGNOREPOS | REXEC_NOT_FIRST;
 	    goto play_it_again;
 	}
-	else if (!iters)
+	else if (!nparens)
 	    XPUSHs(&PL_sv_yes);
 	LEAVE_SCOPE(oldsave);
 	RETURN;
@@ -1831,6 +1830,7 @@ PP(pp_subst)
 	TARG = DEFSV;
 	EXTEND(SP,1);
     }
+    PL_reg_sv = TARG;
     if (SvFAKE(TARG) && SvREADONLY(TARG))
 	sv_force_normal(TARG);
     if (SvREADONLY(TARG)
@@ -1847,7 +1847,7 @@ PP(pp_subst)
     if (PL_tainted)
 	rxtainted |= 2;
     TAINT_NOT;
-
+    
   force_it:
     if (!pm || !s)
 	DIE(aTHX_ "panic: do_subst");
@@ -2004,6 +2004,8 @@ PP(pp_subst)
 	rxtainted |= RX_MATCH_TAINTED(rx);
 	dstr = NEWSV(25, len);
 	sv_setpvn(dstr, m, s-m);
+	if (DO_UTF8(TARG))
+	    SvUTF8_on(dstr);
 	PL_curpm = pm;
 	if (!c) {
 	    register PERL_CONTEXT *cx;
@@ -2030,7 +2032,8 @@ PP(pp_subst)
 		sv_catpvn(dstr, c, clen);
 	    if (once)
 		break;
-	} while (CALLREGEXEC(aTHX_ rx, s, strend, orig, s == m, TARG, NULL, r_flags));
+	} while (CALLREGEXEC(aTHX_ rx, s, strend, orig, s == m,
+			     TARG, NULL, r_flags));
 	sv_catpvn(dstr, s, strend - s);
 
 	(void)SvOOK_off(TARG);

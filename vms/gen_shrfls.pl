@@ -172,7 +172,7 @@ if ($docc) {
 else {
   open(CPP,"$cpp_file") or die "$0: Can't read preprocessed file $cpp_file: $!\n";
 }
-%checkh = map { $_,1 } qw( thread bytecode byterun proto );
+%checkh = map { $_,1 } qw( thread bytecode byterun proto perlio );
 $ckfunc = 0;
 LINE: while (<CPP>) {
   while (/^#.*vmsish\.h/i .. /^#.*perl\.h/i) {

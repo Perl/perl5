@@ -323,3 +323,14 @@
    * Included Perl core patch 8068 -- fix for bug 20001013.009 
      When run with warnings enabled "$hash{XX} = undef " produced an
      "Uninitialized value" warning. This has been fixed.
+
+1.75 17th December 2000
+
+   * Fixed perl core patch 7703
+
+   * Added suppport to allow DB_File to be built with Berkeley DB 3.2 --
+     btree_compare, btree_prefix and hash_cb needed to be changed.
+
+   * Updated dbinfo to support Berkeley DB 3.2 file format changes.
+
+

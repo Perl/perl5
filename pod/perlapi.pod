@@ -298,7 +298,7 @@ L<perlsub/"Constant Functions">.
 	SV*	cv_const_sv(CV* cv)
 
 =for hackers
-Found in file opmini.c
+Found in file op.c
 
 =item dMARK
 
@@ -1045,7 +1045,8 @@ Found in file scope.h
 =item looks_like_number
 
 Test if an the content of an SV looks like a number (or is a
-number).
+number). C<Inf> and C<Infinity> are treated as numbers (so will not
+issue a non-numeric warning), even if your atof() doesn't grok them.
 
 	I32	looks_like_number(SV* sv)
 
@@ -1178,7 +1179,7 @@ eligible for inlining at compile-time.
 	CV*	newCONSTSUB(HV* stash, char* name, SV* sv)
 
 =for hackers
-Found in file opmini.c
+Found in file op.c
 
 =item newHV
 
@@ -1324,7 +1325,7 @@ Found in file sv.c
 Used by C<xsubpp> to hook up XSUBs as Perl subs.
 
 =for hackers
-Found in file opmini.c
+Found in file op.c
 
 =item newXSproto
 
@@ -2430,6 +2431,15 @@ Found in file sv.h
 =item SVt_PVMG
 
 Type flag for blessed scalars.  See C<svtype>.
+
+=for hackers
+Found in file sv.h
+
+=item SvUOK
+
+Returns a boolean indicating whether the SV contains an unsigned integer.
+
+	void	SvUOK(SV* sv)
 
 =for hackers
 Found in file sv.h

@@ -41,7 +41,7 @@ h2xs - convert .h C header files to Perl extensions
 
 =head1 SYNOPSIS
 
-B<h2xs> [B<-ACOPXacdfkmx>] [B<-F> addflags] [B<-M> fmask] [B<-n> module_name] [B<-o> tmask] [B<-p> prefix] [B<-s> subs] [B<-v> version] [headerfile ... [extra_libraries]]
+B<h2xs> [B<-ACOPXacdfkmx>] [B<-F> addflags] [B<-M> fmask] [B<-n> module_name] [B<-o> tmask] [B<-p> prefix] [B<-s> subs] [B<-v> version] [B<-b> compat_version] [headerfile ... [extra_libraries]]
 
 B<h2xs> B<-h>
 

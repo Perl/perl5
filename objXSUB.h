@@ -1263,6 +1263,10 @@
 #define Perl_regdump		pPerl->Perl_regdump
 #undef  regdump
 #define regdump			Perl_regdump
+#undef  Perl_regclass_swash
+#define Perl_regclass_swash	pPerl->Perl_regclass_swash
+#undef  regclass_swash
+#define regclass_swash		Perl_regclass_swash
 #undef  Perl_pregexec
 #define Perl_pregexec		pPerl->Perl_pregexec
 #undef  pregexec

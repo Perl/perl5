@@ -35,7 +35,9 @@ repair()
      -e 's=File/=='\
      -e 's=glob=='\
      -e 's=Glob=='\
-     -e 's/storable/Storable/'
+     -e 's/storable/Storable/'\
+     -e 's/encode/Encode/'\
+     -e 's=filter/util/call=Filter/Util/Call='
 }
 static_ext=$(repair "$static_ext")
 extensions=$(repair "$extensions")

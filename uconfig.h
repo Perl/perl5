@@ -1053,8 +1053,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-/*#define ARCHLIB "/usr/local/lib/perl5/5.6/unknown"		/ **/
-/*#define ARCHLIB_EXP "/usr/local/lib/perl5/5.6/unknown"		/ **/
+/*#define ARCHLIB "/usr/local/lib/perl5/5.7/unknown"		/ **/
+/*#define ARCHLIB_EXP "/usr/local/lib/perl5/5.7/unknown"		/ **/
 
 /* ARCHNAME:
  *	This symbol holds a string representing the architecture name.
@@ -1192,6 +1192,12 @@
 #define CPPRUN ""
 #define CPPLAST ""
 
+/* HAS__FWALK:
+ *	This symbol, if defined, indicates that the _fwalk system call is
+ *	available to apply a function to all the file handles.
+ */
+/*#define HAS__FWALK		/ **/
+
 /* HAS_ACCESS:
  *	This manifest constant lets the C program know that the access()
  *	system call is available to check for accessibility using real UID/GID.
@@ -1289,6 +1295,13 @@
  */
 /*#define HAS_ENDSERVENT		/ **/
 
+/* FCNTL_CAN_LOCK:
+ *	This symbol, if defined, indicates that fcntl() can be used
+ *	for file locking.  Normally on Unix systems this is defined.
+ *	It may be undefined on VMS.
+ */
+/*#define FCNTL_CAN_LOCK		/ **/
+
 /* HAS_FD_SET:
  *	This symbol, when defined, indicates presence of the fd_set typedef
  *	in <sys/types.h>
@@ -1330,6 +1343,13 @@
  *	available to stat filesystems by file descriptors.
  */
 /*#define HAS_FSTATFS		/ **/
+
+/* HAS_FSYNC:
+ *	This symbol, if defined, indicates that the fsync routine is
+ *	available to write a file's modified data and attributes to
+ *	permanent storage.
+ */
+/*#define HAS_FSYNC		/ **/
 
 /* HAS_FTELLO:
  *	This symbol, if defined, indicates that the ftello routine is
@@ -1483,6 +1503,17 @@
  *	available to look up protocols in some data base or another.
  */
 /*#define HAS_GETPROTOENT		/ **/
+
+/* HAS_GETPGRP:
+ *	This symbol, if defined, indicates that the getpgrp routine is
+ *	available to get the current process group.
+ */
+/* USE_BSD_GETPGRP:
+ *	This symbol, if defined, indicates that getpgrp needs one
+ *	arguments whereas USG one needs none.
+ */
+/*#define HAS_GETPGRP		/ **/
+/*#define USE_BSD_GETPGRP	/ **/
 
 /* HAS_GETPROTOBYNAME:
  *	This symbol, if defined, indicates that the getprotobyname()
@@ -1793,6 +1824,15 @@
  */
 /*#define HAS_SANE_MEMCMP	/ **/
 
+/* HAS_SBRK_PROTO:
+ *	This symbol, if defined, indicates that the system provides
+ *	a prototype for the sbrk() function.  Otherwise, it is up
+ *	to the program to supply one.  Good guesses are
+ *		extern void* sbrk _((int));
+ *		extern void* sbrk _((size_t));
+ */
+/*#define	HAS_SBRK_PROTO	/ **/
+
 /* HAS_SEM:
  *	This symbol, if defined, indicates that the entire sem*(2) library is
  *	supported.
@@ -1829,6 +1869,18 @@
  *	available.
  */
 /*#define HAS_SETPROTOENT		/ **/
+
+/* HAS_SETPGRP:
+ *	This symbol, if defined, indicates that the setpgrp routine is
+ *	available to set the current process group.
+ */
+/* USE_BSD_SETPGRP:
+ *	This symbol, if defined, indicates that setpgrp needs two
+ *	arguments whereas USG one needs none.  See also HAS_SETPGID
+ *	for a POSIX interface.
+ */
+/*#define HAS_SETPGRP		/ **/
+/*#define USE_BSD_SETPGRP	/ **/
 
 /* HAS_SETPROCTITLE:
  *	This symbol, if defined, indicates that the setproctitle routine is
@@ -2031,7 +2083,7 @@
 /*#define USE_STDIO_PTR 	/ **/
 #ifdef USE_STDIO_PTR
 #define FILE_ptr(fp)	((fp)->_IO_read_ptr)
-# STDIO_PTR_LVALUE 		/**/
+/*#define STDIO_PTR_LVALUE 		/ **/
 #define FILE_cnt(fp)	((fp)->_IO_read_end - (fp)->_IO_read_ptr)
 /*#define STDIO_CNT_LVALUE 		/ **/
 /*#define STDIO_PTR_LVAL_SETS_CNT	/ **/
@@ -2099,13 +2151,13 @@
  *	This symbol, if defined, indicates that the strtoq routine is
  *	available to convert strings to long longs (quads).
  */
-# HAS_STRTOQ		/**/
+/*#define HAS_STRTOQ		/ **/
 
-/* HAS_STRTOQ:
- *	This symbol, if defined, indicates that the strtoq routine is
- *	available to convert strings to long longs (quads).
+/* HAS_STRTOUL:
+ *	This symbol, if defined, indicates that the strtoul routine is
+ *	available to provide conversion of strings to unsigned long.
  */
-# HAS_STRTOQ		/**/
+/*#define HAS_STRTOUL	/ **/
 
 /* HAS_STRTOULL:
  *	This symbol, if defined, indicates that the strtoull routine is
@@ -2597,6 +2649,17 @@
 #define RD_NODATA -1
 #undef EOF_NONBLOCK
 
+/* NEED_VA_COPY:
+ *	This symbol, if defined, indicates that the system stores
+ *	the variable argument list datatype, va_list, in a format
+ *	that cannot be copied by simple assignment, so that some
+ *	other means must be used when copying is required.
+ *	As such systems vary in their provision (or non-provision)
+ *	of copying mechanisms, handy.h defines a platform-
+ *	independent macro, Perl_va_copy(src, dst), to do the job.
+ */
+/*#define	NEED_VA_COPY		/ **/
+
 /* Netdb_host_t:
  *	This symbol holds the type used for the 1st argument
  *	to gethostbyaddr().
@@ -2729,7 +2792,7 @@
 #endif
 #define	NVSIZE		8		/**/
 #undef	NV_PRESERVES_UV
-#define	NV_PRESERVES_UV_BITS	
+#define	NV_PRESERVES_UV_BITS	0
 
 /* IVdf:
  *	This symbol defines the format string used for printing a Perl IV
@@ -2784,8 +2847,8 @@
  *	This symbol contains the ~name expanded version of PRIVLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define PRIVLIB "/usr/local/lib/perl5/5.6"		/**/
-#define PRIVLIB_EXP "/usr/local/lib/perl5/5.6"		/**/
+#define PRIVLIB "/usr/local/lib/perl5/5.7"		/**/
+#define PRIVLIB_EXP "/usr/local/lib/perl5/5.7"		/**/
 
 /* PTRSIZE:
  *	This symbol contains the size of a pointer, so that the C preprocessor
@@ -2945,6 +3008,12 @@
  *	some shell.
  */
 #define STARTPERL ""		/**/
+
+/* STDCHAR:
+ *	This symbol is defined to be the type of char used in stdio.h.
+ *	It has the values "unsigned char" or "char".
+ */
+#define STDCHAR char	/**/
 
 /* HAS_STDIO_STREAM_ARRAY:
  *	This symbol, if defined, tells that there is an array
@@ -3163,92 +3232,5 @@
  */
 #define PERL_XS_APIVERSION "5.005"
 #define PERL_PM_APIVERSION "5.005"
-
-/* HAS_GETPGRP:
- *	This symbol, if defined, indicates that the getpgrp routine is
- *	available to get the current process group.
- */
-/* USE_BSD_GETPGRP:
- *	This symbol, if defined, indicates that getpgrp needs one
- *	arguments whereas USG one needs none.
- */
-/*#define HAS_GETPGRP		/ **/
-/*#define USE_BSD_GETPGRP	/ **/
-
-/* HAS_SETPGRP:
- *	This symbol, if defined, indicates that the setpgrp routine is
- *	available to set the current process group.
- */
-/* USE_BSD_SETPGRP:
- *	This symbol, if defined, indicates that setpgrp needs two
- *	arguments whereas USG one needs none.  See also HAS_SETPGID
- *	for a POSIX interface.
- */
-/*#define HAS_SETPGRP		/ **/
-/*#define USE_BSD_SETPGRP	/ **/
-
-/* HAS_STRTOUL:
- *	This symbol, if defined, indicates that the strtoul routine is
- *	available to provide conversion of strings to unsigned long.
- */
-/*#define HAS_STRTOUL	/ **/
-
-/* STDCHAR:
- *	This symbol is defined to be the type of char used in stdio.h.
- *	It has the values "unsigned char" or "char".
- */
-#define STDCHAR char	/**/
-
-/* HAS_STRTOUL:
- *	This symbol, if defined, indicates that the strtoul routine is
- *	available to provide conversion of strings to unsigned long.
- */
-/*#define HAS_STRTOUL	/ **/
-
-/* STDCHAR:
- *	This symbol is defined to be the type of char used in stdio.h.
- *	It has the values "unsigned char" or "char".
- */
-#define STDCHAR char	/**/
-
-/* HAS__FWALK:
- *	This symbol, if defined, indicates that the _fwalk system call is
- *	available to apply a function to all the file handles.
- */
-/*#define HAS__FWALK		/ **/
-
-/* FCNTL_CAN_LOCK:
- *	This symbol, if defined, indicates that fcntl() can be used
- *	for file locking.  Normally on Unix systems this is defined.
- *	It may be undefined on VMS.
- */
-/*#define FCNTL_CAN_LOCK		/ **/
-
-/* HAS_FSYNC:
- *	This symbol, if defined, indicates that the fsync routine is
- *	available to write a file's modified data and attributes to
- *	permanent storage.
- */
-# HAS_FSYNC		/**/
-
-/* HAS_SBRK_PROTO:
- *	This symbol, if defined, indicates that the system provides
- *	a prototype for the sbrk() function.  Otherwise, it is up
- *	to the program to supply one.  Good guesses are
- *		extern void* sbrk _((int));
- *		extern void* sbrk _((size_t));
- */
-/*#define	HAS_SBRK_PROTO	/ **/
-
-/* NEED_VA_COPY:
- *	This symbol, if defined, indicates that the system stores
- *	the variable argument list datatype, va_list, in a format
- *	that cannot be copied by simple assignment, so that some
- *	other means must be used when copying is required.
- *	As such systems vary in their provision (or non-provision)
- *	of copying mechanisms, handy.h defines a platform-
- *	independent macro, Perl_va_copy(src, dst), to do the job.
- */
-/*#define	NEED_VA_COPY		/ **/
 
 #endif

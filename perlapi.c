@@ -85,6 +85,13 @@ Perl_Gv_AMupdate(pTHXo_ HV* stash)
     return ((CPerlObj*)pPerl)->Perl_Gv_AMupdate(stash);
 }
 
+#undef  Perl_gv_handler
+CV*
+Perl_gv_handler(pTHXo_ HV* stash, I32 id)
+{
+    return ((CPerlObj*)pPerl)->Perl_gv_handler(stash, id);
+}
+
 #undef  Perl_apply_attrs_string
 void
 Perl_apply_attrs_string(pTHXo_ char *stashpv, CV *cv, char *attrstr, STRLEN len)
@@ -2312,6 +2319,13 @@ Perl_regdump(pTHXo_ regexp* r)
     ((CPerlObj*)pPerl)->Perl_regdump(r);
 }
 
+#undef  Perl_regclass_swash
+SV*
+Perl_regclass_swash(pTHXo_ struct regnode *n, bool doinit, SV **initsvp)
+{
+    return ((CPerlObj*)pPerl)->Perl_regclass_swash(n, doinit, initsvp);
+}
+
 #undef  Perl_pregexec
 I32
 Perl_pregexec(pTHXo_ regexp* prog, char* stringarg, char* strend, char* strbeg, I32 minend, SV* screamer, U32 nosave)
@@ -4095,6 +4109,8 @@ Perl_sys_intern_init(pTHXo)
 #endif
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 #  if defined(DEBUGGING)
+#  endif
+#  if !defined(NV_PRESERVES_UV)
 #  endif
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)

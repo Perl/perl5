@@ -5,6 +5,8 @@ BEGIN {
     @INC = '../lib';
 }
 
+no utf8; # this test contains raw 8-bit data on purpose; don't switch to \x{}
+
 print "1..78\n";
 
 my $test = 1;

@@ -88,12 +88,13 @@ struct regnode_2 {
 };
 
 #define ANYOF_BITMAP_SIZE	32	/* 256 b/(8 b/B) */
-#define ANYOF_CLASSBITMAP_SIZE	 4
+#define ANYOF_CLASSBITMAP_SIZE	 4	/* up to 32 (8*4) named classes */
 
 struct regnode_charclass {
     U8	flags;
     U8  type;
     U16 next_off;
+    U32 arg1;
     char bitmap[ANYOF_BITMAP_SIZE];
 };
 
@@ -101,6 +102,7 @@ struct regnode_charclass_class {
     U8	flags;
     U8  type;
     U16 next_off;
+    U32 arg1;
     char bitmap[ANYOF_BITMAP_SIZE];
     char classflags[ANYOF_CLASSBITMAP_SIZE];
 };
@@ -180,13 +182,21 @@ struct regnode_charclass_class {
 
 /* Flags for node->flags of ANYOF */
 
-#define ANYOF_CLASS	0x08
-#define ANYOF_INVERT	0x04
-#define ANYOF_FOLD	0x02
-#define ANYOF_LOCALE	0x01
+#define ANYOF_CLASS		0x08
+#define ANYOF_INVERT		0x04
+#define ANYOF_FOLD		0x02
+#define ANYOF_LOCALE		0x01
 
 /* Used for regstclass only */
-#define ANYOF_EOS	0x10		/* Can match an empty string too */
+#define ANYOF_EOS		0x10		/* Can match an empty string too */
+
+/* There is a character or a range past 0xff */
+#define ANYOF_UNICODE		0x20
+
+/* Are there any runtime flags on in this node? */
+#define ANYOF_RUNTIME(s)	(ANYOF_FLAGS(s) & 0x0f)
+
+#define ANYOF_FLAGS_ALL		0xff
 
 /* Character classes for node->classflags of ANYOF */
 /* Should be synchronized with a table in regprop() */
@@ -220,7 +230,7 @@ struct regnode_charclass_class {
 #define ANYOF_NXDIGIT	25
 #define ANYOF_PSXSPC	26	/* POSIX space: \s plus the vertical tab */
 #define ANYOF_NPSXSPC	27
-#define ANYOF_BLANK	28	/* GNU extension: space and tab */
+#define ANYOF_BLANK	28	/* GNU extension: space and tab: non-vertical space */
 #define ANYOF_NBLANK	29
 
 #define ANYOF_MAX	32
@@ -238,7 +248,6 @@ struct regnode_charclass_class {
 #define ANYOF_CLASS_SIZE	(sizeof(struct regnode_charclass_class))
 
 #define ANYOF_FLAGS(p)		((p)->flags)
-#define ANYOF_FLAGS_ALL		0xff
 
 #define ANYOF_BIT(c)		(1 << ((c) & 7))
 
@@ -300,12 +309,14 @@ EXTCONST U8 PL_varies[] = {
 EXTCONST U8 PL_simple[];
 #else
 EXTCONST U8 PL_simple[] = {
-    REG_ANY, ANYUTF8, SANY, SANYUTF8, ANYOF, ANYOFUTF8,
-    ALNUM, ALNUMUTF8, ALNUML, ALNUMLUTF8,
-    NALNUM, NALNUMUTF8, NALNUML, NALNUMLUTF8,
-    SPACE, SPACEUTF8, SPACEL, SPACELUTF8,
-    NSPACE, NSPACEUTF8, NSPACEL, NSPACELUTF8,
-    DIGIT, DIGITUTF8, NDIGIT, NDIGITUTF8, 0
+    REG_ANY,	SANY,
+    ANYOF,
+    ALNUM,	ALNUML,
+    NALNUM,	NALNUML,
+    SPACE,	SPACEL,
+    NSPACE,	NSPACEL,
+    DIGIT,	NDIGIT,
+    0
 };
 #endif
 
