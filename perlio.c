@@ -1037,6 +1037,15 @@ PerlIO_funcs PerlIO_unix = {
 /*--------------------------------------------------------------------------------------*/
 /* stdio as a layer */
 
+#if defined(USE_64_BIT_STDIO) && defined(HAS_FSEEKO) && !defined(USE_FSEEK64)
+#define fseek fseeko
+#endif
+
+#if defined(USE_64_BIT_STDIO) && defined(HAS_FTELLO) && !defined(USE_FTELL64)
+#define ftell ftello
+#endif
+
+
 typedef struct
 {
  struct _PerlIO	base;
