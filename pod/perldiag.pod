@@ -4359,10 +4359,10 @@ longer than 1024 characters.  The return value has been truncated to
 
 (W closure) During compilation, an inner named subroutine or eval is
 attempting to capture an outer lexical that is not currently available.
-This can be happen for one of two reasons. First, the outer lexical may be
+This can happen for one of two reasons. First, the outer lexical may be
 declared in an outer anonymous subroutine that has not yet been created.
 (Remember that named subs are created at compile time, while anonymous
-subs are created at run-time. For example,
+subs are created at run-time.) For example,
 
     sub { my $a; sub f { $a } }
 
