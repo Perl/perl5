@@ -522,12 +522,24 @@ ok (ref($x),'Math::Foo');
 # test whether +inf eq inf
 
 $y = 1e1000000;	# create inf, since bareword inf does not work
-$x = Math::BigInt->new('+inf'); ok ($x,$y);
+$x = Math::BigInt->new('+inf'); ok_inf ($x,$y);
 
 ###############################################################################
 # all tests done
 
 ###############################################################################
+
+# libc are confused what to call Infinity
+
+sub ok_inf {
+    my ($x, $y) = @_;
+
+    $x =~ s/^inf(?:inity)?/$1/i;
+    $y =~ s/^inf(?:inity)?/$1/i;
+
+    ok($x, $y);
+}
+
 # Perl 5.005 does not like ok ($x,undef)
 
 sub ok_undef
