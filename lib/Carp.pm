@@ -94,7 +94,7 @@ sub export_fail {
 # each function call on the stack.
 
 sub longmess {
-    require Carp::Heavy;
+    { local $@; require Carp::Heavy; }	# XXX fix require to not clear $@?
     goto &longmess_heavy;
 }
 
@@ -106,7 +106,7 @@ sub longmess {
 # you always get a stack trace
 
 sub shortmess {	# Short-circuit &longmess if called via multiple packages
-    require Carp::Heavy;
+    { local $@; require Carp::Heavy; }	# XXX fix require to not clear $@?
     goto &shortmess_heavy;
 }
 
