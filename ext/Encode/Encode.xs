@@ -309,12 +309,12 @@ PerlIOEncode_flush(pTHX_ PerlIO * f)
 	    XPUSHs(e->enc);
 	    SvCUR_set(e->bufsv, e->base.ptr - e->base.buf);
 	    SvUTF8_on(e->bufsv);
-	    Perl_warn(aTHX_ "flush %_",e->bufsv);
 	    XPUSHs(e->bufsv);
 	    XPUSHs(&PL_sv_yes);
 	    PUTBACK;
-	    if (perl_call_method("encode", G_SCALAR) != 1)
-		code = -1;
+	    if (perl_call_method("encode", G_SCALAR) != 1) {
+		Perl_die(aTHX_ "panic: encode did not return a value");
+	    }
 	    SPAGAIN;
 	    str = POPs;
 	    PUTBACK;
@@ -357,8 +357,9 @@ PerlIOEncode_flush(pTHX_ PerlIO * f)
 		XPUSHs(str);
 		XPUSHs(&PL_sv_yes);
 		PUTBACK;
-		if (perl_call_method("encode", G_SCALAR) != 1)
-		    code = -1;
+		if (perl_call_method("encode", G_SCALAR) != 1) {
+		     Perl_die(aTHX_ "panic: encode did not return a value");
+		}
 		SPAGAIN;
 		str = POPs;
 		PUTBACK;
