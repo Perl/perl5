@@ -1,4 +1,4 @@
-/* $Header: arg.h,v 3.0.1.6 90/08/09 02:25:14 lwall Locked $
+/* $Header: arg.h,v 3.0.1.7 90/10/15 14:53:59 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,18 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	arg.h,v $
+ * Revision 3.0.1.7  90/10/15  14:53:59  lwall
+ * patch29: added SysV IPC
+ * patch29: added waitpid
+ * patch29: added cmp and <=>
+ * patch29: added caller
+ * patch29: added scalar
+ * patch29: added sysread and syswrite
+ * patch29: added -M, -A and -C
+ * patch29: index and substr now have optional 3rd args
+ * patch29: you can now read into the middle string
+ * patch29: various portability fixes
+ * 
  * Revision 3.0.1.6  90/08/09  02:25:14  lwall
  * patch19: added require operator
  * patch19: added truncate operator
@@ -123,7 +135,7 @@
 #define O_EACH 89
 #define O_CHOP 90
 #define O_FORK 91
-#define O_EXEC 92
+#define O_EXEC_OP 92
 #define O_SYSTEM 93
 #define O_OCT 94
 #define O_HEX 95
@@ -277,7 +289,28 @@
 #define O_BINMODE 243
 #define O_REQUIRE 244
 #define O_TRUNCATE 245
-#define MAXO 246
+#define O_MSGGET 246
+#define O_MSGCTL 247
+#define O_MSGSND 248
+#define O_MSGRCV 249
+#define O_SEMGET 250
+#define O_SEMCTL 251
+#define O_SEMOP 252
+#define O_SHMGET 253
+#define O_SHMCTL 254
+#define O_SHMREAD 255
+#define O_SHMWRITE 256
+#define O_NCMP 257
+#define O_SCMP 258
+#define O_CALLER 259
+#define O_SCALAR 260
+#define O_SYSREAD 261
+#define O_SYSWRITE 262
+#define O_FTMTIME 263
+#define O_FTATIME 264
+#define O_FTCTIME 265
+#define O_WAITPID 266
+#define MAXO 267
 
 #ifndef DOINIT
 extern char *opname[];
@@ -529,7 +562,28 @@ char *opname[] = {
     "BINMODE",
     "REQUIRE",
     "TRUNCATE",
-    "245"
+    "MSGGET",
+    "MSGCTL",
+    "MSGSND",
+    "MSGRCV",
+    "SEMGET",
+    "SEMCTL",
+    "SEMOP",
+    "SHMGET",
+    "SHMCTL",
+    "SHMREAD",
+    "SHMWRITE",
+    "NCMP",
+    "SCMP",
+    "CALLER",
+    "SCALAR",
+    "SYSREAD",
+    "SYSWRITE",
+    "FTMTIME",
+    "FTATIME",
+    "FTCTIME",
+    "WAITPID",
+    "264"
 };
 #endif
 
@@ -629,11 +683,8 @@ union argptr {
 struct arg {
     union argptr arg_ptr;
     short	arg_len;
-#ifdef mips
-    short	pad;
-#endif
-    unsigned char arg_type;
-    unsigned char arg_flags;
+    unsigned short arg_type;
+    unsigned short arg_flags;
 };
 
 #define AF_ARYOK 1		/* op can handle multiple values here */
@@ -658,10 +709,11 @@ struct arg {
 #define Nullarg Null(ARG*)
 
 #ifndef DOINIT
-EXT char opargs[MAXO+1];
+EXT unsigned short opargs[MAXO+1];
 #else
-#define A(e1,e2,e3) (e1+(e2<<2)+(e3<<4))
-char opargs[MAXO+1] = {
+#define A(e1,e2,e3)        (e1+(e2<<2)+(e3<<4))
+#define A5(e1,e2,e3,e4,e5) (e1+(e2<<2)+(e3<<4)+(e4<<6)+(e5<<8))
+unsigned short opargs[MAXO+1] = {
 	A(0,0,0),	/* NULL */
 	A(1,0,0),	/* ITEM */
 	A(0,0,0),	/* ITEM2 */
@@ -733,7 +785,7 @@ char opargs[MAXO+1] = {
 	A(0,0,0),	/* NEXT */
 	A(0,0,0),	/* REDO */
 	A(0,0,0),	/* GOTO */
-	A(1,1,0),	/* INDEX */
+	A(1,1,1),	/* INDEX */
 	A(0,0,0),	/* TIME */
 	A(0,0,0),	/* TIMES */
 	A(1,0,0),	/* LOCALTIME */
@@ -818,10 +870,10 @@ char opargs[MAXO+1] = {
 	A(1,1,1),	/* IOCTL */
 	A(1,1,1),	/* FCNTL */
 	A(1,1,0),	/* FLOCK */
-	A(1,1,0),	/* RINDEX */
+	A(1,1,1),	/* RINDEX */
 	A(1,3,0),	/* PACK */
 	A(1,1,0),	/* UNPACK */
-	A(1,1,1),	/* READ */
+	A(1,1,3),	/* READ */
 	A(0,3,0),	/* WARN */
 	A(1,1,1),	/* DBMOPEN */
 	A(1,0,0),	/* DBMCLOSE */
@@ -843,7 +895,7 @@ char opargs[MAXO+1] = {
 	A(1,1,0),	/* LISTEN */
 	A(1,1,0),	/* ACCEPT */
 	A(1,1,3),	/* SEND */
-	A(1,1,1),	/* RECV */
+	A(1,1,3),	/* RECV */
 	A(1,1,1),	/* SSELECT */
 	A(1,1,1),	/* SOCKPAIR */
 	A(0,3,0),	/* DBSUBR */
@@ -908,9 +960,31 @@ char opargs[MAXO+1] = {
 	A(1,0,0),	/* BINMODE */
 	A(1,0,0),	/* REQUIRE */
 	A(1,1,0),	/* TRUNCATE */
+	A(1,1,0),	/* MSGGET */
+	A(1,1,1),	/* MSGCTL */
+	A(1,1,1),	/* MSGSND */
+	A5(1,1,1,1,1),	/* MSGRCV */
+	A(1,1,1),	/* SEMGET */
+	A5(1,1,1,1,0),	/* SEMCTL */
+	A(1,1,1),	/* SEMOP */
+	A(1,1,1),	/* SHMGET */
+	A(1,1,1),	/* SHMCTL */
+	A5(1,1,1,1,0),	/* SHMREAD */
+	A5(1,1,1,1,0),	/* SHMWRITE */
+	A(1,1,0),	/* NCMP */
+	A(1,1,0),	/* SCMP */
+	A(1,0,0),	/* CALLER */
+	A(1,0,0),	/* SCALAR */
+	A(1,1,3),	/* SYSREAD */
+	A(1,1,3),	/* SYSWRITE */
+	A(1,0,0),	/* FTMTIME */
+	A(1,0,0),	/* FTATIME */
+	A(1,0,0),	/* FTCTIME */
+	A(1,1,0),	/* WAITPID */
 	0
 };
 #undef A
+#undef A5
 #endif
 
 int do_trans();

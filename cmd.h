@@ -1,4 +1,4 @@
-/* $Header: cmd.h,v 3.0.1.3 90/08/09 02:29:58 lwall Locked $
+/* $Header: cmd.h,v 3.0.1.4 90/10/15 15:34:50 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	cmd.h,v $
+ * Revision 3.0.1.4  90/10/15  15:34:50  lwall
+ * patch29: scripts now run at almost full speed under the debugger
+ * patch29: added caller
+ * 
  * Revision 3.0.1.3  90/08/09  02:29:58  lwall
  * patch19: did preliminary work toward debugging packages and evals
  * 
@@ -78,6 +82,8 @@ char *cmdname[] = {
 #define CFT_INDGETS 11	/* c_expr is <$variable> */
 #define CFT_NUMOP 12	/* c_expr is a numeric comparison */
 #define CFT_CCLASS 13	/* c_expr must start with one of these characters */
+#define CFT_D0 14	/* no special breakpoint at this line */
+#define CFT_D1 15	/* possible special breakpoint at this line */
 
 #ifdef DEBUGGING
 #ifndef DOINIT
@@ -134,19 +140,33 @@ struct cmd {
     } ucmd;
     short	c_slen;		/* len of c_short, if not null */
     VOLATILE short c_flags;	/* optimization flags--see above */
-    char	*c_pack;	/* package line was compiled in */
-    char	*c_file;	/* file the following line # is from */
+    HASH	*c_stash;	/* package line was compiled in */
+    STAB	*c_filestab;	/* file the following line # is from */
     line_t      c_line;         /* line # of this command */
     char	c_type;		/* what this command does */
 };
 
 #define Nullcmd Null(CMD*)
+#define Nullcsv Null(CSV*)
 
 EXT CMD * VOLATILE main_root INIT(Nullcmd);
 EXT CMD * VOLATILE eval_root INIT(Nullcmd);
 
 EXT CMD compiling;
 EXT CMD * VOLATILE curcmd INIT(&compiling);
+EXT CSV * VOLATILE curcsv INIT(Nullcsv);
+
+struct callsave {
+    SUBR *sub;
+    STAB *stab;
+    CSV *curcsv;
+    CMD *curcmd;
+    ARRAY *savearray;
+    ARRAY *argarray;
+    long depth;
+    int wantarray;
+    char hasargs;
+};
 
 struct compcmd {
     CMD *comp_true;

@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: cmd.subval,v 3.0 89/10/18 15:24:52 lwall Locked $
+# $Header: cmd.subval,v 3.0.1.1 90/10/16 10:46:53 lwall Locked $
 
 sub foo1 {
     'true1';
@@ -33,7 +33,7 @@ sub foo6 {
     'true2' unless $_[0];
 }
 
-print "1..26\n";
+print "1..34\n";
 
 if (do foo1(0) eq '0') {print "ok 1\n";} else {print "not ok 1 $foo\n";}
 if (do foo1(1) eq 'true2') {print "ok 2\n";} else {print "not ok 2\n";}
@@ -99,3 +99,81 @@ print &ary2 eq 3 ? "ok 25\n" : "not ok 25\n";
 $x = join(':',&ary2);
 print $x eq '1:2:3' ? "ok 26\n" : "not ok 26 $x\n";
 
+sub somesub {
+    local($num,$P,$F,$L) = @_;
+    ($p,$f,$l) = caller;
+    print "$p:$f:$l" eq "$P:$F:$L" ? "ok $num\n" : "not ok $num\n";
+}
+
+&somesub(27, 'main', __FILE__, __LINE__);
+
+package foo;
+&main'somesub(28, 'foo', __FILE__, __LINE__);
+
+package main;
+$i = 28;
+open(FOO,">Cmd_subval.tmp");
+print FOO "blah blah\n";
+close FOO;
+
+&file_main(*F);
+close F;
+&info_main;
+
+&file_package(*F);
+close F;
+&info_package;
+
+unlink 'Cmd_subval.tmp';
+
+sub file_main {
+        local(*F) = @_;
+
+        open(F, 'Cmd_subval.tmp') || die "can't open\n";
+	$i++;
+        eof F ? print "not ok $i\n" : print "ok $i\n";
+}
+
+sub info_main {
+        local(*F);
+
+        open(F, 'Cmd_subval.tmp') || die "test: can't open\n";
+	$i++;
+        eof F ? print "not ok $i\n" : print "ok $i\n";
+        &iseof(*F);
+	close F;
+}
+
+sub iseof {
+        local(*UNIQ) = @_;
+
+	$i++;
+        eof UNIQ ? print "(not ok $i)\n" : print "ok $i\n";
+}
+
+{package foo;
+
+ sub main'file_package {
+        local(*F) = @_;
+
+        open(F, 'Cmd_subval.tmp') || die "can't open\n";
+	$main'i++;
+        eof F ? print "not ok $main'i\n" : print "ok $main'i\n";
+ }
+
+ sub main'info_package {
+        local(*F);
+
+        open(F, 'Cmd_subval.tmp') || die "can't open\n";
+	$main'i++;
+        eof F ? print "not ok $main'i\n" : print "ok $main'i\n";
+        &iseof(*F);
+ }
+
+ sub iseof {
+        local(*UNIQ) = @_;
+
+	$main'i++;
+        eof UNIQ ? print "not ok $main'i\n" : print "ok $main'i\n";
+ }
+}

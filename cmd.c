@@ -1,4 +1,4 @@
-/* $Header: cmd.c,v 3.0.1.8 90/08/09 02:28:49 lwall Locked $
+/* $Header: cmd.c,v 3.0.1.9 90/10/15 15:32:39 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,12 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	cmd.c,v $
+ * Revision 3.0.1.9  90/10/15  15:32:39  lwall
+ * patch29: non-existent array values no longer cause core dumps
+ * patch29: scripts now run at almost full speed under the debugger
+ * patch29: @ENV = () now works
+ * patch29: added caller
+ * 
  * Revision 3.0.1.8  90/08/09  02:28:49  lwall
  * patch19: did preliminary work toward debugging packages and evals
  * patch19: conditionals now always supply a scalar context to expression
@@ -600,12 +606,24 @@ until_loop:
 	    }
 	    else {
 		match++;
-		retstr = stab_val(cmd->c_stab) = ar->ary_array[match];
+		if (!(retstr = ar->ary_array[match]))
+		    retstr = afetch(ar,match,TRUE);
+		stab_val(cmd->c_stab) = retstr;
 		cmd->c_short->str_u.str_useful = match;
 		match = TRUE;
 	    }
 	    newsp = -2;
 	    goto maybe;
+	case CFT_D1:
+	    break;
+	case CFT_D0:
+	    if (DBsingle->str_u.str_nval != 0)
+		break;
+	    if (DBsignal->str_u.str_nval != 0)
+		break;
+	    if (DBtrace->str_u.str_nval != 0)
+		break;
+	    goto next_cmd;
 	}
 
     /* we have tried to make this normal case as abnormal as possible */
@@ -1130,7 +1148,7 @@ int base;
 	    break;
 	case SS_SHASH:				/* hash reference */
 	    stab = value->str_u.str_stab;
-	    (void)hfree(stab_xhash(stab));
+	    (void)hfree(stab_xhash(stab), FALSE);
 	    stab_xhash(stab) = (HASH*)value->str_ptr;
 	    value->str_ptr = Nullch;
 	    str_free(value);
@@ -1161,6 +1179,20 @@ int base;
 	    value->str_magic = Nullstr;
 	    (void)stab_clear(stab);
 	    str_free(value);
+	    break;
+	case SS_SCSV:				/* callsave structure */
+	    {
+		CSV *csv = (CSV*) value->str_ptr;
+
+		curcmd = csv->curcmd;
+		curcsv = csv->curcsv;
+		csv->sub->depth = csv->depth;
+		if (csv->hasargs) {		/* put back old @_ */
+		    afree(csv->argarray);
+		    stab_xarray(defstab) = csv->savearray;
+		}
+		str_free(value);
+	    }
 	    break;
 	default:
 	    fatal("panic: restorelist inconsistency");

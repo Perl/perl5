@@ -14,7 +14,6 @@
 #define GETPPID
 #define GETPRIORITY
 #define SETPRIORITY
-#define SYSCALL
 #define KILL
 #endif /* OS2 */
 
@@ -435,7 +434,7 @@
  *	This symbol, if defined, indicates to the C program that it should
  *	include fcntl.h.
  */
-#define	I_FCNTL		/**/
+/*#define	I_FCNTL		/**/
 
 /* I_GRP:
  *	This symbol, if defined, indicates to the C program that it should
@@ -545,7 +544,7 @@
  *	execution path, but it should be accessible by the world.  The program
  *	should be prepared to do ^ expansion.
  */
-#define PRIVLIB "/usr/local/lib/perl"		/**/
+#define PRIVLIB "c:/bin/perl"		/**/
 
 /*
  * BUGGY_MSC:

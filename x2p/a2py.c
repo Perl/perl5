@@ -1,4 +1,4 @@
-/* $Header: a2py.c,v 3.0.1.1 90/08/09 05:48:53 lwall Locked $
+/* $Header: a2py.c,v 3.0.1.2 90/10/16 11:30:34 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	a2py.c,v $
+ * Revision 3.0.1.2  90/10/16  11:30:34  lwall
+ * patch29: various portability fixes
+ * 
  * Revision 3.0.1.1  90/08/09  05:48:53  lwall
  * patch19: a2p didn't emit a chop when NF was referenced though split needs it
  * 
@@ -14,14 +17,33 @@
  * 
  */
 
+#ifdef MSDOS
+#include "../patchlev.h"
+#endif
 #include "util.h"
 char *index();
 
 char *filename;
+char *myname;
 
 int checkers = 0;
 STR *walk();
 
+#ifdef MSDOS
+usage()
+{
+    printf("\nThis is the AWK to PERL translator, version 3.0, patchlevel %d\n", PATCHLEVEL);
+    printf("\nUsage: %s [-D<number>] [-F<char>] [-n<fieldlist>] [-<number>] filename\n", myname);
+    printf("\n  -D<number>      sets debugging flags."
+           "\n  -F<character>   the awk script to translate is always invoked with"
+           "\n                  this -F switch."
+           "\n  -n<fieldlist>   specifies the names of the input fields if input does"
+           "\n                  not have to be split into an array."
+           "\n  -<number>       causes a2p to assume that input will always have that"
+           "\n                  many fields.\n");
+    exit(1);
+}
+#endif
 main(argc,argv,env)
 register int argc;
 register char **argv;
@@ -32,6 +54,7 @@ register char **env;
     int i;
     STR *tmpstr;
 
+    myname = argv[0];
     linestr = str_new(80);
     str = str_new(0);		/* first used for -I flags */
     for (argc--,argv++; argc; argc--,argv++) {
@@ -65,14 +88,24 @@ register char **env;
 	    break;
 	default:
 	    fatal("Unrecognized switch: %s\n",argv[0]);
+#ifdef MSDOS
+            usage();
+#endif
 	}
     }
   switch_end:
 
     /* open script */
 
-    if (argv[0] == Nullch)
-	argv[0] = "-";
+    if (argv[0] == Nullch) {
+#ifdef MSDOS
+	if ( isatty(fileno(stdin)) )
+	    usage();
+#endif
+        argv[0] = "-";
+    }
+    filename = savestr(argv[0]);
+
     filename = savestr(argv[0]);
     if (strEQ(filename,"-"))
 	argv[0] = "";
@@ -1207,7 +1240,7 @@ int prevargs;
     }
     else
 	fatal("panic: unknown argument type %d, arg %d, line %d\n",
-	  type,numargs+1,line);
+	  type,prevargs+1,line);
     return numargs;
 }
 

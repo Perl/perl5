@@ -1,4 +1,4 @@
-/* $Header: consarg.c,v 3.0.1.6 90/08/09 02:38:51 lwall Locked $
+/* $Header: consarg.c,v 3.0.1.7 90/10/15 15:55:28 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	consarg.c,v $
+ * Revision 3.0.1.7  90/10/15  15:55:28  lwall
+ * patch29: defined @foo was behaving inconsistently
+ * patch29: -5 % 5 was wrong
+ * patch29: package behavior is now more consistent
+ * 
  * Revision 3.0.1.6  90/08/09  02:38:51  lwall
  * patch19: fixed problem with % of negative number
  * 
@@ -92,6 +97,9 @@ register ARG *pat;
     register SPAT *spat;
     register ARG *newarg;
 
+    if (!pat)
+	return Nullarg;
+
     if ((pat->arg_type == O_MATCH ||
 	 pat->arg_type == O_SUBST ||
 	 pat->arg_type == O_TRANS ||
@@ -156,17 +164,17 @@ ARG *arg3;
 {
     register ARG *arg;
     register ARG *chld;
-    register int doarg;
+    register unsigned doarg;
+    register int i;
     extern ARG *arg4;	/* should be normal arguments, really */
     extern ARG *arg5;
 
     arg = op_new(newlen);
     arg->arg_type = type;
-    doarg = opargs[type];
     if (chld = arg1) {
 	if (chld->arg_type == O_ITEM &&
-	    (hoistable[chld[1].arg_type] || chld[1].arg_type == A_LVAL ||
-	     (chld[1].arg_type == A_LEXPR &&
+	    (hoistable[ i = (chld[1].arg_type&A_MASK)] || i == A_LVAL ||
+	     (i == A_LEXPR &&
 	      (chld[1].arg_ptr.arg_arg->arg_type == O_LIST ||
 	       chld[1].arg_ptr.arg_arg->arg_type == O_ARRAY ||
 	       chld[1].arg_ptr.arg_arg->arg_type == O_HASH ))))
@@ -181,15 +189,10 @@ ARG *arg3;
 	    arg[1].arg_type = A_EXPR;
 	    arg[1].arg_ptr.arg_arg = chld;
 	}
-	if (!(doarg & 1))
-	    arg[1].arg_type |= A_DONT;
-	if (doarg & 2)
-	    arg[1].arg_flags |= AF_ARYOK;
     }
-    doarg >>= 2;
     if (chld = arg2) {
 	if (chld->arg_type == O_ITEM && 
-	    (hoistable[chld[1].arg_type] || 
+	    (hoistable[chld[1].arg_type&A_MASK] || 
 	     (type == O_ASSIGN && 
 	      ((chld[1].arg_type == A_READ && !(arg[1].arg_type & A_DONT))
 		||
@@ -206,14 +209,9 @@ ARG *arg3;
 	    arg[2].arg_type = A_EXPR;
 	    arg[2].arg_ptr.arg_arg = chld;
 	}
-	if (!(doarg & 1))
-	    arg[2].arg_type |= A_DONT;
-	if (doarg & 2)
-	    arg[2].arg_flags |= AF_ARYOK;
     }
-    doarg >>= 2;
     if (chld = arg3) {
-	if (chld->arg_type == O_ITEM && hoistable[chld[1].arg_type]) {
+	if (chld->arg_type == O_ITEM && hoistable[chld[1].arg_type&A_MASK]) {
 	    arg[3].arg_type = chld[1].arg_type;
 	    arg[3].arg_ptr = chld[1].arg_ptr;
 	    arg[3].arg_len = chld[1].arg_len;
@@ -223,13 +221,9 @@ ARG *arg3;
 	    arg[3].arg_type = A_EXPR;
 	    arg[3].arg_ptr.arg_arg = chld;
 	}
-	if (!(doarg & 1))
-	    arg[3].arg_type |= A_DONT;
-	if (doarg & 2)
-	    arg[3].arg_flags |= AF_ARYOK;
     }
     if (newlen >= 4 && (chld = arg4)) {
-	if (chld->arg_type == O_ITEM && hoistable[chld[1].arg_type]) {
+	if (chld->arg_type == O_ITEM && hoistable[chld[1].arg_type&A_MASK]) {
 	    arg[4].arg_type = chld[1].arg_type;
 	    arg[4].arg_ptr = chld[1].arg_ptr;
 	    arg[4].arg_len = chld[1].arg_len;
@@ -241,7 +235,7 @@ ARG *arg3;
 	}
     }
     if (newlen >= 5 && (chld = arg5)) {
-	if (chld->arg_type == O_ITEM && hoistable[chld[1].arg_type]) {
+	if (chld->arg_type == O_ITEM && hoistable[chld[1].arg_type&A_MASK]) {
 	    arg[5].arg_type = chld[1].arg_type;
 	    arg[5].arg_ptr = chld[1].arg_ptr;
 	    arg[5].arg_len = chld[1].arg_len;
@@ -251,6 +245,14 @@ ARG *arg3;
 	    arg[5].arg_type = A_EXPR;
 	    arg[5].arg_ptr.arg_arg = chld;
 	}
+    }
+    doarg = opargs[type];
+    for (i = 1; i <= newlen; ++i) {
+	if (!(doarg & 1))
+	    arg[i].arg_type |= A_DONT;
+	if (doarg & 2)
+	    arg[i].arg_flags |= AF_ARYOK;
+	doarg >>= 2;
     }
 #ifdef DEBUGGING
     if (debug & 16) {
@@ -354,7 +356,7 @@ register ARG *arg;
 	    if (tmp2 >= 0)
 		str_numset(str,(double)(tmp2 % tmplong));
 	    else
-		str_numset(str,(double)(tmplong - ((-tmp2 - 1) % tmplong))) - 1;
+		str_numset(str,(double)((tmplong-((-tmp2 - 1) % tmplong)) - 1));
 #else
 	    tmp2 = tmp2;
 #endif
@@ -409,6 +411,15 @@ register ARG *arg;
 	case O_NE:
 	    value = str_gnum(s1);
 	    str_numset(str,(value != str_gnum(s2)) ? 1.0 : 0.0);
+	    break;
+	case O_NCMP:
+	    value = str_gnum(s1);
+	    value -= str_gnum(s2);
+	    if (value > 0.0)
+		value = 1.0;
+	    else if (value < 0.0)
+		value = -1.0;
+	    str_numset(str,value);
 	    break;
 	case O_BIT_AND:
 	    value = str_gnum(s1);
@@ -498,6 +509,9 @@ register ARG *arg;
 	    break;
 	case O_SNE:
 	    str_numset(str,(double)(!str_eq(s1,s2)));
+	    break;
+	case O_SCMP:
+	    str_numset(str,(double)(str_cmp(s1,s2)));
 	    break;
 	case O_CRYPT:
 #ifdef CRYPT
@@ -937,20 +951,6 @@ localize(arg)
 ARG *arg;
 {
     arg->arg_flags |= AF_LOCAL;
-    return arg;
-}
-
-ARG *
-fixeval(arg)
-ARG *arg;
-{
-    Renew(arg, 3, ARG);
-    if (arg->arg_len == 0)
-	arg[1].arg_type = A_NULL;
-    arg->arg_len = 2;
-    arg[2].arg_flags = 0;
-    arg[2].arg_ptr.arg_hash = curstash;
-    arg[2].arg_type = A_NULL;
     return arg;
 }
 

@@ -421,6 +421,11 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
  */
 #$d_syscall	SYSCALL		/**/
 
+/* SYSVIPC:
+ *	This symbol, if defined, indicates that System V IPC exists.
+ */
+#$d_sysvipc	SYSVIPC	/**/
+
 /* TRUNCATE:
  *	This symbol, if defined, indicates that the truncate routine is
  *	available to truncate files.
@@ -471,6 +476,11 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
  */
 #$d_wait4	WAIT4	/**/
 
+/* WAITPID:
+ *	This symbol, if defined, indicates that waitpid() exists.
+ */
+#$d_waitpid	WAITPID	/**/
+
 /* GIDTYPE:
  *	This symbol has a value like gid_t, int, ushort, or whatever type is
  *	used to declare group ids in the kernel.
@@ -511,6 +521,10 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
  *	This symbol, if defined, indicates to the C program that it should
  *	include pwd.h.
  */
+/* PWCOMMENT:
+ *	This symbol, if defined, indicates to the C program that struct passwd
+ *	contains pw_comment.
+ */
 /* PWQUOTA:
  *	This symbol, if defined, indicates to the C program that struct passwd
  *	contains pw_quota.
@@ -532,6 +546,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
  *	contains pw_expire.
  */
 #$i_pwd	I_PWD		/**/
+#$d_pwcomment	PWCOMMENT	/**/
 #$d_pwquota	PWQUOTA		/**/
 #$d_pwage	PWAGE		/**/
 #$d_pwchange	PWCHANGE	/**/

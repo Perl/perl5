@@ -1,4 +1,4 @@
-/* $Header: cons.c,v 3.0.1.7 90/08/09 02:35:52 lwall Locked $
+/* $Header: cons.c,v 3.0.1.8 90/10/15 15:41:09 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,12 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	cons.c,v $
+ * Revision 3.0.1.8  90/10/15  15:41:09  lwall
+ * patch29: added caller
+ * patch29: scripts now run at almost full speed under the debugger
+ * patch29: the debugger now understands packages and evals
+ * patch29: package behavior is now more consistent
+ * 
  * Revision 3.0.1.7  90/08/09  02:35:52  lwall
  * patch19: did preliminary work toward debugging packages and evals
  * patch19: Added support for linked-in C subroutines
@@ -76,7 +82,7 @@ CMD *cmd;
 	}
 	Safefree(stab_sub(stab));
     }
-    sub->filename = filename;
+    sub->filestab = curcmd->c_filestab;
     saw_return = FALSE;
     tosave = anew(Nullstab);
     tosave->ary_fill = 0;	/* make 1 based */
@@ -94,13 +100,18 @@ CMD *cmd;
     sub->cmd = cmd;
     stab_sub(stab) = sub;
     if (perldb) {
-	STR *str = str_nmake((double)subline);
+	STR *str;
+	STR *tmpstr = str_static(&str_undef);
 
+	sprintf(buf,"%s:%ld",stab_val(curcmd->c_filestab)->str_ptr,
+	  (long)subline);
+	str = str_make(buf,0);
 	str_cat(str,"-");
 	sprintf(buf,"%ld",(long)curcmd->c_line);
 	str_cat(str,buf);
 	name = str_get(subname);
-	hstore(stab_xhash(DBsub),name,strlen(name),str,0);
+	stab_fullname(tmpstr,stab);
+	hstore(stab_xhash(DBsub), tmpstr->str_ptr, tmpstr->str_cur, str, 0);
 	str_set(subname,"main");
     }
     subline = 0;
@@ -129,7 +140,7 @@ char *filename;
 	}
 	Safefree(stab_sub(stab));
     }
-    sub->filename = filename;
+    sub->filestab = fstab(filename);
     sub->usersub = subaddr;
     sub->userindex = ix;
     stab_sub(stab) = sub;
@@ -445,27 +456,26 @@ CMD *cur;
 	head = cur;
     if (!head->c_line)
 	return cur;
-    str = afetch(lineary,(int)head->c_line,FALSE);
-    if (!str || str->str_nok)
+    str = afetch(stab_xarray(curcmd->c_filestab),(int)head->c_line,FALSE);
+    if (str == &str_undef || str->str_nok)
 	return cur;
     str->str_u.str_nval = (double)head->c_line;
     str->str_nok = 1;
     Newz(106,cmd,1,CMD);
+    str_magic(str, curcmd->c_filestab, 0, Nullch, 0);
+    str->str_magic->str_u.str_cmd = cmd;
     cmd->c_type = C_EXPR;
     cmd->ucmd.acmd.ac_stab = Nullstab;
     cmd->ucmd.acmd.ac_expr = Nullarg;
-    arg = make_op(O_ITEM,1,Nullarg,Nullarg,Nullarg);
-    arg[1].arg_type = A_SINGLE;
-    arg[1].arg_ptr.arg_str = str_nmake((double)head->c_line);
-    cmd->c_expr = make_op(O_SUBR, 2,
+    cmd->c_expr = make_op(O_SUBR, 1,
 	stab2arg(A_WORD,DBstab),
-	make_list(arg),
+	Nullarg,
 	Nullarg);
-    cmd->c_flags |= CF_COND|CF_DBSUB;
+    cmd->c_flags |= CF_COND|CF_DBSUB|CFT_D0;
     cmd->c_line = head->c_line;
     cmd->c_label = head->c_label;
-    cmd->c_file = filename;
-    cmd->c_pack = curpack;
+    cmd->c_filestab = curcmd->c_filestab;
+    cmd->c_stash = curstash;
     return append_line(cmd, cur);
 }
 
@@ -491,8 +501,8 @@ ARG *arg;
 	cmd->c_line = cmdline;
 	cmdline = NOLINE;
     }
-    cmd->c_file = filename;
-    cmd->c_pack = curpack;
+    cmd->c_filestab = curcmd->c_filestab;
+    cmd->c_stash = curstash;
     if (perldb)
 	cmd = dodb(cmd);
     return cmd;
@@ -519,6 +529,8 @@ struct compcmd cblock;
 	cmd->c_line = cmdline;
 	cmdline = NOLINE;
     }
+    cmd->c_filestab = curcmd->c_filestab;
+    cmd->c_stash = curstash;
     if (perldb)
 	cmd = dodb(cmd);
     return cmd;
@@ -550,6 +562,8 @@ struct compcmd cblock;
 	cmd->c_line = cmdline;
 	cmdline = NOLINE;
     }
+    cmd->c_filestab = curcmd->c_filestab;
+    cmd->c_stash = curstash;
     cur = cmd;
     alt = cblock.comp_alt;
     while (alt && alt->c_type == C_ELSIF) {
@@ -939,7 +953,7 @@ char *s;
     else
 	(void)sprintf(tname,"next char %c",yychar);
     (void)sprintf(buf, "%s in file %s at line %d, %s\n",
-      s,filename,curcmd->c_line,tname);
+      s,stab_val(curcmd->c_filestab)->str_ptr,curcmd->c_line,tname);
     if (curcmd->c_line == multi_end && multi_start < multi_end)
 	sprintf(buf+strlen(buf),
 	  "  (Might be a runaway multi-line %c%c string starting on line %d)\n",
@@ -949,7 +963,8 @@ char *s;
     else
 	fputs(buf,stderr);
     if (++error_count >= 10)
-	fatal("%s has too many errors.\n", filename);
+	fatal("%s has too many errors.\n",
+	stab_val(curcmd->c_filestab)->str_ptr);
 }
 
 void

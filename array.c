@@ -1,4 +1,4 @@
-/* $Header: array.c,v 3.0.1.2 90/08/13 21:52:20 lwall Locked $
+/* $Header: array.c,v 3.0.1.3 90/10/15 14:56:17 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	array.c,v $
+ * Revision 3.0.1.3  90/10/15  14:56:17  lwall
+ * patch29: non-existent array values no longer cause core dumps
+ * 
  * Revision 3.0.1.2  90/08/13  21:52:20  lwall
  * patch28: defined(@array) and defined(%array) didn't work right
  * 
@@ -38,12 +41,15 @@ int lval;
 	    return str;
 	}
 	else
-	    return Nullstr;
+	    return &str_undef;
     }
-    if (lval && !ar->ary_array[key]) {
-	str = Str_new(6,0);
-	(void)astore(ar,key,str);
-	return str;
+    if (!ar->ary_array[key]) {
+	if (lval) {
+	    str = Str_new(6,0);
+	    (void)astore(ar,key,str);
+	    return str;
+	}
+	return &str_undef;
     }
     return ar->ary_array[key];
 }
