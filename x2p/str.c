@@ -317,7 +317,7 @@ register FILE *fp;
 	
 	FILE_cnt(fp) = cnt;		/* deregisterize cnt and ptr */
 	FILE_ptr(fp) = ptr;
-	i = _filbuf(fp);		/* get more characters */
+	i = FILE_filbuf(fp);		/* get more characters */
 	cnt = FILE_cnt(fp);
 	ptr = FILE_ptr(fp);		/* reregisterize cnt and ptr */
 
