@@ -307,6 +307,7 @@ use strict;
 use Carp;
 use Exporter;
 use Pod::Parser;
+require VMS::Filespec if $^O eq 'VMS';
 
 use vars qw(@ISA @EXPORT);
 @ISA = qw(Pod::Parser);
@@ -546,6 +547,7 @@ The error level, should be 'WARNING' or 'ERROR'.
 sub poderror {
     my $self = shift;
     my %opts = (ref $_[0]) ? %{shift()} : ();
+    $opts{-file} = VMS::Filespec::unixify($opts{-file}) if (exists($opts{-file}) && $^O eq 'VMS');
 
     ## Retrieve options
     chomp( my $msg  = ($opts{-msg} || "")."@_" );
@@ -670,6 +672,7 @@ sub end_pod {
     ## print the number of errors found
     my $self   = shift;
     my $infile = $self->input_file();
+    $infile = VMS::Filespec::unixify($infile) if $^O eq 'VMS';
     my $out_fh = $self->output_handle();
 
     if(@{$self->{_list_stack}}) {

@@ -195,6 +195,16 @@ syswrite() on closed filehandle main::STDIN at - line 6.
 (Are you trying to call syswrite() on dirhandle main::STDIN?)
 ########
 # pp_sys.c [pp_flock]
+use Config; 
+BEGIN { 
+  if ( $^O eq 'VMS' and ! $Config{d_flock}) {
+    print <<EOM ;
+SKIPPED
+# flock not present
+EOM
+    exit ;
+  } 
+}
 use warnings 'closed' ;
 close STDIN;
 flock STDIN, 8;
@@ -205,8 +215,8 @@ flock STDIN, 8;
 opendir STDIN, ".";
 flock STDIN, 8;
 EXPECT
-flock() on closed filehandle main::STDIN at - line 4.
-flock() on closed filehandle main::STDIN at - line 6.
+flock() on closed filehandle main::STDIN at - line 14.
+flock() on closed filehandle main::STDIN at - line 16.
 (Are you trying to call flock() on dirhandle main::STDIN?)
 ########
 # pp_sys.c [pp_prtf pp_send pp_bind pp_connect pp_listen pp_accept pp_shutdown pp_ssockopt ppp_getpeername]

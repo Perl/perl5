@@ -45,7 +45,7 @@ $   Delete/Log/NoConfirm Perl.;*
 $   Copy/Log/NoConfirm [-]'ndbg'Perl'exe' []Perl.
 $
 $!  Make the environment look a little friendlier to tests which assume Unix
-$   cat = "Type"
+$   cat == "Type"
 $   Macro/NoDebug/NoList/Object=Echo.Obj Sys$Input
 		.title echo
 		.psect data,wrt,noexe
@@ -88,7 +88,7 @@ $   Macro/NoDebug/NoList/Object=Echo.Obj Sys$Input
 		.end echo
 $   Link/NoMap/NoTrace/Exe=Echo.Exe Echo.Obj;
 $   Delete/Log/NoConfirm Echo.Obj;*
-$   echo = "$" + F$Parse("Echo.Exe")
+$   echo == "$" + F$Parse("Echo.Exe")
 $
 $!  And do it
 $   Show Process/Accounting
@@ -112,7 +112,7 @@ use Config;
 @libexcl=('db-btree.t','db-hash.t','db-recno.t',
           'gdbm.t','io_dup.t', 'io_pipe.t', 'io_poll.t', 'io_sel.t',
           'io_sock.t', 'io_unix.t',
-          'ndbm.t','odbm.t','open2.t','open3.t', 'ph.t', 'posix.t');
+          'ndbm.t','odbm.t','open2.t','open3.t', 'ph.t', 'posix.t', 'dprof.t');
 
 # Note: POSIX is not part of basic build, but can be built
 # separately if you're using DECC

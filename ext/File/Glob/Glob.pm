@@ -109,7 +109,9 @@ if ($^O =~ /^(?:MSWin32|VMS|os2|dos|riscos|MacOS)$/) {
 # Autoload methods go after =cut, and are processed by the autosplit program.
 
 sub glob {
-    return doglob(@_);
+    my ($pat,$flags) = @_;
+    $flags = $DEFAULT_FLAGS if @_ < 2;
+    return doglob($pat,$flags);
 }
 
 ## borrowed heavily from gsar's File::DosGlob

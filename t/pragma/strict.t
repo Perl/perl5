@@ -65,9 +65,7 @@ for (@prgs){
     open TEST, ">$tmpfile";
     print TEST $prog,"\n";
     close TEST;
-    my $results = $Is_VMS ?
-                  `MCR $^X $switch $tmpfile` :
-		  $Is_MSWin32 ?
+    my $results = $Is_MSWin32 ?
                   `.\\perl -I../lib $switch $tmpfile 2>&1` :
                   `./perl $switch $tmpfile 2>&1`;
     my $status = $?;

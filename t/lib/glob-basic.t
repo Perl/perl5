@@ -38,7 +38,7 @@ print "ok 2\n";
 
 # look up the user's home directory
 # should return a list with one item, and not set ERROR
-if ($^O ne 'MSWin32') {
+if ($^O ne 'MSWin32' || $^O ne 'VMS') {
   eval {
     ($name, $home) = (getpwuid($>))[0,7];
     1;
@@ -72,7 +72,7 @@ print "ok 5\n";
 
 # check bad protections
 # should return an empty list, and set ERROR
-if ($^O eq 'mpeix' or $^O eq 'MSWin32' or $^O eq 'os2' or not $>) {
+if ($^O eq 'mpeix' or $^O eq 'MSWin32' or $^O eq 'os2' or $^O eq 'VMS' or not $>) {
     print "ok 6 # skipped\n";
 }
 else {
@@ -99,7 +99,7 @@ print "ok 7\n";
     GLOB_BRACE | GLOB_NOMAGIC
 );
 unless (@a == 3
-        and $a[0] eq 'TEST'
+        and $a[0] eq ($^O eq 'VMS'? 'test.' : 'TEST')
         and $a[1] eq 'a'
         and $a[2] eq 'b')
 {

@@ -137,7 +137,7 @@ $ perl_d_sendmsg = "undef"
 $ perl_d_recvmsg = "undef"
 $ perl_d_msghdr_s = "undef"
 $ perl_d_cmsghdr_s = "undef"
-$ IF use_64bitint .eqs. "Y"
+$ IF (use64bitint)
 $ THEN
 $   perl_use64bitint = "define"
 $   perl_uselargefiles = "define"
@@ -149,8 +149,7 @@ $   perl_uselargefiles = "undef"
 $   perl_uselongdouble = "undef"
 $   perl_usemorebits = "undef"
 $ ENDIF
-$ use_64bitall = use_64bitint ! until configure.com question is reworded?
-$ IF use_64bitall .eqs. "Y"
+$ IF (use64bitall)
 $ THEN
 $   perl_use64bitall = "define"
 $ ELSE
@@ -448,7 +447,7 @@ $ perl_pager="most"
 $!
 $! Are we 64 bit?
 $!
-$ if (use_64bitint .eqs. "Y")
+$ if (use64bitint)
 $ THEN
 $   perl_d_PRIfldbl = "define"
 $   perl_d_PRIgldbl = "define"
@@ -4112,7 +4111,7 @@ $ WC "uselargefiles='" + perl_uselargefiles + "'"
 $ WC "uselongdouble='" + perl_uselongdouble + "'"
 $ WC "usemorebits='" + perl_usemorebits + "'"
 $ WC "d_quad='" + perl_d_quad + "'"
-$ if (use_64bitint .eqs. "Y")
+$ IF (use64bitint)
 $ THEN
 $   WC "quadtype='" + perl_quadtype + "'" 
 $   WC "uquadtype='" + perl_uquadtype + "'" 
@@ -4232,12 +4231,12 @@ $    WRITE CONFIG "#define ALWAYS_DEFTYPES"
 $ ELSE
 $    WRITE CONFIG "#undef ALWAYS_DEFTYPES"
 $ ENDIF
-$ if use_64bitint.eqs."Y"
+$ IF (use64bitint)
 $ THEN
 $    WRITE CONFIG "#define USE_64_BIT_INT"
 $    WRITE CONFIG "#define USE_LONG_DOUBLE"
 $ ENDIF
-$ if use_64bitall.eqs."Y"
+$ IF (use64bitall)
 $ THEN
 $    WRITE CONFIG "#define USE_64_BIT_ALL"
 $ ENDIF

@@ -45,7 +45,8 @@ $ use_debugging_perl = "y"
 $ use_ieee_math = "n"
 $ be_case_sensitive = "n"
 $ use_vmsdebug_perl = "n"
-$ use_64bitint = "n"
+$ use64bitall = "n"
+$ use64bitint = "n"
 $ C_Compiler_Replace = "CC="
 $ Thread_Live_Dangerously = "MT="
 $ use_two_pot_malloc = "N"
@@ -55,8 +56,8 @@ $ d_secintgenv = "N"
 $ cc_flags = ""
 $ use_multiplicity = "N"
 $ vms_default_directory_name = F$ENVIRONMENT("DEFAULT")
-$ max_allowed_dir_depth = 3  ! e.g. [A.B.PERL5_00n] not [A.B.C.PERL5_00n]
-$! max_allowed_dir_depth = 2  ! e.g. [FOO.PERL5_00n] not [FOO.BAR.PERL5_00n]
+$ max_allowed_dir_depth = 3  ! e.g. [A.B.PERL5_xxx] not [A.B.C.PERL5_xxx]
+$! max_allowed_dir_depth = 2  ! e.g. [A.PERL5_xxx] not [A.B.PERL5_xxx]
 $!
 $ vms_filcnt = F$GETJPI ("","FILCNT")
 $!
@@ -360,6 +361,7 @@ $! maybe someday
 $!
 $!: set package name
 $ package = "perl5"
+$ packageup = F$EDIT((package - "5"),"UPCASE")
 $!
 $!: Eunice requires " " instead of "", can you believe it
 $ echo ""
@@ -929,44 +931,44 @@ $!: set up shell script to do ~ expansion !sfn
 $!: expand filename                       !sfn
 $!: now set up to get a file name         !sfn
 $!
+$ prefix = F$ENVIRONMENT("DEFAULT") - ".UU]" + "]"
+$ prefix = F$PARSE(prefix,,,,"NO_CONCEAL") - "][" - ".;"
+$ prefixbase = prefix - "]"
+$ prefix = prefixbase + ".]"
+$!: determine root of directory hierarchy where package will be installed.
+$ dflt = prefix
+$ IF .NOT.silent 
+$ THEN 
+$   echo ""
+$   echo "By default, ''package' will be installed in ''dflt', pod"
+$   echo "pages under ''prefixbase'LIB.POD], etc..., i.e. with ''dflt' as prefix for"
+$   echo "all installation directories."
+$   echo "On ''osname' the ''prefix' is used to DEFINE the ''packageup'_ROOT prior to installation"
+$   echo "as well as during subsequent use of ''package' via ''packageup'_SETUP.COM."
+$ ENDIF
+$ rp = "Installation prefix to use (for ''packageup'_ROOT)? [ ''dflt' ] "
+$ GOSUB myread
+$ IF ans.NES.""
+$ THEN 
+$   prefix = ans
+$   IF F$LOCATE(".]",ans) .EQ. F$LENGTH(ans) THEN prefix = prefix - "]" + ".]"
+$ ELSE 
+$   prefix = dflt
+$ ENDIF
+$!
+$! Check here for pre-existing PERL_ROOT.
+$!  -> ask if removal desired.
+$! Check here for writability of requested PERL_ROOT if it is not the default (cwd).
+$!  -> recommend letting PERL_ROOT be PERL_SRC if requested PERL_ROOT is not writable.
+$!
 $ vms_skip_install = "true"
 $ dflt = "y"
 $! echo ""
-$ rp = "%Config-I-VMS, Do you wish to skip the """"where install"""" questions? [''dflt'] "
+$ rp = "%Config-I-VMS, Do you wish to skip the remaining """"where install"""" questions? [''dflt'] "
 $ GOSUB myread
 $ IF (.NOT.ans).AND.(ans.NES."") THEN vms_skip_install = "false"
-$ prefix = F$ENVIRONMENT("DEFAULT") - ".UU]" + "]"
-$ prefix = f$parse(prefix,,,,"NO_CONCEAL") - "][" - ".;"
-$ prefix = prefix - "]" + ".]"
 $ IF (.NOT.vms_skip_install)
 $ THEN
-$!: determine root of directory hierarchy where package will be installed.
-$   dflt = "default"
-$   IF .NOT.silent 
-$   THEN 
-$     echo ""
-$     echo "By default, ''package' will be installed in ''dflt'/bin, manual"
-$     echo "pages under ''dflt'/man, etc..., i.e. with ''dflt' as prefix for"
-$     echo "all installation directories. Typically set to /usr/local, but you"
-$     echo "may choose /usr if you wish to install ''package' among your system
-$   ENDIF
-$   IF .NOT.silent 
-$   THEN TYPE SYS$INPUT:
-binaries. If you wish to have binaries under /bin but manual pages
-under /usr/local/man, that's ok: you will be prompted separately
-for each of the installation directories, the prefix being only used
-to set the defaults.
-$   ENDIF
-$   dflt = prefix
-$   rp = "Installation prefix to use? [ ''dflt' ] "
-$   GOSUB myread
-$   IF ans.NES.""
-$   THEN 
-$     prefix = ans
-$     IF F$LOCATE(".]",ans) .EQ. F$LENGTH(ans) THEN prefix = prefix - "]" + ".]"
-$   ELSE 
-$     prefix = dflt
-$   ENDIF
 $!
 $!: set the prefixit variable, to compute a suitable default value
 $!
@@ -988,7 +990,7 @@ $   THEN privlib = ans
 $   ELSE privlib = dflt
 $   ENDIF
 $!
-$ ENDIF !%Config-I-VMS, skip "where install" questions
+$ ENDIF !%Config-I-VMS, skip remaining "where install" questions
 $!
 $!: set the base revision
 $ baserev="5"
@@ -1744,25 +1746,51 @@ $   use_multiplicity="N"
 $ ENDIF
 $!
 $! Ask if they want to build with 64-bit support
-$ if (Archname.eqs."VMS_AXP").and.("''f$extract(1,3, f$getsyi(""version""))'".ges."7.1")
+$ IF (Archname.eqs."VMS_AXP").and.("''f$extract(1,3, f$getsyi(""version""))'".ges."7.1")
 $ THEN
+$   dflt = use64bitint
 $   echo ""
-$   echo "This version of perl has experimental support for building with
-$   echo "64 bit integers and 128 bit floating point variables. This gives
-$   echo "a much larger range for perl's mathematical operations. (Note that
-$   echo "does *not* enable 64-bit fileops at the moment, as Dec C doesn't
-$   echo "do that yet)"
-$   dflt = use_64bitint
-$   rp = "Build with 64 bit integers and 128 bit floating point variable? [''dflt'] "
+$   echo "You can have native 64-bit long integers.
+$   echo ""
+$   echo "Perl can be built to take advantage of 64-bit integer types
+$   echo "on some systems, which provide a much larger range for perl's 
+$   echo "mathematical operations.  (Note that does *not* enable 64-bit 
+$   echo "fileops at the moment, as Dec C doesn't do that yet)."
+$   echo "Choosing this option will most probably introduce binary incompatibilities.
+$   echo ""
+$   echo "If this doesn't make any sense to you, just accept the default ''dflt'.
+$   rp = "Try to use 64-bit integers, if available? [''dflt'] "
 $   GOSUB myread
-$   if ans.eqs."" then ans = dflt
-$   if (f$extract(0, 1, "''ans'").eqs."Y").or.(f$extract(0, 1, "''ans'").eqs."y")
+$   IF ans .EQS. "" THEN ans = dflt
+$   IF (f$extract(0, 1, f$edit(ans,"COLLAPSE,UPCASE")) .EQS. "Y")
 $   THEN
-$     use_64bitint="Y"
+$     use64bitint="Y"
 $   ELSE
-$     use_64bitint="N"
+$     use64bitint="N"
 $   ENDIF
-$ ENDIF
+$   IF (use64bitint)
+$   THEN
+$     dflt = use64bitall
+$     echo ""
+$     echo "Since you chose 64-bitness you may want to try maximal 64-bitness.
+$     echo "What you have chosen is minimal 64-bitness which means just enough
+$     echo "to get 64-bit integers.  The maximal means using as much 64-bitness
+$     echo "as is possible on the platform.  This in turn means even more binary
+$     echo "incompatibilities.  On the other hand, your platform may not have
+$     echo "any more maximal 64-bitness than what you already have chosen.
+$     echo ""
+$     echo "If this doesn't make any sense to you, just accept the default ''dflt'.
+$     rp = "Try to use full 64-bit support, if available? [''dflt'] "
+$     GOSUB myread
+$     IF ans .EQS. "" THEN ans = dflt
+$     IF (f$extract(0, 1, f$edit(ans,"COLLAPSE,UPCASE")) .EQS. "Y")
+$     THEN
+$       use64bitall="Y"
+$     ELSE
+$       use64bitall="N"
+$     ENDIF
+$   ENDIF
+$ ENDIF ! AXP && >= 7.1
 $!
 $! Ask about threads, if appropriate
 $ if (Using_Dec_C.eqs."Yes")
@@ -1839,9 +1867,8 @@ $ echo "is really PERL_FOO. There are some packages that use an
 $ echo "embedded perl interpreter that instead require case-sensitive
 $ echo "linker symbols.
 $ echo ""
-$ echo "If you have no idea what the heck this means, and don't have
+$ echo "If you have no idea what this means, and don't have
 $ echo "any program requiring anything, choose the default.
-$ echo ""
 $ dflt = be_case_sensitive
 $ rp = "Case-sensitive symbols [''dflt'] "
 $ gosub myread
@@ -1853,7 +1880,6 @@ $ echo ""
 $ echo "Perl normally uses G_FLOAT format floating point numbers
 $ echo "internally, as do most things on VMS. You can, however, build
 $ echo "with IEEE floating point numbers instead if you need to.
-$ echo ""
 $ dflt = use_ieee_math
 $ rp = "Use IEEE math [''dflt'] "
 $ gosub myread
@@ -1865,9 +1891,8 @@ $ echo ""
 $ echo "You can, if you need to, pass extra flags on to the C
 $ echo "compiler. In general you should only do this if you really,
 $ echo "really know what you're doing.
-$ echo ""
 $ dflt = user_c_flags
-$ rp = "Flags [''dflt'] "
+$ rp = "Extra C flags [''dflt'] "
 $ gosub myread
 $ if ans.eqs."" then ans="''dflt'"
 $ user_c_flags = "''ans'"
@@ -1961,7 +1986,7 @@ $ echo "break badly"
 $ echo "
 $ echo "Which modules do you want to build into perl?"
 $! dflt = "Fcntl Errno File::Glob IO Opcode Byteloader Devel::Peek Devel::DProf Data::Dumper attrs re VMS::Stdio VMS::DCLsym B SDBM_File"
-$ dflt = "re Fcntl Errno File::Glob IO Opcode Devel::Peek Devel::DProf Data::Dumper attrs VMS::Stdio VMS::DCLsym B SDBM_File Thread"
+$ dflt = "re Fcntl Errno File::Glob IO Opcode Devel::Peek Devel::DProf Data::Dumper attrs VMS::Stdio VMS::DCLsym B SDBM_File Thread Sys::Hostname"
 $ if Using_Dec_C.eqs."Yes"
 $ THEN
 $   dflt = dflt + " POSIX"
