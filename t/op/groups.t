@@ -11,6 +11,7 @@ $ENV{PATH} = '/bin:/usr/bin:/usr/xpg4/bin:/usr/ucb';
 # Beware 2: id -Gn or id -a format might be id(name) or name(id).
 # Beware 3: the groups= might be anywhere in the id output.
 # Beware 4: groups can have spaces ('id -a' being the only defense against this)
+# Beware 5: id -a might not contain the groups= part.
 #
 # That is, we might meet the following:
 #
@@ -28,7 +29,7 @@ GROUPS: {
     if (($groups = `id -a 2>/dev/null`) ne '') {
 	# $groups is of the form:
 	# uid=39957(gsar) gid=22(users) groups=33536,39181,22(users),0(root),1067(dev)
-	last GROUPS;
+	last GROUPS if $groups =~ /groups=/;
     }
     if (($groups = `id -Gn 2>/dev/null`) ne '') {
 	# $groups could be of the form:
