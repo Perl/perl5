@@ -2,7 +2,7 @@
 
 my $file = "tf$$.txt";
 
-print "1..72\n";
+print "1..75\n";
 
 my $N = 1;
 use Tie::File;
@@ -102,6 +102,13 @@ check_contents("", "whoops", "", "rec3");
   undef $a[3];
   print $good ? "ok $N\n" : "not ok $N # $warn\n";
   $N++; $good = 1;
+}
+
+# (73-75) What if the user has tampered with $\ ?
+{ {  local $\ = "stop messing with the funny variables!";
+     @a = (0..2);
+   }
+  check_contents(0..2);
 }
 
 use POSIX 'SEEK_SET';

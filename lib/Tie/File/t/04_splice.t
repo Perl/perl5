@@ -15,7 +15,7 @@
 my $file = "tf$$.txt";
 $: = Tie::File::_default_recsep();
 my $data = "rec0$:rec1$:rec2$:";
-print "1..106\n";
+print "1..118\n";
 
 init_file($data);
 
@@ -177,7 +177,7 @@ check_contents("");
 @a = (0..11);
 splice @a, -1, 1000;
 check_contents("0$:1$:2$:3$:4$:5$:6$:7$:8$:9$:10$:");
-    
+
 # (104-106) make sure that undefs are treated correctly---they should
 # be converted to empty records, and should not raise any warnings.
 # (Some of these failed in 0.90.  The change to _fixrec fixed them.)
@@ -197,6 +197,27 @@ check_contents("0$:1$:2$:3$:4$:5$:6$:7$:8$:9$:10$:");
   print defined($r[0]) ? "ok $N\n" : "not ok $N\n";
   $N++; $good = 1;
 }
+
+# (107-118) splice with negative length was treated wrong
+# 20020402 Reported by Juerd Waalboer
+@a = (0..8) ;
+splice @a, 0, -3;
+check_contents("6$:7$:8$:");
+@a = (0..8) ;
+splice @a, 1, -3;
+check_contents("0$:6$:7$:8$:");
+@a = (0..8) ;
+splice @a, 7, -3;
+check_contents("0$:1$:2$:3$:4$:5$:6$:7$:8$:");
+@a = (0..2) ;
+splice @a, 0, -3;
+check_contents("0$:1$:2$:");
+@a = (0..2) ;
+splice @a, 1, -3;
+check_contents("0$:1$:2$:");
+@a = (0..2) ;
+splice @a, 7, -3;
+check_contents("0$:1$:2$:");
 
 sub init_file {
   my $data = shift;

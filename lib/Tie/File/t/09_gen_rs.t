@@ -2,7 +2,7 @@
 
 my $file = "tf$$.txt";
 
-print "1..56\n";
+print "1..58\n";
 
 my $N = 1;
 use Tie::File;
@@ -126,6 +126,18 @@ if (setup_badly_terminated_file(4)) {
     : "not ok $N \# expected <$badrec>, got <$r[0]>\n";
   $N++;
   check_contents("x", "y");
+}
+
+# (57-58) 20020402 The modifiaction would have failed if $\ were set wrong.
+# I hate $\.
+if (setup_badly_terminated_file(2)) {
+  $o = tie @a, 'Tie::File', $file,
+    recsep => $RECSEP, autochomp => 0, autodefer => 0
+    or die "Couldn't tie file: $!";
+  { local $\ = "I hate \$\\.";
+    my $z = $a[0];
+  }
+  check_contents($badrec);
 }
 
 sub setup_badly_terminated_file {

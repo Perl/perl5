@@ -78,13 +78,13 @@ close F;
 undef $o;
 untie @a;
 
-if ($] < 5.006) {
-  print "ok 39 # skipped - 5.005_03 panics after this test\n";
-  exit 0;
-}
 # (39) Does it correctly detect a non-seekable handle?
 {  if ($^O =~ /^(MSWin32|dos|BeOS)$/) {
      print "ok $N # skipped ($^O has broken pipe semantics)\n";
+     last;
+   }
+   if ($] < 5.006) {
+     print "ok $N # skipped - 5.005_03 panics after this test\n";
      last;
    }
    my $pipe_succeeded = eval {pipe *R, *W};

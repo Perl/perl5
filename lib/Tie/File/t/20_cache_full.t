@@ -31,7 +31,7 @@ my @z = @a;                     # force cache to contain all ten records
 # It should now contain only the *last* three records, 7, 8, and 9
 {
   my $x = "7 8 9";
-  my $a = join " ", sort $o->{cache}->keys;
+  my $a = join " ", sort $o->{cache}->ckeys;
   if ($a eq $x) { print "ok $N\n" }
   else { print "not ok $N # cache keys were <$a>; expected <$x>\n" }
   $N++;
@@ -182,7 +182,7 @@ for (5, 6, 1) { my $z = $a[$_] }
   else { print "not ok $N # LRU was <$a>; expected <$x>\n" }
   $N++;
   $x = "1 5 6";
-  $a = join " ", sort $o->{cache}->keys;
+  $a = join " ", sort $o->{cache}->ckeys;
   if ($a eq $x) { print "ok $N\n" }
   else { print "not ok $N # cache keys were <$a>; expected <$x>\n" }
   $N++;

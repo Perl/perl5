@@ -6,7 +6,7 @@ use POSIX 'SEEK_SET';
 use Fcntl 'O_CREAT', 'O_RDWR', 'LOCK_EX', 'O_WRONLY', 'O_RDONLY';
 sub O_ACCMODE () { O_RDONLY | O_RDWR | O_WRONLY }
 
-$VERSION = "0.91";
+$VERSION = "0.92";
 my $DEFAULT_MEMORY_SIZE = 1<<21;    # 2 megabytes
 my $DEFAULT_AUTODEFER_THRESHHOLD = 3; # 3 records
 my $DEFAULT_AUTODEFER_FILELEN_THRESHHOLD = 65536; # 16 disk blocksful
@@ -76,6 +76,7 @@ sub TIEARRAY {
 
   $opts{mode} = O_CREAT|O_RDWR unless defined $opts{mode};
   $opts{rdonly} = (($opts{mode} & O_ACCMODE) == O_RDONLY);
+  $opts{sawlastrec} = undef;
 
   my $fh;
 
@@ -306,7 +307,7 @@ sub STORESIZE {
   $#{$self->{offsets}} = $len;
 #  $self->{offsets}[0] = 0;      # in case we just chopped this
 
-  $self->{cache}->remove(grep $_ >= $len, $self->{cache}->keys);
+  $self->{cache}->remove(grep $_ >= $len, $self->{cache}->ckeys);
 }
 
 sub PUSH {
@@ -440,6 +441,12 @@ sub _splice {
       return unless @data;
       $pos = $oldsize;          # This is what perl does for normal arrays
     }
+
+    # The manual is very unclear here
+    if ($nrecs < 0) {
+      $nrecs = $oldsize - $pos + $nrecs;
+      $nrecs = 0 if $nrecs < 0;
+    }
   }
 
   $self->_fixrecs(@data);
@@ -517,7 +524,7 @@ sub _splice {
   # need to be renumbered
   # Maybe merge this with the previous block?
   {
-    my @oldkeys = grep $_ >= $pos + $nrecs, $self->{cache}->keys;
+    my @oldkeys = grep $_ >= $pos + $nrecs, $self->{cache}->ckeys;
     my @newkeys = map $_-$nrecs+@data, @oldkeys;
     $self->{cache}->rekey(\@oldkeys, \@newkeys);
   }
@@ -654,6 +661,7 @@ sub _fill_offsets_to {
 sub _write_record {
   my ($self, $rec) = @_;
   my $fh = $self->{fh};
+  local $\ = "";
   print $fh $rec
     or die "Couldn't write record: $!";  # "Should never happen."
 #  $self->{_written} += length($rec);
@@ -667,11 +675,14 @@ sub _read_record {
     $rec = <$fh>;
   }
   return unless defined $rec;
-  if (substr($rec, -$self->{recseplen}) ne $self->{recsep}) {
+  if (! $self->{sawlastrec} && 
+      substr($rec, -$self->{recseplen}) ne $self->{recsep}) {
     # improperly terminated final record --- quietly fix it.
 #    my $ac = substr($rec, -$self->{recseplen});
 #    $ac =~ s/\n/\\n/g;
+    $self->{sawlastrec} = 1;
     unless ($self->{rdonly}) {
+      local $\ = "";
       my $fh = $self->{fh};
       print $fh $self->{recsep};
     }
@@ -994,6 +1005,7 @@ sub _check_integrity {
   if (not defined $self->{offsets}[0]) {
     _ci_warn("offset 0 is missing!");
     $good = 0;
+
   } elsif ($self->{offsets}[0] != 0) {
     _ci_warn("rec 0: offset <$self->{offsets}[0]> s/b 0!");
     $good = 0;
@@ -1035,7 +1047,7 @@ sub _check_integrity {
     }
 
     my $deferring = $self->_is_deferring;
-    for my $n ($self->{cache}->keys) {
+    for my $n ($self->{cache}->ckeys) {
       my $r = $self->{cache}->_produce($n);
       $cached += length($r);
       next if $n+1 <= $.;         # checked this already
@@ -1049,6 +1061,7 @@ sub _check_integrity {
     }
   }
 
+  # That cache has its own set of tests
   $good = 0 unless $self->{cache}->_check_integrity;
 
   # Now let's check the deferbuffer
@@ -1288,7 +1301,7 @@ sub rekey {
   }
 }
 
-sub keys {
+sub ckeys {
   my $self = shift;
   my @a = keys %{$self->[HASH]};
   @a;
@@ -1319,9 +1332,58 @@ sub _produce_lru {
   $self->[HEAP]->expire_order;
 }
 
-sub _check_integrity {
+BEGIN { *_ci_warn = \&Tie::File::_ci_warn }
+
+sub _check_integrity {          # For CACHE
   my $self = shift;
-  $self->[HEAP]->_check_integrity;
+  my $good = 1;
+
+  # Test HEAP
+  $self->[HEAP]->_check_integrity or $good = 0;
+
+  # Test HASH
+  my $bytes = 0;
+  for my $k (keys %{$self->[HASH]}) {
+    if ($k ne '0' && $k !~ /^[1-9][0-9]*$/) {
+      $good = 0;
+      _ci_warn "Cache hash key <$k> is non-numeric";
+    }
+
+    my $h = $self->[HASH]{$k};
+    if (! defined $h) {
+      $good = 0;
+      _ci_warn "Heap index number for key $k is undefined";
+    } elsif ($h == 0) {
+      $good = 0;
+      _ci_warn "Heap index number for key $k is zero";
+    } else {
+      my $j = $self->[HEAP][$h];
+      if (! defined $j) {
+        $good = 0;
+        _ci_warn "Heap contents key $k (=> $h) are undefined";
+      } else {
+        $bytes += length($j->[2]);
+        if ($k ne $j->[1]) {
+          $good = 0;
+          _ci_warn "Heap contents key $k (=> $h) is $j->[1], should be $k";
+        }
+      }
+    }
+  }
+
+  # Test BYTES
+  if ($bytes != $self->[BYTES]) {
+    $good = 0;
+    _ci_warn "Total data in cache is $bytes, expected $self->[BYTES]";
+  }
+
+  # Test MAX
+  if ($bytes > $self->[MAX]) {
+    $good = 0;
+    _ci_warn "Total data in cache is $bytes, exceeds maximum $self->[MAX]";
+  }
+
+  return $good;
 }
 
 sub delink {
@@ -1418,7 +1480,7 @@ sub _insert_new {
 # If $i is omitted, default to 1 (the top element.)
 sub _insert {
   my ($self, $item, $i) = @_;
-  $self->_check_loc($i) if defined $i;
+#  $self->_check_loc($i) if defined $i;
   $i = 1 unless defined $i;
   until (! defined $self->[$i]) {
     if ($self->[$i][SEQ] > $item->[SEQ]) { # inserted item is older
@@ -1479,7 +1541,7 @@ sub popheap {
 # bottom.
 sub promote {
   my ($self, $n) = @_;
-  $self->_check_loc($n);
+#  $self->_check_loc($n);
   $self->[$n][SEQ] = $self->_nseq;
   my $i = $n;
   while (1) {
@@ -1502,7 +1564,7 @@ sub promote {
 # Return item $n from the heap, promoting its LRU status
 sub lookup {
   my ($self, $n) = @_;
-  $self->_check_loc($n);
+#  $self->_check_loc($n);
   my $val = $self->[$n];
   $self->promote($n);
   $val->[DAT];
@@ -1512,7 +1574,7 @@ sub lookup {
 # Assign a new value for node $n, promoting it to the bottom of the heap
 sub set_val {
   my ($self, $n, $val) = @_;
-  $self->_check_loc($n);
+#  $self->_check_loc($n);
   my $oval = $self->[$n][DAT];
   $self->[$n][DAT] = $val;
   $self->promote($n);
@@ -1523,32 +1585,47 @@ sub set_val {
 # alter the heap's record of the hash key
 sub rekey {
   my ($self, $n, $new_key) = @_;
-  $self->_check_loc($n);
+#  $self->_check_loc($n);
   $self->[$n][KEY] = $new_key;
 }
 
 sub _check_loc {
   my ($self, $n) = @_;
-  unless (defined $self->[$n]) {
+  unless (1 || defined $self->[$n]) {
     confess "_check_loc($n) failed";
   }
 }
 
+BEGIN { *_ci_warn = \&Tie::File::_ci_warn }
+
 sub _check_integrity {
   my $self = shift;
   my $good = 1;
+  my %seq;
+
   unless (eval {$self->[0][1]->isa("Tie::File::Cache")}) {
-    print "# Element 0 of heap corrupt\n";
+    _ci_warn "Element 0 of heap corrupt";
     $good = 0;
   }
   $good = 0 unless $self->_satisfies_heap_condition(1);
   for my $i (2 .. $#{$self}) {
     my $p = int($i/2);          # index of parent node
     if (defined $self->[$i] && ! defined $self->[$p]) {
-      print "# Element $i of heap defined, but parent $p isn't\n";
+      _ci_warn "Element $i of heap defined, but parent $p isn't";
       $good = 0;
     }
+
+    if (defined $self->[$i]) {
+      if ($seq{$self->[$i][SEQ]}) {
+        my $seq = $self->[$i][SEQ];
+        _ci_warn "Nodes $i and $seq{$seq} both have SEQ=$seq";
+        $good = 0;
+      } else {
+        $seq{$self->[$i][SEQ]} = $i;
+      }
+    }
   }
+
   return $good;
 }
 
@@ -1560,7 +1637,7 @@ sub _satisfies_heap_condition {
     my $c = $n*2 + $_;
     next unless defined $self->[$c];
     if ($self->[$n][SEQ] >= $self->[$c]) {
-      print "# Node $n of heap does not predate node $c\n";
+      _ci_warn "Node $n of heap does not predate node $c";
       $good = 0 ;
     }
     $good = 0 unless $self->_satisfies_heap_condition($c);
@@ -1590,7 +1667,7 @@ Tie::File - Access the lines of a disk file via a Perl array
 
 =head1 SYNOPSIS
 
-	# This file documents Tie::File version 0.90
+	# This file documents Tie::File version 0.92
 
 	tie @array, 'Tie::File', filename or die ...;
 
@@ -2085,7 +2162,7 @@ any news of importance, will be available at
 
 =head1 LICENSE
 
-C<Tie::File> version 0.90 is copyright (C) 2002 Mark Jason Dominus.
+C<Tie::File> version 0.92 is copyright (C) 2002 Mark Jason Dominus.
 
 This library is free software; you may redistribute it and/or modify
 it under the same terms as Perl itself.
@@ -2113,7 +2190,7 @@ For licensing inquiries, contact the author at:
 
 =head1 WARRANTY
 
-C<Tie::File> version 0.90 comes with ABSOLUTELY NO WARRANTY.
+C<Tie::File> version 0.92 comes with ABSOLUTELY NO WARRANTY.
 For details, see the license.
 
 =head1 THANKS
