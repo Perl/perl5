@@ -40,11 +40,11 @@ package main;
 
 use Test::More;
 
-my $IsMacPerl = $^O eq 'MacOS';
+my $IsMacOS   = $^O eq 'MacOS';
 my $IsVMS     = $^O eq 'VMS';
 
 # VMS uses native, not POSIX, exit codes.
-my $die_estat = $IsVMS ? 44 : 1;
+my $die_estat = $IsVMS ? 44 : $IsMacOS ? 0 : 1;
 
 my %samples = (
             simple            => {
@@ -439,7 +439,7 @@ while (my($test, $expect) = each %samples) {
     select STDOUT;
 
     # $? is unreliable in MacPerl, so we'll simply fudge it.
-    $failed->{estat} = $die_estat if $IsMacPerl and $failed;
+    $failed->{estat} = $die_estat if $IsMacOS and $failed;
 
     SKIP: {
         skip "special tests for bailout", 1 unless $test eq 'bailout';

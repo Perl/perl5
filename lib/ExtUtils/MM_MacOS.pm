@@ -53,6 +53,8 @@ sub new {
 
     $self = {} unless (defined $self);
 
+    check_hints($self);
+
     my(%initial_att) = %$self; # record initial attributes
 
     if (defined $self->{CONFIGURE}) {
@@ -74,6 +76,9 @@ sub new {
         require ExtUtils::MY;
         @{"$newclass\:\:ISA"} = 'MM';
     }
+
+    $ExtUtils::MakeMaker::Recognized_Att_Keys{$_} = 1
+	for map { $_ . 'Optimize' } qw(MWC MWCPPC MWC68K MPW MRC MRC SC);
 
     if (defined $ExtUtils::MakeMaker::Parent[-2]){
         $self->{PARENT} = $ExtUtils::MakeMaker::Parent[-2];
@@ -154,7 +159,7 @@ END
 	    dynamic_bs dynamic_lib static_lib manifypods
 	    installbin subdirs dist_basics dist_core
 	    dist_dir dist_test dist_ci install force perldepend makefile
-	    staticmake test pm_to_blib selfdocument cflags 
+	    staticmake test pm_to_blib selfdocument 
 	    const_loadlibs const_cccmd
     /) 
     {
@@ -162,7 +167,7 @@ END
     }
     push @ExtUtils::MakeMaker::MM_Sections, "rulez" 
     	unless grep /rulez/, @ExtUtils::MakeMaker::MM_Sections;
-    
+
     if ($self->{PARENT}) {
 	for (qw/install dist dist_basics dist_core dist_dir dist_test dist_ci/) {
 	    $self->{SKIPHASH}{$_} = 1;
@@ -868,6 +873,17 @@ $target :: $plfile
     join "", @m;
 }
 
+sub cflags {
+    my($self,$libperl) = @_;
+    my $optimize;
+
+    for (map { $_ . "Optimize" } qw(MWC MWCPPC MWC68K MPW MRC MRC SC)) {
+	$optimize .= "$_ = $self->{$_}" if exists $self->{$_};
+    }
+
+    return $self->{CFLAGS} = $optimize;
+}
+
 sub _include {  # for Unix-style includes, with -I instead of -i
 	my($inc) = @_;
 	require File::Spec::Unix;
@@ -880,6 +896,45 @@ sub _include {  # for Unix-style includes, with -I instead of -i
 	}
 }
 
+# yes, these are just copies of the same routines in
+# MakeMaker.pm, but with paths changed.
+sub check_hints {
+    my($self) = @_;
+    # We allow extension-specific hints files.
+
+    return unless -d ":hints";
+
+    # First we look for the best hintsfile we have
+    my($hint)="${^O}_$Config{osvers}";
+    $hint =~ s/\./_/g;
+    $hint =~ s/_$//;
+    return unless $hint;
+
+    # Also try without trailing minor version numbers.
+    while (1) {
+        last if -f ":hints:$hint.pl";      # found
+    } continue {
+        last unless $hint =~ s/_[^_]*$//; # nothing to cut off
+    }
+    my $hint_file = ":hints:$hint.pl";
+
+    return unless -f $hint_file;    # really there
+
+    _run_hintfile($self, $hint_file);
+}
+
+sub _run_hintfile {
+    no strict 'vars';
+    local($self) = shift;       # make $self available to the hint file.
+    my($hint_file) = shift;
+
+    local $@;
+    print STDERR "Processing hints file $hint_file\n";
+    my $ret = do $hint_file;
+    unless( defined $ret ) {
+        print STDERR $@ if $@;
+    }
+}
 1;
 
 __END__
