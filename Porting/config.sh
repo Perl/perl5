@@ -8,7 +8,7 @@
 
 # Package name      : perl5
 # Source directory  : .
-# Configuration time: Wed Sep 11 10:54:26 METDST 2002
+# Configuration time: Mon Sep 30 10:33:19 METDST 2002
 # Configured by     : merijn
 # Target system     : hp-ux l1 b.11.00 u 9000800 527706567 unlimited-user license 
 
@@ -63,7 +63,7 @@ ccsymbols='__HP_cc=111104 __STDC_EXT__=1'
 ccversion='B.11.11.25985.GP'
 cf_by='merijn'
 cf_email='yourname@yourhost.yourplace.com'
-cf_time='Wed Sep 11 10:54:26 METDST 2002'
+cf_time='Mon Sep 30 10:33:19 METDST 2002'
 charsize='1'
 chgrp=''
 chmod='chmod'
@@ -304,6 +304,7 @@ d_msgsnd='define'
 d_msync='define'
 d_munmap='define'
 d_mymalloc='undef'
+d_nanosleep='define'
 d_nice='define'
 d_nl_langinfo='define'
 d_nv_preserves_uv='define'
@@ -523,6 +524,7 @@ from=':'
 full_ar='/usr/bin/ar'
 full_csh='/usr/bin/csh'
 full_sed='/usr/bin/sed'
+gccansipedantic=''
 gccosandvers=''
 gccversion=''
 getgrent_r_proto='0'
@@ -691,8 +693,8 @@ libperl='libperl.a'
 libpth='/usr/local/lib /lib /usr/lib /usr/ccs/lib'
 libs='-lcl -lpthread -lnsl -lnm -lndbm -lgdbm -ldb -lmalloc -ldld -lm -lc -lndir -lcrypt -lsec'
 libsdirs=' /lib'
-libsfiles=' libcl.sl libpthread.sl libnsl.sl libnm.sl libndbm.sl libgdbm.sl libdb.sl libmalloc.a libdld.sl libm.sl libc.sl libndir.a libcrypt.a libsec.sl'
-libsfound=' /lib/libcl.sl /lib/libpthread.sl /lib/libnsl.sl /lib/libnm.sl /lib/libndbm.sl /lib/libgdbm.sl /lib/libdb.sl /lib/libmalloc.a /lib/libdld.sl /lib/libm.sl /lib/libc.sl /lib/libndir.a /lib/libcrypt.a /lib/libsec.sl'
+libsfiles=' libcl.sl libpthread.sl libnsl.sl libnm.sl libndbm.sl libgdbm.sl.3 libdb.sl libmalloc.a libdld.sl libm.sl libc.sl libndir.a libcrypt.a libsec.sl'
+libsfound=' /lib/libcl.sl /lib/libpthread.sl /lib/libnsl.sl /lib/libnm.sl /lib/libndbm.sl /lib/libgdbm.sl.3 /lib/libdb.sl /lib/libmalloc.a /lib/libdld.sl /lib/libm.sl /lib/libc.sl /lib/libndir.a /lib/libcrypt.a /lib/libsec.sl'
 libspath=' /usr/local/lib /lib /usr/lib /usr/ccs/lib'
 libswanted='cl pthread sfio socket bind inet nsl nm ndbm gdbm db malloc dl dld sun m c cposix posix ndir dir crypt sec ucb bsd x util'
 libswanted_uselargefiles=''
@@ -771,7 +773,7 @@ patchlevel='9'
 path_sep=':'
 perl5='/pro/bin/perl'
 perl=''
-perl_patchlevel='17892'
+perl_patchlevel='17942'
 perladmin='yourname@yourhost.yourplace.com'
 perllibs='-lcl -lpthread -lnsl -lnm -lmalloc -ldld -lm -lc -lndir -lcrypt -lsec'
 perlpath='/opt/perl/bin/perl5.9.0'
@@ -955,7 +957,7 @@ vendorlibexp=''
 vendorprefix=''
 vendorprefixexp=''
 version='5.9.0'
-version_patchlevel_string='version 9 subversion 0 patch 17892'
+version_patchlevel_string='version 9 subversion 0 patch 17942'
 versiononly='define'
 vi=''
 voidflags='15'
@@ -983,7 +985,7 @@ PERL_SUBVERSION=0
 PERL_API_REVISION=5
 PERL_API_VERSION=8
 PERL_API_SUBVERSION=0
-PERL_PATCHLEVEL=17892
+PERL_PATCHLEVEL=17942
 PERL_CONFIG_SH=true
 # Variables propagated from previous config.sh file.
 doop_cflags=''

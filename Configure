@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Sep 13 16:29:01 METDST 2002 [metaconfig 3.0 PL70]
+# Generated on Mon Sep 30 10:11:20 METDST 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -548,6 +548,7 @@ d_msgrcv=''
 d_msgsnd=''
 d_msync=''
 d_munmap=''
+d_nanosleep=''
 d_nice=''
 d_nl_langinfo=''
 d_off64_t=''
@@ -755,6 +756,7 @@ fflushNULL=''
 fflushall=''
 fpossize=''
 fpostype=''
+gccansipedantic=''
 gccosandvers=''
 gccversion=''
 gidformat=''
@@ -1117,7 +1119,6 @@ defvoidused=''
 voidflags=''
 pm_apiversion=''
 xs_apiversion=''
-gccansipedantic=''
 yacc=''
 yaccflags=''
 CONFIG=''
@@ -2154,12 +2155,12 @@ for dir in \$*; do
 	elif test -f \$dir/\$thing.exe; then
 		if test -n "$DJGPP"; then
 			echo \$dir/\$thing.exe
-			exit 0
 		elif test "$eunicefix" != ":"; then
 			: on Eunice apparently
 			echo \$dir/\$thing
 			exit 0
 		fi
+		exit 0
 	fi
 	;;
 	esac
@@ -7448,19 +7449,19 @@ Therefore I'm assuming you don't want to do that (unless you insist).
 EOM
 	    case "$installusrbinperl" in
 	    "$define"|[yY]*)	dflt='y';;
-	    *)		 	dflt='n';;
+	    *)			dflt='n';;
 	    esac
 	else
 	    $cat <<EOM
 
-Since you don't have a /usr/bin/perl I'm assuming creating one is okay. 
+Since you don't have a /usr/bin/perl I'm assuming creating one is okay.
 
 EOM
 	    case "$installusrbinperl" in
 	    "$undef"|[nN]*)	dflt='n';;
-	    *)		 	dflt='y';;
+	    *)			dflt='y';;
 	    esac
-    	fi
+	fi
 	rp="Do you want to install perl as /usr/bin/perl?"
 	. ./myread
 	case "$ans" in
@@ -13383,6 +13384,10 @@ eval $inlibc
 
 : see if munmap exists
 set munmap d_munmap
+eval $inlibc
+
+: see if nanosleep exists
+set nanosleep d_nanosleep
 eval $inlibc
 
 : see if nice exists
@@ -19985,6 +19990,7 @@ d_msgsnd='$d_msgsnd'
 d_msync='$d_msync'
 d_munmap='$d_munmap'
 d_mymalloc='$d_mymalloc'
+d_nanosleep='$d_nanosleep'
 d_nice='$d_nice'
 d_nl_langinfo='$d_nl_langinfo'
 d_nv_preserves_uv='$d_nv_preserves_uv'
@@ -20204,6 +20210,7 @@ from='$from'
 full_ar='$full_ar'
 full_csh='$full_csh'
 full_sed='$full_sed'
+gccansipedantic='$gccansipedantic'
 gccosandvers='$gccosandvers'
 gccversion='$gccversion'
 getgrent_r_proto='$getgrent_r_proto'
@@ -20642,7 +20649,6 @@ vi='$vi'
 voidflags='$voidflags'
 xlibpth='$xlibpth'
 xs_apiversion='$xs_apiversion'
-gccansipedantic='$gccansipedantic'
 yacc='$yacc'
 yaccflags='$yaccflags'
 zcat='$zcat'
