@@ -16,7 +16,8 @@ require strict;
 
 sub import {
     my $callpack = caller;
-    my ($pack, @imports, $sym, $ch) = @_;
+    my ($pack, @imports) = @_;
+    my ($sym, $ch);
     foreach (@imports) {
         ($ch, $sym) = unpack('a1a*', $_);
 	if ($sym =~ tr/A-Za-z_0-9//c) {
