@@ -1569,8 +1569,18 @@ Perl_sv_grow(pTHX_ register SV *sv, register STRLEN newlen)
 #endif
 	    Renew(s,newlen,char);
 	}
-        else
-	    New(703,s,newlen,char);
+        else {
+	    /* If we're growing a newSVpvn_share()d SV, we must unshare
+	       the PVX by hand, since sv_force_normal_flags() will try
+	       to grow the SV. AMS 20010713 */
+	    if (SvREADONLY(sv) && SvFAKE(sv)) {
+		STRLEN len = SvCUR(sv);
+		SvFAKE_off(sv);
+		SvREADONLY_off(sv);
+		unsharepvn(SvPVX(sv), SvUTF8(sv) ? -(I32)len : len, SvUVX(sv));
+	    }
+	    New(703, s, newlen, char);
+	}
 	SvPV_set(sv, s);
         SvLEN_set(sv, newlen);
     }
