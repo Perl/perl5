@@ -2232,13 +2232,13 @@ lightly.
 
 All bytes in a multi-byte UTF8 character will have the high bit set,
 so you can test if you need to do something special with this
-character like this (the UTF8_IS_CONTINUED() is a macro that tests
-whether the byte is part of a multi-byte UTF-8 character):
+character like this (the UTF8_IS_INVARIANT() is a macro that tests
+whether the byte can be encoded as a single byte even in UTF-8):
 
     U8 *utf;
     UV uv;	/* Note: a UV, not a U8, not a char */
 
-    if (UTF8_IS_CONTINUED(*utf))
+    if (!UTF8_IS_INVARIANT(*utf))
         /* Must treat this as UTF8 */
         uv = utf8_to_uv(utf);
     else
@@ -2249,7 +2249,7 @@ You can also see in that example that we use C<utf8_to_uv> to get the
 value of the character; the inverse function C<uv_to_utf8> is available
 for putting a UV into UTF8:
 
-    if (UTF8_IS_CONTINUED(uv))
+    if (!UTF8_IS_INVARIANT(uv))
         /* Must treat this as UTF8 */
         utf8 = uv_to_utf8(utf8, uv);
     else
@@ -2355,12 +2355,12 @@ it's not - if you pass on the PV to somewhere, pass on the flag too.
 =item *
 
 If a string is UTF8, B<always> use C<utf8_to_uv> to get at the value,
-unless C<!UTF8_IS_CONTINUED(*s)> in which case you can use C<*s>.
+unless C<UTF8_IS_INVARIANT(*s)> in which case you can use C<*s>.
 
 =item *
 
 When writing a character C<uv> to a UTF8 string, B<always> use
-C<uv_to_utf8>, unless C<!UTF8_IS_CONTINUED(uv))> in which case
+C<uv_to_utf8>, unless C<UTF8_IS_INVARIANT(uv))> in which case
 you can use C<*s = uv>.
 
 =item *
