@@ -96,6 +96,11 @@ true)
 	    ldlibpth=`echo $ldlibpth | sed 's/:*$//'`
 	    ;;
         esac
+	case "$osname" in 
+	linux)
+		ldlibpth="LD_PRELOAD=\"\$\$LD_PRELOAD `pwd`/$libperl\" $ldlibpth"
+	;;
+	esac
 	;;
 *)	pldlflags=''
 	static_target='static'
@@ -109,9 +114,6 @@ esac
 
 case "$osname" in
 os390)	test -f /bin/env && ldlibpth="/bin/env $ldlibpth"
-	;;
-linux)
-	ldlibpth="LD_PRELOAD=\"\$\$LD_PRELOAD `pwd`/$libperl\" $ldlibpth"
 	;;
 esac
 
