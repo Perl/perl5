@@ -121,7 +121,7 @@ sub filter_blocks
 		{
 			my $keyword = $3;
 			my $arg = $4;
-			print  STDERR "[$arg]\n";
+			# print  STDERR "[$arg]\n";
 			$text .= $1.$2.'S_W_I_T_C_H: while (1) ';
 			unless ($arg) {
 				@pos = Text::Balanced::_match_codeblock(\$source,qr/\s*/,qr/\(/,qr/\)/,qr/[[{(<]/,qr/[]})>]/,undef) 
