@@ -119,7 +119,7 @@ The syntaxes
 
 now do localise variables, given that the $x is a valid variable name.
 
-=head2 Unicode Character Database
+=head2 Unicode Character Database 4.0.0
 
 Unicode Character Database has been updated to 4.0.0 from 3.2.0.
 
@@ -427,14 +427,17 @@ defining at compile time the cpp define PERL_NO_SHORT_NAMES.
 
 Perl_save_bool() has been added.
 
+utf8::is_utf8() has been added as a quick way to test whether
+a scalar is encoded internally in UTF-8 (Unicode).
+
 -DL removed; verbose modifier v added for -DXv and -Dsv, see L<perlrun>.
 
 =head1 New Tests
 
 In Perl 5.8.0 there were about 69000 separate tests in about 700 test files,
 in Perl 5.8.1 there are about 75000 separate tests in about 750 test files.
-The exact numbers depend on the Perl configuration and on the
-operating system platform.
+The exact numbers depend on the Perl configuration and on the operating
+system platform.
 
 =head1 Known Problems
 
@@ -472,7 +475,8 @@ If you believe you have an unreported bug, please run the B<perlbug>
 program included with your release.  Be sure to trim your bug down
 to a tiny but sufficient test case.  Your bug report, along with the
 output of C<perl -V>, will be sent off to perlbug@perl.org to be
-analysed by the Perl porting team.
+analysed by the Perl porting team.  You can browse and search
+the Perl 5 bugs at http://bugs.perl.org/
 
 =head1 SEE ALSO
 
