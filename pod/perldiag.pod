@@ -3603,6 +3603,10 @@ Check the #! line, or manually feed your script into Perl yourself.
 (F) The unexec() routine failed for some reason.  See your local FSF
 representative, who probably put it there in the first place.
 
+=item Unicode character %s is illegal
+
+Certain Unicode characters have been designated off-limits by the
+Unicode standard and should not be generated.
 
 =item Unknown BYTEORDER
 
