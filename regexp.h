@@ -17,6 +17,12 @@ struct regnode {
 
 typedef struct regnode regnode;
 
+struct reg_data {
+    U32 count;
+    U8 *what;
+    void* data[1];
+};
+
 typedef struct regexp {
 	I32 refcnt;
 	char **startp;

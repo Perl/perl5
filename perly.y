@@ -291,7 +291,7 @@ startformsub:	/* NULL */	/* start a format subroutine scope */
 subname	:	WORD	{ char *name = SvPV(((SVOP*)$1)->op_sv, na);
 			  if (strEQ(name, "BEGIN") || strEQ(name, "END")
 			      || strEQ(name, "INIT"))
-			  { CvUNIQUE_on(compcv); subline = -subline; }
+			      CvUNIQUE_on(compcv);
 			  $$ = $1; }
 	;
 

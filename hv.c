@@ -16,8 +16,8 @@
 
 static void hsplit _((HV *hv));
 static void hfreeentries _((HV *hv));
-
-static HE* more_he(void);
+static void hv_magic_check _((HV *hv, bool *needs_copy, bool *needs_store));
+static HE* more_he _((void));
 
 static HE*
 new_he(void)

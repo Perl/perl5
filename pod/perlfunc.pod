@@ -2856,10 +2856,12 @@ argument.
 Shifts the first value of the array off and returns it, shortening the
 array by 1 and moving everything down.  If there are no elements in the
 array, returns the undefined value.  If ARRAY is omitted, shifts the
-@ARGV array in the main program, and the @_ array in subroutines.
-(This is determined lexically.)  See also unshift(), push(), and pop().
-Shift() and unshift() do the same thing to the left end of an array
-that pop() and push() do to the right end.
+@_ array within the lexical scope of subroutines and formats, and the
+@ARGV array at file scopes or within the lexical scopes established by
+the C<eval ''>, C<BEGIN {}>, C<END {}>, and C<INIT {}> constructs.
+See also unshift(), push(), and pop().  Shift() and unshift() do the
+same thing to the left end of an array that pop() and push() do to the
+right end.
 
 =item shmctl ID,CMD,ARG
 

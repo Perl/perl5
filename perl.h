@@ -254,6 +254,8 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 #   include <stdlib.h>
 #endif
 
+#define MEM_SIZE Size_t
+
 /* This comes after <stdlib.h> so we don't try to change the standard
  * library prototypes; we'll use our own in proto.h instead. */
 
@@ -264,12 +266,20 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 #	define calloc  Mycalloc
 #	define realloc Myremalloc
 #	define free    Myfree
+Malloc_t Mymalloc _((MEM_SIZE nbytes));
+Malloc_t Mycalloc _((MEM_SIZE elements, MEM_SIZE size));
+Malloc_t Myrealloc _((Malloc_t where, MEM_SIZE nbytes));
+Free_t   Myfree _((Malloc_t where));
 #   endif
 #   ifdef EMBEDMYMALLOC
 #	define malloc  Perl_malloc
 #	define calloc  Perl_calloc
 #	define realloc Perl_realloc
 #	define free    Perl_free
+Malloc_t Perl_malloc _((MEM_SIZE nbytes));
+Malloc_t Perl_calloc _((MEM_SIZE elements, MEM_SIZE size));
+Malloc_t Perl_realloc _((Malloc_t where, MEM_SIZE nbytes));
+Free_t   Perl_free _((Malloc_t where));
 #   endif
 
 #   undef safemalloc
@@ -282,8 +292,6 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 #   define safefree    free
 
 #endif /* MYMALLOC */
-
-#define MEM_SIZE Size_t
 
 #if defined(STANDARD_C) && defined(I_STDDEF)
 #   include <stddef.h>

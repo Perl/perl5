@@ -26,7 +26,7 @@ static int dl_debug = 0;	/* value copied from $DynaLoader::dl_error */
 
 
 static void
-dl_generic_private_init()	/* called by dl_*.xs dl_private_init() */
+dl_generic_private_init(void)	/* called by dl_*.xs dl_private_init() */
 {
     char *perl_dl_nonlazy;
 #ifdef DEBUGGING
@@ -44,16 +44,8 @@ dl_generic_private_init()	/* called by dl_*.xs dl_private_init() */
 
 
 /* SaveError() takes printf style args and saves the result in LastError */
-#ifdef STANDARD_C
 static void
 SaveError(char* pat, ...)
-#else
-/*VARARGS0*/
-static void
-SaveError(pat, va_alist)
-    char *pat;
-    va_dcl
-#endif
 {
     va_list args;
     char *message;

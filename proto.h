@@ -568,13 +568,6 @@ int	yylex _((void));
 int	yyparse _((void));
 int	yywarn _((char* s));
 
-#if defined(MYMALLOC) || !defined(STANDARD_C)
-Malloc_t malloc _((MEM_SIZE nbytes));
-Malloc_t calloc _((MEM_SIZE elements, MEM_SIZE size));
-Malloc_t realloc _((Malloc_t where, MEM_SIZE nbytes));
-Free_t   free _((Malloc_t where));
-#endif
-
 #ifndef MYMALLOC
 Malloc_t safemalloc _((MEM_SIZE nbytes));
 Malloc_t safecalloc _((MEM_SIZE elements, MEM_SIZE size));
