@@ -1253,8 +1253,7 @@
 #define doswitches		(curinterp->Idoswitches)
 #define dowarn			(curinterp->Idowarn)
 #define dumplvl			(curinterp->Idumplvl)
-#define e_fp			(curinterp->Ie_fp)
-#define e_tmpname		(curinterp->Ie_tmpname)
+#define e_script		(curinterp->Ie_script)
 #define endav			(curinterp->Iendav)
 #define envgv			(curinterp->Ienvgv)
 #define errgv			(curinterp->Ierrgv)
@@ -1408,8 +1407,7 @@
 #define Idoswitches		doswitches
 #define Idowarn			dowarn
 #define Idumplvl		dumplvl
-#define Ie_fp			e_fp
-#define Ie_tmpname		e_tmpname
+#define Ie_script		e_script
 #define Iendav			endav
 #define Ienvgv			envgv
 #define Ierrgv			errgv
@@ -1573,8 +1571,7 @@
 #define doswitches		Perl_doswitches
 #define dowarn			Perl_dowarn
 #define dumplvl			Perl_dumplvl
-#define e_fp			Perl_e_fp
-#define e_tmpname		Perl_e_tmpname
+#define e_script		Perl_e_script
 #define endav			Perl_endav
 #define errgv			Perl_errgv
 #define eval_root		Perl_eval_root
