@@ -4037,7 +4037,8 @@ newXS(char *name, void (*subaddr) (CV * _CPERLproto), char *filename)
 			    && HvNAME(GvSTASH(CvGV(cv)))
 			    && strEQ(HvNAME(GvSTASH(CvGV(cv))), "autouse"))) {
 		line_t oldline = PL_curcop->cop_line;
-		PL_curcop->cop_line = PL_copline;
+		if (PL_copline != NOLINE)
+		    PL_curcop->cop_line = PL_copline;
 		warner(WARN_REDEFINE, "Subroutine %s redefined",name);
 		PL_curcop->cop_line = oldline;
 	    }
