@@ -157,7 +157,7 @@ elsif ($PLATFORM eq 'os2') {
     # print STDERR "'$dll' <= '$define{PERL_DLL}'\n";
     print <<"---EOP---";
 LIBRARY '$dll' INITINSTANCE TERMINSTANCE
-DESCRIPTION '\@#perl5-porters\@perl.org:$v#\@ Perl interpreter, configured as $CONFIG_ARGS'
+DESCRIPTION '\@#perl5-porters\@perl.org:$v#\@ Perl interpreter'
 STACKSIZE 32768
 CODE LOADONCALL
 DATA LOADONCALL NONSHARED MULTIPLE

@@ -1249,11 +1249,6 @@ eval 'exec $interpreter $arg -S \$0 \${1+"\$\@"}'
 	    next;
 	}
 	my($dev,$ino,$mode) = stat FIXIN;
-	# If they override perm_rwx, we won't notice it during fixin,
-	# because fixin is run through a new instance of MakeMaker.
-	# That is why we must run another CHMOD later.
-	$mode = oct($self->perm_rwx) unless $dev;
-	chmod $mode, $file;
 	
 	# Print out the new #! line (or equivalent).
 	local $\;
@@ -1261,7 +1256,15 @@ eval 'exec $interpreter $arg -S \$0 \${1+"\$\@"}'
 	print FIXOUT $shb, <FIXIN>;
 	close FIXIN;
 	close FIXOUT;
-	# can't rename open files on some DOSISH platforms
+
+	# can't rename/chmod open files on some DOSISH platforms
+
+	# If they override perm_rwx, we won't notice it during fixin,
+	# because fixin is run through a new instance of MakeMaker.
+	# That is why we must run another CHMOD later.
+	$mode = oct($self->perm_rwx) unless $dev;
+	chmod $mode, $file;
+
 	unless ( rename($file, "$file.bak") ) {	
 	    warn "Can't rename $file to $file.bak: $!";
 	    next;
@@ -1276,6 +1279,7 @@ eval 'exec $interpreter $arg -S \$0 \${1+"\$\@"}'
 	}
 	unlink "$file.bak";
     } continue {
+	close(FIXIN) if fileno(FIXIN);
 	chmod oct($self->perm_rwx), $file or
 	  die "Can't reset permissions for $file: $!\n";
 	system("$Config{'eunicefix'} $file") if $Config{'eunicefix'} ne ':';;

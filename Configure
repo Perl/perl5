@@ -3275,6 +3275,7 @@ while test "$type"; do
 		true)
 			case "$ansexp" in
 			/*) value="$ansexp" ;;
+			[a-zA-Z]:/*) value="$ansexp" ;;
 			*)
 				redo=true
 				case "$already" in
