@@ -662,11 +662,17 @@ sub dir_target {
 # too often :)
 
     my($self,@dirs) = @_;
-    my(@m,$dir);
+    my(@m,$dir,$targdir);
     foreach $dir (@dirs) {
 	my($src) = $self->catfile($self->{PERL_INC},'perl.h');
 	my($targ) = $self->catfile($dir,'.exists');
-	my($targdir) = dirname($targ); # Necessary because catfile may have adapted syntax of $dir to target OS
+	# Necessary because catfile may have adapted syntax of $dir to target OS
+	if ($Is_VMS) { # Just remove file name; dirspec is often in macro
+	    ($targdir = $targ) =~ s:/?.exists$::;
+	}
+	else { # while elsewhere we expect to see the dir separator in $targ
+	    $targdir = dirname($targ);
+	}
 	next if $self->{DIR_TARGET}{$self}{$targdir}++;
 	push @m, qq{
 $targ :: $src
@@ -1539,7 +1545,7 @@ usually solves this kind of problem.
     # all the installation path variables to literally $(PREFIX), so
     # the user can still say make PREFIX=foo
     my($configure_prefix) = $Config{'prefix'};
-    $prefix = VMS::Filespec::unixify($prefix) if $Is_VMS;
+    $configure_prefix = VMS::Filespec::unixify($configure_prefix) if $Is_VMS;
     $self->{PREFIX} ||= $configure_prefix;
 
 

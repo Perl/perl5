@@ -455,6 +455,28 @@ kill_file(char *name)
 }  /* end of kill_file() */
 /*}}}*/
 
+
+/*{{{int my_mkdir(char *,mode_t)*/
+int
+my_mkdir(char *dir, mode_t mode)
+{
+  STRLEN dirlen = strlen(dir);
+
+  /* CRTL mkdir() doesn't tolerate trailing /, since that implies
+   * null file name/type.  However, it's commonplace under Unix,
+   * so we'll allow it for a gain in portability.
+   */
+  if (dir[dirlen-1] == '/') {
+    char *newdir = savepvn(dir,dirlen-1);
+    int ret = mkdir(newdir,mode);
+    Safefree(newdir);
+    return ret;
+  }
+  else return mkdir(dir,mode);
+}  /* end of my_mkdir */
+/*}}}*/
+
+
 static void
 create_mbx(unsigned short int *chan, struct dsc$descriptor_s *namdsc)
 {

@@ -2710,7 +2710,7 @@ PP(pp_mkdir)
 
     TAINT_PROPER("mkdir");
 #ifdef HAS_MKDIR
-    SETi( mkdir(tmps, mode) >= 0 );
+    SETi( Mkdir(tmps, mode) >= 0 );
 #else
     SETi( dooneliner("mkdir", tmps) );
     oldumask = umask(0);

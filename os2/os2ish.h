@@ -156,6 +156,7 @@ void *emx_realloc (void *, size_t);
 #define Stat(fname,bufptr) os2_stat((fname),(bufptr))
 #define Fstat(fd,bufptr)   fstat((fd),(bufptr))
 #define Fflush(fp)         fflush(fp)
+#define Mkdir(path,mode)   mkdir((path),(mode))
 
 #undef S_IFBLK
 #undef S_ISBLK
@@ -167,6 +168,7 @@ void *emx_realloc (void *, size_t);
 #define Stat(fname,bufptr) stat((fname),(bufptr))
 #define Fstat(fd,bufptr)   fstat((fd),(bufptr))
 #define Fflush(fp)         fflush(fp)
+#define Mkdir(path,mode)   mkdir((path),(mode))
 
 #endif
 

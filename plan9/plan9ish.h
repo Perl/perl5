@@ -113,6 +113,7 @@
 #define Stat(fname,bufptr) stat((fname),(bufptr))
 #define Fstat(fd,bufptr)   fstat((fd),(bufptr))
 #define Fflush(fp)         fflush(fp)
+#define Mkdir(path,mode)   mkdir((path),(mode))
 
 /* getenv related stuff */
 #define my_getenv(var) getenv(var)

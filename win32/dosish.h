@@ -78,6 +78,7 @@ void Perl_DJGPP_init();
 #define Stat(fname,bufptr) win32_stat((fname),(bufptr))
 #define Fstat(fd,bufptr)   fstat((fd),(bufptr))
 #define Fflush(fp)         fflush(fp)
+#define Mkdir(path,mode)   mkdir((path),(mode))
 
 #define my_getenv(var)  getenv(var)
 /*
