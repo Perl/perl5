@@ -1869,6 +1869,13 @@ a builtin library search path, prefix2 is substituted.  The error may
 appear if components are not found, or are too long.  See
 "PERLLIB_PREFIX" in L<perlos2>.
 
+=item Malformed prototype for %s: %s
+
+(F) You declared or tried to use a function with a malformed
+prototype.  The syntax of function prototypes is given a brief
+compile-time check for obvious errors like invalid characters.  A more
+rigorous check is run when the function is called.
+
 =item Malformed UTF-8 character (%s)
 
 Perl detected something that didn't comply with UTF-8 encoding rules.

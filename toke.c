@@ -4952,10 +4952,13 @@ Perl_yylex(pTHX)
 		    s = scan_str(s,FALSE,FALSE);
 		    if (!s)
 			Perl_croak(aTHX_ "Prototype not terminated");
-		    /* strip spaces */
+		    /* strip spaces and check for bad characters */
 		    d = SvPVX(PL_lex_stuff);
 		    tmp = 0;
 		    for (p = d; *p; ++p) {
+		        if (!strchr("$@%*;[]&\\ ", *p))
+			    Perl_croak(aTHX_ "Malformed prototype for %s : %s",
+				       SvPVX(PL_subname), d);
 			if (!isSPACE(*p))
 			    d[tmp++] = *p;
 		    }
