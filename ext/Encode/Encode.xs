@@ -309,7 +309,9 @@ PerlIOEncode_flush(pTHX_ PerlIO * f)
 	    XPUSHs(e->enc);
 	    SvCUR_set(e->bufsv, e->base.ptr - e->base.buf);
 	    SvUTF8_on(e->bufsv);
+#if 0
 	    Perl_warn(aTHX_ "flush %_",e->bufsv);
+#endif
 	    XPUSHs(e->bufsv);
 	    XPUSHs(&PL_sv_yes);
 	    PUTBACK;
