@@ -31,6 +31,132 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 12381] By: jhi                                   on 2001/10/09  13:52:50
+        Log: Seems that a glob(undef) triggers an ACCVIO in Perl_flex_stat
+             Seems that a glob(undef) triggers an ACCVIO in Perl_flex_stat,
+             when a NULL is passed for the filename string pointer.
+             From Charles Lane.
+     Branch: perl
+	   ! vms/vms.c
+____________________________________________________________________________
+[ 12379] By: jhi                                   on 2001/10/09  13:03:49
+        Log: Subject: HP systems update
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Tue, 09 Oct 2001 15:59:22 +0200
+             Message-Id: <20011009155614.A4F5.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! README.hpux
+____________________________________________________________________________
+[ 12378] By: jhi                                   on 2001/10/09  12:52:21
+        Log: CPAN::Nox does now have a test.
+     Branch: perl
+	   ! t/lib/1_compile.t
+____________________________________________________________________________
+[ 12377] By: jhi                                   on 2001/10/09  12:23:27
+        Log: Subject: [ID 20011001.009] /usr/bin/perl (in addition to /usr/local/bin/perl)
+             From: David Dyck <dcd@tc.fluke.com>
+             Date: Mon, 1 Oct 2001 12:17:36 -0700
+             Message-Id: <200110011917.MAA11879@dd.tc.fluke.com>
+     Branch: perl
+	   ! installperl
+____________________________________________________________________________
+[ 12376] By: jhi                                   on 2001/10/09  12:18:39
+        Log: NetWare update from Ananth Kesari.
+     Branch: perl
+	   ! NetWare/nwperlsys.h makedef.pl
+____________________________________________________________________________
+[ 12375] By: jhi                                   on 2001/10/09  11:43:01
+        Log: Subject: [PATCH Perl@12307] File::Find test on VMS
+             From: lane@DUPHY4.Physics.Drexel.Edu (Charles Lane)
+             Date: Tue, 9 Oct 2001 08:40:57 EDT
+             Message-Id: <011009083426.17530f@DUPHY4.Physics.Drexel.Edu>
+     Branch: perl
+	   ! lib/File/Find/t/find.t
+____________________________________________________________________________
+[ 12374] By: ams                                   on 2001/10/09  05:31:45
+        Log: Subject: [PATCH MANIFEST lib/ExtUtils/Mkbootstrap.t] Add Tests for
+             ExtUtils::Mkbootstrap
+             From: "chromatic" <chromatic@rmci.net>
+             Date: Tue, 09 Oct 2001 00:08:37 -0600
+             Message-Id: <20011009061432.46666.qmail@onion.perl.org>
+     Branch: perl
+	   + lib/ExtUtils/Mkbootstrap.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 12373] By: jhi                                   on 2001/10/09  02:56:13
+        Log: Enable more debugging.
+     Branch: perl
+	   ! lib/utf8_heavy.pl
+____________________________________________________________________________
+[ 12372] By: ams                                   on 2001/10/09  02:11:59
+        Log: #12370 forgot to modify is_gv_magical().
+     Branch: perl
+	   ! gv.c
+____________________________________________________________________________
+[ 12371] By: jhi                                   on 2001/10/09  01:48:17
+        Log: Make the toupper/lower/title API for Unicode not right
+             but at least less wrong: prepare for the mapping being
+             more than just one-character-to-one-character.
+     Branch: perl
+	   ! embed.h embed.pl global.sym handy.h pp.c proto.h regcomp.c
+	   ! regexec.c utf8.c
+____________________________________________________________________________
+[ 12370] By: jhi                                   on 2001/10/09  01:23:08
+        Log: Subject: Re: [PATCH mg.c gv.c and others] ${^TAINT}
+             From: Ronald J Kimball <rjk@linguist.Thayer.dartmouth.edu>
+             Date: Mon, 8 Oct 2001 22:18:23 -0400
+             Message-ID: <20011008221823.A413700@linguist.thayer.dartmouth.edu>
+     Branch: perl
+	   ! pod/perlvar.pod t/op/taint.t
+____________________________________________________________________________
+[ 12369] By: jhi                                   on 2001/10/08  23:31:21
+        Log: FAQ sync.
+     Branch: perl
+	   ! pod/perlfaq3.pod pod/perlfaq4.pod
+____________________________________________________________________________
+[ 12368] By: jhi                                   on 2001/10/08  21:20:45
+        Log: Subject: [PATCH lib/Term/Cap.t] Fix Debian Failures on Test 22
+             From: "chromatic" <chromatic@rmci.net>
+             Date: Mon, 08 Oct 2001 14:05:32 -0600
+             Message-ID: <20011008201126.73702.qmail@onion.perl.org>
+     Branch: perl
+	   ! lib/Term/Cap.t
+____________________________________________________________________________
+[ 12367] By: jhi                                   on 2001/10/08  21:10:49
+        Log: Subject: [PATCH again] Re: [PATCH mg.c gv.c and others] ${^TAINT}
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 8 Oct 2001 17:00:14 -0400
+             Message-ID: <20011008170014.L17083@blackrider>
+     Branch: perl
+	   ! gv.c mg.c pod/perlvar.pod t/op/magic.t t/op/taint.t
+____________________________________________________________________________
+[ 12366] By: jhi                                   on 2001/10/08  20:43:19
+        Log: Subject: [PATCH Perl@12307] Time::Hires for VMS pre-7.0
+             From: lane@DUPHY4.Physics.Drexel.Edu (Charles Lane)
+             Date: Mon, 8 Oct 2001 16:01:33 EDT
+             Message-Id: <011008155856.1604b5@DUPHY4.Physics.Drexel.Edu>
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.xs
+____________________________________________________________________________
+[ 12365] By: jhi                                   on 2001/10/08  20:41:50
+        Log: Subject: [PATCH] Autosplit patch for VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Mon, 08 Oct 2001 15:40:43 -0500
+             Message-Id: <5.1.0.14.0.20011008150808.02302618@exchi01>
+     Branch: perl
+	   ! lib/AutoSplit.pm lib/AutoSplit.t
+____________________________________________________________________________
+[ 12364] By: jhi                                   on 2001/10/08  20:36:58
+        Log: Don't assume that everybody is running OS X 10.1 yet;
+             from Kay Röpke.
+     Branch: perl
+	   ! hints/darwin.sh
+____________________________________________________________________________
+[ 12363] By: jhi                                   on 2001/10/08  14:26:35
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 12362] By: jhi                                   on 2001/10/08  14:05:50
         Log: Retract #12358 for now.
      Branch: perl
