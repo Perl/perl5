@@ -438,6 +438,12 @@ CONFIGPM	= ..\lib\Config.pm
 MINIMOD		= ..\lib\ExtUtils\Miniperl.pm
 X2P		= ..\x2p\a2p.exe
 
+# Nominate a target which causes extensions to be re-built
+# This used to be $(PERLEXE), but at worst it is the .dll that they depend
+# on and really only the interface - i.e. the .def file used to export symbols
+# from the .dll
+PERLDEP		= perldll.def
+
 PL2BAT		= bin\pl2bat.pl
 GLOBBAT		= bin\perlglob.bat
 
@@ -468,6 +474,7 @@ UTILS		=			\
 		bin\search.pl
 
 MAKE		= nmake -nologo
+MAKE_BARE	= nmake
 
 CFGSH_TMPL	= config.vc
 CFGH_TMPL	= config_H.vc
@@ -606,14 +613,6 @@ PERLDLL_OBJ	= $(PERLDLL_OBJ) $(WIN32_OBJ) $(DLL_OBJ)
 SETARGV_OBJ	= setargv$(o)
 !ENDIF
 
-DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B re \
-		Data/Dumper Devel/Peek ByteLoader Devel/DProf File/Glob \
-		Sys/Hostname Storable Filter/Util/Call Encode Digest/MD5 \
-		PerlIO/Scalar MIME/Base64 Time/HiRes Time/Piece \
-		Cwd List/Util PerlIO/Via XS/Typemap
-STATIC_EXT	= DynaLoader
-NONXS_EXT	= Errno
-
 DYNALOADER	= $(EXTDIR)\DynaLoader\DynaLoader
 SOCKET		= $(EXTDIR)\Socket\Socket
 FCNTL		= $(EXTDIR)\Fcntl\Fcntl
@@ -645,9 +644,6 @@ LISTUTIL  	= $(EXTDIR)\List\Util\Util
 PERLIOVIA	= $(EXTDIR)\PerlIO\Via\Via
 XSTYPEMAP	= $(EXTDIR)\XS\Typemap\Typemap
 
-# Help out FindExt::scan_ext() with a copy
-LISTUTIL_PM	= $(LISTUTIL).pm
-
 SOCKET_DLL	= $(AUTODIR)\Socket\Socket.dll
 FCNTL_DLL	= $(AUTODIR)\Fcntl\Fcntl.dll
 OPCODE_DLL	= $(AUTODIR)\Opcode\Opcode.dll
@@ -676,8 +672,6 @@ CWD_DLL		= $(AUTODIR)\Cwd\Cwd.dll
 LISTUTIL_DLL	= $(AUTODIR)\List\Util\Util.dll
 PERLIOVIA_DLL	= $(AUTODIR)\PerlIO\Via\Via.dll
 XSTYPEMAP_DLL	= $(AUTODIR)\XS\Typemap\Typemap.dll
-
-ERRNO_PM	= $(LIBDIR)\Errno.pm
 
 EXTENSION_C	= 		\
 		$(SOCKET).c	\
@@ -739,9 +733,6 @@ EXTENSION_DLL	= 		\
 		$(PERLIOVIA_DLL)	\
 		$(XSTYPEMAP_DLL)
 
-EXTENSION_PM	=		\
-		$(ERRNO_PM)
-
 POD2HTML	= $(PODDIR)\pod2html
 POD2MAN		= $(PODDIR)\pod2man
 POD2LATEX	= $(PODDIR)\pod2latex
@@ -764,10 +755,7 @@ CFG_VARS	=					\
 		"libperl=$(PERLIMPLIB:..\=)"		\
 		"libpth=$(CCLIBDIR:"=\");$(EXTRALIBDIRS:"=\")"	\
 		"libc=$(LIBC)"				\
-		"make=nmake"				\
-		"static_ext=$(STATIC_EXT)"		\
-		"dynamic_ext=$(DYNAMIC_EXT)"		\
-		"nonxs_ext=$(NONXS_EXT)"		\
+		"make=$(MAKE_BARE)"				\
 		"use5005threads=$(USE_5005THREADS)"	\
 		"useithreads=$(USE_ITHREADS)"		\
 		"usethreads=$(USE_5005THREADS)"		\
@@ -781,7 +769,8 @@ CFG_VARS	=					\
 #
 
 all : .\config.h $(GLOBEXE) $(MINIMOD) $(CONFIGPM) $(PERLEXE) \
-	$(X2P) $(EXTENSION_DLL) $(EXTENSION_PM)
+	$(X2P) Extensions
+	@echo	Everything is up to date. '$(MAKE_BARE) test' to run test suite.
 
 $(DYNALOADER)$(o) : $(DYNALOADER).c $(CORE_H) $(EXTDIR)\DynaLoader\dlutils.c
 
@@ -800,7 +789,7 @@ config.w32 : $(CFGSH_TMPL)
 	-del /f config.h
 	copy $(CFGH_TMPL) config.h
 
-..\config.sh : config.w32 $(MINIPERL) $(LISTUTIL_PM) config_sh.PL
+..\config.sh : config.w32 $(MINIPERL) config_sh.PL
 	$(MINIPERL) -I..\lib config_sh.PL $(CFG_VARS) config.w32 > ..\config.sh
 
 # this target is for when changes to the main config.sh happen
@@ -925,184 +914,14 @@ $(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
 $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 	copy dl_win32.xs $(EXTDIR)\DynaLoader\dl_win32.xs
 
-$(DUMPER_DLL): $(PERLEXE) $(DUMPER).xs
-	cd $(EXTDIR)\Data\$(*B)
-	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
-	$(MAKE)
-	cd ..\..\..\win32
+#----------------------------------------------------------------------------------
+Extensions: buildext.pl $(PERLDEP) $(CONFIGPM)
+	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR)
 
-$(DPROF_DLL): $(PERLEXE) $(DPROF).xs
-	cd $(EXTDIR)\Devel\$(*B)
-	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
-	$(MAKE)
-	cd ..\..\..\win32
+Extensions_clean: 
+	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) clean
 
-$(GLOB_DLL): $(PERLEXE) $(GLOB).xs
-	cd $(EXTDIR)\File\$(*B)
-	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
-	$(MAKE)
-	cd ..\..\..\win32
-
-$(PEEK_DLL): $(PERLEXE) $(PEEK).xs
-	cd $(EXTDIR)\Devel\$(*B)
-	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
-	$(MAKE)
-	cd ..\..\..\win32
-
-$(RE_DLL): $(PERLEXE) $(RE).xs
-	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
-	$(MAKE)
-	cd ..\..\win32
-
-$(B_DLL): $(PERLEXE) $(B).xs
-	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
-	$(MAKE)
-	cd ..\..\win32
-
-$(THREAD_DLL): $(PERLEXE) $(THREAD).xs
-	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
-	$(MAKE)
-	cd ..\..\win32
-
-$(ATTRS_DLL): $(PERLEXE) $(ATTRS).xs
-	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
-	$(MAKE)
-	cd ..\..\win32
-
-$(POSIX_DLL): $(PERLEXE) $(POSIX).xs
-	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
-	$(MAKE)
-	cd ..\..\win32
-
-$(IO_DLL): $(PERLEXE) $(IO).xs
-	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
-	$(MAKE)
-	cd ..\..\win32
-
-$(SDBM_FILE_DLL) : $(PERLEXE) $(SDBM_FILE).xs
-	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
-	$(MAKE)
-	cd ..\..\win32
-
-$(FCNTL_DLL): $(PERLEXE) $(FCNTL).xs
-	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
-	$(MAKE)
-	cd ..\..\win32
-
-$(OPCODE_DLL): $(PERLEXE) $(OPCODE).xs
-	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
-	$(MAKE)
-	cd ..\..\win32
-
-$(SOCKET_DLL): $(PERLEXE) $(SOCKET).xs
-	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
-	$(MAKE)
-	cd ..\..\win32
-
-$(HOSTNAME_DLL): $(PERLEXE) $(HOSTNAME).xs
-	cd $(EXTDIR)\Sys\$(*B)
-	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
-	$(MAKE)
-	cd ..\..\..\win32
-
-$(BYTELOADER_DLL): $(PERLEXE) $(BYTELOADER).xs
-	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
-	$(MAKE)
-	cd ..\..\win32
-
-$(STORABLE_DLL): $(PERLEXE) $(STORABLE).xs
-	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
-	$(MAKE)
-	cd ..\..\win32
-
-$(FILTER_DLL): $(PERLEXE) $(FILTER).xs
-	cd $(EXTDIR)\Filter\Util\Call
-	..\..\..\..\miniperl -I..\..\..\..\lib Makefile.PL INSTALLDIRS=perl
-	$(MAKE)
-	cd ..\..\..\..\win32
-
-$(ENCODE_DLL): $(PERLEXE) $(ENCODE).xs
-	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
-	$(MAKE)
-	cd ..\..\win32
-
-$(MD5_DLL): $(PERLEXE) $(MD5).xs
-	cd $(EXTDIR)\Digest\$(*B)
-	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
-	$(MAKE)
-	cd ..\..\..\win32
-
-$(PERLIOSCALAR_DLL): $(PERLEXE) $(PERLIOSCALAR).xs
-	cd $(EXTDIR)\PerlIO\$(*B)
-	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
-	$(MAKE)
-	cd ..\..\..\win32
-
-$(MIMEBASE64_DLL): $(PERLEXE) $(MIMEBASE64).xs
-	cd $(EXTDIR)\MIME\$(*B)
-	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
-	$(MAKE)
-	cd ..\..\..\win32
-
-$(TIMEHIRES_DLL): $(PERLEXE) $(TIMEHIRES).xs
-	cd $(EXTDIR)\Time\$(*B)
-	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
-	$(MAKE)
-	cd ..\..\..\win32
-
-$(TIMEPIECE_DLL): $(PERLEXE) $(TIMEPIECE).xs
-	cd $(EXTDIR)\Time\$(*B)
-	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
-	$(MAKE)
-	cd ..\..\..\win32
-
-$(CWD_DLL): $(PERLEXE) $(CWD).xs
-	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
-	$(MAKE)
-	cd ..\..\win32
-
-$(LISTUTIL_PM): $(EXTDIR)\List\Util\lib\List\Util.pm
-	cd $(EXTDIR)
-	copy List\Util\lib\List\Util.pm List\Util\Util.pm
-	cd ..\win32
-
-$(LISTUTIL_DLL): $(LISTUTIL_PM) $(PERLEXE) $(LISTUTIL).xs
-	cd $(EXTDIR)\List\$(*B)
-	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
-	$(MAKE)
-	cd ..\..\..\win32
-
-$(PERLIOVIA_DLL): $(PERLEXE) $(PERLIOVIA).xs
-	cd $(EXTDIR)\PerlIO\$(*B)
-	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
-	$(MAKE)
-	cd ..\..\..\win32
-
-$(XSTYPEMAP_DLL): $(PERLEXE) $(XSTYPEMAP).xs
-	cd $(EXTDIR)\XS\$(*B)
-	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
-	$(MAKE)
-	cd ..\..\..\win32
-
-$(ERRNO_PM): $(PERLEXE) $(ERRNO)_pm.PL
-	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
-	$(MAKE)
-	cd ..\..\win32
+#----------------------------------------------------------------------------------
 
 doc: $(PERLEXE)
 	$(PERLEXE) -I..\lib ..\installhtml --podroot=.. --htmldir=./html \
@@ -1140,7 +959,7 @@ distclean: clean
 	-del /f $(MINIPERL) $(PERLEXE) $(PERLDLL) $(GLOBEXE) \
 		$(PERLIMPLIB) ..\miniperl.lib $(MINIMOD)
 	-del /f *.def *.map
-	-del /f $(EXTENSION_DLL) $(EXTENSION_PM)
+	-del /f $(EXTENSION_DLL)
 	-del /f $(EXTENSION_C) $(DYNALOADER).c $(ERRNO).pm
 	-del /f $(EXTDIR)\DynaLoader\dl_win32.xs
 	-del /f $(LIBDIR)\.exists $(LIBDIR)\attrs.pm $(LIBDIR)\DynaLoader.pm
@@ -1160,7 +979,6 @@ distclean: clean
 	-del /f $(LIBDIR)\MIME\Base64.pm
 	-del /f $(LIBDIR)\MIME\QuotedPrint.pm
 	-del /f $(LIBDIR)\List\Util.pm
-	-del /f $(LISTUTIL_PM)
 	-del /f $(LIBDIR)\Scalar\Util.pm
 	-del /f $(LIBDIR)\Time\HiRes.pm
 	-del /f $(LIBDIR)\Time\Piece.pm
@@ -1266,7 +1084,7 @@ test-wide-notty : test-prep
 	$(PERLEXE) -I..\lib harness
 	cd ..\win32
 
-clean :
+clean : Extensions_clean
 	-@$(DEL) miniperlmain$(o)
 	-@$(DEL) $(MINIPERL)
 	-@$(DEL) perlglob$(o)
