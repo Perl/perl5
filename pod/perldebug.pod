@@ -1382,4 +1382,280 @@ print nonempty categories, print the absolute values of counts and totals.
 If an extension or an external library does not use Perl API to
 allocate memory, these allocations are not counted.
 
+=head1 Debugging regular expressions
+
+There are two ways to enable debugging output for regular expressions.
+
+If your perl is compiled with C<-DDEBUGGING>, you may use the
+B<-Dr> flag on the command line.
+
+Otherwise, one can C<use re 'debug'>, which has effects both at
+compile time, and at run time (and is I<not> lexically scoped).
+
+=head2 Compile-time output
+
+The debugging output for the compile time looks like this:
+
+  compiling RE `[bc]d(ef*g)+h[ij]k$'
+  size 43 first at 1
+     1: ANYOF(11)
+    11: EXACT <d>(13)
+    13: CURLYX {1,32767}(27)
+    15:   OPEN1(17)
+    17:     EXACT <e>(19)
+    19:     STAR(22)
+    20:       EXACT <f>(0)
+    22:     EXACT <g>(24)
+    24:   CLOSE1(26)
+    26:   WHILEM(0)
+    27: NOTHING(28)
+    28: EXACT <h>(30)
+    30: ANYOF(40)
+    40: EXACT <k>(42)
+    42: EOL(43)
+    43: END(0)
+  anchored `de' at 1 floating `gh' at 3..2147483647 (checking floating)
+				    stclass `ANYOF' minlen 7
+
+The first line shows the pre-compiled form of the regexp, and the
+second shows the size of the compiled form (in arbitrary units,
+usually 4-byte words) and the label I<id> of the first node which
+does a match.
+
+The last line (split into two lines in the above) contains the optimizer
+info.  In the example shown, the optimizer found that the match 
+should contain a substring C<de> at the offset 1, and substring C<gh>
+at some offset between 3 and infinity.  Moreover, when checking for
+these substrings (to abandon impossible matches quickly) it will check
+for the substring C<gh> before checking for the substring C<de>.  The
+optimizer may also use the knowledge that the match starts (at the
+C<first> I<id>) with a character class, and the match cannot be
+shorter than 7 chars.
+
+The fields of interest which may appear in the last line are
+
+=over
+
+=item C<anchored> I<STRING> C<at> I<POS>
+
+=item C<floating> I<STRING> C<at> I<POS1..POS2>
+
+see above;
+
+=item C<matching floating/anchored>
+
+which substring to check first;
+
+=item C<minlen>
+
+the minimal length of the match;
+
+=item C<stclass> I<TYPE>
+
+The type of the first matching node.
+
+=item C<noscan>
+
+which advises to not scan for the found substrings;
+
+=item C<isall>
+
+which says that the optimizer info is in fact all that the regular
+expression contains (thus one does not need to enter the RE engine at
+all);
+
+=item C<GPOS>
+
+if the pattern contains C<\G>;
+
+=item C<plus> 
+
+if the pattern starts with a repeated char (as in C<x+y>);
+
+=item C<implicit>
+
+if the pattern starts with C<.*>;
+
+=item C<with eval> 
+
+if the pattern contain eval-groups (see L<perlre/(?{ code })>);
+
+=item C<anchored(TYPE)>
+
+if the pattern may
+match only at a handful of places  (with C<TYPE> being
+C<BOL>, C<MBOL>, or C<GPOS>, see the table below).
+
+=back
+
+If a substring is known to match at end-of-line only, it may be
+followed by C<$>, as in C<floating `k'$>.
+
+The optimizer-specific info is used to avoid entering (a slow) RE
+engine on strings which will definitely not match.  If C<isall> flag
+is set, a call to the RE engine may be avoided even when optimizer
+found an appropriate place for the match.
+
+The rest of the output contains the list of I<nodes> of the compiled
+form of the RE.  Each line has format 
+
+C<   >I<id>: I<TYPE> I<OPTIONAL-INFO> (I<next-id>)
+
+=head2 Types of nodes
+
+Here is the list of possible types with short descriptions:
+
+    # TYPE arg-description [num-args] [longjump-len] DESCRIPTION
+
+    # Exit points
+    END		no	End of program.
+    SUCCEED	no	Return from a subroutine, basically.
+
+    # Anchors:
+    BOL		no	Match "" at beginning of line.
+    MBOL	no	Same, assuming multiline.
+    SBOL	no	Same, assuming singleline.
+    EOS		no	Match "" at end of string.
+    EOL		no	Match "" at end of line.
+    MEOL	no	Same, assuming multiline.
+    SEOL	no	Same, assuming singleline.
+    BOUND	no	Match "" at any word boundary
+    BOUNDL	no	Match "" at any word boundary
+    NBOUND	no	Match "" at any word non-boundary
+    NBOUNDL	no	Match "" at any word non-boundary
+    GPOS	no	Matches where last m//g left off.
+
+    # [Special] alternatives
+    ANY		no	Match any one character (except newline).
+    SANY	no	Match any one character.
+    ANYOF	sv	Match character in (or not in) this class.
+    ALNUM	no	Match any alphanumeric character
+    ALNUML	no	Match any alphanumeric char in locale
+    NALNUM	no	Match any non-alphanumeric character
+    NALNUML	no	Match any non-alphanumeric char in locale
+    SPACE	no	Match any whitespace character
+    SPACEL	no	Match any whitespace char in locale
+    NSPACE	no	Match any non-whitespace character
+    NSPACEL	no	Match any non-whitespace char in locale
+    DIGIT	no	Match any numeric character
+    NDIGIT	no	Match any non-numeric character
+
+    # BRANCH	The set of branches constituting a single choice are hooked
+    #		together with their "next" pointers, since precedence prevents
+    #		anything being concatenated to any individual branch.  The
+    #		"next" pointer of the last BRANCH in a choice points to the
+    #		thing following the whole choice.  This is also where the
+    #		final "next" pointer of each individual branch points; each
+    #		branch starts with the operand node of a BRANCH node.
+    #
+    BRANCH	node	Match this alternative, or the next...
+
+    # BACK	Normal "next" pointers all implicitly point forward; BACK
+    #		exists to make loop structures possible.
+    # not used
+    BACK	no	Match "", "next" ptr points backward.
+
+    # Literals
+    EXACT	sv	Match this string (preceded by length).
+    EXACTF	sv	Match this string, folded (prec. by length).
+    EXACTFL	sv	Match this string, folded in locale (w/len).
+
+    # Do nothing
+    NOTHING	no	Match empty string.
+    # A variant of above which delimits a group, thus stops optimizations
+    TAIL	no	Match empty string. Can jump here from outside.
+
+    # STAR,PLUS	'?', and complex '*' and '+', are implemented as circular
+    #		BRANCH structures using BACK.  Simple cases (one character
+    #		per match) are implemented with STAR and PLUS for speed
+    #		and to minimize recursive plunges.
+    #
+    STAR	node	Match this (simple) thing 0 or more times.
+    PLUS	node	Match this (simple) thing 1 or more times.
+
+    CURLY	sv 2	Match this simple thing {n,m} times.
+    CURLYN	no 2	Match next-after-this simple thing 
+    #			{n,m} times, set parenths.
+    CURLYM	no 2	Match this medium-complex thing {n,m} times.
+    CURLYX	sv 2	Match this complex thing {n,m} times.
+
+    # This terminator creates a loop structure for CURLYX
+    WHILEM	no	Do curly processing and see if rest matches.
+
+    # OPEN,CLOSE,GROUPP	...are numbered at compile time.
+    OPEN	num 1	Mark this point in input as start of #n.
+    CLOSE	num 1	Analogous to OPEN.
+
+    REF		num 1	Match some already matched string
+    REFF	num 1	Match already matched string, folded
+    REFFL	num 1	Match already matched string, folded in loc.
+
+    # grouping assertions
+    IFMATCH	off 1 2	Succeeds if the following matches.
+    UNLESSM	off 1 2	Fails if the following matches.
+    SUSPEND	off 1 1	"Independent" sub-RE.
+    IFTHEN	off 1 1	Switch, should be preceeded by switcher .
+    GROUPP	num 1	Whether the group matched.
+
+    # Support for long RE
+    LONGJMP	off 1 1	Jump far away.
+    BRANCHJ	off 1 1	BRANCH with long offset.
+
+    # The heavy worker
+    EVAL	evl 1	Execute some Perl code.
+
+    # Modifiers
+    MINMOD	no	Next operator is not greedy.
+    LOGICAL	no	Next opcode should set the flag only.
+
+    # This is not used yet
+    RENUM	off 1 1	Group with independently numbered parens.
+
+    # This is not really a node, but an optimized away piece of a "long" node.
+    # To simplify debugging output, we mark it as if it were a node
+    OPTIMIZED	off	Placeholder for dump.
+
+=head2 Run-time output
+
+First of all, when doing a match, one may get no run-time output even
+if debugging is enabled.  this means that the RE engine was never
+entered, all of the job was done by the optimizer.
+
+If RE engine was entered, the output may look like this:
+
+  Matching `[bc]d(ef*g)+h[ij]k$' against `abcdefg__gh__'
+    Setting an EVAL scope, savestack=3
+     2 <ab> <cdefg__gh_>    |  1: ANYOF
+     3 <abc> <defg__gh_>    | 11: EXACT <d>
+     4 <abcd> <efg__gh_>    | 13: CURLYX {1,32767}
+     4 <abcd> <efg__gh_>    | 26:   WHILEM
+				0 out of 1..32767  cc=effff31c
+     4 <abcd> <efg__gh_>    | 15:     OPEN1
+     4 <abcd> <efg__gh_>    | 17:     EXACT <e>
+     5 <abcde> <fg__gh_>    | 19:     STAR
+			     EXACT <f> can match 1 times out of 32767...
+    Setting an EVAL scope, savestack=3
+     6 <bcdef> <g__gh__>    | 22:       EXACT <g>
+     7 <bcdefg> <__gh__>    | 24:       CLOSE1
+     7 <bcdefg> <__gh__>    | 26:       WHILEM
+				    1 out of 1..32767  cc=effff31c
+    Setting an EVAL scope, savestack=12
+     7 <bcdefg> <__gh__>    | 15:         OPEN1
+     7 <bcdefg> <__gh__>    | 17:         EXACT <e>
+       restoring \1 to 4(4)..7
+				    failed, try continuation...
+     7 <bcdefg> <__gh__>    | 27:         NOTHING
+     7 <bcdefg> <__gh__>    | 28:         EXACT <h>
+				    failed...
+				failed...
+
+The most significant information in the output is about the particular I<node>
+of the compiled RE which is currently being tested against the target string.
+The format of these lines is
+
+C<    >I<STRING-OFFSET> <I<PRE-STRING>> <I<POST-STRING>>   |I<ID>:  I<TYPE>
+
+The I<TYPE> info is indented with respect to the backtracking level.
+Other incidental information appears interspersed within.
+
 =cut

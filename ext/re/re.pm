@@ -11,16 +11,23 @@ re - Perl pragma to alter regular expression behaviour
     use re 'taint';
     ($x) = ($^X =~ /^(.*)$/s);     # $x is tainted here
 
+    $pat = '(?{ $foo = 1 })';
     use re 'eval';
-    /foo(?{ $foo = 1 })bar/;	   # won't fail (when not under -T switch)
+    /foo${pat}bar/;		   # won't fail (when not under -T switch)
 
     {
 	no re 'taint';		   # the default
 	($x) = ($^X =~ /^(.*)$/s); # $x is not tainted here
 
 	no re 'eval';		   # the default
-	/foo(?{ $foo = 1 })bar/;   # disallowed (with or without -T switch)
+	/foo${pat}bar/;		   # disallowed (with or without -T switch)
     }
+
+    use re 'debug';		   # NOT lexically scoped (as others are)
+    /^(.*)$/s;			   # output debugging info during
+    				   #     compile and run time
+
+(We use $^X in these examples because it's tainted by default.)
 
 =head1 DESCRIPTION
 
@@ -31,11 +38,30 @@ on tainted data aren't meant to extract safe substrings, but to perform
 other transformations.
 
 When C<use re 'eval'> is in effect, a regex is allowed to contain
-C<(?{ ... })> zero-width assertions (which may not be interpolated in
-the regex).  That is normally disallowed, since it is a potential security
-risk.  Note that this pragma is ignored when perl detects tainted data,
-i.e.  evaluation is always disallowed with tainted data.  See
-L<perlre/(?{ code })>.
+C<(?{ ... })> zero-width assertions even if regular expression contains
+variable interpolation.  That is normally disallowed, since it is a 
+potential security risk.  Note that this pragma is ignored when the regular
+expression is obtained from tainted data, i.e.  evaluation is always
+disallowed with tainted regular expresssions.  See L<perlre/(?{ code })>.
+
+For the purpose of this pragma, interpolation of precompiled regular 
+expressions (i.e., the result of C<qr//>) is I<not> considered variable
+interpolation.  Thus:
+
+    /foo${pat}bar/
+
+I<is> allowed if $pat is a precompiled regular expression, even 
+if $pat contains C<(?{ ... })> assertions.
+
+When C<use re 'debug'> is in effect, perl emits debugging messages when 
+compiling and using regular expressions.  The output is the same as that
+obtained by running a C<-DDEBUGGING>-enabled perl interpreter with the
+B<-Dr> switch. It may be quite voluminous depending on the complexity
+of the match.
+See L<perldebug/"Debugging regular expressions"> for additional info.
+
+The directive C<use re 'debug'> is I<not lexically scoped>, as the
+other directives are.  It has both compile-time and run-time effects.
 
 See L<perlmodlib/Pragmatic Modules>.
 

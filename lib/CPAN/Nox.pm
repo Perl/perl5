@@ -4,6 +4,7 @@ use CPAN;
 
 $CPAN::META->has_inst('MD5','no');
 $CPAN::META->has_inst('LWP','no');
+$CPAN::META->has_inst('Compress::Zlib','no');
 @EXPORT = @CPAN::EXPORT;
 
 *AUTOLOAD = \&CPAN::AUTOLOAD;

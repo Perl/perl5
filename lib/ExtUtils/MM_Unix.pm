@@ -8,7 +8,7 @@ use strict;
 use vars qw($VERSION $Is_Mac $Is_OS2 $Is_VMS $Is_Win32 $Is_Dos $Is_PERL_OBJECT
 	    $Verbose %pm %static $Xsubpp_Version);
 
-$VERSION = substr q$Revision: 1.126 $, 10;
+$VERSION = substr q$Revision: 1.12601 $, 10;
 # $Id: MM_Unix.pm,v 1.126 1998/06/28 21:32:49 k Exp k $
 
 Exporter::import('ExtUtils::MakeMaker',
@@ -727,8 +727,8 @@ sub dist {
     my($tarflags) = $attribs{TARFLAGS} || 'cvf';
     my($zip)      = $attribs{ZIP}      || 'zip';        # eg pkzip Yuck!
     my($zipflags) = $attribs{ZIPFLAGS} || '-r';
-    my($compress) = $attribs{COMPRESS} || 'compress';   # eg gzip
-    my($suffix)   = $attribs{SUFFIX}   || '.Z';          # eg .gz
+    my($compress) = $attribs{COMPRESS} || 'gzip --best';
+    my($suffix)   = $attribs{SUFFIX}   || '.gz';          # eg .gz
     my($shar)     = $attribs{SHAR}     || 'shar';       # eg "shar --gzip"
     my($preop)    = $attribs{PREOP}    || "$self->{NOECHO}\$(NOOP)"; # eg update MANIFEST
     my($postop)   = $attribs{POSTOP}   || "$self->{NOECHO}\$(NOOP)"; # eg remove the distdir
@@ -2403,6 +2403,7 @@ $(OBJECT) : $(FIRST_MAKEFILE)
 }.$self->{MAKEFILE}.q{ : Makefile.PL $(CONFIGDEP)
 	}.$self->{NOECHO}.q{echo "Makefile out-of-date with respect to $?"
 	}.$self->{NOECHO}.q{echo "Cleaning current config before rebuilding Makefile..."
+	-}.$self->{NOECHO}.q{$(RM_F) }."$self->{MAKEFILE}.old".q{
 	-}.$self->{NOECHO}.q{$(MV) }."$self->{MAKEFILE} $self->{MAKEFILE}.old".q{
 	-$(MAKE) -f }.$self->{MAKEFILE}.q{.old clean $(DEV_NULL) || $(NOOP)
 	$(PERL) "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" Makefile.PL }.join(" ",map(qq["$_"],@ARGV)).q{
@@ -2428,7 +2429,8 @@ put them into the INST_* directories.
 
 sub manifypods {
     my($self, %attribs) = @_;
-    return "\nmanifypods :\n\t$self->{NOECHO}\$(NOOP)\n" unless %{$self->{MAN3PODS}} or %{$self->{MAN1PODS}};
+    return "\nmanifypods : pure_all\n\t$self->{NOECHO}\$(NOOP)\n" unless
+	%{$self->{MAN3PODS}} or %{$self->{MAN1PODS}};
     my($dist);
     my($pod2man_exe);
     if (defined $self->{PERL_SRC}) {
@@ -2456,7 +2458,7 @@ q[-e 'next if -e $$m{$$_} && -M $$m{$$_} < -M $$_ && -M $$m{$$_} < -M "],
 -e 'system(qq[$$^X ].q["-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" $(POD2MAN_EXE) ].qq[$$_>$$m{$$_}])==0 or warn "Couldn\\047t install $$m{$$_}\n";' \\
 -e 'chmod(oct($(PERM_RW))), $$m{$$_} or warn "chmod $(PERM_RW) $$m{$$_}: $$!\n";}'
 ];
-    push @m, "\nmanifypods : ";
+    push @m, "\nmanifypods : pure_all ";
     push @m, join " \\\n\t", keys %{$self->{MAN1PODS}}, keys %{$self->{MAN3PODS}};
 
     push(@m,"\n");
@@ -2922,7 +2924,8 @@ realclean purge ::  clean
         push(@m, "	$self->{RM_F} \$(INST_DYNAMIC) \$(INST_BOOT)\n");
         push(@m, "	$self->{RM_F} \$(INST_STATIC)\n");
     }
-    push(@m, "	$self->{RM_F} " . join(" ", values %{$self->{PM}}) . "\n");
+    push(@m, "	$self->{RM_F} " . join(" ", values %{$self->{PM}}) . "\n")
+	if keys %{$self->{PM}};
     my(@otherfiles) = ($self->{MAKEFILE},
 		       "$self->{MAKEFILE}.old"); # Makefiles last
     push(@otherfiles, $attribs{FILES}) if $attribs{FILES};

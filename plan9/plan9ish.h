@@ -21,16 +21,16 @@
 #define HAS_UTIME		/**/
 
 /* HAS_GROUP
- *	This symbol, if defined, indicates that the getgrnam(),
- *	getgrgid(), and getgrent() routines are available to 
- *	get group entries.
+ *	This symbol, if defined, indicates that the getgrnam() and
+ *	getgrgid() routines are available to get group entries.
+ *	The getgrent() has a separate definition, HAS_GETGRENT.
  */
 /*#define HAS_GROUP		/**/
 
 /* HAS_PASSWD
- *	This symbol, if defined, indicates that the getpwnam(),
- *	getpwuid(), and getpwent() routines are available to 
- *	get password entries.
+ *	This symbol, if defined, indicates that the getpwnam() and
+ *	getpwuid() routines are available to get password entries.
+ *	The getpwent() has a separate definition, HAS_GETPWENT.
  */
 /*#define HAS_PASSWD		/**/
 

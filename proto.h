@@ -435,6 +435,10 @@ VIRTUAL OP*	refkids _((OP* o, I32 type));
 VIRTUAL void	regdump _((regexp* r));
 VIRTUAL I32	pregexec _((regexp* prog, char* stringarg, char* strend, char* strbeg, I32 minend, SV* screamer, U32 nosave));
 VIRTUAL void	pregfree _((struct regexp* r));
+VIRTUAL regexp*	pregcomp _((char* exp, char* xend, PMOP* pm));
+VIRTUAL I32	regexec_flags _((regexp* prog, char* stringarg, char* strend,
+			 char* strbeg, I32 minend, SV* screamer,
+			 void* data, U32 flags));
 VIRTUAL regnode* regnext _((regnode* p));
 VIRTUAL void	regprop _((SV* sv, regnode* o));
 VIRTUAL void	repeatcpy _((char* to, char* from, I32 len, I32 count));
@@ -701,6 +705,7 @@ I32 dopoptoeval _((I32 startingblock));
 I32 dopoptolabel _((char *label));
 I32 dopoptoloop _((I32 startingblock));
 I32 dopoptosub _((I32 startingblock));
+I32 dopoptosub_at _((PERL_CONTEXT* cxstk, I32 startingblock));
 void save_lines _((AV *array, SV *sv));
 OP *doeval _((int gimme, OP** startop));
 SV *mul128 _((SV *sv, U8 m));
@@ -709,11 +714,6 @@ int div128 _((SV *pnum, bool *done));
 
 int runops_standard _((void));
 int runops_debug _((void));
-
-regexp*	pregcomp _((char* exp, char* xend, PMOP* pm));
-I32	regexec_flags _((regexp* prog, char* stringarg, char* strend,
-			 char* strbeg, I32 minend, SV* screamer,
-			 void* data, U32 flags));
 
 void check_uni _((void));
 void  force_next _((I32 type));
@@ -725,7 +725,7 @@ char *scan_formline _((char *s));
 char *scan_heredoc _((char *s));
 char *scan_ident _((char *s, char *send, char *dest, STRLEN destlen, I32 ck_uni));
 char *scan_inputsymbol _((char *start));
-char *scan_pat _((char *start));
+char *scan_pat _((char *start, I32 type));
 char *scan_str _((char *start));
 char *scan_subst _((char *start));
 char *scan_trans _((char *start));

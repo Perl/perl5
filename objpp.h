@@ -229,6 +229,8 @@
 #define dopoptoloop       CPerlObj::dopoptoloop
 #undef  dopoptosub
 #define dopoptosub        CPerlObj::dopoptosub
+#undef  dopoptosub_at
+#define dopoptosub_at     CPerlObj::dopoptosub_at
 #undef  dounwind
 #define dounwind          CPerlObj::Perl_dounwind
 #undef  do_aexec

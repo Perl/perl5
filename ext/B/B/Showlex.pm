@@ -56,3 +56,25 @@ sub compile {
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+B::Showlex - Show lexical variables used in functions or files
+
+=head1 SYNOPSIS
+
+	perl -MO=Showlex[,SUBROUTINE] foo.pl
+
+=head1 DESCRIPTION
+
+When a subroutine name is provided in OPTIONS, prints the lexical
+variables used in that subroutine.  Otherwise, prints the file-scope
+lexicals in the file.
+
+=head1 AUTHOR
+
+Malcolm Beattie, C<mbeattie@sable.ox.ac.uk>
+
+=cut

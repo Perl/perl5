@@ -79,6 +79,7 @@ struct tms {
 };
 
 #ifndef START_EXTERN_C
+#undef EXTERN_C
 #ifdef __cplusplus
 #  define START_EXTERN_C extern "C" {
 #  define END_EXTERN_C }

@@ -60,10 +60,14 @@
 #define pp_rcatline	CPerlObj::Perl_pp_rcatline
 #undef  pp_regcmaybe	
 #define pp_regcmaybe	CPerlObj::Perl_pp_regcmaybe
+#undef  pp_regcreset	
+#define pp_regcreset	CPerlObj::Perl_pp_regcreset
 #undef  pp_regcomp	
 #define pp_regcomp	CPerlObj::Perl_pp_regcomp
 #undef  pp_match	
 #define pp_match	CPerlObj::Perl_pp_match
+#undef  pp_qr
+#define pp_qr		CPerlObj::Perl_pp_qr
 #undef  pp_subst	
 #define pp_subst	CPerlObj::Perl_pp_subst
 #undef  pp_substcont	
@@ -725,8 +729,10 @@ OP * (CPERLscope(*check)[]) _((OP *op)) = {
 	ck_null,	/* readline */
 	ck_null,	/* rcatline */
 	ck_fun,		/* regcmaybe */
+	ck_fun,		/* regcreset */
 	ck_null,	/* regcomp */
 	ck_match,	/* match */
+	ck_match,	/* qr */
 	ck_null,	/* subst */
 	ck_null,	/* substcont */
 	ck_null,	/* trans */
@@ -1074,8 +1080,10 @@ OP * (CPERLscope(*ppaddr)[])(ARGSproto) = {
 	pp_readline,
 	pp_rcatline,
 	pp_regcmaybe,
+	pp_regcreset,
 	pp_regcomp,
 	pp_match,
+	pp_qr,
 	pp_subst,
 	pp_substcont,
 	pp_trans,

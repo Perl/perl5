@@ -13,6 +13,8 @@
 #	Martijn Koster <m.koster@webcrawler.com>
 #	Richard Yeh <rcyeh@cco.caltech.edu>
 #
+# Completely disable SysV IPC pending more complete support from Tenon
+#                      -- Dominic Dunlop <domo@computer.org> 980712
 # Use vfork and perl's malloc by default
 #                      -- Dominic Dunlop <domo@computer.org> 980630
 # Raise perl's stack size again; cut down reg_infty; document
@@ -136,8 +138,12 @@ alignbytes=8
 # friends.  Use setjmp and friends instead.
 expr "$osvers" \< "4.0.3" > /dev/null && d_sigsetjmp='undef'
 
-# semctl(.., ..,  IPC_STATUS, ..) hangs system: say we don't have semctl()
-d_semctl='undef'
+# System V IPC support in MachTen 4.1 is incomplete (missing msg function
+# prototypes, no ftok()), buggy (semctl(.., ..,  IPC_STATUS, ..) hangs
+# system), and undocumented.  Claim it's not there until things improve.
+d_msg=${d_msg:-undef}
+d_sem=${d_sem:-undef}
+d_shm=${d_shm:-undef}
 
 # Get rid of some extra libs which it takes Configure a tediously
 # long time never to find on MachTen
@@ -164,11 +170,12 @@ cat <<EOM >&4
 During Configure, you may see the message
 
 *** WHOA THERE!!! ***
-    The recommended value for \$d_semctl on this machine was "undef"!
+    The recommended value for \$d_msg on this machine was "undef"!
     Keep the recommended value? [y]
 
-Select the default answer: semctl() is buggy, and perl should be built
-without it.
+as well as similar messages concerning \$d_sem and \$d_shm.  Select the
+default answers: MachTen 4.1 appears to provide System V IPC support,
+but it is incomplete and buggy: perl should be built without it.
 
 Similarly, when you see
 

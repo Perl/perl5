@@ -305,11 +305,63 @@ sh-syntax shell installed (see L<"Pdksh">,
 L<"Frequently asked questions">), and perl should be able to find it
 (see L<"PERL_SH_DIR">).
 
-The only cases when the shell is not used is the multi-argument
-system() (see L<perlfunc/system>)/exec() (see L<perlfunc/exec>), and
-one-argument version thereof without redirection and shell
-meta-characters.  Perl may also start scripts which start with cookies
-C<extproc> or C<#!> directly, without an intervention of shell.
+The cases when the shell is used are:
+
+=over
+
+=item 1
+
+One-argument system() (see L<perlfunc/system>), exec() (see L<perlfunc/exec>)
+with redirection or shell meta-characters;
+
+=item 2
+
+Pipe-open (see L<perlfunc/open>) with the command which contains redirection 
+or shell meta-characters;
+
+=item 3
+
+Backticks C<``> (see L<perlop/"I/O Operators">) with the command which contains
+redirection or shell meta-characters;
+
+=item 4
+
+If the executable called by system()/exec()/pipe-open()/C<``> is a script
+with the "magic" C<#!> line or C<extproc> line which specifies shell;
+
+=item 5
+
+If the executable called by system()/exec()/pipe-open()/C<``> is a script
+without "magic" line, and C<$ENV{EXECSHELL}> is set to shell;
+
+=item 6
+
+If the executable called by system()/exec()/pipe-open()/C<``> is not
+found;
+
+=item 7
+
+For globbing (see L<perlfunc/glob>, L<perlop/"I/O Operators">).
+
+=back
+
+For the sake of speed for a common case, in the above algorithms 
+backslashes in the command name are not considered as shell metacharacters.
+
+Perl starts scripts which begin with cookies
+C<extproc> or C<#!> directly, without an intervention of shell.  Perl uses the
+same algorithm to find the executable as F<pdksh>: if the path
+on C<#!> line does not work, and contains C</>, then the executable
+is searched in F<.> and on C<PATH>.  To find arguments for these scripts
+Perl uses a different algorithm than F<pdksh>: up to 3 arguments are 
+recognized, and trailing whitespace is stripped.
+
+If a script
+does not contain such a cooky, then to avoid calling F<sh.exe>, Perl uses
+the same algorithm as F<pdksh>: if C<$ENV{EXECSHELL}> is set, the
+script is given as the first argument to this command, if not set, then
+C<$ENV{COMSPEC} /c> is used (or a hardwired guess if C<$ENV{COMSPEC}> is
+not set).
 
 If starting scripts directly, Perl will use exactly the same algorithm as for 
 the search of script given by B<-S> command-line option: it will look in
@@ -684,6 +736,9 @@ check use
 
 ). You need the latest version of F<pdksh> installed as F<sh.exe>.
 
+Check that you have B<BSD> libraries and headers installed, and - 
+optionally - Berkeley DB headers and libraries, and crypt.
+
 Possible locations to get this from are
 
   ftp://hobbes.nmsu.edu/os2/unix/
@@ -769,6 +824,22 @@ compatibility with XFree86-OS/2). Get a corrected one from
 
   ftp://ftp.math.ohio-state.edu/pub/users/ilya/os2/db_mt.zip
 
+To make C<-p> filetest work, one may also need to apply the following patch
+to EMX headers:
+
+  --- /emx/include/sys/stat.h.orig	Thu May 23 13:48:16 1996
+  +++ /emx/include/sys/stat.h	Sun Jul 12 14:11:32 1998
+  @@ -53,7 +53,7 @@ struct stat
+   #endif
+ 
+   #if !defined (S_IFMT)
+  -#define S_IFMT   0160000  /* Mask for file type */
+  +#define S_IFMT   0170000  /* Mask for file type */
+   #define S_IFIFO  0010000  /* Pipe */
+   #define S_IFCHR  0020000  /* Character device */
+   #define S_IFDIR  0040000  /* Directory */
+
+
 =head2 Hand-editing
 
 You may look into the file F<./hints/os2.sh> and correct anything
@@ -804,7 +875,7 @@ F<POSIX.c>.
 
 =head2 Testing
 
-If you haven't yet moved perl.dll onto LIBPATH, do it now(alternatively, if
+If you haven't yet moved perl.dll onto LIBPATH, do it now (alternatively, if
 you have a previous perl installation you'd rather not disrupt until this one
 is installed, copy perl.dll to the t directory).
 
@@ -813,10 +884,9 @@ Now run
   make test
 
 Some tests (4..6) should fail. Some perl invocations should end in a
-segfault (system error C<SYS3175>). To get finer error reports, 
+segfault (system error C<SYS3175>). To get finer error reports, call
 
-  cd t
-  perl harness
+  perl t/harness
 
 The report you get may look like
 
@@ -828,7 +898,7 @@ The report you get may look like
   op/stat.t                    56    5   8.93%  3-4, 20, 35, 39
   Failed 4/140 test scripts, 97.14% okay. 27/2937 subtests failed, 99.08% okay.
 
-Note that using `make test' target two more tests may fail: C<op/exec:1>
+Note that using C<make test> target two more tests may fail: C<op/exec:1>
 because of (mis)feature of pdksh, and C<lib/posix:15>, which checks
 that the buffers are not flushed on C<_exit> (this is a bug in the test
 which assumes that tty output is buffered).
@@ -909,7 +979,7 @@ In addition to errors, you should get a lot of warnings.
 
 =over 4
 
-=item A lot of `bad free'
+=item A lot of C<bad free>
 
 in databases related to Berkeley DB. This is a confirmed bug of
 DB. You may disable this warnings, see L<"PERL_BADFREE">.
@@ -933,7 +1003,7 @@ the system it runs on is not I<that much> *nixish.
 
 =back
 
-A lot of `bad free'... in databases, bug in DB confirmed on other
+A lot of C<bad free>... in databases, bug in DB confirmed on other
 platforms. You may disable it by setting PERL_BADFREE environment variable
 to 1.
 
@@ -999,9 +1069,9 @@ You have a very old pdksh. See L<Prerequisites>.
 
 You do not have MT-safe F<db.lib>. See L<Prerequisites>.
 
-=head2 Problems with tr
+=head2 Problems with tr or sed
 
-reported with very old version of tr.
+reported with very old version of tr and sed.
 
 =head2 Some problem (forget which ;-)
 
@@ -1038,8 +1108,9 @@ if script was started via cmd.exe).
 
 =head2 Additional modules:
 
-L<OS2::Process>, L<OS2::REXX>, L<OS2::PrfDB>, L<OS2::ExtAttr>. This
-modules provide access to additional numeric argument for C<system>,
+L<OS2::Process>, L<OS2::REXX>, L<OS2::PrfDB>, L<OS2::ExtAttr>. These
+modules provide access to additional numeric argument for C<system>
+and to the list of the running processes,
 to DLLs having functions with REXX signature and to REXX runtime, to
 OS/2 databases in the F<.INI> format, and to Extended Attributes.
 
@@ -1408,7 +1479,7 @@ caching DLLs.
 =head2 Threading
 
 As of release 5.003_01 perl is linked to multithreaded CRT
-DLL. Perl itself is not multithread-safe, as is not perl
+DLL.  If perl itself is not compiled multithread-enabled, so will not be perl
 malloc(). However, extensions may use multiple thread on their own
 risk. 
 
@@ -1422,7 +1493,7 @@ external program I<via shell>, the F<f:/bin/sh.exe> will be called, or
 whatever is the override, see L<"PERL_SH_DIR">.
 
 Thus means that you need to get some copy of a F<sh.exe> as well (I
-use one from pdksh). The drive F: above is set up automatically during
+use one from pdksh). The drive F<F:> above is set up automatically during
 the build to a correct value on the builder machine, but is
 overridable at runtime,
 
@@ -1463,6 +1534,18 @@ C<CORE::system('cmd.exe', '/c', shift)>.
 If you have some working code for C<OS2::Cmd>, please send it to me,
 I will include it into distribution. I have no need for such a module, so
 cannot test it.
+
+For the details of the current situation with calling external programs,
+see L<Starting OS/2 (and DOS) programs under Perl>.
+
+=over
+
+=item
+
+External scripts may be called by name.  Perl will try the same extensions
+as when processing B<-S> command-line switch.
+
+=back
 
 =head2 Memory allocation
 

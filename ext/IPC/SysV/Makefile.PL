@@ -23,7 +23,6 @@ WriteMakefile(
 	VERSION_FROM	=> "SysV.pm",
 	NAME      	=> "IPC::SysV",
  
-	'linkext' 	=> {LINKTYPE => 'dynamic' },
 	'dist'    	=> {COMPRESS => 'gzip -9f',
 			    SUFFIX   => 'gz', 
 			    DIST_DEFAULT => 'all tardist',

@@ -776,3 +776,23 @@ sub compile {
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+B::Bytecode - Perl compiler's bytecode backend
+
+=head1 SYNOPSIS
+
+	perl -MO=Bytecode[,SUBROUTINE] foo.pl
+
+=head1 DESCRIPTION
+
+See F<ext/B/README>.
+
+=head1 AUTHOR
+
+Malcolm Beattie, C<mbeattie@sable.ox.ac.uk>
+
+=cut

@@ -21,6 +21,10 @@ use vars qw($x $y $z);
 
 my $eps = 1e-11;
 
+if ($^O eq 'unicos') { # See lib/Math/Complex.pm and t/lib/complex.t.
+    $eps = 1e-10;
+}
+
 sub near ($$;$) {
     abs($_[0] - $_[1]) < (defined $_[2] ? $_[2] : $eps);
 }

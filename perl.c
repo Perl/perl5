@@ -1718,6 +1718,15 @@ moreswitches(char *s)
 #ifdef atarist
 	printf("atariST series port, ++jrb  bammi@cadence.com\n");
 #endif
+#ifdef __BEOS__
+	printf("BeOS port Copyright Tom Spindler, 1997-1998\n");
+#endif
+#ifdef MPE
+	printf("MPE/iX port Copyright by Mark Klein and Mark Bixby, 1996-1998\n");
+#endif
+#ifdef BINARY_BUILD_NOTICE
+	BINARY_BUILD_NOTICE;
+#endif
 	printf("\n\
 Perl may be copied only under the terms of either the Artistic License or the\n\
 GNU General Public License, which may be found in the Perl 5.0 source kit.\n\n\
@@ -2773,6 +2782,13 @@ init_main_thread()
     formtarget = bodytarget;
     thr->errsv = newSVpv("", 0);
     (void) find_threadsv("@");	/* Ensure $@ is initialised early */
+
+    maxscream = -1;
+    regcompp = FUNC_NAME_TO_PTR(pregcomp);
+    regexecp = FUNC_NAME_TO_PTR(regexec_flags);
+    regindent = 0;
+    reginterp_cnt = 0;
+
     return thr;
 }
 #endif /* USE_THREADS */

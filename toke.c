@@ -11,6 +11,8 @@
  *   "It all comes from here, the stench and the peril."  --Frodo
  */
 
+#define TMP_CRLF_PATCH
+
 #include "EXTERN.h"
 #include "perl.h"
 
@@ -26,7 +28,7 @@ static char *scan_heredoc _((char *s));
 static char *scan_ident _((char *s, char *send, char *dest, STRLEN destlen,
 			   I32 ck_uni));
 static char *scan_inputsymbol _((char *start));
-static char *scan_pat _((char *start));
+static char *scan_pat _((char *start, I32 type));
 static char *scan_str _((char *start));
 static char *scan_subst _((char *start));
 static char *scan_trans _((char *start));
@@ -708,7 +710,7 @@ sublex_push(void)
     curcop->cop_line = multi_start;
 
     lex_inwhat = sublex_info.sub_inwhat;
-    if (lex_inwhat == OP_MATCH || lex_inwhat == OP_SUBST)
+    if (lex_inwhat == OP_MATCH || lex_inwhat == OP_QR || lex_inwhat == OP_SUBST)
 	lex_inpat = sublex_info.sub_op;
     else
 	lex_inpat = Nullop;
@@ -1986,7 +1988,7 @@ yylex(void)
 	}
 	goto retry;
     case '\r':
-#ifndef WIN32CHEAT
+#ifndef TMP_CRLF_PATCH
 	warn("Illegal character \\%03o (carriage return)", '\r');
 	croak(
       "(Maybe you didn't strip carriage returns after a network transfer?)\n");
@@ -2649,7 +2651,7 @@ yylex(void)
 		&& (*last_uni != 's' || s - last_uni < 5 
 		    || memNE(last_uni, "study", 5) || isALNUM(last_uni[5])))
 		check_uni();
-	    s = scan_pat(s);
+	    s = scan_pat(s,OP_MATCH);
 	    TERM(sublex_start());
 	}
 	tmp = *s++;
@@ -2790,7 +2792,7 @@ yylex(void)
 	tmp = (len == 1 && strchr("msyq", tokenbuf[0]) ||
 	       len == 2 && ((tokenbuf[0] == 't' && tokenbuf[1] == 'r') ||
 			    (tokenbuf[0] == 'q' &&
-			     strchr("qwx", tokenbuf[1]))));
+			     strchr("qwxr", tokenbuf[1]))));
 
 	/* x::* is just a word, unless x is "CORE" */
 	if (!tmp && *s == ':' && s[1] == ':' && strNE(tokenbuf, "CORE"))
@@ -3498,7 +3500,7 @@ yylex(void)
 	    UNI(OP_LSTAT);
 
 	case KEY_m:
-	    s = scan_pat(s);
+	    s = scan_pat(s,OP_MATCH);
 	    TERM(sublex_start());
 
 	case KEY_map:
@@ -3657,6 +3659,10 @@ yylex(void)
 	    yylval.ival = OP_STRINGIFY;
 	    if (SvIVX(lex_stuff) == '\'')
 		SvIVX(lex_stuff) = 0;	/* qq'$foo' should intepolate */
+	    TERM(sublex_start());
+
+	case KEY_qr:
+	    s = scan_pat(s,OP_QR);
 	    TERM(sublex_start());
 
 	case KEY_qx:
@@ -4456,6 +4462,7 @@ keyword(register char *d, I32 len)
     case 'q':
 	if (len <= 2) {
 	    if (strEQ(d,"q"))			return KEY_q;
+	    if (strEQ(d,"qr"))			return KEY_qr;
 	    if (strEQ(d,"qq"))			return KEY_qq;
 	    if (strEQ(d,"qw"))			return KEY_qw;
 	    if (strEQ(d,"qx"))			return KEY_qx;
@@ -4965,7 +4972,7 @@ void pmflag(U16 *pmfl, int ch)
 }
 
 STATIC char *
-scan_pat(char *start)
+scan_pat(char *start, I32 type)
 {
     PMOP *pm;
     char *s;
@@ -4978,11 +4985,17 @@ scan_pat(char *start)
 	croak("Search pattern not terminated");
     }
 
-    pm = (PMOP*)newPMOP(OP_MATCH, 0);
+    pm = (PMOP*)newPMOP(type, 0);
     if (multi_open == '?')
 	pm->op_pmflags |= PMf_ONCE;
-    while (*s && strchr("iogcmsx", *s))
-	pmflag(&pm->op_pmflags,*s++);
+    if(type == OP_QR) {
+	while (*s && strchr("iomsx", *s))
+	    pmflag(&pm->op_pmflags,*s++);
+    }
+    else {
+	while (*s && strchr("iogcmsx", *s))
+	    pmflag(&pm->op_pmflags,*s++);
+    }
     pm->op_pmpermflags = pm->op_pmflags;
 
     lex_op = (OP*)pm;
@@ -5155,6 +5168,30 @@ scan_heredoc(register char *s)
     *d++ = '\n';
     *d = '\0';
     len = d - tokenbuf;
+#ifdef TMP_CRLF_PATCH
+    d = strchr(s, '\r');
+    if (d) {
+	char *olds = s;
+	s = d;
+	while (s < bufend) {
+	    if (*s == '\r') {
+		*d++ = '\n';
+		if (*++s == '\n')
+		    s++;
+	    }
+	    else if (*s == '\n' && s[1] == '\r') {	/* \015\013 on a mac? */
+		*d++ = *s++;
+		s++;
+	    }
+	    else
+		*d++ = *s++;
+	}
+	*d = '\0';
+	bufend = d;
+	SvCUR_set(linestr, bufend - SvPVX(linestr));
+	s = olds;
+    }
+#endif
     d = "\n";
     if (outer || !(d=ninstr(s,bufend,d,d+1)))
 	herewas = newSVpv(s,bufend-s);
@@ -5206,6 +5243,20 @@ scan_heredoc(register char *s)
 	    missingterm(tokenbuf);
 	}
 	curcop->cop_line++;
+	bufend = SvPVX(linestr) + SvCUR(linestr);
+#ifdef TMP_CRLF_PATCH
+	if (bufend - linestart >= 2) {
+	    if (bufend[-2] == '\r' || bufend[-2] == '\n') {
+		bufend[-2] = '\n';
+		bufend--;
+		SvCUR_set(linestr, bufend - SvPVX(linestr));
+	    }
+	    else if (bufend[-1] == '\r')
+		bufend[-1] = '\n';
+	}
+	else if (bufend - linestart == 1 && bufend[-1] == '\r')
+	    bufend[-1] = '\n';
+#endif
 	if (PERLDB_LINE && curstash != debstash) {
 	    SV *sv = NEWSV(88,0);
 
@@ -5214,7 +5265,6 @@ scan_heredoc(register char *s)
 	    av_store(GvAV(curcop->cop_filegv),
 	      (I32)curcop->cop_line,sv);
 	}
-	bufend = SvPVX(linestr) + SvCUR(linestr);
 	if (*s == term && memEQ(s,tokenbuf,len)) {
 	    s = bufend - 1;
 	    *s = ' ';
@@ -5491,6 +5541,20 @@ scan_str(char *start)
 
   	if (s < bufend) break;	/* handle case where we are done yet :-) */
 
+#ifdef TMP_CRLF_PATCH
+	if (to - SvPVX(sv) >= 2) {
+	    if (to[-2] == '\r' || to[-2] == '\n') {
+		to[-2] = '\n';
+		to--;
+		SvCUR_set(sv, to - SvPVX(sv));
+	    }
+	    else if (to[-1] == '\r')
+		to[-1] = '\n';
+	}
+	else if (to - SvPVX(sv) == 1 && to[-1] == '\r')
+	    to[-1] = '\n';
+#endif
+	
 	/* if we're out of file, or a read fails, bail and reset the current
 	   line marker so we can report where the unterminated string began
 	*/

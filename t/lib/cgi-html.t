@@ -9,6 +9,7 @@ BEGIN {
 }
 
 BEGIN {$| = 1; print "1..17\n"; }
+BEGIN {$eol = $^O eq 'VMS' ? "\n" : "\cM\cJ";}
 END {print "not ok 1\n" unless $loaded;}
 use CGI (':standard','-no_debug');
 $loaded = 1;
@@ -36,10 +37,10 @@ test(7,h1({-align=>'CENTER'},['fred','agnes']) eq
     local($") = '-'; 
     test(8,h1('fred','agnes','maura') eq '<H1>fred-agnes-maura</H1>',"open/close tag \$\" interpolation");
 }
-test(9,header() eq "Content-Type: text/html\r\n\r\n","header()");
-test(10,header(-type=>'image/gif') eq "Content-Type: image/gif\r\n\r\n","header()");
-test(11,header(-type=>'image/gif',-status=>'500 Sucks') eq "Status: 500 Sucks\r\nContent-Type: image/gif\r\n\r\n","header()");
-test(12,header(-nph=>1) eq "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n","header()");
+test(9,header() eq "Content-Type: text/html${eol}${eol}","header()");
+test(10,header(-type=>'image/gif') eq "Content-Type: image/gif${eol}${eol}","header()");
+test(11,header(-type=>'image/gif',-status=>'500 Sucks') eq "Status: 500 Sucks${eol}Content-Type: image/gif${eol}${eol}","header()");
+test(12,header(-nph=>1) eq "HTTP/1.0 200 OK${eol}Content-Type: text/html${eol}${eol}","header()");
 test(13,start_html() ."\n" eq <<END,"start_html()");
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <HTML><HEAD><TITLE>Untitled Document</TITLE>
@@ -60,5 +61,5 @@ END
     ;
 test(16,($cookie=cookie(-name=>'fred',-value=>['chocolate','chip'],-path=>'/')) eq 
      'fred=chocolate&chip; path=/',"cookie()");
-test(17,header(-Cookie=>$cookie) =~ m!^Set-Cookie: fred=chocolate&chip\; path=/\r\nDate:.*\r\nContent-Type: text/html\r\n\r\n!s,
+test(17,header(-Cookie=>$cookie) =~ m!^Set-Cookie: fred=chocolate&chip\; path=/${eol}Date:.*${eol}Content-Type: text/html${eol}${eol}!s,
      "header(-cookie)");

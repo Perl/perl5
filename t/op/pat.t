@@ -6,14 +6,15 @@
 
 # $RCSfile: pat.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:12 $
 
-print "1..124\n";
+print "1..135\n";
 
 BEGIN {
     chdir 't' if -d 't';
     @INC = "../lib" if -d "../lib";
 }
 eval 'use Config';          #  Defaults assumed if this fails
-use re 'eval';
+
+$ENV{PERL_DESTRUCT_LEVEL} = 0; # XXX known to leaks scalars
 
 $x = "abc\ndef\n";
 
@@ -382,10 +383,22 @@ $test++;
 
 $code = '{$blah = 45}';
 $blah = 12;
-eval { /(?$code)/ };			
-print "not " unless $@ and $@ =~ /not allowed at run time/ and $blah == 12;
+eval { /(?$code)/ };
+print "not " unless $@ and $@ =~ /not allowed at runtime/ and $blah == 12;
 print "ok $test\n";
 $test++;
+
+for $code ('{$blah = 45}','=xx') {
+  $blah = 12;
+  $res = eval { "xx" =~ /(?$code)/o };
+  if ($code eq '=xx') {
+    print "#'$@','$res','$blah'\nnot " unless not $@ and $res;
+  } else {
+    print "#'$@','$res','$blah'\nnot " unless $@ and $@ =~ /not allowed at runtime/ and $blah == 12;    
+  }
+  print "ok $test\n";
+  $test++;
+}
 
 $code = '{$blah = 45}';
 $blah = 12;
@@ -439,8 +452,27 @@ print "not " unless $^R eq '79' and $x eq '12';
 print "ok $test\n";
 $test++;
 
-# This should be changed to qr/\b\v$/ ASAP
-print "not " unless study(/\b\v$/) eq '(?:\bv$)';
+print "not " unless qr/\b\v$/i eq '(?i-xsm:\bv$)';
+print "ok $test\n";
+$test++;
+
+print "not " unless qr/\b\v$/s eq '(?s-xim:\bv$)';
+print "ok $test\n";
+$test++;
+
+print "not " unless qr/\b\v$/m eq '(?m-xis:\bv$)';
+print "ok $test\n";
+$test++;
+
+print "not " unless qr/\b\v$/x eq '(?x-ism:\bv$)';
+print "ok $test\n";
+$test++;
+
+print "not " unless qr/\b\v$/xism eq '(?msix:\bv$)';
+print "ok $test\n";
+$test++;
+
+print "not " unless qr/\b\v$/ eq '(?-xism:\bv$)';
 print "ok $test\n";
 $test++;
 
@@ -476,6 +508,34 @@ print "not " unless $1 and /$1/;
 print "ok $test\n";
 $test++;
 
+$a=qr/(?{++$b})/; 
+$b = 7;
+/$a$a/; 
+print "not " unless $b eq '9'; 
+print "ok $test\n";
+$test++;
+
+$c="$a"; 
+/$a$a/; 
+print "not " unless $b eq '11'; 
+print "ok $test\n";
+$test++;
+
+{
+  use re "eval"; 
+  /$a$c$a/; 
+  print "not " unless $b eq '14'; 
+  print "ok $test\n";
+  $test++;
+
+  no re "eval"; 
+  $match = eval { /$a$c$a/ };
+  print "not " 
+    unless $b eq '14' and $@ =~ /Eval-group not allowed/ and not $match;
+  print "ok $test\n";
+  $test++;
+}
+  
 sub must_warn_pat {
     my $warn_pat = shift;
     return sub { print "not " unless $_[0] =~ /$warn_pat/ }

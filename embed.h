@@ -689,6 +689,7 @@
 #define pp_push			Perl_pp_push
 #define pp_pushmark		Perl_pp_pushmark
 #define pp_pushre		Perl_pp_pushre
+#define pp_qr			Perl_pp_qr
 #define pp_quotemeta		Perl_pp_quotemeta
 #define pp_rand			Perl_pp_rand
 #define pp_range		Perl_pp_range
@@ -703,6 +704,7 @@
 #define pp_refgen		Perl_pp_refgen
 #define pp_regcmaybe		Perl_pp_regcmaybe
 #define pp_regcomp		Perl_pp_regcomp
+#define pp_regcreset		Perl_pp_regcreset
 #define pp_rename		Perl_pp_rename
 #define pp_repeat		Perl_pp_repeat
 #define pp_require		Perl_pp_require

@@ -50,7 +50,7 @@ which are as compact and as fast arrays to access.  This only works
 as long as the objects are accessed through properly typed variables.
 For untyped access to work you have to make sure that a reference to
 the proper %FIELDS hash is assigned to the 0'th element of the array
-object (so that the objects can be treated like an AVHV).  A
+object (so that the objects can be treated like an pseudo-hash).  A
 constructor like this does the job:
 
   sub new
@@ -65,7 +65,7 @@ constructor like this does the job:
 =head1 SEE ALSO
 
 L<base>,
-I<description of AVHVs>
+L<perlref/Pseudo-hashes: Using an array as a hash>
 
 =cut
 

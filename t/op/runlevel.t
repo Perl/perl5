@@ -23,7 +23,7 @@ $tmpfile = "runltmp000";
 END { if ($tmpfile) { 1 while unlink $tmpfile; } }
 
 for (@prgs){
-    my $switch;
+    my $switch = "";
     if (s/^\s*(-\w+)//){
        $switch = $1;
     }
@@ -295,3 +295,23 @@ foo:
 END { print "foobar\n" }
 EXPECT
 foobar
+########
+$SIG{__DIE__} = sub {
+    print "In DIE\n";
+    $i = 0;
+    while (($p,$f,$l,$s) = caller(++$i)) {
+        print "$p|$f|$l|$s\n";
+    }
+};
+eval { die };
+&{sub { eval 'die' }}();
+sub foo { eval { die } } foo();
+EXPECT
+In DIE
+main|-|8|(eval)
+In DIE
+main|-|9|(eval)
+main|-|9|main::__ANON__
+In DIE
+main|-|10|(eval)
+main|-|10|main::foo

@@ -756,6 +756,7 @@ pp_prtf
 pp_push
 pp_pushmark
 pp_pushre
+pp_qr
 pp_quotemeta
 pp_rand
 pp_range
@@ -769,6 +770,7 @@ pp_redo
 pp_ref
 pp_refgen
 pp_regcmaybe
+pp_regcreset
 pp_regcomp
 pp_rename
 pp_repeat

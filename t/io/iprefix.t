@@ -13,6 +13,12 @@ if ($^O eq 'MSWin32') {
   `.\\perl -le "print 'foo'" > .b`;
   `.\\perl -le "print 'foo'" > .c`;
 }
+elsif ($^O eq 'VMS') {
+  $CAT = 'MCR []perl. -e "print<>"';
+  `MCR []perl. -le "print 'foo'" > ./.a`;
+  `MCR []perl. -le "print 'foo'" > ./.b`;
+  `MCR []perl. -le "print 'foo'" > ./.c`;
+}
 else {
   $CAT = 'cat';
   `echo foo | tee .a .b .c`;

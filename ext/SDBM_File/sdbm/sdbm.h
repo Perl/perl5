@@ -133,11 +133,13 @@ extern long sdbm_hash proto((char *, int));
 #  include <unixio.h>
 #endif
 
-#if !defined(MSDOS) && !defined(WIN32) && !defined(VMS)
-#   ifdef PARAM_NEEDS_TYPES
-#	include <sys/types.h>
+#ifdef I_SYS_PARAM
+#   if !defined(MSDOS) && !defined(WIN32) && !defined(VMS)
+#       ifdef PARAM_NEEDS_TYPES
+#	    include <sys/types.h>
+#       endif
+#       include <sys/param.h>
 #   endif
-#   include <sys/param.h>
 #endif
 
 #ifndef _TYPES_		/* If types.h defines this it's easy. */

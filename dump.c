@@ -300,6 +300,7 @@ dump_op(OP *o)
 	break;
     case OP_PUSHRE:
     case OP_MATCH:
+    case OP_QR:
     case OP_SUBST:
 	dump_pm(cPMOPo);
 	break;

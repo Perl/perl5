@@ -7,7 +7,7 @@ perldelta - what's new for perl5.005
 This document describes differences between the 5.004 release and this one.
 
 [XXX this needs more verbose summaries of the sub topics, instead of just
-the "See L<foo>."  Scheduled for a second iteration. GSAR]
+the "See foo."  Scheduled for a second iteration. GSAR]
 
 =head1 About the new versioning system
 
@@ -22,12 +22,11 @@ with 5.004, but you will need to rebuild and reinstall those extensions
 to use them 5.005.  See L<INSTALL> for detailed instructions on how to
 upgrade.
 
-=head2 Installation structure has changed
+=head2 Default installation structure has changed
 
-Extensions that have with architecture-dependent files are now always
-installed in the architecture-dependent locations.  Previously, they
-were shared will multiple versions of perl, an were therefore liable to
-be overwritten with newer versions that may have subtle incompatibilities.
+The new Configure defaults are designed to allow a smooth upgrade from
+5.004 to 5.005, but you should read L<INSTALL> for a detailed
+discussion of the changes in order to adapt them to your system.
 
 =head2 Perl Source Compatibility
 
@@ -38,6 +37,14 @@ If threads are enabled, then some caveats apply. C<@_> and C<$_> become
 lexical variables.  The effect of this should be largely transparent to
 the user, but there are some boundary conditions under which user will
 need to be aware of the issues. [XXX Add e.g. here.]
+
+Some new keywords have been introduced.  These are generally expected to
+have very little impact on compatibility.  See L</New C<INIT> keyword>,
+L</New C<lock> keyword>, and L</New C<qr//> operator>.
+
+Certain barewords are now reserved.  Use of these will provoke a warning
+if you have asked for them with the C<-w> switch.
+See L</C<our> is now a reserved word>.
 
 =head2 C Source Compatibility
 
@@ -62,15 +69,16 @@ Oneliners with the C<-e> switch do not create temporary files anymore.
 
 =head2 Relaxed new mandatory warnings introduced in 5.004
 
-Many new warnings that were introduced in 5.004 have either been made
+Many new warnings that were introduced in 5.004 have been made
 optional.  Some of these warnings are still present, but perl's new
 features make them less often a problem.  See L<New Diagnostics>.
 
 =head2 Licensing
 
-Perl has a new Social Contract for contributors.
+Perl has a new Social Contract for contributors.  See F<Porting/Contract>.
 
-Perl's documentation license has changed.
+The license included in much of the Perl documentation has changed.
+[XXX See where?]
 
 =head1 Core Changes
 
@@ -79,7 +87,7 @@ Perl's documentation license has changed.
 
 WARNING: Threading is considered an experimental feature.  Details of the
 implementation may change without notice.  There are known limitations
-and bugs.
+and and some bugs.
 
 See L<README.threads>.
 
@@ -89,10 +97,33 @@ WARNING: The Compiler and related tools are considered experimental.
 Features may change without notice, and there are known limitations
 and bugs.
 
-B::Lint is an experimental module to detect and warn about suspicious
-code, especially the cases that the -w switch does not detect.
+The Compiler produces three different types of transformations of a
+perl program.  The C backend generates C code that captures perl's state
+just before execution begins.  It eliminates the compile-time overheads
+of the regular perl interpreter, but the run-time performance remains
+comparatively the same.  The CC backend generates optimized C code
+equivivalent to the code path at run-time.  The CC backend has greater
+potential for big optimizations, but only a few optimizations are
+implemented currently.  The Bytecode backend generates a platform
+independent bytecode representation of the interpreter's state
+just before execution.  Thus, the Bytecode back end also eliminates
+much of the compilation overhead of the interpreter.
 
-B::Deparse can be used to demystify perl code.
+The compiler comes with several valuable utilities.
+
+C<B::Lint> is an experimental module to detect and warn about suspicious
+code, especially the cases that the C<-w> switch does not detect.
+
+C<B::Deparse> can be used to demystify perl code, and understand
+how perl optimizes certain constructs.
+
+C<B::Xref> generates cross reference reports of all definition and use
+of variables, subroutines and formats in a program.
+
+C<B::Showlex> show the lexical variables used by a subroutine or file
+at a glance.
+
+C<perlcc> is a simple frontend for compiling perl.
 
 See C<ext/B/README>.
 
@@ -110,24 +141,27 @@ See C<perlfunc/sort>.
 
 =head2 Reliable signals
 
-Via Thread::Signal.
+Two kinds.
 
-Via switched runtime op loop.
+Via C<Thread::Signal>.
+
+Via switched runtime op loop.  [XXX Not yet available.]
 
 =head2 Reliable stack pointers
 
-The internals now reallocate the perl stack only at predicatable times.
+The internals now reallocate the perl stack only at predictable times.
 In particular, magic calls never trigger reallocations of the stack,
 because all reentrancy of the runtime is handled using a "stack of stacks".
-This should improve reliability of cached stack pointers in XSUBs.
+This should improve reliability of cached stack pointers in the internals
+and in XSUBs.
 
-=head2 Behavior of local() on composites is well-defined
+=head2 Behavior of local() on composites is now well-defined
 
 See L<perlfunc/local>.
 
 =head2 C<%!> is transparently tied to the L<Errno> module
 
-See L<perlvar>.
+See L<perlvar>, and L<Errno>.
 
 =head2 Pseudo-hashes are supported
 
@@ -166,13 +200,28 @@ not try to allocate a 1000000-size list anymore.
 
 See L<perllocale>.
 
-=head2 Better support for 64-bit platforms
+=head2 Experimental support for 64-bit platforms
 
-[XXX How?]
+Perl5 has always had 64-bit support on systems with 64-bit longs.
+Starting with 5.005, the beginnings of experimental support for systems
+with 32-bit long and 64-bit 'long long' integers has been added.
+If you add -DUSE_LONG_LONG to your ccflags in config.sh (or manually
+define it in perl.h) then perl will be built with 'long long' support.
+There will be many compiler warnings, and the resultant perl may not
+work on all systems.  There are many other issues related to
+third-party extensions and libraries.  This option exists to allow
+people to work on those issues.
 
 =head2 prototype() returns useful results on builtins
 
 See L<perlfunc/prototype>.
+
+=head2 Extended support for exception handling
+
+C<die()> now accepts a reference value, and C<$@> gets set to that
+value in exception traps.  This makes it possible to propagate
+exception objects.  See L<perlfunc/eval>.  [XXX there's nothing
+about this in perlfunc/eval yet.]
 
 =head2 Re-blessing in DESTROY() supported for chaining DESTROY() methods
 
@@ -184,16 +233,29 @@ See L<perlfunc/printf>.
 
 =head2 New C<INIT> keyword
 
-C<INIT> subs are like C<BEGIN> and C<END>, but they get called just before
-the perl runtime begins execution.
+C<INIT> subs are like C<BEGIN> and C<END>, but they get run just before
+the perl runtime begins execution.  e.g., the Perl Compiler makes use of
+C<INIT> blocks to initialize and resolve pointers to XSUBs.
 
 [XXX Needs to be documented in perlsub or perlmod.]
 
 =head2 New C<lock> keyword
 
+The C<lock> keyword is the fundamental synchronization primitive
+in threaded perl.  When threads are not enabled, it is currently a noop.
+
 To minimize impact on source compatibility this keyword is "weak", i.e., any
 user-defined subroutine of the same name overrides it, unless a C<use Thread>
 has been seen.
+
+=head2 New C<qr//> operator
+
+The C<qr//> operator, which is syntactically similar to the other quote-like
+operators, is used to create precompiled regular expressions.  This compiled
+form can now be explicitly passed around in variables, and interpolated in
+other regular expressions.  See L<perlop>.
+
+=head2 C<our> is now a reserved word
 
 =head2 Tied arrays are now fully supported
 
@@ -204,18 +266,31 @@ See L<Tie::Array>.
 Several missing hooks have been added.  There is also a new base class for
 TIEARRAY implementations.  See L<Tie::Array>.
 
+=head2 4th argument to substr
+
+substr() can now both return and replace in one operation.  The optional
+4th argument is the replacement string.  See L<perlfunc/substr>.
+
+=head2 Negative LENGTH argument to splice
+
+Splice() with a negative LENGTH argument now work similar to what the
+LENGTH did for substr().  Previously a negative LENGTH was treated as
+0.  See L<perlfunc/splice>.
+
 
 =head1 Supported Platforms
 
 Configure has many incremental improvements.  Site-wide policy for building
-perl can now be made perlsistent, via Policy.sh.  Configure can also remember
-the arguments used in previous invocations.
+perl can now be made persistent, via Policy.sh.  Configure also records
+the command-line arguments used in F<config.sh>.
 
 =head2 New Platforms
 
 BeOS is now supported.  See L<README.beos>.
 
 DOS is now supported under the DJGPP tools.  See L<README.dos>.
+
+MPE/iX is now supported.  See L<README.mpeix>.
 
 =head2 Changes in existing support
 
@@ -320,6 +395,13 @@ specify that site umask() policy should be honored.  There is also
 better support for manipulation of .packlist files, and getting
 information about installed modules.
 
+Extensions that have both architecture-dependent and
+architecture-independent files are now always installed completely in
+the architecture-dependent locations.  Previously, the shareable parts
+were shared both across architectures and across perl versions and were
+therefore liable to be overwritten with newer versions that might have
+subtle incompatibilities.
+
 =item CPAN
 
 [XXX What?]
@@ -336,11 +418,11 @@ Keeps better time.
 
 =head1 Utility Changes
 
-The crude GNU configure emulator is now called configure.gnu.
-
 h2ph and related utilities have been vastly overhauled.
 
 perlcc, a new experimental front end for the compiler is available.
+
+The crude GNU configure emulator is now called configure.gnu.
 
 =head1 API Changes
 
@@ -409,12 +491,6 @@ only with arrays that have a hash reference at index 0.
 
 (F) The "goto subroutine" call can't be used to jump out of an eval "string".
 (You can use it to jump out of an eval {BLOCK}, but you probably don't want to.)
-
-=item Can't use %%! because Errno.pm is not available
-
-(F) The first time the %! hash is used, perl automatically loads the
-Errno.pm module. The Errno module is expected to tie the %! hash to
-provide symbolic names for C<$!> errno values.
 
 =item Can't use %%! because Errno.pm is not available
 
@@ -569,7 +645,7 @@ fix the problem can be found in L<perllocale> section B<LOCALE PROBLEMS>.
 =head1 Obsolete Diagnostics
 
 =over
- 
+
 =item Can't mktemp()
 
 (F) The mktemp() routine failed for some reason while trying to process

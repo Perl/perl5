@@ -177,6 +177,9 @@ ARCHOBJS = $archobjs
 # grrr
 SHELL = $sh
 
+# how to tr(anslate) newlines
+TRNL = '$trnl'
+
 !GROK!THIS!
 
 ## In the following dollars and backticks do not need the extra backslash.
@@ -300,6 +303,7 @@ $(LIBPERL): $& perl$(OBJ_EXT) $(obj)
 		case "$osname" in
 		aix)
 			$spitshell >>Makefile <<'!NO!SUBS!'
+	rm -f libperl$(OBJ_EXT)
 	mv $@ libperl$(OBJ_EXT)
 	$(AR) qv $(LIBPERL) libperl$(OBJ_EXT)
 !NO!SUBS!
@@ -376,10 +380,11 @@ preplibrary: miniperl lib/Config.pm $(plextract)
 # try 'make minitest' and/or commenting out the tests at the end of configpm.)
 lib/Config.pm: config.sh miniperl configpm
 	$(LDLIBPTH) ./miniperl configpm tmp
-	sh mv-if-diff tmp lib/Config.pm
+	sh mv-if-diff tmp $@
 
 lib/ExtUtils/Miniperl.pm: miniperlmain.c miniperl minimod.pl lib/Config.pm
-	$(LDLIBPTH) ./miniperl minimod.pl > tmp && mv tmp $@
+	$(LDLIBPTH) ./miniperl minimod.pl > tmp
+	sh mv-if-diff tmp $@
 
 lib/re.pm: ext/re/re.pm
 	cat ext/re/re.pm > $@
@@ -580,7 +585,7 @@ test-notty: test-prep
 
 # Can't depend on lib/Config.pm because that might be where miniperl
 # is crashing.
-minitest: miniperl
+minitest: miniperl lib/re.pm
 	@echo "You may see some irrelevant test failures if you have been unable"
 	@echo "to build lib/Config.pm."
 	- cd t && (rm -f perl$(EXE_EXT); $(LNS) ../miniperl$(EXE_EXT) perl$(EXE_EXT)) \
@@ -600,16 +605,16 @@ nok:	utilities
 	$(LBLIBPTH) ./perl -Ilib utils/perlbug -nok -s '(UNINSTALLED)'
 
 clist:	$(c)
-	echo $(c) | tr ' ' '\012' >.clist
+	echo $(c) | tr ' ' $(TRNL) >.clist
 
 hlist:  $(h)
-	echo $(h) | tr ' ' '\012' >.hlist
+	echo $(h) | tr ' ' $(TRNL) >.hlist
 
 shlist: $(sh)
-	echo $(sh) | tr ' ' '\012' >.shlist
+	echo $(sh) | tr ' ' $(TRNL) >.shlist
 
 pllist: $(pl)
-	echo $(pl) | tr ' ' '\012' >.pllist
+	echo $(pl) | tr ' ' $(TRNL) >.pllist
 
 Makefile: Makefile.SH ./config.sh
 	$(SHELL) Makefile.SH

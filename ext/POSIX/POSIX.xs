@@ -2962,9 +2962,11 @@ localeconv()
 	    if (lcbuf->thousands_sep && *lcbuf->thousands_sep)
 		hv_store(RETVAL, "thousands_sep", 13,
 		    newSVpv(lcbuf->thousands_sep, 0), 0);
+#ifndef NO_LOCALECONV_GROUPING
 	    if (lcbuf->grouping && *lcbuf->grouping)
 		hv_store(RETVAL, "grouping", 8,
 		    newSVpv(lcbuf->grouping, 0), 0);
+#endif
 	    if (lcbuf->int_curr_symbol && *lcbuf->int_curr_symbol)
 		hv_store(RETVAL, "int_curr_symbol", 15,
 		    newSVpv(lcbuf->int_curr_symbol, 0), 0);
@@ -2979,9 +2981,11 @@ localeconv()
 		hv_store(RETVAL, "mon_thousands_sep", 17,
 		    newSVpv(lcbuf->mon_thousands_sep, 0), 0);
 #endif                    
+#ifndef NO_LOCALECONV_MON_GROUPING
 	    if (lcbuf->mon_grouping && *lcbuf->mon_grouping)
 		hv_store(RETVAL, "mon_grouping", 12,
 		    newSVpv(lcbuf->mon_grouping, 0), 0);
+#endif
 	    if (lcbuf->positive_sign && *lcbuf->positive_sign)
 		hv_store(RETVAL, "positive_sign", 13,
 		    newSVpv(lcbuf->positive_sign, 0), 0);

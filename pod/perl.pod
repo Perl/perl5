@@ -49,6 +49,7 @@ of sections:
     perldiag	Perl diagnostic messages
     perlsec	Perl security
     perltrap	Perl traps for the unwary
+    perlport	Perl portability guide
     perlstyle	Perl style guide
 
     perlpod	Perl plain old documentation

@@ -10,5 +10,6 @@ if cmp $1 $2 >/dev/null 2>&1; then
 	echo "File $2 not changed."
 	rm -f $1
 else
+	rm -f $2
 	mv $1 $2
 fi

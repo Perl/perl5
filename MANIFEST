@@ -20,6 +20,7 @@ Porting/config.sh	Sample config.sh
 Porting/config_H	Sample config.h
 Porting/genlog		Generate formatted changelogs by querying p4d
 Porting/makerel		Release making utility
+Porting/p4d2p		Generate standard patches from p4 diffs
 Porting/patching.pod	How to report changes made to Perl
 Porting/patchls		Flexible patch file listing utility
 Porting/pumpkin.pod	Guidelines and hints for Perl maintainers
@@ -28,6 +29,7 @@ README.amiga		Notes about AmigaOS port
 README.beos		Notes about BeOS port
 README.cygwin32		Notes about Cygwin32 port
 README.dos		Notes about dos/djgpp port
+README.mpeix		Notes about MPE/iX port
 README.os2		Notes about OS/2 port
 README.plan9		Notes about Plan9 port
 README.qnx		Notes about QNX port
@@ -35,7 +37,7 @@ README.threads		Notes about multithreading
 README.vms		Notes about VMS port
 README.win32		Notes about Win32 port
 Todo			The Wishlist
-Todo.5.005		What needs doing before 5.005 release
+Todo-5.005		What needs doing before 5.005 release
 XSLock.h		Include file for extensions built with PERL_OBJECT defined
 XSUB.h			Include file for extension subroutines
 av.c			Array value code
@@ -193,6 +195,7 @@ ext/DynaLoader/dl_cygwin32.xs	Cygwin32 implementation
 ext/DynaLoader/dl_dld.xs	GNU dld style implementation
 ext/DynaLoader/dl_dlopen.xs	BSD/SunOS4&5 dlopen() style implementation
 ext/DynaLoader/dl_hpux.xs	HP-UX implementation
+ext/DynaLoader/dl_mpeix.xs	MPE/iX implementation
 ext/DynaLoader/dl_next.xs	Next implementation
 ext/DynaLoader/dl_none.xs	Stub implementation
 ext/DynaLoader/dl_vms.xs	VMS implementation
@@ -220,11 +223,11 @@ ext/IO/lib/IO/Socket.pm		IO::Socket extension Perl module
 ext/IPC/SysV/ChangeLog		IPC::SysV extension Perl module
 ext/IPC/SysV/MANIFEST		IPC::SysV extension Perl module
 ext/IPC/SysV/Makefile.PL	IPC::SysV extension Perl module
+ext/IPC/SysV/Msg.pm		IPC::SysV extension Perl module
 ext/IPC/SysV/README		IPC::SysV extension Perl module
+ext/IPC/SysV/Semaphore.pm	IPC::SysV extension Perl module
 ext/IPC/SysV/SysV.pm		IPC::SysV extension Perl module
 ext/IPC/SysV/SysV.xs		IPC::SysV extension Perl module
-ext/IPC/SysV/Msg.pm		IPC::SysV extension Perl module
-ext/IPC/SysV/Semaphore.pm	IPC::SysV extension Perl module
 ext/IPC/SysV/t/msg.t		IPC::SysV extension Perl module
 ext/IPC/SysV/t/sem.t		IPC::SysV extension Perl module
 ext/NDBM_File/Makefile.PL	NDBM extension makefile writer
@@ -324,6 +327,7 @@ ext/attrs/Makefile.PL	attrs extension makefile writer
 ext/attrs/attrs.pm	attrs extension Perl module
 ext/attrs/attrs.xs	attrs extension external subroutines
 ext/re/Makefile.PL	re extension makefile writer
+ext/re/hints/mpeix.pl	Hints for re for named architecture
 ext/re/re.pm		re extension Perl module
 ext/re/re.xs		re extension external subroutines
 ext/util/make_ext	Used by Makefile to execute extension Makefiles
@@ -435,7 +439,6 @@ lib/AnyDBM_File.pm	Perl module to emulate dbmopen
 lib/AutoLoader.pm	Autoloader base class
 lib/AutoSplit.pm	Split up autoload functions
 lib/Benchmark.pm	Measure execution time
-lib/Bundle/CPAN.pm	The CPAN bundle
 lib/CGI.pm		Web server interface ("Common Gateway Interface")
 lib/CGI/Apache.pm	Support for Apache's Perl module
 lib/CGI/Carp.pm		Log server errors with helpful context
@@ -595,6 +598,9 @@ mg.c			Magic code
 mg.h			Magic header
 minimod.pl		Writes lib/ExtUtils/Miniperl.pm
 miniperlmain.c		Basic perl w/o dynamic loading or extensions
+mpeix/mpeixish.h	MPE/iX port
+mpeix/nm		MPE/iX port
+mpeix/relink		MPE/iX port
 mv-if-diff		Script to mv a file if it changed
 myconfig		Prints summary of the current configuration
 nostdio.h		Cause compile error on stdio calls
@@ -659,7 +665,7 @@ perlsfio.h		Prototype sfio mapping for PerlIO
 perlsh			A poor man's perl shell
 perlvars.h		Global variables
 perly.c			A byacc'ed perly.y
-perly.c.diff		Fixup perly.c to allow recursion
+perly_c.diff		Fixup perly.c to allow recursion
 perly.fixer		A program to remove yacc stack limitations
 perly.h			The header file for perly.c
 perly.y			Yacc grammar for perl
@@ -689,7 +695,7 @@ pod/perlcall.pod	Callback info
 pod/perldata.pod	Data structure info
 pod/perldebug.pod	Debugger info
 pod/perldelta.pod	Changes since last version
-pod/perldelta4.pod	Changes from 5.003 to 5.004
+pod/perld4.pod		Changes from 5.003 to 5.004
 pod/perldiag.pod	Diagnostic info
 pod/perldsc.pod		Data Structures Cookbook
 pod/perlembed.pod	Embedding info
@@ -715,6 +721,7 @@ pod/perlmodlib.pod	Module policy info
 pod/perlobj.pod		Object info
 pod/perlop.pod		Operator info
 pod/perlpod.pod		Pod info
+pod/perlport.pod	Portability guide
 pod/perlre.pod		Regular expression info
 pod/perlref.pod		References info
 pod/perlrun.pod		Execution info
@@ -807,13 +814,13 @@ t/lib/cgi-html.t	See if CGI.pm works
 t/lib/cgi-request.t	See if CGI.pm works
 t/lib/checktree.t	See if File::CheckTree works
 t/lib/complex.t		See if Math::Complex works
-t/lib/dumper.t		See if Data::Dumper works
-t/lib/dumper-ovl.t	See if Data::Dumper works for overloaded data
 t/lib/db-btree.t	See if DB_File works
 t/lib/db-hash.t		See if DB_File works
 t/lib/db-recno.t	See if DB_File works
 t/lib/dirhand.t		See if DirHandle works
 t/lib/dosglob.t		See if File::DosGlob works
+t/lib/dumper-ovl.t	See if Data::Dumper works for overloaded data
+t/lib/dumper.t		See if Data::Dumper works
 t/lib/english.t		See if English works
 t/lib/env.t		See if Env works
 t/lib/errno.t		See if Errno works
@@ -839,6 +846,7 @@ t/lib/io_taint.t	See if the untaint method from IO works
 t/lib/io_tell.t		See if seek()/tell()-related methods from IO work
 t/lib/io_udp.t		See if UDP socket-related methods from IO work
 t/lib/io_xs.t		See if XSUB methods from IO work
+t/lib/ipc_sysv.t	See if IPC::SysV works
 t/lib/ndbm.t		See if NDBM_File works
 t/lib/odbm.t		See if ODBM_File works
 t/lib/opcode.t		See if Opcode works
@@ -895,8 +903,6 @@ t/op/hashwarn.t		See if warnings for bad hash assignments work
 t/op/inc.t		See if inc/dec of integers near 32 bit limit work
 t/op/index.t		See if index works
 t/op/int.t		See if int works
-t/op/ipcmsg.t		See if msg* ops work
-t/op/ipcsem.t		See if sem* ops work
 t/op/join.t		See if join works
 t/op/list.t		See if array lists work
 t/op/local.t		See if local works

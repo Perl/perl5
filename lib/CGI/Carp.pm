@@ -178,7 +178,7 @@ use Carp;
 
 $main::SIG{__WARN__}=\&CGI::Carp::warn;
 $main::SIG{__DIE__}=\&CGI::Carp::die;
-$CGI::Carp::VERSION = '1.10';
+$CGI::Carp::VERSION = '1.101';
 $CGI::Carp::CUSTOM_MSG = undef;
 
 # fancy import routine detects and handles 'errorWrap' specially.
@@ -194,8 +194,9 @@ sub import {
 }
 
 # These are the originals
-sub realwarn { warn(@_); }
-sub realdie { die(@_); }
+# XXX Why not just use CORE::die etc., instead of these two?  GSAR
+sub realwarn { CORE::warn(@_); }
+sub realdie { CORE::die(@_); }
 
 sub id {
     my $level = shift;
@@ -268,7 +269,7 @@ EOF
 sub carpout {
     my($in) = @_;
     my($no) = fileno(to_filehandle($in));
-    die "Invalid filehandle $in\n" unless defined $no;
+    realdie "Invalid filehandle $in\n" unless defined $no;
     
     open(SAVEERR, ">&STDERR");
     open(STDERR, ">&$no") or 

@@ -2,7 +2,7 @@ BEGIN {require 5.002;} # MakeMaker 5.17 was the last MakeMaker that was compatib
 
 package ExtUtils::MakeMaker;
 
-$Version = $VERSION = "5.43";
+$Version = $VERSION = "5.4301";
 $Version_OK = "5.17";	# Makefiles older than $Version_OK will die
 			# (Will be checked from MakeMaker version 4.13 onwards)
 ($Revision = substr(q$Revision: 1.222 $, 10)) =~ s/\s+$//;
@@ -1688,7 +1688,7 @@ part of the Makefile.
 
 =item dist
 
-  {TARFLAGS => 'cvfF', COMPRESS => 'gzip', SUFFIX => 'gz',
+  {TARFLAGS => 'cvfF', COMPRESS => 'gzip', SUFFIX => '.gz',
   SHAR => 'shar -m', DIST_CP => 'ln', ZIP => '/bin/zip',
   ZIPFLAGS => '-rl', DIST_DEFAULT => 'private tardist' }
 
@@ -1883,13 +1883,13 @@ reference to the dist attribute of the WriteMakefile call. The
 following parameters are recognized:
 
     CI           ('ci -u')
-    COMPRESS     ('compress')
+    COMPRESS     ('gzip --best')
     POSTOP       ('@ :')
     PREOP        ('@ :')
     TO_UNIX      (depends on the system)
     RCS_LABEL    ('rcs -q -Nv$(VERSION_SYM):')
     SHAR         ('shar')
-    SUFFIX       ('Z')
+    SUFFIX       ('.gz')
     TAR          ('tar')
     TARFLAGS     ('cvf')
     ZIP          ('zip')
@@ -1897,7 +1897,7 @@ following parameters are recognized:
 
 An example:
 
-    WriteMakefile( 'dist' => { COMPRESS=>"gzip", SUFFIX=>"gz" })
+    WriteMakefile( 'dist' => { COMPRESS=>"bzip2", SUFFIX=>".bz2" })
 
 =head2 Disabling an extension
 

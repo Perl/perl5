@@ -517,6 +517,10 @@ Free_t   Perl_free _((Malloc_t where));
 #   include <netinet/in.h>
 #endif
 
+#ifdef I_ARPA_INET
+#   include <arpa/inet.h>
+#endif
+
 #if defined(SF_APPEND) && defined(USE_SFIO) && defined(I_SFIO)
 /* <sfio.h> defines SF_APPEND and <sys/stat.h> might define SF_APPEND
  * (the neo-BSD seem to do this).  */
@@ -1102,7 +1106,11 @@ typedef I32 (*filter_t) _((int, SV *, int));
 #   if defined(PLAN9)
 #     include "./plan9/plan9ish.h"
 #   else
-#     include "unixish.h"
+#     if defined(MPE)
+#       include "mpeix/mpeixish.h"
+#     else
+#       include "unixish.h"
+#     endif
 #   endif
 # endif
 #endif         
@@ -1849,10 +1857,6 @@ typedef I32 (*regexec_t) _((regexp* prog, char* stringarg, char* strend, char*
 			    strbeg, I32 minend, SV* screamer, void* data, 
 			    U32 flags));
 
-EXT regexp*	pregcomp _((char* exp, char* xend, PMOP* pm));
-EXT I32		regexec_flags _((regexp* prog, char* stringarg, char* strend,
-			 char* strbeg, I32 minend, SV* screamer,
-			 void* data, U32 flags));
 #endif
 
 /* Set up PERLVAR macros for populating structs */

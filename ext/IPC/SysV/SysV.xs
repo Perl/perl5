@@ -15,11 +15,21 @@
 #include <sys/sem.h>
 #endif
 #ifdef HAS_SHM
+#ifdef PERL_SCO5
+#include <sys/sysmacros.h>
+#endif
 #include <sys/shm.h>
 # ifndef HAS_SHMAT_PROTOTYPE
     extern Shmat_t shmat _((int, char *, int));
 # endif
 #endif
+#endif
+
+/* Required in BSDI to get PAGE_SIZE definition for SHMLBA.
+ * Ugly.  More beautiful solutions welcome.
+ * Shouting at BSDI sounds quite beautiful. */
+#ifdef __bsdi__
+#   include <vm/vm_param.h>
 #endif
 
 #ifndef newCONSTSUB

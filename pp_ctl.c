@@ -36,6 +36,7 @@ static I32 dopoptoeval _((I32 startingblock));
 static I32 dopoptolabel _((char *label));
 static I32 dopoptoloop _((I32 startingblock));
 static I32 dopoptosub _((I32 startingblock));
+static I32 dopoptosub_at _((PERL_CONTEXT *cxstk, I32 startingblock));
 static void save_lines _((AV *array, SV *sv));
 static I32 sortcv _((SV *a, SV *b));
 static void qsortsv _((SV **array, size_t num_elts, I32 (*fun)(SV *a, SV *b)));
@@ -64,6 +65,14 @@ PP(pp_wantarray)
 
 PP(pp_regcmaybe)
 {
+    return NORMAL;
+}
+
+PP(pp_regcreset)
+{
+    /* XXXX Should store the old value to allow for tie/overload - and
+       restore in regcomp, where marked with XXXX. */
+    reginterp_cnt = 0;
     return NORMAL;
 }
 
@@ -99,9 +108,13 @@ PP(pp_regcomp)
 		ReREFCNT_dec(pm->op_pmregexp);
 		pm->op_pmregexp = Null(REGEXP*);	/* crucial if regcomp aborts */
 	    }
+	    if (op->op_flags & OPf_SPECIAL)
+		reginterp_cnt = I32_MAX; /* Mark as safe.  */
 
 	    pm->op_pmflags = pm->op_pmpermflags;	/* reset case sensitivity */
 	    pm->op_pmregexp = CALLREGCOMP(t, t + len, pm);
+	    reginterp_cnt = 0;		/* XXXX Be extra paranoid - needed
+					   inside tie/overload accessors.  */
 	}
     }
 
@@ -791,7 +804,7 @@ PP(pp_flip)
 	SV *targ = PAD_SV(op->op_targ);
 
 	if ((op->op_private & OPpFLIP_LINENUM)
-	  ? last_in_gv && SvIV(sv) == IoLINES(GvIOp(last_in_gv))
+	  ? (last_in_gv && SvIV(sv) == (IV)IoLINES(GvIOp(last_in_gv)))
 	  : SvTRUE(sv) ) {
 	    sv_setiv(PAD_SV(cUNOP->op_first->op_targ), 1);
 	    if (op->op_flags & OPf_SPECIAL) {
@@ -857,7 +870,7 @@ PP(pp_flop)
 	SV *targ = PAD_SV(cUNOP->op_first->op_targ);
 	sv_inc(targ);
 	if ((op->op_private & OPpFLIP_LINENUM)
-	  ? last_in_gv && SvIV(sv) == IoLINES(GvIOp(last_in_gv))
+	  ? (last_in_gv && SvIV(sv) == (IV)IoLINES(GvIOp(last_in_gv)))
 	  : SvTRUE(sv) ) {
 	    sv_setiv(PAD_SV(((UNOP*)cUNOP->op_first)->op_first->op_targ), 0);
 	    sv_catpv(targ, "E0");
@@ -945,10 +958,17 @@ STATIC I32
 dopoptosub(I32 startingblock)
 {
     dTHR;
+    return dopoptosub_at(cxstack, startingblock);
+}
+
+STATIC I32
+dopoptosub_at(PERL_CONTEXT *cxstk, I32 startingblock)
+{
+    dTHR;
     I32 i;
     register PERL_CONTEXT *cx;
     for (i = startingblock; i >= 0; i--) {
-	cx = &cxstack[i];
+	cx = &cxstk[i];
 	switch (cx->cx_type) {
 	default:
 	    continue;
@@ -1153,6 +1173,8 @@ PP(pp_caller)
     djSP;
     register I32 cxix = dopoptosub(cxstack_ix);
     register PERL_CONTEXT *cx;
+    register PERL_CONTEXT *ccstack = cxstack;
+    PERL_SI *top_si = curstackinfo;
     I32 dbcxix;
     I32 gimme;
     HV *hv;
@@ -1163,25 +1185,32 @@ PP(pp_caller)
 	count = POPi;
     EXTEND(SP, 6);
     for (;;) {
+	/* we may be in a higher stacklevel, so dig down deeper */
+	while (cxix < 0 && top_si->si_type != PERLSI_MAIN) {
+	    top_si = top_si->si_prev;
+	    ccstack = top_si->si_cxstack;
+	    cxix = dopoptosub_at(ccstack, top_si->si_cxix);
+	}
 	if (cxix < 0) {
 	    if (GIMME != G_ARRAY)
 		RETPUSHUNDEF;
 	    RETURN;
 	}
 	if (DBsub && cxix >= 0 &&
-		cxstack[cxix].blk_sub.cv == GvCV(DBsub))
+		ccstack[cxix].blk_sub.cv == GvCV(DBsub))
 	    count++;
 	if (!count--)
 	    break;
-	cxix = dopoptosub(cxix - 1);
+	cxix = dopoptosub_at(ccstack, cxix - 1);
     }
-    cx = &cxstack[cxix];
-    if (cxstack[cxix].cx_type == CXt_SUB) {
-        dbcxix = dopoptosub(cxix - 1);
-	/* We expect that cxstack[dbcxix] is CXt_SUB, anyway, the
+
+    cx = &ccstack[cxix];
+    if (ccstack[cxix].cx_type == CXt_SUB) {
+        dbcxix = dopoptosub_at(ccstack, cxix - 1);
+	/* We expect that ccstack[dbcxix] is CXt_SUB, anyway, the
 	   field below is defined for any cx. */
-	if (DBsub && dbcxix >= 0 && cxstack[dbcxix].blk_sub.cv == GvCV(DBsub))
-	    cx = &cxstack[dbcxix];
+	if (DBsub && dbcxix >= 0 && ccstack[dbcxix].blk_sub.cv == GvCV(DBsub))
+	    cx = &ccstack[dbcxix];
     }
 
     if (GIMME != G_ARRAY) {
@@ -1205,9 +1234,9 @@ PP(pp_caller)
     PUSHs(sv_2mortal(newSViv((I32)cx->blk_oldcop->cop_line)));
     if (!MAXARG)
 	RETURN;
-    if (cx->cx_type == CXt_SUB) { /* So is cxstack[dbcxix]. */
+    if (cx->cx_type == CXt_SUB) { /* So is ccstack[dbcxix]. */
 	sv = NEWSV(49, 0);
-	gv_efullname3(sv, CvGV(cxstack[cxix].blk_sub.cv), Nullch);
+	gv_efullname3(sv, CvGV(ccstack[cxix].blk_sub.cv), Nullch);
 	PUSHs(sv_2mortal(sv));
 	PUSHs(sv_2mortal(newSViv((I32)cx->blk_sub.hasargs)));
     }
@@ -1699,6 +1728,7 @@ dofindlabel(OP *o, char *label, OP **opstack, OP **oplimit)
     }
     *ops = 0;
     if (o->op_flags & OPf_KIDS) {
+	dTHR;
 	/* First try all the kids at this level, since that's likeliest. */
 	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling) {
 	    if ((kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE) &&
@@ -3183,7 +3213,7 @@ doqsort_all_asserts(
 
 /* ****************************************************************** qsort */
 
-void
+STATIC void
 #ifdef PERL_OBJECT
 qsortsv(SV ** array, size_t num_elts, SVCOMPARE compare)
 #else

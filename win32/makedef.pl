@@ -244,7 +244,7 @@ Perl_sv_nv
 Perl_sv_true
 Perl_sv_uv
 Perl_sv_pvn
-Perl_newRV_noinc)];
+)];
  }
 
 unless ($define{'FAKE_THREADS'})
@@ -455,6 +455,7 @@ win32_stat
 win32_pipe
 win32_popen
 win32_pclose
+win32_rename
 win32_setmode
 win32_lseek
 win32_tell

@@ -25,7 +25,7 @@ INST_TOP	= $(INST_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-INST_VER	= \5.00471
+INST_VER	= \5.00475
 
 #
 # uncomment to enable threads-capabilities
@@ -56,9 +56,18 @@ INST_VER	= \5.00471
 #USE_PERLCRT	= define
 
 #
+# uncomment to enable linking with setargv.obj under the Visual C
+# compiler. Setting this options enables perl to expand wildcards in
+# arguments, but it may be harder to use alternate methods like
+# File::DosGlob that are more powerful.  This option is supported only with
+# Visual C.
+#
+#USE_SETARGV	= define
+
+#
 # if you have the source for des_fcrypt(), uncomment this and make sure the
-# file exists (see README.win32).  File should be located at the perl
-# top level directory.
+# file exists (see README.win32).  File should be located in the same
+# directory as this file.  Not (yet) supported with PERL_OBJECT.
 #
 #CRYPT_SRC	= des_fcrypt.c
 
@@ -130,10 +139,14 @@ USE_THREADS	= undef
 PROCESSOR_ARCHITECTURE	= x86
 !ENDIF
 
+!IF "$(OBJECT)" != ""
+ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)-object
+!ELSE
 !IF "$(USE_THREADS)" == "define"
 ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)-thread
 !ELSE
 ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)
+!ENDIF
 !ENDIF
 
 ARCHDIR		= ..\lib\$(ARCHNAME)
@@ -153,9 +166,9 @@ LIB32		= $(LINK32) -lib
 #
 
 RUNTIME		= -MD
-INCLUDES	= -I.\include -I. -I..
+INCLUDES	= -I$(COREDIR) -I.\include -I. -I..
 #PCHFLAGS	= -Fpc:\temp\vcmoduls.pch -YX 
-DEFINES		= -DWIN32 -D_CONSOLE $(BUILDOPT) $(CRYPT_FLAG)
+DEFINES		= -DWIN32 -D_CONSOLE -DNO_STRICT $(BUILDOPT) $(CRYPT_FLAG)
 LOCDEFS		= -DPERLDLL -DPERL_CORE
 SUBSYS		= console
 CXX_FLAG	= -TP -GX
@@ -342,10 +355,6 @@ MICROCORE_SRC	=		\
 		..\universal.c	\
 		..\util.c
 
-!IF "$(CRYPT_SRC)" != ""
-MICROCORE_SRC	= $(MICROCORE_SRC) ..\$(CRYPT_SRC)
-!ENDIF
-
 !IF "$(PERL_MALLOC)" == "define"
 EXTRACORE_SRC	= $(EXTRACORE_SRC) ..\malloc.c
 !ENDIF
@@ -362,13 +371,17 @@ WIN32_SRC	=		\
 WIN32_SRC	= $(WIN32_SRC) .\win32thread.c 
 !ENDIF
 
+!IF "$(CRYPT_SRC)" != ""
+WIN32_SRC	= $(WIN32_SRC) .\$(CRYPT_SRC)
+!ENDIF
+
 PERL95_SRC	=		\
 		perl95.c	\
 		win32mt.c	\
 		win32sckmt.c
 
 !IF "$(CRYPT_SRC)" != ""
-PERL95_SRC	= $(PERL95_SRC) ..\$(CRYPT_SRC)
+PERL95_SRC	= $(PERL95_SRC) .\$(CRYPT_SRC)
 !ENDIF
 
 DLL_SRC		= $(DYNALOADER).c
@@ -446,6 +459,10 @@ PERLDLL_OBJ	= $(PERLDLL_OBJ) $(WIN32_OBJ) $(DLL_OBJ)
 !ELSE
 PERLEXE_OBJ	= $(PERLEXE_OBJ) $(WIN32_OBJ) $(DLL_OBJ)
 PERL95_OBJ	= $(PERL95_OBJ) DynaLoadmt$(o)
+!ENDIF
+
+!IF "$(USE_SETARGV)" != ""
+SETARGV_OBJ	= setargv$(o)
 !ENDIF
 
 DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B re \
@@ -664,7 +681,7 @@ perlmain$(o) : perlmain.c
 
 $(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ)
 	$(LINK32) -subsystem:console -out:$@ $(LINK_FLAGS) $(LIBFILES) \
-	    $(PERLEXE_OBJ) $(PERLIMPLIB) 
+	    $(PERLEXE_OBJ) $(SETARGV_OBJ) $(PERLIMPLIB) 
 	copy splittree.pl .. 
 	$(MINIPERL) -I..\lib ..\splittree.pl "../LIB" $(AUTODIR)
 
@@ -690,7 +707,8 @@ DynaLoadmt$(o) : $(DYNALOADER).c
 
 $(PERL95EXE): $(PERLDLL) $(CONFIGPM) $(PERL95_OBJ)
 	$(LINK32) -subsystem:console -nodefaultlib -out:$@ $(LINK_FLAGS) \
-	    $(LIBBASEFILES) $(PERL95_OBJ) $(PERLIMPLIB) libcmt.lib
+	    $(LIBBASEFILES) $(PERL95_OBJ) $(SETARGV_OBJ) $(PERLIMPLIB) \
+	    libcmt.lib
 
 !ENDIF
 

@@ -19,3 +19,22 @@ sub import {
 
 1;
 
+__END__
+
+=head1 NAME
+
+O - Generic interface to Perl Compiler backends
+
+=head1 SYNOPSIS
+
+	perl -MO=Backend[,OPTIONS] foo.pl
+
+=head1 DESCRIPTION
+
+See F<ext/B/README>.
+
+=head1 AUTHOR
+
+Malcolm Beattie, C<mbeattie@sable.ox.ac.uk>
+
+=cut

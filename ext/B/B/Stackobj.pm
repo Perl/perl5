@@ -279,3 +279,23 @@ sub B::Stackobj::Bool::write_back {
 sub B::Stackobj::Bool::invalidate {}
 
 1;
+
+__END__
+
+=head1 NAME
+
+B::Stackobj - Helper module for CC backend
+
+=head1 SYNOPSIS
+
+	use B::Stackobj;
+
+=head1 DESCRIPTION
+
+See F<ext/B/README>.
+
+=head1 AUTHOR
+
+Malcolm Beattie, C<mbeattie@sable.ox.ac.uk>
+
+=cut

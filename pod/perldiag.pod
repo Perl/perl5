@@ -978,6 +978,18 @@ to 01411.  Octal constants are introduced with a leading 0 in Perl, as in C.
 Perl uses this generic message when none of the errors that it encountered
 were severe enough to halt compilation immediately.
 
+=item Complex regular subexpression recursion limit (%d) exceeded
+
+(W) The regular expression engine uses recursion in complex situations
+where back-tracking is required.  Recursion depth is limited to 32766,
+or perhaps less in architectures where the stack cannot grow
+arbitrarily.  ("Simple" and "medium" situations are handled without
+recursion and are not subject to a limit.)  Try shortening the string
+under examination; looping in Perl code (e.g. with C<while>) rather
+than in the regular expression engine; or rewriting the regular
+expression so that it is simpler or backtracks less.  (See L<perlbook>
+for information on I<Mastering Regular Expressions>.)
+
 =item connect() on closed fd
 
 (W) You tried to do a connect on a closed socket.  Did you forget to check
@@ -1511,13 +1523,13 @@ catches that.  But an easy way to do the same thing is:
 
 Another way is to assign to a substr() that's off the end of the string.
 
-=item Modification of noncreatable array value attempted, subscript %d
+=item Modification of non-creatable array value attempted, subscript %d
 
 (F) You tried to make an array value spring into existence, and the
 subscript was probably negative, even counting from end of the array
 backwards.
 
-=item Modification of noncreatable hash value attempted, subscript "%s"
+=item Modification of non-creatable hash value attempted, subscript "%s"
 
 (F) You tried to make a hash value spring into existence, and it couldn't
 be created for some peculiar reason.
@@ -2597,8 +2609,13 @@ certain type.  Arrays must be @NAME or C<@{EXPR}>.  Hashes must be
 
 =item umask: argument is missing initial 0
 
-(W) A umask of 222 is incorrect.  It should be 0222, because octal literals
-always start with 0 in Perl, as in C.
+(W) A umask of 222 is incorrect.  It should be 0222, because octal
+literals always start with 0 in Perl, as in C.
+
+=item umask not implemented
+
+(F) Your machine doesn't implement the umask function and you tried
+to use it to restrict permissions for yourself (EXPR & 0700).
 
 =item Unable to create sub named "%s"
 

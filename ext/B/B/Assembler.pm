@@ -205,3 +205,23 @@ sub assemble_fh {
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+B::Assembler - Assemble Perl bytecode
+
+=head1 SYNOPSIS
+
+	use Assembler;
+
+=head1 DESCRIPTION
+
+See F<ext/B/B/Assembler.pm>.
+
+=head1 AUTHOR
+
+Malcolm Beattie, C<mbeattie@sable.ox.ac.uk>
+
+=cut

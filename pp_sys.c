@@ -69,7 +69,9 @@ extern int h_errno;
     struct passwd *getpwnam _((char *));
     struct passwd *getpwuid _((Uid_t));
 # endif
+# ifdef HAS_GETPWENT
   struct passwd *getpwent _((void));
+# endif
 #endif
 
 #ifdef HAS_GROUP
@@ -79,7 +81,9 @@ extern int h_errno;
     struct group *getgrnam _((char *));
     struct group *getgrgid _((Gid_t));
 # endif
+# ifdef HAS_GETGRENT
     struct group *getgrent _((void));
+# endif
 #endif
 
 #ifdef I_UTIME
@@ -495,6 +499,11 @@ PP(pp_umask)
     TAINT_PROPER("umask");
     XPUSHi(anum);
 #else
+    /* Only DIE if trying to restrict permissions on `user' (self).
+     * Otherwise it's harmless and more useful to just return undef
+     * since 'group' and 'other' concepts probably don't exist here. */
+    if (MAXARG >= 1 && (POPi & 0700))
+	DIE("umask not implemented");
     XPUSHs(&sv_undef);
 #endif
     RETURN;
@@ -1263,7 +1272,7 @@ PP(pp_sysread)
 #ifdef HAS_SOCKET
     if (op->op_type == OP_RECV) {
 	char namebuf[MAXPATHLEN];
-#if defined(VMS_DO_SOCKETS) && defined(DECCRTL_SOCKETS)
+#if (defined(VMS_DO_SOCKETS) && defined(DECCRTL_SOCKETS)) || defined(MPE)
 	bufsize = sizeof (struct sockaddr_in);
 #else
 	bufsize = sizeof namebuf;
@@ -1757,18 +1766,47 @@ PP(pp_bind)
 {
     djSP;
 #ifdef HAS_SOCKET
+#ifdef MPE /* Requires PRIV mode to bind() to ports < 1024 */
+    extern GETPRIVMODE();
+    extern GETUSERMODE();
+#endif
     SV *addrsv = POPs;
     char *addr;
     GV *gv = (GV*)POPs;
     register IO *io = GvIOn(gv);
     STRLEN len;
+    int bind_ok = 0;
+#ifdef MPE
+    int mpeprivmode = 0;
+#endif
 
     if (!io || !IoIFP(io))
 	goto nuts;
 
     addr = SvPV(addrsv, len);
     TAINT_PROPER("bind");
-    if (PerlSock_bind(PerlIO_fileno(IoIFP(io)), (struct sockaddr *)addr, len) >= 0)
+#ifdef MPE /* Deal with MPE bind() peculiarities */
+    if (((struct sockaddr *)addr)->sa_family == AF_INET) {
+        /* The address *MUST* stupidly be zero. */
+        ((struct sockaddr_in *)addr)->sin_addr.s_addr = INADDR_ANY;
+        /* PRIV mode is required to bind() to ports < 1024. */
+        if (((struct sockaddr_in *)addr)->sin_port < 1024 &&
+            ((struct sockaddr_in *)addr)->sin_port > 0) {
+            GETPRIVMODE(); /* If this fails, we are aborted by MPE/iX. */
+	    mpeprivmode = 1;
+	}
+    }
+#endif /* MPE */
+    if (PerlSock_bind(PerlIO_fileno(IoIFP(io)),
+		      (struct sockaddr *)addr, len) >= 0)
+	bind_ok = 1;
+
+#ifdef MPE /* Switch back to USER mode */
+    if (mpeprivmode)
+	GETUSERMODE();
+#endif /* MPE */
+
+    if (bind_ok)
 	RETPUSHYES;
     else
 	RETPUSHUNDEF;
@@ -2694,7 +2732,7 @@ PP(pp_rename)
     char *tmps = SvPV(TOPs, na);
     TAINT_PROPER("rename");
 #ifdef HAS_RENAME
-    anum = rename(tmps, tmps2);
+    anum = PerlLIO_rename(tmps, tmps2);
 #else
     if (!(anum = PerlLIO_stat(tmps, &statbuf))) {
 	if (same_dirent(tmps2, tmps))	/* can always rename to same name */
@@ -4111,7 +4149,7 @@ PP(pp_gpwuid)
 PP(pp_gpwent)
 {
     djSP;
-#ifdef HAS_PASSWD
+#if defined(HAS_PASSWD) && defined(HAS_GETPWENT)
     I32 which = op->op_type;
     register SV *sv;
     struct passwd *pwent;
@@ -4140,7 +4178,9 @@ PP(pp_gpwent)
 	sv_setpv(sv, pwent->pw_name);
 
 	PUSHs(sv = sv_mortalcopy(&sv_no));
+#ifdef PWPASSWD
 	sv_setpv(sv, pwent->pw_passwd);
+#endif
 
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	sv_setiv(sv, (IV)pwent->pw_uid);
@@ -4201,7 +4241,7 @@ PP(pp_gpwent)
 PP(pp_spwent)
 {
     djSP;
-#if defined(HAS_PASSWD) && !defined(CYGWIN32)
+#if defined(HAS_PASSWD) && defined(HAS_SETPWENT) && !defined(CYGWIN32)
     setpwent();
     RETPUSHYES;
 #else
@@ -4212,7 +4252,7 @@ PP(pp_spwent)
 PP(pp_epwent)
 {
     djSP;
-#ifdef HAS_PASSWD
+#if defined(HAS_PASSWD) && defined(HAS_ENDPWENT)
     endpwent();
     RETPUSHYES;
 #else
@@ -4241,7 +4281,7 @@ PP(pp_ggrgid)
 PP(pp_ggrent)
 {
     djSP;
-#ifdef HAS_GROUP
+#if defined(HAS_GROUP) && defined(HAS_GETGRENT)
     I32 which = op->op_type;
     register char **elem;
     register SV *sv;
@@ -4269,10 +4309,15 @@ PP(pp_ggrent)
     if (grent) {
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	sv_setpv(sv, grent->gr_name);
+
 	PUSHs(sv = sv_mortalcopy(&sv_no));
+#ifdef GRPASSWD
 	sv_setpv(sv, grent->gr_passwd);
+#endif
+
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	sv_setiv(sv, (IV)grent->gr_gid);
+
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	for (elem = grent->gr_mem; elem && *elem; elem++) {
 	    sv_catpv(sv, *elem);
@@ -4290,7 +4335,7 @@ PP(pp_ggrent)
 PP(pp_sgrent)
 {
     djSP;
-#ifdef HAS_GROUP
+#if defined(HAS_GROUP) && defined(HAS_SETGRENT)
     setgrent();
     RETPUSHYES;
 #else
@@ -4301,7 +4346,7 @@ PP(pp_sgrent)
 PP(pp_egrent)
 {
     djSP;
-#ifdef HAS_GROUP
+#if defined(HAS_GROUP) && defined(HAS_ENDGRENT)
     endgrent();
     RETPUSHYES;
 #else

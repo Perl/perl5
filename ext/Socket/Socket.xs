@@ -7,6 +7,11 @@
 #  include <sys/types.h>
 # endif
 #include <sys/socket.h>
+#ifdef MPE
+# define PF_INET AF_INET
+# define PF_UNIX AF_UNIX
+# define SOCK_RAW 3
+#endif
 #ifdef I_SYS_UN
 #include <sys/un.h>
 #endif
@@ -14,7 +19,9 @@
 #  include <netinet/in.h>
 # endif
 #include <netdb.h>
-#include <arpa/inet.h>
+#ifdef I_ARPA_INET
+# include <arpa/inet.h>
+#endif
 #else
 #include "sockadapt.h"
 #endif
@@ -711,13 +718,11 @@ inet_aton(host)
 	{
 	struct in_addr ip_address;
 	struct hostent * phe;
-	int ok;
+	int ok = inet_aton(host, &ip_address);
 
-	if (phe = gethostbyname(host)) {
+	if (!ok && (phe = gethostbyname(host))) {
 		Copy( phe->h_addr, &ip_address, phe->h_length, char );
 		ok = 1;
-	} else {
-		ok = inet_aton(host, &ip_address);
 	}
 
 	ST(0) = sv_newmortal();

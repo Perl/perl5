@@ -374,7 +374,7 @@ sv_clean_objs(void)
 STATIC void
 do_clean_all(SV *sv)
 {
-    DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning loops:\n "), sv_dump(sv));)
+    DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning loops: SV at 0x%lx\n", sv) );)
     SvFLAGS(sv) |= SVf_BREAK;
     SvREFCNT_dec(sv);
 }
@@ -1118,13 +1118,13 @@ sv_grow(SV* sv, unsigned long newlen)
 	s = SvPVX(sv);
     if (newlen > SvLEN(sv)) {		/* need more room? */
 	if (SvLEN(sv) && s) {
-#ifdef MYMALLOC
+#if defined(MYMALLOC) && !defined(PURIFY)
 	    STRLEN l = malloced_size((void*)SvPVX(sv));
 	    if (newlen <= l) {
 		SvLEN_set(sv, l);
 		return s;
 	    } else
-#endif 
+#endif
 	    Renew(s,newlen,char);
 	}
         else
@@ -1706,16 +1706,41 @@ sv_2pv(register SV *sv, STRLEN *lp)
 			  == (SVs_OBJECT|SVs_RMG))
 			 && strEQ(s=HvNAME(SvSTASH(sv)), "Regexp")
 			 && (mg = mg_find(sv, 'r'))) {
-			if (!mg->mg_ptr) {
-			    regexp *re = (regexp *)mg->mg_obj;
+			dTHR;
+			regexp *re = (regexp *)mg->mg_obj;
 
-			    mg->mg_len = re->prelen + 4;
-			    New(616, mg->mg_ptr, mg->mg_len + 1, char);
-			    Copy("(?:", mg->mg_ptr, 3, char);
-			    Copy(re->precomp, mg->mg_ptr+3, re->prelen, char);
+			if (!mg->mg_ptr) {
+			    char *fptr = "msix";
+			    char reflags[6];
+			    char ch;
+			    int left = 0;
+			    int right = 4;
+ 			    U16 reganch = (re->reganch & PMf_COMPILETIME) >> 12;
+
+ 			    while(ch = *fptr++) {
+ 				if(reganch & 1) {
+ 				    reflags[left++] = ch;
+ 				}
+ 				else {
+ 				    reflags[right--] = ch;
+ 				}
+ 				reganch >>= 1;
+ 			    }
+ 			    if(left != 4) {
+ 				reflags[left] = '-';
+ 				left = 5;
+ 			    }
+
+			    mg->mg_len = re->prelen + 4 + left;
+			    New(616, mg->mg_ptr, mg->mg_len + 1 + left, char);
+			    Copy("(?", mg->mg_ptr, 2, char);
+			    Copy(reflags, mg->mg_ptr+2, left, char);
+			    Copy(":", mg->mg_ptr+left+2, 1, char);
+			    Copy(re->precomp, mg->mg_ptr+3+left, re->prelen, char);
 			    mg->mg_ptr[mg->mg_len - 1] = ')';
 			    mg->mg_ptr[mg->mg_len] = 0;
 			}
+			reginterp_cnt += re->program[0].next_off;
 			*lp = mg->mg_len;
 			return mg->mg_ptr;
 		    }
@@ -3003,7 +3028,7 @@ sv_free(SV *sv)
 	return;
 #ifdef DEBUGGING
     if (SvTEMP(sv)) {
-	warn("Attempt to free temp prematurely: %s", SvPEEK(sv));
+	warn("Attempt to free temp prematurely: SV 0x%lx", (unsigned long)sv);
 	return;
     }
 #endif

@@ -619,6 +619,7 @@ op_free(OP *o)
 	/* FALL THROUGH */
     case OP_PUSHRE:
     case OP_MATCH:
+    case OP_QR:
 	ReREFCNT_dec(cPMOPo->op_pmregexp);
 	break;
     }
@@ -725,6 +726,7 @@ scalar(OP *o)
 	}
 	/* FALL THROUGH */
     case OP_MATCH:
+    case OP_QR:
     case OP_SUBST:
     case OP_NULL:
     default:
@@ -983,6 +985,7 @@ list(OP *o)
 	break;
     default:
     case OP_MATCH:
+    case OP_QR:
     case OP_SUBST:
     case OP_NULL:
 	if (!(o->op_flags & OPf_KIDS))
@@ -1980,12 +1983,6 @@ newUNOP(I32 type, I32 flags, OP *first)
     unop->op_first = first;
     unop->op_flags = flags | OPf_KIDS;
     unop->op_private = 1 | (flags >> 8);
-#if 1
-    if(type == OP_STUDY && first->op_type == OP_MATCH) {
-	first->op_type = OP_PUSHRE;
-	first->op_ppaddr = ppaddr[OP_PUSHRE];
-    }
-#endif
     unop = (UNOP*) CHECKOP(type, unop);
     if (unop->op_next)
 	return (OP*)unop;
@@ -2121,6 +2118,7 @@ newPMOP(I32 type, I32 flags)
 OP *
 pmruntime(OP *o, OP *expr, OP *repl)
 {
+    dTHR;
     PMOP *pm;
     LOGOP *rcop;
     I32 repl_has_vars = 0;
@@ -2146,19 +2144,23 @@ pmruntime(OP *o, OP *expr, OP *repl)
 	op_free(expr);
     }
     else {
-	if (pm->op_pmflags & PMf_KEEP)
-	    expr = newUNOP(OP_REGCMAYBE,0,expr);
+	if (pm->op_pmflags & PMf_KEEP || !(hints & HINT_RE_EVAL))
+	    expr = newUNOP((!(hints & HINT_RE_EVAL) 
+			    ? OP_REGCRESET
+			    : OP_REGCMAYBE),0,expr);
 
 	Newz(1101, rcop, 1, LOGOP);
 	rcop->op_type = OP_REGCOMP;
 	rcop->op_ppaddr = ppaddr[OP_REGCOMP];
 	rcop->op_first = scalar(expr);
-	rcop->op_flags |= OPf_KIDS;
+	rcop->op_flags |= ((hints & HINT_RE_EVAL) 
+			   ? (OPf_SPECIAL | OPf_KIDS)
+			   : OPf_KIDS);
 	rcop->op_private = 1;
 	rcop->op_other = o;
 
 	/* establish postfix order */
-	if (pm->op_pmflags & PMf_KEEP) {
+	if (pm->op_pmflags & PMf_KEEP || !(hints & HINT_RE_EVAL)) {
 	    LINKLIST(expr);
 	    rcop->op_next = expr;
 	    ((UNOP*)expr)->op_first->op_next = (OP*)rcop;
@@ -2218,6 +2220,8 @@ pmruntime(OP *o, OP *expr, OP *repl)
 			     curop->op_type == OP_PADANY) {
 			repl_has_vars = 1;
 		    }
+		    else if (curop->op_type == OP_PUSHRE)
+			; /* Okay here, dangerous in newASSIGNOP */
 		    else
 			break;
 		}
@@ -2516,6 +2520,14 @@ newASSIGNOP(I32 flags, OP *left, I32 optype, OP *right)
 			     curop->op_type == OP_RV2GV) {
 			if (lastop->op_type != OP_GV)	/* funny deref? */
 			    break;
+		    }
+		    else if (curop->op_type == OP_PUSHRE) {
+			if (((PMOP*)curop)->op_pmreplroot) {
+			    GV *gv = (GV*)((PMOP*)curop)->op_pmreplroot;
+			    if (gv == defgv || SvCUR(gv) == generation)
+				break;
+			    SvCUR(gv) = generation;
+			}	
 		    }
 		    else
 			break;
@@ -5016,6 +5028,7 @@ peep(register OP *o)
 	    peep(cLOOP->op_lastop);
 	    break;
 
+	case OP_QR:
 	case OP_MATCH:
 	case OP_SUBST:
 	    o->op_seq = op_seqmax++;

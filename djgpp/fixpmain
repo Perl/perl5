@@ -19,8 +19,8 @@ $perlmain =~ s/^.*boot_$badname.*$//gm if $badname; # delete bad lines
 for $realname (@exts,'DynaLoader')
 {
     $dosname=substr (lc $realname,0,8);
-    $perlmain =~ s/boot_$dosname/boot_$realname/gm;
-    $perlmain =~ s/$dosname(::bootstrap)/$realname$1/gm;
+    $perlmain =~ s/\bboot_$dosname/boot_$realname/gm;
+    $perlmain =~ s/\b$dosname(::bootstrap)/$realname$1/gm;
 }
 
 #DynaLoader is special

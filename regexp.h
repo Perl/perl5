@@ -86,8 +86,8 @@ typedef struct regexp {
 #define ROPT_CHECK_ALL		0x80
 #define ROPT_LOOKBEHIND_SEEN	0x100
 #define ROPT_EVAL_SEEN		0x200
-
-#define ROPT_TAINTED_SEEN	0x8000
+#define ROPT_TAINTED_SEEN	0x400
+/* 0xf800 of reganch is used by PMf_COMPILETIME */
 
 #define RX_MATCH_TAINTED(prog)	((prog)->reganch & ROPT_TAINTED_SEEN)
 #define RX_MATCH_TAINTED_on(prog) ((prog)->reganch |= ROPT_TAINTED_SEEN)

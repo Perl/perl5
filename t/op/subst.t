@@ -280,7 +280,6 @@ $_ = <<'EOL';
 EOL
 $^R = 'junk';
 
-use re 'eval';
 $foo = ' $@%#lowercase $@%# lowercase UPPERCASE$@%#UPPERCASE' .
   ' $@%#lowercase$@%#lowercase$@%# lowercase lowercase $@%#lowercase' .
   ' lowercase $@%#MiXeD$@%# ';

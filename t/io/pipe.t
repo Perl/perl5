@@ -116,6 +116,7 @@ else {
 }
 
 # check that status for the correct process is collected
+wait;				# Collect from $pid
 my $zombie = fork or exit 37;
 my $pipe = open *FH, "sleep 2;exit 13|" or die "Open: $!\n";
 $SIG{ALRM} = sub { return };
@@ -130,5 +131,5 @@ my $wait = wait;
 if ($? == 37*256 && $wait == $zombie && ! $!) {
     print "ok 12\n";
 } else {
-    print "not ok 12\n# pid=$wait   \$?=$?   \$!=", $!+0, ":$!\n";
+    print "not ok 12\n# pid=$wait first=$pid pipe=$pipe zombie=$zombie me=$$ \$?=$?   \$!=", $!+0, ":$!\n";
 }

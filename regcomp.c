@@ -19,7 +19,18 @@
  * with the POSIX routines of the same names.
 */
 
-#ifdef IN_XSUB_RE
+#ifdef PERL_EXT_RE_BUILD
+/* need to replace pregcomp et al, so enable that */
+#  ifndef PERL_IN_XSUB_RE
+#    define PERL_IN_XSUB_RE
+#  endif
+/* need access to debugger hooks */
+#  ifndef DEBUGGING
+#    define DEBUGGING
+#  endif
+#endif
+
+#ifdef PERL_IN_XSUB_RE
 /* We *really* need to overwrite these symbols: */
 #  define Perl_pregcomp my_regcomp
 #  define Perl_regdump my_regdump
@@ -66,7 +77,7 @@
 #include "EXTERN.h"
 #include "perl.h"
 
-#ifndef IN_XSUB_RE
+#ifndef PERL_IN_XSUB_RE
 #  include "INTERN.h"
 #endif
 
@@ -223,6 +234,7 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 			/* deltap: Write maxlen-minlen here. */
 			/* last: Stop before this one. */
 {
+    dTHR;
     I32 min = 0, pars = 0, code;
     regnode *scan = *scanp, *next;
     I32 delta = 0;
@@ -664,6 +676,7 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 STATIC I32
 add_data(I32 n, char *s)
 {
+    dTHR;
     if (regcomp_rx->data) {
 	Renewc(regcomp_rx->data, 
 	       sizeof(*regcomp_rx->data) + sizeof(void*) * (regcomp_rx->data->count + n - 1), 
@@ -698,6 +711,7 @@ add_data(I32 n, char *s)
 regexp *
 pregcomp(char *exp, char *xend, PMOP *pm)
 {
+    dTHR;
     register regexp *r;
     regnode *scan;
     SV **longest;
@@ -720,6 +734,7 @@ pregcomp(char *exp, char *xend, PMOP *pm)
 
     regseen = 0;
     seen_zerolen = *exp == '^' ? -1 : 0;
+    seen_evals = 0;
     extralen = 0;
 
     /* First pass: determine size, legality. */
@@ -787,14 +802,16 @@ pregcomp(char *exp, char *xend, PMOP *pm)
     regnaughty = 0;
     regnpar = 1;
     regcode = r->program;
+    /* Store the count of eval-groups for security checks: */
+    regcode->next_off = ((seen_evals > U16_MAX) ? U16_MAX : seen_evals);
     regc((U8)MAGIC, (char*) regcode++);
     r->data = 0;
     if (reg(0, &flags) == NULL)
 	return(NULL);
 
     /* Dig out information for optimizations. */
+    r->reganch = pm->op_pmflags & PMf_COMPILETIME;
     pm->op_pmflags = regflags;
-    r->reganch = 0;
     r->regstclass = NULL;
     r->naughty = regnaughty >= 10;	/* Probably an expensive pattern. */
     scan = r->program + 1;		/* First BRANCH. */
@@ -976,6 +993,7 @@ STATIC regnode *
 reg(I32 paren, I32 *flagp)
     /* paren: Parenthesized? 0=top, 1=(, inside: changed to letter. */
 {
+    dTHR;
     register regnode *ret;		/* Will be the head of the group. */
     register regnode *br;
     register regnode *lastbr;
@@ -1059,13 +1077,10 @@ reg(I32 paren, I32 *flagp)
 		    regcomp_rx->data->data[n+2] = (void*)sop;
 		    SvREFCNT_dec(sv);
 		} else {		/* First pass */
-		    if (curcop == &compiling) {
-			if (!(hints & HINT_RE_EVAL))
-			    FAIL("Eval-group not allowed, use re 'eval'");
-		    }
-		    else {
-			FAIL("Eval-group not allowed at run time");
-		    }
+		    if (reginterp_cnt < ++seen_evals && curcop != &compiling)
+			/* No compiled RE interpolated, has runtime
+			   components ===> unsafe.  */
+			FAIL("Eval-group not allowed at runtime, use re 'eval'");
 		    if (tainted)
 			FAIL("Eval-group in insecure regular expression");
 		}
@@ -1276,6 +1291,7 @@ reg(I32 paren, I32 *flagp)
 STATIC regnode *
 regbranch(I32 *flagp, I32 first)
 {
+    dTHR;
     register regnode *ret;
     register regnode *chain = NULL;
     register regnode *latest;
@@ -1340,6 +1356,7 @@ regbranch(I32 *flagp, I32 first)
 STATIC regnode *
 regpiece(I32 *flagp)
 {
+    dTHR;
     register regnode *ret;
     register char op;
     register char *next;
@@ -1488,6 +1505,7 @@ regpiece(I32 *flagp)
 STATIC regnode *
 regatom(I32 *flagp)
 {
+    dTHR;
     register regnode *ret = 0;
     I32 flags;
 
@@ -1839,6 +1857,7 @@ regwhite(char *p, char *e)
 STATIC regnode *
 regclass(void)
 {
+    dTHR;
     register char *opnd, *s;
     register I32 Class;
     register I32 lastclass = 1234;
@@ -2043,6 +2062,7 @@ regclass(void)
 STATIC char*
 nextchar(void)
 {
+    dTHR;
     char* retval = regcomp_parse++;
 
     for (;;) {
@@ -2075,6 +2095,7 @@ nextchar(void)
 STATIC regnode *			/* Location. */
 reg_node(U8 op)
 {
+    dTHR;
     register regnode *ret;
     register regnode *ptr;
 
@@ -2099,6 +2120,7 @@ reg_node(U8 op)
 STATIC regnode *			/* Location. */
 reganode(U8 op, U32 arg)
 {
+    dTHR;
     register regnode *ret;
     register regnode *ptr;
 
@@ -2123,6 +2145,7 @@ reganode(U8 op, U32 arg)
 STATIC void
 regc(U8 b, char* s)
 {
+    dTHR;
     if (!SIZE_ONLY)
 	*s = b;
 }
@@ -2135,6 +2158,7 @@ regc(U8 b, char* s)
 STATIC void
 reginsert(U8 op, regnode *opnd)
 {
+    dTHR;
     register regnode *src;
     register regnode *dst;
     register regnode *place;
@@ -2165,6 +2189,7 @@ reginsert(U8 op, regnode *opnd)
 STATIC void
 regtail(regnode *p, regnode *val)
 {
+    dTHR;
     register regnode *scan;
     register regnode *temp;
     register I32 offset;
@@ -2194,6 +2219,7 @@ regtail(regnode *p, regnode *val)
 STATIC void
 regoptail(regnode *p, regnode *val)
 {
+    dTHR;
     /* "Operandless" and "op != BRANCH" are synonymous in practice. */
     if (p == NULL || SIZE_ONLY)
 	return;
@@ -2246,7 +2272,7 @@ dumpuntil(regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
 	if (OP(node) == OPTIMIZED)
 	    goto after_print;
 	regprop(sv, node);
-	PerlIO_printf(Perl_debug_log, "%4d%*s%s", node - start, 
+	PerlIO_printf(Perl_debug_log, "%4d:%*s%s", node - start, 
 		      2*l + 1, "", SvPVX(sv));
 	if (next == NULL)		/* Next ptr. */
 	    PerlIO_printf(Perl_debug_log, "(0)");
@@ -2298,6 +2324,7 @@ void
 regdump(regexp *r)
 {
 #ifdef DEBUGGING
+    dTHR;
     SV *sv = sv_newmortal();
 
     (void)dumpuntil(r->program, r->program + 1, NULL, sv, 0);
@@ -2362,9 +2389,10 @@ void
 regprop(SV *sv, regnode *o)
 {
 #ifdef DEBUGGING
+    dTHR;
     register char *p = 0;
 
-    sv_setpv(sv, ":");
+    sv_setpvn(sv, "", 0);
     switch (OP(o)) {
     case BOL:
 	p = "BOL";
@@ -2552,6 +2580,7 @@ regprop(SV *sv, regnode *o)
 void
 pregfree(struct regexp *r)
 {
+    dTHR;
     if (!r || (--r->refcnt > 0))
 	return;
     if (r->precomp)
@@ -2598,6 +2627,7 @@ pregfree(struct regexp *r)
 regnode *
 regnext(register regnode *p)
 {
+    dTHR;
     register I32 offset;
 
     if (p == &regdummy)

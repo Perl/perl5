@@ -1062,6 +1062,7 @@ fbm_instr(unsigned char *big, register unsigned char *bigend, SV *littlestr, U32
 char *
 screaminstr(SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift, I32 *old_posp, I32 last)
 {
+    dTHR;
     register unsigned char *s, *x;
     register unsigned char *big;
     register I32 pos;
@@ -2791,6 +2792,17 @@ new_struct_thread(struct perl_thread *t)
     formtarget = newSVsv(t->Tformtarget);
     bodytarget = newSVsv(t->Tbodytarget);
     toptarget = newSVsv(t->Ttoptarget);
+
+    statname = NEWSV(66,0);
+    maxscream = -1;
+    regcompp = FUNC_NAME_TO_PTR(pregcomp);
+    regexecp = FUNC_NAME_TO_PTR(regexec_flags);
+    regindent = 0;
+    reginterp_cnt = 0;
+    lastscream = Nullsv;
+    screamfirst = 0;
+    screamnext = 0;
+    reg_start_tmp = 0;
     
     /* Initialise all per-thread SVs that the template thread used */
     svp = AvARRAY(t->threadsv);

@@ -473,7 +473,7 @@ public:
 			     int pmode, int &err) = 0;	
     virtual int		Read(int handle, void *buffer,
 			     unsigned int count, int &err) = 0;
-    virtual int		Rename(const char *oldname,
+    virtual int		Rename(const char *oname,
 			       const char *newname, int &err) = 0;
     virtual int		Setmode(int handle, int mode, int &err) = 0;
     virtual int		NameStat(const char *path,
@@ -520,8 +520,8 @@ public:
 	piLIO->Open((file), (flag), (perm), ErrorNo())
 #define PerlLIO_read(fd, buf, count)					\
 	piLIO->Read((fd), (buf), (count), ErrorNo())
-#define PerlLIO_rename(oldname, newname)				\
-	piLIO->Rename((oldname), (newname), ErrorNo())
+#define PerlLIO_rename(oname, newname)					\
+	piLIO->Rename((oname), (newname), ErrorNo())
 #define PerlLIO_setmode(fd, mode)					\
 	piLIO->Setmode((fd), (mode), ErrorNo())
 #define PerlLIO_stat(name, buf)						\
