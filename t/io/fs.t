@@ -256,6 +256,8 @@ chdir $wd || die "Can't cd back to $wd";
 
 # check if rename() works on directories
 if ($Is_VMSish) {
+    # must have delete access to rename a directory
+    `set file tmp.dir/protection=o:d`;
     rename 'tmp.dir', 'tmp1.dir' or print "not ";
 }
 else {
