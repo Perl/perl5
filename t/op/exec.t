@@ -83,7 +83,7 @@ is( system(qq{$Perl "-I../lib" -e "use vmsish qw(hushed); exit 1"}), $exit_one,
 
 
 $rc = system "lskdfj";
-unless( ok($rc == 255 << 8 or $rc == -1 or $rc == 256) ) {
+unless( ok($rc == 255 << 8 or $rc == -1 or $rc == 256 or $rc == 512) ) {
     print "# \$rc == $rc\n";
 }
 
