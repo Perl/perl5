@@ -1343,7 +1343,7 @@ C<(?(condition)yes-pattern|no-pattern)>
 
 =back
 
-=head2 perltootc - Tom's OO Tutorial for Class Data in Perl
+=head2 perltooc - Tom's OO Tutorial for Class Data in Perl
 
 =over 4
 
@@ -4450,6 +4450,8 @@ PerlIO_apply_layers(f,mode,layers), PerlIO_binmode(f,ptype,imode,layers),
 
 =item Unicode collation and normalization
 
+=item Create debugging macros
+
 =back
 
 =back
@@ -7080,7 +7082,17 @@ escape.
 
 =item NOTES
 
-=item TECHNICAL NOTE
+=over 4
+
+=item List constants
+
+=item Defining multiple constants at once
+
+=item Magic constants
+
+=back
+
+=item TECHNICAL NOTES
 
 =item BUGS
 
@@ -7468,6 +7480,14 @@ warnings::warnif($object, $message)
 =back
 
 =head2 warnings::register - warnings import function
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
 
 =head1 MODULE DOCUMENTATION
 
@@ -8842,49 +8862,49 @@ C<d_getpent>, C<d_getpgid>, C<d_getpgrp2>, C<d_getpgrp>, C<d_getppid>,
 C<d_getprior>, C<d_getprotoprotos>, C<d_getprpwnam>, C<d_getpwent>,
 C<d_getsbyname>, C<d_getsbyport>, C<d_getsent>, C<d_getservprotos>,
 C<d_getspnam>, C<d_gettimeod>, C<d_gnulibc>, C<d_grpasswd>, C<d_hasmntopt>,
-C<d_htonl>, C<d_iconv>, C<d_index>, C<d_inetaton>, C<d_int64_t>,
-C<d_isascii>, C<d_isfinite>, C<d_isinf>, C<d_isnan>, C<d_isnanl>,
-C<d_killpg>, C<d_lchown>, C<d_ldbl_dig>, C<d_link>, C<d_locconv>,
-C<d_lockf>, C<d_longdbl>, C<d_longlong>, C<d_lseekproto>, C<d_lstat>,
-C<d_madvise>, C<d_mblen>, C<d_mbstowcs>, C<d_mbtowc>, C<d_memchr>,
-C<d_memcmp>, C<d_memcpy>, C<d_memmove>, C<d_memset>, C<d_mkdir>,
-C<d_mkdtemp>, C<d_mkfifo>, C<d_mkstemp>, C<d_mkstemps>, C<d_mktime>,
-C<d_mmap>, C<d_modfl>, C<d_modfl_pow32_bug>, C<d_mprotect>, C<d_msg>,
-C<d_msg_ctrunc>, C<d_msg_dontroute>, C<d_msg_oob>, C<d_msg_peek>,
-C<d_msg_proxy>, C<d_msgctl>, C<d_msgget>, C<d_msghdr_s>, C<d_msgrcv>,
-C<d_msgsnd>, C<d_msync>, C<d_munmap>, C<d_mymalloc>, C<d_nice>,
-C<d_nl_langinfo>, C<d_nv_preserves_uv>, C<d_nv_preserves_uv_bits>,
-C<d_off64_t>, C<d_old_pthread_create_joinable>, C<d_oldpthreads>,
-C<d_oldsock>, C<d_open3>, C<d_pathconf>, C<d_pause>,
-C<d_perl_otherlibdirs>, C<d_phostname>, C<d_pipe>, C<d_poll>,
-C<d_portable>, C<d_PRId64>, C<d_PRIeldbl>, C<d_PRIEUldbl>, C<d_PRIfldbl>,
-C<d_PRIFUldbl>, C<d_PRIgldbl>, C<d_PRIGUldbl>, C<d_PRIi64>, C<d_PRIo64>,
-C<d_PRIu64>, C<d_PRIx64>, C<d_PRIXU64>, C<d_pthread_atfork>,
-C<d_pthread_yield>, C<d_pwage>, C<d_pwchange>, C<d_pwclass>,
-C<d_pwcomment>, C<d_pwexpire>, C<d_pwgecos>, C<d_pwpasswd>, C<d_pwquota>,
-C<d_qgcvt>, C<d_quad>, C<d_readdir>, C<d_readlink>, C<d_readv>,
-C<d_recvmsg>, C<d_rename>, C<d_rewinddir>, C<d_rmdir>, C<d_safebcpy>,
-C<d_safemcpy>, C<d_sanemcmp>, C<d_sbrkproto>, C<d_sched_yield>,
-C<d_scm_rights>, C<d_SCNfldbl>, C<d_seekdir>, C<d_select>, C<d_sem>,
-C<d_semctl>, C<d_semctl_semid_ds>, C<d_semctl_semun>, C<d_semget>,
-C<d_semop>, C<d_sendmsg>, C<d_setegid>, C<d_seteuid>, C<d_setgrent>,
-C<d_setgrps>, C<d_sethent>, C<d_setitimer>, C<d_setlinebuf>,
-C<d_setlocale>, C<d_setnent>, C<d_setpent>, C<d_setpgid>, C<d_setpgrp2>,
-C<d_setpgrp>, C<d_setprior>, C<d_setproctitle>, C<d_setpwent>,
-C<d_setregid>, C<d_setresgid>, C<d_setresuid>, C<d_setreuid>, C<d_setrgid>,
-C<d_setruid>, C<d_setsent>, C<d_setsid>, C<d_setvbuf>, C<d_sfio>, C<d_shm>,
-C<d_shmat>, C<d_shmatprototype>, C<d_shmctl>, C<d_shmdt>, C<d_shmget>,
-C<d_sigaction>, C<d_sigprocmask>, C<d_sigsetjmp>, C<d_sockatmark>,
-C<d_sockatmarkproto>, C<d_socket>, C<d_socklen_t>, C<d_sockpair>,
-C<d_socks5_init>, C<d_sqrtl>, C<d_sresgproto>, C<d_sresuproto>,
-C<d_statblks>, C<d_statfs_f_flags>, C<d_statfs_s>, C<d_statvfs>,
-C<d_stdio_cnt_lval>, C<d_stdio_ptr_lval>, C<d_stdio_ptr_lval_nochange_cnt>,
-C<d_stdio_ptr_lval_sets_cnt>, C<d_stdio_stream_array>, C<d_stdiobase>,
-C<d_stdstdio>, C<d_strchr>, C<d_strcoll>, C<d_strctcpy>, C<d_strerrm>,
-C<d_strerror>, C<d_strftime>, C<d_strtod>, C<d_strtol>, C<d_strtold>,
-C<d_strtoll>, C<d_strtoq>, C<d_strtoul>, C<d_strtoull>, C<d_strtouq>,
-C<d_strxfrm>, C<d_suidsafe>, C<d_symlink>, C<d_syscall>, C<d_syscallproto>,
-C<d_sysconf>, C<d_sysernlst>, C<d_syserrlst>, C<d_system>, C<d_tcgetpgrp>,
+C<d_htonl>, C<d_index>, C<d_inetaton>, C<d_int64_t>, C<d_isascii>,
+C<d_isfinite>, C<d_isinf>, C<d_isnan>, C<d_isnanl>, C<d_killpg>,
+C<d_lchown>, C<d_ldbl_dig>, C<d_link>, C<d_locconv>, C<d_lockf>,
+C<d_longdbl>, C<d_longlong>, C<d_lseekproto>, C<d_lstat>, C<d_madvise>,
+C<d_mblen>, C<d_mbstowcs>, C<d_mbtowc>, C<d_memchr>, C<d_memcmp>,
+C<d_memcpy>, C<d_memmove>, C<d_memset>, C<d_mkdir>, C<d_mkdtemp>,
+C<d_mkfifo>, C<d_mkstemp>, C<d_mkstemps>, C<d_mktime>, C<d_mmap>,
+C<d_modfl>, C<d_modfl_pow32_bug>, C<d_mprotect>, C<d_msg>, C<d_msg_ctrunc>,
+C<d_msg_dontroute>, C<d_msg_oob>, C<d_msg_peek>, C<d_msg_proxy>,
+C<d_msgctl>, C<d_msgget>, C<d_msghdr_s>, C<d_msgrcv>, C<d_msgsnd>,
+C<d_msync>, C<d_munmap>, C<d_mymalloc>, C<d_nice>, C<d_nl_langinfo>,
+C<d_nv_preserves_uv>, C<d_nv_preserves_uv_bits>, C<d_off64_t>,
+C<d_old_pthread_create_joinable>, C<d_oldpthreads>, C<d_oldsock>,
+C<d_open3>, C<d_pathconf>, C<d_pause>, C<d_perl_otherlibdirs>,
+C<d_phostname>, C<d_pipe>, C<d_poll>, C<d_portable>, C<d_PRId64>,
+C<d_PRIeldbl>, C<d_PRIEUldbl>, C<d_PRIfldbl>, C<d_PRIFUldbl>,
+C<d_PRIgldbl>, C<d_PRIGUldbl>, C<d_PRIi64>, C<d_PRIo64>, C<d_PRIu64>,
+C<d_PRIx64>, C<d_PRIXU64>, C<d_pthread_atfork>, C<d_pthread_yield>,
+C<d_pwage>, C<d_pwchange>, C<d_pwclass>, C<d_pwcomment>, C<d_pwexpire>,
+C<d_pwgecos>, C<d_pwpasswd>, C<d_pwquota>, C<d_qgcvt>, C<d_quad>,
+C<d_readdir>, C<d_readlink>, C<d_readv>, C<d_recvmsg>, C<d_rename>,
+C<d_rewinddir>, C<d_rmdir>, C<d_safebcpy>, C<d_safemcpy>, C<d_sanemcmp>,
+C<d_sbrkproto>, C<d_sched_yield>, C<d_scm_rights>, C<d_SCNfldbl>,
+C<d_seekdir>, C<d_select>, C<d_sem>, C<d_semctl>, C<d_semctl_semid_ds>,
+C<d_semctl_semun>, C<d_semget>, C<d_semop>, C<d_sendmsg>, C<d_setegid>,
+C<d_seteuid>, C<d_setgrent>, C<d_setgrps>, C<d_sethent>, C<d_setitimer>,
+C<d_setlinebuf>, C<d_setlocale>, C<d_setnent>, C<d_setpent>, C<d_setpgid>,
+C<d_setpgrp2>, C<d_setpgrp>, C<d_setprior>, C<d_setproctitle>,
+C<d_setpwent>, C<d_setregid>, C<d_setresgid>, C<d_setresuid>,
+C<d_setreuid>, C<d_setrgid>, C<d_setruid>, C<d_setsent>, C<d_setsid>,
+C<d_setvbuf>, C<d_sfio>, C<d_shm>, C<d_shmat>, C<d_shmatprototype>,
+C<d_shmctl>, C<d_shmdt>, C<d_shmget>, C<d_sigaction>, C<d_sigprocmask>,
+C<d_sigsetjmp>, C<d_sockatmark>, C<d_sockatmarkproto>, C<d_socket>,
+C<d_socklen_t>, C<d_sockpair>, C<d_socks5_init>, C<d_sqrtl>,
+C<d_sresgproto>, C<d_sresuproto>, C<d_statblks>, C<d_statfs_f_flags>,
+C<d_statfs_s>, C<d_statvfs>, C<d_stdio_cnt_lval>, C<d_stdio_ptr_lval>,
+C<d_stdio_ptr_lval_nochange_cnt>, C<d_stdio_ptr_lval_sets_cnt>,
+C<d_stdio_stream_array>, C<d_stdiobase>, C<d_stdstdio>, C<d_strchr>,
+C<d_strcoll>, C<d_strctcpy>, C<d_strerrm>, C<d_strerror>, C<d_strftime>,
+C<d_strtod>, C<d_strtol>, C<d_strtold>, C<d_strtoll>, C<d_strtoq>,
+C<d_strtoul>, C<d_strtoull>, C<d_strtouq>, C<d_strxfrm>, C<d_suidsafe>,
+C<d_symlink>, C<d_syscall>, C<d_syscallproto>, C<d_sysconf>,
+C<d_sysernlst>, C<d_syserrlst>, C<d_system>, C<d_tcgetpgrp>,
 C<d_tcsetpgrp>, C<d_telldir>, C<d_telldirproto>, C<d_time>, C<d_times>,
 C<d_truncate>, C<d_tzname>, C<d_u32align>, C<d_ualarm>, C<d_umask>,
 C<d_uname>, C<d_union_semun>, C<d_unordered>, C<d_usleep>,
@@ -8921,7 +8941,7 @@ C<h_fcntl>, C<h_sysfile>, C<hint>, C<hostcat>
 C<i16size>, C<i16type>, C<i32size>, C<i32type>, C<i64size>, C<i64type>,
 C<i8size>, C<i8type>, C<i_arpainet>, C<i_bsdioctl>, C<i_db>, C<i_dbm>,
 C<i_dirent>, C<i_dld>, C<i_dlfcn>, C<i_fcntl>, C<i_float>, C<i_fp>,
-C<i_fp_class>, C<i_gdbm>, C<i_grp>, C<i_iconv>, C<i_ieeefp>, C<i_inttypes>,
+C<i_fp_class>, C<i_gdbm>, C<i_grp>, C<i_ieeefp>, C<i_inttypes>,
 C<i_langinfo>, C<i_libutil>, C<i_limits>, C<i_locale>, C<i_machcthr>,
 C<i_malloc>, C<i_math>, C<i_memory>, C<i_mntent>, C<i_ndbm>, C<i_netdb>,
 C<i_neterrno>, C<i_netinettcp>, C<i_niin>, C<i_poll>, C<i_prot>,

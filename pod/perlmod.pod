@@ -501,7 +501,7 @@ package. This is simply done using a hash and Scalar::Util::weaken().
 See L<perlmodlib> for general style issues related to building Perl
 modules and classes, as well as descriptions of the standard library
 and CPAN, L<Exporter> for how Perl's standard import/export mechanism
-works, L<perltoot> and L<perltootc> for an in-depth tutorial on
+works, L<perltoot> and L<perltooc> for an in-depth tutorial on
 creating classes, L<perlobj> for a hard-core reference document on
 objects, L<perlsub> for an explanation of functions and scoping,
 and L<perlxstut> and L<perlguts> for more information on writing
