@@ -344,7 +344,6 @@ ext/Encode/lib/Encode/JP/Constants.pm	Encode extension
 ext/Encode/lib/Encode/JP/H2Z.pm		Encode extension
 ext/Encode/lib/Encode/JP/ISO_2022_JP.pm	Encode extension
 ext/Encode/lib/Encode/JP/JIS.pm	Encode extension
-ext/Encode/lib/Encode/JP/Tr.pm	Encode extension
 ext/Encode/lib/Encode/Tcl.pm		Encode extension
 ext/Encode/lib/Encode/Tcl/Escape.pm	Encode extension
 ext/Encode/lib/Encode/Tcl/Extended.pm	Encode extension
