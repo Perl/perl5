@@ -1646,7 +1646,9 @@ PerlIOBase_read(PerlIO *f, void *vbuf, Size_t count)
    while (count > 0)
     {
      SSize_t avail = PerlIO_get_cnt(f);
-     SSize_t take  = (count < avail) ? count : avail;
+     SSize_t take = 0;
+     if (avail > 0)
+       take = (count < avail) ? count : avail;
      if (take > 0)
       {
        STDCHAR *ptr = PerlIO_get_ptr(f);

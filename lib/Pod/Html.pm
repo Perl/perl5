@@ -499,6 +499,7 @@ END_OF_HEAD
 	else {
 	    next if $ignore;
 	    next if @begin_stack && $begin_stack[-1] ne 'html';
+            print HTML and next if @begin_stack && $begin_stack[-1] eq 'html';
 	    my $text = $_;
 	    if( $text =~ /\A\s+/ ){
 		process_pre( \$text );

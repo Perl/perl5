@@ -177,6 +177,35 @@ EOM
 
 ### COMPILER SPECIFICS
 
+## Local restrictions (point to README.hpux to lift these)
+
+## Optimization limits
+cat >try.c <<EOF
+#include <sys/resource.h>
+
+int main ()
+{
+    struct rlimit rl;
+    int i = getrlimit (RLIMIT_DATA, &rl);
+    printf ("%d\n", rl.rlim_cur / (1024 * 1024));
+    } /* main */
+EOF
+$cc -o try $ccflags $ldflags try.c
+	maxdsiz=`try`
+if [ $maxdsiz -le 64 ]; then
+    # 64 Mb is probably not enough to optimize toke.c
+    # and regexp.c with -O2
+    cat <<EOM >&4
+Your kernel limits the data section of your programs to $maxdsiz Mb,
+which is (sadly) not enough to fully optimize some parts of the
+perl binary. I'll try to use a lower optimization level for
+those parts. If you are a sysadmin, and you *do* want full
+optimization, raise the 'maxdsiz' kernel configuration parameter
+to at least 0x08000000 (128 Mb) and rebuild your kernel.
+EOM
+    exit
+    fi
+
 case "$ccisgcc" in
     $define|true|[Yy])
 	
@@ -202,6 +231,16 @@ case "$ccisgcc" in
 		    esac
 		;;
 	    esac
+	if [ $maxdsiz -le 64 ]; then
+	    # 64 Mb is probably not enough to optimize toke.c
+	    # and regexp.c with -O2
+	    case "$optimize" in
+		*O2*)	opt=`echo "$optimize" | sed -e 's/O2/O1/'`
+			toke_cflags="$ccflags $opt"
+			regexec_cflags="$ccflags $opt"
+			;;
+		esac
+	    fi
 	;;
 
     *)	# HP's compiler cannot combine -g and -O
@@ -209,6 +248,17 @@ case "$ccisgcc" in
 	    "")           optimize="+O2 +Onolimit" ;;
 	    *O[3456789]*) optimize=`echo "$optimize" | sed -e 's/O[3-9]/O2/'` ;;
 	    esac
+	if [ $maxdsiz -le 64 ]; then
+	    # 64 Mb is probably not enough to optimize toke.c
+	    # and regexp.c with -O (+O2)
+	    case "$optimize" in
+		*-O*|\
+		*O2*)	opt=`echo "$optimize" | sed -e 's/-O/+O2/' -e 's/O2/O1/' -e 's/ *+Onolimit//'`
+			toke_cflags="$ccflags $opt"
+			regexec_cflags="$ccflags $opt"
+			;;
+		esac
+	    fi
 	ld=/usr/bin/ld
 	cccdlflags='+Z'
 	lddlflags='-b +vnocompatwarnings'
