@@ -744,6 +744,7 @@ my @layer_syms = qw(
 			 PerlIOBuf_bufsiz
 			 PerlIOBuf_fill
 			 PerlIOBuf_flush
+			 PerlIOBuf_get_base
 			 PerlIOBuf_get_cnt
 			 PerlIOBuf_get_ptr
 			 PerlIOBuf_open
