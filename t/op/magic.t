@@ -23,7 +23,7 @@ $Is_MSWin32 = $^O eq 'MSWin32';
 $Is_VMS     = $^O eq 'VMS';
 $PERL = ($Is_MSWin32 ? '.\perl' : './perl');
 
-print "1..31\n";
+print "1..35\n";
 
 eval '$ENV{"foo"} = "hi there";';	# check that ENV is inited inside eval
 if ($Is_MSWin32) { ok 1, `cmd /x /c set foo` eq "foo=hi there\n"; }
@@ -183,4 +183,22 @@ else {
     local $SIG{'__WARN__'} = sub { print "not " };
     $! = undef;
     print "ok 31\n";
+}
+
+# test case-insignificance of %ENV (these tests must be enabled only
+# when perl is compiled with -DENV_IS_CASELESS)
+if ($Is_MSWin32) {
+    %ENV = ();
+    $ENV{'Foo'} = 'bar';
+    $ENV{'fOo'} = 'baz';
+    ok 32, (scalar(keys(%ENV)) == 1);
+    ok 33, exists($ENV{'FOo'});
+    ok 34, (delete($ENV{'foO'}) eq 'baz');
+    ok 35, (scalar(keys(%ENV)) == 0);
+}
+else {
+    ok 32,1;
+    ok 33,1;
+    ok 34,1;
+    ok 35,1;
 }
