@@ -896,6 +896,7 @@
 
 #define PL_No			(PL_Vars.GNo)
 #define PL_Yes			(PL_Vars.GYes)
+#define PL_csighandlerp		(PL_Vars.Gcsighandlerp)
 #define PL_curinterp		(PL_Vars.Gcurinterp)
 #define PL_do_undump		(PL_Vars.Gdo_undump)
 #define PL_dollarzero_mutex	(PL_Vars.Gdollarzero_mutex)
@@ -912,6 +913,7 @@
 
 #define PL_GNo			PL_No
 #define PL_GYes			PL_Yes
+#define PL_Gcsighandlerp	PL_csighandlerp
 #define PL_Gcurinterp		PL_curinterp
 #define PL_Gdo_undump		PL_do_undump
 #define PL_Gdollarzero_mutex	PL_dollarzero_mutex

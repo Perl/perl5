@@ -1293,7 +1293,7 @@ sigaction(sig, optaction, oldaction = 0)
 
 		/* Get back whether the old handler used safe signals. */
 		svp = hv_fetch(oldaction, "SAFE", 4, TRUE);
-		sv_setiv(*svp, oact.sa_handler == Perl_csighandler);
+		sv_setiv(*svp, oact.sa_handler == PL_csighandlerp);
 	    }
 
 	    if (action) {
