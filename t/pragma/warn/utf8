@@ -14,48 +14,16 @@
      <<<<<< Add a test when somethig actually calls utf16_to_utf8
 
 __END__
-# utf8.c [utf8_to_uv]
+# utf8.c [utf8_to_uv] -W
 use utf8 ;
-my $a = ord "\x80" ;
-EXPECT
-########
-# utf8.c [utf8_to_uv]
-BEGIN {
-    if (ord("\t") == 5) {
-        print "SKIPPED\n# Ebcdic platforms have different \\x constructs.";
-        exit 0;
-    }
-}
-use utf8 ;
-my $a = ord "\x80" ;
+my $a = "snøstorm" ;
 {
-    use warnings 'utf8' ;
-    my $a = ord "\x80" ;
     no warnings 'utf8' ;
-    my $a = ord "\x80" ;
-}
-EXPECT
-\x80 will produce malformed UTF-8 character; use \x{80} for that at - line 12.
-########
-# utf8.c [utf8_to_uv]
-use utf8 ;
-my $a = ord "\xf080" ;
-EXPECT
-########
-# utf8.c [utf8_to_uv]
-BEGIN {
-    if (ord("\t") == 5) {
-        print "SKIPPED\n# Ebcdic platforms have different \\x constructs.";
-        exit 0;
-    }
-}
-use utf8 ;
-my $a = ord "\xf080" ;
-{
+    my $a = "snøstorm";
     use warnings 'utf8' ;
-    my $a = ord "\xf080" ;
-    no warnings 'utf8' ;
-    my $a = ord "\xf080" ;
+    my $a = "snøstorm";
 }
 EXPECT
-\xf0 will produce malformed UTF-8 character; use \x{f0} for that at - line 12.
+Malformed UTF-8 character at - line 3.
+Malformed UTF-8 character at - line 8.
+########

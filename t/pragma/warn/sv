@@ -269,25 +269,6 @@ EXPECT
 Undefined value assigned to typeglob at - line 3.
 ########
 # sv.c
-BEGIN {
-    if (ord("\t") == 5) {
-        print "SKIPPED\n# ebcdic \\x characters differ.";
-        exit 0;
-    }
-}
-use utf8 ;
-$^W =0 ;
-{
-  use warnings 'utf8' ;
-  my $a = rindex "a\xff bc ", "bc" ;
-  no warnings 'utf8' ;
-  $a = rindex "a\xff bc ", "bc" ;
-}
-my $a = rindex "a\xff bc ", "bc" ;
-EXPECT
-\xff will produce malformed UTF-8 character; use \x{ff} for that at - line 12.
-########
-# sv.c
 use warnings 'y2k';
 use Config;
 BEGIN {

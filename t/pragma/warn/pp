@@ -28,11 +28,6 @@
   Constant subroutine %s undefined			<<<TODO
   Constant subroutine (anonymous) undefined		<<<TODO
 
-  Mandatory Warnings
-  ------------------
-  Malformed UTF-8 character (not tested: difficult to produce with
-                             perl now)
-
 __END__
 # pp.c
 use warnings 'substr' ;
@@ -113,20 +108,3 @@ $_ = "\x80  \xff" ;
 reverse ;
 EXPECT
 ########
-# pp.c
-BEGIN {
-    if (ord("\t") == 5) {
-        print "SKIPPED\n# Character codes differ on ebcdic machines.";
-        exit 0;
-    }
-}
-use warnings 'utf8'  ;
-use utf8 ;
-$_ = "\x80  \xff" ;
-reverse ;
-no warnings 'utf8'  ;
-$_ = "\x80  \xff" ;
-reverse ;
-EXPECT
-\x80 will produce malformed UTF-8 character; use \x{80} for that at - line 10.
-\xff will produce malformed UTF-8 character; use \x{ff} for that at - line 10.

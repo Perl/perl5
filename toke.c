@@ -1172,6 +1172,8 @@ S_scan_const(pTHX_ char *start)
     bool dorange = FALSE;			/* are we in a translit range? */
     bool has_utf = FALSE;			/* embedded \x{} */
     I32 len;					/* ? */
+    UV uv;
+
     I32 utf = (PL_lex_inwhat == OP_TRANS && PL_sublex_info.sub_op)
 	? (PL_sublex_info.sub_op->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF))
 	: UTF;
@@ -1293,18 +1295,20 @@ S_scan_const(pTHX_ char *start)
 	/* (now in tr/// code again) */
 
 	if (*s & 0x80 && thisutf) {
-	    dTHR;			/* only for ckWARN */
-	    if (ckWARN(WARN_UTF8)) {
-		(void)utf8_to_uv((U8*)s, &len);	/* could cvt latin-1 to utf8 here... */
-		if (len) {
-		    has_utf = TRUE;
-		    while (len--)
-			*d++ = *s++;
-		    continue;
-		}
-	    }
-	    else
-		has_utf = TRUE;		/* assume valid utf8 */
+	   (void)utf8_to_uv((U8*)s, &len);
+	   if (len == 1) {
+	       /* illegal UTF8, make it valid */
+	       /* need to grow with 1 char to be safe */
+	       char *old_pvx = SvPVX(sv);
+	       d = SvGROW(sv, SvCUR(sv)+2) + (d - old_pvx);
+	       d = (char*)uv_to_utf8((U8*)d, (U8)*s++);
+	   }
+	   else {
+	       while (len--)
+		   *d++ = *s++;
+	   }
+	   has_utf = TRUE;
+	   continue;
 	}
 
 	/* backslashes */
@@ -1360,51 +1364,75 @@ S_scan_const(pTHX_ char *start)
 	    /* \132 indicates an octal constant */
 	    case '0': case '1': case '2': case '3':
 	    case '4': case '5': case '6': case '7':
-		*d++ = (char)scan_oct(s, 3, &len);
+		uv = (UV)scan_oct(s, 3, &len);
 		s += len;
-		continue;
+		goto NUM_ESCAPE_INSERT;
 
 	    /* \x24 indicates a hex constant */
 	    case 'x':
 		++s;
 		if (*s == '{') {
 		    char* e = strchr(s, '}');
-		    UV uv;
-
 		    if (!e) {
 			yyerror("Missing right brace on \\x{}");
 			e = s;
 		    }
-		    /* note: utf always shorter than hex */
-		    uv = (UV)scan_hex(s + 1, e - s - 1, &len);
-		    if (uv > 127) {
-			d = (char*)uv_to_utf8((U8*)d, uv);
-			has_utf = TRUE;
-		    }
-		    else
-			*d++ = (char)uv;
-		    s = e + 1;
+                    uv = (UV)scan_hex(s + 1, e - s - 1, &len);
+                    s = e + 1;
 		}
 		else {
-		    /* XXX collapse this branch into the one above */
-		    UV uv = (UV)scan_hex(s, 2, &len);
-		    if (utf && PL_lex_inwhat == OP_TRANS &&
-			utf != (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF))
-		    {
-			d = (char*)uv_to_utf8((U8*)d, uv);	/* doing a CU or UC */
-			has_utf = TRUE;
-		    }
-		    else {
-			if (uv >= 127 && UTF) {
-			    dTHR;
-			    if (ckWARN(WARN_UTF8))
-				Perl_warner(aTHX_ WARN_UTF8,
-				    "\\x%.*s will produce malformed UTF-8 character; use \\x{%.*s} for that",
-				    (int)len,s,(int)len,s);
-			}
-			*d++ = (char)uv;
-		    }
+		    uv = (UV)scan_hex(s, 2, &len);
 		    s += len;
+		}
+
+	      NUM_ESCAPE_INSERT:
+		/* Insert oct or hex escaped character.
+		 * There will always enough room in sv since such escapes will
+		 * be longer than any utf8 sequence they can end up as
+		 */
+		if (uv > 127) {
+		    if (!thisutf && !has_utf && uv > 255) {
+		        /* might need to recode whatever we have accumulated so far
+			 * if it contains any hibit chars
+			 */
+		        int hicount = 0;
+			char *c;
+			for (c = SvPVX(sv); c < d; c++) {
+			    if (*c & 0x80)
+			        hicount++;
+			}
+			if (hicount) {
+			    char *old_pvx = SvPVX(sv);
+			    char *src, *dst;
+			    d = SvGROW(sv, SvCUR(sv) + hicount + 1) + (d - old_pvx);
+
+			    src = d - 1;
+			    d += hicount;
+			    dst = d - 1;
+
+			    while (src < dst) {
+			        if (*src & 0x80) {
+				    dst--;
+				    uv_to_utf8((U8*)dst, (U8)*src--);
+				    dst--;
+			        }
+			        else {
+				    *dst-- = *src--;
+			        }
+			    }
+                        }
+                    }
+
+                    if (thisutf || uv > 255) {
+		        d = (char*)uv_to_utf8((U8*)d, uv);
+			has_utf = TRUE;
+                    }
+		    else {
+		        *d++ = (char)uv;
+		    }
+		}
+		else {
+		    *d++ = (char)uv;
 		}
 		continue;
 
