@@ -271,10 +271,22 @@ integer formats:
     12345
     12345.67
     .23E-10             # a very small number
-    4_294_967_296       # underline for legibility
+    4_294_967_296       # underscore for legibility
     0xff                # hex
     0377                # octal
     0b011011            # binary
+
+You are allowed to use an underscore in numeric literals for legibility,
+but in decimal numeric literals (those written in base 10, not
+necessarily with a fractional part), digits may only be grouped in
+threes. For decimal numeric literals containing a fractional part,
+this applies only to the part before the decimal point; the fractional
+part (but not the exponent, if given!) may contain underscores
+anywhere you feel it enhances legibility. Binary, octal, and
+hexadecimal numeric literals may contain underscores in any place --
+so you could, for example, group binary digits by threes (as for a
+Unix-style mode argument such as 0b110_100_100) or by fours (to
+represent nibbles, as in 0b1010_0110) or in other groups.
 
 String literals are usually delimited by either single or double
 quotes.  They work much like quotes in the standard Unix shells:
