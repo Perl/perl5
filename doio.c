@@ -1,4 +1,4 @@
-/* $RCSfile: doio.c,v $$Revision: 4.0.1.2 $$Date: 91/06/07 10:53:39 $
+/* $RCSfile: doio.c,v $$Revision: 4.0.1.3 $$Date: 91/06/10 01:21:19 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	doio.c,v $
+ * Revision 4.0.1.3  91/06/10  01:21:19  lwall
+ * patch10: read didn't work from character special files open for writing
+ * patch10: close-on-exec wrongly set on system file descriptors
+ * 
  * Revision 4.0.1.2  91/06/07  10:53:39  lwall
  * patch4: new copyright notice
  * patch4: system fd's are now treated specially
@@ -237,17 +241,13 @@ int len;
 	    (void)fclose(fp);
 	    goto say_false;
 	}
-	if (S_ISSOCK(statbuf.st_mode) || (S_ISCHR(statbuf.st_mode) && writing))
+	if (S_ISSOCK(statbuf.st_mode))
 	    stio->type = 's';	/* in case a socket was passed in to us */
 #ifdef S_IFMT
 	else if (!(statbuf.st_mode & S_IFMT))
 	    stio->type = 's';	/* some OS's return 0 on fstat()ed socket */
 #endif
     }
-#if defined(HAS_FCNTL) && defined(F_SETFD)
-    fd = fileno(fp);
-    fcntl(fd,F_SETFD,fd > maxsysfd);
-#endif
     if (saveifp) {		/* must use old fp? */
 	fd = fileno(saveifp);
 	if (saveofp) {
@@ -263,16 +263,22 @@ int len;
 	}
 	fp = saveifp;
     }
+#if defined(HAS_FCNTL) && defined(F_SETFD)
+    fd = fileno(fp);
+    fcntl(fd,F_SETFD,fd > maxsysfd);
+#endif
     stio->ifp = fp;
     if (writing) {
-	if (stio->type != 's')
-	    stio->ofp = fp;
-	else
+	if (stio->type == 's'
+	  || (stio->type == '>' && S_ISCHR(statbuf.st_mode)) ) {
 	    if (!(stio->ofp = fdopen(fileno(fp),"w"))) {
 		fclose(fp);
 		stio->ifp = Nullfp;
 		goto say_false;
 	    }
+	}
+	else
+	    stio->ofp = fp;
     }
     return TRUE;
 

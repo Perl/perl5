@@ -1,4 +1,4 @@
-/* $RCSfile: toke.c,v $$Revision: 4.0.1.2 $$Date: 91/06/07 12:05:56 $
+/* $RCSfile: toke.c,v $$Revision: 4.0.1.3 $$Date: 91/06/10 01:32:26 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	toke.c,v $
+ * Revision 4.0.1.3  91/06/10  01:32:26  lwall
+ * patch10: m'$foo' now treats string as single quoted
+ * patch10: certain pattern optimizations were botched
+ * 
  * Revision 4.0.1.2  91/06/07  12:05:56  lwall
  * patch4: new copyright notice
  * patch4: debugger lost track of lines in eval
@@ -1514,6 +1518,7 @@ register char *s;
     int len;
     SPAT savespat;
     STR *str = Str_new(93,0);
+    char delim;
 
     Newz(801,spat,1,SPAT);
     spat->spat_next = curstash->tbl_spatroot;	/* link into spat list */
@@ -1538,7 +1543,7 @@ register char *s;
 	yylval.arg = Nullarg;
 	return s;
     }
-    s++;
+    delim = *s++;
     while (*s == 'i' || *s == 'o' || *s == 'g') {
 	if (*s == 'i') {
 	    s++;
@@ -1556,7 +1561,11 @@ register char *s;
     }
     len = str->str_cur;
     e = str->str_ptr + len;
-    for (d = str->str_ptr; d < e; d++) {
+    if (delim == '\'')
+	d = e;
+    else
+	d = str->str_ptr;
+    for (; d < e; d++) {
 	if (*d == '\\')
 	    d++;
 	else if ((*d == '$' && d[1] && d[1] != '|' && d[1] != ')') ||
@@ -1738,15 +1747,18 @@ get_repl:
     return s;
 }
 
+void
 hoistmust(spat)
 register SPAT *spat;
 {
     if (!spat->spat_short && spat->spat_regexp->regstart &&
 	(!spat->spat_regexp->regmust || spat->spat_regexp->reganch & ROPT_ANCH)
        ) {
-	spat->spat_short = spat->spat_regexp->regstart;
 	if (!(spat->spat_regexp->reganch & ROPT_ANCH))
 	    spat->spat_flags |= SPAT_SCANFIRST;
+	else if (spat->spat_flags & SPAT_FOLD)
+	    return;
+	spat->spat_short = str_smake(spat->spat_regexp->regstart);
     }
     else if (spat->spat_regexp->regmust) {/* is there a better short-circuit? */
 	if (spat->spat_short &&

@@ -1,4 +1,4 @@
-char rcsid[] = "$RCSfile: perl.c,v $$Revision: 4.0.1.3 $$Date: 91/06/07 11:40:18 $\nPatch level: ###\n";
+char rcsid[] = "$RCSfile: perl.c,v $$Revision: 4.0.1.4 $$Date: 91/06/10 01:23:07 $\nPatch level: ###\n";
 /*
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,9 @@ char rcsid[] = "$RCSfile: perl.c,v $$Revision: 4.0.1.3 $$Date: 91/06/07 11:40:18
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	perl.c,v $
+ * Revision 4.0.1.4  91/06/10  01:23:07  lwall
+ * patch10: perl -v printed incorrect copyright notice
+ * 
  * Revision 4.0.1.3  91/06/07  11:40:18  lwall
  * patch4: changed old $^P to $^X
  * 
@@ -1199,8 +1202,8 @@ char *s;
 #endif
 #endif
 	fputs("\n\
-Perl may be copied only under the terms of the GNU General Public License,\n\
-a copy of which can be found with the Perl 4.0 distribution kit.\n",stdout);
+Perl may be copied only under the terms of either the Artistic License or the\n\
+GNU General Public License, which may be found in the Perl 4.0 source kit.\n",stdout);
 #ifdef MSDOS
         usage(origargv[0]);
 #endif

@@ -1,8 +1,8 @@
 #!./perl
 
-# $RCSfile: pat.t,v $$Revision: 4.0.1.1 $$Date: 91/06/07 12:01:26 $
+# $RCSfile: pat.t,v $$Revision: 4.0.1.2 $$Date: 91/06/10 01:29:34 $
 
-print "1..48\n";
+print "1..51\n";
 
 $x = "abc\ndef\n";
 
@@ -174,3 +174,11 @@ for $iter (1..5) {
 
 $x = "$t1$t2$t3$t4$t5$t6$t7$t8$t9";
 print $x eq '505550555' ? "ok 48\n" : "not ok 48 $x\n";
+
+$xyz = 'xyz';
+print "abc" =~ /^abc$|$xyz/ ? "ok 49\n" : "not ok 49\n";
+
+# perl 4.009 says "unmatched ()"
+eval '"abc" =~ /a(bc$)|$xyz/; $result = "$&:$1"';
+print $@ eq "" ? "ok 50\n" : "not ok 50\n";
+print $result eq "abc:bc" ? "ok 51\n" : "not ok 51\n";

@@ -1,4 +1,4 @@
-/* $RCSfile: doarg.c,v $$Revision: 4.0.1.2 $$Date: 91/06/07 10:42:17 $
+/* $RCSfile: doarg.c,v $$Revision: 4.0.1.3 $$Date: 91/06/10 01:18:41 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	doarg.c,v $
+ * Revision 4.0.1.3  91/06/10  01:18:41  lwall
+ * patch10: pack(hh,1) dumped core
+ * 
  * Revision 4.0.1.2  91/06/07  10:42:17  lwall
  * patch4: new copyright notice
  * patch4: // wouldn't use previous pattern if it started with a null character
@@ -494,9 +497,10 @@ int *arglast;
 	case 'b':
 	    {
 		char *savepat = pat;
-		int saveitems = items;
+		int saveitems;
 
 		fromstr = NEXTFROM;
+		saveitems = items;
 		aptr = str_get(fromstr);
 		if (pat[-1] == '*')
 		    len = fromstr->str_cur;
@@ -551,9 +555,10 @@ int *arglast;
 	case 'h':
 	    {
 		char *savepat = pat;
-		int saveitems = items;
+		int saveitems;
 
 		fromstr = NEXTFROM;
+		saveitems = items;
 		aptr = str_get(fromstr);
 		if (pat[-1] == '*')
 		    len = fromstr->str_cur;

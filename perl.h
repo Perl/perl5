@@ -1,4 +1,4 @@
-/* $RCSfile: perl.h,v $$Revision: 4.0.1.2 $$Date: 91/06/07 11:28:33 $
+/* $RCSfile: perl.h,v $$Revision: 4.0.1.3 $$Date: 91/06/10 01:25:10 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	perl.h,v $
+ * Revision 4.0.1.3  91/06/10  01:25:10  lwall
+ * patch10: certain pattern optimizations were botched
+ * 
  * Revision 4.0.1.2  91/06/07  11:28:33  lwall
  * patch4: new copyright notice
  * patch4: made some allowances for "semi-standard" C
@@ -749,6 +752,7 @@ FILE *popen();
 STR *interp();
 void free_arg();
 STIO *stio_new();
+void hoistmust();
 
 EXT struct stat statbuf;
 EXT struct stat statcache;

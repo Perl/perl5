@@ -1,4 +1,4 @@
-/* $RCSfile: str.c,v $$Revision: 4.0.1.2 $$Date: 91/06/07 11:58:13 $
+/* $RCSfile: str.c,v $$Revision: 4.0.1.3 $$Date: 91/06/10 01:27:54 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	str.c,v $
+ * Revision 4.0.1.3  91/06/10  01:27:54  lwall
+ * patch10: $) and $| incorrectly handled in run-time patterns
+ * 
  * Revision 4.0.1.2  91/06/07  11:58:13  lwall
  * patch4: new copyright notice
  * patch4: taint check on undefined string could cause core dump
@@ -939,8 +942,14 @@ STR *src;
 	    ++s;
 	    t = s;
 	}
-	else if ((*s == '@' || (*s == '$' && !index(nointrp,s[1]))) &&
-	  s+1 < send) {
+	else if (*s == '$' && s+1 < send && *nointrp && index(nointrp,s[1])) {
+	    str_ncat(str, t, s - t);
+	    str_ncat(str, "$b", 2);
+	    str_ncat(str, s, 2);
+	    s += 2;
+	    t = s;
+	}
+	else if ((*s == '@' || *s == '$') && s+1 < send) {
 	    str_ncat(str,t,s-t);
 	    t = s;
 	    if (*s == '$' && s[1] == '#' && (isalpha(s[2]) || s[2] == '_'))
@@ -1171,6 +1180,9 @@ int sp;
 	    if (s-t > 0)
 		str_ncat(str,t,s-t);
 	    switch(*++s) {
+	    default:
+		fatal("panic: unknown interp cookie\n");
+		break;
 	    case 'a':
 		str_scat(str,*++elem);
 		break;

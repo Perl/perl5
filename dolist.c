@@ -1,4 +1,4 @@
-/* $RCSfile: dolist.c,v $$Revision: 4.0.1.1 $$Date: 91/06/07 10:58:28 $
+/* $RCSfile: dolist.c,v $$Revision: 4.0.1.2 $$Date: 91/06/10 01:22:15 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	dolist.c,v $
+ * Revision 4.0.1.2  91/06/10  01:22:15  lwall
+ * patch10: //g only worked first time through
+ * 
  * Revision 4.0.1.1  91/06/07  10:58:28  lwall
  * patch4: new copyright notice
  * patch4: added global modifier for pattern matches
@@ -202,6 +205,8 @@ int *arglast;
 	    goto gotcha;
 	}
 	else {
+	    if (global)
+		spat->spat_regexp->startp[0] = Nullch;
 	    if (gimme == G_ARRAY)
 		return sp;
 	    str_sset(str,&str_no);
@@ -276,6 +281,8 @@ yup:
 nope:
     spat->spat_regexp->startp[0] = Nullch;
     ++spat->spat_short->str_u.str_useful;
+    if (global)
+	spat->spat_regexp->startp[0] = Nullch;
     if (gimme == G_ARRAY)
 	return sp;
     str_sset(str,&str_no);

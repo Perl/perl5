@@ -1,7 +1,10 @@
 .rn '' }`
-''' $RCSfile: perl.man,v $$Revision: 4.0.1.2 $$Date: 91/06/07 11:41:23 $
+''' $RCSfile: perl.man,v $$Revision: 4.0.1.3 $$Date: 91/06/10 01:26:02 $
 ''' 
 ''' $Log:	perl.man,v $
+''' Revision 4.0.1.3  91/06/10  01:26:02  lwall
+''' patch10: documented some newer features in addenda
+''' 
 ''' Revision 4.0.1.2  91/06/07  11:41:23  lwall
 ''' patch4: added global modifier for pattern matches
 ''' patch4: default top-of-form format is now FILEHANDLE_TOP
@@ -5802,6 +5805,11 @@ In double-quote context, more escapes are supported: \ee, \ea, \ex1b, \ec[,
 The
 .B $/
 variable may now be set to a multi-character delimiter.
+.PP
+There is now a g modifier on ordinary pattern matching that causes it
+to iterate through a string finding multiple matches.
+.PP
+All of the $^X variables are new except for $^T.
 .SH BUGS
 .PP
 .I Perl
