@@ -1447,7 +1447,7 @@ p	|OP*	|die_where	|char* message|STRLEN msglen
 Ap	|void	|dounwind	|I32 cxix
 p	|bool	|do_aexec	|SV* really|SV** mark|SV** sp
 p	|bool	|do_aexec5	|SV* really|SV** mark|SV** sp|int fd|int flag
-Ap	|int	|do_binmode	|PerlIO *fp|int iotype|int flag
+Ap	|int	|do_binmode	|PerlIO *fp|int iotype|int mode
 p	|void	|do_chop	|SV* asv|SV* sv
 Ap	|bool	|do_close	|GV* gv|bool not_implicit
 p	|bool	|do_eof		|GV* gv
@@ -1464,7 +1464,7 @@ p	|I32	|do_msgsnd	|SV** mark|SV** sp
 p	|I32	|do_semop	|SV** mark|SV** sp
 p	|I32	|do_shmio	|I32 optype|SV** mark|SV** sp
 #endif
-p	|void	|do_join	|SV* sv|SV* del|SV** mark|SV** sp
+Ap	|void	|do_join	|SV* sv|SV* del|SV** mark|SV** sp
 p	|OP*	|do_kv
 Ap	|bool	|do_open	|GV* gv|char* name|I32 len|int as_raw \
 				|int rawmode|int rawperm|PerlIO* supplied_fp
@@ -1860,7 +1860,7 @@ p	|void	|regprop	|SV* sv|regnode* o
 Ap	|void	|repeatcpy	|char* to|const char* from|I32 len|I32 count
 Ap	|char*	|rninstr	|const char* big|const char* bigend \
 				|const char* little|const char* lend
-p	|Sighandler_t|rsignal	|int i|Sighandler_t t
+Ap	|Sighandler_t|rsignal	|int i|Sighandler_t t
 p	|int	|rsignal_restore|int i|Sigsave_t* t
 p	|int	|rsignal_save	|int i|Sighandler_t t1|Sigsave_t* t2
 p	|Sighandler_t|rsignal_state|int i
@@ -2055,7 +2055,7 @@ Ap	|void	|vwarn		|const char* pat|va_list* args
 Afp	|void	|warner		|U32 err|const char* pat|...
 Ap	|void	|vwarner	|U32 err|const char* pat|va_list* args
 p	|void	|watch		|char** addr
-p	|I32	|whichsig	|char* sig
+Ap	|I32	|whichsig	|char* sig
 p	|int	|yyerror	|char* s
 #if defined(USE_PURE_BISON)
 p	|int	|yylex		|YYSTYPE *lvalp|int *lcharp
