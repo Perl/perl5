@@ -4,15 +4,9 @@
  * This package may be copied under the same terms as Perl itself.
  */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
-#ifdef __cplusplus
-}
-#endif
 
 #include <perl.h>
 #include <jni.h>
@@ -37,6 +31,7 @@ makeargs(char *sig, SV** svp, int items)
     char *s = sig;
     JNIEnv* env = jplcurenv;
     char *start;
+    STRLEN n_a;
 
     if (jpldebug)
 	fprintf(stderr, "sig = %s, items = %d\n", sig, items);
@@ -98,7 +93,7 @@ makeargs(char *sig, SV** svp, int items)
 		    jsize len = sv_len(sv) / sizeof(jboolean);
 
 		    jbooleanArray ja = (*env)->NewBooleanArray(env, len);
-		    (*env)->SetBooleanArrayRegion(env, ja, 0, len, (jboolean*)SvPV(sv,na));
+		    (*env)->SetBooleanArrayRegion(env, ja, 0, len, (jboolean*)SvPV(sv,n_a));
 		    jv[ix++].l = (jobject)ja;
 		}
 		else
@@ -129,7 +124,7 @@ makeargs(char *sig, SV** svp, int items)
 		    jsize len = sv_len(sv) / sizeof(jbyte);
 
 		    jbyteArray ja = (*env)->NewByteArray(env, len);
-		    (*env)->SetByteArrayRegion(env, ja, 0, len, (jbyte*)SvPV(sv,na));
+		    (*env)->SetByteArrayRegion(env, ja, 0, len, (jbyte*)SvPV(sv,n_a));
 		    jv[ix++].l = (jobject)ja;
 		}
 		else
@@ -160,7 +155,7 @@ makeargs(char *sig, SV** svp, int items)
 		    jsize len = sv_len(sv) / sizeof(jchar);
 
 		    jcharArray ja = (*env)->NewCharArray(env, len);
-		    (*env)->SetCharArrayRegion(env, ja, 0, len, (jchar*)SvPV(sv,na));
+		    (*env)->SetCharArrayRegion(env, ja, 0, len, (jchar*)SvPV(sv,n_a));
 		    jv[ix++].l = (jobject)ja;
 		}
 		else
@@ -191,7 +186,7 @@ makeargs(char *sig, SV** svp, int items)
 		    jsize len = sv_len(sv) / sizeof(jshort);
 
 		    jshortArray ja = (*env)->NewShortArray(env, len);
-		    (*env)->SetShortArrayRegion(env, ja, 0, len, (jshort*)SvPV(sv,na));
+		    (*env)->SetShortArrayRegion(env, ja, 0, len, (jshort*)SvPV(sv,n_a));
 		    jv[ix++].l = (jobject)ja;
 		}
 		else
@@ -222,7 +217,7 @@ makeargs(char *sig, SV** svp, int items)
 		    jsize len = sv_len(sv) / sizeof(jint);
 
 		    jintArray ja = (*env)->NewIntArray(env, len);
-		    (*env)->SetIntArrayRegion(env, ja, 0, len, (jint*)SvPV(sv,na));
+		    (*env)->SetIntArrayRegion(env, ja, 0, len, (jint*)SvPV(sv,n_a));
 		    jv[ix++].l = (jobject)ja;
 		}
 		else
@@ -253,7 +248,7 @@ makeargs(char *sig, SV** svp, int items)
 		    jsize len = sv_len(sv) / sizeof(jlong);
 
 		    jlongArray ja = (*env)->NewLongArray(env, len);
-		    (*env)->SetLongArrayRegion(env, ja, 0, len, (jlong*)SvPV(sv,na));
+		    (*env)->SetLongArrayRegion(env, ja, 0, len, (jlong*)SvPV(sv,n_a));
 		    jv[ix++].l = (jobject)ja;
 		}
 		else
@@ -284,7 +279,7 @@ makeargs(char *sig, SV** svp, int items)
 		    jsize len = sv_len(sv) / sizeof(jfloat);
 
 		    jfloatArray ja = (*env)->NewFloatArray(env, len);
-		    (*env)->SetFloatArrayRegion(env, ja, 0, len, (jfloat*)SvPV(sv,na));
+		    (*env)->SetFloatArrayRegion(env, ja, 0, len, (jfloat*)SvPV(sv,n_a));
 		    jv[ix++].l = (jobject)ja;
 		}
 		else
@@ -315,7 +310,7 @@ makeargs(char *sig, SV** svp, int items)
 		    jsize len = sv_len(sv) / sizeof(jdouble);
 
 		    jdoubleArray ja = (*env)->NewDoubleArray(env, len);
-		    (*env)->SetDoubleArrayRegion(env, ja, 0, len, (jdouble*)SvPV(sv,na));
+		    (*env)->SetDoubleArrayRegion(env, ja, 0, len, (jdouble*)SvPV(sv,n_a));
 		    jv[ix++].l = (jobject)ja;
 		}
 		else
@@ -340,7 +335,7 @@ makeargs(char *sig, SV** svp, int items)
 				jcl = (*env)->FindClass(env, "java/lang/String");
 			    ja = (*env)->NewObjectArray(env, len, jcl, 0);
 			    for (esv = AvARRAY((AV*)rv), i = 0; i < len; esv++, i++) {
-				jobject str = (jobject)(*env)->NewStringUTF(env, SvPV(*esv,na));
+				jobject str = (jobject)(*env)->NewStringUTF(env, SvPV(*esv,n_a));
 				(*env)->SetObjectArrayElement(env, ja, i, str);
 			    }
 			    jv[ix++].l = (jobject)ja;
@@ -375,7 +370,7 @@ makeargs(char *sig, SV** svp, int items)
 			    }
 			    else {
 				jobject str = (jobject)(*env)->NewStringUTF(env,
-				    SvPV(*esv,na));
+				    SvPV(*esv,n_a));
 				(*env)->SetObjectArrayElement(env, ja, i, str);
 			    }
 			}
@@ -393,7 +388,7 @@ makeargs(char *sig, SV** svp, int items)
 	    if (!SvROK(sv) || strnEQ(s, "java/lang/String;", 17)) {
 		s += 17;
 		jv[ix++].l = (jobject)(*env)->NewStringUTF(env,
-				(char*) SvPV(sv,na));
+				(char*) SvPV(sv,n_a));
 		break;
 	    }
 	    while (*s != ';') s++;
@@ -2528,7 +2523,7 @@ GetBooleanArrayElements(array)
 			(STRLEN)RETVAL_len_ * sizeof(jboolean))));
 		}
 		else
-		    PUSHs(&sv_no);
+		    PUSHs(&PL_sv_no);
 	    }
 	    (*env)->ReleaseBooleanArrayElements(env, array,RETVAL,JNI_ABORT);
 	    RESTOREENV;
@@ -2558,7 +2553,7 @@ GetByteArrayElements(array)
 			(STRLEN)RETVAL_len_ * sizeof(jbyte))));
 		}
 		else
-		    PUSHs(&sv_no);
+		    PUSHs(&PL_sv_no);
 	    }
 	    (*env)->ReleaseByteArrayElements(env, array,RETVAL,JNI_ABORT);
 	    RESTOREENV;
@@ -2588,7 +2583,7 @@ GetCharArrayElements(array)
 			(STRLEN)RETVAL_len_ * sizeof(jchar))));
 		}
 		else
-		    PUSHs(&sv_no);
+		    PUSHs(&PL_sv_no);
 	    }
 	    (*env)->ReleaseCharArrayElements(env, array,RETVAL,JNI_ABORT);
 	    RESTOREENV;
@@ -2618,7 +2613,7 @@ GetShortArrayElements(array)
 			(STRLEN)RETVAL_len_ * sizeof(jshort))));
 		}
 		else
-		    PUSHs(&sv_no);
+		    PUSHs(&PL_sv_no);
 	    }
 	    (*env)->ReleaseShortArrayElements(env, array,RETVAL,JNI_ABORT);
 	    RESTOREENV;
@@ -2648,7 +2643,7 @@ GetIntArrayElements(array)
 			(STRLEN)RETVAL_len_ * sizeof(jint))));
 		}
 		else
-		    PUSHs(&sv_no);
+		    PUSHs(&PL_sv_no);
 	    }
 	    (*env)->ReleaseIntArrayElements(env, array,RETVAL,JNI_ABORT);
 	    RESTOREENV;
@@ -2678,7 +2673,7 @@ GetLongArrayElements(array)
 			(STRLEN)RETVAL_len_ * sizeof(jlong))));
 		}
 		else
-		    PUSHs(&sv_no);
+		    PUSHs(&PL_sv_no);
 	    }
 	    (*env)->ReleaseLongArrayElements(env, array,RETVAL,JNI_ABORT);
 	    RESTOREENV;
@@ -2708,7 +2703,7 @@ GetFloatArrayElements(array)
 			(STRLEN)RETVAL_len_ * sizeof(jfloat))));
 		}
 		else
-		    PUSHs(&sv_no);
+		    PUSHs(&PL_sv_no);
 	    }
 	    (*env)->ReleaseFloatArrayElements(env, array,RETVAL,JNI_ABORT);
 	    RESTOREENV;
@@ -2738,7 +2733,7 @@ GetDoubleArrayElements(array)
 			(STRLEN)RETVAL_len_ * sizeof(jdouble))));
 		}
 		else
-		    PUSHs(&sv_no);
+		    PUSHs(&PL_sv_no);
 	    }
 	    (*env)->ReleaseDoubleArrayElements(env, array,RETVAL,JNI_ABORT);
 	    RESTOREENV;
@@ -2893,7 +2888,7 @@ SetBooleanArrayRegion(array,start,len,buf)
 	{
 	    if (buf_len_ < len)
 		croak("string is too short");
-	    else if (buf_len_ > len && dowarn)
+	    else if (buf_len_ > len && PL_dowarn)
 		warn("string is too long");
 	    (*env)->SetBooleanArrayRegion(env, array,start,len,buf);
 	    RESTOREENV;
@@ -2912,7 +2907,7 @@ SetByteArrayRegion(array,start,len,buf)
 	{
 	    if (buf_len_ < len)
 		croak("string is too short");
-	    else if (buf_len_ > len && dowarn)
+	    else if (buf_len_ > len && PL_dowarn)
 		warn("string is too long");
 	    (*env)->SetByteArrayRegion(env, array,start,len,buf);
 	    RESTOREENV;
@@ -2931,7 +2926,7 @@ SetCharArrayRegion(array,start,len,buf)
 	{
 	    if (buf_len_ < len)
 		croak("string is too short");
-	    else if (buf_len_ > len && dowarn)
+	    else if (buf_len_ > len && PL_dowarn)
 		warn("string is too long");
 	    (*env)->SetCharArrayRegion(env, array,start,len,buf);
 	    RESTOREENV;
@@ -2950,7 +2945,7 @@ SetShortArrayRegion(array,start,len,buf)
 	{
 	    if (buf_len_ < len)
 		croak("string is too short");
-	    else if (buf_len_ > len && dowarn)
+	    else if (buf_len_ > len && PL_dowarn)
 		warn("string is too long");
 	    (*env)->SetShortArrayRegion(env, array,start,len,buf);
 	    RESTOREENV;
@@ -2969,7 +2964,7 @@ SetIntArrayRegion(array,start,len,buf)
 	{
 	    if (buf_len_ < len)
 		croak("string is too short");
-	    else if (buf_len_ > len && dowarn)
+	    else if (buf_len_ > len && PL_dowarn)
 		warn("string is too long");
 	    (*env)->SetIntArrayRegion(env, array,start,len,buf);
 	    RESTOREENV;
@@ -2988,7 +2983,7 @@ SetLongArrayRegion(array,start,len,buf)
 	{
 	    if (buf_len_ < len)
 		croak("string is too short");
-	    else if (buf_len_ > len && dowarn)
+	    else if (buf_len_ > len && PL_dowarn)
 		warn("string is too long");
 	    (*env)->SetLongArrayRegion(env, array,start,len,buf);
 	    RESTOREENV;
@@ -3007,7 +3002,7 @@ SetFloatArrayRegion(array,start,len,buf)
 	{
 	    if (buf_len_ < len)
 		croak("string is too short");
-	    else if (buf_len_ > len && dowarn)
+	    else if (buf_len_ > len && PL_dowarn)
 		warn("string is too long");
 	    (*env)->SetFloatArrayRegion(env, array,start,len,buf);
 	    RESTOREENV;
@@ -3026,7 +3021,7 @@ SetDoubleArrayRegion(array,start,len,buf)
 	{
 	    if (buf_len_ < len)
 		croak("string is too short");
-	    else if (buf_len_ > len && dowarn)
+	    else if (buf_len_ > len && PL_dowarn)
 		warn("string is too long");
 	    (*env)->SetDoubleArrayRegion(env, array,start,len,buf);
 	    RESTOREENV;
@@ -3093,7 +3088,7 @@ GetJavaVM(...)
 
 		if (items--) {
 		    ++mark;
-		    lib = SvPV(*mark, na);
+		    lib = SvPV(*mark, PL_na);
 		}
 		else
 		    lib = 0;
@@ -3106,7 +3101,7 @@ GetJavaVM(...)
 		JNI_GetDefaultJavaVMInitArgs(&vm_args);
 		vm_args.exit = &call_my_exit;
 		while (items > 1) {
-		    char *s = SvPV(*++mark,na);
+		    char *s = SvPV(*++mark,PL_na);
 		    items -= 2;
 		    if (strEQ(s, "checkSource"))
 			vm_args.checkSource = (jint)SvIV(*++mark);
@@ -3121,7 +3116,7 @@ GetJavaVM(...)
 		    else if (strEQ(s, "verifyMode"))
 			vm_args.verifyMode = (jint)SvIV(*++mark);
 		    else if (strEQ(s, "classpath"))
-			vm_args.classpath = savepv(SvPV(*++mark,na));
+			vm_args.classpath = savepv(SvPV(*++mark,PL_na));
 		    else if (strEQ(s, "enableClassGC"))
 			vm_args.enableClassGC = (jint)SvIV(*++mark);
 		    else if (strEQ(s, "enableVerboseGC"))

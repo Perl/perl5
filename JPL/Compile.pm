@@ -371,15 +371,15 @@ $glue
 	    emit <<"";
 !    PUTBACK;
 !    if (perl_call_sv(methodsv, G_EVAL|G_KEEPERR))
-!	retsv = *stack_sp--;
+!	retsv = *PL_stack_sp--;
 !    else
-!	retsv = &sv_undef;
+!	retsv = &PL_sv_undef;
 !
 
 	}
 
 	emit <<"";
-!    if (SvTRUE(GvSV(errgv))) {
+!    if (SvTRUE(ERRSV)) {
 !	jthrowable newExcCls;
 !
 !	(*env)->ExceptionDescribe(env);
@@ -387,7 +387,7 @@ $glue
 !
 !	newExcCls = (*env)->FindClass(env, "java/lang/RuntimeException");
 !	if (newExcCls)
-!	    (*env)->ThrowNew(env, newExcCls, SvPV(GvSV(errgv),na));
+!	    (*env)->ThrowNew(env, newExcCls, SvPV(ERRSV,PL_na));
 !    }
 !
 
@@ -416,7 +416,7 @@ $glue
 	}
 	elsif ($sig =~ s#^Ljava/lang/String;##) {
 	    emit <<"";
-!    retval = (*env)->NewStringUTF(env, SvPV(retsv,na));
+!    retval = (*env)->NewStringUTF(env, SvPV(retsv,PL_na));
 !    FREETMPS;
 !    LEAVE;
 !    return retval;
@@ -468,7 +468,7 @@ $glue
 !	jsize len = sv_len(retsv) / sizeof($ntype);
 !
 !	${ntype}Array ja = (*env)->New${ptype}Array(env, len);
-!	(*env)->Set${ptype}ArrayRegion(env, ja, 0, len, ($ntype*)SvPV(retsv,na));
+!	(*env)->Set${ptype}ArrayRegion(env, ja, 0, len, ($ntype*)SvPV(retsv,PL_na));
 !	retval = ($rettype)ja;
 !    }
 !    else
@@ -495,7 +495,7 @@ $glue
 !		jcl = (*env)->FindClass(env, "java/lang/String");
 !	    ja = (*env)->NewObjectArray(env, len, jcl, 0);
 !	    for (esv = AvARRAY((AV*)rv), i = 0; i < len; esv++, i++) {
-!		jobject str = (jobject)(*env)->NewStringUTF(env, SvPV(*esv,na));
+!		jobject str = (jobject)(*env)->NewStringUTF(env, SvPV(*esv,PL_na));
 !		(*env)->SetObjectArrayElement(env, ja, i, str);
 !	    }
 !	    retval = ($rettype)ja;
@@ -535,7 +535,7 @@ $glue
 !		}
 !		else {
 !		    jobject str = (jobject)(*env)->NewStringUTF(env,
-!			SvPV(*esv,na));
+!			SvPV(*esv,PL_na));
 !		    (*env)->SetObjectArrayElement(env, ja, i, str);
 !		}
 !	    }
@@ -734,18 +734,15 @@ sub emit_c_header {
 !
 !#include "$hfile"
 ! 
-!#ifdef __cplusplus
-!extern "C" {
-!#endif
-! 
 !#include "EXTERN.h"
 !#include "perl.h"
 ! 
-!#ifdef __cplusplus
-!}
-!#  define EXTERN_C extern "C"
-!#else
-!#  define EXTERN_C extern
+!#ifndef EXTERN_C
+!#  ifdef __cplusplus
+!#    define EXTERN_C extern "C"
+!#  else
+!#    define EXTERN_C extern
+!#  endif
 !#endif
 !
 !extern int jpldebug;

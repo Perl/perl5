@@ -5,18 +5,15 @@
 #include "PerlInterpreter.h"
 #include <dlfcn.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "EXTERN.h"
 #include "perl.h"
 
-#ifdef __cplusplus
-}
-#  define EXTERN_C extern "C"
-#else
-#  define EXTERN_C extern
+#ifndef EXTERN_C
+#  ifdef __cplusplus
+#    define EXTERN_C extern "C"
+#  else
+#    define EXTERN_C extern
+#  endif
 #endif
 
 static void xs_init _((void));
@@ -46,17 +43,17 @@ Java_PerlInterpreter_init(JNIEnv *env, jobject obj, jstring js)
 	exit(1);
     }
 
-    if (curinterp)
+    if (PL_curinterp)
 	return;
 
     perl_init_i18nl10n(1);
 
-    if (!do_undump) {
+    if (!PL_do_undump) {
 	my_perl = perl_alloc();
 	if (!my_perl)
 	    exit(1);
 	perl_construct( my_perl );
-	perl_destruct_level = 0;
+	PL_perl_destruct_level = 0;
     }
 
     exitstatus = perl_parse( my_perl, xs_init, argc, argv, (char **) NULL );
@@ -90,7 +87,7 @@ Java_PerlInterpreter_eval(JNIEnv *env, jobject obj, jstring js)
 
     perl_eval_pv( (char*)jb, 0 );
 
-    if (SvTRUE(GvSV(errgv))) {
+    if (SvTRUE(ERRSV)) {
 	jthrowable newExcCls;
 
 	(*env)->ExceptionDescribe(env);
@@ -98,7 +95,7 @@ Java_PerlInterpreter_eval(JNIEnv *env, jobject obj, jstring js)
 
 	newExcCls = (*env)->FindClass(env, "java/lang/RuntimeException");
 	if (newExcCls)
-	    (*env)->ThrowNew(env, newExcCls, SvPV(GvSV(errgv),na));
+	    (*env)->ThrowNew(env, newExcCls, SvPV(ERRSV,PL_na));
     }
 
     (*env)->ReleaseStringUTFChars(env,js,jb);

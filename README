@@ -9,11 +9,11 @@ from the network.  Don't expect not to be surprised occasionally.
 
 Requirements
 ------------
-Perl 5.004 (or later) must be compiled and installed as a shared library
-(libperl.so).  I had to use the system's malloc.  We've tested
-it most heavily with 5.004_04.
+Perl 5.005_02 (or later) must be compiled and installed as a shared library
+(libperl.so).  I had to use the system's malloc.  This version has not
+been well tested under 5.005_02, so you can expect some rough edges.
 
-You need JDK 1.1.  On Solaris 1.1.1 works.  On Linux you need 1.1.3 with
+You need JDK 1.1.  On Solaris 1.1.5 works.  On Linux you need 1.1.3 with
 the patches from
 
   ftp://ftp.blackdown.org/pub/Linux/JDK/1.1.3/updates/libjava-1.1.3v2-1.tar.gz
@@ -21,6 +21,10 @@ the patches from
 The get_jdk directory contains a script that will download JDK (but not
 the patch file above) off of the net for you.  (This presumes you've
 already installed the modules mentioned in ../README.)
+
+You may need to ensure that all files under the ../jpl directory are writable.
+install-jpl expects to be run with super-user privileges so that it can
+put things in the right places.
 
 What the heck is JPL?
 ---------------------
@@ -55,7 +59,7 @@ Installation
 Run "install-jpl".  You have to tell it whether you want to use the
 current directory for JPL_HOME or some other directory.  Everything
 else should take care of itself, except that after install-jpl
-write the setvars program, you are responsible to invoke it properly
+writes the setvars program, you are responsible to invoke it properly
 before any JPL applications can be compiled under the current shell.
 
     sh:   eval `setvars -sh`
