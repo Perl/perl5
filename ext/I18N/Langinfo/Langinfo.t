@@ -3,9 +3,10 @@
 BEGIN {
     chdir 't' if -d 't';
     require Config; import Config;
-    if ($Config{'extensions'} !~ m!\bI18N/Langinfo\b! &&
-	$Config{'extensions'} !~ m!\bPOSIX\b!) {
-	print "1..0\n";
+    if ($Config{'extensions'} !~ m!\bI18N/Langinfo\b! ||
+	$Config{'extensions'} !~ m!\bPOSIX\b!)
+    {
+	print "1..0 # skip: I18N::Langinfo or POSIX unavailable\n";
 	exit 0;
     }
 }
