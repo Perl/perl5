@@ -6,10 +6,16 @@ struct _PerlIO_funcs
  char *		name;
  Size_t		size;
  IV		kind;
- IV		(*Fileno)(PerlIO *f);
- PerlIO *	(*Open)(pTHX_ PerlIO_funcs *tab, const char *mode, int fd, int imode, int perm, PerlIO *old, int narg, SV **args);
- IV		(*Pushed)(PerlIO *f,const char *mode,const char *arg,STRLEN len);
+ IV		(*Pushed)(PerlIO *f,const char *mode,SV *arg);
  IV		(*Popped)(PerlIO *f);
+ PerlIO *	(*Open)(pTHX_ PerlIO_funcs *tab,
+			AV *layers, IV n,
+			const char *mode,
+			int fd, int imode, int perm,
+			PerlIO *old,
+			int narg, SV **args);
+ SV *		(*Getarg)(PerlIO *f);
+ IV		(*Fileno)(PerlIO *f);
  /* Unix-like functions - cf sfio line disciplines */
  SSize_t	(*Read)(PerlIO *f, void *vbuf, Size_t count);
  SSize_t	(*Unread)(PerlIO *f, const void *vbuf, Size_t count);
@@ -98,7 +104,7 @@ extern PerlIO *PerlIO_allocate(pTHX);
 /* Generic, or stub layer functions */
 
 extern IV	PerlIOBase_fileno    (PerlIO *f);
-extern IV	PerlIOBase_pushed    (PerlIO *f, const char *mode,const char *arg,STRLEN len);
+extern IV	PerlIOBase_pushed    (PerlIO *f, const char *mode,SV *arg);
 extern IV	PerlIOBase_popped    (PerlIO *f);
 extern SSize_t	PerlIOBase_unread    (PerlIO *f, const void *vbuf, Size_t count);
 extern IV	PerlIOBase_eof       (PerlIO *f);
@@ -129,7 +135,8 @@ typedef struct
  IV		oneword;    /* Emergency buffer */
 } PerlIOBuf;
 
-extern PerlIO *	PerlIOBuf_open       (pTHX_ PerlIO_funcs *self, const char *mode, int fd, int imode, int perm, PerlIO *old, int narg, SV **args);
+extern PerlIO *	PerlIOBuf_open       (pTHX_ PerlIO_funcs *self, AV *layers, IV n, const char *mode, int fd, int imode, int perm, PerlIO *old, int narg, SV **args);
+extern IV	PerlIOBuf_pushed     (PerlIO *f, const char *mode,SV *arg);
 extern SSize_t	PerlIOBuf_read       (PerlIO *f, void *vbuf, Size_t count);
 extern SSize_t	PerlIOBuf_unread     (PerlIO *f, const void *vbuf, Size_t count);
 extern SSize_t	PerlIOBuf_write      (PerlIO *f, const void *vbuf, Size_t count);
