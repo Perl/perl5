@@ -1,5 +1,166 @@
 package Benchmark;
 
+=head1 NAME
+
+Benchmark - benchmark running times of code
+
+timethis - run a chunk of code several times
+
+timethese - run several chunks of code several times
+
+timeit - run a chunk of code and see how long it goes
+
+=head1 SYNOPSIS
+
+    timethis ($count, "code");
+
+    timethese($count, {
+	'Name1' => '...code1...',
+	'Name2' => '...code2...',
+    });
+
+    $t = timeit($count, '...other code...')
+    print "$count loops of other code took:",timestr($t),"\n";
+
+=head1 DESCRIPTION
+
+The Benchmark module encapsulates a number of routines to help you
+figure out how long it takes to execute some code.
+
+=head2 Methods
+
+=over 10
+
+=item new
+
+Returns the current time.   Example:
+
+    use Benchmark;
+    $t0 = new Benchmark;
+    # ... your code here ...
+    $t1 = new Benchmark;
+    $td = timediff($t1, $t0);
+    print "the code took:",timestr($dt),"\n";
+
+=item debug
+
+Enables or disable debugging by setting the C<$Benchmark::Debug> flag:
+
+    debug Benchmark 1; 
+    $t = timeit(10, ' 5 ** $Global ');
+    debug Benchmark 0; 
+
+=back
+
+=head2 Standard Exports
+
+The following routines will be exported into your namespace 
+if you use the Benchmark module:
+
+=over 10
+
+=item timeit(COUNT, CODE)
+
+Arguments: COUNT is the number of time to run the loop, and 
+the second is the code to run.  CODE may be a string containing the code,
+a reference to the function to run, or a reference to a hash containing 
+keys which are names and values which are more CODE specs.
+
+Side-effects: prints out noise to standard out.
+
+Returns: a Benchmark object.  
+
+=item timethis
+
+=item timethese
+
+=item timediff
+
+=item timestr
+
+=back
+
+=head2 Optional Exports
+
+The following routines will be exported into your namespace
+if you specifically ask that they be imported:
+
+=over 10
+
+clearcache
+
+clearallcache
+
+disablecache
+
+enablecache
+
+=back
+
+=head1 NOTES
+
+The data is stored as a list of values from the time and times
+functions: 
+
+      ($real, $user, $system, $children_user, $children_system)
+
+in seconds for the whole loop (not divided by the number of rounds).
+
+The timing is done using time(3) and times(3).
+
+Code is executed in the caller's package.
+
+Enable debugging by:  
+
+    $Benchmark::debug = 1;
+
+The time of the null loop (a loop with the same
+number of rounds but empty loop body) is subtracted
+from the time of the real loop.
+
+The null loop times are cached, the key being the
+number of rounds. The caching can be controlled using
+calls like these:
+
+    clearcache($key); 
+    clearallcache();
+
+    disablecache(); 
+    enablecache();
+
+=head1 INHERITANCE
+
+Benchmark inherits from no other class, except of course
+for Exporter.
+
+=head1 CAVEATS
+
+The real time timing is done using time(2) and
+the granularity is therefore only one second.
+
+Short tests may produce negative figures because perl
+can appear to take longer to execute the empty loop 
+than a short test; try: 
+
+    timethis(100,'1');
+
+The system time of the null loop might be slightly
+more than the system time of the loop with the actual
+code and therefore the difference might end up being < 0.
+
+More documentation is needed :-( especially for styles and formats.
+
+=head1 AUTHORS
+
+Jarkko Hietaniemi <Jarkko.Hietaniemi@hut.fi>,
+Tim Bunce <Tim.Bunce@ig.co.uk>
+
+=head1 MODIFICATION HISTORY
+
+September 8th, 1994; by Tim Bunce.
+
+=cut
+
 # Purpose: benchmark running times of code.
 #
 #

@@ -1,6 +1,6 @@
 package ExtUtils::MakeMaker;
 
-$Version = 4.094; # Last edited 17 Apr 1995 by Andy Dougherty
+$Version = 4.095; # Last edited 17 Apr 1995 by Andy Dougherty
 
 use Config;
 use Carp;
@@ -835,7 +835,7 @@ EOM
 }
 
 
-sub init_dirscan {	# --- File and Directory Lists (.xs .pm etc)
+sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
 
     my($name, %dir, %xs, %c, %h, %ignore, %pl_files);
     local(%pm); #the sub in find() has to see this hash
@@ -853,7 +853,7 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm etc)
 	    $c{$name} = 1;
 	} elsif ($name =~ /\.h$/){
 	    $h{$name} = 1;
-	} elsif ($name =~ /\.p[ml]$/){
+	} elsif ($name =~ /\.(p[ml]|pod)$/){
 	    $pm{$name} = "\$(INST_LIBDIR)/$name";
 	} elsif ($name =~ /\.PL$/ && $name ne "Makefile.PL") {
 	    ($pl_files{$name} = $name) =~ s/\.PL$// ;
@@ -2336,27 +2336,49 @@ F<E<lt>bailey@HMIVAX.HUMGEN.UPENN.EDUE<gt>>.
 =head1 MODIFICATION HISTORY
 
 v1, August 1994; by Andreas Koenig. Based on Andy Dougherty's Makefile.SH.
+
 v2, September 1994 by Tim Bunce.
+
 v3.0 October  1994 by Tim Bunce.
+
 v3.1 November 11th 1994 by Tim Bunce.
+
 v3.2 November 18th 1994 by Tim Bunce.
+
 v3.3 November 27th 1994 by Andreas Koenig.
+
 v3.4 December  7th 1994 by Andreas Koenig and Tim Bunce.
+
 v3.5 December 15th 1994 by Tim Bunce.
+
 v3.6 December 15th 1994 by Tim Bunce.
+
 v3.7 December 30th 1994 By Tim Bunce
+
 v3.8 January  17th 1995 By Andreas Koenig and Tim Bunce
+
 v3.9 January 19th 1995 By Tim Bunce
+
 v3.10 January 23rd 1995 By Tim Bunce
+
 v3.11 January 24th 1995 By Andreas Koenig
+
 v4.00 January 24th 1995 By Tim Bunce
+
 v4.01 January 25th 1995 By Tim Bunce
+
 v4.02 January 29th 1995 By Andreas Koenig
+
 v4.03 January 30th 1995 By Andreas Koenig
+
 v4.04 Februeary 5th 1995 By Andreas Koenig
+
 v4.05 February 8th 1995 By Andreas Koenig
+
 v4.06 February 10th 1995 By Andreas Koenig
+
 v4.061 February 12th 1995 By Andreas Koenig
+
 v4.08 - 4.085  February 14th-21st 1995 by Andreas Koenig
 
 Introduces EXE_FILES and INST_EXE for installing executable scripts 
@@ -2384,7 +2406,7 @@ Variable LIBPERL_A enables indirect setting of the switches -DEMBED,
 old_extliblist() code deleted, new_extliblist() renamed to extliblist().
 
 Improved algorithm in extliblist, that returns ('','','') if no
-library has been found, even if a -L directory has been found.
+library has been found, even if a C<-L> directory has been found.
 
 Fixed a bug that didn't allow lib/ directory work as documented.
 
@@ -2436,7 +2458,7 @@ v4.091 April 3 1995 by Andy Dougherty
 
 Another attempt to fix writedoc() from Dean Roehrich.
 
-v4.092 April 11 1994 by Andreas Koenig
+v4.092 April 11 1995 by Andreas Koenig
 
 Fixed a docu bug in hint file description. Added printing of a warning
 from eval in the hintfile section if the eval has errors.  Moved
@@ -2456,7 +2478,7 @@ line for the linking of a new static perl.
 
 Minor cosmetics.
 
-v4.093 April 12 1994 by Andy Dougherty
+v4.093 April 12 1995 by Andy Dougherty
 
 Rename distclean target to plain dist.  Insert a dummy distclean
 target that's the same as realclean.  This is more consistent with the
@@ -2468,9 +2490,15 @@ are handled.
 Include Tim's suggestions about $verbose and more careful substitution
 of $(CC) for $Config{'cc'}.
 
-v4.094 April 12 1994 by Andy Dougherty
+v4.094 April 12 1995 by Andy Dougherty
 
 Include Andreas' improvement of $(CC) detection.
+
+v4.095 May 30 1995 by Andy Dougherty
+
+Include installation of .pod and .pm files.
+
+Space out documentation for better printing with pod2man.
 
 =head1 NOTES
 

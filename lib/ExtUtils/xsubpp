@@ -50,11 +50,96 @@ No environment variables are used.
 
 Larry Wall
 
+=head1 MODIFICATION HISTORY
+
+=head2 1.0
+
+I<xsubpp> as released with Perl 5.000
+
+=head2 1.1
+
+I<xsubpp> as released with Perl 5.001
+
+=head2 1.2 
+
+Changes by Paul Marquess <pmarquess@bfsec.bt.co.uk>, 22 May 1995.
+
+=over 5
+
+=item 1.
+
+Added I<xsubpp> version number for the first time. As previous releases
+of I<xsubpp> did not have a formal version number, a numbering scheme
+has been applied retrospectively.
+
+=item 2.
+
+If OUTPUT: is being used to specify output parameters and RETVAL is
+also to be returned, it is now no longer necessary for the user to
+ensure that RETVAL is specified last.
+
+=item 3.
+
+The I<xsubpp> version number, the .xs filename and a time stamp are
+written to the generated .c file as a comment.
+
+=item 4.
+
+When I<xsubpp> is parsing the definition of both the input parameters
+and the OUTPUT parameters, any duplicate definitions will be noted and
+ignored.
+
+=item 5.
+
+I<xsubpp> is slightly more forgiving with extra whitespace.
+
+=back
+
+=head2 1.3 
+
+Changes by Paul Marquess <pmarquess@bfsec.bt.co.uk>, 23 May 1995.
+
+=over 5
+
+=item 1.
+
+More whitespace restrictions have been relaxed. In particular some
+cases where a tab character was used to delimit fields has been
+removed. In these cases any whitespace will now suffice.
+
+The specific places where changes have been made are in the TYPEMAP
+section of a typemap file and the input and OUTPUT: parameter
+declarations sections in a .xs file.
+
+=item 2.
+
+More error checking added.
+
+Before processing each typemap file I<xsubpp> now checks that it is a
+text file. If not an warning will be displayed. In addition, a warning
+will be displayed if it is not possible to open the typemap file.
+
+In the TYPEMAP section of a typemap file, an error will be raised if
+the line does not have 2 columns.
+
+When parsing input parameter declarations check that there is at least
+a type and name pair.
+
+=back
+
+=head2 1.4 
+
+When parsing the OUTPUT arguments check that they are all present in
+the corresponding input argument definitions.
+
 =head1 SEE ALSO
 
 perl(1)
 
 =cut
+
+# Global Constants
+$XSUBPP_version = "1.4" ;
 
 $usage = "Usage: xsubpp [-C++] [-except] [-typemap typemap] file.xs\n";
 
@@ -75,6 +160,27 @@ if ($pwd =~ /unrecognized command verb/) { $Is_VMS = 1; $pwd = $ENV{DEFAULT} }
 	or ($dir, $filename) = ('.', $ARGV[0]);
 chdir($dir);
 
+sub TrimWhitespace
+{
+    $_[0] =~ s/^\s+|\s+$//go ;
+}
+
+sub TidyType
+{
+    local ($_) = @_ ;
+
+    # rationalise any '*' by joining them into bunches and removing whitespace
+    s#\s*(\*+)\s*#$1#g;
+
+    # change multiple whitespace into a single space
+    s/\s+/ /g ;
+    
+    # trim leading & trailing whitespace
+    TrimWhitespace($_) ;
+
+    $_ ;
+}
+
 $typemap = shift @ARGV;
 foreach $typemap (@tm) {
     die "Can't find $typemap in $pwd\n" unless -r $typemap;
@@ -83,7 +189,12 @@ unshift @tm, qw(../../../../lib/ExtUtils/typemap ../../../lib/ExtUtils/typemap
                 ../../lib/ExtUtils/typemap ../../../typemap ../../typemap
                 ../typemap typemap);
 foreach $typemap (@tm) {
-    open(TYPEMAP, $typemap) || next;
+    next unless -e $typemap ;
+    # skip directories, binary files etc.
+    warn("Warning: ignoring non-text typemap file '$typemap'\n"), next 
+	unless -T $typemap ;
+    open(TYPEMAP, $typemap) 
+	or warn ("Warning: could not open typemap file '$typemap': $!\n"), next;
     $mode = Typemap;
     $current = \$junk;
     while (<TYPEMAP>) {
@@ -93,8 +204,16 @@ foreach $typemap (@tm) {
 	if (/^TYPEMAP\s*$/) { $mode = Typemap, next }
 	if ($mode eq Typemap) {
 	    chop;
-	    ($typename, $kind) = split(/\t+/, $_, 2);
-	    $type_kind{$typename} = $kind if $kind ne '';
+	    my $line = $_ ;
+            TrimWhitespace($_) ;
+	    # skip blank lines and comment lines
+	    next if /^$/ or /^#/ ;
+	    my @words = split (' ') ;
+	    blurt("Error: File '$typemap' Line $. '$line' TYPEMAP entry needs 2 columns\n"), next 
+		unless @words >= 2 ;
+	    my $kind = pop @words ;
+            TrimWhitespace($kind) ;
+	    $type_kind{TidyType("@words")} = $kind ;
 	}
 	elsif ($mode eq Input) {
 	    if (/^\s/) {
@@ -132,7 +251,19 @@ sub Q {
     $text;
 }
 
-open(F, $filename) || die "cannot open $filename\n";
+# Identify the version of xsubpp used
+$TimeStamp = localtime ;
+print <<EOM ;
+/* 
+ * This file was generated automatically by xsubpp version $XSUBPP_version
+ * from $filename on $TimeStamp
+ *
+ */
+ 
+EOM
+ 
+
+open(F, $filename) or die "cannot open $filename: $!\n";
 
 while (<F>) {
     last if ($Module, $foo, $Package, $foo1, $Prefix) =
@@ -196,9 +327,11 @@ while (&fetch_para) {
     undef($class);
     undef($static);
     undef($elipsis);
+    undef($wantRETVAL) ;
+    undef(%arg_list) ;
 
     # extract return type, function name and arguments
-    $ret_type = shift(@line);
+    $ret_type = TidyType(shift(@line));
     if ($ret_type =~ /^BOOT:/) {
         push (@BootCode, @line, "", "") ;
         next ;
@@ -325,11 +458,20 @@ EOF
 		$_ = shift(@line);
 		last if /^\s*NOT_IMPLEMENTED_YET/;
 		last if /^\s*(PPCODE|CODE|OUTPUT|CLEANUP|CASE)\s*:/;
-		($var_type, $var_name, $var_init) =
-		    /\s*([^\t]+)\s*([^\s=]+)\s*(=.*)?/;
-		# Catch common errors. More error checking required here.
-		blurt("Error: no tab in $pname argument declaration '$_'\n")
-			unless (m/\S+\s*\t\s*\S+/);
+
+                TrimWhitespace($_) ;
+                # skip blank lines 
+                next if /^$/ ;
+		my $line = $_ ;
+	  	# check for optional initialisation code
+		my $var_init = $1 if s/\s*(=.*)$// ;
+
+                my @words = split (' ') ;
+                blurt("Error: invalid argument declaration '$line'"), next
+                    unless @words >= 2 ;
+                my $var_name = pop @words ;
+		my $var_type = "@words" ;
+
 		# catch C style argument declaration (this could be made alowable syntax)
 		warn("Warning: ignored semicolon in $pname argument declaration '$_'\n")
 			if ($var_name =~ s/;//g); # eg SV *<tab>name;
@@ -340,6 +482,11 @@ EOF
 			$var_name =~ s/^&//;
 			$var_addr{$var_name} = 1;
 		}
+
+	        # Check for duplicate definitions
+	        blurt ("Error: duplicate definition of argument '$var_name' ignored"), next
+		    if $arg_list{$var_name} ++  ;
+
 		$thisdone |= $var_name eq "THIS";
 		$retvaldone |= $var_name eq "RETVAL";
 		$var_types{$var_name} = $var_type;
@@ -425,29 +572,48 @@ EOF
 				$func_name = $2;
 			}
 			print "$func_name($func_args);\n";
-			&generate_output($ret_type, 0, "RETVAL")
-			    unless $ret_type eq "void";
+			$wantRETVAL = 1 
+	    		    unless $ret_type eq "void";
 		}
 	}
 
 	# do output variables
 	if (/^\s*OUTPUT\s*:/) {
+		my $gotRETVAL ;
+		my %outargs ;
 		while (@line) {
 			$_ = shift(@line);
 			last if /^\s*CLEANUP\s*:/;
-			s/^\s+//;
-			($outarg, $outcode) = split(/\t+/);
+			TrimWhitespace($_) ;
+			next if /^$/ ;
+			my ($outarg, $outcode) = /^(\S+)\s*(.*)/ ;
+			if (!$gotRETVAL and $outarg eq 'RETVAL') {
+			    # deal with RETVAL last
+			    push(@line, $_) ;
+			    $gotRETVAL = 1 ;
+			    undef ($wantRETVAL) ;
+			    next ;
+			}
+			blurt ("Error: duplicate OUTPUT argument '$outarg' ignored"), next
+			    if $outargs{$outarg} ++ ;
+			blurt ("Error: OUTPUT $outarg not an argument"), next
+			    unless defined($args_match{$outarg});
+			blurt("Error: No input definition for OUTPUT argument '$outarg' - ignored"), next
+			    unless defined $var_types{$outarg} ;
 			if ($outcode) {
 			    print "\t$outcode\n";
 			} else {
-				die "$outarg not an argument"
-				    unless defined($args_match{$outarg});
 				$var_num = $args_match{$outarg};
 				&generate_output($var_types{$outarg}, $var_num,
 				    $outarg); 
 			}
 		}
 	}
+
+	# all OUTPUT done, so now push the return value on the stack
+	&generate_output($ret_type, 0, "RETVAL")
+	     if $wantRETVAL ;
+
 	# do cleanup
 	if (/^\s*CLEANUP\s*:/) {
 	    while (@line) {
@@ -533,7 +699,8 @@ sub generate_init {
     local($ntype);
     local($tk);
 
-    blurt("'$type' not in typemap"), return unless defined($type_kind{$type});
+    $type = TidyType($type) ;
+    blurt("Error: '$type' not in typemap"), return unless defined($type_kind{$type});
     ($ntype = $type) =~ s/\s*\*/Ptr/g;
     $subtype = $ntype;
     $subtype =~ s/Ptr$//;
@@ -570,10 +737,11 @@ sub generate_output {
     local($argoff) = $num - 1;
     local($ntype);
 
+    $type = TidyType($type) ;
     if ($type =~ /^array\(([^,]*),(.*)\)/) {
 	    print "\tsv_setpvn($arg, (char *)$var, $2 * sizeof($1)), XFree((char *)$var);\n";
     } else {
-	    blurt("'$type' not in typemap"), return
+	    blurt("Error: '$type' not in typemap"), return
 		unless defined($type_kind{$type});
 	    ($ntype = $type) =~ s/\s*\*/Ptr/g;
 	    $ntype =~ s/\(\)//g;

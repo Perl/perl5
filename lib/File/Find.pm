@@ -5,6 +5,61 @@ use Config;
 use Cwd;
 use File::Basename;
 
+=head1 NAME
+
+find - traverse a file tree
+
+finddepth - traverse a directory structure depth-first
+
+=head1 SYNOPSIS
+
+    use File::Find;
+    find(\&wanted, '/foo','/bar');
+    sub wanted { ... }
+    
+    use File::Find;
+    finddepth(\&wanted, '/foo','/bar');
+    sub wanted { ... }
+
+=head1 DESCRIPTION
+
+The wanted() function does whatever verifications you want.  $dir contains
+the current directory name, and $_ the current filename within that
+directory.  $name contains C<"$dir/$_">.  You are chdir()'d to $dir when
+the function is called.  The function may set $prune to prune the tree.
+
+This library is primarily for the C<find2perl> tool, which when fed, 
+
+    find2perl / -name .nfs\* -mtime +7 \
+	-exec rm -f {} \; -o -fstype nfs -prune
+
+produces something like:
+
+    sub wanted {
+        /^\.nfs.*$/ &&
+        (($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_)) &&
+        int(-M _) > 7 &&
+        unlink($_)
+        ||
+        ($nlink || (($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_))) &&
+        $dev < 0 &&
+        ($prune = 1);
+    }
+
+Set the variable $dont_use_nlink if you're using AFS, since AFS cheats.
+
+C<finddepth> is just like C<find>, except that it does a depth-first
+search.
+
+Here's another interesting wanted function.  It will find all symlinks
+that don't resolve:
+
+    sub wanted {
+	-l && !-e && print "bogus link: $name\n";
+    } 
+
+=cut
+
 @ISA = qw(Exporter);
 @EXPORT = qw(find finddepth $name $dir);
 

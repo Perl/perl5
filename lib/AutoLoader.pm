@@ -1,6 +1,24 @@
 package AutoLoader;
 use Carp;
 
+=head1 NAME
+
+AutoLoader - load functions only on demand
+
+=head1 SYNOPSIS
+
+    package FOOBAR;
+    use Exporter;
+    use AutoLoader;
+    @ISA = (Exporter, AutoLoader);
+
+=head1 DESCRIPTION
+
+This module tells its users that functions in the FOOBAR package are to be
+autoloaded from F<auto/$AUTOLOAD.al>.  See L<perlsub/"Autoloading">.
+
+=cut
+
 AUTOLOAD {
     my $name = "auto/$AUTOLOAD.al";
     $name =~ s#::#/#g;
@@ -23,6 +41,24 @@ AUTOLOAD {
 	}
     }
     goto &$AUTOLOAD;
+}
+                            
+sub import
+{
+ my ($callclass, $callfile, $callline,$path,$callpack) = caller(0);
+ ($callpack = $callclass) =~ s#::#/#;
+ if (defined($path = $INC{$callpack . '.pm'}))
+  {
+   if ($path =~ s#^(.*)$callpack\.pm$#$1auto/$callpack/autosplit.ix# && -e $path) 
+    {
+     eval {require $path}; 
+     carp $@ if ($@);  
+    } 
+   else 
+    {
+     croak "Have not loaded $callpack.pm";
+    }
+  }
 }
 
 1;

@@ -2,30 +2,39 @@ package Exporter;
 
 =head1 Comments
 
-If the first entry in an import list begins with /, ! or : then
-treat the list as a series of specifications which either add to
-or delete from the list of names to import. They are processed
-left to right. Specifications are in the form:
+If the first entry in an import list begins with !, : or / then the
+list is treated as a series of specifications which either add to or
+delete from the list of names to import. They are processed left to
+right. Specifications are in the form:
 
-    [!]/pattern/    All names in @EXPORT and @EXPORT_OK which match
     [!]name         This name only
-    [!]:tag         All names in $EXPORT_TAGS{":tag"}
     [!]:DEFAULT     All names in @EXPORT
+    [!]:tag         All names in $EXPORT_TAGS{tag} anonymous list
+    [!]/pattern/    All names in @EXPORT and @EXPORT_OK which match
 
-e.g., Foo.pm defines:
+A leading ! indicates that matching names should be deleted from the
+list of names to import.  If the first specification is a deletion it
+is treated as though preceded by :DEFAULT. If you just want to import
+extra names in addition to the default set you will still need to
+include :DEFAULT explicitly.
+
+e.g., Module.pm defines:
 
     @EXPORT      = qw(A1 A2 A3 A4 A5);
     @EXPORT_OK   = qw(B1 B2 B3 B4 B5);
-    %EXPORT_TAGS = (':T1' => [qw(A1 A2 B1 B2)], ':T2' => [qw(A1 A2 B3 B4)]);
+    %EXPORT_TAGS = (T1 => [qw(A1 A2 B1 B2)], T2 => [qw(A1 A2 B3 B4)]);
 
     Note that you cannot use tags in @EXPORT or @EXPORT_OK.
     Names in EXPORT_TAGS must also appear in @EXPORT or @EXPORT_OK.
 
 Application says:
 
-    use Module qw(:T2 !B3 A3);
+    use Module qw(:DEFAULT :T2 !B3 A3);
     use Socket qw(!/^[AP]F_/ !SOMAXCONN !SOL_SOCKET);
     use POSIX  qw(/^S_/ acos asin atan /^E/ !/^EXIT/);
+
+You can set C<$Exporter::Verbose=1;> to see how the specifications are
+being processed and what is actually being imported into modules.
 
 =cut
 
@@ -110,7 +119,7 @@ sub export {
 		}
 	    }
 	}
-	die "Can't continue with import errors.\n" if $oops;
+	Carp::croak("Can't continue with import errors.\n") if $oops;
     }
     else {
 	@imports = @exports;

@@ -3,6 +3,35 @@ require 5.000;
 require Exporter;
 use Config;
 
+=head1 NAME
+
+getcwd - get pathname of current working directory
+
+=head1 SYNOPSIS
+
+    require Cwd;
+    $dir = Cwd::getcwd();
+
+    use Cwd;
+    $dir = getcwd();
+
+    use Cwd 'chdir';
+    chdir "/tmp";
+    print $ENV{'PWD'};
+
+=head1 DESCRIPTION
+
+The getcwd() function re-implements the getcwd(3) (or getwd(3)) functions
+in Perl.  If you ask to override your chdir() built-in function, then your
+PWD environment variable will be kept up to date.  (See
+L<perlsub/Overriding builtin functions>.)
+
+The fastgetcwd() function looks the same as getcwd(), but runs faster.
+It's also more dangerous because you might conceivably chdir() out of a
+directory that you can't chdir() back into.
+
+=cut
+
 @ISA = qw(Exporter);
 @EXPORT = qw(getcwd fastcwd);
 @EXPORT_OK = qw(chdir);

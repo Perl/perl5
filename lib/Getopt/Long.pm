@@ -5,6 +5,144 @@ require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(GetOptions);
 
+=head1 NAME
+
+GetOptions - extended getopt processing
+
+=head1 SYNOPSIS
+
+    use Getopt::Long;
+    $result = GetOptions (...option-descriptions...);
+
+=head1 DESCRIPTION
+
+The Getopt::Long module implements an extended getopt function called
+GetOptions(). This function adheres to the new syntax (long option names,
+no bundling).  It tries to implement the better functionality of
+traditional, GNU and POSIX getopt() functions.
+
+Each description should designate a valid Perl identifier, optionally
+followed by an argument specifier.
+
+Values for argument specifiers are:
+
+  <none>   option does not take an argument
+  !        option does not take an argument and may be negated
+  =s :s    option takes a mandatory (=) or optional (:) string argument
+  =i :i    option takes a mandatory (=) or optional (:) integer argument
+  =f :f    option takes a mandatory (=) or optional (:) real number argument
+
+If option "name" is set, it will cause the Perl variable $opt_name to
+be set to the specified value. The calling program can use this
+variable to detect whether the option has been set. Options that do
+not take an argument will be set to 1 (one).
+
+Options that take an optional argument will be defined, but set to ''
+if no actual argument has been supplied.
+
+If an "@" sign is appended to the argument specifier, the option is
+treated as an array.  Value(s) are not set, but pushed into array
+@opt_name.
+
+Options that do not take a value may have an "!" argument specifier to
+indicate that they may be negated. E.g. "foo!" will allow B<-foo> (which
+sets $opt_foo to 1) and B<-nofoo> (which will set $opt_foo to 0).
+
+The option name may actually be a list of option names, separated by
+'|'s, e.g. B<"foo|bar|blech=s". In this example, options 'bar' and
+'blech' will set $opt_foo instead.
+
+Option names may be abbreviated to uniqueness, depending on
+configuration variable $autoabbrev.
+
+Dashes in option names are allowed (e.g. pcc-struct-return) and will
+be translated to underscores in the corresponding Perl variable (e.g.
+$opt_pcc_struct_return).  Note that a lone dash "-" is considered an
+option, corresponding Perl identifier is $opt_ .
+
+A double dash "--" signals end of the options list.
+
+If the first option of the list consists of non-alphanumeric
+characters only, it is interpreted as a generic option starter.
+Everything starting with one of the characters from the starter will
+be considered an option.
+
+The default values for the option starters are "-" (traditional), "--"
+(POSIX) and "+" (GNU, being phased out).
+
+Options that start with "--" may have an argument appended, separated
+with an "=", e.g. "--foo=bar".
+
+If configuration variable $getopt_compat is set to a non-zero value,
+options that start with "+" may also include their arguments,
+e.g. "+foo=bar".
+
+A return status of 0 (false) indicates that the function detected
+one or more errors.
+
+=head1 EXAMPLES
+
+If option "one:i" (i.e. takes an optional integer argument), then
+the following situations are handled:
+
+   -one -two		-> $opt_one = '', -two is next option
+   -one -2		-> $opt_one = -2
+
+Also, assume "foo=s" and "bar:s" :
+
+   -bar -xxx		-> $opt_bar = '', '-xxx' is next option
+   -foo -bar		-> $opt_foo = '-bar'
+   -foo --		-> $opt_foo = '--'
+
+In GNU or POSIX format, option names and values can be combined:
+
+   +foo=blech		-> $opt_foo = 'blech'
+   --bar=		-> $opt_bar = ''
+   --bar=--		-> $opt_bar = '--'
+
+=over 12
+
+=item $autoabbrev      
+
+Allow option names to be abbreviated to uniqueness.
+Default is 1 unless environment variable
+POSIXLY_CORRECT has been set.
+
+=item $getopt_compat   
+
+Allow '+' to start options.
+Default is 1 unless environment variable
+POSIXLY_CORRECT has been set.
+
+=item $option_start    
+
+Regexp with option starters.
+Default is (--|-) if environment variable
+POSIXLY_CORRECT has been set, (--|-|\+) otherwise.
+
+=item $order           
+
+Whether non-options are allowed to be mixed with
+options.
+Default is $REQUIRE_ORDER if environment variable
+POSIXLY_CORRECT has been set, $PERMUTE otherwise.
+
+=item $ignorecase      
+
+Ignore case when matching options. Default is 1.
+
+=item $debug           
+
+Enable debugging output. Default is 0.
+
+=back
+
+=head1 NOTE
+
+Does not yet use the Exporter--or even packages!!
+Thus, it's not a real module.
+
+=cut
 
 # newgetopt.pl -- new options parsing
 
@@ -316,7 +454,7 @@ sub GetOptions {
 
 	# Double dash is option list terminator.
 	if ( $opt eq $argend ) {
-	    unshift (@ret, @ARGV) if $order == $PERMUTE;
+	    unshift (@ARGV, @ret) if $order == $PERMUTE;
 	    return ($error == 0);
 	}
 	elsif ( $opt =~ /^$genprefix/ ) {

@@ -37,7 +37,7 @@ CONFIG: {
     $erase2 =   "\010";
 }
 
-sub complete {
+sub Complete {
     $prompt = shift;
     if (ref $_[0] || $_[0] =~ /^\*/) {
 	@cmp_lst = sort @{$_[0]};

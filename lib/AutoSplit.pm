@@ -10,6 +10,19 @@ use Carp;
 @EXPORT = qw(&autosplit &autosplit_lib_modules);
 @EXPORT_OK = qw($Verbose $Keep $Maxlen $CheckForAutoloader $CheckModTime);
 
+=head1 NAME
+
+AutoSplit - split a package for autoloading
+
+=head1 DESCRIPTION
+
+This function will split up your program into files that the AutoLoader
+module can handle.  Normally only used to build autoloading Perl library
+modules, especially extensions (like POSIX).  You should look at how
+they're built out for details.
+
+=cut
+
 # for portability warn about names longer than $maxlen
 $Maxlen  = 8;	# 8 for dos, 11 (14-".al") for SYSVR3
 $Verbose = 1;	# 0=none, 1=minimal, 2=list .al files
@@ -83,7 +96,13 @@ sub autosplit_file{
     open(IN, "<$filename") || die "AutoSplit: Can't open $filename: $!\n";
     my($pm_mod_time) = (stat($filename))[9];
     my($autoloader_seen) = 0;
+    my($in_pod) = 0;
     while (<IN>) {
+	# Skip pod text.
+	$in_pod = 1 if /^=/;
+	$in_pod = 0 if /^=cut/;
+	next if ($in_pod || /^=cut/);
+
 	# record last package name seen
 	$package = $1 if (m/^\s*package\s+([\w:]+)\s*;/);
 	++$autoloader_seen if m/^\s*(use|require)\s+AutoLoader\b/;
@@ -199,7 +218,9 @@ sub autosplit_file{
 	    next if $names{substr($subname,0,$maxflen-3)};
 	    my($file) = "$autodir/$modpname/$_";
 	    print "  deleting $file\n" if ($Verbose>=2);
-	    unlink $file or carp "Unable to delete $file: $!";
+	    my($deleted,$thistime);  # catch all versions on VMS
+	    do { $deleted += ($thistime = unlink $file) } while ($thistime);
+	    carp "Unable to delete $file: $!" unless $deleted;
 	}
 	closedir(OUTDIR);
     }
@@ -207,7 +228,9 @@ sub autosplit_file{
     open(TS,">$al_idx_file") or
 	carp "AutoSplit: unable to create timestamp file ($al_idx_file): $!";
     print TS "# Index created by AutoSplit for $filename (file acts as timestamp)\n";
+    print TS "package $package;\n";
     print TS map("sub $_ ;\n", @subnames);
+    print TS "1;\n";
     close(TS);
 
     check_unique($package, $Maxlen, 1, @names);

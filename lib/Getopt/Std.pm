@@ -2,6 +2,30 @@ package Getopt::Std;
 require 5.000;
 require Exporter;
 
+=head1 NAME
+
+getopt - Process single-character switches with switch clustering
+
+getopts - Process single-character switches with switch clustering
+
+=head1 SYNOPSIS
+
+    use Getopt::Std;
+    getopt('oDI');  # -o, -D & -I take arg.  Sets opt_* as a side effect.
+    getopts('oif:');  # -o & -i are boolean flags, -f takes an argument
+		      # Sets opt_* as a side effect.
+
+=head1 DESCRIPTION
+
+The getopt() functions processes single-character switches with switch
+clustering.  Pass one argument which is a string containing all switches
+that take an argument.  For each switch found, sets $opt_x (where x is the
+switch name) to the value of the argument, or 1 if no argument.  Switches
+which take an argument don't care whether there is a space between the
+switch and the argument.
+
+=cut
+
 @ISA = qw(Exporter);
 @EXPORT = qw(getopt getopts);
 
@@ -64,7 +88,7 @@ sub getopts {
 	($first,$rest) = ($1,$2);
 	$pos = index($argumentative,$first);
 	if($pos >= 0) {
-	    if($args[$pos+1] eq ':') {
+	    if(defined($args[$pos+1]) and ($args[$pos+1] eq ':')) {
 		shift(@ARGV);
 		if($rest eq '') {
 		    ++$errs unless @ARGV;
