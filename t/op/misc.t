@@ -371,8 +371,8 @@ argv <e>
 # fdopen from a system descriptor to a system descriptor used to close
 # the former.
 open STDERR, '>&=STDOUT' or die $!;
-select STDOUT; $| = 1; print fileno STDOUT;
-select STDERR; $| = 1; print fileno STDERR;
+select STDOUT; $| = 1; print fileno STDOUT or die $!;
+select STDERR; $| = 1; print fileno STDERR or die $!;
 EXPECT
 1
 2

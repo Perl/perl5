@@ -196,6 +196,10 @@ own module.  Make sure to change the names appropriately.
     }
     our @EXPORT_OK;
 
+    # exported package globals go here
+    our $Var1;
+    our %Hashit;
+
     # non-exported package globals go here
     our @more;
     our $stuff;

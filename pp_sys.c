@@ -57,7 +57,15 @@ extern "C" int syscall(unsigned long,...);
 #if defined(HAS_SOCKET) && !defined(VMS) /* VMS handles sockets via vmsish.h */
 # include <sys/socket.h>
 # if defined(USE_SOCKS) && defined(I_SOCKS)
+#   if !defined(INCLUDE_PROTOTYPES)
+#       define INCLUDE_PROTOTYPES /* for <socks.h> */
+#       define PERL_SOCKS_NEED_PROTOTYPES
+#   endif
 #   include <socks.h>
+#   ifdef PERL_SOCKS_NEED_PROTOTYPES /* keep cpp space clean */
+#       undef INCLUDE_PROTOTYPES
+#       undef PERL_SOCKS_NEED_PROTOTYPES
+#   endif 
 # endif
 # ifdef I_NETDB
 #  include <netdb.h>

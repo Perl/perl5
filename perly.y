@@ -266,7 +266,7 @@ nexpr	:	/* NULL */
 	;
 
 texpr	:	/* NULL means true */
-			{ (void)scan_num("1"); $$ = yylval.opval; }
+			{ (void)scan_num("1", &yylval); $$ = yylval.opval; }
 	|	expr
 	;
 

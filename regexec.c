@@ -325,6 +325,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
     register I32 end_shift;
     register char *s;
     register SV *check;
+    char *strbeg;
     char *t;
     I32 ml_anch;
     char *tmp;
@@ -351,6 +352,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	DEBUG_r(PerlIO_printf(Perl_debug_log, "String too short...\n"));
 	goto fail;
     }
+    strbeg = (sv && SvPOK(sv)) ? strend - SvCUR(sv) : strpos;
     check = prog->check_substr;
     if (prog->reganch & ROPT_ANCH) {	/* Match at beg-of-str or after \n */
 	ml_anch = !( (prog->reganch & ROPT_ANCH_SINGLE)
@@ -361,7 +363,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	  if ( !(prog->reganch & ROPT_ANCH_GPOS) /* Checked by the caller */
 	       /* SvCUR is not set on references: SvRV and SvPVX overlap */
 	       && sv && !SvROK(sv)
-	       && (strpos + SvCUR(sv) != strend)) {
+	       && (strpos != strbeg)) {
 	      DEBUG_r(PerlIO_printf(Perl_debug_log, "Not at start...\n"));
 	      goto fail;
 	  }
@@ -428,7 +430,6 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
     /* Find a possible match in the region s..strend by looking for
        the "check" substring in the region corrected by start/end_shift. */
     if (flags & REXEC_SCREAM) {
-	char *strbeg = SvPVX(sv);	/* XXXX Assume PV_force() on SCREAM! */
 	I32 p = -1;			/* Internal iterator of scream. */
 	I32 *pp = data ? data->scream_pos : &p;
 
@@ -670,7 +671,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	/* Even in this situation we may use MBOL flag if strpos is offset
 	   wrt the start of the string. */
 	if (ml_anch && sv && !SvROK(sv)	/* See prev comment on SvROK */
-	    && (strpos + SvCUR(sv) != strend) && strpos[-1] != '\n'
+	    && (strpos != strbeg) && strpos[-1] != '\n'
 	    /* May be due to an implicit anchor of m{.*foo}  */
 	    && !(prog->reganch & ROPT_IMPLICIT))
 	{
@@ -721,7 +722,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		? s + (prog->minlen? cl_l : 0)
 		: (prog->float_substr ? check_at - start_shift + cl_l
 				      : strend) ;
-	char *startpos = sv && SvPOK(sv) ? strend - SvCUR(sv) : s;
+	char *startpos = strbeg;
 
 	t = s;
 	if (prog->reganch & ROPT_UTF8) {	

@@ -32,6 +32,7 @@ Porting/patchls		Flexible patch file listing utility
 Porting/pumpkin.pod	Guidelines and hints for Perl maintainers
 README			The Instructions
 README.Y2K		Notes about Year 2000 concerns
+README.aix		Notes about AIX port
 README.amiga		Notes about AmigaOS port
 README.apollo		Notes about Apollo DomainOS port
 README.beos		Notes about BeOS port
@@ -480,6 +481,7 @@ hints/newsos4.sh	Hints for named architecture
 hints/next_3.sh		Hints for named architecture
 hints/next_3_0.sh	Hints for named architecture
 hints/next_4.sh		Hints for named architecture
+hints/nonstopux.sh	Hints for named architecture
 hints/openbsd.sh	Hints for named architecture
 hints/opus.sh		Hints for named architecture
 hints/os2.sh		Hints for named architecture
@@ -872,9 +874,9 @@ lib/unicode/Is/DCcompat.pl			Unicode character database
 lib/unicode/Is/DCfinal.pl			Unicode character database
 lib/unicode/Is/DCfont.pl			Unicode character database
 lib/unicode/Is/DCfraction.pl			Unicode character database
-lib/unicode/Is/DCinital.pl			Unicode character database
 lib/unicode/Is/DCinitial.pl			Unicode character database
 lib/unicode/Is/DCisolated.pl			Unicode character database
+lib/unicode/Is/DCmedial.pl			Unicode character database
 lib/unicode/Is/DCnarrow.pl			Unicode character database
 lib/unicode/Is/DCnoBreak.pl			Unicode character database
 lib/unicode/Is/DCsmall.pl			Unicode character database
@@ -1384,6 +1386,7 @@ t/lib/texttabs.t	See if Text::Tabs works
 t/lib/textwrap.t	See if Text::Wrap::wrap works
 t/lib/thr5005.t		Test 5.005-style threading (skipped if no use5005threads) 
 t/lib/tie-push.t	Test for Tie::Array
+t/lib/tie-splice.t	Test for Tie::Array::SPLICE
 t/lib/tie-stdarray.t	Test for Tie::StdArray
 t/lib/tie-stdhandle.t	Test for Tie::StdHandle
 t/lib/tie-stdpush.t	Test for Tie::StdArray

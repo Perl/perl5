@@ -100,9 +100,11 @@ sockets
 =item *
 
 Unpack the source package F<perl5.6*.tar.gz> with djtarx. If you want
-to use long file names under w95, don't forget to use
+to use long file names under w95 and also to get Perl to pass all its
+tests, don't forget to use
 
         set LFN=y
+	set FNCASE=y
 
 before unpacking the archive.
 

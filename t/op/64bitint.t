@@ -220,7 +220,7 @@ if ($^O ne 'unicos') {
     # especially if operating near the UV/IV limits the low-order bits
     # become mangled even by simple arithmetic operations.
     for (23..37) {
-	print "ok #_ # skipped: too imprecise numbers\n";
+	print "ok $_ # skipped: too imprecise numbers\n";
     }
 }
 

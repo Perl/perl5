@@ -89,7 +89,15 @@ sub _backtick_pwd {
 # Since some ports may predefine cwd internally (e.g., NT)
 # we take care not to override an existing definition for cwd().
 
-*cwd = \&_backtick_pwd unless defined &cwd;
+unless(defined &cwd) {
+    # The pwd command is not available in some chroot(2)'ed environments
+    if(grep { -x "$_/pwd" } split(':', $ENV{PATH})) {
+	*cwd = \&_backtick_pwd;
+    }
+    else {
+	*cwd = \&getcwd;
+    }
+}
 
 
 # By Brandon S. Allbery

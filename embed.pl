@@ -1942,7 +1942,7 @@ p	|OP*	|scalarseq	|OP* o
 p	|OP*	|scalarvoid	|OP* o
 Ap	|NV	|scan_bin	|char* start|I32 len|I32* retlen
 Ap	|NV	|scan_hex	|char* start|I32 len|I32* retlen
-Ap	|char*	|scan_num	|char* s
+Ap	|char*	|scan_num	|char* s|YYSTYPE *lvalp
 Ap	|NV	|scan_oct	|char* start|I32 len|I32* retlen
 p	|OP*	|scope		|OP* o
 Ap	|char*	|screaminstr	|SV* bigsv|SV* littlesv|I32 start_shift \
@@ -2093,6 +2093,7 @@ p	|int	|yylex		|YYSTYPE *lvalp|int *lcharp
 #else
 p	|int	|yylex
 #endif
+sp	|int	|syylex
 p	|int	|yyparse
 p	|int	|yywarn		|char* s
 #if defined(MYMALLOC)

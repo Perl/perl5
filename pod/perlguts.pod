@@ -210,6 +210,39 @@ line and all will be well.
 To free an SV that you've created, call C<SvREFCNT_dec(SV*)>.  Normally this
 call is not necessary (see L<Reference Counts and Mortality>).
 
+=head2 Offsets
+
+Perl provides the function C<sv_chop> to efficiently remove characters
+from the beginning of a string; you give it an SV and a pointer to
+somewhere inside the the PV, and it discards everything before the
+pointer. The efficiency comes by means of a little hack: instead of
+actually removing the characters, C<sv_chop> sets the flag C<OOK>
+(offset OK) to signal to other functions that the offset hack is in
+effect, and it puts the number of bytes chopped off into the IV field
+of the SV. It then moves the PV pointer (called C<SvPVX>) forward that
+many bytes, and adjusts C<SvCUR> and C<SvLEN>. 
+
+Hence, at this point, the start of the buffer that we allocated lives
+at C<SvPVX(sv) - SvIV(sv)> in memory and the PV pointer is pointing
+into the middle of this allocated storage.
+
+This is best demonstrated by example:
+
+  % ./perl -Ilib -MDevel::Peek -le '$a="12345"; $a=~s/.//; Dump($a)'
+  SV = PVIV(0x8128450) at 0x81340f0
+    REFCNT = 1
+    FLAGS = (POK,OOK,pPOK)
+    IV = 1  (OFFSET)
+    PV = 0x8135781 ( "1" . ) "2345"\0
+    CUR = 4
+    LEN = 5
+
+Here the number of bytes chopped off (1) is put into IV, and
+C<Devel::Peek::Dump> helpfully reminds us that this is an offset. The
+portion of the string between the "real" and the "fake" beginnings is
+shown in parentheses, and the values of C<SvCUR> and C<SvLEN> reflect
+the fake beginning, not the real one.
+
 =head2 What's Really Stored in an SV?
 
 Recall that the usual method of determining the type of scalar you have is

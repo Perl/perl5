@@ -268,13 +268,13 @@ ok;
 {
     local *F;
     for (1..2) {
-        open(F, "echo #foo|") or print "not ";
+        open(F, "echo \\#foo|") or print "not ";
 	print <F>;
 	close F;
     }
     ok;
     for (1..2) {
-	open(F, "-|", "echo #foo") or print "not ";
+	open(F, "-|", "echo \\#foo") or print "not ";
 	print <F>;
 	close F;
     }

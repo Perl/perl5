@@ -35,6 +35,24 @@ END_EXTERN_C
 
 #define UTF8SKIP(s) PL_utf8skip[*(U8*)s]
 
+#ifdef HAS_QUAD
+#define UTF8LEN(uv) ( (uv) < 0x80           ? 1 : \
+		      (uv) < 0x800          ? 2 : \
+		      (uv) < 0x10000        ? 3 : \
+		      (uv) < 0x200000       ? 4 : \
+		      (uv) < 0x4000000      ? 5 : \
+		      (uv) < 0x80000000     ? 6 : \
+                      (uv) < 0x1000000000LL ? 7 : 13 ) 
+#else
+/* No, I'm not even going to *TRY* putting #ifdef inside a #define */
+#define UTF8LEN(uv) ( (uv) < 0x80           ? 1 : \
+		      (uv) < 0x800          ? 2 : \
+		      (uv) < 0x10000        ? 3 : \
+		      (uv) < 0x200000       ? 4 : \
+		      (uv) < 0x4000000      ? 5 : \
+		      (uv) < 0x80000000     ? 6 : 7 )
+#endif
+
 /*
  * Note: we try to be careful never to call the isXXX_utf8() functions
  * unless we're pretty sure we've seen the beginning of a UTF-8 character

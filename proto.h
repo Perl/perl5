@@ -678,7 +678,7 @@ PERL_CALLCONV OP*	Perl_scalarseq(pTHX_ OP* o);
 PERL_CALLCONV OP*	Perl_scalarvoid(pTHX_ OP* o);
 PERL_CALLCONV NV	Perl_scan_bin(pTHX_ char* start, I32 len, I32* retlen);
 PERL_CALLCONV NV	Perl_scan_hex(pTHX_ char* start, I32 len, I32* retlen);
-PERL_CALLCONV char*	Perl_scan_num(pTHX_ char* s);
+PERL_CALLCONV char*	Perl_scan_num(pTHX_ char* s, YYSTYPE *lvalp);
 PERL_CALLCONV NV	Perl_scan_oct(pTHX_ char* start, I32 len, I32* retlen);
 PERL_CALLCONV OP*	Perl_scope(pTHX_ OP* o);
 PERL_CALLCONV char*	Perl_screaminstr(pTHX_ SV* bigsv, SV* littlesv, I32 start_shift, I32 end_shift, I32 *state, I32 last);
@@ -836,6 +836,7 @@ PERL_CALLCONV int	Perl_yylex(pTHX_ YYSTYPE *lvalp, int *lcharp);
 #else
 PERL_CALLCONV int	Perl_yylex(pTHX);
 #endif
+STATIC int	S_syylex(pTHX);
 PERL_CALLCONV int	Perl_yyparse(pTHX);
 PERL_CALLCONV int	Perl_yywarn(pTHX_ char* s);
 #if defined(MYMALLOC)

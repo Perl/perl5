@@ -2733,7 +2733,8 @@ $ ELSE d_mymalloc="undef"
 $ ENDIF
 $!
 $ usedl="define"
-$ startperl="""$ perl 'f$env(\""procedure\"")' 'p1' 'p2' 'p3' 'p4' 'p5' 'p6' 'p7' 'p8'  !\n$ exit++ + ++$status != 0 and $exit = $status = undef;"""
+$ startperl="""$ perl 'f$env(\""procedure\"")' \""'"+"'p1'\"" \""'"+"'p2'\"" \""'"+"'p3'\"" \""'"+"'p4'\"" \""'"+"'p5'\"" \""'"+"'p6'\"" \""'"+"'p7'\"" \""'"+"'p8'\""!\n"
+$ startperl=startperl + "$ exit++ + ++$status!=0 and $exit=$status=undef; while($ARGV[$#ARGV] eq '"+"'){pop @ARGV;}"""
 $!
 $ IF ((Use_Threads) .AND. (vms_ver .LES. "6.2"))
 $ THEN
@@ -4995,6 +4996,7 @@ $ WC "drand01='" + drand01 + "'"
 $ WC "dynamic_ext='" + extensions + "'"
 $ WC "eagain=' '"
 $ WC "ebcdic='undef'"
+$ WC "embedmymalloc='" + mymalloc + "'"
 $ WC "eunicefix=':'"
 $ WC "exe_ext='" + exe_ext + "'"
 $ WC "extensions='" + extensions + "'"
@@ -5238,6 +5240,7 @@ $ WC "uquadtype='" + uquadtype + "'"
 $ WC "use5005threads='" + use5005threads + "'"
 $ WC "use64bitall='" + use64bitall + "'"
 $ WC "use64bitint='" + use64bitint + "'"
+$ WC "usedebugging_perl='" + use_debugging_perl + "'"
 $ WC "usedl='" + usedl + "'"
 $ WC "useithreads='" + useithreads + "'"
 $ WC "uselargefiles='" + uselargefiles + "'"

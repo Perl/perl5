@@ -501,7 +501,8 @@ provide easy to use ASCII to EBCDIC operations that are also easily
 reversed.
 
 For example, to convert ASCII to code page 037 take the output of the second 
-column from the output of recipe 0 and use it in tr/// like so:
+column from the output of recipe 0 (modified to add \\ characters) and use 
+it in tr/// like so:
 
     $cp_037 = 
     '\000\001\002\003\234\011\206\177\227\215\216\013\014\015\016\017' .
@@ -524,15 +525,19 @@ column from the output of recipe 0 and use it in tr/// like so:
     my $ebcdic_string = $ascii_string;
     eval '$ebcdic_string =~ tr/\000-\377/' . $cp_037 . '/';
 
-To convert from EBCDIC to ASCII just reverse the order of the tr/// 
+To convert from EBCDIC 037 to ASCII just reverse the order of the tr/// 
 arguments like so:
 
     my $ascii_string = $ebcdic_string;
-    eval '$ascii_string = tr/' . $code_page_chrs . '/\000-\037/';
+    eval '$ascii_string = tr/' . $cp_037 . '/\000-\377/';
+
+Similarly one could take the output of the third column from recipe 0 to
+obtain a C<$cp_1047> table.  The fourth column of the output from recipe
+0 could provide a C<$cp_posix_bc> table suitable for transcoding as well.
 
 =head2 iconv
 
-XPG4 operability often implies the presence of an I<iconv> utility
+XPG operability often implies the presence of an I<iconv> utility
 available from the shell or from the C library.  Consult your system's
 documentation for information on iconv.
 

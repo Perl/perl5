@@ -49,6 +49,7 @@ Summary of my $package (revision $baserev version $PERL_VERSION subversion $PERL
     ld='$ld', ldflags ='$ldflags'
     libpth=$libpth
     libs=$libs
+    perllibs=$perllibs
     libc=$libc, so=$so, useshrplib=$useshrplib, libperl=$libperl
   Dynamic Linking:
     dlsrc=$dlsrc, dlext=$dlext, d_dlsymun=$d_dlsymun, ccdlflags='$ccdlflags'

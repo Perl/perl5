@@ -310,6 +310,10 @@ create a file called F<Some/Module.pm> and start with this template:
     }
     our @EXPORT_OK;
 
+    # exported package globals go here
+    our $Var1;
+    our %Hashit;
+
     # non-exported package globals go here
     our @more;
     our $stuff;

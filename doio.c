@@ -59,7 +59,15 @@
 #if defined(HAS_SOCKET) && !defined(VMS) /* VMS handles sockets via vmsish.h */
 # include <sys/socket.h>
 # if defined(USE_SOCKS) && defined(I_SOCKS)
+#   if !defined(INCLUDE_PROTOTYPES)
+#       define INCLUDE_PROTOTYPES /* for <socks.h> */
+#       define PERL_SOCKS_NEED_PROTOTYPES
+#   endif
 #   include <socks.h>
+#   ifdef PERL_SOCKS_NEED_PROTOTYPES /* keep cpp space clean */
+#       undef INCLUDE_PROTOTYPES
+#       undef PERL_SOCKS_NEED_PROTOTYPES
+#   endif 
 # endif 
 # ifdef I_NETBSD
 #  include <netdb.h>
@@ -87,7 +95,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
     register IO *io = GvIOn(gv);
     PerlIO *saveifp = Nullfp;
     PerlIO *saveofp = Nullfp;
-    char savetype = ' ';
+    char savetype = IoTYPE_CLOSED;
     int writing = 0;
     PerlIO *fp;
     int fd;
@@ -216,14 +224,14 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	}
 	mode[0] = mode[1] = mode[2] = mode[3] = '\0';
 	IoTYPE(io) = *type;
-	if (*type == '+' && tlen > 1 && type[tlen-1] != '|') { /* scary */
+	if (*type == IoTYPE_RDWR && tlen > 1 && type[tlen-1] != IoTYPE_PIPE) { /* scary */
 	    mode[1] = *type++;
 	    --tlen;
 	    writing = 1;
 	}
 
-	if (*type == '|') {
-	    if (num_svs && (tlen != 2 || type[1] != '-')) {
+	if (*type == IoTYPE_PIPE) {
+	    if (num_svs && (tlen != 2 || type[1] != IoTYPE_STD)) {
 	      unknown_desr:
 		Perl_croak(aTHX_ "Unknown open() mode '%.*s'", (int)olen, oname);
 	    }
@@ -261,10 +269,11 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    }
 	    writing = 1;
 	}
-	else if (*type == '>') {
+	else if (*type == IoTYPE_WRONLY) {
 	    TAINT_PROPER("open");
 	    type++;
-	    if (*type == '>') {
+	    if (*type == IoTYPE_WRONLY) {
+		/* Two IoTYPE_WRONLYs in a row make for an IoTYPE_APPEND. */
 		mode[0] = IoTYPE(io) = IoTYPE_APPEND;
 		type++;
 		tlen--;
@@ -313,7 +322,13 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 			     * be optimized away on most platforms;
 			     * only Solaris and Linux seem to flush
 			     * on that. --jhi */
-			    PerlIO_seek(fp, 0, SEEK_CUR);
+#ifdef USE_SFIO
+			    /* sfio fails to clear error on next
+			       sfwrite, contrary to documentation.
+			       -- Nick Clark */
+			    if (PerlIO_seek(fp, 0, SEEK_CUR) == -1)
+				PerlIO_clearerr(fp);
+#endif
 			    /* On the other hand, do all platforms
 			     * take gracefully to flushing a read-only
 			     * filehandle?  Perhaps we should do
@@ -348,7 +363,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    else {
 		/*SUPPRESS 530*/
 		for (; isSPACE(*type); type++) ;
-		if (strEQ(type,"-")) {
+		if (*type == IoTYPE_STD && !type[1]) {
 		    fp = PerlIO_stdout();
 		    IoTYPE(io) = IoTYPE_STD;
 		}
@@ -357,7 +372,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		}
 	    }
 	}
-	else if (*type == '<') {
+	else if (*type == IoTYPE_RDONLY) {
 	    if (num_svs && tlen != 1)
 	        goto unknown_desr;
 	    /*SUPPRESS 530*/
@@ -372,16 +387,16 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		name = type;
 		goto duplicity;
 	    }
-	    if (strEQ(type,"-")) {
+	    if (*type == IoTYPE_STD && !type[1]) {
 		fp = PerlIO_stdin();
 		IoTYPE(io) = IoTYPE_STD;
 	    }
 	    else
 		fp = PerlIO_open((num_svs ? name : type), mode);
 	}
-	else if (tlen > 1 && type[tlen-1] == '|') {
+	else if (tlen > 1 && type[tlen-1] == IoTYPE_PIPE) {
 	    if (num_svs) {
-		if (tlen != 2 || type[0] != '-')
+		if (tlen != 2 || type[0] != IoTYPE_STD)
 		    goto unknown_desr;
 	    }
 	    else {
@@ -1188,7 +1203,7 @@ Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
      * but only until the system hard limit/the filesystem limit,
      * at which we would get EPERM.  Note that when using buffered
      * io the write failure can be delayed until the flush/close. --jhi */
-    if (len && (PerlIO_write(fp,tmps,len) == 0 || PerlIO_error(fp)))
+    if (len && (PerlIO_write(fp,tmps,len) == 0))
 	return FALSE;
     return !PerlIO_error(fp);
 }

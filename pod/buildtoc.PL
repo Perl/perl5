@@ -150,6 +150,7 @@ if (-d "pod") {
     perl5005delta       
     perl5004delta       
 
+    perlaix
     perlamiga          
     perlcygwin          
     perldos             
@@ -163,6 +164,7 @@ if (-d "pod") {
 	  );
 
 @ARCHPODS = qw(
+    perlaix	
     perlamiga          
     perlcygwin          
     perldos             

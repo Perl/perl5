@@ -1,0 +1,100 @@
+If you read this file _as_is_, just ignore the funny characters you see.
+It is written in the POD format (see pod/perlpod.pod) which is specially
+designed to be readable as is.
+
+=head1 NAME
+
+README.aix - Perl version 5 on IBM Unix (AIX) systems
+
+=head1 DESCRIPTION
+
+This document describes various features of IBM's Unix operating system
+(AIX) that will affect how Perl version 5 (hereafter just Perl) is
+compiled and/or runs.
+
+=head2 Compiling Perl 5 on AIX
+
+When compiling Perl, you must use an ANSI C compiler. AIX does not shif
+an ANSI compliant C-compiler with AIX by default, but binary builds of
+gcc for AIX are widely available.
+
+At the moment of writing, AIX supports two different native C compilers,
+for which you have to pay: B<xlc> and B<VAC>. If you decide to use eiter
+of these two (which is quite a lot easier than using gcc), be sure to
+upgrade to the latest available patch level. Currently:
+
+    xlC.C     3.1.4.0
+    vac.C     4.4.0.3	(5.0 is already available)
+
+Perl can be compiled with either IBM's ANSI C compiler or with gcc.  The
+former is recommended, as not only can it compile Perl with no
+difficulty, but also can take advantage of features listed later that
+require the use of IBM compiler-specific command-line flags.
+
+If you decide to use gcc, make sure your installation is recent and
+complete, and be sure to read the Perl README file for more gcc-specific
+details.
+
+=head2 OS level
+
+Before installing the patches to the IBM C-compiler you need to know the
+level of patching for the Operating System. IBM's command 'oslevel' will
+show the base, but is not allways complete:
+
+    # oslevel
+    4.3.0.0
+    # lslpp -l | grep 'bos.rte '
+    bos.rte      4.3.2.1  COMMITTED  Base Operating System Runtime
+    bos.rte      4.3.2.0  COMMITTED  Base Operating System Runtime
+    #
+
+=head2 Building Dynamic Extensions on AIX
+
+AIX supports dynamically loadable libraries (shared libraries).
+Shared libraries end with the suffix .a, which is a bit misleading,
+cause *all* libraries are shared ;-).
+
+=head2 The IBM ANSI C Compiler
+
+All defaults for Configure can be used.
+
+If you've chosen to use vac 4, be sure to run 4.4.0.3. Older versions
+will turn up nasty later on.
+
+=head2 Using GNU's gcc for building perl
+
+... ?
+
+Wait, I'll have to scan perlbug ...
+
+=head2 Using Large Files with Perl
+
+... ?
+
+=head2 Threaded Perl
+
+... ?
+
+=head2 64-bit Perl
+
+... ?
+
+=head2 GDBM and Threads
+
+... ?
+
+=head2 NFS filesystems and utime(2)
+
+... ?
+
+=head1 AUTHOR
+
+H.Merijn Brand <h.m.brand@hccnet.nl>
+
+Structure copied from README.hpux
+
+=head1 DATE
+
+Version 0.0.1: 16-10-2000
+
+=cut

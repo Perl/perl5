@@ -42,8 +42,11 @@ BEGIN {
 sub catfile(@) { File::Spec->catfile(@_); }
 
 my $INSTDIR = abs_path(dirname $0);
-$INSTDIR = VMS::Filespec::unixpath($INSTDIR) if $^O eq 'VMS';
-$INSTDIR =~ s#/$## if $^O eq 'VMS';
+if ($^O eq 'VMS') { # clean up directory spec
+    $INSTDIR = VMS::Filespec::unixpath($INSTDIR);
+    $INSTDIR =~ s#/$##;
+    $INSTDIR =~ s#/000000/#/#;
+}
 $INSTDIR = (dirname $INSTDIR) if (basename($INSTDIR) eq 'pod');
 $INSTDIR = (dirname $INSTDIR) if (basename($INSTDIR) eq 't');
 my @PODINCDIRS = ( catfile($INSTDIR, 'lib', 'Pod'),
@@ -51,6 +54,7 @@ my @PODINCDIRS = ( catfile($INSTDIR, 'lib', 'Pod'),
                    catfile($INSTDIR, 'pod'),
                    catfile($INSTDIR, 't', 'pod')
                  );
+print "PODINCDIRS = ",join(', ',@PODINCDIRS),"\n";
 
 ## Find the path to the file to =include
 sub findinclude {

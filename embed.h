@@ -748,6 +748,7 @@
 #else
 #define yylex			Perl_yylex
 #endif
+#define syylex			S_syylex
 #define yyparse			Perl_yyparse
 #define yywarn			Perl_yywarn
 #if defined(MYMALLOC)
@@ -2066,7 +2067,7 @@
 #define scalarvoid(a)		Perl_scalarvoid(aTHX_ a)
 #define scan_bin(a,b,c)		Perl_scan_bin(aTHX_ a,b,c)
 #define scan_hex(a,b,c)		Perl_scan_hex(aTHX_ a,b,c)
-#define scan_num(a)		Perl_scan_num(aTHX_ a)
+#define scan_num(a,b)		Perl_scan_num(aTHX_ a,b)
 #define scan_oct(a,b,c)		Perl_scan_oct(aTHX_ a,b,c)
 #define scope(a)		Perl_scope(aTHX_ a)
 #define screaminstr(a,b,c,d,e,f)	Perl_screaminstr(aTHX_ a,b,c,d,e,f)
@@ -2204,6 +2205,7 @@
 #else
 #define yylex()			Perl_yylex(aTHX)
 #endif
+#define syylex()		S_syylex(aTHX)
 #define yyparse()		Perl_yyparse(aTHX)
 #define yywarn(a)		Perl_yywarn(aTHX_ a)
 #if defined(MYMALLOC)
@@ -4321,6 +4323,8 @@
 #define Perl_yylex		CPerlObj::Perl_yylex
 #define yylex			Perl_yylex
 #endif
+#define S_syylex		CPerlObj::S_syylex
+#define syylex			S_syylex
 #define Perl_yyparse		CPerlObj::Perl_yyparse
 #define yyparse			Perl_yyparse
 #define Perl_yywarn		CPerlObj::Perl_yywarn

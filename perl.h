@@ -540,17 +540,6 @@ Free_t   Perl_mfree (Malloc_t where);
 
 typedef struct perl_mstats perl_mstats_t;
 
-struct perl_mstats {
-    unsigned long *nfree;
-    unsigned long *ntotal;
-    long topbucket, topbucket_ev, topbucket_odd, totfree, total, total_chain;
-    long total_sbrk, sbrks, sbrk_good, sbrk_slack, start_slack, sbrked_remains;
-    long minbucket;
-    /* Level 1 info */
-    unsigned long *bucket_mem_size;
-    unsigned long *bucket_available_size;
-};
-
 #  define safemalloc  Perl_malloc
 #  define safecalloc  Perl_calloc
 #  define saferealloc Perl_realloc
@@ -1071,6 +1060,9 @@ typedef UVTYPE UV;
 #endif
   
 #ifdef USE_LONG_DOUBLE
+#  if defined(HAS_LONG_DOUBLE) && LONG_DOUBLESIZE == DOUBLESIZE
+#      define LONG_DOUBLE_EQUALS_DOUBLE
+#  endif
 #  if !(defined(HAS_LONG_DOUBLE) && (LONG_DOUBLESIZE > DOUBLESIZE))
 #     undef USE_LONG_DOUBLE /* Ouch! */
 #  endif
@@ -1180,13 +1172,9 @@ typedef NVTYPE NV;
 /* e.g. libsunmath doesn't have modfl and frexpl as of mid-March 2000 */
 #   ifdef HAS_MODFL
 #       define Perl_modf(x,y) modfl(x,y)
-#   else
-#       define Perl_modf(x,y) ((long double)modf((double)(x),(double*)(y)))
 #   endif
 #   ifdef HAS_FREXPL
 #       define Perl_frexp(x,y) frexpl(x,y)
-#   else
-#       define Perl_frexp(x,y) ((long double)frexp((double)(x),y))
 #   endif
 #   ifdef HAS_ISNANL
 #       define Perl_isnan(x) isnanl(x)
@@ -1425,6 +1413,18 @@ typedef NVTYPE NV;
 
 #endif
 
+struct perl_mstats {
+    UV *nfree;
+    UV *ntotal;
+    IV topbucket, topbucket_ev, topbucket_odd, totfree, total, total_chain;
+    IV total_sbrk, sbrks, sbrk_good, sbrk_slack, start_slack, sbrked_remains;
+    IV minbucket;
+    /* Level 1 info */
+    UV *bucket_mem_size;
+    UV *bucket_available_size;
+    UV nbuckets;
+};
+
 typedef MEM_SIZE STRLEN;
 
 typedef struct op OP;
@@ -1440,7 +1440,12 @@ typedef struct pvop PVOP;
 typedef struct loop LOOP;
 
 typedef struct interpreter PerlInterpreter;
-typedef struct sv SV;
+#ifdef UTS
+#   define STRUCT_SV perl_sv /* Amdahl's <ksync.h> has struct sv */
+#else
+#   define STRUCT_SV sv
+#endif
+typedef struct STRUCT_SV SV;
 typedef struct av AV;
 typedef struct hv HV;
 typedef struct cv CV;

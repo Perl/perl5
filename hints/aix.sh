@@ -380,7 +380,10 @@ cat > UU/uselongdouble.cbu <<'EOCBU'
 # after it has prompted the user for whether to use long doubles.
 case "$uselongdouble" in
 $define|true|[yY]*)
-	ccflags="$ccflags -qlongdouble"
+        case "$cc" in
+        *gcc*) ;;
+        *) ccflags="$ccflags -qlongdouble" ;;
+        esac
 	# The explicit cc128, xlc128, xlC128 are not needed,
 	# the -qlongdouble should do the trick. --jhi
 	d_Gconvert='sprintf((b),"%.*llg",(n),(x))'

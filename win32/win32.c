@@ -2312,7 +2312,25 @@ win32_abort(void)
 DllExport int
 win32_fstat(int fd,struct stat *sbufptr)
 {
+#ifdef __BORLANDC__
+    /* A file designated by filehandle is not shown as accessible
+     * for write operations, probably because it is opened for reading.
+     * --Vadim Konovalov
+     */ 
+    int rc = fstat(fd,sbufptr);
+    BY_HANDLE_FILE_INFORMATION bhfi;
+    if (GetFileInformationByHandle((HANDLE)_get_osfhandle(fd), &bhfi)) {
+        sbufptr->st_mode &= 0xFE00;
+        if (bhfi.dwFileAttributes & FILE_ATTRIBUTE_READONLY)
+            sbufptr->st_mode |= (S_IREAD + (S_IREAD >> 3) + (S_IREAD >> 6));
+        else
+            sbufptr->st_mode |= ((S_IREAD|S_IWRITE) + ((S_IREAD|S_IWRITE) >> 3)
+              + ((S_IREAD|S_IWRITE) >> 6));
+    }
+    return rc;
+#else
     return fstat(fd,sbufptr);
+#endif
 }
 
 DllExport int

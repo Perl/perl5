@@ -16,18 +16,26 @@ mkdir "To", 0755;
 @todo = (
 # typical
 
-    ['IsWord',  '$cat =~ /^L[ulot]|^Nd/ or $code eq "005F"',	''],
-    ['IsAlnum', '$cat =~ /^L[ulot]|^Nd/',	''],
-    ['IsAlpha',  '$cat =~ /^L[ulot]/',	''],
-    ['IsSpace',  'White space',	$PropData],
+    # 005F: SPACING UNDERSCROE
+    ['IsWord',   '$cat =~ /^[LMN]/ or $code eq "005F"',	''],
+    ['IsAlnum',  '$cat =~ /^[LMN]/',	''],
+    ['IsAlpha',  '$cat =~ /^[LM]/',	''],
+    # 0009: HORIZONTAL TABULATION
+    # 000A: LINE FEED
+    # 000B: VERTICAL TABULATION
+    # 000C: FORM FEED
+    # 000D: CARRIAGE RETURN
+    ['IsSpace',  '$cat  =~ /^Z/ ||
+                  $code =~ /^(0009|000A|000B|000C|000D)$/',	''],
     ['IsDigit',  '$cat =~ /^Nd$/',	''],
     ['IsUpper',  '$cat =~ /^L[ut]$/',	''],
     ['IsLower',  '$cat =~ /^Ll$/',	''],
-    ['IsASCII',  'hex $code <= 127',	''],
+    ['IsASCII',  '$code le "007f"',	''],
     ['IsCntrl',  '$cat =~ /^C/',	''],
-    ['IsGraph',  '$cat =~ /^[^C]/ and ($cat !~ /^Z/ and $code ne "0020" or chr(hex $code) !~ /^\s/)',	''],
-    ['IsPrint',  '$cat =~ /^[^C]/',	''],
-    ['IsPunct',  'Punctuation',	$PropData],
+    ['IsGraph',  '$cat =~ /^([LMNPS]|Co)/',	''],
+    ['IsPrint',  '$cat =~ /^([LMNPS]|Co|Zs)/',	''],
+    ['IsPunct',  '$cat =~ /^P/',	''],
+    # 003[0-9]: DIGIT ZERO..NINE, 00[46][1-6]: A..F, a..f
     ['IsXDigit', '$code =~ /^00(3[0-9]|[46][1-6])$/',	''],
     ['ToUpper',  '$up',			'$up'],
     ['ToLower',  '$down',		'$down'],
@@ -145,7 +153,7 @@ mkdir "To", 0755;
     ['IsDCfont',	'$decomp =~ /^<font>/',		''],
     ['IsDCnoBreak',	'$decomp =~ /^<noBreak>/',	''],
     ['IsDCinitial',	'$decomp =~ /^<initial>/',	''],
-    ['IsDCinital',	'$decomp =~ /^<medial>/',	''],
+    ['IsDCmedial',	'$decomp =~ /^<medial>/',	''],
     ['IsDCfinal',	'$decomp =~ /^<final>/',	''],
     ['IsDCisolated',	'$decomp =~ /^<isolated>/',	''],
     ['IsDCcircle',	'$decomp =~ /^<circle>/',	''],

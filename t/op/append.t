@@ -2,7 +2,7 @@
 
 # $RCSfile: append.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:36 $
 
-print "1..14\n";
+print "1..13\n";
 
 $a = 'ab' . 'c';	# compile time
 $b = 'def';
@@ -53,12 +53,4 @@ if ($_ eq 'abcdef') {print "ok 3\n";} else {print "not ok 3\n";}
     print $t7 =~ /b/ ? "ok 12\n" : "not ok 12\t# $t7\n";
     my $t8 = $u; $t8 = $ub . $t8;
     print $t8 =~ /b/ ? "ok 13\n" : "not ok 13\t# $t8\n";
-}
-
-# test that undef left and right of utf8 results in a valid string
-{
-    my $a;
-    $a .= "\x{1ff}";
-    print $a eq "\x{1ff}" ? "ok 14\n" :
-	"not ok 14\t# (undef.0x1ff) ne (0x1ff)\n";
 }

@@ -1061,7 +1061,7 @@ PP(pp_repeat)
 {
   djSP; dATARGET; tryAMAGICbin(repeat,opASSIGN);
   {
-    register I32 count = POPi;
+    register IV count = POPi;
     if (GIMME == G_ARRAY && PL_op->op_private & OPpREPEAT_DOLIST) {
 	dMARK;
 	I32 items = SP - MARK;
@@ -1461,21 +1461,53 @@ PP(pp_complement)
 	}
       }
       else {
-	register char *tmps;
-	register long *tmpl;
+	register U8 *tmps;
 	register I32 anum;
 	STRLEN len;
 
 	SvSetSV(TARG, sv);
-	tmps = SvPV_force(TARG, len);
+	tmps = (U8*)SvPV_force(TARG, len);
 	anum = len;
+	if (SvUTF8(TARG)) {
+	  /* Calculate exact length, let's not estimate */
+	  STRLEN targlen = 0;
+	  U8 *result;
+	  U8 *send;
+	  I32 l;
+
+	  send = tmps + len;
+	  while (tmps < send) {
+	    UV c = utf8_to_uv(tmps, &l);
+	    tmps += UTF8SKIP(tmps);
+	    targlen += UTF8LEN(~c);
+	  }
+
+	  /* Now rewind strings and write them. */
+	  tmps -= len;
+	  Newz(0, result, targlen + 1, U8);
+	  while (tmps < send) {
+	    UV c = utf8_to_uv(tmps, &l);
+	    tmps += UTF8SKIP(tmps);
+	    result = uv_to_utf8(result,(UV)~c);
+	  }
+	  *result = '\0';
+	  result -= targlen;
+	  sv_setpvn(TARG, (char*)result, targlen);
+	  SvUTF8_on(TARG);
+	  Safefree(result);
+	  SETs(TARG);
+	  RETURN;
+	}
 #ifdef LIBERAL
-	for ( ; anum && (unsigned long)tmps % sizeof(long); anum--, tmps++)
-	    *tmps = ~*tmps;
-	tmpl = (long*)tmps;
-	for ( ; anum >= sizeof(long); anum -= sizeof(long), tmpl++)
-	    *tmpl = ~*tmpl;
-	tmps = (char*)tmpl;
+	{
+	    register long *tmpl;
+	    for ( ; anum && (unsigned long)tmps % sizeof(long); anum--, tmps++)
+		*tmps = ~*tmps;
+	    tmpl = (long*)tmps;
+	    for ( ; anum >= sizeof(long); anum -= sizeof(long), tmpl++)
+		*tmpl = ~*tmpl;
+	    tmps = (U8*)tmpl;
+	}
 #endif
 	for ( ; anum > 0; anum--, tmps++)
 	    *tmps = ~*tmps;
@@ -1850,11 +1882,24 @@ PP(pp_int)
 	SETi(iv);
       }
       else {
-	if (value >= 0.0)
-	  (void)Perl_modf(value, &value);
+	  if (value >= 0.0) {
+#if defined(HAS_MODFL) || defined(LONG_DOUBLE_EQUALS_DOUBLE)
+	      (void)Perl_modf(value, &value);
+#else
+	      double tmp = (double)value;
+	      (void)Perl_modf(tmp, &tmp);
+	      value = (NV)tmp;
+#endif
+	  }
 	else {
-	  (void)Perl_modf(-value, &value);
-	  value = -value;
+#if defined(HAS_MODFL) || defined(LONG_DOUBLE_EQUALS_DOUBLE)
+	    (void)Perl_modf(-value, &value);
+	    value = -value;
+#else
+	    double tmp = (double)value;
+	    (void)Perl_modf(-tmp, &tmp);
+	    value = -(NV)tmp;
+#endif
 	}
 	iv = I_V(value);
 	if (iv == value)
@@ -2065,8 +2110,8 @@ PP(pp_substr)
 PP(pp_vec)
 {
     djSP; dTARGET;
-    register I32 size = POPi;
-    register I32 offset = POPi;
+    register IV size   = POPi;
+    register IV offset = POPi;
     register SV *src = POPs;
     I32 lvalue = PL_op->op_flags & OPf_MOD;
 
@@ -2199,7 +2244,7 @@ PP(pp_chr)
 {
     djSP; dTARGET;
     char *tmps;
-    U32 value = POPu;
+    UV value = POPu;
 
     (void)SvUPGRADE(TARG,SVt_PV);
 
@@ -4805,8 +4850,9 @@ PP(pp_pack)
 		    do {
 			double next = floor(adouble / 128);
 			*--in = (unsigned char)(adouble - (next * 128)) | 0x80;
-			if (--in < buf)  /* this cannot happen ;-) */
+			if (in <= buf)  /* this cannot happen ;-) */
 			    DIE(aTHX_ "Cannot compress integer");
+			in--;
 			adouble = next;
 		    } while (adouble > 0);
 		    buf[sizeof(buf) - 1] &= 0x7f; /* clear continue bit */
@@ -4965,9 +5011,9 @@ PP(pp_split)
 {
     djSP; dTARG;
     AV *ary;
-    register I32 limit = POPi;			/* note, negative is forever */
+    register IV limit = POPi;			/* note, negative is forever */
     SV *sv = POPs;
-    bool isutf = DO_UTF8(sv);
+    bool doutf8 = DO_UTF8(sv);
     STRLEN len;
     register char *s = SvPV(sv, len);
     char *strend = s + len;
@@ -5070,7 +5116,7 @@ PP(pp_split)
 	    sv_setpvn(dstr, s, m-s);
 	    if (make_mortal)
 		sv_2mortal(dstr);
-	    if (isutf)
+	    if (doutf8)
 		(void)SvUTF8_on(dstr);
 	    XPUSHs(dstr);
 
@@ -5092,7 +5138,7 @@ PP(pp_split)
 	    sv_setpvn(dstr, s, m-s);
 	    if (make_mortal)
 		sv_2mortal(dstr);
-	    if (isutf)
+	    if (doutf8)
 		(void)SvUTF8_on(dstr);
 	    XPUSHs(dstr);
 	    s = m;
@@ -5103,11 +5149,11 @@ PP(pp_split)
 	     && !(rx->reganch & ROPT_ANCH)) {
 	int tail = (rx->reganch & RE_INTUIT_TAIL);
 	SV *csv = CALLREG_INTUIT_STRING(aTHX_ rx);
-	char c;
 
 	len = rx->minlen;
 	if (len == 1 && !tail) {
-	    c = *SvPV(csv,len);
+	    STRLEN n_a;
+	    char c = *SvPV(csv, n_a);
 	    while (--limit) {
 		/*SUPPRESS 530*/
 		for (m = s; m < strend && *m != c; m++) ;
@@ -5117,10 +5163,12 @@ PP(pp_split)
 		sv_setpvn(dstr, s, m-s);
 		if (make_mortal)
 		    sv_2mortal(dstr);
-		if (isutf)
+		if (doutf8)
 		    (void)SvUTF8_on(dstr);
 		XPUSHs(dstr);
-		s = m + 1;
+		/* The rx->minlen is in characters but we want to step
+		 * s ahead by bytes. */
+		s = m + (doutf8 ? SvCUR(csv) : len);
 	    }
 	}
 	else {
@@ -5134,10 +5182,12 @@ PP(pp_split)
 		sv_setpvn(dstr, s, m-s);
 		if (make_mortal)
 		    sv_2mortal(dstr);
-		if (isutf)
+		if (doutf8)
 		    (void)SvUTF8_on(dstr);
 		XPUSHs(dstr);
-		s = m + len;		/* Fake \n at the end */
+		/* The rx->minlen is in characters but we want to step
+		 * s ahead by bytes. */
+		s = m + (doutf8 ? SvCUR(csv) : len); /* Fake \n at the end */
 	    }
 	}
     }
@@ -5163,7 +5213,7 @@ PP(pp_split)
 	    sv_setpvn(dstr, s, m-s);
 	    if (make_mortal)
 		sv_2mortal(dstr);
-	    if (isutf)
+	    if (doutf8)
 		(void)SvUTF8_on(dstr);
 	    XPUSHs(dstr);
 	    if (rx->nparens) {
@@ -5178,7 +5228,7 @@ PP(pp_split)
 			dstr = NEWSV(33, 0);
 		    if (make_mortal)
 			sv_2mortal(dstr);
-		    if (isutf)
+		    if (doutf8)
 			(void)SvUTF8_on(dstr);
 		    XPUSHs(dstr);
 		}
@@ -5194,11 +5244,12 @@ PP(pp_split)
 
     /* keep field after final delim? */
     if (s < strend || (iters && origlimit)) {
-	dstr = NEWSV(34, strend-s);
-	sv_setpvn(dstr, s, strend-s);
+        STRLEN l = strend - s;
+	dstr = NEWSV(34, l);
+	sv_setpvn(dstr, s, l);
 	if (make_mortal)
 	    sv_2mortal(dstr);
-	if (isutf)
+	if (doutf8)
 	    (void)SvUTF8_on(dstr);
 	XPUSHs(dstr);
 	iters++;

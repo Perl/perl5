@@ -172,8 +172,12 @@ PP(pp_concat)
 		/* Take a copy since we're about to overwrite TARG */
 		olds = s = (U8*)savepvn((char*)s, len);
 	    }
-	    if (!SvOK(left) && SvTYPE(left) <= SVt_PVMG)
-		sv_setpv(left, "");	/* Suppress warning. */
+	    if (!SvOK(left) && SvTYPE(left) <= SVt_PVMG) {
+	        if (SvREADONLY(left))
+		    left = sv_2mortal(newSVsv(left));
+		else
+		    sv_setpv(left, "");	/* Suppress warning. */
+	    }
             l = (U8*)SvPV(left, targlen);
 	    left_utf |= DO_UTF8(left);
             if (TARG != left)
@@ -1339,7 +1343,7 @@ Perl_do_readline(pTHX)
 		        }
 		        else {
 		           PerlIO_rewind(tmpfp);
-		           IoTYPE(io) = '<';
+		           IoTYPE(io) = IoTYPE_RDONLY;
 		           IoIFP(io) = fp = tmpfp;
 		           IoFLAGS(io) &= ~IOf_UNTAINT;  /* maybe redundant */
 		        }
@@ -1393,7 +1397,7 @@ Perl_do_readline(pTHX)
 	else if (type == OP_GLOB)
 	    SP--;
 	else if (ckWARN(WARN_IO)	/* stdout/stderr or other write fh */
-		 && (IoTYPE(io) == '>' || fp == PerlIO_stdout()
+		 && (IoTYPE(io) == IoTYPE_WRONLY || fp == PerlIO_stdout()
 		     || fp == PerlIO_stderr()))
 	{
 	    /* integrate with report_evil_fh()? */
@@ -1412,7 +1416,8 @@ Perl_do_readline(pTHX)
 	}
     }
     if (!fp) {
-	if (ckWARN2(WARN_GLOB,WARN_CLOSED) && io && !(IoFLAGS(io) & IOf_START)) {
+	if (ckWARN2(WARN_GLOB, WARN_CLOSED)
+		&& (!io || !(IoFLAGS(io) & IOf_START))) {
 	    if (type == OP_GLOB)
 		Perl_warner(aTHX_ WARN_GLOB,
 			    "glob failed (can't start child: %s)",
@@ -2777,7 +2782,7 @@ PP(pp_aelem)
 {
     djSP;
     SV** svp;
-    I32 elem = POPi;
+    IV elem = POPi;
     AV* av = (AV*)POPs;
     U32 lval = PL_op->op_flags & OPf_MOD;
     U32 defer = (PL_op->op_private & OPpLVAL_DEFER) && (elem > AvFILL(av));

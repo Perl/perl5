@@ -3,12 +3,11 @@
 # Any changes made here will be lost!
 return <<'END';
 0009	000d
-0020
-0085
-00a0
-1680
+0020	
+00a0	
+1680	
 2000	200b
 2028	2029
-202f
-3000
+202f	
+3000	
 END
