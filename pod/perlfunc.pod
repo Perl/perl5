@@ -2819,7 +2819,7 @@ otherwise it's necessary to protect any leading and trailing whitespace:
     $file =~ s#^(\s)#./$1#;
     open(FOO, "< $file\0");
 
-(this may not work on some bizzare filesystems).  One should
+(this may not work on some bizarre filesystems).  One should
 conscientiously choose between the I<magic> and 3-arguments form
 of open():
 

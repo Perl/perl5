@@ -1994,7 +1994,7 @@ whether the current character in a string is valid UTF8.
 As mentioned above, UTF8 uses a variable number of bytes to store a
 character. Characters with values 1...128 are stored in one byte, just
 like good ol' ASCII. Character 129 is stored as C<v194.129>; this
-contines up to character 191, which is C<v194.191>. Now we've run out of
+continues up to character 191, which is C<v194.191>. Now we've run out of
 bits (191 is binary C<10111111>) so we move on; 192 is C<v195.128>. And
 so it goes on, moving to three bytes at character 2048.
 

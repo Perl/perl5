@@ -1304,7 +1304,7 @@ with TCP, you'd have to use a different socket handle for each host.
 Note that this example does not include any retries and may consequently
 fail to contact a reachable host. The most prominent reason for this
 is congestion of the queues on the sending host if the number of
-list of hosts to contact is sufficietly large.
+list of hosts to contact is sufficiently large.
 
 =head1 SysV IPC
 

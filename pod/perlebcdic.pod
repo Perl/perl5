@@ -992,7 +992,7 @@ ISSN 1523-0309; Multilingual Computing Inc. Sandpoint ID, USA.
 
 Peter Prymmer E<lt>pvhp@best.comE<gt> wrote this in 1999 and 2000 
 with CCSID 0819 and 0037 help from Chris Leach and 
-Andre' Pirard E<lt>A.Pirard@ulg.ac.beE<gt> as well as POSIX-BC 
+AndrE<eacute> Pirard E<lt>A.Pirard@ulg.ac.beE<gt> as well as POSIX-BC 
 help from Thomas Dorner E<lt>Thomas.Dorner@start.deE<gt>.
 Thanks also to Philip Newton and Vickie Cooper.  Trademarks, registered 
 trademarks, service marks and registered service marks used in this 
