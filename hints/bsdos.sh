@@ -69,7 +69,7 @@ case "$osvers" in
 	'')	cc='gcc2' ;;
 	esac
 	;;
-2.0*|2.1*|3.0*)
+2.0*|2.1*|3.0*|3.1*)
 	so='o'
 
 	# default to GCC 2.X w/shared libraries
@@ -88,8 +88,8 @@ case "$osvers" in
 	libswanted="Xpm Xaw Xmu Xt SM ICE Xext X11 $libswanted"
 	libswanted="rpc curses termcap $libswanted"
 	;;
-3.1*)
-	# ELF dynamic link libraries starting in 3.1
+3.2*)
+	# ELF dynamic link libraries starting in 3.2
         useshrplib='true'
 	so='so'
 	dlext='so'

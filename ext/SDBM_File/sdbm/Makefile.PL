@@ -29,5 +29,11 @@ config ::
 
 lint:
 	lint -abchx $(LIBSRCS)
+
+# This is a workaround, the problem is that our old GNU make exports
+# variables into the environment so $(MYEXTLIB) is set in here to this
+# value which can not be built.
+sdbm/libsdbm.a:
+	true
 ';
 }
