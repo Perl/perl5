@@ -1,0 +1,122 @@
+=head1 NAME
+
+perl571delta - what's new for perl v5.7.1
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.7.0 release and the
+5.7.1 release.  
+
+(To view the differences between the 5.6.0 release and the 5.7.0
+release, see L<perl570delta>).
+
+=head1 Incompatible Changes
+
+=over 4
+
+=item *
+
+Although "you shouldn't do that", it was possible to write code that
+depends on Perl's hashed key order (Data::Dumper does this).  The new
+algorithm "One-at-a-Time" produces a different hashed key order.
+More details are in L<perldelta/Performance Enhancements>.
+
+=back
+
+=head1 Core Enhancements
+
+=over 4
+
+=item *
+
+Formats now support zero-padded decimal fields.
+
+=item *
+ 
+The printf and sprintf now support parameter reordering using the
+C<%\d+\$> and C<*\d+\$> syntaxes.
+
+=back
+
+=head1 Performance Enhancements
+
+=over 4
+
+=item *
+
+Hashes now use Bob Jenkins "One-at-a-Time" hashing key algorithm
+(http://burtleburtle.net/bob/hash/doobs.html).
+This algorithm is reasonably fast while producing a much better spread
+of values.  Hash values output from the algorithm on a hash of all
+3-char printable ASCII keys comes much closer to passing the DIEHARD
+random number generation tests.  According to perlbench, this change
+has not affected the overall speed of Perl.
+
+=back
+
+=head1 Installation and Configuration Improvements
+
+=over 4
+
+=item *
+
+Configure no longer includes the DBM libraries (dbm, gdbm, db, ndbm)
+when building the Perl binary. The only exception to this is SunOS 4.x,
+which needs them.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+vec() now tries to work with characters <= 255 when possible, but it leaves
+higher character values in place.  In that case, if vec() was used to modify
+the string, it is no longer considered to be utf8-encoded.
+
+=back
+
+=head1 Known Problems
+
+=head2 sprintf tests 129 and 130
+
+The op/sprintf tests 129 and 130 are known to fail in some platforms.
+Examples include any platform using sfio, and Tandem's NonStop-UX.
+The failing platforms do not comply with the ANSI C Standard, line
+19ff on page 134 of ANSI X3.159 1989 to be exact.  (They produce
+something else than "1" and "-1" when formatting 0.6 and -0.6 using
+the printf format "%.0f", most often they produce "0" and "-0".)
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the articles
+recently posted to the comp.lang.perl.misc newsgroup and the perl
+bug database at http://bugs.perl.org.  There may also be
+information at http://www.perl.com/perl/, the Perl Home Page.
+
+If you believe you have an unreported bug, please run the B<perlbug>
+program included with your release.  Be sure to trim your bug down
+to a tiny but sufficient test case.  Your bug report, along with the
+output of C<perl -V>, will be sent off to perlbug@perl.org to be
+analysed by the Perl porting team.
+
+=head1 SEE ALSO
+
+The F<Changes> file for exhaustive details on what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=head1 HISTORY
+
+Written by Jarkko Hietaniemi <F<jhi@iki.fi>>, with many contributions
+from The Perl Porters and Perl Users submitting feedback and patches.
+
+Send omissions or corrections to <F<perlbug@perl.org>>.
+
+=cut
