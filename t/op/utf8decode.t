@@ -136,24 +136,21 @@ __EOMK__
 
 # 104..181
 {
-    my $WARNCNT;
     my $id;
 
-    local $SIG{__WARN__} =
-	sub {
-	    print "# $id: @_";
-	    $WARNCNT++;
-	    $WARNMSG = "@_";
-	};
+    local $SIG{__WARN__} = sub {
+	print "# $id: @_";
+	$@ = "@_";
+    };
 
     sub moan {
 	print "$id: @_";
     }
 
-    sub test_unpack_U {
-	$WARNCNT = 0;
-	$WARNMSG = "";
-	unpack('U*', $_[0]);
+    sub warn_unpack_U {
+	$@ = '';
+	my @null = unpack('U0U*', $_[0]);
+	return $@;
     }
 
     for (@MK) {
@@ -161,7 +158,7 @@ __EOMK__
 	    # print "# $_\n";
 	} elsif (/^(\d+\.\d+\.\d+[bu]?)\s+([yn])\s+"(.+)"\s+([0-9a-f]{1,8}|-)\s+(\d+)\s+([0-9a-f]{2}(?::[0-9a-f]{2})*)(?:\s+((?:\d+|-)(?:\s+(.+))?))?$/) {
 	    $id = $1;
-	    my ($okay, $bytes, $Unicode, $byteslen, $hex, $charslen, $error) =
+	    my ($okay, $bytes, $Unicode, $byteslen, $hex, $charslen, $experr) =
 		($2, $3, $4, $5, $6, $7, $8);
 	    my @hex = split(/:/, $hex);
 	    unless (@hex == $byteslen) {
@@ -175,20 +172,19 @@ __EOMK__
 		    moan "bytes length() ($bytesbyteslen) not equal to $byteslen\n";
 		}
 	    }
+	    my $warn = warn_unpack_U($bytes);
 	    if ($okay eq 'y') {
-		test_unpack_U($bytes);
-		if ($WARNCNT) {
-		    moan "unpack('U*') false negative\n";
+		if ($warn) {
+		    moan "unpack('U0U*') false negative\n";
 		    print "not ";
 		}
 	    } elsif ($okay eq 'n') {
-		test_unpack_U($bytes);
-		if ($WARNCNT == 0 || ($error ne '' && $WARNMSG !~ /$error/)) {
-		    moan "unpack('U*') false positive\n";
+		if (not $warn || ($experr ne '' && $warn !~ /$experr/)) {
+		    moan "unpack('U0U*') false positive\n";
 		    print "not ";
 		}
 	    }
-	    print "ok $test\n";
+	    print "ok $test # $id $okay\n";
 	    $test++;
  	} else {
 	    moan "unknown format\n";
