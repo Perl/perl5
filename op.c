@@ -3900,6 +3900,8 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 	}
     }
     else if (first->op_type == OP_WANTARRAY) {
+	/* XXX true only if this result will be returned, else should
+	   propagate outer context */
 	if (type == OP_AND)
 	    list(other);
 	else
@@ -3995,6 +3997,8 @@ Perl_newCONDOP(pTHX_ I32 flags, OP *first, OP *trueop, OP *falseop)
 	}
     }
     else if (first->op_type == OP_WANTARRAY) {
+	/* XXX true only if this result will be returned, else should
+	   propagate outer context */
 	list(trueop);
 	scalar(falseop);
     }
