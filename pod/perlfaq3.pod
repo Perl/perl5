@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq3 - Programming Tools ($Revision: 1.21 $, $Date: 2002/04/28 15:51:10 $)
+perlfaq3 - Programming Tools ($Revision: 1.22 $, $Date: 2002/05/06 13:11:13 $)
 
 =head1 DESCRIPTION
 
@@ -617,17 +617,14 @@ No, Perl's garbage collection system takes care of this.
 
 =head2 How can I free an array or hash so my program shrinks?
 
-You can't.  On most operating systems, memory allocated to a program
-can never be returned to the system.  That's why long-running programs
-sometimes re-exec themselves.  Some operating systems (notably,
-FreeBSD and Linux) allegedly reclaim large chunks of memory that is no
-longer used, but it doesn't appear to happen with Perl (yet).  The Mac
-appears to be the only platform that will reliably (albeit, slowly)
-return memory to the OS.
-
-We've had reports that on Linux (Redhat 5.1) on Intel, C<undef
-$scalar> will return memory to the system, while on Solaris 2.6 it
-won't.  In general, try it yourself and see.
+You usually can't. On most operating systems, memory
+allocated to a program can never be returned to the system.
+That's why long-running programs sometimes re-exec
+themselves. Some operating systems (notably, systems that
+use mmap(2) for allocating large chunks of memory) can
+reclaim memory that is no longer used, but on such systems,
+perl must be configured and compiled to use the OS's malloc,
+not perl's.
 
 However, judicious use of my() on your variables will help make sure
 that they go out of scope so that Perl can free up that space for
