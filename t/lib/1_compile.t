@@ -92,6 +92,10 @@ unless (has_extension('NDBM_File')) {
 
 delete_by_prefix('unicode::');
 
+if (ord('A') == 193) {
+    delete_by_name('Net::Cmd') unless eval { require Convert::EBCDIC };
+}
+
 # Delete all modules which have their own tests.
 # This makes this test a lot faster.
 foreach my $mod (sort keys %Test) {
