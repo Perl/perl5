@@ -149,7 +149,7 @@ Unary "~" performs bitwise negation, i.e. 1's complement.
 Unary "+" has no effect whatsoever, even on strings.  It is useful
 syntactically for separating a function name from a parenthesized expression
 that would otherwise be interpreted as the complete list of function
-arguments.  (See examples above under L<List Operators>.)
+arguments.  (See examples above under L<Terms and List Operators (Leftward)>.)
 
 Unary "\" creates a reference to whatever follows it.  See L<perlref>.
 Do not confuse this behavior with the behavior of backslash within a
@@ -240,7 +240,7 @@ but, because * is higher precedence than ||:
     rand (10) * 20;	# (rand 10) * 20
     rand +(10) * 20;	# rand (10 * 20)
 
-See also L<"List Operators">.
+See also L<"Terms and List Operators (Leftward)">.
 
 =head2 Relational Operators
 
@@ -491,7 +491,7 @@ operators without the need for extra parentheses:
     open HANDLE, "filename"
 	or die "Can't open: $!\n";
 
-See also discussion of list operators in L<List Operators (Leftward)>.
+See also discussion of list operators in L<Terms and List Operators (Leftward)>.
 
 =head2 Logical Not
 
