@@ -832,7 +832,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
     if (len > 1) {
 	if (*name > 'V' ) {
 	    /* Nothing else to do.
-	       The compile will probably turn the switch statement into a
+	       The compiler will probably turn the switch statement into a
 	       branch table. Make sure we avoid even that small overhead for
 	       the common case of lower case variable names.  */
 	} else {
@@ -916,7 +916,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 		if (strEQ(name2, "AINT"))
 		    goto ro_magicalize;
 		break;
-	    case '\025':
+	    case '\025':	/* $^UNICODE */
 		if (strEQ(name2, "NICODE")) 
 		    goto ro_magicalize;
 		break;
