@@ -336,6 +336,12 @@ foreach ('pp_proto.h', 'pp.sym') {
 safer_rename $pp_proto_new, 'pp_proto.h';
 safer_rename $pp_sym_new, 'pp.sym';
 
+END {
+  foreach ('opcode.h', 'opnames.h', 'pp_proto.h', 'pp.sym') {
+    1 while unlink "$_-old";
+  }
+}
+
 ###########################################################################
 sub tab {
     local($l, $t) = @_;

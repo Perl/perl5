@@ -769,11 +769,11 @@ Apache and mod_perl built with the APXS mechanism.
 Linux, and is a common choice when providing a "wrapper" on other
 mechanisms as is done in the OS/2 port.)
 
-=item dl_loadflags()
+=item dl_load_flags()
 
 Syntax:
 
-    $flags = dl_loadflags $modulename;
+    $flags = dl_load_flags $modulename;
 
 Designed to be a method call, and to be overridden by a derived class
 (i.e. a class which has DynaLoader in its @ISA).  The definition in

@@ -687,7 +687,7 @@ Found in file perl.c
 
 Tells Perl to C<require> the file named by the string argument.  It is
 analogous to the Perl code C<eval "require '$file'">.  It's even
-implemented that way; consider using Perl_load_module instead.
+implemented that way; consider using load_module instead.
 
 NOTE: the perl_ form of this function is deprecated.
 
@@ -915,6 +915,7 @@ Found in file hv.h
 =item Nullch
 
 Null character pointer.
+
 =for hackers
 Found in file handy.h
 

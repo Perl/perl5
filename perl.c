@@ -2213,7 +2213,7 @@ Perl_eval_pv(pTHX_ const char *p, I32 croak_on_error)
 
 Tells Perl to C<require> the file named by the string argument.  It is
 analogous to the Perl code C<eval "require '$file'">.  It's even
-implemented that way; consider using Perl_load_module instead.
+implemented that way; consider using load_module instead.
 
 =cut */
 
