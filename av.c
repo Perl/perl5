@@ -327,6 +327,9 @@ av_clear(register AV *av)
 	return;
     /*SUPPRESS 560*/
 
+    if (SvREADONLY(av))
+	croak(no_modify);
+
     /* Give any tie a chance to cleanup first */
     if (SvRMAGICAL(av))
 	mg_clear((SV*)av); 
