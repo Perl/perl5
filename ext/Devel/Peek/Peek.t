@@ -321,7 +321,7 @@ do_test(18,
 	chr(256).chr(0).chr(512),
 'SV = PV\\($ADDR\\) at $ADDR
   REFCNT = 1
-  FLAGS = \\(PADBUSY,PADTMP,POK,READONLY,pPOK,UTF8\\)
+  FLAGS = \\((?:PADBUSY,PADTMP,)?POK,READONLY,pPOK,UTF8\\)
   PV = $ADDR "\\\304\\\200\\\0\\\310\\\200"\\\0 \[UTF8 "\\\x\{100\}\\\x\{0\}\\\x\{200\}"\]
   CUR = 5
   LEN = 6');
