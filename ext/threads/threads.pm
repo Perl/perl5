@@ -50,7 +50,7 @@ our %EXPORT_TAGS = ( all => [qw()]);
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
 our @EXPORT = qw(
-	
+async	
 );
 our $VERSION = '0.99';
 
@@ -58,6 +58,11 @@ our $VERSION = '0.99';
 sub equal {
     return 1 if($_[0]->tid() == $_[1]->tid());
     return 0;
+}
+
+sub async (&;@) {
+    my $cref = shift;
+    return threads->new($cref,@_);
 }
 
 $threads::threads = 1;
