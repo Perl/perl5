@@ -3944,6 +3944,8 @@ int flock(int fd, int op);
     /* If you have different O_TEXT and O_BINARY and you are a CLRF shop,
      * that is, you are somehow DOSish. */
 #   if defined(__BEOS__)
+    /* BeOS has O_TEXT != O_BINARY but O_TEXT and O_BINARY have no effect;
+     * BeOS is always UNIXoid (LF), not DOSish (CRLF). */
     /* If you have O_TEXT different from your O_BINARY but you still are
      * not a CRLF shop. */
 #       undef PERLIO_USING_CRLF
