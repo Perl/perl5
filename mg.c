@@ -94,10 +94,13 @@ restore_magic(void *p)
      */
     if (PL_savestack_ix == mgs->mgs_ss_ix)
     {
-        assert(SSPOPINT == SAVEt_DESTRUCTOR);
+	I32 popval = SSPOPINT;
+        assert(popval == SAVEt_DESTRUCTOR);
         PL_savestack_ix -= 2;
-        assert(SSPOPINT == SAVEt_ALLOC);
-        PL_savestack_ix -= SSPOPINT;
+	popval = SSPOPINT;
+        assert(popval == SAVEt_ALLOC);
+	popval = SSPOPINT;
+        PL_savestack_ix -= popval;
     }
 
 }

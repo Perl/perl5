@@ -144,9 +144,7 @@ free_tmps(void)
 	SV* sv = PL_tmps_stack[PL_tmps_ix];
 	PL_tmps_stack[PL_tmps_ix--] = Nullsv;
 	if (sv) {
-#ifdef DEBUGGING
 	    SvTEMP_off(sv);
-#endif
 	    SvREFCNT_dec(sv);		/* note, can modify tmps_ix!!! */
 	}
     }

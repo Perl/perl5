@@ -219,7 +219,7 @@ if [ "X$use64bits" = "X$define" ]; then
     uname_r=`uname -r`
     case "$uname_r" in
     [1-5]*|6.[01])
-	echo >&4 "IRIX $uname_r" does not support 64-bit types."
+	echo >&4 "IRIX $uname_r does not support 64-bit types."
 	echo >&4 "You should upgrade to at least IRIX 6.2."
 	exit 1
 	;;
