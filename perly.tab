@@ -59,7 +59,7 @@ static const unsigned char yytranslate[] =
 #if YYDEBUG
 /* YYPRHS[YYN] -- Index of the first RHS symbol of rule number YYN in
    YYRHS.  */
-static const unsigned short yyprhs[] =
+static const unsigned short int yyprhs[] =
 {
        0,     0,     3,     6,    11,    12,    13,    18,    19,    20,
       21,    24,    28,    31,    33,    36,    40,    42,    44,    48,
@@ -84,7 +84,7 @@ static const unsigned short yyprhs[] =
 };
 
 /* YYRHS -- A `-1'-separated list of the rules' RHS. */
-static const short yyrhs[] =
+static const short int yyrhs[] =
 {
       86,     0,    -1,    89,    93,    -1,     3,    88,    93,    76,
       -1,    -1,    -1,     3,    91,    93,    76,    -1,    -1,    -1,
@@ -159,7 +159,7 @@ static const short yyrhs[] =
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
-static const unsigned short yyrline[] =
+static const unsigned short int yyrline[] =
 {
        0,    95,    95,   101,   108,   112,   118,   125,   129,   133,
      134,   136,   145,   147,   148,   157,   163,   165,   167,   169,
@@ -178,9 +178,9 @@ static const unsigned short yyrline[] =
      597,   598,   600,   602,   604,   606,   608,   610,   612,   614,
      616,   618,   620,   622,   624,   626,   632,   639,   641,   643,
      645,   648,   651,   654,   656,   658,   660,   662,   664,   667,
-     669,   671,   674,   676,   678,   680,   681,   685,   687,   692,
-     694,   696,   698,   700,   705,   707,   712,   713,   715,   721,
-     725,   729,   733,   737,   741,   745,   750,   752,   754,   757
+     669,   671,   674,   677,   679,   681,   682,   686,   688,   693,
+     695,   697,   699,   701,   706,   708,   713,   714,   716,   722,
+     726,   730,   734,   738,   742,   746,   751,   753,   755,   758
 };
 #endif
 
@@ -189,26 +189,26 @@ static const unsigned short yyrline[] =
    First, the terminals, then, starting at YYNTOKENS, nonterminals. */
 static const char *const yytname[] =
 {
-  "$end", "error", "$undefined", "'{'", "WORD", "METHOD", "FUNCMETH", 
-  "THING", "PMFUNC", "PRIVATEREF", "FUNC0SUB", "UNIOPSUB", "LSTOPSUB", 
-  "LABEL", "FORMAT", "SUB", "ANONSUB", "PACKAGE", "USE", "WHILE", "UNTIL", 
-  "IF", "UNLESS", "ELSE", "ELSIF", "CONTINUE", "FOR", "LOOPEX", "DOTDOT", 
-  "FUNC0", "FUNC1", "FUNC", "UNIOP", "LSTOP", "RELOP", "EQOP", "MULOP", 
-  "ADDOP", "DOLSHARP", "DO", "HASHBRACK", "NOAMP", "LOCAL", "MY", "MYSUB", 
-  "COLONATTR", "'&'", "PREC_LOW", "DOROP", "OROP", "ANDOP", "NOTOP", 
-  "','", "ASSIGNOP", "'?'", "':'", "DORDOR", "OROR", "ANDAND", "BITOROP", 
-  "BITANDOP", "SHIFTOP", "MATCHOP", "'!'", "'~'", "REFGEN", "UMINUS", 
-  "POWOP", "POSTDEC", "POSTINC", "PREDEC", "PREINC", "ARROW", "')'", 
-  "'('", "'['", "'}'", "';'", "']'", "'-'", "'+'", "'$'", "'@'", "'%'", 
-  "'*'", "$accept", "prog", "block", "remember", "progstart", "mblock", 
-  "mremember", "savescope", "lineseq", "line", "sideff", "else", "cond", 
-  "cont", "loop", "nexpr", "texpr", "iexpr", "mexpr", "mnexpr", "mtexpr", 
-  "miexpr", "label", "decl", "format", "formname", "mysubrout", "subrout", 
-  "startsub", "startanonsub", "startformsub", "subname", "proto", 
-  "subattrlist", "myattrlist", "subbody", "package", "use", "@1", "expr", 
-  "argexpr", "listop", "@2", "method", "subscripted", "termbinop", 
-  "termunop", "anonymous", "termdo", "term", "myattrterm", "myterm", 
-  "listexpr", "listexprcom", "my_scalar", "amper", "scalar", "ary", "hsh", 
+  "$end", "error", "$undefined", "'{'", "WORD", "METHOD", "FUNCMETH",
+  "THING", "PMFUNC", "PRIVATEREF", "FUNC0SUB", "UNIOPSUB", "LSTOPSUB",
+  "LABEL", "FORMAT", "SUB", "ANONSUB", "PACKAGE", "USE", "WHILE", "UNTIL",
+  "IF", "UNLESS", "ELSE", "ELSIF", "CONTINUE", "FOR", "LOOPEX", "DOTDOT",
+  "FUNC0", "FUNC1", "FUNC", "UNIOP", "LSTOP", "RELOP", "EQOP", "MULOP",
+  "ADDOP", "DOLSHARP", "DO", "HASHBRACK", "NOAMP", "LOCAL", "MY", "MYSUB",
+  "COLONATTR", "'&'", "PREC_LOW", "DOROP", "OROP", "ANDOP", "NOTOP", "','",
+  "ASSIGNOP", "'?'", "':'", "DORDOR", "OROR", "ANDAND", "BITOROP",
+  "BITANDOP", "SHIFTOP", "MATCHOP", "'!'", "'~'", "REFGEN", "UMINUS",
+  "POWOP", "POSTDEC", "POSTINC", "PREDEC", "PREINC", "ARROW", "')'", "'('",
+  "'['", "'}'", "';'", "']'", "'-'", "'+'", "'$'", "'@'", "'%'", "'*'",
+  "$accept", "prog", "block", "remember", "progstart", "mblock",
+  "mremember", "savescope", "lineseq", "line", "sideff", "else", "cond",
+  "cont", "loop", "nexpr", "texpr", "iexpr", "mexpr", "mnexpr", "mtexpr",
+  "miexpr", "label", "decl", "format", "formname", "mysubrout", "subrout",
+  "startsub", "startanonsub", "startformsub", "subname", "proto",
+  "subattrlist", "myattrlist", "subbody", "package", "use", "@1", "expr",
+  "argexpr", "listop", "@2", "method", "subscripted", "termbinop",
+  "termunop", "anonymous", "termdo", "term", "myattrterm", "myterm",
+  "listexpr", "listexprcom", "my_scalar", "amper", "scalar", "ary", "hsh",
   "arylen", "star", "indirob", 0
 };
 #endif
@@ -216,7 +216,7 @@ static const char *const yytname[] =
 # ifdef YYPRINT
 /* YYTOKNUM[YYLEX-NUM] -- Internal token number corresponding to
    token YYLEX-NUM.  */
-static const unsigned short yytoknum[] =
+static const unsigned short int yytoknum[] =
 {
        0,   256,   257,   123,   258,   259,   260,   261,   262,   263,
      264,   265,   266,   267,   268,   269,   270,   271,   272,   273,
@@ -328,7 +328,7 @@ static const unsigned char yydefact[] =
 };
 
 /* YYDEFGOTO[NTERM-NUM]. */
-static const short yydefgoto[] =
+static const short int yydefgoto[] =
 {
       -1,     1,   104,   101,     2,   361,   372,    10,     4,    23,
      300,   377,    79,   162,    24,   301,   290,   293,   295,   303,
@@ -342,7 +342,7 @@ static const short yydefgoto[] =
 /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
    STATE-NUM.  */
 #define YYPACT_NINF -343
-static const short yypact[] =
+static const short int yypact[] =
 {
     -343,     9,  -343,  -343,   147,  -343,  -343,     8,  -343,  -343,
        7,  -343,  -343,  -343,  -343,  -343,  -343,    19,    52,    -8,
@@ -387,7 +387,7 @@ static const short yypact[] =
 };
 
 /* YYPGOTO[NTERM-NUM].  */
-static const short yypgoto[] =
+static const short int yypgoto[] =
 {
     -343,  -343,   -23,   -98,  -343,    22,  -343,  -343,  -100,  -343,
      305,  -342,  -343,  -112,  -343,  -343,  -343,   194,  -210,   -36,
@@ -403,7 +403,7 @@ static const short yypgoto[] =
    number is the opposite.  If zero, do what YYDEFACT says.
    If YYTABLE_NINF, syntax error.  */
 #define YYTABLE_NINF -176
-static const short yytable[] =
+static const short int yytable[] =
 {
       80,   204,    77,   126,    96,   302,   286,   205,   203,     3,
      100,   145,    19,   195,   210,   211,   212,   213,   214,   215,
@@ -602,7 +602,7 @@ static const short yytable[] =
        0,     0,     0,   190,   191,   192,     0,     0,   193
 };
 
-static const short yycheck[] =
+static const short int yycheck[] =
 {
       25,   101,    25,    54,    27,   215,   206,   106,   100,     0,
       32,    62,     4,     3,   112,   113,   114,   115,   116,   117,

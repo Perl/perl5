@@ -672,7 +672,8 @@ term	:	termbinop
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
 				scalar($1)); }
 	|	FUNC1 '(' ')'                        /* not () */
-			{ $$ = newOP($1, OPf_SPECIAL); }
+			{ $$ = $1 == OP_NOT ? newUNOP($1, 0, newSVOP(OP_CONST, 0, newSViv(0)))
+					    : newOP($1, OPf_SPECIAL); }
 	|	FUNC1 '(' expr ')'                   /* not($foo) */
 			{ $$ = newUNOP($1, 0, $3); }
 	|	PMFUNC '(' argexpr ')'           /* m//, s///, tr/// */
