@@ -1321,6 +1321,7 @@
 #define PL_do_undump		(PL_Vars.Gdo_undump)
 #define PL_hexdigit		(PL_Vars.Ghexdigit)
 #define PL_malloc_mutex		(PL_Vars.Gmalloc_mutex)
+#define PL_my_inv_rand_max	(PL_Vars.Gmy_inv_rand_max)
 #define PL_op_mutex		(PL_Vars.Gop_mutex)
 #define PL_patleave		(PL_Vars.Gpatleave)
 #define PL_sharedsv_space	(PL_Vars.Gsharedsv_space)
@@ -1335,6 +1336,7 @@
 #define PL_Gdo_undump		PL_do_undump
 #define PL_Ghexdigit		PL_hexdigit
 #define PL_Gmalloc_mutex	PL_malloc_mutex
+#define PL_Gmy_inv_rand_max	PL_my_inv_rand_max
 #define PL_Gop_mutex		PL_op_mutex
 #define PL_Gpatleave		PL_patleave
 #define PL_Gsharedsv_space	PL_sharedsv_space

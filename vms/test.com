@@ -134,6 +134,10 @@ foreach $file (@exclist) { $skip{$file}++; }
 
 $| = 1;
 
+# Let tests know they're running in the perl core.  Useful for modules
+# which live dual lives on CPAN.
+$ENV{PERL_CORE} = 1;
+
 @ARGV = grep($_,@ARGV);  # remove empty elements due to "''p1'" syntax
 
 if (lc($ARGV[0]) eq '-v') {

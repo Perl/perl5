@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq7 - Perl Language Issues ($Revision: 1.1 $, $Date: 2001/09/20 03:03:00 $)
+perlfaq7 - Perl Language Issues ($Revision: 1.2 $, $Date: 2001/10/16 13:27:22 $)
 
 =head1 DESCRIPTION
 
@@ -184,7 +184,7 @@ own module.  Make sure to change the names appropriately.
 
 	# if using RCS/CVS, this next line may be preferred,
 	# but beware two-digit versions.
-	$VERSION = do{my@r=q$Revision: 1.1 $=~/\d+/g;sprintf '%d.'.'%02d'x$#r,@r};
+	$VERSION = do{my@r=q$Revision: 1.2 $=~/\d+/g;sprintf '%d.'.'%02d'x$#r,@r};
 
 	@ISA         = qw(Exporter);
 	@EXPORT      = qw(&func1 &func2 &func3);
@@ -682,7 +682,7 @@ construct like this:
 
 Here's a simple example of a switch based on pattern matching, this
 time lined up in a way to make it look more like a switch statement.
-We'll do a multi-way conditional based on the type of reference stored
+We'll do a multiway conditional based on the type of reference stored
 in $whatchamacallit:
 
     SWITCH: for (ref $whatchamacallit) {

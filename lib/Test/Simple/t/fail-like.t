@@ -11,12 +11,17 @@ BEGIN {
 # There was a bug with like() involving a qr// not failing properly.
 # This tests against that.
 
-use strict;
-
 BEGIN { 
     chdir 't' if -d 't';
     @INC = '../lib';
 }
+
+use strict;
+use lib '../t/lib';
+
+require Test::Simple::Catch;
+my($out, $err) = Test::Simple::Catch::caught();
+
 
 # Can't use Test.pm, that's a 5.005 thing.
 package My::Test;
@@ -40,11 +45,6 @@ sub ok ($;$) {
 package main;
 
 require Test::More;
-
-push @INC, '../t/lib';
-require Test::Simple::Catch::More;
-my($out, $err) = Test::Simple::Catch::More::caught();
-
 Test::More->import(tests => 1);
 
 eval q{ like( "foo", qr/that/, 'is foo like that' ); };

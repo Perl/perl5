@@ -27,7 +27,7 @@ sub SWASHNEW {
 
 	unless (defined $file) {
 	    defined %utf8::Is || do "unicore/Is.pl";
-	    if ($type =~ /^(?:Is)?[- _]?([A-Z].*)$/i) {
+	    if ($type =~ /^(?:Is|Category\s*=\s*)?[- _]?([A-Z].*)$/i) {
 		my $istype = $1;
 		print "istype = $istype\n" if DEBUG;
 		unless ($list = do "unicore/Is/$istype.pl") {
@@ -55,10 +55,11 @@ sub SWASHNEW {
 	    unless (defined $file) {
 		defined %utf8::In || do "unicore/In.pl";
 		$type = 'Lampersand' if $type =~ /^(?:Is)?L&$/;
-		if ($type =~ /^(?:In)?[- _]?(?!herited$)(.+)/i) {
-		    my $intype = $1;
-		    print "intype = $intype\n" if DEBUG;
-		    if (exists $utf8::Is{$istype}) {
+		if ($type =~ /^(In|(?:Script|Block)\s*=\s*)?[- _]?(?!herited$)(.+)/i) {
+		    my $incat  = $1;
+		    my $intype = $2;
+		    print "incat = $incat, intype = $intype\n" if DEBUG;
+		    if (exists $utf8::In{$intype}) {
 			$file = "unicore/In/$utf8::In{$intype}";
 		    } else {
 			my $inprefix = substr(lc($intype), 0, 2);
@@ -69,7 +70,13 @@ sub SWASHNEW {
 			    for my $k (keys %{$utf8::InPat{$inprefix}}) {
 				print "inprefix = $inprefix, In = $In, k = $k\n" if DEBUG;
 				if ($In =~ /^$k$/i) {
-				    $file = "unicore/In/$utf8::InPat{$inprefix}->{$k}";
+				    my $i = $utf8::InPat{$inprefix}->{$k};
+				    print "inprefix = $inprefix, In = $In, k = $k, i = $i\n" if DEBUG;
+				    next if $incat =~ /^S/ &&
+					    !exists $utf8::InScript{$i};
+				    next if $incat =~ /^B/ &&
+					    !exists $utf8::InBlock{$i};
+				    $file = "unicore/In/$i";
 				    print "inprefix = $inprefix, In = $In, k = $k, file = $file\n" if DEBUG;
 				    last;
 				}
@@ -159,6 +166,7 @@ sub SWASHNEW {
 # NOTE: utf8.c:swash_init() assumes entries are never modified once generated.
 
 sub SWASHGET {
+    # See utf8.c:Perl_swash_fetch for problems with this interface.
     my ($self, $start, $len) = @_;
     local $^D = 0 if $^D;
     my $type = $self->{TYPE};

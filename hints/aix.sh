@@ -123,7 +123,7 @@ case "$osvers" in
     ccflags="$ccflags -D_ALL_SOURCE -D_ANSI_C_SOURCE -D_POSIX_SOURCE"
     case "$cc" in
      *gcc*) ;;
-     *) ccflags="$ccflags -qmaxmem=16384" ;;
+     *) ccflags="$ccflags -qmaxmem=16384 -qnoansialias" ;;
     esac
     nm_opt='-B'
     ;;

@@ -1,10 +1,9 @@
-# Can't use Test.pm, that's a 5.005 thing.
-
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
 }
 
+# Can't use Test.pm, that's a 5.005 thing.
 package My::Test;
 
 print "1..2\n";
@@ -44,7 +43,10 @@ ok 1 - Foo
 not ok 2 - Bar
 OUT
 
-    My::Test::ok($$err =~ /Looks like you planned 5 tests but only ran 2/);
+    My::Test::ok($$err eq <<ERR);
+#     Failed test ($0 at line 31)
+# Looks like you planned 5 tests but only ran 2.
+ERR
 
     exit 0;
 }

@@ -5,9 +5,9 @@
 # from the Unicode database files (lib/unicore/*.txt).
 #
 
-my $LastUnicodeCodepoint = 0x10FFFF; # As of Unicode 3.1.1.
-
 use strict;
+
+my $LastUnicodeCodepoint = 0x10FFFF; # As of Unicode 3.1.1.
 
 mkdir("In", 0755);
 mkdir("Is", 0755);
@@ -103,6 +103,9 @@ my %In;
 my $InId = 0;
 my %InIn;
 
+my %InScript;
+my %InBlock;
+
 #
 # Read in the Unicode.txt, the main Unicode database.
 #
@@ -123,9 +126,9 @@ if (open(my $Unicode, "Unicode.txt")) {
     my @Mirrored;
     my %To;
     while (<$Unicode>) {
-	next if /^\#/ || /^\s*$/;
-	next unless /^[0-9a-f]+\s*;/i;
+	next unless /^[0-9A-Fa-f]+;/;
 	s/\s+$//;
+
 	my ($code, $name, $cat, $comb, $bidi, $deco,
 	    $decimal, $digit, $number,
 	    $mirrored, $unicode10, $comment,
@@ -259,10 +262,7 @@ if (open(my $LineBrk, "LineBrk.txt")) {
     my %Lbrk;
 
     while (<$LineBrk>) {
-	next if /^\#/ || /^\s*$/;
-	s/\s+$//;
-	s/\s*\#.*//;
-	next unless /^([0-9a-f]+)(?:\.\.([0-9a-f]+))?\s*;\s*(.+)$/i;
+        next unless /^([0-9A-Fa-f]+)(?:\.\.([0-9A-Fa-f]+))?\s*;\s*(\w+)/;
 
 	my ($first, $last, $lbrk) = ($1, $2, $3);
 
@@ -291,9 +291,9 @@ if (open(my $ArabShap, "ArabShap.txt")) {
     my @ArabLinkGroup;
 
     while (<$ArabShap>) {
-	next if /^\#/ || /^\s*$/;
-	next unless /^[0-9a-f]+\s*;/i;
+	next unless /^[0-9A-Fa-f]+;/;
 	s/\s+$//;
+
 	my ($code, $name, $link, $linkgroup) = split(/\s*;\s*/);
 
 	append(\@ArabLink,      $code, $link);
@@ -314,11 +314,9 @@ if (open(my $Jamo, "Jamo.txt")) {
     my @Short;
 
     while (<$Jamo>) {
-	next if /^\#/ || /^\s*$/;
-	next unless /^[0-9a-f]+\s*;/i;
-	s/\s*\#.*//;
-	s/\s+$//;
-	my ($code, $short) = split(/\s*;\s*/);
+	next unless /^([0-9A-Fa-f]+)\s*;\s*(\w*)/;
+
+	my ($code, $short) = ($1, $2);
 
 	append(\@Short, $code, $short);
     }
@@ -336,10 +334,7 @@ my @Scripts;
 
 if (open(my $Scripts, "Scripts.txt")) {
     while (<$Scripts>) {
-	next if /^\#/ || /^\s*$/;
-	s/\s*\#.*//;
-	s/\s+$//;
-	next unless /^([0-9a-f]+)(?:\.\.([0-9a-f]+))?\s*;\s*(.+)$/i;
+	next unless /^([0-9A-Fa-f]+)(?:\.\.([0-9A-Fa-f]+))?\s*;\s*(.+?)\s*\#/;
 
 	# Wait until all the scripts have been read since
 	# they are not listed in numeric order.
@@ -363,8 +358,9 @@ for my $script (sort { $a->[0] <=> $b->[0] } @Scripts) {
 	extend($Script{$name}, $last);
     }
     unless (defined $In{$name}) {
-	$In{$name}   = $InId++;
-	$InIn{$name} = $Script{$name};
+	$InScript{$InId} = $name;
+	$In{$name}       = $InId++;
+	$InIn{$name}     = $Script{$name};
     }
 }
 
@@ -387,17 +383,22 @@ my %Blocks;
 
 if (open(my $Blocks, "Blocks.txt")) {
     while (<$Blocks>) {
-	next if /^\#/ || /^\s*$/;
-	s/\s*\#.*//;
-	s/\s+$//;
-	next unless /^([0-9a-f]+)\.\.([0-9a-f]+)\s*;\s*(.+)$/i;
-
+	next unless /^([0-9A-Fa-f]+)\.\.([0-9A-Fa-f]+)\s*;\s*(.+?)\s*$/;
+	
 	my ($first, $last, $name) = ($1, $2, $3);
+	my $origname = $name;
 
 	# If there's a naming conflict (the script names are
 	# in uppercase), the name of the block has " Block"
 	# appended to it.
-	$name = "$name Block" if defined $In{"\U$name"};
+	my $pat = $name;
+	$pat =~ s/([- _])/(?:[-_]|\\s+)?/g;
+	for my $i (values %InScript) {
+	    if ($i =~ /^$pat$/i) {
+		$name .= " Block";
+		last;
+	    }
+	}
 
 	append(\@Blocks,              $first, $name);
 	append($Blocks{$name} ||= [], $first, $name);
@@ -406,8 +407,9 @@ if (open(my $Blocks, "Blocks.txt")) {
 	    extend($Blocks{$name}, $last);
 	}
 	unless (defined $In{$name}) {
-	    $In{$name}   = $InId++;
-	    $InIn{$name} = $Blocks{$name};
+	    $InBlock{$InId} = $origname;
+	    $In{$name}      = $InId++;
+	    $InIn{$name}    = $Blocks{$name};
 	}
     }
 } else {
@@ -430,10 +432,7 @@ my @Props;
 
 if (open(my $Props, "PropList.txt")) {
     while (<$Props>) {
-	next if /^\#/ || /^\s*$/;
-	s/\s*\#.*//;
-	s/\s+$//;
-	next unless /^([0-9a-f]+)(?:\.\.([0-9a-f]+))?\s*;\s*(\w+)/i;
+	next unless /^([0-9A-Fa-f]+)(?:\.\.([0-9A-Fa-f]+))?\s*;\s*(.+?)\s*\#/;
 
 	# Wait until all the extended properties have been read since
 	# they are not listed in numeric order.
@@ -559,7 +558,7 @@ sub mapping {
 %utf8::${name} =
 (
 EOT
-        for my $i (sort keys %$map) {
+        for my $i (sort { lc $a cmp lc $b } keys %$map) {
 	    my $pat = $i;
 	    # Here is the 'fuzzification': accept any space,
 	    # dash, or underbar where in the official name
@@ -569,7 +568,7 @@ EOT
 	    # The prefix length of 2 is enough spread,
 	    # and besides, we have 'Yi' as an In category.
 	    push @{$pat{lc(substr($i, 0, 2))}}, [ $i, $pat ];
-	    print $fh "'$i' => '$map->{$i}',\n";
+	    printf $fh "%-45s => '$map->{$i}',\n", "'$i'";
 	}
         print $fh <<EOT;
 );
@@ -604,6 +603,39 @@ EOT
 #
 
 mapping(\%In, "In");
+
+#
+# Append the InScript and InBlock mappings.
+# These are needed only if Script= and Block= syntaxes are used.
+#
+
+if (open(my $In, ">>In.pl")) {
+    print $In <<EOT;
+
+%utf8::InScript =
+(
+EOT
+    for my $i (sort { $a <=> $b } keys %InScript) {
+	printf $In "%4d => '$InScript{$i}',\n", $i;
+    }
+    print $In <<EOT;
+);
+EOT
+
+    print $In <<EOT;
+
+%utf8::InBlock =
+(
+EOT
+    for my $i (sort { $a <=> $b } keys %InBlock) {
+	printf $In "%4d => '$InBlock{$i}',\n", $i;
+    }
+    print $In <<EOT;
+);
+EOT
+} else {
+    die "$0: In.pl: $!\n";
+}
 
 # Easy low-calorie cheat.
 use File::Copy;
@@ -681,6 +713,49 @@ my %Is = (
 #
 
 mapping(\%Is, "Is");
+
+#
+# Read in the special cases.
+#
+
+my %Case;
+
+if (open(my $SpecCase, "SpecCase.txt")) {
+    while (<$SpecCase>) {
+	next unless /^[0-9A-Fa-f]+;/;
+	s/\#.*//;
+	s/\s+$//;
+
+	my ($code, $lower, $title, $upper, $condition) = split(/\s*;\s*/);
+
+	if ($condition) { # not implemented yet
+	    print "# SKIPPING $_\n";
+	    next;
+	}
+
+	# Wait until all the special cases have been read since
+	# they are not listed in numeric order.
+	my $ix = hex($code);
+	push @{$Case{Lower}}, [ $ix, $code, $lower ];
+	push @{$Case{Title}}, [ $ix, $code, $title ];
+	push @{$Case{Upper}}, [ $ix, $code, $upper ];
+    }
+} else {
+    die "$0: SpecCase.txt: $!\n";
+}
+
+# Now write out the special cases properties in their code point order.
+# The To/Spec{Lower,Title,Upper}.pl are unused for now since the swash
+# routines do not do returning multiple characters.
+
+for my $case (qw(Lower Title Upper)) {
+    my @case;
+    for my $prop (sort { $a->[0] <=> $b->[0] } @{$Case{$case}}) {
+        my ($ix, $code, $to) = @$prop;
+        append(\@case, $code, $to);
+    }
+    flush(\@case, "To/Spec$case.pl");
+}
 
 # That's all, folks!
 

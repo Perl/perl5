@@ -2464,12 +2464,11 @@ PP(pp_accept)
 	goto nuts;
 
     nstio = GvIOn(ngv);
-    if (IoIFP(nstio))
-	do_close(ngv, FALSE);
-
     fd = PerlSock_accept(PerlIO_fileno(IoIFP(gstio)), (struct sockaddr *)&saddr, &len);
     if (fd < 0)
 	goto badexit;
+    if (IoIFP(nstio))
+	do_close(ngv, FALSE);
     IoIFP(nstio) = PerlIO_fdopen(fd, "r");
     IoOFP(nstio) = PerlIO_fdopen(fd, "w");
     IoTYPE(nstio) = IoTYPE_SOCKET;

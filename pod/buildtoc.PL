@@ -95,6 +95,7 @@ if (-d "pod") {
     qw(
 
     perl
+    perlintro
     perlfaq
     perltoc
     perlbook
@@ -149,8 +150,9 @@ if (-d "pod") {
     perlsec
 
     perlmod
-    perlmodlib
     perlmodinstall
+    perlmodlib
+    perlmodstyle
     perlnewmod
 
     perlfaq1            

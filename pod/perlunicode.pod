@@ -250,6 +250,8 @@ The following reserved ranges have C<In> tests:
     Low Surrogate
     Private Surrogate
     CJK Ideograph Extension B
+    Plane 15 Private Use
+    Plane 16 Private Use
 
 For example C<"\x{AC00}" =~ \p{HangulSyllable}> will test true.
 (Handling of surrogates is not implemented yet.)
@@ -309,7 +311,7 @@ The scripts available for C<\p{In...}> and C<\P{In...}>, for example
     Hangul
     Ethiopic
     Cherokee
-    CanadianAboriginal
+    Canadian Aboriginal
     Ogham
     Runic
     Khmer
@@ -319,7 +321,7 @@ The scripts available for C<\p{In...}> and C<\P{In...}>, for example
     Bopomofo
     Han
     Yi
-    OldItalic
+    Old Italic
     Gothic
     Deseret
     Inherited
@@ -384,101 +386,101 @@ preferential Unicode character class definition; this meant that
 the definitions of some character classes changed (the ones in the
 below list that have the C<Block> appended).
 
-   BasicLatin
-   Latin1Supplement
-   LatinExtendedA
-   LatinExtendedB
-   IPAExtensions
-   SpacingModifierLetters
-   CombiningDiacriticalMarks
-   GreekBlock
-   CyrillicBlock
-   ArmenianBlock
-   HebrewBlock
-   ArabicBlock
-   SyriacBlock
-   ThaanaBlock
-   DevanagariBlock
-   BengaliBlock
-   GurmukhiBlock
-   GujaratiBlock
-   OriyaBlock
-   TamilBlock
-   TeluguBlock
-   KannadaBlock
-   MalayalamBlock
-   SinhalaBlock
-   ThaiBlock
-   LaoBlock
-   TibetanBlock
-   MyanmarBlock
-   GeorgianBlock
-   HangulJamo
-   EthiopicBlock
-   CherokeeBlock
-   UnifiedCanadianAboriginalSyllabics
-   OghamBlock
-   RunicBlock
-   KhmerBlock
-   MongolianBlock
-   LatinExtendedAdditional
-   GreekExtended
-   GeneralPunctuation
-   SuperscriptsandSubscripts
-   CurrencySymbols
-   CombiningMarksforSymbols
-   LetterlikeSymbols
-   NumberForms
+   Basic Latin
+   Latin 1 Supplement
+   Latin Extended-A
+   Latin Extended-B
+   IPA Extensions
+   Spacing Modifier Letters
+   Combining Diacritical Marks
+   Greek Block
+   Cyrillic Block
+   Armenian Block
+   Hebrew Block
+   Arabic Block
+   Syriac Block
+   Thaana Block
+   Devanagari Block
+   Bengali Block
+   Gurmukhi Block
+   Gujarati Block
+   Oriya Block
+   Tamil Block
+   Telugu Block
+   Kannada Block
+   Malayalam Block
+   Sinhala Block
+   Thai Block
+   Lao Block
+   Tibetan Block
+   Myanmar Block
+   Georgian Block
+   Hangul Jamo
+   Ethiopic Block
+   Cherokee Block
+   Unified Canadian Aboriginal Syllabics
+   Ogham Block
+   Runic Block
+   Khmer Block
+   Mongolian Block
+   Latin Extended Additional
+   Greek Extended
+   General Punctuation
+   Superscripts and Subscripts
+   Currency Symbols
+   Combining Marks for Symbols
+   Letterlike Symbols
+   Number Forms
    Arrows
-   MathematicalOperators
-   MiscellaneousTechnical
-   ControlPictures
-   OpticalCharacterRecognition
-   EnclosedAlphanumerics
-   BoxDrawing
-   BlockElements
-   GeometricShapes
-   MiscellaneousSymbols
+   Mathematical Operators
+   Miscellaneous Technical
+   Control Pictures
+   Optical Character Recognition
+   Enclosed Alphanumerics
+   Box Drawing
+   Block Elements
+   Geometric Shapes
+   Miscellaneous Symbols
    Dingbats
-   BraillePatterns
-   CJKRadicalsSupplement
-   KangxiRadicals
-   IdeographicDescriptionCharacters
-   CJKSymbolsandPunctuation
-   HiraganaBlock
-   KatakanaBlock
-   BopomofoBlock
-   HangulCompatibilityJamo
+   Braille Patterns
+   CJK Radicals Supplement
+   Kangxi Radicals
+   Ideographic Description Characters
+   CJK Symbols and Punctuation
+   Hiragana Block
+   Katakana Block
+   Bopomofo Block
+   Hangul Compatibility Jamo
    Kanbun
-   BopomofoExtended
-   EnclosedCJKLettersandMonths
-   CJKCompatibility
-   CJKUnifiedIdeographsExtensionA
-   CJKUnifiedIdeographs
-   YiSyllables
-   YiRadicals
-   HangulSyllables
-   HighSurrogates
-   HighPrivateUseSurrogates
-   LowSurrogates
-   PrivateUse
-   CJKCompatibilityIdeographs
-   AlphabeticPresentationForms
-   ArabicPresentationFormsA
-   CombiningHalfMarks
-   CJKCompatibilityForms
-   SmallFormVariants
-   ArabicPresentationFormsB
+   Bopomofo Extended
+   Enclosed CJK Letters and Months
+   CJK Compatibility
+   CJK Unified Ideographs Extension A
+   CJK Unified Ideographs
+   Yi Syllables
+   Yi Radicals
+   Hangul Syllables
+   High Surrogates
+   High Private Use Surrogates
+   Low Surrogates
+   Private Use
+   CJK Compatibility Ideographs
+   Alphabetic Presentation Forms
+   Arabic Presentation Forms-A
+   Combining Half Marks
+   CJK Compatibility Forms
+   Small Form Variants
+   Arabic Presentation Forms-B
    Specials
-   HalfwidthandFullwidthForms
-   OldItalicBlock
-   GothicBlock
-   DeseretBlock
-   ByzantineMusicalSymbols
-   MusicalSymbols
-   MathematicalAlphanumericSymbols
-   CJKUnifiedIdeographsExtensionB
-   CJKCompatibilityIdeographsSupplement
+   Halfwidth and Fullwidth Forms
+   Old Italic Block
+   Gothic Block
+   Deseret Block
+   Byzantine Musical Symbols
+   Musical Symbols
+   Mathematical Alphanumeric Symbols
+   CJK Unified Ideographs Extension B
+   CJK Compatibility Ideographs Supplement
    Tags
 
 =item *

@@ -1,0 +1,19 @@
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
+
+use Test::Builder;
+
+BEGIN {
+    my $t = Test::Builder->new;
+    $t->no_ending(1);
+}
+
+use Test::More tests => 3;
+
+# Normally, Test::More would yell that we ran too few tests, but we
+# supressed the ending diagnostics.
+pass;
+print "ok 2\n";
+print "ok 3\n";

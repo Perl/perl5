@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq - frequently asked questions about Perl ($Date: 2001/09/20 03:03:00 $)
+perlfaq - frequently asked questions about Perl ($Date: 2001/10/16 13:27:22 $)
 
 =head1 DESCRIPTION
 
@@ -1372,7 +1372,7 @@ of perlfaq7 on variable names within variables.
 
 =item 7/January/99
 
-Small touchups here and there.  Added all questions in this 
+Small touch ups here and there.  Added all questions in this 
 document as a sort of table of contents.
 
 =item 22/June/98

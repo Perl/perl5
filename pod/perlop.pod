@@ -664,6 +664,7 @@ any pair of delimiters you choose.
 		qr{}	      Pattern		  yes*
 		 s{}{}	    Substitution	  yes*
 		tr{}{}	  Transliteration	  no (but see below)
+        <<EOF                 here-doc            yes*
 
 	* unless the delimiter is ''.
 
@@ -1342,6 +1343,98 @@ must use an eval():
     die $@ if $@;
 
     eval "tr/$oldlist/$newlist/, 1" or die $@;
+
+=item <<EOF
+
+A line-oriented form of quoting is based on the shell "here-document"
+syntax.  Following a C<< << >> you specify a string to terminate
+the quoted material, and all lines following the current line down to
+the terminating string are the value of the item.  The terminating
+string may be either an identifier (a word), or some quoted text.  If
+quoted, the type of quotes you use determines the treatment of the
+text, just as in regular quoting.  An unquoted identifier works like
+double quotes.  There must be no space between the C<< << >> and
+the identifier, unless the identifier is quoted.  (If you put a space it
+will be treated as a null identifier, which is valid, and matches the first
+empty line.)  The terminating string must appear by itself (unquoted and
+with no surrounding whitespace) on the terminating line.
+
+       print <<EOF;
+    The price is $Price.
+    EOF
+
+       print << "EOF"; # same as above
+    The price is $Price.
+    EOF
+
+       print << `EOC`; # execute commands
+    echo hi there
+    echo lo there
+    EOC
+
+       print <<"foo", <<"bar"; # you can stack them
+    I said foo.
+    foo
+    I said bar.
+    bar
+
+       myfunc(<< "THIS", 23, <<'THAT');
+    Here's a line
+    or two.
+    THIS
+    and here's another.
+    THAT
+
+Just don't forget that you have to put a semicolon on the end
+to finish the statement, as Perl doesn't know you're not going to
+try to do this:
+
+       print <<ABC
+    179231
+    ABC
+       + 20;
+
+If you want your here-docs to be indented with the 
+rest of the code, you'll need to remove leading whitespace
+from each line manually:
+
+    ($quote = <<'FINIS') =~ s/^\s+//gm;
+       The Road goes ever on and on, 
+       down from the door where it began.
+    FINIS
+
+If you use a here-doc within a delimited construct, such as in C<s///eg>,
+the quoted material must come on the lines following the final delimiter.
+So instead of
+
+    s/this/<<E . 'that'
+    the other
+    E
+     . 'more '/eg;
+
+you have to write
+
+    s/this/<<E . 'that' 
+     . 'more '/eg; 
+    the other 
+    E 
+
+If the terminating identifier is on the last line of the program, you
+must be sure there is a newline after it; otherwise, Perl will give the
+warning B<Can't find string terminator "END" anywhere before EOF...>.
+
+Additionally, the quoting rules for the identifier are not related to
+Perl's quoting rules -- C<q()>, C<qq()>, and the like are not supported
+in place of C<''> and C<"">, and the only interpolation is for backslashing
+the quoting character:
+
+    print << "abc\"def";
+    testing...
+    abc"def
+
+Finally, quoted strings cannot span multiple lines.  The general rule is
+that the identifier must be a string literal.  Stick with that, and you
+should be safe.
 
 =back
 

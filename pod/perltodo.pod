@@ -77,12 +77,8 @@ Allow for the metaproperties: C<XID Start>, C<XID Continue>,
 C<NF*_NO>, C<NF*_MAYBE> (require the DerivedCoreProperties and
 DerviceNormalizationProperties files).
 
-There are also enumerated properties: C<Decomposition Type>,
-C<Numeric Type>, C<East Asian Width>, C<Line Break>.  These
-properties have multiple values: for uniqueness the property
-value should be appended.  For example, C<\p{IsAlphabetic}>
-wouldbe the binary property, while C<\p{AlphabeticLineBreak}>
-would mean the enumerated property.
+There are also multiple value properties still unimplemented:
+C<Numeric Type>, C<East Asian Width>.
 
 =item *
 

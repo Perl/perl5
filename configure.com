@@ -2231,7 +2231,11 @@ $!
 $! Ask if they want to build with 64-bit support
 $ IF (archname.eqs."VMS_AXP").and.("''f$extract(1,3, f$getsyi(""version""))'".ges."7.1")
 $ THEN
-$   dflt = use64bitint
+$   dflt = "n"
+$   IF F$TYPE(use64bitint) .NES. "" 
+$   THEN
+$       IF use64bitint .OR. use64bitint .eqs. "define" THEN dflt = "y"
+$   ENDIF
 $   echo ""
 $   echo "You can have native 64-bit long integers."
 $   echo ""
@@ -2249,25 +2253,32 @@ $   IF ans
 $   THEN use64bitint="Y"
 $   ELSE use64bitint="N"
 $   ENDIF
-$   IF (use64bitint)
+$!
+$   dflt = "n"
+$   IF F$TYPE(use64bitall) .NES. "" 
 $   THEN
-$     dflt = use64bitall
+$       IF use64bitall .OR. use64bitall .eqs. "define" THEN dflt = "y"
+$   ENDIF
+$   echo ""
+$   echo "You may also choose to try maximal 64-bitness.  It means using as much"
+$   echo "64-bitness as possible on the platform.  This in turn means even more"
+$   echo "binary incompatibilities.  On the other hand, your platform may not"
+$   echo "have any more 64-bitness available than what you already have chosen."
+$   echo ""
+$   echo "If this does not make any sense to you, just accept the default ''dflt'."
+$   rp = "Try to use maximal 64-bit support, if available? [''dflt'] "
+$   GOSUB myread
+$   IF ans .EQS. "" THEN ans = dflt
+$   IF ans
+$   THEN use64bitall="Y"
+$   ELSE use64bitall="N"
+$   ENDIF
+$   IF use64bitall .AND. .NOT. use64bitint
+$   THEN
 $     echo ""
-$     echo "Since you chose 64-bitness you may want to try maximal 64-bitness."
-$     echo "What you have chosen is minimal 64-bitness which means just enough"
-$     echo "to get 64-bit integers.  The maximal means using as much 64-bitness"
-$     echo "as is possible on the platform.  This in turn means even more binary"
-$     echo "incompatibilities.  On the other hand, your platform may not have"
-$     echo "any more maximal 64-bitness than what you already have chosen."
-$     echo ""
-$     echo "If this does not make any sense to you, just accept the default ''dflt'."
-$     rp = "Try to use full 64-bit support, if available? [''dflt'] "
-$     GOSUB myread
-$     IF ans .EQS. "" THEN ans = dflt
-$     IF ans
-$     THEN use64bitall="Y"
-$     ELSE use64bitall="N"
-$     ENDIF
+$     echo "Since you have chosen a maximally 64-bit build, I'm also turning on"
+$     echo "the use of 64-bit integers."
+$     use64bitint="Y"
 $   ENDIF
 $ ENDIF ! AXP && >= 7.1
 $!
@@ -2363,6 +2374,9 @@ $   rp = "Use IEEE math? [''dflt'] "
 $   GOSUB myread
 $   IF ans .eqs. "" THEN ans = "''dflt'"
 $   use_ieee_math = "''ans'"
+$ ELSE
+$   be_case_sensitive = "n"
+$   use_ieee_math = "n"
 $ ENDIF
 $! CC Flags
 $ echo ""
@@ -2830,11 +2844,31 @@ $   uselargefiles = "define"
 $   uselongdouble = "define"
 $   alignbytes="16"
 $   usemorebits = "define"
+$   ivdformat="""Ld"""
+$   uvuformat="""Lu"""
+$   uvoformat="""Lo"""
+$   uvxformat="""Lx"""
+$   uvXUformat="""LX"""
 $ ELSE
 $   use64bitint = "undef"
 $   uselargefiles = "undef"
 $   uselongdouble = "undef"
 $   usemorebits = "undef"
+$   ivdformat="""ld"""
+$   uvuformat="""lu"""
+$   uvoformat="""lo"""
+$   uvxformat="""lx"""
+$   uvXUformat="""lX"""
+$ ENDIF
+$ IF uselongdouble .OR. uselongdouble .EQS. "define"
+$ THEN
+$   nveformat="""Le"""
+$   nvfformat="""Lf"""
+$   nvgformat="""Lg"""
+$ ELSE
+$   nveformat="""e"""
+$   nvfformat="""f"""
+$   nvgformat="""g"""
 $ ENDIF
 $ IF use64bitall .OR. use64bitall .EQS. "define"
 $ THEN
@@ -2912,6 +2946,7 @@ $   d_PRIgldbl = "define"
 $   d_PRIu64 = "define"
 $   d_PRIo64 = "define"
 $   d_PRIx64 = "define"
+$   d_PRIXU64 = "define"
 $   sPRId64 = """Ld"""
 $   sPRIEUldbl = """LE"""
 $   sPRIFUldbl = """LF"""
@@ -4479,6 +4514,7 @@ $!
 $! Check rand48 and its ilk
 $!
 $ echo4 "Looking for a random number function..."
+$ d_use_rand = "undef"
 $ OS
 $ WS "#if defined(__DECC) || defined(__DECCXX)"
 $ WS "#include <stdlib.h>"
@@ -4519,9 +4555,10 @@ $   IF compile_status .EQ. good_compile .AND. link_status .EQ. good_link
 $   THEN
 $     echo4 "OK, found random()."
 $   ELSE
-$     drand01="(((float)rand())/((float)RAND_MAX))"
+$     drand01="(((float)rand())*PL_my_inv_rand_max)"
 $     randseedtype = "unsigned"
 $     seedfunc = "srand"
+$     d_use_rand = "define"
 $     echo4 "Yick, looks like I have to use rand()."
 $   ENDIF
 $ ENDIF
@@ -4872,16 +4909,6 @@ $   d_nv_preserves_uv_bits = tmp
 $ ENDIF
 $ DELETE/SYMBOL tmp
 $!
-$ ivdformat="""ld"""
-$ uvuformat="""lu"""
-$ uvoformat="""lo"""
-$ uvxformat="""lx"""
-$ uvXUformat="""lX"""
-$! uselongdouble?
-$ nveformat="""e"""
-$ nvfformat="""f"""
-$ nvgformat="""g"""
-$! 
 $! Finally the composite ones. All config
 $!
 $ myuname="''osname' ''myname' ''osvers' ''F$EDIT(hwname, "TRIM")'"
@@ -4965,7 +4992,7 @@ $ WC "d_Gconvert='my_gconvert(x,n,t,b)'"
 $ WC "d_PRIEldbl='" + d_PRIEUldbl + "'"
 $ WC "d_PRIFldbl='" + d_PRIFUldbl + "'"
 $ WC "d_PRIGldbl='" + d_PRIGUldbl + "'"
-$ WC "d_PRIX64='" + d_PRIXU64 + "'"
+$ WC "d_PRIXU64='" + d_PRIXU64 + "'"
 $ WC "d_PRId64='" + d_PRId64 + "'"
 $ WC "d_PRIeldbl='" + d_PRIeldbl + "'"
 $ WC "d_PRIfldbl='" + d_PRIfldbl + "'"
@@ -5705,6 +5732,7 @@ $ THEN
 $! Alas this does not help to build Fcntl
 $!   WC "#define PERL_IGNORE_FPUSIG SIGFPE"
 $ ENDIF
+$ if d_use_rand .EQS. "define" then WC "#define Drand01_is_rand"
 $ CLOSE CONFIG
 $!
 $ echo4 "Doing variable substitutions on .SH files..."

@@ -1,12 +1,16 @@
-#! /usr/local/bin/perl -w
+#!perl -w
+
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
+}
+
+BEGIN {
     require Test::Harness;
     require Test::More;
 
     if( $Test::Harness::VERSION < 1.23 ) {
-        Test::More->import(skip_all => 'Need the new Test::Harness');
+        Test::More->import(skip_all => 'Need Test::Harness 1.23 or up');
     }
     else {
         Test::More->import(tests => 13);

@@ -235,7 +235,6 @@ if ($PLATFORM eq 'win32') {
 		     Perl_my_chsize
 		     Perl_same_dirent
 		     Perl_setenv_getix
-		     Perl_sortsv
 		     Perl_unlnk
 		     Perl_watch
 		     Perl_safexcalloc
@@ -631,6 +630,7 @@ my @syms = ($global_sym, $globvar_sym); # $pp_sym is not part of the API
 my @layer_syms = qw(
 			 PerlIOBase_clearerr
 			 PerlIOBase_close
+			 PerlIOBase_dup
 			 PerlIOBase_eof
 			 PerlIOBase_error
 			 PerlIOBase_fileno
@@ -656,6 +656,7 @@ my @layer_syms = qw(
 			 PerlIO_pending
 			 PerlIO_allocate
 			 PerlIO_push
+			 PerlIO_sv_dup
 			 PerlIO_unread
 );
 
@@ -1147,6 +1148,7 @@ sub output_symbol {
 1;
 __DATA__
 # extra globals not included above.
+Perl_cxinc
 perl_alloc
 perl_alloc_using
 perl_clone
@@ -1156,42 +1158,43 @@ perl_destruct
 perl_free
 perl_parse
 perl_run
-Perl_cxinc
-PerlIO_define_layer
-PerlIOBuf_set_ptrcnt
-PerlIOBuf_get_cnt
-PerlIOBuf_get_ptr
-PerlIOBuf_bufsiz
 PerlIOBase_clearerr
-PerlIOBase_setlinebuf
+PerlIOBase_close
+PerlIOBase_dup
+PerlIOBase_eof
+PerlIOBase_error
+PerlIOBase_fileno
 PerlIOBase_pushed
 PerlIOBase_read
+PerlIOBase_setlinebuf
 PerlIOBase_unread
-PerlIOBase_error
-PerlIOBase_eof
-PerlIOBuf_tell
-PerlIOBuf_seek
-PerlIOBuf_write
-PerlIOBuf_unread
-PerlIOBuf_read
-PerlIOBuf_open
-PerlIOBase_fileno
-PerlIOBuf_pushed
+PerlIOBuf_bufsiz
 PerlIOBuf_fill
 PerlIOBuf_flush
-PerlIOBase_close
-PerlIO_define_layer
-PerlIO_pending
-PerlIO_unread
-PerlIO_push
+PerlIOBuf_get_cnt
+PerlIOBuf_get_ptr
+PerlIOBuf_open
+PerlIOBuf_pushed
+PerlIOBuf_read
+PerlIOBuf_seek
+PerlIOBuf_set_ptrcnt
+PerlIOBuf_tell
+PerlIOBuf_unread
+PerlIOBuf_write
 PerlIO_allocate
-PerlIO_arg_fetch
 PerlIO_apply_layers
-perlsio_binmode
+PerlIO_arg_fetch
 PerlIO_binmode
-PerlIO_init
-PerlIO_tmpfile
-PerlIO_setpos
+PerlIO_define_layer
+PerlIO_define_layer
 PerlIO_getpos
-PerlIO_vsprintf
+PerlIO_init
+PerlIO_pending
+PerlIO_push
+PerlIO_setpos
 PerlIO_sprintf
+PerlIO_sv_dup
+PerlIO_tmpfile
+PerlIO_unread
+PerlIO_vsprintf
+perlsio_binmode

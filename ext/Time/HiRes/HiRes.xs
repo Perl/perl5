@@ -367,20 +367,54 @@ constant(name, arg)
 	char *		name
 	int		arg
 
-#ifdef HAS_USLEEP
+#if defined(HAS_USLEEP) && defined(HAS_GETTIMEOFDAY)
 
-void
+NV
 usleep(useconds)
-        int useconds 
-
-void
-sleep(...)
-	PROTOTYPE: ;$
+        NV useconds
+	PREINIT:
+	struct timeval Ta, Tb;
 	CODE:
-	if (items > 0)
-	    usleep((int)(SvNV(ST(0)) * 1000000));
-	else
+	gettimeofday(&Ta, NULL);
+	if (items > 0) {
+	    if (useconds > 1E6) {
+		IV seconds = (IV) (useconds / 1E6);
+		sleep(seconds);
+		useconds -= 1E6 * seconds;
+	    }
+	    usleep((UV)useconds);
+	} else
 	    PerlProc_pause();
+	gettimeofday(&Tb, NULL);
+#if 0
+	printf("[%ld %ld] [%ld %ld]\n", Tb.tv_sec, Tb.tv_usec, Ta.tv_sec, Ta.tv_usec);
+#endif
+	RETVAL = 1E6*(Tb.tv_sec-Ta.tv_sec)+(NV)((IV)Tb.tv_usec-(IV)Ta.tv_usec);
+
+	OUTPUT:
+	RETVAL
+
+NV
+sleep(...)
+	PREINIT:
+	struct timeval Ta, Tb;
+	CODE:
+	gettimeofday(&Ta, NULL);
+	if (items > 0) {
+	    NV seconds  = SvNV(ST(0));
+	    IV useconds = 1E6 * (seconds - (IV)seconds);
+	    sleep(seconds);
+	    usleep(useconds);
+	} else
+	    PerlProc_pause();
+	gettimeofday(&Tb, NULL);
+#if 0
+	printf("[%ld %ld] [%ld %ld]\n", Tb.tv_sec, Tb.tv_usec, Ta.tv_sec, Ta.tv_usec);
+#endif
+	RETVAL = (NV)(Tb.tv_sec-Ta.tv_sec)+0.000001*(NV)(Tb.tv_usec-Ta.tv_usec);
+
+	OUTPUT:
+	RETVAL
 
 #endif
 

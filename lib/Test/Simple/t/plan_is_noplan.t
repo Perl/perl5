@@ -1,13 +1,16 @@
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
+
 # Can't use Test.pm, that's a 5.005 thing.
 package My::Test;
 
 # This feature requires a fairly new version of Test::Harness
 BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
     require Test::Harness;
     if( $Test::Harness::VERSION < 1.20 ) {
-        print "1..0\n";
+        print "1..0 # Skipped: Need Test::Harness 1.20 or up\n";
         exit(0);
     }
 }
@@ -33,8 +36,8 @@ package main;
 require Test::Simple;
 
 push @INC, '../t/lib';
-require Test::Simple::Catch::More;
-my($out, $err) = Test::Simple::Catch::More::caught();
+require Test::Simple::Catch;
+my($out, $err) = Test::Simple::Catch::caught();
 
 
 Test::Simple->import('no_plan');

@@ -75,14 +75,14 @@ forms of these methods.
 
 =over 2
 
-=item canonpath()
+=item canonpath
 
 No physical check on the filesystem, but a logical cleanup of a
 path.
 
     $cpath = File::Spec->canonpath( $path ) ;
 
-=item catdir()
+=item catdir
 
 Concatenate two or more directory names to form a complete path ending
 with a directory. But remove the trailing slash from the resulting

@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..747\n";
+print "1..750\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2243,3 +2243,15 @@ print "# some Unicode properties\n";
     print "not " unless "\x{AC00}" =~ /\p{HangulSyllable}/;
     print "ok 747\n";
 }
+
+{
+    print "not " unless "\x{0100}" =~ /\p{Script=Latin}/;
+    print "ok 748\n";
+
+    print "not " unless "\x{0100}" =~ /\p{Block=LatinExtendedA}/;
+    print "ok 749\n";
+
+    print "not " unless "\x{0100}" =~ /\p{Category=UppercaseLetter}/;
+    print "ok 750\n";
+}
+
