@@ -46,6 +46,11 @@ typedef perl_os_thread pthread_t;
 } STMT_END
 #endif
 #endif
+#ifdef OEMVS
+#   define PERL_THREAD_GETSPECIFIC_THREAD(k, t) STMT_START { void *gsptr; PERL_THREAD_GETSPECIFIC(k, gsptr); t = (ithread *) gsptr; } STMT_END
+#else
+#   define PERL_THREAD_GETSPECIFIC_THREAD(k, t) PERL_THREAD_GETSPECIFIC(k, t)
+#endif
 
 /* Values for 'state' member */
 #define PERL_ITHR_JOINABLE		0
@@ -134,12 +139,7 @@ Perl_ithread_destruct (pTHX_ ithread* thread, const char *why)
 	    void *ptr;
 #endif
 	    PERL_SET_CONTEXT(thread->interp);
-#ifdef OEMVS
-	    PERL_THREAD_GETSPECIFIC(self_key,ptr);
-            current_thread = (ithread *) ptr;
-#else
-	    PERL_THREAD_GETSPECIFIC(self_key,current_thread);
-#endif
+	    PERL_THREAD_GETSPECIFIC_THREAD(self_key, current_thread);
 	    PERL_THREAD_SETSPECIFIC(self_key,thread);
 
 
@@ -358,21 +358,13 @@ ithread *
 SV_to_ithread(pTHX_ SV *sv)
 {
     ithread *thread;
-#ifdef OEMVS
-    void *ptr;
-#endif
     if (SvROK(sv))
      {
       thread = INT2PTR(ithread*, SvIV(SvRV(sv)));
      }
     else
      {
-#ifdef OEMVS
-      PERL_THREAD_GETSPECIFIC(self_key,ptr);
-      thread = (ithread *) ptr;
-#else
-      PERL_THREAD_GETSPECIFIC(self_key,thread);
-#endif
+      PERL_THREAD_GETSPECIFIC_THREAD(self_key, thread);
      }
     return thread;
 }
@@ -392,7 +384,7 @@ Perl_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* param
 	SV**            tmps_tmp = PL_tmps_stack;
 	I32             tmps_ix  = PL_tmps_ix;
 
-	PERL_THREAD_GETSPECIFIC(self_key,current_thread);
+	PERL_THREAD_GETSPECIFIC_THREAD(self_key, current_thread);
 	MUTEX_LOCK(&create_destruct_mutex);
 	thread = PerlMemShared_malloc(sizeof(ithread));
 	Zero(thread,1,ithread);
@@ -532,14 +524,8 @@ Perl_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* param
 SV*
 Perl_ithread_self (pTHX_ SV *obj, char* Class)
 {
-    ithread *thread;
-#ifdef OEMVS
-    void *ptr;
-    PERL_THREAD_GETSPECIFIC(self_key,ptr);
-    thread = (ithread *) ptr;
-#else
-    PERL_THREAD_GETSPECIFIC(self_key,thread);
-#endif
+   ithread *thread;
+   PERL_THREAD_GETSPECIFIC_THREAD(self_key, thread);
    if (thread)
 	return ithread_to_SV(aTHX_ obj, thread, Class, TRUE);
    else
@@ -600,7 +586,7 @@ Perl_ithread_join(pTHX_ SV *obj)
 	  clone_params.stashes = newAV();
 	  clone_params.flags |= CLONEf_JOIN_IN;
 	  PL_ptr_table = ptr_table_new();
-	  PERL_THREAD_GETSPECIFIC(self_key,current_thread);
+	  PERL_THREAD_GETSPECIFIC_THREAD(self_key, current_thread);
 	  PERL_THREAD_SETSPECIFIC(self_key,thread);
 
 #if 0
