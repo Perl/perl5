@@ -34,6 +34,152 @@ Version v5.6.2
 --------------
 
 ____________________________________________________________________________
+[ 21685] By: rgs                                   on 2003/11/08  13:48:05
+        Log: Configure hints upgrade from blead.
+     Branch: maint-5.6
+	   ! perl-5.6.2/hints/darwin.sh perl-5.6.2/hints/linux.sh
+	   ! perl-5.6.2/hints/solaris_2.sh
+____________________________________________________________________________
+[ 21684] By: rgs                                   on 2003/11/08  13:44:42
+        Log: Fix the list of added modules in perldelta.
+     Branch: maint-5.6
+	   ! perl-5.6.2/pod/perldelta.pod
+____________________________________________________________________________
+[ 21683] By: rgs                                   on 2003/11/08  13:22:04
+        Log: Copyright updates.
+     Branch: maint-5.6
+	   ! perl-5.6.2/README perl-5.6.2/perl.c perl-5.6.2/perl.h
+	   ! perl-5.6.2/x2p/a2p.c perl-5.6.2/x2p/a2py.c
+	   ! perl-5.6.2/x2p/walk.c
+____________________________________________________________________________
+[ 21682] By: rgs                                   on 2003/11/08  13:07:26
+        Log: perldelta update.
+     Branch: maint-5.6
+	   ! perl-5.6.2/pod/perldelta.pod
+____________________________________________________________________________
+[ 21681] By: rgs                                   on 2003/11/08  12:51:55
+        Log: Upgrade to File::Spec 0.86.
+     Branch: maint-5.6
+	   + perl-5.6.2/lib/File/Spec/t/crossplatform.t
+	   ! perl-5.6.2/MANIFEST perl-5.6.2/lib/File/Spec.pm
+	   ! perl-5.6.2/lib/File/Spec/Cygwin.pm
+	   ! perl-5.6.2/lib/File/Spec/Epoc.pm
+	   ! perl-5.6.2/lib/File/Spec/Mac.pm
+	   ! perl-5.6.2/lib/File/Spec/OS2.pm
+	   ! perl-5.6.2/lib/File/Spec/Unix.pm
+	   ! perl-5.6.2/lib/File/Spec/VMS.pm
+	   ! perl-5.6.2/lib/File/Spec/Win32.pm
+	   ! perl-5.6.2/lib/File/Spec/t/Spec.t
+____________________________________________________________________________
+[ 21680] By: rgs                                   on 2003/11/08  12:38:45
+        Log: Back to MakeMaker 6.17.
+             6.20 apparently breaks with non-GNU makes.
+     Branch: maint-5.6
+	   + perl-5.6.2/lib/ExtUtils/t/00setup_dummy.t
+	   + perl-5.6.2/lib/ExtUtils/t/zz_cleanup_dummy.t
+	   - perl-5.6.2/lib/ExtUtils/t/parse_version.t
+	   - perl-5.6.2/t/lib/MakeMaker/Test/Setup/BFD.pm
+	   - perl-5.6.2/t/lib/MakeMaker/Test/Setup/Problem.pm
+	   ! perl-5.6.2/MANIFEST perl-5.6.2/ext/SDBM_File/sdbm/Makefile.PL
+	   ! perl-5.6.2/lib/ExtUtils/Changes
+	   ! perl-5.6.2/lib/ExtUtils/Command.pm
+	   ! perl-5.6.2/lib/ExtUtils/Command/MM.pm
+	   ! perl-5.6.2/lib/ExtUtils/Install.pm
+	   ! perl-5.6.2/lib/ExtUtils/Liblist/Kid.pm
+	   ! perl-5.6.2/lib/ExtUtils/MANIFEST.SKIP
+	   ! perl-5.6.2/lib/ExtUtils/META.yml perl-5.6.2/lib/ExtUtils/MM.pm
+	   ! perl-5.6.2/lib/ExtUtils/MM_Any.pm
+	   ! perl-5.6.2/lib/ExtUtils/MM_Cygwin.pm
+	   ! perl-5.6.2/lib/ExtUtils/MM_NW5.pm
+	   ! perl-5.6.2/lib/ExtUtils/MM_Unix.pm
+	   ! perl-5.6.2/lib/ExtUtils/MM_VMS.pm
+	   ! perl-5.6.2/lib/ExtUtils/MM_Win32.pm
+	   ! perl-5.6.2/lib/ExtUtils/MM_Win95.pm
+	   ! perl-5.6.2/lib/ExtUtils/MakeMaker.pm
+	   ! perl-5.6.2/lib/ExtUtils/Manifest.pm
+	   ! perl-5.6.2/lib/ExtUtils/README perl-5.6.2/lib/ExtUtils/TODO
+	   ! perl-5.6.2/lib/ExtUtils/instmodsh
+	   ! perl-5.6.2/lib/ExtUtils/t/Command.t
+	   ! perl-5.6.2/lib/ExtUtils/t/INST.t
+	   ! perl-5.6.2/lib/ExtUtils/t/INST_PREFIX.t
+	   ! perl-5.6.2/lib/ExtUtils/t/Install.t
+	   ! perl-5.6.2/lib/ExtUtils/t/MM_Cygwin.t
+	   ! perl-5.6.2/lib/ExtUtils/t/MM_Unix.t
+	   ! perl-5.6.2/lib/ExtUtils/t/Manifest.t
+	   ! perl-5.6.2/lib/ExtUtils/t/basic.t
+	   ! perl-5.6.2/lib/ExtUtils/t/postamble.t
+	   ! perl-5.6.2/lib/ExtUtils/t/prefixify.t
+	   ! perl-5.6.2/lib/ExtUtils/t/prereq_print.t
+	   ! perl-5.6.2/lib/ExtUtils/t/problems.t
+	   ! perl-5.6.2/lib/ExtUtils/t/writemakefile_args.t
+	   ! perl-5.6.2/t/lib/MakeMaker/Test/Setup/Recurs.pm
+____________________________________________________________________________
+[ 21679] By: rgs                                   on 2003/11/07  22:27:42
+        Log: Upgrade to MakeMaker 6.20.
+             Get the SDBM_File/sdbm Makefile.PL from blead, as it now breaks.
+     Branch: maint-5.6
+	   + perl-5.6.2/lib/ExtUtils/t/parse_version.t
+	   + perl-5.6.2/t/lib/MakeMaker/Test/Setup/BFD.pm
+	   + perl-5.6.2/t/lib/MakeMaker/Test/Setup/Problem.pm
+	   - perl-5.6.2/lib/ExtUtils/t/00setup_dummy.t
+	   - perl-5.6.2/lib/ExtUtils/t/zz_cleanup_dummy.t
+	   ! perl-5.6.2/MANIFEST perl-5.6.2/ext/SDBM_File/sdbm/Makefile.PL
+	   ! perl-5.6.2/lib/ExtUtils/Changes
+	   ! perl-5.6.2/lib/ExtUtils/Command.pm
+	   ! perl-5.6.2/lib/ExtUtils/Command/MM.pm
+	   ! perl-5.6.2/lib/ExtUtils/Install.pm
+	   ! perl-5.6.2/lib/ExtUtils/Liblist/Kid.pm
+	   ! perl-5.6.2/lib/ExtUtils/MANIFEST.SKIP
+	   ! perl-5.6.2/lib/ExtUtils/META.yml perl-5.6.2/lib/ExtUtils/MM.pm
+	   ! perl-5.6.2/lib/ExtUtils/MM_Any.pm
+	   ! perl-5.6.2/lib/ExtUtils/MM_Cygwin.pm
+	   ! perl-5.6.2/lib/ExtUtils/MM_NW5.pm
+	   ! perl-5.6.2/lib/ExtUtils/MM_Unix.pm
+	   ! perl-5.6.2/lib/ExtUtils/MM_VMS.pm
+	   ! perl-5.6.2/lib/ExtUtils/MM_Win32.pm
+	   ! perl-5.6.2/lib/ExtUtils/MM_Win95.pm
+	   ! perl-5.6.2/lib/ExtUtils/MakeMaker.pm
+	   ! perl-5.6.2/lib/ExtUtils/Manifest.pm
+	   ! perl-5.6.2/lib/ExtUtils/README perl-5.6.2/lib/ExtUtils/TODO
+	   ! perl-5.6.2/lib/ExtUtils/instmodsh
+	   ! perl-5.6.2/lib/ExtUtils/t/Command.t
+	   ! perl-5.6.2/lib/ExtUtils/t/INST.t
+	   ! perl-5.6.2/lib/ExtUtils/t/INST_PREFIX.t
+	   ! perl-5.6.2/lib/ExtUtils/t/Install.t
+	   ! perl-5.6.2/lib/ExtUtils/t/MM_Cygwin.t
+	   ! perl-5.6.2/lib/ExtUtils/t/MM_Unix.t
+	   ! perl-5.6.2/lib/ExtUtils/t/Manifest.t
+	   ! perl-5.6.2/lib/ExtUtils/t/basic.t
+	   ! perl-5.6.2/lib/ExtUtils/t/postamble.t
+	   ! perl-5.6.2/lib/ExtUtils/t/prefixify.t
+	   ! perl-5.6.2/lib/ExtUtils/t/prereq_print.t
+	   ! perl-5.6.2/lib/ExtUtils/t/problems.t
+	   ! perl-5.6.2/lib/ExtUtils/t/writemakefile_args.t
+	   ! perl-5.6.2/t/lib/MakeMaker/Test/Setup/Recurs.pm
+____________________________________________________________________________
+[ 21678] By: rgs                                   on 2003/11/07  20:42:07
+        Log: Integrate change #21617 from bleadperl :
+             
+             Portability nit for MinGW 3.
+             
+             Subject: MinGW-3.1.0-1 _CRTIMP definition preempting win32.h's
+             From: Greg Matheson <lang@ms.chinmin.edu.tw>
+             Date: Thu, 30 Oct 2003 14:11:58 +0800
+             Message-ID: <20031030141158.A11772@ms>
+             (actual patch by Abe Timmerman)
+     Branch: maint-5.6
+	   ! perl-5.6.2/win32/win32.h
+____________________________________________________________________________
+[ 21510] By: rgs                                   on 2003/10/21  11:17:43
+        Log: The THREADS_HAVE_PIDS cpp symbols is not used in 5.6.x.
+     Branch: maint-5.6
+	   ! perl-5.6.2/hints/linux.sh
+____________________________________________________________________________
+[ 21463] By: rgs                                   on 2003/10/15  21:42:45
+        Log: More Changes and perldelta updating.
+     Branch: maint-5.6
+	   ! perl-5.6.2/Changes perl-5.6.2/pod/perldelta.pod
+____________________________________________________________________________
 [ 21462] By: rgs                                   on 2003/10/15  21:28:10
         Log: Upgrade to Safe 2.10 from bleadperl.
              Don't get the safeops.t from blead as it needs a core patch.
