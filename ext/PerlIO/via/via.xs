@@ -346,7 +346,7 @@ PerlIOVia_binmode(pTHX_ PerlIO * f)
     return SvIV(result);
 }
 
-IV
+Off_t
 PerlIOVia_seek(pTHX_ PerlIO * f, Off_t offset, int whence)
 {
     PerlIOVia *s = PerlIOSelf(f, PerlIOVia);
@@ -356,7 +356,14 @@ PerlIOVia_seek(pTHX_ PerlIO * f, Off_t offset, int whence)
     SV *result =
 	PerlIOVia_method(aTHX_ f, MYMethod(SEEK), G_SCALAR, offsv, whsv,
 			 Nullsv);
+#if Off_t_size == 8 && defined(CONDOP_SIZE) && CONDOP_SIZE < Off_t_size
+    if (result)
+	return (Off_t) SvIV(result);
+    else
+	return (Off_t) -1;
+#else
     return (result) ? SvIV(result) : -1;
+#endif
 }
 
 Off_t

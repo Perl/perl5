@@ -131,4 +131,6 @@
 /* For use by POSIX.xs */
 extern int tcsendbreak(int, int);
 
+#define CONDOP_SIZE 4 /* The Plan 9 compiler cannot return quads from ?: */
+
 #endif /* __PLAN9ISH_H__ */
