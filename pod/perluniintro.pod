@@ -250,7 +250,7 @@ If you want to force the result to Unicode characters, use the special
 C<"U0"> prefix.  It consumes no arguments but forces the result to be
 in Unicode characters, instead of bytes.
 
-   my $chars = pack("U0C*", 0x80, 0xFF);
+   my $chars = pack("U0C*", 0x80, 0x42);
 
 Likewise, you can force the result to be bytes by using the special
 C<"C0"> prefix.
