@@ -1208,7 +1208,8 @@ EOF
 #	    ]]
 EOF
     print $structoutdir;
-    XS_process($structoutput || "\tXS_OUTPUT($structtype, STRUCT, ST(0))\n");
+    XS_process($structoutput || "\tXS_OUTPUT($structtype, STRUCT, ST(0))\n")
+	if $structoutput || $deref eq ".";
     print Q<<"EOF";
 #	]]
 EOF
