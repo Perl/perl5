@@ -2602,6 +2602,16 @@ the problem, however, you will get the same error message each time
 you run Perl.  How to really fix the problem can be found in
 L<perllocale> section B<LOCALE PROBLEMS>.
 
+=item perlio: argument list not closed for layer "%s"
+
+(S) When pusing a layer with arguments onto the Perl I/O system you forgot
+the ) that closes the argument list.  (Layers take care of transforming
+data between external and internal representations.)  Perl assumed that
+the argument list finished at the next : or the end of the layer
+specification. If your program didn't explicitly request the failing
+operation, it may be the result of the value of the environment variable
+PERLIO.
+
 =item perlio: unknown layer "%s"
 
 (S) An attempt was made to push an unknown layer onto the Perl I/O
