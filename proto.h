@@ -1275,7 +1275,7 @@ STATIC int	S_sv_2iuv_non_preserve(pTHX_ SV *sv, I32 numtype);
 STATIC I32	S_expect_number(pTHX_ char** pattern);
 #
 #  if defined(USE_ITHREADS)
-STATIC SV*	S_gv_share(pTHX_ SV *sv);
+STATIC SV*	S_gv_share(pTHX_ SV *sv, CLONE_PARAMS *param);
 #  endif
 #endif
 

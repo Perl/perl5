@@ -1206,4 +1206,5 @@ Returns a pointer to the character buffer.
 struct clone_params {
   AV* stashes;
   UV  flags;
+  PerlInterpreter *proto_perl;
 };

@@ -8859,10 +8859,10 @@ char *PL_watch_pvx;
 /* attempt to make everything in the typeglob readonly */
 
 STATIC SV *
-S_gv_share(pTHX_ SV *sstr)
+S_gv_share(pTHX_ SV *sstr, CLONE_PARAMS *param)
 {
     GV *gv = (GV*)sstr;
-    SV *sv = &PL_sv_no; /* just need SvREADONLY-ness */
+    SV *sv = &param->proto_perl->Isv_no; /* just need SvREADONLY-ness */
 
     if (GvIO(gv) || GvFORM(gv)) {
         GvUNIQUE_off(gv); /* GvIOs cannot be shared. nor can GvFORMs */
@@ -9053,7 +9053,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
     case SVt_PVGV:
 	if (GvUNIQUE((GV*)sstr)) {
             SV *share;
-            if ((share = gv_share(sstr))) {
+            if ((share = gv_share(sstr, param))) {
                 del_SV(dstr);
                 dstr = share;
                 ptr_table_store(PL_ptr_table, sstr, dstr);
@@ -9759,6 +9759,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 #    endif	/* DEBUGGING */
 #endif		/* PERL_IMPLICIT_SYS */
     param->flags = flags;
+    param->proto_perl = proto_perl;
 
     /* arena roots */
     PL_xiv_arenaroot	= NULL;
