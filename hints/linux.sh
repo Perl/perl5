@@ -170,8 +170,8 @@ fi
 if [  ! "`csh -c 'echo $version' 2>/dev/null`"  ] 
 then
     echo 'Real csh found (might break); looking for tcsh ...'
-    # Use ../UU/loc to find tcsh.  (We run in the hints/ directory.)
-    if xxx=`../UU/loc tcsh blurfl $pth`; $test -f "$xxx"; then
+    # Use ./UU/loc to find tcsh.  (We no longer run in the hints/ directory)
+    if xxx=`./UU/loc tcsh blurfl $pth`; $test -f "$xxx"; then
 	echo "Found tcsh.  I'll use it for globbing."
 	# We can't change Configure's setting of $csh, due to the way
 	# Configure handles $d_portable and commands found in $loclist.
