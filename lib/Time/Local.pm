@@ -48,11 +48,22 @@ BEGIN {
 
     $YearFix = ((gmtime(946684800))[5] == 100) ? 100 : 0;
 
-    my $t = time;
-    my @lt = localtime($t);
-    my @gt = gmtime($t);
+}
 
-    $tzsec = ($gt[1] - $lt[1]) * $MIN + ($gt[2] - $lt[2]) * $HR;
+sub timegm {
+    $ym = pack(C2, @_[5,4]);
+    $cheat = $cheat{$ym} || &cheat;
+    return -1 if $cheat<0 and $^O ne 'VMS';
+    $cheat + $_[0] * $SEC + $_[1] * $MIN + $_[2] * $HR + ($_[3]-1) * $DAY;
+}
+
+sub timelocal {
+    my $t = &timegm;
+
+    my (@lt) = localtime($t);
+    my (@gt) = gmtime($t);
+
+    my $tzsec = ($gt[1] - $lt[1]) * $MIN + ($gt[2] - $lt[2]) * $HR;
 
     my($lday,$gday) = ($lt[7],$gt[7]);
     if($lt[5] > $gt[5]) {
@@ -65,18 +76,9 @@ BEGIN {
 	$tzsec += ($gt[7] - $lt[7]) * $DAY;
     }
 
-  $tzsec += $HR if($lt[8]);
-}
-
-sub timegm {
-    $ym = pack(C2, @_[5,4]);
-    $cheat = $cheat{$ym} || &cheat;
-    return -1 if $cheat<0 and $^O ne 'VMS';
-    $cheat + $_[0] * $SEC + $_[1] * $MIN + $_[2] * $HR + ($_[3]-1) * $DAY;
-}
-
-sub timelocal {
-    $time = &timegm + $tzsec;
+    $tzsec += $HR if($lt[8]);
+    
+    $time = $t + $tzsec;
     return -1 if $cheat<0 and $^O ne 'VMS';
     @test = localtime($time);
     $time -= $HR if $test[2] != $_[2];
