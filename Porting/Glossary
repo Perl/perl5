@@ -340,6 +340,10 @@ csh (Loc.U):
 	full pathname (if any) of the csh program.  After Configure runs,
 	the value is reset to a plain "csh" and is not useful.
 
+d__fwalk (d__fwalk.U):
+	This variable conditionally defines HAS__FWALK if _fwalk() is
+	available to apply a function to all the file handles.
+
 d_access (d_access.U):
 	This variable conditionally defines HAS_ACCESS if the access() system
 	call is available to check for access permissions using real IDs.

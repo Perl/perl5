@@ -5688,8 +5688,7 @@ C<-Duse64bitint>, C<-Duselongdouble>, C<-Dusethreads>, C<-Duselargefiles>
 
 =item Suspicious Warnings
 
-I<dlsym()>, Win9x and C<d_eofnblk>, Checking how std your stdio is..,
-Compiler/Preprocessor defines
+I<dlsym()>, Win9x and C<d_eofnblk>, Compiler/Preprocessor defines
 
 =back
 
@@ -6092,9 +6091,13 @@ C<COND_WAIT>, F<os2.c>
 
 =item Build, test, install
 
+=item build anomalies
+
+=item testing anomalies
+
 =item Usage Hints
 
-=item Extensions
+=item Modules and Extensions
 
 =back
 
@@ -6226,6 +6229,8 @@ DATAMODEL_NATIVE specified", sh: ar: not found
 =item Proc::ProcessTable
 
 =item BSD::Resource
+
+=item Net::SSLeay
 
 =back
 
@@ -8113,26 +8118,27 @@ C<d_endsent>, C<d_eofnblk>, C<d_eunice>, C<d_fchmod>, C<d_fchown>,
 C<d_fcntl>, C<d_fcntl_can_lock>, C<d_fd_macros>, C<d_fd_set>,
 C<d_fds_bits>, C<d_fgetpos>, C<d_flexfnam>, C<d_flock>, C<d_fork>,
 C<d_fpathconf>, C<d_fpos64_t>, C<d_frexpl>, C<d_fs_data_s>, C<d_fseeko>,
-C<d_fsetpos>, C<d_fstatfs>, C<d_fstatvfs>, C<d_ftello>, C<d_ftime>,
-C<d_Gconvert>, C<d_getcwd>, C<d_getespwnam>, C<d_getfsstat>, C<d_getgrent>,
-C<d_getgrps>, C<d_gethbyaddr>, C<d_gethbyname>, C<d_gethent>,
-C<d_gethname>, C<d_gethostprotos>, C<d_getlogin>, C<d_getmnt>,
-C<d_getmntent>, C<d_getnbyaddr>, C<d_getnbyname>, C<d_getnent>,
-C<d_getnetprotos>, C<d_getpbyname>, C<d_getpbynumber>, C<d_getpent>,
-C<d_getpgid>, C<d_getpgrp2>, C<d_getpgrp>, C<d_getppid>, C<d_getprior>,
-C<d_getprotoprotos>, C<d_getprpwnam>, C<d_getpwent>, C<d_getsbyname>,
-C<d_getsbyport>, C<d_getsent>, C<d_getservprotos>, C<d_getspnam>,
-C<d_gettimeod>, C<d_gnulibc>, C<d_grpasswd>, C<d_hasmntopt>, C<d_htonl>,
-C<d_iconv>, C<d_index>, C<d_inetaton>, C<d_int64_t>, C<d_isascii>,
-C<d_isnan>, C<d_isnanl>, C<d_killpg>, C<d_lchown>, C<d_ldbl_dig>,
-C<d_link>, C<d_locconv>, C<d_lockf>, C<d_longdbl>, C<d_longlong>,
-C<d_lseekproto>, C<d_lstat>, C<d_madvise>, C<d_mblen>, C<d_mbstowcs>,
-C<d_mbtowc>, C<d_memchr>, C<d_memcmp>, C<d_memcpy>, C<d_memmove>,
-C<d_memset>, C<d_mkdir>, C<d_mkdtemp>, C<d_mkfifo>, C<d_mkstemp>,
-C<d_mkstemps>, C<d_mktime>, C<d_mmap>, C<d_modfl>, C<d_mprotect>, C<d_msg>,
-C<d_msg_ctrunc>, C<d_msg_dontroute>, C<d_msg_oob>, C<d_msg_peek>,
-C<d_msg_proxy>, C<d_msgctl>, C<d_msgget>, C<d_msgrcv>, C<d_msgsnd>,
-C<d_msync>, C<d_munmap>, C<d_mymalloc>, C<d_nice>, C<d_nv_preserves_uv>,
+C<d_fsetpos>, C<d_fstatfs>, C<d_fstatvfs>, C<d_fsync>, C<d_ftello>,
+C<d_ftime>, C<d_Gconvert>, C<d_getcwd>, C<d_getespwnam>, C<d_getfsstat>,
+C<d_getgrent>, C<d_getgrps>, C<d_gethbyaddr>, C<d_gethbyname>,
+C<d_gethent>, C<d_gethname>, C<d_gethostprotos>, C<d_getlogin>,
+C<d_getmnt>, C<d_getmntent>, C<d_getnbyaddr>, C<d_getnbyname>,
+C<d_getnent>, C<d_getnetprotos>, C<d_getpagsz>, C<d_getpbyname>,
+C<d_getpbynumber>, C<d_getpent>, C<d_getpgid>, C<d_getpgrp2>, C<d_getpgrp>,
+C<d_getppid>, C<d_getprior>, C<d_getprotoprotos>, C<d_getprpwnam>,
+C<d_getpwent>, C<d_getsbyname>, C<d_getsbyport>, C<d_getsent>,
+C<d_getservprotos>, C<d_getspnam>, C<d_gettimeod>, C<d_gnulibc>,
+C<d_grpasswd>, C<d_hasmntopt>, C<d_htonl>, C<d_iconv>, C<d_index>,
+C<d_inetaton>, C<d_int64_t>, C<d_isascii>, C<d_isnan>, C<d_isnanl>,
+C<d_killpg>, C<d_lchown>, C<d_ldbl_dig>, C<d_link>, C<d_locconv>,
+C<d_lockf>, C<d_longdbl>, C<d_longlong>, C<d_lseekproto>, C<d_lstat>,
+C<d_madvise>, C<d_mblen>, C<d_mbstowcs>, C<d_mbtowc>, C<d_memchr>,
+C<d_memcmp>, C<d_memcpy>, C<d_memmove>, C<d_memset>, C<d_mkdir>,
+C<d_mkdtemp>, C<d_mkfifo>, C<d_mkstemp>, C<d_mkstemps>, C<d_mktime>,
+C<d_mmap>, C<d_modfl>, C<d_mprotect>, C<d_msg>, C<d_msg_ctrunc>,
+C<d_msg_dontroute>, C<d_msg_oob>, C<d_msg_peek>, C<d_msg_proxy>,
+C<d_msgctl>, C<d_msgget>, C<d_msgrcv>, C<d_msgsnd>, C<d_msync>,
+C<d_munmap>, C<d_mymalloc>, C<d_nice>, C<d_nv_preserves_uv>,
 C<d_nv_preserves_uv_bits>, C<d_off64_t>, C<d_old_pthread_create_joinable>,
 C<d_oldpthreads>, C<d_oldsock>, C<d_open3>, C<d_pathconf>, C<d_pause>,
 C<d_perl_otherlibdirs>, C<d_phostname>, C<d_pipe>, C<d_poll>,
@@ -10300,7 +10306,9 @@ IO ), handles( [ EVENT_MASK ] )
 
 =item DESCRIPTION
 
-=item SEE ALSO
+$io->getpos, $io->setpos, $io->setpos ( POS, WHENCE ), WHENCE=0 (SEEK_SET),
+WHENCE=1 (SEEK_CUR), WHENCE=1 (SEEK_END), $io->sysseek( POS, WHENCE ),
+$io->tell
 
 =item HISTORY
 
@@ -10536,7 +10544,9 @@ I/O objects
 
 =item DESCRIPTION
 
-=item SEE ALSO
+$io->getpos, $io->setpos, $io->setpos ( POS, WHENCE ), WHENCE=0 (SEEK_SET),
+WHENCE=1 (SEEK_CUR), WHENCE=1 (SEEK_END), $io->sysseek( POS, WHENCE ),
+$io->tell
 
 =item HISTORY
 

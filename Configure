@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sun Nov 12 20:50:13 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Thu Nov 16 03:18:20 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >/tmp/c1$$ <<EOF
@@ -308,6 +308,7 @@ cppminus=''
 cpprun=''
 cppstdin=''
 crosscompile=''
+d__fwalk=''
 d_access=''
 d_accessx=''
 d_alarm=''
@@ -7754,6 +7755,10 @@ qgcvt) d_Gconvert='qgcvt((x),(n),(b))' ;;
    ;;  
 esac
 
+: see if _fwalk exists
+set fwalk d__fwalk
+eval $inlibc
+
 : Initialize h_fcntl
 h_fcntl=false
 
@@ -14207,6 +14212,10 @@ $rm -f try try.*
 set d_socklen_t
 eval $setvar
 
+: see if this is a socks.h system
+set socks.h i_socks
+eval $inhdr
+
 : check for type of the size argument to socket calls
 case "$d_socket" in
 "$define")
@@ -14214,7 +14223,6 @@ case "$d_socket" in
 
 Checking to see what type is the last argument of accept().
 EOM
-	hdrs="$define sys/types.h $d_socket sys/socket.h" 
 	yyy=''
 	case "$d_socklen_t" in
 	"$define") yyy="$yyy socklen_t"
@@ -14223,10 +14231,19 @@ EOM
 	for xxx in $yyy; do
 		case "$socksizetype" in
 		'')	try="extern int accept(int, struct sockaddr *, $xxx *);"
-			if ./protochk "$try" $hdrs; then
-				echo "Your system accepts '$xxx *' for the last argument of accept()."
-				socksizetype="$xxx"
-			fi
+			case "$usesocks" in
+			"$define")
+				if ./protochk "$try" $i_systypes sys/types.h $d_socket sys/socket.h literal '#define INCLUDE_PROTOTYPES' $i_socks socks.h.; then
+					echo "Your system accepts '$xxx *' for the last argument of accept()."
+					socksizetype="$xxx"
+				fi
+				;;
+			*)	if ./protochk "$try"  $i_systypes sys/types.h $d_socket sys/socket.h; then
+					echo "Your system accepts '$xxx *' for the last argument of accept()."
+					socksizetype="$xxx"
+				fi
+				;;
+			esac
 			;;
 		esac
 	done
@@ -14873,10 +14890,6 @@ val=$val3; set i_termios; eval $setvar
 set shadow.h i_shadow
 eval $inhdr
 
-: see if this is a socks.h system
-set socks.h i_socks
-eval $inhdr
-
 : see if stdarg is available
 echo " "
 if $test `./findhdr stdarg.h`; then
@@ -15519,6 +15532,7 @@ d_PRIo64='$d_PRIo64'
 d_PRIu64='$d_PRIu64'
 d_PRIx64='$d_PRIx64'
 d_SCNfldbl='$d_SCNfldbl'
+d__fwalk='$d__fwalk'
 d_access='$d_access'
 d_accessx='$d_accessx'
 d_alarm='$d_alarm'
