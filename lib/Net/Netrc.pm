@@ -11,7 +11,7 @@ use strict;
 use FileHandle;
 use vars qw($VERSION);
 
-$VERSION = "2.10"; # $Id: //depot/libnet/Net/Netrc.pm#4$
+$VERSION = "2.11"; # $Id: //depot/libnet/Net/Netrc.pm#10 $
 
 my %netrc = ();
 
@@ -19,7 +19,7 @@ sub _readrc
 {
  my $host = shift;
  my($home,$file);
- 
+
  if($^O eq "MacOS") {
    $home = $ENV{HOME} || `pwd`;
    chomp($home);
@@ -37,7 +37,10 @@ sub _readrc
  $netrc{default} = undef;
 
  # OS/2 and Win32 do not handle stat in a way compatable with this check :-(
- unless($^O eq 'os2' || $^O eq 'MSWin32' || $^O eq 'MacOS')
+ unless($^O eq 'os2'
+     || $^O eq 'MSWin32'
+     || $^O eq 'MacOS'
+     || $^O =~ /^cygwin/)
   { 
    my @stat = stat($file);
 
@@ -199,7 +202,7 @@ Net::Netrc - OO interface to users netrc file
 =head1 SYNOPSIS
 
     use Net::Netrc;
-    
+
     $mach = Net::Netrc->lookup('some.machine');
     $login = $mach->login;
     ($login, $password, $account) = $mach->lpa;
@@ -322,5 +325,9 @@ L<Net::Cmd>
 Copyright (c) 1995-1998 Graham Barr. All rights reserved.
 This program is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
+
+=for html <hr>
+
+$Id: //depot/libnet/Net/Netrc.pm#10 $
 
 =cut

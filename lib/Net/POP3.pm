@@ -13,7 +13,7 @@ use Net::Cmd;
 use Carp;
 use Net::Config;
 
-$VERSION = "2.21"; # $Id$
+$VERSION = "2.22"; # $Id: //depot/libnet/Net/POP3.pm#19 $
 
 @ISA = qw(Net::Cmd IO::Socket::INET);
 
@@ -118,7 +118,7 @@ sub apop
               : "";
   }
 
- my $md = new MD5;
+ my $md = MD5->new;
  $md->add($banner,$pass);
 
  return undef
@@ -159,7 +159,7 @@ sub reset
 
  return 0 
    unless($me->_RSET);
-  
+
  if(defined ${*$me}{'net_pop3_mail'})
   {
    local $_;
@@ -215,7 +215,7 @@ sub list
    $me->message =~ /\d+\D+(\d+)/;
    return $1 || undef;
   }
- 
+
  my $info = $me->read_until_dot
 	or return undef;
 
@@ -277,7 +277,7 @@ sub ping
  ($1 || 0, $2 || 0);
 }
 
- 
+
 sub _STAT { shift->command('STAT')->response() == CMD_OK }
 sub _LIST { shift->command('LIST',@_)->response() == CMD_OK }
 sub _RETR { shift->command('RETR',$_[0])->response() == CMD_OK }
@@ -353,7 +353,7 @@ Net::POP3 - Post Office Protocol 3 Client class (RFC1081)
 =head1 SYNOPSIS
 
     use Net::POP3;
-    
+
     # Constructors
     $pop = Net::POP3->new('pop3host');
     $pop = Net::POP3->new('pop3host', Timeout => 60);
@@ -517,5 +517,9 @@ Graham Barr <gbarr@pobox.com>
 Copyright (c) 1995-1997 Graham Barr. All rights reserved.
 This program is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
+
+=for html <hr>
+
+I<$Id: //depot/libnet/Net/POP3.pm#19 $>
 
 =cut

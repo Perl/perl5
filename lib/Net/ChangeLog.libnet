@@ -1,3 +1,138 @@
+Change 625 on 2001/08/17 by <gbarr@pobox.com> (Graham Barr)
+
+	Doc updates and add cc and bcc as aliases for recipient
+
+Change 624 on 2001/08/17 by <gbarr@pobox.com> (Graham Barr)
+
+	Don't set ENV variables
+
+Change 623 on 2001/08/17 by <gbarr@pobox.com> (Graham Barr)
+
+	Support mixed case in the EHLO response
+
+Change 622 on 2001/08/06 by <gbarr@pobox.com> (Graham Barr)
+
+	Documentation update
+
+Change 621 on 2001/08/06 by <gbarr@pobox.com> (Graham Barr)
+
+	Set the status if command returns due to the connection being closed
+
+Change 620 on 2001/08/06 by <gbarr@pobox.com> (Graham Barr)
+
+	Fix for _msg_spec when passed the same msg number twice, pass N instead of N-N
+
+Change 619 on 2001/05/29 by <gbarr@pobox.com> (Graham Barr)
+
+	Remove DummyInetd
+
+Change 618 on 2001/05/29 by <gbarr@pobox.com> (Graham Barr)
+
+	Move snpp into its own distribution
+
+Change 615 on 2001/05/29 by <gbarr@pobox.com> (Graham Barr)
+
+	Move PH to its own dist
+
+Change 614 on 2001/05/29 by <gbarr@pobox.com> (Graham Barr)
+
+	Move TFTP out of libnet
+
+Change 612 on 2001/03/29 by <gbarr@pobox.com> (Graham Barr)
+
+	Support some non standard servers that return more than
+	just a number in response to SIZE. But the size must be
+	the last thing on the response line [Jeffery W Long]
+
+Change 603 on 2000/10/06 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::Config
+	- Added documentation for ftp_firewall_type
+
+Change 574 on 2000/08/24 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::FTP
+	- Make listen socket listen on same interfacce as the command connection
+	  this fixes a problem when going via a SOCKS firewall
+
+Change 458 on 2000/03/29 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::Cmd, Net::FTP
+	- Support for os390, modified from a patch from Dan Campbell
+
+Change 455 on 2000/03/29 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::Domain
+	- silence warnings on Win32 that domainname does not exist
+
+Change 454 on 2000/03/29 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::FTP
+	- More error checking in ->get()
+
+Change 453 on 2000/03/29 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::FTP
+	- update pattern to dig out unique filename from stou
+
+Change 452 on 2000/03/29 by <gbarr@pobox.com> (Graham Barr)
+
+	t/ftp.t
+	- silently pass if the stor to /pub fails
+
+Change 451 on 2000/03/29 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::FTP
+	- Add Timeout to listen socket
+
+Change 450 on 2000/03/29 by <gbarr@pobox.com> (Graham Barr)
+
+	Makefile.PL
+	- only add ppd conditional on perl version
+
+Change 449 on 2000/03/29 by <gbarr@pobox.com> (Graham Barr)
+
+	Fixed mput example in FAQ to use glob()
+
+Change 448 on 2000/03/29 by <gbarr@pobox.com> (Graham Barr)
+
+	Update README to reflect new way Configure works
+
+Change 447 on 2000/03/29 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::Config
+	- Check that $home is defined before we use it
+
+Change 446 on 2000/03/29 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::FTP
+	- add link to autoftp example
+
+Change 445 on 2000/03/29 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::FTP::A, Net::FTP::I
+	- Move the timeout check into the loop to prevent hanging
+	  on write.
+
+Change 444 on 2000/03/29 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::Cmd, Net::FTP::A, Net::FTP::I
+	- MacOS does not like the setting of $SIG{PIPE} so check $^O
+
+Change 432 on 2000/03/29 by <gbarr@pobox.com> (Graham Barr)
+
+	POD cleanup
+
+Change 431 on 2000/03/29 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::NNTP
+	- Allow a filehandle to be passed to article, head and body
+
+Change 430 on 2000/03/29 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::TFTP
+	- There is no quit method, so don't document one
+
 Change 402 on 2000/03/23 by <gbarr@pobox.com> (Graham Barr)
 
 	Net::Config

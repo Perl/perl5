@@ -1019,7 +1019,6 @@ lib/Net/demos/nntp		libnet
 lib/Net/demos/nntp.mirror	libnet
 lib/Net/demos/pop3		libnet
 lib/Net/demos/smtp.self		libnet
-lib/Net/demos/snpp		libnet
 lib/Net/demos/time		libnet
 lib/Net/Domain.pm		libnet
 lib/Net/FTP.pm			libnet
@@ -1031,7 +1030,6 @@ lib/Net/FTP/L.pm		libnet
 lib/Net/hostent.pm		By-name interface to Perl's builtin gethost*
 lib/Net/hostent.t		See if Net::hostent works
 lib/Net/Hostname.eg		libnet
-lib/Net/libnet.ppd		libnet
 lib/Net/libnetFAQ.pod		libnet
 lib/Net/netent.pm		By-name interface to Perl's builtin getnet*
 lib/Net/netent.t		See if Net::netent works
@@ -1041,7 +1039,6 @@ lib/Net/Ping.pm			Hello, anybody home?
 lib/Net/POP3.pm			libnet
 lib/Net/protoent.pm		By-name interface to Perl's builtin getproto*
 lib/Net/protoent.t		See if Net::protoent works
-lib/Net/README.config		libnet
 lib/Net/README.libnet		libnet
 lib/Net/servent.pm		By-name interface to Perl's builtin getserv*
 lib/Net/servent.t		See if Net::servtent works
