@@ -9,10 +9,10 @@ my $cwd_untainted;
 
 BEGIN {
     chdir 't' if -d 't';
-   @INC = '../lib';
+    unshift @INC => '../lib';
 
     for (keys %ENV) { # untaint ENV
-	($ENV{$_}) = keys %{{ map {$_ => 1} $ENV{$_} }};
+	($ENV{$_}) = $ENV{$_} =~ /(.*)/;
     }
 
     $SIG{'__WARN__'} = sub { $warn_msg = $_[0]; warn "# Warn: $_[0]"; }
@@ -213,6 +213,19 @@ if ($^O eq 'MacOS') {
                    'fb' => 1, 'fba' => 1);
     delete @Expect_Dir{'fb','fba'} unless $symlink_exists;
     File::Find::find( {wanted => \&wanted, untaint => 1},':fa' );
+    Check( scalar(keys %Expect) == 0 );
+
+    print "# check re-entancy\n";
+    %Expect = (':' => 1, 'fsl' => 1, 'fa_ord' => 1, 'fab' => 1, 'fab_ord' => 1,
+           'faba' => 1, 'faa' => 1, 'faa_ord' => 1);
+    delete $Expect{'fsl'} unless $symlink_exists;
+    %Expect_Dir = (':' => 1, 'fa' => 1, 'faa' => 1, 'fab' => 1, 'faba' => 1, 
+                   'fb' => 1, 'fba' => 1);
+    delete @Expect_Dir{'fb','fba'} unless $symlink_exists;
+    File::Find::find( {wanted => sub { 
+      wanted();
+      File::Find::find( {wanted => sub {} , untaint => 1 },':' );
+    }, untaint => 1 }, ':fa' );
     Check( scalar(keys %Expect) == 0 );
 
     %Expect=(':fa' => 1, ':fa:fsl' => 1, ':fa:fa_ord' => 1, ':fa:fab' => 1,
@@ -463,6 +476,19 @@ if ($^O eq 'MacOS') {
                    'fb' => 1, 'fba' => 1);
     delete @Expect_Dir{'fb','fba'} unless $symlink_exists;
     File::Find::find( {wanted => \&wanted, untaint => 1, untaint_pattern => qr|^(.+)$|},'fa' );
+    Check( scalar(keys %Expect) == 0 );
+
+    print "# check re-entancy\n";
+    %Expect = ('.' => 1, 'fsl' => 1, 'fa_ord' => 1, 'fab' => 1, 'fab_ord' => 1,
+           'faba' => 1, 'faa' => 1, 'faa_ord' => 1);
+    delete $Expect{'fsl'} unless $symlink_exists;
+    %Expect_Dir = ('fa' => 1, 'faa' => 1, 'fab' => 1, 'faba' => 1, 
+                   'fb' => 1, 'fba' => 1);
+    delete @Expect_Dir{'fb','fba'} unless $symlink_exists;
+    File::Find::find( {wanted => sub { 
+      wanted();
+      File::Find::find( {wanted => sub {} , untaint => 1, untaint_pattern => qr|^(.+)$|},'.' );
+    }, untaint => 1, untaint_pattern => qr|^(.+)$|},'fa' );
     Check( scalar(keys %Expect) == 0 );
 
     %Expect=('fa' => 1, 'fa/fsl' => 1, 'fa/fa_ord' => 1, 'fa/fab' => 1,

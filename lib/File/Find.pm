@@ -281,8 +281,11 @@ my $Is_MacOS;
 require File::Basename;
 require File::Spec;
 
-my %SLnkSeen;
-my ($wanted_callback, $avoid_nlink, $bydepth, $no_chdir, $follow,
+# Should ideally be my() not our() but local() currently
+# refuses to operate on lexicals
+
+our %SLnkSeen;
+our ($wanted_callback, $avoid_nlink, $bydepth, $no_chdir, $follow,
     $follow_skip, $full_check, $untaint, $untaint_skip, $untaint_pat,
     $pre_process, $post_process);
 
@@ -447,6 +450,15 @@ sub _find_opt {
     my $wanted = shift;
     die "invalid top directory" unless defined $_[0];
 
+    # This function must local()ize everything because callbacks may
+    # call find() or finddepth()
+
+    local %SLnkSeen;
+    local ($wanted_callback, $avoid_nlink, $bydepth, $no_chdir, $follow,
+	$follow_skip, $full_check, $untaint, $untaint_skip, $untaint_pat,
+	$pre_process, $post_process);
+    local($dir, $name, $fullname, $prune);
+
     my $cwd           = $wanted->{bydepth} ? Cwd::fastcwd() : Cwd::cwd();
     my $cwd_untainted = $cwd;
     my $check_t_cwd   = 1;
@@ -463,7 +475,7 @@ sub _find_opt {
     $untaint_skip     = $wanted->{untaint_skip};
 
     # for compatability reasons (find.pl, find2perl)
-    our ($topdir, $topdev, $topino, $topmode, $topnlink);
+    local our ($topdir, $topdev, $topino, $topmode, $topnlink);
 
     # a symbolic link to a directory doesn't increase the link count
     $avoid_nlink      = $follow || $File::Find::dont_use_nlink;
@@ -1028,17 +1040,13 @@ sub wrap_wanted {
 
 sub find {
     my $wanted = shift;
-    %SLnkSeen= (); # clear hash first
     _find_opt(wrap_wanted($wanted), @_);
-    %SLnkSeen= ();  # free memory
 }
 
 sub finddepth {
     my $wanted = wrap_wanted(shift);
-    %SLnkSeen= (); # clear hash first
     $wanted->{bydepth} = 1;
     _find_opt($wanted, @_);
-    %SLnkSeen= ();  # free memory
 }
 
 # default
