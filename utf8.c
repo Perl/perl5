@@ -255,7 +255,7 @@ Perl_utf8n_to_uvuni(pTHX_ U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
     UV uv = *s, ouv = 0;
     STRLEN len = 1;
     bool dowarn = ckWARN_d(WARN_UTF8);
-    U8 startbyte = *s;
+    UV startbyte = *s;
     STRLEN expectlen = 0;
     U32 warning = 0;
 
