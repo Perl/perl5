@@ -832,6 +832,7 @@ PP(pp_flop)
 	    char *tmps = SvPV(final, len);
 
 	    sv = sv_mortalcopy(left);
+	    SvPV_force(sv,na);
 	    while (!SvNIOKp(sv) && SvCUR(sv) <= len &&
 		strNE(SvPVX(sv),tmps) ) {
 		XPUSHs(sv);

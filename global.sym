@@ -502,7 +502,6 @@ magic_clear_all_env
 magic_clearpack
 magic_clearsig
 magic_existspack
-magic_freedefelem
 magic_get
 magic_getarylen
 magic_getdefelem

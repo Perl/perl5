@@ -1992,7 +1992,7 @@ EXT MGVTBL vtbl_uvar =	{magic_getuvar,
 				magic_setuvar,
 					0,	0,	0};
 EXT MGVTBL vtbl_defelem = {magic_getdefelem,magic_setdefelem,
-					0,	0,	magic_freedefelem};
+					0,	0,	0};
 
 #ifdef USE_LOCALE_COLLATE
 EXT MGVTBL vtbl_collxfrm = {0,

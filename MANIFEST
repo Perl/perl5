@@ -16,6 +16,7 @@ Makefile.SH		A script that generates Makefile
 Porting/Contract	Social contract for contributed modules in Perl core
 Porting/Glossary	Glossary of config.sh variables
 Porting/makerel		Release making utility
+Porting/p4d2p		Generate standard patches from p4 diffs
 Porting/patching.pod	How to report changes made to Perl
 Porting/patchls		Flexible patch file listing utility
 Porting/pumpkin.pod	Guidelines and hints for Perl maintainers

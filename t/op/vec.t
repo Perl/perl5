@@ -4,8 +4,6 @@
 
 print "1..15\n";
 
-$ENV{PERL_DESTRUCT_LEVEL} = 0; # XXX known to leaks scalars
-
 print vec($foo,0,1) == 0 ? "ok 1\n" : "not ok 1\n";
 print length($foo) == 0 ? "ok 2\n" : "not ok 2\n";
 vec($foo,0,1) = 1;
