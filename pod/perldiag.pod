@@ -112,16 +112,6 @@ See L<perlfunc/pack>.
 checksumming process loses information, and you can't go the other
 way.  See L<perlfunc/unpack>.
 
-=item Repeat count in pack overflows
-
-(F) You can't specify a repeat count so large that it overflows
-your signed integers.  See L<perlfunc/pack>.
-
-=item Repeat count in unpack overflows
-
-(F) You can't specify a repeat count so large that it overflows
-your signed integers.  See L<perlfunc/unpack>.
-
 =item /%s/: Unrecognized escape \\%c passed through
 
 (W regexp) You used a backslash-character combination which is not recognized
@@ -439,6 +429,12 @@ dereference it first.  See L<perlfunc/substr>.
 shmctl().  In C parlance, the correct sizes are, respectively,
 S<sizeof(struct msqid_ds *)>, S<sizeof(struct semid_ds *)>, and
 S<sizeof(struct shmid_ds *)>.
+
+=item Bad evalled substitution pattern
+
+(F) You've used the /e switch to evaluate the replacement for a
+substitution, but perl found a syntax error in the code to evaluate,
+most likely an unexpected right brace '}'.
 
 =item Bad filehandle: %s
 
@@ -1094,12 +1090,6 @@ You mentioned $a or $b in the same line as the <=> or cmp operator,
 and the variable had earlier been declared as a lexical variable.
 Either qualify the sort variable with the package name, or rename the
 lexical variable.
-
-=item Bad evalled substitution pattern
-
-(F) You've used the /e switch to evaluate the replacement for a
-substitution, but perl found a syntax error in the code to evaluate,
-most likely an unexpected right brace '}'.
 
 =item Can't use %s for loop variable
 
@@ -2650,6 +2640,16 @@ expression compiler gave it.
 =item regexp out of space
 
 (P) A "can't happen" error, because safemalloc() should have caught it earlier.
+
+=item Repeat count in pack overflows
+
+(F) You can't specify a repeat count so large that it overflows
+your signed integers.  See L<perlfunc/pack>.
+
+=item Repeat count in unpack overflows
+
+(F) You can't specify a repeat count so large that it overflows
+your signed integers.  See L<perlfunc/unpack>.
 
 =item Reversed %s= operator
 

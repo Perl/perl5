@@ -40,15 +40,6 @@ change the default installation directory -- see F<INSTALL>.
 This test may fail when first run after building perl.  It does not
 fail subsequently.  The cause is unknown.
 
-=item op/taint.t
-
-This test emits various complaints such as "Operation not permitted",
-but passes.  The cause is an incomplete implementation of System V
-inter-process communication in MachTen 4.1.4.  In versions prior to
-4.1.4, the implementation was so incomplete that the hints file
-disables its incorporation into perl; in 4.1.4, the facilities are
-useable with care.
-
 =item pragma/warnings.t
 
 Test 257 fails due to a failure to warn about attempts to read from a
