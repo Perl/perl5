@@ -8362,10 +8362,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	if (elen) {
 	    if (is_utf8 != has_utf8) {
 	        if (is_utf8) {
-		    if (SvCUR(sv)) {
+		    if (SvCUR(sv))
 		        sv_utf8_upgrade(sv);
-			p = SvEND(sv);
-		    }
 		}
 		else {
 		    SV *nsv = sv_2mortal(newSVpvn(eptr, elen));
@@ -8373,6 +8371,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		    eptr = SvPVX(nsv);
 		    elen = SvCUR(nsv);
 		}
+		SvGROW(sv, SvCUR(sv) + elen + 1);
+		p = SvEND(sv);
 	    }
 	    Copy(eptr, p, elen, char);
 	    p += elen;
