@@ -2761,8 +2761,7 @@ sub uninterp {
 # the same, but treat $|, $), $( and $ at the end of the string differently
 sub re_uninterp {
     my($str) = @_;
-    $str =~ s/(^|\G|[^\\])((?:\\\\)*)([\$\@](?!\||\)|\$\(|$)|\\[uUlLQE])/$1$2\\$3/g
-;
+    $str =~ s/(^|\G|[^\\])((?:\\\\)*)([\$\@](?!\||\)|\$\(|$)|\\[uUlLQE])/$1$2\\$3/g;
     return $str;
 }
 
