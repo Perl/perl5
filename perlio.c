@@ -522,7 +522,7 @@ PerlIO_clone_list(pTHX_ PerlIO_list_t *proto, CLONE_PARAMS *param)
     for (i=0; i < proto->cur; i++) {
 	SV *arg = Nullsv;
 	if (proto->array[i].arg)
-	    arg = sv_dup(proto->array[i].arg,param);
+	    arg = PerlIO_sv_dup(aTHX_ proto->array[i].arg,param);
 	PerlIO_list_push(aTHX_ list, proto->array[i].funcs, arg);
     }
     return list;
@@ -531,6 +531,7 @@ PerlIO_clone_list(pTHX_ PerlIO_list_t *proto, CLONE_PARAMS *param)
 void
 PerlIO_clone(pTHX_ PerlInterpreter *proto, CLONE_PARAMS *param)
 {
+#ifdef USE_ITHREADS
     PerlIO **table = &proto->Iperlio;
     PerlIO *f;
     PL_perlio = NULL;
@@ -547,6 +548,7 @@ PerlIO_clone(pTHX_ PerlInterpreter *proto, CLONE_PARAMS *param)
 		f++;
 	    }
 	}
+#endif
 }
 
 void
