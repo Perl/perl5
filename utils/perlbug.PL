@@ -91,7 +91,7 @@ BEGIN {
     $::HaveUtil = ($@ eq "");
 };
 
-my $Version = "1.29";
+my $Version = "1.30";
 
 # Changed in 1.06 to skip Mail::Send and Mail::Util if not available.
 # Changed in 1.07 to see more sendmail execs, and added pipe output.
@@ -125,6 +125,7 @@ my $Version = "1.29";
 # Changed in 1.27 Added Mac OS and File::Spec support CNANDOR 99-07-27
 # Changed in 1.28 Additional questions for Perlbugtron RFOLEY 20.03.2000
 # Changed in 1.29 Perlbug(tron): auto(-ok), short prompts RFOLEY 05-05-2000
+# Changed in 1.30 Added warnings on failure to open files MSTEVENS 13-07-2000
 
 # TODO: - Allow the user to re-name the file on mail failure, and
 #       make sure failure (transmission-wise) of Mail::Send is
@@ -519,7 +520,7 @@ EOF
     }
 
     # Generate report
-    open(REP,">$filename");
+    open(REP,">$filename") or die "Unable to create report file `$filename': $!\n";
     my $reptype = !$ok ? "bug" : $::opt_n ? "build failure" : "success";
 
     print REP <<EOF;
@@ -555,7 +556,7 @@ EOF
     # read in the report template once so that
     # we can track whether the user does any editing.
     # yes, *all* whitespace is ignored.
-    open(REP, "<$filename");
+    open(REP, "<$filename") or die "Unable to open report file `$filename': $!\n";
     while (<REP>) {
 	s/\s+//g;
 	$REP{$_}++;
@@ -674,7 +675,7 @@ EOF
     # Check that we have a report that has some, eh, report in it.
     my $unseen = 0;
 
-    open(REP, "<$filename");
+    open(REP, "<$filename") or die "Couldn't open `$filename': $!\n";
     # a strange way to check whether any significant editing
     # have been done: check whether any new non-empty lines
     # have been added. Yes, the below code ignores *any* space
@@ -729,7 +730,7 @@ EOF
 		    print "\nError opening $file: $!\n\n";
 		    goto retry;
 		}
-		open(REP, "<$filename");
+		open(REP, "<$filename") or die "Couldn't open file `$filename': $!\n";
 		print FILE "To: $address\nSubject: $subject\n";
 		print FILE "Cc: $cc\n" if $cc;
 		print FILE "Reply-To: $from\n" if $from;
@@ -742,7 +743,7 @@ EOF
 		exit;
 	    } elsif ($action =~ /^(d|l|sh)/i ) { # <D>isplay, <L>ist, <Sh>ow
 		# Display the message
-		open(REP, "<$filename");
+		open(REP, "<$filename") or die "Couldn't open file `$filename': $!\n";
 		while (<REP>) { print $_ }
 		close(REP);
 	    } elsif ($action =~ /^se/i) { # <S>end
@@ -786,7 +787,7 @@ sub Send {
 	$msg->add("Reply-To",$from) if $from;
 
 	$fh = $msg->open;
-	open(REP, "<$filename");
+	open(REP, "<$filename") or die "Couldn't open `$filename': $!\n";
 	while (<REP>) { print $fh $_ }
 	close(REP);
 	$fh->close;
@@ -840,7 +841,7 @@ sendout:
 	print SENDMAIL "Cc: $cc\n" if $cc;
 	print SENDMAIL "Reply-To: $from\n" if $from;
 	print SENDMAIL "\n\n";
-	open(REP, "<$filename");
+	open(REP, "<$filename") or die "Couldn't open `$filename': $!\n";
 	while (<REP>) { print SENDMAIL $_ }
 	close(REP);
 
