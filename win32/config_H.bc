@@ -13,8 +13,8 @@
 /*
  * Package name      : perl5
  * Source directory  : 
- * Configuration time: Sat Nov 24 09:56:15 2001
- * Configured by     : gsar
+ * Configuration time: Sat Dec 29 19:18:51 2001
+ * Configured by     : nick
  * Target system     : 
  */
 
@@ -87,12 +87,6 @@
 #ifndef HASCONST
 #define const
 #endif
-
-/* HAS_CRYPT:
- *	This symbol, if defined, indicates that the crypt routine is available
- *	to encrypt passwords and the like.
- */
-/*#define HAS_CRYPT		/**/
 
 /* HAS_CUSERID:
  *	This symbol, if defined, indicates that the cuserid routine is
@@ -3399,6 +3393,12 @@
  */
 #define PERL_XS_APIVERSION "5.6.0"
 #define PERL_PM_APIVERSION "5.005"
+
+/* HAS_CRYPT:
+ *	This symbol, if defined, indicates that the crypt routine is available
+ *	to encrypt passwords and the like.
+ */
+/*#define HAS_CRYPT		/**/
 
 /* SETUID_SCRIPTS_ARE_SECURE_NOW:
  *	This symbol, if defined, indicates that the bug that prevents
