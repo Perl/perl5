@@ -181,6 +181,7 @@ XS(XS_Internals_hv_clear_placehold);
 XS(XS_PerlIO_get_layers);
 XS(XS_Regexp_DESTROY);
 XS(XS_Internals_hash_seed);
+XS(XS_Internals_HvREHASH);
 
 void
 Perl_boot_core_UNIVERSAL(pTHX)
@@ -206,6 +207,7 @@ Perl_boot_core_UNIVERSAL(pTHX)
                XS_PerlIO_get_layers, file, "*;@");
     newXS("Regexp::DESTROY", XS_Regexp_DESTROY, file);
     newXSproto("Internals::hash_seed",XS_Internals_hash_seed, file, "");
+    newXSproto("Internals::HvREHASH", XS_Internals_HvREHASH, file, "\\%");
 }
 
 
@@ -726,3 +728,17 @@ XS(XS_Internals_hash_seed)
     XSRETURN_UV(PERL_HASH_SEED);
 }
 
+XS(XS_Internals_HvREHASH)	/* Subject to change  */
+{
+    dXSARGS;
+    if (SvROK(ST(0))) {
+	HV *hv = (HV *) SvRV(ST(0));
+	if (items == 1 && SvTYPE(hv) == SVt_PVHV) {
+	    if (HvREHASH(hv))
+		XSRETURN_YES;
+	    else
+		XSRETURN_NO;
+	}
+    }
+    Perl_croak(aTHX_ "Internals::HvREHASH $hashref");
+}
