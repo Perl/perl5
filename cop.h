@@ -357,8 +357,8 @@ typedef struct stackinfo PERL_SI;
 
 #define PUSHSTACK PUSHSTACKi(PERLSI_UNKNOWN)
 
-/* POPSTACK works with PL_stack_sp, so any local sp modifications may
- * need to be flushed with a PUTBACK */
+/* POPSTACK works with PL_stack_sp, so it may need to be bracketed by
+ * PUTBACK/SPAGAIN to flush/refresh any local SP that may be active */
 #define POPSTACK \
     STMT_START {							\
 	djSP;								\

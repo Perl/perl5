@@ -2884,6 +2884,7 @@ sv_clear(register SV *sv)
 				 G_DISCARD|G_EVAL|G_KEEPERR);
 		    SvREFCNT(sv)--;
 		    POPSTACK;
+		    SPAGAIN;
 		    LEAVE;
 		}
 	    } while (SvOBJECT(sv) && SvSTASH(sv) != stash);
