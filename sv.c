@@ -1430,12 +1430,12 @@ S_not_a_number(pTHX_ SV *sv)
 {
     char tmpbuf[64];
     char *d = tmpbuf;
-    char *s;
     char *limit = tmpbuf + sizeof(tmpbuf) - 8;
                   /* each *s can expand to 4 chars + "...\0",
                      i.e. need room for 8 chars */
 
-    for (s = SvPVX(sv); *s && d < limit; s++) {
+    char *s, *end;
+    for (s = SvPVX(sv), end = s + SvCUR(sv); s < end && d < limit; s++) {
 	int ch = *s & 0xFF;
 	if (ch & 128 && !isPRINT_LC(ch)) {
 	    *d++ = 'M';
@@ -1457,6 +1457,10 @@ S_not_a_number(pTHX_ SV *sv)
 	else if (ch == '\\') {
 	    *d++ = '\\';
 	    *d++ = '\\';
+	}
+	else if (ch == '\0') {
+	    *d++ = '\\';
+	    *d++ = '0';
 	}
 	else if (isPRINT_LC(ch))
 	    *d++ = ch;

@@ -226,6 +226,23 @@ EXPECT
 Argument "def" isn't numeric in bitwise and (&) at - line 3.
 ########
 # sv.c
+use warnings 'numeric' ;
+my $x = pack i => "def" ;
+no warnings 'numeric' ;
+my $z = pack i => "def" ;
+EXPECT
+Argument "def" isn't numeric in pack at - line 3.
+########
+# sv.c
+use warnings 'numeric' ; 
+my $a = "d\0f" ;
+my $x = 1 + $a ;
+no warnings 'numeric' ;
+my $z = 1 + $a ;
+EXPECT
+Argument "d\0f" isn't numeric in addition (+) at - line 4.
+########
+# sv.c
 use warnings 'redefine' ;
 sub fred {}  
 sub joe {} 
