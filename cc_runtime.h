@@ -1,4 +1,4 @@
-#define DOOP(ppname) PUTBACK; PL_op = ppname(ARGS); SPAGAIN
+#define DOOP(ppname) PUTBACK; PL_op = ppname(aTHX); SPAGAIN
 
 #define PP_LIST(g) do {			\
 	dMARK;				\
@@ -43,7 +43,7 @@
 	JMPENV_PUSH(ret);			\
 	switch (ret) {				\
 	case 0:					\
-	    PL_op = ppaddr(ARGS);			\
+	    PL_op = ppaddr(aTHX);		\
 	    PL_retstack[PL_retstack_ix - 1] = Nullop;	\
 	    if (PL_op != nxt) CALLRUNOPS();		\
 	    JMPENV_POP;				\

@@ -28,7 +28,7 @@ Perl_runops_standard(pTHX)
 {
     dTHR;
 
-    while ( PL_op = (CALLOP->op_ppaddr)(ARGS) ) ;
+    while ( PL_op = (CALLOP->op_ppaddr)(aTHX) ) ;
 
     TAINT_NOT;
     return 0;
@@ -53,7 +53,7 @@ Perl_runops_debug(pTHX)
 	    DEBUG_t(debop(PL_op));
 	    DEBUG_P(debprof(PL_op));
 	}
-    } while ( PL_op = (CALLOP->op_ppaddr)(ARGS) );
+    } while ( PL_op = (CALLOP->op_ppaddr)(aTHX) );
 
     TAINT_NOT;
     return 0;

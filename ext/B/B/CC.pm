@@ -149,7 +149,7 @@ sub init_pp {
     declare("SV", "**svp");
     map { declare("SV", "*$_") } qw(sv src dst left right);
     declare("MAGIC", "*mg");
-    $decl->add("static OP * $ppname (ARGSproto);");
+    $decl->add("static OP * $ppname (pTHX);");
     debug "init_pp: $ppname\n" if $debug_queue;
 }
 
@@ -1000,7 +1000,7 @@ sub pp_entersub {
     write_back_stack();
     my $sym = doop($op);
     runtime("while (PL_op != ($sym)->op_next && PL_op != (OP*)0 ){");
-    runtime("PL_op = (*PL_op->op_ppaddr)(ARGS);");
+    runtime("PL_op = (*PL_op->op_ppaddr)(aTHX);");
     runtime("SPAGAIN;}");
     $know_op = 0;
     invalidate_lexicals(REGISTER|TEMPORARY);
@@ -1043,7 +1043,7 @@ sub pp_leavewrite {
     my $sym = doop($op);
     # XXX Is this the right way to distinguish between it returning
     # CvSTART(cv) (via doform) and pop_return()?
-    #runtime("if (PL_op) PL_op = (*PL_op->op_ppaddr)(ARGS);");
+    #runtime("if (PL_op) PL_op = (*PL_op->op_ppaddr)(aTHX);");
     runtime("SPAGAIN;");
     $know_op = 0;
     invalidate_lexicals(REGISTER|TEMPORARY);
@@ -1531,7 +1531,7 @@ XS(boot_$cmodule)
     SAVESPTR(PL_op);
     PL_curpad = AvARRAY($curpad_sym);
     PL_op = $start;
-    pp_main(ARGS);
+    pp_main(aTHX);
     FREETMPS;
     LEAVE;
     ST(0) = &PL_sv_yes;
