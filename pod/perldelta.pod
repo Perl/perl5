@@ -69,6 +69,29 @@ were implicitly set to be in Unicode UTF-8 if the locale settings
 indicated the use of UTF-8.  This feature caused too many problems,
 so the feature was turned off and redesigned: see L</"Core Enhancements">.
 
+=head2 Single-number v-strings are no more v-strings
+
+The version strings or v-strings (see L<perldata/"Version Strings">)
+feature introduced in Perl 5.6.0 has been a source of some confusion--
+especially when the user did not want to use it, but Perl thought it
+knew better.  Especially troublesome has been the feature that before
+a "=>" a version string (a "v" followed by digits) has been interpreted
+as a v-string instead of a string literal.  In other words:
+
+	%h = ( v65 => 42 );
+
+has meant since Perl 5.6.0
+
+	%h = ( 'A' => 42 );
+
+(at least in platforms of ASCII progeny)  Perl 5.8.1 restores the
+more natural interpretation
+
+	%h = ( 'v65' => 42 );
+
+The multi-number v-strings like v65.66 and 65.66.67 still continue
+to be v-strings.
+
 =head2 (FreeBSD) Perl now uses the Perl malloc
 
 Using FreeBSD's system malloc for Perl was found to be very slow:
