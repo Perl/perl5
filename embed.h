@@ -116,6 +116,7 @@
 #define die_nocontext		Perl_die_nocontext
 #define deb_nocontext		Perl_deb_nocontext
 #define form_nocontext		Perl_form_nocontext
+#define load_module_nocontext	Perl_load_module_nocontext
 #define mess_nocontext		Perl_mess_nocontext
 #define warn_nocontext		Perl_warn_nocontext
 #define warner_nocontext	Perl_warner_nocontext
@@ -322,6 +323,8 @@
 #define linklist		Perl_linklist
 #define list			Perl_list
 #define listkids		Perl_listkids
+#define load_module		Perl_load_module
+#define vload_module		Perl_vload_module
 #define localize		Perl_localize
 #define looks_like_number	Perl_looks_like_number
 #define magic_clearenv		Perl_magic_clearenv
@@ -1762,6 +1765,7 @@
 #define linklist(a)		Perl_linklist(aTHX_ a)
 #define list(a)			Perl_list(aTHX_ a)
 #define listkids(a)		Perl_listkids(aTHX_ a)
+#define vload_module(a,b,c,d)	Perl_vload_module(aTHX_ a,b,c,d)
 #define localize(a,b)		Perl_localize(aTHX_ a,b)
 #define looks_like_number(a)	Perl_looks_like_number(aTHX_ a)
 #define magic_clearenv(a,b)	Perl_magic_clearenv(aTHX_ a,b)
@@ -3055,6 +3059,8 @@
 #define deb_nocontext		Perl_deb_nocontext
 #define Perl_form_nocontext	CPerlObj::Perl_form_nocontext
 #define form_nocontext		Perl_form_nocontext
+#define Perl_load_module_nocontext	CPerlObj::Perl_load_module_nocontext
+#define load_module_nocontext	Perl_load_module_nocontext
 #define Perl_mess_nocontext	CPerlObj::Perl_mess_nocontext
 #define mess_nocontext		Perl_mess_nocontext
 #define Perl_warn_nocontext	CPerlObj::Perl_warn_nocontext
@@ -3456,6 +3462,10 @@
 #define list			Perl_list
 #define Perl_listkids		CPerlObj::Perl_listkids
 #define listkids		Perl_listkids
+#define Perl_load_module	CPerlObj::Perl_load_module
+#define load_module		Perl_load_module
+#define Perl_vload_module	CPerlObj::Perl_vload_module
+#define vload_module		Perl_vload_module
 #define Perl_localize		CPerlObj::Perl_localize
 #define localize		Perl_localize
 #define Perl_looks_like_number	CPerlObj::Perl_looks_like_number
@@ -5751,6 +5761,7 @@
 #  define deb				Perl_deb_nocontext
 #  define die				Perl_die_nocontext
 #  define form				Perl_form_nocontext
+#  define load_module			Perl_load_module_nocontext
 #  define mess				Perl_mess_nocontext
 #  define newSVpvf			Perl_newSVpvf_nocontext
 #  define sv_catpvf			Perl_sv_catpvf_nocontext
@@ -5769,6 +5780,7 @@
 #  define Perl_die_nocontext		Perl_die
 #  define Perl_deb_nocontext		Perl_deb
 #  define Perl_form_nocontext		Perl_form
+#  define Perl_load_module_nocontext	Perl_load_module
 #  define Perl_mess_nocontext		Perl_mess
 #  define Perl_newSVpvf_nocontext	Perl_newSVpvf
 #  define Perl_sv_catpvf_nocontext	Perl_sv_catpvf

@@ -1821,7 +1821,6 @@ S_dup_attrlist(pTHX_ OP *o)
 STATIC void
 S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs)
 {
-    OP *modname;	/* for 'use' */
     SV *stashsv;
 
     /* fake up C<use attributes $pkg,$rv,@attrs> */
@@ -1831,19 +1830,18 @@ S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs)
 	stashsv = newSVpv(HvNAME(stash), 0);
     else
 	stashsv = &PL_sv_no;
+
 #define ATTRSMODULE "attributes"
-    modname = newSVOP(OP_CONST, 0,
-		      newSVpvn(ATTRSMODULE, sizeof(ATTRSMODULE)-1));
-    modname->op_private |= OPpCONST_BARE;
-    /* that flag is required to make 'use' work right */
-    utilize(1, start_subparse(FALSE, 0),
-	    Nullop, /* version */
-	    modname,
-	    prepend_elem(OP_LIST,
-			 newSVOP(OP_CONST, 0, stashsv),
-			 prepend_elem(OP_LIST,
-				      newSVOP(OP_CONST, 0, newRV(target)),
-				      dup_attrlist(attrs))));
+
+    Perl_load_module(aTHX_ PERL_LOADMOD_IMPORT_OPS,
+		     newSVpvn(ATTRSMODULE, sizeof(ATTRSMODULE)-1),
+		     Nullsv,
+		     prepend_elem(OP_LIST,
+				  newSVOP(OP_CONST, 0, stashsv),
+				  prepend_elem(OP_LIST,
+					       newSVOP(OP_CONST, 0,
+						       newRV(target)),
+					       dup_attrlist(attrs))));
     LEAVE;
 }
 
@@ -3173,6 +3171,58 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *id, OP *arg)
     PL_hints |= HINT_BLOCK_SCOPE;
     PL_copline = NOLINE;
     PL_expect = XSTATE;
+}
+
+void
+Perl_load_module(pTHX_ U32 flags, SV *name, SV *ver, ...)
+{
+    va_list args;
+    va_start(args, ver);
+    vload_module(flags, name, ver, &args);
+    va_end(args);
+}
+
+#ifdef PERL_IMPLICIT_CONTEXT
+void
+Perl_load_module_nocontext(U32 flags, SV *name, SV *ver, ...)
+{
+    dTHX;
+    va_list args;
+    va_start(args, ver);
+    vload_module(flags, name, ver, &args);
+    va_end(args);
+}
+#endif
+
+void
+Perl_vload_module(pTHX_ U32 flags, SV *name, SV *ver, va_list *args)
+{
+    OP *modname, *veop, *imop;
+
+    modname = newSVOP(OP_CONST, 0, name);
+    modname->op_private |= OPpCONST_BARE;
+    if (ver) {
+	veop = newSVOP(OP_CONST, 0, ver);
+    }
+    else
+	veop = Nullop;
+    if (flags & PERL_LOADMOD_NOIMPORT) {
+	imop = sawparens(newNULLLIST());
+    }
+    else if (flags & PERL_LOADMOD_IMPORT_OPS) {
+	imop = va_arg(*args, OP*);
+    }
+    else {
+	SV *sv;
+	imop = Nullop;
+	sv = va_arg(*args, SV*);
+	while (sv) {
+	    imop = append_elem(OP_LIST, imop, newSVOP(OP_CONST, 0, sv));
+	    sv = va_arg(*args, SV*);
+	}
+    }
+    utilize(!(flags & PERL_LOADMOD_DENY), start_subparse(FALSE, 0),
+	    veop, modname, imop);
 }
 
 OP *
@@ -5510,11 +5560,10 @@ Perl_ck_glob(pTHX_ OP *o)
 #if !defined(PERL_EXTERNAL_GLOB)
     /* XXX this can be tightened up and made more failsafe. */
     if (!gv) {
-	OP *modname = newSVOP(OP_CONST, 0, newSVpvn("File::Glob", 10));
-	modname->op_private |= OPpCONST_BARE;
 	ENTER;
-	utilize(1, start_subparse(FALSE, 0), Nullop, modname,
-		newSVOP(OP_CONST, 0, newSVpvn(":globally", 9)));
+	Perl_load_module(aTHX_ 0, newSVpvn("File::Glob", 10), Nullsv,
+			 /* null-terminated import list */
+			 newSVpvn(":globally", 9), Nullsv);
 	gv = gv_fetchpv("CORE::GLOBAL::glob", FALSE, SVt_PVCV);
 	LEAVE;
     }

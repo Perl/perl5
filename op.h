@@ -418,3 +418,8 @@ struct loop {
 #  define OpREFCNT_inc(o)		(o)
 #  define OpREFCNT_dec(o)		0
 #endif
+
+/* flags used by Perl_load_module() */
+#define PERL_LOADMOD_DENY		0x1
+#define PERL_LOADMOD_NOIMPORT		0x2
+#define PERL_LOADMOD_IMPORT_OPS		0x4
