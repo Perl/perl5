@@ -334,6 +334,14 @@ EOM
         libswanted="$*"
 
         usemymalloc='n'
+
+	# These are hidden behind a _POSIX1C ifdef that would
+	# require including <pthread.h> for the Configure hasproto
+	# to see these.
+	d_asctime_r_proto="$define"
+	d_ctime_r_proto="$define"
+	d_gmtime_r_proto="$define"
+	d_localtime_r_proto="$define"
 	;;
 esac
 EOCBU
