@@ -15,7 +15,10 @@ BEGIN {
 }
 
 use Test;
-BEGIN { plan tests => 194 };
+BEGIN { plan tests => 199 };
+
+use strict;
+use warnings;
 use Unicode::Collate;
 
 our $IsEBCDIC = ord("A") != 0x41;
@@ -594,6 +597,7 @@ $Collator->change(alternate => 'Shifted', level => 4);
 
 my $L3ignorable = Unicode::Collate->new(
   alternate => 'Non-ignorable',
+  level => 3,
   table => undef,
   normalization => undef,
   entry => <<'ENTRIES',
@@ -606,6 +610,10 @@ my $L3ignorable = Unicode::Collate->new(
 09C7  ; [.1157.0020.0002.09C7] # BENGALI VOWEL SIGN E
 09CB  ; [.1159.0020.0002.09CB] # BENGALI VOWEL SIGN O
 09C7 09BE ; [.1159.0020.0002.09CB] # BENGALI VOWEL SIGN O
+1D1B9 ; [*098A.0020.0002.1D1B9] # MUSICAL SYMBOL SEMIBREVIS WHITE
+1D1BA ; [*098B.0020.0002.1D1BA] # MUSICAL SYMBOL SEMIBREVIS BLACK
+1D1BB ; [*098A.0020.0002.1D1B9][.0000.0000.0000.1D165] # M.S. MINIMA
+1D1BC ; [*098B.0020.0002.1D1BA][.0000.0000.0000.1D165] # M.S. MINIMA BLACK
 ENTRIES
 );
 
@@ -616,3 +624,8 @@ ok($L3ignorable->eq("\x{09C7}\x{09BE}A", "\x{09C7}\cA\x{09BE}A"));
 ok($L3ignorable->eq("\x{09C7}\x{09BE}A", "\x{09C7}\x{0591}\x{09BE}A"));
 ok($L3ignorable->eq("\x{09C7}\x{09BE}A", "\x{09C7}\x{1D165}\x{09BE}A"));
 ok($L3ignorable->eq("\x{09C7}\x{09BE}A", "\x{09CB}A"));
+ok($L3ignorable->lt("\x{1D1BB}", "\x{1D1BC}"));
+ok($L3ignorable->eq("\x{1D1BB}", "\x{1D1B9}"));
+ok($L3ignorable->eq("\x{1D1BC}", "\x{1D1BA}"));
+ok($L3ignorable->eq("\x{1D1BB}", "\x{1D1B9}\x{1D165}"));
+ok($L3ignorable->eq("\x{1D1BC}", "\x{1D1BA}\x{1D165}"));

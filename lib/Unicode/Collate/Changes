@@ -1,5 +1,10 @@
 Revision history for Perl module Unicode::Collate.
 
+0.26  Sun Aug 03 22:23:17 2003
+    - fix: an expansion in which a CE is level 3 ignorable and others are not
+	was wrongly made level 3 ignorable as a whole entry.
+      (In DUCET, some precomposites in Musical Symbols are so)
+
 0.25  Mon Jun 06 23:20:17 2003
     - fix Makefile.PL.
     - internal tweak (again): pack_U() and unpack_U().

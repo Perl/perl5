@@ -16,6 +16,9 @@ BEGIN {
 
 use Test;
 BEGIN { plan tests => 65 };
+
+use strict;
+use warnings;
 use Unicode::Collate;
 
 our $IsEBCDIC = ord("A") != 0x41;
