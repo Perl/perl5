@@ -71,7 +71,7 @@ See the file F<changes.pod>.
 
 =head1 SEE ALSO
 
-perl(1), perlxs(1), perlxstut(1), perlapi(1)
+perl(1), perlxs(1), perlxstut(1), perlxs(1)
 
 =cut
 
