@@ -1725,20 +1725,20 @@ traditional Unicode classes:
 
     Perl class name  Unicode class name or regular expression
 
-    IsAlpha          ^[LM]
-    IsAlnum          ^[LMN]
-    IsASCII          $code le 127
-    IsCntrl          ^C
-    IsBlank          ^Z[^lp] or $code eq "0009"
+    IsAlpha          /^[LM]/
+    IsAlnum          /^[LMN]/
+    IsASCII          $code <= 127
+    IsCntrl          /^C/
+    IsBlank          $code =~ /^(0020|0009)$/ || /^Z[^lp]/
     IsDigit          Nd
-    IsGraph          ^([LMNPS]|Co)
+    IsGraph          /^([LMNPS]|Co)/
     IsLower          Ll
-    IsPrint          ^([LMNPS]|Co|Zs)
-    IsPunct          ^P
-    IsSpace          ^Z or ($code =~ /^(0009|000A|000B|000C|000D)$/
-    IsSpacePerl      ^Z or ($code =~ /^(0009|000A|000C|000D)$/
-    IsUpper          ^L[ut]
-    IsWord           ^[LMN] or $code eq "005F"
+    IsPrint          /^([LMNPS]|Co|Zs)/
+    IsPunct          /^P/
+    IsSpace          /^Z/ || ($code =~ /^(0009|000A|000B|000C|000D)$/
+    IsSpacePerl      /^Z/ || ($code =~ /^(0009|000A|000C|000D)$/
+    IsUpper          /^L[ut]/
+    IsWord           /^[LMN]/ || $code eq "005F"
     IsXDigit         $code =~ /^00(3[0-9]|[46][1-6])$/
 
 You can also use the official Unicode class names with the C<\p> and
