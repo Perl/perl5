@@ -131,7 +131,7 @@ value of ref().
 The undocumented pack/unpack template letters D/F have been recycled
 for better use: now they stand for long double (if supported by the
 platform) and NV (Perl internal floating point type).  (They used
-to be aliases for f/d, but you never knew that.)
+to be aliases for d/f, but you never knew that.)
 
 =head2 Deprecations
 
@@ -331,7 +331,8 @@ doing, like finishing an internal operation (like sort()) or an
 external operation (like an I/O operation), and only then look at any
 arrived signals (and before starting the next operation).  No more corrupt
 internal state since the current operation is always finished first,
-but the signal may take more time to get heard.
+but the signal may take more time to get heard.  Note that breaking
+out from potentially blocking operations should still work, though.
 
 =head2 Unicode Overhaul
 
@@ -2569,23 +2570,20 @@ OS/390 has rather many test failures but the situation is actually
 better than it was in 5.6.0, it's just that so many new modules and
 tests have been added.
 
-Failed 10/611 test scripts, 98.36% okay. 72/53809 subtests failed, 99.87% okay.
-Failed Test                  Stat Wstat Total Fail  Failed  List of Failed
--------------------------------------------------------------------------------
-../ext/B/t/deparse.t                       17    1   5.88%  14
-../ext/IO/lib/IO/t/io_unix.t                5    4  80.00%  2-5
-../lib/utf8.t                              94   13  13.83%  27 30-31 43 46 73
-                                                            76 79 82 85 88 91
-                                                            94
-../lib/Benchmark.t              1   256   159    1   0.63%  75
-../lib/ExtUtils/t/Embed.t                   9    9 100.00%  1-9
-../lib/ExtUtils/t/ExtUtils.t               27   19  70.37%  5-23
-op/pat.t                                  858    9   1.05%  242-243 665 776 785
-                                                            832-834 845
-op/sprintf.t                              224    3   1.34%  98 100 136
-op/tr.t                                    97    5   5.15%  63 71-74
-uni/fold.t                                767    8   1.04%  25-26 62 169 196
-                                                            648 697-698
+ ../ext/B/t/deparse.t                       17    1   5.88%  14
+ ../ext/IO/lib/IO/t/io_unix.t                5    4  80.00%  2-5
+ ../lib/utf8.t                              94   13  13.83%  27 30-31 43 46 73
+                                                             76 79 82 85 88 91
+                                                             94
+ ../lib/Benchmark.t              1   256   159    1   0.63%  75
+ ../lib/ExtUtils/t/Embed.t                   9    9 100.00%  1-9
+ ../lib/ExtUtils/t/ExtUtils.t               27   19  70.37%  5-23
+ op/pat.t                                  858    9   1.05%  242-243 665 776 785
+                                                             832-834 845
+ op/sprintf.t                              224    3   1.34%  98 100 136
+ op/tr.t                                    97    5   5.15%  63 71-74
+ uni/fold.t                                767    8   1.04%  25-26 62 169 196
+                                                             648 697-698
 57 tests and 377 subtests skipped.
 
 =head2 op/sprintf tests 129 and 130
@@ -2606,21 +2604,24 @@ The following tests are known to fail due to fundamental problems in
 the 5.005 threading implementation. These are not new failures--Perl
 5.005_0x has the same bugs, but didn't have these tests.
 
-  ext/List/Util/t/first         2
-  lib/autouse                   4
-  ext/Thread/thr5005            19-20
+ ../ext/List/Util/t/first.t         255 65280     7    4  57.14%  2 5-7
+ ../lib/English.t                     2   512    54    2   3.70%  2-3
+ ../lib/Filter/Simple/t/data.t                    6    3  50.00%  1-3
+ ../lib/Filter/Simple/t/filter_onl                9    3  33.33%  1-2 5
+ ../lib/autouse.t                                10    1  10.00%  4
+ op/flip.t                                       15    1   6.67%  15
 
 These failures are unlikely to get fixed as the 5.005-style
 threads are considered fundamentally broken.
 
 =head2 UNICOS
 
-  ../ext/Socket/socketpair.t    1   256    45    1   2.22%  12
-  ../lib/Math/Trig.t                       26    1   3.85%  25
-  ../lib/warnings.t                       460    1   0.22%  425
-  io/fs.t                                  36    1   2.78%  31
-  op/numconvert.t                        1440   13   0.90%  208 509-510
-  657-658 665-666 829-830 989-990 1149-1150
+ ../ext/Socket/socketpair.t    1   256    45    1   2.22%  12
+ ../lib/Math/Trig.t                       26    1   3.85%  25
+ ../lib/warnings.t                       460    1   0.22%  425
+ io/fs.t                                  36    1   2.78%  31
+ op/numconvert.t                        1440   13   0.90%  208 509-510
+ 657-658 665-666 829-830 989-990 1149-1150
 
 =head2 UNICOS and UNICOS/mk
 
