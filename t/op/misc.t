@@ -38,7 +38,7 @@ for (@prgs){
     $results =~ s/\n+$//;
 # bison says 'parser error' instead of 'syntax error',
 # various yaccs may or may not capitalize 'syntax'.
-    $results =~ s/^(syntax|parser) error/\L$1 error/i;
+    $results =~ s/^(syntax|parser) error/\L$1 error/mi;
     $expected =~ s/\n+$//;
     if ( $results ne $expected){
 	print STDERR "PROG: $switch\n$prog\n";

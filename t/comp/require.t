@@ -37,7 +37,7 @@ print "ok ",$i++,"\n";
 do_require "1)\n";
 # bison says 'parser error' instead of 'syntax error',
 # various yaccs may or may not capitalize 'syntax'.
-print "# $@\nnot " unless $@ =~ /(syntax|parser) error/i;
+print "# $@\nnot " unless $@ =~ /(syntax|parser) error/mi;
 print "ok ",$i++,"\n";
 
 # successful require

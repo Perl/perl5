@@ -57,7 +57,7 @@ for (@prgs){
     $results =~ s/\n%[A-Z]+-[SIWEF]-.*$// if $Is_VMS;  # clip off DCL status msg
 # bison says 'parser error' instead of 'syntax error',
 # various yaccs may or may not capitalize 'syntax'.
-    $results =~ s/^(syntax|parser) error/\L$1 error/i;
+    $results =~ s/^(syntax|parser) error/\L$1 error/mi;
     $expected =~ s/\n+$//;
     my $prefix = ($results =~ s/^PREFIX\n//) ;
     if ( $results =~ s/^SKIPPED\n//) {
