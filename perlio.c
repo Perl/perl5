@@ -2354,7 +2354,6 @@ IV
 PerlIOUnix_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 {
     IV code = PerlIOBase_pushed(aTHX_ f, mode, arg, tab);
-    PerlIOUnix *s = PerlIOSelf(f, PerlIOUnix);
     if (*PerlIONext(f)) {
 	/* We never call down so do any pending stuff now */
 	PerlIO_flush(PerlIONext(f));
@@ -2363,7 +2362,7 @@ PerlIOUnix_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 	 * handle rather than believing the "mode" we are passed in? XXX
 	 * Should the value on NULL mode be 0 or -1?
 	 */
-        PerlIOUnix_setfd(aTHX_ f, PerlIO_fileno(PerlIONext(f)), 
+        PerlIOUnix_setfd(aTHX_ f, PerlIO_fileno(PerlIONext(f)),
                          mode ? PerlIOUnix_oflags(mode) : -1);
     }
     PerlIOBase(f)->flags |= PERLIO_F_OPEN;
@@ -2485,7 +2484,7 @@ PerlIOUnix_seek(pTHX_ PerlIO *f, Off_t offset, int whence)
 	SETERRNO(EINVAL, LIB_INVARG);
 #endif
 	return -1;
-    } 
+    }
     new  = PerlLIO_lseek(fd, offset, whence);
     if (new == (Off_t) - 1)
      {
