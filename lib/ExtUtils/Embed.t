@@ -78,7 +78,10 @@ if ($^O eq 'VMS') {
         s!-bE:(\S+)!-bE:$perl_exp!;
     }
    } elsif ($^O eq 'cygwin') { # Cygwin needs the libperl copied
-     system("cp ../$Config{'libperl'} ../libperl.dll");    # for test 1
+     my $v_e_r_s = $Config{version};
+     $v_e_r_s =~ tr/./_/;
+     system("cp ../libperl$v_e_r_s.dll ./");    # for test 1
+     system("cp ../$Config{'libperl'} ../libperl.a");    # for test 1
    }
 }
 my $status;
@@ -99,7 +102,8 @@ $status = system($embed_test);
 print (($status? 'not ':'')."ok 9 # $status\n");
 unlink($exe,"embed_test.c",$obj);
 unlink("embed_test.map","embed_test.lis") if $^O eq 'VMS';
-unlink("../libperl.dll") if $^O eq 'cygwin';
+unlink(glob("./libperl*.dll")) if $^O eq 'cygwin';
+unlink("../libperl.a")         if $^O eq 'cygwin';
 
 # gcc -g -I.. -L../ -o perl_test perl_test.c -lperl `../perl -I../lib -MExtUtils::Embed -I../ -e ccopts -e ldopts`
 
