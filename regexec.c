@@ -2669,7 +2669,7 @@ regrepeat_hard(regnode *p, I32 max, I32 *lp)
 }
 
 /*
- - regclass - determine if a character falls into a character class
+ - reginclass - determine if a character falls into a character class
  */
 
 STATIC bool
