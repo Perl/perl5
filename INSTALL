@@ -4,7 +4,7 @@ Install - Build and Installation guide for perl5.
 
 =head1 SYNOPSIS
 
-The basic steps to build and install perl5 are:
+The basic steps to build and install perl5 on a Unix system are:
 
 	rm -f config.sh
 	sh Configure
@@ -13,6 +13,9 @@ The basic steps to build and install perl5 are:
 	make install
 
 Each of these is explained in further detail below.
+
+For information on non-Unix systems, see the section on
+L<"Porting Information">, below.
 
 =head1 DESCRIPTION
 
@@ -414,7 +417,7 @@ install a standard perl5.004 with a shared library.  Then, suppose you
 try to build perl5.004 with -DDEBUGGING enabled, but everything else
 the same, including all the installation directories.  How can you
 ensure that your newly built perl will link with your newly built
-libperl5.so.4 rather with the installed libperl5.so.4?  The answer is
+libperl.so.4 rather with the installed libperl.so.4?  The answer is
 that you might not be able to.  The installation directory is encoded
 in the perl binary with the LD_RUN_PATH environment variable.  On
 Solaris, you can override that with LD_LIBRARY_PATH; on Linux you
@@ -574,7 +577,7 @@ You can also supply a shell script config.over to over-ride Configure's
 guesses.  It will get loaded up at the very end, just before config.sh
 is created.  You have to be careful with this, however, as Configure
 does no checking that your changes make sense.  See the section on
-changing the installation directory for an example.
+L<"Changing the installation directory"> for an example.
 
 =item config.h
 
@@ -613,6 +616,10 @@ corresponing subdirectories.  Additional information, including
 a glossary of all those config.sh variables, is in the Porting
 subdirectory.
 
+Ports for other systems may also be available.  You should check out
+L<"http:/www.perl.com/CPAN/ports"> for current information on ports to
+various other operating systems.
+
 =back
 
 =head1 make depend
@@ -634,6 +641,16 @@ explicitly above.
 This will attempt to make perl in the current directory.
 
 If you can't compile successfully, try some of the following ideas.
+If none of them help, and careful reading of the error message and
+the relevant manual pages on your system doesn't help, you can
+send a message to either the comp.lang.perl.misc newsgroup or to
+perlbug@perl.com with an accurate description of your problem.
+Please include the I<output> of the B<./myconfig> shell script
+that comes with the distribution.
+
+[The B<perlbug> program that comes with the perl distribution is
+useful for sending in such reports, but you need to have
+perl compiled and installed before you can use it.]
 
 =over 4
 
@@ -655,14 +672,15 @@ to test your version of miniperl.
 
 If you get duplicates upon linking for malloc et al, say -DHIDEMYMALLOC.
 
-=item *
+=item varargs
 
 If you get varargs problems with gcc, be sure that gcc is installed
 correctly.  When using gcc, you should probably have i_stdarg='define'
 and i_varargs='undef' in config.sh.  The problem is usually solved by
 running fixincludes correctly.  If you do change config.sh, don't
-forget to propagate your changes with C<sh Configure -S>.  See also the
-vsprintf item below.
+forget to propagate your changes (see
+L<"Propagating your changes to config.sh"> below).
+See also the L<"vsprintf"> item below.
 
 =item *
 
@@ -674,7 +692,7 @@ numbers will vary in different versions of perl):
     proto.h:45: prototype declaration
 
 it might well be a symptom of the gcc "varargs problem".  See the
-previous item.
+previous L<"varargs"> item.
 
 =item Solaris and SunOS dynamic loading
 
@@ -690,7 +708,8 @@ the GCC_EXEC_PREFIX variable.
 =item ld.so.1: ./perl: fatal: relocation error:
 
 If you get this message on SunOS or Solaris, and you're using gcc,
-it's probably the GNU as or GNU ld problem in the previous item.
+it's probably the GNU as or GNU ld problem in the previous item
+L<"Solaris and SunOS dynamic loading">.
 
 =item *
 
@@ -723,7 +742,7 @@ or by answering the nm extraction question interactively.
 If you have previously run Configure, you should I<not> reuse your old
 config.sh.
 
-=item *
+=item vsprintf
 
 If you run into problems with vsprintf in compiling util.c, the
 problem is probably that Configure failed to detect your system's
@@ -774,10 +793,35 @@ F<cflags>.  It's okay to insert rules for specific files into
 F<makefile> since a default rule only takes effect in the absence of a
 specific rule.
 
-=item *
+=item Missing dbmclose
 
 SCO prior to 3.2.4 may be missing dbmclose().  An upgrade to 3.2.4
 that includes libdbm.nfs (which includes dbmclose()) may be available.
+
+=item Warning (will try anyway): No library found for -lposix
+
+If you see such a message during the building of an extension, but
+the extension passes its tests anyway (see L<"make test"> below),
+then don't worry about the warning message.  The extension
+Makefile.PL goes looking for various libraries needed on various
+systems; few systems will need all the possible libries listed.
+For example, a system may have -lcposix or -lposix, but it's
+unlikely to have both, so most users will see warnings for the one
+they don't have.  The message 'will try anyway' is intended to
+reassure you that the process is continuing.
+
+On the other hand, if you are building GDBM_File and you get the
+message
+
+    Warning (will try anyway): No library found for -lgdbm
+
+then it's likely you're going to run into trouble somewhere along
+the line, since it's hard to see how you can use the GDBM_File
+extension without the -lgdbm library.
+
+It is true that, in principle, Configure could have figured all of
+this out, but Configure and the extension building process are not
+quite that tightly coordinated.
 
 =item *
 
@@ -792,6 +836,7 @@ UTS may need one or more of B<-DCRIPPLED_CC>, B<-K> or B<-g>, and undef LSTAT.
 If you get syntax errors on '(', try -DCRIPPLED_CC.
 
 Machines with half-implemented dbm routines will need to #undef I_ODBM
+
 
 =back
 
@@ -1002,4 +1047,15 @@ from the original README by Larry Wall.
 
 =head1 LAST MODIFIED
 
-30 August 1996
+6 September 1996
+
+> > Warning (will try anyway): No library found for -lucb
+> Don't worry about these.  It tried anyway and succeeded.  If you can think
+> of a better way to word the message, please feel free to suggest one.
+
+I figured that Configure should be able to figure out that there are no
+-lucb/-lposix/-lcposix libraries so that ExtUtils::Liblist won't have
+to check for them.  Okay, I'll stop worrying. :)
+
+Thank you!
+Dan
