@@ -1124,13 +1124,12 @@ static const char *context_name[] = {
 };
 
 STATIC I32
-S_dopoptolabel(pTHX_ char *label)
+S_dopoptolabel(pTHX_ const char *label)
 {
     register I32 i;
-    register PERL_CONTEXT *cx;
 
     for (i = cxstack_ix; i >= 0; i--) {
-	cx = &cxstack[i];
+	register const PERL_CONTEXT *cx = &cxstack[i];
 	switch (CxTYPE(cx)) {
 	case CXt_SUBST:
 	case CXt_SUB:
@@ -1167,9 +1166,7 @@ Perl_dowantarray(pTHX)
 I32
 Perl_block_gimme(pTHX)
 {
-    I32 cxix;
-
-    cxix = dopoptosub(cxstack_ix);
+    const I32 cxix = dopoptosub(cxstack_ix);
     if (cxix < 0)
 	return G_VOID;
 
@@ -1190,9 +1187,7 @@ Perl_block_gimme(pTHX)
 I32
 Perl_is_lvalue_sub(pTHX)
 {
-    I32 cxix;
-
-    cxix = dopoptosub(cxstack_ix);
+    const I32 cxix = dopoptosub(cxstack_ix);
     assert(cxix >= 0);  /* We should only be called from inside subs */
 
     if (cxstack[cxix].blk_sub.lval && CvLVALUE(cxstack[cxix].blk_sub.cv))
@@ -1211,9 +1206,8 @@ STATIC I32
 S_dopoptosub_at(pTHX_ PERL_CONTEXT *cxstk, I32 startingblock)
 {
     I32 i;
-    register PERL_CONTEXT *cx;
     for (i = startingblock; i >= 0; i--) {
-	cx = &cxstk[i];
+        register const PERL_CONTEXT *cx = &cxstk[i];
 	switch (CxTYPE(cx)) {
 	default:
 	    continue;
@@ -1231,9 +1225,8 @@ STATIC I32
 S_dopoptoeval(pTHX_ I32 startingblock)
 {
     I32 i;
-    register PERL_CONTEXT *cx;
     for (i = startingblock; i >= 0; i--) {
-	cx = &cxstack[i];
+	register const PERL_CONTEXT *cx = &cxstack[i];
 	switch (CxTYPE(cx)) {
 	default:
 	    continue;
@@ -1249,9 +1242,8 @@ STATIC I32
 S_dopoptoloop(pTHX_ I32 startingblock)
 {
     I32 i;
-    register PERL_CONTEXT *cx;
     for (i = startingblock; i >= 0; i--) {
-	cx = &cxstack[i];
+	register const PERL_CONTEXT *cx = &cxstack[i];
 	switch (CxTYPE(cx)) {
 	case CXt_SUBST:
 	case CXt_SUB:
@@ -1275,12 +1267,11 @@ S_dopoptoloop(pTHX_ I32 startingblock)
 void
 Perl_dounwind(pTHX_ I32 cxix)
 {
-    register PERL_CONTEXT *cx;
     I32 optype;
 
     while (cxstack_ix > cxix) {
 	SV *sv;
-	cx = &cxstack[cxstack_ix];
+        register PERL_CONTEXT *cx = &cxstack[cxstack_ix];
 	DEBUG_l(PerlIO_printf(Perl_debug_log, "Unwinding block %ld, type %s\n",
 			      (long) cxstack_ix, PL_block_type[CxTYPE(cx)]));
 	/* Note: we don't need to restore the base context info till the end. */
@@ -1334,7 +1325,7 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 	    if (PL_in_eval & EVAL_KEEPERR) {
                 static const char prefix[] = "\t(in cleanup) ";
 		SV *err = ERRSV;
-		char *e = Nullch;
+                const char *e = Nullch;
 		if (!SvPOK(err))
 		    sv_setpvn(err,"",0);
 		else if (SvCUR(err) >= sizeof(prefix)+msglen-1) {
@@ -1447,7 +1438,7 @@ PP(pp_caller)
     PERL_SI *top_si = PL_curstackinfo;
     I32 dbcxix;
     I32 gimme;
-    char *stashname;
+    const char *stashname;
     SV *sv;
     I32 count = 0;
 
@@ -1558,7 +1549,7 @@ PP(pp_caller)
 	&& CopSTASH_eq(PL_curcop, PL_debstash))
     {
 	AV *ary = cx->blk_sub.argarray;
-	int off = AvARRAY(ary) - AvALLOC(ary);
+        const int off = AvARRAY(ary) - AvALLOC(ary);
 
 	if (!PL_dbargs) {
 	    GV* tmpgv;
@@ -2569,9 +2560,9 @@ PP(pp_cswitch)
 STATIC void
 S_save_lines(pTHX_ AV *array, SV *sv)
 {
-    register char *s = SvPVX(sv);
-    register char *send = SvPVX(sv) + SvCUR(sv);
-    register char *t;
+    register const char *s = SvPVX(sv);
+    register const char *send = SvPVX(sv) + SvCUR(sv);
+    register const char *t;
     register I32 line = 1;
 
     while (s && s < send) {
@@ -2609,7 +2600,7 @@ STATIC OP *
 S_docatch(pTHX_ OP *o)
 {
     int ret;
-    OP *oldop = PL_op;
+    OP * const oldop = PL_op;
     OP *retop;
     volatile PERL_SI *cursi = PL_curstackinfo;
     dJMPENV;
@@ -2765,15 +2756,14 @@ than in the scope of the debugger itself).
 CV*
 Perl_find_runcv(pTHX_ U32 *db_seqp)
 {
-    I32		 ix;
     PERL_SI	 *si;
-    PERL_CONTEXT *cx;
 
     if (db_seqp)
 	*db_seqp = PL_curcop->cop_seq;
     for (si = PL_curstackinfo; si; si = si->si_prev) {
+        I32 ix;
 	for (ix = si->si_cxix; ix >= 0; ix--) {
-	    cx = &(si->si_cxstack[ix]);
+	    const PERL_CONTEXT *cx = &(si->si_cxstack[ix]);
 	    if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT) {
 		CV *cv = cx->blk_sub.cv;
 		/* skip DB:: code */
@@ -2874,12 +2864,12 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	lex_end();
 	LEAVE;
 	if (optype == OP_REQUIRE) {
-	    char* msg = SvPVx(ERRSV, n_a);
+            const char* msg = SvPVx(ERRSV, n_a);
 	    DIE(aTHX_ "%sCompilation failed in require",
 		*msg ? msg : "Unknown error\n");
 	}
 	else if (startop) {
-	    char* msg = SvPVx(ERRSV, n_a);
+            const char* msg = SvPVx(ERRSV, n_a);
 
 	    POPBLOCK(cx,PL_curpm);
 	    POPEVAL(cx);
@@ -2887,7 +2877,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 		       (*msg ? msg : "Unknown error\n"));
 	}
 	else {
-	    char* msg = SvPVx(ERRSV, n_a);
+            const char* msg = SvPVx(ERRSV, n_a);
 	    if (!*msg) {
 	        sv_setpv(ERRSV, "Compilation error");
 	    }
@@ -2960,7 +2950,7 @@ S_doopen_pm(pTHX_ const char *name, const char *mode)
 
     if (namelen > 3 && strEQ(name + namelen - 3, ".pm")) {
 	SV *pmcsv = Perl_newSVpvf(aTHX_ "%s%c", name, 'c');
-	char *pmc = SvPV_nolen(pmcsv);
+	const char * const pmc = SvPV_nolen(pmcsv);
 	Stat_t pmstat;
 	Stat_t pmcstat;
 	if (PerlLIO_stat(pmc, &pmcstat) < 0) {
@@ -3465,7 +3455,7 @@ PP(pp_leaveeval)
     I32 gimme;
     register PERL_CONTEXT *cx;
     OP *retop;
-    U8 save_flags = PL_op -> op_flags;
+    const U8 save_flags = PL_op -> op_flags;
     I32 optype;
 
     POPBLOCK(cx,newpm);
@@ -3722,9 +3712,7 @@ S_doparseform(pTHX_ SV *sv)
 		while (*s == '#')
 		    s++;
 		if (*s == '.') {
-		    char *f;
-		    s++;
-		    f = s;
+                    const char * const f = ++s;
 		    while (*s == '#')
 			s++;
 		    arg |= 256 + (s - f);
@@ -3741,9 +3729,7 @@ S_doparseform(pTHX_ SV *sv)
                 while (*s == '#')
                     s++;
                 if (*s == '.') {
-                    char *f;
-                    s++;
-                    f = s;
+                    const char * const f = ++s;
                     while (*s == '#')
                         s++;
                     arg |= 256 + (s - f);
@@ -3913,7 +3899,7 @@ run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 /* perhaps someone can come up with a better name for
    this?  it is not really "absolute", per se ... */
 static bool
-S_path_is_absolute(pTHX_ char *name)
+S_path_is_absolute(pTHX_ const char *name)
 {
     if (PERL_FILE_IS_ABSOLUTE(name)
 #ifdef MACOS_TRADITIONAL

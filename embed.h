@@ -3259,7 +3259,7 @@
 #define reghop3(a,b,c)		S_reghop3(aTHX_ a,b,c)
 #define reghopmaybe(a,b)	S_reghopmaybe(aTHX_ a,b)
 #define reghopmaybe3(a,b,c)	S_reghopmaybe3(aTHX_ a,b,c)
-#define find_byclass(a,b,c,d,e,f)	S_find_byclass(aTHX_ a,b,c,d,e,f)
+#define find_byclass(a,b,c,d,e)	S_find_byclass(aTHX_ a,b,c,d,e)
 #define to_utf8_substr(a)	S_to_utf8_substr(aTHX_ a)
 #define to_byte_substr(a)	S_to_byte_substr(aTHX_ a)
 #endif

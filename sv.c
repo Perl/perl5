@@ -7613,7 +7613,7 @@ char *
 Perl_sv_reftype(pTHX_ SV *sv, int ob)
 {
     if (ob && SvOBJECT(sv)) {
-        const char *name = HvNAME(SvSTASH(sv));
+	char *name = HvNAME(SvSTASH(sv));
 	return name ? name : "__ANON__";
     }
     else {
@@ -7631,7 +7631,7 @@ Perl_sv_reftype(pTHX_ SV *sv, int ob)
 				    return "REF";
 				else
 				    return "SCALAR";
-				
+
 	case SVt_PVLV:		return SvROK(sv) ? "REF"
 				/* tied lvalues should appear to be
 				 * scalars for backwards compatitbility */

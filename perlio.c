@@ -4744,6 +4744,7 @@ PerlIO_getname(PerlIO *f, char *buf)
     (void)f;
     (void)buf;
     Perl_croak(aTHX_ "Don't know how to get file name");
+    return Nullch;
 #endif
 }
 

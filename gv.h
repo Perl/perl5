@@ -20,7 +20,7 @@ struct gp {
     U32		gp_cvgen;	/* generational validity of cached gv_cv */
     U32		gp_flags;	/* XXX unused */
     line_t	gp_line;	/* line first declared at (for -w) */
-    const char * gp_file;	/* file first declared in (for -w) */
+    char *	gp_file;	/* file first declared in (for -w) */
 };
 
 #define GvXPVGV(gv)	((XPVGV*)SvANY(gv))
