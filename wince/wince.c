@@ -60,13 +60,6 @@
 #  define getlogin g_getlogin
 #endif
 
-#if defined(PERL_OBJECT)
-#  undef do_aspawn
-#  define do_aspawn g_do_aspawn
-#  undef Perl_do_exec
-#  define Perl_do_exec g_do_exec
-#endif
-
 static long		filetime_to_clock(PFILETIME ft);
 static BOOL		filetime_from_time(PFILETIME ft, time_t t);
 static char *		get_emd_part(SV **leading, char *trailing, ...);
@@ -132,7 +125,7 @@ get_regstr_from(HKEY hkey, const char *valuename, SV **svp)
 	DWORD datalen;
 	retval = XCERegQueryValueExA(handle, valuename, 0, &type, NULL, &datalen);
 	if (retval == ERROR_SUCCESS && type == REG_SZ) {
-	    dTHXo;
+	    dTHX;
 	    if (!*svp)
 		*svp = sv_2mortal(newSVpvn("",0));
 	    SvGROW(*svp, datalen);
@@ -212,7 +205,7 @@ get_emd_part(SV **prev_pathp, char *trailing_path, ...)
     /* only add directory if it exists */
     if (XCEGetFileAttributesA(mod_name) != (DWORD) -1) {
 	/* directory exists */
-	dTHXo;
+	dTHX;
 	if (!*prev_pathp)
 	    *prev_pathp = sv_2mortal(newSVpvn("",0));
 	sv_catpvn(*prev_pathp, ";", 1);
@@ -226,7 +219,7 @@ get_emd_part(SV **prev_pathp, char *trailing_path, ...)
 char *
 win32_get_privlib(const char *pl)
 {
-    dTHXo;
+    dTHX;
     char *stdlib = "lib";
     char buffer[MAX_PATH+1];
     SV *sv = Nullsv;
@@ -243,7 +236,7 @@ win32_get_privlib(const char *pl)
 static char *
 win32_get_xlib(const char *pl, const char *xlib, const char *libname)
 {
-    dTHXo;
+    dTHX;
     char regstr[40];
     char pathstr[MAX_PATH+1];
     DWORD datalen;
@@ -589,23 +582,19 @@ win32_uname(struct utsname *name)
     return 0;
 }
 
-#ifndef PERL_OBJECT
-
 static UINT timerid = 0;
 
 static VOID CALLBACK TimerProc(HWND win, UINT msg, UINT id, DWORD time)
 {
-    dTHXo;
+    dTHX;
     KillTimer(NULL,timerid);
     timerid=0;  
     sighandler(14);
 }
-#endif	/* !PERL_OBJECT */
 
 DllExport unsigned int
 win32_alarm(unsigned int sec)
 {
-#ifndef PERL_OBJECT
     /* 
      * the 'obvious' implentation is SetTimer() with a callback
      * which does whatever receiving SIGALRM would do 
@@ -615,7 +604,7 @@ win32_alarm(unsigned int sec)
      * Snag is unless something is looking at the message queue
      * nothing happens :-(
      */ 
-    dTHXo;
+    dTHX;
     if (sec)
      {
       timerid = SetTimer(NULL,timerid,sec*1000,(TIMERPROC)TimerProc);
@@ -630,7 +619,6 @@ win32_alarm(unsigned int sec)
         timerid=0;  
        }
      }
-#endif	/* !PERL_OBJECT */
     return 0;
 }
 
@@ -641,7 +629,7 @@ extern char *	des_fcrypt(const char *txt, const char *salt, char *cbuf);
 DllExport char *
 win32_crypt(const char *txt, const char *salt)
 {
-    dTHXo;
+    dTHX;
 #ifdef HAVE_DES_FCRYPT
     dTHR;
     return des_fcrypt(txt, salt, w32_crypt_buffer);
@@ -756,7 +744,7 @@ win32_strerror(int e)
 DllExport void
 win32_str_os_error(void *sv, DWORD dwErr)
 {
-  dTHXo;
+  dTHX;
 
   sv_setpvn((SV*)sv, "Error", 5);
 }
@@ -1237,7 +1225,7 @@ win32_execvp(const char *cmdname, const char *const *argv)
 DllExport void*
 win32_dynaload(const char* filename)
 {
-    dTHXo;
+    dTHX;
     HMODULE hModule;
 
     hModule = XCELoadLibraryA(filename);
@@ -1466,7 +1454,7 @@ XS(w32_ShellEx)
 void
 Perl_init_os_extras(void)
 {
-    dTHXo;
+    dTHX;
     char *file = __FILE__;
     dXSUB_SYS;
 
@@ -1570,11 +1558,6 @@ wce_hitreturn()
 }
 
 //////////////////////////////////////////////////////////////////////
-
-#ifdef PERL_OBJECT
-#  undef this
-#  define this pPerl
-#endif
 
 void
 win32_argv2utf8(int argc, char** argv)

@@ -1,4 +1,4 @@
-# SpecialCasing-4.txt
+# SpecialCasing-5.txt
 #
 # Special Casing Properties
 #
@@ -20,20 +20,33 @@
 # one character, they are separated by spaces.
 #
 # The <condition_list> is optional. Where present, it consists of one or more locales or contexts,
-# separated by spaces.
-#  A condition list overrides the normal behavior if all of the listed conditions are true.
-#  Case distinctions in the condition list are not significant.
-#  Conditions preceded by "NON_" represent the negation of the condition
+# separated by spaces. In these conditions:
+# - A condition list overrides the normal behavior if all of the listed conditions are true.
+# - Case distinctions in the condition list are not significant.
+# - Conditions preceded by "NOT_" represent the negation of the condition.
+# - A cased letter is any character with general category = Ll or Lo or Lt
+# - An ignorable sequence is a sequence of *zero* or more characters from
+#    the set {HYPHEN, SOFT HYPHEN, general category = Mn}.
 #
 # A locale is defined as:
 # <locale> := <ISO_639_code> ( "_" <ISO_3166_code> ( "_" <variant> )? )?
 # <ISO_3166_code> := 2-letter ISO country code,
 # <ISO_639_code> :=  2-letter ISO language code
 #
-# A context is one of the following choices:
-#   FINAL:  The letter is not followed by a letter of general category L* (e.g. Ll, Lt, Lu, Lm, or Lo).
-#   MODERN: The mapping is only used for modern text.
-#   AFTER_i: The last base character was "i" 0069
+# A context is a locale or one of the following choices:
+#   CFINAL:      The character is not followed by a sequence consisting of
+#                an ignorable sequence and then a cased letter.
+#   CINITIAL:    The character is not preceded by a sequence consisting of
+#                a cased letter and an ignorable sequence.
+#   FINAL_SIGMA: CFINAL and NOT_CINITIAL
+#   TYPE_i:      The character is "i" (0069), "j" (006A),
+#                or has a canonical decomposition that begins with an "i" or "j"
+#                but has no combining characters above (i.e., i-ogonek (012F),
+#                i-tilde-below (1E2D), or i-dot-below (1ECB)).
+#   AFTER_i:     The last preceding base character was TYPE_i, and
+#                no combining character class 230 (above) has intervened.
+#   MORE_ABOVE:  The character is followed by one or more characters of
+#                combining class 230 (ABOVE) in the combining character sequence
 #
 # Other than as used to separate elements, spaces are to be ignored.
 #
@@ -185,7 +198,7 @@ FB17; FB17; 0544 056D; 0544 053D; # ARMENIAN SMALL LIGATURE MEN XEH
 
 # Special case for final form of sigma
 
-03A3; 03C2; 03A3; 03A3; FINAL; # GREEK CAPITAL LETTER SIGMA
+03A3; 03C2; 03A3; 03A3; FINAL_SIGMA; # GREEK CAPITAL LETTER SIGMA
 
 # Note: the following cases for non-final are already in the UnicodeData file.
 
@@ -195,18 +208,45 @@ FB17; FB17; 0544 056D; 0544 053D; # ARMENIAN SMALL LIGATURE MEN XEH
 
 # Note: the following cases are not included, since they would case-fold in lowercasing
 
-# 03C3; 03C2; 03A3; 03A3; FINAL; # GREEK SMALL LETTER SIGMA
-# 03C2; 03C3; 03A3; 03A3; NON_FINAL; # GREEK SMALL LETTER FINAL SIGMA
+# 03C3; 03C2; 03A3; 03A3; FINAL_SIGMA; # GREEK SMALL LETTER SIGMA
+# 03C2; 03C3; 03A3; 03A3; NOT_FINAL_SIGMA; # GREEK SMALL LETTER FINAL SIGMA
 
 # ================================================================================
 # Locale-sensitive mappings
 # ================================================================================
 
-# Lithuanian 
+# Lithuanian
 
-0307; 0307; ; ; lt AFTER_i; # Remove DOT ABOVE after "i" with upper or titlecase
+# Lithuanian retains the dot in a lowercase i when followed by accents.
 
-# Turkish, Azeri
+# Remove DOT ABOVE after "i" with upper or titlecase
+
+0307; 0307; ; ; lt AFTER_i # COMBINING DOT ABOVE
+
+# Introduce an explicit dot above when lowercasing capital I's and J's
+# whenever there are more accents above
+# (of the accents used in Lithuanian: grave, acute, tilde above, and ogonek)
+
+0049; 0069 0307; 0049; 0049; lt MORE_ABOVE # LATIN CAPITAL LETTER I
+004A; 006A 0307; 004A; 004A; lt MORE_ABOVE # LATIN CAPITAL LETTER J
+012E; 012F 0307; 012E; 012E; lt MORE_ABOVE # LATIN CAPITAL LETTER I WITH OGONEK
+00CC; 0069 0307 0300; 00CC; 00CC; lt # LATIN CAPITAL LETTER I WITH GRAVE
+00CD; 0069 0307 0301; 00CD; 00CD; lt # LATIN CAPITAL LETTER I WITH ACUTE
+0128; 0069 0307 0303; 0128; 0128; lt # LATIN CAPITAL LETTER I WITH TILDE
+
+# ================================================================================
+
+# Turkish and Azeri
+
+# I and i-dotless; I-dot and i are case pairs in Turkish and Azeri
+# The following rules handle those cases.
+
+# Remove spurious dot above small i's when lowercasing, if there are no more accents above:
+
+0307; ; 0307; 0307; tr AFTER_i NOT_MORE_ABOVE # COMBINING DOT ABOVE
+0307; ; 0307; 0307; az AFTER_i NOT_MORE_ABOVE # COMBINING DOT ABOVE
+
+# Fix case pairs
 
 0049; 0131; 0049; 0049; tr; # LATIN CAPITAL LETTER I
 0069; 0069; 0130; 0130; tr; # LATIN SMALL LETTER I

@@ -1,18 +1,20 @@
-ArabicShaping.txt		ArabShap.txt
-BidiMirroring.txt		BidiMirr.txt
-#Blocks.txt			Blocks.txt
-CaseFolding.txt			CaseFold.txt
-CompositionExclusions.txt	CompExcl.txt
-EastAsianWidth.txt		EAWidth.txt
-#Index.txt			Index.txt
-#Jamo.txt			Jamo.txt
-LineBreak.txt			LineBrk.txt
-#NamesList.html			NamesList.html
-#NamesList.txt			NamesList.txt
-#PropList.txt			PropList.txt
-#PropList.html			PropList.html
-#ReadMe.txt			ReadMe.txt
-SpecialCasing.txt		SpecCase.txt
-UnicodeCharacterDatabase.html	UCD.html
-UnicodeData.html		Unicode.html
-UnicodeData.txt			Unicode.txt
+#!/bin/sh
+
+mv ArabicShaping.txt			ArabShap.txt
+mv BidiMirroring.txt			BidiMirr.txt
+#Blocks.txt				Blocks.txt
+mv CaseFolding.txt			CaseFold.txt
+mv CompositionExclusions.txt		CompExcl.txt
+mv EastAsianWidth.txt			EAWidth.txt
+#Index.txt				Index.txt
+#Jamo.txt				Jamo.txt
+mv LineBreak.txt			LineBrk.txt
+#NamesList.html				NamesList.html
+#NamesList.txt				NamesList.txt
+#PropList.txt				PropList.txt
+#PropList.html				PropList.html
+#ReadMe.txt				ReadMe.txt
+mv SpecialCasing.txt			SpecCase.txt
+mv UnicodeCharacterDatabase.html	UCD.html
+mv UnicodeData.html			Unicode.html
+mv UnicodeData.txt			Unicode.txt

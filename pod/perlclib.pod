@@ -166,7 +166,7 @@ table, C<c> is a C<char>, and C<u> is a Unicode codepoint.
     strtoul(s, *p, n)           Strtoul(s, *p, n)
 
 Notice also the C<scan_bin>, C<scan_hex>, and C<scan_oct> functions in
-F<util.c> for converting strings representing numbers in the respective
+F<numeric.c> for converting strings representing numbers in the respective
 bases into C<NV>s.
 
 In theory C<Strtol> and C<Strtoul> may not be defined if the machine perl is

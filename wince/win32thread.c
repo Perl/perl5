@@ -3,12 +3,6 @@
 #include "EXTERN.h"
 #include "perl.h"
 
-#if defined(PERL_OBJECT)
-#define NO_XSLOCKS
-extern CPerlObj* pPerl;
-#include "XSUB.h"
-#endif
-
 #ifdef USE_DECLSPEC_THREAD
 __declspec(thread) void *PL_current_context = NULL;
 #endif
@@ -16,7 +10,7 @@ __declspec(thread) void *PL_current_context = NULL;
 void
 Perl_set_context(void *t)
 {
-#if defined(USE_THREADS) || defined(USE_ITHREADS)
+#if defined(USE_5005THREADS) || defined(USE_ITHREADS)
 #  ifdef USE_DECLSPEC_THREAD
     Perl_current_context = t;
 #  else
@@ -30,7 +24,7 @@ Perl_set_context(void *t)
 void *
 Perl_get_context(void)
 {
-#if defined(USE_THREADS) || defined(USE_ITHREADS)
+#if defined(USE_5005THREADS) || defined(USE_ITHREADS)
 #  ifdef USE_DECLSPEC_THREAD
     return Perl_current_context;
 #  else
@@ -44,7 +38,7 @@ Perl_get_context(void)
 #endif
 }
 
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 void
 Perl_init_thread_intern(struct perl_thread *athr)
 {

@@ -2,7 +2,6 @@
 use Config;
 use File::Compare qw(compare);
 use File::Copy qw(copy);
-my $OBJ   = 1 if $Config{'ccflags'} =~ /PERL_OBJECT/i;
 my $name = $0;
 $name =~ s#^(.*)\.PL$#../$1.SH#;
 my %opt;
@@ -73,7 +72,7 @@ chmod(0666,"../lib/CORE/config.h");
 copy("$file.new","../lib/CORE/config.h") || die "Cannot copy:$!";
 chmod(0444,"../lib/CORE/config.h");
 
-if (!$OBJ && compare("$file.new",$file))
+if (compare("$file.new",$file))
  {
   warn "$file has changed\n";
   chmod(0666,$file);

@@ -2,6 +2,7 @@
 # This file is built by mktables.PL from e.g. Unicode.txt.
 # Any changes made here will be lost!
 return <<'END';
+0621		U
 0622	0625	R
 0626		D
 0627		R
@@ -29,7 +30,7 @@ return <<'END';
 06cf		R
 06d0	06d1	D
 06d2	06d3	R
-06d5		U
+06d5		R
 06fa	06fc	D
 0710		R
 0712	0714	D
@@ -42,4 +43,5 @@ return <<'END';
 072a		R
 072b		D
 072c		R
+200d		C
 END

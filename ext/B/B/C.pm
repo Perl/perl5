@@ -1055,17 +1055,17 @@ typedef struct {
     HV *	xcv_stash;
     OP *	xcv_start;
     OP *	xcv_root;
-    void      (*xcv_xsub) (pTHXo_ CV*);
+    void      (*xcv_xsub) (pTHX_ CV*);
     ANY		xcv_xsubany;
     GV *	xcv_gv;
     char *	xcv_file;
     long	xcv_depth;	/* >= 2 indicates recursive call */
     AV *	xcv_padlist;
     CV *	xcv_outside;
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     perl_mutex *xcv_mutexp;
     struct perl_thread *xcv_owner;	/* current owner thread */
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
     cv_flags_t	xcv_flags;
 } XPVCV_or_similar;
 #define ANYINIT(i) i

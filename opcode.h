@@ -11,6 +11,16 @@
 
 START_EXTERN_C
 
+#ifdef PERL_CUSTOM_OPS
+#define OP_NAME(o) (o->op_type == OP_CUSTOM ? custom_op_name(o) : \
+                    PL_op_name[o->op_type])
+#define OP_DESC(o) (o->op_type == OP_CUSTOM ? custom_op_desc(o) : \
+                    PL_op_desc[o->op_type])
+#else
+#define OP_NAME(o) PL_op_name[o->op_type]
+#define OP_DESC(o) PL_op_desc[o->op_type]
+#endif
+
 #ifndef DOINIT
 EXT char *PL_op_name[];
 #else
@@ -366,6 +376,7 @@ EXT char *PL_op_name[] = {
 	"threadsv",
 	"setstate",
 	"method_named",
+	"custom",
 };
 #endif
 
@@ -724,6 +735,7 @@ EXT char *PL_op_desc[] = {
 	"per-thread value",
 	"set statement info",
 	"method with known name",
+	"unknown custom operator",
 };
 #endif
 
@@ -1445,6 +1457,7 @@ EXT OP * (CPERLscope(*PL_check)[]) (pTHX_ OP *op) = {
 	MEMBER_TO_FPTR(Perl_ck_null),	/* threadsv */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* setstate */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* method_named */
+	MEMBER_TO_FPTR(Perl_ck_null),	/* custom */
 };
 #endif
 
@@ -1803,6 +1816,7 @@ EXT U32 PL_opargs[] = {
 	0x00000044,	/* threadsv */
 	0x00001404,	/* setstate */
 	0x00000c40,	/* method_named */
+	0x00000000,	/* custom */
 };
 #endif
 

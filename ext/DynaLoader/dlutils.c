@@ -30,7 +30,7 @@ static int dl_debug = 0;	/* value copied from $DynaLoader::dl_debug */
 #ifdef DL_UNLOAD_ALL_AT_EXIT
 /* Close all dlopen'd files */
 static void
-dl_unload_all_files(pTHXo_ void *unused)
+dl_unload_all_files(pTHX_ void *unused)
 {
     CV *sub;
     AV *dl_librefs;
@@ -54,7 +54,7 @@ dl_unload_all_files(pTHXo_ void *unused)
 #endif
 
 static void
-dl_generic_private_init(pTHXo)	/* called by dl_*.xs dl_private_init() */
+dl_generic_private_init(pTHX)	/* called by dl_*.xs dl_private_init() */
 {
     char *perl_dl_nonlazy;
 #ifdef DEBUGGING
@@ -77,7 +77,7 @@ dl_generic_private_init(pTHXo)	/* called by dl_*.xs dl_private_init() */
 
 /* SaveError() takes printf style args and saves the result in LastError */
 static void
-SaveError(pTHXo_ char* pat, ...)
+SaveError(pTHX_ char* pat, ...)
 {
     va_list args;
     SV *msv;

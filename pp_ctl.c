@@ -26,24 +26,19 @@
 
 #define DOCATCH(o) ((CATCH_GET == TRUE) ? docatch(o) : (o))
 
-static I32 sortcv(pTHXo_ SV *a, SV *b);
-static I32 sortcv_stacked(pTHXo_ SV *a, SV *b);
-static I32 sortcv_xsub(pTHXo_ SV *a, SV *b);
-static I32 sv_ncmp(pTHXo_ SV *a, SV *b);
-static I32 sv_i_ncmp(pTHXo_ SV *a, SV *b);
-static I32 amagic_ncmp(pTHXo_ SV *a, SV *b);
-static I32 amagic_i_ncmp(pTHXo_ SV *a, SV *b);
-static I32 amagic_cmp(pTHXo_ SV *a, SV *b);
-static I32 amagic_cmp_locale(pTHXo_ SV *a, SV *b);
-static I32 run_user_filter(pTHXo_ int idx, SV *buf_sv, int maxlen);
+static I32 sortcv(pTHX_ SV *a, SV *b);
+static I32 sortcv_stacked(pTHX_ SV *a, SV *b);
+static I32 sortcv_xsub(pTHX_ SV *a, SV *b);
+static I32 sv_ncmp(pTHX_ SV *a, SV *b);
+static I32 sv_i_ncmp(pTHX_ SV *a, SV *b);
+static I32 amagic_ncmp(pTHX_ SV *a, SV *b);
+static I32 amagic_i_ncmp(pTHX_ SV *a, SV *b);
+static I32 amagic_cmp(pTHX_ SV *a, SV *b);
+static I32 amagic_cmp_locale(pTHX_ SV *a, SV *b);
+static I32 run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen);
 
-#ifdef PERL_OBJECT
-static I32 sv_cmp_static(pTHXo_ SV *a, SV *b);
-static I32 sv_cmp_locale_static(pTHXo_ SV *a, SV *b);
-#else
 #define sv_cmp_static Perl_sv_cmp
 #define sv_cmp_locale_static Perl_sv_cmp_locale
-#endif
 
 PP(pp_wantarray)
 {
@@ -90,7 +85,7 @@ PP(pp_regcomp)
     tmpstr = POPs;
 
     /* prevent recompiling under /o and ithreads. */
-#if defined(USE_ITHREADS) || defined(USE_THREADS)
+#if defined(USE_ITHREADS) || defined(USE_5005THREADS)
     if (pm->op_pmflags & PMf_KEEP && PM_GETRE(pm))
 	 RETURN;
 #endif
@@ -155,7 +150,7 @@ PP(pp_regcomp)
     /* XXX runtime compiled output needs to move to the pad */
     if (pm->op_pmflags & PMf_KEEP) {
 	pm->op_private &= ~OPpRUNTIME;	/* no point compiling again */
-#if !defined(USE_ITHREADS) && !defined(USE_THREADS)
+#if !defined(USE_ITHREADS) && !defined(USE_5005THREADS)
 	/* XXX can't change the optree at runtime either */
 	cLOGOP->op_first->op_next = PL_op->op_next;
 #endif
@@ -780,7 +775,7 @@ PP(pp_grepstart)
     ENTER;					/* enter outer scope */
 
     SAVETMPS;
-    /* SAVE_DEFSV does *not* suffice here for USE_THREADS */
+    /* SAVE_DEFSV does *not* suffice here for USE_5005THREADS */
     SAVESPTR(DEFSV);
     ENTER;					/* enter inner scope */
     SAVEVPTR(PL_curpm);
@@ -994,7 +989,7 @@ PP(pp_sort)
 		    PL_secondgv = gv_fetchpv("b", TRUE, SVt_PV);
 		    PL_sortstash = stash;
 		}
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 		sv_lock((SV *)PL_firstgv);
 		sv_lock((SV *)PL_secondgv);
 #endif
@@ -1016,10 +1011,10 @@ PP(pp_sort)
 		/* This is mostly copied from pp_entersub */
 		AV *av = (AV*)PL_curpad[0];
 
-#ifndef USE_THREADS
+#ifndef USE_5005THREADS
 		cx->blk_sub.savearray = GvAV(PL_defgv);
 		GvAV(PL_defgv) = (AV*)SvREFCNT_inc(av);
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 		cx->blk_sub.oldcurpad = PL_curpad;
 		cx->blk_sub.argarray = av;
 	    }
@@ -1195,27 +1190,27 @@ S_dopoptolabel(pTHX_ char *label)
 	case CXt_SUBST:
 	    if (ckWARN(WARN_EXITING))
 		Perl_warner(aTHX_ WARN_EXITING, "Exiting substitution via %s",
-			PL_op_name[PL_op->op_type]);
+			OP_NAME(PL_op));
 	    break;
 	case CXt_SUB:
 	    if (ckWARN(WARN_EXITING))
 		Perl_warner(aTHX_ WARN_EXITING, "Exiting subroutine via %s",
-			PL_op_name[PL_op->op_type]);
+			OP_NAME(PL_op));
 	    break;
 	case CXt_FORMAT:
 	    if (ckWARN(WARN_EXITING))
 		Perl_warner(aTHX_ WARN_EXITING, "Exiting format via %s",
-			PL_op_name[PL_op->op_type]);
+			OP_NAME(PL_op));
 	    break;
 	case CXt_EVAL:
 	    if (ckWARN(WARN_EXITING))
 		Perl_warner(aTHX_ WARN_EXITING, "Exiting eval via %s",
-			PL_op_name[PL_op->op_type]);
+			OP_NAME(PL_op));
 	    break;
 	case CXt_NULL:
 	    if (ckWARN(WARN_EXITING))
 		Perl_warner(aTHX_ WARN_EXITING, "Exiting pseudo-block via %s",
-			PL_op_name[PL_op->op_type]);
+			OP_NAME(PL_op));
 	    return -1;
 	case CXt_LOOP:
 	    if (!cx->blk_loop.label ||
@@ -1330,27 +1325,27 @@ S_dopoptoloop(pTHX_ I32 startingblock)
 	case CXt_SUBST:
 	    if (ckWARN(WARN_EXITING))
 		Perl_warner(aTHX_ WARN_EXITING, "Exiting substitution via %s",
-			PL_op_name[PL_op->op_type]);
+			OP_NAME(PL_op));
 	    break;
 	case CXt_SUB:
 	    if (ckWARN(WARN_EXITING))
 		Perl_warner(aTHX_ WARN_EXITING, "Exiting subroutine via %s",
-			PL_op_name[PL_op->op_type]);
+			OP_NAME(PL_op));
 	    break;
 	case CXt_FORMAT:
 	    if (ckWARN(WARN_EXITING))
 		Perl_warner(aTHX_ WARN_EXITING, "Exiting format via %s",
-			PL_op_name[PL_op->op_type]);
+			OP_NAME(PL_op));
 	    break;
 	case CXt_EVAL:
 	    if (ckWARN(WARN_EXITING))
 		Perl_warner(aTHX_ WARN_EXITING, "Exiting eval via %s",
-			PL_op_name[PL_op->op_type]);
+			OP_NAME(PL_op));
 	    break;
 	case CXt_NULL:
 	    if (ckWARN(WARN_EXITING))
 		Perl_warner(aTHX_ WARN_EXITING, "Exiting pseudo-block via %s",
-			PL_op_name[PL_op->op_type]);
+			OP_NAME(PL_op));
 	    return -1;
 	case CXt_LOOP:
 	    DEBUG_l( Perl_deb(aTHX_ "(Found loop #%ld)\n", (long)i));
@@ -1770,14 +1765,14 @@ PP(pp_enteriter)
     ENTER;
     SAVETMPS;
 
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     if (PL_op->op_flags & OPf_SPECIAL) {
 	svp = &THREADSV(PL_op->op_targ);	/* per-thread variable */
 	SAVEGENERICSV(*svp);
 	*svp = NEWSV(0,0);
     }
     else
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
     if (PL_op->op_targ) {
 #ifndef USE_ITHREADS
 	svp = &PL_curpad[PL_op->op_targ];		/* "my" variable */
@@ -2252,10 +2247,10 @@ PP(pp_goto)
 		EXTEND(PL_stack_sp, items); /* @_ could have been extended. */
 		Copy(AvARRAY(av), PL_stack_sp, items, SV*);
 		PL_stack_sp += items;
-#ifndef USE_THREADS
+#ifndef USE_5005THREADS
 		SvREFCNT_dec(GvAV(PL_defgv));
 		GvAV(PL_defgv) = cx->blk_sub.savearray;
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 		/* abandon @_ if it got reified */
 		if (AvREAL(av)) {
 		    (void)sv_2mortal((SV*)av);	/* delay until return */
@@ -2267,7 +2262,7 @@ PP(pp_goto)
 	    }
 	    else if (CvXSUB(cv)) {	/* put GvAV(defgv) back onto stack */
 		AV* av;
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 		av = (AV*)PL_curpad[0];
 #else
 		av = GvAV(PL_defgv);
@@ -2309,7 +2304,7 @@ PP(pp_goto)
 		    PL_stack_sp--;		/* There is no cv arg. */
 		    /* Push a mark for the start of arglist */
 		    PUSHMARK(mark);
-		    (void)(*CvXSUB(cv))(aTHXo_ cv);
+		    (void)(*CvXSUB(cv))(aTHX_ cv);
 		    /* Pop the current context like a decent sub should */
 		    POPBLOCK(cx, PL_curpm);
 		    /* Do _not_ use PUTBACK, keep the XSUB's return stack! */
@@ -2379,7 +2374,7 @@ PP(pp_goto)
 			svp = AvARRAY(padlist);
 		    }
 		}
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 		if (!cx->blk_sub.hasargs) {
 		    AV* av = (AV*)PL_curpad[0];
 		
@@ -2392,20 +2387,20 @@ PP(pp_goto)
 			PUTBACK ;		
 		    }
 		}
-#endif /* USE_THREADS */		
+#endif /* USE_5005THREADS */		
 		SAVEVPTR(PL_curpad);
 		PL_curpad = AvARRAY((AV*)svp[CvDEPTH(cv)]);
-#ifndef USE_THREADS
+#ifndef USE_5005THREADS
 		if (cx->blk_sub.hasargs)
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 		{
 		    AV* av = (AV*)PL_curpad[0];
 		    SV** ary;
 
-#ifndef USE_THREADS
+#ifndef USE_5005THREADS
 		    cx->blk_sub.savearray = GvAV(PL_defgv);
 		    GvAV(PL_defgv) = (AV*)SvREFCNT_inc(av);
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 		    cx->blk_sub.oldcurpad = PL_curpad;
 		    cx->blk_sub.argarray = av;
 		    ++mark;
@@ -2805,7 +2800,7 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, AV** avp)
     return rop;
 }
 
-/* With USE_THREADS, eval_owner must be held on entry to doeval */
+/* With USE_5005THREADS, eval_owner must be held on entry to doeval */
 STATIC OP *
 S_doeval(pTHX_ int gimme, OP** startop)
 {
@@ -2849,11 +2844,11 @@ S_doeval(pTHX_ int gimme, OP** startop)
     assert(CxTYPE(&cxstack[cxstack_ix]) == CXt_EVAL);
     cxstack[cxstack_ix].blk_eval.cv = PL_compcv;
 
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     CvOWNER(PL_compcv) = 0;
     New(666, CvMUTEXP(PL_compcv), 1, perl_mutex);
     MUTEX_INIT(CvMUTEXP(PL_compcv));
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 
     PL_comppad = newAV();
     av_push(PL_comppad, Nullsv);
@@ -2862,11 +2857,11 @@ S_doeval(pTHX_ int gimme, OP** startop)
     PL_comppad_name_fill = 0;
     PL_min_intro_pending = 0;
     PL_padix = 0;
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     av_store(PL_comppad_name, 0, newSVpvn("@_", 2));
     PL_curpad[0] = (SV*)newAV();
     SvPADMY_on(PL_curpad[0]);	/* XXX Needed? */
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 
     comppadlist = newAV();
     AvREAL_off(comppadlist);
@@ -2940,12 +2935,12 @@ S_doeval(pTHX_ int gimme, OP** startop)
 	}
 	SvREFCNT_dec(PL_rs);
 	PL_rs = SvREFCNT_inc(PL_nrs);
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 	MUTEX_LOCK(&PL_eval_mutex);
 	PL_eval_owner = 0;
 	COND_SIGNAL(&PL_eval_cond);
 	MUTEX_UNLOCK(&PL_eval_mutex);
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 	RETPUSHUNDEF;
     }
     SvREFCNT_dec(PL_rs);
@@ -2984,12 +2979,12 @@ S_doeval(pTHX_ int gimme, OP** startop)
     SP = PL_stack_base + POPMARK;		/* pop original mark */
     PL_op = saveop;			/* The caller may need it. */
     PL_lex_state = LEX_NOTPARSING;	/* $^S needs this. */
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     MUTEX_LOCK(&PL_eval_mutex);
     PL_eval_owner = 0;
     COND_SIGNAL(&PL_eval_cond);
     MUTEX_UNLOCK(&PL_eval_mutex);
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 
     RETURNOP(PL_eval_start);
 }
@@ -3160,7 +3155,7 @@ trylocal: {
 		    }
 
 		    Perl_sv_setpvf(aTHX_ namesv, "/loader/0x%"UVxf"/%s",
-				   PTR2UV(SvANY(loader)), name);
+				   PTR2UV(SvRV(dirsv)), name);
 		    tryname = SvPVX(namesv);
 		    tryrsfp = 0;
 
@@ -3368,14 +3363,14 @@ trylocal: {
     CopLINE_set(&PL_compiling, 0);
 
     PUTBACK;
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     MUTEX_LOCK(&PL_eval_mutex);
     if (PL_eval_owner && PL_eval_owner != thr)
 	while (PL_eval_owner)
 	    COND_WAIT(&PL_eval_cond, &PL_eval_mutex);
     PL_eval_owner = thr;
     MUTEX_UNLOCK(&PL_eval_mutex);
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
     return DOCATCH(doeval(gimme, NULL));
 }
 
@@ -3452,14 +3447,14 @@ PP(pp_entereval)
     if (PERLDB_LINE && PL_curstash != PL_debstash)
 	save_lines(CopFILEAV(&PL_compiling), PL_linestr);
     PUTBACK;
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     MUTEX_LOCK(&PL_eval_mutex);
     if (PL_eval_owner && PL_eval_owner != thr)
 	while (PL_eval_owner)
 	    COND_WAIT(&PL_eval_cond, &PL_eval_mutex);
     PL_eval_owner = thr;
     MUTEX_UNLOCK(&PL_eval_mutex);
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
     ret = doeval(gimme, NULL);
     if (PERLDB_INTER && was != PL_sub_generation /* Some subs defined here. */
 	&& ret != PL_op->op_next) {	/* Successive compilation. */
@@ -3815,12 +3810,11 @@ S_doparseform(pTHX_ SV *sv)
 #ifdef	TESTHARNESS
 #include <sys/types.h>
 typedef	void SV;
-#define pTHXo_
 #define pTHX_
 #define STATIC
 #define New(ID,VAR,N,TYPE) VAR=(TYPE *)malloc((N)*sizeof(TYPE))
 #define	Safefree(VAR) free(VAR)
-typedef int  (*SVCOMPARE_t) (pTHXo_ SV*, SV*);
+typedef int  (*SVCOMPARE_t) (pTHX_ SV*, SV*);
 #endif	/* TESTHARNESS */
 
 typedef char * aptr;		/* pointer for arithmetic on sizes */
@@ -4164,16 +4158,8 @@ S_qsortsv(pTHX_ gptr *list1, size_t nmemb, SVCOMPARE_t cmp)
     return;
 }
 
-
-#ifdef PERL_OBJECT
-#undef this
-#define this pPerl
-#include "XSUB.h"
-#endif
-
-
 static I32
-sortcv(pTHXo_ SV *a, SV *b)
+sortcv(pTHX_ SV *a, SV *b)
 {
     I32 oldsaveix = PL_savestack_ix;
     I32 oldscopeix = PL_scopestack_ix;
@@ -4196,14 +4182,14 @@ sortcv(pTHXo_ SV *a, SV *b)
 }
 
 static I32
-sortcv_stacked(pTHXo_ SV *a, SV *b)
+sortcv_stacked(pTHX_ SV *a, SV *b)
 {
     I32 oldsaveix = PL_savestack_ix;
     I32 oldscopeix = PL_scopestack_ix;
     I32 result;
     AV *av;
 
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     av = (AV*)PL_curpad[0];
 #else
     av = GvAV(PL_defgv);
@@ -4241,7 +4227,7 @@ sortcv_stacked(pTHXo_ SV *a, SV *b)
 }
 
 static I32
-sortcv_xsub(pTHXo_ SV *a, SV *b)
+sortcv_xsub(pTHX_ SV *a, SV *b)
 {
     dSP;
     I32 oldsaveix = PL_savestack_ix;
@@ -4255,7 +4241,7 @@ sortcv_xsub(pTHXo_ SV *a, SV *b)
     *++SP = a;
     *++SP = b;
     PUTBACK;
-    (void)(*CvXSUB(cv))(aTHXo_ cv);
+    (void)(*CvXSUB(cv))(aTHX_ cv);
     if (PL_stack_sp != PL_stack_base + 1)
 	Perl_croak(aTHX_ "Sort subroutine didn't return single value");
     if (!SvNIOKp(*PL_stack_sp))
@@ -4270,7 +4256,7 @@ sortcv_xsub(pTHXo_ SV *a, SV *b)
 
 
 static I32
-sv_ncmp(pTHXo_ SV *a, SV *b)
+sv_ncmp(pTHX_ SV *a, SV *b)
 {
     NV nv1 = SvNV(a);
     NV nv2 = SvNV(b);
@@ -4278,7 +4264,7 @@ sv_ncmp(pTHXo_ SV *a, SV *b)
 }
 
 static I32
-sv_i_ncmp(pTHXo_ SV *a, SV *b)
+sv_i_ncmp(pTHX_ SV *a, SV *b)
 {
     IV iv1 = SvIV(a);
     IV iv2 = SvIV(b);
@@ -4296,7 +4282,7 @@ sv_i_ncmp(pTHXo_ SV *a, SV *b)
 	} STMT_END
 
 static I32
-amagic_ncmp(pTHXo_ register SV *a, register SV *b)
+amagic_ncmp(pTHX_ register SV *a, register SV *b)
 {
     SV *tmpsv;
     tryCALL_AMAGICbin(a,b,ncmp,&tmpsv);
@@ -4314,11 +4300,11 @@ amagic_ncmp(pTHXo_ register SV *a, register SV *b)
            return 1;
         return d? -1 : 0;
      }
-     return sv_ncmp(aTHXo_ a, b);
+     return sv_ncmp(aTHX_ a, b);
 }
 
 static I32
-amagic_i_ncmp(pTHXo_ register SV *a, register SV *b)
+amagic_i_ncmp(pTHX_ register SV *a, register SV *b)
 {
     SV *tmpsv;
     tryCALL_AMAGICbin(a,b,ncmp,&tmpsv);
@@ -4336,11 +4322,11 @@ amagic_i_ncmp(pTHXo_ register SV *a, register SV *b)
            return 1;
         return d? -1 : 0;
     }
-    return sv_i_ncmp(aTHXo_ a, b);
+    return sv_i_ncmp(aTHX_ a, b);
 }
 
 static I32
-amagic_cmp(pTHXo_ register SV *str1, register SV *str2)
+amagic_cmp(pTHX_ register SV *str1, register SV *str2)
 {
     SV *tmpsv;
     tryCALL_AMAGICbin(str1,str2,scmp,&tmpsv);
@@ -4362,7 +4348,7 @@ amagic_cmp(pTHXo_ register SV *str1, register SV *str2)
 }
 
 static I32
-amagic_cmp_locale(pTHXo_ register SV *str1, register SV *str2)
+amagic_cmp_locale(pTHX_ register SV *str1, register SV *str2)
 {
     SV *tmpsv;
     tryCALL_AMAGICbin(str1,str2,scmp,&tmpsv);
@@ -4384,7 +4370,7 @@ amagic_cmp_locale(pTHXo_ register SV *str1, register SV *str2)
 }
 
 static I32
-run_user_filter(pTHXo_ int idx, SV *buf_sv, int maxlen)
+run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 {
     SV *datasv = FILTER_DATA(idx);
     int filter_has_file = IoLINES(datasv);
@@ -4452,19 +4438,3 @@ run_user_filter(pTHXo_ int idx, SV *buf_sv, int maxlen)
 
     return len;
 }
-
-#ifdef PERL_OBJECT
-
-static I32
-sv_cmp_locale_static(pTHXo_ register SV *str1, register SV *str2)
-{
-    return sv_cmp_locale(str1, str2);
-}
-
-static I32
-sv_cmp_static(pTHXo_ register SV *str1, register SV *str2)
-{
-    return sv_cmp(str1, str2);
-}
-
-#endif /* PERL_OBJECT */

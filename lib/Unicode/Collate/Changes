@@ -1,5 +1,8 @@
 Revision history for Perl extension Unicode::Collate.
 
+0.08  Mon Aug 20 22:40:18 2001
+    - add the index method.
+
 0.07  Thu Aug 16 23:42:02 2001
     - rename the module name to Unicode::Collate.
 

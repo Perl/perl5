@@ -223,7 +223,7 @@ ok( charinrange($ranges, "13a0"));
 ok( charinrange($ranges, "13f4"));
 ok(!charinrange($ranges, "13f5"));
 
-ok(Unicode::UCD::UnicodeVersion, 3.1);
+ok(Unicode::UCD::UnicodeVersion, '3.1.1');
 
 use Unicode::UCD qw(compexcl);
 
@@ -264,8 +264,8 @@ ok($casespec->{code} eq '00DF' &&
 
 $casespec = casespec(0x307);
 
-ok($casespec->{code} eq '0307' &&
-   $casespec->{lower} eq '0307'  &&
-   $casespec->{title} eq ''  &&
-   $casespec->{upper} eq '' &&
-   $casespec->{condition} eq 'lt AFTER_i');
+ok($casespec->{az}->{code} eq '0307' &&
+   $casespec->{az}->{lower} eq ''  &&
+   $casespec->{az}->{title} eq '0307'  &&
+   $casespec->{az}->{upper} eq '0307' &&
+   $casespec->{az}->{condition} eq 'az AFTER_i NOT_MORE_ABOVE');

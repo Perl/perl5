@@ -27,23 +27,19 @@ NetWare related modifications done on dl_win32.xs file created by Wei-Yuen Tan t
 //function pointer for UCSInitialize
 typedef void (*PFUCSINITIALIZE) ();
 
-#ifdef PERL_OBJECT
-
-#endif  /* PERL_OBJECT */
-
 #include "dlutils.c"	/* SaveError() etc	*/
 
 static void
-dl_private_init(pTHXo)
+dl_private_init(pTHX)
 {
-    (void)dl_generic_private_init(aTHXo);
+    (void)dl_generic_private_init(aTHX);
 }
 
 
 MODULE = DynaLoader	PACKAGE = DynaLoader
 
 BOOT:
-    (void)dl_private_init(aTHXo);
+    (void)dl_private_init(aTHX);
 
 
 void *
@@ -130,8 +126,8 @@ dl_load_file(filename,flags=0)
 			DLDEBUG(2,PerlIO_printf(Perl_debug_log," libref=%x\n", nlmHandle));
 			ST(0) = sv_newmortal() ;
 			if (nlmHandle == NULL)
-			//SaveError(aTHXo_ "load_file:%s",
-			//	  OS_Error_String(aTHXo)) ;
+			//SaveError(aTHX_ "load_file:%s",
+			//	  OS_Error_String(aTHX)) ;
 			ConsolePrintf("load_file error :  %s\n", mod_name8);
 			else
 			sv_setiv( ST(0), (IV)nlmHandle);
@@ -156,8 +152,8 @@ dl_find_symbol(libhandle, symbolname)
     DLDEBUG(2,PerlIO_printf(Perl_debug_log,"  symbolref = %x\n", RETVAL));
     ST(0) = sv_newmortal() ;
     if (RETVAL == NULL)
-	//SaveError(aTHXo_ "find_symbol:%s",
-	//	  OS_Error_String(aTHXo)) ;
+	//SaveError(aTHX_ "find_symbol:%s",
+	//	  OS_Error_String(aTHX)) ;
 	ConsolePrintf("find_symbol error \n");
     else
 	sv_setiv( ST(0), (IV)RETVAL);
@@ -178,7 +174,7 @@ dl_install_xsub(perl_name, symref, filename="$Package")
     DLDEBUG(2,PerlIO_printf(Perl_debug_log,"dl_install_xsub(name=%s, symref=%x)\n",
 		      perl_name, symref));
     ST(0) = sv_2mortal(newRV((SV*)newXS(perl_name,
-					(void(*)(pTHXo_ CV *))symref,
+					(void(*)(pTHX_ CV *))symref,
 					filename)));
 
 

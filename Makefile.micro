@@ -122,7 +122,7 @@ ulocale$(_O):	$(HE) locale.c
 unumeric$(_O):	$(HE) numeric.c
 	$(CC) -c -o $@ $(CFLAGS) numeric.c
 
-uuniversal$(_O):	$(HE) universal.c objXSUB.h XSUB.h
+uuniversal$(_O):	$(HE) universal.c XSUB.h
 	$(CC) -c -o $@ $(CFLAGS) universal.c
 
 uutf8$(_O):	$(HE) utf8.c

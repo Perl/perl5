@@ -217,7 +217,7 @@ multi-threading code. Under Linux, that also turns on a quick
 hack I did to grab a bit of extra information from segfaults.
 If you have a fancier gdb/threads setup than I do then you'll
 have to delete the lines in perl.c which say
-    #if defined(DEBUGGING) && defined(USE_THREADS) && defined(__linux__)
+    #if defined(DEBUGGING) && defined(USE_5005THREADS) && defined(__linux__)
         DEBUG_S(signal(SIGSEGV, (void(*)(int))catch_sigsegv););
     #endif
 

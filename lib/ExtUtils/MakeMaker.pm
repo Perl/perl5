@@ -2,7 +2,7 @@ BEGIN {require 5.002;} # MakeMaker 5.17 was the last MakeMaker that was compatib
 
 package ExtUtils::MakeMaker;
 
-$VERSION = "5.46";
+$VERSION = "5.47";
 $Version_OK = "5.17";	# Makefiles older than $Version_OK will die
 			# (Will be checked from MakeMaker version 4.13 onwards)
 ($Revision = substr(q$Revision: 1.222 $, 10)) =~ s/\s+$//;
@@ -345,7 +345,8 @@ sub ExtUtils::MakeMaker::new {
 	eval $eval;
 
 	if ($@) {
-	    warn "Warning: prerequisite $prereq failed to load: $@";
+       warn "Warning: prerequisite $prereq $self->{PREREQ_PM}->{$prereq} not found. We have "
+               . ($prereq->VERSION || 'unknown version');
 	}
 	elsif ($prereq->VERSION < $self->{PREREQ_PM}->{$prereq} ){
 	    warn "Warning: prerequisite $prereq $self->{PREREQ_PM}->{$prereq} not found";
@@ -414,7 +415,7 @@ sub ExtUtils::MakeMaker::new {
 	}
 	if ($self->{PARENT}) {
 	    $self->{PARENT}->{CHILDREN}->{$newclass} = $self;
-	    foreach my $opt (qw(CAPI POLLUTE PERL_CORE)) {
+	    foreach my $opt (qw(POLLUTE PERL_CORE)) {
 		if (exists $self->{PARENT}->{$opt}
 		    and not exists $self->{$opt})
 		    {
@@ -1233,17 +1234,6 @@ located in the C<x86> directory relative to the PPD itself.
 Ref to array of *.c file names. Initialised from a directory scan
 and the values portion of the XS attribute hash. This is not
 currently used by MakeMaker but may be handy in Makefile.PLs.
-
-=item CAPI
-
-[This attribute is obsolete in Perl 5.6.  PERL_OBJECT builds are C-compatible
-by default.]
-
-Switch to force usage of the Perl C API even when compiling for PERL_OBJECT.
-
-Note that this attribute is passed through to any recursive build,
-but if and only if the submodule's Makefile.PL itself makes no mention
-of the 'CAPI' attribute.
 
 =item CCFLAGS
 

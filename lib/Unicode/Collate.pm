@@ -7,7 +7,7 @@ use Carp;
 use Lingua::KO::Hangul::Util;
 require Exporter;
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 our $PACKAGE = __PACKAGE__;
 
 our @ISA = qw(Exporter);
@@ -39,7 +39,7 @@ sub new
      ! defined $self->{alternate} ? '' : $self->{alternate};
 
   # collation level
-  $self->{level} ||= $self->{alternate} =~ /shift/ ? 4 : 3;
+  $self->{level} ||= ($self->{alternate} =~ /shift/ ? 4 : 3);
 
   # normalization form
   $self->{normalization} = 'D' if ! exists $self->{normalization};
@@ -126,14 +126,13 @@ sub parseEntry
      defined $self->{ignoreChar} && $ele  =~ /$self->{ignoreChar}/
   )
   {
-     $self->{ignored}{$ele} = 1;
-     $self->{entries}{$ele} = 1; # true
+     $self->{entries}{$ele} = $self->{ignored}{$ele} = 1;
   }
   else
   {
     foreach my $arr ($k =~ /\[(\S+)\]/g) {
       my $var = $arr =~ /\*/;
-      push @key, $self->getCE( $var, _getHexArray($arr) );
+      push @key, $self->altCE( $var, _getHexArray($arr) );
     }
     $self->{entries}{$ele} = \@key;
   }
@@ -142,17 +141,18 @@ sub parseEntry
 
 
 ##
-## list to collation element
+## arrayref CE = altCE(bool variable?, list[num] weights)
 ##
-sub getCE
+sub altCE
 {
   my $self = shift;
   my $var  = shift;
   my @c    = @_;
 
   $self->{alternate} eq 'blanked' ?
-     $var ? [0,0,0] : [ @c[0..2] ] :
-  $self->{alternate} eq 'non-ignorable' ? [ @c[0..2] ] :
+    $var ? [0,0,0] : [ @c[0..2] ] :
+  $self->{alternate} eq 'non-ignorable' ?
+    [ @c[0..2] ] :
   $self->{alternate} eq 'shifted' ?
     $var ? [0,0,0,$c[0] ] : [ @c[0..2], $c[0]+$c[1]+$c[2] ? 0xFFFF : 0 ] :
   $self->{alternate} eq 'shift-trimmed' ?
@@ -161,7 +161,7 @@ sub getCE
 }
 
 ##
-## to debug
+## string hex_sortkey = splitCE(string arg)
 ##
 sub viewSortKey
 {
@@ -172,20 +172,17 @@ sub viewSortKey
   "[$view]";
 }
 
+
 ##
-## sort key
+## list[strings] elements = splitCE(string arg)
 ##
-sub getSortKey
+sub splitCE
 {
   my $self = shift;
   my $code = $self->{preprocess};
   my $norm = $self->{normalize};
   my $ent  = $self->{entries};
-  my $ign  = $self->{ignored};
   my $max  = $self->{maxlength};
-  my $lev  = $self->{level};
-  my $cjk  = $self->{overrideCJK};
-  my $hang = $self->{overrideHangul};
   my $rear = $self->{rearrangeHash};
 
   my $str = ref $code ? &$code(shift) : shift;
@@ -235,20 +232,111 @@ sub getSortKey
         last;
       }
     }
-
-    next if !defined $ch || $ign->{$ch};   # ignored
-
-    push @buf,
-      $ent->{$ch}
-        ? @{ $ent->{$ch} }
-        : _isHangul($u)
-          ? $hang
-            ? &$hang($u)
-            : map(@{ $ent->{pack('U', $_)} }, decomposeHangul($u))
-          : _isCJK($u)
-            ? $cjk ? &$cjk($u) : map($self->getCE(0,@$_), _CJK($u))
-            : map($self->getCE(0,@$_), _derivCE($u));
+    push @buf, $ch;
   }
+  wantarray ? @buf : \@buf;
+}
+
+
+##
+## list[arrayrefs] weight = getWt(string element)
+##
+sub getWt
+{
+  my $self = shift;
+  my $ch   = shift;
+  my $ent  = $self->{entries};
+  my $ign  = $self->{ignored};
+  my $cjk  = $self->{overrideCJK};
+  my $hang = $self->{overrideHangul};
+  return if !defined $ch || $ign->{$ch};   # ignored
+  return @{ $ent->{$ch} } if $ent->{$ch};
+  my $u = unpack('U', $ch);
+  return
+    _isHangul($u)
+      ? $hang
+        ? &$hang($u)
+        : map(@{ $ent->{pack('U', $_)} }, decomposeHangul($u))
+      : _isCJK($u)
+        ? $cjk ? &$cjk($u) : map($self->altCE(0,@$_), _CJK($u))
+        : map($self->altCE(0,@$_), _derivCE($u));
+}
+
+##
+## int = index(string, substring)
+##
+sub index
+{
+  my $self = shift;
+  my $lev  = $self->{level};
+  my $str  = $self->splitCE(shift);
+  my $sub  = $self->splitCE(shift);
+
+  return wantarray ? (0,0) : 0 if ! @$sub;
+  return wantarray ?  ()  : -1 if ! @$str;
+
+  my @subWt = grep _ignorableAtLevel($_,$lev),
+              map $self->getWt($_), @$sub;
+
+  my(@strWt,@strPt);
+  my $count = 0;
+  for my $e (@$str){
+    my @tmp = grep _ignorableAtLevel($_,$lev), $self->getWt($e);
+    push @strWt, @tmp;
+    push @strPt, ($count) x @tmp; 
+    $count += length $e;
+    while(@strWt >= @subWt){
+      if(_eqArray(\@strWt, \@subWt, $lev)){
+        my $pos = $strPt[0];
+        return wantarray ? ($pos, $count-$pos) : $pos;
+      }
+      shift @strWt;
+      shift @strPt;
+    }
+  }
+  return wantarray ? () : -1;
+}
+
+##
+## bool _eqArray(arrayref, arrayref, level)
+##
+sub _eqArray($$$)
+{
+  my $a   = shift; # length $a >= length $b;
+  my $b   = shift;
+  my $lev = shift;
+  for my $v (0..$lev-1){
+    for my $c (0..@$b-1){
+      return if $a->[$c][$v] != $b->[$c][$v];
+    }
+  }
+  return 1;
+}
+
+
+##
+## bool _ignorableAtLevel(CE, level)
+##
+sub _ignorableAtLevel($$)
+{
+  my $ce = shift;
+  return if ! defined $ce;
+  my $lv = shift;
+  ! grep { ! $ce->[$_] } 0..$lv-1;
+}
+
+
+##
+## string sortkey = getSortKey(string arg)
+##
+sub getSortKey
+{
+  my $self = shift;
+  my $lev  = $self->{level};
+  my $rCE  = $self->splitCE(shift); # get an arrayref
+
+  # weight arrays
+  my @buf = grep defined(), map $self->getWt($_), @$rCE;
 
   # make sort key
   my @ret = ([],[],[],[]);
@@ -282,7 +370,7 @@ sub getSortKey
 
 
 ##
-## cmp
+## int compare = cmp(string a, string b)
 ##
 sub cmp
 {
@@ -293,7 +381,7 @@ sub cmp
 }
 
 ##
-## sort
+## list[strings] sorted = sort(list[strings] arg)
 ##
 sub sort
 {
@@ -305,7 +393,7 @@ sub sort
 }
 
 ##
-## Derived CE
+## list[arrayrefs] CE = _derivCE(int codepoint)
 ##
 sub _derivCE
 {
@@ -327,7 +415,7 @@ sub _getHexArray
 }
 
 ##
-##  CJK Unified Ideographs
+## bool is_a_CJK_Unified_Ideograph = _isCJK(int codepoint)
 ##
 sub _isCJK
 {
@@ -338,7 +426,7 @@ sub _isCJK
 }
 
 ##
-##  CJK Unified Ideographs
+## list[arrayref] CE = _CJK(int codepoint_of_CJK)
 ##
 sub _CJK
 {
@@ -347,7 +435,7 @@ sub _CJK
 }
 
 ##
-## Hangul Syllables
+## bool is_a_Hangul_Syllable = _isHangul(int codepoint) 
 ##
 sub _isHangul
 {
@@ -378,6 +466,8 @@ Unicode::Collate - use UCA (Unicode Collation Algorithm)
 =head1 DESCRIPTION
 
 =head2 Constructor and Tailoring
+
+The C<new> method returns a collator object.
 
    $UCA = Unicode::Collate->new(
       alternate => $alternate,
@@ -598,6 +688,44 @@ and get the result of the comparison of the strings using UCA.
       is equivalent to
 
    $UCA->cmp($a, $b)
+
+=item C<$position = $UCA-E<gt>index($string, $substring)>
+
+=item C<($position, $length) = $UCA-E<gt>index($string, $substring)>
+
+-- see 6.8 Searching, UTR #10.
+
+If C<$substring> matches a part of C<$string>, returns
+the position of the first occurrence of the matching part in scalar context;
+in list context, returns a two-element list of
+the position and the length of the matching part.
+
+B<Notice> that the length of the matching part may differ from
+the length of C<$substring>.
+
+B<Note> that the position and the length are counted on the string
+after the process of preprocess, normalization, and rearrangement.
+Therefore, in case the specified string is not binary equal to
+the preprocessed/normalized/rearranged string, the position and the length
+may differ form those on the specified string. But it is guaranteed 
+that, if matched, it returns a non-negative value as C<$position>.
+
+If C<$substring> does not match any part of C<$string>,
+returns C<-1> in scalar context and
+an empty list in list context.
+
+e.g. you say
+
+  my $UCA = Unicode::Collate->new( normalization => undef, level => 1 );
+  my $str = "Ich mu\x{00DF} studieren.";
+  my $sub = "m\x{00FC}ss";
+  my $match;
+  if(my @tmp = $UCA->index($str, $sub)){
+    $match = substr($str, $tmp[0], $tmp[1]);
+  }
+
+and get C<"mu\x{00DF}"> in C<$match> since C<"mu>E<223>C<">
+is primary equal to C<"m>E<252>C<ss">. 
 
 =back
 

@@ -48,7 +48,7 @@ main(int argc, char **argv, char **env)
 
     PERL_SYS_INIT3(&argc,&argv,&env);
 
-#if defined(USE_THREADS) || defined(USE_ITHREADS)
+#if defined(USE_5005THREADS) || defined(USE_ITHREADS)
     /* XXX Ideally, this should really be happening in perl_alloc() or
      * perl_construct() to keep libperl.a transparently fork()-safe.
      * It is currently done here only because Apache/mod_perl have
@@ -72,12 +72,10 @@ main(int argc, char **argv, char **env)
     }
     PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
     exitstatus = perl_parse(my_perl, xs_init, argc, argv, (char **)NULL);
-    if (!exitstatus) {
+    if (!exitstatus)
         perl_run(my_perl);
-        exitstatus = perl_destruct(my_perl);
-    } else {
-        perl_destruct(my_perl);
-    }
+      
+    exitstatus = perl_destruct(my_perl);
 
     perl_free(my_perl);
 

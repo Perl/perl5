@@ -1879,6 +1879,12 @@ regular expression engine didn't specifically check for that.  The <-- HERE
 shows in the regular expression about where the problem was discovered.
 See L<perlre>.
 
+=item "%s" may clash with future reserved word
+
+(W) This warning may be due to running a perl5 script through a perl4
+interpreter, especially if the word that is being warned about is
+"use" or "my".
+
 =item % may only be used in unpack
 
 (F) You can't pack a string by supplying a checksum, because the
@@ -3336,6 +3342,12 @@ questions>.
 (A) You've accidentally run your script through the Bourne shell instead
 of Perl.  Check the #! line, or manually feed your script into Perl
 yourself.
+
+=item syntax error in file %s at line %d, next 2 tokens "%s"
+
+(F) This error is likely to occur if you run a perl5 script through
+a perl4 interpreter, especially if the next 2 tokens are "use strict"
+or "my $var" or "our $var".
 
 =item %s syntax OK
 

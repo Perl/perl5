@@ -154,7 +154,7 @@ extern __declspec(thread) void *PL_current_context;
 #define PERL_SET_CONTEXT(t)		Perl_set_context(t)
 #endif
 
-#if defined(USE_THREADS)
+#if defined(USE_5005THREADS)
 struct perl_thread;
 int Perl_thread_create (struct perl_thread *thr, thread_func_t *fn);
 void Perl_set_thread_self (struct perl_thread *thr);
@@ -162,7 +162,7 @@ void Perl_init_thread_intern (struct perl_thread *t);
 
 #define SET_THREAD_SELF(thr) Perl_set_thread_self(thr)
 
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 
 END_EXTERN_C
 

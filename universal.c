@@ -132,9 +132,9 @@ Perl_sv_derived_from(pTHX_ SV *sv, const char *name)
 
 #include "XSUB.h"
 
-void XS_UNIVERSAL_isa(pTHXo_ CV *cv);
-void XS_UNIVERSAL_can(pTHXo_ CV *cv);
-void XS_UNIVERSAL_VERSION(pTHXo_ CV *cv);
+void XS_UNIVERSAL_isa(pTHX_ CV *cv);
+void XS_UNIVERSAL_can(pTHX_ CV *cv);
+void XS_UNIVERSAL_VERSION(pTHX_ CV *cv);
 XS(XS_utf8_valid);
 XS(XS_utf8_encode);
 XS(XS_utf8_decode);

@@ -83,11 +83,7 @@
 #define PERL_IN_REGCOMP_C
 #include "perl.h"
 
-#ifdef PERL_IN_XSUB_RE
-#  if defined(PERL_CAPI) || defined(PERL_OBJECT)
-#    include "XSUB.h"
-#  endif
-#else
+#ifndef PERL_IN_XSUB_RE
 #  include "INTERN.h"
 #endif
 
@@ -483,7 +479,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 #define Node_Offset(n) (RExC_offsets[2*((n)-RExC_emit_start)-1])
 #define Node_Length(n) (RExC_offsets[2*((n)-RExC_emit_start)])
 
-static void clear_re(pTHXo_ void *r);
+static void clear_re(pTHX_ void *r);
 
 /* Mark that we cannot extend a found fixed substring at this point.
    Updata the longest found anchored substring and the longest found
@@ -4735,7 +4731,7 @@ Perl_save_re_context(pTHX)
     SAVEVPTR(PL_reg_re);		/* from regexec.c */
     SAVEPPTR(PL_reg_ganch);		/* from regexec.c */
     SAVESPTR(PL_reg_sv);		/* from regexec.c */
-    SAVEI32(PL_reg_sv_utf8);		/* from regexec.c */
+    SAVEI8(PL_reg_match_utf8);		/* from regexec.c */
     SAVEVPTR(PL_reg_magic);		/* from regexec.c */
     SAVEI32(PL_reg_oldpos);			/* from regexec.c */
     SAVEVPTR(PL_reg_oldcurpm);		/* from regexec.c */
@@ -4747,14 +4743,8 @@ Perl_save_re_context(pTHX)
 #endif
 }
 
-#ifdef PERL_OBJECT
-#include "XSUB.h"
-#undef this
-#define this pPerl
-#endif
-
 static void
-clear_re(pTHXo_ void *r)
+clear_re(pTHX_ void *r)
 {
     ReREFCNT_dec((regexp *)r);
 }

@@ -74,9 +74,9 @@ struct block_sub {
     CV *	cv;
     GV *	gv;
     GV *	dfoutgv;
-#ifndef USE_THREADS
+#ifndef USE_5005THREADS
     AV *	savearray;
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
     AV *	argarray;
     U16		olddepth;
     U8		hasargs;
@@ -98,7 +98,7 @@ struct block_sub {
 	cx->blk_sub.dfoutgv = PL_defoutgv;				\
 	(void)SvREFCNT_inc(cx->blk_sub.dfoutgv)
 
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 #  define POP_SAVEARRAY() NOOP
 #else
 #  define POP_SAVEARRAY()						\
@@ -106,7 +106,7 @@ struct block_sub {
 	SvREFCNT_dec(GvAV(PL_defgv));					\
 	GvAV(PL_defgv) = cx->blk_sub.savearray;				\
     } STMT_END
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 
 /* junk in @_ spells trouble when cloning CVs and in pp_caller(), so don't
  * leave any (a fast av_clear(ary), basically) */

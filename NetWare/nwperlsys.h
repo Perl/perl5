@@ -647,7 +647,7 @@ PerlLIOChmod(struct IPerlLIO* piPerl, const char *filename, int pmode)
 int
 PerlLIOChown(struct IPerlLIO* piPerl, const char *filename, uid_t owner, gid_t group)
 {
-	dTHXo;
+	dTHX;
     Perl_croak(aTHX_ "chown not implemented!\n");
 	return 0;
 }
@@ -861,7 +861,7 @@ PerlProc_Exit(struct IPerlProc* piPerl, int status)
 int
 PerlProcExecl(struct IPerlProc* piPerl, const char *cmdname, const char *arg0, const char *arg1, const char *arg2, const char *arg3)
 {
-	dTHXo;
+	dTHX;
     Perl_croak(aTHX_ "execl not implemented!\n");
 	return 0;
 }
@@ -917,7 +917,7 @@ PerlProcKill(struct IPerlProc* piPerl, int pid, int sig)
 int
 PerlProcKillpg(struct IPerlProc* piPerl, int pid, int sig)
 {
-    dTHXo;
+    dTHX;
     Perl_croak(aTHX_ "killpg not implemented!\n");
     return 0;
 }
@@ -931,7 +931,7 @@ PerlProcPauseProc(struct IPerlProc* piPerl)
 PerlIO*
 PerlProcPopen(struct IPerlProc* piPerl, const char *command, const char *mode)
 {
-    dTHXo;
+    dTHX;
     PERL_FLUSHALL_FOR_CHILD;
 
 	return (PerlIO*)nw_Popen((char *)command, (char *)mode, (int *)errno);
@@ -1300,7 +1300,7 @@ PerlSockSetservent(struct IPerlSock* piPerl, int stayopen)
 int
 PerlSockSetsockopt(struct IPerlSock* piPerl, SOCKET s, int level, int optname, const char* optval, int optlen)
 {
-	dTHXo;
+	dTHX;
     Perl_croak(aTHX_ "setsockopt not implemented!\n");
 	return 0;
 }
@@ -1320,7 +1320,7 @@ PerlSockSocket(struct IPerlSock* piPerl, int af, int type, int protocol)
 int
 PerlSockSocketpair(struct IPerlSock* piPerl, int domain, int type, int protocol, int* fds)
 {
-    dTHXo;
+    dTHX;
     Perl_croak(aTHX_ "socketpair not implemented!\n");
     return 0;
 }
@@ -1328,7 +1328,7 @@ PerlSockSocketpair(struct IPerlSock* piPerl, int domain, int type, int protocol,
 int
 PerlSockIoctlsocket(struct IPerlSock* piPerl, SOCKET s, long cmd, u_long *argp)
 {
-	dTHXo;
+	dTHX;
     Perl_croak(aTHX_ "ioctlsocket not implemented!\n");
 	return 0;
 }

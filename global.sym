@@ -578,6 +578,8 @@ Perl_ptr_table_clear
 Perl_ptr_table_free
 Perl_sys_intern_clear
 Perl_sys_intern_init
+Perl_custom_op_name
+Perl_custom_op_desc
 Perl_sharedsv_init
 Perl_sharedsv_new
 Perl_sharedsv_find

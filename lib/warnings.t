@@ -81,15 +81,22 @@ for (@prgs){
 	$prog = shift @files ;
     }
     open TEST, ">$tmpfile";
+    print TEST q{
+        BEGIN { 
+            open(STDERR, ">&STDOUT") 
+              or die "Can't dup STDOUT->STDERR: $!;";
+        }
+    };
+    print TEST "\n#line 1\n";  # So the line numbers don't get messed up.
     print TEST $prog,"\n";
     close TEST;
     my $results = $Is_VMS ?
-                  `./perl "-I../lib" $switch $tmpfile 2>&1` :
+                  `./perl "-I../lib" $switch $tmpfile` :
 		  $Is_MSWin32 ?
-                  `.\\perl -I../lib $switch $tmpfile 2>&1` :
+                  `.\\perl -I../lib $switch $tmpfile` :
 		  $Is_NetWare ?
-                  `perl -I../lib $switch $tmpfile 2>&1` :
-                  `./perl -I../lib $switch $tmpfile 2>&1`;
+                  `perl -I../lib $switch $tmpfile` :
+                  `./perl -I../lib $switch $tmpfile`;
     my $status = $?;
     $results =~ s/\n+$//;
     # allow expected output to be written as if $prog is on STDIN

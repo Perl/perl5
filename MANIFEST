@@ -42,7 +42,7 @@ emacs/cperl-mode.el	An alternate perl-mode
 emacs/e2ctags.pl	etags to ctags converter
 emacs/ptags		Creates smart TAGS file
 embed.h			Maps symbols to safer names
-embed.pl		Produces {embed,embedvar,objXSUB,proto}.h, global.sym
+embed.pl		Produces {embed,embedvar,proto}.h, global.sym
 embedvar.h		C namespace management
 epoc/config.sh		EPOC port config.sh template
 epoc/createpkg.pl	EPOC port generate PKG file
@@ -1084,6 +1084,7 @@ lib/SelectSaver.t		See if SelectSaver works
 lib/SelfLoader.pm		Load functions only on demand
 lib/SelfLoader.t		See if SelfLoader works
 lib/Shell.pm			Make AUTOLOADed system() calls
+lib/Shell.t			Tests for above
 lib/shellwords.pl		Perl library to split into words with shell quoting
 lib/sigtrap.pm			For trapping an abort and giving traceback
 lib/stat.pl			Perl library supporting stat function
@@ -1605,7 +1606,6 @@ NetWare/testnlm/type/type.c	Netware port
 NetWare/win32ish.h		Netware port
 nostdio.h			Cause compile error on stdio calls
 numeric.c			Miscellaneous numeric conversion routines
-objXSUB.h			Scoping macros for Perl Object in extensions
 op.c				Opcode syntax tree code
 op.h				Opcode syntax tree header
 opcode.h			Automatically generated opcode header
@@ -2034,6 +2034,7 @@ t/op/groups.t			See if $( works
 t/op/gv.t			See if typeglobs work
 t/op/hashwarn.t			See if warnings for bad hash assignments work
 t/op/inc.t			See if inc/dec of integers near 32 bit limit work
+t/op/inccode.t			See if coderefs work in @INC
 t/op/index.t			See if index works
 t/op/int.t			See if int works
 t/op/join.t			See if join works
@@ -2047,7 +2048,6 @@ t/op/loopctl.t			See if next/last/redo work
 t/op/lop.t			See if logical operators work
 t/op/magic.t			See if magic variables work
 t/op/method.t			See if method calls work
-t/op/misc.t			See if miscellaneous bugs have been fixed
 t/op/mkdir.t			See if mkdir works
 t/op/my.t			See if lexical scoping works
 t/op/my_stash.t			See if my Package works
@@ -2138,6 +2138,7 @@ t/pod/testpchk.pl		Module to test Pod::Checker for a given file
 t/pod/testpods/lib/Pod/Stuff.pm			Sample data for find.t
 t/README			Instructions for regression tests
 t/run/exit.t                    Test perl's exit status.
+t/run/kill_perl.t               Tests that kill perl.
 t/run/runenv.t			Test if perl honors its environment variables.
 t/TEST				The regression tester
 t/TestInit.pm			Preamble library for core tests

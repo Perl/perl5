@@ -7,7 +7,7 @@ use Config;
 use File::Basename qw(basename dirname fileparse);
 use DirHandle;
 use strict;
-our ($Is_Mac,$Is_OS2,$Is_VMS,$Is_Win32,$Is_Dos,$Is_PERL_OBJECT,
+our ($Is_Mac,$Is_OS2,$Is_VMS,$Is_Win32,$Is_Dos,
 	    $Verbose,%pm,%static,$Xsubpp_Version);
 
 our $VERSION = '1.12603';
@@ -19,8 +19,6 @@ $Is_OS2 = $^O eq 'os2';
 $Is_Mac = $^O eq 'MacOS';
 $Is_Win32 = $^O eq 'MSWin32';
 $Is_Dos = $^O eq 'dos';
-
-$Is_PERL_OBJECT = $Config{'ccflags'} =~ /-DPERL_OBJECT/;
 
 if ($Is_VMS = $^O eq 'VMS') {
     require VMS::Filespec;
@@ -386,27 +384,6 @@ sub cflags {
 	$cflags{$_} =~ s/\s+/ /g;
 	$cflags{$_} =~ s/\s+$//;
 	$self->{uc $_} ||= $cflags{$_}
-    }
-
-    if ($Is_PERL_OBJECT) {
-        $self->{CCFLAGS} =~ s/-DPERL_OBJECT(\b|$)/-DPERL_CAPI/g;
-        if ($Is_Win32) { 
-	    if ($Config{'cc'} =~ /^cl/i) {
-		# Turn off C++ mode of the MSC compiler
-		$self->{CCFLAGS} =~ s/-TP(\s|$)//g;
-		$self->{OPTIMIZE} =~ s/-TP(\s|$)//g;
-	    }
-	    elsif ($Config{'cc'} =~ /^bcc32/i) {
-		# Turn off C++ mode of the Borland compiler
-		$self->{CCFLAGS} =~ s/-P(\s|$)//g;
-		$self->{OPTIMIZE} =~ s/-P(\s|$)//g;
-	    }
-	    elsif ($Config{'cc'} =~ /^gcc/i) {
-		# Turn off C++ mode of the GCC compiler
-		$self->{CCFLAGS} =~ s/-xc\+\+(\s|$)//g;
-		$self->{OPTIMIZE} =~ s/-xc\+\+(\s|$)//g;
-	    }
-        }
     }
 
     if ($self->{POLLUTE}) {
@@ -2956,7 +2933,6 @@ PERL_HDRS = \
 	$(PERL_INC)/keywords.h		\
 	$(PERL_INC)/mg.h		\
 	$(PERL_INC)/nostdio.h		\
-	$(PERL_INC)/objXSUB.h		\
 	$(PERL_INC)/op.h		\
 	$(PERL_INC)/opcode.h		\
 	$(PERL_INC)/opnames.h		\

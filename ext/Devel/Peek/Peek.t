@@ -33,6 +33,7 @@ sub do_test {
 	    print "[$dump] vs [$pattern]\nnot " unless $dump =~ /$pattern/ms;
 	    print "ok $_[0]\n";
 	    close(IN);
+            return $1;
 	} else {
 	    die "$0: failed to open peek$$: !\n";
 	}
@@ -86,12 +87,17 @@ do_test( 5,
   FLAGS = \\(PADBUSY,PADMY,IOK,pIOK\\)
   IV = 456');
 
-do_test( 6,
+# If perl is built with PERL_PRESERVE_IVUV then maths is done as integers
+# where possible and this scalar will be an IV. If NO_PERL_PRESERVE_IVUV then
+# maths is done in floating point always, and this scalar will be an NV.
+# ([NI]) captures the type, referred to by \1 in this regexp and $type for
+# building subsequent regexps.
+my $type = do_test( 6,
         $c + $d,
-'SV = IV\\($ADDR\\) at $ADDR
+'SV = ([NI])V\\($ADDR\\) at $ADDR
   REFCNT = 1
-  FLAGS = \\(PADTMP,IOK,pIOK\\)
-  IV = 456');
+  FLAGS = \\(PADTMP,\1OK,p\1OK\\)
+  \1V = 456');
 
 ($d = "789") += 0.1;
 
@@ -132,6 +138,22 @@ do_test(10,
     CUR = 3
     LEN = 4');
 
+my $c_pattern;
+if ($type eq 'N') {
+  $c_pattern = '
+    SV = PVNV\\($ADDR\\) at $ADDR
+      REFCNT = 1
+      FLAGS = \\(IOK,NOK,pIOK,pNOK\\)
+      IV = 456
+      NV = 456
+      PV = 0';
+} else {
+  $c_pattern = '
+    SV = IV\\($ADDR\\) at $ADDR
+      REFCNT = 1
+      FLAGS = \\(IOK,pIOK\\)
+      IV = 456';
+}
 do_test(11,
        [$b,$c],
 'SV = RV\\($ADDR\\) at $ADDR
@@ -153,11 +175,7 @@ do_test(11,
       REFCNT = 1
       FLAGS = \\(IOK,pIOK\\)
       IV = 123
-    Elt No. 1
-    SV = IV\\($ADDR\\) at $ADDR
-      REFCNT = 1
-      FLAGS = \\(IOK,pIOK\\)
-      IV = 456');
+    Elt No. 1' . $c_pattern);
 
 do_test(12,
        {$b=>$c},
@@ -177,11 +195,7 @@ do_test(12,
     MAX = 7
     RITER = -1
     EITER = 0x0
-    Elt "123" HASH = $ADDR
-    SV = IV\\($ADDR\\) at $ADDR
-      REFCNT = 1
-      FLAGS = \\(IOK,pIOK\\)
-      IV = 456');
+    Elt "123" HASH = $ADDR' . $c_pattern);
 
 do_test(13,
         sub(){@_},

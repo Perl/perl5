@@ -67,7 +67,7 @@ Perl_debop(pTHX_ OP *o)
     CV *cv;
     SV *sv;
     STRLEN n_a;
-    Perl_deb(aTHX_ "%s", PL_op_name[o->op_type]);
+    Perl_deb(aTHX_ "%s", OP_NAME(o));
     switch (o->op_type) {
     case OP_CONST:
 	PerlIO_printf(Perl_debug_log, "(%s)", SvPEEK(cSVOPo_sv));

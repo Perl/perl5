@@ -21,9 +21,9 @@
 
 /* Hot code. */
 
-#ifdef USE_THREADS
-static void unset_cvowner(pTHXo_ void *cvarg);
-#endif /* USE_THREADS */
+#ifdef USE_5005THREADS
+static void unset_cvowner(pTHX_ void *cvarg);
+#endif /* USE_5005THREADS */
 
 PP(pp_const)
 {
@@ -1232,7 +1232,7 @@ PP(pp_match)
 		 (PL_tainted && (pm->op_pmflags & PMf_RETAINT)));
     TAINT_NOT;
 
-    PL_reg_sv_utf8 = DO_UTF8(TARG);
+    PL_reg_match_utf8 = DO_UTF8(TARG);
 
     if (pm->op_pmdynflags & PMdf_USED) {
       failure:
@@ -1400,7 +1400,7 @@ yup:					/* Confirmed by INTUIT */
     if (global) {
 	rx->subbeg = truebase;
 	rx->startp[0] = s - truebase;
-	if (PL_reg_sv_utf8) {
+	if (PL_reg_match_utf8) {
 	    char *t = (char*)utf8_hop((U8*)s, rx->minlen);
 	    rx->endp[0] = t - truebase;
 	}
@@ -1790,7 +1790,7 @@ PP(pp_iter)
 	    STRLEN maxlen;
 	    char *max = SvPV((SV*)av, maxlen);
 	    if (!SvNIOK(cur) && SvCUR(cur) <= maxlen) {
-#ifndef USE_THREADS			  /* don't risk potential race */
+#ifndef USE_5005THREADS			  /* don't risk potential race */
 		if (SvREFCNT(*itersvp) == 1 && !SvMAGICAL(*itersvp)) {
 		    /* safe to reuse old SV */
 		    sv_setsv(*itersvp, cur);
@@ -1816,7 +1816,7 @@ PP(pp_iter)
 	if (cx->blk_loop.iterix > cx->blk_loop.itermax)
 	    RETPUSHNO;
 
-#ifndef USE_THREADS			  /* don't risk potential race */
+#ifndef USE_5005THREADS			  /* don't risk potential race */
 	if (SvREFCNT(*itersvp) == 1 && !SvMAGICAL(*itersvp)) {
 	    /* safe to reuse old SV */
 	    sv_setiv(*itersvp, cx->blk_loop.iterix++);
@@ -1928,14 +1928,14 @@ PP(pp_subst)
 	rxtainted |= 2;
     TAINT_NOT;
 
-    PL_reg_sv_utf8 = DO_UTF8(TARG);
+    PL_reg_match_utf8 = DO_UTF8(TARG);
 
   force_it:
     if (!pm || !s)
 	DIE(aTHX_ "panic: pp_subst");
 
     strend = s + len;
-    slen = PL_reg_sv_utf8 ? utf8_length((U8*)s, (U8*)strend) : len;
+    slen = PL_reg_match_utf8 ? utf8_length((U8*)s, (U8*)strend) : len;
     maxiters = 2 * slen + 10;	/* We can match twice at each
 				   position, once with zero-length,
 				   second time with non-zero. */
@@ -2547,7 +2547,7 @@ try_autoload:
 	    DIE(aTHX_ "No DBsub routine");
     }
 
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     /*
      * First we need to check if the sub or method requires locking.
      * If so, we gain a lock on the CV, the first argument or the
@@ -2679,7 +2679,7 @@ try_autoload:
 	    SAVEDESTRUCTOR_X(unset_cvowner, (void*) cv);
 	}
     }
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 
     if (CvXSUB(cv)) {
 #ifdef PERL_XSUB_OLDSTYLE
@@ -2712,11 +2712,11 @@ try_autoload:
 		 * back. This would allow popping @_ in XSUB, e.g.. XXXX */
 		AV* av;
 		I32 items;
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 		av = (AV*)PL_curpad[0];
 #else
 		av = GvAV(PL_defgv);
-#endif /* USE_THREADS */		
+#endif /* USE_5005THREADS */		
 		items = AvFILLp(av) + 1;   /* @_ is not tieable */
 
 		if (items) {
@@ -2734,7 +2734,7 @@ try_autoload:
 		PL_curcopdb = NULL;
 	    }
 	    /* Do we need to open block here? XXXX */
-	    (void)(*CvXSUB(cv))(aTHXo_ cv);
+	    (void)(*CvXSUB(cv))(aTHX_ cv);
 
 	    /* Enforce some sanity in scalar context. */
 	    if (gimme == G_SCALAR && ++markix != PL_stack_sp - PL_stack_base ) {
@@ -2808,7 +2808,7 @@ try_autoload:
 		svp = AvARRAY(padlist);
 	    }
 	}
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 	if (!hasargs) {
 	    AV* av = (AV*)PL_curpad[0];
 
@@ -2821,12 +2821,12 @@ try_autoload:
 		PUTBACK ;		
 	    }
 	}
-#endif /* USE_THREADS */		
+#endif /* USE_5005THREADS */		
 	SAVEVPTR(PL_curpad);
     	PL_curpad = AvARRAY((AV*)svp[CvDEPTH(cv)]);
-#ifndef USE_THREADS
+#ifndef USE_5005THREADS
 	if (hasargs)
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 	{
 	    AV* av;
 	    SV** ary;
@@ -2843,10 +2843,10 @@ try_autoload:
 		AvREAL_off(av);
 		AvREIFY_on(av);
 	    }
-#ifndef USE_THREADS
+#ifndef USE_5005THREADS
 	    cx->blk_sub.savearray = GvAV(PL_defgv);
 	    GvAV(PL_defgv) = (AV*)SvREFCNT_inc(av);
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 	    cx->blk_sub.oldcurpad = PL_curpad;
 	    cx->blk_sub.argarray = av;
 	    ++MARK;
@@ -3129,9 +3129,9 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
     return isGV(gv) ? (SV*)GvCV(gv) : (SV*)gv;
 }
 
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 static void
-unset_cvowner(pTHXo_ void *cvarg)
+unset_cvowner(pTHX_ void *cvarg)
 {
     register CV* cv = (CV *) cvarg;
 
@@ -3146,4 +3146,4 @@ unset_cvowner(pTHXo_ void *cvarg)
     MUTEX_UNLOCK(CvMUTEXP(cv));
     SvREFCNT_dec(cv);
 }
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */

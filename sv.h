@@ -121,7 +121,7 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SvFLAGS(sv)	(sv)->sv_flags
 #define SvREFCNT(sv)	(sv)->sv_refcnt
 
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 
 #  if defined(VMS)
 #    define ATOMIC_INC(count) __ATOMIC_INCREMENT_LONG(&count)
@@ -146,7 +146,7 @@ perform the upgrade if necessary.  See C<svtype>.
 #else
 #  define ATOMIC_INC(count) (++count)
 #  define ATOMIC_DEC_AND_TEST(res, count) (res = (--count == 0))
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 
 #ifdef __GNUC__
 #  define SvREFCNT_inc(sv)		\
@@ -157,7 +157,7 @@ perform the upgrade if necessary.  See C<svtype>.
 	nsv;				\
     })
 #else
-#  if defined(CRIPPLED_CC) || defined(USE_THREADS)
+#  if defined(CRIPPLED_CC) || defined(USE_5005THREADS)
 #    if defined(VMS) && defined(__ALPHA)
 #      define SvREFCNT_inc(sv) \
           (PL_Sv=(SV*)(sv), (PL_Sv && __ATOMIC_INCREMENT_LONG(&(SvREFCNT(PL_Sv)))), (SV *)PL_Sv)
@@ -338,17 +338,17 @@ struct xpvfm {
     HV *	xcv_stash;
     OP *	xcv_start;
     OP *	xcv_root;
-    void      (*xcv_xsub)(pTHXo_ CV*);
+    void      (*xcv_xsub)(pTHX_ CV*);
     ANY		xcv_xsubany;
     GV *	xcv_gv;
     char *	xcv_file;
     long	xcv_depth;	/* >= 2 indicates recursive call */
     AV *	xcv_padlist;
     CV *	xcv_outside;
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     perl_mutex *xcv_mutexp;	/* protects xcv_owner */
     struct perl_thread *xcv_owner;	/* current owner thread */
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
     cv_flags_t	xcv_flags;
 
     I32		xfm_lines;
@@ -702,6 +702,14 @@ and leaves the UTF8 status as it was.
 #define SvVALID(sv)		(SvFLAGS(sv) & SVpbm_VALID)
 #define SvVALID_on(sv)		(SvFLAGS(sv) |= SVpbm_VALID)
 #define SvVALID_off(sv)		(SvFLAGS(sv) &= ~SVpbm_VALID)
+
+#ifdef USE_ITHREADS
+/* The following uses the FAKE flag to show that a regex pointer is infact
+   it's own offset in the regexpad for ithreads */
+#define SvREPADTMP(sv)		(SvFLAGS(sv) & SVf_FAKE)
+#define SvREPADTMP_on(sv)	(SvFLAGS(sv) |= SVf_FAKE)
+#define SvREPADTMP_off(sv)	(SvFLAGS(sv) &= ~SVf_FAKE)
+#endif
 
 #define SvRV(sv) ((XRV*)  SvANY(sv))->xrv_rv
 #define SvRVx(sv) SvRV(sv)
@@ -1084,7 +1092,7 @@ otherwise.
 		: sv_2bool(sv) )
 #  define SvTRUEx(sv) ({SV *nsv = (sv); SvTRUE(nsv); })
 #else /* __GNUC__ */
-#ifndef USE_THREADS
+#ifndef USE_5005THREADS
 /* These inlined macros use globals, which will require a thread
  * declaration in user code, so we avoid them under threads */
 
@@ -1118,7 +1126,7 @@ otherwise.
 		? SvNVX(sv) != 0.0				\
 		: sv_2bool(sv) )
 #  define SvTRUEx(sv) ((PL_Sv = (sv)), SvTRUE(PL_Sv))
-#endif /* !USE_THREADS */
+#endif /* !USE_5005THREADS */
 #endif /* !__GNU__ */
 #endif /* !CRIPPLED_CC */
 

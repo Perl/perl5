@@ -1054,7 +1054,7 @@ Perl_vmess(pTHX_ const char *pat, va_list *args)
 		      line_mode ? "line" : "chunk",
 		      (IV)IoLINES(GvIOp(PL_last_in_gv)));
 	}
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 	if (thr->tid)
 	    Perl_sv_catpvf(aTHX_ sv, " thread %ld", thr->tid);
 #endif
@@ -1406,9 +1406,9 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
     message = SvPV(msv, msglen);
 
     if (ckDEAD(err)) {
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
         DEBUG_S(PerlIO_printf(Perl_debug_log, "croak: 0x%"UVxf" %s", PTR2UV(thr), message));
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
         if (PL_diehook) {
             /* sv_2cv might call Perl_croak() */
             SV *olddiehook = PL_diehook;
@@ -2120,7 +2120,7 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
 void
 Perl_atfork_lock(void)
 {
-#if defined(USE_THREADS) || defined(USE_ITHREADS)
+#if defined(USE_5005THREADS) || defined(USE_ITHREADS)
     /* locks must be held in locking order (if any) */
 #  ifdef MYMALLOC
     MUTEX_LOCK(&PL_malloc_mutex);
@@ -2133,7 +2133,7 @@ Perl_atfork_lock(void)
 void
 Perl_atfork_unlock(void)
 {
-#if defined(USE_THREADS) || defined(USE_ITHREADS)
+#if defined(USE_5005THREADS) || defined(USE_ITHREADS)
     /* locks must be released in same order as in atfork_lock() */
 #  ifdef MYMALLOC
     MUTEX_UNLOCK(&PL_malloc_mutex);
@@ -2147,7 +2147,7 @@ Perl_my_fork(void)
 {
 #if defined(HAS_FORK)
     Pid_t pid;
-#if (defined(USE_THREADS) || defined(USE_ITHREADS)) && !defined(HAS_PTHREAD_ATFORK)
+#if (defined(USE_5005THREADS) || defined(USE_ITHREADS)) && !defined(HAS_PTHREAD_ATFORK)
     atfork_lock();
     pid = fork();
     atfork_unlock();
@@ -2790,7 +2790,7 @@ Perl_find_script(pTHX_ char *scriptname, bool dosearch, char **search_ext, I32 f
 void *
 Perl_get_context(void)
 {
-#if defined(USE_THREADS) || defined(USE_ITHREADS)
+#if defined(USE_5005THREADS) || defined(USE_ITHREADS)
 #  ifdef OLD_PTHREADS_API
     pthread_addr_t t;
     if (pthread_getspecific(PL_thr_key, &t))
@@ -2811,7 +2811,7 @@ Perl_get_context(void)
 void
 Perl_set_context(void *t)
 {
-#if defined(USE_THREADS) || defined(USE_ITHREADS)
+#if defined(USE_5005THREADS) || defined(USE_ITHREADS)
 #  ifdef I_MACH_CTHREADS
     cthread_set_data(cthread_self(), t);
 #  else
@@ -2823,7 +2823,7 @@ Perl_set_context(void *t)
 
 #endif /* !PERL_GET_CONTEXT_DEFINED */
 
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 
 #ifdef FAKE_THREADS
 /* Very simplistic scheduler for now */
@@ -3096,7 +3096,7 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
 #endif /* HAVE_THREAD_INTERN */
     return thr;
 }
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 
 #ifdef PERL_GLOBAL_STRUCT
 struct perl_vars *
@@ -3217,7 +3217,7 @@ Perl_get_vtbl(pTHX_ int vtbl_id)
     case want_vtbl_uvar:
 	result = &PL_vtbl_uvar;
 	break;
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     case want_vtbl_mutex:
 	result = &PL_vtbl_mutex;
 	break;

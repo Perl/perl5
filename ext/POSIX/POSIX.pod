@@ -1536,7 +1536,7 @@ see L<perlfunc/wait>.
 Wait for a child process to change state.  This is identical to Perl's
 builtin C<waitpid()> function, see L<perlfunc/waitpid>.
 
-	$pid = POSIX::waitpid( -1, &POSIX::WNOHANG );
+	$pid = POSIX::waitpid( -1, POSIX::WNOHANG );
 	print "status = ", ($? / 256), "\n";
 
 =item wcstombs

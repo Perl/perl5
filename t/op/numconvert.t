@@ -48,9 +48,11 @@ my $max_chain = $ENV{PERL_TEST_NUMCONVERTS} || 2;
 my $max_uv1 = ~0;
 my $max_uv2 = sprintf "%u", $max_uv1 ** 6; # 6 is an arbitrary number here
 my $big_iv = do {use integer; $max_uv1 * 16}; # 16 is an arbitrary number here
+my $max_uv_less3 = $max_uv1 - 3;
 
 print "# max_uv1 = $max_uv1, max_uv2 = $max_uv2, big_iv = $big_iv\n";
-if ($max_uv1 ne $max_uv2 or $big_iv > $max_uv1) {
+print "# max_uv_less3 = $max_uv_less3\n";
+if ($max_uv1 ne $max_uv2 or $big_iv > $max_uv1 or $max_uv1 == $max_uv_less3) {
   print "1..0 # skipped: unsigned perl arithmetic is not sane";
   eval { require Config; import Config };
   use vars qw(%Config);
@@ -58,6 +60,10 @@ if ($max_uv1 ne $max_uv2 or $big_iv > $max_uv1) {
       print " (common in 64-bit platforms)";
   }
   print "\n";
+  exit 0;
+}
+if ($max_uv_less3 =~ tr/0-9//c) {
+  print "1..0 # skipped: this perl stringifies large unsigned integers using E notation\n";
   exit 0;
 }
 

@@ -125,8 +125,6 @@ $FH = 'File0000' ;
 $usage = "Usage: xsubpp [-v] [-C++] [-except] [-prototypes] [-noversioncheck] [-nolinenumbers] [-nooptimize] [-noinout] [-noargtypes] [-s pattern] [-typemap typemap]... file.xs\n";
 
 $proto_re = "[" . quotemeta('\$%&*@;') . "]" ;
-# mjn
-$OBJ   = 1 if $Config{'ccflags'} =~ /PERL_OBJECT/i;
 
 $except = "";
 $WantPrototypes = -1 ;
@@ -148,7 +146,7 @@ SWITCH: while (@ARGV and $ARGV[0] =~ /^-./) {
     $WantVersionChk = 0, next SWITCH	if $flag eq 'noversioncheck';
     $WantVersionChk = 1, next SWITCH	if $flag eq 'versioncheck';
     # XXX left this in for compat
-    $WantCAPI = 1, next SWITCH    if $flag eq 'object_capi';
+    next SWITCH                         if $flag eq 'object_capi';
     $except = " TRY",	next SWITCH	if $flag eq 'except';
     push(@tm,shift),	next SWITCH	if $flag eq 'typemap';
     $WantLineNumbers = 0, next SWITCH	if $flag eq 'nolinenumbers';
@@ -877,9 +875,6 @@ while (<$FH>) {
     last if ($Module, $Package, $Prefix) =
 	/^MODULE\s*=\s*([\w:]+)(?:\s+PACKAGE\s*=\s*([\w:]+))?(?:\s+PREFIX\s*=\s*(\S+))?\s*$/;
 
-    if ($OBJ) {
-        s/#if(?:def\s|\s+defined)\s*(\(__cplusplus\)|__cplusplus)/#if defined(__cplusplus) && !defined(PERL_OBJECT)/;
-    }
     print $_;
 }
 &Exit unless defined $_;

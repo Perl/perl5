@@ -204,7 +204,7 @@ typedef IV IV64;
 	} STMT_END
 #define BSET_OBJ_STORE(obj, ix)			\
 	(I32)ix > bstate->bs_obj_list_fill ?	\
-	bset_obj_store(aTHXo_ bstate, obj, (I32)ix) : (bstate->bs_obj_list[ix] = obj)
+	bset_obj_store(aTHX_ bstate, obj, (I32)ix) : (bstate->bs_obj_list[ix] = obj)
 
 /* NOTE: the bytecode header only sanity-checks the bytecode. If a script cares about
  * what version of Perl it's being called under, it should do a 'require 5.6.0' or

@@ -165,7 +165,7 @@ char *strerrorcat(char *str, int err) {
     int msgsiz;
     char *msg;
 
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     char *buf = malloc(BUFSIZ);
 
     if (buf == 0)
@@ -193,7 +193,7 @@ char *strerrorcpy(char *str, int err) {
     int msgsiz;
     char *msg;
 
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     char *buf = malloc(BUFSIZ);
 
     if (buf == 0)

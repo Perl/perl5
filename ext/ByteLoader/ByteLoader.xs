@@ -75,7 +75,7 @@ bl_read(struct byteloader_fdata *data, char *buf, size_t size, size_t n)
 }
 
 static I32
-byteloader_filter(pTHXo_ int idx, SV *buf_sv, int maxlen)
+byteloader_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 {
     OP *saveroot = PL_main_root;
     OP *savestart = PL_main_start;
@@ -92,7 +92,7 @@ byteloader_filter(pTHXo_ int idx, SV *buf_sv, int maxlen)
     bstate.bs_sv = Nullsv;
     bstate.bs_iv_overflows = 0;
 
-    byterun(aTHXo_ &bstate);
+    byterun(aTHX_ &bstate);
 
     if (PL_in_eval) {
         OP *o;

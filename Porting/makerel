@@ -117,7 +117,6 @@ my @writables = qw(
     global.sym
     pod/perlintern.pod
     pod/perlapi.pod
-    objXSUB.h
     perlapi.h
     perlapi.c
     ext/ByteLoader/byterun.h

@@ -44,15 +44,11 @@ sub my_return {
     }
 }
 
-sub is_perl_object {
-    $Config{ccflags} =~ /-DPERL_OBJECT/;  
-}
-
 sub xsinit { 
     my($file, $std, $mods) = @_;
     my($fh,@mods,%seen);
     $file ||= "perlxsi.c";
-    my $xsinit_proto = "pTHXo";
+    my $xsinit_proto = "pTHX";
 
     if (@_) {
        @mods = @$mods if $mods;
@@ -96,7 +92,7 @@ EOF
 sub xsi_protos {
     my(@exts) = @_;
     my(@retval,%seen);
-    my $boot_proto = "pTHXo_ CV* cv";
+    my $boot_proto = "pTHX_ CV* cv";
     foreach $_ (@exts){
         my($pname) = canon('/', $_);
         my($mname, $cname);

@@ -16,7 +16,7 @@
 #  if (DJGPP==2 && DJGPP_MINOR < 2)
 #    define NO_LOCALECONV_MON_THOUSANDS_SEP
 #  endif
-#  ifdef USE_THREADS
+#  ifdef USE_5005THREADS
 #    define OLD_PTHREADS_API
 #  endif
 #  define PERL_FS_VER_FMT	"%d_%d_%d"

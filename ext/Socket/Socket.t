@@ -13,7 +13,7 @@ BEGIN {
 	
 use Socket;
 
-print "1..8\n";
+print "1..13\n";
 
 if (socket(T,PF_INET,SOCK_STREAM,6)) {
   print "ok 1\n";
@@ -85,3 +85,19 @@ print ($w == 1 ? "not ok 7\n" : "ok 7\n") ;
 use warnings 'Socket' ;
 sockaddr_in(1,2,3,4,5,6) ;
 print ($w == 1 ? "ok 8\n" : "not ok 8\n") ;
+
+# Thest that whatever we give into pack/unpack_sockaddr retains
+# the value thru the entire chain.
+if((inet_ntoa((unpack_sockaddr_in(pack_sockaddr_in(100,inet_aton("10.250.230.10"))))[1])) eq '10.250.230.10') {
+    print "ok 9\n"; 
+} else {
+    print "not ok 9\n"; 
+}
+print ((inet_aton("10.10.10.10") eq v10.10.10.10) ? "ok 10\n" : "not ok 10\n");
+print ((inet_ntoa(v10.10.10.10) eq '10.10.10.10') ? "ok 11\n" : "not ok 11\n");
+{
+    my ($port,$addr) = unpack_sockaddr_in(pack_sockaddr_in(100,v10.10.10.10));
+    print (($port == 100) ? "ok 12\n" : "not ok 12\n");
+    print (($addr eq v10.10.10.10) ? "ok 13\n" : "not ok 13\n");
+}
+				     

@@ -7,11 +7,6 @@
  * that can be #defined to the system-level function (or a wrapper
  * provided elsewhere).
  *
- * When using C++ with -DPERL_OBJECT, this definition is in the
- * form of a set of virtual base classes which must be subclassed to
- * provide a real implementation.  The Perl Object will use instances
- * of this implementation to use the system-level functionality.
- *
  * GSAR 21-JUN-98
  */
 

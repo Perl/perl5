@@ -1,10 +1,10 @@
 package Time::Local;
-require 5.000;
+require 5.6.0;
 require Exporter;
 use Carp;
 use strict;
 
-our $VERSION    = '1.01';
+our $VERSION    = '1.02';
 our @ISA	= qw( Exporter );
 our @EXPORT	= qw( timegm timelocal );
 our @EXPORT_OK	= qw( timegm_nocheck timelocal_nocheck );
@@ -87,10 +87,11 @@ sub timelocal_nocheck {
 sub cheat {
     my($ym, @date) = @_;
     my($sec, $min, $hour, $day, $month, $year) = @date;
-    my($md);
     unless ($Options{no_range_check}) {
  croak "Month '$month' out of range 0..11" if $month > 11   || $month < 0;
-        $md = (31, 29, 31, 30, 31, 30, 31, 30, 30, 31, 30, 31)[$month];
+        my $md = (31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)[$month];
+	$md++ if $month == 1 &&
+	    $year % 4 == 0 && ($year % 100 > 0 || $year % 400 == 100);	# leap
  croak "Day '$day' out of range 1..$md"    if $day   > $md  || $day   < 1;
  croak "Hour '$hour' out of range 0..23"   if $hour  > 23   || $hour  < 0;
  croak "Minute '$min' out of range 0..59"  if $min   > 59   || $min   < 0;
@@ -142,12 +143,12 @@ Time::Local - efficiently compute time from local and GMT time
 
 =head1 SYNOPSIS
 
-    $time = timelocal($sec,$min,$hours,$mday,$mon,$year);
-    $time = timegm($sec,$min,$hours,$mday,$mon,$year);
+    $time = timelocal($sec,$min,$hour,$mday,$mon,$year);
+    $time = timegm($sec,$min,$hour,$mday,$mon,$year);
 
 =head1 DESCRIPTION
 
-These routines are the inverse of built-in perl fuctions localtime()
+These routines are the inverse of built-in perl functions localtime()
 and gmtime().  They accept a date as a six-element array, and return
 the corresponding time(2) value in seconds since the Epoch (Midnight,
 January 1, 1970).  This value can be positive or negative.
@@ -158,7 +159,7 @@ the values provided.  The value for the day of the month is the actual day
 This is consistent with the values returned from localtime() and gmtime().
 
 The timelocal() and timegm() functions perform range checking on the
-input $sec, $min, $hours, $mday, and $mon values by default.  If you'd
+input $sec, $min, $hour, $mday, and $mon values by default.  If you'd
 rather they didn't, you can explicitly import the timelocal_nocheck()
 and timegm_nocheck() functions.
 

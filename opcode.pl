@@ -65,6 +65,16 @@ print <<END;
 
 START_EXTERN_C
 
+#ifdef PERL_CUSTOM_OPS
+#define OP_NAME(o) (o->op_type == OP_CUSTOM ? custom_op_name(o) : \\
+                    PL_op_name[o->op_type])
+#define OP_DESC(o) (o->op_type == OP_CUSTOM ? custom_op_desc(o) : \\
+                    PL_op_desc[o->op_type])
+#else
+#define OP_NAME(o) PL_op_name[o->op_type]
+#define OP_DESC(o) PL_op_desc[o->op_type]
+#endif
+
 #ifndef DOINIT
 EXT char *PL_op_name[];
 #else
@@ -130,7 +140,7 @@ EXT OP * (CPERLscope(*PL_ppaddr)[])(pTHX) = {
 END
 
 for (@ops) {
-    print "\tMEMBER_TO_FPTR(Perl_pp_$_),\n";
+    print "\tMEMBER_TO_FPTR(Perl_pp_$_),\n" unless $_ eq "custom";
 }
 
 print <<END;
@@ -209,7 +219,6 @@ for (@ops) {
     $argsum |= 32 if $flags =~ /I/;		# has corresponding int op
     $argsum |= 64 if $flags =~ /d/;		# danger, unknown side effects
     $argsum |= 128 if $flags =~ /u/;		# defaults to $_
-
     $flags =~ /([\W\d_])/ or die qq[Opcode "$_" has no class indicator];
     $argsum |= $opclass{$1} << 9;
     $mul = 0x2000;				# 2 ^ OASHIFT
@@ -291,6 +300,7 @@ print PP "\n\n";
 
 for (@ops) {
     next if /^i_(pre|post)(inc|dec)$/;
+    next if /^custom$/;
     print PP "PERL_PPDEF(Perl_pp_$_)\n";
     print PPSYM "Perl_pp_$_\n";
 }
@@ -887,3 +897,5 @@ threadsv	per-thread value	ck_null		ds0
 # Control (contd.)
 setstate	set statement info	ck_null		s;
 method_named	method with known name	ck_null		d$
+
+custom		unknown custom operator		ck_null		0

@@ -61,13 +61,6 @@ engine. The idea is that, for instance, C<\b> needs to be
 algorithmically computed if you're dealing with Thai text. Hence, the
 B<\b> assertion wants to be overloaded by a function.
 
-=head2 Unicode collation and normalization
-
-Simon Cozens promises to work on this.
-
-    Collation?     http://www.unicode.org/unicode/reports/tr10/
-    Normalization? http://www.unicode.org/unicode/reports/tr15/
-
 =head2 Unicode case mappings 
 
     Case Mappings? http://www.unicode.org/unicode/reports/tr21/
@@ -809,4 +802,12 @@ at least few percentages since all regular expression operations would
 be done in full UTF-8.  But if you want to try this, add
 -DUSE_UTF8_SCRIPTS to your compilation flags.
 
+=head2 Unicode collation and normalization
 
+The Unicode::Collate and Unicode::Normalize modules
+by SADAHIRO Tomoyuki have been included since 5.8.0.
+
+    Collation?     http://www.unicode.org/unicode/reports/tr10/
+    Normalization? http://www.unicode.org/unicode/reports/tr15/
+
+=cut

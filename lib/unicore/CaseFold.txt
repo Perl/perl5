@@ -1,4 +1,4 @@
-# CaseFolding-3.txt
+# CaseFolding-4.txt
 #
 # Case Folding Properties
 #
@@ -8,8 +8,8 @@
 # case differences (according to UnicodeData.txt and SpecialCasing.txt)
 # are eliminated.
 #
-# The data supports both implemenations that require simple case foldings
-# (where string lengths don't change), and implemenations that allow full case folding
+# The data supports both implementations that require simple case foldings
+# (where string lengths don't change), and implementations that allow full case folding
 # (where string lengths may grow). Note that where they can be supported, the
 # full case foldings are superior: for example, they allow "MASSE" and "Maﬂe" to match.
 #

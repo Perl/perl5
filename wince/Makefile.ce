@@ -338,13 +338,6 @@ D_CRYPT		= define
 CRYPT_FLAG	= -DHAVE_DES_FCRYPT
 !ENDIF
 
-!IF "$(USE_OBJECT)" == "define"
-PERL_MALLOC	= undef
-USE_5005THREADS	= undef
-USE_MULTI	= undef
-USE_IMP_SYS	= define
-!ENDIF
-
 !IF "$(PERL_MALLOC)" == ""
 PERL_MALLOC	= undef
 !ENDIF
@@ -365,10 +358,6 @@ PERL_MALLOC	= undef
 USE_MULTI	= undef
 !ENDIF
 
-!IF "$(USE_OBJECT)" == ""
-USE_OBJECT	= undef
-!ENDIF
-
 !IF "$(USE_ITHREADS)" == ""
 USE_ITHREADS	= undef
 !ENDIF
@@ -381,16 +370,16 @@ USE_IMP_SYS	= undef
 USE_PERLCRT	= undef
 !ENDIF
 
-!IF "$(USE_IMP_SYS)$(USE_MULTI)$(USE_5005THREADS)$(USE_OBJECT)" == "defineundefundefundef"
+!IF "$(USE_IMP_SYS)$(USE_MULTI)$(USE_5005THREADS)" == "defineundefundef"
 USE_MULTI	= define
 !ENDIF
 
-!IF "$(USE_ITHREADS)$(USE_MULTI)$(USE_OBJECT)" == "defineundefundef"
+!IF "$(USE_ITHREADS)$(USE_MULTI)" == "defineundef"
 USE_MULTI	= define
 USE_5005THREADS	= undef
 !ENDIF
 
-!IF "$(USE_MULTI)$(USE_5005THREADS)$(USE_OBJECT)" != "undefundefundef"
+!IF "$(USE_MULTI)$(USE_5005THREADS)" != "undefundef"
 BUILDOPT	= $(BUILDOPT) -DPERL_IMPLICIT_CONTEXT
 !ENDIF
 
@@ -423,11 +412,6 @@ CXX_FLAG	= -TP -GX
 
 PERLEXE_RES	= perl.res
 PERLDLL_RES	=
-
-!IF "$(USE_OBJECT)" == "define"
-OPTIMIZE	= $(OPTIMIZE) $(CXX_FLAG)
-BUILDOPT	= $(BUILDOPT) -DPERL_OBJECT
-!ENDIF
 
 !if "$(CFG)" == "RELEASE"
 CELIB           = celib.lib
@@ -545,9 +529,7 @@ EXTRACORE_SRC	= $(EXTRACORE_SRC) perllib.c
 EXTRACORE_SRC	= $(EXTRACORE_SRC) ..\malloc.c
 !ENDIF
 
-!IF "$(USE_OBJECT)" != "define"
 EXTRACORE_SRC	= $(EXTRACORE_SRC) ..\perlio.c
-!ENDIF
 
 WIN32_SRC	=		\
 		.\wince.c	\

@@ -80,12 +80,6 @@
 #define PERL_IN_REGEXEC_C
 #include "perl.h"
 
-#ifdef PERL_IN_XSUB_RE
-#  if defined(PERL_CAPI) || defined(PERL_OBJECT)
-#    include "XSUB.h"
-#  endif
-#endif
-
 #include "regcomp.h"
 
 #define RF_tainted	1		/* tainted information used? */
@@ -107,17 +101,17 @@
  */
 
 #define CHR_SVLEN(sv) (UTF ? sv_len_utf8(sv) : SvCUR(sv))
-#define CHR_DIST(a,b) (PL_reg_sv_utf8 ? utf8_distance(a,b) : a - b)
+#define CHR_DIST(a,b) (PL_reg_match_utf8 ? utf8_distance(a,b) : a - b)
 
 #define reghop_c(pos,off) ((char*)reghop((U8*)pos, off))
 #define reghopmaybe_c(pos,off) ((char*)reghopmaybe((U8*)pos, off))
-#define HOP(pos,off) (PL_reg_sv_utf8 ? reghop((U8*)pos, off) : (U8*)(pos + off))
-#define HOPMAYBE(pos,off) (PL_reg_sv_utf8 ? reghopmaybe((U8*)pos, off) : (U8*)(pos + off))
+#define HOP(pos,off) (PL_reg_match_utf8 ? reghop((U8*)pos, off) : (U8*)(pos + off))
+#define HOPMAYBE(pos,off) (PL_reg_match_utf8 ? reghopmaybe((U8*)pos, off) : (U8*)(pos + off))
 #define HOPc(pos,off) ((char*)HOP(pos,off))
 #define HOPMAYBEc(pos,off) ((char*)HOPMAYBE(pos,off))
 
 #define HOPBACK(pos, off) (		\
-    (UTF && PL_reg_sv_utf8)		\
+    (UTF && PL_reg_match_utf8)		\
 	? reghopmaybe((U8*)pos, -off)	\
     : (pos - off >= PL_bostr)		\
 	? (U8*)(pos - off)		\
@@ -127,14 +121,14 @@
 
 #define reghop3_c(pos,off,lim) ((char*)reghop3((U8*)pos, off, (U8*)lim))
 #define reghopmaybe3_c(pos,off,lim) ((char*)reghopmaybe3((U8*)pos, off, (U8*)lim))
-#define HOP3(pos,off,lim) (PL_reg_sv_utf8 ? reghop3((U8*)pos, off, (U8*)lim) : (U8*)(pos + off))
-#define HOPMAYBE3(pos,off,lim) (PL_reg_sv_utf8 ? reghopmaybe3((U8*)pos, off, (U8*)lim) : (U8*)(pos + off))
+#define HOP3(pos,off,lim) (PL_reg_match_utf8 ? reghop3((U8*)pos, off, (U8*)lim) : (U8*)(pos + off))
+#define HOPMAYBE3(pos,off,lim) (PL_reg_match_utf8 ? reghopmaybe3((U8*)pos, off, (U8*)lim) : (U8*)(pos + off))
 #define HOP3c(pos,off,lim) ((char*)HOP3(pos,off,lim))
 #define HOPMAYBE3c(pos,off,lim) ((char*)HOPMAYBE3(pos,off,lim))
 
 #define LOAD_UTF8_CHARCLASS(a,b) STMT_START { if (!CAT2(PL_utf8_,a)) (void)CAT2(is_utf8_, a)((U8*)b); } STMT_END
 
-static void restore_pos(pTHXo_ void *arg);
+static void restore_pos(pTHX_ void *arg);
 
 STATIC CHECKPOINT
 S_regcppush(pTHX_ I32 parenfloor)
@@ -878,7 +872,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	unsigned int c2;
 	char *e;
 	register I32 tmp = 1;	/* Scratch variable? */
-	register bool do_utf8 = PL_reg_sv_utf8;
+	register bool do_utf8 = PL_reg_match_utf8;
 
 	/* We know what class it must start with. */
 	switch (OP(c)) {
@@ -1775,7 +1769,7 @@ got_it:
 	    sv_setsv(oreplsv, GvSV(PL_replgv));/* So that when GvSV(replgv) is
 						  restored, the value remains
 						  the same. */
-	restore_pos(aTHXo_ 0);
+	restore_pos(aTHX_ 0);
     }
 
     /* make sure $`, $&, $', and $digit will work later */
@@ -1804,7 +1798,7 @@ phooey:
     DEBUG_r(PerlIO_printf(Perl_debug_log, "%sMatch failed%s\n",
 			  PL_colors[4],PL_colors[5]));
     if (PL_reg_eval_set)
-	restore_pos(aTHXo_ 0);
+	restore_pos(aTHX_ 0);
     return 0;
 }
 
@@ -1841,7 +1835,7 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
 	if (PL_reg_sv) {
 	    /* Make $_ available to executed code. */
 	    if (PL_reg_sv != DEFSV) {
-		/* SAVE_DEFSV does *not* suffice here for USE_THREADS */
+		/* SAVE_DEFSV does *not* suffice here for USE_5005THREADS */
 		SAVESPTR(DEFSV);
 		DEFSV = PL_reg_sv;
 	    }
@@ -2009,7 +2003,7 @@ S_regmatch(pTHX_ regnode *prog)
 #if 0
     I32 firstcp = PL_savestack_ix;
 #endif
-    register bool do_utf8 = PL_reg_sv_utf8;
+    register bool do_utf8 = PL_reg_match_utf8;
 
 #ifdef DEBUGGING
     PL_regindent++;
@@ -3590,7 +3584,7 @@ S_regrepeat(pTHX_ regnode *p, I32 max)
     register I32 c;
     register char *loceol = PL_regeol;
     register I32 hardcount = 0;
-    register bool do_utf8 = PL_reg_sv_utf8;
+    register bool do_utf8 = PL_reg_match_utf8;
 
     scan = PL_reginput;
     if (max != REG_INFTY && max < loceol - scan)
@@ -3829,7 +3823,7 @@ S_regrepeat_hard(pTHX_ regnode *p, I32 max, I32 *lp)
 	return 0;
 
     start = PL_reginput;
-    if (PL_reg_sv_utf8) {
+    if (PL_reg_match_utf8) {
 	while (PL_reginput < loceol && (scan = PL_reginput, res = regmatch(p))) {
 	    if (!count++) {
 		l = 0;
@@ -4065,12 +4059,8 @@ S_reghopmaybe3(pTHX_ U8* s, I32 off, U8* lim)
     return s;
 }
 
-#ifdef PERL_OBJECT
-#include "XSUB.h"
-#endif
-
 static void
-restore_pos(pTHXo_ void *arg)
+restore_pos(pTHX_ void *arg)
 {
     if (PL_reg_eval_set) {
 	if (PL_reg_oldsaved) {

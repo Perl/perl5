@@ -251,7 +251,7 @@ eval <<'EOE' or $_ = $@;
 EOE
 
 print "# '$_'.\nnot "
-  unless /Can\'t return a readonly value from lvalue subroutine/;
+  unless /Empty array returned from lvalue subroutine in scalar context/;
 print "ok 31\n";
 
 sub lv10 : lvalue {}

@@ -35,7 +35,7 @@ use warnings ();
 # - package declarations using cop_stash
 # - subs, formats and code sorted by cop_seq
 # Changes between 0.51 and 0.52:
-# - added pp_threadsv (special variables under USE_THREADS)
+# - added pp_threadsv (special variables under USE_5005THREADS)
 # - added documentation
 # Changes between 0.52 and 0.53:
 # - many changes adding precedence contexts and associativity

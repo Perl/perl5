@@ -428,7 +428,7 @@ malformed:
 
 	    if (PL_op)
 		Perl_warner(aTHX_ WARN_UTF8,
-			    "%s in %s", s,  PL_op_desc[PL_op->op_type]);
+			    "%s in %s", s,  OP_DESC(PL_op));
 	    else
 		Perl_warner(aTHX_ WARN_UTF8, "%s", s);
 	}

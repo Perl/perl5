@@ -7,12 +7,12 @@
  */
 
 /* package attributes; */
-void XS_attributes__warn_reserved(pTHXo_ CV *cv);
-void XS_attributes_reftype(pTHXo_ CV *cv);
-void XS_attributes__modify_attrs(pTHXo_ CV *cv);
-void XS_attributes__guess_stash(pTHXo_ CV *cv);
-void XS_attributes__fetch_attrs(pTHXo_ CV *cv);
-void XS_attributes_bootstrap(pTHXo_ CV *cv);
+void XS_attributes__warn_reserved(pTHX_ CV *cv);
+void XS_attributes_reftype(pTHX_ CV *cv);
+void XS_attributes__modify_attrs(pTHX_ CV *cv);
+void XS_attributes__guess_stash(pTHX_ CV *cv);
+void XS_attributes__fetch_attrs(pTHX_ CV *cv);
+void XS_attributes_bootstrap(pTHX_ CV *cv);
 
 
 /*
@@ -38,7 +38,7 @@ Perl_boot_core_xsutils(pTHX)
 #include "XSUB.h"
 
 static int
-modify_SV_attributes(pTHXo_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
+modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 {
     SV *attr;
     char *name;
@@ -155,7 +155,7 @@ usage:
 	goto usage;
     sv = SvRV(rv);
     if (items > 1)
-	XSRETURN(modify_SV_attributes(aTHXo_ sv, &ST(0), &ST(1), items-1));
+	XSRETURN(modify_SV_attributes(aTHX_ sv, &ST(0), &ST(1), items-1));
 
     XSRETURN(0);
 }

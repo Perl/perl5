@@ -128,13 +128,13 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 	CvGV(GvCV(gv)) = gv;
 	CvFILE_set_from_cop(GvCV(gv), PL_curcop);
 	CvSTASH(GvCV(gv)) = PL_curstash;
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
 	CvOWNER(GvCV(gv)) = 0;
 	if (!CvMUTEXP(GvCV(gv))) {
 	    New(666, CvMUTEXP(GvCV(gv)), 1, perl_mutex);
 	    MUTEX_INIT(CvMUTEXP(GvCV(gv)));
 	}
-#endif /* USE_THREADS */
+#endif /* USE_5005THREADS */
 	if (proto) {
 	    sv_setpv((SV*)GvCV(gv), proto);
 	    Safefree(proto);
@@ -439,7 +439,7 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
 	  "Use of inherited AUTOLOAD for non-method %s::%.*s() is deprecated",
 	     HvNAME(stash), (int)len, name);
 
-#ifndef USE_THREADS
+#ifndef USE_5005THREADS
     if (CvXSUB(cv)) {
         /* rather than lookup/init $AUTOLOAD here
          * only to have the XSUB do another lookup for $AUTOLOAD
@@ -463,14 +463,14 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
     vargv = *(GV**)hv_fetch(varstash, autoload, autolen, TRUE);
     ENTER;
 
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     sv_lock((SV *)varstash);
 #endif
     if (!isGV(vargv))
 	gv_init(vargv, varstash, autoload, autolen, FALSE);
     LEAVE;
     varsv = GvSV(vargv);
-#ifdef USE_THREADS
+#ifdef USE_5005THREADS
     sv_lock(varsv);
 #endif
     sv_setpv(varsv, HvNAME(stash));

@@ -45,6 +45,15 @@ C<can> checks if the object has a method called C<METHOD>. If it does
 then a reference to the sub is returned. If it does not then I<undef>
 is returned.
 
+C<can> cannot know whether an object will be able to provide a method
+through AUTOLOAD, so a return value of I<undef> does not necessarily mean
+the object will not be able to handle the method call. To get around
+this some module authors use a forward declaration (see L<perlsub>)
+for methods they will handle via AUTOLOAD. For such 'dummy' subs, C<can>
+will still return a code reference, which, when called, will fall through
+to the AUTOLOAD. If no suitable AUTOLOAD is provided, calling the coderef
+will cause an error.
+
 C<can> can be called as either a static or object method call.
 
 =item VERSION ( [ REQUIRE ] )

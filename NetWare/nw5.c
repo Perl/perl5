@@ -17,7 +17,7 @@
 
 
 
-#include <perl.h>	// For dTHXo, etc.
+#include <perl.h>	// For dTHX, etc.
 #include "nwpipe.h"
 
 
@@ -211,7 +211,7 @@ nw_stdout()
 long
 nw_telldir(DIR *dirp)
 {
-	dTHXo;
+	dTHX;
 	Perl_croak(aTHX_ "telldir function is not implemented");
 	return 0l;
 }
@@ -292,7 +292,7 @@ nw_write(int fd, const void *buf, unsigned int cnt)
 char *
 nw_crypt(const char *txt, const char *salt)
 {
-	 dTHXo;
+	 dTHX;
 
 #ifdef HAVE_DES_FCRYPT
     dTHR;
@@ -752,7 +752,7 @@ nw_rename(const char *oname, const char *newname)
 void
 nw_rewinddir(DIR *dirp)
 {
-	dTHXo;
+	dTHX;
 	Perl_croak(aTHX_ "rewinddir function is not implemented");
 }
 
@@ -766,7 +766,7 @@ nw_rewind(FILE *pf)
 void
 nw_seekdir(DIR *dirp, long loc)
 {
-	dTHXo;
+	dTHX;
 	Perl_croak(aTHX_ "seekdir function is not implemented");
 }
 
