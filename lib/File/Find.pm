@@ -309,6 +309,8 @@ sub _find_opt {
         $top_item =~ s|/$||  unless $top_item eq '/';
         $Is_Dir= 0;
         
+        ($topdev,$topino,$topmode,$topnlink) = stat $top_item;
+
         if ($follow) {
             if (substr($top_item,0,1) eq '/') {
                 $abs_dir = $top_item;
@@ -331,7 +333,6 @@ sub _find_opt {
         }
 	else { # no follow
             $topdir = $top_item;
-            ($topdev,$topino,$topmode,$topnlink) = lstat $top_item;
             unless (defined $topnlink) {
                 warn "Can't stat $top_item: $!\n";
                 next Proc_Top_Item;
