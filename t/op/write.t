@@ -271,11 +271,11 @@ if (`$CAT Op_write.tmp` eq $right)
 else
     { print "not ok 11\n"; }
 
-# 12..44: scary format testing from Merijn H. Brand
+# 12..47: scary format testing from Merijn H. Brand
 
 if ($^O eq 'VMS' || $^O eq 'MSWin32' || $^O eq 'dos' ||
     ($^O eq 'os2' and not eval '$OS2::can_fork')) {
-  foreach (12..44) { print "ok $_ # skipped: '|-' and '-|' not supported\n"; }
+  foreach (12..47) { print "ok $_ # skipped: '|-' and '-|' not supported\n"; }
   exit(0);
 }
 
@@ -399,7 +399,7 @@ if (has_format ("EOF")) {
 
 close STDOUT;
 
-# That was test 44.
+# That was test 47.
 
 __END__
     
