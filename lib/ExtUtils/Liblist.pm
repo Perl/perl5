@@ -268,8 +268,8 @@ sub _win32_ext {
 	}
 	$_ .= $libext if !/\Q$libext\E$/i;
 
-    LOOKAGAIN:
 	my $secondpass = 0;
+    LOOKAGAIN:
 
         # look for the file itself
 	if (-f) {
@@ -293,7 +293,7 @@ sub _win32_ext {
 	}
 
 	# do another pass with (or without) leading 'lib' if they used -l
-	if ($thislib =~ /^-l/) {
+	if (!$found_lib and $thislib =~ /^-l/) {
 	    if ($GC)	{ s/^lib//i }
 	    else	{ $_ = "lib$_" }
 	    goto LOOKAGAIN unless $secondpass++;
