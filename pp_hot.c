@@ -367,7 +367,7 @@ PP(pp_print)
 			    SvPV(sv,n_a));
 	    else if (ckWARN(WARN_CLOSED))
 		Perl_warner(aTHX_ WARN_CLOSED,
-			    "print on closed filehandle %s", SvPV(sv,n_a));
+			    "print() on closed filehandle %s", SvPV(sv,n_a));
 	}
 	SETERRNO(EBADF,IoIFP(io)?RMS$_FAC:RMS$_IFI);
 	goto just_say_no;
@@ -1254,7 +1254,7 @@ Perl_do_readline(pTHX)
 		SV* sv = sv_newmortal();
 		gv_efullname3(sv, PL_last_in_gv, Nullch);
 		Perl_warner(aTHX_ WARN_CLOSED,
-			    "Read on closed filehandle %s",
+			    "readline() on closed filehandle %s",
 			    SvPV_nolen(sv));
 	    }
 	}

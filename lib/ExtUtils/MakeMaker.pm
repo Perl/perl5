@@ -1183,7 +1183,7 @@ MakeMaker gives you much more freedom than needed to configure
 internal variables and get different results. It is worth to mention,
 that make(1) also lets you configure most of the variables that are
 used in the Makefile. But in the majority of situations this will not
-be necessary, and should only be done, if the author of a package
+be necessary, and should only be done if the author of a package
 recommends it (or you know what you're doing).
 
 =head2 Using Attributes and Parameters
@@ -1598,9 +1598,9 @@ Makefile.PL.
 
 =item NEEDS_LINKING
 
-MakeMaker will figure out, if an extension contains linkable code
+MakeMaker will figure out if an extension contains linkable code
 anywhere down the directory tree, and will set this variable
-accordingly, but you can speed it up a very little bit, if you define
+accordingly, but you can speed it up a very little bit if you define
 this boolean variable yourself.
 
 =item NOECHO
@@ -1615,7 +1615,7 @@ Boolean.  Attribute to inhibit descending into subdirectories.
 
 =item NO_VC
 
-In general any generated Makefile checks for the current version of
+In general, any generated Makefile checks for the current version of
 MakeMaker and the version the Makefile was built under. If NO_VC is
 set, the version check is neglected. Do not write this into your
 Makefile.PL, use it interactively instead.
@@ -1642,7 +1642,7 @@ to $(CC).
 
 =item PERL_ARCHLIB
 
-Same as above for architecture dependent files
+Same as above for architecture dependent files.
 
 =item PERL_LIB
 
@@ -1699,14 +1699,14 @@ Defining PM in the Makefile.PL will override PMLIBDIRS.
 =item POLLUTE
 
 Release 5.005 grandfathered old global symbol names by providing preprocessor
-macros for extension source compatibility.  As of release 5.006, these
+macros for extension source compatibility.  As of release 5.6, these
 preprocessor definitions are not available by default.  The POLLUTE flag
 specifies that the old names should still be defined:
 
   perl Makefile.PL POLLUTE=1
 
 Please inform the module author if this is necessary to successfully install
-a module under 5.006 or later.
+a module under 5.6 or later.
 
 =item PPM_INSTALL_EXEC
 
@@ -1736,8 +1736,8 @@ only check if any version is installed already.
 =item SKIP
 
 Arryref. E.g. [qw(name1 name2)] skip (do not write) sections of the
-Makefile. Caution! Do not use the SKIP attribute for the neglectible
-speedup. It may seriously damage the resulting Makefile. Only use it,
+Makefile. Caution! Do not use the SKIP attribute for the negligible
+speedup. It may seriously damage the resulting Makefile. Only use it
 if you really need it.
 
 =item TYPEMAPS
@@ -1860,7 +1860,7 @@ NB: Extensions that have nothing but *.pm files had to say
   {LINKTYPE => ''}
 
 with Pre-5.0 MakeMakers. Since version 5.00 of MakeMaker such a line
-can be deleted safely. MakeMaker recognizes, when there's nothing to
+can be deleted safely. MakeMaker recognizes when there's nothing to
 be linked.
 
 =item macro
@@ -1963,7 +1963,7 @@ details)
 =item    make distclean
 
 does a realclean first and then the distcheck. Note that this is not
-needed to build a new distribution as long as you are sure, that the
+needed to build a new distribution as long as you are sure that the
 MANIFEST file is ok.
 
 =item    make manifest

@@ -383,7 +383,8 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 /* HP-UX 10.X CMA (Common Multithreaded Architecure) insists that
    pthread.h must be included before all other header files.
 */
-#if defined(USE_THREADS) && defined(PTHREAD_H_FIRST) && defined(I_PTHREAD)
+#if (defined(USE_THREADS) || defined(USE_ITHREADS)) \
+    && defined(PTHREAD_H_FIRST) && defined(I_PTHREAD)
 #  include <pthread.h>
 #endif
 
@@ -1502,11 +1503,12 @@ typedef struct ptr_tbl PTR_TBL_t;
  * May make sense to have threads after "*ish.h" anyway
  */
 
-#ifdef USE_THREADS
+#if defined(USE_THREADS) || defined(USE_ITHREADS)
+#  if defined(USE_THREADS)
    /* pending resolution of licensing issues, we avoid the erstwhile
     * atomic.h everywhere */
 #  define EMULATE_ATOMIC_REFCOUNTS
-
+#  endif
 #  ifdef FAKE_THREADS
 #    include "fakethr.h"
 #  else
@@ -1537,10 +1539,10 @@ typedef pthread_key_t	perl_key;
 #      endif /* OS2 */
 #    endif /* WIN32 */
 #  endif /* FAKE_THREADS */
-#endif /* USE_THREADS */
+#endif /* USE_THREADS || USE_ITHREADS */
 
 #ifdef WIN32
-#include "win32.h"
+#  include "win32.h"
 #endif
 
 #ifdef VMS

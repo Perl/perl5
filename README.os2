@@ -939,6 +939,8 @@ The reasons for most important skipped tests are:
 
 =item F<op/fs.t>
 
+=over 4
+
 =item 18
 
 Checks C<atime> and C<mtime> of C<stat()> - unfortunately, HPFS

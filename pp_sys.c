@@ -247,7 +247,7 @@ S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
     Gid_t egid = getegid();
     int res;
 
-    MUTEX_LOCK(&PL_cred_mutex);
+    LOCK_CRED_MUTEX;
 #if !defined(HAS_SETREUID) && !defined(HAS_SETRESUID)
     Perl_croak(aTHX_ "switching effective uid is not implemented");
 #else
@@ -293,7 +293,7 @@ S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
 #endif
 #endif
 	Perl_croak(aTHX_ "leaving effective gid failed");
-    MUTEX_UNLOCK(&PL_cred_mutex);
+    UNLOCK_CRED_MUTEX;
 
     return res;
 }
@@ -1281,7 +1281,7 @@ PP(pp_leavewrite)
 			    SvPV_nolen(sv));
 	    else if (ckWARN(WARN_CLOSED))
 		Perl_warner(aTHX_ WARN_CLOSED,
-			    "Write on closed filehandle %s", SvPV_nolen(sv));
+			    "write() on closed filehandle %s", SvPV_nolen(sv));
 	}
 	PUSHs(&PL_sv_no);
     }
@@ -1361,7 +1361,7 @@ PP(pp_prtf)
 			    SvPV(sv,n_a));
 	    else if (ckWARN(WARN_CLOSED))
 		Perl_warner(aTHX_ WARN_CLOSED,
-			    "printf on closed filehandle %s", SvPV(sv,n_a));
+			    "printf() on closed filehandle %s", SvPV(sv,n_a));
 	}
 	SETERRNO(EBADF,IoIFP(io)?RMS$_FAC:RMS$_IFI);
 	goto just_say_no;
@@ -1631,9 +1631,9 @@ PP(pp_send)
 	length = -1;
 	if (ckWARN(WARN_CLOSED)) {
 	    if (PL_op->op_type == OP_SYSWRITE)
-		Perl_warner(aTHX_ WARN_CLOSED, "Syswrite on closed filehandle");
+		Perl_warner(aTHX_ WARN_CLOSED, "syswrite() on closed filehandle");
 	    else
-		Perl_warner(aTHX_ WARN_CLOSED, "Send on closed socket");
+		Perl_warner(aTHX_ WARN_CLOSED, "send() on closed socket");
 	}
     }
     else if (PL_op->op_type == OP_SYSWRITE) {
@@ -2140,7 +2140,7 @@ PP(pp_bind)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	Perl_warner(aTHX_ WARN_CLOSED, "bind() on closed fd");
+	Perl_warner(aTHX_ WARN_CLOSED, "bind() on closed socket");
     SETERRNO(EBADF,SS$_IVCHAN);
     RETPUSHUNDEF;
 #else
@@ -2170,7 +2170,7 @@ PP(pp_connect)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	Perl_warner(aTHX_ WARN_CLOSED, "connect() on closed fd");
+	Perl_warner(aTHX_ WARN_CLOSED, "connect() on closed socket");
     SETERRNO(EBADF,SS$_IVCHAN);
     RETPUSHUNDEF;
 #else
@@ -2196,7 +2196,7 @@ PP(pp_listen)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	Perl_warner(aTHX_ WARN_CLOSED, "listen() on closed fd");
+	Perl_warner(aTHX_ WARN_CLOSED, "listen() on closed socket");
     SETERRNO(EBADF,SS$_IVCHAN);
     RETPUSHUNDEF;
 #else
@@ -2250,7 +2250,7 @@ PP(pp_accept)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	Perl_warner(aTHX_ WARN_CLOSED, "accept() on closed fd");
+	Perl_warner(aTHX_ WARN_CLOSED, "accept() on closed socket");
     SETERRNO(EBADF,SS$_IVCHAN);
 
 badexit:
@@ -2277,7 +2277,7 @@ PP(pp_shutdown)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	Perl_warner(aTHX_ WARN_CLOSED, "shutdown() on closed fd");
+	Perl_warner(aTHX_ WARN_CLOSED, "shutdown() on closed socket");
     SETERRNO(EBADF,SS$_IVCHAN);
     RETPUSHUNDEF;
 #else
@@ -2356,7 +2356,8 @@ PP(pp_ssockopt)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	Perl_warner(aTHX_ WARN_CLOSED, "[gs]etsockopt() on closed fd");
+	Perl_warner(aTHX_ WARN_CLOSED, "%cetsockopt() on closed socket",
+		    optype == OP_GSOCKOPT ? 'g' : 's');
     SETERRNO(EBADF,SS$_IVCHAN);
 nuts2:
     RETPUSHUNDEF;
@@ -2429,7 +2430,8 @@ PP(pp_getpeername)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	Perl_warner(aTHX_ WARN_CLOSED, "get{sock, peer}name() on closed fd");
+	Perl_warner(aTHX_ WARN_CLOSED, "get%sname() on closed socket",
+		    optype == OP_GETSOCKNAME ? "sock" : "peer");
     SETERRNO(EBADF,SS$_IVCHAN);
 nuts2:
     RETPUSHUNDEF;

@@ -8,7 +8,7 @@
     .
     write STDIN;
 
-  Write on closed filehandle %s			[pp_leavewrite]
+  write() on closed filehandle %s		[pp_leavewrite]
     format STDIN =
     .
     close STDIN;
@@ -23,45 +23,47 @@
     $a = "abc"; 
     printf $a "fred"
 
-  printf on closed filehandle %s		[pp_prtf]
+  printf() on closed filehandle %s		[pp_prtf]
     close STDIN ;
     printf STDIN "fred"
 
-  Syswrite on closed filehandle			[pp_send]
+  syswrite() on closed filehandle		[pp_send]
     close STDIN; 
     syswrite STDIN, "fred", 1;
 
-  Send on closed socket				[pp_send]
+  send() on closed socket			[pp_send]
     close STDIN; 
     send STDIN, "fred", 1
 
-  bind() on closed fd				[pp_bind]
+  bind() on closed socket			[pp_bind]
     close STDIN; 
     bind STDIN, "fred" ;
 
 
-  connect() on closed fd			[pp_connect]
+  connect() on closed socket			[pp_connect]
     close STDIN; 
     connect STDIN, "fred" ;
 
-  listen() on closed fd				[pp_listen]
+  listen() on closed socket			[pp_listen]
     close STDIN; 
     listen STDIN, 2;
 
-  accept() on closed fd				[pp_accept]
+  accept() on closed socket			[pp_accept]
     close STDIN; 
     accept STDIN, "fred" ;
 
-  shutdown() on closed fd			[pp_shutdown]
+  shutdown() on closed socket			[pp_shutdown]
     close STDIN; 
     shutdown STDIN, 0;
 
-  [gs]etsockopt() on closed fd			[pp_ssockopt]
+  setsockopt() on closed socket			[pp_ssockopt]
+  getsockopt() on closed socket			[pp_ssockopt]
     close STDIN; 
     setsockopt STDIN, 1,2,3;
     getsockopt STDIN, 1,2;
 
-  get{sock, peer}name() on closed fd		[pp_getpeername]
+  getsockname() on closed socket		[pp_getpeername]
+  getpeername() on closed socket		[pp_getpeername]
     close STDIN; 
     getsockname STDIN;
     getpeername STDIN;
@@ -112,7 +114,7 @@ write STDIN;
 no warnings 'closed' ;
 write STDIN;
 EXPECT
-Write on closed filehandle main::STDIN at - line 6.
+write() on closed filehandle main::STDIN at - line 6.
 ########
 # pp_sys.c [pp_leavewrite]
 use warnings 'io' ;
@@ -148,7 +150,7 @@ printf STDIN "fred";
 no warnings 'closed' ;
 printf STDIN "fred";
 EXPECT
-printf on closed filehandle main::STDIN at - line 4.
+printf() on closed filehandle main::STDIN at - line 4.
 ########
 # pp_sys.c [pp_prtf]
 use warnings 'io' ;
@@ -165,7 +167,7 @@ syswrite STDIN, "fred", 1;
 no warnings 'closed' ;
 syswrite STDIN, "fred", 1;
 EXPECT
-Syswrite on closed filehandle at - line 4.
+syswrite() on closed filehandle at - line 4.
 ########
 # pp_sys.c [pp_prtf pp_send pp_bind pp_connect pp_listen pp_accept pp_shutdown pp_ssockopt ppp_getpeername]
 use warnings 'io' ;
@@ -210,16 +212,16 @@ getsockopt STDIN, 1,2;
 getsockname STDIN;
 getpeername STDIN;
 EXPECT
-Send on closed socket at - line 22.
-bind() on closed fd at - line 23.
-connect() on closed fd at - line 24.
-listen() on closed fd at - line 25.
-accept() on closed fd at - line 26.
-shutdown() on closed fd at - line 27.
-[gs]etsockopt() on closed fd at - line 28.
-[gs]etsockopt() on closed fd at - line 29.
-get{sock, peer}name() on closed fd at - line 30.
-get{sock, peer}name() on closed fd at - line 31.
+send() on closed socket at - line 22.
+bind() on closed socket at - line 23.
+connect() on closed socket at - line 24.
+listen() on closed socket at - line 25.
+accept() on closed socket at - line 26.
+shutdown() on closed socket at - line 27.
+setsockopt() on closed socket at - line 28.
+getsockopt() on closed socket at - line 29.
+getsockname() on closed socket at - line 30.
+getpeername() on closed socket at - line 31.
 ########
 # pp_sys.c [pp_stat]
 use warnings 'newline' ;

@@ -22,6 +22,12 @@ EXPECT
 Malformed UTF-8 character at - line 3.
 ########
 # utf8.c [utf8_to_uv]
+BEGIN {
+    if (ord("\t") == 5) {
+        print "SKIPPED\n# Ebcdic platforms have different \\x constructs.";
+        exit 0;
+    }
+}
 use utf8 ;
 my $a = ord "\x80" ;
 {
@@ -42,6 +48,12 @@ EXPECT
 Malformed UTF-8 character at - line 3.
 ########
 # utf8.c [utf8_to_uv]
+BEGIN {
+    if (ord("\t") == 5) {
+        print "SKIPPED\n# Ebcdic platforms have different \\x constructs.";
+        exit 0;
+    }
+}
 use utf8 ;
 my $a = ord "\xf080" ;
 {

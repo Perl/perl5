@@ -236,7 +236,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		dTHR;
 		name[strlen(name)-1] = '\0' ;
 		if (ckWARN(WARN_PIPE))
-		    Perl_warner(aTHX_ WARN_PIPE, "Can't do bidirectional pipe");
+		    Perl_warner(aTHX_ WARN_PIPE, "Can't open bidirectional pipe");
 	    }
 	    fp = PerlProc_popen(name,"w");
 	    writing = 1;
@@ -660,9 +660,9 @@ Perl_nextargv(pTHX_ register GV *gv)
 		if (!S_ISREG(PL_statbuf.st_mode))	
 		    Perl_warner(aTHX_ WARN_INPLACE,
 				"Can't do inplace edit: %s is not a regular file",
-				PL_oldname );
+				PL_oldname);
 		else
-		    Perl_warner(aTHX_ WARN_INPLACE, "Can't open %s: %s\n",
+		    Perl_warner(aTHX_ WARN_INPLACE, "Can't open %s: %s",
 				PL_oldname, Strerror(errno));
 	    }
 	}

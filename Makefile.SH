@@ -261,7 +261,7 @@ lintflags = -hbvxac
 .c$(OBJ_EXT):
 	$(CCCMD) $(PLDLFLAGS) $*.c
 
-all: $(FIRSTMAKEFILE) miniperl $(private) $(public) $(dynamic_ext) $(nonxs_ext)
+all: $(FIRSTMAKEFILE) miniperl extra.pods $(private) $(public) $(dynamic_ext) $(nonxs_ext)
 	@echo " ";
 	@echo "	Everything is up to date. 'make test' to run test suite."
 
@@ -285,6 +285,9 @@ utilities:	miniperl lib/Config.pm $(plextract) FORCE
 # Apparently some makes require an action for the FORCE target.
 FORCE:
 	@sh -c true
+
+opmini$(OBJ_EXT): op.c
+	$(CCCMD) $(PLDLFLAGS) -DPERL_EXTERNAL_GLOB -o opmini$(OBJ_EXT) op.c
 
 miniperlmain$(OBJ_EXT): miniperlmain.c
 	$(CCCMD) $(PLDLFLAGS) $*.c
@@ -336,8 +339,7 @@ $(LIBPERL_NONSHR): perl$(OBJ_EXT) $(obj)
 	$(RMS) $(LIBPERL_NONSHR)
 	$(AR) rcu $(LIBPERL_NONSHR) perl$(OBJ_EXT) $(obj)
 
-$(MINIPERL_NONSHR): $(LIBPERL_NONSHR) miniperlmain$(OBJ_EXT)
-	$(CCCMD) $(PLDLFLAGS) -DPERL_EXTERNAL_GLOB -o opmini$(OBJ_EXT) op.c
+$(MINIPERL_NONSHR): $(LIBPERL_NONSHR) miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT)
 	$(CC) $(LDFLAGS) -o $(MINIPERL_NONSHR) miniperlmain$(OBJ_EXT) \
 	    opmini$(OBJ_EXT) $(LIBPERL_NONSHR) $(LIBS)
 
@@ -426,20 +428,18 @@ $(LIBPERL): $& perl$(OBJ_EXT) $(obj) $(LIBPERLEXPORT)
 	case "${osname}${osvers}" in
 	next4*)
 		$spitshell >>Makefile <<'!NO!SUBS!'
-miniperl: $& miniperlmain$(OBJ_EXT) $(LIBPERL)
-	$(CCCMD) $(PLDLFLAGS) -DPERL_EXTERNAL_GLOB -o opmini$(OBJ_EXT) op.c
+miniperl: $& miniperlmain$(OBJ_EXT) $(LIBPERL) opmini$(OBJ_EXT)
 	$(CC) -o miniperl `echo $(obj) | sed 's/ op$(OBJ_EXT) / /'` \
 	    miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT) perl$(OBJ_EXT) $(libs)
-	$(LDLIBPTH) ./miniperl -w -Ilib -MExporter -e 0 || $(MAKE) minitest
+	$(LDLIBPTH) ./miniperl -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
 !NO!SUBS!
 		;;
 	*)
 		$spitshell >>Makefile <<'!NO!SUBS!'
-miniperl: $& miniperlmain$(OBJ_EXT) $(LIBPERL)
-	$(CCCMD) $(PLDLFLAGS) -DPERL_EXTERNAL_GLOB -o opmini$(OBJ_EXT) op.c
+miniperl: $& miniperlmain$(OBJ_EXT) $(LIBPERL) opmini$(OBJ_EXT)
 	$(LDLIBPTH) $(CC) $(LARGE) $(CLDFLAGS) -o miniperl \
 	    miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT) $(LLIBPERL) $(libs)
-	$(LDLIBPTH) ./miniperl -w -Ilib -MExporter -e 0 || $(MAKE) minitest
+	$(LDLIBPTH) ./miniperl -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
 !NO!SUBS!
 		;;
 	esac
@@ -505,7 +505,7 @@ lib/re.pm: ext/re/re.pm
 $(plextract):	miniperl lib/Config.pm lib/re.pm
 	$(LDLIBPTH) ./miniperl -Ilib $@.PL
 
-extra.pods: perl
+extra.pods: miniperl
 	-@test -f extra.pods && rm -f `cat extra.pods`
 	-@rm -f extra.pods
 	-@for x in `grep -l '^=[a-z]' README.*` ; do \
@@ -516,7 +516,7 @@ extra.pods: perl
 
 install: all install.perl install.man
 
-install.perl:	all extra.pods installperl
+install.perl:	all installperl
 	if [ -n "$(COMPILE)" ]; \
 	then \
 		cd utils; $(MAKE) compile; \
@@ -526,7 +526,7 @@ install.perl:	all extra.pods installperl
 	fi
 	$(LDLIBPTH) ./perl installperl
 
-install.man:	all extra.pods installman
+install.man:	all installman
 	$(LDLIBPTH) ./perl installman
 
 # XXX Experimental. Hardwired values, but useful for testing.

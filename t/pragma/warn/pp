@@ -112,6 +112,12 @@ EXPECT
 Malformed UTF-8 character at - line 4.
 ########
 # pp.c
+BEGIN {
+    if (ord("\t") == 5) {
+        print "SKIPPED\n# Character codes differ on ebcdic machines.";
+        exit 0;
+    }
+}
 use warnings 'utf8'  ;
 use utf8 ;
 $_ = "\x80  \xff" ;

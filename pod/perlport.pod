@@ -925,10 +925,10 @@ the message body to majordomo@list.stratagy.com.
 Recent versions of Perl have been ported to platforms such as OS/400 on
 AS/400 minicomputers as well as OS/390, VM/ESA, and BS2000 for S/390
 Mainframes.  Such computers use EBCDIC character sets internally (usually
-Character Code Set ID 00819 for OS/400 and 1047 for S/390 systems).
-On the mainframe perl currently works under the "Unix system services
-for OS/390" (formerly known as OpenEdition), VM/ESA OpenEdition, or
-the BS200 POSIX system (BS2000 is supported in perl 5.006 and greater).
+Character Code Set ID 0037 for OS/400 and either 1047 or POSIX-BC for S/390
+systems).  On the mainframe perl currently works under the "Unix system
+services for OS/390" (formerly known as OpenEdition), VM/ESA OpenEdition, or
+the BS200 POSIX-BC system (BS2000 is supported in perl 5.6 and greater).
 
 As of R2.5 of USS for OS/390 and Version 2.3 of VM/ESA these Unix
 sub-systems do not support the C<#!> shebang trick for script invocation.
@@ -1663,6 +1663,10 @@ Not useful. (S<RISC OS>)
 
 =over 4
 
+=item v1.45, 20 December 1999
+
+Small changes from 5.005_63 distribution, more changes to EBCDIC info.
+
 =item v1.44, 19 July 1999
 
 A bunch of updates from Peter Prymmer for C<$^O> values,
@@ -1756,6 +1760,7 @@ Chris Nandor E<lt>pudge@pobox.comE<gt>,
 Matthias Neeracher E<lt>neeri@iis.ee.ethz.chE<gt>,
 Gary Ng E<lt>71564.1743@CompuServe.COME<gt>,
 Tom Phoenix E<lt>rootbeer@teleport.comE<gt>,
+AndrE<eacute> Pirard E<lt>A.Pirard@ulg.ac.beE<gt>,
 Peter Prymmer E<lt>pvhp@forte.comE<gt>,
 Hugo van der Sanden E<lt>hv@crypt0.demon.co.ukE<gt>,
 Gurusamy Sarathy E<lt>gsar@activestate.comE<gt>,
@@ -1769,4 +1774,4 @@ E<lt>pudge@pobox.comE<gt>.
 
 =head1 VERSION
 
-Version 1.44, last modified 22 July 1999
+Version 1.45, last modified 20 December 1999

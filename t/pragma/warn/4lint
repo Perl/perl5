@@ -9,14 +9,14 @@ $a = 1 if $a EQ $b ;
 close STDIN ; print STDIN "abc" ;
 EXPECT
 Use of EQ is deprecated at - line 5.
-print on closed filehandle main::STDIN at - line 6.
+print() on closed filehandle main::STDIN at - line 6.
 ########
 -W
 # lint: check runtime $^W is zapped
 $^W = 0 ;
 close STDIN ; print STDIN "abc" ;
 EXPECT
-print on closed filehandle main::STDIN at - line 4.
+print() on closed filehandle main::STDIN at - line 4.
 ########
 -W
 # lint: check runtime $^W is zapped
@@ -25,7 +25,7 @@ print on closed filehandle main::STDIN at - line 4.
   close STDIN ; print STDIN "abc" ;
 }
 EXPECT
-print on closed filehandle main::STDIN at - line 5.
+print() on closed filehandle main::STDIN at - line 5.
 ########
 -W
 # lint: check "no warnings" is zapped
@@ -35,7 +35,7 @@ $a = 1 if $a EQ $b ;
 close STDIN ; print STDIN "abc" ;
 EXPECT
 Use of EQ is deprecated at - line 5.
-print on closed filehandle main::STDIN at - line 6.
+print() on closed filehandle main::STDIN at - line 6.
 ########
 -W
 # lint: check "no warnings" is zapped
@@ -44,7 +44,7 @@ print on closed filehandle main::STDIN at - line 6.
   close STDIN ; print STDIN "abc" ;
 }
 EXPECT
-print on closed filehandle main::STDIN at - line 5.
+print() on closed filehandle main::STDIN at - line 5.
 ########
 -Ww
 # lint: check combination of -w and -W
@@ -53,7 +53,7 @@ print on closed filehandle main::STDIN at - line 5.
   close STDIN ; print STDIN "abc" ;
 }
 EXPECT
-print on closed filehandle main::STDIN at - line 5.
+print() on closed filehandle main::STDIN at - line 5.
 ########
 -W
 --FILE-- abc.pm

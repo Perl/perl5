@@ -9,7 +9,6 @@
 
 #include "config.h"
 #ifdef CYGWIN
-# define EXT extern
 # define EXTCONST extern const
 #else
 # include "EXTERN.h"

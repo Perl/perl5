@@ -269,6 +269,12 @@ EXPECT
 Undefined value assigned to typeglob at - line 3.
 ########
 # sv.c
+BEGIN {
+    if (ord("\t") == 5) {
+        print "SKIPPED\n# ebcdic \\x characters differ.";
+        exit 0;
+    }
+}
 use utf8 ;
 $^W =0 ;
 {

@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Nov 16 23:04:27 EET 1999 [metaconfig 3.0 PL70]
+# Generated on Wed Dec 22 14:18:58 EST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -6378,13 +6378,13 @@ if $test -d /usr/etc/yp || $test -d /etc/yp; then
 	esac
 fi
 case "$hostcat" in
-'') hostcat='cat /etc/hosts';;
+'') test -f /etc/hosts && hostcat='cat /etc/hosts';;
 esac
 case "$groupcat" in
-'') groupcat='cat /etc/group';;
+'') test -f /etc/group && groupcat='cat /etc/group';;
 esac
 case "$passcat" in
-'') passcat='cat /etc/passwd';;
+'') test -f /etc/passwd && passcat='cat /etc/passwd';;
 esac
 
 : now get the host name
@@ -6486,6 +6486,7 @@ case "$myhostname" in
 				$sed -e 's/[	 ]*#.*//; s/$/ /' > hosts && \
 			$test -s hosts
 		} || {
+			test "X$hostcat" != "X" &&
 		     	$hostcat | $sed -n -e "s/[	 ]*#.*//; s/\$/ /
 					/[	 ]$myhostname[	. ]/p" > hosts
 		}
@@ -6778,7 +6779,7 @@ siteprefixexp="$ansexp"
 : XXX No longer works with Prefixit stuff.
 prog=`echo $package | $sed 's/-*[0-9.]*$//'`
 case "$installstyle" in
-*lib/perl5*) dflt=$siteprefix/lib/site_$prog ;;
+*lib/perl5*) dflt=$siteprefix/lib/$package/site_$prog ;;
 *)	 dflt=$siteprefix/lib/site_$prog ;;
 esac
 $cat <<EOM
@@ -11262,7 +11263,7 @@ int main()
 }
 EOCP
 	set try
-	if eval $compile && ./try; then
+	if eval $compile_ok && ./try; then
 		echo 'Looks OK.' >&4
 	else
 		echo "I can't use Berkeley DB with your <db.h>.  I'll disable Berkeley DB." >&4
@@ -12856,13 +12857,12 @@ esac
 : Remove SIGSTKSIZE used by Linux.
 : Remove SIGSTKSZ used by Posix.
 : Remove SIGTYP void lines used by OS2.
+: Some cpps, like os390, dont give the file name anywhere
 if [ "X$fieldn" = X ]; then
-    xxx=`echo '#include <signal.h>' |
-	$cppstdin $cppminus $cppflags 2>/dev/null |
-	$grep '^[ 	]*#.*include' | 
-	$sed 's!"!!g' | $sort | $uniq`
+	: Just make some guesses.  We check them later.
+	xxx='/usr/include/signal.h /usr/include/sys/signal.h'
 else
-    xxx=`echo '#include <signal.h>' |
+	xxx=`echo '#include <signal.h>' |
 	$cppstdin $cppminus $cppflags 2>/dev/null |
 	$grep '^[ 	]*#.*include' | 
 	$awk "{print \\$$fieldn}" | $sed 's!"!!g' | $sort | $uniq`
@@ -12886,10 +12886,12 @@ $1 == "#" && $2 ~ /^define$/ && $3 ~ /^SIG[A-Z0-9]*$/ && $3 !~ /SIGARRAYSIZE/ &&
 	print substr($3, 4, 20)
 }' $xxxfiles`
 : Append some common names just in case the awk scan failed.
-xxx="$xxx ABRT ALRM BUS CHLD CLD CONT DIL EMT FPE HUP ILL INT IO IOT KILL"
-xxx="$xxx LOST PHONE PIPE POLL PROF PWR QUIT SEGV STKFLT STOP SYS TERM TRAP"
-xxx="$xxx TSTP TTIN TTOU URG USR1 USR2 USR3 USR4 VTALRM"
-xxx="$xxx WINCH WIND WINDOW XCPU XFSZ"
+xxx="$xxx ABRT ALRM BUS CANCEL CHLD CLD CONT DIL EMT FPE"
+xxx="$xxx FREEZE HUP ILL INT IO IOT KILL LOST LWP PHONE"
+xxx="$xxx PIPE POLL PROF PWR QUIT RTMAX RTMIN SEGV STKFLT STOP"
+xxx="$xxx SYS TERM THAW TRAP TSTP TTIN TTOU URG USR1 USR2"
+xxx="$xxx USR3 USR4 VTALRM WAITING WINCH WIND WINDOW XCPU XFSZ"
+
 : generate a few handy files for later
 $cat > signal.c <<'EOCP'
 #include <sys/types.h>

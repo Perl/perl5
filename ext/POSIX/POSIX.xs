@@ -108,7 +108,6 @@
 #else
 #if defined (CYGWIN)
 #    define tzname _tzname
-#    undef MB_CUR_MAX          /* XXX: bug in b20.1 */
 #endif
 #if defined (WIN32)
 #  undef mkfifo
@@ -290,7 +289,7 @@ unsigned long strtoul (const char *, char **, int);
 #endif
 
 #ifdef HAS_TZNAME
-#  ifndef WIN32
+#  if !defined(WIN32) && !defined(CYGWIN)
 extern char *tzname[];
 #  endif
 #else

@@ -4133,9 +4133,9 @@ CV *
 Perl_cv_clone(pTHX_ CV *proto)
 {
     CV *cv;
-    MUTEX_LOCK(&PL_cred_mutex);		/* XXX create separate mutex */
+    LOCK_CRED_MUTEX;			/* XXX create separate mutex */
     cv = cv_clone2(proto, CvOUTSIDE(proto));
-    MUTEX_UNLOCK(&PL_cred_mutex);	/* XXX create separate mutex */
+    UNLOCK_CRED_MUTEX;			/* XXX create separate mutex */
     return cv;
 }
 
