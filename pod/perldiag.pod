@@ -2903,9 +2903,10 @@ filehandle that was either never opened or has since been closed.
 
 (F) This machine doesn't implement the select() system call.
 
-=item Self-ties are not supported
+=item Self-ties of arrays and hashes are not supported
 
-(F) Self-ties are not supported in the current implementation.
+(F) Self-ties are of arrays and hashes are not supported in
+the current implementation.
 
 =item Semicolon seems to be missing
 
