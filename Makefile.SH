@@ -254,7 +254,6 @@ pureperl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
 quantperl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
 	quantify $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o quantperl perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LIBPERL) `cat ext.libs` $(libs)
 
-$(LIBPERL): $& perl$(OBJ_EXT) $(obj)
 !NO!SUBS!
 # How to build libperl.  This is still rather convoluted.
 # Load up custom Makefile.SH fragments?
@@ -265,6 +264,9 @@ if test -r $osname/Makefile.SHs ; then
 Makefile: $osname/Makefile.SHs
 !GROK!THIS!
 else
+	$spitshell >>Makefile <<!NO!SUBS!
+$(LIBPERL): $& perl$(OBJ_EXT) $(obj)
+!NO!SUBS!
 	case "$useshrplib" in
 	true)
 		$spitshell >>Makefile <<'!NO!SUBS!'
