@@ -1131,8 +1131,9 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 		else {
 		    U8 *r = reghop3((U8*)s, -1, (U8*)startpos);
 		
-		    if (s > (char*)r)
-		        tmp = (I32)utf8n_to_uvchr(r, s - (char*)r, 0, 0);
+		    tmp = s > (char*)r ?
+		      utf8n_to_uvchr(r, s - (char*)r, 0, 0) :
+		      utf8n_to_uvchr(s, UTF8SKIP(s), 0, 0);
 		}
 		tmp = ((OP(c) == BOUND ?
 			isALNUM_uni(tmp) : isALNUM_LC_uvchr(UNI_TO_NATIVE(tmp))) != 0);
@@ -1175,8 +1176,9 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 		else {
 		    U8 *r = reghop3((U8*)s, -1, (U8*)startpos);
 		
-		    if (s > (char*)r)
-		        tmp = (I32)utf8n_to_uvchr(r, s - (char*)r, 0, 0);
+		    tmp = s > (char*)r ?
+		      utf8n_to_uvchr(r, s - (char*)r, 0, 0) :
+		      utf8n_to_uvchr(s, UTF8SKIP(s), 0, 0);
 		}
 		tmp = ((OP(c) == NBOUND ?
 			isALNUM_uni(tmp) : isALNUM_LC_uvchr(UNI_TO_NATIVE(tmp))) != 0);
@@ -2563,9 +2565,11 @@ S_regmatch(pTHX_ regnode *prog)
 		if (locinput == PL_bostr)
 		    ln = '\n';
 		else {
-		    U8 *r = reghop((U8*)locinput, -1);
+		    U8 *r = reghop3((U8*)locinput, -1, (U8*)PL_reg_starttry);
 		
-		    ln = utf8n_to_uvchr(r, s - (char*)r, 0, 0);
+		    ln = locinput > (char*)r ?
+		      utf8n_to_uvchr(r, locinput - (char*)r, 0, 0) :
+		      utf8n_to_uvchr(locinput, UTF8SKIP(locinput), 0, 0);
 		}
 		if (OP(scan) == BOUND || OP(scan) == NBOUND) {
 		    ln = isALNUM_uni(ln);
