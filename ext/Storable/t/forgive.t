@@ -19,14 +19,16 @@
 #
 
 sub BEGIN {
-    if ($] < 5.006) {
-	print "1..0 # Skip: newer File::Spec needed\n";
-	exit 0;
-    }
     if ($ENV{PERL_CORE}){
 	chdir('t') if -d 't';
-	@INC = '.'; 
-	push @INC, '../lib';
+	@INC = ('.', '../lib');
+    } else {
+	unshift @INC, 't';
+    }
+    require File::Spec;
+    if ($File::Spec::VERSION < 0.8) {
+	print "1..0 # Skip: newer File::Spec needed\n";
+	exit 0;
     }
     require Config; import Config;
     if ($ENV{PERL_CORE} and $Config{'extensions'} !~ /\bStorable\b/) {
@@ -36,7 +38,7 @@ sub BEGIN {
 }
 
 use Storable qw(store retrieve);
-use File::Spec;
+
 
 print "1..8\n";
 

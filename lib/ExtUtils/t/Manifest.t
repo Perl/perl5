@@ -20,7 +20,10 @@ use Cwd;
 # these files are needed for the module itself
 use File::Spec;
 use File::Path;
-use Carp::Heavy;
+
+# We're going to be chdir'ing and modules are sometimes loaded on the
+# fly in this test, so we need an absolute @INC.
+@INC = map { File::Spec->rel2abs($_) } @INC;
 
 # keep track of everything added so it can all be deleted
 my %files;
@@ -28,14 +31,16 @@ sub add_file {
 	my ($file, $data) = @_;
 	$data ||= 'foo';
     unlink $file;  # or else we'll get multiple versions on VMS
-	open( my $T, '>', $file) or return;
-	print $T $data;
+	open( T, '>'.$file) or return;
+	print T $data;
 	++$files{$file};
+    close T;
 }
 
 sub read_manifest {
-	open( my $M, 'MANIFEST' ) or return;
-	chomp( my @files = <$M> );
+	open( M, 'MANIFEST' ) or return;
+	chomp( my @files = <M> );
+    close M;
 	return @files;
 }
 
@@ -136,9 +141,9 @@ ok( mkdir( 'copy', 0777 ), 'made copy directory' );
 
 $files = maniread();
 eval { (undef, $warn) = catch_warning( sub {
-		manicopy( $files, 'copy', 'cp' ) }) 
+ 		manicopy( $files, 'copy', 'cp' ) }) 
 };
-like( $@, qr/^Can't read none: /, 'carped about none' );
+like( $@, qr/^Can't read none: /, 'croaked about none' );
 
 # a newline comes through, so get rid of it
 chomp($warn);

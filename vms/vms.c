@@ -587,7 +587,7 @@ prime_env_iter(void)
         Perl_warner(aTHX_ packWARN(WARN_INTERNAL),"Ill-formed message in prime_env_iter: |%s|",buf);
         continue;
       }
-      PERL_HASH(hash,(U8*)key,keylen);
+      PERL_HASH(hash,key,keylen);
       sv = newSVpvn(cp2,cp1 - cp2 + 1);
       SvTAINTED_on(sv);
       hv_store(envhv,key,keylen,sv,hash);

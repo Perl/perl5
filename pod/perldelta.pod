@@ -1050,6 +1050,10 @@ is called with an array/hash element as the B<sole> argument.
 
 =item *
 
+The return value of Cwd::fastcwd() is now tainted.
+
+=item *
+
 Data::Dumper has now an option to sort hashes.
 
 =item *
@@ -1064,6 +1068,12 @@ other improvements.
 
 =item *
 
+Devel::Peek now has an interface for the Perl memory statistics
+(this works only if you are using perl's malloc, and if you have
+compiled with debugging).
+
+=item *
+
 The English module can now be used without the infamous performance
 hit by saying
 
@@ -1072,6 +1082,11 @@ hit by saying
 (Assuming, of course, that one doesn't need the troublesome variables
 C<$`>, C<$&>, or C<$'>.)  Also, introduced C<@LAST_MATCH_START> and
 C<@LAST_MATCH_END> English aliases for C<@-> and C<@+>.
+
+=item *
+
+ExtUtils::MakeMaker now uses File::Spec internally, which hopefully
+leads into better portability.
 
 =item *
 
@@ -1111,12 +1126,6 @@ the returned list of filenames.
 
 =item *
 
-Devel::Peek now has an interface for the Perl memory statistics
-(this works only if you are using perl's malloc, and if you have
-compiled with debugging).
-
-=item *
-
 IPC::Open3 now allows the use of numeric file descriptors.
 
 =item *
@@ -1140,11 +1149,6 @@ that the operating system will make one up.)
 
 use lib now works identically to @INC.  Removing directories
 with 'no lib' now works.
-
-=item *
-
-ExtUtils::MakeMaker now uses File::Spec internally, which hopefully
-leads into better portability.
 
 =item *
 

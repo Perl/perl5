@@ -92,7 +92,7 @@ SKIP: {
 	chmod 0444, 'eplist';
 
 	SKIP: {
-	    skip("can write readonly files", 1) if -w 'eplist';
+	    skip("cannot write readonly files", 1) if -w 'eplist';
 
 	    eval { ExtUtils::Packlist::write({}, 'eplist') };
 	    like( $@, qr/Can't open file/, 'write() should croak on open failure' );

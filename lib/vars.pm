@@ -12,36 +12,34 @@ sub import {
     my ($pack, @imports) = @_;
     my ($sym, $ch);
     foreach (@imports) {
-	# TODO: UTF-8 names: (the unpack is quite wrong,
-	# /^(.)(.*)/ would probably be better.)  While you
-	# are at it, until declaring empty package is made
-	# to work the * is too lenient.
-        ($ch, $sym) = unpack('a1a*', $_);
-	if ($sym =~ tr/A-Za-z_0-9//c) {
-	    # time for a more-detailed check-up
-	    if ($sym =~ /^\w+[[{].*[]}]$/) {
-		require Carp;
-		Carp::croak("Can't declare individual elements of hash or array");
-	    } elsif (warnings::enabled() and length($sym) == 1 and $sym !~ tr/a-zA-Z//) {
-		warnings::warn("No need to declare built-in vars");
-            } elsif  (($^H &= strict::bits('vars'))) {
-		# TODO: UTF-8 names: be careful to load the UTF-8
-		# machinery only if the symbol requires it.
-		require Carp;
-		Carp::croak("'$_' is not a valid variable name under strict vars");
+        if (($ch, $sym) = /^([\$\@\%\*\&])(.+)/) {
+	    if ($sym =~ /\W/) {
+		# time for a more-detailed check-up
+		if ($sym =~ /^\w+[[{].*[]}]$/) {
+		    require Carp;
+		    Carp::croak("Can't declare individual elements of hash or array");
+		} elsif (warnings::enabled() and length($sym) == 1 and $sym !~ tr/a-zA-Z//) {
+		    warnings::warn("No need to declare built-in vars");
+		} elsif  (($^H &= strict::bits('vars'))) {
+		    require Carp;
+		    Carp::croak("'$_' is not a valid variable name under strict vars");
+		}
 	    }
+	    $sym = "${callpack}::$sym" unless $sym =~ /::/;
+	    *$sym =
+		(  $ch eq "\$" ? \$$sym
+		 : $ch eq "\@" ? \@$sym
+		 : $ch eq "\%" ? \%$sym
+		 : $ch eq "\*" ? \*$sym
+		 : $ch eq "\&" ? \&$sym 
+		 : do {
+		     require Carp;
+		     Carp::croak("'$_' is not a valid variable name");
+		 });
+	} else {
+	    require Carp;
+	    Carp::croak("'$_' is not a valid variable name");
 	}
-	$sym = "${callpack}::$sym" unless $sym =~ /::/;
-        *$sym =
-          (  $ch eq "\$" ? \$$sym
-           : $ch eq "\@" ? \@$sym
-           : $ch eq "\%" ? \%$sym
-           : $ch eq "\*" ? \*$sym
-           : $ch eq "\&" ? \&$sym
-           : do {
-		require Carp;
-		Carp::croak("'$_' is not a valid variable name");
-	     });
     }
 };
 
@@ -78,8 +76,6 @@ cannot duplicate the effect of package lexicals (total transparency
 outside of the package), it can act as an acceptable substitute by
 pre-declaring global symbols, ensuring their availability to the
 later-loaded routines.
-
-The C<use vars> does not work for UTF-8 variable names.
 
 See L<perlmodlib/Pragmatic Modules>.
 

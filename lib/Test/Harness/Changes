@@ -1,5 +1,10 @@
 Revision history for Perl extension Test::Harness
 
+2.22  Fri May 17 19:01:35 EDT 2002
+    - Fixed parsing of #!/usr/bin/perl-current to not see a -t.
+      (RT #574)
+    - Fixed exit codes on MPE/iX
+
 2.21  Mon May  6 00:43:22 EDT 2002
     - removed a bunch of dead code left over after 2.20's gutting.
     - The fix for the $^X "bug" added in 2.02 has been removed.  It

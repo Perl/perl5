@@ -2368,6 +2368,7 @@ t/lib/sample-tests/head_fail		Test data for Test::Harness
 t/lib/sample-tests/lone_not_bug		Test data for Test::Harness
 t/lib/sample-tests/no_nums		Test data for Test::Harness
 t/lib/sample-tests/out_of_order		Test data for Test::Harness
+t/lib/sample-tests/shbang_misparse	Test data for Test::Harness
 t/lib/sample-tests/simple		Test data for Test::Harness
 t/lib/sample-tests/simple_fail		Test data for Test::Harness
 t/lib/sample-tests/skip			Test data for Test::Harness
@@ -2378,7 +2379,6 @@ t/lib/sample-tests/todo			Test data for Test::Harness
 t/lib/sample-tests/todo_inline		Test data for Test::Harness
 t/lib/sample-tests/vms_nit		Test data for Test::Harness
 t/lib/sample-tests/with_comments	Test data for Test::Harness
-t/lib/st-dump.pl		See if Storable works
 t/lib/strict/refs		Tests of "use strict 'refs'" for strict.t
 t/lib/strict/subs		Tests of "use strict 'subs'" for strict.t
 t/lib/strict/vars		Tests of "use strict 'vars'" for strict.t
@@ -2441,6 +2441,7 @@ t/op/auto.t			See if autoincrement et all work
 t/op/avhv.t			See if pseudo-hashes work
 t/op/bless.t			See if bless works
 t/op/bop.t			See if bitops work
+t/op/caller.t			See if caller() works
 t/op/chars.t			See if character escapes work
 t/op/chdir.t			See if chdir works
 t/op/chop.t			See if chop works

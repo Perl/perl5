@@ -23,7 +23,7 @@ use Config;
 use File::Basename;
 
 use vars qw(@ISA $VERSION);
-$VERSION = '2.02_01';
+$VERSION = '2.04_01';
 
 require ExtUtils::MM_Win32;
 @ISA = qw(ExtUtils::MM_Win32);
@@ -72,7 +72,7 @@ sub const_cccmd {
     return $self->{CONST_CCCMD} = <<'MAKE_FRAG';
 CCCMD = $(CC) $(CCFLAGS) $(INC) $(OPTIMIZE) \
 	$(PERLTYPE) $(MPOLLUTE) -o $@ \
-	-DVERSION="$(VERSION)" -DXS_VERSION="$(XS_VERSION)"
+	-DVERSION=\"$(VERSION)\" -DXS_VERSION=\"$(XS_VERSION)\"
 MAKE_FRAG
 
 }
@@ -259,7 +259,7 @@ END
     # If this extension has it's own library (eg SDBM_File)
     # then copy that to $(INST_STATIC) and add $(OBJECT) into it.
     $m .= <<'END'  if $self->{MYEXTLIB};
-	$self->{CP} $(MYEXTLIB) $\@
+	$self->{CP} $(MYEXTLIB) $@
 END
 
     my $ar_arg;
@@ -284,6 +284,7 @@ END
 
 END
 
+    $m .= $self->dir_target('$(INST_ARCHAUTODIR)');
     return $m;
 }
 

@@ -251,7 +251,7 @@ S_hv_fetch_flags(pTHX_ HV *hv, const char *key, I32 klen, I32 lval, int flags)
         }
     }
 
-    PERL_HASH(hash, (U8*)key, klen);
+    PERL_HASH(hash, key, klen);
 
     /* entry = (HvARRAY(hv))[hash & (I32) HvMAX(hv)]; */
     entry = ((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
@@ -410,7 +410,7 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
     }
 
     if (!hash)
-	PERL_HASH(hash, (U8*)key, klen);
+	PERL_HASH(hash, key, klen);
 
     /* entry = (HvARRAY(hv))[hash & (I32) HvMAX(hv)]; */
     entry = ((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
@@ -578,7 +578,7 @@ Perl_hv_store_flags(pTHX_ HV *hv, const char *key, I32 klen, SV *val,
         HvHASKFLAGS_on((SV*)hv);
 
     if (!hash)
-	PERL_HASH(hash, (U8*)key, klen);
+	PERL_HASH(hash, key, klen);
 
     if (!xhv->xhv_array /* !HvARRAY(hv) */)
 	Newz(505, xhv->xhv_array /* HvARRAY(hv) */,
@@ -738,7 +738,7 @@ Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, U32 hash)
     }
 
     if (!hash)
-	PERL_HASH(hash, (U8*)key, klen);
+	PERL_HASH(hash, key, klen);
 
     if (!xhv->xhv_array /* !HvARRAY(hv) */)
 	Newz(505, xhv->xhv_array /* HvARRAY(hv) */,
@@ -882,7 +882,7 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen, I32 flags)
             k_flags |= HVhek_FREEKEY;
     }
 
-    PERL_HASH(hash, (U8*)key, klen);
+    PERL_HASH(hash, key, klen);
 
     /* oentry = &(HvARRAY(hv))[hash & (I32) HvMAX(hv)]; */
     oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
@@ -1038,7 +1038,7 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
     }
 
     if (!hash)
-	PERL_HASH(hash, (U8*)key, klen);
+	PERL_HASH(hash, key, klen);
 
     /* oentry = &(HvARRAY(hv))[hash & (I32) HvMAX(hv)]; */
     oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
@@ -1185,7 +1185,7 @@ Perl_hv_exists(pTHX_ HV *hv, const char *key, I32 klen)
             k_flags |= HVhek_FREEKEY;
     }
 
-    PERL_HASH(hash, (U8*)key, klen);
+    PERL_HASH(hash, key, klen);
 
 #ifdef DYNAMIC_ENV_FETCH
     if (!xhv->xhv_array /* !HvARRAY(hv) */) entry = Null(HE*);
@@ -1290,7 +1290,7 @@ Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
             k_flags |= HVhek_FREEKEY;
     }
     if (!hash)
-	PERL_HASH(hash, (U8*)key, klen);
+	PERL_HASH(hash, key, klen);
 
 #ifdef DYNAMIC_ENV_FETCH
     if (!xhv->xhv_array /* !HvARRAY(hv) */) entry = Null(HE*);
