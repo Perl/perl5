@@ -3,7 +3,10 @@
 #ifdef WIN32
 #  include <win32thread.h>
 #else
-#  if defined(OLD_PTHREADS_API) && !defined(DJGPP)
+/* XXX What we really need is Configure probing for all of these
+ * pthread thingies, old, medium, and new, not the blanket statement of
+ * OLD_PTHREADS_API. --jhi */
+#  if defined(OLD_PTHREADS_API) && !defined(DJGPP) && !defined(__OPEN_VM) && !defined(OEMVS)
      /* POSIXish threads */
 #    define pthread_mutexattr_init(a) pthread_mutexattr_create(a)
 #    define pthread_mutexattr_settype(a,t) pthread_mutexattr_setkind_np(a,t)
