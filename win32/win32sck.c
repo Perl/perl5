@@ -485,6 +485,41 @@ my_fclose (FILE *pf)
     return fclose(pf);
 }
 
+#undef fstat
+int
+my_fstat(int fd, struct stat *sbufptr)
+{
+    /* This fixes a bug in fstat() on Windows 9x.  fstat() uses the
+     * GetFileType() win32 syscall, which will fail on Windows 9x.
+     * So if we recognize a socket on Windows 9x, we return the
+     * same results as on Windows NT/2000.
+     * XXX this should be extended further to set S_IFSOCK on
+     * sbufptr->st_mode.
+     */
+    int osf;
+    if (!wsock_started || IsWinNT())
+	return fstat(fd, sbufptr);
+
+    osf = TO_SOCKET(fd);
+    if (osf != -1) {
+	char sockbuf[256];
+	int optlen = sizeof(sockbuf);
+	int retval;
+
+	retval = getsockopt((SOCKET)osf, SOL_SOCKET, SO_TYPE, sockbuf, &optlen);
+	if (retval != SOCKET_ERROR || WSAGetLastError() != WSAENOTSOCK) {
+	    sbufptr->st_mode = _S_IFIFO;
+	    sbufptr->st_rdev = sbufptr->st_dev = (dev_t)fd;
+	    sbufptr->st_nlink = 1;
+	    sbufptr->st_uid = sbufptr->st_gid = sbufptr->st_ino = 0;
+	    sbufptr->st_atime = sbufptr->st_mtime = sbufptr->st_ctime = 0;
+	    sbufptr->st_size = (off_t)0;
+	    return 0;
+	}
+    }
+    return fstat(fd, sbufptr);
+}
+
 struct hostent *
 win32_gethostbyaddr(const char *addr, int len, int type)
 {

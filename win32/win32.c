@@ -2350,7 +2350,7 @@ win32_fstat(int fd,struct stat *sbufptr)
     }
     return rc;
 #else
-    return fstat(fd,sbufptr);
+    return my_fstat(fd,sbufptr);
 #endif
 }
 
