@@ -29,9 +29,9 @@ sub SWASHNEW {
     $file =~ s#^(I[sn]|To)([A-Z].*)#$1/$2#;
     $list ||= eval { $caller->$type(); }
 	|| do "$file.pl"
-	|| do "unicode/$file.pl"
-	|| do "unicode/Is/${type}.pl"
-	|| croak("Can't find character property definition via $caller->$type or $file.pl");
+	|| do "$encoding/$file.pl"
+	|| do "$encoding/Is/${type}.pl"
+	|| croak("Can't find $encoding character property definition via $caller->$type or $file.pl");
 
     $| = 1;
 
