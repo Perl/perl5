@@ -188,19 +188,8 @@ PP(pp_rv2sv)
     if (op->op_flags & OPf_MOD) {
 	if (op->op_private & OPpLVAL_INTRO)
 	    sv = save_scalar((GV*)TOPs);
-	else if (op->op_private & (OPpDEREF_HV|OPpDEREF_AV)) {
-	    if (SvGMAGICAL(sv))
-		mg_get(sv);
-	    if (!SvOK(sv)) {
-		if (SvREADONLY(sv))
-		    croak(no_modify);
-		(void)SvUPGRADE(sv, SVt_RV);
-		SvRV(sv) = (op->op_private & OPpDEREF_HV ?
-			    (SV*)newHV() : (SV*)newAV());
-		SvROK_on(sv);
-		SvSETMAGIC(sv);
-	    }
-	}
+	else if (op->op_private & (OPpDEREF_HV|OPpDEREF_AV))
+	    provide_ref(op, sv);
     }
     SETs(sv);
     RETURN;
@@ -433,6 +422,7 @@ PP(pp_study)
     }
 
     SvSCREAM_on(sv);
+    sv_magic(sv, Nullsv, 'g', Nullch, 0);	/* piggyback on m//g magic */
     retval = 1;
   ret:
     XPUSHs(sv_2mortal(newSViv((I32)retval)));
@@ -1330,28 +1320,38 @@ PP(pp_hex)
 {
     dSP; dTARGET;
     char *tmps;
+    unsigned long value;
     I32 argtype;
 
     tmps = POPp;
-    XPUSHi( scan_hex(tmps, 99, &argtype) );
+    value = scan_hex(tmps, 99, &argtype);
+    if ((IV)value >= 0)
+	XPUSHi(value);
+    else
+	XPUSHn(U_V(value));
     RETURN;
 }
 
 PP(pp_oct)
 {
     dSP; dTARGET;
-    I32 value;
+    unsigned long value;
     I32 argtype;
     char *tmps;
 
     tmps = POPp;
-    while (*tmps && (isSPACE(*tmps) || *tmps == '0'))
+    while (*tmps && isSPACE(*tmps))
+	tmps++;
+    if (*tmps == '0')
 	tmps++;
     if (*tmps == 'x')
-	value = (I32)scan_hex(++tmps, 99, &argtype);
+	value = scan_hex(++tmps, 99, &argtype);
     else
-	value = (I32)scan_oct(tmps, 99, &argtype);
-    XPUSHi(value);
+	value = scan_oct(tmps, 99, &argtype);
+    if ((IV)value >= 0)
+	XPUSHi(value);
+    else
+	XPUSHn(U_V(value));
     RETURN;
 }
 
