@@ -1,4 +1,3 @@
-
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
@@ -28,6 +27,10 @@ sub ok {
     printf "# Failed test at line %d\n", (caller)[2] unless $ok;
     $test_id++;
     return $ok;
+}
+
+sub skip {
+    ok(1, "# Skipped: @_");
 }
 
 ok(1,"");
@@ -89,7 +92,6 @@ ok(1,"");
 }
 
 if ($^O eq 'linux') { # We parse ps output so this is OS-dependent.
-
   # First modify $0 in a subthread.
   print "# 1a: \$0 = $0\n";
   join( threads->new( sub {
