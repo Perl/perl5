@@ -1871,6 +1871,26 @@ optimized C backend.
 
 Support for non-Unix platforms has been improved.
 
+=head2 perldoc
+
+C<perldoc> has been reworked to avoid possible security holes.
+It will not by default let itself be run as the superuser, but you
+may still use the B<-U> switch to try to make it drop privileges
+first.
+
+=head2 The Perl Debugger
+
+Many bug fixes and enhancements were added to F<perl5db.pl>, the
+Perl debugger.  The help documentation was rearranged.  New commands
+include C<< < ? >>, C<< > ? >>, and C<< { ? >> to list out current
+actions, C<man I<docpage>> to run your doc viewer on some perl
+docset, and support for quoted options.  The help information was
+rearranged, and should be viewable once again if you're using B<less>
+as your pager.  A serious security hole was plugged--you should
+immediately remove all older versions of the Perl debugger as
+installed in previous releases, all the way back to perl3, from
+your system to avoid being bitten by this.
+
 =head1 Documentation Changes
 
 =over 4
@@ -1882,6 +1902,21 @@ The official list of public Perl API functions.
 =item perlcompile.pod
 
 An introduction to using the Perl Compiler suite.
+
+=item perldebug.pod
+
+All material unrelated to running the Perl debugger, plus all
+low-level guts-like details that risked crushing the casual user
+of the debugger, have been relocated from the old manpage to the
+next entry below.
+
+=item perldebguts.pod
+
+This new manpage contains excessively low-level material not related
+to the Perl debugger, but slightly related to debugging Perl itself.
+It also contains some arcane internal details of how the debugging
+process works that may only be of interest to developers of Perl
+debuggers.
 
 =item perlfilter.pod
 
