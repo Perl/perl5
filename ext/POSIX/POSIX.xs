@@ -1393,9 +1393,9 @@ sigprocmask(how, sigset, oldsigset = 0)
 	POSIX::SigSet		sigset = NO_INIT
 	POSIX::SigSet		oldsigset = NO_INIT
 INIT:
-	if (SvTYPE(ST(1)) == SVt_NULL) {
+	if (! SvOK(ST(1))) {
 	    sigset = NULL;
-	} else if (sv_derived_from(ST(1), "POSIX::SigSet")) {
+	} else if (sv_isa(ST(1), "POSIX::SigSet")) {
 	    IV tmp = SvIV((SV*)SvRV(ST(1)));
 	    sigset = INT2PTR(POSIX__SigSet,tmp);
 	} else {
@@ -1404,7 +1404,7 @@ INIT:
 
 	if ( items < 3 || SvTYPE(ST(2)) == SVt_NULL) {
 	    oldsigset = NULL;
-	} else if (sv_derived_from(ST(2), "POSIX::SigSet")) {
+	} else if (sv_isa(ST(2), "POSIX::SigSet")) {
 	    IV tmp = SvIV((SV*)SvRV(ST(2)));
 	    oldsigset = INT2PTR(POSIX__SigSet,tmp);
 	} else {
