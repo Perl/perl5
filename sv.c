@@ -1913,7 +1913,6 @@ sv_setsv(SV *dstr, register SV *sstr)
     /* There's a lot of redundancy below but we're going for speed here */
 
     switch (stype) {
-    case SVTYPEMASK:		/* forget, forgive, forgo, free radical */
     case SVt_NULL:
 	if (dtype != SVt_PVGV) {
 	    (void)SvOK_off(dstr);
