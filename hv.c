@@ -369,7 +369,7 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
 			   (lval ? HV_FETCH_LVALUE : 0), Nullsv, hash);
 }
 
-HE *
+STATIC HE *
 S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		  int flags, int action, SV *val, register U32 hash)
 {
@@ -870,7 +870,7 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
     return hv_delete_common(hv, keysv, NULL, 0, 0, flags, hash);
 }
 
-SV *
+STATIC SV *
 S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		   int k_flags, I32 d_flags, U32 hash)
 {

@@ -2429,11 +2429,17 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 		       given 10**(NV_MAX_10_EXP+1) == 128 ** x solve for x:
 		       x = (NV_MAX_10_EXP+1) * log (10) / log (128)
 		       And with that many bytes only Inf can overflow.
+		       Some C compilers are strict about integral constant
+		       expressions so we conservatively divide by a slightly
+		       smaller integer instead of multiplying by the exact
+		       floating-point value.
 		    */
 #ifdef NV_MAX_10_EXP
-		    char   buf[1 + (int)((NV_MAX_10_EXP + 1) * 0.47456)];
+/*		    char   buf[1 + (int)((NV_MAX_10_EXP + 1) * 0.47456)]; -- invalid C */
+		    char   buf[1 + (int)((NV_MAX_10_EXP + 1) / 2)]; /* valid C */
 #else
-		    char   buf[1 + (int)((308 + 1) * 0.47456)];
+/*		    char   buf[1 + (int)((308 + 1) * 0.47456)]; -- invalid C */
+		    char   buf[1 + (int)((308 + 1) / 2)]; /* valid C */
 #endif
 		    char  *in = buf + sizeof(buf);
 
