@@ -810,6 +810,7 @@
 #define sv_usepvn_mg		Perl_sv_usepvn_mg
 #define get_vtbl		Perl_get_vtbl
 #define pv_display		Perl_pv_display
+#define sv_uni_display		Perl_sv_uni_display
 #define dump_indent		Perl_dump_indent
 #define dump_vindent		Perl_dump_vindent
 #define do_gv_dump		Perl_do_gv_dump
@@ -1063,7 +1064,7 @@
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
 #define save_scalar_at		S_save_scalar_at
 #endif
-#if defined(USE_ITHREADS) && (defined(PERL_IN_SHAREDSV_C) || defined(PERL_DECL_PROT))
+#if defined(USE_ITHREADS)
 #define sharedsv_init		Perl_sharedsv_init
 #define sharedsv_new		Perl_sharedsv_new
 #define sharedsv_find		Perl_sharedsv_find
@@ -2323,6 +2324,7 @@
 #define sv_usepvn_mg(a,b,c)	Perl_sv_usepvn_mg(aTHX_ a,b,c)
 #define get_vtbl(a)		Perl_get_vtbl(aTHX_ a)
 #define pv_display(a,b,c,d,e)	Perl_pv_display(aTHX_ a,b,c,d,e)
+#define sv_uni_display(a,b,c)	Perl_sv_uni_display(aTHX_ a,b,c)
 #define dump_vindent(a,b,c,d)	Perl_dump_vindent(aTHX_ a,b,c,d)
 #define do_gv_dump(a,b,c,d)	Perl_do_gv_dump(aTHX_ a,b,c,d)
 #define do_gvgv_dump(a,b,c,d)	Perl_do_gvgv_dump(aTHX_ a,b,c,d)
@@ -2573,7 +2575,7 @@
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
 #define save_scalar_at(a)	S_save_scalar_at(aTHX_ a)
 #endif
-#if defined(USE_ITHREADS) && (defined(PERL_IN_SHAREDSV_C) || defined(PERL_DECL_PROT))
+#if defined(USE_ITHREADS)
 #define sharedsv_init()		Perl_sharedsv_init(aTHX)
 #define sharedsv_new()		Perl_sharedsv_new(aTHX)
 #define sharedsv_find(a)	Perl_sharedsv_find(aTHX_ a)

@@ -104,42 +104,65 @@ Perl_dump_eval(pTHX)
 }
 
 char *
-Perl_pv_display(pTHX_ SV *sv, char *pv, STRLEN cur, STRLEN len, STRLEN pvlim)
+Perl_pv_display(pTHX_ SV *dsv, char *pv, STRLEN cur, STRLEN len, STRLEN pvlim)
 {
     int truncated = 0;
     int nul_terminated = len > cur && pv[cur] == '\0';
 
-    sv_setpvn(sv, "\"", 1);
+    sv_setpvn(dsv, "\"", 1);
     for (; cur--; pv++) {
-	if (pvlim && SvCUR(sv) >= pvlim) {
+	if (pvlim && SvCUR(dsv) >= pvlim) {
             truncated++;
 	    break;
         }
         if (isPRINT(*pv)) {
             switch (*pv) {
-	    case '\t': sv_catpvn(sv, "\\t", 2);  break;
-	    case '\n': sv_catpvn(sv, "\\n", 2);  break;
-	    case '\r': sv_catpvn(sv, "\\r", 2);  break;
-	    case '\f': sv_catpvn(sv, "\\f", 2);  break;
-	    case '"':  sv_catpvn(sv, "\\\"", 2); break;
-	    case '\\': sv_catpvn(sv, "\\\\", 2); break;
-	    default:   sv_catpvn(sv, pv, 1);     break;
+	    case '\t': sv_catpvn(dsv, "\\t", 2);  break;
+	    case '\n': sv_catpvn(dsv, "\\n", 2);  break;
+	    case '\r': sv_catpvn(dsv, "\\r", 2);  break;
+	    case '\f': sv_catpvn(dsv, "\\f", 2);  break;
+	    case '"':  sv_catpvn(dsv, "\\\"", 2); break;
+	    case '\\': sv_catpvn(dsv, "\\\\", 2); break;
+	    default:   sv_catpvn(dsv, pv, 1);     break;
             }
         }
 	else {
 	    if (cur && isDIGIT(*(pv+1)))
-		Perl_sv_catpvf(aTHX_ sv, "\\%03o", (U8)*pv);
+		Perl_sv_catpvf(aTHX_ dsv, "\\%03o", (U8)*pv);
 	    else
-		Perl_sv_catpvf(aTHX_ sv, "\\%o", (U8)*pv);
+		Perl_sv_catpvf(aTHX_ dsv, "\\%o", (U8)*pv);
         }
     }
-    sv_catpvn(sv, "\"", 1);
+    sv_catpvn(dsv, "\"", 1);
     if (truncated)
-	sv_catpvn(sv, "...", 3);
+	sv_catpvn(dsv, "...", 3);
     if (nul_terminated)
-	sv_catpvn(sv, "\\0", 2);
+	sv_catpvn(dsv, "\\0", 2);
 
-    return SvPVX(sv);
+    return SvPVX(dsv);
+}
+
+char *
+Perl_sv_uni_display(pTHX_ SV *dsv, SV *ssv, STRLEN pvlim)
+{
+    int truncated = 0;
+    char *s, *e;
+
+    sv_setpvn(dsv, "\"", 1);
+    for (s = SvPVX(ssv), e = s + SvCUR(ssv); s < e; s += UTF8SKIP(s)) {
+	 UV u;
+	 if (pvlim && SvCUR(dsv) >= pvlim) {
+	      truncated++;
+	      break;
+	 }
+	 u = utf8_to_uvchr((U8*)s, 0);
+	 Perl_sv_catpvf(aTHX_ dsv, "\\x{%x}", u);
+    }
+    sv_catpvn(dsv, "\"", 1);
+    if (truncated)
+	 sv_catpvn(dsv, "...", 3);
+    
+    return SvPVX(dsv);
 }
 
 char *
@@ -278,7 +301,8 @@ Perl_sv_peek(pTHX_ SV *sv)
 		Perl_sv_catpvf(aTHX_ t, "[%s]", pv_display(tmp, SvPVX(sv)-SvIVX(sv), SvIVX(sv), 0, 127));
 	    Perl_sv_catpvf(aTHX_ t, "%s)", pv_display(tmp, SvPVX(sv), SvCUR(sv), SvLEN(sv), 127));
 	    if (SvUTF8(sv))
-		Perl_sv_catpvf(aTHX_ t, " [UTF8]");
+		Perl_sv_catpvf(aTHX_ t, " [UTF8 %s]",
+			       sv_uni_display(tmp, sv, 8 * sv_len_utf8(sv)));
 	    SvREFCNT_dec(tmp);
 	}
     }
@@ -1103,7 +1127,10 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	    Perl_dump_indent(aTHX_ level, file,"  PV = 0x%"UVxf" ", PTR2UV(SvPVX(sv)));
 	    if (SvOOK(sv))
 		PerlIO_printf(file, "( %s . ) ", pv_display(d, SvPVX(sv)-SvIVX(sv), SvIVX(sv), 0, pvlim));
-	    PerlIO_printf(file, "%s\n", pv_display(d, SvPVX(sv), SvCUR(sv), SvLEN(sv), pvlim));
+	    PerlIO_printf(file, "%s", pv_display(d, SvPVX(sv), SvCUR(sv), SvLEN(sv), pvlim));
+	    if (SvUTF8(sv)) /* the 8?  \x{....} */
+	        PerlIO_printf(file, " %s", sv_uni_display(d, sv, 8 * sv_len_utf8(sv)));
+	    PerlIO_printf(file, "\n");
 	    Perl_dump_indent(aTHX_ level, file, "  CUR = %"IVdf"\n", (IV)SvCUR(sv));
 	    Perl_dump_indent(aTHX_ level, file, "  LEN = %"IVdf"\n", (IV)SvLEN(sv));
 	}

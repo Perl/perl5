@@ -1898,8 +1898,9 @@ Apd	|void	|sv_setpvn_mg	|SV *sv|const char *ptr|STRLEN len
 Apd	|void	|sv_setsv_mg	|SV *dstr|SV *sstr
 Apd	|void	|sv_usepvn_mg	|SV *sv|char *ptr|STRLEN len
 Ap	|MGVTBL*|get_vtbl	|int vtbl_id
-p	|char*	|pv_display	|SV *sv|char *pv|STRLEN cur|STRLEN len \
+p	|char*	|pv_display	|SV *dsv|char *pv|STRLEN cur|STRLEN len \
 				|STRLEN pvlim
+p	|char*	|sv_uni_display	|SV *dsv|SV *ssv|STRLEN pvlim
 Afp	|void	|dump_indent	|I32 level|PerlIO *file|const char* pat|...
 Ap	|void	|dump_vindent	|I32 level|PerlIO *file|const char* pat \
 				|va_list *args

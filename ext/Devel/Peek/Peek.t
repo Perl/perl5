@@ -12,7 +12,7 @@ BEGIN {
 
 use Devel::Peek;
 
-print "1..17\n";
+print "1..18\n";
 
 our $DEBUG = 0;
 open(SAVERR, ">&STDERR") or die "Can't dup STDERR: $!";
@@ -316,6 +316,15 @@ do_test(17,
     FILE = ".*\\b(?i:peek\\.t)"
     FLAGS = $ADDR
     EGV = $ADDR\\t"a"');
+
+do_test(18,
+	chr(256).chr(0).chr(512),
+'SV = PV\\($ADDR\\) at $ADDR
+  REFCNT = 1
+  FLAGS = \\(PADBUSY,PADTMP,POK,READONLY,pPOK,UTF8\\)
+  PV = $ADDR "\\\304\\\200\\\0\\\310\\\200"\\\0 "\\\x\{100\}\\\x\{0\}\\\x\{200\}"
+  CUR = 5
+  LEN = 6');
 
 END {
   1 while unlink("peek$$");
