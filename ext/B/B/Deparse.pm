@@ -14,7 +14,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 OPpLVAL_INTRO OPpOUR_INTRO OPpENTERSUB_AMPER OPpSLICE OPpCONST_BARE
 	 OPpTRANS_SQUASH OPpTRANS_DELETE OPpTRANS_COMPLEMENT OPpTARGET_MY
 	 OPpCONST_ARYBASE OPpEXISTS_SUB OPpSORT_NUMERIC OPpSORT_INTEGER
-	 OPpSORT_REVERSE OPpSORT_INPLACE OPpSORT_DESCEND
+	 OPpSORT_REVERSE OPpSORT_INPLACE OPpSORT_DESCEND OPpITER_REVERSED
 	 SVf_IOK SVf_NOK SVf_ROK SVf_POK SVpad_OUR SVf_FAKE SVs_RMG SVs_SMG
          CVf_METHOD CVf_LOCKED CVf_LVALUE CVf_ASSERTION
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE PMf_SKIPWHITE
@@ -2403,7 +2403,7 @@ sub pp_list {
 	} elsif ($lop->name ne "undef"
 		# specifically avoid the "reverse sort" optimisation,
 		# where "reverse" is nullified
-		&& !($lop->name eq 'sort' && ($lop->flags | OPpSORT_REVERSE)))
+		&& !($lop->name eq 'sort' && ($lop->flags & OPpSORT_REVERSE)))
 	{
 	    # local()
 	    ($local = "", last) if $local eq "my" || $local eq "our";
@@ -2501,7 +2501,10 @@ sub loop_common {
     } elsif ($enter->name eq "enteriter") { # foreach
 	my $ary = $enter->first->sibling; # first was pushmark
 	my $var = $ary->sibling;
-	if ($enter->flags & OPf_STACKED
+	if ($ary->name eq 'null' and $enter->private & OPpITER_REVERSED) {
+	    # "reverse" was optimised away
+	    $ary = "reverse " . $self->deparse($ary->first->sibling->first->sibling, 1);
+	} elsif ($enter->flags & OPf_STACKED
 	    and not null $ary->first->sibling->sibling)
 	{
 	    $ary = $self->deparse($ary->first->sibling, 9) . " .. " .
