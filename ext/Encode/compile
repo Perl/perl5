@@ -85,6 +85,7 @@ END
     print C "#define U8 U8\n";
    }
   print C "#include \"encode.h\"\n";
+
  }
 elsif ($cname =~ /\.enc$/)
  {
@@ -176,12 +177,35 @@ if ($doC)
     my $sym = "${enc}_encoding";
     $sym =~ s/\W+/_/g;
     print H "extern encode_t $sym;\n";
-    print D " Encode_Define(aTHX_ &$sym);\n";
+    print D " Encode_XSEncoding(aTHX_ &$sym);\n";
    }
 
   if ($cname =~ /(\w+)\.xs$/)
    {
     my $mod = $1;
+    print C <<'END';
+
+void
+Encode_XSEncoding(pTHX_ encode_t *enc)
+{
+ dSP;
+ HV *stash = gv_stashpv("Encode::XS", TRUE);
+ SV *sv    = sv_bless(newRV_noinc(newSViv(PTR2IV(enc))),stash);
+ int i = 0;
+ PUSHMARK(sp);
+ XPUSHs(sv);
+ while (enc->name[i])
+  {
+   const char *name = enc->name[i++];
+   XPUSHs(sv_2mortal(newSVpvn(name,strlen(name))));
+  }
+ PUTBACK;
+ call_pv("Encode::define_encoding",G_DISCARD);
+ SvREFCNT_dec(sv);
+}
+
+END
+
     print C "\nMODULE = Encode::$mod\tPACKAGE = Encode::$mod\n\n";
     print C "BOOT:\n{\n";
     print C "#include \"$dname\"\n";

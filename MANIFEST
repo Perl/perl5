@@ -286,6 +286,7 @@ ext/Encode/Encode/dingbats.ucm		Encode table
 ext/Encode/Encode/euc-cn.enc		Encode table
 ext/Encode/Encode/euc-jp-0212.enc	Encode table
 ext/Encode/Encode/euc-jp.enc		Encode table
+ext/Encode/Encode/euc-jp.ucm		Encode table
 ext/Encode/Encode/euc-kr.enc		Encode table
 ext/Encode/Encode/gb12345.enc		Encode table
 ext/Encode/Encode/gb1988.enc		Encode table
@@ -346,6 +347,8 @@ ext/Encode/MANIFEST		Encode extension
 ext/Encode/README		Encode extension
 ext/Encode/t/Encode.t		Encode extension test
 ext/Encode/t/Tcl.t		Encode extension test
+ext/Encode/EUC_JP/Makefile.PL	Enode module for euc-jp
+ext/Encode/EUC_JP/EUC_JP.pm	Enode module for euc-jp
 ext/Errno/ChangeLog	Errno perl module change log
 ext/Errno/Errno.t	See if Errno works
 ext/Errno/Errno_pm.PL	Errno perl module create script
