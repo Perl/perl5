@@ -834,12 +834,14 @@ prints the version and patchlevel of your perl executable.
 prints summary of the major perl configuration values and the current
 values of @INC.
 
-=item B<-V:>I<name>
+=item B<-V:>I<configvar>
 
 Prints to STDOUT the value of the named configuration variable(s),
-with multiples when your query looks like a regex.
-For example,
+with multiples when your configvar argument looks like a regex (has
+non-letters).  For example:
 
+    $ perl -V:libc
+	libc='/lib/libc-2.2.4.so';
     $ perl -V:lib.
 	libs='-lnsl -lgdbm -ldb -ldl -lm -lcrypt -lutil -lc';
 	libc='/lib/libc-2.2.4.so';
@@ -860,7 +862,7 @@ you to embed queries into shell commands.  (mnemonic: PATH separator
     compression-vars:  zcat='' zip='zip'  are here !
 
 A leading colon removes the 'name=' part of the response, this allows
-you to map to the name you need.
+you to map to the name you need.  (mnemonic: empty label)
 
     $ echo "goodvfork="`./perl -Ilib -V::usevfork`
     goodvfork=false;

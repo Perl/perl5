@@ -368,11 +368,15 @@ sub config_re {
 }
 
 sub config_vars {
+    # implements -V:cfgvar option (see perlrun -V:)
     foreach (@_) {
+	# find optional leading, trailing colons; and query-spec
 	my ($notag,$qry,$lncont) = m/^(:)?(.*?)(:)?$/;	# flags fore and aft, 
-	my $prfx = $notag ? '': "$qry=";		# prefix for print
-	my $lnend = $lncont ? ' ' : ";\n";		# ending for print
+	# map colon-flags to print decorations
+	my $prfx = $notag ? '': "$qry=";		# tag-prefix for print
+	my $lnend = $lncont ? ' ' : ";\n";		# line ending for print
 
+	# all config-vars are by definition \w only, any \W means regex
 	if ($qry =~ /\W/) {
 	    my @matches = config_re($qry);
 	    print map "$_$lnend", @matches ? @matches : "$qry: not found"		if !$notag;
