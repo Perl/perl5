@@ -445,7 +445,7 @@ The following collations all make sense and you may meet any of them
 if you "use locale".
 
 	A B C D E a b c d e
-	A a B b C c D d D e
+	A a B b C c D d E e
 	a A b B c C d D e E
 	a b c d e A B C D E
 
@@ -453,13 +453,13 @@ Here is a code snippet to tell what "word"
 characters are in the current locale, in that locale's order:
 
         use locale;
-        print +(sort grep /\w/, map { chr() } 0..255), "\n";
+        print +(sort grep /\w/, map { chr } 0..255), "\n";
 
 Compare this with the characters that you see and their order if you
 state explicitly that the locale should be ignored:
 
         no locale;
-        print +(sort grep /\w/, map { chr() } 0..255), "\n";
+        print +(sort grep /\w/, map { chr } 0..255), "\n";
 
 This machine-native collation (which is what you get unless S<C<use
 locale>> has appeared earlier in the same block) must be used for
@@ -554,9 +554,9 @@ change the character used for the decimal point--perhaps from '.'  to ','.
 These functions aren't aware of such niceties as thousands separation and
 so on.  (See L<The localeconv function> if you care about these things.)
 
-Output produced by print() is B<never> affected by the
-current locale: it is independent of whether C<use locale> or C<no
-locale> is in effect, and corresponds to what you'd get from printf()
+Output produced by print() is also affected by the
+current locale: it depends on whether C<use locale> or C<no locale> is in
+effect, and corresponds to what you'd get from printf()
 in the "C" locale.  The same is true for Perl's internal conversions
 between numeric and string formats:
 
@@ -565,9 +565,9 @@ between numeric and string formats:
 
         $n = 5/2;   # Assign numeric 2.5 to $n
 
-        $a = " $n"; # Locale-independent conversion to string
+        $a = " $n"; # Locale-dependent conversion to string
 
-        print "half five is $n\n";       # Locale-independent output
+        print "half five is $n\n";       # Locale-dependent output
 
         printf "half five is %g\n", $n;  # Locale-dependent output
 

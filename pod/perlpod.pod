@@ -27,6 +27,8 @@ use however it pleases.  Currently recognized commands are
 
     =head1 heading
     =head2 heading
+    =head3 heading
+    =head4 heading
     =item text
     =over N
     =back
@@ -50,8 +52,13 @@ another paragraph to the doc if you're mixing up code and pod a lot.
 
 =item =head2
 
-Head1 and head2 produce first and second level headings, with the text in
-the same paragraph as the "=headn" directive forming the heading description.
+=item =head3
+
+=item =head4
+
+Head1, head2, head3 and head4 produce first, second, third and fourth
+level headings, with the text in the same paragraph as the "=headn"
+directive forming the heading description.
 
 =item =over
 

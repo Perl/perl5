@@ -682,7 +682,8 @@ the meaning of these elements, pay attention to the line which reads
 
 Anything before this line is plain C code which describes which headers
 to include, and defines some convenience functions.  No translations are
-performed on this part, it goes into the generated output C file as is.
+performed on this part, apart from having embedded POD documentation
+skipped over (see L<perlpod>) it goes into the generated output C file as is.
 
 Anything after this line is the description of XSUB functions.
 These descriptions are translated by B<xsubpp> into C code which

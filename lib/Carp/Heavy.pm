@@ -229,7 +229,7 @@ CALLER:
 	    $msg = "$error at $file line $line";
 	    if (defined &Thread::tid) {
 		my $tid = Thread->self->tid;
-		$mess .= " thread $tid" if $tid;
+		$msg .= " thread $tid" if $tid;
 	    }
 	    $msg .= "\n";
 	    return $msg;
