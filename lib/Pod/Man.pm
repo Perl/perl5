@@ -1,5 +1,5 @@
 # Pod::Man -- Convert POD data to formatted *roff input.
-# $Id: Man.pm,v 1.20 2001/07/19 22:51:11 eagle Exp $
+# $Id: Man.pm,v 1.26 2001/11/15 09:02:06 eagle Exp $
 #
 # Copyright 1999, 2000, 2001 by Russ Allbery <rra@stanford.edu>
 #
@@ -26,6 +26,7 @@ package Pod::Man;
 require 5.004;
 
 use Carp qw(carp croak);
+use Pod::ParseLink qw(parselink);
 use Pod::Parser ();
 
 use strict;
@@ -37,7 +38,7 @@ use vars qw(@ISA %ESCAPES $PREAMBLE $VERSION);
 # Don't use the CVS revision as the version, since this module is also in Perl
 # core and too many things could munge CVS magic revision strings.  This
 # number should ideally be the same as the CVS revision in podlators, however.
-$VERSION = 1.20;
+$VERSION = 1.26;
 
 
 ##############################################################################
@@ -185,6 +186,7 @@ $PREAMBLE = <<'----END OF PREAMBLE----';
 # uniformly for backslash for readability.
 %ESCAPES = (
     'amp'       =>    '&',      # ampersand
+    'apos'      =>    "'",      # apostrophe
     'lt'        =>    '<',      # left chevron, less-than
     'gt'        =>    '>',      # right chevron, greater-than
     'quot'      =>    '"',      # double quote
@@ -253,6 +255,9 @@ $PREAMBLE = <<'----END OF PREAMBLE----';
     'Yacute'    =>    "Y\\*'",  # capital Y, acute accent
     'yacute'    =>    "y\\*'",  # small y, acute accent
     'yuml'      =>    'y\\*:',  # small y, dieresis or umlaut mark
+
+    'nbsp'      =>    '\\ ',    # non-breaking space
+    'shy'       =>    '',       # soft (discretionary) hyphen
 );
 
 
@@ -358,10 +363,11 @@ sub initialize {
     $$self{LQUOTE} =~ s/\"/\"\"/;
     $$self{RQUOTE} =~ s/\"/\"\"/;
 
-    $$self{INDENT}  = 0;        # Current indentation level.
-    $$self{INDENTS} = [];       # Stack of indentations.
-    $$self{INDEX}   = [];       # Index keys waiting to be printed.
-    $$self{ITEMS}   = 0;        # The number of consecutive =items.
+    $$self{INDENT}    = 0;      # Current indentation level.
+    $$self{INDENTS}   = [];     # Stack of indentations.
+    $$self{INDEX}     = [];     # Index keys waiting to be printed.
+    $$self{ITEMS}     = 0;      # The number of consecutive =items.
+    $$self{NEWINDENT} = 0;      # Whether we've seen =over without =item.
 
     $self->SUPER::initialize;
 }
@@ -377,27 +383,51 @@ sub begin_pod {
         $name = $self->input_file;
         $section = 3 if (!$$self{section} && $name =~ /\.pm\z/i);
         $name =~ s/\.p(od|[lm])\z//i;
-        if ($section =~ /^1/) {
+        if ($section !~ /^3/) {
             require File::Basename;
             $name = uc File::Basename::basename ($name);
         } else {
-            # Lose everything up to the first of
-            #     */lib/*perl*      standard or site_perl module
-            #     */*perl*/lib      from -D prefix=/opt/perl
-            #     */*perl*/         random module hierarchy
-            # which works.  Should be fixed to use File::Spec.  Also handle a
-            # leading lib/ since that's what ExtUtils::MakeMaker creates.
-            for ($name) {
-                s%//+%/%g;
-                if (     s%^.*?/lib/[^/]*perl[^/]*/%%si
-                      or s%^.*?/[^/]*perl[^/]*/(?:lib/)?%%si) {
-                    s%^site(_perl)?/%%s;      # site and site_perl
-                    s%^(.*-$^O|$^O-.*)/%%so;  # arch
-                    s%^\d+\.\d+%%s;           # version
+            # Assume that we're dealing with a module.  We want to figure out
+            # the full module name from the path to the file, but we don't
+            # want to include too much of the path into the module name.  Lose
+            # everything up to the first of:
+            #
+            #     */lib/*perl*/         standard or site_perl module
+            #     */*perl*/lib/         from -Dprefix=/opt/perl
+            #     */*perl*/             random module hierarchy
+            #
+            # which works.  Also strip off a leading site or site_perl
+            # component, any OS-specific component, and any version number
+            # component, and strip off an initial component of "lib" or
+            # "blib/lib" since that's what ExtUtils::MakeMaker creates.
+            # splitdir requires at least File::Spec 0.8.
+            require File::Spec;
+            my ($volume, $dirs, $file) = File::Spec->splitpath ($name);
+            my @dirs = File::Spec->splitdir ($dirs);
+            my $cut = 0;
+            my $i;
+            for ($i = 0; $i < scalar @dirs; $i++) {
+                if ($dirs[$i] eq 'lib' && $dirs[$i + 1] =~ /perl/) {
+                    $cut = $i + 2;
+                    last;
+                } elsif ($dirs[$i] =~ /perl/) {
+                    $cut = $i + 1;
+                    $cut++ if $dirs[$i + 1] eq 'lib';
+                    last;
                 }
-                s%^lib/%%;
-                s%/%::%g;
             }
+            if ($cut > 0) {
+                splice (@dirs, 0, $cut);
+                shift @dirs if ($dirs[0] =~ /^site(_perl)?$/);
+                shift @dirs if ($dirs[0] =~ /^[\d.]+$/);
+                shift @dirs if ($dirs[0] =~ /^(.*-$^O|$^O-.*)$/);
+            }
+            shift @dirs if $dirs[0] eq 'lib';
+            splice (@dirs, 0, 2) if ($dirs[0] eq 'blib' && $dirs[1] eq 'lib');
+
+            # Remove empty directories when building the module name; they
+            # occur too easily on Unix by doubling slashes.
+            $name = join ('::', (grep { $_ ? $_ : () } @dirs), $file);
         }
     }
 
@@ -415,15 +445,23 @@ sub begin_pod {
         $$self{date} = sprintf ('%4d-%02d-%02d', $year, $month, $day);
     }
 
-    # Now, print out the preamble and the title.
+    # Now, print out the preamble and the title.  The meaning of the arguments
+    # to .TH unfortunately vary by system; some systems consider the fourth
+    # argument to be a "source" and others use it as a version number.
+    # Generally it's just presented as the left-side footer, though, so it
+    # doesn't matter too much if a particular system gives it another
+    # interpretation.
+    #
+    # The order of date and release used to be reversed in older versions of
+    # this module, but this order is correct for both Solaris and Linux.
     local $_ = $PREAMBLE;
     s/\@CFONT\@/$$self{fixed}/;
     s/\@LQUOTE\@/$$self{LQUOTE}/;
     s/\@RQUOTE\@/$$self{RQUOTE}/;
     chomp $_;
+    my $pversion = $Pod::Parser::VERSION;
     print { $self->output_handle } <<"----END OF HEADER----";
-.\\" Automatically generated by Pod::Man version $VERSION
-.\\" @{[ scalar localtime ]}
+.\\" Automatically generated by Pod::Man v$VERSION, Pod::Parser v$pversion
 .\\"
 .\\" Standard preamble:
 .\\" ========================================================================
@@ -431,10 +469,9 @@ $_
 .\\" ========================================================================
 .\\"
 .IX Title "$name $section"
-.TH $name $section "$$self{release}" "$$self{date}" "$$self{center}"
+.TH $name $section "$$self{date}" "$$self{release}" "$$self{center}"
 .UC
 ----END OF HEADER----
-#"# for cperl-mode
 
     # Initialize a few per-file variables.
     $$self{INDENT} = 0;
@@ -495,47 +532,23 @@ sub textblock {
     return if $$self{EXCLUDE};
     $self->output ($_[0]), return if $$self{VERBATIM};
 
-    # Perform a little magic to collapse multiple L<> references.  We'll just
-    # rewrite the whole thing into actual text at this part, bypassing the
-    # whole internal sequence parsing thing.
+    # Parse the tree.  collapse knows about references to scalars as well as
+    # scalars and does the right thing with them.  Tidy up any trailing
+    # whitespace.
     my $text = shift;
-    $text =~ s{
-        (L<                     # A link of the form L</something>.
-              /
-              (
-                  [:\w]+        # The item has to be a simple word...
-                  (\(\))?       # ...or simple function.
-              )
-          >
-          (
-              ,?\s+(and\s+)?    # Allow lots of them, conjuncted.
-              L<
-                  /
-                  ( [:\w]+ ( \(\) )? )
-              >
-          )+
-        )
-    } {
-        local $_ = $1;
-        s{ L< / ( [^>]+ ) > } {$1}xg;
-        my @items = split /(?:,?\s+(?:and\s+)?)/;
-        my $string = 'the ';
-        my $i;
-        for ($i = 0; $i < @items; $i++) {
-            $string .= $items[$i];
-            $string .= ', ' if @items > 2 && $i != $#items;
-            $string .= ' ' if @items == 2 && $i == 2;
-            $string .= 'and ' if ($i == $#items - 1);
-        }
-        $string .= ' entries elsewhere in this document';
-        $string;
-    }gex;
-
-    # Parse the tree and output it.  collapse knows about references to
-    # scalars as well as scalars and does the right thing with them.
     $text = $self->parse ($text, @_);
     $text =~ s/\n\s*$/\n/;
+
+    # Output the paragraph.  We also have to handle =over without =item.  If
+    # there's an =over without =item, NEWINDENT will be set, and we need to
+    # handle creation of the indent here.  Set WEIRDINDENT so that it will be
+    # cleaned up on =back.
     $self->makespace;
+    if ($$self{NEWINDENT}) {
+        $self->output (".RS $$self{INDENT}\n");
+        $$self{WEIRDINDENT} = 1;
+        $$self{NEWINDENT} = 0;
+    }
     $self->output (protect $self->textmapfonts ($text));
     $self->outindex;
     $$self{NEEDSPACE} = 1;
@@ -548,6 +561,15 @@ sub textblock {
 sub sequence {
     my ($self, $seq) = @_;
     my $command = $seq->cmd_name;
+
+    # We have to defer processing of the inside of an L<> formatting code.  If
+    # this sequence is nested inside an L<> sequence, return the literal raw
+    # text of it.
+    my $parent = $seq->nested;
+    while (defined $parent) {
+        return $seq->raw_text if ($parent->cmd_name eq 'L');
+        $parent = $parent->nested;
+    }
 
     # Zero-width characters.
     if ($command eq 'Z') {
@@ -562,7 +584,8 @@ sub sequence {
     $literal++ if $command eq 'C';
     local $_ = $self->collapse ($seq->parse_tree, $literal);
 
-    # Handle E<> escapes.
+    # Handle E<> escapes.  Numeric escapes that match one of the supported ISO
+    # 8859-1 characters don't work at present.
     if ($command eq 'E') {
         if (/^\d+$/) {
             return bless \ chr ($_), 'Pod::Man::String';
@@ -593,9 +616,12 @@ sub sequence {
 
     # Handle links.
     if ($command eq 'L') {
-        # A bug in lvalue subs in 5.6 requires the temporary variable.
-        my $tmp = $self->buildlink ($_);
-        return bless \ "$tmp", 'Pod::Man::String';
+        my ($text, $type) = (parselink ($_))[1,4];
+        return '' unless $text;
+        my ($file, $line) = $seq->file_line;
+        $text = $self->parse ($text, $line);
+        $text = '<' . $text . '>' if $type eq 'url';
+        return bless \ "$text", 'Pod::Man::String';
     }
 
     # Whitespace protection replaces whitespace with "\ ".
@@ -690,11 +716,12 @@ sub cmd_over {
     my $self = shift;
     local $_ = shift;
     unless (/^[-+]?\d+\s+$/) { $_ = $$self{indent} }
-    if (@{ $$self{INDENTS} } > 0) {
+    if (@{ $$self{INDENTS} } > 0 && !$$self{WEIRDINDENT}) {
         $self->output (".RS $$self{INDENT}\n");
     }
     push (@{ $$self{INDENTS} }, $$self{INDENT});
     $$self{INDENT} = ($_ + 0);
+    $$self{NEWINDENT} = 1;
 }
 
 # End a list.  If we've closed an embedded indent, we've mangled the hanging
@@ -719,6 +746,7 @@ sub cmd_back {
         $$self{WEIRDINDENT} = 1;
     }
     $$self{NEEDSPACE} = 1;
+    $$self{NEWINDENT} = 0;
 }
 
 # An individual list item.  Emit an index entry for anything that's
@@ -736,6 +764,7 @@ sub cmd_item {
         $index = $_;
         $index =~ s/^\s*[-*+o.]?(?:\s+|\Z)//;
     }
+    $_ = '*' unless $_;
     s/^\*(\s|\Z)/\\\(bu$1/;
     if ($$self{WEIRDINDENT}) {
         $self->output (".RE\n");
@@ -747,6 +776,7 @@ sub cmd_item {
     $self->outindex ($index ? ('Item', $index) : ());
     $$self{NEEDSPACE} = 0;
     $$self{ITEMS}++;
+    $$self{NEWINDENT} = 0;
 }
 
 # Begin a block for a particular translator.  Setting VERBATIM triggers
@@ -777,72 +807,6 @@ sub cmd_for {
     local $_ = shift;
     return unless s/^(?:man|roff)\b[ \t]*\n?//;
     $self->output ($_);
-}
-
-
-##############################################################################
-# Link handling
-##############################################################################
-
-# Handle links.  We can't actually make real hyperlinks, so this is all to
-# figure out what text and formatting we print out.
-sub buildlink {
-    my $self = shift;
-    local $_ = shift;
-
-    # Smash whitespace in case we were split across multiple lines.
-    s/\s+/ /g;
-
-    # If we were given any explicit text, just output it.
-    if (m{ ^ ([^|]+) \| }x) { return $1 }
-
-    # Okay, leading and trailing whitespace isn't important.
-    s/^\s+//;
-    s/\s+$//;
-
-    # If the argument looks like a URL, return it verbatim.  This only handles
-    # URLs that use the server syntax.
-    if (m%^[a-z]+://\S+$%) { return $_ }
-
-    # Default to using the whole content of the link entry as a section name.
-    # Note that L<manpage/> forces a manpage interpretation, as does something
-    # looking like L<manpage(section)>.  Do the same to L<manpage(section)> as
-    # we would to manpage(section) without the L<>; see guesswork().  If we've
-    # added italics, don't add the "manpage" text; markup is sufficient.
-    my ($manpage, $section) = ('', $_);
-    if (/^"\s*(.*?)\s*"$/) {
-        $section = '"' . $1 . '"';
-    } elsif (m{ ^ [-:.\w]+ (?: \( \S+ \) )? $ }x) {
-        ($manpage, $section) = ($_, '');
-        $manpage =~ s/^([^\(]+)\(/'\f(IS' . $1 . '\f(IE\|('/e;
-    } elsif (m%/%) {
-        ($manpage, $section) = split (/\s*\/\s*/, $_, 2);
-        if ($manpage =~ /^[-:.\w]+(?:\(\S+\))?$/) {
-            $manpage =~ s/^([^\(]+)\(/'\f(IS' . $1 . '\f(IE\|'/e;
-        }
-        $section =~ s/^\"\s*//;
-        $section =~ s/\s*\"$//;
-    }
-    if ($manpage && $manpage !~ /\\f\(IS/) {
-        $manpage = "the $manpage manpage";
-    }
-
-    # Now build the actual output text.
-    my $text = '';
-    if (!length ($section) && !length ($manpage)) {
-        carp "Invalid link $_";
-    } elsif (!length ($section)) {
-        $text = $manpage;
-    } elsif ($section =~ /^[:\w]+(?:\(\))?/) {
-        $text .= 'the ' . $section . ' entry';
-        $text .= (length $manpage) ? " in $manpage"
-                                   : " elsewhere in this document";
-    } else {
-        if ($section !~ /^".*"$/) { $section = '"' . $section . '"' }
-        $text .= 'the section on ' . $section;
-        $text .= " in $manpage" if length $manpage;
-    }
-    $text;
 }
 
 
@@ -932,7 +896,7 @@ sub collapse {
             if (ref $_) {
                 $$_;
             } else {
-                s/\\/\\e/g;
+                s/\\/\\e/g   if $literal > 1;
                 s/-/\\-/g    if $literal > 1;
                 s/__/_\\|_/g if $literal > 1;
                 $_;
@@ -957,13 +921,34 @@ sub guesswork {
     # Ensure double underbars have a tiny space between them.
     s/__/_\\|_/g;
 
+    # Leave hyphens only if they're part of regular words and there is only
+    # one dash at a time.  Leave a dash after the first character as a regular
+    # non-breaking dash, but don't let it mark the rest of the word invalid
+    # for hyphenation.
+    s/-/\\-/g;
+    s{
+      ( (?:\G|^|\s) [a-zA-Z] ) ( \\- )?
+      ( (?: [a-zA-Z]+ \\-)+ )
+      ( [a-zA-Z]+ ) (?=\s|\Z)
+      \b
+     } {
+         my ($prefix, $hyphen, $main, $suffix) = ($1, $2, $3, $4);
+         $hyphen ||= '';
+         $main =~ s/\\-/-/g;
+         $prefix . $hyphen . $main . $suffix;
+    }egx;
+
+    # Translate -- into a real em dash if it's used like one.
+    s{ (\s) \\-\\- (\s) }                         { $1 . '\*(--' . $2 }egx;
+    s{ (\b[a-zA-Z]+) \\-\\- (\s|\Z|[a-zA-Z]+\b) } { $1 . '\*(--' . $2 }egx;
+
     # Make all caps a little smaller.  Be careful here, since we don't want to
     # make @ARGV into small caps, nor do we want to fix the MIME in
     # MIME-Version, since it looks weird with the full-height V.
     s{
         ( ^ | [\s\(\"\'\`\[\{<>] )
-        ( [A-Z] [A-Z] [/A-Z+:\d_\$&-]* )
-        (?: (?= [\s>\}\]\(\)\'\".?!,;] | -- ) | $ )
+        ( [A-Z] [A-Z] (?: [/A-Z+:\d_\$&] | \\- )* )
+        (?= [\s>\}\]\(\)\'\".?!,;] | \\*\(-- | $ )
     } { $1 . '\s-1' . $2 . '\s0' }egx;
 
     # Italize functions in the form func().
@@ -977,7 +962,7 @@ sub guesswork {
     # func(n) is a reference to a manual page.  Make it \fIfunc\fR\|(n).
     s{
         ( \b | \\s-1 )
-        ( [A-Za-z_] (?:[-:.\w]|\\s-?[01])+ )
+        ( [A-Za-z_] (?:[.:\w]|\\-|\\s-?[01])+ )
         (
             \( \d [a-z]* \)
         )
@@ -989,24 +974,6 @@ sub guesswork {
         ( [\$\@%] [\w:]+ )
         (?! \( )
     } { $1 . '\f(FS' . $2 . '\f(FE'}egx;
-
-    # Translate -- into a real em dash if it's used like one and fix up
-    # dashes, but keep hyphens hyphens.
-    s{ (\G|^|.) (-+) (\b|.) } {
-        my ($pre, $dash, $post) = ($1, $2, $3);
-        if (length ($dash) == 1) {
-            ($pre =~ /[a-zA-Z]/) ? "$pre-$post" : "$pre\\-$post";
-        } elsif (length ($dash) == 2
-                 && ((!$pre && !$post)
-                     || ($pre =~ /\w/ && !$post)
-                     || ($pre eq ' ' && $post eq ' ')
-                     || ($pre eq '=' && $post ne '=')
-                     || ($pre ne '=' && $post eq '='))) {
-            "$pre\\*(--$post";
-        } else {
-            $pre . ('\-' x length $dash) . $post;
-        }
-    }egxs;
 
     # Fix up double quotes.
     s{ \" ([^\"]+) \" } { '\*(L"' . $1 . '\*(R"' }egx;
@@ -1147,10 +1114,10 @@ sub switchquotes {
 
 __END__
 
-.\" These are some extra bits of roff that I don't want to lose track of
-.\" but that have been removed from the preamble to make it a bit shorter
-.\" since they're not currently being used.  They're accents and special
-.\" characters we don't currently have escapes for.
+.\" These are some extra bits of roff that I don't want to lose track of but
+.\" that have been removed from the preamble to make it a bit shorter since
+.\" they're not currently being used.  They're accents and special characters
+.\" we don't currently have escapes for.
 .if n \{\
 .    ds ? ?
 .    ds ! !
@@ -1201,9 +1168,9 @@ Pod::Man - Convert POD data to formatted *roff input
 Pod::Man is a module to convert documentation in the POD format (the
 preferred language for documenting Perl) into *roff input using the man
 macro set.  The resulting *roff code is suitable for display on a terminal
-using nroff(1), normally via man(1), or printing using troff(1).  It is
-conventionally invoked using the driver script B<pod2man>, but it can also
-be used directly.
+using L<nroff(1)>, normally via L<man(1)>, or printing using L<troff(1)>.
+It is conventionally invoked using the driver script B<pod2man>, but it can
+also be used directly.
 
 As a derived class from Pod::Parser, Pod::Man supports the same methods and
 interfaces.  See L<Pod::Parser> for all the details; briefly, one creates a
@@ -1228,13 +1195,13 @@ Similarly, you can set the fonts used for bold, italic, and bold italic
 fixed-width output.
 
 Besides the obvious pod conversions, Pod::Man also takes care of formatting
-func(), func(n), and simple variable references like $foo or @bar so you
+func(), func(3), and simple variable references like $foo or @bar so you
 don't have to use code escapes for them; complex expressions like
 C<$fred{'stuff'}> will still need to be escaped, though.  It also translates
 dashes that aren't used as hyphens into en dashes, makes long dashes--like
 this--into proper em dashes, fixes "paired quotes," makes C++ and PI look
 right, puts a little space between double underbars, makes ALLCAPS a teeny
-bit smaller in troff(1), and escapes stuff that *roff treats as special so
+bit smaller in B<troff>, and escapes stuff that *roff treats as special so
 that you don't have to.
 
 The recognized options to new() are as follows.  All options take a single
@@ -1257,25 +1224,34 @@ YYYY-MM-DD.
 =item fixed
 
 The fixed-width font to use for vertabim text and code.  Defaults to CW.
-Some systems may want CR instead.  Only matters for troff(1) output.
+Some systems may want CR instead.  Only matters for B<troff> output.
 
 =item fixedbold
 
 Bold version of the fixed-width font.  Defaults to CB.  Only matters for
-troff(1) output.
+B<troff> output.
 
 =item fixeditalic
 
 Italic version of the fixed-width font (actually, something of a misnomer,
 since most fixed-width fonts only have an oblique version, not an italic
-version).  Defaults to CI.  Only matters for troff(1) output.
+version).  Defaults to CI.  Only matters for B<troff> output.
 
 =item fixedbolditalic
 
 Bold italic (probably actually oblique) version of the fixed-width font.
 Pod::Man doesn't assume you have this, and defaults to CB.  Some systems
-(such as Solaris) have this font available as CX.  Only matters for troff(1)
+(such as Solaris) have this font available as CX.  Only matters for B<troff>
 output.
+
+=item name
+
+Set the name of the manual page.  Without this option, the manual name is
+set to the uppercased base name of the file being converted unless the
+manual section is 3, in which case the path is parsed to see if it is a Perl
+module path.  If it is, a path like C<.../lib/Pod/Man.pm> is converted into
+a name like C<Pod::Man>.  This option, if given, overrides any automatic
+determination of the name.
 
 =item quotes
 
@@ -1292,7 +1268,7 @@ output).
 =item release
 
 Set the centered footer.  By default, this is the version of Perl you run
-Pod::Man under.  Note that some system macro sets assume that the
+Pod::Man under.  Note that some system an macro sets assume that the
 centered footer will be a modification date and will prepend something like
 "Last modified: "; if this is the case, you may want to set C<release> to
 the last modified date and C<date> to the version number.
@@ -1330,7 +1306,7 @@ details.
 (F) You specified a *roff font (using C<fixed>, C<fixedbold>, etc.) that
 wasn't either one or two characters.  Pod::Man doesn't support *roff fonts
 longer than two characters, although some *roff extensions do (the canonical
-versions of nroff(1) and troff(1) don't either).
+versions of B<nroff> and B<troff> don't either).
 
 =item Invalid link %s
 
@@ -1376,15 +1352,15 @@ for everything in that section.  This would have to be deferred until the
 next section, since extraneous things in NAME tends to confuse various man
 page processors.
 
-The handling of hyphens, en dashes, and em dashes is somewhat fragile, and
-one may get the wrong one under some circumstances.  This should only matter
-for troff(1) output.
+The handling of hyphens and em dashes is somewhat fragile, and one may get
+the wrong one under some circumstances.  This should only matter for
+B<troff> output.
 
 When and whether to use small caps is somewhat tricky, and Pod::Man doesn't
 necessarily get it right.
 
 Pod::Man doesn't handle font names longer than two characters.  Neither do
-most troff(1) implementations, but GNU troff does as an extension.  It would
+most B<troff> implementations, but GNU troff does as an extension.  It would
 be nice to support as an option for those who want to use it.
 
 The preamble added to each output file is rather verbose, and most of it is
@@ -1392,30 +1368,28 @@ only necessary in the presence of EE<lt>E<gt> escapes for non-ASCII
 characters.  It would ideally be nice if all of those definitions were only
 output if needed, perhaps on the fly as the characters are used.
 
-Some of the automagic applied to file names assumes Unix directory
-separators.
-
 Pod::Man is excessively slow.
 
 =head1 SEE ALSO
 
-L<Pod::Parser|Pod::Parser>, perlpod(1), pod2man(1), nroff(1), troff(1),
-man(1), man(7)
+L<Pod::Parser>, L<perlpod(1)>, L<pod2man(1)>, L<nroff(1)>, L<troff(1)>,
+L<man(1)>, L<man(7)>
 
 Ossanna, Joseph F., and Brian W. Kernighan.  "Troff User's Manual,"
 Computing Science Technical Report No. 54, AT&T Bell Laboratories.  This is
-the best documentation of standard nroff(1) and troff(1).  At the time of
-this writing, it's available at http://www.cs.bell-labs.com/cm/cs/cstr.html.
+the best documentation of standard B<nroff> and B<troff>.  At the time of
+this writing, it's available at
+L<http://www.cs.bell-labs.com/cm/cs/cstr.html>.
 
-The man page documenting the man macro set may be man(5) instead of man(7)
-on your system.  Also, please see pod2man(1) for extensive documentation on
-writing manual pages if you've not done it before and aren't familiar with
-the conventions.
+The man page documenting the man macro set may be L<man(5)> instead of
+L<man(7)> on your system.  Also, please see L<pod2man(1)> for extensive
+documentation on writing manual pages if you've not done it before and
+aren't familiar with the conventions.
 
 =head1 AUTHOR
 
-Russ Allbery E<lt>rra@stanford.eduE<gt>, based I<very> heavily on the
-original B<pod2man> by Tom Christiansen E<lt>tchrist@mox.perl.comE<gt>.
+Russ Allbery <rra@stanford.edu>, based I<very> heavily on the original
+B<pod2man> by Tom Christiansen <tchrist@mox.perl.com>.
 
 =head1 COPYRIGHT AND LICENSE
 

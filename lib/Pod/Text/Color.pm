@@ -1,5 +1,5 @@
 # Pod::Text::Color -- Convert POD data to formatted color ASCII text
-# $Id: Color.pm,v 1.1 2001/10/20 08:08:39 eagle Exp $
+# $Id: Color.pm,v 1.2 2001/11/15 08:04:18 eagle Exp $
 #
 # Copyright 1999, 2001 by Russ Allbery <rra@stanford.edu>
 #
@@ -29,7 +29,7 @@ use vars qw(@ISA $VERSION);
 # Don't use the CVS revision as the version, since this module is also in Perl
 # core and too many things could munge CVS magic revision strings.  This
 # number should ideally be the same as the CVS revision in podlators, however.
-$VERSION = 1.01;
+$VERSION = 1.02;
 
 
 ##############################################################################
@@ -125,7 +125,7 @@ B<pod2text> should be taught about those.
 
 =head1 SEE ALSO
 
-L<Pod::Text|Pod::Text>, L<Pod::Parser|Pod::Parser>
+L<Pod::Text>, L<Pod::Parser>
 
 =head1 AUTHOR
 

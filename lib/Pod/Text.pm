@@ -1,5 +1,5 @@
 # Pod::Text -- Convert POD data to formatted ASCII text.
-# $Id: Text.pm,v 2.13 2001/10/20 08:07:21 eagle Exp $
+# $Id: Text.pm,v 2.14 2001/11/15 08:03:18 eagle Exp $
 #
 # Copyright 1999, 2000, 2001 by Russ Allbery <rra@stanford.edu>
 #
@@ -26,6 +26,7 @@ require 5.004;
 
 use Carp qw(carp croak);
 use Exporter ();
+use Pod::ParseLink qw(parselink);
 use Pod::Select ();
 
 use strict;
@@ -41,7 +42,7 @@ use vars qw(@ISA @EXPORT %ESCAPES $VERSION);
 # Don't use the CVS revision as the version, since this module is also in Perl
 # core and too many things could munge CVS magic revision strings.  This
 # number should ideally be the same as the CVS revision in podlators, however.
-$VERSION = 2.13;
+$VERSION = 2.14;
 
 
 ##############################################################################
@@ -54,6 +55,7 @@ $VERSION = 2.13;
 # "divide" added by Tim Jenness.
 %ESCAPES = (
     'amp'       =>    '&',      # ampersand
+    'apos'      =>    "'",      # apostrophe
     'lt'        =>    '<',      # left chevron, less-than
     'gt'        =>    '>',      # right chevron, greater-than
     'quot'      =>    '"',      # double quote
@@ -139,7 +141,7 @@ $VERSION = 2.13;
     "copy"      =>    "\xA9",   # Copyright symbol
     "ordf"      =>    "\xAA",   # feminine ordinal indicator
     "not"       =>    "\xAC",   # not sign
-    "shy"       =>    "\xAD",   # soft hyphen
+    "shy"       =>    '',       # soft (discretionary) hyphen
     "reg"       =>    "\xAE",   # registered trademark
     "macr"      =>    "\xAF",   # macron, overline
     "deg"       =>    "\xB0",   # degree sign
@@ -159,6 +161,8 @@ $VERSION = 2.13;
     "iquest"    =>    "\xBF",   # inverted question mark
     "times"     =>    "\xD7",   # multiplication sign
     "divide"    =>    "\xF7",   # division sign
+
+    "nbsp"      =>    "\x01",   # non-breaking space
 );
 
 
@@ -250,46 +254,7 @@ sub textblock {
     local $_ = shift;
     my $line = shift;
 
-    # Perform a little magic to collapse multiple L<> references.  This is
-    # here mostly for backwards-compatibility.  We'll just rewrite the whole
-    # thing into actual text at this part, bypassing the whole internal
-    # sequence parsing thing.
-    s{
-        (
-          L<                    # A link of the form L</something>.
-              /
-              (
-                  [:\w]+        # The item has to be a simple word...
-                  (\(\))?       # ...or simple function.
-              )
-          >
-          (
-              ,?\s+(and\s+)?    # Allow lots of them, conjuncted.
-              L<
-                  /
-                  (
-                      [:\w]+
-                      (\(\))?
-                  )
-              >
-          )+
-        )
-    } {
-        local $_ = $1;
-        s%L</([^>]+)>%$1%g;
-        my @items = split /(?:,?\s+(?:and\s+)?)/;
-        my $string = "the ";
-        my $i;
-        for ($i = 0; $i < @items; $i++) {
-            $string .= $items[$i];
-            $string .= ", " if @items > 2 && $i != $#items;
-            $string .= " and " if ($i == $#items - 1);
-        }
-        $string .= " entries elsewhere in this document";
-        $string;
-    }gex;
-
-    # Now actually interpolate and output the paragraph.
+    # Interpolate and output the paragraph.
     $_ = $self->interpolate ($_, $line);
     s/\s+$/\n/;
     if (defined $$self{ITEM}) {
@@ -304,9 +269,20 @@ sub textblock {
 # Calls code, bold, italic, file, and link to handle those types of sequences,
 # and handles S<>, E<>, X<>, and Z<> directly.
 sub interior_sequence {
-    my $self = shift;
-    my $command = shift;
-    local $_ = shift;
+    local $_;
+    my ($self, $command, $seq);
+    ($self, $command, $_, $seq) = @_;
+
+    # We have to defer processing of the inside of an L<> formatting code.  If
+    # this sequence is nested inside an L<> sequence, return the literal raw
+    # text of it.
+    my $parent = $seq->nested;
+    while (defined $parent) {
+        return $seq->raw_text if ($parent->cmd_name eq 'L');
+        $parent = $parent->nested;
+    }
+
+    # Index entries are ignored in plain text.
     return '' if ($command eq 'X' || $command eq 'Z');
 
     # Expand escapes into the actual character now, warning if invalid.
@@ -328,7 +304,7 @@ sub interior_sequence {
     # For S<>, compress all internal whitespace and then map spaces to \01.
     # When we output the text, we'll map this back.
     if ($command eq 'S') {
-        s/\s{2,}/ /g;
+        s/\s+/ /g;
         tr/ /\01/;
         return $_;
     }
@@ -338,7 +314,7 @@ sub interior_sequence {
     elsif ($command eq 'C') { return $self->seq_c ($_) }
     elsif ($command eq 'F') { return $self->seq_f ($_) }
     elsif ($command eq 'I') { return $self->seq_i ($_) }
-    elsif ($command eq 'L') { return $self->seq_l ($_) }
+    elsif ($command eq 'L') { return $self->seq_l ($_, $seq) }
     else {
         my $seq = shift;
         my ($file, $line) = $seq->file_line;
@@ -522,55 +498,16 @@ sub seq_c {
     return $$self{alt} ? "``$_''" : "$$self{LQUOTE}$_$$self{RQUOTE}";
 }
 
-# The complicated one.  Handle links.  Since this is plain text, we can't
-# actually make any real links, so this is all to figure out what text we
-# print out.
+# Handle links.  Since this is plain text, we can't actually make any real
+# links, so this is all to figure out what text we print out.  Most of the
+# work is done by Pod::ParseLink.
 sub seq_l {
-    my $self = shift;
-    local $_ = shift;
-
-    # Smash whitespace in case we were split across multiple lines.
-    s/\s+/ /g;
-
-    # If we were given any explicit text, just output it.
-    if (/^([^|]+)\|/) { return $1 }
-
-    # Okay, leading and trailing whitespace isn't important; get rid of it.
-    s/^\s+//;
-    s/\s+$//;
-
-    # If the argument looks like a URL, return it verbatim.  This only handles
-    # URLs that use the server syntax.
-    if (m%^[a-z]+://\S+$%) { return $_ }
-
-    # Default to using the whole content of the link entry as a section name.
-    # Note that L<manpage/> forces a manpage interpretation, as does something
-    # looking like L<manpage(section)>.  The latter is an enhancement over the
-    # original Pod::Text.
-    my ($manpage, $section) = ('', $_);
-    if (/^"\s*(.*?)\s*"$/) {
-        $section = '"' . $1 . '"';
-    } elsif (m/^[-:.\w]+(?:\(\S+\))?$/) {
-        ($manpage, $section) = ($_, '');
-    } elsif (m%/%) {
-        ($manpage, $section) = split (/\s*\/\s*/, $_, 2);
-    }
-
-    # Now build the actual output text.
-    my $text = '';
-    if (!length $section) {
-        $text = "the $manpage manpage" if length $manpage;
-    } elsif ($section =~ /^[:\w]+(?:\(\))?/) {
-        $text .= 'the ' . $section . ' entry';
-        $text .= (length $manpage) ? " in the $manpage manpage"
-                                   : " elsewhere in this document";
-    } else {
-        $section =~ s/^\"\s*//;
-        $section =~ s/\s*\"$//;
-        $text .= 'the section on "' . $section . '"';
-        $text .= " in the $manpage manpage" if length $manpage;
-    }
-    $text;
+    my ($self, $link, $seq) = @_;
+    my ($text, $type) = (parselink ($link))[1,4];
+    my ($file, $line) = $seq->file_line;
+    $text = $self->interpolate ($text, $line);
+    $text = '<' . $text . '>' if $type eq 'url';
+    return $text || '';
 }
 
 
@@ -745,7 +682,7 @@ suitable for nearly any device.
 
 As a derived class from Pod::Parser, Pod::Text supports the same methods and
 interfaces.  See L<Pod::Parser> for all the details; briefly, one creates a
-new parser with C<Pod::Text-E<gt>new()> and then calls either
+new parser with C<< Pod::Text->new() >> and then calls either
 parse_from_filehandle() or parse_from_file().
 
 new() can take options, in the form of key/value pairs, that control the
@@ -870,19 +807,17 @@ though.
 The original Pod::Text contained code to do formatting via termcap
 sequences, although it wasn't turned on by default and it was problematic to
 get it to work at all.  This rewrite doesn't even try to do that, but a
-subclass of it does.  Look for L<Pod::Text::Termcap|Pod::Text::Termcap>.
+subclass of it does.  Look for L<Pod::Text::Termcap>.
 
 =head1 SEE ALSO
 
-L<Pod::Parser|Pod::Parser>, L<Pod::Text::Termcap|Pod::Text::Termcap>,
-pod2text(1)
+L<Pod::Parser>, L<Pod::Text::Termcap>, L<pod2text(1)>
 
 =head1 AUTHOR
 
-Russ Allbery E<lt>rra@stanford.eduE<gt>, based I<very> heavily on the
-original Pod::Text by Tom Christiansen E<lt>tchrist@mox.perl.comE<gt> and
-its conversion to Pod::Parser by Brad Appleton
-E<lt>bradapp@enteract.comE<gt>.
+Russ Allbery <rra@stanford.edu>, based I<very> heavily on the original
+Pod::Text by Tom Christiansen <tchrist@mox.perl.com> and its conversion to
+Pod::Parser by Brad Appleton <bradapp@enteract.com>.
 
 =head1 COPYRIGHT AND LICENSE
 

@@ -36,7 +36,7 @@ $Config{startperl}
 print OUT <<'!NO!SUBS!';
 
 # pod2man -- Convert POD data to formatted *roff input.
-# $Id: pod2man.PL,v 1.7 2001/10/20 08:24:15 eagle Exp $
+# $Id: pod2man.PL,v 1.8 2001/11/05 04:55:47 eagle Exp $
 #
 # Copyright 1999, 2000, 2001 by Russ Allbery <rra@stanford.edu>
 #
@@ -66,8 +66,8 @@ my %options;
 Getopt::Long::config ('bundling_override');
 GetOptions (\%options, 'section|s=s', 'release|r=s', 'center|c=s',
             'date|d=s', 'fixed=s', 'fixedbold=s', 'fixeditalic=s',
-            'fixedbolditalic=s', 'official|o', 'quotes|q=s', 'lax|l',
-            'help|h', 'verbose|v') or exit 1;
+            'fixedbolditalic=s', 'name|n=s', 'official|o', 'quotes|q=s',
+            'lax|l', 'help|h', 'verbose|v') or exit 1;
 pod2usage (0) if $options{help};
 
 # Official sets --center, but don't override things explicitly set.
@@ -100,8 +100,9 @@ pod2man - Convert POD data to formatted *roff input
 pod2man [B<--section>=I<manext>] [B<--release>=I<version>]
 [B<--center>=I<string>] [B<--date>=I<string>] [B<--fixed>=I<font>]
 [B<--fixedbold>=I<font>] [B<--fixeditalic>=I<font>]
-[B<--fixedbolditalic>=I<font>] [B<--official>] [B<--lax>]
-[B<--quotes>=I<quotes>] [B<--verbose>] [I<input> [I<output>] ...]
+[B<--fixedbolditalic>=I<font>] [B<--name>=I<name>] [B<--official>]
+[B<--lax>] [B<--quotes>=I<quotes>] [B<--verbose>]
+[I<input> [I<output>] ...]
 
 pod2man B<--help>
 
@@ -184,6 +185,19 @@ Print out usage information.
 
 Don't complain when required sections are missing.  Not currently used, as
 POD checking functionality is not yet implemented in Pod::Man.
+
+=item B<-n> I<name>, B<--name>=I<name>
+
+Set the name of the manual page to I<name>.  Without this option, the manual
+name is set to the uppercased base name of the file being converted unless
+the manual section is 3, in which case the path is parsed to see if it is a
+Perl module path.  If it is, a path like C<.../lib/Pod/Man.pm> is converted
+into a name like C<Pod::Man>.  This option, if given, overrides any
+automatic determination of the name.
+
+Note that this option is probably not useful when converting multiple POD
+files at once.  The convention for Unix man pages for commands is for the
+man page title to be in all-uppercase even if the command isn't.
 
 =item B<-o>, B<--official>
 

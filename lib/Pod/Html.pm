@@ -308,8 +308,7 @@ $Is83=$^O eq 'dos';
 #
 sub clean_data($){
     my( $dataref ) = @_;
-    my $i;
-    for( $i = 0; $i <= $#$dataref; $i++ ){
+    for my $i ( 0..$#{$dataref} ) {
 	${$dataref}[$i] =~ s/\s+\Z//;
 
         # have a look for all-space lines
@@ -384,7 +383,7 @@ sub pod2html {
     # put a title in the HTML file if one wasn't specified
     if ($title eq '') {
 	TITLE_SEARCH: {
-	    for (my $i = 0; $i < @poddata; $i++) { 
+	    for my $i ( 0..$#poddata ) {
 		if ($poddata[$i] =~ /^=head1\s*NAME\b/m) {
 		    for my $para ( @poddata[$i, $i+1] ) { 
 			last TITLE_SEARCH
@@ -397,7 +396,7 @@ sub pod2html {
     }
     if (!$title and $podfile =~ /\.pod\z/) {
 	# probably a split pod so take first =head[12] as title
-	for (my $i = 0; $i < @poddata; $i++) { 
+	for my $i ( 0..$#poddata ) {
 	    last if ($title) = $poddata[$i] =~ /^=head[12]\s*(.*)/;
 	} 
 	warn "adopted '$title' as title for $podfile\n"
