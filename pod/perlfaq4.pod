@@ -2003,13 +2003,17 @@ Assuming that you don't care about IEEE notations like "NaN" or
    if (/^([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?$/)
 			{ print "a C float\n" }
 
-You can also use the L<Data::Types|Data::Types> module on
-the CPAN, which exports functions that validate data types
-using these and other regular expressions, or you can use
-the C<Regexp::Common> module from CPAN which has regular
-expressions to match various types of numbers.
+There are also some commonly used modules for the task.
+L<Scalar::Util> (distributed with 5.8) provides access to perl's
+internal function C<looks_like_number> for determining
+whether a variable looks like a number.  L<Data::Types>
+exports functions that validate data types using both the
+above and other regular expressions. Thirdly, there is
+C<Regexp::Common> which has regular expressions to match
+various types of numbers. Those three modules are available
+from the CPAN.
 
-If you're on a POSIX system, Perl's supports the C<POSIX::strtod>
+If you're on a POSIX system, Perl supports the C<POSIX::strtod>
 function.  Its semantics are somewhat cumbersome, so here's a C<getnum>
 wrapper function for more convenient access.  This function takes
 a string and returns the number it found, or C<undef> for input that
@@ -2032,7 +2036,7 @@ if you just want to say, ``Is this a float?''
 
     sub is_numeric { defined getnum($_[0]) }
 
-Or you could check out the L<String::Scanf|String::Scanf> module on the CPAN
+Or you could check out the L<String::Scanf> module on the CPAN
 instead. The POSIX module (part of the standard Perl distribution) provides
 the C<strtod> and C<strtol> for converting strings to double and longs,
 respectively.

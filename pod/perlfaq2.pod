@@ -69,7 +69,7 @@ approaches are doomed to failure.
 One simple way to check that things are in the right place is to print out
 the hard-coded @INC that perl looks through for libraries:
 
-    % perl -e 'print join("\n",@INC)'
+    % perl -le 'print for @INC'
 
 If this command lists any paths that don't exist on your system, then you
 may need to move the appropriate libraries to these locations, or create

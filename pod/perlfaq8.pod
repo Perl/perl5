@@ -1163,7 +1163,7 @@ See Perl's L<lib> for more information.
     use lib "$FindBin::Bin";
     use your_own_modules;
 
-=head2 How do I add a directory to my include path at runtime?
+=head2 How do I add a directory to my include path (@INC) at runtime?
 
 Here are the suggested ways of modifying your include path:
 
