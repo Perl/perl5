@@ -1779,6 +1779,7 @@ Apd	|void	|sv_pos_b2u	|SV* sv|I32* offsetp
 Amd	|char*	|sv_pvn_force	|SV* sv|STRLEN* lp
 Apd	|char*	|sv_pvutf8n_force|SV* sv|STRLEN* lp
 Apd	|char*	|sv_pvbyten_force|SV* sv|STRLEN* lp
+Apd	|void	|sv_recode_to_utf8	|SV*
 Apd	|char*	|sv_reftype	|SV* sv|int ob
 Apd	|void	|sv_replace	|SV* sv|SV* nsv
 Apd	|void	|sv_report_used

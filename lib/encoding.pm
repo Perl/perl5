@@ -38,12 +38,14 @@ expected to be Latin-1 (or EBCDIC in EBCDIC platforms).  With the
 encoding pragma you can change this default.
 
 The pragma is a per script, not a per block lexical.  Only the last
-'use encoding' seen matters.
+C<use encoding> matters, and it affects B<the whole script>.
 
 =head1 FUTURE POSSIBILITIES
 
-The C<\x..> and C<\0...> in literals and regular expressions are not
-affected by this pragma.  They probably should.  Ditto C<\N{...}>.
+The C<\x..> and C<\0...> in regular expressions are not
+affected by this pragma.  They probably should.
+
+Also C<\N{...}> might become affected.
 
 =head1 SEE ALSO
 

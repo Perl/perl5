@@ -3302,32 +3302,9 @@ Perl_sv_utf8_upgrade_flags(pTHX_ register SV *sv, I32 flags)
 	sv_force_normal(sv);
     }
 
-    if (PL_encoding) {
-         SV *uni;
-	 STRLEN len;
-	 char *s;
-	 dSP;
-	 ENTER;
-	 SAVETMPS;
-	 PUSHMARK(sp);
-	 EXTEND(SP, 3);
-	 XPUSHs(PL_encoding);
-	 XPUSHs(sv);
-	 XPUSHs(&PL_sv_yes);
-	 PUTBACK;
-	 call_method("decode", G_SCALAR);
-	 SPAGAIN;
-	 uni = POPs;
-	 PUTBACK;
-	 s = SvPVutf8(uni, len);
-	 if (s != SvPVX(sv)) {
-	      SvGROW(sv, len);
-	      Move(s, SvPVX(sv), len, char);
-	      SvCUR_set(sv, len);
-	 }
-	 FREETMPS;
-	 LEAVE;
-    } else { /* Assume Latin-1/EBCDIC */
+    if (PL_encoding)
+        Perl_sv_recode_to_utf8(aTHX_ sv);
+    else { /* Assume Latin-1/EBCDIC */
 	 /* This function could be much more efficient if we
 	  * had a FLAG in SVs to signal if there are any hibit
 	  * chars in the PV.  Given that there isn't such a flag
@@ -3350,9 +3327,9 @@ Perl_sv_utf8_upgrade_flags(pTHX_ register SV *sv, I32 flags)
 		   Safefree(s); /* No longer using what was there before. */
 	      SvLEN(sv) = len; /* No longer know the real size. */
 	 }
+	 /* Mark as UTF-8 even if no hibit - saves scanning loop */
+	 SvUTF8_on(sv);
     }
-    /* Mark as UTF-8 even if no hibit - saves scanning loop */
-    SvUTF8_on(sv);
     return SvCUR(sv);
 }
 
@@ -10381,4 +10358,47 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 }
 
 #endif /* USE_ITHREADS */
+
+/*
+=for apidoc sv_recode_to_utf8
+
+If PL_encoding is set you can call this to recode the pv of the sv.
+The PL_encoding is assumed to be an Encode object, on entry the pv is assumed
+to be octets in that encoding, and the sv will be converted into Unicode
+(and UTF-8).
+
+If PL_encoding is not an Encode object, things will go boom.
+
+=cut
+*/
+
+void
+Perl_sv_recode_to_utf8(pTHX_ SV *sv)
+{
+     SV *uni;
+     STRLEN len;
+     char *s;
+     dSP;
+     ENTER;
+     SAVETMPS;
+     PUSHMARK(sp);
+     EXTEND(SP, 3);
+     XPUSHs(PL_encoding);
+     XPUSHs(sv);
+     XPUSHs(&PL_sv_yes);
+     PUTBACK;
+     call_method("decode", G_SCALAR);
+     SPAGAIN;
+     uni = POPs;
+     PUTBACK;
+     s = SvPVutf8(uni, len);
+     if (s != SvPVX(sv)) {
+	  SvGROW(sv, len);
+	  Move(s, SvPVX(sv), len, char);
+	  SvCUR_set(sv, len);
+     }
+     FREETMPS;
+     LEAVE;
+     SvUTF8_on(sv);
+}
 
