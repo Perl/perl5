@@ -72,6 +72,48 @@ your system supports it.  If you want to force perl to be compiled
 statically, you can either choose this when Configure prompts you or by
 using the Configure command line option -Uusedl.
 
+=head2 Extensions
+
+By default, Configure will offer to build every extension which
+appears to be supported.  For example, Configure will offer to build
+GDBM_File only if it is able to find the gdbm library.  (See examples
+below.)  DynaLoader and Fcntl are always built by default.  Configure
+does not contain code to test for POSIX compliance, so POSIX is always
+built by default as well.  If you wish to skip POSIX, you can set the
+Configure variable useposix=false either in a hint file or from the
+Configure command line.  Similarly, the Safe extension is always built
+by default, but you can skip it by setting the Configure variable
+usesafe=false either in a hint file for from the command line.
+
+In summary, here are the Configure command-line variables you can set
+to turn off each extension:
+
+    DB_File		i_db
+    DynaLoader		(Must always be included)
+    Fcntl		(Always included by default)
+    GDBM_File		i_gdbm
+    NDBM_File		i_ndbm
+    ODBM_File		i_dbm
+    POSIX		useposix
+    SDBM_File		(Always included by default)
+    Safe		usesafe
+    Socket		d_socket
+
+Thus to skip the NDBM_File extension, you can use
+
+	sh Configure -Ui_ndbm
+
+Again, this is taken care of automatically if you don't have the ndbm
+library.
+
+Of course, you may always run Configure interactively and select only
+the Extensions you want.
+
+Finally, if you have dynamic loading (most modern Unix systems do)
+remember that these extensions do not increase the size of your perl
+executable, nor do they impact start-up time, so you probably might as
+well build all the ones that will work on your system.
+
 =head2 GNU-style configure
 
 If you prefer the GNU-style B<configure> command line interface, you can
@@ -181,8 +223,8 @@ by Configure)
 
 	/usr/local/lib/perl5/archname/5.002
 	/usr/local/lib/perl5/
-	/usr/local/lib/site_perl/archname
-	/usr/local/lib/site_perl
+	/usr/local/lib/perl5/site_perl/archname
+	/usr/local/lib/perl5/site_perl
 
 and the following directories for manual pages:
 
@@ -460,6 +502,12 @@ the LD_LIBRARY_PATH environment variable.  Perl should build
 fine with LD_LIBRARY_PATH unset, though that may depend on details
 of your local set-up.
 
+If Configure seems to be having trouble finding library functions,
+try not using nm extraction.  You can do this from the command line
+with
+
+	sh Configure -Uusenm
+
 =back
 
 =head1 make test
@@ -505,6 +553,7 @@ B<make install> will install the following:
 	s2p		sed-to-perl translator
 	find2perl	find-to-perl translator
 	h2xs		Converts C .h header files to Perl extensions.
+	perlbug		Tool to report bugs in Perl.
 	perldoc		Tool to read perl's pod documentation.
 	pod2html,	Converters from perl's pod documentation format
 	pod2latex, and 	to other useful formats.
@@ -520,8 +569,8 @@ B<make install> will install the following:
 
 Installperl will also create the library directories $siteperl and
 $sitearch listed in config.sh.  Usually, these are something like
-	/usr/local/lib/site_perl/
-	/usr/local/lib/site_perl/$archname
+	/usr/local/lib/perl5/site_perl/
+	/usr/local/lib/perl5/site_perl/$archname
 where $archname is something like sun4-sunos.  These directories
 will be used for installing extensions.
 
@@ -600,4 +649,6 @@ is sometimes useful for finding things in the library modules.
 Andy Dougherty <doughera@lafcol.lafayette.edu>, borrowing I<very> heavily
 from the original README by Larry Wall.
 
-18 October 1995
+=head 2 LAST MODIFIED
+
+04 January 1996
