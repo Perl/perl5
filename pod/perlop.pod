@@ -1040,13 +1040,13 @@ See L<"I/O Operators"> for more discussion.
 
 =item qw/STRING/
 
-Returns a list of the words extracted out of STRING, using embedded
-whitespace as the word delimiters.  It is exactly equivalent to
+Evaluates to a list of the words extracted out of STRING, using embedded
+whitespace as the word delimiters.  It can be understood as being roughly
+equivalent to:
 
     split(' ', q/STRING/);
 
-This equivalency means that if used in scalar context, you'll get split's
-(unfortunate) scalar context behavior, complete with mysterious warnings.
+the difference being that it generates a real list at compile time.
 
 Some frequently seen examples:
 

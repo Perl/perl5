@@ -107,6 +107,11 @@ behavior of:
 
 remains unchanged.  See L<perlop>.
 
+=item Improved C<qw//> operator
+
+The C<qw//> operator is now evaluated at compile time instead of being
+replaced with a run time call to C<split()>.
+
 =head1 Supported Platforms
 
 =over 4
