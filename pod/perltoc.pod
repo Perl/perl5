@@ -934,8 +934,8 @@ References, Tutorials, Task-Oriented, Special Topics
 
 =back
 
-=head2 perlfaq3 - Programming Tools ($Revision: 1.33 $, $Date: 2003/01/31
-17:34:56 $)
+=head2 perlfaq3 - Programming Tools ($Revision: 1.35 $, $Date: 2003/08/24
+05:26:59 $)
 
 =over 4
 
@@ -1021,8 +1021,8 @@ my C program; what am I doing wrong?
 
 =back
 
-=head2 perlfaq4 - Data Manipulation ($Revision: 1.44 $, $Date: 2003/07/28
-17:35:21 $)
+=head2 perlfaq4 - Data Manipulation ($Revision: 1.49 $, $Date: 2003/09/20
+06:37:43 $)
 
 =over 4
 
@@ -1035,12 +1035,14 @@ my C program; what am I doing wrong?
 =item Why am I getting long decimals (eg, 19.9499999999999) instead of the
 numbers I should be getting (eg, 19.95)?
 
+=item Why is int() broken?
+
 =item Why isn't my octal data interpreted correctly?
 
 =item Does Perl have a round() function?  What about ceil() and floor()? 
 Trig functions?
 
-=item How do I convert between numeric representations?
+=item How do I convert between numeric representations/bases/radixes?
 
 How do I convert hexadecimal into decimal, How do I convert from decimal to
 hexadecimal, How do I convert from octal to decimal, How do I convert from
@@ -1601,7 +1603,7 @@ complete?
 =item How do I add the directory my program lives in to the module/library
 search path?
 
-=item How do I add a directory to my include path at runtime?
+=item How do I add a directory to my include path (@INC) at runtime?
 
 =item What is socket.ph and where do I get it?
 
@@ -4825,6 +4827,8 @@ report_uninit, sv_add_arena, sv_clean_all, sv_clean_objs, sv_free_arenas
 =over 4
 
 =item History and Background
+
+=item Basic Structure
 
 =item Layers vs Disciplines
 
@@ -12936,7 +12940,7 @@ dynamic extensions at load time
 
 =back
 
-=head2 ExtUtils::MM_Any - Platform agnostic MM methods
+=head2 ExtUtils::MM_Any - Platform-agnostic MM methods
 
 =over 4
 
@@ -17485,7 +17489,7 @@ unix, stdio, perlio, crlf, utf8, bytes, raw, pop
 
 =item Defaults and how to override them
 
-=item Querying the layers of filehandle
+=item Querying the layers of filehandles
 
 =back
 
