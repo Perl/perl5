@@ -79,6 +79,156 @@ Version 5.005_57        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  3181] By: gsar                                  on 1999/03/28  03:37:23
+        Log: integrate change#3179 from maint-5.005
+     Branch: perl
+          !> ext/Thread/Thread.xs t/lib/thread.t
+____________________________________________________________________________
+[  3180] By: gsar                                  on 1999/03/28  02:28:20
+        Log: fix bogus OPf_REF context for the BLOCK in C<grep BLOCK @foo>
+             (sometimes caused bizarreness in the BLOCK)
+     Branch: perl
+           + t/op/grep.t
+           ! MANIFEST op.c
+____________________________________________________________________________
+[  3179] By: gsar                                  on 1999/03/28  02:14:04
+        Log: fix thread segfault when passing large number of arguments to child
+             a la C<Thread->new($foo, 1..1000)>
+     Branch: maint-5.005/perl
+           ! ext/Thread/Thread.xs t/lib/thread.t
+____________________________________________________________________________
+[  3178] By: gbarr                                 on 1999/03/28  01:39:23
+        Log: fix $Config{'usethreads'} typo in perlthrtut
+             
+             From: Ian Maloney <szhmf9@wsblob.ubs.com>
+             Date: Thu, 25 Mar 1999 16:40:14 +0100 (MET)
+             Message-Id: <199903251540.QAA02439@wsblob.>
+             Subject: perlthrtut documentation error
+     Branch: maint-5.005/perl
+           ! pod/perlthrtut.pod
+____________________________________________________________________________
+[  3173] By: gbarr                                 on 1999/03/27  18:19:47
+        Log: Update Test.pm to VERSION 1.122 from CPAN
+     Branch: maint-5.005/perl
+           ! lib/Test.pm
+____________________________________________________________________________
+[  3171] By: jhi                                   on 1999/03/26  22:38:28
+        Log: Integrate from mainperl.
+     Branch: cfgperl
+          !> (integrate 37 files)
+____________________________________________________________________________
+[  3170] By: gsar                                  on 1999/03/26  01:30:25
+        Log: specify type of bracket in "Unmatched bracket" diagnostic;
+             prefer 'brace' or 'curly bracket' over 'curly brace'
+     Branch: perl
+	   ! pod/perldiag.pod pod/perlreftut.pod pod/perlstyle.pod
+           ! t/op/misc.t t/op/re_tests toke.c
+____________________________________________________________________________
+[  3169] By: gsar                                  on 1999/03/26  00:50:51
+        Log: better description of "Integer overflow" diagnostic
+     Branch: perl
+           ! pod/perldiag.pod
+____________________________________________________________________________
+[  3168] By: gsar                                  on 1999/03/25  11:02:46
+        Log: applied needful parts of suggested patch
+             From: "Vishal Bhatia" <vishalb@my-dejanews.com>
+             Date: Tue, 23 Mar 1999 16:21:43 -0800
+             Message-ID: <OOOKJGFMLFLHBAAA@my-dejanews.com>
+             Subject: [PATCH 5.005_56] pp_formline correction
+     Branch: perl
+           ! ext/B/B/Bblock.pm ext/B/B/CC.pm
+____________________________________________________________________________
+[  3167] By: gsar                                  on 1999/03/25  10:39:02
+        Log: clarify what a "comment" means (due to Mark-Jason Dominus
+             <mjd@plover.com>)
+     Branch: perl
+           ! pod/perlsyn.pod
+____________________________________________________________________________
+[  3166] By: gsar                                  on 1999/03/25  10:33:18
+        Log: describe current behavior on local($foo{nothere}) (suggested by
+             Lionel Cons <lionel.cons@cern.ch>)
+     Branch: perl
+           ! pod/perlsub.pod
+____________________________________________________________________________
+[  3165] By: gsar                                  on 1999/03/25  06:21:05
+        Log: fix refcnt on PL_main_cv (variant of suggestion by Vishal Bhatia
+             <vishalb@hotmail.com>)
+     Branch: perl
+           ! ext/B/B/C.pm
+____________________________________________________________________________
+[  3164] By: gsar                                  on 1999/03/25  06:17:27
+        Log: From: Stephen McCamant <smccam@uclink4.berkeley.edu>
+             Date: Tue, 23 Mar 1999 17:47:04 -0800 (PST)
+             Message-ID: <14072.16859.154428.241373@fre-76-120.reshall.berkeley.edu>
+             Subject: [PATCH _56] Compiler needs to know about utf8 SVOP tr///s
+     Branch: perl
+           ! ext/B/B.xs op.h opcode.pl
+____________________________________________________________________________
+[  3163] By: gsar                                  on 1999/03/25  06:15:49
+        Log: B::Deparse update from Stephen McCamant <smccam@uclink4.berkeley.edu>
+             Date: Tue, 23 Mar 1999 02:41:34 -0800 (PST)
+             Message-ID: <14071.27445.867782.852353@fre-76-120.reshall.berkeley.edu>
+             Subject: [PATCH _56] B::Deparse 0.57
+             --
+             Date: Tue, 23 Mar 1999 13:08:12 -0800 (PST)
+             Message-ID: <14072.502.107712.175179@fre-76-120.reshall.berkeley.edu>
+             Subject: Re: [PATCH _56] B::Deparse 0.57 
+     Branch: perl
+           ! AUTHORS MAINTAIN ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  3162] By: gsar                                  on 1999/03/25  06:11:46
+        Log: fix a few places that said 'int', but meant 'STRLEN'
+     Branch: perl
+           ! pod/perlguts.pod proto.h sv.c
+____________________________________________________________________________
+[  3161] By: gsar                                  on 1999/03/25  06:01:18
+        Log: From: Russ Allbery <rra@stanford.edu>
+             Date: 22 Mar 1999 04:26:26 -0800
+             Message-ID: <yl4sndr9ql.fsf@windlord.stanford.edu>
+             Subject: [5.005_56] Add EXISTS to SDBM_File and libsdbm
+     Branch: perl
+	   ! ext/SDBM_File/SDBM_File.xs ext/SDBM_File/sdbm/README.too
+	   ! ext/SDBM_File/sdbm/pair.c ext/SDBM_File/sdbm/pair.h
+	   ! ext/SDBM_File/sdbm/sdbm.3 ext/SDBM_File/sdbm/sdbm.c
+           ! ext/SDBM_File/sdbm/sdbm.h pod/perldelta.pod t/lib/sdbm.t
+____________________________________________________________________________
+[  3160] By: gsar                                  on 1999/03/25  02:26:31
+        Log: better description of OP_UNSTACK (s/unstack/iteration finalizer/)
+     Branch: perl
+           ! opcode.h opcode.pl
+____________________________________________________________________________
+[  3159] By: gsar                                  on 1999/03/25  02:18:17
+        Log: add statement-modifier loops to :base_loop class
+     Branch: perl
+           ! ext/Opcode/Opcode.pm
+____________________________________________________________________________
+[  3158] By: gsar                                  on 1999/03/25  00:36:57
+        Log: integrate changes#3105,3130,3154 from maint-5.005
+     Branch: perl
+          !> Configure INSTALL hints/dec_osf.sh hints/netbsd.sh
+____________________________________________________________________________
+[  3157] By: gsar                                  on 1999/03/25  00:24:17
+        Log: remove bogus panic()
+     Branch: perl
+           ! Changes lib/Math/BigFloat.pm
+____________________________________________________________________________
+[  3156] By: jhi                                   on 1999/03/24  22:43:43
+        Log: Integrate from mainperl.
+     Branch: cfgperl
+          +> (branch 38 files)
+          !> (integrate 68 files)
+____________________________________________________________________________
+[  3155] By: jhi                                   on 1999/03/24  22:12:17
+        Log: Configure regenerated because of changes #3130/#3154 and #3147.
+     Branch: cfgperl
+           ! Configure config_h.SH
+____________________________________________________________________________
+[  3154] By: jhi                                   on 1999/03/24  21:40:51
+        Log: Reword the shared library search path (LD_LIBRARY_PATH) info
+             based on suggestions from Andy Dougherty.
+     Branch: maint-5.005/perl
+           ! INSTALL
+____________________________________________________________________________
 [  3153] By: gsar                                  on 1999/03/24  10:38:05
         Log: applied suggested patch, modulo superceded parts
              From: Charles Bailey <BAILEY@newman.upenn.edu>

@@ -173,7 +173,7 @@ elsif ($^O eq 'mpeix') {
 elsif ($^O ne 'dos') {
     safe_unlink("$installbin/$perl$ver$exe_ext");
     copy("perl$exe_ext", "$installbin/$perl$ver$exe_ext");
-    strip("$installbin/perl$ver$exe_ext") if $^O =~ /^(rhapsody)$;
+    strip("$installbin/perl$ver$exe_ext") if $^O =~ /^(rhapsody)$/;
     chmod(0755, "$installbin/$perl$ver$exe_ext");
 }
 else {
@@ -236,7 +236,7 @@ foreach my $file (@corefiles) {
     if (copy_if_diff($file,"$installarchlib/CORE/$file")) {
 	if ($file =~ /\.(so|\Q$dlext\E)$/) {
 	    chmod(0555, "$installarchlib/CORE/$file");
-	    strip("-S", "$installarchlib/CORE/$file") if $^O =~ /^(rhapsody)$;
+	    strip("-S", "$installarchlib/CORE/$file") if $^O =~ /^(rhapsody)$/;
 	} else {
 	    chmod(0444, "$installarchlib/CORE/$file");
 	}
