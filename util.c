@@ -1304,11 +1304,12 @@ die(pat, va_alist)
 	    SvREADONLY_on(msg);
 	    SAVEFREESV(msg);
 
+	    PUSHSTACK(SI_DIEHOOK);
 	    PUSHMARK(SP);
 	    XPUSHs(msg);
 	    PUTBACK;
 	    perl_call_sv((SV*)cv, G_DISCARD);
-
+	    POPSTACK();
 	    LEAVE;
 	}
     }
@@ -1369,11 +1370,12 @@ croak(pat, va_alist)
 	    SvREADONLY_on(msg);
 	    SAVEFREESV(msg);
 
+	    PUSHSTACK(SI_DIEHOOK);
 	    PUSHMARK(SP);
 	    XPUSHs(msg);
 	    PUTBACK;
 	    perl_call_sv((SV*)cv, G_DISCARD);
-
+	    POPSTACK();
 	    LEAVE;
 	}
     }
@@ -1428,11 +1430,12 @@ warn(pat,va_alist)
 	    SvREADONLY_on(msg);
 	    SAVEFREESV(msg);
 
+	    PUSHSTACK(SI_WARNHOOK);
 	    PUSHMARK(SP);
 	    XPUSHs(msg);
 	    PUTBACK;
 	    perl_call_sv((SV*)cv, G_DISCARD);
-
+	    POPSTACK();
 	    LEAVE;
 	    return;
 	}
