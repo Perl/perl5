@@ -2,10 +2,10 @@ BEGIN {require 5.002;} # MakeMaker 5.17 was the last MakeMaker that was compatib
 
 package ExtUtils::MakeMaker;
 
-$Version = $VERSION = "5.36";
+$Version = $VERSION = "5.38";
 $Version_OK = "5.17";	# Makefiles older than $Version_OK will die
 			# (Will be checked from MakeMaker version 4.13 onwards)
-($Revision = substr(q$Revision: 1.206 $, 10)) =~ s/\s+$//;
+($Revision = substr(q$Revision: 1.207 $, 10)) =~ s/\s+$//;
 
 
 
@@ -299,7 +299,7 @@ sub full_setup {
     # we will use all these variables in the Makefile
     @Get_from_Config = 
 	qw(
-	   ar cc cccdlflags ccdlflags dlext dlsrc ld lddlflags ldflags libc
+	   ar cc cccdlflags ccdlflags ccflags dlext dlsrc ld lddlflags ldflags libc
 	   lib_ext obj_ext ranlib sitelibexp sitearchexp so
 	  );
 
@@ -912,7 +912,7 @@ the macros INST_LIB, INST_ARCHLIB, INST_SCRIPT, INST_MAN1DIR, and
 INST_MAN3DIR. All these default to something below ./blib if you are
 I<not> building below the perl source directory. If you I<are>
 building below the perl source, INST_LIB and INST_ARCHLIB default to
-../../lib, and INST_SCRIPT is not defined.
+ ../../lib, and INST_SCRIPT is not defined.
 
 The I<install> target of the generated Makefile copies the files found
 below each of the INST_* directories to their INSTALL*
@@ -1518,14 +1518,14 @@ routine requires that the file named by VERSION_FROM contains one
 single line to compute the version number. The first line in the file
 that contains the regular expression
 
-    /(\$[\w:]*\bVERSION)\b.*=/
+    /\$(([\w\:\']*)\bVERSION)\b.*\=/
 
 will be evaluated with eval() and the value of the named variable
 B<after> the eval() will be assigned to the VERSION attribute of the
 MakeMaker object. The following lines will be parsed o.k.:
 
     $VERSION = '1.00';
-    ( $VERSION ) = '$Revision: 1.201 $ ' =~ /\$Revision:\s+([^\s]+)/;
+    ( $VERSION ) = '$Revision: 1.207 $ ' =~ /\$Revision:\s+([^\s]+)/;
     $FOO::VERSION = '1.10';
 
 but these will fail:
