@@ -873,6 +873,8 @@ The time at which the program began running, in seconds since the
 epoch (beginning of 1970).  The values returned by the B<-M>, B<-A>,
 and B<-C> filetests are based on this value.
 
+=item $PERL_VERSION_TUPLE
+
 =item $^V
 
 The revision, version, and subversion of the Perl interpreter, represented
