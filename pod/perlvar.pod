@@ -427,12 +427,16 @@ operator.  (Mnemonic: What just went bang?)
 =item $^E
 
 More specific information about the last system error than that
-provided by C<$!>, if available.  (If not, it's just C<$!> again.)
-At the moment, this differs from C<$!> only under VMS, where it
-provides the VMS status value from the last system error.  The
+provided by C<$!>, if available.  (If not, it's just C<$!> again, except under
+OS/2.)
+At the moment, this differs from C<$!> only under VMS and OS/2, where it
+provides the VMS status value from the last system error, and OS/2 error
+code of the last call to OS/2 API which was not directed via CRT.  The
 caveats mentioned in the description of C<$!> apply here, too.
 (Mnemonic: Extra error explanation.)
 
+Note that under OS/2 C<$!> and C<$^E> do not track each other, so if an
+OS/2-specific call is performed, you may need to check both.
 
 =item $EVAL_ERROR
 
