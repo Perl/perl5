@@ -56,6 +56,8 @@ EOF
 }
 
 use Getopt::Std;
+use Config '%Config';
+
 $Is_VMS = $^O eq 'VMS';
 $Is_MSWin32 = $^O eq 'MSWin32';
 
@@ -188,7 +190,9 @@ sub containspod {
  		or ( $ret = minus_f_nocase "$dir/$s"     and containspod($ret))
   		or ( $Is_VMS and 
  		     $ret = minus_f_nocase "$dir/$s.com" and containspod($ret))
-		or ( $Is_MSWin32 and 
+		or ( $^O eq 'os2' and 
+ 		     $ret = minus_f_nocase "$dir/$s.cmd" and containspod($ret))
+		or ( ($Is_MSWin32 or $^O eq 'os2') and 
  		     $ret = minus_f_nocase "$dir/$s.bat" and containspod($ret))
  		or ( $ret = minus_f_nocase "$dir/pod/$s.pod")
  		or ( $ret = minus_f_nocase "$dir/pod/$s" and containspod($ret)))
@@ -219,10 +223,9 @@ foreach (@pages) {
 		for ($i = 0; $trn = $ENV{'DCL$PATH'.$i}; $i++) {
 		    push(@searchdirs,$trn);
 		}
-	    } elsif ($Is_MSWin32) {
-	        push(@searchdirs, grep(-d, split(';', $ENV{'PATH'})));
 	    } else {
-		    push(@searchdirs, grep(-d, split(':', $ENV{'PATH'})));
+	        push(@searchdirs, grep(-d, split($Config{path_sep}, 
+						 $ENV{'PATH'})));
 	    }
 	    @files= searchfor(0,$_,@searchdirs);
 	}
@@ -263,7 +266,12 @@ if ($Is_MSWin32) {
 	$tmp = 'Sys$Scratch:perldoc.tmp1_'.$$;
 	push @pagers, qw( most more less type/page );
 } else {
-	$tmp = "/tmp/perldoc1.$$";
+	if ($^O eq 'os2') {
+	  require POSIX;
+	  $tmp = POSIX::tmpnam();
+	} else {
+	  $tmp = "/tmp/perldoc1.$$";	  
+	}
 	push @pagers, qw( more less pg view cat );
 	unshift @pagers, $ENV{PAGER}  if $ENV{PAGER};
 }
