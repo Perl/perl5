@@ -62,6 +62,8 @@
 
 #define BIT_BUCKET "/dev/null"
 #define PERL_SYS_INIT(c,v)
+#define PERL_SYS_TERM()
+#define dXSUB_SYS int dummy
 
 /*
  * fwrite1() should be a routine with the same calling sequence as fwrite(),
