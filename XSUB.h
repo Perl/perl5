@@ -238,11 +238,17 @@ C<xsubpp>.  See L<perlxs/"The VERSIONCHECK: Keyword">.
 		_sv = get_sv(Perl_form(aTHX_ "%s::%s", module,	\
 				    vn = "VERSION"), FALSE);		\
 	}								\
-	if (_sv && (!SvOK(_sv) || strNE(XS_VERSION, SvPV(_sv, n_a))))	\
-	    Perl_croak(aTHX_ "%s object version %s does not match %s%s%s%s %"SVf,\
-		  module, XS_VERSION,					\
-		  vn ? "$" : "", vn ? module : "", vn ? "::" : "",	\
-		  vn ? vn : "bootstrap parameter", _sv);		\
+	if (_sv) {							\
+	    SV *xssv = Perl_newSVpvf(aTHX_ "%s",XS_VERSION);		\
+	    xssv = new_version(xssv);					\
+	    if ( !sv_derived_from(_sv, "version") )			\
+		_sv = new_version(_sv);				\
+	    if ( vcmp(_sv,xssv) )					\
+		Perl_croak(aTHX_ "%s object version %_ does not match %s%s%s%s %_",\
+		      module, vstringify(xssv),				\
+		      vn ? "$" : "", vn ? module : "", vn ? "::" : "",	\
+		      vn ? vn : "bootstrap parameter", vstringify(_sv));\
+	}                                                               \
     } STMT_END
 #else
 #  define XS_VERSION_BOOTCHECK
