@@ -11,6 +11,10 @@ the 5.8.1 release.
 
 =head1 Core Enhancements
 
+=head2 UTF-8 no more default under UTF-8 locales
+
+=head2 Unsafe signals again available
+
 =head2 Tied Arrays with Negative Array Indices
 
 Formerly, the indices passed to C<FETCH>, C<STORE>, C<EXISTS>, and
@@ -21,6 +25,8 @@ array method.  This behavior is now optional.  If the tied array class
 contains a package variable named C<$NEGATIVE_INDICES> which is set to
 a true value, negative values will be passed to C<FETCH>, C<STORE>,
 C<EXISTS>, and C<DELETE> unchanged.
+
+utime undef, undef for current time
 
 =head2 Warnings
 
@@ -51,19 +57,138 @@ C<5.005 threads are deprecated>.  If you really want to continue using
 
 =head1 Modules and Pragmata
 
+Data::Dumper Pair option
+
+=head2 Updated Modules
+
+Benchmark :hireswallclock
+
+CGI
+
+charnames - custom aliases
+
+Class::Struct - compile time structs
+
+CPAN - now with cpan
+
+DB_File
+
+Digest::MD5
+
+Encode - significant updates on the encoding pragma functionality
+(tr/// and DATA, formats)
+
+libnet
+
+Math::BigInt
+
+MIME::Base64
+
+Net::Ping
+
+podlators
+
+Pod::Perldoc
+
+Scalar::Util - refaddr isvstring looks_like_number set_prototype
+
+Storable - code references (via B::Deparse)
+
+Term::ANSIcolor
+
+Test::More
+
+Test::Simple
+
+Time::HiRes - use of nanosleep allows mixing subsecond sleeps with alarms
+
+Unicode::Collate
+
+Unicode::Normalize
+
+Unicode data fixes
+
+Win32::GetFolderPath
+
 =head1 Utility Changes
 
 =head1 New Documentation
+
+perl573delta
+
+perlos400
 
 =head1 Performance Enhancements
 
 =head1 Installation and Configuration Improvements
 
+Mac OS X now installs with Perl version embedded in installation
+directory names for easier upgrading of user-compiled Perl
+
+Tru64 gcc 3.2.1 -O3 toke.c dropped to -O2
+
+Tru64 building with newer with Berkeley DB
+
+/usr/bin/perl not overwritten by default
+
+Installation directories for site and vendor man and HTML pages,
+and site and vendor scripts
+
+gcc -Ialreadyknowndirectory (warning: changing search order)
+
+OS/400 PASE
+
+<malloc.h> FreeBSD
+
+openbsd -Wl,-R
+
+getgrent_r, gethostbyaddr_r, getnetbyaddr_r, random_r
+
+VMS poll, readdir_r
+
 =head1 Selected Bug Fixes
+
+Setting $0 works again in Linux
+
+Setting $0 now works in HP-UX
+
+Binary mode for pipes and sockets in Win32
+
+Lexicals, Closures by Dave Mitchell
+
+Encode: unmappable characters are detected already during input
+
+PerlIO::scalar reading from non-string scalars
+
+getgrent_r dynamic buffer
+
+User-defined uppercase<->lowercase Unicode mappings
+
+local ${$x}
+
+.= <> UTF-8
 
 =head1 New or Changed Diagnostics
 
 =head1 Changed Internals
+
+Pad work
+
+V-string work
+
+UTF-8 length and position cache
+
+Obsoleted APIs like sv_2pv, sv_catpvn, sv_catsv, sv_setsv again available
+
+Certain APIs like regatom are no more available
+
+Certain APIs like Perl_list are no more available without their Perl_
+
+PERL_NO_SHORT_NAMES for cleaner embedding
+
+Perl_save_bool added
+
+-DL removed, -Dv and -Dxv added
 
 =head1 New Tests
 
