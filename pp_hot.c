@@ -2281,9 +2281,6 @@ PP(pp_entersub)
 	if (CvDEPTH(cv) < 2)
 	    (void)SvREFCNT_inc(cv);
 	else {	/* save temporaries on recursion? */
-	    if (CvDEPTH(cv) == 100 && ckWARN(WARN_RECURSION)
-		  && !(PERLDB_SUB && cv == GvCV(PL_DBsub)))
-		sub_crush_depth(cv);
 	    if (CvDEPTH(cv) > AvFILLp(padlist)) {
 		AV *av;
 		AV *newpad = newAV();
@@ -2383,6 +2380,13 @@ PP(pp_entersub)
 		MARK++;
 	    }
 	}
+	/* warning must come *after* we fully set up the context
+	 * stuff so that __WARN__ handlers can safely dounwind()
+	 * if they want to
+	 */
+	if (CvDEPTH(cv) == 100 && ckWARN(WARN_RECURSION)
+	    && !(PERLDB_SUB && cv == GvCV(PL_DBsub)))
+	    sub_crush_depth(cv);
 #if 0
 	DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 			      "%p entersub returning %p\n", thr, CvSTART(cv)));

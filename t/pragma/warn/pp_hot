@@ -90,10 +90,14 @@ sub fred
 { 
     fred() if $a++ < 200
 } 
-
-fred()
+{
+  local $SIG{__WARN__} = sub {
+    die "ok\n" if $_[0] =~ /^Deep recursion on subroutine "main::fred"/
+  };
+  fred();
+}
 EXPECT
-Deep recursion on subroutine "main::fred" at - line 5.
+ok
 ########
 # pp_hot.c
 use warning 'recursion' ;
