@@ -19,7 +19,7 @@ This module provides the ability to use references as hash keys if you
 first C<tie> the hash variable to this module.  Normally, only the
 keys of the tied hash itself are preserved as references; to use
 references as keys in hashes-of-hashes, use Tie::RefHash::Nestable,
-included as part of Tie::Hash.
+included as part of Tie::RefHash.
 
 It is implemented using the standard perl TIEHASH interface.  Please
 see the C<tie> entry in perlfunc(1) and perltie(1) for more information.
@@ -57,7 +57,7 @@ Gurusamy Sarathy        gsar@activestate.com
 
 =head1 VERSION
 
-Version 1.21    22 Jun 1999
+Version 1.3    8 Apr 2001
 
 =head1 SEE ALSO
 
@@ -65,10 +65,12 @@ perl(1), perlfunc(1), perltie(1)
 
 =cut
 
-require 5.003_11;
+use v5.6.0;
 use Tie::Hash;
-@ISA = qw(Tie::Hash);
 use strict;
+
+our @ISA = qw(Tie::Hash);
+our $VERSION = '1.3';
 
 sub TIEHASH {
   my $c = shift;
@@ -146,7 +148,7 @@ sub CLEAR {
 }
 
 package Tie::RefHash::Nestable;
-use vars '@ISA'; @ISA = qw(Tie::RefHash);
+our @ISA = qw(Tie::RefHash);
 
 sub STORE {
   my($s, $k, $v) = @_;
