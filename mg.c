@@ -16,11 +16,6 @@
 #define PERL_IN_MG_C
 #include "perl.h"
 
-/* XXX If this causes problems, set i_unistd=undef in the hint file.  */
-#ifdef I_UNISTD
-# include <unistd.h>
-#endif
-
 #if defined(HAS_GETGROUPS) || defined(HAS_SETGROUPS)
 #  ifndef NGROUPS
 #    define NGROUPS 32

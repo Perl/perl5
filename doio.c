@@ -51,11 +51,6 @@
 #include <signal.h>
 #endif
 
-/* XXX If this causes problems, set i_unistd=undef in the hint file.  */
-#ifdef I_UNISTD
-#  include <unistd.h>
-#endif
-
 #ifdef SOCKS_64BIT_BUG
 typedef struct __s64_iobuffer {
     struct __s64_iobuffer *next, *last;		/* Queue pointer */

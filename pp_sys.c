@@ -35,11 +35,6 @@
 #   include <shadow.h>
 #endif
 
-/* XXX If this causes problems, set i_unistd=undef in the hint file.  */
-#ifdef I_UNISTD
-# include <unistd.h>
-#endif
-
 #ifdef HAS_SYSCALL
 #ifdef __cplusplus
 extern "C" int syscall(unsigned long,...);

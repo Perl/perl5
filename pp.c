@@ -82,10 +82,6 @@ static double UV_MAX_cxux = ((double)UV_MAX);
 
 /* variations on pp_null */
 
-#ifdef I_UNISTD
-#include <unistd.h>
-#endif
-
 /* XXX I can't imagine anyone who doesn't have this actually _needs_
    it, since pid_t is an integral type.
    --AD  2/20/1998

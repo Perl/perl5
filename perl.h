@@ -496,10 +496,14 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #   include <sys/param.h>
 #endif
 
-
 /* Use all the "standard" definitions? */
 #if defined(STANDARD_C) && defined(I_STDLIB)
 #   include <stdlib.h>
+#endif
+
+/* If this causes problems, set i_unistd=undef in the hint file.  */
+#ifdef I_UNISTD
+#   include <unistd.h>
 #endif
 
 #ifdef PERL_MICRO /* Last chance to export Perl_my_swap */

@@ -19,10 +19,6 @@
 #define PERL_IN_PP_HOT_C
 #include "perl.h"
 
-#ifdef I_UNISTD
-#include <unistd.h>
-#endif
-
 /* Hot code. */
 
 #ifdef USE_THREADS
