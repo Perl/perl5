@@ -6,21 +6,587 @@ perldelta - what's new for perl5.005
 
 This document describes differences between the 5.004 release and this one.
 
+[XXX this needs more verbose summaries of the sub topics, instead of just
+the "See L<foo>."  Scheduled for a second iteration. GSAR]
+
+=head1 About the new versioning system
+
 =head1 Incompatible Changes
+
+=head2 WARNING:  This version is not binary compatible with Perl 5.004.
+
+Starting with Perl 5.004_50 there were many deep and far-reaching changes
+to the language internals.  If you have dynamically loaded extensions
+that you built under perl 5.003 or 5.004, you can continue to use them
+with 5.004, but you will need to rebuild and reinstall those extensions
+to use them 5.005.  See L<INSTALL> for detailed instructions on how to
+upgrade.
+
+=head2 Installation structure has changed
+
+Extensions that have with architecture-dependent files are now always
+installed in the architecture-dependent locations.  Previously, they
+were shared will multiple versions of perl, an were therefore liable to
+be overwritten with newer versions that may have subtle incompatibilities.
+
+=head2 Perl Source Compatibility
+
+When none of the experimental features are enabled, there should be
+no user-visible Perl source compatibility issue.
+
+If threads are enabled, then some caveats apply. C<@_> and C<$_> become
+lexical variables.  The effect of this should be largely transparent to
+the user, but there are some boundary conditions under which user will
+need to be aware of the issues. [XXX Add e.g. here.]
+
+=head2 C Source Compatibility
+
+=item Core sources now require ANSI C compiler
+
+=item Enabling threads has source compatibility issues
+
+=head2 Binary Compatibility
+
+This version is NOT binary compatible with older versions.  All extensions
+will need to be recompiled.
+
+=head2 Security fixes may affect compatibility
+
+A few taint leaks and taint omissions have been corrected.  This may lead
+to "failure" of scripts that used to work with older versions.  Compiling
+with -DINCOMPLETE_TAINTS provides a perl with minimal amounts of changes
+to the tainting behavior.  But note that the resulting perl will have
+known insecurities.
+
+Oneliners with the C<-e> switch do not create temporary files anymore.
+
+=head2 Relaxed new mandatory warnings introduced in 5.004
+
+Many new warnings that were introduced in 5.004 have either been made
+optional.  Some of these warnings are still present, but perl's new
+features make them less often a problem.  See L<New Diagnostics>.
+
+=head2 Licensing
+
+Perl has a new Social Contract for contributors.
+
+Perl's documentation license has changed.
 
 =head1 Core Changes
 
-=head1 Modules
 
-=head2 Required Updates
+=head2 Threads
 
-    XXX Any???
+WARNING: Threading is considered an experimental feature.  Details of the
+implementation may change without notice.  There are known limitations
+and bugs.
+
+See L<README.threads>.
+
+=head2 Compiler
+
+WARNING: The Compiler and related tools are considered experimental.
+Features may change without notice, and there are known limitations
+and bugs.
+
+B::Lint is an experimental module to detect and warn about suspicious
+code, especially the cases that the -w switch does not detect.
+
+B::Deparse can be used to demystify perl code.
+
+See C<ext/B/README>.
+
+=head2 Regular Expressions
+
+See L<perlre> and L<perlop>.
+
+=head2   Improved malloc()
+
+See banner at the beginning of C<malloc.c> for details.
+
+=head2 Quicksort is internally implemented
+
+See C<perlfunc/sort>.
+
+=head2 Reliable signals
+
+Via Thread::Signal.
+
+Via switched runtime op loop.
+
+=head2 Reliable stack pointers
+
+The internals now reallocate the perl stack only at predicatable times.
+In particular, magic calls never trigger reallocations of the stack,
+because all reentrancy of the runtime is handled using a "stack of stacks".
+This should improve reliability of cached stack pointers in XSUBs.
+
+=head2 Behavior of local() on composites is well-defined
+
+See L<perlfunc/local>.
+
+=head2 C<%!> is transparently tied to the L<Errno> module
+
+See L<perlvar>.
+
+=head2 Pseudo-hashes are supported
+
+See L<perlref>.
+
+=head2 C<EXPR foreach EXPR> is supported
+
+See L<perlsyn>.
+
+=head2 Slice notation on glob elements is supported
+
+[XXX See what?]
+
+=head2 Keywords can be globally overridden
+
+See L<perlsub>.
+
+=head2 C<$^E> is meaningful on Win32
+
+See L<perlvar>.
+
+=head2 C<foreach (1..1000000)> optimized
+
+C<foreach (1..1000000)> is now optimized into a counting loop.  It does
+not try to allocate a 1000000-size list anymore.
+
+=head2 C<Foo::> can be used as implicitly quoted package name
+
+[XXX See what?]
+
+=head2 C<exists $Foo::{Bar::}> tests existence of a package
+
+[XXX See what?]
+
+=head2 Better locale support
+
+See L<perllocale>.
+
+=head2 Better support for 64-bit platforms
+
+[XXX How?]
+
+=head2 prototype() returns useful results on builtins
+
+See L<perlfunc/prototype>.
+
+=head2 Re-blessing in DESTROY() supported for chaining DESTROY() methods
+
+See L<perlobj/Destructors>.
+
+=head2 All C<printf> format conversions are handled internally
+
+See L<perlfunc/printf>.
+
+=head2 New C<INIT> keyword
+
+C<INIT> subs are like C<BEGIN> and C<END>, but they get called just before
+the perl runtime begins execution.
+
+[XXX Needs to be documented in perlsub or perlmod.]
+
+=head2 New C<lock> keyword
+
+To minimize impact on source compatibility this keyword is "weak", i.e., any
+user-defined subroutine of the same name overrides it, unless a C<use Thread>
+has been seen.
+
+=head2 Tied arrays are now fully supported
+
+See L<Tie::Array>.
+
+=head2 Tied handles support is better
+
+Several missing hooks have been added.  There is also a new base class for
+TIEARRAY implementations.  See L<Tie::Array>.
+
+
+=head1 Supported Platforms
+
+Configure has many incremental improvements.  Site-wide policy for building
+perl can now be made perlsistent, via Policy.sh.  Configure can also remember
+the arguments used in previous invocations.
+
+=head2 New Platforms
+
+BeOS is now supported.  See L<README.beos>.
+
+DOS is now supported under the DJGPP tools.  See L<README.dos>.
+
+=head2 Changes in existing support
+
+Win32 support has been vastly enhanced.  Support for Perl Object, a C++
+encapsulation of Perl.  GCC and EGCS are now supported on Win32.
+[XXX Perl Object needs a big explanation elsewhere, and a pointer to
+that location here.]
+
+VMS configuration system has been rewritten.  See L<README.vms>.
+
+OpenBSD better supported.  [XXX what others?]
+
+=head1 Modules and Pragmata
+
+=head2 New Modules
+
+=over
+
+=item B
+
+Perl compiler and tools.  See [XXX what?].
+
+=item Data::Dumper
+
+A module to pretty print Perl data.  See L<Data::Dumper>.
+
+=item Errno
+
+A module to look up errors more conveniently.  See L<Errno>.
+
+=item File::Spec
+
+A portable API for file operations.
+
+=item ExtUtils::Installed
+
+Query and manage installed modules.
+
+=item ExtUtils::Packlist
+
+Manipulate .packlist files.
+
+=item Fatal
+
+Make functions/builtins succeed or die.
+
+=item IPC::SysV
+
+Constants and other support infrastructure for System V IPC operations
+in perl.
+
+=item Test
+
+A framework for writing testsuites.
+
+=item Tie::Array
+
+Base class for tied arrays.
+
+=item Tie::Handle
+
+Base class for tied handles.
+
+=item Thread
+
+Perl thread creation, manipulation, and support.
+
+=item attrs
+
+Set subroutine attributes.
+
+=item fields
+
+Compile-time class fields.
+
+=item re
+
+Various pragmata to control behavior of regular expressions.
+
+=back
+
+=head2 Changes in existing modules
+
+=over
+
+=item CGI
+
+CGI has been updated to version 2.42.
+
+=item POSIX
+
+POSIX now has its own platform-specific hints files.
+
+=item DB_File
+
+DB_File supports version 2.x of Berkeley DB.  See C<ext/DB_File/Changes>.
+
+=item MakeMaker
+
+MakeMaker now supports writing empty makefiles, provides a way to
+specify that site umask() policy should be honored.  There is also
+better support for manipulation of .packlist files, and getting
+information about installed modules.
+
+=item CPAN
+
+[XXX What?]
+
+=item Cwd
+
+Cwd::cwd is faster on most platforms.
+
+=item Benchmark
+
+Keeps better time.
+
+=back
 
 =head1 Utility Changes
 
-=head1 C Language API Changes
+The crude GNU configure emulator is now called configure.gnu.
+
+h2ph and related utilities have been vastly overhauled.
+
+perlcc, a new experimental front end for the compiler is available.
+
+=head1 API Changes
+
+=head2 Incompatible Changes
+
+=head2 Deprecations, Extensions
+
+=head2 C++ Support
 
 =head1 Documentation Changes
+
+Config.pm now has a glossary of variables.
+
+Porting/patching.pod has detailed instructions on how to create and
+submit patches for perl.
+
+=head1 New Diagnostics
+
+=over
+
+=item Ambiguous call resolved as CORE::%s(), qualify as such or use &
+
+(W) A subroutine you have declared has the same name as a Perl keyword,
+and you have used the name without qualification for calling one or the
+other.  Perl decided to call the builtin because the subroutine is
+not imported.
+
+To force interpretation as a subroutine call, either put an ampersand
+before the subroutine name, or qualify the name with its package.
+Alternatively, you can import the subroutine (or pretend that it's
+imported with the C<use subs> pragma).
+
+To silently interpret it as the Perl operator, use the C<CORE::> prefix
+on the operator (e.g. C<CORE::log($x)>) or by declaring the subroutine
+to be an object method (see L<attrs>).
+
+=item Bad index while coercing array into hash
+
+(F) The index looked up in the hash found as the 0'th element of a
+pseudo-hash is not legal.  Index values must be at 1 or greater.
+See L<perlref>.
+
+=item Bareword "%s" refers to nonexistent package
+
+(W) You used a qualified bareword of the form C<Foo::>, but
+the compiler saw no other uses of that namespace before that point.
+Perhaps you need to predeclare a package?
+
+=item Can't call method "%s" on an undefined value
+
+(F) You used the syntax of a method call, but the slot filled by the
+object reference or package name contains an undefined value.
+Something like this will reproduce the error:
+
+    $BADREF = 42;
+    process $BADREF 1,2,3;
+    $BADREF->process(1,2,3);
+
+=item Can't coerce array into hash
+
+(F) You used an array where a hash was expected, but the array has no
+information on how to map from keys to array indices.  You can do that
+only with arrays that have a hash reference at index 0.
+
+=item Can't goto subroutine from an eval-string
+
+(F) The "goto subroutine" call can't be used to jump out of an eval "string".
+(You can use it to jump out of an eval {BLOCK}, but you probably don't want to.)
+
+=item Can't use %%! because Errno.pm is not available
+
+(F) The first time the %! hash is used, perl automatically loads the
+Errno.pm module. The Errno module is expected to tie the %! hash to
+provide symbolic names for C<$!> errno values.
+
+=item Can't use %%! because Errno.pm is not available
+
+(F) The first time the %! hash is used, perl automatically loads the
+Errno.pm module. The Errno module is expected to tie the %! hash to
+provide symbolic names for C<$!> errno values.
+
+=item Cannot find an opnumber for "%s"
+
+(F) A string of a form C<CORE::word> was given to prototype(), but
+there is no builtin with the name C<word>.
+
+=item Character class syntax [. .] is reserved for future extensions
+
+(W) Within regular expression character classes ([]) the syntax beginning
+with "[." and ending with ".]" is reserved for future extensions.
+If you need to represent those character sequences inside a regular
+expression character class, just quote the square brackets with the
+backslash: "\[." and ".\]".
+
+=item Character class syntax [: :] is reserved for future extensions
+
+(W) Within regular expression character classes ([]) the syntax beginning
+with "[:" and ending with ":]" is reserved for future extensions.
+If you need to represent those character sequences inside a regular
+expression character class, just quote the square brackets with the
+backslash: "\[:" and ":\]".
+
+=item Character class syntax [= =] is reserved for future extensions
+
+(W) Within regular expression character classes ([]) the syntax
+beginning with "[=" and ending with "=]" is reserved for future extensions.
+If you need to represent those character sequences inside a regular
+expression character class, just quote the square brackets with the
+backslash: "\[=" and "=\]".
+
+=item %s: Eval-group in insecure regular expression
+
+(F) Perl detected tainted data when trying to compile a regular expression
+that contains the C<(?{ ... })> zero-width assertion, which is unsafe.
+See L<perlre/(?{ code })>, and L<perlsec>.
+
+=item %s: Eval-group not allowed, use re 'eval'
+
+(F) A regular expression contained the C<(?{ ... })> zero-width assertion,
+but that construct is only allowed when the C<use re 'eval'> pragma is
+in effect.  See L<perlre/(?{ code })>.
+
+=item %s: Eval-group not allowed at run time
+
+(F) Perl tried to compile a regular expression containing the C<(?{ ... })>
+zero-width assertion at run time, as it would when the pattern contains
+interpolated values.  Since that is a security risk, it is not allowed.
+If you insist, you may still do this by explicitly building the pattern
+from an interpolated string at run time and using that in an eval().
+See L<perlre/(?{ code })>.
+
+=item Explicit blessing to '' (assuming package main)
+
+(W) You are blessing a reference to a zero length string.  This has
+the effect of blessing the reference into the package main.  This is
+usually not what you want.  Consider providing a default target
+package, e.g. bless($ref, $p or 'MyPackage');
+
+=item Illegal hex digit ignored
+
+(W) You may have tried to use a character other than 0 - 9 or A - F in a
+hexadecimal number.  Interpretation of the hexadecimal number stopped
+before the illegal character.
+
+=item No such array field
+
+(F) You tried to access an array as a hash, but the field name used is
+not defined.  The hash at index 0 should map all valid field names to
+array indices for that to work.
+
+=item No such field "%s" in variable %s of type %s
+
+(F) You tried to access a field of a typed variable where the type
+does not know about the field name.  The field names are looked up in
+the %FIELDS hash in the type package at compile time.  The %FIELDS hash
+is usually set up with the 'fields' pragma.
+
+=item Out of memory during ridiculously large request
+
+(F) You can't allocate more than 2^31+"small amount" bytes.  This error
+is most likely to be caused by a typo in the Perl program. e.g., C<$arr[time]>
+instead of C<$arr[$time]>.
+
+=item Range iterator outside integer range
+
+(F) One (or both) of the numeric arguments to the range operator ".."
+are outside the range which can be represented by integers internally.
+One possible workaround is to force Perl to use magical string
+increment by prepending "0" to your numbers.
+
+=item Recursive inheritance detected while looking for method '%s' in package '%s'
+
+(F) More than 100 levels of inheritance were encountered while invoking a
+method.  Probably indicates an unintended loop in your inheritance hierarchy.
+
+=item Reference found where even-sized list expected
+
+(W) You gave a single reference where Perl was expecting a list with
+an even number of elements (for assignment to a hash). This
+usually means that you used the anon hash constructor when you meant 
+to use parens. In any case, a hash requires key/value B<pairs>.
+
+    %hash = { one => 1, two => 2, };   # WRONG
+    %hash = [ qw/ an anon array / ];   # WRONG
+    %hash = ( one => 1, two => 2, );   # right
+    %hash = qw( one 1 two 2 );                 # also fine
+
+=item Undefined value assigned to typeglob
+
+(W) An undefined value was assigned to a typeglob, a la C<*foo = undef>.
+This does nothing.  It's possible that you really mean C<undef *foo>.
+
+=item Use of reserved word "%s" is deprecated
+
+(D) The indicated bareword is a reserved word.  Future versions of perl
+may use it as a keyword, so you're better off either explicitly quoting
+the word in a manner appropriate for its context of use, or using a
+different name altogether.  The warning can be suppressed for subroutine
+names by either adding a C<&> prefix, or using a package qualifier,
+e.g. C<&our()>, or C<Foo::our()>.
+
+=item perl: warning: Setting locale failed.
+
+(S) The whole warning message will look something like:
+
+       perl: warning: Setting locale failed.
+       perl: warning: Please check that your locale settings:
+               LC_ALL = "En_US",
+               LANG = (unset)
+           are supported and installed on your system.
+       perl: warning: Falling back to the standard locale ("C").
+
+Exactly what were the failed locale settings varies.  In the above the
+settings were that the LC_ALL was "En_US" and the LANG had no value.
+This error means that Perl detected that you and/or your system
+administrator have set up the so-called variable system but Perl could
+not use those settings.  This was not dead serious, fortunately: there
+is a "default locale" called "C" that Perl can and will use, the
+script will be run.  Before you really fix the problem, however, you
+will get the same error message each time you run Perl.  How to really
+fix the problem can be found in L<perllocale> section B<LOCALE PROBLEMS>.
+
+=back
+
+
+=head1 Obsolete Diagnostics
+
+=over
+ 
+=item Can't mktemp()
+
+(F) The mktemp() routine failed for some reason while trying to process
+a B<-e> switch.  Maybe your /tmp partition is full, or clobbered.
+
+=item Can't write to temp file for B<-e>: %s
+
+(F) The write routine failed for some reason while trying to process
+a B<-e> switch.  Maybe your /tmp partition is full, or clobbered.
+
+=item Cannot open temporary file
+
+(F) The create routine failed for some reason while trying to process
+a B<-e> switch.  Maybe your /tmp partition is full, or clobbered.
+
+
+=back
 
 =head1 BUGS
 
@@ -46,3 +612,5 @@ The F<README> file for general stuff.
 The F<Artistic> and F<Copying> files for copyright information.
 
 =head1 HISTORY
+
+=cut
