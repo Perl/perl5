@@ -8,13 +8,23 @@
 static ULONG retcode;
 static char fail[300];
 
+#ifdef PERL_CORE
+
+#include "EXTERN.h"
+#include "perl.h"
+
+#else
+
 char *os2error(int rc);
+
+#endif
 
 void *
 dlopen(const char *path, int mode)
 {
 	HMODULE handle;
-	char tmp[260], *beg, *dot;
+	char tmp[260];
+	const char *beg, *dot;
 	ULONG rc;
 
 	fail[0] = 0;

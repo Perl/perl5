@@ -457,7 +457,7 @@ EOF
 #endif
 EOF
     	    push @init, <<EOF;
-#ifdef __GLIBC__
+#if defined(__GLIBC__) || defined(__EMX__)
 	PL_reentrant_buffer->_${func}_struct.initialized = 0;
 	/* work around glibc-2.2.5 bug */
 	PL_reentrant_buffer->_${func}_struct.current_saltbits = 0;

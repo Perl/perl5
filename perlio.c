@@ -3343,7 +3343,7 @@ PerlIOBuf_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 #ifdef PERLIO_USING_CRLF
 #  ifdef PERLIO_IS_BINMODE_FD
 		if (PERLIO_IS_BINMODE_FD(fd))
-		    PerlIO_binmode(f,  '<'/*not used*/, O_BINARY, Nullch);
+		    PerlIO_binmode(aTHX_ f,  '<'/*not used*/, O_BINARY, Nullch);
 		else
 #  endif
 		/*

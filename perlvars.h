@@ -66,3 +66,6 @@ PERLVARI(Gppid,		IV,		0)
 #ifdef USE_ITHREADS
 PERLVAR(Gdollarzero_mutex, perl_mutex)	/* Modifying $0 */
 #endif
+
+/* This is constant on most architectures, a global on OS/2 */
+PERLVARI(Gsh_path,	char *,	SH_PATH)/* full path of shell */

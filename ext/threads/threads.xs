@@ -18,7 +18,11 @@ STMT_START {\
   }\
 } STMT_END
 #else
+#ifdef OS2
+typedef perl_os_thread pthread_t;
+#else
 #include <pthread.h>
+#endif
 #include <thread.h>
 
 #define PERL_THREAD_SETSPECIFIC(k,v) pthread_setspecific(k,v)

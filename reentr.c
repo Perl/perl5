@@ -146,7 +146,7 @@ Perl_reentrant_init(pTHX) {
 	New(31338, PL_reentrant_buffer->_asctime_buffer, PL_reentrant_buffer->_asctime_size, char);
 #endif /* HAS_ASCTIME_R */
 #ifdef HAS_CRYPT_R
-#ifdef __GLIBC__
+#if defined(__GLIBC__) || defined(__EMX__)
 	PL_reentrant_buffer->_crypt_struct.initialized = 0;
 	/* work around glibc-2.2.5 bug */
 	PL_reentrant_buffer->_crypt_struct.current_saltbits = 0;
