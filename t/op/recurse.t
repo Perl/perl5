@@ -123,7 +123,7 @@ is(takeuchi($x, $y, $z), $z + 1, "takeuchi($x, $y, $z) == $z + 1");
     };
   SKIP: {
       skip("Out of memory -- increase your data/heap?", 2)
-	  if $r =~ /Out of memory!/;
+	  if $r =~ /Out of memory/i;
       is($r, '', "64K deep recursion - no output expected");
       is($?,  0, "64K deep recursion - no coredump expected");
   }
