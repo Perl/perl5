@@ -267,6 +267,7 @@ PerlIOEncode_close(PerlIO *f)
 Off_t
 PerlIOEncode_tell(PerlIO *f)
 {
+ dTHX;
  PerlIOBuf *b = PerlIOSelf(f,PerlIOBuf);
  /* Unfortunately the only way to get a postion is to back-translate,
     the UTF8-bytes we have buf..ptr and adjust accordingly.
@@ -275,8 +276,9 @@ PerlIOEncode_tell(PerlIO *f)
   */
  if ((PerlIOBase(f)->flags & PERLIO_F_RDBUF) && b->ptr < b->end)
   {
+
    Size_t count = b->end - b->ptr;
-   PerlIO_push(f,&PerlIO_pending,"r",Nullch,0);
+   PerlIO_push(aTHX_ f,&PerlIO_pending,"r",Nullch,0);
    /* Save what we have left to read */
    PerlIOSelf(f,PerlIOBuf)->bufsiz = count;
    PerlIO_unread(f,b->ptr,count);
@@ -607,7 +609,7 @@ _utf8_off(sv)
 BOOT:
 {
 #if defined(USE_PERLIO) && !defined(USE_SFIO)
- PerlIO_define_layer(&PerlIO_encode);
+ PerlIO_define_layer(aTHX_ &PerlIO_encode);
 #endif
 #include "iso8859.def"
 #include "EBCDIC.def"
