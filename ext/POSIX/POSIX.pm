@@ -1,5 +1,7 @@
 package POSIX;
 
+use vars qw($VERSION @ISA %EXPORT_TAGS @EXPORT_OK $AUTOLOAD); 
+
 use Carp;
 use AutoLoader;
 require Config;
@@ -9,7 +11,7 @@ require Exporter;
 require DynaLoader;
 @ISA = qw(Exporter DynaLoader);
 
-$VERSION = $VERSION = "1.00" ;
+$VERSION = "1.00" ;
 
 %EXPORT_TAGS = (
 
@@ -179,7 +181,7 @@ sub import {
 }
 
 
-bootstrap POSIX;
+bootstrap POSIX $VERSION;
 
 my $EINVAL = constant("EINVAL", 0);
 my $EAGAIN = constant("EAGAIN", 0);

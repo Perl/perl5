@@ -23,11 +23,13 @@ pack up your own arguments to pass as args for locking functions, etc.
 
 =cut
 
+use vars qw($VERSION @ISA @EXPORT @EXPORT_OK $AUTOLOAD);
+
 require Exporter;
 use AutoLoader;
 require DynaLoader;
 @ISA = qw(Exporter DynaLoader);
-$VERSION = $VERSION = "1.00";
+$VERSION = "1.00";
 # Items to export into callers namespace by default
 # (move infrequently used names to @EXPORT_OK below)
 @EXPORT =
@@ -44,16 +46,16 @@ $VERSION = $VERSION = "1.00";
 );
 
 sub AUTOLOAD {
-    local($constname);
+    my($constname);
     ($constname = $AUTOLOAD) =~ s/.*:://;
-    $val = constant($constname, @_ ? $_[0] : 0);
+    my $val = constant($constname, @_ ? $_[0] : 0);
     if ($! != 0) {
 	if ($! =~ /Invalid/) {
 	    $AutoLoader::AUTOLOAD = $AUTOLOAD;
 	    goto &AutoLoader::AUTOLOAD;
 	}
 	else {
-	    ($pack,$file,$line) = caller;
+	    my ($pack,$file,$line) = caller;
 	    die "Your vendor has not defined Fcntl macro $constname, used at $file line $line.
 ";
 	}
@@ -62,7 +64,7 @@ sub AUTOLOAD {
     goto &$AUTOLOAD;
 }
 
-bootstrap Fcntl;
+bootstrap Fcntl $VERSION;
 
 # Preloaded methods go here.  Autoload methods go after __END__, and are
 # processed by the autosplit program.

@@ -1,5 +1,7 @@
 package Socket;
-$VERSION = $VERSION = "1.5";
+
+use vars qw($VERSION @ISA @EXPORT);
+$VERSION = "1.5";
 
 =head1 NAME
 
@@ -250,16 +252,16 @@ sub sockaddr_un {
 
 
 sub AUTOLOAD {
-    local($constname);
+    my($constname);
     ($constname = $AUTOLOAD) =~ s/.*:://;
-    $val = constant($constname, @_ ? $_[0] : 0);
+    my $val = constant($constname, @_ ? $_[0] : 0);
     if ($! != 0) {
 	if ($! =~ /Invalid/) {
 	    $AutoLoader::AUTOLOAD = $AUTOLOAD;
 	    goto &AutoLoader::AUTOLOAD;
 	}
 	else {
-	    ($pack,$file,$line) = caller;
+	    my ($pack,$file,$line) = caller;
 	    croak "Your vendor has not defined Socket macro $constname, used";
 	}
     }
@@ -267,7 +269,7 @@ sub AUTOLOAD {
     goto &$AUTOLOAD;
 }
 
-bootstrap Socket;
+bootstrap Socket $VERSION;
 
 # Preloaded methods go here.  Autoload methods go after __END__, and are
 # processed by the autosplit program.

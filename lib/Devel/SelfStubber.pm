@@ -1,6 +1,7 @@
 package Devel::SelfStubber;
 require SelfLoader;
 @ISA = qw(SelfLoader);
+@EXPORT = 'AUTOLOAD';
 $JUST_STUBS = 1;
 $VERSION = 1.01; sub Version {$VERSION}
 

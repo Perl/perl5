@@ -1,8 +1,11 @@
 package Safe;
+
+use vars qw($VERSION @ISA @EXPORT_OK);
+
 require Exporter;
 require DynaLoader;
 use Carp;
-$VERSION = $VERSION = "1.00";
+$VERSION = "1.00";
 @ISA = qw(Exporter DynaLoader);
 @EXPORT_OK = qw(op_mask ops_to_mask mask_to_ops opcode opname opdesc
 		MAXO emptymask fullmask);
@@ -384,7 +387,7 @@ EOT
     return safe_call_sv($root, $mask, $evalsub);
 }
 
-bootstrap Safe;
+bootstrap Safe $VERSION;
 
 $default_mask = fullmask;
 my $name;

@@ -12,13 +12,15 @@ package DynaLoader;
 #
 # Tim.Bunce@ig.co.uk, August 1994
 
+use vars qw($VERSION @ISA) ;
+
 require Carp;
 require Config;
 require AutoLoader;
 
 @ISA=qw(AutoLoader);
 
-$VERSION = $VERSION = "1.00" ;
+$VERSION = "1.00" ;
 
 sub import { }		# override import inherited from AutoLoader
 
