@@ -16,10 +16,10 @@
 
 /*
  * Package name      : perl5
- * Source directory  : /m/fs/work/work/permanent/perl/pp4/perl
- * Configuration time: Thu Nov 16 16:43:36 EET 2000
+ * Source directory  : /m/fs/work/work/permanent/perl/pp4/maint-5.6/perl
+ * Configuration time: Tue Jan 30 07:23:37 EET 2001
  * Configured by     : jhi
- * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
+ * Target system     : osf1 kosh.hut.fi v4.0 1229 alpha 
  */
 
 #ifndef _config_h_
@@ -1069,8 +1069,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define ARCHLIB "/opt/perl/lib/5.7.0/alpha-dec_osf-thread"		/**/
-#define ARCHLIB_EXP "/opt/perl/lib/5.7.0/alpha-dec_osf-thread"		/**/
+#define ARCHLIB "/opt/perl/lib/5.6.1/alpha-dec_osf-thread"		/**/
+#define ARCHLIB_EXP "/opt/perl/lib/5.6.1/alpha-dec_osf-thread"		/**/
 
 /* ARCHNAME:
  *	This symbol holds a string representing the architecture name.
@@ -1800,7 +1800,7 @@
  *	probably use memmove() or memcpy(). If neither is defined, roll your
  *	own version.
  */
-/*#define HAS_SAFE_MEMCPY	/ **/
+#define HAS_SAFE_MEMCPY	/**/
 
 /* HAS_SANE_MEMCMP:
  *	This symbol, if defined, indicates that the memcmp routine is available
@@ -2788,8 +2788,8 @@
  *	This symbol contains the ~name expanded version of PRIVLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define PRIVLIB "/opt/perl/lib/5.7.0"		/**/
-#define PRIVLIB_EXP "/opt/perl/lib/5.7.0"		/**/
+#define PRIVLIB "/opt/perl/lib/5.6.1"		/**/
+#define PRIVLIB_EXP "/opt/perl/lib/5.6.1"		/**/
 
 /* PTRSIZE:
  *	This symbol contains the size of a pointer, so that the C preprocessor
@@ -2887,8 +2887,8 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITEARCH "/opt/perl/lib/site_perl/5.7.0/alpha-dec_osf-thread"		/**/
-#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.7.0/alpha-dec_osf-thread"		/**/
+#define SITEARCH "/opt/perl/lib/site_perl/5.6.1/alpha-dec_osf-thread"		/**/
+#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.6.1/alpha-dec_osf-thread"		/**/
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.
@@ -2910,8 +2910,8 @@
  *	removed.  The elements in inc_version_list (inc_version_list.U) can
  *	be tacked onto this variable to generate a list of directories to search.
  */
-#define SITELIB "/opt/perl/lib/site_perl/5.7.0"		/**/
-#define SITELIB_EXP "/opt/perl/lib/site_perl/5.7.0"		/**/
+#define SITELIB "/opt/perl/lib/site_perl/5.6.1"		/**/
+#define SITELIB_EXP "/opt/perl/lib/site_perl/5.6.1"		/**/
 #define SITELIB_STEM "/opt/perl/lib/site_perl"		/**/
 
 /* Size_t_size:
@@ -3136,7 +3136,7 @@
 /* PERL_XS_APIVERSION:
  *	This variable contains the version of the oldest perl binary
  *	compatible with the present perl.  perl.c:incpush() and
- *	lib/lib.pm will automatically search in /opt/perl/lib/site_perl/5.7.0/alpha-dec_osf-thread for older
+ *	lib/lib.pm will automatically search in /opt/perl/lib/site_perl/5.6.1/alpha-dec_osf-thread for older
  *	directories across major versions back to xs_apiversion.
  *	This is only useful if you have a perl library directory tree
  *	structured like the default one.
@@ -3155,7 +3155,7 @@
  *	compatible with the present perl.  (That is, pure perl modules
  *	written for pm_apiversion will still work for the current
  *	version).  perl.c:incpush() and lib/lib.pm will automatically
- *	search in /opt/perl/lib/site_perl/5.7.0 for older directories across major versions
+ *	search in /opt/perl/lib/site_perl/5.6.1 for older directories across major versions
  *	back to pm_apiversion.  This is only useful if you have a perl
  *	library directory tree structured like the default one.  The
  *	versioned site_perl library was introduced in 5.005, so that's
@@ -3165,7 +3165,7 @@
  *	(presumably) be similar.
  *	See the INSTALL file for how this works.
  */
-#define PERL_XS_APIVERSION "5.7.0"
+#define PERL_XS_APIVERSION "5.6.1"
 #define PERL_PM_APIVERSION "5.005"
 
 /* HAS_GETPGRP:
