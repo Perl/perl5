@@ -4413,7 +4413,7 @@ S_incpush(pTHX_ char *p, int addsubdirs, int addoldvers, int usesep)
 	av_push(GvAVn(PL_incgv), libdir);
     }
     if (subdir) {
-	assert (SvREFCNT(subdr) == 1);
+	assert (SvREFCNT(subdir) == 1);
 	SvREFCNT_dec(subdir);
     }
 }
