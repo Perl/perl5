@@ -1,8 +1,20 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.97 2003/07/08 21:52:14 dankogai Exp $
+# $Id: Changes,v 1.98 2003/08/20 11:15:31 dankogai Exp dankogai $
 #
-$Revision: 1.97 $ $Date: 2003/07/08 21:52:14 $
+$Revision: 1.98 $ $Date: 2003/08/20 11:15:31 $
+! lib/Encode/MIME/Header.pm AUTHORS t/mime-header.t
+  Dave Evans has found and corrected a bug in Encode::MIME::Header.
+  Test suite added by Dan Kogai.
+  Message-Id: <3F43440B.7060606@rudolf.org.uk>
+! encoding.pm
+  Typo fixes rolled back in from bleedperl
+! t/at-cn.t t/at-tw.t
+  v-strings, now depreciated in perl 5.8.1, is replaced by sadahiro
+  Message-Id: <20030805002313.9880.BQW10602@nifty.com>
+! bin/enc2xs
+  argv case nit for VMS by Craig
+  Message-ID: <3F2B02DE.10207@mac.com>
 ! t/enc_eucjp.t t/enc_utf8.t AUTHORS
   Encode test fixes for VMS by Peter Prymmer
   Message-ID: <OFBD4A7559.D7CF9517-ON85256D6B.00534853-85256D6B.00538131@factset.com>

@@ -1,5 +1,5 @@
 #
-# $Id: mime-header.t,v 1.7 2003/05/10 18:13:59 dankogai Exp $
+# $Id: mime-header.t,v 1.8 2003/08/20 11:15:31 dankogai Exp dankogai $
 # This script is written in utf8
 #
 BEGIN {
@@ -23,7 +23,7 @@ no utf8;
 
 use strict;
 #use Test::More qw(no_plan);
-use Test::More tests => 9;
+use Test::More tests => 10;
 use_ok("Encode::MIME::Header");
 
 my $eheader =<<'EOS';
@@ -97,4 +97,13 @@ $bheader = "What is =?UTF-8?B?PT9VVEYtOD9CP3c0UndabVZzPz0=?= ?";
 $qheader = "What is =?UTF-8?Q?=3D=3FUTF=2D8=3FB=3Fw4RwZmVs=3F=3D?= ?";
 is(Encode::encode('MIME-B', $dheader), $bheader, "Double decode B");
 is(Encode::encode('MIME-Q', $dheader), $qheader, "Double decode Q");
+{
+    # From: Dave Evans <dave@rudolf.org.uk>
+    # Subject: Bug in Encode::MIME::Header
+    # Message-Id: <3F43440B.7060606@rudolf.org.uk>
+    use charnames ":full";
+    my $pound_1024 = "\N{POUND SIGN}1024";
+    is(Encode::encode('MIME-Q' => $pound_1024), '=?UTF-8?Q?=C2=A31024?=',
+       'pound 1024');
+}
 __END__;

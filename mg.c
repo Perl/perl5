@@ -134,6 +134,10 @@ Perl_mg_get(pTHX_ SV *sv)
 	    if (SvTYPE(sv) == SVTYPEMASK) {
 		Perl_croak(aTHX_ "Tied variable freed while still in use");
 	    }
+	    /* guard against magic having been deleted - eg FETCH calling
+	     * untie */
+	    if (!SvMAGIC(sv))
+		break;
 
 	    /* Don't restore the flags for this entry if it was deleted. */
 	    if (mg->mg_flags & MGf_GSKIP)
@@ -1452,9 +1456,9 @@ S_magic_methpack(pTHX_ SV *sv, MAGIC *mg, char *meth)
 int
 Perl_magic_getpack(pTHX_ SV *sv, MAGIC *mg)
 {
-    magic_methpack(sv,mg,"FETCH");
     if (mg->mg_ptr)
 	mg->mg_flags |= MGf_GSKIP;
+    magic_methpack(sv,mg,"FETCH");
     return 0;
 }
 
