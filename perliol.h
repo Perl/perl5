@@ -34,6 +34,13 @@ struct _PerlIO_funcs
  void		(*Set_ptrcnt)(PerlIO *f,STDCHAR *ptr,SSize_t cnt);
 };
 
+/*--------------------------------------------------------------------------------------*/
+/* Kind values */
+#define PERLIO_K_RAW		0x00000001 
+#define PERLIO_K_BUFFERED	0x00000002 
+#define PERLIO_K_CANCRLF	0x00000004
+
+/*--------------------------------------------------------------------------------------*/
 struct _PerlIO
 {
  PerlIOl *	next;       /* Lower layer */
@@ -50,13 +57,14 @@ struct _PerlIO
 #define PERLIO_F_ERROR		0x00080000
 #define PERLIO_F_TRUNCATE	0x00100000
 #define PERLIO_F_APPEND		0x00200000
-#define PERLIO_F_BINARY		0x00400000
+#define PERLIO_F_CRLF		0x00400000
 #define PERLIO_F_UTF8		0x00800000
-#define PERLIO_F_LINEBUF	0x01000000
+#define PERLIO_F_UNBUF		0x01000000
 #define PERLIO_F_WRBUF		0x02000000
 #define PERLIO_F_RDBUF		0x04000000
-#define PERLIO_F_TEMP		0x08000000
-#define PERLIO_F_OPEN		0x10000000
+#define PERLIO_F_LINEBUF	0x08000000
+#define PERLIO_F_TEMP		0x10000000
+#define PERLIO_F_OPEN		0x20000000
 
 #define PerlIOBase(f)      (*(f))
 #define PerlIOSelf(f,type) ((type *)PerlIOBase(f))
@@ -73,6 +81,12 @@ extern PerlIO_funcs PerlIO_mmap;
 #endif
 
 extern PerlIO *PerlIO_allocate(void);
+
+#if O_BINARY != O_TEXT
+#define PERLIO_STDTEXT "t"
+#else
+#define PERLIO_STDTEXT ""
+#endif
 
 /*--------------------------------------------------------------------------------------*/
 /* Generic, or stub layer functions */
