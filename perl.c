@@ -431,7 +431,7 @@ perl_destruct(pTHXx)
     FREETMPS;
 
     /* Need to flush since END blocks can produce output */
-    PerlIO_flush((PerlIO*)NULL);
+    my_fflush_all();
 
     if (CALL_FPTR(PL_threadhook)(aTHX)) {
         /* Threads hook has vetoed further cleanup */
