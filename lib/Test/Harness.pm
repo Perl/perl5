@@ -11,7 +11,7 @@ use vars qw($VERSION $verbose $switches $have_devel_corestack $curtest
 	    @ISA @EXPORT @EXPORT_OK);
 $have_devel_corestack = 0;
 
-$VERSION = "1.1602";
+$VERSION = "1.1603";
 
 $ENV{HARNESS_ACTIVE} = 1;
 
@@ -91,6 +91,7 @@ sub runtests {
 	my %todo = ();
         my $bonus = 0;
 	my $skipped = 0;
+	my $skip_reason;
 	while (<$fh>) {
 	    if( $verbose ){
 		print $_;
@@ -116,11 +117,21 @@ sub runtests {
 			$ok++;
 			$totok++;
 		    }
-		} elsif (/^ok\s*(\d*)(\s*\#\s*[Ss]kip)?/) {
+		} elsif (/^ok\s*(\d*)(\s*\#\s*[Ss]kip\S*(?:(?>\s+)(.+))?)?/) {
 		    $this = $1 if $1 > 0;
 		    $ok++;
 		    $totok++;
 		    $skipped++ if defined $2;
+		    my $reason;
+		    $reason = 'unknown reason' if defined $2;
+		    $reason = $3 if defined $3;
+		    if (defined $reason and defined $skip_reason) {
+		      # print "was: '$skip_reason' new '$reason'\n";
+		      $skip_reason = 'various reasons'
+			if $skip_reason ne $reason;
+		    } elsif (defined $reason) {
+		      $skip_reason = $reason;
+		    }
 		    $bonus++, $totbonus++ if $todo{$this};
 		}
 		if ($this > $next) {
@@ -175,7 +186,7 @@ sub runtests {
 	} elsif ($ok == $max && $next == $max+1) {
 	    if ($max and $skipped + $bonus) {
 		my @msg;
-		push(@msg, "$skipped/$max subtest".($skipped>1?'s':'')." skipped")
+		push(@msg, "$skipped/$max subtest".($skipped>1?'s':'')." skipped: $skip_reason")
 		    if $skipped;
 		push(@msg, "$bonus subtest".($bonus>1?'s':'').
 		     " unexpectedly succeeded")
