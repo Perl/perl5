@@ -88,6 +88,7 @@ so='dylib';
 dlext='bundle';
 dlsrc='dl_dyld.xs'; usedl='define';
 cccdlflags=' '; # space, not empty, because otherwise we get -fpic
+ldflags="${ldflags} -flat_namepace"
 lddlflags="${ldflags} -bundle -undefined suppress";
 ldlibpthname='DYLD_LIBRARY_PATH';
 useshrplib='true';
@@ -108,6 +109,7 @@ usemymalloc='n';
 
 # Locales aren't feeling well.
 LC_ALL=C; export LC_ALL;
+LANG=C; export LANG;
 
 # Case-insensitive filesystems don't get along with Makefile and
 # makefile in the same place.  Since Darwin uses GNU make, this dodges
@@ -115,7 +117,7 @@ LC_ALL=C; export LC_ALL;
 firstmakefile=GNUmakefile;
 
 #
-# The libraries are not threadsafe as of OS X 10. (10.1?)
+# The libraries are not threadsafe as of OS X 10.1.
 # Better stop now.
 #
 # Fix when Apple fixes libc.
