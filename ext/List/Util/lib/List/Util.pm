@@ -1,6 +1,6 @@
 # List::Util.pm
 #
-# Copyright (c) 1997-2000 Graham Barr <gbarr@pobox.com>. All rights reserved.
+# Copyright (c) 1997-2001 Graham Barr <gbarr@pobox.com>. All rights reserved.
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 
@@ -11,7 +11,7 @@ require DynaLoader;
 
 our @ISA       = qw(Exporter DynaLoader);
 our @EXPORT_OK = qw(first min max minstr maxstr reduce sum shuffle);
-our $VERSION   = "1.03_00";
+our $VERSION   = "1.04_00";
 
 bootstrap List::Util $VERSION;
 
@@ -25,7 +25,7 @@ List::Util - A selection of general-utility list subroutines
 
 =head1 SYNOPSIS
 
-    use List::Util qw(first sum min max minstr maxstr reduce);
+    use List::Util qw(first max maxstr min minstr reduce shuffle sum);
 
 =head1 DESCRIPTION
 
@@ -49,7 +49,7 @@ C<undef> is returned.
     $foo = first { defined($_) } @list    # first defined value in @list
     $foo = first { $_ > $value } @list    # first value in @list which
                                           # is greater than $value
-    
+
 This function could be implemented using C<reduce> like this
 
     $foo = reduce { defined($a) ? $a : wanted($b) ? $b : undef } undef, @list
@@ -75,8 +75,8 @@ This function could be implemented using C<reduce> like this
 Similar to C<max>, but treats all the entries in the list as strings
 and returns the highest string as defined by the C<gt> operator.
 If the list is empty then C<undef> is returned.
- 
-    $foo = maxstr 'A'..'Z'     	    # 'Z'
+
+    $foo = maxstr 'A'..'Z'          # 'Z'
     $foo = maxstr "hello","world"   # "world"
     $foo = maxstr @bar, @baz        # whatever
 
@@ -103,9 +103,9 @@ Similar to C<min>, but treats all the entries in the list as strings
 and returns the lowest string as defined by the C<lt> operator.
 If the list is empty then C<undef> is returned.
 
-    $foo = maxstr 'A'..'Z'     	    # 'A'
-    $foo = maxstr "hello","world"   # "hello"
-    $foo = maxstr @bar, @baz        # whatever
+    $foo = minstr 'A'..'Z'          # 'A'
+    $foo = minstr "hello","world"   # "hello"
+    $foo = minstr @bar, @baz        # whatever
 
 This function could be implemented using C<reduce> like this
 
@@ -117,7 +117,7 @@ Reduces LIST by calling BLOCK multiple times, setting C<$a> and C<$b>
 each time. The first call will be with C<$a> and C<$b> set to the first
 two elements of the list, subsequent calls will be done by
 setting C<$a> to the result of the previous call and C<$b> to the next
-element in the list. 
+element in the list.
 
 Returns the result of the last call to BLOCK. If LIST is empty then
 C<undef> is returned. If LIST only contains one element then that
@@ -131,6 +131,8 @@ element is returned and BLOCK is not executed.
 =item shuffle LIST
 
 Returns the elements of LIST in a random order
+
+    @cards = shuffle 0..51      # 0..51 in a random order
 
 =item sum LIST
 
@@ -177,7 +179,7 @@ to add due to them being very simple to implement in perl
 
 =head1 COPYRIGHT
 
-Copyright (c) 1997-2000 Graham Barr <gbarr@pobox.com>. All rights reserved.
+Copyright (c) 1997-2001 Graham Barr <gbarr@pobox.com>. All rights reserved.
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 

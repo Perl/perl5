@@ -1,3 +1,16 @@
+Change 639 on 2001/09/05 by <gbarr@pobox.com> (Graham Barr)
+
+	Fix context type (caused a core on Tru64)
+	Call pp_rand via *(PL_ppaddr[OP_RAND])
+
+Change 638 on 2001/09/05 by <gbarr@pobox.com> (Graham Barr)
+
+	Documentation updates
+
+Change 637 on 2001/09/03 by <gbarr@pobox.com> (Graham Barr)
+
+	Release 1.03
+
 Change 636 on 2001/09/03 by <gbarr@pobox.com> (Graham Barr)
 
 	More changes to help merging with core dist
