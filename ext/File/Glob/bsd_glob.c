@@ -710,7 +710,7 @@ glob3(Char *pathbuf, Char *pathend, Char *pattern,
 
 	/* Search directory for matching names. */
 	if (pglob->gl_flags & GLOB_ALTDIRFUNC)
-		readdirfunc = pglob->gl_readdir;
+               readdirfunc = (Direntry_t *(*)(DIR *))pglob->gl_readdir;
 	else
 		readdirfunc = my_readdir;
 	while ((dp = (*readdirfunc)(dirp))) {
