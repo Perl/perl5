@@ -1363,28 +1363,50 @@ PP(pp_srand)
 static U32
 seed()
 {
+    /*
+     * This is really just a quick hack which grabs various garbage
+     * values.  It really should be a real hash algorithm which
+     * spreads the effect of every input bit onto every output bit,
+     * if someone who knows about such tings would bother to write it.
+     * Might be a good idea to add that function to CORE as well.
+     * No numbers below come from careful analysis or anyting here,
+     * except they are primes and SEED_C1 > 1E6 to get a full-width
+     * value from (tv_sec * SEED_C1 + tv_usec).  The multipliers should
+     * probably be bigger too.
+     */
+#if RANDBITS > 16
+#  define SEED_C1	1000003
+#define   SEED_C4	73819
+#else
+#  define SEED_C1	25747
+#define   SEED_C4	20639
+#endif
+#define   SEED_C2	3
+#define   SEED_C3	269
+#define   SEED_C5	26107
+
     U32 u;
 #ifdef VMS
 #  include <starlet.h>
     unsigned int when[2];
     _ckvmssts(sys$gettim(when));
-    u = when[0] ^ when[1];
+    /* Please tell us:  Which value is seconds and what is the other here? */
+    u = (U32)SEED_C1 * when[0] + (U32)SEED_C2 * when[1];
 #else
 #  ifdef HAS_GETTIMEOFDAY
     struct timeval when;
     gettimeofday(&when,(struct timezone *) 0);
-    u = when.tv_sec ^ when.tv_usec;
+    u = (U32)SEED_C1 * when.tv_sec + (U32)SEED_C2 * when.tv_usec;
 #  else
     Time_t when;
     (void)time(&when);
-    u = when;
+    u = (U32)SEED_C1 * when;
 #  endif
 #endif
-#ifndef PLAN9		/* XXX Plan9 assembler chokes on this; fix needed  */
-    /* What is a good hashing algorithm here? */
-    u ^= (   (  269 * (U32)getpid())
-	   ^ (26107 * (U32)&when)
-	   ^ (73819 * (U32)stack_sp));
+    u += SEED_C3 * (U32)getpid();
+    u += SEED_C4 * (U32)stack_sp;
+#ifndef PLAN9           /* XXX Plan9 assembler chokes on this; fix needed  */
+    u += SEED_C5 * (U32)&when;
 #endif
     return u;
 }
