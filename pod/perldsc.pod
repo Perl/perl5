@@ -48,7 +48,7 @@ create one of these complex data structures, you can just pinch, pilfer, or
 purloin a drop-in example from here.
 
 Let's look at each of these possible constructs in detail.  There are separate
-documents on each of the following:
+sections on each of the following:
 
 =over 5
 
@@ -61,10 +61,6 @@ documents on each of the following:
 =item * hashes of hashes
 
 =item * more elaborate constructs
-
-=item * recursive and self-referential data structures
-
-=item * objects
 
 =back
 
@@ -387,7 +383,7 @@ types of data structures.
 
  # print the whole thing one at a time
  for $i ( 0 .. $#LoL ) {
-     for $j ( 0 .. $#{$LoL[$i]} ) {
+     for $j ( 0 .. $#{ $LoL[$i] } ) {
          print "elt $i $j is $LoL[$i][$j]\n";
      }
  }
@@ -397,9 +393,9 @@ types of data structures.
 =head2 Declaration of a HASH OF LISTS
 
  %HoL = (
-        "flintstones"        => [ "fred", "barney" ],
-        "jetsons"            => [ "george", "jane", "elroy" ],
-        "simpsons"           => [ "homer", "marge", "bart" ],
+        flintstones        => [ "fred", "barney" ],
+        jetsons            => [ "george", "jane", "elroy" ],
+        simpsons           => [ "homer", "marge", "bart" ],
       );
 
 =head2 Generation of a HASH OF LISTS
@@ -456,12 +452,17 @@ types of data structures.
  }
 
  # print the whole thing sorted by number of members
- foreach $family ( sort { @{$HoL{$b}} <=> @{$HoL{$b}} } keys %HoL ) {
+ foreach $family ( sort { @{$HoL{$b}} <=> @{$HoL{$a}} } keys %HoL ) {
      print "$family: @{ $HoL{$family} }\n"
  }
 
  # print the whole thing sorted by number of members and name
- foreach $family ( sort { @{$HoL{$b}} <=> @{$HoL{$a}} } keys %HoL ) {
+ foreach $family ( sort { 
+			    @{$HoL{$b}} <=> @{$HoL{$a}}
+					||
+				    $a cmp $b
+	    } keys %HoL )
+ {
      print "$family: ", join(", ", sort @{ $HoL{$family}), "\n";
  }
 
@@ -560,19 +561,19 @@ types of data structures.
 =head2 Declaration of a HASH OF HASHES
 
  %HoH = (
-        "flintstones" => {
-            "lead"    => "fred",
-            "pal"     => "barney",
+        flintstones => {
+		lead      => "fred",
+		pal       => "barney",
         },
-        "jetsons"     => {
-            "lead"    => "george",
-            "wife"    => "jane",
-            "his boy" => "elroy",
+        jetsons     => {
+		lead      => "george",
+		wife      => "jane",
+		"his boy" => "elroy",
         },
-        "simpsons"    => {
-             "lead"   => "homer",
-             "wife"   => "marge",
-             "kid"    => "bart",
+        simpsons    => {
+		lead      => "homer",
+		wife      => "marge",
+		kid       => "bart",
 	},
  );
 
@@ -614,8 +615,8 @@ types of data structures.
 
  # append new members to an existing family
  %new_folks = (
-     "wife" => "wilma",
-     "pet"  => "dino";
+     wife => "wilma",
+     pet  => "dino";
  );
 
  for $what (keys %new_folks) {
@@ -650,7 +651,7 @@ types of data structures.
 
 
  # print the whole thing sorted by number of members
- foreach $family ( sort { keys %{$HoH{$b}} <=> keys %{$HoH{$b}} } keys %HoH ) {
+ foreach $family ( sort { keys %{$HoH{$b}} <=> keys %{$HoH{$a}} } keys %HoH ) {
      print "$family: { ";
      for $role ( sort keys %{ $HoH{$family} } ) {
          print "$role=$HoH{$family}{$role} ";
@@ -663,10 +664,10 @@ types of data structures.
  for ( qw(lead wife son daughter pal pet) ) { $rank{$_} = ++$i }
 
  # now print the whole thing sorted by number of members
- foreach $family ( sort { keys %{$HoH{$b}} <=> keys %{$HoH{$b}} } keys %HoH ) {
+ foreach $family ( sort { keys %{ $HoH{$b} } <=> keys %{ $HoH{$a} } } keys %HoH ) {
      print "$family: { ";
      # and print these according to rank order
-     for $role ( sort { $rank{$a} <=> $rank{$b} keys %{ $HoH{$family} } } ) {
+     for $role ( sort { $rank{$a} <=> $rank{$b} }  keys %{ $HoH{$family} } ) {
          print "$role=$HoH{$family}{$role} ";
      }
      print "}\n";
@@ -710,7 +711,7 @@ many different sorts:
 =head2 Declaration of a HASH OF COMPLEX RECORDS
 
      %TV = (
-        "flintstones" => {
+        flintstones => {
             series   => "flintstones",
             nights   => [ qw(monday thursday friday) ],
             members  => [
@@ -720,7 +721,7 @@ many different sorts:
             ],
         },
 
-        "jetsons"     => {
+        jetsons     => {
             series   => "jetsons",
             nights   => [ qw(wednesday saturday) ],
             members  => [
@@ -730,7 +731,7 @@ many different sorts:
             ],
          },
 
-        "simpsons"    => {
+        simpsons    => {
             series   => "simpsons",
             nights   => [ qw(monday) ],
             members  => [
@@ -776,7 +777,7 @@ many different sorts:
      foreach $family (keys %TV) {
          $rec = $TV{$family}; # temp pointer
          @kids = ();
-         for $person ( @{$rec->{members}} ) {
+         for $person ( @{ $rec->{members} } ) {
              if ($person->{role} =~ /kid|son|daughter/) {
                  push @kids, $person;
              }
@@ -805,7 +806,7 @@ many different sorts:
          for $who ( @{ $TV{$family}{members} } ) {
              print " $who->{name} ($who->{role}), age $who->{age}\n";
          }
-         print "it turns out that $TV{$family}{'lead'} has ";
+         print "it turns out that $TV{$family}{lead} has ";
          print scalar ( @{ $TV{$family}{kids} } ), " kids named ";
          print join (", ", map { $_->{name} } @{ $TV{$family}{kids} } );
          print "\n";
@@ -830,4 +831,4 @@ perlref(1), perllol(1), perldata(1), perlobj(1)
 Tom Christiansen E<lt>F<tchrist@perl.com>E<gt>
 
 Last update:
-Mon Jul  8 05:22:49 MDT 1996
+Wed Oct 23 04:57:50 MET DST 1996
