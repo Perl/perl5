@@ -124,8 +124,12 @@ $ perl_d_cmsghdr_s = "undef"
 $ IF use_64bit .eqs. "Y"
 $ THEN
 $   perl_use64bits = "define"
+$   perl_uselargefiles = "define"
+$   perl_uselongdouble = "define"
 $ ELSE
 $   perl_use64bits = "undef"
+$   perl_uselargefiles = "undef"
+$   perl_uselongdouble = "undef"
 $ ENDIF
 $ perl_d_drand48proto = "define"
 $ perl_libpth="/sys$share /sys$library"
@@ -3570,6 +3574,8 @@ $ WC "sPRIu64='" + perl_sPRIu64 + "'"
 $ WC "sPRIo64='" + perl_sPRIo64 + "'"
 $ WC "sPRIx64='" + perl_sPRIx64 + "'"
 $ WC "d_llseek='" + perl_d_llseek + "'"
+$ WC "d_uselargefiles='" + perl_d_uselargefiles + "'"
+$ WC "d_uselongdouble='" + perl_d_uselongdouble + "'"
 $!
 $! ##WRITE NEW CONSTANTS HERE##
 $!
