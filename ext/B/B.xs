@@ -566,10 +566,16 @@ OP_name(o)
 char *
 OP_ppaddr(o)
 	B::OP		o
+    PREINIT:
+	int i;
+	SV *sv = sv_newmortal();
     CODE:
-	ST(0) = sv_newmortal();
-	sv_setpvn(ST(0), "Perl_pp_", 8);
-	sv_catpv(ST(0), PL_op_name[o->op_type]);
+	sv_setpvn(sv, "PL_ppaddr[OP_", 13);
+	sv_catpv(sv, PL_op_name[o->op_type]);
+	for (i=13; i<SvCUR(sv); ++i)
+	    SvPVX(sv)[i] = toUPPER(SvPVX(sv)[i]);
+	sv_catpv(sv, "]");
+	ST(0) = sv;
 
 char *
 OP_desc(o)

@@ -572,8 +572,8 @@ This returns the op name as a string (e.g. "add", "rv2av").
 
 =item ppaddr
 
-This returns the function name as a string (e.g. Perl_pp_add,
-Perl_pp_rv2av).
+This returns the function name as a string (e.g. "PL_ppaddr[OP_ADD]",
+"PL_ppaddr[OP_RV2AV]").
 
 =item desc
 
