@@ -5805,7 +5805,6 @@ $ WC "perl_symbol='" + perl_symbol + "'"  ! VMS specific
 $ WC "perl_verb='" + perl_verb + "'"      ! VMS specific
 $ WC "pgflquota='" + pgflquota + "'"
 $ WC "pidtype='" + pidtype + "'"
-$ WC "pm_apiversion='" + version + "'"
 $ WC "prefix='" + vms_prefix + "'"
 $ WC "prefixexp='" + vms_prefix + ":'"
 $ WC "privlib='" + privlib + "'"
@@ -5936,7 +5935,6 @@ $ WC "vms_cc_type='" + vms_cc_type + "'" ! VMS specific
 $ WC "vms_prefix='" + vms_prefix + "'" ! VMS specific
 $ WC "vms_ver='" + vms_ver + "'" ! VMS specific
 $ WC "voidflags='15'"
-$ WC "xs_apiversion='" + version + "'"
 $ WC "PERL_CONFIG_SH='true'"
 $!
 $! ## The UNIXy POSIXy reentrantey thingys ##
