@@ -58,6 +58,9 @@ PerlIOEncode_getarg(pTHX_ PerlIO * f, CLONE_PARAMS * param, int flags)
     SV *sv = &PL_sv_undef;
     if (e->enc) {
 	dSP;
+	/* Not 100% sure stack swap is right thing to do during dup ... */
+	PUSHSTACKi(PERLSI_MAGIC);
+	SPAGAIN;
 	ENTER;
 	SAVETMPS;
 	PUSHMARK(sp);
@@ -68,6 +71,9 @@ PerlIOEncode_getarg(pTHX_ PerlIO * f, CLONE_PARAMS * param, int flags)
 	    sv = newSVsv(POPs);
 	    PUTBACK;
 	}
+	FREETMPS;
+	LEAVE;
+	POPSTACK;
     }
     return sv;
 }
@@ -79,6 +85,9 @@ PerlIOEncode_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg)
     dSP;
     IV  code = PerlIOBuf_pushed(aTHX_ f, mode, Nullsv);
     SV *result = Nullsv;
+
+    PUSHSTACKi(PERLSI_MAGIC);
+    SPAGAIN;
 
     ENTER;
     SAVETMPS;
@@ -140,6 +149,7 @@ PerlIOEncode_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg)
 
     FREETMPS;
     LEAVE;
+    POPSTACK;
     return code;
 }
 
@@ -224,6 +234,8 @@ PerlIOEncode_fill(pTHX_ PerlIO * f)
 	    Perl_die(aTHX_ "panic: cannot push :perlio for %p",f);
 	}
     }
+    PUSHSTACKi(PERLSI_MAGIC);
+    SPAGAIN;
     ENTER;
     SAVETMPS;
   retry:
@@ -363,18 +375,19 @@ PerlIOEncode_fill(pTHX_ PerlIO * f)
 	    PerlIO_set_ptrcnt(n, ptr+use, (avail-use));
 	    goto retry;
 	}
-	FREETMPS;
-	LEAVE;
-	return code;
     }
     else {
     end_of_file:
+	code = -1;
 	if (avail == 0)
 	    PerlIOBase(f)->flags |= PERLIO_F_EOF;
 	else
 	    PerlIOBase(f)->flags |= PERLIO_F_ERROR;
-	return -1;
     }
+    FREETMPS;
+    LEAVE;
+    POPSTACK;
+    return code;
 }
 
 IV
@@ -391,6 +404,8 @@ PerlIOEncode_flush(pTHX_ PerlIO * f)
 	SSize_t count = 0;
 	if (PerlIOBase(f)->flags & PERLIO_F_WRBUF) {
 	    /* Write case encode the buffer and write() to layer below */
+	    PUSHSTACKi(PERLSI_MAGIC);
+	    SPAGAIN;
 	    ENTER;
 	    SAVETMPS;
 	    PUSHMARK(sp);
@@ -413,6 +428,7 @@ PerlIOEncode_flush(pTHX_ PerlIO * f)
 	    }
 	    FREETMPS;
 	    LEAVE;
+	    POPSTACK;
 	    if (PerlIO_flush(PerlIONext(f)) != 0) {
 		code = -1;
 	    }
@@ -437,6 +453,8 @@ PerlIOEncode_flush(pTHX_ PerlIO * f)
 		/* Bother - have unread data.
 		   re-encode and unread() to layer below
 		 */
+		PUSHSTACKi(PERLSI_MAGIC);
+		SPAGAIN;
 		ENTER;
 		SAVETMPS;
 		str = sv_newmortal();
@@ -464,6 +482,7 @@ PerlIOEncode_flush(pTHX_ PerlIO * f)
 		}
 		FREETMPS;
 		LEAVE;
+		POPSTACK;
 	    }
 	}
 	e->base.ptr = e->base.end = e->base.buf;
@@ -594,6 +613,8 @@ BOOT:
      * PerlIO/encoding.pm.  This avoids SEGV when ":encoding()"
      * is invoked without prior "use Encode". -- dankogai
      */
+    PUSHSTACKi(PERLSI_MAGIC);
+    SPAGAIN;
     if (!gv_stashpvn("Encode", 6, FALSE)) {
 #if 0
 	/* This would just be an irritant now loading works */
@@ -607,6 +628,7 @@ BOOT:
 	SPAGAIN;
 	LEAVE;
     }
+#ifdef PERLIO_LAYERS
     PUSHMARK(sp);
     PUTBACK;
     if (call_pv(OUR_DEFAULT_FB, G_SCALAR) != 1) {
@@ -616,7 +638,7 @@ BOOT:
     SPAGAIN;
     sv_setsv(chk, POPs);
     PUTBACK;
-#ifdef PERLIO_LAYERS
     PerlIO_define_layer(aTHX_ &PerlIO_encode);
 #endif
+    POPSTACK;
 }
