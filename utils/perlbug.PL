@@ -837,10 +837,10 @@ with perl (we'll admit this is no mean task, given the sheer volume of
 it all, but at least have a look at the sections that I<seem> relevant).
 
 Be aware of the familiar traps that perl programmers of various hues
-fall into.  See perltrap(1).
+fall into.  See L<perltrap>.
 
 Try to study the problem under the perl debugger, if necessary.
-See perldebug(1).
+See L<perldebug>.
 
 =item Do you have a proper test case?
 
@@ -908,62 +908,62 @@ version of perl comes out and your bug is still present.
 
 =over 8
 
-=item -a
+=item B<-a>
 
 Address to send the report to.  Defaults to `perlbug@perl.com'.
 
-=item -b
+=item B<-b>
 
 Body of the report.  If not included on the command line, or
-in a file with -f, you will get a chance to edit the message.
+in a file with B<-f>, you will get a chance to edit the message.
 
-=item -C
+=item B<-C>
 
 Don't send copy to administrator.
 
-=item -c
+=item B<-c>
 
 Address to send copy of report to.  Defaults to the address of the
 local perl administrator (recorded when perl was built).
 
-=item -d
+=item B<-d>
 
 Data mode (the default if you redirect or pipe output).  This prints out
 your configuration data, without mailing anything.  You can use this
-with -v to get more complete data.
+with B<-v> to get more complete data.
 
-=item -e
+=item B<-e>
 
 Editor to use. 
 
-=item -f
+=item B<-f>
 
 File containing the body of the report.  Use this to quickly send a
 prepared message.
 
-=item -h
+=item B<-h>
 
 Prints a brief summary of the options.
 
-=item -r
+=item B<-r>
 
 Your return address.  The program will ask you to confirm its default
 if you don't use this option.
 
-=item -S
+=item B<-S>
 
 Send without asking for confirmation.
 
-=item -s
+=item B<-s>
 
 Subject to include with the message.  You will be prompted if you don't
 supply one on the command line.
 
-=item -t
+=item B<-t>
 
 Test mode.  The target address defaults to `perlbug-test@perl.com'.
 
-=item -v
+=item B<-v>
 
 Include verbose configuration data in the report.
 
@@ -971,8 +971,8 @@ Include verbose configuration data in the report.
 
 =head1 AUTHORS
 
-Kenneth Albanowski <kjahds@kjahds.com>, subsequently I<doc>tored by
-Gurusamy Sarathy (E<lt>gsar@umich.eduE<gt>), Tom Christiansen
+Kenneth Albanowski (E<lt>kjahds@kjahds.comE<gt>), subsequently I<doc>tored
+by Gurusamy Sarathy (E<lt>gsar@umich.eduE<gt>), Tom Christiansen
 (E<lt>tchrist@perl.comE<gt>), and Nathan Torkington
 (E<lt>gnat@frii.comE<gt>).
 
