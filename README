@@ -76,11 +76,10 @@ or if you have any problems building.)
 2) Read the manual entries before running perl.
 
 3) IMPORTANT!  Help save the world!  Communicate any problems and suggested
-patches to me, larry@wall.org (Larry Wall), so we can
-keep the world in sync.  If you have a problem, there's someone else
-out there who either has had or will have the same problem.
-It's usually helpful if you send the output of the "myconfig" script
-in the main perl directory.
+patches to perlbug@perl.com so we can keep the world in sync.
+If you have a problem, there's someone else out there who either has had
+or will have the same problem.  It's usually helpful if you send the
+output of the "myconfig" script in the main perl directory.
 
 If you've succeeded in compiling perl, the perlbug script in the utils/
 subdirectory can be used to help mail in a bug report.
