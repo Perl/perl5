@@ -4,7 +4,7 @@
 #########################
 
 use Test;
-BEGIN { plan tests => 20 };
+BEGIN { plan tests => 22 };
 use Unicode::Collate;
 ok(1); # If we made it this far, we're ok.
 
@@ -43,7 +43,7 @@ if(!$@){
   ok($NFD->cmp("A$acute", $A_acute), 0);
 }
 else{
-  ok(1,1);
+  ok(1);
 }
 
 my $tr = Unicode::Collate->new(
@@ -112,4 +112,28 @@ my $ign = Unicode::Collate->new(
 );
 
 ok( $ign->cmp("element","lament"), 0);
+
+$UCA->{level} = 2;
+
+my $orig = "This is a Perl book.";
+my $str;
+my $sub = "PERL";
+my $rep = "camel";
+my $ret = "This is a camel book.";
+
+$str = $orig;
+if(my @tmp = $UCA->index($str, $sub)){
+  substr($str, $tmp[0], $tmp[1], $rep);
+}
+
+ok($str, $ret);
+
+$UCA->{level} = $old_level;
+
+$str = $orig;
+if(my @tmp = $UCA->index($str, $sub)){
+  substr($str, $tmp[0], $tmp[1], $rep);
+}
+
+ok($str, $orig);
 
