@@ -937,6 +937,7 @@ ok(128,1);
     ok(137, $warn_count == 0);
     $warn_count = 0;
 
+    untie %hash1;
     unlink $Dfile;
 }
 

@@ -1,10 +1,10 @@
 # DB_File.pm -- Perl 5 interface to Berkeley DB 
 #
-# written by Paul Marquess (Paul.Marquess@btinternet.com)
+# written by Paul Marquess (pmqs@cpan.org)
 # last modified 22nd October 2002
-# version 1.806
+# version 1.807
 #
-#     Copyright (c) 1995-2002 Paul Marquess. All rights reserved.
+#     Copyright (c) 1995-2003 Paul Marquess. All rights reserved.
 #     This program is free software; you can redistribute it and/or
 #     modify it under the same terms as Perl itself.
 
@@ -165,7 +165,7 @@ our ($db_version, $use_XSLoader, $splice_end_array);
 use Carp;
 
 
-$VERSION = "1.806" ;
+$VERSION = "1.807" ;
 
 {
     local $SIG{__WARN__} = sub {$splice_end_array = "@_";};
@@ -2252,7 +2252,7 @@ compile properly on IRIX 5.3.
 
 =head1 COPYRIGHT
 
-Copyright (c) 1995-2002 Paul Marquess. All rights reserved. This program
+Copyright (c) 1995-2003 Paul Marquess. All rights reserved. This program
 is free software; you can redistribute it and/or modify it under the
 same terms as Perl itself.
 
@@ -2284,7 +2284,7 @@ L<dbmfilter>
 =head1 AUTHOR
 
 The DB_File interface was written by Paul Marquess
-E<lt>Paul.Marquess@btinternet.comE<gt>.
+E<lt>pmqs@cpan.org<gt>.
 Questions about the DB system itself may be addressed to
 E<lt>db@sleepycat.com<gt>.
 
