@@ -25,5 +25,6 @@ print $x == -7 ? "ok 5\n" : "# expected -7, got $x\nnot ok 5\n";
 {
     use integer;
     $x = length("abc") % -10;
-    print $x == 3 ? "ok 6\n" : "# expected 3, got $x\nnot ok 6\n";
+    $y = (3/-10)*-10;
+    print $x+$y == 3 && abs($x) < 10 ? "ok 6\n" : "not ok 6\n";
 }
