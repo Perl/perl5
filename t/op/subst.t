@@ -7,7 +7,7 @@ BEGIN {
 }
 
 require './test.pl';
-plan( tests => 124 );
+plan( tests => 125 );
 
 $x = 'foo';
 $_ = "x";
@@ -494,9 +494,19 @@ SKIP: {
 $_ = 'aaaa';
 $r = 'x';
 $s = s/a(?{})/$r/g;
-is("<$_> <$s>", "<xxxx> <4>", "perl #7806");
+is("<$_> <$s>", "<xxxx> <4>", "[perl #7806]");
 
 $_ = 'aaaa';
 $s = s/a(?{})//g;
-is("<$_> <$s>", "<> <4>", "perl #7806");
+is("<$_> <$s>", "<> <4>", "[perl #7806]");
 
+# [perl #19048] Coredump in silly replacement
+{
+    local $^W = 0;
+    $_="abcdef\n";
+    s!.!!eg;
+    is($_, "\n", "[perl #19048]");
+}
+
+
+    
