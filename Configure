@@ -10867,13 +10867,13 @@ EOM
 #include <sys/select.h>
 #endif
 #include <stdio.h>
-#define S sizeof($selecttype)
+$selecttype b;
+#define S sizeof(*(b))
 #define MINBITS	64
 #define NBYTES (S * 8 > MINBITS ? S : MINBITS/8)
 #define NBITS  (NBYTES * 8)
 int main() {
     char s[NBYTES];
-    $selecttype b;
     struct timeval t;
     int i;
     FILE* fp;
@@ -10901,6 +10901,13 @@ EOCP
 		if eval $compile_ok; then
 			selectminbits=`./try`
 			case "$selectminbits" in
+			'')	cat >&4 <<EOM
+Cannot figure out on how many bits at a time your select() operates.
+I'll play safe and guess it is 32 bits.
+EOM
+				selectminbits=32
+				bits="32 bits"
+				;;
 			1)	bits="1 bit" ;;
 			*)	bits="$selectminbits bits" ;;
 			esac
