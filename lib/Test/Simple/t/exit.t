@@ -5,10 +5,12 @@ my $test_num = 1;
 # Utility testing functions.
 sub ok ($;$) {
     my($test, $name) = @_;
-    print "not " unless $test;
-    print "ok $test_num";
-    print " - $name" if defined $name;
-    print "\n";
+    my $ok = '';
+    $ok .= "not " unless $test;
+    $ok .= "ok $test_num";
+    $ok .= " - $name" if defined $name;
+    $ok .= "\n";
+    print $ok;
     $test_num++;
 }
 
@@ -32,7 +34,7 @@ print "1..".keys(%Tests)."\n";
 
 chdir 't' if -d 't';
 while( my($test_name, $exit_code) = each %Tests ) {
-    my $wait_stat = system("$^X -I../lib -Ilib/Test/Simple/ lib/Test/Simple/sample_tests/$test_name");
+    my $wait_stat = system(qq{$^X -"I../blib/lib" sample_tests/$test_name});
     My::Test::ok( $wait_stat >> 8 == $exit_code, 
                   "$test_name exited with $exit_code" );
 }

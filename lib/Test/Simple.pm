@@ -2,7 +2,7 @@ package Test::Simple;
 
 require 5.004;
 
-$Test::Simple::VERSION = '0.08';
+$Test::Simple::VERSION = '0.09';
 
 my(@Test_Results) = ();
 my($Num_Tests, $Planned_Tests, $Test_Died) = (0,0,0);

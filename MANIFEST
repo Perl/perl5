@@ -1101,6 +1101,7 @@ lib/Test/More/t/fail.t          Test::More test, failing tests
 lib/Test/More/t/plan_is_noplan.t        Test::More test, noplan
 lib/Test/More/t/skipall.t       Test::More test, skipping all tests
 lib/Test/Simple.pm              Basic utility for writing tests
+lib/Test/Simple/Changes		Test::Simple changes
 lib/Test/Simple/t/exit.t        Test::Simple test, exit codes
 lib/Test/Simple/t/extra.t       Test::Simple test
 lib/Test/Simple/t/fail.t        Test::Simple test, test failures

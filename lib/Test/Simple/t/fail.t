@@ -9,10 +9,12 @@ my $test_num = 1;
 # Utility testing functions.
 sub ok ($;$) {
     my($test, $name) = @_;
-    print "not " unless $test;
-    print "ok $test_num";
-    print " - $name" if defined $name;
-    print "\n";
+    my $ok = '';
+    $ok .= "not " unless $test;
+    $ok .= "ok $test_num";
+    $ok .= " - $name" if defined $name;
+    $ok .= "\n";
+    print $ok;
     $test_num++;
 }
 
@@ -21,7 +23,7 @@ package main;
 
 require Test::Simple;
 
-push @INC, 'lib/Test/Simple/';
+push @INC, 't', '.';
 require Catch;
 my($out, $err) = Catch::caught();
 
@@ -45,8 +47,8 @@ not ok 5 - damnit
 OUT
 
     My::Test::ok($$err eq <<ERR);
-#     Failed test ($0 at line 33)
-#     Failed test ($0 at line 34)
+#     Failed test ($0 at line 35)
+#     Failed test ($0 at line 36)
 # Looks like you failed 2 tests of 5.
 ERR
 
