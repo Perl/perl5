@@ -11,6 +11,7 @@ package File::DosGlob;
 
 our $VERSION = '1.00';
 use strict;
+use warnings;
 
 sub doglob {
     my $cond = shift;

@@ -91,11 +91,12 @@ Charles Bailey <F<bailey@newman.upenn.edu>>
 
 =cut
 
-use 5.005_64;
+use 5.6.0;
 use Carp;
 use File::Basename ();
 use Exporter ();
 use strict;
+use warnings;
 
 our $VERSION = "1.0404";
 our @ISA = qw( Exporter );

@@ -15,8 +15,6 @@ use File::Copy;
 
 for my $pass (@pass) {
 
-  require File::Copy;
-
   my $loopconst = $pass*$tests;
 
   # First we create a file
@@ -96,10 +94,6 @@ for my $pass (@pass) {
       and not -e "file-$$";;
   printf "ok %d\n", 11+$loopconst;
   unlink "lib/file-$$" or die "unlink: $!";
-
-  # warn sprintf "INC->".$INC{"File/Copy.pm"};
-  delete $INC{"File/Copy.pm"};
-
 }
 
 

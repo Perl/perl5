@@ -1,7 +1,8 @@
 package File::Compare;
 
-use 5.005_64;
+use 5.6.0;
 use strict;
+use warnings;
 our($VERSION, @ISA, @EXPORT, @EXPORT_OK, $Too_Big);
 
 require Exporter;

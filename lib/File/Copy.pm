@@ -7,8 +7,9 @@
 
 package File::Copy;
 
-use 5.005_64;
+use 5.6.0;
 use strict;
+use warnings;
 use Carp;
 our(@ISA, @EXPORT, @EXPORT_OK, $VERSION, $Too_Big, $Syscopy_is_copy);
 sub copy;

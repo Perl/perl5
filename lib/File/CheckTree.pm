@@ -2,8 +2,9 @@ package File::CheckTree;
 
 our $VERSION = '4.1';
 
-require 5.000;
+require 5.6.0;
 require Exporter;
+use warnings;
 
 =head1 NAME
 
@@ -49,6 +50,7 @@ our @EXPORT = qw(validate);
 
 sub validate {
     local($file,$test,$warnings,$oldwarnings);
+    $warnings = 0;
     foreach $check (split(/\n/,$_[0])) {
 	next if $check =~ /^#/;
 	next if $check =~ /^$/;
