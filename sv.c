@@ -3755,33 +3755,33 @@ not 'set' magic.  See C<sv_catsv_mg>.
 =cut */
 
 void
-Perl_sv_catsv(pTHX_ SV *dstr, register SV *sstr)
+Perl_sv_catsv(pTHX_ SV *dsv, register SV *ssv)
 {
     char *spv;
     STRLEN slen;
-    if (!sstr)
+    if (!ssv)
 	return;
-    if ((spv = SvPV(sstr, slen))) {
-	bool dutf8 = DO_UTF8(dstr);
-	bool sutf8 = DO_UTF8(sstr);
+    if ((spv = SvPV(ssv, slen))) {
+	bool dutf8 = DO_UTF8(dsv);
+	bool sutf8 = DO_UTF8(ssv);
 
 	if (dutf8 == sutf8)
-	    sv_catpvn(dstr,spv,slen);
+	    sv_catpvn(dsv,spv,slen);
 	else {
 	    if (dutf8) {
-		SV* cstr = newSVsv(sstr);
+		/* Not modifying source SV, so taking a temporary copy. */
+		SV* csv = sv_2mortal(newSVsv(ssv));
 		char *cpv;
 		STRLEN clen;
 
-		sv_utf8_upgrade(cstr);
-		cpv = SvPV(cstr,clen);
-		sv_catpvn(dstr,cpv,clen);
-		sv_2mortal(cstr);
+		sv_utf8_upgrade(csv);
+		cpv = SvPV(csv,clen);
+		sv_catpvn(dsv,cpv,clen);
 	    }
 	    else {
-		sv_utf8_upgrade(dstr);
-		sv_catpvn(dstr,spv,slen);
-		SvUTF8_on(dstr);
+		sv_utf8_upgrade(dsv);
+		sv_catpvn(dsv,spv,slen);
+		SvUTF8_on(dsv); /* If dsv has no wide characters. */
 	    }
 	}
     }
@@ -3796,10 +3796,10 @@ Like C<sv_catsv>, but also handles 'set' magic.
 */
 
 void
-Perl_sv_catsv_mg(pTHX_ SV *dstr, register SV *sstr)
+Perl_sv_catsv_mg(pTHX_ SV *dsv, register SV *ssv)
 {
-    sv_catsv(dstr,sstr);
-    SvSETMAGIC(dstr);
+    sv_catsv(dsv,ssv);
+    SvSETMAGIC(dsv);
 }
 
 /*

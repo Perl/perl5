@@ -424,7 +424,7 @@ CODE:
  {
   STRLEN len;
   char *s = SvPV(sv,len);
-  if (!SvUTF8(sv) || is_utf8_string(s,len))
+  if (!SvUTF8(sv) || is_utf8_string((U8*)s,len))
    XSRETURN_YES;
   else
    XSRETURN_NO;
