@@ -584,12 +584,24 @@ sub _find_dir_symlnk($$$) {
     while (defined $SE) {
 
 	unless ($bydepth) {
+	    # change to parent directory
+	    unless ($no_chdir) {
+		my $udir = $pdir_loc;
+		if ($untaint) {
+		    $udir = $1 if $pdir_loc =~ m|$untaint_pat|;
+		}
+		unless (chdir $udir) {
+		    warn "Can't cd to $udir: $!\n";
+		    next;
+		}
+	    }
 	    $dir= $p_dir;
             $name= $dir_name;
             $_= ($no_chdir ? $dir_name : $dir_rel );
             $fullname= $dir_loc;
 	    # prune may happen here
             $prune= 0;
+	    lstat($_); # make sure  file tests with '_' work
             &$wanted_callback;
             next if  $prune;
 	}
@@ -673,6 +685,7 @@ sub _find_dir_symlnk($$$) {
                   s|/\.$||;
                 }
 
+		lstat($_); # make sure  file tests with '_' work
 	        &$wanted_callback;
             } else {
                 push @Stack,[$dir_loc, $pdir_loc, $p_dir, $dir_rel,-1]  if  $bydepth;
