@@ -277,5 +277,5 @@ ok($casespec->{az}->{code} eq '0307' &&
    $casespec->{az}->{lower} eq ''  &&
    $casespec->{az}->{title} eq '0307'  &&
    $casespec->{az}->{upper} eq '0307' &&
-   $casespec->{az}->{condition} eq 'az After_Soft_Dotted',
+   $casespec->{az}->{condition} eq 'az After_I',
    'casespec 0x307');
