@@ -16,13 +16,13 @@ use File::Find;
 sub usage {
     print <<__EOF__;
 $0: Usage: $0 [[--maintainer M --module M --files]|file ...]
-$0 --maintainer M	list all maintainers matching M
-$0 --module M		list all modules matching M
-$0 --files		list all files of the module
+--maintainer M	list all maintainers matching M
+--module M	list all modules matching M
+--files		list all files
 Matching is case-ignoring regexp, author matching is both by
 the short id and by the full name and email.  A "module" may
 not be just a module, it may be a file or files or a subdirectory.
-$0 file ...		list the modules and maintainers of the files
+The options may be abbreviated to their unique prefixes
 __EOF__
     exit(0);
 }
@@ -45,7 +45,7 @@ usage() if @Files && ($Maintainer || $Module || $Files);
 
 for my $mean ($Maintainer, $Module) {
     warn "$0: Did you mean '$0 $mean'?\n"
-	if $mean && -e $mean && $mean ne '.';
+	if $mean && -e $mean && $mean ne '.' && !$Files;
 }
 
 warn "$0: Did you mean '$0 -mo $Maintainer'?\n"
