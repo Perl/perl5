@@ -2,6 +2,9 @@ package FindExt;
 
 our $VERSION = '1.00';
 
+# We (probably) have not got a Config.pm yet 
+BEGIN { $INC{'Config.pm'} = __FILE__ };
+
 use strict;
 use File::Find;
 use File::Basename;
