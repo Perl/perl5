@@ -18,6 +18,7 @@ extern int	_stdprintf _ARG_((const char*, ...));
 #define PerlIO_write(f,buf,count)	sfwrite(f,buf,count)
 #define PerlIO_open(path,mode)		sfopen(NULL,path,mode)
 #define PerlIO_fdopen(fd,mode)		_stdopen(fd,mode)
+#define PerlIO_reopen(path,mode,f)	sfopen(f,path,mode)
 #define PerlIO_close(f)			sfclose(f)
 #define PerlIO_puts(f,s)		sfputr(f,s,-1)
 #define PerlIO_putc(f,c)		sfputc(f,c)
