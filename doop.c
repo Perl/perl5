@@ -491,11 +491,11 @@ S_do_trans_complex_utf8(pTHX_ SV *sv) /* SPC - NOT OK */
 	    }
 	    if (uv < none) {
 		matches++;
+		s += UTF8SKIP(s);
 		if (uv != puv) {
 		    d = uv_to_utf8(d, uv);
 		    puv = uv;
 		}
-		s += UTF8SKIP(s);
 		continue;
 	    }
 	    else if (uv == none) {	/* "none" is unmapped character */
@@ -508,11 +508,11 @@ S_do_trans_complex_utf8(pTHX_ SV *sv) /* SPC - NOT OK */
 	    }
 	    else if (uv == extra && !del) {
 		matches++;
+		s += UTF8SKIP(s);
 		if (uv != puv) {
 		    d = uv_to_utf8(d, final);
 		    puv = final;
 		}
-		s += UTF8SKIP(s);
 		continue;
 	    }
 	    matches++;			/* "none+1" is delete character */
@@ -546,8 +546,8 @@ S_do_trans_complex_utf8(pTHX_ SV *sv) /* SPC - NOT OK */
 	    }
 	    else if (uv == extra && !del) {
 		matches++;
-		d = uv_to_utf8(d, final);
 		s += UTF8SKIP(s);
+		d = uv_to_utf8(d, final);
 		continue;
 	    }
 	    matches++;			/* "none+1" is delete character */

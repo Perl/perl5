@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..55\n";
+print "1..57\n";
 
 $_ = "abcdefghijklmnopqrstuvwxyz";
 
@@ -314,4 +314,14 @@ print "ok 54\n";
 ($a = v256) =~ tr/\x{0000}-\x{00ff}\x{0101}/X/c;
 print "not " unless $a eq "X";
 print "ok 55\n"; 
+
+# UTF8 range tests from Inaba Hiroto
+
+($a = "\x{200}") =~ tr/\x00-\x{100}/X/c;
+print "not " unless $a eq "X";
+print "ok 56\n";
+
+($a = "\x{200}") =~ tr/\x00-\x{100}/X/cs;
+print "not " unless $a eq "X";
+print "ok 57\n";
 
