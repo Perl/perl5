@@ -8,7 +8,7 @@
 
 package B::Deparse;
 use Carp;
-use B qw(class main_root main_start main_cv svref_2object opnumber cstring
+use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 OPf_WANT OPf_WANT_VOID OPf_WANT_SCALAR OPf_WANT_LIST
 	 OPf_KIDS OPf_REF OPf_STACKED OPf_SPECIAL OPf_MOD
 	 OPpLVAL_INTRO OPpOUR_INTRO OPpENTERSUB_AMPER OPpSLICE OPpCONST_BARE
@@ -542,14 +542,14 @@ sub compile {
 	my $self = B::Deparse->new(@args);
 	# First deparse command-line args
 	if (defined $^I) { # deparse -i
-	    print q(BEGIN { $^I = ).cstring($^I).qq(; }\n);
+	    print q(BEGIN { $^I = ).perlstring($^I).qq(; }\n);
 	}
 	if ($^W) { # deparse -w
 	    print qq(BEGIN { \$^W = $^W; }\n);
 	}
 	if ($/ ne "\n" or defined $O::savebackslash) { # deparse -l and -0
-	    my $fs = cstring($/) || 'undef';
-	    my $bs = cstring($O::savebackslash) || 'undef';
+	    my $fs = perlstring($/) || 'undef';
+	    my $bs = perlstring($O::savebackslash) || 'undef';
 	    print qq(BEGIN { \$/ = $fs; \$\\ = $bs; }\n);
 	}
 	my @BEGINs  = B::begin_av->isa("B::AV") ? B::begin_av->ARRAY : ();
@@ -1265,9 +1265,7 @@ sub declare_warnings {
     elsif (($to & WARN_MASK) eq "\0"x length($to)) {
 	return "no warnings;\n";
     }
-    my $wb = cstring($to);
-    $wb =~ s/([\$@])/\\$1/g;
-    return "BEGIN {\${^WARNING_BITS} = $wb}\n";
+    return "BEGIN {\${^WARNING_BITS} = ".perlstring($to)."}\n";
 }
 
 sub declare_hints {
