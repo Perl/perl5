@@ -273,42 +273,30 @@ lib/ExtUtils/Miniperl.pm: miniperlmain.c miniperl minimod.PL lib/Config.pm
 
 install: all
 	./perl installperl
-!NO!SUBS!
-
-: Only print out the rules for running byacc if the user _has_ byacc.
-: Otherwise, comment them out.  Users who really know what they are
-: doing can uncomment them and run yacc or bison or whatever.
-case "$d_byacc" in
-'define')
-	comment1=''
-	comment2='#' ;;
-*)	comment1='#'
-	comment2='' ;;
-esac
-
-$spitshell >>Makefile <<!GROK!THIS!
-
-perly.h: perly.c
-	@ echo Dummy dependency for dumb parallel make
-	touch perly.h
 
 # I now supply perly.c with the kits, so the following section is
-# used only if you have byacc.
+# used only if you force byacc to run by saying
+# 	make run_byacc
+# Since we patch up the byacc output, the perly.fixer script needs
+# to run with precisely the same version of byacc as I use.  You
+# normally shouldn't remake perly.[ch].
 
-${comment1}perly.c: 	perly.y perly.c.diff
-${comment1}	@ echo 'Expect' 109 shift/reduce and 1 reduce/reduce conflict
-${comment1}	\$(BYACC) -d perly.y
-${comment1}	sh \$(shellflags) ./perly.fixer y.tab.c perly.c
-${comment1}	mv y.tab.h perly.h
-${comment1}	echo 'extern YYSTYPE yylval;' >>perly.h
+run_byacc:
+	@ echo 'Expect' 109 shift/reduce and 1 reduce/reduce conflict
+	$(BYACC) -d perly.y
+	sh $(shellflags) ./perly.fixer y.tab.c perly.c
+	mv y.tab.h perly.h
+	echo 'extern YYSTYPE yylval;' >>perly.h
 
-# This version is used if you do not have byacc.
-${comment2}perly.c:	perly.y
-${comment2}	touch perly.c
+# We don't want to regenerate perly.c and perly.h, but they might
+# appear out-of-date after a patch is applied or a new distribution is
+# made.
+perly.c: perly.y
+	- touch perly.c
 
-!GROK!THIS!
+perly.h: perly.y
+	- touch perly.h
 
-$spitshell >>Makefile <<'!NO!SUBS!'
 # Extensions:
 # Names added to $(dynamic_ext) or $(static_ext) will automatically
 # get built.  There should ordinarily be no need to change any of
@@ -374,9 +362,7 @@ config.h: config.sh
 
 # When done, touch perlmain.c so that it doesn't get remade each time.
 depend: makedepend
-	- test -f perly.h || cp /dev/null perly.h
 	./makedepend
-	- test -s perly.h || /bin/rm -f perly.h
 	- test -s perlmain.c && touch perlmain.c
 	cd x2p; $(MAKE) depend
 

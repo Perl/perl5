@@ -571,62 +571,58 @@ PP(pp_aassign)
 	if (delaymagic & DM_UID) {
 #ifdef HAS_SETRESUID
 	    (void)setresuid(uid,euid,(Uid_t)-1);
-#else /* not HAS_SETRESUID */
-#ifdef HAS_SETREUID
+#else
+#  ifdef HAS_SETREUID
 	    (void)setreuid(uid,euid);
-#else /* not HAS_SETREUID */
-#ifdef HAS_SETRUID
+#  else
+#    ifdef HAS_SETRUID
 	    if ((delaymagic & DM_UID) == DM_RUID) {
 		(void)setruid(uid);
 		delaymagic &= ~DM_RUID;
 	    }
-#endif /* HAS_SETRUID */
-#endif /* HAS_SETRESUID */
-#ifdef HAS_SETEUID
+#    endif /* HAS_SETRUID */
+#    ifdef HAS_SETEUID
 	    if ((delaymagic & DM_UID) == DM_EUID) {
 		(void)seteuid(uid);
 		delaymagic &= ~DM_EUID;
 	    }
-#endif /* HAS_SETEUID */
+#    endif /* HAS_SETEUID */
 	    if (delaymagic & DM_UID) {
 		if (uid != euid)
 		    DIE("No setreuid available");
 		(void)setuid(uid);
 	    }
-#endif /* not HAS_SETREUID */
+#  endif /* HAS_SETREUID */
+#endif /* HAS_SETRESUID */
 	    uid = (int)getuid();
 	    euid = (int)geteuid();
 	}
 	if (delaymagic & DM_GID) {
 #ifdef HAS_SETRESGID
 	    (void)setresgid(gid,egid,(Gid_t)-1);
-#else /* not HAS_SETREGID */
-#ifdef HAS_SETREGID
+#else
+#  ifdef HAS_SETREGID
 	    (void)setregid(gid,egid);
-#else /* not HAS_SETREGID */
-#endif /* not HAS_SETRESGID */
-#ifdef HAS_SETRGID
+#  else
+#    ifdef HAS_SETRGID
 	    if ((delaymagic & DM_GID) == DM_RGID) {
 		(void)setrgid(gid);
 		delaymagic &= ~DM_RGID;
 	    }
-#endif /* HAS_SETRGID */
-#ifdef HAS_SETRESGID
-	    (void)setresgid(gid,egid,(Gid_t)-1);
-#else /* not HAS_SETREGID */
-#ifdef HAS_SETEGID
+#    endif /* HAS_SETRGID */
+#    ifdef HAS_SETEGID
 	    if ((delaymagic & DM_GID) == DM_EGID) {
 		(void)setegid(gid);
 		delaymagic &= ~DM_EGID;
 	    }
-#endif /* HAS_SETEGID */
+#    endif /* HAS_SETEGID */
 	    if (delaymagic & DM_GID) {
 		if (gid != egid)
 		    DIE("No setregid available");
 		(void)setgid(gid);
 	    }
-#endif /* not HAS_SETRESGID */
-#endif /* not HAS_SETREGID */
+#  endif /* HAS_SETREGID */
+#endif /* HAS_SETRESGID */
 	    gid = (int)getgid();
 	    egid = (int)getegid();
 	}

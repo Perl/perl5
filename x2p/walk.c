@@ -12,12 +12,6 @@
 #include "a2p.h"
 #include "util.h"
 
-static void tab();
-static void fixtab();
-static void addsemi();
-static void emit_split();
-static void numericize();
-
 bool exitval = FALSE;
 bool realexit = FALSE;
 bool saw_getline = FALSE;
@@ -32,12 +26,13 @@ char *limit;
 STR *subs;
 STR *curargs = Nullstr;
 
-void addsemi _(( STR *str ));
-void emit_split _(( STR *str, int level ));
-void fixtab _(( STR *str, int lvl ));
-void numericize _(( int node ));
+static void addsemi _(( STR *str ));
+static void emit_split _(( STR *str, int level ));
+static void fixtab _(( STR *str, int lvl ));
+static void numericize _(( int node ));
+static void tab _(( STR *str, int lvl ));
+
 int prewalk _(( int numit, int level, int node, int *numericptr ));
-void tab _(( STR *str, int lvl ));
 STR * walk _(( int useval, int level, int node, int *numericptr, int minprec ));
 
 
@@ -1606,7 +1601,7 @@ register STR *str;
 	str_cat(str,";");
 }
 
-void
+static void
 emit_split(str,level)
 register STR *str;
 int level;
