@@ -15,6 +15,7 @@ $Is_MSWin32 = $^O eq 'MSWin32';
 $Is_NetWare = $^O eq 'NetWare';
 $Is_Dos = $^O eq 'dos';
 $Is_Cygwin = $^O eq 'cygwin';
+$Is_MPE = $^O eq 'mpeix';
 $Is_Dosish = $Is_Dos || $^O eq 'os2' || $Is_MSWin32 || $Is_NetWare || $Is_Cygwin;
 chop($cwd = (($Is_MSWin32 || $Is_NetWare) ? `cd` : `pwd`));
 
@@ -53,7 +54,7 @@ if (open(FOO, ">Op.stat.tmp")) {
   print "# open failed: $!\nnot ok 1\nnot ok 2\n";
 }
 
-if ($Is_Dosish) { unlink "Op.stat.tmp2"}
+if ($Is_Dosish || $Is_MPE) { unlink "Op.stat.tmp2"}
 else {
     `rm -f Op.stat.tmp2;ln Op.stat.tmp Op.stat.tmp2; chmod 644 Op.stat.tmp`;
 }
@@ -61,13 +62,13 @@ else {
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat('Op.stat.tmp');
 
-if ($Is_Dosish || $Config{dont_use_nlink})
+if ($Is_Dosish || $Is_MPE || $Config{dont_use_nlink})
     {print "ok 3 # skipped: no link count\n";} 
 elsif ($nlink == 2)
     {print "ok 3\n";} 
 else {print "# \$nlink is |$nlink|\nnot ok 3\n";}
 
-if (   $Is_Dosish
+if (   $Is_Dosish || $Is_MPE
         # Solaris tmpfs bug
 	|| ($cwd =~ m#^/tmp# and $mtime && $mtime==$ctime && $^O eq 'solaris')
     || $cwd =~ m#$Config{'afsroot'}/#
@@ -172,7 +173,7 @@ else
     {print "not ok 33\n";}
 if (! -b '.') {print "ok 34\n";} else {print "not ok 34\n";}
 
-if ($^O eq 'mpeix' or $^O eq 'amigaos' or $Is_Dosish or $Is_Cygwin) {
+if ($Is_MPE or $^O eq 'amigaos' or $Is_Dosish or $Is_Cygwin) {
   print "ok 35 # skipped: no -u\n"; goto tty_test;
 }
 

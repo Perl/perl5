@@ -10,7 +10,8 @@ BEGIN {
 use Config;
 
 $Is_Dosish = ($^O eq 'MSWin32' or $^O eq 'NetWare' or $^O eq 'dos' or
-	      $^O eq 'os2' or $^O eq 'mint' or $^O eq 'cygwin');
+	      $^O eq 'os2' or $^O eq 'mint' or $^O eq 'cygwin' or
+	      $^O eq 'mpeix');
 
 if (defined &Win32::IsWinNT && Win32::IsWinNT()) {
     $Is_Dosish = '' if Win32::FsType() eq 'NTFS';

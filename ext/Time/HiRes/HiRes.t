@@ -18,6 +18,7 @@ use strict;
 my $have_gettimeofday	= defined &Time::HiRes::gettimeofday;
 my $have_usleep		= defined &Time::HiRes::usleep;
 my $have_ualarm		= defined &Time::HiRes::ualarm;
+my $have_time		= defined &Time::HiRes::time;
 
 import Time::HiRes 'gettimeofday'	if $have_gettimeofday;
 import Time::HiRes 'usleep'		if $have_usleep;
@@ -54,7 +55,7 @@ else {
     ok 4, ($two[0] > $one[0] || ($two[0] == $one[0] && $two[1] > $one[1])),
     	    "@two is not greater than @one";
 
-    my $f = Time::HiRes::time;
+    my $f = Time::HiRes::time();
     ok 5, $f > 850_000_000, "$f too small";
     ok 6, $f - $two[0] < 2, "$f - @two >= 2";
 }
@@ -74,9 +75,9 @@ else {
     	skip 8;
     }
     else {
-    	my $f = Time::HiRes::time;
+    	my $f = Time::HiRes::time();
 	usleep(500_000);
-        my $f2 = Time::HiRes::time;
+        my $f2 = Time::HiRes::time();
 	my $d = $f2 - $f;
 	ok 8, $d > 0.4 && $d < 0.8, "slept $d secs $f to $f2";
     }
@@ -97,7 +98,7 @@ else {
     ok 10, $f < 2, $f;
 }
 
-if (!$have_usleep) {
+if (!$have_usleep || !$have_gettimeofday) {
     skip 11;
 }
 else {
@@ -129,7 +130,9 @@ else {
 
 # new test: did we even get close?
 
-{
+if (!$have_time) {
+    skip 14
+} else {
  my $t = time();
  my $tf = Time::HiRes::time();
  ok 14, (abs($tf - $t) <= 1),
@@ -152,11 +155,11 @@ unless (defined &Time::HiRes::gettimeofday
     print "$f\nok 15\n";
 
     print "# sleep...";
-    $r = [Time::HiRes::gettimeofday];
+    $r = [Time::HiRes::gettimeofday()];
     sleep (0.5);
     print Time::HiRes::tv_interval($r), "\nok 16\n";
 
-    $r = [Time::HiRes::gettimeofday];
+    $r = [Time::HiRes::gettimeofday()];
     $i = 5;
     $SIG{ALRM} = "tick";
     while ($i)
@@ -187,7 +190,7 @@ unless (defined &Time::HiRes::setitimer
     use Time::HiRes qw (setitimer getitimer ITIMER_VIRTUAL);
 
     my $i = 3;
-    my $r = [Time::HiRes::gettimeofday];
+    my $r = [Time::HiRes::gettimeofday()];
 
     $SIG{VTALRM} = sub {
 	$i ? $i-- : setitimer(ITIMER_VIRTUAL, 0);
