@@ -972,8 +972,6 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\vms\perlvms.pod .\perlvms.pod
 	copy ..\README.win32 .\perlwin32.pod
 	$(MAKE) -f ..\win32\pod.mak converters
-	cd ..\lib
-	$(PERLEXE) lib.pm.PL
 	cd ..\win32
 	$(PERLEXE) $(PL2BAT) $(UTILS)
 
