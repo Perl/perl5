@@ -148,6 +148,13 @@ And this example is actually better than the previous one even for Unix
 platforms, because now any C<\015>'s (C<\cM>'s) are stripped out
 (and there was much rejoicing).
 
+An important thing to remember is that functions that return data
+should translate newlines when appropriate.  Often one line of code
+will suffice:
+
+	$data =~ s/\015?\012/\n/g;
+	return $data;
+
 
 =head2 Numbers endianness and Width
 
@@ -197,7 +204,7 @@ S<Mac OS> uses C<:> as a path separator instead of C</>.
 The filesystem may support neither hard links (C<link()>) nor
 symbolic links (C<symlink()>, C<readlink()>, C<lstat()>).
 
-The filesystem may support neither access timestamp nor change
+The filesystem may not support neither access timestamp nor change
 timestamp (meaning that about the only portable timestamp is the
 modification timestamp), or one second granularity of any timestamps
 (e.g. the FAT filesystem limits the time granularity to two seconds).
@@ -570,7 +577,8 @@ Also see:
 =item The djgpp environment for DOS, C<http://www.delorie.com/djgpp/>
 
 =item The EMX environment for DOS, OS/2, etc. C<emx@iaehv.nl>,
-C<http://www.juge.com/bbs/Hobb.19.html>
+C<http://www.leo.org/pub/comp/os/os2/leo/gnu/emx+gcc/index.html> or
+C<ftp://hobbes.nmsu.edu/pub/os2/dev/emx>
 
 =item Build instructions for Win32, L<perlwin32>.
 
@@ -768,12 +776,12 @@ delimiting character, VOS files, directories, or links whose names
 contain a slash character cannot be processed.  Such files must be
 renamed before they can be processed by Perl.
 
-The following C functions are unimplemented on VOS, any any attempt by
+The following C functions are unimplemented on VOS, and any attempt by
 Perl to use them will result in a fatal error message and an immediate
-exit from Perl:  dup, do_aspawn, do_spawn, execlp, execl, execvp, fork,
-waitpid.  Once these functions become available in the VOS POSIX.1
-implementation, you can either recompile and rebind Perl, or you can
-download a newer port from ftp.stratus.com.
+exit from Perl:  dup, do_aspawn, do_spawn, fork, waitpid.  Once these
+functions become available in the VOS POSIX.1 implementation, you can
+either recompile and rebind Perl, or you can download a newer port from
+ftp.stratus.com.
 
 The value of C<$^O> on VOS is "VOS".  To determine the architecture that
 you are running on without resorting to loading all of C<%Config> you
@@ -1524,6 +1532,11 @@ Not useful. (S<RISC OS>)
 
 =over 4
 
+=item v1.39, 11 February, 1999
+
+Changes from Jarkko and EMX URL fixes Michael Schwern.  Additional
+note about newlines added.
+
 =item v1.38, 31 December 1998
 
 More changes from Jarkko.
@@ -1588,6 +1601,7 @@ Peter Prymmer E<lt>pvhp@forte.comE<gt>,
 Hugo van der Sanden E<lt>hv@crypt0.demon.co.ukE<gt>,
 Gurusamy Sarathy E<lt>gsar@umich.eduE<gt>,
 Paul J. Schinder E<lt>schinder@pobox.comE<gt>,
+Michael G Schwern E<lt>schwern@pobox.comE<gt>,
 Dan Sugalski E<lt>sugalskd@ous.eduE<gt>,
 Nathan Torkington E<lt>gnat@frii.comE<gt>.
 
@@ -1596,4 +1610,4 @@ E<lt>pudge@pobox.comE<gt>.
 
 =head1 VERSION
 
-Version 1.38, last modified 31 December 1998
+Version 1.39, last modified 11 February 1999
