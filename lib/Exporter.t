@@ -75,7 +75,7 @@ $seat     = 'seat';
 BEGIN {*is = \&Is};
 sub Is { 'Is' };
 
-Exporter::export_ok_tags;
+Exporter::export_ok_tags();
 
 my %tags     = map { $_ => 1 } map { @$_ } values %EXPORT_TAGS;
 my %exportok = map { $_ => 1 } @EXPORT_OK;

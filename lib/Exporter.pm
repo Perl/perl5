@@ -9,9 +9,10 @@ require 5.006;
 our $Debug = 0;
 our $ExportLevel = 0;
 our $Verbose ||= 0;
-our $VERSION = '5.58';
+our $VERSION = '5.59';
 our (%Cache);
-$Carp::Internal{Exporter} = 1;
+# Carp does this now for us, so we can finally live w/o Carp
+#$Carp::Internal{Exporter} = 1;
 
 sub as_heavy {
   require Exporter::Heavy;

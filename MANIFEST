@@ -1997,6 +1997,7 @@ lib/utf8.t			See if utf8 operations work
 lib/validate.pl			Perl library supporting wholesale file mode validation
 lib/vars.pm			Declare pseudo-imported global variables
 lib/vars.t			See if "use vars" works
+lib/vars_carp.t			See if "use vars" doesn't load Carp.pm per default
 lib/version.pm			Support for version objects
 lib/version.t			Tests for version objects
 lib/vmsish.pm			Control VMS-specific behavior of Perl core

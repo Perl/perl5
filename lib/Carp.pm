@@ -1,6 +1,6 @@
 package Carp;
 
-our $VERSION = '1.03';
+our $VERSION = '1.04';
 
 =head1 NAME
 
@@ -178,9 +178,11 @@ Defaults to C<0>.
 
 =cut
 
-
+# disable these by default, so they can live w/o require Carp
 $CarpInternal{Carp}++;
 $CarpInternal{warnings}++;
+$Internal{Exporter}++;
+$Internal{'Exporter::Heavy'}++;
 $CarpLevel = 0;     # How many extra package levels to skip on carp.
                     # How many calls to skip on confess.
                     # Reconciling these notions is hard, use

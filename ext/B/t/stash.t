@@ -76,7 +76,7 @@ print "# got = @got\n";
 
 $got = "@got";
 
-my $expected = "attributes Carp Carp::Heavy DB Exporter Exporter::Heavy Internals main Regexp utf8 version warnings";
+my $expected = "attributes Carp Carp::Heavy DB Internals main Regexp utf8 version warnings";
 
 $expected =~ s/version // if $] < 5.009;
 
@@ -88,7 +88,7 @@ $expected =~ s/version // if $] < 5.009;
 if ((($Config{static_ext} eq ' ') || ($Config{static_ext} eq ''))
     && !($^O eq 'os2' and $OS2::is_aout)
 	) {
-    print "# [$got]\n# vs.\n# [$expected]\nnot " if $got ne $expected;
+    print "# got [$got]\n# vs.\n# expected [$expected]\nnot " if $got ne $expected;
     ok;
 } else {
     print "ok $test # skipped: one or more static extensions\n"; $test++;

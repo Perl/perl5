@@ -6,7 +6,7 @@
 
 package warnings;
 
-our $VERSION = '1.03';
+our $VERSION = '1.04';
 
 =head1 NAME
 
@@ -130,8 +130,6 @@ Equivalent to:
 See L<perlmodlib/Pragmatic Modules> and L<perllexwarn>.
 
 =cut
-
-use Carp ();
 
 our %Offsets = (
 
@@ -300,6 +298,7 @@ $All = "" ; vec($All, $Offsets{'all'}, 2) = 3 ;
 
 sub Croaker
 {
+    require Carp;
     delete $Carp::CarpInternal{'warnings'};
     Carp::croak(@_);
 }
@@ -473,6 +472,7 @@ sub warn
 
     my $message = pop ;
     my ($callers_bitmask, $offset, $i) = __chk(@_) ;
+    require Carp;
     Carp::croak($message)
 	if vec($callers_bitmask, $offset+1, 1) ||
 	   vec($callers_bitmask, $Offsets{'all'}+1, 1) ;
@@ -492,6 +492,7 @@ sub warnif
             	(vec($callers_bitmask, $offset, 1) ||
             	vec($callers_bitmask, $Offsets{'all'}, 1)) ;
 
+    require Carp;
     Carp::croak($message)
 	if vec($callers_bitmask, $offset+1, 1) ||
 	   vec($callers_bitmask, $Offsets{'all'}+1, 1) ;
