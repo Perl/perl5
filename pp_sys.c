@@ -420,7 +420,7 @@ PP(pp_tie)
     PUTBACK;
 
     if (op = pp_entersub())
-        run();
+        runops();
     SPAGAIN;
 
     sv = TOPs;
@@ -518,7 +518,7 @@ PP(pp_dbmopen)
     PUTBACK;
 
     if (op = pp_entersub())
-        run();
+        runops();
     SPAGAIN;
 
     if (!sv_isobject(TOPs)) {
@@ -535,7 +535,7 @@ PP(pp_dbmopen)
 	PUTBACK;
 
 	if (op = pp_entersub())
-	    run();
+	    runops();
 	SPAGAIN;
     }
 
@@ -1965,7 +1965,7 @@ PP(pp_ftmtime)
     dSP; dTARGET;
     if (result < 0)
 	RETPUSHUNDEF;
-    PUSHn( (basetime - statcache.st_mtime) / 86400.0 );
+    PUSHn( ((I32)basetime - (I32)statcache.st_mtime) / 86400.0 );
     RETURN;
 }
 
@@ -1975,7 +1975,7 @@ PP(pp_ftatime)
     dSP; dTARGET;
     if (result < 0)
 	RETPUSHUNDEF;
-    PUSHn( (basetime - statcache.st_atime) / 86400.0 );
+    PUSHn( ((I32)basetime - (I32)statcache.st_atime) / 86400.0 );
     RETURN;
 }
 
@@ -1985,7 +1985,7 @@ PP(pp_ftctime)
     dSP; dTARGET;
     if (result < 0)
 	RETPUSHUNDEF;
-    PUSHn( (basetime - statcache.st_ctime) / 86400.0 );
+    PUSHn( ((I32)basetime - (I32)statcache.st_ctime) / 86400.0 );
     RETURN;
 }
 
