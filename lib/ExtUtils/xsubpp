@@ -1220,6 +1220,13 @@ EOF
 #	Perl_croak(aTHX_ "Usage: $pname($report_args)");
 EOF
 
+    #-Wall: if an xsub has no arguments and PPCODE is used
+    #none of ST, XSRETURN or XSprePUSH macros are used
+    #hence `ax' (setup by dXSARGS) is unused
+    print Q<<"EOF" if $PPCODE and $num_args == 0;
+#   if (0) ax = ax; /* -Wall */
+EOF
+
     print Q<<"EOF" if $PPCODE;
 #    SP -= items;
 EOF
@@ -1510,9 +1517,15 @@ EOF
 print Q<<"EOF";
 #[[
 #    dXSARGS;
-#    char* file = __FILE__;
-#
 EOF
+
+#-Wall: if there is no $Full_func_name there are no xsubs in this .xs
+#so `file' is unused
+print Q<<"EOF" if $Full_func_name;
+#    char* file = __FILE__;
+EOF
+
+print Q "#\n";
 
 print Q<<"EOF" if $WantVersionChk ;
 #    XS_VERSION_BOOTCHECK ;

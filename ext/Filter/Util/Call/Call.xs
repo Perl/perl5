@@ -11,6 +11,7 @@
  *
  */
 
+#define PERL_NO_GET_CONTEXT
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
@@ -243,7 +244,8 @@ filter_del()
 
 
 void
-unimport(...)
+unimport(package="$Package", ...)
+    char *package
     PPCODE:
     filter_del(filter_call);
 

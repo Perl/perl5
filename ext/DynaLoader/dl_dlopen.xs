@@ -155,12 +155,13 @@ BOOT:
     (void)dl_private_init(aTHX);
 
 
-void *
+void
 dl_load_file(filename, flags=0)
     char *	filename
     int		flags
   PREINIT:
     int mode = RTLD_LAZY;
+    void *handle;
   CODE:
 {
 #if defined(DLOPEN_WONT_DO_RELATIVE_PATHS)
@@ -184,13 +185,13 @@ dl_load_file(filename, flags=0)
 	Perl_warn(aTHX_ "Can't make loaded symbols global on this platform while loading %s",filename);
 #endif
     DLDEBUG(1,PerlIO_printf(Perl_debug_log, "dl_load_file(%s,%x):\n", filename,flags));
-    RETVAL = dlopen(filename, mode) ;
-    DLDEBUG(2,PerlIO_printf(Perl_debug_log, " libref=%lx\n", (unsigned long) RETVAL));
+    handle = dlopen(filename, mode) ;
+    DLDEBUG(2,PerlIO_printf(Perl_debug_log, " libref=%lx\n", (unsigned long) handle));
     ST(0) = sv_newmortal() ;
-    if (RETVAL == NULL)
+    if (handle == NULL)
 	SaveError(aTHX_ "%s",dlerror()) ;
     else
-	sv_setiv( ST(0), PTR2IV(RETVAL));
+	sv_setiv( ST(0), PTR2IV(handle));
 }
 
 
@@ -207,10 +208,12 @@ dl_unload_file(libref)
     RETVAL
 
 
-void *
+void
 dl_find_symbol(libhandle, symbolname)
     void *	libhandle
     char *	symbolname
+    PREINIT:
+    void *sym;
     CODE:
 #ifdef DLSYM_NEEDS_UNDERSCORE
     symbolname = Perl_form_nocontext("_%s", symbolname);
@@ -218,19 +221,19 @@ dl_find_symbol(libhandle, symbolname)
     DLDEBUG(2, PerlIO_printf(Perl_debug_log,
 			     "dl_find_symbol(handle=%lx, symbol=%s)\n",
 			     (unsigned long) libhandle, symbolname));
-    RETVAL = dlsym(libhandle, symbolname);
+    sym = dlsym(libhandle, symbolname);
     DLDEBUG(2, PerlIO_printf(Perl_debug_log,
-			     "  symbolref = %lx\n", (unsigned long) RETVAL));
+			     "  symbolref = %lx\n", (unsigned long) sym));
     ST(0) = sv_newmortal() ;
-    if (RETVAL == NULL)
+    if (sym == NULL)
 	SaveError(aTHX_ "%s",dlerror()) ;
     else
-	sv_setiv( ST(0), PTR2IV(RETVAL));
+	sv_setiv( ST(0), PTR2IV(sym));
 
 
 void
 dl_undef_symbols()
-    PPCODE:
+    CODE:
 
 
 

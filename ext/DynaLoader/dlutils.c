@@ -27,7 +27,7 @@ static int dl_debug = 0;	/* value copied from $DynaLoader::dl_debug */
 #define DLDEBUG(level,code)
 #endif
 
-
+#ifdef DL_UNLOAD_ALL_AT_EXIT
 /* Close all dlopen'd files */
 static void
 dl_unload_all_files(pTHXo_ void *unused)
@@ -51,7 +51,7 @@ dl_unload_all_files(pTHXo_ void *unused)
         }
     }
 }
-
+#endif
 
 static void
 dl_generic_private_init(pTHXo)	/* called by dl_*.xs dl_private_init() */

@@ -409,7 +409,6 @@ PerlIOVia_get_ptr(PerlIO *f)
    PerlIOVia *s = PerlIOSelf(f,PerlIOVia);
    if (s->var)
     {
-     dTHX;
      STDCHAR *p = (STDCHAR *)(SvEND(s->var) - s->cnt);
      return p;
     }

@@ -17,14 +17,15 @@ get_flag(char *attr)
 MODULE = attrs		PACKAGE = attrs
 
 void
-import(Class, ...)
-char *	Class
+import(...)
     ALIAS:
 	unimport = 1
     PREINIT:
 	int i;
 	CV *cv;
     PPCODE:
+       if (items < 1)
+           Perl_croak(aTHX_ "Usage: %s(Class, ...)", GvNAME(CvGV(cv)));
 	if (!PL_compcv || !(cv = CvOUTSIDE(PL_compcv)))
 	    croak("can't set attributes outside a subroutine scope");
 	if (ckWARN(WARN_DEPRECATED))

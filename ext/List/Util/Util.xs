@@ -293,7 +293,7 @@ CODE:
 	croak("weak references are not implemented in this release of perl");
 #endif
 
-SV *
+void
 isweak(sv)
 	SV *sv
 PROTOTYPE: $

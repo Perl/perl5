@@ -2544,6 +2544,10 @@ constant(char *name, int arg)
     errno = EINVAL;
     return 0;
 
+    if (0) {
+        not_here(""); /* -Wall */
+    }
+
 not_there:
     errno = ENOENT;
     return 0;
@@ -3733,7 +3737,8 @@ char *
 ttyname(fd)
 	int		fd
 
-char *
+#XXX: use sv_getcwd()
+void
 getcwd()
 	PPCODE:
 #ifdef HAS_GETCWD

@@ -65,7 +65,6 @@ PerlIOScalar_popped(PerlIO *f)
 IV
 PerlIOScalar_close(PerlIO *f)
 {
- dTHX;
  IV code = PerlIOBase_close(f);
  PerlIOBase(f)->flags &= ~(PERLIO_F_RDBUF|PERLIO_F_WRBUF);
  return code;

@@ -117,7 +117,8 @@ MODULE = ByteLoader		PACKAGE = ByteLoader
 PROTOTYPES:	ENABLE
 
 void
-import(...)
+import(package="ByteLoader", ...)
+  char *package
   PREINIT:
     SV *sv = newSVpvn ("", 0);
   PPCODE:
@@ -126,6 +127,7 @@ import(...)
     filter_add(byteloader_filter, sv);
 
 void
-unimport(...)
+unimport(package="ByteLoader", ...)
+  char *package
   PPCODE:
     filter_del(byteloader_filter);
