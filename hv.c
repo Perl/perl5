@@ -394,7 +394,7 @@ I32 flags;
 	else
 	    sv = sv_mortalcopy(HeVAL(entry));
 	if (entry == xhv->xhv_eiter)
-	    HeKLEN(entry) = HEf_LAZYDEL;
+	    HvLAZYDEL_on(hv);
 	else
 	    he_free(entry, HvSHAREKEYS(hv));
 	--xhv->xhv_keys;
@@ -456,7 +456,7 @@ U32 hash;
 	else
 	    sv = sv_mortalcopy(HeVAL(entry));
 	if (entry == xhv->xhv_eiter)
-	    HeKLEN(entry) = HEf_LAZYDEL;
+	    HvLAZYDEL_on(hv);
 	else
 	    he_free(entry, HvSHAREKEYS(hv));
 	--xhv->xhv_keys;
@@ -619,6 +619,84 @@ HV *hv;
     }
 }
 
+void
+hv_ksplit(hv, newmax)
+HV *hv;
+IV newmax;
+{
+    register XPVHV* xhv = (XPVHV*)SvANY(hv);
+    I32 oldsize = (I32) xhv->xhv_max + 1; /* sic(k) */
+    register I32 newsize;
+    register I32 i;
+    register I32 j;
+    register HE **a;
+    register HE *entry;
+    register HE **oentry;
+
+    newsize = (I32) newmax;			/* possible truncation here */
+    if (newsize != newmax || newmax <= oldsize)
+	return;
+    while ((newsize & (1 + ~newsize)) != newsize) {
+	newsize &= ~(newsize & (1 + ~newsize));	/* get proper power of 2 */
+    }
+    if (newsize < newmax)
+	newsize *= 2;
+    if (newsize < newmax)
+	return;					/* overflow detection */
+
+    a = (HE**)xhv->xhv_array;
+    if (a) {
+	nomemok = TRUE;
+#ifdef STRANGE_MALLOC
+	Renew(a, newsize, HE*);
+#else
+	i = newsize * sizeof(HE*);
+	j = MALLOC_OVERHEAD;
+	while (j - MALLOC_OVERHEAD < i)
+	    j += j;
+	j -= MALLOC_OVERHEAD;
+	j /= sizeof(HE*);
+	assert(j >= newsize);
+	New(2, a, j, HE*);
+	Copy(xhv->xhv_array, a, oldsize, HE*);
+	if (oldsize >= 64 && !nice_chunk) {
+	    nice_chunk = (char*)xhv->xhv_array;
+	    nice_chunk_size = oldsize * sizeof(HE*) * 2 - MALLOC_OVERHEAD;
+	}
+	else
+	    Safefree(xhv->xhv_array);
+#endif
+	nomemok = FALSE;
+	Zero(&a[oldsize], newsize-oldsize, HE*); /* zero 2nd half*/
+    }
+    else {
+	Newz(0, a, newsize, HE*);
+    }
+    xhv->xhv_max = --newsize;
+    xhv->xhv_array = (char*)a;
+    if (!xhv->xhv_fill)				/* skip rest if no entries */
+	return;
+
+    for (i=0; i<oldsize; i++,a++) {
+	if (!*a)				/* non-existent */
+	    continue;
+	for (oentry = a, entry = *a; entry; entry = *oentry) {
+	    if ((j = (HeHASH(entry) & newsize)) != i) {
+		j -= i;
+		*oentry = HeNEXT(entry);
+		if (!(HeNEXT(entry) = a[j]))
+		    xhv->xhv_fill++;
+		a[j] = entry;
+		continue;
+	    }
+	    else
+		oentry = &HeNEXT(entry);
+	}
+	if (!*a)				/* everything moved */
+	    xhv->xhv_fill--;
+    }
+}
+
 HV *
 newHV()
 {
@@ -760,8 +838,10 @@ HV *hv;
 #ifdef DYNAMIC_ENV_FETCH  /* set up %ENV for iteration */
     if (HvNAME(hv) && strEQ(HvNAME(hv),ENV_HV_NAME)) prime_env_iter();
 #endif
-    if (entry && HeKLEN(entry) == HEf_LAZYDEL)	/* was deleted earlier? */
+    if (entry && HvLAZYDEL(hv)) {	/* was deleted earlier? */
+	HvLAZYDEL_off(hv);
 	he_free(entry, HvSHAREKEYS(hv));
+    }
     xhv->xhv_riter = -1;
     xhv->xhv_eiter = Null(HE*);
     return xhv->xhv_fill;
@@ -818,8 +898,10 @@ HV *hv;
 	entry = ((HE**)xhv->xhv_array)[xhv->xhv_riter];
     }
 
-    if (oldentry && HeKLEN(oldentry) == HEf_LAZYDEL)	/* was deleted earlier? */
+    if (oldentry && HvLAZYDEL(hv)) {		/* was deleted earlier? */
+	HvLAZYDEL_off(hv);
 	he_free(oldentry, HvSHAREKEYS(hv));
+    }
 
     xhv->xhv_eiter = entry;
     return entry;
