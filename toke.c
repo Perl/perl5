@@ -5585,614 +5585,1341 @@ S_pending_ident(pTHX)
     return WORD;
 }
 
+/* Weights are the number of occurrences of that keyword in about 190M of
+   input to Perl_keyword from a lot of real perl. This routine is about 20%
+   faster than the routine it replaces.  */
+
 I32
-Perl_keyword(pTHX_ register char *d, I32 len)
-{
-    switch (*d) {
-    case '_':
-	if (d[1] == '_') {
-	    if (strEQ(d,"__FILE__"))		return -KEY___FILE__;
-	    if (strEQ(d,"__LINE__"))		return -KEY___LINE__;
-	    if (strEQ(d,"__PACKAGE__"))		return -KEY___PACKAGE__;
-	    if (strEQ(d,"__DATA__"))		return KEY___DATA__;
-	    if (strEQ(d,"__END__"))		return KEY___END__;
-	}
-	break;
-    case 'A':
-	if (strEQ(d,"AUTOLOAD"))		return KEY_AUTOLOAD;
-	break;
-    case 'a':
-	switch (len) {
-	case 3:
-	    if (strEQ(d,"and"))			return -KEY_and;
-	    if (strEQ(d,"abs"))			return -KEY_abs;
-	    break;
-	case 5:
-	    if (strEQ(d,"alarm"))		return -KEY_alarm;
-	    if (strEQ(d,"atan2"))		return -KEY_atan2;
-	    break;
-	case 6:
-	    if (strEQ(d,"accept"))		return -KEY_accept;
-	    break;
-	}
-	break;
-    case 'B':
-	if (strEQ(d,"BEGIN"))			return KEY_BEGIN;
-	break;
-    case 'b':
-	if (strEQ(d,"bless"))			return -KEY_bless;
-	if (strEQ(d,"bind"))			return -KEY_bind;
-	if (strEQ(d,"binmode"))			return -KEY_binmode;
-	break;
-    case 'C':
-	if (strEQ(d,"CORE"))			return -KEY_CORE;
-	if (strEQ(d,"CHECK"))			return KEY_CHECK;
-	break;
-    case 'c':
-	switch (len) {
-	case 3:
-	    if (strEQ(d,"cmp"))			return -KEY_cmp;
-	    if (strEQ(d,"chr"))			return -KEY_chr;
-	    if (strEQ(d,"cos"))			return -KEY_cos;
-	    break;
-	case 4:
-	    if (strEQ(d,"chop"))		return -KEY_chop;
-	    break;
-	case 5:
-	    if (strEQ(d,"close"))		return -KEY_close;
-	    if (strEQ(d,"chdir"))		return -KEY_chdir;
-	    if (strEQ(d,"chomp"))		return -KEY_chomp;
-	    if (strEQ(d,"chmod"))		return -KEY_chmod;
-	    if (strEQ(d,"chown"))		return -KEY_chown;
-	    if (strEQ(d,"crypt"))		return -KEY_crypt;
-	    break;
-	case 6:
-	    if (strEQ(d,"chroot"))		return -KEY_chroot;
-	    if (strEQ(d,"caller"))		return -KEY_caller;
-	    break;
-	case 7:
-	    if (strEQ(d,"connect"))		return -KEY_connect;
-	    break;
-	case 8:
-	    if (strEQ(d,"closedir"))		return -KEY_closedir;
-	    if (strEQ(d,"continue"))		return -KEY_continue;
-	    break;
-	}
-	break;
-    case 'D':
-	if (strEQ(d,"DESTROY"))			return KEY_DESTROY;
-	break;
-    case 'd':
-	switch (len) {
-	case 2:
-	    if (strEQ(d,"do"))			return KEY_do;
-	    break;
-	case 3:
-	    if (strEQ(d,"die"))			return -KEY_die;
-	    break;
-	case 4:
-	    if (strEQ(d,"dump"))		return -KEY_dump;
-	    break;
-	case 6:
-	    if (strEQ(d,"delete"))		return KEY_delete;
-	    break;
-	case 7:
-	    if (strEQ(d,"defined"))		return KEY_defined;
-	    if (strEQ(d,"dbmopen"))		return -KEY_dbmopen;
-	    break;
-	case 8:
-	    if (strEQ(d,"dbmclose"))		return -KEY_dbmclose;
-	    break;
-	}
-	break;
-    case 'E':
-	if (strEQ(d,"END"))			return KEY_END;
-	break;
-    case 'e':
-	switch (len) {
-	case 2:
-	    if (strEQ(d,"eq"))			return -KEY_eq;
-	    break;
-	case 3:
-	    if (strEQ(d,"eof"))			return -KEY_eof;
-	    if (strEQ(d,"err"))			return -KEY_err;
-	    if (strEQ(d,"exp"))			return -KEY_exp;
-	    break;
-	case 4:
-	    if (strEQ(d,"else"))		return KEY_else;
-	    if (strEQ(d,"exit"))		return -KEY_exit;
-	    if (strEQ(d,"eval"))		return KEY_eval;
-	    if (strEQ(d,"exec"))		return -KEY_exec;
-           if (strEQ(d,"each"))                return -KEY_each;
-	    break;
-	case 5:
-	    if (strEQ(d,"elsif"))		return KEY_elsif;
-	    break;
-	case 6:
-	    if (strEQ(d,"exists"))		return KEY_exists;
-	    if (strEQ(d,"elseif") && ckWARN_d(WARN_SYNTAX))
-		Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-			"elseif should be elsif");
-	    break;
-	case 8:
-	    if (strEQ(d,"endgrent"))		return -KEY_endgrent;
-	    if (strEQ(d,"endpwent"))		return -KEY_endpwent;
-	    break;
-	case 9:
-	    if (strEQ(d,"endnetent"))		return -KEY_endnetent;
-	    break;
-	case 10:
-	    if (strEQ(d,"endhostent"))		return -KEY_endhostent;
-	    if (strEQ(d,"endservent"))		return -KEY_endservent;
-	    break;
-	case 11:
-	    if (strEQ(d,"endprotoent"))		return -KEY_endprotoent;
-	    break;
-	}
-	break;
-    case 'f':
-	switch (len) {
-	case 3:
-	    if (strEQ(d,"for"))			return KEY_for;
-	    break;
-	case 4:
-	    if (strEQ(d,"fork"))		return -KEY_fork;
-	    break;
-	case 5:
-	    if (strEQ(d,"fcntl"))		return -KEY_fcntl;
-	    if (strEQ(d,"flock"))		return -KEY_flock;
-	    break;
-	case 6:
-	    if (strEQ(d,"format"))		return KEY_format;
-	    if (strEQ(d,"fileno"))		return -KEY_fileno;
-	    break;
-	case 7:
-	    if (strEQ(d,"foreach"))		return KEY_foreach;
-	    break;
-	case 8:
-	    if (strEQ(d,"formline"))		return -KEY_formline;
-	    break;
-	}
-	break;
-    case 'g':
-	if (strnEQ(d,"get",3)) {
-	    d += 3;
-	    if (*d == 'p') {
-		switch (len) {
-		case 7:
-		    if (strEQ(d,"ppid"))	return -KEY_getppid;
-		    if (strEQ(d,"pgrp"))	return -KEY_getpgrp;
-		    break;
-		case 8:
-		    if (strEQ(d,"pwent"))	return -KEY_getpwent;
-		    if (strEQ(d,"pwnam"))	return -KEY_getpwnam;
-		    if (strEQ(d,"pwuid"))	return -KEY_getpwuid;
-		    break;
-		case 11:
-		    if (strEQ(d,"peername"))	return -KEY_getpeername;
-		    if (strEQ(d,"protoent"))	return -KEY_getprotoent;
-		    if (strEQ(d,"priority"))	return -KEY_getpriority;
-		    break;
-		case 14:
-		    if (strEQ(d,"protobyname"))	return -KEY_getprotobyname;
-		    break;
-		case 16:
-		    if (strEQ(d,"protobynumber"))return -KEY_getprotobynumber;
-		    break;
-		}
-	    }
-	    else if (*d == 'h') {
-		if (strEQ(d,"hostbyname"))	return -KEY_gethostbyname;
-		if (strEQ(d,"hostbyaddr"))	return -KEY_gethostbyaddr;
-		if (strEQ(d,"hostent"))		return -KEY_gethostent;
-	    }
-	    else if (*d == 'n') {
-		if (strEQ(d,"netbyname"))	return -KEY_getnetbyname;
-		if (strEQ(d,"netbyaddr"))	return -KEY_getnetbyaddr;
-		if (strEQ(d,"netent"))		return -KEY_getnetent;
-	    }
-	    else if (*d == 's') {
-		if (strEQ(d,"servbyname"))	return -KEY_getservbyname;
-		if (strEQ(d,"servbyport"))	return -KEY_getservbyport;
-		if (strEQ(d,"servent"))		return -KEY_getservent;
-		if (strEQ(d,"sockname"))	return -KEY_getsockname;
-		if (strEQ(d,"sockopt"))		return -KEY_getsockopt;
-	    }
-	    else if (*d == 'g') {
-		if (strEQ(d,"grent"))		return -KEY_getgrent;
-		if (strEQ(d,"grnam"))		return -KEY_getgrnam;
-		if (strEQ(d,"grgid"))		return -KEY_getgrgid;
-	    }
-	    else if (*d == 'l') {
-		if (strEQ(d,"login"))		return -KEY_getlogin;
-	    }
-	    else if (*d == 'c' && d[1] == '\0')	return -KEY_getc;
-	    break;
-	}
-	switch (len) {
-	case 2:
-	    if (strEQ(d,"gt"))			return -KEY_gt;
-	    if (strEQ(d,"ge"))			return -KEY_ge;
-	    break;
-	case 4:
-	    if (strEQ(d,"grep"))		return KEY_grep;
-	    if (strEQ(d,"goto"))		return KEY_goto;
-	    if (strEQ(d,"glob"))		return KEY_glob;
-	    break;
-	case 6:
-	    if (strEQ(d,"gmtime"))		return -KEY_gmtime;
-	    break;
-	}
-	break;
-    case 'h':
-	if (strEQ(d,"hex"))			return -KEY_hex;
-	break;
-    case 'I':
-	if (strEQ(d,"INIT"))			return KEY_INIT;
-	break;
-    case 'i':
-	switch (len) {
-	case 2:
-	    if (strEQ(d,"if"))			return KEY_if;
-	    break;
-	case 3:
-	    if (strEQ(d,"int"))			return -KEY_int;
-	    break;
-	case 5:
-	    if (strEQ(d,"index"))		return -KEY_index;
-	    if (strEQ(d,"ioctl"))		return -KEY_ioctl;
-	    break;
-	}
-	break;
-    case 'j':
-	if (strEQ(d,"join"))			return -KEY_join;
-	break;
-    case 'k':
-	if (len == 4) {
-           if (strEQ(d,"keys"))                return -KEY_keys;
-	    if (strEQ(d,"kill"))		return -KEY_kill;
-	}
-	break;
-    case 'l':
-	switch (len) {
-	case 2:
-	    if (strEQ(d,"lt"))			return -KEY_lt;
-	    if (strEQ(d,"le"))			return -KEY_le;
-	    if (strEQ(d,"lc"))			return -KEY_lc;
-	    break;
-	case 3:
-	    if (strEQ(d,"log"))			return -KEY_log;
-	    break;
-	case 4:
-	    if (strEQ(d,"last"))		return KEY_last;
-	    if (strEQ(d,"link"))		return -KEY_link;
-	    if (strEQ(d,"lock"))		return -KEY_lock;
-	    break;
-	case 5:
-	    if (strEQ(d,"local"))		return KEY_local;
-	    if (strEQ(d,"lstat"))		return -KEY_lstat;
-	    break;
-	case 6:
-	    if (strEQ(d,"length"))		return -KEY_length;
-	    if (strEQ(d,"listen"))		return -KEY_listen;
-	    break;
-	case 7:
-	    if (strEQ(d,"lcfirst"))		return -KEY_lcfirst;
-	    break;
-	case 9:
-	    if (strEQ(d,"localtime"))		return -KEY_localtime;
-	    break;
-	}
-	break;
+Perl_keyword (pTHX_ char *name, I32 len) {
+  /* Initially switch on the length of the name.  */
+  switch (len) {
+  case 1:
+    /* Names all of length 1.  */
+    /* m q s x y */
+    /* Offset 0 gives the best switch position.  */
+    switch (name[0]) {
     case 'm':
-	switch (len) {
-	case 1:					return KEY_m;
-	case 2:
-	    if (strEQ(d,"my"))			return KEY_my;
-	    break;
-	case 3:
-	    if (strEQ(d,"map"))			return KEY_map;
-	    break;
-	case 5:
-	    if (strEQ(d,"mkdir"))		return -KEY_mkdir;
-	    break;
-	case 6:
-	    if (strEQ(d,"msgctl"))		return -KEY_msgctl;
-	    if (strEQ(d,"msgget"))		return -KEY_msgget;
-	    if (strEQ(d,"msgrcv"))		return -KEY_msgrcv;
-	    if (strEQ(d,"msgsnd"))		return -KEY_msgsnd;
-	    break;
-	}
-	break;
-    case 'n':
-	if (strEQ(d,"next"))			return KEY_next;
-	if (strEQ(d,"ne"))			return -KEY_ne;
-	if (strEQ(d,"not"))			return -KEY_not;
-	if (strEQ(d,"no"))			return KEY_no;
-	break;
-    case 'o':
-	switch (len) {
-	case 2:
-	    if (strEQ(d,"or"))			return -KEY_or;
-	    break;
-	case 3:
-	    if (strEQ(d,"ord"))			return -KEY_ord;
-	    if (strEQ(d,"oct"))			return -KEY_oct;
-	    if (strEQ(d,"our"))			return KEY_our;
-	    break;
-	case 4:
-	    if (strEQ(d,"open"))		return -KEY_open;
-	    break;
-	case 7:
-	    if (strEQ(d,"opendir"))		return -KEY_opendir;
-	    break;
-	}
-	break;
-    case 'p':
-	switch (len) {
-	case 3:
-           if (strEQ(d,"pop"))                 return -KEY_pop;
-	    if (strEQ(d,"pos"))			return KEY_pos;
-	    break;
-	case 4:
-           if (strEQ(d,"push"))                return -KEY_push;
-	    if (strEQ(d,"pack"))		return -KEY_pack;
-	    if (strEQ(d,"pipe"))		return -KEY_pipe;
-	    break;
-	case 5:
-	    if (strEQ(d,"print"))		return KEY_print;
-	    break;
-	case 6:
-	    if (strEQ(d,"printf"))		return KEY_printf;
-	    break;
-	case 7:
-	    if (strEQ(d,"package"))		return KEY_package;
-	    break;
-	case 9:
-	    if (strEQ(d,"prototype"))		return KEY_prototype;
-	}
-	break;
+      {
+        return KEY_m; /* Weight 148776 */
+      }
+      break;
     case 'q':
-	if (len == 1) {
-						return KEY_q;
-	}
-	else if (len == 2) {
-	    switch (d[1]) {
-	    case 'r':				return KEY_qr;
-	    case 'q':				return KEY_qq;
-	    case 'w':				return KEY_qw;
-	    case 'x':				return KEY_qx;
-	    };
-	}
-	else if (strEQ(d,"quotemeta"))		return -KEY_quotemeta;
-	break;
-    case 'r':
-	switch (len) {
-	case 3:
-	    if (strEQ(d,"ref"))			return -KEY_ref;
-	    break;
-	case 4:
-	    if (strEQ(d,"read"))		return -KEY_read;
-	    if (strEQ(d,"rand"))		return -KEY_rand;
-	    if (strEQ(d,"recv"))		return -KEY_recv;
-	    if (strEQ(d,"redo"))		return KEY_redo;
-	    break;
-	case 5:
-	    if (strEQ(d,"rmdir"))		return -KEY_rmdir;
-	    if (strEQ(d,"reset"))		return -KEY_reset;
-	    break;
-	case 6:
-	    if (strEQ(d,"return"))		return KEY_return;
-	    if (strEQ(d,"rename"))		return -KEY_rename;
-	    if (strEQ(d,"rindex"))		return -KEY_rindex;
-	    break;
-	case 7:
-	    if (strEQ(d,"require"))		return KEY_require;
-	    if (strEQ(d,"reverse"))		return -KEY_reverse;
-	    if (strEQ(d,"readdir"))		return -KEY_readdir;
-	    break;
-	case 8:
-	    if (strEQ(d,"readlink"))		return -KEY_readlink;
-	    if (strEQ(d,"readline"))		return -KEY_readline;
-	    if (strEQ(d,"readpipe"))		return -KEY_readpipe;
-	    break;
-	case 9:
-	    if (strEQ(d,"rewinddir"))		return -KEY_rewinddir;
-	    break;
-	}
-	break;
+      {
+        return KEY_q; /* Weight 69076 */
+      }
+      break;
     case 's':
-	switch (d[1]) {
-	case 0:					return KEY_s;
-	case 'c':
-	    if (strEQ(d,"scalar"))		return KEY_scalar;
-	    break;
-	case 'e':
-	    switch (len) {
-	    case 4:
-		if (strEQ(d,"seek"))		return -KEY_seek;
-		if (strEQ(d,"send"))		return -KEY_send;
-		break;
-	    case 5:
-		if (strEQ(d,"semop"))		return -KEY_semop;
-		break;
-	    case 6:
-		if (strEQ(d,"select"))		return -KEY_select;
-		if (strEQ(d,"semctl"))		return -KEY_semctl;
-		if (strEQ(d,"semget"))		return -KEY_semget;
-		break;
-	    case 7:
-		if (strEQ(d,"setpgrp"))		return -KEY_setpgrp;
-		if (strEQ(d,"seekdir"))		return -KEY_seekdir;
-		break;
-	    case 8:
-		if (strEQ(d,"setpwent"))	return -KEY_setpwent;
-		if (strEQ(d,"setgrent"))	return -KEY_setgrent;
-		break;
-	    case 9:
-		if (strEQ(d,"setnetent"))	return -KEY_setnetent;
-		break;
-	    case 10:
-		if (strEQ(d,"setsockopt"))	return -KEY_setsockopt;
-		if (strEQ(d,"sethostent"))	return -KEY_sethostent;
-		if (strEQ(d,"setservent"))	return -KEY_setservent;
-		break;
-	    case 11:
-		if (strEQ(d,"setpriority"))	return -KEY_setpriority;
-		if (strEQ(d,"setprotoent"))	return -KEY_setprotoent;
-		break;
-	    }
-	    break;
-	case 'h':
-	    switch (len) {
-	    case 5:
-               if (strEQ(d,"shift"))           return -KEY_shift;
-		break;
-	    case 6:
-		if (strEQ(d,"shmctl"))		return -KEY_shmctl;
-		if (strEQ(d,"shmget"))		return -KEY_shmget;
-		break;
-	    case 7:
-		if (strEQ(d,"shmread"))		return -KEY_shmread;
-		break;
-	    case 8:
-		if (strEQ(d,"shmwrite"))	return -KEY_shmwrite;
-		if (strEQ(d,"shutdown"))	return -KEY_shutdown;
-		break;
-	    }
-	    break;
-	case 'i':
-	    if (strEQ(d,"sin"))			return -KEY_sin;
-	    break;
-	case 'l':
-	    if (strEQ(d,"sleep"))		return -KEY_sleep;
-	    break;
-	case 'o':
-	    if (strEQ(d,"sort"))		return KEY_sort;
-	    if (strEQ(d,"socket"))		return -KEY_socket;
-	    if (strEQ(d,"socketpair"))		return -KEY_socketpair;
-	    break;
-	case 'p':
-	    if (strEQ(d,"split"))		return KEY_split;
-	    if (strEQ(d,"sprintf"))		return -KEY_sprintf;
-           if (strEQ(d,"splice"))              return -KEY_splice;
-	    break;
-	case 'q':
-	    if (strEQ(d,"sqrt"))		return -KEY_sqrt;
-	    break;
-	case 'r':
-	    if (strEQ(d,"srand"))		return -KEY_srand;
-	    break;
-	case 't':
-	    if (strEQ(d,"stat"))		return -KEY_stat;
-	    if (strEQ(d,"study"))		return KEY_study;
-	    break;
-	case 'u':
-	    if (strEQ(d,"substr"))		return -KEY_substr;
-	    if (strEQ(d,"sub"))			return KEY_sub;
-	    break;
-	case 'y':
-	    switch (len) {
-	    case 6:
-		if (strEQ(d,"system"))		return -KEY_system;
-		break;
-	    case 7:
-		if (strEQ(d,"symlink"))		return -KEY_symlink;
-		if (strEQ(d,"syscall"))		return -KEY_syscall;
-		if (strEQ(d,"sysopen"))		return -KEY_sysopen;
-		if (strEQ(d,"sysread"))		return -KEY_sysread;
-		if (strEQ(d,"sysseek"))		return -KEY_sysseek;
-		break;
-	    case 8:
-		if (strEQ(d,"syswrite"))	return -KEY_syswrite;
-		break;
-	    }
-	    break;
-	}
-	break;
-    case 't':
-	switch (len) {
-	case 2:
-	    if (strEQ(d,"tr"))			return KEY_tr;
-	    break;
-	case 3:
-	    if (strEQ(d,"tie"))			return KEY_tie;
-	    break;
-	case 4:
-	    if (strEQ(d,"tell"))		return -KEY_tell;
-	    if (strEQ(d,"tied"))		return KEY_tied;
-	    if (strEQ(d,"time"))		return -KEY_time;
-	    break;
-	case 5:
-	    if (strEQ(d,"times"))		return -KEY_times;
-	    break;
-	case 7:
-	    if (strEQ(d,"telldir"))		return -KEY_telldir;
-	    break;
-	case 8:
-	    if (strEQ(d,"truncate"))		return -KEY_truncate;
-	    break;
-	}
-	break;
-    case 'u':
-	switch (len) {
-	case 2:
-	    if (strEQ(d,"uc"))			return -KEY_uc;
-	    break;
-	case 3:
-	    if (strEQ(d,"use"))			return KEY_use;
-	    break;
-	case 5:
-	    if (strEQ(d,"undef"))		return KEY_undef;
-	    if (strEQ(d,"until"))		return KEY_until;
-	    if (strEQ(d,"untie"))		return KEY_untie;
-	    if (strEQ(d,"utime"))		return -KEY_utime;
-	    if (strEQ(d,"umask"))		return -KEY_umask;
-	    break;
-	case 6:
-	    if (strEQ(d,"unless"))		return KEY_unless;
-	    if (strEQ(d,"unpack"))		return -KEY_unpack;
-	    if (strEQ(d,"unlink"))		return -KEY_unlink;
-	    break;
-	case 7:
-           if (strEQ(d,"unshift"))             return -KEY_unshift;
-	    if (strEQ(d,"ucfirst"))		return -KEY_ucfirst;
-	    break;
-	}
-	break;
-    case 'v':
-	if (strEQ(d,"values"))			return -KEY_values;
-	if (strEQ(d,"vec"))			return -KEY_vec;
-	break;
-    case 'w':
-	switch (len) {
-	case 4:
-	    if (strEQ(d,"warn"))		return -KEY_warn;
-	    if (strEQ(d,"wait"))		return -KEY_wait;
-	    break;
-	case 5:
-	    if (strEQ(d,"while"))		return KEY_while;
-	    if (strEQ(d,"write"))		return -KEY_write;
-	    break;
-	case 7:
-	    if (strEQ(d,"waitpid"))		return -KEY_waitpid;
-	    break;
-	case 9:
-	    if (strEQ(d,"wantarray"))		return -KEY_wantarray;
-	    break;
-	}
-	break;
+      {
+        return KEY_s; /* Weight 403691 */
+      }
+      break;
     case 'x':
-	if (len == 1)				return -KEY_x;
-	if (strEQ(d,"xor"))			return -KEY_xor;
-	break;
+      {
+        return -KEY_x; /* Weight 38549 */
+      }
+      break;
     case 'y':
-	if (len == 1)				return KEY_y;
-	break;
-    case 'z':
-	break;
+      {
+        return KEY_y; /* Weight 567 */
+      }
+      break;
     }
-    return 0;
+    break;
+  case 2:
+    /* Names all of length 2.  */
+    /* do eq ge gt if lc le lt my ne no or qq qr qw qx tr uc */
+    /* Offset 0 gives the best switch position.  */
+    switch (name[0]) {
+    case 'd':
+      if (name[1] == 'o') {
+        return KEY_do; /* Weight 96004 */
+      }
+      break;
+    case 'e':
+      if (name[1] == 'q') {
+        return -KEY_eq; /* Weight 797065 */
+      }
+      break;
+    case 'g':
+      if (name[1] == 'e') {
+        return -KEY_ge; /* Weight 5666 */
+      }
+      if (name[1] == 't') {
+        return -KEY_gt; /* Weight 897 */
+      }
+      break;
+    case 'i':
+      if (name[1] == 'f') {
+        return KEY_if; /* Weight 2482605 */
+      }
+      break;
+    case 'l':
+      if (name[1] == 'c') {
+        return -KEY_lc; /* Weight 38487 */
+      }
+      if (name[1] == 'e') {
+        return -KEY_le; /* Weight 4052 */
+      }
+      if (name[1] == 't') {
+        return -KEY_lt; /* Weight 335 */
+      }
+      break;
+    case 'm':
+      if (name[1] == 'y') {
+        return KEY_my; /* Weight 3785925 */
+      }
+      break;
+    case 'n':
+      if (name[1] == 'e') {
+        return -KEY_ne; /* Weight 112906 */
+      }
+      if (name[1] == 'o') {
+        return KEY_no; /* Weight 61989 */
+      }
+      break;
+    case 'o':
+      if (name[1] == 'r') {
+        return -KEY_or; /* Weight 405163 */
+      }
+      break;
+    case 'q':
+      if (name[1] == 'w') {
+        return KEY_qw; /* Weight 415641 */
+      }
+      if (name[1] == 'q') {
+        return KEY_qq; /* Weight 55149 */
+      }
+      if (name[1] == 'r') {
+        return KEY_qr; /* Weight 28519 */
+      }
+      if (name[1] == 'x') {
+        return KEY_qx; /* Weight 177 */
+      }
+      break;
+    case 't':
+      if (name[1] == 'r') {
+        return KEY_tr; /* Weight 22665 */
+      }
+      break;
+    case 'u':
+      if (name[1] == 'c') {
+        return -KEY_uc; /* Weight 16961 */
+      }
+      break;
+    }
+    break;
+  case 3:
+    /* Names all of length 3.  */
+    /* END abs and chr cmp cos die eof err exp for hex int log map not oct ord
+       our pop pos ref sin sub tie use vec xor */
+    /* Offset 0 gives the best switch position.  */
+    switch (*name++) {
+    case 'E':
+      if (name[0] == 'N' && name[1] == 'D') {
+        return KEY_END; /* Weight 3565 */
+      }
+      break;
+    case 'a':
+      if (name[0] == 'n' && name[1] == 'd') {
+        return -KEY_and; /* Weight 284867 */
+      }
+      if (name[0] == 'b' && name[1] == 's') {
+        return -KEY_abs; /* Weight 7767 */
+      }
+      break;
+    case 'c':
+      if (name[0] == 'h' && name[1] == 'r') {
+        return -KEY_chr; /* Weight 35654 */
+      }
+      if (name[0] == 'm' && name[1] == 'p') {
+        return -KEY_cmp; /* Weight 6808 */
+      }
+      if (name[0] == 'o' && name[1] == 's') {
+        return -KEY_cos; /* Weight 447 */
+      }
+      break;
+    case 'd':
+      if (name[0] == 'i' && name[1] == 'e') {
+        return -KEY_die; /* Weight 192203 */
+      }
+      break;
+    case 'e':
+      if (name[0] == 'o' && name[1] == 'f') {
+        return -KEY_eof; /* Weight 1618 */
+      }
+      if (name[0] == 'r' && name[1] == 'r') {
+        return -KEY_err; /* Weight 522 */
+      }
+      if (name[0] == 'x' && name[1] == 'p') {
+        return -KEY_exp; /* Weight 423 */
+      }
+      break;
+    case 'f':
+      if (name[0] == 'o' && name[1] == 'r') {
+        return KEY_for; /* Weight 118158 */
+      }
+      break;
+    case 'h':
+      if (name[0] == 'e' && name[1] == 'x') {
+        return -KEY_hex; /* Weight 3629 */
+      }
+      break;
+    case 'i':
+      if (name[0] == 'n' && name[1] == 't') {
+        return -KEY_int; /* Weight 18549 */
+      }
+      break;
+    case 'l':
+      if (name[0] == 'o' && name[1] == 'g') {
+        return -KEY_log;
+      }
+      break;
+    case 'm':
+      if (name[0] == 'a' && name[1] == 'p') {
+        return KEY_map; /* Weight 115207 */
+      }
+      break;
+    case 'n':
+      if (name[0] == 'o' && name[1] == 't') {
+        return -KEY_not; /* Weight 55868 */
+      }
+      break;
+    case 'o':
+      if (name[0] == 'u' && name[1] == 'r') {
+        return KEY_our; /* Weight 194417 */
+      }
+      if (name[0] == 'r' && name[1] == 'd') {
+        return -KEY_ord; /* Weight 22221 */
+      }
+      if (name[0] == 'c' && name[1] == 't') {
+        return -KEY_oct; /* Weight 4195 */
+      }
+      break;
+    case 'p':
+      if (name[0] == 'o' && name[1] == 'p') {
+        return -KEY_pop; /* Weight 46933 */
+      }
+      if (name[0] == 'o' && name[1] == 's') {
+        return KEY_pos; /* Weight 5503 */
+      }
+      break;
+    case 'r':
+      if (name[0] == 'e' && name[1] == 'f') {
+        return -KEY_ref; /* Weight 347102 */
+      }
+      break;
+    case 's':
+      if (name[0] == 'u' && name[1] == 'b') {
+        return KEY_sub; /* Weight 2053554 */
+      }
+      if (name[0] == 'i' && name[1] == 'n') {
+        return -KEY_sin; /* Weight 499 */
+      }
+      break;
+    case 't':
+      if (name[0] == 'i' && name[1] == 'e') {
+        return KEY_tie; /* Weight 10131 */
+      }
+      break;
+    case 'u':
+      if (name[0] == 's' && name[1] == 'e') {
+        return KEY_use; /* Weight 686081 */
+      }
+      break;
+    case 'v':
+      if (name[0] == 'e' && name[1] == 'c') {
+        return -KEY_vec; /* Weight 110566 */
+      }
+      break;
+    case 'x':
+      if (name[0] == 'o' && name[1] == 'r') {
+        return -KEY_xor; /* Weight 619 */
+      }
+      break;
+    }
+    break;
+  case 4:
+    /* Names all of length 4.  */
+    /* CORE INIT bind chop dump each else eval exec exit fork getc glob goto
+       grep join keys kill last link lock next open pack pipe push rand read
+       recv redo seek send sort sqrt stat tell tied time wait warn */
+    /* Offset 0 gives the best switch position.  */
+    switch (*name++) {
+    case 'C':
+      if (!memcmp(name, "ORE", 3)) {
+      /*                C         */
+        return -KEY_CORE; /* Weight 47391 */
+      }
+      break;
+    case 'I':
+      if (!memcmp(name, "NIT", 3)) {
+      /*                I         */
+        return KEY_INIT; /* Weight 418 */
+      }
+      break;
+    case 'b':
+      if (!memcmp(name, "ind", 3)) {
+      /*                b         */
+        return -KEY_bind; /* Weight 290 */
+      }
+      break;
+    case 'c':
+      if (!memcmp(name, "hop", 3)) {
+      /*                c         */
+        return -KEY_chop; /* Weight 10172 */
+      }
+      break;
+    case 'd':
+      if (!memcmp(name, "ump", 3)) {
+      /*                d         */
+        return -KEY_dump; /* Weight 274 */
+      }
+      break;
+    case 'e':
+      if (!memcmp(name, "lse", 3)) {
+      /*                e         */
+        return KEY_else; /* Weight 527806 */
+      }
+      if (!memcmp(name, "val", 3)) {
+      /*                e         */
+        return KEY_eval; /* Weight 136977 */
+      }
+      if (!memcmp(name, "ach", 3)) {
+      /*                e         */
+        return -KEY_each; /* Weight 18414 */
+      }
+      if (!memcmp(name, "xit", 3)) {
+      /*                e         */
+        return -KEY_exit; /* Weight 8262 */
+      }
+      if (!memcmp(name, "xec", 3)) {
+      /*                e         */
+        return -KEY_exec; /* Weight 429 */
+      }
+      break;
+    case 'f':
+      if (!memcmp(name, "ork", 3)) {
+      /*                f         */
+        return -KEY_fork; /* Weight 327 */
+      }
+      break;
+    case 'g':
+      if (!memcmp(name, "oto", 3)) {
+      /*                g         */
+        return KEY_goto; /* Weight 109258 */
+      }
+      if (!memcmp(name, "rep", 3)) {
+      /*                g         */
+        return KEY_grep; /* Weight 75912 */
+      }
+      if (!memcmp(name, "lob", 3)) {
+      /*                g         */
+        return KEY_glob; /* Weight 2172 */
+      }
+      if (!memcmp(name, "etc", 3)) {
+      /*                g         */
+        return -KEY_getc; /* Weight 981 */
+      }
+      break;
+    case 'j':
+      if (!memcmp(name, "oin", 3)) {
+      /*                j         */
+        return -KEY_join; /* Weight 130820 */
+      }
+      break;
+    case 'k':
+      if (!memcmp(name, "eys", 3)) {
+      /*                k         */
+        return -KEY_keys; /* Weight 131427 */
+      }
+      if (!memcmp(name, "ill", 3)) {
+      /*                k         */
+        return -KEY_kill; /* Weight 382 */
+      }
+      break;
+    case 'l':
+      if (!memcmp(name, "ast", 3)) {
+      /*                l         */
+        return KEY_last; /* Weight 95078 */
+      }
+      if (!memcmp(name, "ock", 3)) {
+      /*                l         */
+        return -KEY_lock; /* Weight 4210 */
+      }
+      if (!memcmp(name, "ink", 3)) {
+      /*                l         */
+        return -KEY_link; /* Weight 425 */
+      }
+      break;
+    case 'n':
+      if (!memcmp(name, "ext", 3)) {
+      /*                n         */
+        return KEY_next; /* Weight 153355 */
+      }
+      break;
+    case 'o':
+      if (!memcmp(name, "pen", 3)) {
+      /*                o         */
+        return -KEY_open; /* Weight 39060 */
+      }
+      break;
+    case 'p':
+      if (!memcmp(name, "ush", 3)) {
+      /*                p         */
+        return -KEY_push; /* Weight 256975 */
+      }
+      if (!memcmp(name, "ack", 3)) {
+      /*                p         */
+        return -KEY_pack; /* Weight 14491 */
+      }
+      if (!memcmp(name, "ipe", 3)) {
+      /*                p         */
+        return -KEY_pipe; /* Weight 344 */
+      }
+      break;
+    case 'r':
+      if (!memcmp(name, "ead", 3)) {
+      /*                r         */
+        return -KEY_read; /* Weight 9434 */
+      }
+      if (!memcmp(name, "edo", 3)) {
+      /*                r         */
+        return KEY_redo; /* Weight 5219 */
+      }
+      if (!memcmp(name, "and", 3)) {
+      /*                r         */
+        return -KEY_rand; /* Weight 1824 */
+      }
+      if (!memcmp(name, "ecv", 3)) {
+      /*                r         */
+        return -KEY_recv; /* Weight 250 */
+      }
+      break;
+    case 's':
+      if (!memcmp(name, "tat", 3)) {
+      /*                s         */
+        return -KEY_stat; /* Weight 36702 */
+      }
+      if (!memcmp(name, "ort", 3)) {
+      /*                s         */
+        return KEY_sort; /* Weight 36394 */
+      }
+      if (!memcmp(name, "eek", 3)) {
+      /*                s         */
+        return -KEY_seek; /* Weight 2174 */
+      }
+      if (!memcmp(name, "qrt", 3)) {
+      /*                s         */
+        return -KEY_sqrt; /* Weight 766 */
+      }
+      if (!memcmp(name, "end", 3)) {
+      /*                s         */
+        return -KEY_send; /* Weight 496 */
+      }
+      break;
+    case 't':
+      if (!memcmp(name, "ime", 3)) {
+      /*                t         */
+        return -KEY_time; /* Weight 32168 */
+      }
+      if (!memcmp(name, "ied", 3)) {
+      /*                t         */
+        return KEY_tied; /* Weight 9749 */
+      }
+      if (!memcmp(name, "ell", 3)) {
+      /*                t         */
+        return -KEY_tell; /* Weight 2578 */
+      }
+      break;
+    case 'w':
+      if (!memcmp(name, "arn", 3)) {
+      /*                w         */
+        return -KEY_warn; /* Weight 91372 */
+      }
+      if (!memcmp(name, "ait", 3)) {
+      /*                w         */
+        return -KEY_wait;
+      }
+      break;
+    }
+    break;
+  case 5:
+    /* Names all of length 5.  */
+    /* BEGIN CHECK alarm atan2 bless chdir chmod chomp chown close crypt elsif
+       fcntl flock index ioctl local lstat mkdir print reset rmdir semop shift
+       sleep split srand study times umask undef untie until utime while write
+       */
+    /* Offset 3 gives the best switch position.  */
+    switch (name[3]) {
+    case 'C':
+      if (!memcmp(name, "CHECK", 5)) {
+      /*                    ^       */
+        return KEY_CHECK; /* Weight 538 */
+      }
+      break;
+    case 'I':
+      if (!memcmp(name, "BEGIN", 5)) {
+      /*                    ^       */
+        return KEY_BEGIN; /* Weight 24125 */
+      }
+      break;
+    case 'a':
+      if (!memcmp(name, "local", 5)) {
+      /*                    ^       */
+        return KEY_local; /* Weight 262973 */
+      }
+      if (!memcmp(name, "lstat", 5)) {
+      /*                    ^       */
+        return -KEY_lstat; /* Weight 13859 */
+      }
+      break;
+    case 'c':
+      if (!memcmp(name, "flock", 5)) {
+      /*                    ^       */
+        return -KEY_flock; /* Weight 260 */
+      }
+      break;
+    case 'd':
+      if (!memcmp(name, "study", 5)) {
+      /*                    ^       */
+        return KEY_study; /* Weight 1933 */
+      }
+      break;
+    case 'e':
+      if (!memcmp(name, "undef", 5)) {
+      /*                    ^       */
+        return KEY_undef; /* Weight 311156 */
+      }
+      if (!memcmp(name, "index", 5)) {
+      /*                    ^       */
+        return -KEY_index; /* Weight 51465 */
+      }
+      if (!memcmp(name, "sleep", 5)) {
+      /*                    ^       */
+        return -KEY_sleep; /* Weight 519 */
+      }
+      if (!memcmp(name, "times", 5)) {
+      /*                    ^       */
+        return -KEY_times; /* Weight 310 */
+      }
+      if (!memcmp(name, "reset", 5)) {
+      /*                    ^       */
+        return -KEY_reset; /* Weight 127 */
+      }
+      break;
+    case 'f':
+      if (!memcmp(name, "shift", 5)) {
+      /*                    ^       */
+        return -KEY_shift; /* Weight 904125 */
+      }
+      break;
+    case 'i':
+      if (!memcmp(name, "elsif", 5)) {
+      /*                    ^       */
+        return KEY_elsif; /* Weight 322365 */
+      }
+      if (!memcmp(name, "split", 5)) {
+      /*                    ^       */
+        return KEY_split; /* Weight 93678 */
+      }
+      if (!memcmp(name, "chdir", 5)) {
+      /*                    ^       */
+        return -KEY_chdir; /* Weight 20317 */
+      }
+      if (!memcmp(name, "mkdir", 5)) {
+      /*                    ^       */
+        return -KEY_mkdir; /* Weight 2951 */
+      }
+      if (!memcmp(name, "rmdir", 5)) {
+      /*                    ^       */
+        return -KEY_rmdir; /* Weight 2493 */
+      }
+      if (!memcmp(name, "until", 5)) {
+      /*                    ^       */
+        return KEY_until; /* Weight 818 */
+      }
+      if (!memcmp(name, "untie", 5)) {
+      /*                    ^       */
+        return KEY_untie; /* Weight 420 */
+      }
+      break;
+    case 'l':
+      if (!memcmp(name, "while", 5)) {
+      /*                    ^       */
+        return KEY_while; /* Weight 120305 */
+      }
+      break;
+    case 'm':
+      if (!memcmp(name, "chomp", 5)) {
+      /*                    ^       */
+        return -KEY_chomp; /* Weight 22337 */
+      }
+      if (!memcmp(name, "utime", 5)) {
+      /*                    ^       */
+        return -KEY_utime; /* Weight 3849 */
+      }
+      break;
+    case 'n':
+      if (!memcmp(name, "print", 5)) {
+      /*                    ^       */
+        return KEY_print; /* Weight 220904 */
+      }
+      if (!memcmp(name, "atan2", 5)) {
+      /*                    ^       */
+        return -KEY_atan2; /* Weight 350 */
+      }
+      if (!memcmp(name, "srand", 5)) {
+      /*                    ^       */
+        return -KEY_srand; /* Weight 41 */
+      }
+      break;
+    case 'o':
+      if (!memcmp(name, "chmod", 5)) {
+      /*                    ^       */
+        return -KEY_chmod; /* Weight 18455 */
+      }
+      if (!memcmp(name, "semop", 5)) {
+      /*                    ^       */
+        return -KEY_semop;
+      }
+      break;
+    case 'p':
+      if (!memcmp(name, "crypt", 5)) {
+      /*                    ^       */
+        return -KEY_crypt; /* Weight 8 */
+      }
+      break;
+    case 'r':
+      if (!memcmp(name, "alarm", 5)) {
+      /*                    ^       */
+        return -KEY_alarm;
+      }
+      break;
+    case 's':
+      if (!memcmp(name, "bless", 5)) {
+      /*                    ^       */
+        return -KEY_bless; /* Weight 62111 */
+      }
+      if (!memcmp(name, "close", 5)) {
+      /*                    ^       */
+        return -KEY_close; /* Weight 44077 */
+      }
+      if (!memcmp(name, "umask", 5)) {
+      /*                    ^       */
+        return -KEY_umask; /* Weight 1658 */
+      }
+      break;
+    case 't':
+      if (!memcmp(name, "write", 5)) {
+      /*                    ^       */
+        return -KEY_write; /* Weight 2525 */
+      }
+      if (!memcmp(name, "fcntl", 5)) {
+      /*                    ^       */
+        return -KEY_fcntl; /* Weight 1257 */
+      }
+      if (!memcmp(name, "ioctl", 5)) {
+      /*                    ^       */
+        return -KEY_ioctl; /* Weight 967 */
+      }
+      break;
+    case 'w':
+      if (!memcmp(name, "chown", 5)) {
+      /*                    ^       */
+        return -KEY_chown; /* Weight 34 */
+      }
+      break;
+    }
+    break;
+  case 6:
+    /* Names all of length 6.  */
+    /* accept caller chroot delete elseif exists fileno format gmtime length
+       listen msgctl msgget msgrcv msgsnd printf rename return rindex scalar
+       select semctl semget shmctl shmget socket splice substr system unless
+       unlink unpack values */
+    /* Offset 3 gives the best switch position.  */
+    switch (name[3]) {
+    case 'a':
+      if (!memcmp(name, "unpack", 6)) {
+      /*                    ^        */
+        return -KEY_unpack; /* Weight 7849 */
+      }
+      if (!memcmp(name, "rename", 6)) {
+      /*                    ^        */
+        return -KEY_rename; /* Weight 4918 */
+      }
+      break;
+    case 'c':
+      if (!memcmp(name, "semctl", 6)) {
+      /*                    ^        */
+        return -KEY_semctl; /* Weight 17 */
+      }
+      if (!memcmp(name, "msgctl", 6)) {
+      /*                    ^        */
+        return -KEY_msgctl;
+      }
+      if (!memcmp(name, "shmctl", 6)) {
+      /*                    ^        */
+        return -KEY_shmctl;
+      }
+      break;
+    case 'd':
+      if (!memcmp(name, "rindex", 6)) {
+      /*                    ^        */
+        return -KEY_rindex; /* Weight 5005 */
+      }
+      break;
+    case 'e':
+      if (!memcmp(name, "unless", 6)) {
+      /*                    ^        */
+        return KEY_unless; /* Weight 913955 */
+      }
+      if (!memcmp(name, "delete", 6)) {
+      /*                    ^        */
+        return KEY_delete; /* Weight 74966 */
+      }
+      if (!memcmp(name, "select", 6)) {
+      /*                    ^        */
+        return -KEY_select; /* Weight 12209 */
+      }
+      if (!memcmp(name, "fileno", 6)) {
+      /*                    ^        */
+        return -KEY_fileno; /* Weight 8591 */
+      }
+      if (!memcmp(name, "accept", 6)) {
+      /*                    ^        */
+        return -KEY_accept; /* Weight 233 */
+      }
+      if (!memcmp(name, "elseif", 6)) {
+      /*                    ^        */
+        /* This is somewhat hacky.  */
+	if(ckWARN_d(WARN_SYNTAX))
+	  Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "elseif should be elsif");
+	break;
+      }
+      break;
+    case 'g':
+      if (!memcmp(name, "length", 6)) {
+      /*                    ^        */
+        return -KEY_length; /* Weight 163975 */
+      }
+      if (!memcmp(name, "msgget", 6)) {
+      /*                    ^        */
+        return -KEY_msgget;
+      }
+      if (!memcmp(name, "semget", 6)) {
+      /*                    ^        */
+        return -KEY_semget;
+      }
+      if (!memcmp(name, "shmget", 6)) {
+      /*                    ^        */
+        return -KEY_shmget;
+      }
+      break;
+    case 'i':
+      if (!memcmp(name, "splice", 6)) {
+      /*                    ^        */
+        return -KEY_splice; /* Weight 25143 */
+      }
+      if (!memcmp(name, "unlink", 6)) {
+      /*                    ^        */
+        return -KEY_unlink; /* Weight 18616 */
+      }
+      if (!memcmp(name, "gmtime", 6)) {
+      /*                    ^        */
+        return -KEY_gmtime; /* Weight 4040 */
+      }
+      break;
+    case 'k':
+      if (!memcmp(name, "socket", 6)) {
+      /*                    ^        */
+        return -KEY_socket;
+      }
+      break;
+    case 'l':
+      if (!memcmp(name, "caller", 6)) {
+      /*                    ^        */
+        return -KEY_caller; /* Weight 148457 */
+      }
+      if (!memcmp(name, "scalar", 6)) {
+      /*                    ^        */
+        return KEY_scalar; /* Weight 43953 */
+      }
+      break;
+    case 'm':
+      if (!memcmp(name, "format", 6)) {
+      /*                    ^        */
+        return KEY_format; /* Weight 1735 */
+      }
+      break;
+    case 'n':
+      if (!memcmp(name, "printf", 6)) {
+      /*                    ^        */
+        return KEY_printf; /* Weight 6874 */
+      }
+      break;
+    case 'o':
+      if (!memcmp(name, "chroot", 6)) {
+      /*                    ^        */
+        return -KEY_chroot;
+      }
+      break;
+    case 'r':
+      if (!memcmp(name, "msgrcv", 6)) {
+      /*                    ^        */
+        return -KEY_msgrcv;
+      }
+      break;
+    case 's':
+      if (!memcmp(name, "exists", 6)) {
+      /*                    ^        */
+        return KEY_exists; /* Weight 145939 */
+      }
+      if (!memcmp(name, "substr", 6)) {
+      /*                    ^        */
+        return -KEY_substr; /* Weight 121344 */
+      }
+      if (!memcmp(name, "msgsnd", 6)) {
+      /*                    ^        */
+        return -KEY_msgsnd;
+      }
+      break;
+    case 't':
+      if (!memcmp(name, "system", 6)) {
+      /*                    ^        */
+        return -KEY_system; /* Weight 4326 */
+      }
+      if (!memcmp(name, "listen", 6)) {
+      /*                    ^        */
+        return -KEY_listen;
+      }
+      break;
+    case 'u':
+      if (!memcmp(name, "return", 6)) {
+      /*                    ^        */
+        return KEY_return; /* Weight 1401629 */
+      }
+      if (!memcmp(name, "values", 6)) {
+      /*                    ^        */
+        return -KEY_values; /* Weight 10110 */
+      }
+      break;
+    }
+    break;
+  case 7:
+    /* Names all of length 7.  */
+    /* DESTROY __END__ binmode connect dbmopen defined foreach getpgrp getppid
+       lcfirst opendir package readdir require reverse seekdir setpgrp shmread
+       sprintf symlink syscall sysopen sysread sysseek telldir ucfirst unshift
+       waitpid */
+    /* Offset 3 gives the best switch position.  */
+    switch (name[3]) {
+    case 'N':
+      if (!memcmp(name, "__END__", 7)) {
+      /*                    ^         */
+        return KEY___END__; /* Weight 112636 */
+      }
+      break;
+    case 'T':
+      if (!memcmp(name, "DESTROY", 7)) {
+      /*                    ^         */
+        return KEY_DESTROY; /* Weight 7 */
+      }
+      break;
+    case 'c':
+      if (!memcmp(name, "syscall", 7)) {
+      /*                    ^         */
+        return -KEY_syscall; /* Weight 560 */
+      }
+      break;
+    case 'd':
+      if (!memcmp(name, "readdir", 7)) {
+      /*                    ^         */
+        return -KEY_readdir; /* Weight 11716 */
+      }
+      break;
+    case 'e':
+      if (!memcmp(name, "foreach", 7)) {
+      /*                    ^         */
+        return KEY_foreach; /* Weight 281720 */
+      }
+      if (!memcmp(name, "reverse", 7)) {
+      /*                    ^         */
+        return -KEY_reverse; /* Weight 10571 */
+      }
+      break;
+    case 'h':
+      if (!memcmp(name, "unshift", 7)) {
+      /*                    ^         */
+        return -KEY_unshift; /* Weight 36504 */
+      }
+      break;
+    case 'i':
+      if (!memcmp(name, "defined", 7)) {
+      /*                    ^         */
+        return KEY_defined; /* Weight 694277 */
+      }
+      if (!memcmp(name, "sprintf", 7)) {
+      /*                    ^         */
+        return -KEY_sprintf; /* Weight 72704 */
+      }
+      if (!memcmp(name, "ucfirst", 7)) {
+      /*                    ^         */
+        return -KEY_ucfirst; /* Weight 1012 */
+      }
+      if (!memcmp(name, "lcfirst", 7)) {
+      /*                    ^         */
+        return -KEY_lcfirst; /* Weight 165 */
+      }
+      break;
+    case 'k':
+      if (!memcmp(name, "package", 7)) {
+      /*                    ^         */
+        return KEY_package; /* Weight 245661 */
+      }
+      if (!memcmp(name, "seekdir", 7)) {
+      /*                    ^         */
+        return -KEY_seekdir; /* Weight 20 */
+      }
+      break;
+    case 'l':
+      if (!memcmp(name, "symlink", 7)) {
+      /*                    ^         */
+        return -KEY_symlink; /* Weight 386 */
+      }
+      if (!memcmp(name, "telldir", 7)) {
+      /*                    ^         */
+        return -KEY_telldir; /* Weight 294 */
+      }
+      break;
+    case 'm':
+      if (!memcmp(name, "binmode", 7)) {
+      /*                    ^         */
+        return -KEY_binmode; /* Weight 12301 */
+      }
+      break;
+    case 'n':
+      if (!memcmp(name, "opendir", 7)) {
+      /*                    ^         */
+        return -KEY_opendir; /* Weight 9007 */
+      }
+      if (!memcmp(name, "connect", 7)) {
+      /*                    ^         */
+        return -KEY_connect; /* Weight 526 */
+      }
+      break;
+    case 'o':
+      if (!memcmp(name, "sysopen", 7)) {
+      /*                    ^         */
+        return -KEY_sysopen; /* Weight 1230 */
+      }
+      if (!memcmp(name, "dbmopen", 7)) {
+      /*                    ^         */
+        return -KEY_dbmopen;
+      }
+      break;
+    case 'p':
+      if (!memcmp(name, "getppid", 7)) {
+      /*                    ^         */
+        return -KEY_getppid; /* Weight 10 */
+      }
+      if (!memcmp(name, "getpgrp", 7)) {
+      /*                    ^         */
+        return -KEY_getpgrp;
+      }
+      if (!memcmp(name, "setpgrp", 7)) {
+      /*                    ^         */
+        return -KEY_setpgrp;
+      }
+      break;
+    case 'r':
+      if (!memcmp(name, "sysread", 7)) {
+      /*                    ^         */
+        return -KEY_sysread; /* Weight 3729 */
+      }
+      if (!memcmp(name, "shmread", 7)) {
+      /*                    ^         */
+        return -KEY_shmread;
+      }
+      break;
+    case 's':
+      if (!memcmp(name, "sysseek", 7)) {
+      /*                    ^         */
+        return -KEY_sysseek; /* Weight 721 */
+      }
+      break;
+    case 't':
+      if (!memcmp(name, "waitpid", 7)) {
+      /*                    ^         */
+        return -KEY_waitpid; /* Weight 414 */
+      }
+      break;
+    case 'u':
+      if (!memcmp(name, "require", 7)) {
+      /*                    ^         */
+        return KEY_require; /* Weight 375220 */
+      }
+      break;
+    }
+    break;
+  case 8:
+    /* Names all of length 8.  */
+    /* AUTOLOAD __DATA__ __FILE__ __LINE__ closedir continue dbmclose endgrent
+       endpwent formline getgrent getgrgid getgrnam getlogin getpwent getpwnam
+       getpwuid readline readlink readpipe setgrent setpwent shmwrite shutdown
+       syswrite truncate */
+    /* Offset 3 gives the best switch position.  */
+    switch (name[3]) {
+    case 'A':
+      if (!memcmp(name, "__DATA__", 8)) {
+      /*                    ^          */
+        return KEY___DATA__; /* Weight 395 */
+      }
+      break;
+    case 'I':
+      if (!memcmp(name, "__FILE__", 8)) {
+      /*                    ^          */
+        return -KEY___FILE__; /* Weight 888 */
+      }
+      if (!memcmp(name, "__LINE__", 8)) {
+      /*                    ^          */
+        return -KEY___LINE__; /* Weight 209 */
+      }
+      break;
+    case 'O':
+      if (!memcmp(name, "AUTOLOAD", 8)) {
+      /*                    ^          */
+        return KEY_AUTOLOAD; /* Weight 2713 */
+      }
+      break;
+    case 'c':
+      if (!memcmp(name, "dbmclose", 8)) {
+      /*                    ^          */
+        return -KEY_dbmclose;
+      }
+      break;
+    case 'd':
+      if (!memcmp(name, "readlink", 8)) {
+      /*                    ^          */
+        return -KEY_readlink; /* Weight 1537 */
+      }
+      if (!memcmp(name, "readline", 8)) {
+      /*                    ^          */
+        return -KEY_readline; /* Weight 19 */
+      }
+      if (!memcmp(name, "readpipe", 8)) {
+      /*                    ^          */
+        return -KEY_readpipe;
+      }
+      break;
+    case 'g':
+      if (!memcmp(name, "getgrgid", 8)) {
+      /*                    ^          */
+        return -KEY_getgrgid; /* Weight 67 */
+      }
+      if (!memcmp(name, "getgrnam", 8)) {
+      /*                    ^          */
+        return -KEY_getgrnam; /* Weight 11 */
+      }
+      if (!memcmp(name, "endgrent", 8)) {
+      /*                    ^          */
+        return -KEY_endgrent;
+      }
+      if (!memcmp(name, "getgrent", 8)) {
+      /*                    ^          */
+        return -KEY_getgrent;
+      }
+      if (!memcmp(name, "setgrent", 8)) {
+      /*                    ^          */
+        return -KEY_setgrent;
+      }
+      break;
+    case 'l':
+      if (!memcmp(name, "getlogin", 8)) {
+      /*                    ^          */
+        return -KEY_getlogin; /* Weight 158 */
+      }
+      break;
+    case 'm':
+      if (!memcmp(name, "formline", 8)) {
+      /*                    ^          */
+        return -KEY_formline; /* Weight 959 */
+      }
+      break;
+    case 'n':
+      if (!memcmp(name, "truncate", 8)) {
+      /*                    ^          */
+        return -KEY_truncate; /* Weight 1351 */
+      }
+      break;
+    case 'p':
+      if (!memcmp(name, "getpwuid", 8)) {
+      /*                    ^          */
+        return -KEY_getpwuid; /* Weight 681 */
+      }
+      if (!memcmp(name, "getpwnam", 8)) {
+      /*                    ^          */
+        return -KEY_getpwnam; /* Weight 483 */
+      }
+      if (!memcmp(name, "getpwent", 8)) {
+      /*                    ^          */
+        return -KEY_getpwent; /* Weight 12 */
+      }
+      if (!memcmp(name, "endpwent", 8)) {
+      /*                    ^          */
+        return -KEY_endpwent;
+      }
+      if (!memcmp(name, "setpwent", 8)) {
+      /*                    ^          */
+        return -KEY_setpwent;
+      }
+      break;
+    case 's':
+      if (!memcmp(name, "closedir", 8)) {
+      /*                    ^          */
+        return -KEY_closedir; /* Weight 11986 */
+      }
+      break;
+    case 't':
+      if (!memcmp(name, "continue", 8)) {
+      /*                    ^          */
+        return -KEY_continue; /* Weight 2925 */
+      }
+      if (!memcmp(name, "shutdown", 8)) {
+      /*                    ^          */
+        return -KEY_shutdown;
+      }
+      break;
+    case 'w':
+      if (!memcmp(name, "syswrite", 8)) {
+      /*                    ^          */
+        return -KEY_syswrite; /* Weight 4437 */
+      }
+      if (!memcmp(name, "shmwrite", 8)) {
+      /*                    ^          */
+        return -KEY_shmwrite;
+      }
+      break;
+    }
+    break;
+  case 9:
+    /* Names all of length 9.  */
+    /* endnetent getnetent localtime prototype quotemeta rewinddir setnetent
+       wantarray */
+    /* Offset 0 gives the best switch position.  */
+    switch (*name++) {
+    case 'e':
+      if (!memcmp(name, "ndnetent", 8)) {
+      /*                e              */
+        return -KEY_endnetent;
+      }
+      break;
+    case 'g':
+      if (!memcmp(name, "etnetent", 8)) {
+      /*                g              */
+        return -KEY_getnetent;
+      }
+      break;
+    case 'l':
+      if (!memcmp(name, "ocaltime", 8)) {
+      /*                l              */
+        return -KEY_localtime; /* Weight 7993 */
+      }
+      break;
+    case 'p':
+      if (!memcmp(name, "rototype", 8)) {
+      /*                p              */
+        return KEY_prototype; /* Weight 1602 */
+      }
+      break;
+    case 'q':
+      if (!memcmp(name, "uotemeta", 8)) {
+      /*                q              */
+        return -KEY_quotemeta; /* Weight 3120 */
+      }
+      break;
+    case 'r':
+      if (!memcmp(name, "ewinddir", 8)) {
+      /*                r              */
+        return -KEY_rewinddir; /* Weight 218 */
+      }
+      break;
+    case 's':
+      if (!memcmp(name, "etnetent", 8)) {
+      /*                s              */
+        return -KEY_setnetent; /* Weight 1 */
+      }
+      break;
+    case 'w':
+      if (!memcmp(name, "antarray", 8)) {
+      /*                w              */
+        return -KEY_wantarray; /* Weight 43024 */
+      }
+      break;
+    }
+    break;
+  case 10:
+    /* Names all of length 10.  */
+    /* endhostent endservent gethostent getservent getsockopt sethostent
+       setservent setsockopt socketpair */
+    /* Offset 6 gives the best switch position.  */
+    switch (name[6]) {
+    case 'k':
+      if (!memcmp(name, "setsockopt", 10)) {
+      /*                       ^          */
+        return -KEY_setsockopt; /* Weight 356 */
+      }
+      if (!memcmp(name, "getsockopt", 10)) {
+      /*                       ^          */
+        return -KEY_getsockopt; /* Weight 243 */
+      }
+      break;
+    case 'p':
+      if (!memcmp(name, "socketpair", 10)) {
+      /*                       ^          */
+        return -KEY_socketpair;
+      }
+      break;
+    case 't':
+      if (!memcmp(name, "gethostent", 10)) {
+      /*                       ^          */
+        return -KEY_gethostent; /* Weight 3 */
+      }
+      if (!memcmp(name, "endhostent", 10)) {
+      /*                       ^          */
+        return -KEY_endhostent;
+      }
+      if (!memcmp(name, "sethostent", 10)) {
+      /*                       ^          */
+        return -KEY_sethostent;
+      }
+      break;
+    case 'v':
+      if (!memcmp(name, "getservent", 10)) {
+      /*                       ^          */
+        return -KEY_getservent; /* Weight 4 */
+      }
+      if (!memcmp(name, "endservent", 10)) {
+      /*                       ^          */
+        return -KEY_endservent;
+      }
+      if (!memcmp(name, "setservent", 10)) {
+      /*                       ^          */
+        return -KEY_setservent;
+      }
+      break;
+    }
+    break;
+  case 11:
+    /* Names all of length 11.  */
+    /* __PACKAGE__ endprotoent getpeername getpriority getprotoent getsockname
+       setpriority setprotoent */
+    /* Offset 5 gives the best switch position.  */
+    switch (name[5]) {
+    case 'K':
+      if (!memcmp(name, "__PACKAGE__", 11)) {
+      /*                      ^            */
+        return -KEY___PACKAGE__; /* Weight 36767 */
+      }
+      break;
+    case 'c':
+      if (!memcmp(name, "getsockname", 11)) {
+      /*                      ^            */
+        return -KEY_getsockname; /* Weight 235 */
+      }
+      break;
+    case 'e':
+      if (!memcmp(name, "getpeername", 11)) {
+      /*                      ^            */
+        return -KEY_getpeername; /* Weight 713 */
+      }
+      break;
+    case 'i':
+      if (!memcmp(name, "getpriority", 11)) {
+      /*                      ^            */
+        return -KEY_getpriority; /* Weight 5 */
+      }
+      if (!memcmp(name, "setpriority", 11)) {
+      /*                      ^            */
+        return -KEY_setpriority; /* Weight 2 */
+      }
+      break;
+    case 'o':
+      if (!memcmp(name, "endprotoent", 11)) {
+      /*                      ^            */
+        return -KEY_endprotoent;
+      }
+      if (!memcmp(name, "getprotoent", 11)) {
+      /*                      ^            */
+        return -KEY_getprotoent;
+      }
+      if (!memcmp(name, "setprotoent", 11)) {
+      /*                      ^            */
+        return -KEY_setprotoent;
+      }
+      break;
+    }
+    break;
+  case 12:
+    /* Names all of length 12.  */
+    /* getnetbyaddr getnetbyname */
+    /* Offset 9 gives the best switch position.  */
+    switch (name[9]) {
+    case 'a':
+      if (!memcmp(name, "getnetbyname", 12)) {
+      /*                          ^         */
+        return -KEY_getnetbyname;
+      }
+      break;
+    case 'd':
+      if (!memcmp(name, "getnetbyaddr", 12)) {
+      /*                          ^         */
+        return -KEY_getnetbyaddr;
+      }
+      break;
+    }
+    break;
+  case 13:
+    /* Names all of length 13.  */
+    /* gethostbyaddr gethostbyname getservbyname getservbyport */
+    /* Offset 10 gives the best switch position.  */
+    switch (name[10]) {
+    case 'a':
+      if (!memcmp(name, "gethostbyname", 13)) {
+      /*                           ^         */
+        return -KEY_gethostbyname; /* Weight 970 */
+      }
+      if (!memcmp(name, "getservbyname", 13)) {
+      /*                           ^         */
+        return -KEY_getservbyname; /* Weight 299 */
+      }
+      break;
+    case 'd':
+      if (!memcmp(name, "gethostbyaddr", 13)) {
+      /*                           ^         */
+        return -KEY_gethostbyaddr; /* Weight 68 */
+      }
+      break;
+    case 'o':
+      if (!memcmp(name, "getservbyport", 13)) {
+      /*                           ^         */
+        return -KEY_getservbyport;
+      }
+      break;
+    }
+    break;
+  case 14:
+    if (!memcmp(name, "getprotobyname", 14)) {
+      return -KEY_getprotobyname; /* Weight 755 */
+    }
+    break;
+  case 16:
+    if (!memcmp(name, "getprotobynumber", 16)) {
+      return -KEY_getprotobynumber; /* Weight 232 */
+    }
+    break;
+  }
+  return 0;
 }
 
 STATIC void
