@@ -2491,16 +2491,28 @@ S_regclass(pTHX)
 		    if (LOC)
 			ANYOF_CLASS_SET(ret, ANYOF_ASCII);
 		    else {
+#ifdef ASCIIish
 			for (value = 0; value < 128; value++)
 			    ANYOF_BITMAP_SET(ret, value);
+#else  /* EBCDIC */
+			for (value = 0; value < 256; value++)
+			    if (isASCII(value))
+				ANYOF_BITMAP_SET(ret, value);
+#endif /* EBCDIC */
 		    }
 		    break;
 		case ANYOF_NASCII:
 		    if (LOC)
 			ANYOF_CLASS_SET(ret, ANYOF_NASCII);
 		    else {
+#ifdef ASCIIish
 			for (value = 128; value < 256; value++)
 			    ANYOF_BITMAP_SET(ret, value);
+#else  /* EBCDIC */
+			for (value = 0; value < 256; value++)
+			    if (!isASCII(value))
+				ANYOF_BITMAP_SET(ret, value);
+#endif /* EBCDIC */
 		    }
 		    break;
 		case ANYOF_CNTRL:
