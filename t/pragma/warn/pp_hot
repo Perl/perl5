@@ -70,7 +70,7 @@ print getc(STDERR);
 print getc(FOO);
 ####################################################################
 # The next test is known to fail on some systems (Linux+old glibc, #
-# old *BSDs, and NeXT, among others.                               #
+# some *BSDs (including Mac OS X and NeXT), among others.          #
 # We skip it for now (on the grounds that it is "just" a warning). #
 ####################################################################
 #read(FOO,$_,1);
