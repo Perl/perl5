@@ -1192,7 +1192,11 @@ lib/File/Temp/t/posix.t		See if File::Temp works
 lib/File/Temp/t/security.t	See if File::Temp works
 lib/File/Temp/t/tempfile.t	See if File::Temp works
 lib/FileCache.pm		Keep more files open than the system permits
-lib/FileCache.t			See if FileCache works
+lib/FileCache/t/01open.t	See if FileCache works
+lib/FileCache/t/02maxopen.t	See if FileCache works
+lib/FileCache/t/03append.t	See if FileCache works
+lib/FileCache/t/04twoarg.t	See if FileCache works
+lib/FileCache/t/05override.t	See if FileCache works
 lib/FileHandle.pm		Backward-compatible front end to IO extension
 lib/FileHandle.t		See if FileHandle works
 lib/filetest.pm			For "use filetest"
