@@ -71,6 +71,7 @@
 #define append_elem		Perl_append_elem
 #define append_list		Perl_append_list
 #define apply			Perl_apply
+#define apply_attrs_string	Perl_apply_attrs_string
 #define avhv_delete_ent		Perl_avhv_delete_ent
 #define avhv_exists_ent		Perl_avhv_exists_ent
 #define avhv_fetch_ent		Perl_avhv_fetch_ent
@@ -892,6 +893,7 @@
 #define cv_dump			S_cv_dump
 #define cv_clone2		S_cv_clone2
 #define scalar_mod_type		S_scalar_mod_type
+#define method_2entersub	S_method_2entersub
 #define my_kid			S_my_kid
 #define dup_attrlist		S_dup_attrlist
 #define apply_attrs		S_apply_attrs
@@ -1090,6 +1092,7 @@
 #define scan_trans		S_scan_trans
 #define scan_word		S_scan_word
 #define skipspace		S_skipspace
+#define swallow_bom		S_swallow_bom
 #define checkcomma		S_checkcomma
 #define force_ident		S_force_ident
 #define incline			S_incline
@@ -1542,6 +1545,7 @@
 #define append_elem(a,b,c)	Perl_append_elem(aTHX_ a,b,c)
 #define append_list(a,b,c)	Perl_append_list(aTHX_ a,b,c)
 #define apply(a,b,c)		Perl_apply(aTHX_ a,b,c)
+#define apply_attrs_string(a,b,c,d)	Perl_apply_attrs_string(aTHX_ a,b,c,d)
 #define avhv_delete_ent(a,b,c,d)	Perl_avhv_delete_ent(aTHX_ a,b,c,d)
 #define avhv_exists_ent(a,b,c)	Perl_avhv_exists_ent(aTHX_ a,b,c)
 #define avhv_fetch_ent(a,b,c,d)	Perl_avhv_fetch_ent(aTHX_ a,b,c,d)
@@ -2334,6 +2338,7 @@
 #define cv_dump(a)		S_cv_dump(aTHX_ a)
 #define cv_clone2(a,b)		S_cv_clone2(aTHX_ a,b)
 #define scalar_mod_type(a,b)	S_scalar_mod_type(aTHX_ a,b)
+#define method_2entersub(a,b,c)	S_method_2entersub(aTHX_ a,b,c)
 #define my_kid(a,b)		S_my_kid(aTHX_ a,b)
 #define dup_attrlist(a)		S_dup_attrlist(aTHX_ a)
 #define apply_attrs(a,b,c)	S_apply_attrs(aTHX_ a,b,c)
@@ -2531,6 +2536,7 @@
 #define scan_trans(a)		S_scan_trans(aTHX_ a)
 #define scan_word(a,b,c,d,e)	S_scan_word(aTHX_ a,b,c,d,e)
 #define skipspace(a)		S_skipspace(aTHX_ a)
+#define swallow_bom(a)		S_swallow_bom(aTHX_ a)
 #define checkcomma(a,b,c)	S_checkcomma(aTHX_ a,b,c)
 #define force_ident(a,b)	S_force_ident(aTHX_ a,b)
 #define incline(a)		S_incline(aTHX_ a)
@@ -2993,6 +2999,8 @@
 #define append_list		Perl_append_list
 #define Perl_apply		CPerlObj::Perl_apply
 #define apply			Perl_apply
+#define Perl_apply_attrs_string	CPerlObj::Perl_apply_attrs_string
+#define apply_attrs_string	Perl_apply_attrs_string
 #define Perl_avhv_delete_ent	CPerlObj::Perl_avhv_delete_ent
 #define avhv_delete_ent		Perl_avhv_delete_ent
 #define Perl_avhv_exists_ent	CPerlObj::Perl_avhv_exists_ent
@@ -4561,6 +4569,8 @@
 #define cv_clone2		S_cv_clone2
 #define S_scalar_mod_type	CPerlObj::S_scalar_mod_type
 #define scalar_mod_type		S_scalar_mod_type
+#define S_method_2entersub	CPerlObj::S_method_2entersub
+#define method_2entersub	S_method_2entersub
 #define S_my_kid		CPerlObj::S_my_kid
 #define my_kid			S_my_kid
 #define S_dup_attrlist		CPerlObj::S_dup_attrlist
@@ -4921,6 +4931,8 @@
 #define scan_word		S_scan_word
 #define S_skipspace		CPerlObj::S_skipspace
 #define skipspace		S_skipspace
+#define S_swallow_bom		CPerlObj::S_swallow_bom
+#define swallow_bom		S_swallow_bom
 #define S_checkcomma		CPerlObj::S_checkcomma
 #define checkcomma		S_checkcomma
 #define S_force_ident		CPerlObj::S_force_ident
