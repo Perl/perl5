@@ -104,8 +104,8 @@ contain PA-RISC 2.0 chips (this is very likely to be out of date):
     D380, D390, D650, J220, J2240, J280, J282, J400, J410, J5000, J5500XM,
     J5600, J7000, J7600, K250, K260, K260-EG, K270, K360, K370, K380, K450,
     K460, K460-EG, K460-XP, K470, K570, K580, L1000, L2000, L3000, N4000,
-    R380, R390, SD16000, SD32000, SD64000, T540, T600, V2000, V2200, V2250,
-    V2500, V2600
+    R380, R390, RP8400, SD16000, SD32000, SD64000, T540, T600, V2000, V2200,
+    V2250, V2500, V2600
 
 =head2 Itanium
 
@@ -113,7 +113,7 @@ HP also ships servers with the 128-bit Itanium processor(s). As of the
 date of this document's last update, the following systems contain
 Itanium chips (this is very likely to be out of date):
 
-    rx4610
+    RX4610, RX9610
 
 A complete list of models at the time the OS was built is in the file
 /opt/langtools/lib/sched.models.  The first column corresponds to the
