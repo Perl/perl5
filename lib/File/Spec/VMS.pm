@@ -128,26 +128,27 @@ sub fixpath {
 
 =item canonpath (override)
 
-Removes redundant portions of file specifications according to VMS syntax
+Removes redundant portions of file specifications according to VMS syntax.
 
 =cut
 
 sub canonpath {
-    my($self,$path,$reduce_ricochet) = @_;
+    my($self,$path) = @_;
 
     if ($path =~ m|/|) { # Fake Unix
       my $pathify = $path =~ m|/\z|;
-      $path = $self->SUPER::canonpath($path,$reduce_ricochet);
+      $path = $self->SUPER::canonpath($path);
       if ($pathify) { return vmspath($path); }
       else          { return vmsify($path);  }
     }
     else {
-      $path =~ s-\]\[--g;  $path =~ s/><//g;         # foo.][bar       ==> foo.bar
-      $path =~ s/([\[<])000000\./$1/;                # [000000.foo     ==> foo
-      if ($reduce_ricochet) { 
-        $path =~ s/\.[^\[<\.]+\.-([\]\>])/$1/g;
-        $path =~ s/([\[<\.])([^\[<\.]+)\.-\.?/$1/g;
-      }
+      $path =~ s-\]\[--g;  $path =~ s/><//g;            # foo.][bar       ==> foo.bar
+      $path =~ s/([\[<])000000\./$1/;                   # [000000.foo     ==> foo
+      1 while $path =~ s{-\.-}{--};                     # -.-             ==> --
+      $path =~ s/\.[^\[<\.]+\.-([\]\>])/$1/;            # bar.foo.-]      ==> bar]
+      $path =~ s/([\[<])(-+)/$1 . "\cx" x length($2)/e; # encode leading '-'s
+      $path =~ s/([\[<\.])([^\[<\.\cx]+)\.-\.?/$1/g;    # bar.-.foo       ==> foo
+      $path =~ s/([\[<])(\cx+)/$1 . '-' x length($2)/e; # then decode
       return $path;
     }
 }
@@ -172,15 +173,16 @@ sub catdir {
 	$sdir = $self->eliminate_macros($sdir) unless $sdir =~ /^[\w\-]+\z/s;
 	$rslt = $self->fixpath($self->eliminate_macros($spath)."/$sdir",1);
 
-    # Special case for VMS absolute directory specs: these will have had device
-    # prepended during trip through Unix syntax in eliminate_macros(), since
-    # Unix syntax has no way to express "absolute from the top of this device's
-    # directory tree".
-    if ($spath =~ /^[\[<][^.\-]/s) { $rslt =~ s/^[^\[<]+//s; }
+	# Special case for VMS absolute directory specs: these will have had device
+	# prepended during trip through Unix syntax in eliminate_macros(), since
+	# Unix syntax has no way to express "absolute from the top of this device's
+	# directory tree".
+	if ($spath =~ /^[\[<][^.\-]/s) { $rslt =~ s/^[^\[<]+//s; }
     }
     else {
-	if ($dir =~ /^\$\([^\)]+\)\z/s) { $rslt = $dir; }
-	else                            { $rslt = vmspath($dir); }
+	if    (not defined $dir or not length $dir) { $rslt = ''; }
+	elsif ($dir =~ /^\$\([^\)]+\)\z/s)          { $rslt = $dir; }
+	else                                        { $rslt = vmspath($dir); }
     }
     return $rslt;
 }
@@ -209,7 +211,7 @@ sub catfile {
 	    $rslt = vmsify($rslt.($rslt ? '/' : '').unixify($file));
 	}
     }
-    else { $rslt = vmsify($file); }
+    else { $rslt = (defined($file) && length($file)) ? vmsify($file) : ''; }
     return $rslt;
 }
 
@@ -249,7 +251,7 @@ sub rootdir {
 Returns a string representation of the first writable directory
 from the following list or '' if none are writable:
 
-    /sys$scratch
+    sys$scratch
     $ENV{TMPDIR}
 
 =cut
@@ -257,7 +259,7 @@ from the following list or '' if none are writable:
 my $tmpdir;
 sub tmpdir {
     return $tmpdir if defined $tmpdir;
-    foreach ('/sys$scratch', $ENV{TMPDIR}) {
+    foreach ('sys$scratch', $ENV{TMPDIR}) {
 	next unless defined && -d && -w _;
 	$tmpdir = $_;
 	last;
@@ -337,6 +339,7 @@ Split dirspec using VMS syntax.
 sub splitdir {
     my($self,$dirspec) = @_;
     $dirspec =~ s/\]\[//g;  $dirspec =~ s/\-\-/-.-/g;
+    $dirspec = "[$dirspec]" unless $dirspec =~ /[\[<]/; # make legal
     my(@dirs) = split('\.', vmspath($dirspec));
     $dirs[0] =~ s/^[\[<]//s;  $dirs[-1] =~ s/[\]>]\z//s;
     @dirs;
@@ -351,127 +354,25 @@ Construct a complete filespec using VMS syntax
 
 sub catpath {
     my($self,$dev,$dir,$file) = @_;
-    if ($dev =~ m|^/+([^/]+)|) { $dev =~ "$1:"; }
+    if ($dev =~ m|^/+([^/]+)|) { $dev = "$1:"; }
     else { $dev .= ':' unless $dev eq '' or $dev =~ /:\z/; }
-    $dir = vmspath($dir);
+    if (length($dev) or length($dir)) {
+      $dir = "[$dir]" unless $dir =~ /[\[<\/]/;
+      $dir = vmspath($dir);
+    }
     "$dev$dir$file";
 }
 
-=item splitpath
+=item abs2rel (override)
 
-    ($volume,$directories,$file) = File::Spec->splitpath( $path );
-    ($volume,$directories,$file) = File::Spec->splitpath( $path, $no_file );
-
-Splits a VMS path in to volume, directory, and filename portions.
-Ignores $no_file, if present, since VMS paths indicate the 'fileness' of a 
-file.
-
-The results can be passed to L</catpath()> to get back a path equivalent to
-(usually identical to) the original path.
+Use VMS syntax when converting filespecs.
 
 =cut
-
-sub splitpath {
-    my $self = shift ;
-    my ($path, $nofile) = @_;
-
-    my ($volume,$directory,$file) ;
-
-    if ( $path =~ m{/} ) {
-        $path =~ 
-            m{^ ( (?: /[^/]* )? )
-                ( (?: .*/(?:[^/]+\.dir)? )? )
-                (.*)
-             }xs;
-        $volume    = $1;
-        $directory = $2;
-        $file      = $3;
-    }
-    else {
-        $path =~ 
-            m{^ ( (?: (?: (?: [\w\$-]+ (?: "[^"]*")?:: )? [\w\$-]+: )? ) )
-                ( (?:\[.*\])? )
-                (.*)
-             }xs;
-        $volume    = $1;
-        $directory = $2;
-        $file      = $3;
-    }
-
-    $directory = $1
-        if $directory =~ /^\[(.*)\]\z/s ;
-
-    return ($volume,$directory,$file);
-}
-
-
-=item splitdir
-
-The opposite of L</catdir()>.
-
-    @dirs = File::Spec->splitdir( $directories );
-
-$directories must be only the directory portion of the path.
-
-'[' and ']' delimiters are optional. An empty string argument is
-equivalent to '[]': both return an array with no elements.
-
-=cut
-
-sub splitdir {
-    my $self = shift ;
-    my $directories = $_[0] ;
-
-    return File::Spec::Unix::splitdir( $self, @_ )
-        if ( $directories =~ m{/} ) ;
-
-    $directories =~ s/^\[(.*)\]\z/$1/s ;
-
-    #
-    # split() likes to forget about trailing null fields, so here we
-    # check to be sure that there will not be any before handling the
-    # simple case.
-    #
-    if ( $directories !~ m{\.\z} ) {
-        return split( m{\.}, $directories );
-    }
-    else {
-        #
-        # since there was a trailing separator, add a file name to the end, 
-        # then do the split, then replace it with ''.
-        #
-        my( @directories )= split( m{\.}, "${directories}dummy" ) ;
-        $directories[ $#directories ]= '' ;
-        return @directories ;
-    }
-}
-
-
-sub catpath {
-    my $self = shift;
-
-    return File::Spec::Unix::catpath( $self, @_ )
-        if ( join( '', @_ ) =~ m{/} ) ;
-
-    my ($volume,$directory,$file) = @_;
-
-    $volume .= ':'
-        if $volume =~ /[^:]\z/ ;
-
-    $directory = "[$directory"
-        if $directory =~ /^[^\[]/s ;
-
-    $directory .= ']'
-        if $directory =~ /[^\]]\z/ ;
-
-    return "$volume$directory$file" ;
-}
-
 
 sub abs2rel {
     my $self = shift;
 
-    return File::Spec::Unix::abs2rel( $self, @_ )
+    return vmspath(File::Spec::Unix::abs2rel( $self, @_ ))
         if ( join( '', @_ ) =~ m{/} ) ;
 
     my($path,$base) = @_;
@@ -527,13 +428,19 @@ sub abs2rel {
     # @pathchunks now has the directories to descend in to.
     $path_directories = '-.' x @basechunks . join( '.', @pathchunks ) ;
     $path_directories =~ s{\.\z}{} ;
-    return $self->catpath( '', $path_directories, $path_file ) ;
+    return $self->canonpath( $self->catpath( '', $path_directories, $path_file ) ) ;
 }
 
 
+=item rel2abs (override)
+
+Use VMS syntax when converting filespecs.
+
+=cut
+
 sub rel2abs($;$;) {
     my $self = shift ;
-    return File::Spec::Unix::rel2abs( $self, @_ )
+    return vmspath(File::Spec::Unix::rel2abs( $self, @_ ))
         if ( join( '', @_ ) =~ m{/} ) ;
 
     my ($path,$base ) = @_;
@@ -557,12 +464,15 @@ sub rel2abs($;$;) {
         my ( $base_volume, $base_directories, undef ) =
             $self->splitpath( $base ) ;
 
+        $path_directories = '' if $path_directories eq '[]' ||
+                                  $path_directories eq '<>';
         my $sep = '' ;
         $sep = '.'
-            if ( $base_directories =~ m{[^.]\z} &&
-                 $path_directories =~ m{^[^.]}s
+            if ( $base_directories =~ m{[^.\]>]\z} &&
+                 $path_directories =~ m{^[^.\[<]}s
             ) ;
-        $base_directories = "$base_directories$sep$path_directories" ;
+        $base_directories = "$base_directories$sep$path_directories";
+        $base_directories =~ s{\.?[\]>][\[<]\.?}{.};
 
         $path = $self->catpath( $base_volume, $base_directories, $path_file );
    }
