@@ -134,13 +134,13 @@ sub install {
 	}, ".");
 	chdir($cwd) or Carp::croak("Couldn't chdir to $cwd: $!");
     }
-    umask $umask unless $Is_VMS;
     if ($pack{'write'}) {
 	$dir = dirname($pack{'write'});
 	mkpath($dir,0,0755);
 	print "Writing $pack{'write'}\n";
 	$packlist->write($pack{'write'});
     }
+    umask $umask unless $Is_VMS;
 }
 
 sub directory_not_empty ($) {

@@ -1,5 +1,5 @@
-Check out always the latest perl5-porters discussions on these subjects
-before embaring on an implementation tour.
+Always check out the latest perl5-porters discussions on these subjects
+before embarking on an implementation tour.
 
 Tie Modules
 	VecArray		Implement array using vec()
@@ -9,71 +9,72 @@ Tie Modules
 
 Would be nice to have
 	pack "(stuff)*", "(stuff)4", ...
-	Contiguous bitfields in pack/unpack
+	contiguous bitfields in pack/unpack
 	lexperl
-	Bundled perl preprocessor
-	Use posix calls internally where possible
+	bundled perl preprocessor
+	use posix calls internally where possible
 	gettimeofday (possibly best left for a module?)
 	format BOTTOM
 	-i rename file only when successfully changed
-	All ARGV input should act like <>
+	all ARGV input should act like <>
 	report HANDLE [formats].
 	support in perlmain to rerun debugger
 	regression tests using __DIE__ hook
-	reference to compiled regexp
 	lexically scoped functions: my sub foo { ... }
 	lvalue functions
-	    wantlvalue?  more generalized want()?
-	named prototypes: sub ($foo, @bar) foo { ... }
+	    wantlvalue?  more generalized want()/caller()?
+	named prototypes: sub foo ($foo, @bar) { ... } ?
 	regression/sanity tests for suidperl
 	iterators/lazy evaluation/continuations/first/
 	    first_defined/short-circuiting grep/??
 	    This is a very thorny and hotly debated subject,
-	    tread carefully and do your homework first.
-	Full 64 bit support (i.e. "long long").  Things to consider:
+	    tread carefully and do your homework first
+	full 64 bit support (i.e. "long long").  Things to consider:
 	    how to store/retrieve 32+ integers into/from Perl scalars?
 	    32+ constants in Perl code? (non-portable!)
 	    32+ arguments/return values to/from system calls? (seek et al)
 	    32+ bit ops (&|^~, currently explicitly disabled)
-	Generalise Errno way of extracting cpp symbols and use that in
+	generalise Errno way of extracting cpp symbols and use that in
 	    Errno and Fcntl (ExtUtils::CppSymbol?)
-	The _r-problem: for all the {set,get,end}*() system database
+	the _r-problem: for all the {set,get,end}*() system database
 	     calls (and a couple more: readdir, *rand*, crypt, *time,
 	     tmpnam) there are in many systems the _r versions
-	     to be used in re-entrant (=multithreaded) code.
+	     to be used in re-entrant (=multithreaded) code
 	     Icky things: the _r API is not standardized and
-	     the _r-forms require per-thread data to store their state.
-	Memory profiler: turn malloc.c:Perl_dump_mstats() into
+	     the _r-forms require per-thread data to store their state
+	memory profiler: turn malloc.c:Perl_dump_mstats() into
 	    an extension (Devel::MProf?) that would return the malloc
 	    stats in a nice Perl datastructure (also a simple interface
-	    to return just the grand total would be good).
+	    to return just the grand total would be good)
+	Unicode: [=bar=], combining characters equivalence
+	    (U+4001 + U+0308 should be equal to U+00C4, in other words
+             A+diaereres should equal Ä), Unicode collation
 
 Possible pragmas
 	debugger
-	optimize (use less memory, CPU)
+	optimize (use less qw[memory cpu])
 
 Optimizations
 	constant function cache
 	switch structures
 	foreach(reverse...)
-	Set KEEP on constant split
-	Cache eval tree (unless lexical outer scope used (mark in &compiling?))
+	optimize away constant split at compile time (a la qw[f o o])
+	cache eval tree (unless lexical outer scope used (mark in &compiling?))
 	rcatmaybe
-	Shrink opcode tables via multiple implementations selected in peep
-	Cache hash value?  (Not a win, according to Guido)
-	Optimize away @_ where possible
+	shrink opcode tables via multiple implementations selected in peep
+	cache hash value?  (Not a win, according to Guido)
+	optimize away @_ where possible
 	"one pass" global destruction
-	Rewrite regexp parser for better integrated optimization
+	rewrite regexp parser for better integrated optimization
 	LRU cache of regexp: foreach $pat (@pats) { foo() if /$pat/ }
 
 Vague possibilities
-	ref function in list context
+	ref function in list context?
 	make tr/// return histogram in list context?
-	Loop control on do{} et al
-	Explicit switch statements
+	loop control on do{} et al
+	explicit switch statements
 	built-in globbing
 	compile to real threaded code
 	structured types
 	autocroak?
-	Modifiable $1 et al
-
+	modifiable $1 et al

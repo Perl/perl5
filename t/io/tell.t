@@ -7,7 +7,7 @@ print "1..21\n";
 $TST = 'tst';
 
 $Is_Dosish = ($^O eq 'MSWin32' or $^O eq 'dos' or
-	      $^O eq 'os2' or $^O eq 'mint' or $^O =~ /cygwin/);
+	      $^O eq 'os2' or $^O eq 'mint');
 
 open($TST, '../Configure') || (die "Can't open ../Configure");
 binmode $TST if $Is_Dosish;

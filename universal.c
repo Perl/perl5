@@ -197,7 +197,7 @@ XS(XS_UNIVERSAL_VERSION)
 
     gvp = pkg ? (GV**)hv_fetch(pkg,"VERSION",7,FALSE) : Null(GV**);
 
-    if (gvp && (gv = *gvp) != (GV*)&PL_sv_undef && (sv = GvSV(gv))) {
+    if (gvp && isGV(gv = *gvp) && SvOK(sv = GvSV(gv))) {
         SV *nsv = sv_newmortal();
         sv_setsv(nsv, sv);
         sv = nsv;

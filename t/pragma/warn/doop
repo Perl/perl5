@@ -12,11 +12,11 @@ EXPECT
 Malformed UTF-8 character at - line 4.
 ########
 # doop.c
-use warning 'utf8'  ;
+use warnings 'utf8'  ;
 use utf8 ;
 $_ = "\x80  \xff" ;
 chop ;
-no warning 'utf8'  ;
+no warnings 'utf8'  ;
 $_ = "\x80  \xff" ;
 chop ;
 EXPECT

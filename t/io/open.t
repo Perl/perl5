@@ -82,7 +82,7 @@ unlink("afile");
 if ($Is_VMS) { for (24..46) { print "ok $_ # skipped: not Unix fork\n"; {
 else {
 print "# \$!='$!'\nnot " unless open(my $f, '-|', <<'EOC');
-perl -e "print qq(a row\n); print qq(another row\n)"
+./perl -e "print qq(a row\n); print qq(another row\n)"
 EOC
 print "ok 24\n";
 @rows = <$f>;
@@ -94,7 +94,7 @@ print "ok 26\n";
 if ($Is_VMS) { for (27..30) { print "OK $_ # skipped: not Unix fork\n"; }
 else {
 print "# \$!='$!'\nnot " unless open(my $f, '|-', <<'EOC');
-perl -pe "s/^not //"
+./perl -pe "s/^not //"
 EOC
 print "ok 27\n";
 @rows = <$f>;

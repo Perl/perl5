@@ -6,16 +6,22 @@ perlsub - Perl subroutines
 
 To declare subroutines:
 
-    sub NAME;	      	  # A "forward" declaration.
-    sub NAME(PROTO);  	  #  ditto, but with prototypes
+    sub NAME;			  # A "forward" declaration.
+    sub NAME(PROTO);		  #  ditto, but with prototypes
+    sub NAME : ATTRS;		  #  with attributes
+    sub NAME(PROTO) : ATTRS;	  #  with attributes and prototypes
 
-    sub NAME BLOCK    	  # A declaration and a definition.
-    sub NAME(PROTO) BLOCK #  ditto, but with prototypes
+    sub NAME BLOCK		  # A declaration and a definition.
+    sub NAME(PROTO) BLOCK	  #  ditto, but with prototypes
+    sub NAME : ATTRS BLOCK	  #  with attributes
+    sub NAME(PROTO) : ATTRS BLOCK #  with prototypes and attributes
 
 To define an anonymous subroutine at runtime:
 
-    $subref = sub BLOCK;	    # no proto
-    $subref = sub (PROTO) BLOCK;    # with proto
+    $subref = sub BLOCK;		 # no proto
+    $subref = sub (PROTO) BLOCK;	 # with proto
+    $subref = sub : ATTRS BLOCK;	 # with attributes
+    $subref = sub (PROTO) : ATTRS BLOCK; # with proto and attributes
 
 To import subroutines:
 
@@ -112,7 +118,7 @@ Example:
 	...
     }
 
-Asisng to a list of private variables to name your arguments:
+Assigning to a list of private variables to name your arguments:
 
     sub maybeset {
 	my($key, $value) = @_;
@@ -196,7 +202,7 @@ disables any prototype checking on arguments you do provide.  This
 is partly for historical reasons, and partly for having a convenient way
 to cheat if you know what you're doing.  See L<Prototypes> below.
 
-Function whose names are in all upper case are reserved to the Perl
+Functions whose names are in all upper case are reserved to the Perl
 core, as are modules whose names are in all lower case.  A
 function in all capitals is a loosely-held convention meaning it
 will be called indirectly by the run-time system itself, usually
@@ -213,6 +219,11 @@ Synopsis:
     my (@wid, %get); 	# declare list of variables local
     my $foo = "flurp";	# declare $foo lexical, and init it
     my @oof = @bar;	# declare @oof lexical, and init it
+    my $x : Foo = $y;	# similar, with an attribute applied
+
+B<WARNING>: The use of attribute lists on C<my> declarations is
+experimental.  This feature should not be relied upon.  It may
+change or disappear in future releases of Perl.  See L<attributes>.
 
 The C<my> operator declares the listed variables to be lexically
 confined to the enclosing block, conditional (C<if/unless/elsif/else>),
@@ -220,7 +231,7 @@ loop (C<for/foreach/while/until/continue>), subroutine, C<eval>,
 or C<do/require/use>'d file.  If more than one value is listed, the
 list must be placed in parentheses.  All listed elements must be
 legal lvalues.  Only alphanumeric identifiers may be lexically
-scoped--magical built-in like C<$/> must currently be C<local>ize
+scoped--magical built-ins like C<$/> must currently be C<local>ize
 with C<local> instead.
 
 Unlike dynamic variables created by the C<local> operator, lexical
@@ -669,8 +680,8 @@ to it.  Look out for implicit assignments in C<while> conditionals.
 
 =item 2. You need to create a local file or directory handle or a local function.
 
-A function that needs a filehandle of its own must use C<local()> uses
-C<local()> on complete typeglob.   This can be used to create new symbol
+A function that needs a filehandle of its own must use
+C<local()> on a complete typeglob.   This can be used to create new symbol
 table entries:
 
     sub ioqueue {
@@ -798,7 +809,7 @@ It turns out that you can actually do this also:
 
 Here we're using the typeglobs to do symbol table aliasing.  It's
 a tad subtle, though, and also won't work if you're using C<my>
-variables, because only globals (even in disguised as C<local>s)
+variables, because only globals (even in disguise as C<local>s)
 are in the symbol table.
 
 If you're passing around filehandles, you could usually just use the bare
@@ -1043,7 +1054,7 @@ built-in name with the special package qualifier C<CORE::>.  For example,
 saying C<CORE::open()> always refers to the built-in C<open()>, even
 if the current package has imported some other subroutine called
 C<&open()> from elsewhere.  Even though it looks like a regular
-function calls, it isn't: you can't take a reference to it, such as
+function call, it isn't: you can't take a reference to it, such as
 the incorrect C<\&CORE::open> might appear to produce.
 
 Library modules should not in general export built-in names like C<open>
@@ -1166,6 +1177,46 @@ into autoloadable files.  See the standard AutoLoader module
 described in L<AutoLoader> and in L<AutoSplit>, the standard
 SelfLoader modules in L<SelfLoader>, and the document on adding C
 functions to Perl code in L<perlxs>.
+
+=head2 Subroutine Attributes
+
+A subroutine declaration or definition may have a list of attributes
+associated with it.  If such an attribute list is present, it is
+broken up at space or comma boundaries and treated as though a
+C<use attributes> had been seen.  See L<attributes> for details
+about what attributes are currently supported.
+Unlike the limitation with the obsolescent C<use attrs>, the
+C<sub : ATTRLIST> syntax works to associate the attributes with
+a pre-declaration, and not just with a subroutine definition.
+
+The attributes must be valid as simple identifier names (without any
+punctuation other than the '_' character).  They may have a parameter
+list appended, which is only checked for whether its parentheses ('(',')')
+nest properly.
+
+Examples of valid syntax (even though the attributes are unknown):
+
+    sub fnord (&\%) : switch(10,foo(7,3)) , ,  expensive ;
+    sub plugh () : Ugly('\(") , Bad ;
+    sub xyzzy : _5x5 { ... }
+
+Examples of invalid syntax:
+
+    sub fnord : switch(10,foo() ; # ()-string not balanced
+    sub snoid : Ugly('(') ;	  # ()-string not balanced
+    sub xyzzy : 5x5 ;		  # "5x5" not a valid identifier
+    sub plugh : Y2::north ;	  # "Y2::north" not a simple identifier
+    sub snurt : foo + bar ;	  # "+" not a comma or space
+
+The attribute list is passed as a list of constant strings to the code
+which associates them with the subroutine.  In particular, the second example
+of valid syntax above currently looks like this in terms of how it's
+parsed and invoked:
+
+    use attributes __PACKAGE__, \&plugh, q[Ugly('\(")], 'Bad';
+
+For further details on attribute lists and their manipulation,
+see L<attributes>.
 
 =head1 SEE ALSO
 

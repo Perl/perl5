@@ -1265,6 +1265,10 @@
 #define Perl_do_trans		pPerl->Perl_do_trans
 #undef  do_trans
 #define do_trans		Perl_do_trans
+#undef  Perl_do_vecget
+#define Perl_do_vecget		pPerl->Perl_do_vecget
+#undef  do_vecget
+#define do_vecget		Perl_do_vecget
 #undef  Perl_do_vecset
 #define Perl_do_vecset		pPerl->Perl_do_vecset
 #undef  do_vecset
@@ -3505,6 +3509,26 @@
 #define Perl_magic_killbackrefs	pPerl->Perl_magic_killbackrefs
 #undef  magic_killbackrefs
 #define magic_killbackrefs	Perl_magic_killbackrefs
+#undef  Perl_newANONATTRSUB
+#define Perl_newANONATTRSUB	pPerl->Perl_newANONATTRSUB
+#undef  newANONATTRSUB
+#define newANONATTRSUB		Perl_newANONATTRSUB
+#undef  Perl_newATTRSUB
+#define Perl_newATTRSUB		pPerl->Perl_newATTRSUB
+#undef  newATTRSUB
+#define newATTRSUB		Perl_newATTRSUB
+#undef  Perl_newMYSUB
+#define Perl_newMYSUB		pPerl->Perl_newMYSUB
+#undef  newMYSUB
+#define newMYSUB		Perl_newMYSUB
+#undef  Perl_my_attrs
+#define Perl_my_attrs		pPerl->Perl_my_attrs
+#undef  my_attrs
+#define my_attrs		Perl_my_attrs
+#undef  Perl_boot_core_xsutils
+#define Perl_boot_core_xsutils	pPerl->Perl_boot_core_xsutils
+#undef  boot_core_xsutils
+#define boot_core_xsutils	Perl_boot_core_xsutils
 #if defined(PERL_OBJECT)
 #endif
 #if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)
@@ -3559,6 +3583,8 @@
 #  endif
 #endif
 #if defined(PERL_IN_UNIVERSAL_C) || defined(PERL_DECL_PROT)
+#endif
+#if defined(PERL_IN_XSUTILS_C) || defined(PERL_DECL_PROT)
 #endif
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 #  if defined(LEAKTEST)

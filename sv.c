@@ -15,34 +15,6 @@
 #define PERL_IN_SV_C
 #include "perl.h"
 
-#ifdef OVR_DBL_DIG
-/* Use an overridden DBL_DIG */
-# ifdef DBL_DIG
-#  undef DBL_DIG
-# endif
-# define DBL_DIG OVR_DBL_DIG
-#else
-/* The following is all to get DBL_DIG, in order to pick a nice
-   default value for printing floating point numbers in Gconvert.
-   (see config.h)
-*/
-#ifdef I_LIMITS
-#include <limits.h>
-#endif
-#ifdef I_FLOAT
-#include <float.h>
-#endif
-#ifndef HAS_DBL_DIG
-#define DBL_DIG	15   /* A guess that works lots of places */
-#endif
-#endif
-
-#ifdef PERL_OBJECT
-#define VTBL this->*vtbl
-#else /* !PERL_OBJECT */
-#define VTBL *vtbl
-#endif /* PERL_OBJECT */
-
 #define FCALL *f
 #define SV_CHECK_THINKFIRST(sv) if (SvTHINKFIRST(sv)) sv_force_normal(sv)
 
@@ -1068,7 +1040,7 @@ S_not_a_number(pTHX_ SV *sv)
 	Perl_warner(aTHX_ WARN_NUMERIC, "Argument \"%s\" isn't numeric", tmpbuf);
 }
 
-/* the number can be converted to _integer_ with atol() */
+/* the number can be converted to integer with atol() or atoll() */
 #define IS_NUMBER_TO_INT_BY_ATOL 0x01
 #define IS_NUMBER_TO_INT_BY_ATOF 0x02 /* atol() may be != atof() */
 #define IS_NUMBER_NOT_IV	 0x04 /* (IV)atof() may be != atof() */
@@ -1125,7 +1097,7 @@ Perl_sv_2iv(pTHX_ register SV *sv)
     if (SvNOKp(sv)) {
 	/* We can cache the IV/UV value even if it not good enough
 	 * to reconstruct NV, since the conversion to PV will prefer
-	 * NV over IV/UV.				XXXX 64-bit?
+	 * NV over IV/UV.
 	 */
 
 	if (SvTYPE(sv) == SVt_NV)
@@ -1138,10 +1110,17 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 	    SvUVX(sv) = U_V(SvNVX(sv));
 	    SvIsUV_on(sv);
 	  ret_iv_max:
+#ifdef IV_IS_QUAD
+	    DEBUG_c(PerlIO_printf(Perl_debug_log, 
+				  "0x%" PERL_PRIx64 " 2iv(%" PERL_PRIu64 " => %" PERL_PRId64 ") (as unsigned)\n",
+				  (UV)sv,
+				  (UV)SvUVX(sv), (IV)SvUVX(sv)));
+#else
 	    DEBUG_c(PerlIO_printf(Perl_debug_log, 
 				  "0x%lx 2iv(%lu => %ld) (as unsigned)\n",
 				  (unsigned long)sv,
 				  (unsigned long)SvUVX(sv), (long)(IV)SvUVX(sv)));
+#endif
 	    return (IV)SvUVX(sv);
 	}
     }
@@ -1169,7 +1148,7 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 	    (void)SvNOK_on(sv);
 	    (void)SvIOK_on(sv);
 #if defined(USE_LONG_DOUBLE)
-	    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2nv(%Lg)\n",
+	    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2nv(%" PERL_PRIgldbl ")\n",
 				  (unsigned long)sv, SvNVX(sv)));
 #else
 	    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2nv(%g)\n",
@@ -1189,7 +1168,7 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 	    if (SvTYPE(sv) == SVt_PV)
 		sv_upgrade(sv, SVt_PVIV);
 	    (void)SvIOK_on(sv);
-	    SvIVX(sv) = atol(SvPVX(sv)); /* XXXX 64-bit? */
+	    SvIVX(sv) = Atol(SvPVX(sv));
 	}
 	else {				/* Not a number.  Cache 0. */
 	    dTHR;
@@ -1263,7 +1242,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
     if (SvNOKp(sv)) {
 	/* We can cache the IV/UV value even if it not good enough
 	 * to reconstruct NV, since the conversion to PV will prefer
-	 * NV over IV/UV.				XXXX 64-bit?
+	 * NV over IV/UV.
 	 */
 	if (SvTYPE(sv) == SVt_NV)
 	    sv_upgrade(sv, SVt_PVNV);
@@ -1275,10 +1254,17 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	else {
 	    SvIVX(sv) = I_V(SvNVX(sv));
 	  ret_zero:
+#ifdef IV_IS_QUAD
+	    DEBUG_c(PerlIO_printf(Perl_debug_log, 
+				  "0x%" PERL_PRIx64 " 2uv(%" PERL_PRId64 " => %" PERL_PRIu64 ") (as signed)\n",
+				  (unsigned long)sv,(long)SvIVX(sv),
+				  (long)(UV)SvIVX(sv)));
+#else
 	    DEBUG_c(PerlIO_printf(Perl_debug_log, 
 				  "0x%lx 2uv(%ld => %lu) (as signed)\n",
 				  (unsigned long)sv,(long)SvIVX(sv),
 				  (long)(UV)SvIVX(sv)));
+#endif
 	    return (UV)SvIVX(sv);
 	}
     }
@@ -1298,7 +1284,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	     * - otherwise future conversion to NV will be wrong.  */
 	    NV d;
 
-	    d = Atof(SvPVX(sv));	/* XXXX 64-bit? */
+	    d = Atof(SvPVX(sv));
 
 	    if (SvTYPE(sv) < SVt_PVNV)
 		sv_upgrade(sv, SVt_PVNV);
@@ -1306,7 +1292,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	    (void)SvNOK_on(sv);
 	    (void)SvIOK_on(sv);
 #if defined(USE_LONG_DOUBLE)
-	    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2nv(%Lg)\n",
+	    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2nv(%" PERL_PRIgldbl ")\n",
 				  (unsigned long)sv, SvNVX(sv)));
 #else
 	    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2nv(%g)\n",
@@ -1326,7 +1312,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	    if (SvTYPE(sv) == SVt_PV)
 		sv_upgrade(sv, SVt_PVIV);
 	    (void)SvIOK_on(sv);
-	    SvIVX(sv) = (IV)atol(SvPVX(sv)); /* XXXX 64-bit? */
+	    SvIVX(sv) = (IV)Atol(SvPVX(sv));
 	}
 	else if (numtype) {		/* Non-negative */
 	    /* The NV may be reconstructed from UV - safe to cache UV,
@@ -1336,10 +1322,10 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	    (void)SvIOK_on(sv);
 	    (void)SvIsUV_on(sv);
 #ifdef HAS_STRTOUL
-	    SvUVX(sv) = strtoul(SvPVX(sv), Null(char**), 10); /* XXXX 64-bit? */
+	    SvUVX(sv) = Strtoul(SvPVX(sv), Null(char**), 10);
 #else			/* no atou(), but we know the number fits into IV... */
 	    		/* The only problem may be if it is negative... */
-	    SvUVX(sv) = (UV)atol(SvPVX(sv)); /* XXXX 64-bit? */
+	    SvUVX(sv) = (UV)Atol(SvPVX(sv));
 #endif
 	}
 	else {				/* Not a number.  Cache 0. */
@@ -1424,7 +1410,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 #if defined(USE_LONG_DOUBLE)
 	DEBUG_c({
 	    RESTORE_NUMERIC_STANDARD();
-	    PerlIO_printf(Perl_debug_log, "0x%lx num(%Lg)\n",
+	    PerlIO_printf(Perl_debug_log, "0x%lx num(%" PERL_PRIgldbl ")\n",
 			  (unsigned long)sv, SvNVX(sv));
 	    RESTORE_NUMERIC_LOCAL();
 	});
@@ -1463,7 +1449,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 #if defined(USE_LONG_DOUBLE)
     DEBUG_c({
 	RESTORE_NUMERIC_STANDARD();
-	PerlIO_printf(Perl_debug_log, "0x%lx 2nv(%Lg)\n",
+	PerlIO_printf(Perl_debug_log, "0x%lx 2nv(%" PERL_PRIgldbl ")\n",
 		      (unsigned long)sv, SvNVX(sv));
 	RESTORE_NUMERIC_LOCAL();
     });
@@ -1485,7 +1471,7 @@ S_asIV(pTHX_ SV *sv)
     NV d;
 
     if (numtype & IS_NUMBER_TO_INT_BY_ATOL)
-	return atol(SvPVX(sv));		/* XXXX 64-bit? */
+	return Atol(SvPVX(sv));
     if (!numtype) {
 	dTHR;
 	if (ckWARN(WARN_NUMERIC))
@@ -1502,7 +1488,7 @@ S_asUV(pTHX_ SV *sv)
 
 #ifdef HAS_STRTOUL
     if (numtype & IS_NUMBER_TO_INT_BY_ATOL)
-	return strtoul(SvPVX(sv), Null(char**), 10);
+	return Strtoul(SvPVX(sv), Null(char**), 10);
 #endif
     if (!numtype) {
 	dTHR;
@@ -1528,8 +1514,6 @@ S_asUV(pTHX_ SV *sv)
 I32
 Perl_looks_like_number(pTHX_ SV *sv)
 {
-    /* XXXX 64-bit?  It may be not IS_NUMBER_TO_INT_BY_ATOL, but
-     * using atof() may lose precision. */
     register char *s;
     register char *send;
     register char *sbegin;
@@ -1683,16 +1667,23 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
 	    *lp = SvCUR(sv);
 	    return SvPVX(sv);
 	}
-	if (SvIOKp(sv)) {		/* XXXX 64-bit? */
+	if (SvIOKp(sv)) {
+#ifdef IV_IS_QUAD
+	    if (SvIsUV(sv)) 
+		(void)sprintf(tmpbuf,"%" PERL_PRIu64,(UV)SvUVX(sv));
+	    else
+		(void)sprintf(tmpbuf,"%" PERL_PRId64,(IV)SvIVX(sv));
+#else
 	    if (SvIsUV(sv)) 
 		(void)sprintf(tmpbuf,"%lu",(unsigned long)SvUVX(sv));
 	    else
 		(void)sprintf(tmpbuf,"%ld",(long)SvIVX(sv));
+#endif
 	    tsv = Nullsv;
 	    goto tokensave;
 	}
 	if (SvNOKp(sv)) {
-	    Gconvert(SvNVX(sv), DBL_DIG, 0, tmpbuf);
+	    Gconvert(SvNVX(sv), NV_DIG, 0, tmpbuf);
 	    tsv = Nullsv;
 	    goto tokensave;
 	}
@@ -1785,8 +1776,11 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
 		    Perl_sv_setpvf(aTHX_ tsv, "%s=%s", HvNAME(SvSTASH(sv)), s);
 		else
 		    sv_setpv(tsv, s);
-		/* XXXX 64-bit? */
+#ifdef IV_IS_QUAD
+		Perl_sv_catpvf(aTHX_ tsv, "(0x%" PERL_PRIx64")", (UV)sv);
+#else
 		Perl_sv_catpvf(aTHX_ tsv, "(0x%lx)", (unsigned long)sv);
+#endif
 		goto tokensaveref;
 	    }
 	    *lp = strlen(s);
@@ -1802,6 +1796,9 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
     }
     if (SvNOKp(sv)) {			/* See note in sv_2uv() */
 	/* XXXX 64-bit?  IV may have better precision... */
+	/* I tried changing this for to be 64-bit-aware and
+	 * the t/op/numconvert.t became very, very, angry.
+	 * --jhi Sep 1999 */
 	if (SvTYPE(sv) < SVt_PVNV)
 	    sv_upgrade(sv, SVt_PVNV);
 	SvGROW(sv, 28);
@@ -1813,7 +1810,7 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
 	else
 #endif /*apollo*/
 	{
-	    Gconvert(SvNVX(sv), DBL_DIG, 0, s);
+	    Gconvert(SvNVX(sv), NV_DIG, 0, s);
 	}
 	errno = olderrno;
 #ifdef FIXNEGATIVEZERO
@@ -2721,7 +2718,7 @@ Perl_sv_unmagic(pTHX_ SV *sv, int type)
 	    MGVTBL* vtbl = mg->mg_virtual;
 	    *mgp = mg->mg_moremagic;
 	    if (vtbl && (vtbl->svt_free != NULL))
-		(VTBL->svt_free)(aTHX_ sv, mg);
+		CALL_FPTR(vtbl->svt_free)(aTHX_ sv, mg);
 	    if (mg->mg_ptr && mg->mg_type != 'g')
 		if (mg->mg_len >= 0)
 		    Safefree(mg->mg_ptr);
@@ -4709,7 +4706,12 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 	char *eptr = Nullch;
 	STRLEN elen = 0;
-	char ebuf[TYPE_DIGITS(int) * 2 + 16]; /* large enough for "%#.#f" */
+	/* Times 4: a decimal digit takes more than 3 binary digits.
+	 * NV_DIG: mantissa takes than many decimal digits.
+	 * Plus 32: Playing safe. */
+	char ebuf[IV_DIG * 4 + NV_DIG + 32];
+        /* large enough for "%#.#f" --chip */
+	/* what about long double NVs? --jhi */
 	char c;
 	int i;
 	unsigned base;
@@ -4803,15 +4805,20 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 	switch (*q) {
 	case 'l':
-#if 0  /* when quads have better support within Perl */
-	    if (*(q + 1) == 'l') {
+#ifdef HAS_QUAD
+             if (*(q + 1) == 'l') {	/* lld */
 		intsize = 'q';
 		q += 2;
 		break;
-	    }
+	     }
+	case 'L':			/* Ld */
+	case 'q':			/* qd */
+	    intsize = 'q';
+	    q++;
+	    break;
 #endif
-	    /* FALL THROUGH */
 	case 'h':
+	    /* FALL THROUGH */
 	case 'V':
 	    intsize = *q++;
 	    break;
@@ -4898,25 +4905,43 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    goto integer;
 
 	case 'D':
+#ifdef IV_IS_QUAD
+	    /* nothing */
+#else
 	    intsize = 'l';
+#endif
 	    /* FALL THROUGH */
 	case 'd':
 	case 'i':
 	    if (args) {
 		switch (intsize) {
 		case 'h':	iv = (short)va_arg(*args, int); break;
+#ifdef IV_IS_QUAD
+		default:	iv = va_arg(*args, IV); break;
+#else
 		default:	iv = va_arg(*args, int); break;
+#endif
 		case 'l':	iv = va_arg(*args, long); break;
 		case 'V':	iv = va_arg(*args, IV); break;
+#ifdef HAS_QUAD
+		case 'q':	iv = va_arg(*args, Quad_t); break;
+#endif
 		}
 	    }
 	    else {
 		iv = (svix < svmax) ? SvIVx(svargs[svix++]) : 0;
 		switch (intsize) {
 		case 'h':	iv = (short)iv; break;
+#ifdef IV_IS_QUAD
+		default:	break;
+#else
 		default:	iv = (int)iv; break;
+#endif
 		case 'l':	iv = (long)iv; break;
 		case 'V':	break;
+#ifdef HAS_QUAD
+		case 'q':	iv = (Quad_t)iv; break;
+#endif
 		}
 	    }
 	    if (iv >= 0) {
@@ -4932,7 +4957,11 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    goto integer;
 
 	case 'U':
+#ifdef IV_IS_QUAD
+	    /* nothing */
+#else
 	    intsize = 'l';
+#endif
 	    /* FALL THROUGH */
 	case 'u':
 	    base = 10;
@@ -4943,7 +4972,11 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    goto uns_integer;
 
 	case 'O':
+#ifdef IV_IS_QUAD
+	    /* nothing */
+#else
 	    intsize = 'l';
+#endif
 	    /* FALL THROUGH */
 	case 'o':
 	    base = 8;
@@ -4957,18 +4990,32 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    if (args) {
 		switch (intsize) {
 		case 'h':  uv = (unsigned short)va_arg(*args, unsigned); break;
+#ifdef UV_IS_QUAD
+		default:   uv = va_arg(*args, UV); break;
+#else
 		default:   uv = va_arg(*args, unsigned); break;
+#endif
 		case 'l':  uv = va_arg(*args, unsigned long); break;
 		case 'V':  uv = va_arg(*args, UV); break;
+#ifdef HAS_QUAD
+		case 'q':  uv = va_arg(*args, Quad_t); break;
+#endif
 		}
 	    }
 	    else {
 		uv = (svix < svmax) ? SvUVx(svargs[svix++]) : 0;
 		switch (intsize) {
 		case 'h':	uv = (unsigned short)uv; break;
+#ifdef UV_IS_QUAD
+		default:	break;
+#else
 		default:	uv = (unsigned)uv; break;
+#endif
 		case 'l':	uv = (unsigned long)uv; break;
 		case 'V':	break;
+#ifdef HAS_QUAD
+		case 'q':	uv = (Quad_t)uv; break;
+#endif
 		}
 	    }
 
@@ -5061,7 +5108,10 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    *--eptr = '\0';
 	    *--eptr = c;
 #ifdef USE_LONG_DOUBLE
-	    *--eptr = 'L';
+	    {
+		char* p = PERL_PRIfldbl + sizeof(PERL_PRIfldbl) - 3;
+		while (p >= PERL_PRIfldbl) { *--eptr = *p--; }
+	    }
 #endif
 	    if (has_precis) {
 		base = precis;
@@ -5110,9 +5160,16 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    if (args) {
 		switch (intsize) {
 		case 'h':	*(va_arg(*args, short*)) = i; break;
+#ifdef IV_IS_QUAD
+		default:	*(va_arg(*args, IV*)) = i; break;
+#else
 		default:	*(va_arg(*args, int*)) = i; break;
+#endif
 		case 'l':	*(va_arg(*args, long*)) = i; break;
 		case 'V':	*(va_arg(*args, IV*)) = i; break;
+#ifdef HAS_QUAD
+		case 'q':	*(va_arg(*args, Quad_t*)) = i; break;
+#endif
 		}
 	    }
 	    else if (svix < svmax)
@@ -5128,10 +5185,21 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		SV *msg = sv_newmortal();
 		Perl_sv_setpvf(aTHX_ msg, "Invalid conversion in %s: ",
 			  (PL_op->op_type == OP_PRTF) ? "printf" : "sprintf");
-		if (c)
-		    Perl_sv_catpvf(aTHX_ msg, isPRINT(c) ? "\"%%%c\"" : "\"%%\\%03o\"",
-			      c & 0xFF);
-		else
+		if (c) {
+#ifdef UV_IS_QUAD
+		    if (isPRINT(c))
+			Perl_sv_catpvf(aTHX_ msg, 
+				       "\"%%%c\"", c & 0xFF);
+		    else
+			Perl_sv_catpvf(aTHX_ msg,
+				       "\"%%\\%03" PERL_PRIo64 "\"",
+				       (UV)c & 0xFF);
+#else
+		    Perl_sv_catpvf(aTHX_ msg, isPRINT(c) ?
+				   "\"%%%c\"" : "\"%%\\%03o\"",
+				   c & 0xFF);
+#endif
+		} else
 		    sv_catpv(msg, "end of string");
 		Perl_warner(aTHX_ WARN_PRINTF, "%_", msg); /* yes, this is reentrant */
 	    }

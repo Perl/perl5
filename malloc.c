@@ -311,7 +311,10 @@
 
 #ifdef DEBUGGING
 #  undef DEBUG_m
-#  define DEBUG_m(a)  if (PERL_GET_INTERP && PL_debug & 128)   a
+#  define DEBUG_m(a)  \
+    STMT_START {							\
+	if (PERL_GET_INTERP) { dTHX; if (PL_debug & 128) { a; } }	\
+    } STMT_END
 #endif
 
 /*
@@ -902,9 +905,12 @@ Perl_malloc(register size_t nbytes)
   	if ((p = nextf[bucket]) == NULL) {
 		MALLOC_UNLOCK;
 #ifdef PERL_CORE
-		if (!PL_nomemok) {
-		    PerlIO_puts(PerlIO_stderr(),"Out of memory!\n");
-		    WITH_THX(my_exit(1));
+		{
+		    dTHX;
+		    if (!PL_nomemok) {
+			PerlIO_puts(PerlIO_stderr(),"Out of memory!\n");
+			my_exit(1);
+		    }
 		}
 #else
   		return (NULL);

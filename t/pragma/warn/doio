@@ -55,47 +55,47 @@
 
 __END__
 # doio.c
-use warning 'io' ;
+use warnings 'io' ;
 open(F, '|'.($^O eq 'VMS' ? 'mcr ':'')."$^X -e 1|");
 close(F);
-no warning 'io' ;
+no warnings 'io' ;
 open(G, '|'.($^O eq 'VMS' ? 'mcr ':'')."$^X -e 1|");
 close(G);
 EXPECT
 Can't do bidirectional pipe at - line 3.
 ########
 # doio.c
-use warning 'io' ;
+use warnings 'io' ;
 open(F, "|      ");
-no warning 'io' ;
+no warnings 'io' ;
 open(G, "|      ");
 EXPECT
 Missing command in piped open at - line 3.
 ########
 # doio.c
-use warning 'io' ;
+use warnings 'io' ;
 open(F, "      |");
-no warning 'io' ;
+no warnings 'io' ;
 open(G, "      |");
 EXPECT
 Missing command in piped open at - line 3.
 ########
 # doio.c
-use warning 'io' ;
+use warnings 'io' ;
 open(F, "<true\ncd");
-no warning 'io' ;
+no warnings 'io' ;
 open(G, "<true\ncd");
 EXPECT
 Unsuccessful open on filename containing newline at - line 3.
 ########
 # doio.c
-use warning 'io' ;
+use warnings 'io' ;
 close STDIN ;
 tell(STDIN);
 $a = seek(STDIN,1,1);
 $a = sysseek(STDIN,1,1);
 -x STDIN ;
-no warning 'io' ;
+no warnings 'io' ;
 close STDIN ;
 tell(STDIN);
 $a = seek(STDIN,1,1);
@@ -108,24 +108,24 @@ sysseek() on unopened file at - line 6.
 Stat on unopened file <STDIN> at - line 7.
 ########
 # doio.c
-use warning 'uninitialized' ;
+use warnings 'uninitialized' ;
 print $a ;
-no warning 'uninitialized' ;
+no warnings 'uninitialized' ;
 print $b ;
 EXPECT
 Use of uninitialized value at - line 3.
 ########
 # doio.c
-use warning 'io' ;
+use warnings 'io' ;
 
 EXPECT
 
 ########
 # doio.c
-use warning 'io' ;
+use warnings 'io' ;
 stat "ab\ncd";
 lstat "ab\ncd";
-no warning 'io' ;
+no warnings 'io' ;
 stat "ab\ncd";
 lstat "ab\ncd";
 EXPECT
@@ -133,18 +133,18 @@ Unsuccessful stat on filename containing newline at - line 3.
 Unsuccessful stat on filename containing newline at - line 4.
 ########
 # doio.c
-use warning 'io' ;
+use warnings 'io' ;
 exec "lskdjfalksdjfdjfkls","" ;
-no warning 'io' ;
+no warnings 'io' ;
 exec "lskdjfalksdjfdjfkls","" ;
 EXPECT
 OPTION regex
 Can't exec "lskdjfalksdjfdjfkls": .+
 ########
 # doio.c
-use warning 'io' ;
+use warnings 'io' ;
 exec "lskdjfalksdjfdjfkls", "abc" ;
-no warning 'io' ;
+no warnings 'io' ;
 exec "lskdjfalksdjfdjfkls", "abc" ;
 EXPECT
 OPTION regex
@@ -161,13 +161,13 @@ mkdir $filename, 0777
     my $x = <> ;
 }
 {
-    no warning 'inplace' ;
+    no warnings 'inplace' ;
     local (@ARGV) = ($filename) ;
     local ($^I) = "" ;
     my $x = <> ;
 }
 {
-    use warning 'inplace' ;
+    use warnings 'inplace' ;
     local (@ARGV) = ($filename) ;
     local ($^I) = "" ;
     my $x = <> ;

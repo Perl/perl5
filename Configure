@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sun Aug  1 00:18:49 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Mon Aug 30 22:33:03 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -278,6 +278,8 @@ d_archlib=''
 installarchlib=''
 archname=''
 myarchname=''
+d_atolf=''
+d_atoll=''
 baserev=''
 bin=''
 binexp=''
@@ -397,6 +399,7 @@ d_inetaton=''
 d_isascii=''
 d_killpg=''
 d_lchown=''
+d_ldbl_dig=''
 d_link=''
 d_locconv=''
 d_lockf=''
@@ -563,13 +566,6 @@ d_waitpid=''
 d_wcstombs=''
 d_wctomb=''
 d_writev=''
-d_dbmclose64=''
-d_dbminit64=''
-d_delete64=''
-d_fetch64=''
-d_firstkey64=''
-d_nextkey64=''
-d_store64=''
 dlext=''
 cccdlflags=''
 ccdlflags=''
@@ -679,24 +675,9 @@ installusrbinperl=''
 intsize=''
 longsize=''
 shortsize=''
-d_dirent64_s=''
-d_flock64_s=''
-d_fstat64=''
-d_ftruncate64=''
-d_ino64_t=''
+d_fpos64_t=''
 d_llseek=''
-d_lockf64=''
-d_lseek64=''
-d_lstat64=''
 d_off64_t=''
-d_offset_t=''
-d_open64=''
-d_opendir64=''
-d_readdir64=''
-d_seekdir64=''
-d_stat64=''
-d_telldir64=''
-d_truncate64=''
 libc=''
 ldlibpthname=''
 libperl=''
@@ -710,6 +691,18 @@ xlibpth=''
 ignore_versioned_solibs=''
 libs=''
 lns=''
+d_PRIEldbl=''
+d_PRIFldbl=''
+d_PRIGldbl=''
+d_PRIeldbl=''
+d_PRIfldbl=''
+d_PRIgldbl=''
+sPRIEldbl=''
+sPRIFldbl=''
+sPRIGldbl=''
+sPRIeldbl=''
+sPRIfldbl=''
+sPRIgldbl=''
 lseeksize=''
 lseektype=''
 make_set_make=''
@@ -770,6 +763,18 @@ privlib=''
 privlibexp=''
 prototype=''
 ptrsize=''
+d_PRIX64=''
+d_PRId64=''
+d_PRIi64=''
+d_PRIo64=''
+d_PRIu64=''
+d_PRIx64=''
+sPRIX64=''
+sPRId64=''
+sPRIi64=''
+sPRIo64=''
+sPRIu64=''
+sPRIx64=''
 drand01=''
 randbits=''
 randfunc=''
@@ -804,22 +809,15 @@ ssizetype=''
 startperl=''
 startsh=''
 stdchar=''
-d_fgetpos64=''
-d_fopen64=''
-d_freopen64=''
-d_fseek64=''
-d_fseeko64=''
-d_fsetpos64=''
-d_ftell64=''
-d_ftello64=''
-d_tmpfile64=''
 d_stdio_stream_array=''
 stdio_stream_array=''
+d_strtoull=''
 sysman=''
 trnl=''
 uidtype=''
 archname64=''
 use64bits=''
+uselongdouble=''
 usemultiplicity=''
 nm_opt=''
 nm_so_opt=''
@@ -972,7 +970,7 @@ useopcode=true
 : List of libraries we want.
 : If anyone needs -lnet, put it in a hint file.
 libswanted='sfio socket inet nsl nm ndbm gdbm dbm db malloc dl'
-libswanted="$libswanted dld ld sun m rt c cposix posix"
+libswanted="$libswanted dld ld sun m c cposix posix"
 libswanted="$libswanted ndir dir crypt sec"
 libswanted="$libswanted ucb bsd BSD PW x"
 : We probably want to search /usr/shlib before most other libraries.
@@ -3545,7 +3543,7 @@ privlib="$ans"
 privlibexp="$ansexp"
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
-	installprivlib=`echo $privlibexp | sed 's#^$prefix#$installprefix#'`
+	installprivlib=`echo $privlibexp | sed "s#^$prefix#$installprefix#"`
 else
 	installprivlib="$privlibexp"
 fi
@@ -3590,7 +3588,7 @@ else
 fi
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
-	installarchlib=`echo $archlibexp | sed 's#^$prefix#$installprefix#'`
+	installarchlib=`echo $archlibexp | sed "s#^$prefix#$installprefix#"`
 else
 	installarchlib="$archlibexp"
 fi
@@ -3599,7 +3597,10 @@ fi
 : Binary compatibility with 5.005 is not possible for builds
 : with advanced features
 case "$usethreads$usemultiplicity" in
-*define*) bincompat5005="$undef" ;;
+*define*)
+	bincompat5005="$undef"
+	d_bincompat5005="$undef"
+	;;
 *)	$cat <<EOM
 
 Perl 5.006 can be compiled for binary compatibility with 5.005.
@@ -3620,8 +3621,12 @@ EOM
 	set d_bincompat5005
 	eval $setvar
 	case "$d_bincompat5005" in
-	"$define") bincompat5005="$define" ;;
-	*) bincompat5005="$undef" ;;
+	"$define")
+		bincompat5005="$define"
+		;;
+	*)	bincompat5005="$undef"
+		d_bincompat5005="$undef"
+		;;
 	esac
 	;;
 esac
@@ -3793,7 +3798,13 @@ ABC.XYZ
 EOT
 cd ..
 if test ! -f cppstdin; then
-	echo 'cat >.$$.c; '"$cc"' -E ${1+"$@"} .$$.c; rm .$$.c' >cppstdin
+	if test "X$osname" = "Xaix" -a "X$gccversion" = X; then
+		# AIX cc -E doesn't show the absolute headerfile
+		# locations but we'll cheat by using the -M flag.
+		echo 'cat >.$$.c; rm -f .$$.u; '"$cc"' ${1+"$@"} -M -c .$$.c 2>/dev/null; test -s .$$.u && awk '"'"'$2 ~ /\.h$/ { print "# 0 \""$2"\"" }'"'"' .$$.u; rm -f .$$.o .$$.u; '"$cc"' -E ${1+"$@"} .$$.c; rm .$$.c' > cppstdin
+	else
+		echo 'cat >.$$.c; '"$cc"' -E ${1+"$@"} .$$.c; rm .$$.c' >cppstdin
+	fi
 else
 	echo "Keeping your $hint cppstdin wrapper."
 fi
@@ -4140,7 +4151,7 @@ none) libs=' ';;
 *) libs="$ans";;
 esac
 
-: determine optimize, if desired, or use for debug flag also
+: determine optimization, if desired, or use for debug flag also
 case "$optimize" in
 ' '|$undef) dflt='none';;
 '') dflt='-O';;
@@ -4148,11 +4159,10 @@ case "$optimize" in
 esac
 $cat <<EOH
 
-Some C compilers have problems with their optimizers.  By default, $package
-compiles with the -O flag to use the optimizer.  Alternately, you might want
-to use the symbolic debugger, which uses the -g flag (on traditional Unix
-systems).  Either flag can be specified here.  To use neither flag, specify
-the word "none".
+By default, $package compiles with the -O flag to use the optimizer.
+Alternately, you might want to use the symbolic debugger, which uses
+the -g flag (on traditional Unix systems).  Either flag can be
+specified here.  To use neither flag, specify the word "none".
 
 EOH
 rp="What optimizer/debugger flag should be used?"
@@ -4166,7 +4176,7 @@ dflt=''
 : We will not override a previous value, but we might want to
 : augment a hint file
 case "$hint" in
-none|recommended)
+default|recommended)
 	case "$gccversion" in
 	1*) dflt='-fpcc-struct-return' ;;
 	esac
@@ -4178,6 +4188,25 @@ none|recommended)
 			$contains _POSIX_VERSION $usrinc/sys/unistd.h >/dev/null 2>&1
 		then
 			dflt="$dflt -posix"
+		fi
+		;;
+	esac
+	case "$gccversion" in
+	1*) ;;
+	2.[0-8]*) ;;
+	*) 	echo " "
+		echo "Checking if your compiler accepts -fno-strict-aliasing" 2>&1
+		echo 'int main(void) { return 0; }' > gcctest.c
+		if $cc -O2 -fno-strict-aliasing -o gcctest gcctest.c; then
+			echo "Yes, it does." 2>&1
+			case "$ccflags" in
+			*strict-aliasing*) 
+				echo "Leaving current flags $ccflags alone." 2>&1
+				;;
+			*) dflt="$dflt -fno-strict-aliasing" ;;
+			esac
+		else
+			echo "Nope, it doesn't, but that's ok." 2>&1
 		fi
 		;;
 	esac
@@ -4222,7 +4251,7 @@ $define)
 esac
 
 case "$hint" in
-none|recommended) dflt="$ccflags $dflt" ;;
+default|recommended) dflt="$ccflags $dflt" ;;
 *) dflt="$ccflags";;
 esac
 
@@ -4503,7 +4532,6 @@ exit 1
 EOF
 chmod +x findhdr
 
-
 : define an alternate in-header-list? function
 inhdr='echo " "; td=$define; tu=$undef; yyy=$@;
 cont=true; xxf="echo \"<\$1> found.\" >&4";
@@ -4688,7 +4716,7 @@ case "$vendorprefix" in
 	vendorlibexp="$ansexp"
 	: Change installation prefix, if necessary.
 	if $test X"$prefix" != X"$installprefix"; then
-		installvendorlib=`echo $vendorlibexp | $sed 's#^$prefix#$installprefix#'`
+		installvendorlib=`echo $vendorlibexp | $sed "s#^$prefix#$installprefix#"`
 	else
 		installvendorlib="$vendorlibexp"
 	fi
@@ -4751,7 +4779,7 @@ binexp="$ansexp"
 : Change installation prefix, if necessary.
 : XXX Bug? -- ignores Configure -Dinstallprefix setting.
 if $test X"$prefix" != X"$installprefix"; then
-	installbin=`echo $binexp | sed 's#^$prefix#$installprefix#'`
+	installbin=`echo $binexp | sed "s#^$prefix#$installprefix#"`
 else
 	installbin="$binexp"
 fi
@@ -5733,7 +5761,7 @@ esac
 
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
-	installman1dir=`echo $man1direxp | $sed 's#^$prefix#$installprefix#'`
+	installman1dir=`echo $man1direxp | $sed "s#^$prefix#$installprefix#"`
 else
 	installman1dir="$man1direxp"
 fi
@@ -5876,7 +5904,7 @@ esac
 
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
-	installman3dir=`echo $man3direxp | $sed 's#^$prefix#$installprefix#'`
+	installman3dir=`echo $man3direxp | $sed "s#^$prefix#$installprefix#"`
 else
 	installman3dir="$man3direxp"
 fi
@@ -6308,7 +6336,7 @@ scriptdir="$ans"
 scriptdirexp="$ansexp"
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
-	installscript=`echo $scriptdirexp | sed 's#^$prefix#$installprefix#'`
+	installscript=`echo $scriptdirexp | sed "s#^$prefix#$installprefix#"`
 else
 	installscript="$scriptdirexp"
 fi
@@ -6373,7 +6401,7 @@ sitelib="$ans"
 sitelibexp="$ansexp"
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
-	installsitelib=`echo $sitelibexp | sed 's#^$prefix#$installprefix#'`
+	installsitelib=`echo $sitelibexp | sed "s#^$prefix#$installprefix#"`
 else
 	installsitelib="$sitelibexp"
 fi
@@ -6403,10 +6431,47 @@ sitearch="$ans"
 sitearchexp="$ansexp"
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
-	installsitearch=`echo $sitearchexp | sed 's#^$prefix#$installprefix#'`
+	installsitearch=`echo $sitearchexp | sed "s#^$prefix#$installprefix#"`
 else
 	installsitearch="$sitearchexp"
 fi
+
+cat <<EOM
+
+Perl can be built to take advantage of long doubles which
+(if available) may give more accuracy and range for floating point
+numbers.  To do so, Configure must be run with -Duselongdouble.
+
+If this doesn't make any sense to you, just accept the default 'n'.
+EOM
+case "$uselongdouble" in
+$define|true|[yY]*)	dflt='y';;
+*) dflt='n';;
+esac
+rp='Try to use long doubles if available?'
+. ./myread
+case "$ans" in
+y|Y) 	val="$define"	;;
+*)      val="$undef"	;;
+esac
+set uselongdouble
+eval $setvar
+
+case "$uselongdouble" in
+"$define"|true|[yY]*)
+: Look for a hint-file generated 'call-back-unit'.  If the
+: user has specified that long doubles should be used,
+: we may need to set or change some other defaults.
+	if $test -f uselongdouble.cbu; then
+		echo "Your platform has some specific hints for long doubles, using them..."
+		. ./uselongdouble.cbu
+	else
+		$cat <<EOM
+(Your platform doesn't have any specific hints for long doubles.)
+EOM
+	fi
+	;;
+esac
 
 cat <<EOM
 
@@ -6531,6 +6596,493 @@ EOP
 	esac
 fi
 
+: see if inttypes.h is available
+: we want a real compile instead of Inhdr because some systems
+: have an inttypes.h which includes non-existent headers
+echo " "
+$cat >try.c <<EOCP
+#include <inttypes.h>
+int main() {
+	static int32_t foo32 = 0x12345678;
+}
+EOCP
+set try
+if eval $compile; then
+	echo "<inttypes.h> found." >&4
+	val="$define"
+else
+	echo "<inttypes.h> NOT found." >&4
+	val="$undef"
+fi
+$rm -f try.c try
+set i_inttypes
+eval $setvar
+
+: check for int64_t
+case "$use64bits" in
+"$define" )
+	echo " "
+	echo $n "Checking to see if your system supports int64_t...$c" >&4
+	$cat >try.c <<EOCP
+#include <sys/types.h>
+#$i_inttypes I_INTTYPES
+#ifdef I_INTTYPES
+#include <inttypes.h>
+#endif
+int64_t foo() { int64_t x; x = 7; return x; }
+EOCP
+	if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
+		val="$define"
+		echo " Yup, it does." >&4
+	else
+		val="$undef"
+		echo " Nope, it doesn't." >&4
+	fi
+	$rm -f try.*
+	;;
+*)	val="$undef"
+	;;
+esac
+set d_int64t
+eval $setvar
+
+
+: check for lengths of integral types
+echo " "
+case "$intsize" in
+'')
+	echo "Checking to see how big your integers are..." >&4
+	$cat >intsize.c <<'EOCP'
+#include <stdio.h>
+int main()
+{
+	printf("intsize=%d;\n", sizeof(int));
+	printf("longsize=%d;\n", sizeof(long));
+	printf("shortsize=%d;\n", sizeof(short));
+	exit(0);
+}
+EOCP
+	set intsize
+	if eval $compile_ok && ./intsize > /dev/null; then
+		eval `./intsize`
+		echo "Your integers are $intsize bytes long."
+		echo "Your long integers are $longsize bytes long."
+		echo "Your short integers are $shortsize bytes long."
+	else
+		$cat >&4 <<EOM
+!
+Help! I can't compile and run the intsize test program: please enlighten me!
+(This is probably a misconfiguration in your system or libraries, and
+you really ought to fix it.  Still, I'll try anyway.)
+!
+EOM
+		dflt=4
+		rp="What is the size of an integer (in bytes)?"
+		. ./myread
+		intsize="$ans"
+		dflt=$intsize
+		rp="What is the size of a long integer (in bytes)?"
+		. ./myread
+		longsize="$ans"
+		dflt=2
+		rp="What is the size of a short integer (in bytes)?"
+		. ./myread
+		shortsize="$ans"
+	fi
+	;;
+esac
+$rm -f intsize intsize.*
+
+: check for long long
+echo " "
+echo $n "Checking to see if your system supports long long...$c" >&4
+echo 'long long foo() { long long x; x = 7; return x; }' > try.c
+if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
+	val="$define"
+	echo " Yup, it does." >&4
+else
+	val="$undef"
+	echo " Nope, it doesn't." >&4
+fi
+$rm try.*
+set d_longlong
+eval $setvar
+
+: check for length of long long
+case "${d_longlong}${longlongsize}" in
+$define)
+	echo " "
+	$echo $n "Checking to see how big your long longs are...$c" >&4
+	$cat >try.c <<'EOCP'
+#include <stdio.h>
+int main()
+{
+	printf("%d\n", sizeof(long long));
+}
+EOCP
+	set try
+	if eval $compile_ok; then
+		longlongsize=`./try`
+		$echo " $longlongsize bytes." >&4
+	else
+		dflt='8'
+		echo " "
+		echo "(I can't seem to compile the test program.  Guessing...)"
+		rp="What is the size of a long long (in bytes)?"
+		. ./myread
+		longlongsize="$ans"
+	fi
+	if $test "X$longsize" = "X$longlongsize"; then
+		echo "(That isn't any different from an ordinary long.)"
+	fi	
+	;;
+esac
+$rm -f try.c try
+
+echo " "
+
+if $test X"$intsize" = X8 -o X"$longsize" = X8 -o X"$d_int64t" = X"$define" -o X"$d_longlong" = X"$define"; then
+
+echo "Checking how to print 64-bit integers..." >&4
+
+if $test X"$sPRId64" = X -a X"$intsize" = X8; then
+        quad=int
+	$cat >try.c <<'EOCP'
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+  int q = 12345678901;
+  printf("%ld\n", q);
+}
+EOCP
+	set try
+	if eval $compile; then
+		yyy=`./try$exe_ext`
+		case "$yyy" in
+		12345678901)
+			sPRId64='"d"'; sPRIi64='"i"'; sPRIu64='"u"';
+                	sPRIo64='"o"'; sPRIx64='"x"'; sPRIX64='"X"';
+			echo "We will use %d."
+			;;
+		esac
+	fi
+fi
+
+if $test X"$sPRId64" = X -a X"$longsize" = X8; then
+        quad=long
+	$cat >try.c <<'EOCP'
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+  long q = 12345678901;
+  printf("%ld\n", q);
+}
+EOCP
+	set try
+	if eval $compile; then
+		yyy=`./try$exe_ext`
+		case "$yyy" in
+		12345678901)
+			sPRId64='"ld"'; sPRIi64='"li"'; sPRIu64='"lu"';
+                	sPRIo64='"lo"'; sPRIx64='"lx"'; sPRIX64='"lX"';
+			echo "We will use %ld."
+			;;
+		esac
+	fi
+fi
+
+if $test X"$sPRId64" = X -a X"$i_inttypes.h" = X"$define" -a X"$d_int64t" = X"$define"; then
+        quad=int64_t
+	$cat >try.c <<'EOCP'
+#include <sys/types.h>
+#include <inttypes.h>
+#include <stdio.h>
+int main() {
+  int64_t q = 12345678901;
+  printf("%" PRId64 "\n", q);
+}
+EOCP
+	set try
+	if eval $compile; then
+		yyy=`./try$exe_ext`
+		case "$yyy" in
+		12345678901)
+			sPRId64=PRId64; sPRIi64=PRIi64; sPRIu64=PRIu64;
+                	sPRIo64=PRIo64; sPRIx64=PRIx64; sPRIX64=PRIX64;
+			echo "We will use the C9X style."
+			;;
+		esac
+	fi
+fi
+
+if $test X"$sPRId64" = X -a X"$d_longlong" = X"$define" -a X"$longlongsize" = X8; then
+        quad="long long"
+	$cat >try.c <<'EOCP'
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+  long long q = 12345678901LL; /* AIX cc requires the LL prefix. */
+  printf("%lld\n", q);
+}
+EOCP
+	set try
+	if eval $compile; then
+		yyy=`./try$exe_ext`
+		case "$yyy" in
+		12345678901)
+			sPRId64='"lld"'; sPRIi64='"lli"'; sPRIu64='"llu"';
+                	sPRIo64='"llo"'; sPRIx64='"llx"'; sPRIX64='"llX"';
+			echo "We will use the %lld style."
+			;;
+		esac
+	fi
+fi
+
+if $test X"$sPRId64" = X -a X"$quad" != X; then
+	$cat >try.c <<EOCP
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+  $quad q = 12345678901;
+  printf("%Ld\n", q);
+}
+EOCP
+	set try
+	if eval $compile; then
+		yyy=`./try$exe_ext`
+		case "$yyy" in
+		12345678901)
+			sPRId64='"Ld"'; sPRIi64='"Li"'; sPRIu64='"Lu"';
+                	sPRIo64='"Lo"'; sPRIx64='"Lx"'; sPRIX64='"LX"';
+			echo "We will use %lld."
+			;;
+		esac
+	fi
+fi
+
+if $test X"$sPRId64" = X -a X"$quad" != X; then
+	$cat >try.c <<EOCP
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+  $quad q = 12345678901;
+  printf("%qd\n", q);
+}
+EOCP
+	set try
+	if eval $compile; then
+		yyy=`./try$exe_ext`
+		case "$yyy" in
+		12345678901)
+			sPRId64='"qd"'; sPRIi64='"qi"'; sPRIu64='"qu"';
+                	sPRIo64='"qo"'; sPRIx64='"qx"'; sPRIX64='"qX"';
+			echo "We will use %qd."
+			;;
+		esac
+	fi
+fi
+
+if $test X"$sPRId64" = X; then
+	echo "Cannot figure out how to print 64-bit integers." >&4
+fi
+
+$rm -f try try.*
+
+fi # intsize -o longsize -o d_int64t -o d_longlong
+
+case "$sPRId64" in
+'')	d_PRId64="$undef"; d_PRIi64="$undef"; d_PRIu64="$undef"; 
+	d_PRIo64="$undef"; d_PRIx64="$undef"; d_PRIX64="$undef"; 
+	;;
+*)	d_PRId64="$define"; d_PRIi64="$define"; d_PRIu64="$define"; 
+	d_PRIo64="$define"; d_PRIx64="$define"; d_PRIX64="$define"; 
+	;;
+esac
+
+: check for length of double
+echo " "
+case "$doublesize" in
+'')
+	$echo $n "Checking to see how big your double precision numbers are...$c" >&4
+	$cat >try.c <<'EOCP'
+#include <stdio.h>
+int main()
+{
+	printf("%d\n", sizeof(double));
+}
+EOCP
+	set try
+	if eval $compile_ok; then
+		doublesize=`./try`
+		$echo " $doublesize bytes." >&4
+	else
+		dflt='8'
+		echo "(I can't seem to compile the test program.  Guessing...)"
+		rp="What is the size of a double precision number (in bytes)?"
+		. ./myread
+		doublesize="$ans"
+	fi
+	;;
+esac
+$rm -f try.c try
+
+: check for long doubles
+echo " "
+echo $n "Checking to see if your system supports long double...$c" >&4
+echo 'long double foo() { long double x; x = 7.0; return x; }' > try.c
+if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
+	val="$define"
+	echo " Yup, it does." >&4
+else
+	val="$undef"
+	echo " Nope, it doesn't." >&4
+fi
+$rm try.*
+set d_longdbl
+eval $setvar
+
+: check for length of long double
+case "${d_longdbl}${longdblsize}" in
+$define)
+	echo " "
+	$echo $n "Checking to see how big your long doubles are...$c" >&4
+	$cat >try.c <<'EOCP'
+#include <stdio.h>
+int main()
+{
+	printf("%d\n", sizeof(long double));
+}
+EOCP
+	set try
+	if eval $compile; then
+		longdblsize=`./try`
+		$echo " $longdblsize bytes." >&4
+	else
+		dflt='8'
+		echo " "
+		echo "(I can't seem to compile the test program.  Guessing...)" >&4
+		rp="What is the size of a long double (in bytes)?"
+		. ./myread
+		longdblsize="$ans"
+	fi
+	if $test "X$doublesize" = "X$longdblsize"; then
+		echo "(That isn't any different from an ordinary double.)"
+	fi	
+	;;
+esac
+$rm -f try.c try
+
+echo " "
+
+if $test X"$d_longdbl" = X"$define"; then
+
+echo "Checking how to print long doubles..." >&4
+
+if $test X"$sPRIfldbl" = X -a X"$doublesize" = X"$longdblsize"; then
+	$cat >try.c <<'EOCP'
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+  double d = 123.456;
+  printf("%.3f\n", d);
+}
+EOCP
+	set try
+	if eval $compile; then
+		yyy=`./try$exe_ext`
+		case "$yyy" in
+		123.456)
+			sPRIfldbl='"f"'; sPRIgldbl='"g"'; sPRIeldbl='"e"';
+                	sPRIFldbl='"F"'; sPRIGldbl='"G"'; sPRIEldbl='"E"';
+			echo "We will use %f."
+			;;
+		esac
+	fi
+fi
+
+if $test X"$sPRIfldbl" = X; then
+	$cat >try.c <<'EOCP'
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+  long double d = 123.456;
+  printf("%.3llf\n", d);
+}
+EOCP
+	set try
+	if eval $compile; then
+		yyy=`./try$exe_ext`
+		case "$yyy" in
+		123.456)
+			sPRIfldbl='"llf"'; sPRIgldbl='"llg"'; sPRIeldbl='"lle"';
+                	sPRIFldbl='"llF"'; sPRIGldbl='"llG"'; sPRIEldbl='"llE"';
+			echo "We will use %llf."
+			;;
+		esac
+	fi
+fi
+
+if $test X"$sPRIfldbl" = X; then
+	$cat >try.c <<'EOCP'
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+  long double d = 123.456;
+  printf("%.3Lf\n", d);
+}
+EOCP
+	set try
+	if eval $compile; then
+		yyy=`./try$exe_ext`
+		case "$yyy" in
+		123.456)
+			sPRIfldbl='"Lf"'; sPRIgldbl='"Lg"'; sPRIeldbl='"Le"';
+                	sPRIFldbl='"LF"'; sPRIGldbl='"LG"'; sPRIEldbl='"LE"';
+			echo "We will use %Lf."
+			;;
+		esac
+	fi
+fi
+
+if $test X"$sPRIfldbl" = X; then
+	$cat >try.c <<'EOCP'
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+  long double d = 123.456;
+  printf("%.3lf\n", d);
+}
+EOCP
+	set try
+	if eval $compile; then
+		yyy=`./try$exe_ext`
+		case "$yyy" in
+		123.456)
+			sPRIfldbl='"lf"'; sPRIgldbl='"lg"'; sPRIeldbl='"le"';
+                	sPRIFldbl='"lF"'; sPRIGldbl='"lG"'; sPRIEldbl='"lE"';
+			echo "We will use %lf."
+			;;
+		esac
+	fi
+fi
+
+if $test X"$sPRIfldbl" = X; then
+	echo "Cannot figure out how to print long doubles." >&4
+fi
+
+$rm -f try try.*
+
+fi # d_longdbl
+
+case "$sPRIfldbl" in
+'')	d_PRIfldbl="$undef"; d_PRIgldbl="$undef"; d_PRIeldbl="$undef"; 
+	d_PRIFldbl="$undef"; d_PRIGldbl="$undef"; d_PRIEldbl="$undef"; 
+	;;
+*)	d_PRIfldbl="$define"; d_PRIgldbl="$define"; d_PRIeldbl="$define"; 
+	d_PRIFldbl="$define"; d_PRIGldbl="$define"; d_PRIEldbl="$define"; 
+	;;
+esac
+
 : Initialize h_fcntl
 h_fcntl=false
 
@@ -6585,6 +7137,14 @@ eval $inlibc
 
 : see if alarm exists
 set alarm d_alarm
+eval $inlibc
+
+: see if atolf exists
+set atolf d_atolf
+eval $inlibc
+
+: see if atoll exists
+set atoll d_atoll
 eval $inlibc
 
 : Look for GNU-cc style attribute checking
@@ -6748,52 +7308,6 @@ $rm -f set set.c
 : see if bzero exists
 set bzero d_bzero
 eval $inlibc
-
-: check for lengths of integral types
-echo " "
-case "$intsize" in
-'')
-	echo "Checking to see how big your integers are..." >&4
-	$cat >intsize.c <<'EOCP'
-#include <stdio.h>
-int main()
-{
-	printf("intsize=%d;\n", sizeof(int));
-	printf("longsize=%d;\n", sizeof(long));
-	printf("shortsize=%d;\n", sizeof(short));
-	exit(0);
-}
-EOCP
-	set intsize
-	if eval $compile_ok && ./intsize > /dev/null; then
-		eval `./intsize`
-		echo "Your integers are $intsize bytes long."
-		echo "Your long integers are $longsize bytes long."
-		echo "Your short integers are $shortsize bytes long."
-	else
-		$cat >&4 <<EOM
-!
-Help! I can't compile and run the intsize test program: please enlighten me!
-(This is probably a misconfiguration in your system or libraries, and
-you really ought to fix it.  Still, I'll try anyway.)
-!
-EOM
-		dflt=4
-		rp="What is the size of an integer (in bytes)?"
-		. ./myread
-		intsize="$ans"
-		dflt=$intsize
-		rp="What is the size of a long integer (in bytes)?"
-		. ./myread
-		longsize="$ans"
-		dflt=2
-		rp="What is the size of a short integer (in bytes)?"
-		. ./myread
-		shortsize="$ans"
-	fi
-	;;
-esac
-$rm -f intsize intsize.*
 
 : see if signal is declared as pointer to function returning int or void
 echo " "
@@ -7291,51 +7805,9 @@ $rm -f dbl_dig.?
 set d_dbl_dig
 eval $setvar
 
-
-if $test X"$use64bits" = X"$define"; then
-	: see if dbminit64 exists
-	set dbminit64 d_dbminit64
-	eval $inlibc
-
-	: see if dbmclose64 exists
-	set dbmclose64 d_dbmclose64
-	eval $inlibc
-
-	: see if fetch64 exists
-	set fetch64 d_fetch64
-	eval $inlibc
-
-	: see if store64 exists
-	set store64 d_store64
-	eval $inlibc
-
-	: see if delete64 exists
-	set delete64 d_delete64
-	eval $inlibc
-
-	: see if firstkey64 exists
-	set firstkey64 d_firstkey64
-	eval $inlibc
-
-	: see if nextkey64 exists
-	set nextkey64 d_nextkey64
-	eval $inlibc
-else
-	val="$undef"
-	for xxx in d_dbminit64 d_dbmclose64 d_fetch64 d_store64 d_delete64 d_firstkey64 d_nextkey64
-	do
-		set $xxx
-		eval $setvar
-	done
-fi
-
 : see if difftime exists
 set difftime d_difftime
 eval $inlibc
-
-: see if sys/stat.h is available
-set sys/stat.h i_sysstat
-eval $inhdr
 
 : see if this is a dirent system
 echo " "
@@ -7404,162 +7876,6 @@ fi
 set d_dirnamlen
 eval $setvar
 $rm -f try.c
-
-
-if $test X"$use64bits" = X"$define"; then
-	: see if fstat64 exists
-	set fstat64 d_fstat64
-	eval $inlibc
-
-	: see if ftruncate64 exists
-	set ftruncate64 d_ftruncate64
-	eval $inlibc
-
-	: see if lockf64 exists
-	set lockf64 d_lockf64
-	eval $inlibc
-
-	: see if llseek exists
-	set llseek d_llseek
-	eval $inlibc
-
-	: see if lseek64 exists
-	set lseek64 d_lseek64
-	eval $inlibc
-
-	: see if lstat64 exists
-	set lstat64 d_lstat64
-	eval $inlibc
-
-	: see if open64 exists
-	set open64 d_open64
-	eval $inlibc
-
-	: see if opendir64 exists
-	set opendir64 d_opendir64
-	eval $inlibc
-
-	: see if readdir64 exists
-	set readdir64 d_readdir64
-	eval $inlibc
-
-	: see if seekdir64 exists
-	set seekdir64 d_seekdir64
-	eval $inlibc
-
-	: see if stat64 exists
-	set stat64 d_stat64
-	eval $inlibc
-
-	: see if telldir64 exists
-	set telldir64 d_telldir64
-	eval $inlibc
-
-	: see if truncate64 exists
-	set truncate64 d_truncate64
-	eval $inlibc
-
-	: check for off64_t
-	echo " "
-	echo $n "Checking to see if your system supports off64_t...$c" >&4
-	$cat >try.c <<EOCP
-#include <sys/types.h>
-#include <unistd.h>
-off64_t foo() { off64_t x; x = 7; return x; }'
-EOCP
-	if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
-		val="$define"
-		echo " Yup, it does." >&4
-	else
-		val="$undef"
-		echo " Nope, it doesn't." >&4
-	fi
-	$rm -f try.*
-	set d_off64_t
-	eval $setvar
-
-	: check for offset_t
-	echo " "
-	echo $n "Checking to see if your system supports offset_t...$c" >&4
-	$cat >try.c <<EOCP
-#include <sys/types.h>
-#include <unistd.h>
-offset_t foo() { offset_t x; x = 7; return x; }'
-EOCP
-	if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
-		val="$define"
-		echo " Yup, it does." >&4
-	else
-		val="$undef"
-		echo " Nope, it doesn't." >&4
-	fi
-	$rm -f try.*
-	set d_offset_t
-	eval $setvar
-
-	: check for ino64_t
-	echo " "
-	echo $n "Checking to see if your system supports ino64_t...$c" >&4
-	val="$undef"
-	case "$i_sysstat" in
-	"$define" )
-		$cat >try.c <<EOCP
-#include <sys/types.h>
-#include <sys/stat.h>
-ino64_t foo() { ino64_t x; x = 7; return x; }'
-EOCP
-		if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
-			val="$define"
-		fi
-		$rm -f try.*
-		;;
-	esac
-	if $test "X$val" = X"$define"; then
-		echo " Yup, it does." >&4
-	else
-		echo " Nope, it doesn't." >&4
-	fi
-	set d_ino64_t
-	eval $setvar
-
-	: check for struct flock64
-	echo " "
-	echo "Checking to see if your system supports struct flock64..." >&4
-	if $h_fcntl; then
-		set d_flock64_s flock64 l_len define fcntl.h
-		eval $hasfield
-	else
-		val="$undef"
-		set d_flock64_s
-		eval $setvar
-	fi
-	case "$d_flock64_s" in
-	"$define")	echo "Yup, it does." >&4
-			;;
-	*)		echo "Nope, it doesn't." >&4
-			;;
-	esac
-
-	: check for struct dirent64
-	echo " "
-	echo "Checking to see if your system supports struct dirent64..." >&4
-	set d_dirent64_s dirent64 d_off $i_dirent dirent.h
-	eval $hasfield
-	case "$d_dirent64_s" in
-	"$define")	echo "Yup, it does." >&4
-			;;
-	*)		echo "Nope, it doesn't." >&4
-			;;
-	esac
-
-else
-	val="$undef"
-	for xxx in d_fstat64 d_ftruncate64 d_lockf64 d_lseek64 d_lstat64 d_open64 d_opendir64 d_readdir64 d_seekdir64 d_stat64 d_telldir64 d_truncate64 d_off64_t d_offset_t d_ino64_t d_flock64_s d_dirent64_s
-	do
-		set $xxx
-		eval $setvar
-	done
-fi
 
 : see if dlerror exists
 xxx_runnm="$runnm"
@@ -7668,6 +7984,7 @@ EOM
 		esac
 	else
 		echo "I can't compile and run the test program." >&4
+                echo "I'm guessing that dlsym doesn't need a leading underscore." >&4
 	fi
 	;;
 esac
@@ -8142,52 +8459,6 @@ $rm -f fd_set*
 set fgetpos d_fgetpos
 eval $inlibc
 
-
-if $test X"$use64bits" = X"$define"; then
-	: see if fgetpos64 exists
-	set fgetpos64 d_fgetpos64
-	eval $inlibc
-
-	: see if fopen64 exists
-	set freopen64 d_fopen64
-	eval $inlibc
-
-	: see if freopen64 exists
-	set freopen64 d_freopen64
-	eval $inlibc
-
-	: see if fseek64 exists
-	set fseek64 d_fseek64
-	eval $inlibc
-
-	: see if fseeko64 exists
-	set fseeko64 d_fseeko64
-	eval $inlibc
-
-	: see if fsetpos64 exists
-	set fsetpos64 d_fsetpos64
-	eval $inlibc
-
-	: see if ftell64 exists
-	set ftell64 d_ftell64
-	eval $inlibc
-
-	: see if ftello64 exists
-	set ftello64 d_ftello64
-	eval $inlibc
-
-	: see if tmpfile64 exists
-	set tmpfile64 d_tmpfile64
-	eval $inlibc
-else
-	val="$undef"
-	for xxx in d_fgetpos64 d_fopen64 d_freopen64 d_fseek64 d_fseeko64 d_fsetpos64 d_ftell64 d_ftello64 d_tmpfile64
-	do
-		set $xxx
-		eval $setvar
-	done
-fi
-
 : see if flock exists
 set flock d_flock
 eval $inlibc
@@ -8203,6 +8474,48 @@ eval $inlibc
 : see if fpathconf exists
 set fpathconf d_fpathconf
 eval $inlibc
+
+
+: see if llseek exists
+set llseek d_llseek
+eval $inlibc
+
+: check for off64_t
+echo " "
+echo $n "Checking to see if your system supports off64_t...$c" >&4
+$cat >try.c <<EOCP
+#include <sys/types.h>
+#include <unistd.h>
+off64_t foo() { off64_t x; x = 7; return x; }'
+EOCP
+if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
+	val="$define"
+	echo " Yup, it does." >&4
+else
+	val="$undef"
+	echo " Nope, it doesn't." >&4
+fi
+$rm -f try.*
+set d_off64_t
+eval $setvar
+
+: check for fpos64_t
+echo " "
+echo $n "Checking to see if your system supports fpos64_t...$c" >&4
+$cat >try.c <<EOCP
+#include <sys/stdio.h>
+fpos64_t foo() { fpos64_t x; x = 7; return x; }'
+EOCP
+if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
+	val="$define"
+	echo " Yup, it does." >&4
+else
+	val="$undef"
+	echo " Nope, it doesn't." >&4
+fi
+$rm -f try.*
+set d_fpos64_t
+eval $setvar
 
 : see if fseeko exists
 set fseeko d_fseeko
@@ -8599,57 +8912,6 @@ set d_index; eval $setvar
 set inet_aton d_inetaton
 eval $inlibc
 
-: see if inttypes.h is available
-: we want a real compile instead of Inhdr because some systems
-: have an inttypes.h which includes non-existent headers
-echo " "
-$cat >try.c <<EOCP
-#include <inttypes.h>
-int main() {
-	static int32_t foo32 = 0x12345678;
-}
-EOCP
-set try
-if eval $compile; then
-	echo "<inttypes.h> found." >&4
-	val="$define"
-else
-	echo "<inttypes.h> NOT found." >&4
-	val="$undef"
-fi
-$rm -f try.c try
-set i_inttypes
-eval $setvar
-
-: check for int64_t
-case "$use64bits" in
-"$define" )
-	echo " "
-	echo $n "Checking to see if your system supports int64_t...$c" >&4
-	$cat >try.c <<EOCP
-#include <sys/types.h>
-#$i_inttypes I_INTTYPES
-#ifdef I_INTTYPES
-#include <inttypes.h>
-#endif
-int64_t foo() { int64_t x; x = 7; return x; }
-EOCP
-	if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
-		val="$define"
-		echo " Yup, it does." >&4
-	else
-		val="$undef"
-		echo " Nope, it doesn't." >&4
-	fi
-	$rm -f try.*
-	;;
-*)	val="$undef"
-	;;
-esac
-set d_int64t
-eval $setvar
-
-
 : Look for isascii
 echo " "
 $cat >isascii.c <<'EOCP'
@@ -8711,6 +8973,33 @@ fi
 set d_lchown
 eval $setvar
 
+: See if number of significant digits in a double precision number is known
+echo " "
+$cat >ldbl_dig.c <<EOM
+#$i_limits I_LIMITS
+#$i_float I_FLOAT
+#ifdef I_LIMITS
+#include <limits.h>
+#endif
+#ifdef I_FLOAT
+#include <float.h>
+#endif
+#ifdef LDBL_DIG
+printf("Contains LDBL_DIG");
+#endif
+EOM
+$cppstdin $cppflags $cppminus < ldbl_dig.c >ldbl_dig.E 2>/dev/null
+if $contains 'LDBL_DIG' ldbl_dig.E >/dev/null 2>&1; then
+	echo "LDBL_DIG found." >&4
+	val="$define"
+else
+	echo "LDBL_DIG NOT found." >&4
+	val="$undef"
+fi
+$rm -f ldbl_dig.?
+set d_ldbl_dig
+eval $setvar
+
 : see if link exists
 set link d_link
 eval $inlibc
@@ -8722,125 +9011,6 @@ eval $inlibc
 : see if lockf exists
 set lockf d_lockf
 eval $inlibc
-
-: check for length of double
-echo " "
-case "$doublesize" in
-'')
-	$echo $n "Checking to see how big your double precision numbers are...$c" >&4
-	$cat >try.c <<'EOCP'
-#include <stdio.h>
-int main()
-{
-	printf("%d\n", sizeof(double));
-}
-EOCP
-	set try
-	if eval $compile_ok; then
-		doublesize=`./try`
-		$echo " $doublesize bytes." >&4
-	else
-		dflt='8'
-		echo "(I can't seem to compile the test program.  Guessing...)"
-		rp="What is the size of a double precision number (in bytes)?"
-		. ./myread
-		doublesize="$ans"
-	fi
-	;;
-esac
-$rm -f try.c try
-
-: check for long doubles
-echo " "
-echo $n "Checking to see if your system supports long doubles...$c" >&4
-echo 'long double foo() { long double x; x = 7.0; return x; }' > try.c
-if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
-	val="$define"
-	echo " Yup, it does." >&4
-else
-	val="$undef"
-	echo " Nope, it doesn't." >&4
-fi
-$rm try.*
-set d_longdbl
-eval $setvar
-
-: check for length of long double
-case "${d_longdbl}${longdblsize}" in
-$define)
-	echo " "
-	$echo $n "Checking to see how big your long doubles are...$c" >&4
-	$cat >try.c <<'EOCP'
-#include <stdio.h>
-int main()
-{
-	printf("%d\n", sizeof(long double));
-}
-EOCP
-	set try
-	if eval $compile; then
-		longdblsize=`./try`
-		$echo " $longdblsize bytes." >&4
-	else
-		dflt='8'
-		echo " "
-		echo "(I can't seem to compile the test program.  Guessing...)" >&4
-		rp="What is the size of a long double (in bytes)?"
-		. ./myread
-		longdblsize="$ans"
-	fi
-	if $test "X$doublesize" = "X$longdblsize"; then
-		echo "(That isn't any different from an ordinary double.)"
-	fi	
-	;;
-esac
-$rm -f try.c try
-
-: check for long long
-echo " "
-echo $n "Checking to see if your system supports long long...$c" >&4
-echo 'long long foo() { long long x; x = 7; return x; }' > try.c
-if $cc $optimize $ccflags -c try.c >/dev/null 2>&1; then
-	val="$define"
-	echo " Yup, it does." >&4
-else
-	val="$undef"
-	echo " Nope, it doesn't." >&4
-fi
-$rm try.*
-set d_longlong
-eval $setvar
-
-: check for length of long long
-case "${d_longlong}${longlongsize}" in
-$define)
-	echo " "
-	$echo $n "Checking to see how big your long longs are...$c" >&4
-	$cat >try.c <<'EOCP'
-#include <stdio.h>
-int main()
-{
-	printf("%d\n", sizeof(long long));
-}
-EOCP
-	set try
-	if eval $compile_ok; then
-		longlongsize=`./try`
-		$echo " $longlongsize bytes." >&4
-	else
-		dflt='8'
-		echo " "
-		echo "(I can't seem to compile the test program.  Guessing...)"
-		rp="What is the size of a long long (in bytes)?"
-		. ./myread
-		longlongsize="$ans"
-	fi
-	if $test "X$longsize" = "X$longlongsize"; then
-		echo "(That isn't any different from an ordinary long.)"
-	fi	
-	;;
-esac
-$rm -f try.c try
 
 : see if lstat exists
 set lstat d_lstat
@@ -10012,6 +10182,10 @@ set d_sigsetjmp
 eval $setvar
 $rm -f try.c try
 
+: see if sys/stat.h is available
+set sys/stat.h i_sysstat
+eval $inhdr
+
 : see if stat knows about block sizes
 echo " "
 set d_statblks stat st_blocks $i_sysstat sys/stat.h
@@ -10256,6 +10430,10 @@ eval $inlibc
 
 : see if strtoul exists
 set strtoul d_strtoul
+eval $inlibc
+
+: see if strtoull exists
+set strtoull d_strtoull
 eval $inlibc
 
 : see if strxfrm exists
@@ -10628,7 +10806,7 @@ You seem to be either cross-compiling or doing a multiarchitecture build,
 skipping the byteorder check.
 
 EOM
-	byteorder=''
+	byteorder='0xffff'
 	;;
 *)
 	case "$byteorder" in
@@ -10637,8 +10815,9 @@ EOM
 In the following, larger digits indicate more significance.  A big-endian
 machine like a Pyramid or a Motorola 680?0 chip will come out to 4321. A
 little-endian machine like a Vax or an Intel 80?86 chip would be 1234. Other
-machines may have weird orders like 3412.  A Cray will report 87654321. If
-the test program works the default is probably right.
+machines may have weird orders like 3412.  A Cray will report 87654321,
+an Alpha will report 12345678. If the test program works the default is
+probably right.
 I'm now running the test program...
 EOM
 		$cat >try.c <<'EOCP'
@@ -13045,9 +13224,8 @@ case "$d_portable" in
 	echo " "
 	echo "Stripping down executable paths..." >&4
 	for file in $loclist $trylist; do
-		if test X$file != Xln -a X$file != Xar -o X$osname != Xos2; then
-			eval $file="\$file"
-		fi
+		eval temp=\$$file
+		eval $file=`basename $temp`
 	done
 	;;
 esac
@@ -13137,10 +13315,24 @@ crosscompile='$crosscompile'
 cryptlib='$cryptlib'
 csh='$csh'
 d_Gconvert='$d_Gconvert'
+d_PRIEldbl='$d_PRIEldbl'
+d_PRIFldbl='$d_PRIFldbl'
+d_PRIGldbl='$d_PRIGldbl'
+d_PRIX64='$d_PRIX64'
+d_PRId64='$d_PRId64'
+d_PRIeldbl='$d_PRIeldbl'
+d_PRIfldbl='$d_PRIfldbl'
+d_PRIgldbl='$d_PRIgldbl'
+d_PRIi64='$d_PRIi64'
+d_PRIo64='$d_PRIo64'
+d_PRIu64='$d_PRIu64'
+d_PRIx64='$d_PRIx64'
 d_access='$d_access'
 d_accessx='$d_accessx'
 d_alarm='$d_alarm'
 d_archlib='$d_archlib'
+d_atolf='$d_atolf'
+d_atoll='$d_atoll'
 d_attribut='$d_attribut'
 d_bcmp='$d_bcmp'
 d_bcopy='$d_bcopy'
@@ -13162,11 +13354,7 @@ d_crypt='$d_crypt'
 d_csh='$d_csh'
 d_cuserid='$d_cuserid'
 d_dbl_dig='$d_dbl_dig'
-d_dbmclose64='$d_dbmclose64'
-d_dbminit64='$d_dbminit64'
-d_delete64='$d_delete64'
 d_difftime='$d_difftime'
-d_dirent64_s='$d_dirent64_s'
 d_dirnamlen='$d_dirnamlen'
 d_dlerror='$d_dlerror'
 d_dlopen='$d_dlopen'
@@ -13190,30 +13378,18 @@ d_fcntl='$d_fcntl'
 d_fd_macros='$d_fd_macros'
 d_fd_set='$d_fd_set'
 d_fds_bits='$d_fds_bits'
-d_fetch64='$d_fetch64'
-d_fgetpos64='$d_fgetpos64'
 d_fgetpos='$d_fgetpos'
-d_firstkey64='$d_firstkey64'
 d_flexfnam='$d_flexfnam'
-d_flock64_s='$d_flock64_s'
 d_flock='$d_flock'
-d_fopen64='$d_fopen64'
 d_fork='$d_fork'
 d_fpathconf='$d_fpathconf'
-d_freopen64='$d_freopen64'
-d_fseek64='$d_fseek64'
-d_fseeko64='$d_fseeko64'
+d_fpos64_t='$d_fpos64_t'
 d_fseeko='$d_fseeko'
-d_fsetpos64='$d_fsetpos64'
 d_fsetpos='$d_fsetpos'
-d_fstat64='$d_fstat64'
 d_fstatfs='$d_fstatfs'
 d_fstatvfs='$d_fstatvfs'
-d_ftell64='$d_ftell64'
-d_ftello64='$d_ftello64'
 d_ftello='$d_ftello'
 d_ftime='$d_ftime'
-d_ftruncate64='$d_ftruncate64'
 d_getgrent='$d_getgrent'
 d_getgrps='$d_getgrps'
 d_gethbyaddr='$d_gethbyaddr'
@@ -13250,21 +13426,18 @@ d_hasmntopt='$d_hasmntopt'
 d_htonl='$d_htonl'
 d_index='$d_index'
 d_inetaton='$d_inetaton'
-d_ino64_t='$d_ino64_t'
 d_int64t='$d_int64t'
 d_iovec_s='$d_iovec_s'
 d_isascii='$d_isascii'
 d_killpg='$d_killpg'
 d_lchown='$d_lchown'
+d_ldbl_dig='$d_ldbl_dig'
 d_link='$d_link'
 d_llseek='$d_llseek'
 d_locconv='$d_locconv'
-d_lockf64='$d_lockf64'
 d_lockf='$d_lockf'
 d_longdbl='$d_longdbl'
 d_longlong='$d_longlong'
-d_lseek64='$d_lseek64'
-d_lstat64='$d_lstat64'
 d_lstat='$d_lstat'
 d_madvise='$d_madvise'
 d_mblen='$d_mblen'
@@ -13294,16 +13467,12 @@ d_msgsnd='$d_msgsnd'
 d_msync='$d_msync'
 d_munmap='$d_munmap'
 d_mymalloc='$d_mymalloc'
-d_nextkey64='$d_nextkey64'
 d_nice='$d_nice'
 d_off64_t='$d_off64_t'
-d_offset_t='$d_offset_t'
 d_old_pthread_create_joinable='$d_old_pthread_create_joinable'
 d_oldpthreads='$d_oldpthreads'
 d_oldsock='$d_oldsock'
 d_open3='$d_open3'
-d_open64='$d_open64'
-d_opendir64='$d_opendir64'
 d_pathconf='$d_pathconf'
 d_pause='$d_pause'
 d_phostname='$d_phostname'
@@ -13319,7 +13488,6 @@ d_pwexpire='$d_pwexpire'
 d_pwgecos='$d_pwgecos'
 d_pwpasswd='$d_pwpasswd'
 d_pwquota='$d_pwquota'
-d_readdir64='$d_readdir64'
 d_readdir='$d_readdir'
 d_readlink='$d_readlink'
 d_readv='$d_readv'
@@ -13332,7 +13500,6 @@ d_safemcpy='$d_safemcpy'
 d_sanemcmp='$d_sanemcmp'
 d_sched_yield='$d_sched_yield'
 d_scm_rights='$d_scm_rights'
-d_seekdir64='$d_seekdir64'
 d_seekdir='$d_seekdir'
 d_select='$d_select'
 d_sem='$d_sem'
@@ -13377,7 +13544,6 @@ d_sigaction='$d_sigaction'
 d_sigsetjmp='$d_sigsetjmp'
 d_socket='$d_socket'
 d_sockpair='$d_sockpair'
-d_stat64='$d_stat64'
 d_statblks='$d_statblks'
 d_statfs='$d_statfs'
 d_statfsflags='$d_statfsflags'
@@ -13387,7 +13553,6 @@ d_stdio_ptr_lval='$d_stdio_ptr_lval'
 d_stdio_stream_array='$d_stdio_stream_array'
 d_stdiobase='$d_stdiobase'
 d_stdstdio='$d_stdstdio'
-d_store64='$d_store64'
 d_strchr='$d_strchr'
 d_strcoll='$d_strcoll'
 d_strctcpy='$d_strctcpy'
@@ -13396,6 +13561,7 @@ d_strerror='$d_strerror'
 d_strtod='$d_strtod'
 d_strtol='$d_strtol'
 d_strtoul='$d_strtoul'
+d_strtoull='$d_strtoull'
 d_strxfrm='$d_strxfrm'
 d_suidsafe='$d_suidsafe'
 d_symlink='$d_symlink'
@@ -13406,13 +13572,10 @@ d_syserrlst='$d_syserrlst'
 d_system='$d_system'
 d_tcgetpgrp='$d_tcgetpgrp'
 d_tcsetpgrp='$d_tcsetpgrp'
-d_telldir64='$d_telldir64'
 d_telldir='$d_telldir'
 d_telldirproto='$d_telldirproto'
 d_time='$d_time'
 d_times='$d_times'
-d_tmpfile64='$d_tmpfile64'
-d_truncate64='$d_truncate64'
 d_truncate='$d_truncate'
 d_tzname='$d_tzname'
 d_umask='$d_umask'
@@ -13658,6 +13821,18 @@ rd_nodata='$rd_nodata'
 rm='$rm'
 rmail='$rmail'
 runnm='$runnm'
+sPRIEldbl='$sPRIEldbl'
+sPRIFldbl='$sPRIFldbl'
+sPRIGldbl='$sPRIGldbl'
+sPRIX64='$sPRIX64'
+sPRId64='$sPRId64'
+sPRIeldbl='$sPRIeldbl'
+sPRIfldbl='$sPRIfldbl'
+sPRIgldbl='$sPRIgldbl'
+sPRIi64='$sPRIi64'
+sPRIo64='$sPRIo64'
+sPRIu64='$sPRIu64'
+sPRIx64='$sPRIx64'
 sched_yield='$sched_yield'
 scriptdir='$scriptdir'
 scriptdirexp='$scriptdirexp'
@@ -13728,6 +13903,7 @@ uname='$uname'
 uniq='$uniq'
 use64bits='$use64bits'
 usedl='$usedl'
+uselongdouble='$uselongdouble'
 usemultiplicity='$usemultiplicity'
 usemymalloc='$usemymalloc'
 usenm='$usenm'

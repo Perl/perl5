@@ -16,9 +16,9 @@
 
 __END__
 # perl.c
-no warning 'once' ;
+no warnings 'once' ;
 $x = 3 ;
-use warning 'once' ;
+use warnings 'once' ;
 $z = 3 ;
 EXPECT
 Name "main::z" used only once: possible typo at - line 5.
@@ -26,7 +26,7 @@ Name "main::z" used only once: possible typo at - line 5.
 -w
 # perl.c
 $x = 3 ;
-no warning 'once' ;
+no warnings 'once' ;
 $z = 3 
 EXPECT
 Name "main::x" used only once: possible typo at - line 3.
@@ -34,16 +34,16 @@ Name "main::x" used only once: possible typo at - line 3.
 # perl.c
 BEGIN { $^W =1 ; }
 $x = 3 ;
-no warning 'once' ;
+no warnings 'once' ;
 $z = 3 
 EXPECT
 Name "main::x" used only once: possible typo at - line 3.
 ########
 -W
 # perl.c
-no warning 'once' ;
+no warnings 'once' ;
 $x = 3 ;
-use warning 'once' ;
+use warnings 'once' ;
 $z = 3 ;
 EXPECT
 Name "main::x" used only once: possible typo at - line 4.
@@ -51,7 +51,7 @@ Name "main::z" used only once: possible typo at - line 6.
 ########
 -X
 # perl.c
-use warning 'once' ;
+use warnings 'once' ;
 $x = 3 ;
 EXPECT
 

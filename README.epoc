@@ -4,50 +4,104 @@ Perl 5 README file for the EPOC operating system.
 
 Olaf Flebbe <o.flebbe@gmx.de>
 http://www.fortunecity.de/wolkenkratzer/trumpet/84/perl5.html
-June 27, 1999
+Aug 25, 1999
 
 Introduction
 ------------ 
 
-This is a port of Perl version 5, revision 005-57 to EPOC. 
+This is a port of Perl version 5.005_60 to EPOC. 
 
-There are many features left out, because of restrictions of the posix
+There are many features left out, because of restrictions of the POSIX
 support in the SDK.
 
-The following known problems do exist:
 
-1) very little testing.
+Installation/Usage
+------------------
 
-2) no support for system, backquoting, pipes etc. One cannot exec a
+You will need ~4MB free space in order to run perl.
+
+Install perl.sis on the EPOC machine (most likely a PSION Series
+5). If you do not know how to do that, you are on your own. You may
+have to use a CF Card in order to work with perl. The perl debugger
+uses more then 1.5 MB additional RAM. The heap is limited to 2 MB.
+
+Perl itself and its standard library are using 1.7MB disk space. I
+left out UTF support and modules which will not work with this
+version. (For details look into epoc/createpkg.pl). 
+
+Copy eshell.exe to the same location as perl. Start eshell.exe with a
+double click.
+
+Now you can enter: perl -de 0 in order to run the perl debugger. If
+you are leaving perl, you have to switch back manually to eshell.exe
+(With Ctrl-System or the button in the upper right corner of the
+System screen.) When perl is running, you will see a task with the
+name STDOUT in the task list. 
+
+You can redirect the output with the UNIX bourne shell syntax (this is
+built into perl rather then eshell) For instance the following command
+line will run the script test.pl with the output redirected to
+stdout_file, the errors to stderr_file and input from stdin_file.
+
+perl test.pl >stdout_file <stdin_file 2>stderr_file
+
+Alternativly you can use 2>&1 in order to add the standard error output to
+stdout.
+
+Pathnames to executables in eshell.exe have to be written with
+backslashes, file arguments to perl with slashes. The default drive of
+perl is the same as the drive perl.exe is located on, the default path
+is the path perl.exe is / (???).
+
+i.e. command lines look a little bit funny:
+
+D:\perl.exe C:/test.pl >C:/output.txt
+
+In order to use Getopt::Long you have to autosplit this module by hand: run
+
+\perl.exe \autosplit.pl in order to create the necessary files.
+
+You may have a problem to create perl scripts. A cumbersome workaround
+is to use the OPL Editor and exporting to text.
+
+Problems
+--------
+
+The following known problems exist:
+
+1) no support for system, backquoting, pipes etc. One cannot exec a
    different process.
 
-3) no signals, kill. Do not try to use them.
+2) no signals, kill, alarm. Do not try to use them. This may be
+   impossible to implement on EPOC.
 
-4) select is missing.
+3) select is missing.
 
-5) binmode does not work. (No CR LF to LF translation for text files)
+4) binmode does not exist. (No CR LF to LF translation for text files)
 
-6) no Config.pm
+5) Only a stub Config.pm
 
-7) no I/O redirection.
+6) EPOC does not handle the notion of current drive and current
+   directory very well (i.e. not at all, but it tries hard to emulate
+   one)
 
-8) it may not run from a drive other than C: (I have no CF Card to test)
+7) sockets may hardly of any use.
 
-9) sockets may hardly of any use.
-
-10) You need a shell in order to run perl.exe.
+8) You need the shell eshell.exe in order to run perl.exe and supply
+   it with arguments.
 
 
 Compiling Perl 5 on the EPOC cross compiling envionment.
 --------------------------------------------------------
 
 0. You will need the C++ SDK from
-   http://developer.epocworld.com/. Install it on a separate drive.
+   http://developer.epocworld.com/. Install it on a separate
+   drive.
 
-1. Unpack the sources in the epoc development drive: The sources
-   should be in a directory perl5.005/perl5.005_57
-
-2. Move all files in the directory perl5.005_57/epoc to perl5.005_57.
+1. Get the Perl sources from your nearest CPAN site.
+   Unpack the sources of perl5.005_60 in the epoc development drive.
+ 
+2. Copy all files in the directory perl5.005_60/epoc to perl5.005_60.
 
 3. Check the perl.mmp file: It should have the correct locations for
    project und subproject (see step 1)
@@ -59,22 +113,21 @@ Compiling Perl 5 on the EPOC cross compiling envionment.
 
 5. Beam the perl5.005.sis to the Psion5, install and enjoy!
 
-ToDo List
+You can use epoc\createpkg.pl to generate a new perl.pkg file. 
+
+
+Wish List
 ---------
 
-- Allocate an UID from symbian.
+- Implement an OPX to get rid of eshell.exe.
 
-- Implement system() and I/O redirection, in order to run the
-  tests.
+- Implement system(), in order to run the  tests.
 
 - Implement getprotcolbyname() and relatives.
-
-- Implement perl as a OPX module. (What do you think?)
 
 Support Status
 --------------
 
 I'm offering this port "as is".  You can ask me questions, but I can't
 guarantee I'll be able to answer them; I don't know much about Perl
-itself;
-
+internals myself;

@@ -151,6 +151,11 @@ enum {
     OPt_COP		/* 10 */
 };
 
+#if defined(CYGWIN) || defined(VMS)
+extern
+#else
+EXT
+#endif
 void byterun(pTHXo_ struct bytestream bs);
 
 #define INIT_SPECIALSV_LIST STMT_START { \

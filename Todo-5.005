@@ -28,12 +28,10 @@ Configure
     make configuring+building away from source directory work (VPATH et al)
     _r support
     cross-compilation configuring
-    mmap support
     POSIX 1003.1 1996 Edition support
 
 Locales
-    locales across packages
-    decimal separator (3,1415927 is Europeanese for an approximation of pi)
+    locales across packages?
 
 Regexen
    POSIX [=bar=] and [.zap.] would nice too but there's no API for them
@@ -41,6 +39,7 @@ Regexen
    approximate matching
 
 Reliable Signals
+    custom opcodes
     alternate runops() for signal despatch
     figure out how to die() in delayed sighandler
     add tests for Thread::Signal
@@ -58,7 +57,7 @@ Miscellaneous
     rename and alter ISA.pm
     magic_setisa should be made to update %FIELDS [???]
     add new modules (Archive::Tar, Compress::Zlib, CPAN::FTP?)
-    fix pod2html to generate relative URLs
+    fix pod2html to generate relative URLs (replace with new PodtoHtml?)
     automate testing with large parts of CPAN
 
 Ongoing

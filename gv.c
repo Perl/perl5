@@ -677,6 +677,10 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	    }
 	}
 	break;
+    case 'V':
+	if (strEQ(name, "VERSION"))
+	    GvMULTI_on(gv);
+	break;
 
     case '&':
 	if (len > 1)
@@ -757,7 +761,6 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
     case '/':
     case '|':
     case '\001':
-    case '\002':
     case '\003':
     case '\004':
     case '\005':
@@ -767,7 +770,6 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
     case '\017':
     case '\020':
     case '\024':
-    case '\027':
 	if (len > 1)
 	    break;
 	goto magicalize;
@@ -775,6 +777,10 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	if (len > 1)
 	    break;
 	goto ro_magicalize;
+    case '\027':	/* $^W & $^Warnings */
+	if (len > 1 && strNE(name, "\027arnings"))
+	    break;
+	goto magicalize;
 
     case '+':
 	if (len > 1)

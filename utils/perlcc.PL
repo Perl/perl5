@@ -870,11 +870,12 @@ create executable file names.
 
 =item -verbose <verbose_level>
 
-Show exactly what steps perlcc is taking to compile your code. You can change 
-the verbosity level B<verbose_level> much in the same way that the '-D' switch 
-changes perl's debugging level, by giving either a number which is the sum of 
-bits you want or a list of letters representing what you wish to see. Here are 
-the verbosity levels so far :
+Show exactly what steps perlcc is taking to compile your code. You can
+change the verbosity level B<verbose_level> much in the same way that
+the C<-D> switch changes perl's debugging level, by giving either a
+number which is the sum of bits you want or a list of letters
+representing what you wish to see. Here are the verbosity levels so
+far :
 
     Bit 1(g):      Code Generation Errors to STDERR
     Bit 2(a):      Compilation Errors to STDERR
@@ -901,14 +902,14 @@ manually.
 
 =item -argv <arguments>
 
-In combination with '-run' or '-e', tells perlcc to run the resulting 
+In combination with C<-run> or C<-e>, tells perlcc to run the resulting 
 executable with the string B<arguments> as @ARGV.
 
 =item -sav
 
 Tells perl to save the intermediate C code. Usually, this C code is the name
 of the perl code, plus '.c'; 'perlcode.p' gets generated in 'perlcode.p.c',
-for example. If used with the '-e' operator, you need to tell perlcc where to 
+for example. If used with the C<-e> operator, you need to tell perlcc where to 
 save resulting executables.
 
 =item -gen

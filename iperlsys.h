@@ -283,6 +283,7 @@ struct IPerlStdIOInfo
 #else	/* PERL_IMPLICIT_SYS */
 
 #include "perlsdio.h"
+#include "perl.h"
 
 #endif	/* PERL_IMPLICIT_SYS */
 

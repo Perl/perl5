@@ -1,5 +1,18 @@
 package Exporter;
 
+=head1 NAME
+
+Exporter::Heavy - Exporter guts
+
+=head1 SYNOPIS
+
+(internal use only)
+
+=head1 DESCRIPTION
+
+No user-serviceable parts inside.
+ 
+=cut
 #
 # We go to a lot of trouble not to 'require Carp' at file scope,
 #  because Carp requires Exporter, and something has to give.

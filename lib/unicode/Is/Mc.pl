@@ -37,6 +37,17 @@ return <<'END';
 0d46	0d48
 0d4a	0d4c
 0d57	
+0d82	0d83
+0dcf	0dd1
+0dd8	0ddf
+0df2	0df3
 0f3e	0f3f
 0f7f	
+102c	
+1031	
+1038	
+1056	1057
+17b4	17b6
+17be	17c5
+17c7	17c8
 END

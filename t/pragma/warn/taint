@@ -37,10 +37,10 @@ def
 open(FH, "<abc") ;
 $a = <FH> ;
 close FH ;
-use warning 'taint' ;
+use warnings 'taint' ;
 chdir $a ;
 print "xxx\n" ;
-no warning 'taint' ;
+no warnings 'taint' ;
 chdir $a ;
 print "yyy\n" ;
 EXPECT

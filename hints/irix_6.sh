@@ -126,7 +126,10 @@ malloc_cflags='ccflags="-DSTRICT_ALIGNMENT $ccflags"'
 	# and returning small structures.  This affects inet_*() and semctl().
 	# See http://reality.sgi.com/ariel/freeware/gcc-2.8.1-notes.html
 	# for more information.  Reported by Lionel Cons <lionel.cons@cern.ch>.
-	IRIX64) ccflags="$ccflags -mabi=64" ;;
+	IRIX64)	ccflags="$ccflags -mabi=64"
+		ldflags="$ldflags -mabi=64 -L/usr/lib64"
+		lddlflags="$lddlflags -mabi=64"
+		;;
 	esac
 	;;
 *)
@@ -136,6 +139,9 @@ malloc_cflags='ccflags="-DSTRICT_ALIGNMENT $ccflags"'
 	optimize='-O'	  
 	;;
 esac
+
+# Don't groan about unused libraries.
+ldflags="$ldflags -Wl,-woff,84"
 
 # We don't want these libraries.
 # Socket networking is in libc, these are not installed by default,
@@ -237,19 +243,9 @@ EOM
 	    *-n32*)
 		ccflags="$ccflags -DUSE_LONG_LONG"
 		archname64="-n32"
-		d_open64="$undef"
-		# In -n32 mode (ILP32LL64) we use the standard open().
-		# In -64 we will use the open64().
-		cat << 'EOM' >&2
-
-You will see a *** WHOA THERE!!! ***  message from Configure for
-d_open64.  Keep the recommended value.  See hints/irix6.sh
-for more information.
-
-EOM
 		;;
 	    esac
-	    ccflags="$ccflags -DUSE_64_BIT_FILES"
+	    ccflags="$ccflags -DUSE_64_BITS"
 	    ;;
 esac
 EOCBU

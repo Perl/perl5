@@ -11,14 +11,14 @@
 
 __END__
 # perly.y
-use warning 'deprecated' ;
+use warnings 'deprecated' ;
 sub fred {} 
 do fred() ;
 do fred(1) ;
 $a = "fred" ; 
 do $a() ;
 do $a(1) ;
-no warning 'deprecated' ;
+no warnings 'deprecated' ;
 do fred() ;
 do fred(1) ;
 $a = "fred" ; 

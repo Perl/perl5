@@ -178,7 +178,6 @@ delete $h{'goner2'};
 undef $X ;
 untie(%h);
 
-
 # tie to the same file again
 ok(26, $X = tie(%h,'DB_File',$Dfile, O_RDWR, 0640, $DB_BTREE)) ;
 
@@ -1188,5 +1187,32 @@ a	-> mouse	-> mickey
 EOM
 
 }
+
+#{
+#   # R_SETCURSOR
+#   use strict ;
+#   my (%h, $db) ;
+#   unlink $Dfile;
+#
+#   ok(156, $db = tie(%h, 'DB_File', $Dfile, O_RDWR|O_CREAT, 0640, $DB_BTREE ) );
+#
+#   $h{abc} = 33 ;
+#   my $k = "newest" ;
+#   my $v = 44 ;
+#   my $status = $db->put($k, $v, R_SETCURSOR) ;
+#   print "status = [$status]\n" ;
+#   ok(157, $status == 0) ;
+#   $status = $db->del($k, R_CURSOR) ;
+#   print "status = [$status]\n" ;
+#   ok(158, $status == 0) ;
+#   $k = "newest" ;
+#   ok(159, $db->get($k, $v, R_CURSOR)) ;
+#
+#   ok(160, keys %h == 1) ;
+#   
+#   undef $db ;
+#   untie %h;
+#   unlink $Dfile;
+#}
 
 exit ;

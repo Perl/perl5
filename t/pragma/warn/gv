@@ -22,14 +22,14 @@
     
 __END__
 # gv.c
-use warning 'misc' ;
+use warnings 'misc' ;
 @ISA = qw(Fred); joe()
 EXPECT
 Can't locate package Fred for @main::ISA at - line 3.
 Undefined subroutine &main::joe called at - line 3.
 ########
 # gv.c
-no warning 'misc' ;
+no warnings 'misc' ;
 @ISA = qw(Fred); joe()
 EXPECT
 Undefined subroutine &main::joe called at - line 3.
@@ -37,16 +37,16 @@ Undefined subroutine &main::joe called at - line 3.
 # gv.c
 sub Other::AUTOLOAD { 1 } sub Other::fred {}
 @ISA = qw(Other) ;
-use warning 'deprecated' ;
+use warnings 'deprecated' ;
 fred() ;
 EXPECT
 Use of inherited AUTOLOAD for non-method main::fred() is deprecated at - line 5.
 ########
 # gv.c
-use warning 'deprecated' ;
+use warnings 'deprecated' ;
 $a = ${"#"};
 $a = ${"*"};
-no warning 'deprecated' ;
+no warnings 'deprecated' ;
 $a = ${"#"};
 $a = ${"*"};
 EXPECT

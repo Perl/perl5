@@ -81,12 +81,13 @@ long lastxycount[MAXXCOUNT][MAXYCOUNT];
 Malloc_t
 Perl_safesysmalloc(MEM_SIZE size)
 {
+    dTHX;
     Malloc_t ptr;
 #ifdef HAS_64K_LIMIT
 	if (size > 0xffff) {
 	    PerlIO_printf(PerlIO_stderr(),
 			  "Allocation too large: %lx\n", size) FLUSH;
-	    WITH_THX(my_exit(1));
+	    my_exit(1);
 	}
 #endif /* HAS_64K_LIMIT */
 #ifdef DEBUGGING
@@ -94,18 +95,14 @@ Perl_safesysmalloc(MEM_SIZE size)
 	Perl_croak_nocontext("panic: malloc");
 #endif
     ptr = PerlMem_malloc(size?size:1);	/* malloc(0) is NASTY on our system */
-#if !(defined(I286) || defined(atarist))
-    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%x: (%05d) malloc %ld bytes\n",ptr,PL_an++,(long)size));
-#else
     DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) malloc %ld bytes\n",ptr,PL_an++,(long)size));
-#endif
     if (ptr != Nullch)
 	return ptr;
     else if (PL_nomemok)
 	return Nullch;
     else {
 	PerlIO_puts(PerlIO_stderr(),PL_no_mem) FLUSH;
-	WITH_THX(my_exit(1));
+	my_exit(1);
         return Nullch;
     }
     /*NOTREACHED*/
@@ -116,6 +113,7 @@ Perl_safesysmalloc(MEM_SIZE size)
 Malloc_t
 Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 {
+    dTHX;
     Malloc_t ptr;
 #if !defined(STANDARD_C) && !defined(HAS_REALLOC_PROTOTYPE)
     Malloc_t PerlMem_realloc();
@@ -125,7 +123,7 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
     if (size > 0xffff) {
 	PerlIO_printf(PerlIO_stderr(),
 		      "Reallocation too large: %lx\n", size) FLUSH;
-	WITH_THX(my_exit(1));
+	my_exit(1);
     }
 #endif /* HAS_64K_LIMIT */
     if (!size) {
@@ -141,17 +139,8 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 #endif
     ptr = PerlMem_realloc(where,size);
 
-#if !(defined(I286) || defined(atarist))
-    DEBUG_m( {
-	PerlIO_printf(Perl_debug_log, "0x%x: (%05d) rfree\n",where,PL_an++);
-	PerlIO_printf(Perl_debug_log, "0x%x: (%05d) realloc %ld bytes\n",ptr,PL_an++,(long)size);
-    } )
-#else
-    DEBUG_m( {
-	PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) rfree\n",where,PL_an++);
-	PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) realloc %ld bytes\n",ptr,PL_an++,(long)size);
-    } )
-#endif
+    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) rfree\n",where,PL_an++));
+    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) realloc %ld bytes\n",ptr,PL_an++,(long)size));
 
     if (ptr != Nullch)
 	return ptr;
@@ -159,7 +148,7 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 	return Nullch;
     else {
 	PerlIO_puts(PerlIO_stderr(),PL_no_mem) FLUSH;
-	WITH_THX(my_exit(1));
+	my_exit(1);
 	return Nullch;
     }
     /*NOTREACHED*/
@@ -170,11 +159,8 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 Free_t
 Perl_safesysfree(Malloc_t where)
 {
-#if !(defined(I286) || defined(atarist))
-    DEBUG_m( PerlIO_printf(Perl_debug_log, "0x%x: (%05d) free\n",(char *) where,PL_an++));
-#else
+    dTHX;
     DEBUG_m( PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) free\n",(char *) where,PL_an++));
-#endif
     if (where) {
 	/*SUPPRESS 701*/
 	PerlMem_free(where);
@@ -186,13 +172,14 @@ Perl_safesysfree(Malloc_t where)
 Malloc_t
 Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
 {
+    dTHX;
     Malloc_t ptr;
 
 #ifdef HAS_64K_LIMIT
     if (size * count > 0xffff) {
 	PerlIO_printf(PerlIO_stderr(),
 		      "Allocation too large: %lx\n", size * count) FLUSH;
-	WITH_THX(my_exit(1));
+	my_exit(1);
     }
 #endif /* HAS_64K_LIMIT */
 #ifdef DEBUGGING
@@ -201,11 +188,7 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
 #endif
     size *= count;
     ptr = PerlMem_malloc(size?size:1);	/* malloc(0) is NASTY on our system */
-#if !(defined(I286) || defined(atarist))
-    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%x: (%05d) calloc %ld  x %ld bytes\n",ptr,PL_an++,(long)count,(long)size));
-#else
     DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) calloc %ld x %ld bytes\n",ptr,PL_an++,(long)count,(long)size));
-#endif
     if (ptr != Nullch) {
 	memset((void*)ptr, 0, size);
 	return ptr;
@@ -214,7 +197,7 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
 	return Nullch;
     else {
 	PerlIO_puts(PerlIO_stderr(),PL_no_mem) FLUSH;
-	WITH_THX(my_exit(1));
+	my_exit(1);
 	return Nullch;
     }
     /*NOTREACHED*/
@@ -1405,16 +1388,29 @@ Perl_mess(pTHX_ const char *pat, va_list *args)
     sv_vsetpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
     if (!SvCUR(sv) || *(SvEND(sv) - 1) != '\n') {
 	dTHR;
+#ifdef IV_IS_QUAD
+	if (PL_curcop->cop_line)
+	    Perl_sv_catpvf(aTHX_ sv, " at %_ line %" PERL_PRId64,
+		      GvSV(PL_curcop->cop_filegv), (IV)PL_curcop->cop_line);
+#else
 	if (PL_curcop->cop_line)
 	    Perl_sv_catpvf(aTHX_ sv, " at %_ line %ld",
 		      GvSV(PL_curcop->cop_filegv), (long)PL_curcop->cop_line);
+#endif
 	if (GvIO(PL_last_in_gv) && IoLINES(GvIOp(PL_last_in_gv))) {
 	    bool line_mode = (RsSIMPLE(PL_rs) &&
 			      SvCUR(PL_rs) == 1 && *SvPVX(PL_rs) == '\n');
+#ifdef IV_IS_QUAD
+	    Perl_sv_catpvf(aTHX_ sv, ", <%s> %s %" PERL_PRId64,
+		      PL_last_in_gv == PL_argvgv ? "" : GvNAME(PL_last_in_gv),
+		      line_mode ? "line" : "chunk", 
+		      (IV)IoLINES(GvIOp(PL_last_in_gv)));
+#else
 	    Perl_sv_catpvf(aTHX_ sv, ", <%s> %s %ld",
 		      PL_last_in_gv == PL_argvgv ? "" : GvNAME(PL_last_in_gv),
 		      line_mode ? "line" : "chunk", 
 		      (long)IoLINES(GvIOp(PL_last_in_gv)));
+#endif
 	}
 #ifdef USE_THREADS
 	if (thr->tid)
@@ -1478,7 +1474,11 @@ Perl_vdie(pTHX_ const char* pat, va_list *args)
 	    PUSHMARK(SP);
 	    XPUSHs(msg);
 	    PUTBACK;
-	    call_sv((SV*)cv, G_DISCARD);
+	    /* HACK - REVISIT - avoid CATCH_SET(TRUE) in call_sv()
+	       or we come back here due to a JMPENV_JMP() and do 
+	       a POPSTACK - but die_where() will have already done 
+	       one as it unwound - NI-S 1999/08/14 */
+	    call_sv((SV*)cv, G_DISCARD|G_NOCATCH);
 	    POPSTACK;
 	    LEAVE;
 	}
@@ -2205,7 +2205,7 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
 {
     int p[2];
     register I32 This, that;
-    register I32 pid;
+    register Pid_t pid;
     SV *sv;
     I32 doexec = strNE(cmd,"-");
     I32 did_pipes = 0;
@@ -2276,7 +2276,7 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
 #endif	/* defined OS2 */
 	/*SUPPRESS 560*/
 	if (tmpgv = gv_fetchpv("$",TRUE, SVt_PV))
-	    sv_setiv(GvSV(tmpgv), (IV)getpid());
+	    sv_setiv(GvSV(tmpgv), getpid());
 	PL_forkprocess = 0;
 	hv_clear(PL_pidstatus);	/* we have no children */
 	return Nullfp;
@@ -2498,8 +2498,8 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
     Sigsave_t hstat, istat, qstat;
     int status;
     SV **svp;
-    int pid;
-    int pid2;
+    Pid_t pid;
+    Pid_t pid2;
     bool close_failed;
     int saved_errno;
 #ifdef VMS
@@ -2510,7 +2510,7 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 #endif
 
     svp = av_fetch(PL_fdpid,PerlIO_fileno(ptr),TRUE);
-    pid = (int)SvIVX(*svp);
+    pid = SvIVX(*svp);
     SvREFCNT_dec(*svp);
     *svp = &PL_sv_undef;
 #ifdef OS2
@@ -2549,7 +2549,7 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 
 #if  !defined(DOSISH) || defined(OS2) || defined(WIN32)
 I32
-Perl_wait4pid(pTHX_ int pid, int *statusp, int flags)
+Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 {
     SV *sv;
     SV** svp;
@@ -2609,7 +2609,7 @@ Perl_wait4pid(pTHX_ int pid, int *statusp, int flags)
 
 void
 /*SUPPRESS 590*/
-Perl_pidgone(pTHX_ int pid, int status)
+Perl_pidgone(pTHX_ Pid_t pid, int status)
 {
     register SV *sv;
     char spid[TYPE_CHARS(int)];
@@ -2796,8 +2796,8 @@ Perl_scan_bin(pTHX_ char *start, I32 len, I32 *retlen)
 	    }
 	    else {
 		dTHR;
-		if (ckWARN(WARN_UNSAFE))
-		    Perl_warner(aTHX_ WARN_UNSAFE,
+		if (ckWARN(WARN_DIGIT))
+		    Perl_warner(aTHX_ WARN_DIGIT,
 				"Illegal binary digit '%c' ignored", *s);
 		break;
 	    }
@@ -2809,8 +2809,8 @@ Perl_scan_bin(pTHX_ char *start, I32 len, I32 *retlen)
 		dTHR;
 		overflowed = TRUE;
 		rnv = (NV) ruv;
-		if (ckWARN_d(WARN_UNSAFE))
-		    Perl_warner(aTHX_ WARN_UNSAFE,
+		if (ckWARN_d(WARN_OVERFLOW))
+		    Perl_warner(aTHX_ WARN_OVERFLOW,
 				"Integer overflow in binary number");
 	    } else
 		ruv = xuv | (*s - '0');
@@ -2834,8 +2834,8 @@ Perl_scan_bin(pTHX_ char *start, I32 len, I32 *retlen)
 #endif
 	) { 
 	dTHR;
-	if (ckWARN(WARN_UNSAFE))
-	    Perl_warner(aTHX_ WARN_UNSAFE,
+	if (ckWARN(WARN_PORTABLE))
+	    Perl_warner(aTHX_ WARN_PORTABLE,
 			"Binary number > 0b11111111111111111111111111111111 non-portable");
     }
     *retlen = s - start;
@@ -2860,8 +2860,8 @@ Perl_scan_oct(pTHX_ char *start, I32 len, I32 *retlen)
 		 * someone seems to want to use the digits eight and nine). */
 		if (*s == '8' || *s == '9') {
 		    dTHR;
-		    if (ckWARN(WARN_OCTAL))
-			Perl_warner(aTHX_ WARN_OCTAL,
+		    if (ckWARN(WARN_DIGIT))
+			Perl_warner(aTHX_ WARN_DIGIT,
 				    "Illegal octal digit '%c' ignored", *s);
 		}
 		break;
@@ -2874,8 +2874,8 @@ Perl_scan_oct(pTHX_ char *start, I32 len, I32 *retlen)
 		dTHR;
 		overflowed = TRUE;
 		rnv = (NV) ruv;
-		if (ckWARN_d(WARN_UNSAFE))
-		    Perl_warner(aTHX_ WARN_UNSAFE,
+		if (ckWARN_d(WARN_OVERFLOW))
+		    Perl_warner(aTHX_ WARN_OVERFLOW,
 				"Integer overflow in octal number");
 	    } else
 		ruv = xuv | (*s - '0');
@@ -2899,8 +2899,8 @@ Perl_scan_oct(pTHX_ char *start, I32 len, I32 *retlen)
 #endif
 	) {
 	dTHR;
-	if (ckWARN(WARN_UNSAFE))
-	    Perl_warner(aTHX_ WARN_UNSAFE,
+	if (ckWARN(WARN_PORTABLE))
+	    Perl_warner(aTHX_ WARN_PORTABLE,
 			"Octal number > 037777777777 non-portable");
     }
     *retlen = s - start;
@@ -2929,8 +2929,8 @@ Perl_scan_hex(pTHX_ char *start, I32 len, I32 *retlen)
 	    }
 	    else {
 		dTHR;
-		if (ckWARN(WARN_UNSAFE))
-		    Perl_warner(aTHX_ WARN_UNSAFE,
+		if (ckWARN(WARN_DIGIT))
+		    Perl_warner(aTHX_ WARN_DIGIT,
 				"Illegal hexadecimal digit '%c' ignored", *s);
 		break;
 	    }
@@ -2942,8 +2942,8 @@ Perl_scan_hex(pTHX_ char *start, I32 len, I32 *retlen)
 		dTHR;
 		overflowed = TRUE;
 		rnv = (NV) ruv;
-		if (ckWARN_d(WARN_UNSAFE))
-		    Perl_warner(aTHX_ WARN_UNSAFE,
+		if (ckWARN_d(WARN_OVERFLOW))
+		    Perl_warner(aTHX_ WARN_OVERFLOW,
 				"Integer overflow in hexadecimal number");
 	    } else
 		ruv = xuv | ((hexdigit - PL_hexdigit) & 15);
@@ -2967,8 +2967,8 @@ Perl_scan_hex(pTHX_ char *start, I32 len, I32 *retlen)
 #endif
 	) { 
 	dTHR;
-	if (ckWARN(WARN_UNSAFE))
-	    Perl_warner(aTHX_ WARN_UNSAFE,
+	if (ckWARN(WARN_PORTABLE))
+	    Perl_warner(aTHX_ WARN_PORTABLE,
 			"Hexadecimal number > 0xffffffff non-portable");
     }
     *retlen = s - start;
@@ -3395,6 +3395,7 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
     PL_screamnext = 0;
     PL_reg_start_tmp = 0;
     PL_reg_start_tmpl = 0;
+    PL_reg_poscache = Nullch;
 
     /* parent thread's data needs to be locked while we make copy */
     MUTEX_LOCK(&t->mutex);

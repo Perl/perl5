@@ -61,7 +61,8 @@ perl_alloc(void)
 {
     PerlInterpreter *my_perl;
 
-    New(53, my_perl, 1, PerlInterpreter);
+    /* New() needs interpreter, so call malloc() instead */
+    my_perl = (PerlInterpreter*)PerlMem_malloc(sizeof(PerlInterpreter));
     PERL_SET_INTERP(my_perl);
     return my_perl;
 }
@@ -79,6 +80,14 @@ perl_construct(pTHXx)
     
 #ifdef MULTIPLICITY
     Zero(my_perl, 1, PerlInterpreter);
+#endif
+
+#ifdef MULTIPLICITY
+    init_interp();
+    PL_perl_destruct_level = 1; 
+#else
+   if (PL_perl_destruct_level > 0)
+       init_interp();
 #endif
 
    /* Init the real globals (and main thread)? */
@@ -158,13 +167,6 @@ perl_construct(pTHXx)
     PL_rs = SvREFCNT_inc(PL_nrs);
 
     init_stacks();
-#ifdef MULTIPLICITY
-    init_interp();
-    PL_perl_destruct_level = 1; 
-#else
-   if (PL_perl_destruct_level > 0)
-       init_interp();
-#endif
 
     init_ids();
     PL_lex_state = LEX_NOTPARSING;
@@ -558,9 +560,9 @@ void
 perl_free(pTHXx)
 {
 #if defined(PERL_OBJECT)
-    Safefree(this);
+    PerlMem_free(this);
 #else
-    Safefree(aTHXx);
+    PerlMem_free(aTHXx);
 #endif
 }
 
@@ -924,6 +926,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
     CvPADLIST(PL_compcv) = comppadlist;
 
     boot_core_UNIVERSAL();
+    boot_core_xsutils();
 
     if (xsinit)
 	(*xsinit)(aTHXo);	/* in case linked C routines want magical variables */
@@ -1225,10 +1228,16 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 	PL_op->op_private |= OPpENTERSUB_DB;
 
     if (!(flags & G_EVAL)) {
-	CATCH_SET(TRUE);
+        /* G_NOCATCH is a hack for perl_vdie using this path to call
+	   a __DIE__ handler */
+        if (!(flags & G_NOCATCH)) {
+	    CATCH_SET(TRUE);
+	}
 	call_xbody((OP*)&myop, FALSE);
 	retval = PL_stack_sp - (PL_stack_base + oldmark);
-	CATCH_SET(FALSE);
+        if (!(flags & G_NOCATCH)) {
+	    CATCH_SET(FALSE);
+	}
     }
     else {
 	cLOGOP->op_other = PL_op;
@@ -1879,8 +1888,13 @@ S_init_interp(pTHX)
 #    define PERLVAR(var,type)
 #    define PERLVARA(var,n,type)
 #    if defined(PERL_IMPLICIT_CONTEXT)
-#      define PERLVARI(var,type,init)	my_perl->var = init;
-#      define PERLVARIC(var,type,init)	my_perl->var = init;
+#      if defined(USE_THREADS)
+#        define PERLVARI(var,type,init)		PERL_GET_INTERP->var = init;
+#        define PERLVARIC(var,type,init)	PERL_GET_INTERP->var = init;
+#      else /* !USE_THREADS */
+#        define PERLVARI(var,type,init)		aTHX->var = init;
+#        define PERLVARIC(var,type,init)	aTHX->var = init;
+#      endif /* USE_THREADS */
 #    else
 #      define PERLVARI(var,type,init)	PERL_GET_INTERP->var = init;
 #      define PERLVARIC(var,type,init)	PERL_GET_INTERP->var = init;
@@ -2459,10 +2473,10 @@ S_find_beginning(pTHX)
 STATIC void
 S_init_ids(pTHX)
 {
-    PL_uid = (int)PerlProc_getuid();
-    PL_euid = (int)PerlProc_geteuid();
-    PL_gid = (int)PerlProc_getgid();
-    PL_egid = (int)PerlProc_getegid();
+    PL_uid = PerlProc_getuid();
+    PL_euid = PerlProc_geteuid();
+    PL_gid = PerlProc_getgid();
+    PL_egid = PerlProc_getegid();
 #ifdef VMS
     PL_uid |= PL_gid << 16;
     PL_euid |= PL_egid << 16;

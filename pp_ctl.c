@@ -26,12 +26,6 @@
 
 #define DOCATCH(o) ((CATCH_GET == TRUE) ? docatch(o) : (o))
 
-#ifdef PERL_OBJECT
-#define CALLOP this->*PL_op
-#else
-#define CALLOP *PL_op
-#endif
-
 static I32 sortcv(pTHXo_ SV *a, SV *b);
 static I32 sv_ncmp(pTHXo_ SV *a, SV *b);
 static I32 sv_i_ncmp(pTHXo_ SV *a, SV *b);
@@ -588,10 +582,10 @@ PP(pp_formline)
 		RESTORE_NUMERIC_LOCAL();
 #if defined(USE_LONG_DOUBLE)
 		if (arg & 256) {
-		    sprintf(t, "%#*.*Lf",
+		    sprintf(t, "%#*.*" PERL_PRIfldbl,
 			    (int) fieldsize, (int) arg & 255, value);
 		} else {
-		    sprintf(t, "%*.0Lf", (int) fieldsize, value);
+		    sprintf(t, "%*.0" PERL_PRIfldbl, (int) fieldsize, value);
 		}
 #else
 		if (arg & 256) {
@@ -1921,32 +1915,29 @@ S_dofindlabel(pTHX_ OP *o, char *label, OP **opstack, OP **oplimit)
 	*ops++ = cUNOPo->op_first;
 	if (ops >= oplimit)
 	    Perl_croak(aTHX_ too_deep);
-	*ops = 0;
     }
+    *ops = 0;
     if (o->op_flags & OPf_KIDS) {
 	dTHR;
 	/* First try all the kids at this level, since that's likeliest. */
 	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling) {
-	    if ((kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE)
-		&& kCOP->cop_label && strEQ(kCOP->cop_label, label))
-	    {
+	    if ((kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE) &&
+		    kCOP->cop_label && strEQ(kCOP->cop_label, label))
 		return kid;
-	    }
 	}
 	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling) {
 	    if (kid == PL_lastgotoprobe)
 		continue;
-	    if ((kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE)
-		&& (ops == opstack || (ops[-1]->op_type != OP_NEXTSTATE
-				       && ops[-1]->op_type != OP_DBSTATE)))
-	    {
+	    if ((kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE) &&
+		(ops == opstack ||
+		 (ops[-1]->op_type != OP_NEXTSTATE &&
+		  ops[-1]->op_type != OP_DBSTATE)))
 		*ops++ = kid;
-		*ops = 0;
-	    }
 	    if (o = dofindlabel(kid, label, ops, oplimit))
 		return o;
 	}
     }
+    *ops = 0;
     return 0;
 }
 
@@ -2307,7 +2298,7 @@ PP(pp_goto)
 		if (PL_op->op_type == OP_ENTERITER)
 		    DIE(aTHX_ "Can't \"goto\" into the middle of a foreach loop",
 			label);
-		(CALLOP->op_ppaddr)(aTHX);
+		CALL_FPTR(PL_op->op_ppaddr)(aTHX);
 	    }
 	    PL_op = oldop;
 	}

@@ -588,9 +588,15 @@ PP(pp_rv2hv)
 	dTARGET;
 	if (SvTYPE(hv) == SVt_PVAV)
 	    hv = avhv_keys((AV*)hv);
+#ifdef IV_IS_QUAD
 	if (HvFILL(hv))
-	    Perl_sv_setpvf(aTHX_ TARG, "%ld/%ld",
-		      (long)HvFILL(hv), (long)HvMAX(hv) + 1);
+            Perl_sv_setpvf(aTHX_ TARG, "%" PERL_PRId64 "/%" PERL_PRId64,
+                      (Quad_t)HvFILL(hv), (Quad_t)HvMAX(hv) + 1);
+#else
+	if (HvFILL(hv))
+            Perl_sv_setpvf(aTHX_ TARG, "%ld/%ld",
+                      (long)HvFILL(hv), (long)HvMAX(hv) + 1);
+#endif
 	else
 	    sv_setiv(TARG, 0);
 	
@@ -761,8 +767,8 @@ PP(pp_aassign)
 	    }
 #  endif /* HAS_SETREUID */
 #endif /* HAS_SETRESUID */
-	    PL_uid = (int)PerlProc_getuid();
-	    PL_euid = (int)PerlProc_geteuid();
+	    PL_uid = PerlProc_getuid();
+	    PL_euid = PerlProc_geteuid();
 	}
 	if (PL_delaymagic & DM_GID) {
 #ifdef HAS_SETRESGID
@@ -790,8 +796,8 @@ PP(pp_aassign)
 	    }
 #  endif /* HAS_SETREGID */
 #endif /* HAS_SETRESGID */
-	    PL_gid = (int)PerlProc_getgid();
-	    PL_egid = (int)PerlProc_getegid();
+	    PL_gid = PerlProc_getgid();
+	    PL_egid = PerlProc_getegid();
 	}
 	PL_tainting |= (PL_uid && (PL_euid != PL_uid || PL_egid != PL_gid));
     }

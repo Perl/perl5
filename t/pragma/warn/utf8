@@ -25,9 +25,9 @@ Malformed UTF-8 character at - line 3.
 use utf8 ;
 my $a = ord "\x80" ;
 {
-    use warning 'utf8' ;
+    use warnings 'utf8' ;
     my $a = ord "\x80" ;
-    no warning 'utf8' ;
+    no warnings 'utf8' ;
     my $a = ord "\x80" ;
 }
 EXPECT
@@ -45,9 +45,9 @@ Malformed UTF-8 character at - line 3.
 use utf8 ;
 my $a = ord "\xf080" ;
 {
-    use warning 'utf8' ;
+    use warnings 'utf8' ;
     my $a = ord "\xf080" ;
-    no warning 'utf8' ;
+    no warnings 'utf8' ;
     my $a = ord "\xf080" ;
 }
 EXPECT

@@ -30,7 +30,9 @@
 #  define  Perl_set_numeric_local	perl_set_numeric_local
 #  define  Perl_set_numeric_standard	perl_set_numeric_standard
 #  define  PERL_POLLUTE
-#  define  PERL_POLLUTE_MALLOC
+#  ifndef EMBEDMYMALLOC
+#    define  PERL_POLLUTE_MALLOC
+#  endif
 #endif
 
 /* Hide global symbols */
@@ -158,6 +160,7 @@
 #define do_sysseek		Perl_do_sysseek
 #define do_tell			Perl_do_tell
 #define do_trans		Perl_do_trans
+#define do_vecget		Perl_do_vecget
 #define do_vecset		Perl_do_vecset
 #define do_vop			Perl_do_vop
 #define dofile			Perl_dofile
@@ -746,6 +749,11 @@
 #define tmps_grow		Perl_tmps_grow
 #define sv_rvweaken		Perl_sv_rvweaken
 #define magic_killbackrefs	Perl_magic_killbackrefs
+#define newANONATTRSUB		Perl_newANONATTRSUB
+#define newATTRSUB		Perl_newATTRSUB
+#define newMYSUB		Perl_newMYSUB
+#define my_attrs		Perl_my_attrs
+#define boot_core_xsutils	Perl_boot_core_xsutils
 #if defined(PERL_OBJECT)
 #endif
 #if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)
@@ -800,6 +808,9 @@
 #define gv_ename		S_gv_ename
 #define cv_clone2		S_cv_clone2
 #define scalar_mod_type		S_scalar_mod_type
+#define my_kid			S_my_kid
+#define dup_attrlist		S_dup_attrlist
+#define apply_attrs		S_apply_attrs
 #  if defined(PL_OP_SLAB_ALLOC)
 #define Slab_Alloc		S_Slab_Alloc
 #  endif
@@ -872,7 +883,6 @@
 #define reganode		S_reganode
 #define regatom			S_regatom
 #define regbranch		S_regbranch
-#define regc			S_regc
 #define reguni			S_reguni
 #define regclass		S_regclass
 #define regclassutf8		S_regclassutf8
@@ -988,6 +998,9 @@
 #endif
 #if defined(PERL_IN_UNIVERSAL_C) || defined(PERL_DECL_PROT)
 #define isa_lookup		S_isa_lookup
+#endif
+#if defined(PERL_IN_XSUTILS_C) || defined(PERL_DECL_PROT)
+#define modify_SV_attributes	S_modify_SV_attributes
 #endif
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 #define mess_alloc		S_mess_alloc
@@ -1484,6 +1497,7 @@
 #define do_sysseek(a,b,c)	Perl_do_sysseek(aTHX_ a,b,c)
 #define do_tell(a)		Perl_do_tell(aTHX_ a)
 #define do_trans(a)		Perl_do_trans(aTHX_ a)
+#define do_vecget(a,b,c)	Perl_do_vecget(aTHX_ a,b,c)
 #define do_vecset(a)		Perl_do_vecset(aTHX_ a)
 #define do_vop(a,b,c,d)		Perl_do_vop(aTHX_ a,b,c,d)
 #define dofile(a)		Perl_dofile(aTHX_ a)
@@ -2062,6 +2076,11 @@
 #define tmps_grow(a)		Perl_tmps_grow(aTHX_ a)
 #define sv_rvweaken(a)		Perl_sv_rvweaken(aTHX_ a)
 #define magic_killbackrefs(a,b)	Perl_magic_killbackrefs(aTHX_ a,b)
+#define newANONATTRSUB(a,b,c,d)	Perl_newANONATTRSUB(aTHX_ a,b,c,d)
+#define newATTRSUB(a,b,c,d,e)	Perl_newATTRSUB(aTHX_ a,b,c,d,e)
+#define newMYSUB(a,b,c,d,e)	Perl_newMYSUB(aTHX_ a,b,c,d,e)
+#define my_attrs(a,b)		Perl_my_attrs(aTHX_ a,b)
+#define boot_core_xsutils()	Perl_boot_core_xsutils(aTHX)
 #if defined(PERL_OBJECT)
 #endif
 #if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)
@@ -2116,6 +2135,9 @@
 #define gv_ename(a)		S_gv_ename(aTHX_ a)
 #define cv_clone2(a,b)		S_cv_clone2(aTHX_ a,b)
 #define scalar_mod_type(a,b)	S_scalar_mod_type(aTHX_ a,b)
+#define my_kid(a,b)		S_my_kid(aTHX_ a,b)
+#define dup_attrlist(a)		S_dup_attrlist(aTHX_ a)
+#define apply_attrs(a,b,c)	S_apply_attrs(aTHX_ a,b,c)
 #  if defined(PL_OP_SLAB_ALLOC)
 #define Slab_Alloc(a,b)		S_Slab_Alloc(aTHX_ a,b)
 #  endif
@@ -2188,7 +2210,6 @@
 #define reganode(a,b)		S_reganode(aTHX_ a,b)
 #define regatom(a)		S_regatom(aTHX_ a)
 #define regbranch(a,b)		S_regbranch(aTHX_ a,b)
-#define regc(a,b)		S_regc(aTHX_ a,b)
 #define reguni(a,b,c)		S_reguni(aTHX_ a,b,c)
 #define regclass()		S_regclass(aTHX)
 #define regclassutf8()		S_regclassutf8(aTHX)
@@ -2270,7 +2291,7 @@
 #define scan_ident(a,b,c,d,e)	S_scan_ident(aTHX_ a,b,c,d,e)
 #define scan_inputsymbol(a)	S_scan_inputsymbol(aTHX_ a)
 #define scan_pat(a,b)		S_scan_pat(aTHX_ a,b)
-#define scan_str(a)		S_scan_str(aTHX_ a)
+#define scan_str(a,b,c)		S_scan_str(aTHX_ a,b,c)
 #define scan_subst(a)		S_scan_subst(aTHX_ a)
 #define scan_trans(a)		S_scan_trans(aTHX_ a)
 #define scan_word(a,b,c,d,e)	S_scan_word(aTHX_ a,b,c,d,e)
@@ -2303,6 +2324,9 @@
 #endif
 #if defined(PERL_IN_UNIVERSAL_C) || defined(PERL_DECL_PROT)
 #define isa_lookup(a,b,c,d)	S_isa_lookup(aTHX_ a,b,c,d)
+#endif
+#if defined(PERL_IN_XSUTILS_C) || defined(PERL_DECL_PROT)
+#define modify_SV_attributes(a,b,c,d)	S_modify_SV_attributes(aTHX_ a,b,c,d)
 #endif
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 #define mess_alloc()		S_mess_alloc(aTHX)
@@ -2923,6 +2947,8 @@
 #define do_tell			Perl_do_tell
 #define Perl_do_trans		CPerlObj::Perl_do_trans
 #define do_trans		Perl_do_trans
+#define Perl_do_vecget		CPerlObj::Perl_do_vecget
+#define do_vecget		Perl_do_vecget
 #define Perl_do_vecset		CPerlObj::Perl_do_vecset
 #define do_vecset		Perl_do_vecset
 #define Perl_do_vop		CPerlObj::Perl_do_vop
@@ -4068,6 +4094,16 @@
 #define sv_rvweaken		Perl_sv_rvweaken
 #define Perl_magic_killbackrefs	CPerlObj::Perl_magic_killbackrefs
 #define magic_killbackrefs	Perl_magic_killbackrefs
+#define Perl_newANONATTRSUB	CPerlObj::Perl_newANONATTRSUB
+#define newANONATTRSUB		Perl_newANONATTRSUB
+#define Perl_newATTRSUB		CPerlObj::Perl_newATTRSUB
+#define newATTRSUB		Perl_newATTRSUB
+#define Perl_newMYSUB		CPerlObj::Perl_newMYSUB
+#define newMYSUB		Perl_newMYSUB
+#define Perl_my_attrs		CPerlObj::Perl_my_attrs
+#define my_attrs		Perl_my_attrs
+#define Perl_boot_core_xsutils	CPerlObj::Perl_boot_core_xsutils
+#define boot_core_xsutils	Perl_boot_core_xsutils
 #if defined(PERL_OBJECT)
 #endif
 #if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)
@@ -4163,6 +4199,12 @@
 #define cv_clone2		S_cv_clone2
 #define S_scalar_mod_type	CPerlObj::S_scalar_mod_type
 #define scalar_mod_type		S_scalar_mod_type
+#define S_my_kid		CPerlObj::S_my_kid
+#define my_kid			S_my_kid
+#define S_dup_attrlist		CPerlObj::S_dup_attrlist
+#define dup_attrlist		S_dup_attrlist
+#define S_apply_attrs		CPerlObj::S_apply_attrs
+#define apply_attrs		S_apply_attrs
 #  if defined(PL_OP_SLAB_ALLOC)
 #define S_Slab_Alloc		CPerlObj::S_Slab_Alloc
 #define Slab_Alloc		S_Slab_Alloc
@@ -4287,8 +4329,6 @@
 #define regatom			S_regatom
 #define S_regbranch		CPerlObj::S_regbranch
 #define regbranch		S_regbranch
-#define S_regc			CPerlObj::S_regc
-#define regc			S_regc
 #define S_reguni		CPerlObj::S_reguni
 #define reguni			S_reguni
 #define S_regclass		CPerlObj::S_regclass
@@ -4498,6 +4538,10 @@
 #if defined(PERL_IN_UNIVERSAL_C) || defined(PERL_DECL_PROT)
 #define S_isa_lookup		CPerlObj::S_isa_lookup
 #define isa_lookup		S_isa_lookup
+#endif
+#if defined(PERL_IN_XSUTILS_C) || defined(PERL_DECL_PROT)
+#define S_modify_SV_attributes	CPerlObj::S_modify_SV_attributes
+#define modify_SV_attributes	S_modify_SV_attributes
 #endif
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 #define S_mess_alloc		CPerlObj::S_mess_alloc

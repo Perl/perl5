@@ -2488,7 +2488,7 @@ get_childenv(void)
 }
 
 void
-free_childenv(void*)
+free_childenv(void* d)
 {
 }
 
@@ -2499,7 +2499,7 @@ get_childdir(void)
 }
 
 void
-free_childdir(char*)
+free_childdir(char* d)
 {
 }
 
@@ -2565,11 +2565,6 @@ win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
     else {
 	create |= CREATE_NEW_CONSOLE;
     }
-
-#ifndef DEBUGGING
-    StartupInfo.dwFlags |= STARTF_USESHOWWINDOW;
-    StartupInfo.wShowWindow = SW_HIDE;
-#endif
 
 RETRY:
     if (!CreateProcess(cmdname,		/* search PATH to find executable */

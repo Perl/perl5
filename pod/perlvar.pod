@@ -686,13 +686,6 @@ of perl in the right bracket?)  Example:
 See also the documentation of C<use VERSION> and C<require VERSION>
 for a convenient way to fail if the running Perl interpreter is too old.
 
-=item $^B
-
-The current set of warning checks enabled by C<use warning>.
-See the documentation of C<warning> for more details.
-
-Used by lexical warnings to store the 
-
 =item $COMPILING
 
 =item $^C
@@ -821,7 +814,12 @@ and B<-C> filetests are based on this value.
 
 The current value of the warning switch, initially true if B<-w>
 was used, false otherwise, but directly modifiable.  (Mnemonic:
-related to the B<-w> switch.)  See also L<warning>.
+related to the B<-w> switch.)  See also L<warnings>.
+
+=item ${^Warnings}
+
+The current set of warning checks enabled by the C<use warnings> pragma.
+See the documentation of C<warnings> for more details.
 
 =item $EXECUTABLE_NAME
 
@@ -970,7 +968,7 @@ Carp was available.  The third line will be executed only if Carp was
 not available.
 
 See L<perlfunc/die>, L<perlfunc/warn>, L<perlfunc/eval>, and
-L<warning> for additional information.
+L<warnings> for additional information.
 
 =back
 

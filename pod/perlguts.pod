@@ -1506,7 +1506,7 @@ additional complications for conditionals).  These optimizations are
 done in the subroutine peep().  Optimizations performed at this stage
 are subject to the same restrictions as in the pass 2.
 
-=head1 The Perl API
+=head1 The Perl Internal API
 
 WARNING: This information is subject to radical changes prior to
 the Perl 5.6 release.  Use with caution.
@@ -1522,27 +1522,26 @@ a C structure, or inside a thread.  The thread, the C structure, or
 the C++ object will contain all the context, the state of that
 interpreter.
 
-Four macros control the way Perl is built: PERL_IMPLICIT_CONTEXT
-(build for multiple interpreters?), MULTIPLICITY (we pass around an
-C interpreter structure as the first argument), USE_THREADS (we pass
-around a thread as the first argument), and PERL_OBJECT (we build a
-C++ class for the interpreter so the Perl API implementation has a
-C<this> object).  If PERL_IMPLICIT_CONTEXT is not defined, then
-subroutines take no first argument.
+Three macros control the major Perl build flavors: MULTIPLICITY,
+USE_THREADS and PERL_OBJECT.  The MULTIPLICITY build has a C structure
+that packages all the interpreter state, there is a similar thread-specific
+data structure under USE_THREADS, and the PERL_OBJECT build has a C++
+class to maintain interpreter state.  In all three cases,
+PERL_IMPLICIT_CONTEXT is also normally defined, and enables the
+support for passing in a "hidden" first argument that represents all three
+data structures.
 
-This obviously requires a way for the Perl internal functions to be
+All this obviously requires a way for the Perl internal functions to be
 C++ methods, subroutines taking some kind of structure as the first
 argument, or subroutines taking nothing as the first argument.  To
 enable these three very different ways of building the interpreter,
 the Perl source (as it does in so many other situations) makes heavy
 use of macros and subroutine naming conventions.
 
-First problem: deciding which functions will be C++ public methods and
+First problem: deciding which functions will be public API functions and
 which will be private.  Those functions whose names begin C<Perl_> are
-public, and those whose names begin C<S_> are protected (think "S" for
-"Secret").  You can't call them from C++, and should not call them
-from C.  If you find yourself calling an C<S_> function, consider your
-code broken (even though it works, it may not do so forever).
+public, and those whose names begin C<S_> are private (think "S" for
+"secret" or "static").
 
 Some functions have no prefix (e.g., restore_rsfp in toke.c).  These
 are not parts of the object or pseudo-structure because you need to
@@ -1559,7 +1558,8 @@ function used within the Perl guts:
 
 STATIC becomes "static" in C, and is #define'd to nothing in C++.
 
-A public function (i.e. part of the API) begins like this:
+A public function (i.e. part of the internal API, but not necessarily
+sanctioned for use in extensions) begins like this:
 
   void
   Perl_sv_setsv(pTHX_ SV* dsv, SV* ssv)
@@ -1575,11 +1575,11 @@ argument containing the interpreter's context.  The trailing underscore
 in the pTHX_ macro indicates that the macro expansion needs a comma
 after the context argument because other arguments follow it.  If
 PERL_IMPLICIT_CONTEXT is not defined, pTHX_ will be ignored, and the
-subroutine is not prototyped to take an argument.  The form of the
-macro without the trailing underscore is used when there are no
+subroutine is not prototyped to take the extra argument.  The form of the
+macro without the trailing underscore is used when there are no additional
 explicit arguments.
 
-When an core function calls another, it must pass the context.  This
+When a core function calls another, it must pass the context.  This
 is normally hidden via macros.  Consider C<sv_setsv>.  It expands
 something like this:
 
@@ -1646,11 +1646,12 @@ Thus, something like:
 
         sv_setsv(asv, bsv);
 
-in your extesion will translate to this:
+in your extesion will translate to this when PERL_IMPLICIT_CONTEXT is
+in effect:
 
         Perl_sv_setsv(GetPerlInterpreter(), asv, bsv);
 
-when PERL_IMPLICIT_CONTEXT is in effect, or to this otherwise:
+or to this otherwise:
 
         Perl_sv_setsv(asv, bsv);
 
@@ -1669,7 +1670,7 @@ your Foo.xs:
         static my_private_function(int arg1, int arg2);
 
 	static SV *
-	my_private_function(pTHX_ int arg1, int arg2)
+	my_private_function(int arg1, int arg2)
 	{
 	    dTHX;	/* fetch context */
 	    ... call many Perl API functions ...
@@ -1732,9 +1733,9 @@ call, since it is always passed as an extra argument.  Depending on
 your needs for simplicity or efficiency, you may mix the previous
 two approaches freely.
 
-Never say C<pTHX,> yourself--always use the form of the macro with the
-underscore for functions that take explicit arguments, or the form
-without the argument for functions with no explicit arguments.
+Never add a comma after C<pTHX> yourself--always use the form of the
+macro with the underscore for functions that take explicit arguments,
+or the form without the argument for functions with no explicit arguments.
 
 =head2 Future Plans and PERL_IMPLICIT_SYS
 
@@ -1762,7 +1763,9 @@ more "hosts", with free association between them.
 =head1 API LISTING
 
 This is a listing of functions, macros, flags, and variables that may be
-useful to extension writers or that may be found while reading other
+used by extension writers.  The interfaces of any functions that are not
+listed here are subject to change without notice.  For this reason,
+blindly using functions listed in proto.h is to be avoided when writing
 extensions.
 
 Note that all Perl API global variables must be referenced with the C<PL_>

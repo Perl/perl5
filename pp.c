@@ -28,37 +28,6 @@ static double UV_MAX_cxux = ((double)UV_MAX);
 #endif
 
 /*
- * Types used in bitwise operations.
- *
- * Normally we'd just use IV and UV.  However, some hardware and
- * software combinations (e.g. Alpha and current OSF/1) don't have a
- * floating-point type to use for NV that has adequate bits to fully
- * hold an IV/UV.  (In other words, sizeof(long) == sizeof(double).)
- *
- * It just so happens that "int" is the right size almost everywhere.
- */
-typedef int IBW;
-typedef unsigned UBW;
-
-/*
- * Mask used after bitwise operations.
- *
- * There is at least one realm (Cray word machines) that doesn't
- * have an integral type (except char) small enough to be represented
- * in a double without loss; that is, it has no 32-bit type.
- */
-#if LONGSIZE > 4  && defined(_CRAY) && !defined(_CRAYMPP)
-#  define BW_BITS  32
-#  define BW_MASK  ((1 << BW_BITS) - 1)
-#  define BW_SIGN  (1 << (BW_BITS - 1))
-#  define BWi(i)  (((i) & BW_SIGN) ? ((i) | ~BW_MASK) : ((i) & BW_MASK))
-#  define BWu(u)  ((u) & BW_MASK)
-#else
-#  define BWi(i)  (i)
-#  define BWu(u)  (u)
-#endif
-
-/*
  * Offset for integer pack/unpack.
  *
  * On architectures where I16 and I32 aren't really 16 and 32 bits,
@@ -1131,17 +1100,11 @@ PP(pp_left_shift)
 {
     djSP; dATARGET; tryAMAGICbin(lshift,opASSIGN);
     {
-      IBW shift = POPi;
-      if (PL_op->op_private & HINT_INTEGER) {
-	IBW i = TOPi;
-	i = BWi(i) << shift;
-	SETi(BWi(i));
-      }
-      else {
-	UBW u = TOPu;
-	u <<= shift;
-	SETu(BWu(u));
-      }
+      IV shift = POPi;
+      if (PL_op->op_private & HINT_INTEGER)
+	SETi(TOPi << shift);
+      else
+	SETu(TOPu << shift);
       RETURN;
     }
 }
@@ -1150,17 +1113,11 @@ PP(pp_right_shift)
 {
     djSP; dATARGET; tryAMAGICbin(rshift,opASSIGN);
     {
-      IBW shift = POPi;
-      if (PL_op->op_private & HINT_INTEGER) {
-	IBW i = TOPi;
-	i = BWi(i) >> shift;
-	SETi(BWi(i));
-      }
-      else {
-	UBW u = TOPu;
-	u >>= shift;
-	SETu(BWu(u));
-      }
+      IV shift = POPi;
+      if (PL_op->op_private & HINT_INTEGER)
+	SETi(TOPi >> shift);
+      else
+	SETu(TOPu >> shift);
       RETURN;
     }
 }
@@ -1328,14 +1285,10 @@ PP(pp_bit_and)
     {
       dPOPTOPssrl;
       if (SvNIOKp(left) || SvNIOKp(right)) {
-	if (PL_op->op_private & HINT_INTEGER) {
-	  IBW value = SvIV(left) & SvIV(right);
-	  SETi(BWi(value));
-	}
-	else {
-	  UBW value = SvUV(left) & SvUV(right);
-	  SETu(BWu(value));
-	}
+	if (PL_op->op_private & HINT_INTEGER)
+	  SETi( SvIV(left) & SvIV(right) );
+	else
+	  SETu( SvUV(left) & SvUV(right) );
       }
       else {
 	do_vop(PL_op->op_type, TARG, left, right);
@@ -1351,14 +1304,10 @@ PP(pp_bit_xor)
     {
       dPOPTOPssrl;
       if (SvNIOKp(left) || SvNIOKp(right)) {
-	if (PL_op->op_private & HINT_INTEGER) {
-	  IBW value = (USE_LEFT(left) ? SvIV(left) : 0) ^ SvIV(right);
-	  SETi(BWi(value));
-	}
-	else {
-	  UBW value = (USE_LEFT(left) ? SvUV(left) : 0) ^ SvUV(right);
-	  SETu(BWu(value));
-	}
+	if (PL_op->op_private & HINT_INTEGER)
+	  SETi( (USE_LEFT(left) ? SvIV(left) : 0) ^ SvIV(right) );
+	else
+	  SETu( (USE_LEFT(left) ? SvUV(left) : 0) ^ SvUV(right) );
       }
       else {
 	do_vop(PL_op->op_type, TARG, left, right);
@@ -1374,14 +1323,10 @@ PP(pp_bit_or)
     {
       dPOPTOPssrl;
       if (SvNIOKp(left) || SvNIOKp(right)) {
-	if (PL_op->op_private & HINT_INTEGER) {
-	  IBW value = (USE_LEFT(left) ? SvIV(left) : 0) | SvIV(right);
-	  SETi(BWi(value));
-	}
-	else {
-	  UBW value = (USE_LEFT(left) ? SvUV(left) : 0) | SvUV(right);
-	  SETu(BWu(value));
-	}
+	if (PL_op->op_private & HINT_INTEGER)
+	  SETi( (USE_LEFT(left) ? SvIV(left) : 0) | SvIV(right) );
+	else
+	  SETu( (USE_LEFT(left) ? SvUV(left) : 0) | SvUV(right) );
       }
       else {
 	do_vop(PL_op->op_type, TARG, left, right);
@@ -1440,14 +1385,10 @@ PP(pp_complement)
     {
       dTOPss;
       if (SvNIOKp(sv)) {
-	if (PL_op->op_private & HINT_INTEGER) {
-	  IBW value = ~SvIV(sv);
-	  SETi(BWi(value));
-	}
-	else {
-	  UBW value = ~SvUV(sv);
-	  SETu(BWu(value));
-	}
+	if (PL_op->op_private & HINT_INTEGER)
+	  SETi( ~SvIV(sv) );
+	else
+	  SETu( ~SvUV(sv) );
       }
       else {
 	register char *tmps;
@@ -2052,74 +1993,24 @@ PP(pp_vec)
     register I32 offset = POPi;
     register SV *src = POPs;
     I32 lvalue = PL_op->op_flags & OPf_MOD;
-    STRLEN srclen;
-    unsigned char *s = (unsigned char*)SvPV(src, srclen);
-    unsigned long retnum;
-    I32 len;
 
-    SvTAINTED_off(TARG);			/* decontaminate */
-    offset *= size;		/* turn into bit offset */
-    len = (offset + size + 7) / 8;
-    if (offset < 0 || size < 1)
-	retnum = 0;
-    else {
-	if (lvalue) {                      /* it's an lvalue! */
-	    if (SvTYPE(TARG) < SVt_PVLV) {
-		sv_upgrade(TARG, SVt_PVLV);
-		sv_magic(TARG, Nullsv, 'v', Nullch, 0);
-	    }
-
-	    LvTYPE(TARG) = 'v';
-	    if (LvTARG(TARG) != src) {
-		if (LvTARG(TARG))
-		    SvREFCNT_dec(LvTARG(TARG));
-		LvTARG(TARG) = SvREFCNT_inc(src);
-	    }
-	    LvTARGOFF(TARG) = offset;
-	    LvTARGLEN(TARG) = size;
+    SvTAINTED_off(TARG);		/* decontaminate */
+    if (lvalue) {			/* it's an lvalue! */
+	if (SvTYPE(TARG) < SVt_PVLV) {
+	    sv_upgrade(TARG, SVt_PVLV);
+	    sv_magic(TARG, Nullsv, 'v', Nullch, 0);
 	}
-	if (len > srclen) {
-	    if (size <= 8)
-		retnum = 0;
-	    else {
-		offset >>= 3;
-		if (size == 16) {
-		    if (offset >= srclen)
-			retnum = 0;
-		    else
-			retnum = (unsigned long) s[offset] << 8;
-		}
-		else if (size == 32) {
-		    if (offset >= srclen)
-			retnum = 0;
-		    else if (offset + 1 >= srclen)
-			retnum = (unsigned long) s[offset] << 24;
-		    else if (offset + 2 >= srclen)
-			retnum = ((unsigned long) s[offset] << 24) +
-			    ((unsigned long) s[offset + 1] << 16);
-		    else
-			retnum = ((unsigned long) s[offset] << 24) +
-			    ((unsigned long) s[offset + 1] << 16) +
-			    (s[offset + 2] << 8);
-		}
-	    }
+	LvTYPE(TARG) = 'v';
+	if (LvTARG(TARG) != src) {
+	    if (LvTARG(TARG))
+		SvREFCNT_dec(LvTARG(TARG));
+	    LvTARG(TARG) = SvREFCNT_inc(src);
 	}
-	else if (size < 8)
-	    retnum = (s[offset >> 3] >> (offset & 7)) & ((1 << size) - 1);
-	else {
-	    offset >>= 3;
-	    if (size == 8)
-		retnum = s[offset];
-	    else if (size == 16)
-		retnum = ((unsigned long) s[offset] << 8) + s[offset+1];
-	    else if (size == 32)
-		retnum = ((unsigned long) s[offset] << 24) +
-			((unsigned long) s[offset + 1] << 16) +
-			(s[offset + 2] << 8) + s[offset+3];
-	}
+	LvTARGOFF(TARG) = offset;
+	LvTARGLEN(TARG) = size;
     }
 
-    sv_setuv(TARG, (UV)retnum);
+    sv_setuv(TARG, do_vecget(src, offset, size));
     PUSHs(TARG);
     RETURN;
 }
@@ -3350,8 +3241,11 @@ PP(pp_unpack)
 	}
 	else if (isDIGIT(*pat)) {
 	    len = *pat++ - '0';
-	    while (isDIGIT(*pat))
+	    while (isDIGIT(*pat)) {
 		len = (len * 10) + (*pat++ - '0');
+		if (len < 0)
+		    Perl_croak(aTHX_ "Repeat count in unpack overflows");
+	    }
 	}
 	else
 	    len = (datumtype != '@');
@@ -3608,6 +3502,7 @@ PP(pp_unpack)
 	    if (checksum) {
 #if SHORTSIZE != SIZE16
 		if (natint) {
+		    short ashort;
 		    while (len-- > 0) {
 			COPYNN(s, &ashort, sizeof(short));
 			s += sizeof(short);
@@ -3634,6 +3529,7 @@ PP(pp_unpack)
 		EXTEND_MORTAL(len);
 #if SHORTSIZE != SIZE16
 		if (natint) {
+		    short ashort;
 		    while (len-- > 0) {
 			COPYNN(s, &ashort, sizeof(short));
 			s += sizeof(short);
@@ -3673,6 +3569,7 @@ PP(pp_unpack)
 	    if (checksum) {
 #if SHORTSIZE != SIZE16
 		if (unatint) {
+		    unsigned short aushort;
 		    while (len-- > 0) {
 			COPYNN(s, &aushort, sizeof(unsigned short));
 			s += sizeof(unsigned short);
@@ -3702,6 +3599,7 @@ PP(pp_unpack)
 		EXTEND_MORTAL(len);
 #if SHORTSIZE != SIZE16
 		if (unatint) {
+		    unsigned short aushort;
 		    while (len-- > 0) {
 			COPYNN(s, &aushort, sizeof(unsigned short));
 			s += sizeof(unsigned short);
@@ -3826,6 +3724,7 @@ PP(pp_unpack)
 	    if (checksum) {
 #if LONGSIZE != SIZE32
 		if (natint) {
+		    long along;
 		    while (len-- > 0) {
 			COPYNN(s, &along, sizeof(long));
 			s += sizeof(long);
@@ -3857,6 +3756,7 @@ PP(pp_unpack)
 		EXTEND_MORTAL(len);
 #if LONGSIZE != SIZE32
 		if (natint) {
+		    long along;
 		    while (len-- > 0) {
 			COPYNN(s, &along, sizeof(long));
 			s += sizeof(long);
@@ -3896,6 +3796,7 @@ PP(pp_unpack)
 	    if (checksum) {
 #if LONGSIZE != SIZE32
 		if (unatint) {
+		    unsigned long aulong;
 		    while (len-- > 0) {
 			COPYNN(s, &aulong, sizeof(unsigned long));
 			s += sizeof(unsigned long);
@@ -3931,6 +3832,7 @@ PP(pp_unpack)
 		EXTEND_MORTAL(len);
 #if LONGSIZE != SIZE32
 		if (unatint) {
+		    unsigned long aulong;
 		    while (len-- > 0) {
 			COPYNN(s, &aulong, sizeof(unsigned long));
 			s += sizeof(unsigned long);
@@ -4394,8 +4296,11 @@ PP(pp_pack)
 	}
 	else if (isDIGIT(*pat)) {
 	    len = *pat++ - '0';
-	    while (isDIGIT(*pat))
+	    while (isDIGIT(*pat)) {
 		len = (len * 10) + (*pat++ - '0');
+		if (len < 0)
+		    Perl_croak(aTHX_ "Repeat count in pack overflows");
+	    }
 	}
 	else
 	    len = 1;
@@ -4666,6 +4571,8 @@ PP(pp_pack)
 	case 's':
 #if SHORTSIZE != SIZE16
 	    if (natint) {
+		short ashort;
+
 		while (len-- > 0) {
 		    fromstr = NEXTFROM;
 		    ashort = SvIV(fromstr);
@@ -4789,6 +4696,8 @@ PP(pp_pack)
 	case 'L':
 #if LONGSIZE != SIZE32
 	    if (natint) {
+		unsigned long aulong;
+
 		while (len-- > 0) {
 		    fromstr = NEXTFROM;
 		    aulong = SvUV(fromstr);
@@ -4808,6 +4717,8 @@ PP(pp_pack)
 	case 'l':
 #if LONGSIZE != SIZE32
 	    if (natint) {
+		long along;
+
 		while (len-- > 0) {
 		    fromstr = NEXTFROM;
 		    along = SvIV(fromstr);
@@ -4828,7 +4739,7 @@ PP(pp_pack)
 	case 'Q':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
-		auquad = (Uquad_t)SvIV(fromstr);
+		auquad = (Uquad_t)SvUV(fromstr);
 		sv_catpvn(cat, (char*)&auquad, sizeof(Uquad_t));
 	    }
 	    break;

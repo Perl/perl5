@@ -17,6 +17,8 @@ print "ok 1\n";
 
 ######################### End of black magic.
 
+my $Is_EBCDIC = $Config{'ebcdic'} eq 'define';
+
 # util
 sub test {
     local($^W) = 0;
@@ -37,10 +39,17 @@ test(7,h1({-align=>'CENTER'},['fred','agnes']) eq
     local($") = '-'; 
     test(8,h1('fred','agnes','maura') eq '<H1>fred-agnes-maura</H1>',"open/close tag \$\" interpolation");
 }
+if (!$Is_EBCDIC) {
 test(9,header() eq "Content-Type: text/html\015\012\015\012","header()");
 test(10,header(-type=>'image/gif') eq "Content-Type: image/gif\015\012\015\012","header()");
 test(11,header(-type=>'image/gif',-status=>'500 Sucks') eq "Status: 500 Sucks\015\012Content-Type: image/gif\015\012\015\012","header()");
 test(12,header(-nph=>1) eq "HTTP/1.0 200 OK\015\012Content-Type: text/html\015\012\015\012","header()");
+} else {
+test(9,header() eq "Content-Type: text/html\r\n\r\n","header()");
+test(10,header(-type=>'image/gif') eq "Content-Type: image/gif\r\n\r\n","header()");
+test(11,header(-type=>'image/gif',-status=>'500 Sucks') eq "Status: 500 Sucks\r\nContent-Type: image/gif\r\n\r\n","header()");
+test(12,header(-nph=>1) eq "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n","header()");
+}
 test(13,start_html() ."\n" eq <<END,"start_html()");
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <HTML><HEAD><TITLE>Untitled Document</TITLE>
@@ -61,8 +70,13 @@ END
     ;
 test(16,($cookie=cookie(-name=>'fred',-value=>['chocolate','chip'],-path=>'/')) eq 
      'fred=chocolate&chip; domain=localhost; path=/',"cookie()");
+if (!$Is_EBCDIC) {
 test(17,header(-Cookie=>$cookie) =~ m!^Set-Cookie: fred=chocolate&chip\; domain=localhost; path=/\015\012Date:.*\015\012Content-Type: text/html\015\012\015\012!s,
      "header(-cookie)");
+} else {
+test(17,header(-Cookie=>$cookie) =~ m!^Set-Cookie: fred=chocolate&chip\; domain=localhost; path=/\r\nDate:.*\r\nContent-Type: text/html\r\n\r\n!s,
+     "header(-cookie)");
+}
 test(18,start_h3 eq '<H3>');
 test(19,end_h3 eq '</H3>');
 test(20,start_table({-border=>undef}) eq '<TABLE BORDER>');

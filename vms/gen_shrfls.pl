@@ -74,6 +74,8 @@ if ($docc) {
   while(<CONFIG>) {
     $debugging_enabled++ if /define\s+DEBUGGING/;
     $use_mymalloc++ if /define\s+MYMALLOC/;
+    $hide_mymalloc++ if /define\s+EMBEDMYMALLOC/;
+    $use_threads++ if /define\s+USE_THREADS/;
   }
   
   # put quotes back onto defines - they were removed by DCL on the way in
@@ -193,16 +195,16 @@ sub scan_func {
     if ($1 eq 'main' || $1 eq 'perl_init_ext') {
       print "\tskipped\n" if $debug > 1;
     }
-    else { $fcns{$1}++ }
+    else { $fcns{uc($1)}++ }
   }
 }
 
 # Go add some right up front if we need 'em
 if ($use_mymalloc) {
-  $fcns{'Perl_malloc'}++;
-  $fcns{'Perl_calloc'}++;
-  $fcns{'Perl_realloc'}++;
-  $fcns{'Perl_mfree'}++;
+  $fcns{uc('Perl_malloc')}++;
+  $fcns{uc('Perl_calloc')}++;
+  $fcns{uc('Perl_realloc')}++;
+  $fcns{uc('Perl_mfree')}++;
 }
 
 $used_expectation_enum = $used_opcode_enum = 0; # avoid warnings
@@ -306,6 +308,7 @@ if ($isvax) {
     or die "$0: Can't write to ${dir}perlshr_gbl${marord}.mar: $!\n";
   print MAR "\t.title perlshr_gbl$marord\n";
 }
+
 unless ($isgcc) {
   print OPTBLD "PSECT_ATTR=\$GLOBAL_RO_VARS,PIC,NOEXE,RD,NOWRT,SHR\n";
   print OPTBLD "PSECT_ATTR=\$GLOBAL_RW_VARS,PIC,NOEXE,RD,WRT,NOSHR\n";
@@ -391,9 +394,26 @@ if ($isvax) {
 # Initial hack to permit building of compatible shareable images for a
 # given version of Perl.
 if ($ENV{PERLSHR_USE_GSMATCH}) {
-  my $major = int($] * 1000)                        & 0xFF;  # range 0..255
-  my $minor = int(($] * 1000 - $major) * 100 + 0.5) & 0xFF;  # range 0..255
-  print OPTBLD "GSMATCH=LEQUAL,$major,$minor\n";
+  if ($ENV{PERLSHR_USE_GSMATCH} eq 'INCLUDE_COMPILE_OPTIONS') {
+    # Build up a major ID. Since it can only be 8 bits, we encode the version
+    # number in the top four bits and use the bottom four for build options
+    # that'll cause incompatibilities
+    ($ver, $sub) = $] =~ /\.(\d\d\d)(\d\d)/;
+    $gsmatch = ($sub >= 50) ? "equal" : "lequal"; # Force an equal match for
+						  # dev, but be more forgiving
+						  # for releases
+
+    $ver *=16;
+    $ver += 8 if $debugging_enabled;	# If DEBUGGING is set
+    $ver += 4 if $use_threads;		# if we're threaded
+    $ver += 2 if $use_mymalloc;		# if we're using perl's malloc
+    print OPTBLD "GSMATCH=$gsmatch,$ver,$sub\n";
+  }
+  else {
+    my $major = int($] * 1000)                        & 0xFF;  # range 0..255
+    my $minor = int(($] * 1000 - $major) * 100 + 0.5) & 0xFF;  # range 0..255
+    print OPTBLD "GSMATCH=LEQUAL,$major,$minor\n";
+  }
   print OPTBLD 'CLUSTER=$$TRANSFER_VECTOR,,',
                map(",$_$objsuffix",@symfiles), "\n";
 }

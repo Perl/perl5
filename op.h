@@ -117,13 +117,14 @@ typedef U32 PADOFFSET;
 /* Private for OP_REPEAT */
 #define OPpREPEAT_DOLIST	64	/* List replication. */
 
-/* Private for OP_ENTERSUB, OP_RV2?V, OP_?ELEM */
+/* Private for OP_RV2?V, OP_?ELEM */
 #define OPpDEREF		(32|64)	/* Want ref to something: */
 #define OPpDEREF_AV		32	/*   Want ref to AV. */
 #define OPpDEREF_HV		64	/*   Want ref to HV. */
 #define OPpDEREF_SV		(32|64)	/*   Want ref to SV. */
   /* OP_ENTERSUB only */
 #define OPpENTERSUB_DB		16	/* Debug subroutine. */
+#define OPpENTERSUB_HASTARG	32	/* Called from OP tree. */
   /* OP_RV2CV only */
 #define OPpENTERSUB_AMPER	8	/* Used & form to call. */
 #define OPpENTERSUB_NOPAREN	128	/* bare sub call (without parens) */

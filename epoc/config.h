@@ -1055,7 +1055,7 @@
  *	preprocessor can make decisions based on it.
  */
 #define INTSIZE 4		/**/
-#define LONGSIZE 8		/**/
+#define LONGSIZE 4		/**/
 #define SHORTSIZE 2		/**/
 
 /* MULTIARCH:
@@ -2074,8 +2074,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define ARCHLIB "/perl/lib/5.00557/epoc"               /**/
-#define ARCHLIB_EXP "/perl/lib/5.00557/epoc"		/**/
+#define ARCHLIB "/perl/lib/5.00560/epoc"               /**/
+#define ARCHLIB_EXP "/perl/lib/5.00560/epoc"		/**/
 
 /* DLSYM_NEEDS_UNDERSCORE:
  *	This symbol, if defined, indicates that we need to prepend an
@@ -2365,8 +2365,8 @@
  *	This symbol contains the ~name expanded version of PRIVLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define PRIVLIB "/perl/lib/5.00557"		/**/
-#define PRIVLIB_EXP "/perl/lib/5.00557"		/**/
+#define PRIVLIB "/perl/lib/5.00560"		/**/
+#define PRIVLIB_EXP "/perl/lib/5.00560"		/**/
 
 /* SELECT_MIN_BITS:
  *	This symbol holds the minimum number of bits operated by select.
@@ -2391,7 +2391,7 @@
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
 #define SITEARCH "/perl/lib/site_perl/5.00556/epoc"		/**/
-#define SITEARCH_EXP "/perl/lib/site_perl/5.00557/epoc"		/**/
+#define SITEARCH_EXP "/perl/lib/site_perl/5.00560/epoc"		/**/
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.
@@ -2406,8 +2406,8 @@
  *	This symbol contains the ~name expanded version of SITELIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITELIB "/perl/lib/site_perl/5.00557"		/**/
-#define SITELIB_EXP "/perl/lib/site_perl/5.00557"		/**/
+#define SITELIB "/perl/lib/site_perl/5.00560"		/**/
+#define SITELIB_EXP "/perl/lib/site_perl/5.00560"		/**/
 
 /* STARTPERL:
  *	This variable contains the string to put in front of a perl
@@ -2687,4 +2687,16 @@
  */
 #define Uid_t uid_t		/* UID type */
 
+/* PERL_PRIfldbl:
+ *	This symbol, if defined, contains the string used by stdio to
+ *	format long doubles (format 'f') for output.
+ */
+/* PERL_PRIgldbl:
+ *	This symbol, if defined, contains the string used by stdio to
+ *	format long doubles (format 'g') for output.
+ */
+#define PERL_PRIfldbl	"f"	/**/
+#define PERL_PRIgldbl	"g"	/**/
+
 #endif
+

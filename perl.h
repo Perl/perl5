@@ -26,7 +26,6 @@
 /* See L<perlguts/"The Perl API"> for detailed notes on
  * PERL_IMPLICIT_CONTEXT and PERL_IMPLICIT_SYS */
 
-/* XXXXXX testing threads via implicit pointer */
 #ifdef USE_THREADS
 #  ifndef PERL_IMPLICIT_CONTEXT
 #    define PERL_IMPLICIT_CONTEXT
@@ -36,7 +35,6 @@
 #  endif
 #endif
 
-/* XXXXXX testing multiplicity via implicit pointer */
 #if defined(MULTIPLICITY)
 #  ifndef PERL_IMPLICIT_CONTEXT
 #    define PERL_IMPLICIT_CONTEXT
@@ -148,22 +146,17 @@ class CPerlObj;
 
 #define pTHXo			CPerlObj *pPerl
 #define pTHXo_			pTHXo,
-#define _pTHXo			,pTHXo
 #define aTHXo			this
 #define aTHXo_			this,
-#define _aTHXo			,this
 #define PERL_OBJECT_THIS	aTHXo
 #define PERL_OBJECT_THIS_	aTHXo_
-#define _PERL_OBJECT_THIS	_aTHXo
-#define dTHXoa(a)		pTHXo = (CPerlObj *)a
-#define dTHXo			dTHXoa(PERL_GET_INTERP)
+#define dTHXoa(a)		pTHXo = a
+#define dTHXo			dTHXoa(PERL_GET_THX)
 
 #define pTHXx		void
 #define pTHXx_
-#define _pTHXx
 #define aTHXx
 #define aTHXx_
-#define _aTHXx
 
 #else /* !PERL_OBJECT */
 
@@ -172,8 +165,6 @@ class CPerlObj;
 struct perl_thread;
 #    define pTHX	register struct perl_thread *thr
 #    define aTHX	thr
-#    define dTHXa(a)	pTHX = (struct perl_thread *)a
-#    define dTHX	dTHXa(THR)
 #    define dTHR	dNOOP
 #  else
 #    ifndef MULTIPLICITY
@@ -181,13 +172,11 @@ struct perl_thread;
 #    endif
 #    define pTHX	register PerlInterpreter *my_perl
 #    define aTHX	my_perl
-#    define dTHXa(a)	pTHX = (PerlInterpreter *)a
-#    define dTHX	dTHXa(PERL_GET_INTERP)
 #  endif
+#  define dTHXa(a)	pTHX = a
+#  define dTHX		dTHXa(PERL_GET_THX)
 #  define pTHX_		pTHX,
-#  define _pTHX		,pTHX
 #  define aTHX_		aTHX,
-#  define _aTHX		,aTHX
 #endif
 
 #define STATIC static
@@ -216,10 +205,8 @@ struct perl_thread;
 #ifndef pTHX
 #  define pTHX		void
 #  define pTHX_
-#  define _pTHX
 #  define aTHX
 #  define aTHX_
-#  define _aTHX
 #  define dTHXa(a)	dNOOP
 #  define dTHX		dNOOP
 #endif
@@ -227,20 +214,16 @@ struct perl_thread;
 #ifndef pTHXo
 #  define pTHXo		pTHX
 #  define pTHXo_	pTHX_
-#  define _pTHXo	_pTHX
 #  define aTHXo		aTHX
 #  define aTHXo_	aTHX_
-#  define _aTHXo	_aTHX
 #  define dTHXo		dTHX
 #endif
 
 #ifndef pTHXx
 #  define pTHXx		register PerlInterpreter *my_perl
 #  define pTHXx_	pTHXx,
-#  define _pTHXx	,pTHXx
 #  define aTHXx		my_perl
 #  define aTHXx_	aTHXx,
-#  define _aTHXx	,aTHXx
 #  define dTHXx		dTHX
 #endif
 
@@ -487,6 +470,10 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #  include "embed.h"
 #endif
 
+#if defined(NeXT) || defined(__NeXT) || defined (__MACHTEN__)
+#  undef PERL_POLLUTE_MALLOC
+#endif
+
 #define MEM_SIZE Size_t
 
 #if defined(STANDARD_C) && defined(I_STDDEF)
@@ -507,10 +494,12 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 
 #ifdef MYMALLOC
 #  ifdef PERL_POLLUTE_MALLOC
+#   ifndef PERL_EXTMALLOC_DEF
 #    define Perl_malloc		malloc
 #    define Perl_calloc		calloc
 #    define Perl_realloc	realloc
 #    define Perl_mfree		free
+#   endif
 #  else
 #    define EMBEDMYMALLOC	/* for compatibility */
 #  endif
@@ -906,21 +895,14 @@ Free_t   Perl_mfree (Malloc_t where);
 #include <inttypes.h>
 #endif
 
-/*  XXX QUAD stuff is not currently supported on most systems.
-    Specifically, perl internals don't support long long.  Among
-    the many problems is that some compilers support long long,
-    but the underlying library functions (such as sprintf) don't.
-    Some things do work (such as quad pack/unpack on convex);
-    also some systems use long long for the fpos_t typedef.  That
-    seems to work too.
-
+/*
     The IV type is supposed to be long enough to hold any integral
     value or a pointer.
     --Andy Dougherty	August 1996
 */
 
-/*  Much more 64-bit probing added.  Now we should get Quad_t
-    in most systems: int64_t, long long, long, int, will do.
+/*  We should be able to get Quad_t in most systems:
+    all of int64_t, long long, long, int, will work.
 
     Beware of LP32 systems (ILP32, ILP32LL64).  Such systems have been
     used to sizeof(long) == sizeof(foo*).  This is a bad assumption
@@ -932,9 +914,11 @@ Free_t   Perl_mfree (Malloc_t where);
     Summary: a long long system needs to add -DUSE_LONG_LONG to $ccflags
     to get quads -- and if its pointers are still 32 bits, this will break
     binary compatibility.  Casting an IV (a long long) to a pointer will
-    truncate half of the IV away.
+    truncate half of the IV away.  Most systems can just use
+    Configure -Duse64bits to get the -DUSE_LONG_LONG added either by
+    their hints files, or directly by Configure if they are using gcc.
 
-    --jhi		September 1998 */
+    --jhi		September 1999 */
 
 #if INTSIZE == 4 && LONGSIZE == 4 && PTRSIZE == 4
 #   define PERL_ILP32
@@ -1018,6 +1002,9 @@ Free_t   Perl_mfree (Malloc_t where);
 #    define IV_MAX INT64_MAX
 #    define IV_MIN INT64_MIN
 #    define UV_MAX UINT64_MAX
+#    ifndef UINT64_MIN
+#      define UINT64_MIN 0
+#    endif
 #    define UV_MIN UINT64_MIN
 #  else
 #    define IV_MAX PERL_QUAD_MAX
@@ -1025,8 +1012,10 @@ Free_t   Perl_mfree (Malloc_t where);
 #    define UV_MAX PERL_UQUAD_MAX
 #    define UV_MIN PERL_UQUAD_MIN
 #  endif
-#  define IV_SIZEOF 8
-#  define UV_SIZEOF 8
+#  define IVSIZE 8
+#  define UVSIZE 8
+#  define IV_IS_QUAD
+#  define UV_IS_QUAD
 #else
    typedef          long               IV;
    typedef	    unsigned long      UV;
@@ -1034,6 +1023,9 @@ Free_t   Perl_mfree (Malloc_t where);
 #    define IV_MAX INT32_MAX
 #    define IV_MIN INT32_MIN
 #    define UV_MAX UINT32_MAX
+#    ifndef UINT32_MIN
+#      define UINT32_MIN 0
+#    endif
 #    define UV_MIN UINT32_MIN
 #  else
 #    define IV_MAX PERL_LONG_MAX
@@ -1041,19 +1033,92 @@ Free_t   Perl_mfree (Malloc_t where);
 #    define UV_MAX PERL_ULONG_MAX
 #    define UV_MIN PERL_ULONG_MIN
 #  endif
-#  define UV_SIZEOF LONGSIZE
-#  define IV_SIZEOF LONGSIZE
+#  if LONGSIZE == 8
+#    define IV_IS_QUAD
+#    define UV_IS_QUAD
+#  else
+#    undef IV_IS_QUAD
+#    undef UV_IS_QUAD
+#  endif
+#  define UVSIZE LONGSIZE
+#  define IVSIZE LONGSIZE
 #endif
+#define IV_DIG (BIT_DIGITS(IVSIZE * 8))
+#define UV_DIG (BIT_DIGITS(IVSIZE * 8))
 
 #ifdef USE_LONG_DOUBLE
 #  if defined(HAS_LONG_DOUBLE) && (LONG_DOUBLESIZE > DOUBLESIZE)
 #    define LDoub_t long double
+#  else
+#     undef USE_LONG_DOUBLE /* Ouch! */
 #  endif
+#endif
+
+#ifdef OVR_DBL_DIG
+/* Use an overridden DBL_DIG */
+# ifdef DBL_DIG
+#  undef DBL_DIG
+# endif
+# define DBL_DIG OVR_DBL_DIG
+#else
+/* The following is all to get DBL_DIG, in order to pick a nice
+   default value for printing floating point numbers in Gconvert.
+   (see config.h)
+*/
+#ifdef I_LIMITS
+#include <limits.h>
+#endif
+#ifdef I_FLOAT
+#include <float.h>
+#endif
+#ifndef HAS_DBL_DIG
+#define DBL_DIG	15   /* A guess that works lots of places */
+#endif
+#endif
+#ifdef I_FLOAT
+#include <float.h>
+#endif
+#ifndef HAS_DBL_DIG
+#define DBL_DIG	15   /* A guess that works lots of places */
+#endif
+
+#ifdef OVR_LDBL_DIG
+/* Use an overridden LDBL_DIG */
+# ifdef LDBL_DIG
+#  undef LDBL_DIG
+# endif
+# define LDBL_DIG OVR_LDBL_DIG
+#else
+/* The following is all to get LDBL_DIG, in order to pick a nice
+   default value for printing floating point numbers in Gconvert.
+   (see config.h)
+*/
+#ifdef I_LIMITS
+#include <limits.h>
+#endif
+#ifdef I_FLOAT
+#include <float.h>
+#endif
+#ifndef HAS_LDBL_DIG
+#if LONG_DOUBLESIZE == 10
+#define LDBL_DIG 18 /* assume IEEE */
+#else
+#if LONG_DOUBLESIZE == 16
+#define LDBL_DIG 33 /* assume IEEE */
+#else
+#if LONG_DOUBLESIZE == DOUBLESIZE
+#define LDBL_DIG DBL_DIG /* bummer */
+#endif
+#endif
+#endif
+#endif
 #endif
 
 #ifdef USE_LONG_DOUBLE
 #   define HAS_LDOUB
     typedef LDoub_t NV;
+#   define NVSIZE LONG_DOUBLESIZE
+#   define NV_DIG LDBL_DIG
 #   define Perl_modf modfl
 #   define Perl_frexp frexpl
 #   define Perl_cos cosl
@@ -1064,10 +1129,11 @@ Free_t   Perl_mfree (Malloc_t where);
 #   define Perl_atan2 atan2l
 #   define Perl_pow powl
 #   define Perl_floor floorl
-#   define Perl_atof atof
 #   define Perl_fmod fmodl
 #else
     typedef double NV;
+#   define NVSIZE DOUBLESIZE
+#   define NV_DIG DBL_DIG
 #   define Perl_modf modf
 #   define Perl_frexp frexp
 #   define Perl_cos cos
@@ -1078,8 +1144,13 @@ Free_t   Perl_mfree (Malloc_t where);
 #   define Perl_atan2 atan2
 #   define Perl_pow pow
 #   define Perl_floor floor
-#   define Perl_atof atof		/* At some point there may be an atolf */
 #   define Perl_fmod fmod
+#endif
+
+#if defined(USE_LONG_DOUBLE) && defined(HAS_LONG_DOUBLE) && defined(HAS_ATOLF)
+#   define Perl_atof atolf
+#else
+#   define Perl_atof atof
 #endif
 
 /* Previously these definitions used hardcoded figures. 
@@ -1325,125 +1396,106 @@ typedef union any ANY;
 
 #include "handy.h"
 
-/* Some day when we have more 64-bit experience under our belts we may
- * be able to merge some of the USE_64_BIT_{FILES,OFFSETS,STDIO,DBM}. At
- * the moment (Oct 1998), though, keep them separate. --jhi
- */
 #ifdef USE_64_BITS
-#   ifdef USE_64_BIT_FILES
-#       ifndef USE_64_BIT_OFFSETS
-#          define USE_64_BIT_OFFSETS
-#       endif
-#       ifndef USE_64_BIT_STDIO
-#           define USE_64_BIT_STDIO
-#       endif
-#       ifndef USE_64_BIT_DBM
-#           define USE_64_BIT_DBM
-#       endif
+#   define USE_64_BIT_FILES
+#endif
+
+#if defined(USE_64_BIT_FILES) || defined(USE_LARGE_FILES)
+#   define USE_64_BIT_OFFSETS /* Explicit */
+#   define USE_64_BIT_STDIO
+#endif
+
+#if LSEEKSIZE == 8 && !defined(USE_64_BIT_OFFSETS)
+#   define USE_64_BIT_OFFSETS /* Implicit */
+#endif
+
+/* Do we need FSEEKSIZE? */
+
+/* I couldn't find any -Ddefine or -flags in IRIX 6.5 that would
+ * have done the necessary symbol renaming using cpp. --jhi */
+#ifdef __sgi
+#define USE_FOPEN64
+#define USE_FSEEK64
+#define USE_FTELL64
+#define USE_FSETPOS64
+#define USE_FGETPOS64
+#define USE_TMPFILE64
+#define USE_FREOPEN64
+#endif
+
+#ifdef USE_64_BIT_OFFSETS
+#   ifdef HAS_OFF64_T
+#       undef Off_t
+#       define Off_t off64_t
+#       undef LSEEKSIZE
+#       define LSEEKSIZE 8
 #   endif
-/* Mention LSEEKSIZE here to get it included in %Config. */
-#   ifdef USE_64_BIT_OFFSETS
-#       ifdef HAS_FSTAT64
-#           define fstat fstat64
-#       endif
-#       ifdef HAS_FTRUNCATE64
-#           define ftruncate ftruncate64
-#       endif
-#       ifdef HAS_LSEEK64
-#           define lseek lseek64
-#           ifdef HAS_OFF64_T
-#               undef Off_t
-#               define Off_t off64_t
-#           endif
-#       endif
-#       ifdef HAS_LSTAT64
-#           define lstat lstat64
-#       endif
-	/* Some systems have open64() in libc but use that only
-	 * for true LP64 mode, in mixed mode (ILP32LL64, for example)
-	 * they use the vanilla open().  Such systems should undefine
-	 * d_open64 in their hints files. --jhi */
-#       if defined(HAS_OPEN64)
-#           define open open64
-#       endif
-#       ifdef HAS_OPENDIR64
-#           define opendir opendir64
-#       endif
-#       ifdef HAS_READDIR64
-#           define readdir readdir64
-#	    ifdef HAS_STRUCT_DIRENT64
-#               define dirent dirent64
-#           endif
-#       endif
-#       ifdef HAS_SEEKDIR64
-#           define seekdir seekdir64
-#       endif
-#       ifdef HAS_STAT64
-#           define stat stat64 /* Affects also struct stat, hopefully okay. */
-#       endif
-#       ifdef HAS_TELLDIR64
-#           define telldir telldir64
-#       endif
-#       ifdef HAS_TRUNCATE64
-#           define truncate truncate64
-#       endif
-        /* flock is not #defined here to be flock64 because it seems
-	   that a system may have struct flock64 but still use flock()
-	   and not flock64().  The actual flocking code in pp_sys.c
-	   must be changed.  Also lockf and lockf64 must be dealt
-	   with in pp_sys.c. --jhi */
+/* Most 64-bit environments have defines like _LARGEFILE_SOURCE that
+ * will trigger defines like the ones below.  Some 64-bit environments,
+ * however, do not. */
+#   if defined(USE_OPEN64)
+#       define open open64
 #   endif
-#   ifdef USE_64_BIT_STDIO
-#       ifdef HAS_FGETPOS64
-#           define fgetpos fgetpos64
-#       endif
-#       ifdef HAS_FOPEN64
-#           define fopen fopen64
-#       endif
-#       ifdef HAS_FREOPEN64
-#           define freopen freopen64
-#       endif
-#       ifdef HAS_FSEEK64
-#           define fseek fseek64
-#       endif
-#       ifdef HAS_FSEEKO64
-#           define fseeko fseeko64
-#       endif
-#       ifdef HAS_FSETPOS64
-#           define fsetpos fsetpos64
-#       endif
-#       ifdef HAS_FTELL64
-#           define ftell ftell64
-#       endif
-#       ifdef HAS_FTELLO64
-#           define ftello ftello64
-#       endif
-#       ifdef HAS_TMPFILE64
-#           define tmpfile tmpfile64
-#       endif
+#   if defined(USE_LSEEK64)
+#       define lseek lseek64
 #   endif
-#   ifdef USE_64_BIT_DBM
-#       ifdef HAS_DBMINIT64
-#           define dbminit dbminit64
-#       endif
-#       ifdef HAS_DBMCLOSE64
-#           define dbmclose dbmclose64
-#       endif
-#       ifdef HAS_FETCH64
-#           define fetch fetch64
-#       endif
-#       ifdef HAS_DELETE64
-#           define delete delete64
-#       endif
-#       ifdef HAS_STORE64
-#           define store store64
-#       endif
-#       ifdef HAS_FIRSTKEY64
-#           define firstkey firstkey64
-#       endif
-#       ifdef HAS_NEXTKEY64
-#           define nextkey nextkey64
-#       endif
+#   if defined(USE_LLSEEK)
+#       define lseek llseek
+#   endif
+#   if defined(USE_STAT64)
+#       define stat stat64
+#   endif
+#   if defined(USE_FSTAT64)
+#       define fstat fstat64
+#   endif
+#   if defined(USE_LSTAT64)
+#       define lstat lstat64
+#   endif
+#   if defined(USE_FLOCK64)
+#       define flock flock64
+#   endif
+#   if defined(USE_LOCKF64)
+#       define lockf lockf64
+#   endif
+#   if defined(USE_FCNTL64)
+#       define fcntl fcntl64
+#   endif
+#   if defined(USE_TRUNCATE64)
+#       define truncate truncate64
+#   endif
+#   if defined(USE_FTRUNCATE64)
+#       define ftruncate ftruncate64
+#   endif
+#endif
+
+#ifdef USE_64_BIT_STDIO
+#   ifdef HAS_FPOS64_T
+#       undef Fpos_t
+#       define Fpos_t fpos64_t
+#   endif
+/* Most 64-bit environments have defines like _LARGEFILE_SOURCE that
+ * will trigger defines like the ones below.  Some 64-bit environments,
+ * however, do not. */
+#   if defined(USE_FOPEN64)
+#       define fopen fopen64
+#   endif
+#   if defined(USE_FSEEK64)
+#       define fseek fseek64
+#   endif
+#   if defined(USE_FTELL64)
+#       define ftell ftell64
+#   endif
+#   if defined(USE_FSETPOS64)
+#       define fsetpos fsetpos64
+#   endif
+#   if defined(USE_FGETPOS64)
+#       define fgetpos fgetpos64
+#   endif
+#   if defined(USE_TMPFILE64)
+#       define tmpfile tmpfile64
+#   endif
+#   if defined(USE_FREOPEN64)
+#       define freopen freopen64
 #   endif
 #endif
 
@@ -1622,12 +1674,48 @@ typedef pthread_key_t	perl_key;
 # endif
 #endif
 
+/* the traditional thread-unsafe notion of "current interpreter".
+ * XXX todo: a thread-safe version that fetches it from TLS (akin to THR)
+ * needs to be defined elsewhere (conditional on pthread_getspecific()
+ * availability). */
 #ifndef PERL_SET_INTERP
 #  define PERL_SET_INTERP(i)		(PL_curinterp = (PerlInterpreter*)(i))
 #endif
 
 #ifndef PERL_GET_INTERP
 #  define PERL_GET_INTERP		(PL_curinterp)
+#endif
+
+#if defined(PERL_IMPLICIT_CONTEXT) && !defined(PERL_GET_THX)
+#  ifdef USE_THREADS
+#    define PERL_GET_THX		THR
+#  else
+#  ifdef MULTIPLICITY
+#    define PERL_GET_THX		PERL_GET_INTERP
+#  else
+#  ifdef PERL_OBJECT
+#    define PERL_GET_THX		((CPerlObj*)PERL_GET_INTERP)
+#  else
+#    define PERL_GET_THX		((void*)0)
+#  endif
+#  endif
+#  endif
+#endif
+
+#if defined(PERL_IMPLICIT_CONTEXT) && !defined(PERL_GET_THX)
+#  ifdef USE_THREADS
+#    define PERL_GET_THX		THR
+#  else
+#  ifdef MULTIPLICITY
+#    define PERL_GET_THX		PERL_GET_INTERP
+#  else
+#  ifdef PERL_OBJECT
+#    define PERL_GET_THX		((CPerlObj*)PERL_GET_INTERP)
+#  else
+#    define PERL_GET_THX		((void*)0)
+#  endif
+#  endif
+#  endif
 #endif
 
 /* Some unistd.h's give a prototype for pause() even though
@@ -1695,13 +1783,14 @@ typedef I32 (*filter_t) (pTHXo_ int, SV *, int);
 #include "form.h"
 #include "gv.h"
 #include "cv.h"
+#include "opnames.h"
 #include "op.h"
 #include "cop.h"
 #include "av.h"
 #include "hv.h"
 #include "mg.h"
 #include "scope.h"
-#include "warning.h"
+#include "warnings.h"
 #include "utf8.h"
 
 /* Current curly descriptor */
@@ -1811,6 +1900,30 @@ typedef I32 CHECKPOINT;
 #define U_V(what) (cast_uv((NV)(what)))
 #endif
 
+/* These do not care about the fractional part, only about the range. */
+#define NV_WITHIN_IV(nv) (I_V(nv) >= IV_MIN && I_V(nv) <= IV_MAX)
+#define NV_WITHIN_UV(nv) ((nv)>=0.0 && U_V(nv) >= UV_MIN && U_V(nv) <= UV_MAX)
+
+/* Believe. */
+#define IV_FITS_IN_NV
+/* Doubt. */
+#if defined(USE_LONG_DOUBLE) && \
+	defined(LDBL_MANT_DIG) && IV_DIG >= LDBL_MANT_DIG
+#   undef IV_FITS_IN_NV
+#else
+#   if defined(DBL_MANT_DIG) && IV_DIG >= DBL_MANT_DIG
+#       undef IV_FITS_IN_NV
+#   else
+#       if IV_DIG >= NV_DIG
+#           undef IV_FITS_IN_NV
+#       else
+#           if IVSIZE >= NVSIZE
+#               undef IV_FITS_IN_NV
+#           endif
+#       endif
+#   endif
+#endif
+
 /* Used with UV/IV arguments: */
 					/* XXXX: need to speed it up */
 #define CLUMP_2UV(iv)	((iv) < 0 ? 0 : (UV)(iv))
@@ -1856,7 +1969,10 @@ Gid_t getegid (void);
 #  if defined(PERL_OBJECT)
 #    define DEBUG_m(a) if (PL_debug & 128)	a
 #  else
-#    define DEBUG_m(a) if (PERL_GET_INTERP && PL_debug & 128)	a
+#    define DEBUG_m(a)  \
+    STMT_START {							\
+	if (PERL_GET_INTERP) { dTHX; if (PL_debug & 128) { a; } }	\
+    } STMT_END
 #  endif
 #define DEBUG_f(a) if (PL_debug & 256)	a
 #define DEBUG_r(a) if (PL_debug & 512)	a
@@ -2340,6 +2456,8 @@ typedef enum {
     XREF,
     XSTATE,
     XBLOCK,
+    XATTRBLOCK,
+    XATTRTERM,
     XTERMBLOCK
 } expectation;
 
@@ -2475,7 +2593,7 @@ struct perl_vars {
 EXT struct perl_vars PL_Vars;
 EXT struct perl_vars *PL_VarsPtr INIT(&PL_Vars);
 #else /* PERL_CORE */
-#if !defined(__GNUC__) || !(defined(WIN32) || defined(CYGWIN))
+#if !defined(__GNUC__) || !defined(WIN32)
 EXT
 #endif /* WIN32 */
 struct perl_vars *PL_VarsPtr;
@@ -2491,7 +2609,9 @@ struct perl_vars *PL_VarsPtr;
 */
 
 struct interpreter {
-#include "thrdvar.h"
+#ifndef USE_THREADS
+#  include "thrdvar.h"
+#endif
 #include "intrpvar.h"
 };
 
@@ -2956,6 +3076,18 @@ typedef struct am_table_short AMTS;
 #define Atof				Perl_atof
 
 #endif /* !USE_LOCALE_NUMERIC */
+
+#if defined(USE_LONG_LONG) && defined(HAS_LONG_LONG) && defined(HAS_ATOLL)
+#define Atol atoll 
+#else
+#define Atol atol
+#endif
+
+#if defined(USE_LONG_LONG) && defined(HAS_LONG_LONG) && defined(HAS_STRTOULL)
+#define Strtoul strtoull
+#else
+#define Strtoul strtoul
+#endif
 
 #if !defined(PERLIO_IS_STDIO) && defined(HASATTRIBUTE)
 /* 

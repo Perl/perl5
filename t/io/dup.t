@@ -2,7 +2,7 @@
 
 # $RCSfile: dup.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:27 $
 
-print "1..6\n";
+print "1..7\n";
 
 print "ok 1\n";
 
@@ -37,3 +37,17 @@ else                  { system 'cat Io.dup' }
 unlink 'Io.dup';
 
 print STDOUT "ok 6\n";
+
+# 7  # 19990811 mjd@plover.com
+my ($out1, $out2) = ("Line 1\n", "Line 2\n");
+open(W, "> Io.dup") || die "Can't open stdout";
+print W $out1, $out2;
+close W;
+open(R1, "< Io.dup") || die "Can't read temp file";
+$in1 = <R1>;
+open(R2, "<&R1") || die "Can't dup";
+$in2 = <R2>;
+print "not " unless $in1 eq $out1 && $in2 eq $out2;
+print "ok 7\n";
+
+unlink("Io.dup");
