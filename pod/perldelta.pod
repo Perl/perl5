@@ -1320,6 +1320,14 @@ information, see L<File::Glob>.
 
 Compatibility tests for C<sub : attrs> vs the older C<use attrs>.
 
+=item	lib/env
+
+Tests for new environment scalar capability (e.g., C<use Env qw($BAR);>).
+
+=item	lib/env-array
+
+Tests for new environment array capability (e.g., C<use Env qw(@PATH);>).
+
 =item	lib/io_const
 
 IO constants (SEEK_*, _IO*).
@@ -1477,6 +1485,11 @@ of Perl variables and data.  It is a data debugging tool for the XS programmer.
 
 $PERL_VERSION now stands for C<$^V> (a string value) rather than for C<$]>
 (a numeric value).
+
+=item Env
+
+Env now supports accessing environment variables like PATH as array
+variables.
 
 =item ExtUtils::MakeMaker
 
