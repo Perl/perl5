@@ -4268,7 +4268,7 @@ S_reginclasslen(pTHX_ register regnode *n, register U8* p, STRLEN* lenp, registe
 			    STRLEN len;
 			    char *s = SvPV(sv, len);
 			
-			    if (len <= plen && memEQ(s, p, len)) {
+			    if (len <= plen && memEQ(s, (char*)p, len)) {
 			        *lenp = len;
 				match = TRUE;
 				break;
