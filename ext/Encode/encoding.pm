@@ -83,7 +83,7 @@ __END__
 
 =head1 NAME
 
-encoding -  allows you to write your script in non-asii or non-utf8
+encoding -  allows you to write your script in non-ascii or non-utf8
 
 =head1 SYNOPSIS
 
@@ -93,17 +93,17 @@ encoding -  allows you to write your script in non-asii or non-utf8
   # or you can even do this if your shell supports your native encoding
 
   perl -Mencoding=latin2 -e '...' # Feeling centrally European?
-  perl -Mencoding=euc-ko -e '...'
+  perl -Mencoding=euc-ko -e '...' # Korean
 
   # or from the shebang line
 
   #!/your/path/to/perl -Mencoding="8859-6" # Arabian Nights
-  #!/your/path/to/perl -Mencoding=euc-tw
+  #!/your/path/to/perl -Mencoding=euc-tw   # Taiwanese
 
   # more control
 
   # A simple euc-cn => utf-8 converter
-  use encoding "euc-cn", STDOUT => "utf8";  while(<>){print};
+  use encoding "euc-cn", STDOUT => "utf8";  while(<>){print}; # Chinese
 
   # "no encoding;" supported (but not scoped!)
   no encoding;
@@ -134,7 +134,7 @@ You can write a code in EUC-JP as follows:
 And with C<use encoding "euc-jp"> in effect, it is the same thing as
 the code in UTF-8:
 
-  my $Rakuda = "\x{99F1}\x{99DD}"; # who Unicode Characters
+  my $Rakuda = "\x{99F1}\x{99DD}"; # two Unicode Characters
   s/\bCamel\b/$Rakuda/;
 
 The B<encoding> pragma also modifies the filehandle disciplines of
@@ -171,8 +171,8 @@ C<binmode> to change disciplines of those.
 =item use encoding I<ENCNAME> [ STDIN =E<gt> I<ENCNAME_IN> ...] ;
 
 You can also individually set encodings of STDIN and STDOUT via
-STDI<FH> =E<gt> I<ENCNAME_FH> form.  In this case, you cannot omit the
-first I<ENCNAME>.  C<STDI<FH> =E<gt> undef> turns the IO transcoding
+C<< STDIN => I<ENCNAME> >> form.  In this case, you cannot omit the
+first I<ENCNAME>.  C<< STDIN => undef >> turns the IO transcoding
 completely off.
 
 =item no encoding;
@@ -187,7 +187,7 @@ reset to ":raw" (the default unprocessed raw stream of bytes).
 =head2 NOT SCOPED
 
 The pragma is a per script, not a per block lexical.  Only the last
-C<use encoding> or C<matters, and it affects B<the whole script>.
+C<use encoding> or C<no encoding> matters, and it affects B<the whole script>.
 However, <no encoding> pragma is supported and C<use encoding> can
 appear as many times as you want in a given script.  The multiple use
 of this pragma is discouraged.
@@ -227,7 +227,7 @@ free to put your strings in your encoding in quotes and regexes.
 =head1 Non-ASCII Identifiers and Filter option
 
 The magic of C<use encoding> is not applied to the names of
-identifiers.  In order to make C<${"4eba"}++> ($human++, where human
+identifiers.  In order to make C<${"\x{4eba}"}++> ($human++, where human
 is a single Han ideograph) work, you still need to write your script
 in UTF-8 or use a source filter.
 
