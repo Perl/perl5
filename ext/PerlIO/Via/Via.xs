@@ -123,9 +123,9 @@ PerlIOVia_method(pTHX_ PerlIO *f,char *method,CV **save,int flags,...)
 }
 
 IV
-PerlIOVia_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg)
+PerlIOVia_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 {
- IV code = PerlIOBase_pushed(aTHX_ f,mode,Nullsv);
+ IV code = PerlIOBase_pushed(aTHX_ f,mode,Nullsv,tab);
  if (code == 0)
   {
    PerlIOVia *s = PerlIOSelf(f,PerlIOVia);
@@ -559,6 +559,7 @@ PerlIOVia_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
 }
 
 PerlIO_funcs PerlIO_object = {
+ sizeof(PerlIO_funcs),
  "Via",
  sizeof(PerlIOVia),
  PERLIO_K_BUFFERED|PERLIO_K_DESTRUCT,
