@@ -2,6 +2,7 @@ use ExtUtils::MakeMaker;
 
 WriteMakefile(
     VERSION_FROM    => "lib/List/Util.pm",
+    MAN3PODS    => {},  # Pods will be built by installman.
     NAME            => "List::Util",
 );
 

@@ -2,6 +2,7 @@ use ExtUtils::MakeMaker;
 
 WriteMakefile(
               'NAME'      => 'XS::Typemap',
+	      MAN3PODS    => {},  # Pods will be built by installman.
               'VERSION_FROM'   => 'Typemap.pm',
               'dist'      => { COMPRESS => "gzip -9f"},
               OBJECT      => 'stdio.o  Typemap.o',
