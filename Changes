@@ -31,6 +31,181 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 14502] By: jhi                                   on 2002/01/30  14:32:25
+        Log: Subject: [PATCH re bug 200713.003] Re: Perlbug - reminder of bug(20010713.003) status
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Wed, 30 Jan 2002 11:58:33 GMT
+             Message-Id: <200201301158.LAA14883@tempest.npl.co.uk>
+     Branch: perl
+	   ! lib/CPAN.pm
+____________________________________________________________________________
+[ 14501] By: jhi                                   on 2002/01/30  14:20:32
+        Log: Move ext/Encode/lib/Encode.pm to ext/Encode/Encode.pm;
+             re-sort MANIFEST.
+     Branch: perl
+	   + ext/Encode/Encode.pm
+	   - ext/Encode/lib/Encode.pm
+	   ! MANIFEST ext/Encode/Makefile.PL
+____________________________________________________________________________
+[ 14500] By: jhi                                   on 2002/01/30  14:05:13
+        Log: Integrate perlio;
+             
+             Collect some stats during compile process.
+             Experiment with effect of bundling all EUC-JP, EUC-CN, EUC-KR
+             as one XS - inconclusive - marginal win?
+             Add some comments to encode.h
+     Branch: perl
+	  !> ext/Encode/EUC_JP/Makefile.PL ext/Encode/compile
+	  !> ext/Encode/encode.h
+____________________________________________________________________________
+[ 14497] By: jhi                                   on 2002/01/30  04:40:56
+        Log: Subject: [PATCH] perl -V: (was: Re: Inline::C and Perl objects with C API's)   
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Tue, 29 Jan 2002 01:13:09 -0800
+             Message-ID: <lemV8gzkgu/K092yn@efn.org>
+     Branch: perl
+	   ! configpm
+____________________________________________________________________________
+[ 14496] By: jhi                                   on 2002/01/30  01:55:57
+        Log: Subject: [PATCH t/op/inccode.t] new test
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Tue, 29 Jan 2002 22:03:45 +0100
+             Message-ID: <20020129220345.A704@rafael>
+     Branch: perl
+	   ! t/op/inccode.t
+____________________________________________________________________________
+[ 14495] By: jhi                                   on 2002/01/30  01:01:26
+        Log: EBCDIC: t/op/lc.t now passes.
+     Branch: perl
+	   ! t/op/lc.t
+____________________________________________________________________________
+[ 14494] By: jhi                                   on 2002/01/30  00:41:52
+        Log: EBCDIC fix: t/op/lc.t failures 24-25, 29-30, 34-35, 39-40
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 14493] By: jhi                                   on 2002/01/29  22:32:05
+        Log: Must find stuff during build.
+     Branch: perl
+	   ! ext/Encode/compile
+____________________________________________________________________________
+[ 14492] By: jhi                                   on 2002/01/29  22:24:54
+        Log: Integrate with perlio;
+             
+             Basics of a compiled Encode XS extension
+     Branch: perl
+	  +> ext/Encode/EUC_JP/EUC_JP.pm ext/Encode/EUC_JP/Makefile.PL
+	  +> ext/Encode/Encode/euc-jp.ucm
+	  !> MANIFEST ext/Encode/Encode.xs ext/Encode/compile
+	  !> ext/Encode/encode.h
+____________________________________________________________________________
+[ 14491] By: jhi                                   on 2002/01/29  22:23:25
+        Log: EBCDIC tweaks-- no new test passes, but getting closer.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 14488] By: jhi                                   on 2002/01/29  16:38:58
+        Log: Subject: Re: [PATCH] Attribute::Handlers lexical refcount skew (was Re: lexical with attribute, refcount high)
+             From: Richard Clamp <richardc@unixbeard.net>
+             Date: Mon, 28 Jan 2002 02:17:55 +0000
+             Message-ID: <20020128021755.GA28344@mirth.demon.co.uk>
+     Branch: perl
+	   ! lib/Attribute/Handlers.pm lib/Attribute/Handlers/t/multi.t
+____________________________________________________________________________
+[ 14487] By: jhi                                   on 2002/01/29  14:23:03
+        Log: OS/390 seems to do length 0 udp reads, Nicholas says
+             skippage is for now the best cause of action.
+     Branch: perl
+	   ! ext/Socket/socketpair.t
+____________________________________________________________________________
+[ 14486] By: jhi                                   on 2002/01/29  14:09:21
+        Log: Encode cleanup from Dan Kogai; reworked even further.
+     Branch: perl
+	   + ext/Encode/MANIFEST ext/Encode/README ext/Encode/lib/Encode.pm
+	   + ext/Encode/lib/Encode/Encoding.pm
+	   + ext/Encode/lib/Encode/Internal.pm ext/Encode/lib/Encode/Tcl.pm
+	   + ext/Encode/lib/Encode/Tcl/Escape.pm
+	   + ext/Encode/lib/Encode/Tcl/Extended.pm
+	   + ext/Encode/lib/Encode/Tcl/HanZi.pm
+	   + ext/Encode/lib/Encode/Tcl/Table.pm
+	   + ext/Encode/lib/Encode/Unicode.pm ext/Encode/lib/Encode/XS.pm
+	   + ext/Encode/lib/Encode/iso10646_1.pm
+	   + ext/Encode/lib/Encode/ucs2_le.pm ext/Encode/lib/Encode/utf8.pm
+	   + ext/Encode/lib/EncodeFormat.pod ext/Encode/t/Encode.t
+	   + ext/Encode/t/Tcl.t
+	   - ext/Encode.t ext/Encode/Encode.pm
+	   - ext/Encode/Encode/EncodeFormat.pod ext/Encode/Encode/Tcl.pm
+	   - ext/Encode/Encode/Tcl.t ext/Encode/Todo
+	   ! MANIFEST ext/Encode/Encode/8859-1.ucm
+	   ! ext/Encode/Encode/8859-10.ucm ext/Encode/Encode/8859-13.ucm
+	   ! ext/Encode/Encode/8859-14.ucm ext/Encode/Encode/8859-15.ucm
+	   ! ext/Encode/Encode/8859-16.ucm ext/Encode/Encode/8859-2.ucm
+	   ! ext/Encode/Encode/8859-3.ucm ext/Encode/Encode/8859-4.ucm
+	   ! ext/Encode/Encode/8859-5.ucm ext/Encode/Encode/8859-6.ucm
+	   ! ext/Encode/Encode/8859-7.ucm ext/Encode/Encode/8859-8.ucm
+	   ! ext/Encode/Encode/8859-9.ucm ext/Encode/Encode/ascii.ucm
+	   ! ext/Encode/Encode/cp1047.ucm ext/Encode/Encode/cp1250.ucm
+	   ! ext/Encode/Encode/cp37.ucm ext/Encode/Encode/dingbats.ucm
+	   ! ext/Encode/Encode/koi8-r.ucm ext/Encode/Encode/posix-bc.ucm
+	   ! ext/Encode/Encode/symbol.ucm ext/Encode/Makefile.PL
+	   ! ext/Encode/compile
+____________________________________________________________________________
+[ 14485] By: jhi                                   on 2002/01/28  23:17:20
+        Log: Workaround for DJGPP broken F_GETFL from Laszlo.
+     Branch: perl
+	   ! djgpp/djgpp.c perlio.c
+____________________________________________________________________________
+[ 14484] By: jhi                                   on 2002/01/28  23:15:22
+        Log: Prettier printing from Michael Schwern.
+     Branch: perl
+	   ! t/test.pl
+____________________________________________________________________________
+[ 14483] By: jhi                                   on 2002/01/28  23:08:27
+        Log: Show also the debug and debugcolor as known pragmas.
+     Branch: perl
+	   ! ext/re/re.pm
+____________________________________________________________________________
+[ 14482] By: jhi                                   on 2002/01/28  22:08:38
+        Log: Subject: [PATCH] skip assembler.t when there is no ByteLoader
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Mon, 28 Jan 2002 16:30:30 -0600
+             Message-Id: <5.1.0.14.2.20020128162440.01ae7868@exchi01>
+     Branch: perl
+	   ! ext/B/t/assembler.t
+____________________________________________________________________________
+[ 14480] By: jhi                                   on 2002/01/28  21:57:37
+        Log: DJGPP needs to know its exe soon, too.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 14479] By: jhi                                   on 2002/01/28  21:36:34
+        Log: Round #2 on EBCDICation.
+     Branch: perl
+	   ! t/op/append.t
+____________________________________________________________________________
+[ 14478] By: jhi                                   on 2002/01/28  21:19:40
+        Log: Integrate perlio;
+             
+             Set makefile.mk CCHOME etc. for default locations of MinGW and free
+             Borland compilers. (Borland builds one or two oddities.)
+     Branch: perl
+	  !> win32/config.bc win32/makefile.mk
+____________________________________________________________________________
+[ 14473] By: jhi                                   on 2002/01/28  17:12:27
+        Log: Misunderstood Merijn's patch.
+     Branch: perl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[ 14472] By: jhi                                   on 2002/01/28  17:11:58
+        Log: Misapplied Merijn's patch.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 14471] By: jhi                                   on 2002/01/28  14:51:20
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 14470] By: jhi                                   on 2002/01/28  14:33:36
         Log: BeOS has sockets but not true ones.
      Branch: perl
