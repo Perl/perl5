@@ -77,6 +77,9 @@ unsigned char * MacPerl_CopyC2P(const char * c, unsigned char * p);
 const char * MacPerl_CanonDir(const char * dir, char * buf);
 void MacPerl_WriteMsg(void * io, const char * msg, size_t len);
 
+#undef PerlProc_exit
+#define PerlProc_exit(s)	my_exit((s))
+
 /* These defined following should be defined in 5.8 in config.h */
 #define HAS_USLEEP
 #define HAS_UALARM
