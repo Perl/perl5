@@ -186,6 +186,22 @@ C<f(?:oo|ar)> and C<[fg]oo> by hand; this could be done automatically.
 All the code we ship with Perl needs to be sensible about temporary file
 handling, locking, input validation, and so on.
 
+=head2 Sort out the uid-setting mess
+
+Currently there are several problems with the setting of uids ($<, $>
+for the real and effective uids).  Firstly, what exactly setuid() call
+gets invoked in which platform is simply a big mess that needs to be
+untangled.  Secondly, the effects are apparently not standard across
+platforms, (if you first set $< and then $>, or vice versa, being
+uid==euid== zero, or just euid==zero, or as a normal user, what are
+the results?).  The test suite not (usually) being run as root means
+that these things do not get much testing.  Thirdly, there's quite
+often a third uid called saved uid, and Perl has no knowledge of that
+feature in any way.  (If one has the saved uid of zero, one can get
+back any real and effective uids.)  As an example, to change also the
+saved uid, one needs to set the real and effective uids B<twice>-- in
+most systems, that is: in HP-UX that doesn't seem to work.
+	
 =head2 Custom opcodes
 
 Have a way to introduce user-defined opcodes without the subroutine call
