@@ -79,6 +79,38 @@ Version 5.005_54        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  2414] By: gsar                                  on 1998/11/30  02:23:55
+        Log: more JPL tweaks
+     Branch: perl
+           - jpl/JNI/MANIFEST jpl/PerlInterpreter/Makefile
+           ! Changes MANIFEST jpl/JNI/JNI.pm jpl/README
+____________________________________________________________________________
+[  2413] By: gsar                                  on 1998/11/30  01:35:56
+        Log: stub bin/jpl that just runs JPL::Compile::files()
+     Branch: perl
+           + jpl/bin/jpl
+____________________________________________________________________________
+[  2412] By: gsar                                  on 1998/11/30  01:32:14
+        Log: delete symlink
+     Branch: perl
+           - jpl/bin/jpl
+____________________________________________________________________________
+[  2410] By: gsar                                  on 1998/11/30  01:30:44
+        Log: branch jpl from perlext to perl
+     Branch: perl
+          +> (branch 30 files)
+____________________________________________________________________________
+[  2407] By: gsar                                  on 1998/11/30  01:24:53
+        Log: JPL tweaks to build with 5.005
+     Branch: perlext
+	   ! jpl/JNI/JNI.xs jpl/JNI/typemap jpl/JPL/Compile.pm
+           ! jpl/PerlInterpreter/PerlInterpreter.c jpl/README
+____________________________________________________________________________
+[  2406] By: gsar                                  on 1998/11/30  00:55:54
+        Log: integrate changes#2273,2274,2288,2291 from maint-5.004
+     Branch: perl
+           ! Porting/patchls doio.c lib/Sys/Syslog.pm t/op/die_exit.t
+____________________________________________________________________________
 [  2405] By: gsar                                  on 1998/11/30  00:28:55
         Log: patchlevel up to 54
      Branch: perl
