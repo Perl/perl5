@@ -2234,13 +2234,13 @@ XS(w32_GetCwd)
      *   then it worked, set PV valid, 
      *   else leave it 'undef' 
      */
+    EXTEND(SP,1);
     if (SvCUR(sv)) {
 	SvPOK_on(sv);
-	EXTEND(SP,1);
 	ST(0) = sv;
 	XSRETURN(1);
     }
-    XSRETURN_EMPTY;
+    XSRETURN_UNDEF;
 }
 
 static
@@ -2261,15 +2261,16 @@ XS(w32_GetNextAvailDrive)
     dXSARGS;
     char ix = 'C';
     char root[] = "_:\\";
+
+    EXTEND(SP,1);
     while (ix <= 'Z') {
 	root[0] = ix++;
 	if (GetDriveType(root) == 1) {
 	    root[2] = '\0';
-	    EXTEND(SP,1);
 	    XSRETURN_PV(root);
 	}
     }
-    XSRETURN_EMPTY;
+    XSRETURN_UNDEF;
 }
 
 static
@@ -2296,13 +2297,13 @@ XS(w32_LoginName)
     dXSARGS;
     char *name = getlogin_buffer;
     DWORD size = sizeof(getlogin_buffer);
+    EXTEND(SP,1);
     if (GetUserName(name,&size)) {
-	EXTEND(SP,1);
 	/* size includes NULL */
 	ST(0) = sv_2mortal(newSVpv(name,size-1));
 	XSRETURN(1);
     }
-    XSRETURN_EMPTY;
+    XSRETURN_UNDEF;
 }
 
 static
@@ -2311,13 +2312,13 @@ XS(w32_NodeName)
     dXSARGS;
     char name[MAX_COMPUTERNAME_LENGTH+1];
     DWORD size = sizeof(name);
+    EXTEND(SP,1);
     if (GetComputerName(name,&size)) {
-	EXTEND(SP,1);
 	/* size does NOT include NULL :-( */
 	ST(0) = sv_2mortal(newSVpv(name,size));
 	XSRETURN(1);
     }
-    XSRETURN_EMPTY;
+    XSRETURN_UNDEF;
 }
 
 
@@ -2329,6 +2330,7 @@ XS(w32_DomainName)
     /* mingw32 (and Win95) don't have NetWksta*(), so do it the old way */
     char name[256];
     DWORD size = sizeof(name);
+    EXTEND(SP,1);
     if (GetUserName(name,&size)) {
 	char sid[1024];
 	DWORD sidlen = sizeof(sid);
@@ -2337,7 +2339,6 @@ XS(w32_DomainName)
 	SID_NAME_USE snu;
 	if (LookupAccountName(NULL, name, (PSID)&sid, &sidlen,
 			      dname, &dnamelen, &snu)) {
-	    EXTEND(SP,1);
 	    XSRETURN_PV(dname);		/* all that for this */
 	}
     }
@@ -2348,6 +2349,7 @@ XS(w32_DomainName)
     char dname[256];
     DWORD dnamelen = sizeof(dname);
     PWKSTA_INFO_100 pwi;
+    EXTEND(SP,1);
     if (NERR_Success == NetWkstaGetInfo(NULL, 100, (LPBYTE*)&pwi)) {
 	if (pwi->wki100_langroup && *(pwi->wki100_langroup)) {
 	    WideCharToMultiByte(CP_ACP, NULL, pwi->wki100_langroup,
@@ -2358,11 +2360,10 @@ XS(w32_DomainName)
 				-1, (LPSTR)dname, dnamelen, NULL, NULL);
 	}
 	NetApiBufferFree(pwi);
-	EXTEND(SP,1);
 	XSRETURN_PV(dname);
     }
 #endif
-    XSRETURN_EMPTY;
+    XSRETURN_UNDEF;
 }
 
 static
@@ -2436,7 +2437,7 @@ XS(w32_FormatMessage)
 		      msgbuf, sizeof(msgbuf)-1, NULL))
 	XSRETURN_PV(msgbuf);
 
-    XSRETURN_EMPTY;
+    XSRETURN_UNDEF;
 }
 
 static
@@ -2509,7 +2510,7 @@ XS(w32_GetShortPathName)
 	ST(0) = shortpath;
 	XSRETURN(1);
     }
-    XSRETURN_EMPTY;
+    XSRETURN_UNDEF;
 }
 
 static
