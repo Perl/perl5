@@ -5468,7 +5468,7 @@ special compiling is need as you can access hosts directly.
 
 =back
 
-=head2 Configuring lynx or ncftp for going throught the firewall
+=head2 Configuring lynx or ncftp for going through the firewall
 
 If you can go through your firewall with e.g. lynx, presumably with a
 command such as

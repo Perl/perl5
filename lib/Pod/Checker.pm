@@ -202,7 +202,7 @@ These may not necessarily cause trouble, but indicate mediocre style.
 
 =over 4
 
-=item * multiple occurence of link target I<name>
+=item * multiple occurrence of link target I<name>
 
 The POD file has some C<=item> and/or C<=head> commands that have
 the same text. Potential hyperlinks to such a text cannot be unique then.
