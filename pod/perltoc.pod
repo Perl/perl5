@@ -2404,6 +2404,8 @@ chcp, dataset access, iconv, locales
 
 =item BUGS
 
+=item SEE ALSO
+
 =item REFERENCES
 
 =item AUTHOR
@@ -4683,7 +4685,11 @@ accidentally using the context of the sort() itself)
 
 =item ftmp-security tests warn 'system possibly insecure'
 
+=item Test lib/posix Subtest 9 Fails In LP64-Configured HP-UX
+
 =item Long Doubles Still Don't Work In Solaris
+
+=item Linux With Sfio Fails op/misc Test 48
 
 =item Storable tests fail in some platforms
 

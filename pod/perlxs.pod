@@ -71,9 +71,8 @@ is usually referred to as the XS language.
 See L<perlxstut> for a tutorial on the whole extension creation process.
 
 Note: For some extensions, Dave Beazley's SWIG system may provide a
-significantly more convenient mechanism for creating the extension glue
-code. See L<http://www.swig.org/|http://www.swig.org/> for more 
-information.
+significantly more convenient mechanism for creating the extension
+glue code.  See http://www.swig.org/ for more information.
 
 =head2 On The Road
 

@@ -4,10 +4,10 @@ perlguts - Introduction to the Perl API
 
 =head1 DESCRIPTION
 
-This document attempts to describe how to use the Perl API, as well as containing 
-some info on the basic workings of the Perl core. It is far from complete 
-and probably contains many errors. Please refer any questions or 
-comments to the author below.
+This document attempts to describe how to use the Perl API, as well as
+containing some info on the basic workings of the Perl core. It is far
+from complete and probably contains many errors. Please refer any
+questions or comments to the author below.
 
 =head1 Variables
 
@@ -1972,8 +1972,7 @@ produced a new character set containing all the characters you can
 possibly think of and more. There are several ways of representing these
 characters, and the one Perl uses is called UTF8. UTF8 uses
 a variable number of bytes to represent a character, instead of just
-one. You can learn more about Unicode at
-L<http://www.unicode.org/|http://www.unicode.org/>
+one. You can learn more about Unicode at http://www.unicode.org/
 
 =head2 How can I recognise a UTF8 string?
 

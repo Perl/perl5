@@ -724,8 +724,7 @@ can be constructed using C<pod2latex>.
 =head1 BUILD
 
 Here we discuss how to build Perl under OS/2. There is an alternative
-(but maybe older) view on
-L<http://www.shadow.net/~troc/os2perl.html|http://www.shadow.net/~troc/os2perl.html>.
+(but maybe older) view on http://www.shadow.net/~troc/os2perl.html
 
 =head2 Prerequisites
 
