@@ -18,7 +18,7 @@ BEGIN {
 # Later the sem* tests will import more for themselves.
 
 use IPC::SysV qw(IPC_PRIVATE IPC_NOWAIT IPC_STAT IPC_RMID
-		 S_IRWXU S_IRWXG S_IRWXO);
+		 S_IRWXU S_IRWXG S_IRWXO S_IWGRP S_IROTH S_IWOTH);
 use strict;
 
 print "1..16\n";
