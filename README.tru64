@@ -1,0 +1,82 @@
+If you read this file _as_is_, just ignore the funny characters you see.
+It is written in the POD format (see pod/perlpod.pod) which is specially
+designed to be readable as is.
+
+=head1 NAME
+
+README.tru64 - Perl version 5 on Tru64 (formerly known as Digital UNIX formerly known as DEC OSF/1) systems
+
+=head1 DESCRIPTION
+
+This document describes various features of Compaq's (formerly Digital's)
+Unix operating system (Tru64) that will affect how Perl version 5
+is compiled and/or runs.
+
+=head2 Compiling Perl 5 on Tru64
+
+The recommended compiler to use in Tru64 is the native C compiler.
+The native compiler produces much faster code (the speed difference is
+noticeable: several dozen percentages) and also more correct code: if you
+are considering using the GNU C compiler you should use the gcc 2.95.3
+release since older gcc releases are known to produce buggy code when
+compiling Perl.
+
+=head2 Using Large Files with Perl on Tru64
+
+In Tru64 Perl is automatically able to use large files, that is, files
+larger than 2 gigabytes, there is no need to use the Configure
+-Duselargefiles option as described in INSTALL.
+
+=head2 Threaded Perl on Tru64
+
+To compile Perl to use the old Perl 5.005 threads model, run Configure
+with the -Dusethreads -Duse5005threads options as described in INSTALL.
+This will probably only work in Tru64 4.0 and newer releases, older
+operating releases like 3.2 aren't probably going to work properly
+with threads.
+
+Beware: the Perl 5.005 threads model is known to have bugs, for
+example the regular expressions are not thread-safe.  The bugs are
+very hard to fix are and therefore the 5.005 threads model is still
+classified as an experimental feature.
+
+=head2 64-bit Perl on Tru64
+
+In Tru64 Perl's integers are automatically 64-bit wide, there is
+no need to use the Configure -Duse64bitint option as described
+in INSTALL.  Similarly, there is no need for -Duse64bitall.
+
+=head2 Warnings about floating-point overflow when compiling Perl on Tru64
+
+When compiling Perl in Tru64 you may (depending on the compiler
+release) see two warnings like this
+
+    cc: Warning: util.c, line 3797: In this statement, floating-point overflow occurs in evaluating the expression "1.8e308". (floatoverfl)
+        return HUGE_VAL;
+    -----------^
+
+    cc: Warning: POSIX.xs, line 1304: In this statement, floating-point overflow occurs in evaluating the expression "1.8e308". (floatoverfl)
+                return HUGE_VAL;
+    -------------------^
+
+The exact line numbers may vary between Perl releases.
+The warnings are benign and can be ignored.
+
+When the file F<pp_sys.c> is being compiled you may (depending on the
+operating system release) see an additional compiler flag being used:
+C<-DNO_EFF_ONLY_OK>.  This is normal and refers to a feature that is
+relevant only if you use the C<filetest> pragma.  In older releases of
+the operating system the feature was broken and the NO_EFF_ONLY_OK
+instructs Perl not to use the feature.
+
+=head1 Testing Perl on Tru64
+
+During "make test" the C<comp/cpp> will be skipped because on Tru64 it
+cannot be tested before Perl has been installed.  The test refers to
+the use of the C<-P> option of Perl.
+
+=head1 AUTHOR
+
+Jarkko Hietaniemi <jhi@iki.fi>
+
+=cut
