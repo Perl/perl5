@@ -61,6 +61,7 @@ recursive_lock_init(pTHX_ recursive_lock_t *lock)
     COND_INIT(&lock->cond);
 }
 
+void
 recursive_lock_destroy(pTHX_ recursive_lock_t *lock)
 {
     MUTEX_DESTROY(&lock->mutex);
