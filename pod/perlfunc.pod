@@ -2093,9 +2093,16 @@ original list for which the BLOCK or EXPR evaluates to true.
 
 =item mkdir FILENAME,MODE
 
-Creates the directory specified by FILENAME, with permissions specified
-by MODE (as modified by umask).  If it succeeds it returns TRUE, otherwise
-it returns FALSE and sets C<$!> (errno).
+Creates the directory specified by FILENAME, with permissions
+specified by MODE (as modified by C<umask>).  If it succeeds it
+returns TRUE, otherwise it returns FALSE and sets C<$!> (errno).
+
+In general, it is better to create directories with permissive MODEs,
+and let the user modify that with their C<umask>, than it is to supply
+a restrictive MODE and give the user no way to be more permissive.
+The exceptions to this rule are when the file or directory should be
+kept private (mail files, for instance).  The perlfunc(1) entry on
+C<umask> discusses the choice of MODE in more detail.
 
 =item msgctl ID,CMD,ARG
 
@@ -2202,7 +2209,8 @@ you want both read and write access to the file; thus C<'+E<lt>'> is almost
 always preferred for read/write updates--the C<'+E<gt>'> mode would clobber the
 file first.  You can't usually use either read-write mode for updating
 textfiles, since they have variable length records.  See the B<-i>
-switch in L<perlrun> for a better approach.
+switch in L<perlrun> for a better approach.  The file is created with
+permissions of C<0666> modified by the process' C<umask> value.
 
 The prefix and the filename may be separated with spaces.
 These various prefixes correspond to the fopen(3) modes of C<'r'>, C<'r+'>, C<'w'>,
@@ -3870,21 +3878,11 @@ it (typically because MODE includes the C<O_CREAT> flag), then the value of
 PERMS specifies the permissions of the newly created file.  If you omit
 the PERMS argument to C<sysopen()>, Perl uses the octal value C<0666>.
 These permission values need to be in octal, and are modified by your
-process's current C<umask>.  The C<umask> value is a number representing
-disabled permissions bits--if your C<umask> were C<027> (group can't write;
-others can't read, write, or execute), then passing C<sysopen()> C<0666> would
-create a file with mode C<0640> (C<0666 &~ 027> is C<0640>).
+process's current C<umask>.
 
-If you find this C<umask()> talk confusing, here's some advice: supply a
-creation mode of C<0666> for regular files and one of C<0777> for directories
-(in C<mkdir()>) and executable files.  This gives users the freedom of
-choice: if they want protected files, they might choose process umasks
-of C<022>, C<027>, or even the particularly antisocial mask of C<077>.  Programs
-should rarely if ever make policy decisions better left to the user.
-The exception to this is when writing files that should be kept private:
-mail files, web browser cookies, I<.rhosts> files, and so on.  In short,
-seldom if ever use C<0644> as argument to C<sysopen()> because that takes
-away the user's option to have a more permissive umask.  Better to omit it.
+Seldom if ever use C<0644> as argument to C<sysopen()> because that
+takes away the user's option to have a more permissive umask.  Better
+to omit it.  See the perlfunc(1) entry on C<umask> for more on this.
 
 The C<IO::File> module provides a more object-oriented approach, if you're
 into that kind of thing.
@@ -4122,6 +4120,28 @@ If EXPR is omitted, uses C<$_>.
 Sets the umask for the process to EXPR and returns the previous value.
 If EXPR is omitted, merely returns the current umask.
 
+The Unix permission C<rwxr-x---> is represented as three sets of three
+bits, or three octal digits: C<0750> (the leading 0 indicates octal
+and isn't one of the the digits).  The C<umask> value is such a number
+representing disabled permissions bits.  The permission (or "mode")
+values you pass C<mkdir> or C<sysopen> are modified by your umask, so
+even if you tell C<sysopen> to create a file with permissions C<0777>,
+if your umask is C<0022> then the file will actually be created with
+permissions C<0755>.  If your C<umask> were C<0027> (group can't
+write; others can't read, write, or execute), then passing
+C<sysopen()> C<0666> would create a file with mode C<0640> (C<0666 &~
+027> is C<0640>).
+
+Here's some advice: supply a creation mode of C<0666> for regular
+files (in C<sysopen()>) and one of C<0777> for directories (in
+C<mkdir()>) and executable files.  This gives users the freedom of
+choice: if they want protected files, they might choose process umasks
+of C<022>, C<027>, or even the particularly antisocial mask of C<077>.
+Programs should rarely if ever make policy decisions better left to
+the user.  The exception to this is when writing files that should be
+kept private: mail files, web browser cookies, I<.rhosts> files, and
+so on.
+
 If umask(2) is not implemented on your system and you are trying to
 restrict access for I<yourself> (i.e., (EXPR & 0700) > 0), produces a
 fatal error at run time.  If umask(2) is not implemented and you are
@@ -4129,6 +4149,8 @@ not trying to restrict access for yourself, returns C<undef>.
 
 Remember that a umask is a number, usually given in octal; it is I<not> a
 string of octal digits.  See also L</oct>, if all you have is a string.
+
+
 
 =item undef EXPR
 
