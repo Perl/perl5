@@ -260,7 +260,7 @@ Perl_utf16_to_utf8_reversed(pTHX_ U16* p, U8* d, I32 bytelen)
 bool
 Perl_is_uni_alnum(pTHX_ U32 c)
 {
-    U8 tmpbuf[10];
+    U8 tmpbuf[UTF8_MAXLEN];
     uv_to_utf8(tmpbuf, (UV)c);
     return is_utf8_alnum(tmpbuf);
 }
@@ -268,7 +268,7 @@ Perl_is_uni_alnum(pTHX_ U32 c)
 bool
 Perl_is_uni_alnumc(pTHX_ U32 c)
 {
-    U8 tmpbuf[10];
+    U8 tmpbuf[UTF8_MAXLEN];
     uv_to_utf8(tmpbuf, (UV)c);
     return is_utf8_alnumc(tmpbuf);
 }
@@ -276,7 +276,7 @@ Perl_is_uni_alnumc(pTHX_ U32 c)
 bool
 Perl_is_uni_idfirst(pTHX_ U32 c)
 {
-    U8 tmpbuf[10];
+    U8 tmpbuf[UTF8_MAXLEN];
     uv_to_utf8(tmpbuf, (UV)c);
     return is_utf8_idfirst(tmpbuf);
 }
@@ -284,7 +284,7 @@ Perl_is_uni_idfirst(pTHX_ U32 c)
 bool
 Perl_is_uni_alpha(pTHX_ U32 c)
 {
-    U8 tmpbuf[10];
+    U8 tmpbuf[UTF8_MAXLEN];
     uv_to_utf8(tmpbuf, (UV)c);
     return is_utf8_alpha(tmpbuf);
 }
@@ -292,7 +292,7 @@ Perl_is_uni_alpha(pTHX_ U32 c)
 bool
 Perl_is_uni_ascii(pTHX_ U32 c)
 {
-    U8 tmpbuf[10];
+    U8 tmpbuf[UTF8_MAXLEN];
     uv_to_utf8(tmpbuf, (UV)c);
     return is_utf8_ascii(tmpbuf);
 }
@@ -300,7 +300,7 @@ Perl_is_uni_ascii(pTHX_ U32 c)
 bool
 Perl_is_uni_space(pTHX_ U32 c)
 {
-    U8 tmpbuf[10];
+    U8 tmpbuf[UTF8_MAXLEN];
     uv_to_utf8(tmpbuf, (UV)c);
     return is_utf8_space(tmpbuf);
 }
@@ -308,7 +308,7 @@ Perl_is_uni_space(pTHX_ U32 c)
 bool
 Perl_is_uni_digit(pTHX_ U32 c)
 {
-    U8 tmpbuf[10];
+    U8 tmpbuf[UTF8_MAXLEN];
     uv_to_utf8(tmpbuf, (UV)c);
     return is_utf8_digit(tmpbuf);
 }
@@ -316,7 +316,7 @@ Perl_is_uni_digit(pTHX_ U32 c)
 bool
 Perl_is_uni_upper(pTHX_ U32 c)
 {
-    U8 tmpbuf[10];
+    U8 tmpbuf[UTF8_MAXLEN];
     uv_to_utf8(tmpbuf, (UV)c);
     return is_utf8_upper(tmpbuf);
 }
@@ -324,7 +324,7 @@ Perl_is_uni_upper(pTHX_ U32 c)
 bool
 Perl_is_uni_lower(pTHX_ U32 c)
 {
-    U8 tmpbuf[10];
+    U8 tmpbuf[UTF8_MAXLEN];
     uv_to_utf8(tmpbuf, (UV)c);
     return is_utf8_lower(tmpbuf);
 }
@@ -332,7 +332,7 @@ Perl_is_uni_lower(pTHX_ U32 c)
 bool
 Perl_is_uni_cntrl(pTHX_ U32 c)
 {
-    U8 tmpbuf[10];
+    U8 tmpbuf[UTF8_MAXLEN];
     uv_to_utf8(tmpbuf, (UV)c);
     return is_utf8_cntrl(tmpbuf);
 }
@@ -340,7 +340,7 @@ Perl_is_uni_cntrl(pTHX_ U32 c)
 bool
 Perl_is_uni_graph(pTHX_ U32 c)
 {
-    U8 tmpbuf[10];
+    U8 tmpbuf[UTF8_MAXLEN];
     uv_to_utf8(tmpbuf, (UV)c);
     return is_utf8_graph(tmpbuf);
 }
@@ -348,7 +348,7 @@ Perl_is_uni_graph(pTHX_ U32 c)
 bool
 Perl_is_uni_print(pTHX_ U32 c)
 {
-    U8 tmpbuf[10];
+    U8 tmpbuf[UTF8_MAXLEN];
     uv_to_utf8(tmpbuf, (UV)c);
     return is_utf8_print(tmpbuf);
 }
@@ -356,7 +356,7 @@ Perl_is_uni_print(pTHX_ U32 c)
 bool
 Perl_is_uni_punct(pTHX_ U32 c)
 {
-    U8 tmpbuf[10];
+    U8 tmpbuf[UTF8_MAXLEN];
     uv_to_utf8(tmpbuf, (UV)c);
     return is_utf8_punct(tmpbuf);
 }
@@ -364,7 +364,7 @@ Perl_is_uni_punct(pTHX_ U32 c)
 bool
 Perl_is_uni_xdigit(pTHX_ U32 c)
 {
-    U8 tmpbuf[10];
+    U8 tmpbuf[UTF8_MAXLEN];
     uv_to_utf8(tmpbuf, (UV)c);
     return is_utf8_xdigit(tmpbuf);
 }
@@ -372,7 +372,7 @@ Perl_is_uni_xdigit(pTHX_ U32 c)
 U32
 Perl_to_uni_upper(pTHX_ U32 c)
 {
-    U8 tmpbuf[10];
+    U8 tmpbuf[UTF8_MAXLEN];
     uv_to_utf8(tmpbuf, (UV)c);
     return to_utf8_upper(tmpbuf);
 }
@@ -380,7 +380,7 @@ Perl_to_uni_upper(pTHX_ U32 c)
 U32
 Perl_to_uni_title(pTHX_ U32 c)
 {
-    U8 tmpbuf[10];
+    U8 tmpbuf[UTF8_MAXLEN];
     uv_to_utf8(tmpbuf, (UV)c);
     return to_utf8_title(tmpbuf);
 }
@@ -388,7 +388,7 @@ Perl_to_uni_title(pTHX_ U32 c)
 U32
 Perl_to_uni_lower(pTHX_ U32 c)
 {
-    U8 tmpbuf[10];
+    U8 tmpbuf[UTF8_MAXLEN];
     uv_to_utf8(tmpbuf, (UV)c);
     return to_utf8_lower(tmpbuf);
 }

@@ -27,6 +27,8 @@ EXTCONST unsigned char PL_utf8skip[];
 
 END_EXTERN_C
 
+#define UTF8_MAXLEN 13 /* how wide can a single UTF8 encoded character become */
+
 /*#define IN_UTF8 (PL_curcop->op_private & HINT_UTF8)*/
 #define IN_BYTE (PL_curcop->op_private & HINT_BYTE)
 #define DO_UTF8(sv) (SvUTF8(sv) && !IN_BYTE)
