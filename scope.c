@@ -813,7 +813,7 @@ leave_scope(I32 base)
 	    if (ptr) {
 		sv = *(SV**)ptr;
 		if (sv && sv != &PL_sv_undef) {
-		    if (SvRMAGICAL(av) && mg_find((SV*)av, 'P'))
+		    if (SvTIED_mg((SV*)av, 'P'))
 			(void)SvREFCNT_inc(sv);
 		    SvREFCNT_dec(av);
 		    goto restore_sv;
@@ -831,7 +831,7 @@ leave_scope(I32 base)
 		SV *oval = HeVAL((HE*)ptr);
 		if (oval && oval != &PL_sv_undef) {
 		    ptr = &HeVAL((HE*)ptr);
-		    if (SvRMAGICAL(hv) && mg_find((SV*)hv, 'P'))
+		    if (SvTIED_mg((SV*)hv, 'P'))
 			(void)SvREFCNT_inc(*(SV**)ptr);
 		    SvREFCNT_dec(hv);
 		    SvREFCNT_dec(sv);

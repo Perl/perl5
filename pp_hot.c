@@ -311,7 +311,7 @@ PP(pp_print)
 	gv = (GV*)*++MARK;
     else
 	gv = PL_defoutgv;
-    if (SvRMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q'))) {
+    if (mg = SvTIED_mg((SV*)gv, 'q')) {
 	if (MARK == ORIGMARK) {
 	    /* If using default handle then we need to make space to 
 	     * pass object as 1st arg, so move other args up ...
@@ -322,7 +322,7 @@ PP(pp_print)
 	    ++SP;
 	}
 	PUSHMARK(MARK - 1);
-	*MARK = mg->mg_obj;
+	*MARK = SvTIED_obj((SV*)gv, mg);
 	PUTBACK;
 	ENTER;
 	perl_call_method("PRINT", G_SCALAR);
@@ -1055,9 +1055,9 @@ do_readline(void)
     I32 gimme = GIMME_V;
     MAGIC *mg;
 
-    if (SvRMAGICAL(PL_last_in_gv) && (mg = mg_find((SV*)PL_last_in_gv, 'q'))) {
+    if (mg = SvTIED_mg((SV*)PL_last_in_gv, 'q')) {
 	PUSHMARK(SP);
-	XPUSHs(mg->mg_obj);
+	XPUSHs(SvTIED_obj((SV*)PL_last_in_gv, mg));
 	PUTBACK;
 	ENTER;
 	perl_call_method("READLINE", gimme);

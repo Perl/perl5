@@ -2761,8 +2761,8 @@ PP(pp_splice)
     SV **tmparyval = 0;
     MAGIC *mg;
 
-    if (SvRMAGICAL(ary) && (mg = mg_find((SV*)ary,'P'))) {
-	*MARK-- = mg->mg_obj;
+    if (mg = SvTIED_mg((SV*)ary, 'P')) {
+	*MARK-- = SvTIED_obj((SV*)ary, mg);
 	PUSHMARK(MARK);
 	PUTBACK;
 	ENTER;
@@ -2959,8 +2959,8 @@ PP(pp_push)
     register SV *sv = &PL_sv_undef;
     MAGIC *mg;
 
-    if (SvRMAGICAL(ary) && (mg = mg_find((SV*)ary,'P'))) {
-	*MARK-- = mg->mg_obj;
+    if (mg = SvTIED_mg((SV*)ary, 'P')) {
+	*MARK-- = SvTIED_obj((SV*)ary, mg);
 	PUSHMARK(MARK);
 	PUTBACK;
 	ENTER;
@@ -3015,8 +3015,8 @@ PP(pp_unshift)
     register I32 i = 0;
     MAGIC *mg;
 
-    if (SvRMAGICAL(ary) && (mg = mg_find((SV*)ary,'P'))) {
-	*MARK-- = mg->mg_obj;
+    if (mg = SvTIED_mg((SV*)ary, 'P')) {
+	*MARK-- = SvTIED_obj((SV*)ary, mg);
 	PUSHMARK(MARK);
 	PUTBACK;
 	ENTER;
@@ -4532,9 +4532,9 @@ PP(pp_split)
 	av_extend(ary,0);
 	av_clear(ary);
 	SPAGAIN;
-	if (SvRMAGICAL(ary) && (mg = mg_find((SV *) ary, 'P'))) {
+	if (mg = SvTIED_mg((SV*)ary, 'P')) {
 	    PUSHMARK(SP);
-	    XPUSHs(mg->mg_obj);
+	    XPUSHs(SvTIED_obj((SV*)ary, mg));
 	}
 	else {
 	    if (!AvREAL(ary)) {

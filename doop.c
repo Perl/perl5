@@ -1061,7 +1061,7 @@ do_kv(ARGSproto)
 	    RETURN;
 	}
 
-	if (!SvRMAGICAL(keys) || !mg_find((SV*)keys,'P'))
+	if (! SvTIED_mg((SV*)keys, 'P'))
 	    i = HvKEYS(keys);
 	else {
 	    i = 0;

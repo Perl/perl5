@@ -844,7 +844,7 @@ newHVhv(HV *ohv)
 	return hv;
 
 #if 0
-    if (!SvRMAGICAL(ohv) || !mg_find((SV*)ohv,'P')) {
+    if (! SvTIED_mg((SV*)ohv, 'P')) {
 	/* Quick way ???*/
     } 
     else 
@@ -1016,7 +1016,7 @@ hv_iternext(HV *hv)
     xhv = (XPVHV*)SvANY(hv);
     oldentry = entry = xhv->xhv_eiter;
 
-    if (SvRMAGICAL(hv) && (mg = mg_find((SV*)hv,'P'))) {
+    if (mg = SvTIED_mg((SV*)hv, 'P')) {
 	SV *key = sv_newmortal();
 	if (entry) {
 	    sv_setsv(key, HeSVKEY_force(entry));
