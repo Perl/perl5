@@ -62,14 +62,7 @@ sub walk_bblocks_obj {
     walk_bblocks($cv->ROOT, $cv->START);
 }
 
-sub B::OP::mark_if_leader {
-    my $op = shift;
-    my $ppaddr = $op->ppaddr;
-#    if ($ppaddr eq "pp_enter" || $ppaddr eq "pp_entersub" || $ppaddr eq "pp_return") {
-    if ($ppaddr eq "pp_enter" || $ppaddr eq "pp_return") {
-	mark_leader($op->next);
-    }
-}
+sub B::OP::mark_if_leader {}
 
 sub B::COP::mark_if_leader {
     my $op = shift;
@@ -136,7 +129,7 @@ sub compile {
 
 # Basic block leaders:
 #     Any COP (pp_nextstate) with a non-NULL label
-#     The op after a pp_enter
+#     [The op after a pp_enter] Omit
 #     [The op after a pp_entersub. Don't count this one.]
 #     The ops pointed at by nextop, redoop and lastop->op_next of a LOOP
 #     The ops pointed at by op_next and op_other of a LOGOP, except
@@ -144,6 +137,6 @@ sub compile {
 #     The ops pointed at by op_true and op_false of a CONDOP
 #     The op pointed at by op_pmreplstart of a PMOP
 #     The op pointed at by op_other->op_pmreplstart of pp_substcont?
-#     The op after a pp_return
+#     [The op after a pp_return] Omit
 
 1;
