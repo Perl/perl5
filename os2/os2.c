@@ -163,8 +163,11 @@ os2_cond_wait(perl_cond *c, perl_mutex *m)
     if ((rc = DosResetEventSem(*c,&na)) && (rc != ERROR_ALREADY_RESET))
 	croak("panic: COND_WAIT-reset: rc=%i", rc);		
     if (m) MUTEX_UNLOCK(m);					
-    if (CheckOSError(DosWaitEventSem(*c,SEM_INDEFINITE_WAIT)))
+    if (CheckOSError(DosWaitEventSem(*c,SEM_INDEFINITE_WAIT))
+	&& (rc != ERROR_INTERRUPT))
 	croak("panic: COND_WAIT: rc=%i", rc);		
+    if (rc == ERROR_INTERRUPT)
+	errno = EINTR;
     if (m) MUTEX_LOCK(m);					
 } 
 #endif 
@@ -356,7 +359,7 @@ result(int flag, int pid)
 /* global Argv[] contains arguments. */
 
 int
-do_aspawn(really, flag, execf)
+do_spawn_ve(really, flag, execf)
 SV *really;
 U32 flag;
 U32 execf;

@@ -164,6 +164,17 @@ after 5.004_03:
 	$0 may be edited to longer lengths (at least under OS/2).
 	OS2::REXX->loads looks in the OS/2-ish fashion too.
 
+after 5.004_04:
+	Default perl.exe was built with a shorter stack than expected.
+	Strip extensions DLLs too (unless debugging build).
+	./os2.c being RO could stop cp.
+	When starting scripts, Perl will find them on path (using the same
+	  extensions as for -S command-line switch).  If it finds magic
+	  `extproc ' or `#!' cookies, it will start the scripts directly.
+	May use `cmd /c more <' as a pager.
+	If a program could not be started, this might have been hidden.
+	End of pipe was closed twice when `open'ing a pipeline.
+
 after 5.004_53:
 	Minimal thread support added.  One needs to manually move pthread.h
 
