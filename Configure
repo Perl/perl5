@@ -3899,7 +3899,7 @@ case "$nm_opt" in
 		nm_opt='-p'	# Solaris (and SunOS?)
 	elif $test -f /dgux; then
 		nm_opt='-p'	# DG-UX
-	elif $test -x /lib64/rld; then
+	elif $test -f /lib64/rld; then
 		nm_opt='-p'	# 64-bit Irix
 	else
 		nm_opt=''
