@@ -561,9 +561,11 @@ sub compile {
 
 	# Print __DATA__ section, if necessary
 	no strict 'refs';
-	if (defined *{$self->{'curstash'}."::DATA"}{IO}) {
+	my $laststash = defined $self->{'curcop'}
+	    ? $self->{'curcop'}->stash->NAME : $self->{'curstash'};
+	if (defined *{$laststash."::DATA"}{IO}) {
 	    print "__DATA__\n";
-	    print readline(*{$self->{'curstash'}."::DATA"});
+	    print readline(*{$laststash."::DATA"});
 	}
     }
 }
