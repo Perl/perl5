@@ -114,8 +114,8 @@ If no match is found, a reference to an empty hash is returned.
 
 The C<block> property is the same as as returned by charinfo().  It is
 not defined in the Unicode Character Database proper (Chapter 4 of the
-Unicode 3.0 Standard) but instead in an auxiliary database (Chapter 14
-of TUS3).  Similarly for the C<script> property.
+Unicode 3.0 Standard, aka TUS3) but instead in an auxiliary database
+(Chapter 14 of TUS3).  Similarly for the C<script> property.
 
 Note that you cannot do (de)composition and casing based solely on the
 above C<decomposition> and C<lower>, C<upper>, C<title>, properties,
@@ -327,11 +327,13 @@ sub charinrange {
     my $charblock = charblock("0x263a");
     my $charblock = charblock("U+263a");
 
-    my $ranges    = charblock('Armenian');
+    my $range     = charblock('Armenian');
 
-With a B<code point argument> charblock() returns the block the character
+With a B<code point argument> charblock() returns the I<block> the character
 belongs to, e.g.  C<Basic Latin>.  Note that not all the character
 positions within all blocks are defined.
+
+See also L</Blocks versus Scripts>.
 
 If supplied with an argument that can't be a code point, charblock()
 tries to do the opposite and interpret the argument as a character
@@ -388,10 +390,12 @@ sub charblock {
     my $charscript = charscript(1234);
     my $charscript = charscript("U+263a");
 
-    my $ranges     = charscript('Thai');
+    my $range      = charscript('Thai');
 
-With a B<code point argument> charscript() returns the script the
+With a B<code point argument> charscript() returns the I<script> the
 character belongs to, e.g.  C<Latin>, C<Greek>, C<Han>.
+
+See also L</Blocks versus Scripts>.
 
 If supplied with an argument that can't be a code point, charscript()
 tries to do the opposite and interpret the argument as a character
@@ -452,6 +456,8 @@ sub charscript {
 charblocks() returns a reference to a hash with the known block names
 as the keys, and the code point ranges (see L</charblock>) as the values.
 
+See also L</Blocks versus Scripts>.
+
 =cut
 
 sub charblocks {
@@ -467,6 +473,8 @@ sub charblocks {
 
 charscripts() returns a hash with the known script names as the keys,
 and the code point ranges (see L</charscript>) as the values.
+
+See also L</Blocks versus Scripts>.
 
 =cut
 
@@ -503,14 +511,18 @@ C<\p{InCyrillic}>, C<\P{InBasicLatin}>.  Spaces and dashes ('-') are
 removed from the names for the C<\p{In...}>, for example
 C<LatinExtendedA> instead of C<Latin Extended-A>.
 
-There are a few cases where there exists both a script and a block by
-the same name, in these cases the block version has C<Block> appended:
-C<\p{InKatakana}> is the script, C<\p{InKatakanaBlock}> is the block.
+There are a few cases where there is both a script and a block by the
+same name, in these cases the block version has C<Block> appended to
+its name: C<\p{InKatakana}> is the script, C<\p{InKatakanaBlock}> is
+the block.
 
 =head2 Code Point Arguments
 
-A <code point argument> is either a decimal or a hexadecimal scalar,
-or "U+" followed by hexadecimals.
+A <code point argument> is either a decimal or a hexadecimal scalar
+designating a Unicode character, or "U+" followed by hexadecimals
+designating a Unicode character.  Note that Unicode is B<not> limited
+to 16 bits (the number of Unicode characters is open-ended, in theory
+unlimited): you may have more than 4 hexdigits.
 
 =head2 charinrange
 
@@ -721,7 +733,8 @@ sub casespec {
 
 Unicode::UCD::UnicodeVersion() returns the version of the Unicode
 Character Database, in other words, the version of the Unicode
-standard the database implements.
+standard the database implements.  The version is a string
+of numbers delimited by dots (C<'.'>).
 
 =cut
 
@@ -742,7 +755,8 @@ sub UnicodeVersion {
 
 The first use of charinfo() opens a read-only filehandle to the Unicode
 Character Database (the database is included in the Perl distribution).
-The filehandle is then kept open for further queries.
+The filehandle is then kept open for further queries.  In other words,
+if you are wondering where one of your filehandles went, that's where.
 
 =head1 AUTHOR
 
