@@ -8,7 +8,7 @@ BEGIN {
 }
 
 require "test.pl";
-plan(tests => 31);
+plan(tests => 25);
 
 my $IsVMS = $^O eq 'VMS';
 
