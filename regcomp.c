@@ -3933,7 +3933,14 @@ S_regclassutf8(pTHX_ RExC_state_t *pRExC_state)
 
     if (!SIZE_ONLY) {
 	SV *rv = swash_init("utf8", "", listsv, 1, 0);
+#ifdef DEBUGGING
+	AV *av = newAV();
+	av_push(av, rv);
+	av_push(av, listsv);
+	rv = newRV_inc((SV*)av);
+#else
 	SvREFCNT_dec(listsv);
+#endif
 	n = add_data(pRExC_state, 1, "s");
 	RExC_rx->data->data[n] = (void*)rv;
 	ARG1_SET(ret, flags);
@@ -4392,12 +4399,15 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 			sv_catpv(sv, anyofs[i]);
 	}
 	else {
-	    SV *swash = (SV*)PL_regdata->data[ARG2(o)];
+	    SV *rv = (SV*)PL_regdata->data[ARG2(o)];
+	    AV *av = (AV*)SvRV((SV*)rv);
+	    SV *sw = *av_fetch(av, 0, FALSE);
+	    SV *lv = *av_fetch(av, 1, FALSE);
 	    UV i;
 	    U8 s[UTF8_MAXLEN+1];
 	    for (i = 0; i <= 256; i++) { /* just the first 256 */
 		U8 *e = uv_to_utf8(s, i);
-		if (i < 256 && swash_fetch(swash, s)) {
+		if (i < 256 && swash_fetch(sw, s)) {
 		    if (rangestart == -1)
 			rangestart = i;
 		} else if (rangestart != -1) {
@@ -4419,6 +4429,24 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 		}
 	    }
 	    sv_catpv(sv, "...");
+	    {
+		char *s = savepv(SvPVX(lv));
+
+		while(*s && *s != '\n') s++;
+		if (*s == '\n') {
+		    char *t = ++s;
+
+		    while (*s) {
+			if (*s == '\n')
+			    *s = ' ';
+			s++;
+		    }
+		    if (s[-1] == ' ')
+			s[-1] = 0;
+
+		    sv_catpv(sv, t);
+		}
+	    }
 	}
 	Perl_sv_catpvf(aTHX_ sv, "%s]", PL_colors[1]);
     }
@@ -4481,6 +4509,16 @@ Perl_pregfree(pTHX_ struct regexp *r)
 	while (--n >= 0) {
 	    switch (r->data->what[n]) {
 	    case 's':
+#ifdef DEBUGGING
+	        {
+		    SV *rv = (SV*)r->data->data[n];
+		    AV *av = (AV*)SvRV((SV*)rv);
+		    SV *sw = *av_fetch(av, 0, FALSE);
+		    SV *lv = *av_fetch(av, 1, FALSE);
+		    SvREFCNT_dec(sw);
+		    SvREFCNT_dec(lv);
+		}
+#endif
 		SvREFCNT_dec((SV*)r->data->data[n]);
 		break;
 	    case 'f':

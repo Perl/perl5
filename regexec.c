@@ -106,7 +106,11 @@
  */
 
 #define REGINCLASS(p,c)  (ANYOF_FLAGS(p) ? reginclass(p,c) : ANYOF_BITMAP_TEST(p,c))
-#define REGINCLASSUTF8(f,p)  (ARG1(f) ? reginclassutf8(f,p) : swash_fetch((SV*)PL_regdata->data[ARG2(f)],p))
+#ifdef DEBUGGING
+#   define REGINCLASSUTF8(f,p)  (ARG1(f) ? reginclassutf8(f,p) : swash_fetch(*av_fetch((AV*)SvRV((SV*)PL_regdata->data[ARG2(f)]),0,FALSE),p))
+#else
+#   define REGINCLASSUTF8(f,p)  (ARG1(f) ? reginclassutf8(f,p) : swash_fetch((SV*)PL_regdata->data[ARG2(f)],p))
+#endif
 
 #define CHR_SVLEN(sv) (UTF ? sv_len_utf8(sv) : SvCUR(sv))
 #define CHR_DIST(a,b) (UTF ? utf8_distance(a,b) : a - b)
@@ -3790,9 +3794,16 @@ S_reginclassutf8(pTHX_ regnode *f, U8 *p)
     dTHR;
     char flags = ARG1(f);
     bool match = FALSE;
-    SV *sv = (SV*)PL_regdata->data[ARG2(f)];
+#ifdef DEBUGGING
+    SV *rv = (SV*)PL_regdata->data[ARG2(f)];
+    AV *av = (AV*)SvRV((SV*)rv);
+    SV *sw = *av_fetch(av, 0, FALSE);
+    SV *lv = *av_fetch(av, 1, FALSE);
+#else
+    SV *sw = (SV*)PL_regdata->data[ARG2(f)];
+#endif
 
-    if (swash_fetch(sv, p))
+    if (swash_fetch(sw, p))
 	match = TRUE;
     else if (flags & ANYOF_FOLD) {
 	U8 tmpbuf[UTF8_MAXLEN+1];
@@ -3802,7 +3813,7 @@ S_reginclassutf8(pTHX_ regnode *f, U8 *p)
 	}
 	else
 	    uv_to_utf8(tmpbuf, toLOWER_utf8(p));
-	if (swash_fetch(sv, tmpbuf))
+	if (swash_fetch(sw, tmpbuf))
 	    match = TRUE;
     }
 
