@@ -91,14 +91,20 @@ unlink "./foo";
 if ($^O eq 'VMS') {
   # Create a temp file. We jump through these hoops 'cause CREATE really
   # doesn't like our methods for some reason.
-  open TEMPFILE, ">./foo";
+  open FDLFILE, "> ./foo.fdl";
+  print FDLFILE "RECORD\n FORMAT VARIABLE\n";
+  close FDLFILE;
+  open CREATEFILE, "> ./foo.com";
+  print CREATEFILE '$ DEFINE/USER SYS$INPUT NL:', "\n";
+  print CREATEFILE '$ DEFINE/USER SYS$OUTPUT NL:', "\n";
+  print CREATEFILE '$ OPEN YOW []FOO.BAR/WRITE', "\n";
+  print CREATEFILE '$ CLOSE YOW', "\n";
+  print CREATEFILE "\$EXIT\n";
+  close CREATEFILE;
+  $throwaway = `\@\[\]foo`, "\n";
+  open(TEMPFILE, ">./foo.bar") or print "# open failed $! $^E\n";
   print TEMPFILE "foo\nfoobar\nbaz\n";
   close TEMPFILE;
-  open CREATEPIPE, "|\@sys\$input";
-  print CREATEPIPE "DEFINE SYS\$INPUT FOO./user\n";
-  print CREATEPIPE "CREATE []FOO.BAR\n";
-  close CREATEPIPE;
-  unlink "./foo";
 
   open TESTFILE, "<./foo.bar";
   $/ = \10;
@@ -115,6 +121,7 @@ if ($^O eq 'VMS') {
   if ($bar eq "z\n") {print "ok 14\n";} else {print "not ok 14\n";}
 
   unlink "./foo.bar";
+  unlink "./foo.com";  
 } else {
   # Nobody else does this at the moment (well, maybe OS/390, but they can
   # put their own tests in) so we just punt
