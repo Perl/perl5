@@ -511,11 +511,11 @@ Hugo van der Sanden plans to look at this.
 This has been done in places, but needs a thorough code review.
 Also fchdir is available in some platforms.
 
-=head2 Make vstrings overloaded objects
+=head2 Make v-strings overloaded objects
 
-Instead of having to guess whether a string is a vstring
-and thus needs to be displayed with %vd, make vstrings (readonly)
-overloaded objects.
+Instead of having to guess whether a string is a v-string and thus
+needs to be displayed with %vd, make v-strings (readonly) objects
+(class "vstring"?) with a stringify overload.
 
 =head1 Vague ideas
 
