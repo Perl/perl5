@@ -407,7 +407,7 @@ register GV *gv;
 		    do_close(gv,FALSE);
 		    (void)unlink(SvPVX(sv));
 		    (void)rename(oldname,SvPVX(sv));
-		    do_open(gv,SvPVX(sv),SvCUR(GvSV(gv)),FALSE,0,0,Nullfp);
+		    do_open(gv,SvPVX(sv),SvCUR(sv),FALSE,0,0,Nullfp);
 #endif /* MSDOS */
 #else
 		    (void)UNLINK(SvPVX(sv));
@@ -529,9 +529,8 @@ bool explicit;
 do_close(GV *gv, bool explicit)
 #endif /* CAN_PROTOTYPE */
 {
-    bool retval = FALSE;
-    register IO *io;
-    int status;
+    bool retval;
+    IO *io;
 
     if (!gv)
 	gv = argvgv;
@@ -545,6 +544,23 @@ do_close(GV *gv, bool explicit)
 	    warn("Close on unopened file <%s>",GvENAME(gv));
 	return FALSE;
     }
+    retval = io_close(io);
+    if (explicit) {
+	IoLINES(io) = 0;
+	IoPAGE(io) = 0;
+	IoLINES_LEFT(io) = IoPAGE_LEN(io);
+    }
+    IoTYPE(io) = ' ';
+    return retval;
+}
+
+bool
+io_close(io)
+IO* io;
+{
+    bool retval = FALSE;
+    int status;
+
     if (IoIFP(io)) {
 	if (IoTYPE(io) == '|') {
 	    status = my_pclose(IoIFP(io));
@@ -563,12 +579,7 @@ do_close(GV *gv, bool explicit)
 	}
 	IoOFP(io) = IoIFP(io) = Nullfp;
     }
-    if (explicit) {
-	IoLINES(io) = 0;
-	IoPAGE(io) = 0;
-	IoLINES_LEFT(io) = IoPAGE_LEN(io);
-    }
-    IoTYPE(io) = ' ';
+
     return retval;
 }
 
