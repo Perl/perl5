@@ -569,12 +569,39 @@ the implicit loop, just as in B<awk>.
 
 =item B<-P>
 
-causes your program to be run through the C preprocessor before
+B<NOTE: Use of -P is strongly discouraged because of its inherent
+problems, including poor portability.>
+
+This option causes your program to be run through the C preprocessor before
 compilation by Perl.  Because both comments and B<cpp> directives begin
 with the # character, you should avoid starting comments with any words
 recognized by the C preprocessor such as C<"if">, C<"else">, or C<"define">.
-Also, in some platforms the C preprocessor knows too much: it knows
-about the C++ -style until-end-of-line comments starting with C<"//">.
+
+If you're considering using C<-P>, you might also want to look at the
+Filter::cpp module from CPAN.
+
+The problems of -P include, but are not limited to:
+
+=over 10
+
+=item *
+
+The C<#!> line is stripped, so any switches there don't apply.
+
+=item *
+
+A C<-P> on a C<#!> line doesn't work.
+
+=item *
+
+B<All> lines that begin with (whitespace and) a C<#> but
+do not look like cpp commands, are stripped, including anything
+inside Perl strings, regular expressions, and here-docs . 
+
+=item *
+
+In some platforms the C preprocessor knows too much: it knows about
+the C++ -style until-end-of-line comments starting with C<"//">.
 This will cause problems with common Perl constructs like
 
     s/foo//;
@@ -588,8 +615,22 @@ like for example C<"!">:
 
     s!foo!!;
 
-If you're considering using C<-P>, you might also want to look at the
-Filter::cpp module from CPAN.
+
+
+=item *
+
+It requires not only a working C preprocessor but also a working
+F<sed>.  If not on UNIX, you are probably out of luck on this.
+
+=item *
+
+Script line numbers are not preserved.
+
+=item *
+
+The C<-x> does not work with C<-P>.
+
+=back
 
 =item B<-s>
 
