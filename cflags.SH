@@ -1,4 +1,4 @@
-case $CONFIGDOTSH in
+case $CONFIG in
 '')
 	if test -f config.sh; then TOP=.;
 	elif test -f ../config.sh; then TOP=..;
@@ -24,7 +24,6 @@ echo "Extracting cflags (with variable substitutions)"
 rm -f cflags
 $spitshell >cflags <<!GROK!THIS!
 $startsh
-src=$src
 !GROK!THIS!
 
 : In the following dollars and backticks do not need the extra backslash.
@@ -74,12 +73,6 @@ for file do
     1) ;;
     *) echo $n "    $file.c	$c" ;;
     esac
-
-    : allow for out-of-source experience
-
-    if test "X$src" != X.; then
-        ccflags="$ccflags -I$src -I."
-    fi
 
     : allow variables like toke_cflags to be evaluated
 

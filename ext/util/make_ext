@@ -75,7 +75,7 @@ makefile=Makefile
 makeargs=''
 makeopts=''
 
-if test ! -d "$src/ext/$pname"; then
+if test ! -d "ext/$pname"; then
     echo "	Skipping $extspec (directory does not exist)"
     exit 0 # not an error ?
 fi
@@ -83,11 +83,6 @@ fi
 
 echo "	Making $mname ($target)"
 
-mkdir ext        2>/dev/null
-mkdir ext/$pname 2>/dev/null
-if test ! -f ext/$pname/Makefile.PL; then
-  cat $src/ext/$pname/Makefile.PL > ext/$pname/Makefile.PL
-fi
 cd ext/$pname
 
 # check link type and do any preliminaries
@@ -121,7 +116,7 @@ nonxs)      makeargs="";
 esac
 
 if test ! -f $makefile ; then
-	test -f Makefile.PL && ../$depth/miniperl -I../$depth/lib -I$src/lib Makefile.PL INSTALLDIRS=perl $passthru
+	test -f Makefile.PL && ../$depth/miniperl -I../$depth/lib Makefile.PL INSTALLDIRS=perl $passthru
 fi
 if test ! -f $makefile ; then
 	if test -f Makefile.SH; then

@@ -10,11 +10,13 @@ use File::Basename qw(&basename &dirname);
 #  $startperl
 # to ensure Configure will look for $Config{startperl}.
 
-$file = basename($0);
-$file =~ s/\.PL$//i;
-$file .= '.com' if $^O eq 'VMS';
+# This forces PL files to create target in same directory as PL file.
+# This is so that make depend always knows where to find PL derivatives.
+chdir(dirname($0));
+($file = basename($0)) =~ s/\.PL$//;
+$file =~ s/\.pl$//
+        if ($^O eq 'VMS' or $^O eq 'os2');  # "case-forgiving"
 
-chdir("pod") or die "Can't chdir to pod: $!";
 open OUT,">$file" or die "Can't create $file: $!";
 
 print "Extracting $file (with variable substitutions)\n";
