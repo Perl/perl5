@@ -59,10 +59,12 @@ SKIP: {
     my $cq = (($^O eq 'MSWin32'
                || $^O eq 'NetWare'
                || $^O eq 'VMS') ? '"'
-              : "'");
+              : "");
     my @params = ( "${cq}-I../lib$cq",  "${cq}-MPod::Usage$cq", '-e' );
     my $prg = qq[${cq}pod2usage({ $args })$cq];
     my @cmd = ( $^X, @params, $prg );
+
+    print "# cmd = @cmd\n";
 
     is( system( @cmd ) >> 8, $exit, 'Exit status of pod2usage()' );
 }
