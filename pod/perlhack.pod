@@ -2075,13 +2075,13 @@ simply kill away that testing process.
 The excellent valgrind tool can be used to find out both memory leaks
 and illegal memory accesses.  As of August 2003 it unfortunately works
 only on x86 (ELF) Linux.  The special "test.valgrind" target can be used
-to run the tests under valgrind.  Note that in the test script (t/TEST)
-currently (as of Perl 5.8.1) only naughty memory accesses are logged,
-not memory leaks.  Found errors are logged in files named F<test.valgrind>.
-Also note that with Perl built with ithreads, the glibc (at least 2.2.5)
-seems to have a bug of its own, where a non-locked POSIX mutex is
-unlocked, and valgrind catches this, for every test-- therefore the
-test script ignores that error.
+to run the tests under valgrind.  Found errors and memory leaks are
+logged in files named F<test.valgrind>.
+
+As system libraries (most notably glibc) are also triggering errors,
+valgrind allows to suppress such errors using suppression files. The
+default suppression file that comes with valgrind already catches a lot
+of them. Some additional suppressions are defined in F<t/perl.supp>.
 
 To get valgrind and for more information see
 
