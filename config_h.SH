@@ -2598,6 +2598,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	available to split a long double x into a fractional part f and
  *	an integer part i such that |f| < 1.0 and (f + i) = x.
  */
+/* HAS_MODFL_PROTO:
+ *	This symbol, if defined, indicates that the system provides
+ *	a prototype for the modfl() function.  Otherwise, it is up
+ *	to the program to supply one.  C99 says it should be
+ *		long double modfl(long double, long double *);
+ */
 /* HAS_MODFL_POW32_BUG:
  *	This symbol, if defined, indicates that the modfl routine is
  *	broken for long doubles >= pow(2, 32).
@@ -2606,6 +2612,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	release 2.2.2 is known to be okay.
  */
 #$d_modfl HAS_MODFL		/**/
+#$d_modflproto HAS_MODFL_PROTO		/**/
 #$d_modfl_pow32_bug HAS_MODFL_POW32_BUG		/**/
 
 /* HAS_MPROTECT:

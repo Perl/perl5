@@ -1241,6 +1241,11 @@ typedef NVTYPE NV;
 /* e.g. libsunmath doesn't have modfl and frexpl as of mid-March 2000 */
 #   ifdef HAS_MODFL
 #       define Perl_modf(x,y) modfl(x,y)
+/* eg glibc 2.2 series seems to provide modfl on ppc and arm, but has no
+   prototype in <math.h> */
+#       ifndef HAS_MODFL_PROTO
+long double modfl(long double, long double *);
+#	endif
 #   else
 #       define Perl_modf(x,y) ((long double)modf((double)(x),(double*)(y)))
 #   endif
