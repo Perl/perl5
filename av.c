@@ -92,7 +92,7 @@ av_extend(AV *av, I32 key)
 		U32 bytes;
 #endif
 
-#if defined(MYMALLOC) && !defined(PURIFY)
+#if defined(MYMALLOC) && !defined(PURIFY) && !defined(LEAKTEST)
 		newmax = malloced_size((void*)AvALLOC(av))/sizeof(SV*) - 1;
 
 		if (key <= newmax) 
