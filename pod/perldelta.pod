@@ -1,6 +1,6 @@
 =head1 NAME
 
-perldelta - what's new for perl5.006 (as of 5.005_54)
+perldelta - what's new for perl5.006 (as of 5.005_56)
 
 =head1 DESCRIPTION
 
@@ -216,7 +216,8 @@ Siemens BS2000 is now supported under the POSIX Shell.
 
 =item *
 
-The Mach CThreads (NEXTSTEP, OPENSTEP) are now supported by the Thread extension.
+The Mach CThreads (NEXTSTEP, OPENSTEP) are now supported by the Thread
+extension.
 
 =item *
 

@@ -1076,7 +1076,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	double. Usual values are 2, 4 and 8. The default is eight,
  *	for safety.
  */
-#if defined(CROSSCOMPILE) || defined(MULTIARCH)
+#if defined(CROSSCOMPILE) || defined(MULTIARCH) || defined(NeXT) || defined(__NeXT__)
 #  define MEM_ALIGNBYTES 8
 #else
 #define MEM_ALIGNBYTES $alignbytes
@@ -1098,7 +1098,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	so the default case (for NeXT) is big endian to catch them. 
  *	This might matter for NeXT 3.0.
  */
-#if defined(CROSSCOMPILE) || defined(MULTIARCH)
+#if defined(CROSSCOMPILE) || defined(MULTIARCH) || defined(NeXT) || defined(__NeXT__)
 #  ifdef __LITTLE_ENDIAN__
 #    if LONGSIZE == 4
 #      define BYTEORDER 0x1234
