@@ -231,6 +231,12 @@ struct perl_thread;
 #  define PERL_UNUSED_DECL
 #endif
 
+/* gcc -Wall:
+ * for silencing unused variables that are actually used most of the time,
+ * but we cannot quite get rid of, such `ax' in PPCODE+noargs xsubs
+ */
+#define PERL_UNUSED_VAR(var) if (0) var = var
+
 #define NOOP (void)0
 #define dNOOP extern int Perl___notused PERL_UNUSED_DECL
 

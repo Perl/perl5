@@ -1220,6 +1220,15 @@ EOF
 #	Perl_croak(aTHX_ "Usage: $pname($report_args)");
 EOF
 
+    #gcc -Wall: if an xsub has no arguments and PPCODE is used
+    #it is likely none of ST, XSRETURN or XSprePUSH macros are used
+    #hence `ax' (setup by dXSARGS) is unused
+    #XXX: could breakup the dXSARGS; into dSP;dMARK;dITEMS
+    #but such a move could break third-party extensions
+    print Q<<"EOF" if $PPCODE and $num_args == 0;
+#   PERL_UNUSED_VAR(ax); /* -Wall */
+EOF
+
     print Q<<"EOF" if $PPCODE;
 #    SP -= items;
 EOF
