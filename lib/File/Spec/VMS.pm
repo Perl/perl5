@@ -142,13 +142,6 @@ sub canonpath {
       else          { return vmsify($path);  }
     }
     else {
->>>> ORIGINAL VMS.pm#13
-      $path =~ s-\]\[--g;  $path =~ s/><//g;         # foo.][bar       ==> foo.bar
-      $path =~ s/([\[<])000000\./$1/;                # [000000.foo     ==> foo
-      if ($reduce_ricochet) { 
-        $path =~ s/\.[^\[<\.]+\.-([\]\>])/$1/g;
-        $path =~ s/([\[<\.])([^\[<\.]+)\.-\.?/$1/g;
-      }
       $path =~ s-\]\[--g;  $path =~ s/><//g;            # foo.][bar       ==> foo.bar
       $path =~ s/([\[<])000000\./$1/;                   # [000000.foo     ==> foo
       1 while $path =~ s{-\.-}{--};                     # -.-             ==> --
