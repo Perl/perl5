@@ -3032,9 +3032,8 @@ Perl_sv_utf8_downgrade(pTHX_ register SV* sv, bool fail_ok)
 	    }
 	    SvCUR(sv) = len;
 	}
-	SvUTF8_off(sv);
     }
-
+    SvUTF8_off(sv);
     return TRUE;
 }
 
@@ -6153,18 +6152,21 @@ Perl_sv_pvn_force(pTHX_ SV *sv, STRLEN *lp)
 char *
 Perl_sv_pvbyte(pTHX_ SV *sv)
 {
+    sv_utf8_downgrade(sv,0);
     return sv_pv(sv);
 }
 
 char *
 Perl_sv_pvbyten(pTHX_ SV *sv, STRLEN *lp)
 {
+    sv_utf8_downgrade(sv,0);
     return sv_pvn(sv,lp);
 }
 
 char *
 Perl_sv_pvbyten_force(pTHX_ SV *sv, STRLEN *lp)
 {
+    sv_utf8_downgrade(sv,0);
     return sv_pvn_force(sv,lp);
 }
 
