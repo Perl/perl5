@@ -93,6 +93,7 @@ extern PerlIO_funcs *PerlIO_find_layer(pTHX_ const char *name, STRLEN len,
 extern PerlIO *PerlIO_push(pTHX_ PerlIO *f, PerlIO_funcs *tab,
 			   const char *mode, SV *arg);
 extern void PerlIO_pop(pTHX_ PerlIO *f);
+extern void PerlIO_clone(pTHX_ PerlInterpreter *proto, CLONE_PARAMS *param);
 
 #endif				/* PerlIO */
 
@@ -184,7 +185,7 @@ START_EXTERN_C
 #endif
 #endif
 #ifndef PerlIO_init
-extern void PerlIO_init(void);
+extern void PerlIO_init(pTHX);
 #endif
 #ifndef PerlIO_stdoutf
 extern int PerlIO_stdoutf(const char *, ...)
@@ -348,11 +349,12 @@ extern void PerlIO_destruct(pTHX);
 
 extern int PerlIO_intmode2str(int rawmode, char *mode, int *writing);
 
-#ifndef PERLIO_IS_STDIO
-
-extern void PerlIO_cleanup(void);
+#ifdef PERLIO_LAYERS
+extern void PerlIO_cleanup(pTHX);
 
 extern void PerlIO_debug(const char *fmt, ...);
+typedef struct PerlIO_list_s PerlIO_list_t;
+
 
 #endif
 

@@ -223,6 +223,7 @@
 #define PL_dbargs		(PERL_GET_INTERP->Idbargs)
 #define PL_debstash		(PERL_GET_INTERP->Idebstash)
 #define PL_debug		(PERL_GET_INTERP->Idebug)
+#define PL_def_layerlist	(PERL_GET_INTERP->Idef_layerlist)
 #define PL_defgv		(PERL_GET_INTERP->Idefgv)
 #define PL_diehook		(PERL_GET_INTERP->Idiehook)
 #define PL_doextract		(PERL_GET_INTERP->Idoextract)
@@ -266,6 +267,7 @@
 #define PL_incgv		(PERL_GET_INTERP->Iincgv)
 #define PL_initav		(PERL_GET_INTERP->Iinitav)
 #define PL_inplace		(PERL_GET_INTERP->Iinplace)
+#define PL_known_layers		(PERL_GET_INTERP->Iknown_layers)
 #define PL_last_lop		(PERL_GET_INTERP->Ilast_lop)
 #define PL_last_lop_op		(PERL_GET_INTERP->Ilast_lop_op)
 #define PL_last_swash_hv	(PERL_GET_INTERP->Ilast_swash_hv)
@@ -350,6 +352,7 @@
 #define PL_pending_ident	(PERL_GET_INTERP->Ipending_ident)
 #define PL_perl_destruct_level	(PERL_GET_INTERP->Iperl_destruct_level)
 #define PL_perldb		(PERL_GET_INTERP->Iperldb)
+#define PL_perlio		(PERL_GET_INTERP->Iperlio)
 #define PL_pidstatus		(PERL_GET_INTERP->Ipidstatus)
 #define PL_preambleav		(PERL_GET_INTERP->Ipreambleav)
 #define PL_preambled		(PERL_GET_INTERP->Ipreambled)
@@ -511,6 +514,7 @@
 #define PL_dbargs		(vTHX->Idbargs)
 #define PL_debstash		(vTHX->Idebstash)
 #define PL_debug		(vTHX->Idebug)
+#define PL_def_layerlist	(vTHX->Idef_layerlist)
 #define PL_defgv		(vTHX->Idefgv)
 #define PL_diehook		(vTHX->Idiehook)
 #define PL_doextract		(vTHX->Idoextract)
@@ -554,6 +558,7 @@
 #define PL_incgv		(vTHX->Iincgv)
 #define PL_initav		(vTHX->Iinitav)
 #define PL_inplace		(vTHX->Iinplace)
+#define PL_known_layers		(vTHX->Iknown_layers)
 #define PL_last_lop		(vTHX->Ilast_lop)
 #define PL_last_lop_op		(vTHX->Ilast_lop_op)
 #define PL_last_swash_hv	(vTHX->Ilast_swash_hv)
@@ -638,6 +643,7 @@
 #define PL_pending_ident	(vTHX->Ipending_ident)
 #define PL_perl_destruct_level	(vTHX->Iperl_destruct_level)
 #define PL_perldb		(vTHX->Iperldb)
+#define PL_perlio		(vTHX->Iperlio)
 #define PL_pidstatus		(vTHX->Ipidstatus)
 #define PL_preambleav		(vTHX->Ipreambleav)
 #define PL_preambled		(vTHX->Ipreambled)
@@ -802,6 +808,7 @@
 #define PL_Idbargs		PL_dbargs
 #define PL_Idebstash		PL_debstash
 #define PL_Idebug		PL_debug
+#define PL_Idef_layerlist	PL_def_layerlist
 #define PL_Idefgv		PL_defgv
 #define PL_Idiehook		PL_diehook
 #define PL_Idoextract		PL_doextract
@@ -845,6 +852,7 @@
 #define PL_Iincgv		PL_incgv
 #define PL_Iinitav		PL_initav
 #define PL_Iinplace		PL_inplace
+#define PL_Iknown_layers	PL_known_layers
 #define PL_Ilast_lop		PL_last_lop
 #define PL_Ilast_lop_op		PL_last_lop_op
 #define PL_Ilast_swash_hv	PL_last_swash_hv
@@ -929,6 +937,7 @@
 #define PL_Ipending_ident	PL_pending_ident
 #define PL_Iperl_destruct_level	PL_perl_destruct_level
 #define PL_Iperldb		PL_perldb
+#define PL_Iperlio		PL_perlio
 #define PL_Ipidstatus		PL_pidstatus
 #define PL_Ipreambleav		PL_preambleav
 #define PL_Ipreambled		PL_preambled

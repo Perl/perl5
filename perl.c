@@ -258,7 +258,7 @@ perl_construct(pTHXx)
     sys_intern_init();
 #endif
 
-    PerlIO_init();			/* Hook to IO system */
+    PerlIO_init(aTHX);			/* Hook to IO system */
 
     PL_fdpid = newAV();			/* for remembering popen pids by fd */
     PL_modglobal = newHV();		/* pointers to per-interpreter module globals */
@@ -498,7 +498,7 @@ perl_destruct(pTHXx)
                  * flag is set in regexec.c:S_regtry
                  */
                 SvFLAGS(resv) &= ~SVf_BREAK;
-            } 
+            }
 	    else if(SvREPADTMP(resv)) {
 	      SvREPADTMP_off(resv);
 	    }
@@ -800,6 +800,11 @@ perl_destruct(pTHXx)
     if (PL_sv_count != 0 && ckWARN_d(WARN_INTERNAL))
 	Perl_warner(aTHX_ WARN_INTERNAL,"Scalars leaked: %ld\n", (long)PL_sv_count);
 
+#if 1 && defined(PERLIO_LAYERS)
+    /* No more IO - including error messages ! */
+    PerlIO_cleanup(aTHX);
+#endif
+
     Safefree(PL_origfilename);
     Safefree(PL_reg_start_tmp);
     if (PL_reg_curpm)
@@ -883,13 +888,6 @@ perl_free(pTHXx)
 #    else
     void *host = w32_internal_host;
 #    endif
-#    ifndef NETWARE
-    if (PerlProc_lasthost()) {
-#      ifdef USE_PERLIO
-	PerlIO_cleanup();
-#      endif
-    }
-#    endif
     PerlMem_free(aTHXx);
 #    ifdef NETWARE
     nw5_delete_internal_host(host);
@@ -897,9 +895,6 @@ perl_free(pTHXx)
     win32_delete_internal_host(host);
 #    endif
 #  else
-#    ifdef USE_PERLIO
-    PerlIO_cleanup();
-#    endif
     PerlMem_free(aTHXx);
 #  endif
 #else
@@ -946,7 +941,7 @@ setuid perl scripts securely.\n");
     {
         /* we copy rather than point to argv
          * since perl_clone will copy and perl_destruct
-         * has no way of knowing if we've made a copy or 
+         * has no way of knowing if we've made a copy or
          * just point to argv
          */
         int i = PL_origargc;
@@ -1517,7 +1512,7 @@ perl_run(pTHXx)
 	    LEAVE;
 	FREETMPS;
 	PL_curstash = PL_defstash;
-	if (!(PL_exit_flags & PERL_EXIT_DESTRUCT_END) && 
+	if (!(PL_exit_flags & PERL_EXIT_DESTRUCT_END) &&
 	    PL_endav && !PL_minus_c)
 	    call_list(oldscope, PL_endav);
 #ifdef MYMALLOC

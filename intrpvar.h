@@ -493,6 +493,14 @@ PERLVAR(Isavebegin,     bool)	/* save BEGINs for compiler	*/
 PERLVAR(Icustom_op_names, HV*)  /* Names of user defined ops */
 PERLVAR(Icustom_op_descs, HV*)  /* Descriptions of user defined ops */
 
+#ifdef PERLIO_LAYERS
+PERLVARI(Iperlio, PerlIO *,NULL)
+PERLVARI(Iknown_layers, PerlIO_list_t *,NULL)
+PERLVARI(Idef_layerlist, PerlIO_list_t *,NULL)
+#endif
+
 /* New variables must be added to the very end for binary compatibility.
  * XSUB.h provides wrapper functions via perlapi.h that make this
  * irrelevant, but not all code may be expected to #include XSUB.h. */
+
+
