@@ -1,11 +1,11 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 package CPAN;
-$VERSION = '1.59_58';
-# $Id: CPAN.pm,v 1.385 2001/02/09 21:37:57 k Exp $
+$VERSION = '1.60';
+# $Id: CPAN.pm,v 1.389 2002/04/19 09:37:07 k Exp $
 
 # only used during development:
 $Revision = "";
-# $Revision = "[".substr(q$Revision: 1.385 $, 10)."]";
+# $Revision = "[".substr(q$Revision: 1.389 $, 10)."]";
 
 use Carp ();
 use Config ();
@@ -2115,7 +2115,7 @@ sub config {
         @ISA = qw(Exporter LWP::UserAgent);
         $SETUPDONE++;
     } else {
-        $CPAN::Frontent->mywarn("LWP::UserAgent not available\n");
+        $CPAN::Frontend->mywarn("LWP::UserAgent not available\n");
     }
 }
 
@@ -2272,7 +2272,7 @@ sub localize {
             CPAN::LWP::UserAgent->config;
 	    eval {$Ua = CPAN::LWP::UserAgent->new;}; # Why is has_usable still not fit enough?
             if ($@) {
-                $CPAN::Frontent->mywarn("CPAN::LWP::UserAgent->new dies with $@")
+                $CPAN::Frontend->mywarn("CPAN::LWP::UserAgent->new dies with $@")
                     if $CPAN::DEBUG;
             } else {
                 my($var);
@@ -2423,7 +2423,7 @@ sub hosteasy {
               CPAN::LWP::UserAgent->config;
               eval { $Ua = CPAN::LWP::UserAgent->new; };
               if ($@) {
-                  $CPAN::Frontent->mywarn("CPAN::LWP::UserAgent->new dies with $@");
+                  $CPAN::Frontend->mywarn("CPAN::LWP::UserAgent->new dies with $@");
               }
 	  }
 	  my $res = $Ua->mirror($url, $aslocal);
@@ -2555,7 +2555,7 @@ Trying with "$funkyftp$src_switch" to get
     $url
 ]);
 	  my($system) =
-	      "$chdir$funkyftp$src_switch '$url' $devnull$stdout_redir";
+	      "$chdir$funkyftp$src_switch \"$url\" $devnull$stdout_redir";
 	  $self->debug("system[$system]") if $CPAN::DEBUG;
 	  my($wstatus);
 	  if (($wstatus = system($system)) == 0
@@ -2588,7 +2588,7 @@ Trying with "$funkyftp$src_switch" to get
 Trying with "$funkyftp$src_switch" to get
   $url.gz
 ]);
-	    my($system) = "$funkyftp$src_switch '$url.gz' $devnull > $asl_gz";
+	    my($system) = "$funkyftp$src_switch \"$url.gz\" $devnull > $asl_gz";
 	    $self->debug("system[$system]") if $CPAN::DEBUG;
 	    my($wstatus);
 	    if (($wstatus = system($system)) == 0
@@ -4796,6 +4796,14 @@ sub dir {
 
 package CPAN::Bundle;
 
+sub look {
+    my $self = shift;
+    $CPAN::Frontend->myprint(
+                             qq{ look() commmand on bundles not}.
+                             qq{ implemented (What should it do?)}
+                            );
+}
+
 sub undelay {
     my $self = shift;
     delete $self->{later};
@@ -5317,8 +5325,8 @@ sub manpage_headline {
     my $inpod = 0;
     local $/ = "\n";
     while (<$fh>) {
-      $inpod = m/^=(?!head1\s+NAME)/ ? 0 :
-	  m/^=head1\s+NAME/ ? 1 : $inpod;
+      $inpod = m/^=(?!head1\s+NAME\s*$)/ ? 0 :
+	  m/^=head1\s+NAME\s*$/ ? 1 : $inpod;
       next unless $inpod;
       next if /^=/;
       next if /^\s+$/;
