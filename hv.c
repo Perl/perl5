@@ -991,21 +991,6 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	/* if placeholder is here, it's already been deleted.... */
 	if (HeVAL(entry) == &PL_sv_placeholder)
 	{
-	    if (SvREADONLY(hv))
-		return Nullsv; /* if still SvREADONLY, leave it deleted. */
-
-           /* okay, really delete the placeholder. */
-           *oentry = HeNEXT(entry);
-           if (i && !*oentry)
-               xhv->xhv_fill--; /* HvFILL(hv)-- */
-           if (entry == xhv->xhv_eiter /* HvEITER(hv) */)
-               HvLAZYDEL_on(hv);
-           else
-               hv_free_ent(hv, entry);
-           xhv->xhv_keys--; /* HvKEYS(hv)-- */
-	   if (xhv->xhv_keys == 0)
-               HvHASKFLAGS_off(hv);
-           xhv->xhv_placeholders--;
            return Nullsv;
 	}
 	else if (SvREADONLY(hv) && HeVAL(entry) && SvREADONLY(HeVAL(entry))) {
@@ -1028,6 +1013,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	 * an error.
 	 */
 	if (SvREADONLY(hv)) {
+	    SvREFCNT_dec(HeVAL(entry));
 	    HeVAL(entry) = &PL_sv_placeholder;
 	    /* We'll be saving this slot, so the number of allocated keys
 	     * doesn't go down, but the number placeholders goes up */
@@ -1072,6 +1058,17 @@ S_hsplit(pTHX_ HV *hv)
     int longest_chain = 0;
     int was_shared;
 
+    /*PerlIO_printf(PerlIO_stderr(), "hsplit called for %p which had %d\n",
+      hv, (int) oldsize);*/
+
+    if (HvPLACEHOLDERS(hv) && !SvREADONLY(hv)) {
+      /* Can make this clear any placeholders first for non-restricted hashes,
+	 even though Storable rebuilds restricted hashes by putting in all the
+	 placeholders (first) before turning on the readonly flag, because
+	 Storable always pre-splits the hash.  */
+      hv_clear_placeholders(hv);
+    }
+	       
     PL_nomemok = TRUE;
 #if defined(STRANGE_MALLOC) || defined(MYMALLOC)
     Renew(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize), char);
@@ -1501,42 +1498,48 @@ See Hash::Util::lock_keys() for an example of its use.
 void
 Perl_hv_clear_placeholders(pTHX_ HV *hv)
 {
-    I32 items;
-    items = (I32)HvPLACEHOLDERS(hv);
-    if (items) {
-        HE *entry;
-        I32 riter = HvRITER(hv);
-        HE *eiter = HvEITER(hv);
-        hv_iterinit(hv);
-        /* This may look suboptimal with the items *after* the iternext, but
-           it's quite deliberate. We only get here with items==0 if we've
-           just deleted the last placeholder in the hash. If we've just done
-           that then it means that the hash is in lazy delete mode, and the
-           HE is now only referenced in our iterator. If we just quit the loop
-           and discarded our iterator then the HE leaks. So we do the && the
-           other way to ensure iternext is called just one more time, which
-           has the side effect of triggering the lazy delete.  */
-        while ((entry = hv_iternext_flags(hv, HV_ITERNEXT_WANTPLACEHOLDERS))
-            && items) {
-            SV *val = hv_iterval(hv, entry);
+    I32 items = (I32)HvPLACEHOLDERS(hv);
+    I32 i = HvMAX(hv);
 
-            if (val == &PL_sv_placeholder) {
+    if (items == 0)
+	return;
 
-                /* It seems that I have to go back in the front of the hash
-                   API to delete a hash, even though I have a HE structure
-                   pointing to the very entry I want to delete, and could hold
-                   onto the previous HE that points to it. And it's easier to
-                   go in with SVs as I can then specify the precomputed hash,
-                   and don't have fun and games with utf8 keys.  */
-                SV *key = hv_iterkeysv(entry);
+    do {
+	/* Loop down the linked list heads  */
+	int first = 1;
+	HE **oentry = &(HvARRAY(hv))[i];
+	HE *entry = *oentry;
 
-                hv_delete_ent (hv, key, G_DISCARD, HeHASH(entry));
-                items--;
-            }
-        }
-        HvRITER(hv) = riter;
-        HvEITER(hv) = eiter;
-    }
+	if (!entry)
+	    continue;
+
+	for (; entry; entry = *oentry) {
+	    if (HeVAL(entry) == &PL_sv_placeholder) {
+		*oentry = HeNEXT(entry);
+		if (first && !*oentry)
+		    HvFILL(hv)--; /* This linked list is now empty.  */
+		if (HvEITER(hv))
+		    HvLAZYDEL_on(hv);
+		else
+		    hv_free_ent(hv, entry);
+
+		if (--items == 0) {
+		    /* Finished.  */
+		    HvTOTALKEYS(hv) -= HvPLACEHOLDERS(hv);
+		    if (HvKEYS(hv) == 0)
+			HvHASKFLAGS_off(hv);
+		    HvPLACEHOLDERS(hv) = 0;
+		    return;
+		}
+	    } else {
+		oentry = &HeNEXT(entry);
+		first = 0;
+	    }
+	}
+    } while (--i >= 0);
+    /* You can't get here, hence assertion should always fail.  */
+    assert (items == 0);
+    assert (0);
 }
 
 STATIC void
