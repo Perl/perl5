@@ -451,17 +451,77 @@ perl_destruct(pTHXx)
     PL_stderrgv = Nullgv;
     PL_last_in_gv = Nullgv;
     PL_replgv = Nullgv;
+    PL_debstash = Nullhv;
 
     /* reset so print() ends up where we expect */
     setdefout(Nullgv);
+
     SvREFCNT_dec(PL_argvout_stack);
     PL_argvout_stack = Nullav;
+
+    SvREFCNT_dec(PL_fdpid);
+    PL_fdpid = Nullav;
+    SvREFCNT_dec(PL_modglobal);
+    PL_modglobal = Nullhv;
+    SvREFCNT_dec(PL_preambleav);
+    PL_preambleav = Nullav;
+    SvREFCNT_dec(PL_subname);
+    PL_subname = Nullsv;
+    SvREFCNT_dec(PL_linestr);
+    PL_linestr = Nullsv;
+    SvREFCNT_dec(PL_pidstatus);
+    PL_pidstatus = Nullhv;
+    SvREFCNT_dec(PL_toptarget);
+    PL_toptarget = Nullsv;
+    SvREFCNT_dec(PL_bodytarget);
+    PL_bodytarget = Nullsv;
+    PL_formtarget = Nullsv;
+
+    /* clear utf8 character classes */
+    SvREFCNT_dec(PL_utf8_alnum);
+    SvREFCNT_dec(PL_utf8_alnumc);
+    SvREFCNT_dec(PL_utf8_ascii);
+    SvREFCNT_dec(PL_utf8_alpha);
+    SvREFCNT_dec(PL_utf8_space);
+    SvREFCNT_dec(PL_utf8_cntrl);
+    SvREFCNT_dec(PL_utf8_graph);
+    SvREFCNT_dec(PL_utf8_digit);
+    SvREFCNT_dec(PL_utf8_upper);
+    SvREFCNT_dec(PL_utf8_lower);
+    SvREFCNT_dec(PL_utf8_print);
+    SvREFCNT_dec(PL_utf8_punct);
+    SvREFCNT_dec(PL_utf8_xdigit);
+    SvREFCNT_dec(PL_utf8_mark);
+    SvREFCNT_dec(PL_utf8_toupper);
+    SvREFCNT_dec(PL_utf8_tolower);
+    PL_utf8_alnum	= Nullsv;
+    PL_utf8_alnumc	= Nullsv;
+    PL_utf8_ascii	= Nullsv;
+    PL_utf8_alpha	= Nullsv;
+    PL_utf8_space	= Nullsv;
+    PL_utf8_cntrl	= Nullsv;
+    PL_utf8_graph	= Nullsv;
+    PL_utf8_digit	= Nullsv;
+    PL_utf8_upper	= Nullsv;
+    PL_utf8_lower	= Nullsv;
+    PL_utf8_print	= Nullsv;
+    PL_utf8_punct	= Nullsv;
+    PL_utf8_xdigit	= Nullsv;
+    PL_utf8_mark	= Nullsv;
+    PL_utf8_toupper	= Nullsv;
+    PL_utf8_totitle	= Nullsv;
+    PL_utf8_tolower	= Nullsv;
+
+    SvREFCNT_dec(PL_compiling.cop_warnings);
+    PL_compiling.cop_warnings = Nullsv;
 
     /* Prepare to destruct main symbol table.  */
 
     hv = PL_defstash;
     PL_defstash = 0;
     SvREFCNT_dec(hv);
+    SvREFCNT_dec(PL_curstname);
+    PL_curstname = Nullsv;
 
     /* clear queued errors */
     SvREFCNT_dec(PL_errors);
@@ -532,8 +592,6 @@ perl_destruct(pTHXx)
     sv_free_arenas();
 
     /* No SVs have survived, need to clean out */
-    PL_linestr = NULL;
-    PL_pidstatus = Nullhv;
     Safefree(PL_origfilename);
     Safefree(PL_archpat_auto);
     Safefree(PL_reg_start_tmp);
@@ -1627,10 +1685,10 @@ Perl_moreswitches(pTHX_ char *s)
 	    my_setenv("PERL5DB", Perl_form(aTHX_ "use Devel::%s;", ++s));
 	    s += strlen(s);
 	}
-	if (!PL_perldb) {
+	if (!PL_perldb)
 	    PL_perldb = PERLDB_ALL;
+	if (!PL_debstash)
 	    init_debugger();
-	}
 	return s;
     case 'D':
     {	
@@ -1740,7 +1798,7 @@ Perl_moreswitches(pTHX_ char *s)
 		sv_catpv(sv,    "})");
 	    }
 	    s += strlen(s);
-	    if (PL_preambleav == NULL)
+	    if (!PL_preambleav)
 		PL_preambleav = newAV();
 	    av_push(PL_preambleav, sv);
 	}
@@ -2024,7 +2082,6 @@ S_init_main_stash(pTHX)
     sv_setpvn(ERRSV, "", 0);
     PL_curstash = PL_defstash;
     PL_compiling.cop_stash = PL_defstash;
-    PL_debstash = GvHV(gv_fetchpv("DB::", GV_ADDMULTI, SVt_PVHV));
     PL_globalstash = GvHV(gv_fetchpv("CORE::GLOBAL::", GV_ADDMULTI, SVt_PVHV));
     /* We must init $/ before switches are processed. */
     sv_setpvn(get_sv("/", TRUE), "\n", 1);
@@ -2583,6 +2640,7 @@ Perl_init_debugger(pTHX)
     dTHR;
     HV *ostash = PL_curstash;
 
+    PL_debstash = GvHV(gv_fetchpv("DB::", GV_ADDMULTI, SVt_PVHV));
     PL_curstash = PL_debstash;
     PL_dbargs = GvAV(gv_AVadd((gv_fetchpv("args", GV_ADDMULTI, SVt_PVAV))));
     AvREAL_off(PL_dbargs);
@@ -3229,4 +3287,3 @@ read_e_script(pTHXo_ int idx, SV *buf_sv, int maxlen)
     sv_chop(PL_e_script, nl);
     return 1;
 }
-
