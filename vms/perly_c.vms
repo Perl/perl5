@@ -1519,12 +1519,12 @@ yyloop:
     }
     if (yyerrflag) goto yyinrecovery;
 #ifdef lint
-    goto yynewerror;
+
 #endif
 
     yyerror("syntax error");
 #ifdef lint
-    goto yyerrlab;
+
 #endif
 
     ++yynerrs;
