@@ -7,7 +7,7 @@
     print STDIN "abc" ;
 
   Filehandle %s opened only for output		[pp_print]
-    print <STDOUT> ;
+    $a = <STDOUT> ;
 
   print() on closed filehandle %s		[pp_print]
     close STDIN ; print STDIN "abc" ;
@@ -62,27 +62,32 @@ print() on unopened filehandle abc at - line 4.
 ########
 # pp_hot.c [pp_print]
 use warnings 'io' ;
-print STDIN "anc";
-print <STDOUT>;
-print <STDERR>;
-open(FOO, ">&STDOUT") and print <FOO>;
-print getc(STDERR);
-print getc(FOO);
-####################################################################
-# The next test is known to fail on some systems (Linux+old glibc, #
-# some *BSDs (including Mac OS X and NeXT), among others.          #
-# We skip it for now (on the grounds that it is "just" a warning). #
-####################################################################
-#read(FOO,$_,1);
+# There is no guarantee that STDOUT is output only, or STDIN input only.
+# Certainly on some BSDs (at least FreeBSD, Darwin, BSDi) file descriptors
+# 1 and 2 are opened read/write on the tty, and the IO layers may reflect this.
+# So we must make our own file handle that is read only.
+my $file = "./xcv" ; unlink $file ;
+open (FH, ">$file") or die $! ;
+close FH or die $! ;
+die "There is no file $file" unless -f $file ;
+open (FH, "<$file") or die $! ;
+print FH "anc" ;
+open(FOO, "<&FH") or die $! ;
+print FOO "anc" ;
 no warnings 'io' ;
-print STDIN "anc";
+print FH "anc" ;
+print FOO "anc" ;
+use warnings 'io' ;
+print FH "anc" ;
+print FOO "anc" ;
+close (FH) or die $! ;
+close (FOO) or die $! ;
+unlink $file ;
 EXPECT
-Filehandle STDIN opened only for input at - line 3.
-Filehandle STDOUT opened only for output at - line 4.
-Filehandle STDERR opened only for output at - line 5.
-Filehandle FOO opened only for output at - line 6.
-Filehandle STDERR opened only for output at - line 7.
-Filehandle FOO opened only for output at - line 8.
+Filehandle FH opened only for input at - line 12.
+Filehandle FOO opened only for input at - line 14.
+Filehandle FH opened only for input at - line 19.
+Filehandle FOO opened only for input at - line 20.
 ########
 # pp_hot.c [pp_print]
 use warnings 'closed' ;
@@ -150,14 +155,26 @@ readline() on closed filehandle STDIN at - line 4.
 # pp_hot.c [Perl_do_readline]
 use warnings 'io' ;
 my $file = "./xcv" ; unlink $file ;
-open (FH, ">./xcv") ;
+open (FH, ">$file") or die $! ;
 my $a = <FH> ;
 no warnings 'io' ;
 $a = <FH> ;
-close (FH) ;
+use warnings 'io' ;
+open(FOO, ">&FH") or die $! ;
+$a = <FOO> ;
+no warnings 'io' ;
+$a = <FOO> ;
+use warnings 'io' ;
+$a = <FOO> ;
+$a = <FH> ;
+close (FH) or die $! ;
+close (FOO) or die $! ;
 unlink $file ;
 EXPECT
 Filehandle FH opened only for output at - line 5.
+Filehandle FOO opened only for output at - line 10.
+Filehandle FOO opened only for output at - line 14.
+Filehandle FH opened only for output at - line 15.
 ########
 # pp_hot.c [Perl_sub_crush_depth]
 use warnings 'recursion' ;

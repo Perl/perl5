@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.6 $, $Date: 2002/01/25 21:22:22 $)
+perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.8 $, $Date: 2002/02/08 22:31:57 $)
 
 =head1 DESCRIPTION
 
@@ -183,10 +183,10 @@ following groups:
 
     comp.infosystems.www.authoring.cgi 	Writing CGI scripts for the Web.
 
-There is also Usenet gateway to the mailing list used by the crack
-Perl development team (perl5-porters) at
-nntp://nntp.perl.org/perl.perl5.porters or its web interface at
-http://nntp.perl.org/group/perl.perl5.porters .
+There is also Usenet gateway to Perl mailing lists sponsored by perl.org at 
+nntp://nntp.perl.org, or a web interface to the same lists at
+http://nntp.perl.org/group/.  Other groups are listed at 
+http://lists.perl.org.
 
 =head2 Where should I post source code?
 
@@ -427,7 +427,7 @@ subscription information.
 The Google search engine now carries archived and searchable newsgroup
 content. 
 
-http://groups.google.com/groups?hl=en&lr=&safe=off&group=comp.lang.perl.misc
+http://groups.google.com/groups?group=comp.lang.perl.misc
 
 If you have a question, you can be sure someone has already asked the
 same question at some point on c.l.p.m. It requires some time and patience

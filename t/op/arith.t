@@ -1,6 +1,6 @@
 #!./perl -w
 
-print "1..130\n";
+print "1..132\n";
 
 sub try ($$) {
    print +($_[1] ? "ok" : "not ok"), " $_[0]\n";
@@ -245,7 +245,23 @@ tryeq 125, -4.5 / 2, -2.25;
 tryeq 126, -5.5 / -2, 2.75;
 
 # Bluuurg if your floating point can't accurately cope with powers of 2
+# [I suspect this is parsing string->float problems, not actual arith]
 tryeq_sloppy 127, 18446744073709551616/1, 18446744073709551616; # Bluuurg
 tryeq 128, 18446744073709551616/2, 9223372036854775808;
 tryeq 129, 18446744073709551616/4294967296, 4294967296;
 tryeq 130, 18446744073709551616/9223372036854775808, 2;
+
+{
+  # The peephole optimiser is wrong to think that it can substitute intops
+  # in place of regular ops, because i_multiply can overflow.
+  # Bug reported by "Sisyphus" <kalinabears@hdc.com.au>
+  my $n = 1127;
+
+  my $float = ($n % 1000) * 167772160.0;
+  tryeq 131, $float, 21307064320;
+
+  # On a 32 bit machine, if the i_multiply op is used, you will probably get
+  # -167772160. It's actually undefined behaviour, so anything may happen.
+  my $int = ($n % 1000) * 167772160;
+  tryeq 132, $int, 21307064320;
+}

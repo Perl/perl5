@@ -70,6 +70,13 @@ struct cop {
 #define CopLINE_dec(c)		(--CopLINE(c))
 #define CopLINE_set(c,l)	(CopLINE(c) = (l))
 
+/* OutCopFILE() is CopFILE for output (caller, die, warn, etc.) */
+#ifdef MACOS_TRADITIONAL
+#  define OutCopFILE(c) MacPerl_MPWFileName(CopFILE(c))
+#else
+#  define OutCopFILE(c) CopFILE(c)
+#endif
+
 /*
  * Here we have some enormously heavy (or at least ponderous) wizardry.
  */

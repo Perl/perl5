@@ -706,6 +706,11 @@ sub UnicodeData_Txt()
             $title,     ## titlecase mapping
               ) = split(/\s*;\s*/);
 
+	# Note that in Unicode 3.2 there will be names like
+	# LINE FEED (LF), which probably means that \N{} needs
+	# to cope also with LINE FEED and LF.
+	$name = $unicode10 if $name eq '<control>' && $unicode10 ne '';
+
         my $code = hex($hexcode);
 
         if ($comb and $comb == 230) {

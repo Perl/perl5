@@ -3040,14 +3040,14 @@ sub escape_str { # ASCII, UTF8
     my($str) = @_;
     $str =~ s/(.)/ord($1)>255 ? sprintf("\\x{%x}", ord($1)) : $1/eg;
     $str =~ s/\a/\\a/g;
-#    $str =~ s/\cH/\\b/g; # \b means someting different in a regex 
+#    $str =~ s/\cH/\\b/g; # \b means something different in a regex 
     $str =~ s/\t/\\t/g;
     $str =~ s/\n/\\n/g;
     $str =~ s/\e/\\e/g;
     $str =~ s/\f/\\f/g;
     $str =~ s/\r/\\r/g;
     $str =~ s/([\cA-\cZ])/'\\c' . chr(ord('@') + ord($1))/ge;
-    $str =~ s/([\0\033-\037\177-\377])/'\\' . sprintf("%03o", ord($1))/ge;
+    $str =~ s/([^[:print:]])/'\\' . sprintf("%03o", ord($1))/ge;
     return $str;
 }
 
@@ -3056,7 +3056,7 @@ sub escape_str { # ASCII, UTF8
 sub escape_extended_re {
     my($str) = @_;
     $str =~ s/(.)/ord($1)>255 ? sprintf("\\x{%x}", ord($1)) : $1/eg;
-    $str =~ s/([\0\033-\037\177-\377])/'\\' . sprintf("%03o", ord($1))/ge;
+    $str =~ s/([^[:print:]])/'\\' . sprintf("%03o", ord($1))/ge;
     $str =~ s/\n/\n\f/g;
     return $str;
 }
