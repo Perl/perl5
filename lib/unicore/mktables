@@ -2,6 +2,9 @@
 use strict;
 use Carp;
 
+die "$0: Please run me as ./mktables to avoid unnecessary differences\n"
+    unless $0 eq "./mktables";
+
 ##
 ## mktables -- create the runtime Perl Unicode files (lib/unicore/**/*.pl)
 ## from the Unicode database files (lib/unicore/*.txt).
@@ -625,7 +628,7 @@ sub UnicodeData_Txt()
 
         # 005F: SPACING UNDERSCORE
         $Cat{Word}->$op($code)  if $cat =~ /^[LMN]/ || $code == 0x005F;
-        $Cat{Alnum}->$op($code) if $cat =~ /^[LMN]/;
+        $Cat{Alnum}->$op($code) if $cat =~ /^[LM]|Nd/;
         $Cat{Alpha}->$op($code) if $cat =~ /^[LM]/;
 
 
@@ -647,7 +650,7 @@ sub UnicodeData_Txt()
                                     || $code == 0x2028 # 2028: LINE SEPARATOR
                                     || $code == 0x2029;# 2029: PARAGRAPH SEP.
 
-        $Cat{Blank}->$op($code) if $cat  =~ /^Z[^lp]$/
+        $Cat{Blank}->$op($code) if $cat eq "Zs"
                                 || $code == 0x0009  # 0009: HORIZONTAL TAB
                                 || $code == 0x0020; # 0020: SPACE
 
@@ -657,8 +660,9 @@ sub UnicodeData_Txt()
         $Cat{Title}->$op($code) if $cat eq "Lt";
         $Cat{ASCII}->$op($code) if $code <= 0x007F;
         $Cat{Cntrl}->$op($code) if $cat =~ /^C/;
-        $Cat{Graph}->$op($code) if $cat =~ /^([LMNPS]|Co)/;
-        $Cat{Print}->$op($code) if $cat =~ /^([LMNPS]|Co|Zs)/;
+        $Cat{Graph}->$op($code) if $cat =~ /^[^C]/
+                                && $cat ne "Zs";
+        $Cat{Print}->$op($code) if $cat =~ /^[^C]/;
         $Cat{Punct}->$op($code) if $cat =~ /^P/;
 
         $Cat{XDigit}->$op($code) if ($code >= 0x30 && $code <= 0x39)  ## 0..9
