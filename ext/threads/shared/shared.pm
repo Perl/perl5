@@ -63,6 +63,7 @@ sub CLONE {
 
 sub DESTROY {
     my $self = shift;
+    _thrcnt_dec($$self);
     delete($shared{$$self});
 }
 

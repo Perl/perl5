@@ -99,7 +99,10 @@ SV*
 _thrcnt(ref)
         SV* ref
 	CODE:
-        shared_sv* shared = Perl_sharedsv_find(aTHX, ref);
+        shared_sv* shared;
+	if(SvROK(ref))
+	    ref = SvRV(ref);
+	shared = Perl_sharedsv_find(aTHX, ref);
         if(!shared)
            croak("thrcnt can only be used on shared values");
 	SHAREDSvLOCK(shared);
@@ -120,6 +123,15 @@ thrcnt_inc(ref)
         if(!shared)
            croak("thrcnt can only be used on shared values");
 	Perl_sharedsv_thrcnt_inc(aTHX_ shared);
+
+void
+_thrcnt_dec(ref)
+        SV* ref
+        CODE:
+	shared_sv* shared = (shared_sv*) SvIV(ref);
+        if(!shared)
+           croak("thrcnt can only be used on shared values");
+	Perl_sharedsv_thrcnt_dec(aTHX_ shared);
 
 
 MODULE = threads::shared		PACKAGE = threads::shared::sv		
