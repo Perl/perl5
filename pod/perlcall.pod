@@ -1925,8 +1925,8 @@ refers to the last.
 =head2 Creating and calling an anonymous subroutine in C
 
 As we've already shown, C<perl_call_sv> can be used to invoke an
-anonymous subroutine.  However, our example showed how Perl script
-invoking an XSUB to preform this operation.  Let's see how it can be
+anonymous subroutine.  However, our example showed a Perl script
+invoking an XSUB to perform this operation.  Let's see how it can be
 done inside our C code:
 
  ...

@@ -1923,7 +1923,7 @@ system:
     ($retval = ioctl(...)) || ($retval = -1);
     printf "System returned %d\n", $retval;
 
-The special string "C<0> but true" is excempt from B<-w> complaints
+The special string "C<0> but true" is exempt from B<-w> complaints
 about improper numeric conversions.
 
 =item join EXPR,LIST

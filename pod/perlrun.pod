@@ -507,7 +507,7 @@ makes it iterate over filename arguments somewhat like B<sed>:
 
 If a file named by an argument cannot be opened for some reason, Perl
 warns you about it, and moves on to the next file.  Note that the
-lines are printed automatically.  An error occuring during printing is
+lines are printed automatically.  An error occurring during printing is
 treated as fatal.  To suppress printing use the B<-n> switch.  A B<-p>
 overrides a B<-n> switch.
 

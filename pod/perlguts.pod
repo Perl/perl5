@@ -68,7 +68,7 @@ C<sv_setpvfn> is an analogue of C<vsprintf>, but it allows you to specify
 either a pointer to a variable argument list or the address and length of
 an array of SVs.  The last argument points to a boolean; on return, if that
 boolean is true, then locale-specific information has been used to format
-the string, and the string's contents are therefore untrustworty (see
+the string, and the string's contents are therefore untrustworthy (see
 L<perlsec>).  This pointer may be NULL if that information is not
 important.  Note that this function requires you to specify the length of
 the format.
@@ -1791,7 +1791,7 @@ method's CV, which can be obtained from the GV with the C<GvCV> macro.
 =item gv_fetchmethod_autoload
 
 Returns the glob which contains the subroutine to call to invoke the
-method on the C<stash>.  In fact in the presense of autoloading this may
+method on the C<stash>.  In fact in the presence of autoloading this may
 be the glob for "AUTOLOAD".  In this case the corresponding variable
 $AUTOLOAD is already setup.
 

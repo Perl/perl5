@@ -1353,7 +1353,7 @@ $BASETIME, $^T, $WARNING, $^W, $EXECUTABLE_NAME, $^X, $ARGV, @ARGV, @INC,
 
 =item Private Variables via C<my()>
 
-=item Peristent Private Variables
+=item Persistent Private Variables
 
 =item Temporary Values via local()
 
