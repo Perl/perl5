@@ -609,6 +609,10 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 			PL_tainted = FALSE;
 		    }
 		    sv_setpvn(sv, s, i);
+		    if ((PL_curpm->op_pmdynflags & PMdf_UTF8) && !IN_BYTE)
+			SvUTF8_on(sv);
+		    else
+			SvUTF8_off(sv);
 		    if (PL_tainting)
 			PL_tainted = (was_tainted || RX_MATCH_TAINTED(rx));
 		    break;
@@ -1286,7 +1290,7 @@ Perl_magic_getpos(pTHX_ SV *sv, MAGIC *mg)
 	if (mg && mg->mg_len >= 0) {
 	    dTHR;
 	    I32 i = mg->mg_len;
-	    if (IN_UTF8)
+	    if (DO_UTF8(lsv))
 		sv_pos_b2u(lsv, &i);
 	    sv_setiv(sv, i + PL_curcop->cop_arybase);
 	    return 0;
@@ -1323,7 +1327,7 @@ Perl_magic_setpos(pTHX_ SV *sv, MAGIC *mg)
 
     pos = SvIV(sv) - PL_curcop->cop_arybase;
 
-    if (IN_UTF8) {
+    if (DO_UTF8(lsv)) {
 	ulen = sv_len_utf8(lsv);
 	if (ulen)
 	    len = ulen;

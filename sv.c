@@ -2769,7 +2769,7 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 	    *SvEND(dstr) = '\0';
 	    (void)SvPOK_only(dstr);
 	}
-	if (SvUTF8(sstr))
+	if (DO_UTF8(sstr))
 	    SvUTF8_on(dstr);
 	/*SUPPRESS 560*/
 	if (sflags & SVp_NOK) {
@@ -5638,6 +5638,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
     STRLEN origlen;
     I32 svix = 0;
     static char nullstr[] = "(null)";
+    SV *argsv;
 
     /* no matter what, this is a string now */
     (void)SvPV_force(sv, origlen);
@@ -5652,12 +5653,18 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		char *s = va_arg(*args, char*);
 		sv_catpv(sv, s ? s : nullstr);
 	    }
-	    else if (svix < svmax)
+	    else if (svix < svmax) {
 		sv_catsv(sv, *svargs);
+		if (DO_UTF8(*svargs))
+		    SvUTF8_on(sv);
+	    }
 	    return;
 	case '_':
 	    if (args) {
-		sv_catsv(sv, va_arg(*args, SV*));
+		argsv = va_arg(*args, SV*);
+		sv_catsv(sv, argsv);
+		if (DO_UTF8(argsv))
+		    SvUTF8_on(sv);
 		return;
 	    }
 	    /* See comment on '_' below */
@@ -5676,6 +5683,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	STRLEN zeros = 0;
 	bool has_precis = FALSE;
 	STRLEN precis = 0;
+	bool is_utf = FALSE;
 
 	char esignbuf[4];
 	U8 utf8buf[10];
@@ -5816,22 +5824,20 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    goto string;
 
 	case 'c':
-	    if (IN_UTF8) {
-		if (args)
-		    uv = va_arg(*args, int);
-		else
-		    uv = (svix < svmax) ? SvIVx(svargs[svix++]) : 0;
-
+	    if (args)
+		uv = va_arg(*args, int);
+	    else
+		uv = (svix < svmax) ? SvIVx(svargs[svix++]) : 0;
+	    if (uv >= 128 && !IN_BYTE) {
 		eptr = (char*)utf8buf;
 		elen = uv_to_utf8((U8*)eptr, uv) - utf8buf;
-		goto string;
+		is_utf = TRUE;
 	    }
-	    if (args)
-		c = va_arg(*args, int);
-	    else
-		c = (svix < svmax) ? SvIVx(svargs[svix++]) : 0;
-	    eptr = &c;
-	    elen = 1;
+	    else {
+		c = (char)uv;
+		eptr = &c;
+		elen = 1;
+	    }
 	    goto string;
 
 	case 's':
@@ -5851,16 +5857,18 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		}
 	    }
 	    else if (svix < svmax) {
-		eptr = SvPVx(svargs[svix++], elen);
-		if (IN_UTF8) {
+		argsv = svargs[svix++];
+		eptr = SvPVx(argsv, elen);
+		if (DO_UTF8(argsv)) {
 		    if (has_precis && precis < elen) {
 			I32 p = precis;
-			sv_pos_u2b(svargs[svix - 1], &p, 0); /* sticks at end */
+			sv_pos_u2b(argsv, &p, 0); /* sticks at end */
 			precis = p;
 		    }
 		    if (width) { /* fudge width (can't fudge elen) */
-			width += elen - sv_len_utf8(svargs[svix - 1]);
+			width += elen - sv_len_utf8(argsv);
 		    }
+		    is_utf = TRUE;
 		}
 	    }
 	    goto string;
@@ -5873,7 +5881,10 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	     */
 	    if (!args)
 		goto unknown;
-	    eptr = SvPVx(va_arg(*args, SV*), elen);
+	    argsv = va_arg(*args,SV*);
+	    eptr = SvPVx(argsv, elen);
+	    if (DO_UTF8(argsv))
+		is_utf = TRUE;
 
 	string:
 	    if (has_precis && elen > precis)
@@ -6216,6 +6227,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    memset(p, ' ', gap);
 	    p += gap;
 	}
+	if (is_utf)
+	    SvUTF8_on(sv);
 	*p = '\0';
 	SvCUR(sv) = p - SvPVX(sv);
     }

@@ -933,7 +933,7 @@ Perl_do_chop(pTHX_ register SV *astr, register SV *sv)
     s = SvPV(sv, len);
     if (len && !SvPOK(sv))
 	s = SvPV_force(sv, len);
-    if (IN_UTF8) {
+    if (DO_UTF8(sv)) {
 	if (s && len) {
 	    char *send = s + len;
 	    char *start = s;
@@ -946,12 +946,12 @@ Perl_do_chop(pTHX_ register SV *astr, register SV *sv)
 	    *s = '\0';
 	    SvCUR_set(sv, s - start);
 	    SvNIOK_off(sv);
+	    SvUTF8_on(astr);
 	}
 	else
 	    sv_setpvn(astr, "", 0);
     }
-    else
-    if (s && len) {
+    else if (s && len) {
 	s += --len;
 	sv_setpvn(astr, s, 1);
 	*s = '\0';
@@ -961,7 +961,7 @@ Perl_do_chop(pTHX_ register SV *astr, register SV *sv)
     else
 	sv_setpvn(astr, "", 0);
     SvSETMAGIC(sv);
-} 
+}
 
 I32
 Perl_do_chomp(pTHX_ register SV *sv)

@@ -1339,8 +1339,10 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     if (exp == NULL)
 	FAIL("NULL regexp argument");
 
-    if (PL_curcop == &PL_compiling ? (PL_hints & HINT_UTF8) : IN_UTF8)
+    if (PL_curcop == &PL_compiling ? (PL_hints & HINT_UTF8) : IN_UTF8) {
 	PL_reg_flags |= RF_utf8;
+	pm->op_pmdynflags |= PMdf_UTF8;
+    }
     else
 	PL_reg_flags = 0;
 

@@ -30,7 +30,8 @@
 
   Mandatory Warnings
   ------------------
-  Malformed UTF-8 character
+  Malformed UTF-8 character (not tested: difficult to produce with
+                             perl now)
 
 __END__
 # pp.c
@@ -109,7 +110,6 @@ use utf8 ;
 $_ = "\x80  \xff" ;
 reverse ;
 EXPECT
-Malformed UTF-8 character at - line 4.
 ########
 # pp.c
 BEGIN {
@@ -128,4 +128,3 @@ reverse ;
 EXPECT
 \x80 will produce malformed UTF-8 character; use \x{80} for that at - line 10.
 \xff will produce malformed UTF-8 character; use \x{ff} for that at - line 10.
-Malformed UTF-8 character at - line 11.
