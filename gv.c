@@ -58,15 +58,24 @@ GV *
 gv_fetchfile(name)
 char *name;
 {
-    char tmpbuf[1200];
+    char smallbuf[256];
+    char *tmpbuf;
     STRLEN tmplen;
     GV *gv;
 
-    sprintf(tmpbuf, "_<%s", name);
-    tmplen = strlen(tmpbuf);
+    tmplen = strlen(name) + 2;
+    if (tmplen < sizeof smallbuf)
+	tmpbuf = smallbuf;
+    else
+	New(603, tmpbuf, tmplen + 1, char);
+    tmpbuf[0] = '_';
+    tmpbuf[1] = '<';
+    strcpy(tmpbuf + 2, name);
     gv = *(GV**)hv_fetch(defstash, tmpbuf, tmplen, TRUE);
     if (!isGV(gv))
 	gv_init(gv, defstash, tmpbuf, tmplen, FALSE);
+    if (tmpbuf != smallbuf)
+	Safefree(tmpbuf);
     sv_setpv(GvSV(gv), name);
     if (*name == '/' && (instr(name, "/lib/") || instr(name, ".pm")))
 	GvMULTI_on(gv);
