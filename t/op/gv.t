@@ -62,7 +62,7 @@ if (defined $baa) {
 #        fact that %X::Y:: is stored in %X:: isn't documented.
 #        (I hope.)
 
-{ package Foo::Bar }
+{ package Foo::Bar; $test=1; }
 print exists $Foo::{'Bar::'} ? "ok 12\n" : "not ok 12\n";
 print $Foo::{'Bar::'} eq '*Foo::Bar::' ? "ok 13\n" : "not ok 13\n";
 
