@@ -1211,7 +1211,8 @@ PP(pp_ne)
     dSP; tryAMAGICbinSET(ne,0);
 #ifndef NV_PRESERVES_UV
     if (SvROK(TOPs) && SvROK(TOPm1s)) {
-	SETs(boolSV(SvRV(TOPs) != SvRV(TOPm1s)));
+        SP--;
+	SETs(boolSV(SvRV(TOPs) != SvRV(TOPp1s)));
 	RETURN;
     }
 #endif
@@ -1227,7 +1228,9 @@ PP(pp_ncmp)
     dSP; dTARGET; tryAMAGICbin(ncmp,0);
 #ifndef NV_PRESERVES_UV
     if (SvROK(TOPs) && SvROK(TOPm1s)) {
-	SETi(PTR2UV(SvRV(TOPs)) - PTR2UV(SvRV(TOPm1s)));
+        UV right = PTR2UV(SvRV(POPs));
+        UV left = PTR2UV(SvRV(TOPs));
+	SETi((left > right) - (left < right));
 	RETURN;
     }
 #endif

@@ -3151,22 +3151,24 @@ create_command_line(char *cname, STRLEN clen, const char * const *args)
 	    if (!curlen) {
 		do_quote = 1;
 	    }
+	    else if (quote_next) {
+		/* see if it really is multiple arguments pretending to
+		 * be one and force a set of quotes around it */
+		if (*find_next_space(arg))
+		    do_quote = 1;
+	    }
 	    else if (!(arg[0] == '"' && curlen > 1 && arg[curlen-1] == '"')) {
 		STRLEN i = 0;
 		while (i < curlen) {
 		    if (isSPACE(arg[i])) {
 			do_quote = 1;
+		    }
+		    else if (arg[i] == '"') {
+			do_quote = 0;
 			break;
 		    }
 		    i++;
 		}
-	    }
-	    else if (quote_next) {
-		/* ok, we know the argument already has quotes; see if it
-		 * really is multiple arguments pretending to be one and
-		 * force a set of quotes around it */
-		if (*find_next_space(arg))
-		    do_quote = 1;
 	    }
 	}
 
@@ -3194,7 +3196,7 @@ create_command_line(char *cname, STRLEN clen, const char * const *args)
 		    extra_quotes = TRUE;
 		}
 		else {
-		    /* single argument, force quoting if unquoted */
+		    /* single argument, force quoting if it has spaces */
 		    quote_next = TRUE;
 		}
 	    }

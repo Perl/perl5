@@ -11,7 +11,7 @@ BEGIN {
 }
 
 $| = 1;
-print "1..15\n";
+print "1..16\n";
 
 # External program 'tr' assumed.
 open(PIPE, "|-") || (exec 'tr', 'YX', 'ko');
@@ -174,3 +174,21 @@ if ($? != 42) {
 }
 print "ok 15\n";
 $? = 0;
+
+# check that child is reaped if the piped program can't be executed
+{
+  local $SIG{CHLD} = 'DEFAULT';
+  open NIL, '/no_such_process |';
+  close NIL;
+
+  my $child = 0;
+  eval {
+    local $SIG{ALRM} = sub { die; };
+    alarm 2;
+    $child = wait;
+    alarm 0;
+  };
+
+  print "not " if $child != -1;
+  print "ok 16\n";
+}
