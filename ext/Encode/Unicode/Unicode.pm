@@ -4,7 +4,7 @@ use strict;
 use warnings;
 no warnings 'redefine';
 
-our $VERSION = do { my @r = (q$Revision: 2.1 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 2.2 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use XSLoader;
 XSLoader::load(__PACKAGE__,$VERSION);
@@ -46,7 +46,7 @@ sub renew {
     my $self = shift;
     $BOM_Unknown{$self->name} or return $self;
     my $clone = bless { %$self } => ref($self);
-    $clone->{clone} = 1; # so the caller knows it is renewed.
+    $clone->{renewed}++; # so the caller knows it is renewed.
     return $clone;
 }
 

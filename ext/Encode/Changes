@@ -1,8 +1,17 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.7 2004/10/22 19:35:52 dankogai Exp $
+# $Id: Changes,v 2.8 2004/10/24 13:00:29 dankogai Exp dankogai $
 #
-$Revision: 2.7 $ $Date: 2004/10/22 19:35:52 $
+$Revision: 2.8 $ $Date: 2004/10/24 13:00:29 $
+! Encode.xs lib/Encode/Encoding.pm  Unicode/Unicode.{pm,xs}
+  Resolved the issue that was raised by the Encode::utf8 fallbacks vs.
+  PerlIO::encoding issue that was introduced in 2.07.  This is done by
+  making use of ->renew() method that used to be used only by
+  Encode::Unicode.  ->renewed() method was also introduced to fetch
+  the value thereof.
+  Message-Id: <94B2EB12-25B7-11D9-9E6A-000A95DBB50A@dan.co.jp>
+
+2.07 2004/10/22 19:35:52
 ! lib/Encode/Encoding.pm
   "Remove Carp from warnings.pm" that influences Encode, by Tels.
   Message-Id: <200410161618.29779@bloodgate.com>

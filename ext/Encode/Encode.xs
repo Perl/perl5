@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 2.1 2004/10/22 19:35:52 dankogai Exp $
+ $Id: Encode.xs,v 2.2 2004/10/24 13:00:29 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -252,14 +252,6 @@ MODULE = Encode		PACKAGE = Encode::utf8	PREFIX = Method_
 PROTOTYPES: DISABLE
 
 void
-Method_renew(obj)
-SV *	obj
-CODE:
-{
-    XSRETURN(1);
-}
-
-void
 Method_decode_xs(obj,src,check = 0)
 SV *	obj
 SV *	src
@@ -270,6 +262,28 @@ CODE:
     U8 *s = (U8 *) SvPV(src, slen);
     U8 *e = (U8 *) SvEND(src);
     SV *dst = newSV(slen>0?slen:1); /* newSV() abhors 0 -- inaba */
+
+    /* 
+     * PerlO check -- we assume the object is of PerlIO if renewed 
+     * and if so, we set RETURN_ON_ERR for partial character
+     */
+    int renewed = 0;
+    dSP; ENTER; SAVETMPS;
+    PUSHMARK(sp);
+    XPUSHs(obj);
+    PUTBACK;
+    if (call_method("renewed",G_SCALAR) == 1) {
+	SPAGAIN;
+	renewed = POPi;
+	PUTBACK; 
+#if 0
+	fprintf(stderr, "renewed == %d\n", renewed);
+#endif
+	if (renewed){ check |= ENCODE_RETURN_ON_ERR; }
+    }
+    FREETMPS; LEAVE;
+    /* end PerlIO check */
+
     SvPOK_only(dst);
     SvCUR_set(dst,0);
     if (SvUTF8(src)) {
@@ -397,6 +411,14 @@ CODE:
 {
     XSRETURN(1);
 }
+
+int
+Method_renewed(obj)
+SV *    obj
+CODE:
+    RETVAL = 0;
+OUTPUT:
+    RETVAL
 
 void
 Method_name(obj)
