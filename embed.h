@@ -433,6 +433,7 @@
 #if !defined(PERL_OBJECT)
 #define my_pclose		Perl_my_pclose
 #define my_popen		Perl_my_popen
+#define my_popen_list		Perl_my_popen_list
 #endif
 #define my_setenv		Perl_my_setenv
 #define my_stat			Perl_my_stat
@@ -1924,6 +1925,7 @@
 #if !defined(PERL_OBJECT)
 #define my_pclose(a)		Perl_my_pclose(aTHX_ a)
 #define my_popen(a,b)		Perl_my_popen(aTHX_ a,b)
+#define my_popen_list(a,b,c)	Perl_my_popen_list(aTHX_ a,b,c)
 #endif
 #define my_setenv(a,b)		Perl_my_setenv(aTHX_ a,b)
 #define my_stat()		Perl_my_stat(aTHX)
@@ -3767,6 +3769,8 @@
 #define my_pclose		Perl_my_pclose
 #define Perl_my_popen		CPerlObj::Perl_my_popen
 #define my_popen		Perl_my_popen
+#define Perl_my_popen_list	CPerlObj::Perl_my_popen_list
+#define my_popen_list		Perl_my_popen_list
 #endif
 #define Perl_my_setenv		CPerlObj::Perl_my_setenv
 #define my_setenv		Perl_my_setenv

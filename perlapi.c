@@ -1684,6 +1684,13 @@ Perl_my_popen(pTHXo_ char* cmd, char* mode)
 {
     return ((CPerlObj*)pPerl)->Perl_my_popen(cmd, mode);
 }
+
+#undef  Perl_my_popen_list
+PerlIO*
+Perl_my_popen_list(pTHXo_ char* mode, int n, SV ** args)
+{
+    return ((CPerlObj*)pPerl)->Perl_my_popen_list(mode, n, args);
+}
 #endif
 
 #undef  Perl_my_setenv

@@ -499,6 +499,7 @@ PERL_CALLCONV void*	Perl_my_memset(char* loc, I32 ch, I32 len);
 #if !defined(PERL_OBJECT)
 PERL_CALLCONV I32	Perl_my_pclose(pTHX_ PerlIO* ptr);
 PERL_CALLCONV PerlIO*	Perl_my_popen(pTHX_ char* cmd, char* mode);
+PERL_CALLCONV PerlIO*	Perl_my_popen_list(pTHX_ char* mode, int n, SV ** args);
 #endif
 PERL_CALLCONV void	Perl_my_setenv(pTHX_ char* nam, char* val);
 PERL_CALLCONV I32	Perl_my_stat(pTHX);
