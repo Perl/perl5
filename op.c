@@ -2090,19 +2090,19 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
     } else if (type == OP_RV2SV ||	/* "our" declaration */
 	       type == OP_RV2AV ||
 	       type == OP_RV2HV) { /* XXX does this let anything illegal in? */
-      if (cUNOPo->op_first->op_type != OP_GV) { /* MJD 20011224 */
-           yyerror(Perl_form(aTHX_ "Can't declare %s in my", OP_DESC(o)));
-        }
-        if (attrs) {
-            GV *gv = cGVOPx_gv(cUNOPo->op_first);
-            PL_in_my = FALSE;
-            PL_in_my_stash = Nullhv;
-            apply_attrs(GvSTASH(gv),
-                        (type == OP_RV2SV ? GvSV(gv) :
-                         type == OP_RV2AV ? (SV*)GvAV(gv) :
-                         type == OP_RV2HV ? (SV*)GvHV(gv) : (SV*)gv),
-                        attrs, FALSE);
-        }
+	if (cUNOPo->op_first->op_type != OP_GV) { /* MJD 20011224 */
+	    yyerror(Perl_form(aTHX_ "Can't declare %s in %s",
+			OP_DESC(o), PL_in_my == KEY_our ? "our" : "my"));
+	} else if (attrs) {
+	    GV *gv = cGVOPx_gv(cUNOPo->op_first);
+	    PL_in_my = FALSE;
+	    PL_in_my_stash = Nullhv;
+	    apply_attrs(GvSTASH(gv),
+			(type == OP_RV2SV ? GvSV(gv) :
+			 type == OP_RV2AV ? (SV*)GvAV(gv) :
+			 type == OP_RV2HV ? (SV*)GvHV(gv) : (SV*)gv),
+			attrs, FALSE);
+	}
 	o->op_private |= OPpOUR_INTRO;
 	return o;
     }
