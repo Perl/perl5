@@ -28,6 +28,444 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.7.X		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 15108] By: jhi                                   on 2002/03/08  14:59:50
+        Log: Subject: Cygwin cygipc support skipped
+             From: "Gerrit P. Haase" <gerrit@familiehaase.de>
+             Date: Fri, 8 Mar 2002 16:59:34 +0100
+             Message-ID: <113694157285.20020308165934@familiehaase.de>
+     Branch: perl
+	   ! hints/cygwin.sh
+____________________________________________________________________________
+[ 15107] By: jhi                                   on 2002/03/08  14:48:36
+        Log: metaconfig unit change for #15106.
+     Branch: metaconfig
+	   ! U/compline/d_gconvert.U
+____________________________________________________________________________
+[ 15106] By: jhi                                   on 2002/03/08  14:48:14
+        Log: Subject: Re: [PATCH] tests for Gconvert
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Thu, 07 Mar 2002 16:48:10 -0800
+             Message-ID: <KpAi8gzkganW092yn@efn.org>
+     Branch: perl
+	   ! Configure config_h.SH t/base/num.t
+____________________________________________________________________________
+[ 15105] By: jhi                                   on 2002/03/08  14:32:55
+        Log: The new test has some teething problems.
+     Branch: perl
+	   - ext/B/t/lint.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 15104] By: jhi                                   on 2002/03/08  13:42:24
+        Log: Subject: [PATCH] B::Lint tests
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Fri, 8 Mar 2002 14:47:19 +0100
+             Message-ID: <20020308144719.A2663@rafael>
+     Branch: perl
+	   + ext/B/t/lint.t
+	   ! MANIFEST ext/B/B/Lint.pm
+____________________________________________________________________________
+[ 15103] By: jhi                                   on 2002/03/08  13:40:35
+        Log: Subject: [PATCH] hints/powerux.sh for perl-5.7.3
+             From: Tom Horsley <Tom.Horsley@mail.ccur.com>
+             Date: Fri, 8 Mar 2002 13:24:14 GMT
+             Message-Id: <200203081324.NAA00642@cleo>
+     Branch: perl
+	   ! hints/powerux.sh
+____________________________________________________________________________
+[ 15102] By: jhi                                   on 2002/03/08  13:37:04
+        Log: Subject: HP has some new models
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Fri, 08 Mar 2002 13:07:02 +0100
+             Message-Id: <20020308130529.E335.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! README.hpux
+____________________________________________________________________________
+[ 15101] By: ams                                   on 2002/03/08  09:11:40
+        Log: Subject: [PATCH: pod/perlguts.pod] pod markup fixes
+             From: Stas Bekman <stas@stason.org>
+             Date: Fri, 8 Mar 2002 15:29:53 +0800 (SGT)
+             Message-Id: <Pine.LNX.4.44.0203081529050.5375-100000@hope.stason.org>
+     Branch: perl
+	   ! pod/perlguts.pod
+____________________________________________________________________________
+[ 15100] By: pudge                                 on 2002/03/08  03:23:17
+        Log: Update Changes
+     Branch: maint-5.6/macperl
+	   ! macos/Changes
+____________________________________________________________________________
+[ 15099] By: pudge                                 on 2002/03/08  03:20:06
+        Log: Replace macperlbundled with macperldelta
+     Branch: maint-5.6/macperl
+	   ! macos/macperl/MacPerl.podhelp
+____________________________________________________________________________
+[ 15098] By: pudge                                 on 2002/03/08  03:19:44
+        Log: Comsetic fixes (Thomas Wegner)
+     Branch: maint-5.6/macperl
+	   ! macos/macperl/MPBalloons.ball macos/macperl/MacPerl.r
+____________________________________________________________________________
+[ 15097] By: pudge                                 on 2002/03/08  03:19:08
+        Log: Bump OS version
+     Branch: maint-5.6/macperl
+	   ! macos/config.sh
+____________________________________________________________________________
+[ 15096] By: jhi                                   on 2002/03/08  03:14:41
+        Log: Thought I deleted this already?
+     Branch: perl
+	   - ext/I18N/Langinfo/fallback.c
+____________________________________________________________________________
+[ 15095] By: jhi                                   on 2002/03/08  03:06:20
+        Log: perlport updates from Pudge.
+     Branch: perl
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[ 15094] By: ams                                   on 2002/03/08  03:06:03
+        Log: Nitpick.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 15093] By: jhi                                   on 2002/03/08  03:00:46
+        Log: Wrong test.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 15091] By: jhi                                   on 2002/03/08  02:25:23
+        Log: Integrate change 14064 from macperl to blead.
+     Branch: perl
+	  !> pod/perlmodinstall.pod pod/perlport.pod
+____________________________________________________________________________
+[ 15090] By: pudge                                 on 2002/03/08  02:15:01
+        Log: Integrate recent perlport changes
+     Branch: maint-5.6/macperl
+	  !> pod/perlport.pod
+____________________________________________________________________________
+[ 15089] By: ams                                   on 2002/03/08  01:54:03
+        Log: Subject: [ID 20020307.010] [Patch docs] A _very_ small patch to correct a
+             minor typo in perlguts.pod
+             From: Anton Tagunov <tagunov@motor.ru>
+             Date: Fri, 8 Mar 2002 05:26:59 +0300
+             Message-Id: <4649821189.20020308052659@motor.ru>
+     Branch: perl
+	   ! pod/perlguts.pod
+____________________________________________________________________________
+[ 15088] By: jhi                                   on 2002/03/08  01:40:41
+        Log: Subject: Re[2]: [ID 20020307.006] [BUG][use encoding] use encoding 'greek'; print "not" unless pack("U*", 0x3af) eq pack("C*", 0xdf) prints "not"! 
+             From: Anton Tagunov <tagunov@newmail.ru>
+             Date: Fri, 8 Mar 2002 04:31:44 +0300
+             Message-ID: <13946506773.20020308043144@newmail.ru>
+             
+             (one test changed)
+     Branch: perl
+	   ! lib/encoding.t sv.c
+____________________________________________________________________________
+[ 15087] By: jhi                                   on 2002/03/08  00:15:08
+        Log: Subject: [PATCH perldelta] some more deltas
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Thu, 7 Mar 2002 23:13:23 +0100
+             Message-ID: <20020307231323.A13068@rafael>
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 15086] By: jhi                                   on 2002/03/07  22:43:31
+        Log: Subject: [PATCH] perl/t/io/fs.t -- VOS bug
+             From: Paul_GreenVOS@vos.stratus.com
+             Date: Thu, 7 Mar 02 14:25 est
+             Message-Id: <200203071924.OAA03273@mailhub2.stratus.com>
+     Branch: perl
+	   ! t/io/fs.t
+____________________________________________________________________________
+[ 15085] By: jhi                                   on 2002/03/07  22:37:51
+        Log: As suggested by Anton Tagunov, eq and cmp now obey the
+             encoding pragma (by remapping their byte argument if the
+             other argument is in Unicode).  Also fix a bug found by
+             Anton where ord undef under the encoding pragma would barf.
+             ([ID 20020307.009] A null pointer dereference with 'use encoding')
+             Finally, use the nicer form of sv_recode_to_utf8.
+     Branch: perl
+	   ! lib/encoding.pm lib/encoding.t pp.c regcomp.c sv.c toke.c
+____________________________________________________________________________
+[ 15084] By: jhi                                   on 2002/03/07  20:54:02
+        Log: Retract #14985, #14899, and #14990, following the principles
+             "Do no harm." and "If it ain't broke, don't fix it."
+             
+             Firstly, the #14985 broke badly on UTF-EBCDIC, #14990 fixed
+             some, but still broken, and I do not have the extra brain
+             cells for the EBCDIC backport.  Secondly, the old version
+             worked both in EBCDIC and non-.  Thirdly, the old version
+             may be more amenable for the behaviour suggsted by Anton
+             Tagunov regarding the encoding pragma.
+     Branch: perl
+	   ! embed.fnc embed.h global.sym proto.h sv.c util.c
+____________________________________________________________________________
+[ 15083] By: jhi                                   on 2002/03/07  20:26:36
+        Log: Long doubles give you long doubles.
+     Branch: perl
+	   ! t/base/num.t
+____________________________________________________________________________
+[ 15082] By: jhi                                   on 2002/03/07  18:16:39
+        Log: Forgotten deMANIFESTation.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 15081] By: jhi                                   on 2002/03/07  17:29:17
+        Log: Obsolete unused file, noticed by Dank Kogai.
+     Branch: perl
+	   - ext/Encode/lib/Encode/JP/Tr.pm
+____________________________________________________________________________
+[ 15080] By: ams                                   on 2002/03/07  11:31:46
+        Log: Subject: [PATCH Changes] Changes should mirror version number
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Thu, 7 Mar 2002 11:04:24 GMT
+             Message-Id: <200203071104.LAA17200@tempest.npl.co.uk>
+     Branch: perl
+	   ! Porting/pumpkin.pod
+____________________________________________________________________________
+[ 15079] By: jhi                                   on 2002/03/07  04:40:06
+        Log: metaconfig unit change for #15078.
+     Branch: metaconfig
+	   ! U/compline/d_gconvert.U
+____________________________________________________________________________
+[ 15078] By: jhi                                   on 2002/03/07  04:39:39
+        Log: Subject: Re: [PATCH] tests for Gconvert
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Wed, 06 Mar 2002 20:22:54 -0800
+             Message-ID: <esuh8gzkg2/b092yn@efn.org>
+     Branch: perl
+	   ! Configure pod/perldelta.pod t/base/num.t
+____________________________________________________________________________
+[ 15077] By: jhi                                   on 2002/03/07  03:27:38
+        Log: Mac OS X UFS does not do ctime.
+     Branch: perl
+	   ! pod/perldelta.pod pod/perlport.pod
+____________________________________________________________________________
+[ 15076] By: jhi                                   on 2002/03/07  02:40:09
+        Log: AUTHORS updates.
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[ 15075] By: jhi                                   on 2002/03/07  01:48:46
+        Log: Continued Chinese puzzles from Autrijus.
+     Branch: perl
+	   + ext/Encode/t/CN.t ext/Encode/t/TW.t
+	   ! MANIFEST ext/Encode/lib/Encode/CN/HZ.pm
+____________________________________________________________________________
+[ 15074] By: jhi                                   on 2002/03/07  00:16:10
+        Log: Subject: [PATCH bleadperl] reordering conditions in Win32.pm
+             From: Nikola Knezevic <indy@tesla.rcub.bg.ac.yu>
+             Date: Wed, 6 Mar 2002 18:13:51 +0100
+             Message-ID: <16925657426.20020306181351@tesla.rcub.bg.ac.yu>
+     Branch: perl
+	   ! lib/File/Spec/Win32.pm
+____________________________________________________________________________
+[ 15073] By: jhi                                   on 2002/03/07  00:15:11
+        Log: perlport tweaks.
+     Branch: perl
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[ 15072] By: jhi                                   on 2002/03/07  00:05:11
+        Log: Subject: Re: [PATCH docs] Re: Bug with -M
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Wed, 6 Mar 2002 16:20:27 -0500
+             Message-ID: <20020306212027.GC4257@blackrider>
+     Branch: perl
+	   ! pod/perlfunc.pod pod/perlport.pod
+____________________________________________________________________________
+[ 15071] By: jhi                                   on 2002/03/06  20:20:29
+        Log: perldelta updates.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 15070] By: jhi                                   on 2002/03/06  20:06:37
+        Log: 5005threads wasn't even compiling.
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[ 15069] By: jhi                                   on 2002/03/06  15:06:33
+        Log: Subject: Re: perl@15047 New format tests for still existing bugs
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Wed, 06 Mar 2002 12:59:29 +0100
+             Message-Id: <20020306125854.C6F5.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! t/op/write.t
+____________________________________________________________________________
+[ 15068] By: jhi                                   on 2002/03/06  15:04:41
+        Log: Regen Glossary et al.
+     Branch: perl
+	   ! Porting/Glossary Porting/config.sh Porting/config_H
+____________________________________________________________________________
+[ 15067] By: jhi                                   on 2002/03/06  14:39:58
+        Log: Use HAS_TM_TM_ZONE (from #15065).  Should help
+             [ID 20020305.022] POSIX::strftime dumps core: STRUCT_TM_HASZONE should be set
+     Branch: perl
+	   ! util.c
+____________________________________________________________________________
+[ 15066] By: jhi                                   on 2002/03/06  14:39:40
+        Log: metaconfig unit change for #15065.
+     Branch: metaconfig
+	   ! U/compline/i_time.U
+____________________________________________________________________________
+[ 15065] By: jhi                                   on 2002/03/06  14:39:18
+        Log: Scan for tm_zone (and tm_gmtoff, while we are at it).
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[ 15064] By: jhi                                   on 2002/03/06  14:14:02
+        Log: Must remove fallback.c also from here.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 15063] By: jhi                                   on 2002/03/06  13:37:31
+        Log: Subject: Re: perl@15047 WinCE
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Wed, 06 Mar 2002 13:41:30 +0100
+             Message-Id: <20020306134107.C6F8.H.M.BRAND@hccnet.nl>
+             
+             Subject: Re: perl@15047 Win32
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Wed, 06 Mar 2002 13:46:02 +0100
+             Message-Id: <20020306134539.C6FB.H.M.BRAND@hccnet.nl>
+             
+             Subject: Re: perl@15047 Epoc
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Wed, 06 Mar 2002 13:48:31 +0100
+             Message-Id: <20020306134811.C6FE.H.M.BRAND@hccnet.nl>
+             
+             Subject: Re: perl@15047 NetWare
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Wed, 06 Mar 2002 13:55:46 +0100
+             Message-Id: <20020306135406.C701.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! NetWare/config_H.wc epoc/config.sh win32/Makefile
+	   ! win32/config_H.bc win32/config_H.gc win32/config_H.vc
+	   ! wince/Makefile.ce wince/config.h
+____________________________________________________________________________
+[ 15062] By: ams                                   on 2002/03/06  09:26:49
+        Log: Subject: Re: perl@15047
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Wed, 06 Mar 2002 11:25:50 +0100
+             Message-Id: <20020306112536.C6E9.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! cygwin/perlld.in
+____________________________________________________________________________
+[ 15061] By: ams                                   on 2002/03/06  08:44:12
+        Log: Subject: Re: perl@15047
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Wed, 06 Mar 2002 10:38:02 +0100
+             Message-Id: <20020306103741.C6E3.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 15060] By: ams                                   on 2002/03/06  08:30:33
+        Log: Subject: Update perlhist.pod
+             From: mjd@plover.com
+             Date: 6 Mar 2002 07:11:55 -0000
+             Message-Id: <20020306071155.10240.qmail@plover.com>
+             
+             Subject: [PATCH pod/perlvar.pod] $^V => string
+             From: Stas Bekman <stas@stason.org>
+             Date: Wed, 06 Mar 2002 14:56:55 +0800
+             Message-Id: <3C85BDB7.7050700@stason.org>
+     Branch: perl
+	   ! pod/perlhist.pod pod/perlvar.pod
+____________________________________________________________________________
+[ 15059] By: ams                                   on 2002/03/06  04:15:38
+        Log: Subject: [PATCH] assorted configure.com fix-ups
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Tue, 5 Mar 2002 23:11:22 -0600
+             Message-Id: <a05101507b8ab5389f9be@[172.16.52.1]>
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[ 15058] By: jhi                                   on 2002/03/06  04:01:27
+        Log: IRIX failure with long doubles.
+     Branch: perl
+	   ! t/op/pack.t
+____________________________________________________________________________
+[ 15057] By: jhi                                   on 2002/03/06  03:12:15
+        Log: Make reality and Changes coincide.
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
+[ 15056] By: jhi                                   on 2002/03/06  00:49:03
+        Log: Subject: Re[2]: [ID 20020303.005] Patch ... C API description
+             From: Anton Tagunov <tagunov@motor.ru>
+             Date: Wed, 6 Mar 2002 02:10:21 +0300
+             Message-ID: <11152782757.20020306021021@motor.ru>
+             
+             (reworded)
+     Branch: perl
+	   ! pod/perluniintro.pod
+____________________________________________________________________________
+[ 15055] By: jhi                                   on 2002/03/06  00:35:22
+        Log: Subject: [PATCH] B::Lint doesn't work
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Tue, 5 Mar 2002 22:51:18 +0100
+             Message-ID: <20020305225118.C733@rafael>
+     Branch: perl
+	   ! ext/B/B/Lint.pm
+____________________________________________________________________________
+[ 15054] By: jhi                                   on 2002/03/06  00:34:32
+        Log: Subject: Re: [PATCH] Re: [ID 20000922.001] Implicit comparison to $. not performed before filehandle read
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Mon, 04 Mar 2002 16:24:32 -0800
+             Message-ID: <ABBh8gzkgezX092yn@efn.org>
+     Branch: perl
+	   ! op.h pp_ctl.c t/op/flip.t
+____________________________________________________________________________
+[ 15053] By: jhi                                   on 2002/03/06  00:31:02
+        Log: Subject: [PATCH] Re: [ID 20020305.018] test failures with perl5.7.3 on FreeBSD 4.3
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Tue, 5 Mar 2002 22:30:49 +0000
+             Message-ID: <20020305223049.GH1693@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 15052] By: jhi                                   on 2002/03/06  00:28:40
+        Log: Subject: [PATCH] tests for Gconvert
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Tue, 05 Mar 2002 16:35:45 -0800
+             Message-ID: <hRWh8gzkgONX092yn@efn.org>
+     Branch: perl
+	   ! t/base/num.t
+____________________________________________________________________________
+[ 15051] By: jhi                                   on 2002/03/06  00:25:27
+        Log: Subject: [PATCH] toplevel Makefile.SH
+             From: Paul_GreenVOS@vos.stratus.com
+             Date: Tue, 5 Mar 02 17:34 est
+             Message-Id: <200203052233.RAA18424@mailhub2.stratus.com>
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[ 15050] By: jhi                                   on 2002/03/05  20:46:40
+        Log: Subject: [PATCH] pointer to perldelta in Changes
+             From: Chris Nandor <pudge@pobox.com>
+             Date: Tue, 05 Mar 2002 16:04:50 -0500
+             Message-ID: <pudge-920238.16045005032002@onion.valueclick.com>
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
+[ 15049] By: jhi                                   on 2002/03/05  20:45:33
+        Log: Subject: [PATCH perldelta] chom?p overridability is the other way
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Tue, 5 Mar 2002 22:26:20 +0100
+             Message-ID: <20020305222620.A733@rafael>
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 15048] By: jhi                                   on 2002/03/05  20:43:45
+        Log: Solaris: allow for /usr/bin/df not to exist.
+             
+             Subject: [ID 20020305.014] Configure: /usr/bin/df: not found
+             From: Kingpin <mthurn@copper.dulles.tasc.com>
+             Date: Tue, 5 Mar 2002 15:26:55 -0500 (EST)
+             Message-Id: <200203052026.g25KQtV24683@copper.dulles.tasc.com>
+     Branch: perl
+	   ! hints/solaris_2.sh
+____________________________________________________________________________
+[ 15047] By: jhi                                   on 2002/03/05  15:36:10
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 15046] By: jhi                                   on 2002/03/05  14:56:19
         Log: Double MANIFESTing.
      Branch: perl
