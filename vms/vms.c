@@ -911,6 +911,30 @@ my_mkdir(char *dir, Mode_t mode)
 }  /* end of my_mkdir */
 /*}}}*/
 
+/*{{{int my_chdir(char *)*/
+int
+my_chdir(char *dir)
+{
+  STRLEN dirlen = strlen(dir);
+  dTHX;
+
+  /* zero length string sometimes gives ACCVIO */
+  if (dirlen == 0) return -1;
+
+  /* some versions of CRTL chdir() doesn't tolerate trailing /, since
+   * that implies
+   * null file name/type.  However, it's commonplace under Unix,
+   * so we'll allow it for a gain in portability.
+   */
+  if (dir[dirlen-1] == '/') {
+    char *newdir = savepvn(dir,dirlen-1);
+    int ret = chdir(newdir);
+    Safefree(newdir);
+    return ret;
+  }
+  else return chdir(dir);
+}  /* end of my_chdir */
+/*}}}*/
 
 static void
 create_mbx(unsigned short int *chan, struct dsc$descriptor_s *namdsc)
