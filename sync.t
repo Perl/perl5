@@ -3,6 +3,7 @@ use Thread;
 $level = 0;
 
 sub single_file {
+    use attrs 'locked';
     my $arg = shift;
     $level++;
     print "Level $level for $arg\n";
@@ -50,7 +51,6 @@ sub start_baz {
 
 $| = 1;
 srand($$^$^T);
-Thread::sync(\&single_file);
 
 $foo = new Thread \&start_foo;
 $bar = new Thread \&start_bar;

@@ -2,8 +2,7 @@ package Thread;
 require Exporter;
 require DynaLoader;
 @ISA = qw(Exporter DynaLoader);
-@EXPORT_OK = qw(sync fast yield cond_signal cond_broadcast cond_wait
-	       async);
+@EXPORT_OK = qw(yield cond_signal cond_broadcast cond_wait async);
 
 #
 # Methods
@@ -17,13 +16,5 @@ sub async (&) {
 }
 
 bootstrap Thread;
-
-my $cv;
-foreach $cv (\&yield, \&sync, \&join, \&fast, \&DESTROY,
-	    \&cond_wait, \&cond_signal, \&cond_broadcast) {
-    fast($cv);
-}
-
-sync(\&new);	# not sure if this needs to be sync'd
 
 1;

@@ -3,6 +3,7 @@ use Thread;
 $global = undef;
 
 sub single_file {
+    use attrs 'locked';
     my $who = shift;
     my $i;
 
@@ -48,7 +49,6 @@ sub start_c {
 
 $| = 1;
 srand($$^$^T);
-Thread::sync(\&single_file);
 
 $foo = new Thread \&start_a;
 $bar = new Thread \&start_b;

@@ -202,24 +202,6 @@ AV *initargs;
     return thr;
 }
 
-static SV *
-fast(sv)
-SV *sv;
-{
-    HV *hvp;
-    GV *gvp;
-    CV *cv = sv_2cv(sv, &hvp, &gvp, FALSE);
-
-    if (!cv)
-	croak("Not a CODE reference");
-    if (CvCONDP(cv)) {
-	COND_DESTROY(CvCONDP(cv));
-	Safefree(CvCONDP(cv));
-	CvCONDP(cv) = 0;
-    }
-    return sv;
-}
-
 MODULE = Thread		PACKAGE = Thread
 
 Thread
@@ -233,26 +215,15 @@ new(class, startsv, ...)
 	RETVAL
 
 void
-sync(sv)
-	SV *	sv
-	HV *	hvp = NO_INIT
-	GV *	gvp = NO_INIT
-    CODE:
-	SvFLAGS(sv_2cv(sv, &hvp, &gvp, FALSE)) |= SVp_SYNC;
-	ST(0) = sv_mortalcopy(sv);
-
-void
-fast(sv)
-	SV *	sv
-    CODE:
-	ST(0) = sv_mortalcopy(fast(sv));
-
-void
 join(t)
 	Thread	t
 	AV *	av = NO_INIT
 	int	i = NO_INIT
     PPCODE:
+	DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+			      "0x%lx: joining 0x%lx (state 0x%lx)\n",
+			      (unsigned long)thr, (unsigned long)t,
+			      (unsigned long)ThrSTATE(t)););
 	if (ThrSTATE(t) == THR_DETACHED)
 	    croak("tried to join a detached thread");
 	else if (ThrSTATE(t) == THR_JOINED)
@@ -271,6 +242,10 @@ void
 detach(t)
 	Thread	t
     CODE:
+	DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+			      "0x%lx: detaching 0x%lx (state 0x%lx)\n",
+			      (unsigned long)thr, (unsigned long)t,
+			      (unsigned long)ThrSTATE(t)););
 	if (ThrSTATE(t) == THR_DETACHED)
 	    croak("tried to detach an already detached thread");
 	else if (ThrSTATE(t) == THR_JOINED)
