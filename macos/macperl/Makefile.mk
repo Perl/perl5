@@ -24,9 +24,9 @@ ApplRez 		= 	Rez -a -t APPL -c McPL -i $(MACPERL_SRC)
 ApplMWLOpt		=	${LOpt} -xm application -d -warn
 ApplLink68K		=	MWLink68K ${ApplMWLOpt} -model far
 ApplLinkPPC		=	MWLinkPPC ${ApplMWLOpt} 
-ApplMPWLOpt		=	${LOpt} -t APPL -w -mf 
-ApplLinkSC		=	Link ${ApplMPWLOpt}  -model far
-ApplLinkMrC		= 	PPCLink ${ApplMPWLOpt}
+ApplMPWLOpt		=	-t APPL -w -mf 
+ApplLinkSC		=	Link ${LOpt} ${ApplMPWLOpt} -model far -pg 8192
+ApplLinkMrC		= 	PPCLink -sym big ${ApplMPWLOpt}
 RsrcLink68K		= 	MWLink68K -xm coderesource
 RsrcLinkSC		=	Link
 
@@ -109,7 +109,7 @@ Static_Ext_Std	= 	\
 
 	# Errno:Errno done, in from :macos:lib:
 	# not going to be built for the time being:
-	# Cwd:Cwd Encode:Encode GDBM_File:GDBM_File ODBM_File:ODBM_File \
+	# Cwd:Cwd GDBM_File:GDBM_File ODBM_File:ODBM_File \
 	# IPC:IPC:SysV SDBM_File:SDBM_File Sys:Syslog:Syslog \
 	# Thread:Thread threads:threads  
 
@@ -235,7 +235,8 @@ MacPerlLibSC	=	\
 			"$(IC)ICGlueFar.o"								\
 			"$(XL)"XL.SC.Lib
 
-all	: MacPerl "MacPerl Help" MacPerlTest.Script MPDroplet
+all	: MacPerl "MacPerl Help" MPDroplet
+#MacPerlTest.Script 
 
 clean	:	
 	Delete :Obj:Å

@@ -124,9 +124,11 @@ RMS = delete -y
 
 public		=	perl translators sitelib_install 
 Dynamic_Ext_Mac	=	Mac
-Dynamic_Ext_Std	=	
+Dynamic_Ext_Std	=	\
+	Encode:Encode Encode:Byte:Byte Encode:CN:CN \
+	Encode:EBCDIC:EBCDIC Encode:JP:JP Encode:KR:KR \
+	Encode:Symbol:Symbol Encode:TW:TW Encode:Unicode:Unicode \
 Dynamic_Ext_Xtr =
-# this should be rewritten some, eh?
 Static_Lib_Mac	= \
 	ExtUtils:MM_MacOS ExtUtils:Miniperl Config Errno \
 	Mac:Hooks Mac:Pane Mac:LowMem \
@@ -177,7 +179,8 @@ Static_Ext_Mac	= 	\
 Static_Ext_Std	= 	\
 	B:B ByteLoader:ByteLoader DB_File:DB_File Data:Dumper:Dumper \
 	Devel:DProf:DProf Devel:PPPort:PPPort Devel:Peek:Peek \
-	Digest:MD5:MD5 DynaLoader:DynaLoader Fcntl:Fcntl File:Glob:Glob \
+	Digest:MD5:MD5 DynaLoader:DynaLoader \
+	Fcntl:Fcntl File:Glob:Glob \
 	Filter:Util:Call:Call I18N:Langinfo:Langinfo IO:IO List:Util:Util \
 	MIME:Base64:Base64 NDBM_File:NDBM_File Opcode:Opcode POSIX:POSIX \
 	PerlIO:Scalar:Scalar PerlIO:Via:Via PerlIO:encoding:encoding \
@@ -187,7 +190,7 @@ Static_Ext_Std	= 	\
 
 	# Errno:Errno done, in from :macos:lib:
 	# not going to be built for the time being:
-	# Cwd:Cwd Encode:Encode GDBM_File:GDBM_File ODBM_File:ODBM_File \
+	# Cwd:Cwd GDBM_File:GDBM_File ODBM_File:ODBM_File \
 	# IPC:IPC:SysV SDBM_File:SDBM_File Sys:Syslog:Syslog \
 	# Thread:Thread threads:threads  
 
@@ -241,9 +244,9 @@ LibObjectsPPC = {$(libc)}.PPC.o
 LibObjectsSC = {$(libc)}.SC.o
 LibObjectsMRC = {$(libc)}.MrC.o
 
-.PHONY : translators sitelib_install
+.PHONY : translators
 
-all: PLib Obj dupfiles miniperl $(private) $(plextract) $(public) dynlibrary runperl extrlibrary
+all: PLib Obj dupfiles miniperl $(private) $(plextract) $(public) dynlibrary runperl
 	@echo " "; echo "	Everything is up to date."
 
 PLib: 
@@ -272,6 +275,7 @@ sitelib_install:
 	Directory ::bundled_lib:
 	$(MACPERL_SRC)PerlInstall -l :::lib:
 	Directory ::
+	Echo > sitelib_install
 
 
 # This is now done by installman only if you actually want the man pages.
@@ -326,7 +330,7 @@ preplibrary: miniperl
 		directory {{i}}
 		Set Echo 0
 		If `Newer Makefile.PL Makefile.mk` == "Makefile.PL"
-			$(MACPERL_SRC)miniperl -I$(MACPERL_SRC)lib -I$(MACPERL_SRC):lib Makefile.PL
+			$(MACPERL_SRC)miniperl -I$(MACPERL_SRC)lib -I$(MACPERL_SRC):lib Makefile.PL PERL_CORE=1
 		End
 		BuildProgram static
 		BuildProgram install_static
@@ -340,16 +344,16 @@ preplibrary: miniperl
 	Echo > preplibrary
 
 dynlibrary: perl PerlStub
-	For i in :bundled_ext:{$(Dynamic_Ext_Xtr)} ::ext:{$(Dynamic_Ext_Std)} :ext:{$(Dynamic_Ext_Mac)}
+	For i in :bundled_ext:{$(Dynamic_Ext_Xtr)} ::ext:{$(Dynamic_Ext_Std:d)} :ext:{$(Dynamic_Ext_Mac)}
 		directory {{i}}
 		Set Echo 0
 		If `Exists Makefile.PL` != ""
 			If `Newer Makefile.PL Makefile.mk` == "Makefile.PL"
-				$(MACPERL_SRC)perl -I$(MACPERL_SRC)lib -I$(MACPERL_SRC):lib Makefile.PL
+				$(MACPERL_SRC)perl -I$(MACPERL_SRC)lib -I$(MACPERL_SRC):lib Makefile.PL PERL_CORE=1
 			End
 		End
-		BuildProgram all
-		BuildProgram install
+		BuildProgram dynamic
+		BuildProgram install_dynamic
 		directory $(MACPERL_SRC)
 		Set Echo 1
 	end
@@ -361,7 +365,7 @@ extrlibrary: dynlibrary
 		Set Echo 0
 		If `Exists Makefile.PL` != ""
 			If `Newer Makefile.PL Makefile.mk` == "Makefile.PL"
-				$(MACPERL_SRC)perl -I$(MACPERL_SRC)lib -I$(MACPERL_SRC):lib Makefile.PL
+				$(MACPERL_SRC)perl -I$(MACPERL_SRC)lib -I$(MACPERL_SRC):lib Makefile.PL PERL_CORE=1
 			End
 		End
 		BuildProgram all
@@ -409,6 +413,7 @@ perl.exp: miniperl ::makedef.pl perl.nosym ::global.sym ::pp.sym ::globvar.sym m
 # Take care to avoid modifying lib/Config.pm without reason
 ":lib:Config.pm": miniperl ":lib:re.pm"
 	:miniperl -I::lib: configpm
+	Duplicate :lib:Config.pm ::lib:Config.pm
 
 ":lib:ExtUtils:Miniperl.pm": miniperlmain.c miniperl "::minimod.pl" ":lib:Config.pm"
 	:miniperl ::minimod.pl > :lib:ExtUtils:Miniperl.pm

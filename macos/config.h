@@ -3839,7 +3839,7 @@ First build released to public
  *	This symbol, if defined, indicates that the strftime routine is
  *	available to do time formatting.
  */
-/*#define HAS_STRFTIME		/ **/
+#define HAS_STRFTIME		/**/
 
 /* HAS_SYSCALL_PROTO:
  *	This symbol, if defined, indicates that the system provides

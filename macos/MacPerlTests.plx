@@ -2,7 +2,7 @@
 while (<>) {
 	chomp;
 	next if /^\s*#/;
-	if (/^:perl .* (\S+)$/) {
+	if (/^(?:\S+)\bperl(?:\.\w+)? .* (\S+)\s*$/) {
 		if ($script) {
 			$tests{$script}{num}   = $num;
 			$tests{$script}{tests} = [@tests];
@@ -53,10 +53,14 @@ for my $script (sort keys %tests) {
 	} else {
 		push @ok, $script;
 	}
+
+	push @none, $script if $tests{$script}{num} == 0;
 }
 
-print "Test results begin\n";
+print "\n\nTest results begin\n";
 print join("\n  ", "OK:", @ok), "\n\n";
 print join("\n  ", "Not OK:", @notok), "\n\n";
-printf "Test results: %s OK, %s not OK\n\n", scalar @ok, scalar @notok;
+print join("\n  ", "None executed:", @none), "\n\n";
+printf "Test results: %s OK, %s not OK, %s none executed\n\n",
+	scalar @ok, scalar @notok, scalar @none;
 __END__
