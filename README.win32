@@ -71,6 +71,9 @@ your mileage may vary.
 
 The surest way to build it is on WindowsNT, using the cmd shell.
 
+Make sure the path to the build directory does not contain spaces.  The
+build usually works in this circumstance, but some tests will fail.
+
 =item Borland C++
 
 If you are using the Borland compiler, you will need dmake, a freely
@@ -138,7 +141,14 @@ Perl will also build without des_fcrypt(), but the crypt() builtin will
 fail at run time.
 
 You will also have to make sure CCHOME points to wherever you installed
-your compiler.
+your compiler.  Make sure this path has no spaces in it.  If you
+insist on spaces in your path names, there is no telling what else
+will fail, but you can try putting the path in double quotes.  Some
+parts of perl try to accomodate that, but not all pieces do.
+
+The default value for CCHOME in the makefiles for Visual C++
+may not be correct if you have a version later than 5.2.  Make
+sure the default exists and is valid.
 
 Other options are explained in the makefiles.  Be sure to read the
 instructions carefully.
@@ -179,9 +189,10 @@ Type "dmake test" (or "nmake test").  This will run most of the tests from
 the testsuite (many tests will be skipped, and but no test should fail).
 
 If some tests do fail, it may be because you are using a different command
-shell than the native "cmd.exe".
+shell than the native "cmd.exe", or because you are building from a path
+that contains spaces.  So don't do that.
 
-If you used the Borland compiler, you may see a failure in op/taint.t
+If you're using the Borland compiler, you may see a failure in op/taint.t
 arising from the inability to find the Borland Runtime DLLs on the system
 default path.  You will need to copy the DLLs reported by the messages
 from where Borland chose to install it, into the Windows system directory
@@ -424,7 +435,7 @@ all of the ActiveState extensions and most other Win32 extensions from
 CPAN in source form, along with many added bugfixes, and with MakeMaker
 support.  This bundle is available at:
 
-   http://www.perl.com/CPAN/authors/id/GSAR/libwin32-0.12.zip
+   http://www.perl.com/CPAN/authors/id/GSAR/libwin32-0.14.zip
 
 See the README in that distribution for building and installation
 instructions.  Look for later versions that may be available at the
@@ -656,7 +667,7 @@ sundry hacks since then.
 
 Borland support was added in 5.004_01 (Gurusamy Sarathy).
 
-Last updated: 22 September 1998
+Last updated: 29 November 1998
 
 =cut
 
