@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sun Nov 25 08:58:37 EET 2001 [metaconfig 3.0 PL70]
+# Generated on Sun Dec  9 23:28:11 EET 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -7172,7 +7172,7 @@ EOM
 	esac
 	for thisflag in $ldflags; do
 		case "$thisflag" in
-		-L*|-R*)
+		-L*|-R*|-Wl,-R*)
 			case " $dflt " in
 			*" $thisflag "*) ;;
 			*) dflt="$dflt $thisflag" ;;
@@ -7381,10 +7381,10 @@ if "$useshrplib"; then
 	aix)
 		# We'll set it in Makefile.SH...
 		;;
-	solaris|netbsd)
+	solaris)
 		xxx="-R $shrpdir"
 		;;
-	freebsd)
+	freebsd|netbsd)
 		xxx="-Wl,-R$shrpdir"
 		;;
 	linux|irix*|dec_osf)
@@ -15928,8 +15928,11 @@ set fp_class.h i_fp_class
 eval $inhdr
 
 : see if this is a ieeefp.h system
-set ieeefp.h i_ieeefp
-eval $inhdr
+case "$i_ieeefp" in
+'' ) set ieeefp.h i_ieeefp
+     eval $inhdr
+     ;;
+esac
 
 : see if this is a libutil.h system
 set libutil.h i_libutil
