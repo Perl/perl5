@@ -165,7 +165,7 @@ sub _hostdomain {
         };
 
 	chop($dom = `domainname 2>/dev/null`)
-		unless(defined $dom || $^O eq 'MSWin32');
+		unless(defined $dom || $^O =~ /^(MSWin32|cygwin)$/);
 
 	if(defined $dom) {
 	    my @h = ();
