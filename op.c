@@ -20,7 +20,7 @@
 #include "perl.h"
 #include "keywords.h"
 
-#define CALL_PEEP(o) CALL_FPTR(PL_peepp)(o)
+#define CALL_PEEP(o) CALL_FPTR(PL_peepp)(aTHX_ o)
 
 /* #define PL_OP_SLAB_ALLOC */
 
