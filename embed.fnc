@@ -1395,5 +1395,8 @@ p	|int	|get_debug_opts	|char **s
 Ap	|void	|save_set_svflags|SV* sv|U32 mask|U32 val
 Apod	|void	|hv_assert	|HV* tb
 
+#if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
+sM	|bool	|hv_exists_common|HV* tb|SV* key_sv|const char* key|I32 klen|U32 hash
+#endif
 END_EXTERN_C
 

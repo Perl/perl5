@@ -1271,111 +1271,8 @@ C<klen> is the length of the key.
 bool
 Perl_hv_exists(pTHX_ HV *hv, const char *key, I32 klen)
 {
-    register XPVHV* xhv;
-    register U32 hash;
-    register HE *entry;
-    SV *sv;
-    bool is_utf8 = FALSE;
-    const char *keysave = key;
-    int k_flags = 0;
-
-    if (!hv)
-	return 0;
-
-    if (klen < 0) {
-      klen = -klen;
-      is_utf8 = TRUE;
-    }
-
-    if (SvRMAGICAL(hv)) {
-	if (mg_find((SV*)hv, PERL_MAGIC_tied) || SvGMAGICAL((SV*)hv)) {
-	    sv = sv_newmortal();
-	    if (is_utf8) {
-		/* This hack based on the code in hv_exists_ent seems to be
-		   the easiest way to pass the utf8 flag through and fix
-		   the bug in hv_exists for tied hashes with utf8 keys.  */
-		SV *keysv = sv_2mortal(newSVpvn(key, klen));
-		SvUTF8_on(keysv);
-		key = (char *)keysv;
-		klen = HEf_SVKEY;
-	    }
-	    mg_copy((SV*)hv, sv, key, klen);
-	    magic_existspack(sv, mg_find(sv, PERL_MAGIC_tiedelem));
-	    return (bool)SvTRUE(sv);
-	}
-#ifdef ENV_IS_CASELESS
-	else if (mg_find((SV*)hv, PERL_MAGIC_env)) {
-	    sv = sv_2mortal(newSVpvn(key,klen));
-	    key = strupr(SvPVX(sv));
-	}
-#endif
-    }
-
-    xhv = (XPVHV*)SvANY(hv);
-#ifndef DYNAMIC_ENV_FETCH
-    if (!xhv->xhv_array /* !HvARRAY(hv) */)
-	return 0;
-#endif
-
-    if (is_utf8) {
-	STRLEN tmplen = klen;
-	/* See the note in hv_fetch(). --jhi */
-	key = (char*)bytes_from_utf8((U8*)key, &tmplen, &is_utf8);
-	klen = tmplen;
-        if (is_utf8)
-            k_flags = HVhek_UTF8;
-        if (key != keysave)
-            k_flags |= HVhek_FREEKEY;
-    }
-
-    if (HvREHASH(hv)) {
-	PERL_HASH_INTERNAL(hash, key, klen);
-    } else {
-	PERL_HASH(hash, key, klen);
-    }
-
-#ifdef DYNAMIC_ENV_FETCH
-    if (!xhv->xhv_array /* !HvARRAY(hv) */) entry = Null(HE*);
-    else
-#endif
-    /* entry = (HvARRAY(hv))[hash & (I32) HvMAX(hv)]; */
-    entry = ((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
-    for (; entry; entry = HeNEXT(entry)) {
-	if (HeHASH(entry) != hash)		/* strings can't be equal */
-	    continue;
-	if (HeKLEN(entry) != klen)
-	    continue;
-	if (HeKEY(entry) != key && memNE(HeKEY(entry),key,klen))	/* is this it? */
-	    continue;
-	if ((HeKFLAGS(entry) ^ k_flags) & HVhek_UTF8)
-	    continue;
-	if (k_flags & HVhek_FREEKEY)
-	    Safefree(key);
-	/* If we find the key, but the value is a placeholder, return false. */
-	if (HeVAL(entry) == &PL_sv_placeholder)
-	    return FALSE;
-
-	return TRUE;
-    }
-#ifdef DYNAMIC_ENV_FETCH  /* is it out there? */
-    if (SvRMAGICAL((SV*)hv) && mg_find((SV*)hv, PERL_MAGIC_env)) {
-	unsigned long len;
-	char *env = PerlEnv_ENVgetenv_len(key,&len);
-	if (env) {
-	    sv = newSVpvn(env,len);
-	    SvTAINTED_on(sv);
-	    (void)hv_store(hv,key,klen,sv,hash);
-            if (k_flags & HVhek_FREEKEY)
-                Safefree(key);
-	    return TRUE;
-	}
-    }
-#endif
-    if (k_flags & HVhek_FREEKEY)
-        Safefree(key);
-    return FALSE;
+    return hv_exists_common(hv, NULL, key, klen, 0);
 }
-
 
 /*
 =for apidoc hv_exists_ent
@@ -1390,32 +1287,67 @@ computed.
 bool
 Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
 {
+    return hv_exists_common(hv, keysv, NULL, 0, hash);
+}
+
+bool
+S_hv_exists_common(pTHX_ HV *hv, SV *keysv, const char *key, I32 klen_i32,
+		   U32 hash)
+{
     register XPVHV* xhv;
-    register char *key;
     STRLEN klen;
     register HE *entry;
     SV *sv;
     bool is_utf8;
-    char *keysave;
+    const char *keysave;
     int k_flags = 0;
 
     if (!hv)
 	return 0;
 
+    if (keysv) {
+	key = SvPV(keysv, klen);
+	is_utf8 = (SvUTF8(keysv) != 0);
+    } else {
+	if (klen_i32 < 0) {
+	    klen = -klen_i32;
+	    is_utf8 = TRUE;
+	} else {
+	    klen = klen_i32;
+	    is_utf8 = FALSE;
+	}
+    }
+    keysave = key;
+
     if (SvRMAGICAL(hv)) {
 	if (mg_find((SV*)hv, PERL_MAGIC_tied) || SvGMAGICAL((SV*)hv)) {
-	   SV* svret = sv_newmortal();
+	    SV* svret;
+
+	    if (keysv || is_utf8) {
+		if (!keysv) {
+		    keysv = newSVpvn(key, klen);
+		    SvUTF8_on(keysv);
+		} else {
+		    keysv = newSVsv(keysv);
+		}
+		key = (char *)sv_2mortal(keysv);
+		klen = HEf_SVKEY;
+	    }
+
+	    /* I don't understand why hv_exists_ent has svret and sv,
+	       whereas hv_exists only had one.  */
+	    svret = sv_newmortal();
 	    sv = sv_newmortal();
-	    keysv = sv_2mortal(newSVsv(keysv));
-	    mg_copy((SV*)hv, sv, (char*)keysv, HEf_SVKEY);
-	   magic_existspack(svret, mg_find(sv, PERL_MAGIC_tiedelem));
-	   return (bool)SvTRUE(svret);
+	    mg_copy((SV*)hv, sv, key, klen);
+	    magic_existspack(svret, mg_find(sv, PERL_MAGIC_tiedelem));
+	    return (bool)SvTRUE(svret);
 	}
 #ifdef ENV_IS_CASELESS
 	else if (mg_find((SV*)hv, PERL_MAGIC_env)) {
-	    key = SvPV(keysv, klen);
+	    /* XXX This code isn't UTF8 clean.  */
 	    keysv = sv_2mortal(newSVpvn(key,klen));
-	    (void)strupr(SvPVX(keysv));
+	    keysave = key = strupr(SvPVX(keysv));
+	    is_utf8 = 0;
 	    hash = 0;
 	}
 #endif
@@ -1427,8 +1359,6 @@ Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
 	return 0;
 #endif
 
-    keysave = key = SvPV(keysv, klen);
-    is_utf8 = (SvUTF8(keysv) != 0);
     if (is_utf8) {
 	key = (char*)bytes_from_utf8((U8*)key, &klen, &is_utf8);
         if (is_utf8)
@@ -1481,6 +1411,7 @@ Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
         Safefree(key);
     return FALSE;
 }
+
 
 STATIC void
 S_hsplit(pTHX_ HV *hv)
