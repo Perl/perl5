@@ -458,12 +458,6 @@
 #define PL_xpvnv_root		(vTHX->Ixpvnv_root)
 #define PL_xrv_arenaroot	(vTHX->Ixrv_arenaroot)
 #define PL_xrv_root		(vTHX->Ixrv_root)
-#define PL_yycharBINCOMPAT	(vTHX->IyycharBINCOMPAT)
-#define PL_yydebugBINCOMPAT	(vTHX->IyydebugBINCOMPAT)
-#define PL_yyerrflagBINCOMPAT	(vTHX->IyyerrflagBINCOMPAT)
-#define PL_yylvalBINCOMPAT	(vTHX->IyylvalBINCOMPAT)
-#define PL_yynerrsBINCOMPAT	(vTHX->IyynerrsBINCOMPAT)
-#define PL_yyvalBINCOMPAT	(vTHX->IyyvalBINCOMPAT)
 
 #else	/* !MULTIPLICITY */
 
@@ -764,12 +758,6 @@
 #define PL_Ixpvnv_root		PL_xpvnv_root
 #define PL_Ixrv_arenaroot	PL_xrv_arenaroot
 #define PL_Ixrv_root		PL_xrv_root
-#define PL_IyycharBINCOMPAT	PL_yycharBINCOMPAT
-#define PL_IyydebugBINCOMPAT	PL_yydebugBINCOMPAT
-#define PL_IyyerrflagBINCOMPAT	PL_yyerrflagBINCOMPAT
-#define PL_IyylvalBINCOMPAT	PL_yylvalBINCOMPAT
-#define PL_IyynerrsBINCOMPAT	PL_yynerrsBINCOMPAT
-#define PL_IyyvalBINCOMPAT	PL_yyvalBINCOMPAT
 
 #define PL_TSv			PL_Sv
 #define PL_TXpv			PL_Xpv
