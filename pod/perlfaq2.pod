@@ -358,13 +358,12 @@ Recommended books on (or mostly on) Perl follow.
 =head2 Perl in Magazines
 
 The first and only periodical devoted to All Things Perl, I<The
-Perl Journal> contained tutorials, demonstrations, case studies,
-announcements, contests, and much more.  I<TPJ> had columns on web
+Perl Journal> contains tutorials, demonstrations, case studies,
+announcements, contests, and much more.  I<TPJ> has columns on web
 development, databases, Win32 Perl, graphical programming, regular
 expressions, and networking, and sponsored the Obfuscated Perl
-Contest. Sadly, this publication is no longer in circulation, but
-should it be resurrected, it will most likely be announced on
-http://use.perl.org/ .
+Contest. For more details on I<The Perl Journal>, see
+http://www.tpj.com/
 
 Beyond this, magazines that frequently carry high-quality articles
 on Perl are I<Web Techniques> (see http://www.webtechniques.com/),
@@ -481,7 +480,7 @@ Read the perlbug(1) man page (perl5.004 or later) for more information.
 =head2 What is perl.com? Perl Mongers? pm.org? perl.org?
 
 The Perl Home Page at http://www.perl.com/ is currently hosted on a
-T3 line courtesy of Songline Systems, a software-oriented subsidiary of
+T3 line courtesy of The O'Reilly Network, a subsidiary of
 O'Reilly and Associates. Other starting points include
 
     http://language.perl.com/
