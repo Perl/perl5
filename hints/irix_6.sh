@@ -49,7 +49,7 @@ case "$cc" in
     esac    	
 esac
 
-test -z "$cc" && cc=cc
+cc=${cc:-cc}
 
 case "$cc" in
 *gcc*) ;;

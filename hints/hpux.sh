@@ -105,6 +105,8 @@ EOM
     ;;
 esac
 
+cc=${cc:-cc}
+
 case `$cc -v 2>&1`"" in
 *gcc*) ccisgcc="$define" ;;
 *) ccisgcc=''
