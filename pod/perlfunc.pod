@@ -603,6 +603,25 @@ it can be used to increment a loop variable, even when the loop has been
 continued via the C<next> statement (which is similar to the C C<continue>
 statement).
 
+C<last>, C<next>, or C<redo> may appear within a C<continue>
+block. C<last> and C<redo> will behave as if they had been executed within
+the main block. So will C<next>, but since it will execute a C<continue>
+block, it may be more entertaining.
+
+    while (EXPR) {
+	### redo always comes here
+	do_something;
+    } continue {
+	### next always comes here
+	do_something_else;
+	# then back the top to re-check EXPR
+    }
+    ### last always comes here
+
+Omitting the C<continue> section is semantically equivalent to using an
+empty one, logically enough. In that case, C<next> goes directly back
+to check the condition at the top of the loop.
+
 =item cos EXPR
 
 Returns the cosine of EXPR (expressed in radians).  If EXPR is omitted
@@ -673,8 +692,8 @@ variables, not set them.  If you want to test whether you can write,
 either use file tests or try setting a dummy hash entry inside an eval(),
 which will trap the error.
 
-Note that functions such as keys() and values() may return huge array
-values when used on large DBM files.  You may prefer to use the each()
+Note that functions such as keys() and values() may return huge lists
+when used on large DBM files.  You may prefer to use the each()
 function to iterate over large DBM files.  Example:
 
     # print out history file offsets
@@ -908,7 +927,7 @@ Example:
 
 =item each HASH
 
-When called in a list context, returns a 2-element array consisting of the
+When called in a list context, returns a 2-element list consisting of the
 key and value for the next element of a hash, so that you can iterate over
 it.  When called in a scalar context, returns the key for only the next
 element in the hash.  (Note: Keys may be "0" or "", which are logically
@@ -1707,8 +1726,8 @@ See L<perlfunc/split>.
 
 =item keys HASH
 
-Returns a normal array consisting of all the keys of the named hash.  (In
-a scalar context, returns the number of keys.)  The keys are returned in
+Returns a list consisting of all the keys of the named hash.  (In a
+scalar context, returns the number of keys.)  The keys are returned in
 an apparently random order, but it is the same order as either the
 values() or each() function produces (given that the hash has not been
 modified).  As a side effect, it resets HASH's iterator.
@@ -1776,6 +1795,9 @@ C<continue> block, if any, is not executed:
 	last LINE if /^$/;	# exit when done with header
 	...
     }
+
+See also L</continue> for an illustration of how C<last>, C<next>, and
+C<redo> work.
 
 =item lc EXPR
 
@@ -1966,6 +1988,9 @@ the next iteration of the loop:
 Note that if there were a C<continue> block on the above, it would get
 executed even on discarded lines.  If the LABEL is omitted, the command
 refers to the innermost enclosing loop.
+
+See also L</continue> for an illustration of how C<last>, C<next>, and
+C<redo> work.
 
 =item no Module LIST
 
@@ -2566,6 +2591,9 @@ themselves about what was just input:
 	}
 	print;
     }
+
+See also L</continue> for an illustration of how C<last>, C<next>, and
+C<redo> work.
 
 =item ref EXPR
 
@@ -3196,7 +3224,7 @@ Splits a string into an array of strings, and returns it.
 
 If not in a list context, returns the number of fields found and splits into
 the @_ array.  (In a list context, you can force the split into @_ by
-using C<??> as the pattern delimiters, but it still returns the array
+using C<??> as the pattern delimiters, but it still returns the list
 value.)  The use of implicit split to @_ is deprecated, however.
 
 If EXPR is omitted, splits the $_ string.  If PATTERN is also omitted,
@@ -3395,11 +3423,10 @@ one-third of the time.  So don't do that.
 
 =item stat
 
-Returns a 13-element array giving the status info for a file, either the
-file opened via FILEHANDLE, or named by EXPR.  If EXPR is omitted, it
-stats $_.  Returns a null list if the stat fails.  Typically used as
-follows:
-
+Returns a 13-element list giving the status info for a file, either
+the file opened via FILEHANDLE, or named by EXPR.  If EXPR is omitted,
+it stats $_.  Returns a null list if the stat fails.  Typically used
+as follows:
 
     ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
        $atime,$mtime,$ctime,$blksize,$blocks)
@@ -3433,6 +3460,10 @@ last stat or filetest are returned.  Example:
     }
 
 (This works on machines only for which the device number is negative under NFS.)
+
+In scalar context, C<stat> returns a boolean value indicating success
+or failure, and, if successful, sets the information associated with
+the special filehandle C<_>.
 
 =item study SCALAR
 
@@ -3741,9 +3772,9 @@ function of C.  The object returned by the "new" method is also
 returned by the tie() function, which would be useful if you want to
 access other methods in CLASSNAME.
 
-Note that functions such as keys() and values() may return huge array
-values when used on large objects, like DBM files.  You may prefer to
-use the each() function to iterate over such.  Example:
+Note that functions such as keys() and values() may return huge lists
+when used on large objects, like DBM files.  You may prefer to use the
+each() function to iterate over such.  Example:
 
     # print out history file offsets
     use NDBM_File;
@@ -3801,7 +3832,7 @@ Suitable for feeding to gmtime() and localtime().
 
 =item times
 
-Returns a four-element array giving the user and system times, in
+Returns a four-element list giving the user and system times, in
 seconds, for this process and the children of this process.
 
     ($user,$system,$cuser,$csystem) = times;
@@ -4026,11 +4057,12 @@ command if the files already exist:
 
 =item values HASH
 
-Returns a normal array consisting of all the values of the named hash.
-(In a scalar context, returns the number of values.)  The values are
-returned in an apparently random order, but it is the same order as either
-the keys() or each() function would produce on the same hash.  As a side
-effect, it resets HASH's iterator.  See also keys(), each(), and sort().
+Returns a list consisting of all the values of the named hash.  (In a
+scalar context, returns the number of values.)  The values are
+returned in an apparently random order, but it is the same order as
+either the keys() or each() function would produce on the same hash.
+As a side effect, it resets HASH's iterator.  See also keys(), each(),
+and sort().
 
 =item vec EXPR,OFFSET,BITS
 

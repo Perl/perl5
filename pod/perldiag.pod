@@ -823,6 +823,12 @@ message indicates that such a conversion was attempted.
 of upgradability.  Upgrading to undef indicates an error in the
 code calling sv_upgrade.
 
+=item Can't use %%! because Errno.pm is not available
+
+(F) The first time the %! hash is used, perl automatically loads the
+Errno.pm module. The Errno module is expected to tie the %! hash to
+provide symbolic names for C<$!> errno values.
+
 =item Can't use "my %s" in sort comparison
 
 (F) The global variables $a and $b are reserved for sort comparisons.

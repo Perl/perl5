@@ -1703,7 +1703,7 @@ sv_2pv(register SV *sv, STRLEN *lp)
 		case SVt_PVHV:	s = "HASH";			break;
 		case SVt_PVCV:	s = "CODE";			break;
 		case SVt_PVGV:	s = "GLOB";			break;
-		case SVt_PVFM:	s = "FORMLINE";			break;
+		case SVt_PVFM:	s = "FORMAT";			break;
 		case SVt_PVIO:	s = "IO";			break;
 		default:	s = "UNKNOWN";			break;
 		}
@@ -3993,7 +3993,7 @@ sv_reftype(SV *sv, int ob)
 	case SVt_PVHV:		return "HASH";
 	case SVt_PVCV:		return "CODE";
 	case SVt_PVGV:		return "GLOB";
-	case SVt_PVFM:		return "FORMLINE";
+	case SVt_PVFM:		return "FORMAT";
 	default:		return "UNKNOWN";
 	}
     }

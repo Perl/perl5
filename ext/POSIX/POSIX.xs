@@ -44,7 +44,7 @@
 #include <sys/types.h>
 #include <time.h>
 #ifdef I_UNISTD
-#include <unistd.h>	/* see hints/sunos_4_1.sh */
+#include <unistd.h>
 #endif
 #include <fcntl.h>
 

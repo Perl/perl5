@@ -451,8 +451,8 @@ Also see precedence traps, for parsing C<$:>.
 The second and third arguments of C<splice()> are now evaluated in scalar
 context (as the Camel says) rather than list context.
 
-    sub sub1{return(0,2) }          # return a 2-elem array
-    sub sub2{ return(1,2,3)}        # return a 3-elem array
+    sub sub1{return(0,2) }          # return a 2-element list
+    sub sub2{ return(1,2,3)}        # return a 3-element list
     @a1 = ("a","b","c","d","e");
     @a2 = splice(@a1,&sub1,&sub2);
     print join(' ',@a2),"\n";
