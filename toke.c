@@ -1299,8 +1299,8 @@ S_scan_const(pTHX_ char *start)
 	   if (len == 1) {
 	       /* illegal UTF8, make it valid */
 	       char *old_pvx = SvPVX(sv);
-	       /* need space for two characters and a null */
-	       d = SvGROW(sv, SvCUR(sv) + 2 + 1) + (d - old_pvx);
+	       /* need space for one extra char (NOTE: SvCUR() not set here) */
+	       d = SvGROW(sv, SvLEN(sv) + 1) + (d - old_pvx);
 	       d = (char*)uv_to_utf8((U8*)d, (U8)*s++);
 	   }
 	   else {
