@@ -4807,13 +4807,15 @@ XS(w32_GetFullPathName)
     SV *fullpath;
     char *filepart;
     DWORD len;
+    STRLEN filename_len;
+    char *filename_p;
 
     if (items != 1)
 	Perl_croak(aTHX_ "usage: Win32::GetFullPathName($filename)");
 
     filename = ST(0);
-    fullpath = sv_mortalcopy(filename);
-    SvUPGRADE(fullpath, SVt_PV);
+    filename_p = SvPV(filename, filename_len);
+    fullpath = sv_2mortal(newSVpvn(filename_p, filename_len));
     if (!SvPVX(fullpath) || !SvLEN(fullpath))
         XSRETURN_UNDEF;
 
