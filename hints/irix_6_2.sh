@@ -1,5 +1,5 @@
 # irix_6_2.sh
-# from Krishna Sethuraman, krishna@mit.edu
+# from Krishna Sethuraman, krishna@sgi.com
 # Date: Tue Aug 22 00:38:26 PDT 1995
 # removed -ansiposix and -D_POSIX_SOURCE cuz it was choking
 
