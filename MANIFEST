@@ -295,7 +295,6 @@ ext/Encode/Encode/euc-kr.enc		Encode table
 ext/Encode/Encode/gb12345.enc		Encode table
 ext/Encode/Encode/gb1988.enc		Encode table
 ext/Encode/Encode/gb2312.enc		Encode table
-ext/Encode/Encode/gbk.enc		Encode table
 ext/Encode/Encode/gsm0338.enc		Encode table
 ext/Encode/Encode/HZ.enc		Encode table
 ext/Encode/Encode/ir-197.enc		Encode table
