@@ -486,8 +486,8 @@ sub getRendering {
 	    print "stripped <$1>\n" if $in->{stripv};
 	    push @errs, $1;
 	}
-	$rendering =~ s/^(-e syntax OK\n)//ms;
-	$rendering =~ s/^(-e had compilation errors.\n)//ms;
+	$rendering =~ s/-e syntax OK\n//;
+	$rendering =~ s/-e had compilation errors\.\n//;
     }
     return $rendering, @errs;
 }
