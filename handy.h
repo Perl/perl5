@@ -133,6 +133,16 @@ typedef U64TYPE U64;
 #   endif
 #endif /* PERL_CORE */
 
+#ifndef UINT64_C /* usually from <inttypes.h> */
+#   ifdef HAS_LONG_LONG 
+#       define INT64_C(c)	CAT2(c,LL)
+#       define UINT64_C(c)	CAT2(c,ULL)
+#   else
+#       define INT64_C(c)	((I64TYPE)(c))
+#       define UINT64_C(c)	((U64TYPE)(c))
+#   endif
+#endif
+
 /* Mention I8SIZE, U8SIZE, I16SIZE, U16SIZE, I32SIZE, U32SIZE,
    I64SIZE, and U64SIZE here so that metaconfig pulls them in. */
 
