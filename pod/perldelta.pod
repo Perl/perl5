@@ -4,8 +4,10 @@ perldelta - what is new for perl v5.8.0
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.6.0 release
-and the 5.8.0 release.
+This document describes differences between the 5.6.0 release and the
+5.8.0 release.  Changes that have been integrated into the 5.6.1
+release are marked [561]. Changes that also appear in 5.6.1 but have
+been improved since are marked [561+].
 
 Many of the bug fixes in 5.8.0 were already seen in the 5.6.1
 maintenance release since the two releases were kept closely
@@ -124,8 +126,8 @@ their various diacritic-adorned versions, it does not include the various
 punctuation or digits (since they are not solely C<Latin>).
 
 A number of other properties are now supported, including C<\p{L&}>,
-C<\p{Any}> C<\p{Assigned}>, C<\p{Unassigned}>, C<\p{Blank}> and
-C<\p{SpacePerl}> (along with their C<\P{...}> versions, of course).
+C<\p{Any}> C<\p{Assigned}>, C<\p{Unassigned}>, C<\p{Blank}> [561] and
+C<\p{SpacePerl}> [561] (along with their C<\P{...}> versions, of course).
 See L<perlunicode> for details, and more additions.
 
 The C<In> or C<Is> prefix to names used with the C<\p{...}> and C<\P{...}>
@@ -188,12 +190,12 @@ any C<\w> character.
 The list of filenames from glob() (or <...>) is now by default sorted
 alphabetically to be csh-compliant (which is what happened before
 in most UNIX platforms).  (bsd_glob() does still sort platform
-natively, ASCII or EBCDIC, unless GLOB_ALPHASORT is specified.)
+natively, ASCII or EBCDIC, unless GLOB_ALPHASORT is specified.) [561]
 
 =item *
 
 Spurious syntax errors generated in certain situations, when glob()
-caused File::Glob to be loaded for the first time, have been fixed.
+caused File::Glob to be loaded for the first time, have been fixed. [561]
 
 =item *
 
@@ -258,7 +260,7 @@ operators (EQ, NE, LT, LE, GE, GT) have now been removed.
 
 The tr///C and tr///U features have been removed and will not return;
 the interface was a mistake.  Sorry about that.  For similar
-functionality, see pack('U0', ...) and pack('C0', ...).
+functionality, see pack('U0', ...) and pack('C0', ...). [561]
 
 =item *
 
@@ -393,6 +395,7 @@ and L<perlunicode> for details.
 
 The Unicode Character Database coming with Perl has been upgraded
 to Unicode 3.2.0.  For more information, see http://www.unicode.org/ .
+[561+]
 
 =item *
 
@@ -486,8 +489,8 @@ Formats now support zero-padded decimal fields.
 
 =item *
 
-Lvalue subroutines can now return C<undef> in list context.
-However, the lvalue subroutine feature still remains experimental.
+Lvalue subroutines can now return C<undef> in list context.  However,
+the lvalue subroutine feature still remains experimental. [561+]
 
 =item *
 
@@ -501,7 +504,9 @@ C<$^N>, which contains the most-recently closed group (submatch).
 
 =item *
 
-C<no Module;> now works even if there is no "sub unimport" in the Module.
+C<no Module;> does not produce an error even if Module does not have an
+unimport() method.  This parallels the behavior of C<use> vis-a-vis
+C<import>. [561]
 
 =item *
 
@@ -511,7 +516,7 @@ is a NaN.  Previously the behaviour was unspecified.
 =item *
 
 The following builtin functions are now overridable: each(), keys(),
-pop(), push(), shift(), splice(), unshift().
+pop(), push(), shift(), splice(), unshift(). [561]
 
 =item *
 
@@ -530,7 +535,7 @@ C<pack('U0a*', ...)> can now be used to force a string to UTF8.
 
 =item *
 
-my __PACKAGE__ $obj now works.
+my __PACKAGE__ $obj now works. [561]
 
 =item *
 
@@ -588,7 +593,7 @@ modify its target.
 =item *
 
 untie() will now call an UNTIE() hook if it exists.  See L<perltie>
-for details.
+for details. [561]
 
 =item *
 
@@ -661,7 +666,7 @@ See L<Attribute::Handlers>.
 
 C<B::Concise>, by Stephen McCamant, is a new compiler backend for
 walking the Perl syntax tree, printing concise info about ops.
-The output is highly customisable.  See L<B::Concise>.
+The output is highly customisable.  See L<B::Concise>. [561+]
 
 =item *
 
@@ -773,8 +778,9 @@ Filter::Util::Call.  See L<Filter::Simple>.
 
 =item *
 
-C<File::Temp>, by Tim Jenness, allows one to create temporary files and
-directories in an easy, portable, and secure way.  See L<File::Temp>.
+C<File::Temp>, by Tim Jenness, allows one to create temporary files
+and directories in an easy, portable, and secure way.  See
+L<File::Temp>. [561+]
 
 =item *
 
@@ -910,7 +916,7 @@ perlpodspec.
 
 C<Pod::Text::Overstrike>, by Joe Smith, has been added.
 It converts POD data to formatted overstrike text.
-See L<Pod::Text::Overstrike>.
+See L<Pod::Text::Overstrike>. [561+]
 
 =item *
 
@@ -1054,7 +1060,7 @@ for extension writers.
 The following independently supported modules have been updated to the
 newest versions from CPAN: CGI, CPAN, DB_File, File::Spec, File::Temp,
 Getopt::Long, Math::BigFloat, Math::BigInt, the podlators bundle
-(Pod::Man, Pod::Text), Pod::LaTeX, Pod::Parser, Storable,
+(Pod::Man, Pod::Text), Pod::LaTeX [561+], Pod::Parser, Storable,
 Term::ANSIColor, Test, Text-Tabs+Wrap.
 
 =item *
@@ -1135,7 +1141,7 @@ This means that they will be more robust and hopefully faster.
 
 =item *
 
-File::Find now chdir()s correctly when chasing symbolic links.
+File::Find now chdir()s correctly when chasing symbolic links. [561]
 
 =item *
 
@@ -1156,7 +1162,7 @@ You can enable/disable them with C<use/no warnings 'File::Find';>.
 =item *
 
 File::Glob::glob() renamed to File::Glob::bsd_glob() to avoid
-prototype mismatch with CORE::glob().
+prototype mismatch with CORE::glob(). [561]
 
 =item *
 
@@ -1330,7 +1336,7 @@ C<perlcc> has been rewritten and its user interface (that is,
 command line) is much more like that of the UNIX C compiler, cc.
 (The perlbc tools has been removed.  Use C<perlcc -B> instead.)
 B<Note that perlcc is still considered very experimental and
-unsupported.>
+unsupported.> [561]
 
 =item *
 
@@ -1363,7 +1369,8 @@ using the C<psed> utility.)
 
 =item *
 
-C<xsubpp> now understands POD documentation embedded in the *.xs files.
+C<xsubpp> now understands POD documentation embedded in the *.xs
+files. [561]
 
 =item *
 
@@ -1384,15 +1391,16 @@ perl56delta details the changes between the 5.005 release and the
 
 perlclib documents the internal replacements for standard C library
 functions.  (Interesting only for extension writers and Perl core
-hackers.)
+hackers.) [561+]
 
 =item *
 
-perldebtut is a Perl debugging tutorial.
+perldebtut is a Perl debugging tutorial. [561+]
 
 =item *
 
-perlebcdic contains considerations for running Perl on EBCDIC platforms.
+perlebcdic contains considerations for running Perl on EBCDIC
+platforms. [561+]
 
 =item *
 
@@ -1408,7 +1416,7 @@ perlmodstyle is a style guide for writing modules.
 
 =item *
 
-perlnewmod tells about writing and submitting a new module.
+perlnewmod tells about writing and submitting a new module. [561+]
 
 =item *
 
@@ -1427,12 +1435,12 @@ people writing in pod.
 
 =item *
 
-perlretut is a regular expression tutorial.
+perlretut is a regular expression tutorial. [561+]
 
 =item *
 
 perlrequick is a regular expressions quick-start guide.
-Yes, much quicker than perlretut.
+Yes, much quicker than perlretut. [561]
 
 =item *
 
@@ -1452,7 +1460,7 @@ information)
 =item *
 
 perlutil explains the command line utilities packaged with the Perl
-distribution.
+distribution. [561+]
 
 =back
 
@@ -1497,7 +1505,7 @@ documentation on 8.3-restricted filesystems.
 
 map() could get pathologically slow when the result list it generates
 is larger than the source list.  The performance has been improved for
-common scenarios.
+common scenarios. [561]
 
 =item *
 
@@ -1648,7 +1656,7 @@ Configure C<-S> can now run non-interactively.
 =item *
 
 Configure support for pdp11-style memory models has been removed due
-to obsolescence.
+to obsolescence. [561]
 
 =item *
 
@@ -1726,6 +1734,7 @@ unaffected.  After Configure has finished, you can just say
 	make all test
 
 and Perl will be built and tested, all in /tmp/perl/build/directory.
+[561]
 
 =item *
 
@@ -1832,7 +1841,7 @@ L<perlbs2000> (for POSIX-BC), and L<perlvmesa> for more information.
 
 Building perl with -Duseithreads or -Duse5005threads now works under
 HP-UX 10.20 (previously it only worked under 10.30 or later). You will
-need a thread library package installed. See README.hpux.
+need a thread library package installed. See README.hpux. [561]
 
 =item *
 
@@ -1848,7 +1857,7 @@ process.)
 
 =item *
 
-NCR MP-RAS is now supported.
+NCR MP-RAS is now supported. [561]
 
 =item *
 
@@ -1861,7 +1870,7 @@ NetWare from Novell is now supported.  See L<perlnetware>.
 
 =item *
 
-NonStop-UX is now supported.
+NonStop-UX is now supported. [561]
 
 =item *
 
@@ -1884,11 +1893,11 @@ in unexpected order.
 Stratus VOS is now supported using Perl's native build method
 (Configure).  This is the recommended method to build Perl on
 VOS.  The older methods, which build miniperl, are still
-available.  See L<perlvos>.
+available.  See L<perlvos>. [561+]
 
 =item *
 
-The Amdahl UTS UNIX mainframe platform is now supported.
+The Amdahl UTS UNIX mainframe platform is now supported. [561]
 
 =item *
 
@@ -1898,7 +1907,7 @@ WinCE is now supported.  See L<perlce>.
 
 z/OS (formerly known as OS/390, formerly known as MVS OE) now has
 support for dynamic loading.  This is not selected by default,
-however, you must specify -Dusedl in the arguments of Configure.
+however, you must specify -Dusedl in the arguments of Configure. [561]
 
 =back
 
@@ -1906,7 +1915,7 @@ however, you must specify -Dusedl in the arguments of Configure.
 
 Numerous memory leaks and uninitialized memory accesses have been
 hunted down.  Most importantly, anonymous subs used to leak quite
-a bit.
+a bit. [561]
 
 =over 4
 
@@ -1919,18 +1928,18 @@ The autouse pragma didn't work for Multi::Part::Function::Names.
 caller() could cause core dumps in certain situations.  Carp was sometimes
 affected by this problem.  In particular, caller() now returns a
 subroutine name of C<(unknown)> for subroutines that have been removed
-from the symbol table.
+from the symbol table. [561+]
 
 =item *
 
 chop(@list) in list context returned the characters chopped in
-reverse order.  This has been reversed to be in the right order.
+reverse order.  This has been reversed to be in the right order. [561]
 
 =item *
 
 Configure no longer includes the DBM libraries (dbm, gdbm, db, ndbm)
 when building the Perl binary.  The only exception to this is SunOS 4.x,
-which needs them.
+which needs them. [561]
 
 =item *
 
@@ -1950,12 +1959,12 @@ The order of DESTROYs has been made more predictable.
 Several debugger fixes: exit code now reflects the script exit code,
 condition C<"0"> now treated correctly, the C<d> command now checks
 line number, C<$.> no longer gets corrupted, and all debugger output
-now goes correctly to the socket if RemotePort is set.
+now goes correctly to the socket if RemotePort is set. [561]
 
 =item *
 
 Perl 5.6.0 could emit spurious warnings about redefinition of dl_error()
-when statically building extensions into perl.  This has been corrected.
+when statically building extensions into perl.  This has been corrected. [561]
 
 =item *
 
@@ -1972,7 +1981,7 @@ Infinity is now recognized as a number.
 =item *
 
 UNIVERSAL::isa no longer caches methods incorrectly.  (This broke
-the Tk extension with 5.6.0.)
+the Tk extension with 5.6.0.) [561]
 
 =item *
 
@@ -1988,21 +1997,21 @@ were declared before the lexicals.
 =item *
 
 Lexical warnings now propagating correctly between scopes
-and into C<eval "...">.
+and into C<eval "...">. [561+]
 
 =item *
 
 C<use warnings qw(FATAL all)> did not work as intended.  This has been
-corrected.
+corrected. [561]
 
 =item *
 
 warnings::enabled() now reports the state of $^W correctly if the caller
-isn't using lexical warnings.
+isn't using lexical warnings. [561]
 
 =item *
 
-Line renumbering with eval and C<#line> now works.
+Line renumbering with eval and C<#line> now works. [561]
 
 =item *
 
@@ -2057,17 +2066,17 @@ fixed the modfl() bug.
 =item *
 
 Modulus of unsigned numbers now works (4063328477 % 65535 used to
-return 27406, instead of 27047).
+return 27406, instead of 27047). [561]
 
 =item *
 
 Some "not a number" warnings introduced in 5.6.0 eliminated to be
-more compatible with 5.005.  Infinity is now recognised as a number.
+more compatible with 5.005.  Infinity is now recognised as a number. [561]
 
 =item *
 
 Numeric conversions did not recognize changes in the string value
-properly in certain circumstances.
+properly in certain circumstances. [561]
 
 =item *
 
@@ -2081,7 +2090,7 @@ our() variables will not cause "will not stay shared" warnings.
 
 "our" variables of the same name declared in two sibling blocks
 resulted in bogus warnings about "redeclaration" of the variables.
-The problem has been corrected.
+The problem has been corrected. [561]
 
 =item *
 
@@ -2095,7 +2104,7 @@ Fix password routines which in some shadow password platforms
 =item *
 
 The PERL5OPT environment variable (for passing command line arguments
-to Perl) didn't work for more than a single group of options.
+to Perl) didn't work for more than a single group of options. [561]
 
 =item *
 
@@ -2108,12 +2117,12 @@ printf() no longer resets the numeric locale to "C".
 =item *
 
 C<qw(a\\b)> now parses correctly as C<'a\\b'>: that is, as three
-characters, not four.
+characters, not four. [561]
 
 =item *
 
 pos() did not return the correct value within s///ge in earlier
-versions.  This is now handled correctly.
+versions.  This is now handled correctly. [561]
 
 =item *
 
@@ -2122,7 +2131,7 @@ without the q L ll prefixes (assuming you are on a quad-capable platform).
 
 =item *
 
-Regular expressions on references and overloaded scalars now work.
+Regular expressions on references and overloaded scalars now work. [561+]
 
 =item *
 
@@ -2142,7 +2151,7 @@ SOCKS support is now much more robust.
 sort() arguments are now compiled in the right wantarray context
 (they were accidentally using the context of the sort() itself).
 The comparison block is now run in scalar context, and the arguments
-to be sorted are always provided list context.
+to be sorted are always provided list context. [561]
 
 =item *
 
@@ -2155,7 +2164,7 @@ class C<[[:blank:]]> which stands for horizontal whitespace
 
 The tainting behaviour of sprintf() has been rationalized.  It does
 not taint the result of floating point formats anymore, making the
-behaviour consistent with that of string interpolation.
+behaviour consistent with that of string interpolation. [561]
 
 =item *
 
@@ -2165,40 +2174,40 @@ values) have been fixed.
 =item *
 
 The RE engine found in Perl 5.6.0 accidentally pessimised certain kinds
-of simple pattern matches.  These are now handled better.
+of simple pattern matches.  These are now handled better. [561]
 
 =item *
 
 Regular expression debug output (whether through C<use re 'debug'>
-or via C<-Dr>) now looks better.
+or via C<-Dr>) now looks better. [561]
 
 =item *
 
 Multi-line matches like C<"a\nxb\n" =~ /(?!\A)x/m> were flawed.  The
-bug has been fixed.
+bug has been fixed. [561]
 
 =item *
 
 Use of $& could trigger a core dump under some situations.  This
-is now avoided.
+is now avoided. [561]
 
 =item *
 
 The regular expression captured submatches ($1, $2, ...) are now
 more consistently unset if the match fails, instead of leaving false
-data lying around in them.
+data lying around in them. [561]
 
 =item *
 
 readline() on files opened in "slurp" mode could return an extra
 "" (blank line) at the end in certain situations.  This has been
-corrected.
+corrected. [561]
 
 =item *
 
 Autovivification of symbolic references of special variables described
 in L<perlvar> (as in C<${$num}>) was accidentally disabled.  This works
-again now.
+again now. [561]
 
 =item *
 
@@ -2276,7 +2285,7 @@ C<eval "v200"> now works.
 =item *
 
 Perl 5.6.0 parsed m/\x{ab}/ incorrectly, leading to spurious warnings.
-This has been corrected.
+This has been corrected. [561]
 
 =item *
 
@@ -2287,7 +2296,7 @@ Zero entries were missing from the Unicode classes such as C<IsDigit>.
 =item *
 
 Large unsigned numbers (those above 2**31) could sometimes lose their
-unsignedness, causing bogus results in arithmetic operations.
+unsignedness, causing bogus results in arithmetic operations. [561]
 
 =item *
 
@@ -2327,7 +2336,7 @@ Previously DYNIX/ptx had problems in its Configure probe for non-blocking I/O.
 
 EPOC
 
-EPOC update after Perl 5.6.0.  See README.epoc.
+EPOC update after Perl 5.6.0.  See README.epoc. [561]
 
 =item *
 
@@ -2357,7 +2366,7 @@ Linux
 
 =item *
 
-Long doubles should now work (see INSTALL).
+Long doubles should now work (see INSTALL). [561]
 
 =item *
 
@@ -2380,7 +2389,7 @@ for details.
 
 MPE/iX
 
-MPE/iX update after Perl 5.6.0.  See README.mpeix.
+MPE/iX update after Perl 5.6.0.  See README.mpeix. [561]
 
 =item *
 
@@ -2398,7 +2407,7 @@ Perl now works on NetBSD/sparc.
 
 OS/2
 
-Now works with usethreads (see INSTALL).
+Now works with usethreads (see INSTALL). [561]
 
 =item *
 
@@ -2451,7 +2460,7 @@ POSIX-style signals are now emulated much better on VMS versions prior
 to 7.0.
 
 The C<system> function and backticks operator have improved
-functionality and better error handling.
+functionality and better error handling. [561]
 
 File access tests now use current process privileges rather than the
 user's default privileges, which could sometimes result in a mismatch
@@ -2473,13 +2482,13 @@ Windows
 
 =item *
 
-accept() no longer leaks memory.
+accept() no longer leaks memory. [561]
 
 =item *
 
 Borland C++ v5.5 is now a supported compiler that can build Perl.
 However, the generated binaries continue to be incompatible with those
-generated by the other supported compilers (GCC and Visual C++).
+generated by the other supported compilers (GCC and Visual C++). [561]
 
 =item *
 
@@ -2487,16 +2496,17 @@ Better chdir() return value for a non-existent directory.
 
 =item *
 
-Duping socket handles with open(F, ">&MYSOCK") now works under Windows 9x.
+Duping socket handles with open(F, ">&MYSOCK") now works under Windows
+9x. [561]
 
 =item *
 
-New %ENV entries now propagate to subprocesses.
+New %ENV entries now propagate to subprocesses. [561]
 
 =item *
 
 Current directory entries in %ENV are now correctly propagated to child
-processes.
+processes. [561]
 
 =item *
 
@@ -2505,7 +2515,7 @@ $ENV{LIB} now used to search for libs under Visual C.
 =item *
 
 fork() emulation has been improved in various ways, but still continues
-to be experimental.  See L<perlfork> for known bugs and caveats.
+to be experimental.  See L<perlfork> for known bugs and caveats. [561+]
 
 =item *
 
@@ -2514,7 +2524,7 @@ A failed (pseudo)fork now returns undef and sets errno to EAGAIN.
 =item *
 
 Win32::GetCwd() correctly returns C:\ instead of C: when at the drive root.
-Other bugs in chdir() and Cwd::cwd() have also been fixed.
+Other bugs in chdir() and Cwd::cwd() have also been fixed. [561]
 
 =item *
 
@@ -2522,8 +2532,9 @@ HTML files will be installed in c:\perl\html instead of c:\perl\lib\pod\html
 
 =item *
 
-The makefiles now provide a single switch to bulk-enable all the features
-enabled in ActiveState ActivePerl (a popular Win32 binary distribution).
+The makefiles now provide a single switch to bulk-enable all the
+features enabled in ActiveState ActivePerl (a popular Win32 binary
+distribution). [561]
 
 =item *
 
@@ -2531,7 +2542,7 @@ Allow REG_EXPAND_SZ keys in the registry.
 
 =item *
 
-Can now send() from all threads, not just the first one.
+Can now send() from all threads, not just the first one. [561]
 
 =item *
 
@@ -2540,7 +2551,7 @@ Fake signal handling reenabled, bugs and all.
 =item *
 
 %SIG has been enabled under USE_ITHREADS, but its use is completely
-unsupported under all configurations.
+unsupported under all configurations. [561]
 
 =item *
 
@@ -2554,12 +2565,12 @@ C<< File::Spec->tmpdir() >> now prefers C:/temp over /tmp
 
 =item *
 
-Better UNC path handling under ithreads.
+Better UNC path handling under ithreads. [561]
 
 =item *
 
 wait(), waitpid(), and backticks now return the correct exit status
-under Windows 9x.
+under Windows 9x. [561]
 
 =item *
 
@@ -2567,7 +2578,7 @@ Win64 compilation is now supported.
 
 =item *
 
-winsock handle leak fixed.
+winsock handle leak fixed. [561]
 
 =back
 
@@ -2604,7 +2615,7 @@ C<\9>, and C<\_>.  There is no need to escape any of the C<\w> characters.
 =item *
 
 Two new debugging options have been added: if you have compiled your
-Perl with debugging, you can use the -DT and -DR options to trace
+Perl with debugging, you can use the -DT [561] and -DR options to trace
 tokenising and to add reference counts to displaying variables,
 respectively.
 
@@ -2742,7 +2753,7 @@ There are now several profiling make targets.
 
 =back
 
-=head1 Security Vulnerability Closed
+=head1 Security Vulnerability Closed [561]
 
 (This change was already made in 5.7.0 but bears repeating here.)
 
@@ -2772,7 +2783,7 @@ should only be used by security experts who know exactly what they are
 doing and why they are using suidperl instead of some other solution
 such as sudo ( see http://www.courtesan.com/sudo/ ).
 
-=head1 New Tests
+=head1 New Tests [561+]
 
 Several new tests have been added, especially for the F<lib> and F<ext>
 subsections.  There are now about 65 000 individual tests (spread over
@@ -2849,7 +2860,7 @@ use the bundled C compiler.)
 
 Perl 5.8.0 doesn't build in AmigaOS.  It broke at some point
 during the ithreads work and we could not find Amiga experts
-to unbreak the problems.
+to unbreak the problems. [561]
 
 =head2 BeOS
 
