@@ -889,6 +889,7 @@ EOP
 			    $i = $end;
 			} else {
 			    for (; $i <= $end; $i++) {
+				my ($stop,$action);
 				($stop,$action) = split(/\0/, $dbline{$i}) if
 				    $dbline{$i};
 			        $arrow = ($i==$line 
