@@ -109,9 +109,13 @@
 &if (command_status) ^= 0 &then &return
 !&compiler& <<hv.c &diag& &cpu& &cflags& -o hv&s&
 &if (command_status) ^= 0 &then &return
+!&compiler& <<locale.c &diag& &cpu& &cflags& -o locale&s&
+&if (command_status) ^= 0 &then &return
 &   !&compiler& <<malloc.c &diag& &cpu& &cflags& -o malloc&s&
 &   &if (command_status) ^= 0 &then &return
 !&compiler& <<mg.c &diag& &cpu& &cflags& -o mg&s&
+&if (command_status) ^= 0 &then &return
+!&compiler& <<numeric.c &diag& &cpu& &cflags& -o numeric&s&
 &if (command_status) ^= 0 &then &return
 !&compiler& <<op.c &diag& &cpu& &cflags& -o op&s&
 &if (command_status) ^= 0 &then &return
@@ -147,6 +151,8 @@
 !&compiler& <<pp_ctl.c &diag& &cpu& &cflags& -o pp_ctl&s&
 &if (command_status) ^= 0 &then &return
 !&compiler& <<pp_hot.c &diag& &cpu& &cflags& -o pp_hot&s&
+&if (command_status) ^= 0 &then &return
+!&compiler& <<pp_pack.c &diag& &cpu& &cflags& -o pp_pack&s&
 &if (command_status) ^= 0 &then &return
 !&compiler& <<pp_sys.c &diag& &cpu& &cflags& -o pp_sys&s&
 &if (command_status) ^= 0 &then &return
