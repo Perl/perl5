@@ -1,5 +1,5 @@
 # Pod::Man -- Convert POD data to formatted *roff input.
-# $Id: Man.pm,v 1.14 2001/01/16 13:39:45 eagle Exp $
+# $Id: Man.pm,v 1.15 2001/02/10 06:50:22 eagle Exp $
 #
 # Copyright 1999, 2000, 2001 by Russ Allbery <rra@stanford.edu>
 #
@@ -38,7 +38,7 @@ use vars qw(@ISA %ESCAPES $PREAMBLE $VERSION);
 # Perl core and too many things could munge CVS magic revision strings.
 # This number should ideally be the same as the CVS revision in podlators,
 # however.
-$VERSION = 1.14;
+$VERSION = 1.15;
 
 
 ############################################################################
@@ -805,6 +805,10 @@ sub buildlink {
     # Okay, leading and trailing whitespace isn't important.
     s/^\s+//;
     s/\s+$//;
+
+    # If the argument looks like a URL, return it verbatim.  This only
+    # handles URLs that use the server syntax.
+    if (m%^[a-z]+://\S+$%) { return $_ }
 
     # Default to using the whole content of the link entry as a section
     # name.  Note that L<manpage/> forces a manpage interpretation, as does
