@@ -2093,14 +2093,11 @@ create_command_line(const char* command, const char * const *args)
     New(1310, cmd, len, char);
     ptr = cmd;
     strcpy(ptr, command);
-    ptr += strlen(ptr);
-    *ptr++ = ' ';
 
     for (index = 0; (arg = (char*)args[index]) != NULL; ++index) {
-	strcpy(ptr, arg);
 	ptr += strlen(ptr);
-	if ((char*)args[index+1] != NULL)
-	    *ptr++ = ' ';
+	*ptr++ = ' ';
+	strcpy(ptr, arg);
     }
 
     return cmd;
