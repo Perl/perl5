@@ -41,7 +41,7 @@ print defined($dot->read) ? "not ok" : "ok", " 5\n";
 
 open(FH,'>X') || die "Can't create x";
 print FH "X";
-close(FH);
+close(FH) or die "Can't close: $!";
 
 tie %dir, IO::Dir, $DIR;
 my @files = keys %dir;

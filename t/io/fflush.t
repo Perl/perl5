@@ -66,7 +66,7 @@ print OUT $str;
 close OUT;
 EOF
     ;
-close PROG;
+close PROG or die "close ff-prog: $!";;
 push @delete, "ff-prog";
 
 $| = 0; # we want buffered output
@@ -122,7 +122,7 @@ for (qw(system qx popen)) {
     my $command = qq{$runperl "ff-prog" "$f" "rl"};
     open OUT, "> $f" or die "open $f: $!";
     print OUT "Pe";
-    close OUT;
+    close OUT or die "close $f: $!";;
     print "# $command\n";
     $code->($command);
     print file_eq($f, "Perl") ? "ok $t\n" : "not ok $t\n";

@@ -1,4 +1,4 @@
-#!./perl 
+#!./perl
 
 BEGIN {
     chdir 't' if -d 't';
@@ -33,13 +33,13 @@ foreach my $file (@w_files) {
     open F, "<$file" or die "Cannot open $file: $!\n" ;
     my $line = 0;
     while (<F>) {
-        $line++; 
+        $line++;
 	last if /^__END__/ ;
     }
 
     {
         local $/ = undef;
-        $files++; 
+        $files++;
         @prgs = (@prgs, $file, split "\n########\n", <F>) ;
     }
     close F ;
@@ -48,13 +48,13 @@ foreach my $file (@w_files) {
 undef $/;
 
 print "1..", scalar(@prgs)-$files, "\n";
- 
- 
+
+
 for (@prgs){
     unless (/\n/)
      {
-      print "# From $_\n"; 
-      next; 
+      print "# From $_\n";
+      next;
      }
     my $switch = "";
     my @temps = () ;
@@ -66,7 +66,7 @@ for (@prgs){
     if ( $prog =~ /--FILE--/) {
         my(@files) = split(/\n--FILE--\s*([^\s\n]*)\s*\n/, $prog) ;
 	shift @files ;
-	die "Internal error test $i didn't split into pairs, got " . 
+	die "Internal error test $i didn't split into pairs, got " .
 		scalar(@files) . "[" . join("%%%%", @files) ."]\n"
 	    if @files % 2 ;
 	while (@files > 2) {
@@ -75,21 +75,21 @@ for (@prgs){
     	    push @temps, $filename ;
 	    open F, ">$filename" or die "Cannot open $filename: $!\n" ;
 	    print F $code ;
-	    close F ;
+	    close F or die "Cannot close $filename: $!\n";
 	}
 	shift @files ;
 	$prog = shift @files ;
     }
-    open TEST, ">$tmpfile";
+    open TEST, ">$tmpfile" or die "Cannot open >$tmpfile: $!";
     print TEST q{
-        BEGIN { 
-            open(STDERR, ">&STDOUT") 
+        BEGIN {
+            open(STDERR, ">&STDOUT")
               or die "Can't dup STDOUT->STDERR: $!;";
         }
     };
     print TEST "\n#line 1\n";  # So the line numbers don't get messed up.
     print TEST $prog,"\n";
-    close TEST;
+    close TEST or die "Cannot close $tmpfile: $!";
     my $results = $Is_VMS ?
 	              `./perl "-I../lib" $switch $tmpfile` :
 		  $Is_MSWin32 ?
@@ -141,6 +141,6 @@ for (@prgs){
         print "not ";
     }
     print "ok ", ++$i, "\n";
-    foreach (@temps) 
-	{ unlink $_ if $_ } 
+    foreach (@temps)
+	{ unlink $_ if $_ }
 }
