@@ -84,7 +84,7 @@ WELCOME to Plan 9 Perl, brave soul!
    This is a preliminary alpha version of Plan 9 Perl. Still to be
 implemented are MakeMaker and DynaLoader. Many perl commands are
 missing or currently behave in an inscrutable manner. These gaps will,
-with perserverance and a modicum of luck, be remedied in the near
+with perseverance and a modicum of luck, be remedied in the near
 future.To install this software:
 
 1. Create the source directories and libraries for perl by running the

@@ -104,7 +104,7 @@ above abstraction which allows perl more control over how IO is done
 as it decouples IO from the way the operating system and C library
 choose to do things. For USE_PERLIO PerlIO * has an extra layer of
 indirection - it is a pointer-to-a-pointer.  This allows the PerlIO *
-to remain with a known value while swapping the implementation arround
+to remain with a known value while swapping the implementation around
 underneath I<at run time>. In this case all the above are true (but
 very simple) functions which call the underlying implementation.
 
@@ -138,7 +138,7 @@ These correspond to fopen()/fdopen() and the arguments are the same.
 Return C<NULL> and set C<errno> if there is an error.  There may be an
 implementation limit on the number of open handles, which may be lower
 than the limit on the number of open files - C<errno> may not be set
-when C<NULL> is returned if this limnit is exceeded.
+when C<NULL> is returned if this limit is exceeded.
 
 =item B<PerlIO_reopen(path,mode,f)>
 
@@ -289,7 +289,7 @@ problem. However in other cases then mechanisms must exist to create a
 FILE * which can be passed to library code which is going to use stdio
 calls.
 
-The fisrt step is to add this line:
+The first step is to add this line:
 
    #define PERLIO_NOT_STDIO 0
 
@@ -432,7 +432,7 @@ case.
 =item PerlIO_binmode(f,ptype,imode,layers)
 
 The hook used by perl's C<binmode> operator.
-B<ptype> is perl's charcter for the kind of IO:
+B<ptype> is perl's character for the kind of IO:
 
 =over 8
 

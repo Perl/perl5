@@ -275,6 +275,8 @@ have their directionality defined:
     BidiWS      Whitespace
     BidiON      Other Neutrals
 
+=back
+
 =head2 Scripts
 
 The scripts available for C<\p{In...}> and C<\P{In...}>, for example
@@ -481,6 +483,8 @@ below list that have the C<Block> appended).
    Yi Radicals
    Yi Syllables
 
+=over 4
+
 =item *
 
 The special pattern C<\X> match matches any extended Unicode sequence
@@ -563,7 +567,7 @@ than one Unicode character
 
 =back
 
-What doesn't yet work are the followng cases:
+What doesn't yet work are the following cases:
 
 =over 8
 

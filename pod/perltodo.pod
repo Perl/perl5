@@ -173,7 +173,7 @@ C<[1234567890]> aren't the only numerals any more.
 
 =head2 POSIX Unicode character classes
 
-([=a=] for equivalance classes, [.ch.] for collation.)
+(C<[=a=]> for equivalance classes, C<[.ch.]> for collation.)
 These are dependent on Unicode normalization and collation.
 
 =head2 Factoring out common suffices/prefices in regexps (trie optimization)
@@ -213,7 +213,7 @@ fp_setmask(), fp_getmask(), fp_setround(), fp_getround()
 (no metaconfig units yet for these).  Don't forget finitel(), fp_classl(),
 fp_class_l(), (yes, both do, unfortunately, exist), and unorderedl().)
 
-As of Perl 5.6.1 is a Perl macro, Perl_isnan().
+As of Perl 5.6.1, there is a Perl macro, Perl_isnan().
 
 =head2 IV/UV preservation
 
@@ -279,7 +279,7 @@ mark-and-sweep GC implementation.
 
 Alan notes that: The basic idea was to extend the parser token stack
 (C<YYSTYPE>) to include a type field so we knew what sort of thing each
-element of the stack was.  The F<<perly.c> code would then have to be
+element of the stack was.  The F<perly.c> code would then have to be
 postprocessed to record the type of each entry on the stack as it was
 created, and the parser patched so that it could unroll the stack
 properly on error.
@@ -322,11 +322,11 @@ Damian Conway is planning to work on this, but it hasn't happened yet.
 
 =head2 Using POSIX calls internally
 
-When faced with a BSD vs. SySV -style interface to some library or
+When faced with a BSD vs. SysV -style interface to some library or
 system function, perl's roots show in that it typically prefers the BSD
 interface (but falls back to the SysV one).  One example is getpgrp().
 Other examples include C<memcpy> vs. C<bcopy>.  There are others, mostly in
-F<<pp_sys.c>.
+F<pp_sys.c>.
 
 Mostly, this item is a suggestion for which way to start a journey into
 an C<#ifdef> forest.  It is not primarily a suggestion to eliminate any of
@@ -444,7 +444,7 @@ Look at the "reification" code in C<av.c>
 
 Currently, indirect object syntax bypasses prototype checks.
 
-=head2 Install HMTL
+=head2 Install HTML
 
 HTML versions of the documentation need to be installed by default; a
 call to C<installhtml> from C<installperl> may be all that's necessary.
@@ -621,11 +621,11 @@ can be found on the CPAN.
 
 =head2 gettimeofday
 
-C<Time::Hires> has been integrated into the core.
+C<Time::HiRes> has been integrated into the core.
 
 =head2 setitimer and getimiter
 
-Adding C<Time::Hires> got us this too.
+Adding C<Time::HiRes> got us this too.
 
 =head2 Testing __DIE__ hook
 

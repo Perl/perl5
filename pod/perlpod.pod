@@ -173,21 +173,21 @@ usually used just when you want to start a Pod block with an ordinary
 paragraph or a verbatim paragraph.  For example:
 
   =item stuff()
-  
+
   This function does stuff.
-  
+
   =cut
-  
+
   sub stuff {
     ...
   }
-  
+
   =pod
-  
+
   Remember to check its return value, as in:
-  
-    stuff() || die "Couldn't do stufF!";
-  
+
+    stuff() || die "Couldn't do stuff!";
+
   =cut
 
 =item C<=begin I<formatname>>
@@ -208,10 +208,10 @@ is meant for formatters that understand the special format
 called I<formatname>.  For example,
 
   =begin html
-  
+
   <hr> <img src="thang.png">
   <p> This is a raw HTML paragraph </p>
-  
+
   =end html
 
 The command "=for I<formatname> I<text...>"
@@ -613,7 +613,7 @@ wish to work around.
 =item *
 
 If you're more familiar with writing in HTML than with writing in Pod, you
-can try your hand at writing documentation in simple HTML, and coverting
+can try your hand at writing documentation in simple HTML, and converting
 it to Pod with the experimental L<Pod::HTML2Pod|Pod::HTML2Pod> module,
 (available in CPAN), and looking at the resulting code.  The experimental
 L<Pod::PXML|Pod::PXML> module in CPAN might also be useful.
@@ -626,7 +626,7 @@ line.  Having something like this:
 
  # - - - - - - - - - - - -
  =item $firecracker->boom()
- 
+
  This noisily detonates the firecracker object.
  =cut
  sub boom {
@@ -638,13 +638,13 @@ at all.
 Instead, have it like this:
 
  # - - - - - - - - - - - -
- 
+
  =item $firecracker->boom()
- 
+
  This noisily detonates the firecracker object.
- 
+
  =cut
- 
+
  sub boom {
  ...
 

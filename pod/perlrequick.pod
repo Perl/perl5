@@ -238,7 +238,7 @@ C<cat> is able to match earlier in the string.
     "cats"          =~ /cats|cat|ca|c/; # matches "cats"
 
 At a given character position, the first alternative that allows the
-regex match to succeed wil be the one that matches. Here, all the
+regex match to succeed will be the one that matches. Here, all the
 alternatives match at the first string position, so th first matches.
 
 =head2 Grouping things and hierarchical matching

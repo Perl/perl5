@@ -61,11 +61,11 @@ The make process runs only under WinNT shell.
 The NetWare makefile is located under the NetWare folder.
 The makefile for NetWare makes use of miniperl.exe to run some of
 the Perl scripts.  To create miniperl.exe, run nmake from
-win32 folder through WinNT commond prompt.  The build process
+win32 folder through WinNT command prompt.  The build process
 can be stopped after miniperl.exe is created.  Then run nmake
 from NetWare folder through WinNT command prompt.
 
-Currently the follwing two build types are tested on NetWare
+Currently the following two build types are tested on NetWare
 
 =over 4
 

@@ -1201,7 +1201,7 @@ C code have superseded it.
 If you're looking to use L<dump> to speed up your program, consider
 generating bytecode or native C code as described in L<perlcc>.  If
 you're just trying to accelerate a CGI script, consider using the
-C<mod_perl> extension to B<Apache>, or the CPAN module, Fast::CGI.
+C<mod_perl> extension to B<Apache>, or the CPAN module, CGI::Fast.
 You might also consider autoloading or selfloading, which at least
 make your program I<appear> to run faster.
 

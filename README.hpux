@@ -15,7 +15,7 @@ compiled and/or runs.
 =head2 Using perl as shipped with HP-UX
 
 As of application release September 2001, HP-UX 11.00 is shipped with
-perl-5.6.1 in /opt/perl. The first occurrance is on CD 5012-7954 and
+perl-5.6.1 in /opt/perl. The first occurrence is on CD 5012-7954 and
 can be installed using
 
     swinstall -s /cdrom perl
@@ -298,7 +298,7 @@ is listed before -lc in the list of libraries to link Perl with. The
 hints provided for HP-UX during Configure will try very hard to get
 this right for you.
 
-HP-UX versions before 10.30 require a seperate installation of a POSIX
+HP-UX versions before 10.30 require a separate installation of a POSIX
 threads library package. Two examples are the HP DCE package, available
 on "HP-UX Hardware Extensions 3.0, Install and Core OS, Release 10.20,
 April 1999 (B3920-13941)" or the Freely available PTH package, available

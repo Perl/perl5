@@ -136,13 +136,15 @@ functions is that it works with numbers of ANY size, that it is
 optimized for speed on some operations, and for at least some
 programmers the notation might be familiar.
 
+=over 4
+
 =item B<How do I convert Hexadecimal into decimal:>
 
 Using perl's built in conversion of 0x notation:
 
     $int = 0xDEADBEEF;
     $dec = sprintf("%d", $int);
- 
+
 Using the hex function:
 
     $int = hex("DEADBEEF");
@@ -247,6 +249,7 @@ Using Bit::Vector:
 The remaining transformations (e.g. hex -> oct, bin -> hex, etc.)
 are left as an exercise to the inclined reader.
 
+=back
 
 =head2 Why doesn't & work the way I want it to?
 
@@ -1849,7 +1852,7 @@ in L<perltoot>.
 
 =head2 How can I use a reference as a hash key?
 
-You can't do this directly, but you could use the standard Tie::Refhash
+You can't do this directly, but you could use the standard Tie::RefHash
 module distributed with Perl.
 
 =head1 Data: Misc

@@ -1847,7 +1847,7 @@ same as for Perl 5.005_53 (same as in a popular binary release).  Thus
 new Perls will be able to I<resolve the names> of old extension DLLs
 if @INC allows finding their directories.
 
-However, this still does not guarantie that these DLL may be loaded.
+However, this still does not guarantee that these DLL may be loaded.
 The reason is the mangling of the name of the I<Perl DLL>.  And since
 the extension DLLs link with the Perl DLL, extension DLLs for older
 versions would load an older Perl DLL, and would most probably
@@ -1872,7 +1872,7 @@ Old perl executable is started when a new executable is running has
 loaded an extension compiled for the old executable (ouph!).  In this
 case the old executable will get a forwarder DLL instead of the old
 perl DLL, so would link with the new perl DLL.  While not directly
-fatal, it will behave the same as new excutable.  This beats the whole
+fatal, it will behave the same as new executable.  This beats the whole
 purpose of explicitly starting an old executable.
 
 =item *

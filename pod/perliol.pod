@@ -69,9 +69,13 @@ A "layer" is composed of two parts:
 
 =over 4
 
-=item 1. The functions and attributes of the "layer class".
+=item 1.
 
-=item 2. The per-instance data for a particular handle.
+The functions and attributes of the "layer class".
+
+=item 2.
+
+The per-instance data for a particular handle.
 
 =back
 

@@ -1638,7 +1638,7 @@ extremely important to test any addition thoroughly and add new tests
 to explore all boundary conditions that your new function is expected
 to handle.  If your new function is used only by one module (e.g. toke),
 then it should probably be named S_your_function (for static); on the
-other hand, if you expect it to accessable from other functions in
+other hand, if you expect it to accessible from other functions in
 Perl, you should name it Perl_your_function.  See L<perlguts/Internal Functions>
 for more details.
 
@@ -1679,7 +1679,7 @@ Lastly, TEST TEST TEST TEST TEST any code before posting to p5p.
 Test on as many platforms as you can find.  Test as many perl
 Configure options as you can (e.g. MULTIPLICITY).  If you have
 profiling or memory tools, see L<EXTERNAL TOOLS FOR DEBUGGING PERL>
-below for how to use them to futher test your code.  Remember that
+below for how to use them to further test your code.  Remember that
 most of the people on P5P are doing this on their own time and
 don't have the time to debug your code.
 

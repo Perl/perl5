@@ -550,7 +550,7 @@ to give them a chance to match.
 
 The last example points out that character classes are like
 alternations of characters.  At a given character position, the first
-alternative that allows the regexp match to succeed wil be the one
+alternative that allows the regexp match to succeed will be the one
 that matches.
 
 =head2 Grouping things and hierarchical matching
@@ -587,7 +587,7 @@ are
 
 Alternations behave the same way in groups as out of them: at a given
 string position, the leftmost alternative that allows the regexp to
-match is taken.  So in the last example at tth first string position,
+match is taken.  So in the last example at the first string position,
 C<"20"> matches the second alternative, but there is nothing left over
 to match the next two digits C<\d\d>.  So perl moves on to the next
 alternative, which is the null alternative and that works, since

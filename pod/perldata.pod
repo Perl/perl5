@@ -219,7 +219,7 @@ an array that was previously shortened does not recover values
 that were in those elements.  (It used to do so in Perl 4, but we
 had to break this to make sure destructors were called when expected.)
 
-You can also gain some miniscule measure of efficiency by pre-extending
+You can also gain some minuscule measure of efficiency by pre-extending
 an array that is going to get big.  You can also extend an array
 by assigning to an element that is off the end of the array.  You
 can truncate an array down to nothing by assigning the null list
@@ -416,8 +416,8 @@ plain paranoid, you can force the correct interpretation with curly
 braces as above.
 
 If you're looking for the information on how to use here-documents,
-which used to be here, that's been moved to L<perlop> in the section on
-L<Quote and Quote-like Operators>.
+which used to be here, that's been moved to
+L<perlop/Quote and Quote-like Operators>.
 
 =head2 List value constructors
 

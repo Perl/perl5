@@ -1695,7 +1695,7 @@ C<sv_dump> to produce debugging output from Perl-space, so users of that
 module should already be familiar with its format.
 
 C<Perl_op_dump> can be used to dump an C<OP> structure or any of its
-derivatives, and produces output similiar to C<perl -Dx>; in fact,
+derivatives, and produces output similar to C<perl -Dx>; in fact,
 C<Perl_dump_eval> will dump the main root of the code being evaluated,
 exactly like C<-Dx>.
 

@@ -115,7 +115,7 @@ Perl_sharedsv_find(pTHX_ SV* sv)
 =for apidoc sharedsv_lock
 
 Recursive locks on a sharedsv.
-Locks are dynamicly scoped at the level of the first lock.
+Locks are dynamically scoped at the level of the first lock.
 =cut
 */
 void

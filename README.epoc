@@ -50,7 +50,7 @@ start perl with a double click on the camel icon. Be sure to configure
 the perl installation drive first. You can even provide a script with
 a special commandline, if needed.
 
-Alternativly you can get ESHELL from symbian: 
+Alternatively you can get ESHELL from symbian: 
 http://developer.epocworld.com/downloads/progs/Eshell.zip
 
 Running ESHELL you can enter: perl -de 0 in order to run the perl
@@ -68,7 +68,7 @@ command line switch '-x'. See L<perlrun> for details.
 
 You can stop a running perl process in the task list by closing the
 application `STDOUT'. You cannot stop a running perl process if it has
-not written anyting to stdout or stderr! Be very cautious with I/O
+not written anything to stdout or stderr! Be very cautious with I/O
 redirection. You will have to reboot the PDA!
 
 =head1 USING PERL ON EPOC
@@ -129,7 +129,7 @@ backquoting, pipes etc.
 
 =item *
 
-system() does not inherit ressources like: file descriptors,
+system() does not inherit resources like: file descriptors,
 environment etc.
 
 =item *
