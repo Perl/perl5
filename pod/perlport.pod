@@ -2105,40 +2105,43 @@ available at http://www.cpan.org/src/index.html
 
         AIX
         BeOS
+        BSD/OS          (BSDi)
         Cygwin
         DG/UX
         DOS DJGPP       1)
         DYNIX/ptx
         EPOC R5
         FreeBSD
+        HI-UXMPP        (Hitachi) (5.8.0 worked but we didn't know it)
         HP-UX
         IRIX
         Linux
         Mac OS Classic
-        Mac OS X         (Darwin)
+        Mac OS X        (Darwin)
         MPE/iX
         NetBSD
         NetWare
         NonStop-UX
-        ReliantUNIX     (SINIX)
+        ReliantUNIX     (formerly SINIX)
         OpenBSD
-        OpenVMS         (VMS)
+        OpenVMS         (formerly VMS)
+        Open UNIX       (formerly Unixware) (since Perl 5.8.1/5.9.0)
         OS/2
         OS/400          (using the PASE) (since Perl 5.8.1/5.9.0)
         PowerUX
-        POSIX-BC        (BS2000)
+        POSIX-BC        (formerly BS2000)
         QNX
         Solaris
         SunOS 4
-        SUPER-UX
-        Tru64 UNIX      (DEC OSF/1, Digital UNIX)
+        SUPER-UX        (NEC)
+        Tru64 UNIX      (formerly DEC OSF/1, Digital UNIX)
         UNICOS
         UNICOS/mk
         UTS
         VOS
         Win95/98/ME/2K/XP 2)
         WinCE
-        z/OS            (OS/390)
+        z/OS            (formerly OS/390)
         VM/ESA
 
         1) in DOS mode either the DOS or OS/2 ports can be used
