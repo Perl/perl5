@@ -815,3 +815,7 @@ $foo = \-f "blah";
 print "ok" if ref $foo && !$$foo;
 EXPECT
 ok
+######## [ID 20011128.159] 'X' =~ /\X/ segfault in 5.6.1
+print "ok" if 'X' =~ /\X/;
+EXPECT
+ok
