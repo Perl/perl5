@@ -2537,8 +2537,7 @@ PerlIOStdio_close(pTHX_ PerlIO *f)
     FILE *stdio = PerlIOSelf(f, PerlIOStdio)->stdio;
     if (PerlIOUnix_refcnt_dec(fileno(stdio)) > 0) {
 	/* Do not close it but do flush any buffers */
-	PerlIO_flush(f);
-	return 0;
+        return PerlIO_flush(f);
     }
     return (
 #ifdef SOCKS5_VERSION_NAME
