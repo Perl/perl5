@@ -366,6 +366,11 @@ Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
 		    i = t;
 		else			/* @- */
 		    i = s;
+		
+		if (i > 0 && DO_UTF8(PL_reg_sv)) {
+		    char *b = rx->subbeg;
+		    i = Perl_utf8_length(aTHX_ (U8*)b, (U8*)(b+i));
+		}
 		sv_setiv(sv,i);
 	    }
     }
@@ -1410,7 +1415,14 @@ Perl_magic_setsubstr(pTHX_ SV *sv, MAGIC *mg)
 {
     STRLEN len;
     char *tmps = SvPV(sv,len);
-    sv_insert(LvTARG(sv),LvTARGOFF(sv),LvTARGLEN(sv), tmps, len);
+    if (DO_UTF8(sv)) {
+	sv_utf8_upgrade(LvTARG(sv));
+	sv_insert(LvTARG(sv),LvTARGOFF(sv),LvTARGLEN(sv), tmps, len);
+	SvUTF8_on(LvTARG(sv));
+    }
+    else
+        sv_insert(LvTARG(sv),LvTARGOFF(sv),LvTARGLEN(sv), tmps, len);
+
     return 0;
 }
 

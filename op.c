@@ -6772,6 +6772,8 @@ Perl_peep(pTHX_ register OP *o)
 	    if (!fields || !GvHV(*fields))
 		break;
 	    key = SvPV(*svp, keylen);
+	    if (SvUTF8(*svp))
+	        keylen = -keylen;
 	    indsvp = hv_fetch(GvHV(*fields), key, keylen, FALSE);
 	    if (!indsvp) {
 		Perl_croak(aTHX_ "No such pseudo-hash field \"%s\" in variable %s of type %s",
@@ -6837,6 +6839,8 @@ Perl_peep(pTHX_ register OP *o)
 		 key_op = (SVOP*)key_op->op_sibling) {
 		svp = cSVOPx_svp(key_op);
 		key = SvPV(*svp, keylen);
+		if (SvUTF8(*svp))
+	            keylen = -keylen;
 		indsvp = hv_fetch(GvHV(*fields), key, keylen, FALSE);
 		if (!indsvp) {
 		    Perl_croak(aTHX_ "No such pseudo-hash field \"%s\" "

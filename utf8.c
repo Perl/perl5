@@ -163,8 +163,12 @@ bool
 Perl_is_utf8_string(pTHX_ U8 *s, STRLEN len)
 {
     U8* x = s;
-    U8* send = s + len;
+    U8* send;
     STRLEN c;
+
+    if (!len)
+	len = strlen(s);
+    send = s + len;
 
     while (x < send) {
         c = is_utf8_char(x);

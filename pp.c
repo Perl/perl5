@@ -5739,9 +5739,9 @@ PP(pp_split)
     AV *ary;
     register IV limit = POPi;			/* note, negative is forever */
     SV *sv = POPs;
-    bool do_utf8 = DO_UTF8(sv);
     STRLEN len;
     register char *s = SvPV(sv, len);
+    bool do_utf8 = DO_UTF8(sv);
     char *strend = s + len;
     register PMOP *pm;
     register REGEXP *rx;
@@ -5878,7 +5878,7 @@ PP(pp_split)
 	SV *csv = CALLREG_INTUIT_STRING(aTHX_ rx);
 
 	len = rx->minlen;
-	if (len == 1 && !tail) {
+	if (len == 1 && !(rx->reganch & ROPT_UTF8) && !tail) {
 	    STRLEN n_a;
 	    char c = *SvPV(csv, n_a);
 	    while (--limit) {
@@ -5895,7 +5895,10 @@ PP(pp_split)
 		XPUSHs(dstr);
 		/* The rx->minlen is in characters but we want to step
 		 * s ahead by bytes. */
-		s = m + (do_utf8 ? SvCUR(csv) : len);
+ 		if (do_utf8)
+		    s = (char*)utf8_hop((U8*)m, len);
+ 		else
+		    s = m + len; /* Fake \n at the end */
 	    }
 	}
 	else {
@@ -5914,7 +5917,10 @@ PP(pp_split)
 		XPUSHs(dstr);
 		/* The rx->minlen is in characters but we want to step
 		 * s ahead by bytes. */
-		s = m + (do_utf8 ? SvCUR(csv) : len); /* Fake \n at the end */
+ 		if (do_utf8)
+		    s = (char*)utf8_hop((U8*)m, len);
+ 		else
+		    s = m + len; /* Fake \n at the end */
 	    }
 	}
     }

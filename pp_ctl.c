@@ -115,7 +115,9 @@ PP(pp_regcomp)
 
 	    pm->op_pmflags = pm->op_pmpermflags;	/* reset case sensitivity */
 	    if (DO_UTF8(tmpstr))
-		pm->op_pmdynflags |= PMdf_UTF8;
+		pm->op_pmdynflags |= PMdf_DYN_UTF8;
+	    else
+		pm->op_pmdynflags &= ~PMdf_DYN_UTF8;
 	    pm->op_pmregexp = CALLREGCOMP(aTHX_ t, t + len, pm);
 	    PL_reginterp_cnt = 0;		/* XXXX Be extra paranoid - needed
 					   inside tie/overload accessors.  */
@@ -185,12 +187,12 @@ PP(pp_substcont)
 	    SvPVX(targ) = SvPVX(dstr);
 	    SvCUR_set(targ, SvCUR(dstr));
 	    SvLEN_set(targ, SvLEN(dstr));
+	    if (DO_UTF8(dstr))
+		SvUTF8_on(targ);
 	    SvPVX(dstr) = 0;
 	    sv_free(dstr);
 
 	    TAINT_IF(cx->sb_rxtainted & 1);
-	    if (pm->op_pmdynflags & PMdf_UTF8)
-		SvUTF8_on(targ); /* could also copy SvUTF8(dstr)? */
 	    PUSHs(sv_2mortal(newSViv((I32)cx->sb_iters - 1)));
 
 	    (void)SvPOK_only_UTF8(targ);
@@ -1439,8 +1441,13 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 		    }
 		}
 	    }
-	    else
+	    else {
 		sv_setpvn(ERRSV, message, msglen);
+		if (PL_hints & HINT_UTF8)
+		    SvUTF8_on(ERRSV);
+		else
+		    SvUTF8_off(ERRSV);
+	    }
 	}
 	else
 	    message = SvPVx(ERRSV, msglen);
@@ -2754,7 +2761,7 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, AV** avp)
 #else
     SAVEVPTR(PL_op);
 #endif
-    PL_hints = 0;
+    PL_hints &= HINT_UTF8;
 
     PL_op = &dummy;
     PL_op->op_type = OP_ENTEREVAL;

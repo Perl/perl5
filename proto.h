@@ -1147,7 +1147,9 @@ STATIC char*	S_regcppop(pTHX);
 STATIC char*	S_regcp_set_to(pTHX_ I32 ss);
 STATIC void	S_cache_re(pTHX_ regexp *prog);
 STATIC U8*	S_reghop(pTHX_ U8 *pos, I32 off);
+STATIC U8*	S_reghop3(pTHX_ U8 *pos, I32 off, U8 *lim);
 STATIC U8*	S_reghopmaybe(pTHX_ U8 *pos, I32 off);
+STATIC U8*	S_reghopmaybe3(pTHX_ U8 *pos, I32 off, U8 *lim);
 STATIC char*	S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *startpos, I32 norun);
 #endif
 
