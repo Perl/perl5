@@ -864,10 +864,13 @@ Perl_str_to_version(pTHX_ SV *sv)
 /*
  * S_force_version
  * Forces the next token to be a version number.
+ * If the next token appears to be an invalid version number, (e.g. "v2b"),
+ * and if "guessing" is TRUE, then no new token is created (and the caller
+ * must use an alternative parsing method).
  */
 
 STATIC char *
-S_force_version(pTHX_ char *s)
+S_force_version(pTHX_ char *s, int guessing)
 {
     OP *version = Nullop;
     char *d;
@@ -878,7 +881,8 @@ S_force_version(pTHX_ char *s)
     if (*d == 'v')
 	d++;
     if (isDIGIT(*d)) {
-        for (; isDIGIT(*d) || *d == '_' || *d == '.'; d++);
+	while (isDIGIT(*d) || *d == '_' || *d == '.')
+	    d++;
         if (*d == ';' || isSPACE(*d) || *d == '}' || !*d) {
 	    SV *ver;
             s = scan_num(s, &yylval);
@@ -890,13 +894,15 @@ S_force_version(pTHX_ char *s)
 		SvNOK_on(ver);		/* hint that it is a version */
 	    }
         }
+	else if (guessing)
+	    return s;
     }
 
     /* NOTE: The parser sees the package name and the VERSION swapped */
     PL_nextval[PL_nexttoke].opval = version;
     force_next(WORD);
 
-    return (s);
+    return s;
 }
 
 /*
@@ -4534,7 +4540,7 @@ Perl_yylex(pTHX)
 	    if (PL_expect != XSTATE)
 		yyerror("\"no\" not allowed in expression");
 	    s = force_word(s,WORD,FALSE,TRUE,FALSE);
-	    s = force_version(s);
+	    s = force_version(s, FALSE);
 	    yylval.ival = 0;
 	    OPERATOR(USE);
 
@@ -4686,10 +4692,12 @@ Perl_yylex(pTHX)
 
 	case KEY_require:
 	    s = skipspace(s);
-	    if (isDIGIT(*s) || (*s == 'v' && isDIGIT(s[1]))) {
-		s = force_version(s);
+	    if (isDIGIT(*s)) {
+		s = force_version(s, FALSE);
 	    }
-	    else {
+	    else if (*s != 'v' || !isDIGIT(s[1])
+		    || (s = force_version(s, TRUE), *s == 'v'))
+	    {
 		*PL_tokenbuf = '\0';
 		s = force_word(s,WORD,TRUE,TRUE,FALSE);
 		if (isIDFIRST_lazy_if(PL_tokenbuf,UTF))
@@ -5049,15 +5057,19 @@ Perl_yylex(pTHX)
 		yyerror("\"use\" not allowed in expression");
 	    s = skipspace(s);
 	    if (isDIGIT(*s) || (*s == 'v' && isDIGIT(s[1]))) {
-		s = force_version(s);
+		s = force_version(s, TRUE);
 		if (*s == ';' || (s = skipspace(s), *s == ';')) {
 		    PL_nextval[PL_nexttoke].opval = Nullop;
 		    force_next(WORD);
 		}
+		else if (*s == 'v') {
+		    s = force_word(s,WORD,FALSE,TRUE,FALSE);
+		    s = force_version(s, FALSE);
+		}
 	    }
 	    else {
 		s = force_word(s,WORD,FALSE,TRUE,FALSE);
-		s = force_version(s);
+		s = force_version(s, FALSE);
 	    }
 	    yylval.ival = 1;
 	    OPERATOR(USE);

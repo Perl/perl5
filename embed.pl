@@ -2260,7 +2260,7 @@ s	|SV*	|gv_share	|SV *sv
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
 s	|void	|check_uni
 s	|void	|force_next	|I32 type
-s	|char*	|force_version	|char *start
+s	|char*	|force_version	|char *start|int guessing
 s	|char*	|force_word	|char *start|int token|int check_keyword \
 				|int allow_pack|int allow_tick
 s	|SV*	|tokeq		|SV *sv
