@@ -5095,8 +5095,12 @@ Perl_yylex(pTHX)
 
 		if (*s == ':' && s[1] != ':')
 		    PL_expect = attrful;
-		else if (!have_name && *s != '{' && key == KEY_sub)
-		    Perl_croak(aTHX_ "Illegal declaration of anonymous subroutine");
+		else if (*s != '{' && key == KEY_sub) {
+		    if (!have_name)
+			Perl_croak(aTHX_ "Illegal declaration of anonymous subroutine");
+		    else if (*s != ';')
+			Perl_croak(aTHX_ "Illegal declaration of subroutine %"SVf, PL_subname);
+		}
 
 		if (have_proto) {
 		    PL_nextval[PL_nexttoke].opval =

@@ -4069,11 +4069,19 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     char *name;
     char *aname;
     GV *gv;
-    char *ps = proto ? SvPVx(((SVOP*)proto)->op_sv, n_a) : Nullch;
+    char *ps;
     register CV *cv=0;
     SV *const_sv;
 
     name = o ? SvPVx(cSVOPo->op_sv, n_a) : Nullch;
+
+    if (proto) {
+	assert(proto->op_type == OP_CONST);
+	ps = SvPVx(((SVOP*)proto)->op_sv, n_a);
+    }
+    else
+	ps = Nullch;
+
     if (!name && PERLDB_NAMEANON && CopLINE(PL_curcop)) {
 	SV *sv = sv_newmortal();
 	Perl_sv_setpvf(aTHX_ sv, "%s[%s:%"IVdf"]",

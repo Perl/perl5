@@ -1729,6 +1729,10 @@ characters in prototypes are $, @, %, *, ;, [, ], &, and \.
 (F) When using the C<sub> keyword to construct an anonymous subroutine,
 you must always specify a block of code. See L<perlsub>.
 
+=item Illegal declaration of subroutine %s
+
+(F) A subroutine was not declared correctly. See L<perlsub>.
+
 =item Illegal division by zero
 
 (F) You tried to divide a number by 0.  Either something was wrong in

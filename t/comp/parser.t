@@ -9,7 +9,7 @@ BEGIN {
 }
 
 require "./test.pl";
-plan( tests => 44 );
+plan( tests => 47 );
 
 eval '%@x=0;';
 like( $@, qr/^Can't modify hash dereference in repeat \(x\)/, '%@x=0' );
@@ -155,4 +155,16 @@ EOF
     $[ = 1 while $x;
     pass();
     $[ = 0; # restore the original value for less side-effects
+}
+
+# [perl #2738] perl segfautls on input
+{
+    eval q{ sub _ <> {} };
+    like($@, qr/Illegal declaration of subroutine main::_/, "readline operator as prototype");
+
+    eval q{ $s = sub <> {} };
+    like($@, qr/Illegal declaration of anonymous subroutine/, "readline operator as prototype");
+
+    eval q{ sub _ __FILE__ {} };
+    like($@, qr/Illegal declaration of subroutine main::_/, "__FILE__ as prototype");
 }
