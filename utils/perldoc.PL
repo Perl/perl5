@@ -80,14 +80,6 @@ my $Is_VMS = $^O eq 'VMS';
 my $Is_MSWin32 = $^O eq 'MSWin32';
 my $Is_Dos = $^O eq 'dos';
 
-# refuse to run if we should be tainting and aren't
-# (but regular users deserve protection too, though!)
-if (!($Is_VMS || $Is_MSWin32 || $Is_Dos) && ($> == 0 || $< == 0)
-     && !am_taint_checking()) 
-{ 
-    die "Superuser must not run $0 without security audit and taint checks.\n";
-} 
-
 sub usage{
     warn "@_\n" if @_;
     # Erase evidence of previous errors (if any), so exit status is simple.
@@ -111,6 +103,7 @@ Options:
     -v	 Verbosely describe what's going on
     -X	 use index if present (looks for pod.idx at $Config{archlib})
     -q   Search the text of questions (not answers) in perlfaq[1-9]
+    -U	 Run in insecure mode (superuser only)
 
 PageName|ModuleName...
          is the name of a piece of documentation that you want to look at. You
@@ -140,7 +133,7 @@ if (defined $ENV{"PERLDOC"}) {
 }
 !NO!SUBS!
 
-my $getopts = "mhtluvriFf:Xq:n:";
+my $getopts = "mhtluvriFf:Xq:n:U";
 print OUT <<"!GET!OPTS!";
 
 use vars qw( @{[map "\$opt_$_", ($getopts =~ /\w/g)]} );
@@ -151,6 +144,25 @@ getopts("$getopts") || usage;
 print OUT <<'!NO!SUBS!';
 
 usage if $opt_h;
+
+# refuse to run if we should be tainting and aren't
+# (but regular users deserve protection too, though!)
+if (!($Is_VMS || $Is_MSWin32 || $Is_Dos) && ($> == 0 || $< == 0)
+     && !am_taint_checking()) 
+{{
+    if ($opt_U) {
+        my $id = eval { getpwnam("nobody") };
+           $id = eval { getpwnam("nouser") } unless defined $id;
+           $id = -2 unless defined $id;
+        eval {
+            $> = $id;  # must do this one first!
+            $< = $id;
+        };
+        last if !$@ && $< && $>;
+    }
+    die "Superuser must not run $0 without security audit and taint checks.\n";
+}}
+
 $opt_n = "nroff" if !$opt_n;
 
 my $podidx;
@@ -742,6 +754,15 @@ The B<-X> option looks for a entry whose basename matches the name given on the
 command line in the file C<$Config{archlib}/pod.idx>.  The pod.idx file should
 contain fully qualified filenames, one per line.
 
+=item B<-U> run insecurely
+
+Because B<perldoc> does not run properly tainted, and is known to
+have security issues, it will not normally execute as the superuser.
+If you use the B<-U> flag, it will do so, but only after setting
+the effective and real IDs to nobody's or nouser's account, or -2
+if unavailable.  If it cannot relinguish its privileges, it will not
+run.  
+
 =item B<PageName|ModuleName|ProgramName>
 
 The item you want to look up.  Nested modules (such as C<File::Basename>)
@@ -781,6 +802,9 @@ and others.
 =cut
 
 #
+# Version 2.02: Mon Mar 13 18:03:04 MST 2000
+#       Tom Christiansen <tchrist@perl.com>
+#	Added -U insecurity option
 # Version 2.01: Sat Mar 11 15:22:33 MST 2000 
 #       Tom Christiansen <tchrist@perl.com>, querulously.
 #       Security and correctness patches.

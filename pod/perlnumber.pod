@@ -22,7 +22,7 @@ Perl's operator overloading facility is completely ignored here.  Operator
 overloading allows user-defined behaviors for numbers, such as operations
 over arbitrarily large integers, floating points numbers with arbitrary
 precision, operations over "exotic" numbers such as modular arithmetic or
-p-adic arithmetic, and so on.  See L<perlovl> for details.
+p-adic arithmetic, and so on.  See L<overload> for details.
 
 =head1 Storing numbers
 
@@ -182,4 +182,4 @@ Editorial adjustments by Gurusamy Sarathy <gsar@ActiveState.com>
 
 =head1 SEE ALSO
 
-L<perlovl>
+L<overload>

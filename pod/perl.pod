@@ -69,6 +69,7 @@ sections:
 
     perlembed		Perl ways to embed perl in your C or C++ application
     perlapio		Perl internal IO abstraction interface
+    perldebguts		Perl debugging guts and tips
     perlxs		Perl XS application programming interface
     perlxstut		Perl XS tutorial
     perlguts		Perl internal functions for those doing extensions

@@ -1065,6 +1065,7 @@ pod/perlcall.pod	Callback info
 pod/perlcompile.pod	Info on using the Compiler suite
 pod/perldata.pod	Data structure info
 pod/perldbmfilter.pod	Info about DBM Filters
+pod/perldebguts.pod	Debugger guts info
 pod/perldebug.pod	Debugger info
 pod/perldelta.pod	Changes since last version
 pod/perldiag.pod	Diagnostic info
