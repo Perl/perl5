@@ -73,7 +73,7 @@ typedef IV IV64;
 #define BGET_NV(arg) STMT_START {	\
 	char *str;			\
 	BGET_strconst(str);		\
-	arg = Perl_atonv(str);		\
+	arg = Atof(str);		\
     } STMT_END
 
 #define BGET_objindex(arg, type) STMT_START {	\
