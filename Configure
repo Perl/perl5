@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.8 1995/07/25 13:40:02 ram Exp $
 #
-# Generated on Thu Jan 23 14:39:28 EST 1997 [metaconfig 3.0 PL60]
+# Generated on Mon Jan 27 12:33:55 EST 1997 [metaconfig 3.0 PL60]
 
 cat >/tmp/c1$$ <<EOF
 ARGGGHHHH!!!!!
@@ -2482,6 +2482,7 @@ case "$archlib" in
 		     echo $baserev $patchlevel $subversion | \
 		     $awk '{ printf "%.5f\n", $1 + $2/1000.0 + $3/100000.0 }'`
 	fi
+	dflt="$privlib/$archname/$version"
 	;;
     esac
     ;;
@@ -3616,7 +3617,6 @@ if ./osf1; then
 else
 	set signal.h LANGUAGE_C; eval $inctest
 fi
-set signal.h _NO_PROTO; eval $inctest
 
 case "$hint" in
 none|recommended) dflt="$ccflags $dflt" ;;
