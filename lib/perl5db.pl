@@ -2,7 +2,7 @@
 
 C<perl5db.pl> - the perl debugger
 
-=head1 SYNOPSYS
+=head1 SYNOPSIS
 
     perl -d  your_Perl_script
 
@@ -52,14 +52,14 @@ automatic stacking of variables during recursive calls:
 
      sub foo {
         local $some_global++;
-        
+
         # Do some stuff, then ...
         return;
      }
 
 What happens is that on entry to the subroutine, C<$some_global> is localized,
 then altered. When the subroutine returns, Perl automatically undoes the 
-locaization, restoring the previous value. Voila, automatic stack management.
+localization, restoring the previous value. Voila, automatic stack management.
 
 The debugger uses this trick a I<lot>. Of particular note is C<DB::eval>, 
 which lets the debugger get control inside of C<eval>'ed code. The debugger
@@ -73,7 +73,7 @@ In any case, watch for this pattern. It occurs fairly often.
 =head2 The C<^> trick
 
 This is used to cleverly reverse the sense of a logical test depending on 
-the value of an auxillary variable. For instance, the debugger's C<S>
+the value of an auxiliary variable. For instance, the debugger's C<S>
 (search for subroutines by pattern) allows you to negate the pattern 
 like this:
 
@@ -193,7 +193,7 @@ contents as the argument of a debugger <C<O> command.
 
 =head2 STARTUP-ONLY OPTIONS
 
-The foillowing options can only be specified at startup.
+The following options can only be specified at startup.
 To set them in your rcfile, add a call to
 C<&parse_options("optionName=new_value")>.
 
@@ -500,7 +500,7 @@ $header  = "perl5db.pl version $VERSION";
 This function replaces straight C<eval()> inside the debugger; it simplifies
 the process of evaluating code in the user's context.
 
-The code to be evaluated is passedd via the package global variable 
+The code to be evaluated is passed via the package global variable 
 C<$DB::evalarg>; this is done to avoid fiddling with the contents of C<@_>.
 
 We preserve the current settings of X<C<$trace>>, X<C<$single>>, and X<C<$^D>>;
@@ -1100,6 +1100,8 @@ variable. These are:
 
 =item C<$CommandSet> - which command set to use (defaults to new, documented set)
 
+=back
+
 =cut
 
 # These guys may be defined in $ENV{PERL5DB} :
@@ -1125,10 +1127,10 @@ signalLevel($signalLevel);
 
 =pod
 
-The pager to be used is needed next. We try to get it from the enviroment first.
-if it's not defined there, we try to find it in the Perl C<Config.pm>.
-If it's not there, we default to C<more>. We then call the C<pager()>
-fucntion to save the pager name.
+The pager to be used is needed next. We try to get it from the
+environment first.  if it's not defined there, we try to find it in
+the Perl C<Config.pm>.  If it's not there, we default to C<more>. We
+then call the C<pager()> function to save the pager name.
 
 =cut
 
@@ -2123,6 +2125,7 @@ environment, and executing with the last value of C<$?>.
                     clean_ENV();
                     exit $?;
                 };
+
 =head4 C<t> - trace
 
 Turn tracing on or off. Inverts the appropriate bit in C<$trace> (q.v.).
@@ -3998,7 +4001,7 @@ The second function is a wrapper which does the following:
 
 =item * Localizes C<$filename_error> and sets it to the name of the file to be processed.
 
-=item * Locaizes the C<*dbline> glob  and reassigns it to point to the file we want to process. 
+=item * Localizes the C<*dbline> glob and reassigns it to point to the file we want to process. 
 
 =item * Calls the first function. 
 
@@ -4010,6 +4013,8 @@ second function was called at all.
 
 See the comments in C<breakable_line> and C<breakable_line_in_file> for more
 details.
+
+=back
 
 =cut
 
@@ -4123,7 +4128,7 @@ sub breakable_line_in_filename {
 
 =head3 break_on_line(lineno, [condition]) (API)
 
-Adds a breakpoint with the specified codition (or 1 if no condition was 
+Adds a breakpoint with the specified condition (or 1 if no condition was 
 specified) to the specified line. Dies if it can't.
 
 =cut
@@ -4884,7 +4889,7 @@ sub cmd_O {
 
 Uses the C<$preview> variable set in the second C<BEGIN> block (q.v.) to
 move back a few lines to list the selected line in context. Uses C<cmd_l>
-to do the actual listing after figuting out the range of line to request.
+to do the actual listing after figuring out the range of line to request.
 
 =cut 
 
@@ -5527,7 +5532,7 @@ sub dump_trace {
 C<action()> takes input provided as the argument to an add-action command,
 either pre- or post-, and makes sure it's a complete command. It doesn't do
 any fancy parsing; it just keeps reading input until it gets a string
-without a traiing backslash.
+without a trailing backslash.
 
 =cut
 
@@ -6368,7 +6373,7 @@ debugger options.
 
 Sets the input and output filehandles to the specified files or pipes.
 If the terminal supports switching, we go ahead and do it. If not, and
-there's already a terminal in place, we save the infomation to take effect
+there's already a terminal in place, we save the information to take effect
 on restart.
 
 If there's no terminal yet (for instance, during debugger initialization),
@@ -7047,7 +7052,7 @@ END_SUM
 
 =head2 C<print_help()>
 
-Most of what C<print_help_ does is just text formatting. It finds the
+Most of what C<print_help> does is just text formatting. It finds the
 C<B> and C<I> ornaments, cleans them off, and substitutes the proper
 terminal control characters to simulate them (courtesy of 
 <Term::ReadLine::TermCap>).
@@ -7291,9 +7296,11 @@ sub dbdie {
 
 =head2 C<warnlevel()>
 
-Set the C<$DB::warnLevel> variable that stores the value of the C<warnLevel>
-option. Calling C<warnLevel()> with a positive value results in the debugger taking over all warning handlers.Setting C<warnLevel> to zero leaves any warning
-handlers set up by the program being debugged in place.
+Set the C<$DB::warnLevel> variable that stores the value of the
+C<warnLevel> option. Calling C<warnLevel()> with a positive value
+results in the debugger taking over all warning handlers. Setting
+C<warnLevel> to zero leaves any warning handlers set up by the program
+being debugged in place.
 
 =cut
 
@@ -7354,7 +7361,7 @@ sub dieLevel {
 =head2 C<signalLevel>
 
 Number three in a series: set C<signalLevel> to zero to keep your own
-signal handler for C<SIGSEGV> and/or C<SIGBUS>. Oherwise, the debugger 
+signal handler for C<SIGSEGV> and/or C<SIGBUS>. Otherwise, the debugger 
 takes over and handles them with C<DB::diesignal()>.
 
 =cut
@@ -7378,7 +7385,7 @@ sub signalLevel {
 
 =head1 SUBROUTINE DECODING SUPPORT
 
-These subroutines are used duting the C<x> and C<X> commands to try to
+These subroutines are used during the C<x> and C<X> commands to try to
 produce as much information as possible about a code reference. They use
 L<Devel::Peek> to try to find the glob in which this code reference lives
 (if it does) - this allows us to actually code references which correspond
@@ -7647,6 +7654,8 @@ debugger has to have set up before the Perl core starts running:
 
 =item * That we want no return values and no subroutine entry/exit trace.
 
+=back
+
 =cut
 
 # The following BEGIN is very handy if debugger goes havoc, debugging debugger?
@@ -7761,6 +7770,8 @@ sub db_complete {
 
 =item * Return this as the list of possible completions
 
+=back
+
 =cut 
 
     return sort grep /^\Q$text/, (keys %sub),
@@ -7823,6 +7834,8 @@ Possibilities are:
 
 =item 3. An C<eval> (the debugger gets a C<(eval N)> fake file for each C<eval>).
 
+=back
+
 =cut
 
     if ($line =~ /^\|*f\s+(.*)/) {                              # Loaded files
@@ -7864,7 +7877,7 @@ all the matches qualified to the current package.
               );
     } ## end if ((substr $text, 0, ...
 
-=head3  Scalar,array, and hash completion: partially qualified package
+=head3  Scalar, array, and hash completion: partially qualified package
 
 Much like the above, except we have to do a little more cleanup:
 
@@ -7941,6 +7954,7 @@ Much like the above, except we have to do a little more cleanup:
 =item * We set the prefix to the item's sigil, and trim off the sigil to get the text to be completed.
 
 =cut
+
         $prefix = substr $text, 0, 1;
         $text = substr $text, 1;
 
@@ -8075,7 +8089,7 @@ First we set the C<$finished> variable, so that some commands that
 shouldn't be run after the end of program quit working.
 
 We then figure out whether we're truly done (as in the user entered a C<q>
-command, or we finished exection while running nonstop). If we aren't,
+command, or we finished execution while running nonstop). If we aren't,
 we set C<$single> to 1 (causing the debugger to get control again).
 
 We then call C<DB::fake::at_exit()>, which returns the C<Use 'q' to quit ...">
