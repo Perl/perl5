@@ -50,9 +50,8 @@ _utf8_to_bytes(sv, ...)
           if (to)
             RETVAL = _encoded_utf8_to_bytes(sv, SvPV_nolen(to));
           else {
-            U8 *s;
             STRLEN len;
-            s = (U8*)SvPV(sv, len);
+            U8 *s = (U8*)SvPV(sv, len);
 
             if (SvTRUE(check)) {
               /* Must do things the slow way */
@@ -66,9 +65,8 @@ _utf8_to_bytes(sv, ...)
                 if (*s < 0x80)
                   *dest++ = *s++;
                 else {
-                  I32 ulen;
-                  I32 byte;
-		  I32 uv = *s++;
+                  STRLEN ulen;
+		  UV uv = *s++;
                   
                   /* Have to do it all ourselves because of error routine,
 		     aargh. */
