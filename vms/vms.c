@@ -2714,6 +2714,7 @@ Perl_my_waitpid(pTHX_ Pid_t pid, int *statusp, int flags)
 
 #endif /* defined(__CRTL_VER) && __CRTL_VER >= 70100322 */
 
+    {
       $DESCRIPTOR(intdsc,"0 00:00:01");
       unsigned long int ownercode = JPI$_OWNER, ownerpid;
       unsigned long int pidcode = JPI$_PID, mypid;
@@ -2774,7 +2775,7 @@ Perl_my_waitpid(pTHX_ Pid_t pid, int *statusp, int flags)
 
       _ckvmssts(sts);
       return pid;
-
+    }
 }  /* end of waitpid() */
 /*}}}*/
 /*}}}*/
