@@ -14,7 +14,7 @@ eval {
     $have_setlocale++;
 };
 
-print "1..", ($have_setlocale ? 104 : 98), "\n";
+print "1..", ($have_setlocale ? 102 : 98), "\n";
 
 use vars qw($a
 	    $English $German $French $Spanish
@@ -313,32 +313,6 @@ for (@Locale) {
     }
 }
 
-# Cross-check the upper and the lower.
-# Yes, this is broken when the upper<->lower changes the number of
-# the glyphs (e.g. the German sharp-s aka double-s aka sz-ligature,
-# or the Dutch IJ or the Spanish LL or ...)
-# But so far all the implementations do this wrong so we can do it wrong too.
-
-for (keys %UPPER) {
-    if (defined $lower{$UPPER{$_}}) {
-	if ($_ ne $lower{$UPPER{$_}}) {
-	    print 'not ';
-	    last;
-	}
-    }
-}
-print "ok 99\n";
-
-for (keys %lower) {
-    if (defined $UPPER{$lower{$_}}) {
-	if ($_ ne $UPPER{$lower{$_}}) {
-	    print 'not ';
-	    last;
-	}
-    }
-}
-print "ok 100\n";
-
 # Find the alphabets that are not alphabets in the default locale.
 
 {
@@ -360,11 +334,11 @@ print "ok 100\n";
 
     print 'not ' if ($1 ne $word);
 }
-print "ok 101\n";
+print "ok 99\n";
 
 # Find places where the collation order differs from the default locale.
 
-print "# testing 102\n";
+print "# testing 100\n";
 {
     my (@k, $i, $j, @d);
 
@@ -387,7 +361,7 @@ print "# testing 102\n";
     for (@d) {
 	($i, $j) = @$_;
 	if ($i gt $j) {
-	    print "# failed 102 at:\n";
+	    print "# failed 100 at:\n";
 	    print "# i = $i, j = $j, i ",
 	          $i le $j ? 'le' : 'gt', " j\n";
 	    print 'not ';
@@ -395,28 +369,28 @@ print "# testing 102\n";
 	}
     }
 }
-print "ok 102\n";
+print "ok 100\n";
 
 # Cross-check whole character set.
 
-print "# testing 103\n";
+print "# testing 101\n";
 for (map { chr } 0..255) {
     if (/\w/ and /\W/) { print 'not '; last }
     if (/\d/ and /\D/) { print 'not '; last }
     if (/\s/ and /\S/) { print 'not '; last }
     if (/\w/ and /\D/ and not /_/ and
 	not (exists $UPPER{$_} or exists $lower{$_})) {
-	print "# failed 103 at:\n";
+	print "# failed 101 at:\n";
 	print "# ", ord($_), " '$_'\n";
 	print 'not ';
 	last;
     }
 }
-print "ok 103\n";
+print "ok 101\n";
 
 # The @Locale should be internally consistent.
 
-print "# testing 104\n";
+print "# testing 102\n";
 {
     my ($from, $to, $lesser, $greater, @test, %test, $test);
 
@@ -453,7 +427,7 @@ print "# testing 104\n";
 	$test = 0;
 	for my $ti (@test) { $test{$ti} = eval $ti ; $test ||= $test{$ti} }
 	if ($test) {
-	    print "# failed 104 at:\n";
+	    print "# failed 102 at:\n";
 	    print "# lesser  = '$lesser'\n";
 	    print "# greater = '$greater'\n";
 	    print "# (greater) from = $from, to = $to\n";
@@ -471,4 +445,4 @@ print "# testing 104\n";
 	}
     }
 }
-print "ok 104\n";
+print "ok 102\n";
