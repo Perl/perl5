@@ -642,6 +642,8 @@ lib/FindBin.pm		Find name of currently executing program
 lib/Getopt/Long.pm	Fetch command options (GetOptions)
 lib/Getopt/Std.pm	Fetch command options (getopt, getopts)
 lib/I18N/Collate.pm	Routines to do strxfrm-based collation
+lib/if.pm		For "use if"
+lib/if.t		Tests for "use if"
 lib/IPC/Open2.pm	Open a two-ended pipe
 lib/IPC/Open3.pm	Open a three-ended pipe!
 lib/Math/BigFloat.pm	An arbitrary precision floating-point arithmetic package
@@ -679,6 +681,7 @@ lib/Term/Cap.pm		Perl module supporting termcap usage
 lib/Term/Complete.pm	A command completion subroutine
 lib/Term/ReadLine.pm	Stub readline library
 lib/Test.pm		A simple framework for writing test scripts
+lib/Test/Builder.pm		For writing new test libraries
 lib/Test/Harness/Assert.pm	Test::Harness::Assert (internal use only)
 lib/Test/Harness/Changes	Test::Harness
 lib/Test/Harness/Iterator.pm	Test::Harness::Iterator (internal use only)
@@ -694,6 +697,48 @@ lib/Test/Harness/t/pod.t	Test::Harness test
 lib/Test/Harness/t/strap-analyze.t	Test::Harness::Straps test
 lib/Test/Harness/t/strap.t		Test::Harness::Straps test
 lib/Test/Harness/t/test-harness.t	Test::Harness test
+lib/Test/More.pm		More utilities for writing tests
+lib/Test/Simple/Changes		Test::Simple changes
+lib/Test/Simple.pm		Basic utility for writing tests
+lib/Test/Simple/README		Test::Simple README
+lib/Test/Simple/t/bad_plan.t	Test::Builder plan() test
+lib/Test/Simple/t/buffer.t	Test::Builder buffering test
+lib/Test/Simple/t/Builder.t	Test::Builder tests
+lib/Test/Simple/t/curr_test.t	Test::Builder->curr_test tests
+lib/Test/Simple/t/details.t	Test::Builder tests
+lib/Test/Simple/t/diag.t	Test::More diag() test
+lib/Test/Simple/t/exit.t	Test::Simple test, exit codes
+lib/Test/Simple/t/extra.t	Test::Simple test
+lib/Test/Simple/t/fail-like.t	Test::More test, like() failures
+lib/Test/Simple/t/fail-more.t	Test::More test, tests failing
+lib/Test/Simple/t/fail.t	Test::Simple test, test failures
+lib/Test/Simple/t/filehandles.t	Test::Simple test, STDOUT can be played with
+lib/Test/Simple/t/fork.t	Test::More fork tests
+lib/Test/Simple/t/has_plan2.t	Test::More->plan tests
+lib/Test/Simple/t/has_plan.t	Test::Builder->plan tests
+lib/Test/Simple/t/import.t	Test::More test, importing functions
+lib/Test/Simple/t/is_deeply.t	Test::More test, is_deeply()
+lib/Test/Simple/t/maybe_regex.t	Test::Builder->maybe_regex() tests
+lib/Test/Simple/t/missing.t	Test::Simple test, missing tests
+lib/Test/Simple/t/More.t	Test::More test, basic stuff
+lib/Test/Simple/t/no_ending.t	Test::Builder test, no_ending()
+lib/Test/Simple/t/no_header.t	Test::Builder test, no_header()
+lib/Test/Simple/t/no_plan.t	Test::Simple test, forgot the plan
+lib/Test/Simple/t/ok_obj.t	Test::Builder object tests
+lib/Test/Simple/t/output.t	Test::Builder test, output methods
+lib/Test/Simple/t/plan_is_noplan.t	Test::Simple test, no_plan
+lib/Test/Simple/t/plan_no_plan.t	Test::More test, plan() w/no_plan
+lib/Test/Simple/t/plan_skip_all.t	Test::More test, plan() w/skip_all
+lib/Test/Simple/t/plan.t	Test::More test, plan()
+lib/Test/Simple/t/simple.t	Test::Simple test, basic stuff
+lib/Test/Simple/t/skipall.t	Test::More test, skip all tests
+lib/Test/Simple/t/skip.t	Test::More test, SKIP tests
+lib/Test/Simple/t/strays.t	Test::Builder stray newline checks
+lib/Test/Simple/t/threads.t	Test::Builder thread-safe checks
+lib/Test/Simple/t/todo.t	Test::More test, TODO tests
+lib/Test/Simple/t/undef.t	Test::More test, undefs don't cause warnings
+lib/Test/Simple/t/useing.t	Test::More test, compile test
+lib/Test/Simple/t/use_ok.t	Test::More test, use_ok()
 lib/Test/t/fail.t               See if Test works
 lib/Test/t/mix.t                See if Test works
 lib/Test/t/onfail.t             See if Test works
@@ -701,6 +746,7 @@ lib/Test/t/qr.t                 See if Test works
 lib/Test/t/skip.t               See if Test works
 lib/Test/t/success.t            See if Test works
 lib/Test/t/todo.t               See if Test works
+lib/Test/Tutorial.pod		A tutorial on writing tests
 lib/Text/Abbrev.pm	An abbreviation table builder
 lib/Text/ParseWords.pm	Perl module to split words on arbitrary delimiter
 lib/Text/Soundex.pm	Perl module to implement Soundex
@@ -1423,10 +1469,23 @@ t/lib/soundex.t		See if Soundex works
 t/lib/symbol.t		See if Symbol works
 t/lib/syslfs.t		See if large files work for sysio
 t/lib/syslog.t		See if Sys::Syslog works
+t/lib/Test/Simple/Catch.pm	Utility module for testing Test::Simple
+t/lib/Test/Simple/sample_tests/death_in_eval.plx	for exit.t
+t/lib/Test/Simple/sample_tests/death.plx		for exit.t
+t/lib/Test/Simple/sample_tests/extras.plx		for exit.t
+t/lib/Test/Simple/sample_tests/five_fail.plx		for exit.t
+t/lib/Test/Simple/sample_tests/last_minute_death.plx	for exit.t
+t/lib/Test/Simple/sample_tests/one_fail.plx		for exit.t
+t/lib/Test/Simple/sample_tests/pre_plan_death.plx		for exit.t
+t/lib/Test/Simple/sample_tests/require.plx		for exit.t
+t/lib/Test/Simple/sample_tests/success.plx		for exit.t
+t/lib/Test/Simple/sample_tests/too_few.plx		for exit.t
+t/lib/Test/Simple/sample_tests/two_fail.plx		for exit.t
 t/lib/textfill.t	See if Text::Wrap::fill works
 t/lib/texttabs.t	See if Text::Tabs works
 t/lib/textwrap.t	See if Text::Wrap::wrap works
 t/lib/thr5005.t		Test 5.005-style threading (skipped if no use5005threads) 
+t/lib/TieOut.pm			Testing library to capture prints
 t/lib/tie-push.t	Test for Tie::Array
 t/lib/tie-refhash.t	Test for Tie::RefHash and Tie::RefHash::Nestable
 t/lib/tie-splice.t	Test for Tie::Array::SPLICE
