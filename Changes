@@ -95,6 +95,76 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6629] By: jhi                                   on 2000/08/15  03:23:53
+        Log: magic_regdatum_set() is void, not int.
+     Branch: perl
+	   ! embed.pl mg.c proto.h
+____________________________________________________________________________
+[  6628] By: jhi                                   on 2000/08/15  03:08:02
+        Log: Make the user to give up his firstborn, err, to knowingly
+             verify installing an unstable developer release.  Also bump
+             the release to 5.7.0, but leave a patch tag in the local
+             patches saying that this is not yet the real thing.
+     Branch: metaconfig
+	   ! U/modified/Instruct.U
+     Branch: metaconfig/U/perl
+	   + Devel.U
+     Branch: perl
+	   ! Configure patchlevel.h
+____________________________________________________________________________
+[  6627] By: jhi                                   on 2000/08/14  22:32:52
+        Log: README.os2 update.
+             
+             Subject: Re: [PATCH perl-current] Make op/sprintf.t more comprehensive,
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Wed, 02 Aug 2000 21:55:09 -0700
+             Message-ID: <tsPi5gzkgegX092yn@efn.org>
+     Branch: perl
+	   ! README.os2
+____________________________________________________________________________
+[  6626] By: jhi                                   on 2000/08/14  21:00:02
+        Log: Subject: Re: File::Temp problems on VMS in bleedperl
+             From: Tim Jenness <timj@jach.hawaii.edu>
+             cc: vmsperl@perl.org
+             Date: Mon, 14 Aug 2000 09:44:33 -1000 (HST)
+             Message-ID: <Pine.LNX.4.21.0008140941300.6753-100000@lapaki.jach.hawaii.edu>
+     Branch: perl
+	   ! lib/File/Temp.pm t/lib/ftmp-tempfile.t
+____________________________________________________________________________
+[  6625] By: jhi                                   on 2000/08/14  20:52:16
+        Log: Add SUIDMAIL as was done for the CERT alert.
+     Branch: perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[  6624] By: jhi                                   on 2000/08/14  20:48:50
+        Log: Subject: sfio2000
+             From: Daniel Muino <dmuino@afip.gov.ar>
+             Date: Mon, 14 Aug 2000 16:58:11 -0300
+             Message-ID: <20000814165811.B16368@con2-dgi>
+     Branch: perl
+	   ! perlsdio.h perlsfio.h
+____________________________________________________________________________
+[  6623] By: jhi                                   on 2000/08/14  20:47:36
+        Log: Subject: warning: storage class after type is obsolescent
+             From: Daniel Muino <dmuino@afip.gov.ar>
+             Date: Mon, 14 Aug 2000 16:42:47 -0300
+             Message-ID: <20000814164247.A16368@con2-dgi>
+     Branch: perl
+	   ! regcomp.pl regnodes.h
+____________________________________________________________________________
+[  6622] By: jhi                                   on 2000/08/14  20:43:05
+        Log: Subject: [ID 20000814.002] [Patch] Email address in Changes.
+             From: abigail@foad.org
+             Date: 14 Aug 2000 20:00:10 -0000
+             Message-Id: <20000814200010.27271.qmail@foad.org>
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
+[  6621] By: jhi                                   on 2000/08/14  15:23:05
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
 [  6620] By: jhi                                   on 2000/08/14  15:22:14
         Log: Subject: Re: [PATCH] @+, @- readonly
              From: Mike Guy <mjtg@cam.ac.uk>
