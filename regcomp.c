@@ -4657,6 +4657,7 @@ Perl_save_re_context(pTHX)
     SAVEVPTR(PL_reg_oldcurpm);		/* from regexec.c */
     SAVEVPTR(PL_reg_curpm);		/* from regexec.c */
     SAVEI32(PL_regnpar);		/* () count. */
+    SAVEI32(PL_regsize);		/* from regexec.c */
 #ifdef DEBUGGING
     SAVEPPTR(PL_reg_starttry);		/* from regexec.c */
 #endif
