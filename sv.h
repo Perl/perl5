@@ -80,6 +80,8 @@ struct io {
 				    (Sv && ++SvREFCNT(Sv)), (SV*)Sv)
 #define SvREFCNT_dec(sv)	sv_free((SV*)sv)
 #endif
+#define newRV_noinc(sv) 	((Sv = newRV(sv)), \
+				    (--SvREFCNT(sv)), (SV*)Sv)
 
 #define SVTYPEMASK	0xff
 #define SvTYPE(sv)	((sv)->sv_flags & SVTYPEMASK)

@@ -195,6 +195,7 @@ sub autosplit_file{
 
     die "Package $package does not match filename $filename"
 	    unless ($filename =~ m/$modpname.pm$/ or
+		    ($^O eq "msdos") or
 	            $Is_VMS && $filename =~ m/$modpname.pm/i);
 
     if ($check_mod_time){

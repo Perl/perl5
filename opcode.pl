@@ -278,8 +278,8 @@ i_subtract	integer subtraction	ck_null		ifst	S S
 concat		concatenation		ck_concat	fst	S S
 stringify	string			ck_fun		fst	S
 
-left_shift	left bitshift		ck_null		ifst	S S
-right_shift	right bitshift		ck_null		ifst	S S
+left_shift	left bitshift		ck_bitop	fst	S S
+right_shift	right bitshift		ck_bitop	fst	S S
 
 lt		numeric lt		ck_null		Iifs	S S
 i_lt		integer lt		ck_null		ifs	S S
@@ -304,14 +304,14 @@ seq		string eq		ck_null		ifs	S S
 sne		string ne		ck_null		ifs	S S
 scmp		string comparison	ck_null		ifst	S S
 
-bit_and		bitwise and		ck_null		fst	S S
-bit_xor		bitwise xor		ck_null		fst	S S
-bit_or		bitwise or		ck_null		fst	S S
+bit_and		bitwise and		ck_bitop	fst	S S
+bit_xor		bitwise xor		ck_bitop	fst	S S
+bit_or		bitwise or		ck_bitop	fst	S S
 
 negate		negate			ck_null		Ifst	S
 i_negate	integer negate		ck_null		ifst	S
 not		not			ck_null		ifs	S
-complement	1's complement		ck_null		fst	S
+complement	1's complement		ck_bitop	fst	S
 
 # High falutin' math.
 
@@ -343,11 +343,11 @@ formline	formline		ck_formline	ms	S L
 ord		ord			ck_fun		ifstu	S?
 chr		chr			ck_fun		fstu	S?
 crypt		crypt			ck_fun		fst	S S
-ucfirst		upper case first	ck_fun		fst	S
-lcfirst		lower case first	ck_fun		fst	S
-uc		upper case		ck_fun		fst	S
-lc		lower case		ck_fun		fst	S
-quotemeta	quote metachars		ck_fun		fst	S
+ucfirst		upper case first	ck_fun		fstu	S?
+lcfirst		lower case first	ck_fun		fstu	S?
+uc		upper case		ck_fun		fstu	S?
+lc		lower case		ck_fun		fstu	S?
+quotemeta	quote metachars		ck_fun		fstu	S?
 
 # Arrays.
 

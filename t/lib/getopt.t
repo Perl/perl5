@@ -41,7 +41,6 @@ print "ok 7\n";
 # Try illegal options, but avoid printing of the error message
 
 open(STDERR, ">stderr") || die;
-unlink "stderr";
 
 @ARGV = qw(-h help);
 
@@ -69,3 +68,6 @@ print "ok 10\n";
 
 print "not " unless "@ARGV" eq "file";
 print "ok 11\n";
+
+close STDERR;
+unlink "stderr";

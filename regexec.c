@@ -82,10 +82,10 @@ static CURCUR* regcc;
 
 typedef I32 CHECKPOINT;
 
-CHECKPOINT regcppush _((I32 parenfloor));
-char * regcppop _((void));
+static CHECKPOINT regcppush _((I32 parenfloor));
+static char * regcppop _((void));
 
-CHECKPOINT
+static CHECKPOINT
 regcppush(parenfloor)
 I32 parenfloor;
 {
@@ -107,7 +107,7 @@ I32 parenfloor;
     return retval;
 }
 
-char*
+static char *
 regcppop()
 {
     I32 i = SSPOPINT;

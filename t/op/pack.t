@@ -2,7 +2,7 @@
 
 # $RCSfile: pack.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:11 $
 
-print "1..16\n";
+print "1..25\n";
 
 $format = "c2x5CCxsdila6";
 # Need the expression in here to force ary[5] to be numeric.  This avoids
@@ -47,25 +47,26 @@ print +($x = unpack("I",pack("I", 0xFFFFFFFF))) == 0xFFFFFFFF
 
 # check 'w'
 my $test=10;
-my @x = (5,130,256,560,32000,3097152,268435455,2**30+20, 2**56+4711);
+my @x = (5,130,256,560,32000,3097152,268435455,1073741844,
+         '4503599627365785','23728385234614992549757750638446');
 my $x = pack('w*', @x);
-my $y = pack 'C*', 5,129,2,130,0,132,48,129,250,0,129,189,132,64,255,255,255,
-                   127,132,128,128,128,20,129,128,128,128,128,128,128,164,96;
+my $y = pack 'H*', '0581028200843081fa0081bd8440ffffff7f848080801487ffffffffffdb19caefe8e1eeeea0c2e1e3e8ede1ee6e';
 
 print $x eq $y ? "ok $test\n" : "not ok $test\n"; $test++;
 
 @y = unpack('w*', $y);
-my $a = join ':', @x;
-my $b = join ':', @y;
-
-print $a eq $b ? "ok $test\n" : "not ok $test\n"; $test++;
+my $a;
+while ($a = pop @x) {
+  my $b = pop @y;
+  print $a eq $b ? "ok $test\n" : "not ok $test\n$a\n$b\n"; $test++;
+}
 
 @y = unpack('w2', $x);
 
 print scalar(@y) == 2 ? "ok $test\n" : "not ok $test\n"; $test++;
 print $y[1] == 130 ? "ok $test\n" : "not ok $test\n"; $test++;
 
-# test exections
+# test exeptions
 eval { $x = unpack 'w', pack 'C*', 0xff, 0xff};
 print $@ ne '' ? "ok $test\n" : "not ok $test\n"; $test++;
 

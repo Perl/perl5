@@ -29,7 +29,7 @@ void	av_undef _((AV* ar));
 void	av_unshift _((AV* ar, I32 num));
 OP*	bind_match _((I32 type, OP* left, OP* pat));
 OP*	block_end _((int line, int floor, OP* seq));
-int	block_start _((void));
+int	block_start _((int full));
 void	boot_core_UNIVERSAL _((void));
 void	calllist _((AV* list));
 I32	cando _((I32 bit, I32 effective, struct stat* statbufp));
@@ -195,6 +195,7 @@ int	magic_setarylen	_((SV* sv, MAGIC* mg));
 int	magic_setbm	_((SV* sv, MAGIC* mg));
 int	magic_setdbline	_((SV* sv, MAGIC* mg));
 int	magic_setenv	_((SV* sv, MAGIC* mg));
+int	magic_setfm	_((SV* sv, MAGIC* mg));
 int	magic_setisa	_((SV* sv, MAGIC* mg));
 int	magic_setglob	_((SV* sv, MAGIC* mg));
 int	magic_setmglob	_((SV* sv, MAGIC* mg));
@@ -209,15 +210,6 @@ int	magic_setvec	_((SV* sv, MAGIC* mg));
 int	magic_wipepack	_((SV* sv, MAGIC* mg));
 void	magicname _((char* sym, char* name, I32 namlen));
 int	main _((int argc, char** argv, char** env));
-#if !defined(STANDARD_C)
-Malloc_t	malloc _((MEM_SIZE nbytes));
-#endif
-#if defined(MYMALLOC) && defined(HIDEMYMALLOC)
-extern Malloc_t malloc _((MEM_SIZE nbytes));
-extern Malloc_t realloc _((Malloc_t, MEM_SIZE));
-extern Free_t   free _((Malloc_t));
-extern Malloc_t calloc _((MEM_SIZE, MEM_SIZE));
-#endif
 void	markstack_grow _((void));
 char*	mem_collxfrm _((const char *m, const Size_t n, Size_t * nx));
 char*	mess _((char* pat, va_list* args));
@@ -329,7 +321,7 @@ SV*	perl_get_sv _((char* name, I32 create));
 AV*	perl_get_av _((char* name, I32 create));
 HV*	perl_get_hv _((char* name, I32 create));
 CV*	perl_get_cv _((char* name, I32 create));
-int	perl_init_fold _(());
+void	perl_init_fold _(());
 int	perl_init_i18nl10n _((int printwarn));
 int	perl_parse _((PerlInterpreter* sv_interp, void(*xsinit)(void), int argc, char** argv, char** env));
 void	perl_require_pv _((char* pv));
@@ -356,22 +348,6 @@ char*	regprop _((char* op));
 void	repeatcpy _((char* to, char* from, I32 len, I32 count));
 char*	rninstr _((char* big, char* bigend, char* little, char* lend));
 int	runops _((void));
-#ifndef safemalloc
-void	safefree _((Malloc_t where));
-Malloc_t	safemalloc _((MEM_SIZE size));
-#ifndef MSDOS
-Malloc_t	saferealloc _((Malloc_t where, MEM_SIZE size));
-#else
-Malloc_t	saferealloc _((Malloc_t where, unsigned long size));
-#endif
-Malloc_t	safecalloc _((MEM_SIZE cnt, MEM_SIZE size));
-#endif
-#ifdef LEAKTEST
-void	safexfree _((Malloc_t where));
-Malloc_t	safexmalloc _((I32 x, MEM_SIZE size));
-Malloc_t	safexrealloc _((Malloc_t where, MEM_SIZE size));
-Malloc_t	safexcalloc _((I32 x, MEM_SIZE size, MEM_SIZE size));
-#endif
 #ifndef HAS_RENAME
 I32	same_dirent _((char* a, char* b));
 #endif
@@ -392,9 +368,11 @@ void	save_freeop _((OP* op));
 void	save_freepv _((char* pv));
 HV*	save_hash _((GV* gv));
 void	save_hptr _((HV** hptr));
+void	save_I16 _((I16* intp));
 void	save_I32 _((I32* intp));
 void	save_int _((int* intp));
 void	save_item _((SV* item));
+void	save_iv _((IV* iv));
 void	save_list _((SV** sarg, I32 maxsarg));
 void	save_long _((long *longp));
 void	save_nogv _((GV* gv));
@@ -407,9 +385,9 @@ OP*	scalar _((OP* o));
 OP*	scalarkids _((OP* op));
 OP*	scalarseq _((OP* o));
 OP*	scalarvoid _((OP* op));
-unsigned long	scan_hex _((char* start, I32 len, I32* retlen));
+UV	scan_hex _((char* start, I32 len, I32* retlen));
 char*	scan_num _((char* s));
-unsigned long	scan_oct _((char* start, I32 len, I32* retlen));
+UV	scan_oct _((char* start, I32 len, I32* retlen));
 OP*	scope _((OP* o));
 char*	screaminstr _((SV* bigsv, SV* littlesv));
 #ifndef VMS
@@ -439,6 +417,7 @@ void	sv_clear _((SV* sv));
 I32	sv_cmp _((SV* sv1, SV* sv2));
 void	sv_dec _((SV* sv));
 void	sv_dump _((SV* sv));
+bool	sv_derived_from _((SV* sv, char* name));
 I32	sv_eq _((SV* sv1, SV* sv2));
 void	sv_free _((SV* sv));
 void	sv_free_arenas _((void));
@@ -464,6 +443,7 @@ void	sv_replace _((SV* sv, SV* nsv));
 void	sv_report_used _((void));
 void	sv_reset _((char* s, HV* stash));
 void	sv_setiv _((SV* sv, IV num));
+void	sv_setuv _((SV* sv, UV num));
 void	sv_setnv _((SV* sv, double num));
 SV*	sv_setref_iv _((SV *rv, char *classname, IV iv));
 SV*	sv_setref_nv _((SV *rv, char *classname, double nv));
@@ -491,3 +471,17 @@ int	yyerror _((char* s));
 int	yylex _((void));
 int	yyparse _((void));
 int	yywarn _((char* s));
+
+#if defined(MYMALLOC) || !defined(STANDARD_C)
+Malloc_t malloc _((MEM_SIZE nbytes));
+Malloc_t calloc _((MEM_SIZE elements, MEM_SIZE size));
+Malloc_t realloc _((Malloc_t where, MEM_SIZE nbytes));
+Free_t   free _((Malloc_t where));
+#endif
+
+#ifdef LEAKTEST
+Malloc_t safexmalloc _((I32 x, MEM_SIZE size));
+Malloc_t safexcalloc _((I32 x, MEM_SIZE elements, MEM_SIZE size));
+Malloc_t safexrealloc _((Malloc_t where, MEM_SIZE size));
+void     safexfree _((Malloc_t where));
+#endif

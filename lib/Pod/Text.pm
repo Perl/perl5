@@ -1,6 +1,6 @@
 package Pod::Text;
 
-# Version 1.01
+# Version 1.02
 
 =head1 NAME
 
@@ -116,14 +116,14 @@ sub prepare_for_output {
     $maxnest = 10;
     while ($maxnest-- && /[A-Z]</) {
 	unless ($FANCY) {
-	    s/C<(.*?)>/`$1'/g;
+	    s/C<(.*?)>/`$1'/sg;
 	} else {
-	    s/C<(.*?)>/noremap("E<lchevron>${1}E<rchevron>")/ge;
+	    s/C<(.*?)>/noremap("E<lchevron>${1}E<rchevron>")/sge;
 	}
         # s/[IF]<(.*?)>/italic($1)/ge;
-        s/I<(.*?)>/*$1*/g;
+        s/I<(.*?)>/*$1*/sg;
         # s/[CB]<(.*?)>/bold($1)/ge;
-	s/X<.*?>//g;
+	s/X<.*?>//sg;
 	# LREF: a manpage(3f)
 	s:L<([a-zA-Z][^\s\/]+)(\([^\)]+\))?>:the $1$2 manpage:g;
 	# LREF: an =item on another manpage
@@ -167,9 +167,9 @@ sub prepare_for_output {
 		    ?  "the section on \"$2\" in the $1 manpage"
 		    :  "the section on \"$2\""
 	    }
-	}gex;
+	}sgex;
 
-        s/[A-Z]<(.*?)>/$1/g;
+        s/[A-Z]<(.*?)>/$1/sg;
     }
     clear_noremap(1);
 }

@@ -40,12 +40,12 @@ after the 1st of January, 2038 on most machines.
 =cut
 
 BEGIN {
-    @epoch = localtime(0);
-
     $SEC  = 1;
     $MIN  = 60 * $SEC;
     $HR   = 60 * $MIN;
     $DAY  = 24 * $HR;
+    $epoch = (localtime(2*$DAY))[5];	# Allow for bugs near localtime == 0.
+
     $YearFix = ((gmtime(946684800))[5] == 100) ? 100 : 0;
 
     my $t = time;
@@ -71,13 +71,13 @@ BEGIN {
 sub timegm {
     $ym = pack(C2, @_[5,4]);
     $cheat = $cheat{$ym} || &cheat;
-    return -1 if $cheat<0;
+    return -1 if $cheat<0 and $^O ne 'VMS';
     $cheat + $_[0] * $SEC + $_[1] * $MIN + $_[2] * $HR + ($_[3]-1) * $DAY;
 }
 
 sub timelocal {
     $time = &timegm + $tzsec;
-    return -1 if $cheat<0;
+    return -1 if $cheat<0 and $^O ne 'VMS';
     @test = localtime($time);
     $time -= $HR if $test[2] != $_[2];
     $time;
@@ -100,7 +100,7 @@ sub cheat {
 	if $_[0] > 59 || $_[0] < 0;
     $guess = $^T;
     @g = gmtime($guess);
-    $year += $YearFix if $year < $epoch[5];
+    $year += $YearFix if $year < $epoch;
     $lastguess = "";
     while ($diff = $year - $g[5]) {
 	$guess += $diff * (363 * $DAY);

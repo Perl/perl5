@@ -79,8 +79,8 @@ IV *pval;
 
 static SV *
 newFH(FILE *fp, char type) {
-    SV *rv, *gv = NEWSV(0,0);
-    GV **stashp;
+    SV *rv;
+    GV **stashp, *gv = (GV *)NEWSV(0,0);
     HV *stash;
     IO *io;
 
@@ -102,7 +102,7 @@ newFH(FILE *fp, char type) {
     IoIFP(io) = fp;
     if (type != '>') IoOFP(io) = fp;
     IoTYPE(io) = type;
-    rv = newRV(gv);
+    rv = newRV((SV *)gv);
     SvREFCNT_dec(gv);
     return sv_bless(rv,stash);
 }

@@ -169,7 +169,7 @@ module keeps a C<timeout> variable in 'io_socket_timeout'.
 
 L<perlfunc>, 
 L<perlop/"I/O Operators">,
-L<POSIX/"FileHandle">
+L<FileHandle>
 
 =head1 BUGS
 

@@ -145,6 +145,7 @@ is returned.  One effect of these rules is that C<-bareword> is equivalent
 to C<"-bareword">.
 
 Unary "~" performs bitwise negation, i.e. 1's complement.
+(See also L<Integer Arithmetic>.)
 
 Unary "+" has no effect whatsoever, even on strings.  It is useful
 syntactically for separating a function name from a parenthesized expression
@@ -204,13 +205,13 @@ Binary "." concatenates two strings.
 
 =head2 Shift Operators
 
-Binary "E<lt>E<lt>" returns the value of its left argument shifted left by the
-number of bits specified by the right argument.  Arguments should be 
-integers.
+Binary "<<" returns the value of its left argument shifted left by the
+number of bits specified by the right argument.  Arguments should be
+integers.  (See also L<Integer Arithmetic>.)
 
-Binary "E<gt>E<gt>" returns the value of its left argument shifted right by the
-number of bits specified by the right argument.  Arguments should be 
-integers.
+Binary ">>" returns the value of its left argument shifted right by
+the number of bits specified by the right argument.  Arguments should
+be integers.  (See also L<Integer Arithmetic>.)
 
 =head2 Named Unary Operators
 
@@ -292,12 +293,15 @@ less than, equal to, or greater than the right argument.
 =head2 Bitwise And
 
 Binary "&" returns its operators ANDed together bit by bit.
+(See also L<Integer Arithmetic>.)
 
 =head2 Bitwise Or and Exclusive Or
 
 Binary "|" returns its operators ORed together bit by bit.
+(See also L<Integer Arithmetic>.)
 
 Binary "^" returns its operators XORed together bit by bit.
+(See also L<Integer Arithmetic>.)
 
 =head2 C-style Logical And
 
@@ -1103,7 +1107,7 @@ expression represents so that the interpreter
 won't have to.
 
 
-=head2 Integer arithmetic
+=head2 Integer Arithmetic
 
 By default Perl assumes that it must do most of its arithmetic in
 floating point.  But by saying
@@ -1118,3 +1122,9 @@ countermand this by saying
 
 which lasts until the end of that BLOCK.
 
+The bitwise operators ("&", "|", "^", "~", "<<", and ">>") always
+produce integral results.  However, C<use integer> still has meaning
+for them.  By default, their results are interpreted as unsigned
+integers.  However, if C<use integer> is in effect, their results are
+interpeted as signed integers.  For example, C<~0> usually evaluates
+to a large integral value.  However, C<use integer; ~0> is -1.

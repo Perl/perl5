@@ -7,6 +7,7 @@ package File::Copy;
 
 require Exporter;
 use Carp;
+use UNIVERSAL qw(isa);
 
 @ISA=qw(Exporter);
 @EXPORT=qw(copy);
@@ -24,10 +25,11 @@ sub copy {
     croak("Usage: copy( file1, file2 [, buffersize]) ")
       unless(@_ == 2 || @_ == 3);
 
-    if (($^O eq 'VMS' or $^O eq 'os2') && ref(\$_[1]) ne 'GLOB' &&
-        !(defined ref $_[1] and (ref($_[1]) eq 'GLOB' ||
-          ref($_[1]) eq 'FileHandle' || ref($_[1]) eq 'VMS::Stdio')))
-        { return File::Copy::syscopy($_[0],$_[1]) }
+    if (defined &File::Copy::syscopy &&
+	\&File::Copy::syscopy != \&File::Copy::copy &&
+	ref(\$_[1]) ne 'GLOB' &&
+        !(defined ref $_[1] and isa($_[1], 'GLOB')))
+	    { return File::Copy::syscopy($_[0],$_[1]) }
 
     my $from = shift;
     my $to = shift;
@@ -158,10 +160,10 @@ C<copy> routine.  For VMS systems, this calls the C<rmscopy>
 routine (see below).  For OS/2 systems, this calls the C<syscopy>
 XSUB directly.
 
-=head2 Special behavior under VMS
+=head2 Special behavior if C<syscopy> is defined (VMS and OS/2)
 
 If the second argument to C<copy> is not a file handle for an
-already opened file, then C<copy> will perform an RMS copy of
+already opened file, then C<copy> will perform an "system copy" of
 the input file to a new output file, in order to preserve file
 attributes, indexed file structure, I<etc.>  The buffer size
 parameter is ignored.  If the second argument to C<copy> is a
@@ -169,9 +171,11 @@ Perl handle to an opened file, then data is copied using Perl
 operators, and no effort is made to preserve file attributes
 or record structure.
 
-The RMS copy routine may also be called directly under VMS
-as C<File::Copy::rmscopy> (or C<File::Copy::syscopy>, which
+The system copy routine may also be called directly under VMS and OS/2
+as C<File::Copy::syscopy> (or under VMS as C<File::Copy::rmscopy>, which
 is just an alias for this routine).
+
+=over
 
 =item rmscopy($from,$to[,$date_flag])
 
@@ -206,6 +210,8 @@ it defaults to 0.
 
 Like C<copy>, C<rmscopy> returns 1 on success.  If an error occurs,
 it sets C<$!>, deletes the output file, and returns 0.
+
+=back
 
 =head1 RETURN
 

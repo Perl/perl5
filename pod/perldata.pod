@@ -239,12 +239,13 @@ integer formats:
     0377		# octal
     4_294_967_296	# underline for legibility
 
-String literals are usually delimited by either single or double quotes.  They
-work much like shell quotes:  double-quoted string literals are subject
-to backslash and variable substitution; single-quoted strings are not
-(except for "C<\'>" and "C<\\>").  The usual Unix backslash rules apply for making
-characters such as newline, tab, etc., as well as some more exotic
-forms.  See L<perlop/qq> for a list.
+String literals are usually delimited by either single or double
+quotes.  They work much like shell quotes: double-quoted string
+literals are subject to backslash and variable substitution;
+single-quoted strings are not (except for "C<\'>" and "C<\\>").
+The usual Unix backslash rules apply for making characters such as
+newline, tab, etc., as well as some more exotic forms.  See
+L<perlop/Quote and Quotelike Operators> for a list.
 
 You can also embed newlines directly in your strings, i.e. they can end
 on a different line than they begin.  This is nice, but if you forget
@@ -324,17 +325,18 @@ and is almost always right.  If it does guess wrong, or if you're just
 plain paranoid, you can force the correct interpretation with curly
 brackets as above.
 
-A line-oriented form of quoting is based on the shell "here-doc" syntax.
-Following a C<E<lt>E<lt>> you specify a string to terminate the quoted material,
-and all lines following the current line down to the terminating string
-are the value of the item.  The terminating string may be either an
-identifier (a word), or some quoted text.  If quoted, the type of
-quotes you use determines the treatment of the text, just as in regular
-quoting.  An unquoted identifier works like double quotes.  There must
-be no space between the C<E<lt>E<lt>> and the identifier.  (If you put a space it
-will be treated as a null identifier, which is valid, and matches the
-first blank line.)  The terminating string must appear by itself 
-(unquoted and with no surrounding whitespace) on the terminating line.
+A line-oriented form of quoting is based on the shell "here-doc"
+syntax.  Following a C<E<lt>E<lt>> you specify a string to terminate
+the quoted material, and all lines following the current line down to
+the terminating string are the value of the item.  The terminating
+string may be either an identifier (a word), or some quoted text.  If
+quoted, the type of quotes you use determines the treatment of the
+text, just as in regular quoting.  An unquoted identifier works like
+double quotes.  There must be no space between the C<E<lt>E<lt>> and
+the identifier.  (If you put a space it will be treated as a null
+identifier, which is valid, and matches the first blank line.)  The
+terminating string must appear by itself (unquoted and with no
+surrounding whitespace) on the terminating line.
 
 	print <<EOF;	
     The price is $Price.
@@ -511,34 +513,16 @@ Note that just because a hash is initialized in that order doesn't
 mean that it comes out in that order.  See L<perlfunc/sort> for examples
 of how to arrange for an output ordering.
 
-=head2 Typeglobs and FileHandles
+=head2 Typeglobs
 
 Perl uses an internal type called a I<typeglob> to hold an entire
 symbol table entry.  The type prefix of a typeglob is a C<*>, because
 it represents all types.  This used to be the preferred way to 
 pass arrays and hashes by reference into a function, but now that
-we have real references, this is seldom needed.
+we have real references, this is seldom needed.  It also used to be the
+preferred way to pass filehandles into a function, but now
+that we have the *foo{THING} notation it isn't often needed for that,
+either.
 
-One place where you still use typeglobs (or references thereto)
-is for passing or storing filehandles.  If you want to save away
-a filehandle, do it this way:
-
-    $fh = *STDOUT;
-
-or perhaps as a real reference, like this:
-
-    $fh = \*STDOUT;
-
-This is also the way to create a local filehandle.  For example:
-
-    sub newopen {
-	my $path = shift;
-	local *FH;  # not my!
-	open (FH, $path) || return undef;
-	return \*FH;
-    }
-    $fh = newopen('/etc/passwd');
-
-See L<perlref>, L<perlsub>, and L<perlmod/"Symbols Tables"> for more
-discussion on typeglobs.  See L<perlfunc/open> for other ways of
-generating filehandles.
+See L<perlref>, L<perlsub>, and L<perlmod/"Symbol Tables"> for more
+discussion on typeglobs.

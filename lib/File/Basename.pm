@@ -2,8 +2,6 @@ package File::Basename;
 
 =head1 NAME
 
-Basename - parse file specifications
-
 fileparse - split a pathname into pieces
 
 basename - extract just the filename from a path
@@ -35,10 +33,10 @@ pieces using the syntax of different operating systems.
 
 You select the syntax via the routine fileparse_set_fstype().
 If the argument passed to it contains one of the substrings
-"VMS", "MSDOS", or "MacOS", the file specification syntax of that
-operating system is used in future calls to fileparse(),
-basename(), and dirname().  If it contains none of these
-substrings, UNIX syntax is used.  This pattern matching is
+"VMS", "MSDOS", "MacOS" or "AmigaOS", the file specification 
+syntax of that operating system is used in future calls to 
+fileparse(), basename(), and dirname().  If it contains none of
+these substrings, UNIX syntax is used.  This pattern matching is
 case-insensitive.  If you've selected VMS syntax, and the file
 specification you pass to one of these routines contains a "/",
 they assume you are using UNIX emulation and apply the UNIX syntax
@@ -156,6 +154,9 @@ sub fileparse {
   elsif ($fstype =~ /^MacOS/i) {
     ($dirpath,$basename) = ($fullname =~ /^(.*:)?(.*)/);
   }
+  elsif ($fstype =~ /^AmigaOS/i) {
+    ($dirpath,$basename) = ($fullname =~ /(.*[:\/])?(.*)/);
+  }
   elsif ($fstype !~ /^VMS/i) {  # default to Unix
     ($dirpath,$basename) = ($fullname =~ m#^(.*/)?(.*)#);
     $dirpath = './' unless $dirpath;
@@ -205,6 +206,11 @@ sub dirname {
         chop $dirname;
         $dirname =~ s:[^\\]+$:: unless length($basename);
         $dirname = '.' unless length($dirname);
+    }
+    elsif ($fstype =~ /AmigaOS/i) {
+        if ( $dirname =~ /:$/) { return $dirname }
+        chop $dirname;
+        $dirname =~ s#[^:/]+$## unless length($basename);
     }
     else { 
         if ( $dirname =~ m:^/+$:) { return '/'; }

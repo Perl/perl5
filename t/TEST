@@ -41,7 +41,7 @@ while ($test = shift) {
     }
     $te = $test;
     chop($te);
-    print "$te" . '.' x (15 - length($te));
+    print "$te" . '.' x (18 - length($te));
     if ($sharpbang) {
 	open(results,"./$test |") || (print "can't run.\n");
     } else {
@@ -50,6 +50,10 @@ while ($test = shift) {
 	close(script);
 	if (/#!..perl(.*)/) {
 	    $switch = $1;
+	    if ($^O eq 'VMS') {
+		# Must protect uppercase switches with "" on command line
+		$switch =~ s/-([A-Z]\S*)/"-$1"/g;
+	    }
 	} else {
 	    $switch = '';
 	}

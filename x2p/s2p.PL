@@ -95,7 +95,7 @@ S2p uses no environment variables.
 
 =head1 AUTHOR
 
-Larry Wall E<lt>F<lwall@jpl-devvax.Jpl.Nasa.Gov>E<gt>
+Larry Wall E<lt>F<larry@wall.org>E<gt>
 
 =head1 FILES
 

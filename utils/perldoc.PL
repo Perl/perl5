@@ -28,13 +28,14 @@ print OUT <<"!GROK!THIS!";
 $Config{'startperl'}
     eval 'exec perl -S \$0 "\$@"'
 	if 0;
+
+\@pagers = ();
+push \@pagers, "$Config{'pager'}" if -x "$Config{'pager'}";
 !GROK!THIS!
 
 # In the following, perl variables are not expanded during extraction.
 
 print OUT <<'!NO!SUBS!';
-    eval 'exec perl -S $0 "$@"'
-	if 0;
 
 #
 # Perldoc revision #1 -- look up a piece of documentation in .pod format that
@@ -218,14 +219,13 @@ if( ! -t STDOUT ) { $opt_f = 1 }
 
 unless($Is_VMS) {
 	$tmp = "/tmp/perldoc1.$$";
+	push @pagers, qw( more less pg view cat );
+	unshift @pagers, $ENV{PAGER}  if $ENV{PAGER};
 	$goodresult = 0;
-	@pagers = qw( more less pg view cat );
-	unshift(@pagers,$ENV{PAGER}) if $ENV{PAGER};
 } else {
-	require Config;
 	$tmp = 'Sys$Scratch:perldoc.tmp1_'.$$;
-	@pagers = ($Config::Config{'pager'},qw( most more less type/page ));
-	unshift(@pagers,$ENV{PERLDOC_PAGER}) if $ENV{PERLDOC_PAGER};
+	push @pagers, qw( most more less type/page );
+	unshift @pagers, $ENV{PERLDOC_PAGER} if $ENV{PERLDOC_PAGER};
 	$goodresult = 1;
 }
 

@@ -251,14 +251,11 @@ PP(pp_eq)
 PP(pp_preinc)
 {
     dSP;
-    if (SvIOK(TOPs)) {
-    	if (SvIVX(TOPs) == IV_MAX) {
-    	    sv_setnv(TOPs, (double)(SvIVX(TOPs)) + 1.0 );
-    	}
-    	else {
-	    ++SvIVX(TOPs);
-	    SvFLAGS(TOPs) &= ~(SVf_NOK|SVf_POK|SVp_NOK|SVp_POK);
-	}
+    if (SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
+    	SvIVX(TOPs) != IV_MAX)
+    {
+	++SvIVX(TOPs);
+	SvFLAGS(TOPs) &= ~(SVp_NOK|SVp_POK);
     }
     else
 	sv_inc(TOPs);

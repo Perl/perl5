@@ -162,7 +162,11 @@ the return value of your socket() call?  See L<perlfunc/accept>.
 
 =item Allocation too large: %lx
 
-(F) You can't allocate more than 64K on an MSDOS machine.
+(X) You can't allocate more than 64K on an MSDOS machine.
+
+=item Allocation too large
+
+(F) You can't allocate more than 2^31+"small amount" bytes.
 
 =item Arg too short for msgsnd
 
@@ -387,7 +391,7 @@ that you can chdir to, possibly because it doesn't exist.
 =item Can't coerce %s to integer in %s
 
 (F) Certain types of SVs, in particular real symbol table entries
-(type GLOB), can't be forced to stop being what they are.  So you can't
+(typeglobs), can't be forced to stop being what they are.  So you can't
 say things like:
 
     *foo += 1;
@@ -402,12 +406,12 @@ but then $foo no longer contains a glob.
 =item Can't coerce %s to number in %s
 
 (F) Certain types of SVs, in particular real symbol table entries
-(type GLOB), can't be forced to stop being what they are.
+(typeglobs), can't be forced to stop being what they are.
 
 =item Can't coerce %s to string in %s
 
 (F) Certain types of SVs, in particular real symbol table entries
-(type GLOB), can't be forced to stop being what they are.
+(typeglobs), can't be forced to stop being what they are.
 
 =item Can't create pipe mailbox
 
@@ -691,11 +695,6 @@ redefined subroutine while the old routine is running.  Go figure.
 
 (F) You tried to unshift an "unreal" array that can't be unshifted, such
 as the main Perl stack.
-
-=item Can't untie: %d inner references still exist
-
-(F) With "use strict untie" in effect, a copy of the object returned
-from C<tie> (or C<tied>) was still valid when C<untie> was called.
 
 =item Can't upgrade that kind of scalar
 
@@ -1344,7 +1343,7 @@ format, but this indicates you did, and that it didn't exist.
 
 =item Not a GLOB reference
 
-(F) Perl was trying to evaluate a reference to a "type glob" (that is,
+(F) Perl was trying to evaluate a reference to a "typeglob" (that is,
 a symbol table entry that looks like C<*foo>), but found a reference to
 something else instead.  You can use the ref() function to find out
 what kind of ref it really was.  See L<perlref>.
@@ -1399,6 +1398,12 @@ See L<perlform>.
 (F) You can't require the null filename, especially since on many machines
 that means the current directory!  See L<perlfunc/require>.
 
+=item Null picture in formline
+
+(F) The first argument to formline must be a valid format picture
+specification.  It was found to be empty, which probably means you
+supplied it an uninitialized value.  See L<perlform>.
+
 =item NULL OP IN RUN
 
 (P) Some internal routine called run() with a null opcode pointer.
@@ -1448,8 +1453,29 @@ but realloc() wouldn't give it more memory, virtual or otherwise.
 
 =item Out of memory!
 
-(X) The malloc() function returned 0, indicating there was insufficient
-remaining memory (or virtual memory) to satisfy the request.
+(X|F) The malloc() function returned 0, indicating there was insufficient
+remaining memory (or virtual memory) to satisfy the request. Depending
+on the way perl was compiled it may use the contents of C<$^M> as an
+emergency pool after die()ing with this message. In this case the
+error is trappable I<once>.
+
+=item Out of memory during request for %s
+
+(F) The malloc() function returned 0, indicating there was insufficient
+remaining memory (or virtual memory) to satisfy the request. However,
+the request was judged large enough (compile-time default is 64K), so
+a possibility to shut down by trapping this error is granted.
+
+=item Out of memory!
+
+(X|F) The malloc() function returned 0, indicating there was insufficient
+remaining memory (or virtual memory) to satisfy the request. 
+
+The request was judged to be small, so the possibility to trap it
+depends on the way perl was compiled. By default it is not
+trappable. However, if compiled for this, Perl may use the contents of
+C<$^M> as an emergency pool after die()ing with this message. In this
+case the error is trappable I<once>.
 
 =item page overflow
 
@@ -2258,6 +2284,11 @@ while parentheses do not.  So when a parenthesized list is evaluated in
 a scalar context, the comma is treated like C's comma operator, which
 throws away the left argument, which is not what you want.  See
 L<perlref> for more on this.
+
+=item untie attempted while %d inner references still exist
+
+(W) A copy of the object returned from C<tie> (or C<tied>) was still
+valid when C<untie> was called.
 
 =item Variable "%s" is not exported
 

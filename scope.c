@@ -272,6 +272,16 @@ I32 *intp;
 }
 
 void
+save_I16(intp)
+I16 *intp;
+{
+    SSCHECK(3);
+    SSPUSHINT(*intp);
+    SSPUSHPTR(intp);
+    SSPUSHINT(SAVEt_I16);
+}
+
+void
 save_iv(ivp)
 IV *ivp;
 {
@@ -496,6 +506,10 @@ I32 base;
 	    ptr = SSPOPPTR;
 	    *(I32*)ptr = (I32)SSPOPINT;
 	    break;
+	case SAVEt_I16:				/* I16 reference */
+	    ptr = SSPOPPTR;
+	    *(I16*)ptr = (I16)SSPOPINT;
+	    break;
 	case SAVEt_IV:				/* IV reference */
 	    ptr = SSPOPPTR;
 	    *(IV*)ptr = (IV)SSPOPIV;
@@ -599,6 +613,12 @@ I32 base;
 	    {
 		I32 delta = SSPOPINT;
 		savestack_ix -= delta;	/* regexp must have croaked */
+	    }
+	    break;
+	case SAVEt_STACK_POS:		/* Position on Perl stack */
+	    {
+		I32 delta = SSPOPINT;
+		stack_sp = stack_base + delta;
 	    }
 	    break;
 	default:

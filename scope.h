@@ -20,6 +20,8 @@
 #define SAVEt_DELETE	19
 #define SAVEt_DESTRUCTOR 20
 #define SAVEt_REGCONTEXT 21
+#define SAVEt_STACK_POS  22
+#define SAVEt_I16	23
 
 #define SSCHECK(need) if (savestack_ix + need > savestack_max) savestack_grow()
 #define SSPUSHINT(i) (savestack[savestack_ix++].any_i32 = (I32)(i))
@@ -43,16 +45,28 @@
 #define LEAVE pop_scope()
 #define LEAVE_SCOPE(old) if (savestack_ix > old) leave_scope(old)
 
-#define SAVEINT(i) save_int((int*)(&i));
-#define SAVEIV(i) save_iv((IV*)(&i));
-#define SAVEI32(i) save_I32((I32*)(&i));
-#define SAVELONG(l) save_long((long*)(&l));
-#define SAVESPTR(s) save_sptr((SV**)(&s))
-#define SAVEPPTR(s) save_pptr((char**)(&s))
-#define SAVEFREESV(s) save_freesv((SV*)(s))
-#define SAVEFREEOP(o) save_freeop((OP*)(o))
-#define SAVEFREEPV(p) save_freepv((char*)(p))
-#define SAVECLEARSV(sv) save_clearsv((SV**)(&sv))
-#define SAVEDELETE(h,k,l) save_delete((HV*)(h), (char*)(k), (I32)l)
-#define SAVEDESTRUCTOR(f,p) save_destructor((void(*)_((void*)))f,(void*)p)
+/*
+ * Not using SOFT_CAST on SAVEFREESV and SAVEFREESV
+ * because these are used for several kinds of pointer values
+ */
+#define SAVEI16(i)	save_I16(SOFT_CAST(I16*)&(i));
+#define SAVEI32(i)	save_I32(SOFT_CAST(I32*)&(i));
+#define SAVEINT(i)	save_int(SOFT_CAST(int*)&(i));
+#define SAVEIV(i)	save_iv(SOFT_CAST(IV*)&(i));
+#define SAVELONG(l)	save_long(SOFT_CAST(long*)&(l));
+#define SAVESPTR(s)	save_sptr((SV**)&(s))
+#define SAVEPPTR(s)	save_pptr(SOFT_CAST(char**)&(s))
+#define SAVEFREESV(s)	save_freesv((SV*)(s))
+#define SAVEFREEOP(o)	save_freeop(SOFT_CAST(OP*)(o))
+#define SAVEFREEPV(p)	save_freepv(SOFT_CAST(char*)(p))
+#define SAVECLEARSV(sv)	save_clearsv(SOFT_CAST(SV**)&(sv))
+#define SAVEDELETE(h,k,l) \
+	  save_delete(SOFT_CAST(HV*)(h), SOFT_CAST(char*)(k), (I32)(l))
+#define SAVEDESTRUCTOR(f,p) \
+	  save_destructor(SOFT_CAST(void(*)_((void*)))(f),SOFT_CAST(void*)(p))
+#define SAVESTACK_POS() STMT_START {	\
+    SSCHECK(2);				\
+    SSPUSHINT(stack_sp - stack_base);	\
+    SSPUSHINT(SAVEt_STACK_POS);		\
+ } STMT_END
 

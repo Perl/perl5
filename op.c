@@ -1269,22 +1269,25 @@ OP *o;
 }
 
 int
-block_start()
+block_start(full)
+int full;
 {
     int retval = savestack_ix;
-    SAVEINT(comppad_name_floor);
-    if ((comppad_name_fill = AvFILL(comppad_name)) > 0)
-	comppad_name_floor = comppad_name_fill;
-    else
-	comppad_name_floor = 0;
-    SAVEINT(min_intro_pending);
-    SAVEINT(max_intro_pending);
+    SAVEI32(comppad_name_floor);
+    if (full) {
+	if ((comppad_name_fill = AvFILL(comppad_name)) > 0)
+	    comppad_name_floor = comppad_name_fill;
+	else
+	    comppad_name_floor = 0;
+    }
+    SAVEI32(min_intro_pending);
+    SAVEI32(max_intro_pending);
     min_intro_pending = 0;
-    SAVEINT(comppad_name_fill);
-    SAVEINT(padix_floor);
+    SAVEI32(comppad_name_fill);
+    SAVEI32(padix_floor);
     padix_floor = padix;
     pad_reset_pending = FALSE;
-    SAVEINT(hints);
+    SAVEI32(hints);
     hints &= ~HINT_BLOCK_SCOPE;
     return retval;
 }
@@ -2976,6 +2979,9 @@ OP *block;
     if (perldb && curstash != debstash) {
 	SV *sv;
 	SV *tmpstr = sv_newmortal();
+	static GV *db_postponed;
+	CV *cv;
+	HV *hv;
 
 	sprintf(buf,"%s:%ld",SvPVX(GvSV(curcop->cop_filegv)), (long)subline);
 	sv = newSVpv(buf,0);
@@ -2984,6 +2990,18 @@ OP *block;
 	sv_catpv(sv,buf);
 	gv_efullname3(tmpstr, gv, Nullch);
 	hv_store(GvHV(DBsub), SvPVX(tmpstr), SvCUR(tmpstr), sv, 0);
+	if (!db_postponed) {
+	    db_postponed = gv_fetchpv("DB::postponed", TRUE, SVt_PVHV);
+	}
+	hv = GvHVn(db_postponed);
+	if (HvFILL(hv) >= 0 && hv_exists(hv, SvPVX(tmpstr), SvCUR(tmpstr))
+	    && (cv = GvCV(db_postponed))) {
+	    dSP;
+	    PUSHMARK(sp);
+	    XPUSHs(tmpstr);
+	    PUTBACK;
+	    perl_call_sv((SV*)cv, G_DISCARD);
+	}
     }
     op_free(op);
     copline = NOLINE;
@@ -3259,6 +3277,14 @@ OP *o;
 }
 
 /* Check routines. */
+
+OP *
+ck_bitop(op)
+OP *op;
+{
+    op->op_private = hints;
+    return op;
+}
 
 OP *
 ck_concat(op)

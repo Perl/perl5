@@ -74,36 +74,53 @@ int level;
     return &sv_no;
 }
 
+bool
+sv_derived_from(sv, name)
+SV * sv ;
+char * name ;
+{
+    SV *rv;
+    char *type;
+    HV *stash;
+  
+    stash = Nullhv;
+    type = Nullch;
+ 
+    if (SvGMAGICAL(sv))
+        mg_get(sv) ;
+
+    if (SvROK(sv)) {
+        sv = SvRV(sv);
+        type = sv_reftype(sv,0);
+        if(SvOBJECT(sv))
+            stash = SvSTASH(sv);
+    }
+    else {
+        stash = gv_stashsv(sv, FALSE);
+    }
+ 
+    return (type && strEQ(type,name)) ||
+            (stash && isa_lookup(stash, name, strlen(name), 0) == &sv_yes)
+        ? TRUE
+        : FALSE ;
+ 
+}
+
+
 static
 XS(XS_UNIVERSAL_isa)
 {
     dXSARGS;
-    SV *sv, *rv;
-    char *name, *type;
-    HV *stash;
+    SV *sv;
+    char *name;
 
     if (items != 2)
 	croak("Usage: UNIVERSAL::isa(reference, kind)");
 
-    stash = Nullhv;
-    type = Nullch;
     sv = ST(0);
     name = (char *)SvPV(ST(1),na);
 
-    if (SvROK(sv)) {
-	sv = SvRV(sv);
-	type = sv_reftype(sv,0);
-	if(SvOBJECT(sv))
-	    stash = SvSTASH(sv);
-    }
-    else {
-	stash = gv_stashsv(sv, FALSE);
-    }
-
-    ST(0) = (type && strEQ(type,name)) ||
-	    (stash && isa_lookup(stash, name, strlen(name), 0) == &sv_yes)
-	? &sv_yes
-	: &sv_no;
+    ST(0) = (sv_derived_from(sv, name) ? &sv_yes : &sv_no) ;
 
     XSRETURN(1);
 }

@@ -104,3 +104,11 @@ after 5.003_05:
 		perl___ - cannot fork, can dynalink.
 	The build of the first one - perl - is rather convoluted, and
 	  requires a build of miniperl_.
+
+after 5.003_07:
+	custom tmpfile and tmpname which may use $TMP, $TEMP.
+	all the calls to OS/2 API wrapped so that it is safe to use
+		them under DOS (may die(), though).
+	Tested that popen works under DOS with modified PDKSH and RSX.
+	File::Copy works under DOS.
+	MakeMaker modified to work under DOS (perlmain.c.tmp and sh -c true).

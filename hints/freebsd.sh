@@ -14,6 +14,10 @@
 # Ollivier Robert <Ollivier.Robert@keltia.frmug.fr.net>
 # Date: Fri, 12 May 1995 14:30:38 +0200 (MET DST)
 #
+# Additional 2.2 defines from
+# Mark Murray <mark@grondar.za>
+# Date: Wed, 6 Nov 1996 09:44:58 +0200 (MET)
+# 
 # The two flags "-fpic -DPIC" are used to indicate a
 # will-be-shared object.  Configure will guess the -fpic, (and the
 # -DPIC is not used by perl proper) but the full define is included to 
@@ -43,16 +47,38 @@ case "$osvers" in
 	d_setruid='undef'
 	;;
 #
-# Trying to cover 2.0.5, 2.1-current and future 2.1
+# Trying to cover 2.0.5, 2.1-current and future 2.1/2.2
 # It does not covert all 2.1-current versions as the output of uname
 # changed a few times.
 #
+# Even though seteuid/setegid are available, they've been turned off
+# because perl isn't coded with saved set[ug]id variables in mind.
+# In addition, a small patch is requried to suidperl to avoid a security
+# problem with FreeBSD.
+#
 2.0.5*|2.0-built*|2.1*)
  	usevfork='true'
+	d_dosuid='define'
+	d_setregid='define'
+	d_setreuid='define'
+	d_setegid='undef'
+	d_seteuid='undef'
 	;;
 #
-# Guesses at what will be needed after 2.1
+# 2.2 and above have phkmalloc(3).
+2.2*)
+ 	usevfork='true'
+	usemymalloc='n'
+	d_dosuid='define'
+	d_setregid='define'
+	d_setreuid='define'
+	d_setegid='undef'
+	d_seteuid='undef'
+	;;
+#
+# Guesses at what will be needed after 2.2
 *)	usevfork='true'
+	usemymalloc='n'
 	;;
 esac
 

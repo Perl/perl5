@@ -244,6 +244,9 @@ is the same as this:
 	$i++;
     }
 
+(There is one minor difference: The first form implies a lexical scope
+for variables declared with C<my> in the initialization expression.)
+
 Besides the normal array index looping, C<for> can lend itself
 to many other interesting applications.  Here's one that avoids the
 problem you get into if you explicitly test for end-of-file on 
@@ -259,12 +262,14 @@ hang.
 =head2 Foreach Loops
 
 The C<foreach> loop iterates over a normal list value and sets the
-variable VAR to be each element of the list in turn.  The variable is
-implicitly local to the loop and regains its former value upon exiting the
-loop.  If the variable was previously declared with C<my>, it uses that
-variable instead of the global one, but it's still localized to the loop.
-This can cause problems if you have subroutine or format declarations
-within that block's scope.
+variable VAR to be each element of the list in turn.  If the variable
+is preceded with the keyword C<my>, then it is lexically scoped, and
+is therefore visible only within the loop.  Otherwise, the variable is
+implicitly local to the loop and regains its former value upon exiting
+the loop.  If the variable was previously declared with C<my>, it uses
+that variable instead of the global one, but it's still localized to
+the loop.  (Note that a lexically scoped variable can cause problems
+with you have subroutine or format declarations.)
 
 The C<foreach> keyword is actually a synonym for the C<for> keyword, so
 you can use C<foreach> for readability or C<for> for brevity.  If VAR is
@@ -278,7 +283,7 @@ Examples:
 
     for (@ary) { s/foo/bar/ }
 
-    foreach $elem (@elements) {
+    foreach my $elem (@elements) {
 	$elem *= 2;
     }
 
@@ -294,8 +299,8 @@ Examples:
 
 Here's how a C programmer might code up a particular algorithm in Perl:
 
-    for ($i = 0; $i < @ary1; $i++) {
-	for ($j = 0; $j < @ary2; $j++) {
+    for (my $i = 0; $i < @ary1; $i++) {
+	for (my $j = 0; $j < @ary2; $j++) {
 	    if ($ary1[$i] > $ary2[$j]) {
 		last; # can't go to outer :-(
 	    }
@@ -307,8 +312,8 @@ Here's how a C programmer might code up a particular algorithm in Perl:
 Whereas here's how a Perl programmer more comfortable with the idiom might
 do it:
 
-    OUTER: foreach $wid (@ary1) { 
-    INNER:   foreach $jet (@ary2) {
+    OUTER: foreach my $wid (@ary1) { 
+    INNER:   foreach my $jet (@ary2) {
 		next OUTER if $wid > $jet;
 		$wid += $jet;
 	     } 
@@ -324,12 +329,12 @@ equivalent C<for> loop.
 
 =head2 Basic BLOCKs and Switch Statements
 
-A BLOCK by itself (labeled or not) is semantically equivalent to a loop
-that executes once.  Thus you can use any of the loop control
-statements in it to leave or restart the block.  (Note that this
-is I<NOT> true in C<eval{}>, C<sub{}>, or contrary to popular belief C<do{}> blocks,
-which do I<NOT> count as loops.)  The C<continue> block
-is optional.  
+A BLOCK by itself (labeled or not) is semantically equivalent to a
+loop that executes once.  Thus you can use any of the loop control
+statements in it to leave or restart the block.  (Note that this is
+I<NOT> true in C<eval{}>, C<sub{}>, or contrary to popular belief
+C<do{}> blocks, which do I<NOT> count as loops.)  The C<continue>
+block is optional.
 
 The BLOCK construct is particularly nice for doing case
 structures.

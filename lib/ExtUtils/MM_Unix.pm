@@ -1701,7 +1701,7 @@ sub init_others {	# --- Initialize Other Attributes
     };
 
     # These get overridden for VMS and maybe some other systems
-    $self->{NOOP}  ||= "sh -c true";
+    $self->{NOOP}  ||= '$(SHELL) -c true';
     $self->{FIRST_MAKEFILE} ||= "Makefile";
     $self->{MAKEFILE} ||= $self->{FIRST_MAKEFILE};
     $self->{MAKE_APERL_FILE} ||= "Makefile.aperl";
@@ -1923,6 +1923,10 @@ sub macro {
 Called by staticmake. Defines how to write the Makefile to produce a
 static new perl.
 
+By default the Makefile produced includes all the static extensions in
+the perl library. (Purified versions of library files, e.g.,
+DynaLoader_pure_p1_c0_032.a are automatically ignored to avoid link errors.)
+
 =cut
 
 sub makeaperl {
@@ -1987,6 +1991,8 @@ $(MAKE_APERL_FILE) : $(FIRST_MAKEFILE)
     File::Find::find(sub {
 	return unless m/\Q$self->{LIB_EXT}\E$/;
 	return if m/^libperl/;
+	# Skip purified versions of libraries (e.g., DynaLoader_pure_p1_c0_032.a)
+	return if m/_pure_\w+_\w+_\w+\.\w+$/ and -f "$File::Find::dir/.pure";
 
 	if( exists $self->{INCLUDE_EXT} ){
 		my $found = 0;
@@ -2107,7 +2113,7 @@ $tmp/perlmain\$(OBJ_EXT): $tmp/perlmain.c
 $tmp/perlmain.c: $makefilename}, q{
 	}.$self->{NOECHO}.q{echo Writing $@
 	}.$self->{NOECHO}.q{$(PERL) $(MAP_PERLINC) -e 'use ExtUtils::Miniperl; \\
-		writemain(grep s#.*/auto/##, qw|$(MAP_STATIC)|)' > $@.tmp && mv $@.tmp $@
+		writemain(grep s#.*/auto/##, qw|$(MAP_STATIC)|)' > $@t && mv $@t $@
 
 };
 
@@ -2451,7 +2457,7 @@ $(OBJECT) : $(PERL_HDRS)
 =item pm_to_blib
 
 Defines target that copies all files in the hash PM to their
-destination and autosplits them. See L<ExtUtils::Install/pm_to_blib>
+destination and autosplits them. See L<ExtUtils::Install/DESCRIPTION>
 
 =cut
 

@@ -1052,6 +1052,7 @@ EXT char *op_desc[] = {
 };
 #endif
 
+OP *	ck_bitop	_((OP* op));
 OP *	ck_concat	_((OP* op));
 OP *	ck_delete	_((OP* op));
 OP *	ck_eof		_((OP* op));
@@ -1845,8 +1846,8 @@ EXT OP * (*check[]) _((OP *op)) = {
 	ck_null,	/* i_subtract */
 	ck_concat,	/* concat */
 	ck_fun,		/* stringify */
-	ck_null,	/* left_shift */
-	ck_null,	/* right_shift */
+	ck_bitop,	/* left_shift */
+	ck_bitop,	/* right_shift */
 	ck_null,	/* lt */
 	ck_null,	/* i_lt */
 	ck_null,	/* gt */
@@ -1868,13 +1869,13 @@ EXT OP * (*check[]) _((OP *op)) = {
 	ck_null,	/* seq */
 	ck_null,	/* sne */
 	ck_null,	/* scmp */
-	ck_null,	/* bit_and */
-	ck_null,	/* bit_xor */
-	ck_null,	/* bit_or */
+	ck_bitop,	/* bit_and */
+	ck_bitop,	/* bit_xor */
+	ck_bitop,	/* bit_or */
 	ck_null,	/* negate */
 	ck_null,	/* i_negate */
 	ck_null,	/* not */
-	ck_null,	/* complement */
+	ck_bitop,	/* complement */
 	ck_fun,		/* atan2 */
 	ck_fun,		/* sin */
 	ck_fun,		/* cos */
@@ -2195,8 +2196,8 @@ EXT U32 opargs[] = {
 	0x0000111e,	/* i_subtract */
 	0x0000110e,	/* concat */
 	0x0000010e,	/* stringify */
-	0x0000111e,	/* left_shift */
-	0x0000111e,	/* right_shift */
+	0x0000110e,	/* left_shift */
+	0x0000110e,	/* right_shift */
 	0x00001136,	/* lt */
 	0x00001116,	/* i_lt */
 	0x00001136,	/* gt */
@@ -2247,11 +2248,11 @@ EXT U32 opargs[] = {
 	0x0000099e,	/* ord */
 	0x0000098e,	/* chr */
 	0x0000110e,	/* crypt */
-	0x0000010e,	/* ucfirst */
-	0x0000010e,	/* lcfirst */
-	0x0000010e,	/* uc */
-	0x0000010e,	/* lc */
-	0x0000010e,	/* quotemeta */
+	0x0000098e,	/* ucfirst */
+	0x0000098e,	/* lcfirst */
+	0x0000098e,	/* uc */
+	0x0000098e,	/* lc */
+	0x0000098e,	/* quotemeta */
 	0x00000048,	/* rv2av */
 	0x00001304,	/* aelemfast */
 	0x00001304,	/* aelem */

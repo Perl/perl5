@@ -29,6 +29,8 @@ not where carp() was called.
 
 $CarpLevel = 0;		# How many extra package levels to skip on carp.
 $MaxEvalLen = 0;	# How much eval '...text...' to show. 0 = all.
+$MaxArgLen = 64;        # How much of each argument to print. 0 = all.
+$MaxArgNums = 8;        # How many arguments to print. 0 = all.
 
 require Exporter;
 @ISA = Exporter;
@@ -38,8 +40,10 @@ sub longmess {
     my $error = shift;
     my $mess = "";
     my $i = 1 + $CarpLevel;
-    my ($pack,$file,$line,$sub,$eval,$require);
-    while (($pack,$file,$line,$sub,undef,undef,$eval,$require) = caller($i++)) {
+    my ($pack,$file,$line,$sub,$hargs,$eval,$require);
+    my (@a);
+    while (do { { package DB; @a = caller($i++) } } ) {
+      ($pack,$file,$line,$sub,$hargs,undef,$eval,$require) = @a;
 	if ($error =~ m/\n$/) {
 	    $mess .= $error;
 	} else {
@@ -55,6 +59,21 @@ sub longmess {
 		}
 	    } elsif ($sub eq '(eval)') {
 		$sub = 'eval {...}';
+	    }
+	    if ($hargs) {
+	      @a = @DB::args;	# must get local copy of args
+	      if ($MaxArgNums and @a > $MaxArgNums) {
+		$#a = $MaxArgNums;
+		$a[$#a] = "...";
+	      }
+	      for (@a) {
+		s/'/\\'/g;
+		substr($_,$MaxArgLen) = '...' if $MaxArgLen and $MaxArgLen < length;
+		s/([^\0]*)/'$1'/ unless /^-?[\d.]+$/;
+		s/([\200-\377])/sprintf("M-%c",ord($1)&0177)/eg;
+		s/([\0-\37\177])/sprintf("^%c",ord($1)^64)/eg;
+	      }
+	      $sub .= '(' . join(', ', @a) . ')';
 	    }
 	    $mess .= "\t$sub " if $error eq "called";
 	    $mess .= "$error at $file line $line\n";

@@ -100,7 +100,7 @@ Switches include:
 
 =item B<-0>[I<digits>]
 
-specifies the record separator (C<$/>) as an octal number.  If there are
+specifies the input record separator (C<$/>) as an octal number.  If there are
 no digits, the null character is the separator.  Other switches may
 precede or follow the digits.  For example, if you have a version of
 B<find> which can print filenames terminated by the null character, you
@@ -245,9 +245,10 @@ searches /usr/include and /usr/lib/perl.
 =item B<-l>[I<octnum>]
 
 enables automatic line-ending processing.  It has two effects:  first,
-it automatically chomps the line terminator when used with B<-n> or
-B<-p>, and second, it assigns "C<$\>" to have the value of I<octnum> so that
-any print statements will have that line terminator added back on.  If
+it automatically chomps "C<$/>" (the input record separator) when used
+with B<-n> or B<-p>, and second, it assigns "C<$\>"
+(the output record separator) to have the value of I<octnum> so that
+any print statements will have that separator added back on.  If
 I<octnum> is omitted, sets "C<$\>" to the current value of "C<$/>".  For
 instance, to trim lines to 80 columns:
 

@@ -48,7 +48,7 @@
 static void xstat _((void));
 #endif
 
-#ifndef safemalloc
+#ifndef MYMALLOC
 
 /* paranoid version of malloc */
 
@@ -60,19 +60,15 @@ static void xstat _((void));
 
 Malloc_t
 safemalloc(size)
-#ifdef MSDOS
-unsigned long size;
-#else
 MEM_SIZE size;
-#endif /* MSDOS */
 {
     Malloc_t ptr;
-#ifdef MSDOS
+#ifdef HAS_64K_LIMIT
 	if (size > 0xffff) {
 		PerlIO_printf(PerlIO_stderr(), "Allocation too large: %lx\n", size) FLUSH;
 		my_exit(1);
 	}
-#endif /* MSDOS */
+#endif /* HAS_64K_LIMIT */
 #ifdef DEBUGGING
     if ((long)size < 0)
 	croak("panic: malloc");
@@ -99,23 +95,19 @@ MEM_SIZE size;
 Malloc_t
 saferealloc(where,size)
 Malloc_t where;
-#ifndef MSDOS
 MEM_SIZE size;
-#else
-unsigned long size;
-#endif /* MSDOS */
 {
     Malloc_t ptr;
 #if !defined(STANDARD_C) && !defined(HAS_REALLOC_PROTOTYPE)
     Malloc_t realloc();
 #endif /* !defined(STANDARD_C) && !defined(HAS_REALLOC_PROTOTYPE) */
 
-#ifdef MSDOS
+#ifdef HAS_64K_LIMIT 
 	if (size > 0xffff) {
 		PerlIO_printf(PerlIO_stderr(), "Reallocation too large: %lx\n", size) FLUSH;
 		my_exit(1);
 	}
-#endif /* MSDOS */
+#endif /* HAS_64K_LIMIT */
     if (!where)
 	croak("Null realloc");
 #ifdef DEBUGGING
@@ -173,12 +165,12 @@ MEM_SIZE size;
 {
     Malloc_t ptr;
 
-#ifdef MSDOS
+#ifdef HAS_64K_LIMIT
 	if (size * count > 0xffff) {
 		PerlIO_printf(PerlIO_stderr(), "Allocation too large: %lx\n", size * count) FLUSH;
 		my_exit(1);
 	}
-#endif /* MSDOS */
+#endif /* HAS_64K_LIMIT */
 #ifdef DEBUGGING
     if ((long)size < 0 || (long)count < 0)
 	croak("panic: calloc");
@@ -203,7 +195,7 @@ MEM_SIZE size;
     /*NOTREACHED*/
 }
 
-#endif /* !safemalloc */
+#endif /* !MYMALLOC */
 
 #ifdef LEAKTEST
 
@@ -405,7 +397,7 @@ char *lend;
 }
 
 /* Initialize the fold[] array. */
-int
+void
 perl_init_fold()
 {
   int i;
@@ -1576,8 +1568,8 @@ VTOH(vtohs,short)
 VTOH(vtohl,long)
 #endif
 
-#if  (!defined(DOSISH) || defined(HAS_FORK)) && !defined(VMS)  /* VMS' my_popen() is in
-					   VMS.c, same with OS/2. */
+#if  (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) \
+     && !defined(VMS)  /* VMS' my_popen() is in VMS.c, same with OS/2. */
 PerlIO *
 my_popen(cmd,mode)
 char	*cmd;
@@ -1587,7 +1579,12 @@ char	*mode;
     register I32 this, that;
     register I32 pid;
     SV *sv;
-    I32 doexec = strNE(cmd,"-");
+    I32 doexec =
+#ifdef AMIGAOS
+	1;
+#else
+	strNE(cmd,"-");
+#endif
 
 #ifdef OS2
     if (doexec) {
@@ -1659,7 +1656,7 @@ char	*mode;
     return PerlIO_fdopen(p[this], mode);
 }
 #else
-#if defined(atarist)
+#if defined(atarist) || defined(DJGPP)
 FILE *popen();
 PerlIO *
 my_popen(cmd,mode)
@@ -1667,7 +1664,8 @@ char	*cmd;
 char	*mode;
 {
     /* Needs work for PerlIO ! */
-    return popen(PerlIO_exportFILE(cmd), mode);
+    /* used 0 for 2nd parameter to PerlIO-exportFILE; apparently not used */
+    return popen(PerlIO_exportFILE(cmd, 0), mode);
 }
 #endif
 
@@ -1717,7 +1715,8 @@ int newfd;
 }
 #endif
 
-#if  (!defined(DOSISH) || defined(HAS_FORK)) && !defined(VMS)  /* VMS' my_popen() is in VMS.c */
+#if  (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) \
+     && !defined(VMS)  /* VMS' my_popen() is in VMS.c */
 I32
 my_pclose(ptr)
 PerlIO *ptr;
@@ -1827,7 +1826,7 @@ int status;
     return;
 }
 
-#if defined(atarist) || defined(OS2)
+#if defined(atarist) || defined(OS2) || defined(DJGPP)
 int pclose();
 #ifdef HAS_FORK
 int					/* Cannot prototype with I32
@@ -1988,18 +1987,23 @@ char *b;
 }
 #endif /* !HAS_RENAME */
 
-unsigned long
+UV
 scan_oct(start, len, retlen)
 char *start;
 I32 len;
 I32 *retlen;
 {
     register char *s = start;
-    register unsigned long retval = 0;
+    register UV retval = 0;
+    bool overflowed = FALSE;
 
     while (len && *s >= '0' && *s <= '7') {
-	retval <<= 3;
-	retval |= *s++ - '0';
+	register UV n = retval << 3;
+	if (!overflowed && (n >> 3) != retval) {
+	    warn("Integer overflow in octal number");
+	    overflowed = TRUE;
+	}
+	retval = n | (*s++ - '0');
 	len--;
     }
     if (dowarn && len && (*s == '8' || *s == '9'))
@@ -2015,12 +2019,17 @@ I32 len;
 I32 *retlen;
 {
     register char *s = start;
-    register unsigned long retval = 0;
+    register UV retval = 0;
+    bool overflowed = FALSE;
     char *tmp;
 
     while (len-- && *s && (tmp = strchr(hexdigit, *s))) {
-	retval <<= 4;
-	retval |= (tmp - hexdigit) & 15;
+	register UV n = retval << 4;
+	if (!overflowed && (n >> 4) != retval) {
+	    warn("Integer overflow in hex number");
+	    overflowed = TRUE;
+	}
+	retval = n | (tmp - hexdigit) & 15;
 	s++;
     }
     *retlen = s - start;

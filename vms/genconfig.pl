@@ -266,7 +266,7 @@ while (<IN>) {
   elsif (not length $val and not $had_val) {
     # Wups -- should have been shell var for C preprocessor directive
     warn "Constant $token not found in config_h.SH\n";
-    $token =~ tr/A-Z/a-z/;
+    $token = lc $token;
     $token = "d_$token" unless $token =~ /^i_/;
     print OUT "$token='$state'\n";
   }
@@ -282,7 +282,7 @@ while (<IN>) {
   }
   elsif (!$pp_vars{$token}) {  # Haven't seen it previously, either
     warn "Constant $token not found in config_h.SH (val=|$val|)\n";
-    $token =~ tr/A-Z/a-z/;
+    $token = lc $token;
     print OUT "$token='$val'\n";
     if ($token =~ s/exp$//) {print OUT "$token='$val'\n";}
   }

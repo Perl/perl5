@@ -232,7 +232,7 @@ y/SEARCHLIST/REPLACEMENTLIST/cds
 =item Constant Folding
 
 
-=item Integer arithmetic
+=item Integer Arithmetic
 
 
 
@@ -246,6 +246,8 @@ y/SEARCHLIST/REPLACEMENTLIST/cds
 
 =item DESCRIPTION
 
+
+i, m, s, x
 
 =over
 
@@ -742,6 +744,11 @@ structures, objects
 =item Method Invocation
 
 
+=item Default UNIVERSAL methods
+
+isa(CLASS), can(METHOD), VERSION([VERSION]), class(), is_instance()
+
+
 =item Destructors
 
 
@@ -857,20 +864,43 @@ FIRSTKEY this, NEXTKEY this, lastkey, DESTROY this
 =item DESCRIPTION
 
 
+=item The Perl Debugger
+
+
 =over
 
-=item Debugging
+=item Debugger Commands
 
 
-h, T, s, n, f, c, c line, <CR>, l min+incr, l min-max, l line, l, -, w
-line, l subname, /pattern/, ?pattern?, L, S, t, b line [ condition ], b
-subname [ condition ], d line, D, a line command, A, < command, >
-command, V package [symbols], X [symbols], ! number, ! -number, H
--number, q or ^D, command, p expr
+h [command], p expr, x expr, V [pkg [vars]], X [vars], T, s [expr], n,
+E<lt>CRE<gt>, c [line], l, l min+incr, l min-max, l line, l subname,
+-, w [line], f filename, /pattern/, ?pattern?, L, S [[!]pattern], t, t
+expr, b [line] [condition], b subname [condition], d [line], D, a
+[line] command, A, O [opt[=val]] [opt"val"] [opt?].., recallCommand,
+ShellBang, pager, arrayDepth, hashDepth, compactDump, veryCompact,
+globPrint, DumpDBFiles, DumpPackages, quote, HighBit, undefPrint,
+tkRunning, signalLevel, warnLevel. dieLevel, E<lt> command, E<gt>
+command, ! number, ! -number, ! pattern, !! cmd, H -number, q or ^D,
+R, |dbcmd, ||dbcmd, = [alias value], command, p expr
 
-=item Customization
+
+=item Debugger Customization
 
 
+=item Readline Support
+
+
+=item Editor Support for Debugging
+
+
+=item The Perl Profiler
+
+
+=item Debugger Internals
+
+TTY, noTTY, ReadLine, NonStop, LineInfo
+
+  
 =item Other resources
 
 
@@ -899,10 +929,14 @@ command, V package [symbols], X [symbols], ! number, ! -number, H
 
 =over
 
-=item Format Variables
+=item Laundering and Detecting Tainted Data
 
 
+=item Cleaning Up Your Path
 
+
+=item Security Bugs
+  
 
 =back
 
@@ -3147,7 +3181,7 @@ have man pages yet:
 
 =head1 AUTHOR
 
-Larry Wall E<lt><F<larry@wall.org>E<gt>, with the help of oodles of
+Larry Wall E<lt>F<larry@wall.org>E<gt>, with the help of oodles of
 other folks.
 
 

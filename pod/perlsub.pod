@@ -187,11 +187,12 @@ Synopsis:
     my @oof = @bar;	# declare @oof lexical, and init it
 
 A "my" declares the listed variables to be confined (lexically) to the
-enclosing block, subroutine, C<eval>, or C<do/require/use>'d file.  If
-more than one value is listed, the list must be placed in parens.  All
-listed elements must be legal lvalues.  Only alphanumeric identifiers may
-be lexically scoped--magical builtins like $/ must currently be localized with
-"local" instead.  
+enclosing block, conditional (C<if/unless/elsif/else>), loop
+(C<for/foreach/while/until/continue>), subroutine, C<eval>, or
+C<do/require/use>'d file.  If more than one value is listed, the list
+must be placed in parens.  All listed elements must be legal lvalues.
+Only alphanumeric identifiers may be lexically scoped--magical
+builtins like $/ must currently be localized with "local" instead.
 
 Unlike dynamic variables created by the "local" statement, lexical
 variables declared with "my" are totally hidden from the outside world,
@@ -249,6 +250,49 @@ the expression
     my $x = 123 and $x == 123
 
 is false unless the old $x happened to have the value 123.
+
+Lexical scopes of control structures are not bounded precisely by the
+braces that delimit their controlled blocks; control expressions are
+part of the scope, too.  Thus in the loop
+
+    while (my $line = <>) {
+        $line = lc $line;
+    } continue {
+        print $line;
+    }
+
+the scope of $line extends from its declaration throughout the rest of
+the loop construct (including the C<continue> clause), but not beyond
+it.  Similarly, in the conditional
+
+    if ((my $answer = <STDIN>) =~ /^yes$/i) {
+        user_agrees();
+    } elsif ($answer =~ /^no$/i) {
+        user_disagrees();
+    } else {
+	chomp $answer;
+        die "'$answer' is neither 'yes' nor 'no'";
+    }
+
+the scope of $answer extends from its declaration throughout the rest
+of the conditional (including C<elsif> and C<else> clauses, if any),
+but not beyond it.
+
+(None of the foregoing applies to C<if/unless> or C<while/until>
+modifiers appended to simple statements.  Such modifiers are not
+control structures and have no effect on scoping.)
+
+The C<foreach> loop defaults to dynamically scoping its index variable
+(in the manner of C<local>; see below).  However, if the index
+variable is prefixed with the keyword "my", then it is lexically
+scoped instead.  Thus in the loop
+
+    for my $i (1, 2, 3) {
+        some_function();
+    }
+
+the scope of $i extends to the end of the loop, but not beyond it, and
+so the value of $i is unavailable in some_function().
 
 Some users may wish to encourage the use of lexically scoped variables.
 As an aid to catching implicit references to package variables,
@@ -422,11 +466,11 @@ Sometimes you don't want to pass the value of an array to a subroutine
 but rather the name of it, so that the subroutine can modify the global
 copy of it rather than working with a local copy.  In perl you can
 refer to all objects of a particular name by prefixing the name
-with a star: C<*foo>.  This is often known as a "type glob", since the
+with a star: C<*foo>.  This is often known as a "typeglob", since the
 star on the front can be thought of as a wildcard match for all the
 funny prefix characters on variables and subroutines and such.
 
-When evaluated, the type glob produces a scalar value that represents
+When evaluated, the typeglob produces a scalar value that represents
 all the objects of that name, including any filehandle, format or
 subroutine.  When assigned to, it causes the name mentioned to refer to
 whatever "*" value was assigned to it.  Example:
@@ -450,14 +494,15 @@ an array.  It will certainly be faster to pass the typeglob (or reference).
 Even if you don't want to modify an array, this mechanism is useful for
 passing multiple arrays in a single LIST, since normally the LIST
 mechanism will merge all the array values so that you can't extract out
-the individual arrays.  For more on typeglobs, see L<perldata/"Typeglobs">.
+the individual arrays.  For more on typeglobs, see
+L<perldata/"Typeglobs and FileHandles">.
 
 =head2 Pass by Reference
 
-If you want to pass more than one array or hash into a function--or 
-return them from it--and have them maintain their integrity,
-then you're going to have to use an explicit pass-by-reference.
-Before you do that, you need to understand references as detailed in L<perlref>.
+If you want to pass more than one array or hash into a function--or
+return them from it--and have them maintain their integrity, then
+you're going to have to use an explicit pass-by-reference.  Before you
+do that, you need to understand references as detailed in L<perlref>.
 This section may not make much sense to you otherwise.
 
 Here are a few simple examples.  First, let's pass in several
@@ -538,34 +583,6 @@ Here we're using the typeglobs to do symbol table aliasing.  It's
 a tad subtle, though, and also won't work if you're using my()
 variables, since only globals (well, and local()s) are in the symbol table.
 
-If you're passing around filehandles, you could usually just use the bare
-typeglob, like *STDOUT, but typeglobs references would be better because
-they'll still work properly under C<use strict 'refs'>.  For example:
-
-    splutter(\*STDOUT);
-    sub splutter {
-	my $fh = shift;
-	print $fh "her um well a hmmm\n";
-    }
-
-    $rec = get_rec(\*STDIN);
-    sub get_rec {
-	my $fh = shift;
-	return scalar <$fh>;
-    }
-
-If you're planning on generating new filehandles, you could do this:
-
-    sub openit {
-	my $name = shift;
-	local *FH;
-	return open (FH, $path) ? \*FH : undef;
-    } 
-
-Although that will actually produce a small memory leak.  See the bottom
-of L<perlfunc/open()> for a somewhat cleaner way using the FileHandle
-functions supplied with the POSIX package.
-
 =head2 Prototypes
 
 As of the 5.002 release of perl, if you declare
@@ -645,7 +662,7 @@ The interesting thing about & is that you can generate new syntax with it:
 	    &$catch;
 	}
     }
-    sub catch (&) { @_ }
+    sub catch (&) { $_[0] }
 
     try {
 	die "phooey";

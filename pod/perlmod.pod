@@ -155,6 +155,25 @@ Another use of symbol tables is for making "constant"  scalars.
 
 Now you cannot alter $PI, which is probably a good thing all in all.
 
+You can say C<*foo{PACKAGE}> and C<*foo{NAME}> to find out what name and
+package the *foo symbol table entry comes from.  This may be useful
+in a subroutine which is passed typeglobs as arguments
+
+    sub identify_typeglob {
+        my $glob = shift;
+        print 'You gave me ', *{$glob}{PACKAGE}, '::', *{$glob}{NAME}, "\n";
+    }
+    identify_typeglob *foo;
+    identify_typeglob *bar::baz;
+
+This prints
+
+    You gave me main::foo
+    You gave me bar::baz
+
+The *foo{THING} notation can also be used to obtain references to the
+individual elements of *foo, see L<perlref>.
+
 =head2 Package Constructors and Destructors
 
 There are two special subroutine definitions that function as package
@@ -316,53 +335,64 @@ conversion, but it's just a mechanical process, so is far from bulletproof.
 
 They work somewhat like pragmas in that they tend to affect the compilation of
 your program, and thus will usually only work well when used within a
-C<use>, or C<no>.  These are locally scoped, so an inner BLOCK
-may countermand any of these by saying
+C<use>, or C<no>.  Most of these are locally scoped, so an inner BLOCK
+may countermand any of these by saying:
 
     no integer;
     no strict 'refs';
 
 which lasts until the end of that BLOCK.
 
-The following programs are defined (and have their own documentation).
+Unlike the pragrmas that effect the C<$^H> hints variable, the C<use
+vars> and C<use subs> declarations are not BLOCK-scoped.  They allow
+you to pre-declare a variables or subroutines within a particular
+<I>file</I> rather than just a block.  Such declarations are effective
+for the entire file for which they were declared.  You cannot rescind
+them with C<no vars> or C<no subs>.
+
+The following pragmas are defined (and have their own documentation).
 
 =over 12
 
 =item diagnostics
 
-Pragma to produce enhanced diagnostics
+force verbose warning diagnostics
 
 =item integer
 
-Pragma to compute arithmetic in integer instead of double
+compute arithmetic in integer instead of double
 
 =item less
 
-Pragma to request less of something from the compiler
+request less of something from the compiler
+
+=item lib
+
+manipulate @INC at compile time
 
 =item ops
 
-Pragma to restrict use of unsafe opcodes
+restrict unsafe operations when compiling
 
 =item overload
 
-Pragma for overloading operators 
+package for overloading perl operations
 
 =item sigtrap
 
-Pragma to enable stack backtrace on unexpected signals
+enable simple signal handling
 
 =item strict
 
-Pragma to restrict unsafe constructs
+restrict unsafe constructs
 
 =item subs
 
-Pragma to predeclare sub names
+predeclare sub names
 
 =item vars
 
-Pragma to predeclare global symbols
+predeclare global variable names
 
 =back
 
@@ -396,7 +426,7 @@ warn of errors (from perspective of caller)
 
 =item Config
 
-access Perl configuration option
+access Perl configuration information
 
 =item Cwd
 
@@ -404,11 +434,15 @@ get pathname of current working directory
 
 =item DB_File
 
-Perl access to Berkeley DB
+access to Berkeley DB
 
 =item Devel::SelfStubber
 
 generate stubs for a SelfLoading module
+
+=item DirHandle
+
+supply object methods for directory handles
 
 =item DynaLoader
 
@@ -416,15 +450,23 @@ Dynamically load C libraries into Perl code
 
 =item English
 
-use nice English (or B<awk>) names for ugly punctuation variables
+use nice English (or awk) names for ugly punctuation variables
 
 =item Env
 
-perl module that imports environment variables
+import environment variables
 
 =item Exporter
 
-provide import/export controls for Perl modules
+implements default import method for modules
+
+=item ExtUtils::Embed
+
+Utilities for embedding Perl in C/C++ applications
+
+=item ExtUtils::Install
+
+install files from here to there
 
 =item ExtUtils::Liblist
 
@@ -438,13 +480,37 @@ create an extension Makefile
 
 utilities to write and check a MANIFEST file
 
+=item ExtUtils::Miniperl
+
+write the C code for perlmain.c
+
 =item ExtUtils::Mkbootstrap
 
 make a bootstrap file for use by DynaLoader
 
-=item ExtUtils::Miniperl
+=item ExtUtils::Mksymlists
 
-!!!GOOD QUESTION!!!
+write linker options files for dynamic extension
+
+=item ExtUtils::MM_OS2
+
+methods to override UN*X behaviour in ExtUtils::MakeMaker
+
+=item ExtUtils::MM_Unix
+
+methods used by ExtUtils::MakeMaker
+
+=item ExtUtils::MM_VMS
+
+methods to override UN*X behaviour in ExtUtils::MakeMaker
+
+=item ExtUtils::testlib
+
+add blib/* directories to @INC
+
+=item Fatal
+
+replace functions with equivalents which succeed or die
 
 =item Fcntl
 
@@ -454,9 +520,17 @@ load the C Fcntl.h defines
 
 parse file specifications
 
+=item FileCache
+
+keep more files open than the system permits
+
 =item File::CheckTree
 
 run many filetest checks on a tree
+
+=item File::Copy
+
+Copy files or filehandles
 
 =item File::Find
 
@@ -470,45 +544,145 @@ supply object methods for filehandles
 
 create or remove a series of directories
 
+=item FindBin
+
+locate directory of original perl script
+
+=item GDBM_File
+
+access to the gdbm library.
+
 =item Getopt::Long
 
-extended getopt processing
+extended processing of command line options
 
 =item Getopt::Std
 
-Process single-character switches with switch clustering
+process single-character switches with switch clustering
 
 =item I18N::Collate
 
 compare 8-bit scalar data according to the current locale
 
+=item IO
+
+load various IO modules
+
+=item IO::File
+
+supply object methods for filehandles
+
+=item IO::Handle
+
+supply object methods for I/O handles
+
+=item IO::Pipe
+
+supply object methods for pipes
+
+=item IO::Seekable
+
+supply seek based methods for I/O objects
+
+=item IO::Select
+
+OO interface to the select system call
+
+=item IO::Socket
+
+object interface to socket communications
+
 =item IPC::Open2
 
-a process for both reading and writing
+open a process for both reading and writing
 
 =item IPC::Open3
 
 open a process for reading, writing, and error handling
 
+=item Math::BigFloat
+
+arbitrary length float math package
+
+=item Math::BigInt
+
+arbitrary size integer math package
+
+=item Math::Complex
+
+complex numbers and associated mathematical functions
+
+=item NDBM_File
+
+tied access to ndbm files
+
 =item Net::Ping
 
 check a host for upness
 
+=item Opcode
+
+disable named opcodes when compiling perl code
+
+=item Pod::Text
+
+convert POD data to formatted ASCII text
+
 =item POSIX
 
-Perl interface to IEEE Std 1003.1
+interface to IEEE Std 1003.1
+
+=item Safe
+
+compile and execute code in restricted compartments
+
+=item SDBM_File
+
+tied access to sdbm files
+
+=item Search::Dict
+
+search for key in dictionary file
+
+=item SelectSaver
+
+save and restore selected file handle
 
 =item SelfLoader
 
 load functions only on demand
 
-=item Safe
+=item Shell
 
-Creation controlled compartments in which perl code can be evaluated.
+run shell commands transparently within perl
 
 =item Socket
 
 load the C socket.h defines and structure manipulators
+
+=item Symbol
+
+manipulate Perl symbols and their names
+
+=item Sys::Hostname
+
+try every conceivable way to get hostname
+
+=item Sys::Syslog
+
+interface to the UNIX syslog(3) calls
+
+=item Term::Cap
+
+Perl termcap interface
+
+=item Term::Complete
+
+word completion module
+
+=item Term::ReadLine
+
+interface to various readline packages. 
 
 =item Test::Harness
 
@@ -517,6 +691,42 @@ run perl standard test scripts with statistics
 =item Text::Abbrev
 
 create an abbreviation table from a list
+
+=item Text::ParseWords
+
+parse text into an array of tokens
+
+=item Text::Soundex
+
+implementation of the Soundex Algorithm as Described by Knuth
+
+=item Text::Tabs
+
+expand and unexpand tabs per the unix expand(1) and unexpand(1)
+
+=item Text::Wrap
+
+line wrapping to form simple paragraphs
+
+=item Tie::Hash
+
+base class definitions for tied hashes
+
+=item Tie::Scalar
+
+base class definitions for tied scalars
+
+=item Tie::SubstrHash
+
+fixed-table-size, fixed-key-length hashing
+
+=item Time::Local
+
+efficiently compute time from local and GMT time
+
+=item UNIVERSAL
+
+base class for ALL classes (blessed references)
 
 =back
 
@@ -927,7 +1137,7 @@ Copying, ToDo etc.
 
 =item Adding a Copyright Notice.
 
-How you choose to license your work is a personal decision.
+How you choose to licence your work is a personal decision.
 The general mechanism is to assert your Copyright and then make
 a declaration of how others may copy/use/modify your work.
 

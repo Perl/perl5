@@ -32,33 +32,35 @@
 #define ADDOP 288
 #define DOLSHARP 289
 #define DO 290
-#define LOCAL 291
-#define HASHBRACK 292
-#define NOAMP 293
-#define OROP 294
-#define ANDOP 295
-#define NOTOP 296
-#define LSTOP 297
-#define ASSIGNOP 298
-#define OROR 299
-#define ANDAND 300
-#define BITOROP 301
-#define BITANDOP 302
-#define UNIOP 303
-#define SHIFTOP 304
-#define MATCHOP 305
-#define UMINUS 306
-#define REFGEN 307
-#define POWOP 308
-#define PREINC 309
-#define PREDEC 310
-#define POSTINC 311
-#define POSTDEC 312
-#define ARROW 313
+#define HASHBRACK 291
+#define NOAMP 292
+#define LOCAL 293
+#define MY 294
+#define OROP 295
+#define ANDOP 296
+#define NOTOP 297
+#define LSTOP 298
+#define ASSIGNOP 299
+#define OROR 300
+#define ANDAND 301
+#define BITOROP 302
+#define BITANDOP 303
+#define UNIOP 304
+#define SHIFTOP 305
+#define MATCHOP 306
+#define UMINUS 307
+#define REFGEN 308
+#define POWOP 309
+#define PREINC 310
+#define PREDEC 311
+#define POSTINC 312
+#define POSTDEC 313
+#define ARROW 314
 typedef union {
     I32	ival;
     char *pval;
     OP *opval;
     GV *gvval;
 } YYSTYPE;
+extern YYSTYPE yylval;
 extern YYSTYPE yylval;

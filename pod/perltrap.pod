@@ -549,6 +549,36 @@ behave like C<split /\s+/> (which does).
     # perl4 prints: :hi:mom
     # perl5 prints: hi:mom
 
+=item * BugFix
+
+Perl 4 would ignore any text which was attached to an C<-e> switch,
+always taking the code snippet from the following arg.  Additionally, it
+would silently accept an C<-e> switch without a following arg.  Both of
+these behaviors have been fixed.
+
+    perl -e'print "attached to -e"' 'print "separate arg"'
+    
+    # perl4 prints: separate arg
+    # perl5 prints: attached to -e
+    
+    perl -e
+
+    # perl4 prints:
+    # perl5 dies: No code specified for -e.
+
+=item * Discontinuance
+
+In Perl 4 the return value of C<push> was undocumented, but it was
+actually the last value being pushed onto the target list.  In Perl 5
+the return value of C<push> is documented, but has changed, it is the
+number of elements in the resulting list.
+
+    @x = ('existing');
+    print push(@x, 'first new', 'second new');
+    
+    # perl4 prints: second new
+    # perl5 prints: 3
+
 =item * Deprecation
 
 Some error messages will be different.
@@ -640,8 +670,8 @@ Logical tests now return an null, instead of 0
     # perl4 prints: 0
     # perl5 prints:
 
-Also see the L<General Regular Expression Traps> tests for another example 
-of this new feature...
+Also see the L<General Regular Expression Traps using s///, etc.>
+tests for another example of this new feature...
 
 =back
 

@@ -84,7 +84,7 @@ SaveError(pat, va_alist)
 
 
 /* prepend underscore to s. write into buf. return buf. */
-char *
+static char *
 dl_add_underscore(s, buf)
 char *s;
 char *buf;

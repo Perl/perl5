@@ -43,7 +43,7 @@ IO::File - supply object methods for filehandles
 
 =head1 DESCRIPTION
 
-C<IO::File> is inherits from C<IO::Handle> ans C<IO::Seekable>. It extends
+C<IO::File> inherits from C<IO::Handle> and C<IO::Seekable>. It extends
 these classes with methods that are specific to file handles.
 
 =head1 CONSTRUCTOR

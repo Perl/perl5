@@ -56,7 +56,7 @@ It's just a first step, but it's usually a good first step.
 
 =head1 AUTHOR
 
-Larry Wall <lwall@sems.com>
+Larry Wall <larry@wall.org>
 
 =cut
 

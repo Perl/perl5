@@ -46,21 +46,7 @@ print EM <<'END';
 
 #ifdef MULTIPLICITY
 
-/* Undefine symbols that were defined by EMBED. Somewhat ugly */
-
 END
-
-
-open(INT, "<interp.sym") || die "Can't open interp.sym: $!\n";
-while (<INT>) {
-	s/[ \t]*#.*//;		# Delete comments.
-	next unless /\S/;
-	s/^\s*(\S*).*$/#undef $1/;
-	print EM $_ if (exists $global{$1});
-}
-close(INT) || warn "Can't close interp.sym: $!\n";
-
-print EM "\n";
 
 open(INT, "<interp.sym") || die "Can't open interp.sym: $!\n";
 while (<INT>) {
@@ -83,6 +69,18 @@ while (<INT>) {
 	s/[ \t]*#.*//;		# Delete comments.
 	next unless /\S/;
 	s/^\s*(\S+).*$/#define I$1\t\t$1/;
+	s/(................\t)\t/$1/;
+	print EM $_;
+}
+close(INT) || warn "Can't close interp.sym: $!\n";
+
+print EM "\n";
+
+open(INT, "<interp.sym") || die "Can't open interp.sym: $!\n";
+while (<INT>) {
+	s/[ \t]*#.*//;		# Delete comments.
+	next unless /\S/;
+	s/^\s*(\S+).*$/#define $1\t\tPerl_$1/;
 	s/(................\t)\t/$1/;
 	print EM $_;
 }

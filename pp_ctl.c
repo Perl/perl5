@@ -174,7 +174,7 @@ PP(pp_formline)
     bool gotsome;
     STRLEN len;
 
-    if (!SvCOMPILED(form)) {
+    if (!SvMAGICAL(form) || !SvCOMPILED(form)) {
 	SvREADONLY_off(form);
 	doparseform(form);
     }
@@ -708,12 +708,16 @@ PP(pp_flop)
 
 	if (SvNIOKp(left) || !SvPOKp(left) ||
 	  (looks_like_number(left) && *SvPVX(left) != '0') ) {
+	    SV *sv_iv;
+
 	    i = SvIV(left);
 	    max = SvIV(right);
 	    if (max > i)
 		EXTEND(SP, max - i + 1);
+	    sv_iv = sv_2mortal(newSViv(i));
+	    if (i++ <= max) PUSHs(sv_iv);
 	    while (i <= max) {
-		sv = sv_mortalcopy(&sv_no);
+		sv = sv_mortalcopy(sv_iv);
 		sv_setiv(sv,i++);
 		PUSHs(sv);
 	    }
@@ -1295,7 +1299,7 @@ PP(pp_dbstate)
 	SAVETMPS;
 
 	SAVEI32(debug);
-	SAVESPTR(stack_sp);
+	SAVESTACK_POS();
 	debug = 0;
 	hasargs = 0;
 	sp = stack_sp;
@@ -1996,13 +2000,13 @@ int gimme;
 
     /* set up a scratch pad */
 
-    SAVEINT(padix);
+    SAVEI32(padix);
     SAVESPTR(curpad);
     SAVESPTR(comppad);
     SAVESPTR(comppad_name);
-    SAVEINT(comppad_name_fill);
-    SAVEINT(min_intro_pending);
-    SAVEINT(max_intro_pending);
+    SAVEI32(comppad_name_fill);
+    SAVEI32(min_intro_pending);
+    SAVEI32(max_intro_pending);
 
     SAVESPTR(compcv);
     compcv = (CV*)NEWSV(1104,0);
@@ -2079,6 +2083,20 @@ int gimme;
 	scalar(eval_root);
 
     DEBUG_x(dump_eval());
+
+    /* Register with debugger: */
+
+    if (perldb && saveop->op_type == OP_REQUIRE) {
+	CV *cv = perl_get_cv("DB::postponed", FALSE);
+	
+	if (cv) {
+	    dSP;
+	    PUSHMARK(sp);
+	    XPUSHs((SV*)compiling.cop_filegv);
+	    PUTBACK;
+	    perl_call_sv((SV*)cv, G_DISCARD);
+	}
+    }
 
     /* compiled okay, so do it */
 
@@ -2213,9 +2231,10 @@ PP(pp_entereval)
     dSP;
     register CONTEXT *cx;
     dPOPss;
-    I32 gimme = GIMME;
-    char tmpbuf[32];
+    I32 gimme = GIMME, was = sub_generation;
+    char tmpbuf[32], *safestr;
     STRLEN len;
+    OP *ret;
 
     if (!SvPV(sv,len) || !len)
 	RETPUSHUNDEF;
@@ -2231,7 +2250,13 @@ PP(pp_entereval)
     sprintf(tmpbuf, "_<(eval %d)", ++evalseq);
     compiling.cop_filegv = gv_fetchfile(tmpbuf+2);
     compiling.cop_line = 1;
-    SAVEDELETE(defstash, savepv(tmpbuf), strlen(tmpbuf));
+    /* XXX For C<eval "...">s within BEGIN {} blocks, this ends up
+       deleting the eval's FILEGV from the stash before gv_check() runs
+       (i.e. before run-time proper). To work around the coredump that
+       ensues, we always turn GvMULTI_on for any globals that were
+       introduced within evals. See force_ident(). GSAR 96-10-12 */
+    safestr = savepv(tmpbuf);
+    SAVEDELETE(defstash, safestr, strlen(safestr));
     SAVEI32(hints);
     hints = op->op_targ;
 
@@ -2244,7 +2269,11 @@ PP(pp_entereval)
     if (perldb && curstash != debstash)
 	save_lines(GvAV(compiling.cop_filegv), linestr);
     PUTBACK;
-    return doeval(gimme);
+    ret = doeval(gimme);
+    if (perldb && was != sub_generation) { /* Some subs defined here. */
+	strcpy(safestr, "_<(eval )");	/* Anything fake and short. */
+    }
+    return ret;
 }
 
 PP(pp_leaveeval)
@@ -2388,7 +2417,10 @@ SV *sv;
     register I32 arg;
     bool ischop;
 
-    New(804, fops, (send - s)*3+2, U16);    /* Almost certainly too long... */
+    if (len == 0)
+	die("Null picture in formline");
+    
+    New(804, fops, (send - s)*3+10, U16);    /* Almost certainly too long... */
     fpc = fops;
 
     if (s < send) {
@@ -2543,5 +2575,6 @@ SV *sv;
     }
     Copy(fops, s, arg, U16);
     Safefree(fops);
+    sv_magic(sv, Nullsv, 'f', Nullch, 0);
     SvCOMPILED_on(sv);
 }

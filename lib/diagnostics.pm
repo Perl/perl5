@@ -415,10 +415,27 @@ sub warn_trap {
 
 sub death_trap {
     my $exception = $_[0];
-    splainthis($exception);
+
+    # See if we are coming from anywhere within an eval. If so we don't
+    # want to explain the exception because it's going to get caught.
+    my $in_eval = 0;
+    my $i = 0;
+    while (1) {
+      my $caller = (caller($i++))[3] or last;
+      if ($caller eq '(eval)') {
+	$in_eval = 1;
+	last;
+      }
+    }
+
+    splainthis($exception) unless $in_eval;
     if (caller eq $WHOAMI) { print STDERR "INTERNAL EXCEPTION: $exception"; } 
     &$olddie if defined $olddie and $olddie and $olddie ne \&death_trap;
-    $SIG{__DIE__} = $SIG{__WARN__} = '';
+
+    # We don't want to unset these if we're coming from an eval because
+    # then we've turned off diagnostics. (Actually what does this next
+    # line do?  -PSeibel)
+    $SIG{__DIE__} = $SIG{__WARN__} = '' unless $in_eval;
     local($Carp::CarpLevel) = 1;
     confess "Uncaught exception from user code:\n\t$exception";
 	# up we go; where we stop, nobody knows, but i think we die now

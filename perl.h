@@ -16,8 +16,12 @@
  * Above symbol is defined via -D in 'x2p/Makefile.SH'
  * Decouple x2p stuff from some of perls more extreme eccentricities. 
  */
-#undef MULTIPLICITY
 #undef EMBED
+#undef NO_EMBED
+#define NO_EMBED
+#undef MULTIPLICITY
+#undef HIDEMYMALLOC
+#undef EMBEDMYMALLOC
 #undef USE_STDIO
 #define USE_STDIO
 #endif /* PERL_FOR_X2P */
@@ -49,6 +53,16 @@
 
 #define VOIDUSED 1
 #include "config.h"
+
+/*
+ * SOFT_CAST can be used for args to prototyped functions to retain some
+ * type checking; it only casts if the compiler does not know prototypes.
+ */
+#if defined(CAN_PROTOTYPE) && defined(DEBUGGING_COMPILE)
+#define SOFT_CAST(type)	
+#else
+#define SOFT_CAST(type)	(type)
+#endif
 
 #ifndef BYTEORDER
 #   define BYTEORDER 0x1234
@@ -179,8 +193,6 @@
 #include <locale.h>
 #endif
 
-EXT int lc_collate_active;
-
 #ifdef METHOD 	/* Defined by OSF/1 v3.0 by ctype.h */
 #undef METHOD
 #endif
@@ -200,22 +212,34 @@ EXT int lc_collate_active;
 #   include <stdlib.h>
 #endif /* STANDARD_C */
 
-/* Maybe this comes after <stdlib.h> so we don't try to change 
-   the standard library prototypes?.  We'll use our own in 
-   proto.h instead.  I guess.  The patch had no explanation.
-*/
+/* This comes after <stdlib.h> so we don't try to change the standard
+ * library prototypes; we'll use our own in proto.h instead. */
+
 #ifdef MYMALLOC
+
 #   ifdef HIDEMYMALLOC
-#	define malloc Mymalloc
+#	define malloc  Mymalloc
+#	define calloc  Mycalloc
 #	define realloc Myremalloc
-#	define free Myfree
-#	define calloc Mycalloc
+#	define free    Myfree
 #   endif
-#   define safemalloc malloc
+#   ifdef EMBEDMYMALLOC
+#	define malloc  Perl_malloc
+#	define calloc  Perl_calloc
+#	define realloc Perl_realloc
+#	define free    Perl_free
+#   endif
+
+#   undef safemalloc
+#   undef safecalloc
+#   undef saferealloc
+#   undef safefree
+#   define safemalloc  malloc
+#   define safecalloc  calloc
 #   define saferealloc realloc
-#   define safefree free
-#   define safecalloc calloc
-#endif
+#   define safefree    free
+
+#endif /* MYMALLOC */
 
 #define MEM_SIZE Size_t
 
@@ -335,10 +359,8 @@ EXT int lc_collate_active;
 #   endif
 #endif
 
-#ifndef MSDOS
-#  if defined(HAS_TIMES) && defined(I_SYS_TIMES)
+#if defined(HAS_TIMES) && defined(I_SYS_TIMES)
 #    include <sys/times.h>
-#  endif
 #endif
 
 #if defined(HAS_STRERROR) && (!defined(HAS_MKDIR) || !defined(HAS_RMDIR))
@@ -367,10 +389,8 @@ EXT int lc_collate_active;
 #   define SETERRNO(errcode,vmserrcode) STMT_START {set_errno(errcode); set_vaxc_errno(vmserrcode);} STMT_END
 #endif
 
-#ifndef MSDOS
-#   ifndef errno
+#ifndef errno
 	extern int errno;     /* ANSI allows errno to be an lvalue expr */
-#   endif
 #endif
 
 #ifdef HAS_STRERROR
@@ -1140,15 +1160,14 @@ I32 unlnk _((char*));
 #define SCAN_TR 1
 #define SCAN_REPL 2
 
-#ifdef MYMALLOC
-# ifndef DEBUGGING_MSTATS
-#  define DEBUGGING_MSTATS
-# endif
-#endif
-
 #ifdef DEBUGGING
 # ifndef register
 #  define register
+# endif
+# ifdef MYMALLOC
+#  ifndef DEBUGGING_MSTATS
+#   define DEBUGGING_MSTATS
+#  endif
 # endif
 # define PAD_SV(po) pad_sv(po)
 #else
@@ -1173,6 +1192,7 @@ EXT char *** environ_pointer;
 #  endif
 #endif /* environ processing */
 
+EXT int		lc_collate_active;
 EXT int		uid;		/* current real user id */
 EXT int		euid;		/* current effective user id */
 EXT int		gid;		/* current real group id */
@@ -1483,7 +1503,6 @@ EXT U32		hints;		/* various compilation flags */
 #define HINT_BLOCK_SCOPE	0x00000100
 #define HINT_STRICT_SUBS	0x00000200
 #define HINT_STRICT_VARS	0x00000400
-#define HINT_STRICT_UNTIE	0x00000800
 
 /**************************************************************************/
 /* This regexp stuff is global since it always happens within 1 expr eval */
@@ -1792,6 +1811,8 @@ EXT MGVTBL vtbl_pos =	{magic_getpos,
 					0,	0,	0};
 EXT MGVTBL vtbl_bm =	{0,	magic_setbm,
 					0,	0,	0};
+EXT MGVTBL vtbl_fm =	{0,	magic_setfm,
+					0,	0,	0};
 EXT MGVTBL vtbl_uvar =	{magic_getuvar,
 				magic_setuvar,
 					0,	0,	0};
@@ -1823,6 +1844,7 @@ EXT MGVTBL vtbl_substr;
 EXT MGVTBL vtbl_vec;
 EXT MGVTBL vtbl_pos;
 EXT MGVTBL vtbl_bm;
+EXT MGVTBL vtbl_fm;
 EXT MGVTBL vtbl_uvar;
 
 #ifdef OVERLOAD

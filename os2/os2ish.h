@@ -99,6 +99,11 @@ extern char *tmppath;
 PerlIO *my_syspopen(char *cmd, char *mode);
 /* Cannot prototype with I32 at this point. */
 int my_syspclose(PerlIO *f);
+FILE *my_tmpfile (void);
+char *my_tmpnam (char *);
+
+#define tmpfile	my_tmpfile
+#define tmpnam	my_tmpnam
 
 /*
  * fwrite1() should be a routine with the same calling sequence as fwrite(),

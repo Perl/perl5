@@ -40,6 +40,7 @@ static void missingterm _((char *s));
 static void no_op _((char *what, char *s));
 static void set_csh _((void));
 static I32 sublex_done _((void));
+static I32 sublex_push _((void));
 static I32 sublex_start _((void));
 #ifdef CRIPPLED_CC
 static int uni _((I32 f, char *s));
@@ -49,20 +50,27 @@ static void restore_rsfp _((void *f));
 
 static char *linestart;		/* beg. of most recently read line */
 
+static struct {
+    I32 super_state;	/* lexer state to save */
+    I32 sub_inwhat;	/* "lex_inwhat" to use */
+    OP *sub_op;		/* "lex_op" to use */
+} sublex_info;
+
 /* The following are arranged oddly so that the guard on the switch statement
  * can get by with a single comparison (if the compiler is smart enough).
  */
 
-#define LEX_NORMAL		9
-#define LEX_INTERPNORMAL	8
-#define LEX_INTERPCASEMOD	7
-#define LEX_INTERPSTART		6
-#define LEX_INTERPEND		5
-#define LEX_INTERPENDMAYBE	4
-#define LEX_INTERPCONCAT	3
-#define LEX_INTERPCONST		2
-#define LEX_FORMLINE		1
-#define LEX_KNOWNEXT		0
+#define LEX_NORMAL		10
+#define LEX_INTERPNORMAL	 9
+#define LEX_INTERPCASEMOD	 8
+#define LEX_INTERPPUSH		 7
+#define LEX_INTERPSTART		 6
+#define LEX_INTERPEND		 5
+#define LEX_INTERPENDMAYBE	 4
+#define LEX_INTERPCONCAT	 3
+#define LEX_INTERPCONST		 2
+#define LEX_FORMLINE		 1
+#define LEX_KNOWNEXT		 0
 
 #ifdef I_FCNTL
 #include <fcntl.h>
@@ -216,15 +224,15 @@ SV *line;
     char *s;
     STRLEN len;
 
-    SAVEINT(lex_dojoin);
-    SAVEINT(lex_brackets);
-    SAVEINT(lex_fakebrack);
-    SAVEINT(lex_casemods);
-    SAVEINT(lex_starts);
-    SAVEINT(lex_state);
+    SAVEI32(lex_dojoin);
+    SAVEI32(lex_brackets);
+    SAVEI32(lex_fakebrack);
+    SAVEI32(lex_casemods);
+    SAVEI32(lex_starts);
+    SAVEI32(lex_state);
     SAVESPTR(lex_inpat);
-    SAVEINT(lex_inwhat);
-    SAVEINT(curcop->cop_line);
+    SAVEI32(lex_inwhat);
+    SAVEI16(curcop->cop_line);
     SAVEPPTR(bufptr);
     SAVEPPTR(bufend);
     SAVEPPTR(oldbufptr);
@@ -517,7 +525,10 @@ int kind;
 	force_next(WORD);
 	if (kind) {
 	    op->op_private = OPpCONST_ENTERED;
-	    gv_fetchpv(s, TRUE,
+	    /* XXX see note in pp_entereval() for why we forgo typo
+	       warnings if the symbol must be introduced in an eval.
+	       GSAR 96-10-12 */
+	    gv_fetchpv(s, in_eval ? GV_ADDMULTI : TRUE,
 		kind == '$' ? SVt_PV :
 		kind == '@' ? SVt_PVAV :
 		kind == '%' ? SVt_PVHV :
@@ -540,7 +551,7 @@ char *s;
     if(isDIGIT(*s)) {
         char *d;
         int c;
-        for( d=s, c = 1; isDIGIT(*d) || (*d == '.' && c--); d++);
+        for( d=s, c = 1; isDIGIT(*d) || *d == '_' || (*d == '.' && c--); d++);
         if((*d == ';' || isSPACE(*d)) && *(skipspace(d)) != ',') {
             s = scan_num(s);
             /* real VERSION number -- GBARR */
@@ -605,16 +616,36 @@ sublex_start()
 	return THING;
     }
 
+    sublex_info.super_state = lex_state;
+    sublex_info.sub_inwhat = op_type;
+    sublex_info.sub_op = lex_op;
+    lex_state = LEX_INTERPPUSH;
+
+    expect = XTERM;
+    if (lex_op) {
+	yylval.opval = lex_op;
+	lex_op = Nullop;
+	return PMFUNC;
+    }
+    else
+	return FUNC;
+}
+
+static I32
+sublex_push()
+{
     push_scope();
-    SAVEINT(lex_dojoin);
-    SAVEINT(lex_brackets);
-    SAVEINT(lex_fakebrack);
-    SAVEINT(lex_casemods);
-    SAVEINT(lex_starts);
-    SAVEINT(lex_state);
+
+    lex_state = sublex_info.super_state;
+    SAVEI32(lex_dojoin);
+    SAVEI32(lex_brackets);
+    SAVEI32(lex_fakebrack);
+    SAVEI32(lex_casemods);
+    SAVEI32(lex_starts);
+    SAVEI32(lex_state);
     SAVESPTR(lex_inpat);
-    SAVEINT(lex_inwhat);
-    SAVEINT(curcop->cop_line);
+    SAVEI32(lex_inwhat);
+    SAVEI16(curcop->cop_line);
     SAVEPPTR(bufptr);
     SAVEPPTR(oldbufptr);
     SAVEPPTR(oldoldbufptr);
@@ -643,21 +674,13 @@ sublex_start()
     lex_state = LEX_INTERPCONCAT;
     curcop->cop_line = multi_start;
 
-    lex_inwhat = op_type;
-    if (op_type == OP_MATCH || op_type == OP_SUBST)
-	lex_inpat = lex_op;
+    lex_inwhat = sublex_info.sub_inwhat;
+    if (lex_inwhat == OP_MATCH || lex_inwhat == OP_SUBST)
+	lex_inpat = sublex_info.sub_op;
     else
-	lex_inpat = 0;
+	lex_inpat = Nullop;
 
-    expect = XTERM;
-    force_next('(');
-    if (lex_op) {
-	yylval.opval = lex_op;
-	lex_op = Nullop;
-	return PMFUNC;
-    }
-    else
-	return FUNC;
+    return '(';
 }
 
 static I32
@@ -1008,6 +1031,8 @@ GV *gv;
 	/* filehandle or package name makes it a method */
 	if (!gv || GvIO(indirgv) || gv_stashpvn(tmpbuf, len, FALSE)) {
 	    s = skipspace(s);
+	    if ((bufend - s) >= 2 && *s == '=' && *(s+1) == '>')
+		return 0;	/* no assumptions -- "=>" quotes bearword */
 	    nextval[nexttoke].opval =
 		(OP*)newSVOP(OP_CONST, 0,
 			    newSVpv(tmpbuf,0));
@@ -1165,7 +1190,8 @@ STRLEN append;
 {
     if (rsfp_filters) {
 
-        SvCUR_set(sv, 0);	/* start with empty line	*/
+	if (!append)
+            SvCUR_set(sv, 0);	/* start with empty line	*/
         if (FILTER_READ(0, sv, 0) > 0)
             return ( SvPVX(sv) ) ;
         else
@@ -1275,6 +1301,9 @@ yylex()
 		return yylex();
 	}
 
+    case LEX_INTERPPUSH:
+        return sublex_push();
+
     case LEX_INTERPSTART:
 	if (bufptr == bufend)
 	    return sublex_done();
@@ -1375,6 +1404,8 @@ yylex()
 	goto fake_eof;			/* emulate EOF on ^D or ^Z */
     case 0:
 	if (!rsfp) {
+	    last_uni = 0;
+	    last_lop = 0;
 	    if (lex_brackets)
 		yyerror("Missing right bracket");
 	    TOKEN(0);
@@ -2781,10 +2812,16 @@ yylex()
 	case KEY_for:
 	case KEY_foreach:
 	    yylval.ival = curcop->cop_line;
-	    while (s < bufend && isSPACE(*s))
-		s++;
-	    if (isIDFIRST(*s))
-		croak("Missing $ on loop variable");
+	    s = skipspace(s);
+	    if (isIDFIRST(*s)) {
+		char *p = s;
+		if ((bufend - p) >= 3 &&
+		    strnEQ(p, "my", 2) && isSPACE(*(p + 2)))
+		    p += 2;
+		p = skipspace(p);
+		if (isIDFIRST(*p))
+		    croak("Missing $ on loop variable");
+	    }
 	    OPERATOR(FOR);
 
 	case KEY_formline:
@@ -2936,7 +2973,6 @@ yylex()
 	    UNI(OP_LCFIRST);
 
 	case KEY_local:
-	    yylval.ival = 0;
 	    OPERATOR(LOCAL);
 
 	case KEY_length:
@@ -2987,8 +3023,7 @@ yylex()
 
 	case KEY_my:
 	    in_my = TRUE;
-	    yylval.ival = 1;
-	    OPERATOR(LOCAL);
+	    OPERATOR(MY);
 
 	case KEY_next:
 	    s = force_word(s,WORD,TRUE,FALSE,FALSE);
@@ -3077,6 +3112,19 @@ yylex()
 	    s = scan_str(s);
 	    if (!s)
 		missingterm((char*)0);
+	    if (dowarn && SvLEN(lex_stuff)) {
+		d = SvPV_force(lex_stuff, len);
+		for (; len; --len, ++d) {
+		    if (*d == ',') {
+			warn("Possible attempt to separate words with commas");
+			break;
+		    }
+		    if (*d == '#') {
+			warn("Possible attempt to put comments in qw() list");
+			break;
+		    }
+		}
+	    }
 	    force_next(')');
 	    nextval[nexttoke].opval = (OP*)newSVOP(OP_CONST, 0, q(lex_stuff));
 	    lex_stuff = Nullsv;
@@ -4780,8 +4828,9 @@ char *start;
 	croak("panic: scan_num");
     case '0':
 	{
-	    U32 i;
+	    UV u;
 	    I32 shift;
+	    bool overflowed = FALSE;
 
 	    if (s[1] == 'x') {
 		shift = 4;
@@ -4791,8 +4840,10 @@ char *start;
 		goto decimal;
 	    else
 		shift = 3;
-	    i = 0;
+	    u = 0;
 	    for (;;) {
+		UV n, b;
+
 		switch (*s) {
 		default:
 		    goto out;
@@ -4805,25 +4856,27 @@ char *start;
 		    /* FALL THROUGH */
 		case '0': case '1': case '2': case '3': case '4':
 		case '5': case '6': case '7':
-		    i <<= shift;
-		    i += *s++ & 15;
-		    break;
+		    b = *s++ & 15;
+		    goto digit;
 		case 'a': case 'b': case 'c': case 'd': case 'e': case 'f':
 		case 'A': case 'B': case 'C': case 'D': case 'E': case 'F':
 		    if (shift != 4)
 			goto out;
-		    i <<= 4;
-		    i += (*s++ & 7) + 9;
+		    b = (*s++ & 7) + 9;
+		  digit:
+		    n = u << shift;
+		    if (!overflowed && (n >> shift) != u) {
+			warn("Integer overflow in %s number",
+			     (shift == 4) ? "hex" : "octal");
+			overflowed = TRUE;
+		    }
+		    u = n | b;
 		    break;
 		}
 	    }
 	  out:
 	    sv = NEWSV(92,0);
-	    tryi32 = i;
-	    if (tryi32 == i && tryi32 >= 0)
-		sv_setiv(sv,tryi32);
-	    else
-		sv_setnv(sv,(double)i);
+	    sv_setuv(sv, u);
 	}
 	break;
     case '1': case '2': case '3': case '4': case '5':
@@ -4970,15 +5023,15 @@ start_subparse()
 #endif
     save_I32(&subline);
     save_item(subname);
-    SAVEINT(padix);
+    SAVEI32(padix);
     SAVESPTR(curpad);
     SAVESPTR(comppad);
     SAVESPTR(comppad_name);
     SAVESPTR(compcv);
-    SAVEINT(comppad_name_fill);
-    SAVEINT(min_intro_pending);
-    SAVEINT(max_intro_pending);
-    SAVEINT(pad_reset_pending);
+    SAVEI32(comppad_name_fill);
+    SAVEI32(min_intro_pending);
+    SAVEI32(max_intro_pending);
+    SAVEI32(pad_reset_pending);
 
     compcv = (CV*)NEWSV(1104,0);
     sv_upgrade((SV *)compcv, SVt_PVCV);

@@ -7,6 +7,7 @@ use Carp;
 @EXPORT = qw(openlog closelog setlogmask syslog);
 
 use Socket;
+use Sys::Hostname;
 
 # adapted from syslog.pl
 #
@@ -85,7 +86,7 @@ L<syslog(3)>
 
 =head1 AUTHOR
 
-Tom Christiansen E<lt>F<tchrist@perl.com>E<gt> and Larry Wall E<lt>F<lwall@sems.com>E<gt>
+Tom Christiansen E<lt>F<tchrist@perl.com>E<gt> and Larry Wall E<lt>F<larry@wall.org>E<gt>
 
 =cut
 
@@ -190,7 +191,7 @@ sub syslog {
 
 sub xlate {
     local($name) = @_;
-    $name =~ y/a-z/A-Z/;
+    $name = uc $name;
     $name = "LOG_$name" unless $name =~ /^LOG_/;
     $name = "Sys::Syslog::$name";
     eval(&$name) || -1;

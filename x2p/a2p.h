@@ -8,7 +8,6 @@
  * $Log:	a2p.h,v $
  */
 
-#include "../embed.h"
 #define VOIDUSED 1
 #include "../config.h"
 
@@ -31,7 +30,6 @@
 #  include <sys/types.h>
 #endif
 
-
 #ifdef USE_NEXT_CTYPE
 
 #if NX_CURRENT_COMPILER_RELEASE >= 400
@@ -45,6 +43,15 @@
 #endif /* USE_NEXT_CTYPE */
 
 #define MEM_SIZE Size_t
+
+#ifdef STANDARD_C
+#   include <stdlib.h>
+#else
+    Malloc_t malloc _((MEM_SIZE nbytes));
+    Malloc_t calloc _((MEM_SIZE elements, MEM_SIZE size));
+    Malloc_t realloc _((Malloc_t where, MEM_SIZE nbytes));
+    Free_t   free _((Malloc_t where));
+#endif
 
 #if defined(I_STRING) || defined(__cplusplus)
 #   include <string.h>
@@ -105,7 +112,11 @@ char *strchr(), *strrchr();
 char *strcpy(), *strcat();
 #endif /* ! STANDARD_C */
 
-#include "handy.h"
+#include "../handy.h"
+
+#undef Nullfp
+#define Nullfp Null(FILE*)
+
 #define Nullop 0
 
 #define OPROG		1

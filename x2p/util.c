@@ -13,6 +13,9 @@
 #include "INTERN.h"
 #include "util.h"
 
+#ifdef I_STDARG
+#  include <stdarg.h>
+#endif
 #define FLUSH
 
 static char nomem[] = "Out of memory!\n";
@@ -189,32 +192,65 @@ int newlen;
     }
 }
 
-/*VARARGS1*/
 void
+#if defined(I_STDARG) && defined(HAS_VPRINTF)
+croak(char *pat,...)
+#else /* I_STDARG */
+/*VARARGS1*/
 croak(pat,a1,a2,a3,a4)
-char *pat;
-int a1,a2,a3,a4;
+    char *pat;
+    int a1,a2,a3,a4;
+#endif /* I_STDARG */
 {
+#if defined(I_STDARG) && defined(HAS_VPRINTF)
+    va_list args;
+
+    va_start(args, pat);
+    vfprintf(stderr,pat,args);
+#else
     fprintf(stderr,pat,a1,a2,a3,a4);
+#endif
     exit(1);
 }
 
-/*VARARGS1*/
 void
+#if defined(I_STDARG) && defined(HAS_VPRINTF)
+fatal(char *pat,...)
+#else /* I_STDARG */
+/*VARARGS1*/
 fatal(pat,a1,a2,a3,a4)
-char *pat;
-int a1,a2,a3,a4;
+    char *pat;
+    int a1,a2,a3,a4;
+#endif /* I_STDARG */
 {
+#if defined(I_STDARG) && defined(HAS_VPRINTF)
+    va_list args;
+
+    va_start(args, pat);
+    vfprintf(stderr,pat,args);
+#else
     fprintf(stderr,pat,a1,a2,a3,a4);
+#endif
     exit(1);
 }
 
-/*VARARGS1*/
 void
+#if defined(I_STDARG) && defined(HAS_VPRINTF)
+warn(char *pat,...)
+#else /* I_STDARG */
+/*VARARGS1*/
 warn(pat,a1,a2,a3,a4)
-char *pat;
-int a1,a2,a3,a4;
+    char *pat;
+    int a1,a2,a3,a4;
+#endif /* I_STDARG */
 {
+#if defined(I_STDARG) && defined(HAS_VPRINTF)
+    va_list args;
+
+    va_start(args, pat);
+    vfprintf(stderr,pat,args);
+#else
     fprintf(stderr,pat,a1,a2,a3,a4);
+#endif
 }
 

@@ -873,6 +873,16 @@ if (!@files) {
   unless ($@) { @files = readdir(D); closedir(D); }
 }
 if (!@files) { @files = map {chomp && $_} `ls`; }
+if ($^O eq 'VMS') {
+  foreach (@files) {
+    # Clip trailing '.' for portability -- non-VMS OSs don't expect it
+    s%\.$%%;
+    # Fix up for case-sensitive file systems
+    s/$modfname/$modfname/i && next;
+    $_ = "\U$_" if $_ eq 'manifest' or $_ eq 'changes';
+    $_ = 'Makefile.PL' if $_ = 'makefile.pl';
+  }
+}
 print MANI join("\n",@files);
 close MANI;
 !NO!SUBS!

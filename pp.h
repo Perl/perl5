@@ -55,12 +55,14 @@
 #define POPp		(SvPVx(POPs, na))
 #define POPn		(SvNVx(POPs))
 #define POPi		((IV)SvIVx(POPs))
+#define POPu		((UV)SvIVx(POPs))
 #define POPl		((long)SvIVx(POPs))
 
 #define TOPs		(*sp)
 #define TOPp		(SvPV(TOPs, na))
 #define TOPn		(SvNV(TOPs))
 #define TOPi		((IV)SvIV(TOPs))
+#define TOPu		((UV)SvIV(TOPs))
 #define TOPl		((long)SvIV(TOPs))
 
 /* Go to some pains in the rare event that we must extend the stack. */
@@ -80,18 +82,21 @@
 #define PUSHp(p,l)	STMT_START { sv_setpvn(TARG, (p), (l)); PUSHTARG; } STMT_END
 #define PUSHn(n)	STMT_START { sv_setnv(TARG, (double)(n)); PUSHTARG; } STMT_END
 #define PUSHi(i)	STMT_START { sv_setiv(TARG, (IV)(i)); PUSHTARG; } STMT_END
+#define PUSHu(u)	STMT_START { sv_setuv(TARG, (UV)(u)); PUSHTARG; } STMT_END
 
 #define XPUSHs(s)	STMT_START { EXTEND(sp,1); (*++sp = (s)); } STMT_END
 #define XPUSHTARG	STMT_START { SvSETMAGIC(TARG); XPUSHs(TARG); } STMT_END
 #define XPUSHp(p,l)	STMT_START { sv_setpvn(TARG, (p), (l)); XPUSHTARG; } STMT_END
 #define XPUSHn(n)	STMT_START { sv_setnv(TARG, (double)(n)); XPUSHTARG; } STMT_END
 #define XPUSHi(i)	STMT_START { sv_setiv(TARG, (IV)(i)); XPUSHTARG; } STMT_END
+#define XPUSHu(u)	STMT_START { sv_setuv(TARG, (UV)(u)); XPUSHTARG; } STMT_END
 
 #define SETs(s)		(*sp = s)
 #define SETTARG		STMT_START { SvSETMAGIC(TARG); SETs(TARG); } STMT_END
 #define SETp(p,l)	STMT_START { sv_setpvn(TARG, (p), (l)); SETTARG; } STMT_END
 #define SETn(n)		STMT_START { sv_setnv(TARG, (double)(n)); SETTARG; } STMT_END
 #define SETi(i)		STMT_START { sv_setiv(TARG, (IV)(i)); SETTARG; } STMT_END
+#define SETu(u)		STMT_START { sv_setuv(TARG, (UV)(u)); SETTARG; } STMT_END
 
 #define dTOPss		SV *sv = TOPs
 #define dPOPss		SV *sv = POPs
@@ -99,14 +104,18 @@
 #define dPOPnv		double value = POPn
 #define dTOPiv		IV value = TOPi
 #define dPOPiv		IV value = POPi
+#define dTOPuv		UV value = TOPu
+#define dPOPuv		UV value = POPu
 
 #define dPOPPOPssrl	SV *right = POPs; SV *left = POPs
 #define dPOPPOPnnrl	double right = POPn; double left = POPn
 #define dPOPPOPiirl	IV right = POPi; IV left = POPi
+#define dPOPPOPuurl	UV right = POPu; UV left = POPu
 
 #define dPOPTOPssrl	SV *right = POPs; SV *left = TOPs
 #define dPOPTOPnnrl	double right = POPn; double left = TOPn
 #define dPOPTOPiirl	IV right = POPi; IV left = TOPi
+#define dPOPTOPuurl	UV right = POPu; UV left = TOPu
 
 #define RETPUSHYES	RETURNX(PUSHs(&sv_yes))
 #define RETPUSHNO	RETURNX(PUSHs(&sv_no))

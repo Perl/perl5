@@ -98,6 +98,12 @@ static int dooneliner _((char *cmd, char *filename));
 # define my_chsize chsize
 #endif
 
+#if !defined(HAS_FLOCK) && defined(HAS_LOCKF)
+  static int lockf_emulate_flock _((int fd, int operation));
+# define flock lockf_emulate_flock
+#endif
+
+
 /* Pushy I/O. */
 
 PP(pp_backtick)
@@ -156,7 +162,7 @@ PP(pp_glob)
 #ifndef CSH
     *SvPVX(rs) = '\n';
 #endif	/* !CSH */
-#endif	/* !MSDOS */
+#endif	/* !DOSISH */
 
     result = do_readline();
     LEAVE;
@@ -372,7 +378,7 @@ PP(pp_binmode)
 
     EXTEND(SP, 1);
     if (!(io = GvIO(gv)) || !(fp = IoIFP(io)))
-	RETSETUNDEF;
+	RETPUSHUNDEF;
 
 #ifdef DOSISH
 #ifdef atarist
@@ -467,8 +473,8 @@ PP(pp_untie)
     SV * sv ;
 
     sv = POPs;
-    if (hints & HINT_STRICT_UNTIE)
-    {
+
+    if (dowarn) {
         MAGIC * mg ;
         if (SvMAGICAL(sv)) {
             if (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV)
@@ -477,7 +483,7 @@ PP(pp_untie)
                 mg = mg_find(sv, 'q') ;
     
             if (mg && SvREFCNT(SvRV(mg->mg_obj)) > 1)  
-		croak("Can't untie: %d inner references still exist", 
+		warn("untie attempted while %d inner references still exist",
 			SvREFCNT(SvRV(mg->mg_obj)) - 1 ) ;
         }
     }
@@ -486,7 +492,7 @@ PP(pp_untie)
 	sv_unmagic(sv, 'P');
     else
 	sv_unmagic(sv, 'q');
-    RETSETYES;
+    RETPUSHYES;
 }
 
 PP(pp_tied)
@@ -1357,18 +1363,14 @@ PP(pp_ioctl)
 	DIE("ioctl is not implemented");
 #endif
     else
-#if defined(DOSISH) && !defined(OS2)
-	DIE("fcntl is not implemented");
-#else
-#   ifdef HAS_FCNTL
-#     if defined(OS2) && defined(__EMX__)
+#ifdef HAS_FCNTL
+#if defined(OS2) && defined(__EMX__)
 	retval = fcntl(PerlIO_fileno(IoIFP(io)), func, (int)s);
-#     else
+#else
 	retval = fcntl(PerlIO_fileno(IoIFP(io)), func, s);
-#     endif 
-#   else
+#endif 
+#else
 	DIE("fcntl is not implemented");
-#   endif
 #endif
 
     if (SvPOK(argsv)) {
@@ -1397,10 +1399,6 @@ PP(pp_flock)
     int argtype;
     GV *gv;
     PerlIO *fp;
-
-#if !defined(HAS_FLOCK) && defined(HAS_LOCKF)
-#  define flock lockf_emulate_flock
-#endif
 
 #if defined(HAS_FLOCK) || defined(flock)
     argtype = POPi;
@@ -2842,7 +2840,7 @@ PP(pp_system)
     Signal_t (*ihand)();     /* place to save signal during system() */
     Signal_t (*qhand)();     /* place to save signal during system() */
 
-#if defined(HAS_FORK) && !defined(VMS) && !defined(OS2)
+#if (defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(OS2)
     if (SP - MARK == 1) {
 	if (tainting) {
 	    char *junk = SvPV(TOPs, na);
@@ -3084,7 +3082,7 @@ PP(pp_tms)
 {
     dSP;
 
-#if defined(MSDOS) || !defined(HAS_TIMES)
+#ifndef HAS_TIMES
     DIE("times not implemented");
 #else
     EXTEND(SP, 4);
@@ -3104,7 +3102,7 @@ PP(pp_tms)
 	PUSHs(sv_2mortal(newSVnv(((double)timesbuf.tms_cstime)/HZ)));
     }
     RETURN;
-#endif /* MSDOS */
+#endif /* HAS_TIMES */
 }
 
 PP(pp_localtime)
@@ -4106,7 +4104,7 @@ PP(pp_syscall)
 #  define LOCK_UN 8
 # endif
 
-int
+static int
 lockf_emulate_flock (fd, operation)
 int fd;
 int operation;

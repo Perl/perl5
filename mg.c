@@ -1161,6 +1161,16 @@ MAGIC* mg;
 }
 
 int
+magic_setfm(sv,mg)
+SV* sv;
+MAGIC* mg;
+{
+    sv_unmagic(sv, 'f');
+    SvCOMPILED_off(sv);
+    return 0;
+}
+
+int
 magic_setuvar(sv,mg)
 SV* sv;
 MAGIC* mg;

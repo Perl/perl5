@@ -96,7 +96,7 @@ $VERSION = $VERSION = sprintf("%d.%02d", q$Revision: 1.4 $ =~ /(\d+)\.(\d+)/);
 # $realpath;
 #}
 
-sub abs_path
+sub my_abs_path
 {
     my $start = shift || '.';
     my($dotdots, $cwd, @pst, @cst, $dir, @tst);
@@ -154,6 +154,8 @@ BEGIN
 {
  *Dir = \$Bin;
  *RealDir = \$RealBin;
+ if (defined &Cwd::sys_abspath) { *abs_path = \&Cwd::sys_abspath}
+ else { *abs_path = \&my_abs_path}
 
  if($0 eq '-e' || $0 eq '-')
   {

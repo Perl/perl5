@@ -699,6 +699,11 @@ sub stringify_cartesian {
 	my ($x, $y) = @{$z->cartesian};
 	my ($re, $im);
 
+	$x = int($x + ($x < 0 ? -1 : 1) * 1e-14)
+		if int(abs($x)) != int(abs($x) + 1e-14);
+	$y = int($y + ($y < 0 ? -1 : 1) * 1e-14)
+		if int(abs($y)) != int(abs($y) + 1e-14);
+
 	$re = "$x" if abs($x) >= 1e-14;
 	if ($y == 1)				{ $im = 'i' }
 	elsif ($y == -1)			{ $im = '-i' }
@@ -734,7 +739,13 @@ sub stringify_polar {
 	if (abs($nt) <= 1e-14)			{ $theta = 0 }
 	elsif (abs(pi-$nt) <= 1e-14) 	{ $theta = 'pi' }
 
-	return "\[$r,$theta\]" if defined $theta;
+	if (defined $theta) {
+		$r = int($r + ($r < 0 ? -1 : 1) * 1e-14)
+			if int(abs($r)) != int(abs($r) + 1e-14);
+		$theta = int($theta + ($theta < 0 ? -1 : 1) * 1e-14)
+			if int(abs($theta)) != int(abs($theta) + 1e-14);
+		return "\[$r,$theta\]";
+	}
 
 	#
 	# Okay, number is not a real. Try to identify pi/n and friends...
@@ -752,6 +763,11 @@ sub stringify_polar {
 	}
 
 	$theta = $nt unless defined $theta;
+
+	$r = int($r + ($r < 0 ? -1 : 1) * 1e-14)
+		if int(abs($r)) != int(abs($r) + 1e-14);
+	$theta = int($theta + ($theta < 0 ? -1 : 1) * 1e-14)
+		if int(abs($theta)) != int(abs($theta) + 1e-14);
 
 	return "\[$r,$theta\]";
 }

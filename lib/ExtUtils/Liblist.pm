@@ -8,9 +8,12 @@ use Config;
 use Cwd 'cwd';
 use File::Basename;
 
-my $Config_libext = $Config{lib_ext} || ".a";
-
 sub ext {
+  if   ($^O eq 'VMS') { return &_vms_ext;      }
+  else                { return &_unix_os2_ext; }
+}
+
+sub _unix_os2_ext {
     my($self,$potential_libs, $Verbose) = @_;
     if ($^O =~ 'os2' and $Config{libs}) { 
 	# Dynamic libraries are not transitive, so we may need including
@@ -24,6 +27,8 @@ sub ext {
 
     my($so)   = $Config{'so'};
     my($libs) = $Config{'libs'};
+    my $Config_libext = $Config{lib_ext} || ".a";
+
 
     # compute $extralibs, $bsloadlibs and $ldloadlibs from
     # $potential_libs
@@ -174,6 +179,136 @@ sub ext {
     ("@extralibs", "@bsloadlibs", "@ldloadlibs",join(":",@ld_run_path));
 }
 
+
+sub _vms_ext {
+  my($self, $potential_libs,$verbose) = @_;
+  return ('', '', '', '') unless $potential_libs;
+
+  my(@dirs,@libs,$dir,$lib,%sh,%olb,%obj);
+  my $cwd = cwd();
+  my($so,$lib_ext,$obj_ext) = @Config{'so','lib_ext','obj_ext'};
+  # List of common Unix library names and there VMS equivalents
+  # (VMS equivalent of '' indicates that the library is automatially
+  # searched by the linker, and should be skipped here.)
+  my %libmap = ( 'm' => '', 'f77' => '', 'F77' => '', 'V77' => '', 'c' => '',
+                 'malloc' => '', 'crypt' => '', 'resolv' => '', 'c_s' => '',
+                 'socket' => '', 'X11' => 'DECW$XLIBSHR',
+                 'Xt' => 'DECW$XTSHR', 'Xm' => 'DECW$XMLIBSHR',
+                 'Xmu' => 'DECW$XMULIBSHR');
+  if ($Config{'vms_cc_type'} ne 'decc') { $libmap{'curses'} = 'VAXCCURSE'; }
+
+  print STDOUT "Potential libraries are '$potential_libs'\n" if $verbose;
+
+  # First, sort out directories and library names in the input
+  foreach $lib (split ' ',$potential_libs) {
+    push(@dirs,$1),   next if $lib =~ /^-L(.*)/;
+    push(@dirs,$lib), next if $lib =~ /[:>\]]$/;
+    push(@dirs,$lib), next if -d $lib;
+    push(@libs,$1),   next if $lib =~ /^-l(.*)/;
+    push(@libs,$lib);
+  }
+  push(@dirs,split(' ',$Config{'libpth'}));
+
+  # Now make sure we've got VMS-syntax absolute directory specs
+  # (We don't, however, check whether someone's hidden a relative
+  # path in a logical name.)
+  foreach $dir (@dirs) {
+    unless (-d $dir) {
+      print STDOUT "Skipping nonexistent Directory $dir\n" if $verbose > 1;
+      $dir = '';
+      next;
+    }
+    print STDOUT "Resolving directory $dir\n" if $verbose;
+    if ($self->file_name_is_absolute($dir)) { $dir = $self->fixpath($dir,1); }
+    else                                    { $dir = $self->catdir($cwd,$dir); }
+  }
+  @dirs = grep { length($_) } @dirs;
+  unshift(@dirs,''); # Check each $lib without additions first
+
+  LIB: foreach $lib (@libs) {
+    if (exists $libmap{$lib}) {
+      next unless length $libmap{$lib};
+      $lib = $libmap{$lib};
+    }
+
+    my(@variants,$variant,$name,$test,$cand);
+    my($ctype) = '';
+
+    # If we don't have a file type, consider it a possibly abbreviated name and
+    # check for common variants.  We try these first to grab libraries before
+    # a like-named executable image (e.g. -lperl resolves to perlshr.exe
+    # before perl.exe).
+    if ($lib !~ /\.[^:>\]]*$/) {
+      push(@variants,"${lib}shr","${lib}rtl","${lib}lib");
+      push(@variants,"lib$lib") if $lib !~ /[:>\]]/;
+    }
+    push(@variants,$lib);
+    print STDOUT "Looking for $lib\n" if $verbose;
+    foreach $variant (@variants) {
+      foreach $dir (@dirs) {
+        my($type);
+
+        $name = "$dir$variant";
+        print "\tChecking $name\n" if $verbose > 2;
+        if (-f ($test = VMS::Filespec::rmsexpand($name))) {
+          # It's got its own suffix, so we'll have to figure out the type
+          if    ($test =~ /(?:$so|exe)$/i)      { $type = 'sh'; }
+          elsif ($test =~ /(?:$lib_ext|olb)$/i) { $type = 'olb'; }
+          elsif ($test =~ /(?:$obj_ext|obj)$/i) {
+            print STDOUT "Warning (will try anyway): Plain object file $test found in library list\n";
+            $type = 'obj';
+          }
+          else {
+            print STDOUT "Warning (will try anyway): Unknown library type for $test; assuming shared\n";
+            $type = 'sh';
+          }
+        }
+        elsif (-f ($test = VMS::Filespec::rmsexpand($name,$so))      or
+               -f ($test = VMS::Filespec::rmsexpand($name,'.exe')))     {
+          $type = 'sh';
+          $name = $test unless $test =~ /exe;?\d*$/i;
+        }
+        elsif (not length($ctype) and  # If we've got a lib already, don't bother
+               ( -f ($test = VMS::Filespec::rmsexpand($name,$lib_ext)) or
+                 -f ($test = VMS::Filespec::rmsexpand($name,'.olb'))))  {
+          $type = 'olb';
+          $name = $test unless $test =~ /olb;?\d*$/i;
+        }
+        elsif (not length($ctype) and  # If we've got a lib already, don't bother
+               ( -f ($test = VMS::Filespec::rmsexpand($name,$obj_ext)) or
+                 -f ($test = VMS::Filespec::rmsexpand($name,'.obj'))))  {
+          print STDOUT "Warning (will try anyway): Plain object file $test found in library list\n";
+          $type = 'obj';
+          $name = $test unless $test =~ /obj;?\d*$/i;
+        }
+        if (defined $type) {
+          $ctype = $type; $cand = $name;
+          last if $ctype eq 'sh';
+        }
+      }
+      if ($ctype) { 
+        eval '$' . $ctype . "{'$cand'}++";
+        die "Error recording library: $@" if $@;
+        print STDOUT "\tFound as $name (really $test), type $type\n" if $verbose > 1;
+        next LIB;
+      }
+    }
+    print STDOUT "Warning (will try anyway): No library found for $lib\n";
+  }
+
+  @libs = sort keys %obj;
+  # This has to precede any other CRTLs, so just make it first
+  if ($olb{VAXCCURSE}) {
+    push(@libs,"$olb{VAXCCURSE}/Library");
+    delete $olb{VAXCCURSE};
+  }
+  push(@libs, map { "$_/Library" } sort keys %olb);
+  push(@libs, map { "$_/Share"   } sort keys %sh);
+  $lib = join(' ',@libs);
+  print "Result: $lib\n" if $verbose;
+  wantarray ? ($lib, '', $lib, '') : $lib;
+}
+
 1;
 
 __END__
@@ -247,11 +382,55 @@ object file.  This list is used to create a .bs (bootstrap) file.
 This module deals with a lot of system dependencies and has quite a
 few architecture specific B<if>s in the code.
 
+=head2 VMS implementation
+
+The version of ext() which is executed under VMS differs from the
+Unix-OS/2 version in several respects:
+
+=over 2
+
+=item *
+
+Input library and path specifications are accepted with or without the
+C<-l> and C<-L> prefices used by Unix linkers.  If neither prefix is
+present, a token is considered a directory to search if it is in fact
+a directory, and a library to search for otherwise.  Authors who wish
+their extensions to be portable to Unix or OS/2 should use the Unix
+prefixes, since the Unix-OS/2 version of ext() requires them.
+
+=item *
+
+Wherever possible, shareable images are preferred to object libraries,
+and object libraries to plain object files.  In accordance with VMS
+naming conventions, ext() looks for files named I<lib>shr and I<lib>rtl;
+it also looks for I<lib>lib and libI<lib> to accomodate Unix conventions
+used in some ported software.
+
+=item *
+
+For each library that is found, an appropriate directive for a linker options
+file is generated.  The return values are space-separated strings of
+these directives, rather than elements used on the linker command line.
+
+=item *
+
+LDLOADLIBS and EXTRALIBS are always identical under VMS, and BSLOADLIBS
+and LD_RIN_PATH are always empty.
+
+=back
+
+In addition, an attempt is made to recognize several common Unix library
+names, and filter them out or convert them to their VMS equivalents, as
+appropriate.
+
+In general, the VMS version of ext() should properly handle input from
+extensions originally designed for a Unix or VMS environment.  If you
+encounter problems, or discover cases where the search could be improved,
+please let us know.
+
 =head1 SEE ALSO
 
 L<ExtUtils::MakeMaker>
 
 =cut
-
-
 

@@ -15,7 +15,7 @@ use File::Basename qw(&basename &dirname);
 chdir(dirname($0));
 ($file = basename($0)) =~ s/\.PL$//;
 $file =~ s/\.pl$//
-	if ($^O eq 'VMS' or $^O eq 'os2');  # "case-forgiving"
+	if ($^O eq 'VMS' or $^O eq 'os2' or $^O eq 'amigaos');  # "case-forgiving"
 
 open OUT,">$file" or die "Can't create $file: $!";
 
@@ -388,8 +388,11 @@ $wanna_see{SYNOPSIS}++ if $section =~ /^3/;
 
 $name = @ARGV ? $ARGV[0] : "<STDIN>";
 $Filename = $name;
-$name = uc($name) if $section =~ /^1/;
-$name =~ s/\.[^.]*$//;
+if ($section =~ /^1/) {
+    require File::Basename;
+    $name = uc File::Basename::basename($name);
+}
+$name =~ s/\.(pod|p[lm])$//i;
 $name =~ s(/)(::)g; # translate Getopt/Long to Getopt::Long, etc.
 
 if ($name ne 'something') {

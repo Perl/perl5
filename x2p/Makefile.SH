@@ -80,7 +80,7 @@ plextract = find2perl s2p
 
 addedbyconf = $(shextract) $(plextract)
 
-h = EXTERN.h INTERN.h ../config.h handy.h hash.h a2p.h str.h util.h
+h = EXTERN.h INTERN.h ../config.h ../handy.h hash.h a2p.h str.h util.h
 
 c = hash.c $(mallocsrc) str.c util.c walk.c
 
@@ -112,7 +112,8 @@ run_byacc:	FORCE
 a2p.c: a2p.y
 	-@touch a2p.c
 
-a2p$(OBJ_EXT): a2p.c a2py.c a2p.h EXTERN.h util.h INTERN.h handy.h ../config.h str.h hash.h
+a2p$(OBJ_EXT): a2p.c a2py.c a2p.h EXTERN.h util.h INTERN.h \
+		../handy.h ../config.h str.h hash.h
 	$(CCCMD) $(LARGE) a2p.c
 
 clean:

@@ -24,7 +24,7 @@ with object references.
 =item 3.
 
 A method is simply a subroutine that expects an object reference (or
-a package name, for static methods) as the first argument.
+a package name, for class methods) as the first argument.
 
 =back
 
@@ -156,17 +156,18 @@ Unlike say C++, Perl doesn't provide any special syntax for method
 definition.  (It does provide a little syntax for method invocation
 though.  More on that later.)  A method expects its first argument
 to be the object or package it is being invoked on.  There are just two
-types of methods, which we'll call static and virtual, in honor of
-the two C++ method types they most closely resemble.
+types of methods, which we'll call class and instance. 
+(Sometimes you'll hear these called static and virtual, in honor of
+the two C++ method types they most closely resemble.)
 
-A static method expects a class name as the first argument.  It
+A class method expects a class name as the first argument.  It
 provides functionality for the class as a whole, not for any individual
-object belonging to the class.  Constructors are typically static
-methods.  Many static methods simply ignore their first argument, since
+object belonging to the class.  Constructors are typically class
+methods.  Many class methods simply ignore their first argument, since
 they already know what package they're in, and don't care what package
 they were invoked via.  (These aren't necessarily the same, since
-static methods follow the inheritance tree just like ordinary virtual
-methods.)  Another typical use for static methods is to look up an
+class methods follow the inheritance tree just like ordinary instance
+methods.)  Another typical use for class methods is to look up an
 object by name:
 
     sub find {
@@ -174,7 +175,7 @@ object by name:
 	$objtable{$name};
     }
 
-A virtual method expects an object reference as its first argument.
+An instance method expects an object reference as its first argument.
 Typically it shifts the first argument into a "self" or "this" variable,
 and then uses that as an ordinary reference.
 
@@ -194,9 +195,9 @@ already had an "indirect object" syntax that you use when you say
 
     print STDERR "help!!!\n";
 
-This same syntax can be used to call either static or virtual methods.
-We'll use the two methods defined above, the static method to lookup
-an object reference and the virtual method to print out its attributes.
+This same syntax can be used to call either class or instance methods.
+We'll use the two methods defined above, the class method to lookup
+an object reference and the instance method to print out its attributes.
 
     $fred = find Critter "Fred";
     display $fred 'Height', 'Weight';
@@ -300,7 +301,7 @@ I<undef> is returned.
 
 C<VERSION> returns the VERSION number of the class (package). If
 an argument is given then it will check that the current version is not 
-less that the given argument. This method is normally called as a static
+less that the given argument. This method is normally called as a class
 method. This method is also called when the C<VERSION> form of C<use> is
 used.
 

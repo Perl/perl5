@@ -13,10 +13,28 @@ The matching operations can
 have various modifiers, some of which relate to the interpretation of
 the regular expression inside.  These are:
 
-    i   Do case-insensitive pattern matching.
-    m   Treat string as multiple lines.
-    s   Treat string as single line.
-    x   Extend your pattern's legibility with whitespace and comments.
+=over 4
+
+=item i
+
+Do case-insensitive pattern matching.
+
+=item m   
+
+Treat string as multiple lines.  That is, change "^" and "$" from matching
+only at the very start or end of the string to the start or end of any
+line anywhere within the string,
+
+=item s   
+
+Treat string as single line.  That is, change "." to match any character
+whatsoever, even a newline, which it normally would not match.
+
+=item x   
+
+Extend your pattern's legibility by permitting whitespace and comments.
+
+=back
 
 These are usually written as "the C</x> modifier", even though the delimiter
 in question might not actually be a slash.  In fact, any of these
@@ -24,13 +42,15 @@ modifiers may also be embedded within the regular expression itself using
 the new C<(?...)> construct.  See below.
 
 The C</x> modifier itself needs a little more explanation.  It tells
-the regular expression parser to ignore whitespace that is not
-backslashed or within a character class.  You can use this to break up
+the regular expression parser to ignore whitespace that is neither
+backslashed nor within a character class.  You can use this to break up
 your regular expression into (slightly) more readable parts.  The C<#>
 character is also treated as a metacharacter introducing a comment,
-just as in ordinary Perl code.  Taken together, these features go a
-long way towards making Perl 5 a readable language.  See the C comment
-deletion code in L<perlop>.
+just as in ordinary Perl code.  This also means that if you want real
+whitespace or C<#> characters in the pattern that you'll have to either
+escape them or encode them using octal or hex escapes.  Taken together,
+these features go a long way towards making Perl's regular expressions
+more readable.  See the C comment deletion code in L<perlop>.
 
 =head2 Regular Expressions
 
@@ -63,7 +83,7 @@ on the pattern match operator.  (Older programs did this by setting C<$*>,
 but this practice is deprecated in Perl 5.)
 
 To facilitate multi-line substitutions, the "." character never matches a
-newline unless you use the C</s> modifier, which tells Perl to pretend
+newline unless you use the C</s> modifier, which in effect tells Perl to pretend
 the string is a single line--even if it isn't.  The C</s> modifier also
 overrides the setting of C<$*>, in case you have some (badly behaved) older
 code that sets it in another module.

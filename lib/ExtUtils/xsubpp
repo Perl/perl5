@@ -76,7 +76,7 @@ perl(1), perlxs(1), perlxstut(1), perlxs(1)
 =cut
 
 # Global Constants
-$XSUBPP_version = "1.938";
+$XSUBPP_version = "1.939";
 require 5.002;
 use vars '$cplusplus';
 
@@ -741,7 +741,9 @@ while (fetch_para()) {
 	$XSStack[$XSS_work_idx]{varname} = $cpp_next_tmp++;
     }
 
-    death ("Code is not inside a function")
+    death ("Code is not inside a function"
+	   ." (maybe last function was ended by a blank line "
+	   ." followed by a a statement on column one?)")
 	if $line[0] =~ /^\s/;
 
     # initialize info arrays

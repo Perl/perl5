@@ -845,7 +845,9 @@ EXPR is parsed and executed as if it were a little Perl program.  It
 is executed in the context of the current Perl program, so that any
 variable settings, subroutine or format definitions remain afterwards.
 The value returned is the value of the last expression evaluated, or a
-return statement may be used, just as with subroutines.
+return statement may be used, just as with subroutines.  The last
+expression is evaluated in scalar or array context, depending on the
+context of the eval.
 
 If there is a syntax error or runtime error, or a die() statement is
 executed, an undefined value is returned by eval(), and C<$@> is set to the
@@ -898,8 +900,10 @@ instead, as in case 6.
 
 =item exec LIST
 
-The exec() function executes a system command I<AND NEVER RETURNS>.  Use
-the system() function if you want it to return.
+The exec() function executes a system command I<AND NEVER RETURNS>,
+unless the command does not exist and is executed directly instead of
+via C</bin/sh -c> (see below).  Use system() instead of exec() if you
+want it to return.
 
 If there is more than one argument in LIST, or if LIST is an array with
 more than one value, calls execvp(3) with the arguments in LIST.  If
@@ -1446,6 +1450,21 @@ function.  Here's a descending numeric sort of a hash by its values:
     foreach $key (sort { $hash{$b} <=> $hash{$a} } keys %hash)) {
 	printf "%4d %s\n", $hash{$key}, $key;
     }
+
+As an lvalue C<keys> allows you to increase the number of hash buckets
+allocated for the given associative array.  This can gain you a measure
+of efficiency if you know the hash is going to get big.  (This is
+similar to pre-extending an array by assigning a larger number to
+$#array.)  If you say
+
+    keys %hash = 200;
+
+then C<%hash> will have at least 200 buckets allocated for it.  These
+buckets will be retained even if you do C<%hash = ()>, use C<undef
+%hash> if you want to free the storage while C<%hash> is still in scope.
+You can't shrink the number of buckets allocated for the hash using
+C<keys> in this way (but you needn't worry about doing this by accident,
+as trying has no effect).
 
 =item kill LIST
 
@@ -2653,6 +2672,13 @@ but if you're in the C<FooPack> package, it's
 
     @articles = sort {$FooPack::b <=> $FooPack::a} @files;
 
+The comparison function is required to behave.  If it returns
+inconsistent results (sometimes saying $x[1] is less than $x[2] and
+sometimes saying the opposite, for example) the Perl interpreter will
+probably crash and dump core.  This is entirely due to and dependent
+upon your system's qsort(3) library routine; this routine often avoids
+sanity checks in the interest of speed.
+
 =item splice ARRAY,OFFSET,LENGTH,LIST
 
 =item splice ARRAY,OFFSET,LENGTH
@@ -3236,7 +3262,9 @@ call into the "Module" package to tell the module to import the list of
 features back into the current package.  The module can implement its
 import method any way it likes, though most modules just choose to
 derive their import method via inheritance from the Exporter class that
-is defined in the Exporter module. See L<Exporter>.
+is defined in the Exporter module. See L<Exporter>.  If no import
+method can be found then the error is currently silently ignored. This
+may change to a fatal error in a future version.
 
 If you don't want your namespace altered, explicitly supply an empty list:
 
@@ -3268,6 +3296,8 @@ by use, i.e. it calls C<unimport Module LIST> instead of C<import>.
 
     no integer;
     no strict 'refs';
+
+If no unimport method can be found the call fails with a fatal error.
 
 See L<perlmod> for a list of standard modules and pragmas.
 

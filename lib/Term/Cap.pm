@@ -195,11 +195,8 @@ sub Tgetent { ## public -- static method
 		last;
 	    }
 	}
-        if (defined $entry) {
-          $entry .= $_;
-        } else {
-          $entry = $_;
-        }
+	defined $entry or $entry = '';
+	$entry .= $_;
     };
 
     while ($state != 0) {

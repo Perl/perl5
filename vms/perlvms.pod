@@ -238,6 +238,7 @@ directory specifications may use either VMS or Unix syntax.
 
 Perl for VMS supports redirection of input and output on the 
 command line, using a subset of Bourne shell syntax:
+
     <F<file> reads stdin from F<file>,
     >F<file> writes stdout to F<file>,
     >>F<file> appends stdout to F<file>,
@@ -260,6 +261,8 @@ VMS than described in L<perlrun>.  Note also that in order
 to pass uppercase switches to Perl, you need to enclose
 them in double-quotes on the command line, since the CRTL
 downcases all unquoted strings.
+
+=over 4
 
 =item -i
 
@@ -285,6 +288,8 @@ a type of F<.pl>, and a type of F<.com>, in that order.
 The C<-u> switch causes the VMS debugger to be invoked
 after the Perl program is compiled, but before it has
 run.  It does not create a core dump file.
+
+=back
 
 =head1 Perl functions
 
@@ -337,6 +342,7 @@ your copy of Perl:
     getsockopt, listen, recv, select(system call)*,
     send, setsockopt, shutdown, socket
 
+=over 4
 
 =item File tests
 
@@ -605,7 +611,16 @@ and you invoked Perl with the C<-w> switch, a warning will be issued.)
 
 The FLAGS argument is ignored in all cases.
 
+=back
+
 =head1 Perl variables
+
+The following VMS-specific information applies to the indicated
+"special" Perl variables, in addition to the general information
+in L<perlvar>.  Where there is a conflict, this infrmation
+takes precedence.
+
+=over 4
 
 =item %ENV 
 
@@ -698,6 +713,8 @@ Setting C<$|> for an I/O stream causes data to be flushed
 all the way to disk on each write (I<i.e.> not just to
 the underlying RMS buffers for a file).  In other words,
 it's equivalent to calling fflush() and fsync() from C.
+
+=back
 
 =head1 Revision date
 

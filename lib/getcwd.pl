@@ -44,9 +44,9 @@ sub getcwd
 		}
 		unless (@tst = lstat("$dotdots/$dir"))
 		{
-		    warn "lstat($dotdots/$dir): $!";
-		    closedir(getcwd'PARENT);				#');
-		    return '';
+		    # warn "lstat($dotdots/$dir): $!";
+		    # closedir(getcwd'PARENT);				#');
+		    # return '';
 		}
 	    }
 	    while ($dir eq '.' || $dir eq '..' || $tst[$[] != $pst[$[] ||

@@ -53,8 +53,11 @@ reference that the backslash returned.  Here are some examples:
     $arrayref  = \@ARGV;
     $hashref   = \%ENV;
     $coderef   = \&handler;
-    $globref   = \*STDOUT;
+    $globref   = \*foo;
 
+It isn't possible to create a reference to a filehandle using the
+backslash operator.  See the explanation of the *foo{THING} syntax
+below.
 
 =item 2.
 
@@ -188,21 +191,36 @@ talked about dereferencing yet, we can't show you any examples yet.
 
 =item 7.
 
-References to filehandles can be created by taking a reference to 
-a typeglob.  This is currently the best way to pass filehandles into or
-out of subroutines, or to store them in larger data structures.
+A reference can be created by using a special syntax, lovingly known as
+the *foo{THING} syntax.  *foo{THING} returns a reference to the THING
+slot in *foo (which is the symbol table entry which holds everything
+known as foo).
 
-    splutter(\*STDOUT);
+    $scalarref = *foo{SCALAR};
+    $arrayref  = *ARGV{ARRAY};
+    $hashref   = *ENV{HASH};
+    $coderef   = *handler{CODE};
+    $fhref     = *STDIN{FILEHANDLE};
+    $globref   = *foo{GLOB};
+
+Using *foo{FILEHANDLE} is the best way to pass filehandles into or out
+of subroutines, or to store them in larger data structures.
+
+    splutter(*STDOUT{FILEHANDLE});
     sub splutter {
 	my $fh = shift;
 	print $fh "her um well a hmmm\n";
     }
 
-    $rec = get_rec(\*STDIN);
+    $rec = get_rec(*STDIN{FILEHANDLE});
     sub get_rec {
 	my $fh = shift;
 	return scalar <$fh>;
     }
+
+The best way to do this used to be to use the entire *foo typeglob (or a
+reference to it), so you'll probably come accross old code which does it
+that way.
 
 =back
 

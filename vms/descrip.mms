@@ -65,7 +65,7 @@ OBJVAL = $(MMS$TARGET_NAME)$(O)
 .endif
 
 # Updated by fndvers.com -- do not edit by hand
-PERL_VERSION = 5_00305#
+PERL_VERSION = 5_00307#
 
 
 ARCHDIR =  [.lib.$(ARCH).$(PERL_VERSION)]
@@ -94,6 +94,7 @@ XTRADEF = ,GNUC_ATTRIBUTE_CHECK
 XTRAOBJS =
 LIBS1 = GNU_CC:[000000]GCCLIB.OLB/Library
 LIBS2 = Sys$Share:VAXCRTL/Shareable
+POSIX =
 .else
 XTRAOBJS = 
 LIBS1 = $(XTRAOBJS)
@@ -117,6 +118,7 @@ DBGSPECFLAGS = /Show=(Source,Include,Expansion)
 LIBS2 = 
 XTRACCFLAGS = /Include=[]/Standard=Relaxed_ANSI/Prefix=All/Obj=$(OBJVAL)
 XTRADEF =
+POSIX = POSIX
 .else # VAXC
 .first
 	@ @[.vms]fndvers.com "" "" "[.vms]descrip.mms"
@@ -126,6 +128,7 @@ XTRADEF =
 XTRACCFLAGS = /Include=[]/Object=$(O)
 XTRADEF =
 LIBS2 = Sys$Share:VAXCRTL/Shareable
+POSIX =
 .endif
 .endif
 
@@ -267,7 +270,7 @@ all : base extras libmods utils podxform archcorefiles preplibrary perlpods
 	@ $(NOOP)
 base : miniperl perl
 	@ $(NOOP)
-extras : Fcntl FileHandle IO Opcode libmods utils podxform
+extras : Fcntl FileHandle IO Opcode $(POSIX) libmods utils podxform
 	@ $(NOOP)
 libmods : [.lib]Config.pm $(ARCHDIR)Config.pm [.lib]DynaLoader.pm [.lib.VMS]Filespec.pm 
 	@ $(NOOP)
@@ -438,6 +441,25 @@ Fcntl : [.lib]Fcntl.pm [.lib.auto.Fcntl]Fcntl$(E)
 # ${@} necessary to distract different versions of MM[SK]/make
 [.ext.Fcntl]Descrip.MMS : [.ext.Fcntl]Makefile.PL $(ARCHDIR)Config.pm [.lib.VMS]Filespec.pm [.lib]DynaLoader.pm $(DBG)perlshr$(E)
 	$(MINIPERL) "-I[--.lib]" -e "chdir('[.ext.Fcntl]') or die $!; do 'Makefile.PL'; print ${@} if ${@};" "INST_LIB=[--.lib]" "INST_ARCHLIB=[--.lib]"
+
+POSIX : [.lib]POSIX.pm [.lib.auto.POSIX]POSIX$(E)
+	@ $(NOOP)
+
+[.lib]POSIX.pm : [.ext.POSIX]Descrip.MMS
+	@ If F$Search("[.lib]auto.dir").eqs."" Then Create/Directory [.lib.auto]
+	@ Set Default [.ext.POSIX]
+	$(MMS)
+	@ Set Default [--]
+
+[.lib.auto.POSIX]POSIX$(E) : [.ext.POSIX]Descrip.MMS
+	@ Set Default [.ext.POSIX]
+	$(MMS)
+	@ Set Default [--]
+
+# Add "-I[--.lib]" t $(MINIPERL) so we use this copy of lib after C<chdir>
+# ${@} necessary to distract different versions of MM[SK]/make
+[.ext.POSIX]Descrip.MMS : [.ext.POSIX]Makefile.PL $(ARCHDIR)Config.pm [.lib.VMS]Filespec.pm [.lib]DynaLoader.pm $(DBG)perlshr$(E)
+	$(MINIPERL) "-I[--.lib]" -e "chdir('[.ext.POSIX]') or die $!; do 'Makefile.PL'; print ${@} if ${@};" "INST_LIB=[--.lib]" "INST_ARCHLIB=[--.lib]"
 
 IO : [.lib]IO.pm [.lib.IO]File.pm [.lib.IO]Handle.pm [.lib.IO]Pipe.pm [.lib.IO]Seekable.pm [.lib.IO]Socket.pm [.lib.auto.IO]IO$(E)
 	@ $(NOOP)
@@ -1585,6 +1607,11 @@ clean : tidy
 	Set Default [.ext.Opcode]
 	- $(MMS) clean
 	Set Default [--]
+.ifdef DECC
+	Set Default [.ext.POSIX]
+	- $(MMS) clean
+	Set Default [--]
+.endif
 	- If F$Search("*.Opt").nes."" Then Delete/NoConfirm/Log *.Opt;*/Exclude=PerlShr_*.Opt
 	- If F$Search("*$(O);*") .nes."" Then Delete/NoConfirm/Log *$(O);*
 	- If F$Search("Config.H").nes."" Then Delete/NoConfirm/Log Config.H;*
@@ -1618,6 +1645,11 @@ realclean : clean
 	Set Default [.ext.Opcode]
 	- $(MMS) realclean
 	Set Default [--]
+.ifdef DECC
+	Set Default [.ext.POSIX]
+	- $(MMS) realclean
+	Set Default [--]
+.endif
 	- If F$Search("*$(OLB)").nes."" Then Delete/NoConfirm/Log *$(OLB);*
 	- If F$Search("*.Opt").nes."" Then Delete/NoConfirm/Log *.Opt;*
 	- $(MINIPERL) -e "use File::Path; rmtree(['lib/auto','lib/VMS','lib/$(ARCH)'],1,0);"

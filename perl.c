@@ -524,7 +524,7 @@ setuid perl scripts securely.\n");
     else if (scriptname == Nullch) {
 #ifdef MSDOS
 	if ( isatty(PerlIO_fileno(PerlIO_stdin())) )
-	    moreswitches("v");
+	    moreswitches("h");
 #endif
 	scriptname = "-";
     }
@@ -1299,7 +1299,10 @@ char *s;
 	printf("\n\nCopyright 1987-1996, Larry Wall\n");
 	printf("\n\t+ suidperl security patch");
 #ifdef MSDOS
-	printf("MS-DOS port Copyright (c) 1989, 1990, Diomidis Spinellis\n");
+	printf("\n\nMS-DOS port Copyright (c) 1989, 1990, Diomidis Spinellis\n");
+#endif
+#ifdef DJGPP
+	printf("djgpp v2 port (jpl5003c) by Hirofumi Watanabe, 1996\n");
 #endif
 #ifdef OS2
 	printf("\n\nOS/2 port Copyright (c) 1990, 1991, Raymond Chen, Kai Uwe Rommel\n"
@@ -1311,9 +1314,6 @@ char *s;
 	printf("\n\
 Perl may be copied only under the terms of either the Artistic License or the\n\
 GNU General Public License, which may be found in the Perl 5.0 source kit.\n\n");
-#ifdef MSDOS
-        usage(origargv[0]);
-#endif
 	exit(0);
     case 'w':
 	dowarn = TRUE;

@@ -35,7 +35,7 @@ CONFIG: {
 sub Complete {
     package Complete;
 
-    local($[,$return) = 0;
+    local($prompt, @cmp_list, $return, @match, $l, $test, $cmp, $r);
     if ($_[1] =~ /^StB\0/) {
         ($prompt, *_) = @_;
     }

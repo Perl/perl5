@@ -8,7 +8,7 @@ sigtrap - Perl pragma to enable simple signal handling
 
 use Carp;
 
-$VERSION = 1.01;
+$VERSION = 1.02;
 $Verbose ||= 0;
 
 sub import {
@@ -29,13 +29,16 @@ sub import {
 	    }
 	}
 	elsif ($_ eq 'normal-signals') {
-	    unshift @_, qw(HUP INT PIPE TERM);
+	    unshift @_, grep(exists $SIG{$_}, qw(HUP INT PIPE TERM));
 	}
 	elsif ($_ eq 'error-signals') {
-	    unshift @_, qw(ABRT BUS EMT FPE ILL QUIT SEGV SYS TRAP);
+	    unshift @_, grep(exists $SIG{$_},
+			     qw(ABRT BUS EMT FPE ILL QUIT SEGV SYS TRAP));
 	}
 	elsif ($_ eq 'old-interface-signals') {
-	    unshift @_, qw(ABRT BUS EMT FPE ILL PIPE QUIT SEGV SYS TERM TRAP);
+	    unshift @_,
+	    grep(exists $SIG{$_},
+		 qw(ABRT BUS EMT FPE ILL PIPE QUIT SEGV SYS TERM TRAP));
 	}
     	elsif ($_ eq 'stack-trace') {
 	    $handler = \&handler_traceback;
@@ -204,9 +207,14 @@ QUIT, SEGV, SYS and TRAP.
 These are the signals which were trapped by default by the old
 B<sigtrap> interface, they are ABRT, BUS, EMT, FPE, ILL, PIPE, QUIT,
 SEGV, SYS, TERM, and TRAP.  If no signals or signals lists are passed to
-B<sigtrap> this list is used.
+B<sigtrap>, this list is used.
 
 =back
+
+For each of these three lists, the collection of signals set to be
+trapped is checked before trapping; if your architecture does not
+implement a particular signal, it will not be trapped but rather
+silently ignored.
 
 =head2 OTHER
 

@@ -8,6 +8,157 @@ or in the .../src/5/0/unsupported directory for sub-version
 releases.)
 
 ----------------
+Version 5.003_08
+----------------
+
+This patch was a compendium of various fixes and enhancements from
+many people.  Here are some of the more significant changes.
+
+
+ CORE LANGUAGE CHANGES
+
+  Title:  "Make C<no FOO> fail if C<unimport FOO> fails"
+   From:  Tim Bunce <Tim.Bunce@ig.co.uk>
+  Files:  gv.c
+
+  Title:  "Bitwise op sign rationalization"
+          (Make bitwise ops result in unsigned values, unless C<use
+          integer> is in effect.  Includes initial support for UVs.)
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  op.c opcode.pl pod/perlop.pod pod/perltoc.pod pp.c pp.h
+          pp_hot.c proto.h sv.c t/op/bop.t
+
+  Title:  "Defined scoping for C<my> in control structures"
+          (Finally defines semantics of "my" in control expressions,
+          like the condition of "if" and "while".  In all cases, scope
+          of a "my" var extends to the end of the entire control
+          structure.  Also adds new construct "for my", which
+          automatically declares the control variable "my" and limits
+          its scope to the loop.)
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  op.c perly.c perly.c.diff perly.h perly.y proto.h toke.c
+
+  Title:  "Fix ++/-- after int conversion (e.g. 'printf "%d"')"
+          (This patch makes Perl correctly ignore SvIVX() if either
+          NOK or POK is true, since SvIVX() may be a truncated or
+          overflowed version of the real value.)
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  pp.c pp_hot.c sv.c
+
+  Title:  "Make code match Camel II re: functions that use $_"
+   From:  pmarquess@bfsec.bt.co.uk (Paul Marquess)
+  Files:  opcode.pl
+
+  Title:  "Provide scalar context on left side of "->""
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  perly.c perly.y
+
+  Title:  "Quote bearword package/handle FOO in "funcname FOO => 'bar'""
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  toke.c
+
+
+ OTHER CORE CHANGES
+
+  Title:  "Warn on overflow of octal and hex integers"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  proto.h toke.c util.c
+
+  Title:  "If -w active, warn for commas and hashes ('#') in qw()"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  toke.c
+
+  Title:  "Fixes for pack('w')"
+   From:  Ulrich Pfeifer <pfeifer@charly.informatik.uni-dortmund.de>
+  Files:  pp.c t/op/pack.t
+
+  Title:  "More complete output from sv_dump()"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+  Files:  sv.c
+
+  Title:  "Major '..' and debugger patches"
+   From:  Ilya Zakharevich <ilya@math.ohio-state.edu>
+  Files:  lib/perl5db.pl op.c pp_ctl.c scope.c scope.h
+
+  Title:  "Fix for formline()"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+  Files:  global.sym mg.c perl.h pod/perldiag.pod pp_ctl.c proto.h sv.c
+          t/op/write.t
+
+  Title:  "Fix stack botch in untie and binmode"
+   From:  Gurusamy Sarathy <gsar@engin.umich.edu>
+  Files:  pp_sys.c
+
+  Title:  "Complete EMBED, including symbols from interp.sym"
+          (New define EMBEDMYMALLOC makes embedding total by
+          avoiding "Mymalloc" etc.)
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  MANIFEST embed.pl ext/DynaLoader/dlutils.c
+          ext/SDBM_File/sdbm/sdbm.h global.sym handy.h malloc.c
+          perl.h pp_sys.c proto.h regexec.c toke.c util.c
+          x2p/Makefile.SH x2p/a2p.h x2p/handy.h x2p/util.h
+
+  Title:  "Support old embedding for people who want it"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  MANIFEST Makefile.SH old_embed.pl old_global.sym
+
+
+ PORTABILITY
+
+  Title:  "Miscellaneous VMS fixes"
+   From:  Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>
+  Files:  lib/ExtUtils/Liblist.pm lib/ExtUtils/MM_VMS.pm
+          lib/Math/Complex.pm lib/Time/Local.pm lib/timelocal.pl
+          perl.h perl_exp.SH proto.h t/TEST t/io/read.t
+          t/lib/findbin.t t/lib/getopt.t util.c utils/h2xs.PL
+          vms/Makefile vms/config.vms vms/descrip.mms
+          vms/ext/Stdio/Stdio.pm vms/ext/Stdio/Stdio.xs
+          vms/perlvms.pod vms/test.com vms/vms.c
+
+  Title:  "DJGPP patches (MS-DOS)"
+   From:  "Douglas E. Wegscheid" <wegscd@whirlpool.com>
+  Files:  doio.c dosish.h ext/SDBM_File/sdbm/sdbm.c handy.h
+          lib/AutoSplit.pm lib/Cwd.pm lib/File/Find.pm malloc.c perl.c
+          perl.h pp_sys.c proto.h sv.c util.c
+
+  Title:  "Plan 9 update"
+   From:  Luther Huffman <lutherh@infinet.com>
+  Files:  plan9/buildinfo plan9/config.plan9 plan9/exclude
+          plan9/genconfig.pl plan9/mkfile plan9/setup.rc
+
+  Title:  "Patch to make Perl work under AmigaOS"
+   From:  "Norbert Pueschel" <pueschel@imsdd.meb.uni-bonn.de>
+  Files:  MANIFEST hints/amigaos.sh installman lib/File/Basename.pm
+          lib/File/Find.pm pod/pod2man.PL pp_sys.c util.c
+
+ LIBRARY AND EXTENSIONS
+
+  Title:  "DB_File 1.05"
+   From:  Paul Marquess (pmarquess@bfsec.bt.co.uk)
+  Files:  ext/DB_File/DB_File.pm ext/DB_File/DB_File.xs t/lib/db-hash.t
+
+  Title:  "Getopts::Std patch for hash support"
+   From:  Stephen Zander <stephen.zander@interlock.mckesson.com>
+  Files:  lib/Getopt/Std.pm
+
+  Title:  "Kludge for bareword handles"
+          (Add 'require IO::Handle' at beginning of FileHandle.pm)
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  ext/FileHandle/FileHandle.pm
+
+  Title:  "Re: strtod / strtol patch for POSIX module"
+   From:  hammen@gothamcity.jsc.nasa.gov (David Hammen)
+  Files:  Configure config_h.SH ext/POSIX/POSIX.pm ext/POSIX/POSIX.pod
+          ext/POSIX/POSIX.xs t/lib/posix.t
+
+ BUNDLED UTILITIES
+
+  Title:  "Fix a2p translation of '{print "a" "b" "c"}'"
+   From:  Chip Salzenberg <chip@atlantic.net>
+  Files:  x2p/a2p.c x2p/a2p.y
+
+
+----------------
 Version 5.003_07
 ----------------
 

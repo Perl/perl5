@@ -144,9 +144,12 @@ Cf. L<Prerequisites>.
 
 =item B<EMX>
 
-B<EMX> runtime is required. Note that it is possible to make F<perl_.exe>
-to run under DOS without any external support by binding F<emx.exe> to
-it, see L<emxbind>.
+B<EMX> runtime is required (may be substituted by B<RSX>). Note that
+it is possible to make F<perl_.exe> to run under DOS without any
+external support by binding F<emx.exe> to it, see L<emxbind>. Note
+that under DOS for best results one should use B<RSX> runtime, which
+has much more functions working (like C<fork>, C<popen> and so on). In
+fact B<RSX> is required if there is no C<VCPI> present.
 
 Only the latest runtime is supported, currently C<0.9c>.
 
@@ -161,7 +164,13 @@ The runtime component should have the name F<emxrt.zip>.
 
 To run Perl on C<DPMS> platforms one needs B<RSX> runtime. This is
 needed under DOS-inside-OS/2, Win0.31, Win0.95 and WinNT (see 
-L<"Other OSes">).
+L<"Other OSes">). I do not know whether B<RSX> would work with C<VCPI>
+only, as B<EMX> would.
+
+Having B<RSX> and the latest F<sh.exe> one gets a fully functional
+B<*nix>-ish environment under DOS, say, C<fork>, C<``> and
+pipe-C<open> work. In fact, MakeMaker works (for static build), so one
+can have Perl development environment under DOS. 
 
 One can get B<RSX> from, say
 
@@ -169,6 +178,10 @@ One can get B<RSX> from, say
   ftp://ftp.uni-bielefeld.de/pub/systems/msdos/misc
 
 Contact the author on C<rainer@mathematik.uni-bielefeld.de>.
+
+The latest F<sh.exe> with DOS hooks is available at
+
+  ftp://ftp.math.ohio-state.edu/pub/users/ilya/os2/sh_dos.exe
 
 =item B<HPFS>
 
@@ -254,8 +267,21 @@ meta-characters.
 
 =head2 I cannot run extenal programs
 
+=over 4
+
+=item
+
 Did you run your programs with C<-w> switch? See 
 L<Starting OS/2 programs under Perl>.
+
+=item
+
+Do you try to run I<internal> shell commands, like C<`copy a b`>
+(internal for F<cmd.exe>), or C<`glob a*b`> (internal for ksh)? You
+need to specify your shell explicitely, like C<`cmd /c copy a b`>,
+since Perl cannot deduce which commands are internal to your shell.
+
+=back
 
 =head2 I cannot embed perl into my program, or use F<perl.dll> from my
 program. 
@@ -272,6 +298,16 @@ did it once. Sockets would not work, as a lot of other stuff.
 I had reports it does not work. Somebody would need to fix it.
 
 =back
+
+=head2 C<``> and pipe-C<open> do not work under DOS.
+
+This may a variant of just L<"I cannot run extenal programs">, or a
+deeper problem. Basically: you I<need> B<RSX> (see L<"Prerequisites">)
+for these commands to work, and you need a port of F<sh.exe> which
+understands command arguments. One of such ports is listed in
+L<"Prerequisites"> under B<RSX>.
+
+I do not know whether C<DPMI> is required.
 
 =head1 INSTALLATION
 
@@ -674,7 +710,7 @@ Now run
 
   make test
 
-Some tests (4..6) should fail. Some perl invocations should end in a
+Some tests (5..7) should fail. Some perl invocations should end in a
 segfault (system error C<SYS3175>). To get finer error reports, 
 
   cd t
@@ -692,7 +728,8 @@ The report you get may look like
 
 Note that using `make test' target two more tests may fail: C<op/exec:1>
 because of (mis)feature of C<pdksh>, and C<lib/posix:15>, which checks
-that the buffers are not flushed on C<_exit>.
+that the buffers are not flushed on C<_exit> (this is a bug in the test
+which assumes that tty output is buffered).
 
 The reasons for failed tests are:
 
@@ -961,8 +998,22 @@ eventually).
 
 =item
 
-Since <lockf> is present in B<EMX>, but is not functional, the same is
-true for perl.
+Since <flock> is present in B<EMX>, but is not functional, the same is
+true for perl. Here is the list of things which may be "broken" on
+EMX (from EMX docs):
+
+  - The functions recvmsg(), sendmsg(), and socketpair() are not
+    implemented.
+  - sock_init() is not required and not implemented.
+  - flock() is not yet implemented (dummy function).
+  - kill:
+      Special treatment of PID=0, PID=1 and PID=-1 is not implemented.
+  - waitpid:
+      WUNTRACED
+	      Not implemented.
+      waitpid() is not implemented for negative values of PID.
+
+Note that C<kill -9> does not work with the current version of EMX.
 
 =item
 
@@ -971,6 +1022,36 @@ of F<sh.exe> plague perl as well.
 
 In particular, uppercase letters do not work in C<[...]>-patterns with
 the current C<pdksh>.
+
+=back
+
+=head2 Modifications
+
+Perl modifies some standard C library calls in the following ways:
+
+=over 9
+
+=item C<popen>
+
+C<my_popen> always uses F<sh.exe>, cf. L<"PERL_SH_DIR">.
+
+=item C<tmpnam>
+
+is created using C<TMP> or C<TEMP> environment variable, via
+C<tempnam>.
+
+=item C<tmpfile>
+
+If the current directory is not writable, it is created using modified
+C<tmpnam>, so there may be a race condition.
+
+=item C<ctermid>
+
+a dummy implementation.
+
+=item C<stat>
+
+C<os2_stat> special-cases F</dev/tty> and F</dev/con>.
 
 =back
 

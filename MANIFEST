@@ -202,6 +202,7 @@ hints/README.NeXT	Notes about NeXT hints.
 hints/README.hints	Notes about hints.
 hints/aix.sh		Hints for named architecture
 hints/altos486.sh	Hints for named architecture
+hints/amigaos.sh	Hints for named architecture
 hints/apollo.sh		Hints for named architecture
 hints/aux.sh		Hints for named architecture
 hints/bsdos.sh		Hints for named architecture
@@ -386,6 +387,8 @@ miniperlmain.c		Basic perl w/o dynamic loading or extensions
 mv-if-diff		Script to mv a file if it changed
 myconfig		Prints summary of the current configuration
 nostdio.h		Cause compile error on stdio calls
+old_embed.pl		Produces embed.h using old_global.sym
+old_global.sym		Old list of symbols to hide when embedded
 op.c			Opcode syntax tree code
 op.h			Opcode syntax tree header
 opcode.h		Automatically generated opcode header
@@ -708,7 +711,6 @@ x2p/a2p.y		A yacc grammer for awk
 x2p/a2py.c		Awk compiler, sort of
 x2p/cflags.SH		A script that emits C compilation flags per file
 x2p/find2perl.PL	A find to perl translator
-x2p/handy.h		Handy definitions
 x2p/hash.c		Associative arrays again
 x2p/hash.h		Public declarations for the above
 x2p/s2p.PL		Sed to perl translator

@@ -80,7 +80,7 @@ linkage specified in the HASH.
 The command line options are taken from array @ARGV. Upon completion
 of GetOptions, @ARGV will contain the rest (i.e. the non-options) of
 the command line.
- 
+
 Each option specifier designates the name of the option, optionally
 followed by an argument specifier. Values for argument specifiers are:
 

@@ -49,6 +49,8 @@ perl5.def: perl.linkexp
 	echo '  "dlsym"'				>>$@
 	echo '  "dlerror"'				>>$@
 	echo '  "perl_init_i18nl10n"'			>>$@
+	echo '  "my_tmpfile"'				>>$@
+	echo '  "my_tmpnam"'				>>$@
 !NO!SUBS!
 
 if [ ! -z "$myttyname" ] ; then

@@ -13,8 +13,9 @@
 #	Martijn Koster <m.koster@webcrawler.com>
 #	Richard Yeh <rcyeh@cco.caltech.edu>
 #
-# File::Find's use of link count disabled by Dominic Dunlop 950528
-# Perl's use of sigsetjmp etc. disabled by Dominic Dunlop 950521
+# Do not use perl's malloc; SysV IPC OK -- Neil Cutcliffe, Tenon 961030
+# File::Find's use of link count disabled by Dominic Dunlop 960528
+# Perl's use of sigsetjmp etc. disabled by Dominic Dunlop 960521
 #
 # Comments, questions, and improvements welcome!
 #
@@ -22,10 +23,19 @@
 # know how to use it yet.
 #
 #  Updated by Dominic Dunlop <domo@tcp.ip.lu>
-#  Tue May 28 11:20:08 WET DST 1996
+#  Wed Nov 13 11:47:09 WET 1996
+
+
+# Power MachTen is a real memory system and its standard malloc
+# has been optimized for this. Using this malloc instead of Perl's
+# malloc may result in significant memory savings.
+usemymalloc='false'
 
 # Configure doesn't know how to parse the nm output.
 usenm=undef
+
+# Install in /usr/local by default
+prefix='/usr/local'
 
 # At least on PowerMac, doubles must be aligned on 8 byte boundaries.
 # I don't know if this is true for all MachTen systems, or how to
@@ -60,16 +70,3 @@ Hmm...You had some extra variables I don't know about...I'll try to keep 'em.
 Read the File::Find documentation for more information.
 
 EOM
-
-# Date: Wed, 18 Sep 1996 11:29:40 +0200
-# From: Dominic Dunlop <domo@tcp.ip.lu>
-# Subject: Re: Perl 5.003 from ftp.tenon.com requires MT 4.0.3
-
-# MachTen 4.0.2 and earlier do not implement System V interprocess
-# communication (message queues, semaphores and shered memory); 4.0.3 has a
-# half-baked implementation which provides the corresponding library
-# functions but does not implement the system calls or provide the header
-# files (or documentation).  The perl installation process correctly divines
-# that System V IPC is not usable in either case.  Do not attempt to persuade
-# it otherwise, or the resulting perl will crash (rather than producing an
-# error message) if you attempt to use the functions.

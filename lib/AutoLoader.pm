@@ -95,10 +95,6 @@ subroutine may have a shorter name that the routine itself. This can lead to
 conflicting file names. The I<AutoSplit> package warns of these potential
 conflicts when used to split a module.
 
-Calling foo($1) for the autoloaded function foo() might not work as
-expected, because the AUTOLOAD function of B<AutoLoader> clobbers the
-regexp variables.  Invoking it as foo("$1") avoids this problem.
-
 =cut
 
 AUTOLOAD {

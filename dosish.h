@@ -1,10 +1,38 @@
 #define ABORT() abort();
 
-#define BIT_BUCKET "\dev\nul"
+#define SH_PATH "/bin/sh"
+
+#ifdef DJGPP
+#define BIT_BUCKET "nul"
+#define OP_BINARY O_BINARY
+void Perl_DJGPP_init();
+#define PERL_SYS_INIT(argcp, argvp) STMT_START {        \
+    Perl_DJGPP_init();    } STMT_END
+#else
 #define PERL_SYS_INIT(c,v)
+#define BIT_BUCKET "\dev\nul"
+#endif
+
 #define PERL_SYS_TERM()
 #define dXSUB_SYS int dummy
 #define TMPPATH "plXXXXXX"
+
+/*
+ * 5.003_07 and earlier keyed on #ifdef MSDOS for determining if we were 
+ * running on DOS, *and* if we had to cope with 16 bit memory addressing 
+ * constraints, *and* we need to have memory allocated as unsigned long.
+ *
+ * with the advent of *real* compilers for DOS, they are not locked together.
+ * MSDOS means "I am running on MSDOS". HAS_64K_LIMIT means "I have 
+ * 16 bit memory addressing constraints".
+ *
+ * if you need the last, try #DEFINE MEM_SIZE unsigned long.
+ */
+#ifdef MSDOS
+ #ifndef DJGPP
+  #define HAS_64K_LIMIT
+ #endif
+#endif
 
 /* USEMYBINMODE
  *	This symbol, if defined, indicates that the program should

@@ -140,7 +140,7 @@ sub main'syslog {
 
 sub xlate {
     local($name) = @_;
-    $name =~ y/a-z/A-Z/;
+    $name = uc $name;
     $name = "LOG_$name" unless $name =~ /^LOG_/;
     $name = "syslog'$name";
     eval(&$name) || -1;

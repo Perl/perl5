@@ -71,6 +71,8 @@ CONFIG: {
 }
 
 sub Complete {
+    my($prompt, @cmp_list, $return, @match, $l, $test, $cmp, $r);
+
     $prompt = shift;
     if (ref $_[0] || $_[0] =~ /^\*/) {
 	@cmp_lst = sort @{$_[0]};

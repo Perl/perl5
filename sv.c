@@ -1045,12 +1045,12 @@ unsigned long newlen;
 {
     register char *s;
 
-#ifdef MSDOS
+#ifdef HAS_64K_LIMIT
     if (newlen >= 0x10000) {
 	PerlIO_printf(Perl_debug_log, "Allocation too large: %lx\n", newlen);
 	my_exit(1);
     }
-#endif /* MSDOS */
+#endif /* HAS_64K_LIMIT */
     if (SvROK(sv))
 	sv_unref(sv);
     if (SvTYPE(sv) < SVt_PV) {
@@ -1116,6 +1116,17 @@ IV i;
     (void)SvIOK_only(sv);			/* validate number */
     SvIVX(sv) = i;
     SvTAINT(sv);
+}
+
+void
+sv_setuv(sv,u)
+register SV *sv;
+UV u;
+{
+    if (u <= IV_MAX)
+	sv_setiv(sv, u);
+    else
+	sv_setnv(sv, (double)u);
 }
 
 void
@@ -1283,7 +1294,6 @@ register SV *sv;
 	    warn(warn_uninit);
 	return 0;
     }
-    (void)SvIOK_on(sv);
     DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2iv(%ld)\n",
 	(unsigned long)sv,(long)SvIVX(sv)));
     return SvIVX(sv);
@@ -2090,7 +2100,7 @@ I32 namlen;
 {
     MAGIC* mg;
     
-    if (SvREADONLY(sv) && curcop != &compiling && !strchr("gB", how))
+    if (SvREADONLY(sv) && curcop != &compiling && !strchr("gBf", how))
 	croak(no_modify);
     if (SvMAGICAL(sv) || (how == 't' && SvTYPE(sv) >= SVt_PVMG)) {
 	if (SvMAGIC(sv) && (mg = mg_find(sv, how))) {
@@ -2141,6 +2151,9 @@ I32 namlen;
 	break;
     case 'E':
 	mg->mg_virtual = &vtbl_env;
+	break;
+    case 'f':
+	mg->mg_virtual = &vtbl_fm;
 	break;
     case 'e':
 	mg->mg_virtual = &vtbl_envelem;
@@ -2954,14 +2967,18 @@ register SV *sv;
     if (SvGMAGICAL(sv))
 	mg_get(sv);
     flags = SvFLAGS(sv);
-    if (flags & SVp_IOK) {
-	(void)SvIOK_only(sv);
-	++SvIVX(sv);
+    if (flags & SVp_NOK) {
+	(void)SvNOK_only(sv);
+	SvNVX(sv) += 1.0;
 	return;
     }
-    if (flags & SVp_NOK) {
-	SvNVX(sv) += 1.0;
-	(void)SvNOK_only(sv);
+    if (flags & SVp_IOK) {
+	if (SvIVX(sv) == IV_MAX)
+	    sv_setnv(sv, (double)IV_MAX + 1.0);
+	else {
+	    (void)SvIOK_only(sv);
+	    ++SvIVX(sv);
+	}
 	return;
     }
     if (!(flags & SVp_POK) || !*SvPVX(sv)) {
@@ -3024,14 +3041,18 @@ register SV *sv;
     if (SvGMAGICAL(sv))
 	mg_get(sv);
     flags = SvFLAGS(sv);
-    if (flags & SVp_IOK) {
-	(void)SvIOK_only(sv);
-	--SvIVX(sv);
-	return;
-    }
     if (flags & SVp_NOK) {
 	SvNVX(sv) -= 1.0;
 	(void)SvNOK_only(sv);
+	return;
+    }
+    if (flags & SVp_IOK) {
+	if (SvIVX(sv) == IV_MIN)
+	    sv_setnv(sv, (double)IV_MIN - 1.0);
+	else {
+	    (void)SvIOK_only(sv);
+	    --SvIVX(sv);
+	}
 	return;
     }
     if (!(flags & SVp_POK)) {
@@ -3052,7 +3073,7 @@ register SV *sv;
 static void
 sv_mortalgrow()
 {
-    tmps_max += 128;
+    tmps_max += (tmps_max < 512) ? 128 : 512;
     Renew(tmps_stack, tmps_max, SV*);
 }
 
@@ -3681,8 +3702,27 @@ SV* sv;
       if (CvCLONE(sv))  strcat(d, "CLONE,");
       if (CvCLONED(sv)) strcat(d, "CLONED,");
       break;
+    case SVt_PVHV:
+      if (HvSHAREKEYS(sv))	strcat(d, "SHAREKEYS,");
+      if (HvLAZYDEL(sv))	strcat(d, "LAZYDEL,");
+      break;
     case SVt_PVGV:
-      if (GvMULTI(sv))	strcat(d, "MULTI,");
+      if (GvINTRO(sv))		strcat(d, "INTRO,");
+      if (GvMULTI(sv))		strcat(d, "MULTI,");
+      if (GvASSUMECV(sv))	strcat(d, "ASSUMECV,");
+      if (GvIMPORTED(sv)) {
+	  strcat(d, "IMPORT");
+	  if (GvIMPORTED(sv) == GVf_IMPORTED)
+	      strcat(d, "ALL,");
+	  else {
+	      strcat(d, "(");
+	      if (GvIMPORTED_SV(sv))	strcat(d, " SV");
+	      if (GvIMPORTED_AV(sv))	strcat(d, " AV");
+	      if (GvIMPORTED_HV(sv))	strcat(d, " HV");
+	      if (GvIMPORTED_CV(sv))	strcat(d, " CV");
+	      strcat(d, " ),");
+	  }
+      }
 #ifdef OVERLOAD
       if (flags & SVpgv_AM)	strcat(d, "withOVERLOAD,");
 #endif /* OVERLOAD */
@@ -3846,8 +3886,7 @@ SV* sv;
 	PerlIO_printf(Perl_debug_log, "    CVGEN = 0x%lx\n", (long)GvCVGEN(sv));
 	PerlIO_printf(Perl_debug_log, "    LASTEXPR = %ld\n", (long)GvLASTEXPR(sv));
 	PerlIO_printf(Perl_debug_log, "    LINE = %ld\n", (long)GvLINE(sv));
-	PerlIO_printf(Perl_debug_log, "    FLAGS = 0x%x\n", (int)GvFLAGS(sv));
-	PerlIO_printf(Perl_debug_log, "    STASH = \"%s\"\n", HvNAME(GvSTASH(sv)));
+	PerlIO_printf(Perl_debug_log, "    FILEGV = 0x%lx\n", (long)GvFILEGV(sv));
 	PerlIO_printf(Perl_debug_log, "    EGV = 0x%lx\n", (long)GvEGV(sv));
 	break;
     case SVt_PVIO:

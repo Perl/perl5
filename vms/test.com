@@ -137,6 +137,8 @@ while ($test = shift) {
 	close(script);
 	if (/#!..perl(.*)/) {
 	    $switch = $1;
+	    # Add "" to protect uppercase switches on command line
+	    $switch =~ s/-([A-Z]\S*)/"-$1"/g;
 	} else {
 	    $switch = '';
 	}

@@ -418,7 +418,7 @@ register GV *gv;
 		    (void)unlink(SvPVX(sv));
 		    (void)rename(oldname,SvPVX(sv));
 		    do_open(gv,SvPVX(sv),SvCUR(sv),FALSE,0,0,Nullfp);
-#endif /* MSDOS */
+#endif /* DOSISH */
 #else
 		    (void)UNLINK(SvPVX(sv));
 		    if (link(oldname,SvPVX(sv)) < 0) {
@@ -1057,7 +1057,7 @@ char *cmd;
     return FALSE;
 }
 
-#endif 
+#endif /* OS2 */
 
 I32
 apply(type,mark,sp)
@@ -1108,6 +1108,8 @@ register SV **sp;
 #ifdef HAS_KILL
     case OP_KILL:
 	TAINT_PROPER("kill");
+	if (mark == sp)
+	    break;
 	s = SvPVx(*++mark, na);
 	tot = sp - mark;
 	if (isUPPER(*s)) {
@@ -1258,7 +1260,7 @@ register struct stat *statbufp;
       */
      return (bit & statbufp->st_mode) ? TRUE : FALSE;
 
-#else /* ! MSDOS */
+#else /* ! DOSISH */
     if ((effective ? euid : uid) == 0) {	/* root is special */
 	if (bit == S_IXUSR) {
 	    if (statbufp->st_mode & 0111 || S_ISDIR(statbufp->st_mode))
@@ -1279,7 +1281,7 @@ register struct stat *statbufp;
     else if (statbufp->st_mode & bit >> 6)
 	return TRUE;	/* ok as "other" */
     return FALSE;
-#endif /* ! MSDOS */
+#endif /* ! DOSISH */
 }
 #endif /* ! VMS */
 

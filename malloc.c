@@ -145,6 +145,79 @@ static u_int start_slack;
 #  define M_OVERHEAD (sizeof(union overhead) + RSLOP)
 
 /*
+ * Big allocations are often of the size 2^n bytes. To make them a
+ * little bit better, make blocks of size 2^n+pagesize for big n.
+ */
+
+#ifdef TWO_POT_OPTIMIZE
+
+#  define PERL_PAGESIZE 4096
+#  define FIRST_BIG_TWO_POT 14		/* 16K */
+#  define FIRST_BIG_BLOCK (1<<FIRST_BIG_TWO_POT) /* 16K */
+/* If this value or more, check against bigger blocks. */
+#  define FIRST_BIG_BOUND (FIRST_BIG_BLOCK - M_OVERHEAD)
+/* If less than this value, goes into 2^n-overhead-block. */
+#  define LAST_SMALL_BOUND ((FIRST_BIG_BLOCK>>1) - M_OVERHEAD)
+
+#endif /* TWO_POT_OPTIMIZE */
+
+#ifdef PERL_EMERGENCY_SBRK
+
+#ifndef BIG_SIZE
+#  define BIG_SIZE (1<<16)		/* 64K */
+#endif 
+
+static char *emergency_buffer;
+static MEM_SIZE emergency_buffer_size;
+
+static char *
+emergency_sbrk(size)
+    MEM_SIZE size;
+{
+    if (size >= BIG_SIZE) {
+	/* Give the possibility to recover: */
+	die("Out of memory during request for %i bytes", size);
+	/* croak may eat too much memory. */
+    }
+
+    if (!emergency_buffer) {		
+	/* First offense, give a possibility to recover by dieing. */
+	/* No malloc involved here: */
+	GV **gvp = (GV**)hv_fetch(defstash, "^M", 2, 0);
+	SV *sv;
+	char *pv;
+
+	if (!gvp) gvp = (GV**)hv_fetch(defstash, "\015", 1, 0);
+	if (!gvp || !(sv = GvSV(*gvp)) || !SvPOK(sv) 
+	    || (SvLEN(sv) < (1<<11) - M_OVERHEAD)) 
+	    return (char *)-1;		/* Now die die die... */
+
+	/* Got it, now detach SvPV: */
+	pv = SvPV(sv);
+	/* Check alignment: */
+	if ((pv - M_OVERHEAD) & (1<<11 - 1)) {
+	    PerlIO_puts(PerlIO_stderr(),"Bad alignment of $^M!\n");
+	    return -1;			/* die die die */
+	}
+
+	emergency_buffer = pv - M_OVERHEAD;
+	emergency_buffer_size = SvLEN(sv) + M_OVERHEAD;
+	SvPOK_off(sv);
+	SvREADONLY_on(sv);
+	die("Out of memory!");		/* croak may eat too much memory. */
+    } else if (emergency_buffer_size >= size) {
+	emergency_buffer_size -= size;
+	return emergency_buffer + emergency_buffer_size;
+    }
+    
+    return (char *)-1;			/* poor guy... */
+}
+
+#else /* !PERL_EMERGENCY_SBRK */
+#  define emergency_sbrk(size)	-1
+#endif /* !PERL_EMERGENCY_SBRK */
+
+/*
  * nextf[i] is the pointer to the next free block of size 2^(i+3).  The
  * smallest allocatable block is 8 bytes.  The overhead information
  * precedes the data area returned to the user.
@@ -188,22 +261,22 @@ malloc(nbytes)
   	register int bucket = 0;
   	register MEM_SIZE shiftr;
 
-#ifdef safemalloc
+#ifdef PERL_CORE
 #ifdef DEBUGGING
 	MEM_SIZE size = nbytes;
 #endif
 
-#ifdef MSDOS
+#ifdef HAS_64K_LIMIT
 	if (nbytes > 0xffff) {
 		PerlIO_printf(PerlIO_stderr(), "Allocation too large: %lx\n", (long)nbytes);
 		my_exit(1);
 	}
-#endif /* MSDOS */
+#endif /* HAS_64K_LIMIT */
 #ifdef DEBUGGING
 	if ((long)nbytes < 0)
 	    croak("panic: malloc");
 #endif
-#endif /* safemalloc */
+#endif /* PERL_CORE */
 
 	/*
 	 * Convert amount of memory requested into
@@ -214,6 +287,11 @@ malloc(nbytes)
 #ifdef PACK_MALLOC
 	if (nbytes > MAX_2_POT_ALGO) {
 #endif
+#ifdef TWO_POT_OPTIMIZE
+	    if (nbytes >= FIRST_BIG_BOUND) {
+		nbytes -= PERL_PAGESIZE;
+	    }
+#endif 
 	    nbytes += M_OVERHEAD;
 	    nbytes = (nbytes + 3) &~ 3; 
 #ifdef PACK_MALLOC
@@ -232,7 +310,7 @@ malloc(nbytes)
   	if (nextf[bucket] == NULL)    
   		morecore(bucket);
   	if ((p = (union overhead *)nextf[bucket]) == NULL) {
-#ifdef safemalloc
+#ifdef PERL_CORE
 		if (!nomemok) {
 		    PerlIO_puts(PerlIO_stderr(),"Out of memory!\n");
 		    my_exit(1);
@@ -242,10 +320,10 @@ malloc(nbytes)
 #endif
 	}
 
-#ifdef safemalloc
+#ifdef PERL_CORE
     DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) malloc %ld bytes\n",
 	(unsigned long)(p+1),an++,(long)size));
-#endif /* safemalloc */
+#endif /* PERL_CORE */
 
 	/* remove from linked list */
 #ifdef RCHECK
@@ -289,6 +367,9 @@ morecore(bucket)
 
   	if (nextf[bucket])
   		return;
+	if (bucket == (sizeof(MEM_SIZE)*8 - 3)) {
+	    croak("Allocation too large");
+	}
 	/*
 	 * Insure memory is allocated
 	 * on a page boundary.  Should
@@ -323,9 +404,16 @@ morecore(bucket)
   	nblks = 1 << (rnu - (bucket + 3));  /* how many blocks to get */
   	/* if (rnu < bucket)
 		rnu = bucket;	Why anyone needs this? */
+#ifdef TWO_POT_OPTIMIZE
+	op = (union overhead *)sbrk((1L << rnu) 
+				    + ( bucket >= (FIRST_BIG_TWO_POT - 3) 
+					? PERL_PAGESIZE : 0));
+#else
 	op = (union overhead *)sbrk(1L << rnu);
+#endif 
 	/* no more room! */
-  	if ((int)op == -1)
+  	if ((int)op == -1 &&
+	    (int)(op = (union overhead *)emergency_sbrk(size)) == -1)
   		return;
 	/*
 	 * Round up to minimum allocation size boundary
@@ -390,9 +478,9 @@ free(mp)
 	u_char bucket;
 #endif 
 
-#ifdef safemalloc
+#ifdef PERL_CORE
     DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) free\n",(unsigned long)cp,an++));
-#endif /* safemalloc */
+#endif /* PERL_CORE */
 
 	if (cp == NULL)
 		return;
@@ -461,30 +549,30 @@ realloc(mp, nbytes)
 	int was_alloced = 0;
 	char *cp = (char*)mp;
 
-#ifdef safemalloc
+#ifdef PERL_CORE
 #ifdef DEBUGGING
 	MEM_SIZE size = nbytes;
 #endif
 
-#ifdef MSDOS
+#ifdef HAS_64K_LIMIT
 	if (nbytes > 0xffff) {
 		PerlIO_printf(PerlIO_stderr(), "Reallocation too large: %lx\n", size);
 		my_exit(1);
 	}
-#endif /* MSDOS */
+#endif /* HAS_64K_LIMIT */
 	if (!cp)
 		return malloc(nbytes);
 #ifdef DEBUGGING
 	if ((long)nbytes < 0)
 		croak("panic: realloc");
 #endif
-#endif /* safemalloc */
+#endif /* PERL_CORE */
 
 	op = (union overhead *)((caddr_t)cp 
 				- sizeof (union overhead) * CHUNK_SHIFT);
 	i = OV_INDEX(op);
 	if (OV_MAGIC(op, i) == MAGIC) {
-		was_alloced++;
+		was_alloced = 1;
 	} else {
 		/*
 		 * Already free, doing "compaction".
@@ -507,10 +595,24 @@ realloc(mp, nbytes)
 #else
 	    M_OVERHEAD
 #endif
+#ifdef TWO_POT_OPTIMIZE
+	    + (i >= (FIRST_BIG_TWO_POT - 3) ? PERL_PAGESIZE : 0)
+#endif
 	    ;
-	/* avoid the copy if same size block */
+	/* 
+	 *  avoid the copy if same size block.
+	 *  We are not agressive with boundary cases. Note that it is
+	 *  possible for small number of cases give false negative if
+	 *  both new size and old one are in the bucket for
+	 *  FIRST_BIG_TWO_POT, but the new one is near the lower end.
+	 */
 	if (was_alloced &&
-	    nbytes <= onb && nbytes > (onb >> 1) - M_OVERHEAD) {
+	    nbytes <= onb && (nbytes > ( (onb >> 1) - M_OVERHEAD )
+#ifdef TWO_POT_OPTIMIZE
+			      || (i == (FIRST_BIG_TWO_POT - 3) 
+				  && nbytes >= LAST_SMALL_BOUND )
+#endif	
+		)) {
 #ifdef RCHECK
 		/*
 		 * Record new allocated size of block and
@@ -540,7 +642,7 @@ realloc(mp, nbytes)
 			free(cp);
 	}
 
-#ifdef safemalloc
+#ifdef PERL_CORE
 #ifdef DEBUGGING
     if (debug & 128) {
 	PerlIO_printf(PerlIO_stderr(), "0x%lx: (%05d) rfree\n",(unsigned long)res,an++);
@@ -548,7 +650,7 @@ realloc(mp, nbytes)
 	    (unsigned long)res,an++,(long)size);
     }
 #endif
-#endif /* safemalloc */
+#endif /* PERL_CORE */
   	return ((Malloc_t)res);
 }
 
@@ -681,7 +783,7 @@ int size;
     int small, reqsize;
 
     if (!size) return 0;
-#ifdef safemalloc
+#ifdef PERL_CORE
     reqsize = size; /* just for the DEBUG_m statement */
 #endif
     if (size <= Perl_sbrk_oldsize) {
@@ -692,7 +794,7 @@ int size;
       if (size >= PERLSBRK_32_K) {
 	small = 0;
       } else {
-#ifndef safemalloc
+#ifndef PERL_CORE
 	reqsize = size;
 #endif
 	size = PERLSBRK_64_K;
@@ -706,7 +808,7 @@ int size;
       }
     }
 
-#ifdef safemalloc
+#ifdef PERL_CORE
     DEBUG_m(PerlIO_printf(PerlIO_stderr(), "sbrk malloc size %ld (reqsize %ld), left size %ld, give addr 0x%lx\n",
 		    size, reqsize, Perl_sbrk_oldsize, got));
 #endif

@@ -181,43 +181,21 @@ typedef U16 line_t;
    Renew macros.
 	--Andy Dougherty		August 1996
 */
+
 #ifndef lint
 #ifndef LEAKTEST
-#ifndef safemalloc
 
-#  ifdef __cplusplus
-    extern "C" {
-#  endif
-Malloc_t safemalloc _((MEM_SIZE));
-Malloc_t saferealloc _((Malloc_t, MEM_SIZE));
-Free_t safefree _((Malloc_t));
-Malloc_t safecalloc _((MEM_SIZE, MEM_SIZE));
-#  ifdef __cplusplus
-    }
-#  endif
-#endif
-#ifndef MSDOS
 #define New(x,v,n,t)  (v = (t*)safemalloc((MEM_SIZE)((n) * sizeof(t))))
 #define Newc(x,v,n,t,c)  (v = (c*)safemalloc((MEM_SIZE)((n) * sizeof(t))))
 #define Newz(x,v,n,t) (v = (t*)safemalloc((MEM_SIZE)((n) * sizeof(t)))), \
     memzero((char*)(v), (n) * sizeof(t))
 #define Renew(v,n,t) (v = (t*)saferealloc((Malloc_t)(v),(MEM_SIZE)((n)*sizeof(t))))
 #define Renewc(v,n,t,c) (v = (c*)saferealloc((Malloc_t)(v),(MEM_SIZE)((n)*sizeof(t))))
-#else
-#define New(x,v,n,t)  (v = (t*)safemalloc(((unsigned long)(n) * sizeof(t))))
-#define Newc(x,v,n,t,c)  (v = (c*)safemalloc(((unsigned long)(n) * sizeof(t))))
-#define Newz(x,v,n,t) (v = (t*)safemalloc(((unsigned long)(n) * sizeof(t)))), \
-    memzero((char*)(v), (n) * sizeof(t))
-#define Renew(v,n,t) (v = (t*)saferealloc((Malloc_t)(v),((unsigned long)(n)*sizeof(t))))
-#define Renewc(v,n,t,c) (v = (c*)saferealloc((Malloc_t)(v),((unsigned long)(n)*sizeof(t))))
-#endif /* MSDOS */
 #define Safefree(d) safefree((Malloc_t)(d))
 #define NEWSV(x,len) newSV(len)
+
 #else /* LEAKTEST */
-Malloc_t safexmalloc();
-Malloc_t safexrealloc();
-Free_t safexfree();
-Malloc_t safexcalloc();
+
 #define New(x,v,n,t)  (v = (t*)safexmalloc(x,(MEM_SIZE)((n) * sizeof(t))))
 #define Newc(x,v,n,t,c)  (v = (c*)safexmalloc(x,(MEM_SIZE)((n) * sizeof(t))))
 #define Newz(x,v,n,t) (v = (t*)safexmalloc(x,(MEM_SIZE)((n) * sizeof(t)))), \
@@ -229,11 +207,15 @@ Malloc_t safexcalloc();
 #define MAXXCOUNT 1200
 long xcount[MAXXCOUNT];
 long lastxcount[MAXXCOUNT];
+
 #endif /* LEAKTEST */
+
 #define Move(s,d,n,t) (void)memmove((char*)(d),(char*)(s), (n) * sizeof(t))
 #define Copy(s,d,n,t) (void)memcpy((char*)(d),(char*)(s), (n) * sizeof(t))
 #define Zero(d,n,t) (void)memzero((char*)(d), (n) * sizeof(t))
+
 #else /* lint */
+
 #define New(x,v,n,s) (v = Null(s *))
 #define Newc(x,v,n,s,c) (v = Null(s *))
 #define Newz(x,v,n,s) (v = Null(s *))
@@ -242,6 +224,7 @@ long lastxcount[MAXXCOUNT];
 #define Copy(s,d,n,t)
 #define Zero(d,n,t)
 #define Safefree(d) d = d
+
 #endif /* lint */
 
 #ifdef USE_STRUCT_COPY

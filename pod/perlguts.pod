@@ -146,11 +146,11 @@ Take this code:
 This code tries to return a new SV (which contains the value 42) if it should
 return a real value, or undef otherwise.  Instead it has returned a null
 pointer which, somewhere down the line, will cause a segmentation violation,
-or just weird results.  Change the zero to C<&sv_undef> in the first line and
-all will be well.
+bus error, or just plain weird results.  Change the zero to C<&sv_undef> in
+the first line and all will be well.
 
 To free an SV that you've created, call C<SvREFCNT_dec(SV*)>.  Normally this
-call is not necessary.  See the section on B<MORTALITY>.
+call is not necessary.  See the section on L<Mortality>.
 
 =head2 What's Really Stored in an SV?
 
@@ -345,7 +345,7 @@ A reference can be blessed into a package with the following function:
     SV* sv_bless(SV* sv, HV* stash);
 
 The C<sv> argument must be a reference.  The C<stash> argument specifies
-which class the reference will belong to.  See the L<"Stashes">
+which class the reference will belong to.  See the section on L<Stashes>
 for information on converting class names into stashes.
 
 /* Still under construction */
@@ -448,31 +448,205 @@ to use the macros:
     XPUSHp(char*, I32)
     XPUSHs(SV*)
 
-These macros automatically adjust the stack for you, if needed.
+These macros automatically adjust the stack for you, if needed.  Thus, you
+do not need to call C<EXTEND> to extend the stack.
 
 For more information, consult L<perlxs>.
 
+=head1 Localizing Changes
+
+Perl has a very handy construction
+
+  {
+    local $var = 2;
+    ...
+  }
+
+This construction is I<approximately> equivalent to
+
+  {
+    my $oldvar = $var;
+    $var = 2;
+    ...
+    $var = $oldvar;
+  }
+
+The biggest difference is that the first construction would would
+reinstate the initial value of $var, irrespective of how control exits
+the block: C<goto>, C<return>, C<die>/C<eval> etc. It is a little bit
+more efficient as well.
+
+There is a way to achieve a similar task from C via Perl API: create a
+I<pseudo-block>, and arrange for some changes to be automatically
+undone at the end of it, either explicit, or via a non-local exit (via
+die()). A I<block>-like construct is created by a pair of
+C<ENTER>/C<LEAVE> macros (see L<perlcall/EXAMPLE/"Returning a
+Scalar">).  Such a construct may be created specially for some
+important localized task, or an existing one (like boundaries of
+enclosing Perl subroutine/block, or an existing pair for freeing TMPs)
+may be used. (In the second case the overhead of additional
+localization must be almost negligible.) Note that any XSUB is
+automatically enclosed in an C<ENTER>/C<LEAVE> pair.
+
+Inside such a I<pseudo-block> the following service is available:
+
+=over
+
+=item C<SAVEINT(int i)>
+
+=item C<SAVEIV(IV i)>
+
+=item C<SAVEI16(I16 i)>
+
+=item C<SAVEI32(I32 i)>
+
+=item C<SAVELONG(long i)>
+
+These macros arrange things to restore the value of integer variable
+C<i> at the end of enclosing I<pseudo-block>.
+
+=item C<SAVESPTR(p)>
+
+=item C<SAVEPPTR(s)>
+
+These macros arrange things to restore the value of pointers C<s> and
+C<p>. C<p> must be a pointer of a type which survives conversion to
+C<SV*> and back, C<s> should be able to survive conversion to C<char*>
+and back.
+
+=item C<SAVEFREESV(SV *sv)>
+
+The refcount of C<sv> would be decremented at the end of
+I<pseudo-block>. This is similar to C<sv_2mortal>, which should (?) be
+used instead.
+
+=item C<SAVEFREEOP(OP *op)>
+
+The C<OP *> is op_free()ed at the end of I<pseudo-block>.
+
+=item C<SAVEFREEPV(p)>
+
+The chunk of memory which is pointed to by C<p> is Safefree()ed at the
+end of I<pseudo-block>.
+
+=item C<SAVECLEARSV(SV *sv)>
+
+Clears a slot in the current scratchpad which corresponds to C<sv> at
+the end of I<pseudo-block>.
+
+=item C<SAVEDELETE(HV *hv, char *key, I32 length)>
+
+The key C<key> of C<hv> is deleted at the end of I<pseudo-block>. The
+string pointed to by C<key> is Safefree()ed.  If one has a I<key> in
+short-lived storage, the corresponding string may be reallocated like
+this:
+
+  SAVEDELETE(defstash, savepv(tmpbuf), strlen(tmpbuf));
+
+=item C<SAVEDESTRUCTOR(f,p)>
+
+At the end of I<pseudo-block> the function C<f> is called with the
+only argument (of type C<void*>) C<p>.
+
+=item C<SAVESTACK_POS()>
+
+The current offset on the Perl internal stack (cf. C<SP>) is restored
+at the end of I<pseudo-block>.
+
+=back
+
+The following API list contains functions, thus one needs to
+provide pointers to the modifiable data explicitly (either C pointers,
+or Perlish C<GV *>s):
+
+=over
+
+=item C<SV* save_scalar(GV *gv)>
+
+Equivalent to Perl code C<local $gv>.
+
+=item C<AV* save_ary(GV *gv)>
+
+=item C<HV* save_hash(GV *gv)>
+
+Similar to C<save_scalar>, but localize C<@gv> and C<%gv>.
+
+=item C<void save_item(SV *item)>
+
+Duplicates the current value of C<SV>, on the exit from the current
+C<ENTER>/C<LEAVE> I<pseudo-block> will restore the value of C<SV>
+using the stored value.
+
+=item C<void save_list(SV **sarg, I32 maxsarg)>
+
+A variant of C<save_item> which takes multiple arguments via an array
+C<sarg> of C<SV*> of length C<maxsarg>.
+
+=item C<SV* save_svref(SV **sptr)>
+
+Similar to C<save_scalar>, but will reinstate a C<SV *>.
+
+=item C<void save_aptr(AV **aptr)>
+
+=item C<void save_hptr(HV **hptr)>
+
+Similar to C<save_svref>, but localize C<AV *> and C<HV *>.
+
+=item C<void save_nogv(GV *gv)>
+
+Will postpone destruction of a I<stub> glob.
+
+=back
+
 =head1 Mortality
 
-In Perl, values are normally "immortal" -- that is, they are not freed unless
-explicitly done so (via the Perl C<undef> call or other routines in Perl
-itself).
+Perl uses an reference count-driven garbage collection mechanism. SV's,
+AV's, or HV's (xV for short in the following) start their life with a
+reference count of 1.  If the reference count of an xV ever drops to 0,
+then they will be destroyed and their memory made available for reuse.
 
-Add cruft about reference counts.
-	int SvREFCNT(SV* sv);
-	void SvREFCNT_inc(SV* sv);
-	void SvREFCNT_dec(SV* sv);
+This normally doesn't happen at the Perl level unless a variable is
+undef'ed.  At the internal level, however, reference counts can be
+manipulated with the following macros:
 
-In the above example with C<tzname>, we needed to create two new SVs to push
-onto the argument stack, that being the two strings.  However, we don't want
-these new SVs to stick around forever because they will eventually be
-copied into the SVs that hold the two scalar variables.
+    int SvREFCNT(SV* sv);
+    void SvREFCNT_inc(SV* sv);
+    void SvREFCNT_dec(SV* sv);
 
-An SV (or AV or HV) that is "mortal" acts in all ways as a normal "immortal"
-SV, AV, or HV, but is only valid in the "current context".  When the Perl
-interpreter leaves the current context, the mortal SV, AV, or HV is
-automatically freed.  Generally the "current context" means a single
-Perl statement.
+However, there is one other function which manipulates the reference
+count of its argument.  The C<newRV> function, as you should recall,
+creates a reference to the specified argument.  As a side effect, it
+increments the argument's reference count, which is ok in most
+circumstances.  But imagine you want to return a reference from an XS
+function.  You create a new SV which initially has a reference count
+of 1.  Then you call C<newRV>, passing the just-created SV.  This returns
+the reference as a new SV, but the reference count of the SV you passed
+to C<newRV> has been incremented to 2.  Now you return the reference and
+forget about the SV.  But Perl hasn't!  Whenever the returned reference
+is destroyed, the reference count of the original SV is decreased to 1
+and nothing happens.  The SV will hang around without any way to access
+it until Perl itself terminates.  This is a memory leak.
+
+The correct procedure, then, is to call C<SvREFCNT_dec> on the SV after
+C<newRV> has returned.  Then, if and when the reference is destroyed,
+the reference count of the SV will go to 0 and also be destroyed, stopping
+any memory leak.
+
+There are some convenience functions available that can help with this
+process.  These functions introduce the concept of "mortality".  An xV
+that is mortal has had its reference count marked to be decremented,
+but not actually decremented, until the "current context" is left.
+Generally the "current context" means a single Perl statement, such as
+a call to an XSUB function.
+
+"Mortalization" then is at its simplest a deferred C<SvREFCNT_dec>.
+However, if you mortalize a variable twice, the reference count will
+later be decremented twice.
+
+You should be careful about creating mortal variables.  Strange things
+can happen if you make the same value mortal within multiple contexts,
+or if you make a variable mortal multiple times.  Doing the latter can
+cause a variable to become invalid prematurely.
 
 To create a mortal variable, use the functions:
 
@@ -487,7 +661,7 @@ The mortal routines are not just for SVs -- AVs and HVs can be made mortal
 by passing their address (and casting them to C<SV*>) to the C<sv_2mortal> or
 C<sv_mortalcopy> routines.
 
-From Ilya:
+I<From Ilya:>
 Beware that the sv_2mortal() call is eventually equivalent to
 svREFCNT_dec(). A value can happily be mortal in two different contexts,
 and it will be svREFCNT_dec()ed twice, once on exit from these
@@ -496,9 +670,6 @@ that you should be very careful to make a value mortal exactly as many
 times as it is needed. The value that go to the Perl stack I<should>
 be mortal.
 
-You should be careful about creating mortal variables.  It is possible for
-strange things to happen should you make the same value mortal within
-multiple contexts.
 
 =head1 Stashes
 
@@ -597,7 +768,7 @@ associated with an SV.
 
 The C<name> and C<namlem> arguments are used to associate a string with
 the magic, typically the name of a variable. C<namlem> is stored in the
-C<mg_len> field and if C<name> is non-null and C<namlem> E<gt>= 0 a malloc'd
+C<mg_len> field and if C<name> is non-null and C<namlem> >= 0 a malloc'd
 copy of the name is stored in C<mg_ptr> field.
 
 The sv_magic function uses C<how> to determine which, if any, predefined
@@ -2398,14 +2569,14 @@ destination, C<n> is the number of items, and C<t> is the type.
 
 =head1 AUTHOR
 
-Jeff Okamoto E<lt>F<okamoto@corp.hp.com>E<gt>
+Jeff Okamoto <okamoto@corp.hp.com>
 
 With lots of help and suggestions from Dean Roehrich, Malcolm Beattie,
 Andreas Koenig, Paul Hudson, Ilya Zakharevich, Paul Marquess, Neil
-Bowers, Matthew Green, Tim Bunce, and Spider Boardman.
+Bowers, Matthew Green, Tim Bunce, Spider Boardman, and Ulrich Pfeifer.
 
-API Listing by Dean Roehrich E<lt>F<roehrich@cray.com>E<gt>.
+API Listing by Dean Roehrich <roehrich@cray.com>.
 
 =head1 DATE
 
-Version 22: 1996/9/23
+Version 23.1: 1996/10/19

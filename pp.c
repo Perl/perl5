@@ -575,14 +575,11 @@ PP(pp_undef)
 PP(pp_predec)
 {
     dSP;
-    if (SvIOK(TOPs)) {
-    	if (SvIVX(TOPs) == IV_MIN) {
-    	    sv_setnv(TOPs, (double)SvIVX(TOPs) - 1.0);
-    	}
-    	else {
-    	    --SvIVX(TOPs);
-	    SvFLAGS(TOPs) &= ~(SVf_NOK|SVf_POK|SVp_NOK|SVp_POK);
-	}
+    if (SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
+    	SvIVX(TOPs) != IV_MIN)
+    {
+	--SvIVX(TOPs);
+	SvFLAGS(TOPs) &= ~(SVp_NOK|SVp_POK);
     }
     else
 	sv_dec(TOPs);
@@ -594,14 +591,11 @@ PP(pp_postinc)
 {
     dSP; dTARGET;
     sv_setsv(TARG, TOPs);
-    if (SvIOK(TOPs)) {
-    	if (SvIVX(TOPs) == IV_MAX) {
-    	    sv_setnv(TOPs, (double)SvIVX(TOPs) + 1.0);
-    	}
-    	else {
-	    ++SvIVX(TOPs);
-	    SvFLAGS(TOPs) &= ~(SVf_NOK|SVf_POK|SVp_NOK|SVp_POK);
-	}
+    if (SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
+    	SvIVX(TOPs) != IV_MAX)
+    {
+	++SvIVX(TOPs);
+	SvFLAGS(TOPs) &= ~(SVp_NOK|SVp_POK);
     }
     else
 	sv_inc(TOPs);
@@ -616,14 +610,11 @@ PP(pp_postdec)
 {
     dSP; dTARGET;
     sv_setsv(TARG, TOPs);
-    if (SvIOK(TOPs)) {
-    	if (SvIVX(TOPs) == IV_MIN) {
-    	    sv_setnv(TOPs, (double)SvIVX(TOPs) - 1.0);
-    	}
-    	else {
-	    --SvIVX(TOPs);
-	    SvFLAGS(TOPs) &= ~(SVf_NOK|SVf_POK|SVp_NOK|SVp_POK);
-	}
+    if (SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
+    	SvIVX(TOPs) != IV_MIN)
+    {
+	--SvIVX(TOPs);
+	SvFLAGS(TOPs) &= ~(SVp_NOK|SVp_POK);
     }
     else
 	sv_dec(TOPs);
@@ -773,9 +764,12 @@ PP(pp_left_shift)
 {
     dSP; dATARGET; tryAMAGICbin(lshift,opASSIGN); 
     {
-        dPOPTOPiirl;
-        SETi( left << right );
-        RETURN;
+      dPOPTOPiirl;
+      if (op->op_private & HINT_INTEGER)
+	SETi( left << right );
+      else
+	SETu( (UV)left << right );
+      RETURN;
     }
 }
 
@@ -784,7 +778,10 @@ PP(pp_right_shift)
     dSP; dATARGET; tryAMAGICbin(rshift,opASSIGN); 
     {
       dPOPTOPiirl;
-      SETi( left >> right );
+      if (op->op_private & HINT_INTEGER)
+	SETi( left >> right );
+      else
+	SETu( (UV)left >> right );
       RETURN;
     }
 }
@@ -917,17 +914,17 @@ PP(pp_scmp)
     }
 }
 
-PP(pp_bit_and) {
+PP(pp_bit_and)
+{
     dSP; dATARGET; tryAMAGICbin(band,opASSIGN); 
     {
       dPOPTOPssrl;
       if (SvNIOKp(left) || SvNIOKp(right)) {
-	unsigned long value = U_L(SvNV(left));
-	value = value & U_L(SvNV(right));
-	if ((IV)value == value)
-	    SETi(value);
+	UV value = SvIV(left) & SvIV(right);
+	if (op->op_private & HINT_INTEGER)
+	  SETi( (IV)value );
 	else
-	    SETn((double)value);
+	  SETu( value );
       }
       else {
 	do_vop(op->op_type, TARG, left, right);
@@ -943,12 +940,11 @@ PP(pp_bit_xor)
     {
       dPOPTOPssrl;
       if (SvNIOKp(left) || SvNIOKp(right)) {
-	unsigned long value = U_L(SvNV(left));
-	value = value ^ U_L(SvNV(right));
-	if ((IV)value == value)
-	    SETi(value);
+	UV value = SvIV(left) ^ SvIV(right);
+	if (op->op_private & HINT_INTEGER)
+	  SETi( (IV)value );
 	else
-	    SETn((double)value);
+	  SETu( value );
       }
       else {
 	do_vop(op->op_type, TARG, left, right);
@@ -964,12 +960,11 @@ PP(pp_bit_or)
     {
       dPOPTOPssrl;
       if (SvNIOKp(left) || SvNIOKp(right)) {
-	unsigned long value = U_L(SvNV(left));
-	value = value | U_L(SvNV(right));
-	if ((IV)value == value)
-	    SETi(value);
+	UV value = SvIV(left) | SvIV(right);
+	if (op->op_private & HINT_INTEGER)
+	  SETi( (IV)value );
 	else
-	    SETn((double)value);
+	  SETu( value );
       }
       else {
 	do_vop(op->op_type, TARG, left, right);
@@ -986,7 +981,9 @@ PP(pp_negate)
 	dTOPss;
 	if (SvGMAGICAL(sv))
 	    mg_get(sv);
-	if (SvNIOKp(sv))
+	if (SvIOKp(sv) && !SvNOKp(sv) && !SvPOKp(sv) && SvIVX(sv) != IV_MIN)
+	    SETi(-SvIVX(sv));
+	else if (SvNIOKp(sv))
 	    SETn(-SvNV(sv));
 	else if (SvPOKp(sv)) {
 	    STRLEN len;
@@ -1023,18 +1020,17 @@ PP(pp_complement)
     dSP; dTARGET; tryAMAGICun(compl); 
     {
       dTOPss;
-      register I32 anum;
-
       if (SvNIOKp(sv)) {
-	UV value = ~SvIV(sv);
-	if ((IV)value == value)
-	    SETi(value);
+	UV value = ~(UV)SvIV(sv);
+	if (op->op_private & HINT_INTEGER)
+	  SETi( (IV)value );
 	else
-	    SETn((double)value);
+	  SETu( value );
       }
       else {
 	register char *tmps;
 	register long *tmpl;
+	register I32 anum;
 	STRLEN len;
 
 	SvSetSV(TARG, sv);
@@ -1371,22 +1367,17 @@ PP(pp_hex)
 {
     dSP; dTARGET;
     char *tmps;
-    unsigned long value;
     I32 argtype;
 
     tmps = POPp;
-    value = scan_hex(tmps, 99, &argtype);
-    if ((IV)value >= 0)
-	XPUSHi(value);
-    else
-	XPUSHn(U_V(value));
+    XPUSHu(scan_hex(tmps, 99, &argtype));
     RETURN;
 }
 
 PP(pp_oct)
 {
     dSP; dTARGET;
-    unsigned long value;
+    UV value;
     I32 argtype;
     char *tmps;
 
@@ -1399,10 +1390,7 @@ PP(pp_oct)
 	value = scan_hex(++tmps, 99, &argtype);
     else
 	value = scan_oct(tmps, 99, &argtype);
-    if ((IV)value >= 0)
-	XPUSHi(value);
-    else
-	XPUSHn(U_V(value));
+    XPUSHu(value);
     RETURN;
 }
 
@@ -2330,6 +2318,35 @@ PP(pp_reverse)
     RETURN;
 }
 
+static SV      *
+mul128(sv, m)
+     SV             *sv;
+     U8              m;
+{
+  STRLEN          len;
+  char           *s = SvPV(sv, len);
+  char           *t;
+  U32             i = 0;
+
+  if (!strnEQ(s, "0000", 4)) {  /* need to grow sv */
+    SV             *new = newSVpv("0000000000", 10);
+
+    sv_catsv(new, sv);
+    SvREFCNT_dec(sv);		/* free old sv */
+    sv = new;
+    s = SvPV(sv, len);
+  }
+  t = s + len - 1;
+  while (!*t)                   /* trailing '\0'? */
+    t--;
+  while (t > s) {
+    i = ((*t - '0') << 7) + m;
+    *(t--) = '0' + (i % 10);
+    m = i / 10;
+  }
+  return (sv);
+}
+
 /* Explosives and implosives. */
 
 PP(pp_unpack)
@@ -2800,7 +2817,7 @@ PP(pp_unpack)
               while  (len > 0) {
                 if (s >= strend) {
                   if (auint) {
-                    DIE("Unterminated compressed integer");
+                    croak("Unterminated compressed integer");
                   } else {
                     break;
                   }
@@ -2813,17 +2830,29 @@ PP(pp_unpack)
                   len--;
                   auint = 0;
                   bytes = 0;
-                } else if (++bytes >= sizeof(auint)) {         /* promote to double */
-                  adouble = auint;
+                } else if (++bytes >= sizeof(auint)) {	/* promote to string */
+                  char            zero[10];
 
+                  (void) sprintf(zero, "%010ld", auint);
+                  sv = newSVpv(zero, 10);
+            
                   while (*s &  0x80) {
-                    adouble = (adouble * 128) + (*(++s) & 0x7f);
+                    sv = mul128(sv, (U8) (*(++s) & 0x7f));
                     if (s >= strend) {
-                      DIE("Unterminated compressed integer");
+                      croak("Unterminated compressed integer");
                     }
                   }
-                  sv = NEWSV(40, 0);
-                  sv_setnv(sv, adouble);
+                  /* remove leading '0's */
+                  {
+                    char           *s = SvPV(sv, na);
+            
+                    while (*s == '0') {
+                      s++;
+                      na--;
+                    }
+                    /* overlapping copy !! */
+                    sv_setpvn(sv, s, na);
+                  }
                   PUSHs(sv_2mortal(sv));
                   len--;
                   auint = 0;
@@ -3028,6 +3057,85 @@ register I32 len;
     }
     sv_catpvn(sv, "\n", 1);
 }
+
+static SV      *
+is_an_int(s, l)
+     char           *s;
+     STRLEN          l;
+{
+  SV             *result = newSVpv("", l);
+  char           *result_c = SvPV(result, na);	/* convenience */
+  char           *out = result_c;
+  bool            skip = 1;
+  bool            ignore = 0;
+
+  while (*s) {
+    switch (*s) {
+    case ' ':
+      break;
+    case '+':
+      if (!skip) {
+	SvREFCNT_dec(result);
+	return (NULL);
+      }
+      break;
+    case '0':
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+    case '7':
+    case '8':
+    case '9':
+      skip = 0;
+      if (!ignore) {
+	*(out++) = *s;
+      }
+      break;
+    case '.':
+      ignore = 1;
+      break;
+    default:
+      SvREFCNT_dec(result);
+      return (NULL);
+    }
+    s++;
+  }
+  *(out++) = '\0';
+  SvCUR_set(result, out - result_c);
+  return (result);
+}
+
+static int
+div128(pnum, done)
+     SV             *pnum;		    /* must be '\0' terminated */
+     bool           *done;
+{
+  STRLEN          len;
+  char           *s = SvPV(pnum, len);
+  int             m = 0;
+  int             r = 0;
+  char           *t = s;
+
+  *done = 1;
+  while (*t) {
+    int             i;
+
+    i = m * 10 + (*t - '0');
+    m = i & 0x7F;
+    r = (i >> 7);		/* r < 10 */
+    if (r) {
+      *done = 0;
+    }
+    *(t++) = '0' + r;
+  }
+  *(t++) = '\0';
+  SvCUR_set(pnum, (STRLEN) (t - s));
+  return (m);
+}
+
 
 PP(pp_pack)
 {
@@ -3313,34 +3421,64 @@ PP(pp_pack)
               fromstr = NEXTFROM;
               adouble = floor((double)SvNV(fromstr));
 
-              if (adouble < 268435456) {           /* we can use integers */
-                unsigned char buf[4];              /* buffer for compressed int */
-                unsigned char *in = buf + 3;
+              if (adouble <= PERL_ULONG_MAX) {	/* we can use integers */
+                unsigned char   buf[5];         /* buffer for compressed int */
+                unsigned char  *in = buf + 4;
+            
                 auint = U_I(adouble);
+
                 do {
                   *(in--) = (unsigned char) ((auint & 0x7f) |  0x80); 
                   auint >>= 7;
                 } while (auint);
-                buf[3]  &= 0x7f;                   /* clear continue bit */
-                sv_catpvn(cat, (char*) in+1, buf+3-in);
+                buf[4] &= 0x7f;		/* clear continue bit */
+                sv_catpvn(cat, (char *) in + 1, buf + 4 - in);
+              } else if (SvPOKp(fromstr)) {     /* decimal string arithmetics */
+                char           *from;
+                SV             *norm;
+                STRLEN          len;
+            
+                /* Copy string and check for compliance */
+                from = SvPV(fromstr, len);
+                if ((norm = is_an_int(from, len)) == NULL) {
+                  croak("can compress only unsigned integer");
               } else {
-                unsigned char buf[sizeof(double)*2]; /* buffer for compressed int */
-                I8       msize = sizeof(double)*2; /* 8/7 would be enough */
+                  bool            done = 0;
+                  char           *result, *in;
+            
+                  New('w', result, len, char);
+                  in = result + len;
+                  while (!done) {
+                    U8              digit = div128(norm, &done);
+            
+                    *(--in) = digit | 0x80;
+                  }
+                  result[len - 1] &= 0x7F;
+                  sv_catpvn(cat, in, result + len - in);
+                  SvREFCNT_dec(norm);	/* free norm */
+                }
+              } else if (SvNOKp(fromstr)) {
+                I8              msize = sizeof(double) * 2; /* 8/7 <= 2 */
+                unsigned char   buf[sizeof(double) * 2];
                 unsigned char *in = buf + msize -1;
+            
                 if (adouble<0) {
                   croak("Cannot compress negative numbers");
                 }
                 do  {
                   double next = adouble/128;
+            
                   *in = (unsigned char) (adouble - floor(next)*128);
                   *in |= 0x80;                     /* set continue bit */
                   if (--in < buf) {                /* this cannot happen ;-) */
                     croak ("Cannot compress integer");
                   }
                   adouble = next;
-                } while (floor(adouble)>0);        /* floor() not necessary? */
+                } while (floor(adouble));	/* floor() not necessary? */
                 buf[msize-1] &= 0x7f;              /* clear continue bit */
                 sv_catpvn(cat, (char*) in+1, buf+msize-in-1);
+              } else {
+                croak("Cannot compress non integer");
               }
             }
             break;

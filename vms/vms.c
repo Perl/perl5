@@ -2,8 +2,8 @@
  *
  * VMS-specific routines for perl5
  *
- * Last revised: 18-Jul-1996 by Charles Bailey  bailey@genetics.upenn.edu
- * Version: 5.3.1
+ * Last revised: 14-Oct-1996 by Charles Bailey  bailey@genetics.upenn.edu
+ * Version: 5.3.7
  */
 
 #include <acedef.h>
@@ -119,7 +119,7 @@ char *
 my_getenv(char *lnm)
 {
     static char __my_getenv_eqv[LNM$C_NAMLENGTH+1];
-    char uplnm[LNM$C_NAMLENGTH], *cp1, *cp2;
+    char uplnm[LNM$C_NAMLENGTH+1], *cp1, *cp2;
     unsigned long int idx = 0;
     int trnsuccess;
 
@@ -3020,7 +3020,7 @@ struct tm *
 my_gmtime(const time_t *time)
 {
   static int gmtime_emulation_type;
-  static time_t utc_offset_secs;
+  static long int utc_offset_secs;
   char *p;
   time_t when;
 
@@ -3032,7 +3032,7 @@ my_gmtime(const time_t *time)
       if ((p = my_getenv("SYS$TIMEZONE_DIFFERENTIAL")) == NULL)
         gmtime_emulation_type++;
       else
-        utc_offset_secs = (time_t) atol(p);
+        utc_offset_secs = atol(p);
     }
   }
 

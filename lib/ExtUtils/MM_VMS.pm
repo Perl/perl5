@@ -6,7 +6,7 @@
 #   Author:  Charles Bailey  bailey@genetics.upenn.edu
 
 package ExtUtils::MM_VMS;
-$ExtUtils::MM_VMS::Revision=$ExtUtils::MM_VMS::Revision = '5.38 (02-Oct-1996)';
+$ExtUtils::MM_VMS::Revision=$ExtUtils::MM_VMS::Revision = '5.38 (22-Oct-1996)';
 unshift @MM::ISA, 'ExtUtils::MM_VMS';
 
 use Config;
@@ -194,6 +194,7 @@ sub updir {
 
 package ExtUtils::MM_VMS;
 
+sub ExtUtils::MM_VMS::ext;
 sub ExtUtils::MM_VMS::guess_name;
 sub ExtUtils::MM_VMS::find_perl;
 sub ExtUtils::MM_VMS::path;
@@ -204,7 +205,6 @@ sub ExtUtils::MM_VMS::file_name_is_absolute;
 sub ExtUtils::MM_VMS::replace_manpage_separator;
 sub ExtUtils::MM_VMS::init_others;
 sub ExtUtils::MM_VMS::constants;
-sub ExtUtils::MM_VMS::const_loadlibs;
 sub ExtUtils::MM_VMS::cflags;
 sub ExtUtils::MM_VMS::const_cccmd;
 sub ExtUtils::MM_VMS::pm_to_blib;
@@ -268,6 +268,16 @@ sub AUTOLOAD {
 
 #__DATA__
 
+
+# This isn't really an override.  It's just here because ExtUtils::MM_VMS
+# appears in @MM::ISA before ExtUtils::Liblist, so if there isn't an ext()
+# in MM_VMS, then AUTOLOAD is called, and bad things happen.  So, we just
+# mimic inheritance here and hand off to ExtUtils::Liblist.
+sub ext {
+  ExtUtils::Liblist::ext(@_);
+}
+
+
 =head2 SelfLoaded methods
 
 Those methods which override default MM_Unix methods are marked
@@ -289,12 +299,24 @@ package name.
 
 sub guess_name {
     my($self) = @_;
-    my($defname,$defpm);
+    my($defname,$defpm,@pm,%xs,$pm);
     local *PM;
 
     $defname = basename(fileify($ENV{'DEFAULT'}));
     $defname =~ s![\d\-_]*\.dir.*$!!;  # Clip off .dir;1 suffix, and package version
     $defpm = $defname;
+    # Fallback in case for some reason a user has copied the files for an
+    # extension into a working directory whose name doesn't reflect the
+    # extension's name.  We'll use the name of a unique .pm file, or the
+    # first .pm file with a matching .xs file.
+    if (not -e "${defpm}.pm") {
+      @pm = map { s/.pm$//; $_ } glob('*.pm');
+      if (@pm == 1) { ($defpm = $pm[0]) =~ s/.pm$//; }
+      elsif (@pm) {
+        %xs = map { s/.xs$//; ($_,1) } glob('*.xs');
+        if (%xs) { foreach $pm (@pm) { $defpm = $pm, last if exists $xs{$pm}; } }
+      }
+    }
     if (open(PM,"${defpm}.pm")){
         while (<PM>) {
             if (/^\s*package\s+([^;]+)/i) {
@@ -696,57 +718,6 @@ TO_INST_PM = ',join(', ',@{$self->{TO_INST_PM}}),'
 
 PM_TO_BLIB = ',join(', ',@{$self->{PM_TO_BLIB}}),'
 ';
-
-    join('',@m);
-}
-
-=item const_loadlibs (override)
-
-Basically a stub which passes through library specfications provided
-by the caller.  Will be updated or removed when VMS support is added
-to ExtUtils::Liblist.
-
-=cut
-
-sub const_loadlibs {
-    my($self) = @_;
-    my (@m);
-    push @m, "
-# $self->{NAME} might depend on some other libraries.
-# (These comments may need revising:)
-#
-# Dependent libraries can be linked in one of three ways:
-#
-#  1.  (For static extensions) by the ld command when the perl binary
-#      is linked with the extension library. See EXTRALIBS below.
-#
-#  2.  (For dynamic extensions) by the ld command when the shared
-#      object is built/linked. See LDLOADLIBS below.
-#
-#  3.  (For dynamic extensions) by the DynaLoader when the shared
-#      object is loaded. See BSLOADLIBS below.
-#
-# EXTRALIBS =	List of libraries that need to be linked with when
-#		linking a perl binary which includes this extension
-#		Only those libraries that actually exist are included.
-#		These are written to a file and used when linking perl.
-#
-# LDLOADLIBS =	List of those libraries which can or must be linked into
-#		the shared library when created using ld. These may be
-#		static or dynamic libraries.
-#		LD_RUN_PATH is a colon separated list of the directories
-#		in LDLOADLIBS. It is passed as an environment variable to
-#		the process that links the shared library.
-#
-# BSLOADLIBS =	List of those libraries that are needed but can be
-#		linked in dynamically at run time on this platform.
-#		SunOS/Solaris does not need this because ld records
-#		the information (from LDLOADLIBS) into the object file.
-#		This list is used to create a .bs (bootstrap) file.
-#
-EXTRALIBS  = ",map($self->fixpath($_) . ' ',$self->{'EXTRALIBS'}),"
-BSLOADLIBS = ",map($self->fixpath($_) . ' ',$self->{'BSLOADLIBS'}),"
-LDLOADLIBS = ",map($self->fixpath($_) . ' ',$self->{'LDLOADLIBS'}),"\n";
 
     join('',@m);
 }
@@ -1271,7 +1242,21 @@ $(BASEEXT).opt : Makefile.PL
 	$(PERL) -e "print ""$(INST_STATIC)/Include=$(BASEEXT)\n$(INST_STATIC)/Library\n"";" >>$(MMS$TARGET)
 ');
 
+    if (length $self->{LDLOADLIBS}) {
+	my($lib); my($line) = '';
+	foreach $lib (split ' ', $self->{LDLOADLIBS}) {
+	    $lib =~ s%\$%\\\$%g;  # Escape '$' in VMS filespecs
+	    if (length($line) + length($lib) > 160) {
+		push @m, "\t\$(PERL) -e \"print qq[$line]\" >>\$(MMS\$TARGET)\n";
+		$line = $lib . '\n';
+	    }
+	    else { $line .= $lib . '\n'; }
+	}
+	push @m, "\t\$(PERL) -e \"print qq[$line]\" >>\$(MMS\$TARGET)\n" if $line;
+    }
+
     join('',@m);
+
 }
 
 =item dynamic_lib (override)
@@ -1414,8 +1399,7 @@ sub manifypods {
     } else {
 	$pod2man_exe = $self->catfile($Config{scriptdirexp},'pod2man');
     }
-    if ($pod2man_exe = $self->perl_script($pod2man_exe)) { $found_pod2man = 1; }
-    else {
+    if (not ($pod2man_exe = $self->perl_script($pod2man_exe))) {
 	# No pod2man but some MAN3PODS to be installed
 	print <<END;
 
@@ -2255,18 +2239,6 @@ map_clean :
     join '', @m;
 }
   
-=item ext (specific)
-
-Stub routine standing in for C<ExtUtils::LibList::ext> until VMS
-support is added to that package.
-
-=cut
-
-sub ext {
-    my($self) = @_;
-    '','','';
-}
-
 # --- Output postprocessing section ---
 
 =item nicetext (override)

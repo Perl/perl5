@@ -127,7 +127,7 @@ T_REF_IV_PTR
 	else
 	    croak(\"$var is not of type ${ntype}\")
 T_PTROBJ
-	if (sv_isa($arg, \"${ntype}\")) {
+	if (sv_derived_from($arg, \"${ntype}\")) {
 	    IV tmp = SvIV((SV*)SvRV($arg));
 	    $var = ($type) tmp;
 	}

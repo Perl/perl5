@@ -73,6 +73,7 @@ setpriority(int which, int pid, int val)
 
   prio = sys_prio(pid);
 
+  if (!(_emx_env & 0x200)) return 0; /* Nop if not OS/2. */
   if (priors[(32 - val) >> 5] + 1 == (prio >> 8)) {
       /* Do not change class. */
       return CheckOSError(DosSetPriority((pid < 0) 
@@ -114,6 +115,7 @@ getpriority(int which /* ignored */, int pid)
   PIB *pib;
   ULONG rc, ret;
 
+  if (!(_emx_env & 0x200)) return 0; /* Nop if not OS/2. */
   /* DosGetInfoBlocks has old priority! */
 /*   if (CheckOSError(DosGetInfoBlocks(&tib, &pib))) return -1; */
 /*   if (pid != pib->pib_ulpid) { */
@@ -409,6 +411,8 @@ tcp0(char *name)
 {
     static BYTE buf[20];
     PFN fcn;
+
+    if (!(_emx_env & 0x200)) croak("%s requires OS/2", name); /* Die if not OS/2. */
     if (!htcp)
 	DosLoadModule(buf, sizeof buf, "tcp32dll", &htcp);
     if (htcp && DosQueryProcAddr(htcp, 0, name, &fcn) == 0)
@@ -421,6 +425,8 @@ tcp1(char *name, int arg)
 {
     static BYTE buf[20];
     PFN fcn;
+
+    if (!(_emx_env & 0x200)) croak("%s requires OS/2", name); /* Die if not OS/2. */
     if (!htcp)
 	DosLoadModule(buf, sizeof buf, "tcp32dll", &htcp);
     if (htcp && DosQueryProcAddr(htcp, 0, name, &fcn) == 0)
@@ -601,6 +607,7 @@ os2error(int rc)
 	static char buf[300];
 	ULONG len;
 
+        if (!(_emx_env & 0x200)) return ""; /* Nop if not OS/2. */
 	if (rc == 0)
 		return NULL;
 	if (DosGetMessage(NULL, 0, buf, sizeof buf - 1, rc, "OSO001.MSG", &len))
@@ -947,8 +954,12 @@ Xs_OS2_init()
     char *file = __FILE__;
     {
 	GV *gv;
-	
-        newXS("File::Copy::syscopy", XS_File__Copy_syscopy, file);
+
+	if (_emx_env & 0x200) {	/* OS/2 */
+            newXS("File::Copy::syscopy", XS_File__Copy_syscopy, file);
+            newXS("Cwd::extLibpath", XS_Cwd_extLibpath, file);
+            newXS("Cwd::extLibpath_set", XS_Cwd_extLibpath_set, file);
+	}
         newXS("DynaLoader::mod2fname", XS_DynaLoader_mod2fname, file);
         newXS("Cwd::current_drive", XS_Cwd_current_drive, file);
         newXS("Cwd::sys_chdir", XS_Cwd_sys_chdir, file);
@@ -958,8 +969,6 @@ Xs_OS2_init()
         newXS("Cwd::sys_is_relative", XS_Cwd_sys_is_relative, file);
         newXS("Cwd::sys_cwd", XS_Cwd_sys_cwd, file);
         newXS("Cwd::sys_abspath", XS_Cwd_sys_abspath, file);
-        newXS("Cwd::extLibpath", XS_Cwd_extLibpath, file);
-        newXS("Cwd::extLibpath_set", XS_Cwd_extLibpath_set, file);
 	gv = gv_fetchpv("OS2::is_aout", TRUE, SVt_PV);
 	GvMULTI_on(gv);
 #ifdef PERL_IS_AOUT
@@ -992,3 +1001,33 @@ Perl_OS2_init()
     }
 }
 
+#undef tmpnam
+#undef tmpfile
+
+char *
+my_tmpnam (char *str)
+{
+    char *p = getenv("TMP"), *tpath;
+    int len;
+
+    if (!p) p = getenv("TEMP");
+    tpath = tempnam(p, "pltmp");
+    if (str && tpath) {
+	strcpy(str, tpath);
+	return str;
+    }
+    return tpath;
+}
+
+FILE *
+my_tmpfile ()
+{
+    struct stat s;
+
+    stat(".", &s);
+    if (s.st_mode & S_IWOTH) {
+	return tmpfile();
+    }
+    return fopen(my_tmpnam(NULL), "w+b"); /* Race condition, but
+					     grants TMP. */
+}

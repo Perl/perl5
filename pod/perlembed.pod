@@ -20,8 +20,8 @@ Read about backquotes and about C<system> and C<exec> in L<perlfunc>.
 
 =item B<Use Perl from Perl?>
 
-Read about C<do> and C<eval> in L<perlfunc> and C<use>
-and C<require> in L<perlmod>.
+Read about C<do> and C<eval> in L<perlfunc/do> and L<perlfunc/eval> and C<use>
+and C<require> in L<perlmod> and L<perlfunc/require>, L<perlfunc/use>.
 
 =item B<Use C from C?>
 
@@ -236,7 +236,7 @@ ours I<perl_eval()>) that wraps around Perl's L<perlfunc/eval>.
 Arguably, this is the only routine you'll ever need to execute
 snippets of Perl code from within your C program.  Your string can be
 as long as you wish; it can contain multiple statements; it can
-use L<perlmod/require> or L<perlfunc/do> to include external Perl
+use L<perlfunc/require> or L<perlfunc/do> to include external Perl
 files.
 
 Our I<perl_eval()> lets us evaluate individual Perl strings, and then

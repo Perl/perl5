@@ -43,15 +43,16 @@ dep()
 %token <ival> LOOPEX DOTDOT
 %token <ival> FUNC0 FUNC1 FUNC
 %token <ival> RELOP EQOP MULOP ADDOP
-%token <ival> DOLSHARP DO LOCAL HASHBRACK NOAMP
+%token <ival> DOLSHARP DO HASHBRACK NOAMP
+%token LOCAL MY
 
-%type <ival> prog decl format remember startsub '&'
-%type <opval> block lineseq line loop cond nexpr else argexpr
+%type <ival> prog decl local format startsub remember mremember '&'
+%type <opval> block mblock mintro lineseq line loop cond else
 %type <opval> expr term scalar ary hsh arylen star amper sideff
+%type <opval> argexpr nexpr texpr iexpr mexpr mtexpr miexpr
 %type <opval> listexpr listexprcom indirob
-%type <opval> texpr listop method proto
+%type <opval> listop method proto cont my_scalar
 %type <pval> label
-%type <opval> cont
 
 %left <ival> OROP
 %left ANDOP
@@ -95,8 +96,25 @@ block	:	'{' remember lineseq '}'
 			{ $$ = block_end($1,$2,$3); }
 	;
 
-remember:	/* NULL */	/* start a lexical scope */
-			{ $$ = block_start(); }
+remember:	/* NULL */	/* start a full lexical scope */
+			{ $$ = block_start(TRUE); }
+	;
+
+mblock	:	'{' mintro mremember lineseq '}'
+			{ if ($2)
+			    $4 = $4 ? append_list(OP_LINESEQ,
+					  (LISTOP*)$2, (LISTOP*)$4) : $2;
+			  $$ = block_end($1, $3, $4); }
+	;
+
+mintro	:	/* NULL */	/* introduce pending lexicals */
+			{ $$ = min_intro_pending
+			      ? newSTATEOP(0, Nullch, newOP(OP_NULL, 0))
+			      : NULL; }
+	;
+
+mremember:	/* NULL */	/* start a partial lexical scope */
+			{ $$ = block_start(FALSE); }
 	;
 
 lineseq	:	/* NULL */
@@ -137,28 +155,28 @@ sideff	:	error
 			{ $$ = newLOGOP(OP_OR, 0, $3, $1); }
 	|	expr WHILE expr
 			{ $$ = newLOOPOP(OPf_PARENS, 1, scalar($3), $1); }
-	|	expr UNTIL expr
-			{ $$ = newLOOPOP(OPf_PARENS, 1, invert(scalar($3)), $1);}
+	|	expr UNTIL iexpr
+			{ $$ = newLOOPOP(OPf_PARENS, 1, $3, $1);}
 	;
 
 else	:	/* NULL */
 			{ $$ = Nullop; }
-	|	ELSE block
+	|	ELSE mblock
 			{ $$ = scope($2); }
-	|	ELSIF '(' expr ')' block else
+	|	ELSIF '(' mexpr ')' mblock else
 			{ copline = $1;
-			    $$ = newSTATEOP(0, 0,
-				newCONDOP(0, $3, scope($5), $6));
+			    $$ = newCONDOP(0, $3, scope($5), $6);
 			    hints |= HINT_BLOCK_SCOPE; }
 	;
 
-cond	:	IF '(' expr ')' block else
+cond	:	IF '(' remember mexpr ')' mblock else
 			{ copline = $1;
-			    $$ = newCONDOP(0, $3, scope($5), $6); }
-	|	UNLESS '(' expr ')' block else
+			    $$ = block_end($1, $3,
+				    newCONDOP(0, $4, scope($6), $7)); }
+	|	UNLESS '(' remember miexpr ')' mblock else
 			{ copline = $1;
-			    $$ = newCONDOP(0,
-				invert(scalar($3)), scope($5), $6); }
+			    $$ = block_end($1, $3,
+				    newCONDOP(0, $4, scope($6), $7)); }
 	|	IF block block else
 			{ copline = $1;
 			    deprecate("if BLOCK BLOCK");
@@ -176,16 +194,18 @@ cont	:	/* NULL */
 			{ $$ = scope($2); }
 	;
 
-loop	:	label WHILE '(' texpr ')' block cont
+loop	:	label WHILE '(' remember mtexpr ')' mblock cont
 			{ copline = $2;
-			    $$ = newSTATEOP(0, $1,
-				    newWHILEOP(0, 1, (LOOP*)Nullop,
-					$4, $6, $7) ); }
-	|	label UNTIL '(' expr ')' block cont
+			    $$ = block_end($2, $4,
+				   newSTATEOP(0, $1,
+				      newWHILEOP(0, 1, (LOOP*)Nullop,
+						 $5, $7, $8) )); }
+	|	label UNTIL '(' remember miexpr ')' mblock cont
 			{ copline = $2;
-			    $$ = newSTATEOP(0, $1,
-				    newWHILEOP(0, 1, (LOOP*)Nullop,
-					invert(scalar($4)), $6, $7) ); }
+			    $$ = block_end($2, $4,
+				   newSTATEOP(0, $1,
+				      newWHILEOP(0, 1, (LOOP*)Nullop,
+						 $5, $7, $8) )); }
 	|	label WHILE block block cont
 			{ copline = $2;
 			    $$ = newSTATEOP(0, $1,
@@ -196,19 +216,32 @@ loop	:	label WHILE '(' texpr ')' block cont
 			    $$ = newSTATEOP(0, $1,
 				    newWHILEOP(0, 1, (LOOP*)Nullop,
 					invert(scalar(scope($3))), $4, $5)); }
+	|	label FOR MY remember my_scalar '(' expr ')' mblock cont
+			{ $$ = block_end($2, $4,
+				  newFOROP(0, $1, $2, $5, $7, $9, $10)); }
 	|	label FOR scalar '(' expr ')' block cont
 			{ $$ = newFOROP(0, $1, $2, mod($3, OP_ENTERLOOP),
 				$5, $7, $8); }
-	|	label FOR '(' expr ')' block cont
-			{ $$ = newFOROP(0, $1, $2, Nullop, $4, $6, $7); }
-	|	label FOR '(' nexpr ';' texpr ';' nexpr ')' block
+	|	label FOR '(' remember expr ')' mblock cont
+			{ $$ = block_end($2, $4,
+				 newFOROP(0, $1, $2, Nullop, $5, $7, $8)); }
+	|	label FOR '(' remember nexpr ';'
+				{ if ($5) {
+				    $5 = scalar($5);
+				    if (min_intro_pending)
+				      $5 = newSTATEOP(0, Nullch, $5); } }
+			      texpr ';'
+				{ $8 = scalar($8);
+				  if (min_intro_pending)
+				    $8 = newSTATEOP(0, Nullch, $8); }
+			      nexpr ')' mblock
 			/* basically fake up an initialize-while lineseq */
-			{  copline = $2;
-			    $$ = append_elem(OP_LINESEQ,
-				    newSTATEOP(0, $1, scalar($4)),
-				    newSTATEOP(0, $1,
-					newWHILEOP(0, 1, (LOOP*)Nullop,
-					    scalar($6), $10, scalar($8)) )); }
+			{ copline = $2;
+			    $$ = block_end($2, $4,
+				   append_elem(OP_LINESEQ, $5,
+				      newSTATEOP(0, $1,
+					 newWHILEOP(0, 1, (LOOP*)Nullop,
+						    $8, $13, scalar($11))))); }
 	|	label block cont  /* a block is a loop that happens once */
 			{ $$ = newSTATEOP(0,
 				$1, newWHILEOP(0, 1, (LOOP*)Nullop,
@@ -223,6 +256,25 @@ nexpr	:	/* NULL */
 texpr	:	/* NULL means true */
 			{ (void)scan_num("1"); $$ = yylval.opval; }
 	|	expr
+	;
+
+iexpr	:	expr
+			{ $$ = invert(scalar($1)); }
+	;
+
+mexpr	:	expr
+			{ $$ = min_intro_pending
+				? newSTATEOP(0, Nullch, $1) : $1; }
+	;
+
+mtexpr	:	texpr
+			{ $$ = min_intro_pending
+				? newSTATEOP(0, Nullch, $1) : $1; }
+	;
+
+miexpr	:	iexpr
+			{ $$ = min_intro_pending
+				? newSTATEOP(0, Nullch, $1) : $1; }
 	;
 
 label	:	/* empty */
@@ -294,7 +346,7 @@ listop	:	LSTOP indirob argexpr
 	|	term ARROW method '(' listexprcom ')'
 			{ $$ = convert(OP_ENTERSUB, OPf_STACKED,
 				append_elem(OP_LIST,
-				    prepend_elem(OP_LIST, $1, $5),
+				    prepend_elem(OP_LIST, scalar($1), $5),
 				    newUNOP(OP_METHOD, 0, $3))); }
 	|	METHOD indirob listexpr
 			{ $$ = convert(OP_ENTERSUB, OPf_STACKED,
@@ -374,7 +426,7 @@ term	:	term ASSIGNOP term
 	|	PREDEC term
 			{ $$ = newUNOP(OP_PREDEC, 0,
 					mod(scalar($2), OP_PREDEC)); }
-	|	LOCAL term	%prec UNIOP
+	|	local term	%prec UNIOP
 			{ $$ = localize($2,$1); }
 	|	'(' expr ')'
 			{ $$ = sawparens($2); }
@@ -531,6 +583,14 @@ listexprcom:	/* NULL */
 			{ $$ = $1; }
 	|	expr ','
 			{ $$ = $1; }
+	;
+
+local	:	LOCAL	{ $$ = 0; }
+	|	MY	{ $$ = 1; }
+	;
+
+my_scalar:	scalar
+			{ in_my = 0; $$ = my($1); }
 	;
 
 amper	:	'&' indirob

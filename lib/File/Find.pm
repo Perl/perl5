@@ -259,7 +259,8 @@ if ($^O =~ m:^mswin32:i) {
   $dont_use_nlink = 1;
 }
 
-$dont_use_nlink = 1 if $^O eq 'os2';
+$dont_use_nlink = 1
+    if $^O eq 'os2' || $^O eq 'msdos' || $^O eq 'amigaos';
 
 1;
 

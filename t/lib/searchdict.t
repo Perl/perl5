@@ -41,7 +41,7 @@ EOT
 use Search::Dict;
 
 open(DICT, "+>dict-$$") or die "Can't create dict-$$: $!";
-unlink "dict-$$";
+binmode DICT;			# To make length expected one.
 print DICT $DICT;
 
 my $pos = look *DICT, "abash";
@@ -60,3 +60,6 @@ chomp($word = <DICT>);
 
 print "not " if $pos < 0 || $word ne "Aarhus";
 print "ok 3\n";
+
+close DICT or die "cannot close";
+unlink "dict-$$";
