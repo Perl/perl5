@@ -9,6 +9,7 @@ use lib '../lib';
 use Test::Harness;
 
 $Test::Harness::switches = "";	# Too much noise otherwise
+$Test::Harness::verbose = shift if @ARGV && $ARGV[0] eq '-v';
 
 @tests = @ARGV;
 @tests = <*/*.t> unless @tests;
