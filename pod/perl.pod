@@ -4,16 +4,16 @@ perl - Practical Extraction and Report Language
 
 =head1 SYNOPSIS
 
-B<perl>	[ B<-acdhnpPsSTuUvw> ] 
-[ S<B<-0>[I<octal>]> ] 
-[ S<B<-D>I<number/list>]> ]
-[ S<B<-F>I<string>> ] 
-[ S<B<-i>[I<extension>]> ] 
-[ S<B<-I>I<dir>> ]
-[ S<B<-l>I<octal>> ] 
-[ S<B<-x>I<dir>> ]
-[ I<programfile> | S<B<-e> I<command>> ] 
-[ I<argument> ... ]
+B<perl>	S<[ B<-sTuU> ]>
+	S<[ B<-hv> ] [ B<-V>[:I<configvar>] ]>
+	S<[ B<-cw> ] [ B<-d>[:I<debugger>] ] [ B<-D>[I<number/list>] ]>
+	S<[ B<-pna> ] [ B<-F>I<pattern> ] [ B<-l>[I<octal>] ] [ B<-0>[I<octal>] ]>
+	S<[ B<-I>I<dir> ] [ B<-m>[B<->]I<module> ] [ B<-M>[B<->]I<'module...'> ]>
+	S<[ B<-P> ]>
+	S<[ B<-S> ]>
+	S<[ B<-x>[I<dir>] ]>
+	S<[ B<-i>[I<extension>] ]>
+	S<[ B<-e> I<'command'> ] [ B<--> ] [ I<programfile> ] [ I<argument> ]...>
 
 For ease of access, the Perl manual has been split up into a number
 of sections:
@@ -80,7 +80,9 @@ text files, extracting information from those text files, and printing
 reports based on that information.  It's also a good language for many
 system management tasks.  The language is intended to be practical
 (easy to use, efficient, complete) rather than beautiful (tiny,
-elegant, minimal).  It combines (in the author's opinion, anyway) some
+elegant, minimal).
+
+Perl combines (in the author's opinion, anyway) some
 of the best features of C, B<sed>, B<awk>, and B<sh>, so people
 familiar with those languages should have little difficulty with it.
 (Language historians will also note some vestiges of B<csh>, Pascal,
@@ -250,7 +252,7 @@ honest:
 
 =head1 AUTHOR
 
-Larry Wall E<lt><F<lwall@sems.com>E<gt>, with the help of oodles of other folks.
+Larry Wall E<lt>F<lwall@sems.com>E<gt>, with the help of oodles of other folks.
 
 =head1 FILES
 
@@ -298,7 +300,7 @@ given identifier may not be longer than 255 characters, and no
 component of your PATH may be longer than 255 if you use B<-S>.  A regular
 expression may not compile to more than 32767 bytes internally.
 
-See the perl bugs database at F<http://perl.com/perl/bugs/>.  You may
+See the perl bugs database at F< http://perl.com/perl/bugs/ >.  You may
 mail your bug reports (be sure to include full configuration information
 as output by the myconfig program in the perl source tree) to
 F<perlbug@perl.com>.
