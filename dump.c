@@ -412,7 +412,8 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
 	    if (o->op_targ == OP_NEXTSTATE)
 	    {
 		if (CopLINE(cCOPo))
-		    Perl_dump_indent(aTHX_ level, file, "LINE = %d\n",CopLINE(cCOPo));
+		    Perl_dump_indent(aTHX_ level, file, "LINE = %"UVf"\n",
+				     (UV)CopLINE(cCOPo));
 		if (CopSTASHPV(cCOPo))
 		    Perl_dump_indent(aTHX_ level, file, "PACKAGE = \"%s\"\n",
 				     CopSTASHPV(cCOPo));
@@ -655,7 +656,8 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
     case OP_NEXTSTATE:
     case OP_DBSTATE:
 	if (CopLINE(cCOPo))
-	    Perl_dump_indent(aTHX_ level, file, "LINE = %d\n",CopLINE(cCOPo));
+	    Perl_dump_indent(aTHX_ level, file, "LINE = %"UVf"\n",
+			     (UV)CopLINE(cCOPo));
 	if (CopSTASHPV(cCOPo))
 	    Perl_dump_indent(aTHX_ level, file, "PACKAGE = \"%s\"\n",
 			     CopSTASHPV(cCOPo));
