@@ -2929,6 +2929,13 @@ as a list, you need to look into how references work, because Perl will
 not magically convert between scalars and lists for you.  See
 L<perlref>.
 
+=item Scalars leaked: %d
+
+(P) Something went wrong in Perl's internal bookkeeping of scalars:
+not all scalar variables were deallocated by the time Perl exited.
+What this usually indicates is a memory leak, which is of course bad,
+especially if the Perl program is intended to be long-running.
+
 =item Script is not setuid/setgid in suidperl
 
 (F) Oddly, the suidperl program was invoked on a script without a setuid
