@@ -333,33 +333,13 @@ EOM
 esac
 EOCBU
 
-# This script UU/uselfs.cbu will get 'called-back' by Configure 
-# after it has prompted the user for whether to use large files.
-cat > UU/uselfs.cbu <<'EOCBU'
 case "$uselargefiles" in
 $define|true|[yY]*)
-	lfcflags="`getconf LFS_CFLAGS 2>/dev/null`"
-	lfldflags="`getconf LFS_LDFLAGS 2>/dev/null`"
-	lflibs="`getconf LFS_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g`"
-	case "$lfcflags$lfldflags$lflibs" in
-	'');;
-	*) use64bits="$define"
-           echo "(Large files in Solaris require also using long longs...)"
-	   case "$ccflags" in
-	   *-DUSE_64_BITS*) ;;
-	   *) ccflags="$ccflags -DUSE_64_BITS" ;;
-	   esac
-	   ccflags="$ccflags $lfcflags"
-	   ldflags="$ldflags $lfldflags"
-	   libswanted="$libswanted $lflibs"
-	   ;;
-	esac
-	lfcflags=''
-	lfldflags=''
-	lflibs=''
-	;;
+    ccflags="$ccflags `getconf LFS_CFLAGS 2>/dev/null`"
+    ldflags="$ldflags `getconf LFS_LDFLAGS 2>/dev/null`"
+    libswanted="$libswanted `getconf LFS_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g`"
+    ;;
 esac
-EOCBU
 
 # This script UU/use64bits.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use 64 bits.
@@ -375,16 +355,25 @@ EOM
 		exit 1
 		;;
 	    esac
-	    case "$ccflags" in
-	    *-DUSE_64_BITS*) ;;
-	    *) ccflags="$ccflags -DUSE_64_BITS" ;;
-	    esac
 	    # When a 64-bit cc becomes available $archname64
 	    # may need setting so that $archname gets it attached.
 	    ;;
 esac
 EOCBU
 
+case "$usefull64bits" in
+$define|true|[yY]*)
+	    case "$ccflags" in
+	    *-DUSE_FULL_64_BITS*) ;;
+	    *) ccflags="$ccflags -DUSE_FULL_64_BITS" ;;
+	    esac
+	    ccflags="$ccflags `getconf XBS5_LP64_OFF64_CFLAGS`"
+	    ldflags="$ccflags `getconf XBS5_LP64_OFF64_LDFLAGS`"
+	    lddlflags="$lddlflags -G `getconf XBS5_LP64_OFF64_LDFLAGS`"
+	    loclibpth=/usr/lib/sparcv9
+	    ;;
+esac
+ 
 # This is just a trick to include some useful notes.
 cat > /dev/null <<'End_of_Solaris_Notes'
 

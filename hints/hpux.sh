@@ -101,15 +101,6 @@ EOM
     ;;
 esac
 
-# Backward compatibility (uselonglong is deprecated).
-case "$uselonglolong" in
-"$define"|true|[yY]*)
-	case "$use64bits" in
-	'') use64bits="$define" ;;
-	esac
-	;;
-esac                          
-
 # Determine the architecture type of this system.
 # Keep leading tab below -- Configure Black Magic -- RAM, 03/02/97
 	xxOsRevMajor=`uname -r | sed -e 's/^[^0-9]*//' | cut -d. -f1`;

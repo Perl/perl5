@@ -248,15 +248,6 @@ EOM
 		exit 1
 		;;
 	    esac
-	    case "$cc $ccflags" in
-	    *-n32*)
-		case "$ccflags" in
-		*-DUSE_64_BITS*) ;;
-		*) ccflags="$ccflags -DUSE_64_BITS" ;;
-		esac
-		archname64="-n32"
-		;;
-	    esac
 	    ;;
 esac
 EOCBU
