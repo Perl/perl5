@@ -243,8 +243,12 @@ END
 	    # Hmm.  gcc doesn't call /usr/ccs/bin/ld directly, but it
 	    # does appear to be using it eventually.  egcs-1.0.3's ld
 	    # wrapper does this.
-	    # All Solaris versions of ld I've seen contain the magic
+	    # Most Solaris versions of ld I've seen contain the magic
 	    # string used in the grep.
+	    :
+	elif echo "$verbose" | grep "Solaris Link Editors" >/dev/null 2>&1; then
+	    # However some Solaris 8 versions prior to ld 5.8-1.286 contain
+	    # this string instead.
 	    :
 	else
 	    # No evidence yet of /usr/ccs/bin/ld.  Some versions
@@ -263,6 +267,10 @@ END
 	    # Allow that $myld may be '', due to changes in gcc's output 
 	    if ${myld:-ld} -V 2>&1 |
 		grep "ld: Software Generation Utilities" >/dev/null 2>&1; then
+		# Ok, /usr/ccs/bin/ld eventually does get called.
+		:
+	    elif ${myld:-ld} -V 2>&1 |
+		grep "Solaris Link Editors" >/dev/null 2>&1; then
 		# Ok, /usr/ccs/bin/ld eventually does get called.
 		:
 	    else

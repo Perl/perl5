@@ -142,7 +142,7 @@ case `$cc -v 2>&1`"" in
 		*)  ccflags="-Ae $cc_cppflags"
 		    # +vnocompatwarnings not known in 10.10 and older
 		    if [ $xxOsRev -ge 1020 ]; then
-			ccflags="$cc_cppflags -Wl,+vnocompatwarnings"
+			ccflags="$ccflags -Wl,+vnocompatwarnings"
 			fi
 		    ;;
                esac
