@@ -1,3 +1,10 @@
+6.03 Wed Jun 19 17:06:14 EDT 2002
+    - Documented that we're clamping down on cargo-cult MakeMaker
+      programming.
+    - Eased up the parameter verification to leave errant values alone.
+    - Doug MacEachern documented LDDLFLAGS and added to known parameters.
+    - Possible fix for XS compiles on Cygwin for pre 5.8 perls.
+
 6.02 Sat Jun 15 19:46:06 EDT 2002
     - ExtUtils::Installed->modules() was broken in scalar context
     - Sync bleadperl 16922:  Netware updates from Ananth Kesari.

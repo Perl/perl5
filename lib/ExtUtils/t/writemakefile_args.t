@@ -14,7 +14,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 16;
+use Test::More tests => 13;
 
 use TieOut;
 use MakeMaker::Test::Utils;
@@ -35,32 +35,34 @@ ok( chdir 'Big-Dummy', "chdir'd to Big-Dummy" ) ||
         $warnings .= join '', @_;
     };
 
-    my $mm = WriteMakefile(
-        NAME            => 'Big::Dummy',
-        VERSION_FROM    => 'lib/Big/Dummy.pm',
-        MAN3PODS        => ' ', # common mistake
-    );
+    my $mm;
+
+    eval {
+        $mm = WriteMakefile(
+            NAME            => 'Big::Dummy',
+            VERSION_FROM    => 'lib/Big/Dummy.pm',
+            MAN3PODS        => ' ', # common mistake
+        );
+    };
 
     is( $warnings, <<VERIFY );
 WARNING: MAN3PODS takes a hash reference not a string/number.
          Please inform the author.
 VERIFY
-    is_deeply( $mm->{MAN3PODS}, {}, 'Wrong argument type corrected' );
 
     $warnings = '';
-    $mm = WriteMakefile(
-        NAME            => 'Big::Dummy',
-        VERSION_FROM    => 'lib/Big/Dummy.pm',
-        AUTHOR          => sub {},
-    );
+    eval {
+        $mm = WriteMakefile(
+            NAME            => 'Big::Dummy',
+            VERSION_FROM    => 'lib/Big/Dummy.pm',
+            AUTHOR          => sub {},
+        );
+    };
 
     is( $warnings, <<VERIFY );
 WARNING: AUTHOR takes a string/number not a code reference.
          Please inform the author.
 VERIFY
-
-    is_deeply( $mm->{AUTHOR}, '' );
-
 
     # LIBS accepts *both* a string or an array ref.  The first cut of
     # our verification did not take this into account.
@@ -87,15 +89,16 @@ VERIFY
     is_deeply( $mm->{LIBS}, ['-lwibble', '-lwobble'] );
 
     $warnings = '';
-    $mm = WriteMakefile(
-        NAME            => 'Big::Dummy',
-        VERSION_FROM    => 'lib/Big/Dummy.pm',
-        LIBS            => { wibble => "wobble" },
-    );
+    eval {
+        $mm = WriteMakefile(
+            NAME            => 'Big::Dummy',
+            VERSION_FROM    => 'lib/Big/Dummy.pm',
+            LIBS            => { wibble => "wobble" },
+        );
+    };
 
     # We'll get warnings about the bogus libs, that's ok.
     like( $warnings, qr{^WARNING: LIBS takes a array reference or string/number not a hash reference}m );
-    is_deeply( $mm->{LIBS}, [] );
 
 
     $warnings = '';
