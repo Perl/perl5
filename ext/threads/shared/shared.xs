@@ -463,12 +463,16 @@ sharedsv_scalar_store(pTHX_ SV *sv, shared_sv *shared)
     else {
         SvTEMP_off(sv);
 	SHARED_CONTEXT;
+	ENTER;
+	SAVETMPS;
 	sv_setsv_nomg(SHAREDSvPTR(shared), sv);
 	if(SvOBJECT(sv)) {
 	  SV* fake_stash = newSVpv(HvNAME(SvSTASH(sv)),0);
 	  SvOBJECT_on(SHAREDSvPTR(shared));
 	  SvSTASH(SHAREDSvPTR(shared)) = (HV*)fake_stash;
 	}
+	FREETMPS;
+	LEAVE;
 	CALLER_CONTEXT;
     }
     if (!allowed) {
