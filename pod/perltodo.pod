@@ -548,6 +548,12 @@ Should overload be 'contagious' through @ISA so that derived classes
 would inherit their base classes' overload definitions?  What to do
 in case of overload conflicts?
 
+=head2 Taint rethink
+
+Should taint be stopped from affecting control flow, if ($tainted)?
+Should tainted symbolic method calls and subref calls be stopped?
+(Look at Ruby's $SAFE levels for inspiration?)
+
 =head1 Vague ideas
 
 Ideas which have been discussed, and which may or may not happen.

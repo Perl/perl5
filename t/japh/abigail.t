@@ -223,11 +223,11 @@ plan tests => 130;
     END {unlink_all $progfile}
 
     my @programs = (<< '    --', << '    --');
-#!./perl               --    # No trailing newline after the last line!    
+#!./perl
 BEGIN{$|=$SIG{__WARN__}=sub{$_=$_[0];y-_- -;print/(.)"$/;seek _,-open(_ 
 ,"+<$0"),2;truncate _,tell _;close _;exec$0}}//rekcaH_lreP_rehtona_tsuJ
     --
-#!./perl               --   # Remove trailing newline!
+#!./perl
 BEGIN{$SIG{__WARN__}=sub{$_=pop;y-_- -;print/".*(.)"/;  
 truncate$0,-1+-s$0;exec$0;}}//rekcaH_lreP_rehtona_tsuJ
     --

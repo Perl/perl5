@@ -2296,7 +2296,9 @@ sub installbin {
 EXE_FILES = @{$self->{EXE_FILES}}
 
 } . ($Is_Win32
-  ? q{FIXIN = pl2bat.bat
+  ? exists $ENV{PERL_CORE}
+  ? q{FIXIN = bin\pl2bat.bat
+} : q{FIXIN = pl2bat.bat
 } : q{FIXIN = $(PERLRUN) "-MExtUtils::MY" \
     -e "MY->fixin(shift)"
 }).qq{

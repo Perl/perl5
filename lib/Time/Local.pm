@@ -19,8 +19,12 @@ my $Breakpoint   = ($ThisYear + 50) % 100;
 my $NextCentury  = $ThisYear - $ThisYear % 100;
    $NextCentury += 100 if $Breakpoint < 50;
 my $Century      = $NextCentury - 100;
+my $SecOff       = 0;
 
 my (%Options, %Cheat);
+
+my $MaxInt = ((1<<(8 * $Config{intsize} - 2))-1)*2 + 1;
+my $MaxDay = int(($MaxInt-43200)/86400)-1;
 
 # Determine the EPOC day for this machine
 my $Epoc = 0;
@@ -28,15 +32,22 @@ if ($^O eq 'vos') {
 # work around posix-977 -- VOS doesn't handle dates in
 # the range 1970-1980.
   $Epoc = _daygm((0, 0, 0, 1, 0, 70, 4, 0));
-} else {
+}
+elsif ($^O eq 'MacOS') {
+  no integer;
+
+  $MaxDay *=2 if $^O eq 'MacOS';  # time_t unsigned ... quick hack?
+  # MacOS time() is seconds since 1 Jan 1904, localtime
+  # so we need to calculate an offset to apply later
+  $Epoc = 693901;
+  $SecOff = timelocal(localtime(0)) - timelocal(gmtime(0));
+  $Epoc += _daygm(gmtime(0));
+}
+else {
   $Epoc = _daygm(gmtime(0));
 }
 
 %Cheat=(); # clear the cache as epoc has changed
-
-my $MaxInt = ((1<<(8 * $Config{intsize} - 2))-1)*2 + 1;
-my $MaxDay = int(($MaxInt-43200)/86400)-1;
-
 
 sub _daygm {
     $_[3] + ($Cheat{pack("ss",@_[4,5])} ||= do {
@@ -48,7 +59,11 @@ sub _daygm {
 
 
 sub _timegm {
-    $_[0]  +  60 * $_[1]  +  3600 * $_[2]  +  86400 * &_daygm;
+    my $sec = $SecOff + $_[0]  +  60 * $_[1]  +  3600 * $_[2];
+
+    no integer;
+
+    $sec +  86400 * &_daygm;
 }
 
 
@@ -86,7 +101,11 @@ sub timegm {
 	croak "Cannot handle date ($sec, $min, $hour, $mday, $month, $year)";
     }
 
-    $sec + 60*$min + 3600*$hour + 86400*$days;
+    $sec += $SecOff + 60*$min + 3600*$hour;
+
+    no integer;
+
+    $sec + 86400*$days;
 }
 
 
@@ -97,6 +116,7 @@ sub timegm_nocheck {
 
 
 sub timelocal {
+    no integer;
     my $ref_t = &timegm;
     my $loc_t = _timegm(localtime($ref_t));
 

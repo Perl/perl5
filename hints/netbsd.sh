@@ -88,9 +88,6 @@ $define|true|[yY]*)
         if pkg_info -qe pth; then 
             # Add -lpthread. 
             libswanted="$libswanted pthread" 
-            # -R so that we find the libpthread.so from /usr/pkg/lib
-            # during Configure and build.
-            ldflags="-R/usr/pkg/lib $ldflags" 
             # There is no libc_r as of NetBSD 1.5.2, so no c -> c_r. 
         else 
             echo "$0: You need to install the GNU pth.  Aborting." >&4 
@@ -101,6 +98,9 @@ esac
 EOCBU
 
 # Recognize the NetBSD packages collection.
-# GDBM might be here.
-test -d /usr/pkg/lib     && loclibpth="$loclibpth /usr/pkg/lib"
+# GDBM might be here, pth might be there.
+if test -d /usr/pkg/lib; then
+	loclibpth="$loclibpth /usr/pkg/lib"
+	ldflags="$ldflags -R/usr/pkg/lib"
+fi
 test -d /usr/pkg/include && locincpth="$locincpth /usr/pkg/include"

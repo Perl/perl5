@@ -2262,6 +2262,12 @@ MPE/iX update after Perl 5.6.0.  See README.mpeix.
 
 =item *
 
+NetBSD/threads: try installing the GNU pth (should be in the
+packages collection, or http://www.gnu.org/software/pth/),
+and Configure with -Duseithreads. 
+
+=item *
+
 NetBSD/sparc
 
 Perl now works on NetBSD/sparc.
