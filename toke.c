@@ -1948,9 +1948,11 @@ yylex()
 	}
 	goto retry;
     case '\r':
+#ifdef PERL_STRICT_CR
 	warn("Illegal character \\%03o (carriage return)", '\r');
 	croak(
       "(Maybe you didn't strip carriage returns after a network transfer?)\n");
+#endif
     case ' ': case '\t': case '\f': case 013:
 	s++;
 	goto retry;

@@ -484,7 +484,7 @@ PP(pp_umask)
     /* Only DIE if trying to restrict permissions on `user' (self).
      * Otherwise it's harmless and more useful to just return undef
      * since 'group' and 'other' concepts probably don't exist here. */
-    if (MAXARG >= 1 && POPi & 0700)
+    if (MAXARG >= 1 && (POPi & 0700))
 	DIE("umask not implemented");
     XPUSHs(&sv_undef);
 #endif
