@@ -2774,8 +2774,6 @@ print "# some Unicode properties\n";
 
 
 {
-    my $test = 893;
-
     print "# Unicode hash keys and \\w\n";
     # This is not really a regex test but regexes bring
     # out the issue nicely.
@@ -2804,3 +2802,17 @@ print "# some Unicode properties\n";
    }
 }
 
+{
+    print "# qr/.../x\n";
+
+    my $R = qr/ A B C # D E/x;
+
+    print eval {"ABCDE" =~ $R} ? "ok $test\n" : "not ok $test\n";
+    $test++;
+
+    print eval {"ABCDE" =~ m/$R/} ? "ok $test\n" : "not ok $test\n";
+    $test++;
+
+    print eval {"ABCDE" =~ m/($R)/} ? "ok $test\n" : "not ok $test\n";
+    $test++;
+}
