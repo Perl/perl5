@@ -714,6 +714,11 @@ Perl_vmssetenv(pTHX_ char *lnm, char *eqv, struct dsc$descriptor_s **tabvec)
     $DESCRIPTOR(crtlenv,"CRTL_ENV");  $DESCRIPTOR(clisym,"CLISYM");
     $DESCRIPTOR(local,"_LOCAL");
 
+    if (!lnm) {
+        set_errno(EINVAL); set_vaxc_errno(SS$_IVLOGNAM);
+        return SS$_IVLOGNAM;
+    }
+
     for (cp1 = lnm, cp2 = uplnm; *cp1; cp1++, cp2++) {
       *cp2 = _toupper(*cp1);
       if (cp1 - lnm > LNM$C_NAMLENGTH) {
