@@ -123,13 +123,18 @@ Perl_ithread_destruct (pTHX_ ithread* thread, const char *why)
 	MUTEX_UNLOCK(&create_destruct_mutex);
 	/* Thread is now disowned */
 	if (thread->interp) {
+	    dTHXa(thread->interp);
 	    PERL_SET_CONTEXT(thread->interp);
+	    SvREFCNT_dec(thread->params);
+	    thread->params = Nullsv;
 	    perl_destruct(thread->interp);
 	    perl_free(thread->interp);
 	    thread->interp = NULL;
 	}
 	PERL_SET_CONTEXT(aTHX);
 	MUTEX_UNLOCK(&thread->mutex);
+	MUTEX_DESTROY(&thread->mutex);
+        PerlMemShared_free(thread);
 }
 
 int
@@ -186,11 +191,14 @@ ithread_mg_free(pTHX_ SV *sv, MAGIC *mg)
     MUTEX_LOCK(&thread->mutex);
     thread->count--;
     if (thread->count == 0) {
-	if (!(thread->state & (PERL_ITHR_DETACHED|PERL_ITHR_JOINED))) {
-	    Perl_warn(aTHX_ "Implicit detach");
-	}
-	MUTEX_UNLOCK(&thread->mutex);
-	Perl_ithread_detach(aTHX_ thread);
+       if(thread->state & PERL_ITHR_FINISHED &&
+          (thread->state & PERL_ITHR_DETACHED ||
+           thread->state & PERL_ITHR_JOINED))
+       {
+            MUTEX_UNLOCK(&thread->mutex);
+            Perl_ithread_destruct(aTHX_ thread, "no reference");
+       }
+       MUTEX_UNLOCK(&thread->mutex);
     }
     else {
 	MUTEX_UNLOCK(&thread->mutex);
@@ -286,8 +294,6 @@ Perl_ithread_run(void * arg) {
 
 	if (thread->state & PERL_ITHR_DETACHED) {
 		MUTEX_UNLOCK(&thread->mutex);
-		SvREFCNT_dec(thread->params);
-		thread->params = Nullsv;
 		Perl_ithread_destruct(aTHX_ thread, "detached finish");
 	} else {
 		MUTEX_UNLOCK(&thread->mutex);
@@ -506,8 +512,6 @@ Perl_ithread_join(pTHX_ SV *obj)
 	/* We have finished with it */
 	thread->state |= PERL_ITHR_JOINED;
 	MUTEX_UNLOCK(&thread->mutex);
-	sv_unmagic(SvRV(obj),PERL_MAGIC_shared_scalar);
-	Perl_ithread_destruct(aTHX_ thread, "joined");
 	return retparam;
     }
     return (AV*)NULL;
@@ -563,7 +567,9 @@ PPCODE:
   int i;
   I32 len = AvFILL(params);
   for (i = 0; i <= len; i++) {
-    XPUSHs(av_shift(params));
+    SV* tmp = av_shift(params);
+    XPUSHs(tmp);
+    sv_2mortal(tmp);
   }
   SvREFCNT_dec(params);
 }
