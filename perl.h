@@ -3852,7 +3852,7 @@ typedef struct am_table_short AMTS;
 #define IN_LOCALE_COMPILETIME	(PL_hints & HINT_LOCALE)
 
 #define IN_LOCALE \
-	(PL_curcop == &PL_compiling ? IN_LOCALE_COMPILETIME : IN_LOCALE_RUNTIME)
+	(IN_PERL_COMPILETIME ? IN_LOCALE_COMPILETIME : IN_LOCALE_RUNTIME)
 
 #define STORE_NUMERIC_LOCAL_SET_STANDARD() \
 	bool was_local = PL_numeric_local && IN_LOCALE; \

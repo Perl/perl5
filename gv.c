@@ -720,7 +720,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 
 	    if (global)
 		stash = PL_defstash;
-	    else if ((COP*)PL_curcop == &PL_compiling) {
+	    else if (IN_PERL_COMPILETIME) {
 		stash = PL_curstash;
 		if (add && (PL_hints & HINT_STRICT_VARS) &&
 		    sv_type != SVt_PVCV &&

@@ -2677,7 +2677,7 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, PAD** padp)
     SAVETMPS;
     /* switch to eval mode */
 
-    if (PL_curcop == &PL_compiling) {
+    if (IN_PERL_COMPILETIME) {
 	SAVECOPSTASH_FREE(&PL_compiling);
 	CopSTASH_set(&PL_compiling, PL_curstash);
     }
@@ -2710,14 +2710,14 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, PAD** padp)
     PL_hints &= HINT_UTF8;
 
     /* we get here either during compilation, or via pp_regcomp at runtime */
-    runtime = (PL_curcop != &PL_compiling);
+    runtime = IN_PERL_RUNTIME;
     if (runtime)
 	runcv = find_runcv(NULL);
 
     PL_op = &dummy;
     PL_op->op_type = OP_ENTEREVAL;
     PL_op->op_flags = 0;			/* Avoid uninit warning. */
-    PUSHBLOCK(cx, CXt_EVAL|(PL_curcop == &PL_compiling ? 0 : CXp_REAL), SP);
+    PUSHBLOCK(cx, CXt_EVAL|(IN_PERL_COMPILETIME ? 0 : CXp_REAL), SP);
     PUSHEVAL(cx, 0, Nullgv);
 
     if (runtime)
@@ -2733,7 +2733,7 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, PAD** padp)
     /* XXX DAPM do this properly one year */
     *padp = (AV*)SvREFCNT_inc(PL_comppad);
     LEAVE;
-    if (PL_curcop == &PL_compiling)
+    if (IN_PERL_COMPILETIME)
 	PL_compiling.op_private = (U8)(PL_hints & HINT_PRIVATE_MASK);
 #ifdef OP_IN_REGISTER
     op = PL_opsave;

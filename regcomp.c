@@ -2253,13 +2253,13 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 		}
 		else {						/* First pass */
 		    if (PL_reginterp_cnt < ++RExC_seen_evals
-			&& PL_curcop != &PL_compiling)
+			&& IN_PERL_RUNTIME)
 			/* No compiled RE interpolated, has runtime
 			   components ===> unsafe.  */
 			FAIL("Eval-group not allowed at runtime, use re 'eval'");
 		    if (PL_tainting && PL_tainted)
 			FAIL("Eval-group in insecure regular expression");
-		    if (PL_curcop == &PL_compiling)
+		    if (IN_PERL_COMPILETIME)
 			PL_cv_has_eval = 1;
 		}
 

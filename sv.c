@@ -4473,7 +4473,7 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
                 sv_dump(sv);
             }
 	}
-	else if (PL_curcop != &PL_compiling)
+	else if (IN_PERL_RUNTIME)
 	    Perl_croak(aTHX_ PL_no_modify);
         /* At this point I believe that I can drop the global SV mutex.  */
     }
@@ -4490,7 +4490,7 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
 	    *SvEND(sv) = '\0';
 	    unsharepvn(pvx, SvUTF8(sv) ? -(I32)len : len, hash);
 	}
-	else if (PL_curcop != &PL_compiling)
+	else if (IN_PERL_RUNTIME)
 	    Perl_croak(aTHX_ PL_no_modify);
     }
 #endif
@@ -4875,7 +4875,7 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
         sv_force_normal_flags(sv, 0);
 #endif
     if (SvREADONLY(sv)) {
-	if (PL_curcop != &PL_compiling
+	if (IN_PERL_RUNTIME
 	    && how != PERL_MAGIC_regex_global
 	    && how != PERL_MAGIC_bm
 	    && how != PERL_MAGIC_fm
@@ -6396,7 +6396,7 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
     if (PerlIO_isutf8(fp))
 	SvUTF8_on(sv);
 
-    if (PL_curcop == &PL_compiling) {
+    if (IN_PERL_COMPILETIME) {
 	/* we always read code in line mode */
 	rsptr = "\n";
 	rslen = 1;
@@ -6731,7 +6731,7 @@ Perl_sv_inc(pTHX_ register SV *sv)
 	if (SvIsCOW(sv))
 	    sv_force_normal_flags(sv, 0);
 	if (SvREADONLY(sv)) {
-	    if (PL_curcop != &PL_compiling)
+	    if (IN_PERL_RUNTIME)
 		Perl_croak(aTHX_ PL_no_modify);
 	}
 	if (SvROK(sv)) {
@@ -6887,7 +6887,7 @@ Perl_sv_dec(pTHX_ register SV *sv)
 	if (SvIsCOW(sv))
 	    sv_force_normal_flags(sv, 0);
 	if (SvREADONLY(sv)) {
-	    if (PL_curcop != &PL_compiling)
+	    if (IN_PERL_RUNTIME)
 		Perl_croak(aTHX_ PL_no_modify);
 	}
 	if (SvROK(sv)) {

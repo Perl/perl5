@@ -1592,7 +1592,7 @@ Perl_swash_init(pTHX_ char* pkg, char* name, SV *listsv, I32 minbits, I32 none)
     SAVEI32(PL_hints);
     PL_hints = 0;
     save_re_context();
-    if (PL_curcop == &PL_compiling) {
+    if (IN_PERL_COMPILETIME) {
 	/* XXX ought to be handled by lex_start */
 	SAVEI32(PL_in_my);
 	PL_in_my = 0;
@@ -1608,7 +1608,7 @@ Perl_swash_init(pTHX_ char* pkg, char* name, SV *listsv, I32 minbits, I32 none)
     SvREFCNT_dec(errsv_save);
     LEAVE;
     POPSTACK;
-    if (PL_curcop == &PL_compiling) {
+    if (IN_PERL_COMPILETIME) {
 	STRLEN len;
 	char* pv = SvPV(tokenbufsv, len);
 
@@ -1725,7 +1725,7 @@ Perl_swash_fetch(pTHX_ SV *sv, U8 *ptr, bool do_utf8)
 	    POPSTACK;
 	    FREETMPS;
 	    LEAVE;
-	    if (PL_curcop == &PL_compiling)
+	    if (IN_PERL_COMPILETIME)
 		PL_curcop->op_private = (U8)(PL_hints & HINT_PRIVATE_MASK);
 
 	    svp = hv_store(hv, (char*)ptr, klen, retval, 0);
