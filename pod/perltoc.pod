@@ -1991,8 +1991,8 @@ You want to temporarily change just one element of an array or hash
 =item Pragmatic Modules
 
 attributes, attrs, autouse, base, blib, bytes, charnames, constant,
-diagnostics, fields, filetest, integer, less, lib, locale, open, ops,
-overload, re, sigtrap, strict, subs, utf8, vars, warnings
+diagnostics, fields, filetest, integer, less, locale, open, ops, overload,
+re, sigtrap, strict, subs, utf8, vars, warnings
 
 =item Standard Modules
 
@@ -2015,14 +2015,15 @@ File::stat, FileCache, FileHandle, FindBin, Getopt::Long, Getopt::Std,
 I18N::Collate, IO, IPC::Open2, IPC::Open3, Math::BigFloat, Math::BigInt,
 Math::Complex, Math::Trig, NDBM_File, Net::Ping, Net::hostent, Net::netent,
 Net::protoent, Net::servent, O, ODBM_File, Opcode, Pod::Checker, Pod::Find,
-Pod::Html, Pod::InputObjects, Pod::Man, Pod::ParseUtils, Pod::Parser,
-Pod::Plainer, Pod::Select, Pod::Text, Pod::Text::Color, Pod::Text::Termcap,
-Pod::Usage, SDBM_File, Safe, Search::Dict, SelectSaver, SelfLoader, Shell,
-Socket, Symbol, Term::ANSIColor, Term::Cap, Term::Complete, Term::ReadLine,
-Test, Test::Harness, Text::Abbrev, Text::ParseWords, Text::Soundex,
-Text::Wrap, Tie::Array, Tie::Handle, Tie::Hash, Tie::RefHash, Tie::Scalar,
-Tie::SubstrHash, Time::Local, Time::gmtime, Time::localtime, Time::tm,
-UNIVERSAL, User::grent, User::pwent
+Pod::Html, Pod::InputObjects, Pod::LaTeX, Pod::Man, Pod::ParseUtils,
+Pod::Parser, Pod::Plainer, Pod::Select, Pod::Text, Pod::Text::Color,
+Pod::Text::Termcap, Pod::Usage, SDBM_File, Safe, Search::Dict, SelectSaver,
+SelfLoader, Shell, Socket, Symbol, Term::ANSIColor, Term::Cap,
+Term::Complete, Term::ReadLine, Test, Test::Harness, Text::Abbrev,
+Text::ParseWords, Text::Soundex, Text::Wrap, Tie::Array, Tie::Handle,
+Tie::Hash, Tie::RefHash, Tie::Scalar, Tie::SubstrHash, Time::Local,
+Time::gmtime, Time::localtime, Time::tm, UNIVERSAL, User::grent,
+User::pwent
 
 =item Extension Modules
 
@@ -3977,6 +3978,18 @@ FETCH_I<type>_ATTRIBUTES, MODIFY_I<type>_ATTRIBUTES
 
 =back
 
+=head2 attrs - set/get attributes of a subroutine (deprecated)
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+method, locked
+
+=back
+
 =head2 autouse - postpone load of modules until a function is used
 
 =over
@@ -4147,6 +4160,30 @@ double
 
 =back
 
+=head2 lib - manipulate @INC at compile time
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over
+
+=item Adding directories to @INC
+
+=item Deleting directories from @INC
+
+=item Restoring original @INC
+
+=back
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=back
+
 =head2 locale - Perl pragma to use and avoid POSIX locales for built-in
 operations
 
@@ -4167,6 +4204,18 @@ operations
 =item DESCRIPTION
 
 =item UNIMPLEMENTED FUNCTIONALITY
+
+=item SEE ALSO
+
+=back
+
+=head2 ops - Perl pragma to restrict unsafe operations when compiling
+
+=over
+
+=item SYNOPSIS	
+
+=item DESCRIPTION
 
 =item SEE ALSO
 
@@ -4268,6 +4317,16 @@ integer, float, binary, q, qr
 
 =back
 
+=head2 re - Perl pragma to alter regular expression behaviour
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=back
+
 =head2 sigtrap - Perl pragma to enable simple signal handling
 
 =over
@@ -4354,6 +4413,8 @@ use warnings::register, warnings::enabled([$category]),
 warnings::warn([$category,] $message)
 
 =back
+
+=head2 warnings::register - warnings import function
 
 =head1 MODULE DOCUMENTATION
 
@@ -4794,6 +4855,8 @@ B<-u Package>
 
 =back
 
+=head2 B::Stash - show what stashes are loaded
+
 =head2 B::Terse - Walk Perl syntax tree, printing terse info about ops
 
 =over
@@ -4819,6 +4882,18 @@ B<-u Package>
 C<-oFILENAME>, C<-r>, C<-D[tO]>
 
 =item BUGS
+
+=item AUTHOR
+
+=back
+
+=head2 Bblock, B::Bblock - Walk basic blocks
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
 
 =item AUTHOR
 
@@ -4879,6 +4954,29 @@ STYLE ] ), cmpthese ( RESULTSHASHREF ), countit(TIME, CODE), disablecache (
 =item AUTHOR
 
 =item SEE ALSO
+
+=back
+
+=head2 Bytecode, B::Bytecode - Perl compiler's bytecode backend
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item OPTIONS
+
+B<-ofilename>, B<-afilename>, B<-->, B<-f>, B<-fcompress-nullops>,
+B<-fomit-sequence-numbers>, B<-fbypass-nullops>, B<-On>, B<-D>, B<-Do>,
+B<-Db>, B<-Da>, B<-DC>, B<-S>, B<-Ppackage>    Stores package in the
+output.    =back
+
+=item EXAMPLES
+
+=item BUGS
+
+=item AUTHORS
 
 =back
 
@@ -5303,6 +5401,8 @@ B<name()>, B<value()>, B<domain()>, B<path()>, B<expires()>
 
 =back
 
+=head2 CGI::Util - various utilities
+
 =head2 CPAN - query, download and build perl modules from CPAN sites
 
 =over
@@ -5457,6 +5557,275 @@ C<'*%'>), Class (C<'Class_Name'> or C<'*Class_Name'>)
 Example 1, Example 2, Example 3
 
 =item Author and Modification History
+
+=back
+
+=head2 Config - access Perl configuration information
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+myconfig(), config_sh(), config_vars(@names)
+
+=item EXAMPLE
+
+=item WARNING
+
+=item GLOSSARY
+
+=over
+
+=item _
+
+C<_a>, C<_exe>, C<_o>
+
+=item a
+
+C<afs>, C<alignbytes>, C<ansi2knr>, C<aphostname>, C<api_revision>,
+C<api_subversion>, C<api_version>, C<api_versionstring>, C<ar>, C<archlib>,
+C<archlibexp>, C<archname64>, C<archname>, C<archobjs>, C<awk>
+
+=item b
+
+C<baserev>, C<bash>, C<bin>, C<bincompat5005>, C<binexp>, C<bison>,
+C<byacc>, C<byteorder>
+
+=item c
+
+C<c>, C<castflags>, C<cat>, C<cc>, C<cccdlflags>, C<ccdlflags>, C<ccflags>,
+C<ccsymbols>, C<cf_by>, C<cf_email>, C<cf_time>, C<charsize>, C<chgrp>,
+C<chmod>, C<chown>, C<clocktype>, C<comm>, C<compress>
+
+=item C
+
+C<CONFIGDOTSH>, C<contains>, C<cp>, C<cpio>, C<cpp>, C<cpp_stuff>,
+C<cppccsymbols>, C<cppflags>, C<cpplast>, C<cppminus>, C<cpprun>,
+C<cppstdin>, C<cppsymbols>, C<crosscompile>, C<cryptlib>, C<csh>
+
+=item d
+
+C<d_access>, C<d_accessx>, C<d_alarm>, C<d_archlib>, C<d_atolf>,
+C<d_atoll>, C<d_attribut>, C<d_bcmp>, C<d_bcopy>, C<d_bincompat5005>,
+C<d_bsd>, C<d_bsdgetpgrp>, C<d_bsdsetpgrp>, C<d_bzero>, C<d_casti32>,
+C<d_castneg>, C<d_charvspr>, C<d_chown>, C<d_chroot>, C<d_chsize>,
+C<d_closedir>, C<d_const>, C<d_crypt>, C<d_csh>, C<d_cuserid>,
+C<d_dbl_dig>, C<d_difftime>, C<d_dirnamlen>, C<d_dlerror>, C<d_dlopen>,
+C<d_dlsymun>, C<d_dosuid>, C<d_drand48proto>, C<d_dup2>, C<d_eaccess>,
+C<d_endgrent>, C<d_endhent>, C<d_endnent>, C<d_endpent>, C<d_endpwent>,
+C<d_endsent>, C<d_eofnblk>, C<d_eunice>, C<d_fchmod>, C<d_fchown>,
+C<d_fcntl>, C<d_fd_macros>, C<d_fd_set>, C<d_fds_bits>, C<d_fgetpos>,
+C<d_flexfnam>, C<d_flock>, C<d_fork>, C<d_fpathconf>, C<d_fpos64_t>,
+C<d_frexpl>, C<d_fs_data_s>, C<d_fseeko>, C<d_fsetpos>, C<d_fstatfs>,
+C<d_fstatvfs>, C<d_ftello>, C<d_ftime>, C<d_Gconvert>, C<d_getcwd>,
+C<d_getespwnam>, C<d_getfsstat>, C<d_getgrent>, C<d_getgrps>,
+C<d_gethbyaddr>, C<d_gethbyname>, C<d_gethent>, C<d_gethname>,
+C<d_gethostprotos>, C<d_getlogin>, C<d_getmnt>, C<d_getmntent>,
+C<d_getnbyaddr>, C<d_getnbyname>, C<d_getnent>, C<d_getnetprotos>,
+C<d_getpbyname>, C<d_getpbynumber>, C<d_getpent>, C<d_getpgid>,
+C<d_getpgrp2>, C<d_getpgrp>, C<d_getppid>, C<d_getprior>,
+C<d_getprotoprotos>, C<d_getprpwnam>, C<d_getpwent>, C<d_getsbyname>,
+C<d_getsbyport>, C<d_getsent>, C<d_getservprotos>, C<d_getspnam>,
+C<d_gettimeod>, C<d_gnulibc>, C<d_grpasswd>, C<d_hasmntopt>, C<d_htonl>,
+C<d_iconv>, C<d_index>, C<d_inetaton>, C<d_int64_t>, C<d_isascii>,
+C<d_isnan>, C<d_isnanl>, C<d_killpg>, C<d_lchown>, C<d_ldbl_dig>,
+C<d_link>, C<d_locconv>, C<d_lockf>, C<d_longdbl>, C<d_longlong>,
+C<d_lseekproto>, C<d_lstat>, C<d_madvise>, C<d_mblen>, C<d_mbstowcs>,
+C<d_mbtowc>, C<d_memchr>, C<d_memcmp>, C<d_memcpy>, C<d_memmove>,
+C<d_memset>, C<d_mkdir>, C<d_mkdtemp>, C<d_mkfifo>, C<d_mkstemp>,
+C<d_mkstemps>, C<d_mktime>, C<d_mmap>, C<d_modfl>, C<d_mprotect>, C<d_msg>,
+C<d_msg_ctrunc>, C<d_msg_dontroute>, C<d_msg_oob>, C<d_msg_peek>,
+C<d_msg_proxy>, C<d_msgctl>, C<d_msgget>, C<d_msgrcv>, C<d_msgsnd>,
+C<d_msync>, C<d_munmap>, C<d_mymalloc>, C<d_nice>, C<d_nv_preserves_uv>,
+C<d_nv_preserves_uv_bits>, C<d_off64_t>, C<d_old_pthread_create_joinable>,
+C<d_oldpthreads>, C<d_oldsock>, C<d_open3>, C<d_pathconf>, C<d_pause>,
+C<d_perl_otherlibdirs>, C<d_phostname>, C<d_pipe>, C<d_poll>,
+C<d_portable>, C<d_PRId64>, C<d_PRIeldbl>, C<d_PRIEldbl>, C<d_PRIfldbl>,
+C<d_PRIFldbl>, C<d_PRIgldbl>, C<d_PRIGldbl>, C<d_PRIi64>, C<d_PRIo64>,
+C<d_PRIu64>, C<d_PRIx64>, C<d_PRIX64>, C<d_pthread_yield>, C<d_pwage>,
+C<d_pwchange>, C<d_pwclass>, C<d_pwcomment>, C<d_pwexpire>, C<d_pwgecos>,
+C<d_pwpasswd>, C<d_pwquota>, C<d_qgcvt>, C<d_quad>, C<d_readdir>,
+C<d_readlink>, C<d_rename>, C<d_rewinddir>, C<d_rmdir>, C<d_safebcpy>,
+C<d_safemcpy>, C<d_sanemcmp>, C<d_sched_yield>, C<d_scm_rights>,
+C<d_seekdir>, C<d_select>, C<d_sem>, C<d_semctl>, C<d_semctl_semid_ds>,
+C<d_semctl_semun>, C<d_semget>, C<d_semop>, C<d_setegid>, C<d_seteuid>,
+C<d_setgrent>, C<d_setgrps>, C<d_sethent>, C<d_setlinebuf>, C<d_setlocale>,
+C<d_setnent>, C<d_setpent>, C<d_setpgid>, C<d_setpgrp2>, C<d_setpgrp>,
+C<d_setprior>, C<d_setpwent>, C<d_setregid>, C<d_setresgid>,
+C<d_setresuid>, C<d_setreuid>, C<d_setrgid>, C<d_setruid>, C<d_setsent>,
+C<d_setsid>, C<d_setvbuf>, C<d_sfio>, C<d_shm>, C<d_shmat>,
+C<d_shmatprototype>, C<d_shmctl>, C<d_shmdt>, C<d_shmget>, C<d_sigaction>,
+C<d_sigsetjmp>, C<d_socket>, C<d_socklen_t>, C<d_sockpair>, C<d_sqrtl>,
+C<d_statblks>, C<d_statfs_f_flags>, C<d_statfs_s>, C<d_statvfs>,
+C<d_stdio_cnt_lval>, C<d_stdio_ptr_lval>, C<d_stdio_stream_array>,
+C<d_stdiobase>, C<d_stdstdio>, C<d_strchr>, C<d_strcoll>, C<d_strctcpy>,
+C<d_strerrm>, C<d_strerror>, C<d_strtod>, C<d_strtol>, C<d_strtold>,
+C<d_strtoll>, C<d_strtoul>, C<d_strtoull>, C<d_strtouq>, C<d_strxfrm>,
+C<d_suidsafe>, C<d_symlink>, C<d_syscall>, C<d_sysconf>, C<d_sysernlst>,
+C<d_syserrlst>, C<d_system>, C<d_tcgetpgrp>, C<d_tcsetpgrp>, C<d_telldir>,
+C<d_telldirproto>, C<d_time>, C<d_times>, C<d_truncate>, C<d_tzname>,
+C<d_umask>, C<d_uname>, C<d_union_semun>, C<d_ustat>, C<d_vendorarch>,
+C<d_vendorbin>, C<d_vendorlib>, C<d_vfork>, C<d_void_closedir>,
+C<d_voidsig>, C<d_voidtty>, C<d_volatile>, C<d_vprintf>, C<d_wait4>,
+C<d_waitpid>, C<d_wcstombs>, C<d_wctomb>, C<d_xenix>, C<date>,
+C<db_hashtype>, C<db_prefixtype>, C<defvoidused>, C<direntrytype>,
+C<dlext>, C<dlsrc>, C<doublesize>, C<drand01>, C<dynamic_ext>
+
+=item e
+
+C<eagain>, C<ebcdic>, C<echo>, C<egrep>, C<emacs>, C<eunicefix>,
+C<exe_ext>, C<expr>, C<extensions>
+
+=item f
+
+C<fflushall>, C<fflushNULL>, C<find>, C<firstmakefile>, C<flex>,
+C<fpossize>, C<fpostype>, C<freetype>, C<full_ar>, C<full_csh>, C<full_sed>
+
+=item g
+
+C<gccversion>, C<gidformat>, C<gidsign>, C<gidsize>, C<gidtype>,
+C<glibpth>, C<grep>, C<groupcat>, C<groupstype>, C<gzip>
+
+=item h
+
+C<h_fcntl>, C<h_sysfile>, C<hint>, C<hostcat>, C<huge>
+
+=item i
+
+C<i16size>, C<i16type>, C<i32size>, C<i32type>, C<i64size>, C<i64type>,
+C<i8size>, C<i8type>, C<i_arpainet>, C<i_bsdioctl>, C<i_db>, C<i_dbm>,
+C<i_dirent>, C<i_dld>, C<i_dlfcn>, C<i_fcntl>, C<i_float>, C<i_gdbm>,
+C<i_grp>, C<i_iconv>, C<i_ieeefp>, C<i_inttypes>, C<i_limits>, C<i_locale>,
+C<i_machcthr>, C<i_malloc>, C<i_math>, C<i_memory>, C<i_mntent>, C<i_ndbm>,
+C<i_netdb>, C<i_neterrno>, C<i_netinettcp>, C<i_niin>, C<i_poll>,
+C<i_prot>, C<i_pthread>, C<i_pwd>, C<i_rpcsvcdbm>, C<i_sfio>, C<i_sgtty>,
+C<i_shadow>, C<i_socks>, C<i_stdarg>, C<i_stddef>, C<i_stdlib>,
+C<i_string>, C<i_sunmath>, C<i_sysaccess>, C<i_sysdir>, C<i_sysfile>,
+C<i_sysfilio>, C<i_sysin>, C<i_sysioctl>, C<i_syslog>, C<i_sysmman>,
+C<i_sysmode>, C<i_sysmount>, C<i_sysndir>, C<i_sysparam>, C<i_sysresrc>,
+C<i_syssecrt>, C<i_sysselct>, C<i_syssockio>, C<i_sysstat>, C<i_sysstatfs>,
+C<i_sysstatvfs>, C<i_systime>, C<i_systimek>, C<i_systimes>, C<i_systypes>,
+C<i_sysuio>, C<i_sysun>, C<i_sysutsname>, C<i_sysvfs>, C<i_syswait>,
+C<i_termio>, C<i_termios>, C<i_time>, C<i_unistd>, C<i_ustat>, C<i_utime>,
+C<i_values>, C<i_varargs>, C<i_varhdr>, C<i_vfork>,
+C<ignore_versioned_solibs>, C<inc_version_list>, C<inc_version_list_init>,
+C<incpath>, C<inews>, C<installarchlib>, C<installbin>, C<installman1dir>,
+C<installman3dir>, C<installprefix>, C<installprefixexp>,
+C<installprivlib>, C<installscript>, C<installsitearch>, C<installsitebin>,
+C<installsitelib>, C<installstyle>, C<installusrbinperl>,
+C<installvendorarch>, C<installvendorbin>, C<installvendorlib>, C<intsize>,
+C<ivdformat>, C<ivsize>, C<ivtype>
+
+=item k
+
+C<known_extensions>, C<ksh>
+
+=item l
+
+C<large>, C<ld>, C<lddlflags>, C<ldflags>, C<ldlibpthname>, C<less>,
+C<lib_ext>, C<libc>, C<libperl>, C<libpth>, C<libs>, C<libsdirs>,
+C<libsfiles>, C<libsfound>, C<libspath>, C<libswanted>, C<line>, C<lint>,
+C<lkflags>, C<ln>, C<lns>, C<locincpth>, C<loclibpth>, C<longdblsize>,
+C<longlongsize>, C<longsize>, C<lp>, C<lpr>, C<ls>, C<lseeksize>,
+C<lseektype>
+
+=item m
+
+C<mail>, C<mailx>, C<make>, C<make_set_make>, C<mallocobj>, C<mallocsrc>,
+C<malloctype>, C<man1dir>, C<man1direxp>, C<man1ext>, C<man3dir>,
+C<man3direxp>, C<man3ext>
+
+=item M
+
+C<Mcc>, C<medium>, C<mips_type>, C<mkdir>, C<mmaptype>, C<models>,
+C<modetype>, C<more>, C<multiarch>, C<mv>, C<myarchname>, C<mydomain>,
+C<myhostname>, C<myuname>
+
+=item n
+
+C<n>, C<netdb_hlen_type>, C<netdb_host_type>, C<netdb_name_type>,
+C<netdb_net_type>, C<nm>, C<nm_opt>, C<nm_so_opt>, C<nonxs_ext>, C<nroff>,
+C<nvsize>, C<nvtype>
+
+=item o
+
+C<o_nonblock>, C<obj_ext>, C<old_pthread_create_joinable>, C<optimize>,
+C<orderlib>, C<osname>, C<osvers>, C<otherlibdirs>
+
+=item p
+
+C<package>, C<pager>, C<passcat>, C<patchlevel>, C<path_sep>, C<perl5>,
+C<perl>
+
+=item P
+
+C<PERL_REVISION>, C<PERL_SUBVERSION>, C<PERL_VERSION>, C<perladmin>,
+C<perlpath>, C<pg>, C<phostname>, C<pidtype>, C<plibpth>, C<pm_apiversion>,
+C<pmake>, C<pr>, C<prefix>, C<prefixexp>, C<privlib>, C<privlibexp>,
+C<prototype>, C<ptrsize>
+
+=item q
+
+C<quadkind>, C<quadtype>
+
+=item r
+
+C<randbits>, C<randfunc>, C<randseedtype>, C<ranlib>, C<rd_nodata>,
+C<revision>, C<rm>, C<rmail>, C<runnm>
+
+=item s
+
+C<sched_yield>, C<scriptdir>, C<scriptdirexp>, C<sed>, C<seedfunc>,
+C<selectminbits>, C<selecttype>, C<sendmail>, C<sh>, C<shar>, C<sharpbang>,
+C<shmattype>, C<shortsize>, C<shrpenv>, C<shsharp>, C<sig_count>,
+C<sig_name>, C<sig_name_init>, C<sig_num>, C<sig_num_init>, C<signal_t>,
+C<sitearch>, C<sitearchexp>, C<sitebin>, C<sitebinexp>, C<sitelib>,
+C<sitelib_stem>, C<sitelibexp>, C<siteprefix>, C<siteprefixexp>,
+C<sizesize>, C<sizetype>, C<sleep>, C<smail>, C<small>, C<so>,
+C<sockethdr>, C<socketlib>, C<socksizetype>, C<sort>, C<spackage>,
+C<spitshell>, C<split>, C<sPRId64>, C<sPRIeldbl>, C<sPRIEldbl>,
+C<sPRIfldbl>, C<sPRIFldbl>, C<sPRIgldbl>, C<sPRIGldbl>, C<sPRIi64>,
+C<sPRIo64>, C<sPRIu64>, C<sPRIx64>, C<sPRIX64>, C<src>, C<ssizetype>,
+C<startperl>, C<startsh>, C<static_ext>, C<stdchar>, C<stdio_base>,
+C<stdio_bufsiz>, C<stdio_cnt>, C<stdio_filbuf>, C<stdio_ptr>,
+C<stdio_stream_array>, C<strings>, C<submit>, C<subversion>, C<sysman>
+
+=item t
+
+C<tail>, C<tar>, C<tbl>, C<tee>, C<test>, C<timeincl>, C<timetype>,
+C<touch>, C<tr>, C<trnl>, C<troff>
+
+=item u
+
+C<u16size>, C<u16type>, C<u32size>, C<u32type>, C<u64size>, C<u64type>,
+C<u8size>, C<u8type>, C<uidformat>, C<uidsign>, C<uidsize>, C<uidtype>,
+C<uname>, C<uniq>, C<uquadtype>, C<use5005threads>, C<use64bitall>,
+C<use64bitint>, C<usedl>, C<useithreads>, C<uselargefiles>,
+C<uselongdouble>, C<usemorebits>, C<usemultiplicity>, C<usemymalloc>,
+C<usenm>, C<useopcode>, C<useperlio>, C<useposix>, C<usesfio>,
+C<useshrplib>, C<usesocks>, C<usethreads>, C<usevendorprefix>, C<usevfork>,
+C<usrinc>, C<uuname>, C<uvoformat>, C<uvsize>, C<uvtype>, C<uvuformat>,
+C<uvxformat>
+
+=item v
+
+C<vendorarch>, C<vendorarchexp>, C<vendorbin>, C<vendorbinexp>,
+C<vendorlib>, C<vendorlib_stem>, C<vendorlibexp>, C<vendorprefix>,
+C<vendorprefixexp>, C<version>, C<vi>, C<voidflags>
+
+=item x
+
+C<xlibpth>, C<xs_apiversion>
+
+=item z
+
+C<zcat>, C<zip>
+
+=back
+
+=item NOTE
 
 =back
 
@@ -5805,6 +6174,37 @@ veryCompact, set, get
 
 =back
 
+=head2 DynaLoader - Dynamically load C libraries into Perl code
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+@dl_library_path, @dl_resolve_using, @dl_require_symbols, @dl_librefs,
+@dl_modules, dl_error(), $dl_debug, dl_findfile(), dl_expandspec(),
+dl_load_file(), dl_unload_file(), dl_loadflags(), dl_find_symbol(),
+dl_find_symbol_anywhere(), dl_undef_symbols(), dl_install_xsub(),
+bootstrap()
+
+=item AUTHOR
+
+=back
+
+=head2 DynaLoader::XSLoader, XSLoader - Dynamically load C libraries into
+Perl code
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item AUTHOR
+
+=back
+
 =head2 English - use nice English (or awk) names for ugly punctuation
 variables
 
@@ -5830,6 +6230,22 @@ arrays
 =item LIMITATIONS
 
 =item AUTHOR
+
+=back
+
+=head2 Errno - System errno constants
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CAVEATS
+
+=item AUTHOR
+
+=item COPYRIGHT
 
 =back
 
@@ -6493,6 +6909,18 @@ C<Added to MANIFEST:> I<file>
 =item SEE ALSO
 
 =item AUTHOR
+
+=back
+
+=head2 ExtUtils::Miniperl, writemain - write the C code for perlmain.c
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item SEE ALSO
 
 =back
 
@@ -7210,6 +7638,239 @@ locale
 
 =back
 
+=head2 IO::Dir - supply object methods for directory handles
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+new ( [ DIRNAME ] ), open ( DIRNAME ), read (), seek ( POS ), tell (),
+rewind (), close (), tie %hash, IO::Dir, DIRNAME [, OPTIONS ]
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 IO::File - supply object methods for filehandles
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CONSTRUCTOR
+
+new ( FILENAME [,MODE [,PERMS]] ), new_tmpfile
+
+=item METHODS
+
+open( FILENAME [,MODE [,PERMS]] )
+
+=item SEE ALSO
+
+=item HISTORY
+
+=back
+
+=head2 IO::Handle - supply object methods for I/O handles
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CONSTRUCTOR
+
+new (), new_from_fd ( FD, MODE )
+
+=item METHODS
+
+$io->fdopen ( FD, MODE ), $io->opened, $io->getline, $io->getlines,
+$io->ungetc ( ORD ), $io->write ( BUF, LEN [, OFFSET ] ), $io->error,
+$io->clearerr, $io->sync, $io->flush, $io->printflush ( ARGS ),
+$io->blocking ( [ BOOL ] ), $io->untaint
+
+=item NOTE
+
+=item SEE ALSO
+
+=item BUGS
+
+=item HISTORY
+
+=back
+
+=head2 IO::Pipe - supply object methods for pipes
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CONSTRUCTOR
+
+new ( [READER, WRITER] )
+
+=item METHODS
+
+reader ([ARGS]), writer ([ARGS]), handles ()
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 IO::Poll - Object interface to system poll call
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+mask ( IO [, EVENT_MASK ] ), poll ( [ TIMEOUT ] ), events ( IO ), remove (
+IO ), handles( [ EVENT_MASK ] )
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 IO::Seekable - supply seek based methods for I/O objects
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item SEE ALSO
+
+=item HISTORY
+
+=back
+
+=head2 IO::Select - OO interface to the select system call
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CONSTRUCTOR
+
+new ( [ HANDLES ] )
+
+=item METHODS
+
+add ( HANDLES ), remove ( HANDLES ), exists ( HANDLE ), handles, can_read (
+[ TIMEOUT ] ), can_write ( [ TIMEOUT ] ), has_exception ( [ TIMEOUT ] ),
+count (), bits(), select ( READ, WRITE, ERROR [, TIMEOUT ] )
+
+=item EXAMPLE
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 IO::Socket - Object interface to socket communications
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CONSTRUCTOR
+
+new ( [ARGS] )
+
+=item METHODS
+
+accept([PKG]), socketpair(DOMAIN, TYPE, PROTOCOL), timeout([VAL]),
+sockopt(OPT [, VAL]), sockdomain, socktype, protocol, connected
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 IO::Socket::INET - Object interface for AF_INET domain sockets
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CONSTRUCTOR
+
+new ( [ARGS] )
+
+=over
+
+=item METHODS
+
+sockaddr (), sockport (), sockhost (), peeraddr (), peerport (), peerhost
+()
+
+=back
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 IO::Socket::UNIX - Object interface for AF_UNIX domain sockets
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CONSTRUCTOR
+
+new ( [ARGS] )
+
+=item METHODS
+
+hostpath(), peerpath()
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
 =head2 IO::lib::IO::Dir, IO::Dir - supply object methods for directory
 handles
 
@@ -7450,6 +8111,28 @@ hostpath(), peerpath()
 
 =back
 
+=head2 IPC::Msg - SysV Msg IPC object class
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+new ( KEY , FLAGS ), id, rcv ( BUF, LEN [, TYPE [, FLAGS ]] ), remove, set
+( STAT ), set ( NAME => VALUE [, NAME => VALUE ...] ), snd ( TYPE, MSG [,
+FLAGS ] ), stat
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
 =head2 IPC::Open2, open2 - open a process for both reading and writing
 
 =over
@@ -7474,6 +8157,29 @@ handling
 =item DESCRIPTION
 
 =item WARNING
+
+=back
+
+=head2 IPC::Semaphore - SysV Semaphore IPC object class
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+new ( KEY , NSEMS , FLAGS ), getall, getncnt ( SEM ), getpid ( SEM ),
+getval ( SEM ), getzcnt ( SEM ), id, op ( OPLIST ), remove, set ( STAT ),
+set ( NAME => VALUE [, NAME => VALUE ...] ), setall ( VALUES ), setval ( N
+, VALUE ), stat
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT
 
 =back
 
@@ -7750,6 +8456,22 @@ functions
 =item EXAMPLES
 
 =item NOTE
+
+=item AUTHOR
+
+=back
+
+=head2 O - Generic interface to Perl Compiler backends
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CONVENTIONS
+
+=item IMPLEMENTATION
 
 =item AUTHOR
 
@@ -9041,6 +9763,39 @@ C<-pathlist>
 
 =back
 
+=head2 Safe - Compile and execute code in restricted compartments
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+a new namespace, an operator mask
+
+=item WARNING
+
+=over
+
+=item RECENT CHANGES
+
+=item Methods in class Safe
+
+permit (OP, ...), permit_only (OP, ...), deny (OP, ...), deny_only (OP,
+...), trap (OP, ...), untrap (OP, ...), share (NAME, ...), share_from
+(PACKAGE, ARRAYREF), varglob (VARNAME), reval (STRING), rdo (FILENAME),
+root (NAMESPACE), mask (MASK)
+
+=item Some Safety Issues
+
+Memory, CPU, Snooping, Signals, State Changes
+
+=item AUTHOR
+
+=back
+
+=back
+
 =head2 Search::Dict, look - search for key in dictionary file
 
 =over
@@ -9135,6 +9890,27 @@ pack_sockaddr_un PATH, unpack_sockaddr_un SOCKADDR_UN
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=item AUTHOR
+
+=back
+
+=head2 Syslog, Sys::Syslog, openlog, closelog, setlogmask, syslog - Perl
+interface to the UNIX syslog(3) calls
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+openlog $ident, $logopt, $facility, syslog $priority, $format, @args,
+setlogmask $mask_priority, setlogsock $sock_type (added in 5.004_02),
+closelog
+
+=item EXAMPLES
+
+=item SEE ALSO
 
 =item AUTHOR
 
@@ -9651,6 +10427,20 @@ functions
 =item HISTORY
 
 March 18th, 2000
+
+=back
+
+=head2 XSLoader - Dynamically load C libraries into Perl code
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item AUTHOR
+
+=back
 
 =head1 AUXILIARY DOCUMENTATION
 
