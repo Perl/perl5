@@ -1747,6 +1747,8 @@ lib/Unicode/Collate/README	Unicode::Collate
 lib/Unicode/Collate/t/contract.t	Unicode::Collate
 lib/Unicode/Collate/t/hangtype.t	Unicode::Collate
 lib/Unicode/Collate/t/hangul.t	Unicode::Collate
+lib/Unicode/Collate/t/illegal.t	Unicode::Collate
+lib/Unicode/Collate/t/illegalp.t	Unicode::Collate
 lib/Unicode/Collate/t/index.t	Unicode::Collate
 lib/Unicode/Collate/t/normal.t	Unicode::Collate
 lib/Unicode/Collate/t/test.t	Unicode::Collate
