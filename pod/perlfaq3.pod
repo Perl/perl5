@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq3 - Programming Tools ($Revision: 1.4 $, $Date: 2001/10/02 19:42:02 $)
+perlfaq3 - Programming Tools ($Revision: 1.6 $, $Date: 2001/10/03 23:06:15 $)
 
 =head1 DESCRIPTION
 
@@ -164,9 +164,13 @@ related to generating nicely printed output of documents.
 
 =head2 Is there a ctags for Perl?
 
-There's a simple one at
+Recent versions of ctags do much more than older versions did.
+EXUBERANT CTAGS is available from http://ctags.sourceforge.net/
+and does a good job of making tags files for perl code.
+
+There is also a simple one at
 http://www.perl.com/CPAN/authors/id/TOMC/scripts/ptags.gz which may do
-the trick.  And if not, it's easy to hack into what you want.
+the trick.  It can be easy to hack this into what you want.
 
 =head2 Is there an IDE or Windows Perl Editor?
 
@@ -518,6 +522,51 @@ instead of this:
 When the files you're processing are small, it doesn't much matter which
 way you do it, but it makes a huge difference when they start getting
 larger. 
+
+=item * Use map and grep selectively
+
+Remember that both map and grep expect a LIST argument, so doing this:
+
+        @wanted = grep {/pattern/} <FILE>;
+
+will cause the entire file to be slurped. For large files, it's better
+to loop:
+
+        while (<FILE>) {
+                push(@wanted, $_) if /pattern/;
+        }
+
+=item * Avoid unnecessary quotes and stringification
+
+Don't quote large strings unless absolutely necessary:
+
+        my $copy = "$large_string";
+
+makes 2 copies of $large_string (one for $copy and another for the
+quotes), whereas
+
+        my $copy = $large_string;
+
+only makes one copy.
+
+Ditto for stringifying large arrays:
+
+        {
+                local $, = "\n";
+                print @big_array;
+        }
+
+is much more memory-efficient than either
+
+        print join "\n", @big_array;
+
+or
+
+        {
+                local $" = "\n";
+                print "@big_array";
+        }
+
 
 =item * Pass by reference
 
