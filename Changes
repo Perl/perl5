@@ -79,6 +79,142 @@ Version 5.005_57        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  3403] By: gsar                                  on 1999/05/12  10:49:01
+        Log: From: Stephen Zander <gibreel@pobox.com>
+             Date: 12 May 1999 01:22:31 -0700
+             Message-ID: <87u2tik88o.fsf@pooh.fire-swamp.net>
+             Subject: Re: Test::Harness runs tainted tests with wrong library path
+     Branch: perl
+           ! lib/Test/Harness.pm
+____________________________________________________________________________
+[  3402] By: gsar                                  on 1999/05/12  10:42:06
+        Log: typo in change#3400
+     Branch: perl
+           ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  3401] By: jhi                                   on 1999/05/12  10:40:42
+        Log: A better, shinier, and possibly even correctly working
+             reincarnation of #3398.
+     Branch: cfgperl
+           ! Configure config_h.SH
+____________________________________________________________________________
+[  3400] By: gsar                                  on 1999/05/12  10:40:11
+        Log: deparse \&func() as \(&func()) for clarity
+             From: Albert Dvornik <bert@genscan.com>
+             Date: 11 May 1999 13:32:04 -0400
+             Message-ID: <tqk8ufwm0b.fsf@puma.genscan.com>
+             Subject: [PATCH 5.005_56] Deparse and \&func() (was Re: File::Find...)
+     Branch: perl
+           ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  3399] By: gsar                                  on 1999/05/12  10:36:02
+        Log: more testsuite smarts (many of them courtesy Ilya)
+     Branch: perl
+	   ! lib/Test/Harness.pm t/comp/cpp.t t/io/pipe.t t/lib/db-btree.t
+	   ! t/lib/db-hash.t t/lib/db-recno.t t/lib/gdbm.t
+	   ! t/lib/io_multihomed.t t/lib/io_pipe.t t/lib/io_sock.t
+	   ! t/lib/io_udp.t t/lib/io_unix.t t/lib/ipc_sysv.t t/lib/ndbm.t
+	   ! t/lib/odbm.t t/lib/thread.t t/op/exec.t t/op/fork.t
+	   ! t/op/grent.t t/op/groups.t t/op/nothread.t t/op/numconvert.t
+           ! t/op/pwent.t
+____________________________________________________________________________
+[  3398] By: jhi                                   on 1999/05/12  09:33:08
+        Log: Detect whether fflush(NULL) works as per change #3352.
+     Branch: cfgperl
+           ! Configure config_h.SH perl.h
+____________________________________________________________________________
+[  3397] By: gsar                                  on 1999/05/12  08:56:03
+        Log: From: jan.dubois@ibm.net (Jan Dubois)
+             Date: Wed, 12 May 1999 01:01:00 +0200
+             Message-ID: <3741b5e8.20386944@smtp1.ibm.net>
+             Subject: [PATCH 5.005_03] chop/chomp modify readonly values
+     Branch: perl
+           ! doop.c
+____________________________________________________________________________
+[  3396] By: gsar                                  on 1999/05/12  08:23:27
+        Log: opendir(D,"x:") on win32 opens cwd() for drive rather than root;
+             stat() behaves similarly
+     Branch: perl
+           ! win32/win32.c
+____________________________________________________________________________
+[  3395] By: jhi                                   on 1999/05/11  22:21:32
+        Log: Redo parts of #3341 and #3358 that #3394 undid.
+     Branch: cfgperl
+           ! Configure config_h.SH
+____________________________________________________________________________
+[  3394] By: jhi                                   on 1999/05/11  22:03:48
+        Log: Add I_NETINET_TCP to help change #3391.
+     Branch: cfgperl
+           ! Configure config_h.SH ext/Socket/Socket.xs
+____________________________________________________________________________
+[  3393] By: jhi                                   on 1999/05/11  21:44:59
+        Log: Integrate from mainperl.
+     Branch: cfgperl
+          !> (integrate 55 files)
+____________________________________________________________________________
+[  3392] By: gsar                                  on 1999/05/11  20:56:43
+        Log: update embedvar.h
+     Branch: perl
+           ! embedvar.h ext/ByteLoader/ByteLoader.pm pod/perldelta.pod
+____________________________________________________________________________
+[  3391] By: gsar                                  on 1999/05/11  16:32:05
+        Log: From: Joshua Pritikin <joshua.pritikin@db.com>
+             Date: Tue, 11 May 1999 11:10:13 -0400 (EDT)
+             Message-ID: <Pine.GSO.4.02.9905111106460.1418-100000@eq1062.wks.na.deuba.com>
+             Subject: Socket IPPROTO_TCP [PATCH 5.005_5x]
+     Branch: perl
+           ! ext/Socket/Socket.pm ext/Socket/Socket.xs
+____________________________________________________________________________
+[  3390] By: gsar                                  on 1999/05/11  15:27:40
+        Log: display more frequent progress messages when STDOUT is a tty
+     Branch: perl
+           ! lib/Test/Harness.pm
+____________________________________________________________________________
+[  3389] By: gsar                                  on 1999/05/11  14:40:58
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 10 May 1999 02:07:01 -0400 (EDT)
+             Message-Id: <199905100607.CAA26045@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.005_53] Explanations by Test::Harness
+     Branch: perl
+           ! lib/Test/Harness.pm
+____________________________________________________________________________
+[  3388] By: gsar                                  on 1999/05/11  14:08:14
+        Log: avoid creating spurious subroutine stubs on failed subroutine
+             call and other places of sv_2cv() misuse; fixes problems with
+             failed subroutine calls "hiding" later attempts to lookup methods
+             in base classes
+     Branch: perl
+           ! gv.c perl.c pod/perlguts.pod pp_hot.c sv.c t/op/method.t
+____________________________________________________________________________
+[  3387] By: gsar                                  on 1999/05/11  09:34:13
+        Log: various fixes for clean build and test on win32; configpm broken,
+             needed to open myconfig.SH rather than myconfig; sundry adjustments
+             to bytecode stuff; tweaks to DYNAMIC_ENV_FETCH code to make it
+             work under win32; getenv_sv() changed to getenv_len() since SVs
+             aren't visible in the lower echelons; remove bogus exports from
+             config.sym; PERL_OBJECT-ness for C++ exception support; null out
+             IoDIRP in filter_del() or sv_free() will attempt to close it
+     Branch: perl
+	   ! Changes bytecode.pl byterun.c byterun.h configpm embed.h
+	   ! embed.pl ext/B/B/Asmdata.pm ext/ByteLoader/ByteLoader.xs
+	   ! ext/DynaLoader/dlutils.c global.sym hv.c iperlsys.h objXSUB.h
+	   ! op.c perl.c perl.h pp.c pp_ctl.c proto.h scope.c scope.h
+	   ! t/io/open.t t/op/magic.t toke.c util.c vms/vms.c vms/vmsish.h
+	   ! win32/GenCAPI.pl win32/Makefile win32/config.bc
+	   ! win32/config.gc win32/config.vc win32/makedef.pl
+	   ! win32/makefile.mk win32/perlhost.h win32/runperl.c
+           ! win32/win32.c win32/win32.h
+____________________________________________________________________________
+[  3386] By: gsar                                  on 1999/05/11  02:49:07
+        Log: gutsupport for C++ exceptions
+             From: Chip Salzenberg <chip@perlsupport.com>
+             Date: Tue, 9 Mar 1999 11:51:57 -0500
+             Message-ID: <19990309115157.E7911@perlsupport.com>
+             Subject: [PATCH 5.005] Flexible Exceptions
+     Branch: perl
+	   ! embed.h global.sym objXSUB.h perl.c perl.h pp_ctl.c proto.h
+           ! scope.c scope.h thrdvar.h util.c
+____________________________________________________________________________
 [  3385] By: gsar                                  on 1999/05/10  19:33:36
         Log: "weak" references internals, still needs perlguts documentation
              (somewhat modified version of patch suggested by Tuomas J. Lukka

@@ -42,15 +42,7 @@ BEGIN {
 
 use strict 'vars';
 
-my $max_chain = $ENV{PERL_TEST_NUMCONVERTS};
-unless (defined $max_chain) {
-  my $is_debug;
-  eval <<'EOE';
-    use Config;
-    $is_debug = 1 if $Config{ccflags} =~ /-DDEBUGGING\b/;
-EOE
-  $max_chain = $is_debug ? 3 : 2;
-}
+my $max_chain = $ENV{PERL_TEST_NUMCONVERTS} || 2;
 
 # Bulk out if unsigned type is hopelessly wrong:
 my $max_uv1 = ~0;

@@ -4,12 +4,12 @@ BEGIN {
     chdir 't' if -d 't';
     unshift @INC, "../lib" if -d "../lib";
     eval { require Config; import Config; };
-
-    unless (defined $Config{'i_grp'} &&
-	            $Config{'i_grp'} eq 'define' &&
-	    -f "/etc/group" ) { # Play safe.
-	print "1..0\n";
-	exit 0;
+    my $reason;
+    if ($Config{'i_grp'} ne 'define') {
+	$reason = '$Config{i_grp} not defined';
+    }
+    elsif (not -f "/etc/group" ) { # Play safe.
+	$reason = 'no /etc/group file';
     }
 
     if (not defined $where) {	# Try NIS.
@@ -18,6 +18,7 @@ BEGIN {
 		open(GR, "$ypcat group 2>/dev/null |") &&
 		defined(<GR>)) {
 		$where = "NIS group";
+		undef $reason;
 		last;
 	    }
 	}
@@ -29,6 +30,7 @@ BEGIN {
 		open(GR, "$nidump group . 2>/dev/null |") &&
 		defined(<GR>)) {
 		$where = "NetInfo group";
+		undef $reason;
 		last;
 	    }
 	}
@@ -37,12 +39,12 @@ BEGIN {
     if (not defined $where) {	# Try local.
 	my $GR = "/etc/group";
 	if (-f $GR && open(GR, $GR) && defined(<GR>)) {
+	    undef $reason;
 	    $where = $GR;
 	}
     }
-
-    if (not defined $where) {	# Give up.
-	print "1..0\n";
+    if ($reason) {
+	print "1..0 # Skip: $reason\n";
 	exit 0;
     }
 }

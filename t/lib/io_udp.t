@@ -11,13 +11,25 @@ use Config;
 
 BEGIN {
     if(-d "lib" && -f "TEST") {
-        if ( ($Config{'extensions'} !~ /\bSocket\b/ ||
-              $Config{'extensions'} !~ /\bIO\b/	||
-	      ($^O eq 'os2') || $^O eq 'apollo')    &&
-              !(($^O eq 'VMS') && $Config{d_socket})) {
-	    print "1..0\n";
+	my $reason;
+
+	if ($Config{'extensions'} !~ /\bSocket\b/) {
+	  $reason = 'Socket was not built';
+	}
+	elsif ($Config{'extensions'} !~ /\bIO\b/) {
+	  $reason = 'IO was not built';
+	}
+	elsif ($^O eq 'os2') {
+	  $reason = "blocks on OS/2, not debugged yet";
+	}
+	elsif ($^O eq 'apollo') {
+	  $reason = "unknown *FIXME*";
+	}
+	undef $reason if $^O eq 'VMS' and $Config{d_socket};
+	if ($reason) {
+	    print "1..0 # Skip: $reason\n";
 	    exit 0;
-        }
+	}
     }
 }
 

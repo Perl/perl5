@@ -7,10 +7,16 @@ BEGIN {
 
     require Config; import Config;
 
-    unless ($Config{'d_msg'} eq 'define' &&
-	    $Config{'d_sem'} eq 'define') {
-	print "1..0\n";
-	exit;
+    my $reason;
+
+    if ($Config{'d_sem'} ne 'define') {
+      $reason = '$Config{d_sem} undefined';
+    } elsif ($Config{'d_msg'} ne 'define') {
+      $reason = '$Config{d_msg} undefined';
+    }
+    if ($reason) {
+	print "1..0 # Skip: $reason\n";
+	exit 0;
     }
 }
 

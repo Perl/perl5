@@ -4,12 +4,12 @@ BEGIN {
     chdir 't' if -d 't';
     unshift @INC, "../lib" if -d "../lib";
     eval { require Config; import Config; };
-
-    unless (defined $Config{'i_pwd'} &&
-	            $Config{'i_pwd'} eq 'define' &&
-	    -f "/etc/passwd" ) { # Play safe.
-	print "1..0\n";
-	exit 0;
+    my $reason;
+    if ($Config{'i_pwd'} ne 'define') {
+	$reason = '$Config{i_pwd} undefined';
+    }
+    elsif (not -f "/etc/passwd" ) { # Play safe.
+	$reason = 'no /etc/passwd file';
     }
 
     if (not defined $where) {	# Try NIS.
@@ -18,6 +18,7 @@ BEGIN {
 		open(PW, "$ypcat passwd 2>/dev/null |") &&
 		defined(<PW>)) {
 		$where = "NIS passwd";
+		undef $reason;
 		last;
 	    }
 	}
@@ -29,6 +30,7 @@ BEGIN {
 		open(PW, "$nidump passwd . 2>/dev/null |") &&
 		defined(<PW>)) {
 		$where = "NetInfo passwd";
+		undef $reason;
 		last;
 	    }
 	}
@@ -38,11 +40,12 @@ BEGIN {
 	my $PW = "/etc/passwd";
 	if (-f $PW && open(PW, $PW) && defined(<PW>)) {
 	    $where = $PW;
+	    undef $reason;
 	}
     }
 
-    if (not defined $where) {	# Give up.
-	print "1..0\n";
+    if ($reason) {	# Give up.
+	print "1..0 # Skip: $reason\n";
 	exit 0;
     }
 }

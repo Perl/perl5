@@ -5,7 +5,7 @@ BEGIN {
     unshift @INC, '../lib';
     require Config; import Config;
     if (! $Config{'usethreads'}) {
-	print "1..0\n";
+	print "1..0 # Skip: this perl is not threaded\n";
 	exit 0;
     }
 

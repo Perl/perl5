@@ -11,11 +11,19 @@ use Config;
 
 BEGIN {
     if(-d "lib" && -f "TEST") {
-        if (!$Config{'d_fork'} ||
-	    (($Config{'extensions'} !~ /\bSocket\b/ ||
-	      $Config{'extensions'} !~ /\bIO\b/) &&
-	     !(($^O eq 'VMS') && $Config{d_socket}))) {
-	    print "1..0\n";
+	my $reason;
+	if (! $Config{'d_fork'}) {
+	    $reason = 'no fork';
+	}
+	elsif ($Config{'extensions'} !~ /\bSocket\b/) {
+	    $reason = 'Socket extension unavailable';
+	}
+	elsif ($Config{'extensions'} !~ /\bIO\b/) {
+	    $reason = 'IO extension unavailable';
+	}
+	undef $reason if $^O eq 'VMS' and $Config{d_socket};
+	if ($reason) {
+	    print "1..0 # Skip: $reason\n";
 	    exit 0;
         }
     }

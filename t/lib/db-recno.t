@@ -4,7 +4,7 @@ BEGIN {
     unshift @INC, '../lib' if -d '../lib' ;
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bDB_File\b/) {
-	print "1..0\n";
+	print "1..0 # Skip: DB_File was not built\n";
 	exit 0;
     }
 }
