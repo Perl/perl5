@@ -173,6 +173,14 @@ guarantee that the executable in question isn't itself going to turn
 around and execute some other program that is dependent on your PATH, it
 makes sure you set the PATH.
 
+The PATH isn't the only environment variable which can cause problems.
+Because some shells may use the variables IFS, CDPATH, ENV, and
+BASH_ENV, Perl checks that those are either empty or untainted when
+starting subprocesses. You may wish to add something like this to your
+setid and taint-checking scripts.
+
+    delete @ENV{qw(IFS CDPATH ENV BASH_ENV)};   # Make %ENV safer
+
 It's also possible to get into trouble with other operations that don't
 care whether they use tainted values.  Make judicious use of the file
 tests in dealing with any user-supplied filenames.  When possible, do
