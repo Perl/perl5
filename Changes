@@ -31,6 +31,192 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 14150] By: jhi                                   on 2002/01/09  14:27:23
+        Log: Thinko.
+     Branch: perl
+	   ! ext/threads/t/stress_re.t
+____________________________________________________________________________
+[ 14149] By: jhi                                   on 2002/01/09  13:47:31
+        Log: Subject: Re: [ID 20020109.002] /(?m:...\s*$)/ is not backtracking properly
+             From: Hugo van der Sanden <hv@crypt.compulink.co.uk> 
+             Date: Wed, 09 Jan 2002 13:37:17 +0000                
+             Message-Id: <200201091337.g09DbH519379@crypt.compulink.co.uk>
+     Branch: perl
+	   ! regexec.c t/op/re_tests
+____________________________________________________________________________
+[ 14148] By: jhi                                   on 2002/01/09  13:00:09
+        Log: Subject: Re: Weird Malformed warning in bleadperl    
+             From: andreas.koenig@anima.de (Andreas J. Koenig)    
+             Date: 09 Jan 2002 11:12:37 +0100
+             Message-ID: <m3itabbzoq.fsf@anima.de>
+     Branch: perl
+	   ! regexec.c t/op/pat.t
+____________________________________________________________________________
+[ 14147] By: jhi                                   on 2002/01/09  12:59:42
+        Log: Forgot stress_re.t from MANIFEST.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 14146] By: jhi                                   on 2002/01/09  12:47:27
+        Log: In dumping use isPRINT() instead of isprint() so that locale
+             does not come into play.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 14145] By: jhi                                   on 2002/01/09  02:52:39
+        Log: Add a threads stress test for regular expressions
+             (mostly just a modified stress_string.t) and doesn't
+             test that much of regular expressions, just that $1
+             doesn't get stomped by competing threads (as it does
+             in the 5005threads of old).
+     Branch: perl
+	   + ext/threads/t/stress_re.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 14144] By: jhi                                   on 2002/01/09  02:28:33
+        Log: Subject: Re: [ID 20010912.007] substr reference core dump
+             From: Hugo van der Sanden <hv@crypt.compulink.co.uk>
+             Date: Tue, 08 Jan 2002 19:17:50 +0000
+             Message-Id: <200201081917.g08JHoE15793@crypt.compulink.co.uk>
+     Branch: perl
+	   ! scope.c t/run/kill_perl.t
+____________________________________________________________________________
+[ 14143] By: jhi                                   on 2002/01/09  01:32:05
+        Log: SANY (. with /s) wasn't happy on Unicode.
+     Branch: perl
+	   ! regexec.c t/op/pat.t
+____________________________________________________________________________
+[ 14142] By: ams                                   on 2002/01/08  22:42:10
+        Log: Subject: [PATCH] perldebug nit
+             From: Tels <tels@bloodgate.com>
+             Date: Wed, 09 Jan 2002 00:08:59 +0100 (CET)
+     Branch: perl
+	   ! pod/perldebug.pod
+____________________________________________________________________________
+[ 14141] By: ams                                   on 2002/01/08  21:32:59
+        Log: Subject: [PATCH] Minor fix to perl/Makefile.SH
+             From: "Green, Paul" <Paul.Green@stratus.com>
+             Date: Tue, 8 Jan 2002 17:31:35 -0500
+             Message-Id: <95AE3CDB3543D511883A0020485B38B9023534A3@exna3.stratus.com>
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[ 14140] By: ams                                   on 2002/01/08  21:27:57
+        Log: Subject: [PATCH] Re: Slight chokage from Deparse
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Tue, 8 Jan 2002 23:04:45 +0100
+             Message-Id: <20020108230445.A4798@rafael>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 14139] By: jhi                                   on 2002/01/08  19:13:43
+        Log: Subject: [patch] peep() is rude
+             From: Hugo van der Sanden <hv@crypt.compulink.co.uk>            
+             Date: Tue, 08 Jan 2002 19:17:50 +0000            
+             Message-Id: <200201081917.g08JHoW15789@crypt.compulink.co.uk>
+     Branch: perl
+	   ! op.c t/run/kill_perl.t
+____________________________________________________________________________
+[ 14138] By: jhi                                   on 2002/01/08  19:01:16
+        Log: unifold is really an op test since it requires
+             no external modules for its actual testing:
+             only the unicore CaseFold.txt file, and File::Spec
+             to portably access that file.
+     Branch: perl
+	   + t/op/unifold.t
+	   - lib/unifold.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 14137] By: jhi                                   on 2002/01/08  16:29:48
+        Log: Subject: [patch] save a test 
+             From: Hugo van der Sanden <hv@crypt.compulink.co.uk>
+             Date: Tue, 08 Jan 2002 16:18:47 +0000
+             Message-Id: <200201081618.g08GIlN02821@crypt.compulink.co.uk>          
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[ 14135] By: jhi                                   on 2002/01/08  15:12:38
+        Log: Subject: Not OK 13843 
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 08 Jan 2002 14:12:29 +0100
+             Message-ID: <m38zb9c7gi.fsf@anima.de>
+     Branch: perl
+	   ! op.c t/op/subst.t
+____________________________________________________________________________
+[ 14134] By: jhi                                   on 2002/01/08  14:30:00
+        Log: Missed one variant of the fold testing, noticed bu Hugo.
+     Branch: perl
+	   ! lib/unifold.t
+____________________________________________________________________________
+[ 14133] By: jhi                                   on 2002/01/08  14:23:39
+        Log: Enchance the Storable magic description.
+     Branch: perl
+	   ! ext/Storable/Storable.pm
+____________________________________________________________________________
+[ 14132] By: ams                                   on 2002/01/08  09:16:12
+        Log: Subject: [PATCH] don't installperl pods
+             From: H.Merijn Brand <h.m.brand@hccnet.nl>
+             Date: Tue, 08 Jan 2002 10:36:01 +0100
+             Message-Id: <20020108103447.A841.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! installperl
+____________________________________________________________________________
+[ 14131] By: ams                                   on 2002/01/08  03:38:40
+        Log: Subject: Math-BigInt v1.49 released
+             From: Tels <perl_dummy@bloodgate.com>
+             Date: Tue, 08 Jan 2002 03:09:34 +0100 (CET)
+     Branch: perl
+	   + lib/Math/BigInt/t/mbimbf.inc lib/Math/BigInt/t/require.t
+	   + lib/Math/BigInt/t/sub_mif.t lib/Math/BigInt/t/use.t
+	   ! MANIFEST lib/Math/BigFloat.pm lib/Math/BigInt.pm
+	   ! lib/Math/BigInt/Calc.pm lib/Math/BigInt/t/bare_mbi.t
+	   ! lib/Math/BigInt/t/bigfltpm.inc lib/Math/BigInt/t/bigfltpm.t
+	   ! lib/Math/BigInt/t/bigintc.t lib/Math/BigInt/t/bigintpm.inc
+	   ! lib/Math/BigInt/t/bigintpm.t lib/Math/BigInt/t/mbimbf.t
+	   ! lib/Math/BigInt/t/sub_mbf.t lib/Math/BigInt/t/sub_mbi.t
+	   ! t/lib/Math/BigFloat/Subclass.pm t/lib/Math/BigInt/BareCalc.pm
+	   ! t/lib/Math/BigInt/Subclass.pm
+____________________________________________________________________________
+[ 14130] By: jhi                                   on 2002/01/08  02:13:53
+        Log: A little better comments.
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[ 14129] By: jhi                                   on 2002/01/07  23:45:05
+        Log: No normalization form DNF.
+     Branch: perl
+	   ! ext/Unicode/Normalize/Normalize.pm
+____________________________________________________________________________
+[ 14128] By: jhi                                   on 2002/01/07  23:40:15
+        Log: Extension nits found by -Wall (several from threads
+             and threads::shared, but leaving them to Arthur).
+     Branch: perl
+	   ! ext/Data/Dumper/Dumper.xs ext/Devel/PPPort/PPPort.pm
+	   ! ext/Devel/PPPort/PPPort.xs ext/List/Util/Util.xs
+	   ! ext/Opcode/Opcode.xs ext/Unicode/Normalize/Normalize.xs
+	   ! ext/Unicode/Normalize/mkheader x2p/str.c
+____________________________________________________________________________
+[ 14125] By: ams                                   on 2002/01/07  22:03:22
+        Log: Subject: [PATCH] better Exporter docs (Re: [PATCH @13746] Leaner exporter)
+             From: Nicholas Clark (sans From field in mail header)
+             Date: Mon, 7 Jan 2002 16:18:23 +0000
+             Message-Id: <20020107161823.A599@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! lib/Exporter.pm
+____________________________________________________________________________
+[ 14124] By: ams                                   on 2002/01/07  21:46:11
+        Log: Subject: [PATCH] Last patch needed to get Perl5.7 to build natively on VOS
+             From: "Green, Paul" <Paul.Green@stratus.com>
+             Date: Mon, 7 Jan 2002 16:59:38 -0500
+             Message-Id: <95AE3CDB3543D511883A0020485B38B90235349B@exna3.stratus.com>
+     Branch: perl
+	   ! ext/Errno/Errno_pm.PL perl.h t/TEST t/test.pl vos/vosish.h
+____________________________________________________________________________
+[ 14122] By: jhi                                   on 2002/01/07  16:09:50
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 14121] By: jhi                                   on 2002/01/07  16:03:34
         Log: Subject: [PATCH] Correct module name in perldelta*                 
              From: Mike Guy <mjtg@cam.ac.uk>
